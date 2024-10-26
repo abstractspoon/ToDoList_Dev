@@ -200,6 +200,7 @@ namespace FileMisc
 	CString FormatExtension(LPCTSTR szExt, BOOL bWithDot = TRUE);
 	CString& ReplaceExtension(CString& sFilePath, LPCTSTR szExt);
 	CString& RemoveExtension(CString& sFilePath);
+	void EnsureSameExtension(LPCTSTR szFromFile, CString& sToFile);
 	
 	CString GetTempFolder();
 	CString GetTempFilePath(LPCTSTR szPrefix = NULL, UINT uUnique = 0);
@@ -279,7 +280,7 @@ namespace FileMisc
 	BOOL AddToFileName(CString& sFilePath, LPCTSTR szExtra, BOOL bSuffix = TRUE);
 	BOOL AddToFileName(CString& sFilePath, int nSuffix);
 	
-	BOOL IsSamePath(const CString& sPath1, const CString& sPath2);
+	BOOL IsSamePath(const CString& sPath1, const CString& sPath2, BOOL bFileNameOnly = FALSE);
 	int CompareContents(const CString& sPath1, const CString& sPath2);
 
 	CString GetFolderFromFilePath(LPCTSTR szFilePath);

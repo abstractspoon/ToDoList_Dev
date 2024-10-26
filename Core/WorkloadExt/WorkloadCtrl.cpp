@@ -298,10 +298,10 @@ BOOL CWorkloadCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL 
 	}
 
 	if (bForwards)
-		return SelectTask(m_tree.TCH().GetNextItem(hti), select, TRUE);
+		return SelectTask(m_tree.TCH().GetNextItem(hti), select, TRUE); // RECURSIVE CALL
 
 	// else
-	return SelectTask(m_tree.TCH().GetPrevItem(hti), select, FALSE);
+	return SelectTask(m_tree.TCH().GetPrevItem(hti), select, FALSE); // RECURSIVE CALL
 }
 
 BOOL CWorkloadCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
@@ -508,9 +508,9 @@ double CWorkloadCtrl::GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM
 	return CTimeHelper().Convert(dTimeEst, nTHUnits, THU_WEEKDAYS);
 }
 
-BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
+BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:
 	case TDCA_COLOR:
@@ -528,7 +528,7 @@ BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 	}
 	
 	// all else 
-	return (nAttrib == IUI_ALL);
+	return (nAttribID == IUI_ALL);
 }
 
 TDC_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMNID nCol)
@@ -548,9 +548,9 @@ TDC_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMNID nCol)
 	return TDCA_NONE;
 }
 
-WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
+WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:		return WLCC_TITLE;		
 	case TDCA_DUEDATE:		return WLCC_DUEDATE;		
@@ -1105,7 +1105,7 @@ void CWorkloadCtrl::BuildTaskTreeColumns()
 								CEnString(WORKLOADTREECOLUMNS[nCol].nIDColName), 
 								(WORKLOADTREECOLUMNS[nCol].nColAlign | HDF_STRING),
 								0,
-								WORKLOADTREECOLUMNS[nCol].nColID);
+								WORKLOADTREECOLUMNS[nCol].nColumnID);
 	}
 
 	// Build Task totals once only
@@ -1307,11 +1307,11 @@ GM_ITEMSTATE CWorkloadCtrl::GetItemState(HTREEITEM hti) const
 	return GMIS_NONE;
 }
 
-LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	ASSERT(pLVCD->nmcd.hdr.idFrom == IDC_ALLOCATIONCOLUMNS);
 
-	return OnAllocationsListCustomDraw(pLVCD);
+	return OnAllocationsListCustomDraw(pLVCD, aColOrder, aColWidths);
 }
 
 void CWorkloadCtrl::OnTotalsListsCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
@@ -1441,7 +1441,7 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
@@ -1477,7 +1477,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
-			DrawAllocationListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
+			DrawAllocationListItem(pDC, nItem, aColOrder, aColWidths, *pWI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -1607,7 +1607,7 @@ void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, B
 		m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		CWnd::GetParent()->PostMessage(WM_WLCN_SORTCHANGE, m_sort.single.bAscending, m_sort.single.nBy);
+		CWnd::GetParent()->PostMessage(WM_WLCN_SORTCHANGE, m_sort.single.bAscending, m_sort.single.nColumnID);
 }
 
 void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS& multi)
@@ -2283,16 +2283,40 @@ CString CWorkloadCtrl::GetListItemColumnTotal(const CMapAllocationTotals& mapTot
 	return _T("");
 }
 
-void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected)
+void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, const WORKLOADITEM& wi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
-	int nNumCol = GetRequiredListColumnCount();
 
-	for (int nCol = 1; nCol < nNumCol; nCol++)
+	CRect rClip;
+	pDC->GetClipBox(rClip);
+
+	// Much more efficient to calculate the sub-item rects
+	// ourselves than to call GetSubItemRect for every column
+	CRect rColumn;
+	VERIFY(m_list.GetItemRect(nItem, rColumn, LVIR_BOUNDS));
+
+	// First column is always zero width
+	rColumn.right = rColumn.left;
+
+	int nNumCol = aColOrder.GetSize();
+
+	for (int i = 1; i < nNumCol; i++)
 	{
-		CRect rColumn;
-		m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
-		
+		if (rColumn.right >= rClip.right)
+			break; // nothing more to draw
+
+		const int nCol = aColOrder[i];
+		const int nColWidth = aColWidths[nCol];
+
+		if (nColWidth == 0)
+			continue;
+
+		rColumn.left = rColumn.right;
+		rColumn.right += nColWidth;
+
+		if (rColumn.right <= rClip.left)
+			continue; // to left of clip rect
+
 		DrawVertItemDivider(pDC, rColumn, bSelected);
 
 		COLORREF crBack = CLR_NONE;
@@ -2300,8 +2324,10 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 		
 		if (dDays > 0.0)
 		{
-			rColumn.right--;
-			rColumn.bottom--;
+			CRect rCell(rColumn);
+
+			rCell.right--;
+			rCell.bottom--;
 
 			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
 
@@ -2313,18 +2339,18 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
 				if (crBack != CLR_NONE)
-					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
+					GraphicsMisc::DrawRect(pDC, rCell, CLR_NONE, crBack);
 			}
 			else if (crBack != CLR_NONE)
 			{
-				pDC->FillSolidRect(rColumn, crBack);
+				pDC->FillSolidRect(rCell, crBack);
 				crText = GraphicsMisc::GetBestTextColor(crBack);
 			}
 
-			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
+			rCell.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 
 			pDC->SetTextColor(crText);
-			pDC->DrawText(Misc::Format(dDays, 2), &rColumn, DT_CENTER);
+			pDC->DrawText(Misc::Format(dDays, 2), &rCell, DT_CENTER);
 		}
 	}
 }
@@ -2659,7 +2685,7 @@ int CALLBACK CWorkloadCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM
 
 	for (int nCol = 0; ((nCol < 3) && (nCompare == 0)); nCol++)
 	{
-		if (sort.cols[nCol].nBy == TDCA_NONE)
+		if (sort.cols[nCol].nColumnID == TDCA_NONE)
 			break;
 
 		nCompare = pThis->CompareTasks(lParam1, lParam2, sort.cols[nCol]);
@@ -2680,7 +2706,7 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 	int nCompare = 0;
 
 	// Optimise for task ID
-	if (col.nBy == WLCC_TASKID)
+	if (col.nColumnID == WLCC_TASKID)
 	{
 		nCompare = (dwTaskID1 - dwTaskID2);
 	}
@@ -2695,7 +2721,7 @@ int CWorkloadCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOAD
 			return 0;
 		}
 
-		switch (col.nBy)
+		switch (col.nColumnID)
 		{
 		case WLCC_TITLE:
 			nCompare = Compare(pWI1->sTitle, pWI2->sTitle);

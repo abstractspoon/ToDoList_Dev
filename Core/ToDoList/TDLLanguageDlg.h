@@ -10,8 +10,6 @@
 #include "TDLLanguageComboBox.h"
 #include "TDLDialog.h"
 
-#include "..\shared\icon.h"
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLLanguageDlg dialog
 
@@ -26,13 +24,9 @@ public:
 	static CString GetDefaultLanguage();
 
 // Dialog Data
-	//{{AFX_DATA(CTDLLanguageDlg)
 	enum { IDD = IDD_LANGUAGE_DIALOG };
 
 	CTDLLanguageComboBox	m_cbLanguages;
-	CIcon m_icon;
-	//}}AFX_DATA
-
 
 // Overrides
 	// ClassWizard generated virtual function overrides

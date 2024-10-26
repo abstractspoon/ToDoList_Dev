@@ -59,9 +59,9 @@ void CTDLHtmlStyleComboBox::BuildCombo()
 {
 	if (GetCount() == 0)
 	{
-		CDialogHelper::AddString(*this, _T("Wrapped"), TDLPDS_WRAP);
-		CDialogHelper::AddString(*this, _T("Paragraph"), TDLPDS_PARA);
-		CDialogHelper::AddString(*this, _T("Table"), TDLPDS_TABLE);
+		CDialogHelper::AddStringT(*this, _T("Wrapped"), TDLPDS_WRAP);
+		CDialogHelper::AddStringT(*this, _T("Paragraph"), TDLPDS_PARA);
+		CDialogHelper::AddStringT(*this, _T("Table"), TDLPDS_TABLE);
 	}
 }
 
@@ -223,7 +223,7 @@ CTDLPrintStylePage::CTDLPrintStylePage(LPCTSTR szStylesheet,
 	m_sExportToImageView(szExportToImageView),
 	m_sPrefsKey(szPrefsKey),
 	m_cbOtherExporters(mgrImpExp, FALSE, TRUE, _T("html;htm")),
-	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
+	m_eStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
 	m_nSimpleStyle(TDLPDS_WRAP)
 {
 	//{{AFX_DATA_INIT(CTDLPrintStylePage)

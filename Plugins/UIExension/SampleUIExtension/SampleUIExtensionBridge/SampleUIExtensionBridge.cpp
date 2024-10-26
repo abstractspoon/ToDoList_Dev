@@ -155,9 +155,9 @@ void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UP
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CSampleUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CSampleUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const

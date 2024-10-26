@@ -19,6 +19,7 @@
 
 struct USERTOOL
 {
+	USERTOOL();
 	BOOL operator==(const USERTOOL& other) const;
 
 	CString sToolName;
@@ -51,6 +52,7 @@ struct USERTOOLARGS
 class CPreferencesDlg;
 class CEnToolBar;
 class CMenuIconMgr;
+class CTDCImageList;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -74,10 +76,9 @@ public:
 	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
 						const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline);
 
-	static HICON GetToolIcon(const USERTOOL& tool);
-	static BOOL GetToolIcon(const USERTOOL& tool, CBitmap& bmp, COLORREF crBkgnd);
 	static CString GetToolPath(const USERTOOL& tool);
 	static BOOL IsToolCmdID(UINT nCmdID);
+	static int AddToolToImageList(const USERTOOL& tool, CTDCImageList& ilTools);
 
 protected:
 	BOOL m_bTDLEnabled;
@@ -88,14 +89,10 @@ protected:
 	BOOL CheckToDoListVersionCompatibility(const CString& sToolPath) const;
 	BOOL RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bTest);
 
-	static BOOL GetToolPaths(const USERTOOL& tool, CString& sToolPath, CString& sIconPath);
+	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, CLA_TYPE nType, const CString& sValue, BOOL bWebTool);
+	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, const CString& sName, const CString& sValue, BOOL bWebTool);
 
-	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, CLA_TYPE nType, 
-									const CString& sValue, BOOL bWebTool);
-	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, const CString& sName, 
-									const CString& sValue, BOOL bWebTool);
 	static CString EscapeCharacters(const CString& sValue, BOOL bWebTool);
-
 	static int IndexArraySortProc(const void* pV1, const void* pV2);
 	static int BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped);
 	static BOOL GetToolButtonRange(const CEnToolBar& toolbar, int& nFirstBtn, int& nLastBtn);

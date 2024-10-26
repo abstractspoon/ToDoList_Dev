@@ -9,29 +9,29 @@
 
 TDSORTCOLUMN::TDSORTCOLUMN(TDC_COLUMN nSortBy, BOOL bSortAscending)
 	: 
-	nBy(nSortBy), bAscending(bSortAscending)
+	nColumnID(nSortBy), bAscending(bSortAscending)
 {
 	Validate();
 }
 
 BOOL TDSORTCOLUMN::IsSorting() const
 {
-	return (nBy != TDCC_NONE);
+	return (nColumnID != TDCC_NONE);
 }
 
 BOOL TDSORTCOLUMN::IsSortingBy(TDC_COLUMN nSortBy) const
 {
-	return (nBy == nSortBy);
+	return (nColumnID == nSortBy);
 }
 
 BOOL TDSORTCOLUMN::IsSortingByCustom() const
 {
-	return ((nBy >= TDCC_CUSTOMCOLUMN_FIRST) && (nBy <= TDCC_CUSTOMCOLUMN_LAST));
+	return ((nColumnID >= TDCC_CUSTOMCOLUMN_FIRST) && (nColumnID <= TDCC_CUSTOMCOLUMN_LAST));
 }
 
 BOOL TDSORTCOLUMN::SetSortBy(TDC_COLUMN nSortBy, BOOL bSortAscending)
 {
-	nBy = nSortBy;
+	nColumnID = nSortBy;
 
 	if (bSortAscending != -1)
 		bAscending = bSortAscending;
@@ -41,12 +41,12 @@ BOOL TDSORTCOLUMN::SetSortBy(TDC_COLUMN nSortBy, BOOL bSortAscending)
 
 BOOL TDSORTCOLUMN::Verify() const
 {
-	return Verify(nBy);
+	return Verify(nColumnID);
 }
 
 void TDSORTCOLUMN::Clear()
 {
-	nBy = TDCC_NONE;
+	nColumnID = TDCC_NONE;
 	bAscending = -1;
 }
 
@@ -69,7 +69,7 @@ BOOL TDSORTCOLUMN::Matches(const CTDCAttributeMap& mapAttribIDs,
 
 	while (pos)
 	{
-		if (Matches(mapAttribIDs.GetNext(pos), nBy, styles, aCustAttribs))
+		if (Matches(mapAttribIDs.GetNext(pos), nColumnID, styles, aCustAttribs))
 			return TRUE;
 	}
 
@@ -97,6 +97,7 @@ BOOL TDSORTCOLUMN::Matches(TDC_ATTRIBUTE nAttribID,
 	{
 	case TDCA_TASKNAME:
 	case TDCA_STARTDATE:
+	case TDCA_STARTTIME:
 	case TDCA_PRIORITY:
 	case TDCA_ALLOCTO:
 	case TDCA_ALLOCBY:
@@ -112,6 +113,7 @@ BOOL TDSORTCOLUMN::Matches(TDC_ATTRIBUTE nAttribID,
 	case TDCA_COLOR:
 	case TDCA_FLAG:
 	case TDCA_DUEDATE:
+	case TDCA_DUETIME:
 	case TDCA_PERCENT:
 	case TDCA_TIMESPENT:
 	case TDCA_DEPENDENCY:
@@ -136,6 +138,7 @@ BOOL TDSORTCOLUMN::Matches(TDC_ATTRIBUTE nAttribID,
 				Matches(TDCA_DUEDATE, nSortBy, styles, aCustAttribs)); 
 
 	case TDCA_DONEDATE:
+	case TDCA_DONETIME:
 		{
 			ASSERT(nAttribCol != TDCC_NONE);
 
@@ -177,7 +180,7 @@ BOOL TDSORTCOLUMN::Matches(TDC_ATTRIBUTE nAttribID,
 	case TDCA_METADATA:
 		return FALSE;
 
-	case TDCA_CUSTOMATTRIBDEFS:	// Resort all custom columns
+	case TDCA_CUSTOMATTRIB_DEFS:	// Resort all custom columns
 		ASSERT(nAttribCol == TDCC_NONE);
 		return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nSortBy);
 
@@ -269,7 +272,7 @@ TDC_COLUMN TDSORTCOLUMNS::GetSortBy(int nCol) const
 	if ((nCol < 0) || (nCol >= 3))
 		return TDCC_NONE;
 
-	return cols[nCol].nBy;
+	return cols[nCol].nColumnID;
 }
 
 BOOL TDSORTCOLUMNS::SetSortBy(const TDSORTCOLUMNS& sortCols)
@@ -281,7 +284,7 @@ BOOL TDSORTCOLUMNS::SetSortBy(const TDSORTCOLUMNS& sortCols)
 
 BOOL TDSORTCOLUMNS::SetSortBy(int nCol, const TDSORTCOLUMN& col)
 {
-	return SetSortBy(nCol, col.nBy, col.bAscending);
+	return SetSortBy(nCol, col.nColumnID, col.bAscending);
 }
 
 BOOL TDSORTCOLUMNS::SetSortBy(int nCol, TDC_COLUMN nBy, BOOL bAscending)
@@ -392,7 +395,7 @@ BOOL TDSORT::SetSortBy(TDC_COLUMN nBy, BOOL bAscending)
 
 BOOL TDSORT::SetSortBy(const TDSORTCOLUMN& col)
 {
-	return SetSortBy(col.nBy, col.bAscending);
+	return SetSortBy(col.nColumnID, col.bAscending);
 }
 
 BOOL TDSORT::SetSortBy(const TDSORTCOLUMNS& cols)
@@ -433,7 +436,7 @@ void TDSORT::SaveState(IPreferences* pPrefs, const CString& sKey) const
 
 	pPrefs->WriteProfileInt(sSortKey, _T("Multi"), bMulti);
 
-	pPrefs->WriteProfileInt(sSortKey, _T("Column"), single.nBy);
+	pPrefs->WriteProfileInt(sSortKey, _T("Column"), single.nColumnID);
 	pPrefs->WriteProfileInt(sSortKey, _T("Ascending"), single.bAscending);
 
 	for (int nCol = 0; nCol < 3; nCol++)
@@ -444,7 +447,7 @@ void TDSORT::SaveState(IPreferences* pPrefs, const CString& sKey) const
 		CString sAscendKey;
 		sAscendKey.Format(_T("Ascending%d"), (nCol + 1));
 
-		pPrefs->WriteProfileInt(sSortKey, sColKey, multi.Cols()[nCol].nBy);
+		pPrefs->WriteProfileInt(sSortKey, sColKey, multi.Cols()[nCol].nColumnID);
 		pPrefs->WriteProfileInt(sSortKey, sAscendKey, multi.Cols()[nCol].bAscending);
 	}
 }
@@ -453,7 +456,7 @@ BOOL TDSORT::LoadState(const IPreferences* pPrefs, const CString& sKey)
 {
 	CString sSortKey = (sKey + _T("\\SortColState"));
 
-	single.nBy = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column"), TDCC_NONE);
+	single.nColumnID = (TDC_COLUMN)pPrefs->GetProfileInt(sSortKey, _T("Column"), TDCC_NONE);
 	single.bAscending = pPrefs->GetProfileInt(sSortKey, _T("Ascending"), TRUE);
 
 	bMulti = pPrefs->GetProfileInt(sSortKey, _T("Multi"), FALSE);

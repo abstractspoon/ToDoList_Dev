@@ -569,7 +569,8 @@ double CPreferences::GetProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, do
 bool CPreferences::WriteProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, double dValue)
 {
 	// FALSE -> We don't quote numbers
-	return (WritePreferenceString(lpszSection, lpszEntry, Misc::Format(dValue, 6), FALSE) != FALSE);
+	// And we don't localise them either
+	return (WritePreferenceString(lpszSection, lpszEntry, Misc::Format(_T("%.6f"), dValue), FALSE) != FALSE);
 }
 
 int CPreferences::GetProfileArray(LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty) const

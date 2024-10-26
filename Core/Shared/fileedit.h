@@ -8,6 +8,7 @@
 //
 
 #include "enedit.h"
+#include "iconcache.h"
 #include "stringres.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -23,13 +24,12 @@ enum
 {
 	FES_NOBROWSE				= 0x0001,
 	FES_FOLDERS					= 0x0002,
-	FES_COMBOSTYLEBTN			= 0x0004, // draws the browse button like a combo box rather than a button
-	FES_GOBUTTON				= 0x0008,
-	FES_ALLOWURL				= 0x0010, // supports ? in the filename
-	FES_SAVEAS					= 0x0020, // else open file dialog
-	FES_RELATIVEPATHS			= 0x0040,
-	FES_DISPLAYIMAGETHUMBNAILS	= 0x0080,
-	FES_NOPROMPTOVERWRITE		= 0x0100, // exclude OFN_OVERWRITEPROMPT
+	FES_GOBUTTON				= 0x0004,
+	FES_ALLOWURL				= 0x0008, // supports ? in the filename
+	FES_SAVEAS					= 0x0010, // else open file dialog
+	FES_RELATIVEPATHS			= 0x0020,
+	FES_DISPLAYIMAGETHUMBNAILS	= 0x0040,
+	FES_NOPROMPTOVERWRITE		= 0x0080, // exclude OFN_OVERWRITEPROMPT
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ class CFileEdit : public CEnEdit
 
 // Construction
 public:
-	CFileEdit(int nStyle = FES_COMBOSTYLEBTN, LPCTSTR szFilter = FILTER_ALLFILES);
+	CFileEdit(int nStyle = 0, LPCTSTR szFilter = FILTER_ALLFILES);
 	virtual ~CFileEdit();
 
 	void EnableStyle(int nStyle, BOOL bEnable = TRUE);
@@ -64,8 +64,7 @@ public:
 	CString GetCurrentFolder() const { return m_sCurFolder; }
 	void SetBrowseTitle(LPCTSTR szTitle) { m_sBrowseTitle = szTitle; }
 
-	HICON GetFileIcon(LPCTSTR szPath);
-	BOOL DoBrowse();
+	BOOL DoBrowse(LPCTSTR szFilePath = NULL);
 
 	static void SetDefaultButtonTips(LPCTSTR szBrowse, LPCTSTR szGo);
 	static void SetDefaultBrowseTitles(LPCTSTR szBrowseFiles, LPCTSTR szBrowseFolders);
@@ -74,6 +73,15 @@ public:
 	static int GotoFile(HWND hWnd, LPCTSTR szPath, BOOL bHandleError = TRUE);
 	static int GotoFile(HWND hWnd, LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandleError = TRUE);
 
+	static BOOL DrawFileIcon(CDC* pDC, 
+							 const CString& sFilePath, 
+							 const CPoint& ptIcon, 
+							 CIconCache& fileIcons,
+							 CWnd* pRefWnd = NULL,
+							 LPCTSTR szCurrentFolder = NULL,
+							 BOOL bImageThumbnails = FALSE,
+							 BOOL bFolders = FALSE);
+
 // Attributes
 protected:
 	BOOL m_bTipNeeded;
@@ -81,7 +89,7 @@ protected:
 	int m_nStyle;
 	CString m_sCurFolder;
 	CString m_sBrowseTitle;
-	CImageList m_ilImageIcon;
+	CIconCache m_fileIcon;
 
 	static CString s_sBrowseBtnTip, s_sGoBtnTip;
 	static CString s_sBrowseFilesTitle, s_sBrowseFoldersTitle;
@@ -91,7 +99,7 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CFileEdit)
-	protected:
+protected:
 	virtual void PreSubclassWindow();
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	//}}AFX_VIRTUAL
@@ -123,7 +131,6 @@ protected:
 	CRect GetIconScreenRect() const; 
 	void DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon);
 	CString GetBrowseTitle(BOOL bFolder) const;
-	void ClearImageIcon();
 	HBRUSH GetBackgroundBrush(CDC* pDC) const;
 };
 

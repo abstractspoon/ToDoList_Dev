@@ -52,7 +52,6 @@ namespace HTMLReportExporter
 			Title = new TitleTemplateReporter(trans, template.Title);
 			Footer = new FooterTemplateReporter(template.Footer, template.BackColor);
 
-			var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
 			var baseIndent = HtmlReportUtils.FormatTaskBaseIndent(prefs);
 
 			Tasks = new TaskTemplateReporter(trans, template.Task, baseIndent, preview);

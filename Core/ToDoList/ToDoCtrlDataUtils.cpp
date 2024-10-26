@@ -3,6 +3,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "tdcstatic.h"
+#include "tdcmapping.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataUtils.h"
 #include "ToDoCtrlDataDefines.h"
@@ -63,10 +65,10 @@ int CTDCTaskMatcher::Convert(const CResultArray& aResults, CDWordArray& aTaskIDs
 	return aTaskIDs.GetSize();
 }
 
-int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const
+int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const
 {
 	CResultArray aResults;
-	FindTasks(nAttrib, nOp, sValue, bCheckDueToday, aResults);
+	FindTasks(nAttribID, nOp, sValue, bCheckDueToday, aResults);
 
 	return Convert(aResults, aTaskIDs);
 }
@@ -87,14 +89,14 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 	return Convert(aResults, aTaskIDs);
 }
 
-int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CResultArray& aResults) const
+int CTDCTaskMatcher::FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CResultArray& aResults) const
 {
 	// sanity check
 	if (!m_data.GetTaskCount())
 		return 0;
 	
 	SEARCHPARAMS query;
-	query.aRules.Add(SEARCHPARAM(nAttrib, nOp, sValue));
+	query.aRules.Add(SEARCHPARAM(nAttribID, nOp, sValue));
 
 	return FindTasks(query, bCheckDueToday, aResults);
 }
@@ -105,9 +107,9 @@ int CTDCTaskMatcher::FindTasks(const SEARCHPARAMS& query, BOOL bCheckDueToday, C
 	if (!m_data.GetTaskCount())
 		return 0;
 	
-	for (int nSubTask = 0; nSubTask < m_data.m_struct.GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < m_data.m_struct.GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = m_data.m_struct.GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = m_data.m_struct.GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 
 		ASSERT(pTDIChild && pTDSChild);
@@ -122,10 +124,11 @@ int CTDCTaskMatcher::FindTasks(const SEARCHPARAMS& query, BOOL bCheckDueToday, C
 int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, BOOL bCheckDueToday, CResultArray& aResults) const
 {
 	// sanity check
-	ASSERT(pTDI && pTDS);
-
 	if (!pTDI || !pTDS)
+	{
+		ASSERT(0);
 		return 0;
+	}
 	
 	SEARCHRESULT result;
 	int nResults = aResults.GetSize();
@@ -142,9 +145,9 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 	}
 	
 	// process children
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
 		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
 		
 		ASSERT(pTDIChild && pTDSChild);
@@ -519,9 +522,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 
 		case TDCA_DEPENDENCY:
-			if (rule.GetOperator() == FOP_IS_COMPLETE)
+			if (rule.OperatorIs(FOP_DEPENDS_COMPLETE))
 			{
 				bMatch = TRUE;
+				sWhatMatched = CEnString(IDS_FT_MATCHES);
 
 				// look for first incomplete 'local' dependency
 				CDWordArray aDependIDs;
@@ -529,9 +533,12 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 				while (nDepend--)
 				{
-					if (!m_data.IsTaskDone(aDependIDs[nDepend]))
+					DWORD dwDependID = aDependIDs[nDepend];
+
+					if (!m_data.IsTaskDone(dwDependID))
 					{
 						bMatch = FALSE;
+						sWhatMatched.Empty();
 						break;
 					}
 				}
@@ -551,7 +558,6 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 		case TDCA_POSITION:
 			{
-				// Position is 1-based in the UI, but 0-based internally
 				bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, sWhatMatched);
 
 				if (bMatch)
@@ -919,7 +925,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 		break;
 		
 	case FOP_NOT_EQUALS:
-		bMatch = (dTaskDate != 0.0) && (dTaskDate != dSearch);
+		bMatch = (dTaskDate != dSearch);
 		break;
 		
 	case FOP_ON_OR_AFTER:
@@ -1818,6 +1824,13 @@ int CTDCTaskComparer::Compare(double dNum1, double dNum2)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+// if GetSubtask() returns a reference it means we should not include it in our calcs
+#define GET_SUBTASK(ptds, n, tdi, tds) (GetSubtask(ptds, n, tdi, tds) && !tdi->IsReference())
+
+#define CHECKSET_ALREADY_PROCESSED(map, tds, ret) if (map.Has(tds->GetTaskID())) return ret; map.Add(tds->GetTaskID())
+
+// ---------------------------------------------------------------------
+
 CTDCTaskCalculator::CTDCTaskCalculator(const CToDoCtrlData& data) 
 	: 
 	m_data(data)
@@ -1895,6 +1908,8 @@ BOOL CTDCTaskCalculator::IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID) const
 	return FALSE;
 }
 
+// ---------------------------------------------------------------------
+
 BOOL CTDCTaskCalculator::IsTaskRecentlyModified(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -1907,6 +1922,11 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(DWORD dwTaskID) const
 
 BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
+	return IsTaskRecentlyModified(pTDI, pTDS, CDWordSet());
+}
+
+BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
+{
 	// sanity check
 	if (!pTDI || !pTDS)
 	{
@@ -1914,22 +1934,22 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODO
 		return FALSE;
 	}
 
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
+
 	BOOL bRecentMod = pTDI->IsRecentlyModified();
 
 	if (bRecentMod || !m_data.HasStyle(TDCS_USELATESTLASTMODIFIED))
 		return bRecentMod;
 
 	// Children
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDSChild && pTDIChild)
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
-			if (IsTaskRecentlyModified(pTDIChild, pTDSChild))
+			if (IsTaskRecentlyModified(pTDIChild, pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
 				return TRUE;
 		}
 	}
@@ -1938,11 +1958,10 @@ BOOL CTDCTaskCalculator::IsTaskRecentlyModified(const TODOITEM* pTDI, const TODO
 	return FALSE;
 }
 
+// ---------------------------------------------------------------------
+
 BOOL CTDCTaskCalculator::IsTaskFlagged(DWORD dwTaskID) const
 {
-	if (!m_data.HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS))
-		return IsTaskFlagged(dwTaskID);
-
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
@@ -1953,6 +1972,11 @@ BOOL CTDCTaskCalculator::IsTaskFlagged(DWORD dwTaskID) const
 
 BOOL CTDCTaskCalculator::IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
+	return IsTaskFlagged(pTDI, pTDS, CDWordSet());
+}
+
+BOOL CTDCTaskCalculator::IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
+{
 	// sanity check
 	if (!pTDI || !pTDS)
 	{
@@ -1960,25 +1984,40 @@ BOOL CTDCTaskCalculator::IsTaskFlagged(const TODOITEM* pTDI, const TODOSTRUCTURE
 		return FALSE;
 	}
 
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
+
 	if (pTDI->bFlagged || !m_data.HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS))
 		return pTDI->bFlagged;
 
 	// check subtasks
-	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+	for (int sSubtask = 0; sSubtask < pTDS->GetSubTaskCount(); sSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubtask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDIChild && pTDSChild)
+		if (GET_SUBTASK(pTDS, sSubtask, pTDIChild, pTDSChild))
 		{
-			if (IsTaskFlagged(pTDIChild, pTDSChild))
+			if (IsTaskFlagged(pTDIChild, pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
 				return TRUE;
 		}
 	}
 
 	return FALSE;
+}
+
+// ---------------------------------------------------------------------
+
+BOOL CTDCTaskCalculator::IsTaskLocked(DWORD dwTaskID) const
+{
+	if (!m_data.HasStyle(TDCS_SUBTASKSINHERITLOCK))
+		return m_data.IsTaskLocked(dwTaskID);
+
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
+
+	return IsTaskLocked(pTDI, pTDS);
 }
 
 BOOL CTDCTaskCalculator::IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
@@ -1993,8 +2032,10 @@ BOOL CTDCTaskCalculator::IsTaskLocked(const TODOITEM* pTDI, const TODOSTRUCTURE*
 	if (pTDI->bLocked || !m_data.HasStyle(TDCS_SUBTASKSINHERITLOCK))
 		return pTDI->bLocked;
 
-	return IsTaskLocked(pTDS->GetParentTaskID());
+	return IsTaskLocked(pTDS->GetParentTaskID()); // RECURSIVE CALL
 }
+
+// ---------------------------------------------------------------------
 
 BOOL CTDCTaskCalculator::IsTaskRecurring(DWORD dwTaskID) const
 {
@@ -2011,33 +2052,65 @@ BOOL CTDCTaskCalculator::IsTaskRecurring(DWORD dwTaskID) const
 	return IsTaskRecurring(pTDS->GetParentTaskID());
 }
 
-BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
-	int& nSubtasksCount, int& nSubtasksDone) const
-{
-	ASSERT (pTDS && pTDI);
+// ---------------------------------------------------------------------
 
-	if (!pTDS || !pTDS->HasSubTasks() || !pTDI)
+BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
+
+	return GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksTotal, nSubtasksDone);
+}
+
+BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
+											  int& nSubtasksCount, int& nSubtasksDone) const
+{
+	return GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksCount, nSubtasksDone, CDWordSet());
+}
+
+BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
+											  int& nSubtasksCount, int& nSubtasksDone, CDWordSet& mapProcessedIDs) const
+{
+	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	if (!pTDS->HasSubTasks())
+		return FALSE;
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
 	nSubtasksDone = nSubtasksCount = 0;
 
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		nSubtasksCount++;
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
-
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDIChild && pTDSChild)
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
+			nSubtasksCount++;
+
 			if (IsTaskDone(pTDIChild, pTDSChild, TDCCHECKCHILDREN))
 				nSubtasksDone++;
 		}
 	}
 
 	return (nSubtasksCount > 0);
+}
+
+// ---------------------------------------------------------------------
+
+double CTDCTaskCalculator::GetTaskSubtaskCompletion(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
+
+	return GetTaskSubtaskCompletion(pTDI, pTDS);
 }
 
 double CTDCTaskCalculator::GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
@@ -2057,6 +2130,17 @@ double CTDCTaskCalculator::GetTaskSubtaskCompletion(const TODOITEM* pTDI, const 
 	return ((double)nSubtasksDone / (double)nSubtasksCount);
 }
 
+// ---------------------------------------------------------------------
+
+int CTDCTaskCalculator::GetTaskPercentDone(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
+
+	return GetTaskPercentDone(pTDI, pTDS);
+}
+
 int CTDCTaskCalculator::GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	ASSERT (pTDS && pTDI);
@@ -2064,38 +2148,27 @@ int CTDCTaskCalculator::GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUC
 	if (!pTDS || !pTDI)
 		return 0;
 
-	int nPercent = 0;
-
 	if (!m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) || !pTDS->HasSubTasks())
 	{
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			nPercent = GetPercentFromTime(pTDI, pTDS);
-		}
-		else if (pTDI->IsDone())
-		{
-			nPercent = 100;
-		}
-		else
-		{
-			nPercent = pTDI->nPercentDone;
-		}
-	}
-	else if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION)) // has subtasks and we must average their completion
-	{
-		// note: we have separate functions for weighted/unweighted
-		// just to keep the logic for each as clear as possible
-		if (m_data.HasStyle(TDCS_WEIGHTPERCENTCALCBYNUMSUB))
-		{
-			nPercent = Misc::Round(GetWeightedAveragePercentDone(pTDI, pTDS));
-		}
-		else
-		{
-			nPercent = Misc::Round(GetAveragePercentDone(pTDI, pTDS));
-		}
+			return GetPercentFromTime(pTDI, pTDS);
+
+		if (pTDI->IsDone())
+			return 100;
+
+		// all else
+		return pTDI->nPercentDone;
 	}
 
-	return nPercent;
+	// else has subtasks and we must average their completion
+	double dPercent = 0;
+
+	if (m_data.HasStyle(TDCS_WEIGHTPERCENTCALCBYNUMSUB))
+		dPercent = GetWeightedAveragePercentDone(pTDI, pTDS, CDWordSet());
+	else
+		dPercent = GetAveragePercentDone(pTDI, pTDS, CDWordSet());
+
+	return Misc::Round(dPercent);
 }
 
 int CTDCTaskCalculator::GetPercentFromTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
@@ -2107,8 +2180,8 @@ int CTDCTaskCalculator::GetPercentFromTime(const TODOITEM* pTDI, const TODOSTRUC
 
 	ASSERT (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE)); // sanity check
 
-	double dSpent = GetTaskTimeSpent(pTDI, pTDS, TDCU_HOURS);
-	double dUnused, dEstimate = GetTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS, dUnused);
+	double dSpent = GetTaskTimeSpent(pTDI, pTDS, TDCU_HOURS, CDWordSet());
+	double dUnused, dEstimate = GetTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS, dUnused, CDWordSet());
 
 	if ((dSpent > 0) && (dEstimate > 0))
 		return (int)(100 * dSpent / dEstimate);
@@ -2117,69 +2190,65 @@ int CTDCTaskCalculator::GetPercentFromTime(const TODOITEM* pTDI, const TODOSTRUC
 	return 0;
 }
 
-double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
 { 
 	// sanity checks
-	ASSERT(pTDS && pTDI);
+	ASSERT (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION)); // sanity check
 
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return 0;
+	}
 
-	ASSERT (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION)); // sanity check
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
 
 	if (!pTDS->HasSubTasks() || pTDI->IsDone())
 	{
 		// base percent
 		if(m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
 			return GetPercentFromTime(pTDI, pTDS);
-		}
-		else if (pTDI->IsDone())
-		{
+
+		if (pTDI->IsDone())
 			return 100;
-		}
-		else
-		{
-			return pTDI->nPercentDone;
-		}
+
+		// else
+		return pTDI->nPercentDone;
 	}
 
 	// else aggregate child percentages
 	// optionally ignoring completed tasks
-	BOOL bIncludeDone = m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC);
 	int nNumSubtasks = 0, nNumDoneSubtasks = 0;
+	GetTaskSubtaskTotals(pTDI, pTDS, nNumSubtasks, nNumDoneSubtasks);
 
-	if (bIncludeDone)
+	if (nNumDoneSubtasks == nNumSubtasks) // all subtasks are completed
 	{
-		nNumSubtasks = pTDS->GetSubTaskCount();
-		ASSERT(nNumSubtasks);
-	}
-	else
-	{
-		GetTaskSubtaskTotals(pTDI, pTDS, nNumSubtasks, nNumDoneSubtasks);
+		if (m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
+			return 100;
 
-		if (nNumDoneSubtasks == nNumSubtasks) // all subtasks are completed
-			return 0;
+		// else
+		return 0;
 	}
 
 	// Get default done value for each child (ex.4 child = 25, 3 child = 33.33, etc.)
+	if (m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
+		nNumDoneSubtasks = 0;
+
 	double dSplitDoneValue = (1.0 / (nNumSubtasks - nNumDoneSubtasks)); 
 	double dTotalPercentDone = 0;
 
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDSChild && pTDIChild)
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
 			if (m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC) || !IsTaskDone(pTDIChild, pTDSChild))
 			{
 				// add percent per child(eg. 2 child = 50 each if 1st child 
 				// has 75% completed then will add 50*75/100 = 37.5)
-				dTotalPercentDone += dSplitDoneValue * GetAveragePercentDone(pTDIChild, pTDSChild); // RECURSIVE CALL
+				dTotalPercentDone += dSplitDoneValue * GetAveragePercentDone(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
 			}
 		}
 	}
@@ -2187,95 +2256,61 @@ double CTDCTaskCalculator::GetAveragePercentDone(const TODOITEM* pTDI, const TOD
 	return dTotalPercentDone;
 }
 
-int CTDCTaskCalculator::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone) const
-{
-	// sanity check
-	ASSERT(pTDS && pTDI);
-
-	if (!pTDS || !pTDI)
-		return 0;
-
-	if (bIncludeDone)
-	{
-		return pTDS->GetLeafCount();
-	}
-	else if (pTDI->IsDone())
-	{
-		return 0;
-	}
-	else if (!pTDS->HasSubTasks())
-	{
-		return 1;
-	}
-
-	// else traverse sub items
-	int nLeafCount = 0;
-
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
-	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild); 
-
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDSChild && pTDIChild)
-			nLeafCount += GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone);
-	}
-
-	ASSERT(nLeafCount);
-	return nLeafCount;
-}
-
-double CTDCTaskCalculator::GetWeightedAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+double CTDCTaskCalculator::GetWeightedAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
 {
 	// sanity checks
-	ASSERT(pTDS && pTDI);
-
-	if (!pTDS || !pTDI)
-		return 0;
-
 	ASSERT (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION)); // sanity check
 	ASSERT (m_data.HasStyle(TDCS_WEIGHTPERCENTCALCBYNUMSUB)); // sanity check
+
+	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0);
 
 	if (!pTDS->HasSubTasks() || pTDI->IsDone())
 	{
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
 			return GetPercentFromTime(pTDI, pTDS);
-		}
-		else if (pTDI->IsDone())
-		{
+
+		if (pTDI->IsDone())
 			return 100;
-		}
-		else
-		{
-			return pTDI->nPercentDone;
-		}
+
+		// else
+		return pTDI->nPercentDone;
 	}
 
 	// calculate the total number of task leaves for this task
 	// we will proportion our children percentages against these values
-	int nTotalNumSubtasks = GetTaskLeafCount(pTDI, pTDS, m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC));
-	double dTotalPercentDone = 0;
+	BOOL bIncludeDone = m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC);
+	int nTotalNumSubtasks = GetTaskLeafCount(pTDI, pTDS, bIncludeDone, CDWordSet());
+
+	if (nTotalNumSubtasks == 0)
+	{
+		// Must mean all our subtasks are complete
+		ASSERT(!bIncludeDone);
+		return 0.0;
+	}
 
 	// process the children multiplying the split percent by the 
 	// proportion of this subtask's subtasks to the whole
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	double dTotalPercentDone = 0;
+
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDIChild && pTDSChild)
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
-			int nChildNumSubtasks = GetTaskLeafCount(pTDIChild, pTDSChild, m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC));
-
-			if (m_data.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKCHILDREN))
+			if (bIncludeDone || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKCHILDREN))
 			{
-				double dChildPercent = GetWeightedAveragePercentDone(pTDIChild, pTDSChild); // RECURSIVE CALL
+				int nChildNumSubtasks = GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone, CDWordSet());
+				double dChildPercent = GetWeightedAveragePercentDone(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
 
-				dTotalPercentDone += dChildPercent * ((double)nChildNumSubtasks / (double)nTotalNumSubtasks);
+				dTotalPercentDone += (dChildPercent * ((double)nChildNumSubtasks / (double)nTotalNumSubtasks));
 			}
 		}
 	}
@@ -2283,13 +2318,70 @@ double CTDCTaskCalculator::GetWeightedAveragePercentDone(const TODOITEM* pTDI, c
 	return dTotalPercentDone;
 }
 
+// ---------------------------------------------------------------------
+
+int CTDCTaskCalculator::GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone, CDWordSet& mapProcessedIDs) const
+{
+	// sanity check
+	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 1);
+
+	if (bIncludeDone)
+		return pTDS->GetLeafCount();
+
+	if (pTDI->IsDone())
+		return 0; // All subtasks are treated as done
+
+	if (!pTDS->HasSubTasks())
+		return 1; // ourselves
+
+	// else traverse sub items
+	int nLeafCount = 0;
+
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+	{
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL; 
+
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
+		{
+			nLeafCount += GetTaskLeafCount(pTDIChild, pTDSChild, bIncludeDone, mapProcessedIDs); // RECURSIVE CALL
+		}
+	}
+
+	return nLeafCount;
+}
+
+// ---------------------------------------------------------------------
+
+double CTDCTaskCalculator::GetTaskCost(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
+
+	return GetTaskCost(pTDI, pTDS);
+}
+
 double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	return GetTaskCost(pTDI, pTDS, CDWordSet());
+}
+
+double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
 
 	if (!pTDS || !pTDI)
 		return 0.0;
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
 
 	// own cost
 	double dCost = pTDI->cost.dAmount;
@@ -2297,93 +2389,72 @@ double CTDCTaskCalculator::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 	if (pTDI->cost.bIsRate)
 		dCost *= pTDI->timeSpent.dAmount;
 	
-	if (pTDS->HasSubTasks())
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
+
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-			const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
-
-			ASSERT(pTDIChild && pTDSChild);
-
-			if (pTDSChild && pTDIChild)
-				dCost += GetTaskCost(pTDIChild, pTDSChild);
+			dCost += GetTaskCost(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
 		}
 	}
 
 	return dCost;
 }
 
-TDC_UNITS CTDCTaskCalculator::GetBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+// ---------------------------------------------------------------------
+
+BOOL CTDCTaskCalculator::GetSubtask(const TODOSTRUCTURE* pTDSParent, int nSubtask, const TODOITEM*& pTDIChild, const TODOSTRUCTURE*& pTDSChild) const
 {
-	// sanity check
-	ASSERT (pTDS && pTDI);
+	pTDSChild = pTDSParent->GetSubTask(nSubtask);
+	pTDIChild = m_data.GetTask(pTDSChild);
 
-	if (!pTDS || !pTDI)
-		return m_data.m_nDefTimeEstUnits;
+	ASSERT(pTDIChild && pTDSChild);
 
-	TDC_UNITS nUnits = m_data.m_nDefTimeEstUnits;
-
-	if (pTDI->timeEstimate.dAmount > 0)
+	if (pTDIChild->IsReference() && m_data.HasStyle(TDCS_INCLUDEREFERENCESINCALCS))
 	{
-		nUnits = pTDI->timeEstimate.nUnits;
-	}
-	else if (pTDS->HasSubTasks())
-	{
-		DWORD dwID = pTDS->GetSubTaskID(0);
+		pTDSChild = m_data.LocateTask(pTDIChild->dwTaskRefID);
+		pTDIChild = m_data.GetTask(pTDIChild->dwTaskRefID);
 
-		if (m_data.GetTask(dwID, pTDI, pTDS))
-			nUnits = GetBestTimeEstUnits(pTDI, pTDS); // RECURSIVE CALL
+		ASSERT(pTDIChild && pTDSChild);
 	}
 
-	return nUnits;
+	return (pTDIChild && pTDSChild);
 }
 
-TDC_UNITS CTDCTaskCalculator::GetBestTimeSpentUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+// ---------------------------------------------------------------------
+
+double CTDCTaskCalculator::GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const
 {
-	// sanity check
-	ASSERT (pTDS && pTDI);
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
 
-	if (!pTDS || !pTDI)
-		return m_data.m_nDefTimeSpentUnits;
-
-	TDC_UNITS nUnits = m_data.m_nDefTimeSpentUnits;
-
-	if (pTDI->timeSpent.dAmount > 0)
-	{
-		nUnits = pTDI->timeSpent.nUnits;
-	}
-	else if (pTDS->HasSubTasks())
-	{
-		DWORD dwID = pTDS->GetSubTaskID(0);
-
-		if (m_data.GetTask(dwID, pTDI, pTDS))
-			nUnits = GetBestTimeSpentUnits(pTDI, pTDS); // RECURSIVE CALL
-	}
-
-	return nUnits;
+	return GetTaskTimeEstimate(pTDI, pTDS, nUnits);
 }
 
-// external version
 double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const
 {
 	BOOL bReturnWeighted = m_data.HasStyle(TDCS_USEPERCENTDONEINTIMEEST);
 
 	double dWeightedEstimate;
-	double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, nUnits, dWeightedEstimate);
+	double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, nUnits, dWeightedEstimate, CDWordSet());
 
 	return (bReturnWeighted ? dWeightedEstimate : dEstimate);
 }
 
-// internal version
 double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
-	TDC_UNITS nUnits, double& dWeightedEstimate) const
+											   TDC_UNITS nUnits, double& dWeightedEstimate, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return 0.0;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
 
 	double dEstimate = 0.0;
 	dWeightedEstimate = 0.0;
@@ -2407,18 +2478,16 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	}
 
 	// Subtask time
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDIChild && pTDSChild)
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 		{
 			double dChildWeightedEstimate = 0.0;
 
-			dEstimate += GetTaskTimeEstimate(pTDIChild, pTDSChild, TDCU_HOURS, dChildWeightedEstimate); // RECURSIVE CALL
+			dEstimate += GetTaskTimeEstimate(pTDIChild, pTDSChild, TDCU_HOURS, dChildWeightedEstimate, mapProcessedIDs); // RECURSIVE CALL
 			dWeightedEstimate += dChildWeightedEstimate;
 		}
 	}
@@ -2432,13 +2501,130 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	return dEstimate;
 }
 
+TDC_UNITS CTDCTaskCalculator::GetBestTimeEstUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	// sanity check
+	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
+		return m_data.m_nDefTimeEstUnits;
+	}
+
+	TDC_UNITS nUnits = m_data.m_nDefTimeEstUnits;
+
+	if (pTDI->timeEstimate.dAmount > 0)
+	{
+		nUnits = pTDI->timeEstimate.nUnits;
+	}
+	else if (pTDS->HasSubTasks())
+	{
+		DWORD dwID = pTDS->GetSubTaskID(0);
+
+		if (m_data.GetTask(dwID, pTDI, pTDS))
+		{
+			nUnits = GetBestTimeEstUnits(pTDI, pTDS); // RECURSIVE CALL
+		}
+	}
+
+	return nUnits;
+}
+
+// ---------------------------------------------------------------------
+
+double CTDCTaskCalculator::GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
+
+	return GetTaskTimeSpent(pTDI, pTDS, nUnits);
+}
+
+double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const
+{
+	return GetTaskTimeSpent(pTDI, pTDS, nUnits, CDWordSet());
+}
+
+double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, CDWordSet& mapProcessedIDs) const
+{
+	// sanity check
+	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
+		return 0.0;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
+
+	double dSpent = 0;
+
+	// task's own time
+	if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+		dSpent = pTDI->timeSpent.GetTime(THU_HOURS);
+
+	// subtasks'
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+	{
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
+
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
+		{
+			dSpent += GetTaskTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS, mapProcessedIDs); // RECURSIVE CALL
+		}
+	}
+
+	// convert it back from hours to nUnits
+	return CTimeHelper().Convert(dSpent, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
+}
+
+TDC_UNITS CTDCTaskCalculator::GetBestTimeSpentUnits(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	// sanity check
+	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
+		return m_data.m_nDefTimeSpentUnits;
+	}
+
+	TDC_UNITS nUnits = m_data.m_nDefTimeSpentUnits;
+
+	if (pTDI->timeSpent.dAmount > 0)
+	{
+		nUnits = pTDI->timeSpent.nUnits;
+	}
+	else if (pTDS->HasSubTasks())
+	{
+		DWORD dwID = pTDS->GetSubTaskID(0);
+
+		if (m_data.GetTask(dwID, pTDI, pTDS))
+		{
+			nUnits = GetBestTimeSpentUnits(pTDI, pTDS); // RECURSIVE CALL
+		}
+	}
+
+	return nUnits;
+}
+
+// ---------------------------------------------------------------------
+
+double CTDCTaskCalculator::GetTaskTimeRemaining(DWORD dwTaskID, TDC_UNITS& nUnits) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
+
+	return GetTaskTimeRemaining(pTDI, pTDS, nUnits);
+}
+
 double CTDCTaskCalculator::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return 0.0;
+	}
 
 	double dRemain = 0.0, dWeightedEstimate;
 	nUnits = TDCU_NULL;
@@ -2455,7 +2641,7 @@ double CTDCTaskCalculator::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODO
 	}
 	else
 	{
-		double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, pTDI->timeEstimate.nUnits, dWeightedEstimate);
+		double dEstimate = GetTaskTimeEstimate(pTDI, pTDS, pTDI->timeEstimate.nUnits, dWeightedEstimate, CDWordSet());
 
 		if (m_data.HasStyle(TDCS_CALCREMAININGTIMEBYPERCENT))
 		{
@@ -2486,38 +2672,7 @@ double CTDCTaskCalculator::GetTaskTimeRemaining(const TODOITEM* pTDI, const TODO
 	return dRemain;
 }
 
-double CTDCTaskCalculator::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const
-{
-	// sanity check
-	ASSERT (pTDS && pTDI);
-
-	if (!pTDS || !pTDI)
-		return 0.0;
-
-	double dSpent = 0;
-	BOOL bIsParent = pTDS->HasSubTasks();
-
-	// task's own time
-	if (!bIsParent || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-		dSpent = pTDI->timeSpent.GetTime(THU_HOURS);
-
-	if (bIsParent) // children's time
-	{
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
-		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-			const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
-
-			ASSERT(pTDIChild && pTDSChild);
-
-			if (pTDSChild && pTDIChild)
-				dSpent += GetTaskTimeSpent(pTDIChild, pTDSChild, TDCU_HOURS);
-		}
-	}
-
-	// convert it back from hours to nUnits
-	return CTimeHelper().Convert(dSpent, THU_HOURS, TDC::MapUnitsToTHUnits(nUnits));
-}
+// ---------------------------------------------------------------------
 
 BOOL CTDCTaskCalculator::IsTaskStarted(DWORD dwTaskID, BOOL bToday) const
 {
@@ -2531,10 +2686,11 @@ BOOL CTDCTaskCalculator::IsTaskStarted(DWORD dwTaskID, BOOL bToday) const
 BOOL CTDCTaskCalculator::IsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	double dStarted = GetTaskStartDate(pTDI, pTDS);
 
@@ -2544,6 +2700,8 @@ BOOL CTDCTaskCalculator::IsTaskStarted(const TODOITEM* pTDI, const TODOSTRUCTURE
 	// else
 	return ((dStarted > 0) && (dStarted < COleDateTime::GetCurrentTime()));
 }
+
+// ---------------------------------------------------------------------
 
 BOOL CTDCTaskCalculator::IsTaskDue(DWORD dwTaskID, BOOL bToday) const
 {
@@ -2557,10 +2715,11 @@ BOOL CTDCTaskCalculator::IsTaskDue(DWORD dwTaskID, BOOL bToday) const
 BOOL CTDCTaskCalculator::IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-	
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	double dDue = GetTaskDueDate(pTDI, pTDS);
 	
@@ -2577,14 +2736,11 @@ BOOL CTDCTaskCalculator::IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pT
 	return (dDue < COleDateTime::GetCurrentTime());
 }
 
+// ---------------------------------------------------------------------
+
 BOOL CTDCTaskCalculator::IsTaskOverDue(DWORD dwTaskID) const
 {
 	return IsTaskDue(dwTaskID, FALSE);
-}
-
-BOOL CTDCTaskCalculator::IsTaskDueToday(DWORD dwTaskID) const
-{
-	return IsTaskDue(dwTaskID, TRUE);
 }
 
 BOOL CTDCTaskCalculator::IsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
@@ -2592,10 +2748,19 @@ BOOL CTDCTaskCalculator::IsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE
 	return IsTaskDue(pTDI, pTDS, FALSE);
 }
 
+// ---------------------------------------------------------------------
+
+BOOL CTDCTaskCalculator::IsTaskDueToday(DWORD dwTaskID) const
+{
+	return IsTaskDue(dwTaskID, TRUE);
+}
+
 BOOL CTDCTaskCalculator::IsTaskDueToday(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	return IsTaskDue(pTDI, pTDS, TRUE);
 }
+
+// ---------------------------------------------------------------------
 
 BOOL CTDCTaskCalculator::HasOverdueTasks() const
 {
@@ -2608,14 +2773,7 @@ BOOL CTDCTaskCalculator::HasOverdueTasks() const
 	return ((dEarliest > 0.0) && (dEarliest < dtToday));
 }
 
-BOOL CTDCTaskCalculator::HasLockedTasks() const
-{
-	if (m_data.GetTaskCount() == 0)
-		return FALSE;
-
-	// search all tasks for first locked one
-	return HasLockedTasks(m_data.GetStructure());
-}
+// ---------------------------------------------------------------------
 
 BOOL CTDCTaskCalculator::HasDueTodayTasks() const
 {
@@ -2623,16 +2781,19 @@ BOOL CTDCTaskCalculator::HasDueTodayTasks() const
 		return FALSE;
 
 	// search all tasks for first due today
-	return HasDueTodayTasks(m_data.GetStructure());
+	return HasDueTodayTasks(m_data.GetStructure(), CDWordSet());
 }
 
-BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const
+BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
-	ASSERT(pTDS);
-
 	if (!pTDS)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
 	if (pTDS->GetTaskID())
 	{
@@ -2646,58 +2807,80 @@ BOOL CTDCTaskCalculator::HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const
 	}
 
 	// subtasks
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOITEM* pTDIUnused = NULL;
+		const TODOSTRUCTURE* pTDSChild = NULL;
 
-		if (HasDueTodayTasks(pTDSChild))
-			return TRUE;
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIUnused, pTDSChild))
+		{
+			if (HasDueTodayTasks(pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
+				return TRUE;
+		}
 	}
 
 	// no due todays found
 	return FALSE;
 }
 
-BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS) const
+// ---------------------------------------------------------------------
+
+BOOL CTDCTaskCalculator::HasLockedTasks() const
+{
+	if (m_data.GetTaskCount() == 0)
+		return FALSE;
+
+	// search all tasks for first locked one
+	return HasLockedTasks(m_data.GetStructure(), CDWordSet());
+}
+
+BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
-	ASSERT(pTDS);
-
 	if (!pTDS)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
 
 	if (IsTaskLocked(pTDS->GetTaskID()))
 		return TRUE;
 
 	// subtasks
-	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOITEM* pTDIUnused = NULL;
+		const TODOSTRUCTURE* pTDSChild = NULL;
 
-		if (HasLockedTasks(pTDSChild))
-			return TRUE;
+		if (GET_SUBTASK(pTDS, nSubtask, pTDIUnused, pTDSChild))
+		{
+			if (HasLockedTasks(pTDSChild, mapProcessedIDs)) // RECURSIVE CALL
+				return TRUE;
+		}
 	}
 
 	// no locked tasks found
 	return FALSE;
-
 }
+
+// ---------------------------------------------------------------------
 
 double CTDCTaskCalculator::GetEarliestDueDate() const
 {
 	double dEarliest = DBL_MAX;
+	CDWordSet mapProcessedIDs;
 
 	// traverse top level items
-	for (int nSubTask = 0; nSubTask < m_data.m_struct.GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < m_data.m_struct.GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDSChild = m_data.m_struct.GetSubTask(nSubTask);
-		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+		const TODOSTRUCTURE* pTDSChild = NULL;
+		const TODOITEM* pTDIChild = NULL;
 
-		ASSERT(pTDIChild && pTDSChild);
-
-		if (pTDSChild && pTDIChild)
+		if (GET_SUBTASK(&m_data.m_struct, nSubtask, pTDIChild, pTDSChild))
 		{
-			double dTaskEarliest = GetStartDueDate(pTDIChild, pTDSChild, TRUE, TRUE, TRUE);
+			double dTaskEarliest = GetStartDueDate(pTDIChild, pTDSChild, TRUE, TRUE, TRUE, mapProcessedIDs);
 
 			if (dTaskEarliest > 0.0)
 			{
@@ -2712,23 +2895,7 @@ double CTDCTaskCalculator::GetEarliestDueDate() const
 	return ((dEarliest == DBL_MAX) ? 0.0 : dEarliest);
 }
 
-int CTDCTaskCalculator::GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITY);
-
-	return GetTaskPriority(pTDI, pTDS, bCheckOverdue);
-}
-
-int CTDCTaskCalculator::GetTaskRisk(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NORISK);
-
-	return GetTaskRisk(pTDI, pTDS);
-}
+// ---------------------------------------------------------------------
 
 double CTDCTaskCalculator::GetTaskDueDate(DWORD dwTaskID) const
 {
@@ -2739,18 +2906,19 @@ double CTDCTaskCalculator::GetTaskDueDate(DWORD dwTaskID) const
 	return GetTaskDueDate(pTDI, pTDS);
 }
 
-BOOL CTDCTaskCalculator::IsTaskLocked(DWORD dwTaskID) const
+double CTDCTaskCalculator::GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	if (!m_data.HasStyle(TDCS_SUBTASKSINHERITLOCK))
-		return m_data.IsTaskLocked(dwTaskID);
+	if (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE))
+		return GetStartDueDate(pTDI, pTDS, TRUE, TRUE, TRUE, CDWordSet());
 
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
+	if (m_data.HasStyle(TDCS_USELATESTDUEDATE))
+		return GetStartDueDate(pTDI, pTDS, TRUE, TRUE, FALSE, CDWordSet());
 
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
-
-	return IsTaskLocked(pTDI, pTDS);
+	// else
+	return GetStartDueDate(pTDI, pTDS, FALSE, TRUE, FALSE, CDWordSet());
 }
+
+// ---------------------------------------------------------------------
 
 double CTDCTaskCalculator::GetTaskStartDate(DWORD dwTaskID) const
 {
@@ -2761,136 +2929,34 @@ double CTDCTaskCalculator::GetTaskStartDate(DWORD dwTaskID) const
 	return GetTaskStartDate(pTDI, pTDS);
 }
 
-double CTDCTaskCalculator::GetTaskLastModifiedDate(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
-
-	return GetTaskLastModifiedDate(pTDI, pTDS);
-}
-
-CString CTDCTaskCalculator::GetTaskLastModifiedBy(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
-
-	return GetTaskLastModifiedBy(pTDI, pTDS);
-}
-
-double CTDCTaskCalculator::GetTaskCost(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
-
-	return GetTaskCost(pTDI, pTDS);
-}
-
-int CTDCTaskCalculator::GetTaskPercentDone(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
-
-	return GetTaskPercentDone(pTDI, pTDS);
-}
-
-double CTDCTaskCalculator::GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
-
-	return GetTaskTimeEstimate(pTDI, pTDS, nUnits);
-}
-
-double CTDCTaskCalculator::GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
-
-	return GetTaskTimeSpent(pTDI, pTDS, nUnits);
-}
-
-double CTDCTaskCalculator::GetTaskTimeRemaining(DWORD dwTaskID, TDC_UNITS& nUnits) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
-
-	return GetTaskTimeRemaining(pTDI, pTDS, nUnits);
-}
-
-BOOL CTDCTaskCalculator::GetTaskSubtaskTotals(DWORD dwTaskID, int& nSubtasksTotal, int& nSubtasksDone) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
-
-	return GetTaskSubtaskTotals(pTDI, pTDS, nSubtasksTotal, nSubtasksDone);
-}
-
-double CTDCTaskCalculator::GetTaskSubtaskCompletion(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0.0);
-
-	return GetTaskSubtaskCompletion(pTDI, pTDS);
-}
-
-BOOL CTDCTaskCalculator::IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck) const
-{
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
-
-	return IsTaskDone(pTDI, pTDS, dwExtraCheck);
-}
-
-double CTDCTaskCalculator::GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
-{
-	if (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE))
-	{
-		return GetStartDueDate(pTDI, pTDS, TRUE, TRUE, TRUE);
-	}
-	else if (m_data.HasStyle(TDCS_USELATESTDUEDATE))
-	{
-		return GetStartDueDate(pTDI, pTDS, TRUE, TRUE, FALSE);
-	}
-
-	// else
-	return GetStartDueDate(pTDI, pTDS, FALSE, TRUE, FALSE);
-}
-
 double CTDCTaskCalculator::GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	if (m_data.HasStyle(TDCS_USEEARLIESTSTARTDATE))
-	{
-		return GetStartDueDate(pTDI, pTDS, TRUE, FALSE, TRUE);
-	}
-	else if (m_data.HasStyle(TDCS_USELATESTSTARTDATE))
-	{
-		return GetStartDueDate(pTDI, pTDS, TRUE, FALSE, FALSE);
-	}
+		return GetStartDueDate(pTDI, pTDS, TRUE, FALSE, TRUE, CDWordSet());
+
+	if (m_data.HasStyle(TDCS_USELATESTSTARTDATE))
+		return GetStartDueDate(pTDI, pTDS, TRUE, FALSE, FALSE, CDWordSet());
 
 	// else
-	return GetStartDueDate(pTDI, pTDS, FALSE, FALSE, FALSE);
+	return GetStartDueDate(pTDI, pTDS, FALSE, FALSE, FALSE, CDWordSet());
 }
 
-double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest) const
+// ---------------------------------------------------------------------
+
+double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+										   BOOL bCheckChildren, BOOL bDue, BOOL bEarliest, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return 0.0;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
 
 	BOOL bDone = IsTaskDone(pTDI, pTDS, TDCCHECKCHILDREN);
-	double dBest = 0;
+	double dBest = 0.0;
 
 	if (bDone)
 	{
@@ -2908,16 +2974,14 @@ double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUC
 				dBest = (bEarliest ? INT_MAX : -INT_MAX);
 
 			// check children
-			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+			for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 			{
-				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-				const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+				const TODOSTRUCTURE* pTDSChild = NULL;
+				const TODOITEM* pTDIChild = NULL;
 
-				ASSERT(pTDIChild && pTDSChild);
-
-				if (pTDSChild && pTDIChild)
+				if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 				{
-					double dChildDate = GetStartDueDate(pTDIChild, pTDSChild, TRUE, bDue, bEarliest); // RECURSIVE CALL
+					double dChildDate = GetStartDueDate(pTDIChild, pTDSChild, TRUE, bDue, bEarliest, mapProcessedIDs); // RECURSIVE CALL
 					dBest = (bEarliest ? GetEarliestDate(dBest, dChildDate, bDue) : GetLatestDate(dBest, dChildDate, bDue));
 				}
 			}
@@ -2942,9 +3006,20 @@ double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUC
 	return dBest;
 }
 
+// ---------------------------------------------------------------------
+
+double CTDCTaskCalculator::GetTaskLastModifiedDate(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
+
+	return GetTaskLastModifiedDate(pTDI, pTDS);
+}
+
 double CTDCTaskCalculator::GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS);
+	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS, CDWordSet());
 
 	if (!pLatest || !CDateHelper::IsDateSet(pTDI->dateLastMod))
 		return 0.0;
@@ -2952,9 +3027,20 @@ double CTDCTaskCalculator::GetTaskLastModifiedDate(const TODOITEM* pTDI, const T
 	return pLatest->dateLastMod;
 }
 
+// ---------------------------------------------------------------------
+
+CString CTDCTaskCalculator::GetTaskLastModifiedBy(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskLastModifiedBy(pTDI, pTDS);
+}
+
 CString CTDCTaskCalculator::GetTaskLastModifiedBy(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS);
+	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS, CDWordSet());
 
 	if (!pLatest)
 		return EMPTY_STR;
@@ -2962,13 +3048,18 @@ CString CTDCTaskCalculator::GetTaskLastModifiedBy(const TODOITEM* pTDI, const TO
 	return pLatest->sLastModifiedBy;
 }
 
-const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+// ---------------------------------------------------------------------
+
+const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
+	{
+		ASSERT(0);
 		return NULL;
+	}
+
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, pTDI);
 
 	const TODOITEM* pLatest = pTDI;
 
@@ -2976,17 +3067,15 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 	{
 		double dLatest = pTDI->dateLastMod;
 
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-			const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+			const TODOSTRUCTURE* pTDSChild = NULL;
+			const TODOITEM* pTDIChild = NULL;
 
-			ASSERT(pTDIChild && pTDSChild);
-
-			if (pTDSChild && pTDIChild)
+			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
-				const TODOITEM* pLatestChild = GetLastModifiedTask(pTDIChild, pTDSChild); // RECURSIVE CALL
-				double dLatestChildDate = pLatestChild->dateLastMod;
+				const TODOITEM* pLatestChild = GetLastModifiedTask(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
+				double dLatestChildDate = pLatestChild->dateLastMod.m_dt;
 
 				if (GetLatestDate(dLatest, dLatestChildDate, FALSE) == dLatestChildDate)
 				{
@@ -2999,6 +3088,8 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 
 	return pLatest;
 }
+
+// ---------------------------------------------------------------------
 
 double CTDCTaskCalculator::GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay)
 {
@@ -3016,17 +3107,37 @@ double CTDCTaskCalculator::GetEarliestDate(double dDate1, double dDate2, BOOL bN
 	return dtMin.m_dt;
 }
 
+// ---------------------------------------------------------------------
+
+int CTDCTaskCalculator::GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITY);
+
+	return GetTaskPriority(pTDI, pTDS, bCheckOverdue);
+}
+
 int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const
 {
+	return GetTaskPriority(pTDI, pTDS, bCheckOverdue, CDWordSet());
+}
+
+int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue, CDWordSet& mapProcessedIDs) const
+{
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
-		return -1;
+	{
+		ASSERT(0);
+		return FM_NOPRIORITY;
+	}
 
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NOPRIORITY);
+
+	// Do as little work as possible
 	int nHighest = pTDI->nPriority;
 
-	if (pTDI->IsDone() && !m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) && m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY))
+	if (m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY) && IsTaskDone(pTDI, pTDS))
 	{
 		nHighest = min(nHighest, MIN_TDPRIORITY);
 	}
@@ -3036,30 +3147,21 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 		{
 			nHighest = MAX_TDPRIORITY;
 		}
-		else if (m_data.HasStyle(TDCS_USEHIGHESTPRIORITY) && pTDS->HasSubTasks())
+		else if (m_data.HasStyle(TDCS_USEHIGHESTPRIORITY))
 		{
 			// check children
-			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+			int nSubtask = pTDS->GetSubTaskCount();
+
+			while (nSubtask-- && (nHighest < MAX_TDPRIORITY))
 			{
-				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-				const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+				const TODOSTRUCTURE* pTDSChild = NULL;
+				const TODOITEM* pTDIChild = NULL;
 
-				ASSERT(pTDIChild && pTDSChild);
-
-				if (pTDSChild && pTDIChild)
+				if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 				{
-					if (m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
+					if (m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) || !IsTaskDone(pTDIChild, pTDSChild))
 					{
-						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bCheckOverdue);
-
-						// optimization
-						if (nChildHighest == MAX_TDPRIORITY)
-						{
-							nHighest = MAX_TDPRIORITY;
-							break;
-						}
-						
-						// else
+						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bCheckOverdue, mapProcessedIDs); // RECURSIVE CALL
 						nHighest = max(nChildHighest, nHighest);
 					}
 				}
@@ -3070,49 +3172,57 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 	return nHighest;
 }
 
+// ---------------------------------------------------------------------
+
+int CTDCTaskCalculator::GetTaskRisk(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NORISK);
+
+	return GetTaskRisk(pTDI, pTDS);
+}
+
 int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
+	return GetTaskRisk(pTDI, pTDS, CDWordSet());
+}
+
+int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const
+{
 	// sanity check
-	ASSERT (pTDS && pTDI);
-
 	if (!pTDS || !pTDI)
-		return -1;
+	{
+		ASSERT(0);
+		return FM_NORISK;
+	}
 
-	// some optimizations
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NORISK);
+
+	// Do as little work as possible
 	int nHighest = pTDI->nRisk;
 
-	if (pTDI->IsDone() && !m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) && m_data.HasStyle(TDCS_DONEHAVELOWESTRISK))
+	if (m_data.HasStyle(TDCS_DONEHAVELOWESTRISK) && IsTaskDone(pTDI, pTDS))
 	{
 		nHighest = min(nHighest, MIN_TDRISK);
 	}
 	else if (nHighest < MAX_TDRISK)
 	{
-		if (m_data.HasStyle(TDCS_USEHIGHESTRISK) && pTDS->HasSubTasks())
+		if (m_data.HasStyle(TDCS_USEHIGHESTRISK))
 		{
 			// check children
-			nHighest = max(nHighest, FM_NORISK);//MIN_TDRISK;
+			int nSubtask = pTDS->GetSubTaskCount();
 
-			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+			while (nSubtask-- && (nHighest < MAX_TDRISK))
 			{
-				const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-				const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+				const TODOSTRUCTURE* pTDSChild = NULL;
+				const TODOITEM* pTDIChild = NULL;
 
-				ASSERT(pTDIChild && pTDSChild);
-
-				if (pTDSChild && pTDIChild)
+				if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 				{
-					if (m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
+					if (m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !IsTaskDone(pTDIChild, pTDSChild))
 					{
-						int nChildHighest = GetTaskRisk(pTDIChild, pTDSChild);
-
-						// optimization
-						if (nChildHighest == MAX_TDRISK)
-						{
-							nHighest = MAX_TDRISK;
-							break;
-						}
-						
-						// else
+						int nChildHighest = GetTaskRisk(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
 						nHighest = max(nChildHighest, nHighest);
 					}
 				}
@@ -3121,6 +3231,17 @@ int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 	}
 
 	return nHighest;
+}
+
+// ---------------------------------------------------------------------
+
+BOOL CTDCTaskCalculator::IsTaskDone(DWORD dwTaskID, DWORD dwExtraCheck) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
+
+	return IsTaskDone(pTDI, pTDS, dwExtraCheck);
 }
 
 BOOL CTDCTaskCalculator::IsTaskDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, DWORD dwExtraCheck) const
@@ -3156,6 +3277,8 @@ BOOL CTDCTaskCalculator::IsTaskDone(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 	return FALSE;
 }
 
+// ---------------------------------------------------------------------
+
 BOOL CTDCTaskCalculator::IsParentTaskDone(DWORD dwTaskID) const
 {
 	const TODOSTRUCTURE* pTDS = NULL;
@@ -3166,9 +3289,14 @@ BOOL CTDCTaskCalculator::IsParentTaskDone(DWORD dwTaskID) const
 
 BOOL CTDCTaskCalculator::IsParentTaskDone(const TODOSTRUCTURE* pTDS) const
 {
-	ASSERT (pTDS);
+	// Sanity check
+	if (!pTDS)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
-	if (!pTDS || pTDS->ParentIsRoot())
+	if (pTDS->ParentIsRoot())
 		return FALSE;
 
 	const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
@@ -3187,7 +3315,8 @@ BOOL CTDCTaskCalculator::IsParentTaskDone(const TODOSTRUCTURE* pTDS) const
 	return IsParentTaskDone(pTDSParent);
 }
 
-// Custom attribute handling (and calculation) hereafter
+// ---------------------------------------------------------------------
+
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
 	if (!attribDef.bEnabled)
@@ -3203,6 +3332,13 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUS
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
+	return GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits, CDWordSet());
+}
+
+BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, CDWordSet& mapProcessedIDs) const
+{
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FALSE);
+
 	double dCalcValue = DBL_NULL, dSubtaskVal;
 	TDCCADATA data;
 
@@ -3218,7 +3354,6 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 	}
 
-	// -----------------------------------------------------------
 	if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_ACCUMULATE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE) ||
@@ -3228,19 +3363,18 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
 
 		// our children's values
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
+			const TODOITEM* pTDIChild = NULL;
+			const TODOSTRUCTURE* pTDSChild = NULL;
 
-			// ignore references else risk of infinite loop
-			if (!m_data.IsTaskReference(dwSubtaskID))
+			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
+				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue += dSubtaskVal;
 			}
 		}
 	}
-	// -----------------------------------------------------------
 	else if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_MAXIMIZE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_MAXIMIZE) ||
@@ -3252,14 +3386,14 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
 
 		// our children's values
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
+			const TODOITEM* pTDIChild = NULL;
+			const TODOSTRUCTURE* pTDSChild = NULL;
 
-			// ignore references else risk of infinite loop
-			if (!m_data.IsTaskReference(dwSubtaskID))
+			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
+				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue = max(dSubtaskVal, dCalcValue);
 			}
 		}
@@ -3267,7 +3401,6 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (dCalcValue <= -DBL_MAX)
 			dCalcValue = DBL_NULL;
 	}
-	// -----------------------------------------------------------
 	else if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_MINIMIZE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_MINIMIZE) ||
@@ -3279,14 +3412,14 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
 
 		// our children's values
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
+			const TODOITEM* pTDIChild = NULL;
+			const TODOSTRUCTURE* pTDSChild = NULL;
 
-			// ignore references else risk of infinite loop
-			if (!m_data.IsTaskReference(dwSubtaskID))
+			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
+				if (GetTaskCustomAttributeData(pTDIChild, pTDSChild, attribDef, dSubtaskVal, nUnits, mapProcessedIDs)) // RECURSIVE CALL
 					dCalcValue = min(dSubtaskVal, dCalcValue);
 			}
 		}
@@ -3343,18 +3476,46 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 	if (!GetSecondCustomAttributeOperandValue(pTDI, pTDS, calc, dSecondVal, nUnits, bAggregated))
 		return FALSE;
 
+	// Date calculations may need extra post-processing
+	BOOL bFirstIsDate = (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opFirst) == TDCCA_DATE);
+	BOOL bSecondIsDate = (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opSecond) == TDCCA_DATE);
+
 	switch (calc.nOperator)
 	{
 	case TDCCAC_ADD:
-		dResult = (dFirstVal + dSecondVal);
+		{
+			dResult = (dFirstVal + dSecondVal);
+
+			if (bFirstIsDate)
+			{
+				ASSERT(!bSecondIsDate);
+
+				// If the date has a time component but the result falls on
+				// a day boundary then the result date needs decrementing
+				if (CDateHelper::DateHasTime(dFirstVal) && CDateHelper::IsEndOfDay(dResult, TRUE))
+					dResult--;
+			}
+		}
 		break;
 
 	case TDCCAC_SUBTRACT:
-		dResult = (dFirstVal - dSecondVal);
+		{
+			dResult = (dFirstVal - dSecondVal);
+
+			if (bFirstIsDate && bSecondIsDate)
+			{
+				// If the first date falls on the end of the day
+				// then the result date needs decrementing
+				if (CDateHelper::IsEndOfDay(dFirstVal, TRUE))
+					dResult++;
+			}
+		}
 		break;
 
 	case TDCCAC_MULTIPLY:
-		dResult = (dFirstVal * dSecondVal);
+		{
+			dResult = (dFirstVal * dSecondVal);
+		}
 		break;
 
 	case TDCCAC_DIVIDE:
@@ -3383,7 +3544,7 @@ BOOL CTDCTaskCalculator::GetFirstCustomAttributeOperandValue(const TODOITEM* pTD
 	}
 
 	// else built-in attribute
-	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opFirst.nAttribID, dValue, nUnits, bAggregated);
+	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opFirst.nAttributeID, dValue, nUnits, bAggregated);
 }
 
 BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
@@ -3404,7 +3565,7 @@ BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pT
 	}
 
 	// else built-in attribute
-	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opSecond.nAttribID, dValue, nUnits, bAggregated);
+	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opSecond.nAttributeID, dValue, nUnits, bAggregated);
 }
 
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
@@ -3418,6 +3579,10 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 	// Numeric types only
 	switch (nAttribID)
 	{
+	case TDCA_TODAY:
+		dValue = CDateHelper::GetDate(DHD_TODAY);
+		return TRUE;
+
 	case TDCA_COST:
 		if (bAggregated)
 		{
@@ -3460,27 +3625,23 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		return (dValue >= 0);
 
 	case TDCA_CREATIONDATE:
-		if (pTDI->HasCreation())
 		{
-			dValue = pTDI->dateCreated;
-			return TRUE;
+			dValue = pTDI->dateCreated.m_dt;
 		}
-		break;
+		return (dValue != 0);
 
 	case TDCA_DONEDATE:
-		if (pTDI->IsDone())
 		{
-			dValue = pTDI->dateDone;
-			return TRUE;
+			dValue = pTDI->dateDone.m_dt;
 		}
-		break;
+		return (dValue != 0);
 
 	case TDCA_DUEDATE:
 		{
 			if (bAggregated)
 				dValue = GetTaskDueDate(pTDI, pTDS);
 			else
-				dValue = pTDI->dateDue;
+				dValue = pTDI->dateDue.m_dt;
 		}
 		return (dValue != 0);
 
@@ -3489,7 +3650,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 			if (bAggregated)
 				dValue = GetTaskLastModifiedDate(pTDI, pTDS);
 			else
-				dValue = pTDI->dateLastMod;
+				dValue = pTDI->dateLastMod.m_dt;
 		}
 		return (dValue != 0);
 
@@ -3498,7 +3659,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 			if (bAggregated)
 				dValue = GetTaskStartDate(pTDI, pTDS);
 			else
-				dValue = pTDI->dateStart;
+				dValue = pTDI->dateStart.m_dt;
 		}
 		return (dValue != 0);
 
@@ -3713,15 +3874,16 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(DWORD dwTaskID) const
 	return GetTaskTimeRemaining(pTDI, pTDS);
 }
 
-CString CTDCTaskFormatter::FormatDate(const COleDateTime& date) const
+CString CTDCTaskFormatter::GetDateTime(const COleDateTime& date, BOOL bAllowTime) const
 {
 	if (!CDateHelper::IsDateSet(date))
 		return EMPTY_STR;
 
-	DWORD dwDateFmt = m_data.HasStyle(TDCS_SHOWDATESINISO) ? DHFD_ISO : 0;
-
-	if (CDateHelper::DateHasTime(date))
-		dwDateFmt |= DHFD_TIME | DHFD_NOSEC;
+	DWORD dwDateFmt = 0;
+	
+	Misc::SetFlag(dwDateFmt, DHFD_ISO, m_data.HasStyle(TDCS_SHOWDATESINISO));
+	Misc::SetFlag(dwDateFmt, DHFD_DOW, m_data.HasStyle(TDCS_SHOWWEEKDAYINDATES));
+	Misc::SetFlag(dwDateFmt, DHFD_TIME | DHFD_NOSEC, (bAllowTime && CDateHelper::DateHasTime(date)));
 
 	return CDateHelper::FormatDate(date, dwDateFmt);
 }
@@ -3859,16 +4021,19 @@ CString CTDCTaskFormatter::GetCommentSize(float fSize) const
 
 CString CTDCTaskFormatter::GetTaskCommentsSize(const TODOITEM* pTDI) const
 {
+	ASSERT(pTDI);
+
 	if (pTDI)
 		return GetCommentSize(pTDI->GetCommentsSizeInKB());
 
 	// else
-	ASSERT(pTDI);
 	return EMPTY_STR;
 }
 
 CString CTDCTaskFormatter::GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank) const
 {
+	ASSERT(pTDI);
+
 	if (pTDI)
 	{
 		if (!bEmptyIsBlank || !pTDI->sComments.IsEmpty() || !pTDI->customComments.IsEmpty())
@@ -3878,7 +4043,6 @@ CString CTDCTaskFormatter::GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmp
 	}
 
 	// else
-	ASSERT(pTDI);
 	return EMPTY_STR;
 }
 
@@ -4040,23 +4204,23 @@ CString CTDCTaskFormatter::GetTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE
 	{
 	case TDCC_DONEDATE:
 		ASSERT(pTDI);
-		return FormatDate(pTDI->dateDone);
+		return GetDateTime(pTDI->dateDone);
 
 	case TDCC_DUEDATE:
 		ASSERT(pTDI && pTDS);
-		return FormatDate(m_calculator.GetTaskDueDate(pTDI, pTDS));
+		return GetDateTime(m_calculator.GetTaskDueDate(pTDI, pTDS));
 
 	case TDCC_STARTDATE:
 		ASSERT(pTDI && pTDS);
-		return FormatDate(m_calculator.GetTaskStartDate(pTDI, pTDS));
+		return GetDateTime(m_calculator.GetTaskStartDate(pTDI, pTDS));
 
 	case TDCC_CREATIONDATE:
 		ASSERT(pTDI);
-		return FormatDate(pTDI->dateCreated);
+		return GetDateTime(pTDI->dateCreated);
 
 	case TDCC_LASTMODDATE:
 		ASSERT(pTDI);
-		return FormatDate(pTDI->dateLastMod);
+		return GetDateTime(pTDI->dateLastMod);
 	}
 
 	ASSERT(0);
@@ -4192,7 +4356,7 @@ CString CTDCTaskFormatter::GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bA
 		return CTimeHelper().FormatTimeHMS(dTime, nTHUnits, (BOOL)nDecPlaces);
 
 	// else
-	return CTimeHelper().FormatTime(dTime, nTHUnits, nDecPlaces);
+	return CTimeHelper::FormatTime(dTime, nTHUnits, nDecPlaces);
 }
 
 CString CTDCTaskFormatter::GetTaskAllocTo(const TODOITEM* pTDI, TCHAR cSep) const
@@ -4307,6 +4471,12 @@ CString CTDCTaskFormatter::GetTaskPath(DWORD dwTaskID, int nMaxLen) const
 
 CString CTDCTaskFormatter::GetID(DWORD dwTaskID, DWORD dwRefID) const
 {
+	if (dwTaskID == 0)
+	{
+		ASSERT(dwRefID == 0);
+		return EMPTY_STR;
+	}
+
 	if ((dwRefID == 0) || (dwRefID == dwTaskID))
 		return Misc::Format(dwTaskID);
 
@@ -4418,8 +4588,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			case TDCCA_DATE:
 				if (bSuccess)
 				{
-					return TDCCADATA(dValue).FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO),
-														  m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIME));
+					return GetDateTime(dValue, m_data.m_aCustomAttribDefs.CalculationHasFeature(attribDef, TDCCAF_SHOWTIME));
 				}
 				break;
 
@@ -4543,13 +4712,15 @@ BOOL CTDCTaskExporter::ExportSubTasks(const TODOSTRUCTURE* pTDSParent, CTaskFile
 	const TODOITEM* pTDILastRecurringSubtask = NULL;
 	HTASKITEM hPrevSiblingTask = NULL;
 
-	for (int nSubTask = 0; nSubTask < pTDSParent->GetSubTaskCount(); nSubTask++)
+	for (int nSubtask = 0; nSubtask < pTDSParent->GetSubTaskCount(); nSubtask++)
 	{
-		const TODOSTRUCTURE* pTDS = pTDSParent->GetSubTask(nSubTask);
-		ASSERT(pTDS);
+		const TODOSTRUCTURE* pTDS = pTDSParent->GetSubTask(nSubtask);
 
 		if (!pTDS)
+		{
+			ASSERT(0);
 			return FALSE;
+		}
 
 		// DON'T use GET_TDI because that will get the task
 		// pointed to by references and not the reference itself
@@ -4765,13 +4936,25 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	return TRUE;
 }
 
-BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, 
-	HTASKITEM hTask, const TDCGETTASKS& filter) const
+BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const
 {
-	ASSERT(pTDI);
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
 
-	if (!pTDI)
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
+
+	return ExportMatchingTaskAttributes(pTDI, pTDS, tasks, hTask, filter);
+}
+
+BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks,
+													HTASKITEM hTask, const TDCGETTASKS& filter) const
+{
+	// sanity check
+	if (!pTDI || !pTDS)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	BOOL bDone = pTDI->IsDone();
 	BOOL bParent = pTDS->HasSubTasks();
@@ -4783,7 +4966,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 	BOOL bHtmlComments = filter.WantAttribute(TDCA_HTMLCOMMENTS);
 	BOOL bTransform = filter.HasFlag(TDCGTF_TRANSFORM);
 
-	if (pTDS->HasSubTasks())
+	if (bParent)
 		tasks.SetTaskIsParent(hTask);
 
 	// For references, export the 'real' task's attributes
@@ -5321,6 +5504,11 @@ BOOL CTDCMultiTasker::GetTasksColor(const CDWordArray& aTaskIDs, COLORREF& crVal
 	GETTASKSVAL_SIMPLE(m_data.GetTaskColor, crValue, COLORREF);
 }
 
+BOOL CTDCMultiTasker::GetTasksReminder(const CDWordArray& aTaskIDs, const CTDCReminderHelper& reminders, time_t& tValue) const
+{
+	GETTASKSVAL_SIMPLE(reminders.GetTaskReminder, tValue, time_t);
+}
+
 // -----------------------------------------------------------------
 
 #define GETTASKSVAL_ARG(FUNCTION, VAR, TYPE, ARG)        \
@@ -5440,6 +5628,9 @@ BOOL CTDCMultiTasker::GetTasksTimeRemaining(const CDWordArray& aTaskIDs, TDCTIME
 			return FALSE;
 	}
 
+	if (!first.HasValidUnits())
+		return FALSE;
+
 	period = first; 
 	return TRUE;
 }
@@ -5549,11 +5740,6 @@ int CTDCMultiTasker::GetTasksTags(const CDWordArray& aTaskIDs, CStringArray& aMa
 	GETTASKSLIST_SPLIT(m_data.GetTaskTags);
 }
 
-int CTDCMultiTasker::GetTasksFileLinks(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
-{
-	GETTASKSLIST_SPLIT(m_data.GetTaskFileLinks);
-}
-
 int CTDCMultiTasker::GetTasksAllocatedTo(const CDWordArray& aTaskIDs, CStringArray& aMatched, CStringArray& aMixed) const
 {
 	GETTASKSLIST_SPLIT(m_data.GetTaskAllocTo);
@@ -5614,6 +5800,51 @@ BOOL CTDCMultiTasker::AnyTaskHasIcon(const CDWordArray& aTaskIDs) const
 	GETANYTASKHAS_STR(GetTaskIcon);
 }
 
+BOOL CTDCMultiTasker::AnyTaskHasColor(const CDWordArray& aTaskIDs) const
+{
+	GETANYTASKHAS(GetTaskColor);
+}
+
+BOOL CTDCMultiTasker::AnyTaskIsParent(const CDWordArray& aTaskIDs) const
+{
+	GETANYTASKHAS(IsTaskParent);
+}
+
+BOOL CTDCMultiTasker::AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const
+{
+	GETANYTASKHAS(IsTaskRecurring);
+}
+
+BOOL CTDCMultiTasker::AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const
+{
+	GETANYTASKHAS(IsTaskFlagged);
+}
+
+// -----------------------------------------------------------------
+
+BOOL CTDCMultiTasker::AnyTaskHasID(const CDWordArray& aTaskIDs, DWORD dwTaskID, BOOL bIncludeRefs) const
+{
+	if (!aTaskIDs.GetSize() || !dwTaskID)
+		return FALSE;
+
+	BOOL bFound = (Misc::FindT(dwTaskID, aTaskIDs) != -1);
+
+	if (bFound || !bIncludeRefs)
+		return bFound;
+
+	dwTaskID = m_data.GetTrueTaskID(dwTaskID);
+
+	for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (m_data.GetTrueTaskID(aTaskIDs[nID]) == dwTaskID)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+// -----------------------------------------------------------------
+
 BOOL CTDCMultiTasker::AnyTaskHasLockedParent(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
 {
 	if (!aTaskIDs.GetSize())
@@ -5637,44 +5868,6 @@ BOOL CTDCMultiTasker::AnyTaskHasLockedParent(const CDWordArray& aTaskIDs, BOOL b
 	return FALSE;
 }
 
-BOOL CTDCMultiTasker::AnyTaskHasColor(const CDWordArray& aTaskIDs) const
-{
-	GETANYTASKHAS(GetTaskColor);
-}
-
-BOOL CTDCMultiTasker::AnyTaskHasID(const CDWordArray& aTaskIDs, DWORD dwTaskID, BOOL bIncludeRefs) const
-{
-	if (!aTaskIDs.GetSize())
-		return FALSE;
-
-	BOOL bFound = (Misc::FindT(dwTaskID, aTaskIDs) != -1);
-
-	if (bFound || !bIncludeRefs)
-		return bFound;
-
-	dwTaskID = m_data.GetTrueTaskID(dwTaskID);
-
-	for (int nID = 1; nID < aTaskIDs.GetSize(); nID++)
-	{
-		if (m_data.GetTrueTaskID(aTaskIDs[nID]) == dwTaskID)
-			return TRUE;
-	}
-
-	return FALSE;
-}
-
-// -----------------------------------------------------------------
-
-BOOL CTDCMultiTasker::AnyTaskIsParent(const CDWordArray& aTaskIDs) const
-{
-	GETANYTASKHAS(IsTaskParent);
-}
-
-BOOL CTDCMultiTasker::AnyTaskIsRecurring(const CDWordArray& aTaskIDs) const
-{
-	GETANYTASKHAS(IsTaskRecurring);
-}
-
 BOOL CTDCMultiTasker::AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
 {
 	if (!aTaskIDs.GetSize())
@@ -5694,9 +5887,29 @@ BOOL CTDCMultiTasker::AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRe
 	return FALSE;
 }
 
-BOOL CTDCMultiTasker::AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const
+BOOL CTDCMultiTasker::AnyTaskIsUnlocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked) const
 {
-	GETANYTASKHAS(IsTaskFlagged);
+	if (!aTaskIDs.GetSize())
+		return FALSE;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		DWORD dwTaskID = aTaskIDs[nID];
+
+		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwTaskID))
+			return TRUE;
+
+		if (!m_calculator.IsTaskLocked(dwTaskID))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
+{
+	DWORD dwUnused = 0;
+	return GetTasksParentID(aTaskIDs, dwUnused);
 }
 
 // -----------------------------------------------------------------
@@ -5732,10 +5945,14 @@ BOOL CTDCMultiTasker::AllTasksAreReferences(const CDWordArray& aTaskIDs) const
 	GETALLTASKHAS(IsTaskReference);
 }
 
-BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
+BOOL CTDCMultiTasker::AllTasksAreParents(const CDWordArray& aTaskIDs) const
 {
-	DWORD dwUnused = 0;
-	return GetTasksParentID(aTaskIDs, dwUnused);
+	GETALLTASKHAS(IsTaskParent);
+}
+
+BOOL CTDCMultiTasker::AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const
+{
+	GETALLTASKHAS(TaskHasDependencies);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -5884,16 +6101,12 @@ CString CTDCLongestItemMap::GetLongestValue(TDC_COLUMN nColID) const
 	return sValue;
 }
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+// ----------------------------------------------------------------------------------
 
 CTDCTaskColumnSizer::CTDCTaskColumnSizer(const CToDoCtrlData& data,
-										 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
 										 const CContentMgr& mgrContent)
 	:
 	m_data(data),
-	m_aCustAttribDefs(aCustAttribDefs),
 	m_mgrContent(mgrContent),
 	m_formatter(data, mgrContent),
 	m_calculator(data)
@@ -5932,7 +6145,7 @@ CString CTDCTaskColumnSizer::GetLongestValue(TDC_COLUMN nColID, const CDWordArra
 	}
 
 	// All the rest
-	return GetLongestValue(nColID, aTaskIDs);
+	return GetLongestValue(nColID, EMPTY_STR, aTaskIDs);
 }
 
 CString CTDCTaskColumnSizer::GetLongestValue(TDC_COLUMN nColID, const CStringArray& aPossible, const CDWordArray& aTaskIDs) const
@@ -6102,7 +6315,7 @@ BOOL CTDCTaskColumnSizer::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFI
 		return FALSE;
 	}
 
-	switch (m_aCustAttribDefs.GetAttributeDataType(attribDef))
+	switch (m_data.m_aCustomAttribDefs.GetAttributeDataType(attribDef))
 	{
 	case TDCCA_DOUBLE:
 	case TDCCA_FRACTION:
@@ -6218,10 +6431,10 @@ CString CTDCTaskColumnSizer::GetLongestRecurrenceOption()
 	return sLongest;
 }
 
-CString CTDCTaskColumnSizer::GetLongestTime(TDC_COLUMN nCol, const CDWordArray& aTaskIDs) const
+CString CTDCTaskColumnSizer::GetLongestTime(TDC_COLUMN nColID, const CDWordArray& aTaskIDs) const
 {
 	// Sanity check
-	switch (nCol)
+	switch (nColID)
 	{
 	case TDCC_TIMEESTIMATE:
 	case TDCC_TIMESPENT:
@@ -6231,7 +6444,7 @@ CString CTDCTaskColumnSizer::GetLongestTime(TDC_COLUMN nCol, const CDWordArray& 
 
 			for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 			{
-				CString sTaskVal = m_formatter.GetTaskTimePeriod(aTaskIDs[nID], nCol);
+				CString sTaskVal = m_formatter.GetTaskTimePeriod(aTaskIDs[nID], nColID);
 				sLongest = GetLongerString(sTaskVal, sLongest);
 			}
 
@@ -6262,10 +6475,10 @@ CString CTDCTaskColumnSizer::GetLongestCost(const CDWordArray& aTaskIDs) const
 
 int CTDCTaskColumnSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, const CDWordArray& aTaskIDs, CTDCLongestItemMap& mapLongest) const
 {
-	if (mapLongest.Initialise(mapCols, m_aCustAttribDefs))
+	if (mapLongest.Initialise(mapCols, m_data.m_aCustomAttribDefs))
 	{
 		// Likewise for certain calculated custom attributes
-		CTDCCustomAttribDefinitionArray aRestAttribDefs(m_aCustAttribDefs);
+		CTDCCustomAttribDefinitionArray aRestAttribDefs(m_data.m_aCustomAttribDefs);
 		int nCust = aRestAttribDefs.GetSize();
 
 		while (nCust--)
@@ -6310,9 +6523,9 @@ int CTDCTaskColumnSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, const 
 }
 
 void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
-									 const TODOSTRUCTURE* pTDS,
-									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-									 CTDCLongestItemMap& mapLongest) const
+										   const TODOSTRUCTURE* pTDS,
+										   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+										   CTDCLongestItemMap& mapLongest) const
 {
 	if (!pTDI || !pTDS)
 	{
@@ -6382,3 +6595,362 @@ void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
 		}
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+CTDCTaskAttributeCopier::CTDCTaskAttributeCopier(const CToDoCtrlData& data,
+												 const CContentMgr& mgrContent)
+	:
+	m_data(data),
+	m_formatter(data, mgrContent)
+{
+}
+
+BOOL CTDCTaskAttributeCopier::CanCopyAttributeValues(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib, BOOL bSameTasklist) const
+{
+	// Can't copy to calculations
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttrib) &&
+		(m_data.m_aCustomAttribDefs.GetAttributeDataType(nToAttrib) == TDCCA_CALCULATION))
+	{
+		return FALSE;
+	}
+
+	TDC_ATTRIBUTEGROUP nFromGroup = GetAttributeGroup(nFromAttrib);
+	TDC_ATTRIBUTEGROUP nToGroup = GetAttributeGroup(nToAttrib);
+
+	if ((nFromGroup == TDCAG_NONE) || (nToGroup == TDCAG_NONE))
+		return FALSE;
+
+	switch (nToGroup)
+	{
+	case TDCAG_SINGLETEXT:
+	case TDCAG_MULTITEXT:
+		return TRUE;
+
+	case TDCAG_NUMERIC:
+		return (nFromGroup == TDCAG_NUMERIC);
+
+	case TDCAG_CUSTOM:
+		ASSERT(0); // Should have been resolved
+		break;
+
+	case TDCAG_DATETIME:
+		if (nFromGroup == TDCAG_DATETIME)
+		{
+			switch (nFromAttrib)
+			{
+			case TDCA_DONETIME:
+			case TDCA_DUETIME:
+			case TDCA_STARTTIME:
+				switch (nToAttrib)
+				{
+				case TDCA_DONETIME:
+				case TDCA_DUETIME:
+				case TDCA_STARTTIME:
+					return TRUE;
+				}
+				return FALSE;
+			}
+
+			switch (nToAttrib)
+			{
+			case TDCA_CREATIONDATE:
+			case TDCA_LASTMODDATE:
+				return FALSE;
+	
+			case TDCA_DONEDATE:
+			case TDCA_DUEDATE:
+			case TDCA_STARTDATE:
+				return TRUE;
+			}
+
+			// All else
+			return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttrib);
+		}
+		break;
+
+	case TDCAG_TIMEPERIOD:
+		return ((nFromGroup == TDCAG_TIMEPERIOD) && (nToAttrib != TDCA_TIMEREMAINING));
+
+	case TDCAG_OTHER:
+		switch (nFromAttrib)
+		{
+		case TDCA_FLAG:
+		case TDCA_LOCK:
+			switch (nToAttrib)
+			{
+			case TDCA_FLAG:
+			case TDCA_LOCK:
+				return TRUE;
+			}
+			break;
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
+TDC_ATTRIBUTEGROUP CTDCTaskAttributeCopier::GetAttributeGroup(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomAttrib) const
+{
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+	{
+		if (bResolveCustomAttrib)
+		{
+			DWORD dwAttribType = m_data.m_aCustomAttribDefs.GetAttributeDataType(nAttribID);
+			return TDCCUSTOMATTRIBUTEDEFINITION::GetAttributeGroup(dwAttribType);
+		}
+
+		// else
+		return TDCAG_CUSTOM;
+	}
+
+	// Built-in attributes
+	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+	{
+		if (nAttribID == ATTRIBUTES[nAttrib].nAttributeID)
+			return ATTRIBUTES[nAttrib].nGroup;
+	}
+
+	// All else
+	return TDCAG_NONE;
+}
+
+BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_ATTRIBUTE nFromAttribID, TODOITEM& tdiTo, TDC_ATTRIBUTE nToAttribID) const
+{
+	if (!CanCopyAttributeValues(nFromAttribID, nToAttribID, FALSE))
+		return FALSE;
+
+	TDCCADATA dataFrom;
+	m_data.GetTaskAttributeValue(tdiFrom, nFromAttribID, dataFrom);
+
+	TDC_ATTRIBUTEGROUP nFromGroup = GetAttributeGroup(nFromAttribID);
+	TDC_ATTRIBUTEGROUP nToGroup = GetAttributeGroup(nToAttribID);
+
+	CStringArray aValues;
+
+	if ((nToGroup == TDCAG_SINGLETEXT) || (nToGroup == TDCAG_MULTITEXT))
+	{
+		switch (nFromGroup)
+		{
+		case TDCAG_SINGLETEXT:
+		case TDCAG_CUSTOM:
+		case TDCAG_OTHER:
+			break;
+
+		case TDCAG_NUMERIC:
+			switch (nFromAttribID)
+			{
+			case TDCA_COST:
+				{
+					TDCCOST cost;
+
+					if (dataFrom.AsCost(cost) && !cost.bIsRate)
+						dataFrom.Set(m_formatter.GetCost(cost.dAmount));
+				}
+				break;
+
+			default:
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nFromAttribID))
+				{
+					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+					GET_CUSTDEF_ALT(m_data.m_aCustomAttribDefs, nFromAttribID, pDef, FALSE);
+
+					DWORD dwDataType = m_data.m_aCustomAttribDefs.GetAttributeDataType(*pDef);
+					double dValue = dataFrom.AsDouble();
+
+					if ((dValue != 0.0) || !m_data.m_aCustomAttribDefs.CalculationHasFeature(*pDef, TDCCAF_HIDEZERO))
+					{
+						dataFrom.Set(TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(dValue, dwDataType, pDef->dwFeatures));
+					}
+				}
+				break;
+			}
+			break;
+
+		case TDCAG_MULTITEXT:
+			if (nToGroup == TDCAG_SINGLETEXT)
+				dataFrom.Set(dataFrom.FormatAsArray());
+			break;
+
+		case TDCAG_DATETIME:
+			{
+				COleDateTime date(dataFrom.AsDate());
+
+				if ((int)date.m_dt == 0)
+					dataFrom.Set(m_formatter.GetTimeOnly(date, TDC::MapAttributeToDate(nFromAttribID)));
+				else
+					dataFrom.Set(m_formatter.GetDateTime(date));
+			}
+			break;
+
+		case TDCAG_TIMEPERIOD:
+			{
+				TDCTIMEPERIOD time;
+
+				if (dataFrom.AsTimePeriod(time))
+					dataFrom.Set(m_formatter.GetTimePeriod(time.dAmount, time.nUnits, TRUE));
+			}
+			break;
+		}
+	}
+
+	switch (nToAttribID)
+	{
+	case TDCA_VERSION:		tdiTo.sVersion		= dataFrom.AsString();	break;
+	case TDCA_ALLOCBY:		tdiTo.sAllocBy		= dataFrom.AsString();	break;
+	case TDCA_EXTERNALID:	tdiTo.sExternalID	= dataFrom.AsString();	break;
+	case TDCA_STATUS:		tdiTo.sStatus		= dataFrom.AsString();	break;
+	case TDCA_TASKNAME:		tdiTo.sTitle		= dataFrom.AsString();	break;
+
+	case TDCA_PRIORITY:		tdiTo.nPriority		= dataFrom.AsInteger();	break;
+	case TDCA_RISK:			tdiTo.nRisk			= dataFrom.AsInteger();	break;
+	case TDCA_PERCENT:		tdiTo.nPercentDone	= dataFrom.AsInteger();	break;
+
+	case TDCA_FLAG:			tdiTo.bFlagged		= dataFrom.AsBool();	break;
+	case TDCA_LOCK:			tdiTo.bLocked		= dataFrom.AsBool();	break;
+
+	case TDCA_TIMEESTIMATE:	dataFrom.AsTimePeriod(tdiTo.timeEstimate);	break;
+	case TDCA_TIMESPENT:	dataFrom.AsTimePeriod(tdiTo.timeSpent);		break;
+	case TDCA_COST:			dataFrom.AsCost(tdiTo.cost);				break;
+
+	case TDCA_DONEDATE:		CopyDate(dataFrom.AsDate(), tdiTo.dateDone);	break;
+	case TDCA_DUEDATE:		CopyDate(dataFrom.AsDate(), tdiTo.dateDue);		break;
+	case TDCA_STARTDATE:	CopyDate(dataFrom.AsDate(), tdiTo.dateStart);	break;
+
+	case TDCA_FILELINK:		dataFrom.AsArray(aValues); tdiTo.aFileLinks.Copy(aValues);	break;
+	case TDCA_ALLOCTO:		dataFrom.AsArray(aValues); tdiTo.aAllocTo.Copy(aValues);	break;
+	case TDCA_CATEGORY:		dataFrom.AsArray(aValues); tdiTo.aCategories.Copy(aValues); break;
+	case TDCA_TAGS:			dataFrom.AsArray(aValues); tdiTo.aTags.Copy(aValues);		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nToAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_data.m_aCustomAttribDefs, nToAttribID, pDef, FALSE);
+
+			if (nFromGroup == TDCAG_DATETIME)
+			{
+				TDCCADATA dataTo;
+				tdiTo.GetCustomAttributeValue(pDef->sUniqueID, dataTo);
+				
+				COleDateTime dtTo(dataTo.AsDate());
+				CopyDate(dataFrom.AsDate(), dtTo);
+
+				tdiTo.SetCustomAttributeValue(pDef->sUniqueID, dtTo);
+			}
+			else
+			{
+				tdiTo.SetCustomAttributeValue(pDef->sUniqueID, dataFrom);
+			}
+			break;
+		}
+		ASSERT(0); // I've missed something
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+void CTDCTaskAttributeCopier::CopyDate(const COleDateTime& dtFrom, COleDateTime& dtTo)
+{
+	if (CDateHelper::IsDateSet(CDateHelper::GetDateOnly(dtFrom)))
+	{
+		dtTo = dtFrom;
+	}
+	else // 'From' has time only
+	{
+		// 'To' must have date component
+		if (CDateHelper::IsDateSet(CDateHelper::GetDateOnly(dtTo)))
+			dtTo = CDateHelper::MakeDate(dtTo, dtFrom);
+	}
+}
+
+BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nFromColID, TDC_COLUMN nToColID, BOOL bSameTasklist) const
+{
+	return CanCopyAttributeValues(TDC::MapColumnToAttribute(nFromColID), 
+								  TDC::MapColumnToAttribute(nToColID), 
+								  bSameTasklist);
+}
+
+BOOL CTDCTaskAttributeCopier::CopyColumnValue(const TODOITEM& tdiFrom, TDC_COLUMN nFromColID, TODOITEM& tdiTo, TDC_COLUMN nToColID) const
+{
+	return CopyAttributeValue(tdiFrom, 
+							  TDC::MapColumnToAttribute(nFromColID), 
+							  tdiTo, 
+							  TDC::MapColumnToAttribute(nToColID));
+}
+
+BOOL CTDCTaskAttributeCopier::CanCopyColumnValues(TDC_COLUMN nColID) const
+{
+	switch (nColID)
+	{
+	case TDCC_NONE:
+	case TDCC_ICON:
+	case TDCC_RECENTEDIT:
+	case TDCC_LOCK:
+	case TDCC_COLOR:
+	case TDCC_DONE:
+	case TDCC_TRACKTIME:
+	case TDCC_FLAG:
+	case TDCC_REMINDER:
+		return FALSE;
+
+	case TDCC_PRIORITY:
+	case TDCC_PERCENT:
+	case TDCC_TIMEESTIMATE:
+	case TDCC_TIMESPENT:
+	case TDCC_STARTDATE:
+	case TDCC_DUEDATE:
+	case TDCC_DONEDATE:
+	case TDCC_ALLOCTO:
+	case TDCC_ALLOCBY:
+	case TDCC_STATUS:
+	case TDCC_CATEGORY:
+	case TDCC_FILELINK:
+	case TDCC_POSITION:
+	case TDCC_ID:
+	case TDCC_CREATIONDATE:
+	case TDCC_CREATEDBY:
+	case TDCC_LASTMODDATE:
+	case TDCC_RISK:
+	case TDCC_EXTERNALID:
+	case TDCC_COST:
+	case TDCC_DEPENDENCY:
+	case TDCC_RECURRENCE:
+	case TDCC_VERSION:
+	case TDCC_TIMEREMAINING:
+	case TDCC_PARENTID:
+	case TDCC_PATH:
+	case TDCC_TAGS:
+	case TDCC_SUBTASKDONE:
+	case TDCC_STARTTIME:
+	case TDCC_DUETIME:
+	case TDCC_DONETIME:
+	case TDCC_CREATIONTIME:
+	case TDCC_LASTMODBY:
+	case TDCC_COMMENTSSIZE:
+	case TDCC_COMMENTSFORMAT:
+	case TDCC_CLIENT:
+		return TRUE;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+		{
+			switch (m_data.m_aCustomAttribDefs.GetAttributeDataType(nColID))
+			{
+			case TDCCA_BOOL:
+			case TDCCA_ICON:
+				return FALSE;
+			}
+
+			return TRUE;
+		}
+		break;
+	}
+
+	// All else
+	ASSERT(0);
+	return FALSE;
+}
+

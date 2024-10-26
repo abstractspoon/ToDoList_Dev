@@ -32,18 +32,16 @@ enum
 
 //////////////////////////////////////////////////////////////////////
 
-static const CLIPFORMAT CB_TEXTFORMAT = 
 #ifdef _UNICODE
-	CF_UNICODETEXT;
+static const CLIPFORMAT CB_TEXTFORMAT =	CF_UNICODETEXT;
 #else
-	CF_TEXT;
+static const CLIPFORMAT CB_TEXTFORMAT =	CF_TEXT;
 #endif
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef _ttof
+#undef _ttof
 #define _ttof(str) Misc::Atof(str)
-#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -374,23 +372,6 @@ namespace Misc
 
 		return (aValues.GetSize() < nNumItems);
 	}
-/*
-	template <class T> 
-	T IncrementItemT(CArray<T, T&>& aValues, int nItem)
-	{
-		ASSERT(nItem >= 0);
-		
-		if (nItem < 0)
-			return;
-
-		if (nItem >= aValues.GetSize())
-			aValues.SetSize(nItem + 1);
-
-		aValues[nItem] += 1;
-
-		return aValues[nItem];
-	}
-*/
 
 	template <class T> 
 	T IncrementItemStrT(CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
@@ -450,7 +431,7 @@ namespace Misc
 			return FALSE;
 		}
 
-		aValues.RemoveAt(aValues.GetSize() - 1);
+		aValues.RemoveAt(LastIndexT(aValues));
 		return TRUE;
 	}
 		
@@ -463,7 +444,7 @@ namespace Misc
 			return FALSE;
 		}
 		
-		aValues[aValues.GetSize() - 1] = val;
+		aValues[LastIndexT(aValues)] = val;
 		return TRUE;
 	}
 	
@@ -565,7 +546,7 @@ namespace Misc
 			{
 				map1.GetNextAssoc(pos, keySrc, valueSrc);
 				
-				if (!map2.Lookup(keySrc, valueDest) || (valueDest != valueSrc))
+				if (!map2.Lookup(keySrc, valueDest) || !(valueDest == valueSrc))
 					return FALSE;
 			}
 		}
@@ -589,7 +570,7 @@ namespace Misc
 			{
 				map1.GetNextAssoc(pos, sKeySrc, valueSrc);
 
-				if (!map2.Lookup(sKeySrc, valueDest) || (valueDest != valueSrc))
+				if (!map2.Lookup(sKeySrc, valueDest) || !(valueDest == valueSrc))
 					return FALSE;
 			}
 		}
@@ -656,6 +637,47 @@ namespace Misc
 		return FormatArrayT(aValues, lpszFormat, szSep);
 	}
 
+	template <class T>
+	int LastIndexT(const T& aValues)
+	{
+		return (aValues.GetSize() - 1);
+	}
+
+	template <class T>
+	int NextIndexT(const T& aValues, int nIndex, BOOL bForwards, BOOL bWrap = FALSE)
+	{
+		int nSize = aValues.GetSize();
+
+		if ((nIndex < 0) || (nIndex >= nSize))
+		{
+			ASSERT(0);
+			return -1;
+		}
+
+		if (bForwards)
+		{
+			nIndex++;
+			ASSERT(nIndex <= nSize);
+
+			if (nIndex == nSize)
+			{
+				if (bWrap)
+					nIndex = 0;
+				else
+					nIndex = -1;
+			}
+		}
+		else // Backwards
+		{
+			nIndex--;
+			ASSERT(nIndex >= -1);
+
+			if ((nIndex == -1) && bWrap)
+				nIndex = (nSize - 1);
+		}
+
+		return nIndex;
+	}
 
 }
 

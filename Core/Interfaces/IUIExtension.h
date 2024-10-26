@@ -202,7 +202,7 @@ enum IUI_HITTESTREASON
 
 struct IUITASKMOD
 {
-	TDC_ATTRIBUTE nAttrib;
+	TDC_ATTRIBUTE nAttributeID;
 	DWORD dwSelectedTaskID;		// 'zero' for _ALL_ selected tasks
 	LPCWSTR szCustomAttribID;	// TDCA_CUSTOMATTRIB
 
@@ -244,13 +244,13 @@ struct IUITASKMOVE
 
 struct IUIMULTISORT
 {
-	TDC_ATTRIBUTE nAttrib1;
+	TDC_ATTRIBUTE nAttributeID1;
 	bool bAscending1;
 
-	TDC_ATTRIBUTE nAttrib2;
+	TDC_ATTRIBUTE nAttributeID2;
 	bool bAscending2;
 
-	TDC_ATTRIBUTE nAttrib3;
+	TDC_ATTRIBUTE nAttributeID3;
 	bool bAscending3;
 };
 
@@ -258,7 +258,7 @@ struct IUIMULTISORT
 
 struct IUISELECTTASK
 {
-	TDC_ATTRIBUTE nAttrib; // IUI_TASKNAME, IUI_TASKNAMEORCOMMENTS or IUI_ANYTEXTATTRIBUTE
+	TDC_ATTRIBUTE nAttributeID; // IUI_TASKNAME, IUI_TASKNAMEORCOMMENTS or IUI_ANYTEXTATTRIBUTE
 	bool bFindReplace;
 
 	LPCWSTR szWords;	

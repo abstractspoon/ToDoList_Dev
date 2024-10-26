@@ -35,19 +35,20 @@ namespace TreeViewHelper
 				}
 				else
 				{
+                    // Drawing adds 1 to size
+                    btnRect.Width--;
+                    btnRect.Height--;
+
 					graphics.FillRectangle((pressed ? SystemBrushes.Control : SystemBrushes.Window), btnRect);
 					graphics.DrawRectangle(SystemPens.ControlDark, btnRect);
 
-					using (var pen = SystemPens.WindowText)
-					{
-						int midY = ((btnRect.Top + btnRect.Bottom) / 2);
-						graphics.DrawLine(pen, btnRect.Left + 2, midY, btnRect.Right - 2, midY);
+					int midY = ((btnRect.Top + btnRect.Bottom) / 2);
+					graphics.DrawLine(SystemPens.WindowText, btnRect.Left + 2, midY, btnRect.Right - 2, midY);
 
-						if (!opened)
-						{
-							int midX = ((btnRect.Left + btnRect.Right) / 2);
-							graphics.DrawLine(pen, midX, btnRect.Top + 2, midX, btnRect.Bottom - 2);
-						}
+					if (!opened)
+					{
+						int midX = ((btnRect.Left + btnRect.Right) / 2);
+						graphics.DrawLine(SystemPens.WindowText, midX, btnRect.Top + 2, midX, btnRect.Bottom - 2);
 					}
 				}
 			}

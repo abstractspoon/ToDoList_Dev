@@ -33,10 +33,10 @@ CTDCAttributeMap::CTDCAttributeMap()
 {
 }
 
-CTDCAttributeMap::CTDCAttributeMap(TDC_ATTRIBUTE nAttrib)
+CTDCAttributeMap::CTDCAttributeMap(TDC_ATTRIBUTE nAttribID)
 	: CTDCBaseEnumSet<TDC_ATTRIBUTE>()
 {
-	Add(nAttrib);
+	Add(nAttribID);
 }
 
 CTDCAttributeMap::CTDCAttributeMap(const CTDCAttributeMap& mapOther) 
@@ -48,19 +48,19 @@ CTDCAttributeMap::~CTDCAttributeMap()
 {
 }
 
-BOOL CTDCAttributeMap::Add(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCAttributeMap::Add(TDC_ATTRIBUTE nAttribID)
 {
-	// Special cases
-	switch (nAttrib)
+	// Composite attributes
+	switch (nAttribID)
 	{
 	case TDCA_OFFSETTASK:
 		return (Add(TDCA_STARTDATE) && Add(TDCA_DUEDATE)); // RECURSIVE CALLS
 	}
 
-	if (!CanAdd(nAttrib))
+	if (!CanAdd(nAttribID))
 		return FALSE;
 
-	CTDCBaseEnumSet<TDC_ATTRIBUTE>::Add(nAttrib);
+	CTDCBaseEnumSet<TDC_ATTRIBUTE>::Add(nAttribID);
 	return TRUE;
 }
 
@@ -79,7 +79,7 @@ int CTDCAttributeMap::Append(const CTDCAttributeMap& other)
 	return nAdded;
 }
 
-BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttribID) const
 {
 	// Anything can be added if we are empty
 	POSITION pos = GetStartPosition();
@@ -87,31 +87,35 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
 	if (pos == NULL)
 		return TRUE;
 
-	if (Has(nAttrib))
+	if (Has(nAttribID))
 		return TRUE;
 
 	// All the rest
 	BOOL bCanAdd = FALSE;
 
-	// TDCA_HTMLCOMMENTS is special because of its cost.
-	// It must be explicitly specified even if TDCA_ALL is set
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALL:
+		// TDCA_HTMLCOMMENTS is special because of its cost.
+		// It must be explicitly specified even if TDCA_ALL is set
 		bCanAdd = HasOnly(TDCA_HTMLCOMMENTS);
 		break;
 
 	case TDCA_HTMLCOMMENTS:
-		bCanAdd = (HasOnly(TDCA_ALL) || IsTaskAttribute(nAttrib));
+		bCanAdd = (HasOnly(TDCA_ALL) || IsTaskAttribute(nAttribID));
+		break;
+
+	case TDCA_TODAY:
+	case TDCA_REMINDER:
+		// Can only add if we already contain a task attribute
+		bCanAdd = IsTaskAttribute(GetNext(pos));
 		break;
 
 	default:
-		if (IsTaskAttribute(nAttrib))
+		if (IsTaskAttribute(nAttribID))
 		{
-			// Can only add a task attribute if we already
-			// contain a task attribute
-			TDC_ATTRIBUTE nExistAttrib = GetNext(pos);
-			bCanAdd = IsTaskAttribute(nExistAttrib);
+			// Can only add if we already contain a task attribute
+			bCanAdd = IsTaskAttribute(GetNext(pos));
 		}
 		else
 		{
@@ -127,15 +131,17 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
 	return bCanAdd;
 }
 
-BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCBY:
 	case TDCA_ALLOCTO:
 	case TDCA_CATEGORY:
 	case TDCA_COLOR:
 	case TDCA_COMMENTS:
+	case TDCA_COMMENTSSIZE:
+	case TDCA_COMMENTSFORMAT:
 	case TDCA_COST:
 	case TDCA_CREATEDBY:
 	case TDCA_CREATIONDATE:
@@ -160,6 +166,7 @@ BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_POSITION:
 	case TDCA_PRIORITY:
 	case TDCA_RECURRENCE:
+	case TDCA_REMINDER:
 	case TDCA_RISK:
 	case TDCA_STARTDATE:
 	case TDCA_STARTTIME:
@@ -176,7 +183,7 @@ BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	}
 
 	// all else
-	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib);
+	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
 }
 
 TDC_ATTRIBUTE CTDCAttributeMap::GetFirst() const
@@ -206,19 +213,24 @@ CTDCAttributeArray::~CTDCAttributeArray()
 {
 }
 
-BOOL CTDCAttributeArray::Has(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDCAttributeArray::Has(TDC_ATTRIBUTE nAttribID) const
 {
-	return Misc::HasT(nAttrib, *this);
+	return (Find(nAttribID) != -1);
 }
 
-BOOL CTDCAttributeArray::AddUnique(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCAttributeArray::Find(TDC_ATTRIBUTE nAttribID) const
 {
-	return Misc::AddUniqueItemT(nAttrib, *this);
+	return Misc::FindT(nAttribID, *this);
 }
 
-void CTDCAttributeArray::Remove(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCAttributeArray::AddUnique(TDC_ATTRIBUTE nAttribID)
 {
-	Misc::RemoveItemT(nAttrib, *this);
+	return Misc::AddUniqueItemT(nAttribID, *this);
+}
+
+void CTDCAttributeArray::Remove(TDC_ATTRIBUTE nAttribID)
+{
+	Misc::RemoveItemT(nAttribID, *this);
 }
 
 BOOL CTDCAttributeArray::MatchAll(const CTDCAttributeArray& aOther) const

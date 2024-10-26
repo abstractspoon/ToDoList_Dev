@@ -729,7 +729,7 @@ BOOL CEnToolBar::InsertSeparator(int nPos)
 		return FALSE;
 	}
 
-	TBBUTTON tbbSep = { 0, nPos, 0, TBSTYLE_SEP, 0, NULL };
+	TBBUTTON tbbSep = { 0, ID_SEPARATOR, 0, TBSTYLE_SEP, 0, NULL };
 
 	return GetToolBarCtrl().InsertButton(nPos, &tbbSep);
 }

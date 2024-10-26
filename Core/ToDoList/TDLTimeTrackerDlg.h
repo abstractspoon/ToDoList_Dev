@@ -14,6 +14,7 @@
 #include "..\shared\icon.h"
 #include "..\shared\enedit.h"
 #include "..\shared\TooltipCtrlex.h"
+#include "..\shared\IconButton.h"
 
 #include "..\Interfaces\uithemefile.h"
 
@@ -81,6 +82,7 @@ protected:
 	CEnEdit m_eElapsedTime;
 	CImageList m_ilBtns;
 	CToolTipCtrlEx m_tipCaption;
+	CIconButton m_btnGoToTasklist, m_btnGoToTask;
 	
 	CTDCTrackTasklistArray m_aTasklists;
 	CUIThemeFile m_theme;
@@ -120,6 +122,8 @@ protected:
 	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
 	afx_msg void OnToggleTopMost();
 	afx_msg void OnHelp();
+	afx_msg void OnGoToSelectedTasklist();
+	afx_msg void OnGoToSelectedTask();
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
@@ -147,6 +151,7 @@ protected:
 	void SaveSettings() const;
 	void SetAlwaysOnTop(BOOL bTopMost);
 	void CollapseWindow(BOOL bCollapse);
+	void EnableDisableGoToBtns();
 
 	void Resize(int cx = 0, int cy = 0);
 	int CalcAvailableRows(int nHeight) const;

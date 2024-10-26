@@ -60,6 +60,8 @@ void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TASKS, m_cbTasks);
 	DDX_Control(pDX, IDC_STARTSTOP, m_btnStart);
 	DDX_Control(pDX, IDC_ELAPSEDTIME, m_eElapsedTime);
+	DDX_Control(pDX, IDC_GOTOTASKLIST, m_btnGoToTasklist);
+	DDX_Control(pDX, IDC_GOTOTASK, m_btnGoToTask);
 	DDX_Text(pDX, IDC_TASKTIME, m_sTaskTimes);
 	DDX_Text(pDX, IDC_ELAPSEDTIME, m_sElapsedTime);
 	DDX_Text(pDX, IDC_QUICKFIND, m_sQuickFind);
@@ -69,6 +71,8 @@ void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLTimeTrackerDlg, CDialog)
 	ON_BN_CLICKED(IDC_STARTSTOP, OnStartStopTracking)
+	ON_BN_CLICKED(IDC_GOTOTASKLIST, OnGoToSelectedTasklist)
+	ON_BN_CLICKED(IDC_GOTOTASK, OnGoToSelectedTask)
 	ON_WM_CTLCOLOR()
 	ON_WM_NCHITTEST()
 	ON_CBN_SELCHANGE(IDC_TASKLISTS, OnSelchangeTasklist)
@@ -226,7 +230,11 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 	m_iconDlg.Load(IDR_MAINFRAME_STD);
 	SetIcon(m_iconDlg, TRUE);
 
+	m_btnGoToTasklist.SetIcon(AfxGetApp()->LoadIcon(IDI_TIMETRACK_GOTO));
+	m_btnGoToTask.SetIcon(AfxGetApp()->LoadIcon(IDI_TIMETRACK_GOTO));
+
 	EnableToolTips(TRUE);
+	EnableDisableGoToBtns();
 	CalcMinMaxSizes();
 	LoadSettings();
 	
@@ -315,7 +323,7 @@ int CTDLTimeTrackerDlg::GetTasklistCBIndex(const CToDoCtrl* pTDC) const
 {
 	ASSERT(m_cbTasklists.GetSafeHwnd());
 	
-	return CDialogHelper::FindItemByData(m_cbTasklists, (DWORD)pTDC);
+	return CDialogHelper::FindItemByDataT(m_cbTasklists, (DWORD)pTDC);
 }
 
 BOOL CTDLTimeTrackerDlg::HasTasklist(const CToDoCtrl* pTDC) const
@@ -339,7 +347,7 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tas
 	else
 		sTitle = pTDC->GetFriendlyProjectName();
 
-	int nTDC = AddString(m_cbTasklists, sTitle, (DWORD)pTDC);
+	int nTDC = AddStringT(m_cbTasklists, sTitle, (DWORD)pTDC);
 	
 	if (nTDC == CB_ERR)
 	{
@@ -355,7 +363,8 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tas
 	}
 	
 	RefreshMaxDropWidth(m_cbTasklists);
-	
+	EnableDisableGoToBtns();
+
 	return TRUE;
 }
 
@@ -382,7 +391,7 @@ BOOL CTDLTimeTrackerDlg::SetTasks(const CToDoCtrl* pTDC, const CTaskFile& tasks)
 
 void CTDLTimeTrackerDlg::UpdateTasklistName(const CToDoCtrl* pTDC)
 {
-	int nTDC = FindItemByData(m_cbTasklists, (DWORD)pTDC);
+	int nTDC = FindItemByDataT(m_cbTasklists, (DWORD)pTDC);
 
 	if (nTDC == CB_ERR)
 	{
@@ -399,7 +408,7 @@ void CTDLTimeTrackerDlg::UpdateTasklistName(const CToDoCtrl* pTDC)
 
 		m_cbTasklists.DeleteString(nTDC);
 
-		int nTDC = AddString(m_cbTasklists, sNewName, (DWORD)pTDC);
+		int nTDC = AddStringT(m_cbTasklists, sNewName, (DWORD)pTDC);
 		ASSERT(nTDC != CB_ERR);
 
 		// Restore 
@@ -514,13 +523,17 @@ BOOL CTDLTimeTrackerDlg::RemoveTasks(const CToDoCtrl* pTDC, DWORD dwToRemove)
 		return FALSE;
 	}
 
-	return pTTL->RemoveTasks(dwToRemove);
+	if (!pTTL->RemoveTasks(dwToRemove))
+		return FALSE;
+
+	EnableDisableGoToBtns();
+	return TRUE;
 }
 
 BOOL CTDLTimeTrackerDlg::SelectTaskList(const CToDoCtrl* pTDC)
 {
 	// Select the tasklist
-	if (CB_ERR == SelectItemByData(m_cbTasklists, (DWORD)pTDC))
+	if (CB_ERR == SelectItemByDataT(m_cbTasklists, (DWORD)pTDC))
 		return FALSE;
 
 	// Update UI
@@ -531,7 +544,7 @@ BOOL CTDLTimeTrackerDlg::SelectTaskList(const CToDoCtrl* pTDC)
 
 const CToDoCtrl* CTDLTimeTrackerDlg::GetSelectedTasklist() const
 {
-	return (const CToDoCtrl*)GetSelectedItemData(m_cbTasklists);
+	return (const CToDoCtrl*)GetSelectedItemDataT(m_cbTasklists);
 }
 
 BOOL CTDLTimeTrackerDlg::IsSelectedTasklist(const CToDoCtrl* pTDC) const
@@ -560,7 +573,7 @@ BOOL CTDLTimeTrackerDlg::RebuildTasklistCombo()
 		else
 			sTitle = pTTL->pTDC->GetFriendlyProjectName();
 		
-		if (AddString(m_cbTasklists, sTitle, (DWORD)pTTL->pTDC) == CB_ERR)
+		if (AddStringT(m_cbTasklists, sTitle, (DWORD)pTTL->pTDC) == CB_ERR)
 		{
 			ASSERT(0);
 			return FALSE;
@@ -591,6 +604,8 @@ BOOL CTDLTimeTrackerDlg::RemoveTasklist(const CToDoCtrl* pTDC)
 	m_cbTasklists.DeleteString(nCBTasklist);
 	m_aTasklists.DeleteTasklist(pTDC);
 
+	EnableDisableGoToBtns();
+
 	return TRUE;
 }
 
@@ -607,6 +622,7 @@ void CTDLTimeTrackerDlg::RemoveAllTasklists()
 
 	UpdateData(FALSE);
 	UpdatePlayButton();
+	EnableDisableGoToBtns();
 }
 
 void CTDLTimeTrackerDlg::UpdateTracking(const CToDoCtrl* pTDC)
@@ -616,25 +632,19 @@ void CTDLTimeTrackerDlg::UpdateTracking(const CToDoCtrl* pTDC)
 
 	// Update data struct first
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
-	ASSERT(pTTL);
 
 	if (!pTTL)
+	{
+		ASSERT(0);
 		return;
+	}
 
 	BOOL bWasTracking = pTTL->IsTracking();
-	DWORD dwWasTrackingTaskID = (bWasTracking ? pTTL->GetTrackedTaskID() : 0);
-
 	VERIFY(pTTL->UpdateTracking());
-
-	BOOL bIsTracking = pTTL->IsTracking();
-	DWORD dwIsTrackingTaskID = (bIsTracking ? pTTL->GetTrackedTaskID() : 0);
-
-	ASSERT(Misc::StateChanged(bWasTracking, bIsTracking) ||
-			(bWasTracking && bIsTracking && (dwIsTrackingTaskID != dwWasTrackingTaskID)));
 
 	// If we've just started tracking, switch to that tasklist
 	// and show the dialog if required
-	if (bIsTracking && !bWasTracking)
+	if (pTTL->IsTracking() && !bWasTracking)
 	{
 		SelectTaskList(pTDC);
 
@@ -797,6 +807,16 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
 }
 
+void CTDLTimeTrackerDlg::OnGoToSelectedTasklist()
+{
+	SendNotifyMessage(WM_TDLTTN_GOTOTASKLIST, GetSelectedTasklist(), 0);
+}
+
+void CTDLTimeTrackerDlg::OnGoToSelectedTask()
+{
+	SendNotifyMessage(WM_TDLTTN_GOTOTASKLIST, GetSelectedTasklist(), GetSelectedTaskID());
+}
+
 LRESULT CTDLTimeTrackerDlg::SendNotifyMessage(UINT message, const CToDoCtrl* pTDC, DWORD dwTaskID) const
 {
 	ASSERT(pTDC && pTDC->GetSafeHwnd());
@@ -894,6 +914,7 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	UpdatePlayButton();
 	UpdateTaskTime(pTDC);
 	RefreshCaptionText();
+	EnableDisableGoToBtns();
 }
 
 void CTDLTimeTrackerDlg::OnSelchangeTask()
@@ -901,6 +922,13 @@ void CTDLTimeTrackerDlg::OnSelchangeTask()
 	UpdatePlayButton();
 	UpdateTaskTime(GetSelectedTasklist());
 	RefreshCaptionText();
+	EnableDisableGoToBtns();
+}
+
+void CTDLTimeTrackerDlg::EnableDisableGoToBtns()
+{
+	m_btnGoToTasklist.EnableWindow(m_cbTasklists.GetCurSel() != -1);
+	m_btnGoToTask.EnableWindow(m_cbTasks.GetCurSel() != -1);
 }
 
 BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
@@ -990,6 +1018,14 @@ BOOL CTDLTimeTrackerDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*
 		
 	case IDC_TASKS:
 		sTooltip = GetSelectedItem(m_cbTasks);
+		break;
+
+	case IDC_GOTOTASKLIST:
+		sTooltip = CEnString(IDS_GOTOTASKLIST_TIP);
+		break;
+
+	case IDC_GOTOTASK:
+		sTooltip = CEnString(IDS_GOTOTASK_TIP);
 		break;
 
 	default:
@@ -1181,8 +1217,13 @@ void CTDLTimeTrackerDlg::Resize(int cx, int cy)
 		ShowCtrl(this, IDC_QUICKFIND, bShowToolbar);
 		ShowCtrl(this, IDC_TASKLISTS, bShowTasklists);
 		ShowCtrl(this, IDC_TASKLISTS_LABEL, bShowTasklists);
+		ShowCtrl(this, IDC_GOTOTASKLIST, bShowTasklists);
 		ShowCtrl(this, IDC_TASKS, bShowTasks);
 		ShowCtrl(this, IDC_TASKS_LABEL, bShowTasks);
+		ShowCtrl(this, IDC_GOTOTASK, bShowTasks);
+
+		OffsetCtrl(this, IDC_GOTOTASKLIST, nXOffset, nYOffset);
+		OffsetCtrl(this, IDC_GOTOTASK, nXOffset, nYOffset);
 
 		OffsetCtrl(this, IDC_TASKS, 0, nYOffset);
 		ResizeCtrl(this, IDC_TASKS, nXOffset, 0);

@@ -5,9 +5,11 @@
 #include "Win32.h"
 #include "CommCtrl.h"
 #include "PluginHelpers.h"
+#include "DPIScaling.h"
 
 #include <Shared\MessageBox.h>
 #include <Shared\GraphicsMisc.h>
+#include <Shared\Themed.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -237,6 +239,32 @@ int Win32::GetWmNotifyCode(IntPtr lParam)
 void Win32::SetArrowCursor()
 {
 	GraphicsMisc::SetStandardCursor(IDC_ARROW);
+}
+
+HICON Win32::LoadHIcon(LPCWSTR szDllPath, UINT nIDIcon, int nSize, bool bScaleByDPI)
+{
+	HMODULE hMod = LoadLibrary(szDllPath);
+
+	if (bScaleByDPI)
+		nSize = DPIScaling::Scale(nSize);
+
+	HICON hIcon = (HICON)::LoadImage(hMod,
+									 MAKEINTRESOURCE(nIDIcon),
+									 IMAGE_ICON,
+									 nSize,
+									 nSize,
+									 LR_LOADMAP3DCOLORS);
+
+	FreeLibrary(hMod);
+
+	return hIcon;
+}
+
+void Win32::EnableExplorerTheming(IntPtr hWnd)
+{
+	CWnd* pWnd = CWnd::FromHandle(GetHwnd(hWnd));
+
+	CThemed::SetWindowTheme(pWnd, _T("Explorer"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

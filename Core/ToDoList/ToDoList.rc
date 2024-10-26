@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,999,997,1
+ FILEVERSION 8,999,998,6
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 999, 997, 1\0"
+            VALUE "FileVersion", "8, 999, 998, 7\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-24\0"
             VALUE "LegalTrademarks", "\0"
@@ -55,7 +55,7 @@ BEGIN
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "Development Release of ToDoList 9.0\0"
+            VALUE "SpecialBuild", "Alpha Release of ToDoList 9.0\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -148,7 +148,7 @@ BEGIN
     CONTROL         "&Notify me if the tasklist is read-only",
                     IDC_NOTIFYREADONLY,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     WS_TABSTOP,7,25,386,10
-    CONTROL         "N&otify me of all tasks due (and overdue):",
+    CONTROL         "N&otify me of all tasks due (and overdue)",
                     IDC_NOTIFYDUEONLOAD,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     WS_TABSTOP,7,40,386,10
     COMBOBOX        IDC_NOTIFYDUEBYONLOAD,17,52,182,98,CBS_DROPDOWNLIST | 
@@ -173,7 +173,7 @@ BEGIN
                     IDC_WARNADDDELARCHIVE,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     WS_TABSTOP,7,180,386,10
     LTEXT           "When Switching Tasklists",IDC_SWITCHGROUP,7,199,386,8
-    CONTROL         "N&otify me of all tasks due (and overdue):",
+    CONTROL         "N&otify me of all tasks due (and overdue)",
                     IDC_NOTIFYDUEONSWITCH,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     WS_TABSTOP,7,215,386,10
     COMBOBOX        IDC_NOTIFYDUEBYONSWITCH,18,227,182,98,CBS_DROPDOWNLIST | 
@@ -185,13 +185,13 @@ BEGIN
     CONTROL         "&Show comments as simple text",
                     IDC_DISPLAYDUETASKSIMPLECOMMENTS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,18,280,366,10
-    CONTROL         "&Using the following stylesheet:",
+    CONTROL         "&Using the following stylesheet",
                     IDC_USESTYLESHEETFORDUEITEMS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,18,295,375,10
     EDITTEXT        IDC_DUETASKSTYLESHEET,28,307,171,13,ES_AUTOHSCROLL
     CONTROL         "&Show task titles only",IDC_DISPLAYDUETASKTITLESONLY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,325,386,10
-    CONTROL         "&Only display tasks allocated to:",
+    CONTROL         "&Only display tasks allocated to",
                     IDC_ONLYSHOWDUETASKFORPERSON,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,340,386,10
     EDITTEXT        IDC_DUETASKPERSON,18,352,182,13,ES_AUTOHSCROLL
@@ -201,7 +201,7 @@ IDD_PREFGEN_PAGE DIALOG DISCARDABLE  0, 0, 400, 470
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&Display Language:",IDC_STATIC,7,10,376,10
+    LTEXT           "&Display Language",IDC_STATIC,7,10,376,10
     CONTROL         "",IDC_LANGUAGE,"ComboBoxEx32",CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP,7,22,194,359
     PUSHBUTTON      "&Edit...",IDC_EDIT_DISPLAYLANGUAGE,206,22,50,14
@@ -216,7 +216,7 @@ BEGIN
     CONTROL         "&Restore previously open tasklists on startup",
                     IDC_RELOADTASKLISTS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,85,387,10
-    CONTROL         "&Minimise ToDoList to the 'System Tray' when:",
+    CONTROL         "&Minimise ToDoList to the 'System Tray' when",
                     IDC_USESYSTRAY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
                     100,386,10
     COMBOBOX        IDC_SYSTRAYOPTION,18,113,183,56,CBS_DROPDOWNLIST | 
@@ -236,7 +236,7 @@ BEGIN
     CONTROL         "Allo&w multiple instances of ToDoList",
                     IDC_MULTIINSTANCE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     7,190,386,10
-    CONTROL         "&Global hotkey:",IDC_SPECIFYGLOBALHOTKEY,"Button",
+    CONTROL         "&Global hotkey",IDC_SPECIFYGLOBALHOTKEY,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,205,386,10
     CONTROL         "HotKey1",IDC_GLOBALHOTKEY,"msctls_hotkey32",WS_BORDER | 
                     WS_TABSTOP,18,217,183,13
@@ -261,7 +261,7 @@ BEGIN
     CONTROL         "&Save passwords between sessions, for tasklists stored in other repositories (Open From..., Save To...)",
                     IDC_SAVEOTHERPASSWORDS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,352,386,10
-    CONTROL         "Minimise ToDoList after the following period of inactivity:",
+    CONTROL         "Minimise ToDoList after the following period of inactivity",
                     IDC_MINIMIZEONNOEDIT,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     WS_TABSTOP,7,367,375,10
     COMBOBOX        IDC_NOCHANGETIME,18,379,183,111,CBS_DROPDOWNLIST | 
@@ -269,7 +269,7 @@ BEGIN
     CONTROL         "Display &reminders using 'Stickies' (by Zhorn Software)",
                     IDC_USESTICKIES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
                     397,387,10
-    LTEXT           "Path to Stickies executable:",IDC_STICKIESPATHLABEL,18,
+    LTEXT           "Path to Stickies executable",IDC_STICKIESPATHLABEL,18,
                     409,376,8
     EDITTEXT        IDC_PATHTOSTICKIESEXE,18,420,183,13,ES_AUTOHSCROLL
     CONTROL         "Show &full task path in Sticky",
@@ -285,16 +285,16 @@ STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "File Checking",IDC_CHECKGROUP,7,10,386,8
-    LTEXT           "&Check the status of remote tasklists only every:",
+    LTEXT           "&Check the status of remote tasklists only every",
                     IDC_STATIC,19,24,374,8
     COMBOBOX        IDC_REMOTEFILECHECK,18,36,182,71,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         "&If a tasklist's status changes to writable:",
+    CONTROL         "&If a tasklist's status changes to writable",
                     IDC_PROMPTRELOADONWRITABLE,"Button",BS_AUTOCHECKBOX | 
                     BS_TOP | WS_TABSTOP,7,59,386,10
     COMBOBOX        IDC_READONLYRELOADOPTION,18,71,182,122,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         "I&f a tasklist's timestamp changes:",
+    CONTROL         "I&f a tasklist's timestamp changes",
                     IDC_PROMPTRELOADONCHANGE,"Button",BS_AUTOCHECKBOX | 
                     BS_TOP | WS_TABSTOP,7,94,386,10
     COMBOBOX        IDC_TIMESTAMPRELOADOPTION,18,106,182,99,CBS_DROPDOWNLIST | 
@@ -309,7 +309,7 @@ BEGIN
     CONTROL         "C&heck in tasklists when I close them",
                     IDC_CHECKINONCLOSE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     7,174,369,10
-    CONTROL         "Chec&k in tasklists if no changes have been made for more than:",
+    CONTROL         "Chec&k in tasklists if no changes have been made for more than",
                     IDC_CHECKINONNOEDIT,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     WS_TABSTOP,7,189,368,10
     COMBOBOX        IDC_NOCHANGETIME,18,201,172,111,CBS_DROPDOWNLIST | 
@@ -326,10 +326,10 @@ BEGIN
     CONTROL         "Tree1",IDC_COMMANDS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
                     TVS_SHOWSELALWAYS | TVS_FULLROWSELECT | WS_BORDER | 
                     WS_TABSTOP,7,7,281,225
-    LTEXT           "&Current shortcut key:",IDC_CURLABEL,296,7,98,8
+    LTEXT           "&Current shortcut key",IDC_CURLABEL,296,7,98,8
     CONTROL         "HotKey1",IDC_CURHOTKEY,"msctls_hotkey32",WS_DISABLED | 
                     WS_BORDER | WS_TABSTOP,296,18,97,14
-    LTEXT           "&Type new shortcut key:",IDC_NEWLABEL,296,42,98,8
+    LTEXT           "&Type new shortcut key",IDC_NEWLABEL,296,42,98,8
     CONTROL         "HotKey1",IDC_NEWHOTKEY,"msctls_hotkey32",WS_DISABLED | 
                     WS_BORDER | WS_TABSTOP,296,53,97,14
     PUSHBUTTON      "&Assign",IDC_ASSIGNSHORTCUT,296,71,50,14,WS_DISABLED
@@ -347,7 +347,7 @@ BEGIN
     CONTROL         "&Show the Time-Tracker window whenever a task's time is tracked",
                     IDC_SHOWTIMETRACKER,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,25,389,10
-    LTEXT           "Continue time-tracking a task even when:",IDC_STATIC,7,
+    LTEXT           "Continue time-tracking a task even when",IDC_STATIC,7,
                     40,386,8
     CONTROL         "&the task is not selected",IDC_TRACKNONSELECTEDTASKS,
                     "Button",BS_AUTOCHECKBOX | BS_LEFT | BS_TOP | WS_TABSTOP,
@@ -375,7 +375,7 @@ BEGIN
     CONTROL         "&Allow time-tracking on parent tasks",
                     IDC_ALLOWPARENTRACKING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,175,386,10
-    CONTROL         "When time-tracking, remind me every:",
+    CONTROL         "When time-tracking, remind me every",
                     IDC_NOTIFYTIMETRACKING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,190,385,10
     EDITTEXT        IDC_NOTIFYTIMETRACKINGFREQUENCY,18,202,29,14,
@@ -387,28 +387,28 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,249,378,10
     LTEXT           "Time Periods",IDC_TIMEGROUP,7,269,386,8
     GROUPBOX        "Working Day",IDC_STATIC,7,281,375,81
-    LTEXT           "Duration:",IDC_STATIC,18,296,67,8
-    COMBOBOX        IDC_HOURSINONEDAY,87,294,48,115,CBS_DROPDOWN | 
+    LTEXT           "Duration",IDC_STATIC,18,296,67,8
+    COMBOBOX        IDC_HOURSINONEDAY,87,293,48,115,CBS_DROPDOWN | 
                     WS_TABSTOP
     LTEXT           "hours",IDC_STATIC,139,296,59,8
-    LTEXT           "Beginning at:",IDC_STATIC,18,311,67,8
+    LTEXT           "Beginning at",IDC_STATIC,18,311,67,8
     COMBOBOX        IDC_STARTOFDAY,87,309,48,124,CBS_DROPDOWN | 
-                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
-                    WS_TABSTOP
+                    CBS_OWNERDRAWFIXED | CBS_AUTOHSCROLL | CBS_HASSTRINGS | 
+                    WS_VSCROLL | WS_TABSTOP
     CONTROL         "Lunch break (added to duration)",IDC_HASLUNCHBREAK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,328,354,10
     COMBOBOX        IDC_STARTOFLUNCH,29,340,48,30,CBS_DROPDOWN | 
-                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
-                    WS_TABSTOP
+                    CBS_OWNERDRAWFIXED | CBS_AUTOHSCROLL | CBS_HASSTRINGS | 
+                    WS_VSCROLL | WS_TABSTOP
     LTEXT           "-",IDC_STATIC,81,343,8,8
     COMBOBOX        IDC_ENDOFLUNCH,87,340,48,30,CBS_DROPDOWN | 
-                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
-                    WS_TABSTOP
+                    CBS_OWNERDRAWFIXED | CBS_AUTOHSCROLL | CBS_HASSTRINGS | 
+                    WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Working Week",IDC_STATIC,7,368,375,99
     EDITTEXT        IDC_DAYSINONEWEEK,18,383,48,12,ES_AUTOHSCROLL | 
                     ES_READONLY
     LTEXT           "days",IDC_STATIC,70,385,60,8
-    LTEXT           "Th&e following days represent the weekend:",IDC_STATIC,
+    LTEXT           "Th&e following days represent the weekend",IDC_STATIC,
                     18,402,352,8
     LISTBOX         IDC_WEEKENDS,18,414,218,43,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
@@ -539,9 +539,9 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,58,222,86,10
     PUSHBUTTON      "&Test Tool",IDC_TESTTOOL,326,222,67,14
     CONTROL         "",IDC_TOOLBAR,"Static",SS_ETCHEDFRAME | NOT WS_VISIBLE | 
-                    WS_DISABLED,7,3,110,16
+                    WS_DISABLED,7,3,129,16
     CONTROL         "Display in toolbar",IDC_DISPLAYUDTSINTOOLBAR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,122,6,199,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,157,6,166,10
     PUSHBUTTON      "I&mport UDTs...",IDC_IMPORT,326,3,67,14
 END
 
@@ -549,9 +549,9 @@ IDD_PREFUI_PAGE DIALOG DISCARDABLE  0, 0, 395, 679
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Position e&dit fields:",IDC_STATIC,7,10,381,8
+    LTEXT           "Position e&dit fields",IDC_STATIC,7,10,381,8
     COMBOBOX        IDC_CTRLSPOS,7,22,194,145,CBS_DROPDOWNLIST | WS_TABSTOP
-    LTEXT           "Position co&mments:",IDC_STATIC,7,38,381,10
+    LTEXT           "Position co&mments",IDC_STATIC,7,38,381,10
     COMBOBOX        IDC_COMMENTPOS,7,51,194,145,CBS_DROPDOWNLIST | 
                     WS_TABSTOP
     CONTROL         "'Stack' &edit fields and comments when they occupy the same position (left, right or below)",
@@ -566,7 +566,7 @@ BEGIN
     CONTROL         "&Move the input focus to the tasklist when [Enter] is pressed",
                     IDC_FOCUSTREEONENTER,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     WS_TABSTOP,7,115,381,10
-    CONTROL         "&Use the following colour theme:",IDC_USEUITHEME,"Button",
+    CONTROL         "&Use the following colour theme",IDC_USEUITHEME,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,130,381,10
     COMBOBOX        IDC_UITHEMEFILE,17,143,184,126,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
@@ -589,7 +589,7 @@ BEGIN
                     WS_TABSTOP,7,240,381,10
     CONTROL         "A&utomatically refilter after editing",IDC_AUTOREFILTER,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,255,381,10
-    LTEXT           "When filtering by 'Title', match on:",IDC_STATIC,7,270,
+    LTEXT           "When filtering by 'Title', match on",IDC_STATIC,7,270,
                     371,10,SS_CENTERIMAGE
     CONTROL         "&Titles only",IDC_MATCHTITLES,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,17,285,371,10
@@ -608,10 +608,10 @@ BEGIN
                     IDC_ENABLECOLUMNHEADERSORTING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,380,387,10
     LTEXT           "Main Toolbar",IDC_TOOLBARGROUP,7,400,381,8
-    LTEXT           "'New Task' &button places task:",IDC_STATIC,8,415,380,8
+    LTEXT           "'New Task' &button places task",IDC_STATIC,8,415,380,8
     COMBOBOX        IDC_NEWTASKPOSITION,7,427,183,121,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "'New Subtas&k' button places subtask:",IDC_STATIC,7,445,
+    LTEXT           "'New Subtas&k' button places subtask",IDC_STATIC,7,445,
                     381,8
     COMBOBOX        IDC_NEWSUBTASKPOSITION,7,457,183,115,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
@@ -643,7 +643,7 @@ BEGIN
                     WS_TABSTOP,363,10,25,17
 END
 
-IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 508
+IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 527
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -669,73 +669,75 @@ BEGIN
     CONTROL         "&Append the user's 'Created By' name when pasting the 'Date/Time'",
                     IDC_APPENDUSERTODATETIMEPASTE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,115,376,10
-    CONTROL         "A&ppend the following text when pasting the 'Date/Time':",
+    CONTROL         "A&ppend the following text when pasting the 'Date/Time'",
                     IDC_APPENDTEXTTODATETIMEPASTE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,130,366,10
     EDITTEXT        IDC_DATETIMETRAILTEXT,17,142,175,14,ES_AUTOHSCROLL
     LTEXT           "Other",IDC_OTHERGROUP,7,165,379,8
+    CONTROL         "&Hide 'Priority' number ",IDC_HIDEPRIORITYNUMBER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,180,382,10
     CONTROL         "S&how 'Reminders' as dates and times",
                     IDC_SHOWREMINDERSASDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,180,386,10
+                    WS_TABSTOP,7,195,386,10
     CONTROL         "&Show checkbox beside task title when completion column is hidden",
                     IDC_ALLOWTREEITEMCHECKBOX,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,195,386,10
+                    WS_TABSTOP,7,210,386,10
     CONTROL         "Hide the splitter bar between the task titles and attribute columns",
                     IDC_HIDEPANESPLITBAR,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,210,385,10
+                    WS_TABSTOP,7,225,385,10
     CONTROL         "&Show task infotips",IDC_SHOWINFOTIPS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,225,378,10
-    CONTROL         "&Limit length of comments shown to:",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,240,378,10
+    CONTROL         "&Limit length of comments shown to",
                     IDC_LIMITINFOTIPCOMMENTS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,240,368,10
-    EDITTEXT        IDC_INFOTIPCOMMENTSMAX,28,252,69,13,ES_AUTOHSCROLL | 
+                    WS_TABSTOP,18,255,368,10
+    EDITTEXT        IDC_INFOTIPCOMMENTSMAX,28,267,69,13,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    LTEXT           "characters",IDC_STATIC,103,254,283,8
+    LTEXT           "characters",IDC_STATIC,103,269,283,8
     CONTROL         "D&isplay comments after a task's title",
                     IDC_SHOWCOMMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    270,378,10
+                    285,378,10
     CONTROL         "&Display only the first line of comments",
                     IDC_DISPLAYFIRSTCOMMENTLINE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,285,368,10
+                    WS_TABSTOP,18,300,368,10
     CONTROL         "&Strike-through completed tasks",IDC_STRIKETHROUGHDONE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,300,378,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,315,378,10
     CONTROL         "Sho&w parent tasks with a folder icon",
                     IDC_SHOWPARENTSASFOLDERS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,315,378,10
+                    WS_TABSTOP,7,330,378,10
     CONTROL         "Hi&de zero '% Complete' (0%)",IDC_HIDEZEROPERCENT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,330,386,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,345,386,10
     CONTROL         "&Hide '% Complete' for completed tasks",
                     IDC_HIDEPERCENTFORDONETASKS,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,345,378,10
+                    BS_TOP | WS_TABSTOP,7,360,378,10
     CONTROL         "&Show '% Complete' as a progress bar",
                     IDC_SHOWPERCENTPROGRESSBAR,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,360,378,10
-    LTEXT           "&Set '% Complete' increment  to:",IDC_STATIC,7,375,360,
+                    WS_TABSTOP,7,375,378,10
+    LTEXT           "&Set '% Complete' increment  to",IDC_STATIC,7,390,360,
                     10
-    COMBOBOX        IDC_PERCENTINCREMENT,18,387,79,122,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_PERCENTINCREMENT,18,402,79,122,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Sh&ow attribute columns to the right of the task tree",
                     IDC_RIGHTSIDECOLUMNS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,405,378,10
+                    WS_TABSTOP,7,420,378,10
     CONTROL         "Set fo&cus to tasklist whenever ToDoList is activated",
                     IDC_AUTOFOCUSTASKLIST,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,420,378,10
+                    WS_TABSTOP,7,435,378,10
     CONTROL         "&Display the selected task's path in the header bar",
                     IDC_DISPLAYPATHINHEADER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,435,378,10
-    CONTROL         "&Limit width of columns to:",IDC_LIMITCOLWIDTHS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,450,378,10
-    EDITTEXT        IDC_COLWIDTHS,18,462,79,12,ES_AUTOHSCROLL
-    LTEXT           "pixels",IDC_STATIC,103,464,283,8
+                    WS_TABSTOP,7,450,378,10
+    CONTROL         "&Limit width of columns to",IDC_LIMITCOLWIDTHS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,465,378,10
+    EDITTEXT        IDC_COLWIDTHS,18,477,79,12,ES_AUTOHSCROLL
+    LTEXT           "pixels",IDC_STATIC,103,479,283,8
     CONTROL         "&Always hide parent tasks in List View",
                     IDC_HIDELISTPARENTS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,480,379,10
+                    WS_TABSTOP,7,495,379,10
     CONTROL         "Display '&File Link' images as thumbnails",
                     IDC_FILELINKTHUMBNAILS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,495,379,10
+                    WS_TABSTOP,7,510,379,10
 END
 
-IDD_PREFUITASKLISTCOLORS_PAGE DIALOG DISCARDABLE  0, 0, 401, 619
+IDD_PREFUITASKLISTCOLORS_PAGE DIALOG DISCARDABLE  0, 0, 401, 606
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -763,9 +765,9 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Colo&ur 'Priority' column",IDC_COLORPRIORITY,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,145,387,10
-    CONTROL         "I&ndividual:",IDC_INDIVIDUALPRIORITYCOLORS,"Button",
+    CONTROL         "I&ndividual",IDC_INDIVIDUALPRIORITYCOLORS,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,18,160,376,10
-    CONTROL         "&Gradient:",IDC_GRADIENTPRIORITYCOLORS,"Button",
+    CONTROL         "&Gradient",IDC_GRADIENTPRIORITYCOLORS,"Button",
                     BS_AUTORADIOBUTTON | WS_TABSTOP,18,190,376,10
     CONTROL         "S&cheme",IDC_SCHEMEPRIORITYCOLORS,"Button",
                     BS_AUTORADIOBUTTON,18,235,41,10
@@ -783,67 +785,65 @@ BEGIN
     COMBOBOX        IDC_PRIORITYSCHEMES,29,247,173,136,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_GROUP | WS_TABSTOP
-    CONTROL         "&Hide 'Priority' number ",IDC_HIDEPRIORITYNUMBER,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,265,387,10
     CONTROL         "Show &gridlines",IDC_SPECIFYGRIDLINECOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,280,140,10
-    PUSHBUTTON      "S&et...   ",IDC_SETGRIDLINECOLOR,149,278,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,265,140,10
+    PUSHBUTTON      "S&et...   ",IDC_SETGRIDLINECOLOR,149,263,52,13,BS_RIGHT
     CONTROL         "&Alternate line colour",IDC_ALTERNATELINECOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,295,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETALTLINECOLOR,149,293,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,280,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETALTLINECOLOR,149,278,52,13,BS_RIGHT
     CONTROL         "&Group header background colour",
                     IDC_SPECIFYGROUPHEADERBKCOLOR,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,310,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETGROUPHEADERBKCOLOR,149,308,52,13,
+                    WS_TABSTOP,7,295,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETGROUPHEADERBKCOLOR,149,293,52,13,
                     BS_RIGHT
-    LTEXT           "Task Colouring",IDC_TASKCOLOURGROUP,7,330,387,8
+    LTEXT           "Task Colouring",IDC_TASKCOLOURGROUP,7,315,387,8
     CONTROL         "&Use a task's colour for its title background",
                     IDC_COLORTASKBKGND,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,346,387,10
-    CONTROL         "&Colour task titles by:",IDC_COLORTEXTBYATTRIBUTE,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,7,361,387,10
+                    7,331,387,10
+    CONTROL         "&Colour task titles by",IDC_COLORTEXTBYATTRIBUTE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,7,346,387,10
     CONTROL         "Colour task titles by &Priority",
                     IDC_COLORTEXTBYPRIORITY,"Button",BS_AUTORADIOBUTTON,7,
-                    464,387,10
+                    449,387,10
     CONTROL         "Colour task titles by &assigned colours",
-                    IDC_COLORTASKSBYCOLOR,"Button",BS_AUTORADIOBUTTON,7,479,
+                    IDC_COLORTASKSBYCOLOR,"Button",BS_AUTORADIOBUTTON,7,464,
                     387,10
     CONTROL         "&No task title colouring (except for due tasks)",
-                    IDC_NOCOLORTASKS,"Button",BS_AUTORADIOBUTTON,7,494,387,
+                    IDC_NOCOLORTASKS,"Button",BS_AUTORADIOBUTTON,7,479,387,
                     10
-    COMBOBOX        IDC_ATTRIBUTETOCOLORBY,18,373,123,99,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_ATTRIBUTETOCOLORBY,18,358,123,99,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_ATTRIBUTECOLORS,18,389,123,70,CBS_SIMPLE | 
+    COMBOBOX        IDC_ATTRIBUTECOLORS,18,374,123,70,CBS_SIMPLE | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
                     CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_GROUP | 
                     WS_TABSTOP
-    PUSHBUTTON      "S&et...   ",IDC_SETATTRIBUTECOLOR,149,389,52,13,
+    PUSHBUTTON      "S&et...   ",IDC_SETATTRIBUTECOLOR,149,374,52,13,
                     BS_RIGHT
-    PUSHBUTTON      "&Populate",IDC_POPULATEATTRIBLIST,149,404,52,14
+    PUSHBUTTON      "&Populate",IDC_POPULATEATTRIBLIST,149,389,52,14
     CONTROL         "'&Started' task colour",IDC_STARTTASKCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,511,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTASKCOLOR,149,510,52,13,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,496,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTASKCOLOR,149,495,52,13,
                     BS_RIGHT
     CONTROL         "'Starts &Today' task colour",IDC_STARTTODAYTASKCOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,526,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTODAYTASKCOLOR,149,525,52,13,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,511,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTODAYTASKCOLOR,149,510,52,13,
                     BS_RIGHT
     CONTROL         "'&Due' task colour",IDC_DUETASKCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,541,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDUETASKCOLOR,149,540,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,526,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDUETASKCOLOR,149,525,52,13,BS_RIGHT
     CONTROL         "'Due T&oday' task colour",IDC_DUETODAYTASKCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,556,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDUETODAYTASKCOLOR,149,555,52,13,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,541,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDUETODAYTASKCOLOR,149,540,52,13,
                     BS_RIGHT
     CONTROL         "Completed t&ask colour",IDC_SPECIFYDONECOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,571,138,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDONECOLOR,149,570,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,556,138,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDONECOLOR,149,555,52,13,BS_RIGHT
     CONTROL         "&Flagged task colour",IDC_SPECIFYFLAGGEDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,586,140,10
-    PUSHBUTTON      "S&et...   ",IDC_SETFLAGGEDCOLOR,149,586,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,571,140,10
+    PUSHBUTTON      "S&et...   ",IDC_SETFLAGGEDCOLOR,149,571,52,13,BS_RIGHT
     CONTROL         "&Reference task colour",IDC_SPECIFYREFERENCECOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,601,140,10
-    PUSHBUTTON      "S&et...   ",IDC_SETREFERENCECOLOR,149,601,52,13,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,586,140,10
+    PUSHBUTTON      "S&et...   ",IDC_SETREFERENCECOLOR,149,586,52,13,
                     BS_RIGHT
 END
 
@@ -875,13 +875,13 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Offset Task Dates"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Offset:",IDC_STATIC,7,7,39,8
+    LTEXT           "Offset",IDC_STATIC,7,7,39,8
     LISTBOX         IDC_WHATLIST,50,7,97,46,LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_TABSTOP
-    LTEXT           "&Direction:",IDC_STATIC,7,62,42,8
+    LTEXT           "&Direction",IDC_STATIC,7,62,42,8
     COMBOBOX        IDC_DIRECTION,50,60,97,87,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&By:",IDC_STATIC,7,81,39,8
+    LTEXT           "&By",IDC_STATIC,7,81,39,8
     EDITTEXT        IDC_BY,50,79,22,13,ES_AUTOHSCROLL | ES_NUMBER
     COMBOBOX        IDC_BYUNITS,75,79,72,87,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
@@ -965,7 +965,7 @@ EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Sh&ow",IDC_FILTERLABEL,9,8,19,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_FILTERCOMBO,37,7,151,112,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_SHOWFILTERCOMBO,37,7,151,112,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "T&itle",IDC_TITLEFILTERLABEL,201,7,14,8,SS_CENTERIMAGE
@@ -1048,7 +1048,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Active Keyboard Shortcuts"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&ToDoList has the following keyboard shortcuts enabled:",
+    LTEXT           "&ToDoList has the following keyboard shortcuts enabled",
                     IDC_STATIC,7,7,263,11
     CONTROL         "List1",IDC_SHORTCUTS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_NOSORTHEADER | WS_BORDER | 
@@ -1080,7 +1080,7 @@ BEGIN
                     BS_VCENTER | BS_MULTILINE,15,223,207,10
     CONTROL         "&Control each field individually",IDC_SHOWANYATTRIB,
                     "Button",BS_AUTORADIOBUTTON,15,238,200,10
-    GROUPBOX        "Apply changes to:",IDC_STATIC,242,194,177,60,WS_GROUP
+    GROUPBOX        "Apply changes to",IDC_STATIC,242,194,177,60,WS_GROUP
     CONTROL         "&All tasklists",IDC_ALLTASKLISTS,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,250,208,149,10
     CONTROL         "Acti&ve tasklist only",IDC_ACTIVETASKLIST,"Button",
@@ -1107,7 +1107,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Email Tasks"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&Send:",IDC_STATIC,7,9,42,8
+    LTEXT           "&Send",IDC_STATIC,7,9,42,8
     COMBOBOX        IDC_SELTASKSSENDAS,52,7,178,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_GROUP | WS_TABSTOP
     LTEXT           "&Format",IDC_STATIC,7,28,45,8
@@ -1242,7 +1242,7 @@ BEGIN
     PUSHBUTTON      "&Dismiss",IDC_DISMISS,26,195,50,14
     DEFPUSHBUTTON   "OK",IDOK,122,195,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,178,195,50,14
-    LTEXT           "Task:",IDC_STATIC,7,5,38,8
+    LTEXT           "Task",IDC_STATIC,7,5,38,8
     LTEXT           "something\nelsey",IDC_TASKTITLE,47,5,181,19
 END
 
@@ -1297,7 +1297,7 @@ BEGIN
     CONTROL         "Keep &backup copies of tasklists before saving",
                     IDC_BACKUPONSAVE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
                     25,386,10
-    LTEXT           "Backup &to folder:",IDC_BACKUPLOCATIONLABEL,18,40,375,8
+    LTEXT           "Backup &to folder",IDC_BACKUPLOCATIONLABEL,18,40,375,8
     EDITTEXT        IDC_BACKUPLOCATION,18,52,181,13,ES_AUTOHSCROLL
     CONTROL         "Folder is relative to &tasklist",IDC_RELTOTASKLIST,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP,27,72,366,10
@@ -1305,12 +1305,12 @@ BEGIN
                     BS_AUTORADIOBUTTON,27,87,366,10
     CONTROL         "Folder is &full path",IDC_FULLPATH,"Button",
                     BS_AUTORADIOBUTTON,27,102,366,10
-    LTEXT           "&Keep:",IDC_BACKUPCOUNTLABEL,18,120,34,8
+    LTEXT           "&Keep",IDC_BACKUPCOUNTLABEL,18,120,34,8
     COMBOBOX        IDC_NUMBACKUPSTOKEEP,54,118,32,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "most recent backups",IDC_BACKUPCOUNTTRAIL,92,120,301,8
     LTEXT           "Saving",IDC_SAVEGROUP,7,139,386,8
-    CONTROL         "A&uto-save tasklists every:",IDC_AUTOSAVE,"Button",
+    CONTROL         "A&uto-save tasklists every",IDC_AUTOSAVE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,8,155,385,10
     EDITTEXT        IDC_AUTOSAVEFREQUENCY,18,167,29,13,ES_AUTOHSCROLL
     LTEXT           "minutes",IDC_STATIC,53,168,26,8
@@ -1327,9 +1327,9 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,230,386,10
     CONTROL         "&HTML format",IDC_HTMLEXPORT,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,18,245,375,10
-    CONTROL         "Ot&her format:",IDC_OTHEREXPORT,"Button",
+    CONTROL         "Ot&her format",IDC_OTHEREXPORT,"Button",
                     BS_AUTORADIOBUTTON,17,290,376,10
-    CONTROL         "&Using the following stylesheet:",
+    CONTROL         "&Using the following stylesheet",
                     IDC_USESTYLESHEETFORSAVE,"Button",BS_AUTOCHECKBOX | 
                     WS_GROUP | WS_TABSTOP,28,260,365,10
     EDITTEXT        IDC_SAVEEXPORTSTYLESHEET,38,272,161,13,ES_AUTOHSCROLL
@@ -1338,7 +1338,7 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "E&xport filtered tasks only",IDC_EXPORTFILTERED,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,18,322,375,10
-    CONTROL         "Export &to folder:",IDC_EXPORTTOFOLDER,"Button",
+    CONTROL         "Export &to folder",IDC_EXPORTTOFOLDER,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,18,337,375,10
     EDITTEXT        IDC_EXPORTFOLDER,28,349,171,13,ES_AUTOHSCROLL
 END
@@ -1347,94 +1347,96 @@ IDD_PREFTASKCALC_PAGE DIALOG DISCARDABLE  0, 0, 400, 548
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
+    CONTROL         "Include 'Task Reference' values in calculations",
+                    IDC_INCLUDEREFSINCALC,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,10,393,10
     CONTROL         "Display a task's 'Last Modified' date as the latest of its and all its subtasks' last modified dates",
                     IDC_USELATESTLASTMODIFIED,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,10,392,10
+                    WS_TABSTOP,7,25,392,10
     CONTROL         "Display a task as 'Flagged' if any of its subtasks are flagged",
                     IDC_TASKINHERITSSUBTASKFLAGS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,25,383,10
+                    WS_TABSTOP,7,40,383,10
     CONTROL         "Treat subtasks of 'Locked' tasks as also being locked",
                     IDC_SUBTASKSINHERITLOCK,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,40,385,10
-    CONTROL         "After completing a task, set its 'Status' to:",
+                    WS_TABSTOP,7,55,385,10
+    CONTROL         "After completing a task, set its 'Status' to",
                     IDC_SETSTATUSONDONE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,55,392,10
-    EDITTEXT        IDC_DONESTATUS,18,68,134,13,ES_AUTOHSCROLL
+                    WS_TABSTOP,7,70,392,10
+    EDITTEXT        IDC_DONESTATUS,18,83,134,13,ES_AUTOHSCROLL
     CONTROL         "&Synchronise a task's 'Completion' to changes in its 'Status'",
                     IDC_SYNCCOMPLETIONTOSTATUS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,86,377,10
+                    WS_TABSTOP,18,101,377,10
     CONTROL         "&Treat due tasks as having the highest priority",
                     IDC_DUEHAVEHIGHESTPRIORITY,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,103,385,10
+                    BS_TOP | WS_TABSTOP,7,118,385,10
     CONTROL         "T&reat completed tasks as having the lowest priority/risk",
                     IDC_DONEHAVELOWESTPRIORITY,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,118,385,10
+                    BS_TOP | WS_TABSTOP,7,133,385,10
     CONTROL         "Tr&eat tasks whose subtasks are all completed as also being 'completed'",
                     IDC_TREATSUBCOMPLETEDASDONE,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,133,385,10
+                    BS_TOP | WS_TABSTOP,7,148,385,10
     CONTROL         "Di&splay a task's '% Completion' as being equal to its 'Time Spent' divided by its 'Time Estimate'",
                     IDC_AUTOCALCPERCENTDONE,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,148,385,10
+                    BS_TOP | WS_TABSTOP,7,163,385,10
     CONTROL         "&Display a parent task's '% Completion' as being the average of all its subtasks' % completions",
                     IDC_AVERAGEPERCENTSUBCOMPLETION,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,163,385,10
+                    BS_TOP | WS_TABSTOP,7,178,385,10
     CONTROL         "I&nclude completed subtasks in this calculation",
                     IDC_INCLUDEDONEINAVERAGECALC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,178,373,10
+                    WS_TABSTOP,18,193,373,10
     CONTROL         "&Weight % completion by number of subtasks",
                     IDC_WEIGHTPERCENTCALCBYNUMSUB,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,193,373,10
+                    WS_TABSTOP,18,208,373,10
     CONTROL         "T&ake a task's '% Complete' into account when calculating time estimates",
                     IDC_USEPERCENTDONEINTIMEEST,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,208,385,10
+                    BS_TOP | WS_TABSTOP,7,223,385,10
     CONTROL         "Di&splay a task's priority/risk as being the highest of its and all its subtasks' priorities/risks",
                     IDC_USEHIGHESTPRIORITY,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,223,385,10
+                    WS_TABSTOP,7,238,385,10
     CONTROL         "Inclu&de completed subtasks in this assessment",
                     IDC_INCLUDEDONEINPRIORITYCALC,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,238,374,10
+                    WS_TABSTOP,18,253,374,10
     CONTROL         "&Keep a task's time estimate synchronised with its start and due dates (and vice versa)",
                     IDC_SYNCTIMEESTANDDATES,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,253,385,10
+                    BS_TOP | WS_TABSTOP,7,268,385,10
     CONTROL         "A&utomatically adjust a task's dates when its dependency's dates changes",
                     IDC_AUTOUPDATEDEPENDEES,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,268,385,10
+                    BS_TOP | WS_TABSTOP,7,283,385,10
     CONTROL         "Tre&at tasks without a due date as being due 'Today' or on the 'Start' date whichever is later",
                     IDC_NODUEDATEDUETODAY,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,283,385,10
+                    WS_TABSTOP,7,298,385,10
     LTEXT           "&Period defining 'Recently Modified' tasks",IDC_STATIC,
-                    7,298,392,10
-    EDITTEXT        IDC_RECENTMODPERIOD,18,311,69,13,ES_AUTOHSCROLL
-    GROUPBOX        "Display a task's 'Remaining Time' as:",IDC_STATIC,7,330,
+                    7,313,392,10
+    EDITTEXT        IDC_RECENTMODPERIOD,18,326,69,13,ES_AUTOHSCROLL
+    GROUPBOX        "Display a task's 'Remaining Time' as",IDC_STATIC,7,345,
                     368,60
     CONTROL         "Due date - &Current date",IDC_REMAININGTIMEISDUEDATE,
-                    "Button",BS_AUTORADIOBUTTON | BS_TOP | WS_GROUP,15,345,
+                    "Button",BS_AUTORADIOBUTTON | BS_TOP | WS_GROUP,15,360,
                     351,10
     CONTROL         "&Time estimate - Time spent",IDC_REMAININGTIMEISSPENT,
-                    "Button",BS_AUTORADIOBUTTON | BS_TOP,15,360,351,10
+                    "Button",BS_AUTORADIOBUTTON | BS_TOP,15,375,351,10
     CONTROL         "Time &estimate x ( 1 - % Completion)",
                     IDC_REMAININGTIMEISPERCENT,"Button",BS_AUTORADIOBUTTON | 
-                    BS_TOP,15,375,351,10
-    GROUPBOX        "Display a task's 'Due Date' as:",IDC_STATIC,7,395,368,
-                    65
+                    BS_TOP,15,390,351,10
+    GROUPBOX        "Display a task's 'Due Date' as",IDC_STATIC,7,410,368,65
     CONTROL         "The &earliest of its due date and all its subtasks' due dates",
                     IDC_USEEARLIESTDUEDATE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,15,410,351,10
+                    WS_GROUP,15,425,351,10
     CONTROL         "The l&atest of its due date and all its subtasks' due dates",
-                    IDC_USELATESTDUEDATE,"Button",BS_AUTORADIOBUTTON,15,425,
+                    IDC_USELATESTDUEDATE,"Button",BS_AUTORADIOBUTTON,15,440,
                     351,10
     CONTROL         "I&ts assigned date",IDC_NOCALCDUEDATE,"Button",
-                    BS_AUTORADIOBUTTON,15,440,351,10
-    GROUPBOX        "Display a task's 'Start Date' as:",IDC_STATIC,7,465,368,
+                    BS_AUTORADIOBUTTON,15,455,351,10
+    GROUPBOX        "Display a task's 'Start Date' as",IDC_STATIC,7,480,368,
                     65
     CONTROL         "The ea&rliest of its start date and all its subtasks' start dates",
                     IDC_USEEARLIESTSTARTDATE,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,15,480,351,10
+                    WS_GROUP,15,495,351,10
     CONTROL         "The late&st of its start date and all its subtasks' start dates",
                     IDC_USELATESTSTARTDATE,"Button",BS_AUTORADIOBUTTON,15,
-                    495,351,10
+                    510,351,10
     CONTROL         "It&s assigned date",IDC_NOCALCDUEDATE2,"Button",
-                    BS_AUTORADIOBUTTON,15,510,351,10
+                    BS_AUTORADIOBUTTON,15,525,351,10
 END
 
 IDD_ADDLOGGEDTIME_DIALOG DIALOG DISCARDABLE  0, 0, 240, 188
@@ -1442,13 +1444,13 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Log Task Time"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Task:",IDC_STATIC,7,7,62,8
+    LTEXT           "Task",IDC_STATIC,7,7,62,8
     LTEXT           "Static",IDC_TASKTITLE,73,7,159,17
-    LTEXT           "Task ID:",IDC_STATIC,7,30,64,8
+    LTEXT           "Task ID",IDC_STATIC,7,30,64,8
     LTEXT           "Static",IDC_TASKID,73,30,159,8
-    LTEXT           "&Time Spent:",IDC_STATIC,7,48,63,8
+    LTEXT           "&Time Spent",IDC_STATIC,7,48,63,8
     EDITTEXT        IDC_LOGGEDTIME,73,45,74,13,ES_AUTOHSCROLL
-    LTEXT           "&When:",IDC_STATIC,7,67,64,8
+    LTEXT           "&When",IDC_STATIC,7,67,64,8
     CONTROL         "DateTimePicker1",IDC_WHENDATE,"SysDateTimePick32",
                     DTS_RIGHTALIGN | WS_TABSTOP,73,65,74,13
     COMBOBOX        IDC_WHENTIME,155,65,77,30,CBS_DROPDOWN | 
@@ -1457,7 +1459,7 @@ BEGIN
     CONTROL         "&Also add time to task's time spent",
                     IDC_ADDTIMETOTIMESPENT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,73,86,159,10
-    LTEXT           "&Comment:",IDC_COMMENTLABEL,7,103,65,8
+    LTEXT           "&Comment",IDC_COMMENTLABEL,7,103,65,8
     EDITTEXT        IDC_COMMENT,73,103,159,48,ES_MULTILINE | ES_AUTOVSCROLL | 
                     ES_WANTRETURN | WS_VSCROLL
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,159,225,1
@@ -1494,8 +1496,8 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "ToDoList Language Selection"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&Select your preferred display language:",IDC_STATIC,7,
-                    7,174,10
+    LTEXT           "&Select your preferred display language",IDC_STATIC,7,7,
+                    174,10
     CONTROL         "",IDC_LANGUAGES,"ComboBoxEx32",CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP,7,21,174,218
     DEFPUSHBUTTON   "OK",IDOK,77,41,50,14
@@ -1518,7 +1520,7 @@ BEGIN
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,260,387,1
     DEFPUSHBUTTON   "OK",IDOK,289,268,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,344,268,50,14
-    LTEXT           "&Tasklist:",IDC_STATIC,7,7,285,10
+    LTEXT           "&Tasklist",IDC_STATIC,7,7,285,10
     EDITTEXT        IDC_TDLFILEPATH,7,19,387,14,ES_AUTOHSCROLL | ES_READONLY
 END
 
@@ -1527,7 +1529,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Available Commandline Options"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&ToDoList supports the following commandline options:",
+    LTEXT           "&ToDoList supports the following commandline options",
                     IDC_STATIC,7,7,387,10,SS_CENTERIMAGE
     CONTROL         "List1",IDC_CMDLINE_OPTIONS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SORTASCENDING | LVS_NOSORTHEADER | 
@@ -1596,7 +1598,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Recurrence Options"
 FONT 8, "Tahoma"
 BEGIN
-    GROUPBOX        "Task Occurs:",IDC_STATIC,7,7,90,210
+    GROUPBOX        "Task Occurs",IDC_STATIC,7,7,90,210
     CONTROL         "&Once",IDC_OCCUR_ONCE,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP,14,22,78,10
     CONTROL         "&Daily",IDC_OCCUR_DAILY,"Button",BS_AUTORADIOBUTTON,14,
@@ -1762,7 +1764,7 @@ STYLE WS_CHILD | WS_CAPTION
 CAPTION "ToDoList Web Update (c) AbstractSpoon"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&What's New:",IDC_LABEL,0,0,42,8
+    LTEXT           "&What's New",IDC_LABEL,0,0,42,8
     EDITTEXT        IDC_CHANGES,0,13,275,94,ES_MULTILINE | ES_READONLY | 
                     WS_VSCROLL | WS_HSCROLL
 END
@@ -1792,15 +1794,15 @@ BEGIN
     ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,20,20
     LTEXT           "A simple and effective way to keep on top of your daily tasks",
                     IDC_STATIC,34,20,267,8
-    LTEXT           "Contributors:",IDC_STATIC,7,33,250,8
+    LTEXT           "Contributors",IDC_STATIC,7,33,250,8
     CONTROL         "List1",IDC_CONTRIBUTORS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | 
                     WS_BORDER | WS_TABSTOP,7,45,318,110
-    LTEXT           "License:",IDC_STATIC,7,161,64,8
+    LTEXT           "License",IDC_STATIC,7,161,64,8
     LTEXT           "Static",IDC_LICENSE,71,161,254,8
-    LTEXT           "Application:",IDC_STATIC,7,176,64,8
+    LTEXT           "Application",IDC_STATIC,7,176,64,8
     EDITTEXT        IDC_APPPATH,71,174,254,13,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Preferences:",IDC_STATIC,7,192,64,8
+    LTEXT           "Preferences",IDC_STATIC,7,192,64,8
     EDITTEXT        IDC_PREFSPATH,71,190,254,13,ES_AUTOHSCROLL | ES_READONLY
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,209,318,1
     CONTROL         "",IDC_TOOLBAR,"Static",SS_BLACKFRAME | NOT WS_VISIBLE | 
@@ -1815,12 +1817,14 @@ CAPTION "Time Tracker"
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Tasklist",IDC_TASKLISTS_LABEL,4,20,126,8
-    COMBOBOX        IDC_TASKLISTS,4,28,126,128,CBS_DROPDOWNLIST | CBS_SORT | 
+    COMBOBOX        IDC_TASKLISTS,4,28,112,128,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_GOTOTASKLIST,116,27,14,14
     LTEXT           "Task",IDC_TASKS_LABEL,4,42,126,8
-    COMBOBOX        IDC_TASKS,4,50,126,114,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_TASKS,4,50,112,114,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
+    PUSHBUTTON      "",IDC_GOTOTASK,116,49,14,14
     LTEXT           "Time Estimate : Spent",IDC_TASKTIME_LABEL,4,64,126,8
     EDITTEXT        IDC_TASKTIME,4,72,83,12,ES_READONLY | NOT WS_BORDER,
                     WS_EX_CLIENTEDGE
@@ -1838,7 +1842,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Import Tasks from Outlook"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&Select items to import:",IDC_STATIC,7,29,230,8,
+    LTEXT           "&Select items to import",IDC_STATIC,7,29,230,8,
                     SS_CENTERIMAGE
     CONTROL         "Tree1",IDC_TASKLIST,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
@@ -1852,7 +1856,7 @@ BEGIN
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,242,386,1
     DEFPUSHBUTTON   "OK",IDOK,288,249,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,343,249,50,14
-    LTEXT           "Current folder:",IDC_STATIC,7,9,73,8
+    LTEXT           "Current folder",IDC_STATIC,7,9,73,8
     EDITTEXT        IDC_CURFOLDER,96,7,185,14,ES_AUTOHSCROLL | ES_READONLY
     PUSHBUTTON      "&Change...",IDC_CHOOSEFOLDER,288,7,50,14
     PUSHBUTTON      "&Refresh",2007,343,7,50,14
@@ -1877,7 +1881,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Cleanup Ini Preferences"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Tick the boxes of the tasklists you want to delete from your ini file:",
+    LTEXT           "Tick the boxes of the tasklists you want to delete from your ini file",
                     IDC_STATIC,7,41,286,17
     LISTBOX         IDC_TASKLISTS,7,61,286,137,LBS_SORT | LBS_OWNERDRAWFIXED | 
                     LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
@@ -1886,7 +1890,7 @@ BEGIN
     PUSHBUTTON      "Clear All",IDC_CLEARALL,83,204,50,14
     DEFPUSHBUTTON   "OK",IDOK,188,204,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,243,204,50,14
-    LTEXT           "Preferences location:",IDC_STATIC,7,7,286,8
+    LTEXT           "Preferences location",IDC_STATIC,7,7,286,8
     EDITTEXT        IDC_PREFSLOCATION,7,18,286,14,ES_AUTOHSCROLL | 
                     ES_READONLY
 END
@@ -1897,7 +1901,7 @@ CAPTION "Filter Tasks"
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Sh&ow",IDC_FILTERLABEL,7,7,109,8,SS_CENTERIMAGE
-    COMBOBOX        IDC_FILTERCOMBO,7,17,109,112,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_SHOWFILTERCOMBO,7,17,109,112,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "T&itle",IDC_TITLEFILTERLABEL,128,7,109,8,SS_CENTERIMAGE
@@ -2161,9 +2165,9 @@ BEGIN
     CONTROL         "List1",IDC_REMINDERS,"SysListView32",LVS_REPORT | 
                     LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | WS_BORDER | 
                     WS_TABSTOP,7,7,324,115
-    CONTROL         "&Remind me again in:",IDC_SNOOZEOPTIONFOR,"Button",
+    CONTROL         "&Remind me again in",IDC_SNOOZEOPTIONFOR,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,128,109,10
-    CONTROL         "&Remind me again at:",IDC_SNOOZEOPTIONUNTIL,"Button",
+    CONTROL         "&Remind me again at",IDC_SNOOZEOPTIONUNTIL,"Button",
                     BS_AUTORADIOBUTTON | WS_TABSTOP,120,128,134,10
     COMBOBOX        IDC_SNOOZEFOR,17,141,97,386,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
@@ -2176,8 +2180,9 @@ BEGIN
     PUSHBUTTON      "&Snooze",IDC_SNOOZE,281,129,50,14
     PUSHBUTTON      "Snooze &All",IDC_SNOOZEALL,281,148,50,14
     CONTROL         "",IDC_DIVIDER,"Static",SS_ETCHEDHORZ,8,169,323,1
-    PUSHBUTTON      "&Complete",IDC_COMPLETETASK,167,176,50,14
-    PUSHBUTTON      "&Go To Task",IDC_GOTOTASK,224,176,50,14
+    PUSHBUTTON      "&Complete Task",IDC_COMPLETETASK,29,176,62,14
+    PUSHBUTTON      "&Go To Task",IDC_GOTOTASK,97,176,50,14
+    PUSHBUTTON      "Modify...",IDC_MODIFY,225,176,50,14
     DEFPUSHBUTTON   "&Dismiss",IDC_DISMISS,281,176,50,14
 END
 
@@ -2191,7 +2196,7 @@ BEGIN
                     WS_GROUP,15,23,23,10
     CONTROL         "Specific",IDC_SELECTSPECIFIC,"Button",
                     BS_AUTORADIOBUTTON,15,105,41,10
-    LTEXT           "Including:",IDC_STATIC,27,37,32,8
+    LTEXT           "Including",IDC_STATIC,27,37,32,8
     CONTROL         "Task Title",IDC_INCLUDETITLE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,37,50,46,10
     CONTROL         "Comments",IDC_INCLUDECOMMENTS,"Button",BS_AUTOCHECKBOX | 
@@ -2366,6 +2371,10 @@ END
 IDD_PREFTASK_PAGE DLGINIT
 BEGIN
     IDC_HOURSINONEDAY, 0x403, 2, 0
+0x0031, 
+    IDC_HOURSINONEDAY, 0x403, 2, 0
+0x0032, 
+    IDC_HOURSINONEDAY, 0x403, 2, 0
 0x0033, 
     IDC_HOURSINONEDAY, 0x403, 2, 0
 0x0034, 
@@ -2381,6 +2390,10 @@ BEGIN
 0x0039, 
     IDC_HOURSINONEDAY, 0x403, 3, 0
 0x3031, "\000" 
+    IDC_HOURSINONEDAY, 0x403, 3, 0
+0x3131, "\000" 
+    IDC_HOURSINONEDAY, 0x403, 3, 0
+0x3231, "\000" 
     0
 END
 
@@ -2754,12 +2767,11 @@ IDI_FILEEDIT_GO         ICON    DISCARDABLE     "res\\fileedit_go.ico"
 IDI_FILEEDIT_BROWSE     ICON    DISCARDABLE     "res\\fileedit_browse.ico"
 IDI_TIMETRACK           ICON    DISCARDABLE     "res\\clock.ico"
 IDI_UPDATE_FILTER       ICON    DISCARDABLE     "res\\update_filter.ico"
-IDI_CUST_ATTRIB_ICONS   ICON    DISCARDABLE     "res\\custom_attrib_icons.ico"
+IDI_ICON_SELECT         ICON    DISCARDABLE     "res\\select_icon.ico"
 IDI_DEPENDS_LINK        ICON    DISCARDABLE     "res\\depend_link.ico"
 IDI_NULL                ICON    DISCARDABLE     "res\\null.ico"
 IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
 IDI_SIMPLETEXT          ICON    DISCARDABLE     "res\\simpletext.ico"
-IDI_OUTLOOK             ICON    DISCARDABLE     "res\\outlook_16.ico"
 IDI_TIMETRACK_STD       ICON    DISCARDABLE     "res\\app_timetrack.ico"
 IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "res\\plus.ico"
 IDI_RESET               ICON    DISCARDABLE     "res\\reset.ico"
@@ -2771,6 +2783,8 @@ IDI_TRAY_DARK           ICON    DISCARDABLE     "res\\app_tray_dark.ico"
 IDI_TDLUPDATE           ICON    DISCARDABLE     "..\\TDLUpdate\\RES\\TDLUpdate.ico"
 IDI_QUICKFIND_NEXT      ICON    DISCARDABLE     "res\\quickfind_next.ico"
 IDI_QUICKFIND_PREV      ICON    DISCARDABLE     "res\\quickfind_prev.ico"
+IDI_TIMETRACK_GOTO      ICON    DISCARDABLE     "res\\timetrack_goto.ico"
+IDI_REMINDER            ICON    DISCARDABLE     "res\\reminder.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2804,6 +2818,8 @@ IDR_COMMENTS_DATETIME_TOOLBAR BITMAP  DISCARDABLE     "res\\datetime_toolbar.bmp
 IDB_DATETIME_TOOLBAR_STD BITMAP  DISCARDABLE     "res\\datetime_toolbar_std.bmp"
 IDB_UK_FLAG             BITMAP  DISCARDABLE     "res\\uk_flag.bmp"
 IDB_YOURLANG_FLAG       BITMAP  DISCARDABLE     "res\\yourlang_flag.bmp"
+IDR_TASK_ATTRIBUTE_TOOLBAR BITMAP  DISCARDABLE     "res\\taskattrib_toolbar.bmp"
+IDB_TASKATTRIB_TOOLBAR  BITMAP  DISCARDABLE     "res\\taskattrib_toolbar_std.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2851,7 +2867,7 @@ BEGIN
     BUTTON      ID_EDIT_UNDO
     BUTTON      ID_EDIT_REDO
     SEPARATOR
-    BUTTON      ID_MAXTASKLIST
+    BUTTON      ID_VIEW_MAXTASKLIST
     SEPARATOR
     BUTTON      ID_VIEW_EXPANDTASK
     BUTTON      ID_VIEW_COLLAPSETASK
@@ -2866,6 +2882,8 @@ BEGIN
     BUTTON      ID_DELETETASK
     SEPARATOR
     BUTTON      ID_TOOLS_TOGGLECHECKIN
+    SEPARATOR
+    BUTTON      ID_TOOLS_TOGGLEDARKMODE
     SEPARATOR
     BUTTON      ID_PREFERENCES
     SEPARATOR
@@ -2915,6 +2933,12 @@ BEGIN
     BUTTON      ID_COMMENTS_INSERTDATE
     BUTTON      ID_COMMENTS_INSERTTIME
     BUTTON      ID_COMMENTS_INSERTDATETIME
+END
+
+IDR_TASK_ATTRIBUTE_TOOLBAR TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_GROUP_ATTRIBUTES
+    BUTTON      ID_TOGGLE_SORT
 END
 
 
@@ -3245,8 +3269,10 @@ BEGIN
     BEGIN
         MENUITEM "Show Project Name Fiel&d",    ID_VIEW_PROJECTNAME
         MENUITEM SEPARATOR
-        MENUITEM "&Maximise Task View",         ID_MAXTASKLIST
-        MENUITEM "Ma&ximise Comments",          ID_MAXCOMMENTS
+        MENUITEM "&Maximise Task View",         ID_VIEW_MAXTASKLIST
+        MENUITEM "Ma&ximise Comments",          ID_VIEW_MAXCOMMENTS
+        MENUITEM "&Revert Maximisation",        ID_VIEW_UNMAXTASKLISTANDCOMMENTS
+
         MENUITEM SEPARATOR
         MENUITEM "T&oggle between Task Tree and List View", 
                                                 ID_VIEW_TOGGLETREEANDLIST
@@ -3582,6 +3608,8 @@ BEGIN
     END
     POPUP "&Tools"
     BEGIN
+        MENUITEM "Toggle Dark Mode",            ID_TOOLS_TOGGLEDARKMODE
+        MENUITEM SEPARATOR
         MENUITEM "I&mport Tasks...",            ID_TOOLS_IMPORT
         MENUITEM "E&xport Tasks...",            ID_TOOLS_EXPORT
         MENUITEM SEPARATOR
@@ -3968,16 +3996,26 @@ BEGIN
             MENUITEM "Task &Path",                  ID_EDIT_COPYAS_PATH
         END
         MENUITEM SEPARATOR
-        MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
-        MENUITEM "Copy Selected Values from Column", 
-                                                ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
-
-        MENUITEM SEPARATOR
         MENUITEM "Paste as Subtask",            ID_EDIT_PASTESUB
         MENUITEM "Paste &Below",                ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
         MENUITEM SEPARATOR
         MENUITEM "Paste Task Attrib&utes",      ID_EDIT_PASTEATTRIBUTES
+        MENUITEM SEPARATOR
+        POPUP "Column Operations"
+        BEGIN
+            MENUITEM "Copy All Values From Column", ID_TASKLIST_COPYCOLUMNVALUES
+
+            MENUITEM "Copy Selected Values From Column", 
+                                                    ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+
+            MENUITEM "",                            1
+            MENUITEM "&Paste Values into Column",   ID_TASKLIST_PASTECOLUMNVALUES
+
+            MENUITEM "Paste Values into Selected Tasks in Column", 
+                                                    ID_TASKLIST_PASTESELTASKSCOLUMNVALUES
+
+        END
         MENUITEM SEPARATOR
         MENUITEM "&Delete Task",                ID_DELETETASK
         MENUITEM SEPARATOR
@@ -4050,14 +4088,21 @@ BEGIN
     END
     POPUP "TasklistHeader"
     BEGIN
-        MENUITEM "Task Attribute Visibility...", ID_TASKLIST_SELECTCOLUMNS
+        MENUITEM "Task &Attribute Visibility...", ID_TASKLIST_SELECTCOLUMNS
         MENUITEM "&Custom Task Attributes...",  ID_TASKLIST_CUSTOMCOLUMNS
         MENUITEM SEPARATOR
         MENUITEM "Resi&ze Attribute Columns to Fit", ID_VIEW_RESIZECOLSTOFIT
         MENUITEM SEPARATOR
-        MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
-        MENUITEM "Copy Selected Values from Column", 
+        MENUITEM "C&opy All Values From Column", 
+                                                ID_TASKLIST_COPYCOLUMNVALUES
+        MENUITEM "Copy &Selected Values From Column", 
                                                 ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+
+        MENUITEM SEPARATOR
+        MENUITEM "&Paste Values Into Column",   ID_TASKLIST_PASTECOLUMNVALUES
+
+        MENUITEM "Paste Values Into Selected Tasks In Column", 
+                                                ID_TASKLIST_PASTESELTASKSCOLUMNVALUES
 
         MENUITEM SEPARATOR
         MENUITEM "Cancel\tEsc",                 IDCLOSE
@@ -4153,6 +4198,13 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "T&oday's Date",               ID_TOOLARG_TODAYSDATE
+    END
+    POPUP "AttributeCtrl"
+    BEGIN
+        MENUITEM "Copy Attribute Value",        ID_ATTRIBLIST_COPYATTRIBVALUES
+
+        MENUITEM "Paste Attribute Value",       ID_ATTRIBLIST_PASTEATTRIBVALUES
+
     END
 END
 
@@ -4278,12 +4330,12 @@ BEGIN
 
     IDD_PREFUITASKLIST_PAGE, DIALOG
     BEGIN
-        BOTTOMMARGIN, 495
+        BOTTOMMARGIN, 520
     END
 
     IDD_PREFUITASKLISTCOLORS_PAGE, DIALOG
     BEGIN
-        BOTTOMMARGIN, 608
+        BOTTOMMARGIN, 599
     END
 
     IDD_OFFSETDATES_DIALOG, DIALOG
@@ -4615,7 +4667,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_MAXTASKLIST          "\nMaximise Task View"
+    ID_VIEW_MAXTASKLIST     "\nMaximise Task View"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4751,7 +4803,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_FTD_SOMERESULTS     "&Results (%d found):"
+    IDS_FTD_SOMERESULTS     "&Results (%d found)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5041,7 +5093,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_TDC_FIELD_DEPENDENCY "De&pendency"
     IDS_TDLBC_DEPENDS       "Dependency"
-    IDS_TDC_DEPENDSLINK_TIP "View Dependency"
     IDS_TDC_SELTASKHASDEPENDENCY 
                             "The selected task is dependent on another task that must be completed first.\n\nWould you like to view the dependency?"
     IDS_TDC_SELTASKSHAVEDEPENDENCIES 
@@ -5051,8 +5102,8 @@ BEGIN
     IDS_ENCRYPTEDFILE       "The tasklist '%s' has been encrypted.\n\nPlease enter the required password below."
     IDS_DECRYPTFAILED       "The tasklist '%s' could not be decrypted using the provided password.\n\nWould you like to try again?"
     IDS_PD_TITLE            "Password Required"
-    IDS_PD_PASSWORDLABEL    "Password:"
-    IDS_PD_CONFIRMLABEL     "Confirm Password:"
+    IDS_PD_PASSWORDLABEL    "Password"
+    IDS_PD_CONFIRMLABEL     "Confirm Password"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5268,7 +5319,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_FIND_TITLE          "Find in Comments"
     IDS_REPLACE_TITLE       "Replace in Comments"
-    IDS_CAD_BROWSEIMAGES    "Images..."
+    IDS_CAD_BROWSEIMAGES    "Icons..."
     IDS_CAD_INSERTSYMBOL    "Symbols..."
     IDS_TDLBC_CREATETIME    "Creation Time"
     IDS_3RDPARTYSTORAGE     "3rd Party Storage"
@@ -5411,10 +5462,6 @@ BEGIN
     IDS_IMPORTFROMCB_NOTASKS 
                             "The clipboard text contained no tasks which could be imported."
     IDS_FILTER_FLAGGED      "Flagged Tasks"
-    IDS_BEGINWHENREMINDERREST "begins in %s at %s"
-    IDS_DUEWHENREMINDERREST "is due in %s at %s"
-    IDS_BEGINWHENREMINDERMINS "begins in %.0f minutes at %s"
-    IDS_DUEWHENREMINDERMINS "is due in %.0f minutes at %s"
     IDS_TDC_FIELD_STARTTIME "St&art Time"
     IDS_UITHEMEFILEFILTER   "Theme Files (*.xml)|*.xml||"
     IDS_NEEDRESTARTTODOLISTLIGHTBOXCHANGE 
@@ -5427,12 +5474,12 @@ BEGIN
     IDS_FILTER_NOTSTARTED   "Tasks Not Started"
     IDS_PTDP_VERSION        "Version"
     IDS_SD_SERVERLABEL      "&Server"
-    IDS_SD_USERNAMELABEL    "&Username:"
-    IDS_SD_PASSWORDLABEL    "&Password:"
-    IDS_SCD_DICTLABEL       "Ac&tive Dictionary:"
+    IDS_SD_USERNAMELABEL    "&Username"
+    IDS_SD_PASSWORDLABEL    "&Password"
+    IDS_SCD_DICTLABEL       "Ac&tive Dictionary"
     IDS_SCD_BROWSE          "Bro&wse"
     IDS_SCD_URL             "Download More Dictionaries"
-    IDS_SCD_CHECKINGLABEL   "C&hecking Text:"
+    IDS_SCD_CHECKINGLABEL   "C&hecking Text"
     IDS_SCD_RESTART         "R&estart"
 END
 
@@ -5444,8 +5491,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_SCD_REPLACELABEL    "Replace:"
-    IDS_SCD_WITHLABEL       "&With:"
+    IDS_SCD_REPLACELABEL    "Replace"
+    IDS_SCD_WITHLABEL       "&With"
     IDS_SCD_REPLACE         "&Replace"
     IDS_SCD_NEXT            "&Next Word"
     IDS_SCD_TITLE           "Spell Checker"
@@ -5473,8 +5520,6 @@ BEGIN
     IDS_TDC_UPDATEFILTER_TIP "Update Filter"
     IDS_ADVANCEDFILTER      "Find Tasks Filter"
     IDS_LOGFILELOCKED       "The log file could not be updated.\n\nPlease ensure that the file is not already open for editing and \nthat you have the correct permissions and then try again."
-    IDS_DUEWHENREMINDERNOW  "is due now (%s)"
-    IDS_BEGINWHENREMINDERNOW "begins now (%s)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5483,6 +5528,8 @@ BEGIN
     IDS_TDC_COLUMN_PATH     "Path"
     IDS_FILTER_SHOWALLSUB   "Show all subtasks"
     IDS_TASKLISTATTACHED    "<Tasklist Attached>"
+    IDS_RESTARTTOCHANGEDARKMODE 
+                            "Dark Mode|Dark Mode will be updated next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
     IDS_FILTER_SELECTED     "Selected Tasks"
     IDS_OA_BCC              "Bcc"
     IDS_OA_BILLINGINFO      "Billing Info"
@@ -5846,9 +5893,13 @@ BEGIN
                             "Export Tasklist|You must select a filename that does not match the tasklist being exported."
     IDS_UPDATER_FILEMISSING "The updater is missing from the installation folder.\n\nWould you like to try downloading the update file manually?"
     IDS_CTRLCLICKTOFOLLOWLINK "'CTRL + click' to follow link"
-    IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values from '%s' Column"
+    IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values From '%s' Column"
     IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 
-                            "Copy Selected Values from '%s' Column"
+                            "Copy Selected Values From '%s' Column"
+    IDS_TASKLIST_PASTECOLUMNVALUES 
+                            "Paste %d Values From '%s' Column To '%s' Column"
+    IDS_TASKLIST_PASTESELECTEDCOLUMNVALUES 
+                            "Paste %d Values From '%s' Column to Selected Tasks In '%s' Column"
     IDS_TDLBC_TASK          "Task"
 END
 
@@ -5856,7 +5907,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_CUSTOM_FEATURE_NOBLANK "Exclude blank list item"
     IDS_CUSTOM_TIMEATTRIB   "Time (%s)"
-    IDS_IMPORTFROMTEXT      "&Text:"
+    IDS_IMPORTFROMTEXT      "&Text"
     IDS_IMPORTTOTOPOFTASKLIST "Top of tasklist"
     IDS_IMPORTTOSELTASK     "Subtask of selected task"
     IDS_IMPORTTOBELOWSELTASK "After selected task"
@@ -5875,8 +5926,12 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_CUSTOM_FEATURE_ONEDECIMAL "One decimal place"
-    IDS_FP_IS_COMPLETE      "is completed (or not set)"
+    IDS_FP_DEPENDS_COMPLETE "is completed (or not set)"
     IDS_TDC_GROUPBY         "Group by"
+    IDS_TASKLIST_PASTEONECOLUMNVALUES 
+                            "Paste 1 Value From '%s' Column To All Tasks In '%s' Column"
+    IDS_TASKLIST_PASTEONESELECTEDCOLUMNVALUES 
+                            "Paste 1 Value From '%s' Column to All Selected Tasks In '%s' Column"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5914,6 +5969,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_COMMENTS_INSERTTIME  "\nInsert Time"
     ID_COMMENTS_INSERTDATETIME "\nInsert Date and Time"
+    ID_TOGGLE_SORT          "\nToggle Sort Direction"
+    ID_GROUP_ATTRIBUTES     "\nGroup Attributes"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5922,8 +5979,54 @@ BEGIN
     IDS_EDIT_VALUEVARIES    "<value varies>"
     IDS_ATTRIBTIP_TIMEOFDAY "Time of day"
     IDS_ATTRIBTIP_DEFCOLOR  "Default colour"
-    IDS_ATTRIBTIP_DATEREQUIRED "Date must be set"
+    IDS_ATTRIBTIP_NODATESET "No date set"
     IDS_ATTRIBUTES          "Attributes"
+    IDS_ATTRIBCAT_OTHER     "Other"
+    IDS_ATTRIBCAT_SINGLETEXT "Text (Single)"
+    IDS_ATTRIBCAT_NUMERIC   "Numeric"
+    IDS_ATTRIBCAT_DATETIME  "Date/Time"
+    IDS_ATTRIBCAT_TIMEPERIOD "Time Period"
+    IDS_ATTRIBCAT_CUSTOM    "Custom"
+    IDS_TDLBC_TIMEREMAINING "Time Remaining"
+    IDS_ATTRIBCAT_MULTITEXT "Text (Multi)"
+    IDS_ATTRIBCTRL_COPYATTRIBVALUE "Copy '%s' Value"
+    IDS_ATTRIBCTRL_PASTEATTRIBVALUE "Paste '%s' Value to '%s'"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ATTRIBCTRL_COPYATTRIBVALUES "Copy '%s' Values"
+    IDS_ATTRIBCTRL_PASTEATTRIBVALUES "Paste '%s' Values to '%s'"
+    IDS_GOTOTASKLIST_TIP    "Go To Tasklist"
+    IDS_GOTOTASK_TIP        "Go To Task"
+    IDS_TODAY               "<today>"
+    IDS_LISTVIEW_SORTNONEGROUPBELOW "Sort <none> group below other groups"
+    IDS_FILTER_HIDEUNDONEDEPENDS "Hide tasks with incomplete Dependencies"
+    IDS_TOOLSICONDLG_TITLE  "Select Tool Icon"
+    IDS_TOOLBARICONDLG_TITLE "Select Toolbar Icon"
+    IDS_CUSTATTRIBICONDLG_TITLE "Select Custom Icon"
+    IDS_FINDTASKICONDLG_TITLE "Select Search Icon"
+    IDS_CUSTICONSETUPDLG_TITLE "Select Custom Icons"
+    IDS_REMINDER_STARTSIN   "Starts in %s"
+    IDS_REMINDER_STARTEDAGO "Started %s ago"
+    IDS_REMINDER_OVERDUEBY  "Overdue by %s"
+    IDS_REMINDER_DUEIN      "Due in %s"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_REMINDER_ABSOLUTENOW "Now"
+    IDS_REMINDER_ABSOLUTEAGO "%s ago"
+    IDS_REMINDER_STARTSNOW  "Starts Now"
+    IDS_REMINDER_DUENOW     "Due Now"
+    IDS_ATTRIBTIP_DEPENDENTDATE "Dependent date"
+    IDS_ATTRIBTIP_COMPLETEDTASK "Completed task"
+    IDS_ATTRIBTIP_MODIFY    "Modify"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_TOOLS_TOGGLEDARKMODE "\nToggle Dark Mode"
 END
 
 #endif    // English (Australia) resources

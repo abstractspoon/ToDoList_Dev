@@ -10,6 +10,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\osversion.h"
+#include "..\shared\DateHelper.h"
 
 #include "..\3rdparty\shellicons.h"
 
@@ -93,6 +94,7 @@ CTDLFindResultsListCtrl::CTDLFindResultsListCtrl()
 	m_bStrikeThruDone(FALSE),
 	m_bHasIconsOrRefs(FALSE)
 {
+	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(17));
 }
 
 CTDLFindResultsListCtrl::~CTDLFindResultsListCtrl()
@@ -126,8 +128,6 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_LABELTIP, LVS_EX_LABELTIP);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 
-	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(16));
-
 	RefreshUserPreferences();
 }
 
@@ -137,16 +137,10 @@ void CTDLFindResultsListCtrl::UpdateIconAndReferenceStatus()
 
 	int nItem = GetItemCount();
 
-	if (nItem)
+	while (nItem-- && !m_bHasIconsOrRefs)
 	{
-		while (nItem--)
-		{
-			while (nItem-- && !m_bHasIconsOrRefs)
-			{
-				FTDRESULT* pRes = GetResult(nItem);
-				m_bHasIconsOrRefs = (pRes && (pRes->HasIcon() || pRes->IsReference()));
-			}
-		}
+		FTDRESULT* pRes = GetResult(nItem);
+		m_bHasIconsOrRefs = (pRes && (pRes->HasIcon() || pRes->IsReference()));
 	}
 }
 
@@ -271,16 +265,12 @@ void CTDLFindResultsListCtrl::DeleteAllResults()
 	int nItem = GetItemCount();
 
 	while (nItem--)
-	{
-		FTDRESULT* pRes = GetResult(nItem);
-		delete pRes;
-
-		DeleteItem(nItem);
-	}
+		delete GetResult(nItem);
 
 	m_bHasIconsOrRefs = FALSE;
 	m_nCurGroupID = m_nHotItem = -1;
-	m_grouping.RemoveAllGroups();
+
+	DeleteAllItems();
 }
 
 void CTDLFindResultsListCtrl::OnMouseMove(UINT nFlags, CPoint point)
@@ -422,7 +412,7 @@ void CTDLFindResultsListCtrl::RefreshUserPreferences()
 	if (prefs.GetProfileInt(_T("Preferences"), _T("SpecifyGroupHeaderBkgndColor"), FALSE))
 		crGroupBack = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("GroupHeaderBkgnd"), CLR_NONE);
 
-	m_grouping.SetGroupHeaderBackColor(crGroupBack);
+	GetGrouping().SetGroupHeaderBackColor(crGroupBack);
 
 	// update strike thru font
 	BOOL bWasStrikeThru = m_bStrikeThruDone;
@@ -455,7 +445,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 	m_bHasIconsOrRefs |= (pRes->HasIcon() || pRes->IsReference());
 
 	if (m_nCurGroupID != -1)
-		m_grouping.SetItemGroupId(nIndex, m_nCurGroupID);
+		GetGrouping().SetItemGroupId(nIndex, m_nCurGroupID);
 
 	UpdateWindow();
 
@@ -464,10 +454,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 
 BOOL CTDLFindResultsListCtrl::AddHeaderRow(LPCTSTR szText)
 {
-	if (m_nCurGroupID == -1)
-		m_grouping.EnableGroupView(*this);
-
-	return m_grouping.InsertGroupHeader(-1, ++m_nCurGroupID, szText);
+	return GetGrouping().InsertGroupHeader(-1, ++m_nCurGroupID, szText);
 }
 
 CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const
@@ -481,7 +468,7 @@ CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, c
 
 	while (pos)
 	{
-		TDC_ATTRIBUTE nAttribID;
+		TDC_ATTRIBUTE nAttribID = TDCA_NONE;
 		CString sWhatMatched, sFormatted;
 
 		result.mapMatched.GetNextAssoc(pos, nAttribID, sWhatMatched);

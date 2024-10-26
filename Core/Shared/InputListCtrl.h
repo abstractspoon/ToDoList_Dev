@@ -10,6 +10,7 @@
 
 #include "enlistctrl.h"
 #include "popupeditctrl.h"
+
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -21,23 +22,13 @@ enum { NOTVALID, ADDITEM, EDITITEM };
 enum IL_COLUMNTYPE 
 { 
 	ILCT_TEXT, 
-	ILCT_DROPLIST, 
+	ILCT_COMBO, 
 	ILCT_BROWSE, 
 	ILCT_DATE,
 	ILCT_CHECK,
 	ILCT_POPUPMENU, 
-	ILCT_CUSTOMBTN,
+	ILCT_ICON,
 }; 
-
-/////////////////////////////////////////////////////////////////////////////
-
-class CColumnData2 : public CColumnData
-{
-public:
-	CColumnData2() : CColumnData(), bEditEnabled(TRUE), nType(ILCT_TEXT) { }
-	BOOL bEditEnabled;
-	IL_COLUMNTYPE nType;
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // CInputListCtrl window
@@ -83,6 +74,15 @@ public:
 	void SetAutoColPrompt(const CString& sPrompt);
 	void SetColumnType(int nCol, IL_COLUMNTYPE nType);
 	IL_COLUMNTYPE GetColumnType(int nCol) const;
+	
+protected:
+	class CColumnData2 : public CEnListCtrl::CColumnData
+	{
+	public:
+		CColumnData2();
+		BOOL bEditEnabled;
+		IL_COLUMNTYPE nType;
+	};
 
 protected:
 	int m_nItemLastSelected;
@@ -169,13 +169,22 @@ protected:
 	CRect ScrollCellIntoView(int nRow, int nCol); // returns the final position of the cell 
 	BOOL IsPrompt(int nItem, int nCol = -1) const;
 	const CColumnData2* GetColumnData(int nCol) const;
-	int InsertRow(CString sRowText, int nItem, int nImage = -1);
+	int InsertRow(const CString& sRowText, int nItem, int nImage = -1);
 	BOOL CanDeleteCell(int nRow, int nCol) const;
 	void NotifyParentEditCell(const CString& sText, int nRow = -1, int nCol = -1) const;
 	BOOL HasNonTextCells() const;
 	DWORD GetButtonState(int nRow, int nCol, BOOL bSelected) const;
 	BOOL CellHasButton(int nRow, int nCol) const;
 	BOOL IsCellSelected(int nRow, int nCol, BOOL bVisually = FALSE) const;
+
+	void DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState) const;
+	void DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	void DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
+	BOOL DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType, DWORD dwState) const;
 
 private:
 	void RecalcHotButtonRects();

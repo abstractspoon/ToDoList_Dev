@@ -168,7 +168,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,160,57,50,14
     COMBOBOX        IDC_TABWIDTHS,136,28,74,83,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_GROUP | WS_TABSTOP
-    LTEXT           "Subtasks are delimited at each level using:",
+    LTEXT           "Subtasks are delimited at each level using",
                     IDC_CBLABEL,7,27,122,17
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,49,203,1
     CONTROL         "First Line represents the project title",
@@ -184,8 +184,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_IMPORTLABEL         "Subtasks are indented at each level with:"
-    IDS_EXPORTLABEL         "Indent subtasks at each level with:"
+    IDS_IMPORTLABEL         "Subtasks are indented at each level with"
+    IDS_EXPORTLABEL         "Indent subtasks at each level with"
     IDS_IMPORTTITLE         "Import Tasks from Outline"
     IDS_EXPORTTITLE         "Export Tasks to Outline"
     IDS_IMPORTPROJECTLABEL  "Import the first line as the project name"

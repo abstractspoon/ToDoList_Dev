@@ -151,7 +151,7 @@ void CImportExportComboBox::BuildCombo()
 		else
 			sItem = sMenu;
 
-		CDialogHelper::AddString(*this, sItem, nImpExp);
+		CDialogHelper::AddStringT(*this, sItem, nImpExp);
 	}
 
 	CLocalizer::EnableTranslation(*this, FALSE);
@@ -189,7 +189,7 @@ CString CImportExportComboBox::GetSelectedTypeID() const
 	if (GetCurSel() == CB_ERR)
 		return _T("");
 
-	int nImpExp = CDialogHelper::GetSelectedItemData(*this, 0);
+	int nImpExp = CDialogHelper::GetSelectedItemDataT(*this, 0);
 		
 	return (m_bImporting ? 
 			m_mgrImpExp.GetImporterTypeID(nImpExp) :
@@ -214,7 +214,7 @@ int CImportExportComboBox::FindItem(LPCTSTR szTypeID) const
 		else
 			nImpExp = m_mgrImpExp.FindExporterByType(szTypeID);
 
-		nItem = CDialogHelper::FindItemByData(*this, nImpExp);
+		nItem = CDialogHelper::FindItemByDataT(*this, nImpExp);
 	}
 
 	return nItem;

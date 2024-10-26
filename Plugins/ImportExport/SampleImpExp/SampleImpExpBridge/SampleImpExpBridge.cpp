@@ -30,9 +30,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 // see ExporterBridge.h for the class definition
 CSampleImpExpBridge::CSampleImpExpBridge()
 {
-// 	HMODULE hMod = LoadLibrary(L"SampleImpExpBridge.dll"); // us
-// 
-//	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	//m_hIcon = Win32::LoadHIcon(L"SampleImpExpBridge.dll", IDI_SAMPLE, 16, true);
 }
 
 void CSampleImpExpBridge::Release()

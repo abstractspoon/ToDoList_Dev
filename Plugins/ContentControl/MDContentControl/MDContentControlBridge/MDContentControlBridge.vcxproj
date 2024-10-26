@@ -119,7 +119,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\markdown.ico" />
+    <None Include="..\MDContentControlCore\Resources\markdown.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MDContentControlCore\MDContentControlCore.csproj">

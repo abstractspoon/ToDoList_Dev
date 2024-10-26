@@ -135,6 +135,10 @@
     <ClCompile Include="..\ToDoList\TaskFile.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvExporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvImporter.cpp" />
+    <ClCompile Include="..\ToDoList\TDCDarkMode.cpp" />
+    <ClCompile Include="..\ToDoList\TDCMenuIconMgr.cpp" />
+    <ClCompile Include="..\ToDoList\TDCRecurrenceHelper.cpp" />
+    <ClCompile Include="..\ToDoList\tdcstruct.cpp" />
     <ClCompile Include="..\ToDoList\TDCTaskListDropTarget.cpp" />
     <ClCompile Include="..\ToDoList\TaskListExporterBase.cpp" />
     <ClCompile Include="..\ToDoList\TaskListHtmlExporter.cpp" />
@@ -234,6 +238,7 @@
     <ClCompile Include="..\ToDoList\TDLSimpleTextContentCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLStatusBar.cpp" />
     <ClCompile Include="..\ToDoList\TDLStylesheetParamConfigDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskAttributeCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskAttributeListCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskComboBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskCtrlBase.cpp" />
@@ -293,6 +298,9 @@
     <ClInclude Include="..\ToDoList\TaskFile.h" />
     <ClInclude Include="..\ToDoList\TaskListCsvExporter.h" />
     <ClInclude Include="..\ToDoList\TaskListCsvImporter.h" />
+    <ClInclude Include="..\ToDoList\TDCDarkMode.h" />
+    <ClInclude Include="..\ToDoList\TDCMenuIconMgr.h" />
+    <ClInclude Include="..\ToDoList\TDCRecurrenceHelper.h" />
     <ClInclude Include="..\ToDoList\TDCTaskListDropTarget.h" />
     <ClInclude Include="..\ToDoList\TaskListExporterBase.h" />
     <ClInclude Include="..\ToDoList\TaskListHtmlExporter.h" />
@@ -398,6 +406,7 @@
     <ClInclude Include="..\ToDoList\TDLSimpleTextContentCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLStatusBar.h" />
     <ClInclude Include="..\ToDoList\TDLStylesheetParamConfigDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskAttributeCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLTaskAttributeListCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLTaskComboBox.h" />
     <ClInclude Include="..\ToDoList\TDLTaskCtrlBase.h" />

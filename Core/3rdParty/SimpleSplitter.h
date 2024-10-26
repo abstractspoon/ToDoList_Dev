@@ -38,6 +38,7 @@ public:
 	BOOL CreatePane(int nIndex, CWnd* pPaneWnd, DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszClassName = NULL);
 	
 	int GetPaneCount() const { return m_aPanes.GetSize(); }
+	int FindPane(CWnd* pPaneWnd) const;
 	CWnd* GetPane(int nIndex) const;
 	CWnd* GetActivePane(int* pIndex) const;
 
@@ -62,6 +63,7 @@ protected:
 	void InitialisePanes(int nNumPanes);
 	void ResizePaneWindow(int nPane);
 	void ResizePaneWindows();
+	int HitTestBar(CPoint ptClient) const;
 
 	//{{AFX_MSG(CSimpleSplitter)
 	afx_msg void OnPaint();
@@ -71,6 +73,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnNcCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnWindowPosChanging(WINDOWPOS FAR* lpwndpos);
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	//}}AFX_MSG
 	afx_msg LRESULT OnSplitChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDrawSplitBar(WPARAM wp, LPARAM lp);

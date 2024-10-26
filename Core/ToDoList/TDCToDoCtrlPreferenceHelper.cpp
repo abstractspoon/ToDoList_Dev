@@ -97,7 +97,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	TDCCOLEDITFILTERVISIBILITY vis;
 	tdc.GetColumnFieldVisibility(vis);
 
-	vis.ShowColorEditIfAsColumns(prefs.GetTextColorOption() == COLOROPT_DEFAULT);
+	vis.ShowColorEditIfAsColumns(prefs.GetTextColorOption() == TEXTOPT_DEFAULT);
 	tdc.SetColumnFieldVisibility(vis);
 
 	// layout
@@ -141,9 +141,9 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	tdc.SetDueTaskColors(color, crToday);
 
 	CTDCColorMap colors;
-	TDC_ATTRIBUTE nAttrib = prefs.GetAttributeColors(colors);
+	TDC_ATTRIBUTE nAttribID = prefs.GetAttributeColors(colors);
 
-	tdc.SetAttributeColors(nAttrib, colors);
+	tdc.SetAttributeColors(nAttribID, colors);
 
 	// misc
 	tdc.SetSubtaskDragDropPos(prefs.GetNewSubtaskPos() == PUIP_TOP);
@@ -180,9 +180,9 @@ void CTDCToDoCtrlPreferenceHelper::PopulateStyles(const CPreferencesDlg& prefs, 
 	styles[TDCS_CALCREMAININGTIMEBYPERCENT] = (prefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISPERCENTAGE);
 	styles[TDCS_CALCREMAININGTIMEBYSPENT] = (prefs.GetTimeRemainingCalculation() == PTCP_REMAININGTTIMEISSPENT);
 	styles[TDCS_CHECKOUTONLOAD] = prefs.GetAutoCheckOut();
-	styles[TDCS_COLORTEXTBYATTRIBUTE] = (prefs.GetTextColorOption() == COLOROPT_ATTRIB);
-	styles[TDCS_COLORTEXTBYNONE] = (prefs.GetTextColorOption() == COLOROPT_NONE);
-	styles[TDCS_COLORTEXTBYPRIORITY] = (prefs.GetTextColorOption() == COLOROPT_PRIORITY);
+	styles[TDCS_COLORTEXTBYATTRIBUTE] = (prefs.GetTextColorOption() == TEXTOPT_ATTRIB);
+	styles[TDCS_COLORTEXTBYNONE] = (prefs.GetTextColorOption() == TEXTOPT_NONE);
+	styles[TDCS_COLORTEXTBYPRIORITY] = (prefs.GetTextColorOption() == TEXTOPT_PRIORITY);
 	styles[TDCS_COLUMNHEADERSORTING] = prefs.GetEnableColumnHeaderSorting();
 	styles[TDCS_COMMENTSUSETREEFONT] = prefs.GetCommentsUseTreeFont();
 	styles[TDCS_CONFIRMDELETE] = prefs.GetConfirmDelete();
@@ -201,6 +201,7 @@ void CTDCToDoCtrlPreferenceHelper::PopulateStyles(const CPreferencesDlg& prefs, 
 	styles[TDCS_INCLUDEDONEINAVERAGECALC] = prefs.GetIncludeDoneInAverageCalc();
 	styles[TDCS_INCLUDEDONEINPRIORITYCALC] = prefs.GetIncludeDoneInPriorityRiskCalc();
 	styles[TDCS_INCLUDEDONEINRISKCALC] = prefs.GetIncludeDoneInPriorityRiskCalc();
+	styles[TDCS_INCLUDEREFERENCESINCALCS] = prefs.GetIncludeReferencesInCalcs();
 	styles[TDCS_INCLUDEUSERINCHECKOUT] = prefs.GetIncludeUserNameInCheckout();
 	styles[TDCS_LOGTASKTIMESEPARATELY] = prefs.GetLogTaskTimeSeparately();
 	styles[TDCS_LOGTIMETRACKING] = prefs.GetLogTimeTracking();

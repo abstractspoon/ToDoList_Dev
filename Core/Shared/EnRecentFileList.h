@@ -21,6 +21,9 @@ public:
                      LPCTSTR szOriginal = NULL);
 	virtual ~CEnRecentFileList();
 
+	void Remove(int nIndex) { CRecentFileList::Remove(nIndex); }
+	BOOL Remove(LPCTSTR szFile);
+
 	void RemoveAll(BOOL bClearProfile = TRUE);
   	virtual void UpdateMenu(CCmdUI* pCmdUI);
 

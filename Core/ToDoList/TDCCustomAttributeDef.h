@@ -28,17 +28,18 @@ struct TDCCUSTOMATTRIBUTECALCULATIONOPERAND
 	BOOL IsValid(BOOL bAllowNone = TRUE) const;
 	BOOL IsCustom() const;
 
-	TDC_ATTRIBUTE nAttribID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
+	TDC_ATTRIBUTE nAttributeID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
 	CString sCustAttribID;
 
 	static BOOL IsValid(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, BOOL bAllowNone = TRUE);
 	static DWORD GetDataType(TDC_ATTRIBUTE nAttribID);
-
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 const DWORD TDCCA_INVALID = TDCCA_STRING;
+
+// -------------------------------------------------------
 
 struct TDCCUSTOMATTRIBUTECALCULATION
 {
@@ -96,12 +97,12 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	CString GetColumnTitle() const;
 	CString GetToolTip() const;
 
-	inline TDC_COLUMN GetColumnID() const { return nColID; }
-	inline TDC_ATTRIBUTE GetAttributeID() const { return nAttribID; }
+	inline TDC_COLUMN GetColumnID() const { return nColumnID; }
+	inline TDC_ATTRIBUTE GetAttributeID() const { return nAttributeID; }
 	inline DWORD GetAttributeType() const { return dwAttribType; }
 
 	UINT GetColumnHeaderAlignment() const;
-	BOOL HasDefaultHorzAlignment() const;
+	BOOL HasDefaultTextAlignment() const;
 
 	BOOL SetAttributeType(DWORD dwType);
 	BOOL SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
@@ -123,8 +124,10 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	BOOL SupportsFeature(DWORD dwFeature) const;
 	BOOL IsAggregated() const;
+	BOOL ValidateData(TDCCADATA& data) const;
 
 	BOOL SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc);
+	BOOL IsCalculation() const { return calculation.IsValid(FALSE); }
 	const TDCCUSTOMATTRIBUTECALCULATION& Calculation() const { return calculation; }
 
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const;
@@ -140,6 +143,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 	static BOOL IsCustomColumn(TDC_COLUMN nColID);
 	static UINT GetDefaultHorzAlignment(DWORD dwAttribType);
+	static TDC_ATTRIBUTEGROUP GetAttributeGroup(DWORD dwAttribType);
 	static BOOL IsEncodedImageTag(const CString& sImage);
 	static CString EncodeImageTag(const CString& sImage, const CString& sName);
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName);
@@ -151,7 +155,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	CString sUniqueID;
 	CString sColumnTitle;
 	CString sLabel;
-	UINT nHorzAlignment; // DT_LEFT, DT_CENTER, DT_RIGHT
+	UINT nTextAlignment; // DT_LEFT, DT_CENTER, DT_RIGHT
 	DWORD dwFeatures;
 	CStringArray aDefaultListData;
 	mutable CStringArray aAutoListData;
@@ -160,9 +164,10 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 private:
 	// these are managed internally
 	DWORD dwAttribType;
-	TDC_COLUMN nColID;
-	TDC_ATTRIBUTE nAttribID;
+	TDC_COLUMN nColumnID;
+	TDC_ATTRIBUTE nAttributeID;
 	TDCCUSTOMATTRIBUTECALCULATION calculation;
+
 	// ----------------------------------------------------------------
 
 	BOOL SetTypes(DWORD dwDataType, DWORD dwListType);
@@ -173,25 +178,25 @@ private:
 
 #define GET_CUSTDEF_RET(defs, key, def, ret) \
 {                                            \
-	int nAttrib = (defs).Find(key);          \
-	if (nAttrib == -1)                       \
+	int att = (defs).Find(key);              \
+	if (att == -1)                           \
 	{                                        \
 		ASSERT(0);                           \
         return ret;                          \
 	}                                        \
-	def = &((defs)[nAttrib]);                \
+	def = &((defs)[att]);                    \
 }
 
 // alt = break. continue, return
 #define GET_CUSTDEF_ALT(defs, key, def, alt) \
 {                                            \
-	int nAttrib = defs.Find(key);            \
-	if (nAttrib == -1)                       \
+	int att = defs.Find(key);                \
+	if (att == -1)                           \
 	{                                        \
 		ASSERT(0);                           \
         alt;                                 \
 	}                                        \
-	def = &((defs)[nAttrib]);                \
+	def = &((defs)[att]);                    \
 }
 
 // ----------------------------------------------------------------

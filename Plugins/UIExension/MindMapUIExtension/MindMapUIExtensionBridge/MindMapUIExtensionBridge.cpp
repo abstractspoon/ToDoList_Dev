@@ -38,9 +38,7 @@ const LPCWSTR MINDMAP_NAME = L"Mind Map";
 
 CMindMapUIExtensionBridge::CMindMapUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	HMODULE hMod = LoadLibrary(L"MindMapUIExtensionBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MINDMAP), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"MindMapUIExtensionBridge.dll", IDI_MINDMAP, 16, true);
 }
 
 void CMindMapUIExtensionBridge::Release()
@@ -160,9 +158,9 @@ void CMindMapUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_U
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CMindMapUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CMindMapUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CMindMapUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const

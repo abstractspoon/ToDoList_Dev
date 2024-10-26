@@ -103,8 +103,8 @@ protected:
 	TDCUNDOACTION& LastRedoAction();
 	const TDCUNDOACTION& LastUndoAction() const;
 	const TDCUNDOACTION& LastRedoAction() const;
-	int LastUndoIndex() const { return m_aUndo.GetSize() - 1; }
-	int LastRedoIndex() const { return m_aRedo.GetSize() - 1; }
+	int LastUndoIndex() const { return Misc::LastIndexT(m_aUndo); }
+	int LastRedoIndex() const { return Misc::LastIndexT(m_aRedo); }
 	
 };
 

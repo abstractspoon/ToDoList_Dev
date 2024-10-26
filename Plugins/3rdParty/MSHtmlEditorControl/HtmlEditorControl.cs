@@ -50,6 +50,7 @@ using Pavonis.COM;
 using Pavonis.COM.IOleCommandTarget;
 
 using Command.Handling;
+using UIComponents;
 
 #endregion
 
@@ -3191,18 +3192,19 @@ namespace MSDN.Html.Editor
 		public void FormatTextColorPrompt()
         {
             // display the Color dialog and use the selected color to modify text
-            using (ColorDialog colorDialog = new ColorDialog())
+            using (var dlg = new ColorDialogEx())
             {
-				colorDialog.FullOpen = true;
-				colorDialog.AnyColor = true;
-                colorDialog.SolidColorOnly = true;
-                colorDialog.AllowFullOpen = true;
-                colorDialog.Color = GetFontColor();
-                colorDialog.CustomColors = _customColors;
-                if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				dlg.FullOpen = true;
+				dlg.AnyColor = true;
+                dlg.SolidColorOnly = true;
+                dlg.AllowFullOpen = true;
+                dlg.Color = GetFontColor();
+                dlg.CustomColors = _customColors;
+
+                if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    _customColors = colorDialog.CustomColors;
-                    FormatTextColor(colorDialog.Color);
+                    _customColors = dlg.CustomColors;
+                    FormatTextColor(dlg.Color);
                 }
             }
 

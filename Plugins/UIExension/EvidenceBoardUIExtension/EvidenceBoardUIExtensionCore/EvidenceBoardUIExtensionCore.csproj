@@ -105,6 +105,10 @@
       <Project>{5563f985-67ac-4b91-a2c4-1fc9bafe7d49}</Project>
       <Name>CustomComboBox</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\ImageHelper\ImageHelper.csproj">
+      <Project>{819992e3-fc33-4fcd-8aa5-5bc8329b2c20}</Project>
+      <Name>ImageHelper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\RadialTree\RadialTree.csproj">
       <Project>{1db9c8cc-031b-49b5-ac6c-23d9c75fdb0c}</Project>
       <Name>RadialTree</Name>
@@ -124,10 +128,6 @@
     <ProjectReference Include="..\..\..\3rdParty\UIComponents\UIComponents.csproj">
       <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
       <Name>UIComponents</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\ImageHelper\ImageHelper.csproj">
-      <Project>{819992e3-fc33-4fcd-8aa5-5bc8329b2c20}</Project>
-      <Name>ImageHelper</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
@@ -161,7 +161,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="toolbar_std.bmp" />
+    <EmbeddedResource Include="Resources\EvidenceBoard.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\toolbar_std.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

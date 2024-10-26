@@ -77,13 +77,13 @@ void CTDLColumnListBox::PreSubclassWindow()
 	CCheckListBoxEx::PreSubclassWindow();
 }
 
-int CTDLColumnListBox::FindColumn(TDC_COLUMN nTDCCol) const
+int CTDLColumnListBox::FindColumn(TDC_COLUMN nColID) const
 {
 	int nIndex = m_aColumns.GetSize();
 	
 	while (nIndex--)
 	{
-		if (m_aColumns[nIndex].nTDCCol == nTDCCol)
+		if (m_aColumns[nIndex].nColumnID == nColID)
 			return nIndex;
 	}
 
@@ -110,7 +110,7 @@ int CTDLColumnListBox::GetAllColumns(CTDCColumnIDArray& aColumns) const
 	
 	while (nIndex--)
 	{
-		TDC_COLUMN col = m_aColumns[nIndex].nTDCCol;
+		TDC_COLUMN col = m_aColumns[nIndex].nColumnID;
 		VERIFY(aColumns.AddUnique(col));
 	}
 
@@ -146,7 +146,7 @@ HBRUSH CTDLColumnListBox::CtlColor(CDC* /*pDC*/, UINT /*nCtlColor*/)
 
 			int nPos = AddString(cs.sName); // same order as enum
 			SetCheck(nPos, cs.bVisible ? 1 : 0);
-			SetItemData(nPos, (DWORD)cs.nTDCCol);
+			SetItemData(nPos, (DWORD)cs.nColumnID);
 		}
 
 		CDialogHelper::RefreshMaxColumnWidth(*this);
@@ -157,9 +157,9 @@ HBRUSH CTDLColumnListBox::CtlColor(CDC* /*pDC*/, UINT /*nCtlColor*/)
 }
 
 
-void CTDLColumnListBox::SetColumnVisible(TDC_COLUMN nTDCCol, BOOL bVisible)
+void CTDLColumnListBox::SetColumnVisible(TDC_COLUMN nColID, BOOL bVisible)
 {
-	int nCol = FindColumn(nTDCCol);
+	int nCol = FindColumn(nColID);
 	
 	if (nCol != -1)
 	{
@@ -172,7 +172,7 @@ void CTDLColumnListBox::SetColumnVisible(TDC_COLUMN nTDCCol, BOOL bVisible)
 			
 			while (nIndex--)
 			{
-				if ((DWORD)nTDCCol == GetItemData(nIndex))
+				if ((DWORD)nColID == GetItemData(nIndex))
 				{
 					SetCheck(nIndex, bVisible ? 1 : 0);
 					break;
@@ -203,7 +203,7 @@ int CTDLColumnListBox::GetVisibleColumns(CTDCColumnIDArray& aColumns) const
 		COLUMNVIS cs = m_aColumns[nIndex];
 
 		if (cs.bVisible)
-			VERIFY(aColumns.AddUnique(cs.nTDCCol));
+			VERIFY(aColumns.AddUnique(cs.nColumnID));
 	}
 
 	return aColumns.GetSize();

@@ -412,9 +412,13 @@ BOOL CXmlItem::SetName(const CString& sName)
 	return TRUE;
 }
 
-void CXmlItem::ClearValue()
+BOOL CXmlItem::ClearValue()
 {
+	if (m_sValue.IsEmpty())
+		return FALSE;
+
 	m_sValue.Empty();
+	return TRUE;
 }
 
 void CXmlItem::SetValue(const CString& sValue)
@@ -1270,10 +1274,10 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 	
 	int nNumAttrib = pNode->GetAttributes(aNames, aValues);
 	
-	for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
+	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
-		const CString& sName = aNames[nAttrib];
-		const CString& sVal = aValues[nAttrib];
+		const CString& sName = aNames[nAtt];
+		const CString& sVal = aValues[nAtt];
 		
 		xi.AddItem(sName, sVal);
 		

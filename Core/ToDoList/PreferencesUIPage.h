@@ -9,32 +9,9 @@
 
 #include "TDLTaskViewListBox.h"
 #include "tdlthemecombobox.h"
+#include "tdcenum.h"
 
 #include "..\shared\preferencesbase.h"
-
-/////////////////////////////////////////////////////////////////////////////
-
-enum PUIP_NEWTASKPOS
-{ 
-	PUIP_TOP,
-	PUIP_BOTTOM,
-	PUIP_ABOVE,
-	PUIP_BELOW,
-};
-
-enum PUIP_LOCATION
-{
-	PUIP_LOCATEBOTTOM,
-	PUIP_LOCATERIGHT,
-	PUIP_LOCATELEFT,
-};
-
-enum PUIP_MATCHTITLE
-{
-	PUIP_MATCHONTITLE,
-	PUIP_MATCHONTITLECOMMENTS,
-	PUIP_MATCHONANYTEXT,
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUIPage dialog
@@ -84,7 +61,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesUIPage)
-	enum { IDD = IDD_PREFUI_PAGE };
 	CTDLTaskViewListBox	m_lbTaskViews;
 	BOOL	m_bShowCommentsAlways;
 	BOOL	m_bSpecifyToolbarImage;

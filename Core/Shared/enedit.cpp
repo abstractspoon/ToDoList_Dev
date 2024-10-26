@@ -5,6 +5,7 @@
 #include "enedit.h"
 #include "themed.h"
 #include "dlgunits.h"
+#include "misc.h"
 #include "graphicsmisc.h"
 #include "enbitmapex.h"
 #include "AcceleratorString.h"
@@ -45,22 +46,22 @@ CEnEdit::EDITBTN::EDITBTN()
 
 IMPLEMENT_DYNAMIC(CEnEdit, CMaskEdit)
 
-CEnEdit::CEnEdit(BOOL bComboStyle, LPCTSTR szMask, DWORD dwFlags) : 
-					CMaskEdit(szMask, dwFlags),
-					m_bComboStyle(bComboStyle),
-					m_bFirstShow(TRUE), 
-					m_nButtonDown(-1),
-					m_bParentIsCombo(-1),
-					m_nBorderWidth(2),
-					m_nDefaultBtn(0)
+CEnEdit::CEnEdit(LPCTSTR szMask, DWORD dwMaskFlags)
+	:
+	CMaskEdit(szMask, dwMaskFlags),
+	m_bFirstShow(TRUE),
+	m_nButtonDown(-1),
+	m_bParentIsCombo(-1),
+	m_nBtnPadding(0),
+	m_nDefaultBtn(0)
 {
+	EnableButtonPadding();
 }
 
 CEnEdit::~CEnEdit()
 {
 	FreeButtonResources();
 }
-
 
 BEGIN_MESSAGE_MAP(CEnEdit, CMaskEdit)
 	//{{AFX_MSG_MAP(CEnEdit)
@@ -110,7 +111,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, UINT nChar, LPCTSTR szTip, int nW
 
 BOOL CEnEdit::InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, LPCTSTR szFont, BOOL bSymbolFont)
 {
-	if (nWidth < CALC_BTNWIDTH || !nID)
+	if (nWidth < EE_BTNWIDTH_CALCULATE || !nID)
 		return FALSE;
 
 	nPos = max(nPos, 0);
@@ -162,10 +163,10 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 	eb.nID = nID;
 	eb.sTip = szTip;
 
-	if (nWidth != DEF_BTNWIDTH)
+	if (nWidth != EE_BTNWIDTH_DEFAULT)
 		eb.nWidth = GraphicsMisc::ScaleByDPIFactor(nWidth);
 	else
-		eb.nWidth = (GraphicsMisc::ScaleByDPIFactor(16) + 4); // 2 px padding
+		eb.nWidth = EE_BTNWIDTH_ICON;
 
 	if (m_ilBtns.GetSafeHandle())
 	{
@@ -202,7 +203,7 @@ BOOL CEnEdit::InitializeImageLists()
 {
 	if (!m_ilBtns.GetSafeHandle() && !m_ilDisabledBtns.GetSafeHandle())
 	{
-		int nImageSize = 16;//GraphicsMisc::ScaleByDPIFactor(16);
+		const int nImageSize = 16;
 
 		for (int nBtn = 0; nBtn < m_aButtons.GetSize(); nBtn++)
 		{
@@ -270,13 +271,11 @@ void CEnEdit::DeleteAllButtons()
 		SetWindowPos(NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER); 
 }
 
-void CEnEdit::SetBorderWidth(int nWidth)
+void CEnEdit::EnableButtonPadding(BOOL bEnable)
 {
-	nWidth = max(nWidth, 0);
-
-	if (m_nBorderWidth != nWidth)
+	if (Misc::StateChanged(m_nBtnPadding, bEnable))
 	{
-		m_nBorderWidth = nWidth;
+		m_nBtnPadding = (bEnable ? GetSystemMetrics(SM_CXEDGE) : 0);
 
 		// force WM_NCCALCSIZE
 		if (GetSafeHwnd())
@@ -328,19 +327,20 @@ void CEnEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp)
 		{
 			m_bFirstShow = FALSE; // in case we get here before OnNcPaint()
 		
-			lpncsp->rgrc[0].right -= (GetButtonsWidth() + 1);
+			lpncsp->rgrc[0].right -= GetButtonsWidth();
+			lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
 
-			if (m_bParentIsCombo && (m_nBorderWidth == 0))
+			if (m_bParentIsCombo)
 			{
-				// Compensate for the fact that we will be rendering our buttons into the combo DC
-				lpncsp->rgrc[0].right += GetSystemMetrics(SM_CXEDGE);
+				if (m_nBtnPadding == 0)
+					lpncsp->rgrc[0].right++;
+				else
+					lpncsp->rgrc[0].right -= m_nBtnPadding;
 			}
-
-// 			if (!m_bParentIsCombo)
-// 			{
-// 				lpncsp->rgrc[0].top += m_nBorderWidth;
-// 				lpncsp->rgrc[0].bottom -= m_nBorderWidth;
-// 			}
+			else
+			{
+				lpncsp->rgrc[0].right -= m_nBtnPadding;
+			}
 		}
 	}
 	
@@ -390,7 +390,7 @@ void CEnEdit::OnLButtonUp(UINT nFlags, CPoint point)
 	RedrawButtonByIndex(nBtnDown);
 
 	// process
-	if (nBtnDown == nBtnUp)
+	if ((nBtnDown == nBtnUp) && (nBtnUp < GetButtonCount()))
 	{
 		ClickButton(m_aButtons[nBtnUp].nID);
 		RedrawButtonByIndex(nBtnDown);
@@ -493,10 +493,10 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 	{
 		if (m_bParentIsCombo)
 		{
-			if (m_nBorderWidth == 0)
+			if (m_nBtnPadding == 0)
 			{
 				GetParent()->GetWindowRect(rBtn);
-				rBtn.right -= DEF_BTNWIDTH;
+				rBtn.right -= EE_BTNWIDTH_DEFAULT;
 			}
 			else
 			{
@@ -506,7 +506,7 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 		else
 		{
 			GetWindowRect(rBtn);
-			rBtn.DeflateRect(m_nBorderWidth, m_nBorderWidth);
+			rBtn.DeflateRect(m_nBtnPadding, m_nBtnPadding);
 		}
 
 		// Subtract all the button widths coming after this one
@@ -514,7 +514,7 @@ CRect CEnEdit::GetButtonRectByIndex(int nBtn) const
 		{
 			rBtn.right -= GetButtonWidthByIndex(nIndex);
 			
-			if (m_nBorderWidth)
+			if (m_nBtnPadding)
 				rBtn.right--;
 		}
 
@@ -534,7 +534,7 @@ void CEnEdit::OnNcPaint()
 
 	// If the button extends right up to the border
 	// do default rendering first
-	if (m_nBorderWidth == 0)
+	if (m_nBtnPadding == 0)
 	{
 		Default();
 	
@@ -546,7 +546,7 @@ void CEnEdit::OnNcPaint()
 			CRect rWindow;
 		
 			GetParent()->GetWindowRect(rWindow);
-			rWindow.right -= DEF_BTNWIDTH;
+			rWindow.right -= EE_BTNWIDTH_DEFAULT;
 		
 			NcPaint(&dc, rWindow);
 		}
@@ -594,10 +594,8 @@ void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 			while (nBtn--)
 				DrawButton(&dcTemp, rButtons, nBtn, ptCursor);
 
-			// blt to screen
+			// blit to screen
 			rButtons.OffsetRect(-rWindow.TopLeft());
-
-			pDC->FillSolidRect(rWindow, 255);
 			pDC->BitBlt(rButtons.left, rButtons.top, rButtons.Width(), rButtons.Height(), &dcTemp, 0, 0, SRCCOPY);
 			
 			// cleanup
@@ -767,7 +765,7 @@ BOOL CEnEdit::SetButtonCaption(UINT nID, LPCTSTR szCaption)
 		eb.sCaption = sCaption;
 
 		// recalc width?
-		if (eb.nWidth == CALC_BTNWIDTH)
+		if (eb.nWidth == EE_BTNWIDTH_CALCULATE)
 			RecalcBtnHotRects();
 
 		if (GetSafeHwnd())
@@ -814,20 +812,13 @@ int CEnEdit::GetButtonsWidth() const
 	int nWidth = 0, nNumBtns = GetButtonCount();
 
 	for (int nBtn = 0; nBtn < nNumBtns; nBtn++)
-		nWidth += (GetButtonWidthByIndex(nBtn) + (m_nBorderWidth ? 1 : 0));
-
- 	// trim extra final spacing
-	if (m_nBorderWidth)
-	{
-		nWidth--;
-	}
-	else if (m_bParentIsCombo)
-	{
-		// Compensate for the fact that we will be rendering our buttons into the combo DC
-		nWidth -= GetSystemMetrics(SM_CXEDGE);
-	}
+		nWidth += GetButtonWidthByIndex(nBtn);
 	
-	return nWidth;
+	// Add button spacing
+	if (m_nBtnPadding)
+		nWidth += (nNumBtns - 1);
+	
+	return max(nWidth, 0);
 }
 
 CString CEnEdit::GetButtonTip(UINT nID) const
@@ -872,50 +863,19 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 
 	rBtn.OffsetRect(-rWindow.TopLeft());
 
-	// nasty business here because the API function DrawThemeEdge() is not theme aware!
-	// and drawing a themed combostyle button will also draw the arrow which we don't want
-	if (!m_bComboStyle || bThemed)	// draw as button type (for now)
-	{
-		UINT nFlags = DFCS_ADJUSTRECT | DFCS_BUTTONPUSH;
-		
-		// note: we do not take account of ES_READONLY as the effect of this
-		// is not deterministic at this level so we assume derived classes or 
-		// parents have handled it
-		if (!bEnabled)
-		{
-			nFlags |= DFCS_INACTIVE;
-		}
-		else if (bDown)
-		{
-			nFlags |= DFCS_PUSHED;
-		}
-		else if (bHot)
-		{
-			nFlags |= DFCS_HOT;
-		}
-
-		// clip the drawing rect to prevent window getting the parent bkgnd color wrong
-		CRect rClip(rBtn);
-
-		if (bThemed)
-			rBtn.InflateRect(1, 1);
-		
-		// for now
-		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, nFlags, rClip);
-	}
-	else // unthemed combo style
-	{
-		if (bEnabled && bDown)
-		{
-			pDC->DrawEdge(rBtn, BDR_RAISEDOUTER, BF_RECT | BF_MIDDLE | BF_FLAT);
-		}
-		else
-		{
-			pDC->DrawEdge(rBtn, BDR_RAISEDOUTER, BF_ADJUST | BF_RECT | BF_MIDDLE);
-			pDC->DrawEdge(rBtn, BDR_RAISEDINNER, BF_RECT | BF_MIDDLE);
-		}
-	}
-
+	// note: we do not take account of ES_READONLY as the effect of this
+	// is not deterministic at this level so we assume derived classes or 
+	// parents have handled it
+	DWORD dwFlags = DFCS_ADJUSTRECT;
+	
+	Misc::SetFlag(dwFlags, DFCS_INACTIVE, !bEnabled);
+	Misc::SetFlag(dwFlags, DFCS_PUSHED, bDown);
+	Misc::SetFlag(dwFlags, DFCS_HOT, bHot);
+	
+	// Always draw button using Combo-stype theming for consistency
+	// across Windows XP, 7, 10 and 11
+	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, dwFlags);
+	
 	// drop menu arrow
 	if (eb.bDropMenu)
 	{
@@ -986,8 +946,6 @@ void CEnEdit::DrawButton(CDC* pDC, const CRect& rWindow, int nBtn, const CPoint&
 		if (pOld)
 			pDC->SelectObject(pOld);
 	}
-
-	pDC->ExcludeClipRect(rBtn);
 }
 
 void CEnEdit::DrawEnabledText(CDC* pDC, const CPoint& ptTopLeft, const CString& sText, 
@@ -1047,15 +1005,20 @@ LRESULT CEnEdit::OnHotChange(WPARAM wp, LPARAM lp)
 {
 	LRESULT lr = Default();
 
-	// wp has prev hot rect index
-	// lp has new hot rect index
-	ASSERT (((int)wp != -1 || (int)lp != -1) && (int)wp != (int)lp);
+	int nOldHot = (int)wp;
+	int nNewHot = (int)lp;
 
-	if (((int)wp != -1) && m_aButtons[wp].bEnabled)
-		RedrawButtonByIndex(wp);
+	ASSERT ((nOldHot != -1) || (nNewHot != -1) && (nNewHot != nOldHot));
 
-	if (((int)lp != -1) && m_aButtons[lp].bEnabled)
-		RedrawButtonByIndex(lp);
+	// Because this is a posted message we need to 
+	// check that the button indices are still valid
+	int nNumBtns = GetButtonCount();
+
+	if ((nOldHot >= 0) && (nOldHot < nNumBtns) && m_aButtons[nOldHot].bEnabled)
+		RedrawButtonByIndex(nOldHot);
+
+	if ((nNewHot >= 0) && (nNewHot < nNumBtns) && m_aButtons[nNewHot].bEnabled)
+		RedrawButtonByIndex(nNewHot);
 
 	return lr;
 }

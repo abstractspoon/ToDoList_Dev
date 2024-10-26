@@ -20,8 +20,8 @@ public:
 	CKanbanGroupByComboBox();
 	virtual ~CKanbanGroupByComboBox();
 
-	void ShowFixedColumns(BOOL /*bShow*/) { m_bShowFixedColumns = FALSE; } // never
-	void ExcludeAttribute(TDC_ATTRIBUTE nAttrib);
+	void ShowFixedColumns(TDC_ATTRIBUTE /*nAttribID*/) { m_nFixedColumnsAttribID = TDCA_NONE; } // never
+	void ExcludeAttribute(TDC_ATTRIBUTE nAttribID);
 
 // Attributes
 protected:

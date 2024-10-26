@@ -116,9 +116,7 @@ mkdir ..\..\Plugins\debug
 copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y
 copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
 
-unicode_debug\TDLTest.exe
-
-</Command>
+unicode_debug\TDLTest.exe</Command>
     </PostBuildEvent>
     <BuildLog>
       <Path>$(IntDir)$(MSBuildProjectName).log</Path>
@@ -228,7 +226,6 @@ unicode_release\TDLTest.exe
     <None Include="res\column_header.bmp" />
     <None Include="res\custattrib_toolbar.bmp" />
     <None Include="res\custattrib_toolbar_std.bmp" />
-    <None Include="res\custom_attrib_icons.ico" />
     <None Include="res\datetime_toolbar.bmp" />
     <None Include="res\datetime_toolbar_std.bmp" />
     <None Include="res\depend_link.ico" />
@@ -295,6 +292,8 @@ unicode_release\TDLTest.exe
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\reminder.ico" />
+    <Image Include="res\select_icon.ico" />
     <Image Include="res\reset.ico" />
     <Image Include="res\style_image.bmp" />
     <Image Include="res\style_para.bmp" />

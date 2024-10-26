@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "TaskSelectionDlg.h"
 #include "ToDoCtrl.h"
+#include "tdcmapping.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\dialoghelper.h"
@@ -55,11 +56,11 @@ CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAtt
 	{
 		// Default attributes
 		CTDCAttributeMap mapAttrib;
-		int nAttrib = prefs.GetProfileInt(sGroup, _T("Count"), 0);
+		int nAtt = prefs.GetProfileInt(sGroup, _T("Count"), 0);
 
-		while (nAttrib--)
+		while (nAtt--)
 		{
-			CString sKey = Misc::MakeKey(_T("att%d"), nAttrib);
+			CString sKey = Misc::MakeKey(_T("att%d"), nAtt);
 			TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)prefs.GetProfileInt(sGroup, sKey, TDCA_NONE);
 			ASSERT(nAttribID != TDCA_NONE);
 
@@ -68,11 +69,11 @@ CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAtt
 
 		// Custom attributes
 		CStringSet mapCustAttribIDs;
-		nAttrib = prefs.GetProfileInt(sGroup, _T("CustomCount"), 0);
+		nAtt = prefs.GetProfileInt(sGroup, _T("CustomCount"), 0);
 
-		while (nAttrib--)
+		while (nAtt--)
 		{
-			CString sKey = Misc::MakeKey(_T("custom%d"), nAttrib);
+			CString sKey = Misc::MakeKey(_T("custom%d"), nAtt);
 			CString sCustAttribID = prefs.GetProfileString(sGroup, sKey, 0);
 
 			mapCustAttribIDs.Add(sCustAttribID);

@@ -19,7 +19,9 @@ static char THIS_FILE[] = __FILE__;
 
 CEditAllocationsDlg::CEditAllocationsDlg(const WORKLOADITEM& wi, const CStringArray& aAllocTo, LPCTSTR szAllocTo, CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(CEditAllocationsDlg::IDD, pParent), m_lcAllocations(wi, aAllocTo)
+	CDialog(CEditAllocationsDlg::IDD, pParent), 
+	m_lcAllocations(wi, aAllocTo),
+	m_icon(IDR_WORKLOAD)
 {
 	//{{AFX_DATA_INIT(CEditAllocationsDlg)
 	//}}AFX_DATA_INIT
@@ -66,6 +68,8 @@ BOOL CEditAllocationsDlg::OnInitDialog()
 		m_lcAllocations.SetCurSel(nAllocTo, 1, FALSE);
 		m_lcAllocations.EditSelectedCell();
 	}
+
+	SetIcon(m_icon, FALSE);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

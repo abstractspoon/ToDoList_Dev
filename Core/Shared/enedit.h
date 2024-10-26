@@ -11,14 +11,17 @@
 #include "hottracker.h"
 #include "tooltipctrlex.h"
 #include "enimagelist.h"
+#include "GraphicsMisc.h"
 
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnEdit window
 
-const int DEF_BTNWIDTH = ::GetSystemMetrics(SM_CXHTHUMB);
-const int CALC_BTNWIDTH = -1;
+
+const int EE_BTNWIDTH_DEFAULT	= ::GetSystemMetrics(SM_CXHTHUMB);
+const int EE_BTNWIDTH_ICON		= (GraphicsMisc::ScaleByDPIFactor(16 + 2));
+const int EE_BTNWIDTH_CALCULATE = -1;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -41,14 +44,14 @@ class CEnEdit : public CMaskEdit
 
 // Construction
 public:
-	CEnEdit(BOOL bComboStyle = TRUE, LPCTSTR szMask = NULL, DWORD dwFlags = 0);
+	CEnEdit(LPCTSTR szMask = NULL, DWORD dwMaskFlags = 0);
 
-	BOOL AddButton(UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
-	BOOL AddButton(UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
-	BOOL AddButton(UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH);
-	BOOL InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
-	BOOL InsertButton(int nPos, UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH, LPCTSTR szFont = NULL);
-	BOOL InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth = DEF_BTNWIDTH );
+	BOOL AddButton(UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
+	BOOL AddButton(UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
+	BOOL AddButton(UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT);
+	BOOL InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
+	BOOL InsertButton(int nPos, UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
+	BOOL InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT );
 
 	BOOL DeleteButton(UINT nID);
 	void DeleteAllButtons();
@@ -70,7 +73,7 @@ public:
 	BOOL SetDropMenuButton(UINT nID, BOOL bDropMenu = TRUE);
 	UINT TrackPopupMenu(UINT nID, CMenu* pMenu, DWORD dwFlags = EETPM_BELOW);
 
-	void SetBorderWidth(int nWidth);
+	void EnableButtonPadding(BOOL bEnable = TRUE);
 	void FilterToolTipMessage(MSG* pMsg);
 
 // Attributes
@@ -94,14 +97,13 @@ protected:
 
 	CArray<EDITBTN, EDITBTN&> m_aButtons;
 	CHotTracker m_hotTrack;
-	int m_nBorderWidth;
+	int m_nBtnPadding;
 	CEnImageList m_ilBtns, m_ilDisabledBtns;
 	CToolTipCtrlEx m_tooltip;
 	int m_nDefaultBtn;
 
 	BOOL m_bFirstShow;
 	BOOL m_nButtonDown;
-	BOOL m_bComboStyle;
 	BOOL m_bParentIsCombo;
 
 // Overrides

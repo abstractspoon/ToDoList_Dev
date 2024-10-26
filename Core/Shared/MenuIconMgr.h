@@ -13,7 +13,7 @@
 
 #include <afxtempl.h>
 
-typedef CMap<UINT, UINT, HICON, HICON> CMapID2HICON;
+typedef CMap<UINT, UINT, HICON, HICON&> CMapID2HICON;
 
 class CMenuIconMgr : public CSubclassWnd  
 {
@@ -25,11 +25,15 @@ public:
 	BOOL IsInitialized() const;
 	void Release();
 
+	// Will overwrite existing icon
 	BOOL SetImage(UINT nCmdID, HICON hIcon); // hIcon will be cleaned up
+
+	// Will fail if an icon already exists
 	BOOL AddImage(UINT nCmdID, HICON hIcon); // hIcon will be copied
 	BOOL AddImage(UINT nCmdID, UINT nCmdIDToCopy);
 	BOOL AddImage(UINT nCmdID, const CImageList& il, int nImage);
 
+	// Will not change any icons already existing
 	int AddImages(const CToolBar& toolbar);
 	int AddImages(const CUIntArray& aCmdIDs, const CImageList& il, const CImageList* pILDisabled = NULL);
 	int AddImages(const CUIntArray& aCmdIDs, UINT nIDBitmap, COLORREF crMask);
@@ -41,9 +45,10 @@ public:
 		
 	BOOL HasImageID(UINT nCmdID) const;
 	BOOL ChangeImageID(UINT nCmdID, UINT nNewCmdID);
+	HICON GetIcon(UINT nCmdID) const { return LoadItemIcon(nCmdID, TRUE); }
 	
 	void DeleteImage(UINT nCmdID);
-	void ClearImages();
+	virtual void ClearImages();
 	BOOL HasImages() const;
 	BOOL DrawImage(HDC hDC, UINT nCmdID, const CPoint& ptTopLeft, BOOL bNormal = TRUE) const;
 	

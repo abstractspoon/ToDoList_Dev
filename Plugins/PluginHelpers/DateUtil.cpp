@@ -310,6 +310,19 @@ DateTime DateUtil::DateFromMonths(int nMonths)
 	return DateTime(nYear, nMonth, 1);
 }
 
+String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime, bool bISO)
+{
+	DWORD dwFlags = 0;
+	
+	if (bWithTime)
+		dwFlags |= (DHFD_TIME | DHFD_NOSEC);
+
+	if (bISO)
+		dwFlags |= DHFD_ISO;
+
+	return gcnew String(COleDateTimeRange(dateFrom.ToOADate(), dateTo.ToOADate()).Format(dwFlags));
+}
+
 TimeSpan DateUtil::TimeOnly(DateTime date)
 {
 	return (date - date.Date);

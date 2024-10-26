@@ -24,7 +24,7 @@ static char THIS_FILE[]=__FILE__;
 
 CTDLTaskDependencyEdit::CTDLTaskDependencyEdit() 
 	: 
-	CEnEdit(TRUE, _T("0123456789, "), ME_LOCALIZESEPARATOR),
+	CEnEdit(_T("0123456789, "), ME_LOCALIZESEPARATOR),
 	m_bNotifyingParent(FALSE)
 {
 }
@@ -273,12 +273,12 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	
 	if (m_bShowLeadInTimes)
 	{
-		AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_DROPLIST);
+		AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_COMBO);
 		AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (rList.Width() / 3));
 	}
 	else
 	{
-		AddCol(CEnString(IDS_TDLBC_DEPENDS), rList.Width(), ILCT_DROPLIST);
+		AddCol(CEnString(IDS_TDLBC_DEPENDS), rList.Width(), ILCT_COMBO);
 	}
 
 	SetAutoRowPrompt(CEnString(IDS_NEWDEPENDENCY_PROMPT));
@@ -463,7 +463,7 @@ void CTDLTaskDependencyListCtrl::PrepareTaskCombo(int nRow)
 	if ((nLVItem > 1) || m_aDependentTaskIDs.GetSize())
 	{
 		CMap<DWORD, DWORD, int, int&> mapCBItems;
-		CDialogHelper::BuildItemDataMap(m_cbTasks, mapCBItems);
+		CDialogHelper::BuildItemDataMapT(m_cbTasks, mapCBItems);
 
 		while (nLVItem--)
 		{

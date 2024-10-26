@@ -28,7 +28,6 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DayViewCreateTimeBlockDlg));
 			this.m_TaskLabel = new System.Windows.Forms.Label();
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
@@ -51,6 +50,7 @@
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.OK.Enabled = false;
 			this.OK.Location = new System.Drawing.Point(208, 228);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
@@ -92,6 +92,7 @@
 			this.m_TaskCombo.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
 			this.m_TaskCombo.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
 			this.m_TaskCombo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.m_TaskCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_TaskCombo.FormattingEnabled = true;
 			this.m_TaskCombo.Location = new System.Drawing.Point(132, 9);
 			this.m_TaskCombo.Name = "m_TaskCombo";
@@ -112,7 +113,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.m_TaskLabel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = global::DayViewUIExtension.Properties.Resources.dayview;
 			this.Name = "DayViewCreateTimeBlockDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;

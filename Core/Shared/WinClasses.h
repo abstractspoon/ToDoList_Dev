@@ -59,15 +59,18 @@ public:
 	static BOOL IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType = WCD_ANY);
 	static BOOL IsKindOf(HWND hWnd, const CRuntimeClass* pClass);
 
-	static BOOL IsEditControl(LPCTSTR szClass, BOOL bOrRichEdit = TRUE);
 	static BOOL IsEditControl(HWND hWnd, BOOL bOrRichEdit = TRUE);
-	static BOOL IsRichEditControl(LPCTSTR szClass);
 	static BOOL IsRichEditControl(HWND hWnd);
-	static BOOL IsComboBox(LPCTSTR szClass);
 	static BOOL IsComboBox(HWND hWnd);
-	static BOOL IsListBox(LPCTSTR szClass);
 	static BOOL IsListBox(HWND hWnd);
+	static BOOL IsWindowsFormsControl(HWND hWnd);
 	static BOOL IsChild(HWND hWnd);
+
+	static BOOL IsEditControl(LPCTSTR szClass, BOOL bOrRichEdit = TRUE);
+	static BOOL IsRichEditControl(LPCTSTR szClass);
+	static BOOL IsComboBox(LPCTSTR szClass);
+	static BOOL IsListBox(LPCTSTR szClass);
+	static BOOL IsWindowsFormsControl(LPCTSTR szClass);
 
 	static int GetStyleType(HWND hWnd, DWORD dwTypeMask);
 	

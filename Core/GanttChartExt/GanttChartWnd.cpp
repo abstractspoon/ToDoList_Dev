@@ -403,21 +403,25 @@ void CGanttChartWnd::SetUITheme(const UITHEME* pTheme)
 	
 	GraphicsMisc::VerifyDeleteObject(m_brBack);
 	
-	if (CThemed::IsAppThemed() && pTheme)
+	if (pTheme)
 	{
 		m_theme = *pTheme;
-		m_brBack.CreateSolidBrush(m_theme.crAppBackLight);
-
-		// intentionally set background colours to be same as ours
-		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
-		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-
-		// Rescale images because background colour has changed
-		if (GraphicsMisc::WantDPIScaling())
-			m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
-
 		m_ctrlGantt.SetUITheme(m_theme);
-		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
+
+		if (CThemed::IsAppThemed())
+		{
+			m_brBack.CreateSolidBrush(m_theme.crAppBackLight);
+
+			// intentionally set toolbar background colours to be same as ours
+			m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
+			m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+			// Rescale images because background colour has changed
+			if (GraphicsMisc::WantDPIScaling())
+				m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
+
+			m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
+		}
 	}
 }
 
@@ -583,13 +587,13 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			GANTTSORTCOLUMNS sort;
 
-			sort.cols[0].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttrib1);
+			sort.cols[0].nColumnID = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID1);
 			sort.cols[0].bAscending = (pData->sort.bAscending1 ? TRUE : FALSE);
 
-			sort.cols[1].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttrib2);
+			sort.cols[1].nColumnID = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID2);
 			sort.cols[1].bAscending = (pData->sort.bAscending2 ? TRUE : FALSE);
 
-			sort.cols[2].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttrib3);
+			sort.cols[2].nColumnID = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID3);
 			sort.cols[2].bAscending = (pData->sort.bAscending3 ? TRUE : FALSE);
 			
 			m_ctrlGantt.Sort(sort);
@@ -1035,9 +1039,9 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 LRESULT CGanttChartWnd::OnGanttNotifySortChange(WPARAM wp, LPARAM lp)
 {
 	// notify app
-	TDC_ATTRIBUTE nAttrib = CGanttCtrl::MapColumnToAttribute((GTLC_COLUMN)lp);
+	TDC_ATTRIBUTE nAttribID = CGanttCtrl::MapColumnToAttribute((GTLC_COLUMN)lp);
 
-	GetParent()->SendMessage(WM_IUI_SORTCHANGE, wp, nAttrib);
+	GetParent()->SendMessage(WM_IUI_SORTCHANGE, wp, nAttribID);
 
 	return 0L;
 }
@@ -1102,14 +1106,14 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 		case GTLCD_START:
 			if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
 			{
-				mod[0].nAttrib = TDCA_STARTDATE;
+				mod[0].nAttributeID = TDCA_STARTDATE;
 			}
 			break;
 			
 		case GTLCD_END:
 			if (CDateHelper::GetTimeT64(dtDue, mod[0].tValue))
 			{
-				mod[0].nAttrib = TDCA_DUEDATE;
+				mod[0].nAttributeID = TDCA_DUEDATE;
 			}
 			break;
 			
@@ -1126,15 +1130,15 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 				if (bStartSet && bDueSet)
 				{
 					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
-						mod[0].nAttrib = TDCA_OFFSETTASK;
+						mod[0].nAttributeID = TDCA_OFFSETTASK;
 				}
 				else
 				{
 					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue) &&
 						CDateHelper::GetTimeT64(dtDue, mod[1].tValue))
 					{
-						mod[0].nAttrib = TDCA_STARTDATE;
-						mod[1].nAttrib = TDCA_DUEDATE;
+						mod[0].nAttributeID = TDCA_STARTDATE;
+						mod[1].nAttributeID = TDCA_DUEDATE;
 						nNumMod = 2;
 					}
 				}
@@ -1142,7 +1146,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 			break;
 		}
 		
-		if (mod[0].nAttrib != TDCA_NONE)
+		if (mod[0].nAttributeID != TDCA_NONE)
 			return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumMod, (LPARAM)&mod[0]);
 	}
 

@@ -45,8 +45,8 @@ protected:
 	virtual bool InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 	virtual CString GetSpaceForNotes() const { return _T(""); }
 	virtual CString ExportSubtasks(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth) const;
-	virtual CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue) const = 0;
-	virtual CString FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const;
+	virtual CString FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel, const CString& sValue) const = 0;
+	virtual CString FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const;
 	virtual CString FormatTitle(const ITASKLISTBASE* /*pTasks*/) const { return _T(""); }
 	virtual CString FormatHeaderItem(TDC_ATTRIBUTE /*nAttrib*/, const CString& /*sAttribLabel*/) const { return _T(""); }
 	virtual CString FormatHeader(const ITASKLISTBASE* pTasks) const;
@@ -62,7 +62,7 @@ protected:
 private:
 	// helpers
 	CString ExportTaskAndSubtasks(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth) const;
-	CString FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, 
+	CString FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel, 
 							LPCTSTR szAttribName, LPCTSTR szAltAttribName = NULL) const;
 	CString FormatCustomAttributes(const ITASKLISTBASE* pTasks, HTASKITEM hTask) const;
 	CString FormatTime(double dTime, TDC_UNITS cUnits) const;

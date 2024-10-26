@@ -17,6 +17,7 @@
 #include "..\shared\fontcache.h"
 #include "..\shared\CalendarCtrlEx.h"
 #include "..\shared\MidnightTimer.h"
+#include "..\Shared\GraphicsMisc.h"
 
 #include "..\Interfaces\IUIExtension.h"
 #include "..\Interfaces\ITaskList.h"
@@ -48,12 +49,16 @@ public:
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
 	BOOL EnsureSelectionVisible();
 
+	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
+	BOOL SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND nCmd);
+
 	DWORD HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const;
+	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
+	BOOL CanGetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 
 	BOOL GetSelectedTaskLabelRect(CRect& rLabel) const;
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	BOOL GetSelectedTaskCustomDate(const CString& sCustAttribID, COleDateTime& date) const;
-	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
 	BOOL SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending);
 	DWORD GetSelectedTaskID() const;
 
@@ -114,6 +119,7 @@ protected:
 	int m_nMaxDayTaskCount;
 
 	mutable CCalContinuousDrawInfo m_ContinuousDrawInfo;
+	mutable CSortedTaskCalItemArray m_aSortedTasks;
 
 protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
@@ -163,7 +169,7 @@ protected:
 
 	BOOL CalcTaskCellRect(int nTask, const CCalendarCell* pCell, const CRect& rCell, CRect& rTask) const;
 	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const;
-	BOOL WantDrawTaskSelected(const TASKCALITEM* pTCI) const;
+	GM_ITEMSTATE GetTaskSelectedState(const TASKCALITEM* pTCI, BOOL bFocused) const;
 
 	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
@@ -184,6 +190,7 @@ protected:
 	int CalcRequiredTaskFontPointSize() const;
 	CFont* GetTaskFont(const TASKCALITEM* pTCI);
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
+	BOOL HitTestTaskIconRect(const TASKCALITEM* pTCI, const CRect& rTask, const CPoint& ptClient) const;
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
 	void RecalcCellHeaderDateFormats();
@@ -203,7 +210,6 @@ protected:
 	BOOL IsDragging() const;
 	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	double CalcDateDragTolerance() const;
-	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
 	void GetAllowableDragLimits(CRect& rLimits) const;
 	double GetSnapIncrement() const;
 	void FixupSelection(BOOL bScrollToTask);
@@ -211,6 +217,7 @@ protected:
 	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
 	BOOL ClearSelectedCustomDate();
+	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
 
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL IsExtensionItem(DWORD dwTaskID) const;

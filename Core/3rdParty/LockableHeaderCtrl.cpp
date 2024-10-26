@@ -19,24 +19,24 @@ END_MESSAGE_MAP()
 
 //////////////////
 
-void CLockableHeaderCtrl::LockColumn(int nColumn, BOOL bLock)
+void CLockableHeaderCtrl::LockColumn(int nCol, BOOL bLock)
 {
-	if (nColumn >= 0 && nColumn < GetItemCount())
+	if (nCol >= 0 && nCol < GetItemCount())
 	{
 		if (bLock)
-			m_mapLocked[nColumn] = 1;
+			m_mapLocked[nCol] = 1;
 		else
-			m_mapLocked.RemoveKey(nColumn);
+			m_mapLocked.RemoveKey(nCol);
 	}
 }
 
-BOOL CLockableHeaderCtrl::IsColumnLocked(int nColumn)
+BOOL CLockableHeaderCtrl::IsColumnLocked(int nCol)
 {
-	if (nColumn >= 0 && nColumn < GetItemCount())
+	if (nCol >= 0 && nCol < GetItemCount())
 	{
 		int nDummy;
 
-		return m_mapLocked.Lookup(nColumn, nDummy);
+		return m_mapLocked.Lookup(nCol, nDummy);
 	}
 
 	// else

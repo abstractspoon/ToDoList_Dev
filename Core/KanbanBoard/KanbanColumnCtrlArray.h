@@ -43,6 +43,7 @@ public:
 	DWORD HitTestTask(const CPoint& ptScreen) const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	void FilterToolTipMessage(MSG* pMsg);
+	void SetFullColumnColor(COLORREF crFull);
 
 	CSize CalcRequiredColumnSizeForImage() const;
 	BOOL CanSaveToImage() const;
@@ -55,7 +56,7 @@ public:
 
 	void Sort();
 	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	BOOL GroupBy(TDC_ATTRIBUTE nAttrib);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttribID);
 	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	void SetSelectedColumn(const CKanbanColumnCtrl* pSelList);

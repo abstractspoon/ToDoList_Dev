@@ -69,7 +69,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_STATISTICS          ICON    DISCARDABLE     "res\\icon1.ico"
+IDR_STATISTICS          ICON    DISCARDABLE     "res\\burndown.ico"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -138,7 +138,7 @@ END
 IDD_STATISTICS_DLG DIALOGEX 0, 0, 477, 281
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,120,8
     COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | 
@@ -165,8 +165,7 @@ BEGIN
     LTEXT           "&Graph colours",IDC_COLORSLABEL,7,23,344,8
     CONTROL         "List1",IDC_GRAPHCOLORS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
-                    LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,7,36,344,157
+                    LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,7,36,344,157
     CONTROL         "Include 'empty' values in Frequency Distribution graphs",
                     IDC_SHOWEMPTYINFREQUENCYCHARTS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,6,344,10
@@ -246,8 +245,8 @@ BEGIN
     IDS_DISPLAY_INCOMPLETE  "Incomplete Tasks"
     IDS_DISPLAY_REMAINING   "Days Remaining"
     IDS_TOOLTIP_INCOMPLETE  "%s\n%d Tasks"
-    IDS_TOOLTIP_REMAINING   "%s\n%d Estimated\n%d Actual"
-    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%d Estimated\n%d Spent"
+    IDS_TOOLTIP_REMAINING   "%s\n%.2f Estimated\n%.2f Actual"
+    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%.2f Estimated\n%.2f Spent"
     IDS_TOOLTIP_ATTRIBFREQUENCY "%s\n%d Tasks"
 END
 
@@ -265,7 +264,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TREND_NONE          "<none>"
+    IDS_NONE                "<none>"
     IDS_FREQUENCYDIST       "Frequency Distributions"
     IDS_TIMESERIES          "Time Series"
     IDS_FREQUENCY_CATEGORY  "Category Frequency"
@@ -286,6 +285,14 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_BURNDOWN_PREF        "\nGraphs Preferences"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_MINMAX              "Min Max"
+    IDS_DISPLAY_DUEDONEDATES "Due/Completion Dates"
+    IDS_TOOLTIP_DUEDONEDATES "%s\nDue %s\nCompleted %s"
+    IDS_CUSTOMATTRIB_GRAPH  "%s (Custom)"
 END
 
 #endif    // English (Australia) resources

@@ -68,7 +68,7 @@ void CMonthCheckComboBox::InitCombo()
 
 	for (int nMonth = 1; nMonth <= 12; nMonth++)
 	{
-		CDialogHelper::AddString(*this, 
+		CDialogHelper::AddStringT(*this, 
 								 CDateHelper::GetMonthName(nMonth, FALSE), 
 								 CDateHelper::MapMonthIndexToDHMonth(nMonth));
 	}
@@ -76,10 +76,10 @@ void CMonthCheckComboBox::InitCombo()
 
 DWORD CMonthCheckComboBox::GetSelectedMonths() const
 {
-	return CDialogHelper::GetSelectedItemData(*this);
+	return CDialogHelper::GetSelectedItemDataT(*this);
 }
 
 int CMonthCheckComboBox::SetSelectedMonths(DWORD dwMonths)
 {
-	return CDialogHelper::SelectItemByData(*this, dwMonths);
+	return CDialogHelper::SelectItemByDataT(*this, dwMonths);
 }

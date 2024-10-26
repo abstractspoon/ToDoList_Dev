@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Resources;
 using System.IO;
 using System.Net;
@@ -976,6 +977,17 @@ namespace SpreadsheetContentControl
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadFullSelectedNotFocused, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.GridText, SystemColors.WindowText);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.GridBackground, SystemColors.Window);
+
+			// ReoGrid already does a reasonable 'Classic Theme' so we just need
+			// to handle the unfocused colours on a regular theme
+			if (VisualStyleRenderer.IsSupported)
+			{
+				var fillColor = GridControl.ControlStyle[ControlAppearanceColors.SelectionFill];
+				GridControl.ControlStyle.SetColor(ControlAppearanceColors.SelectionNotFocusedFill, new unvell.ReoGrid.Graphics.SolidColor(40, fillColor));
+
+				var borderColor = GridControl.ControlStyle[ControlAppearanceColors.SelectionBorder];
+				GridControl.ControlStyle.SetColor(ControlAppearanceColors.SelectionNotFocusedBorder, new unvell.ReoGrid.Graphics.SolidColor(80, borderColor));
+			}
 
 			// Focused colours
 			backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);

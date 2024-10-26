@@ -80,24 +80,14 @@ const UINT BROWSEBTN = 0x31;
 
 IMPLEMENT_DYNAMIC(CFileEdit, CEnEdit)
 
-CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter) : 
-					CEnEdit(nStyle & FES_COMBOSTYLEBTN),
-					m_nStyle(nStyle), 
-					m_bTipNeeded(FALSE),
-					m_sFilter(szFilter),
-					m_sCurFolder(FileMisc::GetCwd())
+CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter) 
+	: 
+	m_nStyle(nStyle),
+	m_bTipNeeded(FALSE),
+	m_sFilter(szFilter),
+	m_sCurFolder(FileMisc::GetCwd()),
+	m_fileIcon(FALSE)
 {
-	if (!(m_nStyle & FES_NOBROWSE))
-	{
-		CString sTip(s_sBrowseBtnTip.IsEmpty() ? FILEEDIT_BROWSE : s_sBrowseBtnTip);
-
-		// Default images take precedence
-		if (s_hBrowseImage)
-			AddButton(FEBTN_BROWSE, s_hBrowseImage, sTip);
-		else
-			AddButton(FEBTN_BROWSE, BROWSEBTN, sTip, CALC_BTNWIDTH, _T("Wingdings"));
-	}
-
 	if (m_nStyle & FES_GOBUTTON)
 	{
 		BOOL bFolders = (m_nStyle & FES_FOLDERS);
@@ -106,7 +96,18 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter) :
 		if (s_hGoImage)
 			AddButton(FEBTN_GO, s_hGoImage, sTip);
 		else
-			AddButton(FEBTN_GO, VIEWBTN, sTip, CALC_BTNWIDTH, _T("Wingdings"));
+			AddButton(FEBTN_GO, VIEWBTN, sTip, EE_BTNWIDTH_CALCULATE, _T("Wingdings"));
+	}
+
+	if (!(m_nStyle & FES_NOBROWSE))
+	{
+		CString sTip(s_sBrowseBtnTip.IsEmpty() ? FILEEDIT_BROWSE : s_sBrowseBtnTip);
+
+		// Default images take precedence
+		if (s_hBrowseImage)
+			AddButton(FEBTN_BROWSE, s_hBrowseImage, sTip);
+		else
+			AddButton(FEBTN_BROWSE, BROWSEBTN, sTip, EE_BTNWIDTH_CALCULATE, _T("Wingdings"));
 	}
 
 	// mask
@@ -118,7 +119,6 @@ CFileEdit::CFileEdit(int nStyle, LPCTSTR szFilter) :
 
 CFileEdit::~CFileEdit()
 {
-	ClearImageIcon();
 }
 
 
@@ -152,13 +152,16 @@ void CFileEdit::EnableStyle(int nStyle, BOOL bEnable)
 	else
 		m_nStyle &= ~nStyle;
 
+	if (nStyle & FES_DISPLAYIMAGETHUMBNAILS)
+		m_fileIcon.Clear();
+
 	if (GetSafeHwnd())
 		SendMessage(WM_NCPAINT);
 }
 
 BOOL CFileEdit::OnChange() 
 {
-	ClearImageIcon();
+	m_fileIcon.Clear();
 
 	EnableButton(FEBTN_GO, GetWindowTextLength());
 	SendMessage(WM_NCPAINT);
@@ -195,7 +198,7 @@ LRESULT CFileEdit::OnPaste(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CFileEdit::OnSetReadOnly(BOOL bReadOnly)
 {
-	EnableButton(FEBTN_BROWSE, !bReadOnly && IsWindowEnabled());
+	EnableButton(FEBTN_BROWSE, !bReadOnly);
 }
 
 void CFileEdit::OnPaint() 
@@ -259,29 +262,29 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	sFilePath.TrimLeft();
 	sFilePath.TrimRight();
 
-	// Background color
-	CRect rIcon = GetIconScreenRect();
-
+	BOOL bReleaseDC = FALSE;
+	CRect rRef(rWindow);
+	
 	if (m_bParentIsCombo)
 	{
 		// Draw to parent DC
-		CWindowDC dc(GetParent());
+		pDC = GetParent()->GetWindowDC();
+		bReleaseDC = TRUE;
 
-		CRect rParent;
-		GetParent()->GetWindowRect(rParent);
-
-		rIcon.OffsetRect(-rParent.TopLeft());
-		::FillRect(dc, rIcon, GetBackgroundBrush(pDC));
-
-		DrawFileIcon(&dc, sFilePath, rIcon);
+		GetParent()->GetWindowRect(rRef);
 	}
-	else
-	{
-		rIcon.OffsetRect(-rWindow.TopLeft());
-		::FillRect(*pDC, rIcon, GetBackgroundBrush(pDC));
 
-		DrawFileIcon(pDC, sFilePath, rIcon);
-	}
+	CRect rIcon = GetIconScreenRect();
+	rIcon.OffsetRect(-rRef.TopLeft());
+
+	CRect rBkgnd(rIcon);
+	rBkgnd.InflateRect(1, 1);
+
+	::FillRect(*pDC, rBkgnd, GetBackgroundBrush(pDC));
+	DrawFileIcon(pDC, sFilePath, rIcon);
+
+	if (bReleaseDC)
+		GetParent()->ReleaseDC(pDC);
 }
 
 HBRUSH CFileEdit::GetBackgroundBrush(CDC* pDC) const
@@ -301,75 +304,69 @@ HBRUSH CFileEdit::GetBackgroundBrush(CDC* pDC) const
 
 void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon)
 {
+	DrawFileIcon(pDC, 
+				 sFilePath, 
+				 rIcon.TopLeft(), 
+				 m_fileIcon,
+				 this,
+				 m_sCurFolder,
+				 HasStyle(FES_DISPLAYIMAGETHUMBNAILS),
+				 HasStyle(FES_FOLDERS));
+}
+
+BOOL CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CPoint& ptIcon, CIconCache& fileIcons,
+							 CWnd* pRefWnd, LPCTSTR szCurrentFolder, BOOL bImageThumbnails, BOOL bFolders)
+{
+	CString sFullPath = Misc::GetUnquoted(sFilePath, 0);
+
 	if (sFilePath.IsEmpty())
-		return;
+		return FALSE;
 
-	if (HasStyle(FES_FOLDERS))
-	{
-		CFileIcons::DrawFolder(pDC, rIcon.TopLeft());
-		return;
-	}
-
-	int nImage = -1;
-
+	if (Misc::IsEmpty(szCurrentFolder))
+		FileMisc::MakeFullPath(sFullPath);
+	else
+		FileMisc::MakeFullPath(sFullPath, szCurrentFolder);
+	
 	// try parent for override
-	HICON hIcon = (HICON)GetParent()->SendMessage(WM_FE_GETFILEICON, GetDlgCtrlID(), (LPARAM)(LPCTSTR)sFilePath);
-
-	if (hIcon)
+	if (pRefWnd)
 	{
-		ClearImageIcon();
-
-		VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, IMAGE_SIZE, IMAGE_SIZE, 0, NULL, DI_NORMAL));
-		return;
+		HICON hIcon = (HICON)pRefWnd->GetParent()->SendMessage(WM_FE_GETFILEICON, pRefWnd->GetDlgCtrlID(), (LPARAM)(LPCTSTR)sFullPath);
+			
+		if (CIcon(hIcon, FALSE).Draw(pDC, ptIcon))
+			return TRUE;
 	}
 
-	// Make fullpath unless it's a URL
-	CString sFullPath(sFilePath);
-
-	if (!WebMisc::IsURL(sFilePath))
-		FileMisc::MakeFullPath(sFullPath, m_sCurFolder);
-
-	if (HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sFullPath))
+	if (bFolders && CFileIcons::DrawFolder(pDC, ptIcon))
 	{
-		if (m_ilImageIcon.GetSafeHandle() == NULL)
-			VERIFY(m_ilImageIcon.Create(IMAGE_SIZE, IMAGE_SIZE, (ILC_COLOR32 | ILC_MASK), 1, 1));
+		return TRUE;
+	}
 
-		if (m_ilImageIcon.GetImageCount() == 0)
+	if (WebMisc::IsURL(sFullPath) && CFileIcons::Draw(pDC, sFullPath, ptIcon))
+	{
+		return TRUE;
+	}
+
+	// try image content
+	if (bImageThumbnails && CEnBitmap::IsSupportedImageFile(sFullPath))
+	{
+		if (!fileIcons.HasIcon(sFullPath))
 		{
-			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE));
-
-			if (icon.IsValid())
-				m_ilImageIcon.Add(icon);
+			VERIFY(fileIcons.Add(sFullPath, CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), IMAGE_SIZE, IMAGE_SIZE)));
 		}
 
-		if (m_ilImageIcon.GetImageCount() > 0)
-		{
-			VERIFY(m_ilImageIcon.Draw(pDC, 0, rIcon.TopLeft(), ILD_TRANSPARENT));
-			return;
-		}
+		if (fileIcons.Draw(pDC, sFullPath, ptIcon))
+			return TRUE;
 	}
 
 	// All else
-	CFileIcons::Draw(pDC, sFullPath, rIcon.TopLeft());
+	return CFileIcons::Draw(pDC, sFullPath, ptIcon);
 }
 
-HICON CFileEdit::GetFileIcon(LPCTSTR szPath)
+BOOL CFileEdit::DoBrowse(LPCTSTR szFilePath)
 {
-	return CFileIcons::ExtractIcon(szPath);
-}
+	if (szFilePath)
+		SetWindowText(szFilePath);
 
-void CFileEdit::ClearImageIcon()
-{
-	if (m_ilImageIcon.GetSafeHandle())
-	{
-		ASSERT(m_ilImageIcon.GetImageCount() <= 1);
-
-		while (m_ilImageIcon.Remove(0));
-	}
-}
-
-BOOL CFileEdit::DoBrowse()
-{
 	return CEnEdit::ClickButton(FEBTN_BROWSE);
 }
 

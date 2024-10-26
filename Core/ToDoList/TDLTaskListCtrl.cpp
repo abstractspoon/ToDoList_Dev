@@ -8,6 +8,7 @@
 #include "todoctrldata.h"
 #include "tdcstatic.h"
 #include "tdcmsg.h"
+#include "tdcmapping.h"
 #include "tdcimagelist.h"
 
 #include "..\shared\graphicsmisc.h"
@@ -96,6 +97,7 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 
 	m_nGroupBy(TDCC_NONE),
 	m_bSortGroupsAscending(TRUE),
+	m_bSortNoneGroupBelow(FALSE),
 	m_bDeletingGroupHeaders(FALSE),
 	m_crGroupHeaderBkgnd(CLR_NONE)
 {
@@ -290,7 +292,7 @@ DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
 }
 
-LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
@@ -336,7 +338,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 		if (hwndList == m_lcColumns)
 		{
 			// columns handled by base class
-			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD);
+			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD, aColOrder, aColWidths);
 		}
 
 		switch (pLVCD->nmcd.dwDrawStage)
@@ -432,23 +434,34 @@ UINT CTDLTaskListCtrl::GetGroupCount() const
 	return (IsGrouped() ? m_mapGroupHeaders.GetCount() : 0);
 }
 
-BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending)
+BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending, BOOL bSortNoneGroupBelow)
 {
 	if (!CanGroupBy(nGroupBy, TRUE))
 		return FALSE;
 
-	BOOL bGroupChange = (nGroupBy != m_nGroupBy);
-	BOOL bSortChange = ((bSortGroupsAscending != -1) && (bSortGroupsAscending != m_bSortGroupsAscending));
+	BOOL bGroupChange = FALSE, bSortChange = FALSE;
 
-	if (!bGroupChange && !bSortChange)
-		return TRUE;
-
-	m_nGroupBy = nGroupBy;
-
-	if (bSortChange)
+	if (nGroupBy != m_nGroupBy)
+	{
+		m_nGroupBy = nGroupBy;
+		bGroupChange = TRUE;
+	}
+	
+	if ((bSortGroupsAscending != -1) && (bSortGroupsAscending != m_bSortGroupsAscending))
+	{
 		m_bSortGroupsAscending = bSortGroupsAscending;
+		bSortChange = TRUE;
+	}
 
-	if (GetSafeHwnd())
+	if ((bSortNoneGroupBelow != -1) && (bSortNoneGroupBelow != m_bSortNoneGroupBelow))
+	{
+		m_bSortNoneGroupBelow = bSortNoneGroupBelow;
+
+		// 'sort <none> below' has no effect without 'sort ascending'
+		bSortChange = m_bSortGroupsAscending;
+	}
+
+	if ((bGroupChange || bSortChange) && GetSafeHwnd())
 	{
 		if (bGroupChange)
 			UpdateGroupHeaders();
@@ -496,16 +509,31 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) co
 	return FALSE;
 }
 
-void CTDLTaskListCtrl::SetSortGroupsAscending(BOOL bAscending)
+BOOL CTDLTaskListCtrl::SetSortGroupsAscending(BOOL bAscending)
 {
-	if ((m_bSortGroupsAscending && !bAscending) ||
-		(!m_bSortGroupsAscending && bAscending))
-	{
-		m_bSortGroupsAscending = bAscending;
+	if (!Misc::StateChanged(m_bSortGroupsAscending, bAscending))
+		return FALSE;
 
-		if ((GetGroupCount() > 1) && GetSafeHwnd())
-			Resort(FALSE);
-	}
+	m_bSortGroupsAscending = bAscending;
+
+	if ((GetGroupCount() > 1) && GetSafeHwnd())
+		Resort(FALSE);
+
+	return TRUE;
+}
+
+BOOL CTDLTaskListCtrl::SetSortNoneGroupBelow(BOOL bBelow)
+{
+	if (!Misc::StateChanged(m_bSortNoneGroupBelow, bBelow))
+		return FALSE;
+
+	m_bSortNoneGroupBelow = bBelow;
+
+	// 'sort <none> below' has no effect without 'sort ascending'
+	if (m_bSortGroupsAscending && HasNoneGroup() && GetSafeHwnd())
+		Resort(FALSE);
+
+	return TRUE;
 }
 
 void CTDLTaskListCtrl::OnBuildComplete()
@@ -726,6 +754,28 @@ CString CTDLTaskListCtrl::FormatTaskGroupHeaderText(DWORD dwTaskID) const
 	return Misc::Format(_T("%s: %s"), GetGroupByColumnName(), sGroupBy);
 }
 
+BOOL CTDLTaskListCtrl::HasNoneGroup() const
+{
+	if (!IsGrouped())
+		return FALSE;
+
+	CString sGroupBy;
+	DWORD dwUnused;
+
+	POSITION pos = m_mapGroupHeaders.GetStartPosition();
+
+	while (pos)
+	{
+		m_mapGroupHeaders.GetNextAssoc(pos, dwUnused, sGroupBy);
+
+		if (sGroupBy.IsEmpty())
+			return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
 CString CTDLTaskListCtrl::GetGroupByColumnName() const
 {
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
@@ -741,7 +791,7 @@ CString CTDLTaskListCtrl::GetGroupByColumnName() const
 
 	while (nCol--)
 	{
-		if (COLUMNS[nCol].nColID == m_nGroupBy)
+		if (COLUMNS[nCol].nColumnID == m_nGroupBy)
 			return CEnString(COLUMNS[nCol].nIDLongName);
 	}
 
@@ -799,7 +849,7 @@ BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
 
 	if (IsGrouped())
 	{
-		m_aGroupSortCols[0].nBy = m_nGroupBy;
+		m_aGroupSortCols[0].nColumnID = m_nGroupBy;
 		m_aGroupSortCols[0].bAscending = TRUE;
 
 		int nNumCols = 1;
@@ -808,7 +858,7 @@ BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
 		// match the group column
 		for (int nCol = 0; nCol < ss.nNumCols; nCol++)
 		{
-			TDC_COLUMN nSortCol = ss.pCols[nCol].nBy;
+			TDC_COLUMN nSortCol = ss.pCols[nCol].nColumnID;
 
 			if (nSortCol != m_nGroupBy)
 			{
@@ -850,23 +900,33 @@ int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 								   const TDSORTCOLUMN& sort,
 								   const TDSORTFLAGS& flags) const
 {
-	if (IsGrouped() && (sort.nBy == m_nGroupBy))
+	if (IsGrouped() && (sort.nColumnID == m_nGroupBy))
 	{
 		CString sTask1Text = GetTaskGroupValue(lParam1);
 		CString sTask2Text = GetTaskGroupValue(lParam2);
 
 		int nCompare = Misc::NaturalCompare(sTask1Text, sTask2Text);
 
-		// If the items matched then they are part of the 
-		// same group. And if either item is the group item
-		// then always sort that item higher
-		if (nCompare == 0)
+		if (nCompare == 0) // Same group
 		{
+			// Always sort the group header item higher
 			if (IsGroupHeaderTask(lParam1))
 				return -1;
 			
 			if (IsGroupHeaderTask(lParam2))
 				return 1;
+		}
+		else  // different groups
+		{
+			// 'sort <none> below' has no effect without 'sort ascending'
+			if (m_bSortNoneGroupBelow && m_bSortGroupsAscending)
+			{
+				if (sTask1Text.IsEmpty())
+					return 1;
+
+				if (sTask2Text.IsEmpty())
+					return -1;
+			}
 		}
 
 		return (m_bSortGroupsAscending ? nCompare : -nCompare);
@@ -1528,17 +1588,17 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 			ASSERT(IsListItemSelected(m_lcTasks, nItem)); 
 
 			DWORD dwTaskID = GetTaskID(nItem);
-			TDC_COLUMN nClickCol = TDCC_NONE;
+			TDC_COLUMN nColID = TDCC_NONE;
 
 			if (!bDblClk)
 			{
 				if (!IsColumnShowing(TDCC_DONE) && HasHitTestFlag(nFlags, LVHT_ONITEMSTATEICON))
 				{
-					nClickCol = TDCC_DONE;
+					nColID = TDCC_DONE;
 				}
 				else if (!IsColumnShowing(TDCC_ICON) && HasHitTestFlag(nFlags, LVHT_ONITEMICON))
 				{
-					nClickCol = TDCC_ICON;
+					nColID = TDCC_ICON;
 				}
 			}
 			else
@@ -1552,15 +1612,14 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 
 				if (rItem.PtInRect(pt))
 				{
-					nClickCol = TDCC_CLIENT;
+					nColID = TDCC_CLIENT;
 				}
 			}
 
-			if ((nClickCol != TDCC_NONE) && !SelectionHasLocked(FALSE))
+			if ((nColID != TDCC_NONE) && SelectionHasUnlocked())
 			{
 				// forward the click
-				NotifyParentOfColumnEditClick(nClickCol, dwTaskID);
-
+				NotifyParentOfColumnEditClick(nColID, dwTaskID);
 				return TRUE;
 			}
 		}
@@ -1618,27 +1677,32 @@ BOOL CTDLTaskListCtrl::GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT 
 
 BOOL CTDLTaskListCtrl::GetItemTitleRect(int nItem, TDC_LABELRECT nArea, CRect& rect, CDC* pDC, LPCTSTR szTitle) const
 {
-	// basic title rect
-	const_cast<CListCtrl*>(&m_lcTasks)->GetItemRect(nItem, rect, LVIR_LABEL);
-	int nHdrWidth = m_hdrTasks.GetItemWidth(0);
-	
 	switch (nArea)
 	{
 	case TDCTR_BKGND:
-		if (pDC && szTitle)
 		{
-			rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
-			rect.right = min(rect.right + 3, nHdrWidth);
-		}
-		else
-		{
-			ASSERT(!pDC && !szTitle);
-			rect.right = nHdrWidth;
+			// Basic title rect
+			VERIFY(const_cast<CListCtrl*>(&m_lcTasks)->GetItemRect(nItem, rect, LVIR_LABEL));
+
+			// Available width
+			CRect rAvail;
+			m_lcTasks.GetClientRect(rAvail);
+
+			if (pDC && szTitle)
+			{
+				rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
+				rect.right = min(rect.right, rAvail.right);
+			}
+			else
+			{
+				ASSERT(!pDC && !szTitle);
+				rect.right = rAvail.right;
+			}
 		}
 		return TRUE;
 		
 	case TDCTR_TEXT:
-		if (GetItemTitleRect(nItem, TDCTR_BKGND, rect, pDC, szTitle)) // recursive call
+		if (GetItemTitleRect(nItem, TDCTR_BKGND, rect, pDC, szTitle)) // RECURSIVE CALL
 		{
 			rect.left += TITLE_BORDER_OFFSET;
 			return TRUE;
@@ -1646,7 +1710,7 @@ BOOL CTDLTaskListCtrl::GetItemTitleRect(int nItem, TDC_LABELRECT nArea, CRect& r
 		break;
 		
 	case TDCTR_EDIT:
-		if (GetItemTitleRect(nItem, TDCTR_BKGND, rect)) // recursive call
+		if (GetItemTitleRect(nItem, TDCTR_BKGND, rect)) // RECURSIVE CALL
 		{
 			rect.top--;
 			
@@ -1902,7 +1966,7 @@ DWORD CTDLTaskListCtrl::GetTrueTaskID(int nItem) const
 	return m_data.GetTrueTaskID(dwTaskID); 
 }
 
-int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
+int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL /*bOrdered*/) const
 {
 	DWORD dwFocusID;
 	int nNumIDs = GetSelectedTaskIDs(aTaskIDs, dwFocusID);

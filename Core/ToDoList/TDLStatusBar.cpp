@@ -1,8 +1,9 @@
 #include "stdafx.h"
+#include "resource.h"
 #include "TDLStatusBar.h"
 #include "ToDoItem.h"
-#include "resource.h"
 #include "FilteredToDoCtrl.h"
+#include "tdcmapping.h"
 
 #include "..\shared\Localizer.h"
 #include "..\shared\Misc.h"
@@ -340,7 +341,7 @@ CString CTDLStatusBar::FormatTime(double dAmount, TDC_UNITS nUnits, BOOL bHMS)
 		return CTimeHelper().FormatTimeHMS(dAmount, nTHUnits);
 
 	// else
-	return CTimeHelper().FormatTime(dAmount, nTHUnits, 2);
+	return CTimeHelper::FormatTime(dAmount, nTHUnits, 2);
 }
 
 void CTDLStatusBar::SetPaneTextAndTooltip(UINT nIDPane, UINT nIDTextFormat, const CString& sTextValue, UINT nIDTipFormat, LPCTSTR szTipValue)

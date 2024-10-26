@@ -176,15 +176,11 @@ public:
 	BOOL SetReportDetails(LPCTSTR szTitle, const COleDateTime& date = 0.0);
 	void SetAvailableAttributes(const CTDCAttributeMap& mapAttrib);
 
-	int SetSelectedTaskIDs(const CDWordArray& aSelTaskIDs, BOOL bSelect = TRUE);
-	int GetSelectedTaskIDs(CDWordArray& aSelTaskIDs) const;
-	void RemoveNonSelectedTasks();
-
 	// Task-related methods -----------
 	COleDateTime GetTaskLastModifiedOle(HTASKITEM hTask) const;
 	COleDateTime GetTaskDoneDateOle(HTASKITEM hTask) const;
-	COleDateTime GetTaskDueDateOle(HTASKITEM hTask) const;
-	COleDateTime GetTaskStartDateOle(HTASKITEM hTask) const;
+	COleDateTime GetTaskDueDateOle(HTASKITEM hTask, BOOL bCalc = FALSE) const;
+	COleDateTime GetTaskStartDateOle(HTASKITEM hTask, BOOL bCalc = FALSE) const;
 	COleDateTime GetTaskCreationDateOle(HTASKITEM hTask) const;
 
 	BOOL SetTaskID(HTASKITEM hTask, unsigned long nID);
@@ -192,7 +188,7 @@ public:
 	int GetTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents = TRUE) const;
 
 	BOOL SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi);
-	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const;
+	BOOL GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bCalc = FALSE) const;
 
 	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, DWORD dwFlags) const;
 	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi,
@@ -248,18 +244,13 @@ public:
 	BOOL GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CString& sType) const;
 	BOOL SetTaskHtmlComments(HTASKITEM hTask, const CString& sContent, BOOL bForTransform);
 
-	int GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData) const;
+	int GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData, BOOL bCalc = FALSE) const;
 	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CTDCCustomAttributeDataMap& mapData);
 	BOOL SetTaskCustomAttributeData(HTASKITEM hTask, const CString& sCustAttribID, const TDCCADATA& data, BOOL bCalc = FALSE);
 	
 	BOOL DeleteTaskAttributes(HTASKITEM hTask); // deletes all but child tasks
 	BOOL GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, CString& sValue) const;
 	BOOL SetTaskIsParent(HTASKITEM hTask);
-
-	BOOL SelectTask(DWORD dwTaskID, BOOL bSelect = TRUE);
-	BOOL SelectTask(HTASKITEM hTask, BOOL bSelect = TRUE);
-	BOOL IsTaskSelected(HTASKITEM hTask) const;
-	BOOL IsTaskSelected(DWORD dwTaskID) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList18 implementation 
@@ -269,14 +260,16 @@ public:
 
 	double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const;
 
+	unsigned long GetCustomAttributeFeatures(int nIndex) const;
+
 	//////////////////////////////////////////////////////////////
 	// ITaskList17 implementation 
 	LPCTSTR GetFileName(bool bFullPath) const;
 
 	bool IsTaskRecurring(HTASKITEM hTask) const;
-	bool IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const;
-	bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const;
-	LPCTSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const;
+	bool IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const;
+	bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay) const;
+	LPCTSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay) const;
 
 	bool SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate);
 	double GetTaskCost(HTASKITEM hTask, bool bCalc, bool& bIsRate) const;
@@ -547,10 +540,10 @@ protected:
 	DWORD m_dwNextUniqueID;
 	BOOL m_bISODates;
 	CString m_sHtmlImgFolder;
-	CTDCAttributeMap m_mapReadableAttrib;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 	mutable CMap <DWORD, DWORD, HTASKITEM, HTASKITEM&> m_mapHandles;
+	mutable CTDCAttributeMap m_mapReadableAttrib;
 
 protected:
 	void BuildHandleMap() const;
@@ -559,9 +552,7 @@ protected:
 	void RemoveTaskFromMap(const CXmlItem* pXITask) const;
 	CXmlItem* TaskFromHandle(HTASKITEM hTask) const;
 	void AddTaskIDs(HTASKITEM hTask, BOOL bIncParents, CDWordArray& aTaskIDs) const;
-	int GetSelectedTaskIDs(HTASKITEM hTask, CDWordArray& aSelTaskIDs) const;
-	void RemoveNonSelectedTasks(HTASKITEM hTask);
-	void CleanUp(HTASKITEM hTask = NULL);
+	BOOL CleanUp(HTASKITEM hTask = NULL);
 	BOOL WantGetTaskAttribute(HTASKITEM hSrcTask, LPCTSTR szSrcAttrib, TODOITEM& tdiDest, TDC_ATTRIBUTE nDestAttrib, 
 							  const CTDCAttributeMap& mapAttribs, DWORD dwFlags) const;
 
@@ -578,6 +569,7 @@ protected:
 	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
 	BOOL DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
 	CString FormatDate(const COleDateTime& date) const;
+	void LoadAvailableAttributes() const;
 
 	const CXmlItem* GetCustomAttribDefs(int nIndex = 0) const;
 	const CXmlItem* GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const;
@@ -597,6 +589,12 @@ protected:
 	bool SetTaskDouble(HTASKITEM hTask, const CString& sDoubleItem, double dVal);
 	bool SetTaskTime(HTASKITEM hTask, const CString& sTimeItem, double dTime,
 					 const CString& sUnitsItem, TDC_UNITS cUnits);
+
+	BOOL MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi,
+							 const CTDCAttributeMap& mapAttribs,
+							 const CTDCCustomAttribDefinitionArray& aCustAttribs,
+							 DWORD dwFlags,
+							 bool bCalc) const;
 
 	// for handling arrays at *task* level
 	bool AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem, BOOL bAllowEmpty);
@@ -623,7 +621,7 @@ protected:
 	static BOOL SetMetaData(CXmlItem* pXItem, const CMapStringToString& mapMetaData);
 	static int GetMetaData(const CXmlItem* pXItem, CMapStringToString& mapMetaData);
 	static BOOL OffsetDate(COleDateTime& date, int nNumDays);
-	static LPCTSTR GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay);
+	static LPCTSTR GetAttribTag(TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay);
 	static BOOL WantMergeCustomAttribute(LPCTSTR szAttribID, TDCCADATA dataSrc, TODOITEM& tdiDest, DWORD dwFlags);
 };
 

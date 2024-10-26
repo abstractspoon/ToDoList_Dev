@@ -1567,7 +1567,7 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 		sDow.Empty();
 
 	// Time
-	if (dwFlags & DHFD_TIME)
+	if ((dwFlags & DHFD_TIME) && (!(dwFlags & DHFD_HASTIME) || DateHasTime(date))) 
 		sTime = CTimeHelper::FormatClockTime(st.wHour, st.wMinute, st.wSecond, !(dwFlags & DHFD_NOSEC), (dwFlags & DHFD_ISO));
 	else 
 		sTime.Empty();

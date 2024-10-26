@@ -69,7 +69,7 @@ CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent,
 			{
 			case FD_NEXTNDAYS:
 				{
-					CEnEdit* pEdit = new CEnEdit(TRUE, _T("0123456789"));
+					CEnEdit* pEdit = new CEnEdit(_T("0123456789"));
 					CIcon iconUpdate(IDI_UPDATE_FILTER, 16);
 
 					pEdit->AddButton(1, iconUpdate, CEnString(IDS_TDC_UPDATEFILTER_TIP));
@@ -262,9 +262,9 @@ int CTDCCustomFilterAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomA
 
 	UINT nID = IDC_FIRST_CUSTOMFILTERFIELD;
 
-	for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < aAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAtt];
 
 		// don't add unwanted controls
 		if (!WantControl(attribDef))
@@ -272,7 +272,7 @@ int CTDCCustomFilterAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomA
 
 		CUSTOMATTRIBCTRLITEM ctrl;
 
-		ctrl.nAttrib = attribDef.GetAttributeID();
+		ctrl.nAttributeID = attribDef.GetAttributeID();
 		ctrl.sAttribID = attribDef.sUniqueID;
 
 		// Main control
@@ -313,9 +313,9 @@ BOOL CTDCCustomFilterAttributeUIHelper::RebuildControls(CWnd* pParent,
 	const CWnd* pInsertAfter = pParent->GetDlgItem(nCtrlIDPos);
 	ASSERT(pInsertAfter);
 
-	for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < aAttribDefs.GetSize(); nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAtt];
 
 		// don't add unwanted controls
 		if (!WantControl(attribDef))
@@ -323,7 +323,7 @@ BOOL CTDCCustomFilterAttributeUIHelper::RebuildControls(CWnd* pParent,
 		
 		CUSTOMATTRIBCTRLITEM ctrl;
 
-		ctrl.nAttrib = attribDef.GetAttributeID();
+		ctrl.nAttributeID = attribDef.GetAttributeID();
 		ctrl.sAttribID = attribDef.sUniqueID;
 
 		TDCCADATA data;
@@ -431,7 +431,7 @@ void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent,
 													  const CTDCCustomAttribDefinitionArray& aAttribDefs,
 													  const CTDCCustomAttributeDataMap& mapData)
 {
-	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttributeID));
 
 	TDCCADATA data;
 		
@@ -459,7 +459,7 @@ TDCCAUI_UPDATERESULT CTDCCustomFilterAttributeUIHelper::GetControlData(const CWn
 																	   const TDCCADATA& dataPrev, TDCCADATA& data)
 {
 	ASSERT_VALID(pParent);
-	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttributeID));
 
 	DWORD dwDataType = 0, dwListType = 0;
 	VERIFY(GetControlAttributeTypes(ctrl, aAttribDefs, dwDataType, dwListType));
@@ -733,7 +733,7 @@ void CTDCCustomFilterAttributeUIHelper::UpdateControl(const CWnd* pParent,
 													  const TDCCADATA& data)
 {
 	ASSERT_VALID(pParent);
-	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttributeID));
 
 	DWORD dwDataType = 0, dwListType = 0;
 	VERIFY(GetControlAttributeTypes(ctrl, aAttribDefs, dwDataType, dwListType));
@@ -799,7 +799,7 @@ void CTDCCustomFilterAttributeUIHelper::UpdateControlAutoListData(const CWnd* pP
 															const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
 	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-	GET_CUSTDEF_ALT(aAttribDefs, ctrl.nAttrib, pDef, return);
+	GET_CUSTDEF_ALT(aAttribDefs, ctrl.nAttributeID, pDef, return);
 
 	if (pDef->IsList())
 	{

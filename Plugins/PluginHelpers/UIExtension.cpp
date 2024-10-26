@@ -300,7 +300,7 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, String^ customA
 bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 {
 	mod.dwSelectedTaskID = dwSelectedTaskID;
-	mod.nAttrib = Task::MapAttribute(nAttrib);
+	mod.nAttributeID = Task::MapAttribute(nAttrib);
 
 	switch (dataType)
 	{
@@ -366,48 +366,48 @@ UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent)
 
 // -----------------------------------------------------------------------------------
 
-bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, DateTime date)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, DateTime date)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, date));
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, date));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, double value)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, double value)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, value));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, double time, Task::TimeUnits units)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, double time, Task::TimeUnits units)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, time, units));
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, time, units));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, int value)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, int value)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, value));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, bool value)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, bool value)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, value));
 	return true;
 }
 
@@ -420,68 +420,68 @@ bool UIExtension::ParentNotify::AddMod(String^ sCustAttribID, String^ value)
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, String^ value)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, String^ value)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value));
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, value));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, String^ value, bool append)
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, String^ value, bool append)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(nAttribute, value, append));
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, value, append));
 	return true;
 }
 
 // -----------------------------------------------------------------------------------
 
-bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, DateTime date)
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, DateTime date)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, date));
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, date));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, double value)
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, double value)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, double time, Task::TimeUnits units)
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, time, units));
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, time, units));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, int value)
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, int value)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, bool value)
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, bool value)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value));
 	return true;
 }
 
@@ -494,21 +494,21 @@ bool UIExtension::ParentNotify::AddMod(UInt32 taskID, String^ sCustAttribID, Str
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value)
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, String^ value)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value));
 	return true;
 }
 
-bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value, bool append)
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append)
 {
-	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
 		return false;
 
-	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value, append));
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value, append));
 	return true;
 }
 
@@ -548,42 +548,42 @@ bool UIExtension::ParentNotify::NotifyMod(bool bClearModsAlways)
 	return bSuccess;
 }
 
-bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, DateTime date)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, DateTime date)
 {
 	ClearMods();
-	AddMod(nAttribute, date);
+	AddMod(attrib, date);
 	
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, double value)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, double value)
 {
 	ClearMods();
-	AddMod(nAttribute, value);
+	AddMod(attrib, value);
 
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, double time, Task::TimeUnits units)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, double time, Task::TimeUnits units)
 {
 	ClearMods();
-	AddMod(nAttribute, time, units);
+	AddMod(attrib, time, units);
 
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, int value)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, int value)
 {
 	ClearMods();
-	AddMod(nAttribute, value);
+	AddMod(attrib, value);
 
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, bool value)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, bool value)
 {
 	ClearMods();
-	AddMod(nAttribute, value);
+	AddMod(attrib, value);
 
 	return NotifyMod(true);
 }
@@ -596,18 +596,18 @@ bool UIExtension::ParentNotify::NotifyMod(String^ sCustAttribID, String^ value)
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, String^ value)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, String^ value)
 {
 	ClearMods();
-	AddMod(nAttribute, value);
+	AddMod(attrib, value);
 
 	return NotifyMod(true);
 }
 
-bool UIExtension::ParentNotify::NotifyMod(Task::Attribute nAttribute, String^ value, bool append)
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, String^ value, bool append)
 {
 	ClearMods();
-	AddMod(nAttribute, value, append);
+	AddMod(attrib, value, append);
 
 	return NotifyMod(true);
 }
@@ -781,8 +781,16 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 
 bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent)
 {
+	return Draw(hwnd, g, x, y, cx, cy, style, transparent, false, false);
+}
+
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent, bool clipLeft, bool clipRight)
+{
+	if (style == Style::None)
+		return false;
+
 	// Must retrieve clip rect before getting HDC
-	Drawing::Rectangle rClip = Rectangle::Truncate(g->ClipBounds);
+	Drawing::Rectangle clipRect = Rectangle::Truncate(g->ClipBounds);
 	HDC hDC = Win32::GetHdc(g->GetHdc());
 
 	if (hDC == NULL)
@@ -790,19 +798,29 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 
 	GM_ITEMSTATE state = Map(style);
 	int nSaveDC = ::SaveDC(hDC);
-		
-	::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
+
+	::IntersectClipRect(hDC, clipRect.Left, clipRect.Top, clipRect.Right, clipRect.Bottom);
 
 	DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_PREDRAW | GMIB_POSTDRAW : 0));
+
+	if (clipLeft)
+		flags |= GMIB_CLIPLEFT;
+
+	if (clipRight)
+		flags |= GMIB_CLIPRIGHT;
+
+	CRect rItem(x, y, (x + cx), (y + cy));
+	LPCRECT prcClip = ((clipLeft || clipRight) ? &rItem : NULL);
 
 	BOOL bRes = GraphicsMisc::DrawExplorerItemSelection(CDC::FromHandle(hDC), 
 														Win32::GetHwnd(hwnd), 
 														state, 
-														CRect(x, y, (x + cx), (y + cy)), 
-														flags);
+														rItem, 
+														flags,
+														prcClip);
 	::RestoreDC(hDC, nSaveDC);
 	g->ReleaseHdc();
-	g->SetClip(rClip); // restore clip rect
+	g->SetClip(clipRect); // restore clip rect
 
 	return (bRes != FALSE);
 }
@@ -828,6 +846,14 @@ Drawing::Color UIExtension::SelectionRect::GetColor(Style style)
 {
 	GM_ITEMSTATE state = Map(style);
 	COLORREF color = GraphicsMisc::GetExplorerItemSelectionBackColor(state, GMIB_THEMECLASSIC);
+
+	return ColorUtil::DrawingColor::ToColor(color);
+}
+
+Drawing::Color UIExtension::SelectionRect::GetBorderColor(Style style)
+{
+	GM_ITEMSTATE state = Map(style);
+	COLORREF color = GraphicsMisc::GetExplorerItemSelectionBorderColor(state, GMIB_THEMECLASSIC);
 
 	return ColorUtil::DrawingColor::ToColor(color);
 }

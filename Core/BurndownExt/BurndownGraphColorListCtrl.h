@@ -7,7 +7,7 @@
 // BurndownGraphColorListCtrl.h : header file
 //
 
-#include "BurndownStruct.h"
+#include "BurndownGraphs.h"
 
 #include "..\Shared\InputListCtrl.h"
 
@@ -25,18 +25,19 @@ public:
 	CBurndownGraphColorListCtrl();
 	virtual ~CBurndownGraphColorListCtrl();
 
-	BOOL Initialize(const CBurndownChart& chart);
+	BOOL Initialize(const CGraphsMap& mapGraphs, BURNDOWN_GRAPH nActiveGraph);
 	const CGraphColorMap& GetGraphColors() const { return m_mapColors; }
 
 protected:
 	CGraphColorMap m_mapColors;
+	CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CString, CString&> m_mapCustAttribIDs;
 
 protected:
-	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
+	int GetRowColors(int nRow, CColorArray& aColors) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

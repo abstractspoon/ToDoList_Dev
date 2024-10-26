@@ -116,6 +116,20 @@ int CTestUtils::Compare(LPCTSTR sz1, LPCTSTR sz2, BOOL bCaseSensitive) const
 }
 
 //////////////////////////////////////////////////////////////////////
+
+CTDCScopedTest::CTDCScopedTest(CTDLTestBase& base, LPCTSTR szTest)
+	:
+	m_base(base)
+{
+	m_base.BeginTest(szTest);
+}
+
+CTDCScopedTest::~CTDCScopedTest()
+{
+	m_base.EndTest();
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -126,7 +140,7 @@ public:
 
 	TESTRESULT Run()
 	{
-		BeginTest(_T("CTDLTestBase::SelfTest"));
+		CTDCScopedTest test(*this, _T("CTDLTestBase::SelfTest"));
 
 		// -------------------------------------------------
 		

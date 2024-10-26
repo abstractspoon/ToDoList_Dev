@@ -128,8 +128,11 @@ BOOL CToDoCtrlMgr::TDCITEM::IsSelectable() const
 	return (!HasFilePath() || bLoaded || FileMisc::FileExists(pTDC->GetFilePath()));
 }
 
-BOOL CToDoCtrlMgr::TDCITEM::HasFilePath() const
+BOOL CToDoCtrlMgr::TDCITEM::HasFilePath(BOOL bIncStorage) const
 {
+	if (!bIncStorage && UsesStorage())
+		return FALSE;
+
 	return pTDC->HasFilePath();
 }
 
@@ -157,30 +160,56 @@ void CToDoCtrlMgr::TDCITEM::RefreshPathType()
 	}
 }
 
-void CToDoCtrlMgr::TDCITEM::ClearStorageDetails()
+BOOL CToDoCtrlMgr::TDCITEM::ClearStorageDetails(BOOL bIncFilePath)
 {
+	if (!UsesStorage())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	storageinfo.Reset();
+
+	if (bIncFilePath)
+	{
+		pTDC->SetFilePath(_T(""));
+		bLoaded = FALSE;
+	}
+
 	pTDC->SetAlternatePreferencesKey(_T(""));
+	return TRUE;
 }
 
-void CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
+BOOL CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
 {
-	if (info.HasInfo())
-	{
-		storageinfo = info;
+	ASSERT(info.HasInfo());
 
-		// set filename and alternate pref name to be the display name
-		pTDC->SetFilePath(info.szDisplayName);
-		pTDC->SetAlternatePreferencesKey(info.szDisplayName);
+	if (!info.HasInfo())
+	{
+		ASSERT(0);
+		return FALSE;
 	}
-	else
-		ClearStorageDetails();
+
+	storageinfo = info;
+	bLoaded = TRUE;
+
+	// set filename and alternate pref name to be the display name
+	pTDC->SetFilePath(info.szDisplayPath);
+	pTDC->SetAlternatePreferencesKey(info.szDisplayPath);
+
+	return TRUE;
 }
 
 CString CToDoCtrlMgr::TDCITEM::GetFriendlyProjectName() const 
 { 
 	if (UsesStorage() && pTDC->GetProjectName().IsEmpty())
-		return storageinfo.szDisplayName;
+	{
+		if (storageinfo.HasTasklistName())
+			return storageinfo.szTasklistName;
+
+		// else
+		return storageinfo.szDisplayPath;
+	}
 
 	// else
 	return pTDC->GetFriendlyProjectName(nUntitledIndex); 
@@ -337,7 +366,7 @@ CString CToDoCtrlMgr::GetDisplayPath(int nIndex) const
 	TSM_TASKLISTINFO storageInfo;
 
 	if (GetStorageDetails(nIndex, storageInfo))
-		return storageInfo.szDisplayName;
+		return storageInfo.szDisplayPath;
 
 	// else
 	return GetFilePath(nIndex);
@@ -358,6 +387,8 @@ BOOL CToDoCtrlMgr::GetStorageDetails(int nIndex, TSM_TASKLISTINFO& info) const
 		return FALSE;
 
 	info = GetTDCItem(nIndex).storageinfo;
+	info.SetTasklistName(GetFriendlyProjectName(nIndex));
+
 	return TRUE;
 }
 
@@ -365,7 +396,8 @@ BOOL CToDoCtrlMgr::SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	GetTDCItem(nIndex).SetStorageDetails(info);
+	if (!GetTDCItem(nIndex).SetStorageDetails(info))
+		return FALSE;
 
 	// reset file timestamp info
 	RefreshFileLastModified(nIndex);
@@ -373,15 +405,11 @@ BOOL CToDoCtrlMgr::SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info)
 	return TRUE;
 }
 
-BOOL CToDoCtrlMgr::ClearStorageDetails(int nIndex)
+BOOL CToDoCtrlMgr::ClearStorageDetails(int nIndex, BOOL bIncFilePath)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	if (!UsesStorage(nIndex))
-		return FALSE;
-
-	GetTDCItem(nIndex).ClearStorageDetails();
-	return TRUE;
+	return GetTDCItem(nIndex).ClearStorageDetails(bIncFilePath);
 }
 
 CString CToDoCtrlMgr::GetFriendlyProjectName(int nIndex) const
@@ -449,11 +477,11 @@ void CToDoCtrlMgr::ClearFilePath(int nIndex)
 	GetToDoCtrl(nIndex).ClearFilePath();
 }
 
-BOOL CToDoCtrlMgr::HasFilePath(int nIndex) const
+BOOL CToDoCtrlMgr::HasFilePath(int nIndex, BOOL bIncStorage) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	return GetTDCItem(nIndex).HasFilePath();
+	return GetTDCItem(nIndex).HasFilePath(bIncStorage);
 }
 
 TDCM_PATHTYPE CToDoCtrlMgr::GetFilePathType(int nIndex) const
@@ -871,6 +899,13 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 			else
 				prefs.WriteProfileInt(sKey, _T("TabColor"), tdci.crTab);
 		}
+
+		// cleanup temp storage file
+		if (tdci.UsesStorage() && FileMisc::FileExists(tdci.storageinfo.szLocalFileName))
+		{
+			ASSERT(FileMisc::IsTempFilePath(tdci.storageinfo.szLocalFileName));
+			FileMisc::DeleteFile(tdci.storageinfo.szLocalFileName, TRUE);
+		}
 	}
 	
 	m_aToDoCtrls.RemoveAt(nIndex);
@@ -1248,6 +1283,10 @@ BOOL CToDoCtrlMgr::CanAddToSourceControl(int nIndex, BOOL bAdd) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
+	// Not supported by storage providers
+	if (UsesStorage(nIndex))
+		return FALSE;
+
 	return GetToDoCtrl(nIndex).CanAddToSourceControl(bAdd);
 }
 
@@ -1315,7 +1354,7 @@ COLORREF CToDoCtrlMgr::GetTabColor(int nIndex) const
 	if (!m_tabCtrl.IsSupportedFlag(TCE_TABCOLORS))
 	{
 		ASSERT(0);
-		return FALSE;
+		return CLR_NONE;
 	}
 	
 	CHECKVALIDINDEXRET(nIndex, CLR_NONE);
@@ -1421,13 +1460,13 @@ void CToDoCtrlMgr::SetAllNeedPreferenceUpdate(BOOL bNeed, int nExcept)
 	}
 }
 
-int CToDoCtrlMgr::FindToDoCtrl(LPCTSTR szFilePath) const
+int CToDoCtrlMgr::FindToDoCtrl(LPCTSTR szFilePath, BOOL bFileNameOnly) const
 {
 	int nCtrl = GetCount();
 	
 	while (nCtrl--)
 	{
-		if (GetFilePath(nCtrl).CompareNoCase(szFilePath) == 0)
+		if (FileMisc::IsSamePath(GetFilePath(nCtrl), szFilePath, bFileNameOnly))
 			return nCtrl;
 	}
 

@@ -35,7 +35,6 @@ protected:
 
 // Dialog Data
 	//{{AFX_DATA(CPreferencesToolbarPage)
-	enum { IDD = IDD_PREFTOOLBAR_PAGE };
 	//}}AFX_DATA
 
 	CTDLToolbarButtonListCtrl m_ilcButtons;

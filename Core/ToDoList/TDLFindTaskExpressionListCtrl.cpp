@@ -5,12 +5,14 @@
 #include "resource.h"
 #include "TDLFindTaskExpressionListCtrl.h"
 #include "tdcstatic.h"
+#include "tdcmapping.h"
 #include "TDLTaskIconDlg.h"
 
 #include "..\shared\HoldRedraw.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\localizer.h"
 #include "..\shared\GraphicsMisc.h"
+#include "..\Shared\DateHelper.h"
 
 #include "..\Interfaces\ContentMgr.h"
 
@@ -72,7 +74,7 @@ CTDLFindTaskExpressionListCtrl::CTDLFindTaskExpressionListCtrl(const CContentMgr
 	m_cbCustomIcons(m_ilIcons, TRUE, FALSE),
 	m_cbRecurrence(FALSE)
 {
-	m_eTimePeriod.SetBorderWidth(0);
+	m_eTimePeriod.EnableButtonPadding(FALSE);
 	m_eTimePeriod.SetDefaultButton(0);
 }
 
@@ -122,9 +124,9 @@ void CTDLFindTaskExpressionListCtrl::PreSubclassWindow()
 	ShowGrid(TRUE, TRUE);
 
 	AddCol(CEnString(IDS_FT_ATTRIB), 120);
-	AddCol(CEnString(IDS_FT_MATCHES), 160, ILCT_DROPLIST);
+	AddCol(CEnString(IDS_FT_MATCHES), 160, ILCT_COMBO);
 	AddCol(CEnString(IDS_FT_VALUE), 130, ILCT_TEXT); // overridden in GetCellType()
-	AddCol(CEnString(IDS_FT_ANDOR), 60, ILCT_DROPLIST);
+	AddCol(CEnString(IDS_FT_ANDOR), 60, ILCT_COMBO);
 	SetView(LVS_REPORT);
 
 	AutoAdd(TRUE, FALSE);
@@ -405,7 +407,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 					{
 						CTDLTaskIconDlg dialog(m_ilIcons, rule.ValueAsString());
 
-						if (dialog.DoModal() == IDOK)
+						if (dialog.DoModal(IDS_FINDTASKICONDLG_TITLE) == IDOK)
 						{
 							rule.SetValue(dialog.GetIconName());
 							UpdateValueColumnText(nItem);
@@ -456,12 +458,12 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 	switch (nCol)
 	{
 	case ATTRIB_COL:
-		return ILCT_DROPLIST;
+		return ILCT_COMBO;
 
 	case OPERATOR_COL:
 		if (!rule.AttributeIs(TDCA_NONE))
 		{
-			return ILCT_DROPLIST;
+			return ILCT_COMBO;
 		}
 		break;
 
@@ -490,7 +492,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 					GET_CUSTDEF_RET(m_aAttribDefs, nAttribID, pDef, ILCT_BROWSE);
 
 					if (pDef->IsList())
-						return ILCT_DROPLIST;
+						return ILCT_COMBO;
 				}
 				return ILCT_BROWSE;
 
@@ -501,7 +503,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				break;
 
 			case FT_RECURRENCE:
-				return ILCT_DROPLIST;
+				return ILCT_COMBO;
 
 			default:
 				switch (nAttribID)
@@ -515,7 +517,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				case TDCA_PRIORITY:
 				case TDCA_RISK:
 				case TDCA_COMMENTSFORMAT:
-					return ILCT_DROPLIST;
+					return ILCT_COMBO;
 
 				default:
 					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aAttribDefs.GetSize())
@@ -524,7 +526,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 						GET_CUSTDEF_ALT(m_aAttribDefs, nAttribID, pDef, break);
 
 						if (pDef->IsList())
-							return ILCT_DROPLIST;
+							return ILCT_COMBO;
 
 					}
 					break;
@@ -534,7 +536,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 		break;
 
 	case ANDOR_COL:
-		return ILCT_DROPLIST;
+		return ILCT_COMBO;
 	}
 
 	// all else
@@ -625,13 +627,13 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 	}
 }
 
-BOOL CTDLFindTaskExpressionListCtrl::HasRule(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDLFindTaskExpressionListCtrl::HasRule(TDC_ATTRIBUTE nAttribID) const
 {
 	int nRule = m_aSearchParams.GetSize();
 
 	while (nRule--)
 	{
-		if (m_aSearchParams.GetAt(nRule).AttributeIs(nAttrib))
+		if (m_aSearchParams.GetAt(nRule).AttributeIs(nAttribID))
 			return TRUE;
 	}
 
@@ -843,7 +845,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				AddOperatorToCombo(FOP_NOT_EQUALS);
 				AddOperatorToCombo(FOP_INCLUDES);
 				AddOperatorToCombo(FOP_NOT_INCLUDES);
-				AddOperatorToCombo(FOP_IS_COMPLETE);
+				AddOperatorToCombo(FOP_DEPENDS_COMPLETE);
 				break;
 				
 			case FT_RECURRENCE:
@@ -854,7 +856,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				break;
 			}
 	
-			CDialogHelper::SelectItemByData(m_cbOperators, (DWORD)rule.GetOperator());
+			CDialogHelper::SelectItemByDataT(m_cbOperators, (DWORD)rule.GetOperator());
 		}
 		break;
 
@@ -909,12 +911,12 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			{
-				int nAttrib = m_aAttribDefs.Find(nAttribID);
-				ASSERT(nAttrib != -1);
+				int nAtt = m_aAttribDefs.Find(nAttribID);
+				ASSERT(nAtt != -1);
 
-				if (nAttrib != -1)
+				if (nAtt != -1)
 				{
-					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAttrib];
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAtt];
 					ASSERT(attribDef.IsList());
 
 					if (attribDef.IsList())
@@ -1311,7 +1313,7 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 				break;
 
 			case FT_TIMEPERIOD:
-				sValue = CTimeHelper().FormatTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()), 2);
+				sValue = CTimeHelper::FormatTime(rule.ValueAsDouble(), TDC::MapUnitsToTHUnits(rule.GetTimeUnits()), 2);
 				break;
 
 			case FT_BOOL:

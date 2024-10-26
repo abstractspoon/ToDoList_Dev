@@ -42,7 +42,7 @@ BEGIN_MESSAGE_MAP(CEnHeaderCtrl, CHeaderCtrl)
 	//}}AFX_MSG_MAP
 	ON_WM_LBUTTONDBLCLK()
 	ON_NOTIFY_REFLECT(HDN_BEGINTRACK, OnBeginTrackHeader)
-	ON_NOTIFY_REFLECT(HDN_ENDTRACK, OnEndTrackHeader)
+	ON_NOTIFY_REFLECT_EX(HDN_ENDTRACK, OnEndTrackHeader)
 	ON_NOTIFY_REFLECT(HDN_BEGINDRAG, OnBeginDragHeader)
 	ON_NOTIFY_REFLECT_EX(HDN_ENDDRAG, OnEndDragHeader)
 	ON_MESSAGE(HDM_LAYOUT, OnLayout)
@@ -157,13 +157,16 @@ LRESULT CEnHeaderCtrl::OnDeleteItem(WPARAM wp, LPARAM lp)
 	return lResult;
 }
 
-void CEnHeaderCtrl::OnEndTrackHeader(NMHDR* pNMHDR, LRESULT* pResult) 
+BOOL CEnHeaderCtrl::OnEndTrackHeader(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	LPNMHEADER pNMH = (LPNMHEADER)pNMHDR;
 
 	// mark item as having been tracked
 	if (IsItemTrackable(pNMH->iItem))
 		ModifyItemFlags(pNMH->iItem, EHCF_TRACKED, TRUE);
+
+	// Allow parent to be notified too
+	return FALSE;
 }
 
 void CEnHeaderCtrl::OnBeginTrackHeader(NMHDR* pNMHDR, LRESULT* pResult) 

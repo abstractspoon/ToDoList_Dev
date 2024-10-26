@@ -30,27 +30,26 @@ double ONE_DAY_IN_MINS = (24.0 * 60);
 
 CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLShowReminderDlg::IDD, _T("ShowReminders"), pParent),
+	CTDLDialog(IDD_SHOWREMINDER_DIALOG, _T("ShowReminders"), pParent),
+	m_lcReminders(m_sPrefsKey),
 	m_dtSnoozeUntil(COleDateTime::GetCurrentTime()),
-	m_bChangingReminders(FALSE),
-	m_cbSnoozeTime(TCB_HOURSINDAY)
+	m_bModifyingList(FALSE),
+	m_bModifyingReminder(FALSE),
+	m_cbSnoozeTime(TCB_HOURSINDAY),
+	m_bSnoozeUntil(FALSE)
 {
-	//{{AFX_DATA_INIT(CTDLShowReminderDlg)
-	m_bSnoozeUntil = FALSE;
-	//}}AFX_DATA_INIT
-
-	// init snooze value
 	m_nSnoozeMins = CPreferences().GetProfileInt(m_sPrefsKey, _T("Snooze"), 5);
+
+	SetIcon(IDR_MAINFRAME);
 }
 
 
 void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLShowReminderDlg)
+
 	DDX_Control(pDX, IDC_REMINDERS, m_lcReminders);
 	DDX_Radio(pDX, IDC_SNOOZEOPTIONFOR, m_bSnoozeUntil);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_SNOOZEFOR, m_cbSnoozeFor);
 	DDX_Control(pDX, IDC_SNOOZEUNTILDATE, m_dtcSnoozeDate);
 	DDX_Control(pDX, IDC_SNOOZEUNTILTIME, m_cbSnoozeTime);
@@ -80,6 +79,7 @@ IMPLEMENT_DYNAMIC(CTDLShowReminderDlg, CTDLDialog)
 BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLShowReminderDlg)
 	ON_BN_CLICKED(IDC_SNOOZE, OnSnooze)
+	ON_BN_CLICKED(IDC_MODIFY, OnModify)
 	ON_BN_CLICKED(IDC_DISMISS, OnDismiss)
 	ON_BN_CLICKED(IDC_GOTOTASK, OnGotoTask)
 	ON_BN_CLICKED(IDC_COMPLETETASK, OnCompleteTask)
@@ -90,7 +90,7 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(NM_DBLCLK, IDC_REMINDERS, OnDblClkReminders)
 	ON_WM_CLOSE()
-	ON_WM_DESTROY()
+	ON_WM_ACTIVATE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ BOOL CTDLShowReminderDlg::Create(CWnd* pParent, BOOL bVisible)
 	if (CTDLDialog::Create(IDD_SHOWREMINDER_DIALOG, pParent))
 	{
 		if (bVisible)
-			ShowWindow(SW_SHOW);
+			CTDLDialog::ShowWindow(SW_SHOW);
 
 		return TRUE;
 	}
@@ -118,41 +118,14 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	if (m_icon.Load(IDR_MAINFRAME_STD))
-		SetIcon(m_icon, FALSE);
-
 	m_cbSnoozeTime.SetItemHeight(-1, CDlgUnits(this).ToPixelsY(9));
 	ResizeChild(&m_dtcSnoozeDate, 0, GetChildHeight(&m_cbSnoozeFor) - GetChildHeight(&m_dtcSnoozeDate));
 
 	VERIFY(m_lcReminders.Initialise());
 
-	EnableControls();
-
-	// Restore sort state
-	CPreferences prefs;
-
-	int nSortCol = prefs.GetProfileInt(m_sPrefsKey, _T("SortCol"), -1);
-
-	if (nSortCol != -1)
-	{
-		m_lcReminders.SetSortColumn(nSortCol, FALSE);
-		m_lcReminders.SetSortAscending(prefs.GetProfileInt(m_sPrefsKey, _T("SortAscending"), TRUE));
-	}
+	EnableDisableControls();
 
 	return TRUE;
-}
-
-void CTDLShowReminderDlg::OnDestroy()
-{
-	// Save sort state
-	CPreferences prefs;
-
-	prefs.WriteProfileInt(m_sPrefsKey, _T("SortCol"), m_lcReminders.GetSortColumn());
-	prefs.WriteProfileInt(m_sPrefsKey, _T("SortAscending"), m_lcReminders.GetSortAscending());
-
-	RemoveAllListReminders();
-
-	CTDLDialog::OnDestroy();
 }
 
 void CTDLShowReminderDlg::UpdateTitleText()
@@ -160,18 +133,17 @@ void CTDLShowReminderDlg::UpdateTitleText()
 	SetWindowText(CEnString(IDS_TASKREMINDERDLG_TITLE, m_lcReminders.GetItemCount()));
 }
 
-void CTDLShowReminderDlg::RemoveAllListReminders()
-{
-	m_lcReminders.DeleteAllItems();
-	HideWindow();
-}
-
 BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 {
 	BOOL bNewRem = m_lcReminders.AddReminder(rem);
 
-	m_lcReminders.SetFocus();
 	UpdateTitleText();
+
+	if (bNewRem && !m_bModifyingReminder)
+	{
+		m_lcReminders.SetFocus();
+		ShowWindow();
+	}
 
 	return bNewRem;
 }
@@ -219,6 +191,23 @@ void CTDLShowReminderDlg::OnSnooze()
 	SnoozeReminders(FALSE);
 }
 
+void CTDLShowReminderDlg::OnModify()
+{
+	TDCREMINDER rem;
+
+	if (CanModifyReminders() && m_lcReminders.GetSelectedReminder(rem) != -1)
+	{
+		{
+			CAutoFlag af(m_bModifyingReminder, TRUE);
+
+			EnableDisableModify();
+			DoModifyReminder(rem);
+		}
+
+		EnableDisableModify();
+	}
+}
+
 void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 {
 	UpdateData();
@@ -233,7 +222,7 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 	if ((bAll && m_lcReminders.GetReminders(aRem)) ||
 		(!bAll && m_lcReminders.GetSelectedReminders(aRem)))
 	{
-		CAutoFlag af(m_bChangingReminders, TRUE);
+		CAutoFlag af(m_bModifyingList, TRUE);
 
 		for (int nRem = 0; nRem < aRem.GetSize(); nRem++)
 			DoSnoozeReminder(aRem[nRem]);
@@ -306,7 +295,7 @@ void CTDLShowReminderDlg::OnDismiss()
 	{
 		int nPrevSel = m_lcReminders.GetLastSel();
 		{
-			CAutoFlag af(m_bChangingReminders, TRUE);
+			CAutoFlag af(m_bModifyingList, TRUE);
 
 			for (int nRem = 0; nRem < aRem.GetSize(); nRem++)
 				DoDismissReminder(aRem[nRem]);
@@ -353,18 +342,18 @@ void CTDLShowReminderDlg::OnClose()
 
 void CTDLShowReminderDlg::OnSnoozeFor() 
 {
-	EnableControls();
+	EnableDisableControls();
 }
 
 void CTDLShowReminderDlg::OnSnoozeUntil() 
 {
-	EnableControls();
+	EnableDisableControls();
 }
 
-void CTDLShowReminderDlg::EnableControls()
+void CTDLShowReminderDlg::EnableDisableControls()
 {
 	UpdateData();
-	
+
 	int nNumRem = m_lcReminders.GetItemCount();
 	int nNumSel = m_lcReminders.GetSelectedCount();
 
@@ -378,8 +367,21 @@ void CTDLShowReminderDlg::EnableControls()
 
 	GetDlgItem(IDC_SNOOZE)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_DISMISS)->EnableWindow(nNumSel);
+
 	GetDlgItem(IDC_GOTOTASK)->EnableWindow(nNumSel == 1);
 	GetDlgItem(IDC_COMPLETETASK)->EnableWindow(nNumSel == 1);
+
+	EnableDisableModify();
+}
+
+void CTDLShowReminderDlg::EnableDisableModify()
+{
+	GetDlgItem(IDC_MODIFY)->EnableWindow(CanModifyReminders());
+}
+
+BOOL CTDLShowReminderDlg::CanModifyReminders() const 
+{ 
+	return (!m_bModifyingReminder && (m_lcReminders.GetSelectedCount() == 1));
 }
 
 void CTDLShowReminderDlg::UpdateControls()
@@ -397,12 +399,12 @@ void CTDLShowReminderDlg::UpdateControls()
 		UpdateData(FALSE);
 	}
 
-	EnableControls();
+	EnableDisableControls();
 }
 
 void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	if (!m_bChangingReminders)
+	if (!m_bModifyingList)
 		UpdateControls();
 
 	*pResult = 0;
@@ -416,9 +418,36 @@ void CTDLShowReminderDlg::OnDblClkReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
+// Note: We never call this internally so as not to
+// interfere with what the app might be doing
+void CTDLShowReminderDlg::ShowWindow() 
+{ 
+	if (IsIconic())
+	{
+		CTDLDialog::ShowWindow(SW_RESTORE);
+	}
+	else if (!IsWindowVisible())
+	{
+		CTDLDialog::ShowWindow(SW_SHOW);
+	}
+}
+
+void CTDLShowReminderDlg::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
+{
+	CTDLDialog::OnActivate(nState, pWndOther, bMinimized);
+
+	if (!bMinimized)
+		EnableDisableModify();
+}
+
+BOOL CTDLShowReminderDlg::IsForegroundWindow() const 
+{ 
+	return (::GetForegroundWindow() == GetSafeHwnd()); 
+}
+
 void CTDLShowReminderDlg::HideWindow()
 {
-	ShowWindow(SW_HIDE);
+	CTDLDialog::ShowWindow(SW_HIDE);
 }
 
 void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
@@ -433,15 +462,14 @@ void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
 	OffsetCtrl(this, IDC_SNOOZE, dx, dy);
 	OffsetCtrl(this, IDC_SNOOZEALL, dx, dy);
 	OffsetCtrl(this, IDC_DISMISS, dx, dy);
-	OffsetCtrl(this, IDC_GOTOTASK, dx, dy);
-	OffsetCtrl(this, IDC_COMPLETETASK, dx, dy);
+	OffsetCtrl(this, IDC_MODIFY, dx, dy);
 
+	OffsetCtrl(this, IDC_GOTOTASK, 0, dy);
+	OffsetCtrl(this, IDC_COMPLETETASK, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEOPTIONFOR, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEOPTIONUNTIL, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEFOR, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEUNTILDATE, 0, dy);
 	OffsetCtrl(this, IDC_SNOOZEUNTILTIME, 0, dy);
-
-	m_lcReminders.UpdateColumnWidths();
 }
 

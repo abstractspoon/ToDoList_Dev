@@ -31,7 +31,7 @@ IMPLEMENT_DYNCREATE(CPreferencesTaskDef2Page, CPreferencesPageBase)
 
 CPreferencesTaskDef2Page::CPreferencesTaskDef2Page() 
 	: 
-	CPreferencesPageBase(CPreferencesTaskDef2Page::IDD)
+	CPreferencesPageBase(IDD_PREFTASKDEF2_PAGE)
 {
 	//{{AFX_DATA_INIT(CPreferencesTaskDef2Page)
 	//}}AFX_DATA_INIT
@@ -55,6 +55,7 @@ CPreferencesTaskDef2Page::CPreferencesTaskDef2Page()
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_TAGS, TDCA_TAGS, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_CUSTOMATTRIBS, TDCA_CUSTOMATTRIB, -1)); 
 	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_DONEDATE, TDCA_DONEDATE, -1));
+	m_aAttribPrefs.Add(ATTRIBPREF(IDS_TDLBC_ICON, TDCA_ICON, -1));
 }
 
 CPreferencesTaskDef2Page::~CPreferencesTaskDef2Page()
@@ -120,7 +121,7 @@ void CPreferencesTaskDef2Page::OnFirstShow()
 	{
 		int nIndex = m_lbInheritAttrib.AddString(m_aAttribPrefs[nItem].sName);
 
-		m_lbInheritAttrib.SetItemData(nIndex, m_aAttribPrefs[nItem].nAttrib);
+		m_lbInheritAttrib.SetItemData(nIndex, m_aAttribPrefs[nItem].nAttributeID);
 		m_lbInheritAttrib.SetCheck(nIndex, m_aAttribPrefs[nItem].bUse ? 1 : 0);
 	}
 	UpdateCustomAttributeInfoVisibility();
@@ -156,7 +157,7 @@ BOOL CPreferencesTaskDef2Page::EnableCustomAttributeInheritance()
 
 	while (nCustItem--)
 	{
-		if (m_aAttribPrefs[nCustItem].nAttrib == TDCA_CUSTOMATTRIB)
+		if (m_aAttribPrefs[nCustItem].nAttributeID == TDCA_CUSTOMATTRIB)
 			break;
 	}
 	ASSERT(nCustItem != -1);
@@ -312,13 +313,13 @@ void CPreferencesTaskDef2Page::OnAttribUseChange()
 		TDC_ATTRIBUTE nSelAttrib = (TDC_ATTRIBUTE)m_lbInheritAttrib.GetItemData(m_nSelAttribUse);
 
 		// search for this item
-		int nAttrib = m_aAttribPrefs.GetSize();
+		int nAtt = m_aAttribPrefs.GetSize();
 		
-		while (nAttrib--)
+		while (nAtt--)
 		{
-			if (m_aAttribPrefs[nAttrib].nAttrib == nSelAttrib)
+			if (m_aAttribPrefs[nAtt].nAttributeID == nSelAttrib)
 			{
-				m_aAttribPrefs[nAttrib].bUse = m_lbInheritAttrib.GetCheck(m_nSelAttribUse);
+				m_aAttribPrefs[nAtt].bUse = m_lbInheritAttrib.GetCheck(m_nSelAttribUse);
 				break;
 			}
 		}
@@ -334,7 +335,7 @@ void CPreferencesTaskDef2Page::UpdateCustomAttributeInfoVisibility()
 
 	if (bShowInfo)
 	{
-		int nCustAttrib = FindItemByData(m_lbInheritAttrib, TDCA_CUSTOMATTRIB);
+		int nCustAttrib = FindItemByDataT(m_lbInheritAttrib, TDCA_CUSTOMATTRIB);
 		bShowInfo = ((nCustAttrib != -1) && m_lbInheritAttrib.GetCheck(nCustAttrib));
 	}
 
@@ -343,11 +344,11 @@ void CPreferencesTaskDef2Page::UpdateCustomAttributeInfoVisibility()
 
 BOOL CPreferencesTaskDef2Page::HasCheckedAttributes() const
 {
-	int nAttrib = m_aAttribPrefs.GetSize();
+	int nAtt = m_aAttribPrefs.GetSize();
 
-	while (nAttrib--)
+	while (nAtt--)
 	{
-		if (m_aAttribPrefs[nAttrib].bUse)
+		if (m_aAttribPrefs[nAtt].bUse)
 			return TRUE;
 	}
 
@@ -367,7 +368,7 @@ int CPreferencesTaskDef2Page::GetInheritParentAttributes(CTDCAttributeMap& mapAt
 		while (nIndex--)
 		{
 			if (m_aAttribPrefs[nIndex].bUse)
-				mapAttribs.Add(m_aAttribPrefs[nIndex].nAttrib);
+				mapAttribs.Add(m_aAttribPrefs[nIndex].nAttributeID);
 		}
 	}
 	else
@@ -394,7 +395,7 @@ void CPreferencesTaskDef2Page::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	
 	while (nIndex--)
 	{
-		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttrib);
+		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttributeID);
 		m_aAttribPrefs[nIndex].bUse = pPrefs->GetProfileInt(_T("Preferences\\AttribUse"), sKey, FALSE);
 	}
 
@@ -442,7 +443,7 @@ void CPreferencesTaskDef2Page::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 	while (nIndex--)
 	{
-		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttrib);
+		CString sKey = Misc::MakeKey(_T("Attrib%d"), m_aAttribPrefs[nIndex].nAttributeID);
 		pPrefs->WriteProfileInt(_T("Preferences\\AttribUse"), sKey, m_aAttribPrefs[nIndex].bUse);
 	}
 

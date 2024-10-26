@@ -23,6 +23,11 @@ int DPIScaling::Scale(int nValue)
 	return ::MulDiv(nValue, Win32::GetSystemDPI(), 96);
 }
 
+float DPIScaling::Scale(float fValue)
+{
+	return ((fValue * Win32::GetSystemDPI()) / 96);
+}
+
 Point DPIScaling::Scale(Point point)
 {
 	return Point(Scale(point.X), Scale(point.Y));
@@ -38,9 +43,22 @@ Drawing::Rectangle DPIScaling::Scale(Drawing::Rectangle rect)
 	return Drawing::Rectangle(Scale(rect.Location), Scale(rect.Size));
 }
 
+void DPIScaling::ScaleColumnWidths(Windows::Forms::ListView^ list)
+{
+	for (int col = 0; col < list->Columns->Count; col++)
+		list->Columns[col]->Width = Scale(list->Columns[col]->Width);
+}
+
+// ---------------------------------------------------------
+
 int DPIScaling::UnScale(int nValue)
 {
 	return ::MulDiv(nValue, 96, Win32::GetSystemDPI());
+}
+
+float DPIScaling::UnScale(float fValue)
+{
+	return ((fValue * 96) / Win32::GetSystemDPI());
 }
 
 Point DPIScaling::UnScale(Point point)

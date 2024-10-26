@@ -22,8 +22,10 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNCREATE(CPreferencesFilePage, CPreferencesPageBase)
 
-CPreferencesFilePage::CPreferencesFilePage() : CPreferencesPageBase(CPreferencesFilePage::IDD),
-		m_eDueTaskStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
+CPreferencesFilePage::CPreferencesFilePage() 
+	: 
+	CPreferencesPageBase(IDD_PREFFILE_PAGE),
+	m_eDueTaskStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {
 //	m_psp.dwFlags &= ~PSP_HASHELP;
 

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "filemisc.h"
+#include "webmisc.h"
 #include "fileregister.h"
 #include "misc.h"
 #include "driveinfo.h"
@@ -1539,32 +1540,30 @@ CString FileMisc::GetTempFolder()
 	TCHAR szTempPath[MAX_PATH+1] = { 0 };
 	
 	if (::GetTempPath(MAX_PATH, szTempPath))
-		return CString(szTempPath);
+		::GetLongPathName(szTempPath, szTempPath, MAX_PATH);
+	else
+		lstrcpy(szTempPath, _T("C:\\Temp"));
 
-	// else
-	return _T("C:\\Temp");
+	return szTempPath;
 }
 
 CString FileMisc::GetTempFilePath(LPCTSTR szPrefix, UINT uUnique)
 {
-	TCHAR szTempFile[MAX_PATH+1] = { 0 }, szTempPath[MAX_PATH+1] = { 0 };
+	CString sTempPath = GetTempFolder();
+	TCHAR szTempFile[MAX_PATH+1] = { 0 };
 	
-	if (::GetTempPath(MAX_PATH, szTempPath))
-	{
-		if (::GetTempFileName(szTempPath, szPrefix, uUnique, szTempFile))
-			return szTempFile;
-	}
+	if (::GetTempFileName(sTempPath, szPrefix, uUnique, szTempFile))
+		::GetLongPathName(szTempFile, szTempFile, MAX_PATH);
+	else
+		szTempFile[0] = 0;
 
-	return "";
+	return szTempFile;
 }
 
 CString FileMisc::GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt)
 {
-	CString sTempFile;
-	TCHAR szTempPath[MAX_PATH+1] = { 0 };
-	
-	if (::GetTempPath(MAX_PATH, szTempPath))
-		MakePath(sTempFile, NULL, szTempPath, szFilename, szExt);
+	CString sTempFile, sTempPath = GetTempFolder();
+	MakePath(sTempFile, NULL, sTempPath, szFilename, szExt);
 
 	return sTempFile;
 }
@@ -2376,6 +2375,14 @@ CString FileMisc::FormatExtension(LPCTSTR szExt, BOOL bWithDot)
 	return sExt;
 }
 
+void FileMisc::EnsureSameExtension(LPCTSTR szFromFile, CString& sToFile)
+{
+	CString sExt = GetExtension(szFromFile, FALSE);
+
+	if (!HasExtension(sToFile, sExt))
+		ReplaceExtension(sToFile, sExt);
+}
+
 void FileMisc::SplitPath(LPCTSTR szPath, CString* pDrive, CString* pDir, CString* pFName, CString* pExt)
 {
 	TCHAR szDrive[_MAX_DRIVE+1] = { 0 }, 
@@ -2437,7 +2444,7 @@ CString FileMisc::PathConcat(LPCTSTR szPath, LPCTSTR szDirOrFName)
 CString FileMisc::GetFullPath(const CString& sFilePath, const CString& sRelativeToFolder)
 {
 	// Check for URLs and already full paths
-	if (sFilePath.Find(':') != -1)
+	if ((sFilePath.Find(':') != -1) || WebMisc::IsURL(sFilePath))
 		return sFilePath;
 
 	CString sFullPath;
@@ -2497,8 +2504,12 @@ CString& FileMisc::MakeRelativePath(CString& sFilePath, const CString& sRelative
 	return sFilePath;
 }
 
-BOOL FileMisc::IsSamePath(const CString& sPath1, const CString& sPath2)
+BOOL FileMisc::IsSamePath(const CString& sPath1, const CString& sPath2, BOOL bFileNameOnly)
 {
+	if (bFileNameOnly)
+		return (GetFileNameFromPath(sPath1).CompareNoCase(GetFileNameFromPath(sPath2)) == 0);
+
+	// else
 	CString sFullPath1 = GetFullPath(sPath1);
 	CString sFullPath2 = GetFullPath(sPath2);
 

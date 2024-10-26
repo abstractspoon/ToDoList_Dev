@@ -645,23 +645,12 @@ void CDialogHelper::SetFont(CWnd* pWnd, HFONT hFont, BOOL bRedraw)
 
 HFONT CDialogHelper::GetFont(const CWnd* pWnd)
 {
-   if (pWnd)
-      return GetFont(pWnd->GetSafeHwnd());
-
-   return (HFONT)::GetStockObject(DEFAULT_GUI_FONT);
+	return GraphicsMisc::GetFont(pWnd ? pWnd->GetSafeHwnd() : NULL);
 }
  
 HFONT CDialogHelper::GetFont(HWND hWnd)
 {
-   if (hWnd)
-   {
-      HFONT hFont = (HFONT)::SendMessage(hWnd, WM_GETFONT, 0, 0);
-
-      if (hFont)
-         return hFont;
-   }
-
-   return (HFONT)::GetStockObject(DEFAULT_GUI_FONT);
+	return GraphicsMisc::GetFont(hWnd);
 }
 
 int CDialogHelper::SetComboBoxItems(CComboBox& combo, const CStringArray& aItems) 
@@ -1079,6 +1068,16 @@ int CDialogHelper::FindItemByValue(const CComboBox& combo, int nValue)
 	return combo.FindString(-1, sNum);
 }
 
+int CDialogHelper::SelectItemExact(CComboBox& combo, LPCTSTR szItem)
+{
+	int nSel = combo.FindStringExact(-1, szItem);
+
+	if (nSel != CB_ERR)
+		combo.SetCurSel(nSel);
+
+	return nSel;
+}
+
 CString CDialogHelper::GetSelectedItem(const CComboBox& combo)
 {
 	return GetItem(combo, combo.GetCurSel());
@@ -1106,7 +1105,7 @@ int CDialogHelper::GetSelectedItemAsValue(const CComboBox& combo)
 	return _ttoi(Misc::TrimAlpha(sValue));
 }
 
-DWORD CDialogHelper::GetSelectedItemData(const CComboBox& combo)
+DWORD CDialogHelper::GetSelectedItemDataT(const CComboBox& combo)
 {
 	int nSel = combo.GetCurSel();
 
@@ -1765,11 +1764,21 @@ void CDialogHelper::InvalidateAllCtrls(const CWnd* pParent, BOOL bErase)
 	}
 }
 
+void CDialogHelper::InvalidateCtrl(const CWnd* pParent, UINT nCtrlID, BOOL bErase, BOOL bUpdate)
+{
+	InvalidateChild(pParent->GetDlgItem(nCtrlID), bErase, bUpdate);
+}
+
+void CDialogHelper::InvalidateChild(const CWnd* pChild, BOOL bErase, BOOL bUpdate)
+{
+	if (::InvalidateRect(*pChild, NULL, bErase) && bUpdate)
+		::UpdateWindow(*pChild);
+}
+
 void CDialogHelper::RemoveCtrlID(UINT nCtrlID, CUIntArray& aCtrlIDs)
 {
 	Misc::RemoveItemT(nCtrlID, aCtrlIDs);
 }
-
 
 void CDialogHelper::ShowCtrls(const CWnd* pParent, const CUIntArray& aCtrlIDs, BOOL bShow)
 {

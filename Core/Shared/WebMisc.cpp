@@ -41,6 +41,8 @@ const LPCTSTR FILEPROTOCOLS[] =
 
 const int NUM_FILEPROTOCOLS = (sizeof(FILEPROTOCOLS) / sizeof(LPCTSTR));
 
+const CString INTERNETSETTINGS("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL WebMisc::IsOnline()
@@ -456,4 +458,33 @@ BOOL WebMisc::DownloadPage(LPCTSTR szDownloadUri, CString& sPageContents, IBindS
 		return FALSE;
 
 	return FileMisc::LoadFile(sTempFile, sPageContents);
+}
+
+BOOL WebMisc::GetProxySettings(CString& sProxy, UINT& nPort)
+{
+	CRegKey2 reg;
+
+	if (reg.Open(HKEY_CURRENT_USER, INTERNETSETTINGS, TRUE) == ERROR_SUCCESS)
+	{
+		// is proxy enabled?
+		DWORD dwProxyEnabled = FALSE;
+
+		if ((reg.Read(_T("ProxyEnabled"), dwProxyEnabled) == ERROR_SUCCESS) && dwProxyEnabled)
+		{
+			if ((reg.Read(_T("ProxyServer"), sProxy) == ERROR_SUCCESS) && !sProxy.IsEmpty())
+			{
+				CString sPort;
+
+				if (Misc::Split(sProxy, sPort, ':'))
+					nPort = _ttoi(sPort);
+				else
+					nPort = 80;
+
+				return TRUE;
+			}
+		}
+	}
+
+	// all else 
+	return FALSE;
 }

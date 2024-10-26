@@ -17,6 +17,8 @@
 #include "..\shared\themed.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\WorkingWeek.h"
+#include "..\shared\scopedtimer.h"
+#include "..\shared\FileMisc.h"
 
 #include "..\Interfaces\UITheme.h"
 
@@ -505,9 +507,9 @@ CString CGanttCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	return Misc::FormatArray(aAllocTo);
 }
 
-BOOL CGanttCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
+BOOL CGanttCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:
 	case TDCA_COLOR:
@@ -526,12 +528,12 @@ BOOL CGanttCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 	}
 	
 	// all else 
-	return (nAttrib == IUI_ALL);
+	return (nAttribID == IUI_ALL);
 }
 
-BOOL CGanttCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib)
+BOOL CGanttCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:
 	case TDCA_DUEDATE:
@@ -542,7 +544,7 @@ BOOL CGanttCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib)
 	case TDCA_TAGS:
 	case TDCA_DONEDATE:
 	case TDCA_DEPENDENCY:
-		return (MapAttributeToColumn(nAttrib) != GTLCC_NONE);
+		return (MapAttributeToColumn(nAttribID) != GTLCC_NONE);
 
 	case TDCA_NONE:
 		return TRUE;
@@ -571,9 +573,9 @@ TDC_ATTRIBUTE CGanttCtrl::MapColumnToAttribute(GTLC_COLUMN nCol)
 	return TDCA_NONE;
 }
 
-GTLC_COLUMN CGanttCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
+GTLC_COLUMN CGanttCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:		return GTLCC_TITLE;		
 	case TDCA_DUEDATE:		return GTLCC_DUEDATE;		
@@ -1347,7 +1349,7 @@ void CGanttCtrl::BuildTreeColumns()
 								CEnString(GANTTTREECOLUMNS[nCol].nIDColName), 
 								(GANTTTREECOLUMNS[nCol].nColAlign | HDF_STRING),
 								0,
-								GANTTTREECOLUMNS[nCol].nColID);
+								GANTTTREECOLUMNS[nCol].nColumnID);
 	}
 }
 
@@ -1455,7 +1457,7 @@ GM_ITEMSTATE CGanttCtrl::GetItemState(HTREEITEM hti) const
 	return CTreeListCtrl::GetItemState(hti);
 }
 
-LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
@@ -1492,7 +1494,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
-			DrawListItem(pDC, nItem, *pGI, (nState != GMIS_NONE));
+			DrawListItem(pDC, nItem, aColOrder, aColWidths, *pGI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
 								
@@ -1621,7 +1623,7 @@ void CGanttCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL 
 	m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		CWnd::GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nBy);
+		CWnd::GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nColumnID);
 }
 
 void CGanttCtrl::Sort(const GANTTSORTCOLUMNS& multi)
@@ -2953,15 +2955,14 @@ void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BO
 	}
 }
 
-void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected)
+void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, const GANTTITEM& gi, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
-	int nNumCol = GetRequiredListColumnCount();
-	
-	// Rollups for collapsed parents
+
 	CRect rClip;
 	pDC->GetClipBox(rClip);
 
+	// Rollups for collapsed parents
 	HTREEITEM htiRollUp = NULL;
 
 	if (HasOption(GTLCF_DISPLAYPARENTROLLUPS) && gi.bParent)
@@ -2973,25 +2974,37 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 			htiRollUp = htiParent;
 	}
 
-	BOOL bContinue = TRUE;
+	// Much more efficient to calculate the sub-item rects
+	// ourselves than to call GetSubItemRect for every column
+	CRect rColumn;
+	VERIFY(m_list.GetItemRect(nItem, rColumn, LVIR_BOUNDS));
 
-	for (int nCol = 1; ((nCol <= nNumCol) && bContinue); nCol++)
+	// First column is always zero width
+	rColumn.right = rColumn.left;
+
+	int nNumCol = aColOrder.GetSize();
+
+	for (int i = 1; i < nNumCol; i++)
 	{
-		bContinue = DrawListItemColumn(pDC, nItem, nCol, gi, bSelected, FALSE);
+		if (rColumn.right >= rClip.right)
+			break; // nothing more to draw
+
+		const int nCol = aColOrder[i];
+		const int nColWidth = aColWidths[nCol];
+
+		if (nColWidth == 0)
+			continue;
+
+		rColumn.left = rColumn.right;
+		rColumn.right += nColWidth;
+
+		if (rColumn.right <= rClip.left)
+			continue; // to left of clip rect
+
+		DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, FALSE);
 
 		if (htiRollUp)
-		{
-			CRect rColumn;
-			VERIFY(m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn));
-
-			if (rColumn.right < rClip.left)
-				continue;
-
-			if (rColumn.left > rClip.right)
-				break; // we can stop
-
 			DrawListItemRollup(pDC, htiRollUp, nCol, rColumn, bSelected);
-		}
 	}
 
 	// Trailing text
@@ -3087,6 +3100,7 @@ void CGanttCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, con
 	}
 }
 
+/*
 BOOL CGanttCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, 
 											BOOL bSelected, BOOL bRollup)
 {
@@ -3111,6 +3125,7 @@ BOOL CGanttCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTIT
 
 	return DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, bRollup);
 }
+*/
 
 BOOL CGanttCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, 
 												BOOL bSelected, BOOL bRollup)
@@ -4906,7 +4921,7 @@ int CALLBACK CGanttCtrl::MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lP
 
 	for (int nCol = 0; ((nCol < 3) && (nCompare == 0)); nCol++)
 	{
-		if (sort.cols[nCol].nBy == TDCA_NONE)
+		if (sort.cols[nCol].nColumnID == TDCA_NONE)
 			break;
 
 		nCompare = pThis->CompareTasks(lParam1, lParam2, sort.cols[nCol]);
@@ -4927,7 +4942,7 @@ int CGanttCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCO
 	int nCompare = 0;
 
 	// Optimise for task ID
-	if (col.nBy == GTLCC_TASKID)
+	if (col.nColumnID == GTLCC_TASKID)
 	{
 		nCompare = (dwTaskID1 - dwTaskID2);
 	}
@@ -4942,7 +4957,7 @@ int CGanttCtrl::CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCO
 			return 0;
 		}
 
-		switch (col.nBy)
+		switch (col.nColumnID)
 		{
 		case GTLCC_TITLE:
 			nCompare = Compare(pGI1->sTitle, pGI2->sTitle);

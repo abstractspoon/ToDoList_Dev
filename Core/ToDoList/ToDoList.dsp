@@ -195,10 +195,6 @@ SOURCE=.\res\custattrib_toolbar_std.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\custom_attrib_icons.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\datetime_toolbar.bmp
 # End Source File
 # Begin Source File
@@ -267,11 +263,19 @@ SOURCE=.\res\quickfind_prev.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\reminder.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\reset.ico
 # End Source File
 # Begin Source File
 
 SOURCE=.\res\search_prefs.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\select_icon.ico
 # End Source File
 # Begin Source File
 

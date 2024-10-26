@@ -45,7 +45,7 @@ void CXmlFileTest::TestAddPerformance()
 		return;
 	}
 
-	BeginTest(_T("CXmlFileTest::TestAddSiblingPerformance"));
+	CTDCScopedTest test(*this, _T("CXmlFileTest::TestAddSiblingPerformance"));
 	
 	for (int nLevel = 2, nNumTasks = 10; nLevel <= 5; nLevel++)
 	{
@@ -54,8 +54,6 @@ void CXmlFileTest::TestAddPerformance()
 		TestAddSiblingPerformance(nNumTasks);
 		TestAddItemPerformance(nNumTasks);
 	}
-
-	EndTest();
 }
 
 void CXmlFileTest::TestAddItemPerformance(int nNumItems)

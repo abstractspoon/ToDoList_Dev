@@ -8,6 +8,7 @@
 //
 
 #include "runtimedlg.h"
+#include "WndPrompt.h"
 
 #include "..\Interfaces\Ipreferences.h"
 
@@ -44,8 +45,11 @@ class CServerDlg : public CRuntimeDlg
 {
 // Construction
 public:
-	CServerDlg(LPCTSTR szServer = NULL, LPCTSTR szUsername = NULL, 
-				LPCTSTR szPassword = NULL, AL_TYPE nAnonymousLogin = ANONLOGIN_AUTO);   // standard constructor
+	CServerDlg(LPCTSTR szServer = NULL, 
+			   LPCTSTR szUsername = NULL, 
+			   LPCTSTR szPassword = NULL, 
+			   AL_TYPE nAnonymousLogin = ANONLOGIN_AUTO,
+			   HICON hIcon = NULL);
 
 	CString GetServer() const { return m_sServer; }
 	CString GetUsername() const { return m_sUsername; }
@@ -55,49 +59,46 @@ public:
 
 	int DoModal(IPreferences* pPrefs, LPCTSTR szKey);
 
-	// for overiding the default text for translating
+	// for overriding the default text for translating
 	static void SetItemText(UINT nIDItem, UINT nIDText);
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CServerDlg)
 	CString	m_sServer;
 	CString	m_sUsername;
 	CString	m_sPassword;
-	//}}AFX_DATA
 	CString m_sProxy;
 	UINT m_nProxyPort;
+	AL_TYPE m_nAnonLogin;
+
 	CComboBox m_cbServers;
 	CComboBox m_cbUsernames;
-	AL_TYPE m_nAnonLogin;
+	CWndPrompt m_wpProxy;
+	HICON m_hIcon;
 	
 	IPreferences* m_pPrefs;
 	CString m_sPrefKey;
 
 	static CMap<UINT, UINT, CString, CString&> s_mapText;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CServerDlg)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
 	virtual void OnOK();
-
-// Implementation
-protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(CServerDlg)
-	afx_msg void OnChangeServer();
 	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
+	virtual CString OverrideItemText(UINT nIDItem) { return GetItemText(nIDItem, NULL); }
+
+protected:
+	afx_msg void OnChangeServer();
 	afx_msg void OnAnonLogin();
 	afx_msg void OnChangeProxy();
 	DECLARE_MESSAGE_MAP()
 
+protected:
 	CString GetItemText(UINT nIDItem, LPCTSTR szDefault);
-	virtual CString OverrideItemText(UINT nIDItem) { return GetItemText(nIDItem, NULL); }
+	void EnableDisableProxy();
+	BOOL HasProxySettings() const;
+	
+	void PopulateComboHistory(CComboBox& combo, LPCTSTR szCountKey, LPCTSTR szItemTemplate, LPCTSTR szCurrentValue) const;
 };
 
 //{{AFX_INSERT_LOCATION}}

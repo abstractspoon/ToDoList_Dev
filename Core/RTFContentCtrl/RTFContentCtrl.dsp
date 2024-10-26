@@ -228,11 +228,11 @@ SOURCE=.\res\RTFContentCtrl.rc2
 # End Source File
 # Begin Source File
 
-SOURCE=.\toolbar.bmp
+SOURCE=.\res\toolbar.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\toolbar2.bmp
+SOURCE=.\res\toolbar_std.bmp
 # End Source File
 # End Group
 # Begin Group "Libs"

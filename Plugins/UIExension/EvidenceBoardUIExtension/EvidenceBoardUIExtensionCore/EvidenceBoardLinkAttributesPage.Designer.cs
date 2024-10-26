@@ -71,7 +71,7 @@
             "5"});
 			this.m_ThicknessCombo.Location = new System.Drawing.Point(111, 31);
 			this.m_ThicknessCombo.Name = "m_ThicknessCombo";
-			this.m_ThicknessCombo.Size = new System.Drawing.Size(172, 21);
+			this.m_ThicknessCombo.Size = new System.Drawing.Size(173, 21);
 			this.m_ThicknessCombo.TabIndex = 14;
 			// 
 			// m_ArrowsLabel

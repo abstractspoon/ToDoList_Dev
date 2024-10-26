@@ -13,16 +13,19 @@ class CFileComboBox : public CAutoComboBox
 	DECLARE_DYNAMIC(CFileComboBox)
 		
 public:
-	CFileComboBox(int nEditStyle = FES_COMBOSTYLEBTN);
+	CFileComboBox(int nEditStyle = 0);
 	virtual ~CFileComboBox();
 
-	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE) { m_fileEdit.EnableStyle(nStyle, bEnable); }
+	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE);
 	void SetCurrentFolder(LPCTSTR szFolder) { m_fileEdit.SetCurrentFolder(szFolder); }
 	CString GetCurrentFolder() const { return m_fileEdit.GetCurrentFolder(); }
+	CString GetFirstFile() const;
 
 	void SetReadOnly(BOOL bReadOnly = TRUE);
 	void SetDefaultButton(UINT nID) { m_fileEdit.SetDefaultButton(nID); }
-	void SetButtonBorderWidth(int nWidth) { m_fileEdit.SetBorderWidth(nWidth); }
+	void EnableButtonPadding(BOOL bEnable = TRUE) { m_fileEdit.EnableButtonPadding(bEnable); }
+
+	BOOL DoBrowse();
 
 	int GetFileList(CStringArray& aFiles);
 	int SetFileList(const CStringArray& aFiles);
@@ -43,7 +46,7 @@ protected:
 	
 protected:
 	CMultiFileEdit m_fileEdit;
-	CIconCache m_imageIcons;
+	CIconCache m_fileIcons;
 	BOOL m_bReadOnly;
 
 protected:

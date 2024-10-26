@@ -73,7 +73,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.IgnoredWords);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = Properties.Resources.WordCloud;
 			this.Name = "EditIgnoreListDlg";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

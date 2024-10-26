@@ -190,7 +190,7 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
   </ItemGroup>
   <ItemGroup>
     <None Include="res\help_button.ico" />
-    <None Include="res\icon1.ico" />
+    <None Include="res\burndown.ico" />
     <None Include="res\BurndownExt.rc2" />
     <None Include="res\toolbar.bmp" />
     <None Include="res\toolbar_std.bmp" />

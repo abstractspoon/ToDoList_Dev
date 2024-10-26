@@ -7,6 +7,8 @@
 #include "filteredtodoctrl.h"
 #include "todoctrlreminders.h"
 
+#include "..\shared\DateHelper.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma warning(push)
@@ -47,11 +49,44 @@ enum
 ///////////////////////////////////////////////////////////////////////////
 // CTDLShowReminderListCtrl
 
-CTDLShowReminderListCtrl::CTDLShowReminderListCtrl()
+CTDLShowReminderListCtrl::CTDLShowReminderListCtrl(LPCTSTR szPrefsKey)
 	:
 	m_bHasIcons(FALSE),
-	m_dwNextReminderID(1)
+	m_dwNextReminderID(1),
+	m_sPrefsKey(szPrefsKey)
 {
+	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(17));
+}
+
+BEGIN_MESSAGE_MAP(CTDLShowReminderListCtrl, CEnListCtrl)
+	ON_WM_SIZE()
+	ON_WM_DESTROY()
+END_MESSAGE_MAP()
+
+void CTDLShowReminderListCtrl::OnSize(UINT nType, int cx, int cy)
+{
+	CEnListCtrl::OnSize(nType, cx, cy);
+
+	RecalcColumnWidths();
+}
+
+void CTDLShowReminderListCtrl::OnDestroy()
+{
+	// Save state
+	CPreferences prefs;
+
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SortCol"), GetSortColumn());
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SortAscending"), GetSortAscending());
+
+	CIntArray aColWidths;
+	GetHeader()->GetItemWidths(aColWidths);
+
+	prefs.WriteProfileString(m_sPrefsKey, _T("ColWidths"), Misc::FormatArrayT(aColWidths, _T("%d"), '|'));
+
+	// Cleanup
+	DeleteAllItems();
+
+	CEnListCtrl::OnDestroy();
 }
 
 BOOL CTDLShowReminderListCtrl::Initialise()
@@ -60,18 +95,30 @@ BOOL CTDLShowReminderListCtrl::Initialise()
 		return FALSE;
 
 	// create list columns
-	InsertColumn(TASK_COL, CEnString(IDS_REMINDER_TASKCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(200));
-	InsertColumn(TASKPARENT_COL, CEnString(IDS_REMINDER_TASKPARENTCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(75));
-	InsertColumn(TASKLIST_COL, CEnString(IDS_REMINDER_TASKLISTCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(75));
-	InsertColumn(WHEN_COL, CEnString(IDS_REMINDER_WHENCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(150));
+	CPreferences prefs;
+	CString sColWidths = prefs.GetProfileString(m_sPrefsKey, _T("ColWidths"), _T("10|5|5|10"));
+
+	CDWordArray aWidths;
+	Misc::Split(sColWidths, aWidths, '|');
+
+	InsertColumn(TASK_COL, CEnString(IDS_REMINDER_TASKCOL), LVCFMT_LEFT, (int)aWidths[0]);
+	InsertColumn(TASKPARENT_COL, CEnString(IDS_REMINDER_TASKPARENTCOL), LVCFMT_LEFT, (int)aWidths[1]);
+	InsertColumn(TASKLIST_COL, CEnString(IDS_REMINDER_TASKLISTCOL), LVCFMT_LEFT, (int)aWidths[2]);
+	InsertColumn(WHEN_COL, CEnString(IDS_REMINDER_WHENCOL), LVCFMT_LEFT, (int)aWidths[3]);
+
+	RecalcColumnWidths();
+	SetTooltipCtrlText(CEnString(IDS_REMINDER_DBLCLK_TIP));
 
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+	
+	int nSortCol = prefs.GetProfileInt(m_sPrefsKey, _T("SortCol"), -1);
 
-	SetTooltipCtrlText(CEnString(IDS_REMINDER_DBLCLK_TIP));
-	SetSortEmptyValuesBelow(FALSE);
-
-	UpdateColumnWidths();
+	if (nSortCol != -1)
+	{
+		SetSortColumn(nSortCol, FALSE);
+		SetSortAscending(prefs.GetProfileInt(m_sPrefsKey, _T("SortAscending"), TRUE));
+	}
 
 	return TRUE;
 }
@@ -95,11 +142,8 @@ BOOL CTDLShowReminderListCtrl::AddReminder(const TDCREMINDER& rem)
 		if (nItem == -1)
 			return FALSE;
 
-		SetItemText(nItem, TASKPARENT_COL, rem.GetParentTitle());
 		SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
 		SetItemData(nItem, m_dwNextReminderID);
-
-		m_bHasIcons |= (rem.pTDC->GetTaskIconIndex(rem.dwTaskID) != -1);
 
 		m_mapReminders[m_dwNextReminderID] = rem;
 		m_dwNextReminderID++;
@@ -113,7 +157,9 @@ BOOL CTDLShowReminderListCtrl::AddReminder(const TDCREMINDER& rem)
 			SetCurSel(nItem);
 	}
 
-	SetItemText(nItem, WHEN_COL, rem.FormatWhenString()); // always
+	UpdateReminder(rem, nItem);
+
+	m_bHasIcons |= (rem.pTDC->GetTaskIconIndex(rem.dwTaskID) != -1);
 
 	if (bNewReminder && IsSorting())
 		Sort();
@@ -157,10 +203,21 @@ BOOL CTDLShowReminderListCtrl::UpdateReminder(const TDCREMINDER& rem)
 	if (nItem == -1)
 		return FALSE;
 
-	SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
-	SetItemText(nItem, WHEN_COL, rem.FormatWhenString());
+	UpdateReminder(rem, nItem);
+	return TRUE;
+}
 
-	return FALSE;
+void CTDLShowReminderListCtrl::UpdateReminder(const TDCREMINDER& rem, int nItem)
+{
+	ASSERT(nItem != -1);
+
+	// Assume tasklist cannot change
+	ASSERT(GetItemText(nItem, TASKLIST_COL) == rem.GetTaskListName());
+
+	// But everything else can
+	SetItemText(nItem, TASK_COL, rem.GetTaskTitle());
+	SetItemText(nItem, TASKPARENT_COL, rem.GetParentTitle());
+	SetItemText(nItem, WHEN_COL, rem.FormatNotification());
 }
 
 BOOL CTDLShowReminderListCtrl::RemoveReminder(const TDCREMINDER& rem)
@@ -297,22 +354,13 @@ void CTDLShowReminderListCtrl::DeleteAllItems()
 	m_bHasIcons = FALSE;
 }
 
-void CTDLShowReminderListCtrl::UpdateColumnWidths()
+void CTDLShowReminderListCtrl::RecalcColumnWidths()
 {
 	CRect rAvail;
 	GetClientRect(rAvail);
 
-	int nCol = (NUM_COLS - 1), nTotalColWidth = 0;
-
-	while (nCol--)
-		nTotalColWidth += GetColumnWidth(nCol);
-
-	// The 'when' column is essentially of fixed width so we leave it alone
-	int nAvailWidth = (rAvail.Width() - GetColumnWidth(WHEN_COL));
-
-	double dFactor = (double)nAvailWidth / nTotalColWidth;
-
-	nCol = (NUM_COLS - 1);
+	int nCol = NUM_COLS, nTotalColWidth = GetHeader()->CalcTotalItemWidth();
+	double dFactor = (double)rAvail.Width() / nTotalColWidth;
 
 	while (nCol--)
 		SetColumnWidth(nCol, (int)(GetColumnWidth(nCol) * dFactor));
@@ -348,12 +396,18 @@ int CTDLShowReminderListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2,
 		VERIFY(m_mapReminders.Lookup(dwItemData1, rem1));
 		VERIFY(m_mapReminders.Lookup(dwItemData2, rem2));
 
+		// Sort reminders by 'urgency'
 		COleDateTime dt1, dt2;
 
-		VERIFY(rem1.GetReminderDate(dt1, FALSE));
-		VERIFY(rem2.GetReminderDate(dt2, FALSE));
+		BOOL bHasDate1 = (rem1.bRelative ? rem1.GetRelativeToDate(dt1) : rem1.GetReminderDate(dt1));
+		BOOL bHasDate2 = (rem2.bRelative ? rem2.GetRelativeToDate(dt2) : rem2.GetReminderDate(dt2));
 
-		return CDateHelper::Compare(dt1, dt2);
+		int nCompare = CompareEmptiness(!bHasDate1, !bHasDate2);
+
+		if (nCompare == 0)
+			nCompare = CDateHelper::Compare(dt1, dt2);
+
+		return nCompare;
 	}
 
 	// All else
@@ -400,11 +454,12 @@ void CTDLShowReminderListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const
 		CRect rRest(rText);
 		rRest.left += (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
 
-		return CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
+		CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
+		return;
 	}
 
 	// else
-	return CEnListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
+	CEnListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
 }
 
 void CTDLShowReminderListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)

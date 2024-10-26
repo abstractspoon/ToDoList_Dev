@@ -48,12 +48,12 @@ public:
 	BOOL GetHidePaneSplitBar() const { return m_bHidePaneSplitBar; }
 	BOOL GetShowRemindersAsDateAndTime() const { return m_bShowRemindersAsDateAndTime; }
 	BOOL GetShowFileLinkThumbnails() const { return m_bShowFileLinkThumbnails; }
-//	BOOL Get() const { return m_b; }
+	BOOL GetHidePriorityNumber() const { return m_bHidePriorityNumber; }
+	//	BOOL Get() const { return m_b; }
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesUITasklistPage)
-	enum { IDD = IDD_PREFUITASKLIST_PAGE };
 	//}}AFX_DATA
 	CComboBox	m_cbPercentIncrement;
 	BOOL	m_bShowRemindersAsDateAndTime;
@@ -61,6 +61,7 @@ protected:
 	BOOL	m_bShowWeekdayInDates;
 	BOOL	m_bShowParentsAsFolders;
 	BOOL	m_bDisplayFirstCommentLine;
+	BOOL	m_bHidePriorityNumber;
 	int		m_nMaxInfoTipCommentsLength;
 	BOOL	m_bLimitInfoTipCommentsLength;
 	BOOL	m_bAutoFocusTasklist;

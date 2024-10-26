@@ -98,7 +98,7 @@ int CCheckListBoxEx::GetCheckedItems(CStringArray& aChecked) const
 
 BOOL CCheckListBoxEx::GetCheckByData(DWORD dwItemData) const
 {
-	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
+	int nIndex = CDialogHelper::FindItemByDataT(*this, dwItemData);
 
 	if (nIndex == CB_ERR)
 		return FALSE;
@@ -108,7 +108,7 @@ BOOL CCheckListBoxEx::GetCheckByData(DWORD dwItemData) const
 
 int CCheckListBoxEx::SetCheckByData(DWORD dwItemData, BOOL bChecked)
 {
-	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
+	int nIndex = CDialogHelper::FindItemByDataT(*this, dwItemData);
 
 	if (nIndex == CB_ERR)
 		return FALSE;

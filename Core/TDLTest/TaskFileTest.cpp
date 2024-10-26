@@ -79,7 +79,7 @@ TESTRESULT CTaskFileTest::Run()
 
 void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 {
-	BeginTest(_T("CTaskFileTest::MergeTaskAttributes(OverwriteAll)"));
+	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(OverwriteAll)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -129,13 +129,11 @@ void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 			ExpectTrue(tdiDestCopy.MatchAll(tdiDestFull, mapMerge));
 		}
 	}
-	
-	EndTest();
 }
 
 void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
 {
-	BeginTest(_T("CTaskFileTest::MergeTaskAttributes(ExcludeEmptySrcValues)"));
+	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(ExcludeEmptySrcValues)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -184,13 +182,11 @@ void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
 			ExpectTrue(tdiDestCopy.MatchAll(tdiDestFull, mapRest));
 		}
 	}
-		
-	EndTest();
 }
 
 void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 {
-	BeginTest(_T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValues)"));
+	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValues)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -256,13 +252,11 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 			ExpectTrue(tdiDestCopy.MatchAll(tdiDestEmpty, mapRest));
 		}
 	}
-
-	EndTest();
 }
 
 void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues()
 {
-	BeginTest(_T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValuesAndExcludeEmptySrcValues)"));
+	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValuesAndExcludeEmptySrcValues)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -297,8 +291,6 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExclud
 			ExpectTrue(tdiDestCopy == tdiSrcFull);
 		}
 	}
-
-	EndTest();
 }
 
 void CTaskFileTest::PrepareMergeTestTasks(CTaskFile& tasksSrc, HTASKITEM& hSrcEmpty, HTASKITEM& hSrcFull, 

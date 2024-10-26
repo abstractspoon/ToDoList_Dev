@@ -64,10 +64,12 @@ typedef HRESULT (STDAPICALLTYPE *PFNENDBUFFEREDPAINT)(HPAINTBUFFER, BOOL);
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 HMODULE CThemed::s_hUxTheme = HMODULE(-1);
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
 
 CThemed::CThemed(const CWnd* pWnd, LPCTSTR szClassList) : m_hWnd(NULL), m_hTheme(NULL)
 {
@@ -263,12 +265,57 @@ BOOL CThemed::DrawFrameControl(const CWnd* pWnd, CDC* pDC, const CRect& rect, UI
 			}
 		}
 				
-		th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);
-		
-		return TRUE;
+		return th.DrawBackground(pDC, nThPart, nThState, rImage, pClip);
 	}
 
 	// else
+	return DrawUnthemedFrameControl(pDC, rect, nType, nState);
+}
+
+BOOL CThemed::DrawUnthemedFrameControl(CDC* pDC, const CRect& rect, UINT nType, UINT nState)
+{
+	ASSERT(!SupportsTheming(STAP_ALLOW_CONTROLS) || !SupportsTheming(STAP_ALLOW_NONCLIENT));
+
+	// Fallback for our custom types
+	switch (nType)
+	{
+	case DFC_COMBO:
+		nType = DFC_SCROLL;
+		nState |= DFCS_SCROLLDOWN;
+		break;
+
+	case DFC_COMBONOARROW:
+		nType = DFC_BUTTON;
+		nState |= DFCS_BUTTONPUSH;
+		// fall through
+
+	case DFC_BUTTON:
+		if (nState & DFCS_BUTTONPUSH)
+		{
+			// We draw push buttons ourselves to be consistent with how 
+			// DrawFrameControl draws the combo/scroll button
+			CRect rFrame(rect);
+
+			if (nState & DFCS_PUSHED)
+			{
+				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DSHADOW), GetSysColor(COLOR_3DSHADOW));
+			}
+			else
+			{
+				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DFACE), GetSysColor(COLOR_3DDKSHADOW));
+				rFrame.DeflateRect(1, 1);
+
+				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DHIGHLIGHT), GetSysColor(COLOR_3DSHADOW));
+			}		
+			
+			rFrame.DeflateRect(1, 1);
+			pDC->FillSolidRect(rFrame, GetSysColor(COLOR_3DFACE));
+
+			return TRUE;
+		}
+		break;
+	}
+
 	return pDC->DrawFrameControl((LPRECT)(LPCRECT)rect, nType, nState);
 }
 
@@ -667,7 +714,8 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 	sThClass.Empty();
 	nThPart = 0;
 	nThState = 0;
-	
+
+	// Note: 'Disabled' takes priority
 	switch (nType)
 	{
 	case DFC_BUTTON:
@@ -679,13 +727,13 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 			{
 				nThPart = BP_PUSHBUTTON;
 				
-				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
-				{
-					nThState = PBS_PRESSED;
-				}
-				else if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+				if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
 				{
 					nThState = PBS_DISABLED;
+				}
+				else if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+				{
+					nThState = PBS_PRESSED;
 				}
 				else if ((nState & DFCS_HOT) == DFCS_HOT)
 				{
@@ -780,37 +828,46 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 		break;
 		
 	case DFC_SCROLL:
+		if (nState & DFCS_SCROLLCOMBOBOX)
 		{
-			if (nState & DFCS_SCROLLCOMBOBOX) 
+			VERIFY(GetThemeClassPartState(DFC_COMBO, nState, sThClass, nThPart, nThState)); // RECURSIVE CALL
+		}
+		else if (nState & DFCS_SCROLLSIZEGRIP)
+		{
+			sThClass = "SCROLLBAR";
+			nThPart = SBP_SIZEBOX;
+			nThState = (nState & DFCS_SCROLLLEFT) ? SZB_LEFTALIGN : SZB_RIGHTALIGN;
+		}
+		else if (nState & DFCS_SCROLLDOWN)
+		{
+			sThClass = "SCROLLBAR";
+			nThPart = SBP_LOWERTRACKVERT;
+			nThState = SCRBS_NORMAL;
+		}
+		else
+		{
+			ASSERT(0);
+		}
+		break;
+
+	case DFC_COMBO:
+	case DFC_COMBONOARROW:
+		{
+			sThClass = "COMBOBOX";
+			nThPart = (nType == DFC_COMBO ? CP_DROPDOWNBUTTON : CP_READONLY);
+			nThState = CBXS_NORMAL;
+
+			if (nState & DFCS_INACTIVE)
 			{
-				sThClass = "COMBOBOX";
-				nThPart = CP_DROPDOWNBUTTON;
-				nThState = CBXS_NORMAL;
-				
-				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
-					nThState = CBXS_PRESSED;
-				
-				else if (nState & DFCS_INACTIVE)
-					nThState = CBXS_DISABLED;
-				
-				else if (nState & DFCS_HOT)
-					nThState = CBXS_HOT;
+				nThState = CBXS_DISABLED;
 			}
-			else if (nState & DFCS_SCROLLSIZEGRIP)
+			else if (nState & (DFCS_CHECKED | DFCS_PUSHED))
 			{
-				sThClass = "SCROLLBAR";
-				nThPart = SBP_SIZEBOX;
-				nThState = (nState & DFCS_SCROLLLEFT) ? SZB_LEFTALIGN : SZB_RIGHTALIGN;
+				nThState = CBXS_PRESSED;
 			}
-			else if (nState & DFCS_SCROLLDOWN)
+			else if (nState & DFCS_HOT)
 			{
-				sThClass = "SCROLLBAR";
-				nThPart = SBP_LOWERTRACKVERT;
-				nThState = SCRBS_NORMAL;
-			}
-			else
-			{
-				ASSERT(0);
+				nThState = CBXS_HOT;
 			}
 		}
 		break;

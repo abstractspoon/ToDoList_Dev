@@ -92,7 +92,10 @@ const TIMEUNIT& GetTimeUnit(TH_UNITS nUnits)
 // Construction/Destruction
 /////////////////////////////////////////////////////////////////////////////////////
 
-CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) : m_nUnits(nUnits), m_nMaxDecPlaces(nMaxDecPlaces)
+CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) 
+	: 
+	m_nUnits(nUnits), 
+	m_nMaxDecPlaces(nMaxDecPlaces)
 {
 	// init static units
 	for (int nUnit = 0; nUnit < NUM_UNITS; nUnit++)
@@ -105,7 +108,7 @@ CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) : m_nUnits(nUnits), m_n
 
 	SetMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
 
-	AddButton(TEBTN_UNITS, _T(""), _T(""), CALC_BTNWIDTH);
+	AddButton(TEBTN_UNITS, _T(""), _T(""), EE_BTNWIDTH_CALCULATE);
 	SetDropMenuButton(TEBTN_UNITS);
 
 	UpdateButtonText(nUnits);
@@ -349,7 +352,7 @@ double CTimeEdit::ConvertTime(TH_UNITS nUnits) const
 
 CString CTimeEdit::FormatTime(BOOL bUnits) const
 {
-	return CTimeHelper().FormatTime(GetTime(), (bUnits ? m_nUnits : THU_NULL), m_nMaxDecPlaces);
+	return CTimeHelper::FormatTime(GetTime(), (bUnits ? m_nUnits : THU_NULL), m_nMaxDecPlaces);
 }
 
 CString CTimeEdit::FormatTimeHMS() const
@@ -359,7 +362,7 @@ CString CTimeEdit::FormatTimeHMS() const
 
 void CTimeEdit::OnSetReadOnly(BOOL bReadOnly)
 {
-	EnableButton(1, !bReadOnly && IsWindowEnabled());
+	EnableButton(TEBTN_UNITS, !bReadOnly);
 }
 
 void CTimeEdit::SetUnits(TH_UNITS nUnits, LPCTSTR szLongUnits, LPCTSTR szAbbrevUnits)

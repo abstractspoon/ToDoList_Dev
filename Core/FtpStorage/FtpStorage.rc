@@ -76,8 +76,9 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    AFX_IDS_APP_TITLE       "EasyFtp"
-    IDS_SD_TITLE            "Remote Server Details"
+    IDS_SD_TITLE            "Connect to Server"
+    IDS_DOWNLOADERROR_TITLE "Download Error"
+    IDS_UPLOADERROR_TITLE   "Upload Error"
 END
 
 #endif    // English (U.S.) resources

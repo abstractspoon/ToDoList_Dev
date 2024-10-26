@@ -9,6 +9,7 @@
 #include "themed.h"
 #include "graphicsmisc.h"
 #include "enimagelist.h"
+#include "enstring.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -16,7 +17,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-const COLORREF ELC_GRIDCOLOR = RGB(192, 192, 192);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -118,10 +118,13 @@ struct LVGROUP
 
 /////////////////////////////////////////////////////////////////////////////
 
-const DWORD NOTSET = 0xffffffff;
-DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
-
-/////////////////////////////////////////////////////////////////////////////
+CListCtrlItemGrouping::CListCtrlItemGrouping(HWND hwndList) 
+	: 
+	m_hwndList(hwndList), 
+	m_bEnabled(FALSE),
+	m_crBkgnd(CLR_NONE) 
+{
+}
 
 BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 {
@@ -131,7 +134,11 @@ BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 		return FALSE;
 	}
 
-	return (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
+	if (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) == -1)
+		return FALSE;
+
+	m_bEnabled = bEnable;
+	return TRUE;
 }
 
 BOOL CListCtrlItemGrouping::EnableGroupView(HWND hwndList, BOOL bEnable)
@@ -207,23 +214,8 @@ BOOL CListCtrlItemGrouping::HasGroups() const
 
 void CListCtrlItemGrouping::RemoveAllGroups()
 {
-	::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
-}
-
-BOOL CListCtrlItemGrouping::DrawGroupHeader(const LPNMLVCUSTOMDRAW pLVCD)
-{
-	const LVCUSTOMDRAW* pNMLV = (const LVCUSTOMDRAW*)pLVCD;
-
-	if (pNMLV->dwItemType != LVCDI_GROUP)
-		return FALSE;
-
-	CDC* pDC = CDC::FromHandle(pNMLV->nmcd.hdc);
-	CString sHeader = GetGroupHeaderText(pNMLV->nmcd.dwItemSpec);
-
-	CRect rRow(pNMLV->rcText);
-	GraphicsMisc::DrawGroupHeaderRow(pDC, m_hwndList, rRow, sHeader, CLR_NONE, m_crBkgnd);
-
-	return TRUE;
+	if (m_bEnabled)
+		::SendMessage(m_hwndList, LVM_REMOVEALLGROUPS, 0, 0);
 }
 
 void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
@@ -235,6 +227,23 @@ void CListCtrlItemGrouping::SetGroupHeaderBackColor(COLORREF crBack)
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+const DWORD NOTSET = 0xffffffff;
+const COLORREF ELC_GRIDCOLOR = RGB(192, 192, 192);
+const int TIMERID_EDITLABELS = 42;
+
+/////////////////////////////////////////////////////////////////////////////
+
+DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
+
+/////////////////////////////////////////////////////////////////////////////
+
+CEnListCtrl::CColumnData::CColumnData()
+{
+	crText = ::GetSysColor(COLOR_WINDOWTEXT);
+	nFormat = ES_END;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl
@@ -297,10 +306,23 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl message handlers
 
-CListCtrlItemGrouping& CEnListCtrl::GetGrouping() 
-{ 
-	VERIFY(m_grouping.EnableGroupView(GetSafeHwnd()));
-	return m_grouping; 
+BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
+{
+	if (!Misc::StateChanged(bEnable, m_grouping.IsEnabled()))
+		return TRUE;
+	
+	if (!m_grouping.EnableGroupView(GetSafeHwnd(), bEnable))
+		return FALSE;
+
+	RefreshItemHeight();
+	return TRUE;
+}
+
+BOOL CEnListCtrl::DeleteAllItems()
+{
+	m_grouping.RemoveAllGroups();
+	
+	return CListCtrl::DeleteAllItems();
 }
 
 void CEnListCtrl::OnPaint() 
@@ -392,7 +414,7 @@ void CEnListCtrl::DeleteAllColumnData()
 	}
 }
 
-CColumnData* CEnListCtrl::CreateColumnData(int nCol)
+CEnListCtrl::CColumnData* CEnListCtrl::CreateColumnData(int nCol)
 {
 	CColumnData* pData = NULL;
 
@@ -417,7 +439,7 @@ CColumnData* CEnListCtrl::CreateColumnData(int nCol)
 	return pData;
 }
 
-const CColumnData* CEnListCtrl::GetColumnData(int nCol) const
+const CEnListCtrl::CColumnData* CEnListCtrl::GetColumnData(int nCol) const
 {
 	CColumnData* pData = NULL;
 	m_mapColumnData.Lookup(nCol, pData);
@@ -620,12 +642,7 @@ void CEnListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, CO
 	}
 	else if (crBack != CLR_NONE)
 	{
-		CRect rBack(rItem);
-
-		if (m_bHorzGrid)
-			rBack.bottom--;
-
-		pDC->FillSolidRect(rBack, crBack);
+		pDC->FillSolidRect(rItem, crBack);
 	}
 }
 
@@ -703,7 +720,7 @@ void CEnListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 		pDC->SelectObject(pOldFont);
 }
 
-void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
+void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	pDC->SelectObject(GetFont());
@@ -717,6 +734,10 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// init helper variables
 	CRect rItem, rClient;
 	GetItemRect(nItem, rItem, LVIR_BOUNDS);
+
+	if (m_grouping.IsEnabled())
+		rItem.top--;
+
 	GetClientRect(&rClient);
 
 	// some problems with drop-highlighting items during drag and drop
@@ -755,6 +776,13 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	{
 		COLORREF crBack = GetItemBackColor(nItem, bSelected, FALSE, bItemFocused);
 		DrawItemBackground(pDC, nItem, rItem, crBack, bSelected, bDropHighlighted, bItemFocused);
+
+		// draw horz grid lines if required
+		if (m_bHorzGrid)
+		{
+			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
+			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, ELC_GRIDCOLOR);
+		}
 
 		// cycle thru columns formatting and drawing each subitem
 		int nNumCol = GetColumnCount();
@@ -803,21 +831,18 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				rCell.left += nImageWidth;
 			}
 
-			CEnString sText(GetItemText(nItem, nCol));
-			DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bListFocused);
-
 			// draw vert grid if required and we're not tight up against the client edge
 			if (m_bVertGrid && (rCell.right < rClient.right))
 			{
 				GraphicsMisc::DrawVertLine(pDC, rCell.bottom, rCell.top, (rCell.right - 1), ELC_GRIDCOLOR);
+				rCell.right--;
 			}
-		}
 
-		// draw horz grid lines if required
-		if (m_bHorzGrid)
-		{
-			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
-			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, ELC_GRIDCOLOR);
+			if (m_bHorzGrid)
+				rCell.bottom--;
+
+			CEnString sText(GetItemText(nItem, nCol));
+			DrawCell(pDC, nItem, nCol, rCell, sText, bSelected, bDropHighlighted, bListFocused);
 		}
 
 		// focus rect: normal method doesn't work because we are focusing whole line
@@ -919,9 +944,9 @@ BOOL CEnListCtrl::SetTooltipCtrlText(CString sText)
 
 void CEnListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	int nSel = HitTest(point);
+	int nHit = HitTest(point);
 
-	if (!WantSelChange(nSel))
+	if (!WantSelChange(nHit))
 	{
 		// Make sure we finish editing
 		if (GetEditControl() != NULL)
@@ -930,44 +955,36 @@ void CEnListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		return;
 	}
 
-	BOOL bChangedEditLabels = FALSE;
-
-	// if the list is in report mode AND supports label editing then
-	// clicking anywhere on the item when its already selected will
-	// edit the label of column one which is not what we want. 
-	// so we selectively disable it
-	if ((nSel != -1) && m_nCurView == LVS_REPORT)
-	{
-		if (GetStyle() & LVS_EDITLABELS)
-		{
-			CRect rItem;
-			GetSubItemRect(nSel, 0, LVIR_BOUNDS, rItem);
-
-			if (GetImageList(LVSIL_SMALL))
-				rItem.left += 19;
-
-			if (GetImageList(LVSIL_STATE))
-				rItem.left += 19;
-
-			if ((point.x < rItem.left) || (point.x > rItem.right))
-			{
-				ModifyStyle(LVS_EDITLABELS, 0);
-				bChangedEditLabels = TRUE;
-			}
-		}
-	}
-	
 	CListCtrl::OnLButtonDown(nFlags, point);
 
-	if (nSel != -1) // user clicked on an item
+	if (nHit != -1)
 	{
-		// determine whether a sel change has occured
-		// and tell our parent if it has
-		NotifySelChange();
-	}
+		int nSel = GetCurSel();
 
-	if (bChangedEditLabels)
-		ModifyStyle(0, LVS_EDITLABELS);
+		if (nHit == nSel)
+		{
+			// if the list is in report mode AND supports label editing then
+			// clicking anywhere on the item when its already selected will
+			// edit the label of column one which is not what we want. 
+			// So if we detect that situation we kill the label edit timer.
+			if ((m_nCurView == LVS_REPORT) && (GetStyle() & LVS_EDITLABELS))
+			{
+				CRect rItem;
+				GetSubItemRect(nHit, 0, LVIR_LABEL, rItem);
+
+				if (!rItem.PtInRect(point))
+				{
+					KillTimer(TIMERID_EDITLABELS);
+				}
+			}
+		}
+		else // user clicked on another item
+		{
+			// determine whether a sel change has occurred
+			// and tell our parent if it has
+			NotifySelChange();
+		}
+	}
 }
 
 void CEnListCtrl::SetColumnTextColor(int nCol, COLORREF color)
@@ -1366,7 +1383,12 @@ int CEnListCtrl::CalcItemHeight() const
 	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9); // default edit height
 	int nFontHeight = GraphicsMisc::GetFontPixelSize(GetSafeHwnd());
 
-	return max(nBaseHeight, max(m_nMinItemHeight, nFontHeight));
+	int nItemHeight = max(m_nMinItemHeight, max(nBaseHeight, nFontHeight));
+
+	if (m_grouping.IsEnabled())
+		nItemHeight--;
+
+	return nItemHeight;
 }
 
 void CEnListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
@@ -1378,12 +1400,11 @@ void CEnListCtrl::RefreshItemHeight()
 {
 	if (GetSafeHwnd())
 	{
-		// I've tried everything I can think of but
-		// this is the only thing that seems to be able
-		// to trigger a WM_MEASUREITEM message
+		// I've tried everything I can think of but the only thing 
+		// that seems to trigger a WM_MEASUREITEM message is a size change
 		CRect rWindow;
-		GetWindowRect(rWindow);
 
+		GetWindowRect(rWindow);
 		GetParent()->ScreenToClient(rWindow);
 
 		rWindow.right--;
@@ -1508,13 +1529,21 @@ void CEnListCtrl::GetCellRect(int nRow, int nCol, CRect& rCell) const
 	// which is weird so we do a bit of trickery
 	if (nCol == 0)
 		rCell.left = -GetScrollPos(SB_HORZ);
+
+	if (m_grouping.IsEnabled())
+		rCell.top--;
 }
 
 void CEnListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
 {
 	GetCellRect(nRow, nCol, rCell);
 
-	rCell.OffsetRect(-2, 0);
+	// Overlap the edit rect with the previous cell's grid borders
+	if (m_bVertGrid && (nCol > 0))
+		rCell.left--;
+
+	if (m_bHorzGrid && (nRow > 0))
+		rCell.top--;
 }
 
 void CEnListCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
@@ -1547,18 +1576,41 @@ BOOL CEnListCtrl::OnColumnClick(NMHDR* pNMHDR, LPARAM* /*lParam*/)
 BOOL CEnListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = CDRF_DODEFAULT;
-	LPNMLVCUSTOMDRAW pLVCD = (LPNMLVCUSTOMDRAW)pNMHDR;
+	LVCUSTOMDRAW* pLVCD = (LVCUSTOMDRAW*)pNMHDR;
 
 	if (pLVCD->nmcd.dwDrawStage == CDDS_PREPAINT)
 	{
-		if (m_grouping.DrawGroupHeader(pLVCD/*, m_crGroupBkgnd*/))
+		if (pLVCD->dwItemType == LVCDI_GROUP)
 		{
+			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+
+			CRect rRow(pLVCD->rcText);
+			rRow.OffsetRect(0, -2);
+
+			DrawGroupHeader(pDC, 
+							rRow,
+							m_grouping.GetGroupHeaderText(pLVCD->nmcd.dwItemSpec),
+							m_grouping.GetGroupHeaderBackColor());
+
+			if (m_bHorzGrid)
+			{
+				if (m_bVertGrid)
+					rRow.right = pLVCD->nmcd.rc.right;
+
+				GraphicsMisc::DrawHorzLine(pDC, 0, rRow.right, rRow.bottom, ELC_GRIDCOLOR);
+			}
+
 			*pResult = CDRF_SKIPDEFAULT;
 			return TRUE;
 		}
 	}
 
 	return FALSE;
+}
+
+void CEnListCtrl::DrawGroupHeader(CDC* pDC, CRect& rRow, const CString& sText, COLORREF crBack)
+{
+	GraphicsMisc::DrawGroupHeaderRow(pDC, *this, rRow, sText, CLR_NONE, crBack);
 }
 
 void CEnListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult)
@@ -1591,14 +1643,14 @@ void CEnListCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult)
 	}
 }
 
-void CEnListCtrl::SetSortColumn(int nColumn, BOOL bResort)
+void CEnListCtrl::SetSortColumn(int nCol, BOOL bResort)
 {
 	if (!m_bSortingEnabled)
 		return;
 
-	if (nColumn != m_nSortColumn)
+	if (nCol != m_nSortColumn)
 	{
-		m_nSortColumn = nColumn;
+		m_nSortColumn = nCol;
 		m_bSortAscending = TRUE;
 
 		if (m_header.GetSafeHwnd())
@@ -1680,17 +1732,30 @@ int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortC
 	m_mapSortStrings.Lookup(dwItemData1, sItem1); 
 	m_mapSortStrings.Lookup(dwItemData2, sItem2);
 
-	if (m_bSortEmptyBelow)
-	{
-		if (sItem1.IsEmpty())
-			return m_bSortAscending ? 1 : -1;
+	int nCompare = CompareEmptiness(sItem1.IsEmpty(), sItem2.IsEmpty());
 
-		if (sItem2.IsEmpty())
-			return m_bSortAscending ? -1 : 1;
-	}
+	if (nCompare != 0)
+		return nCompare;
 
 	// else
 	return sItem1.CompareNoCase(sItem2);
+}
+
+int CEnListCtrl::CompareEmptiness(BOOL bItem1Empty, BOOL bItem2Empty) const
+{
+	if (m_bSortEmptyBelow)
+	{
+		if (bItem1Empty && bItem2Empty)
+			return 0;
+
+		if (bItem1Empty)
+			return m_bSortAscending ? 1 : -1;
+
+		if (bItem2Empty)
+			return m_bSortAscending ? -1 : 1;
+	}
+
+	return 0;
 }
 
 CString CEnListCtrl::GetSortText(DWORD dwItemData) const // this is for derived classes
@@ -1773,6 +1838,9 @@ void CEnListCtrl::PreSubclassWindow()
 
 	if (m_nCurView == -1)
 		m_nCurView = (GetStyle() & LVS_TYPEMASK);
+
+	if (m_nMinItemHeight != -1)
+		RefreshItemHeight();
 }
 
 BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC) 
@@ -1780,8 +1848,8 @@ BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC)
 	if (GetItemCount() && GetView() != LVS_REPORT)
 		return CListCtrl::OnEraseBkgnd(pDC);
 	
-	else // we do all the work in OnPaint
-		return TRUE;
+	// else we do all the work in OnPaint
+	return TRUE;
 }
 
 void CEnListCtrl::EnableAlternateRowColoring(BOOL bEnable)

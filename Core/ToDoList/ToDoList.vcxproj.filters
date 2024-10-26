@@ -50,9 +50,6 @@
     <None Include="res\custattrib_toolbar_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\custom_attrib_icons.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\depend_link.ico">
       <Filter>Resource Files</Filter>
     </None>
@@ -248,6 +245,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\style_wrap.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\select_icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\reminder.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

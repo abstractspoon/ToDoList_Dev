@@ -87,12 +87,12 @@ void CTDLMultiSortDlg::BuildCombos()
 		for (nCol = 0; nCol < NUM_COLUMNS; nCol++)
 		{
 			const TDCCOLUMN& col = COLUMNS[nCol];
-			TDC_COLUMN nColID = col.nColID;
+			TDC_COLUMN nColID = col.nColumnID;
 
 			if (!IsColumnVisible(nColID))
 				continue;
 				
-			AddString(combo, col.nIDLongName, nColID);
+			AddStringT(combo, col.nIDLongName, nColID);
 		}
 	
 		// custom columns
@@ -107,14 +107,14 @@ void CTDLMultiSortDlg::BuildCombos()
 			ASSERT(attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT));
 
 			CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			AddString(combo, sColumn, nColID);
+			AddStringT(combo, sColumn, nColID);
 		}
 
 		// add blank item at top of 2nd and 3rd combo
 		if (nSort > 0)
-			AddString(combo, _T(""), TDCC_NONE);
+			AddStringT(combo, _T(""), TDCC_NONE);
 
-		SelectItemByData(combo, m_sort.GetSortBy(nSort));
+		SelectItemByDataT(combo, m_sort.GetSortBy(nSort));
 	}
 
 	// set selection to first item if first combo selection is not set
@@ -122,25 +122,22 @@ void CTDLMultiSortDlg::BuildCombos()
 	{
 		m_cbSortBy[0].SetCurSel(0);
 
-		TDC_COLUMN nColID = GetSelectedItemData(m_cbSortBy[0], TDCC_NONE);
+		TDC_COLUMN nColID = GetSelectedItemDataT(m_cbSortBy[0], TDCC_NONE);
 		m_sort.SetSortBy(0, nColID);
 	}
 }
 
-BOOL CTDLMultiSortDlg::IsColumnVisible(TDC_COLUMN col) const
+BOOL CTDLMultiSortDlg::IsColumnVisible(TDC_COLUMN nColID) const
 {
 	// special cases:
-	if (col == TDCC_CLIENT)
-	{
+	if (nColID == TDCC_CLIENT)
 		return TRUE;
-	}
-	else if (col == TDCC_NONE)
-	{
+
+	if (nColID == TDCC_NONE)
 		return FALSE;
-	}
 
 	// else test column
-	return m_mapVisibleColumns.Has(col);
+	return m_mapVisibleColumns.Has(nColID);
 }
 
 void CTDLMultiSortDlg::OnSelchangeSortby1() 
@@ -160,7 +157,7 @@ void CTDLMultiSortDlg::OnSelchangeSortby3()
 
 void CTDLMultiSortDlg::OnSelchangeSortby(int nCol)
 {
-	TDC_COLUMN nColID = GetSelectedItemData(m_cbSortBy[nCol], TDCC_NONE);
+	TDC_COLUMN nColID = GetSelectedItemDataT(m_cbSortBy[nCol], TDCC_NONE);
 	m_sort.SetSortBy(nCol, nColID);
 
 	EnableControls();

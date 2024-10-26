@@ -81,17 +81,27 @@ PFNDRAWTHEMETEXT TrueDrawThemeText = NULL;
 
 //////////////////////////////////////////////////////////////////////
 
-void CDarkMode::Enable(BOOL bEnable)
+void UnhookAll();
+
+//////////////////////////////////////////////////////////////////////
+
+BOOL CDarkMode::IsSupported()
 {
 	if (Misc::IsHighContrastActive())
-		return;
+		return FALSE;
 
 	if (!CThemed::IsAppThemed())
+		return FALSE;
+
+	return TRUE;
+}
+
+void CDarkMode::Enable(BOOL bEnable)
+{
+	if (!IsSupported())
 		return;
 
-	BOOL bIsEnabled = IsEnabled();
-
-	if ((bEnable && bIsEnabled) || (!bEnable && !bIsEnabled))
+	if (!Misc::StateChanged(bEnable, IsEnabled()))
 		return;
 
 	if (bEnable)
@@ -166,12 +176,26 @@ void CDarkMode::Enable(BOOL bEnable)
 			VERIFY(DetourDetach(&(PVOID&)TrueDrawThemeText, MyDrawThemeText) == 0);
 
 		VERIFY(DetourTransactionCommit() == 0);
+
+		UnhookAll();
 	}
 }
 
 //////////////////////////////////////////////////////////////////////
 
 static CMap<HWND, HWND, CSubclassWnd*, CSubclassWnd*&> s_mapScWnds;
+
+// ----------------------------------------------------
+
+struct THEMEELEMENT
+{
+	THEMEELEMENT() : nRefCount(0) {}
+
+	CString sClass;
+	int nRefCount;
+};
+
+static CMap<HTHEME, HTHEME, THEMEELEMENT, THEMEELEMENT&> s_mapThWnds;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -217,17 +241,22 @@ void UnhookWindow(HWND hWnd)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////
-
-struct THEMEELEMENT
+void UnhookAll()
 {
-	THEMEELEMENT() : nRefCount(0) {}
+	POSITION pos = s_mapScWnds.GetStartPosition();
+	HWND hUnused;
+	CSubclassWnd* pWnd = NULL;
 
-	CString sClass;
-	int nRefCount;
-};
+	while (pos)
+	{
+		s_mapScWnds.GetNextAssoc(pos, hUnused, pWnd);
+		pWnd->HookWindow(NULL);
+		delete pWnd;
+	}
 
-static CMap<HTHEME, HTHEME, THEMEELEMENT, THEMEELEMENT&> s_mapThWnds;
+	s_mapScWnds.RemoveAll();
+	s_mapThWnds.RemoveAll();
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -761,6 +790,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		nTrueColor = COLOR_WINDOW;
 		break;
 
+#ifdef _DEBUG
 	case COLOR_ACTIVEBORDER:
 	case COLOR_INACTIVEBORDER:
 	case COLOR_INACTIVECAPTION:	
@@ -775,8 +805,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 // 	case COLOR_MENUHILIGHT:
 // 	case COLOR_MENUBAR:
 	case COLOR_BACKGROUND:
-		// TODO
 		RETURN_STATIC_COLOR_OR_BRUSH(colorRed);
+#endif
 	}
 
 	if (bColor)

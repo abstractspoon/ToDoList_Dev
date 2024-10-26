@@ -138,32 +138,32 @@ namespace Abstractspoon
 				public:
 					ParentNotify(IntPtr hwndParent);
 
-					bool AddMod(Task::Attribute nAttribute, DateTime value);
-					bool AddMod(Task::Attribute nAttribute, double value);
-					bool AddMod(Task::Attribute nAttribute, double time, Task::TimeUnits units);
-					bool AddMod(Task::Attribute nAttribute, int value);
-					bool AddMod(Task::Attribute nAttribute, bool value);
-					bool AddMod(Task::Attribute nAttribute, String^ value);
-					bool AddMod(Task::Attribute nAttribute, String^ value, bool append);
+					bool AddMod(Task::Attribute attrib, DateTime value);
+					bool AddMod(Task::Attribute attrib, double value);
+					bool AddMod(Task::Attribute attrib, double time, Task::TimeUnits units);
+					bool AddMod(Task::Attribute attrib, int value);
+					bool AddMod(Task::Attribute attrib, bool value);
+					bool AddMod(Task::Attribute attrib, String^ value);
+					bool AddMod(Task::Attribute attrib, String^ value, bool append);
 					bool AddMod(String^ sCustAttribID, String^ value);
 
-					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, DateTime value);
-					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, double value);
-					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, double time, Task::TimeUnits units);
-					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, int value);
-					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, bool value);
-					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value);
-					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value, bool append);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, DateTime value);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, double value);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, int value);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, bool value);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, String^ value);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append);
 					bool AddMod(UInt32 taskID, String^ sCustAttribID, String^ value);
 
 					bool NotifyMod();
-					bool NotifyMod(Task::Attribute nAttribute, DateTime value);
-					bool NotifyMod(Task::Attribute nAttribute, double value);
-					bool NotifyMod(Task::Attribute nAttribute, double time, Task::TimeUnits units);
-					bool NotifyMod(Task::Attribute nAttribute, int value);
-					bool NotifyMod(Task::Attribute nAttribute, bool value);
-					bool NotifyMod(Task::Attribute nAttribute, String^ value);
-					bool NotifyMod(Task::Attribute nAttribute, String^ value, bool append);
+					bool NotifyMod(Task::Attribute attrib, DateTime value);
+					bool NotifyMod(Task::Attribute attrib, double value);
+					bool NotifyMod(Task::Attribute attrib, double time, Task::TimeUnits units);
+					bool NotifyMod(Task::Attribute attrib, int value);
+					bool NotifyMod(Task::Attribute attrib, bool value);
+					bool NotifyMod(Task::Attribute attrib, String^ value);
+					bool NotifyMod(Task::Attribute attrib, String^ value, bool append);
 					bool NotifyMod(String^ sCustAttribID, String^ value);
 
 					bool NotifyMove(UInt32 taskID, UInt32 parentTaskID, UInt32 afterSiblingID);
@@ -288,6 +288,7 @@ namespace Abstractspoon
 				public:
 					enum class Style
 					{
+						None = -1,
 						Selected,
 						SelectedNotFocused,
 						DropHighlighted,
@@ -296,9 +297,10 @@ namespace Abstractspoon
 				public:
 					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool transparent);
 					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent);
-
+					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent, bool clipLeft, bool clipRight);
 
 					static Drawing::Color GetTextColor(Style style, Drawing::Color baseColor);
+					static Drawing::Color GetBorderColor(Style style);
 					static Drawing::Color GetColor(Style style);
 					static GM_ITEMSTATE Map(Style style);
 				};

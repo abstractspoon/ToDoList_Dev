@@ -7,6 +7,7 @@
 // TDLGoToTaskDlg.h : header file
 //
 
+#include "TDLDialog.h"
 #include "FilteredToDoCtrl.h"
 
 #include "..\Shared\MASKEDIT.H"
@@ -15,7 +16,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CTDLGoToTaskDlg dialog
 
-class CTDLGoToTaskDlg : public CDialog
+class CTDLGoToTaskDlg : public CTDLDialog
 {
 // Construction
 public:

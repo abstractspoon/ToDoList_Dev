@@ -229,6 +229,10 @@ SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCDarkMode.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCDialogHelper.cpp
 # End Source File
 # Begin Source File
@@ -261,6 +265,10 @@ SOURCE=..\ToDoList\TDCMainMenu.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCMenuIconMgr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCMergeTasklist.cpp
 # End Source File
 # Begin Source File
@@ -270,6 +278,10 @@ SOURCE=..\ToDoList\TDCOutlookImportHelper.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCRecurrence.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCRecurrenceHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -298,6 +310,10 @@ SOURCE=..\ToDoList\TDCSourceControl.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCStartupOptions.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\tdcstruct.cpp
 # End Source File
 # Begin Source File
 
@@ -561,6 +577,10 @@ SOURCE=..\ToDoList\TDLShowReminderDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLShowReminderListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLSimpleTextContentCtrl.cpp
 # End Source File
 # Begin Source File
@@ -570,6 +590,10 @@ SOURCE=..\ToDoList\TDLStatusBar.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskAttributeCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -853,6 +877,10 @@ SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCDarkMode.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCDialogHelper.h
 # End Source File
 # Begin Source File
@@ -893,6 +921,10 @@ SOURCE=..\ToDoList\tdcmapping.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCMenuIconMgr.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCMergeTasklist.h
 # End Source File
 # Begin Source File
@@ -906,6 +938,10 @@ SOURCE=..\ToDoList\TDCOutlookImportHelper.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCRecurrence.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCRecurrenceHelper.h
 # End Source File
 # Begin Source File
 
@@ -1209,6 +1245,10 @@ SOURCE=..\ToDoList\TDLShowReminderDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLShowReminderListCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLSimpleTextContentCtrl.h
 # End Source File
 # Begin Source File
@@ -1218,6 +1258,10 @@ SOURCE=..\ToDoList\TDLStatusBar.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskAttributeCtrl.h
 # End Source File
 # Begin Source File
 

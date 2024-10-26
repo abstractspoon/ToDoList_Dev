@@ -39,9 +39,7 @@ const LPCWSTR DAYVIEW_NAME = L"Week Planner";
 
 CDayViewUIExtensionBridge::CDayViewUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	HMODULE hMod = LoadLibrary(L"DayViewUIExtensionBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_DAYVIEW), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"DayViewUIExtensionBridge.dll", IDI_DAYVIEW, 16, true);
 }
 
 void CDayViewUIExtensionBridge::Release()
@@ -162,9 +160,9 @@ void CDayViewUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_U
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CDayViewUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CDayViewUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CDayViewUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const

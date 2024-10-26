@@ -130,7 +130,7 @@ protected:
 	int HitTestGridRow(const CPoint& point) const;
 
 	COLORREF GetFadedThemeColour(int percent) const;
-	int GetDayOfWeek(int nColumn) const;
+	int GetDayOfWeek(int nCol) const;
 	COleDateTime GetMinDate(int nRow) const;
 	COleDateTime GetMaxDate(int nRow) const;
 

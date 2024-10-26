@@ -64,7 +64,8 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 
  	BOOL Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
-	BOOL GroupBy(TDC_ATTRIBUTE nAttrib);
+	BOOL GroupBy(TDC_ATTRIBUTE nAttribID);
+	TDC_ATTRIBUTE GetGroupBy() const { return m_nGroupBy; }
 
 	void SetOptions(DWORD dwOptions);
 	DWORD GetOptions() const { return m_dwOptions; }
@@ -75,13 +76,14 @@ public:
 	void SetReadOnly(bool bReadOnly);
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	void SetPriorityColors(const CDWordArray& aColors);
+	void SetFullColumnColor(COLORREF crFull);
 
 	int GetVisibleColumnCount() const;
 	int GetVisibleTaskCount() const { return m_aColumns.GetVisibleTaskCount(); }
 
-	BOOL TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
+	BOOL TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
 	int GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aValues) const;
-	TDC_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
+	TDC_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackedAttributeID; }
 	TDC_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
 
 	const CKanbanCustomAttributeDefinitionArray& GetCustomAttributeDefinitions() const { return m_aCustomAttribDefs; }
@@ -107,6 +109,7 @@ protected:
 	CDWordArray m_aPrevPinnedTasks;
 	CPoint m_ptDragStart;
 	COLORREF m_crGroupHeaderBkgnd;
+	COLORREF m_crFullColumn;
 
 	CKanbanColumnCtrl* m_pSelectedColumn;
 	CKanbanColumnCtrlArray m_aColumns;
@@ -115,7 +118,7 @@ protected:
 	CImageList m_ilDrag;
 	CMidnightTimer m_timerMidnight;
 
-	TDC_ATTRIBUTE m_nTrackAttribute, m_nSortBy, m_nGroupBy;
+	TDC_ATTRIBUTE m_nTrackedAttributeID, m_nSortBy, m_nGroupBy;
 	CString m_sTrackAttribID, m_sGroupByCustAttribID;
 	BOOL m_bSortAscending;
 
@@ -143,6 +146,7 @@ protected:
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnEndTrackHeaderItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
@@ -199,7 +203,7 @@ protected:
 	BOOL SelectClosestAdjacentItemToSelection(int nAdjacentCol);
 	int MapHeaderItemToColumn(int nItem) const;
 
-	inline BOOL UsingFixedColumns() const { return m_aColumnDefs.GetSize(); }
+	inline BOOL UsingFixedColumns() const { return ((m_nTrackedAttributeID == TDCA_FIXEDCOLUMNS) && m_aColumnDefs.GetSize()); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
 
 	BOOL IsDragging() const;
@@ -211,9 +215,9 @@ protected:
 	BOOL NotifyParentAttibuteChange(const CDWordArray& aTaskIDs);
 	void NotifyParentSelectionChange();
 	BOOL GetColumnAttributeValue(const CKanbanColumnCtrl* pDestCol, const CPoint& ptScreen, CString& sValue) const;
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CString& sNewValue);
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, int nNewValue);
-	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CStringArray& aNewValues);
+	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CString& sNewValue);
+	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, int nNewValue);
+	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttribID, const CStringArray& aNewValues);
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues);
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey);
 	BOOL IsTrackedAttributeMultiValue() const;
@@ -241,7 +245,7 @@ protected:
 	static int GetTaskTags(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aValues);
 	static BOOL RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, 
 									  BOOL bHideParents, BOOL bHideSubtasks, BOOL bHideNoGroup);
-	static CString GetXMLTag(TDC_ATTRIBUTE nAttrib);
+	static CString GetXMLTag(TDC_ATTRIBUTE nAttribID);
 	static BOOL HasNonParentTasks(const CKanbanItemArray* pItems);
 	static void UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);

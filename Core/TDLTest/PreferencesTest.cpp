@@ -49,7 +49,7 @@ void CPreferencesTest::TestSectionPerformance()
 		return;
 	}
 
-	BeginTest(_T("CPreferencesTest::SectionPerformance"));
+	CTDCScopedTest test(*this, _T("CPreferencesTest::SectionPerformance"));
 
 	CString sIniPath = FileMisc::GetTempFilePath(_T("Test"), _T(".ini"));
 
@@ -106,10 +106,10 @@ void CPreferencesTest::TestSectionPerformance()
 		_tprintf(_T("Reading %d sections x %d entries took %ld ms\n"), nNumSection, nNumEntry, dwDuration / 10);
 	}
 
-	// Clear preferences to prevent save
+#ifndef _DEBUG
+	// Reset preferences to prevent a save affecting timing
 	CPreferences::Release();
-	
-	EndTest();
+#endif
 }
 
 void CPreferencesTest::TestArrayPerformance()
@@ -120,7 +120,7 @@ void CPreferencesTest::TestArrayPerformance()
 		return;
 	}
 
-	BeginTest(_T("CPreferencesTest::TestArrayPerformance"));
+	CTDCScopedTest test(*this, _T("CPreferencesTest::TestArrayPerformance"));
 
 	// Separate items
 	{
@@ -261,8 +261,6 @@ void CPreferencesTest::TestArrayPerformance()
 			nTestSize *= 10;
 		}
 	}
-	
-	EndTest();
 }
 
 void CPreferencesTest::InitArray(CDWordArray& aItems, int nSize)

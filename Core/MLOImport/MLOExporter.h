@@ -29,7 +29,7 @@ public:
 	// interface implementation
 	void Release() { delete this; }
 	void SetLocalizer(ITransText* pTT);
-	bool SupportsHtmlComments() const { return false; }
+	bool SupportsHtmlComments() const { return true; }
 	HICON GetIcon() const { return m_icon; }
 
 	// caller must copy only
@@ -50,8 +50,14 @@ protected:
 	void BuildPlacesMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CMapStringToString& mapPlaces, BOOL bAndSiblings);
 	void ExportPlaces(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj);
 
+	CString FormatFileLinks(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask) const;
+	CString FormatDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestItem) const;
+	CString FormatComments(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask) const;
+	CString FormatDestID(const CString& sTitle, DWORD dwID) const;
+
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 	static CString FormatDate(time64_t tDate);
+	static void AddSpacedContent(const CString& sSrc, CString& sDest);
 };
 
 #endif // !defined(AFX_MLOEXPORTER_H__F588E6B1_3646_4994_99A2_4223FDDA1A31__INCLUDED_)

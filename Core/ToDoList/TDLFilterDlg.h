@@ -49,7 +49,7 @@ protected:
 	CEnCheckComboBox			m_cbAllocByFilter;
 	CEnCheckComboBox			m_cbVersionFilter;
 	CEnCheckComboBox			m_cbTagFilter;
-	CTDLFilterComboBox			m_cbTaskFilter;
+	CTDLFilterComboBox			m_cbShowFilter;
 	CTDLFilterDateComboBox		m_cbStartFilter;
 	CTDLFilterDateComboBox		m_cbDueFilter;
 	CTDLPriorityComboBox		m_cbPriorityFilter;

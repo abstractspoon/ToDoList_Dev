@@ -84,7 +84,7 @@ protected:
 	CBrush m_brBack;
 	UITHEME m_theme;
 	CString	m_sTrackedCustomAttribID, m_sGroupByCustomAttribID;
-	TDC_ATTRIBUTE m_nTrackedAttrib, m_nGroupByAttrib;
+	TDC_ATTRIBUTE m_nTrackedAttribID, m_nGroupByAttribID;
 	CDWordArray m_aSelTaskIDs;
 	CWndPromptManager m_mgrPrompts;
 

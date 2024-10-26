@@ -44,35 +44,36 @@ public:
 	int FindDefinition(const CString& sAttribID) const;
 
 	TDC_ATTRIBUTE GetDefinitionID(const CString& sAttribID) const;
-	BOOL HasDefinition(TDC_ATTRIBUTE nAttrib) const;
+	BOOL HasDefinition(TDC_ATTRIBUTE nAttribID) const;
 
-	CString GetDefinitionID(TDC_ATTRIBUTE nAttrib) const;
-	CString GetDefinitionLabel(TDC_ATTRIBUTE nAttrib) const;
+	CString GetDefinitionID(TDC_ATTRIBUTE nAttribID) const;
+	CString GetDefinitionLabel(TDC_ATTRIBUTE nAttribID) const;
 
 protected:
-	int FindDefinition(TDC_ATTRIBUTE nAttrib) const;
+	int FindDefinition(TDC_ATTRIBUTE nAttribID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
 namespace KBUtils
 {
-	CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
+	CString FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
 							const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+	CString FormatDate(const COleDateTime& date, BOOL bISODates);
 
-	UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);
-	CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
+	UINT GetDisplayFormat(TDC_ATTRIBUTE nAttribID, BOOL bLong);
+	CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID, KBC_ATTRIBLABELS nLabelVis,
 							 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 
-	CString GetAttributeID(TDC_ATTRIBUTE nAttrib);
-	CString GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs);
+	CString GetAttributeID(TDC_ATTRIBUTE nAttribID);
+	CString GetAttributeID(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribs);
 
 	BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
-	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttrib);
-	BOOL IsSortableAttribute(TDC_ATTRIBUTE nAttrib);
+	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttribID);
+	BOOL IsSortableAttribute(TDC_ATTRIBUTE nAttribID);
 
-	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
-	BOOL IsGroupableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+	BOOL IsGroupableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -115,9 +116,9 @@ struct KANBANITEM
 
 	int GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
-	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const;
-	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs) const;
-	BOOL HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const;
+	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, BOOL bISODates = FALSE) const;
+	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs, BOOL bISODates = FALSE) const;
+	BOOL HasAttributeDisplayValue(TDC_ATTRIBUTE nAttribID) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
 	COLORREF GetBorderColor(BOOL bColorIsBkgnd) const;
@@ -149,7 +150,7 @@ protected:
 
 protected:
 	CString GetTrackedAttributeValue(LPCTSTR szAttrib) const;
-	int GetPriorityOrRisk(TDC_ATTRIBUTE nAttrib, DWORD dwOptions) const;
+	int GetPriorityOrRisk(TDC_ATTRIBUTE nAttribID, DWORD dwOptions) const;
 };
 typedef CArray<const KANBANITEM*, const KANBANITEM*> CKanbanItemArray;
 
@@ -227,7 +228,6 @@ struct KANBANCOLUMN
 	CStringArray aAttribValues;
 	int nMaxTaskCount;
 	COLORREF crBackground;
-	COLORREF crExcess;
 };
 
 /////////////////////////////////////////////////////////////////////////////

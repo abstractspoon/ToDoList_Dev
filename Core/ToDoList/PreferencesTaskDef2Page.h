@@ -48,7 +48,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesTaskDef2Page)
-	enum { IDD = IDD_PREFTASKDEF2_PAGE };
 	//}}AFX_DATA
 
 	BOOL	m_bUpdateInheritAttributes;
@@ -70,11 +69,11 @@ protected:
 
 	struct ATTRIBPREF
 	{
-		ATTRIBPREF() : nAttrib(TDCA_NONE), bUse(FALSE) {}
-		ATTRIBPREF(UINT nIDName, TDC_ATTRIBUTE attrib, BOOL use) : nAttrib(attrib), bUse(use) { sName.LoadString(nIDName); }
+		ATTRIBPREF() : nAttributeID(TDCA_NONE), bUse(FALSE) {}
+		ATTRIBPREF(UINT nIDName, TDC_ATTRIBUTE nAttribID, BOOL use) : nAttributeID(nAttribID), bUse(use) { sName.LoadString(nIDName); }
 
 		CString sName;
-		TDC_ATTRIBUTE nAttrib;
+		TDC_ATTRIBUTE nAttributeID;
 		BOOL bUse;
 	};
 	CArray<ATTRIBPREF, ATTRIBPREF&> m_aAttribPrefs;

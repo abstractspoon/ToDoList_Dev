@@ -26,7 +26,7 @@ IMPLEMENT_DYNCREATE(CPreferencesExportPage, CPreferencesPageBase)
 
 CPreferencesExportPage::CPreferencesExportPage() 
 	: 
-	CPreferencesPageBase(CPreferencesExportPage::IDD), 
+	CPreferencesPageBase(IDD_PREFEXPORT_PAGE),
 	m_eTextIndent(_T("0123456789")), 
 	m_eLineSpaces(_T("0123456789"))
 {

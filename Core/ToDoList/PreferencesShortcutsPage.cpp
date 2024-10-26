@@ -39,7 +39,8 @@ const int SHORTCUTCOL_MINWIDTH	= 75;
 // CPreferencesShortcutsPage property page
 
 CPreferencesShortcutsPage::CPreferencesShortcutsPage(CShortcutManager* pMgr) 
-	: CPreferencesPageBase(CPreferencesShortcutsPage::IDD), 
+	: 
+	CPreferencesPageBase(IDD_PREFSHORTCUTS_PAGE),
 	m_pShortcutMgr(pMgr), 
 	m_tcCommands(NCGS_SHOWHEADER)
 {

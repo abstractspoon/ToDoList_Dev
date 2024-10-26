@@ -12,6 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "tdcmsg.h"
+#include "tdcsort.h"
 #include "tdcstruct.h"
 #include "todoctrlfind.h"
 #include "todoctrldata.h"
@@ -110,7 +111,7 @@ public:
 	virtual int GetItemCount() const = 0;
 	virtual int GetVisibleItemCount() const = 0;
 	virtual int GetSelectedCount() const = 0;
- 	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const = 0;
+ 	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const = 0;
 	virtual DWORD GetSelectedTaskID() const = 0;
 	virtual BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const = 0;
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs) = 0;
@@ -122,8 +123,7 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL CanSaveToImage() const;
 
-	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	int GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom = 0, int nTo = -1) const;
 	CString GetColumnName(TDC_COLUMN nColID) const;
 
 	CString GetSelectedTaskComments() const;
@@ -147,6 +147,7 @@ public:
 	BOOL SelectionHasRecurring() const;
 	BOOL SelectionHasSubtasks() const; // == SelectionHasParents
 	BOOL SelectionHasIcon() const;
+	BOOL SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLocked(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasParents() const;
@@ -184,7 +185,7 @@ public:
 	void Unsort();
 	BOOL CanSortBy(TDC_COLUMN nBy) const { return IsColumnShowing(nBy); }
 	void MultiSort(const TDSORTCOLUMNS& sort);
-	TDC_COLUMN GetSortBy() const { return m_sort.single.nBy; }
+	TDC_COLUMN GetSortBy() const { return m_sort.single.nColumnID; }
 	void GetSortBy(TDSORTCOLUMNS& sort) const;
 	BOOL IsSorting() const;
 	BOOL IsMultiSorting() const;
@@ -206,8 +207,8 @@ public:
 	COLORREF GetCompletedTaskColor() const { return m_crDone; }
 	BOOL SetFlaggedTaskColor(COLORREF color);
 	BOOL SetReferenceTaskColor(COLORREF color);
-	BOOL SetAttributeColors(TDC_ATTRIBUTE nAttrib, const CTDCColorMap& colors);
-	TDC_ATTRIBUTE GetColorByAttribute() const  { return m_nColorByAttrib; }
+	BOOL SetAttributeColors(TDC_ATTRIBUTE nAttribID, const CTDCColorMap& colors);
+	TDC_ATTRIBUTE GetColorByAttribute() const  { return m_nColorByAttribID; }
 	BOOL SetStartedTaskColors(COLORREF crStarted, COLORREF crStartedToday);
 	BOOL SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const { crDue = m_crDue; crDueToday = m_crDueToday; }
@@ -216,7 +217,7 @@ public:
 
 	BOOL ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) const;
 	BOOL ModsCauseTaskTextColorChange(const CTDCAttributeMap& mapAttribIDs) const;
-	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const;
+	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCAttributeMap& mapAttribIDs) const;
 
 	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
 	void Resize(const CRect& rect);
@@ -263,6 +264,7 @@ protected:
 	float m_fAveHeaderCharWidth;
 	CString m_sTasklistFolder;
 	TDCDATETIMEWIDTHS m_dateTimeWidths;
+	int m_nHeaderContextMenuItem;
 
 	CTDCTaskComparer m_comparer;
 	CTDCTaskCalculator m_calculator;
@@ -276,7 +278,7 @@ protected:
 	COLORREF m_crDueToday, m_crFlagged, m_crReference;
 	CDWordArray m_aPriorityColors;
 	CTDCColorMap m_mapAttribColors;
-	TDC_ATTRIBUTE m_nColorByAttrib;
+	TDC_ATTRIBUTE m_nColorByAttribID;
 	CBrush m_brDue, m_brDueToday;
 	CFontCache m_fonts;
 	CEnImageList m_ilCheckboxes, m_ilColSymbols;
@@ -299,6 +301,7 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -314,7 +317,7 @@ protected:
 	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	
- 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+ 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths);
  	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
 
 	void OnNotifySplitterChange(int nSplitPos);
@@ -377,13 +380,11 @@ protected:
 
 	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bCopying = FALSE) const;
 	CString FormatTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_DATE nDate) const;
-	CString FormatDate(const COleDateTime& date, TDC_DATE nDate) const;
 	BOOL FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime = FALSE) const;
 
 	int CalcColumnWidth(int nCol, CDC* pDC, const CDWordArray& aTaskIDs) const;
 	void RecalcUntrackedColumnWidths(BOOL bCustomOnly);
 	void RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers = FALSE, BOOL bCustomOnly = FALSE);
-	int GetColumnItemsTaskIDs(CDWordArray& aTaskIDs) const;
 	int RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const;
 
 	BOOL SetColumnOrder(const CDWordArray& aColumns);
@@ -454,14 +455,15 @@ protected:
 	BOOL ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nColID, const CPoint* pCursor = NULL) const;
 	BOOL AccumulateRecalcColumn(TDC_COLUMN nColID, CSet<TDC_COLUMN>& aColIDs) const;
 
-	void DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
-							COLORREF crText, BOOL bSelected);
+	void DrawColumnsRowText(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, 
+							DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crText, BOOL bSelected);
+	void DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+							TDC_COLUMN nColID, const CRect& rColumn, COLORREF crText);
 	void DrawColumnText(CDC* pDC, const CString& sText, const CRect& rect, int nAlign, 
 						COLORREF crText, BOOL bTaskTitle = FALSE, int nTextLen = -1);
 	void DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect);
 	void DrawColumnImage(CDC* pDC, TDC_COLUMN nColID, const CRect& rect, BOOL bAlternate = FALSE);
 	void DrawGridlines(CDC* pDC, const CRect& rect, BOOL bSelected, BOOL bHorz, BOOL bVert);
-	void DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack);
 	BOOL DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, 
 							  CDC* pDC, const CRect& rSubItem, COLORREF crText);
 	enum TTCB_CHECK { TTCNC_UNCHECKED, TTCBC_CHECKED, TTCBC_MIXED };
@@ -470,6 +472,8 @@ protected:
 
 	void DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, 
 						BOOL bCalculated = FALSE, BOOL bCustomWantsTime = FALSE, int nAlign = DT_RIGHT);
+	void DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect& rLabel, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack);
+	BOOL WantDrawCommentsText(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	inline BOOL IsBoundSelecting() const { return (m_bBoundSelecting && Misc::IsKeyPressed(VK_LBUTTON)); }
 	inline BOOL IsEditingTask(DWORD dwTaskID) const { return (m_dwEditTitleTaskID == dwTaskID); }

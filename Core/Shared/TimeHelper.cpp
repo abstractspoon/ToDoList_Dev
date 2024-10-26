@@ -243,8 +243,10 @@ double CTimeHelper::DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds)
 			if (bIncSeconds)
 				dTime += (_ttof(aBits[2]) / 3600);	// seconds
 			// fall thru
+
 		case 2: dTime += (_ttof(aBits[1]) / 60);	// minutes
 			// fall thru
+
 		case 1: dTime += (_ttof(aBits[0]));			// hours
 		}
 	}
@@ -262,9 +264,15 @@ double CTimeHelper::DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds)
 		dTime = _ttof(sTime);
 	}
 
-	// Modify for PM signifier
-	if (bPM && dTime < 12)
+	// Modify for AM/PM signifier
+	if (bPM && (dTime < 12.0))
+	{
 		dTime += 12;
+	}
+	else if (bAM && ((int)dTime == 12))
+	{
+		dTime -= 12;
+	}
 
 	// truncate to 0-24
 	return min(max(dTime, 0.0), 24.0);
@@ -291,12 +299,12 @@ BOOL CTimeHelper::RemoveAM(CString& sTime)
 			Misc::RemoveSuffix(sTime, Misc::GetAM()));
 }
 
-CString CTimeHelper::FormatTime(double dTime, int nDecPlaces) const
+CString CTimeHelper::FormatTime(double dTime, int nDecPlaces, TCHAR cSpacer)
 {
-	return FormatTime(dTime, THU_NULL, nDecPlaces);
+	return FormatTime(dTime, THU_NULL, nDecPlaces, cSpacer);
 }
 
-CString CTimeHelper::FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) const
+CString CTimeHelper::FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces, TCHAR cSpacer)
 {
 	// sanity check
 	if (nUnits && !IsValidUnit(nUnits))
@@ -310,7 +318,9 @@ CString CTimeHelper::FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) c
 	
 	if (nUnits && MAPUNIT2CH.Lookup(nUnits, cUnits))
 	{
-		sTime += ' ';
+		if (cSpacer)
+			sTime += cSpacer;
+
 		sTime += cUnits;
 	}
 	
@@ -461,7 +471,8 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeft
 		return _T("");
 	}
 
-	CString sTime = FormatTimeHMS((int)dTime, nUnits);
+	CString sTime = FormatTime(dTime, nUnits, 0, '\0');
+	ASSERT(sTime == FormatTimeHMS(Misc::Round(dTime), nUnits));
 	
 	if (bDecPlaces && (nLeftOverUnits != THU_NULL))
 	{

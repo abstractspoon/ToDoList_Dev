@@ -268,7 +268,7 @@ void CTransComboBox::Initialize()
 		if (nItem == nCurSel)
 			sCurSel = aItems[nItem].sText;
 
-		CDialogHelper::AddString(*pCombo, cbid.sText, cbid.dwData);
+		CDialogHelper::AddStringT(*pCombo, cbid.sText, cbid.dwData);
 	}
 
 	// Restore selection
@@ -418,7 +418,7 @@ void CTransListBox::Initialize()
 		LBITEMDATA& lbid = aItems[nItem];
 		TranslateText(lbid.sText);
 
-		int nIndex = CDialogHelper::AddString(*pLB, lbid.sText, lbid.dwData);
+		int nIndex = CDialogHelper::AddStringT(*pLB, lbid.sText, lbid.dwData);
 
 		if (pCLB)
 			pCLB->SetCheck(nIndex, lbid.nCheck);

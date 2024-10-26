@@ -19,11 +19,8 @@ public:
 	CTDLTasklistStorageMgr();
 	virtual ~CTDLTasklistStorageMgr();
 
-	BOOL RetrieveTasklist(TSM_TASKLISTINFO& storageInfo, CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bSilent = FALSE);
-	BOOL StoreTasklist(TSM_TASKLISTINFO& storageInfo, const CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bSilent = FALSE);
-
-protected:
-	virtual void Initialize() const;
+	BOOL RetrieveTasklist(TSM_TASKLISTINFO& storageInfo, CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bPrompt);
+	BOOL StoreTasklist(TSM_TASKLISTINFO& storageInfo, const CTaskFile& tasks, int nByStorage, IPreferences* pPrefs, BOOL bPrompt);
 
 };
 

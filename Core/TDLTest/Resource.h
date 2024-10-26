@@ -5,10 +5,12 @@
 #define IDR_MAINFRAME_STD               128
 #define IDI_FILEEDIT_BROWSE             284
 #define IDI_TIME_TRACK                  286
+#define IDI_ICON_SELECT                 288
 #define IDI_DEPENDS_LINK                289
 #define IDI_NULL                        290
 #define IDI_SIMPLETEXT                  302
 #define IDI_ADD_LOGGED_TIME             308
+#define IDI_REMINDER                    333
 #define IDS_ONCEONLY                    51018
 #define IDS_DAILY                       51019
 #define IDS_WEEKLY                      51020

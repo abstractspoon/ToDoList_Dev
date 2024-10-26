@@ -167,20 +167,23 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 
 	UINT nFlags = (DT_TOP | DT_NOPREFIX | (bCentred ? DT_CENTER : DT_LEFT));
 	COLORREF crText = GetTextColor();
+	DWORD dwStyle = ::GetWindowLong(hWnd, GWL_STYLE);
 
 	if (CWinClasses::IsComboBox(szClass))
 	{
 		nFlags |= (DT_VCENTER | DT_SINGLELINE);
 		rClient.DeflateRect(2, 0);
 
-		if (::GetFocus() == hWnd)
+		if ((::GetFocus() == hWnd) && (dwStyle & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE)))
+		{
 			crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
+		}
 	}
 	else if (CWinClasses::IsEditControl(hWnd))
 	{
 		HBRUSH hbrBkgnd = NULL;
 
-		if (!::IsWindowEnabled(hWnd) || (::GetWindowLong(hWnd, GWL_STYLE) & ES_READONLY))
+		if (!::IsWindowEnabled(hWnd) || (dwStyle & ES_READONLY))
 		{
 			hbrBkgnd = GetSysColorBrush(COLOR_3DFACE);
 		}

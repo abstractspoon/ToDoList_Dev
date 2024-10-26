@@ -64,8 +64,9 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 		HWND hwndPt = ::WindowFromPoint(info.pt);
 		CString sClass = CWinClasses::GetClass(hwndPt);
 
-		// Windows explorer is tricky so we leave it well alone
-		if (CWinClasses::IsClass(sClass, WC_DIRECTUIHWND))
+		// Windows Explorer and Internet Explorer are tricky 
+		// so we leave them well alone
+		if (CWinClasses::IsClass(sClass, WC_DIRECTUIHWND) || CWinClasses::IsClass(sClass, WC_IE))
 			return FALSE;
 
 		int zDelta = GET_WHEEL_DELTA_WPARAM(info.mouseData);
@@ -112,7 +113,8 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 			else if (CWinClasses::IsEditControl(hwndPt) && bHasVScroll)
 			{
 				// Check that the scrollbar is enabled
-				SCROLLINFO si = { 0 };
+				SCROLLINFO si = { sizeof(si), SIF_ALL, 0 };
+
 				bForwardToParent = !::GetScrollInfo(hwndPt, SB_VERT, &si);
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) ||
@@ -123,10 +125,12 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 			}
 			else if (!bHasVScroll)
 			{
-				// For all other controls without scrollbars, we forward the mouse wheel 
-				// to the parent, but NOT if the control key is down, because that implies 
-				// some other sort of operation like zooming
-				bForwardToParent = !Misc::IsKeyPressed(VK_CONTROL);
+				// For all other controls without scrollbars, we forward the 
+				// mouse wheel to the parent but NOT if :
+				// 1) the windows is a .NET control OR
+				// 2) the CTRL key is down, because that implies some other sort of operation like zooming
+				bForwardToParent = !Misc::IsKeyPressed(VK_CONTROL) && 
+									!CWinClasses::IsWindowsFormsControl(sClass);
 			}
 
 			if (bForwardToParent)

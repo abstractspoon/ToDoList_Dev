@@ -227,10 +227,29 @@ class CTaskCalItemArray : public CArray<TASKCALITEM*, TASKCALITEM*&>
 public:
 	void SortItems(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending);
 	int FindItem(DWORD dwTaskID) const;
+	int GetNextItem(DWORD dwTaskID, BOOL bForwards = TRUE) const;
 
 protected:
 	static int CompareItems(const void* pV1, const void* pV2);
+};
 
+/////////////////////////////////////////////////////////////////////////////
+
+class CSortedTaskCalItemArray : protected CTaskCalItemArray
+{
+public:
+	CSortedTaskCalItemArray(const CTaskCalItemMap& mapTasks);
+
+	const CTaskCalItemArray& GetTasks();
+
+	void SetNeedsRebuild();
+	void SetNeedsResort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending);
+
+protected:
+	const CTaskCalItemMap& m_mapTasks;
+
+	TDC_ATTRIBUTE m_nSortBy;
+	BOOL m_bNeedsResort, m_bSortAscending;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -248,7 +267,7 @@ public:
 	BOOL HasHeat() const { return m_mapHeat.GetCount(); }
 
 	BOOL SetColorPalette(const CDWordArray& aColors);
-	BOOL Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib, DWORD dwOptions);
+	BOOL Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions);
 
 	int GetHeat(const COleDateTime& date) const;
 	COLORREF GetColor(const COleDateTime& date) const;

@@ -219,15 +219,15 @@ SOURCE=.\StdAfx.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
+SOURCE=.\res\burndown.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\BurndownExt.rc2
 # End Source File
 # Begin Source File
 
 SOURCE=.\res\help_button.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\icon1.ico
 # End Source File
 # Begin Source File
 

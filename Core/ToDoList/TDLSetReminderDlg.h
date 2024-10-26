@@ -39,7 +39,7 @@ class CTDLSetReminderDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLSetReminderDlg(CWnd* pParent = NULL);   // standard constructor
+	CTDLSetReminderDlg(HICON hIcon, CWnd* pParent = NULL);   // standard constructor
 
 	int DoModal(TDCREMINDER& rem, DWORD dwFlags = 0);
 
@@ -57,9 +57,9 @@ protected:
 	double  m_dRelativeLeadInHours;
 	CString	m_sSoundFile;
 	int		m_bRelative;
-	COleDateTime	m_dtAbsoluteDate;
+	COleDateTime m_dtAbsoluteDate;
 	CString	m_sTaskTitle;
-	double	m_dAbsoluteTime;
+	double	m_dAbsoluteTime; // must come after absolute date
 	CString m_sModifyDlgTitle;
 
 // Overrides

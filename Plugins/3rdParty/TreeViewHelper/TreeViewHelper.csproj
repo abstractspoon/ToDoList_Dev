@@ -46,7 +46,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ImageHelper\ImageHelper.csproj">
+    <ProjectReference Include="..\ImageHelper\ImageHelper.csproj">
       <Project>{819992e3-fc33-4fcd-8aa5-5bc8329b2c20}</Project>
       <Name>ImageHelper</Name>
     </ProjectReference>

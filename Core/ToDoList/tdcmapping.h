@@ -64,6 +64,29 @@ namespace TDC
 		return TDC_INSERTATBOTTOM;
 	}
 
+	static UINT MapNewTaskPosToCmdID(PUIP_NEWTASKPOS nPos, BOOL bSubtask)
+	{
+		if (!bSubtask) // task
+		{
+			switch (nPos)
+			{
+			case PUIP_TOP:		return ID_NEWTASK_ATTOP;
+			case PUIP_BOTTOM:	return ID_NEWTASK_ATBOTTOM;
+			case PUIP_BELOW:	return ID_NEWTASK_AFTERSELECTEDTASK;
+			}
+
+			// All else (PUIP_ABOVE)
+			return ID_NEWTASK_BEFORESELECTEDTASK;
+		}
+
+		// subtask
+		if (nPos == PUIP_BOTTOM)
+			return ID_NEWSUBTASK_ATBOTTOM;
+
+		// else
+		return ID_NEWSUBTASK_ATTOP;
+	}
+
 	static TDC_COLUMN MapSortIDToColumn(UINT nSortID) 
 	{
 		switch (nSortID)
@@ -176,9 +199,9 @@ namespace TDC
 		return 0;
 	}
 
-	static TDC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttrib) 
+	static TDC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttribID) 
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_ALLOCBY:			return TDCC_ALLOCBY;
 		case TDCA_ALLOCTO:			return TDCC_ALLOCTO;
@@ -203,6 +226,7 @@ namespace TDC
 		case TDCA_LASTMODBY:		return TDCC_LASTMODBY;
 		case TDCA_LOCK:				return TDCC_LOCK;
 		case TDCA_NONE:				return TDCC_NONE;
+		case TDCA_PARENTID:			return TDCC_PARENTID;
 		case TDCA_PATH:				return TDCC_PATH;
 		case TDCA_PERCENT:			return TDCC_PERCENT;
 		case TDCA_PRIORITY:			return TDCC_PRIORITY;
@@ -226,110 +250,15 @@ namespace TDC
 		}
 		
 		// handle custom columns
-		if (nAttrib >= TDCA_CUSTOMATTRIB_FIRST && nAttrib <= TDCA_CUSTOMATTRIB_LAST)
+		if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST))
 		{
-			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nAttrib - TDCA_CUSTOMATTRIB_FIRST));
+			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nAttribID - TDCA_CUSTOMATTRIB_FIRST));
 		}
 		
 		// all else
 		return TDCC_NONE;
 	}
 
-	static UINT MapAttributeToCtrlID(TDC_ATTRIBUTE nAttrib) 
-	{
-		// custom columns not supported for now
-		// We could have used CTDCCustomAttributeHelper but that's an unwanted dependency
-		ASSERT(nAttrib < TDCA_CUSTOMATTRIB_FIRST || nAttrib > TDCA_CUSTOMATTRIB_LAST);
-		
-		switch (nAttrib)
-		{
-//		case TDCA_ALLOCBY:			return IDC_ALLOCBY;
-// 		case TDCA_ALLOCTO:			return IDC_ALLOCTO;
-// 		case TDCA_CATEGORY:			return IDC_CATEGORY;
-// 		case TDCA_COST:				return IDC_COST;
-// 		case TDCA_DEPENDENCY:		return IDC_DEPENDS;
-// 		case TDCA_DONEDATE:			return IDC_DONEDATE; 
-// 		case TDCA_DONETIME:			return IDC_DONETIME;
-// 		case TDCA_DUEDATE:			return IDC_DUEDATE;
-// 		case TDCA_DUETIME:			return IDC_DUETIME;
-// 		case TDCA_EXTERNALID:		return IDC_EXTERNALID;
-// 		case TDCA_FILELINK:			return IDC_FILEPATH;
-// 		case TDCA_PERCENT:			return IDC_PERCENT;
-// 		case TDCA_PRIORITY:			return IDC_PRIORITY;
-// 		case TDCA_RECURRENCE:		return IDC_RECURRENCE;
-// 		case TDCA_RISK:				return IDC_RISK;
-// 		case TDCA_STARTDATE:		return IDC_STARTDATE;
-// 		case TDCA_STARTTIME:		return IDC_STARTTIME;
-// 		case TDCA_STATUS:			return IDC_STATUS;
-// 		case TDCA_TAGS:				return IDC_TAGS;
-		case TDCA_TASKNAME:			return IDC_TASKTREECTRL;
-// 		case TDCA_TIMEESTIMATE:		return IDC_TIMEEST;
-// 		case TDCA_TIMESPENT:		return IDC_TIMESPENT;
-// 		case TDCA_VERSION:			return IDC_VERSION;
-// 		case TDCA_COLOR:			return IDC_COLOUR;
-
-		// don't have controls
-		case TDCA_SUBTASKDONE:
-		case TDCA_POSITION:
-		case TDCA_POSITION_SAMEPARENT:
-		case TDCA_POSITION_DIFFERENTPARENT:
-		case TDCA_PATH:
-		case TDCA_NONE:
-		case TDCA_FLAG:
-		case TDCA_ID:
-		case TDCA_LASTMODDATE:
-		case TDCA_LASTMODBY:
-		case TDCA_CREATEDBY:
-		case TDCA_CREATIONDATE:
-		case TDCA_ICON:
-		case TDCA_LOCK:
-		case TDCA_COMMENTSFORMAT:
-		case TDCA_COMMENTSSIZE:
-		case TDCA_REMINDER:
-			break;
-		}
-		
-		return (UINT)-1;
-	}
-	
-	static TDC_ATTRIBUTE MapCtrlIDToAttribute(UINT nCtrlID) 
-	{
-		switch (nCtrlID)
-		{
-//		case IDC_ALLOCBY:		return TDCA_ALLOCBY;		
-// 		case IDC_ALLOCTO:		return TDCA_ALLOCTO;			
-// 		case IDC_CATEGORY:		return TDCA_CATEGORY;			
-// 		case IDC_COST:			return TDCA_COST;				
-// 		case IDC_DEPENDS:		return TDCA_DEPENDENCY;		
-// 		case IDC_DONEDATE:		return TDCA_DONEDATE;			
-// 		case IDC_DONETIME:		return TDCA_DONETIME;			
-// 		case IDC_DUEDATE:		return TDCA_DUEDATE;			
-// 		case IDC_DUETIME:		return TDCA_DUETIME;			
-// 		case IDC_EXTERNALID:	return TDCA_EXTERNALID;		
-// 		case IDC_FILEPATH:		return TDCA_FILELINK;			
-// 		case IDC_PERCENT:		return TDCA_PERCENT;			
-// 		case IDC_PRIORITY:		return TDCA_PRIORITY;			
-// 		case IDC_RECURRENCE:	return TDCA_RECURRENCE;		
-// 		case IDC_RISK:			return TDCA_RISK;				
-// 		case IDC_STARTDATE:		return TDCA_STARTDATE;		
-// 		case IDC_STARTTIME:		return TDCA_STARTTIME;		
-// 		case IDC_STATUS:		return TDCA_STATUS;			
-// 		case IDC_TAGS:			return TDCA_TAGS;				
-		case IDC_TASKTREECTRL:	return TDCA_TASKNAME;			
-// 		case IDC_TIMEEST:		return TDCA_TIMEESTIMATE;			
-// 		case IDC_TIMESPENT:		return TDCA_TIMESPENT;		
-// 		case IDC_VERSION:		return TDCA_VERSION;			
-// 		case IDC_COLOUR:		return TDCA_COLOR;	
-			
-		default:
-			if (nCtrlID >= IDC_FIRST_CUSTOMEDITFIELD && (nCtrlID <= IDC_LAST_CUSTOMEDITFIELD))
-				return TDCA_CUSTOMATTRIB;
-			break;
-		}
-		
-		return TDCA_NONE;
-	}
-	
 	static TDC_ATTRIBUTE MapColumnToAttribute(TDC_COLUMN nColumn) 
 	{
 		switch (nColumn)
@@ -534,9 +463,9 @@ namespace TDC
 	}
 	
 
-	static TDC_DATE MapAttributeToDate(TDC_ATTRIBUTE nAttrib)
+	static TDC_DATE MapAttributeToDate(TDC_ATTRIBUTE nAttribID)
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_CREATIONDATE:	return TDCD_CREATE;
 		case TDCA_LASTMODDATE:	return TDCD_LASTMOD;
@@ -556,9 +485,9 @@ namespace TDC
 		return TDCD_NONE;
 	}
 	
-	static TDC_DATE MapColumnToDate(TDC_COLUMN nCol)
+	static TDC_DATE MapColumnToDate(TDC_COLUMN nColID)
 	{
-		switch (nCol)
+		switch (nColID)
 		{
 		case TDCC_LASTMODDATE:	return TDCD_LASTMOD;
 		case TDCC_DUEDATE:		return TDCD_DUE;
@@ -567,8 +496,8 @@ namespace TDC
 		case TDCC_DONEDATE:		return TDCD_DONE;
 
 		default:
-			if ((nCol >= TDCC_CUSTOMCOLUMN_FIRST) && 
-				(nCol < TDCC_CUSTOMCOLUMN_LAST))
+			if ((nColID >= TDCC_CUSTOMCOLUMN_FIRST) && 
+				(nColID < TDCC_CUSTOMCOLUMN_LAST))
 			{
 				return TDCD_CUSTOM;
 			}
@@ -579,9 +508,9 @@ namespace TDC
 		return TDCD_NONE;
 	}
 
-	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(TDC_ATTRIBUTE nAttrib)
+	static IUI_UPDATETYPE MapAttributeToIUIUpdateType(TDC_ATTRIBUTE nAttribID)
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_POSITION: // == move
 		case TDCA_POSITION_SAMEPARENT:
@@ -629,12 +558,12 @@ namespace TDC
 		case TDCA_TIMEESTIMATE:			
 		case TDCA_TIMESPENT:		
 		case TDCA_VERSION:			
-		case TDCA_CUSTOMATTRIBDEFS:
+		case TDCA_CUSTOMATTRIB_DEFS:
 		case TDCA_PROJECTNAME:
 			return IUI_EDIT;
 
 		default: // handle custom attrib
-			if ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib < TDCA_CUSTOMATTRIB_LAST))
+			if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID < TDCA_CUSTOMATTRIB_LAST))
 				return IUI_EDIT;
 		}
 
@@ -672,39 +601,14 @@ namespace TDC
 
 	static void MapSortColumnsToIUIMultiSort(const TDSORTCOLUMN* pSortCols, IUIMULTISORT& multiSort)
 	{
-		multiSort.nAttrib1 = MapColumnToAttribute(pSortCols[0].nBy);
+		multiSort.nAttributeID1 = MapColumnToAttribute(pSortCols[0].nColumnID);
 		multiSort.bAscending1 = (pSortCols[0].bAscending != FALSE);
 
-		multiSort.nAttrib2 = MapColumnToAttribute(pSortCols[1].nBy);
+		multiSort.nAttributeID2 = MapColumnToAttribute(pSortCols[1].nColumnID);
 		multiSort.bAscending2 = (pSortCols[1].bAscending != FALSE);
 
-		multiSort.nAttrib3 = MapColumnToAttribute(pSortCols[2].nBy);
+		multiSort.nAttributeID3 = MapColumnToAttribute(pSortCols[2].nColumnID);
 		multiSort.bAscending3 = (pSortCols[2].bAscending != FALSE);
-	}
-
-	static TDC_ATTRIBUTE MapDeprecatedAttribute(TDC_ATTRIBUTE nAttribID)
-	{
-		switch (nAttribID)
-		{
-			case TDCA_DONEDATE_RELATIVE_DEP:		return TDCA_DONEDATE;
-			case TDCA_DUEDATE_RELATIVE_DEP:			return TDCA_DUEDATE;
-			case TDCA_STARTDATE_RELATIVE_DEP:		return TDCA_STARTDATE;
-			case TDCA_CREATIONDATE_RELATIVE_DEP:	return TDCA_CREATIONDATE;
-			case TDCA_LASTMOD_RELATIVE_DEP:			return TDCA_LASTMODDATE;
-		}
-
-		// All else
-		return nAttribID;
-	}
-
-	static TDC_COLUMN MapDeprecatedColumn(TDC_COLUMN nColumnID)
-	{
-// 		switch (nColumnID)
-// 		{
-// 		}
-
-		// All else
-		return nColumnID;
 	}
 
 	static TDC_ATTRIBUTE MapCommandLineSwitchToAttribute(LPCTSTR szSwitch)

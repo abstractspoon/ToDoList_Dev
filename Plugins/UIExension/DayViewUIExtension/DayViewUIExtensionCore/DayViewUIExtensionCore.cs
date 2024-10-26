@@ -248,6 +248,7 @@ namespace DayViewUIExtension
 			m_DayView.DependencyDatesAreCalculated = prefs.GetProfileBool("Preferences", "AutoAdjustDependents", false);
             m_DayView.StrikeThruDoneTasks = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_DayView.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+			m_DayView.DisplayDatesInISO = prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false);
 
 			m_AllowModifyTimeEstimate = !prefs.GetProfileBool("Preferences", "SyncTimeEstAndDates", false);
 
@@ -261,7 +262,12 @@ namespace DayViewUIExtension
 
             m_DayView.GridlineColor = ((gridColor == -1) ? DefGridColor : DrawingColor.ToColor((UInt32)gridColor));
             
-            if (!appOnly)
+            if (appOnly)
+			{
+				UpdateWorkingHourDisplay();
+				UpdatedSelectedTaskDatesText();
+			}
+			else
             {
 				// private settings
 				m_DefaultTimeBlockEditMask = prefs.GetProfileEnum(key, "DefaultTimeBlockEditMask", m_DefaultTimeBlockEditMask);
@@ -284,10 +290,6 @@ namespace DayViewUIExtension
 				UpdateDayViewPreferences();
 				SetDaysShowing(prefs.GetProfileInt(key, "DaysShowing", 7));
             }
-			else
-			{
-				UpdateWorkingHourDisplay();
-			}
  		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
@@ -409,7 +411,7 @@ namespace DayViewUIExtension
 
 			var menu = new ContextMenuStrip();
 
-			if (appt is CustomTaskDateAttribute)
+			if (appt is TaskCustomDateAttribute)
 			{
 				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
 				item.Click += (s, a) => { m_DayView.DeleteSelectedCustomDate();	};
@@ -820,6 +822,8 @@ namespace DayViewUIExtension
             m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
             m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
 			m_DayView.ShowFutureOccurrences = m_PrefsDlg.ShowFutureOccurrences;
+			m_DayView.ShowWorkingHoursOnly = m_PrefsDlg.ShowWorkingHoursOnly;
+			m_DayView.TreatOverdueTasksAsDueToday = m_PrefsDlg.TreatOverdueTasksAsDueToday;
 
 			m_DayView.SlotsPerHour = (60 / m_PrefsDlg.SlotMinutes);
 			m_DayView.MinSlotHeight = DPIScaling.Scale(m_PrefsDlg.MinSlotHeight);
@@ -985,9 +989,7 @@ namespace DayViewUIExtension
 			if (m_DayView.GetSelectedTaskDates(out from, out to))
 			{
 				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
-
-				String toDate = to.ToString((from.DayOfYear == to.DayOfYear) ? "t" : "g");
-				String dateRange = String.Format("{0} - {1}", from.ToString("g"), toDate);
+				String dateRange = DateUtil.FormatRange(from, to, true, m_DayView.DisplayDatesInISO);
 
 				m_SelectedTaskDatesLabel.Text = (label + dateRange);
 				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);

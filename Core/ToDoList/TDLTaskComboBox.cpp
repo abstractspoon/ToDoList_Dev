@@ -45,12 +45,12 @@ END_MESSAGE_MAP()
 
 DWORD CTDLTaskComboBox::GetSelectedTaskID() const
 {
-	return CDialogHelper::GetSelectedItemData(*this);
+	return CDialogHelper::GetSelectedItemDataT(*this);
 }
 
 BOOL CTDLTaskComboBox::SetSelectedTaskID(DWORD dwTaskID)
 {
-	return (CDialogHelper::SelectItemByData(*this, dwTaskID) != CB_ERR);
+	return (CDialogHelper::SelectItemByDataT(*this, dwTaskID) != CB_ERR);
 }
 
 CString CTDLTaskComboBox::GetSelectedTaskName() const
@@ -73,7 +73,7 @@ BOOL CTDLTaskComboBox::AddTask(const CString& sTask, DWORD dwTaskID, BOOL bParen
 
 BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference)
 {
-	int nTask = CDialogHelper::InsertString(*this, nPos, (CString(TAB, nIndent) + sTask), dwTaskID);
+	int nTask = CDialogHelper::InsertStringT(*this, nPos, (CString(TAB, nIndent) + sTask), dwTaskID);
 
 	if (nTask == CB_ERR)
 		return FALSE;

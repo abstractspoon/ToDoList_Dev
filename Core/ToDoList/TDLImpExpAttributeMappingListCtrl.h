@@ -35,7 +35,7 @@ public:
 	void SetColumnMapping(const CTDCAttributeMapping& aMapping);
 	int GetColumnMapping(CTDCAttributeMapping& aMapping) const;
 
-	BOOL IsAttributeMapped(TDC_ATTRIBUTE nAttrib) const { return m_aMapping.IsAttributeMapped(nAttrib); }
+	BOOL IsAttributeMapped(TDC_ATTRIBUTE nAttribID) const { return m_aMapping.IsAttributeMapped(nAttribID); }
 
 // attributes
 protected:
@@ -72,12 +72,12 @@ protected:
 
 	void PrepareEdit(int nRow, int nCol);
 
-	int FindRow(TDC_ATTRIBUTE nAttrib, int nIgnoreRow = -1) const;
+	int FindRow(TDC_ATTRIBUTE nAttribID, int nIgnoreRow = -1) const;
 	int FindRow(const CString& sName, int nIgnoreRow = -1) const;
 	void TraceMapping() const;
 	void ResizeColumns();
 
-	static CString GetAttributeName(TDC_ATTRIBUTE nAttrib);
+	static CString GetAttributeName(TDC_ATTRIBUTE nAttribID);
 };
 
 /////////////////////////////////////////////////////////////////////////////

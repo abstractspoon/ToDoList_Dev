@@ -107,9 +107,24 @@ struct TESTRESULT
 
 //////////////////////////////////////////////////////////////////////
 
+class CTDLTestBase;
+
+class CTDCScopedTest
+{
+public:
+	CTDCScopedTest(CTDLTestBase& base, LPCTSTR szTest);
+	~CTDCScopedTest();
+
+protected:
+	CTDLTestBase& m_base;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CTDLTestBase
 {
 	friend class CTDLTestSelfTest;
+	friend class CTDCScopedTest;
 
 public:
 	virtual ~CTDLTestBase();

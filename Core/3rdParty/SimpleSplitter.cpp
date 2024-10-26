@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CSimpleSplitter, CWnd)
 	ON_WM_NCCREATE()
 	ON_WM_WINDOWPOSCHANGING()
 	ON_WM_CREATE()
+	ON_WM_SETCURSOR()
 	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_SS_DRAWSPLITBAR, OnDrawSplitBar)
 	ON_REGISTERED_MESSAGE(WM_SS_NOTIFYSPLITCHANGE, OnSplitChange)
@@ -91,15 +92,10 @@ BOOL CSimpleSplitter::Create(SS_ORIENTATION nOrientation, CWnd* pParent, UINT nI
 
 	m_nOrientation = nOrientation;
 
-	HCURSOR crsResize = AfxGetApp()->LoadCursor(IsHorz() ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR);
-
-	if (crsResize == NULL)
-		crsResize = ::LoadCursor(0, IsHorz() ? IDC_SIZEWE : IDC_SIZENS);
-
 	CRect rClient;
 	pParent->GetClientRect(rClient);
 
-	return CreateEx(0, AfxRegisterWndClass(CS_DBLCLKS, crsResize, NULL, NULL), NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS, rClient, pParent, nID, NULL);
+	return CWnd::Create(NULL, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS, rClient, pParent, nID, NULL);
 }
 
 BOOL CSimpleSplitter::CreatePane(int nIndex, CWnd* pPaneWnd, DWORD dwStyle, DWORD dwExStyle, LPCTSTR lpszClassName)
@@ -116,6 +112,28 @@ BOOL CSimpleSplitter::CreatePane(int nIndex, CWnd* pPaneWnd, DWORD dwStyle, DWOR
 
 	m_aPanes[nIndex] = pPaneWnd;
 	return TRUE;
+}
+
+BOOL CSimpleSplitter::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	CPoint point(::GetMessagePos());
+	ScreenToClient(&point);
+
+	if (HitTestBar(point) != -1)
+	{
+		HCURSOR cursor = AfxGetApp()->LoadCursor(IsHorz() ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR);
+
+		if (cursor == NULL)
+			cursor = ::LoadCursor(0, IsHorz() ? IDC_SIZEWE : IDC_SIZENS);
+
+		if (cursor)
+		{
+			SetCursor(cursor);
+			return TRUE;
+		}
+	}
+	
+	return CWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
 void CSimpleSplitter::SetPaneCount(int nCount)
@@ -144,6 +162,16 @@ CWnd* CSimpleSplitter::GetPane(int nIndex) const
 {
 	ASSERT((nIndex >= 0) && (nIndex < m_aPanes.GetSize()));
 	return m_aPanes[nIndex];
+}
+
+int CSimpleSplitter::FindPane(CWnd* pPaneWnd) const
+{
+	for (int i = 0; i < m_aPanes.GetSize(); i++)
+	{
+		if (pPaneWnd == m_aPanes[i])
+			return i;
+	}
+	return -1;
 }
 
 void CSimpleSplitter::SetActivePane(int nIndex)
@@ -416,28 +444,43 @@ void CSimpleSplitter::OnSize(UINT nType, int cx, int cy)
 	RecalcLayout();
 }
 
+int CSimpleSplitter::HitTestBar(CPoint ptClient) const
+{
+	if (GetPaneCount())
+	{
+		for (int i = 0; i < m_aPanes.GetSize() - 1; i++)
+		{
+			CRect rBar;
+			GetBarRect(i, rBar);
+
+			if (rBar.PtInRect(ptClient))
+				return i;
+		}
+	}
+
+	return -1;
+}
+
 void CSimpleSplitter::OnLButtonDown(UINT nFlags, CPoint point) 
 {
 	CWnd::OnLButtonDown(nFlags, point);
 
 	if (GetPaneCount())
 	{
-		int mouse_pos = (IsHorz() ? point.x : point.y);
-		
-		for (m_nTrackIndex = 1; m_nTrackIndex < m_aPanes.GetSize(); m_nTrackIndex++)
-		{
-			CRect rBar;
-			GetBarRect(m_nTrackIndex - 1, rBar);
+		int nHit = HitTestBar(point);
 
-			if (rBar.PtInRect(point) && ::DragDetect(*this, point))
-			{
-				SetCapture();
-				break;
-			}
+		if (nHit != -1)
+		{
+			m_nTrackIndex = (nHit + 1); 
+			SetCapture();
+		}
+		else
+		{
+			m_nTrackIndex = m_aPanes.GetSize();
 		}
 		
 		m_nTracker = m_aOrgPaneSizes[m_nTrackIndex];
-		m_nTrackerMouseOffset = mouse_pos - m_nTracker;
+		m_nTrackerMouseOffset = ((IsHorz() ? point.x : point.y) - m_nTracker);
 	}
 }
 

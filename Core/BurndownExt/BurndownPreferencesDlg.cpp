@@ -18,21 +18,13 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-const COLORREF COLOR_GREEN		= RGB(122, 204, 0);
-const COLORREF COLOR_RED		= RGB(204, 0, 0);
-const COLORREF COLOR_YELLOW		= RGB(204, 164, 0);
-const COLORREF COLOR_BLUE		= RGB(0, 0, 244);
-const COLORREF COLOR_PINK		= RGB(234, 28, 74);
-const COLORREF COLOR_ORANGE		= RGB(255, 91, 21);
-
-/////////////////////////////////////////////////////////////////////////////
 // CBurndownPreferencesPage dialog
 
-CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, CWnd* /*pParent*/ /*=NULL*/)
+CBurndownPreferencesPage::CBurndownPreferencesPage(const CGraphsMap& mapGraphs, CWnd* /*pParent*/ /*=NULL*/)
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE),
-	m_chart(chart)
+	m_mapGraphs(mapGraphs),
+	m_nActiveGraph(BCG_UNKNOWNGRAPH)
 {
 	//{{AFX_DATA_INIT(CBurndownPreferencesPage)
 	//}}AFX_DATA_INIT
@@ -62,7 +54,7 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	VERIFY(m_lcGraphColors.Initialize(m_chart));
+	VERIFY(m_lcGraphColors.Initialize(m_mapGraphs, m_nActiveGraph));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -110,10 +102,10 @@ void CBurndownPreferencesPage::OnSize(UINT nType, int cx, int cy)
 
 const UINT IDC_HELPBUTTON = 1001;
 
-CBurndownPreferencesDlg::CBurndownPreferencesDlg(const CBurndownChart& chart, CWnd* pParent /*=NULL*/)
+CBurndownPreferencesDlg::CBurndownPreferencesDlg(const CGraphsMap& mapGraphs, CWnd* pParent /*=NULL*/)
 	: 
 	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_BURNDOWN, IDI_HELP_BUTTON, pParent),
-	m_page(chart)
+	m_page(mapGraphs)
 {
 	//{{AFX_DATA_INIT(CBurndownPreferencesDlg)
 	//}}AFX_DATA_INIT
@@ -140,4 +132,11 @@ void CBurndownPreferencesDlg::DoHelp()
 	
 	if (m_pParentWnd)
 		m_pParentWnd->SendMessage(WM_BDC_PREFSHELP);
+}
+
+int CBurndownPreferencesDlg::DoModal(BURNDOWN_GRAPH nActiveGraph)
+{
+	m_page.SetActiveGraph(nActiveGraph);
+
+	return CPreferencesDlgBase::DoModal();
 }

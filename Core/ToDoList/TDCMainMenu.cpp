@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "TDCMainMenu.h"
 #include "TDCStatic.h"
+#include "TDCMapping.h"
 #include "FilteredToDoCtrl.h"
 #include "ToDoCtrlMgr.h"
 #include "PreferencesDlg.h"
@@ -233,6 +234,17 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	if (sTipText.IsEmpty())
 		sTipText = GetMenuString(nMenuID, MF_BYCOMMAND);
 
+	// Add parent menu name for context
+	HMENU hParentMenu = NULL;
+	
+	int nPos = FindMenuItem(*this, nMenuID, hParentMenu);
+	ASSERT(hParentMenu);
+
+	nPos = FindMenuItem(*this, hParentMenu, hParentMenu);
+	ASSERT(hParentMenu);
+
+	sTipText = (GetMenuString(hParentMenu, nPos, MF_BYPOSITION) + _T(" > ") + sTipText);
+
 	// removed embedded tabs
 	if (!sTipText.IsEmpty())
 		sTipText.Replace('\t', ' ');
@@ -298,8 +310,6 @@ void CTDCMainMenu::UpdateBackgroundColor()
 	{
 		SetBackgroundColor(m_theme.crMenuBack);
 	}
-
-	AfxGetMainWnd()->DrawMenuBar();
 }
 
 // test for top-level menus
@@ -596,7 +606,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 		case ID_EDIT_TASKCOLOR:
 		case ID_EDIT_CLEARTASKCOLOR:
-			bDelete = !((prefs.GetTextColorOption() == COLOROPT_DEFAULT) ||
+			bDelete = !((prefs.GetTextColorOption() == TEXTOPT_DEFAULT) ||
 						tdc.IsEditFieldShowing(TDCA_COLOR));
 			break;
 
@@ -912,5 +922,5 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 	CUserToolArray aTools;
 	prefs.GetUserTools(aTools);
 
-	CTDCToolsHelper(FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons, TRUE/*prefs.GetWantToolsgrouping()*/);
+	CTDCToolsHelper(FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons);
 }

@@ -174,7 +174,7 @@ BEGIN
     CONTROL         "&Auto-scroll to task when selecting",
                     IDC_AUTOSCROLLSELECTION,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,67,333,10
-    CONTROL         "&Treat tasks with the following tag as 'Milestones':",
+    CONTROL         "&Treat tasks with the following tag as 'Milestones'",
                     IDC_USETAGFORMILESTONE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,82,333,10
     EDITTEXT        IDC_MILESTONETAG,18,94,211,13,ES_AUTOHSCROLL
@@ -212,10 +212,9 @@ BEGIN
                     WS_TABSTOP,7,338,333,10
 END
 
-IDD_CREATEDEPENDS_DIALOG DIALOGEX 0, 0, 186, 113
+IDD_CREATEDEPENDS_DIALOG DIALOG DISCARDABLE  0, 0, 186, 113
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,67,92,50,14
     GROUPBOX        "Steps",IDC_STATIC,7,7,172,79

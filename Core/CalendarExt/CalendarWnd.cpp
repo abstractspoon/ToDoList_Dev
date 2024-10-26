@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CCalendarWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_DRAGCHANGE, OnBigCalendarNotifyDragChange)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_VISIBLEWEEKCHANGE, OnBigCalendarNotifyVisibleWeekChange)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_PREFSHELP, OnBigCalendarPrefsHelp)
+	ON_REGISTERED_MESSAGE(WM_CALENDAR_EDITTASKICON, OnBigCalendarEditTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_GETTASKICON, OnBigCalendarGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_GETTASKFUTUREDATES, OnBigCalendarGetTaskFutureDates)
 	ON_WM_NCDESTROY()
@@ -187,12 +188,12 @@ BOOL CCalendarWnd::OnInitDialog()
 
 void CCalendarWnd::InitSnapCombo()
 {
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHOUR,	TCCSM_NEARESTHOUR);
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY,	TCCSM_NEARESTDAY);
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, TCCSM_NEARESTHALFDAY);
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE,			TCCSM_FREE);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_NEARESTHOUR,	TCCSM_NEARESTHOUR);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_NEARESTDAY,	TCCSM_NEARESTDAY);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, TCCSM_NEARESTHALFDAY);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_FREE,			TCCSM_FREE);
 
-	CDialogHelper::SelectItemByData(m_cbSnapModes, m_BigCalendar.GetDefaultSnapMode());
+	CDialogHelper::SelectItemByDataT(m_cbSnapModes, m_BigCalendar.GetDefaultSnapMode());
 }
 
 void CCalendarWnd::OnSelChangeNumWeeks()
@@ -206,7 +207,7 @@ void CCalendarWnd::OnSelChangeNumWeeks()
 
 void CCalendarWnd::OnSelChangeSnapMode()
 {
-	m_BigCalendar.SetDefaultSnapMode(CDialogHelper::GetSelectedItemData(m_cbSnapModes, TCCSM_FREE));
+	m_BigCalendar.SetDefaultSnapMode(CDialogHelper::GetSelectedItemDataT(m_cbSnapModes, TCCSM_FREE));
 }
 
 void CCalendarWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 
@@ -231,6 +232,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	Misc::SetFlag(dwPrefs, TCCO_PREVENTDEPENDENTDRAGGING, pPrefs->GetProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), TRUE));
 	Misc::SetFlag(dwPrefs, TCCO_SHOWPARENTTASKSASFOLDER, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), TRUE));
 	Misc::SetFlag(dwPrefs, TCCO_ENABLELABELTIPS, !pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
+	Misc::SetFlag(dwPrefs, TCCO_SHOWISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 
 	m_BigCalendar.SetOptions(dwPrefs);
 
@@ -262,7 +264,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		TCC_SNAPMODE nSnap = (TCC_SNAPMODE)pPrefs->GetProfileInt(szKey, _T("SnapMode"), TCCSM_NEARESTHOUR);
 		m_BigCalendar.SetDefaultSnapMode(nSnap);
-		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
+		CDialogHelper::SelectItemByDataT(m_cbSnapModes, nSnap);
 	
 		// make sure 'today' is visible
 		COleDateTime dtToday = COleDateTime::GetCurrentTime();
@@ -300,6 +302,7 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_PREVENTDEPENDENTDRAGGING,			m_BigCalendar.HasOption(TCCO_PREVENTDEPENDENTDRAGGING));
 	Misc::SetFlag(dwOptions, TCCO_SHOWPARENTTASKSASFOLDER,			m_BigCalendar.HasOption(TCCO_SHOWPARENTTASKSASFOLDER));
 	Misc::SetFlag(dwOptions, TCCO_ENABLELABELTIPS,					m_BigCalendar.HasOption(TCCO_ENABLELABELTIPS));
+	Misc::SetFlag(dwOptions, TCCO_SHOWISODATES,						m_BigCalendar.HasOption(TCCO_SHOWISODATES));
 
 	m_BigCalendar.SetOptions(dwOptions);
 	m_MiniCalendar.SetOptions(dwOptions);
@@ -322,26 +325,29 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 	
 	GraphicsMisc::VerifyDeleteObject(m_brBack);
 
-	if (CThemed::IsAppThemed() && pTheme)
+	if (pTheme)
 	{
 		m_theme = *pTheme;
-		m_brBack.CreateSolidBrush(pTheme->crAppBackLight);
 
-		m_dlgPrefs.SetThemeBkgndColors(pTheme->crAppBackLight, pTheme->crAppBackDark);
-
-		m_BigCalendar.SetUITheme(*pTheme);
-		m_MiniCalendar.SetUITheme(*pTheme);
-
-		// intentionally set background colours to be same as ours
-		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
-		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-
-		// Rescale images because background colour has changed
-		if (GraphicsMisc::WantDPIScaling())
-			m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
+		m_BigCalendar.SetUITheme(m_theme);
+		m_MiniCalendar.SetUITheme(m_theme);
 
 		m_stSelectedTaskDates.SetBkColor(m_theme.crAppBackLight);
 		m_stSelectedTaskDates.SetTextColor(m_theme.crAppText);
+
+		if (CThemed::IsAppThemed())
+		{
+			m_brBack.CreateSolidBrush(pTheme->crAppBackLight);
+			m_dlgPrefs.SetThemeBkgndColors(pTheme->crAppBackLight, pTheme->crAppBackDark);
+
+			// intentionally set toolbar background colours to be same as ours
+			m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
+			m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+			// Rescale images because background colour has changed
+			if (GraphicsMisc::WantDPIScaling())
+				m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
+		}
 	}
 }
 
@@ -374,6 +380,55 @@ bool CCalendarWnd::ProcessMessage(MSG* pMsg)
 	return false;
 }
 
+bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	switch (nCmd)
+	{
+	case IUI_EXPANDALL:
+	case IUI_COLLAPSEALL:
+	case IUI_EXPANDSELECTED:
+	case IUI_COLLAPSESELECTED:
+	case IUI_RESIZEATTRIBCOLUMNS:
+		// not handled
+		break;
+
+	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
+	case IUI_GETNEXTTOPLEVELTASK:
+	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
+	case IUI_GETPREVTOPLEVELTASK:
+		if (pData)
+			return (m_BigCalendar.CanGetNextTask(pData->dwTaskID, nCmd) != FALSE);
+		break;
+
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
+		return true;
+
+	case IUI_SETFOCUS:
+		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
+
+	case IUI_SORT:
+		if (pData)
+			return (CTaskCalendarCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
+		break;
+
+	case IUI_SAVETOIMAGE:
+		return (m_BigCalendar.CanSaveToImage() != FALSE);
+
+	case IUI_SCROLLTOSELECTEDTASK:
+		return (m_BigCalendar.GetSelectedTaskID() != 0);
+	}
+
+	return false;
+}
+
 bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -385,13 +440,34 @@ bool CCalendarWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_EXPANDSELECTED:
 	case IUI_COLLAPSESELECTED:
 	case IUI_RESIZEATTRIBCOLUMNS:
+		// not handled
+		break;
+
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
-		// not handled
+		if (pData)
+		{
+			DWORD dwNextID = m_BigCalendar.GetNextTask(pData->dwTaskID, nCmd);
+
+			if (dwNextID && (dwNextID != pData->dwTaskID))
+			{
+				pData->dwTaskID = dwNextID;
+				return true;
+			}
+		}
+		break;
+
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
+		if (pData)
+			return (m_BigCalendar.SelectTask(pData->select, nCmd) != FALSE);
 		break;
 
 	case IUI_SORT:
@@ -424,42 +500,6 @@ void CCalendarWnd::SetTaskFont(HFONT hFont)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	m_BigCalendar.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE);
-}
-
-bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const 
-{ 
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	switch (nCmd)
-	{
-	case IUI_EXPANDALL:
-	case IUI_COLLAPSEALL:
-	case IUI_EXPANDSELECTED:
-	case IUI_COLLAPSESELECTED:
-	case IUI_RESIZEATTRIBCOLUMNS:
-	case IUI_GETNEXTVISIBLETASK:
-	case IUI_GETNEXTTOPLEVELTASK:
-	case IUI_GETPREVVISIBLETASK:
-	case IUI_GETPREVTOPLEVELTASK:
-		// not handled
-		break;
-
-	case IUI_SETFOCUS:
-		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
-
-	case IUI_SORT:
-		if (pData)
-			return (CTaskCalendarCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
-		break;
-
-	case IUI_SAVETOIMAGE:
-		return (m_BigCalendar.CanSaveToImage() != FALSE);
-
-	case IUI_SCROLLTOSELECTEDTASK:
-		return (m_BigCalendar.GetSelectedTaskID() != 0);
-	}
-	
-	return false;
 }
 
 bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)
@@ -761,17 +801,21 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 			{
 			case TCCHT_BEGIN:
 				if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
-					mod.nAttrib = TDCA_STARTDATE;
+					mod.nAttributeID = TDCA_STARTDATE;
 				break;
 
 			case TCCHT_MIDDLE:
 				if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
-					mod.nAttrib = TDCA_OFFSETTASK;
+					mod.nAttributeID = TDCA_OFFSETTASK;
 				break;
 
 			case TCCHT_END:
 				if (CDateHelper::GetTimeT64(dtDue, mod.tValue))
-					mod.nAttrib = TDCA_DUEDATE;
+					mod.nAttributeID = TDCA_DUEDATE;
+				break;
+
+			case TCCHT_ICON:
+				ASSERT(0);
 				break;
 			}
 		}
@@ -784,7 +828,7 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 		ASSERT(!bHasDate || (notify->nHit == TCCHT_MIDDLE));
 
 		mod.szCustomAttribID = notify->sCustAttribID;
-		mod.nAttrib = TDCA_CUSTOMATTRIB;
+		mod.nAttributeID = TDCA_CUSTOMATTRIB;
 
 		if (bHasDate)		
 			sCustAttribValue = CDateHelper::FormatDate(date, DHFD_TIME);
@@ -792,7 +836,7 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 		mod.szValue = sCustAttribValue;
 	}
 
-	if (mod.nAttrib != TDCA_NONE)
+	if (mod.nAttributeID != TDCA_NONE)
 	{
 		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 		{
@@ -824,22 +868,11 @@ void CCalendarWnd::UpdateSelectedTaskDates()
 	
 	if (m_BigCalendar.GetSelectedTaskDates(dtStart, dtDue))
 	{
-		CString sStart, sDue;
+		DWORD dwFlags = (DHFD_TIME | DHFD_NOSEC);
+		dwFlags |= (m_BigCalendar.HasOption(TCCO_SHOWISODATES) ? DHFD_ISO : 0);
 
-		if (CDateHelper::DateHasTime(dtStart))
-			sStart = CDateHelper::FormatDate(dtStart, DHFD_TIME | DHFD_NOSEC);
-		else
-			sStart = CDateHelper::FormatDate(dtStart);
-
-		if (CDateHelper::DateHasTime(dtDue))
-			sDue = CDateHelper::FormatDate(dtDue, DHFD_TIME | DHFD_NOSEC);
-		else
-			sDue = CDateHelper::FormatDate(dtDue);
-
-		CString sDateRange;
-		sDateRange.Format(_T("%s - %s"), sStart, sDue);
-
-		sSelectedTaskDates.Format(_T("%s: <a href=%s>%s</a>"), CEnString(IDS_SELTASKDATES_LABEL), _T(""), sDateRange);
+		CString sDateRange = COleDateTimeRange(dtStart, dtDue).Format(dwFlags);
+		sSelectedTaskDates.Format(_T("%s: <a href=>%s</a>"), CEnString(IDS_SELTASKDATES_LABEL), sDateRange);
 	}
 
 	m_stSelectedTaskDates.SetWindowText(sSelectedTaskDates);
@@ -852,7 +885,6 @@ void CCalendarWnd::OnClickSelectedTaskDates()
 
 LRESULT CCalendarWnd::OnBigCalendarNotifyDragChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	//CDialogHelper::SelectItemByData(m_cbSnapModes, wp);
 	UpdateSelectedTaskDates();
 
 	return 0L;
@@ -896,6 +928,10 @@ LRESULT CCalendarWnd::OnBigCalendarGetTaskIcon(WPARAM wp, LPARAM lp)
 	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
 }
 
+LRESULT CCalendarWnd::OnBigCalendarEditTaskIcon(WPARAM wp, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKICON, wp, lp);
+}
 
 LRESULT CCalendarWnd::OnBigCalendarGetTaskFutureDates(WPARAM wp, LPARAM lp)
 {

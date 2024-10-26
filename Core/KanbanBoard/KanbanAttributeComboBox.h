@@ -24,17 +24,17 @@ public:
 
 	TDC_ATTRIBUTE GetSelectedAttribute() const;
 	TDC_ATTRIBUTE GetSelectedAttribute(CString& sCustomAttribID) const;
-	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
+	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustomAttribID);
 
 	void SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs);
-	void ShowFixedColumns(BOOL bShow = TRUE);
+	void ShowFixedColumns(TDC_ATTRIBUTE nAttribID);
 
 	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value, CString& sCustomAttribID);
 
 // Attributes
 protected:
 	BOOL m_bShowCustomAttrib;
-	BOOL m_bShowFixedColumns;
+	TDC_ATTRIBUTE m_nFixedColumnsAttribID;
 
 	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
 

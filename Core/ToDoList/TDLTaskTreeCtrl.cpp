@@ -8,6 +8,7 @@
 #include "todoctrldata.h"
 #include "tdcstatic.h"
 #include "tdcmsg.h"
+#include "tdcmapping.h"
 #include "tdcimagelist.h"
 
 #include "..\shared\treectrlhelper.h"
@@ -858,14 +859,13 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 				}
 			}
 
-			if ((nClickCol != TDCC_NONE) && !SelectionHasLocked(FALSE))
+			if ((nClickCol != TDCC_NONE) && SelectionHasUnlocked())
 			{
 				// make sure attribute pane is synced
 				SyncColumnSelectionToTasks();
 
 				// forward the click
 				NotifyParentOfColumnEditClick(nClickCol, dwTaskID);
-
 				return TRUE;
 			}
 		}
@@ -1417,12 +1417,12 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					}
 					else if (nHitFlags & TVHT_ONITEMICON)
 					{
-						if (!m_bReadOnly && !SelectionHasLocked(FALSE, TRUE))
-						{
+// 						if (!m_bReadOnly && SelectionHasUnlocked(TRUE))
+// 						{
 							// save item handle so we don't re-handle in LButtonUp handler
 							m_htiLastHandledLBtnDown = htiHit;
 							bColClick = TRUE;
-						}
+// 						}
 					}
 					else
 					{
@@ -1471,7 +1471,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							(nHitFlags & TVHT_ONITEMLABEL) && 
 							(nSelCount == 1) && 
 							(htiLastHandledLBtnDown == NULL) &&
-							!SelectionHasLocked(FALSE, FALSE))
+							!SelectionHasLocked())
 						{
 							BeginLabelEditTimer();
 						}
@@ -1664,27 +1664,32 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 {
 	ASSERT(hti);
 
-	// basic title rect
-	VERIFY(m_tcTasks.GetItemRect(hti, rect, TRUE));
-	int nHdrWidth = m_hdrTasks.GetItemWidth(0);
-
 	switch (nArea)
 	{
 	case TDCTR_TEXT:
-		if (pDC && szTitle)
 		{
-			rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
-			rect.right = min(rect.right, nHdrWidth);
-		}
-		else
-		{
-			ASSERT(!pDC && !szTitle);
-			rect.right = nHdrWidth;
+			// Basic title rect
+			VERIFY(m_tcTasks.GetItemRect(hti, rect, TRUE));
+
+			// Available width
+			CRect rAvail;
+			m_tcTasks.GetClientRect(rAvail);
+
+			if (pDC && szTitle)
+			{
+				rect.right = (rect.left + pDC->GetTextExtent(szTitle).cx);
+				rect.right = min(rect.right, rAvail.right);
+			}
+			else
+			{
+				ASSERT(!pDC && !szTitle);
+				rect.right = rAvail.right;
+			}
 		}
 		return TRUE;
 
 	case TDCTR_BKGND:
-		if (GetItemTitleRect(hti, TDCTR_TEXT, rect)) // recursive call
+		if (GetItemTitleRect(hti, TDCTR_TEXT, rect)) // RECURSIVE CALL
 		{
 			rect.left -= TITLE_BORDER_OFFSET;
 			return TRUE;
@@ -1692,7 +1697,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 		break;
 
 	case TDCTR_EDIT:
-		if (GetItemTitleRect(hti, TDCTR_BKGND, rect)) // recursive call
+		if (GetItemTitleRect(hti, TDCTR_BKGND, rect)) // RECURSIVE CALL
 		{
 			rect.top--;
 			
@@ -1895,7 +1900,7 @@ BOOL CTDLTaskTreeCtrl::IsSelectedTaskMoveEnabled(TDC_MOVEMETHOD nMethod) const
 	case TDCM_NONDRAG:
 		{
 			// Prevent moving locked tasks unless references
-			if (SelectionHasLocked(FALSE, TRUE))
+			if (SelectionHasLocked(TRUE))
 				return FALSE;
 
 			// Prevent moving subtasks of locked parent unless parent is reference
@@ -1970,50 +1975,6 @@ DD_DROPEFFECT CTDLTaskTreeCtrl::GetSelectedTaskDropEffect(DWORD dwTargetID, BOOL
 		nEffect = DD_DROPEFFECT_NONE;
 	
 	return nEffect;
-}
-
-BOOL CTDLTaskTreeCtrl::SelectionHasLocked(BOOL bCheckChildren, BOOL bTreatRefsAsUnlocked) const
-{
-	BOOL bLocked = CTDLTaskCtrlBase::SelectionHasLocked(bTreatRefsAsUnlocked);
-
-	if (bLocked || !bCheckChildren)
-		return bLocked;
-
-	// Check children of selection
-	POSITION pos = GetFirstSelectedTaskPos();
-
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		if (TaskHasLockedSubtasks(dwTaskID, bTreatRefsAsUnlocked))
-			return TRUE;
-	}
-
-	return FALSE; // All subtasks were unlocked
-}
-
-BOOL CTDLTaskTreeCtrl::TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
-{
-	const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-
-	for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
-	{
-		DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
-
-		if (bTreatRefsAsUnlocked && m_data.IsTaskReference(dwTaskID))
-		{
-			// References can only contain other references
-			// so no need to check children
-			continue;
-		}
-		
-		// Check this task and its children
-		if (m_data.IsTaskLocked(dwSubtaskID) || TaskHasLockedSubtasks(dwSubtaskID, bTreatRefsAsUnlocked))
-			return TRUE;
-	}
-
-	return FALSE; // All subtasks were unlocked
 }
 
 BOOL CTDLTaskTreeCtrl::CanSelectTasksInHistory(BOOL bForward) const 
@@ -2179,7 +2140,7 @@ BOOL CTDLTaskTreeCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 
 int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
 {
-	if (GetSelectedTaskIDs(cache.aSelTaskIDs, cache.dwFocusedTaskID, FALSE) > 0)
+	if (GetSelectedTaskIDs(cache.aSelTaskIDs, cache.dwFocusedTaskID, FALSE, TRUE) > 0) // ordered
 	{
 		cache.dwFirstVisibleTaskID = GetTaskID(m_tcTasks.GetFirstVisibleItem());
  
@@ -2266,10 +2227,10 @@ BOOL CTDLTaskTreeCtrl::IsTaskSelected(DWORD dwTaskID, BOOL bSingly) const
 	return TSH().HasItem(dwTaskID);
 }
 
-int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const
+int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered) const
 {
 	DWORD dwFocusID;
-	int nNumIDs = GetSelectedTaskIDs(aTaskIDs, dwFocusID, FALSE);
+	int nNumIDs = GetSelectedTaskIDs(aTaskIDs, dwFocusID, FALSE, bOrdered);
 
 	// extra processing
 	if (nNumIDs && bTrue)
@@ -2278,7 +2239,7 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) cons
 	return nNumIDs;
 }
 
-int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const
+int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes, BOOL bOrdered) const
 {
 	aTaskIDs.RemoveAll();
 	dwFocusedTaskID = 0;
@@ -2288,7 +2249,7 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 		// get selected tasks ordered with/out duplicate subtasks
 		CHTIList selection;
 
-		TSH().CopySelection(selection, bRemoveChildDupes, TRUE);
+		TSH().CopySelection(selection, bRemoveChildDupes, bOrdered);
 		TSH().GetItemData(selection, aTaskIDs);
 		
 		// focused item

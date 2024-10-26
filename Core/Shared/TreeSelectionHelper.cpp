@@ -543,7 +543,7 @@ int CTreeSelectionHelper::BuildSortArray(const CHTIList& selection, CSortArray& 
 		SORTITEM& si = aItems[nItem++];
 
 		si.hti = selection.GetNext(pos);
-		si.nPos = m_tch.GetItemTop(si.hti);
+		si.nVPos = m_tch.GetItemTop(si.hti);
 	}
 
 	return aItems.GetSize();
@@ -554,7 +554,7 @@ int CTreeSelectionHelper::SortProc(const void* item1, const void* item2)
 	const SORTITEM* pItem1 = (const SORTITEM*)item1;
 	const SORTITEM* pItem2 = (const SORTITEM*)item2;
 
-	return (pItem1->nPos - pItem2->nPos);
+	return (pItem1->nVPos - pItem2->nVPos);
 }
 
 void CTreeSelectionHelper::RemoveChildDuplicates() 
@@ -646,7 +646,7 @@ BOOL CTreeSelectionHelper::ContainsAllItems() const
 
 BOOL CTreeSelectionHelper::HasNextSelection() const
 {
-	return (m_nCurSelection < m_aHistory.GetSize() - 1);
+	return (m_nCurSelection < Misc::LastIndexT(m_aHistory));
 }
 
 int CTreeSelectionHelper::GetNextSelectionIDs(CDWordArray& aIDs) const

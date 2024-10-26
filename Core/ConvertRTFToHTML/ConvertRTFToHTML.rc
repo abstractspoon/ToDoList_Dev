@@ -39,7 +39,7 @@ BEGIN
     LTEXT           "Output Tasklist",IDC_STATIC,7,28,49,8
     EDITTEXT        IDC_INPUTTASKLIST,70,7,244,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_OUTPUTTASKLIST,70,26,244,14,ES_AUTOHSCROLL
-    LTEXT           "Processing:",IDC_STATIC,7,74,38,8
+    LTEXT           "Processing",IDC_STATIC,7,74,38,8
     LTEXT           "Static",IDC_CURRENTTASK,70,75,244,8
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,7,66,307,1
     CONTROL         "Use MS Word for content conversion",IDC_USEMSWORD,

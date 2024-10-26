@@ -732,14 +732,11 @@ namespace WordCloudUIExtension
 
 		private void CreateToolbar()
 		{
-			var assembly = Assembly.GetExecutingAssembly();
-			var images = new Bitmap(assembly.GetManifestResourceStream("WordCloudUIExtension.toolbar_std.bmp"));
-
 			m_TBImageList = new ImageList();
 			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
 			m_TBImageList.ImageSize = new System.Drawing.Size(16, 16);
 			m_TBImageList.TransparentColor = Color.Magenta;
-			m_TBImageList.Images.AddStrip(images);
+			m_TBImageList.Images.AddStrip(Properties.Resources.toolbar_std);
 
 			m_Toolbar = new IIControls.ToolStripEx();
 			m_Toolbar.Anchor = AnchorStyles.None;

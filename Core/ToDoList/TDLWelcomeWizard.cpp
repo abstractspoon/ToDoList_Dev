@@ -246,7 +246,7 @@ IMPLEMENT_DYNCREATE(CTDLWelcomePage3, CPropertyPageEx)
 CTDLWelcomePage3::CTDLWelcomePage3() 
 	: 
 	CPropertyPageEx(CTDLWelcomePage3::IDD, 0),
-	m_eSampleTasklist(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS), 
+	m_eSampleTasklist(FES_RELATIVEPATHS), 
 	m_hFont(NULL)
 {
 	//{{AFX_DATA_INIT(CWelcomePage3)

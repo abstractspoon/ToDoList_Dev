@@ -9,6 +9,7 @@
 
 #include "tdcstruct.h"
 #include "TDCToolsHelper.h"
+#include "TDCImageList.h"
 
 #include "..\shared\fileedit.h"
 #include "..\shared\preferencesbase.h"
@@ -47,22 +48,23 @@ protected:
 
 // Dialog Data
 	//{{AFX_DATA(CPreferencesToolPage)
-	enum { IDD = IDD_PREFTOOLS_PAGE };
 	//}}AFX_DATA
 	CMenuButton	m_btnArgMenu;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CEdit	m_eCmdLine;
-	CFileEdit	m_eToolPath;
-	CListCtrl	m_lcTools;
-	CFileEdit	m_eIconPath;
+	CEdit m_eCmdLine;
+	CFileEdit m_eToolPath;
+	CListCtrl m_lcTools;
+	CFileEdit m_eIconPath;
+	CTDCImageList m_ilTools;
 
 	int m_nMaxNumTools;
+	int m_nNumDefaultIcons;
 	BOOL m_bDisplayUDTsInToolbar;
 	CString	m_sToolPath;
 	CString	m_sCommandLine;
-	BOOL	m_bRunMinimized;
-	CString		m_sIconPath;
+	BOOL m_bRunMinimized;
+	CString m_sIconPath;
 	
 	CUserToolArray m_aTools;
 	CStringArray m_aMenuCustomAttribIDs;
@@ -115,6 +117,7 @@ protected:
 	afx_msg void OnChangeIconPath();
 	afx_msg void OnImportTools();
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSelectIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -125,10 +128,11 @@ protected:
 	void EnableControls();
 	int GetCurSel() const;
 	BOOL SetCurSel(int nTool);
-	void RebuildListCtrlImages();
+	void RebuildListImages();
 	BOOL InitializeToolbar();
-	BOOL GetListTool(int nTool, USERTOOL& tool) const;
-	int AddListTool(const USERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	BOOL GetToolFromList(int nTool, USERTOOL& tool) const;
+	int AddToolToList(const USERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	void RebuildToolsFromList(BOOL bSafeQuotes = FALSE);
 	
 	CString MapCmdIDToPlaceholder(UINT nCmdID) const;
 	CString GetNewUserVariableName(LPCTSTR szVarType) const;

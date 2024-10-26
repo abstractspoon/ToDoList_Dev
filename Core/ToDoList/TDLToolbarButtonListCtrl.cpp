@@ -95,7 +95,7 @@ void CTDLToolbarButtonListCtrl::InitState()
 	OverrideSelectionTheming(TRUE, TRUE);
 	ShowGrid(TRUE, TRUE);
 
-	AddCol(_T("Menu Item"), GraphicsMisc::ScaleByDPIFactor(350), ILCT_DROPLIST);
+	AddCol(_T("Menu Item"), GraphicsMisc::ScaleByDPIFactor(350), ILCT_COMBO);
 	AddCol(_T("Image"), GraphicsMisc::ScaleByDPIFactor(75), ILCT_BROWSE);
 
 	SetAutoRowPrompt(CEnString(IDS_NEW_TOOLBARBUTTON));
@@ -158,7 +158,7 @@ void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 			TOOLBARBUTTON& tb = m_aButtons[nItem];
 			CTDLTaskIconDlg dialog(m_ilImages, tb.sImageID, FALSE);
 			
-			if (dialog.DoModal() == IDOK)
+			if (dialog.DoModal(IDS_TOOLBARICONDLG_TITLE) == IDOK)
 			{
 				tb.sImageID = dialog.GetIconName();
 				SetItemText(nItem, nCol, tb.sImageID);
@@ -183,7 +183,7 @@ void CTDLToolbarButtonListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		{
 			ASSERT (&ctrl == &m_cbMenuItems);
 			
-			CDialogHelper::SelectItemByData(m_cbMenuItems, tb.nMenuID);
+			CDialogHelper::SelectItemByDataT(m_cbMenuItems, tb.nMenuID);
 			CDialogHelper::RefreshMaxDropWidth(m_cbMenuItems);
 		}
 		break;

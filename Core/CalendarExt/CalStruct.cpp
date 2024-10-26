@@ -941,6 +941,65 @@ int CTaskCalItemArray::FindItem(DWORD dwTaskID) const
 	return -1;
 }
 
+int CTaskCalItemArray::GetNextItem(DWORD dwTaskID, BOOL bForwards) const
+{
+	int nNext = FindItem(dwTaskID);
+
+	if (nNext != -1)
+		nNext =  Misc::NextIndexT(*this, nNext, bForwards);
+
+	return nNext;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+CSortedTaskCalItemArray::CSortedTaskCalItemArray(const CTaskCalItemMap& mapTasks)
+	:
+	m_mapTasks(mapTasks),
+	m_bNeedsResort(TRUE),
+	m_nSortBy(TDCA_NONE),
+	m_bSortAscending(TRUE)
+{
+}
+
+void CSortedTaskCalItemArray::SetNeedsRebuild()
+{
+	RemoveAll();
+	m_bNeedsResort = TRUE;
+}
+
+void CSortedTaskCalItemArray::SetNeedsResort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending)
+{
+	m_nSortBy = nSortBy;
+	m_bSortAscending = bSortAscending;
+	m_bNeedsResort = TRUE;
+}
+
+const CTaskCalItemArray& CSortedTaskCalItemArray::GetTasks()
+{
+	if (GetSize() == 0)
+	{
+		SetSize(m_mapTasks.GetCount());
+
+		POSITION pos = m_mapTasks.GetStartPosition();
+		int nTask = 0;
+
+		while (pos)
+		{
+			TASKCALITEM* pTCI = m_mapTasks.GetNextTask(pos);
+			SetAt(nTask++, pTCI);
+		}
+	}
+
+	if (m_bNeedsResort)
+	{
+		SortItems(m_nSortBy, m_bSortAscending);
+		m_bNeedsResort = FALSE;
+	}
+	
+	return *this;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 CHeatMap::CHeatMap(int nMinHeatCutoff) 
@@ -971,11 +1030,11 @@ BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
 	return TRUE;
 }
 
-BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib, DWORD dwOptions)
+BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions)
 {
 	m_mapHeat.RemoveAll();
 
-	if ((nAttrib == TDCA_NONE) || (mapData.GetCount() == 0))
+	if ((nAttribID == TDCA_NONE) || (mapData.GetCount() == 0))
 		return FALSE;
 
 	POSITION pos = mapData.GetStartPosition();
@@ -989,7 +1048,7 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib
 		if (pTCI->IsParent() && Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS))
 			continue;
 
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_DONEDATE:
 			if (pTCI->IsDone(FALSE))
@@ -1068,7 +1127,7 @@ COLORREF CHeatMap::GetColor(const COleDateTime& date) const
 		nHeat = min(nHeat, m_nMaxHeatCutoff);
 
 		int nColor = ((m_aColorPalette.GetSize() * nHeat) / m_nMaxHeatCutoff);
-		nColor = min(nColor, m_aColorPalette.GetSize() - 1);
+		nColor = min(nColor, Misc::LastIndexT(m_aColorPalette));
 
 		if (nColor >= 0)
 			return m_aColorPalette[nColor];

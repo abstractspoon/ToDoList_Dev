@@ -198,7 +198,7 @@ FONT 8, "Tahoma"
 BEGIN
     CONTROL         "&Hide parent tasks",IDC_HIDEPARENTTASKS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,7,334,10
-    CONTROL         "&Having the following tag:",IDC_HIDEPARENTTASKSBYTAG,
+    CONTROL         "&Having the following tag",IDC_HIDEPARENTTASKSBYTAG,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,22,324,10
     EDITTEXT        IDC_HIDEPARENTTAG,29,35,146,13,ES_AUTOHSCROLL
     CONTROL         "&Show vertical mini calendar-bar",IDC_SHOWMINICALENDAR,
@@ -240,7 +240,7 @@ BEGIN
     CONTROL         "Show the 'Week Number' on the first day of the week",
                     IDC_SHOWWEEKNUMINCELL,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,260,334,10
-    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,276,
+    GROUPBOX        "Calculate missing 'Start' dates as",IDC_STATIC,7,276,
                     334,62
     CONTROL         "The task's 'Creation' date",IDC_USECREATIONFORSTART,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,290,316,10

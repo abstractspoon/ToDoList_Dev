@@ -83,6 +83,7 @@ namespace Abstractspoon
 				static int GetMaxMonthNameWidth(Drawing::Graphics^ graphics, Drawing::Font^ font, bool shortName);
 
 				static String^ GetMonthName(int nMonth, bool shortName);
+				static String^ FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime, bool bISO);
 
 				static int DateInMonths(DateTime date);
 				static DateTime DateFromMonths(int nMonths);

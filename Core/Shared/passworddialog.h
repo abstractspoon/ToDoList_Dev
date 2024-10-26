@@ -39,8 +39,9 @@ public:
 	static BOOL RetrievePassword(BOOL bConfirm, CString& sPassword, LPCTSTR szExplanation = NULL);
 	static BOOL VerifyPassword(LPCTSTR szPassword, LPCTSTR szExplanation = NULL, LPCTSTR szErrorMsg = NULL);
 
-	// for overiding the default text for translating
+	// for overriding the default text for translating
 	static void SetItemText(UINT nIDItem, UINT nIDText);
+	static void SetIcon(HICON hIcon) { s_hIconDlg = hIcon; }
 
 protected:
 // Dialog Data
@@ -51,6 +52,7 @@ protected:
 	BOOL m_bConfirm;
 
 	static CMap<UINT, UINT, CString, CString&> s_mapText;
+	static HICON s_hIconDlg;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

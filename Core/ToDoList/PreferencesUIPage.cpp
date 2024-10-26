@@ -26,7 +26,7 @@ IMPLEMENT_DYNCREATE(CPreferencesUIPage, CPreferencesPageBase)
 
 CPreferencesUIPage::CPreferencesUIPage(const CUIExtensionMgr* pMgrUIExt) 
 	: 
-	CPreferencesPageBase(CPreferencesUIPage::IDD), 
+	CPreferencesPageBase(IDD_PREFUI_PAGE),
 	m_pMgrUIExt(pMgrUIExt),
 	m_lbTaskViews(pMgrUIExt)
 {
@@ -147,7 +147,7 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_bSortDoneTasksAtBottom = pPrefs->GetProfileInt(szKey, _T("SortDoneTasksAtBottom"), TRUE);
 	m_bRTLComments = pPrefs->GetProfileInt(szKey, _T("RTLComments"), FALSE);
 	m_nCommentsPos = (PUIP_LOCATION)pPrefs->GetProfileInt(szKey, _T("VertComments"), PUIP_LOCATERIGHT);
-	m_nCtrlsPos = (PUIP_LOCATION)pPrefs->GetProfileInt(szKey, _T("VertControls"), PUIP_LOCATEBOTTOM);
+	m_nCtrlsPos = (PUIP_LOCATION)pPrefs->GetProfileInt(szKey, _T("VertControls"), PUIP_LOCATERIGHT);
 	m_bMultiSelFilters = pPrefs->GetProfileInt(szKey, _T("MultiSelFilters"), TRUE);
 	m_bRestoreTasklistFilters = pPrefs->GetProfileInt(szKey, _T("RestoreTasklistFilters"), TRUE);
 	m_bAutoRefilter = pPrefs->GetProfileInt(szKey, _T("AutoRefilter"), TRUE);

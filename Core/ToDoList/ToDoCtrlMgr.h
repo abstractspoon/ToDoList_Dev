@@ -61,7 +61,7 @@ public:
 
 	int FindToDoCtrl(HWND hwndTDC) const;
 	int FindToDoCtrl(const CFilteredToDoCtrl* pTDC) const;
-	int FindToDoCtrl(LPCTSTR szFilePath) const;
+	int FindToDoCtrl(LPCTSTR szFilePath, BOOL bFileNameOnly = FALSE) const;
 	int FindToDoCtrl(const TSM_TASKLISTINFO& info) const;
 	int FindPristineToDoCtrl() const;
 	
@@ -69,7 +69,7 @@ public:
 	CString GetFilePath(int nIndex, BOOL bStrict = TRUE) const;
 	CString GetFolderPath(int nIndex) const;
 	void ClearFilePath(int nIndex);
-	BOOL HasFilePath(int nIndex) const;
+	BOOL HasFilePath(int nIndex, BOOL bIncStorage = TRUE) const;
 	TDCM_PATHTYPE GetFilePathType(int nIndex) const;
 	TDCM_PATHTYPE RefreshPathType(int nIndex); 
 	CString GetFriendlyProjectName(int nIndex) const;
@@ -83,7 +83,7 @@ public:
 	BOOL UsesStorage(int nIndex) const;
 	BOOL GetStorageDetails(int nIndex, TSM_TASKLISTINFO& info) const;
 	BOOL SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info);
-	BOOL ClearStorageDetails(int nIndex);
+	BOOL ClearStorageDetails(int nIndex, BOOL bIncFilePath);
 
 	BOOL RefreshFileLastModified(int nIndex); // true if changed
 	BOOL IsModified(int nIndex) const;
@@ -155,12 +155,12 @@ protected:
 		TDCM_PATHTYPE GetPathType() const;
 		CString GetFriendlyProjectName() const;
 		BOOL IsSelectable() const;
-		BOOL HasFilePath() const;
+		BOOL HasFilePath(BOOL bIncStorage = TRUE) const;
 
 		BOOL UsesStorage() const;
 		void RefreshPathType();
-		void ClearStorageDetails();
-		void SetStorageDetails(const TSM_TASKLISTINFO& info);
+		BOOL ClearStorageDetails(BOOL bIncFilePath);
+		BOOL SetStorageDetails(const TSM_TASKLISTINFO& info);
 		
 		static TDCM_PATHTYPE TranslatePathType(int nDriveInfoType);
 	

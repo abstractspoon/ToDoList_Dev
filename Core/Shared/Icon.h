@@ -4,8 +4,6 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// fileedit.h : header file
-//
 
 class CIcon
 {

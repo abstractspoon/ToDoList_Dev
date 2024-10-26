@@ -102,6 +102,11 @@
     <EmbeddedResource Include="Resources\ToolbarFileNew.bmp" />
     <EmbeddedResource Include="Resources\ToolbarFileOpen.bmp" />
     <EmbeddedResource Include="Resources\ToolbarFileSave.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarImage.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarImageClear.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarBackColorClear.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarFileSaveAs.bmp" />
+    <EmbeddedResource Include="Resources\ToolbarHelp.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\3rdParty\CommandHandling\CommandHandling.csproj">
@@ -111,6 +116,10 @@
     <ProjectReference Include="..\..\..\3rdParty\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
       <Name>ToolStripEx</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\UIComponents\UIComponents.csproj">
+      <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
+      <Name>UIComponents</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\WebBrowserEx\WebBrowserEx.csproj">
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
@@ -122,12 +131,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\ToolbarImage.bmp" />
-    <EmbeddedResource Include="Resources\ToolbarImageClear.bmp" />
-    <EmbeddedResource Include="Resources\ToolbarBackColorClear.bmp" />
-    <EmbeddedResource Include="Resources\ToolbarFileSaveAs.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <COMReference Include="MSHTML">
       <Guid>{3050F1C5-98B5-11CF-BB82-00AA00BDCE0B}</Guid>
       <VersionMajor>4</VersionMajor>
@@ -137,9 +140,6 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ToolbarHelp.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
