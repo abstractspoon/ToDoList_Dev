@@ -144,9 +144,6 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt,
 	// tab is on by default
 	m_styles[TDCS_SHOWTREELISTBAR] = TRUE;
 	m_styles[TDCS_SHOWTASKVIEWTABCLOSEBUTTON] = TRUE;
-
-	// Will be enabled on first showing
-	m_taskList.EnableRecalcColumns(FALSE);
 }
 
 CTabbedToDoCtrl::~CTabbedToDoCtrl()
@@ -949,9 +946,6 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				pLVData->bNeedFontUpdate = FALSE;
 				m_taskList.SetFont(m_taskTree.GetFont());
 			}
-
-			// This does nothing if already enabled
-			m_taskList.EnableRecalcColumns(TRUE);
 		}
 		break;
 
@@ -1107,6 +1101,7 @@ BOOL CTabbedToDoCtrl::DoIdleProcessing()
 	
 	switch (nView)
 	{
+	case FTCV_UNSET:
 	case FTCV_TASKTREE:
 		return CToDoCtrl::DoIdleProcessing();
 

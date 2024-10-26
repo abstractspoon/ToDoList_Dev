@@ -125,21 +125,6 @@ BOOL CTDLTaskCtrlBase::TDSORTFLAGS::WantIncludeTime(TDC_COLUMN nColID) const
 	return FALSE;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-CHoldRecalcColumns::CHoldRecalcColumns(CTDLTaskCtrlBase& tcb) 
-	: 
-	m_tcb(tcb),
-	m_bInitialState(tcb.m_bEnableRecalcColumns)
-{
-	m_tcb.EnableRecalcColumns(FALSE);
-}
-
-CHoldRecalcColumns::~CHoldRecalcColumns()
-{
-	m_tcb.EnableRecalcColumns(m_bInitialState);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) 
@@ -197,7 +182,6 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_sizer(data, m_mgrContent),
 	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(FALSE),
-	m_bEnableRecalcColumns(TRUE),
 	m_mgrContent(mgrContent),
 	m_bReadOnly(FALSE),
 	m_nHeaderContextMenuItem(-1)
@@ -1189,25 +1173,15 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	}
 
 	RecalcUntrackedColumnWidths();
+	
+	// Force the recalculation first time only
+	DoIdleProcessing(); 
 
 	return TRUE;
 }
 
-void CTDLTaskCtrlBase::EnableRecalcColumns(BOOL bEnable)
-{
-	if (Misc::StateChanged(bEnable, m_bEnableRecalcColumns))
-	{
-		m_bEnableRecalcColumns = bEnable;
-
-		if (bEnable)
-			RecalcUntrackedColumnWidths();
-	}
-}
-
 void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 {
-	ASSERT(m_bEnableRecalcColumns);
-
 	m_hdrColumns.ClearAllTracked();
 
 	RecalcUntrackedColumnWidths();
@@ -1220,39 +1194,37 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 {
-	if (!m_bEnableRecalcColumns)
-		return;
-
 	// Get a list of all the visible column attributes
-	CTDCColumnIDMap mapCols;
-
 	if (!bCustomOnly)
-		mapCols.Copy(m_mapVisibleCols);
+		m_idleTasks.aRecalcWidthColIDs.Copy(m_mapVisibleCols);
 	
-	m_aCustomAttribDefs.GetVisibleColumnIDs(mapCols, TRUE); // append
-
-	CWaitCursor cursor;
-	RecalcUntrackedColumnWidths(mapCols, TRUE, bCustomOnly);
+	m_aCustomAttribDefs.GetVisibleColumnIDs(m_idleTasks.aRecalcWidthColIDs, TRUE); // append
 }
 
 BOOL CTDLTaskCtrlBase::DoIdleProcessing()
 {
 	AF_NOREENTRANT_RET(FALSE);
 
-	if (!m_idleTasks.aRecalcColIDs.IsEmpty())
+	if (!m_idleTasks.IsEmpty())
 	{
-		RecalcUntrackedColumnWidths(m_idleTasks.aRecalcColIDs);
-		m_idleTasks.aRecalcColIDs.RemoveAll();
+		CScopedLogTimer timer(_T("CTDLTaskCtrlBase::DoIdleProcessing"));
+		timer.LogStart();
 
-		return TRUE;
+		if (!m_idleTasks.aRecalcWidthColIDs.IsEmpty())
+		{
+			RecalcUntrackedColumnWidths(m_idleTasks.aRecalcWidthColIDs);
+			m_idleTasks.aRecalcWidthColIDs.RemoveAll();
+
+			return TRUE;
+		}
+		/*
+			else if (m_idleTasks.SomethingElse)
+			{
+				// TODO
+				return TRUE;
+			}
+		*/
 	}
-/*
-	else if (m_idleTasks.SomethingElse)
-	{
-		// TODO
-		return TRUE;
-	}
-*/
 	// else
 	return FALSE;
 }
@@ -1307,9 +1279,6 @@ int CTDLTaskCtrlBase::RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers, BOOL bCustomOnly)
 {
-	if (!m_bEnableRecalcColumns)
-		return;
-
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()"));
 	///////////////////////////////////////////////////////////////////
@@ -4908,7 +4877,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 	// so if idle processing has not been called since the 
 	// last call to this function we want to accumulate any
 	// additional columns rather than overwrite them
-	m_aIdleRecalcColIDs.Append(aColIDs);
+	m_idleTasks.aRecalcWidthColIDs.Append(aColIDs);
 }
 
 int CTDLTaskCtrlBase::GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const

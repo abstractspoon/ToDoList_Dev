@@ -442,7 +442,7 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 	if (hti && !CanExpandItem(hti, bExpand))
 		return;
 
-	CHoldRecalcColumns hr(*this);
+//	CHoldRecalcColumns hr(*this);
 	HTREEITEM htiSel = GetSelectedItem();
 	
 	// scope redraw holding else EnsureVisible doesn't work

@@ -43,19 +43,6 @@ class CTDCStyleMap;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CHoldRecalcColumns
-{
-public:
-	CHoldRecalcColumns(CTDLTaskCtrlBase& tcb);
-	~CHoldRecalcColumns();
-
-protected:
-	CTDLTaskCtrlBase& m_tcb;
-	BOOL m_bInitialState; // To handle nested holds
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer   
 {
 	friend class CHoldRecalcColumns;
@@ -102,7 +89,6 @@ public:
 	void RedrawColumn(TDC_COLUMN nColID) const;
 	void RecalcUntrackedColumnWidths();
 	void RecalcAllColumnWidths();
-	void EnableRecalcColumns(BOOL bEnable = TRUE);
 	void UpdateSelectedTaskPath();
 	
  	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
@@ -289,13 +275,8 @@ protected:
 private:
 	BOOL m_bBoundSelecting;
 	BOOL m_bAutoFitSplitter;
-	BOOL m_bEnableRecalcColumns;
 
-	struct IDLETASKS
-	{
-		CTDCColumnIDMap aRecalcColIDs;
-	};
-	IDLETASKS m_idleTasks;
+	TDLTCBIDLETASKS m_idleTasks;
 	
 protected:
 	// Message map functions

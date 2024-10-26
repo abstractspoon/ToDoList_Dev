@@ -2168,7 +2168,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks)
 	if (m_aRecreateTaskIDs.GetSize())
 	{
 		// Don't recalc column widths until after the new tasks are created
-		m_taskTree.EnableRecalcColumns(FALSE);
+// 		m_taskTree.EnableRecalcColumns(FALSE);
 		PostMessage(WM_TDC_RECREATERECURRINGTASK, 0, m_aRecreateTaskIDs.GetSize());
 	}
 
@@ -2332,7 +2332,7 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 
 	// always
 	m_aRecreateTaskIDs.RemoveAll();
-	m_taskTree.EnableRecalcColumns();
+//	m_taskTree.EnableRecalcColumns();
 
 	return 0L;
 }
@@ -4686,7 +4686,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	if (!GetSafeHwnd())
 		return FALSE;
 
-	CHoldRecalcColumns hr(m_taskTree);
+// 	CHoldRecalcColumns hr(m_taskTree);
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTimer log;
@@ -6781,7 +6781,7 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent
 	TCH().SelectItem(NULL);
 	TSH().RemoveAll();
 
-	CHoldRecalcColumns hr(m_taskTree);
+// 	CHoldRecalcColumns hr(m_taskTree);
 
 	while (hTask)
 	{
@@ -9533,7 +9533,7 @@ void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 	CScopedLogTimer timer(_T("ExpandTasks(%s)"), Misc::Format(bExpand));
 	////////////////////////////////////////////////////////////////////
 
-	CHoldRecalcColumns hr(m_taskTree);
+// 	CHoldRecalcColumns hr(m_taskTree);
 
 	CHTIList prevSel;
 	TSH().CopySelection(prevSel);
