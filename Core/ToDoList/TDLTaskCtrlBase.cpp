@@ -1239,14 +1239,20 @@ BOOL CTDLTaskCtrlBase::DoIdleProcessing()
 {
 	AF_NOREENTRANT_RET(FALSE);
 
-	if (!m_aIdleRecalcColIDs.IsEmpty())
+	if (!m_idleTasks.aRecalcColIDs.IsEmpty())
 	{
-		RecalcUntrackedColumnWidths(m_aIdleRecalcColIDs);
-		m_aIdleRecalcColIDs.RemoveAll();
+		RecalcUntrackedColumnWidths(m_idleTasks.aRecalcColIDs);
+		m_idleTasks.aRecalcColIDs.RemoveAll();
 
 		return TRUE;
 	}
-
+/*
+	else if (m_idleTasks.SomethingElse)
+	{
+		// TODO
+		return TRUE;
+	}
+*/
 	// else
 	return FALSE;
 }

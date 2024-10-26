@@ -251,8 +251,6 @@ protected:
 	BOOL m_bReadOnly;
 	BOOL m_bSortingColumns;
 
-	CTDCColumnIDMap m_aIdleRecalcColIDs;
-
 	CString m_sCompletionStatus;
 	CString m_sTasksWndPrompt;
 	DWORD m_dwEditTitleTaskID;
@@ -292,6 +290,12 @@ private:
 	BOOL m_bBoundSelecting;
 	BOOL m_bAutoFitSplitter;
 	BOOL m_bEnableRecalcColumns;
+
+	struct IDLETASKS
+	{
+		CTDCColumnIDMap aRecalcColIDs;
+	};
+	IDLETASKS m_idleTasks;
 	
 protected:
 	// Message map functions
