@@ -171,7 +171,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_nSortDir(TDC_SORTNONE),
 	m_dwTimeTrackTaskID(0), 
 	m_dwEditTitleTaskID(0),
-	m_dwLargestTaskID(0/*100*/),
+	m_dwLargestTaskID(100), // for initial width calculation
 	m_bSortingColumns(FALSE),
 	m_nColorByAttribID(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
