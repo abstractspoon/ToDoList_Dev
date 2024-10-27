@@ -910,6 +910,7 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 	if (mapChanges.Has(TDCC_ICON) || mapChanges.Has(TDCC_DONE))
 		OnImageListChange();
 
+	// We DON'T use idle tasks here so that the subsequent lines will work
 	RecalcUntrackedColumnWidths(mapChanges);
 
 	if (m_bAutoFitSplitter)
