@@ -192,6 +192,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_REGISTERED_MESSAGE(WM_IUI_SHOWFILELINK, OnUIExtShowFileLink)
 	ON_REGISTERED_MESSAGE(WM_IUI_SETTASKLISTMETADATA, OnUIExtSetTasklistMetaData)
 
+	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnLabelEditCancel)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
@@ -4710,6 +4711,15 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	}
 	
 	*pResult = 0;
+}
+
+LRESULT CTabbedToDoCtrl::OnLabelEditCancel(WPARAM wParam, LPARAM lParam)
+{
+	// user hit escape key so we may need to clear the selection
+	if (InListView() && (GetSelectedTaskID() == m_dwLastAddedID))
+		m_taskList.DeselectAll();
+
+	return CToDoCtrl::OnLabelEditCancel(wParam, lParam);
 }
 
 void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)

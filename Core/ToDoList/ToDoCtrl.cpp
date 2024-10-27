@@ -834,9 +834,9 @@ void CToDoCtrl::ShowHideControls()
 	}
 }
 
-void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
+void CToDoCtrl::EnableDisableControls(BOOL bHasSelection)
 {
-	EnableDisableComments(hti);
+	EnableDisableComments(bHasSelection);
 
 	if (m_layout.HasMaximiseState(TDCMS_NORMAL) && HasStyle(TDCS_SHOWPROJECTNAME))
 		SetCtrlState(this, IDC_PROJECTNAME, (IsReadOnly() ? RTCS_READONLY : RTCS_ENABLED));
@@ -844,7 +844,7 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 		SetCtrlState(this, IDC_PROJECTNAME, RTCS_DISABLED);
 }
 
-void CToDoCtrl::EnableDisableComments(HTREEITEM hti)
+void CToDoCtrl::EnableDisableComments(BOOL bHasSelection)
 {
 	CONTENTFORMAT cfComments;
 	GetSelectedTaskCustomComments(cfComments);
@@ -853,7 +853,7 @@ void CToDoCtrl::EnableDisableComments(HTREEITEM hti)
 	BOOL bCommentsVis = m_layout.IsCommentsVisible();
 	RT_CTRLSTATE nCommentsState = RTCS_ENABLED, nComboState = RTCS_ENABLED;
 
-	if (!bCommentsVis || !hti)
+	if (!bCommentsVis || !bHasSelection)
 	{
 		nComboState = nCommentsState = RTCS_DISABLED;
 	}
@@ -874,7 +874,7 @@ void CToDoCtrl::UpdateSelectedTaskPath()
 	m_taskTree.UpdateSelectedTaskPath();
 }
 
-void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
+void CToDoCtrl::UpdateControls(BOOL bIncComments)
 {
 	if (m_bDeletingTasks)
 		return;
@@ -896,13 +896,11 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	}
 	ASSERT(!m_bPendingUpdateControls);
 
-	if (!hti)
-		hti = GetUpdateControlsItem();
-	
 	CDWordArray aSelTaskIDs;
+	BOOL bHasSelection = (NULL != GetUpdateControlsItem());
 
-	if (hti)
-		GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+	if (bHasSelection)
+		bHasSelection = GetSelectedTaskIDs(aSelTaskIDs, TRUE);
 
 	m_ctrlAttributes.SetSelectedTaskIDs(aSelTaskIDs);
 
@@ -914,7 +912,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	
 	// Do the control enabling before updating the comments
 	// to prevent unwanted intermediate comments states
-	EnableDisableControls(hti);
+	EnableDisableControls(bHasSelection);
 
 	// Finally update comments
 	if (bIncComments)
@@ -930,9 +928,9 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_ctrlComments.GetSelectedFormat(cfPrev);
 
 		CONTENTFORMAT cfComments;
-		const CBinaryData& customComments = (hti ? m_taskTree.GetSelectedTaskCustomComments(cfComments) : emptyComments);
+		const CBinaryData& customComments = (bHasSelection ? m_taskTree.GetSelectedTaskCustomComments(cfComments) : emptyComments);
 		
-		CString sTextComments = (hti ? m_taskTree.GetSelectedTaskComments() : sEmptyComments);
+		CString sTextComments = (bHasSelection ? m_taskTree.GetSelectedTaskComments() : sEmptyComments);
 		
 		// if more than one comments type is selected then sCommentsType
 		// will be empty which will put the comments type combo in an
@@ -958,7 +956,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		// format changed because the new control will have 
 		// been created enabled and we may not want that
 		if (m_cfComments.IsEmpty() && (m_cfComments != cfPrev))
-			EnableDisableComments(hti);
+			EnableDisableComments(bHasSelection);
 	}
 }
 
