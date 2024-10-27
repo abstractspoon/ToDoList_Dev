@@ -45,10 +45,28 @@ class CTDCStyleMap;
 
 class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer   
 {
-	friend class CHoldRecalcColumns;
-
 	DECLARE_DYNAMIC(CTDLTaskCtrlBase);
 	
+private:
+	struct IDLETASKS
+	{
+		IDLETASKS();
+		
+		void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
+		void Resort();
+		BOOL Process(CTDLTaskCtrlBase& tcb);
+		
+	protected:
+		CTDCColumnIDMap mapRecalcWidthColIDs;
+		BOOL bResort;
+		
+	protected:
+		BOOL IsEmpty() const;
+		
+	};
+
+	friend struct IDLETASKS;
+
 protected: // base class only
 	CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data, 
@@ -276,7 +294,7 @@ private:
 	BOOL m_bBoundSelecting;
 	BOOL m_bAutoFitSplitter;
 
-	TDLTCBIDLETASKS m_idleTasks;
+	IDLETASKS m_idleTasks;
 	
 protected:
 	// Message map functions

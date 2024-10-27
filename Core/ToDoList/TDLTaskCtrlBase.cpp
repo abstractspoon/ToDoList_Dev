@@ -136,6 +136,51 @@ CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb)
 }
 
 //////////////////////////////////////////////////////////////////////
+
+CTDLTaskCtrlBase::IDLETASKS::IDLETASKS() 
+	: 
+	bResort(FALSE) 
+{
+}
+
+void CTDLTaskCtrlBase::IDLETASKS::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs)
+{
+	mapRecalcWidthColIDs.Append(aColIDs);
+}
+
+void CTDLTaskCtrlBase::IDLETASKS::Resort()
+{
+	bResort = TRUE;
+}
+
+BOOL CTDLTaskCtrlBase::IDLETASKS::Process(CTDLTaskCtrlBase& tcb)
+{
+	if (IsEmpty())
+		return FALSE;
+
+	CScopedLogTimer timer(_T("CTDLTaskCtrlBase::DoIdleProcessing"));
+	timer.LogStart();
+	
+	if (!mapRecalcWidthColIDs.IsEmpty())
+	{
+		tcb.RecalcUntrackedColumnWidths(mapRecalcWidthColIDs);
+		mapRecalcWidthColIDs.RemoveAll();
+	}
+	else if (bResort)
+	{
+		tcb.Resort();
+		bResort = FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CTDLTaskCtrlBase::IDLETASKS::IsEmpty() const
+{
+	return ((mapRecalcWidthColIDs.GetSize() == 0) && !bResort);
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -547,7 +592,7 @@ void CTDLTaskCtrlBase::SetLargestTaskID(DWORD dwTaskID)
 	{
 		m_dwLargestTaskID = dwTaskID;
 
-		m_idleTasks.aRecalcWidthColIDs.Add(TDCC_ID);
+		m_idleTasks.RecalcColumnWidths(TDCC_ID);
 	}
 }
 
@@ -1190,39 +1235,21 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 {
-	// Get a list of all the visible column attributes
+	CTDCColumnIDMap aColIDs;
+
 	if (!bCustomOnly)
-		m_idleTasks.aRecalcWidthColIDs.Copy(m_mapVisibleCols);
+		aColIDs.Copy(m_mapVisibleCols);
 	
-	m_aCustomAttribDefs.GetVisibleColumnIDs(m_idleTasks.aRecalcWidthColIDs, TRUE); // append
+	m_aCustomAttribDefs.GetVisibleColumnIDs(aColIDs, TRUE); // append
+
+	m_idleTasks.RecalcColumnWidths(aColIDs);
 }
 
 BOOL CTDLTaskCtrlBase::DoIdleProcessing()
 {
 	AF_NOREENTRANT_RET(FALSE);
 
-	if (!m_idleTasks.IsEmpty())
-	{
-		CScopedLogTimer timer(_T("CTDLTaskCtrlBase::DoIdleProcessing"));
-		timer.LogStart();
-
-		if (!m_idleTasks.aRecalcWidthColIDs.IsEmpty())
-		{
-			RecalcUntrackedColumnWidths(m_idleTasks.aRecalcWidthColIDs);
-			m_idleTasks.aRecalcWidthColIDs.RemoveAll();
-
-			return TRUE;
-		}
-		/*
-			else if (m_idleTasks.SomethingElse)
-			{
-				// TODO
-				return TRUE;
-			}
-		*/
-	}
-	// else
-	return FALSE;
+	return m_idleTasks.Process(*this);
 }
 
 int CTDLTaskCtrlBase::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
@@ -4869,11 +4896,8 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 		m_lcColumns.UpdateWindow();
 	}
 
-	// This container will be cleared after idle processing
-	// so if idle processing has not been called since the 
-	// last call to this function we want to accumulate any
-	// additional columns rather than overwrite them
-	m_idleTasks.aRecalcWidthColIDs.Append(aColIDs);
+	// This appends to any existing columns
+	m_idleTasks.RecalcColumnWidths(aColIDs);
 }
 
 int CTDLTaskCtrlBase::GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const
