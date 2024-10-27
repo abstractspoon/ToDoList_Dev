@@ -112,6 +112,7 @@ public:
 	virtual BOOL DoIdleProcessing();
 	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const;
 	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes, BOOL bOrdered = FALSE) const;
+	virtual void DeselectAll();
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }

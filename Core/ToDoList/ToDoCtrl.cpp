@@ -3846,7 +3846,7 @@ BOOL CToDoCtrl::DeleteAllTasks()
 
 	// must do these first
 	Flush();
-	m_taskTree.DeselectAll();
+	DeselectAll();
 	
 	CWaitCursor cursor;
 	
@@ -9916,20 +9916,22 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
  		CWaitCursor cursor;
 		CLockUpdates lu(*this);
 		HOLD_REDRAW(*this, m_taskTree);
-		
-		TDCSELECTIONCACHE cache;
-		CacheTreeSelection(cache);
 
-		// fix up selection first in case we are about to delete the selected item
-		m_taskTree.DeselectAll();
+		TDCSELECTIONCACHE cache;
+		CDWordArray aTaskIDs;
 
 		// get the list of the task IDs that will be undone/redone
-		CDWordArray aTaskIDs;
+		// and clear selection if we will be removing the selection
 		TDC_UNDOACTIONTYPE nUndoType = m_data.GetLastUndoActionType(bUndo);
+		BOOL bClearSelection = ((nUndoType == TDCUAT_DELETE && !bUndo) || 
+								(nUndoType == TDCUAT_ADD && bUndo));
 
-		// but not if the result is that the items in question were deleted
-		if (!(nUndoType == TDCUAT_DELETE && !bUndo) && 
-			!(nUndoType == TDCUAT_ADD && bUndo))
+		if (bClearSelection)
+		{
+			CacheTreeSelection(cache);
+			DeselectAll();
+		}
+		else
 		{
 			m_data.GetLastUndoActionTaskIDs(bUndo, aTaskIDs);
 		}
@@ -9943,10 +9945,10 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 			m_taskTree.OnUndoRedo(bUndo);
 
 			// restore selection
-			if (!aTaskIDs.GetSize() || !m_taskTree.SelectTasks(aTaskIDs))
+			if (bClearSelection || !SelectTasks(aTaskIDs))
 			{
 				if (!RestoreTreeSelection(cache))
-					m_taskTree.SelectTasksInHistory(FALSE);
+					SelectTasksInHistory(FALSE);
 			}
 			
 			// update current selection

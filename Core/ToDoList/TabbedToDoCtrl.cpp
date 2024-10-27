@@ -2686,6 +2686,14 @@ void CTabbedToDoCtrl::SelectAll()
 	}
 }
 
+void CTabbedToDoCtrl::DeselectAll()
+{
+	if (InListView())
+		m_taskList.DeselectAll();
+
+	CToDoCtrl::DeselectAll();
+}
+
 int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered) const
 {
 	if (InListView())

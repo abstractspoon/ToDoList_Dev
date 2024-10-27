@@ -697,6 +697,7 @@ protected:
 	virtual BOOL CopySelectedTasks() const;
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
+	virtual void DeselectAll() { m_taskTree.DeselectAll(); }
 
 	// -------------------------------------------------------------------------------
 	
