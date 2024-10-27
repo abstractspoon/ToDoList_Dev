@@ -138,8 +138,6 @@ CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb)
 //////////////////////////////////////////////////////////////////////
 
 CTDLTaskCtrlBase::IDLETASKS::IDLETASKS() 
-	: 
-	bResort(FALSE) 
 {
 }
 
@@ -148,36 +146,42 @@ void CTDLTaskCtrlBase::IDLETASKS::RecalcColumnWidths(const CTDCColumnIDMap& aCol
 	mapRecalcWidthColIDs.Append(aColIDs);
 }
 
-void CTDLTaskCtrlBase::IDLETASKS::Resort()
+void CTDLTaskCtrlBase::IDLETASKS::Resort(const TDSORT& sort)
 {
-	bResort = TRUE;
+	tdsResort = sort;
 }
 
 BOOL CTDLTaskCtrlBase::IDLETASKS::Process(CTDLTaskCtrlBase& tcb)
 {
-	if (IsEmpty())
-		return FALSE;
-
-	CScopedLogTimer timer(_T("CTDLTaskCtrlBase::DoIdleProcessing"));
-	timer.LogStart();
-	
 	if (!mapRecalcWidthColIDs.IsEmpty())
 	{
+		CScopedLogTimer timer(_T("IDLETASKS::Process(RecalcColumnWidths)"));
+
 		tcb.RecalcUntrackedColumnWidths(mapRecalcWidthColIDs);
+
+		// Cleanup
 		mapRecalcWidthColIDs.RemoveAll();
+		return TRUE;
 	}
-	else if (bResort)
+
+	// else
+	if (tdsResort.IsSorting())
 	{
-		tcb.Resort();
-		bResort = FALSE;
+		CScopedLogTimer timer(_T("IDLETASKS::Process(Resort)"));
+
+		if (tdsResort.bMulti)
+			tcb.MultiSort(tdsResort.multi);
+		else
+			tcb.Sort(tdsResort.single.nColumnID, FALSE); // No toggle
+
+		// Cleanup
+		tdsResort.SetSortBy(TDCC_NONE, FALSE);
+		ASSERT(!tdsResort.IsSorting());
+
+		return TRUE;
 	}
 
-	return TRUE;
-}
-
-BOOL CTDLTaskCtrlBase::IDLETASKS::IsEmpty() const
-{
-	return ((mapRecalcWidthColIDs.GetSize() == 0) && !bResort);
+	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1776,34 +1780,12 @@ BOOL CTDLTaskCtrlBase::IsAlternateColumnLine(int nItem) const
 	return (HasColor(m_crAltLine) && ((nItem % 2) == 0));
 }
 
-BOOL CTDLTaskCtrlBase::IsSorting() const
-{
-	return m_sort.IsSorting();
-}
-
-BOOL CTDLTaskCtrlBase::IsSortingBy(TDC_COLUMN nSortBy) const
-{
-	return (m_sort.IsSortingBy(nSortBy, TRUE));
-}
-
 void CTDLTaskCtrlBase::Resort(BOOL bAllowToggle) 
 { 
-	if (IsMultiSorting())
-	{
-		TDSORTCOLUMNS sort;
-
-		GetSortBy(sort);
-		MultiSort(sort);
-	}
+	if (IsMultiSorting() || !bAllowToggle)
+		m_idleTasks.Resort(m_sort);
 	else
-	{
-		Sort(GetSortBy(), bAllowToggle); 
-	}
-}
-
-BOOL CTDLTaskCtrlBase::IsMultiSorting() const
-{
-	return (m_sort.bMulti && m_sort.multi.IsSorting());
+		Sort(GetSortBy(), TRUE); // immediate
 }
 
 void CTDLTaskCtrlBase::Unsort()

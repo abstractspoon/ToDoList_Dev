@@ -517,7 +517,7 @@ BOOL CTDLTaskListCtrl::SetSortGroupsAscending(BOOL bAscending)
 	m_bSortGroupsAscending = bAscending;
 
 	if ((GetGroupCount() > 1) && GetSafeHwnd())
-		Resort(FALSE);
+		Resort();
 
 	return TRUE;
 }
@@ -531,7 +531,7 @@ BOOL CTDLTaskListCtrl::SetSortNoneGroupBelow(BOOL bBelow)
 
 	// 'sort <none> below' has no effect without 'sort ascending'
 	if (m_bSortGroupsAscending && HasNoneGroup() && GetSafeHwnd())
-		Resort(FALSE);
+		Resort();
 
 	return TRUE;
 }

@@ -4455,7 +4455,7 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 		if (bNewTask || (pVData && pVData->sort.Matches(mapAttribIDs, m_styles, m_aCustomAttribDefs)))
 		{
 			if ((nExtView == nView) && HasStyle(TDCS_RESORTONMODIFY))
-				Resort(FALSE);
+				Resort();
 			else
 				pVData->bNeedResort = TRUE;
 		}
@@ -5036,7 +5036,7 @@ BOOL CTabbedToDoCtrl::IsSorting() const
 
 BOOL CTabbedToDoCtrl::IsMultiSorting() const
 {
-	return GetSort().bMulti;
+	return GetSort().IsMultiSorting();
 }
 
 void CTabbedToDoCtrl::MultiSort(const TDSORTCOLUMNS& sort)

@@ -53,16 +53,12 @@ private:
 		IDLETASKS();
 		
 		void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
-		void Resort();
+		void Resort(const TDSORT& sort);
 		BOOL Process(CTDLTaskCtrlBase& tcb);
 		
 	protected:
 		CTDCColumnIDMap mapRecalcWidthColIDs;
-		BOOL bResort;
-		
-	protected:
-		BOOL IsEmpty() const;
-		
+		TDSORT tdsResort;
 	};
 
 	friend struct IDLETASKS;
@@ -187,13 +183,13 @@ public:
 	// sort functions
 	void Sort(TDC_COLUMN nBy, BOOL bAllowToggle = TRUE); // calling twice with the same param will toggle ascending attrib
 	void Unsort();
-	BOOL CanSortBy(TDC_COLUMN nBy) const { return IsColumnShowing(nBy); }
 	void MultiSort(const TDSORTCOLUMNS& sort);
+	BOOL CanSortBy(TDC_COLUMN nBy) const { return IsColumnShowing(nBy); }
 	TDC_COLUMN GetSortBy() const { return m_sort.single.nColumnID; }
 	void GetSortBy(TDSORTCOLUMNS& sort) const;
-	BOOL IsSorting() const;
-	BOOL IsMultiSorting() const;
-	BOOL IsSortingBy(TDC_COLUMN nBy) const;
+	BOOL IsSorting() const { return m_sort.IsSorting(); }
+	BOOL IsMultiSorting() const { return m_sort.IsMultiSorting(); }
+	BOOL IsSortingBy(TDC_COLUMN nBy) const { return m_sort.IsSortingBy(nBy, TRUE); }
 	const TDSORT& GetSort() const { return m_sort; }
 
 	virtual void Resort(BOOL bAllowToggle = FALSE);
