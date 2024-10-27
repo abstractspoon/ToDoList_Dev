@@ -1883,6 +1883,10 @@ BOOL CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 
 void CTDLTaskCtrlBase::DoSort()
 {
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CTDLTaskCtrlBase::DoSort()"));
+	///////////////////////////////////////////////////////////////////
+
 	TDSORTPARAMS ss(*this);
 	
 	if (PrepareSort(ss))
