@@ -5280,6 +5280,18 @@ void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTask
 	SetModified(mapAttribIDs, aModTaskIDs, !m_findReplace.IsReplacing());
 }
 
+BOOL CToDoCtrl::IsNewTaskMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
+{
+	return (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
+}
+
+BOOL CToDoCtrl::IsNewTaskTitleEditMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
+{
+	return (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
+			(aModTaskIDs.GetSize() == 1) &&
+			(aModTaskIDs[0] == m_dwLastAddedID));
+}
+
 void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
 	ASSERT(aModTaskIDs.GetSize() || 
@@ -5298,11 +5310,13 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	if (mapAttribIDs.Has(TDCA_PASTE))
 		UpdateAutoListData();
 	
-	// Avoid notifying the tree ctrl when the user is in 
-	// the process of creating a new task because this will
-	// recalculate the column widths which could have a
-	// significant impact on the responsiveness of the UI
-	BOOL bNewTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
+	// For new tasks we want to do as little processing as possible 
+	// so as not to delay the appearance of the title edit field.
+	BOOL bNewTask = IsNewTaskMod(mapAttribIDs, aModTaskIDs);
+	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mapAttribIDs, aModTaskIDs);
+
+	if (bNewTaskTitleEdit || mapAttribIDs.Has(TDCA_PASTE))
+		m_taskTree.SetLargestTaskID(m_dwNextUniqueID);
 
 	if (!bNewTask)
 		m_taskTree.SetModified(mapAttribIDs, bAllowResort);
@@ -7575,7 +7589,7 @@ HTREEITEM CToDoCtrl::RebuildTree(const void* pContext)
 	
 	if (BuildTreeItem(NULL, m_data.GetStructure(), pContext))
 	{
-		m_taskTree.SetNextUniqueTaskID(m_dwNextUniqueID);
+		m_taskTree.SetLargestTaskID(m_dwNextUniqueID);
 
 		hti = m_taskTree.GetChildItem();
 	}

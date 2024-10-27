@@ -209,7 +209,7 @@ public:
 	void Resize(const CRect& rect);
 	void SetTimeTrackTaskID(DWORD dwTaskID);
 	void SetEditTitleTaskID(DWORD dwTaskID);
-	void SetNextUniqueTaskID(DWORD dwTaskID);
+	void SetLargestTaskID(DWORD dwTaskID);
 	void SetCompletionStatus(const CString& sStatus);
 	CString GetCompletionStatus() const { return m_sCompletionStatus; }
 
@@ -240,7 +240,7 @@ protected:
 	CString m_sCompletionStatus;
 	CString m_sTasksWndPrompt;
 	DWORD m_dwEditTitleTaskID;
-	DWORD m_dwNextUniqueTaskID;
+	DWORD m_dwLargestTaskID;
 	DWORD m_dwTimeTrackTaskID;
 	TDC_COLUMN m_nSortColID;
 	TDC_SORTDIR m_nSortDir;

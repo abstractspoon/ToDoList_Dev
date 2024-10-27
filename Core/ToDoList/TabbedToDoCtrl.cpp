@@ -3500,7 +3500,7 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 			}	
 		}
 
-		m_taskList.SetNextUniqueTaskID(m_dwNextUniqueID);
+		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
 		m_taskList.OnBuildComplete();
 
 		ResortList();
@@ -3601,14 +3601,11 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	// so as not to delay the appearance of the title edit field.
 	// So, we don't update 'other' views until we receive a successful 
 	// title edit notification unless they are the active view
-	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
+	BOOL bNewSingleTask = IsNewTaskMod(mapAttribIDs, aModTaskIDs);
+	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mapAttribIDs, aModTaskIDs);
 
-	BOOL bNewSingleTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && 
-							(aModTaskIDs.GetSize() == 1));
-
-	BOOL bNewTaskTitleEdit = (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
-								(aModTaskIDs.GetSize() == 1) &&
-								(dwModTaskID == m_dwLastAddedID));
+	if (bNewTaskTitleEdit || mapAttribIDs.Has(TDCA_PASTE))
+		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
 
 	// For custom attributes we always update the extensions
 	// with ALL custom attribute values
@@ -3645,7 +3642,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 		else
 		{
 			// Ensure new task is selected for label editing
-			SelectTask(dwModTaskID, FALSE);
+			SelectTask(aModTaskIDs[0], FALSE);
 		}
 		break;
 
@@ -3678,7 +3675,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 		else
 		{
 			// Ensure new task is selected for label editing
-			SelectTask(dwModTaskID, FALSE);
+			SelectTask(aModTaskIDs[0], FALSE);
 		}
 		break;
 	}
@@ -3695,6 +3692,12 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 
 	if (!bInListView && pVData->bNeedFullTaskUpdate)
 		return;
+
+	if (mapAttribIDs.Has(TDCA_NEWTASK) || 
+		mapAttribIDs.Has(TDCA_PASTE))
+	{
+		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
+	}
 
 	if (mapAttribIDs.Has(TDCA_DELETE) ||
 		mapAttribIDs.Has(TDCA_ARCHIVE))

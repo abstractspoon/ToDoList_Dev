@@ -171,7 +171,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_nSortDir(TDC_SORTNONE),
 	m_dwTimeTrackTaskID(0), 
 	m_dwEditTitleTaskID(0),
-	m_dwNextUniqueTaskID(100),
+	m_dwLargestTaskID(0/*100*/),
 	m_bSortingColumns(FALSE),
 	m_nColorByAttribID(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
@@ -538,20 +538,16 @@ void CTDLTaskCtrlBase::SetTimeTrackTaskID(DWORD dwTaskID)
 
 void CTDLTaskCtrlBase::SetEditTitleTaskID(DWORD dwTaskID)
 {
-	if (m_dwEditTitleTaskID != dwTaskID)
-	{
-		m_dwEditTitleTaskID = dwTaskID;
-	}
+	m_dwEditTitleTaskID = dwTaskID;
 }
 
-void CTDLTaskCtrlBase::SetNextUniqueTaskID(DWORD dwTaskID)
+void CTDLTaskCtrlBase::SetLargestTaskID(DWORD dwTaskID)
 {
-	if (m_dwNextUniqueTaskID != dwTaskID)
+	if (m_dwLargestTaskID != dwTaskID)
 	{
-		m_dwNextUniqueTaskID = dwTaskID;
+		m_dwLargestTaskID = dwTaskID;
 
-		if (GetSafeHwnd())
-			RecalcUntrackedColumnWidths(CTDCColumnIDMap(TDCC_ID));
+		m_idleTasks.aRecalcWidthColIDs.Add(TDCC_ID);
 	}
 }
 
@@ -897,7 +893,7 @@ void CTDLTaskCtrlBase::OnImageListChange()
 	if (Tasks())
 	{
 		// Always force the task icon imagelist on the columns to ensure
-		// the item height don't changes when hiding label icons on the Tasks
+		// the item height doesn't change when hiding label icons on the Tasks
 		ListView_SetImageList(m_lcColumns, m_ilTaskIcons, LVSIL_SMALL);
 
 		SetTasksImageList(m_ilTaskIcons, FALSE, !IsColumnShowing(TDCC_ICON));
@@ -5320,12 +5316,12 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, const CDWordArray& aTa
 	case TDCC_ID:
 		{
 			DWORD dwRefID = (IsTreeList() ? m_sizer.GetLargestReferenceID(aTaskIDs) : 0);
-			nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwNextUniqueTaskID - 1, dwRefID));
+			nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwLargestTaskID - 1, dwRefID));
 		}
 		break; 
 
 	case TDCC_PARENTID:
-		nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwNextUniqueTaskID - 1));
+		nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwLargestTaskID - 1));
 		break; 
 
 	case TDCC_POSITION:
