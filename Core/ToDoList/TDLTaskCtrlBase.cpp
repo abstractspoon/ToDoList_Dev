@@ -137,7 +137,9 @@ CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb)
 
 //////////////////////////////////////////////////////////////////////
 
-CTDLTaskCtrlBase::IDLETASKS::IDLETASKS() 
+CTDLTaskCtrlBase::IDLETASKS::IDLETASKS(CTDLTaskCtrlBase& tcb)
+	:
+	m_tcb(tcb)
 {
 }
 
@@ -151,13 +153,13 @@ void CTDLTaskCtrlBase::IDLETASKS::Resort(const TDSORT& sort)
 	tdsResort = sort;
 }
 
-BOOL CTDLTaskCtrlBase::IDLETASKS::Process(CTDLTaskCtrlBase& tcb)
+BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 {
 	if (!mapRecalcWidthColIDs.IsEmpty())
 	{
-		CScopedLogTimer timer(_T("IDLETASKS::Process(RecalcColumnWidths)"));
+		CScopedLogTimer log(_T("IDLETASKS::Process(RecalcColumnWidths)"));
 
-		tcb.RecalcUntrackedColumnWidths(mapRecalcWidthColIDs);
+		m_tcb.RecalcUntrackedColumnWidths(mapRecalcWidthColIDs);
 
 		// Cleanup
 		mapRecalcWidthColIDs.RemoveAll();
@@ -167,12 +169,12 @@ BOOL CTDLTaskCtrlBase::IDLETASKS::Process(CTDLTaskCtrlBase& tcb)
 	// else
 	if (tdsResort.IsSorting())
 	{
-		CScopedLogTimer timer(_T("IDLETASKS::Process(Resort)"));
+		CScopedLogTimer log(_T("IDLETASKS::Process(Resort)"));
 
 		if (tdsResort.bMulti)
-			tcb.MultiSort(tdsResort.multi);
+			m_tcb.MultiSort(tdsResort.multi);
 		else
-			tcb.Sort(tdsResort.single.nColumnID, FALSE); // No toggle
+			m_tcb.Sort(tdsResort.single.nColumnID, FALSE); // No toggle
 
 		// Cleanup
 		tdsResort.SetSortBy(TDCC_NONE, FALSE);
@@ -233,7 +235,8 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_imageIcons(FALSE),
 	m_mgrContent(mgrContent),
 	m_bReadOnly(FALSE),
-	m_nHeaderContextMenuItem(-1)
+	m_nHeaderContextMenuItem(-1),
+	m_idleTasks(*this)
 {
 	// build one time column map
 	if (s_mapColumns.IsEmpty())
@@ -1254,7 +1257,7 @@ BOOL CTDLTaskCtrlBase::DoIdleProcessing()
 {
 	AF_NOREENTRANT_RET(FALSE);
 
-	return m_idleTasks.Process(*this);
+	return m_idleTasks.Process();
 }
 
 int CTDLTaskCtrlBase::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
@@ -1880,6 +1883,10 @@ BOOL CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 
 void CTDLTaskCtrlBase::DoSort()
 {
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CTDLTaskCtrlBase::DoSort()"));
+	///////////////////////////////////////////////////////////////////
+
 	TDSORTPARAMS ss(*this);
 	
 	if (PrepareSort(ss))

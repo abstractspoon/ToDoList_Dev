@@ -50,11 +50,14 @@ class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer
 private:
 	struct IDLETASKS
 	{
-		IDLETASKS();
+		IDLETASKS(CTDLTaskCtrlBase& tcb);
 		
 		void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
 		void Resort(const TDSORT& sort);
-		BOOL Process(CTDLTaskCtrlBase& tcb);
+		BOOL Process();
+
+	protected:
+		CTDLTaskCtrlBase& m_tcb;
 		
 	protected:
 		CTDCColumnIDMap mapRecalcWidthColIDs;
