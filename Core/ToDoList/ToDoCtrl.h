@@ -696,11 +696,12 @@ protected:
 	virtual BOOL CopySelectedTasks() const;
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
+	virtual void DeselectAll() { m_taskTree.DeselectAll(); }
 
 	// -------------------------------------------------------------------------------
 	
 	void UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags = 0);
-	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
+	void UpdateControls(BOOL bIncComments = TRUE);
 	void IncrementTrackedTime(BOOL bEnding);
 	BOOL FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks);
 
@@ -746,8 +747,8 @@ protected:
 	BOOL GetClipboardID(CString& sClipID, BOOL bArchive) const;
 
 	void ShowHideControls();
-	void EnableDisableControls(HTREEITEM hti);
-	void EnableDisableComments(HTREEITEM hti);
+	void EnableDisableControls(BOOL bHasSelection);
+	void EnableDisableComments(BOOL bHasSelection);
 	void ReposProjectName(CRect& rAvailable);
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
 

@@ -92,6 +92,7 @@ public:
 	BOOL SelectItem(int nItem);
 	BOOL IsItemSelected(int nItem) const;
 	BOOL SelectAll();
+	void DeselectAll();
 	BOOL InvalidateSelection(BOOL bUpdate = FALSE);
 	BOOL InvalidateItem(int nItem, BOOL bUpdate = FALSE);
 	DWORD GetFocusedListTaskID() const;
@@ -168,7 +169,6 @@ protected:
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	HWND Tasks() const { return m_lcTasks; }
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;
-	void DeselectAll();
 	DWORD GetHelpID() const;
 	BOOL DoSaveToImage(CBitmap& bmImage, COLORREF crDivider);
 	LPCTSTR GetDebugName() const { return _T("ListView"); }

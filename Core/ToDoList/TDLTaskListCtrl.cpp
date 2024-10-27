@@ -890,7 +890,7 @@ void CTDLTaskListCtrl::SetGroupHeaderBackgroundColor(COLORREF color)
 	{
 		m_crGroupHeaderBkgnd = color;
 
-		if (IsGrouped())
+		if (IsGrouped() && GetSafeHwnd())
 			CWnd::Invalidate();
 	}
 }

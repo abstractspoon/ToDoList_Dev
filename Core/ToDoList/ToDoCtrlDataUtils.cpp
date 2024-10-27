@@ -4543,7 +4543,6 @@ CString CTDCTaskFormatter::GetTaskTitlePaths(const CDWordArray& aTaskIDs, DWORD 
 	return Misc::FormatArray(aTitlePaths, cSep);
 }
 
-
 CString CTDCTaskFormatter::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
 {
 	if (!attribDef.bEnabled)
