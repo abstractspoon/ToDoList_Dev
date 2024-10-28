@@ -170,7 +170,6 @@ BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 	if (tdsResort.IsSorting())
 	{
 		CScopedLogTimer log(_T("IDLETASKS::Process(Resort)"));
-		CHoldRedraw hr(m_tcb);
 
 		if (tdsResort.bMulti)
 			m_tcb.MultiSort(tdsResort.multi);
@@ -916,13 +915,7 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 	if (mapChanges.Has(TDCC_ICON) || mapChanges.Has(TDCC_DONE))
 		OnImageListChange();
 
-	// We DON'T use idle tasks here so that the subsequent lines will work
-	RecalcUntrackedColumnWidths(mapChanges);
-
-	if (m_bAutoFitSplitter)
-		AdjustSplitterToFitAttributeColumns();
-	else
-		PostResize(TRUE); // resync scrollbars
+	m_idleTasks.RecalcColumnWidths(mapChanges);
 }
 
 void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
@@ -995,11 +988,6 @@ void CTDLTaskCtrlBase::OnCustomAttributesChange()
 
 	UpdateAttributePaneVisibility();
 	RecalcUntrackedColumnWidths(TRUE); // Only custom columns
-
-	if (m_bAutoFitSplitter)
-		AdjustSplitterToFitAttributeColumns();
-	else
-		PostResize(TRUE); // resync horizontal scrollbars
 }
 
 BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
@@ -1223,7 +1211,7 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	RecalcUntrackedColumnWidths();
 	
 	// Force the recalculation first time only
-	DoIdleProcessing(); 
+	m_idleTasks.Process(); 
 
 	return TRUE;
 }
@@ -1404,8 +1392,11 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	// cleanup
 	dc.SelectObject(pOldFont);
 
-	// Resync horizontal scrollbars
-	PostResize();
+	if (m_bAutoFitSplitter)
+		AdjustSplitterToFitAttributeColumns();
+	 
+	// resync horizontal scrollbars
+	PostResize(TRUE);
 }
 
 void CTDLTaskCtrlBase::SaveState(CPreferences& prefs, const CString& sKey) const
