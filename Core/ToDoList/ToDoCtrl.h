@@ -389,7 +389,6 @@ public:
 	BOOL SetTreeFont(HFONT hFont); // setter responsible for deleting
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting
 
-	const CImageList& GetCheckImageList() const { return m_taskTree.GetCheckImageList(); }
 	const CTDCImageList& GetTaskIconImageList() const;
 
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;

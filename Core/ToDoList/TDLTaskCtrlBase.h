@@ -92,8 +92,6 @@ public:
 	HFONT GetFont() const;
 	BOOL SetFont(HFONT hFont);
 
-	const CImageList& GetCheckImageList() const { return m_ilCheckboxes; }
-
 	void SaveState(CPreferences& prefs, const CString& sKey) const; 
 	void LoadState(const CPreferences& prefs, const CString& sKey);
 
