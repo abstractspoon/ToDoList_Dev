@@ -170,6 +170,7 @@ BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 	if (tdsResort.IsSorting())
 	{
 		CScopedLogTimer log(_T("IDLETASKS::Process(Resort)"));
+		CHoldRedraw hr(m_tcb);
 
 		if (tdsResort.bMulti)
 			m_tcb.MultiSort(tdsResort.multi);
