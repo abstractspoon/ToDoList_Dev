@@ -219,7 +219,6 @@ public:
 	BOOL ModsCauseTaskTextColorChange(const CTDCAttributeMap& mapAttribIDs) const;
 	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttribID, CTDCAttributeMap& mapAttribIDs) const;
 
-	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
 	void Resize(const CRect& rect);
 	void SetTimeTrackTaskID(DWORD dwTaskID);
 	void SetEditTitleTaskID(DWORD dwTaskID);
@@ -246,9 +245,6 @@ protected:
 	const CTDCColumnIDMap& m_mapVisibleCols;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 	const CContentMgr& m_mgrContent;
-
-	BOOL m_bReadOnly;
-	BOOL m_bSortingColumns;
 
 	CString m_sCompletionStatus;
 	CString m_sTasksWndPrompt;
@@ -290,9 +286,6 @@ private:
 	BOOL m_bAutoFitSplitter;
 	BOOL m_bEnableRecalcColumns;
 
-protected:
-	// Virtual function overrides
-	
 protected:
 	// Message map functions
 	afx_msg void OnDestroy();
