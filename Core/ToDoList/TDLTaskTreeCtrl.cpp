@@ -1376,7 +1376,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						
 						bSelChange = TRUE;
 					}
-					else if (m_bReadOnly || !::DragDetect(hRealWnd, pt))
+					else if (HasStyle(TDCS_READONLY) || !::DragDetect(hRealWnd, pt))
 					{
 						// if this is not the beginning of a drag then toggle selection
 						TSH().SetItem(htiHit, TSHS_TOGGLE);
@@ -1416,12 +1416,9 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					}
 					else if (nHitFlags & TVHT_ONITEMICON)
 					{
-// 						if (!m_bReadOnly && SelectionHasUnlocked(TRUE))
-// 						{
-							// save item handle so we don't re-handle in LButtonUp handler
-							m_htiLastHandledLBtnDown = htiHit;
-							bColClick = TRUE;
-// 						}
+						// save item handle so we don't re-handle in LButtonUp handler
+						m_htiLastHandledLBtnDown = htiHit;
+						bColClick = TRUE;
 					}
 					else
 					{
@@ -1466,7 +1463,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						int nSelCount = TSH().GetCount();
 						ASSERT (nSelCount);
 						
-						if (!m_bReadOnly && 
+						if (!HasStyle(TDCS_READONLY) &&
 							(nHitFlags & TVHT_ONITEMLABEL) && 
 							(nSelCount == 1) && 
 							(htiLastHandledLBtnDown == NULL) &&

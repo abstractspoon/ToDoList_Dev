@@ -224,7 +224,6 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_dwTimeTrackTaskID(0), 
 	m_dwEditTitleTaskID(0),
 	m_dwLargestTaskID(100), // for initial width calculation
-	m_bSortingColumns(FALSE),
 	m_nColorByAttribID(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
 	m_comparer(data, mgrContent),
@@ -235,7 +234,6 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(FALSE),
 	m_mgrContent(mgrContent),
-	m_bReadOnly(FALSE),
 	m_nHeaderContextMenuItem(-1),
 	m_idleTasks(*this)
 {
