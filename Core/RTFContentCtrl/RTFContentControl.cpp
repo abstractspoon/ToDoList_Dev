@@ -369,6 +369,16 @@ void CRTFContentControl::SetContentFont(HFONT hFont)
 	CRulerRichEditCtrl::SetDefaultFont(hFont);
 }
 
+void CRTFContentControl::SetPrompt(LPCWSTR szPrompt)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!m_wndPrompt.IsValid())
+		m_wndPrompt.InitializeEdit(*this, szPrompt, FALSE, TRUE);
+	else
+		m_wndPrompt.SetPrompt(szPrompt);
+}
+
 HWND CRTFContentControl::GetHwnd() const
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());

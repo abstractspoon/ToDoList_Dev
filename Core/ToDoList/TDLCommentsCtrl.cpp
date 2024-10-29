@@ -154,8 +154,11 @@ void CTDLCommentsCtrl::SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szComment
 	if (m_cbCommentsFmt.GetSafeHwnd())
 		m_mgrPrompts.SetComboPrompt(m_cbCommentsFmt, szComboPrompt);
 
-	if (m_ctrlComments.GetSafeHwnd() && CWinClasses::IsEditControl(m_ctrlComments))
-		m_mgrPrompts.SetEditPrompt(m_ctrlComments, szCommentsPrompt, TRUE);
+	if (m_ctrlComments.GetSafeHwnd())
+		m_ctrlComments.SetPrompt(szCommentsPrompt);
+
+// 	if (m_ctrlComments.GetSafeHwnd() && CWinClasses::IsEditControl(m_ctrlComments))
+// 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, szCommentsPrompt, TRUE);
 }
 
 void CTDLCommentsCtrl::SetContentFont(HFONT hFont)
@@ -366,9 +369,10 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cfNew)
 		m_ctrlComments.SetContentFont(m_hContentFont);
 
 	m_ctrlComments.SetReadOnly(m_bReadOnlyComments);
+	m_ctrlComments.SetPrompt(m_sCommentsPrompt);
 
-	if (CWinClasses::IsEditControl(m_ctrlComments))
-		m_mgrPrompts.SetEditPrompt(m_ctrlComments, m_sCommentsPrompt);
+// 	if (CWinClasses::IsEditControl(m_ctrlComments))
+// 		m_mgrPrompts.SetEditPrompt(m_ctrlComments, m_sCommentsPrompt);
 	
 	LoadPreferences(FALSE);
 

@@ -52,6 +52,7 @@ public:
 	BOOL EnableWindow(BOOL bEnable);
 	BOOL SetReadOnly(BOOL bReadOnly);
 	void MoveWindow(const CRect& rect, BOOL bRepaint);
+	void SetPrompt(LPCTSTR szPrompt);
 
 	BOOL ModifyStyle(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0);
 	BOOL ModifyStyleEx(DWORD dwRemove, DWORD dwAdd, UINT nFlags = 0);

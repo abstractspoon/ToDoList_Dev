@@ -8,6 +8,7 @@
 //
 
 #include "..\shared\urlricheditctrl.h"
+#include "..\shared\WndPrompt.h"
 
 #include "..\Interfaces\richeditspellcheck.h"
 #include "..\Interfaces\IContentControl.h"
@@ -41,6 +42,7 @@ public:
 	bool Redo();
 	void SetUITheme(const UITHEME* pTheme);
 	void SetContentFont(HFONT hFont);
+	void SetPrompt(LPCWSTR szPrompt);
 	void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
 	bool FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, bool bCaseSensitive, bool bWholeWord);
@@ -55,6 +57,7 @@ protected:
 	BOOL m_bWordWrap;
 
 	CRichEditSpellCheck m_reSpellCheck;
+	CWndPrompt m_wndPrompt;
 
 	static BOOL s_bInlineSpellChecking;
 	static BOOL s_bPasteSourceUrls;

@@ -18,9 +18,13 @@ public:
 	CWndPrompt();
 	virtual ~CWndPrompt();
 
-	BOOL Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
-	
+	BOOL Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg = WM_GETTEXTLENGTH, LRESULT lCheckRes = 0L, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
+	BOOL InitializeEdit(HWND hwndEdit, LPCTSTR szPrompt, BOOL bCentred = FALSE, BOOL bIncReadonly = FALSE);
+
+	void Release() { HookWindow(NULL); }
+
 	void SetPrompt(LPCTSTR szPrompt, BOOL bCentred = -1);
+	void ClearPrompt() { SetPrompt(NULL); }
 	CString GetPrompt() const { return m_sPrompt; }
 
 	static void DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc = NULL, BOOL bCentred = FALSE, LPCTSTR szClass = NULL);

@@ -33,77 +33,80 @@ CWndPrompt::~CWndPrompt()
 BOOL CWndPrompt::Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, 
 							LRESULT lCheckRes, BOOL bCentred, BOOL bIncReadonlyEdit)
 {
-	ASSERT (hWnd);
-	ASSERT (!IsHooked());
-	ASSERT (nCheckMsg);
-
-	if (!IsHooked() && hWnd && !Misc::IsEmpty(szPrompt) && nCheckMsg)
+	if (!IsWindow(hWnd) || IsHooked())
 	{
-		if (HookWindow(hWnd))
-		{
-#ifdef _DEBUG
-			int nID = ::GetDlgCtrlID(hWnd);
-#endif
-			m_sPrompt = szPrompt;
-			m_nCheckMsg = nCheckMsg;
-			m_lCheckResult = lCheckRes;
-			m_sClass = CWinClasses::GetClass(hWnd);
-			m_bCentred = bCentred;
-			m_bIncReadonlyEdit = bIncReadonlyEdit;
-			
-			if (WantPrompt())
-				Invalidate();
-
-			return TRUE;
-		}
+		ASSERT(0);
+		return FALSE;
 	}
 
-	return FALSE;
+	if (!HookWindow(hWnd))
+		return FALSE;
+
+#ifdef _DEBUG
+	int nID = ::GetDlgCtrlID(hWnd);
+#endif
+	m_sPrompt = szPrompt;
+	m_nCheckMsg = nCheckMsg;
+	m_lCheckResult = lCheckRes;
+	m_sClass = CWinClasses::GetClass(hWnd);
+	m_bCentred = bCentred;
+	m_bIncReadonlyEdit = bIncReadonlyEdit;
+
+	if (WantPrompt())
+		Invalidate();
+
+	return TRUE;
+}
+
+BOOL CWndPrompt::InitializeEdit(HWND hwndEdit, LPCTSTR szPrompt, BOOL bCentred, BOOL bIncReadonly)
+{
+	if (!CWinClasses::IsEditControl(hwndEdit))
+		return FALSE;
+
+	return Initialize(hwndEdit, szPrompt, WM_GETTEXTLENGTH, 0L, bCentred, bIncReadonly);
 }
 
 void CWndPrompt::SetPrompt(LPCTSTR szPrompt, BOOL bCentred)
 {
-	if (IsHooked() && !Misc::IsEmpty(szPrompt))
-	{
-		m_sPrompt = szPrompt;
+	ASSERT(IsHooked());
 
-		if (bCentred >= 0)
-			m_bCentred = bCentred;
+	m_sPrompt = szPrompt;
 
-		if (WantPrompt())
-			Invalidate();
-	}
-	else
-	{
-		ASSERT(0);
-	}
+	if (bCentred >= 0)
+		m_bCentred = bCentred;
+
+	if (WantPrompt())
+		Invalidate();
 }
 
 LRESULT CWndPrompt::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (msg)
+	if (!m_sPrompt.IsEmpty())
 	{
-	case WM_KILLFOCUS:
-	case WM_SETFOCUS:
-		if (CWinClasses::IsEditControl(hRealWnd) && WantPrompt(FALSE))
-			Invalidate();
-		break;
-
-	case WM_PRINT:
+		switch (msg)
 		{
-			LRESULT lr = Default();
-			DrawPrompt((HDC)wp);
-			return lr;
-		}
-		break;
+		case WM_KILLFOCUS:
+		case WM_SETFOCUS:
+			if (CWinClasses::IsEditControl(hRealWnd) && WantPrompt(FALSE))
+				Invalidate();
+			break;
 
-	case WM_PAINT:
-		{
-			LRESULT lr = Default();
-			DrawPrompt(NULL);
-			return lr;
+		case WM_PRINT:
+			{
+				LRESULT lr = Default();
+				DrawPrompt((HDC)wp);
+				return lr;
+			}
+			break;
+
+		case WM_PAINT:
+			{
+				LRESULT lr = Default();
+				DrawPrompt(NULL);
+				return lr;
+			}
+			break;
 		}
-		break;
 	}
 
 	return CSubclassWnd::Default();
@@ -111,6 +114,9 @@ LRESULT CWndPrompt::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 BOOL CWndPrompt::WantPrompt(BOOL bCheckEditFocus)
 { 
+	if (m_sPrompt.IsEmpty())
+		return FALSE;
+
 	BOOL bWantPrompt = (SendMessage(m_nCheckMsg) == m_lCheckResult); 
 
 	if (bWantPrompt)
@@ -400,7 +406,7 @@ BOOL CWndPromptManager::SetComboPrompt(HWND hwndCombo, LPCTSTR szPrompt, BOOL bI
 		!CWinClasses::IsClass(sClass, WC_COMBOBOXEX))
 		return FALSE;
 
-	// if the combo has an edit field then this is where the 
+	// if the combo has an edit field then that is where the 
 	// prompt must be set
 	UINT nStyle = GetWindowLong(hwndCombo, GWL_STYLE);
 

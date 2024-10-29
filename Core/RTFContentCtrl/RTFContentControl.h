@@ -14,6 +14,7 @@
 #include "..\shared\subclass.h"
 #include "..\shared\menuiconmgr.h"
 #include "..\shared\ShortcutManager.h"
+#include "..\shared\WndPrompt.h"
 
 #include "..\Interfaces\IContentControl.h"
 #include "..\Interfaces\richeditspellcheck.h"
@@ -48,6 +49,7 @@ public:
 	bool Redo();
 	void SetUITheme(const UITHEME* pTheme);
 	void SetContentFont(HFONT hFont);
+	void SetPrompt(LPCWSTR szPrompt);
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
 	bool FindReplaceAll(LPCTSTR szFind, LPCTSTR szReplace, bool bCaseSensitive, bool bWholeWord);
@@ -68,6 +70,7 @@ protected:
 	CharFormat m_cfCopiedFormat;
 	CShortcutManager m_mgrShortcuts;
 	CRTFPreferencesDlg m_dlgPrefs;
+	CWndPrompt m_wndPrompt;
 
 	static BOOL s_bInlineSpellChecking;
 

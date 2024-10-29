@@ -422,6 +422,14 @@ void CTDLSimpleTextContentCtrl::SetContentFont(HFONT hFont)
 	SendMessage(WM_SETFONT, (WPARAM)hFont);
 }
 
+void CTDLSimpleTextContentCtrl::SetPrompt(LPCWSTR szPrompt)
+{
+	if (!m_wndPrompt.IsValid())
+		m_wndPrompt.InitializeEdit(*this, szPrompt, FALSE, TRUE);
+	else
+		m_wndPrompt.SetPrompt(szPrompt);
+}
+
 BOOL CTDLSimpleTextContentCtrl::OnChangeText() 
 {
 	CUrlRichEditCtrl::OnChangeText();
