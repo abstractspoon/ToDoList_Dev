@@ -194,6 +194,11 @@ namespace MDContentControl
 			m_SettingTextOrFont = false;
 		}
 
+		public void SetPrompt(string prompt)
+		{
+			// TODO
+		}
+
 		public bool InsertTextContent(String content, bool bAtEnd)
 		{
 			if (ReadOnly || !InputTextCtrl.Enabled)

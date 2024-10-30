@@ -220,6 +220,13 @@ bool CMDContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, 
 	return false;
 }
 
+void CMDContentControlBridge::SetPrompt(LPCWSTR szPrompt)
+{
+	msclr::auto_gcroot<String^> prompt = gcnew String(szPrompt);
+
+	m_wnd->SetPrompt(prompt);
+}
+
 void CMDContentControlBridge::SetReadOnly(bool bReadOnly)
 {
 	m_wnd->ReadOnly = bReadOnly;

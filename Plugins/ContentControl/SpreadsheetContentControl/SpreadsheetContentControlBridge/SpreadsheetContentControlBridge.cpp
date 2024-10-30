@@ -220,6 +220,13 @@ bool CSpreadsheetContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR sz
 	return (m_wnd->FindReplaceAll(find.get(), replace.get(), bWholeWord, bCaseSensitive) > 0);
 }
 
+void CSpreadsheetContentControlBridge::SetPrompt(LPCWSTR szPrompt)
+{
+	msclr::auto_gcroot<String^> prompt = gcnew String(szPrompt);
+
+	m_wnd->SetPrompt(prompt);
+}
+
 bool CSpreadsheetContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 {
 	msclr::auto_gcroot<String^> content = gcnew String(szContent);

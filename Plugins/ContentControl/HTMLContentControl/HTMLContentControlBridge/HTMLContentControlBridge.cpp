@@ -270,6 +270,13 @@ void CHTMLContentControlBridge::SetContentFont(HFONT hFont)
 	m_wnd->SetContentFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
+void CHTMLContentControlBridge::SetPrompt(LPCWSTR szPrompt)
+{
+	msclr::auto_gcroot<String^> prompt = gcnew String(szPrompt);
+
+	m_wnd->SetPrompt(prompt);
+}
+
 void CHTMLContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);

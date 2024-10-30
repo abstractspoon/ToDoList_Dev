@@ -76,6 +76,7 @@ public:
 
    void SetUITheme(const UITHEME* pTheme);
    void SetContentFont(HFONT hFont);
+   void SetPrompt(LPCWSTR szPrompt);
 
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);

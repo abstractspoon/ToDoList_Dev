@@ -76,6 +76,11 @@ namespace SpreadsheetContentControl
 			return m_EditorControl.FindReplaceAll(findText, replaceText, matchWhole, matchCase/*, true*/);
 		}
 
+		public void SetPrompt(string prompt)
+		{
+			// TODO
+		}
+
 		public void SetContentFont(String fontName, int pointSize)
 		{
 			m_EditorControl.SetContentFont(fontName, pointSize);

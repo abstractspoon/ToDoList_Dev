@@ -104,6 +104,7 @@ namespace Abstractspoon
 
 				void SetUITheme(UITheme^ theme);
 				void SetReadOnly(bool bReadOnly);
+				void SetPrompt(String^ prompt);
 
 				void SavePreferences(Preferences^ prefs, String^ key);
 				void LoadPreferences(Preferences^ prefs, String^ key, bool appOnly);

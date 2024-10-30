@@ -83,7 +83,12 @@ namespace HTMLContentControl
             return m_HtmlEditControl.FindReplaceAll(findText, replaceText, matchWhole, matchCase, true);
         }
 
-        public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+		public void SetPrompt(string prompt)
+		{
+			// TODO
+		}
+		
+		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
 			return m_HtmlEditControl.ProcessMessage(hwnd, message, wParam, lParam, time, xPos, yPos);
         }
