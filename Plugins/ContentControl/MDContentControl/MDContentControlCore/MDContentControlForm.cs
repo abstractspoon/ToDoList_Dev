@@ -32,6 +32,7 @@ namespace MDContentControl
 		bool m_SettingTextOrFont = false;
 
 		string m_TempFile = Path.GetTempFileName();
+		Font m_ControlFont = new Font("Tahoma", 8.25f);
 
 		// -----------------------------------------------------------------
 
@@ -67,6 +68,11 @@ namespace MDContentControl
 			InputTextCtrl.NeedLinkTooltip += (s, e) =>
 			{
 				NeedLinkTooltip?.Invoke(this, e);
+			};
+
+			InputTextCtrl.Paint += (s, e) =>
+			{
+				int breakpoint = 0;
 			};
 		}
 
@@ -196,7 +202,7 @@ namespace MDContentControl
 
 		public void SetPrompt(string prompt)
 		{
-			// TODO
+			InputTextCtrl.SetPrompt(prompt, m_ControlFont);
 		}
 
 		public bool InsertTextContent(String content, bool bAtEnd)

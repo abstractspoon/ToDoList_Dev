@@ -79,6 +79,12 @@ namespace Abstractspoon
 					bool NotifySimple(UINT nMsg);
 				};
 
+				ref class CueBanner
+				{
+				public:
+					static void Draw(Drawing::Graphics^ graphics, String^ prompt, Drawing::Font^ font, Drawing::Rectangle rect, bool centred);
+				};
+
 				static bool GoToLink(String^ sLink, IntPtr hwndParent, IntPtr hwndFrom);
 				static String^ HandleNeedLinkTooltip(String^ sLink, IntPtr hwndParent, IntPtr hwndFrom);
 				static List<String^>^ HandleNeedAttributeList(Task::Attribute attrib, IntPtr hwndParent, IntPtr hwndFrom);

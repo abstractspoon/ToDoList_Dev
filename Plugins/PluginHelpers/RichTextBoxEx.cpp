@@ -34,11 +34,6 @@ CreateParams^ RichTextBoxEx::CreateParams::get()
 	return cp;
 }
 
-HWND RichTextBoxEx::HWnd()
-{
-	return Win32::GetHwnd(Handle);
-}
-
 void RichTextBoxEx::WndProc(Message% m)
 {
 	const int WM_REFLECT = (WM_USER + 0x1C00);
@@ -150,6 +145,25 @@ void RichTextBoxEx::WndProc(Message% m)
 	case WM_MOUSELEAVE:
 		m_CurrentLink = String::Empty;
 		break;
+
+	case WM_KILLFOCUS:
+	case WM_SETFOCUS:
+		if (!String::IsNullOrWhiteSpace(m_Prompt) && (Text == String::Empty))
+			Invalidate(false);
+		break;
+
+	case WM_PAINT:
+		if ((!Focused || ReadOnly) && !String::IsNullOrWhiteSpace(m_Prompt) && (Text == String::Empty))
+		{
+			RichTextBox::WndProc(m);
+
+			auto graphics = RichTextBox::CreateGraphics();
+			ContentControlWnd::CueBanner::Draw(graphics, m_Prompt, m_PromptFont, ClientRectangle, false);
+
+			delete graphics;
+			return;
+		}
+		break;
 	}
 
 	RichTextBox::WndProc(m);
@@ -193,7 +207,7 @@ String^ RichTextBoxEx::GetTextRange(const CHARRANGE& cr)
 	TEXTRANGE tr;
 	tr.chrg = cr;
 	tr.lpstrText = szChar;
-	::SendMessage(HWnd(), EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+	::SendMessage(Win32::GetHwnd(Handle), EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
 	CString sText(szChar);
 	delete[] szChar;
@@ -273,4 +287,12 @@ void RichTextBoxEx::Outdent()
 	{
 		SelectionIndent = Math::Max(0, (SelectionIndent - TabWidth));
 	}
+}
+
+void RichTextBoxEx::SetPrompt(String^ szPrompt, Drawing::Font^ font)
+{
+	m_Prompt = szPrompt;
+	m_PromptFont = font;
+
+	Invalidate();
 }

@@ -224,7 +224,7 @@ void CMDContentControlBridge::SetPrompt(LPCWSTR szPrompt)
 {
 	msclr::auto_gcroot<String^> prompt = gcnew String(szPrompt);
 
-	m_wnd->SetPrompt(prompt);
+	m_wnd->SetPrompt(prompt.get());
 }
 
 void CMDContentControlBridge::SetReadOnly(bool bReadOnly)

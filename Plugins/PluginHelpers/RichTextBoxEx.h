@@ -25,6 +25,7 @@ namespace Abstractspoon
 
 				void Indent();
 				void Outdent();
+				void SetPrompt(String^ szPrompt, Drawing::Font^ font);
 
 				virtual LabelTipInfo^ ToolHitTest(Drawing::Point ptScreen);
 				virtual Windows::Forms::Control^ GetOwner() { return this; }
@@ -33,7 +34,9 @@ namespace Abstractspoon
 
 			protected:
 				String^ m_CurrentLink;
-				LabelTip^ m_LinkTip;
+				String^ m_Prompt;
+				Drawing::Font^ m_PromptFont = nullptr;
+				LabelTip^ m_LinkTip = nullptr;
 				int m_LinkTipVOffset = 0;
 
 			protected:
@@ -46,7 +49,6 @@ namespace Abstractspoon
 				virtual void OnLinkClicked(Windows::Forms::LinkClickedEventArgs^ e) override;
 
 				String^ GetTextRange(const CHARRANGE& cr);
-				HWND HWnd();
 			};
 		}
 	}

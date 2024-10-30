@@ -163,6 +163,21 @@ HWND ContentControlWnd::ParentNotify::GetFrom()
 	return (m_hwndFrom ? m_hwndFrom : m_hwndParent);
 }
 
+void ContentControlWnd::CueBanner::Draw(Drawing::Graphics^ graphics, String^ prompt, Drawing::Font^ font, Drawing::Rectangle rect, bool centred)
+{
+	auto format = gcnew Drawing::StringFormat();
+
+	format->Alignment = (centred ? Drawing::StringAlignment::Center : Drawing::StringAlignment::Near);
+	format->LineAlignment = Drawing::StringAlignment::Near;
+	format->FormatFlags = Drawing::StringFormatFlags::NoWrap;
+
+	graphics->DrawString(prompt,
+						 font,
+						 Drawing::SystemBrushes::ControlDark,
+						 Drawing::Rectangle::Inflate(rect, -2, -2),
+						 format);
+}
+
 bool ContentControlWnd::GoToLink(String^ sLink, IntPtr hwndParent, IntPtr hwndFrom)
 {
 	ParentNotify notify(hwndParent, hwndFrom);
