@@ -287,6 +287,11 @@ namespace HTMLContentControl
 			return true;
 		}
 
+		public void SetPrompt(string prompt, Font font)
+		{
+			// TODO
+		}
+
 		protected override DialogResult ShowDialog(Form dialog)
 		{
 			return base.ShowDialog(dialog, Properties.Resources.html);
