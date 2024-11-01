@@ -586,10 +586,10 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	if (!m_ctrlKanban.SelectTasks(m_aSelTaskIDs))
 		m_ctrlKanban.GetSelectedTaskIDs(m_aSelTaskIDs);
 
-	// If the previously tracked attribute was custom then after every
-	// update we need to check that the attribute is still available
+	// If the previously tracked attribute was custom then we need to 
+	// check that the attribute is still available after every update 
 
-	// Cache previous state
+	// 1. Cache previous state
 	CString sPrevTrackedCustomAttribID = m_sTrackedCustomAttribID;
 	TDC_ATTRIBUTE nPrevTrackedAttribID = m_nTrackedAttribID;
 
@@ -598,14 +598,14 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	if (bHadFixedCols)
 		nPrevTrackedAttribID = m_dlgPrefs.GetFixedAttributeToTrack(sPrevTrackedCustomAttribID);
 
-	// Update preferences to validate fixed columns
+	// 2. Update preferences to validate fixed columns
 	const CKanbanCustomAttributeDefinitionArray& aCustAttribs = m_ctrlKanban.GetCustomAttributeDefinitions();
 
 	m_dlgPrefs.SetCustomAttributeDefs(aCustAttribs);
 	m_cbAttributes.SetCustomAttributeDefs(aCustAttribs);
 	m_cbGroupBy.SetCustomAttributeDefs(aCustAttribs);
 
-	// Get new state
+	// 3. Determine new state
 	CString sTrackedCustomAttribID;
 	TDC_ATTRIBUTE nTrackedAttribID = TDCA_NONE;
 
@@ -614,7 +614,8 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	else
 		nTrackedAttribID = m_ctrlKanban.GetTrackedAttribute(sTrackedCustomAttribID); // Dynamic
 
-	// Check that the custom attribute is still valid
+	// 4. Check that the custom attribute is still valid
+	//    and fall-back as required
 	if (!sPrevTrackedCustomAttribID.IsEmpty())
 	{
 		ASSERT(sTrackedCustomAttribID.IsEmpty() || (sTrackedCustomAttribID == sPrevTrackedCustomAttribID));
@@ -645,7 +646,7 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 		}
 	}
 		
-	// Likewise for the group-by attribute
+	// 5. Likewise for the group-by attribute
 	TDC_ATTRIBUTE nGroupBy = m_ctrlKanban.GetGroupBy();
 
 	if (nGroupBy != m_nGroupByAttribID)
@@ -660,7 +661,7 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 
 	m_cbGroupBy.ExcludeAttribute(nTrackedAttribID);
 
-	// Validate any change in selection
+	// 6. Validate any changes in selection
 	UpdateData(FALSE);
 }
 
