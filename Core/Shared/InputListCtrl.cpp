@@ -558,6 +558,9 @@ void CInputListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 void CInputListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, 
 								  const CString& sText, COLORREF crText, UINT nDrawTextFlags)
 {
+	if (!IsWindowEnabled() && IsPrompt(nRow))
+		return;
+
 	if (GetCellType(nRow, nCol) == ILCT_CHECK)
 		return;
 
