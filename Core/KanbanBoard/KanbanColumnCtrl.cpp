@@ -367,7 +367,11 @@ void CKanbanColumnCtrl::SetFullColor(COLORREF color)
 
 void CKanbanColumnCtrl::SetMaximumTaskCount(int nMaxTasks)
 {
-	m_columnDef.nMaxTaskCount = nMaxTasks;
+	if (m_columnDef.nMaxTaskCount != nMaxTasks)
+	{
+		m_columnDef.nMaxTaskCount = nMaxTasks;
+		RefreshBkgndColor();
+	}
 }
 
 void CKanbanColumnCtrl::OnDisplayAttributeChanged()
