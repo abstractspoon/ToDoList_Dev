@@ -274,7 +274,7 @@ void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 
 void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
 {
-	m_nFixedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("FixedAttribute"), TDCA_STATUS);
+	m_nFixedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("FixedAttribute"), TDCA_NONE);
 	m_sFixedCustomAttribID = pPrefs->GetProfileString(szKey, _T("FixedCustomAttributeID"));
 
 	m_bAlwaysShowBacklog = pPrefs->GetProfileInt(szKey, _T("AlwaysShowBacklog"), TRUE);
@@ -287,7 +287,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	m_crFullColumn = pPrefs->GetProfileInt(szKey, _T("FullColumnColor"), 255);
 	m_bAltKeyOverridesMaxCount = pPrefs->GetProfileInt(szKey, _T("AltKeyOverridesMaxCount"), TRUE);
 
-	// column defs
+	// column definitions
 	m_aFixedColumnDefs.RemoveAll();
 	int nNumDefs = pPrefs->GetProfileInt(szKey, _T("FixedColumnCount"));
 
@@ -456,6 +456,7 @@ void CKanbanPreferencesPage::SetCustomAttributes(const CKanbanCustomAttributeDef
 	m_aCustAttribDefs.Copy(aCustAttribDefs);
 	m_cbAttributes.SetCustomAttributeDefs(aCustAttribDefs);
 
+	// Check that the fixed column custom attribute is still available
 	if (!m_sFixedCustomAttribID.IsEmpty())
 	{
 		m_nFixedAttrib = aCustAttribDefs.GetDefinitionID(m_sFixedCustomAttribID);
@@ -465,11 +466,7 @@ void CKanbanPreferencesPage::SetCustomAttributes(const CKanbanCustomAttributeDef
 
 		if (m_cbAttributes.GetSafeHwnd())
 		{
-			if (m_nFixedAttrib == TDCA_NONE)
-				m_cbAttributes.SetCurSel(CB_ERR);
-			else
-				m_cbAttributes.SetSelectedAttribute(m_nFixedAttrib, m_sFixedCustomAttribID);
-
+			m_cbAttributes.SetSelectedAttribute(m_nFixedAttrib, m_sFixedCustomAttribID);
 			EnableDisableControls();
 		}
 	}

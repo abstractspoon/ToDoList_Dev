@@ -55,7 +55,7 @@ void CKanbanGroupByComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttribID)
 void CKanbanGroupByComboBox::BuildCombo()
 {
 	// Override base class's selection restoration because
-	// our default is 'none'
+	// of our extra item
 	CString sSelCustID;
 	TDC_ATTRIBUTE nSelAttrib = GetSelectedAttribute(sSelCustID);
 
