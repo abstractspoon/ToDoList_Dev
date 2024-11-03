@@ -3271,7 +3271,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Maximise Task View",         ID_VIEW_MAXTASKLIST
         MENUITEM "Ma&ximise Comments",          ID_VIEW_MAXCOMMENTS
-        MENUITEM "&Revert Maximisation",        ID_VIEW_UNMAXTASKLISTANDCOMMENTS
+        MENUITEM "&Unmaximise",                 ID_VIEW_UNMAXTASKLISTANDCOMMENTS
 
         MENUITEM SEPARATOR
         MENUITEM "T&oggle between Task Tree and List View", 

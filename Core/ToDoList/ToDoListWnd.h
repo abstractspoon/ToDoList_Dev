@@ -121,7 +121,7 @@ protected:
 	int m_nToolbarEndSepWidth;
 	UINT m_nContextMenuID;
 	TDC_COLUMN m_nContextColumnID;
-	TDC_MAXSTATE m_nMaxState, m_nPrevMaxState;
+	TDC_MAXSTATE m_nMaxState;
 	HWND m_hwndLastFocus;
 	TODOITEM m_tdiDefault;
 

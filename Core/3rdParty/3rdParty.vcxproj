@@ -271,6 +271,7 @@
     <ClInclude Include="ColourPicker.h" />
     <ClInclude Include="ColourPopup.h" />
     <ClInclude Include="Compression.h" />
+    <ClInclude Include="COMUTIL.H" />
     <ClInclude Include="DibData.h" />
     <ClInclude Include="DragDrop.h" />
     <ClInclude Include="FileVersionInfo.h" />
