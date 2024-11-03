@@ -352,7 +352,10 @@ bool CUnzipper::UnzipFile(LPCTSTR szFolder, bool bIgnoreFilePath)
 		return FALSE;
 
 	if (unzOpenCurrentFile(m_uzFile) != UNZ_OK)
+	{
+		CloseHandle(hOutputFile);
 		return FALSE;
+	}
 
 	// read the file and output
 	int nRet = UNZ_OK;

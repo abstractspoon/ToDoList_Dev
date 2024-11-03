@@ -237,7 +237,7 @@ LRESULT CTrayIcon::OnTrayIconNotify(WPARAM wParam, LPARAM lParam)
 
 BOOL CTrayIcon::AddToTray()
 {
-	NOTIFYICONDATA_TI nid;
+	NOTIFYICONDATA_TI nid = { 0 };
 
 	nid.cbSize = sizeof(nid);
 	nid.hWnd = GetSafeHwnd();

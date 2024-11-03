@@ -36,7 +36,6 @@ public:
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect);
 	BOOL SelectTasksInHistory(BOOL bForward);
 
-	FILTER_SHOW GetFilter(CTDCFilter& filter) const { filter = m_filter; }
 	void RefreshFilter();
 	void ClearFilter();
 	void ToggleFilter();

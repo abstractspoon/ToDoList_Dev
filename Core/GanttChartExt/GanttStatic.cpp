@@ -56,7 +56,7 @@ GTLC_MONTH_DISPLAY GanttStatic::GetNextDisplay(GTLC_MONTH_DISPLAY nDisplay)
 
 GTLC_MONTH_DISPLAY GanttStatic::GetLastDisplay()
 {
-	return DISPLAYMODES[NUM_DISPLAYMODES + 1].nDisplay;
+	return DISPLAYMODES[NUM_DISPLAYMODES - 1].nDisplay;
 }
 
 GTLC_MONTH_DISPLAY GanttStatic::GetFirstDisplay()
