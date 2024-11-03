@@ -36,6 +36,8 @@ namespace HTMLContentControl
         private String m_PrevTextChange = "";
 		private Boolean m_SettingContent = false;
 		private HtmlElement m_CurrentHRef = null;
+		private string m_Prompt = "";
+		private Font m_PromptFont = null;
 
 		private TDLDropTarget m_DragDrop;
 
@@ -176,15 +178,27 @@ namespace HTMLContentControl
             return System.Text.Encoding.Unicode.GetBytes(html);
         }
 
-        public bool SetContent(Byte[] content, bool bResetSelection)
+		bool RefreshPrompt()
+		{
+			if (string.IsNullOrEmpty(InnerText) && !ContainsFocus)
+			{
+				InnerHtml = GetPromptText();
+				return true;
+			}
+
+			return false;
+		}
+
+		public bool SetContent(Byte[] content, bool bResetSelection)
         {
             m_SettingContent = true;
 
             try
             {
                 var html = System.Text.Encoding.Unicode.GetString(content).TrimEnd('\0').Trim();
-
                 InnerHtml = html;
+
+				RefreshPrompt();
                 m_PrevTextChange = InnerHtml;
             }
             finally
@@ -264,6 +278,8 @@ namespace HTMLContentControl
 					InnerHtml = content;
 				}
 
+				RefreshPrompt();
+
 				m_PrevTextChange = InnerHtml;
             }
             // catch (Exception exception)
@@ -289,7 +305,10 @@ namespace HTMLContentControl
 
 		public void SetPrompt(string prompt, Font font)
 		{
-			// TODO
+			m_Prompt = prompt.Replace("<", "&lt;").Replace(">", "&gt;");
+			m_PromptFont = font;
+
+			RefreshPrompt();
 		}
 
 		protected override DialogResult ShowDialog(Form dialog)
@@ -665,6 +684,41 @@ namespace HTMLContentControl
 			return success;
 		}
 
-	}
+		string GetPromptText()
+		{
+			if (string.IsNullOrWhiteSpace(m_Prompt))
+				return string.Empty;
 
+			// else
+			string PromptFormat =	
+				@"<html>
+					<head>
+						<style type=""text/css"">
+							.watermark
+							{
+								opacity: 0.5;
+								color:   BLACK;
+								position:fixed;
+								top:     2px;
+								left:    2px;
+								cursor:  default;
+								font-family: ""{0}"";
+								font-size: {1}px;
+								user-select: none;
+								-webkit-user-select: none;
+								-khtml-user-select: none;
+								-moz-user-select: none;
+								-ms-user-select: none;
+							}
+						</style>
+					</head>
+
+					<body>
+						<div class=""watermark"">{2}</div>
+					</body>
+				</html>";
+
+			return string.Format(PromptFormat, m_PromptFont.FontFamily.Name, m_PromptFont.Height, m_Prompt);
+		}
+	}
 }
