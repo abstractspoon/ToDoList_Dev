@@ -690,17 +690,17 @@ namespace HTMLContentControl
 				return string.Empty;
 
 			// else
-			string PromptFormat =	
+			string PromptFormat =
 				@"<html>
 					<head>
 						<style type=""text/css"">
 							.watermark
-							{
+							{{
 								opacity: 0.5;
 								color:   BLACK;
 								position:fixed;
-								top:     2px;
-								left:    2px;
+								top:     0px;
+								left:    0px;
 								cursor:  default;
 								font-family: ""{0}"";
 								font-size: {1}px;
@@ -710,6 +710,7 @@ namespace HTMLContentControl
 								-moz-user-select: none;
 								-ms-user-select: none;
 							}
+							}}
 						</style>
 					</head>
 
