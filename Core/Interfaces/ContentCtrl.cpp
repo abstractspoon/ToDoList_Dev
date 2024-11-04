@@ -265,7 +265,7 @@ BOOL CContentCtrl::PostMessage(UINT message, WPARAM wParam, LPARAM lParam)
 void CContentCtrl::SetPrompt(LPCTSTR szPrompt)
 {
 	if (m_pContentCtrl)
-		return m_pContentCtrl->SetPrompt(szPrompt);
+		m_pContentCtrl->SetPrompt(szPrompt);
 }
 
 int CContentCtrl::GetContent(unsigned char* pContent) const
