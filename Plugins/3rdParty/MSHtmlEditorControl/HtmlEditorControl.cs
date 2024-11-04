@@ -68,6 +68,7 @@ namespace MSDN.Html.Editor
     public partial class HtmlEditorControl : UserControl
     {
 		public new event EventHandler LostFocus;
+		public new event EventHandler GotFocus;
 
 		#region Public Events
 
@@ -550,8 +551,12 @@ namespace MSDN.Html.Editor
 
         private void DocumentLoseFocus(object sender, EventArgs e)
         {
-			if (LostFocus != null)
-				LostFocus(this, e);
+			LostFocus?.Invoke(this, e);
+		} //DocumentLoseFocus
+
+        private void DocumentGetFocus(object sender, EventArgs e)
+        {
+			GotFocus?.Invoke(this, e);
 		} //DocumentLoseFocus
 
         private void DocumentDoubleClick(object sender, HtmlElementEventArgs e)
@@ -985,6 +990,7 @@ namespace MSDN.Html.Editor
 			this.editorWebBrowser.Document.AttachEventHandler("onselectionchange", DocumentSelectionChange);
             this.editorWebBrowser.Document.AttachEventHandler("onkeydown", DocumentKeyPress);
 			this.editorWebBrowser.Document.AttachEventHandler("onfocusout", DocumentLoseFocus);
+			this.editorWebBrowser.Document.AttachEventHandler("onfocusin", DocumentGetFocus);
 
 			// signalled complete
 			codeNavigate = false;

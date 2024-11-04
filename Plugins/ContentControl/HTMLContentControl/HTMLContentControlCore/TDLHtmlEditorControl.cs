@@ -36,7 +36,9 @@ namespace HTMLContentControl
         private String m_PrevTextChange = "";
 		private Boolean m_SettingContent = false;
 		private HtmlElement m_CurrentHRef = null;
+
 		private string m_Prompt = "";
+		private string m_PromptHtml = "";
 		private Font m_PromptFont = null;
 
 		private TDLDropTarget m_DragDrop;
@@ -140,6 +142,10 @@ namespace HTMLContentControl
 			this.WebBrowser.Document.MouseUp += new HtmlElementEventHandler(OnDocumentMouseUp);
 			this.WebBrowser.Document.MouseMove += new HtmlElementEventHandler(OnDocumentMouseMove);
 
+			// Prompt handling
+			this.WebBrowser.LostFocus += (s, e) => RefreshPrompt();
+			this.WebBrowser.GotFocus += (s, e) => RefreshPrompt();
+
 			base.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnBaseNavigateLink);
 		}
 
@@ -183,6 +189,8 @@ namespace HTMLContentControl
 			if (string.IsNullOrEmpty(InnerText) && !ContainsFocus)
 			{
 				InnerHtml = GetPromptText();
+				m_PromptHtml = InnerHtml;
+
 				return true;
 			}
 
@@ -709,7 +717,6 @@ namespace HTMLContentControl
 								-khtml-user-select: none;
 								-moz-user-select: none;
 								-ms-user-select: none;
-							}
 							}}
 						</style>
 					</head>
