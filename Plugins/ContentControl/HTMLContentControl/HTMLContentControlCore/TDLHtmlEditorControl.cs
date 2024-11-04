@@ -143,8 +143,8 @@ namespace HTMLContentControl
 			this.WebBrowser.Document.MouseMove += new HtmlElementEventHandler(OnDocumentMouseMove);
 
 			// Prompt handling
-			this.WebBrowser.LostFocus += (s, e) => RefreshPrompt();
-			this.WebBrowser.GotFocus += (s, e) => RefreshPrompt();
+			this.LostFocus += new EventHandler(OnLostFocus);
+			this.GotFocus += new EventHandler(OnGotFocus);
 
 			base.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnBaseNavigateLink);
 		}
@@ -160,7 +160,7 @@ namespace HTMLContentControl
 
 		private void OnTextChangeTimer(object sender, EventArgs e)
         {
-            if (!IsDisposed && ContainsFocus)
+            if (!IsDisposed && ContainsFocus && (InnerHtml != m_PromptHtml))
             {
                 var s = InnerHtml ?? string.Empty;
                 var p = m_PrevTextChange ?? string.Empty;
@@ -184,19 +184,6 @@ namespace HTMLContentControl
             return System.Text.Encoding.Unicode.GetBytes(html);
         }
 
-		bool RefreshPrompt()
-		{
-			if (string.IsNullOrEmpty(InnerText) && !ContainsFocus)
-			{
-				InnerHtml = GetPromptText();
-				m_PromptHtml = InnerHtml;
-
-				return true;
-			}
-
-			return false;
-		}
-
 		public bool SetContent(Byte[] content, bool bResetSelection)
         {
             m_SettingContent = true;
@@ -205,9 +192,9 @@ namespace HTMLContentControl
             {
                 var html = System.Text.Encoding.Unicode.GetString(content).TrimEnd('\0').Trim();
                 InnerHtml = html;
+                m_PrevTextChange = InnerHtml;
 
 				RefreshPrompt();
-                m_PrevTextChange = InnerHtml;
             }
             finally
             {
@@ -285,10 +272,9 @@ namespace HTMLContentControl
 					// Copy back to HTML
 					InnerHtml = content;
 				}
+				m_PrevTextChange = InnerHtml;
 
 				RefreshPrompt();
-
-				m_PrevTextChange = InnerHtml;
             }
             // catch (Exception exception)
             // {
@@ -317,6 +303,38 @@ namespace HTMLContentControl
 			m_PromptFont = font;
 
 			RefreshPrompt();
+		}
+
+		bool RefreshPrompt()
+		{
+			if (string.IsNullOrEmpty(InnerText) && !ContainsFocus)
+			{
+				InnerHtml = GetPromptText();
+
+				m_PromptHtml = InnerHtml;
+				m_PrevTextChange = InnerHtml;
+
+				return true;
+			}
+
+			m_PromptHtml = "";
+			return false;
+		}
+
+		private void OnLostFocus(object sender, EventArgs e)
+		{
+			RefreshPrompt();
+		}
+
+		private void OnGotFocus(object sender, EventArgs e)
+		{
+			if (!string.IsNullOrEmpty(m_PromptHtml) && (InnerHtml == m_PromptHtml))
+			{
+				InnerHtml = "";
+
+				m_PromptHtml = InnerHtml;
+				m_PrevTextChange = InnerHtml;
+			}
 		}
 
 		protected override DialogResult ShowDialog(Form dialog)
