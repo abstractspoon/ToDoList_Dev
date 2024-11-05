@@ -163,11 +163,8 @@ BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 
 		// Cleanup
 		mapRecalcWidthColIDs.RemoveAll();
-		return TRUE;
 	}
-
-	// else
-	if (tdsResort.IsSorting())
+	else if (tdsResort.IsSorting())
 	{
 		CScopedLogTimer log(_T("IDLETASKS::Process(Resort)"));
 
@@ -179,11 +176,15 @@ BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 		// Cleanup
 		tdsResort.SetSortBy(TDCC_NONE, FALSE);
 		ASSERT(!tdsResort.IsSorting());
-
-		return TRUE;
 	}
 
-	return FALSE;
+	return HasTasks();
+}
+
+BOOL CTDLTaskCtrlBase::IDLETASKS::HasTasks() const
+{
+	return (mapRecalcWidthColIDs.IsEmpty() ||
+			tdsResort.IsSorting());
 }
 
 //////////////////////////////////////////////////////////////////////

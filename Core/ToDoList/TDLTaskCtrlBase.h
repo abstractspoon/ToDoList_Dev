@@ -58,10 +58,11 @@ private:
 
 	protected:
 		CTDLTaskCtrlBase& m_tcb;
-		
-	protected:
 		CTDCColumnIDMap mapRecalcWidthColIDs;
 		TDSORT tdsResort;
+
+	protected:
+		BOOL HasTasks() const;
 	};
 
 	friend struct IDLETASKS;

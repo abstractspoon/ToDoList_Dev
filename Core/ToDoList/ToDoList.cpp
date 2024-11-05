@@ -2214,7 +2214,10 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 BOOL CToDoListApp::OnIdle(LONG lCount)
 {
 	if (m_pMainWnd)
-		((CToDoListWnd*)m_pMainWnd)->DoIdleProcessing();
-
+	{
+		if (((CToDoListWnd*)m_pMainWnd)->DoIdleProcessing())
+			return TRUE;
+	}
+	
 	return CWinApp::OnIdle(lCount);
 }

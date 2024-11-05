@@ -900,13 +900,14 @@ void CToDoListWnd::UpdateToolbarColors(CEnToolBar& toolbar, const CUIThemeFile& 
 	}
 }
 
-void CToDoListWnd::DoIdleProcessing()
+BOOL CToDoListWnd::DoIdleProcessing()
 {
-	if (!GetTDCCount() || GetToDoCtrl().DoIdleProcessing())
-		return;
+	if (GetTDCCount() && GetToDoCtrl().DoIdleProcessing())
+		return TRUE;
 
 	// else do our own idle processing
 	// TODO
+	return FALSE;
 }
 
 BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
