@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 
 CKanbanGroupByComboBox::CKanbanGroupByComboBox() 
 	: 
-	CKanbanAttributeComboBox(),
+	CKanbanAttributeComboBox(TRUE), // include <none>
 	m_nExcludeAttribID(TDCA_NONE)
 {
 }
@@ -55,20 +55,22 @@ void CKanbanGroupByComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttribID)
 void CKanbanGroupByComboBox::BuildCombo()
 {
 	// Override base class's selection restoration because
-	// our default is 'none'
+	// of our extra item
 	CString sSelCustID;
 	TDC_ATTRIBUTE nSelAttrib = GetSelectedAttribute(sSelCustID);
 
 	CKanbanAttributeComboBox::BuildCombo();
 
 	// Remove excluded attribute
-	int nExclude = CDialogHelper::FindItemByDataT(*this, m_nExcludeAttribID);
-	
-	if (nExclude != CB_ERR)
-		DeleteString(nExclude);
+	if (m_nExcludeAttribID != TDCA_NONE)
+	{
+		int nExclude = CDialogHelper::FindItemByDataT(*this, m_nExcludeAttribID);
+
+		if (nExclude != CB_ERR)
+			DeleteString(nExclude);
+	}
 
 	// Add extra items
-	CDialogHelper::AddStringT(*this, CEnString(IDS_NONE), TDCA_NONE);
 	CDialogHelper::AddStringT(*this, CEnString(IDS_DISPLAY_RECURRENCE), TDCA_RECURRENCE);
 
 	// Restore selection

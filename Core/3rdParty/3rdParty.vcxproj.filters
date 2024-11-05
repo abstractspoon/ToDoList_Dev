@@ -300,6 +300,9 @@
     <ClInclude Include="SimpleSplitter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="COMUTIL.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

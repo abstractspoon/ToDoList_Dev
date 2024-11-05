@@ -911,8 +911,7 @@ void CCustomAttributeCalcPage::OnChangeSecondOperandType()
 
 CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CString& sTaskFile,
 											   const CTDCCustomAttribDefinitionArray& aAttribDef,
-											   const CTDCImageList& ilTaskIcons,
-											   const CImageList& ilCheckBoxes, 
+											   const CTDCImageList& ilTaskIcons, 
 											   CWnd* pParent)
 	: 
 	CTDLDialog(CTDLCustomAttributeDlg::IDD, _T("CustomAttributes"), pParent), 
@@ -920,7 +919,6 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CString& sTaskFile,
 	m_eUniqueID(_T(". \r\n\t"), ME_EXCLUDE),
 	m_sTaskFile(sTaskFile),
 	m_pageList(ilTaskIcons),
-	m_ilCheckBoxes(ilCheckBoxes),
 	m_aAttribDef(aAttribDef)
 {
 	//{{AFX_DATA_INIT(CTDLCustomAttributeDlg)
@@ -1043,6 +1041,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	m_lcAttributes.SetItemState(0, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	OnItemchangedAttriblist(NULL, NULL);
 
+	VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckBoxes, IDB_CHECKBOXES, 255));
 	ListView_SetImageList(m_lcAttributes, m_ilCheckBoxes, LVSIL_SMALL);
 
 	m_mgrPrompts.SetComboPrompt(m_cbFeatures, IDS_TDC_NONE);

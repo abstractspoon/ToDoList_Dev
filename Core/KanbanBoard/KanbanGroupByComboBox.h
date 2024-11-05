@@ -26,7 +26,6 @@ public:
 // Attributes
 protected:
 	TDC_ATTRIBUTE m_nExcludeAttribID;
-	//CString m_sExcludeCustomAttribID;
 
 	// Generated message map functions
 protected:
@@ -38,7 +37,6 @@ protected:
 
 protected:
 	virtual void BuildCombo();
-	virtual TDC_ATTRIBUTE GetFallbackAttribute() const { return TDCA_NONE; }
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -196,7 +196,6 @@ CToDoListWnd::CToDoListWnd()
 	m_mruList(0, _T("MRU"), _T("TaskList%d"), 16, MRU_MAX_ITEM_LEN, CEnString(IDS_RECENTFILES)),
 	m_nLastSelItem(-1), 
 	m_nMaxState(TDCMS_NORMAL), 
-	m_nPrevMaxState(TDCMS_NORMAL),
 	m_bShowFilterBar(TRUE),
 	m_bShowStatusBar(TRUE),
 	m_bInNewTask(FALSE),
@@ -6038,28 +6037,11 @@ void CToDoListWnd::OnUpdateEditCopy(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMaximizeTasklist() 
 {
-	// toggle max state on or off
-	switch (m_nMaxState)
-	{
-	case TDCMS_MAXTASKLIST:
-		// turn off maximize tasklist by restoring previous max state
-		m_nMaxState = m_nPrevMaxState;
-		m_nPrevMaxState = TDCMS_NORMAL; // reset
-		break;
-
-	case TDCMS_MAXCOMMENTS:
-		// turn on maximize tasklist and save previous max state
+	if (m_nMaxState == TDCMS_MAXTASKLIST)
+		m_nMaxState = TDCMS_NORMAL;
+	else
 		m_nMaxState = TDCMS_MAXTASKLIST;
-		m_nPrevMaxState = TDCMS_MAXCOMMENTS;
-		break;
 
-	case TDCMS_NORMAL:
-		// turn on maximize tasklist
-		m_nMaxState = TDCMS_MAXTASKLIST;
-		m_nPrevMaxState = TDCMS_NORMAL; // reset
-		break;
-	}
-	
 	// update active tasklist
 	GetToDoCtrl().SetMaximizeState(m_nMaxState);
 	Invalidate();
@@ -6075,28 +6057,11 @@ void CToDoListWnd::OnUpdateMaximizeTasklist(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMaximizeComments() 
 {
-	// toggle max state on or off
-	switch (m_nMaxState)
-	{
-	case TDCMS_MAXCOMMENTS:
-		// toggle off maximize comments by restoring previous max state
-		m_nMaxState = m_nPrevMaxState;
-		m_nPrevMaxState = TDCMS_NORMAL; // reset
-		break;
-
-	case TDCMS_MAXTASKLIST:
-		// turn on maximize comments and save previous max state
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		m_nMaxState = TDCMS_NORMAL;
+	else
 		m_nMaxState = TDCMS_MAXCOMMENTS;
-		m_nPrevMaxState = TDCMS_MAXTASKLIST;
-		break;
 
-	case TDCMS_NORMAL:
-		// turn on maximize comments
-		m_nMaxState = TDCMS_MAXCOMMENTS;
-		m_nPrevMaxState = TDCMS_NORMAL; // reset
-		break;
-	}
-	
 	// update active tasklist
 	GetToDoCtrl().SetMaximizeState(m_nMaxState);
 	Invalidate();
@@ -13016,11 +12981,14 @@ void CToDoListWnd::OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo)
 void CToDoListWnd::OnViewCycleTaskViews() 
 {
 	GetToDoCtrl().SetNextTaskView();
+
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		OnMaximizeTasklist();
 }
 
 void CToDoListWnd::OnUpdateViewCycleTaskViews(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_nMaxState != TDCMS_MAXCOMMENTS);
+	pCmdUI->Enable(TRUE);
 }
 
 void CToDoListWnd::OnViewToggleTreeandList() 
@@ -13042,23 +13010,42 @@ void CToDoListWnd::OnViewToggleTreeandList()
 
 void CToDoListWnd::OnUpdateViewToggleTreeandList(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_nMaxState != TDCMS_MAXCOMMENTS);
+	pCmdUI->Enable(TRUE);
 }
 
 void CToDoListWnd::OnViewToggletasksandcomments() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	if (!tdc.TasksHaveFocus())
-		tdc.SetFocusToTasks();
+	BOOL bTasksVisible = (m_nMaxState != TDCMS_MAXCOMMENTS);
+	BOOL bCommentsVisible = ((m_nMaxState != TDCMS_MAXTASKLIST) || Prefs().GetShowCommentsAlways());
+	
+	if (bTasksVisible && bCommentsVisible)
+	{
+		if (!tdc.TasksHaveFocus())
+			tdc.SetFocusToTasks();
+		else
+			tdc.SetFocusToComments();
+	}
+	else if (bTasksVisible)
+	{
+		ASSERT(m_nMaxState == TDCMS_MAXTASKLIST);
+		ASSERT(!Prefs().GetShowCommentsAlways());
+
+		OnMaximizeComments();
+	}
 	else
-		tdc.SetFocusToComments();
+	{
+		ASSERT(bCommentsVisible);
+		ASSERT(m_nMaxState == TDCMS_MAXCOMMENTS);
+
+		OnMaximizeTasklist();
+	}
 }
 
 void CToDoListWnd::OnUpdateViewToggletasksandcomments(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_nMaxState == TDCMS_NORMAL || 
-					(m_nMaxState == TDCMS_MAXTASKLIST && Prefs().GetShowCommentsAlways()));
+	pCmdUI->Enable(TRUE);
 }
 
 void CToDoListWnd::OnMove(int x, int y) 
@@ -13372,8 +13359,7 @@ void CToDoListWnd::OnTasklistCustomColumns()
 	{
 		CTDLCustomAttributeDlg dialog(tdc.GetFilePath(),
 									  tdc.GetCustomAttributeDefs(),
-									  tdc.GetTaskIconImageList(),
-									  tdc.GetCheckImageList());
+									  tdc.GetTaskIconImageList());
 
 		if (dialog.DoModal(CMDICON(ID_TASKLIST_CUSTOMCOLUMNS)) == IDOK)
 		{

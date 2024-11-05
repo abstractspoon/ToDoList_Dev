@@ -397,7 +397,9 @@ BOOL CImageBlurrer::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* p
 	BOOL bRes = TRUE;
 
 	if (m_nAmount == 0)
+	{
 		bRes = C32BitImageProcessor::ProcessPixels(pSrcPixels, sizeSrc, pDestPixels, sizeDest);
+	}
 	else
 	{
 		ASSERT (sizeSrc == sizeDest);
@@ -434,11 +436,14 @@ BOOL CImageBlurrer::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* p
 					}
 				}
 
-				RGBX* pRGBDest = &pDestPixels[nY * sizeDest.cx + nX];
+				if (nDivisor)
+				{
+					RGBX* pRGBDest = &pDestPixels[nY * sizeDest.cx + nX];
 
-				pRGBDest->btRed = (BYTE)min(255, nRed / nDivisor);
-				pRGBDest->btGreen = (BYTE)min(255, nGreen / nDivisor);
-				pRGBDest->btBlue = (BYTE)min(255, nBlue / nDivisor);
+					pRGBDest->btRed = (BYTE)min(255, nRed / nDivisor);
+					pRGBDest->btGreen = (BYTE)min(255, nGreen / nDivisor);
+					pRGBDest->btBlue = (BYTE)min(255, nBlue / nDivisor);
+				}
 			}
 		}
 	}

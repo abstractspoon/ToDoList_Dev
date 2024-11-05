@@ -355,7 +355,7 @@ CString CiCalExporter::FormatRecurrence(int nRegularity, DWORD dwSpecific1, DWOR
 		break;
 
 	case TDIR_DAY_EVERY_NWEEKDAYS: // TDIR_DAILY
-		sRecurrence.Format(_T("RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=%lu"));
+		sRecurrence.Format(_T("RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=%lu"), dwSpecific1);
 		break;
 
 	case TDIR_DAY_EVERY_WEEKDAY:

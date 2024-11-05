@@ -1230,18 +1230,27 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 			}
 
 			// Handle the tracked attribute having disappeared
-			if ((m_nTrackedAttributeID == TDCA_CUSTOMATTRIB) && 
-				(m_aCustomAttribDefs.FindDefinition(m_sTrackAttribID) == -1))
+			if (KBUtils::IsCustomAttribute(m_nTrackedAttributeID))
 			{
-				m_nTrackedAttributeID = TDCA_STATUS;
-				m_sTrackAttribID = KBUtils::GetAttributeID(m_nTrackedAttributeID);
+				nAttribID = m_aCustomAttribDefs.GetDefinitionID(m_sTrackAttribID);
+				
+				if (nAttribID == TDCA_NONE)
+				{
+					m_nTrackedAttributeID = TDCA_NONE;
+					m_sTrackAttribID.Empty();
 
-				bChange = TRUE;
+					bChange = TRUE;
+				}
+				else if (nAttribID != m_nTrackedAttributeID)
+				{
+					m_nTrackedAttributeID = nAttribID;
+					bChange = TRUE;
+				}
 			}
 
 			// Handle the group attribute having disappeared or 
 			// being the same as the tracked attribute
-			if (m_nGroupBy == TDCA_CUSTOMATTRIB &&
+			if (KBUtils::IsCustomAttribute(m_nGroupBy) &&
 				((m_aCustomAttribDefs.FindDefinition(m_sGroupByCustAttribID) == -1) || (m_sGroupByCustAttribID == m_sTrackAttribID)))
 			{
 				m_nGroupBy = TDCA_NONE;
@@ -1979,6 +1988,9 @@ void CKanbanCtrl::RefreshColumnHeaderText()
 {
 	int nNumColumns = m_aColumns.GetSize(), nVis = 0;
 
+	if (nNumColumns == 0)
+		return;
+
 	for (int nCol = 0; nCol < nNumColumns; nCol++)
 	{
 		const CKanbanColumnCtrl* pCol = m_aColumns[nCol];
@@ -2121,7 +2133,7 @@ BOOL CKanbanCtrl::GroupBy(TDC_ATTRIBUTE nAttribID)
 
 TDC_ATTRIBUTE CKanbanCtrl::GetTrackedAttribute(CString& sCustomAttrib) const
 {
-	if (m_nTrackedAttributeID == TDCA_CUSTOMATTRIB)
+	if (KBUtils::IsCustomAttribute(m_nTrackedAttributeID))
 		sCustomAttrib = m_sTrackAttribID;
 	else
 		sCustomAttrib.Empty();
@@ -2199,6 +2211,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 		}
 		else if (!aColumnDefs.GetSize()) // not switching to fixed columns
 		{
+			ASSERT(m_aColumnDefs.GetSize() == 0);
 			return TRUE;
 		}
 	}

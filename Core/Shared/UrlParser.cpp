@@ -34,9 +34,11 @@ CUrlParser::CUrlParser()
 	AddProtocol(_T("winword:"), FALSE);
 	AddProtocol(_T("thunderlink://"), FALSE);
 	AddProtocol(_T("wiki:"), FALSE);
+	AddProtocol(_T("obsidian://"), FALSE);
+	AddProtocol(_T("zotero://"), FALSE);
 
-	// Note: The correct file URI protocol has an extra trailing slash
-	// but we use the incorrect one to pick up badly formatted URIs
+	// Note: The correct file URI protocol has 3 forward slashes
+	// but we use the 2-slash version to pick up badly formatted URIs
 	m_nFileProtocol = AddProtocol(_T("file:///"), FALSE);
 	m_nFileProtocol2 = AddProtocol(_T("file://"), FALSE);
 }
