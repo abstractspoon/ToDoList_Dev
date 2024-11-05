@@ -37,7 +37,7 @@ class CKanbanPreferencesPage : public CPreferencesPageBase
 public:
 	CKanbanPreferencesPage(CWnd* pParent = NULL);   // standard constructor
 
-	BOOL HasFixedColumns() const { return (m_aFixedColumnDefs.GetSize() ? TRUE : FALSE); }
+	BOOL HasFixedColumns() const;
 	int GetFixedColumnDefinitions(CKanbanColumnArray& aColumnDefs) const;
 	BOOL GetSortSubtasksBelowParents() const { return m_bSortSubtaskBelowParent; }
 	BOOL GetAlwaysShowBacklog() const { return m_bAlwaysShowBacklog; }
@@ -145,7 +145,7 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
-	void SetCustomAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs);
+	void SetCustomAttributeDefs(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs);
 	void SetAttributeValues(const CKanbanAttributeValueMap& mapValues);
 
 protected:

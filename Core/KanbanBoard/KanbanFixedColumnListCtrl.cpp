@@ -259,6 +259,9 @@ void CKanbanFixedColumnListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 
 BOOL CKanbanFixedColumnListCtrl::CanMoveSelectedColumnRow(BOOL bUp) const
 {
+	if (!IsWindowEnabled())
+		return FALSE;
+
 	int nRow = GetCurSel();
 	int nNumRows = (GetItemCount() - 1);
 

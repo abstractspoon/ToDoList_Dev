@@ -34,7 +34,8 @@ CKanbanPreferencesPage::CKanbanPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	m_bHideEmptyAttributeValues(TRUE),
 	m_bSpecifyFullColor(TRUE),
 	m_bAltKeyOverridesMaxCount(TRUE),
-	m_crFullColumn(255)
+	m_crFullColumn(255),
+	m_cbAttributes(TRUE) // include <none>
 {
 	//{{AFX_DATA_INIT(CKanbanPreferencesPage)
 	//}}AFX_DATA_INIT
@@ -89,7 +90,7 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 	m_mgrGroupLines.AddGroupLine(IDC_COLUMNGROUP, *this);
 	m_btFullColor.EnableWindow(m_bSpecifyFullColor);
 	
-	m_cbAttributes.SetAttributeDefinitions(m_aCustAttribDefs);
+	m_cbAttributes.SetCustomAttributeDefs(m_aCustAttribDefs);
 	m_cbAttributes.SetSelectedAttribute(m_nFixedAttrib, m_sFixedCustomAttribID);
 
 	EnableDisableControls();
@@ -120,27 +121,22 @@ TDC_ATTRIBUTE CKanbanPreferencesPage::GetFixedAttributeToTrack(CString& sCustomA
 {
 	sCustomAttribID.Empty();
 
-	if (HasFixedColumns())
+	if (!HasFixedColumns())
+		return TDCA_NONE;
+
+	if (IsCustomFixedAttribute())
 	{
-		if (IsCustomFixedAttribute())
-		{
-			sCustomAttribID = m_sFixedCustomAttribID;
+		sCustomAttribID = m_sFixedCustomAttribID;
 
-			if (m_aCustAttribDefs.GetSize())
-				return m_aCustAttribDefs.GetDefinitionID(m_sFixedCustomAttribID);
+		if (m_aCustAttribDefs.GetSize())
+			return m_aCustAttribDefs.GetDefinitionID(m_sFixedCustomAttribID);
 
-			// else
-			return TDCA_CUSTOMATTRIB;
-		}
-		else
-		{
-			return m_nFixedAttrib;
-		}
+		// else
+		return TDCA_CUSTOMATTRIB;
 	}
-
+	
 	// else
-	ASSERT(0);
-	return TDCA_NONE;
+	return m_nFixedAttrib;
 }
 
 BOOL CKanbanPreferencesPage::IsCustomFixedAttribute() const 
@@ -201,6 +197,14 @@ void CKanbanPreferencesPage::OnOK()
 			m_aDisplayAttrib.Add(nAttribID);
 		}
 	}
+}
+
+BOOL CKanbanPreferencesPage::HasFixedColumns() const 
+{ 
+	if (m_nFixedAttrib == TDCA_NONE)
+		return FALSE;
+	
+	return (m_aFixedColumnDefs.GetSize() > 0); 
 }
 
 int CKanbanPreferencesPage::GetFixedColumnDefinitions(CKanbanColumnArray& aColumnDefs) const
@@ -270,7 +274,7 @@ void CKanbanPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 
 void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
 {
-	m_nFixedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("FixedAttribute"), TDCA_STATUS);
+	m_nFixedAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("FixedAttribute"), TDCA_NONE);
 	m_sFixedCustomAttribID = pPrefs->GetProfileString(szKey, _T("FixedCustomAttributeID"));
 
 	m_bAlwaysShowBacklog = pPrefs->GetProfileInt(szKey, _T("AlwaysShowBacklog"), TRUE);
@@ -283,7 +287,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	m_crFullColumn = pPrefs->GetProfileInt(szKey, _T("FullColumnColor"), 255);
 	m_bAltKeyOverridesMaxCount = pPrefs->GetProfileInt(szKey, _T("AltKeyOverridesMaxCount"), TRUE);
 
-	// column defs
+	// column definitions
 	m_aFixedColumnDefs.RemoveAll();
 	int nNumDefs = pPrefs->GetProfileInt(szKey, _T("FixedColumnCount"));
 
@@ -352,8 +356,11 @@ void CKanbanPreferencesPage::EnableDisableControls()
 	GetDlgItem(IDC_INDENTSUBTASKS)->EnableWindow(m_bSortSubtaskBelowParent);
 	GetDlgItem(IDC_COLORBARBYPRIORITY)->EnableWindow(m_bShowTaskColorAsBar);
 
+	m_lcFixedColumnDefs.EnableWindow(m_cbAttributes.GetSelectedAttribute() != TDCA_NONE);
+
 	GetDlgItem(IDC_MOVECOL_DOWN)->EnableWindow(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(FALSE));
 	GetDlgItem(IDC_MOVECOL_UP)->EnableWindow(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(TRUE));
+	GetDlgItem(IDC_POPULATECOLUMNS)->EnableWindow(m_lcFixedColumnDefs.IsWindowEnabled());
 }
 
 void CKanbanPreferencesPage::OnSelchangeAttribute() 
@@ -447,7 +454,22 @@ void CKanbanPreferencesPage::OnItemchangedColumndefs(NMHDR* /*pNMHDR*/, LRESULT*
 void CKanbanPreferencesPage::SetCustomAttributes(const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	m_aCustAttribDefs.Copy(aCustAttribDefs);
-	m_cbAttributes.SetAttributeDefinitions(aCustAttribDefs);
+	m_cbAttributes.SetCustomAttributeDefs(aCustAttribDefs);
+
+	// Check that the fixed column custom attribute is still available
+	if (!m_sFixedCustomAttribID.IsEmpty())
+	{
+		m_nFixedAttrib = aCustAttribDefs.GetDefinitionID(m_sFixedCustomAttribID);
+
+		if (m_nFixedAttrib == TDCA_NONE)
+			m_sFixedCustomAttribID.Empty();
+
+		if (m_cbAttributes.GetSafeHwnd())
+		{
+			m_cbAttributes.SetSelectedAttribute(m_nFixedAttrib, m_sFixedCustomAttribID);
+			EnableDisableControls();
+		}
+	}
 }
 
 void CKanbanPreferencesPage::SetAttributeValues(const CKanbanAttributeValueMap& mapValues)
@@ -537,7 +559,7 @@ BEGIN_MESSAGE_MAP(CKanbanPreferencesDlg, CPreferencesDlgBase)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-void CKanbanPreferencesDlg::SetCustomAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs)
+void CKanbanPreferencesDlg::SetCustomAttributeDefs(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs)
 {
 	m_page.SetCustomAttributes(aCustomAttribDefs);
 }
