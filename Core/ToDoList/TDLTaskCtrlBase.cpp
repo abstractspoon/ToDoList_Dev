@@ -183,7 +183,7 @@ BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 
 BOOL CTDLTaskCtrlBase::IDLETASKS::HasTasks() const
 {
-	return (m_mapRecalcWidthColIDs.IsEmpty() ||
+	return (!m_mapRecalcWidthColIDs.IsEmpty() ||
 			m_tdsResort.IsSorting());
 }
 
