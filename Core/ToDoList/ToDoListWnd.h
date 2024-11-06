@@ -772,11 +772,11 @@ protected:
 	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
 	void RefreshFilterBarAdvancedFilters();
-	void RefreshToDoCtrlDueItemStatus(int nCtrl = -1);
 	void RefreshTimeTrackingStatus(); // Idle task
 	void RefreshPauseTimeTracking(); // Idle task
 	void RefreshTabOrder(); // Idle task
 
+	void RefreshTasklistDueItemStatus(int nCtrl = -1);
 	void RefreshTasklistCheckoutStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
 	void RefreshTasklistReadOnlyStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
 	void RefreshTasklistTimestampChange(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);

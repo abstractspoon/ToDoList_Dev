@@ -3729,7 +3729,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	if (pMod->mapAttrib.Has(TDCA_DUEDATE) || 
 		pMod->mapAttrib.Has(TDCA_DONEDATE))
 	{
-		RefreshToDoCtrlDueItemStatus(nTDC);
+		RefreshTasklistDueItemStatus(nTDC);
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_CUSTOMATTRIB_DEFS))
@@ -4619,7 +4619,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 		if (userPrefs.GetRefreshFindOnLoad() && m_dlgFindTasks.GetSafeHwnd())
 			m_dlgFindTasks.RefreshSearch();
 
-		RefreshToDoCtrlDueItemStatus(nTDC);
+		RefreshTasklistDueItemStatus(nTDC);
 		CheckRemovePristineTasklist();
 	}
 	else if (GetTDCCount() >= 1) // only delete if there's another ctrl existing
@@ -6955,7 +6955,7 @@ void CToDoListWnd::OnTimer(UINT nIDEvent)
 		break;
 		
 	case TIMER_DUEITEMS:
-		RefreshToDoCtrlDueItemStatus();
+		RefreshTasklistDueItemStatus();
 		break;
 		
 	case TIMER_TIMETRACKING:
@@ -7079,7 +7079,7 @@ LPARAM CToDoListWnd::OnToDoCtrlNotifyTimeTrackReminder(WPARAM wParam, LPARAM lPa
 	return TRUE;
 }
 
-void CToDoListWnd::RefreshToDoCtrlDueItemStatus(int nCtrl)
+void CToDoListWnd::RefreshTasklistDueItemStatus(int nCtrl)
 {
 	AF_NOREENTRANT // macro helper
 
