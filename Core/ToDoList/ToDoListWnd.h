@@ -91,7 +91,7 @@ private:
 		CToDoListWnd& m_tdl;
 
 		BOOL m_bUpdateCaption;
-		BOOL m_bUpdateTimeTrack;
+		BOOL m_bUpdateTimeTrackAllTasks;
 		BOOL m_bRefreshTimeTrackStatus;
 		BOOL m_bUpdateMenuSSCStatus;
 		BOOL m_bRefreshPauseTimeTracking;

@@ -192,7 +192,7 @@ CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
 	:
 	m_tdl(tdl),
 	m_bUpdateCaption(FALSE),
-	m_bUpdateTimeTrack(-1),
+	m_bUpdateTimeTrackAllTasks(-1),
 	m_bRefreshTimeTrackStatus(FALSE),
 	m_bUpdateMenuSSCStatus(FALSE),
 	m_bRefreshPauseTimeTracking(FALSE),
@@ -202,13 +202,17 @@ CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
 
 void CToDoListWnd::IDLETASKS::UpdateStatusBar(const CTDCAttributeMap& mapAttrib)
 {
-	m_mapStatusBarAttrib.Copy(mapAttrib);
+	m_mapStatusBarAttrib.Append(mapAttrib);
 }
 
 void CToDoListWnd::IDLETASKS::UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib)
 {
-	m_bUpdateTimeTrack = (bAllTasks != FALSE);
-	m_mapTimeTrackAttrib.Copy(mapAttrib);
+	if (m_bUpdateTimeTrackAllTasks == -1)
+		m_bUpdateTimeTrackAllTasks = (bAllTasks != FALSE);
+	else
+		m_bUpdateTimeTrackAllTasks |= (bAllTasks != FALSE);
+
+	m_mapTimeTrackAttrib.Append(mapAttrib);
 }
 
 BOOL CToDoListWnd::IDLETASKS::Process()
@@ -229,11 +233,11 @@ BOOL CToDoListWnd::IDLETASKS::Process()
 
 			m_mapStatusBarAttrib.RemoveAll();
 		}
-		else if (m_bUpdateTimeTrack != -1)
+		else if (m_bUpdateTimeTrackAllTasks != -1)
 		{
-			m_tdl.UpdateTimeTrackerTasks(m_bUpdateTimeTrack, m_mapTimeTrackAttrib);
+			m_tdl.UpdateTimeTrackerTasks(m_bUpdateTimeTrackAllTasks, m_mapTimeTrackAttrib);
 
-			m_bUpdateTimeTrack = -1;
+			m_bUpdateTimeTrackAllTasks = -1;
 			m_mapTimeTrackAttrib.RemoveAll();
 		}
 		else if (m_bRefreshTimeTrackStatus)
@@ -280,7 +284,7 @@ BOOL CToDoListWnd::IDLETASKS::HasTasks() const
 			m_bRefreshPauseTimeTracking ||
 			m_bRefreshTabOrder ||
 			(m_nUpdateAutoListDataAttribID != TDCA_NONE) ||
-			(m_bUpdateTimeTrack != -1) ||
+			(m_bUpdateTimeTrackAllTasks != -1) ||
 			!m_mapStatusBarAttrib.IsEmpty());
 }
 
