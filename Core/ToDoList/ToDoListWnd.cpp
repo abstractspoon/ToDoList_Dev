@@ -8798,12 +8798,11 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 		m_idleTasks.UpdateCaption();
 		m_idleTasks.UpdateStatusBar();
 		m_idleTasks.UpdateMenuSourceControlStatus();
-		UpdateCwd();
-		
-		RefreshFilterBarControls(TDCA_ALL);
 		m_idleTasks.UpdateAutoListData(TDCA_ALL);
 		m_idleTasks.RefreshPauseTimeTracking();
-
+		
+		UpdateCwd();
+		RefreshFilterBarControls(TDCA_ALL);
 		DoDueTaskNotification(GetSelToDoCtrl(), nNotifyDueTasksBy);
 	}
 
