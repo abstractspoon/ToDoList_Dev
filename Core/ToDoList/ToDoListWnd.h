@@ -70,6 +70,44 @@ class CTDLImportFromTextBaseDlg;
 
 class CToDoListWnd : public CFrameWnd, public CDialogHelper
 {
+private:
+	struct IDLETASKS
+	{
+		IDLETASKS(CToDoListWnd& tdl);
+
+		void UpdateCaption() { m_bUpdateCaption = TRUE; }
+		void UpdateStatusBar(const CTDCAttributeMap& mapAttrib = TDCA_ALL);
+		void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL);
+		void UpdateMenuSourceControlStatus() { m_bUpdateMenuSSCStatus = TRUE; }
+		void UpdateAutoListData(TDC_ATTRIBUTE nAttribID) { m_nUpdateAutoListDataAttribID = nAttribID; }
+
+		void RefreshTimeTrackingStatus() { m_bRefreshTimeTrackStatus = TRUE; }
+		void RefreshPauseTimeTracking() { m_bRefreshPauseTimeTracking = TRUE; }
+		void RefreshTabOrder() { m_bRefreshTabOrder = TRUE; }
+
+		BOOL Process();
+
+	protected:
+		CToDoListWnd& m_tdl;
+
+		BOOL m_bUpdateCaption;
+		BOOL m_bUpdateTimeTrack;
+		BOOL m_bRefreshTimeTrackStatus;
+		BOOL m_bUpdateMenuSSCStatus;
+		BOOL m_bRefreshPauseTimeTracking;
+		BOOL m_bRefreshTabOrder;
+
+		TDC_ATTRIBUTE m_nUpdateAutoListDataAttribID;
+
+		CTDCAttributeMap m_mapStatusBarAttrib;
+		CTDCAttributeMap m_mapTimeTrackAttrib;
+		
+	protected:
+		BOOL HasTasks() const;
+	};
+
+	friend struct IDLETASKS;
+
 public:
 	// Construction
 	CToDoListWnd(); 
@@ -170,6 +208,9 @@ protected:
 	BOOL m_bSplitting;
 	BOOL m_bStartHidden;
 	BOOL m_bVisible;
+
+private:
+	IDLETASKS m_idleTasks;
 
 protected:
 	// Windows message handlers
@@ -611,15 +652,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 		
 	// Pseudo-handlers
-	void OnTimerCheckoutStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
-	void OnTimerCheckReloadTasklists(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
-	void OnTimerReadOnlyStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
-	void OnTimerTimestampChange(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
-
-	void OnTimerAutoMinimize();
-	void OnTimerAutoSave();
-	void OnTimerDueItems(int nCtrl = -1);
-	void OnTimerTimeTracking();
+	void AutoSaveTasklists();
 
 	void OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bUpdateFilterCtrls);
 	void OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWhere);
@@ -681,19 +714,12 @@ protected:
 	BOOL HasTaskFile(const CTDCStartupOptions& startup) const;
 	void MinimizeToTray();
 	void Show(BOOL bAllowToggle);
-	void RefreshPauseTimeTracking();
 	BOOL IsActivelyTimeTracking() const;
 	void SetTimer(UINT nTimerID, BOOL bOn);
-	void RefreshTabOrder();
-	void UpdateGlobalHotkey();
-	void UpdateCwd();
 	BOOL WantTasklistTabbarVisible() const;
-	void UpdateAeroFeatures();
 	void CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat);
 	void InitUITheme();
-	void UpdateUITheme();
 	void ProcessQuickFindTextChange(BOOL bComboSelChange);
-	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
 	BOOL GetAutoArchiveOptions(TDC_ARCHIVE& nRemove, BOOL& bRemoveFlagged) const;
 	BOOL ValidateTaskLinkFilePath(CString& sPath) const;
 	BOOL WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed) const;
@@ -716,28 +742,6 @@ protected:
 	void StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC nFrom);
 	void StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom);
 
-	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID);
-	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
-	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
-	void RefreshFilterBarAdvancedFilters();
-	void RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilters, const CStringArray& aNewFilters);
-
-	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
-	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
-	BOOL GetFilterBarRect(CRect& rect) const;
-	void CheckResizeFilterBar();
-	BOOL GetFindTasksDialogSplitterRect(CRect& rSplitter) const;
-
-	void ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable);
-	void ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable);
-	void ReposStatusBar(CDeferWndMove* pDwm, CRect& rAvailable);
-	void ReposTabBar(CDeferWndMove* pDwm, CRect& rAvailable);
-	void ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable);
-	void ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable);
-
-	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
-	void UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pCtrl);
-	
 	enum UDTCHANGETYPE
 	{
 		UDT_INIT = 0,
@@ -746,6 +750,56 @@ protected:
 		UDT_PREFERENCES
 	};
 	void UpdateUDTsInToolbar(UDTCHANGETYPE nChange);
+	void UpdateGlobalHotkey();
+	void UpdateCwd();
+	void UpdateAeroFeatures();
+	void UpdateUITheme();
+	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID);
+	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
+	void UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pCtrl);
+	void UpdateTrayTooltip();
+	void UpdateCaption();
+	void UpdateStatusBar(const CTDCAttributeMap& mapAttrib);
+	void UpdateMenuIconMgrSourceControlStatus();
+	void UpdateTimeTrackerPreferences();
+	void UpdateWindowIcons();
+	void UpdateTrayIcon();
+	void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib);
+	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
+	void UpdateTaskTreeAndCommentsFonts();
+	void UpdateFindTasksAndRemindersFonts();
+
+	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
+	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
+	void RefreshFilterBarAdvancedFilters();
+	void RefreshToDoCtrlDueItemStatus(int nCtrl = -1);
+	void RefreshTimeTrackingStatus();
+	void RefreshPauseTimeTracking();
+	void RefreshTabOrder();
+	void RefreshTasklistCheckoutStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
+	void RefreshTasklistReadOnlyStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
+	void RefreshTasklistTimestampChange(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
+	
+	void CheckReloadToDoCtrls(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
+	void CheckAutoMinimizeApp();
+	void CheckResizeFilterBar();
+	void CheckCloseTasklist(int nIndex);
+	void CheckRemovePristineTasklist();
+	void CheckUpdateActiveToDoCtrlPreferences();
+	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
+
+	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
+	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
+	BOOL GetFilterBarRect(CRect& rect) const;
+	BOOL GetFindTasksDialogSplitterRect(CRect& rSplitter) const;
+
+	void ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposStatusBar(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposTabBar(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable);
+		
 	void PopulateToolArgs(USERTOOLARGS& args) const;
 
 	CFilteredToDoCtrl& GetToDoCtrl();
@@ -761,8 +815,6 @@ protected:
 	BOOL CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser);
 	BOOL VerifyToDoCtrlPassword() const;
 	BOOL VerifyToDoCtrlPassword(int nIndex) const;
-	void CheckCloseTasklist(int nIndex);
-	void CheckRemovePristineTasklist();
 
 	// caller must flush todoctrls if required before calling these
 	BOOL CloseToDoCtrl(int nIndex);
@@ -770,16 +822,7 @@ protected:
 	TDC_FILE SaveTaskList(int nIndex, LPCTSTR szFilePath = NULL, DWORD dwFlags = 0);
 	TDC_FILE SaveAll(DWORD dwFlags);
 	
-	void UpdateTrayTooltip();
-	void UpdateCaption();
-	void UpdateStatusBar(const CTDCAttributeMap& mapAttrib = TDCA_ALL);
-	void UpdateMenuIconMgrSourceControlStatus();
-	void UpdateTimeTrackerPreferences();
-	void UpdateWindowIcons();
-	void UpdateTrayIcon();
-
 	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl);
-	void CheckUpdateActiveToDoCtrlPreferences();
 	const CPreferencesDlg& Prefs() const;
 	void ResetPrefs();
 	void ToggleActiveTasklistStyle(TDC_STYLE nStyle, BOOL& bFlag);
@@ -805,18 +848,15 @@ protected:
 	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);
 	TDCEXPORTTASKLIST* PrepareNewExportAfterSave(int nTDC, const CTaskFile& tasks);
 
-	void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 	BOOL ImportTasks(BOOL bFromText, const CString& sImportFrom,
 					int nImporter, TDLID_IMPORTTO nImportTo);
 	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg);
 	UINT GetNewTaskCmdID() const;
 	UINT GetNewSubtaskCmdID() const;
-	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
 	void SaveCurrentFocus(HWND hwndFocus = NULL);
 	void PostAppRestoreFocus(BOOL bActivate = FALSE);
-	void UpdateTaskTreeAndCommentsFonts();
-	void UpdateFindTasksAndRemindersFonts();
 	int CalcEditFieldInset() const;
+	void RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilters, const CStringArray& aNewFilters);
 
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
 	static void HandleExportTasklistResult(IIMPORTEXPORT_RESULT nRes, const CString& sExportPath, BOOL bToClipboard, BOOL bPreview);
