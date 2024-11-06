@@ -757,10 +757,10 @@ protected:
 	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID);
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
 	void UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pCtrl);
-	void UpdateTrayTooltip();
-	void UpdateCaption();
-	void UpdateStatusBar(const CTDCAttributeMap& mapAttrib);
-	void UpdateMenuIconMgrSourceControlStatus();
+	void UpdateTrayTooltip(); // Idle task via UpdateCaption
+	void UpdateCaption(); // Idle task
+	void UpdateStatusBar(const CTDCAttributeMap& mapAttrib); // Idle task
+	void UpdateMenuIconMgrSourceControlStatus(); // Idle task
 	void UpdateTimeTrackerPreferences();
 	void UpdateWindowIcons();
 	void UpdateTrayIcon();
@@ -773,9 +773,10 @@ protected:
 	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
 	void RefreshFilterBarAdvancedFilters();
 	void RefreshToDoCtrlDueItemStatus(int nCtrl = -1);
-	void RefreshTimeTrackingStatus();
-	void RefreshPauseTimeTracking();
-	void RefreshTabOrder();
+	void RefreshTimeTrackingStatus(); // Idle task
+	void RefreshPauseTimeTracking(); // Idle task
+	void RefreshTabOrder(); // Idle task
+
 	void RefreshTasklistCheckoutStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
 	void RefreshTasklistReadOnlyStatus(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
 	void RefreshTasklistTimestampChange(int nCtrl = -1, BOOL bForceCheckRemote = FALSE);
