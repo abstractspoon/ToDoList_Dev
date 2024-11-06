@@ -145,37 +145,37 @@ CTDLTaskCtrlBase::IDLETASKS::IDLETASKS(CTDLTaskCtrlBase& tcb)
 
 void CTDLTaskCtrlBase::IDLETASKS::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs)
 {
-	mapRecalcWidthColIDs.Append(aColIDs);
+	m_mapRecalcWidthColIDs.Append(aColIDs);
 }
 
 void CTDLTaskCtrlBase::IDLETASKS::Resort(const TDSORT& sort)
 {
-	tdsResort = sort;
+	m_tdsResort = sort;
 }
 
 BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 {
-	if (!mapRecalcWidthColIDs.IsEmpty())
+	if (!m_mapRecalcWidthColIDs.IsEmpty())
 	{
 		CScopedLogTimer log(_T("IDLETASKS::Process(RecalcColumnWidths)"));
 
-		m_tcb.RecalcUntrackedColumnWidths(mapRecalcWidthColIDs);
+		m_tcb.RecalcUntrackedColumnWidths(m_mapRecalcWidthColIDs);
 
 		// Cleanup
-		mapRecalcWidthColIDs.RemoveAll();
+		m_mapRecalcWidthColIDs.RemoveAll();
 	}
-	else if (tdsResort.IsSorting())
+	else if (m_tdsResort.IsSorting())
 	{
 		CScopedLogTimer log(_T("IDLETASKS::Process(Resort)"));
 
-		if (tdsResort.bMulti)
-			m_tcb.MultiSort(tdsResort.multi);
+		if (m_tdsResort.bMulti)
+			m_tcb.MultiSort(m_tdsResort.multi);
 		else
-			m_tcb.Sort(tdsResort.single.nColumnID, FALSE); // No toggle
+			m_tcb.Sort(m_tdsResort.single.nColumnID, FALSE); // No toggle
 
 		// Cleanup
-		tdsResort.SetSortBy(TDCC_NONE, FALSE);
-		ASSERT(!tdsResort.IsSorting());
+		m_tdsResort.SetSortBy(TDCC_NONE, FALSE);
+		ASSERT(!m_tdsResort.IsSorting());
 	}
 
 	return HasTasks();
@@ -183,8 +183,8 @@ BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 
 BOOL CTDLTaskCtrlBase::IDLETASKS::HasTasks() const
 {
-	return (mapRecalcWidthColIDs.IsEmpty() ||
-			tdsResort.IsSorting());
+	return (m_mapRecalcWidthColIDs.IsEmpty() ||
+			m_tdsResort.IsSorting());
 }
 
 //////////////////////////////////////////////////////////////////////

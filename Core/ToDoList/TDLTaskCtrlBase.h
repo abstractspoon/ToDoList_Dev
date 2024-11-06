@@ -58,8 +58,8 @@ private:
 
 	protected:
 		CTDLTaskCtrlBase& m_tcb;
-		CTDCColumnIDMap mapRecalcWidthColIDs;
-		TDSORT tdsResort;
+		CTDCColumnIDMap m_mapRecalcWidthColIDs;
+		TDSORT m_tdsResort;
 
 	protected:
 		BOOL HasTasks() const;
