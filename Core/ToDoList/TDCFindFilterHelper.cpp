@@ -29,22 +29,8 @@ CTDCFindFilterHelper::~CTDCFindFilterHelper()
 void CTDCFindFilterHelper::RefreshFilterBarAdvancedFilters()
 {
 	CStringArray aFilters;
+
 	m_findDlg.GetSavedSearches(aFilters);
-
-/*
-	Hiding this because I've no idea why it's here and 
-	it produces unexpected outcomes
-
-	// check/add unnamed filter
-	if (m_findDlg.GetSafeHwnd())
-	{
-		CEnString sUnNamed(IDS_UNNAMEDFILTER);
-
-		if (m_findDlg.GetActiveSearch().IsEmpty() && !Misc::Contains(sUnNamed, aFilters, FALSE, TRUE))
-			aFilters.Add(sUnNamed);
-	}
-*/
-
 	m_filterBar.AddAdvancedFilters(aFilters);
 
 	int nFilter = aFilters.GetSize();
