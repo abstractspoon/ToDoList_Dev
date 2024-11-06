@@ -1095,6 +1095,10 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 
 BOOL CTabbedToDoCtrl::DoIdleProcessing()
 {
+	if (InTreeView())
+		return CToDoCtrl::DoIdleProcessing();
+
+	// else
 	if (m_ctrlComments.HasFocus() && m_ctrlComments.DoIdleProcessing())
 		return TRUE;
 
@@ -1102,10 +1106,6 @@ BOOL CTabbedToDoCtrl::DoIdleProcessing()
 	
 	switch (nView)
 	{
-	case FTCV_UNSET:
-	case FTCV_TASKTREE:
-		return CToDoCtrl::DoIdleProcessing();
-
 	case FTCV_TASKLIST:
 		return m_taskList.DoIdleProcessing();
 		
