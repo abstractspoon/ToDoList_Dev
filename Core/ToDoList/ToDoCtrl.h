@@ -49,8 +49,33 @@ struct TDCTASKCOMPLETION;
 
 class CToDoCtrl : public CRuntimeDlg
 {
+private:
+	struct IDLETASKS
+	{
+		IDLETASKS(CToDoCtrl& tdc);
+
+		void RefreshAttributeValues(const CTDCAttributeMap& aAttribIDs = TDCA_ALL);
+		void UpdateSelectedTaskPath() { m_bUpdateSelectedTaskPath = TRUE; }
+		BOOL Process();
+
+	protected:
+		CToDoCtrl& m_tdc;
+
+		CTDCAttributeMap m_mapRefreshAttribIDs;
+		BOOL m_bUpdateSelectedTaskPath;
+
+	protected:
+		BOOL HasTasks() const;
+	};
+
+	friend struct IDLETASKS;
+
+	// ----------------------------------------------------
+
 	friend class CTDCSourceControl;
 	friend class CTDCFindReplace;
+
+	// ----------------------------------------------------
 
 // Construction
 public:
@@ -530,7 +555,10 @@ protected:
 	BOOL m_bInSelectedTaskEdit;
 	BOOL m_bPendingUpdateControls;
 
-// Overrides
+private:
+	IDLETASKS m_idleTasks;
+
+	// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CToDoCtrl)
 public:

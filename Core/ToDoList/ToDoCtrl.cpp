@@ -170,6 +170,48 @@ HICON CToDoCtrl::s_hIconAddLogDlg = NULL;
 
 //////////////////////////////////////////////////////////////////////////////
 
+CToDoCtrl::IDLETASKS::IDLETASKS(CToDoCtrl& tdc) : m_tdc(tdc)
+{
+}
+
+void CToDoCtrl::IDLETASKS::RefreshAttributeValues(const CTDCAttributeMap& mapAttribIDs)
+{
+	if (mapAttribIDs.Has(TDCA_ALL))
+	{
+		m_mapRefreshAttribIDs.Set(TDCA_ALL);
+	}
+	else if (!m_mapRefreshAttribIDs.Has(TDCA_ALL))
+	{
+		m_mapRefreshAttribIDs.Append(mapAttribIDs);
+	}
+}
+
+BOOL CToDoCtrl::IDLETASKS::Process()
+{
+	if (!m_mapRefreshAttribIDs.IsEmpty())
+	{
+		m_tdc.m_ctrlAttributes.RefreshSelectedTasksValues(m_mapRefreshAttribIDs);
+
+		m_mapRefreshAttribIDs.RemoveAll();
+	}
+	else if (m_bUpdateSelectedTaskPath)
+	{
+		m_tdc.UpdateSelectedTaskPath();
+
+		m_bUpdateSelectedTaskPath = FALSE;
+	}
+
+	return HasTasks();
+}
+
+BOOL CToDoCtrl::IDLETASKS::HasTasks() const
+{
+	return (m_bUpdateSelectedTaskPath ||
+			!m_mapRefreshAttribIDs.IsEmpty());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent, 
 					 const CShortcutManager& mgrShortcuts, 
 					 const CONTENTFORMAT& cfDefault, 
@@ -206,6 +248,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
+	m_idleTasks(*this),
 
 	m_data(m_styles, m_aCustomAttribDefs),
 	m_timeTracking(m_data, m_taskTree.TSH()),
@@ -518,9 +561,7 @@ BOOL CToDoCtrl::DoIdleProcessing()
 	if (m_taskTree.DoIdleProcessing())
 		return TRUE;
 
-	// else do out own processing
-	// TODO
-	return FALSE;
+	return m_idleTasks.Process();
 }
 
 BOOL CToDoCtrl::OnInitDialog() 
@@ -788,7 +829,7 @@ void CToDoCtrl::Resize(int cx, int cy)
 		m_layout.Resize(cx, cy);
 
 		ShowHideControls();
-		UpdateSelectedTaskPath();
+		m_idleTasks.UpdateSelectedTaskPath();
 	}
 }
 
@@ -918,11 +959,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments)
 
 	m_ctrlAttributes.SetSelectedTaskIDs(aSelTaskIDs);
 
-	// update data controls excluding comments
-	UpdateData(FALSE);
-
 	// and task header
-	UpdateSelectedTaskPath();
+	m_idleTasks.UpdateSelectedTaskPath();
 	
 	// Do the control enabling before updating the comments
 	// to prevent unwanted intermediate comments states
@@ -1008,7 +1046,6 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 	
 	// else
 	CSaveFocus sf;
-	UpdateData();
 	
 	switch (nAttribID)
 	{
@@ -1021,7 +1058,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			COleDateTime date = m_ctrlAttributes.GetDoneDate();
 			
 			if (SetSelectedTaskDate(TDCD_DONE, date, TRUE))
-				m_ctrlAttributes.RefreshSelectedTasksValues();
+				m_idleTasks.RefreshAttributeValues();
 		}
 		break;
 		
@@ -3038,7 +3075,7 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends,
 		// Start and due dates might also have changed
 		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		{
-			m_ctrlAttributes.RefreshSelectedTasksValues();
+			m_idleTasks.RefreshAttributeValues();
 		}
 	}
 
@@ -5327,7 +5364,7 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	if (mapAttribIDs.Has(TDCA_PROJECTNAME))
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
 	else
-		m_ctrlAttributes.RefreshSelectedTasksValues(mapAttribIDs);
+		m_idleTasks.RefreshAttributeValues(mapAttribIDs);
 }
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -7441,7 +7478,7 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 		if (!m_taskTree.SelectItem(hti))
 			UpdateControls(); // disable controls
 
-		UpdateSelectedTaskPath();
+		m_idleTasks.UpdateSelectedTaskPath();
 		NotifyParentSelectionChange();
 	}
 }
@@ -7867,7 +7904,7 @@ BOOL CToDoCtrl::RestoreTreeSelection(const TDCSELECTIONCACHE& cache)
 		if (bSelChange)
 			UpdateControls();
 
-		m_ctrlAttributes.RefreshSelectedTasksValues();
+		m_idleTasks.RefreshAttributeValues();
 		return TRUE;
 	}
 
@@ -9946,11 +9983,6 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 			}
 			
 			// update current selection
-			m_taskTree.CacheSelection(cache);
-
-			m_ctrlAttributes.SetSelectedTaskIDs(cache.aSelTaskIDs);
-			m_ctrlAttributes.RefreshSelectedTasksValues();
-
 			UpdateControls();
 
 			// If the operation just un/redone was an edit then we treat it as such
