@@ -2203,7 +2203,6 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks)
 	if (m_aRecreateTaskIDs.GetSize())
 	{
 		// Don't recalc column widths until after the new tasks are created
-// 		m_taskTree.EnableRecalcColumns(FALSE);
 		PostMessage(WM_TDC_RECREATERECURRINGTASK, 0, m_aRecreateTaskIDs.GetSize());
 	}
 
@@ -2367,7 +2366,6 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 
 	// always
 	m_aRecreateTaskIDs.RemoveAll();
-//	m_taskTree.EnableRecalcColumns();
 
 	return 0L;
 }
