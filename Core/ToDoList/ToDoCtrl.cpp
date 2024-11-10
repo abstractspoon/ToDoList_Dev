@@ -1036,10 +1036,7 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 	
 	// else
 	CSaveFocus sf;
-<<<<<<< HEAD
-=======
 	BOOL bChange = FALSE;
->>>>>>> master
 	
 	switch (nAttribID)
 	{
@@ -1048,16 +1045,7 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 		break;
 
 	case TDCA_DONEDATE:
-<<<<<<< HEAD
-		{
-			COleDateTime date = m_ctrlAttributes.GetDoneDate();
-			
-			if (SetSelectedTaskDate(TDCD_DONE, date, TRUE))
-				m_idleTasks.RefreshAttributeValues();
-		}
-=======
  		bChange = SetSelectedTaskDate(TDCD_DONE, m_ctrlAttributes.GetDoneDate()); // NOT TDCD_DONEDATE
->>>>>>> master
 		break;
 		
 	case TDCA_DONETIME:
@@ -2882,18 +2870,6 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends,
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
-<<<<<<< HEAD
-	if (aModTaskIDs.GetSize())
-	{
-		// Start and due dates might also have changed
-		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-		{
-			m_idleTasks.RefreshAttributeValues();
-		}
-	}
-
-=======
->>>>>>> master
 	SetModified(TDCA_DEPENDENCY, aModTaskIDs);
 	return TRUE;
 }
