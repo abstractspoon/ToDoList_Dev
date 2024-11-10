@@ -245,7 +245,7 @@ protected:
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
 	CWnd* GetEditControl(int nRow, BOOL bBtnClick);
 	void RefreshSelectedTasksValue(int nRow);
-	void NotifyParentEdit(int nRow);
+	void NotifyParentEdit(int nRow, LPARAM nFlags = 0L);
 	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
  	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
 	void HandleTimePeriodEdit(int nRow, BOOL bBtnClick);
@@ -255,7 +255,7 @@ protected:
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
-	BOOL SetValueText(int nRow, const CString& sNewText);
+	BOOL SetValueText(int nRow, const CString& sNewText, LPARAM nFlags = 0L);
 
 	int HitTestButtonID(int nRow) const;
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;

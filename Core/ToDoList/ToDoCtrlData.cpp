@@ -2758,10 +2758,11 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& 
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	TDCTIMEPERIOD newEst(timeEst);
-	
+	// Preserve existing time units when offsetting
+	TDCTIMEPERIOD newEst(bOffset ? pTDI->timeEstimate : timeEst);
+
 	if (bOffset)
-		newEst.AddTime(pTDI->timeEstimate);
+		newEst.AddTime(timeEst);
 
 	TDC_SET nRes = EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEESTIMATE, pTDI->timeEstimate, newEst);
 
@@ -2793,6 +2794,7 @@ TDC_SET CToDoCtrlData::SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& tim
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
+	// Preserve existing time units when offsetting
 	TDCTIMEPERIOD newSpent(bOffset ? pTDI->timeSpent : timeSpent);
 
 	if (bOffset)
