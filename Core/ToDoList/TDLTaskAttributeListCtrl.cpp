@@ -104,6 +104,7 @@ const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
 const int MIN_COL_WIDTH		= (4 * EE_BTNWIDTH_DEFAULT);
 
 const int VALUE_VARIES = 1;
+const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
 
 const TCHAR NEWLINE = '\n';
 
@@ -3204,12 +3205,12 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 	SetValueText(nRow, sNewValue);
 }
 
-void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow)
+void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM nFlags)
 {
 	UpdateWindow();
 
 	// Refresh the cell text only if the edit failed
-	if (!GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE)))
+	if (!GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE), nFlags))
 		RefreshSelectedTasksValue(nRow);
 }
 
@@ -3234,28 +3235,33 @@ void CTDLTaskAttributeListCtrl::OnSingleFileLinkChange()
 	SetValueText(nRow, sFile);
 }
 
-BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText)
+BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, LPARAM nFlags)
 {
 	if (sNewText == GetItemText(nRow, VALUE_COL))
 		return FALSE;
 
 	VERIFY(SetItemText(nRow, VALUE_COL, sNewText));
-	NotifyParentEdit(nRow);
+	NotifyParentEdit(nRow, nFlags);
 
 	return TRUE;
 }
 
 void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
 {
-	// Received after a manual edit of the task IDs
-	int nRow = GetCurSel();
-	TDCTIMEPERIOD tp(m_eTimePeriod.GetTime(), m_eTimePeriod.GetUnits());
-
 	HideControl(m_eTimePeriod);
 	m_eTimePeriod.DeleteButton(ID_BTN_ADDLOGGEDTIME);
 	m_eTimePeriod.DeleteButton(ID_BTN_TIMETRACK);
 
-	SetValueText(nRow, tp.Format(6)); // Preserve full(ish) precision
+	int nRow = GetCurSel();
+
+	TDCTIMEPERIOD tpCur(GetItemText(nRow, VALUE_COL));
+	TDCTIMEPERIOD tpNew(m_eTimePeriod.GetTime(), m_eTimePeriod.GetUnits());
+
+	BOOL bUnitsChange = ((tpCur.dAmount > 0.0) && 
+						(tpNew.nUnits != tpCur.nUnits) &&
+						(Misc::Format(tpNew.dAmount, TIMEPERIOD_DECPLACES) == Misc::Format(tpCur.dAmount, TIMEPERIOD_DECPLACES)));
+
+	SetValueText(nRow, tpNew.Format(TIMEPERIOD_DECPLACES), bUnitsChange);
 }
 
 void CTDLTaskAttributeListCtrl::OnCancelEdit()

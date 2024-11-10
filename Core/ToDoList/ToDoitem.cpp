@@ -37,6 +37,11 @@ TDCTIMEPERIOD::TDCTIMEPERIOD(double dTime, TH_UNITS nTimeUnits) : dAmount(dTime)
 	SetTHUnits(nTimeUnits, FALSE);
 }
 
+TDCTIMEPERIOD::TDCTIMEPERIOD(LPCTSTR szPeriod) : dAmount(0), nUnits(TDCU_HOURS)
+{
+	VERIFY(Parse(szPeriod));
+}
+
 BOOL TDCTIMEPERIOD::operator==(const TDCTIMEPERIOD& other) const
 {
 	return ((dAmount == other.dAmount) && (nUnits == other.nUnits));
