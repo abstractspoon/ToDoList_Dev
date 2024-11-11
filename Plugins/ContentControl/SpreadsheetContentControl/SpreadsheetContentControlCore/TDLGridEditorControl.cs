@@ -974,7 +974,9 @@ namespace SpreadsheetContentControl
             ToolBar.BackColor = backColor;
 			FontBar.BackColor = backColor;
 			StatusBar.BackColor = backColor;
+
 			FormulaBar.BackColor = backColor;
+			FormulaBar.SplitterBackColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarDark);
 
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalStart, backColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalEnd, backColor);

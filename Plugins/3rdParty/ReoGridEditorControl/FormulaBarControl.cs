@@ -24,6 +24,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 using unvell.Common;
 using unvell.ReoGrid.Events;
@@ -62,14 +63,15 @@ namespace unvell.ReoGrid.Editor
 					pictureBox1.Width, panel1.ClientRectangle.Height);
 			};
 
-			this.splitterUp.BackColor = SystemColors.ControlLight;
-
 			this.splitterDown.Paint += (s, e) =>
 			{
-				var g = e.Graphics;
+				if (!VisualStyleRenderer.IsSupported)
+				{
+					var g = e.Graphics;
 
-				g.DrawLine(SystemPens.Control, 0, 0, splitterDown.Right, 0);
-				g.DrawLine(SystemPens.ControlDark, 0, splitterDown.Height - 1, splitterDown.Right, splitterDown.Height - 1);
+					g.DrawLine(SystemPens.Control, 0, 0, splitterDown.Right, 0);
+					g.DrawLine(SystemPens.ControlDark, 0, splitterDown.Height - 1, splitterDown.Right, splitterDown.Height - 1);
+				}
 			};
 
 			this.splitterDown.MouseDown += (s, e) =>
@@ -112,6 +114,11 @@ namespace unvell.ReoGrid.Editor
 			};
 
 			ToolStripEx.RemapSysColors(this.pictureBox1.Image as Bitmap);
+		}
+
+		public Color SplitterBackColor
+		{
+			set { this.splitterDown.BackColor = value; }
 		}
 
 		private TextBox FocusedTextBox
