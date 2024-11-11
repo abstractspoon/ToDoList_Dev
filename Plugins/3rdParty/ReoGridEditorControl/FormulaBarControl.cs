@@ -205,20 +205,23 @@ namespace unvell.ReoGrid.Editor
 
 		void txtFormula_KeyDown(object sender, KeyEventArgs e)
 		{
-		if (e.KeyCode == Keys.Enter)
+			if (e.KeyCode == Keys.Enter)
 			{
-				if (ApplyNewFormula())
+				if (e.Control)
 				{
-					this.worksheet.MoveSelectionForward();
+					txtFormula.SelectedText = "\r\n";
 				}
-				
+				else
+				{
+					if (ApplyNewFormula())
+						this.worksheet.MoveSelectionForward();
+
+					if (FocusToGridAfterInputValue)
+						grid.Focus();
+				}
+
 				e.Handled = true;
 				e.SuppressKeyPress = true;
-
-				if (FocusToGridAfterInputValue)
-				{
-					grid.Focus();
-				}
 			}
 		}
 

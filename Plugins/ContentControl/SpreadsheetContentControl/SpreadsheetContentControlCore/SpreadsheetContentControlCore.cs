@@ -110,19 +110,18 @@ namespace SpreadsheetContentControl
 
         public void SavePreferences(Preferences prefs, String key)
         {
-            // TODO
-
+            m_EditorControl.SavePreferences(prefs, key);
         }
 
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
-            // TODO
+			if (!appOnly)
+				m_EditorControl.LoadPreferences(prefs, key);
+		}
 
-        }
+		// --------------------------------------------------------------------
 
-        // --------------------------------------------------------------------
-
-        protected override void OnResize(System.EventArgs e)
+		protected override void OnResize(System.EventArgs e)
         {
             base.OnResize(e);
 

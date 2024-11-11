@@ -477,6 +477,19 @@ namespace SpreadsheetContentControl
 			return numChanges;
 		}
 
+		public void SavePreferences(Preferences prefs, String key)
+		{
+			prefs.WriteProfileInt(key, "FormulaHeight", this.FormulaBar.Height);
+		}
+
+		public void LoadPreferences(Preferences prefs, String key)
+		{
+			int nHeight = prefs.GetProfileInt(key, "FormulaHeight", -1);
+
+			if (nHeight > 0)
+				this.FormulaBar.Height = nHeight;
+		}
+
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
 		{
 			const int WM_KEYDOWN = 0x0100;

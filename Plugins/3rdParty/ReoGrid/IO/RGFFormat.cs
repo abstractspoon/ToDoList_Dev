@@ -758,10 +758,10 @@ namespace unvell.ReoGrid
 				}
 				else
 				{
-					cellValue = xmlCell.data;
+					cellValue = xmlCell.data.Replace("\n", "\r\n");
 				}
 #else
-				cellValue = xmlCell.data;
+				cellValue = xmlCell.data.Replace("\n", "\r\n");
 #endif // FORMULA
 
 				// data or formula

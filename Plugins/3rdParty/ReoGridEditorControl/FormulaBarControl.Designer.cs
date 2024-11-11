@@ -48,13 +48,13 @@ namespace unvell.ReoGrid.Editor
 		{
 			this.leftPanel = new System.Windows.Forms.Panel();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.addressField = new unvell.ReoGrid.Editor.AddressFieldControl();
 			this.panel2 = new System.Windows.Forms.Panel();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.splitterDown = new System.Windows.Forms.Splitter();
 			this.splitterUp = new System.Windows.Forms.Splitter();
 			this.panel3 = new System.Windows.Forms.Panel();
 			this.txtFormula = new System.Windows.Forms.TextBox();
-			this.addressField = new unvell.ReoGrid.Editor.AddressFieldControl();
 			this.leftPanel.SuspendLayout();
 			this.panel1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -74,9 +74,9 @@ namespace unvell.ReoGrid.Editor
 			// panel1
 			// 
 			this.panel1.BackColor = System.Drawing.SystemColors.Control;
+			this.panel1.Controls.Add(this.pictureBox1);
 			this.panel1.Controls.Add(this.addressField);
 			this.panel1.Controls.Add(this.panel2);
-			this.panel1.Controls.Add(this.pictureBox1);
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.panel1.Location = new System.Drawing.Point(0, 0);
 			this.panel1.Name = "panel1";
@@ -84,22 +84,34 @@ namespace unvell.ReoGrid.Editor
 			this.panel1.Size = new System.Drawing.Size(251, 20);
 			this.panel1.TabIndex = 5;
 			// 
+			// addressField
+			// 
+			this.addressField.BackColor = System.Drawing.SystemColors.Window;
+			this.addressField.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.addressField.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.addressField.GridControl = null;
+			this.addressField.Location = new System.Drawing.Point(0, 0);
+			this.addressField.Name = "addressField";
+			this.addressField.Padding = new System.Windows.Forms.Padding(0, 2, 0, 0);
+			this.addressField.Size = new System.Drawing.Size(209, 20);
+			this.addressField.TabIndex = 7;
+			// 
 			// panel2
 			// 
 			this.panel2.Dock = System.Windows.Forms.DockStyle.Right;
-			this.panel2.Location = new System.Drawing.Point(180, 0);
+			this.panel2.Location = new System.Drawing.Point(209, 0);
 			this.panel2.Name = "panel2";
 			this.panel2.Size = new System.Drawing.Size(41, 20);
 			this.panel2.TabIndex = 10;
 			// 
 			// pictureBox1
 			// 
-			this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Right;
+			this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
 			this.pictureBox1.Image = global::unvell.ReoGrid.Editor.Properties.Resources.FunctionHS;
 			this.pictureBox1.Location = new System.Drawing.Point(221, 0);
 			this.pictureBox1.Name = "pictureBox1";
 			this.pictureBox1.Size = new System.Drawing.Size(29, 20);
-			this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+			this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
 			this.pictureBox1.TabIndex = 0;
 			this.pictureBox1.TabStop = false;
 			// 
@@ -136,23 +148,11 @@ namespace unvell.ReoGrid.Editor
 			this.txtFormula.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.txtFormula.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.txtFormula.Location = new System.Drawing.Point(3, 1);
-			this.txtFormula.MinimumSize = new System.Drawing.Size(0, 20);
+			this.txtFormula.MinimumSize = new System.Drawing.Size(4, 20);
 			this.txtFormula.Multiline = true;
 			this.txtFormula.Name = "txtFormula";
 			this.txtFormula.Size = new System.Drawing.Size(526, 190);
 			this.txtFormula.TabIndex = 9;
-			// 
-			// addressField
-			// 
-			this.addressField.BackColor = System.Drawing.SystemColors.Window;
-			this.addressField.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.addressField.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.addressField.GridControl = null;
-			this.addressField.Location = new System.Drawing.Point(0, 0);
-			this.addressField.Name = "addressField";
-			this.addressField.Padding = new System.Windows.Forms.Padding(0, 2, 0, 0);
-			this.addressField.Size = new System.Drawing.Size(180, 20);
-			this.addressField.TabIndex = 7;
 			// 
 			// FormulaBarControl
 			// 
