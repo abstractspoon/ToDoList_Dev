@@ -8010,7 +8010,7 @@ void CToDoCtrl::SetFocusToTasks()
 void CToDoCtrl::SetFocusToComments()
 {
 	// ignore if comments are not visible
-	if (m_layout.HasMaximiseState(TDCMS_MAXTASKLIST))
+	if (!m_layout.IsCommentsVisible())
 		return;
 
 	m_ctrlComments.SetFocus();
@@ -8018,7 +8018,7 @@ void CToDoCtrl::SetFocusToComments()
 
 void CToDoCtrl::SetFocusToProjectName()
 {
-	// ignore if comments is maximised
+	// ignore if tasklist is maximised
 	if (m_layout.HasMaximiseState(TDCMS_MAXTASKLIST))
 		return;
 
