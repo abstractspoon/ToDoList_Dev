@@ -58,6 +58,14 @@ namespace unvell.ReoGrid.Editor
 			txtFormula.GotFocus += txtFormula_GotFocus;
 			txtFormula.LostFocus += txtFormula_LostFocus;
 
+			txtFormula.TextChanged += (s, e) =>
+			{
+				if (txtFormula.Text.Contains('\n'))
+					txtFormula.ScrollBars = ScrollBars.Vertical;
+				else
+					txtFormula.ScrollBars = ScrollBars.None;
+			};
+
 			panel1.Paint += (s, e) =>
 			{
 				if (!VisualStyleRenderer.IsSupported)
