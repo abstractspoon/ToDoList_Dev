@@ -934,7 +934,9 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments)
 			ASSERT(!m_ctrlComments.IsUpdatingFormat());
 
 			m_bPendingUpdateControls = FALSE;
-			UpdateControls();
+			UpdateControls(); // RECURSIVE CALL
+
+			return;
 		}
 		
 		UpdateComments(sTextComments, customComments);
