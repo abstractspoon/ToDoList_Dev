@@ -262,7 +262,6 @@ protected:
 	afx_msg void OnEditSetTasklistTabColor();
 	afx_msg void OnEditSettaskicon();
 	afx_msg void OnEditTaskcolor();
-	afx_msg void OnEditTasktext();
 	afx_msg void OnEditTimeTrackTask();
 	afx_msg void OnEditToggleTaskDone();
 	afx_msg void OnEditUndo();
