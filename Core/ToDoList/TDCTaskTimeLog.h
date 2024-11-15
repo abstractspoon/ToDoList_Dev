@@ -39,6 +39,7 @@ struct TASKTIMELOGITEM
 	CString sPerson;
 	CString sPath;
 	BOOL bTracked;
+	COLORREF crAltColor;
 };
 typedef CArray<TASKTIMELOGITEM, TASKTIMELOGITEM&> CTaskTimeLogItemArray;
 

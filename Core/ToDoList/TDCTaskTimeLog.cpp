@@ -54,7 +54,7 @@ struct LOG_VERSION_INFO
 const LOG_VERSION_INFO LOG_VERSIONS[] = 
 {
 	{ VER_0, 2, 6 },
-	{ VER_LATEST, 7, 11 },
+	{ VER_LATEST, 7, 12 },
 };
 const int NUM_LOG_VERSIONS = sizeof(LOG_VERSIONS) / sizeof(LOG_VERSION_INFO);
 
@@ -93,6 +93,7 @@ void TASKTIMELOGITEM::Reset()
 	dwTaskID = 0;
 	dHours = 0.0;
 	bTracked = TRUE;
+	crAltColor = CLR_NONE;
 
 	CDateHelper::ClearDate(dtFrom);
 	CDateHelper::ClearDate(dtTo);
@@ -112,28 +113,29 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 	switch (nRowVer)
 	{
 	case VER_0:
-		sItem.Format(sRowFormat, 
-					Misc::Format(dwTaskID),
-					sTaskTitle,
-					Misc::Format(dHours, 3), 
-					Misc::GetUserName(),
-					CDateHelper::FormatDate(dtTo, DHFD_TIME), 
-					CDateHelper::FormatDate(dtFrom, DHFD_TIME));
+		sItem.Format(sRowFormat,
+					 Misc::Format(dwTaskID),
+					 sTaskTitle,
+					 Misc::Format(dHours, 3),
+					 Misc::GetUserName(),
+					 CDateHelper::FormatDate(dtTo, DHFD_TIME),
+					 CDateHelper::FormatDate(dtFrom, DHFD_TIME));
 		break;
 		
 	case VER_LATEST:
-		sItem.Format(sRowFormat, 
-					Misc::Format(dwTaskID), 
-					sTaskTitle,
-					Misc::GetUserName(),
-					CDateHelper::FormatDate(dtFrom, DHFD_ISO),
-					CTimeHelper::FormatClockTime(dtFrom, FALSE, TRUE), 
-					CDateHelper::FormatDate(dtTo, DHFD_ISO), 
-					CTimeHelper::FormatClockTime(dtTo, FALSE, TRUE),
-					Misc::Format(dHours, 3),
-					sComment,
-					CEnString(bTracked ? IDS_LOG_TYPETRACKED : IDS_LOG_TYPEADJUSTED),
-					sPath);		
+		sItem.Format(sRowFormat,
+					 Misc::Format(dwTaskID),
+					 sTaskTitle,
+					 Misc::GetUserName(),
+					 CDateHelper::FormatDate(dtFrom, DHFD_ISO),
+					 CTimeHelper::FormatClockTime(dtFrom, FALSE, TRUE),
+					 CDateHelper::FormatDate(dtTo, DHFD_ISO),
+					 CTimeHelper::FormatClockTime(dtTo, FALSE, TRUE),
+					 Misc::Format(dHours, 3),
+					 sComment,
+					 CEnString(bTracked ? IDS_LOG_TYPETRACKED : IDS_LOG_TYPEADJUSTED),
+					 sPath,
+					 ((crAltColor == CLR_NONE) ? _T("") : Misc::Format((int)crAltColor)));
 		break;
 		
 	default:
@@ -146,8 +148,6 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 	
 	return sItem;
 }
-
-
 
 BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 {
@@ -204,17 +204,32 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 			dHours = _ttof(aFields[7]);
 			
 			// optional fields
-			if (nNumFields > 8)
+			switch (nNumFields)
 			{
+				// ADDITIONAL FIELDS ADDED HERE
+
+			case 12:
+				if (aFields[11].IsEmpty())
+					crAltColor = CLR_NONE;
+				else
+					crAltColor = _ttoi(aFields[11]);
+				// fall through
+
+			case 11:
+				sPath = aFields[10];
+				// fall through
+
+			case 10:
+				bTracked = _ttoi(aFields[9]);
+				// fall through
+
+			case 9:
 				sComment = aFields[8];
-				
-				if (nNumFields > 9)
-				{
-					bTracked = _ttoi(aFields[9]);
-					
-					if (nNumFields > 10)
-						sPath = aFields[10];
-				}
+				break;
+
+			default:
+				ASSERT(0);
+				break;
 			}
 		}
 		else
@@ -391,17 +406,18 @@ CString CTDCTaskTimeLog::GetLatestColumnHeader() const // always the latest vers
 	CString sColumnHeader;
 
 	sColumnHeader.Format(sRowFormat,
-						CEnString(IDS_LOG_TASKID),
-						CEnString(IDS_LOG_TASKTITLE),
-						CEnString(IDS_LOG_USERID),
-						CEnString(IDS_LOG_STARTDATE),
-						CEnString(IDS_LOG_STARTTIME),
-						CEnString(IDS_LOG_ENDDATE),
-						CEnString(IDS_LOG_ENDTIME),
-						CEnString(IDS_LOG_TIMESPENT),
-						CEnString(IDS_LOG_COMMENT),
-						CEnString(IDS_LOG_TYPE),
-						CEnString(IDS_LOG_PATH));
+						 CEnString(IDS_LOG_TASKID),
+						 CEnString(IDS_LOG_TASKTITLE),
+						 CEnString(IDS_LOG_USERID),
+						 CEnString(IDS_LOG_STARTDATE),
+						 CEnString(IDS_LOG_STARTTIME),
+						 CEnString(IDS_LOG_ENDDATE),
+						 CEnString(IDS_LOG_ENDTIME),
+						 CEnString(IDS_LOG_TIMESPENT),
+						 CEnString(IDS_LOG_COMMENT),
+						 CEnString(IDS_LOG_TYPE),
+						 CEnString(IDS_LOG_PATH),
+						 CEnString(IDS_LOG_ALTCOLOR));
 	
 	return sColumnHeader;
 }
