@@ -786,13 +786,14 @@ BOOL CDateHelper::IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign)
 
 BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime)
 {
-	// check for valid date string
-	if (date.ParseDateTime(sDate, VAR_DATEVALUEONLY))
+	// Default processing
+	if (bAndTime)
 	{
-		if (bAndTime)
-			return date.ParseDateTime(sDate, 0);
-
-		// else
+		if (date.ParseDateTime(sDate))
+			return TRUE;
+	}
+	else if (date.ParseDateTime(sDate, VAR_DATEVALUEONLY))
+	{
 		return TRUE;
 	}
 
