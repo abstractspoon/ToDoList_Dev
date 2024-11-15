@@ -175,7 +175,7 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 			dHours = _ttof(aFields[2]);
 			sPerson = aFields[3];
 			
-			// NOTE: 'To' precedes 'From' because 'To' was added later
+			// NOTE: 'To' precedes 'From' because 'From' was added later
 			if (CDateHelper::DecodeDate(aFields[4], date, TRUE))
 				dtTo = date;
 			
@@ -195,10 +195,10 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 			sTaskTitle = aFields[1];
 			sPerson = aFields[2];
 			
-			if (CDateHelper::DecodeDate(aFields[3], date, TRUE))
+			if (CDateHelper::DecodeDate((aFields[3] + ' ' + aFields[4]), date, TRUE))
 				dtFrom = date;
 			
-			if (CDateHelper::DecodeDate(aFields[5], date, TRUE))
+			if (CDateHelper::DecodeDate((aFields[5] + ' ' + aFields[6]), date, TRUE))
 				dtTo = date;
 			
 			dHours = _ttof(aFields[7]);
