@@ -124,7 +124,7 @@ protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
-	int AddNewTool(BOOL bEditLabel);
+	int AddNewTool(BOOL bTDLTool);
 	void EnableControls();
 	int GetCurSel() const;
 	BOOL SetCurSel(int nTool);

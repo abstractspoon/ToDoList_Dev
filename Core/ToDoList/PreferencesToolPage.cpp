@@ -239,35 +239,23 @@ int CPreferencesToolPage::AddToolToList(const USERTOOL& tool, int nPos, BOOL bRe
 
 void CPreferencesToolPage::OnNewExternalTool() 
 {
-	if (AddNewTool(TRUE) == -1)
-	{
-		ASSERT(0);
+	if (AddNewTool(FALSE) == -1)
 		return;
-	}
 
 	CPreferencesPageBase::OnControlChange();
 }
 
 void CPreferencesToolPage::OnNewTDLTool()
 {
-	int nTool = AddNewTool(FALSE);
-
-	if (nTool == -1)
-	{
+	if (AddNewTool(TRUE) == -1)
 		ASSERT(0);
-		return;
-	}
-
-	m_lcTools.SetItemText(nTool, COL_PATH, _T("todolist.exe"));
-	m_lcTools.SetItemText(nTool, COL_ARGS, MapCmdIDToPlaceholder(ID_TOOLARG_PATHNAME));
-	m_lcTools.EditLabel(nTool);
 
 	RebuildListImages();
 
 	CPreferencesPageBase::OnControlChange();
 }
 
-int CPreferencesToolPage::AddNewTool(BOOL bEditLabel)
+int CPreferencesToolPage::AddNewTool(BOOL bTDLTool)
 {
 	if (m_lcTools.GetItemCount() >= m_nMaxNumTools)
 	{
@@ -287,10 +275,15 @@ int CPreferencesToolPage::AddNewTool(BOOL bEditLabel)
 	m_lcTools.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
 	m_lcTools.SetFocus();
 
-	if (bEditLabel)
-		m_lcTools.EditLabel(nIndex);
+	if (bTDLTool)
+	{
+		m_aTools[nIndex].sToolPath = _T("todolist.exe");
+		m_lcTools.SetItemText(nIndex, COL_PATH, _T("todolist.exe"));
+		m_lcTools.SetItemText(nIndex, COL_ARGS, MapCmdIDToPlaceholder(ID_TOOLARG_PATHNAME));
+	}
 
 	m_toolbar.RefreshButtonStates(TRUE);
+	m_lcTools.EditLabel(nIndex);
 
 	return nIndex;
 }
