@@ -3749,6 +3749,13 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		break;
 
 	case TDCS_SHOWCOMMENTSALWAYS:
+		if (m_layout.GetMaximiseState() == TDCMS_MAXTASKLIST)
+		{
+			m_layout.SetMaximised(TDCMS_MAXTASKLIST, bEnable);
+			dwResult = TDCSS_WANTRESIZE;
+		}
+		break;
+
 	case TDCS_COLORTEXTBYPRIORITY:
 	case TDCS_COLORTEXTBYATTRIBUTE:
 	case TDCS_COLORTEXTBYNONE:
