@@ -141,13 +141,13 @@
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = global::TimeLogUIExtension.Properties.Resources.dayview;
+			this.Icon = global::TimeLogUIExtension.Properties.Resources.TimeLog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "TimeLogPreferencesDlg";
 			this.Padding = new System.Windows.Forms.Padding(10);
 			this.ShowInTaskbar = false;
-			this.Text = "Week Planner Preferences";
+			this.Text = "Time Log Preferences";
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
 			this.ResumeLayout(false);

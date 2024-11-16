@@ -113,7 +113,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.m_TaskLabel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = global::TimeLogUIExtension.Properties.Resources.dayview;
+			this.Icon = global::TimeLogUIExtension.Properties.Resources.TimeLog;
 			this.Name = "TimeLogCreateTimeBlockDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;

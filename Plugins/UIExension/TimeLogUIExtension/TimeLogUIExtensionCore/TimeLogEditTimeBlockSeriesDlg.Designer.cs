@@ -106,7 +106,7 @@
 			this.Controls.Add(this.m_TaskTitle);
 			this.Controls.Add(this.m_TaskLabel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = Properties.Resources.dayview;
+			this.Icon = Properties.Resources.TimeLog;
 			this.Name = "TimeLogEditTimeBlockSeriesDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;

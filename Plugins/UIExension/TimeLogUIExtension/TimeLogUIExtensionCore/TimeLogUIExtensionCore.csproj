@@ -133,7 +133,7 @@
     <EmbeddedResource Include="toolbar_std.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\dayview.ico" />
+    <EmbeddedResource Include="Resources\TimeLog.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

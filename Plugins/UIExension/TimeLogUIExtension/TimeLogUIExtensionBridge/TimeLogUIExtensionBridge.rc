@@ -51,7 +51,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_DAYVIEW             ICON                    "..\\TimeLogUIExtensionCore\\Resources\\dayview.ico"
+IDI_DAYVIEW             ICON                    "..\\TimeLogUIExtensionCore\\Resources\\TimeLog.ico"
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 
