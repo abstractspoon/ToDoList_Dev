@@ -20,7 +20,7 @@ namespace TimeLogUIExtension
 			DrawMode = DrawMode.OwnerDrawFixed;
 		}
 
-		public void Initialise(IEnumerable<TimeLogEntry> taskItems, UIExtension.TaskIcon taskIcons, uint taskId)
+		public void Initialise(IEnumerable<TaskItem> taskItems, UIExtension.TaskIcon taskIcons, uint taskId)
 		{
 			m_TaskIcons = taskIcons;
 
@@ -40,7 +40,7 @@ namespace TimeLogUIExtension
 		{
 			get
 			{
-				var selItem = (SelectedItem as TimeLogEntry);
+				var selItem = (SelectedItem as LogEntry);
 				return ((selItem == null) ? 0 : selItem.Id);
 			}
 		}
@@ -49,7 +49,7 @@ namespace TimeLogUIExtension
 		{
 			get
 			{
-				var selItem = (SelectedItem as TimeLogEntry);
+				var selItem = (SelectedItem as LogEntry);
 				return ((selItem == null) ? null : selItem.Dates);
 			}
 		}
@@ -66,7 +66,7 @@ namespace TimeLogUIExtension
 			if (e.Index < 0)
 				return;
 
-			var taskItem = (Items[e.Index] as TimeLogEntry);
+			var taskItem = (Items[e.Index] as TaskItem);
 
 			if (taskItem != null)
 			{

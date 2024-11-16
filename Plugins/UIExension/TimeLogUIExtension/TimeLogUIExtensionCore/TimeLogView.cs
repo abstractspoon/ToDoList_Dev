@@ -26,7 +26,8 @@ namespace TimeLogUIExtension
 
 		private int m_UserMinSlotHeight = -1;
 
-		private TimeLogEntries m_LogEntries;
+		private TaskItems m_TaskItems;
+		private LogEntries m_LogEntries;
 //		private DateSortedTasks m_DateSortedTasks;
 
 		//private TDLRenderer m_Renderer;
@@ -62,7 +63,7 @@ namespace TimeLogUIExtension
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
 
-			m_LogEntries = new TimeLogEntries();
+			m_LogEntries = new LogEntries();
 //			m_DateSortedTasks = new DateSortedTasks(m_LogEntries);
 
 // 			base.AppointmentMove += new Calendar.AppointmentEventHandler(OnTimeLogAppointmentChanged);
@@ -79,7 +80,7 @@ namespace TimeLogUIExtension
 			InitializeComponent();
 		}
 
-		public IEnumerable<TimeLogEntry> TaskItems { get { return m_LogEntries.Values; } }
+// 		public IEnumerable<TaskItems> TaskItems { get { return m_TaskItems.Values; } }
 
 		// ILabelTipHandler implementation
 		public Control GetOwner()
@@ -310,10 +311,10 @@ namespace TimeLogUIExtension
 
 		public bool IsTaskDisplayable(uint dwTaskID)
 		{
-			if (dwTaskID == 0)
+// 			if (dwTaskID == 0)
 				return false;
 
-			return IsItemDisplayable(m_LogEntries.GetItem(dwTaskID));
+// 			return IsItemDisplayable(m_LogEntries.GetItem(dwTaskID));
 		}
 
 		public uint SelectedTaskId
@@ -331,18 +332,18 @@ namespace TimeLogUIExtension
 		{
 			from = to = Calendar.Appointment.NullDate;
 
-			uint selTaskID = SelectedTaskId;
-
-			if (selTaskID == 0)
-				return false;
-
-			TimeLogEntry item = m_LogEntries.GetItem(selTaskID);
-
-			if ((item == null) || !item.HasValidDates())
-				return false;
-
-			from = item.StartDate;
-			to = item.EndDate;
+// 			uint selTaskID = SelectedTaskId;
+// 
+// 			if (selTaskID == 0)
+// 				return false;
+// 
+// 			LogEntry item = m_LogEntries.GetItem(selTaskID);
+// 
+// 			if ((item == null) || !item.HasValidDates())
+// 				return false;
+// 
+// 			from = item.StartDate;
+// 			to = item.EndDate;
 
 			return true;
 		}
@@ -466,29 +467,29 @@ namespace TimeLogUIExtension
 
 			if (selTaskID > 0)
 			{
-				TimeLogEntry item = m_LogEntries.GetItem(selTaskID);
-
-				if (item != null)
-				{
-					if (scrollToTask)
-					{
-						if (item.StartDate != Calendar.Appointment.NullDate)
-						{
-							if (!IsItemWithinRange(item, StartDate, EndDate))
-								StartDate = item.StartDate;
-
-							SelectedAppointment = item;
-						}
-					}
-					else if (IsItemWithinRange(item, StartDate, EndDate))
-					{
-						SelectedAppointment = item;
-					}
-				}
-				else
-				{
+// 				LogEntry item = m_LogEntries.GetItem(selTaskID);
+// 
+// 				if (item != null)
+// 				{
+// 					if (scrollToTask)
+// 					{
+// 						if (item.StartDate != Calendar.Appointment.NullDate)
+// 						{
+// 							if (!IsItemWithinRange(item, StartDate, EndDate))
+// 								StartDate = item.StartDate;
+// 
+// 							SelectedAppointment = item;
+// 						}
+// 					}
+// 					else if (IsItemWithinRange(item, StartDate, EndDate))
+// 					{
+// 						SelectedAppointment = item;
+// 					}
+// 				}
+// 				else
+// 				{
 					SelectedAppointment = null;
-				}
+// 				}
 			}
 			else
 			{
@@ -496,11 +497,11 @@ namespace TimeLogUIExtension
 			}
 
 			// Notify parent of changes
-			if (allowNotify && (SelectedTaskId != prevSelTaskID))
-			{
-				TimeLogEntry item = m_LogEntries.GetItem(m_VisibleSelectedTaskID);
-				RaiseSelectionChanged(item);
-			}
+// 			if (allowNotify && (SelectedTaskId != prevSelTaskID))
+// 			{
+// 				LogEntry item = m_LogEntries.GetItem(m_VisibleSelectedTaskID);
+// 				RaiseSelectionChanged(item);
+// 			}
 
 			return SelectedAppointment;
 		}
@@ -591,7 +592,7 @@ namespace TimeLogUIExtension
 
 		public bool AppointmentSupportsTaskContextMenu(Calendar.Appointment appt)
 		{
-			return ((appt != null) && (appt is TimeLogEntry));
+			return ((appt != null) && (appt is LogEntry));
 		}
 
 		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
@@ -638,7 +639,7 @@ namespace TimeLogUIExtension
 
 		public Calendar.Appointment GetAppointment(uint taskID)
 		{
-			return m_LogEntries.GetItem(taskID);
+			return null;//m_LogEntries.GetItem(taskID);
 		}
 
 		public Calendar.Appointment GetRealAppointment(Calendar.Appointment appt)
@@ -716,23 +717,23 @@ namespace TimeLogUIExtension
 			return ((today >= start) && (today < end));
 		}
 
-		public bool IsItemDisplayable(Calendar.Appointment appt)
-		{
-			if (appt == null)
-				return false;
-
-			// Always show a task if it is currently being dragged
-			if (IsResizingAppointment())
-			{
-				if (appt.Id == SelectedAppointment.Id)
-					return true;
-			}
-
-			if (!appt.HasValidDates())
-				return false;
-
-			return true;
-		}
+// 		public bool IsItemDisplayable(Calendar.Appointment appt)
+// 		{
+// 			if (appt == null)
+// 				return false;
+// 
+// 			// Always show a task if it is currently being dragged
+// 			if (IsResizingAppointment())
+// 			{
+// 				if (appt.Id == SelectedAppointment.Id)
+// 					return true;
+// 			}
+// 
+// 			if (!appt.HasValidDates())
+// 				return false;
+// 
+// 			return true;
+// 		}
 
 		private bool IsItemWithinRange(Calendar.Appointment appt, DateTime startDate, DateTime endDate)
 		{
@@ -774,10 +775,10 @@ namespace TimeLogUIExtension
 		{
 			// Make sure the selected task remains visible
 			// after any changes if it was visible to start with
-			var selItem = (SelectedAppointment as TimeLogEntry);
+			var selItem = (SelectedAppointment as LogEntry);
 
 			bool selTaskWasVisible = (selItem != null) &&
-									 IsItemDisplayable(selItem) &&
+// 									 IsItemDisplayable(selItem) &&
 									 IsItemWithinRange(selItem, StartDate, EndDate);
 
 			bool tasksWasEmpty = (m_LogEntries.Count == 0);
@@ -831,24 +832,24 @@ namespace TimeLogUIExtension
 			if (!task.IsValid())
 				return false;
 
-			uint taskId = task.GetID();
-			m_MaxTaskID = Math.Max(m_MaxTaskID, taskId); // needed for extension occurrences
-
-			// Get or create a new task and update it
-			bool newTask = (m_LogEntries.ContainsKey(taskId) == false);
-
-			TimeLogEntry taskItem = m_LogEntries.GetItem(taskId, newTask);
-
-// 			taskItem.UpdateTaskAttributes(task, m_CustomDateDefs, type, newTask, metaDataKey, depth);
-
-			// Update Time Blocks
-			if (newTask || 
-				task.HasAttribute(Task.Attribute.StartDate) || 
-				task.HasAttribute(Task.Attribute.DueDate))
-			{
-				datesChanged = true;
-// 				m_TimeBlocks.SynchroniseDates(taskItem);
-			}
+// 			uint taskId = task.GetID();
+// 			m_MaxTaskID = Math.Max(m_MaxTaskID, taskId); // needed for extension occurrences
+// 
+// 			// Get or create a new task and update it
+// 			bool newTask = (m_LogEntries.ContainsKey(taskId) == false);
+// 
+// 			LogEntry taskItem = m_LogEntries.GetItem(taskId, newTask);
+// 
+// // 			taskItem.UpdateTaskAttributes(task, m_CustomDateDefs, type, newTask, metaDataKey, depth);
+// 
+// 			// Update Time Blocks
+// 			if (newTask || 
+// 				task.HasAttribute(Task.Attribute.StartDate) || 
+// 				task.HasAttribute(Task.Attribute.DueDate))
+// 			{
+// 				datesChanged = true;
+// // 				m_TimeBlocks.SynchroniseDates(taskItem);
+// 			}
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
@@ -1002,10 +1003,10 @@ namespace TimeLogUIExtension
 		{
 			if ((appt == null) && (m_SelectedTaskID != 0))
 			{
-				TimeLogEntry item;
-
-				if (m_LogEntries.TryGetValue(m_SelectedTaskID, out item))
-					appt = item;
+// 				LogEntry item;
+// 
+// 				if (m_LogEntries.TryGetValue(m_SelectedTaskID, out item))
+// 					appt = item;
 			}
 
 			return base.EnsureVisible(appt, partialOK);
@@ -1095,9 +1096,9 @@ namespace TimeLogUIExtension
 					}
 				}
 			}
-*/
 
-			appts.Sort((a, b) => TimeLogEntry.CompareDates(a, b));
+			appts.Sort((a, b) => LogEntry.CompareDates(a, b));
+*/
 
 			return appts;
 		}
@@ -1181,7 +1182,7 @@ namespace TimeLogUIExtension
 		{
 			if (base.CancelAppointmentResizing())
 			{
-				var taskItem = (SelectedAppointment as TimeLogEntry);
+				var taskItem = (SelectedAppointment as LogEntry);
 
 				if (taskItem != null)
 				{

@@ -842,7 +842,7 @@ namespace TimeLogUIExtension
 			// Handle double-click differently for each type
 			if (doubleClick)
 			{
-				if (appt is TimeLogEntry)
+				if (appt is LogEntry)
 				{
 					if (!m_TimeLog.ReadOnly && !appt.Locked)
 					{
@@ -899,15 +899,15 @@ namespace TimeLogUIExtension
 		{
 			DateTime from, to;
 
-			if (m_TimeLog.GetSelectedTaskDates(out from, out to))
-			{
-				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
-				String dateRange = DateUtil.FormatRange(from, to, true, m_TimeLog.DisplayDatesInISO);
-
-				m_SelectedTaskDatesLabel.Text = (label + dateRange);
-				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
-			}
-			else
+// 			if (m_TimeLog.GetSelectedTaskDates(out from, out to))
+// 			{
+// 				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
+// 				String dateRange = DateUtil.FormatRange(from, to, true, m_TimeLog.DisplayDatesInISO);
+// 
+// 				m_SelectedTaskDatesLabel.Text = (label + dateRange);
+// 				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
+// 			}
+// 			else
 			{
 				m_SelectedTaskDatesLabel.Text = String.Empty;
 			}
@@ -1004,7 +1004,7 @@ namespace TimeLogUIExtension
 		}
 */
 
-		private bool PrepareTaskNotify(TimeLogEntry item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
+		private bool PrepareTaskNotify(LogEntry item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
 		{
 /*
 			switch (mode)

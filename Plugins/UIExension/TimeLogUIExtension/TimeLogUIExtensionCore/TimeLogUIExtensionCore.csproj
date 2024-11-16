@@ -50,6 +50,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TaskItem.cs" />
     <Compile Include="TimeLogCreateTimeBlockDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -62,7 +63,7 @@
     <Compile Include="TimeLogEditTimeBlockSeriesDlg.Designer.cs">
       <DependentUpon>TimeLogEditTimeBlockSeriesDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="TimeLogEntry.cs" />
+    <Compile Include="LogEntry.cs" />
     <Compile Include="TimeLogMonthComboBox.cs" />
     <Compile Include="TimeLogRenderer.cs" />
     <Compile Include="TimeLogTaskComboBox.cs">

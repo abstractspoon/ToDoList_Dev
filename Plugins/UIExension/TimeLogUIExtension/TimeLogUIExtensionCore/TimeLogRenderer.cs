@@ -536,14 +536,14 @@ namespace TimeLogUIExtension
 			}
 		}
 
-		public bool TaskHasIcon(TimeLogEntry taskItem)
+		public bool TaskHasIcon(TaskItem taskItem)
 		{
 			return ((m_TaskIcons != null) &&
 					(taskItem != null) &&
 					(taskItem.HasIcon || (ShowParentsAsFolder && taskItem.IsParent)));
 		}
 
-		TimeLogEntry GetLogEntry(Calendar.Appointment appt)
+		LogEntry GetLogEntry(Calendar.Appointment appt)
 		{
 // 			bool isExtItem = (appt is TaskExtensionItem);
 // 
@@ -551,7 +551,7 @@ namespace TimeLogUIExtension
 // 				return (appt as TaskExtensionItem).RealTask;
 
 			// else
-			return (appt as TimeLogEntry);
+			return (appt as LogEntry);
 		}
 
 		void GetTaskColors(Calendar.AppointmentView apptView, bool isSelected, out Color textColor, out Color fillColor, out Color borderColor, out Color barColor)
@@ -864,26 +864,23 @@ namespace TimeLogUIExtension
 
 				using (SolidBrush brush = new SolidBrush(textColor))
 				{
-					TimeLogEntry taskItem = GetLogEntry(apptView.Appointment);
-					var fontStyle = FontStyle.Regular;
-
-					if (taskItem.IsDone && StrikeThruDoneTasks)
-						fontStyle |= FontStyle.Strikeout;
-
-// 					if (taskItem.IsTopLevel && !(apptView.Appointment is TaskFutureOccurrence))
-// 						fontStyle |= FontStyle.Bold;
-
-					if (fontStyle != FontStyle.Regular)
-					{
-						using (Font font = new Font(BaseFont(), fontStyle))
-						{
-							g.DrawString(taskItem.Title, font, brush, rect, format);
-						}
-					}
-					else
-					{
-						g.DrawString(taskItem.Title, BaseFont(), brush, rect, format);
-					}
+// 					TaskItem taskItem = GetTaskItem(apptView.Appointment);
+// 					var fontStyle = FontStyle.Regular;
+// 
+// 					if (taskItem.IsDone && StrikeThruDoneTasks)
+// 						fontStyle |= FontStyle.Strikeout;
+// 
+// 					if (fontStyle != FontStyle.Regular)
+// 					{
+// 						using (Font font = new Font(BaseFont(), fontStyle))
+// 						{
+// 							g.DrawString(taskItem.Title, font, brush, rect, format);
+// 						}
+// 					}
+// 					else
+// 					{
+// 						g.DrawString(taskItem.Title, BaseFont(), brush, rect, format);
+// 					}
 				}
 
 				g.TextRenderingHint = TextRenderingHint.SystemDefault;
