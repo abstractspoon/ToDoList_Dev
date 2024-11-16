@@ -945,7 +945,7 @@ namespace TimeLogUIExtension
 			}
 		}
 
-   		public void SetUITheme(UITheme theme)
+		public void SetUITheme(UITheme theme)
 		{
             Theme = theme;
 			m_ToolbarRenderer.SetUITheme(theme);
@@ -1201,7 +1201,7 @@ namespace TimeLogUIExtension
 			get { return false;/*CanEditSelectedTimeBlockSeries;*/ }
 		}
 
-		public bool DeleteSelectedTimeBlock()
+		public bool DeleteSelectedLogEntry()
 		{
 			if (CanDeleteSelectedTimeBlock)
 			{

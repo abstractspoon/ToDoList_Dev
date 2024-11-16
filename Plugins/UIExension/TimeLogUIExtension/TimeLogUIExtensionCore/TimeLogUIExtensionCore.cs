@@ -29,7 +29,6 @@ namespace TimeLogUIExtension
 
 		private bool m_SettingMonthYear = false;
 		private bool m_SettingTimeLogStartDate = false;
-		private bool m_AllowModifyTimeEstimate = false;
 
 		private TimeLogWeekLabel m_WeekLabel;
 		private TimeLogMonthComboBox m_MonthCombo;
@@ -245,8 +244,6 @@ namespace TimeLogUIExtension
             m_TimeLog.StrikeThruDoneTasks = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_TimeLog.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 			m_TimeLog.DisplayDatesInISO = prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false);
-
-			m_AllowModifyTimeEstimate = !prefs.GetProfileBool("Preferences", "SyncTimeEstAndDates", false);
 
 			m_WorkWeek.Load(prefs);
             m_TimeLog.WeekendDays = m_WorkWeek.WeekendDays();
@@ -561,46 +558,23 @@ namespace TimeLogUIExtension
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn7 = new ToolStripButton();
-			btn7.Name = "NewTimeBlock";
+			btn7.Name = "NewLogEntry";
 			btn7.ImageIndex = 6;
-			btn7.Click += new EventHandler(OnNewTimeBlock);
-			btn7.ToolTipText = "New Time Block";
+			btn7.Click += new EventHandler(OnNewLogEntry);
+			btn7.ToolTipText = "New Log Entry";
 			m_Toolbar.Items.Add(btn7);
 
 			var btn8 = new ToolStripButton();
-			btn8.Name = "DeleteTimeBlock";
+			btn8.Name = "DeleteLogEntry";
 			btn8.ImageIndex = 7;
-			btn8.Click += new EventHandler(OnDeleteTimeBlock);
-			btn8.ToolTipText = "Delete Time Block";
+			btn8.Click += new EventHandler(OnDeleteLogEntry);
+			btn8.ToolTipText = "Delete Log Entry";
 			m_Toolbar.Items.Add(btn8);
-
-			var btn9 = new ToolStripButton();
-			btn9.Name = "DuplicateTimeBlock";
-			btn9.ImageIndex = 8;
-			btn9.Click += new EventHandler(OnDuplicateTimeBlock);
-			btn9.ToolTipText = "Duplicate Time Block";
-			m_Toolbar.Items.Add(btn9);
-
-			m_Toolbar.Items.Add(new ToolStripSeparator());
-
-			var btn10 = new ToolStripButton();
-			btn10.Name = "EditTimeBlockSeries";
-			btn10.ImageIndex = 9;
-			btn10.Click += new EventHandler(OnEditTimeBlockSeries);
-			btn10.ToolTipText = "Edit Time Block Series";
-			m_Toolbar.Items.Add(btn10);
-
-			var btn11 = new ToolStripButton();
-			btn11.Name = "DeleteTimeBlockSeries";
-			btn11.ImageIndex = 10;
-			btn11.Click += new EventHandler(OnDeleteTimeBlockSeries);
-			btn11.ToolTipText = "Delete Time Block Series";
-			m_Toolbar.Items.Add(btn11);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn12 = new ToolStripButton();
-			btn12.ImageIndex = 11;
+			btn12.ImageIndex = 8;
 			btn12.Click += new EventHandler(OnPreferences);
 			btn12.ToolTipText = "Preferences";
 			m_Toolbar.Items.Add(btn12);
@@ -608,7 +582,7 @@ namespace TimeLogUIExtension
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn13 = new ToolStripButton();
-			btn13.ImageIndex = 12;
+			btn13.ImageIndex = 9;
 			btn13.Click += new EventHandler(OnHelp);
 			btn13.ToolTipText = "Online Help";
 			m_Toolbar.Items.Add(btn13);
@@ -666,60 +640,19 @@ namespace TimeLogUIExtension
             UpdatedSelectedTaskDatesPosition();
 		}
 
-		private void OnDeleteTimeBlock(object sender, EventArgs e)
+		private void OnDeleteLogEntry(object sender, EventArgs e)
 		{
-			if (m_TimeLog.DeleteSelectedTimeBlock())
+			if (m_TimeLog.DeleteSelectedLogEntry())
 				UpdateToolbarButtonStates();
 		}
 
-		private void OnDeleteTimeBlockSeries(object sender, EventArgs e)
+		private void OnNewLogEntry(object sender, EventArgs e)
 		{
-// 			if (m_TimeLog.DeleteSelectedTimeBlockSeries())
-// 				UpdateToolbarButtonStates();
-		}
-
-		private void OnEditTimeBlockSeries(object sender, EventArgs e)
-		{
-			EditSelectedTimeBlockSeries();
-		}
-
-		private bool EditSelectedTimeBlockSeries()
-		{
-/*
-			if (m_TimeLog.SelectedAppointment is TaskTimeBlock)
-			{
-				var block = (m_TimeLog.SelectedAppointment as TaskTimeBlock);
-				var series = m_TimeLog.SelectedTimeBlockSeries;
-
-				if (series != null)
-				{
-					var dlg = new TimeLogEditTimeBlockSeriesDlg(block.Title, m_WorkWeek, series.Attributes, m_DefaultTimeBlockEditMask);
-					FormsUtil.SetFont(dlg, m_ControlsFont);
-					m_Trans.Translate(dlg);
-
-					if (dlg.ShowDialog() != DialogResult.OK)
-						return false;
-
-					m_DefaultTimeBlockEditMask = dlg.EditMask;
-
-					if (!m_TimeLog.EditSelectedTimeBlockSeries(dlg.Attributes, dlg.EditMask))
-						return false;
-
-					return true;
-				}
-			}
-
-*/
-			return false;
-		}
-
-		private void OnNewTimeBlock(object sender, EventArgs e)
-		{
-			if (CreateTimeBlock())
+			if (CreateLogEntry())
 				UpdateToolbarButtonStates();
 		}
 
-		private bool CreateTimeBlock()
+		private bool CreateLogEntry()
 		{
 			return false;
 /*
@@ -784,11 +717,6 @@ namespace TimeLogUIExtension
 */
 		}
 
-		private void OnDuplicateTimeBlock(object sender, EventArgs e)
-		{
-// 			m_TimeLog.DuplicateSelectedTimeBlock();
-		}
-
 		private void UpdateToolbarButtonStates()
 		{
 			(m_Toolbar.Items["Show1TimeLog"] as ToolStripButton).Checked = (m_TimeLog.DaysShowing == 1);
@@ -797,12 +725,8 @@ namespace TimeLogUIExtension
 			(m_Toolbar.Items["Show14TimeLog"] as ToolStripButton).Checked = (m_TimeLog.DaysShowing == 14);
             (m_Toolbar.Items["Show28TimeLog"] as ToolStripButton).Checked = (m_TimeLog.DaysShowing == 28);
 
-// 			m_Toolbar.Items["NewTimeBlock"].Enabled = m_TimeLog.CanCreateNewTaskBlockSeries;
-// 			m_Toolbar.Items["DeleteTimeBlock"].Enabled = m_TimeLog.CanDeleteSelectedTimeBlock;
-// 			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = m_TimeLog.CanDuplicateSelectedTimeBlock;
-// 
-// 			m_Toolbar.Items["EditTimeBlockSeries"].Enabled = m_TimeLog.CanEditSelectedTimeBlockSeries;
-// 			m_Toolbar.Items["DeleteTimeBlockSeries"].Enabled = m_TimeLog.CanDeleteSelectedTimeBlockSeries;
+// 			m_Toolbar.Items["NewLogEntry"].Enabled = m_TimeLog.CanCreateNewLogEntry;
+// 			m_Toolbar.Items["DeleteLogEntry"].Enabled = m_TimeLog.CanDeleteSelectedLogEntry;
 		}
 
 		private void OnPreferences(object sender, EventArgs e)
@@ -926,10 +850,6 @@ namespace TimeLogUIExtension
 						notify.NotifyEditLabel();
 					}
 				}
-// 				else if (appt is TaskTimeBlock)
-// 				{
-// 					EditSelectedTimeBlockSeries();
-// 				}
 			}
 		}
 
