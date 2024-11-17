@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO;
 
 using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
@@ -781,15 +782,22 @@ namespace TimeLogUIExtension
 // 									 IsItemDisplayable(selItem) &&
 									 IsItemWithinRange(selItem, StartDate, EndDate);
 
-			bool tasksWasEmpty = (m_LogEntries.Count == 0);
+			bool tasksWasEmpty = m_LogEntries.IsEmpty;
 
-            switch (type)
+			string filePath = tasks.GetFilePath();
+
+			string logPath = Path.GetFileNameWithoutExtension(filePath) + "_Log.csv";
+			logPath = Path.Combine(Path.GetDirectoryName(filePath), logPath);
+
+			m_LogEntries.Load(logPath);
+
+			switch (type)
 			{
 				case UIExtension.UpdateType.Delete:
 				case UIExtension.UpdateType.All:
 				{
 					// Rebuild
-					m_LogEntries.Clear();
+//					m_LogEntries.Clear();
 //					m_DateSortedTasks.SetNeedsRebuild();
 					m_MaxTaskID = 0;
 

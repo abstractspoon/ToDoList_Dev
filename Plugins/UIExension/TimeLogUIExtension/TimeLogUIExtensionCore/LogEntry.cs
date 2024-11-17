@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -13,66 +14,104 @@ namespace TimeLogUIExtension
 {
 	// ---------------------------------------------------------------
 
-	public class LogEntries : List<LogEntry>
+	public class LogEntries
 	{
-		private String m_Version = string.Empty;
-		private String m_Header = string.Empty;
-		private string m_Delim = CultureInfo.CurrentCulture.TextInfo.ListSeparator;
-		private Encoding m_Encoding = Encoding.UTF8;
+		private String m_Version;
+		private String m_Header;
+		private string m_Delim;
+		private Encoding m_Encoding;
+		private List<LogEntry> m_Entries;
 
 		public LogEntries()
 		{
 			// TODO
 		}
 
-		public bool Load(string fileName)
+		public bool IsEmpty { get { return (m_Entries?.Count == 0); } }
+
+		private void Reset()
 		{
-			Clear();
+			m_Version = null;
+			m_Header = null;
+			m_Delim = null;
+			m_Encoding = Encoding.UTF8;
+			m_Entries = null;
+		}
+
+		public bool Load(string filePath)
+		{
+			Reset();
 
 			try
 			{
-				using (var reader = new FileInfo(fileName).OpenText())
+				using (var reader = new StreamReader(filePath))
 				{
-					m_Version = reader.ReadLine();
+					string version = reader.ReadLine();
 
-					if (string.IsNullOrEmpty(m_Version) || !m_Version.Contains("TODOTIMELOG VERSION"))
+					if (string.IsNullOrEmpty(version) || !version.Contains("TODOTIMELOG VERSION"))
 						return false;
 
 					// Must be version 1 or higher
-					if (m_Version[m_Version.Length - 1] == '0')
+					int versionNum = 0;
+
+					if (!int.TryParse(version.Substring(version.Length - 1), out versionNum))
 						return false;
 
-					m_Header = reader.ReadLine();
-
-					if (string.IsNullOrEmpty(m_Header))
+					if (versionNum < 1)
 						return false;
 
-					if (m_Header.Contains("\t"))
+					string header = reader.ReadLine();
+
+					if (string.IsNullOrEmpty(header))
+						return false;
+
+					if (header.Contains("\t"))
 						m_Delim = "\t";
+
+					m_Version = version;
+					m_Header = header;
+					m_Encoding = reader.CurrentEncoding;
+					m_Entries = new List<LogEntry>();
 
 					string line = reader.ReadLine();
 
 					while (line != null)
 					{
-						Add(new LogEntry(line, m_Delim));
+						m_Entries.Add(new LogEntry(line, m_Delim));
 						line = reader.ReadLine();
 					}
+				}
+
+				return true;
+			}
+			catch (Exception )
+			{
+			}
+
+			Reset();
+			return false;
+		}
+
+		public bool SaveLogFile(string filePath)
+		{
+			if (string.IsNullOrEmpty(m_Version) || string.IsNullOrEmpty(m_Header))
+				return false;
+
+			try
+			{
+				using (var writer = new StreamWriter(filePath, false, m_Encoding))
+				{
+					writer.WriteLine(m_Version);
+					writer.WriteLine(m_Header);
+
+					foreach (var entry in m_Entries)
+						writer.WriteLine(entry.Encode());
 				}
 			}
 			catch (Exception )
 			{
-				if (File.Exists(fileName))
-					return false;
-
-				// Check for Excel => use tab as delimiter
-				// todo
+				// File locked?
 			}
-
-			return true;
-		}
-
-		public bool SaveLogFile(string fileName)
-		{
 
 			return false;
 		}
@@ -104,10 +143,10 @@ namespace TimeLogUIExtension
 		private string m_Type;
 		private string m_Path;
 
-		private uint m_TaskId;
-		private double m_TimeSpentInHrs;
+		private uint m_TaskId = 0;
+		private double m_TimeSpentInHrs = 0.0;
 
-		bool m_Decoded = false;
+		bool m_NeedsEncoding = false;
 
 		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
 
@@ -122,102 +161,148 @@ namespace TimeLogUIExtension
 		public LogEntry(string logEntry, string delim) : this(delim)
 		{
 			m_Entry = logEntry;
+			Decode();
 		}
 
 		public uint TaskId
 		{
-			get { Decode(); return m_TaskId; }
+			get { return m_TaskId; }
+			set
+			{
+				if (m_TaskId == 0)
+				{
+					m_TaskId = value;
+					m_NeedsEncoding = true;
+				}
+			}
 		}
 
 		public string UserId
 		{
-			get { Decode(); return m_UserId; }
-			set { m_UserId = value; Encode(); }
+			get { return m_UserId; }
+			set
+			{
+				if (string.IsNullOrEmpty(m_UserId))
+				{
+					m_UserId = value;
+					m_NeedsEncoding = true;
+				}
+			}
 		}
 
 		public double TimeSpentInHrs
 		{
-			get { Decode(); return m_TimeSpentInHrs; }
-			set { m_TimeSpentInHrs = value; Encode(); }
+			get { return m_TimeSpentInHrs; }
+			set
+			{
+				if (m_TimeSpentInHrs != value)
+				{
+					m_TimeSpentInHrs = value;
+					m_NeedsEncoding = true;
+				}
+			}
 		}
 
 		public string Comment
 		{
-			get { Decode(); return m_Comment; }
-			set { m_Comment = value; Encode(); }
+			get { return m_Comment; }
+			set
+			{
+				if (m_Comment != value)
+				{
+					m_Comment = value;
+					m_NeedsEncoding = true;
+				}
+			}
 		}
 
 		public string EntryType
 		{
-			get { Decode(); return m_Type; }
-			set { m_Type = value; Encode(); }
-		}
-
-		public override DateTime StartDate
-		{
-			get	{ Decode();	return base.StartDate; }
-			set { base.StartDate = value; }
-		}
-
-		public override DateTime EndDate
-		{
-			get { Decode(); return base.EndDate; }
-			set { base.EndDate = value; }
+			get { return m_Type; }
+			set
+			{
+				if (m_Type != value)
+				{
+					m_Type = value;
+					m_NeedsEncoding = true;
+				}
+			}
 		}
 
 		private void Decode()
 		{
-			if (!m_Decoded)
+			var parts = m_Entry.Split(new string[] { m_Delim }, StringSplitOptions.None);
+
+			if (parts.Length >= 11)
 			{
+				DateTime start, end;
+				int rgbColor = -1;
 
+				uint.TryParse(parts[0], out m_TaskId);
+				Title = parts[1];
+				m_UserId = parts[2];
+				DateTime.TryParse(parts[3] + ' ' + parts[4], out start);
+				DateTime.TryParse(parts[5] + ' ' + parts[6], out end);
+				double.TryParse(parts[7], out m_TimeSpentInHrs);
+				m_Comment = parts[8];
+				m_Type = parts[9];
+				m_Path = parts[10];
 
-				m_Decoded = true;
+				if (parts.Length > 11)
+					int.TryParse(parts[11], out rgbColor);
+
+				StartDate = start;
+				EndDate = end;
+				FillColor = ((rgbColor == -1) ? Color.Empty : Color.FromArgb(rgbColor));
 			}
+
+			m_NeedsEncoding = false;
 		}
 
 		public string Encode()
 		{
-			if (!m_Decoded)
-				return m_Entry;
-			
-			// else
-			var elements = new string[]
-				{
+			if (m_NeedsEncoding)
+			{
+				var elements = new string[]
+					{
 					m_TaskId.ToString(),
 					m_UserId,
-					base.StartDate.Date.ToString(), // must be IDO
-					base.StartDate.ToString(),
-					base.EndDate.Date.ToString(),
-					base.EndDate.ToString(),
+					base.StartDate.ToString("yyyy-MM-dd"), // ISO
+					base.StartDate.ToString("HH:mm"),      // ISO
+					base.EndDate.ToString("yyyy-MM-dd"),   // ISO
+					base.EndDate.ToString("HH:mm"),        // ISO
 					m_TimeSpentInHrs.ToString(),
 					m_Comment,
 					m_Type,
 					m_Path,
-					base.FillColor.ToString()
-				};
+					base.FillColor.ToArgb().ToString()
+					};
 
-			m_Entry = string.Join(m_Delim, elements);
+				m_Entry = string.Join(m_Delim, elements);
+				m_NeedsEncoding = false;
+			}
+
 			return m_Entry;
 		}
 
 		protected override void OnEndDateChanged()
 		{
-			Encode();
+			m_NeedsEncoding = true;
 		}
 
 		protected override void OnStartDateChanged()
 		{
-			Encode();
+			m_NeedsEncoding = true;
 		}
 
 		protected override void OnColorChanged()
 		{
-			Encode();
+			m_NeedsEncoding = true;
 		}
 
 		protected override void OnTitleChanged()
 		{
-			Encode();
+			m_NeedsEncoding = true;
 		}
 
 		public void UpdateOriginalDates()
