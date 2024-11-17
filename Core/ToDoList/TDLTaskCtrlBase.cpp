@@ -125,21 +125,6 @@ BOOL CTDLTaskCtrlBase::TDSORTFLAGS::WantIncludeTime(TDC_COLUMN nColID) const
 	return FALSE;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-
-CHoldRecalcColumns::CHoldRecalcColumns(CTDLTaskCtrlBase& tcb) 
-	: 
-	m_tcb(tcb),
-	m_bInitialState(tcb.m_bEnableRecalcColumns)
-{
-	m_tcb.EnableRecalcColumns(FALSE);
-}
-
-CHoldRecalcColumns::~CHoldRecalcColumns()
-{
-	m_tcb.EnableRecalcColumns(m_bInitialState);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) 
@@ -148,6 +133,58 @@ CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb)
 	pCols(NULL),
 	nNumCols(0)
 {
+}
+
+//////////////////////////////////////////////////////////////////////
+
+CTDLTaskCtrlBase::IDLETASKS::IDLETASKS(CTDLTaskCtrlBase& tcb)
+	:
+	m_tcb(tcb)
+{
+}
+
+void CTDLTaskCtrlBase::IDLETASKS::RecalcColumnWidths(const CTDCColumnIDMap& aColIDs)
+{
+	m_mapRecalcWidthColIDs.Append(aColIDs);
+}
+
+void CTDLTaskCtrlBase::IDLETASKS::Resort(const TDSORT& sort)
+{
+	m_tdsResort = sort;
+}
+
+BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
+{
+	if (!m_mapRecalcWidthColIDs.IsEmpty())
+	{
+		CScopedLogTimer log(_T("IDLETASKS::Process(RecalcColumnWidths)"));
+
+		m_tcb.RecalcUntrackedColumnWidths(m_mapRecalcWidthColIDs);
+
+		// Cleanup
+		m_mapRecalcWidthColIDs.RemoveAll();
+	}
+	else if (m_tdsResort.IsSorting())
+	{
+		CScopedLogTimer log(_T("IDLETASKS::Process(Resort)"));
+
+		if (m_tdsResort.bMulti)
+			m_tcb.MultiSort(m_tdsResort.multi);
+		else
+			m_tcb.Sort(m_tdsResort.single.nColumnID, FALSE); // No toggle
+
+		// Cleanup
+		m_tdsResort.SetSortBy(TDCC_NONE, FALSE);
+		ASSERT(!m_tdsResort.IsSorting());
+	}
+
+	return HasTasks();
+}
+
+BOOL CTDLTaskCtrlBase::IDLETASKS::HasTasks() const
+{
+	return (!m_mapRecalcWidthColIDs.IsEmpty() ||
+			m_tdsResort.IsSorting());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -186,7 +223,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_nSortDir(TDC_SORTNONE),
 	m_dwTimeTrackTaskID(0), 
 	m_dwEditTitleTaskID(0),
-	m_dwNextUniqueTaskID(100),
+	m_dwLargestTaskID(100), // for initial width calculation
 	m_nColorByAttribID(TDCA_NONE),
 	m_bBoundSelecting(FALSE),
 	m_comparer(data, mgrContent),
@@ -196,9 +233,9 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_sizer(data, m_mgrContent),
 	m_bAutoFitSplitter(TRUE),
 	m_imageIcons(FALSE),
-	m_bEnableRecalcColumns(TRUE),
 	m_mgrContent(mgrContent),
-	m_nHeaderContextMenuItem(-1)
+	m_nHeaderContextMenuItem(-1),
+	m_idleTasks(*this)
 {
 	// build one time column map
 	if (s_mapColumns.IsEmpty())
@@ -552,20 +589,16 @@ void CTDLTaskCtrlBase::SetTimeTrackTaskID(DWORD dwTaskID)
 
 void CTDLTaskCtrlBase::SetEditTitleTaskID(DWORD dwTaskID)
 {
-	if (m_dwEditTitleTaskID != dwTaskID)
-	{
-		m_dwEditTitleTaskID = dwTaskID;
-	}
+	m_dwEditTitleTaskID = dwTaskID;
 }
 
-void CTDLTaskCtrlBase::SetNextUniqueTaskID(DWORD dwTaskID)
+void CTDLTaskCtrlBase::SetLargestTaskID(DWORD dwTaskID)
 {
-	if (m_dwNextUniqueTaskID != dwTaskID)
+	if (m_dwLargestTaskID != dwTaskID)
 	{
-		m_dwNextUniqueTaskID = dwTaskID;
+		m_dwLargestTaskID = dwTaskID;
 
-		if (GetSafeHwnd())
-			RecalcUntrackedColumnWidths(CTDCColumnIDMap(TDCC_ID));
+		m_idleTasks.RecalcColumnWidths(TDCC_ID);
 	}
 }
 
@@ -883,12 +916,7 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 	if (mapChanges.Has(TDCC_ICON) || mapChanges.Has(TDCC_DONE))
 		OnImageListChange();
 
-	RecalcUntrackedColumnWidths(mapChanges);
-
-	if (m_bAutoFitSplitter)
-		AdjustSplitterToFitAttributeColumns();
-	else
-		PostResize(TRUE); // resync scrollbars
+	m_idleTasks.RecalcColumnWidths(mapChanges);
 }
 
 void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
@@ -911,7 +939,7 @@ void CTDLTaskCtrlBase::OnImageListChange()
 	if (Tasks())
 	{
 		// Always force the task icon imagelist on the columns to ensure
-		// the item height don't changes when hiding label icons on the Tasks
+		// the item height doesn't change when hiding label icons on the Tasks
 		ListView_SetImageList(m_lcColumns, m_ilTaskIcons, LVSIL_SMALL);
 
 		SetTasksImageList(m_ilTaskIcons, FALSE, !IsColumnShowing(TDCC_ICON));
@@ -961,11 +989,6 @@ void CTDLTaskCtrlBase::OnCustomAttributesChange()
 
 	UpdateAttributePaneVisibility();
 	RecalcUntrackedColumnWidths(TRUE); // Only custom columns
-
-	if (m_bAutoFitSplitter)
-		AdjustSplitterToFitAttributeColumns();
-	else
-		PostResize(TRUE); // resync horizontal scrollbars
 }
 
 BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
@@ -1187,25 +1210,15 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 	}
 
 	RecalcUntrackedColumnWidths();
+	
+	// Force the recalculation first time only
+	m_idleTasks.Process(); 
 
 	return TRUE;
 }
 
-void CTDLTaskCtrlBase::EnableRecalcColumns(BOOL bEnable)
-{
-	if (Misc::StateChanged(bEnable, m_bEnableRecalcColumns))
-	{
-		m_bEnableRecalcColumns = bEnable;
-
-		if (bEnable)
-			RecalcUntrackedColumnWidths();
-	}
-}
-
 void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 {
-	ASSERT(m_bEnableRecalcColumns);
-
 	m_hdrColumns.ClearAllTracked();
 
 	RecalcUntrackedColumnWidths();
@@ -1218,19 +1231,21 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 {
-	if (!m_bEnableRecalcColumns)
-		return;
-
-	// Get a list of all the visible column attributes
-	CTDCColumnIDMap mapCols;
+	CTDCColumnIDMap aColIDs;
 
 	if (!bCustomOnly)
-		mapCols.Copy(m_mapVisibleCols);
+		aColIDs.Copy(m_mapVisibleCols);
 	
-	m_aCustomAttribDefs.GetVisibleColumnIDs(mapCols, TRUE); // append
+	m_aCustomAttribDefs.GetVisibleColumnIDs(aColIDs, TRUE); // append
 
-	CWaitCursor cursor;
-	RecalcUntrackedColumnWidths(mapCols, TRUE, bCustomOnly);
+	m_idleTasks.RecalcColumnWidths(aColIDs);
+}
+
+BOOL CTDLTaskCtrlBase::DoIdleProcessing()
+{
+	AF_NOREENTRANT_RET(FALSE);
+
+	return m_idleTasks.Process();
 }
 
 int CTDLTaskCtrlBase::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
@@ -1283,9 +1298,6 @@ int CTDLTaskCtrlBase::RemoveUntrackedColumns(CTDCColumnIDMap& mapCols) const
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers, BOOL bCustomOnly)
 {
-	if (!m_bEnableRecalcColumns)
-		return;
-
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()"));
 	///////////////////////////////////////////////////////////////////
@@ -1381,8 +1393,11 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	// cleanup
 	dc.SelectObject(pOldFont);
 
-	// Resync horizontal scrollbars
-	PostResize();
+	if (m_bAutoFitSplitter)
+		AdjustSplitterToFitAttributeColumns();
+	 
+	// resync horizontal scrollbars
+	PostResize(TRUE);
 }
 
 void CTDLTaskCtrlBase::SaveState(CPreferences& prefs, const CString& sKey) const
@@ -1759,34 +1774,12 @@ BOOL CTDLTaskCtrlBase::IsAlternateColumnLine(int nItem) const
 	return (HasColor(m_crAltLine) && ((nItem % 2) == 0));
 }
 
-BOOL CTDLTaskCtrlBase::IsSorting() const
-{
-	return m_sort.IsSorting();
-}
-
-BOOL CTDLTaskCtrlBase::IsSortingBy(TDC_COLUMN nSortBy) const
-{
-	return (m_sort.IsSortingBy(nSortBy, TRUE));
-}
-
 void CTDLTaskCtrlBase::Resort(BOOL bAllowToggle) 
 { 
-	if (IsMultiSorting())
-	{
-		TDSORTCOLUMNS sort;
-
-		GetSortBy(sort);
-		MultiSort(sort);
-	}
+	if (IsMultiSorting() || !bAllowToggle)
+		m_idleTasks.Resort(m_sort);
 	else
-	{
-		Sort(GetSortBy(), bAllowToggle); 
-	}
-}
-
-BOOL CTDLTaskCtrlBase::IsMultiSorting() const
-{
-	return (m_sort.bMulti && m_sort.multi.IsSorting());
+		Sort(GetSortBy(), TRUE); // immediate
 }
 
 void CTDLTaskCtrlBase::Unsort()
@@ -4873,17 +4866,19 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 	{
 		Resort();
 	}
-
-	RecalcUntrackedColumnWidths(aColIDs);
 	
 	if (bRedrawTasks)
 	{
-		InvalidateAll();
+		InvalidateAll(FALSE, TRUE);
 	}
 	else if (bRedrawCols || !aColIDs.IsEmpty())
 	{
 		m_lcColumns.Invalidate();
+		m_lcColumns.UpdateWindow();
 	}
+
+	// This appends to any existing columns
+	m_idleTasks.RecalcColumnWidths(aColIDs);
 }
 
 int CTDLTaskCtrlBase::GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const
@@ -5326,12 +5321,12 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, const CDWordArray& aTa
 	case TDCC_ID:
 		{
 			DWORD dwRefID = (IsTreeList() ? m_sizer.GetLargestReferenceID(aTaskIDs) : 0);
-			nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwNextUniqueTaskID - 1, dwRefID));
+			nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwLargestTaskID - 1, dwRefID));
 		}
 		break; 
 
 	case TDCC_PARENTID:
-		nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwNextUniqueTaskID - 1));
+		nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwLargestTaskID - 1));
 		break; 
 
 	case TDCC_POSITION:

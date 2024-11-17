@@ -43,25 +43,30 @@ class CTDCStyleMap;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CHoldRecalcColumns
-{
-public:
-	CHoldRecalcColumns(CTDLTaskCtrlBase& tcb);
-	~CHoldRecalcColumns();
-
-protected:
-	CTDLTaskCtrlBase& m_tcb;
-	BOOL m_bInitialState; // To handle nested holds
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer   
 {
-	friend class CHoldRecalcColumns;
-
 	DECLARE_DYNAMIC(CTDLTaskCtrlBase);
 	
+private:
+	struct IDLETASKS
+	{
+		IDLETASKS(CTDLTaskCtrlBase& tcb);
+		
+		void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
+		void Resort(const TDSORT& sort);
+		BOOL Process();
+
+	protected:
+		CTDLTaskCtrlBase& m_tcb;
+		CTDCColumnIDMap m_mapRecalcWidthColIDs;
+		TDSORT m_tdsResort;
+
+	protected:
+		BOOL HasTasks() const;
+	};
+
+	friend struct IDLETASKS;
+
 protected: // base class only
 	CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data, 
@@ -100,7 +105,6 @@ public:
 	void RedrawColumn(TDC_COLUMN nColID) const;
 	void RecalcUntrackedColumnWidths();
 	void RecalcAllColumnWidths();
-	void EnableRecalcColumns(BOOL bEnable = TRUE);
 	void UpdateSelectedTaskPath();
 	
  	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
@@ -181,13 +185,13 @@ public:
 	// sort functions
 	void Sort(TDC_COLUMN nBy, BOOL bAllowToggle = TRUE); // calling twice with the same param will toggle ascending attrib
 	void Unsort();
-	BOOL CanSortBy(TDC_COLUMN nBy) const { return IsColumnShowing(nBy); }
 	void MultiSort(const TDSORTCOLUMNS& sort);
+	BOOL CanSortBy(TDC_COLUMN nBy) const { return IsColumnShowing(nBy); }
 	TDC_COLUMN GetSortBy() const { return m_sort.single.nColumnID; }
 	void GetSortBy(TDSORTCOLUMNS& sort) const;
-	BOOL IsSorting() const;
-	BOOL IsMultiSorting() const;
-	BOOL IsSortingBy(TDC_COLUMN nBy) const;
+	BOOL IsSorting() const { return m_sort.IsSorting(); }
+	BOOL IsMultiSorting() const { return m_sort.IsMultiSorting(); }
+	BOOL IsSortingBy(TDC_COLUMN nBy) const { return m_sort.IsSortingBy(nBy, TRUE); }
 	const TDSORT& GetSort() const { return m_sort; }
 
 	virtual void Resort(BOOL bAllowToggle = FALSE);
@@ -220,11 +224,12 @@ public:
 	void Resize(const CRect& rect);
 	void SetTimeTrackTaskID(DWORD dwTaskID);
 	void SetEditTitleTaskID(DWORD dwTaskID);
-	void SetNextUniqueTaskID(DWORD dwTaskID);
+	void SetLargestTaskID(DWORD dwTaskID);
 	void SetCompletionStatus(const CString& sStatus);
 	CString GetCompletionStatus() const { return m_sCompletionStatus; }
 
 	BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL DoIdleProcessing();
 	void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
 	void ScreenToClient(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
 
@@ -247,7 +252,7 @@ protected:
 	CString m_sCompletionStatus;
 	CString m_sTasksWndPrompt;
 	DWORD m_dwEditTitleTaskID;
-	DWORD m_dwNextUniqueTaskID;
+	DWORD m_dwLargestTaskID;
 	DWORD m_dwTimeTrackTaskID;
 	TDC_COLUMN m_nSortColID;
 	TDC_SORTDIR m_nSortDir;
@@ -282,8 +287,9 @@ protected:
 private:
 	BOOL m_bBoundSelecting;
 	BOOL m_bAutoFitSplitter;
-	BOOL m_bEnableRecalcColumns;
 
+	IDLETASKS m_idleTasks;
+	
 protected:
 	// Message map functions
 	afx_msg void OnDestroy();

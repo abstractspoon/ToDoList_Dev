@@ -385,6 +385,11 @@ BOOL TDSORT::IsSortingBy(TDC_COLUMN nBy, BOOL bCheckMulti) const
 	return FALSE;
 }
 
+BOOL TDSORT::IsMultiSorting() const
+{
+	return (bMulti && multi.IsSorting());
+}
+
 BOOL TDSORT::SetSortBy(TDC_COLUMN nBy, BOOL bAscending)
 {
 	single.SetSortBy(nBy, bAscending);

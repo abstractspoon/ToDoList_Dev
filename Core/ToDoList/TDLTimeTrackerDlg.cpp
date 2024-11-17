@@ -420,10 +420,9 @@ void CTDLTimeTrackerDlg::UpdateTasklistName(const CToDoCtrl* pTDC)
 void CTDLTimeTrackerDlg::UpdateAllTasks(const CToDoCtrl* pTDC)
 {
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
+	ASSERT(pTTL);
 
-	if (!pTTL)
-		ASSERT(0);
-	else
+	if (pTTL)
 		pTTL->bNeedFullTaskUpdate = pTTL->bNeedComboRebuild = TRUE;
 }
 
@@ -784,27 +783,33 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 		return;
 	}
 	
+	// Between clicking the start/stop button and arriving here
+	// an update may have taken place and invalidated the previously
+	// selected task ID so we need to check before proceeding
 	DWORD dwSelTaskID = GetSelectedTaskID();
 
-	if (pTTL->IsTracking(dwSelTaskID))
+	if (dwSelTaskID)
 	{
-		// notify parent to STOP tracking
-		SendNotifyMessage(WM_TDLTTN_STOPTRACKING, pTTL->pTDC, 0);
+		if (pTTL->IsTracking(dwSelTaskID))
+		{
+			// notify parent to STOP tracking
+			SendNotifyMessage(WM_TDLTTN_STOPTRACKING, pTTL->pTDC, 0);
+		}
+		else
+		{
+			// notify parent to START tracking
+			SendNotifyMessage(WM_TDLTTN_STARTTRACKING, pTTL->pTDC, dwSelTaskID);
+		}
+
+		UpdateTracking(pTTL->pTDC);
+		m_cbTasks.UpdateRecentlyTrackedTasks(pTTL);
+
+		RefreshCaptionText();
+
+		// redraw text colour
+		GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
+		GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
 	}
-	else
-	{
-		// notify parent to START tracking
-		SendNotifyMessage(WM_TDLTTN_STARTTRACKING, pTTL->pTDC, dwSelTaskID);
-	}
-
-	UpdateTracking(pTTL->pTDC);
-	m_cbTasks.UpdateRecentlyTrackedTasks(pTTL);
-
-	RefreshCaptionText();
-
-	// redraw text colour
-	GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
-	GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
 }
 
 void CTDLTimeTrackerDlg::OnGoToSelectedTasklist()

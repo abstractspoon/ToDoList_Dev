@@ -195,7 +195,6 @@ void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 #define FWD_FUNC_VOID_0ARG(name) void CTDLTaskAttributeCtrl::name() { m_lcAttributes.name(); }
 
 FWD_FUNC_VOID_0ARG(RefreshDateTimeFormatting)
-FWD_FUNC_VOID_0ARG(RefreshSelectedTasksValues)
 
 // -----------------------------------------------------------------------
 

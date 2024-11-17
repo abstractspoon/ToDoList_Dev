@@ -59,6 +59,7 @@ public:
 
    bool ProcessMessage(MSG* pMsg);
    void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
+   bool DoIdleProcessing();
 
    bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;

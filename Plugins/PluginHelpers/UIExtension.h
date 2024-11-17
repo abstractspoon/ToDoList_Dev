@@ -369,6 +369,7 @@ namespace Abstractspoon
 				bool PrepareNewTask(Task^% task);
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
+				bool DoIdleProcessing();
 				bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
 
 				UIExtension::HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension::HitTestReason reason);

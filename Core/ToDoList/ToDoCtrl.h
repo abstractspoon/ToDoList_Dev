@@ -49,8 +49,33 @@ struct TDCTASKCOMPLETION;
 
 class CToDoCtrl : public CRuntimeDlg
 {
+private:
+	struct IDLETASKS
+	{
+		IDLETASKS(CToDoCtrl& tdc);
+
+		void RefreshAttributeValues(const CTDCAttributeMap& aAttribIDs = TDCA_ALL);
+		void UpdateSelectedTaskPath() { m_bUpdateSelectedTaskPath = TRUE; }
+		BOOL Process();
+
+	protected:
+		CToDoCtrl& m_tdc;
+
+		CTDCAttributeMap m_mapRefreshAttribIDs;
+		BOOL m_bUpdateSelectedTaskPath;
+
+	protected:
+		BOOL HasTasks() const;
+	};
+
+	friend struct IDLETASKS;
+
+	// ----------------------------------------------------
+
 	friend class CTDCSourceControl;
 	friend class CTDCFindReplace;
+
+	// ----------------------------------------------------
 
 // Construction
 public:
@@ -379,6 +404,7 @@ public:
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
+	virtual BOOL DoIdleProcessing();
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	BOOL SelectTasksInHistory(BOOL bForward);
@@ -529,7 +555,10 @@ protected:
 	BOOL m_bInSelectedTaskEdit;
 	BOOL m_bPendingUpdateControls;
 
-// Overrides
+private:
+	IDLETASKS m_idleTasks;
+
+	// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CToDoCtrl)
 public:
@@ -832,6 +861,8 @@ protected:
 	void UpdateAutoListData(TDC_ATTRIBUTE nAttribID = TDCA_ALL);
 	void UpdateDefaultTaskCustomAttributeValues();
 	void SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs = CDWordArray());
+	BOOL IsNewTaskMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const;
+	BOOL IsNewTaskTitleEditMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const;
 
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);
