@@ -35,6 +35,7 @@ public:
 	HWND GetHwnd() const;
 	void Release();
 	bool ProcessMessage(MSG* pMsg);
+	bool DoIdleProcessing() { return false; }
 	void FilterToolTipMessage(MSG* pMsg);
 	ISpellCheck* GetSpellCheckInterface();
 	bool Undo();

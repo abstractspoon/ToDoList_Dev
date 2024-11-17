@@ -86,7 +86,12 @@ namespace SpreadsheetContentControl
 			return m_EditorControl.ProcessMessage(hwnd, message, wParam, lParam, time, xPos, yPos);
         }
 
-        public bool Undo()
+		public bool DoIdleProcessing()
+		{
+			return false;
+		}
+
+		public bool Undo()
         {
 			m_EditorControl.Undo();
             return true;

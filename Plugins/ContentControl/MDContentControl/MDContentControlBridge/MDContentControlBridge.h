@@ -47,8 +47,7 @@ class CMDContentControlBridge : public IContentControl
 public:
 	CMDContentControlBridge(ITransText* pTT);
 
-   BOOL Create(UINT nCtrlID, DWORD nStyle, 
-      long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
+   BOOL Create(UINT nCtrlID, DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
    int GetContent(unsigned char* pContent) const;
    bool SetContent(const unsigned char* pContent, int nLength, bool bResetSelection);
@@ -68,6 +67,7 @@ public:
    void Release();
    bool ProcessMessage(MSG* pMsg);
    void FilterToolTipMessage(MSG* pMsg) {} //.Net tooltips don't need this
+   bool DoIdleProcessing() { return false; }
 
    ISpellCheck* GetSpellCheckInterface();
 

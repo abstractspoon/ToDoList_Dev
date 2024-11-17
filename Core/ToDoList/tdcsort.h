@@ -90,6 +90,7 @@ struct TDSORT
 
 	BOOL IsSorting() const;
 	BOOL IsSortingBy(TDC_COLUMN nBy, BOOL bCheckMulti) const;
+	BOOL IsMultiSorting() const;
 
 	BOOL SetSortBy(TDC_COLUMN nBy, BOOL bAscending);
 	BOOL SetSortBy(const TDSORTCOLUMN& col);

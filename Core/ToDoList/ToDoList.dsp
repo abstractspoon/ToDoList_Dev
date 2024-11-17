@@ -335,6 +335,10 @@ SOURCE=.\res\timetrack_btns.bmp
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\timetrack_goto.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\timetrack_toolbar_std.bmp
 # End Source File
 # Begin Source File

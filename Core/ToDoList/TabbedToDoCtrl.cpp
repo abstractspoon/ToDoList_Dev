@@ -144,9 +144,6 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt,
 	// tab is on by default
 	m_styles[TDCS_SHOWTREELISTBAR] = TRUE;
 	m_styles[TDCS_SHOWTASKVIEWTABCLOSEBUTTON] = TRUE;
-
-	// Will be enabled on first showing
-	m_taskList.EnableRecalcColumns(FALSE);
 }
 
 CTabbedToDoCtrl::~CTabbedToDoCtrl()
@@ -950,9 +947,6 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				pLVData->bNeedFontUpdate = FALSE;
 				m_taskList.SetFont(m_taskTree.GetFont());
 			}
-
-			// This does nothing if already enabled
-			m_taskList.EnableRecalcColumns(TRUE);
 		}
 		break;
 
@@ -1097,6 +1091,50 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 	GetParent()->SendMessage(WM_TDCN_VIEWPOSTCHANGE, nOldView, nNewView);
 	
 	return 0L;
+}
+
+BOOL CTabbedToDoCtrl::DoIdleProcessing()
+{
+	if (InTreeView())
+		return CToDoCtrl::DoIdleProcessing();
+
+	// else
+	if (m_ctrlComments.HasFocus() && m_ctrlComments.DoIdleProcessing())
+		return TRUE;
+
+	FTC_VIEW nView = GetTaskView();
+	
+	switch (nView)
+	{
+	case FTCV_TASKLIST:
+		return m_taskList.DoIdleProcessing();
+		
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd && pExtWnd->GetHwnd());
+
+			return pExtWnd->DoIdleProcessing();
+		}
+		break;
+	}
+
+	return FALSE;
 }
 
 void CTabbedToDoCtrl::ShowListViewSpecificCtrls(BOOL bShow)
@@ -3470,7 +3508,7 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 			}	
 		}
 
-		m_taskList.SetNextUniqueTaskID(m_dwNextUniqueID);
+		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
 		m_taskList.OnBuildComplete();
 
 		ResortList();
@@ -3571,14 +3609,11 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	// so as not to delay the appearance of the title edit field.
 	// So, we don't update 'other' views until we receive a successful 
 	// title edit notification unless they are the active view
-	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
+	BOOL bNewSingleTask = IsNewTaskMod(mapAttribIDs, aModTaskIDs);
+	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mapAttribIDs, aModTaskIDs);
 
-	BOOL bNewSingleTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && 
-							(aModTaskIDs.GetSize() == 1));
-
-	BOOL bNewTaskTitleEdit = (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
-								(aModTaskIDs.GetSize() == 1) &&
-								(dwModTaskID == m_dwLastAddedID));
+	if (bNewTaskTitleEdit || mapAttribIDs.Has(TDCA_PASTE))
+		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
 
 	// For custom attributes we always update the extensions
 	// with ALL custom attribute values
@@ -3615,7 +3650,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 		else
 		{
 			// Ensure new task is selected for label editing
-			SelectTask(dwModTaskID, FALSE);
+			SelectTask(aModTaskIDs[0], FALSE);
 		}
 		break;
 
@@ -3648,7 +3683,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 		else
 		{
 			// Ensure new task is selected for label editing
-			SelectTask(dwModTaskID, FALSE);
+			SelectTask(aModTaskIDs[0], FALSE);
 		}
 		break;
 	}
@@ -3665,6 +3700,12 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 
 	if (!bInListView && pVData->bNeedFullTaskUpdate)
 		return;
+
+	if (mapAttribIDs.Has(TDCA_NEWTASK) || 
+		mapAttribIDs.Has(TDCA_PASTE))
+	{
+		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
+	}
 
 	if (mapAttribIDs.Has(TDCA_DELETE) ||
 		mapAttribIDs.Has(TDCA_ARCHIVE))
@@ -4414,7 +4455,7 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 		if (bNewTask || (pVData && pVData->sort.Matches(mapAttribIDs, m_styles, m_aCustomAttribDefs)))
 		{
 			if ((nExtView == nView) && HasStyle(TDCS_RESORTONMODIFY))
-				Resort(FALSE);
+				Resort();
 			else
 				pVData->bNeedResort = TRUE;
 		}
@@ -4995,7 +5036,7 @@ BOOL CTabbedToDoCtrl::IsSorting() const
 
 BOOL CTabbedToDoCtrl::IsMultiSorting() const
 {
-	return GetSort().bMulti;
+	return GetSort().IsMultiSorting();
 }
 
 void CTabbedToDoCtrl::MultiSort(const TDSORTCOLUMNS& sort)
