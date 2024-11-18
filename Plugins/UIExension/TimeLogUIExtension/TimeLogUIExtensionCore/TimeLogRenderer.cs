@@ -641,41 +641,14 @@ namespace TimeLogUIExtension
 								Calendar.AppointmentView apptView,
 								bool isSelected,
 								Color fillColor, 
-								Color borderColor,
-								bool clipLeftBorder,
-								bool clipRightBorder)
+								Color borderColor)
 		{
 			if (rect.Width <= 0)
 				return;
 
-			bool isLong = apptView.IsLong;
-// 			bool isFutureItem = (apptView.Appointment is TaskFutureOccurrence);
-// 			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
-
-			if (isLong)
-			{
-				if (clipLeftBorder)
-				{
-					rect.X++;
-					rect.Width--;
-				}
-
-				if (clipRightBorder)
-					rect.Width--;
-			}
-			else
-			{
-				Debug.Assert(!clipLeftBorder && !clipRightBorder);
-			}
 
 			if (isSelected)
 			{
-				if (isLong)
-				{
-					rect.Height++;
-					rect.Width++;
-				}
-
 				UIExtension.SelectionRect.Draw(Handle,
 												g,
 												rect.Left,
@@ -683,28 +656,10 @@ namespace TimeLogUIExtension
 												rect.Width,
 												rect.Height,
 												GetAppointmentSelectedState(apptView.Appointment),
-												false/*isTimeBlock*/,
-												clipLeftBorder,
-												clipRightBorder);
-
-				if (/*isFutureItem &&*/ !borderColor.IsEmpty)
-				{
-					rect.Height--; // drawing with pen adds 1 to height
-					rect.Width--;
-
-					using (Pen pen = new Pen(borderColor, 1))
-					{
-						pen.DashStyle = DashStyle.Dash;
-
-						DrawTaskBorder(g, rect, pen, clipLeftBorder, clipRightBorder);
-					}
-				}
+												false);
 			}
 			else
 			{
-// 				if (isTimeBlock && !SystemInformation.HighContrast)
-// 					fillColor = Color.FromArgb(64, fillColor);
-
 				using (SolidBrush brush = new SolidBrush(fillColor))
 				{
 					var fillRect = rect;
@@ -716,40 +671,12 @@ namespace TimeLogUIExtension
 
 				if (borderColor != Color.Empty)
 				{
-					if (!isLong)
-					{
-						rect.Height--; // drawing with pen adds 1 to height
-						rect.Width--;
-					}
+					rect.Height--; // drawing with pen adds 1 to height
+					rect.Width--;
 
 					using (Pen pen = new Pen(borderColor, 1))
-					{
-// 						if (isFutureItem)
-// 							pen.DashStyle = DashStyle.Dash;
-
-						DrawTaskBorder(g, rect, pen, clipLeftBorder, clipRightBorder);
-					}
+						g.DrawRectangle(pen, rect);
 				}
-			}
-		}
-
-		void DrawTaskBorder(Graphics g, Rectangle rect, Pen pen, bool clipLeft, bool clipRight)
-		{
-			if (!clipLeft && !clipRight)
-			{
-				g.DrawRectangle(pen, rect);
-			}
-			else
-			{
-				if (!clipLeft)
-					g.DrawLine(pen, RectUtil.TopLeft(rect), RectUtil.BottomLeft(rect));
-
-				if (!clipRight)
-					g.DrawLine(pen, RectUtil.TopRight(rect), RectUtil.BottomRight(rect));
-
-				// top and bottom
-				g.DrawLine(pen, RectUtil.TopLeft(rect), RectUtil.TopRight(rect));
-				g.DrawLine(pen, RectUtil.BottomLeft(rect), RectUtil.BottomRight(rect));
 			}
 		}
 
@@ -848,39 +775,34 @@ namespace TimeLogUIExtension
 			using (StringFormat format = new StringFormat())
 			{
 				format.Alignment = StringAlignment.Near;
-				format.LineAlignment = (apptView.IsLong ? StringAlignment.Center : StringAlignment.Near);
-
-				if (apptView.IsLong)
-					format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
+				format.LineAlignment = StringAlignment.Near;
 
 				rect.Y += TextOffset;
-
-				if (apptView.IsLong)
-					rect.Height = BaseFont().Height;
-				else
-					rect.Height -= TextOffset;
+				rect.Height -= TextOffset;
 
 				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
 				using (SolidBrush brush = new SolidBrush(textColor))
 				{
 // 					TaskItem taskItem = GetTaskItem(apptView.Appointment);
-// 					var fontStyle = FontStyle.Regular;
-// 
-// 					if (taskItem.IsDone && StrikeThruDoneTasks)
-// 						fontStyle |= FontStyle.Strikeout;
-// 
-// 					if (fontStyle != FontStyle.Regular)
-// 					{
-// 						using (Font font = new Font(BaseFont(), fontStyle))
-// 						{
-// 							g.DrawString(taskItem.Title, font, brush, rect, format);
-// 						}
-// 					}
-// 					else
-// 					{
-// 						g.DrawString(taskItem.Title, BaseFont(), brush, rect, format);
-// 					}
+					var fontStyle = FontStyle.Regular;
+
+					// 					if (taskItem.IsDone && StrikeThruDoneTasks)
+					// 						fontStyle |= FontStyle.Strikeout;
+
+// 					var logEntry = (apptView.Appointment as LogEntry);
+
+					if (fontStyle != FontStyle.Regular)
+					{
+						using (Font font = new Font(BaseFont(), fontStyle))
+						{
+							g.DrawString(apptView.Appointment.Title, font, brush, rect, format);
+						}
+					}
+					else
+					{
+						g.DrawString(apptView.Appointment.Title, BaseFont(), brush, rect, format);
+					}
 				}
 
 				g.TextRenderingHint = TextRenderingHint.SystemDefault;
@@ -900,51 +822,15 @@ namespace TimeLogUIExtension
 			// Our custom gripper bar
 			var gripRect = apptRect;
 			gripRect.Inflate(-2, -2);
+			gripRect.Width = 5;
 
-			// Future tasks are not draggable -> no gripper
-// 			if (apptView.Appointment is TaskFutureOccurrence)
-// 				gripRect.Width = 0;
-// 			else
-				gripRect.Width = 5;
-
-			bool longAppt = apptView.IsLong;
-
-			if (longAppt)
+			if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
 			{
-				// If and the start date precedes the 
-				// start of the week then extend the draw rect to the left 
-				// so the edge is clipped and likewise for the end date.
-				if (appt.StartDate < StartDate)
-				{
-					apptRect.X -= 4;
-					apptRect.Width += 4;
-
-					gripRect.X = apptRect.X;
-					gripRect.Width = 0;
-				}
-				else if (appt.StartDate > StartDate)
-				{
-					apptRect.X++;
-					apptRect.Width--;
-
-					gripRect.X++;
-				}
-
-				if (appt.EndDate >= EndDate)
-				{
-					apptRect.Width += 5;
-				}
+				apptRect.Y++;
+				apptRect.Height--;
 			}
-			else // day appt
-			{
-				if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
-				{
-					apptRect.Y++;
-					apptRect.Height--;
-				}
 
-				apptRect.Width -= 1;
-			}
+			apptRect.Width -= 1;
 
 			apptView.Rectangle = apptRect;
 			apptView.GripRect = gripRect;
@@ -975,7 +861,7 @@ namespace TimeLogUIExtension
 
 			var apptRect = apptView.Rectangle;
 
-			DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor, false, false);
+			DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor);
 			DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref apptRect);
 			DrawTaskText(g, apptView, apptRect, textColor);
 
