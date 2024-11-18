@@ -75,7 +75,6 @@
       <DependentUpon>TimeLogTimeBlockAttributesPage.cs</DependentUpon>
     </Compile>
     <Compile Include="TimeLogView.cs" />
-    <Compile Include="TimeLogWeekLabel.cs" />
     <Compile Include="TimeLogPreferencesDlg.cs">
       <SubType>Form</SubType>
     </Compile>

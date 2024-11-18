@@ -33,7 +33,7 @@ namespace DayViewUIExtension
 		private bool m_SettingDayViewStartDate = false;
 		private bool m_AllowModifyTimeEstimate = false;
 
-		private DayViewWeekLabel m_WeekLabel;
+		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
 		private YearComboBox m_YearCombo;
         private DayViewPreferencesDlg m_PrefsDlg;
@@ -458,7 +458,7 @@ namespace DayViewUIExtension
 
 		private void CreateWeekLabel()
 		{
-			m_WeekLabel = new DayViewWeekLabel(m_Trans);
+			m_WeekLabel = new WeekLabel(m_Trans);
 
 			m_WeekLabel.Font = new Font(FontName, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);

@@ -32,7 +32,7 @@ namespace TimeLogUIExtension
 		private bool m_SettingMonthYear = false;
 		private bool m_SettingTimeLogStartDate = false;
 
-		private TimeLogWeekLabel m_WeekLabel;
+		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
 		private YearComboBox m_YearCombo;
         private TimeLogPreferencesDlg m_PrefsDlg;
@@ -459,7 +459,7 @@ namespace TimeLogUIExtension
 
 		private void CreateWeekLabel()
 		{
-			m_WeekLabel = new TimeLogWeekLabel(m_Trans);
+			m_WeekLabel = new WeekLabel(m_Trans);
 
 			m_WeekLabel.Font = new Font(FontName, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);

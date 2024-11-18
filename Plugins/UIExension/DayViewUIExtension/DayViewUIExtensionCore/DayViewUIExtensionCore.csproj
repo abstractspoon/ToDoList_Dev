@@ -71,7 +71,6 @@
     <Compile Include="DayViewTimeBlockAttributesPage.Designer.cs">
       <DependentUpon>DayViewTimeBlockAttributesPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewWeekLabel.cs" />
     <Compile Include="DayViewPreferencesDlg.cs">
       <SubType>Form</SubType>
     </Compile>
