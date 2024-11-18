@@ -182,6 +182,11 @@ bool CTimeLogUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 		pMsg->pt.y);
 }
 
+bool CTimeLogUIExtensionBridgeWindow::DoIdleProcessing()
+{
+	return m_wnd->DoIdleProcessing();
+}
+
 bool CTimeLogUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
 	switch (nCmd)

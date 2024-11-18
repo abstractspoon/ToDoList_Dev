@@ -123,6 +123,11 @@ namespace TimeLogUIExtension
 			return m_TimeLog.PrepareNewTask(ref task);
 		}
 
+		public bool DoIdleProcessing()
+		{
+			return false;
+		}
+
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
 		{
 /*
