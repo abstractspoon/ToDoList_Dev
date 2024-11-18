@@ -22,6 +22,8 @@ namespace TimeLogUIExtension
 		private Encoding m_Encoding;
 		private List<LogEntry> m_Entries;
 
+		const string VersionPrefix = "TODOTIMELOG VERSION";
+
 		public LogEntries()
 		{
 			// TODO
@@ -46,18 +48,17 @@ namespace TimeLogUIExtension
 			{
 				using (var reader = new StreamReader(filePath))
 				{
-					string version = reader.ReadLine();
+					string version = reader.ReadLine().Trim();
 
-					if (string.IsNullOrEmpty(version) || !version.Contains("TODOTIMELOG VERSION"))
+					if (string.IsNullOrEmpty(version) || (version.IndexOf(VersionPrefix) != 0))
 						return false;
 
 					// Must be version 1 or higher
-					int versionNum = 0;
+					string versionNum = version.Substring(VersionPrefix.Length + 1, 1);
 
-					if (!int.TryParse(version.Substring(version.Length - 1), out versionNum))
-						return false;
+					int ver = 0;
 
-					if (versionNum < 1)
+					if (!int.TryParse(versionNum, out ver) || (ver < 1))
 						return false;
 
 					string header = reader.ReadLine();
