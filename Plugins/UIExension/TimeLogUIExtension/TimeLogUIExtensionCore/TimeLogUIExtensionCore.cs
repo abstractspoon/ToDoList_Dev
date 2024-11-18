@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
+using UIComponents;
+
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
@@ -31,8 +33,8 @@ namespace TimeLogUIExtension
 		private bool m_SettingTimeLogStartDate = false;
 
 		private TimeLogWeekLabel m_WeekLabel;
-		private TimeLogMonthComboBox m_MonthCombo;
-		private TimeLogYearComboBox m_YearCombo;
+		private MonthComboBox m_MonthCombo;
+		private YearComboBox m_YearCombo;
         private TimeLogPreferencesDlg m_PrefsDlg;
 
         private IIControls.ToolStripEx m_Toolbar;
@@ -773,7 +775,7 @@ namespace TimeLogUIExtension
 
 		private void CreateMonthYearCombos()
 		{
-			m_MonthCombo = new TimeLogMonthComboBox();
+			m_MonthCombo = new MonthComboBox();
 
 			m_MonthCombo.Font = m_ControlsFont;
             m_MonthCombo.Location = new Point(DPIScaling.Scale(0), ComboTop);
@@ -784,7 +786,7 @@ namespace TimeLogUIExtension
 			
 			Controls.Add(m_MonthCombo);
 
-			m_YearCombo = new TimeLogYearComboBox();
+			m_YearCombo = new YearComboBox();
 
 			m_YearCombo.Font = m_ControlsFont;
             m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);

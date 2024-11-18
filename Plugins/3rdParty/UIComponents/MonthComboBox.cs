@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace DayViewUIExtension
+namespace UIComponents
 {
-	[System.ComponentModel.DesignerCategory("")]
-	class DayViewMonthComboBox : System.Windows.Forms.ComboBox
+	public class MonthComboBox : System.Windows.Forms.ComboBox
 	{
-		public DayViewMonthComboBox()
+		public MonthComboBox()
 		{
 			InitializeComponent();
 		}
