@@ -59,12 +59,13 @@ namespace TimeLogUIExtension
 			dayGripWidth = 1; // to match app styling
 
 			m_Trans = trans;
-//			m_TaskIcons = taskIcons;
+			m_TaskIcons = taskIcons;
 			m_ToolbarRenderer = new UIThemeToolbarRenderer();
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
 
 			m_LogEntries = new LogEntries();
+			m_TaskItems = new TaskItems();
 //			m_DateSortedTasks = new DateSortedTasks(m_LogEntries);
 
 // 			base.AppointmentMove += new Calendar.AppointmentEventHandler(OnTimeLogAppointmentChanged);
@@ -81,7 +82,7 @@ namespace TimeLogUIExtension
 			InitializeComponent();
 		}
 
-// 		public IEnumerable<TaskItems> TaskItems { get { return m_TaskItems.Values; } }
+//		public IEnumerable<TaskItems> TaskItems { get { return m_TaskItems.Values; } }
 
 		// ILabelTipHandler implementation
 		public Control GetOwner()
@@ -273,12 +274,12 @@ namespace TimeLogUIExtension
 			Anchor = (System.Windows.Forms.AnchorStyles.Bottom |
 									 System.Windows.Forms.AnchorStyles.Left |
 									 System.Windows.Forms.AnchorStyles.Right);
-// 			AppHeightMode = Calendar.TimeLog.AppHeightDrawMode.TrueHeightAll;
+ 			AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
 			DrawAllAppBorder = false;
 			Location = new Point(0, 0);
 			MinHalfHourApp = false;
 			Name = "m_dayView";
-//			Renderer = this;
+			Renderer = this;
 			Size = new Size(798, 328);
 			SlotsPerHour = 4;
 			TabIndex = 0;
@@ -315,7 +316,7 @@ namespace TimeLogUIExtension
 // 			if (dwTaskID == 0)
 				return false;
 
-// 			return IsItemDisplayable(m_LogEntries.GetItem(dwTaskID));
+// 			return IsItemDisplayable(m_TaskItems.GetItem(dwTaskID));
 		}
 
 		public uint SelectedTaskId
@@ -751,26 +752,11 @@ namespace TimeLogUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-// 			m_TimeBlocks.Save(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key)
 		{
-// 			m_TimeBlocks.Load(prefs, key);
 		}
-
-/*
-		protected int FindTimeBlock(TaskTimeBlock block, List<Calendar.AppointmentDates> timeBlocks)
-		{
-			if (timeBlocks == null)
-			{
-				Debug.Assert(timeBlocks != null);
-				return -1;
-			}
-
-			return timeBlocks.FindIndex(x => ((x.Start == block.StartDate) && (x.End == block.EndDate)));
-		}
-*/
 
 		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type, string metaDataKey)
 		{
@@ -1027,88 +1013,7 @@ namespace TimeLogUIExtension
 
 		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end)
 		{
-			// Extension items are always populated on demand
-//			m_ExtensionItems.Clear();
-
-			var appts = new List<Calendar.Appointment>();
-			uint nextExtId = (((m_MaxTaskID / 1000) + 1) * 1000);
-
-/*
-			foreach (var pair in m_LogEntries)
-			{
-				TimeLogEntry item = pair.Value;
-
-				if (IsItemDisplayable(item))
-				{
-					if (IsItemWithinRange(item, start, end))
-						appts.Add(item);
-
-					if (m_ShowFutureOcurrences && item.IsRecurring && !item.IsDoneOrGoodAsDone)
-					{
-						// Add this task's future items for the current date range
-						// Note: we deliberately double the range else we lose 
-						// future items which overlap the the current item
-						var futureItems = m_TaskRecurrences.Get(item.Id, StartDate, EndDate.AddDays(DaysShowing));
-
-						if (futureItems != null)
-						{
-							foreach (var futureItem in futureItems)
-							{
-								var futureAppt = new TaskFutureOccurrence(item, nextExtId, futureItem.Item1, futureItem.Item2);
-
-								if (IsItemWithinRange(futureAppt, start, end))
-								{
-									m_ExtensionItems[nextExtId++] = futureAppt;
-									appts.Add(futureAppt);
-								}
-							}
-						}
-					}
-				}
-
-				if (m_CustomDateDefs.Count > 0)
-				{
-					foreach (var attrib in m_CustomDateDefs)
-					{
-						DateTime date;
-
-						if (item.CustomDates.TryGetValue(attrib.Id, out date))
-						{
-							var customDate = new TaskCustomDateAttribute(item, nextExtId, attrib.Id, date);
-
-							if (IsItemDisplayable(customDate) && IsItemWithinRange(customDate, start, end))
-							{
-								m_ExtensionItems[nextExtId++] = customDate;
-								appts.Add(customDate);
-							}
-						}
-					}
-				}
-
-				var seriesList = m_TimeBlocks.GetTaskSeries(pair.Key, false);
-
-				if (seriesList != null)
-				{
-					foreach (var series in seriesList.Series)
-					{
-						foreach (var block in series.Blocks)
-						{
-							var timeBlock = new TaskTimeBlock(item, nextExtId, block);
-
-							if (IsItemWithinRange(timeBlock, start, end))
-							{
-								m_ExtensionItems[nextExtId++] = timeBlock;
-								appts.Add(timeBlock);
-							}
-						}
-					}
-				}
-			}
-
-			appts.Sort((a, b) => LogEntry.CompareDates(a, b));
-*/
-
-			return appts;
+			return m_LogEntries.GetEntries(start, end).ConvertAll(x => (Calendar.Appointment)x);
 		}
 
 		private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)

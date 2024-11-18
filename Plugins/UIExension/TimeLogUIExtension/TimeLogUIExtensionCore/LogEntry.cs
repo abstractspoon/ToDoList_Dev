@@ -75,10 +75,11 @@ namespace TimeLogUIExtension
 					m_Entries = new List<LogEntry>();
 
 					string line = reader.ReadLine();
+					uint entryId = 1;
 
 					while (line != null)
 					{
-						m_Entries.Add(new LogEntry(line, m_Delim));
+						m_Entries.Add(new LogEntry(entryId++, line, m_Delim));
 						line = reader.ReadLine();
 					}
 				}
@@ -91,6 +92,11 @@ namespace TimeLogUIExtension
 
 			Reset();
 			return false;
+		}
+
+		public List<LogEntry> GetEntries(DateTime from, DateTime to)
+		{
+			return m_Entries.Where(x => (x.StartDate >= from) && (x.EndDate <= to)).ToList();
 		}
 
 		public bool SaveLogFile(string filePath)
@@ -153,13 +159,17 @@ namespace TimeLogUIExtension
 
 		// --------------------
 
-		public LogEntry(string delim)
+		public LogEntry(uint entryId, string delim)
 		{
 			m_Delim = delim;
 			m_Entry = string.Empty;
+
+			base.Id = entryId;
 		}
 
-		public LogEntry(string logEntry, string delim) : this(delim)
+		public LogEntry(uint entryId, string logEntry, string delim) 
+			: 
+			this(entryId, delim)
 		{
 			m_Entry = logEntry;
 			Decode();

@@ -30,6 +30,7 @@ namespace TimeLogUIExtension
 
 	// ---------------------------------------------------------------
 
+/*
 	public class DateSortedTasks
 	{
 		public class TaskList : List<TaskItem>
@@ -101,6 +102,7 @@ namespace TimeLogUIExtension
 			m_NeedsResort = true;
 		}
 	}
+*/
 
 	// ---------------------------------------------------------------
 
