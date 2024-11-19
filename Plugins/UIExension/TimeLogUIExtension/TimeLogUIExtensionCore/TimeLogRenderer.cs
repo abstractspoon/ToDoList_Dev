@@ -13,14 +13,9 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace TimeLogUIExtension
 {
-	public partial class TimeLogView : Calendar.IRenderer
+	public class RenderHelper
 	{
-		private UIExtension.TaskIcon m_TaskIcons;
 		private Font m_BaseFont, m_BoldFont, m_HourFont, m_MinuteFont;
-
-		private int m_DayWidth = -1;
-		private int m_HeaderPadding = DPIScaling.Scale(3);
-		private int m_ImageSize = DPIScaling.Scale(16);
 
 		enum DowNameStyle
 		{
@@ -41,48 +36,71 @@ namespace TimeLogUIExtension
 
 		// ------------------------------------------------------------------------
 
-        public UITheme Theme { get; set; }
+		public UITheme Theme { get; set; }
+		public bool DisplayDatesInISO { get; set; }
+		public Color GridlineColor { get; set; }
+
+		public int HeaderPadding { get { return DPIScaling.Scale(3); } }
+		public int ImageSize { get { return DPIScaling.Scale(16); } }
 		public int TextPadding { get { return 2; } }
 		public int TextOffset { get { return 3; } }
 
-        protected override void Dispose(bool mainThread)
-        {
-            base.Dispose(mainThread);
-
-            if (m_BaseFont != null)
-                m_BaseFont.Dispose();
-        }
-
-        public virtual Font BaseFont()
-        {
-			if (m_BaseFont == null)
+		public Font BaseFont
+		{
+			get
 			{
-				m_BaseFont = new Font("Tahoma", 8.25f);
-				RecalcLongAppointmentHeight();
-			}
+				if (m_BaseFont == null)
+				{
+					m_BaseFont = new Font("Tahoma", 8.25f);
+				}
 
-			return m_BaseFont;
+				return m_BaseFont;
+			}
 		}
 
-		public virtual Font HourFont()
+		public void SetFont(IntPtr handle, String fontName, int fontSize, int daysWidth)
 		{
-			if (m_HourFont == null)
-			{
-				m_HourFont = new Font(BaseFont().FontFamily.Name, 12);
-			}
+			if ((BaseFont != null) && (BaseFont.Name == fontName) && (m_BaseFont.Size == fontSize))
+				return;
 
-			return m_HourFont;
+			m_BaseFont = new Font(fontName, fontSize, FontStyle.Regular);
+
+			m_MinuteFont = null;
+			m_HourFont = null;
+			m_BoldFont = null;
+
+			// Update the visibility of the day of week component
+			using (Graphics g = Graphics.FromHwnd(handle))
+			{
+				UpdateHeaderStyles(g, daysWidth);
+			}
+		}
+
+		public Font HourFont
+		{
+			get
+			{
+				if (m_HourFont == null)
+				{
+					m_HourFont = new Font(BaseFont.FontFamily.Name, 12);
+				}
+
+				return m_HourFont;
+			}
 		}
 
 
-		public virtual Font MinuteFont()
+		public Font MinuteFont
 		{
-			if (m_MinuteFont == null)
+			get
 			{
-				m_MinuteFont = new Font(BaseFont().FontFamily.Name, 8.25f);
-			}
+				if (m_MinuteFont == null)
+				{
+					m_MinuteFont = new Font(BaseFont.FontFamily.Name, 8.25f);
+				}
 
-			return m_MinuteFont;
+				return m_MinuteFont;
+			}
 		}
 
 		public Font BoldFont
@@ -91,11 +109,19 @@ namespace TimeLogUIExtension
 			{
 				if (m_BoldFont == null)
 				{
-					m_BoldFont = new Font(BaseFont(), FontStyle.Bold);
+					m_BoldFont = new Font(BaseFont, FontStyle.Bold);
 				}
 
 				return m_BoldFont;
 			}
+		}
+
+		public void DisposeFonts()
+		{
+			m_BaseFont?.Dispose();
+			m_MinuteFont?.Dispose();
+			m_HourFont?.Dispose();
+			m_BoldFont?.Dispose();
 		}
 
 		private static string FormatHeaderText(DateTime date, DowNameStyle dowStyle, MonthNameStyle monthStyle, bool firstDay, bool iso)
@@ -151,16 +177,16 @@ namespace TimeLogUIExtension
 
 		public int CalculateMinimumDayWidthForImage(Graphics g)
 		{
-			return (int)Math.Ceiling(g.MeasureString("31/12", BaseFont()).Width);
+			return (int)Math.Ceiling(g.MeasureString("31/12", BaseFont).Width);
 		}
 
-		private void UpdateHeaderStyles(Graphics g)
+		public void UpdateHeaderStyles(Graphics g, int dayWidth)
 		{
-			int availWidth = (m_DayWidth - (m_HeaderPadding * 2));
+			int availWidth = (dayWidth - (HeaderPadding * 2));
 
 			// Basic header string format is '<Day of week> <Day of month> <Month>'
-			int maxDayNum = (int)(g.MeasureString("31", BaseFont()).Width);
-			int maxDayAndMonthNum = (int)(g.MeasureString((DisplayDatesInISO ? "31-12" : "31/12"), BaseFont()).Width);
+			int maxDayNum = (int)(g.MeasureString("31", BaseFont).Width);
+			int maxDayAndMonthNum = (int)(g.MeasureString((DisplayDatesInISO ? "31-12" : "31/12"), BaseFont).Width);
 
 			int maxLongDow = DateUtil.GetMaxDayOfWeekNameWidth(g, BoldFont, false);
 			int maxShortDow = DateUtil.GetMaxDayOfWeekNameWidth(g, BoldFont, true);
@@ -206,149 +232,73 @@ namespace TimeLogUIExtension
 			}
 		}
 
-		public int DayWidth { get { return m_DayWidth; } }
-
-		private void OnNotifyDayWidth(object sender, Graphics g, int colWidth)
-		{
-			if (m_DayWidth == colWidth)
-				return;
-
-			m_DayWidth = colWidth;
-
-			// Update the visibility of the day of week component
-			UpdateHeaderStyles(g);
-		}
-
-		private void RecalcLongAppointmentHeight()
+		public int CalcLongAppointmentHeight(int longAppointmentSpacing)
 		{
 			int fontHeight = 0;
 
 			if (DPIScaling.WantScaling())
-				fontHeight = BaseFont().Height;
+				fontHeight = BaseFont.Height;
 			else
-				fontHeight = Win32.GetPixelHeight(BaseFont().ToHfont());
+				fontHeight = Win32.GetPixelHeight(BaseFont.ToHfont());
 
 			int itemHeight = (fontHeight + 6 - longAppointmentSpacing);
 
-			LongAppointmentHeight = Math.Max(itemHeight, m_ImageSize + 1);
+			return Math.Max(itemHeight, ImageSize + 1);
 		}
 
-		public void SetFont(String fontName, int fontSize)
-        {
-			if ((m_BaseFont != null) && (m_BaseFont.Name == fontName) && (m_BaseFont.Size == fontSize))
-                return;
-
-            m_BaseFont = new Font(fontName, fontSize, FontStyle.Regular);
-            m_BoldFont = null;
- 
-			// Update the visibility of the day of week component
-			using (Graphics g = Graphics.FromHwnd(Handle))
-			{
-				UpdateHeaderStyles(g);
-			}
-
-			RecalcLongAppointmentHeight();
-		}
-
-		private Color m_GridlineColor = Color.Gray;
-
-		public Color GridlineColor
+		public int FontHeight
 		{
-			set
-			{
-				if (value != m_GridlineColor)
-				{
-					m_GridlineColor = value;
-					Invalidate();
-				}
-			}
+			get { return BaseFont.Height; }
 		}
 
-		public int GetFontHeight()
-        {
-            return BaseFont().Height;
-        }
+		public Color HourColor
+		{
+			get { return Color.FromArgb(230, 237, 247); }
+		}
 
-        public virtual Color HourColor()
-        {
-            return Color.FromArgb(230, 237, 247);
-        }
+		public Color HalfHourSeperatorColor
+		{
+			get { return GridlineColor; }
+		}
 
-        public virtual Color HalfHourSeperatorColor()
-        {
-            return m_GridlineColor;
-        }
-
-        public virtual Color HourSeperatorColor()
-        {
+		public Color HourSeperatorColor
+		{
 			// Slightly darker
-            return DrawingColor.AdjustLighting(m_GridlineColor, -0.2f, false);
-        }
-
-        public virtual Color WorkingHourColor()
-        {
-            return Color.FromArgb(255, 255, 255);
-        }
-
-        public virtual Color BackColor()
-        {
-			return Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-        }
-
-		public virtual Color AllDayEventsBackColor()
-		{
-			return SystemColors.ControlDarkDark;
+			get { return DrawingColor.AdjustLighting(GridlineColor, -0.2f, false); }
 		}
 
-		public virtual Color SelectionColor()
-        {
-            return Color.FromArgb(41, 76, 122);
-        }
-
-        public Color TextColor
-        {
-            get
-            {
-                return Theme.GetAppDrawingColor(UITheme.AppColor.AppText);
-            }
-        }
-
-		protected override void DrawDay(PaintEventArgs e, Rectangle rect, DateTime date)
+		public Color WorkingHourColor
 		{
-			e.Graphics.FillRectangle(SystemBrushes.Window, rect);
-
-			if (SystemInformation.HighContrast)
-			{
-				// Draw selection first because it's opaque
-				DrawDaySelection(e, rect, date);
-
-				DrawDaySlotSeparators(e, rect, date);
-				DrawNonWorkHours(e, rect, date);
-				DrawTodayBackground(e, rect, date);
-				DrawDayAppointments(e, rect, date);
-			}
-			else
-			{
-				DrawDaySlotSeparators(e, rect, date);
-				DrawNonWorkHours(e, rect, date);
-				DrawTodayBackground(e, rect, date);
-				DrawDayAppointments(e, rect, date);
-
-				// Draw selection last because it's translucent
-				DrawDaySelection(e, rect, date);
-			}
-
-			DrawTodayTime(e, rect, date);
-			DrawDayGripper(e, rect);
+			get { return Color.FromArgb(255, 255, 255); }
 		}
 
-		public virtual void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm)
-        {
-            if (g == null)
-                throw new ArgumentNullException("g");
+		public Color BackColor
+		{
+			get { return Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight); }
+		}
 
-            using (SolidBrush brush = new SolidBrush(TextColor))
-            {
+		public Color AllDayEventsBackColor
+		{
+			get { return SystemColors.ControlDarkDark; }
+		}
+
+		public Color SelectionColor
+		{
+			get { return Color.FromArgb(41, 76, 122); }
+		}
+
+		public Color TextColor
+		{
+			get { return Theme.GetAppDrawingColor(UITheme.AppColor.AppText); }
+		}
+
+		public void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm)
+		{
+			if (g == null)
+				throw new ArgumentNullException("g");
+
+			using (SolidBrush brush = new SolidBrush(TextColor))
+			{
 				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
 				string amPmTime = "00";
@@ -365,69 +315,69 @@ namespace TimeLogUIExtension
 				}
 
 				String hourStr = hour.ToString("##00", System.Globalization.CultureInfo.InvariantCulture);
-				g.DrawString(hourStr, HourFont(), brush, rect);
+				g.DrawString(hourStr, HourFont, brush, rect);
 
-				rect.X += ((int)g.MeasureString(hourStr, HourFont()).Width + 2);
-				g.DrawString(amPmTime, MinuteFont(), brush, rect);
+				rect.X += ((int)g.MeasureString(hourStr, HourFont).Width + 2);
+				g.DrawString(amPmTime, MinuteFont, brush, rect);
 
 				g.TextRenderingHint = TextRenderingHint.SystemDefault;
 			}
 		}
 
-        public virtual void DrawMinuteLine(Graphics g, Rectangle rect, int minute)
-        {
-            if (g == null)
-                throw new ArgumentNullException("g");
+		public void DrawMinuteLine(Graphics g, Rectangle rect, int minute)
+		{
+			if (g == null)
+				throw new ArgumentNullException("g");
 
-            if ((minute % 30) == 0)
-            {
-                using (Pen pen = new Pen(MinuteLineColor))
-                {
+			if ((minute % 30) == 0)
+			{
+				using (Pen pen = new Pen(MinuteLineColor))
+				{
 					g.SmoothingMode = SmoothingMode.None;
 
-                    if (minute == 0)
-                    {
-                        g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
-                    }
-                    else if (rect.Height > MinuteFont().Height)
-                    {
-                        // 30 min mark - halve line width
-                        rect.X += rect.Width / 2;
-                        rect.Width /= 2;
+					if (minute == 0)
+					{
+						g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
+					}
+					else if (rect.Height > MinuteFont.Height)
+					{
+						// 30 min mark - halve line width
+						rect.X += rect.Width / 2;
+						rect.Width /= 2;
 
 						g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
 
-                        // Draw label beneath
-                        using (SolidBrush brush = new SolidBrush(TextColor)) 
-                        {
-                            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                            g.DrawString("30", MinuteFont(), brush, rect);
-                            g.TextRenderingHint = TextRenderingHint.SystemDefault;
-                        }
-                    }
-                }
-            }
-        }
-
-		public virtual void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth)
-		{
-			Calendar.AbstractRenderer.DrawDayGripper(g, rect, gripWidth, HourSeperatorColor());
+						// Draw label beneath
+						using (SolidBrush brush = new SolidBrush(TextColor))
+						{
+							g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+							g.DrawString("30", MinuteFont, brush, rect);
+							g.TextRenderingHint = TextRenderingHint.SystemDefault;
+						}
+					}
+				}
+			}
 		}
 
-		public virtual void DrawAllDayBackground(Graphics g, Rectangle rect)
+		public void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth)
 		{
-			using (Brush brush = new SolidBrush(Calendar.AbstractRenderer.InterpolateColors(BackColor(), Color.Black, 0.5f)))
+			Calendar.AbstractRenderer.DrawDayGripper(g, rect, gripWidth, HourSeperatorColor);
+		}
+
+		public void DrawAllDayBackground(Graphics g, Rectangle rect, int numDaysShowing, int allDayEventsHeaderHeight)
+		{
+			using (Brush brush = new SolidBrush(Calendar.AbstractRenderer.InterpolateColors(BackColor, Color.Black, 0.5f)))
 				g.FillRectangle(brush, rect);
 
 			// Draw the day dividers
-			int dayWidth = (rect.Width / DaysShowing);
+			int dayWidth = (rect.Width / numDaysShowing);
 
 			Point lineTop = new Point((rect.X + dayWidth), rect.Top);
 			Point lineBot = new Point((rect.X + dayWidth), rect.Top + allDayEventsHeaderHeight);
 
-			using (var pen = new Pen(Calendar.AbstractRenderer.InterpolateColors(BackColor(), Color.Black, 0.4f)))
+			using (var pen = new Pen(Calendar.AbstractRenderer.InterpolateColors(BackColor, Color.Black, 0.4f)))
 			{
-				for (int day = 0; day < DaysShowing; day++)
+				for (int day = 0; day < numDaysShowing; day++)
 				{
 					g.DrawLine(pen, lineTop, lineBot);
 					lineTop.X += dayWidth;
@@ -436,23 +386,23 @@ namespace TimeLogUIExtension
 			}
 		}
 
-		private Color MinuteLineColor
-        {
-            get
-            {
-                Color appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+		public Color MinuteLineColor
+		{
+			get
+			{
+				Color appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
 
-                if (appLineColor == BackColor())
-                    appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
+				if (appLineColor == BackColor)
+					appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
 
-                return appLineColor;
-            }
-        }
+				return appLineColor;
+			}
+		}
 
-        public virtual void DrawDayHeader(Graphics g, Rectangle rect, DateTime date, bool firstDay)
-        {
-            if (g == null)
-                throw new ArgumentNullException("g");
+		public void DrawDayHeader(Graphics g, Rectangle rect, DateTime date, bool firstDay)
+		{
+			if (g == null)
+				throw new ArgumentNullException("g");
 
 			// Header background
 			bool isToday = date.Date.Equals(DateTime.Now.Date);
@@ -484,16 +434,16 @@ namespace TimeLogUIExtension
 				rHeader.Y++;
 
 				var headerBrush = (isToday ? SystemBrushes.ButtonHighlight : SystemBrushes.ButtonFace);
-                g.FillRectangle(headerBrush, rHeader);
+				g.FillRectangle(headerBrush, rHeader);
 
 				ControlPaint.DrawBorder3D(g, rHeader, Border3DStyle.Raised);
-            }
+			}
 
 			// Header text
 			g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
 			// Use bold font for first-day-of-month
-			Font font = ((date.Day == 1) ? BoldFont : BaseFont());
+			Font font = ((date.Day == 1) ? BoldFont : BaseFont);
 
 			var fmt = new StringFormat()
 			{
@@ -503,12 +453,350 @@ namespace TimeLogUIExtension
 			};
 
 			Rectangle rText = rect;
-			rText.X += m_HeaderPadding;
-			rText.Width -= m_HeaderPadding;
+			rText.X += HeaderPadding;
+			rText.Width -= HeaderPadding;
 
 			string text = FormatHeaderText(date, DowStyle, MonthStyle, firstDay, DisplayDatesInISO);
 
 			g.DrawString(text, font, SystemBrushes.ControlText, rText, fmt);
+		}
+
+		public virtual void DrawDayBackground(Graphics g, Rectangle rect)
+		{
+			// Not needed
+		}
+
+		public virtual void DrawHourRange(IntPtr handle, Graphics g, Rectangle rect, bool drawBorder, bool hilight)
+		{
+			if (hilight)
+			{
+				// Draw selection rect
+				UIExtension.SelectionRect.Draw(handle,
+												g,
+												rect.X,
+												rect.Y,
+												rect.Width,
+												rect.Height,
+												UIExtension.SelectionRect.Style.SelectedNotFocused,
+												true); // transparent
+			}
+			else
+			{
+				Calendar.AbstractRenderer.DrawHourRange(g, rect, drawBorder, (hilight ? SelectionColor : WorkingHourColor));
+			}
+		}
+
+		public void DrawTaskBackground(IntPtr handle,
+										Graphics g,
+										Rectangle rect,
+										Calendar.AppointmentView apptView,
+										UIExtension.SelectionRect.Style selState, 
+										Color fillColor,
+										Color borderColor)
+		{
+			if (rect.Width <= 0)
+				return;
+
+
+			if (selState != UIExtension.SelectionRect.Style.None)
+			{
+				UIExtension.SelectionRect.Draw(handle,
+												g,
+												rect.Left,
+												rect.Top,
+												rect.Width,
+												rect.Height,
+												selState,
+												false);
+			}
+			else
+			{
+				using (SolidBrush brush = new SolidBrush(fillColor))
+				{
+					var fillRect = rect;
+					fillRect.Width++;
+					fillRect.Height++;
+
+					g.FillRectangle(brush, fillRect);
+				}
+
+				if (borderColor != Color.Empty)
+				{
+					rect.Height--; // drawing with pen adds 1 to height
+					rect.Width--;
+
+					using (Pen pen = new Pen(borderColor, 1))
+						g.DrawRectangle(pen, rect);
+				}
+			}
+		}
+
+		public void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor, FontStyle fontStyle)
+		{
+			if (rect.Width <= 0)
+				return;
+
+			using (StringFormat format = new StringFormat())
+			{
+				format.Alignment = StringAlignment.Near;
+				format.LineAlignment = StringAlignment.Near;
+
+				rect.Y += TextOffset;
+				rect.Height -= TextOffset;
+
+				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+				using (SolidBrush brush = new SolidBrush(textColor))
+				{
+					if (fontStyle != FontStyle.Regular)
+					{
+						using (Font font = new Font(BaseFont, fontStyle))
+						{
+							g.DrawString(apptView.Appointment.Title, font, brush, rect, format);
+						}
+					}
+					else
+					{
+						g.DrawString(apptView.Appointment.Title, BaseFont, brush, rect, format);
+					}
+				}
+
+				g.TextRenderingHint = TextRenderingHint.SystemDefault;
+			}
+		}
+
+		public bool CalcAppointmentRects(Calendar.AppointmentView apptView)
+		{
+			if (apptView.Rectangle.Width == 0 || apptView.Rectangle.Height == 0)
+			{
+				return false;
+			}
+
+			var appt = apptView.Appointment;
+			var apptRect = apptView.Rectangle;
+
+			// Our custom gripper bar
+			var gripRect = apptRect;
+			gripRect.Inflate(-2, -2);
+			gripRect.Width = 5;
+
+			if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
+			{
+				apptRect.Y++;
+				apptRect.Height--;
+			}
+
+			apptRect.Width -= 1;
+
+			apptView.Rectangle = apptRect;
+			apptView.GripRect = gripRect;
+
+			return true;
+		}
+
+		public bool WantDrawToday(DateTime date)
+		{
+			if (!Theme.HasAppColor(UITheme.AppColor.Today))
+				return false;
+
+			return (date.Date == DateTime.Now.Date);
+		}
+
+		public void DrawTodayBackground(PaintEventArgs e, Rectangle rect, DateTime date)
+		{
+			if (!WantDrawToday(date))
+				return;
+
+			using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
+			{
+				e.Graphics.FillRectangle(brush, rect);
+			}
+		}
+
+		public void DrawTodayTime(Graphics g, Rectangle rect, DateTime date, int scrollVPos)
+		{
+			if (date.Date != DateTime.Now.Date)
+				return;
+
+			if ((scrollVPos > rect.Top) && (scrollVPos < rect.Bottom))
+			{
+				Color color = Theme.GetAppDrawingColor(UITheme.AppColor.Today);
+
+				using (var pen = new Pen(color, DPIScaling.Scale(2.0f)))
+				{
+					g.DrawLine(pen, rect.Left, scrollVPos, rect.Right, scrollVPos);
+
+					// Draw a blob at the end point to draw attention to the line
+					// Note: we avoid the start because that might conflict with a task's 'bar'
+					using (var brush = new SolidBrush(color))
+					{
+						g.FillEllipse(brush, RectUtil.CentredRect(new Point(rect.Right, scrollVPos), DPIScaling.Scale(10)));
+					}
+				}
+			}
+		}
+	}
+
+	public partial class TimeLogView : Calendar.IRenderer
+	{
+		private RenderHelper m_RenderHelper = new RenderHelper(); 
+		private UIExtension.TaskIcon m_TaskIcons;
+		private int m_DayWidth = -1;
+
+		// ------------------------------------------------------------------------
+
+		public UITheme Theme
+		{
+			get { return m_RenderHelper.Theme; }
+			set { m_RenderHelper.Theme = value; }
+		}
+
+		public Color GridlineColor
+		{
+			get { return m_RenderHelper.GridlineColor; }
+			set { m_RenderHelper.GridlineColor = value; }
+		}
+
+		protected override void Dispose(bool mainThread)
+        {
+            base.Dispose(mainThread);
+
+            m_RenderHelper.DisposeFonts();
+        }
+
+        public virtual Font BaseFont()
+        {
+			return m_RenderHelper.BaseFont;
+		}
+
+		public virtual Font HourFont()
+		{
+			return m_RenderHelper.HourFont;
+		}
+
+
+		public virtual Font MinuteFont()
+		{
+			return m_RenderHelper.MinuteFont;
+		}
+
+		public Font BoldFont()
+		{
+			return m_RenderHelper.BoldFont;
+		}
+
+		private void UpdateHeaderStyles(Graphics g)
+		{
+			m_RenderHelper.UpdateHeaderStyles(g, m_DayWidth);
+		}
+
+		public int DayWidth { get { return m_DayWidth; } }
+
+		private void OnNotifyDayWidth(object sender, Graphics g, int colWidth)
+		{
+			if (m_DayWidth == colWidth)
+				return;
+
+			m_DayWidth = colWidth;
+
+			// Update the visibility of the day of week component
+			m_RenderHelper.UpdateHeaderStyles(g, m_DayWidth);
+		}
+
+		public void SetFont(String fontName, int fontSize)
+        {
+			m_RenderHelper.SetFont(Handle, fontName, fontSize, m_DayWidth);
+
+			LongAppointmentHeight = m_RenderHelper.CalcLongAppointmentHeight(longAppointmentSpacing);
+		}
+
+		public virtual Color HourColor()
+        {
+            return m_RenderHelper.HourColor;
+        }
+
+        public virtual Color HalfHourSeperatorColor()
+        {
+            return m_RenderHelper.HalfHourSeperatorColor;
+        }
+
+        public virtual Color HourSeperatorColor()
+        {
+            return m_RenderHelper.HourSeperatorColor;
+        }
+
+        public virtual Color WorkingHourColor()
+        {
+            return m_RenderHelper.WorkingHourColor;
+        }
+
+        public virtual Color BackColor()
+        {
+			return m_RenderHelper.BackColor;
+        }
+
+		public virtual Color AllDayEventsBackColor()
+		{
+			return m_RenderHelper.AllDayEventsBackColor;
+		}
+
+		public virtual Color SelectionColor()
+        {
+			return m_RenderHelper.SelectionColor;
+		}
+
+		protected override void DrawDay(PaintEventArgs e, Rectangle rect, DateTime date)
+		{
+			e.Graphics.FillRectangle(SystemBrushes.Window, rect);
+
+			if (SystemInformation.HighContrast)
+			{
+				// Draw selection first because it's opaque
+				DrawDaySelection(e, rect, date);
+
+				DrawDaySlotSeparators(e, rect, date);
+				DrawNonWorkHours(e, rect, date);
+				m_RenderHelper.DrawTodayBackground(e, rect, date);
+				DrawDayAppointments(e, rect, date);
+			}
+			else
+			{
+				DrawDaySlotSeparators(e, rect, date);
+				DrawNonWorkHours(e, rect, date);
+				m_RenderHelper.DrawTodayBackground(e, rect, date);
+				DrawDayAppointments(e, rect, date);
+
+				// Draw selection last because it's translucent
+				DrawDaySelection(e, rect, date);
+			}
+
+			DrawTodayTime(e, rect, date);
+			DrawDayGripper(e, rect);
+		}
+
+		public virtual void DrawDayHeader(Graphics g, Rectangle rect, DateTime date, bool firstDay)
+		{
+			m_RenderHelper.DrawDayHeader(g, rect, date, firstDay);
+		}
+
+		public virtual void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm)
+        {
+			m_RenderHelper.DrawHourLabel(g, rect, hour, ampm);
+		}
+
+        public virtual void DrawMinuteLine(Graphics g, Rectangle rect, int minute)
+        {
+			m_RenderHelper.DrawMinuteLine(g, rect, minute);
+		}
+
+		public virtual void DrawDayGripper(Graphics g, Rectangle rect, int gripWidth)
+		{
+			m_RenderHelper.DrawDayGripper(g, rect, gripWidth);
+		}
+
+		public virtual void DrawAllDayBackground(Graphics g, Rectangle rect)
+		{
+			m_RenderHelper.DrawAllDayBackground(g, rect, DaysShowing, allDayEventsHeaderHeight);
 		}
 
 		public virtual void DrawDayBackground(Graphics g, Rectangle rect)
@@ -518,22 +806,7 @@ namespace TimeLogUIExtension
 
 		public virtual void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight)
 		{
-			if (hilight)
-			{
-				// Draw selection rect
-				UIExtension.SelectionRect.Draw(Handle, 
-												g, 
-												rect.X, 
-												rect.Y, 
-												rect.Width, 
-												rect.Height, 
-												UIExtension.SelectionRect.Style.SelectedNotFocused, 
-												true); // transparent
-			}
-			else
-			{
-				Calendar.AbstractRenderer.DrawHourRange(g, rect, drawBorder, (hilight ? SelectionColor() : WorkingHourColor()));
-			}
+			m_RenderHelper.DrawHourRange(Handle, g, rect, drawBorder, hilight);
 		}
 
 		public bool TaskHasIcon(TaskItem taskItem)
@@ -643,41 +916,13 @@ namespace TimeLogUIExtension
 								Color fillColor, 
 								Color borderColor)
 		{
-			if (rect.Width <= 0)
-				return;
-
-
-			if (isSelected)
-			{
-				UIExtension.SelectionRect.Draw(Handle,
-												g,
-												rect.Left,
-												rect.Top,
-												rect.Width,
-												rect.Height,
-												GetAppointmentSelectedState(apptView.Appointment),
-												false);
-			}
-			else
-			{
-				using (SolidBrush brush = new SolidBrush(fillColor))
-				{
-					var fillRect = rect;
-					fillRect.Width++;
-					fillRect.Height++;
-
-					g.FillRectangle(brush, fillRect);
-				}
-
-				if (borderColor != Color.Empty)
-				{
-					rect.Height--; // drawing with pen adds 1 to height
-					rect.Width--;
-
-					using (Pen pen = new Pen(borderColor, 1))
-						g.DrawRectangle(pen, rect);
-				}
-			}
+			m_RenderHelper.DrawTaskBackground(Handle, 
+												g, 
+												rect, 
+												apptView, 
+												GetAppointmentSelectedState(apptView.Appointment), 
+												fillColor, 
+												borderColor);
 		}
 
 		void DrawTaskIconAndGripper(Graphics g, Calendar.AppointmentView apptView, bool isSelected, Color barColor, ref Rectangle rect)
@@ -769,73 +1014,7 @@ namespace TimeLogUIExtension
 
 		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
 		{
-			if (rect.Width <= 0)
-				return;
-
-			using (StringFormat format = new StringFormat())
-			{
-				format.Alignment = StringAlignment.Near;
-				format.LineAlignment = StringAlignment.Near;
-
-				rect.Y += TextOffset;
-				rect.Height -= TextOffset;
-
-				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-
-				using (SolidBrush brush = new SolidBrush(textColor))
-				{
-// 					TaskItem taskItem = GetTaskItem(apptView.Appointment);
-					var fontStyle = FontStyle.Regular;
-
-					// 					if (taskItem.IsDone && StrikeThruDoneTasks)
-					// 						fontStyle |= FontStyle.Strikeout;
-
-// 					var logEntry = (apptView.Appointment as LogEntry);
-
-					if (fontStyle != FontStyle.Regular)
-					{
-						using (Font font = new Font(BaseFont(), fontStyle))
-						{
-							g.DrawString(apptView.Appointment.Title, font, brush, rect, format);
-						}
-					}
-					else
-					{
-						g.DrawString(apptView.Appointment.Title, BaseFont(), brush, rect, format);
-					}
-				}
-
-				g.TextRenderingHint = TextRenderingHint.SystemDefault;
-			}
-		}
-
-		public bool CalcAppointmentRects(Calendar.AppointmentView apptView)
-		{
-			if (apptView.Rectangle.Width == 0 || apptView.Rectangle.Height == 0)
-			{
-				return false;
-			}
-
-			var appt = apptView.Appointment;
-			var apptRect = apptView.Rectangle;
-
-			// Our custom gripper bar
-			var gripRect = apptRect;
-			gripRect.Inflate(-2, -2);
-			gripRect.Width = 5;
-
-			if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
-			{
-				apptRect.Y++;
-				apptRect.Height--;
-			}
-
-			apptRect.Width -= 1;
-
-			apptView.Rectangle = apptRect;
-			apptView.GripRect = gripRect;
-
-			return true;
+			m_RenderHelper.DrawTaskText(g, apptView, rect, textColor, FontStyle.Regular);
 		}
 
 		public void DrawAppointment(Graphics g, Rectangle daysRect, Calendar.AppointmentView apptView, bool isSelected)
@@ -846,7 +1025,7 @@ namespace TimeLogUIExtension
             if (g == null)
                 throw new ArgumentNullException("g");
 
-			if (!CalcAppointmentRects(apptView))
+			if (!m_RenderHelper.CalcAppointmentRects(apptView))
 				return;
 
 			Color textColor, fillColor, borderColor, barColor;
@@ -868,71 +1047,32 @@ namespace TimeLogUIExtension
 // 			tdlView.TextHorzOffset = (apptView.Rectangle.X - apptRect.X);
 		}
 
-		private bool WantDrawToday(DateTime date)
-		{
-			if (!Theme.HasAppColor(UITheme.AppColor.Today))
-				return false;
-
-			return (date.Date == DateTime.Now.Date);
-		}
-
-		protected void DrawTodayBackground(PaintEventArgs e, Rectangle rect, DateTime date)
-		{
-			if (!WantDrawToday(date))
-				return;
-
-			using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
-			{
-				e.Graphics.FillRectangle(brush, rect);
-			}
-		}
-
 		protected void DrawTodayTime(PaintEventArgs e, Rectangle rect, DateTime date)
 		{
-			if (date.Date != DateTime.Now.Date)
-				return;
-
-			int vPos = GetHourScrollPos(DateTime.Now);
-
-			if ((vPos > rect.Top) && (vPos < rect.Bottom))
-			{
-				Color color = Theme.GetAppDrawingColor(UITheme.AppColor.Today);
-
-				using (var pen = new Pen(color, DPIScaling.Scale(2.0f)))
-				{
-					e.Graphics.DrawLine(pen, rect.Left, vPos, rect.Right, vPos);
-
-					// Draw a blob at the end point to draw attention to the line
-					// Note: we avoid the start because that might conflict with a task's 'bar'
-					using (var brush = new SolidBrush(color))
-					{
-						e.Graphics.FillEllipse(brush, RectUtil.CentredRect(new Point(rect.Right, vPos), DPIScaling.Scale(10)));
-					}
-				}
-			}
+			m_RenderHelper.DrawTodayTime(e.Graphics, rect, date, GetHourScrollPos(DateTime.Now));
 		}
 
 		protected void DrawNonWorkHours(PaintEventArgs e, Rectangle rect, DateTime date)
 		{
-			if (Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(date.DayOfWeek))
+			if (m_RenderHelper.Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(date.DayOfWeek))
 			{
-				var weekendColor = Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
+				var weekendColor = m_RenderHelper.Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
 
 				// If this is also 'today' then convert to gray so it doesn't 
 				// impose too much when the today colour is laid on top
-				if (WantDrawToday(date))
+				if (m_RenderHelper.WantDrawToday(date))
 					weekendColor = DrawingColor.ToGray(weekendColor);
 
 				using (var brush = new SolidBrush(weekendColor))
 					e.Graphics.FillRectangle(brush, rect);
 			}
-			else if (Theme.HasAppColor(UITheme.AppColor.NonWorkingHours))
+			else if (m_RenderHelper.Theme.HasAppColor(UITheme.AppColor.NonWorkingHours))
 			{
-				var nonWorkColor = Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128);
+				var nonWorkColor = m_RenderHelper.Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128);
 
 				// If this is also 'today' then convert to gray so it doesn't 
 				// impose too much when the today colour is laid on top
-				if (WantDrawToday(date))
+				if (m_RenderHelper.WantDrawToday(date))
 					nonWorkColor = DrawingColor.ToGray(nonWorkColor);
 
 				using (SolidBrush brush = new SolidBrush(nonWorkColor))
