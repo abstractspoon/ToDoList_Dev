@@ -62,9 +62,6 @@
     <Compile Include="DayViewEditTimeBlockSeriesDlg.Designer.cs">
       <DependentUpon>DayViewEditTimeBlockSeriesDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewTaskComboBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="DayViewTimeBlockAttributesPage.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -33,7 +33,7 @@
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
 			this.m_Attributes = new TimeLogUIExtension.TimeLogTimeBlockAttributesPage();
-			this.m_TaskCombo = new TimeLogUIExtension.TimeLogTaskComboBox();
+			this.m_TaskCombo = new Abstractspoon.Tdl.PluginHelpers.TaskComboBox();
 			this.SuspendLayout();
 			// 
 			// m_TaskLabel
@@ -130,7 +130,7 @@
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Label label5;
-		private TimeLogTaskComboBox m_TaskCombo;
+		private Abstractspoon.Tdl.PluginHelpers.TaskComboBox m_TaskCombo;
 		private TimeLogTimeBlockAttributesPage m_Attributes;
 	}
 }

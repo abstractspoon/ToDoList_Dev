@@ -65,9 +65,6 @@
     </Compile>
     <Compile Include="LogEntry.cs" />
     <Compile Include="TimeLogRenderer.cs" />
-    <Compile Include="TimeLogTaskComboBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="TimeLogTimeBlockAttributesPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
