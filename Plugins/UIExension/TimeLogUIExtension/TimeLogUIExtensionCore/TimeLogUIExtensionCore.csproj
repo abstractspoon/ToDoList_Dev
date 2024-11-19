@@ -127,6 +127,10 @@
       <Project>{D17A4D6A-4CAA-4470-8A19-F42463C021FD}</Project>
       <Name>TimeLog</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\DayViewUIExtension\DayViewUIExtensionCore\DayViewUIExtensionCore.csproj">
+      <Project>{92fefdb8-3f95-4404-a620-8003b51c5a53}</Project>
+      <Name>DayViewUIExtensionCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="toolbar_std.bmp" />
