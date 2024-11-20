@@ -14154,12 +14154,12 @@ void CToDoListWnd::OnToolsAnonymizeTaskTimeLog()
 
 	if (CTDCAnonymizeTaskTimeLog::Anonymize(sLogPath, sAnonFilePath))
 	{
-		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZE_SUCCESS, MB_YESNO))
+		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZETASKTIMELOG_SUCCESS, MB_YESNO))
 			DisplayTimelogfile(sAnonFilePath);
 	}
 	else
 	{
-		CMessageBox::AfxShow(IDS_ANONYMIZE_FAIL);
+		CMessageBox::AfxShow(IDS_ANONYMIZETASKTIMELOG_FAIL);
 	}
 }
 
@@ -14169,12 +14169,12 @@ void CToDoListWnd::OnToolsAnonymizeTasklist()
 
 	if (CTDCAnonymizeTasklist::Anonymize(GetToDoCtrl().GetFilePath(), sAnonFilePath))
 	{
-		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZE_SUCCESS, MB_YESNO))
+		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZETASKLIST_SUCCESS, MB_YESNO))
 			OpenTaskList(sAnonFilePath, FALSE);
 	}
 	else
 	{
-		CMessageBox::AfxShow(IDS_ANONYMIZE_FAIL);
+		CMessageBox::AfxShow(IDS_ANONYMIZETASKLIST_FAIL);
 	}
 }
 
