@@ -3707,6 +3707,8 @@ BEGIN
         MENUITEM "&View Debug Log File",        ID_TOOLS_VIEWLOG
         MENUITEM SEPARATOR
         MENUITEM "Anon&ymise Tasklist",         ID_TOOLS_ANONYMIZE_TASKLIST
+        MENUITEM "Anon&ymise Task Log File",    ID_TOOLS_ANONYMIZE_TASKTIMELOG
+
     END
     POPUP "&Window"
     BEGIN

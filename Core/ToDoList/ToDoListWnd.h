@@ -378,6 +378,7 @@ protected:
 	afx_msg void OnToolsAddtoSourceControl();
 	afx_msg void OnToolsAnalyseLoggedTime();
 	afx_msg void OnToolsAnonymizeTasklist();
+	afx_msg void OnToolsAnonymizeTaskTimeLog();
 	afx_msg void OnToolsCheckin();
 	afx_msg void OnToolsCheckout();
 	afx_msg void OnToolsCleanupIniPreferences();
@@ -874,6 +875,7 @@ protected:
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
 	static BOOL CALLBACK FindOtherInstance(HWND hwnd, LPARAM lParam);
+	static void DisplayTimelogfile(LPCTSTR szFilePath);
 
 };
 
