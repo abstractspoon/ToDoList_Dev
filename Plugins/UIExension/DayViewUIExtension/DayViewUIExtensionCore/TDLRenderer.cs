@@ -611,7 +611,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor, FontStyle fontStyle)
+		public void DrawItemText(Graphics g, string text, Rectangle rect, Color textColor, FontStyle fontStyle, bool isLong)
 		{
 			if (rect.Width <= 0)
 				return;
@@ -619,14 +619,14 @@ namespace DayViewUIExtension
 			using (StringFormat format = new StringFormat())
 			{
 				format.Alignment = StringAlignment.Near;
-				format.LineAlignment = (apptView.IsLong ? StringAlignment.Center : StringAlignment.Near);
+				format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
 
-				if (apptView.IsLong)
+				if (isLong)
 					format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
 
 				rect.Y += TextOffset;
 
-				if (apptView.IsLong)
+				if (isLong)
 					rect.Height = BaseFont.Height;
 				else
 					rect.Height -= TextOffset;
@@ -639,12 +639,12 @@ namespace DayViewUIExtension
 					{
 						using (Font font = new Font(BaseFont, fontStyle))
 						{
-							g.DrawString(apptView.Appointment.Title, font, brush, rect, format);
+							g.DrawString(text, font, brush, rect, format);
 						}
 					}
 					else
 					{
-						g.DrawString(apptView.Appointment.Title, BaseFont, brush, rect, format);
+						g.DrawString(text, BaseFont, brush, rect, format);
 					}
 				}
 
@@ -1166,16 +1166,18 @@ namespace DayViewUIExtension
 
 		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
 		{
-			TaskItem taskItem = GetTaskItem(apptView.Appointment);
+			var appt = apptView.Appointment;
+
+			TaskItem taskItem = GetTaskItem(appt);
 			var fontStyle = FontStyle.Regular;
 
 			if (taskItem.IsDone && StrikeThruDoneTasks)
 				fontStyle |= FontStyle.Strikeout;
 
-			if (taskItem.IsTopLevel && !(apptView.Appointment is TaskFutureOccurrence))
+			if (taskItem.IsTopLevel && !(appt is TaskFutureOccurrence))
 				fontStyle |= FontStyle.Bold;
 
-			m_RenderHelper.DrawTaskText(g, apptView, rect, textColor, fontStyle);
+			m_RenderHelper.DrawItemText(g, appt.Title, rect, textColor, fontStyle, apptView.IsLong);
 		}
 
 		public bool CalcAppointmentRects(Calendar.AppointmentView apptView)

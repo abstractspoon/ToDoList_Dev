@@ -195,95 +195,71 @@ namespace TimeLogUIExtension
 
 		LogEntry GetLogEntry(Calendar.Appointment appt)
 		{
-// 			bool isExtItem = (appt is TaskExtensionItem);
-// 
-// 			if (isExtItem)
-// 				return (appt as TaskExtensionItem).RealTask;
-
-			// else
 			return (appt as LogEntry);
+		}
+
+		TaskItem GetTaskItem(Calendar.Appointment appt)
+		{
+			var entry = GetLogEntry(appt);
+
+			if (entry.TaskId <= 0)
+				return null;
+
+			return m_TaskItems.GetItem(entry.TaskId);
 		}
 
 		void GetTaskColors(Calendar.AppointmentView apptView, bool isSelected, out Color textColor, out Color fillColor, out Color borderColor, out Color barColor)
 		{
-//			TimeLogEntry taskItem = GetLogEntry(apptView.Appointment);
-
-// 			bool isFutureItem = (apptView.Appointment is TaskFutureOccurrence);
-// 			bool isTimeBlock = (apptView.Appointment is TaskTimeBlock);
-// 			bool isLong = apptView.IsLong;
+			var taskItem = GetTaskItem(apptView.Appointment);
+			bool isLong = apptView.IsLong;
 
 			textColor = borderColor = fillColor = barColor = Color.Empty;
 
-/*
 			if (SystemInformation.HighContrast)
 			{
 				if (isSelected)
 				{
 					textColor = borderColor = SystemColors.HighlightText;
 					fillColor = SystemColors.Highlight;
-
-					if (!isFutureItem)
-						barColor = (taskItem.HasTaskTextColor ? taskItem.TaskTextColor : textColor);
 				}
-				else if (taskItem.HasTaskTextColor)
-				{
-					textColor = borderColor = taskItem.TaskTextColor;
-					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
-
-					if (!isFutureItem)
-						barColor = textColor;
-				}
+// 				else if (taskItem.HasTaskTextColor)
+// 				{
+// 					textColor = borderColor = taskItem.TaskTextColor;
+// 					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
+// 				}
 				else
 				{
 					textColor = borderColor = SystemColors.WindowText;
 					fillColor = (isLong ? SystemColors.Control : SystemColors.Window);
-
-					if (!isFutureItem)
-						barColor = textColor;
 				}
 			}
 			else // NOT high contrast
 			{
 				if (isSelected)
 				{
-					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TaskTextColor);
-
-					if (isFutureItem)
- 						borderColor = textColor;
-					else
-						barColor = (taskItem.HasTaskTextColor ? taskItem.TaskTextColor : textColor);
+					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, Color.Black/*taskItem.TaskTextColor*/);
+					barColor = (/*taskItem.HasTaskTextColor ? taskItem.TaskTextColor :*/ textColor);
 				}
-				else if (taskItem.HasTaskTextColor)
-				{
-					textColor = borderColor = taskItem.TaskTextColor;
-					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
-
-					if (!isFutureItem)
-						barColor = textColor;
-				}
+// 				else if (taskItem.HasTaskTextColor)
+// 				{
+// 					textColor = borderColor = taskItem.TaskTextColor;
+// 					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
+// 				}
 				else
 				{
 					textColor = borderColor = SystemColors.WindowText;
 					fillColor = (isLong ? SystemColors.Control : SystemColors.Window);
-
-					if (!isFutureItem)
-						barColor = textColor;
 				}
 			}
-*/
 
-// 			if (TaskColorIsBackground && 
-// 				taskItem.HasTaskTextColor && 
-// 				!isSelected && 
-// 				!isFutureItem && 
-// 				!isTimeBlock)
-			{
-				barColor = textColor;
-				fillColor = textColor;
-
-				textColor = DrawingColor.GetBestTextColor(textColor, true);
-				borderColor = DrawingColor.AdjustLighting(textColor, -0.5f, true);
-			}
+// 			if (TaskColorIsBackground && taskItem.HasTaskTextColor)
+// 			{
+// 				barColor = textColor;
+// 				fillColor = textColor;
+// 
+// 				textColor = DrawingColor.GetBestTextColor(textColor, true);
+// 				borderColor = DrawingColor.AdjustLighting(textColor, -0.5f, true);
+// 			}
 		}
 
 		void DrawTaskBackground(Graphics g, 
@@ -324,7 +300,11 @@ namespace TimeLogUIExtension
 
 		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
 		{
-			m_RenderHelper.DrawTaskText(g, apptView, rect, textColor, FontStyle.Regular);
+			var appt = apptView.Appointment;
+
+			m_RenderHelper.DrawItemText(g, appt.Title, rect, textColor, FontStyle.Regular, apptView.IsLong);
+
+			// Draw comment text too
 		}
 
 		public void DrawAppointment(Graphics g, Rectangle daysRect, Calendar.AppointmentView apptView, bool isSelected)
