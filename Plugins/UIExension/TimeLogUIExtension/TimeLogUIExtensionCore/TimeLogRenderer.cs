@@ -335,7 +335,7 @@ namespace TimeLogUIExtension
             if (g == null)
                 throw new ArgumentNullException("g");
 
-			if (!m_RenderHelper.CalcAppointmentRects(apptView))
+			if (!m_RenderHelper.CalcAppointmentRects(apptView, StartDate, EndDate))
 				return;
 
 			Color textColor, fillColor, borderColor, barColor;

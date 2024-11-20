@@ -619,10 +619,17 @@ namespace DayViewUIExtension
 			using (StringFormat format = new StringFormat())
 			{
 				format.Alignment = StringAlignment.Near;
-				format.LineAlignment = StringAlignment.Near;
+				format.LineAlignment = (apptView.IsLong ? StringAlignment.Center : StringAlignment.Near);
+
+				if (apptView.IsLong)
+					format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
 
 				rect.Y += TextOffset;
-				rect.Height -= TextOffset;
+
+				if (apptView.IsLong)
+					rect.Height = BaseFont.Height;
+				else
+					rect.Height -= TextOffset;
 
 				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
@@ -645,7 +652,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool CalcAppointmentRects(Calendar.AppointmentView apptView)
+		public bool CalcAppointmentRects(Calendar.AppointmentView apptView, DateTime startDate, DateTime endDate)
 		{
 			if (apptView.Rectangle.Width == 0 || apptView.Rectangle.Height == 0)
 			{
@@ -658,15 +665,51 @@ namespace DayViewUIExtension
 			// Our custom gripper bar
 			var gripRect = apptRect;
 			gripRect.Inflate(-2, -2);
-			gripRect.Width = 5;
 
-			if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
+			// Future tasks are not draggable -> no gripper
+			if (apptView.Appointment is TaskFutureOccurrence)
+				gripRect.Width = 0;
+			else
+				gripRect.Width = 5;
+
+			bool longAppt = apptView.IsLong;
+
+			if (longAppt)
 			{
-				apptRect.Y++;
-				apptRect.Height--;
-			}
+				// If and the start date precedes the 
+				// start of the week then extend the draw rect to the left 
+				// so the edge is clipped and likewise for the end date.
+				if (appt.StartDate < startDate)
+				{
+					apptRect.X -= 4;
+					apptRect.Width += 4;
 
-			apptRect.Width -= 1;
+					gripRect.X = apptRect.X;
+					gripRect.Width = 0;
+				}
+				else if (appt.StartDate > startDate)
+				{
+					apptRect.X++;
+					apptRect.Width--;
+
+					gripRect.X++;
+				}
+
+				if (appt.EndDate >= endDate)
+				{
+					apptRect.Width += 5;
+				}
+			}
+			else // day appt
+			{
+				if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
+				{
+					apptRect.Y++;
+					apptRect.Height--;
+				}
+
+				apptRect.Width -= 1;
+			}
 
 			apptView.Rectangle = apptRect;
 			apptView.GripRect = gripRect;
@@ -720,7 +763,6 @@ namespace DayViewUIExtension
 	public partial class TDLDayView : Calendar.IRenderer
 	{
 		private RenderHelper m_RenderHelper = new RenderHelper(); 
-		private UIExtension.TaskIcon m_TaskIcons;
 		private int m_DayWidth = -1;
 
 		// ------------------------------------------------------------------------
@@ -891,7 +933,7 @@ namespace DayViewUIExtension
 
 		public bool TaskHasIcon(TaskItem taskItem)
 		{
-			return ((m_TaskIcons != null) &&
+			return ((m_RenderHelper.TaskIcons != null) &&
 					(taskItem != null) &&
 					(taskItem.HasIcon || (ShowParentsAsFolder && taskItem.IsParent)));
 		}
@@ -1292,7 +1334,7 @@ namespace DayViewUIExtension
             if (g == null)
                 throw new ArgumentNullException("g");
 
-			if (!m_RenderHelper.CalcAppointmentRects(apptView))
+			if (!m_RenderHelper.CalcAppointmentRects(apptView, StartDate, EndDate))
 				return;
 
 			Color textColor, fillColor, borderColor, barColor;
