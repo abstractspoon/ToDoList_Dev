@@ -494,6 +494,9 @@
     <ClCompile Include="..\ToDoList\TDCDarkMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCAnonymizeTaskTimeLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -998,6 +1001,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCDarkMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCAnonymizeTaskTimeLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
