@@ -4,9 +4,7 @@
 
 #include "stdafx.h"
 #include "TDCAnonymizeTaskTimeLog.h"
-#include "todoitem.h"
 
-#include "..\Shared\Misc.h"
 #include "..\Shared\fileMisc.h"
 
 #ifdef _DEBUG
@@ -108,6 +106,7 @@ BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLogItems(CTaskTimeLogItemArray& aLogItem
 CString CTDCAnonymizeTaskTimeLog::GetContent(const CTaskTimeLogItemArray& aLogItems) const
 {
 	CString sContent;
+
 	int nItem = aLogItems.GetSize();
 
 	while (nItem--)
@@ -116,8 +115,6 @@ CString CTDCAnonymizeTaskTimeLog::GetContent(const CTaskTimeLogItemArray& aLogIt
 
 		sContent += li.sTaskTitle;
 		sContent += li.sComment;
-		sContent += li.sPerson;
-		sContent += li.sPath;
 	}
 
 	return sContent;
