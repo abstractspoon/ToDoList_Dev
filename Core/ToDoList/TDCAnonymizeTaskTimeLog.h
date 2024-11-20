@@ -30,8 +30,11 @@ protected:
 protected:
 	CTDCAnonymizeTaskTimeLog();
 
-	BOOL AnonymizeLog(CTaskTimeLogItemArray& aLogItems);
+	BOOL AnonymizeLog(LPCTSTR szLogfile, CString& sAnonFilePath);
+	BOOL AnonymizeLogItems(CTaskTimeLogItemArray& aLogItems);
+
 	CString AnonymizeText(const CString& sItem) const;
+	void AnonymizeItem(CString& sItem, CMapStringToString& mapTLD) const;
 
 	BOOL BuildContent(const CTaskTimeLogItemArray& aLogItems);
 	CString GetContent(const CTaskTimeLogItemArray& aLogItems) const;

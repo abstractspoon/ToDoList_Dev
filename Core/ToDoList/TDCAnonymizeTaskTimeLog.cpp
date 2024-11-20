@@ -31,22 +31,27 @@ BOOL CTDCAnonymizeTaskTimeLog::Anonymize(LPCTSTR szLogfile)
 
 BOOL CTDCAnonymizeTaskTimeLog::Anonymize(LPCTSTR szLogfile, CString& sAnonFilePath)
 {
+	return CTDCAnonymizeTaskTimeLog().AnonymizeLog(szLogfile, sAnonFilePath);
+}
+
+BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLog(LPCTSTR szLogfile, CString& sAnonFilePath)
+{
 	CTaskTimeLogItemArray aLogItems;
 	CString sDelim;
+
+	Initialise(szLogfile);
 
 	if (!LoadLogItems(szLogfile, aLogItems, FALSE, sDelim))
 		return FALSE;
 
-	CTDCAnonymizeTaskTimeLog anon;
-
-	if (!anon.AnonymizeLog(aLogItems))
+	if (!AnonymizeLogItems(aLogItems))
 		return FALSE;
 
 	// Save to alternate filename
 	sAnonFilePath = szLogfile;
 	FileMisc::AddToFileName(sAnonFilePath, _T(".rnd"));
 	
-	return anon.SaveAnonymisedLogFile(sAnonFilePath, aLogItems, sDelim);
+	return SaveAnonymisedLogFile(sAnonFilePath, aLogItems, sDelim);
 }
 
 BOOL CTDCAnonymizeTaskTimeLog::SaveAnonymisedLogFile(const CString& sLogPath, const CTaskTimeLogItemArray& aLogItems, const CString sDelim)
@@ -74,7 +79,7 @@ BOOL CTDCAnonymizeTaskTimeLog::SaveAnonymisedLogFile(const CString& sLogPath, co
 	return TRUE;
 }
 
-BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLog(CTaskTimeLogItemArray& aLogItems)
+BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLogItems(CTaskTimeLogItemArray& aLogItems)
 {
 	// Use a different seed value so that we don't get same
 	// result each time we run this method
@@ -90,10 +95,11 @@ BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLog(CTaskTimeLogItemArray& aLogItems)
 	{
 		TASKTIMELOGITEM& li = aLogItems[nItem];
 
-		li.sTaskTitle = AnonymizeText(li.sTaskTitle);
+		AnonymizeItem(li.sTaskTitle, *m_mapSharedData.GetAddMapping(_T("TITLE")));
+		AnonymizeItem(li.sPerson, *m_mapSharedData.GetAddMapping(_T("PERSON")));
+		AnonymizeItem(li.sPath, *m_mapSharedData.GetAddMapping(_T("PATH")));
+
 		li.sComment = AnonymizeText(li.sComment);
-		li.sPerson = AnonymizeText(li.sPerson);
-		li.sPath = AnonymizeText(li.sPath);
 	}
 
 	return TRUE;
@@ -149,6 +155,24 @@ BOOL CTDCAnonymizeTaskTimeLog::IsWhiteSpaceOrNumberOrPunctuation(TCHAR c)
 		return FALSE;
 
 	return TRUE;
+}
+
+void CTDCAnonymizeTaskTimeLog::AnonymizeItem(CString& sItem, CMapStringToString& mapTLD) const
+{
+	if (!sItem.IsEmpty())
+	{
+		CString sRandom;
+
+		if (!mapTLD.Lookup(sItem, sRandom))
+		{
+			// add to map
+			sRandom = AnonymizeText(sItem);
+			mapTLD[sItem] = sRandom;
+		}
+
+		sItem = sRandom;
+		ASSERT(!sItem.IsEmpty());
+	}
 }
 
 CString CTDCAnonymizeTaskTimeLog::AnonymizeText(const CString& sItem) const

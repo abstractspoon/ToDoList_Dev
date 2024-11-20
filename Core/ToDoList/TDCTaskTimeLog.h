@@ -23,7 +23,7 @@ struct TASKTIMELOGITEM
 	
 	BOOL IsValidToAnalyse() const;
 	BOOL IsValidToLog() const;
-	void Reset();
+	void Clear(BOOL bInitPerson = FALSE);
 
 	CString FormatRow(int nRowVer, const CString& sDelim) const;
 	BOOL ParseRow(const CString& sRow, const CString& sDelim);

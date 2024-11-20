@@ -62,7 +62,7 @@ const int NUM_LOG_VERSIONS = sizeof(LOG_VERSIONS) / sizeof(LOG_VERSION_INFO);
 
 TASKTIMELOGITEM::TASKTIMELOGITEM()
 {
-	Reset();
+	Clear(TRUE);
 }
 
 BOOL TASKTIMELOGITEM::IsValidToLog() const
@@ -88,7 +88,7 @@ BOOL TASKTIMELOGITEM::IsValidToAnalyse() const
 	return FALSE;
 }
 
-void TASKTIMELOGITEM::Reset()
+void TASKTIMELOGITEM::Clear(BOOL bInitPerson)
 {
 	dwTaskID = 0;
 	dHours = 0.0;
@@ -100,8 +100,12 @@ void TASKTIMELOGITEM::Reset()
 
 	sTaskTitle.Empty();
 	sComment.Empty();
-	sPerson.Empty();
 	sPath.Empty();
+
+	if (bInitPerson)
+		sPerson = Misc::GetUserName();
+	else
+		sPerson.Empty();
 }
 
 CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
@@ -117,7 +121,7 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 					 Misc::Format(dwTaskID),
 					 sTaskTitle,
 					 Misc::Format(dHours, 3),
-					 Misc::GetUserName(),
+					 sPerson,
 					 CDateHelper::FormatDate(dtTo, DHFD_TIME),
 					 CDateHelper::FormatDate(dtFrom, DHFD_TIME));
 		break;
@@ -126,7 +130,7 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 		sItem.Format(sRowFormat,
 					 Misc::Format(dwTaskID),
 					 sTaskTitle,
-					 Misc::GetUserName(),
+					 sPerson,
 					 CDateHelper::FormatDate(dtFrom, DHFD_ISO),
 					 CTimeHelper::FormatClockTime(dtFrom, FALSE, TRUE),
 					 CDateHelper::FormatDate(dtTo, DHFD_ISO),
@@ -163,7 +167,7 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 	ASSERT (nRowVer != -1);
 	
 	COleDateTime date;
-	Reset();
+	Clear();
 	
 	switch (nRowVer)
 	{
