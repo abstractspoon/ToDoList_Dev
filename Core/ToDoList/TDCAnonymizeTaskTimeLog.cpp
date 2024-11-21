@@ -106,6 +106,7 @@ BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLogItems(CTaskTimeLogItemArray& aLogItem
 CString CTDCAnonymizeTaskTimeLog::GetContent(const CTaskTimeLogItemArray& aLogItems) const
 {
 	CString sContent;
+	CStringSet mapUniqueValues;
 
 	int nItem = aLogItems.GetSize();
 
@@ -113,8 +114,18 @@ CString CTDCAnonymizeTaskTimeLog::GetContent(const CTaskTimeLogItemArray& aLogIt
 	{
 		const TASKTIMELOGITEM& li = aLogItems[nItem];
 
-		sContent += li.sTaskTitle;
-		sContent += li.sComment;
+		// Avoid duplicate title and comment entries
+		if (!mapUniqueValues.Has(li.sTaskTitle))
+		{
+			sContent += li.sTaskTitle;
+			mapUniqueValues.Add(li.sTaskTitle);
+		}
+
+		if (!mapUniqueValues.Has(li.sComment))
+		{
+			sContent += li.sComment;
+			mapUniqueValues.Add(li.sComment);
+		}
 	}
 
 	return sContent;
