@@ -4125,11 +4125,14 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			break;
 
 		case WM_MOUSEWHEEL:
-			// Windows only invalidates the item labels but
-			// we need the whole row because we render the 
-			// comments after the task text
-			if (HasHScrollBar(hRealWnd) && !HasVScrollBar(hRealWnd))
-				::InvalidateRect(hRealWnd, NULL, FALSE);
+			if (!Misc::IsKeyPressed(VK_CONTROL)) // ie. NOT zooming
+			{
+				// Windows only invalidates the item labels but
+				// we need the whole row because we render the 
+				// comments after the task text
+				if (HasHScrollBar(hRealWnd) && !HasVScrollBar(hRealWnd))
+					::InvalidateRect(hRealWnd, NULL, FALSE);
+			}
 			break;
 		}
 	}

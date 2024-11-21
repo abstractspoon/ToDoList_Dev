@@ -1065,25 +1065,28 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			}
 			break;
 
-		case WM_MOUSEWHEEL:
-			// if the tree has a horizontal scrollbar and the list doesn't have
-			// a vertical scrollbar then Windows will scroll the tree horizontally 
-			// so we need to redraw the whole tree to prevent artifacts caused
-			// by our multiple columns
-			if (!HasVScrollBar(m_list) && HasHScrollBar(m_tree))
+		case WM_MOUSEWHEEL: 
+			if (!Misc::IsKeyPressed(VK_CONTROL)) // ie. NOT zooming
 			{
-				int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
-				WORD wKeys = LOWORD(wp);
+				// if the tree has a horizontal scrollbar and the list doesn't have
+				// a vertical scrollbar then Windows will scroll the tree horizontally 
+				// so we need to redraw the whole tree to prevent artifacts caused
+				// by our multiple columns
+				if (!HasVScrollBar(m_list) && HasHScrollBar(m_tree))
+				{
+					int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
+					WORD wKeys = LOWORD(wp);
 
-				if ((zDelta == 0) || (wKeys != 0))
-					return TRUE; // eat
+					if ((zDelta == 0) || (wKeys != 0))
+						return TRUE; // eat
 
-				if (!CanScroll(m_tree, SB_HORZ, (zDelta > 0)))
-					return TRUE; // eat
+					if (!CanScroll(m_tree, SB_HORZ, (zDelta > 0)))
+						return TRUE; // eat
 
-				CHoldRedraw hr(hRealWnd, NCR_PAINT | NCR_UPDATE);
+					CHoldRedraw hr(hRealWnd, NCR_PAINT | NCR_UPDATE);
 
-				return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+					return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+				}
 			}
 			break;
 
