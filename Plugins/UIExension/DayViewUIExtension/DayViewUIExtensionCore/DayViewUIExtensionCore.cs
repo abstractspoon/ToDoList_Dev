@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
+using UIComponents;
+
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
@@ -31,9 +33,9 @@ namespace DayViewUIExtension
 		private bool m_SettingDayViewStartDate = false;
 		private bool m_AllowModifyTimeEstimate = false;
 
-		private DayViewWeekLabel m_WeekLabel;
-		private DayViewMonthComboBox m_MonthCombo;
-		private DayViewYearComboBox m_YearCombo;
+		private WeekLabel m_WeekLabel;
+		private MonthComboBox m_MonthCombo;
+		private YearComboBox m_YearCombo;
         private DayViewPreferencesDlg m_PrefsDlg;
 
         private IIControls.ToolStripEx m_Toolbar;
@@ -456,7 +458,7 @@ namespace DayViewUIExtension
 
 		private void CreateWeekLabel()
 		{
-			m_WeekLabel = new DayViewWeekLabel(m_Trans);
+			m_WeekLabel = new WeekLabel(m_Trans);
 
 			m_WeekLabel.Font = new Font(FontName, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);
@@ -851,7 +853,7 @@ namespace DayViewUIExtension
 
 		private void CreateMonthYearCombos()
 		{
-			m_MonthCombo = new DayViewMonthComboBox();
+			m_MonthCombo = new MonthComboBox();
 
 			m_MonthCombo.Font = m_ControlsFont;
             m_MonthCombo.Location = new Point(DPIScaling.Scale(0), ComboTop);
@@ -862,7 +864,7 @@ namespace DayViewUIExtension
 			
 			Controls.Add(m_MonthCombo);
 
-			m_YearCombo = new DayViewYearComboBox();
+			m_YearCombo = new YearComboBox();
 
 			m_YearCombo.Font = m_ControlsFont;
             m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);

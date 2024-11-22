@@ -62,18 +62,12 @@
     <Compile Include="DayViewEditTimeBlockSeriesDlg.Designer.cs">
       <DependentUpon>DayViewEditTimeBlockSeriesDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewMonthComboBox.cs" />
-    <Compile Include="DayViewTaskComboBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="DayViewTimeBlockAttributesPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="DayViewTimeBlockAttributesPage.Designer.cs">
       <DependentUpon>DayViewTimeBlockAttributesPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewWeekLabel.cs" />
-    <Compile Include="DayViewYearComboBox.cs" />
     <Compile Include="DayViewPreferencesDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -124,6 +118,10 @@
     <ProjectReference Include="..\..\..\3rdParty\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
       <Name>ToolStripEx</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\UIComponents\UIComponents.csproj">
+      <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
+      <Name>UIComponents</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}</Project>
