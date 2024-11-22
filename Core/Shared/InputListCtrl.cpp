@@ -750,7 +750,7 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) const
 
 BOOL CInputListCtrl::CanDeleteSelectedCell() const
 {
-	return CanEditSelectedCell();
+	return (CanEditSelectedCell() && !IsPrompt(GetCurSel(), m_nCurCol));
 }
 
 BOOL CInputListCtrl::CanDeleteCell(int nRow, int nCol) const

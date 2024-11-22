@@ -6,7 +6,6 @@ using System.Diagnostics;
 
 using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
-using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace DayViewUIExtension
 {
@@ -56,7 +55,6 @@ namespace DayViewUIExtension
 		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
 		private List<CustomAttributeDefinition> m_CustomDateDefs;
 
-		//private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
 		private UIExtension.TaskRecurrences m_TaskRecurrences;
 		private Translator m_Trans;
@@ -85,7 +83,7 @@ namespace DayViewUIExtension
 			dayGripWidth = 1; // to match app styling
 
 			m_Trans = trans;
-			m_TaskIcons = taskIcons;
+			m_RenderHelper.TaskIcons = taskIcons;
 			m_ToolbarRenderer = new UIThemeToolbarRenderer();
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
@@ -141,7 +139,7 @@ namespace DayViewUIExtension
 
 			bool startPortion = (tip.Rect.Right < tdlView.Rectangle.Right);
 
-			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, TextOffset);
+			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, m_RenderHelper.TextOffset);
 
 			var appt = tdlView.Appointment;
 			tip.Id = appt.Id;
@@ -215,7 +213,7 @@ namespace DayViewUIExtension
 			}
 
 			// Inflate the rect now we've done all our calculations
-			tip.Rect.Inflate(TextPadding, TextPadding);
+			tip.Rect.Inflate(m_RenderHelper.TextPadding, m_RenderHelper.TextPadding);
 
 			return tip;
 		}
@@ -884,7 +882,7 @@ namespace DayViewUIExtension
 					rect.X += 1;
 					rect.Y += 1;
 
-					rect.Height = (GetFontHeight() + 4); // 4 = border
+					rect.Height = (m_RenderHelper.FontHeight + 4); // 4 = border
 				}
 
 				return true;
@@ -1829,7 +1827,7 @@ namespace DayViewUIExtension
 			int minDayWidth = 0;
 
 			using (Graphics g = Graphics.FromHwnd(Handle))
-				minDayWidth = CalculateMinimumDayWidthForImage(g);
+				minDayWidth = m_RenderHelper.CalculateMinimumDayWidthForImage(g);
 
 			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * Math.Max(dayWidth, minDayWidth)));
 

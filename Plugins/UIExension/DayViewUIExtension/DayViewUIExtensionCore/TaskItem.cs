@@ -129,7 +129,7 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class TaskItem : Calendar.Appointment
+	public class TaskItem : Calendar.Appointment, ITask
 	{
 		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
 		private DateTime m_PrevDueDate = NullDate;
