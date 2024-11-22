@@ -1602,11 +1602,14 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		break;
 
 	case WM_MOUSEWHEEL:
-		// If the right-side window has a vertical scrollbar forward it on
-		if (HasVScrollBar())
+		if (!Misc::IsKeyPressed(VK_CONTROL)) // ie. NOT zooming
 		{
-			m_scRight.PostMessage(WM_MOUSEWHEEL, wp, lp);
-			return 0L;
+			// If the right-side window has a vertical scrollbar forward it on
+			if (HasVScrollBar())
+			{
+				m_scRight.PostMessage(WM_MOUSEWHEEL, wp, lp);
+				return 0L;
+			}
 		}
 		break;
 
@@ -2829,6 +2832,9 @@ void CTreeListSyncer::FixupListListItemIsDataLinkage(int nFrom)
 
 BOOL CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 {
+	if (Misc::IsKeyPressed(VK_CONTROL)) // ie. zooming
+		return FALSE;
+
 	int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
 	ASSERT(zDelta);
 

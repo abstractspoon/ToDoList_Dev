@@ -1838,15 +1838,19 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			return 0L;
 
 		case WM_MOUSEWHEEL:
-			CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
-
-			if (HasHScrollBar(hRealWnd) && !HasVScrollBar(hRealWnd))
+			if (!Misc::IsKeyPressed(VK_CONTROL)) // ie. NOT zooming
 			{
-				// Keep totals synced
-				m_lcColumnTotals.Invalidate(FALSE);
-				m_lcColumnTotals.UpdateWindow();
+				CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
+
+				if (HasHScrollBar(hRealWnd) && !HasVScrollBar(hRealWnd))
+				{
+					// Keep totals synced
+					m_lcColumnTotals.Invalidate(FALSE);
+					m_lcColumnTotals.UpdateWindow();
+				}
+				return 0L;
 			}
-			return 0L;
+			break;
 
 		case WM_SETCURSOR:
 			if (!m_bReadOnly)
@@ -1910,20 +1914,23 @@ LRESULT CWorkloadCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 BOOL CWorkloadCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint pt)
 {
-	// We have to handle mouse wheel over the totals because we have disabled it
-	if (HasHScrollBar(m_list))
+	if (!Misc::IsKeyPressed(VK_CONTROL)) // ie. NOT zooming
 	{
-		CWnd::ScreenToClient(&pt);
-
-		if (ChildWindowFromPoint(pt) == &m_lcColumnTotals)
+		// We have to handle mouse wheel over the totals because we have disabled it
+		if (HasHScrollBar(m_list))
 		{
-			BOOL bScrollRight = (zDelta < 0);
-			int nScroll = 3;
+			CWnd::ScreenToClient(&pt);
 
-			while (nScroll--)
-				m_list.SendMessage(WM_HSCROLL, (bScrollRight ? SB_LINERIGHT : SB_LINELEFT), 0L);
+			if (ChildWindowFromPoint(pt) == &m_lcColumnTotals)
+			{
+				BOOL bScrollRight = (zDelta < 0);
+				int nScroll = 3;
 
-			return TRUE;
+				while (nScroll--)
+					m_list.SendMessage(WM_HSCROLL, (bScrollRight ? SB_LINERIGHT : SB_LINELEFT), 0L);
+
+				return TRUE;
+			}
 		}
 	}
 
