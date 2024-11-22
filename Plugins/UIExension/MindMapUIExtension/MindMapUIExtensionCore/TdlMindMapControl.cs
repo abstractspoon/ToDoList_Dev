@@ -530,14 +530,12 @@ namespace MindMapUIExtension
 
 		// Idle processing ----------------------------------------------------
 
-		bool DoIdleRecalcPositions;
+		bool DoIdleEndUpdate;
 		bool InMouseWheel;
-		Bitmap idleBitmap;
+ 		Bitmap IdleSnapshot;
 
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
-			Debug.WriteLine("TdlMindMapControl.OnMouseWheel");
-
 			InMouseWheel = true;
 
 			base.OnMouseWheel(e);
@@ -547,24 +545,18 @@ namespace MindMapUIExtension
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			if (idleBitmap?.Tag != null)
-			{
-				e.Graphics.DrawImage(idleBitmap, new Point(0, 0));
-			}
+			if (IdleSnapshot != null)
+				e.Graphics.DrawImage(IdleSnapshot, new Point(0, 0));
 			else
-			{
 				base.OnPaint(e);
-			}
 		}
 
 		override protected void BeginUpdate()
 		{
-			if (InMouseWheel)
+			if (InMouseWheel && (IdleSnapshot == null))
 			{
-				idleBitmap = new Bitmap(Width, Height);
-				DrawToBitmap(idleBitmap, new Rectangle(0, 0, Width, Height));
-
-				idleBitmap.Tag = this;
+				IdleSnapshot = new Bitmap(Width, Height);
+				DrawToBitmap(IdleSnapshot, new Rectangle(0, 0, Width, Height));
 			}
 
 			base.BeginUpdate();
@@ -573,32 +565,22 @@ namespace MindMapUIExtension
 		override protected void EndUpdate()
 		{
 			if (InMouseWheel)
-			{
-				HoldRedraw = false;
-				EnableExpandNotifications(true);
-				EnableSelectionNotifications(true);
-
-				DoIdleRecalcPositions = true;
-			}
+				DoIdleEndUpdate = true;
 			else
-			{
 				base.EndUpdate();
-			}
 		}
 
 		public bool DoIdleProcessing()
 		{
-			if (!DoIdleRecalcPositions)
-				return false;
+			if (DoIdleEndUpdate)
+			{
+				DoIdleEndUpdate = false;
+				IdleSnapshot = null;
 
-			Debug.WriteLine("TdlMindMapControl.DoIdleProcessing");
+				base.EndUpdate();
+			}
 
-			DoIdleRecalcPositions = false;
-			idleBitmap = null;
-
-			RecalculatePositions();
-
-			return true;
+			return false;
 		}
 
 		// Internal ------------------------------------------------------------
