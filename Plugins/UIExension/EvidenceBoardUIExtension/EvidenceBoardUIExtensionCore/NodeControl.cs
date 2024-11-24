@@ -45,7 +45,7 @@ namespace EvidenceBoardUIExtension
 		const int GraphBorder = 50;
 		const int ExpansionBtnBorder = 2;
 
-		readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
+		protected readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
 
 		int m_PinRadius = 2;
 
@@ -162,6 +162,8 @@ namespace EvidenceBoardUIExtension
 			this.BackColor = System.Drawing.SystemColors.Window;
 			this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.DoubleBuffered = true;
+			this.AllPaintingInWmPaint = true;
+			this.UserPaint = true;
 			this.Name = "NodeControl";
 			this.Size = new System.Drawing.Size(516, 422);
 			this.ResumeLayout(false);
@@ -609,23 +611,49 @@ namespace EvidenceBoardUIExtension
 				// Save the mouse pos in graphs coords
 				var ptGraph = ClientToGraph(ptClient);
 
+				BeginZoom(); // for derived classes
+
 				// Recalculate the zoom
 				m_ZoomLevel = level;
 
-				RecalcZoomFactor();
-				RecalcTextFont();
-				Invalidate();
+				EndZoom(ptClient, ptGraph);
+// 				RecalcZoomFactor();
+// 				RecalcTextFont();
+// 				Invalidate();
+// 
+// 				// Keep the previous position beneath the mouse
+// 				if (ptClient != NullPoint)
+// 				{
+// 					var ptClientNew = GraphToClient(ptGraph);
+// 
+// 					HorizontalScroll.OffsetValue(ptClientNew.X - ptClient.X);
+// 					VerticalScroll.OffsetValue(ptClientNew.Y - ptClient.Y);
+// 
+// 					PerformLayout();
+// 				}
+			}
+		}
 
-				// Keep the previous position beneath the mouse
-				if (ptClient != NullPoint)
-				{
-					var ptClientNew = GraphToClient(ptGraph);
+		protected virtual void BeginZoom()
+		{
+			
+		}
 
-					HorizontalScroll.OffsetValue(ptClientNew.X - ptClient.X);
-					VerticalScroll.OffsetValue(ptClientNew.Y - ptClient.Y);
+		protected virtual void EndZoom(Point ptClient, Point ptGraph)
+		{
+			RecalcZoomFactor();
+			RecalcTextFont();
+			Invalidate();
 
-					PerformLayout();
-				}
+			// Keep the previous position beneath the mouse
+			if (ptClient != NullPoint)
+			{
+				var ptClientNew = GraphToClient(ptGraph);
+
+				HorizontalScroll.OffsetValue(ptClientNew.X - ptClient.X);
+				VerticalScroll.OffsetValue(ptClientNew.Y - ptClient.Y);
+
+				PerformLayout();
 			}
 		}
 

@@ -1241,6 +1241,9 @@ namespace EvidenceBoardUIExtension
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
+			if (DoIdlePaint(e))
+				return;
+
 			base.OnPaint(e);
 
 			if (HasSelectedUserLink)
@@ -2930,6 +2933,93 @@ namespace EvidenceBoardUIExtension
 			BackgroundImageChanged?.Invoke(this, null);
 
 			return true;
+		}
+
+		// Idle processing ----------------------------------------------------
+
+		// Mouse-wheel zooming triggers a Begin/EndZoom pair for each
+		// wheel-event which itself calls various UI operations  which can
+		// be an expensive operation.
+		// So what we do is cache all the EndZooms until the message
+		// queue is empty and do a final EndZoom at that point.
+		// And to avoid any drawing artifacts we take a client screenshot
+		// at the first BeginZoom and use that for painting until the 
+		// final EndZoom.
+
+		bool WantIdleEndZoom = false;
+		bool PerformingWheelZoom = false;
+		Bitmap CachedSnapshot = null;
+		Point ClientZoomPos, GraphZoomPos;
+		
+		protected override void OnMouseWheel(MouseEventArgs e)
+		{
+			if (ModifierKeys.HasFlag(Keys.Control))
+			{
+				Debug.WriteLine("OnMouseWheel(zoom)");
+				PerformingWheelZoom = true;
+			}
+
+			base.OnMouseWheel(e);
+
+			PerformingWheelZoom = false;
+		}
+
+		protected bool DoIdlePaint(PaintEventArgs e)
+		{
+			if (CachedSnapshot == null)
+				return false;
+
+			e.Graphics.DrawImage(CachedSnapshot, new Point(0, 0));
+			return true;
+		}
+
+		override protected void BeginZoom()
+		{
+			Debug.WriteLine("BeginZoom");
+
+			if (PerformingWheelZoom)
+			{
+				CachedSnapshot = new Bitmap(Width, Height);
+				DrawToBitmap(CachedSnapshot, new Rectangle(0, 0, Width, Height));
+
+				ClientZoomPos = NullPoint;
+				GraphZoomPos = NullPoint;
+			}
+
+			base.BeginZoom();
+		}
+
+		override protected void EndZoom(Point ptClient, Point ptGraph)
+		{
+			if (PerformingWheelZoom)
+			{
+				if (!WantIdleEndZoom) // first time only
+				{
+					ClientZoomPos = ptClient;
+					GraphZoomPos = ptGraph;
+				}
+				WantIdleEndZoom = true;
+			}
+			else
+			{
+				base.EndZoom(ptClient, ptGraph);
+			}
+		}
+
+		public bool DoIdleProcessing()
+		{
+			if (WantIdleEndZoom)
+			{
+				Debug.WriteLine("EndZoom");
+
+				WantIdleEndZoom = false;
+				CachedSnapshot = null;
+
+				base.EndZoom(ClientZoomPos, GraphZoomPos);
+				Update();
+			}
+
+			return false; // no more tasks
 		}
 
 	}
