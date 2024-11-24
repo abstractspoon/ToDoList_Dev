@@ -530,33 +530,48 @@ namespace MindMapUIExtension
 
 		// Idle processing ----------------------------------------------------
 
-		bool DoIdleEndUpdate;
-		bool InMouseWheel;
- 		Bitmap IdleSnapshot;
+		// Mouse-wheel zooming triggers a Begin/EndUpdate pair for each
+		// wheel-event which itself calls RecalculatePositions which can
+		// be an expensive operation.
+		// So what we do is cache all the EndUpdates until the message
+		// queue is empty and do a final EndUpdate at that point.
+		// And to avoid any drawing artifacts we take a client screenshot
+		// at the first BeginUpdate and use that for painting until the 
+		// final EndUpdate.
+
+		bool WantIdleEndUpdate = false;
+		bool PerformingZoom = false;
+		Bitmap CachedSnapshot = null;
 
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
-			InMouseWheel = true;
+			if (ModifierKeys.HasFlag(Keys.Control))
+			{
+				Debug.WriteLine("OnMouseWheel(zoom)");
+				PerformingZoom = true;
+			}
 
 			base.OnMouseWheel(e);
 
-			InMouseWheel = false;
+			PerformingZoom = false;
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			if (IdleSnapshot != null)
-				e.Graphics.DrawImage(IdleSnapshot, new Point(0, 0));
+			if (CachedSnapshot != null)
+				e.Graphics.DrawImage(CachedSnapshot, new Point(0, 0));
 			else
 				base.OnPaint(e);
 		}
 
 		override protected void BeginUpdate()
 		{
-			if (InMouseWheel && (IdleSnapshot == null))
+			Debug.WriteLine("BeginUpdate");
+
+			if (PerformingZoom && (CachedSnapshot == null))
 			{
-				IdleSnapshot = new Bitmap(Width, Height);
-				DrawToBitmap(IdleSnapshot, new Rectangle(0, 0, Width, Height));
+				CachedSnapshot = new Bitmap(Width, Height);
+				DrawToBitmap(CachedSnapshot, new Rectangle(0, 0, Width, Height));
 			}
 
 			base.BeginUpdate();
@@ -564,23 +579,25 @@ namespace MindMapUIExtension
 
 		override protected void EndUpdate()
 		{
-			if (InMouseWheel)
-				DoIdleEndUpdate = true;
+			if (PerformingZoom)
+				WantIdleEndUpdate = true;
 			else
 				base.EndUpdate();
 		}
 
 		public bool DoIdleProcessing()
 		{
-			if (DoIdleEndUpdate)
+			if (WantIdleEndUpdate)
 			{
-				DoIdleEndUpdate = false;
-				IdleSnapshot = null;
+				Debug.WriteLine("EndUpdate");
+				
+				WantIdleEndUpdate = false;
+				CachedSnapshot = null;
 
 				base.EndUpdate();
 			}
 
-			return false;
+			return false; // no more tasks
 		}
 
 		// Internal ------------------------------------------------------------
