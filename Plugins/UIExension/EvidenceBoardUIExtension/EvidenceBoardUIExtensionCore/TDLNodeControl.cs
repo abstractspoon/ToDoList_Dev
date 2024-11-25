@@ -2950,11 +2950,22 @@ namespace EvidenceBoardUIExtension
 		bool PerformingWheelZoom = false;
 		Bitmap CachedSnapshot = null;
 		Point ClientZoomPos, GraphZoomPos;
+
+		int LastMouseWheelTick = 0;
 		
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			if (ModifierKeys.HasFlag(Keys.Control))
 			{
+				// PERMANENT TRACE ///////////////////////////////////////////////
+				int mouseWheelTick = Environment.TickCount;
+
+				if (LastMouseWheelTick > 0)
+					Trace.WriteLine(string.Format("Time since last Mouse wheel = {0} ms", mouseWheelTick - LastMouseWheelTick));
+
+				LastMouseWheelTick = mouseWheelTick;
+				//////////////////////////////////////////////////////////////////
+
 				Debug.WriteLine("OnMouseWheel(zoom)");
 				PerformingWheelZoom = true;
 			}
@@ -2981,8 +2992,11 @@ namespace EvidenceBoardUIExtension
 			{
 				Cursor = Cursors.WaitCursor;
 
-				CachedSnapshot = new Bitmap(Width, Height);
-				DrawToBitmap(CachedSnapshot, new Rectangle(0, 0, Width, Height));
+				if (CachedSnapshot == null)
+				{
+					CachedSnapshot = new Bitmap(Width, Height);
+					DrawToBitmap(CachedSnapshot, new Rectangle(0, 0, Width, Height));
+				}
 
 				ClientZoomPos = NullPoint;
 				GraphZoomPos = NullPoint;

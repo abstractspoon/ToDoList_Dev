@@ -540,20 +540,31 @@ namespace MindMapUIExtension
 		// final EndUpdate.
 
 		bool WantIdleEndUpdate = false;
-		bool PerformingZoom = false;
+		bool PerformingWheelZoom = false;
 		Bitmap CachedSnapshot = null;
 
+		int LastMouseWheelTick = 0;
+		
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			if (ModifierKeys.HasFlag(Keys.Control))
 			{
+				// PERMANENT TRACE ///////////////////////////////////////////////
+				int mouseWheelTick = Environment.TickCount;
+
+				if (LastMouseWheelTick > 0)
+					Trace.WriteLine(string.Format("Time since last Mouse wheel = {0} ms", mouseWheelTick - LastMouseWheelTick));
+
+				LastMouseWheelTick = mouseWheelTick;
+				//////////////////////////////////////////////////////////////////
+
 				Debug.WriteLine("OnMouseWheel(zoom)");
-				PerformingZoom = true;
+				PerformingWheelZoom = true;
 			}
 
 			base.OnMouseWheel(e);
 
-			PerformingZoom = false;
+			PerformingWheelZoom = false;
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
@@ -568,7 +579,9 @@ namespace MindMapUIExtension
 		{
 			Debug.WriteLine("BeginUpdate");
 
-			if (PerformingZoom && (CachedSnapshot == null))
+			Cursor = Cursors.WaitCursor;
+
+			if (PerformingWheelZoom && (CachedSnapshot == null))
 			{
 				CachedSnapshot = new Bitmap(Width, Height);
 				DrawToBitmap(CachedSnapshot, new Rectangle(0, 0, Width, Height));
@@ -579,7 +592,7 @@ namespace MindMapUIExtension
 
 		override protected void EndUpdate()
 		{
-			if (PerformingZoom)
+			if (PerformingWheelZoom)
 				WantIdleEndUpdate = true;
 			else
 				base.EndUpdate();
@@ -595,6 +608,8 @@ namespace MindMapUIExtension
 				CachedSnapshot = null;
 
 				base.EndUpdate();
+
+				Cursor = Cursors.Default;
 			}
 
 			return false; // no more tasks
