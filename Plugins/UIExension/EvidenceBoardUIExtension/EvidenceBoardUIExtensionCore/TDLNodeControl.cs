@@ -2979,6 +2979,8 @@ namespace EvidenceBoardUIExtension
 
 			if (PerformingWheelZoom)
 			{
+				Cursor = Cursors.WaitCursor;
+
 				CachedSnapshot = new Bitmap(Width, Height);
 				DrawToBitmap(CachedSnapshot, new Rectangle(0, 0, Width, Height));
 
@@ -2993,12 +2995,10 @@ namespace EvidenceBoardUIExtension
 		{
 			if (PerformingWheelZoom)
 			{
-				if (!WantIdleEndZoom) // first time only
-				{
-					ClientZoomPos = ptClient;
-					GraphZoomPos = ptGraph;
-				}
 				WantIdleEndZoom = true;
+
+				ClientZoomPos = ptClient;
+				GraphZoomPos = ptGraph;
 			}
 			else
 			{
@@ -3017,6 +3017,8 @@ namespace EvidenceBoardUIExtension
 
 				base.EndZoom(ClientZoomPos, GraphZoomPos);
 				Update();
+
+				Cursor = Cursors.Default;
 			}
 
 			return false; // no more tasks
