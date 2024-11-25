@@ -162,8 +162,6 @@ namespace EvidenceBoardUIExtension
 			this.BackColor = System.Drawing.SystemColors.Window;
 			this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.DoubleBuffered = true;
-			this.AllPaintingInWmPaint = true;
-			this.UserPaint = true;
 			this.Name = "NodeControl";
 			this.Size = new System.Drawing.Size(516, 422);
 			this.ResumeLayout(false);
@@ -617,20 +615,6 @@ namespace EvidenceBoardUIExtension
 				m_ZoomLevel = level;
 
 				EndZoom(ptClient, ptGraph);
-// 				RecalcZoomFactor();
-// 				RecalcTextFont();
-// 				Invalidate();
-// 
-// 				// Keep the previous position beneath the mouse
-// 				if (ptClient != NullPoint)
-// 				{
-// 					var ptClientNew = GraphToClient(ptGraph);
-// 
-// 					HorizontalScroll.OffsetValue(ptClientNew.X - ptClient.X);
-// 					VerticalScroll.OffsetValue(ptClientNew.Y - ptClient.Y);
-// 
-// 					PerformLayout();
-// 				}
 			}
 		}
 
