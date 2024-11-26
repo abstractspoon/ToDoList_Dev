@@ -9,7 +9,7 @@ using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace TimeLogUIExtension
+namespace TrackedTimeUIExtension
 {
 	// ------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ namespace TimeLogUIExtension
 
 	// ------------------------------------------------------------------------------
 
-	public partial class TimeLogView : Calendar.DayView, ILabelTipHandler
+	public partial class TrackedTimeView : Calendar.DayView, ILabelTipHandler
 	{
 		private uint m_SelectedTaskID = 0;
 		private uint m_VisibleSelectedTaskID = 0;
@@ -50,7 +50,7 @@ namespace TimeLogUIExtension
 
 		// ----------------------------------------------------------------
 
-		public TimeLogView(Translator trans, UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
+		public TrackedTimeView(Translator trans, UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
 		{
 			minHourLabelWidth = DPIScaling.Scale(minHourLabelWidth);
 			hourLabelIndent = DPIScaling.Scale(hourLabelIndent);

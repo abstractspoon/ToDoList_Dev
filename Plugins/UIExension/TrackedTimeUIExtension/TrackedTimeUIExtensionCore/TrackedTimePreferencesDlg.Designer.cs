@@ -1,6 +1,6 @@
-﻿namespace TimeLogUIExtension
+﻿namespace TrackedTimeUIExtension
 {
-    partial class TimeLogPreferencesDlg
+    partial class TrackedTimePreferencesDlg
     {
         /// <summary>
         /// Required designer variable.
@@ -141,7 +141,7 @@
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = global::TimeLogUIExtension.Properties.Resources.TimeLog;
+			this.Icon = Properties.Resources.TrackedTime;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "TimeLogPreferencesDlg";

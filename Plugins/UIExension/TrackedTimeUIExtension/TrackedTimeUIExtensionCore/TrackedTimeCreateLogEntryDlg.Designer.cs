@@ -1,6 +1,6 @@
-﻿namespace TimeLogUIExtension
+﻿namespace TrackedTimeUIExtension
 {
-	partial class TimeLogCreateTimeBlockDlg
+	partial class TrackedTimeCreateLogEntryDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -32,7 +32,7 @@
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
-			this.m_Attributes = new TimeLogUIExtension.TimeLogTimeBlockAttributesPage();
+			this.m_Attributes = new TrackedTimeLogEntryAttributesPage();
 			this.m_TaskCombo = new Abstractspoon.Tdl.PluginHelpers.TaskComboBox();
 			this.SuspendLayout();
 			// 
@@ -71,8 +71,8 @@
 			// 
 			// label5
 			// 
-			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+			| System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.label5.Location = new System.Drawing.Point(-2, 218);
 			this.label5.Name = "label5";
@@ -113,7 +113,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.m_TaskLabel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = global::TimeLogUIExtension.Properties.Resources.TimeLog;
+			this.Icon = Properties.Resources.TrackedTime;
 			this.Name = "TimeLogCreateTimeBlockDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
@@ -131,6 +131,6 @@
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Label label5;
 		private Abstractspoon.Tdl.PluginHelpers.TaskComboBox m_TaskCombo;
-		private TimeLogTimeBlockAttributesPage m_Attributes;
+		private TrackedTimeLogEntryAttributesPage m_Attributes;
 	}
 }

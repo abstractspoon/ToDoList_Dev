@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace TimeLogUIExtension
+namespace TrackedTimeUIExtension
 {
-	public partial class TimeLogCreateTimeBlockDlg : Form
+	public partial class TrackedTimeCreateLogEntryDlg : Form
 	{
 /*
 		public TimeLogCreateTimeBlockDlg()

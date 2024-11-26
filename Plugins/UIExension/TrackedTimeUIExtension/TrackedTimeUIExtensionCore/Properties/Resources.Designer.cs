@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TimeLogUIExtension.Properties {
+namespace TrackedTimeUIExtension.Properties {
     using System;
     
     
@@ -63,9 +63,9 @@ namespace TimeLogUIExtension.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon TimeLog {
+        internal static System.Drawing.Icon TrackedTime {
             get {
-                object obj = ResourceManager.GetObject("TimeLog", resourceCulture);
+                object obj = ResourceManager.GetObject("TrackedTime", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

@@ -1,6 +1,6 @@
-﻿namespace TimeLogUIExtension
+﻿namespace TrackedTimeUIExtension
 {
-	partial class TimeLogEditTimeBlockSeriesDlg
+	partial class TrackedTimeEditLogEntryDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -28,13 +28,13 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TimeLogEditTimeBlockSeriesDlg));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TrackedTimeEditLogEntryDlg));
 			this.label5 = new System.Windows.Forms.Label();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.OK = new System.Windows.Forms.Button();
 			this.m_TaskLabel = new System.Windows.Forms.Label();
 			this.m_TaskTitle = new System.Windows.Forms.TextBox();
-			this.m_Attributes = new TimeLogUIExtension.TimeLogTimeBlockAttributesPage();
+			this.m_Attributes = new TrackedTimeLogEntryAttributesPage();
 			this.SuspendLayout();
 			// 
 			// label5
@@ -106,7 +106,7 @@
 			this.Controls.Add(this.m_TaskTitle);
 			this.Controls.Add(this.m_TaskLabel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = Properties.Resources.TimeLog;
+			this.Icon = Properties.Resources.TrackedTime;
 			this.Name = "TimeLogEditTimeBlockSeriesDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
@@ -124,6 +124,6 @@
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Label m_TaskLabel;
 		private System.Windows.Forms.TextBox m_TaskTitle;
-		private TimeLogTimeBlockAttributesPage m_Attributes;
+		private TrackedTimeLogEntryAttributesPage m_Attributes;
 	}
 }

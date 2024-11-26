@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace TimeLogUIExtension
+namespace TrackedTimeUIExtension
 {
-	public partial class TimeLogTimeBlockAttributesPage : UserControl
+	public partial class TrackedTimeLogEntryAttributesPage : UserControl
 	{
 /*
 		[Flags]

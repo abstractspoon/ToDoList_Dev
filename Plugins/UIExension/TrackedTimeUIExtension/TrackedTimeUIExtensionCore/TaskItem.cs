@@ -10,7 +10,7 @@ using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace TimeLogUIExtension
+namespace TrackedTimeUIExtension
 {
 	public class TaskItems : Dictionary<uint, TaskItem>
 	{

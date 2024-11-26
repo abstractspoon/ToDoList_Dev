@@ -9,11 +9,11 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace TimeLogUIExtension
+namespace TrackedTimeUIExtension
 {
-	public partial class TimeLogEditTimeBlockSeriesDlg : Form
+	public partial class TrackedTimeEditLogEntryDlg : Form
 	{
-		public TimeLogEditTimeBlockSeriesDlg()
+		public TrackedTimeEditLogEntryDlg()
 		{
 			InitializeComponent();
 		}

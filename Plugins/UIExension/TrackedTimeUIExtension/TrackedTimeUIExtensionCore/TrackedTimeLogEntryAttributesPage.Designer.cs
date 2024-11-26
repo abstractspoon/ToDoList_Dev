@@ -1,6 +1,6 @@
-﻿namespace TimeLogUIExtension
+﻿namespace TrackedTimeUIExtension
 {
-	partial class TimeLogTimeBlockAttributesPage
+	partial class TrackedTimeLogEntryAttributesPage
 	{
 		/// <summary> 
 		/// Required designer variable.

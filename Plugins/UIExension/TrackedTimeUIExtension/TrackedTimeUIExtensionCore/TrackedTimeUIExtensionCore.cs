@@ -11,14 +11,14 @@ using UIComponents;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace TimeLogUIExtension
+namespace TrackedTimeUIExtension
 {
 
 	[System.ComponentModel.DesignerCategory("")]
-	public class TimeLogUIExtensionCore : Panel, IUIExtension
+	public class TrackedTimeUIExtensionCore : Panel, IUIExtension
 	{
 		private IntPtr m_HwndParent = IntPtr.Zero;
-		private TimeLogView m_TimeLog = null;
+		private TrackedTimeView m_TimeLog = null;
 		private Translator m_Trans = null;
 		private String m_TypeId, m_UiName;
 		private WorkingWeek m_WorkWeek = null;
@@ -35,7 +35,7 @@ namespace TimeLogUIExtension
 		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
 		private YearComboBox m_YearCombo;
-        private TimeLogPreferencesDlg m_PrefsDlg;
+        private TrackedTimePreferencesDlg m_PrefsDlg;
 
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
@@ -48,7 +48,7 @@ namespace TimeLogUIExtension
 		
 		// --------------------------------------------------------------------------------------
 
-		public TimeLogUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
+		public TrackedTimeUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
 		{
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
@@ -346,7 +346,7 @@ namespace TimeLogUIExtension
 		private void InitializeComponent()
 		{
 			m_ControlsFont = new Font(FontName, 8.25f);
-			m_PrefsDlg = new TimeLogPreferencesDlg(this, m_Trans, m_ControlsFont);
+			m_PrefsDlg = new TrackedTimePreferencesDlg(this, m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
 			CreateMonthYearCombos();
@@ -360,7 +360,7 @@ namespace TimeLogUIExtension
 
 		private void CreateTimeLogView()
 		{
-			m_TimeLog = new TimeLogView(m_Trans,
+			m_TimeLog = new TrackedTimeView(m_Trans,
 										new UIExtension.TaskIcon(m_HwndParent),
 										new UIExtension.TaskRecurrences(m_HwndParent),
 										DPIScaling.Scale(5));
