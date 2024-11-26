@@ -96,6 +96,7 @@ BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLogItems(CTaskTimeLogItemArray& aLogItem
 		AnonymizeItem(li.sTaskTitle, *m_mapSharedData.GetAddMapping(_T("TITLE")));
 		AnonymizeItem(li.sPerson, *m_mapSharedData.GetAddMapping(_T("PERSON")));
 		AnonymizeItem(li.sPath, *m_mapSharedData.GetAddMapping(_T("PATH")));
+		AnonymizeItem(li.sType, *m_mapSharedData.GetAddMapping(_T("TYPE")));
 
 		li.sComment = AnonymizeText(li.sComment);
 	}

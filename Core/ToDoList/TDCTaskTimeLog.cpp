@@ -92,7 +92,6 @@ void TASKTIMELOGITEM::Clear(BOOL bInitPerson)
 {
 	dwTaskID = 0;
 	dHours = 0.0;
-	bTracked = TRUE;
 	crAltColor = CLR_NONE;
 
 	CDateHelper::ClearDate(dtFrom);
@@ -101,6 +100,7 @@ void TASKTIMELOGITEM::Clear(BOOL bInitPerson)
 	sTaskTitle.Empty();
 	sComment.Empty();
 	sPath.Empty();
+	sType = CEnString(IDS_LOG_TYPETRACKED);
 
 	if (bInitPerson)
 		sPerson = Misc::GetUserName();
@@ -137,7 +137,7 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 					 CTimeHelper::FormatClockTime(dtTo, FALSE, TRUE),
 					 Misc::Format(dHours, 3),
 					 sComment,
-					 CEnString(bTracked ? IDS_LOG_TYPETRACKED : IDS_LOG_TYPEADJUSTED),
+					 sType,
 					 sPath,
 					 ((crAltColor == CLR_NONE) ? _T("") : Misc::Format((int)crAltColor)));
 		break;
@@ -224,7 +224,7 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 				// fall through
 
 			case 10:
-				bTracked = _ttoi(aFields[9]);
+				sType = aFields[9];
 				// fall through
 
 			case 9:
@@ -294,7 +294,6 @@ CString TASKTIMELOGITEM::GetRowFormat(int nRowVer, const CString& sDelim)
 	return sRowFormat;
 }
 
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -334,7 +333,7 @@ BOOL CTDCTaskTimeLog::LogTime(DWORD dwTaskID, LPCTSTR szTaskTitle, LPCTSTR szTas
 	li.sComment = sComment;
 	li.sPath = szTaskPath;
 	li.sPerson = Misc::GetUserName();
-	li.bTracked = bTracked;
+	li.sType = CEnString(bTracked ? IDS_LOG_TYPETRACKED : IDS_LOG_TYPEADJUSTED);
 	li.dHours = dHours;
 	li.dtTo = dtWhen;
 	li.dtFrom = dtWhen;
