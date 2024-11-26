@@ -11,9 +11,9 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace TrackedTimeUIExtension
 {
-	public partial class TrackedTimeEditLogEntryDlg : Form
+	public partial class TrackedTimeEditEntryDlg : Form
 	{
-		public TrackedTimeEditLogEntryDlg()
+		public TrackedTimeEditEntryDlg()
 		{
 			InitializeComponent();
 		}

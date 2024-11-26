@@ -11,13 +11,13 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace TrackedTimeUIExtension
 {
-	public partial class TrackedTimeCreateLogEntryDlg : Form
+	public partial class TrackedTimeCreateEntryDlg : Form
 	{
-/*
-		public TimeLogCreateTimeBlockDlg()
+		public TrackedTimeCreateEntryDlg()
 		{
 			InitializeComponent();
 		}
+/*
 
 		public TimeLogCreateTimeBlockDlg(IEnumerable<TaskItem> taskItems, 
 										 UIExtension.TaskIcon taskIcons, 

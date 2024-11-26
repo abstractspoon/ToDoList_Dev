@@ -1,6 +1,6 @@
 ﻿namespace TrackedTimeUIExtension
 {
-	partial class TrackedTimeEditLogEntryDlg
+	partial class TrackedTimeEditEntryDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -28,13 +28,13 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TrackedTimeEditLogEntryDlg));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TrackedTimeEditEntryDlg));
 			this.label5 = new System.Windows.Forms.Label();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.OK = new System.Windows.Forms.Button();
 			this.m_TaskLabel = new System.Windows.Forms.Label();
 			this.m_TaskTitle = new System.Windows.Forms.TextBox();
-			this.m_Attributes = new TrackedTimeLogEntryAttributesPage();
+			this.m_Attributes = new TrackedTimeEntryAttributesPage();
 			this.SuspendLayout();
 			// 
 			// label5
@@ -124,6 +124,6 @@
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Label m_TaskLabel;
 		private System.Windows.Forms.TextBox m_TaskTitle;
-		private TrackedTimeLogEntryAttributesPage m_Attributes;
+		private TrackedTimeEntryAttributesPage m_Attributes;
 	}
 }

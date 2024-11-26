@@ -1,6 +1,6 @@
 ﻿namespace TrackedTimeUIExtension
 {
-	partial class TrackedTimeLogEntryAttributesPage
+	partial class TrackedTimeEntryAttributesPage
 	{
 		/// <summary> 
 		/// Required designer variable.

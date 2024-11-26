@@ -11,7 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace TrackedTimeUIExtension
 {
-	public partial class TrackedTimeLogEntryAttributesPage : UserControl
+	public partial class TrackedTimeEntryAttributesPage : UserControl
 	{
 /*
 		[Flags]
@@ -27,11 +27,12 @@ namespace TrackedTimeUIExtension
 		}
 
 		private bool m_EditMode = false;
-
-		public TimeLogTimeBlockAttributesPage()
+*/
+		public TrackedTimeEntryAttributesPage()
 		{
 			InitializeComponent();
 		}
+/*
 
 		public void Initialise(WorkingWeek workWeek, TimeBlockSeriesAttributes attribs, bool editMode, 
 								TimeBlockSeriesAttributes.EditMask mask = TimeBlockSeriesAttributes.EditMask.None)

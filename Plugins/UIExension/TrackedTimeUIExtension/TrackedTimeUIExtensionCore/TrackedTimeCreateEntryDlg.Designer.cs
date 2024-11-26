@@ -1,6 +1,6 @@
 ﻿namespace TrackedTimeUIExtension
 {
-	partial class TrackedTimeCreateLogEntryDlg
+	partial class TrackedTimeCreateEntryDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -32,7 +32,7 @@
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
-			this.m_Attributes = new TrackedTimeLogEntryAttributesPage();
+			this.m_Attributes = new TrackedTimeEntryAttributesPage();
 			this.m_TaskCombo = new Abstractspoon.Tdl.PluginHelpers.TaskComboBox();
 			this.SuspendLayout();
 			// 
@@ -131,6 +131,6 @@
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Label label5;
 		private Abstractspoon.Tdl.PluginHelpers.TaskComboBox m_TaskCombo;
-		private TrackedTimeLogEntryAttributesPage m_Attributes;
+		private TrackedTimeEntryAttributesPage m_Attributes;
 	}
 }
