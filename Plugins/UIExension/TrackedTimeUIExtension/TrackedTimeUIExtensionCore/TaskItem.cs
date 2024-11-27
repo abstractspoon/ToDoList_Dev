@@ -106,7 +106,7 @@ namespace TrackedTimeUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class TaskItem
+	public class TaskItem : ITask
 	{
 		public TaskItem()
 		{

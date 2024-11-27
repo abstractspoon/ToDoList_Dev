@@ -37,6 +37,7 @@ namespace Abstractspoon
 								UInt32 selTaskId);
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
+				property String^ SelectedTaskTitle { String^ get(); }
 
 			private:
 				UIExtension::TaskIcon^ m_TaskIcons;

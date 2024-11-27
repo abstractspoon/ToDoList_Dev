@@ -13,22 +13,26 @@ namespace TrackedTimeUIExtension
 {
 	public partial class TrackedTimeCreateEntryDlg : Form
 	{
+		LogEntry m_DefaultEntry;
+
+		// ---------------------------------------
+
 		public TrackedTimeCreateEntryDlg()
 		{
 			InitializeComponent();
 		}
-/*
 
-		public TimeLogCreateTimeBlockDlg(IEnumerable<TaskItem> taskItems, 
+		public TrackedTimeCreateEntryDlg(IEnumerable<TaskItem> taskItems, 
 										 UIExtension.TaskIcon taskIcons, 
 										 WorkingWeek workWeek,
-										 uint taskId,
-										 TimeBlockSeriesAttributes attribs)
+										 LogEntry defaultEntry)
 			:
 			this()
 		{
-			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, taskId);
-			m_Attributes.Initialise(workWeek, attribs, false);
+			m_DefaultEntry = defaultEntry;
+
+			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, 0);
+			m_Attributes.Initialise(workWeek, defaultEntry);
 		}
 
 		public uint SelectedTaskId
@@ -36,15 +40,26 @@ namespace TrackedTimeUIExtension
 			get { return m_TaskCombo.SelectedTaskId; }
 		}
 
-		public TimeBlockSeriesAttributes Attributes
+		public LogEntry Entry
 		{
-			get { return m_Attributes.Attributes; }
+			get
+			{
+				return new LogEntry(m_DefaultEntry, 0)
+				{
+					TaskId = m_TaskCombo.SelectedTaskId,
+					Title = m_TaskCombo.SelectedTaskTitle,
+					UserId = string.Empty, // TODO
+					StartDate = m_Attributes.From,
+					EndDate = m_Attributes.To,
+					Comment = m_Attributes.Comment,
+					TimeSpentInHrs = m_Attributes.TimeSpent
+				};
+			}
 		}
 
 		private void OnTaskComboSelChange(object sender, EventArgs e)
 		{
 			OK.Enabled = (SelectedTaskId != 0);
 		}
-*/
 	}
 }

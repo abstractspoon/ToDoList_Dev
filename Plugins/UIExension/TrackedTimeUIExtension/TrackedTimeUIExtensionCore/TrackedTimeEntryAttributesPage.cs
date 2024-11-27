@@ -13,7 +13,7 @@ namespace TrackedTimeUIExtension
 {
 	public partial class TrackedTimeEntryAttributesPage : UserControl
 	{
-		private LogEntry m_Entry;
+		private double m_OrgTimeSpent = 0.0;
 
 		public TrackedTimeEntryAttributesPage()
 		{
@@ -26,25 +26,33 @@ namespace TrackedTimeUIExtension
 
 			SetDates(workWeek, entry);
 
-			m_Entry = entry;
+			m_OrgTimeSpent = entry.TimeSpentInHrs;
+			m_TimeSpentEdit.Text = entry.TimeSpentInHrs.ToString();
+			m_CommentEdit.Text = entry.Comment;
 		}
 
-		public LogEntry Entry
+		public DateTime From
+		{
+			get { return (m_FromDateCtrl.Value.Date + m_FromTimeCombo.GetTime()); }
+		}
+
+		public DateTime To
+		{
+			get { return (m_FromDateCtrl.Value.Date + m_ToTimeCombo.GetTime()); }
+		}
+
+		public string Comment
+		{
+			get	{ return m_CommentEdit.Text; }
+		}
+
+		public double TimeSpent
 		{
 			get
 			{
 				double hours = 0.0;
 
-				if (!double.TryParse(m_TimeSpentEdit.Text, out hours))
-					hours = m_Entry.TimeSpentInHrs;
-
-				return new LogEntry(m_Entry)
-				{
-					StartDate = (m_FromDateCtrl.Value.Date + m_FromTimeCombo.GetTime()),
-					EndDate = (m_FromDateCtrl.Value.Date + m_ToTimeCombo.GetTime()),
-					Comment = m_CommentEdit.Text,
-					TimeSpentInHrs = hours
-				};
+				return (double.TryParse(m_TimeSpentEdit.Text, out hours) ? hours : m_OrgTimeSpent);
 			}
 		}
 

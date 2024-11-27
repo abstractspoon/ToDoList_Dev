@@ -41,6 +41,12 @@ UInt32 TaskComboBox::SelectedTaskId::get()
 	return ((selItem == nullptr) ? 0 : selItem->Id);
 }
 
+String^ TaskComboBox::SelectedTaskTitle::get()
+{
+	auto selItem = ASTYPE(SelectedItem, ITask);
+	return ((selItem == nullptr) ? String::Empty : selItem->Title);
+}
+
 void TaskComboBox::OnMeasureItem(MeasureItemEventArgs^ e)
 {
 	ComboBox::OnMeasureItem(e);
