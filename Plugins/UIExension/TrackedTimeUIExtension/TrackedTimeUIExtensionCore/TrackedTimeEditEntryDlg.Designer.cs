@@ -134,7 +134,7 @@
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Edit Time Block Series";
+			this.Text = "Edit Log Entry";
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
