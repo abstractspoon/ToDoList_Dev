@@ -25,7 +25,8 @@ namespace TrackedTimeUIExtension
 		public TrackedTimeCreateEntryDlg(IEnumerable<TaskItem> taskItems, 
 										 UIExtension.TaskIcon taskIcons, 
 										 WorkingWeek workWeek,
-										 LogEntry attrib)
+										 LogEntry attrib,
+										 bool readonlyTasks)
 			:
 			this()
 		{
@@ -35,7 +36,7 @@ namespace TrackedTimeUIExtension
 				m_TaskIdLabel.Text = attrib.TaskId.ToString();
 
 			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, attrib.TaskId);
-			m_Attributes.Initialise(workWeek, attrib);
+			m_Attributes.Initialise(attrib, workWeek, readonlyTasks);
 		}
 
 		public uint SelectedTaskId

@@ -22,31 +22,32 @@ namespace TrackedTimeUIExtension
 			InitializeComponent();
 		}
 
-		public TrackedTimeEditEntryDlg(TaskItem taskItem, LogEntry entry, WorkingWeek workWeek)
+		public TrackedTimeEditEntryDlg(LogEntry entry, WorkingWeek workWeek, bool readonlyTask)
 			:
 			this()
 		{
 			m_Entry = entry;
 
-			m_TaskLabel.Text = taskItem.Title;
+			m_TaskTitleLabel.Text = entry.Title;
 			m_TaskIdLabel.Text = entry.TaskId.ToString();
 
-			m_Attributes.Initialise(workWeek, entry);
+			m_Attributes.Initialise(entry, workWeek, readonlyTask);
 		}
 
-		public LogEntry Entry
+		public void GetAttributes(ref LogEntry entry)
 		{
-			get
-			{
-				return new LogEntry(m_Entry)
-				{
-					StartDate = m_Attributes.From,
-					EndDate = m_Attributes.To,
-					Comment = m_Attributes.Comment,
-					TimeSpentInHrs = m_Attributes.TimeSpent
-				};
-			}
+			entry.StartDate = m_Attributes.From;
+			entry.EndDate = m_Attributes.To;
+			entry.Comment = m_Attributes.Comment;
+			entry.TimeSpentInHrs = m_Attributes.TimeSpent;
 		}
+
+		public bool WantAddToTimeSpent
+		{
+			get { return m_Attributes.WantAddToTimeSpent; }
+		}
+
+
 	}
 
 

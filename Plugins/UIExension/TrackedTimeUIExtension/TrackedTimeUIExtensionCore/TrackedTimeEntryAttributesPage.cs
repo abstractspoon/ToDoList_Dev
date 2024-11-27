@@ -20,7 +20,7 @@ namespace TrackedTimeUIExtension
 			InitializeComponent();
 		}
 
-		public void Initialise(WorkingWeek workWeek, LogEntry entry)
+		public void Initialise(LogEntry entry, WorkingWeek workWeek, bool readonlyTask)
 		{
 			TimeComboBox.SetWorkingWeek(workWeek);
 
@@ -29,6 +29,8 @@ namespace TrackedTimeUIExtension
 			m_OrgTimeSpent = entry.TimeSpentInHrs;
 			m_TimeSpentEdit.Text = entry.TimeSpentInHrs.ToString();
 			m_CommentEdit.Text = entry.Comment;
+
+			m_AddToTimeSpentCheckBox.Enabled = !readonlyTask;
 		}
 
 		public DateTime From
@@ -58,7 +60,14 @@ namespace TrackedTimeUIExtension
 
 		public bool WantAddToTimeSpent
 		{
-			get { return m_AddToTimeSpentCheckBox.Checked; }
+			get
+			{
+				if (m_AddToTimeSpentCheckBox.Enabled)
+					return m_AddToTimeSpentCheckBox.Checked;
+			
+				// else	
+				return false;
+			}
 		}
 
 		public void SetDates(WorkingWeek workWeek, LogEntry entry)
@@ -72,8 +81,8 @@ namespace TrackedTimeUIExtension
 			else // valid start date
 			{
 				m_FromDateCtrl.Value = entry.Dates.Start.Date;
-				m_FromTimeCombo.SetTime(entry.Dates.Start.Date);
-				m_ToTimeCombo.SetTime(entry.Dates.End.Date);
+				m_FromTimeCombo.SetTime(entry.Dates.Start);
+				m_ToTimeCombo.SetTime(entry.Dates.End);
 			}
 		}
 

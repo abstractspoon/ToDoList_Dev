@@ -21,7 +21,7 @@ namespace TrackedTimeUIExtension
 
 	public partial class TrackedTimeView : Calendar.DayView, ILabelTipHandler
 	{
-		private uint m_SelectedTaskID = 0;
+		private uint m_SelectedEntryId = 0;
 		private uint m_VisibleSelectedTaskID = 0;
 		private uint m_MaxTaskID = 0;
 
@@ -59,7 +59,7 @@ namespace TrackedTimeUIExtension
 			dayGripWidth = 1; // to match app styling
 
 			m_Trans = trans;
-			m_TaskIcons = taskIcons;
+			m_RenderHelper.TaskIcons = taskIcons;
 			m_ToolbarRenderer = new UIThemeToolbarRenderer();
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
@@ -82,7 +82,7 @@ namespace TrackedTimeUIExtension
 			InitializeComponent();
 		}
 
-//		public IEnumerable<TaskItems> TaskItems { get { return m_TaskItems.Values; } }
+	//	public IEnumerable<TaskItems> TaskItems { get { return m_TaskItems.Values; } }
 
 		// ILabelTipHandler implementation
 		public Control GetOwner()
@@ -323,10 +323,31 @@ namespace TrackedTimeUIExtension
 		{
 			get
 			{
-				if (!IsTaskDisplayable(m_SelectedTaskID))
+				if (!IsTaskDisplayable(m_SelectedEntryId))
 					return 0;
 
-				return m_SelectedTaskID;
+				return m_SelectedEntryId;
+			}
+		}
+
+		public TaskItem SelectedTaskItem
+		{
+			get
+			{
+				var entry = SelectedLogEntry;
+
+				return (entry == null ? null : m_TaskItems.GetItem(entry.TaskId));
+			}
+		}
+
+		public LogEntry SelectedLogEntry
+		{
+			get
+			{
+// 				if (!IsTaskDisplayable(m_SelectedEntryId))
+// 					return 0;
+
+				return m_LogEntries.GetEntry(m_SelectedEntryId);
 			}
 		}
 
@@ -517,7 +538,7 @@ namespace TrackedTimeUIExtension
 		// Internal
 		private bool SelectTask(uint dwTaskID, bool allowNotify)
 		{
-			m_SelectedTaskID = dwTaskID;
+			m_SelectedEntryId = dwTaskID;
 			FixupSelection(true, allowNotify);
 
 			return (SelectedTaskId != 0);
@@ -812,7 +833,7 @@ namespace TrackedTimeUIExtension
 // 				m_DateSortedTasks.SetNeedsResort();
 
 			// Scroll to the selected item if it was modified and was 'visible'
-			if ((selTaskWasVisible || tasksWasEmpty) && tasks.HasTask(m_SelectedTaskID))
+			if ((selTaskWasVisible || tasksWasEmpty) && tasks.HasTask(m_SelectedEntryId))
                 EnsureVisible(SelectedAppointment, true);
 
 			SelectedDates.Start = SelectedDates.End;
@@ -995,7 +1016,7 @@ namespace TrackedTimeUIExtension
 
 		public override bool EnsureVisible(Calendar.Appointment appt, bool partialOK)
 		{
-			if ((appt == null) && (m_SelectedTaskID != 0))
+			if ((appt == null) && (m_SelectedEntryId != 0))
 			{
 // 				LogEntry item;
 // 
@@ -1020,10 +1041,8 @@ namespace TrackedTimeUIExtension
         {
             if (args.Appointment != null)
 			{
-				m_SelectedTaskID = args.Appointment.Id;
-
-				// User made this selection so the task must be visible
-				m_VisibleSelectedTaskID = m_SelectedTaskID;
+				m_SelectedEntryId = args.Appointment.Id;
+				m_VisibleSelectedTaskID = (args.Appointment as LogEntry).TaskId;
 			}
 		}
 

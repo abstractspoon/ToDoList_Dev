@@ -530,35 +530,35 @@ namespace TrackedTimeUIExtension
 			var btn2 = new ToolStripButton();
 			btn2.Name = "Show1TimeLog";
 			btn2.ImageIndex = 1;
-			btn2.Click += new EventHandler(OnShow1TimeLog);
+			btn2.Click += new EventHandler(OnShow1Day);
 			btn2.ToolTipText = string.Format(format, 1);
 			m_Toolbar.Items.Add(btn2);
 
 			var btn3 = new ToolStripButton();
 			btn3.Name = "Show3TimeLog";
 			btn3.ImageIndex = 2;
-			btn3.Click += new EventHandler(OnShow3TimeLog);
+			btn3.Click += new EventHandler(OnShow3Day);
 			btn3.ToolTipText = string.Format(format, 3);
 			m_Toolbar.Items.Add(btn3);
 
 			var btn4 = new ToolStripButton();
 			btn4.Name = "Show7TimeLog";
 			btn4.ImageIndex = 3;
-			btn4.Click += new EventHandler(OnShow7TimeLog);
+			btn4.Click += new EventHandler(OnShow7Days);
 			btn4.ToolTipText = string.Format(format, 7);
 			m_Toolbar.Items.Add(btn4);
 
 			var btn5 = new ToolStripButton();
 			btn5.Name = "Show14TimeLog";
 			btn5.ImageIndex = 4;
-			btn5.Click += new EventHandler(OnShow14TimeLog);
+			btn5.Click += new EventHandler(OnShow14Days);
 			btn5.ToolTipText = string.Format(format, 14);
 			m_Toolbar.Items.Add(btn5);
 
 			var btn6 = new ToolStripButton();
 			btn6.Name = "Show28TimeLog";
 			btn6.ImageIndex = 5;
-			btn6.Click += new EventHandler(OnShow28TimeLog);
+			btn6.Click += new EventHandler(OnShow28Days);
 			btn6.ToolTipText = string.Format(format, 28);
 			m_Toolbar.Items.Add(btn6);
 
@@ -567,16 +567,23 @@ namespace TrackedTimeUIExtension
 			var btn7 = new ToolStripButton();
 			btn7.Name = "NewLogEntry";
 			btn7.ImageIndex = 6;
-			btn7.Click += new EventHandler(OnNewLogEntry);
+			btn7.Click += new EventHandler(OnCreateLogEntry);
 			btn7.ToolTipText = "New Log Entry";
 			m_Toolbar.Items.Add(btn7);
 
 			var btn8 = new ToolStripButton();
-			btn8.Name = "DeleteLogEntry";
-			btn8.ImageIndex = 7;
-			btn8.Click += new EventHandler(OnDeleteLogEntry);
-			btn8.ToolTipText = "Delete Log Entry";
+			btn8.Name = "NewLogEntry";
+			btn8.ImageIndex = 6;
+			btn8.Click += new EventHandler(OnEditLogEntry);
+			btn8.ToolTipText = "Edit Log Entry";
 			m_Toolbar.Items.Add(btn8);
+
+			var btn9 = new ToolStripButton();
+			btn9.Name = "DeleteLogEntry";
+			btn9.ImageIndex = 7;
+			btn9.Click += new EventHandler(OnDeleteLogEntry);
+			btn9.ToolTipText = "Delete Log Entry";
+			m_Toolbar.Items.Add(btn9);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
@@ -605,31 +612,31 @@ namespace TrackedTimeUIExtension
             m_TimeLog.GoToToday();
 		}
 
-		private void OnShow1TimeLog(object sender, EventArgs e)
+		private void OnShow1Day(object sender, EventArgs e)
 		{
 			if (m_TimeLog.DaysShowing != 1)
 				SetDaysShowing(1);
 		}
 
-		private void OnShow3TimeLog(object sender, EventArgs e)
+		private void OnShow3Day(object sender, EventArgs e)
 		{
 			if (m_TimeLog.DaysShowing != 3)
 				SetDaysShowing(3);
 		}
 
-        private void OnShow7TimeLog(object sender, EventArgs e)
+        private void OnShow7Days(object sender, EventArgs e)
         {
             if (m_TimeLog.DaysShowing != 7)
                 SetDaysShowing(7);
         }
 
-		private void OnShow14TimeLog(object sender, EventArgs e)
+		private void OnShow14Days(object sender, EventArgs e)
 		{
 			if (m_TimeLog.DaysShowing != 14)
 				SetDaysShowing(14);
 		}
 
-		private void OnShow28TimeLog(object sender, EventArgs e)
+		private void OnShow28Days(object sender, EventArgs e)
 		{
 			if (m_TimeLog.DaysShowing != 28)
 				SetDaysShowing(28);
@@ -653,10 +660,40 @@ namespace TrackedTimeUIExtension
 				UpdateToolbarButtonStates();
 		}
 
-		private void OnNewLogEntry(object sender, EventArgs e)
+		private void OnCreateLogEntry(object sender, EventArgs e)
 		{
 			if (CreateLogEntry())
 				UpdateToolbarButtonStates();
+		}
+
+		private void OnEditLogEntry(object sender, EventArgs e)
+		{
+			// Display a dialog to retrieve the task ID from a list
+			// to support tasks without dates
+			var entry = m_TimeLog.SelectedLogEntry;
+			var taskItem = m_TimeLog.SelectedTaskItem;
+
+			var dlg = new TrackedTimeEditEntryDlg(entry, m_WorkWeek, (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked));
+
+			FormsUtil.SetFont(dlg, m_ControlsFont);
+			m_Trans.Translate(dlg);
+
+			m_TimeLog.ForceShowSelection = true;
+
+			var res = dlg.ShowDialog();
+
+			m_TimeLog.ForceShowSelection = false;
+
+			if (res == DialogResult.OK)
+			{
+				dlg.GetAttributes(ref entry);
+				m_TimeLog.Invalidate();
+
+				if (dlg.WantAddToTimeSpent)
+				{
+					// TODO
+				}
+			}
 		}
 
 		private bool CreateLogEntry()
@@ -848,16 +885,7 @@ namespace TrackedTimeUIExtension
 
 			// Handle double-click differently for each type
 			if (doubleClick)
-			{
-				if (appt is LogEntry)
-				{
-					if (!m_TimeLog.ReadOnly && !appt.Locked)
-					{
-						var notify = new UIExtension.ParentNotify(m_HwndParent);
-						notify.NotifyEditLabel();
-					}
-				}
-			}
+				OnEditLogEntry(this, null);
 		}
 
 		private void OnTimeLogMouseClick(object sender, MouseEventArgs e)

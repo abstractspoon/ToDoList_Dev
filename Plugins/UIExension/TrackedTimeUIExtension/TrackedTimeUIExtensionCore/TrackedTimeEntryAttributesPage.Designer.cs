@@ -88,7 +88,7 @@
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(31, 13);
 			this.label3.TabIndex = 38;
-			this.label3.Text = "From";
+			this.label3.Text = "Start";
 			// 
 			// label4
 			// 
@@ -96,9 +96,9 @@
 			this.label4.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.label4.Location = new System.Drawing.Point(0, 83);
 			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(19, 13);
+			this.label4.Size = new System.Drawing.Size(25, 13);
 			this.label4.TabIndex = 38;
-			this.label4.Text = "To";
+			this.label4.Text = "End";
 			// 
 			// label5
 			// 

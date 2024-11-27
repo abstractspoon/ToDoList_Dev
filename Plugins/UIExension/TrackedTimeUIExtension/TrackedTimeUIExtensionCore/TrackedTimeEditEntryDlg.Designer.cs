@@ -31,7 +31,7 @@
 			this.label5 = new System.Windows.Forms.Label();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.OK = new System.Windows.Forms.Button();
-			this.m_TaskLabel = new System.Windows.Forms.Label();
+			this.label = new System.Windows.Forms.Label();
 			this.m_Attributes = new TrackedTimeUIExtension.TrackedTimeEntryAttributesPage();
 			this.m_TaskTitleLabel = new System.Windows.Forms.Label();
 			this.m_TaskIdLabel = new System.Windows.Forms.Label();
@@ -69,20 +69,20 @@
 			this.OK.Text = "OK";
 			this.OK.UseVisualStyleBackColor = true;
 			// 
-			// m_TaskLabel
+			// label
 			// 
-			this.m_TaskLabel.AutoSize = true;
-			this.m_TaskLabel.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.m_TaskLabel.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.m_TaskLabel.Location = new System.Drawing.Point(7, 12);
-			this.m_TaskLabel.Name = "m_TaskLabel";
-			this.m_TaskLabel.Size = new System.Drawing.Size(29, 13);
-			this.m_TaskLabel.TabIndex = 13;
-			this.m_TaskLabel.Text = "&Task";
+			this.label.AutoSize = true;
+			this.label.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.label.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.label.Location = new System.Drawing.Point(8, 12);
+			this.label.Name = "label";
+			this.label.Size = new System.Drawing.Size(29, 13);
+			this.label.TabIndex = 13;
+			this.label.Text = "&Task";
 			// 
 			// m_Attributes
 			// 
-			this.m_Attributes.Location = new System.Drawing.Point(8, 71);
+			this.m_Attributes.Location = new System.Drawing.Point(7, 71);
 			this.m_Attributes.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.m_Attributes.Name = "m_Attributes";
 			this.m_Attributes.Size = new System.Drawing.Size(350, 191);
@@ -90,16 +90,16 @@
 			// 
 			// m_TaskTitleLabel
 			// 
-			this.m_TaskTitleLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.m_TaskTitleLabel.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.m_TaskTitleLabel.Location = new System.Drawing.Point(107, 12);
 			this.m_TaskTitleLabel.Name = "m_TaskTitleLabel";
 			this.m_TaskTitleLabel.Size = new System.Drawing.Size(242, 30);
 			this.m_TaskTitleLabel.TabIndex = 19;
-			this.m_TaskTitleLabel.Text = "label1";
 			// 
 			// m_TaskIdLabel
 			// 
 			this.m_TaskIdLabel.AutoSize = true;
+			this.m_TaskIdLabel.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.m_TaskIdLabel.Location = new System.Drawing.Point(107, 50);
 			this.m_TaskIdLabel.Name = "m_TaskIdLabel";
 			this.m_TaskIdLabel.Size = new System.Drawing.Size(35, 13);
@@ -109,9 +109,10 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(7, 50);
+			this.label3.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.label3.Location = new System.Drawing.Point(8, 50);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(45, 13);
+			this.label3.Size = new System.Drawing.Size(43, 13);
 			this.label3.TabIndex = 20;
 			this.label3.Text = "Task ID";
 			// 
@@ -127,7 +128,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.Cancel);
 			this.Controls.Add(this.m_Attributes);
-			this.Controls.Add(this.m_TaskLabel);
+			this.Controls.Add(this.label);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = global::TrackedTimeUIExtension.Properties.Resources.TrackedTime;
 			this.Name = "TrackedTimeEditEntryDlg";
@@ -145,7 +146,7 @@
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Button OK;
-		private System.Windows.Forms.Label m_TaskLabel;
+		private System.Windows.Forms.Label label;
 		private TrackedTimeEntryAttributesPage m_Attributes;
 		private System.Windows.Forms.Label m_TaskTitleLabel;
 		private System.Windows.Forms.Label m_TaskIdLabel;

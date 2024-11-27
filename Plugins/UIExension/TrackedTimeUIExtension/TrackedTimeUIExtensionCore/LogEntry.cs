@@ -94,6 +94,11 @@ namespace TrackedTimeUIExtension
 			return false;
 		}
 
+		public LogEntry GetEntry(uint entryId)
+		{
+			return m_Entries.Find(x => (x.Id == entryId));
+		}
+
 		public List<LogEntry> GetEntries(DateTime from, DateTime to)
 		{
 			return m_Entries.Where(x => (x.StartDate >= from) && (x.EndDate <= to)).ToList();

@@ -17,7 +17,6 @@ namespace TrackedTimeUIExtension
 	public partial class TrackedTimeView : Calendar.IRenderer
 	{
 		private DayViewUIExtension.RenderHelper m_RenderHelper = new DayViewUIExtension.RenderHelper(); 
-		private UIExtension.TaskIcon m_TaskIcons;
 		private int m_DayWidth = -1;
 
 		// ------------------------------------------------------------------------
@@ -188,7 +187,7 @@ namespace TrackedTimeUIExtension
 
 		public bool TaskHasIcon(TaskItem taskItem)
 		{
-			return ((m_TaskIcons != null) &&
+			return ((m_RenderHelper.TaskIcons != null) &&
 					(taskItem != null) &&
 					(taskItem.HasIcon || (ShowParentsAsFolder && taskItem.IsParent)));
 		}
@@ -400,14 +399,14 @@ namespace TrackedTimeUIExtension
 			if (base.SavingToImage)
 				return UIExtension.SelectionRect.Style.None;
 
-			if (m_SelectedTaskID == appt.Id)
+			if (m_SelectedEntryId == appt.Id)
 				return (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
 
 			// Check interrelatedness of types
 			if (Focused)
 			{
 				var realAppt = GetRealAppointment(appt);
-				var selAppt = GetAppointment(m_SelectedTaskID);
+				var selAppt = GetAppointment(m_SelectedEntryId);
 				var selRealAppt = GetRealAppointment(selAppt);
 
 				if (selRealAppt == realAppt)
