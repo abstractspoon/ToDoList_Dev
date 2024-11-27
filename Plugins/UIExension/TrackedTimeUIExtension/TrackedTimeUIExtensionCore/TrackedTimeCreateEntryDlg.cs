@@ -13,7 +13,7 @@ namespace TrackedTimeUIExtension
 {
 	public partial class TrackedTimeCreateEntryDlg : Form
 	{
-		LogEntry m_DefaultEntry;
+		LogEntry m_DefaultAttrib;
 
 		// ---------------------------------------
 
@@ -25,14 +25,17 @@ namespace TrackedTimeUIExtension
 		public TrackedTimeCreateEntryDlg(IEnumerable<TaskItem> taskItems, 
 										 UIExtension.TaskIcon taskIcons, 
 										 WorkingWeek workWeek,
-										 LogEntry defaultEntry)
+										 LogEntry attrib)
 			:
 			this()
 		{
-			m_DefaultEntry = defaultEntry;
+			m_DefaultAttrib = attrib;
 
-			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, 0);
-			m_Attributes.Initialise(workWeek, defaultEntry);
+			if (attrib.TaskId != 0)
+				m_TaskIdLabel.Text = attrib.TaskId.ToString();
+
+			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, attrib.TaskId);
+			m_Attributes.Initialise(workWeek, attrib);
 		}
 
 		public uint SelectedTaskId
@@ -44,7 +47,7 @@ namespace TrackedTimeUIExtension
 		{
 			get
 			{
-				return new LogEntry(m_DefaultEntry, 0)
+				return new LogEntry(m_DefaultAttrib, 0)
 				{
 					TaskId = m_TaskCombo.SelectedTaskId,
 					Title = m_TaskCombo.SelectedTaskTitle,

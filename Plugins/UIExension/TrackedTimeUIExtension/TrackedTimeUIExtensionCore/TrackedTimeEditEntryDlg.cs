@@ -13,33 +13,40 @@ namespace TrackedTimeUIExtension
 {
 	public partial class TrackedTimeEditEntryDlg : Form
 	{
+		LogEntry m_Entry;
+
+		// ---------------------------------------
+
 		public TrackedTimeEditEntryDlg()
 		{
 			InitializeComponent();
 		}
 
-/*
-		public TimeLogEditTimeBlockSeriesDlg(string taskTitle,
-											WorkingWeek workWeek,
-											TimeBlockSeriesAttributes attrbs,
-											TimeBlockSeriesAttributes.EditMask mask)
+		public TrackedTimeEditEntryDlg(TaskItem taskItem, LogEntry entry, WorkingWeek workWeek)
 			:
 			this()
 		{
-			m_TaskTitle.Text = taskTitle;
-			m_Attributes.Initialise(workWeek, attrbs, true, mask);
-		}
-		
-		public TimeBlockSeriesAttributes Attributes
-		{
-			get { return m_Attributes.Attributes; }
+			m_Entry = entry;
+
+			m_TaskLabel.Text = taskItem.Title;
+			m_TaskIdLabel.Text = entry.TaskId.ToString();
+
+			m_Attributes.Initialise(workWeek, entry);
 		}
 
-		public TimeBlockSeriesAttributes.EditMask EditMask
+		public LogEntry Entry
 		{
-			get { return m_Attributes.EditMask; }
+			get
+			{
+				return new LogEntry(m_Entry)
+				{
+					StartDate = m_Attributes.From,
+					EndDate = m_Attributes.To,
+					Comment = m_Attributes.Comment,
+					TimeSpentInHrs = m_Attributes.TimeSpent
+				};
+			}
 		}
-*/
 	}
 
 
