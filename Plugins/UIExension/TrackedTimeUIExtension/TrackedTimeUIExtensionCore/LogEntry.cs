@@ -167,12 +167,34 @@ namespace TrackedTimeUIExtension
 			base.Id = entryId;
 		}
 
-		public LogEntry(uint entryId, string logEntry, string delim) 
+		public LogEntry(uint entryId, string logEntry, string delim)
 			: 
 			this(entryId, delim)
 		{
 			m_Entry = logEntry;
 			Decode();
+		}
+
+		public LogEntry(LogEntry entry)
+			:
+			this(entry, entry.Id)
+		{
+
+		}
+
+		public LogEntry(LogEntry entry, uint entryId)
+		{
+			m_Delim = entry.m_Delim;
+			m_Entry = entry.m_Entry;
+			m_UserId = entry.m_UserId;
+			m_Comment = entry.m_Comment;
+			m_Type = entry.m_Type;
+			m_Path = entry.m_Path;
+
+			m_TaskId = entry.m_TaskId;
+			m_TimeSpentInHrs = entry.m_TimeSpentInHrs;
+
+			base.Id = entryId;
 		}
 
 		public uint TaskId

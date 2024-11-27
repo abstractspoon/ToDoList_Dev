@@ -497,7 +497,7 @@ namespace TrackedTimeUIExtension
 		private void CreateToolbar()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
-			var images = new Bitmap(assembly.GetManifestResourceStream("TimeLogUIExtension.toolbar_std.bmp"));
+			var images = new Bitmap(assembly.GetManifestResourceStream("TrackedTimeUIExtension.toolbar_std.bmp"));
             
             m_TBImageList = new ImageList();
 			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
