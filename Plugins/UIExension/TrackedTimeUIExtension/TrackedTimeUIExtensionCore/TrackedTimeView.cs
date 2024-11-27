@@ -351,6 +351,21 @@ namespace TrackedTimeUIExtension
 			}
 		}
 
+		public bool AddEntry(uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		{
+			return m_LogEntries.AddEntry(taskId, taskTitle, start, end, comment, timeSpentInHrs, fillColor);
+		}
+
+		public bool ModifyEntry(uint entryId, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		{
+			return m_LogEntries.ModifyEntry(entryId, start, end, comment, timeSpentInHrs, fillColor);
+		}
+
+		public bool DeleteEntry(uint entryId)
+		{
+			return m_LogEntries.DeleteEntry(entryId);
+		}
+
 		public bool GetSelectedTaskDates(out DateTime from, out DateTime to)
 		{
 			from = to = Calendar.Appointment.NullDate;

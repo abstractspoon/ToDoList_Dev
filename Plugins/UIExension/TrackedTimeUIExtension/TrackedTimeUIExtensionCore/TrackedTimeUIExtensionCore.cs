@@ -686,12 +686,14 @@ namespace TrackedTimeUIExtension
 
 			if (res == DialogResult.OK)
 			{
-				dlg.GetAttributes(ref entry);
-				m_TimeLog.Invalidate();
-
-				if (dlg.WantAddToTimeSpent)
+				if (m_TimeLog.ModifyEntry(entry.Id, dlg.From, dlg.To, dlg.Comment, dlg.TimeSpent, dlg.FillColor))
 				{
-					// TODO
+					m_TimeLog.Invalidate();
+
+					if (dlg.WantAddToTimeSpent)
+					{
+						// TODO
+					}
 				}
 			}
 		}

@@ -44,21 +44,34 @@ namespace TrackedTimeUIExtension
 			get { return m_TaskCombo.SelectedTaskId; }
 		}
 
-		public LogEntry Entry
+		public DateTime From
 		{
-			get
-			{
-				return new LogEntry(m_DefaultAttrib, 0)
-				{
-					TaskId = m_TaskCombo.SelectedTaskId,
-					Title = m_TaskCombo.SelectedTaskTitle,
-					UserId = string.Empty, // TODO
-					StartDate = m_Attributes.From,
-					EndDate = m_Attributes.To,
-					Comment = m_Attributes.Comment,
-					TimeSpentInHrs = m_Attributes.TimeSpent
-				};
-			}
+			get { return m_Attributes.From; }
+		}
+
+		public DateTime To
+		{
+			get { return m_Attributes.To; }
+		}
+
+		public string Comment
+		{
+			get { return m_Attributes.Comment; }
+		}
+
+		public double TimeSpent
+		{
+			get { return m_Attributes.TimeSpent; }
+		}
+
+		public Color FillColor
+		{
+			get { return Color.Empty;/*m_Attributes.FillColor*/; }
+		}
+
+		public bool WantAddToTimeSpent
+		{
+			get { return m_Attributes.WantAddToTimeSpent; }
 		}
 
 		private void OnTaskComboSelChange(object sender, EventArgs e)

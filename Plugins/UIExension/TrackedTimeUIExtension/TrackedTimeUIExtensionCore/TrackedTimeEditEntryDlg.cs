@@ -34,12 +34,29 @@ namespace TrackedTimeUIExtension
 			m_Attributes.Initialise(entry, workWeek, readonlyTask);
 		}
 
-		public void GetAttributes(ref LogEntry entry)
+		public DateTime From
 		{
-			entry.StartDate = m_Attributes.From;
-			entry.EndDate = m_Attributes.To;
-			entry.Comment = m_Attributes.Comment;
-			entry.TimeSpentInHrs = m_Attributes.TimeSpent;
+			get { return m_Attributes.From; }
+		}
+
+		public DateTime To
+		{
+			get { return m_Attributes.To; }
+		}
+
+		public string Comment
+		{
+			get { return m_Attributes.Comment; }
+		}
+
+		public double TimeSpent
+		{
+			get { return m_Attributes.TimeSpent; }
+		}
+
+		public Color FillColor
+		{
+			get { return Color.Empty;/*m_Attributes.FillColor*/; }
 		}
 
 		public bool WantAddToTimeSpent

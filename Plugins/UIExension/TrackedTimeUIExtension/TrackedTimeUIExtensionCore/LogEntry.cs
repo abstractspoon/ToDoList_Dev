@@ -21,6 +21,8 @@ namespace TrackedTimeUIExtension
 		private string m_Delim;
 		private Encoding m_Encoding;
 		private List<LogEntry> m_Entries;
+		private uint m_NextEntryId;
+		private bool m_Modified;
 
 		const string VersionPrefix = "TODOTIMELOG VERSION";
 
@@ -38,6 +40,41 @@ namespace TrackedTimeUIExtension
 			m_Delim = null;
 			m_Encoding = Encoding.UTF8;
 			m_Entries = null;
+			m_Modified = false;
+			m_NextEntryId = 1;
+		}
+
+		public bool AddEntry(uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		{
+			// TODO
+			return false;
+		}
+
+		public bool ModifyEntry(uint entryId, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		{
+			var entry = GetEntry(entryId);
+
+			if (entry == null)
+				return false;
+
+			if (!entry.Modify(start, end, comment, timeSpentInHrs, fillColor))
+				return false;
+
+			m_Modified = true;
+			return true;
+		}
+
+		public bool DeleteEntry(uint entryId)
+		{
+			int iEntry = GetEntryIndex(entryId);
+
+			if (iEntry == -1)
+				return false;
+
+			m_Entries.RemoveAt(iEntry);
+			m_Modified = true;
+
+			return true;
 		}
 
 		public bool Load(string filePath)
@@ -82,6 +119,8 @@ namespace TrackedTimeUIExtension
 						m_Entries.Add(new LogEntry(entryId++, line, m_Delim));
 						line = reader.ReadLine();
 					}
+
+					m_NextEntryId = entryId;
 				}
 
 				return true;
@@ -99,6 +138,11 @@ namespace TrackedTimeUIExtension
 			return m_Entries.Find(x => (x.Id == entryId));
 		}
 
+		public int GetEntryIndex(uint entryId)
+		{
+			return m_Entries.FindIndex(x => (x.Id == entryId));
+		}
+
 		public List<LogEntry> GetEntries(DateTime from, DateTime to)
 		{
 			return m_Entries.Where(x => (x.StartDate >= from) && (x.EndDate <= to)).ToList();
@@ -108,6 +152,9 @@ namespace TrackedTimeUIExtension
 		{
 			if (string.IsNullOrEmpty(m_Version) || string.IsNullOrEmpty(m_Header))
 				return false;
+
+			if (!m_Modified)
+				return true;
 
 			try
 			{
@@ -125,7 +172,8 @@ namespace TrackedTimeUIExtension
 				// File locked?
 			}
 
-			return false;
+			m_Modified = false;
+			return true;
 		}
 
 	}
@@ -150,10 +198,10 @@ namespace TrackedTimeUIExtension
 	{
 		private string m_Delim;
 		private string m_Entry;
-		private string m_UserId;
-		private string m_Comment;
-		private string m_Type;
-		private string m_Path;
+// 		private string m_UserId;
+// 		private string m_Comment;
+// 		private string m_Type;
+// 		private string m_Path;
 
 		private uint m_TaskId = 0;
 		private double m_TimeSpentInHrs = 0.0;
@@ -180,91 +228,71 @@ namespace TrackedTimeUIExtension
 			Decode();
 		}
 
-		public LogEntry(LogEntry entry)
-			:
-			this(entry, entry.Id)
+		// 		public LogEntry(LogEntry entry)
+		// 			:
+		// 			this(entry, entry.Id)
+		// 		{
+		// 
+		// 		}
+		// 
+		// 		public LogEntry(LogEntry entry, uint entryId)
+		// 		{
+		// 			m_Delim = entry.m_Delim;
+		// 			m_Entry = entry.m_Entry;
+		// 			m_UserId = entry.m_UserId;
+		// 			m_Comment = entry.m_Comment;
+		// 			m_Type = entry.m_Type;
+		// 			m_Path = entry.m_Path;
+		// 
+		// 			m_TaskId = entry.m_TaskId;
+		// 			m_TimeSpentInHrs = entry.m_TimeSpentInHrs;
+		// 
+		// 			base.Id = entryId;
+		// 		}
+
+		public string UserId { get; private set; }
+		public string Path { get; private set; }
+		public string Type { get; private set; }
+		public string Comment { get; private set; }
+
+		public uint TaskId { get; private set; }
+		public double TimeSpentInHrs { get; private set; }
+
+		public bool Modify(DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
 		{
+			bool modified = false;
 
-		}
-
-		public LogEntry(LogEntry entry, uint entryId)
-		{
-			m_Delim = entry.m_Delim;
-			m_Entry = entry.m_Entry;
-			m_UserId = entry.m_UserId;
-			m_Comment = entry.m_Comment;
-			m_Type = entry.m_Type;
-			m_Path = entry.m_Path;
-
-			m_TaskId = entry.m_TaskId;
-			m_TimeSpentInHrs = entry.m_TimeSpentInHrs;
-
-			base.Id = entryId;
-		}
-
-		public uint TaskId
-		{
-			get { return m_TaskId; }
-			set
+			if (StartDate != start)
 			{
-				if (m_TaskId == 0)
-				{
-					m_TaskId = value;
-					m_NeedsEncoding = true;
-				}
+				StartDate = start;
+				modified = true;
 			}
-		}
 
-		public string UserId
-		{
-			get { return m_UserId; }
-			set
+			if (EndDate != end)
 			{
-				if (string.IsNullOrEmpty(m_UserId))
-				{
-					m_UserId = value;
-					m_NeedsEncoding = true;
-				}
+				EndDate = end;
+				modified = true;
 			}
-		}
 
-		public double TimeSpentInHrs
-		{
-			get { return m_TimeSpentInHrs; }
-			set
+			if (TimeSpentInHrs != timeSpentInHrs)
 			{
-				if (m_TimeSpentInHrs != value)
-				{
-					m_TimeSpentInHrs = value;
-					m_NeedsEncoding = true;
-				}
+				TimeSpentInHrs = timeSpentInHrs;
+				modified = true;
 			}
-		}
 
-		public string Comment
-		{
-			get { return m_Comment; }
-			set
+			if (Comment != comment)
 			{
-				if (m_Comment != value)
-				{
-					m_Comment = value;
-					m_NeedsEncoding = true;
-				}
+				Comment = comment;
+				modified = true;
 			}
-		}
 
-		public string EntryType
-		{
-			get { return m_Type; }
-			set
+			if (FillColor != fillColor)
 			{
-				if (m_Type != value)
-				{
-					m_Type = value;
-					m_NeedsEncoding = true;
-				}
+				FillColor = fillColor;
+				modified = true;
 			}
+
+			return modified;
 		}
 
 		private void Decode()
@@ -278,13 +306,13 @@ namespace TrackedTimeUIExtension
 
 				uint.TryParse(parts[0], out m_TaskId);
 				Title = parts[1];
-				m_UserId = parts[2];
+				UserId = parts[2];
 				DateTime.TryParse(parts[3] + ' ' + parts[4], out start);
 				DateTime.TryParse(parts[5] + ' ' + parts[6], out end);
 				double.TryParse(parts[7], out m_TimeSpentInHrs);
-				m_Comment = parts[8];
-				m_Type = parts[9];
-				m_Path = parts[10];
+				Comment = parts[8];
+				Type = parts[9];
+				Path = parts[10];
 
 				if (parts.Length > 11)
 					int.TryParse(parts[11], out rgbColor);
@@ -304,15 +332,15 @@ namespace TrackedTimeUIExtension
 				var elements = new string[]
 					{
 					m_TaskId.ToString(),
-					m_UserId,
+					UserId,
 					base.StartDate.ToString("yyyy-MM-dd"), // ISO
 					base.StartDate.ToString("HH:mm"),      // ISO
 					base.EndDate.ToString("yyyy-MM-dd"),   // ISO
 					base.EndDate.ToString("HH:mm"),        // ISO
 					m_TimeSpentInHrs.ToString(),
-					m_Comment,
-					m_Type,
-					m_Path,
+					Comment,
+					Type,
+					Path,
 					base.FillColor.ToArgb().ToString()
 					};
 
@@ -334,11 +362,6 @@ namespace TrackedTimeUIExtension
 		}
 
 		protected override void OnColorChanged()
-		{
-			m_NeedsEncoding = true;
-		}
-
-		protected override void OnTitleChanged()
 		{
 			m_NeedsEncoding = true;
 		}
