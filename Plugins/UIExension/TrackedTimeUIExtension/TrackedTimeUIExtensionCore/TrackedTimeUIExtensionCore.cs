@@ -573,14 +573,14 @@ namespace TrackedTimeUIExtension
 
 			var btn8 = new ToolStripButton();
 			btn8.Name = "NewLogEntry";
-			btn8.ImageIndex = 6;
+			btn8.ImageIndex = 7;
 			btn8.Click += new EventHandler(OnEditLogEntry);
 			btn8.ToolTipText = "Edit Log Entry";
 			m_Toolbar.Items.Add(btn8);
 
 			var btn9 = new ToolStripButton();
 			btn9.Name = "DeleteLogEntry";
-			btn9.ImageIndex = 7;
+			btn9.ImageIndex = 8;
 			btn9.Click += new EventHandler(OnDeleteLogEntry);
 			btn9.ToolTipText = "Delete Log Entry";
 			m_Toolbar.Items.Add(btn9);
@@ -588,7 +588,7 @@ namespace TrackedTimeUIExtension
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn12 = new ToolStripButton();
-			btn12.ImageIndex = 8;
+			btn12.ImageIndex = 9;
 			btn12.Click += new EventHandler(OnPreferences);
 			btn12.ToolTipText = "Preferences";
 			m_Toolbar.Items.Add(btn12);
@@ -596,7 +596,7 @@ namespace TrackedTimeUIExtension
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn13 = new ToolStripButton();
-			btn13.ImageIndex = 9;
+			btn13.ImageIndex = 10;
 			btn13.Click += new EventHandler(OnHelp);
 			btn13.ToolTipText = "Online Help";
 			m_Toolbar.Items.Add(btn13);
