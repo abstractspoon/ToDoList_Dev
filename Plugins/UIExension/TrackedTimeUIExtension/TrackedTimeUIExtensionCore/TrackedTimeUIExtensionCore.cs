@@ -572,7 +572,7 @@ namespace TrackedTimeUIExtension
 			m_Toolbar.Items.Add(btn7);
 
 			var btn8 = new ToolStripButton();
-			btn8.Name = "NewLogEntry";
+			btn8.Name = "EditLogEntry";
 			btn8.ImageIndex = 7;
 			btn8.Click += new EventHandler(OnEditLogEntry);
 			btn8.ToolTipText = "Edit Log Entry";
@@ -686,7 +686,7 @@ namespace TrackedTimeUIExtension
 
 			if (res == DialogResult.OK)
 			{
-				if (m_TimeLog.ModifyEntry(entry.Id, dlg.From, dlg.To, dlg.Comment, dlg.TimeSpent, dlg.FillColor))
+				if (m_TimeLog.ModifySelectedLogEntry(dlg.From, dlg.To, dlg.Comment, dlg.TimeSpent, dlg.FillColor))
 				{
 					m_TimeLog.Invalidate();
 
@@ -771,8 +771,9 @@ namespace TrackedTimeUIExtension
 			(m_Toolbar.Items["Show14TimeLog"] as ToolStripButton).Checked = (m_TimeLog.DaysShowing == 14);
             (m_Toolbar.Items["Show28TimeLog"] as ToolStripButton).Checked = (m_TimeLog.DaysShowing == 28);
 
-// 			m_Toolbar.Items["NewLogEntry"].Enabled = m_TimeLog.CanCreateNewLogEntry;
-// 			m_Toolbar.Items["DeleteLogEntry"].Enabled = m_TimeLog.CanDeleteSelectedLogEntry;
+			m_Toolbar.Items["NewLogEntry"].Enabled = m_TimeLog.CanCreateNewLogEntry;
+			m_Toolbar.Items["EditLogEntry"].Enabled = m_TimeLog.CanModifySelectedLogEntry;
+			m_Toolbar.Items["DeleteLogEntry"].Enabled = m_TimeLog.CanDeleteSelectedLogEntry;
 		}
 
 		private void OnPreferences(object sender, EventArgs e)
@@ -917,19 +918,19 @@ namespace TrackedTimeUIExtension
 		{
             UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			switch (m_TimeLog.SelectionType)
-			{
-			case Calendar.SelectionType.Appointment:
+// 			switch (m_TimeLog.SelectionType)
+// 			{
+// 			case Calendar.SelectionType.Appointment:
 				UpdatedSelectedTaskDatesText();
 				UpdateToolbarButtonStates();
+// 				break;
+// 
+// 			case Calendar.SelectionType.DateRange:
+// 				UpdateToolbarButtonStates();
+// 				break;
+// 			}
 
-				notify.NotifySelChange(m_TimeLog.SelectedTaskId);
-				break;
-
-			case Calendar.SelectionType.DateRange:
-				UpdateToolbarButtonStates();
-				break;
-			}
+			notify.NotifySelChange(m_TimeLog.SelectedTaskId);
 		}
 
 		private void UpdatedSelectedTaskDatesText()

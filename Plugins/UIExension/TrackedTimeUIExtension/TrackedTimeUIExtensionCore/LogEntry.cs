@@ -28,7 +28,7 @@ namespace TrackedTimeUIExtension
 
 		public LogEntries()
 		{
-			// TODO
+			m_Entries = new List<LogEntry>();
 		}
 
 		public bool IsEmpty { get { return (m_Entries?.Count == 0); } }
@@ -39,9 +39,14 @@ namespace TrackedTimeUIExtension
 			m_Header = null;
 			m_Delim = null;
 			m_Encoding = Encoding.UTF8;
-			m_Entries = null;
+			m_Entries.Clear();
 			m_Modified = false;
 			m_NextEntryId = 1;
+		}
+
+		public bool HasEntry(uint entryId)
+		{
+			return (GetEntry(entryId) != null);
 		}
 
 		public bool AddEntry(uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
@@ -109,7 +114,6 @@ namespace TrackedTimeUIExtension
 					m_Version = version;
 					m_Header = header;
 					m_Encoding = reader.CurrentEncoding;
-					m_Entries = new List<LogEntry>();
 
 					string line = reader.ReadLine();
 					uint entryId = 1;
@@ -164,7 +168,7 @@ namespace TrackedTimeUIExtension
 					writer.WriteLine(m_Header);
 
 					foreach (var entry in m_Entries)
-						writer.WriteLine(entry.Encode());
+						writer.WriteLine(entry.Encode(m_Delim));
 				}
 			}
 			catch (Exception )
@@ -196,12 +200,7 @@ namespace TrackedTimeUIExtension
 
 	public class LogEntry : Calendar.Appointment
 	{
-		private string m_Delim;
 		private string m_Entry;
-// 		private string m_UserId;
-// 		private string m_Comment;
-// 		private string m_Type;
-// 		private string m_Path;
 
 		private uint m_TaskId = 0;
 		private double m_TimeSpentInHrs = 0.0;
@@ -212,9 +211,8 @@ namespace TrackedTimeUIExtension
 
 		// --------------------
 
-		public LogEntry(uint entryId, string delim)
+		public LogEntry(uint entryId)
 		{
-			m_Delim = delim;
 			m_Entry = string.Empty;
 
 			base.Id = entryId;
@@ -222,41 +220,24 @@ namespace TrackedTimeUIExtension
 
 		public LogEntry(uint entryId, string logEntry, string delim)
 			: 
-			this(entryId, delim)
+			this(entryId)
 		{
 			m_Entry = logEntry;
-			Decode();
+			Decode(delim);
 		}
 
-		// 		public LogEntry(LogEntry entry)
-		// 			:
-		// 			this(entry, entry.Id)
-		// 		{
-		// 
-		// 		}
-		// 
-		// 		public LogEntry(LogEntry entry, uint entryId)
-		// 		{
-		// 			m_Delim = entry.m_Delim;
-		// 			m_Entry = entry.m_Entry;
-		// 			m_UserId = entry.m_UserId;
-		// 			m_Comment = entry.m_Comment;
-		// 			m_Type = entry.m_Type;
-		// 			m_Path = entry.m_Path;
-		// 
-		// 			m_TaskId = entry.m_TaskId;
-		// 			m_TimeSpentInHrs = entry.m_TimeSpentInHrs;
-		// 
-		// 			base.Id = entryId;
-		// 		}
+		public LogEntry(uint entryId, uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		{
+
+		}
 
 		public string UserId { get; private set; }
 		public string Path { get; private set; }
 		public string Type { get; private set; }
 		public string Comment { get; private set; }
 
-		public uint TaskId { get; private set; }
-		public double TimeSpentInHrs { get; private set; }
+		public uint TaskId { get { return m_TaskId; } }
+		public double TimeSpentInHrs { get { return m_TimeSpentInHrs; } }
 
 		public bool Modify(DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
 		{
@@ -276,7 +257,7 @@ namespace TrackedTimeUIExtension
 
 			if (TimeSpentInHrs != timeSpentInHrs)
 			{
-				TimeSpentInHrs = timeSpentInHrs;
+				m_TimeSpentInHrs = timeSpentInHrs;
 				modified = true;
 			}
 
@@ -295,9 +276,9 @@ namespace TrackedTimeUIExtension
 			return modified;
 		}
 
-		private void Decode()
+		private void Decode(string delim)
 		{
-			var parts = m_Entry.Split(new string[] { m_Delim }, StringSplitOptions.None);
+			var parts = m_Entry.Split(new string[] { delim }, StringSplitOptions.None);
 
 			if (parts.Length >= 11)
 			{
@@ -325,7 +306,7 @@ namespace TrackedTimeUIExtension
 			m_NeedsEncoding = false;
 		}
 
-		public string Encode()
+		public string Encode(string delim)
 		{
 			if (m_NeedsEncoding)
 			{
@@ -344,7 +325,7 @@ namespace TrackedTimeUIExtension
 					base.FillColor.ToArgb().ToString()
 					};
 
-				m_Entry = string.Join(m_Delim, elements);
+				m_Entry = string.Join(delim, elements);
 				m_NeedsEncoding = false;
 			}
 

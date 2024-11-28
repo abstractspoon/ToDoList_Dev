@@ -351,19 +351,59 @@ namespace TrackedTimeUIExtension
 			}
 		}
 
-		public bool AddEntry(uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		public bool CanCreateNewLogEntry
 		{
-			return m_LogEntries.AddEntry(taskId, taskTitle, start, end, comment, timeSpentInHrs, fillColor);
+			get { return !ReadOnly && !m_LogEntries.IsEmpty; }
 		}
 
-		public bool ModifyEntry(uint entryId, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		public bool CanModifySelectedLogEntry
 		{
-			return m_LogEntries.ModifyEntry(entryId, start, end, comment, timeSpentInHrs, fillColor);
+			get { return !ReadOnly && !m_LogEntries.IsEmpty && m_LogEntries.HasEntry(m_SelectedEntryId); }
 		}
 
-		public bool DeleteEntry(uint entryId)
+		public bool CanDeleteSelectedLogEntry
 		{
-			return m_LogEntries.DeleteEntry(entryId);
+			get { return CanModifySelectedLogEntry; }
+		}
+		
+		public bool AddLogEntry(uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		{
+			if (!CanCreateNewLogEntry)
+				return false;
+
+			if (!m_LogEntries.AddEntry(taskId, taskTitle, start, end, comment, timeSpentInHrs, fillColor))
+				return false;
+
+			Invalidate();
+
+			return true;
+		}
+
+		public bool ModifySelectedLogEntry(DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		{
+			if (!CanModifySelectedLogEntry)
+				return false;
+
+			if (!m_LogEntries.ModifyEntry(m_SelectedEntryId, start, end, comment, timeSpentInHrs, fillColor))
+				return false;
+
+			Invalidate();
+
+			return true;
+		}
+
+		public bool DeleteSelectedLogEntry()
+		{
+			if (!CanDeleteSelectedLogEntry)
+				return false;
+			
+			if (!m_LogEntries.DeleteEntry(m_SelectedEntryId))
+				return false;
+
+			m_SelectedEntryId = 0;
+			Invalidate();
+
+			return true;
 		}
 
 		public bool GetSelectedTaskDates(out DateTime from, out DateTime to)
@@ -558,52 +598,6 @@ namespace TrackedTimeUIExtension
 
 			return (SelectedTaskId != 0);
 		}
-
-/*
-		public bool CanDuplicateSelectedTimeBlock
-		{
-			get { return (SelectedAppointment is TaskTimeBlock); }
-		}
-
-		public bool CanCreateNewTaskBlockSeries
-		{
-			get { return true; }
-		}
-
-		public bool CreateNewTaskBlockSeries(uint taskId, TimeBlockSeriesAttributes attribs)
-		{
-			var seriesList = m_TimeBlocks.GetTaskSeries(taskId, true);
-
-			if (seriesList == null)
-				return false;
-
-			if (!seriesList.AddSeries(attribs))
-				return false;
-
-			SelectedAppointment = null;
-
-			return SelectTask(taskId);
-		}
-
-		public bool DuplicateSelectedTimeBlock()
-		{
- 			var block = (SelectedAppointment as TaskTimeBlock);
- 
- 			if (block == null)
- 				return false;
-
-			var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, true);
-
-			if (seriesList == null)
-				return false;
-
-			if (!seriesList.DuplicateBlock(block.TimeBlock))
-				return false;
-
-			Invalidate();
-			return true;
-		}
-*/
 
 		public void GoToToday()
         {
@@ -1059,6 +1053,12 @@ namespace TrackedTimeUIExtension
 				m_SelectedEntryId = args.Appointment.Id;
 				m_VisibleSelectedTaskID = (args.Appointment as LogEntry).TaskId;
 			}
+			else
+			{
+				m_SelectedEntryId = m_VisibleSelectedTaskID = 0;
+			}
+
+			Invalidate();
 		}
 
         private void OnWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
@@ -1141,32 +1141,6 @@ namespace TrackedTimeUIExtension
 				return true;
 			}
 
-			return false;
-		}
-
-		public bool CanDeleteSelectedTimeBlock
-		{
-			get { return false;/*CanEditSelectedTimeBlockSeries;*/ }
-		}
-
-		public bool DeleteSelectedLogEntry()
-		{
-			if (CanDeleteSelectedTimeBlock)
-			{
-// 				var block = (SelectedAppointment as TaskTimeBlock);
-// 				var seriesList = m_TimeBlocks.GetTaskSeries(block.RealTaskId, false);
-// 
-// 				if (seriesList.DeleteBlock(block.TimeBlock))
-// 				{
-// 					// Move selection to 'real' task
-// 					SelectTask(block.RealTaskId, true);
-// 					Invalidate();
-// 
-// 					return true;
-// 				}
-			}
-
-			// else
 			return false;
 		}
 
