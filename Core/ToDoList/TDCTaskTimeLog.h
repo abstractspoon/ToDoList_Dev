@@ -40,6 +40,9 @@ struct TASKTIMELOGITEM
 	CString sPath;
 	BOOL bTracked;
 	COLORREF crAltColor;
+
+protected:
+	static double ParseTimeSpent(CString sValue);
 };
 typedef CArray<TASKTIMELOGITEM, TASKTIMELOGITEM&> CTaskTimeLogItemArray;
 

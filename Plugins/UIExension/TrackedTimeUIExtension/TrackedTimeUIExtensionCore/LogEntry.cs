@@ -290,7 +290,7 @@ namespace TrackedTimeUIExtension
 				UserId = parts[2];
 				DateTime.TryParse(parts[3] + ' ' + parts[4], out start);
 				DateTime.TryParse(parts[5] + ' ' + parts[6], out end);
-				double.TryParse(parts[7], out m_TimeSpentInHrs);
+				m_TimeSpentInHrs = ParseTimeSpent(parts[7]);
 				Comment = parts[8];
 				Type = parts[9];
 				Path = parts[10];
@@ -306,6 +306,20 @@ namespace TrackedTimeUIExtension
 			m_NeedsEncoding = false;
 		}
 
+		static double ParseTimeSpent(string value)
+		{
+			// There are essentially only two decimal separators 
+			// that the world uses: '.' and ','
+			// Plus we know that these entries will not contain thousands separators
+			string nativeSep = CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator;
+			var alternativeSep = ((nativeSep == ".") ? "," : ".");
+
+			double timeSpent = 0.0;
+			double.TryParse(value.Replace(alternativeSep, nativeSep), out timeSpent);
+
+			return timeSpent;
+		}
+
 		public string Encode(string delim)
 		{
 			if (m_NeedsEncoding)
@@ -318,7 +332,7 @@ namespace TrackedTimeUIExtension
 					base.StartDate.ToString("HH:mm"),      // ISO
 					base.EndDate.ToString("yyyy-MM-dd"),   // ISO
 					base.EndDate.ToString("HH:mm"),        // ISO
-					m_TimeSpentInHrs.ToString(),
+					m_TimeSpentInHrs.ToString("N3"),	   // 3 decimals
 					Comment,
 					Type,
 					Path,
