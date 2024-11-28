@@ -172,7 +172,7 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 		{
 			dwTaskID = _ttoi(aFields[0]);
 			sTaskTitle = aFields[1];
-			dHours = _ttof(aFields[2]);
+			dHours = ParseTimeSpent(aFields[2]);
 			sPerson = aFields[3];
 			
 			// NOTE: 'To' precedes 'From' because 'From' was added later
