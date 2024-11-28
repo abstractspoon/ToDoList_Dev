@@ -449,17 +449,16 @@ namespace Calendar
 					DateTime firstDayOfWeek = FirstDayOfWeekUtility.GetFirstDayOfWeek(value);
 
 					if (startDate != firstDayOfWeek)
-					{
 						startDate = firstDayOfWeek;
-						OnStartDateChanged();
-					}
 				}
 				else
 				{
 					startDate = value.Date;
 				}
-            }
-        }
+
+				OnStartDateChanged();
+			}
+		}
 
         public DateTime EndDate
         {
