@@ -27,14 +27,14 @@ protected:
 
 	void CheckLoadLogItemResult(const TASKTIMELOGITEM& tli,
 								DWORD dwTaskID,
-								double dHours,
 								LPCTSTR szTaskTitle,
 								LPCTSTR szPerson,
 								LPCTSTR szDateFrom,
 								LPCTSTR szDateTo,
+								double dHours,
 								LPCTSTR szComment = _T(""),
-								LPCTSTR szPath = _T(""),
 								LPCTSTR szTracked = _T(""),
+								LPCTSTR szPath = _T(""),
 								COLORREF crAltColor = CLR_NONE);
 };
 

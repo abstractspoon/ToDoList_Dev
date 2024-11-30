@@ -211,32 +211,25 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 			dHours = ParseTimeSpent(aFields[7]);
 			
 			// optional fields
-			switch (nNumFields)
+			if (nNumFields > 8)
 			{
-				// ADDITIONAL FIELDS ADDED HERE
+				switch (nNumFields)
+				{
+					// ADDITIONAL FIELDS ADDED HERE
 
-			case 12:
-				if (aFields[11].IsEmpty())
-					crAltColor = CLR_NONE;
-				else
-					crAltColor = _ttoi(aFields[11]);
-				// fall through
+				case 12:
+					if (!aFields[11].IsEmpty())
+						crAltColor = _ttoi(aFields[11]);
 
-			case 11:
-				sPath = aFields[10];
-				// fall through
+				case 11: sPath		= aFields[10];
+				case 10: sTracked	= aFields[9];
+				case 9:  sComment	= aFields[8];
+					break;
 
-			case 10:
-				sTracked = aFields[9];
-				// fall through
-
-			case 9:
-				sComment = aFields[8];
-				break;
-
-			default:
-				ASSERT(0);
-				break;
+				default:
+					ASSERT(0);
+					break;
+				}
 			}
 		}
 		else
