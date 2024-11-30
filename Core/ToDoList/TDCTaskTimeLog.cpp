@@ -28,9 +28,11 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const CString HEADER_LINE = _T("TODOTIMELOG VERSION");
+const CString HEADER_LINE	= _T("TODOTIMELOG VERSION");
 
-static CString TAB = _T("\t");
+static CString TAB			= _T("\t");
+static CString COMMA		= _T(",");
+static CString SEMICOLON	= _T(";");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,14 +49,16 @@ enum CSVFMT_LOG_VERSION
 struct LOG_VERSION_INFO
 {
 	CSVFMT_LOG_VERSION nVersion;
+	int nNumHeaderRows;
 	int nTimeField;
-	int nNumFields;
+	int nMinFields;
+	int nMaxFields;
 };
 
 const LOG_VERSION_INFO LOG_VERSIONS[] = 
 {
-	{ VER_0, 2, 6 },
-	{ VER_LATEST, 7, 12 },
+	{ VER_0, 1, 2, 6, 6 },
+	{ VER_LATEST, 2, 7, 8, 12 },
 };
 const int NUM_LOG_VERSIONS = sizeof(LOG_VERSIONS) / sizeof(LOG_VERSION_INFO);
 
@@ -92,7 +96,6 @@ void TASKTIMELOGITEM::Reset()
 {
 	dwTaskID = 0;
 	dHours = 0.0;
-	bTracked = TRUE;
 	crAltColor = CLR_NONE;
 
 	CDateHelper::ClearDate(dtFrom);
@@ -102,6 +105,7 @@ void TASKTIMELOGITEM::Reset()
 	sComment.Empty();
 	sPerson.Empty();
 	sPath.Empty();
+	sTracked.Empty();
 }
 
 CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
@@ -133,7 +137,7 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 					 CTimeHelper::FormatClockTime(dtTo, FALSE, TRUE),
 					 Misc::Format(dHours, 3),
 					 sComment,
-					 CEnString(bTracked ? IDS_LOG_TYPETRACKED : IDS_LOG_TYPEADJUSTED),
+					 sTracked,
 					 sPath,
 					 ((crAltColor == CLR_NONE) ? _T("") : Misc::Format((int)crAltColor)));
 		break;
@@ -158,13 +162,16 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 	if (!nNumFields)
 		return FALSE;
 	
+	Reset();
+
 	// try to determine row version dynamically
 	int nRowVer = GetRowVersion(nNumFields);
-	ASSERT (nRowVer != -1);
+
+	if (nRowVer == VER_NONE)
+		return FALSE;
 	
 	COleDateTime date;
-	Reset();
-	
+
 	switch (nRowVer)
 	{
 	case VER_0:
@@ -220,7 +227,7 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 				// fall through
 
 			case 10:
-				bTracked = _ttoi(aFields[9]);
+				sTracked = aFields[9];
 				// fall through
 
 			case 9:
@@ -266,7 +273,8 @@ BOOL TASKTIMELOGITEM::GetRowVersion(int nNumFields)
 	
 	while (nVer--)
 	{
-		if (LOG_VERSIONS[nVer].nNumFields == nNumFields)
+		if ((nNumFields >= LOG_VERSIONS[nVer].nMinFields) &&
+			(nNumFields <= LOG_VERSIONS[nVer].nMaxFields))
 		{
 			nRowVer = LOG_VERSIONS[nVer].nVersion;
 			ASSERT(nVer == nRowVer);
@@ -276,7 +284,7 @@ BOOL TASKTIMELOGITEM::GetRowVersion(int nNumFields)
 	}
 
 	// else
-	return VER_LATEST;
+	return VER_NONE;
 }
 
 CString TASKTIMELOGITEM::GetRowFormat(int nRowVer, const CString& sDelim)
@@ -292,7 +300,7 @@ CString TASKTIMELOGITEM::GetRowFormat(int nRowVer, const CString& sDelim)
 	// build row format from 
 	CString sRowFormat;
 	
-	for (int nField = 0; nField < vi.nNumFields; nField++)
+	for (int nField = 0; nField < vi.nMaxFields; nField++)
 	{
 		if (!sRowFormat.IsEmpty())
 			sRowFormat += sDelim;
@@ -343,7 +351,7 @@ BOOL CTDCTaskTimeLog::LogTime(DWORD dwTaskID, LPCTSTR szTaskTitle, LPCTSTR szTas
 	li.sComment = sComment;
 	li.sPath = szTaskPath;
 	li.sPerson = Misc::GetUserName();
-	li.bTracked = bTracked;
+	li.sTracked = CEnString(bTracked ? IDS_LOG_TYPETRACKED : IDS_LOG_TYPEADJUSTED);
 	li.dHours = dHours;
 	li.dtTo = dtWhen;
 	li.dtFrom = dtWhen;
@@ -360,9 +368,9 @@ BOOL CTDCTaskTimeLog::LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately)
 		return FALSE;
 
 	// init state
-	CString sLogPath = GetLogPath(li.dwTaskID, bLogSeparately), sUnused;
+	CString sLogPath = GetLogPath(li.dwTaskID, bLogSeparately);
 
-	Initialise(sLogPath, sUnused);
+	Initialise(sLogPath);
 	ASSERT(m_nVersion != VER_NONE);
 
 	// if the file doesn't exist then we insert the 
@@ -438,50 +446,52 @@ CString CTDCTaskTimeLog::GetLatestColumnHeader() const // always the latest vers
 // public static helper
 int CTDCTaskTimeLog::LoadLogItems(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim)
 {
+	if (!FileMisc::FileExists(sLogPath))
+		return 0;
+
 	CTDCTaskTimeLog log;
-	log.Initialise(sLogPath, sHeaderDelim);
+	log.Initialise(sLogPath);
 
-	if (FileMisc::FileExists(sLogPath))
+	sHeaderDelim = log.m_sHeaderDelim;
+
+	CStringArray aLines;
+	int nNumLines = FileMisc::LoadFile(sLogPath, aLines), nItem = 0;
+
+	if (nNumLines)
 	{
-		CStringArray aLines;
-		int nNumLines = FileMisc::LoadFile(sLogPath, aLines);
+		CTaskTimeLogItemArray aTempLogItems;
 
-		if (nNumLines)
+		// skip header and column titles lines
+		int nNumHeaderRows = log.GetNumHeaderRows();
+		aTempLogItems.SetSize(nNumLines - nNumHeaderRows);
+
+		for (int nLine = nNumHeaderRows; nLine < nNumLines; nLine++)
 		{
-			int nItem = 0;
-			CTaskTimeLogItemArray aTempLogItems;
+			const CString& sLine = Misc::GetItem(aLines, nLine);
+			CString sDelim = log.GetDelimiter(sLine);
 
-			// skip header and column titles lines
-			aTempLogItems.SetSize(nNumLines - 2);
+			TASKTIMELOGITEM& li = aTempLogItems[nItem];
 
-			for (int nLine = 2; nLine < nNumLines; nLine++)
-			{
-				const CString& sLine = Misc::GetItem(aLines, nLine);
-				CString sDelim = log.GetDelimiter(sLine);
+			if (li.ParseRow(sLine, sDelim))
+				nItem++;
+		}
 
-				TASKTIMELOGITEM& li = aTempLogItems[nItem];
+		if (nItem)
+		{
+			// Remove unused items
+			aTempLogItems.SetSize(nItem);
 
-				if (li.ParseRow(sLine, sDelim))
-					nItem++;
-			}
-
-			if (nItem)
-			{
-				// Remove unused items
-				aTempLogItems.SetSize(nItem);
-
-				if (bAppend && aLogItems.GetSize())
-					aLogItems.Append(aTempLogItems);
-				else
-					aLogItems.Copy(aTempLogItems);
-			}
+			if (bAppend && aLogItems.GetSize())
+				aLogItems.Append(aTempLogItems);
+			else
+				aLogItems.Copy(aTempLogItems);
 		}
 	}
 
-	return aLogItems.GetSize();
+	return nItem;
 }
 
-void CTDCTaskTimeLog::Initialise(const CString& sLogPath, CString& sHeaderDelim)
+void CTDCTaskTimeLog::Initialise(const CString& sLogPath)
 {
 	// Once only
 	if (m_nVersion != VER_NONE)
@@ -490,17 +500,13 @@ void CTDCTaskTimeLog::Initialise(const CString& sLogPath, CString& sHeaderDelim)
 	m_bLogExists = FileMisc::FileExists(sLogPath);
 	m_bUseTabDelim = CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE);
 
-	if (!m_bLogExists) // new log file
+	m_nVersion = VER_LATEST; // default
+	m_sHeaderDelim = GetDelimiter(); // default
+
+	if (m_bLogExists)
 	{
-		m_nVersion = VER_LATEST;
-	}
-	else
-	{
-		// get version and delimiter from file
-		m_nVersion = VER_0;
-		
 		CStringArray aLines;
-		
+
 		if (FileMisc::LoadFile(sLogPath, aLines, 2))
 		{
 			CString sLine = aLines[0];
@@ -514,20 +520,45 @@ void CTDCTaskTimeLog::Initialise(const CString& sLogPath, CString& sHeaderDelim)
 				m_nVersion = _ttoi(sVer);
 				sLine = aLines[1];
 			}
+			else
+			{
+				m_nVersion = VER_0;
+			}
 
-			// check for tab char in column header
-			m_bUseTabDelim = (sLine.Find(TAB) != -1);
+			// Test for column header delimiter
+			m_sHeaderDelim = TAB;
+
+			CStringArray aUnused;
+			int nNumFields = Misc::Split(sLine, aUnused, m_sHeaderDelim);
+
+			if (TASKTIMELOGITEM::GetRowVersion(nNumFields) != VER_NONE)
+			{
+				m_bUseTabDelim = TRUE;
+			}
+			else
+			{
+				m_bUseTabDelim = FALSE;
+				
+				// Try some others
+				m_sHeaderDelim = COMMA;
+
+				nNumFields = Misc::Split(sLine, aUnused, m_sHeaderDelim);
+
+				if (TASKTIMELOGITEM::GetRowVersion(nNumFields) == VER_NONE)
+				{
+					m_sHeaderDelim = SEMICOLON;
+					nNumFields = Misc::Split(sLine, aUnused, m_sHeaderDelim);
+
+					if (TASKTIMELOGITEM::GetRowVersion(nNumFields) == VER_NONE)
+						m_sHeaderDelim.Empty(); // unknown
+				}
+			}
 		}
 	}
-
-	sHeaderDelim = GetDelimiter();
 }
 
 CString CTDCTaskTimeLog::GetDelimiter(const CString& sLine) const
 {
-	if (m_bUseTabDelim)
-		return TAB;
-
 	if (!sLine.IsEmpty())
 	{
 		ASSERT(isdigit(sLine[0]));
@@ -543,5 +574,17 @@ CString CTDCTaskTimeLog::GetDelimiter(const CString& sLine) const
 		}
 	}
 
-	return Misc::GetListSeparator();
+	// else
+	return (m_bUseTabDelim ? TAB : Misc::GetListSeparator());
+}
+
+int CTDCTaskTimeLog::GetNumHeaderRows() const
+{
+	if ((m_nVersion < 0) || (m_nVersion >= NUM_LOG_VERSIONS))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	return LOG_VERSIONS[m_nVersion].nNumHeaderRows;
 }

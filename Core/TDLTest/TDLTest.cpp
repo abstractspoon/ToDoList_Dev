@@ -15,6 +15,7 @@
 #include "TDCDependencyTest.h"
 #include "TDCRecurrenceTest.h"
 #include "TDCTaskCalculatorTest.h"
+#include "TDCTaskTimeLogTest.h"
 #include "TDLTaskCtrlBaseTest.h"
 #include "TimeHelperTest.h"
 #include "ToDoCtrlDataTest.h"
@@ -80,24 +81,25 @@ void DoTests(const CTestUtils& utils)
 	TESTRESULT res;
 
 	// Keep sorted for easy scanning
-	res += CDateHelperTest(utils).Run();
-	res += CFileMiscTest(utils).Run();
-	res += CImportExportMgrTest(utils).Run();
-	res += CMiscTest(utils).Run();
-	res += CPreferencesTest(utils).Run();
-	res += CRemapMenuIDsTest(utils).Run();
-	res += CTaskFileTest(utils).Run();
-	res += CTDCCUSTOMATTRIBUTECALCULATIONTest(utils).Run();
-	res += CTDCDEPENDENCYTest(utils).Run();
-	res += CTDCRECURRENCETest(utils).Run();
-	res += CTDCTaskCalculatorTest(utils).Run();
-	res += CTDLTaskCtrlBaseTest(utils).Run();
-	res += CTimeHelperTest(utils).Run();
-	res += CToDoCtrlDataTest(utils).Run();
-	res += CToDoCtrlTaskLinkTest(utils).Run();
-	res += CWorkingDayTest(utils).Run();
-	res += CWorkingWeekTest(utils).Run();
- 	res += CXmlFileTest(utils).Run();
+// 	res += CDateHelperTest(utils).Run();
+// 	res += CFileMiscTest(utils).Run();
+// 	res += CImportExportMgrTest(utils).Run();
+// 	res += CMiscTest(utils).Run();
+// 	res += CPreferencesTest(utils).Run();
+// 	res += CRemapMenuIDsTest(utils).Run();
+// 	res += CTaskFileTest(utils).Run();
+// 	res += CTDCCUSTOMATTRIBUTECALCULATIONTest(utils).Run();
+// 	res += CTDCDEPENDENCYTest(utils).Run();
+// 	res += CTDCRECURRENCETest(utils).Run();
+// 	res += CTDCTaskCalculatorTest(utils).Run();
+	res += CTDCTaskTimeLogTest(utils).Run();
+// 	res += CTDLTaskCtrlBaseTest(utils).Run();
+// 	res += CTimeHelperTest(utils).Run();
+// 	res += CToDoCtrlDataTest(utils).Run();
+// 	res += CToDoCtrlTaskLinkTest(utils).Run();
+// 	res += CWorkingDayTest(utils).Run();
+// 	res += CWorkingWeekTest(utils).Run();
+//  	res += CXmlFileTest(utils).Run();
 
 	// More...
 

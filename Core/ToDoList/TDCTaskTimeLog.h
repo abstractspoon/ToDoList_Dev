@@ -38,7 +38,7 @@ struct TASKTIMELOGITEM
 	CString sComment;
 	CString sPerson;
 	CString sPath;
-	BOOL bTracked;
+	CString sTracked;
 	COLORREF crAltColor;
 
 protected:
@@ -69,13 +69,16 @@ protected:
 	int m_nVersion;
 	BOOL m_bLogExists;
 	BOOL m_bUseTabDelim;
+	CString m_sHeaderDelim;
 
 protected: 
 	CTDCTaskTimeLog();
-	void Initialise(const CString& sLogPath, CString& sHeaderDelim);
+
+	void Initialise(const CString& sLogPath);
 
 	CString GetLatestColumnHeader() const;
 	CString GetDelimiter(const CString& sLine = _T("")) const;
+	int GetNumHeaderRows() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
