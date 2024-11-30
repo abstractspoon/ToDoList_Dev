@@ -20,7 +20,9 @@
 struct TASKTIMELOGITEM
 {
 	TASKTIMELOGITEM();
-	
+
+	BOOL operator==(const TASKTIMELOGITEM& other) const;
+
 	BOOL IsValidToAnalyse() const;
 	BOOL IsValidToLog() const;
 	void Reset();

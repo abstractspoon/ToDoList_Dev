@@ -69,6 +69,20 @@ TASKTIMELOGITEM::TASKTIMELOGITEM()
 	Reset();
 }
 
+BOOL TASKTIMELOGITEM::operator==(const TASKTIMELOGITEM& other) const
+{
+	return ((other.dwTaskID == dwTaskID) &&
+			(other.sTaskTitle == sTaskTitle) &&
+			(other.sPerson == sPerson) &&
+			(other.dtFrom == dtFrom) &&
+			(other.dtTo == dtTo) &&
+			(other.dHours == dHours) &&
+			(other.sComment == sComment) &&
+			(other.sTracked == sTracked) &&
+			(other.sPath == sPath) &&
+			(other.crAltColor == crAltColor));
+}
+
 BOOL TASKTIMELOGITEM::IsValidToLog() const
 {
 	if (dwTaskID && !sTaskTitle.IsEmpty())
@@ -121,7 +135,7 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 					 Misc::Format(dwTaskID),
 					 sTaskTitle,
 					 Misc::Format(dHours, 3),
-					 Misc::GetUserName(),
+					 (sPerson.IsEmpty() ? Misc::GetUserName() : sPerson),
 					 CDateHelper::FormatDate(dtTo, DHFD_TIME),
 					 CDateHelper::FormatDate(dtFrom, DHFD_TIME));
 		break;
@@ -130,7 +144,7 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 		sItem.Format(sRowFormat,
 					 Misc::Format(dwTaskID),
 					 sTaskTitle,
-					 Misc::GetUserName(),
+					 (sPerson.IsEmpty() ? Misc::GetUserName() : sPerson),
 					 CDateHelper::FormatDate(dtFrom, DHFD_ISO),
 					 CTimeHelper::FormatClockTime(dtFrom, FALSE, TRUE),
 					 CDateHelper::FormatDate(dtTo, DHFD_ISO),
@@ -380,7 +394,7 @@ BOOL CTDCTaskTimeLog::LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately)
 			nFormat = SFEF_UTF16;
 
 		VERIFY(FileMisc::CreateFolderFromFilePath(sLogPath));
-		VERIFY(FileMisc::SaveFile(sLogPath, sHeader, nFormat));
+		VERIFY(m_bLogExists = FileMisc::SaveFile(sLogPath, sHeader, nFormat));
 	}
 
 	return FileMisc::AppendLineToFile(sLogPath, li.FormatRow(m_nVersion, GetDelimiter()), SFEF_AUTODETECT);

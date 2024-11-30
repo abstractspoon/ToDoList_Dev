@@ -36,6 +36,18 @@ protected:
 								LPCTSTR szTracked = _T(""),
 								LPCTSTR szPath = _T(""),
 								COLORREF crAltColor = CLR_NONE);
+
+	void PopulateLogItem(TASKTIMELOGITEM& tli,
+						 DWORD dwTaskID,
+						 LPCTSTR szTaskTitle,
+						 LPCTSTR szPerson,
+						 LPCTSTR szDateFrom,
+						 LPCTSTR szDateTo,
+						 double dHours,
+						 LPCTSTR szComment = _T(""),
+						 LPCTSTR szTracked = _T(""),
+						 LPCTSTR szPath = _T(""),
+						 COLORREF crAltColor = CLR_NONE);
 };
 
 #endif // !defined(AFX_TDCTASKTIMELOGTEST_H__6A11464D_D4DA_4ABA_8FDB_310C9A5252E5__INCLUDED_)

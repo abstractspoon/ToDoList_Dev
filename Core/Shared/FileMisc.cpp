@@ -862,7 +862,12 @@ BOOL FileMisc::CreateFolderFromFilePath(LPCTSTR szFilePath)
 {
 	ASSERT(!Misc::IsEmpty(szFilePath));
 
-	return CreateFolder(GetFolderFromFilePath(szFilePath));
+	CString sFolder(GetFolderFromFilePath(szFilePath));
+
+	if (sFolder.IsEmpty())
+		return TRUE; // cwd always exists
+
+	return CreateFolder(sFolder);
 }
 
 BOOL FileMisc::PathHasWildcard(LPCTSTR szFilePath)
