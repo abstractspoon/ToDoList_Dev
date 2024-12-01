@@ -33,7 +33,7 @@ protected:
 								LPCTSTR szDateTo,
 								double dHours,
 								LPCTSTR szComment = _T(""),
-								LPCTSTR szTracked = _T(""),
+								LPCTSTR szType = _T(""),
 								LPCTSTR szPath = _T(""),
 								COLORREF crAltColor = CLR_NONE);
 
@@ -45,7 +45,7 @@ protected:
 						 LPCTSTR szDateTo,
 						 double dHours,
 						 LPCTSTR szComment = _T(""),
-						 LPCTSTR szTracked = _T(""),
+						 LPCTSTR szType = _T(""),
 						 LPCTSTR szPath = _T(""),
 						 COLORREF crAltColor = CLR_NONE);
 };

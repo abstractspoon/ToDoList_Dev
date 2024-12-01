@@ -172,7 +172,7 @@ void CTDCTaskTimeLogTest::TestLogTime()
 
 			// Extended fields not logged
 			ExpectTrue(aItems[1].sComment.IsEmpty());
-			ExpectTrue(aItems[1].sTracked.IsEmpty());
+			ExpectTrue(aItems[1].sType.IsEmpty());
 			ExpectTrue(aItems[1].sPath.IsEmpty());
 			ExpectTrue(aItems[1].crAltColor == CLR_NONE);
 		}
@@ -187,7 +187,7 @@ void CTDCTaskTimeLogTest::PopulateLogItem(TASKTIMELOGITEM& tli,
 										  LPCTSTR szDateTo,
 										  double dHours,
 										  LPCTSTR szComment,
-										  LPCTSTR szTracked,
+										  LPCTSTR szType,
 										  LPCTSTR szPath,
 										  COLORREF crAltColor)
 {
@@ -198,7 +198,7 @@ void CTDCTaskTimeLogTest::PopulateLogItem(TASKTIMELOGITEM& tli,
 	tli.dtTo.ParseDateTime(szDateTo);
 	tli.dHours = dHours;
 	tli.sComment = szComment;
-	tli.sTracked = szTracked;
+	tli.sType = szType;
 	tli.sPath = szPath;
 	tli.crAltColor = crAltColor;
 }
@@ -712,7 +712,7 @@ void CTDCTaskTimeLogTest::CheckLoadLogItemResult(const TASKTIMELOGITEM& tli,
 												 LPCTSTR szDateTo,
 												 double dHours,
 												 LPCTSTR szComment,
-												 LPCTSTR szTracked,
+												 LPCTSTR szType,
 												 LPCTSTR szPath,
 												 COLORREF crAltColor)
 {
@@ -722,7 +722,7 @@ void CTDCTaskTimeLogTest::CheckLoadLogItemResult(const TASKTIMELOGITEM& tli,
 	ExpectEQ(tli.sPerson, szPerson);
 
 	ExpectEQ(tli.sComment, szComment);
-	ExpectEQ(tli.sTracked, szTracked);
+	ExpectEQ(tli.sType, szType);
 	ExpectEQ(tli.sPath, szPath);
 	ExpectEQ(tli.crAltColor, crAltColor);
 
