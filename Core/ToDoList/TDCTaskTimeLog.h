@@ -20,7 +20,9 @@
 struct TASKTIMELOGITEM
 {
 	TASKTIMELOGITEM();
-	
+
+	BOOL operator==(const TASKTIMELOGITEM& other) const;
+
 	BOOL IsValidToAnalyse() const;
 	BOOL IsValidToLog() const;
 	void Reset();
@@ -38,7 +40,7 @@ struct TASKTIMELOGITEM
 	CString sComment;
 	CString sPerson;
 	CString sPath;
-	BOOL bTracked;
+	CString sTracked;
 	COLORREF crAltColor;
 
 protected:
@@ -60,22 +62,25 @@ public:
 
 	CString GetLogPath() const;
 	CString GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const;
-	const CString& GetDelimiter() const  { return m_sDelim; }
 	
-	static int LoadLogItems(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sDelim);
+	static int LoadLogItems(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
 
 protected:
 	CString m_sRefPath;
 	SFE_FORMAT m_nFormat;
 	int m_nVersion;
 	BOOL m_bLogExists;
-	CString m_sDelim;
+	BOOL m_bUseTabDelim;
+	CString m_sHeaderDelim;
 
 protected: 
 	CTDCTaskTimeLog();
+
 	void Initialise(const CString& sLogPath);
 
 	CString GetLatestColumnHeader() const;
+	CString GetDelimiter(const CString& sLine = _T("")) const;
+	int GetNumHeaderRows() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

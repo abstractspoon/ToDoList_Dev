@@ -181,6 +181,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClCompile Include="TDCDEPENDENCYTest.cpp" />
     <ClCompile Include="TDCRECURRENCETest.cpp" />
     <ClCompile Include="TDCTaskCalculatorTest.cpp" />
+    <ClCompile Include="TDCTaskTimeLogTest.cpp" />
     <ClCompile Include="TDLTaskCtrlBaseTest.cpp" />
     <ClCompile Include="TDLTest.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -220,6 +221,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClInclude Include="TDCDEPENDENCYTest.h" />
     <ClInclude Include="TDCRECURRENCETest.h" />
     <ClInclude Include="TDCTaskCalculatorTest.h" />
+    <ClInclude Include="TDCTaskTimeLogTest.h" />
     <ClInclude Include="TDLTaskCtrlBaseTest.h" />
     <ClInclude Include="TDLTest.h" />
     <ClInclude Include="TDLTestBase.h" />
@@ -242,6 +244,9 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ProjectReference Include="..\ToDoListLib\ToDoListLib.vcxproj">
       <Project>{940be78e-1486-7f9b-02b3-6f0113741a6a}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\ToDoList\RES\app_std.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
