@@ -63,7 +63,8 @@ public:
 	CString GetLogPath() const;
 	CString GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const;
 	
-	static int LoadLogItems(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
+	static int LoadLogFile(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
+	static BOOL SaveLogFile(const CString& sLogPath, const CTaskTimeLogItemArray& aLogItems, BOOL bPreserveVersion = TRUE);
 
 protected:
 	CString m_sRefPath;
@@ -71,7 +72,7 @@ protected:
 	int m_nVersion;
 	BOOL m_bLogExists;
 	BOOL m_bUseTabDelim;
-	CString m_sHeaderDelim;
+	CString m_sHeaderDelim, m_sColumnHeader;
 
 protected: 
 	CTDCTaskTimeLog();

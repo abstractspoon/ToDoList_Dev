@@ -85,7 +85,7 @@ void CTDCTaskTimeLogTest::TestLogTime()
 				ExpectTrue(log.LogTime(tli, FALSE));
 				ExpectTrue(FileMisc::FileExists(TEMP_LOGFILE));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectTrue((USEEXCELFORCSV && sHeaderDelim == _T("\t")) || (!USEEXCELFORCSV && (sHeaderDelim == LIST_SEP)));
 				ExpectTrue(aItems[0] == tli);
 			}
@@ -97,7 +97,7 @@ void CTDCTaskTimeLogTest::TestLogTime()
 				PopulateLogItem(tli, 47, _T("title2"), _T("person2"), _T("2022-10-13 16:23"), _T("2022-10-13 17:23"), 0.5, _T("comment2"), _T("tracked2"), _T("path2"), 255);
 				ExpectTrue(log.LogTime(tli, FALSE));
 
-				ExpectEQ(2, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(2, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectTrue((USEEXCELFORCSV && sHeaderDelim == _T("\t")) || (!USEEXCELFORCSV && (sHeaderDelim == LIST_SEP)));
 				ExpectTrue(aItems[1] == tli);
 			}
@@ -124,7 +124,7 @@ void CTDCTaskTimeLogTest::TestLogTime()
 				ExpectTrue(log.LogTime(tli, FALSE));
 				ExpectTrue(FileMisc::FileExists(TEMP_LOGFILE));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectTrue((USEEXCELFORCSV && sHeaderDelim == _T("\t")) || (!USEEXCELFORCSV && (sHeaderDelim == LIST_SEP)));
 				ExpectTrue(aItems[0] == tli);
 			}
@@ -137,7 +137,7 @@ void CTDCTaskTimeLogTest::TestLogTime()
 				PopulateLogItem(tli, 47, _T("title2"), _T("person2"), _T("2022-10-13 16:23"), _T("2022-10-13 17:23"), 0.5, _T("comment2"), _T("tracked2"), _T("path2"), 255);
 				ExpectTrue(log.LogTime(tli, FALSE));
 
-				ExpectEQ(2, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(2, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectTrue((USEEXCELFORCSV && sHeaderDelim == _T("\t")) || (!USEEXCELFORCSV && (sHeaderDelim == LIST_SEP)));
 				ExpectTrue(aItems[1] == tli);
 			}
@@ -159,7 +159,7 @@ void CTDCTaskTimeLogTest::TestLogTime()
 			PopulateLogItem(tli, 47, _T("title2"), _T("person2"), _T("2022-10-13 16:23"), _T("2022-10-13 17:23"), 0.5, _T("comment2"), _T("tracked2"), _T("path2"), 255);
 			ExpectTrue(log.LogTime(tli, FALSE));
 
-			ExpectEQ(2, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+			ExpectEQ(2, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 			ExpectTrue(sHeaderDelim == _T(","));
 			ExpectFalse(tli == aItems[1]);
 
@@ -224,7 +224,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("23,title,0.5,person,2022-10-13 16:23\n"),
 											  SFEF_UTF16));
 
-				ExpectEQ(0, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(0, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectTrue(sHeaderDelim.IsEmpty());
 			}
 		}
@@ -241,7 +241,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("23,title,0.5,person,2022-10-13 16:23,2022-10-13 15:23\n"),
 											  SFEF_UTF16));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T(","));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -264,7 +264,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 												  _T("23;title;0,5;person;2022-10-13 16:23;2022-10-13 15:23\n"),
 												  SFEF_UTF8));
 
-					ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+					ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 					ExpectEQ(sHeaderDelim, _T("\t"));
 
 					CheckLoadLogItemResult(aItems[0],
@@ -285,7 +285,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 												  _T("47,title2,0.75,person2,2022-10-13 16:23,2022-10-13 15:23\n"),
 												  SFEF_UTF8));
 
-					ExpectEQ(2, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+					ExpectEQ(2, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 					ExpectEQ(sHeaderDelim, _T("\t"));
 
 					CheckLoadLogItemResult(aItems[0],
@@ -323,7 +323,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("23,title,person,2022-10-13,15:45,2022-10-13,16:23\n"),
 											  SFEF_UTF16));
 
-				ExpectEQ(0, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(0, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectTrue(sHeaderDelim.IsEmpty());
 			}
 		}
@@ -341,7 +341,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("23,title,person,2022-10-13,15:45,2022-10-13,16:23,0.5\n"),
 											  SFEF_UTF16));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T("\t"));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -367,7 +367,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("23,title,person,2022-10-13,15:45,2022-10-13,16:23,0.5,comment\n"),
 											  SFEF_UTF16));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T("\t"));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -394,7 +394,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("23,title,person,2022-10-13,15:45,2022-10-13,16:23,0.5,comment,tracked\n"),
 											  SFEF_UTF16));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T("\t"));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -422,7 +422,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("23,title,person,2022-10-13,15:45,2022-10-13,16:23,0.5,comment,tracked,path\n"),
 											  SFEF_UTF16));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T("\t"));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -451,7 +451,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("23,title,person,2022-10-13,15:45,2022-10-13,16:23,0.5,comment,tracked,path,255\n"),
 											  SFEF_UTF16));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T("\t"));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -478,7 +478,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("123\ttitle\tperson\t2022-10-13\t15:45\t2022-10-13\t16:23\t0,5\tcomment\ttracked\tpath\t255\n"),
 											  SFEF_UTF8));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T(","));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -505,7 +505,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("123\ttitle\tperson\t2022-10-13\t15:45\t2022-10-13\t16:23\t0,5\tcomment\ttracked\tpath\t255\n"),
 											  SFEF_UTF8));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T(";"));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -532,7 +532,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("123\ttitle\tperson\t2022-10-13\t15:45\t2022-10-13\t16:23\t0,5\tcomment\ttracked\tpath\t255\n"),
 											  SFEF_UTF8));
 
-				ExpectEQ(1, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(1, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectTrue(sHeaderDelim.IsEmpty()); // pipe = not detectable
 
 				CheckLoadLogItemResult(aItems[0],
@@ -560,7 +560,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("47;title2;person2;2022-10-13;15:45;2022-10-13;16:23;0.75;comment2;tracked2;path2;128\n"),
 											  SFEF_UTF8));
 
-				ExpectEQ(2, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(2, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T(","));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -600,7 +600,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("47;title2;person2;2022-10-13;15:45;2022-10-13;16:23;0.75;comment2;tracked2;path2;128\n"),
 											  SFEF_UTF8));
 
-				ExpectEQ(2, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(2, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T(","));
 
 				CheckLoadLogItemResult(aItems[0],
@@ -647,7 +647,7 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 											  _T("68,title6,person6,2022-10-13,15:45,2022-10-13,16:23,0.5,comment6,tracked6\n"),		// 10 fields
 											  SFEF_UTF16));
 
-				ExpectEQ(5, CTDCTaskTimeLog::LoadLogItems(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
+				ExpectEQ(5, CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 				ExpectEQ(sHeaderDelim, _T("\t"));
 
 				CheckLoadLogItemResult(aItems[0],

@@ -267,7 +267,7 @@ int CTDCTaskTimeLogAnalysis::BuildLogItemArray()
 	{
 		CString sHeaderDelim;
 		
-		if (CTDCTaskTimeLog::LoadLogItems(aLogFiles[nFile], m_aLogItems, TRUE, sHeaderDelim))
+		if (CTDCTaskTimeLog::LoadLogFile(aLogFiles[nFile], m_aLogItems, TRUE, sHeaderDelim))
 		{
 			if (m_sCsvDelim.IsEmpty() && !sHeaderDelim.IsEmpty())
 				m_sCsvDelim = sHeaderDelim;

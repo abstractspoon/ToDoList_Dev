@@ -39,7 +39,7 @@ BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLog(LPCTSTR szLogfile, CString& sAnonFil
 
 	Initialise(szLogfile);
 
-	if (!LoadLogItems(szLogfile, aLogItems, FALSE, sDelim))
+	if (!LoadLogFile(szLogfile, aLogItems, FALSE, sDelim))
 		return FALSE;
 
 	if (!AnonymizeLogItems(aLogItems))
