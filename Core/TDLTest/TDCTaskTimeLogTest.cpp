@@ -49,7 +49,7 @@ TESTRESULT CTDCTaskTimeLogTest::Run()
 	ClearTotals();
 
 	TestLogTime();
-	TestLoadLogItems();
+	TestLoadSaveLogFile();
 
 	return GetTotals();
 }
@@ -203,11 +203,11 @@ void CTDCTaskTimeLogTest::PopulateLogItem(TASKTIMELOGITEM& tli,
 	tli.crAltColor = crAltColor;
 }
 
-void CTDCTaskTimeLogTest::TestLoadLogItems()
+void CTDCTaskTimeLogTest::TestLoadSaveLogFile()
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskTimeLogTest::LoadLogItems"));
+	CTDCScopedTest test(*this, _T("CTDCTaskTimeLogTest::Load/SaveLogFile"));
 
-	CTaskTimeLogItemArray aItems;
+	CTaskTimeLogItemArray aItems, aCheckItems;
 	CString sHeaderDelim;
 
 	// File version = 0 (no version row)
@@ -251,6 +251,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("2022-10-13 15:23"),
 									   _T("2022-10-13 16:23"),
 									   0.5);
+
+				TestSaveAndReload(aItems);
 			}
 
 			// Header delimiter = TAB
@@ -274,6 +276,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 										   _T("2022-10-13 15:23"),
 										   _T("2022-10-13 16:23"),
 										   0.5);
+
+					TestSaveAndReload(aItems);
 				}
 
 				// Field delimiter = <varies>
@@ -303,6 +307,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 										   _T("2022-10-13 15:23"),
 										   _T("2022-10-13 16:23"),
 										   0.75);
+
+					TestSaveAndReload(aItems);
 				}
 			}
 		}
@@ -351,6 +357,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("2022-10-13 15:45"),
 									   _T("2022-10-13 16:23"),
 									   0.5);
+
+				TestSaveAndReload(aItems);
 			}
 		}
 
@@ -378,6 +386,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("2022-10-13 16:23"),
 									   0.5,
 									   _T("comment"));
+
+				TestSaveAndReload(aItems);
 			}
 		}
 
@@ -406,6 +416,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   0.5,
 									   _T("comment"),
 									   _T("tracked"));
+
+				TestSaveAndReload(aItems);
 			}
 		}
 
@@ -435,6 +447,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("comment"),
 									   _T("tracked"),
 									   _T("path"));
+
+				TestSaveAndReload(aItems);
 			}
 		}
 
@@ -465,6 +479,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("tracked"),
 									   _T("path"),
 									   255);
+
+				TestSaveAndReload(aItems);
 			}
 
 			// Header delimiter = COMMA
@@ -492,6 +508,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("tracked"),
 									   _T("path"),
 									   255);
+
+				TestSaveAndReload(aItems);
 			}
 
 			// Header delimiter = SEMICOLON
@@ -519,6 +537,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("tracked"),
 									   _T("path"),
 									   255);
+
+				TestSaveAndReload(aItems);
 			}
 
 			// Header delimiter = '|' (pipe)
@@ -546,6 +566,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("tracked"),
 									   _T("path"),
 									   255);
+
+				TestSaveAndReload(aItems);
 			}
 
 			// Header delimiter = COMMA
@@ -586,6 +608,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("tracked2"),
 									   _T("path2"),
 									   128);
+
+				TestSaveAndReload(aItems);
 			}
 
 			// Header delimiter = COMMA
@@ -626,6 +650,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   _T("tracked2"),
 									   _T("path2"),
 									   128);
+
+				TestSaveAndReload(aItems);
 			}
 		}
 
@@ -699,6 +725,8 @@ void CTDCTaskTimeLogTest::TestLoadLogItems()
 									   0.5,
 									   _T("comment6"),
 									   _T("tracked6"));
+
+				TestSaveAndReload(aItems);
 			}
 		}
 	}
@@ -747,4 +775,16 @@ void CTDCTaskTimeLogTest::CheckLoadLogItemResult(const TASKTIMELOGITEM& tli,
 	{
 		ExpectTrue(!CDateHelper::IsDateSet(tli.dtTo));
 	}
+}
+
+void CTDCTaskTimeLogTest::TestSaveAndReload(const CTaskTimeLogItemArray& aItems)
+{
+	CTaskTimeLogItemArray aCheckItems;
+	CString sHeaderDelim;
+
+	// Save, reload and compare
+	ExpectTrue(CTDCTaskTimeLog::SaveLogFile(TEMP_LOGFILE, aItems));
+	ExpectEQ(aItems.GetSize(), CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aCheckItems, FALSE, sHeaderDelim));
+
+	ExpectTrue(Misc::MatchAllT(aItems, aCheckItems, TRUE));
 }

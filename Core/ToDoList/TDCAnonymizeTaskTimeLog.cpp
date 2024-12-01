@@ -49,32 +49,7 @@ BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLog(LPCTSTR szLogfile, CString& sAnonFil
 	sAnonFilePath = szLogfile;
 	FileMisc::AddToFileName(sAnonFilePath, _T(".rnd"));
 	
-	return SaveAnonymisedLogFile(sAnonFilePath, aLogItems, sDelim);
-}
-
-BOOL CTDCAnonymizeTaskTimeLog::SaveAnonymisedLogFile(const CString& sLogPath, const CTaskTimeLogItemArray& aLogItems, const CString sDelim)
-{
-	const CString ENDL(_T("\n"));
-	const CString HEADER_LINE(_T("TODOTIMELOG VERSION 1"));
-
-	CStdioFileEx file;
-
-	if (!file.Open(sLogPath, CFile::modeCreate | CFile::modeWrite | CFile::typeText, SFEF_UTF16))
-		return FALSE;
-
-	file.WriteString(HEADER_LINE + ENDL);
-	file.WriteString(GetLatestColumnHeader() + ENDL);
-
-	int nNumItems = aLogItems.GetSize();
-
-	for (int nItem = 0; nItem < nNumItems; nItem++)
-	{
-		file.WriteString(aLogItems[nItem].FormatRow(1, sDelim));
-		file.WriteString(ENDL);
-	}
-
-	file.Close();
-	return TRUE;
+	return CTDCTaskTimeLog::SaveLogFile(sAnonFilePath, aLogItems);
 }
 
 BOOL CTDCAnonymizeTaskTimeLog::AnonymizeLogItems(CTaskTimeLogItemArray& aLogItems)

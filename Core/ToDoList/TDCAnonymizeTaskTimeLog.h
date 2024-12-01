@@ -39,8 +39,6 @@ protected:
 	BOOL BuildContent(const CTaskTimeLogItemArray& aLogItems);
 	CString GetContent(const CTaskTimeLogItemArray& aLogItems) const;
 
-	BOOL SaveAnonymisedLogFile(const CString& sLogPath, const CTaskTimeLogItemArray& aLogItems, const CString sDelim);
-
 	static BOOL IsWhiteSpaceOrNumberOrPunctuation(TCHAR c);
 
 };

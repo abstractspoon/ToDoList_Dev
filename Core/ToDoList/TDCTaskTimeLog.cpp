@@ -379,8 +379,8 @@ BOOL CTDCTaskTimeLog::LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately)
 
 	// init state
 	CString sLogPath = GetLogPath(li.dwTaskID, bLogSeparately);
-
 	Initialise(sLogPath);
+
 	ASSERT(m_nVersion != VER_NONE);
 
 	// if the file doesn't exist then we insert the 
@@ -390,14 +390,8 @@ BOOL CTDCTaskTimeLog::LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately)
 		CString sHeader;
 		sHeader.Format(_T("%s %d\n%s\n"), VERSION_LINE, m_nVersion, GetLatestColumnHeader());
 
-		// if Excel is installed we use UTF16 else UTF8
-		SFE_FORMAT nFormat = SFEF_UTF8;
-
-		if (CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE))
-			nFormat = SFEF_UTF16;
-
 		VERIFY(FileMisc::CreateFolderFromFilePath(sLogPath));
-		VERIFY(m_bLogExists = FileMisc::SaveFile(sLogPath, sHeader, nFormat));
+		VERIFY(m_bLogExists = FileMisc::SaveFile(sLogPath, sHeader, m_nFormat));
 	}
 
 	return FileMisc::AppendLineToFile(sLogPath, li.FormatRow(m_nVersion, GetDelimiter()), SFEF_AUTODETECT);
@@ -532,7 +526,7 @@ BOOL CTDCTaskTimeLog::SaveLogFile(const CString& sLogPath, const CTaskTimeLogIte
 	aLines.SetSize(nNumHeaderRows + nNumItems);
 
 	if (nVersion != VER_0)
-		aLines[nLine++].Format(_T("%s %n"), VERSION_LINE, nVersion);
+		aLines[nLine++].Format(_T("%s %d"), VERSION_LINE, nVersion);
 
 	aLines[nLine++] = log.m_sColumnHeader;
 
@@ -558,6 +552,7 @@ void CTDCTaskTimeLog::Initialise(const CString& sLogPath)
 
 	m_bLogExists = FileMisc::FileExists(sLogPath);
 	m_bUseTabDelim = CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE);
+	m_nFormat = (m_bUseTabDelim ? SFEF_UTF16 : SFEF_UTF8);
 
 	m_nVersion = VER_LATEST; // default
 	m_sHeaderDelim = GetDelimiter(); // default

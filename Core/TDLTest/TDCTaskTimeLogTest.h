@@ -9,9 +9,13 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "TDLTestBase.h"
 
-struct TASKTIMELOGITEM;
+#include "..\ToDoList\TDCTaskTimeLog.h"
+
+//////////////////////////////////////////////////////////////////////
 
 class CTDCTaskTimeLogTest : public CTDLTestBase
 {
@@ -23,7 +27,7 @@ public:
 
 protected:
 	void TestLogTime();
-	void TestLoadLogItems();
+	void TestLoadSaveLogFile();
 
 	void CheckLoadLogItemResult(const TASKTIMELOGITEM& tli,
 								DWORD dwTaskID,
@@ -48,6 +52,8 @@ protected:
 						 LPCTSTR szType = _T(""),
 						 LPCTSTR szPath = _T(""),
 						 COLORREF crAltColor = CLR_NONE);
+
+	void TestSaveAndReload(const CTaskTimeLogItemArray& aItems);
 };
 
 #endif // !defined(AFX_TDCTASKTIMELOGTEST_H__6A11464D_D4DA_4ABA_8FDB_310C9A5252E5__INCLUDED_)
