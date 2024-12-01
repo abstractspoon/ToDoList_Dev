@@ -57,8 +57,8 @@ struct LOG_VERSION_INFO
 
 const LOG_VERSION_INFO LOG_VERSIONS[] = 
 {
-	{ VER_0, 1, 2, 6, 6 },
-	{ VER_LATEST, 2, 7, 8, 12 },
+	{ VER_0,		1, 2, 6, 6 },
+	{ VER_LATEST,	2, 7, 8, 12 },
 };
 const int NUM_LOG_VERSIONS = sizeof(LOG_VERSIONS) / sizeof(LOG_VERSION_INFO);
 
