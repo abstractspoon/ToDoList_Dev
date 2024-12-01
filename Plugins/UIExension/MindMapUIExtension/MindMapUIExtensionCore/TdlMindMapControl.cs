@@ -530,41 +530,48 @@ namespace MindMapUIExtension
 
 		// Idle processing ----------------------------------------------------
 
-		bool DoIdleRecalcPositions;
-		bool InMouseWheel;
-		Bitmap idleBitmap;
+		// Mouse-wheel zooming triggers a Begin/EndUpdate pair for each
+		// wheel-event which itself calls RecalculatePositions which can
+		// be an expensive operation.
+		// So what we do is cache all the EndUpdates until the message
+		// queue is empty and do a final EndUpdate at that point.
+		// And to avoid any drawing artifacts we take a client screenshot
+		// at the first BeginUpdate and use that for painting until the 
+		// final EndUpdate.
+
+		bool WantIdleEndUpdate = false;
+		bool PerformingZoom = false;
+		Bitmap CachedSnapshot = null;
 
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
-			Debug.WriteLine("TdlMindMapControl.OnMouseWheel");
-
-			InMouseWheel = true;
+			if (ModifierKeys.HasFlag(Keys.Control))
+			{
+				Debug.WriteLine("OnMouseWheel(zoom)");
+				PerformingZoom = true;
+			}
 
 			base.OnMouseWheel(e);
 
-			InMouseWheel = false;
+			PerformingZoom = false;
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
-			if (idleBitmap?.Tag != null)
-			{
-				e.Graphics.DrawImage(idleBitmap, new Point(0, 0));
-			}
+			if (CachedSnapshot != null)
+				e.Graphics.DrawImage(CachedSnapshot, new Point(0, 0));
 			else
-			{
 				base.OnPaint(e);
-			}
 		}
 
 		override protected void BeginUpdate()
 		{
-			if (InMouseWheel)
-			{
-				idleBitmap = new Bitmap(Width, Height);
-				DrawToBitmap(idleBitmap, new Rectangle(0, 0, Width, Height));
+			Debug.WriteLine("BeginUpdate");
 
-				idleBitmap.Tag = this;
+			if (PerformingZoom && (CachedSnapshot == null))
+			{
+				CachedSnapshot = new Bitmap(Width, Height);
+				DrawToBitmap(CachedSnapshot, new Rectangle(0, 0, Width, Height));
 			}
 
 			base.BeginUpdate();
@@ -572,33 +579,25 @@ namespace MindMapUIExtension
 
 		override protected void EndUpdate()
 		{
-			if (InMouseWheel)
-			{
-				HoldRedraw = false;
-				EnableExpandNotifications(true);
-				EnableSelectionNotifications(true);
-
-				DoIdleRecalcPositions = true;
-			}
+			if (PerformingZoom)
+				WantIdleEndUpdate = true;
 			else
-			{
 				base.EndUpdate();
-			}
 		}
 
 		public bool DoIdleProcessing()
 		{
-			if (!DoIdleRecalcPositions)
-				return false;
+			if (WantIdleEndUpdate)
+			{
+				Debug.WriteLine("EndUpdate");
+				
+				WantIdleEndUpdate = false;
+				CachedSnapshot = null;
 
-			Debug.WriteLine("TdlMindMapControl.DoIdleProcessing");
+				base.EndUpdate();
+			}
 
-			DoIdleRecalcPositions = false;
-			idleBitmap = null;
-
-			RecalculatePositions();
-
-			return true;
+			return false; // no more tasks
 		}
 
 		// Internal ------------------------------------------------------------
