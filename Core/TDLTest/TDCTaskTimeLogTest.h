@@ -29,7 +29,7 @@ protected:
 	void TestLogTime();
 	void TestLoadSaveLogFile();
 
-	void CheckLoadLogItemResult(const TASKTIMELOGITEM& tli,
+	void VerifyLogItemResult(const TASKTIMELOGITEM& tli,
 								DWORD dwTaskID,
 								LPCTSTR szTaskTitle,
 								LPCTSTR szPerson,

@@ -137,9 +137,9 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 	case VER_0:
 		sItem.Format(sRowFormat,
 					 Misc::Format(dwTaskID),
-					 sTaskTitle,
-					 Misc::Format(dHours, 3),
-					 sPerson,
+					 EncodeValue(sTaskTitle, sDelim),
+					 EncodeValue(Misc::Format(dHours, 3), sDelim),
+					 EncodeValue(sPerson, sDelim),
 					 CDateHelper::FormatDate(dtTo, DHFD_TIME),
 					 CDateHelper::FormatDate(dtFrom, DHFD_TIME));
 		break;
@@ -147,16 +147,16 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 	case VER_LATEST:
 		sItem.Format(sRowFormat,
 					 Misc::Format(dwTaskID),
-					 sTaskTitle,
-					 sPerson,
+					 EncodeValue(sTaskTitle, sDelim),
+					 EncodeValue(sPerson, sDelim),
 					 CDateHelper::FormatDate(dtFrom, DHFD_ISO),
 					 CTimeHelper::FormatClockTime(dtFrom, FALSE, TRUE),
 					 CDateHelper::FormatDate(dtTo, DHFD_ISO),
 					 CTimeHelper::FormatClockTime(dtTo, FALSE, TRUE),
-					 Misc::Format(dHours, 3),
-					 sComment,
-					 sType,
-					 sPath,
+					 EncodeValue(Misc::Format(dHours, 3), sDelim),
+					 EncodeValue(sComment, sDelim, TRUE),
+					 EncodeValue(sType, sDelim),
+					 EncodeValue(sPath, sDelim),
 					 ((crAltColor == CLR_NONE) ? _T("") : Misc::Format((int)crAltColor)));
 		break;
 		
@@ -164,10 +164,6 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 		ASSERT(0);
 	}
 
-	// handle newline chars
-	sItem.Replace(_T("\r"), _T(""));
-	sItem.Replace('\n', '|');
-	
 	return sItem;
 }
 
@@ -175,7 +171,7 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 {
 	// NOTE: order of elements as FormatItemRow above
 	CStringArray aFields;
-	int nNumFields = Misc::Split(sRow, aFields, sDelim, TRUE);
+	int nNumFields = Misc::Split(sRow, aFields, sDelim, TRUE, TRUE); // Allow Empty and Preserve Quotes
 	
 	if (!nNumFields)
 		return FALSE;
@@ -217,8 +213,8 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 		if (nNumFields >= 8)
 		{
 			dwTaskID = _ttoi(aFields[0]);
-			sTaskTitle = aFields[1];
-			sPerson = aFields[2];
+			sTaskTitle = DecodeValue(aFields[1], sDelim);
+			sPerson = DecodeValue(aFields[2], sDelim);
 			
 			if (CDateHelper::DecodeDate((aFields[3] + ' ' + aFields[4]), date, TRUE))
 				dtFrom = date;
@@ -226,9 +222,9 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 			if (CDateHelper::DecodeDate((aFields[5] + ' ' + aFields[6]), date, TRUE))
 				dtTo = date;
 			
-			dHours = ParseTimeSpent(aFields[7]);
+			dHours = ParseTimeSpent(DecodeValue(aFields[7], sDelim));
 			
-			// optional fields
+			// Extra fields
 			if (nNumFields > 8)
 			{
 				switch (nNumFields)
@@ -239,9 +235,9 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 					if (!aFields[11].IsEmpty())
 						crAltColor = _ttoi(aFields[11]);
 
-				case 11: sPath		= aFields[10];
-				case 10: sType		= aFields[9];
-				case 9:  sComment	= aFields[8];
+				case 11: sPath		= DecodeValue(aFields[10], sDelim);
+				case 10: sType		= DecodeValue(aFields[9], sDelim);
+				case 9:  sComment	= DecodeValue(aFields[8], sDelim, TRUE);
 					break;
 
 				default:
@@ -275,6 +271,44 @@ double TASKTIMELOGITEM::ParseTimeSpent(CString sValue)
 	sValue.Replace(sAltSep, sNativeSep);
 
 	return _ttof(sValue);
+}
+
+CString TASKTIMELOGITEM::EncodeValue(const CString& sValue, const CString& sDelim, BOOL bEncodeNewLines)
+{
+	if (sValue.IsEmpty())
+		return sValue;
+
+	CString sEncoded(sValue);
+	
+	if (bEncodeNewLines)
+	{
+		sEncoded.Remove('\r');
+		sEncoded.Replace('\n', '|');
+	}
+
+	if (sEncoded.Find(sDelim) >= 0)
+		Misc::MakeQuoted(sEncoded);
+
+	return sEncoded;
+}
+
+CString TASKTIMELOGITEM::DecodeValue(const CString& sValue, const CString& sDelim, BOOL bDecodeNewLines)
+{
+	if (sValue.IsEmpty())
+		return sValue;
+
+	CString sDecoded(sValue);
+
+	if (sDecoded.Find(sDelim) >= 0)
+		Misc::MakeUnquoted(sDecoded);
+
+	if (bDecodeNewLines)
+	{
+		sDecoded.Replace('|', '\n');
+		sDecoded.Replace(_T("\n"), _T("\r\n"));
+	}
+
+	return sDecoded;
 }
 
 BOOL TASKTIMELOGITEM::GetRowVersion(int nNumFields)

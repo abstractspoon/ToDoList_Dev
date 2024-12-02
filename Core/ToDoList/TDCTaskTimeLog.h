@@ -45,6 +45,8 @@ struct TASKTIMELOGITEM
 
 protected:
 	static double ParseTimeSpent(CString sValue);
+	static CString EncodeValue(const CString& sValue, const CString& sDelim, BOOL bEncodeNewLines = FALSE);
+	static CString DecodeValue(const CString& sValue, const CString& sDelim, BOOL bDecodeNewLines = FALSE);
 };
 typedef CArray<TASKTIMELOGITEM, TASKTIMELOGITEM&> CTaskTimeLogItemArray;
 
