@@ -926,17 +926,11 @@ LRESULT CTDLTaskTreeCtrl::OnTreeGetDispInfo(NMTVDISPINFO* pTVDI)
 			pTVDI->item.mask |= TVIF_STATE;
 			pTVDI->item.stateMask = TVIS_STATEIMAGEMASK;
 
-			if (pTDI->IsDone())
+			switch (GetTaskCheckState(pTDI, pTDS))
 			{
-				pTVDI->item.state = TCHC_CHECKED;
-			}
-			else if (m_data.TaskHasCompletedSubtasks(pTDS))
-			{
-				pTVDI->item.state = TCHC_MIXED;
-			}
-			else 
-			{
-				pTVDI->item.state = TCHC_UNCHECKED;
+			case CTDLTaskCtrlBase::TTCBC_UNCHECKED:	pTVDI->item.state = TCHC_UNCHECKED; break;
+			case CTDLTaskCtrlBase::TTCBC_MIXED:		pTVDI->item.state = TCHC_MIXED;		break;
+			case CTDLTaskCtrlBase::TTCBC_CHECKED:	pTVDI->item.state = TCHC_CHECKED;	break;
 			}
 		}
 	}

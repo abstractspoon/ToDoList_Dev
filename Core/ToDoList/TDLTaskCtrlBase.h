@@ -463,9 +463,11 @@ protected:
 	void DrawGridlines(CDC* pDC, const CRect& rect, BOOL bSelected, BOOL bHorz, BOOL bVert);
 	BOOL DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, 
 							  CDC* pDC, const CRect& rSubItem, COLORREF crText);
-	enum TTCB_CHECK { TTCNC_UNCHECKED, TTCBC_CHECKED, TTCBC_MIXED };
-	void DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_CHECK nCheck);
 	void DrawFileLinkIcon(CDC* pDC, const CString& sFileLink, const CPoint& ptTopLeft);
+
+	enum TTCB_CHECK { TTCBC_UNCHECKED, TTCBC_CHECKED, TTCBC_MIXED };
+	TTCB_CHECK GetTaskCheckState(const  TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	void DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_CHECK nCheck);
 
 	void DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DATE nDate, const CRect& rect, COLORREF crText, 
 						BOOL bCalculated = FALSE, BOOL bCustomWantsTime = FALSE, int nAlign = DT_RIGHT);

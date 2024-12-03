@@ -49,6 +49,7 @@ public:
 	BOOL GetShowRemindersAsDateAndTime() const { return m_bShowRemindersAsDateAndTime; }
 	BOOL GetShowFileLinkThumbnails() const { return m_bShowFileLinkThumbnails; }
 	BOOL GetHidePriorityNumber() const { return m_bHidePriorityNumber; }
+	BOOL GetShowMixedCompletionState() const { return m_bShowMixedCompletionState; }
 	//	BOOL Get() const { return m_b; }
 
 protected:
@@ -87,6 +88,7 @@ protected:
 	BOOL	m_bAllowCheckboxAgainstTreeItem;
 	BOOL	m_bHidePaneSplitBar;
 	BOOL	m_bShowFileLinkThumbnails;
+	BOOL	m_bShowMixedCompletionState;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

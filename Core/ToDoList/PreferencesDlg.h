@@ -284,6 +284,7 @@ public:
 	BOOL GetShowRemindersAsDateAndTime() const { return m_pageUITasklist.GetShowRemindersAsDateAndTime(); }
 	BOOL GetShowFileLinkThumbnails() const { return m_pageUITasklist.GetShowFileLinkThumbnails(); }
 	COLORREF GetHidePriorityNumber() const { return m_pageUITasklist.GetHidePriorityNumber(); }
+	BOOL GetShowMixedCompletionState() const { return m_pageUITasklist.GetShowMixedCompletionState(); }
 
 	// CPreferencesUITasklistColorsPage
 	int GetTextColorOption() const { return m_pageUITasklistColors.GetTextColorOption(); }

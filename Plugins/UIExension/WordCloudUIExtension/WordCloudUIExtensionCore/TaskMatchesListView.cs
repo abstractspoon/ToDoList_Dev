@@ -69,6 +69,7 @@ namespace WordCloudUIExtension
 		private Boolean m_ShowParentAsFolder;
 		private Boolean m_TaskColorIsBkgnd;
 		private Boolean m_ShowCompletionCheckboxes;
+		private Boolean m_ShowMixedCompletionState;
 
 		public TaskMatchesListView(IntPtr hwndParent)
 		{
@@ -162,6 +163,19 @@ namespace WordCloudUIExtension
 				if (m_ShowCompletionCheckboxes != value)
 				{
 					m_ShowCompletionCheckboxes = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool ShowMixedCompletionState
+		{
+			get { return m_ShowMixedCompletionState; }
+			set
+			{
+				if (m_ShowMixedCompletionState != value)
+				{
+					m_ShowMixedCompletionState = value;
 					Invalidate();
 				}
 			}
@@ -856,7 +870,7 @@ namespace WordCloudUIExtension
             if (taskItem.IsDone(false))
                 return CheckBoxState.CheckedNormal;
 
-            if (taskItem.HasSomeSubtasksDone)
+            if (taskItem.HasSomeSubtasksDone && ShowMixedCompletionState)
                 return CheckBoxState.MixedNormal;
 
             // else

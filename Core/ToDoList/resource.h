@@ -588,6 +588,7 @@
 #define IDC_DATETIMEGROUP               1297
 #define IDC_INCLUDE                     1298
 #define IDC_OTHERGROUP                  1298
+#define IDC_DONEGROUP                   1299
 #define IDC_ICONLIST                    1299
 #define IDC_RELATIVEFROMWHERE           1300
 #define IDC_TASKTITLE                   1301
@@ -870,6 +871,7 @@
 #define IDC_GOTOTASKLIST                1577
 #define IDC_MODIFY                      1579
 #define IDC_INCLUDEREFSINCALC           1581
+#define IDC_SHOWMIXEDDONECHECKBOX       1582
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -2558,7 +2560,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        335
 #define _APS_NEXT_COMMAND_VALUE         34770
-#define _APS_NEXT_CONTROL_VALUE         1582
+#define _APS_NEXT_CONTROL_VALUE         1583
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

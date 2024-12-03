@@ -983,17 +983,11 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 					pLVDI->item.mask |= LVIF_STATE;
 					pLVDI->item.stateMask = LVIS_STATEIMAGEMASK | LVIS_SELECTED;
 
-					if (pTDI->IsDone())
+					switch (GetTaskCheckState(pTDI, pTDS))
 					{
-						pLVDI->item.state = LCHC_CHECKED;
-					}
-					else if (m_data.TaskHasCompletedSubtasks(pTDS))
-					{
-						pLVDI->item.state = LCHC_MIXED;
-					}
-					else 
-					{
-						pLVDI->item.state = LCHC_UNCHECKED;
+					case CTDLTaskCtrlBase::TTCBC_UNCHECKED:	pLVDI->item.state = LCHC_UNCHECKED; break;
+					case CTDLTaskCtrlBase::TTCBC_MIXED:		pLVDI->item.state = LCHC_MIXED;		break;
+					case CTDLTaskCtrlBase::TTCBC_CHECKED:	pLVDI->item.state = LCHC_CHECKED;	break;
 					}
 				}
 			}
