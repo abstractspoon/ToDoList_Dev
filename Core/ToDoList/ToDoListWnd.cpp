@@ -10,6 +10,7 @@
 #include "tasklisthtmlexporter.h"
 #include "tasklisttxtexporter.h"
 #include "TDCAnonymizeTasklist.h"
+#include "TDCAnonymizeTaskTimeLog.h"
 #include "TDCDarkMode.h"
 #include "tdcmapping.h"
 #include "tdcmsg.h"
@@ -488,6 +489,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_TASKLIST_SELECTCOLUMNS, OnTasklistSelectColumns)
 	ON_COMMAND(ID_TOOLS_ADDTOSOURCECONTROL, OnToolsAddtoSourceControl)
 	ON_COMMAND(ID_TOOLS_ANALYSELOGGEDTIME, OnToolsAnalyseLoggedTime)
+	ON_COMMAND(ID_TOOLS_ANONYMIZE_TASKTIMELOG, OnToolsAnonymizeTaskTimeLog)
 	ON_COMMAND(ID_TOOLS_ANONYMIZE_TASKLIST, OnToolsAnonymizeTasklist)
 	ON_COMMAND(ID_TOOLS_CHECKIN, OnToolsCheckin)
 	ON_COMMAND(ID_TOOLS_CHECKOUT, OnToolsCheckout)
@@ -735,6 +737,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_CUSTOMCOLUMNS, OnUpdateTasklistCustomcolumns)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ADDTOSOURCECONTROL, OnUpdateToolsAddtoSourceControl)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANALYSELOGGEDTIME, OnUpdateToolsAnalyseLoggedTime)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANONYMIZE_TASKTIMELOG, OnUpdateShowTimelogfile) // same as ID_SHOWTIMELOGFILE
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANONYMIZE_TASKLIST, OnUpdateToolsAnonymizeTasklist)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CHECKIN, OnUpdateToolsCheckin)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CHECKOUT, OnUpdateToolsCheckout)
@@ -12157,20 +12160,27 @@ void CToDoListWnd::OnPrintpreview()
 void CToDoListWnd::OnShowTimelogfile() 
 {
 	CString sLogPath = GetToDoCtrl().GetSelectedTaskTimeLogPath();
-	
-	if (FileMisc::FileExists(sLogPath))
+
+	DisplayTimelogfile(sLogPath);
+}
+
+void CToDoListWnd::DisplayTimelogfile(LPCTSTR szFilePath)
+{
+	HWND hwndThis = AfxGetMainWnd()->GetSafeHwnd();
+
+	if (FileMisc::FileExists(szFilePath))
 	{
 		// special handling for excel
 		if (CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE))
 		{
 			CString sParams;
-			sParams.Format(_T("/r \"%s\""), sLogPath); // readonly 
+			sParams.Format(_T("/r \"%s\""), szFilePath); // readonly 
 
-			FileMisc::Run(*this, CFileRegister::GetRegisteredAppPath(_T("csv")), sParams);
+			FileMisc::Run(hwndThis, CFileRegister::GetRegisteredAppPath(_T("csv")), sParams);
 		}
 		else
 		{
-			FileMisc::Run(*this, sLogPath);
+			FileMisc::Run(hwndThis, szFilePath);
 		}
 	}
 }
@@ -14137,22 +14147,38 @@ void CToDoListWnd::OnUpdateToolsViewLogFile(CCmdUI* pCmdUI)
 	pCmdUI->Enable(FileMisc::FileExists(FileMisc::GetLogFilePath()));
 }
 
-void CToDoListWnd::OnToolsAnonymizeTasklist() 
+void CToDoListWnd::OnToolsAnonymizeTaskTimeLog() 
+{
+	CString sAnonFilePath;
+	CString sLogPath = GetToDoCtrl().GetSelectedTaskTimeLogPath();
+
+	if (CTDCAnonymizeTaskTimeLog::Anonymize(sLogPath, sAnonFilePath))
+	{
+		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZETASKTIMELOG_SUCCESS, MB_YESNO))
+			DisplayTimelogfile(sAnonFilePath);
+	}
+	else
+	{
+		CMessageBox::AfxShow(IDS_ANONYMIZETASKTIMELOG_FAIL);
+	}
+}
+
+void CToDoListWnd::OnToolsAnonymizeTasklist()
 {
 	CString sAnonFilePath;
 
 	if (CTDCAnonymizeTasklist::Anonymize(GetToDoCtrl().GetFilePath(), sAnonFilePath))
 	{
-		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZE_SUCCESS, MB_YESNO))
+		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZETASKLIST_SUCCESS, MB_YESNO))
 			OpenTaskList(sAnonFilePath, FALSE);
 	}
 	else
 	{
-		CMessageBox::AfxShow(IDS_ANONYMIZE_FAIL);
+		CMessageBox::AfxShow(IDS_ANONYMIZETASKLIST_FAIL);
 	}
 }
 
-void CToDoListWnd::OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(GetToDoCtrl().HasFilePath());
 }

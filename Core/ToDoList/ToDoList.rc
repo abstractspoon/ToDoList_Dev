@@ -3707,6 +3707,8 @@ BEGIN
         MENUITEM "&View Debug Log File",        ID_TOOLS_VIEWLOG
         MENUITEM SEPARATOR
         MENUITEM "Anon&ymise Tasklist",         ID_TOOLS_ANONYMIZE_TASKLIST
+        MENUITEM "Anon&ymise Task Log File",    ID_TOOLS_ANONYMIZE_TASKTIMELOG
+
     END
     POPUP "&Window"
     BEGIN
@@ -4701,8 +4703,9 @@ BEGIN
     IDS_TDC_EDITPROMPT_UNKNOWNFORMAT "<unknown format>"
     IDS_ADVANCEDFILTERPLACEHOLDER "Find Tasks Filters"
     IDS_NOSOUND             "<no sound>"
-    IDS_ANONYMIZE_FAIL      "The active tasklist could not be anonymised"
-    IDS_ANONYMIZE_SUCCESS   "The active tasklist was successfully anonymised.\n\nWould you like to load the anonymised version?"
+    IDS_ANONYMIZETASKLIST_FAIL "The active tasklist could not be anonymised"
+    IDS_ANONYMIZETASKLIST_SUCCESS 
+                            "The active tasklist was successfully anonymised.\n\nWould you like to load the anonymised version?"
     IDS_PSP_NOMATCHES       "No matching menu items found"
 END
 
@@ -4742,6 +4745,8 @@ BEGIN
     IDS_REMINDER_DBLCLK_TIP "Double-click to go to task"
     IDS_CMDLINE_TASKICON    "-ic <icon name/number>\tSets the 'Icon' for the currently selected task"
     IDS_CMDLINE_TITLEPREFIX "-tp <prefix>\tApplies a prefix to the application title"
+    IDS_ANONYMIZETASKTIMELOG_FAIL 
+                            "The active task log file could not be anonymised"
     IDS_FIND_SELECTALL      "Select &All"
 END
 
@@ -5952,6 +5957,8 @@ BEGIN
     IDS_CONFIRMSAVEAS_TITLE "Confirm Save As"
     IDS_PRINT_TASKVIEW      "Image of active task view (%s)"
     IDS_TASKCOMPLETION      "Task Completion"
+    IDS_ANONYMIZETASKTIMELOG_SUCCESS 
+                            "The active log file was successfully anonymised.\n\nWould you like to load the anonymised version?"
     IDS_COMMENTSMEMORYERROR "Memory Allocation Error|The application was unable to allocate enough memory to retrieve the most recently modified comments.\n\nTry creating a separate subtask for any further comments."
     IDS_FIND_TASKS          "Find Tasks"
     IDS_RECURS_WEEKDAY      "weekday"

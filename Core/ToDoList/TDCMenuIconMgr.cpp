@@ -91,8 +91,10 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 	aCmdIDs.Add(ID_EDIT_PASTEATTRIBUTES);
 	aCmdIDs.Add(ID_TOOLS_IMPORT);
 	aCmdIDs.Add(ID_TOOLS_EXPORT);
+	aCmdIDs.Add(ID_TOOLS_ANONYMIZE_TASKLIST);
 
 	AddImages(aCmdIDs, IDB_APP_EXTRA_STD, colorMagenta);
+	AddImage(ID_TOOLS_ANONYMIZE_TASKTIMELOG, ID_TOOLS_ANONYMIZE_TASKLIST); // copy
 
 	// social images ---------------------------------------
 	aCmdIDs.RemoveAll();

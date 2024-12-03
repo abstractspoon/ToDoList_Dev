@@ -25,7 +25,7 @@ struct TASKTIMELOGITEM
 
 	BOOL IsValidToAnalyse() const;
 	BOOL IsValidToLog() const;
-	void Reset();
+	void Clear(BOOL bInitPerson = FALSE);
 
 	CString FormatRow(int nRowVer, const CString& sDelim) const;
 	BOOL ParseRow(const CString& sRow, const CString& sDelim);
@@ -40,11 +40,13 @@ struct TASKTIMELOGITEM
 	CString sComment;
 	CString sPerson;
 	CString sPath;
-	CString sTracked;
+	CString sType;
 	COLORREF crAltColor;
 
 protected:
 	static double ParseTimeSpent(CString sValue);
+	static CString EncodeValue(const CString& sValue, const CString& sDelim, BOOL bEncodeNewLines = FALSE);
+	static CString DecodeValue(const CString& sValue, const CString& sDelim, BOOL bDecodeNewLines = FALSE);
 };
 typedef CArray<TASKTIMELOGITEM, TASKTIMELOGITEM&> CTaskTimeLogItemArray;
 
@@ -63,7 +65,8 @@ public:
 	CString GetLogPath() const;
 	CString GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const;
 	
-	static int LoadLogItems(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
+	static int LoadLogFile(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
+	static BOOL SaveLogFile(const CString& sLogPath, const CTaskTimeLogItemArray& aLogItems, BOOL bPreserveVersion = TRUE);
 
 protected:
 	CString m_sRefPath;
@@ -71,7 +74,7 @@ protected:
 	int m_nVersion;
 	BOOL m_bLogExists;
 	BOOL m_bUseTabDelim;
-	CString m_sHeaderDelim;
+	CString m_sHeaderDelim, m_sColumnHeader;
 
 protected: 
 	CTDCTaskTimeLog();
