@@ -570,8 +570,9 @@ namespace WordCloudUIExtension
             m_TaskMatchesList.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
             m_TaskMatchesList.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
 			m_TaskMatchesList.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+			m_TaskMatchesList.ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
 
-            UpdateBlacklist();
+			UpdateBlacklist();
         }
 
 		void ShowSplitterBar(bool show = true)
