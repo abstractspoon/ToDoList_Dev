@@ -664,6 +664,7 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 		case TDCS_CALCREMAININGTIMEBYPERCENT:
 		case TDCS_COLORTEXTBYATTRIBUTE:
 		case TDCS_INCLUDEREFERENCESINCALCS:
+		case TDCS_SHOWMIXEDCOMPLETIONSTATE:
 			bInvalidateAll = TRUE;
 			break;
 
@@ -3027,7 +3028,7 @@ CTDLTaskCtrlBase::TTCB_CHECK CTDLTaskCtrlBase::GetTaskCheckState(const  TODOITEM
 	if (pTDI->IsDone())
 		return TTCBC_CHECKED;
 
-	if (m_data.TaskHasCompletedSubtasks(pTDS))
+	if (HasStyle(TDCS_SHOWMIXEDCOMPLETIONSTATE) && m_data.TaskHasCompletedSubtasks(pTDS))
 		return TTCBC_MIXED;
 
 	return TTCBC_UNCHECKED;
