@@ -1043,6 +1043,10 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				CWnd::Invalidate(FALSE);
 				break;
 
+			case WLCF_SHOWMIXEDCOMPLETIONSTATE:
+				CWnd::Invalidate(FALSE);
+				break;
+
 			case WLCF_SHOWSPLITTERBAR:
 				CTreeListCtrl::SetSplitBarWidth(bSet ? 10 : 0);
 				break;
@@ -1679,7 +1683,7 @@ void CWorkloadCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		{
 			pDispInfo->item.state = TCHC_CHECKED;
 		}
-		else if (pWI->bSomeSubtaskDone)
+		else if (pWI->bSomeSubtaskDone && HasOption(WLCF_SHOWMIXEDCOMPLETIONSTATE))
 		{
 			pDispInfo->item.state = TCHC_MIXED;
 		}

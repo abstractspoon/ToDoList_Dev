@@ -469,7 +469,8 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 		if (GetSafeHwnd())
 		{
 			if (Misc::FlagHasChanged(KBCF_SHOWTASKCOLORASBAR, dwPrevOptions, m_dwOptions) ||
-				Misc::FlagHasChanged(KBCF_COLORBARBYPRIORITY, dwPrevOptions, m_dwOptions))
+				Misc::FlagHasChanged(KBCF_COLORBARBYPRIORITY, dwPrevOptions, m_dwOptions) ||
+				Misc::FlagHasChanged(KBCF_SHOWMIXEDCOMPLETIONSTATE, dwPrevOptions, m_dwOptions))
 			{
  				Invalidate(FALSE);
 			}
@@ -1200,7 +1201,7 @@ void CKanbanColumnCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect&
 		{
 			iImage = KLCC_CHECKED;
 		}
-		else if (pKI->bSomeSubtaskDone)
+		else if (pKI->bSomeSubtaskDone && HasOption(KBCF_SHOWMIXEDCOMPLETIONSTATE))
 		{
 			iImage = KLCC_MIXED;
 		}

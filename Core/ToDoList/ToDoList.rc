@@ -694,7 +694,7 @@ BEGIN
                     10
     COMBOBOX        IDC_PERCENTINCREMENT,18,282,79,122,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Other",IDC_OTHERGROUP2,7,300,379,8
+    LTEXT           "Other",IDC_OTHERGROUP,7,300,379,8
     CONTROL         "&Hide 'Priority' number ",IDC_HIDEPRIORITYNUMBER,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,315,382,10
     CONTROL         "S&how 'Reminders' as dates and times",
