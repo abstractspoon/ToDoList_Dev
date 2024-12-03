@@ -588,7 +588,7 @@
 #define IDC_DATETIMEGROUP               1297
 #define IDC_INCLUDE                     1298
 #define IDC_OTHERGROUP                  1298
-#define IDC_DONEGROUP                   1298
+#define IDC_DONEGROUP                   1299
 #define IDC_ICONLIST                    1299
 #define IDC_RELATIVEFROMWHERE           1300
 #define IDC_TASKTITLE                   1301
