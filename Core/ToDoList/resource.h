@@ -2511,7 +2511,6 @@
 #define IDS_FIND_TASKS                  51629
 #define IDS_RECURS_WEEKDAY              51630
 #define IDS_TDLBC_COMMENTSFORMAT        51631
-#define IDS_TDC_EMPTY                   51632
 #define IDS_EDIT_VALUEVARIES            51633
 #define IDS_ATTRIBTIP_TIMEOFDAY         51634
 #define IDS_ATTRIBTIP_DEFCOLOR          51635
