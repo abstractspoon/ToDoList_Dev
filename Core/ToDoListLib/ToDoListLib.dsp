@@ -213,6 +213,10 @@ SOURCE=..\ToDoList\TDCAnonymizeTasklist.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCAnonymizeTaskTimeLog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCContentMgr.cpp
 # End Source File
 # Begin Source File
@@ -858,6 +862,10 @@ SOURCE=..\ToDoList\TaskSelectionDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCAnonymizeTasklist.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCAnonymizeTaskTimeLog.h
 # End Source File
 # Begin Source File
 

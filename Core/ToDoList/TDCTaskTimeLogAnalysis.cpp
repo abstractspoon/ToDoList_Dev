@@ -265,17 +265,17 @@ int CTDCTaskTimeLogAnalysis::BuildLogItemArray()
 	// iterate the list of files building a master list of log items
 	for (int nFile = 0; nFile < nNumLogFiles; nFile++)
 	{
-		CString sDelim;
+		CString sHeaderDelim;
 		
-		if (CTDCTaskTimeLog::LoadLogItems(aLogFiles[nFile], m_aLogItems, TRUE, sDelim))
+		if (CTDCTaskTimeLog::LoadLogFile(aLogFiles[nFile], m_aLogItems, TRUE, sHeaderDelim))
 		{
-			if (m_sCsvDelim.IsEmpty())
-			{
-				ASSERT(!sDelim.IsEmpty());
-				m_sCsvDelim = sDelim;
-			}
+			if (m_sCsvDelim.IsEmpty() && !sHeaderDelim.IsEmpty())
+				m_sCsvDelim = sHeaderDelim;
 		}
 	}
+
+	if (m_sCsvDelim.IsEmpty())
+		m_sCsvDelim = Misc::GetListSeparator();
 
 	// Build reverse lookup
 	int nNumItems = m_aLogItems.GetSize(), nItem = nNumItems;

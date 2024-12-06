@@ -175,7 +175,7 @@ void CTDLPriorityComboBox::BuildCombo()
 		int nPriority = nLevel;
 		
 		CString sPriority;
-		sPriority.Format(_T("%d (%s)"), nPriority, CString((LPCTSTR)IDS_TDC_SCALE[nLevel]));
+		sPriority.Format(_T("%d (%s)"), nPriority, CEnString(IDS_TDC_SCALE[nLevel]));
 		AddColor(color, sPriority);
 	}
 	

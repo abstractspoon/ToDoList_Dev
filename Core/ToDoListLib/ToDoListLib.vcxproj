@@ -135,6 +135,7 @@
     <ClCompile Include="..\ToDoList\TaskFile.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvExporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListCsvImporter.cpp" />
+    <ClCompile Include="..\ToDoList\TDCAnonymizeTaskTimeLog.cpp" />
     <ClCompile Include="..\ToDoList\TDCDarkMode.cpp" />
     <ClCompile Include="..\ToDoList\TDCMenuIconMgr.cpp" />
     <ClCompile Include="..\ToDoList\TDCRecurrenceHelper.cpp" />
@@ -298,6 +299,7 @@
     <ClInclude Include="..\ToDoList\TaskFile.h" />
     <ClInclude Include="..\ToDoList\TaskListCsvExporter.h" />
     <ClInclude Include="..\ToDoList\TaskListCsvImporter.h" />
+    <ClInclude Include="..\ToDoList\TDCAnonymizeTaskTimeLog.h" />
     <ClInclude Include="..\ToDoList\TDCDarkMode.h" />
     <ClInclude Include="..\ToDoList\TDCMenuIconMgr.h" />
     <ClInclude Include="..\ToDoList\TDCRecurrenceHelper.h" />

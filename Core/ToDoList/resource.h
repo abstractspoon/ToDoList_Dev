@@ -588,6 +588,7 @@
 #define IDC_DATETIMEGROUP               1297
 #define IDC_INCLUDE                     1298
 #define IDC_OTHERGROUP                  1298
+#define IDC_DONEGROUP                   1299
 #define IDC_ICONLIST                    1299
 #define IDC_RELATIVEFROMWHERE           1300
 #define IDC_TASKTITLE                   1301
@@ -870,6 +871,7 @@
 #define IDC_GOTOTASKLIST                1577
 #define IDC_MODIFY                      1579
 #define IDC_INCLUDEREFSINCALC           1581
+#define IDC_SHOWMIXEDDONECHECKBOX       1582
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -1607,6 +1609,7 @@
 #define ID_ATTRIBLIST_PASTEATTRIBVALUES 34766
 #define ID_VIEW_UNMAXTASKLISTANDCOMMENTS 34767
 #define ID_TOOLS_TOGGLEDARKMODE         34768
+#define ID_TOOLS_ANONYMIZE_TASKTIMELOG  34769
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -2455,7 +2458,9 @@
 #define IDS_ADVANCEDFILTERPLACEHOLDER   51579
 #define IDS_NOSOUND                     51580
 #define IDS_ANONYMIZE_FAIL              51581
+#define IDS_ANONYMIZETASKLIST_FAIL      51581
 #define IDS_ANONYMIZE_SUCCESS           51582
+#define IDS_ANONYMIZETASKLIST_SUCCESS   51582
 #define IDS_PSP_NOMATCHES               51583
 #define IDS_CLEARSEARCH_TIP             51584
 #define IDS_TABTIP_NOTFOUND             51585
@@ -2488,6 +2493,7 @@
 #define IDS_CMDLINE_TASKICON            51612
 #define IDS_CMDLINE_TITLEPREFIX         51613
 #define IDS_FIND_SHOWATTRIBUTEINRESULTS 51614
+#define IDS_ANONYMIZETASKTIMELOG_FAIL   51614
 #define IDS_FIND_SELECTALL              51615
 #define IDS_FIND_APPLYASFILTER          51616
 #define IDS_FIND_RESULTS                51617
@@ -2500,11 +2506,11 @@
 #define IDS_CONFIRMSAVEAS_TITLE         51624
 #define IDS_PRINT_TASKVIEW              51625
 #define IDS_TASKCOMPLETION              51626
+#define IDS_ANONYMIZETASKTIMELOG_SUCCESS 51627
 #define IDS_COMMENTSMEMORYERROR         51628
 #define IDS_FIND_TASKS                  51629
 #define IDS_RECURS_WEEKDAY              51630
 #define IDS_TDLBC_COMMENTSFORMAT        51631
-#define IDS_TDC_EMPTY                   51632
 #define IDS_EDIT_VALUEVARIES            51633
 #define IDS_ATTRIBTIP_TIMEOFDAY         51634
 #define IDS_ATTRIBTIP_DEFCOLOR          51635
@@ -2552,8 +2558,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        335
-#define _APS_NEXT_COMMAND_VALUE         34769
-#define _APS_NEXT_CONTROL_VALUE         1582
+#define _APS_NEXT_COMMAND_VALUE         34770
+#define _APS_NEXT_CONTROL_VALUE         1583
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

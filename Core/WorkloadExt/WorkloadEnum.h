@@ -36,6 +36,7 @@ enum // options
 	WLCF_RECALCPROPORTIONALLY			= 0x0200,
 	WLCF_ALLOWPARENTALLOCATIONS			= 0x0400,
 	WLCF_INCLUDEDATELESSTASKSINPERIOD	= 0x0800,
+	WLCF_SHOWMIXEDCOMPLETIONSTATE		= 0x1000,
 };
 
 /////////////////////////////////////////////////////////////////////////////

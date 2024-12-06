@@ -81,7 +81,7 @@ BOOL CTaskClipboard::TasklistIDMatches(const CString& sRefTasklistID)
 		return FALSE;
 	
 	CString sClipID = GetTasklistID();
-	BOOL bMatches = (sRefTasklistID.CompareNoCase(sClipID) == 0);
+	BOOL bMatches = (Misc::ToUpper(sRefTasklistID) == sClipID);
 
 	// TEMPORARY LOGGING
 	if (sRefTasklistID != DEF_CLIPID)

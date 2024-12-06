@@ -643,7 +643,7 @@ BEGIN
                     WS_TABSTOP,363,10,25,17
 END
 
-IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 527
+IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 562
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -673,68 +673,72 @@ BEGIN
                     IDC_APPENDTEXTTODATETIMEPASTE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,130,366,10
     EDITTEXT        IDC_DATETIMETRAILTEXT,17,142,175,14,ES_AUTOHSCROLL
-    LTEXT           "Other",IDC_OTHERGROUP,7,165,379,8
-    CONTROL         "&Hide 'Priority' number ",IDC_HIDEPRIORITYNUMBER,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,180,382,10
-    CONTROL         "S&how 'Reminders' as dates and times",
-                    IDC_SHOWREMINDERSASDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,195,386,10
+    LTEXT           "Task Completion",IDC_DONEGROUP,7,165,379,8
+    CONTROL         "Show a 'partially-complete' checkbox for incomplete parent tasks with completed subtasks ",
+                    IDC_SHOWMIXEDDONECHECKBOX,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,180,383,10
     CONTROL         "&Show checkbox beside task title when completion column is hidden",
                     IDC_ALLOWTREEITEMCHECKBOX,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,210,386,10
-    CONTROL         "Hide the splitter bar between the task titles and attribute columns",
-                    IDC_HIDEPANESPLITBAR,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,225,385,10
-    CONTROL         "&Show task infotips",IDC_SHOWINFOTIPS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,240,378,10
-    CONTROL         "&Limit length of comments shown to",
-                    IDC_LIMITINFOTIPCOMMENTS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,255,368,10
-    EDITTEXT        IDC_INFOTIPCOMMENTSMAX,28,267,69,13,ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    LTEXT           "characters",IDC_STATIC,103,269,283,8
-    CONTROL         "D&isplay comments after a task's title",
-                    IDC_SHOWCOMMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
-                    285,378,10
-    CONTROL         "&Display only the first line of comments",
-                    IDC_DISPLAYFIRSTCOMMENTLINE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,18,300,368,10
+                    WS_TABSTOP,7,195,386,10
     CONTROL         "&Strike-through completed tasks",IDC_STRIKETHROUGHDONE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,315,378,10
-    CONTROL         "Sho&w parent tasks with a folder icon",
-                    IDC_SHOWPARENTSASFOLDERS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,330,378,10
-    CONTROL         "Hi&de zero '% Complete' (0%)",IDC_HIDEZEROPERCENT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,345,386,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,210,378,10
     CONTROL         "&Hide '% Complete' for completed tasks",
                     IDC_HIDEPERCENTFORDONETASKS,"Button",BS_AUTOCHECKBOX | 
-                    BS_TOP | WS_TABSTOP,7,360,378,10
+                    BS_TOP | WS_TABSTOP,7,225,378,10
     CONTROL         "&Show '% Complete' as a progress bar",
                     IDC_SHOWPERCENTPROGRESSBAR,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,375,378,10
-    LTEXT           "&Set '% Complete' increment  to",IDC_STATIC,7,390,360,
+                    WS_TABSTOP,7,240,378,10
+    CONTROL         "Hi&de zero '% Complete' (0%)",IDC_HIDEZEROPERCENT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,255,386,10
+    LTEXT           "&Set '% Complete' increment  to",IDC_STATIC,7,270,360,
                     10
-    COMBOBOX        IDC_PERCENTINCREMENT,18,402,79,122,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_PERCENTINCREMENT,18,282,79,122,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Other",IDC_OTHERGROUP,7,300,379,8
+    CONTROL         "&Hide 'Priority' number ",IDC_HIDEPRIORITYNUMBER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,315,382,10
+    CONTROL         "S&how 'Reminders' as dates and times",
+                    IDC_SHOWREMINDERSASDATES,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,330,386,10
+    CONTROL         "Hide the splitter bar between the task titles and attribute columns",
+                    IDC_HIDEPANESPLITBAR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,345,385,10
+    CONTROL         "&Show task infotips",IDC_SHOWINFOTIPS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,360,378,10
+    CONTROL         "&Limit length of comments shown to",
+                    IDC_LIMITINFOTIPCOMMENTS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,18,375,368,10
+    EDITTEXT        IDC_INFOTIPCOMMENTSMAX,28,387,69,13,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "characters",IDC_STATIC,103,389,283,8
+    CONTROL         "D&isplay comments after a task's title",
+                    IDC_SHOWCOMMENTS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
+                    405,378,10
+    CONTROL         "&Display only the first line of comments",
+                    IDC_DISPLAYFIRSTCOMMENTLINE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,18,420,368,10
+    CONTROL         "Sho&w parent tasks with a folder icon",
+                    IDC_SHOWPARENTSASFOLDERS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,435,378,10
     CONTROL         "Sh&ow attribute columns to the right of the task tree",
                     IDC_RIGHTSIDECOLUMNS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,420,378,10
+                    WS_TABSTOP,7,450,378,10
     CONTROL         "Set fo&cus to tasklist whenever ToDoList is activated",
                     IDC_AUTOFOCUSTASKLIST,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,435,378,10
+                    WS_TABSTOP,7,465,378,10
     CONTROL         "&Display the selected task's path in the header bar",
                     IDC_DISPLAYPATHINHEADER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,450,378,10
+                    WS_TABSTOP,7,480,378,10
     CONTROL         "&Limit width of columns to",IDC_LIMITCOLWIDTHS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,465,378,10
-    EDITTEXT        IDC_COLWIDTHS,18,477,79,12,ES_AUTOHSCROLL
-    LTEXT           "pixels",IDC_STATIC,103,479,283,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,495,378,10
+    EDITTEXT        IDC_COLWIDTHS,18,507,79,12,ES_AUTOHSCROLL
+    LTEXT           "pixels",IDC_STATIC,103,509,283,8
     CONTROL         "&Always hide parent tasks in List View",
                     IDC_HIDELISTPARENTS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,495,379,10
+                    WS_TABSTOP,7,525,379,10
     CONTROL         "Display '&File Link' images as thumbnails",
                     IDC_FILELINKTHUMBNAILS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,510,379,10
+                    WS_TABSTOP,7,540,379,10
 END
 
 IDD_PREFUITASKLISTCOLORS_PAGE DIALOG DISCARDABLE  0, 0, 401, 606
@@ -1487,7 +1491,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,343,249,50,14
     LTEXT           "&File: ",IDC_STATIC,7,7,207,8
     EDITTEXT        IDC_CSVFILEPATH,7,19,312,14,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "&Csv delimiter",IDC_STATIC,326,7,67,8
+    LTEXT           "&Delimiter",IDC_STATIC,327,7,67,8
     EDITTEXT        IDC_CSVDELIMITER,327,19,66,14,ES_AUTOHSCROLL
 END
 
@@ -3707,6 +3711,8 @@ BEGIN
         MENUITEM "&View Debug Log File",        ID_TOOLS_VIEWLOG
         MENUITEM SEPARATOR
         MENUITEM "Anon&ymise Tasklist",         ID_TOOLS_ANONYMIZE_TASKLIST
+        MENUITEM "Anon&ymise Task Log File",    ID_TOOLS_ANONYMIZE_TASKTIMELOG
+
     END
     POPUP "&Window"
     BEGIN
@@ -4330,7 +4336,7 @@ BEGIN
 
     IDD_PREFUITASKLIST_PAGE, DIALOG
     BEGIN
-        BOTTOMMARGIN, 520
+        BOTTOMMARGIN, 555
     END
 
     IDD_PREFUITASKLISTCOLORS_PAGE, DIALOG
@@ -4701,8 +4707,9 @@ BEGIN
     IDS_TDC_EDITPROMPT_UNKNOWNFORMAT "<unknown format>"
     IDS_ADVANCEDFILTERPLACEHOLDER "Find Tasks Filters"
     IDS_NOSOUND             "<no sound>"
-    IDS_ANONYMIZE_FAIL      "The active tasklist could not be anonymised"
-    IDS_ANONYMIZE_SUCCESS   "The active tasklist was successfully anonymised.\n\nWould you like to load the anonymised version?"
+    IDS_ANONYMIZETASKLIST_FAIL "The active tasklist could not be anonymised"
+    IDS_ANONYMIZETASKLIST_SUCCESS 
+                            "The active tasklist was successfully anonymised.\n\nWould you like to load the anonymised version?"
     IDS_PSP_NOMATCHES       "No matching menu items found"
 END
 
@@ -4742,6 +4749,8 @@ BEGIN
     IDS_REMINDER_DBLCLK_TIP "Double-click to go to task"
     IDS_CMDLINE_TASKICON    "-ic <icon name/number>\tSets the 'Icon' for the currently selected task"
     IDS_CMDLINE_TITLEPREFIX "-tp <prefix>\tApplies a prefix to the application title"
+    IDS_ANONYMIZETASKTIMELOG_FAIL 
+                            "The active task log file could not be anonymised"
     IDS_FIND_SELECTALL      "Select &All"
 END
 
@@ -5952,6 +5961,8 @@ BEGIN
     IDS_CONFIRMSAVEAS_TITLE "Confirm Save As"
     IDS_PRINT_TASKVIEW      "Image of active task view (%s)"
     IDS_TASKCOMPLETION      "Task Completion"
+    IDS_ANONYMIZETASKTIMELOG_SUCCESS 
+                            "The active log file was successfully anonymised.\n\nWould you like to load the anonymised version?"
     IDS_COMMENTSMEMORYERROR "Memory Allocation Error|The application was unable to allocate enough memory to retrieve the most recently modified comments.\n\nTry creating a separate subtask for any further comments."
     IDS_FIND_TASKS          "Find Tasks"
     IDS_RECURS_WEEKDAY      "weekday"
@@ -5975,7 +5986,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDC_EMPTY           "<empty>"
     IDS_EDIT_VALUEVARIES    "<value varies>"
     IDS_ATTRIBTIP_TIMEOFDAY "Time of day"
     IDS_ATTRIBTIP_DEFCOLOR  "Default colour"
