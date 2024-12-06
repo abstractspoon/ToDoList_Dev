@@ -266,7 +266,7 @@ double TASKTIMELOGITEM::ParseTimeSpent(CString sValue)
 	// that the world uses: '.' and ','
 	// Plus we know that these entries will not contain thousands separators
 	CString sNativeSep = Misc::GetDecimalSeparator();
-	CString sAltSep = ((sNativeSep == ".") ? "," : ".");
+	CString sAltSep = ((sNativeSep == ".") ? _T(",") : _T("."));
 
 	sValue.Replace(sAltSep, sNativeSep);
 
