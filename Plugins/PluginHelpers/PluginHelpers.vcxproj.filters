@@ -102,6 +102,9 @@
     <ClInclude Include="TaskComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TaskTimeLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -186,6 +189,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TaskComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskTimeLog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

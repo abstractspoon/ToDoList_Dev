@@ -482,18 +482,18 @@ CString CTDCTaskTimeLog::GetLatestColumnHeader() const // always the latest vers
 }
 
 // public static helper
-int CTDCTaskTimeLog::LoadLogFile(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim)
+int CTDCTaskTimeLog::LoadLogFile(LPCTSTR szLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim)
 {
-	if (!FileMisc::FileExists(sLogPath))
+	if (!FileMisc::FileExists(szLogPath))
 		return 0;
 
 	CTDCTaskTimeLog log;
-	log.Initialise(sLogPath);
+	log.Initialise(szLogPath);
 
 	sHeaderDelim = log.m_sHeaderDelim;
 
 	CStringArray aLines;
-	int nNumLines = FileMisc::LoadFile(sLogPath, aLines), nItem = 0;
+	int nNumLines = FileMisc::LoadFile(szLogPath, aLines), nItem = 0;
 
 	if (nNumLines)
 	{
@@ -529,7 +529,7 @@ int CTDCTaskTimeLog::LoadLogFile(const CString& sLogPath, CTaskTimeLogItemArray&
 	return nItem;
 }
 
-BOOL CTDCTaskTimeLog::SaveLogFile(const CString& sLogPath, const CTaskTimeLogItemArray& aLogItems, BOOL bPreserveVersion)
+BOOL CTDCTaskTimeLog::SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray& aLogItems, BOOL bPreserveVersion)
 {
 	// sanity check
 	if (aLogItems.GetSize() == 0)
@@ -543,12 +543,12 @@ BOOL CTDCTaskTimeLog::SaveLogFile(const CString& sLogPath, const CTaskTimeLogIte
 	if (!bPreserveVersion)
 	{
 		// Rename the log file so it won't be found by 'Initialise'
-		sTempFile = FileMisc::GetTempFilePath(sLogPath, _T("bak"));
-		FileMisc::MoveFile(sLogPath, sTempFile);
+		sTempFile = FileMisc::GetTempFilePath(szLogPath, _T("bak"));
+		FileMisc::MoveFile(szLogPath, sTempFile);
 	}
 
 	CTDCTaskTimeLog log;
-	log.Initialise(sLogPath);
+	log.Initialise(szLogPath);
 
 	CString sDelim = log.GetDelimiter();
 	int nVersion = log.m_nVersion;
@@ -569,9 +569,9 @@ BOOL CTDCTaskTimeLog::SaveLogFile(const CString& sLogPath, const CTaskTimeLogIte
 
 	CString sFileContents = Misc::FormatArray(aLines, '\n');
 
-	if (!FileMisc::SaveFile(sLogPath, sFileContents, nFormat)) 
+	if (!FileMisc::SaveFile(szLogPath, sFileContents, nFormat)) 
 	{
-		VERIFY(FileMisc::MoveFile(sTempFile, sLogPath));
+		VERIFY(FileMisc::MoveFile(sTempFile, szLogPath));
 		return FALSE;
 	}
 
