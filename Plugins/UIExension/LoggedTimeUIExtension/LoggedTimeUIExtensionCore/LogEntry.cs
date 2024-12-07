@@ -16,10 +16,6 @@ namespace LoggedTimeUIExtension
 
 	public class LogEntries
 	{
-		private String m_Version;
-		private String m_Header;
-		private string m_Delim;
-		private Encoding m_Encoding;
 		private List<LogEntry> m_Entries;
 		private uint m_NextEntryId;
 		private bool m_Modified;
@@ -35,10 +31,6 @@ namespace LoggedTimeUIExtension
 
 		private void Reset()
 		{
-			m_Version = null;
-			m_Header = null;
-			m_Delim = null;
-			m_Encoding = Encoding.UTF8;
 			m_Entries.Clear();
 			m_Modified = false;
 			m_NextEntryId = 1;
@@ -88,43 +80,18 @@ namespace LoggedTimeUIExtension
 
 			try
 			{
-				using (var reader = new StreamReader(filePath))
+				using (var reader = new TaskTimeLogReader(filePath))
 				{
-					string version = reader.ReadLine().Trim();
+					int numEntries = reader.EntryCount;
+					LogEntry le = null;
 
-					if (string.IsNullOrEmpty(version) || (version.IndexOf(VersionPrefix) != 0))
-						return false;
-
-					// Must be version 1 or higher
-					string versionNum = version.Substring(VersionPrefix.Length + 1, 1);
-
-					int ver = 0;
-
-					if (!int.TryParse(versionNum, out ver) || (ver < 1))
-						return false;
-
-					string header = reader.ReadLine();
-
-					if (string.IsNullOrEmpty(header))
-						return false;
-
-					if (header.Contains("\t"))
-						m_Delim = "\t";
-
-					m_Version = version;
-					m_Header = header;
-					m_Encoding = reader.CurrentEncoding;
-
-					string line = reader.ReadLine();
-					uint entryId = 1;
-
-					while (line != null)
+					for (int entry = 0; entry < numEntries; entry++)
 					{
-						m_Entries.Add(new LogEntry(entryId++, line, m_Delim));
-						line = reader.ReadLine();
+						if (LogEntry.TryReadEntry(reader, entry, out le))
+							m_Entries.Add(le);
 					}
 
-					m_NextEntryId = entryId;
+					m_NextEntryId = (m_Entries.LastOrDefault().Id + 1);
 				}
 
 				return true;
@@ -154,30 +121,31 @@ namespace LoggedTimeUIExtension
 
 		public bool SaveLogFile(string filePath)
 		{
-			if (string.IsNullOrEmpty(m_Version) || string.IsNullOrEmpty(m_Header))
-				return false;
-
-			if (!m_Modified)
-				return true;
-
-			try
+			using (var writer = new TaskTimeLogWriter(m_Entries.Count))
 			{
-				using (var writer = new StreamWriter(filePath, false, m_Encoding))
+				for (int entry = 0; entry < m_Entries.Count; entry++)
 				{
-					writer.WriteLine(m_Version);
-					writer.WriteLine(m_Header);
+					writer.SetEntry(entry,
+										m_Entries[entry].TaskId,
+										m_Entries[entry].StartDate,
+										m_Entries[entry].EndDate,
+										m_Entries[entry].TimeSpentInHrs,
+										m_Entries[entry].Title,
+										m_Entries[entry].Comment,
+										m_Entries[entry].UserId,
+										m_Entries[entry].Path,
+										m_Entries[entry].Type,
+										m_Entries[entry].FillColor);
+				}
 
-					foreach (var entry in m_Entries)
-						writer.WriteLine(entry.Encode(m_Delim));
+				if (writer.Save(filePath))
+				{
+					m_Modified = false;
+					return true;
 				}
 			}
-			catch (Exception )
-			{
-				// File locked?
-			}
 
-			m_Modified = false;
-			return true;
+			return false;
 		}
 
 	}
@@ -200,30 +168,60 @@ namespace LoggedTimeUIExtension
 
 	public class LogEntry : Calendar.Appointment
 	{
-		private string m_Entry;
-
-		private uint m_TaskId = 0;
-		private double m_TimeSpentInHrs = 0.0;
-
-		bool m_NeedsEncoding = false;
-
 		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
 
 		// --------------------
 
 		public LogEntry(uint entryId)
 		{
-			m_Entry = string.Empty;
-
 			base.Id = entryId;
 		}
 
-		public LogEntry(uint entryId, string logEntry, string delim)
-			: 
-			this(entryId)
+		public static bool TryReadEntry(TaskTimeLogReader logReader, int entry, out LogEntry le)
 		{
-			m_Entry = logEntry;
-			Decode(delim);
+			le = null;
+
+			UInt32 taskID;
+			DateTime fromDate;
+			DateTime toDate;
+			double timeInHours;
+			String taskTitle;
+			String comment;
+			String person;
+			String path;
+			String type;
+			Color altColor;
+
+			if (!logReader.GetEntry(entry,
+									out taskID,
+									out fromDate,
+									out toDate,
+									out timeInHours,
+									out taskTitle,
+									out comment,
+									out person,
+									out path,
+									out type,
+									out altColor))
+			{
+				return false;
+			}
+
+			le = new LogEntry((uint)entry + 1)
+				{
+					TaskId = taskID,
+					StartDate = fromDate,
+					EndDate = toDate,
+					TimeSpentInHrs = timeInHours,
+					Title = taskTitle,
+					Comment = comment,
+					UserId = person,
+					Path = path,
+					Type = type,
+					FillColor = altColor
+				};
+
+			return true;
 		}
 
 		public LogEntry(uint entryId, uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
@@ -231,13 +229,12 @@ namespace LoggedTimeUIExtension
 
 		}
 
+		public uint TaskId { get; private set; }
+		public double TimeSpentInHrs { get; private set; }
 		public string UserId { get; private set; }
 		public string Path { get; private set; }
 		public string Type { get; private set; }
 		public string Comment { get; private set; }
-
-		public uint TaskId { get { return m_TaskId; } }
-		public double TimeSpentInHrs { get { return m_TimeSpentInHrs; } }
 
 		public bool Modify(DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
 		{
@@ -257,7 +254,7 @@ namespace LoggedTimeUIExtension
 
 			if (TimeSpentInHrs != timeSpentInHrs)
 			{
-				m_TimeSpentInHrs = timeSpentInHrs;
+				TimeSpentInHrs = timeSpentInHrs;
 				modified = true;
 			}
 
@@ -276,89 +273,16 @@ namespace LoggedTimeUIExtension
 			return modified;
 		}
 
-		private void Decode(string delim)
-		{
-			var parts = m_Entry.Split(new string[] { delim }, StringSplitOptions.None);
-
-			if (parts.Length >= 11)
-			{
-				DateTime start, end;
-				int rgbColor = -1;
-
-				uint.TryParse(parts[0], out m_TaskId);
-				Title = parts[1];
-				UserId = parts[2];
-				DateTime.TryParse(parts[3] + ' ' + parts[4], out start);
-				DateTime.TryParse(parts[5] + ' ' + parts[6], out end);
-				m_TimeSpentInHrs = ParseTimeSpent(parts[7]);
-				Comment = parts[8];
-				Type = parts[9];
-				Path = parts[10];
-
-				if (parts.Length > 11)
-					int.TryParse(parts[11], out rgbColor);
-
-				StartDate = start;
-				EndDate = end;
-				FillColor = ((rgbColor == -1) ? Color.Empty : Color.FromArgb(rgbColor));
-			}
-
-			m_NeedsEncoding = false;
-		}
-
-		static double ParseTimeSpent(string value)
-		{
-			// There are essentially only two decimal separators 
-			// that the world uses: '.' and ','
-			// Plus we know that these entries will not contain thousands separators
-			string nativeSep = CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator;
-			var alternativeSep = ((nativeSep == ".") ? "," : ".");
-
-			double timeSpent = 0.0;
-			double.TryParse(value.Replace(alternativeSep, nativeSep), out timeSpent);
-
-			return timeSpent;
-		}
-
-		public string Encode(string delim)
-		{
-			if (m_NeedsEncoding)
-			{
-				var elements = new string[]
-					{
-					m_TaskId.ToString(),
-					UserId,
-					base.StartDate.ToString("yyyy-MM-dd"), // ISO
-					base.StartDate.ToString("HH:mm"),      // ISO
-					base.EndDate.ToString("yyyy-MM-dd"),   // ISO
-					base.EndDate.ToString("HH:mm"),        // ISO
-					m_TimeSpentInHrs.ToString("N3"),	   // 3 decimals
-					Comment,
-					Type,
-					Path,
-					base.FillColor.ToArgb().ToString()
-					};
-
-				m_Entry = string.Join(delim, elements);
-				m_NeedsEncoding = false;
-			}
-
-			return m_Entry;
-		}
-
 		protected override void OnEndDateChanged()
 		{
-			m_NeedsEncoding = true;
 		}
 
 		protected override void OnStartDateChanged()
 		{
-			m_NeedsEncoding = true;
 		}
 
 		protected override void OnColorChanged()
 		{
-			m_NeedsEncoding = true;
 		}
 
 		public void UpdateOriginalDates()

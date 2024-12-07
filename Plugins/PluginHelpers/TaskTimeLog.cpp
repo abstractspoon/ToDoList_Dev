@@ -40,8 +40,8 @@ int TaskTimeLogReader::EntryCount::get()
 
 bool TaskTimeLogReader::GetEntry(int entry, 
 				 UInt32% taskID,
-				 DateTime^% fromDate,
-				 DateTime^% toDate,
+				 DateTime% fromDate,
+				 DateTime% toDate,
 				 double% timeInHours,
 				 String^% taskTitle,
 				 String^% comment,
