@@ -37,7 +37,8 @@ enum THU_HMS
 	HMS_ALLOWZERO		= 0x01,
 	HMS_DECIMALPLACES	= 0x02,
 	HMS_WANTSECONDS		= 0x04,
-	HMS_FORMATSPACED	= 0x08
+	HMS_FORMATSPACED	= 0x08,
+	HMS_PRESERVEUNITS	= 0x10
 };
 
 //////////////////////////////////////////////////////////////////////

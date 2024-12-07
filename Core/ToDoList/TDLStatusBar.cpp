@@ -338,7 +338,7 @@ CString CTDLStatusBar::FormatTime(double dAmount, TDC_UNITS nUnits, BOOL bHMS)
 	TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
 
 	if (bHMS)
-		return CTimeHelper().FormatTimeHMS(dAmount, nTHUnits);
+		return CTimeHelper().FormatTimeHMS(dAmount, nTHUnits, (HMS_DECIMALPLACES | HMS_PRESERVEUNITS));
 
 	// else
 	return CTimeHelper::FormatTime(dAmount, nTHUnits, 2);
