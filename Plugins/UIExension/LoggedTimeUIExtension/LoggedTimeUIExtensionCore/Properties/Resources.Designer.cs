@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TrackedTimeUIExtension.Properties {
+namespace LoggedTimeUIExtension.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace TrackedTimeUIExtension.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TrackedTimeUIExtension.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LoggedTimeUIExtension.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace TrackedTimeUIExtension.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon TrackedTime {
+        internal static System.Drawing.Icon LoggedTime {
             get {
-                object obj = ResourceManager.GetObject("TrackedTime", resourceCulture);
+                object obj = ResourceManager.GetObject("LoggedTime", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

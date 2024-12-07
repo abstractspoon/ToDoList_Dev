@@ -1,6 +1,6 @@
-﻿namespace TrackedTimeUIExtension
+﻿namespace LoggedTimeUIExtension
 {
-	partial class TrackedTimeEditEntryDlg
+	partial class LoggedTimeEditEntryDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -32,7 +32,7 @@
 			this.Cancel = new System.Windows.Forms.Button();
 			this.OK = new System.Windows.Forms.Button();
 			this.label = new System.Windows.Forms.Label();
-			this.m_Attributes = new TrackedTimeUIExtension.TrackedTimeEntryAttributesPage();
+			this.m_Attributes = new LoggedTimeUIExtension.LoggedTimeEntryAttributesPage();
 			this.m_TaskTitleLabel = new System.Windows.Forms.Label();
 			this.m_TaskIdLabel = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
@@ -116,7 +116,7 @@
 			this.label3.TabIndex = 20;
 			this.label3.Text = "Task ID";
 			// 
-			// TrackedTimeEditEntryDlg
+			// LoggedTimeEditEntryDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -130,8 +130,8 @@
 			this.Controls.Add(this.m_Attributes);
 			this.Controls.Add(this.label);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = global::TrackedTimeUIExtension.Properties.Resources.TrackedTime;
-			this.Name = "TrackedTimeEditEntryDlg";
+			this.Icon = global::LoggedTimeUIExtension.Properties.Resources.LoggedTime;
+			this.Name = "LoggedTimeEditEntryDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -147,7 +147,7 @@
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Label label;
-		private TrackedTimeEntryAttributesPage m_Attributes;
+		private LoggedTimeEntryAttributesPage m_Attributes;
 		private System.Windows.Forms.Label m_TaskTitleLabel;
 		private System.Windows.Forms.Label m_TaskIdLabel;
 		private System.Windows.Forms.Label label3;

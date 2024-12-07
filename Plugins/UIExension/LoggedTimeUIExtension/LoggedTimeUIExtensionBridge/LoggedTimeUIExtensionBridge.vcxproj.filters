@@ -7,7 +7,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TrackedTimeUIExtensionBridge.cpp">
+    <ClCompile Include="LoggedTimeUIExtensionBridge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -21,7 +21,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TrackedTimeUIExtensionBridge.h">
+    <ClInclude Include="LoggedTimeUIExtensionBridge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -37,12 +37,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="TrackedTimeUIExtensionBridge.rc">
+    <ResourceCompile Include="LoggedTimeUIExtensionBridge.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\TrackedTimeUIExtensionCore\Resources\TrackedTime.ico">
+    <Image Include="..\LoggedTimeUIExtensionCore\Resources\LoggedTime.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

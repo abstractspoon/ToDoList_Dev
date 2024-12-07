@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace TrackedTimeUIExtension
+namespace LoggedTimeUIExtension
 {
-    partial class TrackedTimePreferencesDlg : Form
+    partial class LoggedTimePreferencesDlg : Form
     {
 		private Translator m_Trans;
 		private IWin32Window m_Owner;
@@ -42,7 +42,7 @@ namespace TrackedTimeUIExtension
 
 		// ------------------------------------------------------------------------
 
-        public TrackedTimePreferencesDlg(IWin32Window owner, Translator trans, Font font)
+        public LoggedTimePreferencesDlg(IWin32Window owner, Translator trans, Font font)
         {
 			m_Trans = trans;
 			m_Owner = owner;
@@ -128,7 +128,7 @@ namespace TrackedTimeUIExtension
 			{
 				int numMins = 15;
 
-				if (TrackedTimeView.IsValidSlotsPerHour(60 / value))
+				if (LoggedTimeView.IsValidSlotsPerHour(60 / value))
 					numMins = value;
 
 				int index = m_SlotMinuteCombo.FindStringExact(SlotMinutesItem.ToString(numMins, m_Trans));

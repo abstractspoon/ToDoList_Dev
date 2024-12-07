@@ -9,7 +9,7 @@ using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace TrackedTimeUIExtension
+namespace LoggedTimeUIExtension
 {
 	// ------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ namespace TrackedTimeUIExtension
 
 	// ------------------------------------------------------------------------------
 
-	public partial class TrackedTimeView : Calendar.DayView, ILabelTipHandler
+	public partial class LoggedTimeView : Calendar.DayView, ILabelTipHandler
 	{
 		private uint m_SelectedEntryId = 0;
 		private uint m_VisibleSelectedTaskID = 0;
@@ -50,7 +50,7 @@ namespace TrackedTimeUIExtension
 
 		// ----------------------------------------------------------------
 
-		public TrackedTimeView(Translator trans, UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
+		public LoggedTimeView(Translator trans, UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
 		{
 			minHourLabelWidth = DPIScaling.Scale(minHourLabelWidth);
 			hourLabelIndent = DPIScaling.Scale(hourLabelIndent);

@@ -9,29 +9,39 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace TrackedTimeUIExtension
+namespace LoggedTimeUIExtension
 {
-	public partial class TrackedTimeEditEntryDlg : Form
+	public partial class LoggedTimeCreateEntryDlg : Form
 	{
-		LogEntry m_Entry;
+		LogEntry m_DefaultAttrib;
 
 		// ---------------------------------------
 
-		public TrackedTimeEditEntryDlg()
+		public LoggedTimeCreateEntryDlg()
 		{
 			InitializeComponent();
 		}
 
-		public TrackedTimeEditEntryDlg(LogEntry entry, WorkingWeek workWeek, bool readonlyTask)
+		public LoggedTimeCreateEntryDlg(IEnumerable<TaskItem> taskItems, 
+										 UIExtension.TaskIcon taskIcons, 
+										 WorkingWeek workWeek,
+										 LogEntry attrib,
+										 bool readonlyTasks)
 			:
 			this()
 		{
-			m_Entry = entry;
+			m_DefaultAttrib = attrib;
 
-			m_TaskTitleLabel.Text = entry.Title;
-			m_TaskIdLabel.Text = entry.TaskId.ToString();
+			if (attrib.TaskId != 0)
+				m_TaskIdLabel.Text = attrib.TaskId.ToString();
 
-			m_Attributes.Initialise(entry, workWeek, readonlyTask);
+			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, attrib.TaskId);
+			m_Attributes.Initialise(attrib, workWeek, readonlyTasks);
+		}
+
+		public uint SelectedTaskId
+		{
+			get { return m_TaskCombo.SelectedTaskId; }
 		}
 
 		public DateTime From
@@ -64,8 +74,9 @@ namespace TrackedTimeUIExtension
 			get { return m_Attributes.WantAddToTimeSpent; }
 		}
 
-
+		private void OnTaskComboSelChange(object sender, EventArgs e)
+		{
+			OK.Enabled = (SelectedTaskId != 0);
+		}
 	}
-
-
 }

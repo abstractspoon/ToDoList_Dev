@@ -11,10 +11,10 @@ using System.Windows.Forms;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace TrackedTimeUIExtension
+namespace LoggedTimeUIExtension
 {
 
-	public partial class TrackedTimeView : Calendar.IRenderer
+	public partial class LoggedTimeView : Calendar.IRenderer
 	{
 		private DayViewUIExtension.RenderHelper m_RenderHelper = new DayViewUIExtension.RenderHelper(); 
 		private int m_DayWidth = -1;

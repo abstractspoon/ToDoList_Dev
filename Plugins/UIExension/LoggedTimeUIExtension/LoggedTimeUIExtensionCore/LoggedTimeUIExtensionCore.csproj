@@ -8,8 +8,8 @@
     <ProjectGuid>{4B4C2975-69B4-4EBC-8802-CAAE2DB37B96}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TrackedTimeUIExtension</RootNamespace>
-    <AssemblyName>TrackedTimeUIExtension</AssemblyName>
+    <RootNamespace>LoggedTimeUIExtension</RootNamespace>
+    <AssemblyName>LoggedTimeUIExtension</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -56,49 +56,49 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="TaskItem.cs" />
-    <Compile Include="TrackedTimeCreateEntryDlg.cs">
+    <Compile Include="LoggedTimeCreateEntryDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TrackedTimeCreateEntryDlg.Designer.cs">
-      <DependentUpon>TrackedTimeCreateEntryDlg.cs</DependentUpon>
+    <Compile Include="LoggedTimeCreateEntryDlg.Designer.cs">
+      <DependentUpon>LoggedTimeCreateEntryDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="TrackedTimeEditEntryDlg.cs">
+    <Compile Include="LoggedTimeEditEntryDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TrackedTimeEditEntryDlg.Designer.cs">
-      <DependentUpon>TrackedTimeEditEntryDlg.cs</DependentUpon>
+    <Compile Include="LoggedTimeEditEntryDlg.Designer.cs">
+      <DependentUpon>LoggedTimeEditEntryDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="LogEntry.cs" />
-    <Compile Include="TrackedTimeRenderer.cs" />
-    <Compile Include="TrackedTimeEntryAttributesPage.cs">
+    <Compile Include="LoggedTimeRenderer.cs" />
+    <Compile Include="LoggedTimeEntryAttributesPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TrackedTimeEntryAttributesPage.Designer.cs">
-      <DependentUpon>TrackedTimeEntryAttributesPage.cs</DependentUpon>
+    <Compile Include="LoggedTimeEntryAttributesPage.Designer.cs">
+      <DependentUpon>LoggedTimeEntryAttributesPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="TrackedTimeView.cs" />
-    <Compile Include="TrackedTimePreferencesDlg.cs">
+    <Compile Include="LoggedTimeView.cs" />
+    <Compile Include="LoggedTimePreferencesDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TrackedTimePreferencesDlg.Designer.cs">
-      <DependentUpon>TrackedTimePreferencesDlg.cs</DependentUpon>
+    <Compile Include="LoggedTimePreferencesDlg.Designer.cs">
+      <DependentUpon>LoggedTimePreferencesDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="TrackedTimeUIExtensionCore.cs" />
+    <Compile Include="LoggedTimeUIExtensionCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="TrackedTimeCreateEntryDlg.resx">
-      <DependentUpon>TrackedTimeCreateEntryDlg.cs</DependentUpon>
+    <EmbeddedResource Include="LoggedTimeCreateEntryDlg.resx">
+      <DependentUpon>LoggedTimeCreateEntryDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="TrackedTimeEditEntryDlg.resx">
-      <DependentUpon>TrackedTimeEditEntryDlg.cs</DependentUpon>
+    <EmbeddedResource Include="LoggedTimeEditEntryDlg.resx">
+      <DependentUpon>LoggedTimeEditEntryDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TrackedTimePreferencesDlg.resx">
-      <DependentUpon>TrackedTimePreferencesDlg.cs</DependentUpon>
+    <EmbeddedResource Include="LoggedTimePreferencesDlg.resx">
+      <DependentUpon>LoggedTimePreferencesDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TrackedTimeEntryAttributesPage.resx">
-      <DependentUpon>TrackedTimeEntryAttributesPage.cs</DependentUpon>
+    <EmbeddedResource Include="LoggedTimeEntryAttributesPage.resx">
+      <DependentUpon>LoggedTimeEntryAttributesPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -136,7 +136,7 @@
     <EmbeddedResource Include="toolbar_std.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\TrackedTime.ico" />
+    <EmbeddedResource Include="Resources\LoggedTime.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

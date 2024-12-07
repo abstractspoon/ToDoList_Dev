@@ -9,13 +9,13 @@ using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace TrackedTimeUIExtension
+namespace LoggedTimeUIExtension
 {
-	public partial class TrackedTimeEntryAttributesPage : UserControl
+	public partial class LoggedTimeEntryAttributesPage : UserControl
 	{
 		private double m_OrgTimeSpent = 0.0;
 
-		public TrackedTimeEntryAttributesPage()
+		public LoggedTimeEntryAttributesPage()
 		{
 			InitializeComponent();
 		}

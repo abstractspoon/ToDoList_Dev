@@ -10,7 +10,7 @@ using System.Linq;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace TrackedTimeUIExtension
+namespace LoggedTimeUIExtension
 {
 	// ---------------------------------------------------------------
 

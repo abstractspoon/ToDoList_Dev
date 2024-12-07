@@ -11,14 +11,14 @@ using UIComponents;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace TrackedTimeUIExtension
+namespace LoggedTimeUIExtension
 {
 
 	[System.ComponentModel.DesignerCategory("")]
-	public class TrackedTimeUIExtensionCore : Panel, IUIExtension
+	public class LoggedTimeUIExtensionCore : Panel, IUIExtension
 	{
 		private IntPtr m_HwndParent = IntPtr.Zero;
-		private TrackedTimeView m_TimeLog = null;
+		private LoggedTimeView m_TimeLog = null;
 		private Translator m_Trans = null;
 		private String m_TypeId, m_UiName;
 		private WorkingWeek m_WorkWeek = null;
@@ -35,7 +35,7 @@ namespace TrackedTimeUIExtension
 		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
 		private YearComboBox m_YearCombo;
-        private TrackedTimePreferencesDlg m_PrefsDlg;
+        private LoggedTimePreferencesDlg m_PrefsDlg;
 
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
@@ -48,7 +48,7 @@ namespace TrackedTimeUIExtension
 		
 		// --------------------------------------------------------------------------------------
 
-		public TrackedTimeUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
+		public LoggedTimeUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
 		{
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
@@ -346,7 +346,7 @@ namespace TrackedTimeUIExtension
 		private void InitializeComponent()
 		{
 			m_ControlsFont = new Font(FontName, 8.25f);
-			m_PrefsDlg = new TrackedTimePreferencesDlg(this, m_Trans, m_ControlsFont);
+			m_PrefsDlg = new LoggedTimePreferencesDlg(this, m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
 			CreateMonthYearCombos();
@@ -360,7 +360,7 @@ namespace TrackedTimeUIExtension
 
 		private void CreateTimeLogView()
 		{
-			m_TimeLog = new TrackedTimeView(m_Trans,
+			m_TimeLog = new LoggedTimeView(m_Trans,
 										new UIExtension.TaskIcon(m_HwndParent),
 										new UIExtension.TaskRecurrences(m_HwndParent),
 										DPIScaling.Scale(5));
@@ -497,7 +497,7 @@ namespace TrackedTimeUIExtension
 		private void CreateToolbar()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
-			var images = new Bitmap(assembly.GetManifestResourceStream("TrackedTimeUIExtension.toolbar_std.bmp"));
+			var images = new Bitmap(assembly.GetManifestResourceStream("LoggedTimeUIExtension.toolbar_std.bmp"));
             
             m_TBImageList = new ImageList();
 			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
@@ -673,7 +673,7 @@ namespace TrackedTimeUIExtension
 			var entry = m_TimeLog.SelectedLogEntry;
 			var taskItem = m_TimeLog.SelectedTaskItem;
 
-			var dlg = new TrackedTimeEditEntryDlg(entry, m_WorkWeek, (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked));
+			var dlg = new LoggedTimeEditEntryDlg(entry, m_WorkWeek, (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked));
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 			m_Trans.Translate(dlg);

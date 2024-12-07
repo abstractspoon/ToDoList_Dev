@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0090C2A3-F40F-4D69-A656-006833F7D27C}</ProjectGuid>
     <RootNamespace>TimeLogUIExtensionBridge</RootNamespace>
-    <ProjectName>TrackedTimeUIExtensionBridge</ProjectName>
+    <ProjectName>LoggedTimeUIExtensionBridge</ProjectName>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -98,7 +98,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="TrackedTimeUIExtensionBridge.cpp">
+    <ClCompile Include="LoggedTimeUIExtensionBridge.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
     </ClCompile>
@@ -107,7 +107,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TrackedTimeUIExtensionBridge.h" />
+    <ClInclude Include="LoggedTimeUIExtensionBridge.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -122,13 +122,13 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="TrackedTimeUIExtensionBridge.rc" />
+    <ResourceCompile Include="LoggedTimeUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\TrackedTimeUIExtensionCore\Resources\TrackedTime.ico" />
+    <Image Include="..\LoggedTimeUIExtensionCore\Resources\LoggedTime.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TrackedTimeUIExtensionCore\TrackedTimeUIExtensionCore.csproj">
+    <ProjectReference Include="..\LoggedTimeUIExtensionCore\LoggedTimeUIExtensionCore.csproj">
       <Project>{4b4c2975-69b4-4ebc-8802-caae2db37b96}</Project>
     </ProjectReference>
   </ItemGroup>

@@ -6,7 +6,7 @@
 #include <msclr\auto_gcroot.h>
 
 #include "stdafx.h" 
-#include "TrackedTimeUIExtensionBridge.h"
+#include "LoggedTimeUIExtensionBridge.h"
 #include "resource.h"
 
 #include <Interfaces\ITasklist.h>
@@ -25,51 +25,51 @@ using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 using namespace System::Drawing;
 
-using namespace TrackedTimeUIExtension;
+using namespace LoggedTimeUIExtension;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 const LPCWSTR TIMELOG_GUID = L"F428A59A-97AF-4CA7-92CF-B1DC4CD5920C";
-const LPCWSTR TIMELOG_NAME = L"Tracked Time";
+const LPCWSTR TIMELOG_NAME = L"Logged Time";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CTrackedTimeUIExtensionBridge::CTrackedTimeUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
+CLoggedTimeUIExtensionBridge::CLoggedTimeUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	m_hIcon = Win32::LoadHIcon(L"TrackedTimeUIExtensionBridge.dll", IDI_DAYVIEW, 16, true);
+	m_hIcon = Win32::LoadHIcon(L"LoggedTimeUIExtensionBridge.dll", IDI_DAYVIEW, 16, true);
 }
 
-void CTrackedTimeUIExtensionBridge::Release()
+void CLoggedTimeUIExtensionBridge::Release()
 {
 	delete this;
 }
 
-void CTrackedTimeUIExtensionBridge::SetLocalizer(ITransText* pTT)
+void CLoggedTimeUIExtensionBridge::SetLocalizer(ITransText* pTT)
 {
 	if (m_pTT == nullptr)
 		m_pTT = pTT;
 }
 
-LPCWSTR CTrackedTimeUIExtensionBridge::GetMenuText() const
+LPCWSTR CLoggedTimeUIExtensionBridge::GetMenuText() const
 {
 	return TIMELOG_NAME;
 }
 
-HICON CTrackedTimeUIExtensionBridge::GetIcon() const
+HICON CLoggedTimeUIExtensionBridge::GetIcon() const
 {
 	return m_hIcon;
 }
 
-LPCWSTR CTrackedTimeUIExtensionBridge::GetTypeID() const
+LPCWSTR CLoggedTimeUIExtensionBridge::GetTypeID() const
 {
 	return TIMELOG_GUID;
 }
 
-IUIExtensionWindow* CTrackedTimeUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
+IUIExtensionWindow* CLoggedTimeUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
 	DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CTrackedTimeUIExtensionBridgeWindow* pExtWnd = new CTrackedTimeUIExtensionBridgeWindow(m_pTT);
+	CLoggedTimeUIExtensionBridgeWindow* pExtWnd = new CLoggedTimeUIExtensionBridgeWindow(m_pTT);
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -80,33 +80,33 @@ IUIExtensionWindow* CTrackedTimeUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 	return pExtWnd;
 }
 
-void CTrackedTimeUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+void CLoggedTimeUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	// TODO
 }
 
-void CTrackedTimeUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
+void CLoggedTimeUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CTrackedTimeUIExtensionBridgeWindow::CTrackedTimeUIExtensionBridgeWindow(ITransText* pTT)
+CLoggedTimeUIExtensionBridgeWindow::CLoggedTimeUIExtensionBridgeWindow(ITransText* pTT)
 	: 
 	m_pTT(pTT)
 {
 
 }
 
-BOOL CTrackedTimeUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
+BOOL CLoggedTimeUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<String^> typeID = gcnew String(TIMELOG_GUID);
 	msclr::auto_gcroot<String^> uiName = gcnew String(TIMELOG_NAME);
 
-	m_wnd = gcnew TrackedTimeUIExtension::TrackedTimeUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew LoggedTimeUIExtension::LoggedTimeUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 
@@ -122,27 +122,27 @@ BOOL CTrackedTimeUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	return false;
 }
 
-HICON CTrackedTimeUIExtensionBridgeWindow::GetIcon() const
+HICON CLoggedTimeUIExtensionBridgeWindow::GetIcon() const
 {
 	return NULL;
 }
 
-LPCWSTR CTrackedTimeUIExtensionBridgeWindow::GetMenuText() const
+LPCWSTR CLoggedTimeUIExtensionBridgeWindow::GetMenuText() const
 {
 	return TIMELOG_NAME;
 }
 
-LPCWSTR CTrackedTimeUIExtensionBridgeWindow::GetTypeID() const
+LPCWSTR CLoggedTimeUIExtensionBridgeWindow::GetTypeID() const
 {
 	return TIMELOG_GUID;
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
+bool CLoggedTimeUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
+bool CLoggedTimeUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
 
@@ -152,26 +152,26 @@ bool CTrackedTimeUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, i
 	return m_wnd->SelectTasks(taskIDs);
 }
 
-void CTrackedTimeUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
+void CLoggedTimeUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
+bool CLoggedTimeUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
 	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
+bool CLoggedTimeUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
 	msclr::auto_gcroot<TaskList^> task = gcnew TaskList(pTask);
 
 	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
+bool CLoggedTimeUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
 	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
 		pMsg->message, 
@@ -182,12 +182,12 @@ bool CTrackedTimeUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 		pMsg->pt.y);
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::DoIdleProcessing()
+bool CLoggedTimeUIExtensionBridgeWindow::DoIdleProcessing()
 {
 	return m_wnd->DoIdleProcessing();
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
+bool CLoggedTimeUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
 	switch (nCmd)
 	{
@@ -242,7 +242,7 @@ bool CTrackedTimeUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIA
 	return false;
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
+bool CLoggedTimeUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
 {
 	switch (nCmd)
 	{
@@ -280,7 +280,7 @@ bool CTrackedTimeUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, c
 	return false;
 }
 
-DWORD CTrackedTimeUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
+DWORD CLoggedTimeUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
 {
 	UIExtension::GetTask getTask;
 
@@ -295,7 +295,7 @@ DWORD CTrackedTimeUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWOR
 	return taskID;
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
+bool CLoggedTimeUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
 	UIExtension::SelectTask selectWhat;
 
@@ -307,44 +307,44 @@ bool CTrackedTimeUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd
 	return m_wnd->SelectTask(sWords, selectWhat, select.bCaseSensitive, select.bWholeWord, select.bFindReplace);
 }
 
-bool CTrackedTimeUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
+bool CLoggedTimeUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 {
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CTrackedTimeUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
+IUI_HITTEST CLoggedTimeUIExtensionBridgeWindow::HitTest(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	return UIExtension::MapHitTestResult(m_wnd->HitTest(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason)));
 }
 
-DWORD CTrackedTimeUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
+DWORD CLoggedTimeUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 {
 	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y, UIExtension::MapHitTestReason(nReason));
 }
 
-void CTrackedTimeUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
+void CLoggedTimeUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
 
 	m_wnd->SetUITheme(theme.get());
 }
 
-void CTrackedTimeUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
+void CLoggedTimeUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
 {
 	m_wnd->SetTaskFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
-void CTrackedTimeUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
+void CLoggedTimeUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 {
 	m_wnd->SetReadOnly(bReadOnly);
 }
 
-HWND CTrackedTimeUIExtensionBridgeWindow::GetHwnd() const
+HWND CLoggedTimeUIExtensionBridgeWindow::GetHwnd() const
 {
 	return static_cast<HWND>(m_wnd->Handle.ToPointer());
 }
 
-void CTrackedTimeUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+void CLoggedTimeUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
@@ -352,7 +352,7 @@ void CTrackedTimeUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, 
 	m_wnd->SavePreferences(prefs.get(), key.get());
 }
 
-void CTrackedTimeUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
+void CLoggedTimeUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);

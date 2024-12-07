@@ -1,6 +1,6 @@
-﻿namespace TrackedTimeUIExtension
+﻿namespace LoggedTimeUIExtension
 {
-	partial class TrackedTimeEntryAttributesPage
+	partial class LoggedTimeEntryAttributesPage
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -148,7 +148,7 @@
 			this.m_AddToTimeSpentCheckBox.Text = "Also add time to task\'s time spent";
 			this.m_AddToTimeSpentCheckBox.UseVisualStyleBackColor = true;
 			// 
-			// TrackedTimeEntryAttributesPage
+			// LoggedTimeEntryAttributesPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -163,7 +163,7 @@
 			this.Controls.Add(this.m_ToTimeCombo);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.m_CommentEdit);
-			this.Name = "TrackedTimeEntryAttributesPage";
+			this.Name = "LoggedTimeEntryAttributesPage";
 			this.Size = new System.Drawing.Size(349, 201);
 			this.ResumeLayout(false);
 			this.PerformLayout();

@@ -8,15 +8,15 @@
 #include <Interfaces\IUIExtension.h>
 
 #include <vcclr.h>
-using namespace TrackedTimeUIExtension;
+using namespace LoggedTimeUIExtension;
 
 ///////////////////////////////////////////////////////////////////////////////
-// This class is exported from TrackedTimeUIExtensionBridge.dll
+// This class is exported from LoggedTimeUIExtensionBridge.dll
 
-class CTrackedTimeUIExtensionBridge : public IUIExtension
+class CLoggedTimeUIExtensionBridge : public IUIExtension
 {
 public:
-	CTrackedTimeUIExtensionBridge();
+	CLoggedTimeUIExtensionBridge();
 
    void Release(); // releases the interface
 
@@ -39,12 +39,12 @@ protected:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// This class is exported from TrackedTimeUIExtensionBridge.dll
+// This class is exported from LoggedTimeUIExtensionBridge.dll
 
-class CTrackedTimeUIExtensionBridgeWindow : public IUIExtensionWindow
+class CLoggedTimeUIExtensionBridgeWindow : public IUIExtensionWindow
 {
 public:
-	CTrackedTimeUIExtensionBridgeWindow(ITransText* pTT);
+	CLoggedTimeUIExtensionBridgeWindow(ITransText* pTT);
 
    BOOL Create(UINT nCtrlID, DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
@@ -80,7 +80,7 @@ public:
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
    
 protected:
-   gcroot<TrackedTimeUIExtensionCore^> m_wnd;
+   gcroot<LoggedTimeUIExtensionCore^> m_wnd;
    ITransText* m_pTT;
 
 protected:
@@ -95,6 +95,6 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IUIExtension* CreateUIExtensionInterface()
 {
-   return new CTrackedTimeUIExtensionBridge();
+   return new CLoggedTimeUIExtensionBridge();
 }
 
