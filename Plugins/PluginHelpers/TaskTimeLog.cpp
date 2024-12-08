@@ -50,14 +50,6 @@ List<TaskTimeLogEntry^>^ TaskTimeLog::Load(String^ logFilePath)
 	return logEntries;
 }
 
-String^ TaskTimeLog::ToString(const CString& str)
-{
-	if (str.IsEmpty())
-		return String::Empty;
-
-	return gcnew String(str);
-}
-
 bool TaskTimeLog::Save(String^ logFilePath, List<TaskTimeLogEntry^>^ logEntries)
 {
 	CTaskTimeLogItemArray aLogEntries;
@@ -96,4 +88,12 @@ CString TaskTimeLog::ToString(String^ str)
 
 	// else
 	return CString(MS(str));
+}
+
+String^ TaskTimeLog::ToString(const CString& str)
+{
+	if (str.IsEmpty())
+		return String::Empty;
+
+	return gcnew String(str);
 }
