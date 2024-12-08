@@ -6,10 +6,6 @@ using namespace System;
 using namespace System::Runtime::InteropServices;
 using namespace System::Collections::Generic;
 
-struct TASKTIMELOGITEM;
-
-typedef CArray<TASKTIMELOGITEM, TASKTIMELOGITEM&> CTaskTimeLogItemArray;
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace Abstractspoon
@@ -35,34 +31,15 @@ namespace Abstractspoon
 
 			// -------------------------------------------------------
 
-			public ref class TaskTimeLogReader
+			public ref class TaskTimeLog
 			{
 			public:
-				TaskTimeLogReader(String^ logFilePath);
-				!TaskTimeLogReader();
-				~TaskTimeLogReader();
-
-				property int EntryCount { int get(); }
-				TaskTimeLogEntry^ GetEntry(int entry);
+				static List<TaskTimeLogEntry^>^ Load(String^ logFilePath);
+				static bool Save(String^ logFilePath, List<TaskTimeLogEntry^>^ logEntries);
 
 			private:
-				CTaskTimeLogItemArray* m_pItems;
-			};
-
-			// -------------------------------------------------------
-
-			public ref class TaskTimeLogWriter
-			{
-			public:
-				TaskTimeLogWriter(int entryCount);
-				!TaskTimeLogWriter();
-				~TaskTimeLogWriter();
-
-				bool SetEntry(int entry, TaskTimeLogEntry^ logEntry);
-				bool Save(String^ logFilePath);
-
-			private:
-				CTaskTimeLogItemArray* m_pItems;
+				static String^ ToString(const CString& str);
+				static CString ToString(String^ str);
 			};
 		}
 	}

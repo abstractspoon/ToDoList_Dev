@@ -100,16 +100,13 @@ namespace LoggedTimeUIExtension
 
 			try
 			{
-				using (var reader = new TaskTimeLogReader(filePath))
-				{
-					int numEntries = reader.EntryCount;
-					m_NextEntryId = 1;
+				var logEntries = TaskTimeLog.Load(filePath);
 
-					for (int entry = 0; entry < numEntries; entry++)
-					{
-						m_Entries.Add(new LogEntry(m_NextEntryId++, reader.GetEntry(entry)));
-					}
-				}
+				m_Entries.Clear();
+				m_NextEntryId = 1;
+
+				foreach (var entry in logEntries)
+					m_Entries.Add(new LogEntry(m_NextEntryId++, entry));
 
 				return true;
 			}
@@ -140,34 +137,31 @@ namespace LoggedTimeUIExtension
 		{
 			if (m_Modified && !string.IsNullOrEmpty(filePath))
 			{
+				var logEntries = new List<TaskTimeLogEntry>();
+
+				foreach (var entry in m_Entries)
+				{
+					logEntries.Add(new TaskTimeLogEntry()
+					{
+						TaskId = entry.TaskId,
+						From = entry.StartDate,
+						To = entry.EndDate,
+						TimeInHours = entry.TimeSpentInHrs,
+						TaskTitle = entry.Title,
+						Comment = entry.Comment,
+						Person = entry.Person,
+						TaskPath = entry.TaskPath,
+						Type = entry.Type,
+						AltColor = entry.FillColor
+					});
+				}
+
 				try
 				{
-					using (var writer = new TaskTimeLogWriter(m_Entries.Count))
+					if (TaskTimeLog.Save(filePath, logEntries))
 					{
-						for (int entry = 0; entry < m_Entries.Count; entry++)
-						{
-							var logEntry = new TaskTimeLogEntry()
-							{
-								TaskId = m_Entries[entry].TaskId,
-								From = m_Entries[entry].StartDate,
-								To = m_Entries[entry].EndDate,
-								TimeInHours = m_Entries[entry].TimeSpentInHrs,
-								TaskTitle = m_Entries[entry].Title,
-								Comment = m_Entries[entry].Comment,
-								Person = m_Entries[entry].Person,
-								TaskPath = m_Entries[entry].TaskPath,
-								Type = m_Entries[entry].Type,
-								AltColor = m_Entries[entry].FillColor
-							};
-
-							writer.SetEntry(entry, logEntry);
-						}
-
-						if (writer.Save(filePath))
-						{
-							m_Modified = false;
-							return true;
-						}
+						m_Modified = false;
+						return true;
 					}
 				}
 				catch (Exception)
