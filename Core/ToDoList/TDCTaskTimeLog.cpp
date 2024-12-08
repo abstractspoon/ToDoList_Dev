@@ -128,8 +128,6 @@ void TASKTIMELOGITEM::Clear(BOOL bInitPerson)
 
 CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 {
-	ASSERT(IsValidToLog());
-
 	CString sItem, sRowFormat(GetRowFormat(nRowVer, sDelim));
 	
 	switch (nRowVer)
@@ -257,7 +255,7 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 		break;
 	}
 	
-	return IsValidToAnalyse();
+	return TRUE;
 }
 
 double TASKTIMELOGITEM::ParseTimeSpent(CString sValue)
