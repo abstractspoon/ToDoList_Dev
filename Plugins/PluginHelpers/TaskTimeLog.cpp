@@ -96,8 +96,8 @@ bool TaskTimeLogWriter::SetEntry(int entry, TaskTimeLogEntry^ logEntry)
 	TASKTIMELOGITEM& li = m_pItems->GetAt(entry);
 
 	li.dwTaskID = logEntry->TaskId;
-	li.dtFrom.m_dt = logEntry->From.ToOADate();
-	li.dtTo.m_dt = logEntry->To.ToOADate();
+	li.dtFrom = logEntry->From.ToOADate();
+	li.dtTo = logEntry->To.ToOADate();
 	li.dHours = logEntry->TimeInHours;
 	li.sTaskTitle = MS(logEntry->TaskTitle);
 	li.sComment = MS(logEntry->Comment);

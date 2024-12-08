@@ -128,7 +128,7 @@ void TASKTIMELOGITEM::Clear(BOOL bInitPerson)
 
 CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 {
-//	ASSERT(IsValidToLog());
+	ASSERT(IsValidToLog());
 
 	CString sItem, sRowFormat(GetRowFormat(nRowVer, sDelim));
 	
