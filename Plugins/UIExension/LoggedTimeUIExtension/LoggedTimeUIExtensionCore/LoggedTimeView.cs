@@ -29,6 +29,7 @@ namespace LoggedTimeUIExtension
 
 		private TaskItems m_TaskItems;
 		private LogEntries m_LogEntries;
+		private string m_LogFilePath;
 //		private DateSortedTasks m_DateSortedTasks;
 
 		//private TDLRenderer m_Renderer;
@@ -225,6 +226,13 @@ namespace LoggedTimeUIExtension
 */
 		}
 
+		public bool DoIdleProcessing()
+		{
+			m_LogEntries.SaveLogFile(m_LogFilePath);
+
+			return false; // Always
+		}
+
 		public uint IconHitTest(Point ptScreen)
 		{
 			return 0;
@@ -366,16 +374,15 @@ namespace LoggedTimeUIExtension
 			get { return CanModifySelectedLogEntry; }
 		}
 		
-		public bool AddLogEntry(uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		public bool AddLogEntry(uint taskId, string taskTitle, DateTime start, DateTime end, double timeSpentInHrs, string comment, string path, string type, Color fillColor)
 		{
 			if (!CanCreateNewLogEntry)
 				return false;
 
-			if (!m_LogEntries.AddEntry(taskId, taskTitle, start, end, comment, timeSpentInHrs, fillColor))
+			if (!m_LogEntries.AddEntry(taskId, taskTitle, start, end, timeSpentInHrs, comment, path, type, fillColor))
 				return false;
 
 			Invalidate();
-
 			return true;
 		}
 
@@ -388,7 +395,6 @@ namespace LoggedTimeUIExtension
 				return false;
 
 			Invalidate();
-
 			return true;
 		}
 
@@ -802,10 +808,10 @@ namespace LoggedTimeUIExtension
 
 			string filePath = tasks.GetFilePath();
 
-			string logPath = Path.GetFileNameWithoutExtension(filePath) + "_Log.csv";
-			logPath = Path.Combine(Path.GetDirectoryName(filePath), logPath);
+			m_LogFilePath = Path.GetFileNameWithoutExtension(filePath) + "_Log.csv";
+			m_LogFilePath = Path.Combine(Path.GetDirectoryName(filePath), m_LogFilePath);
 
-			m_LogEntries.Load(logPath);
+			m_LogEntries.Load(m_LogFilePath);
 
 			switch (type)
 			{

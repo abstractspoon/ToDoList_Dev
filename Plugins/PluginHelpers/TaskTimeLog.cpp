@@ -38,39 +38,31 @@ int TaskTimeLogReader::EntryCount::get()
 	return 0;
 }
 
-bool TaskTimeLogReader::GetEntry(int entry, 
-				 UInt32% taskID,
-				 DateTime% fromDate,
-				 DateTime% toDate,
-				 double% timeInHours,
-				 String^% taskTitle,
-				 String^% comment,
-				 String^% person,
-				 String^% path,
-				 String^% type,
-				 Drawing::Color% altColor)
+TaskTimeLogEntry^ TaskTimeLogReader::GetEntry(int entry)
 {
 	if ((entry < 0) || (entry >= EntryCount))
-		return false;
+		return nullptr;
 
 	const TASKTIMELOGITEM& li = m_pItems->GetAt(entry);
 
-	taskID = li.dwTaskID;
-	fromDate = DateTime::FromOADate(li.dtFrom.m_dt);
-	toDate = DateTime::FromOADate(li.dtTo);
-	timeInHours = li.dHours;
-	taskTitle = gcnew String(li.sTaskTitle);
-	comment = gcnew String(li.sComment);
-	person = gcnew String(li.sPerson);
-	path = gcnew String(li.sPath);
-	type = gcnew String(li.sType);
+	TaskTimeLogEntry^ logEntry = gcnew TaskTimeLogEntry();
+
+	logEntry->TaskId = li.dwTaskID;
+	logEntry->From = DateTime::FromOADate(li.dtFrom.m_dt);
+	logEntry->To = DateTime::FromOADate(li.dtTo);
+	logEntry->TimeInHours = li.dHours;
+	logEntry->TaskTitle = gcnew String(li.sTaskTitle);
+	logEntry->Comment = gcnew String(li.sComment);
+	logEntry->Person = gcnew String(li.sPerson);
+	logEntry->TaskPath = gcnew String(li.sPath);
+	logEntry->Type = gcnew String(li.sType);
 
 	if (li.crAltColor == CLR_NONE)
-		altColor = Drawing::Color::Empty;
+		logEntry->AltColor = Drawing::Color::Empty;
 	else
-		altColor = Drawing::Color::FromArgb(li.crAltColor);
+		logEntry->AltColor = Drawing::Color::FromArgb(li.crAltColor);
 
-	return true;
+	return logEntry;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,17 +85,7 @@ TaskTimeLogWriter::~TaskTimeLogWriter()
 	this->!TaskTimeLogWriter();
 }
 
-bool TaskTimeLogWriter::SetEntry(int entry,
-								 UInt32 taskID,
-								 DateTime^ fromDate,
-								 DateTime^ toDate,
-								 double timeInHours,
-								 String^ taskTitle,
-								 String^ comment,
-								 String^ person,
-								 String^ path,
-								 String^ type,
-								 Drawing::Color altColor)
+bool TaskTimeLogWriter::SetEntry(int entry, TaskTimeLogEntry^ logEntry)
 {
 	if (!m_pItems)
 		return false;
@@ -113,20 +95,20 @@ bool TaskTimeLogWriter::SetEntry(int entry,
 
 	TASKTIMELOGITEM& li = m_pItems->GetAt(entry);
 
-	li.dwTaskID = taskID;
-	li.dtFrom.m_dt = fromDate->ToOADate();
-	li.dtTo.m_dt = toDate->ToOADate();
-	li.dHours = timeInHours;
-	li.sTaskTitle = MS(taskTitle);
-	li.sComment = MS(comment);
-	li.sPerson = MS(person);
-	li.sPath = MS(path);
-	li.sType = MS(type);
+	li.dwTaskID = logEntry->TaskId;
+	li.dtFrom.m_dt = logEntry->From.ToOADate();
+	li.dtTo.m_dt = logEntry->To.ToOADate();
+	li.dHours = logEntry->TimeInHours;
+	li.sTaskTitle = MS(logEntry->TaskTitle);
+	li.sComment = MS(logEntry->Comment);
+	li.sPerson = MS(logEntry->Person);
+	li.sPath = MS(logEntry->TaskPath);
+	li.sType = MS(logEntry->Type);
 
-	if (li.crAltColor == CLR_NONE)
-		altColor = Drawing::Color::Empty;
+	if (logEntry->AltColor == Drawing::Color::Empty)
+		li.crAltColor = CLR_NONE;
 	else
-		altColor = Drawing::Color::FromArgb(li.crAltColor);
+		li.crAltColor = logEntry->AltColor.ToArgb();
 
 	return true;
 }

@@ -41,10 +41,30 @@ namespace LoggedTimeUIExtension
 			return (GetEntry(entryId) != null);
 		}
 
-		public bool AddEntry(uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		public bool AddEntry(uint taskId,
+							string taskTitle,
+							DateTime from,
+							DateTime to,
+							double timeSpentInHrs,
+							string comment,
+							string path,
+							string type,
+							Color altColor)
 		{
-			// TODO
-			return false;
+			m_Entries.Add(new LogEntry(m_NextEntryId++,
+										taskId,
+										taskTitle,
+										from,
+										to,
+										timeSpentInHrs,
+										comment,
+										Environment.UserName,
+										path,
+										type,
+										altColor));
+
+			m_Modified = true;
+			return true;
 		}
 
 		public bool ModifyEntry(uint entryId, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
@@ -83,20 +103,17 @@ namespace LoggedTimeUIExtension
 				using (var reader = new TaskTimeLogReader(filePath))
 				{
 					int numEntries = reader.EntryCount;
-					LogEntry le = null;
+					m_NextEntryId = 1;
 
 					for (int entry = 0; entry < numEntries; entry++)
 					{
-						if (LogEntry.TryReadEntry(reader, entry, out le))
-							m_Entries.Add(le);
+						m_Entries.Add(new LogEntry(m_NextEntryId++, reader.GetEntry(entry)));
 					}
-
-					m_NextEntryId = (m_Entries.LastOrDefault().Id + 1);
 				}
 
 				return true;
 			}
-			catch (Exception )
+			catch (Exception)
 			{
 			}
 
@@ -121,33 +138,45 @@ namespace LoggedTimeUIExtension
 
 		public bool SaveLogFile(string filePath)
 		{
-			using (var writer = new TaskTimeLogWriter(m_Entries.Count))
+			if (m_Modified && !string.IsNullOrEmpty(filePath))
 			{
-				for (int entry = 0; entry < m_Entries.Count; entry++)
+				try
 				{
-					writer.SetEntry(entry,
-										m_Entries[entry].TaskId,
-										m_Entries[entry].StartDate,
-										m_Entries[entry].EndDate,
-										m_Entries[entry].TimeSpentInHrs,
-										m_Entries[entry].Title,
-										m_Entries[entry].Comment,
-										m_Entries[entry].UserId,
-										m_Entries[entry].Path,
-										m_Entries[entry].Type,
-										m_Entries[entry].FillColor);
-				}
+					using (var writer = new TaskTimeLogWriter(m_Entries.Count))
+					{
+						for (int entry = 0; entry < m_Entries.Count; entry++)
+						{
+							var logEntry = new TaskTimeLogEntry()
+							{
+								TaskId = m_Entries[entry].TaskId,
+								From = m_Entries[entry].StartDate,
+								To = m_Entries[entry].EndDate,
+								TimeInHours = m_Entries[entry].TimeSpentInHrs,
+								TaskTitle = m_Entries[entry].Title,
+								Comment = m_Entries[entry].Comment,
+								Person = m_Entries[entry].Person,
+								TaskPath = m_Entries[entry].TaskPath,
+								Type = m_Entries[entry].Type,
+								AltColor = m_Entries[entry].FillColor
+							};
 
-				if (writer.Save(filePath))
+							writer.SetEntry(entry, logEntry);
+						}
+
+						if (writer.Save(filePath))
+						{
+							m_Modified = false;
+							return true;
+						}
+					}
+				}
+				catch (Exception)
 				{
-					m_Modified = false;
-					return true;
 				}
 			}
 
 			return false;
 		}
-
 	}
 
 	// ---------------------------------------------------------------
@@ -177,78 +206,71 @@ namespace LoggedTimeUIExtension
 			base.Id = entryId;
 		}
 
-		public static bool TryReadEntry(TaskTimeLogReader logReader, int entry, out LogEntry le)
+		public LogEntry(uint entryId, TaskTimeLogEntry logEntry)
+			:
+			this(entryId,
+				logEntry.TaskId,
+				logEntry.TaskTitle,
+				logEntry.From,
+				logEntry.To,
+				logEntry.TimeInHours,
+				logEntry.Comment,
+				logEntry.Person,
+				logEntry.TaskPath,
+				logEntry.Type,
+				logEntry.AltColor)
 		{
-			le = null;
-
-			UInt32 taskID;
-			DateTime fromDate;
-			DateTime toDate;
-			double timeInHours;
-			String taskTitle;
-			String comment;
-			String person;
-			String path;
-			String type;
-			Color altColor;
-
-			if (!logReader.GetEntry(entry,
-									out taskID,
-									out fromDate,
-									out toDate,
-									out timeInHours,
-									out taskTitle,
-									out comment,
-									out person,
-									out path,
-									out type,
-									out altColor))
-			{
-				return false;
-			}
-
-			le = new LogEntry((uint)entry + 1)
-				{
-					TaskId = taskID,
-					StartDate = fromDate,
-					EndDate = toDate,
-					TimeSpentInHrs = timeInHours,
-					Title = taskTitle,
-					Comment = comment,
-					UserId = person,
-					Path = path,
-					Type = type,
-					FillColor = altColor
-				};
-
-			return true;
 		}
 
-		public LogEntry(uint entryId, uint taskId, string taskTitle, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		public LogEntry(uint entryId,
+						uint taskId,
+						string taskTitle,
+						DateTime from,
+						DateTime to,
+						double timeSpentInHrs,
+						string comment,
+						string person,
+						string path,
+						string type,
+						Color altColor)
 		{
-
+			Id = entryId;
+			TaskId = taskId;
+			StartDate = from;
+			EndDate = to;
+			TimeSpentInHrs = timeSpentInHrs;
+			Title = taskTitle;
+			Comment = comment;
+			Person = person;
+			TaskPath = path;
+			Type = type;
+			FillColor = altColor;
 		}
 
 		public uint TaskId { get; private set; }
 		public double TimeSpentInHrs { get; private set; }
-		public string UserId { get; private set; }
-		public string Path { get; private set; }
+		public string Person { get; private set; }
+		public string TaskPath { get; private set; }
 		public string Type { get; private set; }
 		public string Comment { get; private set; }
 
-		public bool Modify(DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		public bool Modify(DateTime from, DateTime to, string comment, double timeSpentInHrs, Color fillColor)
 		{
 			bool modified = false;
 
-			if (StartDate != start)
+			// To and from must point to the same day
+			if ((int)from.ToOADate() != (int)to.ToOADate())
+				return false;
+
+			if (StartDate != from)
 			{
-				StartDate = start;
+				StartDate = from;
 				modified = true;
 			}
 
-			if (EndDate != end)
+			if (EndDate != to)
 			{
-				EndDate = end;
+				EndDate = to;
 				modified = true;
 			}
 

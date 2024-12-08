@@ -18,6 +18,23 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
+			public ref class TaskTimeLogEntry
+			{
+			public:
+				UInt32 TaskId;
+				DateTime From;
+				DateTime To;
+				double TimeInHours;
+				String^ TaskTitle;
+				String^ Comment;
+				String^ Person;
+				String^ TaskPath;
+				String^ Type;
+				Drawing::Color AltColor;
+			};
+
+			// -------------------------------------------------------
+
 			public ref class TaskTimeLogReader
 			{
 			public:
@@ -26,18 +43,8 @@ namespace Abstractspoon
 				~TaskTimeLogReader();
 
 				property int EntryCount { int get(); }
+				TaskTimeLogEntry^ GetEntry(int entry);
 
-				bool GetEntry(int entry,
-							  [Out] UInt32% taskID,
-							  [Out] DateTime% fromDate,
-							  [Out] DateTime% toDate,
-							  [Out] double% timeInHours,
-							  [Out] String^% taskTitle,
-							  [Out] String^% comment,
-							  [Out] String^% person,
-							  [Out] String^% path,
-							  [Out] String^% type,
-							  [Out] Drawing::Color% altColor);
 			private:
 				CTaskTimeLogItemArray* m_pItems;
 			};
@@ -51,18 +58,7 @@ namespace Abstractspoon
 				!TaskTimeLogWriter();
 				~TaskTimeLogWriter();
 
-				bool SetEntry(int entry,
-								 UInt32 taskID,
-								 DateTime^ fromDate,
-								 DateTime^ toDate,
-								 double timeInHours,
-								 String^ taskTitle,
-								 String^ comment,
-								 String^ person,
-								 String^ path,
-								 String^ type,
-								 Drawing::Color altColor);
-
+				bool SetEntry(int entry, TaskTimeLogEntry^ logEntry);
 				bool Save(String^ logFilePath);
 
 			private:
