@@ -11,18 +11,18 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
 {
-	public partial class LoggedTimeCreateEntryDlg : Form
+	public partial class CreateLoggedEntryDlg : Form
 	{
 		LogEntry m_DefaultAttrib;
 
 		// ---------------------------------------
 
-		public LoggedTimeCreateEntryDlg()
+		public CreateLoggedEntryDlg()
 		{
 			InitializeComponent();
 		}
 
-		public LoggedTimeCreateEntryDlg(IEnumerable<TaskItem> taskItems, 
+		public CreateLoggedEntryDlg(IEnumerable<TaskItem> taskItems, 
 										 UIExtension.TaskIcon taskIcons, 
 										 WorkingWeek workWeek,
 										 LogEntry attrib,

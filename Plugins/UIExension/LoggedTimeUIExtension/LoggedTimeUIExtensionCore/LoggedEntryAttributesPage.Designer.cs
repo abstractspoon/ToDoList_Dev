@@ -1,6 +1,6 @@
 ﻿namespace LoggedTimeUIExtension
 {
-	partial class LoggedTimeEntryAttributesPage
+	partial class LoggedEntryAttributesPage
 	{
 		/// <summary> 
 		/// Required designer variable.

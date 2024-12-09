@@ -673,7 +673,7 @@ namespace LoggedTimeUIExtension
 			var entry = m_TimeLog.SelectedLogEntry;
 			var taskItem = m_TimeLog.SelectedTaskItem;
 
-			var dlg = new LoggedTimeEditEntryDlg(entry, m_WorkWeek, (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked));
+			var dlg = new EditLoggedEntryDlg(entry, m_WorkWeek, (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked));
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 			m_Trans.Translate(dlg);

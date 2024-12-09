@@ -56,25 +56,25 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="TaskItem.cs" />
-    <Compile Include="LoggedTimeCreateEntryDlg.cs">
+    <Compile Include="CreateLoggedEntryDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LoggedTimeCreateEntryDlg.Designer.cs">
-      <DependentUpon>LoggedTimeCreateEntryDlg.cs</DependentUpon>
+    <Compile Include="CreateLoggedEntryDlg.Designer.cs">
+      <DependentUpon>CreateLoggedEntryDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="LoggedTimeEditEntryDlg.cs">
+    <Compile Include="EditLoggedEntryDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LoggedTimeEditEntryDlg.Designer.cs">
-      <DependentUpon>LoggedTimeEditEntryDlg.cs</DependentUpon>
+    <Compile Include="EditLoggedEntryDlg.Designer.cs">
+      <DependentUpon>EditLoggedEntryDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="LogEntry.cs" />
     <Compile Include="LoggedTimeRenderer.cs" />
-    <Compile Include="LoggedTimeEntryAttributesPage.cs">
+    <Compile Include="LoggedEntryAttributesPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="LoggedTimeEntryAttributesPage.Designer.cs">
-      <DependentUpon>LoggedTimeEntryAttributesPage.cs</DependentUpon>
+    <Compile Include="LoggedEntryAttributesPage.Designer.cs">
+      <DependentUpon>LoggedEntryAttributesPage.cs</DependentUpon>
     </Compile>
     <Compile Include="LoggedTimeView.cs" />
     <Compile Include="LoggedTimePreferencesDlg.cs">
@@ -87,18 +87,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="LoggedTimeCreateEntryDlg.resx">
-      <DependentUpon>LoggedTimeCreateEntryDlg.cs</DependentUpon>
+    <EmbeddedResource Include="CreateLoggedEntryDlg.resx">
+      <DependentUpon>CreateLoggedEntryDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="LoggedTimeEditEntryDlg.resx">
-      <DependentUpon>LoggedTimeEditEntryDlg.cs</DependentUpon>
+    <EmbeddedResource Include="EditLoggedEntryDlg.resx">
+      <DependentUpon>EditLoggedEntryDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LoggedTimePreferencesDlg.resx">
       <DependentUpon>LoggedTimePreferencesDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LoggedTimeEntryAttributesPage.resx">
-      <DependentUpon>LoggedTimeEntryAttributesPage.cs</DependentUpon>
+    <EmbeddedResource Include="LoggedEntryAttributesPage.resx">
+      <DependentUpon>LoggedEntryAttributesPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

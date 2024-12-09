@@ -101,7 +101,7 @@
 			// m_ShowWorkingHoursOnly
 			// 
 			this.m_ShowWorkingHoursOnly.AutoSize = true;
-			this.m_ShowWorkingHoursOnly.Location = new System.Drawing.Point(13, 109);
+			this.m_ShowWorkingHoursOnly.Location = new System.Drawing.Point(13, 66);
 			this.m_ShowWorkingHoursOnly.Name = "m_ShowWorkingHoursOnly";
 			this.m_ShowWorkingHoursOnly.Size = new System.Drawing.Size(138, 17);
 			this.m_ShowWorkingHoursOnly.TabIndex = 7;
@@ -131,7 +131,7 @@
 			this.BtnOK.Text = "OK";
 			this.BtnOK.UseVisualStyleBackColor = true;
 			// 
-			// TimeLogPreferencesDlg
+			// LoggedTimePreferencesDlg
 			// 
 			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -141,10 +141,10 @@
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = Properties.Resources.LoggedTime;
+			this.Icon = global::LoggedTimeUIExtension.Properties.Resources.LoggedTime;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "TimeLogPreferencesDlg";
+			this.Name = "LoggedTimePreferencesDlg";
 			this.Padding = new System.Windows.Forms.Padding(10);
 			this.ShowInTaskbar = false;
 			this.Text = "Time Log Preferences";

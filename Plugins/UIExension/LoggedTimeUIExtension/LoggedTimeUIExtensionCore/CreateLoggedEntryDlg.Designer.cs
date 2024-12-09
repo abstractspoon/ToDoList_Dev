@@ -1,6 +1,6 @@
 ﻿namespace LoggedTimeUIExtension
 {
-	partial class LoggedTimeCreateEntryDlg
+	partial class CreateLoggedEntryDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -35,7 +35,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_TaskIdLabel = new System.Windows.Forms.Label();
 			this.m_TaskCombo = new Abstractspoon.Tdl.PluginHelpers.TaskComboBox();
-			this.m_Attributes = new LoggedTimeUIExtension.LoggedTimeEntryAttributesPage();
+			this.m_Attributes = new LoggedTimeUIExtension.LoggedEntryAttributesPage();
 			this.SuspendLayout();
 			// 
 			// m_TaskLabel
@@ -152,7 +152,7 @@
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Label label5;
 		private Abstractspoon.Tdl.PluginHelpers.TaskComboBox m_TaskCombo;
-		private LoggedTimeEntryAttributesPage m_Attributes;
+		private LoggedEntryAttributesPage m_Attributes;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label m_TaskIdLabel;
 	}

@@ -11,18 +11,18 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
 {
-	public partial class LoggedTimeEditEntryDlg : Form
+	public partial class EditLoggedEntryDlg : Form
 	{
 		LogEntry m_Entry;
 
 		// ---------------------------------------
 
-		public LoggedTimeEditEntryDlg()
+		public EditLoggedEntryDlg()
 		{
 			InitializeComponent();
 		}
 
-		public LoggedTimeEditEntryDlg(LogEntry entry, WorkingWeek workWeek, bool readonlyTask)
+		public EditLoggedEntryDlg(LogEntry entry, WorkingWeek workWeek, bool readonlyTask)
 			:
 			this()
 		{

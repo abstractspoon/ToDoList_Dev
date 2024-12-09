@@ -1,6 +1,6 @@
 ﻿namespace LoggedTimeUIExtension
 {
-	partial class LoggedTimeEditEntryDlg
+	partial class EditLoggedEntryDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -32,7 +32,7 @@
 			this.Cancel = new System.Windows.Forms.Button();
 			this.OK = new System.Windows.Forms.Button();
 			this.label = new System.Windows.Forms.Label();
-			this.m_Attributes = new LoggedTimeUIExtension.LoggedTimeEntryAttributesPage();
+			this.m_Attributes = new LoggedTimeUIExtension.LoggedEntryAttributesPage();
 			this.m_TaskTitleLabel = new System.Windows.Forms.Label();
 			this.m_TaskIdLabel = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
@@ -147,7 +147,7 @@
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Label label;
-		private LoggedTimeEntryAttributesPage m_Attributes;
+		private LoggedEntryAttributesPage m_Attributes;
 		private System.Windows.Forms.Label m_TaskTitleLabel;
 		private System.Windows.Forms.Label m_TaskIdLabel;
 		private System.Windows.Forms.Label label3;

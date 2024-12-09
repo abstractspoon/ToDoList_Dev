@@ -11,11 +11,11 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
 {
-	public partial class LoggedTimeEntryAttributesPage : UserControl
+	public partial class LoggedEntryAttributesPage : UserControl
 	{
 		private double m_OrgTimeSpent = 0.0;
 
-		public LoggedTimeEntryAttributesPage()
+		public LoggedEntryAttributesPage()
 		{
 			InitializeComponent();
 		}
