@@ -29,7 +29,10 @@ namespace LoggedTimeUIExtension
 
 		private TaskItems m_TaskItems;
 		private LogEntries m_LogEntries;
-		private string m_LogFilePath;
+
+		private string m_LogFilePath = @"\."; // something valid
+		private FileSystemWatcher m_LogFileWatcher;
+
 //		private DateSortedTasks m_DateSortedTasks;
 
 		//private TDLRenderer m_Renderer;
@@ -224,13 +227,6 @@ namespace LoggedTimeUIExtension
 				}
 			}
 */
-		}
-
-		public bool DoIdleProcessing()
-		{
-			m_LogEntries.SaveLogFile(m_LogFilePath);
-
-			return false; // Always
 		}
 
 		public uint IconHitTest(Point ptScreen)
@@ -794,8 +790,86 @@ namespace LoggedTimeUIExtension
 		{
 		}
 
+		///////////////////////////////////////////////////////////
+		// Idle processing
+
+		bool m_WantIdleReload = false;
+
+		public bool DoIdleProcessing()
+		{
+			Debug.Assert(!(m_LogEntries.IsModified && m_WantIdleReload));
+
+			if (m_LogEntries.IsModified)
+			{
+				// Temporarily disable file watcher
+				m_LogFileWatcher.EnableRaisingEvents = false;
+
+				if (!m_LogEntries.SaveLogFile(m_LogFilePath))
+					return true; // try again
+
+				m_LogFileWatcher.EnableRaisingEvents = true;
+			}
+			else if (m_WantIdleReload)
+			{
+				m_WantIdleReload = false;
+
+				ReloadLogFile();
+			}
+
+			return false; // No more tasks
+		}
+
+		private static bool IsSamePath(string path1, string path2)
+		{
+			return (string.Compare(Path.GetFullPath(path1), Path.GetFullPath(path2), StringComparison.InvariantCultureIgnoreCase) == 0);
+		}
+
+		private void OnLogFileModified(object sender, FileSystemEventArgs e)
+		{
+			if (IsSamePath(m_LogFilePath, e.FullPath))
+				m_WantIdleReload = true;
+		}
+
+		private string GetLogFilePath(string tasklistPath)
+		{
+			if (string.IsNullOrWhiteSpace(tasklistPath))
+				return string.Empty;
+
+			var logPath = (Path.GetFileNameWithoutExtension(tasklistPath) + "_Log.csv");
+			
+			return Path.Combine(Path.GetDirectoryName(tasklistPath), logPath);
+		}
+
+		private void ReloadLogFile()
+		{
+			if (m_LogEntries.Load(m_LogFilePath))
+			{
+				if (m_LogFileWatcher == null)
+				{
+					m_LogFileWatcher = new FileSystemWatcher();
+
+					m_LogFileWatcher.Filter = "*.csv";
+					m_LogFileWatcher.NotifyFilter = NotifyFilters.LastWrite;
+					m_LogFileWatcher.Changed += new FileSystemEventHandler(OnLogFileModified);
+				}
+
+				m_LogFileWatcher.Path = Path.GetDirectoryName(m_LogFilePath);
+				m_LogFileWatcher.EnableRaisingEvents = true;
+			}
+		}
+
+		///////////////////////////////////////////////////////////
+
 		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type, string metaDataKey)
 		{
+			string logPath = GetLogFilePath(tasks.GetFilePath());
+
+			if (!IsSamePath(logPath, m_LogFilePath))
+			{
+				m_LogFilePath = logPath;
+				m_WantIdleReload = true;
+			}
+
 			// Make sure the selected task remains visible
 			// after any changes if it was visible to start with
 			var selItem = (SelectedAppointment as LogEntry);
@@ -805,13 +879,6 @@ namespace LoggedTimeUIExtension
 									 IsItemWithinRange(selItem, StartDate, EndDate);
 
 			bool tasksWasEmpty = m_LogEntries.IsEmpty;
-
-			string filePath = tasks.GetFilePath();
-
-			m_LogFilePath = Path.GetFileNameWithoutExtension(filePath) + "_Log.csv";
-			m_LogFilePath = Path.Combine(Path.GetDirectoryName(filePath), m_LogFilePath);
-
-			m_LogEntries.Load(m_LogFilePath);
 
 			switch (type)
 			{

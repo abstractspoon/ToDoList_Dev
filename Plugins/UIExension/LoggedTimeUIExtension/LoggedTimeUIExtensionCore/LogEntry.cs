@@ -18,7 +18,6 @@ namespace LoggedTimeUIExtension
 	{
 		private List<LogEntry> m_Entries;
 		private uint m_NextEntryId;
-		private bool m_Modified;
 
 		const string VersionPrefix = "TODOTIMELOG VERSION";
 
@@ -28,11 +27,11 @@ namespace LoggedTimeUIExtension
 		}
 
 		public bool IsEmpty { get { return (m_Entries?.Count == 0); } }
+		public bool IsModified { get; private set; }
 
 		private void Reset()
 		{
 			m_Entries.Clear();
-			m_Modified = false;
 			m_NextEntryId = 1;
 		}
 
@@ -63,7 +62,7 @@ namespace LoggedTimeUIExtension
 										type,
 										altColor));
 
-			m_Modified = true;
+			IsModified = true;
 			return true;
 		}
 
@@ -77,7 +76,7 @@ namespace LoggedTimeUIExtension
 			if (!entry.Modify(start, end, comment, timeSpentInHrs, fillColor))
 				return false;
 
-			m_Modified = true;
+			IsModified = true;
 			return true;
 		}
 
@@ -89,7 +88,7 @@ namespace LoggedTimeUIExtension
 				return false;
 
 			m_Entries.RemoveAt(iEntry);
-			m_Modified = true;
+			IsModified = true;
 
 			return true;
 		}
@@ -130,12 +129,14 @@ namespace LoggedTimeUIExtension
 
 		public List<LogEntry> GetEntries(DateTime from, DateTime to)
 		{
-			return m_Entries.Where(x => (x.StartDate >= from) && (x.EndDate <= to)).ToList();
+			return m_Entries.Where(x => (x.StartDate < x.EndDate) &&
+										(x.StartDate >= from) &&
+										(x.EndDate <= to)).ToList();
 		}
 
 		public bool SaveLogFile(string filePath)
 		{
-			if (m_Modified && !string.IsNullOrEmpty(filePath))
+			if (IsModified && !string.IsNullOrEmpty(filePath))
 			{
 				var logEntries = new List<TaskTimeLogEntry>();
 
@@ -160,7 +161,7 @@ namespace LoggedTimeUIExtension
 				{
 					if (TaskTimeLog.Save(filePath, logEntries))
 					{
-						m_Modified = false;
+						IsModified = false;
 						return true;
 					}
 				}
