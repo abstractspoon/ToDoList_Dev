@@ -249,6 +249,11 @@ namespace LoggedTimeUIExtension
 		public string Type { get; private set; }
 		public string Comment { get; private set; }
 
+		public Color TrueFillColor
+		{
+			get	{ return ((FillColor == SystemColors.Window) ? Color.Empty : FillColor); }
+		}
+
 		public bool Modify(DateTime from, DateTime to, string comment, double timeSpentInHrs, Color fillColor)
 		{
 			bool modified = false;
@@ -323,8 +328,6 @@ namespace LoggedTimeUIExtension
 		{
 			return ((StartDate - m_OrgDates.Start).TotalSeconds != 0.0);
 		}
-
-		public Color Color { get; private set; }
 
         public TimeSpan OriginalLength
         {

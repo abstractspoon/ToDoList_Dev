@@ -39,6 +39,8 @@
 			this.m_TimeSpentEdit = new System.Windows.Forms.TextBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.m_AddToTimeSpentCheckBox = new System.Windows.Forms.CheckBox();
+			this.m_FillColorCheckBox = new System.Windows.Forms.CheckBox();
+			this.m_FillColorButton = new UIComponents.ColorButton();
 			this.SuspendLayout();
 			// 
 			// m_FromDateCtrl
@@ -148,10 +150,34 @@
 			this.m_AddToTimeSpentCheckBox.Text = "Also add time to task\'s time spent";
 			this.m_AddToTimeSpentCheckBox.UseVisualStyleBackColor = true;
 			// 
-			// LoggedTimeEntryAttributesPage
+			// m_FillColorCheckBox
+			// 
+			this.m_FillColorCheckBox.AutoSize = true;
+			this.m_FillColorCheckBox.Location = new System.Drawing.Point(0, 201);
+			this.m_FillColorCheckBox.Name = "m_FillColorCheckBox";
+			this.m_FillColorCheckBox.Size = new System.Drawing.Size(71, 17);
+			this.m_FillColorCheckBox.TabIndex = 42;
+			this.m_FillColorCheckBox.Text = "Fill Colour";
+			this.m_FillColorCheckBox.UseVisualStyleBackColor = true;
+			// 
+			// m_FillColorButton
+			// 
+			this.m_FillColorButton.Color = System.Drawing.Color.Empty;
+			this.m_FillColorButton.ForeColor = System.Drawing.SystemColors.ControlText;
+			this.m_FillColorButton.Location = new System.Drawing.Point(102, 197);
+			this.m_FillColorButton.Name = "m_FillColorButton";
+			this.m_FillColorButton.Size = new System.Drawing.Size(75, 23);
+			this.m_FillColorButton.TabIndex = 43;
+			this.m_FillColorButton.Text = "Set...";
+			this.m_FillColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_FillColorButton.UseVisualStyleBackColor = true;
+			// 
+			// LoggedEntryAttributesPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.m_FillColorButton);
+			this.Controls.Add(this.m_FillColorCheckBox);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.m_TimeSpentEdit);
 			this.Controls.Add(this.label6);
@@ -163,8 +189,8 @@
 			this.Controls.Add(this.m_ToTimeCombo);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.m_CommentEdit);
-			this.Name = "LoggedTimeEntryAttributesPage";
-			this.Size = new System.Drawing.Size(349, 201);
+			this.Name = "LoggedEntryAttributesPage";
+			this.Size = new System.Drawing.Size(349, 221);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -182,5 +208,7 @@
 		private System.Windows.Forms.TextBox m_TimeSpentEdit;
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.CheckBox m_AddToTimeSpentCheckBox;
+		private System.Windows.Forms.CheckBox m_FillColorCheckBox;
+		private UIComponents.ColorButton m_FillColorButton;
 	}
 }

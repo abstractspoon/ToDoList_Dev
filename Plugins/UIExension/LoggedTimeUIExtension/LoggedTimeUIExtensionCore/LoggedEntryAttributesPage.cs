@@ -29,8 +29,13 @@ namespace LoggedTimeUIExtension
 			m_OrgTimeSpent = entry.TimeSpentInHrs;
 			m_TimeSpentEdit.Text = entry.TimeSpentInHrs.ToString();
 			m_CommentEdit.Text = entry.Comment;
+			m_FillColorButton.Color = entry.TrueFillColor;
 
+			m_FillColorCheckBox.Checked = (entry.TrueFillColor != Color.Empty);
+			m_FillColorButton.Enabled = m_FillColorCheckBox.Checked;
 			m_AddToTimeSpentCheckBox.Enabled = !readonlyTask;
+
+			m_FillColorCheckBox.CheckedChanged += (s, e) => { m_FillColorButton.Enabled = m_FillColorCheckBox.Checked; };
 		}
 
 		public DateTime From
@@ -46,6 +51,18 @@ namespace LoggedTimeUIExtension
 		public string Comment
 		{
 			get	{ return m_CommentEdit.Text; }
+		}
+
+		public Color FillColor
+		{
+			get
+			{
+				if (m_FillColorCheckBox.Checked)
+					return m_FillColorButton.Color;
+
+				// else
+				return Color.Empty;
+			}
 		}
 
 		public double TimeSpent

@@ -53,7 +53,7 @@
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
 			this.OK.Enabled = false;
-			this.OK.Location = new System.Drawing.Point(193, 272);
+			this.OK.Location = new System.Drawing.Point(193, 297);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 9;
@@ -64,7 +64,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(274, 272);
+			this.Cancel.Location = new System.Drawing.Point(274, 297);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 10;
@@ -76,7 +76,7 @@
 			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label5.Location = new System.Drawing.Point(-2, 262);
+			this.label5.Location = new System.Drawing.Point(-2, 287);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(366, 2);
 			this.label5.TabIndex = 11;
@@ -116,15 +116,15 @@
 			this.m_Attributes.Location = new System.Drawing.Point(8, 60);
 			this.m_Attributes.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.m_Attributes.Name = "m_Attributes";
-			this.m_Attributes.Size = new System.Drawing.Size(351, 198);
+			this.m_Attributes.Size = new System.Drawing.Size(351, 222);
 			this.m_Attributes.TabIndex = 12;
 			// 
-			// LoggedTimeCreateEntryDlg
+			// CreateLoggedEntryDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
-			this.ClientSize = new System.Drawing.Size(357, 304);
+			this.ClientSize = new System.Drawing.Size(357, 329);
 			this.Controls.Add(this.m_TaskIdLabel);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.label5);
@@ -135,7 +135,7 @@
 			this.Controls.Add(this.m_TaskLabel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = global::LoggedTimeUIExtension.Properties.Resources.LoggedTime;
-			this.Name = "LoggedTimeCreateEntryDlg";
+			this.Name = "CreateLoggedEntryDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

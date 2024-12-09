@@ -42,7 +42,7 @@
 			// 
 			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label5.Location = new System.Drawing.Point(-24, 272);
+			this.label5.Location = new System.Drawing.Point(-24, 299);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(390, 2);
 			this.label5.TabIndex = 16;
@@ -51,7 +51,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(274, 282);
+			this.Cancel.Location = new System.Drawing.Point(274, 309);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 15;
@@ -62,7 +62,7 @@
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(193, 282);
+			this.OK.Location = new System.Drawing.Point(193, 309);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 14;
@@ -85,7 +85,7 @@
 			this.m_Attributes.Location = new System.Drawing.Point(7, 71);
 			this.m_Attributes.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.m_Attributes.Name = "m_Attributes";
-			this.m_Attributes.Size = new System.Drawing.Size(350, 191);
+			this.m_Attributes.Size = new System.Drawing.Size(350, 223);
 			this.m_Attributes.TabIndex = 18;
 			// 
 			// m_TaskTitleLabel
@@ -116,11 +116,11 @@
 			this.label3.TabIndex = 20;
 			this.label3.Text = "Task ID";
 			// 
-			// LoggedTimeEditEntryDlg
+			// EditLoggedEntryDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(359, 314);
+			this.ClientSize = new System.Drawing.Size(359, 341);
 			this.Controls.Add(this.m_TaskIdLabel);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.m_TaskTitleLabel);
@@ -131,7 +131,7 @@
 			this.Controls.Add(this.label);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = global::LoggedTimeUIExtension.Properties.Resources.LoggedTime;
-			this.Name = "LoggedTimeEditEntryDlg";
+			this.Name = "EditLoggedEntryDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

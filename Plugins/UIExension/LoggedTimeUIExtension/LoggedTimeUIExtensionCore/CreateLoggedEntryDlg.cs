@@ -66,7 +66,7 @@ namespace LoggedTimeUIExtension
 
 		public Color FillColor
 		{
-			get { return Color.Empty;/*m_Attributes.FillColor*/; }
+			get { return m_Attributes.FillColor; }
 		}
 
 		public bool WantAddToTimeSpent

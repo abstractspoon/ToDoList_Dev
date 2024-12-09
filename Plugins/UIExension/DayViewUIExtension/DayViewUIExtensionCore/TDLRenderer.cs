@@ -577,7 +577,6 @@ namespace DayViewUIExtension
 			if (rect.Width <= 0)
 				return;
 
-
 			if (selState != UIExtension.SelectionRect.Style.None)
 			{
 				UIExtension.SelectionRect.Draw(handle,
@@ -593,11 +592,7 @@ namespace DayViewUIExtension
 			{
 				using (SolidBrush brush = new SolidBrush(fillColor))
 				{
-					var fillRect = rect;
-					fillRect.Width++;
-					fillRect.Height++;
-
-					g.FillRectangle(brush, fillRect);
+					g.FillRectangle(brush, rect);
 				}
 
 				if (borderColor != Color.Empty)
@@ -606,7 +601,9 @@ namespace DayViewUIExtension
 					rect.Width--;
 
 					using (Pen pen = new Pen(borderColor, 1))
+					{
 						g.DrawRectangle(pen, rect);
+					}
 				}
 			}
 		}
@@ -1100,11 +1097,7 @@ namespace DayViewUIExtension
 
 				using (SolidBrush brush = new SolidBrush(fillColor))
 				{
-					var fillRect = rect;
-					fillRect.Width++;
-					fillRect.Height++;
-
-					g.FillRectangle(brush, fillRect);
+					g.FillRectangle(brush, rect);
 				}
 
 				if (borderColor != Color.Empty)

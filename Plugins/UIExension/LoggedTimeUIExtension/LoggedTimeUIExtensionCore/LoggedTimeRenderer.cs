@@ -209,56 +209,63 @@ namespace LoggedTimeUIExtension
 
 		void GetTaskColors(Calendar.AppointmentView apptView, bool isSelected, out Color textColor, out Color fillColor, out Color borderColor, out Color barColor)
 		{
-			var taskItem = GetTaskItem(apptView.Appointment);
+			var logEntry = GetLogEntry(apptView.Appointment);
+			var taskItem = m_TaskItems.GetItem(logEntry.TaskId);
+
 			bool isLong = apptView.IsLong;
 
 			textColor = borderColor = fillColor = barColor = Color.Empty;
 
-			if (SystemInformation.HighContrast)
+			if (isSelected)
 			{
-				if (isSelected)
+				if (SystemInformation.HighContrast)
 				{
 					textColor = borderColor = SystemColors.HighlightText;
 					fillColor = SystemColors.Highlight;
 				}
-// 				else if (taskItem.HasTaskTextColor)
-// 				{
-// 					textColor = borderColor = taskItem.TaskTextColor;
-// 					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
-// 				}
+				else if (logEntry.TrueFillColor != Color.Empty)
+				{
+					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, logEntry.TrueFillColor);
+					barColor = logEntry.TrueFillColor;
+				}
+				else if ((taskItem != null) && taskItem.HasTaskTextColor)
+				{
+					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, taskItem.TaskTextColor);
+					barColor = taskItem.TaskTextColor;
+				}
 				else
 				{
-					textColor = borderColor = SystemColors.WindowText;
-					fillColor = (isLong ? SystemColors.Control : SystemColors.Window);
+					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, Color.Black);
+					barColor = textColor;
 				}
 			}
-			else // NOT high contrast
+			else if (logEntry.TrueFillColor != Color.Empty)
 			{
-				if (isSelected)
+				fillColor = logEntry.TrueFillColor;
+				textColor = DrawingColor.GetBestTextColor(fillColor, true);
+
+				borderColor = DrawingColor.AdjustLighting(fillColor, -0.5f, true);
+				barColor = fillColor;
+			}
+			else if ((taskItem != null) && taskItem.HasTaskTextColor)
+			{
+				textColor = borderColor = taskItem.TaskTextColor;
+				fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
+
+				if (TaskColorIsBackground)
 				{
-					textColor = UIExtension.SelectionRect.GetTextColor(UIExtension.SelectionRect.Style.Selected, Color.Black/*taskItem.TaskTextColor*/);
-					barColor = (/*taskItem.HasTaskTextColor ? taskItem.TaskTextColor :*/ textColor);
-				}
-// 				else if (taskItem.HasTaskTextColor)
-// 				{
-// 					textColor = borderColor = taskItem.TaskTextColor;
-// 					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
-// 				}
-				else
-				{
-					textColor = borderColor = SystemColors.WindowText;
-					fillColor = (isLong ? SystemColors.Control : SystemColors.Window);
+					barColor = textColor;
+					fillColor = textColor;
+
+					textColor = DrawingColor.GetBestTextColor(textColor, true);
+					borderColor = DrawingColor.AdjustLighting(textColor, -0.5f, true);
 				}
 			}
-
-// 			if (TaskColorIsBackground && taskItem.HasTaskTextColor)
-// 			{
-// 				barColor = textColor;
-// 				fillColor = textColor;
-// 
-// 				textColor = DrawingColor.GetBestTextColor(textColor, true);
-// 				borderColor = DrawingColor.AdjustLighting(textColor, -0.5f, true);
-// 			}
+			else
+			{
+				textColor = borderColor = SystemColors.WindowText;
+				fillColor = (isLong ? SystemColors.Control : SystemColors.Window);
+			}
 		}
 
 		void DrawTaskBackground(Graphics g, 

@@ -141,94 +141,23 @@ namespace LoggedTimeUIExtension
 			return false;
 		}
 
-		public static int CompareDates(TaskItem a, TaskItem b)
+		public bool HasTaskTextColor
 		{
-			int cmp = a.StartDate.CompareTo(b.StartDate);
-
-			if (cmp != 0)
-				return cmp;
-
-			cmp = a.EndDate.CompareTo(b.EndDate);
-
-			if (cmp != 0)
-				return cmp;
-
-			return a.Id.CompareTo(b.Id); // for stable sort
+			get { return !TaskTextColor.IsEmpty; }
 		}
 
 		public string Title { get; private set; }
 		public string Position { get; private set; }
 		public uint Id { get; private set; }
-		public DateTime StartDate { get; private set; }
-		public DateTime EndDate { get; private set; }
 		public bool Locked { get; private set; }
 		public bool IsParent { get; private set; }
 		public bool HasIcon { get; private set; }
         public bool IsDone { get; private set; }
         public bool IsGoodAsDone { get; private set; }
-		public double TimeSpent { get; private set; }
-        public Task.TimeUnits TimeSpentUnits { get; private set; }
 		public int Depth { get; private set; }
-		public Color TaskColor { get; private set; }
+		public Color TaskTextColor { get; private set; }
 
 		public bool IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
-
-// 		public override TimeSpan Length
-//         {
-//             get
-//             {
-//                 // Handle 'end of day'
-//                 if (IsEndOfDay(EndDate))
-//                     return (EndDate.Date.AddDays(1) - StartDate);
-// 
-//                 return base.Length;
-//             }
-//         }
-
-		public static bool IsEndOfDay(DateTime date)
-		{
-			return (date == EndOfDay(date));
-		}
-
-		public static bool IsStartOfDay(DateTime date)
-		{
-			return (date == date.Date);
-		}
-
-/*
-		public bool IsSingleDay
-		{
-			get { return !IsLongAppt(); }
-		}
-
-		public override bool IsLongAppt(DateTime start, DateTime end)
-		{
-			if (base.IsLongAppt(start, end))
-				return true;
-
-			// Also check for 'end of day' if the start time is midnight
-			if ((start.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(end))
-				return true;
-
-			return false;
-		}
-
-		public bool Intersects(Calendar.Appointment other, bool displayLongAppointmentsContinuous)
-		{
-			if (!base.Intersects(other))
-				return false;
-
-			if (IsLongAppt() && !displayLongAppointmentsContinuous)
-			{
-				return ((StartDate.Date == other.StartDate.Date) ||
-						(StartDate.Date == other.EndDate.Date) ||
-						(EndDate.Date == other.EndDate.Date) ||
-						(EndDate.Date == other.StartDate.Date));
-			}
-
-			return true;
-		}
-*/
 
 		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey, int depth)
 		{
@@ -238,7 +167,7 @@ namespace LoggedTimeUIExtension
 			UInt32 taskID = task.GetID();
 
 			// Always
-			TaskColor = task.GetTextDrawingColor();
+			TaskTextColor = task.GetTextDrawingColor();
 			Locked = task.IsLocked(true);
 			IsParent = task.IsParent();
 
@@ -248,64 +177,25 @@ namespace LoggedTimeUIExtension
 				HasIcon = task.HasIcon();
 				Id = taskID;
 				Depth = depth;
-
-				Task.TimeUnits units = Task.TimeUnits.Unknown;
-				TimeSpent = task.GetTimeEstimate(ref units, false);
-				TimeSpentUnits = units;
-
 				IsDone = task.IsDone();
                 IsGoodAsDone = task.IsGoodAsDone();
-
-				StartDate = task.GetStartDate(false);
-				EndDate = CheckGetEndOfDay((IsDone ? task.GetDoneDate() : task.GetDueDate(false)));
 			}
 			else
 			{
 				if (task.IsAttributeAvailable(Task.Attribute.Title))
 					Title = task.GetTitle();
 
-				if (task.IsAttributeAvailable(Task.Attribute.TimeSpent))
-				{
-					Task.TimeUnits units = Task.TimeUnits.Unknown;
-					TimeSpent = task.GetTimeSpent(ref units, false);
-					TimeSpentUnits = units;
-				}
-
 				if (task.IsAttributeAvailable(Task.Attribute.Icon))
 					HasIcon = task.HasIcon();
-
-                // Dates
-				if (task.IsAttributeAvailable(Task.Attribute.StartDate))
-					StartDate = task.GetStartDate(false);
-
-				if (task.IsAttributeAvailable(Task.Attribute.DueDate) && !task.IsDone())
-					EndDate = CheckGetEndOfDay(task.GetDueDate(false));
 
 				if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
 				{
 				    IsDone = task.IsDone();
                     IsGoodAsDone = task.IsGoodAsDone();
-
-					if (IsDone)
-						EndDate = CheckGetEndOfDay(task.GetDoneDate());
 				}
 			}
 
 			return true;
-		}
-
-		static public DateTime EndOfDay(DateTime date)
-		{
-			return date.Date.AddDays(1).AddSeconds(-1);
-		}
-
-		static public DateTime CheckGetEndOfDay(DateTime date)
-		{
-			if ((date != Calendar.Appointment.NullDate) && (date == date.Date))
-				return EndOfDay(date);
-
-			// else
-			return date;
 		}
 	}
 

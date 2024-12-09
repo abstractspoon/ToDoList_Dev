@@ -668,8 +668,6 @@ namespace LoggedTimeUIExtension
 
 		private void OnEditLogEntry(object sender, EventArgs e)
 		{
-			// Display a dialog to retrieve the task ID from a list
-			// to support tasks without dates
 			var entry = m_TimeLog.SelectedLogEntry;
 			var taskItem = m_TimeLog.SelectedTaskItem;
 
