@@ -674,7 +674,7 @@ BEGIN
                     WS_TABSTOP,7,130,366,10
     EDITTEXT        IDC_DATETIMETRAILTEXT,17,142,175,14,ES_AUTOHSCROLL
     LTEXT           "Task Completion",IDC_DONEGROUP,7,165,379,8
-    CONTROL         "Show a 'partially-complete' checkbox for incomplete parent tasks with completed subtasks ",
+    CONTROL         "Show a 'partially-complete' checkbox for incomplete parent tasks with completed subtasks",
                     IDC_SHOWMIXEDDONECHECKBOX,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,180,383,10
     CONTROL         "&Show checkbox beside task title when completion column is hidden",
