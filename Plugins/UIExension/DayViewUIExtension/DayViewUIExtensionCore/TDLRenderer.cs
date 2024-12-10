@@ -125,6 +125,11 @@ namespace DayViewUIExtension
 			m_BoldFont?.Dispose();
 		}
 
+		public int CalculateMinimumDayWidthForImage(Graphics g)
+		{
+			return (int)Math.Ceiling(g.MeasureString("31/12", BaseFont).Width);
+		}
+
 		private static string FormatHeaderText(DateTime date, DowNameStyle dowStyle, MonthNameStyle monthStyle, bool firstDay, bool iso)
 		{
 			// Day of week
@@ -174,11 +179,6 @@ namespace DayViewUIExtension
 			}
 
 			return date.ToString(format);
-		}
-
-		public int CalculateMinimumDayWidthForImage(Graphics g)
-		{
-			return (int)Math.Ceiling(g.MeasureString("31/12", BaseFont).Width);
 		}
 
 		public void UpdateHeaderStyles(Graphics g, int dayWidth)

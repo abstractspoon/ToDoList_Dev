@@ -62,36 +62,17 @@ namespace LoggedTimeUIExtension
 		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
-/*
-            if (m_TimeLog.SelectedTaskId == dwTaskID)
-                return true;
-
-			bool selected = m_TimeLog.SelectTask(dwTaskID);
-
-			m_SettingMonthYear = true;
-
-// 			m_WeekLabel.StartDate = m_TimeLog.StartDate;
-// 			m_MonthCombo.SelectedMonth = m_TimeLog.StartDate.Month;
-// 			m_YearCombo.SelectedYear = m_TimeLog.StartDate.Year;
-
-			m_SettingMonthYear = false;
-
-			UpdatedSelectedTaskDatesText();
-
-			return selected;
-*/
-			return false;
+			return false; // not supported
 		}
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
 		{
-            // not currently supported
-			return false;
+			return false; // not supported
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			m_TimeLog.UpdateTasks(tasks, type/*, m_TypeId*/);
+			m_TimeLog.UpdateTasks(tasks, type);
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -99,16 +80,8 @@ namespace LoggedTimeUIExtension
 			switch (attrib)
 			{
 			case Task.Attribute.Title:
-			case Task.Attribute.DoneDate:
-			case Task.Attribute.DueDate:
-			case Task.Attribute.StartDate:
 			case Task.Attribute.AllocatedTo:
 			case Task.Attribute.Icon:
-			case Task.Attribute.TimeEstimate:
-			case Task.Attribute.Dependency:
-			case Task.Attribute.Recurrence:
-			case Task.Attribute.Tags:
-			case Task.Attribute.CustomAttribute:
 			case Task.Attribute.Color:
 				return true;
 			}
@@ -119,13 +92,12 @@ namespace LoggedTimeUIExtension
 
 		public bool WantSortUpdate(Task.Attribute attrib)
 		{
-			return false;
+			return false; // not supported
 		}
 	   
 		public bool PrepareNewTask(ref Task task)
 		{
-			//return m_TimeLog.PrepareNewTask(ref task);
-			return false;
+			return false; // not supported
 		}
 
 		public bool DoIdleProcessing()
@@ -135,7 +107,6 @@ namespace LoggedTimeUIExtension
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
 		{
-/*
 			const int WM_KEYDOWN = 0x0100;
 
 			switch (message)
@@ -147,58 +118,31 @@ namespace LoggedTimeUIExtension
 					switch (keys)
 					{
 					case Keys.Escape:
-						return m_TimeLog.CancelAppointmentResizing();
-
-					case Keys.Delete:
-						{
-							if (m_TimeLog.DeleteSelectedCustomDate())
-								return true;
-
-							if (m_TimeLog.DeleteSelectedTimeBlock())
-							{
-								UpdateToolbarButtonStates();
-								return true;
-							}
-						}
-						break;
-
-					case (Keys.Control | Keys.F2):
-						return EditSelectedTimeBlockSeries();
-
-					case (Keys.Control | Keys.Delete):
-						if (m_TimeLog.DeleteSelectedTimeBlockSeries())
+						if (m_TimeLog.CancelAppointmentResizing())
 						{
 							UpdateToolbarButtonStates();
 							return true;
 						}
 						break;
+
+					case Keys.Delete:
+						OnDeleteLogEntry(this, null);
+						return true;
+
+					case (Keys.Control | Keys.F2):
+						OnEditLogEntry(this, null);
+						return true;
 					}
 				}
 				break;
 			}
-*/
 
 			return false;
 		}
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-//             Rectangle rect = new Rectangle();
-// 
-//             if (m_TimeLog.GetSelectedItemLabelRect(ref rect))
-//             {
-//                 rect = m_TimeLog.RectangleToScreen(rect);
-// 
-//                 left = rect.Left;
-//                 top = rect.Top;
-//                 right = rect.Right;
-// 				bottom = rect.Bottom;
-// 
-//                 return true;
-//             }
-
-            // else
-            return false;
+            return false; // not supported
 		}
 
 		public UIExtension.HitTestResult HitTest(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
@@ -208,7 +152,7 @@ namespace LoggedTimeUIExtension
 
 		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
-			return 0;//m_TimeLog.HitTestTask(xScreen, yScreen, reason);
+			return 0; // not supported
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -297,7 +241,7 @@ namespace LoggedTimeUIExtension
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
 		{
-            return false;//m_TimeLog.GetTask(getTask, ref taskID);
+            return false; // not supported
 		}
 
         public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
@@ -307,12 +251,12 @@ namespace LoggedTimeUIExtension
 		
 		public bool ScrollToSelectedTask()
 		{
-			return false;//m_TimeLog.EnsureSelectionVisible(false);
+			return false; // not supported
 		}
 
 		public bool CanScrollToSelectedTask()
 		{
-			return false;//(m_TimeLog.SelectedTaskId != 0);
+			return false; // not supported
 		}
 
 		public new Boolean Focus()
@@ -707,8 +651,6 @@ namespace LoggedTimeUIExtension
 					UpdateToolbarButtonStates();
 				}
 			}
-
-// 			if (CreateLogEntry())
 		}
 
 		private void OnEditLogEntry(object sender, EventArgs e)
@@ -740,71 +682,6 @@ namespace LoggedTimeUIExtension
 				}
 			}
 		}
-
-/*
-		private bool CreateLogEntry()
-		{
-			return false;
-			// Display a dialog to retrieve the task ID from a list
-			// to support tasks without dates
-			var attribs = new TimeBlockSeriesAttributes(m_DefaultNewLogEntryAttributes);
-
-			if (m_TimeLog.SelectionType == Calendar.SelectionType.DateRange)
-			{
-				var dates = m_TimeLog.SelectedDates;
-
-				attribs.FromDate = attribs.ToDate = dates.Start.Date;
-				attribs.FromTime = dates.Start.TimeOfDay;
-				attribs.ToTime = dates.End.TimeOfDay;
-				attribs.SyncToTaskDates = false;
-			}
-			else if (m_TimeLog.SelectedAppointment is TimeLogEntry)
-			{
-				var dates = m_TimeLog.SelectedAppointment.Dates;
-
-				attribs.FromDate = dates.Start.Date;
-				attribs.ToDate = dates.End.Date;
-
-				// Use default times
-			}
-			else if (m_TimeLog.SelectedAppointment is TaskTimeBlock)
-			{
-				// Use time from time block
-				var dates = m_TimeLog.SelectedAppointment.Dates;
-
-				attribs.FromTime = dates.Start.TimeOfDay;
-				attribs.ToTime = dates.End.TimeOfDay;
-
-				// Use dates from real task
-				dates = m_TimeLog.GetRealAppointment(m_TimeLog.SelectedAppointment).Dates;
-
-				attribs.FromDate = dates.Start.Date;
-				attribs.ToDate = dates.End.Date;
-			}
-
-			var dlg = new TimeLogCreateTimeBlockDlg(m_TimeLog.TaskItems, 
-													new UIExtension.TaskIcon(m_HwndParent),
-													m_WorkWeek,
-													m_TimeLog.SelectedTaskId,
-													attribs);
-
-			FormsUtil.SetFont(dlg, m_ControlsFont);
-			m_Trans.Translate(dlg);
-
-			m_TimeLog.ForceShowSelection = true;
-
-			var res = dlg.ShowDialog();
-
-			m_TimeLog.ForceShowSelection = false;
-			
-			if (res != DialogResult.OK)
-				return false;
-
-			m_DefaultNewLogEntryAttributes = dlg.Attributes;
-
-			return m_TimeLog.CreateNewTaskBlockSeries(dlg.SelectedTaskId, dlg.Attributes);
-		}
-*/
 
 		private void UpdateToolbarButtonStates()
 		{
@@ -959,26 +836,13 @@ namespace LoggedTimeUIExtension
 
 		private void OnTimeLogSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
-//             UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
-
-// 			switch (m_TimeLog.SelectionType)
-// 			{
-// 			case Calendar.SelectionType.Appointment:
-				UpdatedSelectedTaskDatesText();
-				UpdateToolbarButtonStates();
-// 				break;
-// 
-// 			case Calendar.SelectionType.DateRange:
-// 				UpdateToolbarButtonStates();
-// 				break;
-// 			}
-
-// 			notify.NotifySelChange(m_TimeLog.SelectedTaskId);
+			UpdatedSelectedTaskDatesText();
+			UpdateToolbarButtonStates();
 		}
 
 		private void UpdatedSelectedTaskDatesText()
 		{
-			DateTime from, to;
+// 			DateTime from, to;
 
 // 			if (m_TimeLog.GetSelectedTaskDates(out from, out to))
 // 			{
@@ -1029,133 +893,6 @@ namespace LoggedTimeUIExtension
 
 				m_SettingTimeLogStartDate = false;
 			}
-		}
-
-/*
-        private void OnTimeLogAppointmentChanged(object sender, TDLMoveAppointmentEventArgs args)
-		{
-			ProcessTaskAppointmentChange(args);
-		}
-
-		private void ProcessTaskAppointmentChange(TDLMoveAppointmentEventArgs args)
-		{
-            if (!args.Finished)
-            {
-                UpdatedSelectedTaskDatesText();
-                return;
-            }
-
-			var item = args.Appointment as TimeLogEntry;
-
-			if (item == null)
-				return;
-
-			var notify = new UIExtension.ParentNotify(m_HwndParent);
-
-			if (!string.IsNullOrEmpty(args.CustomAttributeId))
-			{
-				var date = item.CustomDates[args.CustomAttributeId];
-
-				if (date == DateTime.MinValue)
-					notify.NotifyMod(args.CustomAttributeId, string.Empty);
-				else
-					notify.NotifyMod(args.CustomAttributeId, date.ToString());
-
-				return;
-			}
-
-			// Start/Due change
-			if (PrepareTaskNotify(item, args.Mode, notify))
-			{
-				bool modifyTimeEst = WantModifyTimeEstimate(item);
-
-				if (notify.NotifyMod())
-				{
-					item.UpdateOriginalDates();
-
-					if (modifyTimeEst)
-						item.RecalcTimeEstimate(m_WorkWeek);
-
-					return;
-				}
-			}
-
-			item.RestoreOriginalDates();
-			m_TimeLog.Invalidate();
-		}
-*/
-
-		private bool PrepareTaskNotify(LogEntry item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
-		{
-/*
-			switch (mode)
-			{
-			case Calendar.SelectionTool.Mode.Move:
-				if (item.LengthDiffersFromOriginal())
-				{
-					// Start date WITHOUT TIME ESTIMATE
-					PrepareTaskNotify(item, Calendar.SelectionTool.Mode.ResizeLeft, notify, false);
-
-					// End date WITHOUT TIME ESTIMATE
-					PrepareTaskNotify(item, Calendar.SelectionTool.Mode.ResizeRight, notify, false);
-
-					if (includeTimeEstimate && WantModifyTimeEstimate(item))
-					{
-						notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
-					}
-
-					return true;
-				}
-				else if (item.StartDateDiffersFromOriginal())
-				{
-					notify.AddMod(Task.Attribute.OffsetTask, item.StartDate);
-
-					return true;
-				}
-				break;
-
-			case Calendar.SelectionTool.Mode.ResizeLeft:
-			case Calendar.SelectionTool.Mode.ResizeTop:
-				if (item.StartDateDiffersFromOriginal())
-				{
-					notify.AddMod(Task.Attribute.StartDate, item.StartDate);
-
-					if (includeTimeEstimate && WantModifyTimeEstimate(item))
-					{
-						notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
-					}
-
-					return true;
-				}
-				break;
-
-			case Calendar.SelectionTool.Mode.ResizeRight:
-			case Calendar.SelectionTool.Mode.ResizeBottom:
-				if (item.EndDateDiffersFromOriginal())
-				{
-					// Allow for end of day
-					var endDate = item.EndDate;
-
-					if (endDate == endDate.Date)
-						endDate = endDate.AddDays(-1);
-
-					if (item.IsDone)
-						notify.AddMod(Task.Attribute.DoneDate, endDate);
-					else
-						notify.AddMod(Task.Attribute.DueDate, endDate);
-
-					if (includeTimeEstimate && WantModifyTimeEstimate(item))
-					{
-						notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
-					}
-
-					return true;
-				}
-				break;
-			}
-*/
-
-			return false;
 		}
 
         private int ControlTop

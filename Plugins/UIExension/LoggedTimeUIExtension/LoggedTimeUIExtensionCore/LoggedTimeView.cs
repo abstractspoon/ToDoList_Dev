@@ -198,37 +198,6 @@ namespace LoggedTimeUIExtension
 */
 		}
 
-		private void OnTimeLogAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
-		{
-/*
-			// Repackage and forward to parent
-			if (AppointmentMove != null)
-			{
-				var move = (args as Calendar.MoveAppointmentEventArgs);
-
-				if (move != null)
-				{
-					TimeLogEntry taskItem = (GetRealAppointment(move.Appointment) as TimeLogEntry);
-					string custAttribId = String.Empty;
-
-					if (args.Appointment is TaskCustomDateAttribute)
-					{
-						custAttribId = (args.Appointment as TaskCustomDateAttribute).AttributeId;
-						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
-					}
-					else if (args.Appointment is TaskTimeBlock)
-					{
-						(args.Appointment as TaskTimeBlock).UpdateTimeBlock();
-					}
-					else
-					{
-						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, move.Mode, move.Finished));
-					}
-				}
-			}
-*/
-		}
-
 		public uint IconHitTest(Point ptScreen)
 		{
 			return 0;
@@ -293,50 +262,24 @@ namespace LoggedTimeUIExtension
 			ResolveAppointments += new Calendar.ResolveAppointmentsEventHandler(OnResolveAppointments);
 			SelectionChanged += new Calendar.AppointmentEventHandler(OnSelectionChanged);
 			WeekChange += new Calendar.WeekChangeEventHandler(OnWeekChanged);
-// 			AppointmentMove += new TDLAppointmentEventHandler(OnAppointmentChanged);
+ 			AppointmentMove += new Calendar.AppointmentEventHandler(OnAppointmentChanged);
 		}
 
-/*
-		protected void OnAppointmentChanged(object sender, TDLMoveAppointmentEventArgs e)
+		protected void OnAppointmentChanged(object sender, Calendar.AppointmentEventArgs e)
 		{
-			if ((SelectedAppointment != null) && 
-				(SelectedAppointment is TimeLogEntry) && 
-				SelectedAppointment.IsLongAppt() && 
-				e.Finished)
+			var me = (e as Calendar.MoveAppointmentEventArgs);
+
+			if ((me != null) && me.Finished)
 			{
-				m_TimeBlocks.SynchroniseDates(SelectedAppointment as TimeLogEntry);
+				 // TODO
 			}
 		}
-*/
 
 		public bool ShowLabelTips
 		{
 			set { m_LabelTip.Active = value; }
 			get { return m_LabelTip.Active; }
 		}
-
-/*
-		public bool IsTaskDisplayable(uint dwTaskID)
-		{
-// 			if (dwTaskID == 0)
-				return false;
-
-// 			return IsItemDisplayable(m_TaskItems.GetItem(dwTaskID));
-		}
-*/
-
-/*
-		public uint SelectedTaskId
-		{
-			get
-			{
-				if (!IsTaskDisplayable(m_SelectedEntryId))
-					return 0;
-
-				return m_SelectedEntryId;
-			}
-		}
-*/
 
 		public TaskItem SelectedLogEntryTaskItem
 		{
@@ -477,65 +420,6 @@ namespace LoggedTimeUIExtension
 			return false;
 		}
 
-		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
-		{
-			if (text == String.Empty)
-				return false;
-
-/*
-			var sortedTasks = m_DateSortedTasks.Items;
-			bool forwards = true;
-			int from = -1;
-
-			switch (selectTask)
-			{
-			case UIExtension.SelectTask.SelectFirstTask:
-				if (sortedTasks.Count > 0)
-					from = 0;
-				break;
-
-			case UIExtension.SelectTask.SelectNextTask:
-				from = sortedTasks.NextIndex(SelectedAppointmentId, true);
-				break;
-
-			case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-				from = sortedTasks.FindItem(SelectedAppointmentId);
-				break;
-
-			case UIExtension.SelectTask.SelectPrevTask:
-				from = sortedTasks.NextIndex(SelectedAppointmentId, false);
-				forwards = false;
-				break;
-
-			case UIExtension.SelectTask.SelectLastTask:
-				from = (sortedTasks.Count - 1);
-				forwards = false;
-				break;
-			}
-
-			if (from >= 0)
-			{
-				do
-				{
-					var taskItem = sortedTasks[from];
-					var words = text.Split(' ');
-
-					if (IsItemDisplayable(taskItem) && taskItem.TitleMatches(words, caseSensitive, wholeWord))
-					{
-						if (SelectTask(taskItem.Id, true))
-							return true;
-					}
-
-					from = sortedTasks.NextIndex(from, forwards);
-				}
-				while (from != -1);
-			}
-*/
-
-			// all else
-			return false;
-		}
-
 		public Calendar.Appointment FixupSelection(bool scrollToTask, bool allowNotify)
 		{
 			// Our base class clears the selected appointment whenever
@@ -564,33 +448,18 @@ namespace LoggedTimeUIExtension
 			return SelectedAppointment;
 		}
 
-		// External
-// 		public bool SelectTask(uint dwTaskID)
-// 		{
-// 			return SelectTask(dwTaskID, false);
-// 		}
-// 
-// 		// Internal
-// 		private bool SelectTask(uint dwTaskID, bool allowNotify)
-// 		{
-// 			m_SelectedEntryId = dwTaskID;
-// 			FixupSelection(true, allowNotify);
-// 
-// 			return (SelectedTaskId != 0);
-// 		}
-
 		public void GoToToday()
         {
             StartDate = DateTime.Now;
 
-			// And scroll vertically to first short task
+			// And scroll vertically to first log entry
 			var appointments = GetMatchingAppointments(StartDate, EndDate);
 
 			if (appointments != null)
 			{
 				foreach (var appt in appointments)
 				{
-					if (!IsLongAppt(appt) && EnsureVisible(appt, false))
+					if (EnsureVisible(appt, false))
 						break;
 				}
 			}
@@ -619,94 +488,6 @@ namespace LoggedTimeUIExtension
 			return UIExtension.HitTestResult.Nowhere;
 		}
 
-/*
-		public uint HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
-		{
-			Point pt = PointToClient(new Point(xScreen, yScreen));
-			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
-
-			if ((appt != null) &&
-				(reason != UIExtension.HitTestReason.ContextMenu) ||
-				AppointmentSupportsTaskContextMenu(appt))
-			{
-				return appt.Id;
-			}
-
-			return 0;
-		}
-
-		public Calendar.Appointment GetRealAppointmentAt(int x, int y)
-		{
-			return GetRealAppointment(GetAppointmentAt(x, y));
-		}
-
-		public Calendar.Appointment GetAppointment(uint taskID)
-		{
-			return null;//m_LogEntries.GetItem(taskID);
-		}
-
-		public Calendar.Appointment GetRealAppointment(Calendar.Appointment appt)
-		{
-// 			if ((appt != null) && (appt is TaskExtensionItem))
-// 				return (appt as TaskExtensionItem).RealTask;
-
-			return appt;
-		}
-*/
-
-/*
-		public bool GetSelectedItemLabelRect(ref Rectangle rect)
-		{
-			FixupSelection(true, false);
-			var appt = GetRealAppointment(SelectedAppointment);
-
-			EnsureVisible(appt, false);
-			Update(); // make sure draw rects are updated
-
-			if (GetAppointmentRect(appt, ref rect))
-			{
-				TimeLogEntry item = (appt as TimeLogEntry);
-				bool hasIcon = TaskHasIcon(item);
-
-				if (IsLongAppt(appt))
-				{
-					// Gripper
-					if (appt.StartDate >= StartDate)
-						rect.X += 8;
-					else
-						rect.X -= 3;
-
-					if (hasIcon)
-						rect.X += 16;
-
-					rect.X += 1;
-					rect.Height += 1;
-				}
-				else
-				{
-					if (hasIcon)
-					{
-						rect.X += 18;
-					}
-					else
-					{
-						// Gripper
-						rect.X += 8;
-					}
-
-					rect.X += 1;
-					rect.Y += 1;
-
-					rect.Height = (GetFontHeight() + 4); // 4 = border
-				}
-
-				return true;
-			}
-
-			return false;
-		}
-*/
-
 		private bool IsTodayVisible
 		{
 			get
@@ -720,26 +501,6 @@ namespace LoggedTimeUIExtension
 			var today = DateTime.Now.Date;
 			return ((today >= start) && (today < end));
 		}
-
-/*
-		public bool IsItemDisplayable(Calendar.Appointment appt)
-		{
-			if (appt == null)
-				return false;
-
-			// Always show a task if it is currently being dragged
-			if (IsResizingAppointment())
-			{
-				if (appt.Id == SelectedAppointment.Id)
-					return true;
-			}
-
-			if (!appt.HasValidDates())
-				return false;
-
-			return true;
-		}
-*/
 
 		private bool IsItemWithinRange(Calendar.Appointment appt, DateTime startDate, DateTime endDate)
 		{
@@ -844,55 +605,11 @@ namespace LoggedTimeUIExtension
 				ReloadLogFile();
 			}
 
-			// Make sure the selected task remains visible
-			// after any changes if it was visible to start with
-			var selItem = (SelectedAppointment as LogEntry);
-
-			bool selTaskWasVisible = (selItem != null) &&
-// 									 IsItemDisplayable(selItem) &&
-									 IsItemWithinRange(selItem, StartDate, EndDate);
-
-			bool tasksWasEmpty = m_LogEntries.IsEmpty;
-
-			switch (type)
-			{
-				case UIExtension.UpdateType.Delete:
-				case UIExtension.UpdateType.All:
-				{
-					// Rebuild
-//					m_LogEntries.Clear();
-//					m_DateSortedTasks.SetNeedsRebuild();
-// 					m_MaxTaskID = 0;
-
-					SelectedAppointment = null;
-				}
-				break;
-
-				case UIExtension.UpdateType.New:
-					// In-place update
-//					m_DateSortedTasks.SetNeedsRebuild();
-					break;
-
-				case UIExtension.UpdateType.Edit:
-					// In-place update
-					break;
-			}
-
 			// Update the tasks
 			Task task = tasks.GetFirstTask();
-			bool datesChanged = false;
 
 			while (ProcessTaskUpdate(task, type, 0))
 				task = task.GetNextTask();
-
-// 			if (datesChanged)
-// 				m_DateSortedTasks.SetNeedsResort();
-
-			// Scroll to the selected item if it was modified and was 'visible'
-			if ((selTaskWasVisible || tasksWasEmpty) && tasks.HasTask(m_SelectedEntryId))
-                EnsureVisible(SelectedAppointment, true);
-
-			SelectedDates.Start = SelectedDates.End;
 
             AdjustVScrollbar();
             Invalidate();
@@ -918,43 +635,6 @@ namespace LoggedTimeUIExtension
 
 			return true;
 		}
-
-/*
-		public bool PrepareNewTask(ref Task task)
-		{
-			// Set the start/due dates to match the current selection
-			if (SelectedDates.Start < SelectedDates.End)
-			{
-				task.SetStartDate(SelectedDates.Start);
-
-				DateTime endDate = SelectedDates.End;
-
-// 				if (TimeLogEntry.IsStartOfDay(endDate))
-// 					endDate = endDate.AddSeconds(-1); // end of day before
-
-				task.SetDueDate(endDate);
-			}
-			else if ((SelectedAppointmentId != 0) &&
-					(task.GetParentID() == SelectedAppointmentId))
-			{
-				// Initialise the subtask to begin at the start of the parent
-				var startDate = SelectedAppointment.StartDate;
-
-				task.SetStartDate(startDate);
-				task.SetDueDate(startDate.AddDays(1));
-			}
-			else
-			{
-				// Use 'today'
-				var startDate = DateTime.Today.Date;
-
-				task.SetStartDate(startDate);
-				task.SetDueDate(startDate.AddDays(1));
-			}
-
-			return true;
-		}
-*/
 
 		private bool m_StrikeThruDoneTasks = false;
 
@@ -1015,20 +695,6 @@ namespace LoggedTimeUIExtension
             Invalidate(true);
 		}
 
-/*
-		public override DateTime GetDateAt(int x, bool longAppt)
-		{
-			DateTime date = base.GetDateAt(x, longAppt);
-
-// 			if (longAppt && (date >= EndDate))
-// 			{
-// 				date = EndDate.AddSeconds(-1);
-// 			}
-
-			return date;
-		}
-*/
-
         public override TimeSpan GetTimeAt(int y)
         {
             TimeSpan time = base.GetTimeAt(y);
@@ -1052,16 +718,6 @@ namespace LoggedTimeUIExtension
 			}
 		}
 
-// 		public bool EnsureSelectionVisible(bool partialOK)
-// 		{
-// 			var appt = FixupSelection(true, false);
-// 
-// 			if (appt == null)
-// 				return false;
-// 
-// 			return EnsureVisible(appt, partialOK);
-// 		}
-
 		public override bool EnsureVisible(Calendar.Appointment appt, bool partialOK)
 		{
 			if ((appt == null) && (m_SelectedEntryId != 0))
@@ -1083,14 +739,9 @@ namespace LoggedTimeUIExtension
 		private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
         {
             if (args.Appointment != null)
-			{
 				m_SelectedEntryId = args.Appointment.Id;
-// 				m_VisibleSelectedTaskID = (args.Appointment as LogEntry).TaskId;
-			}
 			else
-			{
-				m_SelectedEntryId = /*m_VisibleSelectedTaskID =*/ 0;
-			}
+				m_SelectedEntryId = 0;
 
 			Invalidate();
 		}
@@ -1311,8 +962,6 @@ namespace LoggedTimeUIExtension
 
 			if (appt != null)
 			{
-// 				var realAppt = GetRealAppointment(appt);
-
 				if (!ReadOnly && (IconHitTest(PointToScreen(e.Location)) > 0))
 				{
 					if (appt.Locked)
@@ -1417,14 +1066,14 @@ namespace LoggedTimeUIExtension
 			Size image = base.CalculateImageSize();
 
 			// Make sure image is wide enough to properly render day numbers
-// 			int dayWidth = ((ClientRectangle.Width - (minHourLabelWidth + hourLabelIndent)) / DaysShowing);
-// 			int minDayWidth = 0;
-// 
-// 			using (Graphics g = Graphics.FromHwnd(Handle))
-// 				minDayWidth = CalculateMinimumDayWidthForImage(g);
-// 
-// 			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * Math.Max(dayWidth, minDayWidth)));
-// 
+			int dayWidth = ((ClientRectangle.Width - (minHourLabelWidth + hourLabelIndent)) / DaysShowing);
+			int minDayWidth = 0;
+
+			using (Graphics g = Graphics.FromHwnd(Handle))
+				minDayWidth = m_RenderHelper.CalculateMinimumDayWidthForImage(g);
+
+			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * Math.Max(dayWidth, minDayWidth)));
+
 			return image;
 		}
 
