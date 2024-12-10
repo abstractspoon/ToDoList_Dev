@@ -159,7 +159,7 @@ namespace LoggedTimeUIExtension
 
 		public bool IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
 
-		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey, int depth)
+		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask, int depth)
 		{
 			if (!task.IsValid())
 				return false;

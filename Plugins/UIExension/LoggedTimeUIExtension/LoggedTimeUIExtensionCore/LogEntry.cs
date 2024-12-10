@@ -66,14 +66,14 @@ namespace LoggedTimeUIExtension
 			return true;
 		}
 
-		public bool ModifyEntry(uint entryId, DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		public bool ModifyEntry(uint entryId, DateTime start, DateTime end, double timeSpentInHrs, string comment, Color fillColor)
 		{
 			var entry = GetEntry(entryId);
 
 			if (entry == null)
 				return false;
 
-			if (!entry.Modify(start, end, comment, timeSpentInHrs, fillColor))
+			if (!entry.Modify(start, end, timeSpentInHrs, comment, fillColor))
 				return false;
 
 			IsModified = true;
@@ -254,7 +254,7 @@ namespace LoggedTimeUIExtension
 			get	{ return ((FillColor == SystemColors.Window) ? Color.Empty : FillColor); }
 		}
 
-		public bool Modify(DateTime from, DateTime to, string comment, double timeSpentInHrs, Color fillColor)
+		public bool Modify(DateTime from, DateTime to, double timeSpentInHrs, string comment, Color fillColor)
 		{
 			bool modified = false;
 

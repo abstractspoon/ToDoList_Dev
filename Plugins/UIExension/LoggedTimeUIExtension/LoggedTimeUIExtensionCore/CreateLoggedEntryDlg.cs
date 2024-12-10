@@ -23,10 +23,9 @@ namespace LoggedTimeUIExtension
 		}
 
 		public CreateLoggedEntryDlg(IEnumerable<TaskItem> taskItems, 
-										 UIExtension.TaskIcon taskIcons, 
-										 WorkingWeek workWeek,
-										 LogEntry attrib,
-										 bool readonlyTasks)
+									UIExtension.TaskIcon taskIcons, 
+									WorkingWeek workWeek,
+									LogEntry attrib)
 			:
 			this()
 		{
@@ -36,10 +35,10 @@ namespace LoggedTimeUIExtension
 				m_TaskIdLabel.Text = attrib.TaskId.ToString();
 
 			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, attrib.TaskId);
-			m_Attributes.Initialise(attrib, workWeek, readonlyTasks);
+			m_Attributes.Initialise(attrib, workWeek, false);
 		}
 
-		public uint SelectedTaskId
+		public uint TaskId
 		{
 			get { return m_TaskCombo.SelectedTaskId; }
 		}
@@ -72,11 +71,6 @@ namespace LoggedTimeUIExtension
 		public bool WantAddToTimeSpent
 		{
 			get { return m_Attributes.WantAddToTimeSpent; }
-		}
-
-		private void OnTaskComboSelChange(object sender, EventArgs e)
-		{
-			OK.Enabled = (SelectedTaskId != 0);
 		}
 	}
 }

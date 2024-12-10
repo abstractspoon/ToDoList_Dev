@@ -22,9 +22,6 @@ namespace LoggedTimeUIExtension
 	public partial class LoggedTimeView : Calendar.DayView, ILabelTipHandler
 	{
 		private uint m_SelectedEntryId = 0;
-		private uint m_VisibleSelectedTaskID = 0;
-		private uint m_MaxTaskID = 0;
-
 		private int m_UserMinSlotHeight = -1;
 
 		private TaskItems m_TaskItems;
@@ -86,7 +83,10 @@ namespace LoggedTimeUIExtension
 			InitializeComponent();
 		}
 
-	//	public IEnumerable<TaskItems> TaskItems { get { return m_TaskItems.Values; } }
+		public IEnumerable<TaskItem> TaskItems { get { return m_TaskItems.Values; } }
+		public UIExtension.TaskIcon TaskIcons { get { return m_RenderHelper.TaskIcons; } }
+
+		public TaskItem GetTask(uint taskId) { return m_TaskItems.GetItem(taskId); }
 
 		// ILabelTipHandler implementation
 		public Control GetOwner()
@@ -315,6 +315,7 @@ namespace LoggedTimeUIExtension
 			get { return m_LabelTip.Active; }
 		}
 
+/*
 		public bool IsTaskDisplayable(uint dwTaskID)
 		{
 // 			if (dwTaskID == 0)
@@ -322,7 +323,9 @@ namespace LoggedTimeUIExtension
 
 // 			return IsItemDisplayable(m_TaskItems.GetItem(dwTaskID));
 		}
+*/
 
+/*
 		public uint SelectedTaskId
 		{
 			get
@@ -333,8 +336,9 @@ namespace LoggedTimeUIExtension
 				return m_SelectedEntryId;
 			}
 		}
+*/
 
-		public TaskItem SelectedTaskItem
+		public TaskItem SelectedLogEntryTaskItem
 		{
 			get
 			{
@@ -346,16 +350,10 @@ namespace LoggedTimeUIExtension
 
 		public LogEntry SelectedLogEntry
 		{
-			get
-			{
-// 				if (!IsTaskDisplayable(m_SelectedEntryId))
-// 					return 0;
-
-				return m_LogEntries.GetEntry(m_SelectedEntryId);
-			}
+			get { return m_LogEntries.GetEntry(m_SelectedEntryId); }
 		}
 
-		public bool CanCreateNewLogEntry
+		public bool CanAddNewLogEntry
 		{
 			get { return !ReadOnly && !m_LogEntries.IsEmpty; }
 		}
@@ -370,24 +368,26 @@ namespace LoggedTimeUIExtension
 			get { return CanModifySelectedLogEntry; }
 		}
 		
-		public bool AddLogEntry(uint taskId, string taskTitle, DateTime start, DateTime end, double timeSpentInHrs, string comment, string path, string type, Color fillColor)
+		public bool AddNewLogEntry(TaskItem taskItem, DateTime start, DateTime end, double timeSpentInHrs, string comment, string path, string type, Color fillColor)
 		{
-			if (!CanCreateNewLogEntry)
+			if (!CanAddNewLogEntry)
 				return false;
 
-			if (!m_LogEntries.AddEntry(taskId, taskTitle, start, end, timeSpentInHrs, comment, path, type, fillColor))
+			uint taskId = ((taskItem == null) ? 0 : taskItem.Id);
+
+			if (!m_LogEntries.AddEntry(taskId, taskItem?.Title, start, end, timeSpentInHrs, comment, path, type, fillColor))
 				return false;
 
 			Invalidate();
 			return true;
 		}
 
-		public bool ModifySelectedLogEntry(DateTime start, DateTime end, string comment, double timeSpentInHrs, Color fillColor)
+		public bool ModifySelectedLogEntry(DateTime start, DateTime end, double timeSpentInHrs, string comment, Color fillColor)
 		{
 			if (!CanModifySelectedLogEntry)
 				return false;
 
-			if (!m_LogEntries.ModifyEntry(m_SelectedEntryId, start, end, comment, timeSpentInHrs, fillColor))
+			if (!m_LogEntries.ModifyEntry(m_SelectedEntryId, start, end, timeSpentInHrs, comment, fillColor))
 				return false;
 
 			Invalidate();
@@ -540,66 +540,44 @@ namespace LoggedTimeUIExtension
 		{
 			// Our base class clears the selected appointment whenever
 			// the week changes so we can't always rely on 'SelectedAppointmentId'
-			uint prevSelTaskID = m_VisibleSelectedTaskID;
-			uint selTaskID = SelectedTaskId;
+			LogEntry item = m_LogEntries.GetEntry(m_SelectedEntryId);
 
-			m_VisibleSelectedTaskID = selTaskID;
-
-			if (selTaskID > 0)
+			if (item != null)
 			{
-// 				LogEntry item = m_LogEntries.GetItem(selTaskID);
-// 
-// 				if (item != null)
-// 				{
-// 					if (scrollToTask)
-// 					{
-// 						if (item.StartDate != Calendar.Appointment.NullDate)
-// 						{
-// 							if (!IsItemWithinRange(item, StartDate, EndDate))
-// 								StartDate = item.StartDate;
-// 
-// 							SelectedAppointment = item;
-// 						}
-// 					}
-// 					else if (IsItemWithinRange(item, StartDate, EndDate))
-// 					{
-// 						SelectedAppointment = item;
-// 					}
-// 				}
-// 				else
-// 				{
+				if (scrollToTask)
+				{
+					if (!IsItemWithinRange(item, StartDate, EndDate))
+						StartDate = item.StartDate;
+
+					SelectedAppointment = item;
+				}
+				else
+				{
 					SelectedAppointment = null;
-// 				}
+				}
 			}
 			else
 			{
 				SelectedAppointment = null;
 			}
 
-			// Notify parent of changes
-// 			if (allowNotify && (SelectedTaskId != prevSelTaskID))
-// 			{
-// 				LogEntry item = m_LogEntries.GetItem(m_VisibleSelectedTaskID);
-// 				RaiseSelectionChanged(item);
-// 			}
-
 			return SelectedAppointment;
 		}
 
 		// External
-		public bool SelectTask(uint dwTaskID)
-		{
-			return SelectTask(dwTaskID, false);
-		}
-
-		// Internal
-		private bool SelectTask(uint dwTaskID, bool allowNotify)
-		{
-			m_SelectedEntryId = dwTaskID;
-			FixupSelection(true, allowNotify);
-
-			return (SelectedTaskId != 0);
-		}
+// 		public bool SelectTask(uint dwTaskID)
+// 		{
+// 			return SelectTask(dwTaskID, false);
+// 		}
+// 
+// 		// Internal
+// 		private bool SelectTask(uint dwTaskID, bool allowNotify)
+// 		{
+// 			m_SelectedEntryId = dwTaskID;
+// 			FixupSelection(true, allowNotify);
+// 
+// 			return (SelectedTaskId != 0);
+// 		}
 
 		public void GoToToday()
         {
@@ -634,23 +612,14 @@ namespace LoggedTimeUIExtension
 			Point pt = PointToClient(new Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-			if (appt != null)
-			{
-				if ((reason != UIExtension.HitTestReason.ContextMenu) ||
-					AppointmentSupportsTaskContextMenu(appt))
-				{
-					return UIExtension.HitTestResult.Task;
-				}
-			}
-			else if (GetTrueRectangle().Contains(pt))
-			{
+			if ((appt != null) && GetTrueRectangle().Contains(pt))
 				return UIExtension.HitTestResult.Tasklist;
-			}
 
 			// else
 			return UIExtension.HitTestResult.Nowhere;
 		}
 
+/*
 		public uint HitTestTask(Int32 xScreen, Int32 yScreen, UIExtension.HitTestReason reason)
 		{
 			Point pt = PointToClient(new Point(xScreen, yScreen));
@@ -683,10 +652,11 @@ namespace LoggedTimeUIExtension
 
 			return appt;
 		}
+*/
 
+/*
 		public bool GetSelectedItemLabelRect(ref Rectangle rect)
 		{
-/*
 			FixupSelection(true, false);
 			var appt = GetRealAppointment(SelectedAppointment);
 
@@ -732,10 +702,10 @@ namespace LoggedTimeUIExtension
 
 				return true;
 			}
-*/
 
 			return false;
 		}
+*/
 
 		private bool IsTodayVisible
 		{
@@ -751,23 +721,25 @@ namespace LoggedTimeUIExtension
 			return ((today >= start) && (today < end));
 		}
 
-// 		public bool IsItemDisplayable(Calendar.Appointment appt)
-// 		{
-// 			if (appt == null)
-// 				return false;
-// 
-// 			// Always show a task if it is currently being dragged
-// 			if (IsResizingAppointment())
-// 			{
-// 				if (appt.Id == SelectedAppointment.Id)
-// 					return true;
-// 			}
-// 
-// 			if (!appt.HasValidDates())
-// 				return false;
-// 
-// 			return true;
-// 		}
+/*
+		public bool IsItemDisplayable(Calendar.Appointment appt)
+		{
+			if (appt == null)
+				return false;
+
+			// Always show a task if it is currently being dragged
+			if (IsResizingAppointment())
+			{
+				if (appt.Id == SelectedAppointment.Id)
+					return true;
+			}
+
+			if (!appt.HasValidDates())
+				return false;
+
+			return true;
+		}
+*/
 
 		private bool IsItemWithinRange(Calendar.Appointment appt, DateTime startDate, DateTime endDate)
 		{
@@ -855,19 +827,21 @@ namespace LoggedTimeUIExtension
 
 				m_LogFileWatcher.Path = Path.GetDirectoryName(m_LogFilePath);
 				m_LogFileWatcher.EnableRaisingEvents = true;
+
+				Invalidate();
 			}
 		}
 
 		///////////////////////////////////////////////////////////
 
-		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type, string metaDataKey)
+		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type)
 		{
 			string logPath = GetLogFilePath(tasks.GetFilePath());
 
 			if (!IsSamePath(logPath, m_LogFilePath))
 			{
 				m_LogFilePath = logPath;
-				m_WantIdleReload = true;
+				ReloadLogFile();
 			}
 
 			// Make sure the selected task remains visible
@@ -888,7 +862,7 @@ namespace LoggedTimeUIExtension
 					// Rebuild
 //					m_LogEntries.Clear();
 //					m_DateSortedTasks.SetNeedsRebuild();
-					m_MaxTaskID = 0;
+// 					m_MaxTaskID = 0;
 
 					SelectedAppointment = null;
 				}
@@ -908,7 +882,7 @@ namespace LoggedTimeUIExtension
 			Task task = tasks.GetFirstTask();
 			bool datesChanged = false;
 
-			while (ProcessTaskUpdate(task, type, metaDataKey, 0, ref datesChanged))
+			while (ProcessTaskUpdate(task, type, 0))
 				task = task.GetNextTask();
 
 // 			if (datesChanged)
@@ -924,39 +898,28 @@ namespace LoggedTimeUIExtension
             Invalidate();
         }
 
-		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey, int depth, ref bool datesChanged)
+		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, int depth)
 		{
 			if (!task.IsValid())
 				return false;
 
-// 			uint taskId = task.GetID();
-// 			m_MaxTaskID = Math.Max(m_MaxTaskID, taskId); // needed for extension occurrences
-// 
-// 			// Get or create a new task and update it
-// 			bool newTask = (m_LogEntries.ContainsKey(taskId) == false);
-// 
-// 			LogEntry taskItem = m_LogEntries.GetItem(taskId, newTask);
-// 
-// // 			taskItem.UpdateTaskAttributes(task, m_CustomDateDefs, type, newTask, metaDataKey, depth);
-// 
-// 			// Update Time Blocks
-// 			if (newTask || 
-// 				task.HasAttribute(Task.Attribute.StartDate) || 
-// 				task.HasAttribute(Task.Attribute.DueDate))
-// 			{
-// 				datesChanged = true;
-// // 				m_TimeBlocks.SynchroniseDates(taskItem);
-// 			}
+			// Get or create a new task and update it
+			uint taskId = task.GetID();
+			bool newTask = (m_TaskItems.ContainsKey(taskId) == false);
+
+			var taskItem = m_TaskItems.GetItem(taskId, newTask);
+			taskItem.UpdateTaskAttributes(task, type, newTask, depth);
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (ProcessTaskUpdate(subtask, type, metaDataKey, (depth + 1), ref datesChanged))
+			while (ProcessTaskUpdate(subtask, type, (depth + 1)))
 				subtask = subtask.GetNextTask();
 
 			return true;
 		}
 
+/*
 		public bool PrepareNewTask(ref Task task)
 		{
 			// Set the start/due dates to match the current selection
@@ -991,6 +954,7 @@ namespace LoggedTimeUIExtension
 
 			return true;
 		}
+*/
 
 		private bool m_StrikeThruDoneTasks = false;
 
@@ -1051,6 +1015,7 @@ namespace LoggedTimeUIExtension
             Invalidate(true);
 		}
 
+/*
 		public override DateTime GetDateAt(int x, bool longAppt)
 		{
 			DateTime date = base.GetDateAt(x, longAppt);
@@ -1062,6 +1027,7 @@ namespace LoggedTimeUIExtension
 
 			return date;
 		}
+*/
 
         public override TimeSpan GetTimeAt(int y)
         {
@@ -1086,25 +1052,20 @@ namespace LoggedTimeUIExtension
 			}
 		}
 
-		public bool EnsureSelectionVisible(bool partialOK)
-		{
-			var appt = FixupSelection(true, false);
-
-			if (appt == null)
-				return false;
-
-			return EnsureVisible(appt, partialOK);
-		}
+// 		public bool EnsureSelectionVisible(bool partialOK)
+// 		{
+// 			var appt = FixupSelection(true, false);
+// 
+// 			if (appt == null)
+// 				return false;
+// 
+// 			return EnsureVisible(appt, partialOK);
+// 		}
 
 		public override bool EnsureVisible(Calendar.Appointment appt, bool partialOK)
 		{
 			if ((appt == null) && (m_SelectedEntryId != 0))
-			{
-// 				LogEntry item;
-// 
-// 				if (m_LogEntries.TryGetValue(m_SelectedTaskID, out item))
-// 					appt = item;
-			}
+				appt = m_LogEntries.GetEntry(m_SelectedEntryId);
 
 			return base.EnsureVisible(appt, partialOK);
 		}
@@ -1124,11 +1085,11 @@ namespace LoggedTimeUIExtension
             if (args.Appointment != null)
 			{
 				m_SelectedEntryId = args.Appointment.Id;
-				m_VisibleSelectedTaskID = (args.Appointment as LogEntry).TaskId;
+// 				m_VisibleSelectedTaskID = (args.Appointment as LogEntry).TaskId;
 			}
 			else
 			{
-				m_SelectedEntryId = m_VisibleSelectedTaskID = 0;
+				m_SelectedEntryId = /*m_VisibleSelectedTaskID =*/ 0;
 			}
 
 			Invalidate();
@@ -1350,11 +1311,11 @@ namespace LoggedTimeUIExtension
 
 			if (appt != null)
 			{
-				var realAppt = GetRealAppointment(appt);
+// 				var realAppt = GetRealAppointment(appt);
 
 				if (!ReadOnly && (IconHitTest(PointToScreen(e.Location)) > 0))
 				{
-					if (realAppt.Locked)
+					if (appt.Locked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 					return UIExtension.HandCursor();
@@ -1382,7 +1343,7 @@ namespace LoggedTimeUIExtension
 				}
 				else
 				{
-					if (realAppt.Locked)
+					if (appt.Locked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 					if (mode == Calendar.SelectionTool.Mode.Move)
