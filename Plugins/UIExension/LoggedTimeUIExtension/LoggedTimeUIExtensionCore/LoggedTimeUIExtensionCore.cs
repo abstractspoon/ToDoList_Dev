@@ -41,7 +41,7 @@ namespace LoggedTimeUIExtension
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
-		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
+//		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
 
 // 		private LogEntry m_DefaultNewLogEntryAttributes;
@@ -167,7 +167,7 @@ namespace LoggedTimeUIExtension
 			m_ToolbarRenderer.SetUITheme(theme);
 
 			m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
-			m_SelectedTaskDatesLabel.ForeColor = m_WeekLabel.ForeColor;
+//			m_SelectedTaskDatesLabel.ForeColor = m_WeekLabel.ForeColor;
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -212,7 +212,7 @@ namespace LoggedTimeUIExtension
             if (appOnly)
 			{
 				UpdateWorkingHourDisplay();
-				UpdatedSelectedTaskDatesText();
+				//UpdatedSelectedTaskDatesText();
 			}
 			else
             {
@@ -299,7 +299,7 @@ namespace LoggedTimeUIExtension
 			CreateMonthYearCombos();
 			CreateToolbar();
 			CreateWeekLabel();
-			CreateSelectedTaskDatesLabel();
+			//CreateSelectedTaskDatesLabel();
 
 			// view always comes last
 			CreateTimeLogView();
@@ -417,6 +417,7 @@ namespace LoggedTimeUIExtension
 			Controls.Add(m_WeekLabel);
 		}
 
+/*
 		private void CreateSelectedTaskDatesLabel()
 		{
 			m_SelectedTaskDatesLabel = new LinkLabelEx.LinkLabelEx();
@@ -434,6 +435,7 @@ namespace LoggedTimeUIExtension
 			
 			Controls.Add(m_SelectedTaskDatesLabel);
 		}
+*/
 
 		protected void OnClickSelectedTaskDatesLink(object sender, LinkLabelLinkClickedEventArgs e)
 		{
@@ -598,7 +600,7 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.HScrollTooltipText = String.Format(format, m_TimeLog.HScrollStep);
 
 			UpdateToolbarButtonStates();
-            UpdatedSelectedTaskDatesPosition();
+            //UpdatedSelectedTaskDatesPosition();
 		}
 
 		private void OnDeleteLogEntry(object sender, EventArgs e)
@@ -774,7 +776,7 @@ namespace LoggedTimeUIExtension
 			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, LabelTop - 2);
 			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, LabelTop);
 
-			UpdatedSelectedTaskDatesPosition(); // called elsewhere also
+			//UpdatedSelectedTaskDatesPosition(); // called elsewhere also
 
 			Rectangle dayViewRect = ClientRectangle;
 
@@ -836,23 +838,24 @@ namespace LoggedTimeUIExtension
 
 		private void OnTimeLogSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
-			UpdatedSelectedTaskDatesText();
+			//UpdatedSelectedTaskDatesText();
 			UpdateToolbarButtonStates();
 		}
 
+/*
 		private void UpdatedSelectedTaskDatesText()
 		{
-// 			DateTime from, to;
+			DateTime from, to;
 
-// 			if (m_TimeLog.GetSelectedTaskDates(out from, out to))
-// 			{
-// 				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
-// 				String dateRange = DateUtil.FormatRange(from, to, true, m_TimeLog.DisplayDatesInISO);
-// 
-// 				m_SelectedTaskDatesLabel.Text = (label + dateRange);
-// 				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
-// 			}
-// 			else
+			if (m_TimeLog.GetSelectedTaskDates(out from, out to))
+			{
+				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
+				String dateRange = DateUtil.FormatRange(from, to, true, m_TimeLog.DisplayDatesInISO);
+
+				m_SelectedTaskDatesLabel.Text = (label + dateRange);
+				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
+			}
+			else
 			{
 				m_SelectedTaskDatesLabel.Text = String.Empty;
 			}
@@ -862,6 +865,7 @@ namespace LoggedTimeUIExtension
 		{
 			m_SelectedTaskDatesLabel.Location = new Point(m_WeekLabel.Right + 10, m_YearCombo.Bottom - m_SelectedTaskDatesLabel.Height);
 		}
+*/
 
 		private void OnTimeLogWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
 		{
@@ -874,7 +878,7 @@ namespace LoggedTimeUIExtension
 				m_MonthCombo.SelectedMonth = args.StartDate.Month;
 				m_YearCombo.SelectedYear = args.StartDate.Year;
 
-				UpdatedSelectedTaskDatesPosition();
+				//UpdatedSelectedTaskDatesPosition();
 
 				m_SettingMonthYear = false;
 			}
@@ -889,7 +893,7 @@ namespace LoggedTimeUIExtension
 				m_TimeLog.StartDate = new DateTime(m_YearCombo.SelectedYear, m_MonthCombo.SelectedMonth, 1);
 				m_WeekLabel.StartDate = m_TimeLog.StartDate;
 
-				UpdatedSelectedTaskDatesPosition();
+				//UpdatedSelectedTaskDatesPosition();
 
 				m_SettingTimeLogStartDate = false;
 			}
