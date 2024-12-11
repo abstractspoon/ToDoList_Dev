@@ -1454,7 +1454,7 @@ BEGIN
     LTEXT           "Static",IDC_TASKID,73,30,159,8
     LTEXT           "&Time Spent",IDC_STATIC,7,46,63,8
     EDITTEXT        IDC_LOGGEDTIME,73,43,74,13,ES_AUTOHSCROLL
-    CONTROL         "&Also add time to task's time spent",
+    CONTROL         "Also add time to task 'Time Spent'",
                     IDC_ADDTIMETOTIMESPENT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,73,60,159,10
     LTEXT           "&When",IDC_STATIC,7,78,64,8

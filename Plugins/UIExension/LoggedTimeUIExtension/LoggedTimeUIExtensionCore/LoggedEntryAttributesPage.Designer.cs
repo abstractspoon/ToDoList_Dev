@@ -145,9 +145,9 @@
 			this.m_AddToTimeSpentCheckBox.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.m_AddToTimeSpentCheckBox.Location = new System.Drawing.Point(102, 28);
 			this.m_AddToTimeSpentCheckBox.Name = "m_AddToTimeSpentCheckBox";
-			this.m_AddToTimeSpentCheckBox.Size = new System.Drawing.Size(186, 17);
+			this.m_AddToTimeSpentCheckBox.Size = new System.Drawing.Size(193, 17);
 			this.m_AddToTimeSpentCheckBox.TabIndex = 41;
-			this.m_AddToTimeSpentCheckBox.Text = "Also add time to task\'s time spent";
+			this.m_AddToTimeSpentCheckBox.Text = "Also add time to task \'Time Spent\'";
 			this.m_AddToTimeSpentCheckBox.UseVisualStyleBackColor = true;
 			// 
 			// m_FillColorCheckBox
