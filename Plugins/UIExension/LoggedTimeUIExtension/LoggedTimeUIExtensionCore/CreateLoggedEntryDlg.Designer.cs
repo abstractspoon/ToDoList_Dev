@@ -33,7 +33,7 @@
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
-			this.m_TaskIdLabel = new System.Windows.Forms.Label();
+			this.m_TaskId = new System.Windows.Forms.Label();
 			this.m_TaskCombo = new Abstractspoon.Tdl.PluginHelpers.TaskComboBox();
 			this.m_Attributes = new LoggedTimeUIExtension.LoggedEntryAttributesPage();
 			this.SuspendLayout();
@@ -52,7 +52,7 @@
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(193, 297);
+			this.OK.Location = new System.Drawing.Point(180, 297);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 9;
@@ -63,7 +63,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(274, 297);
+			this.Cancel.Location = new System.Drawing.Point(261, 297);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 10;
@@ -77,7 +77,7 @@
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.label5.Location = new System.Drawing.Point(-2, 287);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(366, 2);
+			this.label5.Size = new System.Drawing.Size(353, 2);
 			this.label5.TabIndex = 11;
 			// 
 			// label1
@@ -89,14 +89,14 @@
 			this.label1.TabIndex = 13;
 			this.label1.Text = "Task ID";
 			// 
-			// m_TaskIdLabel
+			// m_TaskId
 			// 
-			this.m_TaskIdLabel.AutoSize = true;
-			this.m_TaskIdLabel.Location = new System.Drawing.Point(107, 39);
-			this.m_TaskIdLabel.Name = "m_TaskIdLabel";
-			this.m_TaskIdLabel.Size = new System.Drawing.Size(35, 13);
-			this.m_TaskIdLabel.TabIndex = 14;
-			this.m_TaskIdLabel.Text = "label2";
+			this.m_TaskId.AutoSize = true;
+			this.m_TaskId.Location = new System.Drawing.Point(107, 39);
+			this.m_TaskId.Name = "m_TaskId";
+			this.m_TaskId.Size = new System.Drawing.Size(35, 13);
+			this.m_TaskId.TabIndex = 14;
+			this.m_TaskId.Text = "label2";
 			// 
 			// m_TaskCombo
 			// 
@@ -107,15 +107,16 @@
 			this.m_TaskCombo.FormattingEnabled = true;
 			this.m_TaskCombo.Location = new System.Drawing.Point(110, 9);
 			this.m_TaskCombo.Name = "m_TaskCombo";
-			this.m_TaskCombo.Size = new System.Drawing.Size(239, 21);
+			this.m_TaskCombo.Size = new System.Drawing.Size(226, 21);
 			this.m_TaskCombo.TabIndex = 0;
 			// 
 			// m_Attributes
 			// 
-			this.m_Attributes.Location = new System.Drawing.Point(8, 60);
+			this.m_Attributes.Location = new System.Drawing.Point(7, 60);
 			this.m_Attributes.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.m_Attributes.Name = "m_Attributes";
-			this.m_Attributes.Size = new System.Drawing.Size(351, 222);
+			this.m_Attributes.ReadOnlyTask = false;
+			this.m_Attributes.Size = new System.Drawing.Size(344, 222);
 			this.m_Attributes.TabIndex = 12;
 			// 
 			// CreateLoggedEntryDlg
@@ -123,8 +124,8 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
-			this.ClientSize = new System.Drawing.Size(357, 329);
-			this.Controls.Add(this.m_TaskIdLabel);
+			this.ClientSize = new System.Drawing.Size(344, 329);
+			this.Controls.Add(this.m_TaskId);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.m_Attributes);
@@ -153,6 +154,6 @@
 		private Abstractspoon.Tdl.PluginHelpers.TaskComboBox m_TaskCombo;
 		private LoggedEntryAttributesPage m_Attributes;
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Label m_TaskIdLabel;
+		private System.Windows.Forms.Label m_TaskId;
 	}
 }

@@ -28,10 +28,17 @@ namespace LoggedTimeUIExtension
 		{
 			m_Entry = entry;
 
-			m_TaskTitleLabel.Text = entry.Title;
-			m_TaskIdLabel.Text = entry.TaskId.ToString();
+			if (entry.TaskId == 0)
+			{
+				m_TaskTitle.Text = m_TaskId.Text = "<none>";
+			}
+			else
+			{
+				m_TaskTitle.Text = entry.Title;
+				m_TaskId.Text = entry.TaskId.ToString();
+			}
 
-			m_Attributes.Initialise(entry, workWeek, readonlyTask);
+			m_Attributes.Initialise(entry, workWeek, readonlyTask, true);
 		}
 
 		public DateTime From

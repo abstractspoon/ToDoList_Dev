@@ -36,7 +36,7 @@
 			this.label4 = new System.Windows.Forms.Label();
 			this.label5 = new System.Windows.Forms.Label();
 			this.m_CommentEdit = new System.Windows.Forms.TextBox();
-			this.m_TimeSpentEdit = new System.Windows.Forms.TextBox();
+			this.m_TimeSpentEdit = new UIComponents.NumberBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.m_AddToTimeSpentCheckBox = new System.Windows.Forms.CheckBox();
 			this.m_FillColorCheckBox = new System.Windows.Forms.CheckBox();
@@ -57,7 +57,7 @@
 			// m_ToTimeCombo
 			// 
 			this.m_ToTimeCombo.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.m_ToTimeCombo.Location = new System.Drawing.Point(230, 83);
+			this.m_ToTimeCombo.Location = new System.Drawing.Point(218, 83);
 			this.m_ToTimeCombo.Name = "m_ToTimeCombo";
 			this.m_ToTimeCombo.Size = new System.Drawing.Size(110, 22);
 			this.m_ToTimeCombo.TabIndex = 26;
@@ -66,7 +66,7 @@
 			// m_FromTimeCombo
 			// 
 			this.m_FromTimeCombo.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.m_FromTimeCombo.Location = new System.Drawing.Point(230, 53);
+			this.m_FromTimeCombo.Location = new System.Drawing.Point(218, 53);
 			this.m_FromTimeCombo.Name = "m_FromTimeCombo";
 			this.m_FromTimeCombo.Size = new System.Drawing.Size(110, 22);
 			this.m_FromTimeCombo.TabIndex = 25;
@@ -118,11 +118,12 @@
 			this.m_CommentEdit.Location = new System.Drawing.Point(102, 113);
 			this.m_CommentEdit.Multiline = true;
 			this.m_CommentEdit.Name = "m_CommentEdit";
-			this.m_CommentEdit.Size = new System.Drawing.Size(238, 77);
+			this.m_CommentEdit.Size = new System.Drawing.Size(226, 77);
 			this.m_CommentEdit.TabIndex = 39;
 			// 
 			// m_TimeSpentEdit
 			// 
+			this.m_TimeSpentEdit.DecimalMode = false;
 			this.m_TimeSpentEdit.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.m_TimeSpentEdit.Location = new System.Drawing.Point(102, 0);
 			this.m_TimeSpentEdit.Name = "m_TimeSpentEdit";
@@ -133,7 +134,7 @@
 			// 
 			this.label6.AutoSize = true;
 			this.label6.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.label6.Location = new System.Drawing.Point(227, 3);
+			this.label6.Location = new System.Drawing.Point(215, 3);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(34, 13);
 			this.label6.TabIndex = 38;
@@ -145,7 +146,7 @@
 			this.m_AddToTimeSpentCheckBox.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.m_AddToTimeSpentCheckBox.Location = new System.Drawing.Point(102, 28);
 			this.m_AddToTimeSpentCheckBox.Name = "m_AddToTimeSpentCheckBox";
-			this.m_AddToTimeSpentCheckBox.Size = new System.Drawing.Size(193, 17);
+			this.m_AddToTimeSpentCheckBox.Size = new System.Drawing.Size(186, 17);
 			this.m_AddToTimeSpentCheckBox.TabIndex = 41;
 			this.m_AddToTimeSpentCheckBox.Text = "Also add time to task \'Time Spent\'";
 			this.m_AddToTimeSpentCheckBox.UseVisualStyleBackColor = true;
@@ -190,7 +191,7 @@
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.m_CommentEdit);
 			this.Name = "LoggedEntryAttributesPage";
-			this.Size = new System.Drawing.Size(349, 221);
+			this.Size = new System.Drawing.Size(333, 221);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -205,7 +206,7 @@
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.TextBox m_CommentEdit;
-		private System.Windows.Forms.TextBox m_TimeSpentEdit;
+		private UIComponents.NumberBox m_TimeSpentEdit;
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.CheckBox m_AddToTimeSpentCheckBox;
 		private System.Windows.Forms.CheckBox m_FillColorCheckBox;

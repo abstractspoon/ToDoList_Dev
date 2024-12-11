@@ -13,9 +13,9 @@ namespace LoggedTimeUIExtension
 {
 	public partial class CreateLoggedEntryDlg : Form
 	{
-		LogEntry m_DefaultAttrib;
+		IEnumerable<TaskItem> m_TaskItems;
 
-		// ---------------------------------------
+		// -----------------------------------
 
 		public CreateLoggedEntryDlg()
 		{
@@ -29,13 +29,33 @@ namespace LoggedTimeUIExtension
 			:
 			this()
 		{
-			m_DefaultAttrib = attrib;
+			m_TaskItems = taskItems;
 
-			if (attrib.TaskId != 0)
-				m_TaskIdLabel.Text = attrib.TaskId.ToString();
+			m_Attributes.Initialise(attrib, workWeek, false, false);
 
-			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, attrib.TaskId);
-			m_Attributes.Initialise(attrib, workWeek, false);
+			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, attrib.TaskId, TaskItem.None);
+			m_TaskCombo.SelectedIndex = 0;
+
+			m_TaskCombo.SelectedIndexChanged += OnSelectedTaskChange;
+			OnSelectedTaskChange(this, null);
+		}
+
+		protected void OnSelectedTaskChange(object sender, EventArgs e)
+		{
+			uint taskId = m_TaskCombo.SelectedTaskId;
+
+			if (taskId == 0)
+			{
+				m_TaskId.Text = "<none>";
+				m_Attributes.ReadOnlyTask = true;
+			}
+			else
+			{
+				m_TaskId.Text = taskId.ToString();
+
+				var taskItem = m_TaskItems.Where(x => (x.Id == taskId)).FirstOrDefault();
+				m_Attributes.ReadOnlyTask = ((taskItem == null) || taskItem.Locked);
+			}
 		}
 
 		public uint TaskId

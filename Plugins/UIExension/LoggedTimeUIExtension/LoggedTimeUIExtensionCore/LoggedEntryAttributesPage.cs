@@ -14,28 +14,56 @@ namespace LoggedTimeUIExtension
 	public partial class LoggedEntryAttributesPage : UserControl
 	{
 		private double m_OrgTimeSpent = 0.0;
+		private bool m_EditMode = false;
+		private bool m_ReadOnlyTask = false;
 
 		public LoggedEntryAttributesPage()
 		{
 			InitializeComponent();
 		}
 
-		public void Initialise(LogEntry entry, WorkingWeek workWeek, bool readonlyTask)
+		public void Initialise(LogEntry entry, WorkingWeek workWeek, bool readonlyTask, bool editMode)
 		{
 			TimeComboBox.SetWorkingWeek(workWeek);
-
 			SetDates(workWeek, entry);
 
+			m_EditMode = editMode;
+			ReadOnlyTask = readonlyTask;
 			m_OrgTimeSpent = entry.TimeSpentInHrs;
-			m_TimeSpentEdit.Text = entry.TimeSpentInHrs.ToString();
+
+			m_TimeSpentEdit.Text = entry.TimeSpentInHrs.ToString("N3");
+			m_TimeSpentEdit.DecimalMode = true;
 			m_CommentEdit.Text = entry.Comment;
+
 			m_FillColorButton.Color = entry.TrueFillColor;
-
 			m_FillColorCheckBox.Checked = (entry.TrueFillColor != Color.Empty);
-			m_FillColorButton.Enabled = m_FillColorCheckBox.Checked;
-			m_AddToTimeSpentCheckBox.Enabled = !readonlyTask;
 
-			m_FillColorCheckBox.CheckedChanged += (s, e) => { m_FillColorButton.Enabled = m_FillColorCheckBox.Checked; };
+			m_FillColorCheckBox.CheckedChanged += OnFillColorCheckChange;
+			OnFillColorCheckChange(this, null);
+
+			m_TimeSpentEdit.TextChanged += OnTimeSpentChanged; 
+			OnTimeSpentChanged(this, null);
+		}
+
+		public bool ReadOnlyTask
+		{
+			get { return m_ReadOnlyTask; }
+			set
+			{
+				m_ReadOnlyTask = value;
+				m_AddToTimeSpentCheckBox.Enabled = !value;
+			}
+		}
+		
+		private void OnFillColorCheckChange(object sender, EventArgs e)
+		{
+			m_FillColorButton.Enabled = m_FillColorCheckBox.Checked;
+		}
+
+		private void OnTimeSpentChanged(object sender, EventArgs e)
+		{
+			if (m_EditMode && m_AddToTimeSpentCheckBox.Enabled)
+				m_AddToTimeSpentCheckBox.Text = string.Format("Also modify task 'Time Spent' by {0:0.###} hours", (TimeSpent - m_OrgTimeSpent));
 		}
 
 		public DateTime From
@@ -102,6 +130,5 @@ namespace LoggedTimeUIExtension
 				m_ToTimeCombo.SetTime(entry.Dates.End);
 			}
 		}
-
 	}
 }

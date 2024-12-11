@@ -146,6 +146,11 @@ namespace LoggedTimeUIExtension
 			get { return !TaskTextColor.IsEmpty; }
 		}
 
+		static public TaskItem None
+		{
+			get { return new TaskItem() { Title = "<none>", Id = 0 }; }
+		}
+
 		public string Title { get; private set; }
 		public string Position { get; private set; }
 		public uint Id { get; private set; }
