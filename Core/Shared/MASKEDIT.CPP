@@ -18,7 +18,9 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CMaskEdit, CEdit)
 
-CMaskEdit::CMaskEdit(LPCTSTR szMask, DWORD dwFlags) : m_sMask(szMask), m_dwFlags(dwFlags)
+CMaskEdit::CMaskEdit(LPCTSTR szMask, DWORD dwFlags) 
+	: 
+	m_dwFlags(0)
 {
 	SetMask(szMask, dwFlags);
 }
@@ -77,8 +79,17 @@ void CMaskEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 				CString sText;
 				GetWindowText(sText);
 
-				if (sText.Find(nChar) != -1)
-					return;
+				int nDecimal = sText.Find(nChar);
+				
+				if (nDecimal != -1)
+				{
+					// Unless the existing decimal is selected (for replacement)
+					int nSelFrom, nSelTo;
+					GetSel(nSelFrom, nSelTo);
+
+					if ((nDecimal < nSelFrom) || (nDecimal >= nSelTo))
+						return;
+				}
 			}
 			else
 			{
