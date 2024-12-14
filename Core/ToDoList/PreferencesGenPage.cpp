@@ -217,7 +217,6 @@ void CPreferencesGenPage::OnClearMRU()
 
 void CPreferencesGenPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_bAlwaysOnTop = pPrefs->GetProfileInt(szKey, _T("AlwaysOnTop"), FALSE);
 	m_bUseSysTray = pPrefs->GetProfileInt(szKey, _T("UseSysTray"), FALSE);
 	m_bConfirmDelete = pPrefs->GetProfileInt(szKey, _T("ConfirmDelete"), FALSE);
@@ -250,13 +249,10 @@ void CPreferencesGenPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR sz
 
 	if (m_sStickiesPath.IsEmpty() && FileMisc::FileExists(DEFAULT_STICKIES_PATH))
 		m_sStickiesPath = DEFAULT_STICKIES_PATH;
-
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), TRUE);
 }
 
 void CPreferencesGenPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("AlwaysOnTop"), m_bAlwaysOnTop);
 	pPrefs->WriteProfileInt(szKey, _T("UseSysTray"), m_bUseSysTray);
 	pPrefs->WriteProfileInt(szKey, _T("ConfirmDelete"), m_bConfirmDelete);
@@ -284,8 +280,6 @@ void CPreferencesGenPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 
 	pPrefs->WriteProfileString(szKey, _T("LanguageFile"), m_cbLanguages.GetSelectedLanguageFile(TRUE)); // relative path
 	pPrefs->WriteProfileString(szKey, _T("PathToStickies"), m_sStickiesPath);
-
-	//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 void CPreferencesGenPage::OnSelchangeLanguage() 

@@ -149,7 +149,6 @@ void CPreferencesMultiUserPage::LoadPreferences(const IPreferences* pPrefs, LPCT
 
 void CPreferencesMultiUserPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("PromptReloadOnWritable"), m_bPromptReloadOnWritable);
 	pPrefs->WriteProfileInt(szKey, _T("PromptReloadOnTimestamp"), m_bPromptReloadOnTimestamp);
 	pPrefs->WriteProfileInt(szKey, _T("AutoCheckOut"), m_bAutoCheckOut);
@@ -162,7 +161,6 @@ void CPreferencesMultiUserPage::SavePreferences(IPreferences* pPrefs, LPCTSTR sz
 	pPrefs->WriteProfileInt(szKey, _T("CheckinNoEdit"), m_bCheckinNoChange);
 	pPrefs->WriteProfileInt(szKey, _T("IncludeUserNameInCheckout"), m_bIncludeUserNameInCheckout);
 	pPrefs->WriteProfileInt(szKey, _T("Use3rdPartySourceControl"), m_bUse3rdPartySourceControl);
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 void CPreferencesMultiUserPage::OnUse3rdpartysourcectrl() 

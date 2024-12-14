@@ -914,7 +914,6 @@ void CPreferencesUITasklistColorsPage::OnSetduetodaytaskcolor()
 
 void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// prefs
 	m_bColorPriority = pPrefs->GetProfileInt(szKey, _T("ColorPriority"), TRUE);
 	m_sTreeFont = pPrefs->GetProfileString(szKey, _T("TreeFont"), _T("Arial"));
 	m_nTreeFontSize = pPrefs->GetProfileInt(szKey, _T("FontSize"), DEFFONTSIZE);

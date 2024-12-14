@@ -380,7 +380,6 @@ int CPreferencesTaskDef2Page::GetInheritParentAttributes(CTDCAttributeMap& mapAt
 
 void CPreferencesTaskDef2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_bInheritParentAttributes = pPrefs->GetProfileInt(szKey, _T("InheritParentAttributes"), pPrefs->GetProfileInt(szKey, _T("UseParentAttributes")));
 	m_bUpdateInheritAttributes = pPrefs->GetProfileInt(szKey, _T("UpdateInheritAttributes"), FALSE);
 	m_bCatListReadonly = pPrefs->GetProfileInt(szKey, _T("CatListReadonly"), FALSE);
@@ -428,7 +427,6 @@ void CPreferencesTaskDef2Page::SaveDefaultListItems(LPCTSTR szValueList, IPrefer
 
 void CPreferencesTaskDef2Page::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("InheritParentAttributes"), m_bInheritParentAttributes);
 	pPrefs->WriteProfileInt(szKey, _T("UpdateInheritAttributes"), m_bUpdateInheritAttributes);
 	pPrefs->WriteProfileInt(szKey, _T("CatListReadonly"), m_bCatListReadonly);
