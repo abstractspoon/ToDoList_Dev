@@ -1460,7 +1460,7 @@ BEGIN
     COMBOBOX        IDC_WHENTIME,155,65,77,30,CBS_DROPDOWN | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "&Also add time to task's time spent",
+    CONTROL         "&Also add time to task's 'Time Spent'",
                     IDC_ADDTIMETOTIMESPENT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,73,86,159,10
     LTEXT           "&Comment",IDC_COMMENTLABEL,7,103,65,8
