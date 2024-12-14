@@ -100,6 +100,7 @@ void CPreferencesUITasklistPage::OnFirstShow()
 	CPreferencesPageBase::OnFirstShow();
 
 	AddGroupLine(IDC_DATETIMEGROUP);
+	AddGroupLine(IDC_DONEGROUP);
 	AddGroupLine(IDC_OTHERGROUP);
 
 	GetDlgItem(IDC_DISPLAYFIRSTCOMMENTLINE)->EnableWindow(m_bShowComments);
@@ -183,12 +184,10 @@ void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs, LPC
 	m_bShowFileLinkThumbnails = pPrefs->GetProfileInt(szKey, _T("ShowFileLinkThumbnails"), FALSE);
 	m_bHidePriorityNumber = pPrefs->GetProfileInt(szKey, _T("HidePriorityNumber"), FALSE);
 	m_bShowMixedCompletionState = pPrefs->GetProfileInt(szKey, _T("ShowMixedCompletionState"), TRUE);
-	//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
 void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("ShowInfoTips"), m_bShowInfoTips);
 	pPrefs->WriteProfileInt(szKey, _T("ShowComments"), m_bShowComments);
 	pPrefs->WriteProfileInt(szKey, _T("DisplayFirstCommentLine"), m_bDisplayFirstCommentLine);
@@ -221,7 +220,6 @@ void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR s
 	pPrefs->WriteProfileInt(szKey, _T("ShowFileLinkThumbnails"), m_bShowFileLinkThumbnails);
 	pPrefs->WriteProfileInt(szKey, _T("HidePriorityNumber"), m_bHidePriorityNumber);
 	pPrefs->WriteProfileInt(szKey, _T("ShowMixedCompletionState"), m_bShowMixedCompletionState);
-	//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 void CPreferencesUITasklistPage::OnLimitcolwidths() 

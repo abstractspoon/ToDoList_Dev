@@ -4352,11 +4352,13 @@ CString CTDCTaskFormatter::GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bA
 	TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
 	int nDecPlaces = (m_data.HasStyle(TDCS_ROUNDTIMEFRACTIONS) ? 0 : 2);
 
-	if (m_data.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
-		return CTimeHelper().FormatTimeHMS(dTime, nTHUnits, (BOOL)nDecPlaces);
+	if (!m_data.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT))
+		return CTimeHelper::FormatTime(dTime, nTHUnits, nDecPlaces);
 
 	// else
-	return CTimeHelper::FormatTime(dTime, nTHUnits, nDecPlaces);
+	DWORD dwFlags = (HMS_PRESERVEUNITS | (nDecPlaces ? HMS_DECIMALPLACES : 0));
+
+	return CTimeHelper().FormatTimeHMS(dTime, nTHUnits, dwFlags);
 }
 
 CString CTDCTaskFormatter::GetTaskAllocTo(const TODOITEM* pTDI, TCHAR cSep) const

@@ -253,13 +253,10 @@ void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 
 	m_eSaveExportStylesheet.SetCurrentFolder(sFolder);
 	m_sSaveExportStylesheet = FileMisc::GetRelativePath(m_sSaveExportStylesheet, sFolder, FALSE);
-
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
 void CPreferencesFile2Page::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("BackupOnSave"), m_bBackupOnSave);
 	pPrefs->WriteProfileString(szKey, _T("BackupLocation"), m_sBackupLocation);
 	pPrefs->WriteProfileInt(szKey, _T("KeepBackups"), m_nKeepBackups);
@@ -280,8 +277,6 @@ void CPreferencesFile2Page::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 	pPrefs->WriteProfileString(szKey, _T("ExportFolderPath"), m_sExportFolderPath);
 	pPrefs->WriteProfileString(szKey, _T("SaveExportStylesheet"), m_sSaveExportStylesheet);
 	pPrefs->WriteProfileString(szKey, _T("OtherExporterTypeID"), m_sOtherExportTypeID);
-
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 void CPreferencesFile2Page::OnBackuponsave() 

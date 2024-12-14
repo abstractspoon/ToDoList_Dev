@@ -209,7 +209,6 @@ void CPreferencesTaskDefPage::OnSetdefaultcolor()
 
 void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_nDefPriority = pPrefs->GetProfileInt(szKey, _T("DefaultPriority"), 5); 
 	m_nDefRisk = pPrefs->GetProfileInt(szKey, _T("DefaultRisk"), 0); 
 	m_sDefAllocTo = pPrefs->GetProfileString(szKey, _T("DefaultAllocTo"));
@@ -266,7 +265,6 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 
 void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("DefaultPriority"), m_nDefPriority);
 	pPrefs->WriteProfileInt(szKey, _T("DefaultRisk"), m_nDefRisk);
 	pPrefs->WriteProfileString(szKey, _T("DefaultAllocTo"), m_sDefAllocTo);
