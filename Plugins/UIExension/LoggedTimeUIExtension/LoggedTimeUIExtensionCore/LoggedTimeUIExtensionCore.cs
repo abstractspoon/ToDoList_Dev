@@ -644,14 +644,21 @@ namespace LoggedTimeUIExtension
 
 				if (m_TimeLog.AddNewLogEntry(taskItem, dlg.From, dlg.To, dlg.TimeSpent, dlg.Comment, /*taskItem?.Path*/"", /*TODO*/"", dlg.FillColor))
 				{
-					m_TimeLog.Invalidate();
-
-					if (dlg.WantAddToTimeSpent)
-					{
-						// TODO
-					}
+					AddHoursToTaskTimeSpent(dlg.TaskId, dlg.HoursToAddToTimeSpent);
 					UpdateToolbarButtonStates();
 				}
+			}
+		}
+
+		private void AddHoursToTaskTimeSpent(uint taskId, double amount)
+		{
+			if (amount != 0.0)
+			{
+				var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+				notify.NotifySelChange(taskId);
+				notify.NotifyMod(Task.Attribute.TimeSpent, amount, Task.TimeUnits.Hours, true);
+				notify.NotifySelChange(0);
 			}
 		}
 
@@ -675,12 +682,7 @@ namespace LoggedTimeUIExtension
 			{
 				if (m_TimeLog.ModifySelectedLogEntry(dlg.From, dlg.To, dlg.TimeSpent, dlg.Comment, dlg.FillColor))
 				{
-					m_TimeLog.Invalidate();
-
-					if (dlg.WantAddToTimeSpent)
-					{
-						// TODO
-					}
+					AddHoursToTaskTimeSpent(entry.TaskId, dlg.HoursToAddToTimeSpent);
 				}
 			}
 		}

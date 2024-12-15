@@ -1819,9 +1819,9 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			TDCTIMEPERIOD time(mod.dValue, mod.nTimeUnits);
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, time));
+				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, time, mod.bAppend));
 			else
-				bChange = SetSelectedTaskTimeEstimate(time);
+				bChange = SetSelectedTaskTimeEstimate(time, mod.bAppend);
 		}
 		break;
 
@@ -1830,9 +1830,9 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			TDCTIMEPERIOD time(mod.dValue, mod.nTimeUnits);
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, time));
+				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, time, mod.bAppend));
 			else
-				bChange = SetSelectedTaskTimeSpent(time);
+				bChange = SetSelectedTaskTimeSpent(time, mod.bAppend);
 		}
 		break;
 

@@ -17,6 +17,24 @@ namespace UIComponents
 
 		public bool DecimalMode { get; set; } = false;
 
+		public double GetAmount(double fallback = 0.0)
+		{
+			double amount = 0.0;
+			return (double.TryParse(Text, out amount) ? amount : fallback);
+		}
+
+		public void SetAmount(double amount, string format = "N3")
+		{
+			DecimalMode = true;
+			Text = amount.ToString(format);
+		}
+
+		public void SetAmount(int amount)
+		{
+			DecimalMode = false;
+			Text = amount.ToString();
+		}
+
 		protected override void OnKeyPress(KeyPressEventArgs e)
 		{
 			if (char.IsControl(e.KeyChar))

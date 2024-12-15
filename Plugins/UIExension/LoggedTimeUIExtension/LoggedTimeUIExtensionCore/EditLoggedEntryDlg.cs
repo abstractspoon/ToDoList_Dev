@@ -66,9 +66,9 @@ namespace LoggedTimeUIExtension
 			get { return m_Attributes.FillColor; }
 		}
 
-		public bool WantAddToTimeSpent
+		public double HoursToAddToTimeSpent
 		{
-			get { return m_Attributes.WantAddToTimeSpent; }
+			get { return m_Attributes.HoursToAddToTimeSpent; }
 		}
 
 

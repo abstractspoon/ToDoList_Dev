@@ -95,23 +95,23 @@ namespace LoggedTimeUIExtension
 
 		public double TimeSpent
 		{
-			get
-			{
-				double hours = 0.0;
-
-				return (double.TryParse(m_TimeSpentEdit.Text, out hours) ? hours : m_OrgTimeSpent);
-			}
+			get { return m_TimeSpentEdit.GetAmount(m_OrgTimeSpent); }
 		}
 
-		public bool WantAddToTimeSpent
+		bool WantAddToTimeSpent
+		{
+			get { return (m_AddToTimeSpentCheckBox.Enabled && m_AddToTimeSpentCheckBox.Checked); }
+		}
+
+		public double HoursToAddToTimeSpent
 		{
 			get
 			{
-				if (m_AddToTimeSpentCheckBox.Enabled)
-					return m_AddToTimeSpentCheckBox.Checked;
-			
-				// else	
-				return false;
+				if (WantAddToTimeSpent)
+					return (m_EditMode ? (TimeSpent - m_OrgTimeSpent) : TimeSpent);
+
+				// else
+				return 0.0;
 			}
 		}
 
