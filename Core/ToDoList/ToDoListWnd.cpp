@@ -203,7 +203,14 @@ CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
 
 void CToDoListWnd::IDLETASKS::UpdateStatusBar(const CTDCAttributeMap& mapAttrib)
 {
-	m_mapStatusBarAttrib.Append(mapAttrib);
+	if (mapAttrib.Has(TDCA_ALL))
+	{
+		m_mapStatusBarAttrib.Set(TDCA_ALL);
+	}
+	else if (!m_mapStatusBarAttrib.Has(TDCA_ALL))
+	{
+		m_mapStatusBarAttrib.Append(mapAttrib);
+	}
 }
 
 void CToDoListWnd::IDLETASKS::UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib)
