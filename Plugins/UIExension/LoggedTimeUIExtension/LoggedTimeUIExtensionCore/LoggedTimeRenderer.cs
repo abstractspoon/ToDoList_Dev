@@ -304,13 +304,41 @@ namespace LoggedTimeUIExtension
 			*/
 		}
 
+		static string FormatTime(double hours, string hoursFormat, string minutesFormat, Translator trans)
+		{
+			if (hours >= 1)
+				return string.Format(trans.Translate(hoursFormat, Translator.Type.Label), hours.ToString("0.###"));
+
+			// else
+			return string.Format(trans.Translate(minutesFormat, Translator.Type.Label), (int)(hours * 60));
+		}
+
+		static string FormatTimeSpent(LogEntry entry, Translator trans)
+		{
+			return FormatTime(entry.TimeSpentInHrs, "{0} hours logged", "{0} minutes logged", trans);
+		}
+
+		static string FormatDuration(LogEntry entry, Translator trans)
+		{
+			return FormatTime((entry.Length.TotalMinutes + 0.5) / 60, "{0} hours duration", "{0} minutes duration", trans);
+		}
+
 		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
 		{
-			var appt = apptView.Appointment;
+			var entry = (apptView.Appointment as LogEntry);
 
-			m_RenderHelper.DrawItemText(g, appt.Title, rect, textColor, FontStyle.Regular, apptView.IsLong);
+			string text = string.Empty;
 
-			// Draw comment text too
+			if (!string.IsNullOrEmpty(entry.Title))
+				text = text + entry.Title + '\n';
+
+			text = text + FormatTimeSpent(entry, m_Trans) + '\n';
+			text = text + FormatDuration(entry, m_Trans) + '\n';
+
+			if (!string.IsNullOrEmpty(entry.Comment))
+				text = text + entry.Comment + '\n';
+
+			m_RenderHelper.DrawItemText(g, text, rect, textColor, FontStyle.Regular, false);
 		}
 
 		public void DrawAppointment(Graphics g, Rectangle daysRect, Calendar.AppointmentView apptView, bool isSelected)
