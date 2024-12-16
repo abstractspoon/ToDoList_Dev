@@ -4,10 +4,9 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
-using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
-using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace LoggedTimeUIExtension
 {
@@ -27,7 +26,7 @@ namespace LoggedTimeUIExtension
 		private TaskItems m_TaskItems;
 		private LogEntries m_LogEntries;
 
-		private string m_LogFilePath = @"\."; // something valid
+		private string m_TasklistPath = @"\."; // something valid
 		private FileSystemWatcher m_LogFileWatcher;
 
 //		private DateSortedTasks m_DateSortedTasks;
@@ -73,7 +72,7 @@ namespace LoggedTimeUIExtension
 // 			base.NotifyDayWidth += new Calendar.DayWidthEventHandler(OnNotifyDayWidth);
 
 			// Create a 5 minute timer for updating the line indicating time of day 'today'
-			var timer = new Timer()
+			var timer = new System.Windows.Forms.Timer()
 			{
 				Enabled = true,
 				Interval = (1000 * 5 * 60)
@@ -298,12 +297,14 @@ namespace LoggedTimeUIExtension
 
 		public bool CanAddNewLogEntry
 		{
-			get { return !ReadOnly && !m_LogEntries.IsEmpty; }
+			// Must have a valid tasklist path -> valid log file path
+			// and there must be no pending modifications
+			get { return !string.IsNullOrEmpty(m_TasklistPath) && !m_LogEntries.IsModified; }
 		}
 
 		public bool CanModifySelectedLogEntry
 		{
-			get { return !ReadOnly && !m_LogEntries.IsEmpty && m_LogEntries.HasEntry(m_SelectedEntryId); }
+			get { return !ReadOnly && m_LogEntries.HasEntry(m_SelectedEntryId); }
 		}
 
 		public bool CanDeleteSelectedLogEntry
@@ -318,8 +319,39 @@ namespace LoggedTimeUIExtension
 
 			uint taskId = ((taskItem == null) ? 0 : taskItem.Id);
 
-			if (!m_LogEntries.AddEntry(taskId, taskItem?.Title, start, end, timeSpentInHrs, comment, path, type, fillColor))
+			// To keep the log file open for the shortest possible time we just
+			// append to its end and allow the log file to be idle-reloaded
+			var newEntry = new TaskTimeLogEntry()
+			{
+				TaskId = taskId,
+				From = start,
+				To = end,
+				TimeInHours = timeSpentInHrs,
+				TaskTitle = taskItem?.Title,
+				Comment = comment,
+				Person = Environment.UserName,
+				TaskPath = path,
+				Type = type,
+				AltColor = fillColor
+			};
+
+			int iTry = 10;
+
+			while (iTry-- > 0)
+			{
+				if (TaskTimeLog.Add(m_TasklistPath, newEntry, false))
+					break;
+
+				Thread.Sleep(50);
+			}
+
+			if (iTry < 0)
+			{
+				// Test if log file is locked and notify user
+				// TODO
+
 				return false;
+			}
 
 			Invalidate();
 			return true;
@@ -537,7 +569,7 @@ namespace LoggedTimeUIExtension
 				// Temporarily disable file watcher
 				m_LogFileWatcher.EnableRaisingEvents = false;
 
-				if (!m_LogEntries.SaveLogFile(m_LogFilePath))
+				if (!m_LogEntries.SaveLogFile(m_TasklistPath))
 					return true; // try again
 
 				m_LogFileWatcher.EnableRaisingEvents = true;
@@ -559,23 +591,13 @@ namespace LoggedTimeUIExtension
 
 		private void OnLogFileModified(object sender, FileSystemEventArgs e)
 		{
-			if (IsSamePath(m_LogFilePath, e.FullPath))
+			if (IsSamePath(TaskTimeLog.GetPath(m_TasklistPath), e.FullPath))
 				m_WantIdleReload = true;
-		}
-
-		private string GetLogFilePath(string tasklistPath)
-		{
-			if (string.IsNullOrWhiteSpace(tasklistPath))
-				return string.Empty;
-
-			var logPath = (Path.GetFileNameWithoutExtension(tasklistPath) + "_Log.csv");
-			
-			return Path.Combine(Path.GetDirectoryName(tasklistPath), logPath);
 		}
 
 		private void ReloadLogFile()
 		{
-			if (m_LogEntries.Load(m_LogFilePath))
+			if (m_LogEntries.Load(m_TasklistPath))
 			{
 				if (m_LogFileWatcher == null)
 				{
@@ -586,7 +608,7 @@ namespace LoggedTimeUIExtension
 					m_LogFileWatcher.Changed += new FileSystemEventHandler(OnLogFileModified);
 				}
 
-				m_LogFileWatcher.Path = Path.GetDirectoryName(m_LogFilePath);
+				m_LogFileWatcher.Path = Path.GetDirectoryName(m_TasklistPath);
 				m_LogFileWatcher.EnableRaisingEvents = true;
 
 				Invalidate();
@@ -597,11 +619,11 @@ namespace LoggedTimeUIExtension
 
 		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type)
 		{
-			string logPath = GetLogFilePath(tasks.GetFilePath());
+			string tasklistPath = tasks.GetFilePath();
 
-			if (!IsSamePath(logPath, m_LogFilePath))
+			if (!IsSamePath(tasklistPath, m_TasklistPath))
 			{
-				m_LogFilePath = logPath;
+				m_TasklistPath = tasklistPath;
 				ReloadLogFile();
 			}
 

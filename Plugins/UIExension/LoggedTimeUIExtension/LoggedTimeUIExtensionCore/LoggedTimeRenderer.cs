@@ -310,7 +310,9 @@ namespace LoggedTimeUIExtension
 				return string.Format(trans.Translate(hoursFormat, Translator.Type.Label), hours.ToString("0.###"));
 
 			// else
-			return string.Format(trans.Translate(minutesFormat, Translator.Type.Label), (int)(hours * 60));
+			int minutes = (int)((hours * 60) + 0.5);
+
+			return string.Format(trans.Translate(minutesFormat, Translator.Type.Label), minutes);
 		}
 
 		static string FormatTimeSpent(LogEntry entry, Translator trans)
@@ -320,7 +322,7 @@ namespace LoggedTimeUIExtension
 
 		static string FormatDuration(LogEntry entry, Translator trans)
 		{
-			return FormatTime((entry.Length.TotalMinutes + 0.5) / 60, "{0} hours duration", "{0} minutes duration", trans);
+			return FormatTime(entry.Length.TotalHours, "{0} hours duration", "{0} minutes duration", trans);
 		}
 
 		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)

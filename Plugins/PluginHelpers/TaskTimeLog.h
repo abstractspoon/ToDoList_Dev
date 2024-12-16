@@ -8,6 +8,10 @@ using namespace System::Collections::Generic;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct TASKTIMELOGITEM;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace Abstractspoon
 {
 	namespace Tdl
@@ -34,12 +38,18 @@ namespace Abstractspoon
 			public ref class TaskTimeLog
 			{
 			public:
-				static List<TaskTimeLogEntry^>^ Load(String^ logFilePath);
-				static bool Save(String^ logFilePath, List<TaskTimeLogEntry^>^ logEntries);
+				static List<TaskTimeLogEntry^>^ Load(String^ tasklistPath);
+				static bool Save(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries);
+				static bool Add(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately);
+
+				static String^ GetPath(String^ tasklistPath);
+				static String^ GetPath(String^ tasklistPath, UInt32 taskId, bool logSeparately);
 
 			private:
 				static String^ ToString(const CString& str);
 				static CString ToString(String^ str);
+
+				static void Copy(TaskTimeLogEntry^ from, TASKTIMELOGITEM& to);
 			};
 		}
 	}

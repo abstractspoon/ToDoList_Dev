@@ -646,6 +646,9 @@ namespace LoggedTimeUIExtension
 				{
 					AddHoursToTaskTimeSpent(dlg.TaskId, dlg.HoursToAddToTimeSpent);
 					UpdateToolbarButtonStates();
+
+					// Clear selection
+					m_TimeLog.SelectedDates.End = m_TimeLog.SelectedDates.Start;
 				}
 			}
 		}

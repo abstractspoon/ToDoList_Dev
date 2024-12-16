@@ -85,25 +85,13 @@ BOOL TASKTIMELOGITEM::operator==(const TASKTIMELOGITEM& other) const
 
 BOOL TASKTIMELOGITEM::IsValidToLog() const
 {
-	if (dwTaskID && !sTaskTitle.IsEmpty())
-	{
-		// must have a comment or valid time
-		return (!sComment.IsEmpty() || IsValidToAnalyse());
-	}
-
-	// else 
-	return FALSE;
+	// must have a comment or valid time
+	return (!sComment.IsEmpty() || IsValidToAnalyse());
 }
 
 BOOL TASKTIMELOGITEM::IsValidToAnalyse() const
 {
-	if (dwTaskID && !sTaskTitle.IsEmpty())
-	{
-		return ((dHours != 0) && CDateHelper::IsDateSet(dtFrom) && (dtTo >= dtFrom));
-	}
-
-	// else 
-	return FALSE;
+	return ((dHours != 0) && CDateHelper::IsDateSet(dtFrom) && (dtTo >= dtFrom));
 }
 
 void TASKTIMELOGITEM::Clear(BOOL bInitPerson)
@@ -565,7 +553,7 @@ BOOL CTDCTaskTimeLog::SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray
 	for (int nItem = 0; nItem < nNumItems; nItem++, nLine++)
 		aLines[nLine] = aLogItems[nItem].FormatRow(nVersion, sDelim);
 
-	CString sFileContents = Misc::FormatArray(aLines, '\n');
+	CString sFileContents = Misc::FormatArray(aLines, '\n') + '\n';
 
 	if (!FileMisc::SaveFile(szLogPath, sFileContents, nFormat)) 
 	{

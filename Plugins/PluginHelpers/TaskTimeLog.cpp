@@ -13,19 +13,19 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-List<TaskTimeLogEntry^>^ TaskTimeLog::Load(String^ logFilePath)
+List<TaskTimeLogEntry^>^ TaskTimeLog::Load(String^ tasklistPath)
 {
 	CTaskTimeLogItemArray aLogEntries;
 	CString sUnused;
 
 	List<TaskTimeLogEntry^>^ logEntries = gcnew List<TaskTimeLogEntry^>();
+	String^ logFilePath = GetPath(tasklistPath);
 
 	if (CTDCTaskTimeLog::LoadLogFile(MS(logFilePath), aLogEntries, FALSE, sUnused))
 	{
 		for (int nEntry = 0; nEntry < aLogEntries.GetSize(); nEntry++)
 		{
 			const TASKTIMELOGITEM& li = aLogEntries.GetAt(nEntry);
-
 			TaskTimeLogEntry^ logEntry = gcnew TaskTimeLogEntry();
 
 			logEntry->TaskId = li.dwTaskID;
@@ -50,7 +50,7 @@ List<TaskTimeLogEntry^>^ TaskTimeLog::Load(String^ logFilePath)
 	return logEntries;
 }
 
-bool TaskTimeLog::Save(String^ logFilePath, List<TaskTimeLogEntry^>^ logEntries)
+bool TaskTimeLog::Save(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries)
 {
 	CTaskTimeLogItemArray aLogEntries;
 	aLogEntries.SetSize(logEntries->Count);
@@ -60,23 +60,48 @@ bool TaskTimeLog::Save(String^ logFilePath, List<TaskTimeLogEntry^>^ logEntries)
 		TASKTIMELOGITEM& li = aLogEntries.GetAt(nEntry);
 		TaskTimeLogEntry^ logEntry = logEntries[nEntry];
 
-		li.dwTaskID = logEntry->TaskId;
-		li.dtFrom = logEntry->From.ToOADate();
-		li.dtTo = logEntry->To.ToOADate();
-		li.dHours = logEntry->TimeInHours;
-		li.sTaskTitle = ToString(logEntry->TaskTitle);
-		li.sComment = ToString(logEntry->Comment);
-		li.sPerson = ToString(logEntry->Person);
-		li.sPath = ToString(logEntry->TaskPath);
-		li.sType = ToString(logEntry->Type);
-
-		if (logEntry->AltColor == Drawing::Color::Empty)
-			li.crAltColor = CLR_NONE;
-		else
-			li.crAltColor = logEntry->AltColor.ToArgb();
+		Copy(logEntry, li);
 	}
 
+	String^ logFilePath = GetPath(tasklistPath);
+
 	return (CTDCTaskTimeLog::SaveLogFile(MS(logFilePath), aLogEntries, FALSE) != FALSE);
+}
+
+bool TaskTimeLog::Add(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately)
+{
+	TASKTIMELOGITEM li;
+	Copy(logEntry, li);
+
+	return (CTDCTaskTimeLog(MS(tasklistPath)).LogTime(li, logSeparately) != FALSE);
+}
+
+String^ TaskTimeLog::GetPath(String^ tasklistPath)
+{
+	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogPath());
+}
+
+String^ TaskTimeLog::GetPath(String^ tasklistPath, UInt32 taskId, bool logSeparately)
+{
+	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogPath(taskId, logSeparately));
+}
+
+void TaskTimeLog::Copy(TaskTimeLogEntry^ from, TASKTIMELOGITEM& to)
+{
+	to.dwTaskID = from->TaskId;
+	to.dtFrom = from->From.ToOADate();
+	to.dtTo = from->To.ToOADate();
+	to.dHours = from->TimeInHours;
+	to.sTaskTitle = ToString(from->TaskTitle);
+	to.sComment = ToString(from->Comment);
+	to.sPerson = ToString(from->Person);
+	to.sPath = ToString(from->TaskPath);
+	to.sType = ToString(from->Type);
+
+	if (from->AltColor == Drawing::Color::Empty)
+		to.crAltColor = CLR_NONE;
+	else
+		to.crAltColor = from->AltColor.ToArgb();
 }
 
 CString TaskTimeLog::ToString(String^ str)

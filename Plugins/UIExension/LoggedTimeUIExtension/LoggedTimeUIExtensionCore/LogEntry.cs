@@ -40,6 +40,7 @@ namespace LoggedTimeUIExtension
 			return (GetEntry(entryId) != null);
 		}
 
+/*
 		public bool AddEntry(uint taskId,
 							string taskTitle,
 							DateTime from,
@@ -65,6 +66,7 @@ namespace LoggedTimeUIExtension
 			IsModified = true;
 			return true;
 		}
+*/
 
 		public bool ModifyEntry(uint entryId, DateTime start, DateTime end, double timeSpentInHrs, string comment, Color fillColor)
 		{
@@ -122,7 +124,7 @@ namespace LoggedTimeUIExtension
 			return m_Entries.Find(x => (x.Id == entryId));
 		}
 
-		public int GetEntryIndex(uint entryId)
+		private int GetEntryIndex(uint entryId)
 		{
 			return m_Entries.FindIndex(x => (x.Id == entryId));
 		}
