@@ -317,12 +317,12 @@ namespace LoggedTimeUIExtension
 
 		static string FormatTimeSpent(LogEntry entry, Translator trans)
 		{
-			return FormatTime(entry.TimeSpentInHrs, "{0} hours logged", "{0} minutes logged", trans);
+			return FormatTime(entry.TimeSpentInHrs, "{0}H logged", "{0}m logged", trans);
 		}
 
 		static string FormatDuration(LogEntry entry, Translator trans)
 		{
-			return FormatTime(entry.Length.TotalHours, "{0} hours duration", "{0} minutes duration", trans);
+			return FormatTime(entry.Length.TotalHours, "{0}H duration", "{0}m duration", trans);
 		}
 
 		void DrawTaskText(Graphics g, Calendar.AppointmentView apptView, Rectangle rect, Color textColor)
