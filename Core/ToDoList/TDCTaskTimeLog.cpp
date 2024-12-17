@@ -475,43 +475,43 @@ BOOL CTDCTaskTimeLog::LoadLogFile(LPCTSTR szLogPath, CTaskTimeLogItemArray& aLog
 	if (!FileMisc::FileExists(szLogPath))
 		return FALSE;
 
-	CTDCTaskTimeLog log;
-	
-	if (!log.Initialise(szLogPath))
+	CStringArray aLines;
+
+	if (!FileMisc::LoadFile(szLogPath, aLines))
 		return FALSE;
 
-	sHeaderDelim = log.m_sHeaderDelim;
+	CTDCTaskTimeLog log;
+	
+	if (!log.Initialise(aLines))
+		return FALSE;
 
-	CStringArray aLines;
-	int nNumLines = FileMisc::LoadFile(szLogPath, aLines), nItem = 0;
+	int nNumLines = aLines.GetSize(), nItem = 0;
+	int nNumHeaderRows = log.GetNumHeaderRows();
 
-	if (nNumLines)
+	// skip header and column titles lines
+	CTaskTimeLogItemArray aTempLogItems;
+	aTempLogItems.SetSize(nNumLines - nNumHeaderRows);
+
+	for (int nLine = nNumHeaderRows; nLine < nNumLines; nLine++)
 	{
-		CTaskTimeLogItemArray aTempLogItems;
+		const CString& sLine = Misc::GetItem(aLines, nLine);
+		CString sDelim = log.GetDelimiter(sLine);
 
-		// skip header and column titles lines
-		int nNumHeaderRows = log.GetNumHeaderRows();
-		aTempLogItems.SetSize(nNumLines - nNumHeaderRows);
+		TASKTIMELOGITEM& li = aTempLogItems[nItem];
 
-		for (int nLine = nNumHeaderRows; nLine < nNumLines; nLine++)
-		{
-			const CString& sLine = Misc::GetItem(aLines, nLine);
-			CString sDelim = log.GetDelimiter(sLine);
-
-			TASKTIMELOGITEM& li = aTempLogItems[nItem];
-
-			if (li.ParseRow(sLine, sDelim))
-				nItem++;
-		}
-
-		// Remove unused items
-		aTempLogItems.SetSize(nItem);
-
-		if (bAppend)
-			aLogItems.Append(aTempLogItems);
-		else
-			aLogItems.Copy(aTempLogItems);
+		if (li.ParseRow(sLine, sDelim))
+			nItem++;
 	}
+
+	// Remove unused items
+	aTempLogItems.SetSize(nItem);
+
+	if (bAppend)
+		aLogItems.Append(aTempLogItems);
+	else
+		aLogItems.Copy(aTempLogItems);
+
+	sHeaderDelim = log.m_sHeaderDelim;
 
 	return TRUE;
 }
@@ -573,7 +573,27 @@ BOOL CTDCTaskTimeLog::Initialise(const CString& sLogPath)
 	if (m_nVersion != VER_NONE)
 		return TRUE; 
 
-	m_bLogExists = FileMisc::FileExists(sLogPath);
+	CStringArray aLines;
+
+	if (FileMisc::FileExists(sLogPath) && 
+		(FileMisc::LoadFile(sLogPath, aLines, 2) == 0))
+	{
+		m_nVersion = VER_NONE;
+		return FALSE;
+	}
+
+	return Initialise(aLines);
+}
+
+BOOL CTDCTaskTimeLog::Initialise(const CStringArray& aLines)
+{
+	// Once only
+	if (m_nVersion != VER_NONE)
+		return TRUE;
+
+	int nNumLines = aLines.GetSize();
+
+	m_bLogExists = (nNumLines > 0);
 	m_bUseTabDelim = CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE);
 	m_nFormat = (m_bUseTabDelim ? SFEF_UTF16 : SFEF_UTF8);
 
@@ -583,14 +603,6 @@ BOOL CTDCTaskTimeLog::Initialise(const CString& sLogPath)
 
 	if (m_bLogExists)
 	{
-		CStringArray aLines;
-
-		if (FileMisc::LoadFile(sLogPath, aLines, 2) == 0)
-		{
-			m_nVersion = VER_NONE;
-			return FALSE;
-		}
-
 		CString sLine = aLines[0];
 
 		// version
@@ -600,7 +612,11 @@ BOOL CTDCTaskTimeLog::Initialise(const CString& sLogPath)
 			Misc::Split(sLine, sVer, VERSION_LINE);
 
 			m_nVersion = _ttoi(sVer);
-			sLine = aLines[1];
+
+			if (nNumLines < 2)
+				sLine = GetLatestColumnHeader();
+			else
+				sLine = aLines[1];
 		}
 		else
 		{

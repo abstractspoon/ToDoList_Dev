@@ -80,6 +80,7 @@ protected:
 	CTDCTaskTimeLog();
 
 	BOOL Initialise(const CString& sLogPath);
+	BOOL Initialise(const CStringArray& aLines);
 
 	CString GetLatestColumnHeader() const;
 	CString GetDelimiter(const CString& sLine = _T("")) const;
