@@ -83,6 +83,12 @@ BOOL TASKTIMELOGITEM::operator==(const TASKTIMELOGITEM& other) const
 			(other.crAltColor == crAltColor));
 }
 
+BOOL TASKTIMELOGITEM::IsValidToLog() const
+{
+	// must have a comment or valid time
+	return (!sComment.IsEmpty() || IsValidToAnalyse());
+}
+
 BOOL TASKTIMELOGITEM::IsValidToAnalyse() const
 {
 	return ((dHours != 0) && CDateHelper::IsDateSet(dtFrom) && (dtTo >= dtFrom));
@@ -388,7 +394,8 @@ BOOL CTDCTaskTimeLog::LogTime(DWORD dwTaskID, LPCTSTR szTaskTitle, LPCTSTR szTas
 
 BOOL CTDCTaskTimeLog::LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately)
 {
-	ASSERT(li.IsValidToAnalyse());
+	if (!li.IsValidToLog())
+		return FALSE;
 
 	// init state
 	CString sLogPath = GetLogPath(li.dwTaskID, bLogSeparately);
@@ -497,16 +504,13 @@ BOOL CTDCTaskTimeLog::LoadLogFile(LPCTSTR szLogPath, CTaskTimeLogItemArray& aLog
 				nItem++;
 		}
 
-		if (nItem)
-		{
-			// Remove unused items
-			aTempLogItems.SetSize(nItem);
+		// Remove unused items
+		aTempLogItems.SetSize(nItem);
 
-			if (bAppend && aLogItems.GetSize())
-				aLogItems.Append(aTempLogItems);
-			else
-				aLogItems.Copy(aTempLogItems);
-		}
+		if (bAppend)
+			aLogItems.Append(aTempLogItems);
+		else
+			aLogItems.Copy(aTempLogItems);
 	}
 
 	return TRUE;

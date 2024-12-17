@@ -7140,18 +7140,19 @@ BOOL CToDoCtrl::AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDa
 									const CString& sComment, BOOL bTracked)
 {
 	// sanity check
-	ASSERT((dHours != 0.0) || !sComment.IsEmpty());
+	if ((dHours == 0.0) && sComment.IsEmpty())
+		return FALSE; // sanity check
 
 	CTDCTaskTimeLog log(GetFilePath());
 
-	if (!log.LogTime(dwTaskID,
-					 GetTaskTitle(dwTaskID),
-					 GetTaskPath(dwTaskID),
-					 dHours,
-					 dtWhen,
-					 sComment,
-					 bTracked,
-					 HasStyle(TDCS_LOGTASKTIMESEPARATELY)))
+	if (!log.LogTime(dwTaskID, 
+						GetTaskTitle(dwTaskID), 
+						GetTaskPath(dwTaskID), 
+						dHours,
+						dtWhen, 
+						sComment, 
+						bTracked, 
+						HasStyle(TDCS_LOGTASKTIMESEPARATELY)))
 	{
 		UpdateWindow();
 		AfxMessageBox(CEnString(IDS_LOGFILELOCKED));
