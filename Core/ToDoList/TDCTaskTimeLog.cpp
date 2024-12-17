@@ -83,12 +83,6 @@ BOOL TASKTIMELOGITEM::operator==(const TASKTIMELOGITEM& other) const
 			(other.crAltColor == crAltColor));
 }
 
-BOOL TASKTIMELOGITEM::IsValidToLog() const
-{
-	// must have a comment or valid time
-	return (!sComment.IsEmpty() || IsValidToAnalyse());
-}
-
 BOOL TASKTIMELOGITEM::IsValidToAnalyse() const
 {
 	return ((dHours != 0) && CDateHelper::IsDateSet(dtFrom) && (dtTo >= dtFrom));
@@ -394,12 +388,13 @@ BOOL CTDCTaskTimeLog::LogTime(DWORD dwTaskID, LPCTSTR szTaskTitle, LPCTSTR szTas
 
 BOOL CTDCTaskTimeLog::LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately)
 {
-	if (!li.IsValidToLog())
-		return FALSE;
+	ASSERT(li.IsValidToAnalyse());
 
 	// init state
 	CString sLogPath = GetLogPath(li.dwTaskID, bLogSeparately);
-	Initialise(sLogPath);
+	
+	if (!Initialise(sLogPath))
+		return FALSE;
 
 	ASSERT(m_nVersion != VER_NONE);
 
