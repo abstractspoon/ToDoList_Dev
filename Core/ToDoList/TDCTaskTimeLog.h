@@ -65,7 +65,7 @@ public:
 	CString GetLogPath() const;
 	CString GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const;
 	
-	static int LoadLogFile(LPCTSTR szLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
+	static BOOL LoadLogFile(LPCTSTR szLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
 	static BOOL SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray& aLogItems, BOOL bPreserveVersion = TRUE);
 
 protected:
@@ -79,7 +79,7 @@ protected:
 protected: 
 	CTDCTaskTimeLog();
 
-	void Initialise(const CString& sLogPath);
+	BOOL Initialise(const CString& sLogPath);
 
 	CString GetLatestColumnHeader() const;
 	CString GetDelimiter(const CString& sLine = _T("")) const;

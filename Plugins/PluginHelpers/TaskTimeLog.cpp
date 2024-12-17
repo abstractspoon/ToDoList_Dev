@@ -15,36 +15,36 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 List<TaskTimeLogEntry^>^ TaskTimeLog::Load(String^ tasklistPath)
 {
+	String^ logFilePath = GetPath(tasklistPath);
 	CTaskTimeLogItemArray aLogEntries;
 	CString sUnused;
 
+	if (!CTDCTaskTimeLog::LoadLogFile(MS(logFilePath), aLogEntries, FALSE, sUnused))
+		return nullptr;
+
 	List<TaskTimeLogEntry^>^ logEntries = gcnew List<TaskTimeLogEntry^>();
-	String^ logFilePath = GetPath(tasklistPath);
 
-	if (CTDCTaskTimeLog::LoadLogFile(MS(logFilePath), aLogEntries, FALSE, sUnused))
+	for (int nEntry = 0; nEntry < aLogEntries.GetSize(); nEntry++)
 	{
-		for (int nEntry = 0; nEntry < aLogEntries.GetSize(); nEntry++)
-		{
-			const TASKTIMELOGITEM& li = aLogEntries.GetAt(nEntry);
-			TaskTimeLogEntry^ logEntry = gcnew TaskTimeLogEntry();
+		const TASKTIMELOGITEM& li = aLogEntries.GetAt(nEntry);
+		TaskTimeLogEntry^ logEntry = gcnew TaskTimeLogEntry();
 
-			logEntry->TaskId = li.dwTaskID;
-			logEntry->From = DateTime::FromOADate(li.dtFrom.m_dt);
-			logEntry->To = DateTime::FromOADate(li.dtTo);
-			logEntry->TimeInHours = li.dHours;
-			logEntry->TaskTitle = ToString(li.sTaskTitle);
-			logEntry->Comment = ToString(li.sComment);
-			logEntry->Person = ToString(li.sPerson);
-			logEntry->TaskPath = ToString(li.sPath);
-			logEntry->Type = ToString(li.sType);
+		logEntry->TaskId = li.dwTaskID;
+		logEntry->From = DateTime::FromOADate(li.dtFrom.m_dt);
+		logEntry->To = DateTime::FromOADate(li.dtTo);
+		logEntry->TimeInHours = li.dHours;
+		logEntry->TaskTitle = ToString(li.sTaskTitle);
+		logEntry->Comment = ToString(li.sComment);
+		logEntry->Person = ToString(li.sPerson);
+		logEntry->TaskPath = ToString(li.sPath);
+		logEntry->Type = ToString(li.sType);
 
-			if (li.crAltColor == CLR_NONE)
-				logEntry->AltColor = Drawing::Color::Empty;
-			else
-				logEntry->AltColor = Drawing::Color::FromArgb(li.crAltColor);
+		if (li.crAltColor == CLR_NONE)
+			logEntry->AltColor = Drawing::Color::Empty;
+		else
+			logEntry->AltColor = Drawing::Color::FromArgb(li.crAltColor);
 
-			logEntries->Add(logEntry);
-		}
+		logEntries->Add(logEntry);
 	}
 	
 	return logEntries;

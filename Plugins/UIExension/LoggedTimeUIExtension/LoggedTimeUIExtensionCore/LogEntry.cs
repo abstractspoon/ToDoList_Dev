@@ -103,19 +103,22 @@ namespace LoggedTimeUIExtension
 			{
 				var logEntries = TaskTimeLog.Load(filePath);
 
-				m_Entries.Clear();
-				m_NextEntryId = 1;
+				if (logEntries != null)
+				{
+					m_Entries.Clear();
+					m_NextEntryId = 1;
 
-				foreach (var entry in logEntries)
-					m_Entries.Add(new LogEntry(m_NextEntryId++, entry));
+					foreach (var entry in logEntries)
+						m_Entries.Add(new LogEntry(m_NextEntryId++, entry));
 
-				return true;
+					return true;
+				}
 			}
 			catch (Exception)
 			{
+				Reset();
 			}
 
-			Reset();
 			return false;
 		}
 

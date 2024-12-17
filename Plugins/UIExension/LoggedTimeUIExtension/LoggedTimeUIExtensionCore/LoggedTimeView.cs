@@ -613,6 +613,14 @@ namespace LoggedTimeUIExtension
 
 				Invalidate();
 			}
+			else
+			{
+				// Notify user only if log file exists
+				var logPath = TaskTimeLog.GetPath(m_TasklistPath);
+
+				if (File.Exists(logPath))
+					MessageBox.Show(string.Format(m_Trans.Translate("Unable to load log file '{0}'", Translator.Type.Text)), logPath);
+			}
 		}
 
 		///////////////////////////////////////////////////////////
