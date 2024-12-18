@@ -28,6 +28,7 @@ namespace LoggedTimeUIExtension
 
 		private string m_TasklistPath = @"\."; // something valid
 		private FileSystemWatcher m_LogFileWatcher;
+		private bool m_LastLogAccessFailed = false;
 
 //		private DateSortedTasks m_DateSortedTasks;
 
@@ -36,12 +37,7 @@ namespace LoggedTimeUIExtension
 		private Translator m_Trans;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
 
-		private int LabelTipBorder
-		{
-			get { return DPIScaling.Scale(4); }
-		}
-
-		public bool ReadOnly { get; set; }
+		private int LabelTipBorder { get { return DPIScaling.Scale(4); } }
 
 		// ----------------------------------------------------------------
 
@@ -86,13 +82,9 @@ namespace LoggedTimeUIExtension
 		public UIExtension.TaskIcon TaskIcons { get { return m_RenderHelper.TaskIcons; } }
 
 		public TaskItem GetTask(uint taskId) { return m_TaskItems.GetItem(taskId); }
-
-		// ILabelTipHandler implementation
-		public Control GetOwner()
-		{
-			return this;
-		}
-
+		public Control GetOwner() { return this; } // ILabelTipHandler implementation
+		
+		public bool ReadOnly;
 		public bool ForceShowSelection;
 
 		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
@@ -297,14 +289,20 @@ namespace LoggedTimeUIExtension
 
 		public bool CanAddNewLogEntry
 		{
-			// Must have a valid tasklist path -> valid log file path
-			// and there must be no pending modifications
-			get { return !string.IsNullOrEmpty(m_TasklistPath) && !m_LogEntries.IsModified; }
+			get
+			{
+				if (m_LastLogAccessFailed)
+					return false;
+
+				// Must have a valid tasklist path -> valid log file path
+				// and there must be no pending modifications
+				return !string.IsNullOrEmpty(m_TasklistPath) && !m_LogEntries.IsModified;
+			}
 		}
 
 		public bool CanModifySelectedLogEntry
 		{
-			get { return !ReadOnly && m_LogEntries.HasEntry(m_SelectedEntryId); }
+			get { return !ReadOnly && !m_LastLogAccessFailed && m_LogEntries.HasEntry(m_SelectedEntryId); }
 		}
 
 		public bool CanDeleteSelectedLogEntry
@@ -335,26 +333,10 @@ namespace LoggedTimeUIExtension
 				AltColor = fillColor
 			};
 
-			int iTry = 10;
-
-			while (iTry-- > 0)
-			{
-				if (TaskTimeLog.Add(m_TasklistPath, newEntry, false))
-					break;
-
-				Thread.Sleep(50);
-			}
-
-			if (iTry < 0)
-			{
-				// Test if log file is locked and notify user
-				// TODO
-
-				return false;
-			}
+			m_LastLogAccessFailed = !TaskTimeLog.Add(m_TasklistPath, newEntry, false);
 
 			Invalidate();
-			return true;
+			return !m_LastLogAccessFailed;
 		}
 
 		public bool ModifySelectedLogEntry(DateTime start, DateTime end, double timeSpentInHrs, string comment, Color fillColor)
@@ -569,16 +551,14 @@ namespace LoggedTimeUIExtension
 				// Temporarily disable file watcher
 				m_LogFileWatcher.EnableRaisingEvents = false;
 
-				if (!m_LogEntries.SaveLogFile(m_TasklistPath))
-					return true; // try again
+				m_LastLogAccessFailed = !m_LogEntries.SaveLogFile(m_TasklistPath);
 
 				m_LogFileWatcher.EnableRaisingEvents = true;
 			}
 			else if (m_WantIdleReload)
 			{
-				m_WantIdleReload = false;
-
-				ReloadLogFile();
+				// Keep trying if it fails
+				m_WantIdleReload = m_LastLogAccessFailed = !ReloadLogFile();
 			}
 
 			return false; // No more tasks
@@ -595,7 +575,7 @@ namespace LoggedTimeUIExtension
 				m_WantIdleReload = true;
 		}
 
-		private void ReloadLogFile()
+		private bool ReloadLogFile()
 		{
 			if (m_LogEntries.Load(m_TasklistPath))
 			{
@@ -611,16 +591,22 @@ namespace LoggedTimeUIExtension
 				m_LogFileWatcher.Path = Path.GetDirectoryName(m_TasklistPath);
 				m_LogFileWatcher.EnableRaisingEvents = true;
 
+				m_LastLogAccessFailed = false;
+
 				Invalidate();
 			}
-			else
+			else if (!m_LastLogAccessFailed)
 			{
 				// Notify user only if log file exists
 				var logPath = TaskTimeLog.GetPath(m_TasklistPath);
 
 				if (File.Exists(logPath))
-					MessageBox.Show(string.Format(m_Trans.Translate("Unable to load log file '{0}'", Translator.Type.Text)), logPath);
+					TaskTimeLog.ShowAccessErrorMsg(m_Trans, "Logged Time", MessageBoxButtons.OK);
+
+				m_LastLogAccessFailed = true;
 			}
+
+			return !m_LastLogAccessFailed;
 		}
 
 		///////////////////////////////////////////////////////////
@@ -632,7 +618,7 @@ namespace LoggedTimeUIExtension
 			if (!IsSamePath(tasklistPath, m_TasklistPath))
 			{
 				m_TasklistPath = tasklistPath;
-				ReloadLogFile();
+				m_WantIdleReload = !ReloadLogFile();
 			}
 
 			// Update the tasks

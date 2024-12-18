@@ -102,7 +102,11 @@ namespace LoggedTimeUIExtension
 
 		public bool DoIdleProcessing()
 		{
-			return m_TimeLog.DoIdleProcessing();
+			m_TimeLog.DoIdleProcessing();
+
+			UpdateToolbarButtonStates();
+
+			return false; // always
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
@@ -119,10 +123,7 @@ namespace LoggedTimeUIExtension
 					{
 					case Keys.Escape:
 						if (m_TimeLog.CancelAppointmentResizing())
-						{
-							UpdateToolbarButtonStates();
 							return true;
-						}
 						break;
 
 					case Keys.Delete:
@@ -599,14 +600,12 @@ namespace LoggedTimeUIExtension
 			string format = m_Trans.Translate("Next/Previous {0} days", Translator.Type.ToolTip);
 			m_TimeLog.HScrollTooltipText = String.Format(format, m_TimeLog.HScrollStep);
 
-			UpdateToolbarButtonStates();
-            //UpdatedSelectedTaskDatesPosition();
+			//UpdatedSelectedTaskDatesPosition();
 		}
 
 		private void OnDeleteLogEntry(object sender, EventArgs e)
 		{
-			if (m_TimeLog.DeleteSelectedLogEntry())
-				UpdateToolbarButtonStates();
+			m_TimeLog.DeleteSelectedLogEntry();
 		}
 
 		private void OnCreateLogEntry(object sender, EventArgs e)
@@ -645,7 +644,6 @@ namespace LoggedTimeUIExtension
 				if (m_TimeLog.AddNewLogEntry(taskItem, dlg.From, dlg.To, dlg.TimeSpent, dlg.Comment, /*taskItem?.Path*/"", /*TODO*/"", dlg.FillColor))
 				{
 					AddHoursToTaskTimeSpent(dlg.TaskId, dlg.HoursToAddToTimeSpent);
-					UpdateToolbarButtonStates();
 
 					// Clear selection
 					m_TimeLog.SelectedDates.End = m_TimeLog.SelectedDates.Start;
@@ -667,6 +665,9 @@ namespace LoggedTimeUIExtension
 
 		private void OnEditLogEntry(object sender, EventArgs e)
 		{
+			if (!m_TimeLog.CanModifySelectedLogEntry)
+				return;
+
 			var entry = m_TimeLog.SelectedLogEntry;
 			var taskItem = m_TimeLog.SelectedLogEntryTaskItem;
 
@@ -844,9 +845,7 @@ namespace LoggedTimeUIExtension
 		private void OnTimeLogSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
 			//UpdatedSelectedTaskDatesText();
-			UpdateToolbarButtonStates();
 		}
-
 /*
 		private void UpdatedSelectedTaskDatesText()
 		{

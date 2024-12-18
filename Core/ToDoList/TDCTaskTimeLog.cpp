@@ -399,24 +399,34 @@ BOOL CTDCTaskTimeLog::LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately)
 
 	// init state
 	CString sLogPath = GetLogPath(li.dwTaskID, bLogSeparately);
-	
-	if (!Initialise(sLogPath))
-		return FALSE;
 
-	ASSERT(m_nVersion != VER_NONE);
-
-	// if the file doesn't exist then we insert the 
-	// column headings as the first line
-	if (!m_bLogExists)
+	if (Initialise(sLogPath))
 	{
-		CString sHeader;
-		sHeader.Format(_T("%s %d\n%s\n"), VERSION_LINE, m_nVersion, GetLatestColumnHeader());
+		ASSERT(m_nVersion != VER_NONE);
 
-		VERIFY(FileMisc::CreateFolderFromFilePath(sLogPath));
-		VERIFY(m_bLogExists = FileMisc::SaveFile(sLogPath, sHeader, m_nFormat));
+		// if the file doesn't exist then we insert the 
+		// column headings as the first line
+		if (!m_bLogExists)
+		{
+			CString sHeader;
+			sHeader.Format(_T("%s %d\n%s\n"), VERSION_LINE, m_nVersion, GetLatestColumnHeader());
+
+			VERIFY(FileMisc::CreateFolderFromFilePath(sLogPath));
+			VERIFY(m_bLogExists = FileMisc::SaveFile(sLogPath, sHeader, m_nFormat));
+		}
+
+		int nTry = 10;
+
+		while (nTry--)
+		{
+			if (FileMisc::AppendLineToFile(sLogPath, li.FormatRow(m_nVersion, GetDelimiter()), SFEF_AUTODETECT))
+				return TRUE;
+
+			::Sleep(100);
+		}
 	}
 
-	return FileMisc::AppendLineToFile(sLogPath, li.FormatRow(m_nVersion, GetDelimiter()), SFEF_AUTODETECT);
+	return FALSE;
 }
 
 CString CTDCTaskTimeLog::GetLogPath() const

@@ -4,11 +4,13 @@
 #include "stdafx.h"
 #include "pluginhelpers.h"
 #include "TaskTimeLog.h"
+#include "Translator.h"
 
 #include <ToDoList\TDCTaskTimeLog.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+using namespace System::Windows::Forms;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19,7 +21,7 @@ List<TaskTimeLogEntry^>^ TaskTimeLog::Load(String^ tasklistPath)
 	CTaskTimeLogItemArray aLogEntries;
 	CString sUnused;
 
-	if (!CTDCTaskTimeLog::LoadLogFile(MS(logFilePath), aLogEntries, FALSE, sUnused))
+	if (CTDCTaskTimeLog::LoadLogFile(MS(logFilePath), aLogEntries, FALSE, sUnused) == FALSE)
 		return nullptr;
 
 	List<TaskTimeLogEntry^>^ logEntries = gcnew List<TaskTimeLogEntry^>();
@@ -74,6 +76,15 @@ bool TaskTimeLog::Add(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool log
 	Copy(logEntry, li);
 
 	return (CTDCTaskTimeLog(MS(tasklistPath)).LogTime(li, logSeparately) != FALSE);
+}
+
+DialogResult TaskTimeLog::ShowAccessErrorMsg(Translator^ trans, String^ title, MessageBoxButtons btns)
+{
+	auto ERR_TEXT = gcnew String(L"The log file could not be accessed.\n\n"
+								 L"Please ensure that the file is not already open for editing and \n"
+								 L"that you have the correct permissions and then try again.");
+
+	return MessageBox::Show(trans->Translate(ERR_TEXT, Translator::Type::Text), title, btns, MessageBoxIcon::Exclamation);
 }
 
 String^ TaskTimeLog::GetPath(String^ tasklistPath)
