@@ -40,7 +40,6 @@ namespace LoggedTimeUIExtension
 
 		// ----------------------------------------------------------------
 
-// 		public new event TDLAppointmentEventHandler AppointmentMove;
 		public new event TDLContextMenuEventHandler ContextMenu;
 		public event EventHandler LogAccessStatusChanged;
 
@@ -64,7 +63,6 @@ namespace LoggedTimeUIExtension
 			m_TaskItems = new TaskItems();
 //			m_DateSortedTasks = new DateSortedTasks(m_LogEntries);
 
-// 			base.AppointmentMove += new Calendar.AppointmentEventHandler(OnTimeLogAppointmentChanged);
 // 			base.NotifyDayWidth += new Calendar.DayWidthEventHandler(OnNotifyDayWidth);
 
 			// Create a 5 minute timer for updating the line indicating time of day 'today'
@@ -263,7 +261,9 @@ namespace LoggedTimeUIExtension
 
 			if ((me != null) && me.Finished)
 			{
-				 // TODO
+				var entry = (e.Appointment as LogEntry);
+
+				m_LogEntries.ModifyEntry(m_SelectedEntryId, entry.StartDate, entry.EndDate, entry.TimeSpentInHrs, entry.Comment, entry.FillColor);
 			}
 		}
 

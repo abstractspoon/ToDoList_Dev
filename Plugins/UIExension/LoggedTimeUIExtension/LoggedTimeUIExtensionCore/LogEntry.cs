@@ -75,10 +75,16 @@ namespace LoggedTimeUIExtension
 			if (entry == null)
 				return false;
 
-			if (!entry.Modify(start, end, timeSpentInHrs, comment, fillColor))
+			if (!entry.Modify(start, end, timeSpentInHrs, comment, fillColor) &&
+				!entry.StartDateDiffersFromOriginal() && 
+				!entry.EndDateDiffersFromOriginal())
+			{
 				return false;
+			}
 
 			IsModified = true;
+			entry.UpdateOriginalDates();
+
 			return true;
 		}
 
@@ -245,6 +251,8 @@ namespace LoggedTimeUIExtension
 			TaskPath = path;
 			Type = type;
 			FillColor = altColor;
+
+			UpdateOriginalDates();
 		}
 
 		public uint TaskId { get; private set; }
