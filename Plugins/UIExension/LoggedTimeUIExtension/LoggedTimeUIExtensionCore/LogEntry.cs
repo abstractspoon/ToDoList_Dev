@@ -75,9 +75,8 @@ namespace LoggedTimeUIExtension
 			if (entry == null)
 				return false;
 
-			if (!entry.Modify(start, end, timeSpentInHrs, comment, fillColor) &&
-				!entry.StartDateDiffersFromOriginal() && 
-				!entry.EndDateDiffersFromOriginal())
+			if (!entry.Modify(start, end, timeSpentInHrs, comment, fillColor) && 
+				!entry.DatesDifferFromOriginal())
 			{
 				return false;
 			}
@@ -340,6 +339,11 @@ namespace LoggedTimeUIExtension
 		public bool StartDateDiffersFromOriginal()
 		{
 			return ((StartDate - m_OrgDates.Start).TotalSeconds != 0.0);
+		}
+
+		public bool DatesDifferFromOriginal()
+		{
+			return (StartDateDiffersFromOriginal() || EndDateDiffersFromOriginal());
 		}
 
         public TimeSpan OriginalLength
