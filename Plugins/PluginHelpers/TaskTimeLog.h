@@ -49,7 +49,7 @@ namespace Abstractspoon
 				static String^ GetPath(String^ tasklistPath);
 				static String^ GetPath(String^ tasklistPath, UInt32 taskId, bool logSeparately);
 
-				static Windows::Forms::DialogResult ShowAccessErrorMsg(Translator^ trans, String^ title, Windows::Forms::MessageBoxButtons btns);
+				static property String^ LogAccessErrorMsg { String^ get(); }
 
 			private:
 				static String^ ToString(const CString& str);

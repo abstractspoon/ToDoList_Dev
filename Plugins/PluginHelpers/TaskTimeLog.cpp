@@ -78,13 +78,11 @@ bool TaskTimeLog::Add(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool log
 	return (CTDCTaskTimeLog(MS(tasklistPath)).LogTime(li, logSeparately) != FALSE);
 }
 
-DialogResult TaskTimeLog::ShowAccessErrorMsg(Translator^ trans, String^ title, MessageBoxButtons btns)
+String^ TaskTimeLog::LogAccessErrorMsg::get()
 {
-	auto ERR_TEXT = gcnew String(L"The log file could not be accessed.\n\n"
-								 L"Please ensure that the file is not already open for editing and \n"
-								 L"that you have the correct permissions and then try again.");
-
-	return MessageBox::Show(trans->Translate(ERR_TEXT, Translator::Type::Text), title, btns, MessageBoxIcon::Exclamation);
+	return gcnew String(L"The log file could not be accessed.\n\n"
+						L"Please ensure that the file is not already open for editing and \n"
+						L"that you have the correct permissions and then try again.");
 }
 
 String^ TaskTimeLog::GetPath(String^ tasklistPath)

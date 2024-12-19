@@ -319,6 +319,7 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.MouseWheel += new MouseEventHandler(OnTimeLogMouseWheel);
 			m_TimeLog.MouseDoubleClick += new MouseEventHandler(OnTimeLogMouseDoubleClick);
 			m_TimeLog.ContextMenu += new TDLContextMenuEventHandler(OnTimeLogContextMenu);
+			m_TimeLog.LogAccessStatusChanged += new EventHandler(OnLogAccessStatusChanged);
 
 			// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
 			// causes the edit icon dialog to fail to correctly get focus but
@@ -348,6 +349,19 @@ namespace LoggedTimeUIExtension
 
 			menu.Items.Add(item);
 			return item;
+		}
+
+		void OnLogAccessStatusChanged(object sender, EventArgs e)
+		{
+			UpdateToolbarButtonStates();
+
+			if (m_TimeLog.LastLogAccessFailed)
+			{
+				MessageBox.Show(m_Trans.Translate(TaskTimeLog.LogAccessErrorMsg, Translator.Type.Text),
+								m_Trans.Translate("Logged Time", Translator.Type.Text), 
+								MessageBoxButtons.OK, 
+								MessageBoxIcon.Exclamation);
+			}
 		}
 
 		bool OnTimeLogContextMenu(object sender, MouseEventArgs e)
@@ -601,11 +615,13 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.HScrollTooltipText = String.Format(format, m_TimeLog.HScrollStep);
 
 			//UpdatedSelectedTaskDatesPosition();
+			UpdateToolbarButtonStates();
 		}
 
 		private void OnDeleteLogEntry(object sender, EventArgs e)
 		{
-			m_TimeLog.DeleteSelectedLogEntry();
+			if (m_TimeLog.DeleteSelectedLogEntry())
+				UpdateToolbarButtonStates();
 		}
 
 		private void OnCreateLogEntry(object sender, EventArgs e)
@@ -644,6 +660,7 @@ namespace LoggedTimeUIExtension
 				if (m_TimeLog.AddNewLogEntry(taskItem, dlg.From, dlg.To, dlg.TimeSpent, dlg.Comment, /*taskItem?.Path*/"", /*TODO*/"", dlg.FillColor))
 				{
 					AddHoursToTaskTimeSpent(dlg.TaskId, dlg.HoursToAddToTimeSpent);
+					UpdateToolbarButtonStates();
 
 					// Clear selection
 					m_TimeLog.SelectedDates.End = m_TimeLog.SelectedDates.Start;
@@ -845,31 +862,32 @@ namespace LoggedTimeUIExtension
 		private void OnTimeLogSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
 			//UpdatedSelectedTaskDatesText();
+			UpdateToolbarButtonStates();
 		}
-/*
-		private void UpdatedSelectedTaskDatesText()
-		{
-			DateTime from, to;
+		/*
+				private void UpdatedSelectedTaskDatesText()
+				{
+					DateTime from, to;
 
-			if (m_TimeLog.GetSelectedTaskDates(out from, out to))
-			{
-				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
-				String dateRange = DateUtil.FormatRange(from, to, true, m_TimeLog.DisplayDatesInISO);
+					if (m_TimeLog.GetSelectedTaskDates(out from, out to))
+					{
+						String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
+						String dateRange = DateUtil.FormatRange(from, to, true, m_TimeLog.DisplayDatesInISO);
 
-				m_SelectedTaskDatesLabel.Text = (label + dateRange);
-				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
-			}
-			else
-			{
-				m_SelectedTaskDatesLabel.Text = String.Empty;
-			}
-		}
+						m_SelectedTaskDatesLabel.Text = (label + dateRange);
+						m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
+					}
+					else
+					{
+						m_SelectedTaskDatesLabel.Text = String.Empty;
+					}
+				}
 
-		private void UpdatedSelectedTaskDatesPosition()
-		{
-			m_SelectedTaskDatesLabel.Location = new Point(m_WeekLabel.Right + 10, m_YearCombo.Bottom - m_SelectedTaskDatesLabel.Height);
-		}
-*/
+				private void UpdatedSelectedTaskDatesPosition()
+				{
+					m_SelectedTaskDatesLabel.Location = new Point(m_WeekLabel.Right + 10, m_YearCombo.Bottom - m_SelectedTaskDatesLabel.Height);
+				}
+		*/
 
 		private void OnTimeLogWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
 		{
