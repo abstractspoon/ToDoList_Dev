@@ -403,6 +403,7 @@ namespace LoggedTimeUIExtension
 		public bool CacheSelectedLogEntry()
 		{
 			Debug.Assert(m_SelectedLogEntryId != 0);
+			Debug.Assert(m_CachedLogEntry == null);
 
 			var entry = m_LogEntries.GetEntry(m_SelectedLogEntryId);
 
@@ -419,7 +420,10 @@ namespace LoggedTimeUIExtension
 		public bool RestoreCachedLogEntry()
 		{
 			if (m_CachedLogEntry == null)
+			{
+				Debug.Assert(false);
 				return false;
+			}
 
 			m_LogEntries.DeleteEntry(m_CachedLogEntry.Id);
 			m_LogEntries.AddEntry(m_CachedLogEntry);
@@ -670,15 +674,12 @@ namespace LoggedTimeUIExtension
 
 			m_LogFileWatcher.EnableRaisingEvents = true;
 
-			if (!success)
-			{
+			if (success)
+				ClearCachedLogEntry();
+			else
 				RestoreCachedLogEntry();
-				return false;
-			}
 
-			// else
-			ClearCachedLogEntry();
-			return true;
+			return success;
 		}
 
 		private void HandleLastLogAccessFailed(bool failed)
