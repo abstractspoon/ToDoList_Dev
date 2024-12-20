@@ -436,7 +436,7 @@ namespace LoggedTimeUIExtension
 			if (base.SavingToImage)
 				return UIExtension.SelectionRect.Style.None;
 
-			if (m_SelectedEntryId == appt.Id)
+			if (m_SelectedLogEntryId == appt.Id)
 				return (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
 
 			// Check interrelatedness of types

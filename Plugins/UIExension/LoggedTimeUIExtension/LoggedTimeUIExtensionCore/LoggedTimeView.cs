@@ -20,11 +20,12 @@ namespace LoggedTimeUIExtension
 
 	public partial class LoggedTimeView : Calendar.DayView, ILabelTipHandler
 	{
-		private uint m_SelectedEntryId = 0;
+		private uint m_SelectedLogEntryId = 0;
 		private int m_UserMinSlotHeight = -1;
 
 		private TaskItems m_TaskItems;
 		private LogEntries m_LogEntries;
+		private LogEntry m_CachedLogEntry;
 
 		private string m_TasklistPath = @"\."; // something valid
 		private FileSystemWatcher m_LogFileWatcher;
@@ -273,7 +274,7 @@ namespace LoggedTimeUIExtension
 
 		public LogEntry SelectedLogEntry
 		{
-			get { return m_LogEntries.GetEntry(m_SelectedEntryId); }
+			get { return m_LogEntries.GetEntry(m_SelectedLogEntryId); }
 		}
 
 		public bool CanAddNewLogEntry
@@ -291,7 +292,7 @@ namespace LoggedTimeUIExtension
 
 		public bool CanModifySelectedLogEntry
 		{
-			get { return !ReadOnly && !LastLogAccessFailed && m_LogEntries.HasEntry(m_SelectedEntryId); }
+			get { return !ReadOnly && !LastLogAccessFailed && m_LogEntries.HasEntry(m_SelectedLogEntryId); }
 		}
 
 		public bool CanDeleteSelectedLogEntry
@@ -341,11 +342,13 @@ namespace LoggedTimeUIExtension
 			if (!CanModifySelectedLogEntry)
 				return false;
 
-			m_LogEntries.CacheEntry(m_SelectedEntryId);
+			CacheSelectedLogEntry();
 
-			if (!m_LogEntries.ModifyEntry(m_SelectedEntryId, dates, timeSpentInHrs, comment, fillColor))
+			var entry = m_LogEntries.GetEntry(m_SelectedLogEntryId);
+
+			if (!entry.Modify(dates, timeSpentInHrs, comment, fillColor))
 			{
-				m_LogEntries.ClearCachedEntry();
+				ClearCachedLogEntry();
 				return false;
 			}
 
@@ -360,14 +363,19 @@ namespace LoggedTimeUIExtension
 
 			if (me != null)
 			{
-				if (me.Started)
+				Debug.Assert(e.Appointment.Id == m_SelectedLogEntryId);
+
+				switch (me.State)
 				{
-					m_LogEntries.CacheEntry(m_SelectedEntryId);
-				}
-				else if (me.Finished)
-				{
-					m_LogEntries.SetCachedEntryDatesModified(m_SelectedEntryId);
+				case Calendar.SelectionTool.State.Started:
+					if (CanModifyAppointmentDates)
+						CacheSelectedLogEntry();
+					break;
+
+				case Calendar.SelectionTool.State.Finished:
+					Debug.Assert(e.Appointment.Id == m_CachedLogEntry.Id);
 					SaveLogFile();
+					break;
 				}
 			}
 		}
@@ -377,24 +385,58 @@ namespace LoggedTimeUIExtension
 			if (!CanDeleteSelectedLogEntry)
 				return false;
 
-			m_LogEntries.CacheEntry(m_SelectedEntryId);
+			CacheSelectedLogEntry();
 
-			if (!m_LogEntries.DeleteEntry(m_SelectedEntryId))
-			{
-				m_LogEntries.ClearCachedEntry();
-				return false;
-			}
+			if (!m_LogEntries.DeleteEntry(m_SelectedLogEntryId))
+				Debug.Assert(false);
 
 			if (!SaveLogFile())
 				return false;
 
 			// else
-			m_SelectedEntryId = 0;
+			m_SelectedLogEntryId = 0;
 			Invalidate();
 
 			return true;
 		}
 
+		public bool CacheSelectedLogEntry()
+		{
+			Debug.Assert(m_SelectedLogEntryId != 0);
+
+			var entry = m_LogEntries.GetEntry(m_SelectedLogEntryId);
+
+			if (entry == null)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
+			m_CachedLogEntry = new LogEntry(m_SelectedLogEntryId, entry);
+			return true;
+		}
+
+		public bool RestoreCachedLogEntry()
+		{
+			if (m_CachedLogEntry == null)
+				return false;
+
+			m_LogEntries.DeleteEntry(m_CachedLogEntry.Id);
+			m_LogEntries.AddEntry(m_CachedLogEntry);
+
+			m_SelectedLogEntryId = m_CachedLogEntry.Id;
+
+			ClearCachedLogEntry();
+			Invalidate();
+
+			return true;
+		}
+
+		public void ClearCachedLogEntry()
+		{
+			m_CachedLogEntry = null;
+		}
+		
 		public bool GetSelectedTaskDates(out DateTime from, out DateTime to)
 		{
 			from = to = Calendar.Appointment.NullDate;
@@ -468,7 +510,7 @@ namespace LoggedTimeUIExtension
 		{
 			// Our base class clears the selected appointment whenever
 			// the week changes so we can't always rely on 'SelectedAppointmentId'
-			LogEntry item = m_LogEntries.GetEntry(m_SelectedEntryId);
+			LogEntry item = m_LogEntries.GetEntry(m_SelectedLogEntryId);
 
 			if (item != null)
 			{
@@ -630,14 +672,12 @@ namespace LoggedTimeUIExtension
 
 			if (!success)
 			{
-				m_LogEntries.RestoreCachedEntry();
-				Invalidate();
-
+				RestoreCachedLogEntry();
 				return false;
 			}
 
 			// else
-			m_LogEntries.ClearCachedEntry();
+			ClearCachedLogEntry();
 			return true;
 		}
 
@@ -778,8 +818,8 @@ namespace LoggedTimeUIExtension
 
 		public override bool EnsureVisible(Calendar.Appointment appt, bool partialOK)
 		{
-			if ((appt == null) && (m_SelectedEntryId != 0))
-				appt = m_LogEntries.GetEntry(m_SelectedEntryId);
+			if ((appt == null) && (m_SelectedLogEntryId != 0))
+				appt = m_LogEntries.GetEntry(m_SelectedLogEntryId);
 
 			return base.EnsureVisible(appt, partialOK);
 		}
@@ -797,9 +837,9 @@ namespace LoggedTimeUIExtension
 		private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
         {
             if (args.Appointment != null)
-				m_SelectedEntryId = args.Appointment.Id;
+				m_SelectedLogEntryId = args.Appointment.Id;
 			else
-				m_SelectedEntryId = 0;
+				m_SelectedLogEntryId = 0;
 
 			Invalidate();
 		}
@@ -831,23 +871,14 @@ namespace LoggedTimeUIExtension
 			base.OnMouseDown(e);
 
 			// Cancel resizing if our task is not editable
-			if (IsResizingAppointment())
-			{
-				var mode = GetMode(SelectedAppointment, e.Location);
-
-				if (!CanModifyAppointmentDates(SelectedAppointment, mode))
-				{
-					CancelAppointmentResizing();
-				}
-			}
+			if (IsResizingAppointment() && !CanModifyAppointmentDates)
+				CancelAppointmentResizing();
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)
 		{
 			if ((e.Button == MouseButtons.Right) && (ContextMenu?.Invoke(this, e) == true))
-			{
 				return; // handled
-			}
 						
 			base.OnMouseClick(e);
 		}
@@ -872,119 +903,16 @@ namespace LoggedTimeUIExtension
 		{
 			if (base.CancelAppointmentResizing())
 			{
-				m_LogEntries.RestoreCachedEntry();
-				Invalidate();
-
+				RestoreCachedLogEntry();
 				return true;
 			}
 
 			return false;
 		}
 
-		private bool CanModifyAppointmentDates(Calendar.Appointment appt, Calendar.SelectionTool.Mode mode)
+		private bool CanModifyAppointmentDates
 		{
-/*
-			if (appt == null)
-				return false;
-			
-			if (appt.Locked)
-				return false;
-			
-			bool isTimeBlock = (appt is TaskTimeBlock);
-
-			if (ReadOnly && !isTimeBlock)
-				return false;
-
-			var taskItem = (appt as TimeLogEntry);
-
-			// Disable start date editing for tasks with dependencies that are auto-calculated
-			// Disable resizing for custom date attributes
-			bool isCustomDate = (appt is TaskCustomDateAttribute);
-			bool hasDepends = ((taskItem != null) && taskItem.HasDependencies);
-			bool hasLockedDepends = (hasDepends && DependencyDatesAreCalculated);
-
-			switch (mode)
-			{
-			case Calendar.SelectionTool.Mode.Move:
-				if (hasLockedDepends)
-				{
-					// can't change the start date if it's dependent
-					// on the end date of another task
-					return false;
-				}
-				else if (HasCalculatedStartDate(appt))
-				{
-					// can't move a task with a calculated start date
-					return false;
-				}
-				break;
-
-			case Calendar.SelectionTool.Mode.ResizeTop:
-				if (isCustomDate)
-				{
-					// custom dates are ALWAYS long tasks
-					return false; 
-				}
-				else if (hasLockedDepends)
-				{
-					// can't change the start date if it's dependent
-					// on the end date of another task
-					return false; 
-				}
-				break;
-
-			case Calendar.SelectionTool.Mode.ResizeLeft:
-				if (isTimeBlock)
-				{
-					// time blocks are NEVER long tasks
-					return false; 
-				}
-				else if (isCustomDate)
-				{
-					// custom dates are of FIXED length
-					return false;
-				}
-				else if (hasLockedDepends)
-				{
-					// can't change the start date if it's dependent
-					// on the end date of another task
-					return false;
-				}
-				break;
-
-			case Calendar.SelectionTool.Mode.ResizeBottom:
-				if (isCustomDate)
-				{
-					// custom dates are ALWAYS long tasks
-					return false;
-				}
-				break;
-
-			case Calendar.SelectionTool.Mode.ResizeRight:
-				if (isTimeBlock)
-				{
-					// time blocks are NEVER long tasks
-					return false;
-				}
-				else if (isCustomDate)
-				{
-					// custom dates are of FIXED length
-					return false;
-				}
-				else if (HasCalculatedEndDate(appt))
-				{
-					// can't resize a task with a calculated end date
-					return false;
-				}
-				break;
-
-			default:
-				return false;
-			}
-*/
-
-			// all else
-			return true;
+			get { return (!ReadOnly && !LastLogAccessFailed); }
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
@@ -1024,7 +952,7 @@ namespace LoggedTimeUIExtension
 
 				var mode = GetMode(appt, e.Location);
 
-				if (CanModifyAppointmentDates(appt, mode)) // handles readonly flag
+				if (CanModifyAppointmentDates)
 				{
 					// Same as Calendar.SelectionTool
 					switch (mode)
@@ -1032,10 +960,6 @@ namespace LoggedTimeUIExtension
 					case Calendar.SelectionTool.Mode.ResizeBottom:
 					case Calendar.SelectionTool.Mode.ResizeTop:
 						return Cursors.SizeNS;
-
-					case Calendar.SelectionTool.Mode.ResizeLeft:
-					case Calendar.SelectionTool.Mode.ResizeRight:
-						return Cursors.SizeWE;
 
 					case Calendar.SelectionTool.Mode.Move:
 						// default cursor below

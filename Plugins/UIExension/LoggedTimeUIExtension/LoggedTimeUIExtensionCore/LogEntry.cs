@@ -18,7 +18,6 @@ namespace LoggedTimeUIExtension
 	{
 		private List<LogEntry> m_Entries;
 		private uint m_NextEntryId;
-		private LogEntry m_CachedEntry;
 
 		public LogEntries()
 		{
@@ -26,7 +25,6 @@ namespace LoggedTimeUIExtension
 		}
 
 		public bool IsEmpty { get { return (m_Entries?.Count == 0); } }
-		public bool IsModified { get; private set; }
 
 		private void Reset()
 		{
@@ -39,32 +37,21 @@ namespace LoggedTimeUIExtension
 			return (GetEntry(entryId) != null);
 		}
 
-		public bool ModifyEntry(uint entryId, Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, Color fillColor)
+		public bool AddEntry(LogEntry entry)
 		{
-			var entry = GetEntry(entryId);
-
-			if (entry == null)
-				return false;
-
-			if (!entry.Modify(dates, timeSpentInHrs, comment, fillColor))
-				return false;
-
-			IsModified = true;
-			return true;
-		}
-
-		public void SetCachedEntryDatesModified(uint entryId)
-		{
-			if (m_CachedEntry != null)
+			if (HasEntry(entry.Id))
 			{
-				var entry = GetEntry(entryId);
-
-				Debug.Assert((entry != null) &&
-							 (entryId == m_CachedEntry.Id) &&
-							 !entry.DatesMatch(m_CachedEntry.Dates));
-
-				IsModified = true;
+				Debug.Assert(false);
+				return false;
 			}
+
+			if (entry.Id == 0)
+				entry.Id = m_NextEntryId++;
+			else
+				m_NextEntryId = Math.Max(m_NextEntryId, (entry.Id + 1));
+
+			m_Entries.Add(entry);
+			return true;
 		}
 
 		public bool DeleteEntry(uint entryId)
@@ -75,38 +62,7 @@ namespace LoggedTimeUIExtension
 				return false;
 
 			m_Entries.RemoveAt(iEntry);
-			IsModified = true;
-
 			return true;
-		}
-
-		public bool CacheEntry(uint entryId)
-		{
-			var entry = GetEntry(entryId);
-
-			if (entry == null)
-				return false;
-
-			m_CachedEntry = new LogEntry(entryId, entry);
-			return true;
-		}
-
-		public bool RestoreCachedEntry()
-		{
-			if (m_CachedEntry == null)
-				return false;
-
-			DeleteEntry(m_CachedEntry.Id);
-			m_Entries.Add(m_CachedEntry);
-
-			m_CachedEntry = null;
-
-			return true;
-		}
-
-		public void ClearCachedEntry()
-		{
-			m_CachedEntry = null;
 		}
 
 		public bool Load(string filePath)
@@ -155,7 +111,7 @@ namespace LoggedTimeUIExtension
 
 		public bool SaveLogFile(string filePath)
 		{
-			if (IsModified && !string.IsNullOrEmpty(filePath))
+			if (!string.IsNullOrEmpty(filePath))
 			{
 				var logEntries = new List<TaskTimeLogEntry>();
 
@@ -178,11 +134,7 @@ namespace LoggedTimeUIExtension
 
 				try
 				{
-					if (TaskTimeLog.Save(filePath, logEntries))
-					{
-						IsModified = false;
-						return true;
-					}
+					return TaskTimeLog.Save(filePath, logEntries);
 				}
 				catch (Exception)
 				{
@@ -283,7 +235,7 @@ namespace LoggedTimeUIExtension
 			get	{ return ((FillColor == SystemColors.Window) ? Color.Empty : FillColor); }
 		}
 
-		public bool Modify(Calendar.AppointmentDates dates)
+		private bool Modify(Calendar.AppointmentDates dates)
 		{
 			if (dates.IsValid)
 				return false;
