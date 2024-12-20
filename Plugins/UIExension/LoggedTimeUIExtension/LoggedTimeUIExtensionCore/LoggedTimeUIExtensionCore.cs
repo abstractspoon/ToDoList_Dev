@@ -366,57 +366,30 @@ namespace LoggedTimeUIExtension
 
 		bool OnTimeLogContextMenu(object sender, MouseEventArgs e)
 		{
-			return false;
-/*
 			var appt = m_TimeLog.GetAppointmentAt(e.X, e.Y);
-
-			if ((appt == null) || m_TimeLog.AppointmentSupportsTaskContextMenu(appt))
-				return false;
-
 			var menu = new ContextMenuStrip();
 
-			if (appt is TaskCustomDateAttribute)
-			{
-				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
-				item.Click += (s, a) => { m_TimeLog.DeleteSelectedCustomDate();	};
-			}
-			else if (appt is TaskTimeBlock)
-			{
-				var item = AddMenuItem(menu, "New Time Block", Keys.None, 6);
-				item.Click += (s, a) => { CreateTimeBlock(); };
+			var item = AddMenuItem(menu, "New Log Entry", Keys.None, 6);
+			item.Enabled = (appt == null);
+			item.Click += (s, a) => { OnCreateLogEntry(sender, e); };
 
-				item = AddMenuItem(menu, "Delete Time Block", Keys.Delete, 7);
-				item.Click += (s, a) => { m_TimeLog.DeleteSelectedTimeBlock(); };
+			item = AddMenuItem(menu, "Modify Log Entry", (Keys.Control | Keys.F2), 7);
+			item.Enabled = (appt != null);
+			item.Click += (s, a) => { OnEditLogEntry(sender, e); };
 
-				item = AddMenuItem(menu, "Duplicate Time Block", (Keys.Control | Keys.D), 8);
-				item.Click += (s, a) =>	{ m_TimeLog.DuplicateSelectedTimeBlock(); };
+			item = AddMenuItem(menu, "Delete Log Entry", Keys.Delete, 8);
+			item.Enabled = (appt != null);
+			item.Click += (s, a) => { OnDeleteLogEntry(sender, e); };
 
-				menu.Items.Add(new ToolStripSeparator());
-
-				item = AddMenuItem(menu, "Edit Time Block Series", Keys.Control | Keys.F2, 9);
-				item.Click += (s, a) => { EditSelectedTimeBlockSeries(); };
-
-				item = AddMenuItem(menu, "Delete Time Block Series", (Keys.Control | Keys.Delete), 10);
-				item.Click += (s, a) =>	{ m_TimeLog.DeleteSelectedTimeBlockSeries(); };
-			}
-			else
-			{
-				Debug.Assert(false);
-			}
-
-			if (menu.Items.Count > 0)
-			{
-				menu.Items.Add(new ToolStripSeparator());
-				menu.Items.Add("Cancel");
-
-				menu.Renderer = m_ToolbarRenderer;
-				menu.Show(m_TimeLog, e.Location);
-			}
+			menu.Items.Add(new ToolStripSeparator());
+			menu.Items.Add("Cancel");
 
 			m_Trans.Translate(menu.Items, true);
 
+			menu.Renderer = m_ToolbarRenderer;
+			menu.Show(m_TimeLog, e.Location);
+
 			return true; // handled
-*/
 		}
 
 		private void CreateWeekLabel()
