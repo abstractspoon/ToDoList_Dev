@@ -349,17 +349,9 @@ namespace LoggedTimeUIExtension
 				return false;
 			}
 
-			if (!SaveLogFile())
-			{
-				m_LogEntries.RestoreCachedEntry();
-				return false;
-			}
-
-			// else
-			m_LogEntries.ClearCachedEntry();
-
 			Invalidate();
-			return true;
+
+			return SaveLogFile();
 		}
 
 		protected void OnAppointmentChanged(object sender, Calendar.AppointmentEventArgs e)
@@ -374,11 +366,7 @@ namespace LoggedTimeUIExtension
 				}
 				else if (me.Finished)
 				{
-					if (m_LogEntries.CheckCachedEntryDatesModified(m_SelectedEntryId))
-					{
-						m_LogEntries.ClearCachedEntry();
-					}
-
+					m_LogEntries.SetCachedEntryDatesModified(m_SelectedEntryId);
 					SaveLogFile();
 				}
 			}
@@ -641,11 +629,16 @@ namespace LoggedTimeUIExtension
 			m_LogFileWatcher.EnableRaisingEvents = true;
 
 			if (!success)
+			{
 				m_LogEntries.RestoreCachedEntry();
-			else
-				m_LogEntries.ClearCachedEntry();
+				Invalidate();
 
-			return success;
+				return false;
+			}
+
+			// else
+			m_LogEntries.ClearCachedEntry();
+			return true;
 		}
 
 		private void HandleLastLogAccessFailed(bool failed)

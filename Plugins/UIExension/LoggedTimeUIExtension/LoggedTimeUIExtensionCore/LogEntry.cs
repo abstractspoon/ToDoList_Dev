@@ -53,21 +53,18 @@ namespace LoggedTimeUIExtension
 			return true;
 		}
 
-		public bool CheckCachedEntryDatesModified(uint entryId)
+		public void SetCachedEntryDatesModified(uint entryId)
 		{
-			if (m_CachedEntry == null)
-				return false;
+			if (m_CachedEntry != null)
+			{
+				var entry = GetEntry(entryId);
 
-			var entry = GetEntry(entryId);
-
-			bool modified = ((entry != null) &&
+				Debug.Assert((entry != null) &&
 							 (entryId == m_CachedEntry.Id) &&
 							 !entry.DatesMatch(m_CachedEntry.Dates));
 
-			ClearCachedEntry();
-			IsModified |= modified;
-
-			return modified;
+				IsModified = true;
+			}
 		}
 
 		public bool DeleteEntry(uint entryId)
