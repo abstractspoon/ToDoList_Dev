@@ -30,10 +30,38 @@ namespace Calendar
 			End = end;
 		}
 
+		public bool IsValid
+		{
+			get
+			{
+				return ((Start != NullDate) &&
+						(End != NullDate) &&
+						(End > Start));
+			}
+		}
+
+		public bool Intersects(AppointmentDates other)
+		{
+			if (!IsValid || !other.IsValid)
+				return false;
+
+			if (Start >= other.End)
+				return false;
+
+			if (End <= other.Start)
+				return false;
+
+			return true;
+		}
+
+		public bool IsLongAppt { get { return (Start.Date < End.Date); } }
 		public TimeSpan Length { get { return (End - Start); } }
+
+		static public DateTime NullDate { get { return DateTime.MinValue; } }
+
 	}
 
-    public class Appointment
+	public class Appointment
     {
         public Appointment(string t = "New Appointment")
         {
@@ -68,13 +96,11 @@ namespace Calendar
         public string Group { get; set; }
 		public bool DrawBorder { get; set; }
 
-		static public DateTime NullDate { get { return DateTime.MinValue; } }
+		static public DateTime NullDate { get { return AppointmentDates.NullDate; } }
 
 		virtual public bool HasValidDates()
 		{
-			return ((StartDate != NullDate) &&
-					(EndDate != NullDate) &&
-					(EndDate > StartDate));
+			return dates.IsValid;
 		}
 		
 		private AppointmentDates dates = new AppointmentDates();
@@ -286,16 +312,10 @@ namespace Calendar
 
 		public bool Intersects(Appointment other)
 		{
-			if (!HasValidDates() || !other.HasValidDates())
+			if (!dates.Intersects(other.dates))
 				return false;
 
 			if (IsLongAppt() != other.IsLongAppt())
-				return false;
-
-			if (StartDate >= other.EndDate)
-				return false;
-
-			if (EndDate <= other.StartDate)
 				return false;
 
 			return true;
@@ -306,7 +326,7 @@ namespace Calendar
 			if (!HasValidDates())
 				return false;
 
-			return (start.Date != end.Date);
+			return (start.Date < end.Date);
 		}
 
     }

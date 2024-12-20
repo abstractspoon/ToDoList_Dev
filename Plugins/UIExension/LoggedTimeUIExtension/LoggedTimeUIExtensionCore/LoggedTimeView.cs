@@ -255,18 +255,6 @@ namespace LoggedTimeUIExtension
  			AppointmentMove += new Calendar.AppointmentEventHandler(OnAppointmentChanged);
 		}
 
-		protected void OnAppointmentChanged(object sender, Calendar.AppointmentEventArgs e)
-		{
-			var me = (e as Calendar.MoveAppointmentEventArgs);
-
-			if ((me != null) && me.Finished)
-			{
-				var entry = (e.Appointment as LogEntry);
-
-				m_LogEntries.ModifyEntry(m_SelectedEntryId, entry.StartDate, entry.EndDate, entry.TimeSpentInHrs, entry.Comment, entry.FillColor);
-			}
-		}
-
 		public bool ShowLabelTips
 		{
 			set { m_LabelTip.Active = value; }
@@ -297,7 +285,7 @@ namespace LoggedTimeUIExtension
 
 				// Must have a valid tasklist path -> valid log file path
 				// and there must be no pending modifications
-				return !string.IsNullOrEmpty(m_TasklistPath) && !m_LogEntries.IsModified;
+				return !string.IsNullOrEmpty(m_TasklistPath)/* && !m_LogEntries.IsModified*/;
 			}
 		}
 
@@ -311,9 +299,15 @@ namespace LoggedTimeUIExtension
 			get { return CanModifySelectedLogEntry; }
 		}
 		
-		public bool AddNewLogEntry(TaskItem taskItem, DateTime start, DateTime end, double timeSpentInHrs, string comment, string path, string type, Color fillColor)
+		public bool AddNewLogEntry(TaskItem taskItem, Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, string path, string type, Color fillColor)
 		{
 			if (!CanAddNewLogEntry)
+				return false;
+
+			if (!dates.IsValid)
+				return false;
+
+			if (dates.IsLongAppt)
 				return false;
 
 			uint taskId = ((taskItem == null) ? 0 : taskItem.Id);
@@ -323,8 +317,8 @@ namespace LoggedTimeUIExtension
 			var newEntry = new TaskTimeLogEntry()
 			{
 				TaskId = taskId,
-				From = start,
-				To = end,
+				From = dates.Start,
+				To = dates.End,
 				TimeInHours = timeSpentInHrs,
 				TaskTitle = taskItem?.Title,
 				Comment = comment,
@@ -342,26 +336,71 @@ namespace LoggedTimeUIExtension
 			return success;
 		}
 
-		public bool ModifySelectedLogEntry(DateTime start, DateTime end, double timeSpentInHrs, string comment, Color fillColor)
+		public bool ModifySelectedLogEntry(Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, Color fillColor)
 		{
 			if (!CanModifySelectedLogEntry)
 				return false;
 
-			if (!m_LogEntries.ModifyEntry(m_SelectedEntryId, start, end, timeSpentInHrs, comment, fillColor))
+			m_LogEntries.CacheEntry(m_SelectedEntryId);
+
+			if (!m_LogEntries.ModifyEntry(m_SelectedEntryId, dates, timeSpentInHrs, comment, fillColor))
+			{
+				m_LogEntries.ClearCachedEntry();
 				return false;
+			}
+
+			if (!SaveLogFile())
+			{
+				m_LogEntries.RestoreCachedEntry();
+				return false;
+			}
+
+			// else
+			m_LogEntries.ClearCachedEntry();
 
 			Invalidate();
 			return true;
+		}
+
+		protected void OnAppointmentChanged(object sender, Calendar.AppointmentEventArgs e)
+		{
+			var me = (e as Calendar.MoveAppointmentEventArgs);
+
+			if (me != null)
+			{
+				if (me.Started)
+				{
+					m_LogEntries.CacheEntry(m_SelectedEntryId);
+				}
+				else if (me.Finished)
+				{
+					if (m_LogEntries.CheckCachedEntryDatesModified(m_SelectedEntryId))
+					{
+						m_LogEntries.ClearCachedEntry();
+					}
+
+					SaveLogFile();
+				}
+			}
 		}
 
 		public bool DeleteSelectedLogEntry()
 		{
 			if (!CanDeleteSelectedLogEntry)
 				return false;
-			
+
+			m_LogEntries.CacheEntry(m_SelectedEntryId);
+
 			if (!m_LogEntries.DeleteEntry(m_SelectedEntryId))
+			{
+				m_LogEntries.ClearCachedEntry();
+				return false;
+			}
+
+			if (!SaveLogFile())
 				return false;
 
+			// else
 			m_SelectedEntryId = 0;
 			Invalidate();
 
@@ -547,22 +586,8 @@ namespace LoggedTimeUIExtension
 
 		public bool DoIdleProcessing()
 		{
-			Debug.Assert(!(m_LogEntries.IsModified && m_WantIdleReload));
-
-			if (m_LogEntries.IsModified)
-			{
-				// Temporarily disable file watcher
-				m_LogFileWatcher.EnableRaisingEvents = false;
-
-				bool success = m_LogEntries.SaveLogFile(m_TasklistPath);
-				HandleLastLogAccessFailed(!success);
-
-				m_LogFileWatcher.EnableRaisingEvents = true;
-			}
-			else if (m_WantIdleReload)
-			{
+			if (m_WantIdleReload)
 				ReloadLogFile();
-			}
 
 			return false; // No more tasks
 		}
@@ -603,6 +628,24 @@ namespace LoggedTimeUIExtension
 			}
 
 			m_WantIdleReload = LastLogAccessFailed; // Keep trying
+		}
+
+		private bool SaveLogFile()
+		{
+			// Temporarily disable file watcher
+			m_LogFileWatcher.EnableRaisingEvents = false;
+
+			bool success = m_LogEntries.SaveLogFile(m_TasklistPath);
+			HandleLastLogAccessFailed(!success);
+
+			m_LogFileWatcher.EnableRaisingEvents = true;
+
+			if (!success)
+				m_LogEntries.RestoreCachedEntry();
+			else
+				m_LogEntries.ClearCachedEntry();
+
+			return success;
 		}
 
 		private void HandleLastLogAccessFailed(bool failed)
@@ -836,13 +879,7 @@ namespace LoggedTimeUIExtension
 		{
 			if (base.CancelAppointmentResizing())
 			{
-				var taskItem = (SelectedAppointment as LogEntry);
-
-				if (taskItem != null)
-				{
-					taskItem.RestoreOriginalDates();
-				}
-
+				m_LogEntries.RestoreCachedEntry();
 				Invalidate();
 
 				return true;

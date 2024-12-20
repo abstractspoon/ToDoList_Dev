@@ -18,8 +18,7 @@ namespace LoggedTimeUIExtension
 	{
 		private List<LogEntry> m_Entries;
 		private uint m_NextEntryId;
-
-		const string VersionPrefix = "TODOTIMELOG VERSION";
+		private LogEntry m_CachedEntry;
 
 		public LogEntries()
 		{
@@ -40,51 +39,35 @@ namespace LoggedTimeUIExtension
 			return (GetEntry(entryId) != null);
 		}
 
-/*
-		public bool AddEntry(uint taskId,
-							string taskTitle,
-							DateTime from,
-							DateTime to,
-							double timeSpentInHrs,
-							string comment,
-							string path,
-							string type,
-							Color altColor)
-		{
-			m_Entries.Add(new LogEntry(m_NextEntryId++,
-										taskId,
-										taskTitle,
-										from,
-										to,
-										timeSpentInHrs,
-										comment,
-										Environment.UserName,
-										path,
-										type,
-										altColor));
-
-			IsModified = true;
-			return true;
-		}
-*/
-
-		public bool ModifyEntry(uint entryId, DateTime start, DateTime end, double timeSpentInHrs, string comment, Color fillColor)
+		public bool ModifyEntry(uint entryId, Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, Color fillColor)
 		{
 			var entry = GetEntry(entryId);
 
 			if (entry == null)
 				return false;
 
-			if (!entry.Modify(start, end, timeSpentInHrs, comment, fillColor) && 
-				!entry.DatesDifferFromOriginal())
-			{
+			if (!entry.Modify(dates, timeSpentInHrs, comment, fillColor))
 				return false;
-			}
 
 			IsModified = true;
-			entry.UpdateOriginalDates();
-
 			return true;
+		}
+
+		public bool CheckCachedEntryDatesModified(uint entryId)
+		{
+			if (m_CachedEntry == null)
+				return false;
+
+			var entry = GetEntry(entryId);
+
+			bool modified = ((entry != null) &&
+							 (entryId == m_CachedEntry.Id) &&
+							 !entry.DatesMatch(m_CachedEntry.Dates));
+
+			ClearCachedEntry();
+			IsModified |= modified;
+
+			return modified;
 		}
 
 		public bool DeleteEntry(uint entryId)
@@ -98,6 +81,35 @@ namespace LoggedTimeUIExtension
 			IsModified = true;
 
 			return true;
+		}
+
+		public bool CacheEntry(uint entryId)
+		{
+			var entry = GetEntry(entryId);
+
+			if (entry == null)
+				return false;
+
+			m_CachedEntry = new LogEntry(entryId, entry);
+			return true;
+		}
+
+		public bool RestoreCachedEntry()
+		{
+			if (m_CachedEntry == null)
+				return false;
+
+			DeleteEntry(m_CachedEntry.Id);
+			m_Entries.Add(m_CachedEntry);
+
+			m_CachedEntry = null;
+
+			return true;
+		}
+
+		public void ClearCachedEntry()
+		{
+			m_CachedEntry = null;
 		}
 
 		public bool Load(string filePath)
@@ -194,18 +206,12 @@ namespace LoggedTimeUIExtension
 
 		public Rectangle IconRect = Rectangle.Empty;
 		public int TextHorzOffset = 0;
-		public int EndOfStart = -1, StartOfEnd = -1;
-		public int StartOfToday = -1, EndOfToday = -1;
 	}
 
 	// ---------------------------------------------------------------
 
 	public class LogEntry : Calendar.Appointment
 	{
-		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
-
-		// --------------------
-
 		public LogEntry(uint entryId)
 		{
 			base.Id = entryId;
@@ -224,6 +230,22 @@ namespace LoggedTimeUIExtension
 				logEntry.TaskPath,
 				logEntry.Type,
 				logEntry.AltColor)
+		{
+		}
+
+		public LogEntry(uint entryId, LogEntry other)
+			:
+			this(entryId,
+				other.TaskId,
+				other.Title,
+				other.StartDate,
+				other.EndDate,
+				other.TimeSpentInHrs,
+				other.Comment,
+				other.Person,
+				other.TaskPath,
+				other.Type,
+				other.FillColor)
 		{
 		}
 
@@ -250,8 +272,6 @@ namespace LoggedTimeUIExtension
 			TaskPath = path;
 			Type = type;
 			FillColor = altColor;
-
-			UpdateOriginalDates();
 		}
 
 		public uint TaskId { get; private set; }
@@ -266,25 +286,23 @@ namespace LoggedTimeUIExtension
 			get	{ return ((FillColor == SystemColors.Window) ? Color.Empty : FillColor); }
 		}
 
-		public bool Modify(DateTime from, DateTime to, double timeSpentInHrs, string comment, Color fillColor)
+		public bool Modify(Calendar.AppointmentDates dates)
 		{
-			bool modified = false;
-
-			// To and from must point to the same day
-			if ((int)from.ToOADate() != (int)to.ToOADate())
+			if (dates.IsValid)
 				return false;
 
-			if (StartDate != from)
-			{
-				StartDate = from;
-				modified = true;
-			}
+			if (DatesMatch(dates))
+				return false;
 
-			if (EndDate != to)
-			{
-				EndDate = to;
-				modified = true;
-			}
+			StartDate = dates.Start;
+			EndDate = dates.End;
+
+			return true;
+		}
+
+		public bool Modify(Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, Color fillColor)
+		{
+			bool modified = Modify(dates);
 
 			if (TimeSpentInHrs != timeSpentInHrs)
 			{
@@ -305,55 +323,6 @@ namespace LoggedTimeUIExtension
 			}
 
 			return modified;
-		}
-
-		protected override void OnEndDateChanged()
-		{
-		}
-
-		protected override void OnStartDateChanged()
-		{
-		}
-
-		protected override void OnColorChanged()
-		{
-		}
-
-		public void UpdateOriginalDates()
-		{
-			m_OrgDates.Start = StartDate;
-			m_OrgDates.End = EndDate;
-		}
-
-		public void RestoreOriginalDates()
-		{
-			StartDate = m_OrgDates.Start;
-			EndDate = m_OrgDates.End;
-		}
-
-		public bool EndDateDiffersFromOriginal()
-		{
-			return ((EndDate - m_OrgDates.End).TotalSeconds != 0.0);
-		}
-
-		public bool StartDateDiffersFromOriginal()
-		{
-			return ((StartDate - m_OrgDates.Start).TotalSeconds != 0.0);
-		}
-
-		public bool DatesDifferFromOriginal()
-		{
-			return (StartDateDiffersFromOriginal() || EndDateDiffersFromOriginal());
-		}
-
-        public TimeSpan OriginalLength
-        {
-            get { return m_OrgDates.Length; }
-        }
-
-		public bool LengthDiffersFromOriginal()
-		{
-			return ((Length - OriginalLength).TotalSeconds != 0.0);
 		}
 
 		public override bool IsLongAppt(DateTime start, DateTime end)

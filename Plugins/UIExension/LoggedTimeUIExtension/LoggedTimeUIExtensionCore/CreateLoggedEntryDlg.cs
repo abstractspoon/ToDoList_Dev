@@ -63,14 +63,9 @@ namespace LoggedTimeUIExtension
 			get { return m_TaskCombo.SelectedTaskId; }
 		}
 
-		public DateTime From
+		public Calendar.AppointmentDates Dates
 		{
-			get { return m_Attributes.From; }
-		}
-
-		public DateTime To
-		{
-			get { return m_Attributes.To; }
+			get { return m_Attributes.Dates; }
 		}
 
 		public string Comment

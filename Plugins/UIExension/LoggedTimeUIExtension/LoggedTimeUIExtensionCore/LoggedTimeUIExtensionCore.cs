@@ -657,7 +657,7 @@ namespace LoggedTimeUIExtension
 			{
 				var taskItem = m_TimeLog.GetTask(dlg.TaskId);
 
-				if (m_TimeLog.AddNewLogEntry(taskItem, dlg.From, dlg.To, dlg.TimeSpent, dlg.Comment, /*taskItem?.Path*/"", /*TODO*/"", dlg.FillColor))
+				if (m_TimeLog.AddNewLogEntry(taskItem, dlg.Dates, dlg.TimeSpent, dlg.Comment, /*taskItem?.Path*/"", /*TODO*/"", dlg.FillColor))
 				{
 					AddHoursToTaskTimeSpent(dlg.TaskId, dlg.HoursToAddToTimeSpent);
 					UpdateToolbarButtonStates();
@@ -701,7 +701,7 @@ namespace LoggedTimeUIExtension
 
 			if (res == DialogResult.OK)
 			{
-				if (m_TimeLog.ModifySelectedLogEntry(dlg.From, dlg.To, dlg.TimeSpent, dlg.Comment, dlg.FillColor))
+				if (m_TimeLog.ModifySelectedLogEntry(dlg.Dates, dlg.TimeSpent, dlg.Comment, dlg.FillColor))
 				{
 					AddHoursToTaskTimeSpent(entry.TaskId, dlg.HoursToAddToTimeSpent);
 				}

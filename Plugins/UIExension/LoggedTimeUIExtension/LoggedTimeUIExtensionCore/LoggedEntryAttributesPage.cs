@@ -66,14 +66,13 @@ namespace LoggedTimeUIExtension
 				m_AddToTimeSpentCheckBox.Text = string.Format("Also modify task 'Time Spent' by {0:0.###} hours", (TimeSpent - m_OrgTimeSpent));
 		}
 
-		public DateTime From
+		public Calendar.AppointmentDates Dates
 		{
-			get { return (m_FromDateCtrl.Value.Date + m_FromTimeCombo.GetTime()); }
-		}
-
-		public DateTime To
-		{
-			get { return (m_FromDateCtrl.Value.Date + m_ToTimeCombo.GetTime()); }
+			get
+			{
+				return new Calendar.AppointmentDates(m_FromDateCtrl.Value.Date + m_FromTimeCombo.GetTime(),
+													(m_FromDateCtrl.Value.Date + m_ToTimeCombo.GetTime()));
+			}
 		}
 
 		public string Comment

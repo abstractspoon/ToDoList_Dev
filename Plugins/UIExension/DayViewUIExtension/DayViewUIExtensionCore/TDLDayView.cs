@@ -15,12 +15,16 @@ namespace DayViewUIExtension
 	{
 		public string CustomAttributeId { get; private set; }
 
-		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
+		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, Calendar.SelectionTool.Mode mode, Calendar.SelectionTool.State state) 
+			: 
+			base(appointment, mode, state)
 		{
 			CustomAttributeId = "";
 		}
 
-		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, string attribId, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
+		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, string attribId, Calendar.SelectionTool.Mode mode, Calendar.SelectionTool.State state) 
+			: 
+			base(appointment, mode, state)
 		{
 			CustomAttributeId = attribId;
 		}
@@ -233,7 +237,7 @@ namespace DayViewUIExtension
 					if (args.Appointment is TaskCustomDateAttribute)
 					{
 						custAttribId = (args.Appointment as TaskCustomDateAttribute).AttributeId;
-						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
+						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.State));
 					}
 					else if (args.Appointment is TaskTimeBlock)
 					{
@@ -241,7 +245,7 @@ namespace DayViewUIExtension
 					}
 					else
 					{
-						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, move.Mode, move.Finished));
+						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, move.Mode, move.State));
 					}
 				}
 			}
@@ -1458,7 +1462,10 @@ namespace DayViewUIExtension
 				custDate.ClearDate();
 
 				// Notify parent of change
-				AppointmentMove?.Invoke(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, custDate.AttributeId, Calendar.SelectionTool.Mode.None, true));
+				AppointmentMove?.Invoke(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, 
+																			  custDate.AttributeId, 
+																			  Calendar.SelectionTool.Mode.None, 
+																			  Calendar.SelectionTool.State.Finished));
 
 				// Move selection to 'real' task
 				SelectTask(custDate.RealTaskId, true);
