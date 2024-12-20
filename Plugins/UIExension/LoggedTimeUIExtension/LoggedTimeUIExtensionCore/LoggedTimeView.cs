@@ -687,6 +687,9 @@ namespace LoggedTimeUIExtension
 			{
 				LastLogAccessFailed = failed;
 
+				if (failed)
+					m_WantIdleReload = true;
+
 				LogAccessStatusChanged?.Invoke(this, new EventArgs());
 			}
 		}
@@ -885,7 +888,7 @@ namespace LoggedTimeUIExtension
 
 		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appt, Point mousePos)
 		{
-			if (ReadOnly || (appt == null))
+			if (!CanModifyAppointmentDates || (appt == null))
 				return Calendar.SelectionTool.Mode.None;
 
 			var selTool = (ActiveTool as Calendar.SelectionTool);
