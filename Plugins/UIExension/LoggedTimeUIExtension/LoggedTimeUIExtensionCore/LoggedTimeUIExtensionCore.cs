@@ -320,7 +320,7 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.MouseWheel += new MouseEventHandler(OnTimeLogMouseWheel);
 			m_TimeLog.MouseDoubleClick += new MouseEventHandler(OnTimeLogMouseDoubleClick);
 			m_TimeLog.ContextMenu += new TDLContextMenuEventHandler(OnTimeLogContextMenu);
-			m_TimeLog.LogAccessStatusChanged += new EventHandler(OnLogAccessStatusChanged);
+			m_TimeLog.LogAccessStatusChanged += new LogAccessStatusEventHandler(OnTimeLogAccessStatusChanged);
 
 			// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
 			// causes the edit icon dialog to fail to correctly get focus but
@@ -352,13 +352,13 @@ namespace LoggedTimeUIExtension
 			return item;
 		}
 
-		void OnLogAccessStatusChanged(object sender, EventArgs e)
+		void OnTimeLogAccessStatusChanged(object sender, LogAccessEventArgs e)
 		{
 			UpdateToolbarButtonStates();
 
-			if (m_TimeLog.LastLogAccessFailed)
+			if (!e.Success)
 			{
-				MessageBox.Show(m_Trans.Translate(TaskTimeLog.LogAccessErrorMsg, Translator.Type.Text),
+				MessageBox.Show(TaskTimeLog.FormatLogAccessError(m_Trans, e.Loading),
 								m_Trans.Translate("Logged Time", Translator.Type.Text), 
 								MessageBoxButtons.OK, 
 								MessageBoxIcon.Exclamation);

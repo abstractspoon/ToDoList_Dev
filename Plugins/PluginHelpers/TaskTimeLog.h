@@ -49,7 +49,7 @@ namespace Abstractspoon
 				static String^ GetPath(String^ tasklistPath);
 				static String^ GetPath(String^ tasklistPath, UInt32 taskId, bool logSeparately);
 
-				static property String^ LogAccessErrorMsg { String^ get(); }
+				static String^ FormatLogAccessError(Translator^ trans, bool loading);
 
 			private:
 				static String^ ToString(const CString& str);

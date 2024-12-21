@@ -67,8 +67,6 @@ namespace LoggedTimeUIExtension
 
 		public bool Load(string filePath)
 		{
-			Reset();
-
 			try
 			{
 				var logEntries = TaskTimeLog.Load(filePath);

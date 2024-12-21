@@ -78,11 +78,17 @@ bool TaskTimeLog::Add(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool log
 	return (CTDCTaskTimeLog(MS(tasklistPath)).LogTime(li, logSeparately) != FALSE);
 }
 
-String^ TaskTimeLog::LogAccessErrorMsg::get()
+String^ TaskTimeLog::FormatLogAccessError(Translator^ trans, bool loading)
 {
-	return gcnew String(L"The log file could not be accessed.\n\n"
-						L"Please ensure that the file is not already open for editing and \n"
-						L"that you have the correct permissions and then try again.");
+	String^ part1 = trans->Translate(loading ?
+									 "The log file could not be loaded." :
+									 "The log file could not be updated.",
+									 Translator::Type::Text);
+	String^ part2 = trans->Translate("Please ensure that the file is not already open for editing and \n"
+									 "that you have the correct permissions and then try again.",
+									 Translator::Type::Text);
+
+	return String::Format(L"{0}\n\n{1}", part1, part2);
 }
 
 String^ TaskTimeLog::GetPath(String^ tasklistPath)
