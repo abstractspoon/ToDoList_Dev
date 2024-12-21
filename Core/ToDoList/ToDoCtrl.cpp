@@ -7155,7 +7155,7 @@ BOOL CToDoCtrl::AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDa
 						HasStyle(TDCS_LOGTASKTIMESEPARATELY)))
 	{
 		UpdateWindow();
-		AfxMessageBox(CEnString(IDS_LOGFILELOCKED));
+		AfxMessageBox(Misc::Format(_T("%s\n\n%s"), CEnString(IDS_LOGFILELOCKED), CEnString(IDS_LOGFILELOCKED_EXTRA)));
 
 		return FALSE;
 	}
