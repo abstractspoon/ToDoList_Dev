@@ -447,11 +447,11 @@ namespace DayViewUIExtension
 				menu.Items.Add(new ToolStripSeparator());
 				menu.Items.Add("Cancel");
 
+				m_Trans.Translate(menu.Items, true);
+
 				menu.Renderer = m_ToolbarRenderer;
 				menu.Show(m_DayView, e.Location);
 			}
-
-			m_Trans.Translate(menu.Items, true);
 
 			return true; // handled
 		}

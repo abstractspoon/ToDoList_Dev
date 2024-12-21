@@ -235,7 +235,7 @@ namespace LoggedTimeUIExtension
 
 		private bool Modify(Calendar.AppointmentDates dates)
 		{
-			if (dates.IsValid)
+			if (!dates.IsValid)
 				return false;
 
 			if (DatesMatch(dates))

@@ -65,6 +65,7 @@ namespace Calendar
         protected int appointmentSpacing = 1;
         protected int groupSpacing = 1;
         protected int daySpacing = 1;
+		protected int rightClickSelectionMinutes = 60;
 
 		public event DayWidthEventHandler NotifyDayWidth;
 
@@ -196,7 +197,7 @@ namespace Calendar
 		// ------------------------------------------------------------------
 
 		protected bool SavingToImage { get; set; }
-		
+
 		// ------------------------------------------------------------------
 
 		private AppHeightDrawMode appHeightMode = AppHeightDrawMode.TrueHeightAll;
@@ -1066,8 +1067,8 @@ namespace Calendar
 
 							if ((click < SelectedDates.Start) || (click > SelectedDates.End))
 							{
-								SelectedDates.Start = new DateTime(click.Year, click.Month, click.Day, click.Hour, 0, 0);
-								SelectedDates.End = SelectedDates.Start.AddMinutes(60);
+								SelectedDates.Start = new DateTime(click.Year, click.Month, click.Day, click.Hour, ((click.Minute / 30) * 30), 0);
+								SelectedDates.End = SelectedDates.Start.AddMinutes(rightClickSelectionMinutes);
 
 								redraw = true;
 							}

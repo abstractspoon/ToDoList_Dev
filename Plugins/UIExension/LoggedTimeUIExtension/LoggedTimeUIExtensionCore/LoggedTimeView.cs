@@ -62,6 +62,7 @@ namespace LoggedTimeUIExtension
 			minDayHeaderHeight = DPIScaling.Scale(minDayHeaderHeight);
 			longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
 			dayGripWidth = 1; // to match app styling
+			rightClickSelectionMinutes = 30;
 
 			m_Trans = trans;
 			m_RenderHelper.TaskIcons = taskIcons;
