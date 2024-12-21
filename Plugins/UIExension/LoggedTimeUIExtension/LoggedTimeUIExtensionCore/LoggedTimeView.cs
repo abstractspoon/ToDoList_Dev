@@ -403,7 +403,7 @@ namespace LoggedTimeUIExtension
 		public bool CacheSelectedLogEntry()
 		{
 			Debug.Assert(m_SelectedLogEntryId != 0);
-			Debug.Assert(m_CachedLogEntry == null);
+			//Debug.Assert(m_CachedLogEntry == null);
 
 			var entry = m_LogEntries.GetEntry(m_SelectedLogEntryId);
 

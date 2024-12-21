@@ -118,8 +118,10 @@
 			// 
 			// EditLoggedEntryDlg
 			// 
+			this.AcceptButton = this.OK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.CancelButton = this.Cancel;
 			this.ClientSize = new System.Drawing.Size(345, 341);
 			this.Controls.Add(this.m_TaskId);
 			this.Controls.Add(this.label3);

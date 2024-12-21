@@ -130,8 +130,9 @@ namespace LoggedTimeUIExtension
 						OnDeleteLogEntry(this, null);
 						return true;
 
-					case (Keys.Control | Keys.F2):
-						OnEditLogEntry(this, null);
+					case Keys.F2:
+						if (ModifierKeys == Keys.Control)
+							OnEditLogEntry(this, null);
 						return true;
 					}
 				}
@@ -425,11 +426,11 @@ namespace LoggedTimeUIExtension
 		}
 */
 
-		protected void OnClickSelectedTaskDatesLink(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			//m_TimeLog.EnsureSelectionVisible(false);
-			m_TimeLog.Focus();
-		}
+// 		protected void OnClickSelectedTaskDatesLink(object sender, LinkLabelLinkClickedEventArgs e)
+// 		{
+// 			//m_TimeLog.EnsureSelectionVisible(false);
+// 			m_TimeLog.Focus();
+// 		}
 
 		private void CreateToolbar()
 		{
