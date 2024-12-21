@@ -321,8 +321,6 @@ namespace LoggedTimeUIExtension
 
 			uint taskId = ((taskItem == null) ? 0 : taskItem.Id);
 
-			// To keep the log file open for the shortest possible time we just
-			// append to its end and allow the log file to be idle-reloaded
 			var newEntry = new TaskTimeLogEntry()
 			{
 				TaskId = taskId,
@@ -337,10 +335,20 @@ namespace LoggedTimeUIExtension
 				AltColor = fillColor
 			};
 
+			// Temporarily disable file watcher
+			m_LogFileWatcher.EnableRaisingEvents = false;
+
 			bool success = TaskTimeLog.Add(m_TasklistPath, newEntry, false);
 
+			m_LogFileWatcher.EnableRaisingEvents = true;
+			
+			if (success)
+			{
+				m_LogEntries.AddEntry(new LogEntry(0, newEntry));
+				Invalidate();
+			}
+
 			HandleLogAccessResult(true, success);
-			Invalidate();
 
 			return success;
 		}
@@ -651,6 +659,7 @@ namespace LoggedTimeUIExtension
 			bool success = m_LogEntries.Load(m_TasklistPath);
 
 			HandleLogAccessResult(true, success);
+			Invalidate();
 		}
 
 		private bool SaveLogFile()
