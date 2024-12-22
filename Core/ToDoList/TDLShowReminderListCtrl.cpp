@@ -8,6 +8,7 @@
 #include "todoctrlreminders.h"
 
 #include "..\shared\DateHelper.h"
+#include "..\shared\AutoFlag.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -53,7 +54,8 @@ CTDLShowReminderListCtrl::CTDLShowReminderListCtrl(LPCTSTR szPrefsKey)
 	:
 	m_bHasIcons(FALSE),
 	m_dwNextReminderID(1),
-	m_sPrefsKey(szPrefsKey)
+	m_sPrefsKey(szPrefsKey),
+	m_bModifyingReminders(FALSE)
 {
 	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(17));
 }
@@ -67,7 +69,8 @@ void CTDLShowReminderListCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CEnListCtrl::OnSize(nType, cx, cy);
 
-	RecalcColumnWidths();
+	if (!m_bModifyingReminders)
+		RecalcColumnWidths();
 }
 
 void CTDLShowReminderListCtrl::OnDestroy()
@@ -135,7 +138,8 @@ BOOL CTDLShowReminderListCtrl::AddReminder(const TDCREMINDER& rem)
 
 	if (bNewReminder)
 	{
-		// Insert at end
+		CAutoFlag af(m_bModifyingReminders, TRUE);
+
 		nItem = InsertItem(GetItemCount(), rem.GetTaskTitle());
 		ASSERT(nItem != -1);
 
@@ -209,6 +213,8 @@ BOOL CTDLShowReminderListCtrl::UpdateReminder(const TDCREMINDER& rem)
 
 void CTDLShowReminderListCtrl::UpdateReminder(const TDCREMINDER& rem, int nItem)
 {
+	CAutoFlag af(m_bModifyingReminders, TRUE);
+
 	ASSERT(nItem != -1);
 
 	// Assume tasklist cannot change
@@ -227,6 +233,8 @@ BOOL CTDLShowReminderListCtrl::RemoveReminder(const TDCREMINDER& rem)
 	if (nItem == -1)
 		return FALSE;
 
+	CAutoFlag af(m_bModifyingReminders, TRUE);
+
 	BOOL bUpdateTaskHaveIcons = rem.HasIcon();
 	DWORD dwRemID = GetReminderID(nItem);
 
@@ -244,6 +252,8 @@ BOOL CTDLShowReminderListCtrl::RemoveReminder(const TDCREMINDER& rem)
 int CTDLShowReminderListCtrl::RemoveReminders(const CFilteredToDoCtrl& tdc)
 {
 	ASSERT(m_mapReminders.GetCount() == GetItemCount());
+
+	CAutoFlag af(m_bModifyingReminders, TRUE);
 
 	int nItem = GetItemCount(), nNumRemoved = 0;
 
@@ -417,12 +427,14 @@ int CTDLShowReminderListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2,
 COLORREF CTDLShowReminderListCtrl::GetItemTextColor(int nItem, int nSubItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
 	TDCREMINDER rem;
-	VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
 
-	COLORREF crText, crUnused;
+	if (m_mapReminders.Lookup(GetItemData(nItem), rem))
+	{
+		COLORREF crText, crUnused;
 
-	if (rem.pTDC->GetTaskTextColors(rem.dwTaskID, crText, crUnused, (bSelected || bDropHighlighted)))
-		return crText;
+		if (rem.pTDC->GetTaskTextColors(rem.dwTaskID, crText, crUnused, (bSelected || bDropHighlighted)))
+			return crText;
+	}
 
 	// else
 	return CEnListCtrl::GetItemTextColor(nItem, nSubItem, bSelected, bDropHighlighted, bWndFocus);
@@ -431,12 +443,14 @@ COLORREF CTDLShowReminderListCtrl::GetItemTextColor(int nItem, int nSubItem, BOO
 COLORREF CTDLShowReminderListCtrl::GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
 	TDCREMINDER rem;
-	VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
 
-	COLORREF crUnused, crBack;
+	if (m_mapReminders.Lookup(GetItemData(nItem), rem))
+	{
+		COLORREF crUnused, crBack;
 	
-	if (rem.pTDC->GetTaskTextColors(rem.dwTaskID, crUnused, crBack, (bSelected || bDropHighlighted)) && (crBack != CLR_NONE))
-		return crBack;
+		if (rem.pTDC->GetTaskTextColors(rem.dwTaskID, crUnused, crBack, (bSelected || bDropHighlighted)) && (crBack != CLR_NONE))
+			return crBack;
+	}
 
 	// else
 	return CEnListCtrl::GetItemBackColor(nItem, bSelected, bDropHighlighted, bWndFocus);
@@ -447,15 +461,17 @@ void CTDLShowReminderListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const
 	if ((nCol == TASK_COL) && m_bHasIcons)
 	{
 		TDCREMINDER rem;
-		VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
+		
+		if (m_mapReminders.Lookup(GetItemData(nItem), rem))
+		{
+			rem.DrawIcon(pDC, rText);
 
-		rem.DrawIcon(pDC, rText);
+			CRect rRest(rText);
+			rRest.left += (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
 
-		CRect rRest(rText);
-		rRest.left += (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
-
-		CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
-		return;
+			CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
+			return;
+		}
 	}
 
 	// else
@@ -467,16 +483,18 @@ void CTDLShowReminderListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRe
 	if (m_bHasIcons)
 	{
 		TDCREMINDER rem;
-		VERIFY(m_mapReminders.Lookup(GetItemData(nItem), rem));
+		
+		if (m_mapReminders.Lookup(GetItemData(nItem), rem))
+		{
+			CRect rText(rItem);
+			rText.left += (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
 
-		CRect rText(rItem);
-		rText.left += (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
-
-		CEnListCtrl::DrawItemBackground(pDC, nItem, rText, crBack, bSelected, bDropHighlighted, bFocused);
-		return;
+			CEnListCtrl::DrawItemBackground(pDC, nItem, rText, crBack, bSelected, bDropHighlighted, bFocused);
+			return;
+		}
 	}
 
-	CEnListCtrl::DrawItemBackground(pDC, nItem, rItem, bSelected, crBack, bDropHighlighted, bFocused);
+	CEnListCtrl::DrawItemBackground(pDC, nItem, rItem, crBack, bSelected, bDropHighlighted, bFocused);
 }
 
 void CTDLShowReminderListCtrl::UpdateIconStatus()
