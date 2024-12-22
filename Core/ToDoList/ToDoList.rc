@@ -5529,7 +5529,7 @@ BEGIN
     IDS_TDC_UPDATEFILTER_TIP "Update Filter"
     IDS_ADVANCEDFILTER      "Find Tasks Filter"
     IDS_LOGFILELOCKED       "The log file could not be updated."
-    IDS_LOGFILELOCKED_EXTRA "Please ensure that the log file is not already open for editing and \nthat you have the correct permissions and then try again."
+    IDS_LOGFILELOCKED_EXTRA "Please ensure that the file is not already open for editing and \nthat you have the correct permissions and then try again."
 END
 
 STRINGTABLE DISCARDABLE 
