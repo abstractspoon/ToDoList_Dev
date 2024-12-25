@@ -15,9 +15,14 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-List<TaskTimeLogEntry^>^ TaskTimeLog::Load(String^ tasklistPath)
+List<TaskTimeLogEntry^>^ TaskTimeLog::LoadEntries(String^ tasklistPath)
 {
-	String^ logFilePath = GetPath(tasklistPath);
+	return LoadEntries(tasklistPath, 0);
+}
+
+List<TaskTimeLogEntry^>^ TaskTimeLog::LoadEntries(String^ tasklistPath, UInt32 taskId)
+{
+	String^ logFilePath = GetLogPath(tasklistPath, taskId);
 	CTaskTimeLogItemArray aLogEntries;
 	CString sUnused;
 
@@ -40,6 +45,7 @@ List<TaskTimeLogEntry^>^ TaskTimeLog::Load(String^ tasklistPath)
 		logEntry->Person = ToString(li.sPerson);
 		logEntry->TaskPath = ToString(li.sPath);
 		logEntry->Type = ToString(li.sType);
+		logEntry->LogSeparately = (taskId != 0);
 
 		if (li.crAltColor == CLR_NONE)
 			logEntry->AltColor = Drawing::Color::Empty;
@@ -52,7 +58,12 @@ List<TaskTimeLogEntry^>^ TaskTimeLog::Load(String^ tasklistPath)
 	return logEntries;
 }
 
-bool TaskTimeLog::Save(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries)
+bool TaskTimeLog::SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries)
+{
+	return SaveEntries(tasklistPath, logEntries, 0);
+}
+
+bool TaskTimeLog::SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries, UInt32 taskId)
 {
 	CTaskTimeLogItemArray aLogEntries;
 	aLogEntries.SetSize(logEntries->Count);
@@ -65,12 +76,12 @@ bool TaskTimeLog::Save(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries
 		Copy(logEntry, li);
 	}
 
-	String^ logFilePath = GetPath(tasklistPath);
+	String^ logFilePath = GetLogPath(tasklistPath, taskId);
 
 	return (CTDCTaskTimeLog::SaveLogFile(MS(logFilePath), aLogEntries, FALSE) != FALSE);
 }
 
-bool TaskTimeLog::Add(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately)
+bool TaskTimeLog::AddEntry(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately)
 {
 	TASKTIMELOGITEM li;
 	Copy(logEntry, li);
@@ -91,14 +102,18 @@ String^ TaskTimeLog::FormatLogAccessError(Translator^ trans, bool loading)
 	return String::Format(L"{0}\n\n{1}", part1, part2);
 }
 
-String^ TaskTimeLog::GetPath(String^ tasklistPath)
+String^ TaskTimeLog::GetLogPath(String^ tasklistPath)
 {
 	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogPath());
 }
 
-String^ TaskTimeLog::GetPath(String^ tasklistPath, UInt32 taskId, bool logSeparately)
+String^ TaskTimeLog::GetLogPath(String^ tasklistPath, UInt32 taskId)
 {
-	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogPath(taskId, logSeparately));
+	if (taskId == 0)
+		return GetLogPath(tasklistPath);
+
+	// else
+	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogPath(taskId, true));
 }
 
 void TaskTimeLog::Copy(TaskTimeLogEntry^ from, TASKTIMELOGITEM& to)

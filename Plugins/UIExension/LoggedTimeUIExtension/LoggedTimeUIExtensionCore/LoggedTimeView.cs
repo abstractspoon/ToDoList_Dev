@@ -95,6 +95,7 @@ namespace LoggedTimeUIExtension
 		
 		public bool ReadOnly;
 		public bool ForceShowSelection;
+		public bool LogTasksSeparately;
 
 		protected override bool WantDrawDaySelection { get { return base.WantDrawDaySelection || ForceShowSelection; } }
 
@@ -339,7 +340,7 @@ namespace LoggedTimeUIExtension
 			// Temporarily disable file watcher
 			m_LogFileWatcher.EnableRaisingEvents = false;
 
-			bool success = TaskTimeLog.Add(m_TasklistPath, newEntry, false);
+			bool success = TaskTimeLog.AddEntry(m_TasklistPath, newEntry, (LogTasksSeparately && (taskItem != null)));
 
 			m_LogFileWatcher.EnableRaisingEvents = true;
 			
@@ -651,7 +652,7 @@ namespace LoggedTimeUIExtension
 
 		private void OnLogFileModified(object sender, FileSystemEventArgs e)
 		{
-			if (IsSamePath(TaskTimeLog.GetPath(m_TasklistPath), e.FullPath))
+			if (IsSamePath(TaskTimeLog.GetLogPath(m_TasklistPath), e.FullPath))
 				m_WantIdleReload = true;
 		}
 

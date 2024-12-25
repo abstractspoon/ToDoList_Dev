@@ -200,6 +200,7 @@ namespace LoggedTimeUIExtension
             m_TimeLog.StrikeThruDoneTasks = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_TimeLog.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 			m_TimeLog.DisplayDatesInISO = prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false);
+			m_TimeLog.LogTasksSeparately = prefs.GetProfileBool("Preferences", "LogTasksSeparately", false);
 
 			m_WorkWeek.Load(prefs);
             m_TimeLog.WeekendDays = m_WorkWeek.WeekendDays();

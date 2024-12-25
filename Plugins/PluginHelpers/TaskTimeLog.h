@@ -35,6 +35,7 @@ namespace Abstractspoon
 				String^ TaskPath;
 				String^ Type;
 				Drawing::Color AltColor;
+				bool LogSeparately;
 			};
 
 			// -------------------------------------------------------
@@ -42,12 +43,16 @@ namespace Abstractspoon
 			public ref class TaskTimeLog
 			{
 			public:
-				static List<TaskTimeLogEntry^>^ Load(String^ tasklistPath);
-				static bool Save(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries);
-				static bool Add(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately);
+				static List<TaskTimeLogEntry^>^ LoadEntries(String^ tasklistPath);
+				static List<TaskTimeLogEntry^>^ LoadEntries(String^ tasklistPath, UInt32 taskId);
 
-				static String^ GetPath(String^ tasklistPath);
-				static String^ GetPath(String^ tasklistPath, UInt32 taskId, bool logSeparately);
+				static bool SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries);
+				static bool SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries, UInt32 taskId);
+
+				static bool AddEntry(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately);
+
+				static String^ GetLogPath(String^ tasklistPath);
+				static String^ GetLogPath(String^ tasklistPath, UInt32 taskId);
 
 				static String^ FormatLogAccessError(Translator^ trans, bool loading);
 

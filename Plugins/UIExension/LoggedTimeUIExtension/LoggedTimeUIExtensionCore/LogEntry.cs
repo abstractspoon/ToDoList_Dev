@@ -69,7 +69,7 @@ namespace LoggedTimeUIExtension
 		{
 			try
 			{
-				var logEntries = TaskTimeLog.Load(filePath);
+				var logEntries = TaskTimeLog.LoadEntries(filePath);
 
 				if (logEntries != null)
 				{
@@ -132,7 +132,7 @@ namespace LoggedTimeUIExtension
 
 				try
 				{
-					return TaskTimeLog.Save(filePath, logEntries);
+					return TaskTimeLog.SaveEntries(filePath, logEntries);
 				}
 				catch (Exception)
 				{
