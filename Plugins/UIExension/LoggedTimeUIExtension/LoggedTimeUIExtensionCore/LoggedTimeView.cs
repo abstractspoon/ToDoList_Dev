@@ -32,11 +32,11 @@ namespace LoggedTimeUIExtension
 		private int m_UserMinSlotHeight = -1;
 
 		private TaskItems m_TaskItems;
-		private LogEntries m_LogEntries;
+		private LogFiles m_LogFiles;
 		private LogEntry m_CachedLogEntry;
 
 		private string m_TasklistPath = @"\."; // something valid
-		private FileSystemWatcher m_LogFileWatcher;
+		private FileSystemWatcher m_MainLogFileWatcher, m_TaskLogFileWatcher;
 		private bool m_LastLogAccessSucceeded = true;
 
 //		private DateSortedTasks m_DateSortedTasks;
@@ -70,7 +70,7 @@ namespace LoggedTimeUIExtension
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
 
-			m_LogEntries = new LogEntries();
+			m_LogFiles = new LogFiles();
 			m_TaskItems = new TaskItems();
 //			m_DateSortedTasks = new DateSortedTasks(m_LogEntries);
 
@@ -284,7 +284,7 @@ namespace LoggedTimeUIExtension
 
 		public LogEntry SelectedLogEntry
 		{
-			get { return m_LogEntries.GetEntry(m_SelectedLogEntryId); }
+			get { return m_LogFiles.GetEntry(m_SelectedLogEntryId); }
 		}
 
 		public bool CanAddNewLogEntry
@@ -302,7 +302,7 @@ namespace LoggedTimeUIExtension
 
 		public bool CanModifySelectedLogEntry
 		{
-			get { return !ReadOnly && m_LastLogAccessSucceeded && m_LogEntries.HasEntry(m_SelectedLogEntryId); }
+			get { return !ReadOnly && m_LastLogAccessSucceeded && m_LogFiles.HasEntry(m_SelectedLogEntryId); }
 		}
 
 		public bool CanDeleteSelectedLogEntry
@@ -322,6 +322,7 @@ namespace LoggedTimeUIExtension
 				return false;
 
 			uint taskId = ((taskItem == null) ? 0 : taskItem.Id);
+			bool logSeparately = (LogTasksSeparately && (taskId != 0));
 
 			var newEntry = new TaskTimeLogEntry()
 			{
@@ -338,19 +339,20 @@ namespace LoggedTimeUIExtension
 			};
 
 			// Temporarily disable file watcher
-			m_LogFileWatcher.EnableRaisingEvents = false;
+			EnableFileWatching(false);
 
-			bool success = TaskTimeLog.AddEntry(m_TasklistPath, newEntry, (LogTasksSeparately && (taskItem != null)));
+			bool success = TaskTimeLog.AddEntry(m_TasklistPath, newEntry, logSeparately);
 
-			m_LogFileWatcher.EnableRaisingEvents = true;
-			
+			EnableFileWatching(true);
+
 			if (success)
 			{
-				m_LogEntries.AddEntry(new LogEntry(0, newEntry));
+				m_LogFiles.AddEntry(new LogEntry(0, newEntry), logSeparately);
 				Invalidate();
 			}
 
-			HandleLogAccessResult(true, success);
+			var logPath = TaskTimeLog.GetLogPath(m_TasklistPath, taskId);
+			HandleLogAccessResult(logPath, false, success);
 
 			return success;
 		}
@@ -362,7 +364,7 @@ namespace LoggedTimeUIExtension
 
 			CacheSelectedLogEntry();
 
-			var entry = m_LogEntries.GetEntry(m_SelectedLogEntryId);
+			var entry = m_LogFiles.GetEntry(m_SelectedLogEntryId);
 
 			if (!entry.Modify(dates, timeSpentInHrs, comment, fillColor))
 			{
@@ -372,7 +374,7 @@ namespace LoggedTimeUIExtension
 
 			Invalidate();
 
-			return SaveLogFile();
+			return SaveLogFile(m_SelectedLogEntryId);
 		}
 
 		protected void OnAppointmentChanged(object sender, Calendar.AppointmentEventArgs e)
@@ -391,7 +393,7 @@ namespace LoggedTimeUIExtension
 
 				case Calendar.SelectionTool.State.Finished:
 					Debug.Assert(e.Appointment.Id == m_CachedLogEntry.Id);
-					SaveLogFile();
+					SaveLogFile(m_SelectedLogEntryId);
 					break;
 				}
 			}
@@ -402,12 +404,20 @@ namespace LoggedTimeUIExtension
 			if (!CanDeleteSelectedLogEntry)
 				return false;
 
+			var logFile = m_LogFiles.GetLogFile(m_SelectedLogEntryId);
+
+			if (logFile == null)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
 			CacheSelectedLogEntry();
 
-			if (!m_LogEntries.DeleteEntry(m_SelectedLogEntryId))
+			if (!logFile.DeleteEntry(m_SelectedLogEntryId))
 				Debug.Assert(false);
 
-			if (!SaveLogFile())
+			if (!logFile.SaveEntries(m_TasklistPath))
 				return false;
 
 			// else
@@ -421,7 +431,7 @@ namespace LoggedTimeUIExtension
 		{
 			Debug.Assert(m_SelectedLogEntryId != 0);
 
-			var entry = m_LogEntries.GetEntry(m_SelectedLogEntryId);
+			var entry = m_LogFiles.GetEntry(m_SelectedLogEntryId);
 
 			if (entry == null)
 			{
@@ -441,8 +451,8 @@ namespace LoggedTimeUIExtension
 				return false;
 			}
 
-			m_LogEntries.DeleteEntry(m_CachedLogEntry.Id);
-			m_LogEntries.AddEntry(m_CachedLogEntry);
+// 			m_LogFiles.DeleteEntry(m_CachedLogEntry.Id);
+// 			m_LogFiles.AddEntry(m_CachedLogEntry);
 
 			m_SelectedLogEntryId = m_CachedLogEntry.Id;
 
@@ -530,7 +540,7 @@ namespace LoggedTimeUIExtension
 		{
 			// Our base class clears the selected appointment whenever
 			// the week changes so we can't always rely on 'SelectedAppointmentId'
-			LogEntry item = m_LogEntries.GetEntry(m_SelectedLogEntryId);
+			LogEntry item = m_LogFiles.GetEntry(m_SelectedLogEntryId);
 
 			if (item != null)
 			{
@@ -632,47 +642,56 @@ namespace LoggedTimeUIExtension
 		///////////////////////////////////////////////////////////
 		// Idle processing
 
-		bool m_WantIdleReload = false;
+		List<string> m_IdleReloadLogFiles = new List<string>();
 
 		public bool DoIdleProcessing()
 		{
-			if (m_WantIdleReload)
+			if (m_IdleReloadLogFiles.Count > 0)
 			{
-				m_WantIdleReload = false;
-				ReloadLogFile();
+				ReloadLogFile(m_IdleReloadLogFiles[0]);
+				m_IdleReloadLogFiles.RemoveAt(0);
 			}
 
-			return false; // No more tasks
+			return (m_IdleReloadLogFiles.Count > 0);
 		}
 
-		private static bool IsSamePath(string path1, string path2)
+		private void OnMainLogFileModified(object sender, FileSystemEventArgs e)
 		{
-			return (string.Compare(Path.GetFullPath(path1), Path.GetFullPath(path2), StringComparison.InvariantCultureIgnoreCase) == 0);
+			if (LogFiles.IsSamePath(TaskTimeLog.GetLogPath(m_TasklistPath), e.FullPath))
+				m_IdleReloadLogFiles.Add(e.FullPath);
 		}
 
-		private void OnLogFileModified(object sender, FileSystemEventArgs e)
+		private void OnTaskLogFileModified(object sender, FileSystemEventArgs e)
 		{
-			if (IsSamePath(TaskTimeLog.GetLogPath(m_TasklistPath), e.FullPath))
-				m_WantIdleReload = true;
+			// We know these are 'our' log files because there in a sub-folder
+			m_IdleReloadLogFiles.Add(e.FullPath);
 		}
 
-		private void ReloadLogFile()
+		private void ReloadLogFile(string logPath)
 		{
-			bool success = m_LogEntries.Load(m_TasklistPath);
+			bool success = m_LogFiles.ReloadLogFile(logPath);
 
-			HandleLogAccessResult(true, success);
+			HandleLogAccessResult(logPath, true, success);
 			Invalidate();
 		}
 
-		private bool SaveLogFile()
+		private bool SaveLogFile(uint entryId)
 		{
+			var logFile = m_LogFiles.GetLogFile(entryId);
+
+			if (logFile == null)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
 			// Temporarily disable file watcher
-			m_LogFileWatcher.EnableRaisingEvents = false;
+			EnableFileWatching(false);
 
-			bool success = m_LogEntries.SaveLogFile(m_TasklistPath);
-			HandleLogAccessResult(false, success);
+			bool success = logFile.SaveEntries(m_TasklistPath);
+			HandleLogAccessResult(logFile.FilePath, false, success);
 
-			m_LogFileWatcher.EnableRaisingEvents = true;
+			EnableFileWatching(true);
 
 			if (success)
 				ClearCachedLogEntry();
@@ -682,7 +701,7 @@ namespace LoggedTimeUIExtension
 			return success;
 		}
 
-		private void HandleLogAccessResult(bool loading, bool success)
+		private void HandleLogAccessResult(string logPath, bool loading, bool success)
 		{
 			if (success != m_LastLogAccessSucceeded)
 			{
@@ -694,7 +713,11 @@ namespace LoggedTimeUIExtension
 			}
 
 			m_LastLogAccessSucceeded = success;
-			m_WantIdleReload |= !success;
+
+			if (success)
+				m_IdleReloadLogFiles.Remove(logPath);
+			else
+				m_IdleReloadLogFiles.Add(logPath);
 		}
 
 		///////////////////////////////////////////////////////////
@@ -703,23 +726,16 @@ namespace LoggedTimeUIExtension
 		{
 			string tasklistPath = tasks.GetFilePath();
 
-			if (!IsSamePath(tasklistPath, m_TasklistPath))
+			if (!LogFiles.IsSamePath(tasklistPath, m_TasklistPath))
 			{
 				m_TasklistPath = tasklistPath;
 
-				if (m_LogFileWatcher == null)
-				{
-					m_LogFileWatcher = new FileSystemWatcher();
+				PrepareFileWatcher(ref m_MainLogFileWatcher, Path.GetDirectoryName(m_TasklistPath), new FileSystemEventHandler(OnMainLogFileModified));
+				PrepareFileWatcher(ref m_TaskLogFileWatcher, Path.Combine(Path.GetDirectoryName(m_TasklistPath), Path.GetFileNameWithoutExtension(m_TasklistPath)), new FileSystemEventHandler(OnTaskLogFileModified));
 
-					m_LogFileWatcher.Filter = "*.csv";
-					m_LogFileWatcher.NotifyFilter = NotifyFilters.LastWrite;
-					m_LogFileWatcher.Changed += new FileSystemEventHandler(OnLogFileModified);
-				}
+				EnableFileWatching(true);
 
-				m_LogFileWatcher.Path = Path.GetDirectoryName(m_TasklistPath);
-				m_LogFileWatcher.EnableRaisingEvents = true;
-
-				ReloadLogFile();
+				m_LogFiles.LoadLogFiles(m_TasklistPath);
 			}
 
 			// Update the tasks
@@ -731,6 +747,33 @@ namespace LoggedTimeUIExtension
             AdjustVScrollbar();
             Invalidate();
         }
+
+		private void EnableFileWatching(bool enable)
+		{
+			EnableFileWatching(m_MainLogFileWatcher, enable);
+			EnableFileWatching(m_TaskLogFileWatcher, enable);
+		}
+
+		private static void EnableFileWatching(FileSystemWatcher watcher, bool enable)
+		{
+			if (watcher != null)
+				watcher.EnableRaisingEvents = (enable && !string.IsNullOrEmpty(watcher.Path) && Directory.Exists(watcher.Path));
+		}
+
+		private static void PrepareFileWatcher(ref FileSystemWatcher watcher, string logFolder, FileSystemEventHandler eh)
+		{
+			if (watcher == null)
+			{
+				watcher = new FileSystemWatcher();
+
+				watcher.Filter = "*.csv";
+				watcher.NotifyFilter = NotifyFilters.LastWrite;
+				watcher.Changed += eh;
+			}
+
+			if (Directory.Exists(logFolder))
+				watcher.Path = logFolder;
+		}
 
 		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, int depth)
 		{
@@ -838,7 +881,7 @@ namespace LoggedTimeUIExtension
 		public override bool EnsureVisible(Calendar.Appointment appt, bool partialOK)
 		{
 			if ((appt == null) && (m_SelectedLogEntryId != 0))
-				appt = m_LogEntries.GetEntry(m_SelectedLogEntryId);
+				appt = m_LogFiles.GetEntry(m_SelectedLogEntryId);
 
 			return base.EnsureVisible(appt, partialOK);
 		}
@@ -850,7 +893,7 @@ namespace LoggedTimeUIExtension
 
 		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end)
 		{
-			return m_LogEntries.GetEntries(start, end).ConvertAll(x => (Calendar.Appointment)x);
+			return m_LogFiles.GetEntries(start, end).ConvertAll(x => (Calendar.Appointment)x);
 		}
 
 		private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)

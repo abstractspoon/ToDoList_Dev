@@ -64,6 +64,8 @@ public:
 
 	CString GetLogPath() const;
 	CString GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const;
+
+	CString GetLogFileFilter(BOOL bLogSeparately) const;
 	
 	static BOOL LoadLogFile(LPCTSTR szLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
 	static BOOL SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray& aLogItems, BOOL bPreserveVersion = TRUE);

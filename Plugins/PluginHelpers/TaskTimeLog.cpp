@@ -11,6 +11,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System::Windows::Forms;
+using namespace System::IO;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +29,12 @@ List<TaskTimeLogEntry^>^ TaskTimeLog::LoadEntries(String^ tasklistPath, UInt32 t
 	CString sUnused;
 
 	if (CTDCTaskTimeLog::LoadLogFile(MS(logFilePath), aLogEntries, FALSE, sUnused) == FALSE)
-		return nullptr;
+	{
+		// If the log file existed and failed to load return null
+		// else we return an empty list by falling through
+		if (File::Exists(logFilePath))
+			return nullptr;
+	}
 
 	List<TaskTimeLogEntry^>^ logEntries = gcnew List<TaskTimeLogEntry^>();
 
@@ -45,7 +52,6 @@ List<TaskTimeLogEntry^>^ TaskTimeLog::LoadEntries(String^ tasklistPath, UInt32 t
 		logEntry->Person = ToString(li.sPerson);
 		logEntry->TaskPath = ToString(li.sPath);
 		logEntry->Type = ToString(li.sType);
-		logEntry->LogSeparately = (taskId != 0);
 
 		if (li.crAltColor == CLR_NONE)
 			logEntry->AltColor = Drawing::Color::Empty;
@@ -114,6 +120,11 @@ String^ TaskTimeLog::GetLogPath(String^ tasklistPath, UInt32 taskId)
 
 	// else
 	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogPath(taskId, true));
+}
+
+String^ TaskTimeLog::GetLogFileFilter(String^ tasklistPath, bool logSeparately)
+{
+	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogFileFilter(logSeparately));
 }
 
 void TaskTimeLog::Copy(TaskTimeLogEntry^ from, TASKTIMELOGITEM& to)

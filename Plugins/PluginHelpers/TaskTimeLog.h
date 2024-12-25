@@ -35,7 +35,6 @@ namespace Abstractspoon
 				String^ TaskPath;
 				String^ Type;
 				Drawing::Color AltColor;
-				bool LogSeparately;
 			};
 
 			// -------------------------------------------------------
@@ -53,7 +52,8 @@ namespace Abstractspoon
 
 				static String^ GetLogPath(String^ tasklistPath);
 				static String^ GetLogPath(String^ tasklistPath, UInt32 taskId);
-
+				static String^ GetLogFileFilter(String^ tasklistPath, bool logSeparately);
+				
 				static String^ FormatLogAccessError(Translator^ trans, bool loading);
 
 			private:

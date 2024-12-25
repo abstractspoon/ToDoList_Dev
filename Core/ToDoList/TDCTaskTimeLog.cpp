@@ -454,6 +454,25 @@ CString CTDCTaskTimeLog::GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const
 	return sLogPath;
 }
 
+CString CTDCTaskTimeLog::GetLogFileFilter(BOOL bLogSeparately) const
+{
+	CString sFilter;
+
+	// use ref filename as the basis for the log filename
+	if (!m_sRefPath.IsEmpty())
+	{
+		CString sDrive, sFolder, sFileName;
+		FileMisc::SplitPath(m_sRefPath, &sDrive, &sFolder, &sFileName);
+
+		if (bLogSeparately)
+			sFilter.Format(_T("%s%s%s\\*_Log.csv"), sDrive, sFolder, sFileName);
+		else
+			sFilter.Format(_T("%s%s%s_Log.csv"), sDrive, sFolder, sFileName);
+	}
+
+	return sFilter;
+}
+
 CString CTDCTaskTimeLog::GetLatestColumnHeader() const // always the latest version
 {
 	// sanity check

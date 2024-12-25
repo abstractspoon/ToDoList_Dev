@@ -12,14 +12,14 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
 {
-	// ---------------------------------------------------------------
-
-	public class LogEntries
+	public class LogFile
 	{
 		private List<LogEntry> m_Entries;
-		private uint m_NextEntryId;
 
-		public LogEntries()
+		public uint TaskId { get; private set; }
+		public string FilePath { get; private set; }
+
+		public LogFile()
 		{
 			m_Entries = new List<LogEntry>();
 		}
@@ -29,7 +29,6 @@ namespace LoggedTimeUIExtension
 		private void Reset()
 		{
 			m_Entries.Clear();
-			m_NextEntryId = 1;
 		}
 
 		public bool HasEntry(uint entryId)
@@ -37,7 +36,7 @@ namespace LoggedTimeUIExtension
 			return (GetEntry(entryId) != null);
 		}
 
-		public bool AddEntry(LogEntry entry)
+		public bool AddEntry(LogEntry entry, ref uint nextEntryId)
 		{
 			if (HasEntry(entry.Id))
 			{
@@ -46,9 +45,9 @@ namespace LoggedTimeUIExtension
 			}
 
 			if (entry.Id == 0)
-				entry.Id = m_NextEntryId++;
+				entry.Id = nextEntryId++;
 			else
-				m_NextEntryId = Math.Max(m_NextEntryId, (entry.Id + 1));
+				nextEntryId = Math.Max(nextEntryId, (entry.Id + 1));
 
 			m_Entries.Add(entry);
 			return true;
@@ -65,26 +64,26 @@ namespace LoggedTimeUIExtension
 			return true;
 		}
 
-		public bool Load(string filePath)
+		public bool LoadEntries(string tasklistPath, ref uint nextEntryId)
 		{
-			try
+			return LoadEntries(tasklistPath, 0, ref nextEntryId);
+		}
+
+		public bool LoadEntries(string tasklistPath, uint taskId, ref uint nextEntryId)
+		{
+			var logEntries = TaskTimeLog.LoadEntries(tasklistPath);
+
+			if (logEntries != null)
 			{
-				var logEntries = TaskTimeLog.LoadEntries(filePath);
+				m_Entries.Clear();
 
-				if (logEntries != null)
-				{
-					m_Entries.Clear();
-					m_NextEntryId = 1;
+				foreach (var entry in logEntries)
+					m_Entries.Add(new LogEntry(nextEntryId++, entry));
 
-					foreach (var entry in logEntries)
-						m_Entries.Add(new LogEntry(m_NextEntryId++, entry));
+				TaskId = taskId;
+				FilePath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
 
-					return true;
-				}
-			}
-			catch (Exception)
-			{
-				Reset();
+				return true;
 			}
 
 			return false;
@@ -107,9 +106,9 @@ namespace LoggedTimeUIExtension
 										(x.EndDate <= to)).ToList();
 		}
 
-		public bool SaveLogFile(string filePath)
+		public bool SaveEntries(string tasklistPath)
 		{
-			if (!string.IsNullOrEmpty(filePath))
+			if (!string.IsNullOrEmpty(tasklistPath))
 			{
 				var logEntries = new List<TaskTimeLogEntry>();
 
@@ -132,7 +131,7 @@ namespace LoggedTimeUIExtension
 
 				try
 				{
-					return TaskTimeLog.SaveEntries(filePath, logEntries);
+					return TaskTimeLog.SaveEntries(tasklistPath, logEntries, TaskId);
 				}
 				catch (Exception)
 				{
@@ -141,6 +140,178 @@ namespace LoggedTimeUIExtension
 
 			return false;
 		}
+	}
+
+	// ---------------------------------------------------------------
+
+	public class LogFiles
+	{
+		private List<LogFile> m_LogFiles;
+		private uint m_NextEntryId;
+
+		public LogFiles()
+		{
+			m_LogFiles = new List<LogFile>();
+		}
+
+		public bool IsEmpty { get { return (m_LogFiles?.Count == 0); } }
+		public string TasklistPath { get; private set; }
+
+		private void Reset()
+		{
+			m_LogFiles.Clear();
+			m_NextEntryId = 1;
+		}
+
+		public bool HasLogFile(string logPath)
+		{
+			return (GetLogFile(logPath) != null);
+		}
+
+		public LogFile GetLogFile(string logPath)
+		{
+			return m_LogFiles.Find(x => (string.Compare(x.FilePath, logPath, true) == 0));
+		}
+
+		public LogFile GetLogFile(uint entryId)
+		{
+			foreach (var logFile in m_LogFiles)
+			{
+				if (logFile.HasEntry(entryId))
+					return logFile;
+			}
+
+			return null;
+		}
+
+		public bool HasEntry(uint entryId)
+		{
+			return (GetEntry(entryId) != null);
+		}
+
+		public LogEntry GetEntry(uint entryId)
+		{
+			foreach (var logFile in m_LogFiles)
+			{
+				var entry = logFile.GetEntry(entryId);
+
+				if (entry != null)
+					return entry;
+			}
+
+			return null;
+		}
+
+		public bool AddEntry(LogEntry entry, bool logSeparately)
+		{
+			var logPath = TaskTimeLog.GetLogPath(TasklistPath, (logSeparately ? entry.TaskId : 0));
+			var logFile = GetLogFile(logPath);
+
+			if (logFile == null)
+			{
+				logFile = new LogFile();
+				m_LogFiles.Add(logFile);
+			}
+
+			return logFile.AddEntry(entry, ref m_NextEntryId);
+		}
+
+// 		public bool DeleteEntry(uint entryId)
+// 		{
+// 			foreach (var logFile in m_LogFiles)
+// 			{
+// 				if (logFile.DeleteEntry(entryId))
+// 					return true;
+// 			}
+// 
+// 			return false;
+// 		}
+
+		public bool LoadLogFiles(string tasklistPath)
+		{
+			TasklistPath = tasklistPath;
+
+			// Top-level log file
+			LoadLogFile(tasklistPath);
+
+			// Separate task log files
+			var filter = TaskTimeLog.GetLogFileFilter(tasklistPath, true);
+
+			if (Directory.Exists(Path.GetDirectoryName(filter)))
+			{
+				var logFiles = Directory.GetFiles(Path.GetDirectoryName(filter), Path.GetFileName(filter));
+
+				foreach (var file in logFiles)
+					ReloadLogFile(file);
+			}
+
+			return true;
+		}
+
+		public static bool IsSamePath(string path1, string path2)
+		{
+			return (string.Compare(Path.GetFullPath(path1), Path.GetFullPath(path2), StringComparison.InvariantCultureIgnoreCase) == 0);
+		}
+
+		public bool ReloadLogFile(string logFilePath)
+		{
+			if (IsSamePath(logFilePath, TaskTimeLog.GetLogPath(TasklistPath)))
+				return LoadLogFile(TasklistPath, 0);
+
+			// Decode path into
+			var filename = Path.GetFileNameWithoutExtension(logFilePath);
+			uint taskId = 0;
+
+			if (!uint.TryParse(filename.Substring(0, filename.Length - 4), out taskId)) // remove '_Log'
+				return false;
+
+			return LoadLogFile(TasklistPath, taskId);
+		}
+
+		private bool LoadLogFile(string tasklistPath, uint taskId = 0)
+		{
+			var logPath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
+			var logFile = GetLogFile(logPath);
+
+			bool newLogFile = (logFile == null);
+
+			if (newLogFile)
+				logFile = new LogFile();
+
+			if (!logFile.LoadEntries(tasklistPath, taskId, ref m_NextEntryId))
+				return false;
+
+			if (newLogFile)
+				m_LogFiles.Add(logFile);
+
+			return true;
+		}
+
+		public List<LogEntry> GetEntries(DateTime from, DateTime to)
+		{
+			var logEntries = new List<LogEntry>();
+
+			foreach (var logFile in m_LogFiles)
+				logEntries.AddRange(logFile.GetEntries(from, to));
+
+			return logEntries;
+		}
+
+// 		public bool SaveLogFile(string tasklistPath, uint taskId = 0)
+// 		{
+// 			if (!string.IsNullOrEmpty(tasklistPath))
+// 			{
+// 				var logPath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
+// 				var logFile = GetLogFile(logPath);
+// 
+// 				if (logFile == null)
+// 					return false;
+// 
+// 				return logFile.SaveEntries(tasklistPath);
+// 			}
+// 
+// 			return false;
+// 		}
 	}
 
 	// ---------------------------------------------------------------
