@@ -1016,7 +1016,7 @@ namespace WordCloudUIExtension
 
 		private void OnWordCloudEditIgnoreList(object sender, EventArgs e)
 		{
-			if (EditIgnoreListDlg.DoEdit(m_UserIgnoreFilePath))
+			if (EditIgnoreListDlg.DoEdit(m_Trans, m_UserIgnoreFilePath))
 			{
 				UpdateBlacklist();
 			}
