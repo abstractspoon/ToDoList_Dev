@@ -1460,7 +1460,7 @@ BEGIN
     LTEXT           "&When",IDC_STATIC,7,78,64,8
     CONTROL         "DateTimePicker1",IDC_WHENDATE,"SysDateTimePick32",
                     DTS_RIGHTALIGN | WS_TABSTOP,73,76,74,13
-    COMBOBOX        IDC_WHENTIME,149,76,77,30,CBS_DROPDOWN | 
+    COMBOBOX        IDC_WHENTIME,151,76,74,30,CBS_DROPDOWN | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "&Comment",IDC_COMMENTLABEL,7,95,65,8

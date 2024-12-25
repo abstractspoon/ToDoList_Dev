@@ -22,14 +22,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAddLoggedTimeDlg dialog
 
-CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, BOOL bShowAddTimeToTimeSpent, double dHours, CWnd* pParent /*=NULL*/)
+CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, BOOL bEnableAddTimeToTimeSpent, double dHours, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLAddLoggedTimeDlg::IDD, _T("AddLoggedTime"), pParent), 
 	m_cbTimeWhen(TCB_HALFHOURS | TCB_HOURSINDAY),
 	m_loggedTime(dHours, TDCU_HOURS),
 	m_dwTaskID(dwTaskID),
 	m_sTaskTitle(szTaskTitle),
-	m_bShowAddTimeToTimeSpent(bShowAddTimeToTimeSpent),
+	m_bEnableAddTimeToTimeSpent(bEnableAddTimeToTimeSpent),
 	m_bTracked(dHours != 0.0)
 {
 	//{{AFX_DATA_INIT(CTDLAddLoggedTimeDlg)
@@ -56,7 +56,7 @@ CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
 		m_eLoggedTime.EnableNegativeTimes(TRUE);
 	}
 
-	if (m_bShowAddTimeToTimeSpent)
+	if (m_bEnableAddTimeToTimeSpent)
 		m_bAddTimeToTimeSpent = CPreferences().GetProfileInt(m_sPrefsKey, _T("AddLoggedTimeToTimeSpent"), TRUE);
 }
 
@@ -123,7 +123,7 @@ void CTDLAddLoggedTimeDlg::OnOK()
 	CPreferences prefs;
 	prefs.WriteProfileInt(m_sPrefsKey, _T("AddLoggedTimeUnits"), m_loggedTime.GetTHUnits());
 
-	if (m_bShowAddTimeToTimeSpent)
+	if (m_bEnableAddTimeToTimeSpent)
 	{
 		prefs.WriteProfileInt(m_sPrefsKey, _T("AddLoggedTimeToTimeSpent"), m_bAddTimeToTimeSpent);
 
@@ -139,24 +139,11 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 
 	CLocalizer::EnableTranslation(::GetDlgItem(*this, IDC_TASKTITLE), FALSE);
 	
-	if (m_bShowAddTimeToTimeSpent)
-	{
-		GetDlgItem(IDAPPLY)->EnableWindow(FALSE);
-	}
-	else
-	{
-		GetDlgItem(IDC_ADDTIMETOTIMESPENT)->EnableWindow(FALSE);
-		GetDlgItem(IDC_ADDTIMETOTIMESPENT)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDAPPLY)->EnableWindow(FALSE);
+	GetDlgItem(IDC_ADDTIMETOTIMESPENT)->EnableWindow(m_bEnableAddTimeToTimeSpent);
 
-		CRect rCheckbox = CDialogHelper::GetCtrlRect(this, IDC_ADDTIMETOTIMESPENT);
-		CRect rComments = CDialogHelper::GetCtrlRect(this, IDC_COMMENT);
-		int nYOffset = (rComments.top - rCheckbox.top);
-
-		CDialogHelper::OffsetCtrl(this, IDC_COMMENTLABEL, 0, -nYOffset);
-		CDialogHelper::OffsetCtrl(this, IDC_COMMENT, 0, -nYOffset);
-		CDialogHelper::ResizeCtrl(this, IDC_COMMENT, 0, nYOffset);
-		
-		GetDlgItem(IDAPPLY)->EnableWindow(FALSE);
+	if (!m_bEnableAddTimeToTimeSpent)
+	{
 		GetDlgItem(IDAPPLY)->ShowWindow(SW_HIDE);
 		
 		CRect rApply = CDialogHelper::GetCtrlRect(this, IDAPPLY);
@@ -184,7 +171,7 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 
 void CTDLAddLoggedTimeDlg::OnApply() 
 {
-	ASSERT(m_bShowAddTimeToTimeSpent);
+	ASSERT(m_bEnableAddTimeToTimeSpent);
 
 	// make sure we are up to date
 	UpdateData();
@@ -203,7 +190,7 @@ void CTDLAddLoggedTimeDlg::OnApply()
 void CTDLAddLoggedTimeDlg::OnChange() 
 {
 	// re-enable apply button
-	if (m_bShowAddTimeToTimeSpent)
+	if (m_bEnableAddTimeToTimeSpent)
 		GetDlgItem(IDAPPLY)->EnableWindow(TRUE);
 }
 
