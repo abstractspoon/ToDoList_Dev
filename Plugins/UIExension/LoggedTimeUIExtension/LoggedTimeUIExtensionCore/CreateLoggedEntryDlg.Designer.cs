@@ -83,7 +83,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(6, 39);
+			this.label1.Location = new System.Drawing.Point(7, 39);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(45, 13);
 			this.label1.TabIndex = 13;
@@ -105,7 +105,7 @@
 			this.m_TaskCombo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
 			this.m_TaskCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_TaskCombo.FormattingEnabled = true;
-			this.m_TaskCombo.Location = new System.Drawing.Point(110, 9);
+			this.m_TaskCombo.Location = new System.Drawing.Point(109, 9);
 			this.m_TaskCombo.Name = "m_TaskCombo";
 			this.m_TaskCombo.Size = new System.Drawing.Size(226, 21);
 			this.m_TaskCombo.TabIndex = 0;

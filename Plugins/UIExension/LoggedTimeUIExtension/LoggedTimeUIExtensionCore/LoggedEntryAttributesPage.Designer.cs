@@ -165,7 +165,7 @@
 			// 
 			this.m_FillColorButton.Color = System.Drawing.Color.Empty;
 			this.m_FillColorButton.ForeColor = System.Drawing.SystemColors.ControlText;
-			this.m_FillColorButton.Location = new System.Drawing.Point(102, 197);
+			this.m_FillColorButton.Location = new System.Drawing.Point(101, 197);
 			this.m_FillColorButton.Name = "m_FillColorButton";
 			this.m_FillColorButton.Size = new System.Drawing.Size(75, 23);
 			this.m_FillColorButton.TabIndex = 43;
