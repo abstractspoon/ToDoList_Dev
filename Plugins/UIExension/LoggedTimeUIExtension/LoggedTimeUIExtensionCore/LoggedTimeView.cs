@@ -36,8 +36,11 @@ namespace LoggedTimeUIExtension
 		private LogEntry m_CachedLogEntry;
 
 		private string m_TasklistPath = @"\."; // something valid
-		private FileSystemWatcher m_MainLogFileWatcher, m_TaskLogFileWatcher;
 		private bool m_LastLogAccessSucceeded = true;
+
+		private FileSystemWatcher m_MainLogFileWatcher = new FileSystemWatcher();
+		private FileSystemWatcher m_TaskLogFolderWatcher = new FileSystemWatcher();
+		private FileSystemWatcher m_TaskLogFileWatcher = new FileSystemWatcher();
 
 //		private DateSortedTasks m_DateSortedTasks;
 
@@ -85,6 +88,7 @@ namespace LoggedTimeUIExtension
 			timer.Tick += (s, e) => { UpdateTodayTime(); };
 
 			InitializeComponent();
+			InitializeFileWatchers();
 		}
 
 		public IEnumerable<TaskItem> TaskItems { get { return m_TaskItems.Values; } }
@@ -648,31 +652,25 @@ namespace LoggedTimeUIExtension
 		{
 			if (m_IdleReloadLogFiles.Count > 0)
 			{
-				ReloadLogFile(m_IdleReloadLogFiles[0]);
-				m_IdleReloadLogFiles.RemoveAt(0);
+				string logPath = m_IdleReloadLogFiles[0];
+				bool success = m_LogFiles.ReloadLogFile(logPath);
+
+				HandleLogAccessResult(logPath, true, success);
+				Invalidate();
+
+				m_IdleReloadLogFiles.Remove(logPath);
 			}
 
 			return (m_IdleReloadLogFiles.Count > 0);
 		}
 
-		private void OnMainLogFileModified(object sender, FileSystemEventArgs e)
+		private void AddIdleReload(string logPath, bool mainLogFile)
 		{
-			if (LogFiles.IsSamePath(TaskTimeLog.GetLogPath(m_TasklistPath), e.FullPath))
-				m_IdleReloadLogFiles.Add(e.FullPath);
-		}
-
-		private void OnTaskLogFileModified(object sender, FileSystemEventArgs e)
-		{
-			// We know these are 'our' log files because there in a sub-folder
-			m_IdleReloadLogFiles.Add(e.FullPath);
-		}
-
-		private void ReloadLogFile(string logPath)
-		{
-			bool success = m_LogFiles.ReloadLogFile(logPath);
-
-			HandleLogAccessResult(logPath, true, success);
-			Invalidate();
+			if (m_LogFiles.IsLogFile(logPath, mainLogFile))
+			{
+				if (m_IdleReloadLogFiles.Find(x => LogFiles.IsSamePath(x, logPath)) == null)
+					m_IdleReloadLogFiles.Add(logPath);
+			}
 		}
 
 		private bool SaveLogFile(uint entryId)
@@ -729,13 +727,9 @@ namespace LoggedTimeUIExtension
 			if (!LogFiles.IsSamePath(tasklistPath, m_TasklistPath))
 			{
 				m_TasklistPath = tasklistPath;
-
-				PrepareFileWatcher(ref m_MainLogFileWatcher, Path.GetDirectoryName(m_TasklistPath), new FileSystemEventHandler(OnMainLogFileModified));
-				PrepareFileWatcher(ref m_TaskLogFileWatcher, Path.Combine(Path.GetDirectoryName(m_TasklistPath), Path.GetFileNameWithoutExtension(m_TasklistPath)), new FileSystemEventHandler(OnTaskLogFileModified));
+				m_LogFiles.LoadLogFiles(m_TasklistPath);
 
 				EnableFileWatching(true);
-
-				m_LogFiles.LoadLogFiles(m_TasklistPath);
 			}
 
 			// Update the tasks
@@ -750,29 +744,63 @@ namespace LoggedTimeUIExtension
 
 		private void EnableFileWatching(bool enable)
 		{
-			EnableFileWatching(m_MainLogFileWatcher, enable);
-			EnableFileWatching(m_TaskLogFileWatcher, enable);
-		}
+			string mainLogFolder = Path.GetDirectoryName(m_TasklistPath);
 
-		private static void EnableFileWatching(FileSystemWatcher watcher, bool enable)
-		{
-			if (watcher != null)
-				watcher.EnableRaisingEvents = (enable && !string.IsNullOrEmpty(watcher.Path) && Directory.Exists(watcher.Path));
-		}
-
-		private static void PrepareFileWatcher(ref FileSystemWatcher watcher, string logFolder, FileSystemEventHandler eh)
-		{
-			if (watcher == null)
+			if (enable && Directory.Exists(mainLogFolder))
 			{
-				watcher = new FileSystemWatcher();
+				m_MainLogFileWatcher.Path = mainLogFolder;
+				m_MainLogFileWatcher.EnableRaisingEvents = true;
 
-				watcher.Filter = "*.csv";
-				watcher.NotifyFilter = NotifyFilters.LastWrite;
-				watcher.Changed += eh;
+				m_TaskLogFolderWatcher.Path = mainLogFolder;
+				m_TaskLogFolderWatcher.EnableRaisingEvents = true;
+
+				string taskLogFolder = Path.ChangeExtension(m_TasklistPath, null);
+
+				m_TaskLogFileWatcher.Path = taskLogFolder;
+				m_TaskLogFileWatcher.EnableRaisingEvents = Directory.Exists(taskLogFolder);
 			}
+			else
+			{
+				m_MainLogFileWatcher.EnableRaisingEvents = false;
+				m_TaskLogFolderWatcher.EnableRaisingEvents = false;
+				m_TaskLogFileWatcher.EnableRaisingEvents = false;
+			}
+		}
 
-			if (Directory.Exists(logFolder))
-				watcher.Path = logFolder;
+		private void InitializeFileWatchers()
+		{
+			m_MainLogFileWatcher.Filter = "*.csv";
+			m_MainLogFileWatcher.NotifyFilter = (NotifyFilters.CreationTime | NotifyFilters.LastWrite);
+			m_MainLogFileWatcher.Changed += (s, e) =>
+			{
+				AddIdleReload(e.FullPath, true);
+			};
+
+			m_TaskLogFolderWatcher.NotifyFilter = (NotifyFilters.CreationTime | NotifyFilters.DirectoryName);
+			m_TaskLogFolderWatcher.Created += (s, e) =>
+			{
+				EnableFileWatching(true);
+			};
+			m_TaskLogFolderWatcher.Deleted += (s, e) =>
+			{
+				m_LogFiles.DeleteAllTaskLogFiles();
+				EnableFileWatching(true);
+			};
+
+			m_TaskLogFileWatcher.Filter = "*.csv";
+			m_TaskLogFileWatcher.NotifyFilter = (NotifyFilters.CreationTime | NotifyFilters.LastWrite | NotifyFilters.FileName);
+			m_TaskLogFileWatcher.Created += (s, e) =>
+			{
+				AddIdleReload(e.FullPath, false);
+			};
+			m_TaskLogFileWatcher.Changed += (s, e) =>
+			{
+				AddIdleReload(e.FullPath, false);
+			};
+			m_TaskLogFileWatcher.Deleted += (s, e) =>
+			{
+				m_LogFiles.DeleteLogFile(e.FullPath);
+			};
 		}
 
 		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, int depth)

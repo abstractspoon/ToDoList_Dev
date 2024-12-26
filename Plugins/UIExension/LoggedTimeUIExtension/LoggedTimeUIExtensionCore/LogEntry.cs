@@ -71,7 +71,7 @@ namespace LoggedTimeUIExtension
 
 		public bool LoadEntries(string tasklistPath, uint taskId, ref uint nextEntryId)
 		{
-			var logEntries = TaskTimeLog.LoadEntries(tasklistPath);
+			var logEntries = TaskTimeLog.LoadEntries(tasklistPath, taskId);
 
 			if (logEntries != null)
 			{
@@ -170,7 +170,7 @@ namespace LoggedTimeUIExtension
 
 		public LogFile GetLogFile(string logPath)
 		{
-			return m_LogFiles.Find(x => (string.Compare(x.FilePath, logPath, true) == 0));
+			return m_LogFiles.Find(x => LogFiles.IsSamePath(x.FilePath, logPath));
 		}
 
 		public LogFile GetLogFile(uint entryId)
@@ -216,25 +216,15 @@ namespace LoggedTimeUIExtension
 			return logFile.AddEntry(entry, ref m_NextEntryId);
 		}
 
-// 		public bool DeleteEntry(uint entryId)
-// 		{
-// 			foreach (var logFile in m_LogFiles)
-// 			{
-// 				if (logFile.DeleteEntry(entryId))
-// 					return true;
-// 			}
-// 
-// 			return false;
-// 		}
-
 		public bool LoadLogFiles(string tasklistPath)
 		{
+			Reset();
 			TasklistPath = tasklistPath;
 
-			// Top-level log file
-			LoadLogFile(tasklistPath);
+			// 'Main' log file
+			LoadLogFile(tasklistPath, 0);
 
-			// Separate task log files
+			// Separate 'Task' log files
 			var filter = TaskTimeLog.GetLogFileFilter(tasklistPath, true);
 
 			if (Directory.Exists(Path.GetDirectoryName(filter)))
@@ -253,22 +243,41 @@ namespace LoggedTimeUIExtension
 			return (string.Compare(Path.GetFullPath(path1), Path.GetFullPath(path2), StringComparison.InvariantCultureIgnoreCase) == 0);
 		}
 
-		public bool ReloadLogFile(string logFilePath)
+		private bool ExtractTaskIdFromLogPath(string logPath, out uint taskId)
 		{
-			if (IsSamePath(logFilePath, TaskTimeLog.GetLogPath(TasklistPath)))
-				return LoadLogFile(TasklistPath, 0);
+			taskId = 0;
 
-			// Decode path into
-			var filename = Path.GetFileNameWithoutExtension(logFilePath);
-			uint taskId = 0;
+			var filename = Path.GetFileNameWithoutExtension(logPath);
+			string taskIdStr = filename.Substring(0, filename.Length - 4); // remove '_Log'
 
-			if (!uint.TryParse(filename.Substring(0, filename.Length - 4), out taskId)) // remove '_Log'
+			return uint.TryParse(taskIdStr, out taskId);
+		}
+
+		public bool IsLogFile(string logPath, bool main)
+		{
+			if (main)
+				return IsSamePath(logPath, TaskTimeLog.GetLogPath(TasklistPath));
+
+			// else
+			if (!IsSamePath(Path.GetDirectoryName(logPath), Path.ChangeExtension(TasklistPath, null)))
 				return false;
 
+			uint taskId = 0;
+			return (ExtractTaskIdFromLogPath(logPath, out taskId) && (taskId != 0));
+		}
+
+		public bool ReloadLogFile(string logPath)
+		{
+			uint taskId;
+
+			if (!ExtractTaskIdFromLogPath(logPath, out taskId))
+				return false;
+
+			// else
 			return LoadLogFile(TasklistPath, taskId);
 		}
 
-		private bool LoadLogFile(string tasklistPath, uint taskId = 0)
+		private bool LoadLogFile(string tasklistPath, uint taskId)
 		{
 			var logPath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
 			var logFile = GetLogFile(logPath);
@@ -297,21 +306,17 @@ namespace LoggedTimeUIExtension
 			return logEntries;
 		}
 
-// 		public bool SaveLogFile(string tasklistPath, uint taskId = 0)
-// 		{
-// 			if (!string.IsNullOrEmpty(tasklistPath))
-// 			{
-// 				var logPath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
-// 				var logFile = GetLogFile(logPath);
-// 
-// 				if (logFile == null)
-// 					return false;
-// 
-// 				return logFile.SaveEntries(tasklistPath);
-// 			}
-// 
-// 			return false;
-// 		}
+		public bool DeleteLogFile(string logPath)
+		{
+			var logFile = GetLogFile(logPath);
+
+			return m_LogFiles.Remove(logFile);
+		}
+
+		public bool DeleteAllTaskLogFiles()
+		{
+			return (m_LogFiles.RemoveAll(x => (x.TaskId != 0)) > 0);
+		}
 	}
 
 	// ---------------------------------------------------------------
