@@ -36,7 +36,6 @@ namespace LoggedTimeUIExtension
 		private LogEntry m_CachedLogEntry;
 
 		private string m_TasklistPath = @"\."; // something valid
-		private bool m_LastLogAccessSucceeded = true;
 
 		private FileSystemWatcher m_MainLogFileWatcher = new FileSystemWatcher();
 		private FileSystemWatcher m_TaskLogFolderWatcher = new FileSystemWatcher();
@@ -295,18 +294,41 @@ namespace LoggedTimeUIExtension
 		{
 			get
 			{
-				if (!m_LastLogAccessSucceeded)
+				if (string.IsNullOrEmpty(m_TasklistPath))
+				{
 					return false;
+				}
 
-				// Must have a valid tasklist path -> valid log file path
-				// and there must be no pending modifications
-				return !string.IsNullOrEmpty(m_TasklistPath)/* && !m_LogEntries.IsModified*/;
+				if (LogTasksSeparately)
+				{
+					// We've no idea what task the user is going to check
+					// so we can't verify that the log file is not accessible
+					return true;
+				}
+
+				var mainLogFile = m_LogFiles.GetLogFile(m_TasklistPath, 0);
+
+				return ((mainLogFile != null) && mainLogFile.IsAccessible);
 			}
 		}
 
 		public bool CanModifySelectedLogEntry
 		{
-			get { return !ReadOnly && m_LastLogAccessSucceeded && m_LogFiles.HasEntry(m_SelectedLogEntryId); }
+			get
+			{
+				if (ReadOnly)
+					return false;
+
+				var logFile = m_LogFiles.GetLogFile(m_SelectedLogEntryId);
+
+				if (logFile == null)
+				{
+					Debug.Assert(logFile != null);
+					return false;
+				}
+
+				return logFile.IsAccessible;
+			}
 		}
 
 		public bool CanDeleteSelectedLogEntry
@@ -356,7 +378,7 @@ namespace LoggedTimeUIExtension
 			}
 
 			var logPath = TaskTimeLog.GetLogPath(m_TasklistPath, taskId);
-			HandleLogAccessResult(logPath, false, success);
+			HandleLogAccessResult(logPath, false);
 
 			return success;
 		}
@@ -683,7 +705,7 @@ namespace LoggedTimeUIExtension
 			EnableFileWatching(false);
 
 			bool success = logFile.SaveEntries(m_TasklistPath);
-			HandleLogAccessResult(logFile.FilePath, false, success);
+			HandleLogAccessResult(logFile.FilePath, false);
 
 			EnableFileWatching(true);
 
@@ -695,20 +717,21 @@ namespace LoggedTimeUIExtension
 			return success;
 		}
 
-		private void HandleLogAccessResult(string logPath, bool loading, bool success)
+		private void HandleLogAccessResult(string logPath, bool loading)
 		{
-			if (success != m_LastLogAccessSucceeded)
+			var logFile = m_LogFiles.GetLogFile(logPath);
+			Debug.Assert(logFile != null);
+
+			if (logFile.IsAccessible != logFile.WasAccessible)
 			{
 				LogAccessStatusChanged?.Invoke(this, new LogAccessEventArgs()
 				{
 					Loading = loading,
-					Success = success
+					Success = logFile.IsAccessible
 				});
 			}
 
-			m_LastLogAccessSucceeded = success;
-
-			if (success)
+			if (logFile.IsAccessible)
 				m_IdleReloadLogFiles.Remove(logPath);
 			else
 				m_IdleReloadLogFiles.Add(logPath);
@@ -740,17 +763,17 @@ namespace LoggedTimeUIExtension
 
 		private void LoadLogFile(string logPath)
 		{
-			bool hadSelection = CacheSelectedLogEntry(), success = false;
+			bool hadSelection = CacheSelectedLogEntry();
 
 			if (logPath == null)
 			{
-				success = m_LogFiles.LoadLogFiles(m_TasklistPath);
-				HandleLogAccessResult(TaskTimeLog.GetLogPath(m_TasklistPath), true, success);
+				m_LogFiles.LoadLogFiles(m_TasklistPath);
+				HandleLogAccessResult(TaskTimeLog.GetLogPath(m_TasklistPath), true);
 			}
 			else
 			{
-				success = m_LogFiles.ReloadLogFile(logPath);
-				HandleLogAccessResult(logPath, true, success);
+				m_LogFiles.ReloadLogFile(logPath);
+				HandleLogAccessResult(logPath, true);
 			}
 
 			if (hadSelection)
@@ -1023,7 +1046,7 @@ namespace LoggedTimeUIExtension
 
 		private bool CanModifyAppointmentDates
 		{
-			get { return (!ReadOnly && m_LastLogAccessSucceeded); }
+			get { return CanModifySelectedLogEntry; }
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)

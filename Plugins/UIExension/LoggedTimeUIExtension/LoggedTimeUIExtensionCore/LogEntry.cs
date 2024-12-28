@@ -151,6 +151,8 @@ namespace LoggedTimeUIExtension
 
 		public uint TaskId { get; private set; }
 		public string FilePath { get; private set; }
+		public bool IsAccessible { get; private set; } = true;
+		public bool WasAccessible { get; private set; } = true;
 
 		public LogFile()
 		{
@@ -215,11 +217,12 @@ namespace LoggedTimeUIExtension
 
 				TaskId = taskId;
 				FilePath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
-
-				return true;
 			}
 
-			return false;
+			WasAccessible = IsAccessible;
+			IsAccessible = (logEntries != null);
+
+			return IsAccessible;
 		}
 
 		public LogEntry GetEntry(uint entryId)
@@ -246,37 +249,39 @@ namespace LoggedTimeUIExtension
 
 		public bool SaveEntries(string tasklistPath)
 		{
-			if (!string.IsNullOrEmpty(tasklistPath))
+			Debug.Assert(!string.IsNullOrEmpty(tasklistPath));
+
+			var logEntries = new List<TaskTimeLogEntry>();
+
+			foreach (var entry in m_Entries)
 			{
-				var logEntries = new List<TaskTimeLogEntry>();
-
-				foreach (var entry in m_Entries)
+				logEntries.Add(new TaskTimeLogEntry()
 				{
-					logEntries.Add(new TaskTimeLogEntry()
-					{
-						TaskId = entry.TaskId,
-						From = entry.StartDate,
-						To = entry.EndDate,
-						TimeInHours = entry.TimeSpentInHrs,
-						TaskTitle = entry.Title,
-						Comment = entry.Comment,
-						Person = entry.Person,
-						TaskPath = entry.TaskPath,
-						Type = entry.Type,
-						AltColor = entry.FillColor
-					});
-				}
-
-				try
-				{
-					return TaskTimeLog.SaveEntries(tasklistPath, logEntries, TaskId);
-				}
-				catch (Exception)
-				{
-				}
+					TaskId = entry.TaskId,
+					From = entry.StartDate,
+					To = entry.EndDate,
+					TimeInHours = entry.TimeSpentInHrs,
+					TaskTitle = entry.Title,
+					Comment = entry.Comment,
+					Person = entry.Person,
+					TaskPath = entry.TaskPath,
+					Type = entry.Type,
+					AltColor = entry.FillColor
+				});
 			}
 
-			return false;
+			WasAccessible = IsAccessible;
+
+			try
+			{
+				IsAccessible = TaskTimeLog.SaveEntries(tasklistPath, logEntries, TaskId);
+			}
+			catch (Exception)
+			{
+				IsAccessible = false;
+			}
+
+			return IsAccessible;
 		}
 	}
 
@@ -311,15 +316,16 @@ namespace LoggedTimeUIExtension
 			return m_LogFiles.Find(x => LogFiles.IsSamePath(x.FilePath, logPath));
 		}
 
+		public LogFile GetLogFile(string tasklistPath, uint taskId)
+		{
+			string logPath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
+
+			return m_LogFiles.Find(x => LogFiles.IsSamePath(x.FilePath, logPath));
+		}
+
 		public LogFile GetLogFile(uint entryId)
 		{
-			foreach (var logFile in m_LogFiles)
-			{
-				if (logFile.HasEntry(entryId))
-					return logFile;
-			}
-
-			return null;
+			return m_LogFiles.Find(x => x.HasEntry(entryId));
 		}
 
 		public bool HasEntry(uint entryId)
