@@ -12,6 +12,139 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
 {
+	public class LogEntry : Calendar.Appointment
+	{
+		public LogEntry(uint entryId)
+		{
+			base.Id = entryId;
+		}
+
+		public LogEntry(uint entryId, TaskTimeLogEntry logEntry)
+			:
+			this(entryId,
+				logEntry.TaskId,
+				logEntry.TaskTitle,
+				logEntry.From,
+				logEntry.To,
+				logEntry.TimeInHours,
+				logEntry.Comment,
+				logEntry.Person,
+				logEntry.TaskPath,
+				logEntry.Type,
+				logEntry.AltColor)
+		{
+		}
+
+		public LogEntry(uint entryId, LogEntry other)
+			:
+			this(entryId,
+				other.TaskId,
+				other.Title,
+				other.StartDate,
+				other.EndDate,
+				other.TimeSpentInHrs,
+				other.Comment,
+				other.Person,
+				other.TaskPath,
+				other.Type,
+				other.FillColor)
+		{
+		}
+
+		public LogEntry(uint entryId,
+						uint taskId,
+						string taskTitle,
+						DateTime from,
+						DateTime to,
+						double timeSpentInHrs,
+						string comment,
+						string person,
+						string path,
+						string type,
+						Color altColor)
+		{
+			Id = entryId;
+			TaskId = taskId;
+			StartDate = from;
+			EndDate = to;
+			TimeSpentInHrs = timeSpentInHrs;
+			Title = taskTitle;
+			Comment = comment;
+			Person = person;
+			TaskPath = path;
+			Type = type;
+			FillColor = altColor;
+		}
+
+		public uint TaskId { get; private set; }
+		public double TimeSpentInHrs { get; private set; }
+		public string Person { get; private set; }
+		public string TaskPath { get; private set; }
+		public string Type { get; private set; }
+		public string Comment { get; private set; }
+
+		public Color TrueFillColor
+		{
+			get { return ((FillColor == SystemColors.Window) ? Color.Empty : FillColor); }
+		}
+
+		public bool Matches(uint taskId, Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, Color fillColor)
+		{
+			return ((taskId == TaskId) &&
+					 DatesMatch(dates) && 
+					(timeSpentInHrs == TimeSpentInHrs) && 
+					(comment == Comment) && 
+					(fillColor == FillColor));
+		}
+
+		private bool Modify(Calendar.AppointmentDates dates)
+		{
+			if (!dates.IsValid)
+				return false;
+
+			if (DatesMatch(dates))
+				return false;
+
+			StartDate = dates.Start;
+			EndDate = dates.End;
+
+			return true;
+		}
+
+		public bool Modify(Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, Color fillColor)
+		{
+			bool modified = Modify(dates);
+
+			if (TimeSpentInHrs != timeSpentInHrs)
+			{
+				TimeSpentInHrs = timeSpentInHrs;
+				modified = true;
+			}
+
+			if (Comment != comment)
+			{
+				Comment = comment;
+				modified = true;
+			}
+
+			if (FillColor != fillColor)
+			{
+				FillColor = fillColor;
+				modified = true;
+			}
+
+			return modified;
+		}
+
+		public override bool IsLongAppt(DateTime start, DateTime end)
+		{
+			return false; // never
+		}
+
+	}
+
+	// ---------------------------------------------------------------
+
 	public class LogFile
 	{
 		private List<LogEntry> m_Entries;
@@ -106,6 +239,11 @@ namespace LoggedTimeUIExtension
 										(x.EndDate <= to)).ToList();
 		}
 
+		public LogEntry FindEntry(uint taskId, Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, Color fillColor)
+		{
+			return m_Entries.Find(x => x.Matches(taskId, dates, timeSpentInHrs, comment, fillColor));
+		}
+
 		public bool SaveEntries(string tasklistPath)
 		{
 			if (!string.IsNullOrEmpty(tasklistPath))
@@ -194,6 +332,19 @@ namespace LoggedTimeUIExtension
 			foreach (var logFile in m_LogFiles)
 			{
 				var entry = logFile.GetEntry(entryId);
+
+				if (entry != null)
+					return entry;
+			}
+
+			return null;
+		}
+
+		public LogEntry FindEntry(uint taskId, Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, Color fillColor)
+		{
+			foreach (var logFile in m_LogFiles)
+			{
+				var entry = logFile.FindEntry(taskId, dates, timeSpentInHrs, comment, fillColor);
 
 				if (entry != null)
 					return entry;
@@ -331,127 +482,4 @@ namespace LoggedTimeUIExtension
 		public int TextHorzOffset = 0;
 	}
 
-	// ---------------------------------------------------------------
-
-	public class LogEntry : Calendar.Appointment
-	{
-		public LogEntry(uint entryId)
-		{
-			base.Id = entryId;
-		}
-
-		public LogEntry(uint entryId, TaskTimeLogEntry logEntry)
-			:
-			this(entryId,
-				logEntry.TaskId,
-				logEntry.TaskTitle,
-				logEntry.From,
-				logEntry.To,
-				logEntry.TimeInHours,
-				logEntry.Comment,
-				logEntry.Person,
-				logEntry.TaskPath,
-				logEntry.Type,
-				logEntry.AltColor)
-		{
-		}
-
-		public LogEntry(uint entryId, LogEntry other)
-			:
-			this(entryId,
-				other.TaskId,
-				other.Title,
-				other.StartDate,
-				other.EndDate,
-				other.TimeSpentInHrs,
-				other.Comment,
-				other.Person,
-				other.TaskPath,
-				other.Type,
-				other.FillColor)
-		{
-		}
-
-		public LogEntry(uint entryId,
-						uint taskId,
-						string taskTitle,
-						DateTime from,
-						DateTime to,
-						double timeSpentInHrs,
-						string comment,
-						string person,
-						string path,
-						string type,
-						Color altColor)
-		{
-			Id = entryId;
-			TaskId = taskId;
-			StartDate = from;
-			EndDate = to;
-			TimeSpentInHrs = timeSpentInHrs;
-			Title = taskTitle;
-			Comment = comment;
-			Person = person;
-			TaskPath = path;
-			Type = type;
-			FillColor = altColor;
-		}
-
-		public uint TaskId { get; private set; }
-		public double TimeSpentInHrs { get; private set; }
-		public string Person { get; private set; }
-		public string TaskPath { get; private set; }
-		public string Type { get; private set; }
-		public string Comment { get; private set; }
-
-		public Color TrueFillColor
-		{
-			get	{ return ((FillColor == SystemColors.Window) ? Color.Empty : FillColor); }
-		}
-
-		private bool Modify(Calendar.AppointmentDates dates)
-		{
-			if (!dates.IsValid)
-				return false;
-
-			if (DatesMatch(dates))
-				return false;
-
-			StartDate = dates.Start;
-			EndDate = dates.End;
-
-			return true;
-		}
-
-		public bool Modify(Calendar.AppointmentDates dates, double timeSpentInHrs, string comment, Color fillColor)
-		{
-			bool modified = Modify(dates);
-
-			if (TimeSpentInHrs != timeSpentInHrs)
-			{
-				TimeSpentInHrs = timeSpentInHrs;
-				modified = true;
-			}
-
-			if (Comment != comment)
-			{
-				Comment = comment;
-				modified = true;
-			}
-
-			if (FillColor != fillColor)
-			{
-				FillColor = fillColor;
-				modified = true;
-			}
-
-			return modified;
-		}
-
-		public override bool IsLongAppt(DateTime start, DateTime end)
-		{
-			return false; // never
-		}
-
-	}
 }

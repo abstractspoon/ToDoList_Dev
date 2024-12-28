@@ -366,7 +366,8 @@ namespace LoggedTimeUIExtension
 			if (!CanModifySelectedLogEntry)
 				return false;
 
-			CacheSelectedLogEntry();
+			if (!CacheSelectedLogEntry())
+				Debug.Assert(false);
 
 			var entry = m_LogFiles.GetEntry(m_SelectedLogEntryId);
 
@@ -392,7 +393,8 @@ namespace LoggedTimeUIExtension
 				switch (me.State)
 				{
 				case Calendar.SelectionTool.State.Started:
-					CacheSelectedLogEntry();
+					if (!CacheSelectedLogEntry())
+						Debug.Assert(false);
 					break;
 
 				case Calendar.SelectionTool.State.Finished:
@@ -416,7 +418,8 @@ namespace LoggedTimeUIExtension
 				return false;
 			}
 
-			CacheSelectedLogEntry();
+			if (!CacheSelectedLogEntry())
+				Debug.Assert(false);
 
 			if (!logFile.DeleteEntry(m_SelectedLogEntryId))
 				Debug.Assert(false);
@@ -433,15 +436,10 @@ namespace LoggedTimeUIExtension
 
 		public bool CacheSelectedLogEntry()
 		{
-			Debug.Assert(m_SelectedLogEntryId != 0);
-
 			var entry = m_LogFiles.GetEntry(m_SelectedLogEntryId);
 
 			if (entry == null)
-			{
-				Debug.Assert(false);
 				return false;
-			}
 
 			m_CachedLogEntry = new LogEntry(m_SelectedLogEntryId, entry);
 			return true;
@@ -455,6 +453,7 @@ namespace LoggedTimeUIExtension
 				return false;
 			}
 
+			// TODO
 // 			m_LogFiles.DeleteEntry(m_CachedLogEntry.Id);
 // 			m_LogFiles.AddEntry(m_CachedLogEntry);
 
@@ -653,11 +652,8 @@ namespace LoggedTimeUIExtension
 			if (m_IdleReloadLogFiles.Count > 0)
 			{
 				string logPath = m_IdleReloadLogFiles[0];
-				bool success = m_LogFiles.ReloadLogFile(logPath);
 
-				HandleLogAccessResult(logPath, true, success);
-				Invalidate();
-
+				LoadLogFile(logPath);
 				m_IdleReloadLogFiles.Remove(logPath);
 			}
 
@@ -727,8 +723,8 @@ namespace LoggedTimeUIExtension
 			if (!LogFiles.IsSamePath(tasklistPath, m_TasklistPath))
 			{
 				m_TasklistPath = tasklistPath;
-				m_LogFiles.LoadLogFiles(m_TasklistPath);
 
+				LoadLogFile(null); // all
 				EnableFileWatching(true);
 			}
 
@@ -741,6 +737,31 @@ namespace LoggedTimeUIExtension
             AdjustVScrollbar();
             Invalidate();
         }
+
+		private void LoadLogFile(string logPath)
+		{
+			bool hadSelection = CacheSelectedLogEntry(), success = false;
+
+			if (logPath == null)
+			{
+				success = m_LogFiles.LoadLogFiles(m_TasklistPath);
+				HandleLogAccessResult(TaskTimeLog.GetLogPath(m_TasklistPath), true, success);
+			}
+			else
+			{
+				success = m_LogFiles.ReloadLogFile(logPath);
+				HandleLogAccessResult(logPath, true, success);
+			}
+
+			if (hadSelection)
+			{
+				var entry = m_LogFiles.FindEntry(m_CachedLogEntry.TaskId, m_CachedLogEntry.Dates, m_CachedLogEntry.TimeSpentInHrs, m_CachedLogEntry.Comment, m_CachedLogEntry.FillColor);
+				m_SelectedLogEntryId = ((entry == null) ? 0 : entry.Id);
+
+				ClearCachedLogEntry();
+			}
+			Invalidate();
+		}
 
 		private void EnableFileWatching(bool enable)
 		{
