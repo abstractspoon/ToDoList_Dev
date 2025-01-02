@@ -267,8 +267,8 @@ protected:
 	HICON GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID, DWORD dwState) const;
 	BOOL DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sText, DWORD dwBaseState, CRect& rBtn) const;
 
-	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
-	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
+	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort = TRUE);
+	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort = TRUE);
 	void PrepareSingleFileEdit(int nRow, const CString& sValue);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
 	void PrepareTimeOfDayCombo(int nRow);

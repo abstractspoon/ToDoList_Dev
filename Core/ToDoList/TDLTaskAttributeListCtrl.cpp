@@ -2297,10 +2297,11 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 	return TRUE;
 }
 
-void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
+void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
 	CheckRecreateCombo(nRow, combo);
 
+	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
 	combo.EnableMultiSelection(TRUE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);
@@ -2312,10 +2313,11 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 	combo.SetChecked(aMatched, aMixed);
 }
 
-void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
+void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
 	CheckRecreateCombo(nRow, combo);
 
+	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
 	combo.EnableMultiSelection(FALSE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);
@@ -2454,6 +2456,8 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 			if (pDef->IsList())
 			{
+				BOOL bWantSort = !pDef->IsFixedList();
+
 				switch (pDef->GetDataType())
 				{
 				case TDCCA_STRING:
@@ -2461,16 +2465,16 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 				case TDCCA_INTEGER:
 				case TDCCA_DOUBLE:
 					if (pDef->IsMultiList())
-						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers);
+						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers, bWantSort);
 					else
-						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers);
+						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers, bWantSort);
 					break;
 
 				case TDCCA_ICON:
 					if (pDef->IsMultiList())
-						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
+						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons, bWantSort);
 					else
-						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
+						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons, bWantSort);
 					break;
 
 				case TDCCA_BOOL:

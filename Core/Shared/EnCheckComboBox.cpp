@@ -131,6 +131,15 @@ int CEnCheckComboBox::SetStrings(const CStringArray& aItems)
 	return nRes;
 }
 
+int CEnCheckComboBox::SelectString(int nStartAfter, LPCTSTR lpszString)
+{
+	if (m_bMultiSel)
+		return CCheckComboBox::SelectString(nStartAfter, lpszString);
+	
+	// else
+	return CAutoComboBox::SelectString(nStartAfter, lpszString);
+}
+
 void CEnCheckComboBox::FixupEmptyStringsAtStart()
 {
 	CHoldRedraw hr(*this);
