@@ -1265,6 +1265,27 @@ BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRI
 	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwResultType, attribDef.GetListType(), dwFeature);
 }
 
+BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCAttributeMap& mapAttribIDs) const
+{
+	int nDef = GetSize();
+
+	while (nDef--)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
+
+		if (!def.IsCalculation())
+			continue;
+		
+		if (mapAttribIDs.Has(def.Calculation().opFirst.nAttributeID) ||
+			mapAttribIDs.Has(def.Calculation().opSecond.nAttributeID))
+		{
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustColID) const
 {
 	return GetDefinition(nCustColID).GetAttributeID();
