@@ -1305,7 +1305,7 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 			pEdit->SetSel(0, -1);
 		}
 
-		if (bBtnClick || pEdit)
+		if (bBtnClick || !pEdit)
 			ctrl.SendMessage(CB_SHOWDROPDOWN, TRUE);
 	}
 	else if (ctrl.IsKindOf(RUNTIME_CLASS(CEdit)))
