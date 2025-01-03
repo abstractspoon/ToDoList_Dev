@@ -825,7 +825,10 @@ BOOL CDateHelper::GetTimeT(time64_t date, time_t& timeT)
 	if ((date < 0) || (date > LONG_MAX))
 		return FALSE;
 
-	timeT = (time_t)date;
+	SYSTEMTIME st = { 0 };
+	T64Utils::T64ToSystemTime(&date, &st);
+
+	timeT = CTime(st).GetTime();
 	return TRUE;
 }
 
