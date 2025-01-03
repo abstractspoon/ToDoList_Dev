@@ -26,6 +26,7 @@ public:
 	void ClearMultiSelectionHistory();
 
 	int SetStrings(const CStringArray& aItems);
+	int SelectString(int nStartAfter, LPCTSTR lpszString);
 
 	BOOL GetCheck(int nIndex) const;
 	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;

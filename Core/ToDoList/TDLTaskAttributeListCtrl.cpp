@@ -191,6 +191,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
+	ON_NOTIFY(NM_KILLFOCUS, IDC_DATE_PICKER, OnDateKillFocus)
 
 	ON_EN_CHANGE(IDC_DEPENDS_EDIT, OnDependsChange)
 	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodChange)
@@ -1158,17 +1159,37 @@ BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 	return TRUE;
 }
 
+void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues()
+{
+	RefreshSelectedTasksValues(TDCA_ALL);
+}
+
 void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs)
 {
 	CHoldRedraw hr(*this);
 	HideAllControls();
 
-	int nRow = GetItemCount();
 	BOOL bRefreshAll = mapAttribIDs.Has(TDCA_ALL);
+	BOOL bRefreshCustomCalcs = (bRefreshAll || m_aCustomAttribDefs.AnyCalculationUsesAnyAttribute(mapAttribIDs));
+
+	int nRow = GetItemCount();
 
 	while (nRow--)
 	{
-		if (bRefreshAll || mapAttribIDs.Has(GetAttributeID(nRow, TRUE)))
+		BOOL bWantRefresh = bRefreshAll;
+
+		if (!bWantRefresh)
+		{
+			TDC_ATTRIBUTE nRowAttribID = GetAttributeID(nRow, TRUE);
+			bWantRefresh = mapAttribIDs.Has(nRowAttribID);
+
+			if (!bWantRefresh && bRefreshCustomCalcs && TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nRowAttribID))
+			{
+				bWantRefresh = (m_aCustomAttribDefs.GetAttributeDataType(nRowAttribID, FALSE) == TDCCA_CALCULATION);
+			}
+		}
+
+		if (bWantRefresh)
 		{
 			if (m_aSelectedTaskIDs.GetSize())
 				RefreshSelectedTasksValue(nRow);
@@ -1733,6 +1754,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		break;
 
 	case TDCA_PRIORITY:
+		if (!sText.IsEmpty())
 		{
 			int nPriority = _ttoi(sText);
 
@@ -1759,6 +1781,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 
 	case TDCA_RISK:
+		if (!sText.IsEmpty())
 		{
 			int nRisk = _ttoi(sText);
 
@@ -2276,10 +2299,11 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 	return TRUE;
 }
 
-void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
+void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
 	CheckRecreateCombo(nRow, combo);
 
+	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
 	combo.EnableMultiSelection(TRUE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);
@@ -2291,10 +2315,11 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 	combo.SetChecked(aMatched, aMixed);
 }
 
-void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
+void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
 	CheckRecreateCombo(nRow, combo);
 
+	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
 	combo.EnableMultiSelection(FALSE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);
@@ -2433,6 +2458,8 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 			if (pDef->IsList())
 			{
+				BOOL bWantSort = !pDef->IsFixedList();
+
 				switch (pDef->GetDataType())
 				{
 				case TDCCA_STRING:
@@ -2440,16 +2467,16 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 				case TDCCA_INTEGER:
 				case TDCCA_DOUBLE:
 					if (pDef->IsMultiList())
-						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers);
+						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers, bWantSort);
 					else
-						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers);
+						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers, bWantSort);
 					break;
 
 				case TDCCA_ICON:
 					if (pDef->IsMultiList())
-						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
+						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons, bWantSort);
 					else
-						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
+						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons, bWantSort);
 					break;
 
 				case TDCCA_BOOL:
@@ -3200,12 +3227,12 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 	SetValueText(nRow, sNewValue);
 }
 
-void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM nFlags)
+void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM bUnitsChange)
 {
 	UpdateWindow();
 
 	// Refresh the cell text only if the edit failed
-	if (!GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE), nFlags))
+	if (!GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE), bUnitsChange))
 		RefreshSelectedTasksValue(nRow);
 }
 
@@ -3230,13 +3257,13 @@ void CTDLTaskAttributeListCtrl::OnSingleFileLinkChange()
 	SetValueText(nRow, sFile);
 }
 
-BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, LPARAM nFlags)
+BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, LPARAM bUnitsChange)
 {
 	if (sNewText == GetItemText(nRow, VALUE_COL))
 		return FALSE;
 
 	VERIFY(SetItemText(nRow, VALUE_COL, sNewText));
-	NotifyParentEdit(nRow, nFlags);
+	NotifyParentEdit(nRow, bUnitsChange);
 
 	return TRUE;
 }
@@ -3281,6 +3308,8 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
 
 	HideControl(m_datePicker); 
+	NotifyParentEdit(GetCurSel());
+
 	*pResult = 0;
 }
 
@@ -3289,23 +3318,23 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 	UNREFERENCED_PARAMETER(pNMHDR);
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
 
-	// Only handle this if the calendar is closed
+	// Only handle this if the calendar is closed ie. it's a manual edit
 	if (!m_datePicker.IsCalendarVisible())
 	{
-		// Note: Don't hide the date picker because the user 
-		// may be editing the date components manually
-		int nRow = GetCurSel();
-
-		CString sNewValue;
+		// Use the cell text as a scratch-pad for storing intermediate
+		// date edits but without notifying our parent
 		COleDateTime date;
 
 		if (m_datePicker.GetTime(date))
-			sNewValue = m_formatter.GetDateOnly(date, TRUE);
-		
-		SetValueText(nRow, sNewValue);
+			VERIFY(SetItemText(GetCurSel(), VALUE_COL, m_formatter.GetDateOnly(date, TRUE)));
 	}
 
 	*pResult = 0;
+}
+
+void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NotifyParentEdit(GetCurSel());
 }
 
 LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
@@ -3577,6 +3606,23 @@ void CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragLeave(CWnd* pWnd)
 BOOL CTDLTaskAttributeListCtrl::PreTranslateMessage(MSG* pMsg)
 {
 	m_tooltip.FilterToolTipMessage(pMsg);
+
+	// special WM_KEYDOWN handling for DateTimeCtrl because base class
+	// eats VK_RETURN/VK_CANCEL
+	if ((pMsg->message == WM_KEYDOWN) && (GetFocus() == &m_datePicker))
+	{
+		switch (pMsg->wParam)
+		{
+		case VK_RETURN:
+			NotifyParentEdit(GetCurSel());
+			break;
+
+		case VK_ESCAPE:
+			// Revert any changes
+			RefreshSelectedTasksValue(GetCurSel());
+			break;
+		}
+	}
 
 	return CInputListCtrl::PreTranslateMessage(pMsg);
 }
@@ -3862,14 +3908,24 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 		// Prepare menu items
 		BOOL bMultiSel = (m_aSelectedTaskIDs.GetSize() > 1);
+		CString sAttrib = GetItemText(nRow, ATTRIB_COL);
+
+		// Copy command
 		CEnString sMenuText;
 
-		CString sAttrib = GetItemText(nRow, ATTRIB_COL);
-		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
+		if (GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
+		{
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
 
-		CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-		pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
 
+		// Paste command
 		TDC_ATTRIBUTE nFromAttribID = TDCA_NONE;
 
 		if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
@@ -3885,6 +3941,19 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
 		}
 
+		// Clear command
+		if (CanEditCell(nRow, nCol))
+		{
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
+
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
+
 		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
 									   pos.x, pos.y, 0, GetSafeHwnd(), NULL);
 
@@ -3896,6 +3965,10 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 		case ID_ATTRIBLIST_PASTEATTRIBVALUES:
 			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
+			break;
+
+		case ID_ATTRIBLIST_CLEARATTRIBVALUES:
+			GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID);
 			break;
 		}
 	}

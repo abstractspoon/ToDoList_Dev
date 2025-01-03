@@ -2379,9 +2379,6 @@ void CToDoListWnd::SaveSettings()
 	prefs.WriteProfileInt(_T("Pos"), _T("Hidden"), !m_bVisible);
 	prefs.WriteProfileInt(_T("Pos"), _T("Maximized"), IsZoomed());
 	
-	// version
-	prefs.WriteProfileString(_T("Version"), _T("Version"), GetVersion(FALSE));
-	
 	// last open files
 	int nCount = GetTDCCount();
 	int nSel = GetSelToDoCtrl(); // and last active file

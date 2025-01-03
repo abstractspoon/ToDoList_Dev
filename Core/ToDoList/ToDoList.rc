@@ -47,15 +47,15 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 999, 998, 7\0"
+            VALUE "FileVersion", "8, 997, 0, 0\0"
             VALUE "InternalName", "ToDoList\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-24\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-25\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "ToDoList.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "Alpha Release of ToDoList 9.0\0"
+            VALUE "SpecialBuild", "Pre-Release of ToDoList 9.1\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -674,7 +674,7 @@ BEGIN
                     WS_TABSTOP,7,130,366,10
     EDITTEXT        IDC_DATETIMETRAILTEXT,17,142,175,14,ES_AUTOHSCROLL
     LTEXT           "Task Completion",IDC_DONEGROUP,7,165,379,8
-    CONTROL         "Show a 'partially-complete' checkbox for incomplete parent tasks with completed subtasks ",
+    CONTROL         "Show a 'partially-complete' checkbox for incomplete parent tasks with completed subtasks",
                     IDC_SHOWMIXEDDONECHECKBOX,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,180,383,10
     CONTROL         "&Show checkbox beside task title when completion column is hidden",
@@ -1794,7 +1794,7 @@ BEGIN
     ICON            IDR_MAINFRAME_STD,IDC_STATIC,7,8,20,20
     EDITTEXT        IDC_TITLE,34,7,173,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
                     WS_BORDER
-    LTEXT           "(c) Abstractspoon 2003-24",IDC_STATIC,213,7,87,8
+    LTEXT           "(c) Abstractspoon 2003-25",IDC_STATIC,213,7,87,8
     ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,20,20
     LTEXT           "A simple and effective way to keep on top of your daily tasks",
                     IDC_STATIC,34,20,267,8
@@ -4210,6 +4210,9 @@ BEGIN
         MENUITEM "Copy Attribute Value",        ID_ATTRIBLIST_COPYATTRIBVALUES
 
         MENUITEM "Paste Attribute Value",       ID_ATTRIBLIST_PASTEATTRIBVALUES
+
+        MENUITEM SEPARATOR
+        MENUITEM "Clear Attribute Value",       ID_ATTRIBLIST_CLEARATTRIBVALUES
 
     END
 END

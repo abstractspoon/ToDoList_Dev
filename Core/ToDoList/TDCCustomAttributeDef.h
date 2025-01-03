@@ -217,7 +217,6 @@ public:
 	int Find(TDC_ATTRIBUTE nCustAttribID, int nIgnore = -1) const;
 	int Find(TDC_COLUMN nCustColID, int nIgnore = -1) const;
 
-	BOOL CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
 	BOOL AnyHasFeature(DWORD dwFeature) const;
 	BOOL MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	
@@ -248,6 +247,8 @@ public:
 	BOOL IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone = TRUE) const;
 	DWORD GetCalculationOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
+	BOOL CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
+	BOOL AnyCalculationUsesAnyAttribute(const CTDCAttributeMap& mapAttribIDs) const;
 
 	// VC6 fixes
 	const TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) const { return ElementAt(nIndex); }
