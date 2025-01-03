@@ -4211,6 +4211,9 @@ BEGIN
 
         MENUITEM "Paste Attribute Value",       ID_ATTRIBLIST_PASTEATTRIBVALUES
 
+        MENUITEM SEPARATOR
+        MENUITEM "Clear Attribute Value",       ID_ATTRIBLIST_CLEARATTRIBVALUES
+
     END
 END
 
