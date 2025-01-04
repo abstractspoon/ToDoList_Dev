@@ -304,24 +304,24 @@ void CToDoCtrlLayout::RebuildLayout(BOOL bRecalcLayout)
 
 						case TDCUIL_BOTTOM: // Attributes
 							{
-								// .----. .----.
-								// | C  | | T  |
-								// |    | |    |
-								// ·----· ·----·
-								// .-----------.
-								// |     A     |
-								// |           |
-								// ·-----------·
-								m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
-								m_splitterHorz.Create(SSP_HORZ, &m_splitterVert, IDC_HORZSPLITTER);
-
-								m_splitterVert.SetPaneCount(2);
-								m_splitterVert.SetPane(0, &m_splitterHorz);
-								m_splitterVert.SetPane(1, m_pAttributes);
+								// .----..---------.
+								// | C  || T       |
+								// |    ||         |
+								// |    |·---------·
+								// |    |.---------.
+								// |    || A       |
+								// |    ||         |
+								// ·----··---------·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+								m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
 
 								m_splitterHorz.SetPaneCount(2);
 								m_splitterHorz.SetPane(0, m_pComments);
-								m_splitterHorz.SetPane(1, NULL); // Tasks
+								m_splitterHorz.SetPane(1, &m_splitterVert);
+
+								m_splitterVert.SetPaneCount(2);
+								m_splitterVert.SetPane(0, NULL); // Tasks
+								m_splitterVert.SetPane(1, m_pAttributes);
 							}
 							break;
 						}
@@ -403,24 +403,24 @@ void CToDoCtrlLayout::RebuildLayout(BOOL bRecalcLayout)
 
 						case TDCUIL_BOTTOM: // Attributes
 							{
-								// .-----. .-----.
-								// |  T  | |  C  |
-								// |     | |     |
-								// ·-----· ·-----·
-								// .-------------.
-								// |      A      |
-								// |             |
-								// ·-------------·
-								m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
-								m_splitterHorz.Create(SSP_HORZ, &m_splitterVert, IDC_HORZSPLITTER);
-
-								m_splitterVert.SetPaneCount(2);
-								m_splitterVert.SetPane(0, &m_splitterHorz);
-								m_splitterVert.SetPane(1, m_pAttributes);
+								// .---------..----.
+								// | T       || C  |
+								// |         ||    |
+								// ·---------·|    |
+								// .---------.|    |
+								// | A       ||    |
+								// |         ||    |
+								// ·---------··----·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+								m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
 
 								m_splitterHorz.SetPaneCount(2);
-								m_splitterHorz.SetPane(0, NULL); // Tasks
+								m_splitterHorz.SetPane(0, &m_splitterVert);
 								m_splitterHorz.SetPane(1, m_pComments);
+
+								m_splitterVert.SetPaneCount(2);
+								m_splitterVert.SetPane(0, NULL); // Tasks
+								m_splitterVert.SetPane(1, m_pAttributes);
 							}
 							break;
 						}
