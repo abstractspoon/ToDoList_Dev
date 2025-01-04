@@ -98,7 +98,7 @@ public:
 	DWORD GetFocusedListTaskID() const;
 	int GetFocusedListItem() const;
 	int FindTaskItem(DWORD dwTaskID) const;
-	int InsertItem(DWORD dwTaskID, int nPos = -1);
+	int InsertTaskItem(DWORD dwTaskID, int nPos = -1);
 	DWORD GetNextSelectedTaskID(POSITION& pos) const;
 
 	BOOL GetLabelEditRect(CRect& rLabel) const;

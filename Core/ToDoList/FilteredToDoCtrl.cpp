@@ -637,12 +637,16 @@ int CFilteredToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BO
 
 BOOL CFilteredToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const
 {
-	BOOL bWantAdd = CTabbedToDoCtrl::WantAddTreeTaskToList(dwTaskID, pContext);
+	if (!CTabbedToDoCtrl::WantAddTreeTaskToList(dwTaskID, pContext))
+		return FALSE;
 
-	if ((pContext == NULL) || !bWantAdd)
-		return bWantAdd;
-
-	// Hide non-matching parents
+	if (pContext == NULL)
+	{
+		// Assume the tree is our source of truth
+		return (m_taskTree.GetItem(dwTaskID) != NULL);
+	}
+	
+	// else hide parent tasks non-matching the filter
 	const TODOSTRUCTURE* pTDS = NULL;
 	const TODOITEM* pTDI = NULL;
 
@@ -654,10 +658,10 @@ BOOL CFilteredToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pConte
 		const SEARCHPARAMS* pFilter = static_cast<const SEARCHPARAMS*>(pContext);
 		SEARCHRESULT unused;
 
-		bWantAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), unused);
+		return m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), unused);
 	}
 
-	return bWantAdd;
+	return TRUE;
 }
 
 HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
@@ -904,8 +908,8 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 		bListRefiltered = InListView();
 	}
 
-	// This may cause either the list or one of the extensions to be rebuilt
-	// we set flags and ignore it
+	// Calling our base class may cause either the list or one of 
+	// the extensions to be rebuilt which we want to avoid
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
@@ -1370,6 +1374,10 @@ DWORD CFilteredToDoCtrl::MergeNewTaskIntoDataModel(const CTaskFile& tasks, HTASK
 
 DWORD CFilteredToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate)
 {
+	// The original task must be in the tree view so that the
+	// new task can be placed after it. It it's been filtered 
+	// out we need to toggle the filter to make it appear, then 
+	// add the new task, then restore the filter
 	DWORD dwTaskID = task.GetTaskID(task.GetFirstTask());
 	BOOL bToggleFilter = (HasAnyFilter() && (m_taskTree.GetItem(dwTaskID) == NULL));
 

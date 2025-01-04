@@ -404,7 +404,7 @@ void CTDLTaskListCtrl::OnNotifySplitterChange(int nSplitPos)
 	}
 }
 
-int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
+int CTDLTaskListCtrl::InsertTaskItem(DWORD dwTaskID, int nPos)
 {
 	if (FindTaskItem(dwTaskID) != -1)
 	{

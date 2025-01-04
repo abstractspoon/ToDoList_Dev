@@ -3504,7 +3504,7 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 
 			if (WantAddTreeTaskToList(dwTaskID, pContext))
 			{
-				VERIFY (m_taskList.InsertItem(dwTaskID) >= 0);
+				VERIFY (m_taskList.InsertTaskItem(dwTaskID) >= 0);
 			}	
 		}
 
@@ -3521,7 +3521,7 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 	BuildListGroupByCombo();
 }
 
-BOOL CTabbedToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const
+BOOL CTabbedToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* /*pContext*/) const
 {
 	ASSERT(!m_data.IsTaskParent(dwTaskID) || !(HasListOption(LVO_HIDEPARENTS) || HasStyle(TDCS_ALWAYSHIDELISTPARENTS)));
 	
@@ -3728,13 +3728,21 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 	}
 	else if (mapAttribIDs.Has(TDCA_NEWTASK) && aModTaskIDs.GetSize())
 	{
-		int nSel = m_taskList.GetSelectedItem();
+		DWORD dwTaskID = aModTaskIDs[0];
+		ASSERT(dwTaskID);
 
-		if (nSel != -1)
-			nSel++;
+		int nPos = m_taskList.GetSelectedItem();
 
-		ASSERT(aModTaskIDs[0]);
-		m_taskList.InsertItem(aModTaskIDs[0], nSel);
+		if (nPos != -1)
+			nPos++;
+
+		if (WantAddTreeTaskToList(dwTaskID))
+		{
+			VERIFY(m_taskList.InsertTaskItem(dwTaskID, nPos) >= 0);
+		
+			if (bInListView)
+				SyncListSelectionToTree(TRUE);
+		}
 	}
 	else if (mapAttribIDs.Has(TDCA_NEWTASK) ||
 			 mapAttribIDs.Has(TDCA_UNDO) ||
@@ -6556,6 +6564,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 		if (!cacheList.SelectionMatches(cacheTree))
 		{
 			cacheTree.dwFirstVisibleTaskID = 0;
+			bSelChange = TRUE;
 
 			if (m_taskList.RestoreSelection(cacheTree, bEnsureSelection))
 			{
@@ -6564,14 +6573,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 				CacheListSelection(cacheList);
 
 				if (!cacheList.SelectionMatches(cacheTree))
-				{
 					RestoreTreeSelection(cacheList);
-					bSelChange = TRUE;
-				}
-			}
-			else
-			{
-				bSelChange = TRUE;
 			}
 		}
 	}
