@@ -294,6 +294,7 @@ void CPreferencesGenPage::OnSelchangeLanguage()
 	case LANG_HEBREW:
 	case LANG_ARABIC:
 	case LANG_URDU:
+	case LANG_PERSIAN:
 		bEnable = TRUE;
 		break;
 	}
@@ -315,6 +316,7 @@ void CPreferencesGenPage::EnableDisableLanguageOptions()
 	case LANG_HEBREW:
 	case LANG_ARABIC:
 	case LANG_URDU:
+	case LANG_PERSIAN:
 		bEnable = TRUE;
 		break;
 	}
