@@ -2553,6 +2553,8 @@
 #define IDS_ATTRIBTIP_COMPLETEDTASK     51669
 #define IDS_ATTRIBTIP_MODIFY            51670
 #define IDS_LOG_ALTCOLOR                51671
+#define IDS_ATTRIBCTRL_CLEARATTRIBVALUE 51672
+#define IDS_ATTRIBCTRL_CLEARATTRIBVALUES 51673
 
 // Next default values for new objects
 // 
