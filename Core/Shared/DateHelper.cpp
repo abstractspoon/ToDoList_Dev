@@ -786,6 +786,9 @@ BOOL CDateHelper::IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign)
 
 BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime)
 {
+	if (sDate.IsEmpty())
+		return FALSE;
+
 	// Default processing
 	if (bAndTime)
 	{

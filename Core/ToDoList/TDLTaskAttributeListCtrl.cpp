@@ -246,7 +246,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Create our edit fields
 	CreateControl(m_cbTextAndNumbers, IDC_TEXTANDNUM_COMBO, (CBS_DROPDOWN | CBS_SORT | CBS_AUTOHSCROLL));
-	CreateControl(m_datePicker, IDC_DATE_PICKER);
+	CreateControl(m_datePicker, IDC_DATE_PICKER, DTS_SHORTDATEFORMAT | DTS_SHOWNONE);
 	CreateControl(m_cbTimeOfDay, IDC_TIME_PICKER, (CBS_DROPDOWN | CBS_AUTOHSCROLL));
 	CreateControl(m_cbPriority, IDC_PRIORITY_COMBO, CBS_DROPDOWNLIST);
 	CreateControl(m_cbRisk, IDC_RISK_COMBO, CBS_DROPDOWNLIST);
@@ -3315,18 +3315,26 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	UNREFERENCED_PARAMETER(pNMHDR);
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
 
 	// Only handle this if the calendar is closed ie. it's a manual edit
+	// or the checkbox was clicked when the calendar was visible
 	if (!m_datePicker.IsCalendarVisible())
 	{
-		// Use the cell text as a scratch-pad for storing intermediate
-		// date edits but without notifying our parent
-		COleDateTime date;
+		NMDATETIMECHANGE* pNMDTC = (NMDATETIMECHANGE*)pNMHDR;
 
-		if (m_datePicker.GetTime(date))
-			VERIFY(SetItemText(GetCurSel(), VALUE_COL, m_formatter.GetDateOnly(date, TRUE)));
+		if (pNMDTC->dwFlags == GDT_NONE)
+		{
+			// Clear the text and end the edit, triggering a parent notification
+			VERIFY(SetItemText(GetCurSel(), VALUE_COL, _T("")));
+			HideControl(m_datePicker);
+		}
+		else
+		{
+			// Use the cell text as a scratch-pad for storing intermediate
+			// date edits but without notifying our parent
+			VERIFY(SetItemText(GetCurSel(), VALUE_COL, m_formatter.GetDateOnly(pNMDTC->st, TRUE)));
+		}
 	}
 
 	*pResult = 0;

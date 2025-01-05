@@ -214,57 +214,47 @@ BOOL CDateTimeCtrlEx::OnDateTimeChange(NMHDR* pNMHDR, LRESULT* pResult)
 	return FALSE; // route to parent
 }
 
-BOOL CDateTimeCtrlEx::OnCloseUp(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+BOOL CDateTimeCtrlEx::OnCloseUp(NMHDR* pNMHDR, LRESULT* pResult) 
 {
+	// Note: m_monthCal will clean itself up when HWND is destroyed
 	*pResult = 0;
 
-	// Note: m_monthCal will clean itself up when HWND is destroyed
-
-	// if DTS_SHOWNONE is NOT set then we can receive this before the
-	// the left mouse button is released if the user re-clicks the
-	// drop button to hide the calendar
-#ifdef _DEBUG
-/*
-	if (!(GetStyle() & DTS_SHOWNONE))
-	{
-		CPoint pt(GetMessagePos());
-		ScreenToClient(&pt);
-
-		if (GetDropButtonRect().PtInRect(pt))
-		{
-			ASSERT(m_bLButtonDown);
-			ASSERT(!m_bDropped);
-		}
-		else
-		{
-			ASSERT(!m_bLButtonDown);
-			ASSERT(m_bDropped);
-		}
-	}
-	else
-	{
-		ASSERT(!m_bLButtonDown);
-		ASSERT(m_bDropped);
-	}
-*/
-#endif
-
-	// see if we can figure out what key was pressed
-	BOOL bCancel = (GetKeyState(VK_ESCAPE) & 0x8000);
-	BOOL bSetDate = (GetKeyState(VK_RETURN) & 0x8000);
+	// Figure out what caused the calendar to close
+	BOOL bCancel = Misc::IsKeyPressed(VK_ESCAPE);
+	BOOL bSetDate = Misc::IsKeyPressed(VK_RETURN);
 
 	ASSERT(!(bCancel && bSetDate));
 
 	m_bLButtonDown = m_bDropped = FALSE;
 
-	// if neither is pressed then try figure out whether 
-	// the date is set
 	if (!bCancel && !bSetDate)
 	{
-		COleDateTime date(m_nmdtcLast.st);
+		// if neither was pressed then see if the checkbox was clicked
+		if ((GetStyle() & DTS_SHOWNONE) && Misc::IsKeyPressed(VK_LBUTTON))
+		{
+			CPoint pt(GetMessagePos());
+			ScreenToClient(&pt);
+
+			if (GetCheckboxRect().PtInRect(pt))
+			{
+				ASSERT(m_bWasSet);
+
+				m_nmdtcLast.nmhdr = *pNMHDR;
+				m_nmdtcLast.nmhdr.code = DTN_DATETIMECHANGE;
+				m_nmdtcLast.dwFlags = GDT_NONE;
+
+				bSetDate = TRUE;
+			}
+		}
+
+		// else try to figure out from the state of the date
+		if (!bSetDate)
+		{
+			COleDateTime date(m_nmdtcLast.st);
 		
-		bSetDate = ((date.m_dt != 0.0) && (date.GetStatus() == COleDateTime::valid));
-		bCancel = !bSetDate;
+			bSetDate = ((date.m_dt != 0.0) && (date.GetStatus() == COleDateTime::valid));
+			bCancel = !bSetDate;
+		}
 	}
 	
 	if (bCancel)
