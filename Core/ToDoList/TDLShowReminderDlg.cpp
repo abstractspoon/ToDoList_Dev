@@ -407,10 +407,21 @@ void CTDLShowReminderDlg::UpdateControls()
 	EnableDisableControls();
 }
 
-void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	if (!m_bModifyingList)
-		UpdateControls();
+	{
+		NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+
+		if (pNMListView->uChanged & LVIF_STATE)
+		{
+			BOOL bWasSel = (pNMListView->uOldState & LVIS_SELECTED);
+			BOOL bIsSel = (pNMListView->uNewState & LVIS_SELECTED);
+
+			if (Misc::StateChanged(bIsSel, bWasSel))
+				UpdateControls();
+		}
+	}
 
 	*pResult = 0;
 }
