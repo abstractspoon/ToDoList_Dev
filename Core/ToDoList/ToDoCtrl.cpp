@@ -2965,10 +2965,16 @@ BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sExtID)
 
 BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 {
+	if (nFile < 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	CStringArray aFiles;
 	int nNumFiles = m_ctrlAttributes.GetFileLinks(aFiles);
 
-	if (nFile < (nNumFiles - 1))
+	if (nFile < nNumFiles)
 		return GotoFile(aFiles[nFile]);
 
 	return FALSE;
