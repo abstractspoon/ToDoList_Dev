@@ -930,21 +930,19 @@ void CRTFContentControl::OnUpdateEditOpenCopyUrl(CCmdUI* pCmdUI)
 {
 	if (pCmdUI->m_pMenu)
 	{
-		CEnString sUrl = m_rtf.GetContextUrl();
+		CEnString sUrl = m_rtf.GetContextUrl(TRUE);
 		pCmdUI->Enable(!sUrl.IsEmpty());
 		
-		if (!sUrl.IsEmpty() && pCmdUI->m_pMenu)
+		if (!sUrl.IsEmpty())
 		{
-			CString sText, sMenu;
-			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
-			
-			sUrl = CUrlParser::GetUrlAsFile(sUrl);
-
 			// restrict url length to 250 pixels
 			CClientDC dc(this);
 			sUrl.FormatDC(&dc, 250, ES_PATH);
 			
-			sText.Format(_T("%s: %s"), sMenu, sUrl);
+			CString sText, sMenu;
+			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
+			
+			sText.Format(_T("%s: %s"), CEnString(sMenu), sUrl);
 			pCmdUI->SetText(sText);
 		}
 	}
