@@ -10,13 +10,13 @@
 /////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl window
 
-#define LVN_USERSELCHANGE			(LVN_FIRST-21)
-#define LVN_COPY					(LVN_FIRST-22)
-#define LVN_CUT						(LVN_FIRST-23)
-#define LVN_PASTE					(LVN_FIRST-24)
-#define LVN_DELETE					(LVN_FIRST-25)
-#define LVN_USERSELCHANGEDBLCLK		(LVN_FIRST-26)
-#define LVN_CHECKCHANGE				(LVN_FIRST-40)
+#define LVN_USERSELCHANGE			(LVN_LAST+1)
+#define LVN_COPY					(LVN_LAST+2)
+#define LVN_CUT						(LVN_LAST+3)
+#define LVN_PASTE					(LVN_LAST+4)
+#define LVN_DELETE					(LVN_LAST+5)
+#define LVN_USERSELCHANGEDBLCLK		(LVN_LAST+6)
+#define LVN_CHECKCHANGE				(LVN_LAST+7)
 
 /////////////////////////////////////////////////////////////////////////////
 
