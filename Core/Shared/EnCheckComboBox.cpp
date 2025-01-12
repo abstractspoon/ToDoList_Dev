@@ -290,9 +290,11 @@ int CEnCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) co
 
 int CEnCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) const
 {
-	int nNumItems = CCheckComboBox::GetChecked(aChecked, aMixed);
+	// Call base class directly to avoid 'our' handling of 'Any'
+	int nNumItems = (CCheckComboBox::GetChecked(aChecked, CCBC_CHECKED) + 
+					 CCheckComboBox::GetChecked(aMixed, CCBC_MIXED));
 
-	// Remove 'Any'
+	// Then remove 'Any'
 	if (m_bMultiSel && IsItemAnyChecked())
 	{
 		ASSERT(aChecked.GetSize());
@@ -430,8 +432,6 @@ BOOL CEnCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArr
 		// Caller can call 'ClearMultiSelectionHistory' as required afterwards.
 		if ((nAny != CB_ERR) && !aChecked.GetSize() && aCurChecked.GetSize())
 		{
-			ASSERT(!bAnyIsChecked);
-
 			if (CCheckComboBox::SetCheck(nAny, CCBC_CHECKED, FALSE) == CB_ERR)
 				return FALSE;
 
