@@ -3313,6 +3313,11 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
+void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	OnDateCloseUp(pNMHDR, pResult);
+}
+
 void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
@@ -3338,11 +3343,6 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 
 	*pResult = 0;
-}
-
-void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	NotifyParentEdit(GetCurSel());
 }
 
 LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
@@ -3891,6 +3891,8 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 {
+	HideAllControls();
+
 	LVHITTESTINFO lvHit = { { pos.x, pos.y }, 0 };
 	ScreenToClient(&lvHit.pt);
 
