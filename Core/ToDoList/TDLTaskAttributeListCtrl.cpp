@@ -3296,7 +3296,14 @@ void CTDLTaskAttributeListCtrl::OnCancelEdit()
 		CWnd* pCtrl = GetEditControl(nRow, FALSE);
 
 		if (pCtrl)
+		{
+			// If we've been using the cell text as a scratch pad we need 
+			// revert any changes before calling PrepareControl
+			if (pCtrl == &m_datePicker)
+				RefreshSelectedTasksValue(nRow);
+
 			PrepareControl(*pCtrl, nRow, VALUE_COL);
+		}
 	}
 
 	CInputListCtrl::OnCancelEdit();
@@ -3614,23 +3621,6 @@ void CTDLTaskAttributeListCtrl::CFileDropTarget::OnDragLeave(CWnd* pWnd)
 BOOL CTDLTaskAttributeListCtrl::PreTranslateMessage(MSG* pMsg)
 {
 	m_tooltip.FilterToolTipMessage(pMsg);
-
-	// special WM_KEYDOWN handling for DateTimeCtrl because base class
-	// eats VK_RETURN/VK_CANCEL
-	if ((pMsg->message == WM_KEYDOWN) && (GetFocus() == &m_datePicker))
-	{
-		switch (pMsg->wParam)
-		{
-		case VK_RETURN:
-			NotifyParentEdit(GetCurSel());
-			break;
-
-		case VK_ESCAPE:
-			// Revert any changes
-			RefreshSelectedTasksValue(GetCurSel());
-			break;
-		}
-	}
 
 	return CInputListCtrl::PreTranslateMessage(pMsg);
 }
