@@ -293,15 +293,18 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	// Tasks Header ---------------------------------------------------------------------
-	DWORD dwStyle = (WS_CHILD | WS_VISIBLE);
 
-	if (!m_hdrTasks.Create((dwStyle | HDS_BUTTONS), rect, this, IDC_TASKTREEHEADER))
+	// Don't add the HDS_BUTTONS style to correspond to the 
+	// default state (off) of the TDCS_COLUMNHEADERSORTING style
+	if (!m_hdrTasks.Create((WS_CHILD | WS_VISIBLE), rect, this, IDC_TASKTREEHEADER))
 		return FALSE;
 
 	// Column List ---------------------------------------------------------------------
 	rect.OffsetRect(rect.Width(), 0);
 
-	if (!m_lcColumns.Create((dwStyle | WS_TABSTOP),	rect, this, IDC_TASKTREECOLUMNS))
+	// Disable column header sorting to correspond to the 
+	// default state (off) of the TDCS_COLUMNHEADERSORTING style
+	if (!m_lcColumns.Create((WS_CHILD | WS_VISIBLE | WS_TABSTOP | LVS_NOSORTHEADER), rect, this, IDC_TASKTREECOLUMNS))
 		return FALSE;
 
 	// extended styles
