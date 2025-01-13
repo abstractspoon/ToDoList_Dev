@@ -755,7 +755,7 @@ BOOL CInputListCtrl::CanDeleteSelectedCell() const
 
 BOOL CInputListCtrl::CanDeleteCell(int nRow, int nCol) const
 {
-	return CanEditCell(nRow, nCol);
+	return (CanEditCell(nRow, nCol) && !IsPrompt(nRow, nCol));
 }
 
 BOOL CInputListCtrl::DeleteSelectedCell()
