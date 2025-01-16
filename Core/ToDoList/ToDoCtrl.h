@@ -772,7 +772,7 @@ protected:
 	BOOL GetClipboardID(CString& sClipID, BOOL bArchive) const;
 
 	void ShowHideControls();
-	void EnableDisableControls(BOOL bHasSelection);
+	void EnableDisableControls(BOOL bHasSelection = -1);
 	void EnableDisableComments(BOOL bHasSelection);
 	void ReposProjectName(CRect& rAvailable);
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);

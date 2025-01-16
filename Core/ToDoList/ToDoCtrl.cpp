@@ -877,10 +877,15 @@ void CToDoCtrl::ShowHideControls()
 		m_ctrlComments.ShowWindow(SW_SHOW);
 		break;
 	}
+
+	EnableDisableControls();
 }
 
 void CToDoCtrl::EnableDisableControls(BOOL bHasSelection)
 {
+	if (bHasSelection == -1)
+		bHasSelection = (GetUpdateControlsItem() && HasSelection());
+
 	EnableDisableComments(bHasSelection);
 
 	if (m_layout.HasMaximiseState(TDCMS_NORMAL) && HasStyle(TDCS_SHOWPROJECTNAME))
