@@ -872,6 +872,7 @@ SEARCHPARAM::SEARCHPARAM(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, int nVal, B
 	case FT_INTEGER:
 	case FT_BOOL:
 	case FT_RECURRENCE:
+	case FT_COLOR:
 		nValue = nVal;
 		break;
 
@@ -922,6 +923,7 @@ BOOL SEARCHPARAM::operator==(const SEARCHPARAM& rule) const
 
 		case FT_INTEGER:
 		case FT_RECURRENCE:
+		case FT_COLOR:
 			return (nValue == rule.nValue);
 
 		case FT_STRING:
@@ -1131,7 +1133,6 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 		return FT_DEPENDENCY;
 
 	case TDCA_PRIORITY:
-	case TDCA_COLOR:
 	case TDCA_PERCENT:
 	case TDCA_RISK:
 	case TDCA_ID:
@@ -1141,6 +1142,9 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 
 	case TDCA_RECURRENCE:
 		return FT_RECURRENCE;
+
+	case TDCA_COLOR:
+		return FT_COLOR;
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
@@ -1322,6 +1326,7 @@ void SEARCHPARAM::SetValue(const CString& sVal)
 	case FT_INTEGER:
 	case FT_BOOL:
 	case FT_RECURRENCE:
+	case FT_COLOR:
 		nValue = _ttoi(sVal);
 		break;
 
@@ -1354,6 +1359,7 @@ void SEARCHPARAM::SetValue(int nVal)
 	case FT_INTEGER:
 	case FT_BOOL:
 	case FT_RECURRENCE:
+	case FT_COLOR:
 		nValue = nVal;
 		break;
 
@@ -1402,6 +1408,7 @@ CString SEARCHPARAM::ValueAsString() const
 
 	case FT_BOOL:
 	case FT_RECURRENCE:
+	case FT_COLOR:
 		return Misc::Format(nValue);
 
 	case FT_STRING:
@@ -1431,6 +1438,7 @@ double SEARCHPARAM::ValueAsDouble() const
 	case FT_INTEGER:
 	case FT_BOOL:
 	case FT_RECURRENCE:
+	case FT_COLOR:
 		return (double)nValue;
 	}
 
@@ -1454,6 +1462,7 @@ int SEARCHPARAM::ValueAsInteger() const
 	case FT_INTEGER:
 	case FT_BOOL:
 	case FT_RECURRENCE:
+	case FT_COLOR:
 		return nValue;
 	}
 

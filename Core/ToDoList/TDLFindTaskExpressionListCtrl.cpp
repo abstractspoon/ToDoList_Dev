@@ -13,6 +13,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\GraphicsMisc.h"
 #include "..\Shared\DateHelper.h"
+#include "..\Shared\EnColorDialog.h"
 
 #include "..\Interfaces\ContentMgr.h"
 
@@ -380,7 +381,6 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 				}
 				break;
 
-
 			case FT_DATERELATIVE:
 				{
 					PrepareEdit(nItem, nCol);
@@ -421,25 +421,28 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 				}
 				break;
 
-			default:
-				switch (rule.GetAttribute())
+			case FT_COLOR:
 				{
-				case TDCA_ICON:
-					{
-					}
-					break;
+					CEnColorDialog dialog(rule.ValueAsInteger());
 
-				default:
+					if (dialog.DoModal(CPreferences()) == IDOK)
 					{
-						PrepareEdit(nItem, nCol);
-
-						if (pEdit == &m_editBox)
-							CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
-						else
-							ShowControl(*pEdit, nItem, nCol, bBtnClick);
+						rule.SetValue((int)dialog.GetColor());
+						UpdateValueColumnText(nItem);
 					}
-					break;
 				}
+				break;
+
+			default:
+				{
+					PrepareEdit(nItem, nCol);
+
+					if (pEdit == &m_editBox)
+						CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+					else
+						ShowControl(*pEdit, nItem, nCol, bBtnClick);
+				}
+				break;
 			}
 		}
 		break;
@@ -505,6 +508,9 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 			case FT_RECURRENCE:
 				return ILCT_COMBO;
 
+			case FT_COLOR:
+				return ILCT_BROWSE;
+
 			default:
 				switch (nAttribID)
 				{
@@ -527,7 +533,6 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 
 						if (pDef->IsList())
 							return ILCT_COMBO;
-
 					}
 					break;
 				}
@@ -849,6 +854,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				break;
 				
 			case FT_RECURRENCE:
+			case FT_COLOR:
 				AddOperatorToCombo(FOP_SET);
 				AddOperatorToCombo(FOP_NOT_SET);
 				AddOperatorToCombo(FOP_EQUALS);
@@ -1305,6 +1311,7 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 			case FT_DOUBLE:
 			case FT_ICON:
 			case FT_DEPENDENCY:
+			case FT_COLOR:
 				sValue = rule.ValueAsString();
 				break;
 
@@ -1559,24 +1566,41 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-		if (rule.HasIcon())
+		if (rule.TypeIs(FT_ICON))
 		{
-			// Don't use sText because it might have been truncated
-			CStringArray aIcons;
-			int nNumIcons = Misc::Split(GetItemText(nRow, nCol), aIcons);
-
-			CRect rIcon(rText);
-			rIcon.DeflateRect(0, ((rText.Height() - IMAGE_SIZE) / 2));
-
-			for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+			if (!sText.IsEmpty())
 			{
-				int nIconIdx = m_ilIcons.GetImageIndex(aIcons[nIcon]);
-				
-				if (nIconIdx != -1)
+				// Don't use sText because it might have been truncated
+				CStringArray aIcons;
+				int nNumIcons = Misc::Split(GetItemText(nRow, nCol), aIcons);
+
+				CRect rIcon(rText);
+				rIcon.DeflateRect(0, ((rText.Height() - IMAGE_SIZE) / 2));
+
+				for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 				{
-					m_ilIcons.Draw(pDC, nIconIdx, rIcon.TopLeft(), ILD_TRANSPARENT);
-					rIcon.left += (IMAGE_SIZE + 2);
+					int nIconIdx = m_ilIcons.GetImageIndex(aIcons[nIcon]);
+
+					if (nIconIdx != -1)
+					{
+						m_ilIcons.Draw(pDC, nIconIdx, rIcon.TopLeft(), ILD_TRANSPARENT);
+						rIcon.left += (IMAGE_SIZE + 2);
+					}
 				}
+			}
+
+			return;
+		}
+		else if (rule.GetAttribute() == TDCA_COLOR)
+		{
+			if (!sText.IsEmpty())
+			{
+				COLORREF color = _ttoi(GetItemText(nRow, nCol));
+
+				CRect rColor(rText);
+				rColor.DeflateRect(2, 2);
+
+				pDC->FillSolidRect(rColor, color);
 			}
 
 			return;

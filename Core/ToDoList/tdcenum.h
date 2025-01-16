@@ -577,7 +577,8 @@ enum FIND_ATTRIBTYPE
 	FT_DATERELATIVE,
 	FT_ICON,
 	FT_RECURRENCE,
-	FT_DEPENDENCY
+	FT_DEPENDENCY,
+	FT_COLOR,
 };
  
 /////////////////////////////////////////////////////////////////////////////

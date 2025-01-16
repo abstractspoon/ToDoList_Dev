@@ -482,6 +482,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				bMatch = ValueMatches(dCost, rule, sWhatMatched);
 			}
 			break;
+
+		case TDCA_COLOR:
+			bMatch = ValueMatches((int)pTDI->color, rule, sWhatMatched);
+			break;
 			
 		case TDCA_COMMENTSSIZE:
 			bMatch = ValueMatches(pTDI->GetCommentsSizeInKB(), rule, sWhatMatched);
