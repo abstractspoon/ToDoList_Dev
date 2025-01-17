@@ -1188,16 +1188,19 @@ COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
 	switch (nDate)
 	{
 	case TDCD_CREATE:		return dateCreated;
+	case TDCD_LASTMOD:		return dateLastMod;
+
 	case TDCD_START:		return dateStart;
 	case TDCD_STARTDATE:	return CDateHelper::GetDateOnly(dateStart);
 	case TDCD_STARTTIME:	return CDateHelper::GetTimeOnly(dateStart);
+
 	case TDCD_DUE:			return dateDue;
 	case TDCD_DUEDATE:		return CDateHelper::GetDateOnly(dateDue);
 	case TDCD_DUETIME:		return CDateHelper::GetTimeOnly(dateDue);
+
 	case TDCD_DONE:			return dateDone;
 	case TDCD_DONEDATE:		return CDateHelper::GetDateOnly(dateDone);
 	case TDCD_DONETIME:		return CDateHelper::GetTimeOnly(dateDone);
-	case TDCD_LASTMOD:		return dateLastMod;
 	}
 	
 	// else
