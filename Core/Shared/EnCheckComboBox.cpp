@@ -150,7 +150,7 @@ void CEnCheckComboBox::FixupEmptyStringsAtStart()
 	int nEmpty = CalcNumRequiredEmptyStrings();
 
 	while (nEmpty--)
-		int nItem = CComboBox::InsertString(0, _T("")); // bypass checks for uniqueness
+		CComboBox::InsertString(0, _T("")); // bypass checks for uniqueness
 }
 
 int CEnCheckComboBox::CalcNumRequiredEmptyStrings() const

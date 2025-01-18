@@ -1277,6 +1277,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 {
 	// update the combos before copying over the current defaults
 	m_ctrlAttributes.SetDefaultAutoListData(tld);
+	m_ctrlAttributes.GetAutoListData(TDCA_ALL, m_tldAll);
 
 	m_tldDefault.Copy(tld, TDCA_ALL);
 }
@@ -4246,7 +4247,10 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 {
 	if (tasks.GetAutoListData(m_tldAll))
+	{
 		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
+		UpdateAutoListData();
+	}
 }
 
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const

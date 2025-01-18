@@ -143,6 +143,7 @@ struct TDCAUTOLISTDATA
 
 	int GetSize() const;
 	CString Format(TDC_ATTRIBUTE nAttribID, TCHAR cSep = 0) const;
+	BOOL Matches(const TDCAUTOLISTDATA& other, TDC_ATTRIBUTE nAttribID) const;
 
 	CStringArray aCategory;
 	CStringArray aStatus;

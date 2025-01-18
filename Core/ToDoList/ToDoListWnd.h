@@ -79,7 +79,7 @@ private:
 		void UpdateStatusBar(const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 		void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 		void UpdateMenuSourceControlStatus() { m_bUpdateMenuSSCStatus = TRUE; }
-		void UpdateAutoListData(TDC_ATTRIBUTE nAttribID) { m_nUpdateAutoListDataAttribID = nAttribID; }
+		void UpdateAutoListData(TDC_ATTRIBUTE nAttribID = TDCA_ALL) { m_nUpdateAutoListDataAttribID = nAttribID; }
 
 		void RefreshTimeTrackingStatus() { m_bRefreshTimeTrackStatus = TRUE; }
 		void RefreshPauseTimeTracking() { m_bRefreshPauseTimeTracking = TRUE; }
@@ -652,8 +652,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 		
 	// Pseudo-handlers
-	void AutoSaveTasklists();
-
 	void OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bUpdateFilterCtrls);
 	void OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWhere);
 	void OnEditSetReminder(int nTDC, DWORD dwTaskID);
@@ -754,7 +752,8 @@ protected:
 	void UpdateCwd();
 	void UpdateAeroFeatures();
 	void UpdateUITheme();
-	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID);
+	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID); // Idle task
+	void UpdateFindTasksListData(TDC_ATTRIBUTE nAttribID); // Idle task
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
 	void UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pCtrl);
 	void UpdateTrayTooltip(); // Idle task via UpdateCaption
@@ -769,8 +768,7 @@ protected:
 	void UpdateTaskTreeAndCommentsFonts();
 	void UpdateFindTasksAndRemindersFonts();
 
-	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
-	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
+	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID = TDCA_ALL, BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFilterBarAdvancedFilters();
 	void RefreshTimeTrackingStatus(); // Idle task
 	void RefreshPauseTimeTracking(); // Idle task
@@ -819,10 +817,11 @@ protected:
 
 	// caller must flush todoctrls if required before calling these
 	BOOL CloseToDoCtrl(int nIndex);
+	void AutoSaveTasklists();
 	TDC_FILE ConfirmSaveTaskList(int nIndex, DWORD dwFlags = 0);
 	TDC_FILE SaveTaskList(int nIndex, LPCTSTR szFilePath = NULL, DWORD dwFlags = 0);
 	TDC_FILE SaveAll(DWORD dwFlags);
-	
+
 	void UpdateToDoCtrlPreferences(CFilteredToDoCtrl* pCtrl);
 	const CPreferencesDlg& Prefs() const;
 	void ResetPrefs();

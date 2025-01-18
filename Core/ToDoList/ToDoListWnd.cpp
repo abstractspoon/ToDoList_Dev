@@ -269,7 +269,7 @@ BOOL CToDoListWnd::IDLETASKS::Process()
 		else if (m_nUpdateAutoListDataAttribID != TDCA_NONE)
 		{
 			m_tdl.UpdateFilterBarListData(m_nUpdateAutoListDataAttribID);
-			m_tdl.RefreshFindTasksListData(m_nUpdateAutoListDataAttribID);
+			m_tdl.UpdateFindTasksListData(m_nUpdateAutoListDataAttribID);
 
 			m_nUpdateAutoListDataAttribID = TDCA_NONE;
 		}
@@ -3745,13 +3745,10 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	{
 		// Ignore modification callback if it came from us
 		if (m_bSettingAttribDefs)
-		{
 			return 0L;
-		}
-		else if (m_dlgFindTasks.GetSafeHwnd())
-		{
+
+		if (m_dlgFindTasks.GetSafeHwnd())
 			UpdateFindDialogCustomAttributes(&tdc);
-		}
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_ICON))
@@ -3761,7 +3758,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_PASTE))
-		m_idleTasks.UpdateAutoListData(TDCA_ALL);
+		m_idleTasks.UpdateAutoListData();
 
 	m_idleTasks.UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
 	m_idleTasks.UpdateStatusBar(pMod->mapAttrib);
@@ -5231,6 +5228,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		m_idleTasks.RefreshTabOrder();
 		m_idleTasks.RefreshPauseTimeTracking();
 		m_idleTasks.UpdateCaption();
+		m_idleTasks.UpdateAutoListData();
 
 		// colours
 		if (m_dlgFindTasks.GetSafeHwnd())
@@ -5247,7 +5245,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		UpdateFindTasksAndRemindersFonts();
 
 		// then refresh filter bar for any new default cats, statuses, etc
-		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFilterBarControls();
 
 		// Recreate custom toolbar as required before any resize
 		CToolbarButtonArray aOldButtons, aNewButtons;
@@ -6008,7 +6006,7 @@ void CToDoListWnd::OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWher
 	{
 		DoImportPasteFromClipboard(nImportWhere);
 
-		RefreshFilterBarControls(TDCA_ALL, FALSE);
+		RefreshFilterBarControls();
 		m_idleTasks.UpdateTimeTrackerTasks(FALSE, TDCA_PASTE);
 	}
 }
@@ -6256,9 +6254,9 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 		
 		m_idleTasks.UpdateCaption();
 		m_idleTasks.UpdateStatusBar();
-
-		RefreshFilterBarControls(TDCA_ALL);
 		m_idleTasks.UpdateTimeTrackerTasks(TRUE);
+
+		RefreshFilterBarControls();
 	}
 	else if (bNotifyError)
 	{
@@ -8259,7 +8257,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		UpdateToDoCtrlPreferences(&tdcShow);
 
 		// update the filter selection
- 		RefreshFilterBarControls(TDCA_ALL);
+ 		RefreshFilterBarControls();
  		
 		m_idleTasks.UpdateCaption();
 		m_idleTasks.UpdateStatusBar();
@@ -8305,7 +8303,6 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 		// update find dialog with this ToDoCtrl's custom attributes
 		UpdateFindDialogActiveTasklist(&tdcShow);
-		m_idleTasks.UpdateAutoListData(TDCA_ALL);
 
 		// leave focus setting till last else the 'old' tasklist flashes
 		tdcShow.SetFocusToTasks();
@@ -8321,6 +8318,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 	m_idleTasks.UpdateMenuSourceControlStatus();
 	m_idleTasks.RefreshPauseTimeTracking();
+	m_idleTasks.UpdateAutoListData();
 
 	///////////////////////////////////////////////////////////////////////
 	// PERMANENT LOGGING
@@ -8405,7 +8403,7 @@ void CToDoListWnd::CheckResizeFilterBar()
 	InvalidateRect(rFilter, TRUE);
 }
 
-void CToDoListWnd::RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID)
+void CToDoListWnd::UpdateFindTasksListData(TDC_ATTRIBUTE nAttribID)
 {
 	BOOL bRefreshAll = (nAttribID == TDCA_ALL);
 	BOOL bCustAttrib = TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
@@ -8807,11 +8805,11 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 		m_idleTasks.UpdateCaption();
 		m_idleTasks.UpdateStatusBar();
 		m_idleTasks.UpdateMenuSourceControlStatus();
-		m_idleTasks.UpdateAutoListData(TDCA_ALL);
+		m_idleTasks.UpdateAutoListData();
 		m_idleTasks.RefreshPauseTimeTracking();
 		
 		UpdateCwd();
-		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFilterBarControls();
 		DoDueTaskNotification(GetSelToDoCtrl(), nNotifyDueTasksBy);
 	}
 
@@ -8845,7 +8843,7 @@ void CToDoListWnd::CheckUpdateActiveToDoCtrlPreferences()
 		UpdateToDoCtrlPreferences(&GetToDoCtrl(nSel));
 
 		// and filter bar relies on this tdc's visible columns
-		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFilterBarControls();
 	}
 }
 
@@ -10853,7 +10851,7 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	tdc.SetAdvancedFilter(filter);
 	
-	RefreshFilterBarControls(TDCA_ALL);
+	RefreshFilterBarControls();
 	m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 
 	tdc.SetFocusToTasks();
@@ -11344,7 +11342,7 @@ void CToDoListWnd::OnViewSelectedTask(BOOL bNext)
 		// because the required tasks were hidden
 		if (bWasFiltered && !tdc.HasAnyFilter())
 		{
-			RefreshFilterBarControls(TDCA_ALL);
+			RefreshFilterBarControls();
 			m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 		}
 	}
@@ -11813,7 +11811,7 @@ void CToDoListWnd::OnViewShowfilterbar()
 	m_bShowFilterBar = !m_bShowFilterBar;
 
 	if (m_bShowFilterBar)
-		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFilterBarControls();
 
 	m_filterBar.ShowWindow(m_bShowFilterBar ? SW_SHOW : SW_HIDE);
 
@@ -11861,7 +11859,7 @@ void CToDoListWnd::OnViewTogglefilter()
 		tdc.ToggleFilter();
 
 		if (m_bShowFilterBar)
-			RefreshFilterBarControls(TDCA_ALL);
+			RefreshFilterBarControls();
 		else
 			m_filterBar.RefreshFilterControls(tdc); // so menu updates work
 
@@ -11930,7 +11928,7 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 	}
 
 	if (bUpdateFilterCtrls)
-		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFilterBarControls();
 	else
 		CheckResizeFilterBar();
 
@@ -12040,7 +12038,7 @@ void CToDoListWnd::OnTasklistSelectColumns()
 				GetToDoCtrl(nTDC).SetColumnFieldVisibility(vis);
 		}
 
-		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFilterBarControls();
 		m_idleTasks.UpdateStatusBar(); // Time Est/Spent, Cost visibility may have changed
 
 		// reload the menu if we dynamically alter it
@@ -13484,7 +13482,7 @@ void CToDoListWnd::OnTasklistCustomColumns()
 
 			if (tdc.SetCustomAttributeDefs(aAttrib))
 			{
-				RefreshFilterBarControls(TDCA_ALL);
+				RefreshFilterBarControls();
 				UpdateFindDialogActiveTasklist();
 
 				// Auto-enable attribute inheritance first time only

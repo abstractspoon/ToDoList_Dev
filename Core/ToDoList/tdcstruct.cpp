@@ -267,25 +267,16 @@ int TDCAUTOLISTDATA::AppendUnique(const TDCAUTOLISTDATA& other, TDC_ATTRIBUTE nA
 
 int TDCAUTOLISTDATA::RemoveItems(const TDCAUTOLISTDATA& other, TDC_ATTRIBUTE nAttribID)
 {
+#define REMOVE_ITEMS(att, arr) if (WantAttribute(nAttribID, att)) nNumRemoved += Misc::RemoveItems(other.arr, arr)
+
 	int nNumRemoved = 0;
 
-	if (WantAttribute(nAttribID, TDCA_CATEGORY))
-		nNumRemoved += Misc::RemoveItems(other.aCategory, aCategory);
-
-	if (WantAttribute(nAttribID, TDCA_STATUS))
-		nNumRemoved += Misc::RemoveItems(other.aStatus, aStatus);
-
-	if (WantAttribute(nAttribID, TDCA_ALLOCTO))
-		nNumRemoved += Misc::RemoveItems(other.aAllocTo, aAllocTo);
-
-	if (WantAttribute(nAttribID, TDCA_ALLOCBY))
-		nNumRemoved += Misc::RemoveItems(other.aAllocBy, aAllocBy);
-
-	if (WantAttribute(nAttribID, TDCA_TAGS))
-		nNumRemoved += Misc::RemoveItems(other.aTags, aTags);
-
-	if (WantAttribute(nAttribID, TDCA_VERSION))
-		nNumRemoved += Misc::RemoveItems(other.aVersion, aVersion);
+	REMOVE_ITEMS(TDCA_CATEGORY, aCategory);
+	REMOVE_ITEMS(TDCA_STATUS,	aStatus);
+	REMOVE_ITEMS(TDCA_ALLOCTO,	aAllocTo);
+	REMOVE_ITEMS(TDCA_ALLOCBY,	aAllocBy);
+	REMOVE_ITEMS(TDCA_TAGS,		aTags);
+	REMOVE_ITEMS(TDCA_VERSION,	aVersion);
 
 	return nNumRemoved;
 }
@@ -302,23 +293,14 @@ int TDCAUTOLISTDATA::GetSize() const
 
 void TDCAUTOLISTDATA::RemoveAll(TDC_ATTRIBUTE nAttribID)
 {
-	if (WantAttribute(nAttribID, TDCA_CATEGORY))
-		aCategory.RemoveAll();
+#define REMOVE_ALL(att, arr) if (WantAttribute(nAttribID, att)) arr.RemoveAll()
 
-	if (WantAttribute(nAttribID, TDCA_STATUS))
-		aStatus.RemoveAll();
-
-	if (WantAttribute(nAttribID, TDCA_ALLOCTO))
-		aAllocTo.RemoveAll();
-
-	if (WantAttribute(nAttribID, TDCA_ALLOCBY))
-		aAllocBy.RemoveAll();
-
-	if (WantAttribute(nAttribID, TDCA_TAGS))
-		aTags.RemoveAll();
-
-	if (WantAttribute(nAttribID, TDCA_VERSION))
-		aVersion.RemoveAll();
+	REMOVE_ALL(TDCA_CATEGORY,	aCategory);
+	REMOVE_ALL(TDCA_STATUS,		aStatus);
+	REMOVE_ALL(TDCA_ALLOCTO,	aAllocTo);
+	REMOVE_ALL(TDCA_ALLOCBY,	aAllocBy);
+	REMOVE_ALL(TDCA_TAGS,		aTags);
+	REMOVE_ALL(TDCA_VERSION,	aVersion);
 }
 
 CString TDCAUTOLISTDATA::Format(TDC_ATTRIBUTE nAttribID, TCHAR cSep) const
@@ -337,6 +319,20 @@ CString TDCAUTOLISTDATA::Format(TDC_ATTRIBUTE nAttribID, TCHAR cSep) const
 	return _T("");
 }
 
+BOOL TDCAUTOLISTDATA::Matches(const TDCAUTOLISTDATA& other, TDC_ATTRIBUTE nAttribID) const
+{
+#define MATCH_ARR(att, arr) if (WantAttribute(nAttribID, att) && !Misc::MatchAll(arr, other.arr)) return FALSE
+
+	MATCH_ARR(TDCA_CATEGORY,	aCategory);
+	MATCH_ARR(TDCA_STATUS,		aStatus);
+	MATCH_ARR(TDCA_ALLOCTO,		aAllocTo);
+	MATCH_ARR(TDCA_ALLOCBY,		aAllocBy);
+	MATCH_ARR(TDCA_TAGS,		aTags);
+	MATCH_ARR(TDCA_VERSION,		aVersion);
+
+	return TRUE;
+}
+
 BOOL TDCAUTOLISTDATA::WantAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nWantedAttribID) const
 {
 	return ((nAttribID == TDCA_ALL) || (nAttribID == nWantedAttribID));
@@ -344,25 +340,16 @@ BOOL TDCAUTOLISTDATA::WantAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nWant
 
 int TDCAUTOLISTDATA::Copy(const TDCAUTOLISTDATA& from, TDCAUTOLISTDATA& to, BOOL bAppend, TDC_ATTRIBUTE nAttribID)
 {
+#define COPY_ARR(att, arr) if (WantAttribute(nAttribID, att)) nNumCopied += CopyItems(from.arr, to.arr, bAppend);
+
 	int nNumCopied = 0;
 
-	if (WantAttribute(nAttribID, TDCA_CATEGORY))
-		nNumCopied += CopyItems(from.aCategory, to.aCategory, bAppend);
-
-	if (WantAttribute(nAttribID, TDCA_STATUS))
-		nNumCopied += CopyItems(from.aStatus, to.aStatus, bAppend);
-
-	if (WantAttribute(nAttribID, TDCA_ALLOCTO))
-		nNumCopied += CopyItems(from.aAllocTo, to.aAllocTo, bAppend);
-
-	if (WantAttribute(nAttribID, TDCA_ALLOCBY))
-		nNumCopied += CopyItems(from.aAllocBy, to.aAllocBy, bAppend);
-
-	if (WantAttribute(nAttribID, TDCA_TAGS))
-		nNumCopied += CopyItems(from.aTags, to.aTags, bAppend);
-
-	if (WantAttribute(nAttribID, TDCA_VERSION))
-		nNumCopied += CopyItems(from.aVersion, to.aVersion, bAppend);
+	COPY_ARR(TDCA_CATEGORY,	aCategory);
+	COPY_ARR(TDCA_STATUS,	aStatus);
+	COPY_ARR(TDCA_ALLOCTO,	aAllocTo);
+	COPY_ARR(TDCA_ALLOCBY,	aAllocBy);
+	COPY_ARR(TDCA_TAGS,		aTags);
+	COPY_ARR(TDCA_VERSION,	aVersion);
 
 	return nNumCopied;
 }

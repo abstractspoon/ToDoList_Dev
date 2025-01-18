@@ -1105,15 +1105,19 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL b
 
 void CTDLTaskAttributeListCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault) 
 { 
-	m_tldAll.RemoveItems(m_tldDefault, TDCA_ALL);
-	m_tldAll.AppendUnique(tldDefault, TDCA_ALL);
+	if (!m_tldDefault.Matches(tldDefault, TDCA_ALL))
+	{
+		m_tldAll.RemoveItems(m_tldDefault, TDCA_ALL);
+		m_tldAll.AppendUnique(tldDefault, TDCA_ALL);
 
-	m_tldDefault.Copy(tldDefault, TDCA_ALL);
+		m_tldDefault.Copy(tldDefault, TDCA_ALL);
+	}
 }
 
 void CTDLTaskAttributeListCtrl::SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld)
 {
 	m_tldAll.Copy(tld, nAttribID);
+	m_tldAll.AppendUnique(m_tldDefault, nAttribID);
 }
 
 void CTDLTaskAttributeListCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
