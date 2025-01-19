@@ -48,6 +48,7 @@ public:
 	void EnableInlineEditing(BOOL bEnable = TRUE) { m_bEnableInlineEditing = bEnable; }
 	void ShowCalendarOnCompleting(BOOL bShow = TRUE) { m_bShowCalendarOnCompleting = bShow; }
 	BOOL ShowSeconds(BOOL bShow);
+	BOOL GetPickerInfo(DATETIMEPICKERINFO& dtpi) const;
 
 // Attributes
 protected:
@@ -95,7 +96,6 @@ protected:
 	CRect GetDropButtonRect() const;
 	CRect GetCheckboxRect() const;
 	void ResetCalendarHandling();
-	BOOL GetPickerInfo(DATETIMEPICKERINFO& dtpi) const;
 
 };
 

@@ -213,8 +213,6 @@ void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_nBackupFolderType = pPrefs->GetProfileInt(szKey, _T("BackupFolderType"), PFP_RELATIVETOTASKLIST);
 	
 	// saving
-	m_nAutoSaveFrequency = pPrefs->GetProfileInt(szKey, _T("AutoSaveFrequency"), 1);
-	m_bAutoSave = pPrefs->GetProfileInt(szKey, _T("AutoSave"), (m_nAutoSaveFrequency > 0));
 	m_bAutoExport = pPrefs->GetProfileInt(szKey, _T("AutoHtmlExport"), FALSE);
 	m_sExportFolderPath = pPrefs->GetProfileString(szKey, _T("ExportFolderPath"));
 	m_sSaveExportStylesheet = pPrefs->GetProfileString(szKey, _T("SaveExportStylesheet"));
@@ -223,6 +221,13 @@ void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_bOtherExport = pPrefs->GetProfileInt(szKey, _T("OtherExport"), FALSE);
 	m_bExportFilteredOnly = pPrefs->GetProfileInt(szKey, _T("ExportFilteredOnly"), FALSE);
 	m_bAutoSaveOnRunTools = pPrefs->GetProfileInt(szKey, _T("AutoSaveOnRunTools"), TRUE);
+	m_nAutoSaveFrequency = pPrefs->GetProfileInt(szKey, _T("AutoSaveFrequency"), 1);
+
+#ifdef _DEBUG
+	m_bAutoSave = pPrefs->GetProfileInt(szKey, _T("AutoSave"), FALSE);
+#else
+	m_bAutoSave = pPrefs->GetProfileInt(szKey, _T("AutoSave"), (m_nAutoSaveFrequency > 0));
+#endif
 
 	m_sOtherExportTypeID = pPrefs->GetProfileString(szKey, _T("OtherExporterTypeID"));
 

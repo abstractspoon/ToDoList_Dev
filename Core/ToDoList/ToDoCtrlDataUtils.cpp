@@ -4040,10 +4040,11 @@ CString CTDCTaskFormatter::GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmp
 
 	if (pTDI)
 	{
-		if (!bEmptyIsBlank || !pTDI->sComments.IsEmpty() || !pTDI->customComments.IsEmpty())
-			return m_mgrContent.GetContentDescription(pTDI->cfComments);
+		if (bEmptyIsBlank && pTDI->sComments.IsEmpty() && pTDI->customComments.IsEmpty())
+			return EMPTY_STR;
 
-		return EMPTY_STR;
+		// else
+		return m_mgrContent.GetContentDescription(pTDI->cfComments);
 	}
 
 	// else

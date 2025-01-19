@@ -734,6 +734,13 @@ BOOL CDialogHelper::ComboHasEdit(const CComboBox& combo)
 	return (NULL != combo.GetDlgItem(1001));
 }
 
+BOOL CDialogHelper::IsComboEdit(HWND hWnd)
+{
+	return ((::GetDlgCtrlID(hWnd) == 1001) &&
+			CWinClasses::IsEditControl(hWnd) &&
+			CWinClasses::IsComboBox(::GetParent(hWnd)));
+}
+
 void CDialogHelper::MoveCombo(CComboBox& combo, const CRect& rNew, int nDropHeight)
 {
 	// don't move if nothing's changed
@@ -2113,6 +2120,23 @@ BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonCli
 	
 	TRACKMOUSEEVENT tme = { sizeof(tme), dwFlags, hWnd, 0 };
 	return _TrackMouseEvent(&tme);
+}
+
+BOOL CDialogHelper::IsMouseDownInWindow(HWND hWnd)
+{
+	ASSERT(hWnd);
+	ASSERT(::IsWindowVisible(hWnd));
+
+	if (!hWnd || !Misc::IsKeyPressed(VK_LBUTTON))
+		return FALSE;
+
+	CPoint ptMsg(::GetMessagePos());
+	::ScreenToClient(hWnd, &ptMsg);
+
+	CRect rWnd;
+	::GetClientRect(hWnd, rWnd);
+
+	return rWnd.PtInRect(ptMsg);
 }
 
 BOOL CDialogHelper::SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen)
