@@ -29,14 +29,15 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR NO_ICON = _T("__NONE__");
+const LPCTSTR NO_ICON	= _T("__NONE__");
+const LPCTSTR PREFS_KEY = _T("TaskIcons");
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskIconDlg dialog
 
 CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem, int nNumImages, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, _T("TaskIcons"), pParent), 
+	CTDLDialog(CTDLTaskIconDlg::IDD, PREFS_KEY, pParent),
 	m_ilIcons(ilIcons), 
 	m_sIconName(sSelName), 
 	m_bMultiSel(FALSE),
@@ -48,7 +49,7 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sS
 
 CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, int nNumImages, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, _T("TaskIcons"), pParent), 
+	CTDLDialog(CTDLTaskIconDlg::IDD, PREFS_KEY, pParent),
 	m_ilIcons(ilIcons), 
 	m_bMultiSel(TRUE),
 	m_bWantNone(FALSE),
@@ -175,10 +176,10 @@ int CTDLTaskIconDlg::GetIconNames(CStringArray& aSelNames) const
 	return aSelNames.GetSize();
 }
 
-CString CTDLTaskIconDlg::GetUserIconName(const CString& sImage) const
+CString CTDLTaskIconDlg::GetUserIconName(const CString& sImage)
 {
 	CPreferences prefs;
-	return prefs.GetProfileString(m_sPrefsKey, sImage);
+	return prefs.GetProfileString(PREFS_KEY, sImage);
 }
 
 void CTDLTaskIconDlg::EnableDisable()

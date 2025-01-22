@@ -75,7 +75,7 @@ protected:
 	CTDLIconComboBox				m_cbCustomIcons;
 
 	CSearchParamArray				m_aSearchParams;
-	CTDCCustomAttribDefinitionArray m_aAttribDefs;
+	CTDCCustomAttribDefinitionArray m_aCustAttribDefs;
 	TDCAUTOLISTDATA					m_tldListContents;
 	CTDCImageList					m_ilIcons;
 

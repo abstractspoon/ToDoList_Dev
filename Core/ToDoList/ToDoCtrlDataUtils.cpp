@@ -1130,6 +1130,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const TDCCADATA& data, DWORD dwAttribType, co
 		switch (dwdataType)
 		{
 		case TDCCA_STRING:	
+		case TDCCA_ICON:
 			bMatch = ValueMatches(data.AsString(), rule, bCaseSensitive, sWhatMatched);
 			break;
 			

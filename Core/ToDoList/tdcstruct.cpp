@@ -1281,7 +1281,7 @@ TDC_UNITS SEARCHPARAM::GetTimeUnits() const
 
 BOOL SEARCHPARAM::GetMatchWholeWord() const
 {
-	ASSERT(TypeIs(FT_STRING) || TypeIs(FT_DEPENDENCY));
+	ASSERT(TypeIs(FT_STRING) || TypeIs(FT_DEPENDENCY) || TypeIs(FT_ICON));
 
 	return bMatchWholeWord;
 }

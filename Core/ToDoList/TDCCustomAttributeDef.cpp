@@ -625,6 +625,29 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::DecodeListData(const CString& sListData)
 	return FALSE;
 }
 
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetListIconName(const CString& sImage, CString& sName) const
+{
+	if (IsDataType(TDCCA_ICON) && IsList())
+	{
+		for (int nItem = 0; nItem < aDefaultListData.GetSize(); nItem++)
+		{
+			CString sListItem(aDefaultListData[nItem]);
+
+			if ((sListItem.Find(sImage) == 0) && (sListItem[sImage.GetLength()] == ':'))
+			{
+				sName = sListItem.Mid(sImage.GetLength() + 1);
+				return TRUE;
+			}
+		}
+	}
+	else
+	{
+		ASSERT(0);
+	}
+
+	return FALSE;
+}
+
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 {
 	return AttributeSupportsFeature(GetDataType(), GetListType(), dwFeature);

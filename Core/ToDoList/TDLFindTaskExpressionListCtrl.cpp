@@ -161,8 +161,8 @@ void CTDLFindTaskExpressionListCtrl::PreSubclassWindow()
 
 void CTDLFindTaskExpressionListCtrl::SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
-	m_aAttribDefs.Copy(aAttribDefs);
-	m_cbAttributes.SetCustomAttributes(m_aAttribDefs);
+	m_aCustAttribDefs.Copy(aAttribDefs);
+	m_cbAttributes.SetCustomAttributes(m_aCustAttribDefs);
 }
 
 void CTDLFindTaskExpressionListCtrl::SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID)
@@ -306,7 +306,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 					{
 						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-						GET_CUSTDEF_ALT(m_aAttribDefs, nAttribID, pDef, break);
+						GET_CUSTDEF_ALT(m_aCustAttribDefs, nAttribID, pDef, break);
 
 						if (pDef->IsList())
 						{
@@ -398,7 +398,7 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 					if (!bBrowse)
 					{
 						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-						GET_CUSTDEF_ALT(m_aAttribDefs, rule.GetAttribute(), pDef, return);
+						GET_CUSTDEF_ALT(m_aCustAttribDefs, rule.GetAttribute(), pDef, return);
 
 						bBrowse = !pDef->IsList();
 					}
@@ -489,10 +489,10 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				return ILCT_POPUPMENU;
 
 			case FT_ICON:
-				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aAttribDefs.GetSize())
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aCustAttribDefs.GetSize())
 				{
 					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-					GET_CUSTDEF_RET(m_aAttribDefs, nAttribID, pDef, ILCT_BROWSE);
+					GET_CUSTDEF_RET(m_aCustAttribDefs, nAttribID, pDef, ILCT_BROWSE);
 
 					if (pDef->IsList())
 						return ILCT_COMBO;
@@ -526,10 +526,10 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 					return ILCT_COMBO;
 
 				default:
-					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aAttribDefs.GetSize())
+					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aCustAttribDefs.GetSize())
 					{
 						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-						GET_CUSTDEF_ALT(m_aAttribDefs, nAttribID, pDef, break);
+						GET_CUSTDEF_ALT(m_aCustAttribDefs, nAttribID, pDef, break);
 
 						if (pDef->IsList())
 							return ILCT_COMBO;
@@ -899,7 +899,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		else if (&ctrl == &m_cbCustomIcons)
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_CUSTDEF_ALT(m_aAttribDefs, rule.GetAttribute(), pDef, return);
+			GET_CUSTDEF_ALT(m_aCustAttribDefs, rule.GetAttribute(), pDef, return);
 
 			ASSERT(pDef->IsList());
 
@@ -917,12 +917,12 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			{
-				int nAtt = m_aAttribDefs.Find(nAttribID);
+				int nAtt = m_aCustAttribDefs.Find(nAttribID);
 				ASSERT(nAtt != -1);
 
 				if (nAtt != -1)
 				{
-					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAtt];
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustAttribDefs[nAtt];
 					ASSERT(attribDef.IsList());
 
 					if (attribDef.IsList())
@@ -1566,16 +1566,19 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-		if (rule.TypeIs(FT_ICON))
+		switch (rule.GetAttribType())
 		{
+		case FT_ICON:
 			if (!sText.IsEmpty())
 			{
-				// Don't use sText because it might have been truncated
-				CStringArray aIcons;
-				int nNumIcons = Misc::Split(GetItemText(nRow, nCol), aIcons);
-
 				CRect rIcon(rText);
 				rIcon.DeflateRect(0, ((rText.Height() - IMAGE_SIZE) / 2));
+
+				// Don't use sText because it might have been truncated
+				CString sIcons = GetItemText(nRow, nCol);
+				CStringArray aIcons;
+
+				int nNumIcons = Misc::Split(sIcons, aIcons);
 
 				for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 				{
@@ -1587,12 +1590,33 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 						rIcon.left += (IMAGE_SIZE + 2);
 					}
 				}
-			}
 
+				if (nNumIcons == 1) // Draw icon name?
+				{
+					CString sIconName;
+
+					if (rule.IsCustomAttribute())
+					{
+						// When switching tasklists it's possible that
+						// the new tasklist does not support the same custom
+						// attributes as the one for which the rules were
+						// configured so we DON'T want this to assert
+						int nCust = m_aCustAttribDefs.Find(rule.GetCustomAttributeID());
+
+						if ((nCust != -1) && m_aCustAttribDefs[nCust].IsList())
+							m_aCustAttribDefs[nCust].GetListIconName(sIcons, sIconName);
+					}
+
+					if (sIconName.IsEmpty())
+						sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, sIconName, crText, nDrawTextFlags);
+				}
+			}
 			return;
-		}
-		else if (rule.GetAttribute() == TDCA_COLOR)
-		{
+
+
+		case FT_COLOR:
 			if (!sText.IsEmpty())
 			{
 				COLORREF color = _ttoi(GetItemText(nRow, nCol));
@@ -1602,7 +1626,6 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 
 				pDC->FillSolidRect(rColor, color);
 			}
-
 			return;
 		}
 	}

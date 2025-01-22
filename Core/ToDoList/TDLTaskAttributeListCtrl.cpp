@@ -9,6 +9,7 @@
 #include "tdcstatic.h"
 #include "tdcstruct.h"
 #include "tdcmapping.h"
+#include "TDLTaskIconDlg.h"
 
 #include "..\shared\EnMenu.h"
 #include "..\shared\GraphicsMisc.h"
@@ -205,7 +206,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 
 	ON_CONTROL_RANGE(CBN_KILLFOCUS, 0, 0xffff, OnComboKillFocus)
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
-	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboEditChange)
+	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboSelChange)
 
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnTextEditOK)
 
@@ -1801,7 +1802,12 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 
 	case TDCA_ICON:
-		DrawIcon(pDC, sText, rText, FALSE);
+		{
+			CRect rIcon(rText);
+
+			if (DrawIcon(pDC, sText, rIcon, FALSE))
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, CTDLTaskIconDlg::GetUserIconName(sText), crText, nDrawTextFlags);
+		}
 		return;
 
 	case TDCA_COST:
@@ -1863,11 +1869,9 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			for (int nFile = 0; nFile < nNumFiles; nFile++)
 			{
 				CString sFile = aFiles[nFile];
+				DrawIcon(pDC, sFile, rFile, TRUE);
 
-				if (DrawIcon(pDC, sFile, rFile, TRUE))
-					rFile.left += (ICON_SIZE + 2);
-
-				if (!TDCTASKLINK::IsTaskLink(aFiles[0], TRUE))
+				if (!TDCTASKLINK::IsTaskLink(sFile, TRUE))
 					sFile = FileMisc::GetFileNameFromPath(sFile);
 
 				if (nFile < (nNumFiles - 1))
@@ -1896,8 +1900,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				CString sTitle = m_formatter.GetTaskTitlePath(dwDependsID, (TDCTF_TITLEONLY | TDCTF_TRAILINGID));
 				CString sIcon = m_data.GetTaskIcon(dwDependsID);
 	
-				if (DrawIcon(pDC, m_data.GetTaskIcon(dwDependsID), rTitle, FALSE))
-					rTitle.left += (ICON_SIZE + 2);
+				DrawIcon(pDC, m_data.GetTaskIcon(dwDependsID), rTitle, FALSE);
 
 				if (nDepend < (nNumDepends - 1))
 					sTitle += Misc::GetListSeparator() + ' ';
@@ -1919,34 +1922,47 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			case TDCCA_FILELINK:
 				{
 					CRect rRest(rText);
-
-					if (DrawIcon(pDC, sText, rText, TRUE))
-						rRest.left += (ICON_SIZE + 2);
+					DrawIcon(pDC, sText, rRest, TRUE);
 	
 					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, FileMisc::GetFileNameFromPath(sText), crText, nDrawTextFlags);
 				}
 				return;
 
 			case TDCCA_ICON:
-				if (pDef->IsMultiList())
 				{
-					CString sMatched(sText), sUnused;
-					Misc::Split(sMatched, sUnused, '|');
-
-					CStringArray aIcons;
-						int nNumIcons = SplitValueArray(sMatched, aIcons);
-
+					CString sIconName;
 					CRect rIcon(rText);
 
-					for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+					if (pDef->IsMultiList())
 					{
-						if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
-							rIcon.left += (ICON_SIZE + 2);
+						CString sMatched(sText), sUnused;
+						Misc::Split(sMatched, sUnused, '|');
+
+						CStringArray aIcons;
+						int nNumIcons = SplitValueArray(sMatched, aIcons);
+
+						for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+							DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE);
+
+						if (nNumIcons == 1)
+						{
+							if (!pDef->GetListIconName(sText, sIconName))
+								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+						}
 					}
-				}
-				else
-				{
-					DrawIcon(pDC, sText, rText, FALSE);
+					else
+					{
+						CString sImage;
+						
+						if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(sText, sImage, sIconName) &&
+							DrawIcon(pDC, sImage, rIcon, FALSE))
+						{
+							if (sIconName.IsEmpty() && (!pDef->IsList() || !pDef->GetListIconName(sText, sIconName)))
+								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+						}
+					}
+
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, sIconName, crText, nDrawTextFlags);
 				}
 				return;
 
@@ -1979,26 +1995,33 @@ CPoint CTDLTaskAttributeListCtrl::GetIconPos(const CRect& rText)
 	return CPoint(rText.left - 1, rText.top + ((rText.Height() - ICON_SIZE) / 2));
 }
 
-BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile)
+BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, CRect& rIcon, BOOL bIconIsFile)
 {
 	if (sIcon.IsEmpty())
 		return FALSE;
 
-	CPoint ptIcon(GetIconPos(rText));
+	CPoint ptIcon(GetIconPos(rIcon));
+	BOOL bDrawn = FALSE;
 
 	if (bIconIsFile)
 	{
-		return CFileEdit::DrawFileIcon(pDC, 
-									   sIcon,
-									   ptIcon, 
-									   m_iconCache,
-									   this,
-									   m_sCurrentFolder,
-									   m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
+		bDrawn = CFileEdit::DrawFileIcon(pDC,
+										 sIcon,
+										 ptIcon,
+										 m_iconCache,
+										 this,
+										 m_sCurrentFolder,
+										 m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
+	}
+	else
+	{
+		bDrawn = m_ilIcons.Draw(pDC, sIcon, ptIcon, ILD_TRANSPARENT);
 	}
 
-	// else
-	return m_ilIcons.Draw(pDC, sIcon, GetIconPos(rText), ILD_TRANSPARENT);
+	if (bDrawn)
+		rIcon.left += (ICON_SIZE + 2);
+
+	return bDrawn;
 }
 
 void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
@@ -3167,24 +3190,24 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 
 void CTDLTaskAttributeListCtrl::OnTimeOfDaySelEndOK()
 {
-	OnComboEditChange(IDC_TIME_PICKER);
+	OnComboSelChange(IDC_TIME_PICKER);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
 { 
 	CWnd* pCombo = GetDlgItem(nCtrlID);
 
-	// If the combo has already been hidden by the base class
-	// we can ignore this
-	if (!pCombo->IsWindowVisible())
-		return;
+	// Note: our base class may already have hidden 
+	// the combo so we have to check first
+	if (pCombo->IsWindowVisible())
+	{
+		// If the combo has an edit field AND the user clicked inside 
+		// the edit field to close the combo, DON'T hide the combo
+		CWnd* pEdit = pCombo->GetDlgItem(1001);
 
-	// If the combo has an edit field AND the user clicked inside 
-	// the edit field to close the combo, DON'T hide the combo
-	CWnd* pEdit = pCombo->GetDlgItem(1001);
-
-	if (pEdit && CDialogHelper::IsMouseDownInWindow(*pEdit))
-		return;
+		if (pEdit && CDialogHelper::IsMouseDownInWindow(*pEdit))
+			return;
+	}
 
 	// All else
 	HideControl(*pCombo);
@@ -3198,12 +3221,12 @@ void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)
 	switch (nCtrlID)
 	{
 	case IDC_TIME_PICKER:
-		OnComboEditChange(nCtrlID);
+		OnComboSelChange(nCtrlID);
 		break;
 	}
 }
 
-void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
+void CTDLTaskAttributeListCtrl::OnComboSelChange(UINT nCtrlID)
 {
 	int nRow = GetCurSel();
 	CString sNewValue;
@@ -3269,11 +3292,16 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 		break;
 
 	case IDC_CUSTOMICON_COMBO:
+		if (m_cbCustomIcons.IsMultiSelectionEnabled())
 		{
 			CStringArray aMatched, aMixed;
 			m_cbCustomIcons.GetChecked(aMatched, aMixed);
 
 			sNewValue = FormatMultiSelItems(aMatched, aMixed);
+		}
+		else
+		{
+			sNewValue = CDialogHelper::GetSelectedItem(m_cbCustomIcons);
 		}
 		break;
 

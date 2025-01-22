@@ -121,6 +121,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	int GetUniqueListData(CStringArray& aData) const;
 	CString EncodeListData() const;
 	BOOL DecodeListData(const CString& sListData);
+	BOOL GetListIconName(const CString& sImage, CString& sName) const;
 
 	BOOL SupportsFeature(DWORD dwFeature) const;
 	BOOL IsAggregated() const;
