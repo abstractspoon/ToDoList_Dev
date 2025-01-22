@@ -3394,30 +3394,20 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 	UNREFERENCED_PARAMETER(pNMHDR);
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
 
-	// If the field has already been hidden by the base class
-	// we can ignore this
-	if (!m_datePicker.IsWindowVisible())
-		return;
-
-	// If the use clicked in the date field DON'T hide it
-	if (CDialogHelper::IsMouseDownInWindow(m_datePicker))
+	// Note: our base class may already have hidden 
+	// the date picker so we have to check first
+	if (m_datePicker.IsWindowVisible())
 	{
-		DATETIMEPICKERINFO dtpi = { 0 };
-
-		if (m_datePicker.GetPickerInfo(dtpi))
+		// If the use clicked in the date field DON'T hide the date picker
+		// because we assume they want to perform a keyboard edit
+		if (Misc::IsKeyPressed(VK_LBUTTON) &&
+			(m_datePicker.HitTest(GetMessagePos(), TRUE) == DTCHT_DATETIME))
 		{
-			CPoint ptMsg(::GetMessagePos());
-			m_datePicker.ScreenToClient(&ptMsg);
-
-			if (!::PtInRect(&dtpi.rcButton, ptMsg) &&
-				!::PtInRect(&dtpi.rcCheck, ptMsg))
-			{
-				return;
-			}
+			return;
 		}
-	}
 
-	HideControl(m_datePicker); 
+		HideControl(m_datePicker);
+	}
 
 	// If we've got multiple different values, DON'T notify
 	// our parent if the cell text has not actually changed

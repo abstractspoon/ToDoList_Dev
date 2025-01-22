@@ -70,7 +70,6 @@ BEGIN_MESSAGE_MAP(CDateTimeCtrlEx, CDateTimeCtrl)
 	ON_WM_SYSKEYDOWN()
 	ON_WM_KEYDOWN()
 	//}}AFX_MSG_MAP
-	ON_WM_CREATE()
 	ON_WM_PAINT()
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
@@ -115,17 +114,6 @@ BOOL CDateTimeCtrlEx::IsCalendarVisible() const
 	return FALSE;
 }
 
-int CDateTimeCtrlEx::OnCreate(LPCREATESTRUCT pCreate)
-{
-// 	if (m_dwMonthCalStyle)
-// 	{
-// 		SetMonthCalStyle(m_dwMonthCalStyle);
-// 		m_dwMonthCalStyle = 0;
-// 	}
-
-	return CDateTimeCtrl::OnCreate(pCreate);
-}
-
 void CDateTimeCtrlEx::PreSubclassWindow()
 {
 	if (m_dwMonthCalStyle)
@@ -165,21 +153,25 @@ void CDateTimeCtrlEx::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		ResetCalendarHandling();
 
-		if (GetDropButtonRect().PtInRect(point))
-		{
-			m_bLButtonDown = TRUE;
+		DTC_HITTEST nHit = HitTest(point);
+		ASSERT(nHit != DTCHT_OUTSIDE);
 
-			// was the date set before ?
-			COleDateTime date;
-			m_bWasSet = (GetTime(date) && (date.GetStatus() == COleDateTime::valid));
-		}
-		else if (m_bShowCalendarOnCompleting && GetCheckboxRect().PtInRect(point))
+		switch (nHit)
 		{
-			if (!IsDateSet())
+		case DTCHT_DROPBUTTON:
+			{
+				m_bLButtonDown = TRUE;
+				m_bWasSet = IsDateSet();
+			}
+			break;
+
+		case DTCHT_CHECKBOX:
+			if (m_bShowCalendarOnCompleting && !IsDateSet())
 			{
 				SendMessage(WM_SYSKEYDOWN, VK_DOWN);
 				return; // eat it
 			}
+			break;
 		}
 	}
 
@@ -229,26 +221,40 @@ BOOL CDateTimeCtrlEx::OnCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if (!bCancel && !bSetDate)
 	{
-		// if neither was pressed then see if the checkbox was clicked
-		if ((GetStyle() & DTS_SHOWNONE) && Misc::IsKeyPressed(VK_LBUTTON))
+		// If neither key was pressed, check to see if the user
+		// clicked somewhere within the date control and decide what to do
+		if (Misc::IsKeyPressed(VK_LBUTTON))
 		{
-			CPoint pt(GetMessagePos());
-			ScreenToClient(&pt);
-
-			if (GetCheckboxRect().PtInRect(pt))
+			switch (HitTest(GetMessagePos(), TRUE))
 			{
-				ASSERT(m_bWasSet);
+			case DTCHT_CHECKBOX:
+				{
+					// The checkbox must have been ticked for the month
+					// calendar to be visible so we toggle the checkbox off
+					m_nmdtcLast.nmhdr = *pNMHDR;
+					m_nmdtcLast.nmhdr.code = DTN_DATETIMECHANGE;
+					m_nmdtcLast.dwFlags = GDT_NONE;
 
-				m_nmdtcLast.nmhdr = *pNMHDR;
-				m_nmdtcLast.nmhdr.code = DTN_DATETIMECHANGE;
-				m_nmdtcLast.dwFlags = GDT_NONE;
+					bSetDate = TRUE;
+				}
+				break;
 
-				bSetDate = TRUE;
+			case DTCHT_DATETIME:
+				{
+					// the user clicked in the date part of the 
+					// control so we accept the date
+					bSetDate = TRUE;
+				}
+				break;
+
+			case DTCHT_DROPBUTTON:
+				bCancel = TRUE;
+				break;
 			}
 		}
 
 		// else try to figure out from the state of the date
-		if (!bSetDate)
+		if (!bSetDate && !bCancel)
 		{
 			COleDateTime date(m_nmdtcLast.st);
 		
@@ -284,10 +290,8 @@ BOOL CDateTimeCtrlEx::OnCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)(&m_nmdtcLast));
 		}
-		else
+		else // fall back on the first notification
 		{
-			// fall back on the first notification
-			ASSERT(m_nmdtcFirst.nmhdr.hwndFrom != NULL);
 			GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)(&m_nmdtcFirst));
 		}
 	}
@@ -328,7 +332,6 @@ BOOL CDateTimeCtrlEx::GetPickerInfo(DATETIMEPICKERINFO& dtpi) const
 	if (GetSafeHwnd() && (COSVersion() >= OSV_VISTA))
 	{
 		dtpi.cbSize = sizeof(dtpi);
-		
 		return ::SendMessage(m_hWnd, DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi);
 	}
 
@@ -388,6 +391,27 @@ CRect CDateTimeCtrlEx::GetCheckboxRect() const
 	rButton.right = (rButton.left + GetSystemMetrics(SM_CXVSCROLL));
 
 	return rButton;
+}
+
+DTC_HITTEST CDateTimeCtrlEx::HitTest(CPoint point, BOOL bScreen) const
+{
+	if (bScreen)
+		ScreenToClient(&point);
+
+	CRect rClient;
+	GetClientRect(rClient);
+
+	if (!rClient.PtInRect(point))
+		return DTCHT_OUTSIDE;
+
+	if (GetCheckboxRect().PtInRect(point))
+		return DTCHT_CHECKBOX;
+
+	if (GetDropButtonRect().PtInRect(point))
+		return DTCHT_DROPBUTTON;
+
+	// all else
+	return DTCHT_DATETIME;
 }
 
 void CDateTimeCtrlEx::OnPaint()
