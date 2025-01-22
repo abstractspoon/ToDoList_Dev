@@ -282,6 +282,8 @@ protected:
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 	static int HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns);
 	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
+	static CString FormatValueArray(const CStringArray& aValues);
+	static int SplitValueArray(const CString& sValues, CStringArray& aValues);
 
 private:
 	// ---------------------------------------------------------------------
