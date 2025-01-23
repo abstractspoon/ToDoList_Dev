@@ -1,3 +1,5 @@
+title ToDoList_Dev Release Build
+
 ECHO OFF
 CLS
 
@@ -14,26 +16,23 @@ REM - Remember to update ToDoList version number
 REM - Remember to pull latest translations
 pause
 
-REM - Build core app in VC6
+SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
+
+REM - Build core app
 cd %REPO%\Core
 
-REM - Detours
-REM "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\3rdParty\Detours\Detours.dsw /MAKE "ALL - Win32 Unicode Release"
+set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Build_Output.txt
+%MSBUILD% .\ToDoList_Core.sln /t:Build /p:Configuration="Unicode Release" /m /v:normal > %OUTPUT_FILE%
 
-REM - Core app
-set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Core_Build_Output.txt
-"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
-
-REM - Check for compile errors
+REM - Check for build errors
 ECHO OFF
+findstr /C:"Build FAILED." %OUTPUT_FILE%
 
-findstr /C:") : error" %OUTPUT_FILE%
 if %errorlevel%==1 (
-REM - Check for link errors
-findstr /C:"Error executing link.exe" %OUTPUT_FILE%
+echo [92m Build SUCCEEDED[0m
 )
 if %errorlevel%==0 (
-echo Build Errors!
+echo [91m Build FAILED[0m
 pause
 exit
 )
@@ -42,28 +41,36 @@ REM Run units tests
 ECHO ON
 
 cd TDLTest\Unicode_Release
-
 TDLTest > %OUTPUT_FILE%
 
 ECHO OFF
 findstr /C:"tests FAILED" %OUTPUT_FILE%
 if %errorlevel%==0 (
-echo Test Errors!
+echo [91m Tests FAILED[0m
 pause
 exit
 )
 
-REM - Build plugins using MSBuild for reliability
+REM - Build plugins
 ECHO ON
 
-SET MSBUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\MSBuild.exe"
-SET BUILDPARAMS=/t:Build /p:Configuration=Release /m /v:normal /noWarn:MSB3267;MSB3305;LNK4248;CS1762;LNK4221;MSB3026
-
-REM - This is required to get the warning suppression to work
-SET VCTargetsPath=C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\
-
 cd %REPO%\Plugins
-%MSBUILD% .\ToDoList_Plugins.sln %BUILDPARAMS%
+
+set OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
+%MSBUILD% .\ToDoList_Plugins.sln /t:Build /p:Configuration=Release /m /v:normal > %OUTPUT_FILE%
+
+REM - Check for build errors
+ECHO OFF
+findstr /C:"Build FAILED." %OUTPUT_FILE%
+
+if %errorlevel%==1 (
+echo [92m Build SUCCEEDED[0m
+)
+if %errorlevel%==0 (
+echo [91m Build FAILED[0m
+pause
+exit
+)
 
 REM - Allow caller to cancel building Zip
 pause

@@ -133,15 +133,19 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\XmlDiffView.exe
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ZstdNet.dll
 
+REM REquired MS components
+%PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\MFC140U.dll
+%PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\VCRUNTIME140.dll
+
 REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest
 
-REM - Copy latest Resources
+REM - Copy latest Resources to output directory
 del %OUTDIR%\Resources\ /Q /S
 del %OUTDIR%\Resources\Translations\backup\ /Q
 xcopy %RESREPO%\*.* %OUTDIR%\Resources\ /Y /D /E /EXCLUDE:%REPO%\BuildReleaseZip_Exclude.txt
 
-REM - Zip install instructions to root
+REM - Add install instructions to root
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Windows.txt
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Linux.txt
 
@@ -149,7 +153,7 @@ REM - And remove from resources to avoid duplication
 del %OUTDIR%\Resources\Install.Windows.txt
 del %OUTDIR%\Resources\Install.Linux.txt
 
-REM - Zip Resources
+REM - Add Resources
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\ -x!.git*
 
 REM - Copy the zip file to the download folder
