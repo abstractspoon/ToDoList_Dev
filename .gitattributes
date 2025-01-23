@@ -12,3 +12,5 @@
 *.dat binary
 *.xlsx binary
 *.zip binary
+*.csv binary
+*.exe binary
