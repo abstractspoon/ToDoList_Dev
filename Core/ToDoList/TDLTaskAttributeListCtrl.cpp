@@ -1957,8 +1957,8 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 						if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(sText, sImage, sIconName) &&
 							DrawIcon(pDC, sImage, rIcon, FALSE))
 						{
-							if (sIconName.IsEmpty() && (!pDef->IsList() || !pDef->GetListIconName(sText, sIconName)))
-								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+							if (sIconName.IsEmpty() && (!pDef->IsList() || !pDef->GetListIconName(sImage, sIconName)))
+								sIconName = CTDLTaskIconDlg::GetUserIconName(sImage);
 						}
 					}
 

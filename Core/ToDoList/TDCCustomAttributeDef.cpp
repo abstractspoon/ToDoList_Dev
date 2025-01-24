@@ -627,6 +627,8 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::DecodeListData(const CString& sListData)
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetListIconName(const CString& sImage, CString& sName) const
 {
+	sName.Empty();
+
 	if (IsDataType(TDCCA_ICON) && IsList())
 	{
 		for (int nItem = 0; nItem < aDefaultListData.GetSize(); nItem++)
@@ -634,10 +636,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetListIconName(const CString& sImage, CStrin
 			CString sListItem(aDefaultListData[nItem]);
 
 			if ((sListItem.Find(sImage) == 0) && (sListItem[sImage.GetLength()] == ':'))
-			{
 				sName = sListItem.Mid(sImage.GetLength() + 1);
-				return TRUE;
-			}
 		}
 	}
 	else
@@ -645,7 +644,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetListIconName(const CString& sImage, CStrin
 		ASSERT(0);
 	}
 
-	return FALSE;
+	return !sName.IsEmpty();
 }
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
