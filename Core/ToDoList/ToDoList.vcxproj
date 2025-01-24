@@ -293,6 +293,8 @@ unicode_release\TDLTest.exe
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\quickfind_next.ico" />
+    <Image Include="res\quickfind_prev.ico" />
     <Image Include="res\reminder.ico" />
     <Image Include="res\select_icon.ico" />
     <Image Include="res\reset.ico" />
@@ -300,6 +302,11 @@ unicode_release\TDLTest.exe
     <Image Include="res\style_para.bmp" />
     <Image Include="res\style_table.bmp" />
     <Image Include="res\style_wrap.bmp" />
+    <Image Include="res\taskattrib_toolbar.bmp" />
+    <Image Include="res\taskattrib_toolbar_std.bmp" />
+    <Image Include="res\timetrack_goto.ico" />
+    <Image Include="res\uk_flag.bmp" />
+    <Image Include="res\yourlang_flag.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
