@@ -896,6 +896,9 @@ void CToDoCtrl::EnableDisableControls(BOOL bHasSelection)
 
 void CToDoCtrl::EnableDisableComments(BOOL bHasSelection)
 {
+	if (bHasSelection == -1)
+		bHasSelection = (GetUpdateControlsItem() && HasSelection());
+
 	CONTENTFORMAT cfComments;
 	GetSelectedTaskCustomComments(cfComments);
 	BOOL bEditComments = (m_mgrContent.FindContent(cfComments) != -1);
@@ -5173,6 +5176,9 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
 	else
 		m_idleTasks.RefreshAttributeValues(mapAttribIDs);
+
+	if (mapAttribIDs.Has(TDCA_LOCK))
+		EnableDisableComments();
 }
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)

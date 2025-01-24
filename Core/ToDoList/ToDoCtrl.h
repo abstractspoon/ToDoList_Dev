@@ -773,7 +773,7 @@ protected:
 
 	void ShowHideControls();
 	void EnableDisableControls(BOOL bHasSelection = -1);
-	void EnableDisableComments(BOOL bHasSelection);
+	void EnableDisableComments(BOOL bHasSelection = -1);
 	void ReposProjectName(CRect& rAvailable);
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
 
