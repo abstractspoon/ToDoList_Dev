@@ -24,10 +24,13 @@ protected:
 	void TestFormatArray();
 	void TestHasPrefix();
 	void TestHasSuffix();
+	void TestAtof();
 
 	void TestRegionalSettingsRetrievalPerformance();
 
 protected:
+	void TestAtof(const CString& sLocale);
+
 	static BOOL ActualLengthMatchesCalculation(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncEmpty = FALSE);
 };
 

@@ -9,6 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <locale.h>
 #include <afxtempl.h>
 
 //////////////////////////////////////////////////////////////////////
@@ -42,6 +43,28 @@ static const CLIPFORMAT CB_TEXTFORMAT =	CF_TEXT;
 
 #undef _ttof
 #define _ttof(str) Misc::Atof(str)
+
+//////////////////////////////////////////////////////////////////////
+
+class CTempLocale
+{
+public:
+	CTempLocale(const CString& sLocale); // LC_ALL
+	CTempLocale(int nCategory, const CString& sLocale);
+	virtual ~CTempLocale();
+
+	void ChangeLocale(const CString& sAltLocale);
+
+	static CString Current(int nCategory = LC_ALL);
+
+protected:
+	int m_nCategory;
+	CString m_sPrevLocale;
+
+protected:
+	void Initialise(int nCategory, const CString& sLocale);
+
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -256,7 +279,7 @@ namespace Misc
 #endif
 }
 
-// Template helpers
+// Template helpers ///////////////////////////////////////////////////////
 namespace Misc  
 {
 	template <class T>

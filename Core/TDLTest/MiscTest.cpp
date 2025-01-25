@@ -39,10 +39,12 @@ TESTRESULT CMiscTest::Run()
 	ClearTotals();
 
 	TestRegionalSettingsRetrievalPerformance();
+
 	TestGetFormattedLength();
 	TestFormatArray();
 	TestHasPrefix();
 	TestHasSuffix();
+	TestAtof();
 
 	return GetTotals();
 }
@@ -344,6 +346,41 @@ void CMiscTest::TestHasSuffix()
 		ExpectFalse(Misc::HasSuffix(_T("abc\n"), _T("ABC"), FALSE));
 	}
 }
+
+void  CMiscTest::TestAtof()
+{
+	CTDCScopedTest test(*this, _T("Misc::Atof"));
+	
+	TestAtof("C");
+	TestAtof("en-GB");
+	TestAtof("en-BE");
+	TestAtof("fr-FR");
+	TestAtof("fr-BE");
+	TestAtof("zh-CN");
+	TestAtof("hu-HU");
+	TestAtof("ar-DZ");
+}
+
+void CMiscTest::TestAtof(const CString& sLocale)
+{
+	ExpectEQ(CTempLocale::Current(), _T("C"));
+	{
+		CTempLocale loc(LC_ALL, sLocale);
+		ExpectEQ(CTempLocale::Current(), sLocale);
+
+		ExpectEQ(Misc::Atof(_T("10.12345")), 10.12345);
+		ExpectEQ(Misc::Atof(_T("-10.12345")), -10.12345);
+
+		ExpectEQ(Misc::Atof(_T("10,12345")), 10.12345);
+		ExpectEQ(Misc::Atof(_T("-10,12345")), -10.12345);
+
+		ExpectEQ(Misc::Atof(_T("10'12345")), 10.0);
+		ExpectEQ(Misc::Atof(_T("-10'12345")), -10.0);
+	}
+	ExpectEQ(CTempLocale::Current(), _T("C"));
+}
+
+///////////////////////////////////////////////////////////////////////
 
 void CMiscTest::TestRegionalSettingsRetrievalPerformance()
 {

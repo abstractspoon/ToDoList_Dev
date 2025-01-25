@@ -199,7 +199,7 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 									int nDecimals, LPTSTR szBuffer, int nBufSize)
 {
 	// handle locale specific decimal separator
-	setlocale(LC_NUMERIC, "");
+	CTempLocale loc(LC_NUMERIC, "");
 
 	ASSERT(pData != NULL);
 	ASSERT((nDecimals == -1) || (nDecimals > 0));
@@ -215,8 +215,8 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 //			pDX->Fail();        // throws exception
 // *******************************************************************
 			
-			// try English locale
-			setlocale(LC_NUMERIC, "English");
+			// try 'C' locale
+			loc.ChangeLocale("C");
 			SimpleFloatParse(szBuffer, d);
 		}
 
@@ -244,9 +244,6 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 		_stprintf(szBuffer, _T("%.*g"), nSizeGcvt, value);
 #endif
 	}
-
-	// restore decimal separator to '.'
-	setlocale(LC_NUMERIC, "English");
 }
 
 //////////////////////////////////////////////////////////////////////

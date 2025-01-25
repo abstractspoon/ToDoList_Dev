@@ -39,6 +39,49 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+CTempLocale::CTempLocale(const CString& sLocale) : m_nCategory(-1)
+{
+	Initialise(LC_ALL, sLocale);
+}
+
+CTempLocale::CTempLocale(int nCategory, const CString& sLocale) : m_nCategory(-1)
+{
+	Initialise(nCategory, sLocale);
+}
+
+CTempLocale::~CTempLocale()
+{
+	_tsetlocale(m_nCategory, m_sPrevLocale);
+}
+
+void CTempLocale::Initialise(int nCategory, const CString& sLocale)
+{
+	ASSERT(m_nCategory == -1);
+	ASSERT(m_sPrevLocale.IsEmpty());
+
+	m_nCategory = nCategory;
+	m_sPrevLocale = _tsetlocale(m_nCategory, NULL);
+
+#ifdef _DEBUG
+	CString sNewLocale = _tsetlocale(m_nCategory, sLocale);
+	ASSERT(sLocale.IsEmpty() || (sNewLocale == sLocale));
+#else
+	_tsetlocale(m_nCategory, sLocale);
+#endif
+}
+
+void CTempLocale::ChangeLocale(const CString& sAltLocale)
+{
+	_tsetlocale(m_nCategory, sAltLocale);
+}
+
+CString CTempLocale::Current(int nCategory)
+{
+	return _tsetlocale(nCategory, NULL);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 BOOL Misc::Is64BitWindows()
 {
 #if defined(_WIN64)
@@ -1852,27 +1895,39 @@ const CString& Misc::GetLongest(const CString& str1, const CString& str2, BOOL b
 
 double Misc::Atof(const CString& sValue)
 {
-	if (sValue.IsEmpty())
-		return 0.0;
+	double dValue = 0.0;
 
-	// needs special care to handle decimal point properly
-	// especially since we've no way of knowing how it is encoded.
-	// so we assume that if a period is present then it's encoded
-	// in 'english' else it's in native format
-	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL));
-	
-	if (sValue.Find('.') != -1)
-		setlocale(LC_NUMERIC, "English");
-	else
-		setlocale(LC_NUMERIC, "");
+	if (!sValue.IsEmpty())
+	{
+		// Always use the 'C' locale and convert decimal separators 
+		// to periods because that gives us much more control
+		CTempLocale loc(LC_NUMERIC, "C");
+		
+		if (sValue.Find('.') != -1)
+		{
+			// No changes required
+			dValue = _tcstod(sValue, NULL);
+		}
+		else
+		{
+			CString sTemp(sValue);
+			
+			// Check for comma as most likely next bet
+			if (sTemp.Replace(',', '.') == 0)
+			{
+				// else check for a custom decimal
+				// separator unless that's a comma too
+				TCHAR cDecSep = GetDecimalSeparator()[0];
+				
+				if (cDecSep != ',')
+					sTemp.Replace(cDecSep, '.');
+			}
+			
+			dValue = _tcstod(sTemp, NULL);
+		}
+	}
 
-	double dVal = _tcstod(sValue, NULL);
-
-	// restore locale
-	setlocale(LC_NUMERIC, szLocale);
-	free(szLocale);
-	
-	return dVal; 
+	return dValue;
 }
 
 BOOL Misc::ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason)
@@ -2178,8 +2233,8 @@ int Misc::ParseSearchString(LPCTSTR szSearch, CStringArray& aWords)
 
 CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 {
-	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL)); // current locale
-	setlocale(LC_NUMERIC, ""); // local default
+	// Change locale to local default
+	CTempLocale(LC_NUMERIC, "");
 
 	CString sValue;
 
@@ -2198,10 +2253,6 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 		sValue.Format(_T("%.*f"), nDecPlaces, dVal); 
 		break;
 	}
-				
-	// restore locale
-	setlocale(LC_NUMERIC, szLocale);
-	free(szLocale);
 
 	return (sValue + szTrail);
 }
@@ -2235,12 +2286,10 @@ CString Misc::Format(LPCTSTR lpszFormat, ...)
 
 #define FORMAT_REGION_VALUE(FUNC)                             \
                                                               \
-char* szPrevLocale = _strdup(setlocale(LC_NUMERIC, NULL));    \
-setlocale(LC_NUMERIC, "");                                    \
+{ CTempLocale loc(LC_NUMERIC, "");                            \
 const UINT BUFSIZE = 100; TCHAR szValue[BUFSIZE + 1] = { 0 }; \
 FUNC(NULL, 0, sValue, NULL, szValue, BUFSIZE);                \
-sValue = szValue;                                             \
-setlocale(LC_NUMERIC, szPrevLocale); free(szPrevLocale);
+sValue = szValue; }
 
 // ----------------------------------------------------------------
 

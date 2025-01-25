@@ -199,8 +199,11 @@ CFPSMiniCalendarCtrl::CFPSMiniCalendarCtrl()
 	SetFontInfo(FMC_FONT_SPECIALDAYS, m_strDefaultFontName, FMC_DEFAULT_FONT_SIZE, TRUE);
 	SetFontInfo(FMC_FONT_SCROLLBTNS, _T("Marlett"), FMC_DEFAULT_FONT_SIZE, TRUE, FALSE, FALSE, TRUE);
 
+	// Set locale to user's default
+	CString sPrevLocale = setlocale(LC_TIME, NULL);
+	sPrevLocale = setlocale(LC_TIME, "");
+
 	// set month names
-	setlocale(LC_TIME, "");		// should I be doing this here AND am I doing it right???
 	COleDateTime dtTemp;
 	dtTemp.SetDate(2000, 1, 1); SetMonthName(1, dtTemp.Format(_T("%B")));
 	dtTemp.SetDate(2000, 2, 1); SetMonthName(2, dtTemp.Format(_T("%B")));
@@ -242,6 +245,9 @@ CFPSMiniCalendarCtrl::CFPSMiniCalendarCtrl()
 		SetFirstDayOfWeek(iFirstDayOfWeek);
 	else
 		SetFirstDayOfWeek(1);
+
+	// Restore previous locale
+	_tsetlocale(LC_TIME, sPrevLocale);
 }
 
 CFPSMiniCalendarCtrl::~CFPSMiniCalendarCtrl()
@@ -1935,7 +1941,10 @@ void CFPSMiniCalendarCtrl::SetFirstDayOfWeek(int iDayOfWeek)
 	{
 		m_iFirstDayOfWeek = iDayOfWeek;
 
-		setlocale(LC_TIME, "");			// should I be doing this here AND am I doing it right???
+		// Set locale to user's default
+		CString sPrevLocale = setlocale(LC_NUMERIC, NULL);
+		setlocale(LC_TIME, "");	
+		
 		COleDateTime dtTemp = COleDateTime::GetCurrentTime();
 
 		// find the specified day of the week
@@ -1949,6 +1958,9 @@ void CFPSMiniCalendarCtrl::SetFirstDayOfWeek(int iDayOfWeek)
 
 			dtTemp += 1;
 		}
+
+		// Restore previous locale
+		_tsetlocale(LC_TIME, sPrevLocale);
 	}
 }
 
