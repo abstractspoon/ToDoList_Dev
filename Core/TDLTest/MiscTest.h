@@ -25,6 +25,7 @@ protected:
 	void TestHasPrefix();
 	void TestHasSuffix();
 	void TestAtof();
+	void TestIsNumber();
 
 	void TestRegionalSettingsRetrievalPerformance();
 

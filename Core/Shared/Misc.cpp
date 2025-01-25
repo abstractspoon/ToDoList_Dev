@@ -1802,17 +1802,52 @@ int Misc::GetNextValue(int nValue, int nIncrement)
 
 BOOL Misc::IsNumber(const CString& sValue)
 {
-	if (sValue.IsEmpty())
+	int nLen = sValue.GetLength();
+
+	if (nLen == 0)
 		return FALSE;
 
-	static const CString DELIMS(_T("+-."));
+	// Can start with '+' or a '-'
+	int nPos = 0;
+	TCHAR chr = sValue[nPos];
 
-	for (int nChar = 0; nChar < sValue.GetLength(); nChar++)
+	if ((chr == '-') || (chr == '+'))
 	{
-		TCHAR chr = sValue[nChar];
-
-		if (!_istdigit(chr) && DELIMS.Find(chr) == -1)
+		if (nLen == 1)
 			return FALSE;
+
+		nPos++;
+	}
+
+	// Rest must be digits with a single optional decimal
+	TCHAR cDecSep = 0;
+	BOOL bHasDecimal = FALSE;
+
+	for (; nPos < nLen; nPos++)
+	{
+		chr = sValue[nPos];
+
+		if (_istdigit(chr))
+			continue;
+		
+		if (((chr == '.') || (chr == ',')) && !bHasDecimal)
+		{
+			bHasDecimal = TRUE;
+		}
+		else if (!bHasDecimal)
+		{
+			if (cDecSep == 0)
+				cDecSep = Misc::GetDecimalSeparator()[0];
+
+			if (chr != cDecSep)
+				return FALSE;
+
+			bHasDecimal = TRUE;
+		}
+		else
+		{
+			return FALSE;
+		}
 	}
 
 	return TRUE;

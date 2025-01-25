@@ -45,6 +45,7 @@ TESTRESULT CMiscTest::Run()
 	TestHasPrefix();
 	TestHasSuffix();
 	TestAtof();
+	TestIsNumber();
 
 	return GetTotals();
 }
@@ -378,6 +379,103 @@ void CMiscTest::TestAtof(const CString& sLocale)
 		ExpectEQ(Misc::Atof(_T("-10'12345")), -10.0);
 	}
 	ExpectEQ(CTempLocale::Current(), _T("C"));
+}
+
+void CMiscTest::TestIsNumber()
+{
+	// Invalid formats
+	{
+		ExpectFalse(Misc::IsNumber(_T("-")));
+		ExpectFalse(Misc::IsNumber(_T("+")));
+		ExpectFalse(Misc::IsNumber(_T("a")));
+		ExpectFalse(Misc::IsNumber(_T("+a")));
+		ExpectFalse(Misc::IsNumber(_T("5+")));
+		ExpectFalse(Misc::IsNumber(_T("--7")));
+		ExpectFalse(Misc::IsNumber(_T("3-")));
+		ExpectFalse(Misc::IsNumber(_T("1.a")));
+		ExpectFalse(Misc::IsNumber(_T("1#8")));
+		ExpectFalse(Misc::IsNumber(_T("-3-5")));
+		ExpectFalse(Misc::IsNumber(_T("+2+0")));
+		ExpectFalse(Misc::IsNumber(_T("1.3.45")));
+		ExpectFalse(Misc::IsNumber(_T("1..45")));
+		ExpectFalse(Misc::IsNumber(_T("1.,45")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+	}
+
+	// Valid formats
+	{
+		// Integer
+		{
+			ExpectTrue(Misc::IsNumber(_T("-1")));
+			ExpectTrue(Misc::IsNumber(_T("+2")));
+			ExpectTrue(Misc::IsNumber(_T("37983")));
+			ExpectTrue(Misc::IsNumber(_T("45")));
+		}
+
+		// Period decimal
+		{
+			ExpectTrue(Misc::IsNumber(_T("-1.23")));
+			ExpectTrue(Misc::IsNumber(_T("+2.56")));
+			ExpectTrue(Misc::IsNumber(_T("3.89")));
+			ExpectTrue(Misc::IsNumber(_T("456.789")));
+			ExpectTrue(Misc::IsNumber(_T("-23.")));
+			ExpectTrue(Misc::IsNumber(_T("+56.")));
+			ExpectTrue(Misc::IsNumber(_T(".89")));
+			ExpectTrue(Misc::IsNumber(_T("-.23")));
+			ExpectTrue(Misc::IsNumber(_T("+.56")));
+			ExpectTrue(Misc::IsNumber(_T("-23.")));
+			ExpectTrue(Misc::IsNumber(_T("+56.")));
+			ExpectTrue(Misc::IsNumber(_T("89.")));
+		}
+
+		// Comma decimal
+		{
+			ExpectTrue(Misc::IsNumber(_T("-1,23")));
+			ExpectTrue(Misc::IsNumber(_T("+2,56")));
+			ExpectTrue(Misc::IsNumber(_T("3,89")));
+			ExpectTrue(Misc::IsNumber(_T("456,789")));
+			ExpectTrue(Misc::IsNumber(_T("-,23")));
+			ExpectTrue(Misc::IsNumber(_T("+,56")));
+			ExpectTrue(Misc::IsNumber(_T(",89")));
+			ExpectTrue(Misc::IsNumber(_T("-,23")));
+			ExpectTrue(Misc::IsNumber(_T("+,56")));
+			ExpectTrue(Misc::IsNumber(_T("-23,")));
+			ExpectTrue(Misc::IsNumber(_T("+56,")));
+			ExpectTrue(Misc::IsNumber(_T("89,")));
+		}
+
+		// User decimal
+		{
+			CString sDecSep = Misc::GetDecimalSeparator();
+
+			ExpectTrue(Misc::IsNumber(_T("-1") + sDecSep + _T("23")));
+			ExpectTrue(Misc::IsNumber(_T("+2") + sDecSep + _T("56")));
+			ExpectTrue(Misc::IsNumber(_T("3") + sDecSep + _T("89")));
+			ExpectTrue(Misc::IsNumber(_T("456") + sDecSep + _T("789")));
+			ExpectTrue(Misc::IsNumber(_T("-") + sDecSep + _T("23")));
+			ExpectTrue(Misc::IsNumber(_T("+") + sDecSep + _T("56")));
+			ExpectTrue(Misc::IsNumber(sDecSep + _T("89")));
+		}
+
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////
