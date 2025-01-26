@@ -64,6 +64,7 @@ namespace MySqlStorage
 			var connInfo = new ConnectionInfo(m_ConnectionInfo);
 
 			connInfo.Server = m_ConnectionPage.Server;
+			connInfo.Port = m_ConnectionPage.Port;
 			connInfo.DatabaseName = m_ConnectionPage.Database;
 			connInfo.Username = m_ConnectionPage.Username;
 			connInfo.Password = m_ConnectionPage.Password;

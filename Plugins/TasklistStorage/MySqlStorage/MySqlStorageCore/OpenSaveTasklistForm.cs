@@ -137,8 +137,9 @@ namespace MySqlStorage
 
 		private void UpdateControlData()
 		{
-			m_Database.Text = string.Format("{0}/{1}", 
-											m_TasklistInfo.Connection.Server, 
+			m_Database.Text = string.Format("{0}:{1}/{2}", 
+											m_TasklistInfo.Connection.Server,
+											m_TasklistInfo.Connection.Port,
 											m_TasklistInfo.Connection.DatabaseName);
 
 			m_Tasklist.Text = m_TasklistInfo.Tasklist.Name;
