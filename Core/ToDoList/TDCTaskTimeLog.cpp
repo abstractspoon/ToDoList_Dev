@@ -179,7 +179,7 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 		{
 			dwTaskID = _ttoi(aFields[0]);
 			sTaskTitle = aFields[1];
-			dHours = ParseTimeSpent(aFields[2]);
+			dHours = Misc::Atof(aFields[2]);
 			sPerson = aFields[3];
 			
 			// NOTE: 'To' precedes 'From' because 'From' was added later
@@ -208,7 +208,7 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 			if (CDateHelper::DecodeDate((aFields[5] + ' ' + aFields[6]), date, TRUE))
 				dtTo = date;
 			
-			dHours = ParseTimeSpent(DecodeValue(aFields[7], sDelim));
+			dHours = Misc::Atof(DecodeValue(aFields[7], sDelim));
 			
 			// Extra fields
 			if (nNumFields > 8)
@@ -244,19 +244,6 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 	}
 	
 	return TRUE;
-}
-
-double TASKTIMELOGITEM::ParseTimeSpent(CString sValue)
-{
-	// There are essentially only two decimal separators 
-	// that the world uses: '.' and ','
-	// Plus we know that these entries will not contain thousands separators
-	CString sNativeSep = Misc::GetDecimalSeparator();
-	CString sAltSep = ((sNativeSep == ".") ? _T(",") : _T("."));
-
-	sValue.Replace(sAltSep, sNativeSep);
-
-	return _ttof(sValue);
 }
 
 CString TASKTIMELOGITEM::EncodeValue(const CString& sValue, const CString& sDelim, BOOL bEncodeNewLines)
