@@ -108,6 +108,8 @@ namespace MySqlStorage
 					m_HandlingSelectionChange = false;
 				}
 			}
+
+			EnableDisableOK();
 		}
 
 		private void OnDoubleClickTaskLists(object sender, EventArgs e)
@@ -144,11 +146,20 @@ namespace MySqlStorage
 
 			m_Tasklist.Text = m_TasklistInfo.Tasklist.Name;
 			m_Tasklists.Initialise(m_Connection, m_TasklistInfo.Connection, m_OpenTasklist);
+
+			EnableDisableOK();
 		}
 
 		private void OnFilterTextChanged(object sender, EventArgs e)
 		{
 			m_Tasklists.Filter = m_Filter.Text;
+
+			EnableDisableOK();
+		}
+
+		private void EnableDisableOK()
+		{
+			OK.Enabled = (m_Tasklists.SelectedTasklist != null);
 		}
 
 	}
