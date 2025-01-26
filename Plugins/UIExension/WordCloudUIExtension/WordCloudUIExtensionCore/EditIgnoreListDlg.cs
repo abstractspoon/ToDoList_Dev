@@ -2,6 +2,8 @@
 using System.Windows.Forms;
 using System.IO;
 
+using Abstractspoon.Tdl.PluginHelpers;
+
 namespace WordCloudUIExtension
 {
 	public partial class EditIgnoreListDlg : Form
@@ -14,9 +16,11 @@ namespace WordCloudUIExtension
 			IgnoredWords.SelectionStart = IgnoredWords.TextLength;
 		}
 
-		public static bool DoEdit(string filePath)
+		public static bool DoEdit(Translator trans, string filePath)
 		{
 			var dlg = new EditIgnoreListDlg(filePath);
+
+			trans.Translate(dlg);
 
 			if (dlg.ShowDialog() != DialogResult.OK)
 				return false;

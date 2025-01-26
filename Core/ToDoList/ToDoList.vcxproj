@@ -111,11 +111,12 @@
       <OutputFile>.\Unicode_Debug/ToDoList.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>mkdir ..\..\Plugins
-mkdir ..\..\Plugins\debug
-copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y
-copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
+      <Command>mkdir $(SolutionDir)..\Plugins
+mkdir $(SolutionDir)..\Plugins\debug
+copy unicode_debug\ToDoList.exe $(SolutionDir)..\Plugins\debug /y
+copy unicode_debug\ToDoList.pdb $(SolutionDir)..\Plugins\debug /y
 
+unicode_debug\TDLTest.exe
 
 </Command>
     </PostBuildEvent>
@@ -177,9 +178,9 @@ copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
       <OutputFile>.\Unicode_Release/ToDoList.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>mkdir ..\..\ToDoList_Plugins
-mkdir ..\..\ToDoList_Plugins\release
-copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
+      <Command>mkdir $(SolutionDir)..\Plugins
+mkdir $(SolutionDir)..\Plugins\release
+copy unicode_release\ToDoList.exe $(SolutionDir)..\Plugins\release /y
 
 unicode_release\TDLTest.exe
 </Command>
@@ -293,6 +294,8 @@ unicode_release\TDLTest.exe
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\quickfind_next.ico" />
+    <Image Include="res\quickfind_prev.ico" />
     <Image Include="res\reminder.ico" />
     <Image Include="res\select_icon.ico" />
     <Image Include="res\reset.ico" />
@@ -300,6 +303,11 @@ unicode_release\TDLTest.exe
     <Image Include="res\style_para.bmp" />
     <Image Include="res\style_table.bmp" />
     <Image Include="res\style_wrap.bmp" />
+    <Image Include="res\taskattrib_toolbar.bmp" />
+    <Image Include="res\taskattrib_toolbar_std.bmp" />
+    <Image Include="res\timetrack_goto.ico" />
+    <Image Include="res\uk_flag.bmp" />
+    <Image Include="res\yourlang_flag.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

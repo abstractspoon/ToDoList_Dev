@@ -25,7 +25,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,999,998,6
+ FILEVERSION 9,0,997,1
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -43,13 +43,13 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AbstractSpoon Software"
             VALUE "FileDescription", "ToDoList"
-            VALUE "FileVersion", "8, 999, 998, 7"
+            VALUE "FileVersion", "9.0.997.1"
             VALUE "InternalName", "ToDoList"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-25"
             VALUE "OriginalFilename", "ToDoList.exe"
             VALUE "ProductName", "ToDoList"
             VALUE "ProductVersion", "1, 0, 0, 0"
-            VALUE "SpecialBuild", "Alpha Release of ToDoList 9.0"
+            VALUE "SpecialBuild", "Pre-Release of ToDoList 9.1"
         END
     END
     BLOCK "VarFileInfo"
@@ -1299,7 +1299,7 @@ FONT 8, "Tahoma"
 BEGIN
     ICON            IDR_MAINFRAME_STD,IDC_STATIC,7,8,20,20
     EDITTEXT        IDC_TITLE,34,7,173,12,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
-    LTEXT           "(c) Abstractspoon 2003-24",IDC_STATIC,213,7,87,8
+    LTEXT           "(c) Abstractspoon 2003-25",IDC_STATIC,213,7,87,8
     ICON            IDI_ABSTRACTSPOON,IDC_STATIC,304,7,20,20
     LTEXT           "A simple and effective way to keep on top of your daily tasks",IDC_STATIC,34,20,267,8
     LTEXT           "Contributors",IDC_STATIC,7,33,250,8
@@ -3407,6 +3407,8 @@ BEGIN
     BEGIN
         MENUITEM "Copy Attribute Value",        ID_ATTRIBLIST_COPYATTRIBVALUES
         MENUITEM "Paste Attribute Value",       ID_ATTRIBLIST_PASTEATTRIBVALUES
+        MENUITEM SEPARATOR
+        MENUITEM "Clear Attribute Value",       ID_ATTRIBLIST_CLEARATTRIBVALUES
     END
 END
 
@@ -4725,7 +4727,7 @@ BEGIN
     IDS_TDC_UPDATEFILTER_TIP "Update Filter"
     IDS_ADVANCEDFILTER      "Find Tasks Filter"
     IDS_LOGFILELOCKED       "The log file could not be updated."
-    IDS_LOGFILELOCKED_EXTRA "Please ensure that the log file is not already open for editing and \nthat you have the correct permissions and then try again."
+    IDS_LOGFILELOCKED_EXTRA "Please ensure that the file is not already open for editing and \nthat you have the correct permissions and then try again."
 END
 
 STRINGTABLE
@@ -5094,7 +5096,7 @@ BEGIN
     IDS_SD_TITLE            "Remote Server Details"
     IDS_CAD_FRACTION        "Fraction (eg. 2/3)"
     IDS_CUSTOM_FEATURE_PERCENTAGE "Display as percentage"
-    IDS_FILTERPLACEHOLDER   "Filters"
+    IDS_FILTERPLACEHOLDER   "Default Filters"
     IDS_ERROR_EXPORT_OVERWRITETASKLIST 
                             "Export Tasklist|You must select a filename that does not match the tasklist being exported."
     IDS_UPDATER_FILEMISSING "The updater is missing from the installation folder.\n\nWould you like to try downloading the update file manually?"
@@ -5230,6 +5232,8 @@ BEGIN
     IDS_ATTRIBTIP_COMPLETEDTASK "Completed task"
     IDS_ATTRIBTIP_MODIFY    "Modify"
     IDS_LOG_ALTCOLOR        "Colour"
+    IDS_ATTRIBCTRL_CLEARATTRIBVALUE "Clear '%s' Value"
+    IDS_ATTRIBCTRL_CLEARATTRIBVALUES "Clear '%s' Values"
 END
 
 STRINGTABLE

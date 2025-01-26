@@ -625,6 +625,28 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::DecodeListData(const CString& sListData)
 	return FALSE;
 }
 
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetListIconName(const CString& sImage, CString& sName) const
+{
+	sName.Empty();
+
+	if (IsDataType(TDCCA_ICON) && IsList())
+	{
+		for (int nItem = 0; nItem < aDefaultListData.GetSize(); nItem++)
+		{
+			CString sListItem(aDefaultListData[nItem]);
+
+			if ((sListItem.Find(sImage) == 0) && (sListItem[sImage.GetLength()] == ':'))
+				sName = sListItem.Mid(sImage.GetLength() + 1);
+		}
+	}
+	else
+	{
+		ASSERT(0);
+	}
+
+	return !sName.IsEmpty();
+}
+
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 {
 	return AttributeSupportsFeature(GetDataType(), GetListType(), dwFeature);
@@ -1265,6 +1287,27 @@ BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRI
 	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwResultType, attribDef.GetListType(), dwFeature);
 }
 
+BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCAttributeMap& mapAttribIDs) const
+{
+	int nDef = GetSize();
+
+	while (nDef--)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
+
+		if (!def.IsCalculation())
+			continue;
+		
+		if (mapAttribIDs.Has(def.Calculation().opFirst.nAttributeID) ||
+			mapAttribIDs.Has(def.Calculation().opSecond.nAttributeID))
+		{
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustColID) const
 {
 	return GetDefinition(nCustColID).GetAttributeID();
@@ -1418,13 +1461,10 @@ DWORD CTDCCustomAttribDefinitionArray::GetCalculationOperandDataType(const TDCCU
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAtt);
 
 			if (attribDef.IsDataType(TDCCA_CALCULATION))
-			{
 				return GetCalculationResultDataType(attribDef.Calculation()); // RECURSIVE CALL
-			}
-			else if (!attribDef.IsMultiList())
-			{
+
+			if (!attribDef.IsMultiList())
 				return attribDef.GetDataType();
-			}
 		}
 	}
 

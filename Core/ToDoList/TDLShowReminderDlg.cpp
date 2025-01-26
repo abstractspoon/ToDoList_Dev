@@ -10,6 +10,7 @@
 #include "..\Shared\DateHelper.h"
 #include "..\Shared\autoflag.h"
 #include "..\Shared\dlgunits.h"
+#include "..\Shared\holdredraw.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -195,10 +196,12 @@ void CTDLShowReminderDlg::OnModify()
 {
 	TDCREMINDER rem;
 
-	if (CanModifyReminders() && m_lcReminders.GetSelectedReminder(rem) != -1)
+	if (CanModifyReminders())
 	{
+		if (m_lcReminders.GetSelectedReminder(rem) != -1)
 		{
 			CAutoFlag af(m_bModifyingReminder, TRUE);
+			CHoldRedraw hr(m_lcReminders);
 
 			EnableDisableModify();
 			DoModifyReminder(rem);
@@ -223,6 +226,7 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 		(!bAll && m_lcReminders.GetSelectedReminders(aRem)))
 	{
 		CAutoFlag af(m_bModifyingList, TRUE);
+		CHoldRedraw hr(m_lcReminders);
 
 		for (int nRem = 0; nRem < aRem.GetSize(); nRem++)
 			DoSnoozeReminder(aRem[nRem]);
@@ -295,6 +299,7 @@ void CTDLShowReminderDlg::OnDismiss()
 	{
 		int nPrevSel = m_lcReminders.GetLastSel();
 		{
+			CHoldRedraw hr(m_lcReminders);
 			CAutoFlag af(m_bModifyingList, TRUE);
 
 			for (int nRem = 0; nRem < aRem.GetSize(); nRem++)
@@ -402,10 +407,21 @@ void CTDLShowReminderDlg::UpdateControls()
 	EnableDisableControls();
 }
 
-void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	if (!m_bModifyingList)
-		UpdateControls();
+	{
+		NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+
+		if (pNMListView->uChanged & LVIF_STATE)
+		{
+			BOOL bWasSel = (pNMListView->uOldState & LVIS_SELECTED);
+			BOOL bIsSel = (pNMListView->uNewState & LVIS_SELECTED);
+
+			if (Misc::StateChanged(bIsSel, bWasSel))
+				UpdateControls();
+		}
+	}
 
 	*pResult = 0;
 }

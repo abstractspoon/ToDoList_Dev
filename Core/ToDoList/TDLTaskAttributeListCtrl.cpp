@@ -9,6 +9,7 @@
 #include "tdcstatic.h"
 #include "tdcstruct.h"
 #include "tdcmapping.h"
+#include "TDLTaskIconDlg.h"
 
 #include "..\shared\EnMenu.h"
 #include "..\shared\GraphicsMisc.h"
@@ -20,6 +21,7 @@
 #include "..\shared\WndPrompt.h"
 #include "..\shared\Themed.h"
 #include "..\Shared\DateHelper.h"
+#include "..\Shared\WinClasses.h"
 
 #ifdef _DEBUG
 #	include "..\shared\ScopedTimer.h"
@@ -108,6 +110,8 @@ const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
 
 const TCHAR NEWLINE = '\n';
 
+const LPCTSTR DATETIME_VARIES = _T("-1");
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum 
@@ -191,14 +195,18 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
+	ON_NOTIFY(NM_KILLFOCUS, IDC_DATE_PICKER, OnDateKillFocus)
 
 	ON_EN_CHANGE(IDC_DEPENDS_EDIT, OnDependsChange)
-	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodChange)
-	ON_EN_KILLFOCUS(IDC_FILELINK_EDIT, OnSingleFileLinkChange)
+	ON_EN_KILLFOCUS(IDC_DEPENDS_EDIT, OnDependsKillFocus)
+	ON_EN_KILLFOCUS(IDC_TIMEPERIOD_EDIT, OnTimePeriodKillFocus)
+	ON_EN_KILLFOCUS(IDC_FILELINK_EDIT, OnSingleFileLinkKillFocus)
+	
+	ON_CBN_SELENDOK(IDC_TIME_PICKER, OnTimeOfDaySelEndOK)
 
 	ON_CONTROL_RANGE(CBN_KILLFOCUS, 0, 0xffff, OnComboKillFocus)
 	ON_CONTROL_RANGE(CBN_CLOSEUP, 0, 0xffff, OnComboCloseUp)
-	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboEditChange)
+	ON_CONTROL_RANGE(CBN_SELCHANGE, 0, 0xffff, OnComboSelChange)
 
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnTextEditOK)
 
@@ -245,7 +253,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Create our edit fields
 	CreateControl(m_cbTextAndNumbers, IDC_TEXTANDNUM_COMBO, (CBS_DROPDOWN | CBS_SORT | CBS_AUTOHSCROLL));
-	CreateControl(m_datePicker, IDC_DATE_PICKER);
+	CreateControl(m_datePicker, IDC_DATE_PICKER, DTS_SHORTDATEFORMAT | DTS_SHOWNONE);
 	CreateControl(m_cbTimeOfDay, IDC_TIME_PICKER, (CBS_DROPDOWN | CBS_AUTOHSCROLL));
 	CreateControl(m_cbPriority, IDC_PRIORITY_COMBO, CBS_DROPDOWNLIST);
 	CreateControl(m_cbRisk, IDC_RISK_COMBO, CBS_DROPDOWNLIST);
@@ -1113,6 +1121,7 @@ void CTDLTaskAttributeListCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tl
 void CTDLTaskAttributeListCtrl::SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld)
 {
 	m_tldAll.Copy(tld, nAttribID);
+	m_tldAll.AppendUnique(m_tldDefault, nAttribID);
 }
 
 void CTDLTaskAttributeListCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
@@ -1158,17 +1167,37 @@ BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 	return TRUE;
 }
 
+void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues()
+{
+	RefreshSelectedTasksValues(TDCA_ALL);
+}
+
 void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs)
 {
 	CHoldRedraw hr(*this);
 	HideAllControls();
 
-	int nRow = GetItemCount();
 	BOOL bRefreshAll = mapAttribIDs.Has(TDCA_ALL);
+	BOOL bRefreshCustomCalcs = (bRefreshAll || m_aCustomAttribDefs.AnyCalculationUsesAnyAttribute(mapAttribIDs));
+
+	int nRow = GetItemCount();
 
 	while (nRow--)
 	{
-		if (bRefreshAll || mapAttribIDs.Has(GetAttributeID(nRow, TRUE)))
+		BOOL bWantRefresh = bRefreshAll;
+
+		if (!bWantRefresh)
+		{
+			TDC_ATTRIBUTE nRowAttribID = GetAttributeID(nRow, TRUE);
+			bWantRefresh = mapAttribIDs.Has(nRowAttribID);
+
+			if (!bWantRefresh && bRefreshCustomCalcs && TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nRowAttribID))
+			{
+				bWantRefresh = (m_aCustomAttribDefs.GetAttributeDataType(nRowAttribID, FALSE) == TDCCA_CALCULATION);
+			}
+		}
+
+		if (bWantRefresh)
 		{
 			if (m_aSelectedTaskIDs.GetSize())
 				RefreshSelectedTasksValue(nRow);
@@ -1226,16 +1255,16 @@ else bValueVaries = TRUE; }
 #define GETMULTIVALUE_DATE(DT, ANDTIME)							\
 { COleDateTime value;											\
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
-sValue = FormatDate(value, ANDTIME);							\
-else bValueVaries = TRUE; }
+{ sValue = FormatDate(value, ANDTIME); }						\
+else { sValue = DATETIME_VARIES; bValueVaries = TRUE; } }
 
 // -----------------------------------------------------------------------------------------
 
 #define GETMULTIVALUE_TIME(DT)									\
 { COleDateTime value;											\
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
-sValue = FormatTime(value, TRUE);								\
-else bValueVaries = TRUE; }
+{ sValue = FormatTime(value, TRUE); }							\
+else { sValue = DATETIME_VARIES; bValueVaries = TRUE; } }
 
 // -----------------------------------------------------------------------------------------
 
@@ -1307,7 +1336,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 			CStringArray aFileLinks;
 			
 			if (m_multitasker.GetTasksFileLinks(m_aSelectedTaskIDs, aFileLinks))
-				sValue = Misc::FormatArray(aFileLinks);
+				sValue = FormatValueArray(aFileLinks);
 			else
 				bValueVaries = TRUE;
 		}
@@ -1460,8 +1489,8 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		break;
 	}
 
-	// To distinguish between empty values and multiple differing values
-	// we use the item image index
+	// Use the item image index To distinguish between 
+	// empty values and multiple differing values
 	SetItemImage(nRow, (bValueVaries ? VALUE_VARIES : -1));
 	SetItemText(nRow, VALUE_COL, sValue);
 }
@@ -1733,6 +1762,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		break;
 
 	case TDCA_PRIORITY:
+		if (!sText.IsEmpty())
 		{
 			int nPriority = _ttoi(sText);
 
@@ -1759,6 +1789,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 
 	case TDCA_RISK:
+		if (!sText.IsEmpty())
 		{
 			int nRisk = _ttoi(sText);
 
@@ -1771,7 +1802,12 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 
 	case TDCA_ICON:
-		DrawIcon(pDC, sText, rText, FALSE);
+		{
+			CRect rIcon(rText);
+
+			if (DrawIcon(pDC, sText, rIcon, FALSE))
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, CTDLTaskIconDlg::GetUserIconName(sText), crText, nDrawTextFlags);
+		}
 		return;
 
 	case TDCA_COST:
@@ -1826,18 +1862,16 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 	case TDCA_FILELINK:
 		{
 			CStringArray aFiles;
-			int nNumFiles = Misc::Split(sText, aFiles);
+			int nNumFiles = SplitValueArray(sText, aFiles);
 
 			CRect rFile(rText);
 
 			for (int nFile = 0; nFile < nNumFiles; nFile++)
 			{
 				CString sFile = aFiles[nFile];
+				DrawIcon(pDC, sFile, rFile, TRUE);
 
-				if (DrawIcon(pDC, sFile, rFile, TRUE))
-					rFile.left += (ICON_SIZE + 2);
-
-				if (!TDCTASKLINK::IsTaskLink(aFiles[0], TRUE))
+				if (!TDCTASKLINK::IsTaskLink(sFile, TRUE))
 					sFile = FileMisc::GetFileNameFromPath(sFile);
 
 				if (nFile < (nNumFiles - 1))
@@ -1866,8 +1900,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				CString sTitle = m_formatter.GetTaskTitlePath(dwDependsID, (TDCTF_TITLEONLY | TDCTF_TRAILINGID));
 				CString sIcon = m_data.GetTaskIcon(dwDependsID);
 	
-				if (DrawIcon(pDC, m_data.GetTaskIcon(dwDependsID), rTitle, FALSE))
-					rTitle.left += (ICON_SIZE + 2);
+				DrawIcon(pDC, m_data.GetTaskIcon(dwDependsID), rTitle, FALSE);
 
 				if (nDepend < (nNumDepends - 1))
 					sTitle += Misc::GetListSeparator() + ' ';
@@ -1889,34 +1922,47 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			case TDCCA_FILELINK:
 				{
 					CRect rRest(rText);
-
-					if (DrawIcon(pDC, sText, rText, TRUE))
-						rRest.left += (ICON_SIZE + 2);
+					DrawIcon(pDC, sText, rRest, TRUE);
 	
 					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, FileMisc::GetFileNameFromPath(sText), crText, nDrawTextFlags);
 				}
 				return;
 
 			case TDCCA_ICON:
-				if (pDef->IsMultiList())
 				{
-					CString sMatched(sText), sUnused;
-					Misc::Split(sMatched, sUnused, '|');
-
-					CStringArray aIcons;
-					int nNumIcons = Misc::Split(sMatched, aIcons);
-
+					CString sIconName;
 					CRect rIcon(rText);
 
-					for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+					if (pDef->IsMultiList())
 					{
-						if (DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE))
-							rIcon.left += (ICON_SIZE + 2);
+						CString sMatched(sText), sUnused;
+						Misc::Split(sMatched, sUnused, '|');
+
+						CStringArray aIcons;
+						int nNumIcons = SplitValueArray(sMatched, aIcons);
+
+						for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+							DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE);
+
+						if (nNumIcons == 1)
+						{
+							if (!pDef->GetListIconName(sText, sIconName))
+								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+						}
 					}
-				}
-				else
-				{
-					DrawIcon(pDC, sText, rText, FALSE);
+					else
+					{
+						CString sImage;
+						
+						if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(sText, sImage, sIconName) &&
+							DrawIcon(pDC, sImage, rIcon, FALSE))
+						{
+							if (sIconName.IsEmpty() && (!pDef->IsList() || !pDef->GetListIconName(sImage, sIconName)))
+								sIconName = CTDLTaskIconDlg::GetUserIconName(sImage);
+						}
+					}
+
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, sIconName, crText, nDrawTextFlags);
 				}
 				return;
 
@@ -1949,26 +1995,33 @@ CPoint CTDLTaskAttributeListCtrl::GetIconPos(const CRect& rText)
 	return CPoint(rText.left - 1, rText.top + ((rText.Height() - ICON_SIZE) / 2));
 }
 
-BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile)
+BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, CRect& rIcon, BOOL bIconIsFile)
 {
 	if (sIcon.IsEmpty())
 		return FALSE;
 
-	CPoint ptIcon(GetIconPos(rText));
+	CPoint ptIcon(GetIconPos(rIcon));
+	BOOL bDrawn = FALSE;
 
 	if (bIconIsFile)
 	{
-		return CFileEdit::DrawFileIcon(pDC, 
-									   sIcon,
-									   ptIcon, 
-									   m_iconCache,
-									   this,
-									   m_sCurrentFolder,
-									   m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
+		bDrawn = CFileEdit::DrawFileIcon(pDC,
+										 sIcon,
+										 ptIcon,
+										 m_iconCache,
+										 this,
+										 m_sCurrentFolder,
+										 m_data.HasStyle(TDCS_SHOWFILELINKTHUMBNAILS));
+	}
+	else
+	{
+		bDrawn = m_ilIcons.Draw(pDC, sIcon, ptIcon, ILD_TRANSPARENT);
 	}
 
-	// else
-	return m_ilIcons.Draw(pDC, sIcon, GetIconPos(rText), ILD_TRANSPARENT);
+	if (bDrawn)
+		rIcon.left += (ICON_SIZE + 2);
+
+	return bDrawn;
 }
 
 void CTDLTaskAttributeListCtrl::OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult)
@@ -2044,7 +2097,7 @@ int CTDLTaskAttributeListCtrl::GetTags(CStringArray& aMatched, CStringArray& aMi
 
 int CTDLTaskAttributeListCtrl::GetFileLinks(CStringArray& aFiles) const
 {
-	return Misc::Split(GetValueText(TDCA_FILELINK), aFiles);
+	return SplitValueArray(GetValueText(TDCA_FILELINK), aFiles);
 }
 
 CString CTDLTaskAttributeListCtrl::GetExternalID() const
@@ -2216,10 +2269,10 @@ BOOL CTDLTaskAttributeListCtrl::IsCustomTime(TDC_ATTRIBUTE nAttribID)
 
 CString CTDLTaskAttributeListCtrl::FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed)
 {
-	CString sValue = Misc::FormatArray(aMatched);
+	CString sValue = FormatValueArray(aMatched);
 	
 	if (aMixed.GetSize())
-		sValue += ('|' + Misc::FormatArray(aMixed));
+		sValue += ('|' + FormatValueArray(aMixed));
 
 	return sValue;
 }
@@ -2229,8 +2282,8 @@ int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStri
 	CString sMatched(sValues), sMixed;
 
 	Misc::Split(sMatched, sMixed, '|');
-	Misc::Split(sMatched, aMatched);
-	Misc::Split(sMixed, aMixed);
+	SplitValueArray(sMatched, aMatched);
+	SplitValueArray(sMixed, aMixed);
 
 	return aMatched.GetSize();
 }
@@ -2276,10 +2329,11 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 	return TRUE;
 }
 
-void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
+void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
 	CheckRecreateCombo(nRow, combo);
 
+	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
 	combo.EnableMultiSelection(TRUE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);
@@ -2291,10 +2345,11 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 	combo.SetChecked(aMatched, aMixed);
 }
 
-void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo)
+void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
 	CheckRecreateCombo(nRow, combo);
 
+	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
 	combo.EnableMultiSelection(FALSE);
 	combo.ResetContent();
 	combo.AddStrings(aDefValues);
@@ -2340,7 +2395,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			{
 				CStringArray aFiles;
 
-				if (Misc::Split(sValue, aFiles))
+				if (SplitValueArray(sValue, aFiles))
 					m_cbMultiFileLink.SetFileList(aFiles);
 
 				m_cbMultiFileLink.SetCurrentFolder(m_sCurrentFolder);
@@ -2380,12 +2435,21 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_PRIORITY:
 		{
 			m_cbPriority.SetColors(m_aPriorityColors);
-			m_cbPriority.SetSelectedPriority(_ttoi(GetItemText(nRow, nCol)));
+
+			if (RowValueVaries(nRow))
+				m_cbPriority.SetCurSel(CB_ERR);
+			else
+				m_cbPriority.SetSelectedPriority(_ttoi(GetItemText(nRow, nCol)));
 		}
 		break;
 
 	case TDCA_RISK:
-		m_cbRisk.SetSelectedRisk(_ttoi(GetItemText(nRow, nCol)));
+		{
+			if (RowValueVaries(nRow))
+				m_cbRisk.SetCurSel(CB_ERR);
+			else
+				m_cbRisk.SetSelectedRisk(_ttoi(GetItemText(nRow, nCol)));
+		}
 		break;
 
 	case TDCA_TIMEESTIMATE:
@@ -2433,6 +2497,8 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 			if (pDef->IsList())
 			{
+				BOOL bWantSort = !pDef->IsFixedList();
+
 				switch (pDef->GetDataType())
 				{
 				case TDCCA_STRING:
@@ -2440,16 +2506,16 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 				case TDCCA_INTEGER:
 				case TDCCA_DOUBLE:
 					if (pDef->IsMultiList())
-						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers);
+						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers, bWantSort);
 					else
-						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers);
+						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbTextAndNumbers, bWantSort);
 					break;
 
 				case TDCCA_ICON:
 					if (pDef->IsMultiList())
-						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
+						PrepareMultiSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons, bWantSort);
 					else
-						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons);
+						PrepareSingleSelCombo(nRow, pDef->aDefaultListData, pDef->aAutoListData, m_cbCustomIcons, bWantSort);
 					break;
 
 				case TDCCA_BOOL:
@@ -2519,7 +2585,7 @@ void CTDLTaskAttributeListCtrl::PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallb
 {
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
-	if (sValue.IsEmpty() && 
+	if ((sValue.IsEmpty() || (sValue == DATETIME_VARIES)) && 
 		(nFallbackDate != TDCA_NONE) && 
 		(TDC::MapAttributeToDate(nFallbackDate) != TDCD_NONE))
 	{
@@ -2540,7 +2606,7 @@ void CTDLTaskAttributeListCtrl::PrepareTimeOfDayCombo(int nRow)
 {
 	CString sValue = GetItemText(nRow, VALUE_COL);
 
-	if (sValue.IsEmpty())
+	if (sValue.IsEmpty() || (sValue == DATETIME_VARIES))
 		m_cbTimeOfDay.Set24HourTime(-1);
 	else
 		m_cbTimeOfDay.Set24HourTime(CTimeHelper::DecodeClockTime(sValue));
@@ -2554,11 +2620,14 @@ void CTDLTaskAttributeListCtrl::PrepareTimeOfDayCombo(int nRow)
 void CTDLTaskAttributeListCtrl::PrepareTimePeriodEdit(int nRow)
 {
 	CString sValue = GetItemText(nRow, VALUE_COL);
+
 	TH_UNITS nUnits = THU_NULL;
 	double dValue = 0.0;
-		
-	if (CTimeHelper::DecodeOffset(sValue, dValue, nUnits, FALSE))
-		m_eTimePeriod.SetTime(dValue, nUnits);
+
+	if (!RowValueVaries(nRow))
+		CTimeHelper::DecodeOffset(sValue, dValue, nUnits, FALSE);
+
+	m_eTimePeriod.SetTime(dValue, nUnits);
 }
 
 CString CTDLTaskAttributeListCtrl::GetValueText(TDC_ATTRIBUTE nAttribID) const 
@@ -3089,7 +3158,9 @@ void CTDLTaskAttributeListCtrl::HandleTimePeriodEdit(int nRow, BOOL bBtnClick)
 	if (bBtnClick)
 	{
 		m_eTimePeriod.ShowUnitsPopupMenu(); // modal loop
-		HideControl(m_eTimePeriod);
+
+		if (m_eTimePeriod.HasValidTime())
+			HideControl(m_eTimePeriod);
 	}
 }
 
@@ -3117,24 +3188,45 @@ void CTDLTaskAttributeListCtrl::HideAllControls(const CWnd* pWndIgnore)
 	}
 }
 
+void CTDLTaskAttributeListCtrl::OnTimeOfDaySelEndOK()
+{
+	OnComboSelChange(IDC_TIME_PICKER);
+}
+
 void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID) 
 { 
 	CWnd* pCombo = GetDlgItem(nCtrlID);
 
-	if (pCombo->GetDlgItem(1001) == NULL) // no edit control
-		HideControl(*pCombo);
+	// Note: our base class may already have hidden 
+	// the combo so we have to check first
+	if (pCombo->IsWindowVisible())
+	{
+		// If the combo has an edit field AND the user clicked inside 
+		// the edit field to close the combo, DON'T hide the combo
+		CWnd* pEdit = pCombo->GetDlgItem(1001);
+
+		if (pEdit && CDialogHelper::IsMouseDownInWindow(*pEdit))
+			return;
+	}
+
+	// All else
+	HideControl(*pCombo);
 }
 
 void CTDLTaskAttributeListCtrl::OnComboKillFocus(UINT nCtrlID)
 {
-	// Special case
-	if (nCtrlID == IDC_TIME_PICKER)
-		OnComboEditChange(IDC_TIME_PICKER);
-	else
-		HideControl(*GetDlgItem(nCtrlID));
+	HideControl(*GetDlgItem(nCtrlID));
+
+	// Extra handling
+	switch (nCtrlID)
+	{
+	case IDC_TIME_PICKER:
+		OnComboSelChange(nCtrlID);
+		break;
+	}
 }
 
-void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
+void CTDLTaskAttributeListCtrl::OnComboSelChange(UINT nCtrlID)
 {
 	int nRow = GetCurSel();
 	CString sNewValue;
@@ -3157,11 +3249,28 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 
 	case IDC_TIME_PICKER:
 		{
-			// Don't hide if dropped-down
-			if (m_cbTimeOfDay.GetDroppedState())
-				return;
+			double dTime = m_cbTimeOfDay.Get24HourTime();
 
-			sNewValue = CTimeHelper::FormatClockTime(m_cbTimeOfDay.Get24HourTime() / 24);
+			if (dTime != 0.0)
+				sNewValue = CTimeHelper::FormatClockTime(dTime / 24);
+
+			// If the combo is visible, use the cell value as a 
+			// scratch pad but WITHOUT notifying the parent
+			if (m_cbTimeOfDay.IsWindowVisible())
+			{
+				SetItemText(nRow, VALUE_COL, sNewValue);
+				return;
+			}
+
+			// If we've got multiple different values, DON'T notify
+			// our parent if the cell text has not actually changed
+			if (RowValueVaries(nRow) && (GetItemText(nRow, VALUE_COL) == DATETIME_VARIES))
+			{
+				return;
+			}
+
+			// Revert any scratch pad changes before default handling
+			RefreshSelectedTasksValue(nRow);
 		}
 		break;
 
@@ -3178,16 +3287,21 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 			CStringArray aFiles;
 			
 			if (m_cbMultiFileLink.GetFileList(aFiles))
-				sNewValue = Misc::FormatArray(aFiles);
+				sNewValue = FormatValueArray(aFiles);
 		}
 		break;
 
 	case IDC_CUSTOMICON_COMBO:
+		if (m_cbCustomIcons.IsMultiSelectionEnabled())
 		{
 			CStringArray aMatched, aMixed;
 			m_cbCustomIcons.GetChecked(aMatched, aMixed);
 
 			sNewValue = FormatMultiSelItems(aMatched, aMixed);
+		}
+		else
+		{
+			sNewValue = CDialogHelper::GetSelectedItem(m_cbCustomIcons);
 		}
 		break;
 
@@ -3200,61 +3314,77 @@ void CTDLTaskAttributeListCtrl::OnComboEditChange(UINT nCtrlID)
 	SetValueText(nRow, sNewValue);
 }
 
-void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM nFlags)
+void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM bUnitsChange)
 {
 	UpdateWindow();
 
 	// Refresh the cell text only if the edit failed
-	if (!GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE), nFlags))
+	if (!GetParent()->SendMessage(WM_TDCN_ATTRIBUTEEDITED, GetAttributeID(nRow, TRUE), bUnitsChange))
 		RefreshSelectedTasksValue(nRow);
 }
 
 void CTDLTaskAttributeListCtrl::OnDependsChange()
 {
 	// Received after a manual edit of the task IDs
-	int nRow = GetCurSel();
-
 	HideControl(m_eDepends);
+
+	int nRow = GetCurSel();
 	SetValueText(nRow, m_eDepends.FormatDependencies());
 }
 
-void CTDLTaskAttributeListCtrl::OnSingleFileLinkChange()
+void CTDLTaskAttributeListCtrl::OnDependsKillFocus()
+{
+	OnDependsChange();
+}
+
+void CTDLTaskAttributeListCtrl::OnSingleFileLinkKillFocus()
 {
 	// Received after a manual edit of the task IDs
-	int nRow = GetCurSel();
-
 	CString sFile;
 	m_eSingleFileLink.GetWindowText(sFile);
 
 	HideControl(m_eSingleFileLink);
+
+	int nRow = GetCurSel();
 	SetValueText(nRow, sFile);
 }
 
-BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, LPARAM nFlags)
+BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, LPARAM bUnitsChange)
 {
 	if (sNewText == GetItemText(nRow, VALUE_COL))
 		return FALSE;
 
+	CLockUpdates hr(*this);
+
 	VERIFY(SetItemText(nRow, VALUE_COL, sNewText));
-	NotifyParentEdit(nRow, nFlags);
+	NotifyParentEdit(nRow, bUnitsChange);
 
 	return TRUE;
 }
 
-void CTDLTaskAttributeListCtrl::OnTimePeriodChange()
+void CTDLTaskAttributeListCtrl::OnTimePeriodKillFocus()
 {
 	HideControl(m_eTimePeriod);
 	m_eTimePeriod.DeleteButton(ID_BTN_ADDLOGGEDTIME);
 	m_eTimePeriod.DeleteButton(ID_BTN_TIMETRACK);
+	
+	if (!m_eTimePeriod.HasValidTime())
+		return;
 
-	int nRow = GetCurSel();
-
-	TDCTIMEPERIOD tpCur(GetItemText(nRow, VALUE_COL));
 	TDCTIMEPERIOD tpNew(m_eTimePeriod.GetTime(), m_eTimePeriod.GetUnits());
 
-	BOOL bUnitsChange = ((tpCur.dAmount > 0.0) && 
+	int nRow = GetCurSel();
+	CString sCurTime = GetItemText(nRow, VALUE_COL);
+	BOOL bUnitsChange = sCurTime.IsEmpty();
+
+	if (!bUnitsChange)
+	{
+		TDCTIMEPERIOD tpCur(sCurTime);
+
+		bUnitsChange = ((tpCur.dAmount > 0.0) &&
 						(tpNew.nUnits != tpCur.nUnits) &&
 						(Misc::Format(tpNew.dAmount, TIMEPERIOD_DECPLACES) == Misc::Format(tpCur.dAmount, TIMEPERIOD_DECPLACES)));
+	}
 
 	SetValueText(nRow, tpNew.Format(TIMEPERIOD_DECPLACES), bUnitsChange);
 }
@@ -3269,7 +3399,19 @@ void CTDLTaskAttributeListCtrl::OnCancelEdit()
 		CWnd* pCtrl = GetEditControl(nRow, FALSE);
 
 		if (pCtrl)
+		{
+			// If we've been using the cell text as a scratch pad we need 
+			// revert any changes before calling PrepareControl
+			switch (pCtrl->GetDlgCtrlID())
+			{
+			case IDC_DATE_PICKER:
+			case IDC_TIME_PICKER:
+				RefreshSelectedTasksValue(nRow);
+				break;
+			}
+
 			PrepareControl(*pCtrl, nRow, VALUE_COL);
+		}
 	}
 
 	CInputListCtrl::OnCancelEdit();
@@ -3280,29 +3422,61 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 	UNREFERENCED_PARAMETER(pNMHDR);
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
 
-	HideControl(m_datePicker); 
+	// Note: our base class may already have hidden 
+	// the date picker so we have to check first
+	if (m_datePicker.IsWindowVisible())
+	{
+		// If the use clicked in the date field DON'T hide the date picker
+		// because we assume they want to perform a keyboard edit
+		if (Misc::IsKeyPressed(VK_LBUTTON) &&
+			(m_datePicker.HitTest(GetMessagePos(), TRUE) == DTCHT_DATETIME))
+		{
+			return;
+		}
+
+		HideControl(m_datePicker);
+	}
+
+	// If we've got multiple different values, DON'T notify
+	// our parent if the cell text has not actually changed
+	int nRow = GetCurSel();
+
+	if (RowValueVaries(nRow) && (GetItemText(nRow, VALUE_COL) == DATETIME_VARIES))
+		return;
+	
+	NotifyParentEdit(nRow);
+
 	*pResult = 0;
+}
+
+void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	OnDateCloseUp(pNMHDR, pResult);
 }
 
 void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	UNREFERENCED_PARAMETER(pNMHDR);
 	ASSERT(pNMHDR->idFrom == IDC_DATE_PICKER);
 
-	// Only handle this if the calendar is closed
+	// Only handle this if the calendar is closed ie. it's a manual edit
+	// or the checkbox was clicked when the calendar was visible
 	if (!m_datePicker.IsCalendarVisible())
 	{
-		// Note: Don't hide the date picker because the user 
-		// may be editing the date components manually
-		int nRow = GetCurSel();
+		NMDATETIMECHANGE* pNMDTC = (NMDATETIMECHANGE*)pNMHDR;
 
-		CString sNewValue;
-		COleDateTime date;
-
-		if (m_datePicker.GetTime(date))
-			sNewValue = m_formatter.GetDateOnly(date, TRUE);
-		
-		SetValueText(nRow, sNewValue);
+		if (pNMDTC->dwFlags == GDT_NONE)
+		{
+			// Clear the text and end the edit, triggering a parent notification
+			VERIFY(SetItemText(GetCurSel(), VALUE_COL, _T("")));
+			
+			OnDateCloseUp(pNMHDR, pResult);
+		}
+		else
+		{
+			// Use the cell text as a scratch-pad for storing intermediate
+			// date edits but without notifying our parent
+			VERIFY(SetItemText(GetCurSel(), VALUE_COL, m_formatter.GetDateOnly(pNMDTC->st, TRUE)));
+		}
 	}
 
 	*pResult = 0;
@@ -3458,11 +3632,11 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::OnDrop(CWnd* pWnd, COleDataObje
 	{
 		// Append unique file names to list
 		CStringArray aExisting;
-		Misc::Split(m_pAttributeList->GetItemText(nRow, VALUE_COL), aExisting);
+		SplitValueArray(m_pAttributeList->GetItemText(nRow, VALUE_COL), aExisting);
 
 		if (Misc::AddUniqueItems(aFiles, aExisting))
 		{
-			m_pAttributeList->SetValueText(nRow, Misc::FormatArray(aExisting));
+			m_pAttributeList->SetValueText(nRow, FormatValueArray(aExisting));
 		}
 	}
 
@@ -3603,7 +3777,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	LVHITTESTINFO lvHit = { { point.x, point.y }, 0 };
 
-	// Get around const-ness
+	// Get around constness
 	int nRow = (int)::SendMessage(m_hWnd, LVM_SUBITEMHITTEST, 0, (LPARAM)&lvHit);
 	int nCol = lvHit.iSubItem;
 
@@ -3717,7 +3891,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				{
 					CStringArray aValues;
 
-					if (Misc::Split(GetItemText(nRow, nCol), aValues) > 1)
+					if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
 						sTooltip = Misc::FormatArray(aValues, NEWLINE);
 				}
 				break;
@@ -3781,7 +3955,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 							{
 								CStringArray aValues;
 
-								if (Misc::Split(GetItemText(nRow, nCol), aValues) > 1)
+								if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
 									sTooltip = Misc::FormatArray(aValues, NEWLINE);
 							}
 							break;
@@ -3837,6 +4011,8 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 {
+	HideAllControls();
+
 	LVHITTESTINFO lvHit = { { pos.x, pos.y }, 0 };
 	ScreenToClient(&lvHit.pt);
 
@@ -3862,14 +4038,24 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 		// Prepare menu items
 		BOOL bMultiSel = (m_aSelectedTaskIDs.GetSize() > 1);
+		CString sAttrib = GetItemText(nRow, ATTRIB_COL);
+
+		// Copy command
 		CEnString sMenuText;
 
-		CString sAttrib = GetItemText(nRow, ATTRIB_COL);
-		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
+		if (GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
+		{
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
 
-		CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-		pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
 
+		// Paste command
 		TDC_ATTRIBUTE nFromAttribID = TDCA_NONE;
 
 		if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
@@ -3885,6 +4071,19 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
 		}
 
+		// Clear command
+		if (CanEditCell(nRow, nCol))
+		{
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
+
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
+
 		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
 									   pos.x, pos.y, 0, GetSafeHwnd(), NULL);
 
@@ -3897,8 +4096,22 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 		case ID_ATTRIBLIST_PASTEATTRIBVALUES:
 			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
 			break;
+
+		case ID_ATTRIBLIST_CLEARATTRIBVALUES:
+			GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID);
+			break;
 		}
 	}
+}
+
+CString CTDLTaskAttributeListCtrl::FormatValueArray(const CStringArray& aValues)
+{
+	return Misc::FormatArray(aValues, NEWLINE);
+}
+
+int CTDLTaskAttributeListCtrl::SplitValueArray(const CString& sValues, CStringArray& aValues)
+{
+	return Misc::Split(sValues, aValues, NEWLINE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -26,10 +26,11 @@ public:
 	void ClearMultiSelectionHistory();
 
 	int SetStrings(const CStringArray& aItems);
+	int SelectString(int nStartAfter, LPCTSTR lpszString);
 
 	BOOL GetCheck(int nIndex) const;
 	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
-	int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const; // virtual
+	virtual int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	BOOL SetChecked(const CStringArray& aChecked);
 	BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED); 

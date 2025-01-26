@@ -680,19 +680,16 @@ void CTDLSimpleTextContentCtrl::OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI)
 
 		if (!m_sContextUrl.IsEmpty() && pCmdUI->m_pMenu)
 		{
-			CString sText, sMenu;
-			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
-			
+			CEnString sUrl(CUrlParser::GetUrlAsFile(m_sContextUrl));
+
 			// restrict url length to 250 pixels
-			CEnString sUrl(m_sContextUrl);
-
-			if (WebMisc::IsFileURI(sUrl))
-				sUrl = CUrlParser::GetUrlAsFile(m_sContextUrl);
-
 			CClientDC dc(this);
 			sUrl.FormatDC(&dc, 250, ES_PATH);
 
-			sText.Format(_T("%s: %s"), sMenu, sUrl);
+			CString sText, sMenu;
+			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
+
+			sText.Format(_T("%s: %s"), CEnString(sMenu), sUrl);
 			pCmdUI->SetText(sText);
 		}
 		break;

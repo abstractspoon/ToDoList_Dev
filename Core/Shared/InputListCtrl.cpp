@@ -558,6 +558,9 @@ void CInputListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 void CInputListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, 
 								  const CString& sText, COLORREF crText, UINT nDrawTextFlags)
 {
+	if (sText.IsEmpty())
+		return;
+
 	if (!IsWindowEnabled() && IsPrompt(nRow))
 		return;
 
@@ -755,7 +758,7 @@ BOOL CInputListCtrl::CanDeleteSelectedCell() const
 
 BOOL CInputListCtrl::CanDeleteCell(int nRow, int nCol) const
 {
-	return CanEditCell(nRow, nCol);
+	return (CanEditCell(nRow, nCol) && !IsPrompt(nRow, nCol));
 }
 
 BOOL CInputListCtrl::DeleteSelectedCell()
@@ -1305,7 +1308,7 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 			pEdit->SetSel(0, -1);
 		}
 
-		if (bBtnClick || pEdit)
+		if (bBtnClick || !pEdit)
 			ctrl.SendMessage(CB_SHOWDROPDOWN, TRUE);
 	}
 	else if (ctrl.IsKindOf(RUNTIME_CLASS(CEdit)))
@@ -1778,7 +1781,10 @@ BOOL CInputListCtrl::PreTranslateMessage(MSG* pMsg)
 				CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
 
 				if ((pWnd != &m_editBox) && IsChild(pWnd))
+				{
 					HideControl(*pWnd);
+					return TRUE;
+				}
 			}
 			break;
 
@@ -1787,7 +1793,10 @@ BOOL CInputListCtrl::PreTranslateMessage(MSG* pMsg)
 				CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
 
 				if ((pWnd != &m_editBox) && IsChild(pWnd))
+				{
 					OnEditCancel(0, TRUE);
+					return TRUE;
+				}
 			}
 			break;
 		}

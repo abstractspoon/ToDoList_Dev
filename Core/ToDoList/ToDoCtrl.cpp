@@ -877,10 +877,15 @@ void CToDoCtrl::ShowHideControls()
 		m_ctrlComments.ShowWindow(SW_SHOW);
 		break;
 	}
+
+	EnableDisableControls();
 }
 
 void CToDoCtrl::EnableDisableControls(BOOL bHasSelection)
 {
+	if (bHasSelection == -1)
+		bHasSelection = (GetUpdateControlsItem() && HasSelection());
+
 	EnableDisableComments(bHasSelection);
 
 	if (m_layout.HasMaximiseState(TDCMS_NORMAL) && HasStyle(TDCS_SHOWPROJECTNAME))
@@ -891,6 +896,9 @@ void CToDoCtrl::EnableDisableControls(BOOL bHasSelection)
 
 void CToDoCtrl::EnableDisableComments(BOOL bHasSelection)
 {
+	if (bHasSelection == -1)
+		bHasSelection = (GetUpdateControlsItem() && HasSelection());
+
 	CONTENTFORMAT cfComments;
 	GetSelectedTaskCustomComments(cfComments);
 	BOOL bEditComments = (m_mgrContent.FindContent(cfComments) != -1);
@@ -1272,6 +1280,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 {
 	// update the combos before copying over the current defaults
 	m_ctrlAttributes.SetDefaultAutoListData(tld);
+	m_ctrlAttributes.GetAutoListData(TDCA_ALL, m_tldAll);
 
 	m_tldDefault.Copy(tld, TDCA_ALL);
 }
@@ -1317,13 +1326,9 @@ BOOL CToDoCtrl::EditSelectedTaskColor()
 
 	CEnColorDialog dialog(GetSelectedTaskColor());
 
-	CPreferences prefs;
-	dialog.LoadPreferences(prefs);
-
-	if (dialog.DoModal() != IDOK)
+	if (dialog.DoModal(CPreferences()) != IDOK)
 		return FALSE;
 
-	dialog.SavePreferences(prefs);
 	return SetSelectedTaskColor(dialog.GetColor());
 }
 
@@ -2965,10 +2970,16 @@ BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sExtID)
 
 BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 {
+	if (nFile < 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	CStringArray aFiles;
 	int nNumFiles = m_ctrlAttributes.GetFileLinks(aFiles);
 
-	if (nFile < (nNumFiles - 1))
+	if (nFile < nNumFiles)
 		return GotoFile(aFiles[nFile]);
 
 	return FALSE;
@@ -4239,7 +4250,10 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 {
 	if (tasks.GetAutoListData(m_tldAll))
+	{
 		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
+		UpdateAutoListData();
+	}
 }
 
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
@@ -5162,6 +5176,9 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
 	else
 		m_idleTasks.RefreshAttributeValues(mapAttribIDs);
+
+	if (mapAttribIDs.Has(TDCA_LOCK))
+		EnableDisableComments();
 }
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -10016,7 +10033,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_PERCENT:		return SetSelectedTaskPercentDone(0);
 	case TDCA_FLAG:			return SetSelectedTaskFlag(FALSE);
 	case TDCA_LOCK:			return SetSelectedTaskLock(FALSE);
-	case TDCA_COLOR:		return SetSelectedTaskColor(0);
+	case TDCA_COLOR:		return SetSelectedTaskColor(CLR_NONE);
 	case TDCA_RECURRENCE:	return SetSelectedTaskRecurrence(TDCRECURRENCE());
 	case TDCA_ICON:			return ClearSelectedTaskIcon();
 		
@@ -10062,6 +10079,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_ID:
 	case TDCA_PARENTID:
 	case TDCA_PATH:
+	case TDCA_TASKNAME:
 		ASSERT(0);
 		return FALSE;
 	}

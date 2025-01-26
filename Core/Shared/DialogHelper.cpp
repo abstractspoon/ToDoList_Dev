@@ -199,7 +199,7 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 									int nDecimals, LPTSTR szBuffer, int nBufSize)
 {
 	// handle locale specific decimal separator
-	setlocale(LC_NUMERIC, "");
+	CTempLocale loc(LC_NUMERIC, "");
 
 	ASSERT(pData != NULL);
 	ASSERT((nDecimals == -1) || (nDecimals > 0));
@@ -215,8 +215,8 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 //			pDX->Fail();        // throws exception
 // *******************************************************************
 			
-			// try English locale
-			setlocale(LC_NUMERIC, "English");
+			// try 'C' locale
+			loc.ChangeLocale("C");
 			SimpleFloatParse(szBuffer, d);
 		}
 
@@ -244,9 +244,6 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 		_stprintf(szBuffer, _T("%.*g"), nSizeGcvt, value);
 #endif
 	}
-
-	// restore decimal separator to '.'
-	setlocale(LC_NUMERIC, "English");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -732,6 +729,13 @@ BOOL CDialogHelper::SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL b
 BOOL CDialogHelper::ComboHasEdit(const CComboBox& combo)
 {
 	return (NULL != combo.GetDlgItem(1001));
+}
+
+BOOL CDialogHelper::IsComboEdit(HWND hWnd)
+{
+	return ((::GetDlgCtrlID(hWnd) == 1001) &&
+			CWinClasses::IsEditControl(hWnd) &&
+			CWinClasses::IsComboBox(::GetParent(hWnd)));
 }
 
 void CDialogHelper::MoveCombo(CComboBox& combo, const CRect& rNew, int nDropHeight)
@@ -2113,6 +2117,23 @@ BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonCli
 	
 	TRACKMOUSEEVENT tme = { sizeof(tme), dwFlags, hWnd, 0 };
 	return _TrackMouseEvent(&tme);
+}
+
+BOOL CDialogHelper::IsMouseDownInWindow(HWND hWnd)
+{
+	ASSERT(hWnd);
+	ASSERT(::IsWindowVisible(hWnd));
+
+	if (!hWnd || !Misc::IsKeyPressed(VK_LBUTTON))
+		return FALSE;
+
+	CPoint ptMsg(::GetMessagePos());
+	::ScreenToClient(hWnd, &ptMsg);
+
+	CRect rWnd;
+	::GetClientRect(hWnd, rWnd);
+
+	return rWnd.PtInRect(ptMsg);
 }
 
 BOOL CDialogHelper::SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen)

@@ -28,7 +28,7 @@ class COwnerdrawComboBoxBase : public CComboBox
 
 // Construction
 public:
-	COwnerdrawComboBoxBase(int nDefMinVisible = 30);
+	COwnerdrawComboBoxBase(int nDefMinVisible = 30, int nItemIndentBelowHeadings = 16);
 	virtual ~COwnerdrawComboBoxBase();
 
 	void RefreshDropWidth();
@@ -42,6 +42,7 @@ public:
 
 	int SetDisabledItem(int nItem, BOOL bDisabled = TRUE);
 	int SetHeadingItem(int nItem, BOOL bHeading = TRUE);
+	void SetItemIndentBelowHeadings(int nIndent);
 	
 	BOOL IsHeadingItem(int nItem) const;
 	BOOL IsDisabledItem(int nItem) const;
@@ -51,6 +52,7 @@ protected:
 	int m_nMaxTextWidth;
 	int m_nDefMinVisible;
 	int m_nNumHeadings;
+	int m_nItemIndentBelowHeadings;
 	BOOL m_bHasExtItemData;
 
 // Overrides

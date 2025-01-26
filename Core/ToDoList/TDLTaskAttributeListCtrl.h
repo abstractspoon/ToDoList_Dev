@@ -82,7 +82,8 @@ public:
 	TDC_ATTRIBUTE GetSelectedAttributeID() const;
 	CString GetSelectedAttributeLabel() const;
 
-	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs = TDCA_ALL);
+	void RefreshSelectedTasksValues();
+	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateTimeFormatting();
 
@@ -189,18 +190,21 @@ protected:
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
-
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
+
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateChange(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg void OnDependsChange();
-	afx_msg void OnTimePeriodChange();
-	afx_msg void OnSingleFileLinkChange();
+	afx_msg void OnDependsKillFocus();
+	afx_msg void OnTimePeriodKillFocus();
+	afx_msg void OnSingleFileLinkKillFocus();
+	afx_msg void OnTimeOfDaySelEndOK();
 
 	afx_msg void OnComboKillFocus(UINT nCtrlID);
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
-	afx_msg void OnComboEditChange(UINT nCtrlID);
+	afx_msg void OnComboSelChange(UINT nCtrlID);
 
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnEditButtonClick(WPARAM wParam, LPARAM lParam);
@@ -245,8 +249,8 @@ protected:
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
 	CWnd* GetEditControl(int nRow, BOOL bBtnClick);
 	void RefreshSelectedTasksValue(int nRow);
-	void NotifyParentEdit(int nRow, LPARAM nFlags = 0L);
-	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
+	void NotifyParentEdit(int nRow, LPARAM bUnitsChange = FALSE);
+	BOOL DrawIcon(CDC* pDC, const CString& sIcon, CRect& rIcon, BOOL bIconIsFile);
  	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
 	void HandleTimePeriodEdit(int nRow, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
@@ -255,7 +259,7 @@ protected:
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
-	BOOL SetValueText(int nRow, const CString& sNewText, LPARAM nFlags = 0L);
+	BOOL SetValueText(int nRow, const CString& sNewText, LPARAM bUnitsChange = FALSE);
 
 	int HitTestButtonID(int nRow) const;
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;
@@ -265,8 +269,8 @@ protected:
 	HICON GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID, DWORD dwState) const;
 	BOOL DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sText, DWORD dwBaseState, CRect& rBtn) const;
 
-	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
-	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
+	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort = TRUE);
+	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort = TRUE);
 	void PrepareSingleFileEdit(int nRow, const CString& sValue);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
 	void PrepareTimeOfDayCombo(int nRow);
@@ -278,6 +282,8 @@ protected:
 	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 	static int HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns);
 	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
+	static CString FormatValueArray(const CStringArray& aValues);
+	static int SplitValueArray(const CString& sValues, CStringArray& aValues);
 
 private:
 	// ---------------------------------------------------------------------

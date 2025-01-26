@@ -32,6 +32,16 @@ struct DATETIMEPICKERINFO
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+enum DTC_HITTEST
+{
+	DTCHT_OUTSIDE = -1,
+	DTCHT_CHECKBOX,
+	DTCHT_DATETIME,
+	DTCHT_DROPBUTTON,
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CDateTimeCtrlEx window
 
 class CDateTimeCtrlEx : public CDateTimeCtrl
@@ -43,11 +53,14 @@ public:
 	CDateTimeCtrlEx(DWORD dwMonthCalStyle = MCS_WEEKNUMBERS);
 
 	DWORD SetMonthCalStyle(DWORD dwStyle);
-	DWORD GetMonthCalStyle() const;
-	BOOL IsCalendarVisible() const;
 	void EnableInlineEditing(BOOL bEnable = TRUE) { m_bEnableInlineEditing = bEnable; }
 	void ShowCalendarOnCompleting(BOOL bShow = TRUE) { m_bShowCalendarOnCompleting = bShow; }
 	BOOL ShowSeconds(BOOL bShow);
+
+	DWORD GetMonthCalStyle() const;
+	BOOL IsCalendarVisible() const;
+	BOOL IsDateSet() const;
+	DTC_HITTEST HitTest(CPoint point, BOOL bScreen = FALSE) const;
 
 // Attributes
 protected:
@@ -80,7 +93,6 @@ protected:
 	afx_msg void OnSysKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	//}}AFX_MSG
-	afx_msg int OnCreate(LPCREATESTRUCT pCreate);
 	afx_msg void OnPaint();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
@@ -91,11 +103,10 @@ protected:
 
 protected:
 	BOOL IsCheckboxFocused() const;
-	BOOL IsDateSet() const;
+	BOOL GetPickerInfo(DATETIMEPICKERINFO& dtpi) const;
 	CRect GetDropButtonRect() const;
 	CRect GetCheckboxRect() const;
 	void ResetCalendarHandling();
-	BOOL GetPickerInfo(DATETIMEPICKERINFO& dtpi) const;
 
 };
 

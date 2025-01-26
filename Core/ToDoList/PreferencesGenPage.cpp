@@ -25,6 +25,10 @@ static char THIS_FILE[] = __FILE__;
 #	define BCM_SETSHIELD 0x0000160C
 #endif
 
+#ifndef LANG_PERSIAN
+#	define LANG_PERSIAN 0x29
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 
 const LPCTSTR DEFAULT_STICKIES_PATH = _T("C:\\Program Files (x86)\\Stickies\\stickies.exe");
@@ -294,6 +298,7 @@ void CPreferencesGenPage::OnSelchangeLanguage()
 	case LANG_HEBREW:
 	case LANG_ARABIC:
 	case LANG_URDU:
+	case LANG_PERSIAN:
 		bEnable = TRUE;
 		break;
 	}
@@ -315,6 +320,7 @@ void CPreferencesGenPage::EnableDisableLanguageOptions()
 	case LANG_HEBREW:
 	case LANG_ARABIC:
 	case LANG_URDU:
+	case LANG_PERSIAN:
 		bEnable = TRUE;
 		break;
 	}

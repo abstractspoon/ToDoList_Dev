@@ -231,6 +231,7 @@ void CPreferencesUICustomToolbarPage::EnableDisableButtons()
 	GetDlgItem(IDC_MOVEDOWN)->EnableWindow(m_ilcButtons.CanMoveSelectedButtonDown());
 	GetDlgItem(IDC_MOVEUP)->EnableWindow(m_ilcButtons.CanMoveSelectedButtonUp());
 	GetDlgItem(IDC_DELETE)->EnableWindow(m_ilcButtons.CanDeleteSelectedButton());
+	GetDlgItem(IDC_DUPLICATE)->EnableWindow(m_ilcButtons.CanDuplicateSelectedButton());
 }
 
 BOOL CPreferencesUICustomToolbarPage::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs)

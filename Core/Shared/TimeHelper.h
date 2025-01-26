@@ -64,6 +64,7 @@ public:
 	static BOOL DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits, BOOL bMustHaveSign = TRUE, TH_UNITS nDefaultUnits = THU_HOURS);
 	static TH_UNITS DecodeUnits(TCHAR cUnits, TH_UNITS nDefault = THU_HOURS);
 	static TH_UNITS DecodeUnits(LPCTSTR szValueWithUnits, TH_UNITS nDefault = THU_HOURS);
+	static BOOL IsValidUnits(TH_UNITS nUnits);
 
 	static CString FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces, TCHAR cSpacer = ' ');
 	static CString FormatTime(double dTime, int nDecPlaces, TCHAR cSpacer = ' ');
@@ -88,7 +89,6 @@ protected:
 								double dLeftOverMultiplier, BOOL bDecPlaces, TCHAR cDelim);
 	static CString FormatTimeHMS(int nTime, TH_UNITS nUnits);
 
-	static BOOL IsValidUnit(TH_UNITS nUnits);
 	static BOOL RemovePM(CString& sTime);
 	static BOOL RemoveAM(CString& sTime);
 };

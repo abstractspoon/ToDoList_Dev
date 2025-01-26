@@ -40,12 +40,9 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLFilterComboBox)
-	protected:
+protected:
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
-
-	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 
 // Implementation
 public:
@@ -64,7 +61,7 @@ protected:
 	void RestoreSelection(FILTER_SHOW nFilter, LPCTSTR szAdvanced = NULL);
 	int AddDefaultFilterItem(int nItem);
 
-	static CString FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter, BOOL bIncAdvancedLabel = TRUE);
+	static CString FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter);
 	static BOOL ExtractAdvancedFilterName(const CString& sDisplay, CString& sFilter);
 };
 

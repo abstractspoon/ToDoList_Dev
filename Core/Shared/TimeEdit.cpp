@@ -204,7 +204,11 @@ void CTimeEdit::OnShowWindow(BOOL bShow, UINT nStatus)
 	if (bShow)
 	{
 		UpdateButtonText(m_nUnits);
-		SetTime(GetTime());
+
+		if (m_nUnits == THU_NULL)
+			SetWindowText(NULL);
+		else
+			SetTime(GetTime());
 	}
 }
 
@@ -257,6 +261,17 @@ void CTimeEdit::SetUnits(TH_UNITS nUnits)
 		m_nUnits = nUnits;
 		UpdateButtonText(m_nUnits);
 	}
+}
+
+BOOL CTimeEdit::HasValidTime() const
+{
+	if (!IsValidUnits(m_nUnits))
+		return FALSE;
+
+	CString sTime;
+	GetWindowText(sTime);
+
+	return !sTime.IsEmpty();
 }
 
 void CTimeEdit::SetMaxDecimalPlaces(int nMaxDecPlaces)

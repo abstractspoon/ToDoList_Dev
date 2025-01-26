@@ -298,11 +298,17 @@ public:
 static CEnCommandLineInfo cmdInfoEmpty;
 
 // private constructor for self test
-CTDLTestBase::CTDLTestBase() : m_utils(cmdInfoEmpty)
+CTDLTestBase::CTDLTestBase() 
+	: 
+	m_utils(cmdInfoEmpty),
+	m_nCurTest(0)
 {
 }
 
-CTDLTestBase::CTDLTestBase(const CTestUtils& utils) : m_utils(utils) 
+CTDLTestBase::CTDLTestBase(const CTestUtils& utils) 
+	: 
+	m_utils(utils),
+	m_nCurTest(0)
 {
 
 }

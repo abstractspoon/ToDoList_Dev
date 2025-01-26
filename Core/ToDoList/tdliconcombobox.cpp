@@ -6,6 +6,7 @@
 #include "tdliconcombobox.h"
 #include "tdcimagelist.h"
 #include "tdcstruct.h"
+#include "TDLTaskIconDlg.h"
 
 #include "..\Shared\GraphicsMisc.h"
 
@@ -84,6 +85,9 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 	if (nNumImage > 0)
 	{
+		CString sListSep = Misc::GetListSeparator();
+		BOOL bWantDrawName = (bList || (nNumImage == 1));
+
 		for (int nImg = 0; nImg < nNumImage; nImg++)
 		{
 			CString sImage, sName;
@@ -100,11 +104,26 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 				}
 
 				// draw optional text bypassing base class checkbox drawing
-				if (bList && !sName.IsEmpty())
+				if (bWantDrawName)
 				{
-					rImage.left += 2;
+					if (!bList && sName.IsEmpty()) // static portion
+					{
+						// Search for the item in the droplist because
+						// that will definitely contain the user icon names
+						int nListItem = FindString(-1, TDCCUSTOMATTRIBUTEDEFINITION::EncodeImageTag(sImage, _T("")));
 
-					CAutoComboBox::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, sName, bList, crText);
+						if (nListItem != -1)
+							TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(GetItemText(nListItem), sImage, sName);
+					}
+
+					if (sName.IsEmpty())
+						sName = CTDLTaskIconDlg::GetUserIconName(sImage);
+
+					if (!sName.IsEmpty())
+					{
+						rImage.left += 2;
+						CAutoComboBox::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, sName, bList, crText);
+					}
 				}
 			}
 			else if (bList)
@@ -122,8 +141,8 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 				if (nNumImage > 1)
 				{
-					CAutoComboBox::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, Misc::GetListSeparator(), bList, crText);
-					rImage.left += (dc.GetTextExtent(Misc::GetListSeparator()).cx);
+					CAutoComboBox::DrawItemText(dc, rImage, nItem, nItemState, dwItemData, sListSep, bList, crText);
+					rImage.left += (dc.GetTextExtent(sListSep).cx);
 				}
 			}
 		}

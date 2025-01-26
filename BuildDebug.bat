@@ -1,3 +1,5 @@
+title ToDoList_Dev Debug Build
+
 pushd %~dp0
 set REPO=%CD%
 ECHO REPO=%REPO%
@@ -5,23 +7,73 @@ ECHO REPO=%REPO%
 if NOT EXIST %REPO%\Core exit
 if NOT EXIST %REPO%\Plugins exit
 
-SET MSBUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\MSBuild.exe"
+SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 
-REM - Build core app using MSBuild 
+REM - Build core app
 cd %REPO%\Core
-%MSBUILD% .\ToDoList_Core.sln /t:Build /p:Configuration="Unicode Debug" /m /v:normal
+
+set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Debug\Build_Output.txt
+del %OUTPUT_FILE%
+
+%MSBUILD% .\ToDoList_Core.sln /t:Build /p:Configuration="Unicode Debug" /m /v:normal > %OUTPUT_FILE%
 
 REM - Check for build errors
+ECHO OFF
+findstr /C:"Build FAILED." %OUTPUT_FILE%
+
+if %errorlevel%==1 (
+echo [92m Build SUCCEEDED[0m
+)
+if %errorlevel%==0 (
+echo [91m Build FAILED[0m
 pause
+exit
+)
 
-REM - Build plugins using MSBuild 
-SET BUILDPARAMS=/t:Build /p:Configuration=Debug /m /v:normal /noWarn:MSB3267;MSB3305;LNK4248;CS1762;LNK4221;MSB3026
+REM Run units tests
+ECHO ON
 
-REM - This is required to get the warning suppression to work
-SET VCTargetsPath=C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\
+cd TDLTest\Unicode_Debug
+
+set OUTPUT_FILE=Test_Output.txt
+del %OUTPUT_FILE%
+
+TDLTest > %OUTPUT_FILE%
+
+REM - Check for test errors
+ECHO OFF
+findstr /C:"tests FAILED" Test_Output.txt
+
+if %errorlevel%==1 (
+echo [92m Tests SUCCEEDED[0m
+)
+if %errorlevel%==0 (
+echo [91m Tests FAILED[0m
+pause
+exit
+)
+
+REM - Build plugins
+ECHO ON
 
 cd %REPO%\Plugins
-%MSBUILD% .\ToDoList_Plugins.sln %BUILDPARAMS%
+
+set OUTPUT_FILE=%REPO%\Plugins\Debug\Build_Output.txt
+del %OUTPUT_FILE%
+
+%MSBUILD% .\ToDoList_Plugins.sln /t:Build /p:Configuration=Debug /m /v:normal > %OUTPUT_FILE%
 
 REM - Check for build errors
+ECHO OFF
+findstr /C:"Build FAILED." %OUTPUT_FILE%
+
+if %errorlevel%==1 (
+echo [92m Build SUCCEEDED[0m
+)
+if %errorlevel%==0 (
+echo [91m Build FAILED[0m
+pause
+exit
+)
+
 pause

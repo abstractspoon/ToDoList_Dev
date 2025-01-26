@@ -39,10 +39,13 @@ TESTRESULT CMiscTest::Run()
 	ClearTotals();
 
 	TestRegionalSettingsRetrievalPerformance();
+
 	TestGetFormattedLength();
 	TestFormatArray();
 	TestHasPrefix();
 	TestHasSuffix();
+	TestAtof();
+	TestIsNumber();
 
 	return GetTotals();
 }
@@ -344,6 +347,138 @@ void CMiscTest::TestHasSuffix()
 		ExpectFalse(Misc::HasSuffix(_T("abc\n"), _T("ABC"), FALSE));
 	}
 }
+
+void  CMiscTest::TestAtof()
+{
+	CTDCScopedTest test(*this, _T("Misc::Atof"));
+	
+	TestAtof("C");
+	TestAtof("en-GB");
+	TestAtof("en-BE");
+	TestAtof("fr-FR");
+	TestAtof("fr-BE");
+	TestAtof("zh-CN");
+	TestAtof("hu-HU");
+	TestAtof("ar-DZ");
+}
+
+void CMiscTest::TestAtof(const CString& sLocale)
+{
+	ExpectEQ(CTempLocale::Current(), _T("C"));
+	{
+		CTempLocale loc(LC_ALL, sLocale);
+		ExpectEQ(CTempLocale::Current(), sLocale);
+
+		ExpectEQ(Misc::Atof(_T("10.12345")), 10.12345);
+		ExpectEQ(Misc::Atof(_T("-10.12345")), -10.12345);
+
+		ExpectEQ(Misc::Atof(_T("10,12345")), 10.12345);
+		ExpectEQ(Misc::Atof(_T("-10,12345")), -10.12345);
+
+		ExpectEQ(Misc::Atof(_T("10'12345")), 10.0);
+		ExpectEQ(Misc::Atof(_T("-10'12345")), -10.0);
+	}
+	ExpectEQ(CTempLocale::Current(), _T("C"));
+}
+
+void CMiscTest::TestIsNumber()
+{
+	// Invalid formats
+	{
+		ExpectFalse(Misc::IsNumber(_T("-")));
+		ExpectFalse(Misc::IsNumber(_T("+")));
+		ExpectFalse(Misc::IsNumber(_T("a")));
+		ExpectFalse(Misc::IsNumber(_T("+a")));
+		ExpectFalse(Misc::IsNumber(_T("5+")));
+		ExpectFalse(Misc::IsNumber(_T("--7")));
+		ExpectFalse(Misc::IsNumber(_T("3-")));
+		ExpectFalse(Misc::IsNumber(_T("1.a")));
+		ExpectFalse(Misc::IsNumber(_T("1#8")));
+		ExpectFalse(Misc::IsNumber(_T("-3-5")));
+		ExpectFalse(Misc::IsNumber(_T("+2+0")));
+		ExpectFalse(Misc::IsNumber(_T("1.3.45")));
+		ExpectFalse(Misc::IsNumber(_T("1..45")));
+		ExpectFalse(Misc::IsNumber(_T("1.,45")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+		// 	ExpectFalse(Misc::IsNumber(_T("")));
+	}
+
+	// Valid formats
+	{
+		// Integer
+		{
+			ExpectTrue(Misc::IsNumber(_T("-1")));
+			ExpectTrue(Misc::IsNumber(_T("+2")));
+			ExpectTrue(Misc::IsNumber(_T("37983")));
+			ExpectTrue(Misc::IsNumber(_T("45")));
+		}
+
+		// Period decimal
+		{
+			ExpectTrue(Misc::IsNumber(_T("-1.23")));
+			ExpectTrue(Misc::IsNumber(_T("+2.56")));
+			ExpectTrue(Misc::IsNumber(_T("3.89")));
+			ExpectTrue(Misc::IsNumber(_T("456.789")));
+			ExpectTrue(Misc::IsNumber(_T("-23.")));
+			ExpectTrue(Misc::IsNumber(_T("+56.")));
+			ExpectTrue(Misc::IsNumber(_T(".89")));
+			ExpectTrue(Misc::IsNumber(_T("-.23")));
+			ExpectTrue(Misc::IsNumber(_T("+.56")));
+			ExpectTrue(Misc::IsNumber(_T("-23.")));
+			ExpectTrue(Misc::IsNumber(_T("+56.")));
+			ExpectTrue(Misc::IsNumber(_T("89.")));
+		}
+
+		// Comma decimal
+		{
+			ExpectTrue(Misc::IsNumber(_T("-1,23")));
+			ExpectTrue(Misc::IsNumber(_T("+2,56")));
+			ExpectTrue(Misc::IsNumber(_T("3,89")));
+			ExpectTrue(Misc::IsNumber(_T("456,789")));
+			ExpectTrue(Misc::IsNumber(_T("-,23")));
+			ExpectTrue(Misc::IsNumber(_T("+,56")));
+			ExpectTrue(Misc::IsNumber(_T(",89")));
+			ExpectTrue(Misc::IsNumber(_T("-,23")));
+			ExpectTrue(Misc::IsNumber(_T("+,56")));
+			ExpectTrue(Misc::IsNumber(_T("-23,")));
+			ExpectTrue(Misc::IsNumber(_T("+56,")));
+			ExpectTrue(Misc::IsNumber(_T("89,")));
+		}
+
+		// User decimal
+		{
+			CString sDecSep = Misc::GetDecimalSeparator();
+
+			ExpectTrue(Misc::IsNumber(_T("-1") + sDecSep + _T("23")));
+			ExpectTrue(Misc::IsNumber(_T("+2") + sDecSep + _T("56")));
+			ExpectTrue(Misc::IsNumber(_T("3") + sDecSep + _T("89")));
+			ExpectTrue(Misc::IsNumber(_T("456") + sDecSep + _T("789")));
+			ExpectTrue(Misc::IsNumber(_T("-") + sDecSep + _T("23")));
+			ExpectTrue(Misc::IsNumber(_T("+") + sDecSep + _T("56")));
+			ExpectTrue(Misc::IsNumber(sDecSep + _T("89")));
+		}
+
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+		// 	ExpectTrue(Misc::IsNumber(_T("")));
+	}
+}
+
+///////////////////////////////////////////////////////////////////////
 
 void CMiscTest::TestRegionalSettingsRetrievalPerformance()
 {

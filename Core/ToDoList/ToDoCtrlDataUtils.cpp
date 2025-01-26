@@ -482,6 +482,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				bMatch = ValueMatches(dCost, rule, sWhatMatched);
 			}
 			break;
+
+		case TDCA_COLOR:
+			bMatch = ValueMatches((int)pTDI->color, rule, sWhatMatched);
+			break;
 			
 		case TDCA_COMMENTSSIZE:
 			bMatch = ValueMatches(pTDI->GetCommentsSizeInKB(), rule, sWhatMatched);
@@ -1126,6 +1130,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const TDCCADATA& data, DWORD dwAttribType, co
 		switch (dwdataType)
 		{
 		case TDCCA_STRING:	
+		case TDCCA_ICON:
 			bMatch = ValueMatches(data.AsString(), rule, bCaseSensitive, sWhatMatched);
 			break;
 			
@@ -4036,10 +4041,11 @@ CString CTDCTaskFormatter::GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmp
 
 	if (pTDI)
 	{
-		if (!bEmptyIsBlank || !pTDI->sComments.IsEmpty() || !pTDI->customComments.IsEmpty())
-			return m_mgrContent.GetContentDescription(pTDI->cfComments);
+		if (bEmptyIsBlank && pTDI->sComments.IsEmpty() && pTDI->customComments.IsEmpty())
+			return EMPTY_STR;
 
-		return EMPTY_STR;
+		// else
+		return m_mgrContent.GetContentDescription(pTDI->cfComments);
 	}
 
 	// else

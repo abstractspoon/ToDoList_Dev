@@ -621,14 +621,6 @@ int CCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) cons
 	return aItems.GetSize();
 }
 
-int CCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) const
-{
-	GetChecked(aChecked, CCBC_CHECKED);
-	GetChecked(aMixed, CCBC_MIXED);
-
-	return (aChecked.GetSize() + aMixed.GetSize());
-}
-
 CString CCheckComboBox::FormatCheckedItems(LPCTSTR szSep) const
 {
 	CStringArray aChecked;

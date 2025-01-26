@@ -47,6 +47,7 @@ public:
 
 protected:
 	BOOL m_bHasIcons;
+	BOOL m_bModifyingReminders;
 	CString m_sPrefsKey;
 	DWORD m_dwNextReminderID;
 	CTDCReminderMap m_mapReminders;

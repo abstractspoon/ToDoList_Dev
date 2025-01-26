@@ -220,6 +220,7 @@ public:
 	static int FindItemByValue(const CComboBox& combo, int nValue);
 	static BOOL SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL bReadonly = TRUE, int nDropHeight = 200);
 	static void SetComboEditReadonly(CComboBox& combo, BOOL bReadonly = TRUE);
+	static BOOL IsComboEdit(HWND hWnd);
 	static BOOL ComboHasEdit(const CComboBox& combo);
 	static void MoveCombo(CComboBox& combo, const CRect& rNew, int nDropHeight = 200);
 
@@ -270,7 +271,8 @@ public:
 	static void InvalidateChild(const CWnd* pChild, BOOL bErase = TRUE, BOOL bUpdate = FALSE);
 
 	static BOOL TrackMouseLeave(HWND hWnd, BOOL bEnable = TRUE, BOOL bIncludeNonClient = TRUE);
-	
+	static BOOL IsMouseDownInWindow(HWND hWnd);
+
 	// helpers for updating only a single item
 	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate = TRUE);
 	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, short& value, BOOL bSaveAndValidate = TRUE);
