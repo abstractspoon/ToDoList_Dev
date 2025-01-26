@@ -49,8 +49,13 @@ del %OUTPUT_FILE%
 
 TDLTest > %OUTPUT_FILE%
 
+REM - Check for test errors
 ECHO OFF
-findstr /C:"tests FAILED" %OUTPUT_FILE%
+findstr /C:"tests FAILED" Test_Output.txt
+
+if %errorlevel%==1 (
+echo [92m Tests SUCCEEDED[0m
+)
 if %errorlevel%==0 (
 echo [91m Tests FAILED[0m
 pause
