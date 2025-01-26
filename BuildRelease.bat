@@ -22,6 +22,8 @@ REM - Build core app
 cd %REPO%\Core
 
 set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Build_Output.txt
+del %OUTPUT_FILE%
+
 %MSBUILD% .\ToDoList_Core.sln /t:Build /p:Configuration="Unicode Release" /m /v:normal > %OUTPUT_FILE%
 
 REM - Check for build errors
@@ -41,6 +43,10 @@ REM Run units tests
 ECHO ON
 
 cd TDLTest\Unicode_Release
+
+set OUTPUT_FILE=Test_Output.txt
+del %OUTPUT_FILE%
+
 TDLTest > %OUTPUT_FILE%
 
 ECHO OFF
@@ -57,6 +63,8 @@ ECHO ON
 cd %REPO%\Plugins
 
 set OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
+del %OUTPUT_FILE%
+
 %MSBUILD% .\ToDoList_Plugins.sln /t:Build /p:Configuration=Release /m /v:normal > %OUTPUT_FILE%
 
 REM - Check for build errors

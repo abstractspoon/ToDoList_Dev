@@ -13,6 +13,8 @@ REM - Build core app
 cd %REPO%\Core
 
 set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Debug\Build_Output.txt
+del %OUTPUT_FILE%
+
 %MSBUILD% .\ToDoList_Core.sln /t:Build /p:Configuration="Unicode Debug" /m /v:normal > %OUTPUT_FILE%
 
 REM - Check for build errors
@@ -33,7 +35,9 @@ ECHO ON
 cd %REPO%\Plugins
 
 set OUTPUT_FILE=%REPO%\Plugins\Debug\Build_Output.txt
-%MSBUILD% .\ToDoList_Plugins.sln /t:Build /p:Configuration=Debug /m /v:normal  > %OUTPUT_FILE%
+del %OUTPUT_FILE%
+
+%MSBUILD% .\ToDoList_Plugins.sln /t:Build /p:Configuration=Debug /m /v:normal > %OUTPUT_FILE%
 
 REM - Check for build errors
 ECHO OFF
