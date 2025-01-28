@@ -31,10 +31,10 @@ ECHO OFF
 findstr /C:"Build FAILED." %OUTPUT_FILE%
 
 if %errorlevel%==1 (
-echo [92m Build SUCCEEDED[0m
+echo [42m Build SUCCEEDED[0m
 )
 if %errorlevel%==0 (
-echo [91m Build FAILED[0m
+echo [41m Build FAILED[0m
 pause
 exit
 )
@@ -54,10 +54,10 @@ ECHO OFF
 findstr /C:"tests FAILED" Test_Output.txt
 
 if %errorlevel%==1 (
-echo [92m Tests SUCCEEDED[0m
+echo [42m Tests SUCCEEDED[0m
 )
 if %errorlevel%==0 (
-echo [91m Tests FAILED[0m
+echo [41m Tests FAILED[0m
 pause
 exit
 )
@@ -77,10 +77,10 @@ ECHO OFF
 findstr /C:"Build FAILED." %OUTPUT_FILE%
 
 if %errorlevel%==1 (
-echo [92m Build SUCCEEDED[0m
+echo [42m Build SUCCEEDED[0m
 )
 if %errorlevel%==0 (
-echo [91m Build FAILED[0m
+echo [41m Build FAILED[0m
 pause
 exit
 )
