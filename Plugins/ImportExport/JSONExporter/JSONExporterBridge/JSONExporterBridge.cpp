@@ -62,7 +62,7 @@ LPCWSTR CJSONExporterBridge::GetMenuText() const
 
 LPCWSTR CJSONExporterBridge::GetFileFilter() const
 {
-	return _T("JSON Files (*.md.html)|*.md.html||");
+	return _T("JSON Files (*.json)|*.json||");
 }
 
 LPCWSTR CJSONExporterBridge::GetFileExtension() const
