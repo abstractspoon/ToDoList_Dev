@@ -5,6 +5,8 @@ using System.Text;
 using System.Diagnostics;
 using System.Windows.Forms;
 
+using Newtonsoft.Json.Linq;
+
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace JSONExporter
@@ -15,7 +17,6 @@ namespace JSONExporter
 		private String m_TypeId;
 
 		private List<Tuple<String, Task.Attribute>> m_Attributes;
-		private bool m_WantComments, m_WantPosition;
 
 		// --------------------------------------------------------------------------------------
 
@@ -31,98 +32,66 @@ namespace JSONExporter
         {
 			InitialiseAttributeList(srcTasks);
 
-//             BulletedMarkdownContainer mdTasks = new BulletedMarkdownContainer();
-//             Task task = srcTasks.GetFirstTask();
-// 
-//             while (task.IsValid())
-//             {
-//                 ExportTask(task, mdTasks, true);
-// 
-//                 task = task.GetNextTask();
-//             }
-// 
-//             StringBuilder mdFile = new StringBuilder();
-// 
-//             mdFile.AppendLine("<meta charset=\"utf-8\">");
-//             mdFile.AppendLine(mdTasks.ToMarkdown());
-// 
-//             mdFile.AppendLine("<!-- JSON: -->");
-//             mdFile.AppendLine("<style class=\"fallback\">body{visibility:hidden;white-space:pre;font-family:monospace}</style>");
-//             mdFile.AppendLine("<script src=\"markdeep.min.js\" charset=\"utf-8\"></script>");
-//             mdFile.AppendLine("<script src=\"https://casual-effects.com/markdeep/latest/markdeep.min.js\" charset=\"utf-8\"></script>");
-//             mdFile.AppendLine("<script>window.alreadyProcessedJSON||(document.body.style.visibility=\"visible\")</script>");
-// 
-//             Debug.Write(mdFile.ToString());
-//             System.IO.File.WriteAllText(sDestFilePath, mdFile.ToString(), Encoding.UTF8);
+			JArray jTasks = new JArray();
+            Task task = srcTasks.GetFirstTask();
 
-            return true;
+            while (task.IsValid())
+            {
+                ExportTask(task, jTasks);
+                task = task.GetNextTask();
+            }
+
+			JObject jRoot = new JObject();
+			jRoot.Add(new JProperty("tasks", jTasks));
+
+			Debug.Write(jRoot.ToString());
+			System.IO.File.WriteAllText(sDestFilePath, jRoot.ToString(), Encoding.UTF8);
+
+			return true;
         }
 
-        protected bool ExportTask(Task task, /*BulletedMarkdownContainer mdParent,*/ bool root)
+        protected bool ExportTask(Task task, JArray jTasks)
         {
             // add ourselves
-//             mdParent.Append(new RawMarkdown(FormatTaskAttributes(task, root)));
-// 
-//             Task subtask = task.GetFirstSubtask();
-// 
-//             if (subtask.IsValid())
-//             {
-//                 // then our subtasks in a container
-//                 BulletedMarkdownContainer mdSubtasks = new BulletedMarkdownContainer();
-// 
-//                 while (subtask.IsValid())
-//                 {
-//                     ExportTask(subtask, mdSubtasks, false); // RECURSIVE CALL
-// 
-//                     subtask = subtask.GetNextTask();
-//                 }
-// 
-//                 mdParent.Append(mdSubtasks);
-//             }
+			JObject jTask = new JObject();
+            AppendTaskAttributes(task, jTask);
 
-            return true;
+            // then our subtasks in an array
+            Task subtask = task.GetFirstSubtask();
+
+            if (subtask.IsValid())
+            {
+                JArray jSubtasks = new JArray();
+
+                while (subtask.IsValid())
+                {
+                    ExportTask(subtask, jSubtasks); // RECURSIVE CALL
+                    subtask = subtask.GetNextTask();
+                }
+
+				jTask.Add(new JProperty("tasks", jSubtasks));
+            }
+
+			// Add to parent
+			jTasks.Add(jTask);
+
+			return true;
         }
 
-        protected string FormatTaskAttributes(Task task, bool root)
+        protected void AppendTaskAttributes(Task task, JObject jTask)
         {
-            StringBuilder taskAttrib = new StringBuilder();
-
-			// Task title
-			taskAttrib.Append("**");
-
-			if (m_WantPosition)
-				taskAttrib.Append(task.GetPositionString()).Append(" ");
-
-			taskAttrib.Append(task.GetTitle())
-					  .Append("**")
-					  .AppendLine("<br>");
-
-			// Rest of attributes
 			foreach (var item in m_Attributes)
 			{
 				var attribValue = task.GetAttributeValue(item.Item2, true, true);
 
 				if (!String.IsNullOrWhiteSpace(attribValue))
-				{
-					taskAttrib.Append("  ")
-							  .Append(item.Item1)
-							  .Append(": ")
-							  .Append(attribValue)
-							  .AppendLine("<br>");
-				}
+					jTask.Add(new JProperty(item.Item1, attribValue));
 			}
-
-			// Comments
-			if (m_WantComments)
-				taskAttrib.Append("<blockquote>").Append(task.GetComments()).Append("</blockquote>");
-
-            return taskAttrib.AppendLine().ToString();
         }
 
 		private void InitialiseAttributeList(TaskList tasks)
 		{
 			m_Attributes = new List<Tuple<String, Task.Attribute>>();
-			m_WantComments = m_WantPosition = false;
 
 			// Construct basic list of attributes
 			// excluding those whose positions are fixed
@@ -130,33 +99,14 @@ namespace JSONExporter
 			{
 				switch (attrib)
 				{
-					case Task.Attribute.Title:
-						// Always first
-						break;
+				case Task.Attribute.ProjectName:
+					// Not a task attribute
+					break;
 
-					case Task.Attribute.Comments:
-						// Always last if present
-						m_WantComments = true;
-						break;
-
-					case Task.Attribute.HtmlComments:
-						// Always last if present
-						m_WantComments = true;
-						break;
-
-					case Task.Attribute.Position:
-						// Precedes task title
-						m_WantPosition = true;
-						break;
-
-					case Task.Attribute.ProjectName:
-						// Not a task attribute
-						break;
-
-					default:
-						if (tasks.IsAttributeAvailable(attrib))
-							AddAttribute(attrib, m_Attributes, true);
-						break;
+				default:
+					if (tasks.IsAttributeAvailable(attrib))
+						AddAttribute(attrib, m_Attributes, true);
+					break;
 				}
 			}
 
