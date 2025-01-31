@@ -42,7 +42,7 @@ namespace JSONExporter
             }
 
 			JObject jRoot = new JObject();
-			jRoot.Add(new JProperty("tasks", jTasks));
+			jRoot.Add(new JProperty(m_Trans.Translate("Tasks", Translator.Type.Text), jTasks));
 
 			Debug.Write(jRoot.ToString());
 			System.IO.File.WriteAllText(sDestFilePath, jRoot.ToString(), Encoding.UTF8);
@@ -69,7 +69,7 @@ namespace JSONExporter
                     subtask = subtask.GetNextTask();
                 }
 
-				jTask.Add(new JProperty("tasks", jSubtasks));
+				jTask.Add(new JProperty(m_Trans.Translate("Subtasks", Translator.Type.Text), jSubtasks));
             }
 
 			// Add to parent
