@@ -81,14 +81,6 @@ LPCWSTR CJSONExporterBridge::GetTypeID() const
 
 IIMPORTEXPORT_RESULT CJSONExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
-   const ITaskList14* pTasks14 = GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14);
-
-   if (pTasks14 == nullptr)
-   {
-      MessageBox(NULL, L"You need a minimum ToDoList version of 7.0 to use this plugin", L"Version Not Supported", MB_OK);
-      return IIER_BADINTERFACE;
-   }
-
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
