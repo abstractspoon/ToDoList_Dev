@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JSONExporter.cs" />
     <Compile Include="JSONExporterCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
