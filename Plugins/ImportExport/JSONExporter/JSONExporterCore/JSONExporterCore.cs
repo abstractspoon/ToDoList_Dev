@@ -52,8 +52,8 @@ namespace JSONExporter
 			JObject jRoot = new JObject();
 			jRoot.Add(new JProperty(m_Trans.Translate("Tasks", Translator.Type.Text), jTasks));
 
-			Debug.Write(jRoot.ToString());
-			System.IO.File.WriteAllText(sDestFilePath, jRoot.ToString(), Encoding.UTF8);
+			var utf8 = new UTF8Encoding(false); // No BOM
+			System.IO.File.WriteAllBytes(sDestFilePath, utf8.GetBytes(jRoot.ToString()));
 
 			return true;
         }
