@@ -1415,8 +1415,7 @@ const CString& Misc::GetItem(const CStringArray& aValues, int nItem)
 
 int Misc::RemoveEmptyItems(CStringArray& aFrom)
 {
-	int nRemoved = 0; // counter
-	int nItem = aFrom.GetSize();
+	int nOrgCount = aFrom.GetSize(), nItem = nOrgCount;
 
 	while (nItem--)
 	{
@@ -1424,13 +1423,10 @@ int Misc::RemoveEmptyItems(CStringArray& aFrom)
 		Trim(sItem);
 
 		if (sItem.IsEmpty())
-		{
 			aFrom.RemoveAt(nItem);
-			nRemoved++;
-		}
 	}
 
-	return nRemoved;
+	return (nOrgCount - aFrom.GetSize());
 }
 
 int Misc::RemoveDuplicates(CStringArray& aFrom, BOOL bCaseSensitive)
@@ -1460,18 +1456,36 @@ int Misc::RemoveDuplicates(CStringArray& aFrom, BOOL bCaseSensitive)
 
 int Misc::RemoveItems(const CStringArray& aValues, CStringArray& aFrom, BOOL bCaseSensitive)
 {
-	int nRemoved = 0; // counter
-	int nItem = aValues.GetSize();
+	if (aValues.GetSize() == 0)
+		return 0;
+
+	// Create a look up of the values to be removed
+	CStringSet mapValues;
+
+	if (bCaseSensitive)
+	{
+		mapValues.CopyFrom(aValues);
+	}
+	else
+	{
+		int nItem = aValues.GetSize();
+
+		while (nItem--)
+			mapValues.Add(ToUpper(aValues[nItem]));
+	}
+
+	// Traverse the existing array removing as we go
+	int nOrgCount = aFrom.GetSize(), nItem = nOrgCount;
 
 	while (nItem--)
 	{
-		const CString& sItem = GetItem(aValues, nItem);
+		CString sItem = (bCaseSensitive ? aFrom[nItem] : ToUpper(aFrom[nItem]));
 
-		if (RemoveItem(sItem, aFrom, bCaseSensitive))
-			nRemoved++;
+		if (mapValues.Has(sItem))
+			aFrom.RemoveAt(nItem);
 	}
 
-	return nRemoved;
+	return (nOrgCount - aFrom.GetSize());
 }
 
 BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)

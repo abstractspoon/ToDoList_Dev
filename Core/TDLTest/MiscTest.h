@@ -27,6 +27,7 @@ protected:
 	void TestAtof();
 	void TestIsNumber();
 	void TestRemoveDuplicates();
+	void TestRemoveItems();
 
 	void TestRegionalSettingsRetrievalPerformance();
 

@@ -571,16 +571,16 @@ void CMiscTest::TestRemoveDuplicates()
 			aItems.Add(11);
 			aItems.Add(13);
 
-			ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 0);
+			ExpectEQ(Misc::RemoveDuplicates(aItems), 0);
 			ExpectEQ(aItems.GetSize(), 7);
 
-			ExpectEQ(aItems[0], 1);
-			ExpectEQ(aItems[1], 2);
-			ExpectEQ(aItems[2], 3);
-			ExpectEQ(aItems[3], 5);
-			ExpectEQ(aItems[4], 7);
-			ExpectEQ(aItems[5], 11);
-			ExpectEQ(aItems[6], 13);
+			ExpectEQ(aItems[0], 1UL);
+			ExpectEQ(aItems[1], 2UL);
+			ExpectEQ(aItems[2], 3UL);
+			ExpectEQ(aItems[3], 5UL);
+			ExpectEQ(aItems[4], 7UL);
+			ExpectEQ(aItems[5], 11UL);
+			ExpectEQ(aItems[6], 13UL);
 		}
 
 		// Some duplicates exist
@@ -599,18 +599,96 @@ void CMiscTest::TestRemoveDuplicates()
 			aItems.Add(11); // dupe
 			aItems.Add(5);  // dupe
 
-			ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 4);
+			ExpectEQ(Misc::RemoveDuplicates(aItems), 4);
 			ExpectEQ(aItems.GetSize(), 7);
 
-			ExpectEQ(aItems[0], 1);
-			ExpectEQ(aItems[1], 2);
-			ExpectEQ(aItems[2], 3);
-			ExpectEQ(aItems[3], 5);
-			ExpectEQ(aItems[4], 7);
-			ExpectEQ(aItems[5], 11);
-			ExpectEQ(aItems[6], 13);
+			ExpectEQ(aItems[0], 1UL);
+			ExpectEQ(aItems[1], 2UL);
+			ExpectEQ(aItems[2], 3UL);
+			ExpectEQ(aItems[3], 5UL);
+			ExpectEQ(aItems[4], 7UL);
+			ExpectEQ(aItems[5], 11UL);
+			ExpectEQ(aItems[6], 13UL);
 		}
 	}
+}
+
+void CMiscTest::TestRemoveItems()
+{
+	// Case sensitive
+	{
+		// No matches
+		{
+			CStringArray aItems, aFrom;
+
+			aFrom.Add(_T("abc"));
+			aFrom.Add(_T("abC"));
+			aFrom.Add(_T("Abc"));
+
+			aItems.Add(_T("ABC"));
+			aItems.Add(_T("aBC"));
+			aItems.Add(_T("AbC"));
+			aItems.Add(_T("ABc"));
+
+			ExpectEQ(Misc::RemoveItems(aItems, aFrom, TRUE), 0);
+			ExpectEQ(aFrom.GetSize(), 3);
+
+			ExpectEQ(aFrom[0], _T("abc"));
+			ExpectEQ(aFrom[1], _T("abC"));
+			ExpectEQ(aFrom[2], _T("Abc"));
+		}
+
+		// Some matches
+		{
+			CStringArray aItems, aFrom;
+
+			aFrom.Add(_T("abc"));
+			aFrom.Add(_T("abC"));
+			aFrom.Add(_T("Abc"));
+			aFrom.Add(_T("ABC"));
+			aFrom.Add(_T("aBC"));
+			aFrom.Add(_T("AbC"));
+			aFrom.Add(_T("ABc"));
+			aFrom.Add(_T("cde"));
+
+			aItems.Add(_T("abc")); // match
+			aItems.Add(_T("ABC")); // match
+			aItems.Add(_T("AbC")); // match
+			aItems.Add(_T("abc")); // match & dupe
+			aItems.Add(_T("bcd")); // NO match
+
+			ExpectEQ(Misc::RemoveItems(aItems, aFrom, TRUE), 3);
+			ExpectEQ(aFrom.GetSize(), 5);
+
+			ExpectEQ(aFrom[0], _T("abC"));
+			ExpectEQ(aFrom[1], _T("Abc"));
+			ExpectEQ(aFrom[2], _T("aBC"));
+			ExpectEQ(aFrom[3], _T("ABc"));
+			ExpectEQ(aFrom[4], _T("cde"));
+		}
+	}
+
+	// Case Insensitive
+	{
+		CStringArray aItems, aFrom;
+
+		aFrom.Add(_T("abc"));
+		aFrom.Add(_T("abC"));
+		aFrom.Add(_T("Abc"));
+		aFrom.Add(_T("ABC"));
+		aFrom.Add(_T("aBC"));
+		aFrom.Add(_T("AbC"));
+		aFrom.Add(_T("ABc"));
+		aFrom.Add(_T("bcd"));
+
+		aItems.Add(_T("ABC"));
+
+		ExpectEQ(Misc::RemoveItems(aItems, aFrom, TRUE), 7);
+		ExpectEQ(aFrom.GetSize(), 1);
+
+		ExpectEQ(aFrom[0], _T("bcd"));
+	}
+
 }
 
 ///////////////////////////////////////////////////////////////////////
