@@ -429,7 +429,7 @@ void KANBANITEM::SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray&
 	if (aValues.GetSize() == 0)
 		mapAttribValues.RemoveKey(szAttrib);
 	else
-		mapAttribValues.Set(szAttrib, aValues);
+		mapAttribValues.Set(szAttrib, aValues, TRUE);
 }
 
 void KANBANITEM::SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)

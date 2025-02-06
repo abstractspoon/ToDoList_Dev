@@ -356,12 +356,10 @@ int TDCAUTOLISTDATA::Copy(const TDCAUTOLISTDATA& from, TDCAUTOLISTDATA& to, BOOL
 
 int TDCAUTOLISTDATA::CopyItems(const CStringArray& aFrom, CStringArray& aTo, BOOL bAppend)
 {
-	if (bAppend)
-		return Misc::AddUniqueItems(aFrom, aTo);
+	if (!bAppend)
+		aTo.RemoveAll();
 
-	// else
-	aTo.Copy(aFrom);
-	return aTo.GetSize();
+	return Misc::AppendItems(aFrom, aTo, TRUE);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

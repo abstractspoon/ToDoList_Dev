@@ -3830,10 +3830,8 @@ bool CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, LPCTST
 			pXICustDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (int)temp.GetAttributeType());
 		}
 
-		if (Misc::AddUniqueItems(aData, temp.aDefaultListData))
-		{
+		if (Misc::AppendItems(aData, temp.aDefaultListData, TRUE))
 			pXICustDef->SetItemValue(TDL_CUSTOMATTRIBLISTDATA, temp.EncodeListData());
-		}
 	}
 
 	return true;

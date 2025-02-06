@@ -646,7 +646,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
  		if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
 		{
  			GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
-			Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
+			Misc::AppendItems(pWI->aAllocTo, m_aAllocTo, TRUE);
 
 			bAllocationChange = TRUE;
 		}
@@ -935,7 +935,7 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
-		Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
+		Misc::AppendItems(pWI->aAllocTo, m_aAllocTo, TRUE);
 		
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
 		pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));

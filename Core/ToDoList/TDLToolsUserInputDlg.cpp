@@ -409,7 +409,7 @@ int CTDLToolsUserInputDlg::GetArgumentListData(const CMDLINEARG& arg, CStringArr
 
 		// else
 		aItems.Copy(pDef->aAutoListData);
-		Misc::AddUniqueItems(pDef->aDefaultListData, aItems);
+		Misc::AppendItems(pDef->aDefaultListData, aItems, TRUE);
 	}
 	else // built-in attribute
 	{

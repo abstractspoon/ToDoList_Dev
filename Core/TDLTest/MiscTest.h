@@ -28,6 +28,7 @@ protected:
 	void TestIsNumber();
 	void TestRemoveDuplicates();
 	void TestRemoveItems();
+	void TestAppendItems();
 
 	void TestRegionalSettingsRetrievalPerformance();
 
