@@ -590,9 +590,9 @@ int CPreferencesDlg::GetDefaultListItems(TDCAUTOLISTDATA& tld) const
 	TODOITEM tdiDef;
 	GetDefaultTaskAttributes(tdiDef);
 
-	Misc::AddUniqueItems(tdiDef.aCategories, tld.aCategory);
-	Misc::AddUniqueItems(tdiDef.aAllocTo, tld.aAllocTo);
-	Misc::AddUniqueItems(tdiDef.aTags, tld.aTags);
+	Misc::AppendItems(tdiDef.aCategories, tld.aCategory, TRUE);
+	Misc::AppendItems(tdiDef.aAllocTo, tld.aAllocTo, TRUE);
+	Misc::AppendItems(tdiDef.aTags, tld.aTags, TRUE);
 
 	Misc::AddUniqueItem(tdiDef.sStatus, tld.aStatus);
 	Misc::AddUniqueItem(tdiDef.sAllocBy, tld.aAllocBy);

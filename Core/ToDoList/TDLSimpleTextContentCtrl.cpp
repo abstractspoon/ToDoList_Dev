@@ -321,7 +321,7 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 
 					Misc::Split(sAllocTo, aListData, '\n');
 					Misc::Split(sAllocBy, aTemp, '\n');
-					Misc::AddUniqueItems(aTemp, aListData);
+					Misc::AppendItems(aTemp, aListData, TRUE);
 
 					if (aListData.GetSize())
 					{

@@ -2084,7 +2084,7 @@ TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 			}
 		}
 
-		Misc::AddUniqueItems(aMatched, aNewItems);
+		Misc::AppendItems(aMatched, aNewItems, TRUE);
 	}
 	else
 	{
@@ -3100,7 +3100,7 @@ TDC_SET CToDoCtrlData::EditTaskArrayAttribute(DWORD dwTaskID, TODOITEM* pTDI, TD
 	
 	// make the change
 	if (bAppend)
-		Misc::AddUniqueItems(aNewValues, aValues);
+		Misc::AppendItems(aNewValues, aValues, TRUE);
 	else
 		aValues.Copy(aNewValues);
 

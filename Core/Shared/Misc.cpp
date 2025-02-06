@@ -1499,34 +1499,28 @@ BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 	return TRUE;
 }
 
-int Misc::AddUniqueItems(const CStringArray& aValues, CStringArray& aTo, BOOL bCaseSensitive)
+int Misc::AppendItems(const CStringArray& aFrom, CStringArray& aTo, BOOL bRemoveDuplicates, BOOL bCaseSensitiveRemove)
 {
-	int nAdded = 0; // counter
-	int nSize = aValues.GetSize();
-	
-	for (int nItem = 0; nItem < nSize; nItem++)
-	{
-		const CString& sItem = GetItem(aValues, nItem);
+	int nOrgCount = aTo.GetSize();
 
-		if (AddUniqueItem(sItem, aTo, bCaseSensitive))
-			nAdded++;
-	}
+	aTo.Append(aFrom);
 
-	return nAdded;
+	if (bRemoveDuplicates)
+		RemoveDuplicates(aTo, bCaseSensitiveRemove);
+
+	return (aTo.GetSize() - nOrgCount);
 }
 
-int Misc::AddUniqueItems(const CDWordArray& aValues, CDWordArray& aTo)
+int Misc::AppendItems(const CDWordArray& aFrom, CDWordArray& aTo, BOOL bRemoveDuplicates)
 {
-	int nAdded = 0; // counter
-	int nSize = aValues.GetSize();
-	
-	for (int nItem = 0; nItem < nSize; nItem++)
-	{
-		if (AddUniqueItemT(aValues[nItem], aTo))
-			nAdded++;
-	}
+	int nOrgCount = aTo.GetSize();
 
-	return nAdded;
+	aTo.Append(aFrom);
+
+	if (bRemoveDuplicates)
+		RemoveDuplicates(aTo);
+
+	return (aTo.GetSize() - nOrgCount);
 }
 
 int Misc::RemoveDuplicates(CDWordArray& aFrom)

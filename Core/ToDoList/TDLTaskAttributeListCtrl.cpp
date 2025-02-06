@@ -3644,10 +3644,8 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::OnDrop(CWnd* pWnd, COleDataObje
 		CStringArray aExisting;
 		SplitValueArray(m_pAttributeList->GetItemText(nRow, VALUE_COL), aExisting);
 
-		if (Misc::AddUniqueItems(aFiles, aExisting))
-		{
+		if (Misc::AppendItems(aFiles, aExisting, TRUE))
 			m_pAttributeList->SetValueText(nRow, FormatValueArray(aExisting));
-		}
 	}
 
 	return TRUE;

@@ -106,7 +106,7 @@ BOOL CTDLCleanupIniPreferencesDlg::OnInitDialog()
 		m_mru.ReadList(prefs);
 		m_mru.GetFileNames(m_aMRU);
 
-		Misc::AddUniqueItems(m_aMRU, aTasklists);
+		Misc::AppendItems(m_aMRU, aTasklists, TRUE);
 				
 		// 'Last Active' tasklist
 		m_sLastActiveFile = prefs.GetProfileString(SETTINGSKEY, _T("LastActiveFile"));

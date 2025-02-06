@@ -585,7 +585,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetListType(DWORD dwListType)
 int TDCCUSTOMATTRIBUTEDEFINITION::GetUniqueListData(CStringArray& aData) const
 {
 	aData.Copy(aAutoListData);
-	Misc::AddUniqueItems(aDefaultListData, aData);
+	Misc::AppendItems(aDefaultListData, aData, TRUE);
 
 	return aData.GetSize();
 }

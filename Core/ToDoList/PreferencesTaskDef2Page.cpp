@@ -205,7 +205,7 @@ int CPreferencesTaskDef2Page::GetListItems(TDC_ATTRIBUTE nList, CStringArray& aI
 
 	CStringArray aDef;
 	Misc::Split(sDef, aDef, ENDL);
-	Misc::AddUniqueItems(aDef, aItems);
+	Misc::AppendItems(aDef, aItems, TRUE);
 
 	return aItems.GetSize();
 }
