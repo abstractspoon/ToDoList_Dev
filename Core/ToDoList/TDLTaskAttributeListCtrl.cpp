@@ -2331,16 +2331,27 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 	return TRUE;
 }
 
+void CTDLTaskAttributeListCtrl::RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel, BOOL bWantSort)
+{
+	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
+	combo.EnableMultiSelection(bMultiSel);
+
+	CStringArray aAllValues;
+	
+	aAllValues.Copy(aDefValues);
+	aAllValues.Append(aUserValues);
+	Misc::RemoveDuplicates(aAllValues);
+
+	CDialogHelper::SetComboBoxItems(combo, aAllValues);
+}
+
 void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
+	// Populate
 	CheckRecreateCombo(nRow, combo);
+	RebuildCombo(combo, aDefValues, aUserValues, TRUE, bWantSort);
 
-	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
-	combo.EnableMultiSelection(TRUE);
-	combo.ResetContent();
-	combo.AddStrings(aDefValues);
-	combo.AddUniqueItems(aUserValues);
-
+	// Set selection
 	CStringArray aMatched, aMixed;
 	ParseMultiSelValues(GetItemText(nRow, VALUE_COL), aMatched, aMixed);
 
@@ -2349,14 +2360,11 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 
 void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
+	// Populate
 	CheckRecreateCombo(nRow, combo);
+	RebuildCombo(combo, aDefValues, aUserValues, FALSE, bWantSort);
 
-	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
-	combo.EnableMultiSelection(FALSE);
-	combo.ResetContent();
-	combo.AddStrings(aDefValues);
-	combo.AddUniqueItems(aUserValues);
-
+	// Set selection
 	CString sValue = GetItemText(nRow, VALUE_COL);
 	combo.AddUniqueItem(sValue);
 

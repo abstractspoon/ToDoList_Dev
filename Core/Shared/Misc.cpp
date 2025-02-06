@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Misc.h"
+#include "mapex.h"
 
 #include <Lmcons.h>
 #include <math.h>
@@ -1430,6 +1431,31 @@ int Misc::RemoveEmptyItems(CStringArray& aFrom)
 	}
 
 	return nRemoved;
+}
+
+int Misc::RemoveDuplicates(CStringArray& aFrom, BOOL bCaseSensitive)
+{
+	CStringSet mapUniqueItems;
+	int nOrgCount = aFrom.GetSize(), nNumItems = nOrgCount;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		CString sItem = (bCaseSensitive ? aFrom[nItem] : ToUpper(aFrom[nItem]));
+
+		if (!mapUniqueItems.Has(sItem))
+		{
+			mapUniqueItems.Add(sItem);
+			continue;
+		}
+
+		// else
+		aFrom.RemoveAt(nItem);
+
+		nItem--;
+		nNumItems--;
+	}
+
+	return (nOrgCount - nNumItems);
 }
 
 int Misc::RemoveItems(const CStringArray& aValues, CStringArray& aFrom, BOOL bCaseSensitive)

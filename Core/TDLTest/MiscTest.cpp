@@ -46,6 +46,7 @@ TESTRESULT CMiscTest::Run()
 	TestHasSuffix();
 	TestAtof();
 	TestIsNumber();
+	TestRemoveDuplicates();
 
 	return GetTotals();
 }
@@ -475,6 +476,81 @@ void CMiscTest::TestIsNumber()
 		// 	ExpectTrue(Misc::IsNumber(_T("")));
 		// 	ExpectTrue(Misc::IsNumber(_T("")));
 		// 	ExpectTrue(Misc::IsNumber(_T("")));
+	}
+}
+
+void CMiscTest::TestRemoveDuplicates()
+{
+	// Case sensitive
+	{
+		// No duplicates exist
+		{
+			CStringArray aItems;
+
+			aItems.Add(_T("abc"));
+			aItems.Add(_T("abC"));
+			aItems.Add(_T("Abc"));
+			aItems.Add(_T("ABC"));
+			aItems.Add(_T("aBC"));
+			aItems.Add(_T("AbC"));
+			aItems.Add(_T("ABc"));
+
+			ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 0);
+			ExpectEQ(aItems.GetSize(), 7);
+
+			ExpectEQ(aItems[0], _T("abc"));
+			ExpectEQ(aItems[1], _T("abC"));
+			ExpectEQ(aItems[2], _T("Abc"));
+			ExpectEQ(aItems[3], _T("ABC"));
+			ExpectEQ(aItems[4], _T("aBC"));
+			ExpectEQ(aItems[5], _T("AbC"));
+			ExpectEQ(aItems[6], _T("ABc"));
+		}
+
+		// Some duplicates exist
+		{
+			CStringArray aItems;
+
+			aItems.Add(_T("abc"));
+			aItems.Add(_T("abC"));
+			aItems.Add(_T("abc")); // dupe
+			aItems.Add(_T("Abc"));
+			aItems.Add(_T("ABC"));
+			aItems.Add(_T("aBC"));
+			aItems.Add(_T("ABC")); // dupe
+			aItems.Add(_T("AbC"));
+			aItems.Add(_T("ABc"));
+			aItems.Add(_T("AbC")); // dupe
+
+			ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 3);
+			ExpectEQ(aItems.GetSize(), 7);
+			
+			ExpectEQ(aItems[0], _T("abc"));
+			ExpectEQ(aItems[1], _T("abC"));
+			ExpectEQ(aItems[2], _T("Abc"));
+			ExpectEQ(aItems[3], _T("ABC"));
+			ExpectEQ(aItems[4], _T("aBC"));
+			ExpectEQ(aItems[5], _T("AbC"));
+			ExpectEQ(aItems[6], _T("ABc"));
+		}
+	}
+
+	// Case Insensitive
+	{
+		CStringArray aItems;
+
+		aItems.Add(_T("abc"));
+		aItems.Add(_T("abC"));
+		aItems.Add(_T("Abc"));
+		aItems.Add(_T("ABC"));
+		aItems.Add(_T("aBC"));
+		aItems.Add(_T("AbC"));
+		aItems.Add(_T("ABc"));
+
+		ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 6);
+		ExpectEQ(aItems.GetSize(), 1);
+
+		ExpectEQ(aItems[0], _T("abc")); // only the first item remains
 	}
 }
 
