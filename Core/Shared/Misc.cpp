@@ -1515,6 +1515,29 @@ int Misc::AddUniqueItems(const CDWordArray& aValues, CDWordArray& aTo)
 	return nAdded;
 }
 
+int Misc::RemoveDuplicates(CDWordArray& aFrom)
+{
+	CDWordSet mapUniqueItems;
+	int nOrgCount = aFrom.GetSize(), nNumItems = nOrgCount;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		if (!mapUniqueItems.Has(aFrom[nItem]))
+		{
+			mapUniqueItems.Add(aFrom[nItem]);
+			continue;
+		}
+
+		// else
+		aFrom.RemoveAt(nItem);
+
+		nItem--;
+		nNumItems--;
+	}
+
+	return (nOrgCount - nNumItems);
+}
+
 BOOL Misc::AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive)
 {
 	if (sItem.IsEmpty())

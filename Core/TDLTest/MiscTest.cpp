@@ -481,9 +481,64 @@ void CMiscTest::TestIsNumber()
 
 void CMiscTest::TestRemoveDuplicates()
 {
-	// Case sensitive
+	// CStringArray
 	{
-		// No duplicates exist
+		// Case sensitive
+		{
+			// No duplicates exist
+			{
+				CStringArray aItems;
+
+				aItems.Add(_T("abc"));
+				aItems.Add(_T("abC"));
+				aItems.Add(_T("Abc"));
+				aItems.Add(_T("ABC"));
+				aItems.Add(_T("aBC"));
+				aItems.Add(_T("AbC"));
+				aItems.Add(_T("ABc"));
+
+				ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 0);
+				ExpectEQ(aItems.GetSize(), 7);
+
+				ExpectEQ(aItems[0], _T("abc"));
+				ExpectEQ(aItems[1], _T("abC"));
+				ExpectEQ(aItems[2], _T("Abc"));
+				ExpectEQ(aItems[3], _T("ABC"));
+				ExpectEQ(aItems[4], _T("aBC"));
+				ExpectEQ(aItems[5], _T("AbC"));
+				ExpectEQ(aItems[6], _T("ABc"));
+			}
+
+			// Some duplicates exist
+			{
+				CStringArray aItems;
+
+				aItems.Add(_T("abc"));
+				aItems.Add(_T("abC"));
+				aItems.Add(_T("abc")); // dupe
+				aItems.Add(_T("Abc"));
+				aItems.Add(_T("ABC"));
+				aItems.Add(_T("aBC"));
+				aItems.Add(_T("ABC")); // dupe
+				aItems.Add(_T("AbC"));
+				aItems.Add(_T("ABc"));
+				aItems.Add(_T("AbC")); // dupe
+				aItems.Add(_T("abc")); // dupe
+
+				ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 4);
+				ExpectEQ(aItems.GetSize(), 7);
+
+				ExpectEQ(aItems[0], _T("abc"));
+				ExpectEQ(aItems[1], _T("abC"));
+				ExpectEQ(aItems[2], _T("Abc"));
+				ExpectEQ(aItems[3], _T("ABC"));
+				ExpectEQ(aItems[4], _T("aBC"));
+				ExpectEQ(aItems[5], _T("AbC"));
+				ExpectEQ(aItems[6], _T("ABc"));
+			}
+		}
+
+		// Case Insensitive
 		{
 			CStringArray aItems;
 
@@ -494,63 +549,67 @@ void CMiscTest::TestRemoveDuplicates()
 			aItems.Add(_T("aBC"));
 			aItems.Add(_T("AbC"));
 			aItems.Add(_T("ABc"));
+
+			ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 6);
+			ExpectEQ(aItems.GetSize(), 1);
+
+			ExpectEQ(aItems[0], _T("abc")); // only the first item remains
+		}
+	}
+
+	// CDWordArray
+	{
+		// No duplicates exist
+		{
+			CDWordArray aItems;
+
+			aItems.Add(1);
+			aItems.Add(2);
+			aItems.Add(3);
+			aItems.Add(5);
+			aItems.Add(7);
+			aItems.Add(11);
+			aItems.Add(13);
 
 			ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 0);
 			ExpectEQ(aItems.GetSize(), 7);
 
-			ExpectEQ(aItems[0], _T("abc"));
-			ExpectEQ(aItems[1], _T("abC"));
-			ExpectEQ(aItems[2], _T("Abc"));
-			ExpectEQ(aItems[3], _T("ABC"));
-			ExpectEQ(aItems[4], _T("aBC"));
-			ExpectEQ(aItems[5], _T("AbC"));
-			ExpectEQ(aItems[6], _T("ABc"));
+			ExpectEQ(aItems[0], 1);
+			ExpectEQ(aItems[1], 2);
+			ExpectEQ(aItems[2], 3);
+			ExpectEQ(aItems[3], 5);
+			ExpectEQ(aItems[4], 7);
+			ExpectEQ(aItems[5], 11);
+			ExpectEQ(aItems[6], 13);
 		}
 
 		// Some duplicates exist
 		{
-			CStringArray aItems;
+			CDWordArray aItems;
 
-			aItems.Add(_T("abc"));
-			aItems.Add(_T("abC"));
-			aItems.Add(_T("abc")); // dupe
-			aItems.Add(_T("Abc"));
-			aItems.Add(_T("ABC"));
-			aItems.Add(_T("aBC"));
-			aItems.Add(_T("ABC")); // dupe
-			aItems.Add(_T("AbC"));
-			aItems.Add(_T("ABc"));
-			aItems.Add(_T("AbC")); // dupe
+			aItems.Add(1);
+			aItems.Add(2);
+			aItems.Add(1);  // dupe
+			aItems.Add(3);
+			aItems.Add(5);
+			aItems.Add(7);
+			aItems.Add(5);  // dupe
+			aItems.Add(11);
+			aItems.Add(13);
+			aItems.Add(11); // dupe
+			aItems.Add(5);  // dupe
 
-			ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 3);
+			ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 4);
 			ExpectEQ(aItems.GetSize(), 7);
-			
-			ExpectEQ(aItems[0], _T("abc"));
-			ExpectEQ(aItems[1], _T("abC"));
-			ExpectEQ(aItems[2], _T("Abc"));
-			ExpectEQ(aItems[3], _T("ABC"));
-			ExpectEQ(aItems[4], _T("aBC"));
-			ExpectEQ(aItems[5], _T("AbC"));
-			ExpectEQ(aItems[6], _T("ABc"));
+
+			ExpectEQ(aItems[0], 1);
+			ExpectEQ(aItems[1], 2);
+			ExpectEQ(aItems[2], 3);
+			ExpectEQ(aItems[3], 5);
+			ExpectEQ(aItems[4], 7);
+			ExpectEQ(aItems[5], 11);
+			ExpectEQ(aItems[6], 13);
 		}
-	}
-
-	// Case Insensitive
-	{
-		CStringArray aItems;
-
-		aItems.Add(_T("abc"));
-		aItems.Add(_T("abC"));
-		aItems.Add(_T("Abc"));
-		aItems.Add(_T("ABC"));
-		aItems.Add(_T("aBC"));
-		aItems.Add(_T("AbC"));
-		aItems.Add(_T("ABc"));
-
-		ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 6);
-		ExpectEQ(aItems.GetSize(), 1);
-
-		ExpectEQ(aItems[0], _T("abc")); // only the first item remains
 	}
 }
 
