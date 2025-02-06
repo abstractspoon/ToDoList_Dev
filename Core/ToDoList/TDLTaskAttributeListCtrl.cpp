@@ -1976,11 +1976,15 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			default:
 				if (pDef->IsMultiList())
 				{
-					CString sMatched(sText), sUnused;
-					Misc::Split(sMatched, sUnused, MIXED_DELIM);
+					CString sChecked = Misc::SplitLeft(sText, MIXED_DELIM);
 
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
-					return;
+					if (!sChecked.IsEmpty())
+					{
+						sChecked.Replace(ITEM_DELIM, Misc::GetListSeparator());
+
+						CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sChecked, crText, nDrawTextFlags);
+						return;
+					}
 				}
 				break;
 			}
