@@ -688,7 +688,94 @@ void CMiscTest::TestRemoveItems()
 
 		ExpectEQ(aFrom[0], _T("bcd"));
 	}
+}
 
+void CMiscTest::TestAppendItems()
+{
+	// Because what's interesting about this function is that
+	// it can call RemoveDuplicates, we don't need to exhaustively
+	// test that aspect of it
+
+	// No Remove duplicates
+	{
+		CStringArray aTo, aFrom;
+
+		aFrom.Add(_T("abc"));
+		aFrom.Add(_T("abC"));
+		aFrom.Add(_T("Abc"));
+
+		aTo.Add(_T("ABC"));
+		aTo.Add(_T("aBC"));
+		aTo.Add(_T("AbC"));
+		aTo.Add(_T("ABc"));
+		aTo.Add(_T("abc")); // dupe
+		aTo.Add(_T("abC")); // dupe
+		aTo.Add(_T("Abc")); // dupe
+
+		ExpectEQ(Misc::AppendItems(aFrom, aTo, FALSE), 7);
+		ExpectEQ(aFrom.GetSize(), 10);
+
+		ExpectEQ(aTo[0], _T("abc"));
+		ExpectEQ(aTo[1], _T("abC"));
+		ExpectEQ(aTo[2], _T("Abc"));
+		ExpectEQ(aTo[3], _T("ABC"));
+		ExpectEQ(aTo[4], _T("aBC"));
+		ExpectEQ(aTo[5], _T("AbC"));
+		ExpectEQ(aTo[6], _T("ABc"));
+		ExpectEQ(aTo[7], _T("abc"));
+		ExpectEQ(aTo[8], _T("abC"));
+		ExpectEQ(aTo[9], _T("Abc"));
+	}
+
+	// Remove duplicates case-sensitively
+	{
+		CStringArray aTo, aFrom;
+
+		aFrom.Add(_T("abc"));
+		aFrom.Add(_T("abC"));
+		aFrom.Add(_T("Abc"));
+
+		aTo.Add(_T("ABC"));
+		aTo.Add(_T("aBC"));
+		aTo.Add(_T("AbC"));
+		aTo.Add(_T("ABc"));
+		aTo.Add(_T("abc")); // dupe
+		aTo.Add(_T("abC")); // dupe
+		aTo.Add(_T("Abc")); // dupe
+
+		ExpectEQ(Misc::AppendItems(aFrom, aTo, TRUE, TRUE), 4);
+		ExpectEQ(aFrom.GetSize(), 7);
+
+		ExpectEQ(aTo[0], _T("abc"));
+		ExpectEQ(aTo[1], _T("abC"));
+		ExpectEQ(aTo[2], _T("Abc"));
+		ExpectEQ(aTo[3], _T("ABC"));
+		ExpectEQ(aTo[4], _T("aBC"));
+		ExpectEQ(aTo[5], _T("AbC"));
+		ExpectEQ(aTo[6], _T("ABc"));
+	}
+
+	// Remove duplicates case-insensitively
+	{
+		CStringArray aTo, aFrom;
+
+		aFrom.Add(_T("abc"));
+		aFrom.Add(_T("abC"));
+		aFrom.Add(_T("Abc"));
+
+		aTo.Add(_T("ABC"));
+		aTo.Add(_T("aBC"));
+		aTo.Add(_T("AbC"));
+		aTo.Add(_T("ABc"));
+		aTo.Add(_T("abc")); // dupe
+		aTo.Add(_T("abC")); // dupe
+		aTo.Add(_T("Abc")); // dupe
+
+		ExpectEQ(Misc::AppendItems(aFrom, aTo, TRUE, FALSE), 0);
+		ExpectEQ(aFrom.GetSize(), 1);
+
+		ExpectEQ(aTo[0], _T("abc"));
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////
