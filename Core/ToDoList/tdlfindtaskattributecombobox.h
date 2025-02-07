@@ -28,19 +28,10 @@ public:
 	CString GetAttributeName(const SEARCHPARAM& sp) const;
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFindTaskAttributeComboBox)
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLFindTaskAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
 
+	virtual BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -18,6 +18,7 @@ class CTDLAttributeComboBox : public CComboBox
 // Construction
 public:
 	CTDLAttributeComboBox(BOOL bIncRelativeDates);
+	virtual ~CTDLAttributeComboBox();
 
 // Operations
 public:
@@ -40,21 +41,6 @@ protected:
 	CTDCAttributeMap m_mapWantedAttrib;
 	BOOL m_bIncRelativeDates;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLTaskAttributeComboBox)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLAttributeComboBox();
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLTaskAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -63,7 +49,8 @@ protected:
 	void DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttribID, BOOL& bRelativeDate) const;
 	BOOL AttributeIsDate(TDC_ATTRIBUTE nAttribID) const;
 	BOOL AttributeIsTimePeriod(TDC_ATTRIBUTE nAttribID) const;
-	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
+
+	virtual BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
