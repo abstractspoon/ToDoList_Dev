@@ -85,6 +85,8 @@ pause
 exit
 )
 
+ECHO ON
+
 REM - Allow caller to cancel building Zip
 pause
 
