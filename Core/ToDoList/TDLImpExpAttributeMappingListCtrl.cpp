@@ -78,7 +78,6 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		switch (att.nAttributeID)
 		{
 		case TDCA_COLOR:
-		case TDCA_PROJECTNAME:
 		case TDCA_RECURRENCE:
 		case TDCA_POSITION:
 		case TDCA_TASKNAMEORCOMMENTS:

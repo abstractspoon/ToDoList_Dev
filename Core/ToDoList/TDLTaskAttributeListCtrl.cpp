@@ -477,12 +477,8 @@ BOOL CTDLTaskAttributeListCtrl::WantAddAttribute(TDC_ATTRIBUTE nAttribID) const
 {
 	switch (nAttribID)
 	{
-	case TDCA_PROJECTNAME:
-	case TDCA_COMMENTS:
-		return FALSE;
-
-	case TDCA_TASKNAME:
-		return TRUE;
+	case TDCA_COMMENTS:	return FALSE;
+	case TDCA_TASKNAME:	return TRUE;
 
 	case TDCA_ICON:
 		// Always show the icon field unless explicitly hidden
