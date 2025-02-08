@@ -156,8 +156,7 @@ void CTDLAttributeComboBox::BuildCombo()
 
 	CLocalizer::EnableTranslation(*this, FALSE);
 
-	int nAtt;
-	for (nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
+	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 	{
 		const TDCATTRIBUTE& ap = TASKATTRIBUTES[nAtt];
 
@@ -183,9 +182,9 @@ void CTDLAttributeComboBox::BuildCombo()
 	}
 
 	// custom attributes
-	for (nAtt = 0; nAtt < m_aAttribDefs.GetSize(); nAtt++)
+	for (int nCust = 0; nCust < m_aAttribDefs.GetSize(); nCust++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAtt];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nCust];
 
 		if (WantAttribute(attribDef.GetAttributeID()))
 		{
