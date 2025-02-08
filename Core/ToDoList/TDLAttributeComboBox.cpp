@@ -159,7 +159,7 @@ void CTDLAttributeComboBox::BuildCombo()
 	int nAtt;
 	for (nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 	{
-		const TDCATTRIBUTE& ap = ATTRIBUTES[nAtt];
+		const TDCATTRIBUTE& ap = TASKATTRIBUTES[nAtt];
 
 		if (ap.nAttribResID && WantAttribute(ap.nAttributeID))
 		{

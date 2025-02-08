@@ -72,7 +72,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 
 	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 	{
-		const TDCATTRIBUTE& att = ATTRIBUTES[nAtt];
+		const TDCATTRIBUTE& att = TASKATTRIBUTES[nAtt];
 
 		// ignore certain attributes
 		switch (att.nAttributeID)

@@ -506,7 +506,7 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 	{
 		for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
 		{
-			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAtt];
+			const TDCATTRIBUTE& attrib = TASKATTRIBUTES[nAtt];
 
 			if ((attrib.nGroup == nGroup) && WantAddAttribute(attrib.nAttributeID))
 				mapAttrib[attrib.nAttributeID] = CEnString(attrib.nAttribResID);
@@ -608,7 +608,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 		{
 			// Built-in attributes
 			for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
-				CheckAddAttribute(ATTRIBUTES[nAtt].nAttributeID, ATTRIBUTES[nAtt].nAttribResID);
+				CheckAddAttribute(TASKATTRIBUTES[nAtt].nAttributeID, TASKATTRIBUTES[nAtt].nAttribResID);
 
 			// Associated time fields
 			CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);

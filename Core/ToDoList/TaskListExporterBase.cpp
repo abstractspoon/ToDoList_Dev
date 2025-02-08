@@ -602,7 +602,7 @@ void CTaskListExporterBase::BuildLabelMap()
 	{
 		for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 		{
-			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAtt];
+			const TDCATTRIBUTE& attrib = TASKATTRIBUTES[nAtt];
 			ATTRIBLABELS[attrib.nAttributeID] = CEnString(attrib.nAttribResID);
 		}
 

@@ -2708,8 +2708,8 @@ int TDCCOLEDITVISIBILITY::UpdateEditVisibility()
 
 		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 		{
-			if (IsEditFieldVisible(ATTRIBUTES[nAttrib].nAttributeID))
-				mapVisibleEdits.Add(ATTRIBUTES[nAttrib].nAttributeID);
+			if (IsEditFieldVisible(TASKATTRIBUTES[nAttrib].nAttributeID))
+				mapVisibleEdits.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 		}
 	}
 
@@ -2722,8 +2722,8 @@ int TDCCOLEDITVISIBILITY::GetAllEditFields(CTDCAttributeMap& mapAttrib)
 
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (IsSupportedEdit(ATTRIBUTES[nAttrib].nAttributeID))
-			mapAttrib.Add(ATTRIBUTES[nAttrib].nAttributeID);
+		if (IsSupportedEdit(TASKATTRIBUTES[nAttrib].nAttributeID))
+			mapAttrib.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 	}
 
 	return mapAttrib.GetCount();
@@ -2944,8 +2944,8 @@ int TDCCOLEDITFILTERVISIBILITY::UpdateFilterVisibility()
 
 		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 		{
-			if (IsFilterFieldVisible(ATTRIBUTES[nAttrib].nAttributeID))
-				mapVisibleFilters.Add(ATTRIBUTES[nAttrib].nAttributeID);
+			if (IsFilterFieldVisible(TASKATTRIBUTES[nAttrib].nAttributeID))
+				mapVisibleFilters.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 		}
 	}
 
@@ -2958,8 +2958,8 @@ int TDCCOLEDITFILTERVISIBILITY::GetAllFilterFields(CTDCAttributeMap& mapAttrib)
 
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (IsSupportedFilter(ATTRIBUTES[nAttrib].nAttributeID))
-			mapAttrib.Add(ATTRIBUTES[nAttrib].nAttributeID);
+		if (IsSupportedFilter(TASKATTRIBUTES[nAttrib].nAttributeID))
+			mapAttrib.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 	}
 
 	return mapAttrib.GetCount();
