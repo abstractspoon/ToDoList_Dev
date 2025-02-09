@@ -336,6 +336,41 @@ private:
 		static int AscendingSortProc(const void* item1, const void* item2);
 		static int DescendingSortProc(const void* item1, const void* item2);
 	};
+
+	// ---------------------------------------------------------------------
+
+	struct ATTRIBITEM
+	{
+		ATTRIBITEM(CString sName = _T(""), TDC_ATTRIBUTE nAttribID = TDCA_NONE);
+
+		CString sName;
+		TDC_ATTRIBUTE nAttribID;
+	};
+
+	class CAttributeOrder : public CArray<ATTRIBITEM, ATTRIBITEM&>
+	{
+	public:
+		CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribs);
+
+		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow);
+		int CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const;
+
+	protected:
+		const CTDCCustomAttribDefinitionArray& m_aCustAttribs;
+
+		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
+
+	private:
+		void RebuildPositionMap();
+		int GetAttribPos(TDC_ATTRIBUTE nAttribID) const;
+
+		static int SortProc(const void* item1, const void* item2);
+
+	};
+
+	CAttributeOrder m_aAttribOrder;
+
+	// ---------------------------------------------------------------------
 };
 
 /////////////////////////////////////////////////////////////////////////////

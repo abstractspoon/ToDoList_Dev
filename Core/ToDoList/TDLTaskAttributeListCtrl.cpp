@@ -153,6 +153,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_fAttribColProportion(0.5f),
 	m_bGrouped(FALSE),
 	m_aSortedGroupedItems(*this),
+	m_aAttribOrder(aCustAttribDefs),
 	m_reminders(rems),
 	m_eSingleFileLink(FES_GOBUTTON),
 	m_cbMultiFileLink(FES_GOBUTTON),
@@ -285,7 +286,7 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 	m_bSortAscending = !m_bSortAscending;
 
 	if (m_bGrouped)
-		Populate();
+		Populate(); // will also sort 
 	else
 		Sort();
 }
@@ -311,12 +312,13 @@ int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2
 		if (bAttrib1IsTime && bAttrib2IsTime)
 		{
 			ASSERT(nDateAttribID1 != nDateAttribID2);
-			return CInputListCtrl::CompareItems(nDateAttribID1, nDateAttribID2, nSortColumn);
-		}
 
-		// else if the first item is a time field
-		if (bAttrib1IsTime)
+			nAttribID1 = nDateAttribID1;
+			nAttribID2 = nDateAttribID2;
+		}
+		else if (bAttrib1IsTime)
 		{
+			// else if the first item is a time field
 			ASSERT(!bAttrib2IsTime);
 
 			// If the second attribute is the first attribute's  
@@ -331,28 +333,29 @@ int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2
 
 			// else we use the date field for the comparison
 			// to keep the date and time adjacent to one another
-			return CInputListCtrl::CompareItems(nDateAttribID1, dwItemData2, nSortColumn);
+			nAttribID1 = nDateAttribID1;
 		}
-
-		// else second item must be a time field
-		ASSERT(bAttrib2IsTime);
-
-		// If the first attribute is the second attribute's
-		// date field we sort the time below the date
-		if (nAttribID1 == nDateAttribID2)
+		else // else second item must be a time field
 		{
 			ASSERT(bAttrib2IsTime);
-			ASSERT(nAttribID1 != TDCA_NONE);
 
-			return (m_bSortAscending ? -1 : 1);
+			// If the first attribute is the second attribute's
+			// date field we sort the time below the date
+			if (nAttribID1 == nDateAttribID2)
+			{
+				ASSERT(bAttrib2IsTime);
+				ASSERT(nAttribID1 != TDCA_NONE);
+
+				return (m_bSortAscending ? -1 : 1);
+			}
+
+			// else we use the date field for the comparison
+			// to keep the date and time adjacent to one another
+			nAttribID2 = nDateAttribID2;
 		}
-
-		// else we use the date field for the comparison
-		// to keep the date and time adjacent to one another
-		return CInputListCtrl::CompareItems(dwItemData1, nDateAttribID2, nSortColumn);
 	}
 
-	return CInputListCtrl::CompareItems(dwItemData1, dwItemData2, nSortColumn);
+	return m_aAttribOrder.CompareItems(nAttribID1, nAttribID2);
 }
 
 void CTDLTaskAttributeListCtrl::ToggleGrouping()
@@ -4300,6 +4303,116 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::AscendingSortProc(cons
 int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::DescendingSortProc(const void* item1, const void* item2)
 {
 	return -AscendingSortProc(item1, item2);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(CString name, TDC_ATTRIBUTE nAttID)
+	:
+	sName(name),
+	nAttribID(nAttID)
+{
+}
+
+CTDLTaskAttributeListCtrl::CAttributeOrder::CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribs)
+	:
+	m_aCustAttribs(aCustAttribs)
+{
+	// Built-in (excluding TDCA_NONE)
+	for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
+	{
+		const TDCATTRIBUTE& attrib = TASKATTRIBUTES[nAtt];
+		Add(ATTRIBITEM(CEnString(attrib.nAttribResID), attrib.nAttributeID));
+	}
+
+	// Custom
+	CString sCustLabel;
+
+	for (int nCust = 0; nCust < 64; nCust++)
+	{
+		if (nCust < aCustAttribs.GetSize())
+			sCustLabel = m_aCustAttribs[nCust].sLabel;
+		else
+			sCustLabel.Empty();
+
+		Add(ATTRIBITEM(sCustLabel, (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB_FIRST + nCust)));
+	}
+
+	// Misc other
+	Add(ATTRIBITEM(CEnString(IDS_TDLBC_REMINDER), TDCA_REMINDER));
+
+	// Sort 
+	Misc::SortArrayT(*this, SortProc);
+	RebuildPositionMap();
+}
+
+BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow)
+{
+	ASSERT(nAttribID != TDCA_NONE);
+
+	int nOldPos = GetAttribPos(nAttribID);
+	int nNewPos = (GetAttribPos(nAttribIDBelow) + 1);
+
+	if ((nOldPos < 0) || (nNewPos < 0))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (nNewPos == nOldPos)
+		return FALSE;
+
+	ATTRIBITEM item = GetAt(nOldPos);
+	InsertAt(nNewPos, item);
+
+	if (nNewPos > nOldPos)
+		RemoveAt(nOldPos);
+	else
+		RemoveAt(nOldPos + 1);
+	
+	RebuildPositionMap();
+	return TRUE;
+}
+
+int CTDLTaskAttributeListCtrl::CAttributeOrder::GetAttribPos(TDC_ATTRIBUTE nAttribID) const
+{
+	int nPos = -1;
+	
+	if (!m_mapPositions.Lookup(nAttribID, nPos) && (nAttribID != TDCA_NONE))
+	{
+		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
+		nPos = (GetSize() - 1);
+	}
+
+	return nPos;
+}
+
+int CTDLTaskAttributeListCtrl::CAttributeOrder::CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const
+{
+	ASSERT((nAttribID1 != TDCA_NONE) && (nAttribID2 != TDCA_NONE));
+
+	int nPos1 = GetAttribPos(nAttribID1);
+	int nPos2 = GetAttribPos(nAttribID2);
+
+	return (nPos1 - nPos2);
+}
+
+int CTDLTaskAttributeListCtrl::CAttributeOrder::SortProc(const void* item1, const void* item2)
+{
+	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
+	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
+
+	return Misc::NaturalCompare(pItem1->sName, pItem2->sName);
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::RebuildPositionMap()
+{
+	m_mapPositions.RemoveAll();
+
+	for (int nItem = 0; nItem < GetSize(); nItem++)
+	{
+		m_mapPositions[GetAt(nItem).nAttribID] = nItem;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
