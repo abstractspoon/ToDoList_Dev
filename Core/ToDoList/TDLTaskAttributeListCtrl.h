@@ -74,6 +74,9 @@ public:
 	void ToggleGrouping();
 	BOOL IsGrouped() const { return m_bGrouped; }
 
+	BOOL MoveSelectedAttribute(BOOL bUp);
+	BOOL CanMoveSelectedAttribute(BOOL bUp) const;
+
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
 	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;

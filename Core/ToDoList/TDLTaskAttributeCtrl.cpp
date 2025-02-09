@@ -50,6 +50,8 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 
 	ON_COMMAND(ID_GROUP_ATTRIBUTES, OnGroupAttributes)
 	ON_COMMAND(ID_TOGGLE_SORT, OnToggleSorting)
+	ON_COMMAND(ID_MOVEATTRIB_UP, OnMoveAttributeUp)
+	ON_COMMAND(ID_MOVEATTRIB_DOWN, OnMoveAttributeDown)
 
 	// These we just forward to our parent
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnEditTaskAttribute)
@@ -176,6 +178,16 @@ void CTDLTaskAttributeCtrl::OnToggleSorting()
 	m_lcAttributes.ToggleSortDirection();
 }
 
+void CTDLTaskAttributeCtrl::OnMoveAttributeUp()
+{
+	m_lcAttributes.MoveSelectedAttribute(TRUE);
+}
+
+void CTDLTaskAttributeCtrl::OnMoveAttributeDown()
+{
+	m_lcAttributes.MoveSelectedAttribute(FALSE);
+}
+
 void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
 {
 	m_lcAttributes.LoadState(prefs, szKey);
@@ -190,6 +202,8 @@ void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 {
 	m_toolbar.GetToolBarCtrl().PressButton(ID_GROUP_ATTRIBUTES, m_lcAttributes.IsGrouped());
+
+
 }
 
 // -----------------------------------------------------------------------

@@ -291,6 +291,55 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 		Sort();
 }
 
+BOOL CTDLTaskAttributeListCtrl::MoveSelectedAttribute(BOOL bUp)
+{
+	if (!CanMoveSelectedAttribute(bUp))
+		return FALSE;
+
+	int nSelRow = GetCurSel();
+
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nSelRow);
+	TDC_ATTRIBUTE nAttribIDBelow = TDCA_NONE; // ie. Move to top
+
+	if (bUp)
+	{
+		if (nSelRow > 1)
+			nAttribIDBelow = GetAttributeID(nSelRow - 2, TRUE); // resolve times to dates
+	}
+	else
+	{
+		nAttribIDBelow = GetAttributeID(nSelRow + 1);
+
+		// Avoid time fields
+		if (MapTimeToDate(nAttribIDBelow) != TDCA_NONE)
+			nAttribIDBelow = GetAttributeID(nSelRow + 2);
+	}
+
+	VERIFY (m_aAttribOrder.MoveAttribute(nAttribID, nAttribIDBelow));
+	Sort();
+
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CanMoveSelectedAttribute(BOOL bUp) const
+{
+	// Can't move time of day rows
+	int nSelRow = GetCurSel();
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nSelRow);
+
+	if (MapTimeToDate(nAttribID) != TDCA_NONE)
+		return FALSE;
+
+	// else
+	if (bUp)
+		return (nSelRow > 0);
+	
+	// else
+	int nLastItem = (GetItemCount() - 1);
+
+	return (nSelRow < nLastItem);
+}
+
 int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
 {
 	TDC_ATTRIBUTE nAttribID1 = (TDC_ATTRIBUTE)dwItemData1;
