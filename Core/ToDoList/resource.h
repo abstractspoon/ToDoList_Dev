@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by ToDoList.rc
 //
 #define IDR_MANIFEST                    1
@@ -1611,6 +1611,8 @@
 #define ID_TOOLS_TOGGLEDARKMODE         34768
 #define ID_TOOLS_ANONYMIZE_TASKTIMELOG  34769
 #define ID_ATTRIBLIST_CLEARATTRIBVALUES 34770
+#define ID_MOVEATTRIB_UP                34771
+#define ID_MOVEATTRIB_DOWN              34773
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -2562,7 +2564,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        335
-#define _APS_NEXT_COMMAND_VALUE         34771
+#define _APS_NEXT_COMMAND_VALUE         34774
 #define _APS_NEXT_CONTROL_VALUE         1583
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

@@ -2387,7 +2387,11 @@ END
 IDR_TASK_ATTRIBUTE_TOOLBAR TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_GROUP_ATTRIBUTES
+    SEPARATOR
     BUTTON      ID_TOGGLE_SORT
+    SEPARATOR
+    BUTTON      ID_MOVEATTRIB_UP
+    BUTTON      ID_MOVEATTRIB_DOWN
 END
 
 
@@ -5239,6 +5243,8 @@ END
 STRINGTABLE
 BEGIN
     ID_TOOLS_TOGGLEDARKMODE "\nToggle Dark Mode"
+    ID_MOVEATTRIB_UP        "\nMove Attribute Up"
+    ID_MOVEATTRIB_DOWN      "\nMove Attribute Down"
 END
 
 #endif    // English (Australia) resources
