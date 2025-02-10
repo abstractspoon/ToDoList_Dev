@@ -462,6 +462,8 @@ void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) co
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
 	prefs.WriteProfileInt(szKey, _T("AttribSortAscending"), m_bSortAscending);
 	prefs.WriteProfileInt(szKey, _T("AttribGrouped"), m_bGrouped);
+
+	m_aAttribOrder.SaveState(prefs, szKey);
 }
 
 void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
@@ -469,6 +471,8 @@ void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szK
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
 	m_bGrouped = prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE);
+
+	m_aAttribOrder.LoadState(prefs, szKey);
 
 	if (GetSafeHwnd())
 	{
@@ -517,6 +521,8 @@ void CTDLTaskAttributeListCtrl::SetTimeTrackTaskID(DWORD dwTaskID)
 
 void CTDLTaskAttributeListCtrl::OnCustomAttributesChange()
 {
+	m_aAttribOrder.UpdateCustomAttributes(m_aCustomAttribDefs);
+
 	Populate();
 }
 
@@ -4359,40 +4365,46 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::DescendingSortProc(con
 CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(CString name, TDC_ATTRIBUTE nAttID)
 	:
 	sName(name),
-	nAttribID(nAttID)
+	nAttribID(nAttID),
+	nPos(0)
 {
 }
 
-CTDLTaskAttributeListCtrl::CAttributeOrder::CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribs)
-	:
-	m_aCustAttribs(aCustAttribs)
+BOOL CTDLTaskAttributeListCtrl::ATTRIBITEM::IsCustom() const
 {
-	// Built-in (excluding TDCA_NONE)
+	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
+}
+
+CTDLTaskAttributeListCtrl::CAttributeOrder::CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+{
+	// Built-in attributes (excluding TDCA_NONE)
 	for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
 	{
 		const TDCATTRIBUTE& attrib = TASKATTRIBUTES[nAtt];
-		Add(ATTRIBITEM(CEnString(attrib.nAttribResID), attrib.nAttributeID));
+		m_aAttributeItems.Add(ATTRIBITEM(CEnString(attrib.nAttribResID), attrib.nAttributeID));
 	}
 
-	// Custom
+	// Custom attributes
+	m_aCustomAttribDefs.Copy(aCustAttribDefs);
+	
 	CString sCustLabel;
+	ATTRIBITEM item;
 
-	for (int nCust = 0; nCust < 64; nCust++)
+	for (int nCust = 0; nCust < aCustAttribDefs.GetSize(); nCust++)
 	{
-		if (nCust < aCustAttribs.GetSize())
-			sCustLabel = m_aCustAttribs[nCust].sLabel;
-		else
-			sCustLabel.Empty();
+		item.sName = aCustAttribDefs[nCust].sLabel;
+		item.sCustAttribID = aCustAttribDefs[nCust].sUniqueID;
+		item.nAttribID = (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB_FIRST + nCust);
 
-		Add(ATTRIBITEM(sCustLabel, (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB_FIRST + nCust)));
+		m_aAttributeItems.Add(item);
 	}
 
 	// Misc other
-	Add(ATTRIBITEM(CEnString(IDS_TDLBC_REMINDER), TDCA_REMINDER));
+	m_aAttributeItems.Add(ATTRIBITEM(CEnString(IDS_TDLBC_REMINDER), TDCA_REMINDER));
 
 	// Sort 
-	Misc::SortArrayT(*this, SortProc);
-	RebuildPositionMap();
+	Misc::SortArrayT(m_aAttributeItems, SortByNameProc);
+	RebuildItemPositions();
 }
 
 BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow)
@@ -4411,15 +4423,15 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::MoveAttribute(TDC_ATTRIBUTE nAt
 	if (nNewPos == nOldPos)
 		return FALSE;
 
-	ATTRIBITEM item = GetAt(nOldPos);
-	InsertAt(nNewPos, item);
+	ATTRIBITEM item = m_aAttributeItems.GetAt(nOldPos);
+	m_aAttributeItems.InsertAt(nNewPos, item);
 
 	if (nNewPos > nOldPos)
-		RemoveAt(nOldPos);
+		m_aAttributeItems.RemoveAt(nOldPos);
 	else
-		RemoveAt(nOldPos + 1);
+		m_aAttributeItems.RemoveAt(nOldPos + 1);
 	
-	RebuildPositionMap();
+	RebuildItemPositions();
 	return TRUE;
 }
 
@@ -4430,7 +4442,7 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::GetAttribPos(TDC_ATTRIBUTE nAttr
 	if (!m_mapPositions.Lookup(nAttribID, nPos) && (nAttribID != TDCA_NONE))
 	{
 		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
-		nPos = (GetSize() - 1);
+		nPos = (m_aAttributeItems.GetSize() - 1);
 	}
 
 	return nPos;
@@ -4446,7 +4458,7 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::CompareItems(TDC_ATTRIBUTE nAttr
 	return (nPos1 - nPos2);
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeOrder::SortProc(const void* item1, const void* item2)
+int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByNameProc(const void* item1, const void* item2)
 {
 	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
 	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
@@ -4454,13 +4466,96 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::SortProc(const void* item1, cons
 	return Misc::NaturalCompare(pItem1->sName, pItem2->sName);
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeOrder::RebuildPositionMap()
+int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByPosProc(const void* item1, const void* item2)
+{
+	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
+	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
+
+	return (pItem1->nPos - pItem2->nPos);
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::RebuildItemPositions()
 {
 	m_mapPositions.RemoveAll();
 
-	for (int nItem = 0; nItem < GetSize(); nItem++)
+	int nItem = m_aAttributeItems.GetSize();
+
+	while (nItem--)
 	{
-		m_mapPositions[GetAt(nItem).nAttribID] = nItem;
+		ATTRIBITEM& item = m_aAttributeItems[nItem];
+
+		item.nPos = nItem;
+		m_mapPositions[item.nAttribID] = nItem;
+	}
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::UpdateCustomAttributes(const CTDCCustomAttribDefinitionArray& aCustAttribs)
+{
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::SaveState(CPreferences& prefs, LPCTSTR szKey) const
+{
+	// Write the current order out as a delimited string
+	if (m_aCustomAttribDefs.GetSize())
+	{
+		CStringArray aOrder;
+		aOrder.SetSize(m_aAttributeItems.GetSize());
+
+		int nItem = m_aAttributeItems.GetSize();
+
+		while (nItem--)
+		{
+			const ATTRIBITEM& item = m_aAttributeItems[nItem];
+
+			if (item.IsCustom())
+				aOrder[nItem] = item.sCustAttribID;
+			else
+				aOrder[nItem].Format(_T("%d"), item.nAttribID);
+		}
+
+		prefs.WriteProfileString(szKey, _T("AttribOrder"), Misc::FormatArray(aOrder, ITEM_DELIM));
+	}
+	else
+	{
+		CDWordArray aOrder;
+		aOrder.SetSize(m_aAttributeItems.GetSize());
+
+		int nItem = m_aAttributeItems.GetSize();
+
+		while (nItem--)
+			aOrder[nItem] = m_aAttributeItems[nItem].nAttribID;
+
+		prefs.WriteProfileString(szKey, _T("AttribOrder"), Misc::FormatArray(aOrder, ITEM_DELIM));
+	}
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::LoadState(const CPreferences& prefs, LPCTSTR szKey)
+{
+	CString sOrder = prefs.GetProfileString(szKey, _T("AttribOrder"));
+
+	if (!sOrder.IsEmpty())
+	{
+		CStringArray aOrder;
+		int nNumItems = Misc::Split(sOrder, aOrder, ITEM_DELIM);
+
+		for (int nItem = 0; nItem < nNumItems; nItem++)
+		{
+			TDC_ATTRIBUTE nAttribID = TDCA_NONE;
+			const CString& sItem = aOrder[nItem];
+
+			if (Misc::IsNumber(sItem))
+				nAttribID = (TDC_ATTRIBUTE)_ttoi(sItem);
+			else
+				nAttribID = m_aCustomAttribDefs.GetAttributeID(sItem);
+
+			int nOldPos = GetAttribPos(nAttribID);
+
+			if (nOldPos != -1)
+				m_aAttributeItems[nOldPos].nPos = nItem;
+		}
+
+		Misc::SortArrayT(m_aAttributeItems, SortByPosProc);
+		RebuildItemPositions();
 	}
 }
 

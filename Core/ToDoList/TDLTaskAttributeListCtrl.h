@@ -344,30 +344,41 @@ private:
 
 	struct ATTRIBITEM
 	{
-		ATTRIBITEM(CString sName = _T(""), TDC_ATTRIBUTE nAttribID = TDCA_NONE);
+		ATTRIBITEM(const CString sName = _T(""), TDC_ATTRIBUTE nAttribID = TDCA_NONE);
+
+		BOOL IsCustom() const;
 
 		CString sName;
 		TDC_ATTRIBUTE nAttribID;
+		CString sCustAttribID;
+		int nPos;
 	};
 
-	class CAttributeOrder : public CArray<ATTRIBITEM, ATTRIBITEM&>
+	class CAttributeOrder
 	{
 	public:
-		CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribs);
+		CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow);
+		void UpdateCustomAttributes(const CTDCCustomAttribDefinitionArray& aCustAttribs);
+
+		void SaveState(CPreferences& prefs, LPCTSTR szKey) const;
+		void LoadState(const CPreferences& prefs, LPCTSTR szKey);
+
 		int CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const;
 
 	protected:
-		const CTDCCustomAttribDefinitionArray& m_aCustAttribs;
+		CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
+		CArray<ATTRIBITEM, ATTRIBITEM&> m_aAttributeItems;
 
 	private:
-		void RebuildPositionMap();
+		void RebuildItemPositions();
 		int GetAttribPos(TDC_ATTRIBUTE nAttribID) const;
 
-		static int SortProc(const void* item1, const void* item2);
+		static int SortByNameProc(const void* item1, const void* item2);
+		static int SortByPosProc(const void* item1, const void* item2);
 
 	};
 
