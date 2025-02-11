@@ -6705,10 +6705,13 @@ void CTabbedToDoCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 	}
 }
 
-void CTabbedToDoCtrl::OnListSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CTabbedToDoCtrl::OnListSelChanged(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	*pResult = 0;
-	OnListSelChanged();
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+	{
+		OnListSelChanged();
+		*pResult = 0;
+	}
 }
 
 void CTabbedToDoCtrl::OnListSelChanged()

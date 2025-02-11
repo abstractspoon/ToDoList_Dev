@@ -1180,8 +1180,11 @@ void CTDLCustomAttributeDlg::OnDoubleClickItem(NMHDR* pNMHDR, LRESULT* pResult)
 		m_lcAttributes.EditLabel(nItem);
 }
 
-void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
+void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* /*pResult*/) 
 {
+	if (!CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+		return;
+
 	int nSel = GetCurSel();
 
 	// Changing a single selection listctrl always cycles

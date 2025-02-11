@@ -1362,12 +1362,13 @@ int CTDLFindTasksDlg::GetSelectedItem()
 	return m_nCurSel;
 }
 
-void CTDLFindTasksDlg::OnItemchangedRulelist(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CTDLFindTasksDlg::OnItemchangedRulelist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-//	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-
-	if (m_toolbar.GetSafeHwnd())
-		m_toolbar.RefreshButtonStates();
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+	{
+		if (m_toolbar.GetSafeHwnd())
+			m_toolbar.RefreshButtonStates();
+	}
 
 	// enable 'set as filter' provided there is something to set
 	EnableApplyAsFilterButton();
