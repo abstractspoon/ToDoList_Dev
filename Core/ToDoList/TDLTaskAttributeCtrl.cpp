@@ -53,6 +53,8 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_COMMAND(ID_MOVEATTRIB_UP, OnMoveAttributeUp)
 	ON_COMMAND(ID_MOVEATTRIB_DOWN, OnMoveAttributeDown)
 
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_TASKATTRIBUTES, OnItemChanged)
+
 	// These we just forward to our parent
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnEditTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnEditTaskReminder)
@@ -176,16 +178,25 @@ void CTDLTaskAttributeCtrl::OnGroupAttributes()
 void CTDLTaskAttributeCtrl::OnToggleSorting()
 {
 	m_lcAttributes.ToggleSortDirection();
+	UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnItemChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
+{
+	if (m_lcAttributes.IsSelectionChange((NMLISTVIEW*)pNMHDR))
+		UpdateToolbarButtons();
 }
 
 void CTDLTaskAttributeCtrl::OnMoveAttributeUp()
 {
-	m_lcAttributes.MoveSelectedAttribute(TRUE);
+	if (m_lcAttributes.MoveSelectedAttribute(TRUE))
+		UpdateToolbarButtons();
 }
 
 void CTDLTaskAttributeCtrl::OnMoveAttributeDown()
 {
-	m_lcAttributes.MoveSelectedAttribute(FALSE);
+	if (m_lcAttributes.MoveSelectedAttribute(FALSE))
+		UpdateToolbarButtons();
 }
 
 void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
@@ -201,9 +212,11 @@ void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 
 void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 {
-	m_toolbar.GetToolBarCtrl().PressButton(ID_GROUP_ATTRIBUTES, m_lcAttributes.IsGrouped());
-
-
+	CToolBarCtrl& tb = m_toolbar.GetToolBarCtrl();
+	
+	tb.PressButton(ID_GROUP_ATTRIBUTES, m_lcAttributes.IsGrouped());
+	tb.EnableButton(ID_MOVEATTRIB_UP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
+	tb.EnableButton(ID_MOVEATTRIB_DOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
 }
 
 // -----------------------------------------------------------------------
