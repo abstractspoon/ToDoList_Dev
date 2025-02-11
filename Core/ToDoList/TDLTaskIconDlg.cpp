@@ -10,6 +10,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
+#include "..\shared\enlistctrl.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -286,12 +287,11 @@ void CTDLTaskIconDlg::OnDblclkIconlist(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLTaskIconDlg::OnItemchangedIconlist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	int nItem = -1;
 
-	if (!(pNMListView->uOldState & LVIS_SELECTED) &&
-		 (pNMListView->uNewState & LVIS_SELECTED))
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR, &nItem))
 	{
-		int nImage = m_lcIcons.GetItemData(pNMListView->iItem);
+		int nImage = m_lcIcons.GetItemData(nItem);
 
 		if (nImage == -1)
 			m_sIconName = NO_ICON;
@@ -300,9 +300,8 @@ void CTDLTaskIconDlg::OnItemchangedIconlist(NMHDR* pNMHDR, LRESULT* pResult)
 
 		// disable OK button if nothing selected
 		EnableDisable();
+		*pResult = 0;
 	}
-		
-	*pResult = 0;
 }
 
 void CTDLTaskIconDlg::OnBeginlabeleditIconlist(NMHDR* pNMHDR, LRESULT* pResult) 

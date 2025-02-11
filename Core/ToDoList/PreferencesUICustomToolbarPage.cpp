@@ -220,10 +220,13 @@ void CPreferencesUICustomToolbarPage::OnDuplicateButton()
 		EnableDisableButtons();
 }
 
-void CPreferencesUICustomToolbarPage::OnListSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CPreferencesUICustomToolbarPage::OnListSelChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	*pResult = 0;
-	EnableDisableButtons();
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+	{
+		EnableDisableButtons();
+		*pResult = 0;
+	}
 }
 
 void CPreferencesUICustomToolbarPage::EnableDisableButtons()

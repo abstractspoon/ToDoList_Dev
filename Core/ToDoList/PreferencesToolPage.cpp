@@ -16,6 +16,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\themed.h"
 #include "..\shared\fileicons.h"
+#include "..\shared\enlistctrl.h"
 
 #include "..\3rdparty\ini.h"
 #include "..\3rdparty\XNamedColors.h"
@@ -451,9 +452,11 @@ void CPreferencesToolPage::OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResul
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesToolPage::OnItemchangedToollist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
+void CPreferencesToolPage::OnItemchangedToollist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	EnableControls();
+	if (pNMHDR && !CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+		return;
+
 	int nSel = GetCurSel();
 
 	if (nSel >= 0)
@@ -472,6 +475,8 @@ void CPreferencesToolPage::OnItemchangedToollist(NMHDR* /*pNMHDR*/, LRESULT* /*p
 	}
 
 	UpdateData(FALSE);
+	EnableControls();
+
 	m_toolbar.RefreshButtonStates(FALSE);
 }
 
