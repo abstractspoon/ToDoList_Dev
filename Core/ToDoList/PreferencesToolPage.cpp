@@ -16,6 +16,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\themed.h"
 #include "..\shared\fileicons.h"
+#include "..\shared\enlistctrl.h"
 
 #include "..\3rdparty\ini.h"
 #include "..\3rdparty\XNamedColors.h"
@@ -451,28 +452,33 @@ void CPreferencesToolPage::OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResul
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesToolPage::OnItemchangedToollist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
+void CPreferencesToolPage::OnItemchangedToollist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	EnableControls();
-	int nSel = GetCurSel();
-
-	if (nSel >= 0)
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
 	{
-		m_sToolPath = m_lcTools.GetItemText(nSel, COL_PATH);
-		m_sCommandLine = m_lcTools.GetItemText(nSel, COL_ARGS);
-		m_sIconPath = m_lcTools.GetItemText(nSel, COL_ICON);
-		m_bRunMinimized = m_lcTools.GetItemData(nSel);
-	}
-	else
-	{
-		m_sToolPath.Empty();
-		m_sCommandLine.Empty();
-		m_bRunMinimized = FALSE;
-		m_sIconPath.Empty();
-	}
+		int nSel = GetCurSel();
 
-	UpdateData(FALSE);
-	m_toolbar.RefreshButtonStates(FALSE);
+		if (nSel >= 0)
+		{
+			m_sToolPath = m_lcTools.GetItemText(nSel, COL_PATH);
+			m_sCommandLine = m_lcTools.GetItemText(nSel, COL_ARGS);
+			m_sIconPath = m_lcTools.GetItemText(nSel, COL_ICON);
+			m_bRunMinimized = m_lcTools.GetItemData(nSel);
+		}
+		else
+		{
+			m_sToolPath.Empty();
+			m_sCommandLine.Empty();
+			m_bRunMinimized = FALSE;
+			m_sIconPath.Empty();
+		}
+
+		UpdateData(FALSE);
+		EnableControls();
+
+		m_toolbar.RefreshButtonStates(FALSE);
+		*pResult = 0;
+	}
 }
 
 void CPreferencesToolPage::EnableControls()

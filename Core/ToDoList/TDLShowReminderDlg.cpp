@@ -409,21 +409,11 @@ void CTDLShowReminderDlg::UpdateControls()
 
 void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (!m_bModifyingList)
+	if (!m_bModifyingList && CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
 	{
-		NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-
-		if (pNMListView->uChanged & LVIF_STATE)
-		{
-			BOOL bWasSel = (pNMListView->uOldState & LVIS_SELECTED);
-			BOOL bIsSel = (pNMListView->uNewState & LVIS_SELECTED);
-
-			if (Misc::StateChanged(bIsSel, bWasSel))
-				UpdateControls();
-		}
+		UpdateControls();
+		*pResult = 0;
 	}
-
-	*pResult = 0;
 }
 
 void CTDLShowReminderDlg::OnDblClkReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult) 

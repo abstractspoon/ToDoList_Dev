@@ -119,8 +119,9 @@ public:
 	void DeleteAllColumns();
 	void SetLastColumnStretchy(BOOL bStretchy);
 	void SetFirstColumnStretchy(BOOL bStretchy);
-
 	void OverrideSelectionTheming(BOOL bThemed, BOOL bClassic) { m_dwSelectionTheming = MAKELONG(bThemed, bClassic); }
+
+	static BOOL IsSelectionChange(NMLISTVIEW* pNMLV, int* pItem = NULL);
 	static void EnableSelectionTheming(BOOL bThemed, BOOL bClassic) { s_dwSelectionTheming = MAKELONG(bThemed, bClassic); }
 
 #if _MSC_VER >= 1300
