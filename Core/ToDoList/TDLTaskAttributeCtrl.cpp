@@ -7,6 +7,7 @@
 #include "tdcstruct.h"
 
 #include "..\shared\Localizer.h"
+#include "..\shared\EnMenu.h"
 
 #include "..\3rdparty\XNamedColors.h"
 
@@ -47,6 +48,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_WM_SIZE()
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
+	ON_WM_CONTEXTMENU()
 
 	ON_COMMAND(ID_ATTRIBCTRL_TOGGLEGROUP, OnToggleGrouping)
 	ON_COMMAND(ID_ATTRIBCTRL_TOGGLESORT, OnToggleSorting)
@@ -60,16 +62,11 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnEditTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnAttributeEdited)
 	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoItemAddedOrDeleted)
-	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnClearTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnToggleTimeTracking)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnAddTimeToLogFile)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTDEPENDENCIES, OnSelectDependencies)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_DISPLAYLINK, OnDisplayLink)
-	ON_REGISTERED_MESSAGE(WM_TDCM_COPYTASKATTRIBUTE, OnCopyTaskAttribute)
-	ON_REGISTERED_MESSAGE(WM_TDCM_PASTETASKATTRIBUTE, OnPasteTaskAttribute)
-	ON_REGISTERED_MESSAGE(WM_TDCM_CANCOPYTASKATTRIBUTE, OnCanCopyTaskAttribute)
-	ON_REGISTERED_MESSAGE(WM_TDCM_CANPASTETASKATTRIBUTE, OnCanPasteTaskAttribute)
 
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 
@@ -85,17 +82,11 @@ FWD_MSG(WM_TDCM_EDITTASKATTRIBUTE,		OnEditTaskAttribute)
 FWD_MSG(WM_TDCM_EDITTASKREMINDER,		OnEditTaskReminder)
 FWD_MSG(WM_TDCN_ATTRIBUTEEDITED,		OnAttributeEdited)
 FWD_MSG(WM_TDCN_AUTOITEMADDEDDELETED,	OnAutoItemAddedOrDeleted)
-FWD_MSG(WM_TDCM_CLEARTASKATTRIBUTE,		OnClearTaskAttribute)
 FWD_MSG(WM_TDCM_TOGGLETIMETRACKING,		OnToggleTimeTracking)
 FWD_MSG(WM_TDCM_ADDTIMETOLOGFILE,		OnAddTimeToLogFile)
 FWD_MSG(WM_TDCM_SELECTDEPENDENCIES,		OnSelectDependencies)
 FWD_MSG(WM_TDCM_GETLINKTOOLTIP,			OnGetLinkTooltip)
 FWD_MSG(WM_TDCM_DISPLAYLINK,			OnDisplayLink)
-FWD_MSG(WM_TDCM_COPYTASKATTRIBUTE,		OnCopyTaskAttribute)
-FWD_MSG(WM_TDCM_PASTETASKATTRIBUTE,		OnPasteTaskAttribute)
-FWD_MSG(WM_TDCM_CANCOPYTASKATTRIBUTE,	OnCanCopyTaskAttribute)
-FWD_MSG(WM_TDCM_CANPASTETASKATTRIBUTE,	OnCanPasteTaskAttribute)
-
 FWD_MSG(WM_FE_GETFILEICON,				OnGetFileIcon)
 
 /////////////////////////////////////////////////////////////////////////////
@@ -217,6 +208,93 @@ void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 	tb.PressButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.IsGrouped());
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
+}
+
+void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+{
+	int nRow, nCol;
+
+	if (!m_lcAttributes.GetCurSel(nRow, nCol) || (nCol == 0))
+		return; // eat
+
+	// Decide whether we should show a menu at all
+	TDC_ATTRIBUTE nAttribID = m_lcAttributes.GetSelectedAttributeID();
+
+	if (!GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
+		return; // eat
+
+	CMenu menu;
+
+	if (menu.LoadMenu(IDR_MISC))
+	{
+		CMenu* pPopup = menu.GetSubMenu(MM_ATTRIBUTECTRL);
+
+		// Prepare menu items
+		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
+		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
+
+		// Copy command
+		CEnString sMenuText;
+
+		if (GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
+		{
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
+
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
+
+		// Paste command
+		TDC_ATTRIBUTE nFromAttribID = TDCA_NONE;
+
+		if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
+		{
+			CString sFromAttrib = m_lcAttributes.GetAttributeLabel(nFromAttribID);
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
+
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_PASTEATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
+
+		// Clear command
+		if (m_lcAttributes.CanEditSelectedAttribute())
+		{
+			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
+
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+		}
+		else
+		{
+			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+		}
+
+		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
+									   pos.x, pos.y, 0, GetSafeHwnd(), NULL);
+
+		switch (nCmdID)
+		{
+		case ID_ATTRIBLIST_COPYATTRIBVALUES:
+			GetParent()->SendMessage(WM_TDCM_COPYTASKATTRIBUTE, nAttribID);
+			break;
+
+		case ID_ATTRIBLIST_PASTEATTRIBVALUES:
+			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
+			break;
+
+		case ID_ATTRIBLIST_CLEARATTRIBVALUES:
+			GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID);
+			break;
+		}
+	}
 }
 
 // -----------------------------------------------------------------------

@@ -11,7 +11,6 @@
 #include "tdcmapping.h"
 #include "TDLTaskIconDlg.h"
 
-#include "..\shared\EnMenu.h"
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\FileMisc.h"
 #include "..\shared\HoldRedraw.h"
@@ -189,12 +188,12 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_SIZE()
 	ON_WM_SETCURSOR()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_CAPTURECHANGED()
 	ON_WM_KEYDOWN()
-	ON_WM_CONTEXTMENU()
 
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
@@ -887,7 +886,7 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 		int nRow = SubItemHitTest(&lvHit);
 		int nCol = lvHit.iSubItem;
 
-		if (nCol == VALUE_COL)
+		if ((nRow != -1) && (nCol == VALUE_COL))
 		{
 			BOOL bEditable = CanEditCell(nRow, nCol);
 
@@ -944,6 +943,22 @@ CString CTDLTaskAttributeListCtrl::GetSelectedAttributeLabel() const
 
 	// else
 	return GetItemText(nRow, ATTRIB_COL);
+}
+
+CString CTDLTaskAttributeListCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const
+{
+	int nRow = GetRow(nAttribID);
+
+	if (nRow == -1)
+		return _T("");
+
+	// else
+	return GetItemText(nRow, ATTRIB_COL);
+}
+
+BOOL CTDLTaskAttributeListCtrl::CanEditSelectedAttribute() const
+{
+	return CanEditCell(GetCurSel(), VALUE_COL);
 }
 
 IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
@@ -4117,99 +4132,19 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CInputListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+void CTDLTaskAttributeListCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	HideAllControls();
 
-	LVHITTESTINFO lvHit = { { pos.x, pos.y }, 0 };
-	ScreenToClient(&lvHit.pt);
+	LVHITTESTINFO lvHit = { point, 0 };
 
 	int nRow = SubItemHitTest(&lvHit);
 	int nCol = lvHit.iSubItem;
 
-	if (nCol != VALUE_COL)
-		return; // eat
-
 	SetCurSel(nRow, nCol);
 
-	// Decide whether we should show a menu at all
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow, TRUE);
-
-	if (!GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
-		return; // eat
-
-	CMenu menu;
-
-	if (menu.LoadMenu(IDR_MISC))
-	{
-		CMenu* pPopup = menu.GetSubMenu(MM_ATTRIBUTECTRL);
-
-		// Prepare menu items
-		BOOL bMultiSel = (m_aSelectedTaskIDs.GetSize() > 1);
-		CString sAttrib = GetItemText(nRow, ATTRIB_COL);
-
-		// Copy command
-		CEnString sMenuText;
-
-		if (GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
-		{
-			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
-
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
-		}
-		else
-		{
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
-		}
-
-		// Paste command
-		TDC_ATTRIBUTE nFromAttribID = TDCA_NONE;
-
-		if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
-		{
-			CString sFromAttrib = GetItemText(GetRow(nFromAttribID), ATTRIB_COL);
-			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
-
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_PASTEATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
-		}
-		else
-		{
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
-		}
-
-		// Clear command
-		if (CanEditCell(nRow, nCol))
-		{
-			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
-
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
-		}
-		else
-		{
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
-		}
-
-		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
-									   pos.x, pos.y, 0, GetSafeHwnd(), NULL);
-
-		switch (nCmdID)
-		{
-		case ID_ATTRIBCTRL_COPYATTRIBVALUES:
-			GetParent()->SendMessage(WM_TDCM_COPYTASKATTRIBUTE, nAttribID);
-			break;
-
-		case ID_ATTRIBCTRL_PASTEATTRIBVALUES:
-			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
-			break;
-
-		case ID_ATTRIBCTRL_CLEARATTRIBVALUES:
-			GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID);
-			break;
-		}
-	}
+	// Parent handles context menu
+	CInputListCtrl::OnRButtonDown(nFlags, point);
 }
 
 CString CTDLTaskAttributeListCtrl::FormatValueArray(const CStringArray& aValues)
