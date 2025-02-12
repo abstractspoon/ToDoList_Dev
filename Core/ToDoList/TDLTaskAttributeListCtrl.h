@@ -264,6 +264,9 @@ protected:
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
 	BOOL SetValueText(int nRow, const CString& sNewText, LPARAM bUnitsChange = FALSE);
 
+	BOOL GetAttributeToMoveBelow(TDC_ATTRIBUTE nAttribID, BOOL bUp, TDC_ATTRIBUTE& nBelowAttribID) const;
+	BOOL IsAttributeMoveLimited(TDC_ATTRIBUTE nAttribID, BOOL bUp) const;
+
 	int HitTestButtonID(int nRow) const;
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;
 	BOOL CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText) const;
@@ -344,13 +347,16 @@ private:
 
 	struct ATTRIBITEM
 	{
-		ATTRIBITEM(const CString sName = _T(""), TDC_ATTRIBUTE nAttribID = TDCA_NONE);
+		ATTRIBITEM(const CString sName = _T(""), TDC_ATTRIBUTE nAttribID = TDCA_NONE, TDC_ATTRIBUTEGROUP nGroup = TDCAG_NONE);
+		ATTRIBITEM(const TDCATTRIBUTE& attrib);
+		ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
 		BOOL IsCustom() const;
 
 		CString sName;
 		TDC_ATTRIBUTE nAttribID;
 		CString sCustAttribID;
+		TDC_ATTRIBUTEGROUP nGroup;
 		int nPos;
 	};
 
@@ -359,19 +365,20 @@ private:
 	public:
 		CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
-		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow);
+		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nBelowAttribID);
 		void UpdateCustomAttributes(const CTDCCustomAttribDefinitionArray& aCustAttribs);
 
 		void SaveState(CPreferences& prefs, LPCTSTR szKey) const;
 		void LoadState(const CPreferences& prefs, LPCTSTR szKey);
 
 		int CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const;
+		BOOL GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const;
 
 	protected:
 		CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
+		CArray<ATTRIBITEM, ATTRIBITEM&> m_aAttributeItems;
 
 		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
-		CArray<ATTRIBITEM, ATTRIBITEM&> m_aAttributeItems;
 
 	private:
 		void RebuildItemPositions();
@@ -379,7 +386,6 @@ private:
 
 		static int SortByNameProc(const void* item1, const void* item2);
 		static int SortByPosProc(const void* item1, const void* item2);
-
 	};
 
 	CAttributeOrder m_aAttribOrder;

@@ -291,31 +291,85 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 		Sort();
 }
 
-BOOL CTDLTaskAttributeListCtrl::MoveSelectedAttribute(BOOL bUp)
+BOOL CTDLTaskAttributeListCtrl::GetAttributeToMoveBelow(TDC_ATTRIBUTE nAttribID, BOOL bUp, TDC_ATTRIBUTE& nBelowAttribID) const
 {
-	if (!CanMoveSelectedAttribute(bUp))
+	// Reverse direction if sorted descending
+	if (!m_bSortAscending)
+		bUp = !bUp;
+
+	nBelowAttribID = nAttribID;
+
+	if (nAttribID == TDCA_NONE)
 		return FALSE;
 
-	int nSelRow = GetCurSel();
+	// Time of day is not movable
+	if (MapTimeToDate(nAttribID) != TDCA_NONE)
+		return FALSE;
 
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nSelRow);
-	TDC_ATTRIBUTE nAttribIDBelow = TDCA_NONE; // ie. Move to top
+	if (IsAttributeMoveLimited(nAttribID, bUp))
+		return FALSE;
 
-	if (bUp)
+	int nRowOffset = (bUp ? 2 : 1);
+
+	for (int nStep = 0; nStep < nRowOffset; nStep++)
 	{
-		if (nSelRow > 1)
-			nAttribIDBelow = GetAttributeID(nSelRow - 2, TRUE); // resolve times to dates
+		TDC_ATTRIBUTE nNextAttribID;
+		
+		if (!m_aAttribOrder.GetNextAttribute(nBelowAttribID, bUp, m_bGrouped, nNextAttribID))
+		{
+			ASSERT(bUp);
+			ASSERT(nStep == 1);
+
+			// if we are on the second 'step' shifting UP then it means
+			// we're either below the absolute topmost attribute or we're 
+			// below 'our' topmost group item
+			if (m_bGrouped)
+			{
+				// Use whatever attribute is immediately above the topmost
+				// group item regardless of visibility
+				if (m_aAttribOrder.GetNextAttribute(nBelowAttribID, bUp, FALSE, nNextAttribID))
+					break;
+			}
+
+			// else there is no attribute above so we're at the top
+			// so we return TDCA_NONE to insert above the topmost item
+			nNextAttribID = TDCA_NONE;
+		}
+
+		nBelowAttribID = nNextAttribID;
+
+		if (nBelowAttribID == TDCA_NONE)
+			break;
+		
+		// Skip attributes not actually in the list
+		if (GetRow(nBelowAttribID) == -1)
+			nStep--;
 	}
-	else
+
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::IsAttributeMoveLimited(TDC_ATTRIBUTE nAttribID, BOOL bUp) const
+{
+	TDC_ATTRIBUTE nNextAttribID = nAttribID;
+
+	while (m_aAttribOrder.GetNextAttribute(nNextAttribID, bUp, m_bGrouped, nNextAttribID))
 	{
-		nAttribIDBelow = GetAttributeID(nSelRow + 1);
-
-		// Avoid time fields
-		if (MapTimeToDate(nAttribIDBelow) != TDCA_NONE)
-			nAttribIDBelow = GetAttributeID(nSelRow + 2);
+		if (GetRow(nNextAttribID) != -1)
+			return FALSE;
 	}
 
-	VERIFY (m_aAttribOrder.MoveAttribute(nAttribID, nAttribIDBelow));
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::MoveSelectedAttribute(BOOL bUp)
+{
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel()), nBelowAttribID;
+
+	if (!GetAttributeToMoveBelow(nAttribID, bUp, nBelowAttribID))
+		return FALSE;
+
+	VERIFY(m_aAttribOrder.MoveAttribute(nAttribID, nBelowAttribID));
 	Sort();
 
 	return TRUE;
@@ -323,21 +377,9 @@ BOOL CTDLTaskAttributeListCtrl::MoveSelectedAttribute(BOOL bUp)
 
 BOOL CTDLTaskAttributeListCtrl::CanMoveSelectedAttribute(BOOL bUp) const
 {
-	// Can't move time of day rows
-	int nSelRow = GetCurSel();
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nSelRow);
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel()), nUnused;
 
-	if (MapTimeToDate(nAttribID) != TDCA_NONE)
-		return FALSE;
-
-	// else
-	if (bUp)
-		return (nSelRow > 0);
-	
-	// else
-	int nLastItem = (GetItemCount() - 1);
-
-	return (nSelRow < nLastItem);
+	return GetAttributeToMoveBelow(nAttribID, bUp, nUnused);
 }
 
 int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
@@ -4220,11 +4262,11 @@ int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetNextItem(int nKeyPress)
 	switch (nKeyPress)
 	{
 	case VK_DOWN:	
-		nNext = (nFrom + 1);	
+		nNext = (nFrom + 1);
 		break;
 	
 	case VK_UP:		
-		nNext = (nFrom - 1);	
+		nNext = (nFrom - 1);
 		break;
 
 	case VK_NEXT:	
@@ -4236,11 +4278,11 @@ int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetNextItem(int nKeyPress)
 		break;
 
 	case VK_END:	
-		nNext = (nNumItems - 1);	
+		nNext = (nNumItems - 1);
 		break;
 	
 	case VK_HOME:	
-		nNext = 0;	
+		nNext = 0;
 		break;
 
 	default:
@@ -4362,10 +4404,30 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::DescendingSortProc(con
 
 ////////////////////////////////////////////////////////////////////////////////
 
-CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(CString name, TDC_ATTRIBUTE nAttID)
+CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const CString name, TDC_ATTRIBUTE attribID, TDC_ATTRIBUTEGROUP group)
 	:
 	sName(name),
-	nAttribID(nAttID),
+	nAttribID(attribID),
+	nGroup(group),
+	nPos(0)
+{
+}
+
+CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCATTRIBUTE& attrib)
+	:
+	sName(CEnString(attrib.nAttribResID)),
+	nAttribID(attrib.nAttributeID),
+	nGroup(attrib.nGroup),
+	nPos(0)
+{
+}
+
+CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+	:
+	sName(attribDef.sLabel),
+	nAttribID(attribDef.GetAttributeID()),
+	sCustAttribID(attribDef.sUniqueID),
+	nGroup(TDCAG_CUSTOM),
 	nPos(0)
 {
 }
@@ -4380,30 +4442,23 @@ CTDLTaskAttributeListCtrl::CAttributeOrder::CAttributeOrder(const CTDCCustomAttr
 	// Built-in attributes (excluding TDCA_NONE)
 	for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
 	{
-		const TDCATTRIBUTE& attrib = TASKATTRIBUTES[nAtt];
-		m_aAttributeItems.Add(ATTRIBITEM(CEnString(attrib.nAttribResID), attrib.nAttributeID));
+		m_aAttributeItems.Add(ATTRIBITEM(TASKATTRIBUTES[nAtt]));
 	}
 
 	// Custom attributes
 	m_aCustomAttribDefs.Copy(aCustAttribDefs);
 	
-	CString sCustLabel;
-	ATTRIBITEM item;
-
 	for (int nCust = 0; nCust < aCustAttribDefs.GetSize(); nCust++)
 	{
-		item.sName = aCustAttribDefs[nCust].sLabel;
-		item.sCustAttribID = aCustAttribDefs[nCust].sUniqueID;
-		item.nAttribID = (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB_FIRST + nCust);
-
-		m_aAttributeItems.Add(item);
+		m_aAttributeItems.Add(ATTRIBITEM(aCustAttribDefs[nCust]));
 	}
 
-	// Misc other
-	m_aAttributeItems.Add(ATTRIBITEM(CEnString(IDS_TDLBC_REMINDER), TDCA_REMINDER));
+	// Misc others
+	m_aAttributeItems.Add(ATTRIBITEM(CEnString(IDS_TDLBC_REMINDER), TDCA_REMINDER, TDCAG_DATETIME));
 
 	// Sort 
 	Misc::SortArrayT(m_aAttributeItems, SortByNameProc);
+
 	RebuildItemPositions();
 }
 
@@ -4446,6 +4501,69 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::GetAttribPos(TDC_ATTRIBUTE nAttr
 	}
 
 	return nPos;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const
+{
+	if (nAttribID == TDCA_NONE)
+		return FALSE;
+
+	int nPos = GetAttribPos(nAttribID), nNextPos = nPos;
+	int nNumItems = m_aAttributeItems.GetSize();
+
+	if ((bUp && (nPos == 0)) || (!bUp && (nPos >= (nNumItems - 1))))
+		return FALSE;
+
+	if (bSameGroup)
+	{
+		const ATTRIBITEM& attrib = m_aAttributeItems[nPos];
+
+		if (bUp)
+		{
+			for (--nNextPos; nNextPos >= 0; nNextPos--)
+			{
+				const ATTRIBITEM& attribNext = m_aAttributeItems[nNextPos];
+
+				if (attribNext.nGroup == attrib.nGroup)
+				{
+					nNextAttribID = attribNext.nAttribID;
+					return TRUE;
+				}
+			}
+		}
+		else
+		{
+			for (++nNextPos; nNextPos < nNumItems; nNextPos++)
+			{
+				const ATTRIBITEM& attribNext = m_aAttributeItems[nNextPos];
+
+				if (attribNext.nGroup == attrib.nGroup)
+				{
+					nNextAttribID = attribNext.nAttribID;
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
+	}
+	else
+	{
+		if (bUp)
+			nNextPos--;
+		else
+			nNextPos++;
+	}
+
+	if (nNextPos >= nNumItems)
+		return FALSE;
+
+	if (nNextPos < 0)
+		nNextAttribID = TDCA_NONE; // top of list
+	else
+		nNextAttribID = m_aAttributeItems[nNextPos].nAttribID;
+
+	 return (nNextAttribID != nAttribID);
 }
 
 int CTDLTaskAttributeListCtrl::CAttributeOrder::CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const
