@@ -73,6 +73,7 @@ public:
 	void ToggleSortDirection();
 	void ToggleGrouping();
 	BOOL IsGrouped() const { return m_bGrouped; }
+	BOOL HasMultiSelection() const { return (m_aSelectedTaskIDs.GetSize() > 1); }
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
@@ -81,6 +82,8 @@ public:
 
 	TDC_ATTRIBUTE GetSelectedAttributeID() const;
 	CString GetSelectedAttributeLabel() const;
+	CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const;
+	BOOL CanEditSelectedAttribute() const;
 
 	void RefreshSelectedTasksValues();
 	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
@@ -184,12 +187,12 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);

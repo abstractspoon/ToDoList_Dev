@@ -117,6 +117,7 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT pCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 
 	afx_msg void OnGroupAttributes();
 	afx_msg void OnToggleSorting();
@@ -125,17 +126,12 @@ protected:
 	afx_msg LRESULT OnEditTaskReminder(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAttributeEdited(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAutoItemAddedOrDeleted(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnClearTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToggleTimeTracking(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAddTimeToLogFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSelectDependencies(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetLinkTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDisplayLink(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCopyTaskAttribute(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnPasteTaskAttribute(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCanCopyTaskAttribute(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCanPasteTaskAttribute(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
