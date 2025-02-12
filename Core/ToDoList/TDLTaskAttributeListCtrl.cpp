@@ -4155,12 +4155,12 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 		{
 			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
 
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
 		}
 		else
 		{
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
 		}
 
 		// Paste command
@@ -4171,12 +4171,12 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 			CString sFromAttrib = GetItemText(GetRow(nFromAttribID), ATTRIB_COL);
 			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
 
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_PASTEATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_PASTEATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
 		}
 		else
 		{
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
 		}
 
 		// Clear command
@@ -4184,12 +4184,12 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 		{
 			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
 
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
 		}
 		else
 		{
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
 		}
 
 		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
@@ -4197,15 +4197,15 @@ void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 		switch (nCmdID)
 		{
-		case ID_ATTRIBLIST_COPYATTRIBVALUES:
+		case ID_ATTRIBCTRL_COPYATTRIBVALUES:
 			GetParent()->SendMessage(WM_TDCM_COPYTASKATTRIBUTE, nAttribID);
 			break;
 
-		case ID_ATTRIBLIST_PASTEATTRIBVALUES:
+		case ID_ATTRIBCTRL_PASTEATTRIBVALUES:
 			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
 			break;
 
-		case ID_ATTRIBLIST_CLEARATTRIBVALUES:
+		case ID_ATTRIBCTRL_CLEARATTRIBVALUES:
 			GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID);
 			break;
 		}

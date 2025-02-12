@@ -48,10 +48,10 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
 
-	ON_COMMAND(ID_GROUP_ATTRIBUTES, OnGroupAttributes)
-	ON_COMMAND(ID_TOGGLE_SORT, OnToggleSorting)
-	ON_COMMAND(ID_MOVEATTRIB_UP, OnMoveAttributeUp)
-	ON_COMMAND(ID_MOVEATTRIB_DOWN, OnMoveAttributeDown)
+	ON_COMMAND(ID_ATTRIBCTRL_TOGGLEGROUP, OnToggleGrouping)
+	ON_COMMAND(ID_ATTRIBCTRL_TOGGLESORT, OnToggleSorting)
+	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBUP, OnMoveAttributeUp)
+	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBDOWN, OnMoveAttributeDown)
 
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_TASKATTRIBUTES, OnItemChanged)
 
@@ -169,7 +169,7 @@ void CTDLTaskAttributeCtrl::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 }
 
-void CTDLTaskAttributeCtrl::OnGroupAttributes()
+void CTDLTaskAttributeCtrl::OnToggleGrouping()
 {
 	m_lcAttributes.ToggleGrouping();
 	UpdateToolbarButtons();
@@ -214,9 +214,9 @@ void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 {
 	CToolBarCtrl& tb = m_toolbar.GetToolBarCtrl();
 	
-	tb.PressButton(ID_GROUP_ATTRIBUTES, m_lcAttributes.IsGrouped());
-	tb.EnableButton(ID_MOVEATTRIB_UP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
-	tb.EnableButton(ID_MOVEATTRIB_DOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
+	tb.PressButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.IsGrouped());
+	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
+	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
 }
 
 // -----------------------------------------------------------------------

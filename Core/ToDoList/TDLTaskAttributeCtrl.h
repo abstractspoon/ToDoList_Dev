@@ -119,7 +119,7 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
 
-	afx_msg void OnGroupAttributes();
+	afx_msg void OnToggleGrouping();
 	afx_msg void OnToggleSorting();
 	afx_msg void OnMoveAttributeUp();
 	afx_msg void OnMoveAttributeDown();
