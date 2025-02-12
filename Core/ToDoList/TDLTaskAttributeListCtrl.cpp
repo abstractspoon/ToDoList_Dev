@@ -786,7 +786,7 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 		int nRow = SubItemHitTest(&lvHit);
 		int nCol = lvHit.iSubItem;
 
-		if (nCol == VALUE_COL)
+		if ((nRow != -1) && (nCol == VALUE_COL))
 		{
 			BOOL bEditable = CanEditCell(nRow, nCol);
 
