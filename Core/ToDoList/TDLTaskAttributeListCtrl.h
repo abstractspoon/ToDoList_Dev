@@ -77,6 +77,8 @@ public:
 
 	BOOL MoveSelectedAttribute(BOOL bUp);
 	BOOL CanMoveSelectedAttribute(BOOL bUp) const;
+	BOOL ResetAttributeMoves();
+	BOOL CanResetAttributeMoves() const;
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
@@ -375,6 +377,8 @@ private:
 
 		int GetOrder(CStringArray& aOrder) const;
 		void SetOrder(const CStringArray& aOrder);
+		BOOL ResetOrder();
+		BOOL CanResetOrder() const;
 
 		int CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const;
 		BOOL GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const;
@@ -386,6 +390,8 @@ private:
 
 		CArray<ATTRIBITEM, ATTRIBITEM&> m_aAttributeItems;
 		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
+
+		CStringArray m_aDefaultOrder;
 
 	private:
 		void RebuildItemPositions();

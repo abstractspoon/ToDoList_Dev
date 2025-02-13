@@ -124,6 +124,7 @@ protected:
 	afx_msg void OnToggleSorting();
 	afx_msg void OnMoveAttributeUp();
 	afx_msg void OnMoveAttributeDown();
+	afx_msg void OnResetAttributeMoves();
 
 	afx_msg LRESULT OnEditTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditTaskReminder(WPARAM wParam, LPARAM lParam);

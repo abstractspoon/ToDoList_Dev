@@ -54,6 +54,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_COMMAND(ID_ATTRIBCTRL_TOGGLESORT, OnToggleSorting)
 	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBUP, OnMoveAttributeUp)
 	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBDOWN, OnMoveAttributeDown)
+	ON_COMMAND(ID_ATTRIBCTRL_RESETMOVES, OnResetAttributeMoves)
 
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_TASKATTRIBUTES, OnItemChanged)
 
@@ -190,6 +191,12 @@ void CTDLTaskAttributeCtrl::OnMoveAttributeDown()
 		UpdateToolbarButtons();
 }
 
+void CTDLTaskAttributeCtrl::OnResetAttributeMoves()
+{
+	if (m_lcAttributes.ResetAttributeMoves())
+		UpdateToolbarButtons();
+}
+
 void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
 {
 	m_lcAttributes.LoadState(prefs, szKey);
@@ -208,6 +215,7 @@ void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 	tb.PressButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.IsGrouped());
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
+	tb.EnableButton(ID_ATTRIBCTRL_RESETMOVES, m_lcAttributes.CanResetAttributeMoves());
 }
 
 void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)

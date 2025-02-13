@@ -381,6 +381,20 @@ BOOL CTDLTaskAttributeListCtrl::CanMoveSelectedAttribute(BOOL bUp) const
 	return GetAttributeToMoveBelow(nAttribID, bUp, nUnused);
 }
 
+BOOL CTDLTaskAttributeListCtrl::ResetAttributeMoves()
+{
+	if (!m_aAttribOrder.ResetOrder())
+		return FALSE;
+
+	Sort();
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CanResetAttributeMoves() const
+{
+	return m_aAttribOrder.CanResetOrder();
+}
+
 int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
 {
 	TDC_ATTRIBUTE nAttribID1 = (TDC_ATTRIBUTE)dwItemData1;
@@ -4401,6 +4415,7 @@ void CTDLTaskAttributeListCtrl::CAttributeOrder::Populate()
 
 	// Sort 
 	Misc::SortArrayT(m_aAttributeItems, SortByNameProc);
+	GetOrder(m_aDefaultOrder);
 
 	RebuildItemPositions();
 }
@@ -4516,7 +4531,13 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::CompareItems(TDC_ATTRIBUTE nAttr
 	int nPos1 = GetAttribPos(nAttribID1);
 	int nPos2 = GetAttribPos(nAttribID2);
 
-	return (nPos1 - nPos2);
+	int nCompare = (nPos1 - nPos2);
+
+	// Sort by ID for a stable sort
+	if (nCompare == 0)
+		nCompare = (nAttribID1 - nAttribID2);
+
+	return nCompare;
 }
 
 int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByNameProc(const void* item1, const void* item2)
@@ -4524,7 +4545,13 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByNameProc(const void* item1
 	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
 	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
 
-	return Misc::NaturalCompare(pItem1->sName, pItem2->sName);
+	int nCompare = Misc::NaturalCompare(pItem1->sName, pItem2->sName);
+
+	// Sort by ID for a stable sort
+	if (nCompare == 0)
+		nCompare = (pItem1->nAttribID - pItem2->nAttribID);
+
+	return nCompare;
 }
 
 int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByPosProc(const void* item1, const void* item2)
@@ -4532,7 +4559,13 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByPosProc(const void* item1,
 	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
 	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
 
-	return (pItem1->nPos - pItem2->nPos);
+	int nCompare = (pItem1->nPos - pItem2->nPos);
+
+	// Sort by ID for a stable sort
+	if (nCompare == 0)
+		nCompare = (pItem1->nAttribID - pItem2->nAttribID);
+
+	return nCompare;
 }
 
 void CTDLTaskAttributeListCtrl::CAttributeOrder::RebuildItemPositions()
@@ -4623,5 +4656,25 @@ void CTDLTaskAttributeListCtrl::CAttributeOrder::SetOrder(const CStringArray& aO
 	Misc::SortArrayT(m_aAttributeItems, SortByPosProc);
 	RebuildItemPositions();
 }
+
+BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::ResetOrder()
+{
+	if (!CanResetOrder())
+		return FALSE;
+
+	Misc::SortArrayT(m_aAttributeItems, SortByNameProc);
+	RebuildItemPositions();
+
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::CanResetOrder() const
+{
+	CStringArray aOrder;
+	VERIFY(GetOrder(aOrder));
+
+	return !Misc::MatchAll(aOrder, m_aDefaultOrder, TRUE);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
