@@ -454,31 +454,30 @@ void CPreferencesToolPage::OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResul
 
 void CPreferencesToolPage::OnItemchangedToollist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+	if (pNMHDR && !CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+		return;
+
+	int nSel = GetCurSel();
+
+	if (nSel >= 0)
 	{
-		int nSel = GetCurSel();
-
-		if (nSel >= 0)
-		{
-			m_sToolPath = m_lcTools.GetItemText(nSel, COL_PATH);
-			m_sCommandLine = m_lcTools.GetItemText(nSel, COL_ARGS);
-			m_sIconPath = m_lcTools.GetItemText(nSel, COL_ICON);
-			m_bRunMinimized = m_lcTools.GetItemData(nSel);
-		}
-		else
-		{
-			m_sToolPath.Empty();
-			m_sCommandLine.Empty();
-			m_bRunMinimized = FALSE;
-			m_sIconPath.Empty();
-		}
-
-		UpdateData(FALSE);
-		EnableControls();
-
-		m_toolbar.RefreshButtonStates(FALSE);
-		*pResult = 0;
+		m_sToolPath = m_lcTools.GetItemText(nSel, COL_PATH);
+		m_sCommandLine = m_lcTools.GetItemText(nSel, COL_ARGS);
+		m_sIconPath = m_lcTools.GetItemText(nSel, COL_ICON);
+		m_bRunMinimized = m_lcTools.GetItemData(nSel);
 	}
+	else
+	{
+		m_sToolPath.Empty();
+		m_sCommandLine.Empty();
+		m_bRunMinimized = FALSE;
+		m_sIconPath.Empty();
+	}
+
+	UpdateData(FALSE);
+	EnableControls();
+
+	m_toolbar.RefreshButtonStates(FALSE);
 }
 
 void CPreferencesToolPage::EnableControls()
