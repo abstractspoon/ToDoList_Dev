@@ -1182,7 +1182,7 @@ void CTDLCustomAttributeDlg::OnDoubleClickItem(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* /*pResult*/) 
 {
-	if (!CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+	if (pNMHDR && !CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
 		return;
 
 	int nSel = GetCurSel();

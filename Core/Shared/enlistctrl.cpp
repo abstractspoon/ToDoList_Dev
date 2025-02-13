@@ -1575,6 +1575,8 @@ BOOL CEnListCtrl::OnColumnClick(NMHDR* pNMHDR, LPARAM* /*lParam*/)
 
 BOOL CEnListCtrl::IsSelectionChange(NMLISTVIEW* pNMLV, int* pItem)
 {
+	ASSERT(pNMLV);
+
 	if (pNMLV->uChanged & LVIF_STATE)
 	{
 		BOOL bWasSel = (pNMLV->uOldState & LVIS_SELECTED);
