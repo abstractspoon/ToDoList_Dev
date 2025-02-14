@@ -84,7 +84,9 @@ namespace MySqlStorage
 
 		private void OnPortKeypress(object sender, KeyPressEventArgs e)
 		{
-			e.Handled = ((e.KeyChar < '0') || (e.KeyChar > '9'));
+			// Simple masking
+			e.Handled = (((e.KeyChar >= 'A') && (e.KeyChar <= 'Z')) ||
+						 ((e.KeyChar >= 'a') && (e.KeyChar <= 'z')));
 		}
 	}
 }
