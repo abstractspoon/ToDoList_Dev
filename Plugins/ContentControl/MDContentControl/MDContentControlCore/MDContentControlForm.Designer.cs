@@ -140,6 +140,7 @@
 			this.PreviewBrowser.Url = new System.Uri("about:blank", System.UriKind.Absolute);
 			this.PreviewBrowser.WebBrowserShortcutsEnabled = false;
 			this.PreviewBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
+			this.PreviewBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.HtmlPreview_Navigating);
 			// 
 			// InputTextCtrl
 			// 
