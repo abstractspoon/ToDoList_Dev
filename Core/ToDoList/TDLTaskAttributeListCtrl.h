@@ -75,6 +75,11 @@ public:
 	BOOL IsGrouped() const { return m_bGrouped; }
 	BOOL HasMultiSelection() const { return (m_aSelectedTaskIDs.GetSize() > 1); }
 
+	BOOL MoveSelectedAttribute(BOOL bUp);
+	BOOL CanMoveSelectedAttribute(BOOL bUp) const;
+	BOOL ResetAttributeMoves();
+	BOOL CanResetAttributeMoves() const;
+
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
 	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
@@ -264,6 +269,9 @@ protected:
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
 	BOOL SetValueText(int nRow, const CString& sNewText, LPARAM bUnitsChange = FALSE);
 
+	BOOL GetAttributeToMoveBelow(TDC_ATTRIBUTE nAttribID, BOOL bUp, TDC_ATTRIBUTE& nBelowAttribID) const;
+	BOOL IsAttributeMoveLimited(TDC_ATTRIBUTE nAttribID, BOOL bUp) const;
+
 	int HitTestButtonID(int nRow) const;
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;
 	BOOL CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText) const;
@@ -339,6 +347,64 @@ private:
 		static int AscendingSortProc(const void* item1, const void* item2);
 		static int DescendingSortProc(const void* item1, const void* item2);
 	};
+
+	// ---------------------------------------------------------------------
+
+	struct ATTRIBITEM
+	{
+		ATTRIBITEM(UINT nAttribResID = 0, TDC_ATTRIBUTE nAttribID = TDCA_NONE, TDC_ATTRIBUTEGROUP nGroup = TDCAG_NONE);
+		ATTRIBITEM(const TDCATTRIBUTE& attrib);
+		ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
+
+		BOOL IsCustom() const;
+
+		CString sName;
+		TDC_ATTRIBUTE nAttribID;
+		CString sCustAttribID;
+		TDC_ATTRIBUTEGROUP nGroup;
+		int nPos;
+	};
+
+	class CAttributeOrder
+	{
+	public:
+		CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+
+		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nBelowAttribID);
+
+		void SaveState(CPreferences& prefs, LPCTSTR szKey) const;
+		void LoadState(const CPreferences& prefs, LPCTSTR szKey);
+
+		int GetOrder(CStringArray& aOrder) const;
+		void SetOrder(const CStringArray& aOrder);
+		BOOL ResetOrder();
+		BOOL CanResetOrder() const;
+
+		int CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const;
+		BOOL GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const;
+
+		void OnCustomAttributesChange();
+
+	protected:
+		const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
+
+		CArray<ATTRIBITEM, ATTRIBITEM&> m_aAttributeItems;
+		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
+
+		CStringArray m_aDefaultOrder;
+
+	private:
+		void RebuildItemPositions();
+		void Populate();
+		int GetAttribPos(TDC_ATTRIBUTE nAttribID) const;
+
+		static int SortByNameProc(const void* item1, const void* item2);
+		static int SortByPosProc(const void* item1, const void* item2);
+	};
+
+	CAttributeOrder m_aAttribOrder;
+
+	// ---------------------------------------------------------------------
 };
 
 /////////////////////////////////////////////////////////////////////////////

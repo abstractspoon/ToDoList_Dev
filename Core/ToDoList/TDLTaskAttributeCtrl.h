@@ -117,10 +117,14 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT pCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 
-	afx_msg void OnGroupAttributes();
+	afx_msg void OnToggleGrouping();
 	afx_msg void OnToggleSorting();
+	afx_msg void OnMoveAttributeUp();
+	afx_msg void OnMoveAttributeDown();
+	afx_msg void OnResetAttributeMoves();
 
 	afx_msg LRESULT OnEditTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditTaskReminder(WPARAM wParam, LPARAM lParam);

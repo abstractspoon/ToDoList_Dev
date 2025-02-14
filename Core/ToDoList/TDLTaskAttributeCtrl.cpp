@@ -50,8 +50,13 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_WM_SETFOCUS()
 	ON_WM_CONTEXTMENU()
 
-	ON_COMMAND(ID_GROUP_ATTRIBUTES, OnGroupAttributes)
-	ON_COMMAND(ID_TOGGLE_SORT, OnToggleSorting)
+	ON_COMMAND(ID_ATTRIBCTRL_TOGGLEGROUP, OnToggleGrouping)
+	ON_COMMAND(ID_ATTRIBCTRL_TOGGLESORT, OnToggleSorting)
+	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBUP, OnMoveAttributeUp)
+	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBDOWN, OnMoveAttributeDown)
+	ON_COMMAND(ID_ATTRIBCTRL_RESETMOVES, OnResetAttributeMoves)
+
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_TASKATTRIBUTES, OnItemChanged)
 
 	// These we just forward to our parent
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnEditTaskAttribute)
@@ -112,7 +117,10 @@ int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 		return -1;
 
 	// Create toolbar
-	if (!m_toolbar.Create(this) || !m_toolbar.LoadToolBar(IDR_TASK_ATTRIBUTE_TOOLBAR, IDB_TASKATTRIB_TOOLBAR, colorMagenta))
+	if (!m_toolbar.CreateEx(this, (TBSTYLE_FLAT | TBSTYLE_WRAPABLE), WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
+		return -1;
+		
+	if (!m_toolbar.LoadToolBar(IDR_TASK_ATTRIBUTE_TOOLBAR, IDB_TASKATTRIB_TOOLBAR, colorMagenta))
 		return -1;
 
 	if (!m_tbHelper.Initialize(&m_toolbar))
@@ -153,7 +161,7 @@ void CTDLTaskAttributeCtrl::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 }
 
-void CTDLTaskAttributeCtrl::OnGroupAttributes()
+void CTDLTaskAttributeCtrl::OnToggleGrouping()
 {
 	m_lcAttributes.ToggleGrouping();
 	UpdateToolbarButtons();
@@ -162,6 +170,31 @@ void CTDLTaskAttributeCtrl::OnGroupAttributes()
 void CTDLTaskAttributeCtrl::OnToggleSorting()
 {
 	m_lcAttributes.ToggleSortDirection();
+	UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnItemChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
+{
+	if (m_lcAttributes.IsSelectionChange((NMLISTVIEW*)pNMHDR))
+		UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnMoveAttributeUp()
+{
+	if (m_lcAttributes.MoveSelectedAttribute(TRUE))
+		UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnMoveAttributeDown()
+{
+	if (m_lcAttributes.MoveSelectedAttribute(FALSE))
+		UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnResetAttributeMoves()
+{
+	if (m_lcAttributes.ResetAttributeMoves())
+		UpdateToolbarButtons();
 }
 
 void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
@@ -177,7 +210,12 @@ void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 
 void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 {
-	m_toolbar.GetToolBarCtrl().PressButton(ID_GROUP_ATTRIBUTES, m_lcAttributes.IsGrouped());
+	CToolBarCtrl& tb = m_toolbar.GetToolBarCtrl();
+	
+	tb.PressButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.IsGrouped());
+	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
+	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
+	tb.EnableButton(ID_ATTRIBCTRL_RESETMOVES, m_lcAttributes.CanResetAttributeMoves());
 }
 
 void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
@@ -210,12 +248,12 @@ void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 		{
 			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
 
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
 		}
 		else
 		{
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
 		}
 
 		// Paste command
@@ -226,12 +264,12 @@ void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 			CString sFromAttrib = m_lcAttributes.GetAttributeLabel(nFromAttribID);
 			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
 
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_PASTEATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_PASTEATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
 		}
 		else
 		{
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
 		}
 
 		// Clear command
@@ -239,12 +277,12 @@ void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 		{
 			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
 
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
+			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
 		}
 		else
 		{
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
+			pPopup->EnableMenuItem(ID_ATTRIBCTRL_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
 		}
 
 		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
@@ -252,15 +290,15 @@ void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 
 		switch (nCmdID)
 		{
-		case ID_ATTRIBLIST_COPYATTRIBVALUES:
+		case ID_ATTRIBCTRL_COPYATTRIBVALUES:
 			GetParent()->SendMessage(WM_TDCM_COPYTASKATTRIBUTE, nAttribID);
 			break;
 
-		case ID_ATTRIBLIST_PASTEATTRIBVALUES:
+		case ID_ATTRIBCTRL_PASTEATTRIBVALUES:
 			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
 			break;
 
-		case ID_ATTRIBLIST_CLEARATTRIBVALUES:
+		case ID_ATTRIBCTRL_CLEARATTRIBVALUES:
 			GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID);
 			break;
 		}
