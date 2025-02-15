@@ -576,7 +576,9 @@ BOOL CTDCTaskTimeLog::SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray
 
 	if (!FileMisc::SaveFile(szLogPath, sFileContents, nFormat)) 
 	{
-		VERIFY(FileMisc::MoveFile(sTempFile, szLogPath));
+		if (!sTempFile.IsEmpty())
+			VERIFY(FileMisc::MoveFile(sTempFile, szLogPath));
+
 		return FALSE;
 	}
 
