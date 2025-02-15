@@ -748,9 +748,11 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CToDoCtrl* pTDC, BOOL bCheckVisibi
 
 	if (HasOption(TTDO_FORMATTIMESASHMS))
 	{
+		DWORD dwFlags = (HMS_ALLOWZERO | HMS_DECIMALPLACES | HMS_PRESERVEUNITS);
+
 		m_sTaskTimes.Format(_T("%s : %s"),
-			th.FormatTimeHMS(timeEst.dAmount, timeEst.GetTHUnits(), (HMS_ALLOWZERO | HMS_DECIMALPLACES)),
-			th.FormatTimeHMS(timeSpent.dAmount, timeSpent.GetTHUnits(), (HMS_ALLOWZERO | HMS_DECIMALPLACES)));
+			th.FormatTimeHMS(timeEst.dAmount, timeEst.GetTHUnits(), dwFlags),
+			th.FormatTimeHMS(timeSpent.dAmount, timeSpent.GetTHUnits(), dwFlags));
 	}
 	else
 	{
