@@ -2429,7 +2429,7 @@ BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
 				CDWordArray aNewTaskIDs;
 				tsh.GetItemData(aNewTaskIDs);
 
-				Misc::AddUniqueItems(aNewTaskIDs, m_aSelTaskIDs);
+				Misc::AppendItems(aNewTaskIDs, m_aSelTaskIDs, TRUE);
 			}
 			else
 			{

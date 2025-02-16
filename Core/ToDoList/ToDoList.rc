@@ -49,7 +49,7 @@ BEGIN
             VALUE "OriginalFilename", "ToDoList.exe"
             VALUE "ProductName", "ToDoList"
             VALUE "ProductVersion", "1, 0, 0, 0"
-            VALUE "SpecialBuild", "Pre-Release of ToDoList 9.1"
+            VALUE "SpecialBuild", "Development Preview of ToDoList 9.1"
         END
     END
     BLOCK "VarFileInfo"
@@ -2386,8 +2386,13 @@ END
 
 IDR_TASK_ATTRIBUTE_TOOLBAR TOOLBAR 16, 15
 BEGIN
-    BUTTON      ID_GROUP_ATTRIBUTES
-    BUTTON      ID_TOGGLE_SORT
+    BUTTON      ID_ATTRIBCTRL_TOGGLEGROUP
+    SEPARATOR
+    BUTTON      ID_ATTRIBCTRL_TOGGLESORT
+    SEPARATOR
+    BUTTON      ID_ATTRIBCTRL_MOVEATTRIBUP
+    BUTTON      ID_ATTRIBCTRL_MOVEATTRIBDOWN
+    BUTTON      ID_ATTRIBCTRL_RESETMOVES
 END
 
 
@@ -3232,8 +3237,8 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "Column Operations"
         BEGIN
-            MENUITEM "Copy All Values From Column", ID_TASKLIST_COPYCOLUMNVALUES
-            MENUITEM "Copy Selected Values From Column", ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+            MENUITEM "Copy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
+            MENUITEM "Copy Selected Values from Column", ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
             MENUITEM "",                            1
             MENUITEM "&Paste Values into Column",   ID_TASKLIST_PASTECOLUMNVALUES
             MENUITEM "Paste Values into Selected Tasks in Column", ID_TASKLIST_PASTESELTASKSCOLUMNVALUES
@@ -3310,11 +3315,11 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Resi&ze Attribute Columns to Fit", ID_VIEW_RESIZECOLSTOFIT
         MENUITEM SEPARATOR
-        MENUITEM "C&opy All Values From Column", ID_TASKLIST_COPYCOLUMNVALUES
-        MENUITEM "Copy &Selected Values From Column", ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
+        MENUITEM "C&opy All Values from Column", ID_TASKLIST_COPYCOLUMNVALUES
+        MENUITEM "Copy &Selected Values from Column", ID_TASKLIST_COPYSELTASKSCOLUMNVALUES
         MENUITEM SEPARATOR
-        MENUITEM "&Paste Values Into Column",   ID_TASKLIST_PASTECOLUMNVALUES
-        MENUITEM "Paste Values Into Selected Tasks In Column", ID_TASKLIST_PASTESELTASKSCOLUMNVALUES
+        MENUITEM "&Paste Values into Column",   ID_TASKLIST_PASTECOLUMNVALUES
+        MENUITEM "Paste Values into Selected Tasks in Column", ID_TASKLIST_PASTESELTASKSCOLUMNVALUES
         MENUITEM SEPARATOR
         MENUITEM "Cancel\tEsc",                 IDCLOSE
     END
@@ -3405,10 +3410,10 @@ BEGIN
     END
     POPUP "AttributeCtrl"
     BEGIN
-        MENUITEM "Copy Attribute Value",        ID_ATTRIBLIST_COPYATTRIBVALUES
-        MENUITEM "Paste Attribute Value",       ID_ATTRIBLIST_PASTEATTRIBVALUES
+        MENUITEM "Copy Attribute Value",        ID_ATTRIBCTRL_COPYATTRIBVALUES
+        MENUITEM "Paste Attribute Value",       ID_ATTRIBCTRL_PASTEATTRIBVALUES
         MENUITEM SEPARATOR
-        MENUITEM "Clear Attribute Value",       ID_ATTRIBLIST_CLEARATTRIBVALUES
+        MENUITEM "Clear Attribute Value",       ID_ATTRIBCTRL_CLEARATTRIBVALUES
     END
 END
 
@@ -5101,13 +5106,13 @@ BEGIN
                             "Export Tasklist|You must select a filename that does not match the tasklist being exported."
     IDS_UPDATER_FILEMISSING "The updater is missing from the installation folder.\n\nWould you like to try downloading the update file manually?"
     IDS_CTRLCLICKTOFOLLOWLINK "'CTRL + click' to follow link"
-    IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values From '%s' Column"
+    IDS_TASKLIST_COPYCOLUMNVALUES "Copy All Values from '%s' Column"
     IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 
-                            "Copy Selected Values From '%s' Column"
+                            "Copy Selected Values from '%s' Column"
     IDS_TASKLIST_PASTECOLUMNVALUES 
-                            "Paste %d Values From '%s' Column To '%s' Column"
+                            "Paste %d Values from '%s' Column to '%s' Column"
     IDS_TASKLIST_PASTESELECTEDCOLUMNVALUES 
-                            "Paste %d Values From '%s' Column to Selected Tasks In '%s' Column"
+                            "Paste %d Values from '%s' Column to Selected Tasks in '%s' Column"
     IDS_TDLBC_TASK          "Task"
 END
 
@@ -5137,9 +5142,9 @@ BEGIN
     IDS_FP_DEPENDS_COMPLETE "is completed (or not set)"
     IDS_TDC_GROUPBY         "Group by"
     IDS_TASKLIST_PASTEONECOLUMNVALUES 
-                            "Paste 1 Value From '%s' Column To All Tasks In '%s' Column"
+                            "Paste Single Value from '%s' Column to All Tasks in '%s' Column"
     IDS_TASKLIST_PASTEONESELECTEDCOLUMNVALUES 
-                            "Paste 1 Value From '%s' Column to All Selected Tasks In '%s' Column"
+                            "Paste Single Value from '%s' Column to All Selected Tasks in '%s' Column"
 END
 
 STRINGTABLE
@@ -5179,8 +5184,8 @@ STRINGTABLE
 BEGIN
     ID_COMMENTS_INSERTTIME  "\nInsert Time"
     ID_COMMENTS_INSERTDATETIME "\nInsert Date and Time"
-    ID_TOGGLE_SORT          "\nToggle Sort Direction"
-    ID_GROUP_ATTRIBUTES     "\nGroup Attributes"
+    ID_ATTRIBCTRL_TOGGLESORT "\nToggle Sort Direction"
+    ID_ATTRIBCTRL_TOGGLEGROUP "\nGroup Attributes"
 END
 
 STRINGTABLE
@@ -5239,6 +5244,9 @@ END
 STRINGTABLE
 BEGIN
     ID_TOOLS_TOGGLEDARKMODE "\nToggle Dark Mode"
+    ID_ATTRIBCTRL_MOVEATTRIBUP "\nMove Attribute Up"
+    ID_ATTRIBCTRL_MOVEATTRIBDOWN "\nMove Attribute Down"
+    ID_ATTRIBCTRL_RESETMOVES "\nReset Attribute Order"
 END
 
 #endif    // English (Australia) resources

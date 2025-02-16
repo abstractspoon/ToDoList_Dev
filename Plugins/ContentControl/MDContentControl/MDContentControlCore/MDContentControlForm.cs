@@ -274,6 +274,19 @@ namespace MDContentControl
 			}
 		}
 
+		private void HtmlPreview_Navigating(object sender, WebBrowserNavigatingEventArgs e)
+		{
+			var path = new Uri(e.Url.ToString()).LocalPath;
+
+			if (string.Compare(path, m_TempFile, true) != 0)
+			{
+				// Open everything other than m_TempFile externally
+				e.Cancel = true;
+				Process.Start(e.Url.ToString());
+			}
+
+		}
+
 		private void textBox1_TextChanged(object sender, EventArgs e)
 		{
 			// We don't restore the focus to the input control

@@ -159,8 +159,8 @@ REM - Add Resources
 REM - Copy the zip file to the download folder
 copy %OUTZIP% %REPO%\..\ToDoList_Downloads\Latest\
 
-REM - And then move it to ToDoList_Prev\9.0
-MKDIR %REPO%\..\ToDoList_Prev\9.0
-move %OUTZIP% %REPO%\..\ToDoList_Prev\9.0\ToDoList_exe.9.0._.zip
+REM - And then move it to ToDoList_Prev\9.1
+MKDIR %REPO%\..\ToDoList_Prev\9.1
+move %OUTZIP% %REPO%\..\ToDoList_Prev\9.1\ToDoList_exe.9.1._.zip
 
 popd

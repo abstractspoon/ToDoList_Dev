@@ -1573,6 +1573,28 @@ BOOL CEnListCtrl::OnColumnClick(NMHDR* pNMHDR, LPARAM* /*lParam*/)
 	return FALSE; // continue routing
 }
 
+BOOL CEnListCtrl::IsSelectionChange(NMLISTVIEW* pNMLV, int* pItem)
+{
+	ASSERT(pNMLV);
+
+	if (pNMLV->uChanged & LVIF_STATE)
+	{
+		BOOL bWasSel = (pNMLV->uOldState & LVIS_SELECTED);
+		BOOL bIsSel = (pNMLV->uNewState & LVIS_SELECTED);
+
+		if (Misc::StateChanged(bIsSel, bWasSel))
+		{
+			if (pItem)
+				*pItem = pNMLV->iItem;
+
+			return TRUE;
+		}
+	}
+
+	// else
+	return FALSE;
+}
+
 BOOL CEnListCtrl::OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	*pResult = CDRF_DODEFAULT;

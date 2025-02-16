@@ -300,8 +300,8 @@ void CTDLCsvImportExportDlg::BuildDefaultMasterColumnMapping()
 
 	for (int nCol = 0; nCol < ATTRIB_COUNT; nCol++)
 	{
-		TDC_ATTRIBUTE attrib = ATTRIBUTES[nCol].nAttributeID;
-		CEnString sName(ATTRIBUTES[nCol].nAttribResID);
+		TDC_ATTRIBUTE attrib = TASKATTRIBUTES[nCol].nAttributeID;
+		CEnString sName(TASKATTRIBUTES[nCol].nAttribResID);
 
 		m_aMasterColumnMapping.Add(TDCATTRIBUTEMAPPING(sName, attrib));
 	}

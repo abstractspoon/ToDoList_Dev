@@ -72,13 +72,12 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 
 	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 	{
-		const TDCATTRIBUTE& att = ATTRIBUTES[nAtt];
+		const TDCATTRIBUTE& att = TASKATTRIBUTES[nAtt];
 
 		// ignore certain attributes
 		switch (att.nAttributeID)
 		{
 		case TDCA_COLOR:
-		case TDCA_PROJECTNAME:
 		case TDCA_RECURRENCE:
 		case TDCA_POSITION:
 		case TDCA_TASKNAMEORCOMMENTS:

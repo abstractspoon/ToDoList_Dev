@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
-
 using System.Diagnostics;
+
+using Abstractspoon.Tdl.PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -19,20 +20,31 @@ namespace MySqlStorage
 		public string Username { get { return m_Username.Text; } }
 		public string Password { get { return m_Password.Text; } }
 
-		public void Initialise(ConnectionInfo def)
+		public uint Port
 		{
-			m_Server.Text = def.Server;
-			m_Database.Text = def.DatabaseName;
-			m_Username.Text = def.Username;
-			m_Password.Text = def.Password;
+			get
+			{
+				uint port;
+
+				if (uint.TryParse(m_Port.Text, out port))
+					return port;
+
+				return ConnectionInfo.DefaultPort;
+			}
+		}
+
+		public void Initialise(ConnectionInfo conn)
+		{
+			m_Server.Text = conn.Server;
+			m_Port.Text = conn.Port.ToString();
+			m_Database.Text = conn.DatabaseName;
+			m_Username.Text = conn.Username;
+			m_Password.Text = conn.Password;
+
+			Win32.SetEditCue(m_Port.Handle, ConnectionInfo.DefaultPort.ToString());
 
 			if (Visible)
 				UIUtils.SetFocusToFirstEmpty(Controls);
-		}
-
-		public bool SetFocusToFirstEmpty()
-		{
-			return UIUtils.SetFocusToFirstEmpty(Controls);
 		}
 
 		public void HandleError(DbError error)
@@ -53,6 +65,7 @@ namespace MySqlStorage
 			switch (error)
 			{
 			case DbError.Server:		return m_Server;
+			case DbError.Port:			return m_Port;
 			case DbError.DatabaseName:	return m_Database;
 			case DbError.Username:		return m_Username;
 			case DbError.Password:		return m_Password;
@@ -67,6 +80,13 @@ namespace MySqlStorage
 			}
 
 			return null;
+		}
+
+		private void OnPortKeypress(object sender, KeyPressEventArgs e)
+		{
+			// Simple masking
+			e.Handled = (((e.KeyChar >= 'A') && (e.KeyChar <= 'Z')) ||
+						 ((e.KeyChar >= 'a') && (e.KeyChar <= 'z')));
 		}
 	}
 }

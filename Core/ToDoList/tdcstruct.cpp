@@ -356,12 +356,10 @@ int TDCAUTOLISTDATA::Copy(const TDCAUTOLISTDATA& from, TDCAUTOLISTDATA& to, BOOL
 
 int TDCAUTOLISTDATA::CopyItems(const CStringArray& aFrom, CStringArray& aTo, BOOL bAppend)
 {
-	if (bAppend)
-		return Misc::AddUniqueItems(aFrom, aTo);
+	if (!bAppend)
+		aTo.RemoveAll();
 
-	// else
-	aTo.Copy(aFrom);
-	return aTo.GetSize();
+	return Misc::AppendItems(aFrom, aTo, TRUE);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1104,7 +1102,6 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 	case TDCA_VERSION:
 	case TDCA_COMMENTS:
 	case TDCA_FILELINK:
-	case TDCA_PROJECTNAME:
 	case TDCA_CREATEDBY:
 	case TDCA_EXTERNALID:
 	case TDCA_TAGS:
@@ -2603,7 +2600,6 @@ BOOL TDCCOLEDITVISIBILITY::IsSupportedEdit(TDC_ATTRIBUTE nAttribID)
 	case TDCA_STARTTIME:
 	case TDCA_DONETIME:
 	case TDCA_TAGS:
-	case TDCA_PROJECTNAME:
 	case TDCA_FLAG:
 	case TDCA_LOCK:
 	case TDCA_ICON:
@@ -2712,8 +2708,8 @@ int TDCCOLEDITVISIBILITY::UpdateEditVisibility()
 
 		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 		{
-			if (IsEditFieldVisible(ATTRIBUTES[nAttrib].nAttributeID))
-				mapVisibleEdits.Add(ATTRIBUTES[nAttrib].nAttributeID);
+			if (IsEditFieldVisible(TASKATTRIBUTES[nAttrib].nAttributeID))
+				mapVisibleEdits.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 		}
 	}
 
@@ -2726,8 +2722,8 @@ int TDCCOLEDITVISIBILITY::GetAllEditFields(CTDCAttributeMap& mapAttrib)
 
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (IsSupportedEdit(ATTRIBUTES[nAttrib].nAttributeID))
-			mapAttrib.Add(ATTRIBUTES[nAttrib].nAttributeID);
+		if (IsSupportedEdit(TASKATTRIBUTES[nAttrib].nAttributeID))
+			mapAttrib.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 	}
 
 	return mapAttrib.GetCount();
@@ -2948,8 +2944,8 @@ int TDCCOLEDITFILTERVISIBILITY::UpdateFilterVisibility()
 
 		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 		{
-			if (IsFilterFieldVisible(ATTRIBUTES[nAttrib].nAttributeID))
-				mapVisibleFilters.Add(ATTRIBUTES[nAttrib].nAttributeID);
+			if (IsFilterFieldVisible(TASKATTRIBUTES[nAttrib].nAttributeID))
+				mapVisibleFilters.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 		}
 	}
 
@@ -2962,8 +2958,8 @@ int TDCCOLEDITFILTERVISIBILITY::GetAllFilterFields(CTDCAttributeMap& mapAttrib)
 
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
-		if (IsSupportedFilter(ATTRIBUTES[nAttrib].nAttributeID))
-			mapAttrib.Add(ATTRIBUTES[nAttrib].nAttributeID);
+		if (IsSupportedFilter(TASKATTRIBUTES[nAttrib].nAttributeID))
+			mapAttrib.Add(TASKATTRIBUTES[nAttrib].nAttributeID);
 	}
 
 	return mapAttrib.GetCount();

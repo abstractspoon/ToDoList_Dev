@@ -694,19 +694,35 @@ TASKCALEXTENSIONITEM::TASKCALEXTENSIONITEM(const TASKCALITEM& tciOrg, DWORD dwEx
 	dwTaskID = dwExtID;
 }
 
-COLORREF TASKCALEXTENSIONITEM::GetFillColor(BOOL /*bTextIsBack*/) const
+COLORREF TASKCALEXTENSIONITEM::GetFillColor(BOOL bTextIsBack) const
 {
-	return TASKCALITEM::GetFillColor(FALSE);
+	COLORREF crFill = TASKCALITEM::GetFillColor(bTextIsBack);
+
+	if (HasColor() && bTextIsBack)
+	{
+		// Make it lighter to distinguish with 'real' task
+		crFill = GraphicsMisc::Lighter(crFill, 0.5);
+	}
+
+	return crFill;
 }
 
-COLORREF TASKCALEXTENSIONITEM::GetBorderColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
+COLORREF TASKCALEXTENSIONITEM::GetBorderColor(BOOL bSelected, BOOL bTextIsBack) const
 {
-	return TASKCALITEM::GetBorderColor(bSelected, FALSE);
+	return TASKCALITEM::GetBorderColor(bSelected, bTextIsBack);
 }
 
-COLORREF TASKCALEXTENSIONITEM::GetTextColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
+COLORREF TASKCALEXTENSIONITEM::GetTextColor(BOOL bSelected, BOOL bTextIsBack) const
 {
-	return TASKCALITEM::GetTextColor(bSelected, FALSE);
+	COLORREF crText = TASKCALITEM::GetTextColor(bSelected, bTextIsBack);
+
+	if (HasColor() && !bSelected && bTextIsBack)
+	{
+		// Make it lighter to distinguish with 'real' task
+		crText = GraphicsMisc::Lighter(crText, 0.5);
+	}
+
+	return crText;
 }
 
 /////////////////////////////////////////////////////////////////////////////

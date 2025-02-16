@@ -585,7 +585,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetListType(DWORD dwListType)
 int TDCCUSTOMATTRIBUTEDEFINITION::GetUniqueListData(CStringArray& aData) const
 {
 	aData.Copy(aAutoListData);
-	Misc::AddUniqueItems(aDefaultListData, aData);
+	Misc::AppendItems(aDefaultListData, aData, TRUE);
 
 	return aData.GetSize();
 }
@@ -1179,9 +1179,9 @@ void CTDCCustomAttribDefinitionArray::RemoveAt(int nIndex, int nCount)
 
 BOOL CTDCCustomAttribDefinitionArray::MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const
 {
-	for (int nAtt = 0; nAtt < aAttribDefs.GetSize(); nAtt++)
+	for (int nDef = 0; nDef < aAttribDefs.GetSize(); nDef++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAtt];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nDef];
 
 		if (Find(attribDef.GetAttributeID()) != -1)
 			return TRUE;
@@ -1196,14 +1196,14 @@ int CTDCCustomAttribDefinitionArray::Find(const CString& sAttribID, int nIgnore)
 
 	if (!sAttribID.IsEmpty())
 	{
-		int nAtt = GetSize();
+		int nDef = GetSize();
 
-		while (nAtt--)
+		while (nDef--)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAtt);
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nDef);
 
-			if ((nAtt != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
-				return nAtt;
+			if ((nDef != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
+				return nDef;
 		}
 	}
 
@@ -1226,14 +1226,14 @@ int CTDCCustomAttribDefinitionArray::Find(TDC_ATTRIBUTE nCustAttribID, int nIgno
 {
 	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nCustAttribID));
 
-	int nAtt = GetSize();
+	int nDef = GetSize();
 
-	while (nAtt--)
+	while (nDef--)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAtt);
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nDef);
 
-		if ((nAtt != nIgnore) && (attribDef.GetAttributeID() == nCustAttribID))
-			return nAtt;
+		if ((nDef != nIgnore) && (attribDef.GetAttributeID() == nCustAttribID))
+			return nDef;
 	}
 
 	return -1;
@@ -1243,14 +1243,14 @@ int CTDCCustomAttribDefinitionArray::Append(const CTDCCustomAttribDefinitionArra
 {
 	int nOrgSize = GetSize();
 
-	for (int nAtt = 0; nAtt < aSrc.GetSize(); nAtt++)
+	for (int nDef = 0; nDef < aSrc.GetSize(); nDef++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aSrc[nAtt];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aSrc[nDef];
 
 		// Append unique items only
 		if (Find(attribDef.sUniqueID) == -1)
 		{
-			TDCCUSTOMATTRIBUTEDEFINITION def = aSrc[nAtt];
+			TDCCUSTOMATTRIBUTEDEFINITION def = aSrc[nDef];
 			Add(def);
 		}
 		// else skip
@@ -1282,7 +1282,7 @@ BOOL CTDCCustomAttribDefinitionArray::CalculationHasFeature(const TDCCUSTOMATTRI
 	if (!Misc::HasFlag(attribDef.dwFeatures, dwFeature))
 		return FALSE;
 
-	DWORD dwResultType = GetCalculationResultDataType(attribDef.Calculation());
+	DWORD dwResultType = GetCalculationResultDataType(attribDef.calculation);
 
 	return TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwResultType, attribDef.GetListType(), dwFeature);
 }
@@ -1297,12 +1297,22 @@ BOOL CTDCCustomAttribDefinitionArray::AnyCalculationUsesAnyAttribute(const CTDCA
 
 		if (!def.IsCalculation())
 			continue;
+
+		// First operand
+		TDC_ATTRIBUTE nFirstOpAttribID = (def.calculation.opFirst.IsCustom() ? 
+										  GetAttributeID(def.calculation.opFirst.sCustAttribID) :
+										  def.calculation.opFirst.nAttributeID);
 		
-		if (mapAttribIDs.Has(def.Calculation().opFirst.nAttributeID) ||
-			mapAttribIDs.Has(def.Calculation().opSecond.nAttributeID))
-		{
+		if (mapAttribIDs.Has(nFirstOpAttribID))
 			return TRUE;
-		}
+
+		// Second operand
+		TDC_ATTRIBUTE nSecondOpAttribID = (def.calculation.opSecond.IsCustom() ? 
+										  GetAttributeID(def.calculation.opSecond.sCustAttribID) :
+										  def.calculation.opSecond.nAttributeID);
+		
+		if (mapAttribIDs.Has(nSecondOpAttribID))
+			return TRUE;
 	}
 
 	return FALSE;
@@ -1349,29 +1359,29 @@ int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCol
 
 const TDCCUSTOMATTRIBUTEDEFINITION& CTDCCustomAttribDefinitionArray::GetDefinition(TDC_ATTRIBUTE nCustAttribID) const
 {
-	int nAtt = Find(nCustAttribID);
+	int nDef = Find(nCustAttribID);
 
-	return ((nAtt != -1) ? ElementAt(nAtt) : FALLBACK);
+	return ((nDef != -1) ? ElementAt(nDef) : FALLBACK);
 }
 
 const TDCCUSTOMATTRIBUTEDEFINITION& CTDCCustomAttribDefinitionArray::GetDefinition(TDC_COLUMN nCustColID) const
 {
-	int nAtt = Find(nCustColID);
+	int nDef = Find(nCustColID);
 
-	return ((nAtt != -1) ? ElementAt(nAtt) : FALLBACK);
+	return ((nDef != -1) ? ElementAt(nDef) : FALLBACK);
 }
 
 const TDCCUSTOMATTRIBUTEDEFINITION& CTDCCustomAttribDefinitionArray::GetDefinition(const CString& sCustAttribID) const
 {
-	int nAtt = Find(sCustAttribID);
+	int nDef = Find(sCustAttribID);
 
-	return ((nAtt != -1) ? ElementAt(nAtt) : FALLBACK);
+	return ((nDef != -1) ? ElementAt(nDef) : FALLBACK);
 }
 
 DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bResolveCalcType) const
 {
 	if (bResolveCalcType && attribDef.IsDataType(TDCCA_CALCULATION))
-		return GetCalculationResultDataType(attribDef.Calculation());
+		return GetCalculationResultDataType(attribDef.calculation);
 
 	return attribDef.GetDataType();
 }
@@ -1439,9 +1449,9 @@ void CTDCCustomAttribDefinitionArray::RebuildIDs()
 	int nCustColID = TDCC_CUSTOMCOLUMN_FIRST;
 	int nCustAttribID = TDCA_CUSTOMATTRIB_FIRST;
 
-	for (int nAtt = 0; nAtt < GetSize(); nAtt++)
+	for (int nDef = 0; nDef < GetSize(); nDef++)
 	{
-		TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAtt);
+		TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nDef);
 
 		attribDef.nColumnID = (TDC_COLUMN)nCustColID++;
 		attribDef.nAttributeID = (TDC_ATTRIBUTE)nCustAttribID++;
@@ -1454,14 +1464,14 @@ DWORD CTDCCustomAttribDefinitionArray::GetCalculationOperandDataType(const TDCCU
 
 	if ((dwDataType == TDCCA_INVALID) && (op.nAttributeID == TDCA_CUSTOMATTRIB))
 	{
-		int nAtt = Find(op.sCustAttribID);
+		int nDef = Find(op.sCustAttribID);
 
-		if (nAtt != -1)
+		if (nDef != -1)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAtt);
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nDef);
 
 			if (attribDef.IsDataType(TDCCA_CALCULATION))
-				return GetCalculationResultDataType(attribDef.Calculation()); // RECURSIVE CALL
+				return GetCalculationResultDataType(attribDef.calculation); // RECURSIVE CALL
 
 			if (!attribDef.IsMultiList())
 				return attribDef.GetDataType();

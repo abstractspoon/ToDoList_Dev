@@ -434,21 +434,23 @@ void CAutoComboBox::OnSize(UINT nType, int cx, int cy)
 
 int CAutoComboBox::AddUniqueItems(const CStringArray& aItems)
 {
-    int nItemCount = aItems.GetSize(), nCount = 0;
+	// If there's lot's of items to add then it's much
+	// more efficient to build the unique list outside
+	// of the combo and then re-add the items
+	if (aItems.GetSize())
+	{
+		CStringArray aCBItems;
+		int nOrgCount = GetItems(aCBItems);
 
-	// maintain order
-    for (int nItem = 0; nItem < nItemCount; nItem++)
-    {
-		const CString& sItem = Misc::GetItem(aItems, nItem);
+		aCBItems.Append(aItems);
+		Misc::RemoveDuplicates(aCBItems);
 
-        if (AddUniqueItem(sItem, FALSE) != CB_ERR)
-            nCount++;
-    }
+		CDialogHelper::SetComboBoxItems(*this, aCBItems);
 
-	if (nCount)
-		RefreshDropWidth();
+		return (aCBItems.GetSize() - nOrgCount);
+	}
 
-    return nCount;
+    return 0;
 }
 
 int CAutoComboBox::AddUniqueItems(const CAutoComboBox& cbItems)

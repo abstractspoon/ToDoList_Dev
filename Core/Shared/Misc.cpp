@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Misc.h"
+#include "mapex.h"
 
 #include <Lmcons.h>
 #include <math.h>
@@ -1414,8 +1415,7 @@ const CString& Misc::GetItem(const CStringArray& aValues, int nItem)
 
 int Misc::RemoveEmptyItems(CStringArray& aFrom)
 {
-	int nRemoved = 0; // counter
-	int nItem = aFrom.GetSize();
+	int nOrgCount = aFrom.GetSize(), nItem = nOrgCount;
 
 	while (nItem--)
 	{
@@ -1423,29 +1423,69 @@ int Misc::RemoveEmptyItems(CStringArray& aFrom)
 		Trim(sItem);
 
 		if (sItem.IsEmpty())
-		{
 			aFrom.RemoveAt(nItem);
-			nRemoved++;
-		}
 	}
 
-	return nRemoved;
+	return (nOrgCount - aFrom.GetSize());
+}
+
+int Misc::RemoveDuplicates(CStringArray& aFrom, BOOL bCaseSensitive)
+{
+	CStringSet mapUniqueItems;
+	int nOrgCount = aFrom.GetSize(), nNumItems = nOrgCount;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		CString sItem = (bCaseSensitive ? aFrom[nItem] : ToUpper(aFrom[nItem]));
+
+		if (!mapUniqueItems.Has(sItem))
+		{
+			mapUniqueItems.Add(sItem);
+			continue;
+		}
+
+		// else
+		aFrom.RemoveAt(nItem);
+
+		nItem--;
+		nNumItems--;
+	}
+
+	return (nOrgCount - nNumItems);
 }
 
 int Misc::RemoveItems(const CStringArray& aValues, CStringArray& aFrom, BOOL bCaseSensitive)
 {
-	int nRemoved = 0; // counter
-	int nItem = aValues.GetSize();
+	if (aValues.GetSize() == 0)
+		return 0;
+
+	// Create a look up of the values to be removed
+	CStringSet mapValues;
+
+	if (bCaseSensitive)
+	{
+		mapValues.CopyFrom(aValues);
+	}
+	else
+	{
+		int nItem = aValues.GetSize();
+
+		while (nItem--)
+			mapValues.Add(ToUpper(aValues[nItem]));
+	}
+
+	// Traverse the existing array removing as we go
+	int nOrgCount = aFrom.GetSize(), nItem = nOrgCount;
 
 	while (nItem--)
 	{
-		const CString& sItem = GetItem(aValues, nItem);
+		CString sItem = (bCaseSensitive ? aFrom[nItem] : ToUpper(aFrom[nItem]));
 
-		if (RemoveItem(sItem, aFrom, bCaseSensitive))
-			nRemoved++;
+		if (mapValues.Has(sItem))
+			aFrom.RemoveAt(nItem);
 	}
 
-	return nRemoved;
+	return (nOrgCount - aFrom.GetSize());
 }
 
 BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
@@ -1459,34 +1499,51 @@ BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 	return TRUE;
 }
 
-int Misc::AddUniqueItems(const CStringArray& aValues, CStringArray& aTo, BOOL bCaseSensitive)
+int Misc::AppendItems(const CStringArray& aFrom, CStringArray& aTo, BOOL bRemoveDuplicates, BOOL bCaseSensitiveRemove)
 {
-	int nAdded = 0; // counter
-	int nSize = aValues.GetSize();
-	
-	for (int nItem = 0; nItem < nSize; nItem++)
-	{
-		const CString& sItem = GetItem(aValues, nItem);
+	int nOrgCount = aTo.GetSize();
 
-		if (AddUniqueItem(sItem, aTo, bCaseSensitive))
-			nAdded++;
-	}
+	aTo.Append(aFrom);
 
-	return nAdded;
+	if (bRemoveDuplicates)
+		RemoveDuplicates(aTo, bCaseSensitiveRemove);
+
+	return (aTo.GetSize() - nOrgCount);
 }
 
-int Misc::AddUniqueItems(const CDWordArray& aValues, CDWordArray& aTo)
+int Misc::AppendItems(const CDWordArray& aFrom, CDWordArray& aTo, BOOL bRemoveDuplicates)
 {
-	int nAdded = 0; // counter
-	int nSize = aValues.GetSize();
-	
-	for (int nItem = 0; nItem < nSize; nItem++)
+	int nOrgCount = aTo.GetSize();
+
+	aTo.Append(aFrom);
+
+	if (bRemoveDuplicates)
+		RemoveDuplicates(aTo);
+
+	return (aTo.GetSize() - nOrgCount);
+}
+
+int Misc::RemoveDuplicates(CDWordArray& aFrom)
+{
+	CDWordSet mapUniqueItems;
+	int nOrgCount = aFrom.GetSize(), nNumItems = nOrgCount;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		if (AddUniqueItemT(aValues[nItem], aTo))
-			nAdded++;
+		if (!mapUniqueItems.Has(aFrom[nItem]))
+		{
+			mapUniqueItems.Add(aFrom[nItem]);
+			continue;
+		}
+
+		// else
+		aFrom.RemoveAt(nItem);
+
+		nItem--;
+		nNumItems--;
 	}
 
-	return nAdded;
+	return (nOrgCount - nNumItems);
 }
 
 BOOL Misc::AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive)

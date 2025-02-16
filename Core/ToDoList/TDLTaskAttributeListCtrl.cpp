@@ -11,7 +11,6 @@
 #include "tdcmapping.h"
 #include "TDLTaskIconDlg.h"
 
-#include "..\shared\EnMenu.h"
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\FileMisc.h"
 #include "..\shared\HoldRedraw.h"
@@ -108,7 +107,9 @@ const int MIN_COL_WIDTH		= (4 * EE_BTNWIDTH_DEFAULT);
 const int VALUE_VARIES = 1;
 const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
 
-const TCHAR NEWLINE = '\n';
+// We use non-printable characters to avoid clashing with user data
+const TCHAR ITEM_DELIM[2]  = { 14, 0 };
+const TCHAR MIXED_DELIM[2] = { 15, 0 };
 
 const LPCTSTR DATETIME_VARIES = _T("-1");
 
@@ -151,6 +152,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_fAttribColProportion(0.5f),
 	m_bGrouped(FALSE),
 	m_aSortedGroupedItems(*this),
+	m_aAttribOrder(aCustAttribDefs),
 	m_reminders(rems),
 	m_eSingleFileLink(FES_GOBUTTON),
 	m_cbMultiFileLink(FES_GOBUTTON),
@@ -186,12 +188,12 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	ON_WM_SIZE()
 	ON_WM_SETCURSOR()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_CAPTURECHANGED()
 	ON_WM_KEYDOWN()
-	ON_WM_CONTEXTMENU()
 
 	ON_NOTIFY(DTN_CLOSEUP, IDC_DATE_PICKER, OnDateCloseUp)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_DATE_PICKER, OnDateChange)
@@ -283,9 +285,114 @@ void CTDLTaskAttributeListCtrl::ToggleSortDirection()
 	m_bSortAscending = !m_bSortAscending;
 
 	if (m_bGrouped)
-		Populate();
+		Populate(); // will also sort 
 	else
 		Sort();
+}
+
+BOOL CTDLTaskAttributeListCtrl::GetAttributeToMoveBelow(TDC_ATTRIBUTE nAttribID, BOOL bUp, TDC_ATTRIBUTE& nBelowAttribID) const
+{
+	// Reverse direction if sorted descending
+	if (!m_bSortAscending)
+		bUp = !bUp;
+
+	nBelowAttribID = nAttribID;
+
+	if (nAttribID == TDCA_NONE)
+		return FALSE;
+
+	// Time of day is not movable
+	if (MapTimeToDate(nAttribID) != TDCA_NONE)
+		return FALSE;
+
+	if (IsAttributeMoveLimited(nAttribID, bUp))
+		return FALSE;
+
+	int nRowOffset = (bUp ? 2 : 1);
+
+	for (int nStep = 0; nStep < nRowOffset; nStep++)
+	{
+		TDC_ATTRIBUTE nNextAttribID;
+		
+		if (!m_aAttribOrder.GetNextAttribute(nBelowAttribID, bUp, m_bGrouped, nNextAttribID))
+		{
+			ASSERT(bUp);
+			ASSERT(nStep == 1);
+
+			// if we are on the second 'step' shifting UP then it means
+			// we're either below the absolute topmost attribute or we're 
+			// below 'our' topmost group item
+			if (m_bGrouped)
+			{
+				// Use whatever attribute is immediately above the topmost
+				// group item regardless of visibility
+				if (m_aAttribOrder.GetNextAttribute(nBelowAttribID, bUp, FALSE, nNextAttribID))
+					break;
+			}
+
+			// else there is no attribute above so we're at the top
+			// so we return TDCA_NONE to insert above the topmost item
+			nNextAttribID = TDCA_NONE;
+		}
+
+		nBelowAttribID = nNextAttribID;
+
+		if (nBelowAttribID == TDCA_NONE)
+			break;
+		
+		// Skip attributes not actually in the list
+		if (GetRow(nBelowAttribID) == -1)
+			nStep--;
+	}
+
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::IsAttributeMoveLimited(TDC_ATTRIBUTE nAttribID, BOOL bUp) const
+{
+	TDC_ATTRIBUTE nNextAttribID = nAttribID;
+
+	while (m_aAttribOrder.GetNextAttribute(nNextAttribID, bUp, m_bGrouped, nNextAttribID))
+	{
+		if (GetRow(nNextAttribID) != -1)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::MoveSelectedAttribute(BOOL bUp)
+{
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel()), nBelowAttribID;
+
+	if (!GetAttributeToMoveBelow(nAttribID, bUp, nBelowAttribID))
+		return FALSE;
+
+	VERIFY(m_aAttribOrder.MoveAttribute(nAttribID, nBelowAttribID));
+	Sort();
+
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CanMoveSelectedAttribute(BOOL bUp) const
+{
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(GetCurSel()), nUnused;
+
+	return GetAttributeToMoveBelow(nAttribID, bUp, nUnused);
+}
+
+BOOL CTDLTaskAttributeListCtrl::ResetAttributeMoves()
+{
+	if (!m_aAttribOrder.ResetOrder())
+		return FALSE;
+
+	Sort();
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CanResetAttributeMoves() const
+{
+	return m_aAttribOrder.CanResetOrder();
 }
 
 int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
@@ -309,12 +416,13 @@ int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2
 		if (bAttrib1IsTime && bAttrib2IsTime)
 		{
 			ASSERT(nDateAttribID1 != nDateAttribID2);
-			return CInputListCtrl::CompareItems(nDateAttribID1, nDateAttribID2, nSortColumn);
-		}
 
-		// else if the first item is a time field
-		if (bAttrib1IsTime)
+			nAttribID1 = nDateAttribID1;
+			nAttribID2 = nDateAttribID2;
+		}
+		else if (bAttrib1IsTime)
 		{
+			// else if the first item is a time field
 			ASSERT(!bAttrib2IsTime);
 
 			// If the second attribute is the first attribute's  
@@ -329,28 +437,29 @@ int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2
 
 			// else we use the date field for the comparison
 			// to keep the date and time adjacent to one another
-			return CInputListCtrl::CompareItems(nDateAttribID1, dwItemData2, nSortColumn);
+			nAttribID1 = nDateAttribID1;
 		}
-
-		// else second item must be a time field
-		ASSERT(bAttrib2IsTime);
-
-		// If the first attribute is the second attribute's
-		// date field we sort the time below the date
-		if (nAttribID1 == nDateAttribID2)
+		else // else second item must be a time field
 		{
 			ASSERT(bAttrib2IsTime);
-			ASSERT(nAttribID1 != TDCA_NONE);
 
-			return (m_bSortAscending ? -1 : 1);
+			// If the first attribute is the second attribute's
+			// date field we sort the time below the date
+			if (nAttribID1 == nDateAttribID2)
+			{
+				ASSERT(bAttrib2IsTime);
+				ASSERT(nAttribID1 != TDCA_NONE);
+
+				return (m_bSortAscending ? -1 : 1);
+			}
+
+			// else we use the date field for the comparison
+			// to keep the date and time adjacent to one another
+			nAttribID2 = nDateAttribID2;
 		}
-
-		// else we use the date field for the comparison
-		// to keep the date and time adjacent to one another
-		return CInputListCtrl::CompareItems(dwItemData1, nDateAttribID2, nSortColumn);
 	}
 
-	return CInputListCtrl::CompareItems(dwItemData1, dwItemData2, nSortColumn);
+	return m_aAttribOrder.CompareItems(nAttribID1, nAttribID2);
 }
 
 void CTDLTaskAttributeListCtrl::ToggleGrouping()
@@ -408,6 +517,8 @@ void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) co
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
 	prefs.WriteProfileInt(szKey, _T("AttribSortAscending"), m_bSortAscending);
 	prefs.WriteProfileInt(szKey, _T("AttribGrouped"), m_bGrouped);
+
+	m_aAttribOrder.SaveState(prefs, szKey);
 }
 
 void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
@@ -415,6 +526,8 @@ void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szK
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
 	m_bGrouped = prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE);
+
+	m_aAttribOrder.LoadState(prefs, szKey);
 
 	if (GetSafeHwnd())
 	{
@@ -463,6 +576,8 @@ void CTDLTaskAttributeListCtrl::SetTimeTrackTaskID(DWORD dwTaskID)
 
 void CTDLTaskAttributeListCtrl::OnCustomAttributesChange()
 {
+	m_aAttribOrder.OnCustomAttributesChange();
+
 	Populate();
 }
 
@@ -475,12 +590,8 @@ BOOL CTDLTaskAttributeListCtrl::WantAddAttribute(TDC_ATTRIBUTE nAttribID) const
 {
 	switch (nAttribID)
 	{
-	case TDCA_PROJECTNAME:
-	case TDCA_COMMENTS:
-		return FALSE;
-
-	case TDCA_TASKNAME:
-		return TRUE;
+	case TDCA_COMMENTS:	return FALSE;
+	case TDCA_TASKNAME:	return TRUE;
 
 	case TDCA_ICON:
 		// Always show the icon field unless explicitly hidden
@@ -508,7 +619,7 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 	{
 		for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
 		{
-			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAtt];
+			const TDCATTRIBUTE& attrib = TASKATTRIBUTES[nAtt];
 
 			if ((attrib.nGroup == nGroup) && WantAddAttribute(attrib.nAttributeID))
 				mapAttrib[attrib.nAttributeID] = CEnString(attrib.nAttribResID);
@@ -551,12 +662,10 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 			if (attribDef.bEnabled)
 			{
 				TDC_ATTRIBUTE nAttribID = attribDef.GetAttributeID();
-				CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-
-				mapAttrib[nAttribID] = sAttrib;
+				mapAttrib[nAttribID] = attribDef.sLabel;
 
 				if (attribDef.IsDataType(TDCCA_DATE) && attribDef.HasFeature(TDCCAF_SHOWTIME))
-					mapAttrib[CUSTOMTIMEATTRIBID(nAttribID)] = sAttrib;
+					mapAttrib[CUSTOMTIMEATTRIBID(nAttribID)] = attribDef.sLabel;
 			}
 		}
 	}
@@ -612,7 +721,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 		{
 			// Built-in attributes
 			for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
-				CheckAddAttribute(ATTRIBUTES[nAtt].nAttributeID, ATTRIBUTES[nAtt].nAttribResID);
+				CheckAddAttribute(TASKATTRIBUTES[nAtt].nAttributeID, TASKATTRIBUTES[nAtt].nAttribResID);
 
 			// Associated time fields
 			CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
@@ -791,7 +900,7 @@ BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 		int nRow = SubItemHitTest(&lvHit);
 		int nCol = lvHit.iSubItem;
 
-		if (nCol == VALUE_COL)
+		if ((nRow != -1) && (nCol == VALUE_COL))
 		{
 			BOOL bEditable = CanEditCell(nRow, nCol);
 
@@ -848,6 +957,22 @@ CString CTDLTaskAttributeListCtrl::GetSelectedAttributeLabel() const
 
 	// else
 	return GetItemText(nRow, ATTRIB_COL);
+}
+
+CString CTDLTaskAttributeListCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const
+{
+	int nRow = GetRow(nAttribID);
+
+	if (nRow == -1)
+		return _T("");
+
+	// else
+	return GetItemText(nRow, ATTRIB_COL);
+}
+
+BOOL CTDLTaskAttributeListCtrl::CanEditSelectedAttribute() const
+{
+	return CanEditCell(GetCurSel(), VALUE_COL);
 }
 
 IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
@@ -1685,7 +1810,7 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 		case TDCA_FILELINK:
 		case TDCA_ALLOCTO:
 		case TDCA_DEPENDENCY:
-			bValueVaries = (sText.Find('|') != -1);
+			bValueVaries = (sText.Find(MIXED_DELIM) != -1);
 			break;
 
 		default:
@@ -1695,7 +1820,7 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 				GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
 				if (pDef->IsList())
-					bValueVaries = (sText.Find('|') != -1);
+					bValueVaries = (sText.Find(MIXED_DELIM) != -1);
 			}
 			else if (IsCustomTime(nAttribID))
 			{
@@ -1849,11 +1974,13 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 	case TDCA_CATEGORY:
 	case TDCA_TAGS:
 		{
-			int nMixed = sText.Find('|');
+			CString sChecked = Misc::SplitLeft(sText, MIXED_DELIM);
 
-			if (nMixed != -1)
+			if (!sChecked.IsEmpty())
 			{
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText.Left(nMixed), crText, nDrawTextFlags);
+				sChecked.Replace(ITEM_DELIM, Misc::GetListSeparator());
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sChecked, crText, nDrawTextFlags);
+
 				return;
 			}
 		}
@@ -1936,7 +2063,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 					if (pDef->IsMultiList())
 					{
 						CString sMatched(sText), sUnused;
-						Misc::Split(sMatched, sUnused, '|');
+						Misc::Split(sMatched, sUnused, MIXED_DELIM);
 
 						CStringArray aIcons;
 						int nNumIcons = SplitValueArray(sMatched, aIcons);
@@ -1974,11 +2101,15 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			default:
 				if (pDef->IsMultiList())
 				{
-					CString sMatched(sText), sUnused;
-					Misc::Split(sMatched, sUnused, '|');
+					CString sChecked = Misc::SplitLeft(sText, MIXED_DELIM);
 
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sMatched, crText, nDrawTextFlags);
-					return;
+					if (!sChecked.IsEmpty())
+					{
+						sChecked.Replace(ITEM_DELIM, Misc::GetListSeparator());
+
+						CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sChecked, crText, nDrawTextFlags);
+						return;
+					}
 				}
 				break;
 			}
@@ -2272,7 +2403,7 @@ CString CTDLTaskAttributeListCtrl::FormatMultiSelItems(const CStringArray& aMatc
 	CString sValue = FormatValueArray(aMatched);
 	
 	if (aMixed.GetSize())
-		sValue += ('|' + FormatValueArray(aMixed));
+		sValue += (MIXED_DELIM + FormatValueArray(aMixed));
 
 	return sValue;
 }
@@ -2281,7 +2412,7 @@ int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStri
 {
 	CString sMatched(sValues), sMixed;
 
-	Misc::Split(sMatched, sMixed, '|');
+	Misc::Split(sMatched, sMixed, MIXED_DELIM);
 	SplitValueArray(sMatched, aMatched);
 	SplitValueArray(sMixed, aMixed);
 
@@ -2329,16 +2460,27 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 	return TRUE;
 }
 
+void CTDLTaskAttributeListCtrl::RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel, BOOL bWantSort)
+{
+	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
+	combo.EnableMultiSelection(bMultiSel);
+
+	CStringArray aAllValues;
+	
+	aAllValues.Copy(aDefValues);
+	aAllValues.Append(aUserValues);
+	Misc::RemoveDuplicates(aAllValues);
+
+	CDialogHelper::SetComboBoxItems(combo, aAllValues);
+}
+
 void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
+	// Populate
 	CheckRecreateCombo(nRow, combo);
+	RebuildCombo(combo, aDefValues, aUserValues, TRUE, bWantSort);
 
-	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
-	combo.EnableMultiSelection(TRUE);
-	combo.ResetContent();
-	combo.AddStrings(aDefValues);
-	combo.AddUniqueItems(aUserValues);
-
+	// Set selection
 	CStringArray aMatched, aMixed;
 	ParseMultiSelValues(GetItemText(nRow, VALUE_COL), aMatched, aMixed);
 
@@ -2347,14 +2489,11 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 
 void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
+	// Populate
 	CheckRecreateCombo(nRow, combo);
+	RebuildCombo(combo, aDefValues, aUserValues, FALSE, bWantSort);
 
-	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
-	combo.EnableMultiSelection(FALSE);
-	combo.ResetContent();
-	combo.AddStrings(aDefValues);
-	combo.AddUniqueItems(aUserValues);
-
+	// Set selection
 	CString sValue = GetItemText(nRow, VALUE_COL);
 	combo.AddUniqueItem(sValue);
 
@@ -3634,10 +3773,8 @@ BOOL CTDLTaskAttributeListCtrl::CFileDropTarget::OnDrop(CWnd* pWnd, COleDataObje
 		CStringArray aExisting;
 		SplitValueArray(m_pAttributeList->GetItemText(nRow, VALUE_COL), aExisting);
 
-		if (Misc::AddUniqueItems(aFiles, aExisting))
-		{
+		if (Misc::AppendItems(aFiles, aExisting, TRUE))
 			m_pAttributeList->SetValueText(nRow, FormatValueArray(aExisting));
-		}
 	}
 
 	return TRUE;
@@ -3892,7 +4029,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					CStringArray aValues;
 
 					if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
-						sTooltip = Misc::FormatArray(aValues, NEWLINE);
+						sTooltip = Misc::FormatArray(aValues, ITEM_DELIM);
 				}
 				break;
 
@@ -3937,7 +4074,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					CTDCDependencyArray aDepends;
 					
 					if (aDepends.Parse(GetItemText(nRow, nCol)) > 1)
-						sTooltip = m_formatter.GetDependencies(aDepends, NEWLINE);
+						sTooltip = m_formatter.GetDependencies(aDepends, '\n');
 				}
 				break;
 
@@ -3956,7 +4093,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 								CStringArray aValues;
 
 								if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
-									sTooltip = Misc::FormatArray(aValues, NEWLINE);
+									sTooltip = Misc::FormatArray(aValues, ITEM_DELIM);
 							}
 							break;
 						}
@@ -4009,109 +4146,29 @@ void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CInputListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-void CTDLTaskAttributeListCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+void CTDLTaskAttributeListCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	HideAllControls();
 
-	LVHITTESTINFO lvHit = { { pos.x, pos.y }, 0 };
-	ScreenToClient(&lvHit.pt);
+	LVHITTESTINFO lvHit = { point, 0 };
 
 	int nRow = SubItemHitTest(&lvHit);
 	int nCol = lvHit.iSubItem;
 
-	if (nCol != VALUE_COL)
-		return; // eat
-
 	SetCurSel(nRow, nCol);
 
-	// Decide whether we should show a menu at all
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow, TRUE);
-
-	if (!GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
-		return; // eat
-
-	CMenu menu;
-
-	if (menu.LoadMenu(IDR_MISC))
-	{
-		CMenu* pPopup = menu.GetSubMenu(MM_ATTRIBUTECTRL);
-
-		// Prepare menu items
-		BOOL bMultiSel = (m_aSelectedTaskIDs.GetSize() > 1);
-		CString sAttrib = GetItemText(nRow, ATTRIB_COL);
-
-		// Copy command
-		CEnString sMenuText;
-
-		if (GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
-		{
-			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
-
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
-		}
-		else
-		{
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
-		}
-
-		// Paste command
-		TDC_ATTRIBUTE nFromAttribID = TDCA_NONE;
-
-		if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
-		{
-			CString sFromAttrib = GetItemText(GetRow(nFromAttribID), ATTRIB_COL);
-			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
-
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_PASTEATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
-		}
-		else
-		{
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
-		}
-
-		// Clear command
-		if (CanEditCell(nRow, nCol))
-		{
-			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
-
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBLIST_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
-		}
-		else
-		{
-			pPopup->EnableMenuItem(ID_ATTRIBLIST_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
-		}
-
-		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
-									   pos.x, pos.y, 0, GetSafeHwnd(), NULL);
-
-		switch (nCmdID)
-		{
-		case ID_ATTRIBLIST_COPYATTRIBVALUES:
-			GetParent()->SendMessage(WM_TDCM_COPYTASKATTRIBUTE, nAttribID);
-			break;
-
-		case ID_ATTRIBLIST_PASTEATTRIBVALUES:
-			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
-			break;
-
-		case ID_ATTRIBLIST_CLEARATTRIBVALUES:
-			GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID);
-			break;
-		}
-	}
+	// Parent handles context menu
+	CInputListCtrl::OnRButtonDown(nFlags, point);
 }
 
 CString CTDLTaskAttributeListCtrl::FormatValueArray(const CStringArray& aValues)
 {
-	return Misc::FormatArray(aValues, NEWLINE);
+	return Misc::FormatArray(aValues, ITEM_DELIM);
 }
 
 int CTDLTaskAttributeListCtrl::SplitValueArray(const CString& sValues, CStringArray& aValues)
 {
-	return Misc::Split(sValues, aValues, NEWLINE);
+	return Misc::Split(sValues, aValues, ITEM_DELIM);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4154,11 +4211,11 @@ int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetNextItem(int nKeyPress)
 	switch (nKeyPress)
 	{
 	case VK_DOWN:	
-		nNext = (nFrom + 1);	
+		nNext = (nFrom + 1);
 		break;
 	
 	case VK_UP:		
-		nNext = (nFrom - 1);	
+		nNext = (nFrom - 1);
 		break;
 
 	case VK_NEXT:	
@@ -4170,11 +4227,11 @@ int CTDLTaskAttributeListCtrl::CSortedGroupItemArray::GetNextItem(int nKeyPress)
 		break;
 
 	case VK_END:	
-		nNext = (nNumItems - 1);	
+		nNext = (nNumItems - 1);
 		break;
 	
 	case VK_HOME:	
-		nNext = 0;	
+		nNext = 0;
 		break;
 
 	default:
@@ -4293,5 +4350,331 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::DescendingSortProc(con
 {
 	return -AscendingSortProc(item1, item2);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(UINT nAttribResID, TDC_ATTRIBUTE attribID, TDC_ATTRIBUTEGROUP group)
+	:
+	nAttribID(attribID),
+	nGroup(group),
+	nPos(0)
+{
+	if (nAttribResID)
+		sName = CEnString(nAttribResID);
+}
+
+CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCATTRIBUTE& attrib)
+	:
+	sName(CEnString(attrib.nAttribResID)),
+	nAttribID(attrib.nAttributeID),
+	nGroup(attrib.nGroup),
+	nPos(0)
+{
+}
+
+CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+	:
+	sName(attribDef.sLabel),
+	nAttribID(attribDef.GetAttributeID()),
+	sCustAttribID(attribDef.sUniqueID),
+	nGroup(TDCAG_CUSTOM),
+	nPos(0)
+{
+}
+
+BOOL CTDLTaskAttributeListCtrl::ATTRIBITEM::IsCustom() const
+{
+	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
+}
+
+// -----------------------------------------------------------------
+
+CTDLTaskAttributeListCtrl::CAttributeOrder::CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+	:
+	m_aCustomAttribDefs(aCustAttribDefs)
+{
+	Populate();
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::Populate()
+{
+	// Built-in attributes (excluding TDCA_NONE)
+	for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
+	{
+		m_aAttributeItems.Add(ATTRIBITEM(TASKATTRIBUTES[nAtt]));
+	}
+
+	// Custom attributes
+	for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
+	{
+		m_aAttributeItems.Add(ATTRIBITEM(m_aCustomAttribDefs[nCust]));
+	}
+
+	// Misc others
+	m_aAttributeItems.Add(ATTRIBITEM(IDS_TDLBC_REMINDER, TDCA_REMINDER, TDCAG_DATETIME));
+
+	// Sort 
+	Misc::SortArrayT(m_aAttributeItems, SortByNameProc);
+	GetOrder(m_aDefaultOrder);
+
+	RebuildItemPositions();
+}
+
+BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow)
+{
+	ASSERT(nAttribID != TDCA_NONE);
+
+	int nOldPos = GetAttribPos(nAttribID);
+	int nNewPos = (GetAttribPos(nAttribIDBelow) + 1);
+
+	if ((nOldPos < 0) || (nNewPos < 0))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (nNewPos == nOldPos)
+		return FALSE;
+
+	ATTRIBITEM item = m_aAttributeItems.GetAt(nOldPos);
+	m_aAttributeItems.InsertAt(nNewPos, item);
+
+	if (nNewPos > nOldPos)
+		m_aAttributeItems.RemoveAt(nOldPos);
+	else
+		m_aAttributeItems.RemoveAt(nOldPos + 1);
+	
+	RebuildItemPositions();
+	return TRUE;
+}
+
+int CTDLTaskAttributeListCtrl::CAttributeOrder::GetAttribPos(TDC_ATTRIBUTE nAttribID) const
+{
+	int nPos = -1;
+	
+	if (!m_mapPositions.Lookup(nAttribID, nPos) && (nAttribID != TDCA_NONE))
+	{
+		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
+		nPos = (m_aAttributeItems.GetSize() - 1);
+	}
+
+	return nPos;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const
+{
+	if (nAttribID == TDCA_NONE)
+		return FALSE;
+
+	int nPos = GetAttribPos(nAttribID), nNextPos = nPos;
+	int nNumItems = m_aAttributeItems.GetSize();
+
+	if ((bUp && (nPos == 0)) || (!bUp && (nPos >= (nNumItems - 1))))
+		return FALSE;
+
+	if (bSameGroup)
+	{
+		const ATTRIBITEM& attrib = m_aAttributeItems[nPos];
+
+		if (bUp)
+		{
+			for (--nNextPos; nNextPos >= 0; nNextPos--)
+			{
+				const ATTRIBITEM& attribNext = m_aAttributeItems[nNextPos];
+
+				if (attribNext.nGroup == attrib.nGroup)
+				{
+					nNextAttribID = attribNext.nAttribID;
+					return TRUE;
+				}
+			}
+		}
+		else
+		{
+			for (++nNextPos; nNextPos < nNumItems; nNextPos++)
+			{
+				const ATTRIBITEM& attribNext = m_aAttributeItems[nNextPos];
+
+				if (attribNext.nGroup == attrib.nGroup)
+				{
+					nNextAttribID = attribNext.nAttribID;
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
+	}
+	else
+	{
+		if (bUp)
+			nNextPos--;
+		else
+			nNextPos++;
+	}
+
+	if (nNextPos >= nNumItems)
+		return FALSE;
+
+	if (nNextPos < 0)
+		nNextAttribID = TDCA_NONE; // top of list
+	else
+		nNextAttribID = m_aAttributeItems[nNextPos].nAttribID;
+
+	 return (nNextAttribID != nAttribID);
+}
+
+int CTDLTaskAttributeListCtrl::CAttributeOrder::CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const
+{
+	ASSERT((nAttribID1 != TDCA_NONE) && (nAttribID2 != TDCA_NONE));
+
+	int nPos1 = GetAttribPos(nAttribID1);
+	int nPos2 = GetAttribPos(nAttribID2);
+
+	int nCompare = (nPos1 - nPos2);
+
+	// Sort by ID for a stable sort
+	if (nCompare == 0)
+		nCompare = (nAttribID1 - nAttribID2);
+
+	return nCompare;
+}
+
+int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByNameProc(const void* item1, const void* item2)
+{
+	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
+	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
+
+	int nCompare = Misc::NaturalCompare(pItem1->sName, pItem2->sName);
+
+	// Sort by ID for a stable sort
+	if (nCompare == 0)
+		nCompare = (pItem1->nAttribID - pItem2->nAttribID);
+
+	return nCompare;
+}
+
+int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByPosProc(const void* item1, const void* item2)
+{
+	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
+	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
+
+	int nCompare = (pItem1->nPos - pItem2->nPos);
+
+	// Sort by ID for a stable sort
+	if (nCompare == 0)
+		nCompare = (pItem1->nAttribID - pItem2->nAttribID);
+
+	return nCompare;
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::RebuildItemPositions()
+{
+	m_mapPositions.RemoveAll();
+
+	int nItem = m_aAttributeItems.GetSize();
+
+	while (nItem--)
+	{
+		ATTRIBITEM& item = m_aAttributeItems[nItem];
+
+		item.nPos = nItem;
+		m_mapPositions[item.nAttribID] = nItem;
+	}
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::OnCustomAttributesChange()
+{
+	CStringArray aOrder;
+	VERIFY(GetOrder(aOrder));
+
+	m_aAttributeItems.RemoveAll();
+	Populate();
+
+	SetOrder(aOrder);
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::SaveState(CPreferences& prefs, LPCTSTR szKey) const
+{
+	// Write the current order out as a delimited string
+	CStringArray aOrder;
+	VERIFY(GetOrder(aOrder));
+
+	prefs.WriteProfileString(szKey, _T("AttribOrder"), Misc::FormatArray(aOrder, ITEM_DELIM));
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::LoadState(const CPreferences& prefs, LPCTSTR szKey)
+{
+	CString sOrder = prefs.GetProfileString(szKey, _T("AttribOrder"));
+
+	if (!sOrder.IsEmpty())
+	{
+		CStringArray aOrder;
+		Misc::Split(sOrder, aOrder, ITEM_DELIM);
+
+		SetOrder(aOrder);
+	}
+}
+
+int CTDLTaskAttributeListCtrl::CAttributeOrder::GetOrder(CStringArray& aOrder) const
+{
+	aOrder.SetSize(m_aAttributeItems.GetSize());
+
+	int nItem = m_aAttributeItems.GetSize();
+
+	while (nItem--)
+	{
+		const ATTRIBITEM& item = m_aAttributeItems[nItem];
+
+		if (item.IsCustom())
+			aOrder[nItem] = item.sCustAttribID;
+		else
+			aOrder[nItem].Format(_T("%d"), item.nAttribID);
+	}
+
+	return aOrder.GetSize();
+}
+
+void CTDLTaskAttributeListCtrl::CAttributeOrder::SetOrder(const CStringArray& aOrder)
+{
+	for (int nItem = 0; nItem < aOrder.GetSize(); nItem++)
+	{
+		TDC_ATTRIBUTE nAttribID = TDCA_NONE;
+		const CString& sItem = aOrder[nItem];
+
+		if (Misc::IsNumber(sItem))
+			nAttribID = (TDC_ATTRIBUTE)_ttoi(sItem);
+		else
+			nAttribID = m_aCustomAttribDefs.GetAttributeID(sItem);
+
+		int nOldPos = GetAttribPos(nAttribID);
+
+		if (nOldPos != -1)
+			m_aAttributeItems[nOldPos].nPos = nItem;
+	}
+
+	Misc::SortArrayT(m_aAttributeItems, SortByPosProc);
+	RebuildItemPositions();
+}
+
+BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::ResetOrder()
+{
+	if (!CanResetOrder())
+		return FALSE;
+
+	Misc::SortArrayT(m_aAttributeItems, SortByNameProc);
+	RebuildItemPositions();
+
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::CanResetOrder() const
+{
+	CStringArray aOrder;
+	VERIFY(GetOrder(aOrder));
+
+	return !Misc::MatchAll(aOrder, m_aDefaultOrder, TRUE);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////

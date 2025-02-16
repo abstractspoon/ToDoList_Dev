@@ -26,6 +26,9 @@ protected:
 	void TestHasSuffix();
 	void TestAtof();
 	void TestIsNumber();
+	void TestRemoveDuplicates();
+	void TestRemoveItems();
+	void TestAppendItems();
 
 	void TestRegionalSettingsRetrievalPerformance();
 

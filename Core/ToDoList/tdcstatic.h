@@ -159,7 +159,7 @@ static const int NUM_DATEFILTER = sizeof(DATE_FILTERS) / (2 * sizeof(UINT));
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-static const TDCATTRIBUTE ATTRIBUTES[] = 
+static const TDCATTRIBUTE TASKATTRIBUTES[] = 
 {
 	{ TDCA_NONE,				TDCAG_NONE,			0 },
 	{ TDCA_TASKNAME,			TDCAG_SINGLETEXT,	IDS_TDLBC_TITLE },
@@ -177,7 +177,6 @@ static const TDCATTRIBUTE ATTRIBUTES[] =
 	{ TDCA_TIMEESTIMATE,		TDCAG_TIMEPERIOD,	IDS_TDLBC_TIMEEST },
 	{ TDCA_TIMESPENT,			TDCAG_TIMEPERIOD,	IDS_TDLBC_TIMESPENT },
 	{ TDCA_FILELINK,			TDCAG_MULTITEXT,	IDS_TDLBC_FILELINK },
-	{ TDCA_PROJECTNAME,			TDCAG_NONE,			IDS_TDLBC_PROJECTNAME },
 	{ TDCA_FLAG,				TDCAG_OTHER,		IDS_TDLBC_FLAG },
 	{ TDCA_LOCK,				TDCAG_OTHER,		IDS_TDLBC_LOCK },
 	{ TDCA_CREATIONDATE,		TDCAG_DATETIME,		IDS_TDLBC_CREATEDATE },
@@ -203,7 +202,7 @@ static const TDCATTRIBUTE ATTRIBUTES[] =
 	{ TDCA_COMMENTSFORMAT,		TDCAG_SINGLETEXT,	IDS_TDLBC_COMMENTSFORMAT },
 	{ TDCA_TIMEREMAINING,		TDCAG_TIMEPERIOD,	IDS_TDLBC_TIMEREMAINING },
 };
-static const int ATTRIB_COUNT = sizeof(ATTRIBUTES) / sizeof(TDCATTRIBUTE);
+static const int ATTRIB_COUNT = sizeof(TASKATTRIBUTES) / sizeof(TDCATTRIBUTE);
 
 namespace TDC
 {
@@ -211,8 +210,8 @@ namespace TDC
 	{
 		for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 		{
-			if (nAttribID == ATTRIBUTES[nAtt].nAttributeID)
-				return CEnString(ATTRIBUTES[nAtt].nAttribResID);
+			if (nAttribID == TASKATTRIBUTES[nAtt].nAttributeID)
+				return CEnString(TASKATTRIBUTES[nAtt].nAttribResID);
 		}
 
 		return _T("");

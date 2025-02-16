@@ -1877,7 +1877,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 		if (aDateModTaskIDs.GetSize())
 		{
 			mapAttribs.Add(TDC::MapDateToAttribute(nDate));
-			Misc::AddUniqueItems(aDateModTaskIDs, aModTaskIDs);
+			Misc::AppendItems(aDateModTaskIDs, aModTaskIDs, TRUE);
 		}
 	}
 
@@ -2815,7 +2815,7 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray
 		// and if the task itself has any current array items
 		if (bMergeItems && m_data.GetTaskArray(dwTaskID, nAttribID, aTaskItems))
 		{
-			Misc::AddUniqueItems(aChecked, aTaskItems);
+			Misc::AppendItems(aChecked, aTaskItems, TRUE);
 			Misc::RemoveItems(aUnchecked, aTaskItems);
 		}
 		else
@@ -2850,7 +2850,7 @@ BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bA
 	if (bAppend)
 		GetSelectedTaskFileLinks(aFileLinks); // full paths
 
-	Misc::AddUniqueItems(aFilePaths, aFileLinks);
+	Misc::AppendItems(aFilePaths, aFileLinks, TRUE);
 	MakeRelativePaths(aFileLinks);
 
 	return SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend);
@@ -5043,9 +5043,9 @@ HTREEITEM CToDoCtrl::InsertTreeItem(const TODOITEM* pTDI, DWORD dwTaskID, HTREEI
 	// add unique items to combo-boxes
 	if (bAddToCombos)
 	{
-		Misc::AddUniqueItems(pTDI->aAllocTo, m_tldAll.aAllocTo);
-		Misc::AddUniqueItems(pTDI->aCategories, m_tldAll.aCategory);
-		Misc::AddUniqueItems(pTDI->aTags, m_tldAll.aTags);
+		Misc::AppendItems(pTDI->aAllocTo, m_tldAll.aAllocTo, TRUE);
+		Misc::AppendItems(pTDI->aCategories, m_tldAll.aCategory, TRUE);
+		Misc::AppendItems(pTDI->aTags, m_tldAll.aTags, TRUE);
 
 		Misc::AddUniqueItem(pTDI->sAllocBy, m_tldAll.aAllocBy);
 		Misc::AddUniqueItem(pTDI->sStatus, m_tldAll.aStatus);
@@ -9469,7 +9469,7 @@ void CToDoCtrl::SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand)
 
 				// Its parents
 				if (m_data.GetTaskParentIDs(dwTaskID, aParentIDs))
-					Misc::AddUniqueItems(aParentIDs, aTaskIDs);
+					Misc::AppendItems(aParentIDs, aTaskIDs, TRUE);
 			}
 		}
 
@@ -9989,11 +9989,11 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const
 
 	switch (nAttribID)
 	{
-	case TDCA_LOCK:
-		return TRUE;
+	case TDCA_LOCK:		return TRUE;
+	case TDCA_TASKNAME:	return FALSE;
 
-	case TDCA_TASKNAME:
 	case TDCA_PROJECTNAME:
+		ASSERT(0);
 		return FALSE;
 	}
 
@@ -10241,11 +10241,11 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
-	case TDCA_PROJECTNAME:
 	case TDCA_UNDO:
 	case TDCA_CUSTOMATTRIB_DEFS:
 	case TDCA_POSITION:
 	case TDCA_ENCRYPT:
+	case TDCA_PROJECTNAME:
 		return TRUE;
 
 	case TDCA_LOCK:

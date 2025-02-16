@@ -1891,21 +1891,24 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 				}
 			}
 
-			if (HasOption(TCCO_DISPLAYDONE) && pTCI->IsDone(FALSE))
+			if (!IsExtensionItem(pTCI))
 			{
-				if (CDateHelper::GetDateOnly(pTCI->GetDoneDate()).m_dt == dCellStart)
+				if (HasOption(TCCO_DISPLAYDONE) && pTCI->IsDone(FALSE))
 				{
-					pTasks->Add(pTCI);
-					continue;
+					if (CDateHelper::GetDateOnly(pTCI->GetDoneDate()).m_dt == dCellStart)
+					{
+						pTasks->Add(pTCI);
+						continue;
+					}
 				}
-			}
 
-			if (HasOption(TCCO_DISPLAYACTIVETODAY))
-			{
-				if (bToday && pTCI->IsActive(dtCell))
+				if (HasOption(TCCO_DISPLAYACTIVETODAY))
 				{
-					pTasks->Add(pTCI);
-					continue;
+					if (bToday && pTCI->IsActive(dtCell))
+					{
+						pTasks->Add(pTCI);
+						continue;
+					}
 				}
 			}
 		}

@@ -114,12 +114,15 @@ namespace Misc
 	BOOL MatchAll(const CDWordArray& array1, const CDWordArray& array2, BOOL bOrderSensitive = FALSE);
 	BOOL MatchAny(const CDWordArray& array1, const CDWordArray& array2);
 	
+	int AppendItems(const CStringArray& aFrom, CStringArray& aTo, BOOL bRemoveDuplicates = FALSE, BOOL bCaseSensitiveRemove = FALSE);
+	BOOL AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
 	int RemoveItems(const CStringArray& aItems, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	int RemoveEmptyItems(CStringArray& aFrom);
+	int RemoveDuplicates(CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	BOOL RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
-	int AddUniqueItems(const CStringArray& aItems, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
-	int AddUniqueItems(const CDWordArray& aItems, CDWordArray& aTo);
-	BOOL AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
+
+	int AppendItems(const CDWordArray& aFrom, CDWordArray& aTo, BOOL bRemoveDuplicates = FALSE);
+	int RemoveDuplicates(CDWordArray& aFrom);
 
 	CString GetLongestItem(const CStringArray& aValues);
 	int GetMaximumItemLength(const CStringArray& aValues);

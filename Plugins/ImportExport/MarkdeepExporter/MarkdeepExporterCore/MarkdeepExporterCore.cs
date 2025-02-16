@@ -73,7 +73,7 @@ namespace MarkdeepExporter
 
                 while (subtask.IsValid())
                 {
-                    ExportTask(subtask, mdSubtasks, false);
+                    ExportTask(subtask, mdSubtasks, false); // RECURSIVE CALL
 
                     subtask = subtask.GetNextTask();
                 }

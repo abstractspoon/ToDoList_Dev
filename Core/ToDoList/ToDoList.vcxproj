@@ -231,7 +231,6 @@ unicode_release\TDLTest.exe
     <None Include="res\datetime_toolbar.bmp" />
     <None Include="res\datetime_toolbar_std.bmp" />
     <None Include="res\depend_link.ico" />
-    <None Include="res\English.gif" />
     <None Include="res\fileedit_browse.ico" />
     <None Include="res\fileedit_go.ico" />
     <None Include="res\find_dialog_std.ico" />
@@ -260,7 +259,6 @@ unicode_release\TDLTest.exe
     <None Include="res\udtprefs_toolbar_std.bmp" />
     <None Include="res\update_filter.ico" />
     <None Include="RES\XPcheckboxes.bmp" />
-    <None Include="res\YourLanguage.GIF" />
     <None Include="Unicode_Debug\Itenso.Rtf.Converter.Html.dll" />
     <None Include="Unicode_Debug\Itenso.Rtf.Interpreter.dll" />
     <None Include="Unicode_Debug\Itenso.Rtf.Parser.dll" />

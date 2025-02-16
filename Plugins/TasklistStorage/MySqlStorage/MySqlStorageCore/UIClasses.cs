@@ -206,13 +206,13 @@ namespace MySqlStorage
 		private void Populate(string filter = "")
 		{
 			// Cache selected tasklist
-			var selId = SelectedTasklist?.Key;
+			var selTasklist = SelectedTasklist;
 
 			Items.Clear();
 
 			foreach (var tasklist in m_Tasklists)
 			{
-				if (tasklist.Name.IndexOf(filter, StringComparison.InvariantCultureIgnoreCase) != -1)
+				if (tasklist.Name.IndexOf(filter, StringComparison.InvariantCultureIgnoreCase) == 0)
 				{
 					var item = new ListViewItem(tasklist.Name);
 
@@ -222,6 +222,15 @@ namespace MySqlStorage
 
 					Items.Add(item);
 				}
+			}
+
+			if (Items.Count == 1)
+			{
+				SelectedIndices.Add(0);
+			}
+			else if (selTasklist != null)
+			{
+				SelectedTasklist = selTasklist;
 			}
 		}
 

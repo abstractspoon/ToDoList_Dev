@@ -483,7 +483,7 @@ class CMapDWordToContainer : public CContainerMap<DWORD, DWORD, VALUE>
 class CMapStringToStringArray : public CMapStringToContainer<CStringArray>
 {
 public:
-	BOOL Set(const CString& sKey, const CStringArray& aItems)
+	BOOL Set(const CString& sKey, const CStringArray& aItems, BOOL bRemoveDuplicates = FALSE, BOOL bCaseSensitiveRemove = FALSE)
 	{
 		CStringArray* pArray = GetAddMapping(sKey);
 
@@ -494,7 +494,7 @@ public:
 		}
 
 		pArray->RemoveAll();
-		Misc::AddUniqueItems(aItems, *pArray);
+		Misc::AppendItems(aItems, *pArray, bRemoveDuplicates, bCaseSensitiveRemove);
 
 		return TRUE;
 	}
@@ -510,12 +510,12 @@ public:
 		}
 
 		pArray->RemoveAll();
-		Misc::AddUniqueItem(sValue, *pArray);
+		pArray->Add(sValue);
 
 		return TRUE;
 	}
 
-	BOOL Add(const CString& sKey, const CString& sValue)
+	BOOL Add(const CString& sKey, const CString& sValue, BOOL bCaseSensitive = FALSE)
 	{
 		CStringArray* pArray = GetAddMapping(sKey);
 
@@ -525,17 +525,17 @@ public:
 			return FALSE;
 		}
 
-		return (Misc::AddUniqueItem(sValue, *pArray) != -1);
+		return (Misc::AddUniqueItem(sValue, *pArray, bCaseSensitive) != -1);
 	}
 
-	void Remove(const CString& sKey, const CString& sValue, BOOL bRemoveKeyWhenEmpty)
+	void Remove(const CString& sKey, const CString& sValue, BOOL bRemoveKeyWhenEmpty, BOOL bCaseSensitive = FALSE)
 	{
 		CStringArray* pArray = GetMapping(sKey);
 
 		if (pArray == NULL)
 			return; // not an error
 
-		Misc::RemoveItem(sValue, *pArray);
+		Misc::RemoveItem(sValue, *pArray, bCaseSensitive);
 
 		if (bRemoveKeyWhenEmpty && (pArray->GetSize() == 0))
 			RemoveKey(sKey);
