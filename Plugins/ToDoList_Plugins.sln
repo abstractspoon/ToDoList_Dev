@@ -222,6 +222,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoggedTimeUIExtensionBridge", "UIExension\LoggedTimeUIExtension\LoggedTimeUIExtensionBridge\LoggedTimeUIExtensionBridge.vcxproj", "{0090C2A3-F40F-4D69-A656-006833F7D27C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggedTimeUIExtensionCore", "UIExension\LoggedTimeUIExtension\LoggedTimeUIExtensionCore\LoggedTimeUIExtensionCore.csproj", "{4B4C2975-69B4-4EBC-8802-CAAE2DB37B96}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JSONExporter", "JSONExporter", "{9BA2ED13-1849-4341-A0D3-F5F364B2612D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JSONExporterBridge", "ImportExport\JSONExporter\JSONExporterBridge\JSONExporterBridge.vcxproj", "{3122F292-3C62-4EC8-A68A-5741C5E7F5B8}"
