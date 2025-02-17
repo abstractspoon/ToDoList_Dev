@@ -327,7 +327,10 @@ BOOL CTDLTaskAttributeListCtrl::GetAttributeToMoveBelow(TDC_ATTRIBUTE nAttribID,
 				// Use whatever attribute is immediately above the topmost
 				// group item regardless of visibility
 				if (m_aAttribOrder.GetNextAttribute(nBelowAttribID, bUp, FALSE, nNextAttribID))
+				{
+					nBelowAttribID = nNextAttribID;
 					break;
+				}
 			}
 
 			// else there is no attribute above so we're at the top
