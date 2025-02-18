@@ -330,6 +330,11 @@ void CKanbanColumnCtrlArray::Redraw(BOOL bErase, BOOL bUpdate)
 	);
 }
 
+void CKanbanColumnCtrlArray::Offset(int nAmount)
+{
+	ARRAY_FN(CDialogHelper::OffsetChild(pCol, nAmount, 0));
+}
+
 int CKanbanColumnCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 {
 	// Go thru each list removing deleted items

@@ -65,8 +65,9 @@ const UINT IDC_HEADER		= 102;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MIN_COL_WIDTH = GraphicsMisc::ScaleByDPIFactor(6);
-const int HEADER_HEIGHT = GraphicsMisc::ScaleByDPIFactor(24);
+const int MIN_COL_DRAGWIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_COL_AUTOWIDTH = GraphicsMisc::ScaleByDPIFactor(75);
+const int HEADER_HEIGHT		= GraphicsMisc::ScaleByDPIFactor(24);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -139,6 +140,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_SETCURSOR()
 	ON_WM_CAPTURECHANGED()
 	ON_WM_DESTROY()
+	ON_WM_HSCROLL()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_EDITTASKDONE, OnColumnEditTaskDone)
 	ON_MESSAGE(WM_KLCN_EDITTASKFLAG, OnColumnEditTaskFlag)
@@ -2545,8 +2547,35 @@ void CKanbanCtrl::Resize(int cx, int cy)
 		if (rAvail.IsRectEmpty())
 			GetClientRect(rAvail);
 
-		// Create a border
+		// Reduce for border
 		rAvail.DeflateRect(1, 1);
+
+		if (m_header.GetItemCount() > 1)
+		{
+			int nMinReqWidth = CalcMinRequiredColumnsWidth();
+
+			if (rAvail.Width() < nMinReqWidth)
+			{
+				SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE) };
+
+				si.nMin = 0;
+				si.nMax = nMinReqWidth;
+				si.nPage = rAvail.Width();
+
+				SetScrollInfo(SB_HORZ, &si);
+				ModifyStyle(0, WS_HSCROLL);
+
+				rAvail.right = (rAvail.left + nMinReqWidth);
+			}
+			else
+			{
+				ModifyStyle(WS_HSCROLL, 0);
+			}
+		}
+		else
+		{
+			ModifyStyle(WS_HSCROLL, 0);
+		}
 
 		ResizeHeader(dwm, rAvail);
 		
@@ -2593,6 +2622,69 @@ void CKanbanCtrl::Resize(int cx, int cy)
 	}
 }
 
+void CKanbanCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* /*pScrollBar*/)
+{
+	CKanbanColumnCtrl* pCol = m_aColumns[0];
+	ASSERT(pCol && pCol->GetSafeHwnd());
+
+	CRect rCol = CDialogHelper::GetChildRect(pCol);
+
+	int nOldPos = GetScrollPos(SB_HORZ);
+	int nNewPos = nOldPos;
+
+	SCROLLINFO si = { sizeof(si), 0 };
+	GetScrollInfo(SB_HORZ, &si, (SIF_PAGE | SIF_POS | SIF_RANGE));
+
+	switch (nSBCode)
+	{
+	case SB_LEFT:			nNewPos = 0; break;
+	case SB_RIGHT:			nNewPos = si.nMax; break;
+
+	case SB_LINELEFT:		nNewPos -= (MIN_COL_AUTOWIDTH / 2); break;
+	case SB_LINERIGHT:		nNewPos += (MIN_COL_AUTOWIDTH / 2); break;
+
+	case SB_PAGELEFT:		nNewPos -= si.nPage; break;
+	case SB_PAGERIGHT:		nNewPos += si.nPage; break;
+
+	case SB_THUMBPOSITION:
+	case SB_THUMBTRACK:		nNewPos = (int)nPos; break;
+
+	default:
+		return;
+	}
+
+	nNewPos = min((si.nMax - (int)si.nPage), max(0, nNewPos));
+
+	if (nNewPos != nOldPos)
+	{
+		SetScrollPos(SB_HORZ, nNewPos);
+
+		int nOffset = (nOldPos - nNewPos);
+		m_aColumns.Offset(nOffset);
+		CDialogHelper::OffsetChild(&m_header, nOffset, 0);
+
+		Invalidate();
+		UpdateWindow();
+	}
+}
+
+int CKanbanCtrl::CalcMinRequiredColumnsWidth() const
+{
+	int nNumCols = m_header.GetItemCount(), nMinWidth = 0;
+
+	for (int nCol = 0, nColStart = 0; nCol < nNumCols; nCol++)
+	{
+		int nColWidth = m_header.GetItemWidth(nCol);
+
+		if (m_header.IsItemTracked(nCol))
+			nMinWidth += max(nColWidth, MIN_COL_AUTOWIDTH);
+		else
+			nMinWidth += MIN_COL_AUTOWIDTH;
+	}
+
+	return nMinWidth;
+}
+
 void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 {
 	if (rAvail.IsRectEmpty())
@@ -2606,7 +2698,7 @@ void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 	ASSERT(nNumCols == GetVisibleColumnCount());
 
 	CRect rNewHeader(rAvail);
-	rAvail.top = rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
+	rAvail.top = (rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT));
 
 	dwm.MoveWindow(&m_header, rNewHeader, TRUE);
 		
@@ -3206,8 +3298,8 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		int nThisWidth = m_header.GetItemWidth(pHDN->iItem);
 		int nNextWidth = m_header.GetItemWidth(pHDN->iItem + 1);
 
-		pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
-		pHDN->pitem->cxy = min(pHDN->pitem->cxy, (nThisWidth + nNextWidth - MIN_COL_WIDTH));
+		pHDN->pitem->cxy = max(MIN_COL_DRAGWIDTH, pHDN->pitem->cxy);
+		pHDN->pitem->cxy = min(pHDN->pitem->cxy, (nThisWidth + nNextWidth - MIN_COL_DRAGWIDTH));
 		
 		// Resize 'next' column
 		nNextWidth = (nThisWidth + nNextWidth - pHDN->pitem->cxy);

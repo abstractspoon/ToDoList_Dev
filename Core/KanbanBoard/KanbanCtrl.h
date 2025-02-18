@@ -142,13 +142,15 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnEndTrackHeaderItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDestroy();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+
+	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnColumnEditLabel(WPARAM wp, LPARAM lp);
@@ -202,6 +204,7 @@ protected:
 	BOOL HasFocus() const;
 	BOOL SelectClosestAdjacentItemToSelection(int nAdjacentCol);
 	int MapHeaderItemToColumn(int nItem) const;
+	int CalcMinRequiredColumnsWidth() const;
 
 	inline BOOL UsingFixedColumns() const { return m_aColumnDefs.GetSize(); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
