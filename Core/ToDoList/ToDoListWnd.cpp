@@ -1421,10 +1421,12 @@ BOOL CToDoListWnd::InitFilterbar()
 	if (!m_filterBar.Create(this))
 		return FALSE;
 
-	m_filterBar.EnableMultiSelection(Prefs().GetMultiSelFilters());
-	m_filterBar.ShowDefaultFilters(Prefs().GetShowDefaultFiltersInFilterBar());
-	m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
-	m_filterBar.SetNumPriorityRiskLevels(Prefs().GetNumPriorityRiskLevels());
+	const CPreferencesDlg& prefs = Prefs();
+
+	m_filterBar.EnableMultiSelection(prefs.GetMultiSelFilters());
+	m_filterBar.ShowDefaultFilters(prefs.GetShowDefaultFiltersInFilterBar());
+	m_filterBar.SetTitleFilterOption(prefs.GetTitleFilterOption());
+	m_filterBar.SetNumPriorityRiskLevels(prefs.GetNumPriorityRiskLevels());
 	m_filterBar.SetUITheme(m_theme);
 
 	RefreshFilterBarAdvancedFilters();

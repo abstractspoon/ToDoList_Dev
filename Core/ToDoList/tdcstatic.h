@@ -274,7 +274,7 @@ namespace TDC
 		return FALSE;
 	}
 
-	static BOOL IsValidNumPriorityResourceLevels(int& nNumLevels)
+	static BOOL IsValidNumPriorityResourceLevels(int nNumLevels)
 	{
 		return ((nNumLevels >= 2) && (nNumLevels <= 11));
 	}
