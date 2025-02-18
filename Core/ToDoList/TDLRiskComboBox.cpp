@@ -3,8 +3,10 @@
 
 #include "stdafx.h"
 #include "TDLRiskComboBox.h"
+#include "TDLPriorityComboBox.h"
 #include "resource.h"
 #include "tdcenum.h"
+#include "tdcstatic.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\EnString.h"
@@ -16,25 +18,13 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-const UINT IDS_TDC_SCALE[] = { IDS_TDC_SCALE0,
-								IDS_TDC_SCALE1,
-								IDS_TDC_SCALE2,
-								IDS_TDC_SCALE3,
-								IDS_TDC_SCALE4,
-								IDS_TDC_SCALE5,
-								IDS_TDC_SCALE6,
-								IDS_TDC_SCALE7,
-								IDS_TDC_SCALE8,
-								IDS_TDC_SCALE9,
-								IDS_TDC_SCALE10 };
-
-
-const int TDC_NUMSCALES = sizeof(IDS_TDC_SCALE) / sizeof(UINT);
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRiskComboBox
 
-CTDLRiskComboBox::CTDLRiskComboBox(BOOL bIncludeAny) : m_bIncludeAny(bIncludeAny)
+CTDLRiskComboBox::CTDLRiskComboBox(BOOL bIncludeAny) 
+	: 
+	m_bIncludeAny(bIncludeAny),
+	m_nNumLevels(11)
 {
 }
 
@@ -92,7 +82,7 @@ int CTDLRiskComboBox::GetSelectedRisk() const
 	return nRisk;
 }
 
-void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> 10
+void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 {
 	int nSel = CB_ERR;
 
@@ -108,7 +98,7 @@ void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> 10
 		break;
 
 	default:
-		if (nRisk >= 0 && nRisk <= 10)
+		if ((nRisk >= 0) && (nRisk < m_nNumLevels))
 			nSel = (m_bIncludeAny ? (nRisk + 2) : (nRisk + 1));
 		break;
 	}
@@ -130,10 +120,13 @@ void CTDLRiskComboBox::BuildCombo()
 	
 	AddString(CEnString(IDS_TDC_NONE));
 	
-	for (int nLevel = 0; nLevel <= 10; nLevel++)
+	UINT aStrResIDs[11];
+	TDC::GetPriorityRiskLevelStringResourceIDs(m_nNumLevels, aStrResIDs);
+
+	for (int nLevel = 0; nLevel < m_nNumLevels; nLevel++)
 	{
 		CString sRisk;
-		sRisk.Format(_T("%d (%s)"), nLevel, CEnString(IDS_TDC_SCALE[nLevel]));
+		sRisk.Format(_T("%d (%s)"), nLevel, CEnString(aStrResIDs[nLevel]));
 		AddString(sRisk);
 	}
 	
@@ -160,3 +153,19 @@ void CTDLRiskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	// all else
 	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
+
+void CTDLRiskComboBox::SetNumLevels(int nLevels)
+{
+	if ((nLevels < 2) || (nLevels > 11))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	if (nLevels == m_nNumLevels)
+		return;
+
+	m_nNumLevels = nLevels;
+	BuildCombo();
+}
+

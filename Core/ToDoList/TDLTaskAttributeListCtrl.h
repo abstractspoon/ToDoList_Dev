@@ -101,6 +101,7 @@ public:
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetPercentDoneIncrement(int nAmount);
 	void SetTimeTrackTaskID(DWORD dwTaskID);
+	void SetNumPriorityRiskLevels(int nNumLevels);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 	void SelectValue(TDC_ATTRIBUTE nAttribID);
@@ -145,6 +146,7 @@ public:
 	void OnCustomAttributesChange();
 	void OnAttributeVisibilityChange();
 
+
 protected:
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
@@ -184,6 +186,9 @@ protected:
 	CFileDropTarget m_dropFiles;
 	
 	mutable CIconCache m_iconCache;
+
+	int m_nNumPriorityRiskLevels;
+	UINT m_aPriorityRiskStrResIDs[11];
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)

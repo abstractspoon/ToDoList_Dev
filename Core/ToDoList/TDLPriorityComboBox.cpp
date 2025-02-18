@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "TDLPriorityComboBox.h"
 #include "tdcenum.h"
+#include "tdcstatic.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\EnString.h"
@@ -16,32 +17,19 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-const UINT IDS_TDC_SCALE[] = { IDS_TDC_SCALE0,
-								IDS_TDC_SCALE1,
-								IDS_TDC_SCALE2,
-								IDS_TDC_SCALE3,
-								IDS_TDC_SCALE4,
-								IDS_TDC_SCALE5,
-								IDS_TDC_SCALE6,
-								IDS_TDC_SCALE7,
-								IDS_TDC_SCALE8,
-								IDS_TDC_SCALE9,
-								IDS_TDC_SCALE10 };
-
-
-const int TDC_NUMSCALES = sizeof(IDS_TDC_SCALE) / sizeof(UINT);
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPriorityComboBox
 
-CTDLPriorityComboBox::CTDLPriorityComboBox(BOOL bIncludeAny) : m_bIncludeAny(bIncludeAny)
+CTDLPriorityComboBox::CTDLPriorityComboBox(BOOL bIncludeAny) 
+	: 
+	m_bIncludeAny(bIncludeAny),
+	m_nNumLevels(11)
 {
 }
 
 CTDLPriorityComboBox::~CTDLPriorityComboBox()
 {
 }
-
 
 BEGIN_MESSAGE_MAP(CTDLPriorityComboBox, CColorComboBox)
 	//{{AFX_MSG_MAP(CTDLPriorityComboBox)
@@ -73,7 +61,7 @@ int CTDLPriorityComboBox::IncrementPriority(int nAmount)
 {
 	int nPrevPriority = GetCurSel();
 	int nPriority = nPrevPriority + nAmount;
-	nPriority = max(0, min(nPriority, 11));	
+	nPriority = max(0, min(nPriority, m_nNumLevels));	
 
 	if (nPriority != nPrevPriority)
 		SetCurSel(nPriority);
@@ -120,7 +108,7 @@ void CTDLPriorityComboBox::SetSelectedPriority(int nPriority) // -2 -> 10
 		break;
 
 	default:
-		if (nPriority >= 0 && nPriority <= 10)
+		if ((nPriority >= 0) && (nPriority < m_nNumLevels))
 			nSel = (m_bIncludeAny ? (nPriority + 2) : (nPriority + 1));
 		break;
 	}
@@ -142,7 +130,7 @@ BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 			// Update the colours in-place
 			int nNumItems = GetCount();
 
-			for (int nItem = (nNumItems - 11), nColor = 0; nItem < nNumItems; nItem++, nColor++)
+			for (int nItem = (nNumItems - m_nNumLevels), nColor = 0; nItem < nNumItems; nItem++, nColor++)
 				SetColor(nItem, aColors[nColor]);
 		}
 	}
@@ -168,14 +156,17 @@ void CTDLPriorityComboBox::BuildCombo()
 		AddColor(CLR_NONE, CEnString(IDS_TDC_ANY));
 	
 	AddColor(CLR_NONE, CEnString(IDS_TDC_NONE));
-	
-	for (int nLevel = 0; nLevel <= 10; nLevel++)
+
+	UINT aStrResIDs[11];
+	TDC::GetPriorityRiskLevelStringResourceIDs(m_nNumLevels, aStrResIDs);
+
+	for (int nLevel = 0; nLevel < m_nNumLevels; nLevel++)
 	{
 		COLORREF color = bHasColors ? m_aColors[nLevel] : -1;
 		int nPriority = nLevel;
 		
 		CString sPriority;
-		sPriority.Format(_T("%d (%s)"), nPriority, CEnString(IDS_TDC_SCALE[nLevel]));
+		sPriority.Format(_T("%d (%s)"), nPriority, CEnString(aStrResIDs[nLevel]));
 		AddColor(color, sPriority);
 	}
 	
@@ -212,3 +203,19 @@ void CTDLPriorityComboBox::DDX(CDataExchange* pDX, int& nPriority)
 	else
 		SetSelectedPriority(nPriority);
 }
+
+void CTDLPriorityComboBox::SetNumLevels(int nLevels)
+{
+	if ((nLevels < 2) || (nLevels > 11))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	if (nLevels == m_nNumLevels)
+		return;
+
+	m_nNumLevels = nLevels;
+	BuildCombo();
+}
+

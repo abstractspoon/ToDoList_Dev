@@ -17,6 +17,9 @@ class CTDLRiskComboBox : public COwnerdrawComboBoxBase
 // Construction
 public:
 	CTDLRiskComboBox(BOOL bIncludeAny);
+	virtual ~CTDLRiskComboBox();
+
+	void SetNumLevels(int nLevels); // 2 - 11
 
 	int GetSelectedRisk() const; // -2 -> 10
 	void SetSelectedRisk(int nRisk); // -2 -> 10
@@ -27,16 +30,12 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLRiskComboBox)
-protected:
 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 
 protected:
 	BOOL m_bIncludeAny;
-
-	// Implementation
-public:
-	virtual ~CTDLRiskComboBox();
+	int m_nNumLevels;
 
 	// Generated message map functions
 protected:
