@@ -1424,6 +1424,7 @@ BOOL CToDoListWnd::InitFilterbar()
 	m_filterBar.EnableMultiSelection(Prefs().GetMultiSelFilters());
 	m_filterBar.ShowDefaultFilters(Prefs().GetShowDefaultFiltersInFilterBar());
 	m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
+	m_filterBar.SetNumPriorityRiskLevels(Prefs().GetNumPriorityRiskLevels());
 	m_filterBar.SetUITheme(m_theme);
 
 	RefreshFilterBarAdvancedFilters();
