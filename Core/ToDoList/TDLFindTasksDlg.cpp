@@ -615,6 +615,21 @@ void CTDLFindTasksDlg::SetActiveTasklist(const CString& sTasklist, BOOL bWantDef
 	m_lcFindSetup.SetActiveTasklist(sTasklist, bWantDefaultIcons);
 }
 
+void CTDLFindTasksDlg::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	m_lcFindSetup.SetNumPriorityRiskLevels(nNumLevels);
+}
+
+void CTDLFindTasksDlg::SetGroupHeaderBackColor(COLORREF crBack)
+{
+	m_lcResults.SetGroupHeaderBackColor(crBack);
+}
+
+void CTDLFindTasksDlg::SetStrikeThroughCompletedTasks(BOOL bStrikeThru)
+{
+	m_lcResults.SetStrikeThroughCompletedTasks(bStrikeThru);
+}
+
 void CTDLFindTasksDlg::AddResults(const CFilteredToDoCtrl* pTDC, const CResultArray& aResults, BOOL bShowValueOnly, LPCTSTR szHeaderText)
 {
 	if (!GetSafeHwnd())

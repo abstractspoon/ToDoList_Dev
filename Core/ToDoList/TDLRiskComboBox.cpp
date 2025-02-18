@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "TDLRiskComboBox.h"
-#include "TDLPriorityComboBox.h"
 #include "resource.h"
 #include "tdcenum.h"
 #include "tdcstatic.h"
@@ -154,18 +153,16 @@ void CTDLRiskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
-void CTDLRiskComboBox::SetNumLevels(int nLevels)
+void CTDLRiskComboBox::SetNumLevels(int nNumLevels)
 {
-	if ((nLevels < 2) || (nLevels > 11))
+	ASSERT(TDC::IsValidNumPriorityResourceLevels(nNumLevels));
+
+	if (nNumLevels != m_nNumLevels)
 	{
-		ASSERT(0);
-		return;
+		m_nNumLevels = nNumLevels;
+
+		if (GetSafeHwnd())
+			BuildCombo();
 	}
-
-	if (nLevels == m_nNumLevels)
-		return;
-
-	m_nNumLevels = nLevels;
-	BuildCombo();
 }
 

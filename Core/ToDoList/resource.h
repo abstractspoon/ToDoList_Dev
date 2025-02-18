@@ -872,6 +872,8 @@
 #define IDC_MODIFY                      1579
 #define IDC_INCLUDEREFSINCALC           1581
 #define IDC_SHOWMIXEDDONECHECKBOX       1582
+#define IDC_NUMPRORITYRISKLEVELS        1587
+#define IDC_SETNUMPRIORITYRISKLEVELS    1588
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -2562,9 +2564,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        335
+#define _APS_NEXT_RESOURCE_VALUE        336
 #define _APS_NEXT_COMMAND_VALUE         34778
-#define _APS_NEXT_CONTROL_VALUE         1583
+#define _APS_NEXT_CONTROL_VALUE         1589
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

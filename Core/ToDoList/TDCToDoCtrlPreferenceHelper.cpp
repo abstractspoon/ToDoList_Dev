@@ -149,6 +149,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	tdc.SetSubtaskDragDropPos(prefs.GetNewSubtaskPos() == PUIP_TOP);
 	tdc.SetPercentDoneIncrement(prefs.GetPercentDoneIncrement());
 	tdc.SetTimeTrackingReminderInterval(prefs.GetTrackReminderFrequency());
+	tdc.SetNumPriorityRiskLevels(prefs.GetNumPriorityRiskLevels());
 
 	CString sStatus;
 	prefs.GetCompletionStatus(sStatus);

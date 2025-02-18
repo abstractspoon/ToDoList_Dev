@@ -274,6 +274,11 @@ namespace TDC
 		return FALSE;
 	}
 
+	static BOOL IsValidNumPriorityResourceLevels(int& nNumLevels)
+	{
+		return ((nNumLevels >= 2) && (nNumLevels <= 11));
+	}
+
 	static void GetPriorityRiskLevelStringResourceIDs(int nNumLevels, UINT aStrResIDs[11])
 	{
 		ASSERT((nNumLevels >= 2) && (nNumLevels <= 11));

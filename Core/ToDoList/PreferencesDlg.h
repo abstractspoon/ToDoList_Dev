@@ -285,6 +285,7 @@ public:
 	BOOL GetShowFileLinkThumbnails() const { return m_pageUITasklist.GetShowFileLinkThumbnails(); }
 	COLORREF GetHidePriorityNumber() const { return m_pageUITasklist.GetHidePriorityNumber(); }
 	BOOL GetShowMixedCompletionState() const { return m_pageUITasklist.GetShowMixedCompletionState(); }
+	BOOL GetNumPriorityRiskLevels() const { return m_pageUITasklist.GetNumPriorityRiskLevels(); }
 
 	// CPreferencesUITasklistColorsPage
 	int GetTextColorOption() const { return m_pageUITasklistColors.GetTextColorOption(); }

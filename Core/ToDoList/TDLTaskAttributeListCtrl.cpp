@@ -461,7 +461,7 @@ void CTDLTaskAttributeListCtrl::ToggleGrouping()
 
 void CTDLTaskAttributeListCtrl::SetNumPriorityRiskLevels(int nNumLevels)
 {
-	nNumLevels = max(2, min(11, nNumLevels));
+	ASSERT(TDC::IsValidNumPriorityResourceLevels(nNumLevels));
 
 	if (nNumLevels != m_nNumPriorityRiskLevels)
 	{

@@ -204,18 +204,16 @@ void CTDLPriorityComboBox::DDX(CDataExchange* pDX, int& nPriority)
 		SetSelectedPriority(nPriority);
 }
 
-void CTDLPriorityComboBox::SetNumLevels(int nLevels)
+void CTDLPriorityComboBox::SetNumLevels(int nNumLevels)
 {
-	if ((nLevels < 2) || (nLevels > 11))
+	ASSERT(TDC::IsValidNumPriorityResourceLevels(nNumLevels));
+
+	if (nNumLevels != m_nNumLevels)
 	{
-		ASSERT(0);
-		return;
+		m_nNumLevels = nNumLevels;
+
+		if (GetSafeHwnd())
+			BuildCombo();
 	}
-
-	if (nLevels == m_nNumLevels)
-		return;
-
-	m_nNumLevels = nLevels;
-	BuildCombo();
 }
 

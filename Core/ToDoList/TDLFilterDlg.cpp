@@ -22,12 +22,13 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterDlg dialog
 
-CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter, 
-							BOOL bMultiSelFilters, 
-							const CStringArray& aAdvFilterNames,
-							const CFilteredToDoCtrl& tdc, 
-							const CDWordArray& aPriorityColors,
-							CWnd* pParent /*=NULL*/)
+CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
+							 BOOL bMultiSelFilters,
+							 const CStringArray& aAdvFilterNames,
+							 const CFilteredToDoCtrl& tdc,
+							 const CDWordArray& aPriorityColors,
+							 int nNumPriorityRiskLevels,
+							 CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLFilterDlg::IDD, _T("Filtering"), pParent), 
 	m_cbCategoryFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
@@ -68,6 +69,8 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	tdc.GetAutoListData(TDCA_ALL, m_tldListData);
 
 	m_cbPriorityFilter.SetColors(aPriorityColors);
+	m_cbPriorityFilter.SetNumLevels(nNumPriorityRiskLevels);
+	m_cbRiskFilter.SetNumLevels(nNumPriorityRiskLevels);
 }
 
 

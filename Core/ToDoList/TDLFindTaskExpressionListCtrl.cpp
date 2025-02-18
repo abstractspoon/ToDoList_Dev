@@ -965,10 +965,12 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		}
 		else if (&ctrl == &m_cbPriority)
 		{
+			m_cbPriority.SetNumLevels(m_nNumPriorityRiskLevels);
 			m_cbPriority.SetSelectedPriority(rule.ValueAsInteger());
 		}
 		else if (&ctrl == &m_cbRisk)
 		{
+			m_cbRisk.SetNumLevels(m_nNumPriorityRiskLevels);
 			m_cbRisk.SetSelectedRisk(rule.ValueAsInteger());
 		}
 		else if (&ctrl == &m_cbRecurrence)
