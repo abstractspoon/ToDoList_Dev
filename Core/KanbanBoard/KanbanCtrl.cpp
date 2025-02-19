@@ -107,9 +107,14 @@ public:
 	
 	~CHoldColumnHScroll()
 	{
-		::SendMessage(::GetParent(m_hwndScroll), 
-					  WM_HSCROLL, 
-					  MAKEWPARAM(SB_THUMBPOSITION, m_nOrgHScrollPos), 
+		SCROLLINFO si = { sizeof(si), SIF_RANGE, 0 };
+
+		if (!::GetScrollInfo(m_hwndScroll, SB_CTL, &si) || (si.nMax == 0))
+			m_nOrgHScrollPos = 0;
+
+		::SendMessage(::GetParent(m_hwndScroll),
+					  WM_HSCROLL,
+					  MAKEWPARAM(SB_THUMBPOSITION, m_nOrgHScrollPos),
 					  (LPARAM)m_hwndScroll);
 	}
 
@@ -117,7 +122,6 @@ protected:
 	HWND m_hwndScroll;
 	int m_nOrgHScrollPos;
 };
-
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -2586,6 +2590,7 @@ void CKanbanCtrl::Resize(int cx, int cy)
 		int nMinReqWidth = CalcMinRequiredColumnsWidth();
 
 		CDeferWndMove dwm(nNumVisibleCols + 2); // +2 is for header and possibly scrollbar
+		SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE), 0 };
 
 		if ((m_header.GetItemCount() > 1) && (rAvail.Width() < nMinReqWidth))
 		{
@@ -2593,10 +2598,6 @@ void CKanbanCtrl::Resize(int cx, int cy)
 			rScroll.top = (rScroll.bottom - GetSystemMetrics(SM_CYHSCROLL));
 			dwm.MoveWindow(&m_sbHorz, rScroll);
 
-			SCROLLINFO si = { 0 };
-
-			si.cbSize = sizeof(si);
-			si.fMask = (SIF_PAGE | SIF_POS | SIF_RANGE);
 			si.nMin = 0;
 			si.nMax = nMinReqWidth;
 			si.nPage = rAvail.Width();
@@ -2604,18 +2605,13 @@ void CKanbanCtrl::Resize(int cx, int cy)
 			nScrollPos = min((si.nMax - (int)si.nPage), max(0, nScrollPos));
 			si.nPos = nScrollPos;
 
-			m_sbHorz.SetScrollInfo(&si);
-			m_sbHorz.ShowScrollBar(TRUE);
-
 			rAvail.bottom = rScroll.top;
 			rAvail.left -= nScrollPos;
 			rAvail.right = (rAvail.left + nMinReqWidth);
 		}
-		else
-		{
-			m_sbHorz.ShowScrollBar(FALSE);
-			m_sbHorz.SetScrollPos(0);
-		}
+
+		m_sbHorz.SetScrollInfo(&si);
+		m_sbHorz.ShowScrollBar(si.nMax != 0);
 
 		ResizeHeader(dwm, rAvail);
 		
@@ -2674,11 +2670,11 @@ void CKanbanCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 		switch (nSBCode)
 		{
-		case SB_LEFT:			nNewPos = 0; break;
+		case SB_LEFT:			nNewPos = si.nMin; break;
 		case SB_RIGHT:			nNewPos = si.nMax; break;
 
-		case SB_LINELEFT:		nNewPos -= (MIN_COL_AUTOWIDTH / 2); break;
-		case SB_LINERIGHT:		nNewPos += (MIN_COL_AUTOWIDTH / 2); break;
+		case SB_LINELEFT:		nNewPos -= MIN_COL_AUTOWIDTH; break;
+		case SB_LINERIGHT:		nNewPos += MIN_COL_AUTOWIDTH; break;
 
 		case SB_PAGELEFT:		nNewPos -= si.nPage; break;
 		case SB_PAGERIGHT:		nNewPos += si.nPage; break;
@@ -2690,7 +2686,7 @@ void CKanbanCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			return;
 		}
 
-		nNewPos = min((si.nMax - (int)si.nPage), max(0, nNewPos));
+		nNewPos = min((si.nMax - (int)si.nPage), max(si.nMin, nNewPos));
 
 		if (nNewPos != nOldPos)
 		{
