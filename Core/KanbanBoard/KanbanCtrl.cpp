@@ -66,7 +66,7 @@ const UINT IDC_HEADER		= 102;
 //////////////////////////////////////////////////////////////////////
 
 const int MIN_COL_DRAGWIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
-const int MIN_COL_AUTOWIDTH = GraphicsMisc::ScaleByDPIFactor(75);
+const int MIN_COL_AUTOWIDTH = GraphicsMisc::ScaleByDPIFactor(100);
 const int HEADER_HEIGHT		= GraphicsMisc::ScaleByDPIFactor(24);
 
 //////////////////////////////////////////////////////////////////////
@@ -2541,7 +2541,6 @@ void CKanbanCtrl::Resize(int cx, int cy)
 
 	if (nNumVisibleCols)
 	{
-		CDeferWndMove dwm(nNumVisibleCols + 1);
 		CRect rAvail(0, 0, cx, cy);
 
 		if (rAvail.IsRectEmpty())
@@ -2550,9 +2549,11 @@ void CKanbanCtrl::Resize(int cx, int cy)
 		// Reduce for border
 		rAvail.DeflateRect(1, 1);
 
+		// Show/hide the horizontal scrollbar
 		if (m_header.GetItemCount() > 1)
 		{
 			int nMinReqWidth = CalcMinRequiredColumnsWidth();
+			int nPos = GetScrollPos(SB_HORZ);
 
 			if (rAvail.Width() < nMinReqWidth)
 			{
@@ -2561,10 +2562,12 @@ void CKanbanCtrl::Resize(int cx, int cy)
 				si.nMin = 0;
 				si.nMax = nMinReqWidth;
 				si.nPage = rAvail.Width();
+				si.nPos = nPos;
 
 				SetScrollInfo(SB_HORZ, &si);
 				ModifyStyle(0, WS_HSCROLL);
 
+				rAvail.left = -nPos;
 				rAvail.right = (rAvail.left + nMinReqWidth);
 			}
 			else
@@ -2577,6 +2580,7 @@ void CKanbanCtrl::Resize(int cx, int cy)
 			ModifyStyle(WS_HSCROLL, 0);
 		}
 
+		CDeferWndMove dwm(nNumVisibleCols + 1); // +1 is header
 		ResizeHeader(dwm, rAvail);
 		
 		CRect rCol(rAvail);
@@ -2659,9 +2663,11 @@ void CKanbanCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* /*pScrollBar*/)
 	{
 		SetScrollPos(SB_HORZ, nNewPos);
 
+		CDeferWndMove dwm(m_aColumns.GetSize() + 1);
 		int nOffset = (nOldPos - nNewPos);
-		m_aColumns.Offset(nOffset);
-		CDialogHelper::OffsetChild(&m_header, nOffset, 0);
+
+		m_aColumns.Offset(dwm, nOffset);
+		dwm.OffsetChild(&m_header, nOffset, 0);
 
 		Invalidate();
 		UpdateWindow();

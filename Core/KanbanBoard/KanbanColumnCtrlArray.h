@@ -10,6 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 class CKanbanColumnCtrl;
+class CDeferWndMove;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +45,7 @@ public:
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	void FilterToolTipMessage(MSG* pMsg);
 	void SetFullColumnColor(COLORREF crFull);
-	void Offset(int nAmount);
+	void Offset(CDeferWndMove& dwm, int nAmount);
 
 	CSize CalcRequiredColumnSizeForImage() const;
 	BOOL CanSaveToImage() const;

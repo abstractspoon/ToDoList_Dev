@@ -9,6 +9,7 @@
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\DeferWndMove.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -330,9 +331,9 @@ void CKanbanColumnCtrlArray::Redraw(BOOL bErase, BOOL bUpdate)
 	);
 }
 
-void CKanbanColumnCtrlArray::Offset(int nAmount)
+void CKanbanColumnCtrlArray::Offset(CDeferWndMove& dwm, int nAmount)
 {
-	ARRAY_FN(CDialogHelper::OffsetChild(pCol, nAmount, 0));
+	ARRAY_FN(dwm.OffsetChild(pCol, nAmount, 0));
 }
 
 int CKanbanColumnCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
