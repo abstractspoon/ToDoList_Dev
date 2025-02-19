@@ -101,16 +101,16 @@ public:
 	CHoldColumnHScroll(HWND hwndScroll)
 		:
 		m_hwndScroll(hwndScroll),
-		m_nOrgHScrollPos(::GetScrollPos(hwndScroll, SB_CTL))
+		m_nOrgHScrollPos(0)
 	{
+		if (IsValidWindow())
+			m_nOrgHScrollPos = ::GetScrollPos(hwndScroll, SB_CTL);
 	}
-	
+
 	~CHoldColumnHScroll()
 	{
-		SCROLLINFO si = { sizeof(si), SIF_RANGE, 0 };
-
-		if (!::GetScrollInfo(m_hwndScroll, SB_CTL, &si) || (si.nMax == 0))
-			m_nOrgHScrollPos = 0;
+		if (!IsValidWindow())
+			return;
 
 		::SendMessage(::GetParent(m_hwndScroll),
 					  WM_HSCROLL,
@@ -121,6 +121,12 @@ public:
 protected:
 	HWND m_hwndScroll;
 	int m_nOrgHScrollPos;
+
+protected:
+	BOOL IsValidWindow() const
+	{
+		return (m_hwndScroll && ::IsWindow(m_hwndScroll));
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -206,10 +212,6 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CRect rHeader(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50);
 
 	if (!m_header.Create(HDS_FULLDRAG | HDS_BUTTONS | WS_CHILD | WS_VISIBLE, rHeader, this, IDC_HEADER))
-		return -1;
-
-	// Create scrollbar hidden
-	if (!m_sbHorz.Create(WS_CHILD, CRect(0, 0, 0, 0), this, (UINT)IDC_STATIC))
 		return -1;
 
 	return 0;
@@ -2586,18 +2588,29 @@ void CKanbanCtrl::Resize(int cx, int cy)
 		rAvail.DeflateRect(1, 1);
 
 		// Show/hide the horizontal scrollbar
-		int nScrollPos = (m_sbHorz.IsWindowVisible() ? m_sbHorz.GetScrollPos() : 0);
-		int nMinReqWidth = CalcMinRequiredColumnsWidth();
-
 		CDeferWndMove dwm(nNumVisibleCols + 2); // +2 is for header and possibly scrollbar
-		SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE), 0 };
+		int nMinReqWidth = CalcMinRequiredColumnsWidth();
 
 		if ((m_header.GetItemCount() > 1) && (rAvail.Width() < nMinReqWidth))
 		{
+			// Preserve scrollpos where possible
+			int nScrollPos = 0;
+
+			if (m_sbHorz.GetSafeHwnd())
+				nScrollPos = m_sbHorz.GetScrollPos();
+			else
+				VERIFY(m_sbHorz.Create(WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, (UINT)IDC_STATIC));
+
+			// Position scrollbar
 			CRect rScroll(rAvail);
 			rScroll.top = (rScroll.bottom - GetSystemMetrics(SM_CYHSCROLL));
 			dwm.MoveWindow(&m_sbHorz, rScroll);
 
+			// Configure scrollbar (includes restoring scroll pos)
+			SCROLLINFO si = { 0 };
+
+			si.cbSize = sizeof(si);
+			si.fMask = (SIF_PAGE | SIF_POS | SIF_RANGE);
 			si.nMin = 0;
 			si.nMax = nMinReqWidth;
 			si.nPage = rAvail.Width();
@@ -2605,13 +2618,17 @@ void CKanbanCtrl::Resize(int cx, int cy)
 			nScrollPos = min((si.nMax - (int)si.nPage), max(0, nScrollPos));
 			si.nPos = nScrollPos;
 
+			m_sbHorz.SetScrollInfo(&si);
+
+			// Update available space to account for scrollbar
 			rAvail.bottom = rScroll.top;
 			rAvail.left -= nScrollPos;
 			rAvail.right = (rAvail.left + nMinReqWidth);
 		}
-
-		m_sbHorz.SetScrollInfo(&si);
-		m_sbHorz.ShowScrollBar(si.nMax != 0);
+		else
+		{
+			m_sbHorz.DestroyWindow();
+		}
 
 		ResizeHeader(dwm, rAvail);
 		
