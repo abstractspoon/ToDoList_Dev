@@ -66,7 +66,7 @@ const UINT IDC_HEADER		= 102;
 //////////////////////////////////////////////////////////////////////
 
 const int MIN_COL_DRAGWIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
-const int MIN_COL_AUTOWIDTH = GraphicsMisc::ScaleByDPIFactor(100);
+const int MIN_COL_AUTOWIDTH = GraphicsMisc::ScaleByDPIFactor(150);
 const int HEADER_HEIGHT		= GraphicsMisc::ScaleByDPIFactor(24);
 
 //////////////////////////////////////////////////////////////////////
@@ -92,6 +92,32 @@ const CPoint DRAG_NOT_SET(-10000, -10000);
 	ASSERT(ki);				\
 	if (ki == NULL)	return;	\
 }
+
+//////////////////////////////////////////////////////////////////////
+
+class CHoldColumnHScroll
+{
+public:
+	CHoldColumnHScroll(HWND hwndScroll)
+		:
+		m_hwndScroll(hwndScroll),
+		m_nOrgHScrollPos(::GetScrollPos(hwndScroll, SB_CTL))
+	{
+	}
+	
+	~CHoldColumnHScroll()
+	{
+		::SendMessage(::GetParent(m_hwndScroll), 
+					  WM_HSCROLL, 
+					  MAKEWPARAM(SB_THUMBPOSITION, m_nOrgHScrollPos), 
+					  (LPARAM)m_hwndScroll);
+	}
+
+protected:
+	HWND m_hwndScroll;
+	int m_nOrgHScrollPos;
+};
+
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -1893,6 +1919,7 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelT
 	}
 
 	CHoldRedraw gr(*this, NCR_PAINT | NCR_ERASEBKGND);
+	CHoldColumnHScroll hs(m_sbHorz);
 
 	CKanbanItemArrayMap mapKIArray;
 	m_data.BuildTempItemMaps(m_sTrackAttribID, m_dwOptions, mapKIArray);
@@ -2234,6 +2261,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 	m_aColumns.RemoveAll();
 
 	// Don't attempt to restore selection
+	// or save scroll pos
 	RebuildColumns(KCRC_REBUILDCONTENTS);
 	Resize();
 
@@ -2565,17 +2593,22 @@ void CKanbanCtrl::Resize(int cx, int cy)
 			rScroll.top = (rScroll.bottom - GetSystemMetrics(SM_CYHSCROLL));
 			dwm.MoveWindow(&m_sbHorz, rScroll);
 
-			SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE) };
+			SCROLLINFO si = { 0 };
+
+			si.cbSize = sizeof(si);
+			si.fMask = (SIF_PAGE | SIF_POS | SIF_RANGE);
 			si.nMin = 0;
 			si.nMax = nMinReqWidth;
 			si.nPage = rAvail.Width();
+
+			nScrollPos = min((si.nMax - (int)si.nPage), max(0, nScrollPos));
 			si.nPos = nScrollPos;
 
 			m_sbHorz.SetScrollInfo(&si);
 			m_sbHorz.ShowScrollBar(TRUE);
 
 			rAvail.bottom = rScroll.top;
-			rAvail.left += nScrollPos;
+			rAvail.left -= nScrollPos;
 			rAvail.right = (rAvail.left + nMinReqWidth);
 		}
 		else
@@ -2632,9 +2665,6 @@ void CKanbanCtrl::Resize(int cx, int cy)
 void CKanbanCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	ASSERT(pScrollBar == &m_sbHorz);
-
-	CKanbanColumnCtrl* pCol = m_aColumns[0];
-	ASSERT(pCol && pCol->GetSafeHwnd());
 
 	SCROLLINFO si = { sizeof(si), 0 };
 	
