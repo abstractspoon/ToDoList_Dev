@@ -172,12 +172,15 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 
-	if (!m_header.Create(HDS_FULLDRAG | HDS_BUTTONS | WS_CHILD | WS_VISIBLE, 
-						 CRect(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50),
-						 this, IDC_HEADER))
-	{
+	// Creater header
+	CRect rHeader(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50);
+
+	if (!m_header.Create(HDS_FULLDRAG | HDS_BUTTONS | WS_CHILD | WS_VISIBLE, rHeader, this, IDC_HEADER))
 		return -1;
-	}
+
+	// Create scrollbar hidden
+	if (!m_sbHorz.Create(WS_CHILD, CRect(0, 0, 0, 0), this, (UINT)IDC_STATIC))
+		return -1;
 
 	return 0;
 }
@@ -2551,7 +2554,7 @@ void CKanbanCtrl::Resize(int cx, int cy)
 		rAvail.DeflateRect(1, 1);
 
 		// Show/hide the horizontal scrollbar
-		int nScrollPos = (m_sbHorz.GetSafeHwnd() ? m_sbHorz.GetScrollPos() : 0);
+		int nScrollPos = (m_sbHorz.IsWindowVisible() ? m_sbHorz.GetScrollPos() : 0);
 		int nMinReqWidth = CalcMinRequiredColumnsWidth();
 
 		CDeferWndMove dwm(nNumVisibleCols + 2); // +2 is for header and possibly scrollbar
@@ -2560,14 +2563,9 @@ void CKanbanCtrl::Resize(int cx, int cy)
 		{
 			CRect rScroll(rAvail);
 			rScroll.top = (rScroll.bottom - GetSystemMetrics(SM_CYHSCROLL));
-
-			if (!m_sbHorz.GetSafeHwnd())
-				VERIFY(m_sbHorz.Create(WS_CHILD, rScroll, this, (UINT)IDC_STATIC));
-			else
-				dwm.MoveWindow(&m_sbHorz, rScroll);
+			dwm.MoveWindow(&m_sbHorz, rScroll);
 
 			SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE) };
-
 			si.nMin = 0;
 			si.nMax = nMinReqWidth;
 			si.nPage = rAvail.Width();
@@ -2580,9 +2578,10 @@ void CKanbanCtrl::Resize(int cx, int cy)
 			rAvail.left += nScrollPos;
 			rAvail.right = (rAvail.left + nMinReqWidth);
 		}
-		else if (m_sbHorz.GetSafeHwnd())
+		else
 		{
 			m_sbHorz.ShowScrollBar(FALSE);
+			m_sbHorz.SetScrollPos(0);
 		}
 
 		ResizeHeader(dwm, rAvail);
