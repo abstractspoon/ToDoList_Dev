@@ -2481,6 +2481,7 @@ BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
 	if (m_aColumns.GetSize())
 	{
 		CDialogHelper::ExcludeChild(&m_header, pDC);
+		CDialogHelper::ExcludeChild(&m_sbHorz, pDC);
 
 		// Clip out the list controls
 		m_aColumns.Exclude(pDC);
@@ -2550,37 +2551,40 @@ void CKanbanCtrl::Resize(int cx, int cy)
 		rAvail.DeflateRect(1, 1);
 
 		// Show/hide the horizontal scrollbar
-		if (m_header.GetItemCount() > 1)
+		int nScrollPos = (m_sbHorz.GetSafeHwnd() ? m_sbHorz.GetScrollPos() : 0);
+		int nMinReqWidth = CalcMinRequiredColumnsWidth();
+
+		CDeferWndMove dwm(nNumVisibleCols + 2); // +2 is for header and possibly scrollbar
+
+		if ((m_header.GetItemCount() > 1) && (rAvail.Width() < nMinReqWidth))
 		{
-			int nMinReqWidth = CalcMinRequiredColumnsWidth();
-			int nPos = GetScrollPos(SB_HORZ);
+			CRect rScroll(rAvail);
+			rScroll.top = (rScroll.bottom - GetSystemMetrics(SM_CYHSCROLL));
 
-			if (rAvail.Width() < nMinReqWidth)
-			{
-				SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE) };
-
-				si.nMin = 0;
-				si.nMax = nMinReqWidth;
-				si.nPage = rAvail.Width();
-				si.nPos = nPos;
-
-				SetScrollInfo(SB_HORZ, &si);
-				ModifyStyle(0, WS_HSCROLL);
-
-				rAvail.left = -nPos;
-				rAvail.right = (rAvail.left + nMinReqWidth);
-			}
+			if (!m_sbHorz.GetSafeHwnd())
+				VERIFY(m_sbHorz.Create(WS_CHILD, rScroll, this, (UINT)IDC_STATIC));
 			else
-			{
-				ModifyStyle(WS_HSCROLL, 0);
-			}
+				dwm.MoveWindow(&m_sbHorz, rScroll);
+
+			SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE) };
+
+			si.nMin = 0;
+			si.nMax = nMinReqWidth;
+			si.nPage = rAvail.Width();
+			si.nPos = nScrollPos;
+
+			m_sbHorz.SetScrollInfo(&si);
+			m_sbHorz.ShowScrollBar(TRUE);
+
+			rAvail.bottom = rScroll.top;
+			rAvail.left += nScrollPos;
+			rAvail.right = (rAvail.left + nMinReqWidth);
 		}
-		else
+		else if (m_sbHorz.GetSafeHwnd())
 		{
-			ModifyStyle(WS_HSCROLL, 0);
+			m_sbHorz.ShowScrollBar(FALSE);
 		}
 
-		CDeferWndMove dwm(nNumVisibleCols + 1); // +1 is header
 		ResizeHeader(dwm, rAvail);
 		
 		CRect rCol(rAvail);
@@ -2626,51 +2630,52 @@ void CKanbanCtrl::Resize(int cx, int cy)
 	}
 }
 
-void CKanbanCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* /*pScrollBar*/)
+void CKanbanCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
+	ASSERT(pScrollBar == &m_sbHorz);
+
 	CKanbanColumnCtrl* pCol = m_aColumns[0];
 	ASSERT(pCol && pCol->GetSafeHwnd());
 
-	CRect rCol = CDialogHelper::GetChildRect(pCol);
-
-	int nOldPos = GetScrollPos(SB_HORZ);
-	int nNewPos = nOldPos;
-
 	SCROLLINFO si = { sizeof(si), 0 };
-	GetScrollInfo(SB_HORZ, &si, (SIF_PAGE | SIF_POS | SIF_RANGE));
-
-	switch (nSBCode)
+	
+	if (m_sbHorz.GetScrollInfo(&si, (SIF_PAGE | SIF_POS | SIF_RANGE)))
 	{
-	case SB_LEFT:			nNewPos = 0; break;
-	case SB_RIGHT:			nNewPos = si.nMax; break;
+		int nOldPos = si.nPos, nNewPos = nOldPos;
 
-	case SB_LINELEFT:		nNewPos -= (MIN_COL_AUTOWIDTH / 2); break;
-	case SB_LINERIGHT:		nNewPos += (MIN_COL_AUTOWIDTH / 2); break;
+		switch (nSBCode)
+		{
+		case SB_LEFT:			nNewPos = 0; break;
+		case SB_RIGHT:			nNewPos = si.nMax; break;
 
-	case SB_PAGELEFT:		nNewPos -= si.nPage; break;
-	case SB_PAGERIGHT:		nNewPos += si.nPage; break;
+		case SB_LINELEFT:		nNewPos -= (MIN_COL_AUTOWIDTH / 2); break;
+		case SB_LINERIGHT:		nNewPos += (MIN_COL_AUTOWIDTH / 2); break;
 
-	case SB_THUMBPOSITION:
-	case SB_THUMBTRACK:		nNewPos = (int)nPos; break;
+		case SB_PAGELEFT:		nNewPos -= si.nPage; break;
+		case SB_PAGERIGHT:		nNewPos += si.nPage; break;
 
-	default:
-		return;
-	}
+		case SB_THUMBPOSITION:
+		case SB_THUMBTRACK:		nNewPos = (int)nPos; break;
 
-	nNewPos = min((si.nMax - (int)si.nPage), max(0, nNewPos));
+		default:
+			return;
+		}
 
-	if (nNewPos != nOldPos)
-	{
-		SetScrollPos(SB_HORZ, nNewPos);
+		nNewPos = min((si.nMax - (int)si.nPage), max(0, nNewPos));
 
-		CDeferWndMove dwm(m_aColumns.GetSize() + 1);
-		int nOffset = (nOldPos - nNewPos);
+		if (nNewPos != nOldPos)
+		{
+			m_sbHorz.SetScrollPos(nNewPos);
 
-		m_aColumns.Offset(dwm, nOffset);
-		dwm.OffsetChild(&m_header, nOffset, 0);
+			CDeferWndMove dwm(m_aColumns.GetSize() + 1);
+			int nOffset = (nOldPos - nNewPos);
 
-		Invalidate();
-		UpdateWindow();
+			m_aColumns.Offset(dwm, nOffset);
+			dwm.OffsetChild(&m_header, nOffset, 0);
+
+			Invalidate();
+			UpdateWindow();
+		}
 	}
 }
 

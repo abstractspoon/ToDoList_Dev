@@ -117,6 +117,7 @@ protected:
 	CFontCache m_fonts;
 	CImageList m_ilDrag;
 	CMidnightTimer m_timerMidnight;
+	CScrollBar m_sbHorz;
 
 	TDC_ATTRIBUTE m_nTrackedAttributeID, m_nSortBy, m_nGroupBy;
 	CString m_sTrackAttribID, m_sGroupByCustAttribID;
