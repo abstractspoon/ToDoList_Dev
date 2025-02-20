@@ -206,7 +206,7 @@ void CTDLPriorityComboBox::DDX(CDataExchange* pDX, int& nPriority)
 
 void CTDLPriorityComboBox::SetNumLevels(int nNumLevels)
 {
-	ASSERT(TDC::IsValidNumPriorityResourceLevels(nNumLevels));
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
 
 	if (nNumLevels != m_nNumLevels)
 	{

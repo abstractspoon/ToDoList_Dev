@@ -155,7 +155,7 @@ void CTDLRiskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 void CTDLRiskComboBox::SetNumLevels(int nNumLevels)
 {
-	ASSERT(TDC::IsValidNumPriorityResourceLevels(nNumLevels));
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
 
 	if (nNumLevels != m_nNumLevels)
 	{
