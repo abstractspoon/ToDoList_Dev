@@ -58,16 +58,26 @@ enum // RebuildColumns
 	KCRC_RESTORESELECTION	= 0x02,
 };
 
+enum
+{
+	DELAY_INTERVAL	= 250,
+	SCROLL_INTERVAL = 50,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 const UINT IDC_COLUMNCTRL	= 101;
 const UINT IDC_HEADER		= 102;
+const UINT IDC_SCROLLBAR	= 103;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MIN_COL_DRAGWIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
-const int MIN_COL_AUTOWIDTH = GraphicsMisc::ScaleByDPIFactor(150);
-const int HEADER_HEIGHT		= GraphicsMisc::ScaleByDPIFactor(24);
+const int MIN_COL_DRAGWIDTH		= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_COL_AUTOWIDTH		= GraphicsMisc::ScaleByDPIFactor(150);
+const int HEADER_HEIGHT			= GraphicsMisc::ScaleByDPIFactor(24);
+
+const int DRAGSCROLL_ZONEWIDTH	= (MIN_COL_AUTOWIDTH / 5);
+const int DRAGSCROLL_INCREMENT	= (MIN_COL_AUTOWIDTH / 10);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -164,6 +174,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_CREATE()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
+	ON_WM_TIMER()
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_HEADER, OnHeaderCustomDraw)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_HEADER, OnHeaderClick)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_HEADER, OnHeaderDividerDoubleClick)
@@ -2599,7 +2610,7 @@ void CKanbanCtrl::Resize(int cx, int cy)
 			if (m_sbHorz.GetSafeHwnd())
 				nScrollPos = m_sbHorz.GetScrollPos();
 			else
-				VERIFY(m_sbHorz.Create(WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, (UINT)IDC_STATIC));
+				VERIFY(m_sbHorz.Create(WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, IDC_SCROLLBAR));
 
 			// Position scrollbar
 			CRect rScroll(rAvail);
@@ -3886,9 +3897,70 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		}
 
 		m_aColumns.SetDropTarget(bValidDest ? pDestCol : NULL);
+
+		// Auto-scrolling
+		if (m_sbHorz.GetSafeHwnd())
+		{
+			CRect rClient;
+			GetClientRect(rClient);
+			ClientToScreen(rClient);
+	
+ 			KillTimer(DELAY_INTERVAL);
+ 			KillTimer(SCROLL_INTERVAL);
+
+			if (rClient.PtInRect(point))
+			{
+				BOOL bLeft = (point.x <= (rClient.left + DRAGSCROLL_ZONEWIDTH));
+				BOOL bRight = (point.x >= (rClient.right - DRAGSCROLL_ZONEWIDTH));
+
+				if (bLeft || bRight)
+	 				SetTimer(DELAY_INTERVAL, DELAY_INTERVAL, NULL);
+			}
+		}
 	}
 	
 	CWnd::OnMouseMove(nFlags, point);
+}
+
+void CKanbanCtrl::OnTimer(UINT_PTR nIDEvent)
+{
+	KillTimer(nIDEvent);
+
+	CRect rClient;
+	GetClientRect(rClient);
+	ClientToScreen(rClient);
+
+	CPoint point(::GetMessagePos());
+
+	if (!rClient.PtInRect(point))
+		return;
+
+	BOOL bLeft = (point.x <= (rClient.left + DRAGSCROLL_ZONEWIDTH));
+	BOOL bRight = (point.x >= (rClient.right - DRAGSCROLL_ZONEWIDTH));
+
+	if (!bLeft && !bRight)
+		return;
+	
+	switch (nIDEvent)
+	{
+	case DELAY_INTERVAL:
+	case SCROLL_INTERVAL:
+		{
+			int nOldPos = m_sbHorz.GetScrollPos();
+			int nInc = (bLeft ? -DRAGSCROLL_INCREMENT : DRAGSCROLL_INCREMENT), nNewPos = (nOldPos + nInc);
+
+			for (int i = 0; i < 10; i++)
+			{
+				SendMessage(WM_HSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nNewPos), (LPARAM)m_sbHorz.GetSafeHwnd());
+				Sleep(25);
+
+				nNewPos += nInc;
+			}
+
+			SetTimer(SCROLL_INTERVAL, SCROLL_INTERVAL, NULL);
+		}
+		break;
+	}
 }
 
 BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
