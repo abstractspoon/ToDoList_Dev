@@ -175,6 +175,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_TIMER()
+	ON_WM_MOUSEWHEEL()
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_HEADER, OnHeaderCustomDraw)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_HEADER, OnHeaderClick)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_HEADER, OnHeaderDividerDoubleClick)
@@ -2686,9 +2687,23 @@ void CKanbanCtrl::Resize(int cx, int cy)
 	}
 }
 
+BOOL CKanbanCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint /*pt*/)
+{
+	// We are receiving this because the column beneath the mouse
+	// does not have a vertical scrollbar, so we treat it as a 
+	// horizontal scroll
+	if (m_sbHorz.GetSafeHwnd())
+	{
+		BOOL bLeft = (zDelta > 0);
+		OnHScroll((bLeft ? SB_LINELEFT : SB_LINERIGHT), 0, &m_sbHorz);
+	}
+
+	return TRUE;
+}
+
 void CKanbanCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	ASSERT(pScrollBar == &m_sbHorz);
+	ASSERT(pScrollBar == &m_sbHorz || pScrollBar->IsKindOf(RUNTIME_CLASS(CKanbanColumnCtrl)));
 
 	SCROLLINFO si = { sizeof(si), 0 };
 	
