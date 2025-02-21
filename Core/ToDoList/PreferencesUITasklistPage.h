@@ -12,6 +12,10 @@
 #include "..\shared\preferencesbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+const UINT WM_PUITCP_NUMPRORITYRISKLEVELS = ::RegisterWindowMessage(_T("WM_PUITCP_NUMPRORITYRISKLEVELS"));
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesUITasklistPage dialog
 
 class CPreferencesUITasklistPage : public CPreferencesPageBase
@@ -114,6 +118,7 @@ protected:
 	afx_msg void OnShowparentsasfolders();
 	afx_msg void OnAppendTextToDateTimePaste();
 	afx_msg void OnSetNumPriorityRiskLevels();
+	afx_msg void OnSelChangeNumPriorityRiskLevels();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

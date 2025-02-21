@@ -83,6 +83,7 @@ BEGIN_MESSAGE_MAP(CPreferencesUITasklistPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SHOWPARENTSASFOLDERS, OnShowparentsasfolders)
 	ON_BN_CLICKED(IDC_APPENDTEXTTODATETIMEPASTE, OnAppendTextToDateTimePaste)
 	ON_BN_CLICKED(IDC_SETNUMPRIORITYRISKLEVELS, OnSetNumPriorityRiskLevels)
+	ON_CBN_SELCHANGE(IDC_SETNUMPRIORITYRISKLEVELS, OnSelChangeNumPriorityRiskLevels)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -257,4 +258,12 @@ void CPreferencesUITasklistPage::OnSetNumPriorityRiskLevels()
 	UpdateData();
 
 	GetDlgItem(IDC_NUMPRORITYRISKLEVELS)->EnableWindow(m_bSetNumPriorityRiskLevels);
+	GetParent()->SendMessage(WM_PUITCP_NUMPRORITYRISKLEVELS);
+}
+
+void CPreferencesUITasklistPage::OnSelChangeNumPriorityRiskLevels()
+{
+	UpdateData();
+
+	GetParent()->SendMessage(WM_PUITCP_NUMPRORITYRISKLEVELS);
 }

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "PreferencesUITasklistColorsPage.h"
+#include "tdcstatic.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
@@ -25,6 +26,7 @@ const int DEFFONTSIZE = 8;
 const TDC_ATTRIBUTE DEFCOLORATTRIB = TDCA_CATEGORY;
 
 const COLORREF DEF_LIGHTGRAY = RGB(240, 240, 240);
+
 /////////////////////////////////////////////////////////////////////////////
 
 const COLORREF DEF_PRIORITYCOLOR[] =
@@ -41,12 +43,10 @@ const COLORREF DEF_PRIORITYCOLOR[] =
 	RGB(255, 0, 0),
 	RGB(255, 0, 0)
 };
-const int NUM_PRIORITY = (sizeof(DEF_PRIORITYCOLOR) / sizeof(DEF_PRIORITYCOLOR[0]));
+const int NUM_DEFPRIORITY = (sizeof(DEF_PRIORITYCOLOR) / sizeof(DEF_PRIORITYCOLOR[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUITasklistColorsPage property page
-
-//IMPLEMENT_DYNCREATE(CPreferencesUITasklistColorsPage, CPreferencesPageBase)
 
 CPreferencesUITasklistColorsPage::CPreferencesUITasklistColorsPage() 
 	: 
@@ -54,11 +54,12 @@ CPreferencesUITasklistColorsPage::CPreferencesUITasklistColorsPage()
 	m_nPriorityColorOption(PRIORITYOPT_GRADIENT),
 	m_nTextColorOption(TEXTOPT_DEFAULT), 
 	m_cbAttributes(CCBS_DRAWNOCOLOR, ACBS_ALLOWDELETE), 
-	m_nColorAttribute(DEFCOLORATTRIB)
+	m_nColorAttribute(DEFCOLORATTRIB),
+	m_cbPriorityColors(FALSE, FALSE),
+	m_nNumPriorityRiskLevels(NUM_DEFPRIORITY)
 {
 	//{{AFX_DATA_INIT(CPreferencesUITasklistColorsPage)
 	//}}AFX_DATA_INIT
-	// priority colors
 	m_nSelPriorityColor = 0; 
 }
 
@@ -255,15 +256,17 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	m_btGroupHeaderBkgndColor.SetColor(m_crGroupHeaderBkgnd);
 
 	// priority colors
-	for (int nPriority = 0; nPriority < m_aPriorityColors.GetSize(); nPriority++)
+	ASSERT(m_aPriorityColors.GetSize() >= m_nNumPriorityRiskLevels);
+
+	for (int nPriority = 0; nPriority < m_nNumPriorityRiskLevels; nPriority++)
 		m_cbPriorityColors.SetColor(nPriority, (COLORREF)m_aPriorityColors[nPriority]);
 
 	// Priority colors schemes
 	CColorBrewer brewer(CBF_SYNTHESIZE | CBF_TEXTSAFE);
 	CColorBrewerPaletteArray aPalettes;
 
-	brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, NUM_PRIORITY);
-	brewer.GetPalettes(CBPT_DIVERGING, aPalettes, NUM_PRIORITY, TRUE);
+	brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, m_nNumPriorityRiskLevels);
+	brewer.GetPalettes(CBPT_DIVERGING, aPalettes, m_nNumPriorityRiskLevels, TRUE);
 
 	m_cbPriorityScheme.Initialize(aPalettes);
 
@@ -370,7 +373,7 @@ int CPreferencesUITasklistColorsPage::GetPriorityColors(CDWordArray& aColors) co
 			break;
 
 		case PRIORITYOPT_GRADIENT:	
-			GraphicsMisc::CalculateColorGradient(m_crPriorityLow, m_crPriorityHigh, NUM_PRIORITY, aColors, !m_bHLSColorGradient);
+			GraphicsMisc::CalculateColorGradient(m_crPriorityLow, m_crPriorityHigh, m_nNumPriorityRiskLevels, aColors, !m_bHLSColorGradient);
 			break;
 
 		case PRIORITYOPT_SCHEME:
@@ -380,7 +383,7 @@ int CPreferencesUITasklistColorsPage::GetPriorityColors(CDWordArray& aColors) co
 	}
 	else // gray scale
 	{
-		GraphicsMisc::CalculateColorGradient(DEF_LIGHTGRAY, 0, NUM_PRIORITY, aColors, TRUE);
+		GraphicsMisc::CalculateColorGradient(DEF_LIGHTGRAY, 0, m_nNumPriorityRiskLevels, aColors, TRUE);
 	}
 	
 	return aColors.GetSize(); 
@@ -992,20 +995,20 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 
 		// Priority Individual colours
 		int nColor;
-		m_aPriorityColors.SetSize(NUM_PRIORITY);
+		m_aPriorityColors.SetSize(NUM_DEFPRIORITY);
 
-		for (nColor = 0; nColor < NUM_PRIORITY; nColor++)
+		for (nColor = 0; nColor < NUM_DEFPRIORITY; nColor++)
 		{
 			CString sKey = Misc::MakeKey(_T("P%d"), nColor);
 			m_aPriorityColors[nColor] = pPrefs->GetProfileInt(sColorKey, sKey, DEF_PRIORITYCOLOR[nColor]);
 		}
 
 		// Priority Scheme
-		m_aPriorityScheme.SetSize(NUM_PRIORITY);
+		m_aPriorityScheme.SetSize(NUM_DEFPRIORITY);
 
 		if (pPrefs->GetProfileInt(sColorKey, _T("S0"), CLR_NONE) != CLR_NONE)
 		{
-			for (int nColor = 0; nColor < NUM_PRIORITY; nColor++)
+			for (int nColor = 0; nColor < NUM_DEFPRIORITY; nColor++)
 			{
 				CString sKey = Misc::MakeKey(_T("S%d"), nColor);
 				m_aPriorityScheme.Add(pPrefs->GetProfileInt(sColorKey, sKey, CLR_NONE));
@@ -1159,6 +1162,23 @@ void CPreferencesUITasklistColorsPage::SetDefaultListData(const TDCAUTOLISTDATA&
 	m_defaultListData.Copy(defaultListData, TDCA_ALL);
 }
 
+void CPreferencesUITasklistColorsPage::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
+
+	m_nNumPriorityRiskLevels = nNumLevels;
+	m_cbPriorityColors.SetNumLevels(nNumLevels);
+
+	CColorBrewer brewer(CBF_SYNTHESIZE | CBF_TEXTSAFE);
+	CColorBrewerPaletteArray aPalettes;
+
+	brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, nNumLevels);
+	brewer.GetPalettes(CBPT_DIVERGING, aPalettes, nNumLevels, TRUE);
+
+	m_cbPriorityScheme.Initialize(aPalettes);
+
+}
+
 void CPreferencesUITasklistColorsPage::OnSelchangeAttributetocolorby() 
 {
 	UpdateData(TRUE);
@@ -1166,8 +1186,8 @@ void CPreferencesUITasklistColorsPage::OnSelchangeAttributetocolorby()
 
 void CPreferencesUITasklistColorsPage::GetDefaultPriorityColors(CDWordArray& aColors)
 {
-	aColors.SetSize(NUM_PRIORITY);
+	aColors.SetSize(NUM_DEFPRIORITY);
 
-	for (int nColor = 0; nColor < NUM_PRIORITY; nColor++)
+	for (int nColor = 0; nColor < NUM_DEFPRIORITY; nColor++)
 		aColors[nColor] = DEF_PRIORITYCOLOR[nColor];
 }

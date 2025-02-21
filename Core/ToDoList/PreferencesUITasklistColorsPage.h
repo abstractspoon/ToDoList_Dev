@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "tdcstruct.h"
+#include "TDLPriorityComboBox.h"
 
 #include "..\shared\colorbutton.h"
 #include "..\shared\colorcombobox.h"
@@ -71,6 +72,7 @@ public:
 	~CPreferencesUITasklistColorsPage();
 
 	void SetDefaultListData(const TDCAUTOLISTDATA& defaultListData);
+	void SetNumPriorityRiskLevels(int nNumLevels);
 
 	BOOL GetColorPriority() const { return m_bColorPriority; }
 	PUITCP_TEXTCOLOROPTION GetTextColorOption() const { return m_nTextColorOption; }
@@ -103,7 +105,7 @@ protected:
 	CComboBox m_cbColorByAttribute;
 	CComboBox m_cbTreeFontSize, m_cbCommentsFontSize;
 	CColorComboBox m_cbAttributes;
-	CColorComboBox m_cbPriorityColors;
+	CTDLPriorityComboBox m_cbPriorityColors;
 	CColorBrewerComboBox m_cbPriorityScheme;
 	CFontNameComboBox m_cbTreeFonts, m_cbCommentsFonts;
 
@@ -148,6 +150,7 @@ protected:
 	int m_nSelPriorityColor;
 	int m_nTreeFontSize;
 	int m_nCommentsFontSize;
+	int m_nNumPriorityRiskLevels;
 
 	CString	m_sSelAttribValue;
 	CString m_sTreeFont;
