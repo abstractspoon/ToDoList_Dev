@@ -20,11 +20,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRiskComboBox
 
-CTDLRiskComboBox::CTDLRiskComboBox(BOOL bIncludeAny) 
+CTDLRiskComboBox::CTDLRiskComboBox(BOOL bIncludeAny, BOOL bIncludeNone)
 	: 
 	m_bIncludeAny(bIncludeAny),
+	m_bIncludeNone(bIncludeNone),
 	m_nNumLevels(11)
 {
+	// 'Any' and NOT 'None' is unexpected though it will still work
+	ASSERT(!bIncludeAny || bIncludeNone);
 }
 
 CTDLRiskComboBox::~CTDLRiskComboBox()
@@ -60,25 +63,41 @@ void CTDLRiskComboBox::PreSubclassWindow()
 
 int CTDLRiskComboBox::GetSelectedRisk() const
 {
-	int nSel = GetCurSel(), nRisk = nSel;
+	int nSel = GetCurSel();
 
-	switch (nSel)
+	if ((nSel == CB_ERR) || (!m_bIncludeAny && !m_bIncludeNone))
 	{
-	case 0:
-		nRisk = (m_bIncludeAny ? FM_ANYRISK : FM_NORISK);
-		break;
-
-	case 1:
-		nRisk = (m_bIncludeAny ? FM_NORISK : (nSel - 1));
-		break;
-
-	default:
-		if (nSel != CB_ERR)
-			nRisk = (m_bIncludeAny ? (nSel - 2) : (nSel - 1));
-		break;
+		// index is priority
+		return nSel;
 	}
 
-	return nRisk;
+	// Both
+	if (m_bIncludeAny && m_bIncludeNone)
+	{
+		switch (nSel)
+		{
+		case 0:		return FM_ANYPRIORITY;
+		case 1:		return FM_NOPRIORITY;
+		default:	return (nSel - 2);
+		}
+	}
+
+	// Only 'Any'
+	if (m_bIncludeAny)
+	{
+		switch (nSel)
+		{
+		case 0:		return FM_NOPRIORITY;
+		default:	return (nSel - 1);
+		}
+	}
+
+	// Only 'None'
+	switch (nSel)
+	{
+	case 0:		return FM_ANYPRIORITY;
+	default:	return (nSel - 1);
+	}
 }
 
 void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
@@ -87,18 +106,28 @@ void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 
 	switch (nRisk)
 	{
-	case FM_ANYRISK:
+	case FM_ANYPRIORITY:
 		if (m_bIncludeAny)
 			nSel = 0;
+		else
+			ASSERT(0);
 		break;
 
-	case FM_NORISK:
-		nSel = (m_bIncludeAny ? 1 : 0);
+	case FM_NOPRIORITY:
+		if (m_bIncludeNone)
+			nSel = (m_bIncludeAny ? 1 : 0);
+		else
+			ASSERT(0);
 		break;
 
 	default:
 		if ((nRisk >= 0) && (nRisk < m_nNumLevels))
-			nSel = (m_bIncludeAny ? (nRisk + 2) : (nRisk + 1));
+		{
+			if (m_bIncludeAny && m_bIncludeNone) // both
+				nSel = (nRisk + 2);
+			else
+				nSel = (nRisk + 1); // one or other
+		}
 		break;
 	}
 

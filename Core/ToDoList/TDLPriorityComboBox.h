@@ -16,7 +16,7 @@ class CTDLPriorityComboBox : public CColorComboBox
 {
 // Construction
 public:
-	CTDLPriorityComboBox(BOOL bIncludeAny);
+	CTDLPriorityComboBox(BOOL bIncludeAny, BOOL bIncludeNone = TRUE);
 	virtual ~CTDLPriorityComboBox();
 
 	BOOL SetColors(const CDWordArray& aColors); // 2 - 11
@@ -38,7 +38,7 @@ protected:
 
 protected:
 	CDWordArray m_aColors;
-	BOOL m_bIncludeAny;
+	BOOL m_bIncludeAny, m_bIncludeNone;
 	int m_nNumLevels;
 
 	// Generated message map functions

@@ -1429,6 +1429,11 @@ BOOL CToDoListWnd::InitFilterbar()
 	m_filterBar.SetNumPriorityRiskLevels(prefs.GetNumPriorityRiskLevels());
 	m_filterBar.SetUITheme(m_theme);
 
+	CDWordArray aPriorityColors;
+	prefs.GetPriorityColors(aPriorityColors);
+
+	m_filterBar.SetPriorityColors(aPriorityColors);
+
 	RefreshFilterBarAdvancedFilters();
 
 	return TRUE;
@@ -5222,6 +5227,11 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			CFilteredToDoCtrl::SetRecentlyModifiedPeriod(newPrefs.GetRecentlyModifiedPeriod());
 			bRefreshFilter = (m_filterBar.GetFilter() == FS_RECENTMOD);
 		}
+
+		CDWordArray aPriorityColors;
+		newPrefs.GetPriorityColors(aPriorityColors);
+
+		m_filterBar.SetPriorityColors(aPriorityColors);
 		
 		if (bRefreshFilter)
 			OnViewRefreshfilter();
@@ -5240,6 +5250,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			m_dlgFindTasks.SetNumPriorityRiskLevels(newPrefs.GetNumPriorityRiskLevels());
 			m_dlgFindTasks.SetGroupHeaderBackColor(newPrefs.GetGroupHeaderBackgroundColor());
 			m_dlgFindTasks.SetStrikeThroughCompletedTasks(newPrefs.GetStrikethroughDone());
+			m_dlgFindTasks.SetPriorityColors(aPriorityColors);
 		}
 
 		m_dlgReminders.EnableReducedFlashing(newPrefs.GetReduceReminderDialogFlashing());
@@ -10586,7 +10597,7 @@ void CToDoListWnd::OnUpdateGotoNexttask(CCmdUI* pCmdUI)
 }
 //------------------------------------------------------------------------
 
-BOOL CToDoListWnd::InitFindDialog()
+BOOL CToDoListWnd::InitFindTasksDialog()
 {
 	if (!m_dlgFindTasks.GetSafeHwnd())
 	{
@@ -10602,6 +10613,11 @@ BOOL CToDoListWnd::InitFindDialog()
 			m_dlgFindTasks.SetResultsFont(m_fontTree);
 
 		m_dlgFindTasks.SetNumPriorityRiskLevels(Prefs().GetNumPriorityRiskLevels());
+
+		CDWordArray aColors;
+		Prefs().GetPriorityColors(aColors);
+
+		m_dlgFindTasks.SetPriorityColors(aColors);
 	}
 
 	return TRUE;
@@ -10674,7 +10690,7 @@ void CToDoListWnd::OnFindTasks()
 void CToDoListWnd::ShowFindDialog(BOOL bAllowResizeApp)
 {
 	// Create the find dialog first time only
-	InitFindDialog();
+	InitFindTasksDialog();
 
 	if (IsWindowVisible())
 	{

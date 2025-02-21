@@ -47,6 +47,7 @@ public:
 	void SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 	void SetNumPriorityRiskLevels(int nNumLevels);
+	void SetPriorityColors(const CDWordArray& aColors);
 
 	BOOL AddRule();
 	BOOL DeleteSelectedRule();

@@ -20,11 +20,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPriorityComboBox
 
-CTDLPriorityComboBox::CTDLPriorityComboBox(BOOL bIncludeAny) 
+CTDLPriorityComboBox::CTDLPriorityComboBox(BOOL bIncludeAny, BOOL bIncludeNone)
 	: 
 	m_bIncludeAny(bIncludeAny),
+	m_bIncludeNone(bIncludeNone),
 	m_nNumLevels(11)
 {
+	// 'Any' and NOT 'None' is unexpected though it will still work
+	ASSERT(!bIncludeAny || bIncludeNone);
 }
 
 CTDLPriorityComboBox::~CTDLPriorityComboBox()
@@ -71,25 +74,41 @@ int CTDLPriorityComboBox::IncrementPriority(int nAmount)
 
 int CTDLPriorityComboBox::GetSelectedPriority() const
 {
-	int nSel = GetCurSel(), nPriority = nSel;
-
-	switch (nSel)
+	int nSel = GetCurSel();
+	
+	if ((nSel == CB_ERR) || (!m_bIncludeAny && !m_bIncludeNone))
 	{
-	case 0:
-		nPriority = (m_bIncludeAny ? FM_ANYPRIORITY : FM_NOPRIORITY);
-		break;
-
-	case 1:
-		nPriority = (m_bIncludeAny ? FM_NOPRIORITY : (nSel - 1));
-		break;
-
-	default:
-		if (nSel != CB_ERR)
-			nPriority = (m_bIncludeAny ? (nSel - 2) : (nSel - 1));
-		break;
+		// index is priority
+		return nSel;
 	}
 
-	return nPriority;
+	// Both
+	if (m_bIncludeAny && m_bIncludeNone)
+	{
+		switch (nSel)
+		{
+		case 0:		return FM_ANYPRIORITY;
+		case 1:		return FM_NOPRIORITY;
+		default:	return (nSel - 2);
+		}
+	}
+
+	// Only 'Any'
+	if (m_bIncludeAny)
+	{
+		switch (nSel)
+		{
+		case 0:		return FM_NOPRIORITY;
+		default:	return (nSel - 1);
+		}
+	}
+
+	// Only 'None'
+	switch (nSel)
+	{
+	case 0:		return FM_ANYPRIORITY;
+	default:	return (nSel - 1);
+	}
 }
 
 void CTDLPriorityComboBox::SetSelectedPriority(int nPriority) // -2 -> 10
@@ -101,15 +120,25 @@ void CTDLPriorityComboBox::SetSelectedPriority(int nPriority) // -2 -> 10
 	case FM_ANYPRIORITY:
 		if (m_bIncludeAny)
 			nSel = 0;
+		else
+			ASSERT(0);
 		break;
 
 	case FM_NOPRIORITY:
-		nSel = (m_bIncludeAny ? 1 : 0);
+		if (m_bIncludeNone)
+			nSel = (m_bIncludeAny ? 1 : 0);
+		else
+			ASSERT(0);
 		break;
 
 	default:
 		if ((nPriority >= 0) && (nPriority < m_nNumLevels))
-			nSel = (m_bIncludeAny ? (nPriority + 2) : (nPriority + 1));
+		{
+			if (m_bIncludeAny && m_bIncludeNone) // both
+				nSel = (nPriority + 2);
+			else
+				nSel = (nPriority + 1); // one or other
+		}
 		break;
 	}
 
@@ -118,7 +147,7 @@ void CTDLPriorityComboBox::SetSelectedPriority(int nPriority) // -2 -> 10
 
 BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 {
-	if (aColors.GetSize() < 11)
+	if (aColors.GetSize() < m_nNumLevels)
 		return FALSE;
 
 	if (!Misc::MatchAll(aColors, m_aColors, TRUE))
@@ -155,7 +184,8 @@ void CTDLPriorityComboBox::BuildCombo()
 	if (m_bIncludeAny)
 		AddColor(CLR_NONE, CEnString(IDS_TDC_ANY));
 	
-	AddColor(CLR_NONE, CEnString(IDS_TDC_NONE));
+	if (m_bIncludeNone)
+		AddColor(CLR_NONE, CEnString(IDS_TDC_NONE));
 
 	UINT aStrResIDs[11];
 	TDC::GetPriorityRiskLevelStringResourceIDs(m_nNumLevels, aStrResIDs);

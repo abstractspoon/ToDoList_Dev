@@ -16,7 +16,7 @@ class CTDLRiskComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CTDLRiskComboBox(BOOL bIncludeAny);
+	CTDLRiskComboBox(BOOL bIncludeAny, BOOL bIncludeNone = TRUE);
 	virtual ~CTDLRiskComboBox();
 
 	void SetNumLevels(int nNumLevels); // 2 - 11
@@ -35,7 +35,7 @@ protected:
 	//}}AFX_VIRTUAL
 
 protected:
-	BOOL m_bIncludeAny;
+	BOOL m_bIncludeAny, m_bIncludeNone;
 	int m_nNumLevels;
 
 	// Generated message map functions

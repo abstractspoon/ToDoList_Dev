@@ -466,6 +466,8 @@ void CTDLTaskAttributeListCtrl::SetNumPriorityRiskLevels(int nNumLevels)
 		TDC::GetPriorityRiskLevelStringResourceIDs(nNumLevels, m_aPriorityRiskStrResIDs);
 
 	m_cbPriority.SetNumLevels(nNumLevels);
+	m_cbPriority.SetColors(m_aPriorityColors);
+
 	m_cbRisk.SetNumLevels(nNumLevels);
 }
 
@@ -551,6 +553,8 @@ void CTDLTaskAttributeListCtrl::SetPriorityColors(const CDWordArray& aColors)
 		return;
 
 	m_aPriorityColors.Copy(aColors);
+	m_cbPriority.SetColors(m_aPriorityColors);
+
 	RedrawValue(TDCA_PRIORITY);
 }
 
@@ -2572,8 +2576,6 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 	case TDCA_PRIORITY:
 		{
-			m_cbPriority.SetColors(m_aPriorityColors);
-
 			if (RowValueVaries(nRow))
 				m_cbPriority.SetCurSel(CB_ERR);
 			else
