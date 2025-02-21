@@ -39,6 +39,8 @@ public:
 
 	BOOL HasFixedColumns() const;
 	int GetFixedColumnDefinitions(CKanbanColumnArray& aColumnDefs) const;
+	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
+
 	BOOL GetSortSubtasksBelowParents() const { return m_bSortSubtaskBelowParent; }
 	BOOL GetAlwaysShowBacklog() const { return m_bAlwaysShowBacklog; }
 	BOOL GetShowTaskColorAsBar() const { return m_bShowTaskColorAsBar; }
@@ -46,7 +48,6 @@ public:
 	BOOL GetIndentSubtasks() const { return m_bSortSubtaskBelowParent && m_bIndentSubtasks; }
 	BOOL GetHideEmptyAttributes() const { return m_bHideEmptyAttributeValues; }
 	BOOL GetAltKeyOverridesMaxCount() const { return m_bAltKeyOverridesMaxCount; }
-	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const;
 	COLORREF GetFullColumnColor() const { return (m_bSpecifyFullColor ? m_crFullColumn : CLR_NONE); }
 

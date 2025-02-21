@@ -122,6 +122,7 @@ protected:
 	TDC_ATTRIBUTE m_nTrackedAttributeID, m_nSortBy, m_nGroupBy;
 	CString m_sTrackAttribID, m_sGroupByCustAttribID;
 	BOOL m_bSortAscending;
+	int m_nNumPriorityRiskLevels;
 
 	CKanbanItemMap m_data;
 	CKanbanAttributeValueMap m_mapAttributeValues;
@@ -182,6 +183,7 @@ protected:
 	void RebuildColumnHeader();
 	void RefreshColumnHeaderText();
 	void HideEmptyColumns(int nPrevColCount);
+	void BuildPriorityRiskAttributeMapping(TDC_ATTRIBUTE nAttribID, BOOL bRebuild);
 
 	KBC_ATTRIBLABELS GetColumnAttributeLabelVisibility(int nCol, int nColWidth);
 	float GetAverageColumnCharWidth();

@@ -158,7 +158,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_bSettingColumnFocus(FALSE),
 	m_bSavingToImage(FALSE),
 	m_crGroupHeaderBkgnd(CLR_NONE),
-	m_crFullColumn(CLR_NONE)
+	m_crFullColumn(CLR_NONE),
+	m_nNumPriorityRiskLevels(11)
 {
 }
 
@@ -1175,25 +1176,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
-		{
-			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
-
-			// create once only
-			if (!m_mapAttributeValues.HasMapping(sAttribID))
-			{
-				CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sAttribID);
-				ASSERT(pValues);
-
-				for (int nItem = 0; nItem <= 10; nItem++)
-				{
-					CString sValue(Misc::Format(nItem));
-					pValues->SetAt(sValue, sValue);
-				}
-				
-				// Add backlog item
-				pValues->AddValue(EMPTY_STR);
-			}
-		}
+		BuildPriorityRiskAttributeMapping(nAttribID, FALSE); 
 		break;
 		
 	case TDCA_STATUS:
@@ -1328,6 +1311,38 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	return FALSE;
 }
 
+void CKanbanCtrl::BuildPriorityRiskAttributeMapping(TDC_ATTRIBUTE nAttribID, BOOL bRebuild)
+{
+	switch (nAttribID)
+	{
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+		{
+			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
+
+			if (bRebuild || !m_mapAttributeValues.HasMapping(sAttribID))
+			{
+				CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sAttribID);
+				pValues->RemoveAll();
+
+				for (int nItem = 0; nItem < m_nNumPriorityRiskLevels; nItem++)
+				{
+					CString sValue(Misc::Format(nItem));
+					pValues->SetAt(sValue, sValue);
+				}
+
+				// Add backlog item
+				pValues->AddValue(EMPTY_STR);
+			}
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+}
+
 BOOL CKanbanCtrl::UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringArray& aValues)
 {
 	CKanbanValueMap mapNewValues;
@@ -1416,7 +1431,20 @@ void CKanbanCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, boo
 
 	m_aColumns.SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
 
-	if (m_nTrackedAttributeID != TDCA_NONE)
+	int nNumLevels = pPrefs->GetProfileInt(_T("Preferences"), _T("NumPriorityRiskLevels"), 11);
+	BOOL bRebuildColumns = (m_nTrackedAttributeID != TDCA_NONE);
+
+	if (nNumLevels != m_nNumPriorityRiskLevels)
+	{
+		m_nNumPriorityRiskLevels = nNumLevels;
+
+		BuildPriorityRiskAttributeMapping(TDCA_PRIORITY, TRUE);
+		BuildPriorityRiskAttributeMapping(TDCA_RISK, TRUE);
+
+		bRebuildColumns |= ((m_nTrackedAttributeID == TDCA_PRIORITY) || (m_nTrackedAttributeID == TDCA_RISK));
+	}
+
+	if (bRebuildColumns)
 	{
 		// Both column visibility AND contents may have changed
 		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
