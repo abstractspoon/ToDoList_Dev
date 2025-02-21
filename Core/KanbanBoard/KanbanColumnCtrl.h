@@ -187,6 +187,7 @@ protected:
 	afx_msg LRESULT OnGetNextItem(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
 	DECLARE_MESSAGE_MAP()
 

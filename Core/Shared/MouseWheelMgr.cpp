@@ -79,7 +79,7 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 
 		if (m_bShiftHorzScrollingEnabled && bShift)
 		{
-			::SendMessage(hwndPt, WM_HSCROLL, (bRight ? SB_PAGERIGHT : SB_PAGELEFT), 0L);
+			::SendMessage(hwndPt, WM_HSCROLL, (bRight ? SB_LINERIGHT : SB_LINELEFT), 0L);
 			return TRUE; // handled
 		}
 

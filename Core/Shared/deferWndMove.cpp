@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "deferWndMove.h"
+#include "dialoghelper.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -52,11 +53,6 @@ BOOL CDeferWndMove::EndMove()
 
 BOOL CDeferWndMove::MoveWindow(CWnd* pWnd, int x, int y, int nWidth, int nHeight, BOOL bRepaint)
 {
-// 	ASSERT (m_hdwp);
-// 	
-// 	if (!m_hdwp)
-// 		return FALSE;
-	
 	ASSERT (pWnd->GetParent());
 	
 	// figure out what flags we need
@@ -69,7 +65,7 @@ BOOL CDeferWndMove::MoveWindow(CWnd* pWnd, int x, int y, int nWidth, int nHeight
 	if (x == rWnd.left && y == rWnd.top)
 		nFlags |= SWP_NOMOVE;
 	
-	if (nWidth == rWnd.Width() && nHeight == rWnd.Height())
+	if ((nWidth == rWnd.Width()) && (nHeight == rWnd.Height()))
 		nFlags |= SWP_NOSIZE;
 	
 	BOOL bNeedMove = !((nFlags & SWP_NOMOVE) && (nFlags & SWP_NOSIZE));
@@ -101,15 +97,41 @@ BOOL CDeferWndMove::MoveWindow(CWnd* pWnd, LPCRECT lpRect, BOOL bRepaint)
 							      lpRect->bottom - lpRect->top, bRepaint);
 }
 
-CRect CDeferWndMove::OffsetCtrl(CWnd* pParent, UINT nCtrlID, int x, int y)
+CRect CDeferWndMove::OffsetCtrl(const CWnd* pParent, UINT nCtrlID, int x, int y)
 {
-	CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
+	return OffsetCtrl(pParent, pParent->GetDlgItem(nCtrlID), x, y);
+}
 
-	if (pCtrl)
+CRect CDeferWndMove::MoveCtrl(const CWnd* pParent, UINT nCtrlID, int x, int y)
+{
+	return MoveCtrl(pParent, pParent->GetDlgItem(nCtrlID), x, y);
+}
+
+CRect CDeferWndMove::ResizeCtrl(const CWnd* pParent, UINT nCtrlID, int cx, int cy)
+{
+	return ResizeCtrl(pParent, pParent->GetDlgItem(nCtrlID), cx, cy);
+}
+
+CRect CDeferWndMove::OffsetChild(CWnd* pChild, int x, int y)
+{
+	return OffsetCtrl(pChild->GetParent(), pChild, x, y);
+}
+
+CRect CDeferWndMove::ResizeChild(CWnd* pChild, int cx, int cy)
+{
+	return ResizeCtrl(pChild->GetParent(), pChild, cx, cy);
+}
+
+CRect CDeferWndMove::MoveChild(CWnd* pChild, int x, int y)
+{
+	return MoveCtrl(pChild->GetParent(), pChild, x, y);
+}
+
+CRect CDeferWndMove::OffsetCtrl(const CWnd* pParent, CWnd* pCtrl, int x, int y)
+{
+	if (pParent && pCtrl)
 	{
-		CRect rChild;
-		pCtrl->GetWindowRect(rChild);
-		pParent->ScreenToClient(rChild);
+		CRect rChild = CDialogHelper::GetChildRect(pCtrl);
 
 		if (x || y)
 		{
@@ -120,18 +142,15 @@ CRect CDeferWndMove::OffsetCtrl(CWnd* pParent, UINT nCtrlID, int x, int y)
 		return rChild;
 	}
 
+	ASSERT(0);
 	return CRect(0, 0, 0, 0);
 }
 
-CRect CDeferWndMove::MoveCtrl(CWnd* pParent, UINT nCtrlID, int x, int y)
+CRect CDeferWndMove::MoveCtrl(const CWnd* pParent, CWnd* pCtrl, int x, int y)
 {
-	CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
-
 	if (pCtrl)
 	{
-		CRect rChild;
-		pCtrl->GetWindowRect(rChild);
-		pParent->ScreenToClient(rChild);
+		CRect rChild = CDialogHelper::GetChildRect(pCtrl);
 
 		rChild.OffsetRect(x - rChild.left, y - rChild.top);
 		MoveWindow(pCtrl, rChild); // our own version
@@ -139,19 +158,15 @@ CRect CDeferWndMove::MoveCtrl(CWnd* pParent, UINT nCtrlID, int x, int y)
 		return rChild;
 	}
 
+	ASSERT(0);
 	return CRect(0, 0, 0, 0);
 }
 
-CRect CDeferWndMove::ResizeCtrl(CWnd* pParent, UINT nCtrlID, int cx, int cy)
+CRect CDeferWndMove::ResizeCtrl(const CWnd* pParent, CWnd* pCtrl, int cx, int cy)
 {
-	CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
-
 	if (pCtrl)
 	{
-		CRect rChild, rParent;
-		pCtrl->GetWindowRect(rChild);
-		pParent->ScreenToClient(rChild);
-		pParent->GetClientRect(rParent);
+		CRect rChild = CDialogHelper::GetChildRect(pCtrl);
 
 		if (cx || cy)
 		{
@@ -159,6 +174,9 @@ CRect CDeferWndMove::ResizeCtrl(CWnd* pParent, UINT nCtrlID, int cx, int cy)
 			rChild.bottom += cy;
 
 			// make sure it also intersects with parent
+			CRect rParent;
+			pParent->GetClientRect(rParent);
+
 			if (rChild.IntersectRect(rChild, rParent))
 				MoveWindow(pCtrl, rChild); // our own version
 		}
@@ -166,5 +184,6 @@ CRect CDeferWndMove::ResizeCtrl(CWnd* pParent, UINT nCtrlID, int cx, int cy)
 		return rChild;
 	}
 
+	ASSERT(0);
 	return CRect(0, 0, 0, 0);
 }
