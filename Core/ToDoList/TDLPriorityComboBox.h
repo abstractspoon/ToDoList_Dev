@@ -21,6 +21,7 @@ public:
 
 	BOOL SetColors(const CDWordArray& aColors); // 2 - 11
 	void SetNumLevels(int nLevels); // 2 - 11
+	int GetNumLevels() const { return m_nNumLevels; }
 
 	int IncrementPriority(int nAmount);
 	int GetSelectedPriority() const; // -2 -> Num Levels - 1

@@ -146,7 +146,6 @@ public:
 	void OnCustomAttributesChange();
 	void OnAttributeVisibilityChange();
 
-
 protected:
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
@@ -187,7 +186,6 @@ protected:
 	
 	mutable CIconCache m_iconCache;
 
-	int m_nNumPriorityRiskLevels;
 	UINT m_aPriorityRiskStrResIDs[11];
 
 protected:

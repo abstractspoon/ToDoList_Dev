@@ -46,7 +46,7 @@ public:
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
-	void SetNumPriorityRiskLevels(int nNumLevels) { m_nNumPriorityRiskLevels = nNumLevels; }
+	void SetNumPriorityRiskLevels(int nNumLevels);
 
 	BOOL AddRule();
 	BOOL DeleteSelectedRule();
@@ -81,8 +81,6 @@ protected:
 	CTDCImageList					m_ilIcons;
 
 	const CContentMgr&				m_mgrContent;
-
-	int m_nNumPriorityRiskLevels;
 
 protected:
 	virtual void PreSubclassWindow();

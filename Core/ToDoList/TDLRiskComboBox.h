@@ -20,6 +20,7 @@ public:
 	virtual ~CTDLRiskComboBox();
 
 	void SetNumLevels(int nNumLevels); // 2 - 11
+	int GetNumLevels() const { return m_nNumLevels; }
 
 	int GetSelectedRisk() const; // -2 -> 10
 	void SetSelectedRisk(int nRisk); // -2 -> 10
