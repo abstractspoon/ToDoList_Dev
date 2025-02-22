@@ -1916,9 +1916,9 @@ void CKanbanCtrl::RebuildFixedColumns()
 	// columns like with dynamic columns, we just hide them
 	if (m_aColumns.GetSize() == 0)
 	{
-		for (int nDef = 0; nDef < m_aColumnDefs.GetSize(); nDef++)
+		for (int nDef = 0; nDef < m_aFixedColDefs.GetSize(); nDef++)
 		{
-			const KANBANCOLUMN& colDef = m_aColumnDefs[nDef];
+			const KANBANCOLUMN& colDef = m_aFixedColDefs[nDef];
 			VERIFY(AddNewColumn(colDef) != NULL);
 		}
 	}
@@ -2259,11 +2259,11 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 		// Check if only display attributes have changed
 		if (UsingFixedColumns())
 		{
-			if (m_aColumnDefs.MatchesAll(aColumnDefs))
+			if (m_aFixedColDefs.MatchesAll(aColumnDefs))
 			{
 				return TRUE;
 			}
-			else if (m_aColumnDefs.MatchesAll(aColumnDefs, FALSE))
+			else if (m_aFixedColDefs.MatchesAll(aColumnDefs, FALSE))
 			{
 				int nCol = aColumnDefs.GetSize();
 				ASSERT(nCol == m_aColumns.GetSize());
@@ -2279,7 +2279,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 						pCol->SetBackgroundColor(colDef.crBackground);
 						pCol->SetMaximumTaskCount(colDef.nMaxTaskCount);
 
-						m_aColumnDefs[nCol] = colDef;
+						m_aFixedColDefs[nCol] = colDef;
 					}
 				}
 	
@@ -2289,12 +2289,12 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 		}
 		else if (!aColumnDefs.GetSize()) // not switching to fixed columns
 		{
-			ASSERT(m_aColumnDefs.GetSize() == 0);
+			ASSERT(m_aFixedColDefs.GetSize() == 0);
 			return TRUE;
 		}
 	}
 
-	m_aColumnDefs.Copy(aColumnDefs);
+	m_aFixedColDefs.Copy(aColumnDefs);
 
 	// update state
 	m_nTrackedAttributeID = nAttribID;

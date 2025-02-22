@@ -128,7 +128,7 @@ protected:
 	CKanbanAttributeValueMap m_mapAttributeValues;
 	CKanbanAttributeValueMap m_mapGlobalAttributeValues;
 	CKanbanAttributeArray m_aDisplayAttrib;
-	CKanbanColumnArray m_aColumnDefs;
+	CKanbanColumnArray m_aFixedColDefs;
 	CKanbanCustomAttributeDefinitionArray m_aCustomAttribDefs;
 
 protected:
@@ -211,7 +211,7 @@ protected:
 	int MapHeaderItemToColumn(int nItem) const;
 	int CalcMinRequiredColumnsWidth() const;
 
-	inline BOOL UsingFixedColumns() const { return m_aColumnDefs.GetSize(); }
+	inline BOOL UsingFixedColumns() const { return m_aFixedColDefs.GetSize(); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
 
 	BOOL IsDragging() const;
