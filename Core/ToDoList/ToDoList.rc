@@ -2654,8 +2654,12 @@ BEGIN
         MENUITEM "Ma&ximise Comments",          ID_VIEW_MAXCOMMENTS
         MENUITEM "&Unmaximise",                 ID_VIEW_UNMAXTASKLISTANDCOMMENTS
         MENUITEM SEPARATOR
-        MENUITEM "T&oggle between Task Tree and List View", ID_VIEW_TOGGLETREEANDLIST
-        MENUITEM "To&ggle between Tasks and Comments", ID_VIEW_TOGGLETASKSANDCOMMENTS
+        POPUP "Set Focus"
+        BEGIN
+            MENUITEM "&Task View",                  ID_VIEW_SETFOCUSTOTASKS
+            MENUITEM "&Comments",                   ID_VIEW_SETFOCUSTOCOMMENTS
+            MENUITEM "&Attributes",                 ID_VIEW_SETFOCUSTOATTRIBUTES
+        END
         MENUITEM SEPARATOR
         MENUITEM "Next Task Vie&w",             ID_VIEW_CYCLETASKVIEWS
         POPUP "Activate &Task View"

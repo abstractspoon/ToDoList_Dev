@@ -399,8 +399,10 @@ public:
 
 	virtual BOOL TasksHaveFocus() const { return m_taskTree.HasFocus(); }
 	virtual BOOL CommentsHaveFocus() const { return m_ctrlComments.HasFocus(); }
+	virtual BOOL AttributesHaveFocus() const { return m_ctrlAttributes.HasFocus(); }
 	virtual void SetFocusToTasks();
 	virtual void SetFocusToComments();
+	virtual void SetFocusToAttributes();
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;

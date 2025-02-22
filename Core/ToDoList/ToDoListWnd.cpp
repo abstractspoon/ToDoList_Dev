@@ -537,6 +537,9 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_RESIZECOLSTOFIT, OnViewResizeColsToFit)
 	ON_COMMAND(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnViewRestoreDefaultTaskViewFontSize)
 	ON_COMMAND(ID_VIEW_SAVETOIMAGE, OnViewSaveToImage)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOTASKS, OnViewSetFocusToTasks)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOCOMMENTS, OnViewSetFocusToComments)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOATTRIBUTES, OnViewSetFocusToAttributes)
 	ON_COMMAND(ID_VIEW_SHOWALLBARS, OnViewShowAllBars)
 	ON_COMMAND(ID_VIEW_SHOWFILTERBAR, OnViewShowfilterbar)
 	ON_COMMAND(ID_VIEW_SHOWREMINDERS, OnViewShowRemindersWindow)
@@ -780,6 +783,9 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RESIZECOLSTOFIT, OnUpdateViewResizeColsToFit)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnUpdateViewRestoreDefaultTaskViewFontSize)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SAVETOIMAGE, OnUpdateViewSaveToImage)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOTASKS, OnUpdateViewSetFocusToTasks)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOCOMMENTS, OnUpdateViewSetFocusToComments)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOATTRIBUTES, OnUpdateViewSetFocusToAttributes)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWALLBARS, OnUpdateViewShowAllBars)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWFILTERBAR, OnUpdateViewShowfilterbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWREMINDERS, OnUpdateViewShowRemindersWindow)
@@ -1215,6 +1221,9 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_VIEW_PREV_SEL,					VK_LEFT,		HOTKEYF_ALT | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_REFRESHFILTER,				VK_F5,			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_RESIZECOLSTOFIT,				VK_ADD,			HOTKEYF_CONTROL);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOTASKS,				'T',			HOTKEYF_ALT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOCOMMENTS,			'C',			HOTKEYF_ALT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOATTRIBUTES,		'A',			HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLEFILTER,				VK_F12,			0);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLETASKEXPANDED,			VK_SPACE,		HOTKEYF_CONTROL | HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLEALLTASKEXPANDED,		VK_SPACE,		HOTKEYF_SHIFT | HOTKEYF_ALT);
@@ -13180,6 +13189,57 @@ void CToDoListWnd::OnViewToggletasksandcomments()
 }
 
 void CToDoListWnd::OnUpdateViewToggletasksandcomments(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(TRUE);
+}
+
+void CToDoListWnd::OnViewSetFocusToTasks()
+{
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (tdc.TasksHaveFocus())
+		return;
+
+	if (tdc.CommentsHaveFocus())
+		OnViewToggletasksandcomments();
+
+	if (tdc.AttributesHaveFocus())
+		tdc.SetFocusToTasks();
+}
+
+void CToDoListWnd::OnViewSetFocusToComments()
+{
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (tdc.CommentsHaveFocus())
+		return;
+
+	if (tdc.TasksHaveFocus())
+		OnViewToggletasksandcomments();
+
+	if (tdc.AttributesHaveFocus())
+		tdc.SetFocusToComments();
+}
+
+void CToDoListWnd::OnViewSetFocusToAttributes()
+{
+	if (m_nMaxState != TDCMS_NORMAL)
+		OnUnmaximizeTasklistAndComments();
+
+	GetToDoCtrl().SetFocusToAttributes();
+}
+
+void CToDoListWnd::OnUpdateViewSetFocusToTasks(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(TRUE);
+}
+
+void CToDoListWnd::OnUpdateViewSetFocusToComments(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(TRUE);
+}
+
+void CToDoListWnd::OnUpdateViewSetFocusToAttributes(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(TRUE);
 }

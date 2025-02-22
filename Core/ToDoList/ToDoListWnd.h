@@ -421,6 +421,9 @@ protected:
 	afx_msg void OnViewResizeColsToFit();
 	afx_msg void OnViewRestoreDefaultTaskViewFontSize();
 	afx_msg void OnViewSaveToImage();
+	afx_msg void OnViewSetFocusToTasks();
+	afx_msg void OnViewSetFocusToComments();
+	afx_msg void OnViewSetFocusToAttributes();
 	afx_msg void OnViewShowAllBars();
 	afx_msg void OnViewShowRemindersWindow();
 	afx_msg void OnViewShowTasklistTabbar();
@@ -568,6 +571,9 @@ protected:
 	afx_msg void OnUpdateViewResizeColsToFit(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewSaveToImage(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewSetFocusToTasks(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewSetFocusToComments(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewSetFocusToAttributes(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowAllBars(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowTasklistTabbar(CCmdUI* pCmdUI);

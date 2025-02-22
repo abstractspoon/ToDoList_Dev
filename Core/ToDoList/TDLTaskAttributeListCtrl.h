@@ -74,6 +74,7 @@ public:
 	void ToggleGrouping();
 	BOOL IsGrouped() const { return m_bGrouped; }
 	BOOL HasMultiSelection() const { return (m_aSelectedTaskIDs.GetSize() > 1); }
+	BOOL HasFocus() const;
 
 	BOOL MoveSelectedAttribute(BOOL bUp);
 	BOOL CanMoveSelectedAttribute(BOOL bUp) const;

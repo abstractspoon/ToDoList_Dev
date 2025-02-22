@@ -8104,6 +8104,15 @@ void CToDoCtrl::SetFocusToComments()
 	m_ctrlComments.SetFocus();
 }
 
+void CToDoCtrl::SetFocusToAttributes()
+{
+	// ignore if tasklist is maximised
+	if (m_layout.HasMaximiseState(TDCMS_MAXTASKLIST))
+		return;
+
+	m_ctrlAttributes.SetFocus();
+}
+
 void CToDoCtrl::SetFocusToProjectName()
 {
 	// ignore if tasklist is maximised
