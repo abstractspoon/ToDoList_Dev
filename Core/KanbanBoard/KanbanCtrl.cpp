@@ -1871,7 +1871,6 @@ int CKanbanCtrl::AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 				colDef.sAttribID = m_sTrackAttribID;
 				colDef.sTitle = sAttribValue;
 				colDef.aAttribValues.Add(sAttribValue);
-				//colDef.crBackground = KBCOLORS[m_nNextColor++ % NUM_KBCOLORS];
 				
 				VERIFY (AddNewColumn(colDef) != NULL);
 				nNumAdded++;
