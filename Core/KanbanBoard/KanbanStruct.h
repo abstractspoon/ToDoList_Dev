@@ -74,6 +74,8 @@ namespace KBUtils
 
 	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 	BOOL IsGroupableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+
+	static BOOL IsPriorityOrRisk(const CString& sAttribID);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -188,7 +190,7 @@ public:
 	KANBANITEM* NewItem(DWORD dwTaskID, const CString& sTitle);
 
 	void RemoveDeletedItems(const CDWordSet& mapCurIDs);
-	int BuildTempItemMaps(const CString& sAttribID, DWORD dwOptions, CKanbanItemArrayMap& map) const;
+	int BuildTempItemMaps(const CString& sAttribID, DWORD dwOptions, int nNumPriorityRiskLevels, CKanbanItemArrayMap& map) const;
 
 	int GetPinnedItems(CDWordArray& aTaskIDs) const;
 	void SetPinnedItems(const CDWordArray& aTaskIDs, BOOL bReset = TRUE);

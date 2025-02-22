@@ -1967,7 +1967,7 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelT
 	CHoldColumnHScroll hs(m_sbHorz);
 
 	CKanbanItemArrayMap mapKIArray;
-	m_data.BuildTempItemMaps(m_sTrackAttribID, m_dwOptions, mapKIArray);
+	m_data.BuildTempItemMaps(m_sTrackAttribID, m_dwOptions, m_nNumPriorityRiskLevels, mapKIArray);
 
 	// Rebuild columns
 	if (UsingDynamicColumns())
@@ -2109,12 +2109,13 @@ void CKanbanCtrl::RefreshColumnHeaderText()
 
 void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 {
-	int nCol = m_aColumns.GetSize();
-	
 	BOOL bHideParents = HasOption(KBCF_HIDEPARENTTASKS);
 	BOOL bHideSubtasks = HasOption(KBCF_HIDESUBTASKS);
 	BOOL bHideNoGroup = (HasOption(KBCF_HIDENONEGROUP) && IsGrouping());
 
+	int nCol = m_aColumns.GetSize();
+	m_aColumns.SetRedraw(FALSE);
+	
 	while (nCol--)
 	{
 		CKanbanColumnCtrl* pCol = m_aColumns[nCol];
@@ -2145,6 +2146,8 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 		m_aColumns.GroupBy(m_nGroupBy);
 	else
 		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+
+	m_aColumns.SetRedraw(TRUE);
 }
 
 void CKanbanCtrl::FixupSelectedColumn()
@@ -2352,10 +2355,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	if (!pCol || !pCol->GetSafeHwnd())
 		return FALSE;
 
-	CDWordArray aSelTaskIDs;
-	pCol->GetSelectedTaskIDs(aSelTaskIDs);
-
-	pCol->SetRedraw(FALSE);
+// 	pCol->SetRedraw(FALSE);
 	pCol->RemoveAll();
 
 	CStringArray aValueIDs;
@@ -2389,7 +2389,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	}
 	
 	pCol->RefreshItemLineHeights();
-	pCol->SetRedraw(TRUE);
+// 	pCol->SetRedraw(TRUE);
 
 	return TRUE;
 }

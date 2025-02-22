@@ -123,6 +123,12 @@ CString KBUtils::GetAttributeID(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttr
 	return GetAttributeID(nAttribID);
 }
 
+BOOL KBUtils::IsPriorityOrRisk(const CString& sAttribID)
+{
+	return ((sAttribID == KBUtils::GetAttributeID(TDCA_PRIORITY)) ||
+			(sAttribID == KBUtils::GetAttributeID(TDCA_RISK)));
+}
+
 BOOL KBUtils::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
 {
 	return ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST));
@@ -531,7 +537,7 @@ int KANBANITEM::GetTrackedAttributeValues(const CString& sAttribID, DWORD dwOpti
 {
 	aValues.RemoveAll();
 
-	if ((_tcscmp(sAttribID, _T("PRIORITY")) == 0) || (_tcscmp(sAttribID, _T("RISK")) == 0))
+	if (KBUtils::IsPriorityOrRisk(sAttribID))
 	{
 		if ((dwOptions & KBCF_DONEHAVELOWESTPRIORITYRISK) && IsDone(TRUE))
 		{
@@ -1027,7 +1033,7 @@ void CKanbanItemMap::ClearPinnedItems()
 	}
 }
 
-int CKanbanItemMap::BuildTempItemMaps(const CString& sAttribID, DWORD dwOptions, CKanbanItemArrayMap& map) const
+int CKanbanItemMap::BuildTempItemMaps(const CString& sAttribID, DWORD dwOptions, int nNumPriorityRiskLevels, CKanbanItemArrayMap& map) const
 {
 	ASSERT(!sAttribID.IsEmpty());
 
@@ -1062,6 +1068,23 @@ int CKanbanItemMap::BuildTempItemMaps(const CString& sAttribID, DWORD dwOptions,
 		}
 	}
 
+	// If the tracked attribute is Priority or Risk
+	// Move all tasks with values above m_nNumPriorityRiskLevels
+	// to the bucket with the value (m_nNumPriorityRiskLevels - 1)
+	if ((nNumPriorityRiskLevels < 11) && KBUtils::IsPriorityOrRisk(sAttribID))
+	{
+		CString sLastColValue = Misc::Format(nNumPriorityRiskLevels - 1);
+
+		for (int nLevel = nNumPriorityRiskLevels; nLevel < 11; nLevel++)
+		{
+			CString sColValue = Misc::Format(nLevel);
+			const CKanbanItemArray* pKIArr = map.GetMapping(sColValue);
+
+			if (pKIArr && pKIArr->GetSize())
+				map.GetAddMapping(sLastColValue)->Append(*pKIArr);
+		}
+	}
+
 	return map.GetCount();
 }
 
@@ -1083,7 +1106,7 @@ void CKanbanItemMap::TraceSummary(const CString& sAttribID, DWORD dwOptions) con
 {
 	CKanbanItemArrayMap map;
 
-	if (BuildTempItemMaps(sAttribID, dwOptions, map) == 0)
+	if (BuildTempItemMaps(sAttribID, dwOptions, 11, map) == 0)
 	{
 		TRACE(_T("'%s' contains no unique values\n"), sAttribID);
 		return;
