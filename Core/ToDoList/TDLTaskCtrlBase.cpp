@@ -2161,9 +2161,10 @@ COLORREF CTDLTaskCtrlBase::GetTaskCommentsTextColor(const TODOITEM* pTDI, const 
 
 BOOL CTDLTaskCtrlBase::SetPriorityColors(const CDWordArray& aColors)
 {
-	ASSERT (aColors.GetSize() == 11);
-	
-	if ((aColors.GetSize() == 11) && !Misc::MatchAllT(aColors, m_aPriorityColors, TRUE))
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(aColors.GetSize()));
+
+	if (TDC::IsValidNumPriorityRiskLevels(aColors.GetSize()) &&
+		!Misc::MatchAllT(aColors, m_aPriorityColors, TRUE))
 	{
 		m_aPriorityColors.Copy(aColors);
 			
@@ -2306,9 +2307,11 @@ BOOL CTDLTaskCtrlBase::GetAttributeColor(const CString& sAttrib, COLORREF& color
 
 COLORREF CTDLTaskCtrlBase::GetPriorityColor(int nPriority) const
 {
-	if (nPriority < 0 || nPriority >= m_aPriorityColors.GetSize())
+	if (nPriority < 0)
 		return 0;
-	
+
+	nPriority = min(nPriority, m_aPriorityColors.GetSize() - 1);
+
 	return (COLORREF)m_aPriorityColors[nPriority];
 }
 

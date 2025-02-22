@@ -155,6 +155,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_ppHost.ForwardMessage(WM_PGP_EDITLANGFILE);
 	m_ppHost.ForwardMessage(WM_PPB_CTRLCHANGE);
 	m_ppHost.ForwardMessage(WM_PUITCP_TEXTCOLOROPTION);
+	m_ppHost.ForwardMessage(WM_PUITCP_NUMPRORITYRISKLEVELS);
 	
 	LoadPreferences(m_prefs, PREFSKEY);
 }
@@ -188,6 +189,7 @@ BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	ON_REGISTERED_MESSAGE(WM_PGP_EDITLANGFILE, OnGenPageEditLangFile)
 	ON_REGISTERED_MESSAGE(WM_PPB_CTRLCHANGE, OnControlChange)
 	ON_REGISTERED_MESSAGE(WM_PUITCP_TEXTCOLOROPTION, OnColorPageTextOption)
+	ON_REGISTERED_MESSAGE(WM_PUITCP_NUMPRORITYRISKLEVELS, OnNumPriorityRiskLevels)
 	ON_MESSAGE(WM_COPY, OnCopy)
 END_MESSAGE_MAP()
 
@@ -213,8 +215,8 @@ void CPreferencesDlg::LoadPreferences(const IPreferences* prefs, LPCTSTR szKey)
 	{
 		CPreferencesDlgBase::LoadPreferences(prefs, szKey);
 
-		OnColorPageTextOption((WPARAM)m_pageUITasklistColors.GetSafeHwnd(), 
-							  m_pageUITasklistColors.GetTextColorOption());
+		OnColorPageTextOption(0, 0);
+		OnNumPriorityRiskLevels(0, 0);
 	}
 }
 
@@ -235,7 +237,6 @@ BOOL CPreferencesDlg::OnInitDialog()
 	CThemed::SetWindowTheme(&m_tcPages, _T("Explorer"));
 
 	GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
-
 	AddPagesToTree(FALSE); // all pages
 
 	return FALSE;  // return TRUE unless you set the focus to a control
@@ -823,15 +824,28 @@ FILTER_TITLE CPreferencesDlg::GetTitleFilterOption() const
 	return FT_FILTERONTITLEONLY;
 }
 
-LRESULT CPreferencesDlg::OnColorPageTextOption(WPARAM wParam, LPARAM lParam)
+LRESULT CPreferencesDlg::OnColorPageTextOption(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	UNREFERENCED_PARAMETER(wParam);
-
 	TDCCOLEDITFILTERVISIBILITY vis;
 	m_pageUIVisibility.GetColumnAttributeVisibility(vis);
 
 	vis.ShowColorEditIfAsColumns(m_pageUITasklistColors.GetTextColorOption() == TEXTOPT_DEFAULT);
 	m_pageUIVisibility.SetColumnAttributeVisibility(vis);
+
+	return 0L;
+}
+
+LRESULT CPreferencesDlg::OnNumPriorityRiskLevels(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	int nNumLevels = m_pageUITasklist.GetNumPriorityRiskLevels();
+
+	m_pageUITasklistColors.SetNumPriorityRiskLevels(nNumLevels);
+	m_pageTaskDef.SetNumPriorityRiskLevels(nNumLevels);
+
+	CDWordArray aColors;
+	m_pageUITasklistColors.GetPriorityColors(aColors);
+
+	m_pageTaskDef.SetPriorityColors(aColors);
 
 	return 0L;
 }
@@ -915,31 +929,31 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 	switch (pTVCD->nmcd.dwDrawStage)
 	{
-		case CDDS_PREPAINT:
-			*pResult = CDRF_NOTIFYITEMDRAW;
-			break;
+	case CDDS_PREPAINT:
+		*pResult = CDRF_NOTIFYITEMDRAW;
+		break;
 
-		case CDDS_ITEMPREPAINT:
-			if (m_aSearchTerms.GetSize())
+	case CDDS_ITEMPREPAINT:
+		if (m_aSearchTerms.GetSize())
+		{
+			CString sPage = m_tcPages.GetItemText(hti);
+
+			if (CCtrlTextHighlighter::TextContainsOneOf(sPage, m_aSearchTerms))
 			{
-				CString sPage = m_tcPages.GetItemText(hti);
+				pTVCD->clrTextBk = HILITE_COLOUR;
+				pTVCD->clrText = GraphicsMisc::GetBestTextColor(HILITE_COLOUR);
 
-				if (CCtrlTextHighlighter::TextContainsOneOf(sPage, m_aSearchTerms))
-				{
-					pTVCD->clrTextBk = HILITE_COLOUR;
-					pTVCD->clrText = GraphicsMisc::GetBestTextColor(HILITE_COLOUR);
-
-					*pResult = CDRF_NEWFONT;
-					break;
-				}
-			}
-			// All else
-			if (m_tcPages.GetSelectedItem() == hti)
-			{
-				pTVCD->clrText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
 				*pResult = CDRF_NEWFONT;
+				break;
 			}
-			break;
+		}
+		// All else
+		if (m_tcPages.GetSelectedItem() == hti)
+		{
+			pTVCD->clrText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
+			*pResult = CDRF_NEWFONT;
+		}
+		break;
 	}
 }
 

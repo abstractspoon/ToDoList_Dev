@@ -123,6 +123,12 @@ CString KBUtils::GetAttributeID(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttr
 	return GetAttributeID(nAttribID);
 }
 
+BOOL KBUtils::IsPriorityOrRisk(const CString& sAttribID)
+{
+	return ((sAttribID == KBUtils::GetAttributeID(TDCA_PRIORITY)) ||
+			(sAttribID == KBUtils::GetAttributeID(TDCA_RISK)));
+}
+
 BOOL KBUtils::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
 {
 	return ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST));
@@ -417,9 +423,9 @@ void KANBANITEM::SetTrackedAttributeValues(TDC_ATTRIBUTE nAttribID, const CStrin
 	SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttribID), aValues);
 }
 
-void KANBANITEM::SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues)
+void KANBANITEM::SetTrackedAttributeValues(const CString& sAttribID, const CStringArray& aValues)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
@@ -427,14 +433,14 @@ void KANBANITEM::SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray&
 
 	// else
 	if (aValues.GetSize() == 0)
-		mapAttribValues.RemoveKey(szAttrib);
+		mapAttribValues.RemoveKey(sAttribID);
 	else
-		mapAttribValues.Set(szAttrib, aValues, TRUE);
+		mapAttribValues.Set(sAttribID, aValues, TRUE);
 }
 
-void KANBANITEM::SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
+void KANBANITEM::SetTrackedAttributeValue(const CString& sAttribID, LPCTSTR szValue)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
@@ -442,38 +448,38 @@ void KANBANITEM::SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 
 	// else
 	if (Misc::IsEmpty(szValue))
-		mapAttribValues.RemoveKey(szAttrib);
+		mapAttribValues.RemoveKey(sAttribID);
 	else
-		mapAttribValues.Set(szAttrib, szValue);
+		mapAttribValues.Set(sAttribID, szValue);
 }
 
-void KANBANITEM::AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
+void KANBANITEM::AddTrackedAttributeValue(const CString& sAttribID, LPCTSTR szValue)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
 	}
 
 	if (!Misc::IsEmpty(szValue))
-		mapAttribValues.Add(szAttrib, szValue);
+		mapAttribValues.Add(sAttribID, szValue);
 }
 
-void KANBANITEM::RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
+void KANBANITEM::RemoveTrackedAttributeValue(const CString& sAttribID, LPCTSTR szValue)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
 	}
 
 	if (!Misc::IsEmpty(szValue))
-		mapAttribValues.Remove(szAttrib, szValue, TRUE);
+		mapAttribValues.Remove(sAttribID, szValue, TRUE);
 }
 
-void KANBANITEM::RemoveTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues)
+void KANBANITEM::RemoveTrackedAttributeValues(const CString& sAttribID, const CStringArray& aValues)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
@@ -482,18 +488,18 @@ void KANBANITEM::RemoveTrackedAttributeValues(LPCTSTR szAttrib, const CStringArr
 	int nVal = aValues.GetSize();
 
 	while (nVal--)
-		mapAttribValues.Remove(szAttrib, aValues[nVal], TRUE);
+		mapAttribValues.Remove(sAttribID, aValues[nVal], TRUE);
 }
 
-void KANBANITEM::RemoveAllTrackedAttributeValues(LPCTSTR szAttrib)
+void KANBANITEM::RemoveAllTrackedAttributeValues(const CString& sAttribID)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
 	}
 
-	mapAttribValues.RemoveKey(szAttrib);
+	mapAttribValues.RemoveKey(sAttribID);
 }
 
 void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, LPCTSTR szValue)
@@ -512,13 +518,13 @@ void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, int nValue)
 	SetTrackedAttributeValue(nAttribID, sValue);
 }
 
-CString KANBANITEM::GetTrackedAttributeValue(LPCTSTR szAttrib) const
+CString KANBANITEM::GetTrackedAttributeValue(const CString& sAttribID) const
 {
 	CString sValue;
 
-	if (!Misc::IsEmpty(szAttrib))
+	if (!sAttribID.IsEmpty())
 	{
-		const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+		const CStringArray* pArray = mapAttribValues.GetMapping(sAttribID);
 
 		if (pArray)
 			sValue = Misc::FormatArray(*pArray);
@@ -527,11 +533,11 @@ CString KANBANITEM::GetTrackedAttributeValue(LPCTSTR szAttrib) const
 	return sValue;
 }
 
-int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CStringArray& aValues) const
+int KANBANITEM::GetTrackedAttributeValues(const CString& sAttribID, DWORD dwOptions, CStringArray& aValues) const
 {
 	aValues.RemoveAll();
 
-	if ((_tcscmp(szAttrib, _T("PRIORITY")) == 0) || (_tcscmp(szAttrib, _T("RISK")) == 0))
+	if (KBUtils::IsPriorityOrRisk(sAttribID))
 	{
 		if ((dwOptions & KBCF_DONEHAVELOWESTPRIORITYRISK) && IsDone(TRUE))
 		{
@@ -545,7 +551,7 @@ int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CSt
 
 	if (aValues.GetSize() == 0)
 	{
-		const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+		const CStringArray* pArray = mapAttribValues.GetMapping(sAttribID);
 
 		if (pArray)
 			aValues.Copy(*pArray);
@@ -554,12 +560,12 @@ int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CSt
 	return aValues.GetSize();
 }
 
-BOOL KANBANITEM::HasTrackedAttributeValues(LPCTSTR szAttrib) const
+BOOL KANBANITEM::HasTrackedAttributeValues(const CString& sAttribID) const
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 		return FALSE;
 
-	const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+	const CStringArray* pArray = mapAttribValues.GetMapping(sAttribID);
 
 	return (pArray && pArray->GetSize());
 }
@@ -677,10 +683,10 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttribID) const
 	return FALSE;
 }
 
-BOOL KANBANITEM::AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) const
+BOOL KANBANITEM::AttributeValuesMatch(const CString& sAttribID, const KANBANITEM& ki) const
 {
-	const CStringArray* pThisArray = mapAttribValues.GetMapping(szAttrib);
-	const CStringArray* pOtherArray = ki.mapAttribValues.GetMapping(szAttrib);
+	const CStringArray* pThisArray = mapAttribValues.GetMapping(sAttribID);
+	const CStringArray* pOtherArray = ki.mapAttribValues.GetMapping(sAttribID);
 
 	int nThisCount = (pThisArray ? pThisArray->GetSize() : 0);
 	int nOtherCount = (pOtherArray ? pOtherArray->GetSize() : 0);
@@ -695,9 +701,9 @@ BOOL KANBANITEM::AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) co
 	return TRUE;
 }
 
-BOOL KANBANITEM::AttributeValuesMatch(LPCTSTR szAttrib, const CStringArray& aValues) const
+BOOL KANBANITEM::AttributeValuesMatch(const CString& sAttribID, const CStringArray& aValues) const
 {
-	const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+	const CStringArray* pArray = mapAttribValues.GetMapping(sAttribID);
 
 	int nThisCount = (pArray ? pArray->GetSize() : 0);
 	int nOtherCount = aValues.GetSize();
@@ -1027,9 +1033,9 @@ void CKanbanItemMap::ClearPinnedItems()
 	}
 }
 
-int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, DWORD dwOptions, CKanbanItemArrayMap& map) const
+int CKanbanItemMap::BuildTempItemMaps(const CString& sAttribID, DWORD dwOptions, int nNumPriorityRiskLevels, CKanbanItemArrayMap& map) const
 {
-	ASSERT(!Misc::IsEmpty(szAttribID));
+	ASSERT(!sAttribID.IsEmpty());
 
 	map.RemoveAll();
 
@@ -1044,19 +1050,38 @@ int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, DWORD dwOptions, CKanb
 		ASSERT(pKI);
 
 		CStringArray aAttribValues;
-		int nVal = pKI->GetTrackedAttributeValues(szAttribID, dwOptions, aAttribValues);
+		int nNumVal = pKI->GetTrackedAttributeValues(sAttribID, dwOptions, aAttribValues);
 
-		if (nVal == 0)
+		if (nNumVal == 0)
 		{
 			AddItemToMap(pKI, _T(""), map);
 		}
 		else
 		{
+			int nVal = nNumVal;
+
 			while (nVal--)
 			{
 				const CString& sValue = aAttribValues[nVal];
 				AddItemToMap(pKI, sValue, map);
 			}
+		}
+	}
+
+	// If the tracked attribute is Priority or Risk
+	// Move all tasks with values above m_nNumPriorityRiskLevels
+	// to the bucket with the value (m_nNumPriorityRiskLevels - 1)
+	if ((nNumPriorityRiskLevels < 11) && KBUtils::IsPriorityOrRisk(sAttribID))
+	{
+		CString sLastColValue = Misc::Format(nNumPriorityRiskLevels - 1);
+
+		for (int nLevel = nNumPriorityRiskLevels; nLevel < 11; nLevel++)
+		{
+			CString sColValue = Misc::Format(nLevel);
+			const CKanbanItemArray* pKIArr = map.GetMapping(sColValue);
+
+			if (pKIArr && pKIArr->GetSize())
+				map.GetAddMapping(sLastColValue)->Append(*pKIArr);
 		}
 	}
 
@@ -1077,18 +1102,18 @@ void CKanbanItemMap::AddItemToMap(const KANBANITEM* pKI, const CString& sValue, 
 }
 
 #ifdef _DEBUG
-void CKanbanItemMap::TraceSummary(LPCTSTR szAttribID, DWORD dwOptions) const
+void CKanbanItemMap::TraceSummary(const CString& sAttribID, DWORD dwOptions) const
 {
 	CKanbanItemArrayMap map;
 
-	if (BuildTempItemMaps(szAttribID, dwOptions, map) == 0)
+	if (BuildTempItemMaps(sAttribID, dwOptions, 11, map) == 0)
 	{
-		TRACE(_T("'%s' contains no unique values\n"), szAttribID);
+		TRACE(_T("'%s' contains no unique values\n"), sAttribID);
 		return;
 	}
 
 	// else
-	TRACE(_T("'%s' contains the following unique values:\n"), szAttribID);
+	TRACE(_T("'%s' contains the following unique values:\n"), sAttribID);
 
 	POSITION pos = map.GetStartPosition();
 

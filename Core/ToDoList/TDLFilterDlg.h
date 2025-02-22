@@ -34,6 +34,7 @@ public:
 				const CStringArray& aAdvancedFilterNames, 
 				const CFilteredToDoCtrl& tdc, 
 				const CDWordArray& aPriorityColors,
+				int nNumPriorityRiskLevels,
 				CWnd* pParent = NULL);
 
 	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;

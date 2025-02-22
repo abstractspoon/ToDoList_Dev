@@ -48,6 +48,7 @@ public:
 
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetDefaultCommentsFont(const CString& sFaceName, int nPointSize);
+	void SetNumPriorityRiskLevels(int nNumLevels);
 
 	void GetTaskAttributes(TODOITEM& tdiDefault) const;
 	BOOL GetReminder(TDCREMINDER& rem) const;

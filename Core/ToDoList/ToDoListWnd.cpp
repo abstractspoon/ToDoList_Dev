@@ -1421,10 +1421,18 @@ BOOL CToDoListWnd::InitFilterbar()
 	if (!m_filterBar.Create(this))
 		return FALSE;
 
-	m_filterBar.EnableMultiSelection(Prefs().GetMultiSelFilters());
-	m_filterBar.ShowDefaultFilters(Prefs().GetShowDefaultFiltersInFilterBar());
-	m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
+	const CPreferencesDlg& prefs = Prefs();
+
+	m_filterBar.EnableMultiSelection(prefs.GetMultiSelFilters());
+	m_filterBar.ShowDefaultFilters(prefs.GetShowDefaultFiltersInFilterBar());
+	m_filterBar.SetTitleFilterOption(prefs.GetTitleFilterOption());
+	m_filterBar.SetNumPriorityRiskLevels(prefs.GetNumPriorityRiskLevels());
 	m_filterBar.SetUITheme(m_theme);
+
+	CDWordArray aPriorityColors;
+	prefs.GetPriorityColors(aPriorityColors);
+
+	m_filterBar.SetPriorityColors(aPriorityColors);
 
 	RefreshFilterBarAdvancedFilters();
 
@@ -5200,6 +5208,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			bResizeDlg = TRUE;
 
 		m_filterBar.ShowDefaultFilters(newPrefs.GetShowDefaultFiltersInFilterBar());
+		m_filterBar.SetNumPriorityRiskLevels(newPrefs.GetNumPriorityRiskLevels());
 
 		BOOL bEnableMultiSel = newPrefs.GetMultiSelFilters();
 		BOOL bPrevMultiSel = oldPrefs.GetMultiSelFilters();
@@ -5218,6 +5227,11 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			CFilteredToDoCtrl::SetRecentlyModifiedPeriod(newPrefs.GetRecentlyModifiedPeriod());
 			bRefreshFilter = (m_filterBar.GetFilter() == FS_RECENTMOD);
 		}
+
+		CDWordArray aPriorityColors;
+		newPrefs.GetPriorityColors(aPriorityColors);
+
+		m_filterBar.SetPriorityColors(aPriorityColors);
 		
 		if (bRefreshFilter)
 			OnViewRefreshfilter();
@@ -5230,9 +5244,14 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		m_idleTasks.UpdateCaption();
 		m_idleTasks.UpdateAutoListData();
 
-		// colours
+		// Find tasks dialog
 		if (m_dlgFindTasks.GetSafeHwnd())
-			m_dlgFindTasks.RefreshUserPreferences();
+		{
+			m_dlgFindTasks.SetNumPriorityRiskLevels(newPrefs.GetNumPriorityRiskLevels());
+			m_dlgFindTasks.SetGroupHeaderBackColor(newPrefs.GetGroupHeaderBackgroundColor());
+			m_dlgFindTasks.SetStrikeThroughCompletedTasks(newPrefs.GetStrikethroughDone());
+			m_dlgFindTasks.SetPriorityColors(aPriorityColors);
+		}
 
 		m_dlgReminders.EnableReducedFlashing(newPrefs.GetReduceReminderDialogFlashing());
 		
@@ -10578,7 +10597,7 @@ void CToDoListWnd::OnUpdateGotoNexttask(CCmdUI* pCmdUI)
 }
 //------------------------------------------------------------------------
 
-BOOL CToDoListWnd::InitFindDialog()
+BOOL CToDoListWnd::InitFindTasksDialog()
 {
 	if (!m_dlgFindTasks.GetSafeHwnd())
 	{
@@ -10592,6 +10611,13 @@ BOOL CToDoListWnd::InitFindDialog()
 
 		if (Prefs().GetFindTasksUseTreeFont())
 			m_dlgFindTasks.SetResultsFont(m_fontTree);
+
+		m_dlgFindTasks.SetNumPriorityRiskLevels(Prefs().GetNumPriorityRiskLevels());
+
+		CDWordArray aColors;
+		Prefs().GetPriorityColors(aColors);
+
+		m_dlgFindTasks.SetPriorityColors(aColors);
 	}
 
 	return TRUE;
@@ -10664,7 +10690,7 @@ void CToDoListWnd::OnFindTasks()
 void CToDoListWnd::ShowFindDialog(BOOL bAllowResizeApp)
 {
 	// Create the find dialog first time only
-	InitFindDialog();
+	InitFindTasksDialog();
 
 	if (IsWindowVisible())
 	{
@@ -11947,7 +11973,8 @@ void CToDoListWnd::OnViewFilter()
 						 prefs.GetMultiSelFilters(),
 						 m_filterBar.GetAdvancedFilterNames(),
 						 GetToDoCtrl(),
-						 aPriorityColors);
+						 aPriorityColors, 
+						 prefs.GetNumPriorityRiskLevels());
 
 	if (dialog.DoModal(CMDICON(ID_VIEW_FILTER)) == IDOK)
 	{

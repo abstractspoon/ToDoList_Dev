@@ -267,6 +267,12 @@ void CTDLFilterBar::ClearCheckboxHistory()
 	}
 }
 
+void CTDLFilterBar::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	m_cbPriorityFilter.SetNumLevels(nNumLevels);
+	m_cbRiskFilter.SetNumLevels(nNumLevels);
+}
+
 void CTDLFilterBar::OnSelchangeFilter() 
 {
 	CString sAdvanced;

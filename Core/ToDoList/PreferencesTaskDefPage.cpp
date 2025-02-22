@@ -6,6 +6,7 @@
 #include "PreferencesTaskDefPage.h"
 #include "tdcenum.h"
 #include "tdcmapping.h"
+#include "tdcstatic.h"
 #include "todoitem.h"
 #include "tdltaskicondlg.h"
 #include "tdccontentmgr.h"
@@ -172,7 +173,18 @@ BOOL CPreferencesTaskDefPage::GetReminder(TDCREMINDER& rem) const
 
 void CPreferencesTaskDefPage::SetPriorityColors(const CDWordArray& aColors)
 {
+	ASSERT(aColors.GetSize() >= m_cbDefPriority.GetNumLevels());
+
 	m_cbDefPriority.SetColors(aColors);
+}
+
+
+void CPreferencesTaskDefPage::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
+
+	m_cbDefPriority.SetNumLevels(nNumLevels);
+	m_cbDefRisk.SetNumLevels(nNumLevels);
 }
 
 void CPreferencesTaskDefPage::SetDefaultCommentsFont(const CString& sFaceName, int nPointSize)

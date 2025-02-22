@@ -5,6 +5,7 @@
 #include "TDLRiskComboBox.h"
 #include "resource.h"
 #include "tdcenum.h"
+#include "tdcstatic.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\EnString.h"
@@ -16,26 +17,17 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-const UINT IDS_TDC_SCALE[] = { IDS_TDC_SCALE0,
-								IDS_TDC_SCALE1,
-								IDS_TDC_SCALE2,
-								IDS_TDC_SCALE3,
-								IDS_TDC_SCALE4,
-								IDS_TDC_SCALE5,
-								IDS_TDC_SCALE6,
-								IDS_TDC_SCALE7,
-								IDS_TDC_SCALE8,
-								IDS_TDC_SCALE9,
-								IDS_TDC_SCALE10 };
-
-
-const int TDC_NUMSCALES = sizeof(IDS_TDC_SCALE) / sizeof(UINT);
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRiskComboBox
 
-CTDLRiskComboBox::CTDLRiskComboBox(BOOL bIncludeAny) : m_bIncludeAny(bIncludeAny)
+CTDLRiskComboBox::CTDLRiskComboBox(BOOL bIncludeAny, BOOL bIncludeNone)
+	: 
+	m_bIncludeAny(bIncludeAny),
+	m_bIncludeNone(bIncludeNone),
+	m_nNumLevels(11)
 {
+	// 'Any' and NOT 'None' is unexpected though it will still work
+	ASSERT(!bIncludeAny || bIncludeNone);
 }
 
 CTDLRiskComboBox::~CTDLRiskComboBox()
@@ -71,45 +63,71 @@ void CTDLRiskComboBox::PreSubclassWindow()
 
 int CTDLRiskComboBox::GetSelectedRisk() const
 {
-	int nSel = GetCurSel(), nRisk = nSel;
+	int nSel = GetCurSel();
 
-	switch (nSel)
+	if ((nSel == CB_ERR) || (!m_bIncludeAny && !m_bIncludeNone))
 	{
-	case 0:
-		nRisk = (m_bIncludeAny ? FM_ANYRISK : FM_NORISK);
-		break;
-
-	case 1:
-		nRisk = (m_bIncludeAny ? FM_NORISK : (nSel - 1));
-		break;
-
-	default:
-		if (nSel != CB_ERR)
-			nRisk = (m_bIncludeAny ? (nSel - 2) : (nSel - 1));
-		break;
+		// index is priority
+		return nSel;
 	}
 
-	return nRisk;
+	// Both
+	if (m_bIncludeAny && m_bIncludeNone)
+	{
+		switch (nSel)
+		{
+		case 0:		return FM_ANYPRIORITY;
+		case 1:		return FM_NOPRIORITY;
+		default:	return (nSel - 2);
+		}
+	}
+
+	// Only 'Any'
+	if (m_bIncludeAny)
+	{
+		switch (nSel)
+		{
+		case 0:		return FM_NOPRIORITY;
+		default:	return (nSel - 1);
+		}
+	}
+
+	// Only 'None'
+	switch (nSel)
+	{
+	case 0:		return FM_ANYPRIORITY;
+	default:	return (nSel - 1);
+	}
 }
 
-void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> 10
+void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 {
 	int nSel = CB_ERR;
 
 	switch (nRisk)
 	{
-	case FM_ANYRISK:
+	case FM_ANYPRIORITY:
 		if (m_bIncludeAny)
 			nSel = 0;
+		else
+			ASSERT(0);
 		break;
 
-	case FM_NORISK:
-		nSel = (m_bIncludeAny ? 1 : 0);
+	case FM_NOPRIORITY:
+		if (m_bIncludeNone)
+			nSel = (m_bIncludeAny ? 1 : 0);
+		else
+			ASSERT(0);
 		break;
 
 	default:
-		if (nRisk >= 0 && nRisk <= 10)
-			nSel = (m_bIncludeAny ? (nRisk + 2) : (nRisk + 1));
+		if ((nRisk >= 0) && (nRisk < m_nNumLevels))
+		{
+			if (m_bIncludeAny && m_bIncludeNone) // both
+				nSel = (nRisk + 2);
+			else
+				nSel = (nRisk + 1); // one or other
+		}
 		break;
 	}
 
@@ -130,10 +148,13 @@ void CTDLRiskComboBox::BuildCombo()
 	
 	AddString(CEnString(IDS_TDC_NONE));
 	
-	for (int nLevel = 0; nLevel <= 10; nLevel++)
+	UINT aStrResIDs[11];
+	TDC::GetPriorityRiskLevelStringResourceIDs(m_nNumLevels, aStrResIDs);
+
+	for (int nLevel = 0; nLevel < m_nNumLevels; nLevel++)
 	{
 		CString sRisk;
-		sRisk.Format(_T("%d (%s)"), nLevel, CEnString(IDS_TDC_SCALE[nLevel]));
+		sRisk.Format(_T("%d (%s)"), nLevel, CEnString(aStrResIDs[nLevel]));
 		AddString(sRisk);
 	}
 	
@@ -160,3 +181,17 @@ void CTDLRiskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	// all else
 	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
+
+void CTDLRiskComboBox::SetNumLevels(int nNumLevels)
+{
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
+
+	if (nNumLevels != m_nNumLevels)
+	{
+		m_nNumLevels = nNumLevels;
+
+		if (GetSafeHwnd())
+			BuildCombo();
+	}
+}
+

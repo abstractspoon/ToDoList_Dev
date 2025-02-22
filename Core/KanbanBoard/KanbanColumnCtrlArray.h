@@ -37,6 +37,7 @@ public:
 	CKanbanColumnCtrl* GetLastNonEmpty() const;
 	CKanbanColumnCtrl* GetBacklog() const;
 
+	void SetRedraw(BOOL bRedraw = TRUE);
 	void SetOptions(DWORD dwOptions);
 	void SetReadOnly(BOOL bReadOnly);
 	int GetVisibleTaskCount() const;

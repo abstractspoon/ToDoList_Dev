@@ -267,6 +267,11 @@ void CKanbanColumnCtrlArray::RefreshItemLineHeights()
 	ARRAY_FN(pCol->RefreshItemLineHeights());
 }
 
+void CKanbanColumnCtrlArray::SetRedraw(BOOL bRedraw)
+{
+	ARRAY_FN(pCol->SetRedraw(bRedraw));
+}
+
 void CKanbanColumnCtrlArray::SetOptions(DWORD dwOptions)
 {
 	ARRAY_FN(pCol->SetOptions(dwOptions));

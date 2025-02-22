@@ -9909,6 +9909,11 @@ void CToDoCtrl::SetUITheme(const CUIThemeFile& theme)
 	Invalidate();
 }
 
+void CToDoCtrl::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	m_ctrlAttributes.SetNumPriorityRiskLevels(nNumLevels);
+}
+
 HBRUSH CToDoCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
 	HBRUSH hbr = CRuntimeDlg::OnCtlColor(pDC, pWnd, nCtlColor);

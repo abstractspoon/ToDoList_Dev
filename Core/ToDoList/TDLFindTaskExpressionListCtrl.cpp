@@ -176,6 +176,21 @@ void CTDLFindTaskExpressionListCtrl::SetActiveTasklist(const CString& sTasklist,
 		m_ilIcons.LoadDefaultImages();
 }
 
+void CTDLFindTaskExpressionListCtrl::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
+
+	m_cbPriority.SetNumLevels(nNumLevels);
+	m_cbRisk.SetNumLevels(nNumLevels);
+}
+
+void CTDLFindTaskExpressionListCtrl::SetPriorityColors(const CDWordArray& aColors)
+{
+	ASSERT(aColors.GetSize() >= m_cbPriority.GetNumLevels());
+
+	m_cbPriority.SetColors(aColors);
+}
+
 void CTDLFindTaskExpressionListCtrl::SetSearchParams(const SEARCHPARAM& param)
 {
 	m_aSearchParams.RemoveAll();

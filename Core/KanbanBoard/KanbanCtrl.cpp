@@ -158,7 +158,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_bSettingColumnFocus(FALSE),
 	m_bSavingToImage(FALSE),
 	m_crGroupHeaderBkgnd(CLR_NONE),
-	m_crFullColumn(CLR_NONE)
+	m_crFullColumn(CLR_NONE),
+	m_nNumPriorityRiskLevels(11)
 {
 }
 
@@ -1175,25 +1176,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
-		{
-			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
-
-			// create once only
-			if (!m_mapAttributeValues.HasMapping(sAttribID))
-			{
-				CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sAttribID);
-				ASSERT(pValues);
-
-				for (int nItem = 0; nItem <= 10; nItem++)
-				{
-					CString sValue(Misc::Format(nItem));
-					pValues->SetAt(sValue, sValue);
-				}
-				
-				// Add backlog item
-				pValues->AddValue(EMPTY_STR);
-			}
-		}
+		BuildPriorityRiskAttributeMapping(nAttribID, FALSE); 
 		break;
 		
 	case TDCA_STATUS:
@@ -1328,6 +1311,38 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	return FALSE;
 }
 
+void CKanbanCtrl::BuildPriorityRiskAttributeMapping(TDC_ATTRIBUTE nAttribID, BOOL bRebuild)
+{
+	switch (nAttribID)
+	{
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+		{
+			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
+
+			if (bRebuild || !m_mapAttributeValues.HasMapping(sAttribID))
+			{
+				CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sAttribID);
+				pValues->RemoveAll();
+
+				for (int nItem = 0; nItem < m_nNumPriorityRiskLevels; nItem++)
+				{
+					CString sValue(Misc::Format(nItem));
+					pValues->SetAt(sValue, sValue);
+				}
+
+				// Add backlog item
+				pValues->AddValue(EMPTY_STR);
+			}
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+}
+
 BOOL CKanbanCtrl::UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringArray& aValues)
 {
 	CKanbanValueMap mapNewValues;
@@ -1416,7 +1431,20 @@ void CKanbanCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, boo
 
 	m_aColumns.SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
 
-	if (m_nTrackedAttributeID != TDCA_NONE)
+	int nNumLevels = pPrefs->GetProfileInt(_T("Preferences"), _T("NumPriorityRiskLevels"), 11);
+	BOOL bRebuildColumns = (m_nTrackedAttributeID != TDCA_NONE);
+
+	if (nNumLevels != m_nNumPriorityRiskLevels)
+	{
+		m_nNumPriorityRiskLevels = nNumLevels;
+
+		BuildPriorityRiskAttributeMapping(TDCA_PRIORITY, TRUE);
+		BuildPriorityRiskAttributeMapping(TDCA_RISK, TRUE);
+
+		bRebuildColumns |= ((m_nTrackedAttributeID == TDCA_PRIORITY) || (m_nTrackedAttributeID == TDCA_RISK));
+	}
+
+	if (bRebuildColumns)
 	{
 		// Both column visibility AND contents may have changed
 		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
@@ -1843,7 +1871,6 @@ int CKanbanCtrl::AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 				colDef.sAttribID = m_sTrackAttribID;
 				colDef.sTitle = sAttribValue;
 				colDef.aAttribValues.Add(sAttribValue);
-				//colDef.crBackground = KBCOLORS[m_nNextColor++ % NUM_KBCOLORS];
 				
 				VERIFY (AddNewColumn(colDef) != NULL);
 				nNumAdded++;
@@ -1888,9 +1915,9 @@ void CKanbanCtrl::RebuildFixedColumns()
 	// columns like with dynamic columns, we just hide them
 	if (m_aColumns.GetSize() == 0)
 	{
-		for (int nDef = 0; nDef < m_aColumnDefs.GetSize(); nDef++)
+		for (int nDef = 0; nDef < m_aFixedColDefs.GetSize(); nDef++)
 		{
-			const KANBANCOLUMN& colDef = m_aColumnDefs[nDef];
+			const KANBANCOLUMN& colDef = m_aFixedColDefs[nDef];
 			VERIFY(AddNewColumn(colDef) != NULL);
 		}
 	}
@@ -1940,7 +1967,7 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelT
 	CHoldColumnHScroll hs(m_sbHorz);
 
 	CKanbanItemArrayMap mapKIArray;
-	m_data.BuildTempItemMaps(m_sTrackAttribID, m_dwOptions, mapKIArray);
+	m_data.BuildTempItemMaps(m_sTrackAttribID, m_dwOptions, m_nNumPriorityRiskLevels, mapKIArray);
 
 	// Rebuild columns
 	if (UsingDynamicColumns())
@@ -2082,12 +2109,13 @@ void CKanbanCtrl::RefreshColumnHeaderText()
 
 void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 {
-	int nCol = m_aColumns.GetSize();
-	
 	BOOL bHideParents = HasOption(KBCF_HIDEPARENTTASKS);
 	BOOL bHideSubtasks = HasOption(KBCF_HIDESUBTASKS);
 	BOOL bHideNoGroup = (HasOption(KBCF_HIDENONEGROUP) && IsGrouping());
 
+	int nCol = m_aColumns.GetSize();
+	m_aColumns.SetRedraw(FALSE);
+	
 	while (nCol--)
 	{
 		CKanbanColumnCtrl* pCol = m_aColumns[nCol];
@@ -2118,6 +2146,8 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 		m_aColumns.GroupBy(m_nGroupBy);
 	else
 		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+
+	m_aColumns.SetRedraw(TRUE);
 }
 
 void CKanbanCtrl::FixupSelectedColumn()
@@ -2231,11 +2261,11 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 		// Check if only display attributes have changed
 		if (UsingFixedColumns())
 		{
-			if (m_aColumnDefs.MatchesAll(aColumnDefs))
+			if (m_aFixedColDefs.MatchesAll(aColumnDefs))
 			{
 				return TRUE;
 			}
-			else if (m_aColumnDefs.MatchesAll(aColumnDefs, FALSE))
+			else if (m_aFixedColDefs.MatchesAll(aColumnDefs, FALSE))
 			{
 				int nCol = aColumnDefs.GetSize();
 				ASSERT(nCol == m_aColumns.GetSize());
@@ -2251,7 +2281,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 						pCol->SetBackgroundColor(colDef.crBackground);
 						pCol->SetMaximumTaskCount(colDef.nMaxTaskCount);
 
-						m_aColumnDefs[nCol] = colDef;
+						m_aFixedColDefs[nCol] = colDef;
 					}
 				}
 	
@@ -2261,12 +2291,12 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 		}
 		else if (!aColumnDefs.GetSize()) // not switching to fixed columns
 		{
-			ASSERT(m_aColumnDefs.GetSize() == 0);
+			ASSERT(m_aFixedColDefs.GetSize() == 0);
 			return TRUE;
 		}
 	}
 
-	m_aColumnDefs.Copy(aColumnDefs);
+	m_aFixedColDefs.Copy(aColumnDefs);
 
 	// update state
 	m_nTrackedAttributeID = nAttribID;
@@ -2325,10 +2355,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	if (!pCol || !pCol->GetSafeHwnd())
 		return FALSE;
 
-	CDWordArray aSelTaskIDs;
-	pCol->GetSelectedTaskIDs(aSelTaskIDs);
-
-	pCol->SetRedraw(FALSE);
+// 	pCol->SetRedraw(FALSE);
 	pCol->RemoveAll();
 
 	CStringArray aValueIDs;
@@ -2362,7 +2389,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	}
 	
 	pCol->RefreshItemLineHeights();
-	pCol->SetRedraw(TRUE);
+// 	pCol->SetRedraw(TRUE);
 
 	return TRUE;
 }

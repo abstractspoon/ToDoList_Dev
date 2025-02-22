@@ -57,6 +57,7 @@ public:
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetPercentDoneIncrement(int nAmount);
 	void SetTimeTrackTaskID(DWORD dwTaskID);
+	void SetNumPriorityRiskLevels(int nNumLevels);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 	void SelectValue(TDC_ATTRIBUTE nAttribID);

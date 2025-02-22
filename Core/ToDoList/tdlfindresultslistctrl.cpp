@@ -127,8 +127,6 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_ONECLICKACTIVATE, LVS_EX_ONECLICKACTIVATE);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_LABELTIP, LVS_EX_LABELTIP);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
-
-	RefreshUserPreferences();
 }
 
 void CTDLFindResultsListCtrl::UpdateIconAndReferenceStatus()
@@ -402,28 +400,24 @@ CFont* CTDLFindResultsListCtrl::GetItemFont(int nItem, int nSubItem) const
 	return CEnListCtrl::GetItemFont(nItem, nSubItem);
 }
 
-void CTDLFindResultsListCtrl::RefreshUserPreferences()
+void CTDLFindResultsListCtrl::SetStrikeThroughCompletedTasks(BOOL bStrikeThru)
 {
-	CPreferences prefs;
-	
-	// update user colour
-	COLORREF crGroupBack = CLR_NONE;
-
-	if (prefs.GetProfileInt(_T("Preferences"), _T("SpecifyGroupHeaderBkgndColor"), FALSE))
-		crGroupBack = (COLORREF)prefs.GetProfileInt(_T("Preferences\\Colors"), _T("GroupHeaderBkgnd"), CLR_NONE);
-
-	GetGrouping().SetGroupHeaderBackColor(crGroupBack);
-
-	// update strike thru font
-	BOOL bWasStrikeThru = m_bStrikeThruDone;
-	m_bStrikeThruDone = prefs.GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), FALSE);
-
-	// clear the font cache if 'strike through' has changed
-	if (Misc::StateChanged(m_bStrikeThruDone, bWasStrikeThru))
+	if (Misc::StateChanged(m_bStrikeThruDone, bStrikeThru))
+	{
+		m_bStrikeThruDone = bStrikeThru;
 		m_fonts.Clear();
 
-	if (IsWindowVisible())
 		Invalidate();
+	}
+}
+
+void CTDLFindResultsListCtrl::SetGroupHeaderBackColor(COLORREF crBack)
+{
+	if (crBack != GetGrouping().GetGroupHeaderBackColor())
+	{
+		GetGrouping().SetGroupHeaderBackColor(crBack);
+		Invalidate();
+	}
 }
 
 int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly)

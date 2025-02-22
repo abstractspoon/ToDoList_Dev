@@ -76,23 +76,6 @@ enum
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT IDS_PRIORITYRISK_SCALE[] = 
-{ 
-	IDS_TDC_SCALE0,
-	IDS_TDC_SCALE1,
-	IDS_TDC_SCALE2,
-	IDS_TDC_SCALE3,
-	IDS_TDC_SCALE4,
-	IDS_TDC_SCALE5,
-	IDS_TDC_SCALE6,
-	IDS_TDC_SCALE7,
-	IDS_TDC_SCALE8,
-	IDS_TDC_SCALE9,
-	IDS_TDC_SCALE10
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 
 #define CUSTOMTIMEATTRIBID(dateID) ((TDC_ATTRIBUTE)(dateID + CUSTOMTIMEATTRIBOFFSET))
@@ -276,6 +259,8 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	VERIFY(m_tooltip.Create(this));
 	m_tooltip.EnableMultilineTips();
+
+	TDC::GetPriorityRiskLevelStringResourceIDs(m_cbPriority.GetNumLevels(), m_aPriorityRiskStrResIDs);
 
 	return 0;
 }
@@ -476,6 +461,19 @@ void CTDLTaskAttributeListCtrl::ToggleGrouping()
 	}
 }
 
+void CTDLTaskAttributeListCtrl::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
+
+	if (nNumLevels != m_cbPriority.GetNumLevels())
+		TDC::GetPriorityRiskLevelStringResourceIDs(nNumLevels, m_aPriorityRiskStrResIDs);
+
+	m_cbPriority.SetNumLevels(nNumLevels);
+	m_cbPriority.SetColors(m_aPriorityColors);
+
+	m_cbRisk.SetNumLevels(nNumLevels);
+}
+
 void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
 {
 	int nRow = GetRow(nAttribID);
@@ -558,6 +556,8 @@ void CTDLTaskAttributeListCtrl::SetPriorityColors(const CDWordArray& aColors)
 		return;
 
 	m_aPriorityColors.Copy(aColors);
+	m_cbPriority.SetColors(m_aPriorityColors);
+
 	RedrawValue(TDCA_PRIORITY);
 }
 
@@ -1896,6 +1896,8 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 			if ((nPriority >= 0) && m_aPriorityColors.GetSize())
 			{
+				nPriority = min(nPriority, (m_cbPriority.GetNumLevels() - 1));
+
 				// Draw box
 				CRect rBox(rText);
 				rBox.DeflateRect(0, 3);
@@ -1910,7 +1912,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				CRect rLeft(rText);
 				rLeft.left += rText.Height();
 
-				CString sPriority = sText + Misc::Format(_T(" (%s)"), CEnString(IDS_PRIORITYRISK_SCALE[nPriority]));
+				CString sPriority = sText + Misc::Format(_T(" (%s)"), CEnString(m_aPriorityRiskStrResIDs[nPriority]));
 				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rLeft, sPriority, crText, nDrawTextFlags);
 			}
 		}
@@ -1920,11 +1922,12 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		if (!sText.IsEmpty())
 		{
 			int nRisk = _ttoi(sText);
-
 			if (nRisk >= 0)
 			{
-				CString sPriority = sText + Misc::Format(_T(" (%s)"), CEnString(IDS_PRIORITYRISK_SCALE[nRisk]));
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sPriority, crText, nDrawTextFlags);
+				nRisk = min(nRisk, (m_cbRisk.GetNumLevels() - 1));
+
+				CString sRisk = sText + Misc::Format(_T(" (%s)"), CEnString(m_aPriorityRiskStrResIDs[nRisk]));
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sRisk, crText, nDrawTextFlags);
 			}
 		}
 		return;
@@ -2576,8 +2579,6 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 	case TDCA_PRIORITY:
 		{
-			m_cbPriority.SetColors(m_aPriorityColors);
-
 			if (RowValueVaries(nRow))
 				m_cbPriority.SetCurSel(CB_ERR);
 			else
