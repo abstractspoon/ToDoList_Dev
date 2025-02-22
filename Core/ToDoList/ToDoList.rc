@@ -25,7 +25,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,0,997,1
+ FILEVERSION 9,0,997,2
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -43,7 +43,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "AbstractSpoon Software"
             VALUE "FileDescription", "ToDoList"
-            VALUE "FileVersion", "9.0.997.1"
+            VALUE "FileVersion", "9.0.997.2"
             VALUE "InternalName", "ToDoList"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-25"
             VALUE "OriginalFilename", "ToDoList.exe"
