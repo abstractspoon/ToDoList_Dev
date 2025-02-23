@@ -586,7 +586,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_MESSAGE(WM_GETICON, OnGetIcon)
 	ON_MESSAGE(WM_HOTKEY, OnHotkey)
 	ON_MESSAGE(WM_POSTONCREATE, OnPostOnCreate)
-	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnUpdateUDTsInToolbar)
+	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnRefreshUDTsInToolbar)
 
 	ON_NOTIFY(NM_CLICK, IDC_TRAYICON, OnTrayIconClick)
 	ON_NOTIFY(NM_DBLCLK, IDC_TRAYICON, OnTrayIconDblClk)
@@ -725,7 +725,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_GOTOTASK, OnUpdateMoveGoToTask)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
-	ON_UPDATE_COMMAND_UI(ID_NEW, OnUpdateNewTasklist)
+	ON_UPDATE_COMMAND_UI(ID_NEW, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTASK, OnUpdateGotoNexttask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTOPLEVELTASK, OnUpdateNexttopleveltask)
 	ON_UPDATE_COMMAND_UI(ID_OPEN_RELOAD, OnUpdateReload)
@@ -733,7 +733,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_PREVTOPLEVELTASK, OnUpdatePrevtopleveltask)
 	ON_UPDATE_COMMAND_UI(ID_PRINT, OnUpdatePrint)
 	ON_UPDATE_COMMAND_UI(ID_SAVEALL, OnUpdateSaveall)
-	ON_UPDATE_COMMAND_UI(ID_SAVEAS, OnUpdateSaveas)
+	ON_UPDATE_COMMAND_UI(ID_SAVEAS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_SAVE_NORMAL, OnUpdateSave)
 	ON_UPDATE_COMMAND_UI(ID_SCROLLTOSELTASK, OnUpdateScrollToSelectedTask)
 	ON_UPDATE_COMMAND_UI(ID_SENDTASKS, OnUpdateSendTasks)
@@ -754,7 +754,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CLEANUPINIPREFERENCES, OnUpdateToolsCleanupIniPreferences)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_COPYTASKLISTPATH, OnUpdateToolsCopyTasklistPath)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORT, OnUpdateExport)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORT, OnUpdateImport)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORT, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_REMOVEFROMSOURCECONTROL, OnUpdateToolsRemovefromsourcecontrol)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTINEXPLORER, OnUpdateToolsSelectinExplorer)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SPELLCHECKTASKLIST, OnUpdateSpellcheckTasklist)
@@ -764,7 +764,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_VIEWLOG, OnUpdateToolsViewLogFile)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CLEARFILTER, OnUpdateViewClearfilter)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CUSTOMTOOLBAR, OnUpdateViewCustomToolbar)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_CYCLETASKVIEWS, OnUpdateViewCycleTaskViews)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_CYCLETASKVIEWS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_DECREMENTTASKVIEWFONTSIZE, OnUpdateViewDecrementTaskViewFontSize)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FILTER, OnUpdateViewFilter)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_HIDEALLBARS, OnUpdateViewHideAllBars)
@@ -783,12 +783,12 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RESIZECOLSTOFIT, OnUpdateViewResizeColsToFit)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnUpdateViewRestoreDefaultTaskViewFontSize)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SAVETOIMAGE, OnUpdateViewSaveToImage)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOTASKS, OnUpdateViewSetFocusToTasks)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOCOMMENTS, OnUpdateViewSetFocusToComments)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOATTRIBUTES, OnUpdateViewSetFocusToAttributes)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOTASKS, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOCOMMENTS, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOATTRIBUTES, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWALLBARS, OnUpdateViewShowAllBars)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWFILTERBAR, OnUpdateViewShowfilterbar)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWREMINDERS, OnUpdateViewShowRemindersWindow)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWREMINDERS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWTASKLISTTABBAR, OnUpdateViewShowTasklistTabbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWTREELISTTABBAR, OnUpdateViewShowTreeListTabbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SORTTASKLISTTABS, OnUpdateViewSorttasklisttabs)
@@ -796,8 +796,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEALLTASKEXPANDED, OnUpdateViewExpandTasks)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEFILTER, OnUpdateViewTogglefilter)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKEXPANDED, OnUpdateViewExpandTasks)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKSANDCOMMENTS, OnUpdateViewToggletasksandcomments)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETREEANDLIST, OnUpdateViewToggleTreeandList)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKSANDCOMMENTS, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETREEANDLIST, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_UNMAXTASKLISTANDCOMMENTS, OnUpdateUnmaximizeTasklistAndComments)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
 
@@ -2460,7 +2460,7 @@ void CToDoListWnd::SaveSettings()
 	m_mgrContent.SavePreferences(prefs, _T("ContentControls"));
 }
 
-LRESULT CToDoListWnd::OnUpdateUDTsInToolbar(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CToDoListWnd::OnRefreshUDTsInToolbar(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	UpdateUDTsInToolbar(UDT_INIT);
 
@@ -3048,11 +3048,6 @@ void CToDoListWnd::OnUpdateSave(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetTDCCount() && tdc.IsModified() && !tdc.IsReadOnly());	
 }
 
-void CToDoListWnd::OnUpdateNewTasklist(CCmdUI* pCmdUI)  
-{
-	pCmdUI->Enable(TRUE);	
-}
-
 BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC) 
 {
 	if (!GetTDCCount())
@@ -3219,7 +3214,7 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 		break;
 
 	case ID_SORTBY_NONE:
-		pCmdUI->Enable(TRUE);
+		AlwaysEnabled(pCmdUI);
 		break;
 		
 	case ID_SORTBY_COLOR:
@@ -3943,11 +3938,6 @@ void CToDoListWnd::OnSaveas()
  		if (SaveTaskList(nSel, sNewFilePath) != TDCF_SUCCESS)
 			tdc.SetProjectName(sCurProjName); // revert change
 	}
-}
-
-void CToDoListWnd::OnUpdateSaveas(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(TRUE);
 }
 
 void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point) 
@@ -9730,12 +9720,6 @@ void CToDoListWnd::OnSysCommand(UINT nID, LPARAM lParam)
 	CFrameWnd::OnSysCommand(nID, lParam);
 }
 
-
-void CToDoListWnd::OnUpdateImport(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(TRUE);
-}
-
 UINT CToDoListWnd::GetNewTaskCmdID() const
 {
 	return TDC::MapNewTaskPosToCmdID(Prefs().GetNewTaskPos(), FALSE);
@@ -10431,7 +10415,7 @@ void CToDoListWnd::OnUpdateExport(CCmdUI* pCmdUI)
 	{
 		if (GetToDoCtrl().GetTaskCount())
 		{
-			pCmdUI->Enable(TRUE);
+			AlwaysEnabled(pCmdUI);
 			return;
 		}
 	}
@@ -13130,11 +13114,6 @@ void CToDoListWnd::OnViewCycleTaskViews()
 		OnMaximizeTasklist();
 }
 
-void CToDoListWnd::OnUpdateViewCycleTaskViews(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(TRUE);
-}
-
 void CToDoListWnd::OnViewToggleTreeandList() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
@@ -13150,11 +13129,6 @@ void CToDoListWnd::OnViewToggleTreeandList()
 		tdc.SetTaskView(FTCV_TASKTREE);
 		break;
 	}
-}
-
-void CToDoListWnd::OnUpdateViewToggleTreeandList(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(TRUE);
 }
 
 void CToDoListWnd::OnViewToggletasksandcomments() 
@@ -13967,11 +13941,6 @@ void CToDoListWnd::OnUpdateEditFindReplaceInTaskComments(CCmdUI* pCmdUI)
 void CToDoListWnd::OnViewShowRemindersWindow() 
 {
 	m_dlgReminders.ShowWindow();
-}
-
-void CToDoListWnd::OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(TRUE);
 }
 
 void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
