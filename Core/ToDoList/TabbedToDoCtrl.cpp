@@ -6187,19 +6187,24 @@ void CTabbedToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 		break;
 
 	case FTCV_TASKLIST:
+		// Basically a copy of CToDoCtrl's handling of FTCV_TASKTREE
+		if (!m_taskList.HasFocus())
 		{
-			if (!m_taskList.HasFocus())
+			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
+			{
+				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
+				SetMaximizeState(TDCMS_MAXTASKLIST);
+			}
+			else
 			{
 				// See CToDoCtrl::SetFocus(TDCSF_TASKVIEW) for why we need this
 				if (m_layout.IsVisible(TDCSF_COMMENTS))
 					m_ctrlComments.SetFocus();
 
-				if (!m_layout.IsVisible(TDCSF_TASKVIEW))
-					SetMaximizeState(TDCMS_MAXTASKLIST);
-				else
-					m_taskList.SetFocus();
+				m_taskList.SetFocus();
 			}
 
+			// ensure the selected tree item is visible
 			m_taskList.EnsureSelectionVisible(TRUE);
 		}
 		break;

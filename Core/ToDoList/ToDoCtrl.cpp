@@ -8080,14 +8080,14 @@ void CToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 	switch (nLocation)
 	{
 	case TDCSF_TASKVIEW:
-		if (!HasFocus(TDCSF_TASKVIEW))
+		if (!m_taskTree.HasFocus())
 		{
 			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
 			{
 				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
 				SetMaximizeState(TDCMS_MAXTASKLIST);
 			}
-			else if (!m_taskTree.HasFocus())
+			else
 			{
 				// NOTE: if the comments was the last window focused
 				// before we were disabled, and we revert the focus
@@ -8095,9 +8095,9 @@ void CToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 				// and will not want to take the focus even though it
 				// contains the caret, so we force it to have the focus
 				// before switching to the tree.
-				ASSERT(m_layout.IsVisible(TDCSF_COMMENTS));
+				if (m_layout.IsVisible(TDCSF_COMMENTS))
+					m_ctrlComments.SetFocus();
 
-				m_ctrlComments.SetFocus();
 				m_taskTree.SetFocus();
 			}
 
