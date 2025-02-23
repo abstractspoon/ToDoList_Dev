@@ -423,6 +423,8 @@ protected:
 	afx_msg void OnViewSetFocusToTasks();
 	afx_msg void OnViewSetFocusToComments();
 	afx_msg void OnViewSetFocusToAttributes();
+	afx_msg void OnViewSetFocusToProjectName();
+	afx_msg void OnViewSetFocusToFilterBar();
 	afx_msg void OnViewShowAllBars();
 	afx_msg void OnViewShowRemindersWindow();
 	afx_msg void OnViewShowTasklistTabbar();

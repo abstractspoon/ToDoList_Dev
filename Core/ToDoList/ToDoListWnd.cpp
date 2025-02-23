@@ -540,6 +540,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_SETFOCUSTOTASKS, OnViewSetFocusToTasks)
 	ON_COMMAND(ID_VIEW_SETFOCUSTOCOMMENTS, OnViewSetFocusToComments)
 	ON_COMMAND(ID_VIEW_SETFOCUSTOATTRIBUTES, OnViewSetFocusToAttributes)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOPROJECTNAME, OnViewSetFocusToProjectName)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOFILTERBAR, OnViewSetFocusToFilterBar)
 	ON_COMMAND(ID_VIEW_SHOWALLBARS, OnViewShowAllBars)
 	ON_COMMAND(ID_VIEW_SHOWFILTERBAR, OnViewShowfilterbar)
 	ON_COMMAND(ID_VIEW_SHOWREMINDERS, OnViewShowRemindersWindow)
@@ -786,6 +788,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOTASKS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOCOMMENTS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOATTRIBUTES, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOPROJECTNAME, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOFILTERBAR, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWALLBARS, OnUpdateViewShowAllBars)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWFILTERBAR, OnUpdateViewShowfilterbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWREMINDERS, AlwaysEnabled)
@@ -1223,6 +1227,8 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOTASKS,				'T',			HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOCOMMENTS,			'C',			HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOATTRIBUTES,		'A',			HOTKEYF_ALT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOFILTERBAR,			'B',			HOTKEYF_ALT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOPROJECTNAME,		'P',			HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLEFILTER,				VK_F12,			0);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLETASKEXPANDED,			VK_SPACE,		HOTKEYF_CONTROL | HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLEALLTASKEXPANDED,		VK_SPACE,		HOTKEYF_SHIFT | HOTKEYF_ALT);
@@ -13166,6 +13172,19 @@ void CToDoListWnd::OnViewSetFocusToComments()
 void CToDoListWnd::OnViewSetFocusToAttributes()
 {
 	SetToDoCtrlFocus(TDCSF_ATTRIBUTES);
+}
+
+void CToDoListWnd::OnViewSetFocusToProjectName()
+{
+	SetToDoCtrlFocus(TDCSF_PROJECTNAME);
+}
+
+void CToDoListWnd::OnViewSetFocusToFilterBar()
+{
+	if (!m_bShowFilterBar)
+		OnViewShowfilterbar();
+
+	m_filterBar.SetFocus();
 }
 
 void CToDoListWnd::OnEditSettaskicon() 
