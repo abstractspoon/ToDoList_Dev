@@ -833,7 +833,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_LBUTTONUP()
 	ON_WM_MEASUREITEM()
 	ON_WM_MOUSEMOVE()
-	ON_WM_MOVE()
 	ON_WM_NCLBUTTONDBLCLK()
 	ON_WM_NCDESTROY()
 	ON_WM_QUERYENDSESSION()
@@ -1721,7 +1720,7 @@ BOOL CToDoListWnd::SendShortcutCommand(UINT nCmdID)
 	case ID_EDIT_CUT:
 	case ID_EDIT_COPY:
 		// tree must have the focus
-		if (!GetToDoCtrl().TasksHaveFocus())
+		if (!GetToDoCtrl().HasFocus(TDCSF_TASKVIEW))
 		{
 			bSendCommand = FALSE;
 			GetToDoCtrl().ClearCopiedItem();
@@ -1733,7 +1732,7 @@ BOOL CToDoListWnd::SendShortcutCommand(UINT nCmdID)
 	case ID_EDIT_PASTE: 
 	case ID_DELETEALLTASKS:
 	case ID_DELETETASK:
-		bSendCommand = GetToDoCtrl().TasksHaveFocus();
+		bSendCommand = GetToDoCtrl().HasFocus(TDCSF_TASKVIEW);
 		break;
 	}
 
@@ -1785,7 +1784,7 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 			case VK_TAB: // tabbing away from Quick Find -> tasks
 				if (::IsChild(m_cbQuickFind, pMsg->hwnd))
 				{
-					GetToDoCtrl().SetFocusToTasks();
+					GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 					return TRUE;
 				}
 				break;
@@ -1833,7 +1832,7 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 				{
 					if (::IsChild(m_filterBar, pMsg->hwnd) && !CtrlWantsEnter(pMsg->hwnd))
 					{
-						GetToDoCtrl().SetFocusToTasks();
+						GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 						return TRUE;
 					}
 				}
@@ -2692,7 +2691,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 			m_dlgFindTasks.RefreshSearch();
 
 		// Find dialog will have stolen focus
-		GetToDoCtrl().SetFocusToTasks();
+		GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 	}
 
 	// log the app and its dlls for debugging
@@ -2964,7 +2963,7 @@ void CToDoListWnd::OnNewTasklist()
 {
 	CreateNewTaskList(FALSE, TRUE);
 
-	GetToDoCtrl().SetFocusToProjectName();
+	GetToDoCtrl().SetFocus(TDCSF_PROJECTNAME);
 }
 
 BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser)
@@ -6859,7 +6858,7 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 
 	if (!pTDC->IsDelayLoaded() && SelectToDoCtrl(nSel, FALSE))
 	{
-		pTDC->SetFocusToTasks();
+		pTDC->SetFocus(TDCSF_TASKVIEW);
 	
 		// if this is the only control then set or terminate the various status 
 		// check timers
@@ -8333,7 +8332,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		UpdateFindDialogActiveTasklist(&tdcShow);
 
 		// leave focus setting till last else the 'old' tasklist flashes
-		tdcShow.SetFocusToTasks();
+		tdcShow.SetFocus(TDCSF_TASKVIEW);
 
 		// check for external changes to file
 		CheckReloadToDoCtrls(nCurSel, TRUE);
@@ -8820,7 +8819,7 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 		tdcHide.EnableWindow(FALSE);
 	}
 	
-	tdcShow.SetFocusToTasks();
+	tdcShow.SetFocus(TDCSF_TASKVIEW);
 	tdcShow.Invalidate(TRUE);
 	tdcShow.UpdateWindow();
 	
@@ -10751,7 +10750,7 @@ LRESULT CToDoListWnd::OnFindDlgClose(WPARAM /*wp*/, LPARAM /*lp*/)
 	if (m_dlgFindTasks.IsDocked())
 		OnFindDlgDockChange(m_dlgFindTasks.GetDockPosition(), DMP_UNDOCKED);
 	
-	GetToDoCtrl().SetFocusToTasks();
+	GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 
 	return 0L;
 }
@@ -10838,7 +10837,7 @@ LRESULT CToDoListWnd::OnFindSelectResult(WPARAM /*wp*/, LPARAM lp)
 
 	if (tdc.SelectTask(pResult->dwTaskID, TRUE))
 	{
-		tdc.SetFocusToTasks();
+		tdc.SetFocus(TDCSF_TASKVIEW);
 
 		Invalidate();
 		UpdateWindow();
@@ -10869,7 +10868,7 @@ LRESULT CToDoListWnd::OnFindSelectAll(WPARAM /*wp*/, LPARAM /*lp*/)
 			tdc.SelectTasks(aTaskIDs);
 	}
 
-	tdcSel.SetFocusToTasks();
+	tdcSel.SetFocus(TDCSF_TASKVIEW);
 
 	return 0;
 }
@@ -10889,7 +10888,7 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	RefreshFilterBarControls();
 	m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 
-	tdc.SetFocusToTasks();
+	tdc.SetFocus(TDCSF_TASKVIEW);
 
 	return 0;
 }
@@ -11642,7 +11641,7 @@ LRESULT CToDoListWnd::OnAppRestoreFocus(WPARAM /*wp*/, LPARAM lp)
 	}
 	else if (GetTDCCount() && (hWnd == GetToDoCtrl().GetSafeHwnd()))
 	{
-		GetToDoCtrl().SetFocusToTasks();
+		GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 	}
 	else if (::IsWindowEnabled(hWnd) && ::IsWindowVisible(hWnd) && (::GetFocus() != hWnd))
 	{
@@ -12908,7 +12907,7 @@ void CToDoListWnd::OnUpdateCommentsInsertDateAndOrTime(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	pCmdUI->Enable(tdc.CommentsHaveFocus() && tdc.CanPasteDateTime());
+	pCmdUI->Enable(tdc.HasFocus(TDCSF_COMMENTS) && tdc.CanPasteDateTime());
 }
 
 BOOL CToDoListWnd::CanInsertDateAndTime() const
@@ -13162,91 +13161,37 @@ void CToDoListWnd::OnViewToggletasksandcomments()
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	BOOL bTasksVisible = (m_nMaxState != TDCMS_MAXCOMMENTS);
-	BOOL bCommentsVisible = ((m_nMaxState != TDCMS_MAXTASKLIST) || Prefs().GetShowCommentsAlways());
-	
-	if (bTasksVisible && bCommentsVisible)
-	{
-		if (!tdc.TasksHaveFocus())
-			tdc.SetFocusToTasks();
-		else
-			tdc.SetFocusToComments();
-	}
-	else if (bTasksVisible)
-	{
-		ASSERT(m_nMaxState == TDCMS_MAXTASKLIST);
-		ASSERT(!Prefs().GetShowCommentsAlways());
-
-		OnMaximizeComments();
-	}
+	if (!tdc.HasFocus(TDCSF_TASKVIEW))
+		SetToDoCtrlFocus(TDCSF_TASKVIEW);
 	else
-	{
-		ASSERT(bCommentsVisible);
-		ASSERT(m_nMaxState == TDCMS_MAXCOMMENTS);
-
-		OnMaximizeTasklist();
-	}
+		SetToDoCtrlFocus(TDCSF_COMMENTS);
 }
 
-void CToDoListWnd::OnUpdateViewToggletasksandcomments(CCmdUI* pCmdUI) 
+void CToDoListWnd::SetToDoCtrlFocus(TDC_SETFOCUSTO nLocation)
 {
-	pCmdUI->Enable(TRUE);
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	TDC_MAXSTATE nPrevMaxState = tdc.GetMaximizeState();
+
+	tdc.SetFocus(nLocation);
+	m_nMaxState = tdc.GetMaximizeState();
+
+	if (m_nMaxState != nPrevMaxState)
+		Invalidate(FALSE);
 }
 
 void CToDoListWnd::OnViewSetFocusToTasks()
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	if (tdc.TasksHaveFocus())
-		return;
-
-	if (tdc.CommentsHaveFocus())
-		OnViewToggletasksandcomments();
-
-	if (tdc.AttributesHaveFocus())
-		tdc.SetFocusToTasks();
+	SetToDoCtrlFocus(TDCSF_TASKVIEW);
 }
 
 void CToDoListWnd::OnViewSetFocusToComments()
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	if (tdc.CommentsHaveFocus())
-		return;
-
-	if (tdc.TasksHaveFocus())
-		OnViewToggletasksandcomments();
-
-	if (tdc.AttributesHaveFocus())
-		tdc.SetFocusToComments();
+	SetToDoCtrlFocus(TDCSF_COMMENTS);
 }
 
 void CToDoListWnd::OnViewSetFocusToAttributes()
 {
-	if (m_nMaxState != TDCMS_NORMAL)
-		OnUnmaximizeTasklistAndComments();
-
-	GetToDoCtrl().SetFocusToAttributes();
-}
-
-void CToDoListWnd::OnUpdateViewSetFocusToTasks(CCmdUI* pCmdUI)
-{
-	pCmdUI->Enable(TRUE);
-}
-
-void CToDoListWnd::OnUpdateViewSetFocusToComments(CCmdUI* pCmdUI)
-{
-	pCmdUI->Enable(TRUE);
-}
-
-void CToDoListWnd::OnUpdateViewSetFocusToAttributes(CCmdUI* pCmdUI)
-{
-	pCmdUI->Enable(TRUE);
-}
-
-void CToDoListWnd::OnMove(int x, int y) 
-{
-	CFrameWnd::OnMove(x, y);
+	SetToDoCtrlFocus(TDCSF_ATTRIBUTES);
 }
 
 void CToDoListWnd::OnEditSettaskicon() 

@@ -595,7 +595,7 @@ BOOL CToDoCtrl::OnInitDialog()
 	
 	// Initial state
 	UpdateControls();
-	SetFocusToTasks();
+	SetFocus(TDCSF_TASKVIEW);
 
 	// notify parent that we have been created
 	GetParent()->SendMessage(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, GetDlgCtrlID()), (LPARAM)GetSafeHwnd());
@@ -698,7 +698,7 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 
 		case TDCMS_MAXTASKLIST:
 			if (!HasStyle(TDCS_SHOWCOMMENTSALWAYS) || !m_ctrlComments.HasFocus())
-				SetFocusToTasks();
+				SetFocus(TDCSF_TASKVIEW);
 			break;
 
 		case TDCMS_MAXCOMMENTS:
@@ -903,7 +903,7 @@ void CToDoCtrl::EnableDisableComments(BOOL bHasSelection)
 	GetSelectedTaskCustomComments(cfComments);
 	BOOL bEditComments = (m_mgrContent.FindContent(cfComments) != -1);
 
-	BOOL bCommentsVis = m_layout.IsCommentsVisible();
+	BOOL bCommentsVis = m_layout.IsVisible(TDCSF_COMMENTS);
 	RT_CTRLSTATE nCommentsState = RTCS_ENABLED, nComboState = RTCS_ENABLED;
 
 	if (!bCommentsVis || !bHasSelection)
@@ -1427,7 +1427,7 @@ BOOL CToDoCtrl::CanPasteText() const
 
 	// Special case
 	if (nAttribID == TDCA_COMMENTS)
-		return CommentsHaveFocus();
+		return HasFocus(TDCSF_COMMENTS);
 
 	return FALSE;
 }
@@ -3179,7 +3179,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		if (bEditLabel)
 			EditSelectedTaskTitle(TRUE);
 		else
-			SetFocusToTasks();
+			SetFocus(TDCSF_TASKVIEW);
 	}
 	else // cleanup
 	{
@@ -3414,7 +3414,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 
 	// restore focus
 	if (!focus.RestoreFocus())
-		SetFocusToTasks();
+		SetFocus(TDCSF_TASKVIEW);
 
 	return TRUE;
 }
@@ -3556,7 +3556,7 @@ LRESULT CToDoCtrl::OnLabelEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 		// or if the edit box loses the focus so we need to check
 		// the lParam and only set the focus if the user chose return
 		if (lParam)
-			SetFocusToTasks();
+			SetFocus(TDCSF_TASKVIEW);
 
 		if (!sText.IsEmpty())
 		{
@@ -3637,7 +3637,7 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		m_data.ClearRedoStack(); // Not undoable
 	}
 
-	SetFocusToTasks();
+	SetFocus(TDCSF_TASKVIEW);
 	SetEditTitleTaskID(0);
 
 	return 0L;
@@ -3807,7 +3807,7 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		// Fix up focus
 		if (!bEnable && (GetFocus() == GetDlgItem(IDC_PROJECTNAME)))
 		{
-			SetFocusToTasks();
+			SetFocus(TDCSF_TASKVIEW);
 		}
 		dwResult = TDCSS_WANTRESIZE;
 		break;
@@ -5855,7 +5855,7 @@ BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg)
 				if (pFocus && IsChild(pFocus))
 				{
 					if (!CtrlWantsEnter(*pFocus))
-						SetFocusToTasks();
+						SetFocus(TDCSF_TASKVIEW);
 
 					return FALSE; // allow further routing
 				}
@@ -5873,7 +5873,7 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 		return FALSE;
 
 	Flush(); // end any editing action
-	SetFocusToTasks(); // else datetime controls get their focus screwed
+	SetFocus(TDCSF_TASKVIEW); // else datetime controls get their focus screwed
 
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 
@@ -8075,51 +8075,106 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 	return FALSE;
 }
 
-void CToDoCtrl::SetFocusToTasks()
+void CToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 {
-	if (!m_taskTree.HasFocus())
+	switch (nLocation)
 	{
-		// NOTE: if the comments was the last window focused
-		// before we were disabled, and we revert the focus
-		// to the tree, then the comments gets very confused
-		// and will not want to take the focus even though it
-		// contains the caret, so we force it to have the focus
-		// before switching to the tree.
-		SetFocusToComments();
-		
-		m_taskTree.SetFocus();
+	case TDCSF_TASKVIEW:
+		if (!HasFocus(TDCSF_TASKVIEW))
+		{
+			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
+			{
+				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
+				SetMaximizeState(TDCMS_MAXTASKLIST);
+			}
+			else if (!m_taskTree.HasFocus())
+			{
+				// NOTE: if the comments was the last window focused
+				// before we were disabled, and we revert the focus
+				// to the tree, then the comments gets very confused
+				// and will not want to take the focus even though it
+				// contains the caret, so we force it to have the focus
+				// before switching to the tree.
+				ASSERT(m_layout.IsVisible(TDCSF_COMMENTS));
+
+				m_ctrlComments.SetFocus();
+				m_taskTree.SetFocus();
+			}
+
+			// ensure the selected tree item is visible
+			if (!m_taskTree.EnsureSelectionVisible(TRUE))
+				SelectItem(m_taskTree.GetChildItem());
+		}
+		break;
+
+	case TDCSF_COMMENTS:
+		{
+			if (!m_layout.IsVisible(TDCSF_COMMENTS))
+			{
+				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXTASKLIST);
+				SetMaximizeState(TDCMS_MAXCOMMENTS);
+			}
+			else
+			{
+				m_ctrlComments.SetFocus();
+			}
+		}
+		break;
+
+	case TDCSF_ATTRIBUTES:
+		{
+			if (!m_layout.IsVisible(nLocation))
+			{
+				ASSERT(m_layout.GetMaximiseState() != TDCMS_NORMAL);
+				SetMaximizeState(TDCMS_NORMAL);
+			}
+
+			m_ctrlAttributes.SetFocus();
+		}
+		break;
+
+	case TDCSF_PROJECTNAME:
+		{
+			if (!m_layout.IsVisible(nLocation))
+			{
+				ASSERT(m_layout.GetMaximiseState() != TDCMS_NORMAL);
+				SetMaximizeState(TDCMS_NORMAL);
+			}
+
+			GetDlgItem(IDC_PROJECTNAME)->SetFocus();
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		return;
 	}
 
-	// ensure the selected tree item is visible
-	if (!m_taskTree.EnsureSelectionVisible(TRUE))
-		SelectItem(m_taskTree.GetChildItem());
+	InvalidateAllCtrls(this, FALSE);
 }
 
-void CToDoCtrl::SetFocusToComments()
+BOOL CToDoCtrl::HasFocus(TDC_SETFOCUSTO nLocation) const
 {
-	// ignore if comments are not visible
-	if (!m_layout.IsCommentsVisible())
-		return;
+	if (!m_layout.IsVisible(nLocation))
+		return FALSE;
 
-	m_ctrlComments.SetFocus();
-}
+	switch (nLocation)
+	{
+	case TDCSF_TASKVIEW:
+		return m_taskTree.HasFocus();
 
-void CToDoCtrl::SetFocusToAttributes()
-{
-	// ignore if tasklist is maximised
-	if (m_layout.HasMaximiseState(TDCMS_MAXTASKLIST))
-		return;
+	case TDCSF_COMMENTS:
+		return m_ctrlComments.HasFocus();
 
-	m_ctrlAttributes.SetFocus();
-}
+	case TDCSF_ATTRIBUTES:
+		return m_ctrlAttributes.HasFocus();
 
-void CToDoCtrl::SetFocusToProjectName()
-{
-	// ignore if tasklist is maximised
-	if (m_layout.HasMaximiseState(TDCMS_MAXTASKLIST))
-		return;
+	case TDCSF_PROJECTNAME:
+		return (GetFocus() == GetDlgItem(IDC_PROJECTNAME));
+	}
 
-	GetDlgItem(IDC_PROJECTNAME)->SetFocus();
+	ASSERT(0);
+	return FALSE;
 }
 
 CString CToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
@@ -8320,7 +8375,7 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 			}
 		}
 
-		SetFocusToTasks();
+		SetFocus(TDCSF_TASKVIEW);
 		PostMessage(WM_TDC_FIXUPPOSTDROPSELECTION, 0L, (LPARAM)pData->dwTaskID);
 	}
 
@@ -9632,13 +9687,12 @@ BOOL CToDoCtrl::ShowTaskLink(const CString& sLink, BOOL bURL)
 	{
 		if (SelectTask(dwTaskID, TRUE))
 		{
-			SetFocusToTasks();
+			SetFocus(TDCSF_TASKVIEW);
 			return TRUE;
 		}
-		else
-		{
-			CMessageBox::AfxShow(IDS_TDC_TASKIDNOTFOUND_TITLE, IDS_TDC_TASKIDNOTFOUND);
-		}
+
+		// else
+		CMessageBox::AfxShow(IDS_TDC_TASKIDNOTFOUND_TITLE, IDS_TDC_TASKIDNOTFOUND);
 	}
 	else
 	{

@@ -238,7 +238,6 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnMove(int x, int y);
 	afx_msg void OnNcDestroy();
 	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
@@ -848,6 +847,7 @@ protected:
 	BOOL CanInsertDateAndTime() const;
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
 	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL, BOOL bFlush = TRUE);
+	void SetToDoCtrlFocus(TDC_SETFOCUSTO nLocation);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	void DoMoveTask(TDC_MOVETASK nDirection);
 
