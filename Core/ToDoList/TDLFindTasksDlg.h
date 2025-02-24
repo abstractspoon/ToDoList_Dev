@@ -76,10 +76,13 @@ public:
 							const CTDCCustomAttribDefinitionArray& aAllTasklistsAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tldActive, const TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID);
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
-	
-	void RefreshUserPreferences() { m_lcResults.RefreshUserPreferences(); }
+
+	void SetStrikeThroughCompletedTasks(BOOL bStrikeThru);
+	void SetNumPriorityRiskLevels(int nNumLevels);
+	void SetGroupHeaderBackColor(COLORREF crBack);
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetResultsFont(HFONT hFont) { m_lcResults.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); }
+	void SetPriorityColors(const CDWordArray& aColors) { m_lcFindSetup.SetPriorityColors(aColors); }
 
 	BOOL IsDocked() const { return IsDocked(m_nDockPos); }
 	DM_POS GetDockPosition() const { return m_nDockPos; }
@@ -100,10 +103,10 @@ protected:
 	CWndPromptManager m_mgrPrompts;
 	CToolbarHelper m_tbHelper;
 
-	BOOL m_bInitializing;
-	BOOL m_bSplitting;
 	int m_nCurSel;
 	int	m_bAllTasklists;
+	BOOL m_bInitializing;
+	BOOL m_bSplitting;
 	DM_POS m_nDockPos;
 
 	CEnString m_sResultsLabel;

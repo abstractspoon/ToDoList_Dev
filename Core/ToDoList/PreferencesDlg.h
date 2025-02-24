@@ -285,6 +285,7 @@ public:
 	BOOL GetShowFileLinkThumbnails() const { return m_pageUITasklist.GetShowFileLinkThumbnails(); }
 	COLORREF GetHidePriorityNumber() const { return m_pageUITasklist.GetHidePriorityNumber(); }
 	BOOL GetShowMixedCompletionState() const { return m_pageUITasklist.GetShowMixedCompletionState(); }
+	BOOL GetNumPriorityRiskLevels() const { return m_pageUITasklist.GetNumPriorityRiskLevels(); }
 
 	// CPreferencesUITasklistColorsPage
 	int GetTextColorOption() const { return m_pageUITasklistColors.GetTextColorOption(); }
@@ -379,6 +380,7 @@ protected:
 	afx_msg LRESULT OnGenPageEditLangFile(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnControlChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnColorPageTextOption(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnNumPriorityRiskLevels(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnCopy(WPARAM wp, LPARAM lp);

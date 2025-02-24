@@ -184,6 +184,7 @@ public:
 	BOOL HasDueTodayColor() const { return m_taskTree.HasDueTodayColor(); }
 
 	void SetUITheme(const CUIThemeFile& theme);
+	void SetNumPriorityRiskLevels(int nNumLevels);
 	void ResizeAttributeColumnsToFit();
 
 	// these return the full list of items in each droplist

@@ -10,6 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 class CKanbanColumnCtrl;
+class CDeferWndMove;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -36,6 +37,7 @@ public:
 	CKanbanColumnCtrl* GetLastNonEmpty() const;
 	CKanbanColumnCtrl* GetBacklog() const;
 
+	void SetRedraw(BOOL bRedraw = TRUE);
 	void SetOptions(DWORD dwOptions);
 	void SetReadOnly(BOOL bReadOnly);
 	int GetVisibleTaskCount() const;
@@ -44,6 +46,7 @@ public:
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	void FilterToolTipMessage(MSG* pMsg);
 	void SetFullColumnColor(COLORREF crFull);
+	void Offset(CDeferWndMove& dwm, int nAmount);
 
 	CSize CalcRequiredColumnSizeForImage() const;
 	BOOL CanSaveToImage() const;

@@ -46,6 +46,8 @@ public:
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
+	void SetNumPriorityRiskLevels(int nNumLevels);
+	void SetPriorityColors(const CDWordArray& aColors);
 
 	BOOL AddRule();
 	BOOL DeleteSelectedRule();
@@ -80,12 +82,9 @@ protected:
 	CTDCImageList					m_ilIcons;
 
 	const CContentMgr&				m_mgrContent;
-// Overrides
+
 protected:
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFindTaskExpressionListCtrl)
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:

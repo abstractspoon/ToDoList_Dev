@@ -9,6 +9,7 @@
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\DeferWndMove.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -266,6 +267,11 @@ void CKanbanColumnCtrlArray::RefreshItemLineHeights()
 	ARRAY_FN(pCol->RefreshItemLineHeights());
 }
 
+void CKanbanColumnCtrlArray::SetRedraw(BOOL bRedraw)
+{
+	ARRAY_FN(pCol->SetRedraw(bRedraw));
+}
+
 void CKanbanColumnCtrlArray::SetOptions(DWORD dwOptions)
 {
 	ARRAY_FN(pCol->SetOptions(dwOptions));
@@ -328,6 +334,11 @@ void CKanbanColumnCtrlArray::Redraw(BOOL bErase, BOOL bUpdate)
 		if (bUpdate)	
 			pCol->UpdateWindow()
 	);
+}
+
+void CKanbanColumnCtrlArray::Offset(CDeferWndMove& dwm, int nAmount)
+{
+	ARRAY_FN(dwm.OffsetChild(pCol, nAmount, 0));
 }
 
 int CKanbanColumnCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)

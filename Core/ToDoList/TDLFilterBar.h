@@ -59,6 +59,7 @@ public:
 	BOOL FilterMatches(const TDCFILTER& filter) { return (filter == m_filter); }
 	BOOL SetTitleFilterOption(FILTER_TITLE nOption);
 	void ClearCheckboxHistory();
+	void SetNumPriorityRiskLevels(int nNumLevels);
 
 	void EnableMultiSelection(BOOL bEnable);
 	void SetUITheme(const CUIThemeFile& theme);

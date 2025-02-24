@@ -164,6 +164,7 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_SETFOCUS()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_CHAR()
+	ON_WM_HSCROLL()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(TVM_HITTEST, OnHitTest)
@@ -273,6 +274,12 @@ BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	}
 
 	return CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+void CKanbanColumnCtrl::OnHScroll(UINT nSBCode, UINT /*nPos*/, CScrollBar* /*pScrollBar*/)
+{
+	// Forward to parent because it must be coming from a mouse-wheel
+	GetParent()->SendMessage(WM_HSCROLL, nSBCode, (LPARAM)GetSafeHwnd());
 }
 
 void CKanbanColumnCtrl::SetDropTarget(BOOL bTarget)

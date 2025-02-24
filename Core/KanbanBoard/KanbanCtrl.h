@@ -117,16 +117,18 @@ protected:
 	CFontCache m_fonts;
 	CImageList m_ilDrag;
 	CMidnightTimer m_timerMidnight;
+	CScrollBar m_sbHorz;
 
 	TDC_ATTRIBUTE m_nTrackedAttributeID, m_nSortBy, m_nGroupBy;
 	CString m_sTrackAttribID, m_sGroupByCustAttribID;
 	BOOL m_bSortAscending;
+	int m_nNumPriorityRiskLevels;
 
 	CKanbanItemMap m_data;
 	CKanbanAttributeValueMap m_mapAttributeValues;
 	CKanbanAttributeValueMap m_mapGlobalAttributeValues;
 	CKanbanAttributeArray m_aDisplayAttrib;
-	CKanbanColumnArray m_aColumnDefs;
+	CKanbanColumnArray m_aFixedColDefs;
 	CKanbanCustomAttributeDefinitionArray m_aCustomAttribDefs;
 
 protected:
@@ -142,13 +144,17 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnEndTrackHeaderItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDestroy();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+
+	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnColumnEditLabel(WPARAM wp, LPARAM lp);
@@ -177,6 +183,7 @@ protected:
 	void RebuildColumnHeader();
 	void RefreshColumnHeaderText();
 	void HideEmptyColumns(int nPrevColCount);
+	void BuildPriorityRiskAttributeMapping(TDC_ATTRIBUTE nAttribID, BOOL bRebuild);
 
 	KBC_ATTRIBLABELS GetColumnAttributeLabelVisibility(int nCol, int nColWidth);
 	float GetAverageColumnCharWidth();
@@ -202,8 +209,9 @@ protected:
 	BOOL HasFocus() const;
 	BOOL SelectClosestAdjacentItemToSelection(int nAdjacentCol);
 	int MapHeaderItemToColumn(int nItem) const;
+	int CalcMinRequiredColumnsWidth() const;
 
-	inline BOOL UsingFixedColumns() const { return m_aColumnDefs.GetSize(); }
+	inline BOOL UsingFixedColumns() const { return m_aFixedColDefs.GetSize(); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
 
 	BOOL IsDragging() const;

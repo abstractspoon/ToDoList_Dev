@@ -65,8 +65,8 @@ public:
 	
 	FTDRESULT* GetResult(int nItem) const { return (FTDRESULT*)GetItemData(nItem); }
 
-	void RefreshUserPreferences();
-
+	void SetStrikeThroughCompletedTasks(BOOL bStrikeThru);
+	void SetGroupHeaderBackColor(COLORREF crBack);
 	int GetColumnWidths(CIntArray& aWidths) const;
 	BOOL SetColumnWidths(const CIntArray& aWidths);
 

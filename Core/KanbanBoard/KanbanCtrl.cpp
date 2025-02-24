@@ -58,15 +58,26 @@ enum // RebuildColumns
 	KCRC_RESTORESELECTION	= 0x02,
 };
 
+enum
+{
+	DELAY_INTERVAL	= 250,
+	SCROLL_INTERVAL = 50,
+};
+
 //////////////////////////////////////////////////////////////////////
 
 const UINT IDC_COLUMNCTRL	= 101;
 const UINT IDC_HEADER		= 102;
+const UINT IDC_SCROLLBAR	= 103;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MIN_COL_WIDTH = GraphicsMisc::ScaleByDPIFactor(6);
-const int HEADER_HEIGHT = GraphicsMisc::ScaleByDPIFactor(24);
+const int MIN_COL_DRAGWIDTH		= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_COL_AUTOWIDTH		= GraphicsMisc::ScaleByDPIFactor(150);
+const int HEADER_HEIGHT			= GraphicsMisc::ScaleByDPIFactor(24);
+
+const int DRAGSCROLL_ZONEWIDTH	= (MIN_COL_AUTOWIDTH / 5);
+const int DRAGSCROLL_INCREMENT	= (MIN_COL_AUTOWIDTH / 10);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -93,6 +104,42 @@ const CPoint DRAG_NOT_SET(-10000, -10000);
 }
 
 //////////////////////////////////////////////////////////////////////
+
+class CHoldColumnHScroll
+{
+public:
+	CHoldColumnHScroll(HWND hwndScroll)
+		:
+		m_hwndScroll(hwndScroll),
+		m_nOrgHScrollPos(0)
+	{
+		if (IsValidWindow())
+			m_nOrgHScrollPos = ::GetScrollPos(hwndScroll, SB_CTL);
+	}
+
+	~CHoldColumnHScroll()
+	{
+		if (!IsValidWindow())
+			return;
+
+		::SendMessage(::GetParent(m_hwndScroll),
+					  WM_HSCROLL,
+					  MAKEWPARAM(SB_THUMBPOSITION, m_nOrgHScrollPos),
+					  (LPARAM)m_hwndScroll);
+	}
+
+protected:
+	HWND m_hwndScroll;
+	int m_nOrgHScrollPos;
+
+protected:
+	BOOL IsValidWindow() const
+	{
+		return (m_hwndScroll && ::IsWindow(m_hwndScroll));
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -111,7 +158,8 @@ CKanbanCtrl::CKanbanCtrl()
 	m_bSettingColumnFocus(FALSE),
 	m_bSavingToImage(FALSE),
 	m_crGroupHeaderBkgnd(CLR_NONE),
-	m_crFullColumn(CLR_NONE)
+	m_crFullColumn(CLR_NONE),
+	m_nNumPriorityRiskLevels(11)
 {
 }
 
@@ -127,6 +175,8 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_CREATE()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
+	ON_WM_TIMER()
+	ON_WM_MOUSEWHEEL()
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_HEADER, OnHeaderCustomDraw)
 	ON_NOTIFY(HDN_ITEMCLICK, IDC_HEADER, OnHeaderClick)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_HEADER, OnHeaderDividerDoubleClick)
@@ -139,6 +189,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_SETCURSOR()
 	ON_WM_CAPTURECHANGED()
 	ON_WM_DESTROY()
+	ON_WM_HSCROLL()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_EDITTASKDONE, OnColumnEditTaskDone)
 	ON_MESSAGE(WM_KLCN_EDITTASKFLAG, OnColumnEditTaskFlag)
@@ -170,12 +221,11 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 
-	if (!m_header.Create(HDS_FULLDRAG | HDS_BUTTONS | WS_CHILD | WS_VISIBLE, 
-						 CRect(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50),
-						 this, IDC_HEADER))
-	{
+	// Creater header
+	CRect rHeader(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50);
+
+	if (!m_header.Create(HDS_FULLDRAG | HDS_BUTTONS | WS_CHILD | WS_VISIBLE, rHeader, this, IDC_HEADER))
 		return -1;
-	}
 
 	return 0;
 }
@@ -1126,25 +1176,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
-		{
-			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
-
-			// create once only
-			if (!m_mapAttributeValues.HasMapping(sAttribID))
-			{
-				CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sAttribID);
-				ASSERT(pValues);
-
-				for (int nItem = 0; nItem <= 10; nItem++)
-				{
-					CString sValue(Misc::Format(nItem));
-					pValues->SetAt(sValue, sValue);
-				}
-				
-				// Add backlog item
-				pValues->AddValue(EMPTY_STR);
-			}
-		}
+		BuildPriorityRiskAttributeMapping(nAttribID, FALSE); 
 		break;
 		
 	case TDCA_STATUS:
@@ -1279,6 +1311,38 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 	return FALSE;
 }
 
+void CKanbanCtrl::BuildPriorityRiskAttributeMapping(TDC_ATTRIBUTE nAttribID, BOOL bRebuild)
+{
+	switch (nAttribID)
+	{
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+		{
+			CString sAttribID(KBUtils::GetAttributeID(nAttribID));
+
+			if (bRebuild || !m_mapAttributeValues.HasMapping(sAttribID))
+			{
+				CKanbanValueMap* pValues = m_mapAttributeValues.GetAddMapping(sAttribID);
+				pValues->RemoveAll();
+
+				for (int nItem = 0; nItem < m_nNumPriorityRiskLevels; nItem++)
+				{
+					CString sValue(Misc::Format(nItem));
+					pValues->SetAt(sValue, sValue);
+				}
+
+				// Add backlog item
+				pValues->AddValue(EMPTY_STR);
+			}
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+}
+
 BOOL CKanbanCtrl::UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringArray& aValues)
 {
 	CKanbanValueMap mapNewValues;
@@ -1367,7 +1431,20 @@ void CKanbanCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, boo
 
 	m_aColumns.SetGroupHeaderBackgroundColor(m_crGroupHeaderBkgnd);
 
-	if (m_nTrackedAttributeID != TDCA_NONE)
+	int nNumLevels = pPrefs->GetProfileInt(_T("Preferences"), _T("NumPriorityRiskLevels"), 11);
+	BOOL bRebuildColumns = (m_nTrackedAttributeID != TDCA_NONE);
+
+	if (nNumLevels != m_nNumPriorityRiskLevels)
+	{
+		m_nNumPriorityRiskLevels = nNumLevels;
+
+		BuildPriorityRiskAttributeMapping(TDCA_PRIORITY, TRUE);
+		BuildPriorityRiskAttributeMapping(TDCA_RISK, TRUE);
+
+		bRebuildColumns |= ((m_nTrackedAttributeID == TDCA_PRIORITY) || (m_nTrackedAttributeID == TDCA_RISK));
+	}
+
+	if (bRebuildColumns)
 	{
 		// Both column visibility AND contents may have changed
 		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
@@ -1794,7 +1871,6 @@ int CKanbanCtrl::AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 				colDef.sAttribID = m_sTrackAttribID;
 				colDef.sTitle = sAttribValue;
 				colDef.aAttribValues.Add(sAttribValue);
-				//colDef.crBackground = KBCOLORS[m_nNextColor++ % NUM_KBCOLORS];
 				
 				VERIFY (AddNewColumn(colDef) != NULL);
 				nNumAdded++;
@@ -1839,9 +1915,9 @@ void CKanbanCtrl::RebuildFixedColumns()
 	// columns like with dynamic columns, we just hide them
 	if (m_aColumns.GetSize() == 0)
 	{
-		for (int nDef = 0; nDef < m_aColumnDefs.GetSize(); nDef++)
+		for (int nDef = 0; nDef < m_aFixedColDefs.GetSize(); nDef++)
 		{
-			const KANBANCOLUMN& colDef = m_aColumnDefs[nDef];
+			const KANBANCOLUMN& colDef = m_aFixedColDefs[nDef];
 			VERIFY(AddNewColumn(colDef) != NULL);
 		}
 	}
@@ -1888,9 +1964,10 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelT
 	}
 
 	CHoldRedraw gr(*this, NCR_PAINT | NCR_ERASEBKGND);
+	CHoldColumnHScroll hs(m_sbHorz);
 
 	CKanbanItemArrayMap mapKIArray;
-	m_data.BuildTempItemMaps(m_sTrackAttribID, m_dwOptions, mapKIArray);
+	m_data.BuildTempItemMaps(m_sTrackAttribID, m_dwOptions, m_nNumPriorityRiskLevels, mapKIArray);
 
 	// Rebuild columns
 	if (UsingDynamicColumns())
@@ -2032,12 +2109,13 @@ void CKanbanCtrl::RefreshColumnHeaderText()
 
 void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 {
-	int nCol = m_aColumns.GetSize();
-	
 	BOOL bHideParents = HasOption(KBCF_HIDEPARENTTASKS);
 	BOOL bHideSubtasks = HasOption(KBCF_HIDESUBTASKS);
 	BOOL bHideNoGroup = (HasOption(KBCF_HIDENONEGROUP) && IsGrouping());
 
+	int nCol = m_aColumns.GetSize();
+	m_aColumns.SetRedraw(FALSE);
+	
 	while (nCol--)
 	{
 		CKanbanColumnCtrl* pCol = m_aColumns[nCol];
@@ -2068,6 +2146,8 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 		m_aColumns.GroupBy(m_nGroupBy);
 	else
 		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+
+	m_aColumns.SetRedraw(TRUE);
 }
 
 void CKanbanCtrl::FixupSelectedColumn()
@@ -2181,11 +2261,11 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 		// Check if only display attributes have changed
 		if (UsingFixedColumns())
 		{
-			if (m_aColumnDefs.MatchesAll(aColumnDefs))
+			if (m_aFixedColDefs.MatchesAll(aColumnDefs))
 			{
 				return TRUE;
 			}
-			else if (m_aColumnDefs.MatchesAll(aColumnDefs, FALSE))
+			else if (m_aFixedColDefs.MatchesAll(aColumnDefs, FALSE))
 			{
 				int nCol = aColumnDefs.GetSize();
 				ASSERT(nCol == m_aColumns.GetSize());
@@ -2201,7 +2281,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 						pCol->SetBackgroundColor(colDef.crBackground);
 						pCol->SetMaximumTaskCount(colDef.nMaxTaskCount);
 
-						m_aColumnDefs[nCol] = colDef;
+						m_aFixedColDefs[nCol] = colDef;
 					}
 				}
 	
@@ -2211,12 +2291,12 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 		}
 		else if (!aColumnDefs.GetSize()) // not switching to fixed columns
 		{
-			ASSERT(m_aColumnDefs.GetSize() == 0);
+			ASSERT(m_aFixedColDefs.GetSize() == 0);
 			return TRUE;
 		}
 	}
 
-	m_aColumnDefs.Copy(aColumnDefs);
+	m_aFixedColDefs.Copy(aColumnDefs);
 
 	// update state
 	m_nTrackedAttributeID = nAttribID;
@@ -2229,6 +2309,7 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustom
 	m_aColumns.RemoveAll();
 
 	// Don't attempt to restore selection
+	// or save scroll pos
 	RebuildColumns(KCRC_REBUILDCONTENTS);
 	Resize();
 
@@ -2274,10 +2355,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	if (!pCol || !pCol->GetSafeHwnd())
 		return FALSE;
 
-	CDWordArray aSelTaskIDs;
-	pCol->GetSelectedTaskIDs(aSelTaskIDs);
-
-	pCol->SetRedraw(FALSE);
+// 	pCol->SetRedraw(FALSE);
 	pCol->RemoveAll();
 
 	CStringArray aValueIDs;
@@ -2311,7 +2389,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	}
 	
 	pCol->RefreshItemLineHeights();
-	pCol->SetRedraw(TRUE);
+// 	pCol->SetRedraw(TRUE);
 
 	return TRUE;
 }
@@ -2479,6 +2557,7 @@ BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
 	if (m_aColumns.GetSize())
 	{
 		CDialogHelper::ExcludeChild(&m_header, pDC);
+		CDialogHelper::ExcludeChild(&m_sbHorz, pDC);
 
 		// Clip out the list controls
 		m_aColumns.Exclude(pDC);
@@ -2539,14 +2618,56 @@ void CKanbanCtrl::Resize(int cx, int cy)
 
 	if (nNumVisibleCols)
 	{
-		CDeferWndMove dwm(nNumVisibleCols + 1);
 		CRect rAvail(0, 0, cx, cy);
 
 		if (rAvail.IsRectEmpty())
 			GetClientRect(rAvail);
 
-		// Create a border
+		// Reduce for border
 		rAvail.DeflateRect(1, 1);
+
+		// Show/hide the horizontal scrollbar
+		CDeferWndMove dwm(nNumVisibleCols + 2); // +2 is for header and possibly scrollbar
+		int nMinReqWidth = CalcMinRequiredColumnsWidth();
+
+		if ((m_header.GetItemCount() > 1) && (rAvail.Width() < nMinReqWidth))
+		{
+			// Preserve scrollpos where possible
+			int nScrollPos = 0;
+
+			if (m_sbHorz.GetSafeHwnd())
+				nScrollPos = m_sbHorz.GetScrollPos();
+			else
+				VERIFY(m_sbHorz.Create(WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, IDC_SCROLLBAR));
+
+			// Position scrollbar
+			CRect rScroll(rAvail);
+			rScroll.top = (rScroll.bottom - GetSystemMetrics(SM_CYHSCROLL));
+			dwm.MoveWindow(&m_sbHorz, rScroll);
+
+			// Configure scrollbar (includes restoring scroll pos)
+			SCROLLINFO si = { 0 };
+
+			si.cbSize = sizeof(si);
+			si.fMask = (SIF_PAGE | SIF_POS | SIF_RANGE);
+			si.nMin = 0;
+			si.nMax = nMinReqWidth;
+			si.nPage = rAvail.Width();
+
+			nScrollPos = min((si.nMax - (int)si.nPage), max(0, nScrollPos));
+			si.nPos = nScrollPos;
+
+			m_sbHorz.SetScrollInfo(&si);
+
+			// Update available space to account for scrollbar
+			rAvail.bottom = rScroll.top;
+			rAvail.left -= nScrollPos;
+			rAvail.right = (rAvail.left + nMinReqWidth);
+		}
+		else
+		{
+			m_sbHorz.DestroyWindow();
+		}
 
 		ResizeHeader(dwm, rAvail);
 		
@@ -2593,6 +2714,83 @@ void CKanbanCtrl::Resize(int cx, int cy)
 	}
 }
 
+BOOL CKanbanCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint /*pt*/)
+{
+	// We are receiving this because the column beneath the mouse
+	// does not have a vertical scrollbar, so we treat it as a 
+	// horizontal scroll
+	if (m_sbHorz.GetSafeHwnd())
+	{
+		BOOL bLeft = (zDelta > 0);
+		OnHScroll((bLeft ? SB_LINELEFT : SB_LINERIGHT), 0, &m_sbHorz);
+	}
+
+	return TRUE;
+}
+
+void CKanbanCtrl::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	ASSERT(pScrollBar == &m_sbHorz || pScrollBar->IsKindOf(RUNTIME_CLASS(CKanbanColumnCtrl)));
+
+	SCROLLINFO si = { sizeof(si), 0 };
+	
+	if (m_sbHorz.GetScrollInfo(&si, (SIF_PAGE | SIF_POS | SIF_RANGE)))
+	{
+		int nOldPos = si.nPos, nNewPos = nOldPos;
+
+		switch (nSBCode)
+		{
+		case SB_LEFT:			nNewPos = si.nMin; break;
+		case SB_RIGHT:			nNewPos = si.nMax; break;
+
+		case SB_LINELEFT:		nNewPos -= MIN_COL_AUTOWIDTH; break;
+		case SB_LINERIGHT:		nNewPos += MIN_COL_AUTOWIDTH; break;
+
+		case SB_PAGELEFT:		nNewPos -= si.nPage; break;
+		case SB_PAGERIGHT:		nNewPos += si.nPage; break;
+
+		case SB_THUMBPOSITION:
+		case SB_THUMBTRACK:		nNewPos = (int)nPos; break;
+
+		default:
+			return;
+		}
+
+		nNewPos = min((si.nMax - (int)si.nPage), max(si.nMin, nNewPos));
+
+		if (nNewPos != nOldPos)
+		{
+			m_sbHorz.SetScrollPos(nNewPos);
+
+			CDeferWndMove dwm(m_aColumns.GetSize() + 1);
+			int nOffset = (nOldPos - nNewPos);
+
+			m_aColumns.Offset(dwm, nOffset);
+			dwm.OffsetChild(&m_header, nOffset, 0);
+
+			Invalidate();
+			UpdateWindow();
+		}
+	}
+}
+
+int CKanbanCtrl::CalcMinRequiredColumnsWidth() const
+{
+	int nNumCols = m_header.GetItemCount(), nMinWidth = 0;
+
+	for (int nCol = 0, nColStart = 0; nCol < nNumCols; nCol++)
+	{
+		int nColWidth = m_header.GetItemWidth(nCol);
+
+		if (m_header.IsItemTracked(nCol))
+			nMinWidth += max(nColWidth, MIN_COL_AUTOWIDTH);
+		else
+			nMinWidth += MIN_COL_AUTOWIDTH;
+	}
+
+	return nMinWidth;
+}
+
 void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 {
 	if (rAvail.IsRectEmpty())
@@ -2606,7 +2804,7 @@ void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 	ASSERT(nNumCols == GetVisibleColumnCount());
 
 	CRect rNewHeader(rAvail);
-	rAvail.top = rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
+	rAvail.top = (rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT));
 
 	dwm.MoveWindow(&m_header, rNewHeader, TRUE);
 		
@@ -3206,8 +3404,8 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		int nThisWidth = m_header.GetItemWidth(pHDN->iItem);
 		int nNextWidth = m_header.GetItemWidth(pHDN->iItem + 1);
 
-		pHDN->pitem->cxy = max(MIN_COL_WIDTH, pHDN->pitem->cxy);
-		pHDN->pitem->cxy = min(pHDN->pitem->cxy, (nThisWidth + nNextWidth - MIN_COL_WIDTH));
+		pHDN->pitem->cxy = max(MIN_COL_DRAGWIDTH, pHDN->pitem->cxy);
+		pHDN->pitem->cxy = min(pHDN->pitem->cxy, (nThisWidth + nNextWidth - MIN_COL_DRAGWIDTH));
 		
 		// Resize 'next' column
 		nNextWidth = (nThisWidth + nNextWidth - pHDN->pitem->cxy);
@@ -3741,9 +3939,70 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		}
 
 		m_aColumns.SetDropTarget(bValidDest ? pDestCol : NULL);
+
+		// Auto-scrolling
+		if (m_sbHorz.GetSafeHwnd())
+		{
+			CRect rClient;
+			GetClientRect(rClient);
+			ClientToScreen(rClient);
+	
+ 			KillTimer(DELAY_INTERVAL);
+ 			KillTimer(SCROLL_INTERVAL);
+
+			if (rClient.PtInRect(point))
+			{
+				BOOL bLeft = (point.x <= (rClient.left + DRAGSCROLL_ZONEWIDTH));
+				BOOL bRight = (point.x >= (rClient.right - DRAGSCROLL_ZONEWIDTH));
+
+				if (bLeft || bRight)
+	 				SetTimer(DELAY_INTERVAL, DELAY_INTERVAL, NULL);
+			}
+		}
 	}
 	
 	CWnd::OnMouseMove(nFlags, point);
+}
+
+void CKanbanCtrl::OnTimer(UINT_PTR nIDEvent)
+{
+	KillTimer(nIDEvent);
+
+	CRect rClient;
+	GetClientRect(rClient);
+	ClientToScreen(rClient);
+
+	CPoint point(::GetMessagePos());
+
+	if (!rClient.PtInRect(point))
+		return;
+
+	BOOL bLeft = (point.x <= (rClient.left + DRAGSCROLL_ZONEWIDTH));
+	BOOL bRight = (point.x >= (rClient.right - DRAGSCROLL_ZONEWIDTH));
+
+	if (!bLeft && !bRight)
+		return;
+	
+	switch (nIDEvent)
+	{
+	case DELAY_INTERVAL:
+	case SCROLL_INTERVAL:
+		{
+			int nOldPos = m_sbHorz.GetScrollPos();
+			int nInc = (bLeft ? -DRAGSCROLL_INCREMENT : DRAGSCROLL_INCREMENT), nNewPos = (nOldPos + nInc);
+
+			for (int i = 0; i < 10; i++)
+			{
+				SendMessage(WM_HSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nNewPos), (LPARAM)m_sbHorz.GetSafeHwnd());
+				Sleep(25);
+
+				nNewPos += nInc;
+			}
+
+			SetTimer(SCROLL_INTERVAL, SCROLL_INTERVAL, NULL);
+		}
+		break;
+	}
 }
 
 BOOL CKanbanCtrl::SaveToImage(CBitmap& bmImage)
