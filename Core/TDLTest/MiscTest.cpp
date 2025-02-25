@@ -361,6 +361,7 @@ void  CMiscTest::TestAtof()
 	TestAtof("zh-CN");
 	TestAtof("hu-HU");
 	TestAtof("ar-DZ");
+	TestAtof("fa-IR");
 }
 
 void CMiscTest::TestAtof(const CString& sLocale)
@@ -400,14 +401,6 @@ void CMiscTest::TestIsNumber()
 		ExpectFalse(Misc::IsNumber(_T("1.3.45")));
 		ExpectFalse(Misc::IsNumber(_T("1..45")));
 		ExpectFalse(Misc::IsNumber(_T("1.,45")));
-		// 	ExpectFalse(Misc::IsNumber(_T("")));
-		// 	ExpectFalse(Misc::IsNumber(_T("")));
-		// 	ExpectFalse(Misc::IsNumber(_T("")));
-		// 	ExpectFalse(Misc::IsNumber(_T("")));
-		// 	ExpectFalse(Misc::IsNumber(_T("")));
-		// 	ExpectFalse(Misc::IsNumber(_T("")));
-		// 	ExpectFalse(Misc::IsNumber(_T("")));
-		// 	ExpectFalse(Misc::IsNumber(_T("")));
 	}
 
 	// Valid formats
@@ -464,18 +457,6 @@ void CMiscTest::TestIsNumber()
 			ExpectTrue(Misc::IsNumber(_T("+") + sDecSep + _T("56")));
 			ExpectTrue(Misc::IsNumber(sDecSep + _T("89")));
 		}
-
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
-		// 	ExpectTrue(Misc::IsNumber(_T("")));
 	}
 }
 
