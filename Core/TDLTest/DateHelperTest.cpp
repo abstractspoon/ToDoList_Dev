@@ -32,15 +32,71 @@ TESTRESULT CDateHelperTest::Run()
 {
 	ClearTotals();
 
-	Test64BitDates();
+	TestDecodeDate();
 	TestDecodeRelativeDate();
 	TestTruncateSeconds();
 	TestGetDateOnly();
 	TestGetTimeOnly();
 	TestMakeDate();
 	TestCompare();
-	
+	Test64BitDates();
+
 	return GetTotals();
+}
+
+void CDateHelperTest::TestDecodeDate()
+{
+	// CDateHelper::FormatDate(DHFD_TIME)
+	{
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CString sNow = CDateHelper::FormatDate(dtNow, DHFD_TIME);
+
+		COleDateTime dtCheck;
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
+		ExpectEQ(dtCheck, dtNow);
+
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+	}
+
+	// CDateHelper::FormatDate() - no time
+	{
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CString sNow = CDateHelper::FormatDate(dtNow);
+
+		COleDateTime dtCheck;
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+	}
+
+	// CDateHelper::FormatDate(DHFD_ISO | DHFD_TIME)
+	{
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CString sNow = CDateHelper::FormatDate(dtNow, DHFD_ISO | DHFD_TIME);
+
+		COleDateTime dtCheck;
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
+		ExpectEQ(dtCheck, dtNow);
+
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+	}
+
+	// CDateHelper::FormatDate(DHFD_ISO) - no time
+	{
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CString sNow = CDateHelper::FormatDate(dtNow, DHFD_ISO);
+
+		COleDateTime dtCheck;
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+	}
 }
 
 void CDateHelperTest::TestDecodeRelativeDate()

@@ -248,6 +248,7 @@ protected:
 
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;
+	COleDateTime GetDateTime(TDC_ATTRIBUTE nAttribID) const;
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
 	TDC_ATTRIBUTE MapTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 

@@ -37,10 +37,13 @@ struct TDCDATETIMEWIDTHS
 	void ResetWidths();
 	void Initialise(CDC* pDC);
 
+	int CalcMaxColumWidth(BOOL bIncTime, BOOL bIncDow) const;
+
 	int nMaxDateWidth;
 	int nMinDateWidth;		// No 'year'
 	int nMaxTimeWidth;		// No 'seconds'
 	int nMaxDowNameWidth;	// Short format
+	int nSepWidth;
 
 protected:
 	BOOL bIsoFormat;

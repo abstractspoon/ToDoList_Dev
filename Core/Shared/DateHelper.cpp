@@ -9,6 +9,7 @@
 #include "WorkingWeek.h"
 
 #include "..\3rdParty\T64Utils.h"
+#include "..\3rdParty\JalaliCalendar.h"
 
 #include <math.h>
 
@@ -789,23 +790,35 @@ BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAnd
 	if (sDate.IsEmpty())
 		return FALSE;
 
-	// Default processing
-	if (bAndTime)
+	if (bAndTime && date.ParseDateTime(sDate))
 	{
-		if (date.ParseDateTime(sDate))
-			return TRUE;
+		// success
 	}
-	else if (date.ParseDateTime(sDate, VAR_DATEVALUEONLY))
+	else if (!bAndTime && date.ParseDateTime(sDate, VAR_DATEVALUEONLY))
 	{
-		return TRUE;
+		// success
+	}
+	else if (DecodeISODate(sDate, date, bAndTime))
+	{
+		// success
+	}
+	else if (DecodeLocalShortDate(sDate, date))
+	{
+		// success
+	}
+	else
+	{
+		return FALSE;
 	}
 
-	// Perhaps it's in ISO format
-	if (DecodeISODate(sDate, date, bAndTime))
-		return TRUE;
+	// Handle Persian/Jalali dates
+	if ((date.m_dt < 0.0) && 
+		(Misc::GetPrimaryLanguage() == LANG_PERSIAN))
+	{
+		CJalaliCalendar::JalaliToGregorian(COleDateTime(date), date);
+	}
 
-	// all else
-	return DecodeLocalShortDate(sDate, date);
+	return TRUE;
 }
 
 BOOL CDateHelper::GetTimeT(const COleDateTime& date, time_t& timeT)
@@ -1561,6 +1574,15 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 			CString sSep = Misc::GetDateSeparator();
 			Misc::Trim(sFormat, sSep);
 			sFormat.Replace((sSep + sSep), sSep);
+		}
+
+		// RTL dates
+		switch (Misc::GetPrimaryLanguage())
+		{
+		case LANG_ARABIC:
+		case LANG_PERSIAN:
+			Misc::Reverse(sFormat);
+			break;
 		}
 	}
 

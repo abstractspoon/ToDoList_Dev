@@ -848,6 +848,11 @@ BOOL Misc::RemoveAt(CString& sText, int nPos)
 	return TRUE;
 }
 
+void Misc::Reverse(CString& sText)
+{
+	_tcsrev((LPTSTR)(LPCTSTR)sText);
+}
+
 BOOL Misc::IsEmpty(LPCTSTR szText) 
 { 
 	return ((!szText || !szText[0]) ? TRUE : FALSE); 
@@ -2172,6 +2177,14 @@ BOOL Misc::IsFullScreenAppActive()
 LANGID Misc::GetUserKeyboardLanguage()
 {
 	return LOWORD(::GetKeyboardLayout(0));
+}
+
+LANGID Misc::GetPrimaryLanguage()
+{
+	LCID lcid = ::GetThreadLocale();
+	LANGID lid = LANGIDFROMLCID(lcid);
+	
+	return PRIMARYLANGID(lid);
 }
 
 CString Misc::GetDefCharset()
