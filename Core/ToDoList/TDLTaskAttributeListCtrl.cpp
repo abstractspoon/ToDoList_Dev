@@ -474,6 +474,11 @@ void CTDLTaskAttributeListCtrl::SetNumPriorityRiskLevels(int nNumLevels)
 	m_cbRisk.SetNumLevels(nNumLevels);
 }
 
+BOOL CTDLTaskAttributeListCtrl::HasFocus() const 
+{ 
+	return (IsEditing() || CDialogHelper::IsChildOrSame(this, GetFocus())); 
+}
+
 void CTDLTaskAttributeListCtrl::RedrawValue(TDC_ATTRIBUTE nAttribID)
 {
 	int nRow = GetRow(nAttribID);

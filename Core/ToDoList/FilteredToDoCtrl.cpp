@@ -103,8 +103,8 @@ BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTaskLink)
 	{
 		// Shift the focus away from the comments because toggling
 		// the filter may cause the comments to become disabled
-		if (m_ctrlComments.HasFocus())
-			SetFocusToTasks();
+		if (HasFocus(TDCSF_COMMENTS))
+			SetFocus(TDCSF_TASKVIEW);
 	
 		ToggleFilter(); // show all tasks
 		

@@ -2464,18 +2464,7 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 			break;
 
 		case FTCV_TASKLIST:
-			{
-				// Show/Hide list-specific controls
-				int nShow = (nState != TDCMS_MAXCOMMENTS) ? SW_SHOW : SW_HIDE;
-
-				for (int nCtrl = 0; nCtrl < NUM_TTDCCTRLS; nCtrl++)
-				{
-					const TDCCONTROL& ctrl = TTDCCONTROLS[nCtrl];
-
-					if (ctrl.nID != IDC_TASKLISTTABCTRL)
-						GetDlgItem(ctrl.nID)->ShowWindow(nShow);
-				}
-			}
+			ShowListViewSpecificCtrls(nState != TDCMS_MAXCOMMENTS);
 			break;
 
 		case FTCV_UIEXTENSION1:
@@ -6180,27 +6169,44 @@ BOOL CTabbedToDoCtrl::ScrollToSelectedTask()
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::SetFocusToTasks()
+void CTabbedToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 {
+	if (nLocation != TDCSF_TASKVIEW)
+	{
+		CToDoCtrl::SetFocus(nLocation);
+		return;
+	}
+
 	FTC_VIEW nView = GetTaskView();
 
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		CToDoCtrl::SetFocusToTasks();
+		CToDoCtrl::SetFocus(nLocation);
 		break;
 
 	case FTCV_TASKLIST:
-		if (GetFocus() != &m_taskList)
+		// Basically a copy of CToDoCtrl's handling of FTCV_TASKTREE
+		if (!m_taskList.HasFocus())
 		{
-			// See CToDoCtrl::SetFocusToTasks() for why we need this
-			SetFocusToComments();
-			
-			m_taskList.SetFocus();
+			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
+			{
+				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
+				SetMaximizeState(TDCMS_MAXTASKLIST);
+			}
+			else
+			{
+				// See CToDoCtrl::SetFocus(TDCSF_TASKVIEW) for why we need this
+				if (m_layout.IsVisible(TDCSF_COMMENTS))
+					m_ctrlComments.SetFocus();
+
+				m_taskList.SetFocus();
+			}
+
+			// ensure the selected tree item is visible
+			m_taskList.EnsureSelectionVisible(TRUE);
 		}
-			
-		m_taskList.EnsureSelectionVisible(TRUE);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -6227,15 +6233,18 @@ void CTabbedToDoCtrl::SetFocusToTasks()
 	}
 }
 
-BOOL CTabbedToDoCtrl::TasksHaveFocus() const
+BOOL CTabbedToDoCtrl::HasFocus(TDC_SETFOCUSTO nLocation) const
 { 
+	if (nLocation != TDCSF_TASKVIEW)
+		return CToDoCtrl::HasFocus(nLocation);
+
 	FTC_VIEW nView = GetTaskView();
 
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::TasksHaveFocus(); 
+		return CToDoCtrl::HasFocus(nLocation); 
 
 	case FTCV_TASKLIST:
 		return m_taskList.HasFocus();
