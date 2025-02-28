@@ -1383,7 +1383,8 @@ else bValueVaries = TRUE; }
 #define GETMULTIVALUE_DATETIME(DT)								\
 { COleDateTime value;											\
 if (m_multitasker.GetTasksDate(m_aSelectedTaskIDs, DT, value))	\
-{ sValue = Misc::Format(value.m_dt); }							\
+{ if (CDateHelper::IsDateSet(value))							\
+sValue = Misc::Format(value.m_dt); }							\
 else { sValue = DATETIME_VARIES; bValueVaries = TRUE; } }
 
 // -----------------------------------------------------------------------------------------
