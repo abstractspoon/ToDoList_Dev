@@ -1283,7 +1283,7 @@ void CTDLTimeTrackerDlg::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 
 void CTDLTimeTrackerDlg::CollapseWindow(BOOL bCollapse)
 {
-	if (Misc::StateChanged(m_bCollapsed, bCollapse))
+	if (Misc::StatesDiffer(m_bCollapsed, bCollapse))
 	{
 		m_bCollapsed = bCollapse;
 

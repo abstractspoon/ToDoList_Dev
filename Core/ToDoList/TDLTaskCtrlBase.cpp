@@ -268,6 +268,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
 	ON_WM_TIMER()
 	ON_WM_HELPINFO()
 	ON_WM_CONTEXTMENU()
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 
 END_MESSAGE_MAP()
 
@@ -358,6 +359,13 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	return 0;
+}
+
+LRESULT CTDLTaskCtrlBase::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	m_dateTimeWidths.ResetWidths();
+
+	return CWnd::Default();
 }
 
 int CTDLTaskCtrlBase::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
@@ -1320,8 +1328,8 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	CHoldRedraw hr(m_lcColumns);
 	CClientDC dc(&m_lcColumns);
 
-	int nPrevTotalWidth = m_hdrColumns.CalcTotalItemWidth();
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
+	m_dateTimeWidths.Initialise(&dc);
 
 	// Optimise for single columns
 	if (!bZeroOthers && (nNumCols == 1))
@@ -1761,8 +1769,8 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 		CHoldRedraw hr(*this);
 		::SendMessage(Tasks(), WM_SETFONT, (WPARAM)hFont, TRUE);
 
-		RecalcUntrackedColumnWidths();
 		m_dateTimeWidths.ResetWidths();
+		RecalcUntrackedColumnWidths();
 	}
 	
 	return bChange;
@@ -3346,13 +3354,13 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 
 	m_dateTimeWidths.Initialise(pDC);
 
-	int nSpace = pDC->GetTextExtent(_T(" ")).cx;
+	const int nSepWidth = m_dateTimeWidths.nSepWidth;
 
 	int nMaxDateWidth = m_dateTimeWidths.nMaxDateWidth;
 	int nMinDateWidth = m_dateTimeWidths.nMinDateWidth;
 
-	int nMaxTimeWidth = (bHasTime ? (m_dateTimeWidths.nMaxTimeWidth + nSpace) : 0);
-	int nMaxDayWidth = (bHasDow ? (m_dateTimeWidths.nMaxDowNameWidth + nSpace) : 0);
+	int nMaxTimeWidth = (bHasTime ? (m_dateTimeWidths.nMaxTimeWidth + nSepWidth) : 0);
+	int nMaxDayWidth = (bHasDow ? (m_dateTimeWidths.nMaxDowNameWidth + nSepWidth) : 0);
 
 	// Work out what we can draw
 	BOOL bDrawDate = FALSE;
@@ -3409,7 +3417,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		// Sacrifice the date if it falls within 7 days
 		BOOL bWithin7Days = IsDateWithin7DaysOfToday(date, nDate);
 
-		nReqWidth = (nMaxDayWidth + nMaxTimeWidth - nSpace);
+		nReqWidth = (nMaxDayWidth + nMaxTimeWidth - nSepWidth);
 
 		if (bHasDow && bWithin7Days && (nAvailWidth >= nReqWidth))
 		{
@@ -3442,7 +3450,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 			bDrawTime = TRUE;
 			bDrawDate = FALSE;
 
-			nReqWidth = nMaxTimeWidth - nSpace;
+			nReqWidth = nMaxTimeWidth - nSepWidth;
 			break;
 		}
 
@@ -3453,7 +3461,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 			bDrawTime = FALSE;
 			bDrawDate = FALSE;
 
-			nReqWidth = nMaxDayWidth - nSpace;
+			nReqWidth = nMaxDayWidth - nSepWidth;
 			break;
 		}
 
@@ -3524,7 +3532,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 	if (bDrawDate)
 	{
 		DrawColumnText(pDC, sDate, rDraw, DT_RIGHT, crText);
-		rDraw.right -= (nMaxDateWidth + nSpace);
+		rDraw.right -= (nMaxDateWidth + nSepWidth);
 	}
 	
 	// Finally day of week
@@ -5210,28 +5218,8 @@ void CTDLTaskCtrlBase::RedrawTasks(BOOL bErase) const
 
 int CTDLTaskCtrlBase::CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime) const
 {
-	COleDateTime dateMax(2000, 12, 31, 23, 59, 0);
-	CString sDateMax, sTimeMax, sDow;
-
-	VERIFY(FormatDate(dateMax, nDate, sDateMax, sTimeMax, sDow, bCustomWantsTime));
-
-	// Always want date
-	int nSpace = pDC->GetTextExtent(_T(" ")).cx;
-	int nWidth = pDC->GetTextExtent(sDateMax).cx;
-
-	if (!sTimeMax.IsEmpty())
-	{
-		nWidth += nSpace;
-		nWidth += pDC->GetTextExtent(sTimeMax).cx;
-	}
-
-	if (!sDow.IsEmpty())
-	{
-		nWidth += nSpace;
-		nWidth += CDateHelper::GetMaxDayOfWeekNameWidth(pDC, TRUE);
-	}
-
-	return nWidth;
+	return m_dateTimeWidths.CalcMaxColumWidth(WantDrawColumnTime(nDate, bCustomWantsTime),
+											  HasStyle(TDCS_SHOWWEEKDAYINDATES));
 }
 
 BOOL CTDLTaskCtrlBase::WantDrawColumnTime(TDC_DATE nDate, BOOL bCustomWantsTime) const

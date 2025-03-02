@@ -238,7 +238,6 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnMove(int x, int y);
 	afx_msg void OnNcDestroy();
 	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
@@ -421,6 +420,11 @@ protected:
 	afx_msg void OnViewResizeColsToFit();
 	afx_msg void OnViewRestoreDefaultTaskViewFontSize();
 	afx_msg void OnViewSaveToImage();
+	afx_msg void OnViewSetFocusToTasks();
+	afx_msg void OnViewSetFocusToComments();
+	afx_msg void OnViewSetFocusToAttributes();
+	afx_msg void OnViewSetFocusToProjectName();
+	afx_msg void OnViewSetFocusToFilterBar();
 	afx_msg void OnViewShowAllBars();
 	afx_msg void OnViewShowRemindersWindow();
 	afx_msg void OnViewShowTasklistTabbar();
@@ -493,7 +497,6 @@ protected:
 	afx_msg void OnUpdateFileSaveToUserStorage(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateGotoNexttask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateGotoPrevtask(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateImport(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateMaximizeComments(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateMaximizeTasklist(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateMoveGoToTask(CCmdUI* pCmdUI);
@@ -504,7 +507,6 @@ protected:
 	afx_msg void OnUpdateMovetaskright(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateMovetaskup(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateNewTask(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateNewTasklist(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateNexttopleveltask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdatePrevtopleveltask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdatePrint(CCmdUI* pCmdUI);
@@ -515,7 +517,6 @@ protected:
 	afx_msg void OnUpdateReload(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSave(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSaveall(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateSaveas(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateScrollToSelectedTask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSendSelectedTasks(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSendTasks(CCmdUI* pCmdUI);
@@ -550,7 +551,6 @@ protected:
 	afx_msg void OnUpdateUserTool(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewClearfilter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewCustomToolbar(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateViewCycleTaskViews(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewDecrementTaskViewFontSize(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewExpandTasks(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewFilter(CCmdUI* pCmdUI);
@@ -569,16 +569,15 @@ protected:
 	afx_msg void OnUpdateViewRestoreDefaultTaskViewFontSize(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewSaveToImage(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowAllBars(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowTasklistTabbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowTreeListTabbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowfilterbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewSorttasklisttabs(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewStatusBar(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateViewToggleTreeandList(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewTogglefilter(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateViewToggletasksandcomments(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateWindow(CCmdUI* pCmdUI);
+
+	void AlwaysEnabled(CCmdUI* pCmdUI) { pCmdUI->Enable(TRUE); }
 
 	// Registered message handlers
 	afx_msg LRESULT OnAppRestoreFocus(WPARAM wp, LPARAM lp);
@@ -607,6 +606,7 @@ protected:
 	afx_msg LRESULT OnPreferencesClearMRU(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesEditLanguageFile(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesTestTool(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnRefreshUDTsInToolbar(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnReminderCompleteTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSelchangeFilter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSessionStatusChange(WPARAM wp, LPARAM lp);
@@ -637,7 +637,6 @@ protected:
 	afx_msg LRESULT OnToDoListPasswordRestore(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoListRefreshPrefs(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoListShowWindow(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnUpdateUDTsInToolbar(WPARAM wp, LPARAM lp);
 
 #ifdef _DEBUG
 	afx_msg void OnDebugCleanDictionaries();
@@ -842,6 +841,7 @@ protected:
 	BOOL CanInsertDateAndTime() const;
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
 	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL, BOOL bFlush = TRUE);
+	void SetToDoCtrlFocus(TDC_SETFOCUSTO nLocation);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	void DoMoveTask(TDC_MOVETASK nDirection);
 

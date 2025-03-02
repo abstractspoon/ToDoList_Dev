@@ -206,6 +206,7 @@ namespace Misc
 	BOOL HasEmpty(const CStringArray& aItems);
 	CString Last(const CStringArray& aText);
 	CString& Last(CStringArray& aText);
+	void Reverse(CString& sText);
 
 	int FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos = -1);
 	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE);
@@ -223,7 +224,7 @@ namespace Misc
 	int GetNextValue(int nValue, int nIncrement);
 	BOOL IsNumber(const CString& sValue);
 	BOOL IsSymbol(const CString& sValue);
-	BOOL StateChanged(BOOL b1, BOOL b2);
+	BOOL StatesDiffer(BOOL bState1, BOOL bState2);
 
 	// These use regional settings
 	CString FormatNumber(int nVal, LPCTSTR szTrail = NULL);
@@ -246,11 +247,13 @@ namespace Misc
 	BOOL IsScreenSaverActive();
 	BOOL IsScreenReaderActive(BOOL bCheckForMSNarrator = TRUE);
 	BOOL IsMSNarratorActive();
-	LANGID GetUserDefaultUILanguage();
-	LANGID GetUserKeyboardLanguage();
 	BOOL IsMetricMeasurementSystem();
 	BOOL IsHighContrastActive();
 	BOOL IsFullScreenAppActive();
+
+	LANGID GetUserDefaultUILanguage();
+	LANGID GetUserKeyboardLanguage();
+	LANGID GetPrimaryLanguage();
 
 	BOOL ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason);
 	BOOL ShutdownBlockReasonDestroy(HWND hWnd);

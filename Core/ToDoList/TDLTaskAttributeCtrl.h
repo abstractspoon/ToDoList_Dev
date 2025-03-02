@@ -38,6 +38,7 @@ public:
 public:
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
 	void SetUITheme(const CUIThemeFile& theme);
+	BOOL HasFocus() const { return m_lcAttributes.HasFocus(); }
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);

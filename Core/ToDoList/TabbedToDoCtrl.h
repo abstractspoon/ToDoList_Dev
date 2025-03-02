@@ -131,8 +131,8 @@ public:
 	BOOL CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const;
 	void ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand = TRUE);
 
-	void SetFocusToTasks();
-	BOOL TasksHaveFocus() const;
+	void SetFocus(TDC_SETFOCUSTO nLocation);
+	BOOL HasFocus(TDC_SETFOCUSTO nLocation) const;
 
 	BOOL SelectTasksInHistory(BOOL bForward);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;

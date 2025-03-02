@@ -44,20 +44,29 @@ ECHO ON
 
 cd TDLTest\Unicode_Release
 
-set OUTPUT_FILE=Test_Output.txt
+set OUTPUT_FILE=%REPO%\Core\TDLTest\Unicode_Release\Test_Output.txt
 del %OUTPUT_FILE%
 
 TDLTest > %OUTPUT_FILE%
 
 REM - Check for test errors
 ECHO OFF
-findstr /C:"tests FAILED" Test_Output.txt
+findstr /C:"tests FAILED" %OUTPUT_FILE%
 
-if %errorlevel%==1 (
-echo [42m Tests SUCCEEDED[0m
-)
 if %errorlevel%==0 (
 echo [41m Tests FAILED[0m
+pause
+exit
+)
+
+REM - Check for test success
+findstr /C:"tests SUCCEEDED" %OUTPUT_FILE% > nul
+
+if %errorlevel%==0 (
+echo [42m Tests SUCCEEDED[0m
+)
+if %errorlevel%==1 (
+echo [41m Test Results EMPTY[0m
 pause
 exit
 )

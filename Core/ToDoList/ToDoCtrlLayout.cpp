@@ -88,8 +88,8 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 
 	if (!bRebuild && (m_nAttribsPos == m_nCommentsPos))
 	{
-		bRebuild = (Misc::StateChanged(m_bAllowStacking, bAllowStacking) ||
-					 Misc::StateChanged(m_bStackCommentsAbove, bStackCommentAbove));
+		bRebuild = (Misc::StatesDiffer(m_bAllowStacking, bAllowStacking) ||
+					 Misc::StatesDiffer(m_bStackCommentsAbove, bStackCommentAbove));
 	}
 
 	m_nAttribsPos = nAttribsPos;
@@ -161,27 +161,27 @@ BOOL CToDoCtrlLayout::ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect)
 	return TRUE;
 }
 
-BOOL CToDoCtrlLayout::IsCommentsVisible() const
+BOOL CToDoCtrlLayout::IsVisible(TDC_SETFOCUSTO nLocation) const
 {
-	switch (m_nMaxState)
+	switch (nLocation)
 	{
-	case TDCMS_MAXTASKLIST:
-		return m_bShowCommentsAlways;
+	case TDCSF_COMMENTS:	return ((m_nMaxState == TDCMS_MAXTASKLIST) ? m_bShowCommentsAlways : TRUE);
+	case TDCSF_TASKVIEW:	return (m_nMaxState != TDCMS_MAXCOMMENTS);
+	case TDCSF_PROJECTNAME:	return (m_nMaxState == TDCMS_NORMAL);
+	case TDCSF_ATTRIBUTES:	return (m_nMaxState == TDCMS_NORMAL);
+		break;
 
-	case TDCMS_NORMAL:
-	case TDCMS_MAXCOMMENTS:
-		return TRUE;
+	default:
+		ASSERT(0);
+		break;
 	}
-
-	ASSERT(0);
-	return FALSE;
 }
 
 BOOL CToDoCtrlLayout::SetMaximised(TDC_MAXSTATE nState, BOOL bShowCommentsAlways, BOOL bRecalcLayout)
 {
 	if (m_nMaxState == nState)
 	{
-		if (!Misc::StateChanged(m_bShowCommentsAlways, bShowCommentsAlways))
+		if (!Misc::StatesDiffer(m_bShowCommentsAlways, bShowCommentsAlways))
 			return FALSE;
 
 		switch (nState)

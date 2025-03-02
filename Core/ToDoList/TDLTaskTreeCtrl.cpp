@@ -646,7 +646,7 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 	BOOL bWasSel = (pNMLV->uOldState & LVIS_SELECTED);
 	BOOL bSel = (pNMLV->uNewState & LVIS_SELECTED);
 	
-	if (Misc::StateChanged(bSel, bWasSel))
+	if (Misc::StatesDiffer(bSel, bWasSel))
 		TSH().SetItem(hti, (bSel ? TSHS_SELECT : TSHS_DESELECT), FALSE);
 	
 	// then sync focused item
@@ -656,7 +656,7 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 	BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
 	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
 
-	if (Misc::StateChanged(bFocused, bWasFocused))
+	if (Misc::StatesDiffer(bFocused, bWasFocused))
 	{
 		TSH().FixupTreeSelection();
 		

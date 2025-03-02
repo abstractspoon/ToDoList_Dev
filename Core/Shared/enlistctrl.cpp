@@ -308,7 +308,7 @@ END_MESSAGE_MAP()
 
 BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
 {
-	if (!Misc::StateChanged(bEnable, m_grouping.IsEnabled()))
+	if (!Misc::StatesDiffer(bEnable, m_grouping.IsEnabled()))
 		return TRUE;
 	
 	if (!m_grouping.EnableGroupView(GetSafeHwnd(), bEnable))
@@ -1582,7 +1582,7 @@ BOOL CEnListCtrl::IsSelectionChange(NMLISTVIEW* pNMLV, int* pItem)
 		BOOL bWasSel = (pNMLV->uOldState & LVIS_SELECTED);
 		BOOL bIsSel = (pNMLV->uNewState & LVIS_SELECTED);
 
-		if (Misc::StateChanged(bIsSel, bWasSel))
+		if (Misc::StatesDiffer(bIsSel, bWasSel))
 		{
 			if (pItem)
 				*pItem = pNMLV->iItem;

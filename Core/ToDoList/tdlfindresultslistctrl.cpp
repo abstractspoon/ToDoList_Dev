@@ -402,7 +402,7 @@ CFont* CTDLFindResultsListCtrl::GetItemFont(int nItem, int nSubItem) const
 
 void CTDLFindResultsListCtrl::SetStrikeThroughCompletedTasks(BOOL bStrikeThru)
 {
-	if (Misc::StateChanged(m_bStrikeThruDone, bStrikeThru))
+	if (Misc::StatesDiffer(m_bStrikeThruDone, bStrikeThru))
 	{
 		m_bStrikeThruDone = bStrikeThru;
 		m_fonts.Clear();

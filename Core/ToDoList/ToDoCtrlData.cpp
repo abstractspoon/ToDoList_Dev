@@ -4641,7 +4641,7 @@ TDC_SET CToDoCtrlData::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
 	// completion date if its completion state has also changed
 	BOOL bDone = CDateHelper::IsDateSet(date);
 	BOOL bWasDone = IsTaskDone(dwTaskID);
-	BOOL bStateChange = Misc::StateChanged(bDone, bWasDone);
+	BOOL bStateChange = Misc::StatesDiffer(bDone, bWasDone);
 	BOOL bDateChange = bStateChange;
 
 	if (!bDateChange && bDone && bWasDone)

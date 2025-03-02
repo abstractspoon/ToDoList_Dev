@@ -185,6 +185,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="JalaliCalendar.cpp" />
     <ClCompile Include="LockableHeaderCtrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -285,6 +286,7 @@
     <ClInclude Include="HMXDataset.h" />
     <ClInclude Include="Html2Rtf.h" />
     <ClInclude Include="Ini.h" />
+    <ClInclude Include="JalaliCalendar.h" />
     <ClInclude Include="Quantize.h" />
     <ClInclude Include="RangeSlider.h" />
     <ClInclude Include="SimpleSplitter.h" />

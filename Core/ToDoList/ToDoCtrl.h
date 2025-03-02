@@ -113,9 +113,6 @@ public:
 	BOOL ModifyPassword();
 	BOOL WantPasswordReprompting() const;
 
-	void SetMaximizeState(TDC_MAXSTATE nState);
-	virtual BOOL WantTaskContextMenu() const { return TRUE; }
-
 	TDC_FILE CheckIn();
 	TDC_FILE CheckOut(CString& sCheckedOutTo, BOOL bForce = FALSE);
 	BOOL IsCheckedOut() const;
@@ -397,16 +394,17 @@ public:
 	BOOL IsTaskLabelEditing() const;
 	void NotifyParentSelectionChange() const;
 
-	virtual BOOL TasksHaveFocus() const { return m_taskTree.HasFocus(); }
-	virtual BOOL CommentsHaveFocus() const { return m_ctrlComments.HasFocus(); }
-	virtual void SetFocusToTasks();
-	virtual void SetFocusToComments();
+	virtual void SetFocus(TDC_SETFOCUSTO nLocation);
+	virtual BOOL HasFocus(TDC_SETFOCUSTO nLocation) const;
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 	virtual BOOL DoIdleProcessing();
+	virtual void SetMaximizeState(TDC_MAXSTATE nState);
+	virtual BOOL WantTaskContextMenu() const { return TRUE; }
 
+	TDC_MAXSTATE GetMaximizeState() const { return m_layout.GetMaximiseState(); }
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	BOOL SelectTasksInHistory(BOOL bForward);
 	void SelectAll(BOOL bVisibleOnly = TRUE);
@@ -436,7 +434,6 @@ public:
 	void RefreshReminders();
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos);
 	void SetCompletionStatus(const CString& sStatus);
-	void SetFocusToProjectName();
 	COleDateTime GetEarliestDueDate() const { return m_calculator.GetEarliestDueDate(); } // entire tasklist
 
 	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull) const;

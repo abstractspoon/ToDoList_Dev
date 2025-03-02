@@ -74,6 +74,7 @@ public:
 	void ToggleGrouping();
 	BOOL IsGrouped() const { return m_bGrouped; }
 	BOOL HasMultiSelection() const { return (m_aSelectedTaskIDs.GetSize() > 1); }
+	BOOL HasFocus() const;
 
 	BOOL MoveSelectedAttribute(BOOL bUp);
 	BOOL CanMoveSelectedAttribute(BOOL bUp) const;
@@ -248,6 +249,7 @@ protected:
 
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;
+	COleDateTime GetDateTime(TDC_ATTRIBUTE nAttribID) const;
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
 	TDC_ATTRIBUTE MapTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 

@@ -234,7 +234,7 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	// application preferences
 	BOOL bISODates = pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE);
 
-	if (Misc::StateChanged(m_mapGraphs.IsDisplayingISODates(), bISODates))
+	if (Misc::StatesDiffer(m_mapGraphs.IsDisplayingISODates(), bISODates))
 	{
 		m_mapGraphs.SetDisplayISODates(bISODates);
 		m_chart.OnDisplayISODatesChanged();

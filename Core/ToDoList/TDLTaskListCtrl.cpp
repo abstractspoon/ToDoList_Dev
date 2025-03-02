@@ -511,7 +511,7 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) co
 
 BOOL CTDLTaskListCtrl::SetSortGroupsAscending(BOOL bAscending)
 {
-	if (!Misc::StateChanged(m_bSortGroupsAscending, bAscending))
+	if (!Misc::StatesDiffer(m_bSortGroupsAscending, bAscending))
 		return FALSE;
 
 	m_bSortGroupsAscending = bAscending;
@@ -524,7 +524,7 @@ BOOL CTDLTaskListCtrl::SetSortGroupsAscending(BOOL bAscending)
 
 BOOL CTDLTaskListCtrl::SetSortNoneGroupBelow(BOOL bBelow)
 {
-	if (!Misc::StateChanged(m_bSortNoneGroupBelow, bBelow))
+	if (!Misc::StatesDiffer(m_bSortNoneGroupBelow, bBelow))
 		return FALSE;
 
 	m_bSortNoneGroupBelow = bBelow;
