@@ -58,10 +58,10 @@ BOOL CTDCImageList::NeedLoadImages(const CString& sTaskList, COLORREF crTranspar
 	if (GetSafeHandle() == NULL)
 		return TRUE;
 
-	if (Misc::StateChanged(bWantToolbars, m_bWantToolbars))
+	if (Misc::StatesDiffer(bWantToolbars, m_bWantToolbars))
 		return TRUE;
 
-	if (Misc::StateChanged(bWantDefaultIcons, m_bWantDefaultIcons))
+	if (Misc::StatesDiffer(bWantDefaultIcons, m_bWantDefaultIcons))
 		return TRUE;
 
 	if ((bWantDefaultIcons || bWantToolbars) && (crTransparent != m_crTransparent))

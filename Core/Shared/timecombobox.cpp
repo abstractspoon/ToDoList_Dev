@@ -159,7 +159,7 @@ void CTimeComboBox::SetStyle(DWORD dwStyle)
 
 	m_dwStyle = dwStyle;
 
-	if (Misc::StateChanged(bWasISO, bIsISO))
+	if (Misc::StatesDiffer(bWasISO, bIsISO))
 	{
 		double date = GetOleTime();
 

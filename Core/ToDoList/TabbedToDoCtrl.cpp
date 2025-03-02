@@ -6750,7 +6750,7 @@ void CTabbedToDoCtrl::OnListSelChanged()
 		else
 			m_taskTree.RestoreSelection(cacheList);
 	}
-	else if (Misc::StateChanged(bListHadSelection, pLVData->bHasSelectedTask))
+	else if (Misc::StatesDiffer(bListHadSelection, pLVData->bHasSelectedTask))
 	{
 		UpdateControls();
 		NotifyParentSelectionChange();

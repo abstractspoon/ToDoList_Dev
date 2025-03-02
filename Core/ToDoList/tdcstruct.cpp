@@ -39,7 +39,7 @@ TDCDATETIMEWIDTHS::TDCDATETIMEWIDTHS()
 
 void TDCDATETIMEWIDTHS::SetIsoFormat(BOOL bIso)
 {
-	if (!Misc::StateChanged(bIso, bIsoFormat))
+	if (!Misc::StatesDiffer(bIso, bIsoFormat))
 		return;
 
 	bIsoFormat = bIso;

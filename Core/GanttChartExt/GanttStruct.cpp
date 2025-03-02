@@ -908,7 +908,7 @@ BOOL GANTTDATERANGE::operator==(const COleDateTimeRange& dtOther) const
 {
 	// return false if one or other is not valid,
 	// but allow both being unset
-	if (Misc::StateChanged(IsValid(), dtOther.IsValid()))
+	if (Misc::StatesDiffer(IsValid(), dtOther.IsValid()))
 		return FALSE;
 
 	ASSERT(!m_bInclusive && !dtOther.m_bInclusive); // always

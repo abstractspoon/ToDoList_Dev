@@ -192,7 +192,7 @@ void CSessionStatusWnd::OnTimer(UINT_PTR nIDEvent)
 			BOOL bWasActive = m_bScreenSaver;
 			BOOL bIsActive = Misc::IsScreenSaverActive();
 
-			if (Misc::StateChanged(bWasActive, bIsActive))
+			if (Misc::StatesDiffer(bWasActive, bIsActive))
 			{
 				m_bScreenSaver = bIsActive;
 				Notify(SESSIONSTATUS_SCREENSAVER, bIsActive);
@@ -205,7 +205,7 @@ void CSessionStatusWnd::OnTimer(UINT_PTR nIDEvent)
 			BOOL bWasLocked = m_bLocked;
 			BOOL bIsLocked = Misc::IsWorkStationLocked();
 
-			if (Misc::StateChanged(bWasLocked, bIsLocked))
+			if (Misc::StatesDiffer(bWasLocked, bIsLocked))
 			{
 				m_bLocked = bIsLocked;
 				Notify(SESSIONSTATUS_LOCK, bIsLocked);

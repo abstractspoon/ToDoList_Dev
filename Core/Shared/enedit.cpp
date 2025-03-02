@@ -273,7 +273,7 @@ void CEnEdit::DeleteAllButtons()
 
 void CEnEdit::EnableButtonPadding(BOOL bEnable)
 {
-	if (Misc::StateChanged(m_nBtnPadding, bEnable))
+	if (Misc::StatesDiffer(m_nBtnPadding, bEnable))
 	{
 		m_nBtnPadding = (bEnable ? GetSystemMetrics(SM_CXEDGE) : 0);
 

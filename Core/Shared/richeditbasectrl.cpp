@@ -194,7 +194,7 @@ BOOL CRichEditBaseCtrl::EnableChangeNotifications(BOOL bEnable)
 	else
 		SetEventMask(GetEventMask() & ~ENM_CHANGE);
 
-	return !Misc::StateChanged(HasChangeNotifications(), bEnable);
+	return !Misc::StatesDiffer(HasChangeNotifications(), bEnable);
 }
 
 BOOL CRichEditBaseCtrl::HasChangeNotifications() const

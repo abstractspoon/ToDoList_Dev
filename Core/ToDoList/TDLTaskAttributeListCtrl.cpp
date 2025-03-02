@@ -2475,7 +2475,7 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 		break;
 	}
 
-	if (Misc::StateChanged(bIsReadOnly, bWantReadOnly))
+	if (Misc::StatesDiffer(bIsReadOnly, bWantReadOnly))
 	{
 		if (!CDialogHelper::SetAutoComboReadOnly(combo, TRUE, bWantReadOnly, COMBO_DROPHEIGHT))
 		{

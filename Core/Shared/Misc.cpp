@@ -1931,9 +1931,9 @@ BOOL Misc::IsSymbol(const CString& sValue)
 	return TRUE;
 }
 
-BOOL Misc::StateChanged(BOOL b1, BOOL b2) 
+BOOL Misc::StatesDiffer(BOOL bState1, BOOL bState2) 
 { 
-	return ((b1 && !b2) || (!b1 && b2)); 
+	return ((bState1 && !bState2) || (!bState1 && bState2)); 
 }
 
 // From: http://www.geeksforgeeks.org/shuffle-a-given-array/

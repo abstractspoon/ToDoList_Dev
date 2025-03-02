@@ -185,7 +185,7 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 void CTaskCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
 {
 	BOOL bIsHidden = HasOption(TCCO_HIDEPARENTTASKS);
-	BOOL bChange = (Misc::StateChanged(bHide, bIsHidden) || 
+	BOOL bChange = (Misc::StatesDiffer(bHide, bIsHidden) || 
 					(bHide && (m_sHideParentTag != sTag)));
 
 	if (bChange)
@@ -1533,7 +1533,7 @@ BOOL CTaskCalendarCtrl::SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending)
 	if (!WantSortUpdate(nSortBy))
 		return FALSE;
 
-	if (nSortBy != m_nSortBy || Misc::StateChanged(m_bSortAscending, bAscending))
+	if (nSortBy != m_nSortBy || Misc::StatesDiffer(m_bSortAscending, bAscending))
 		m_aSortedTasks.SetNeedsResort(nSortBy, bAscending);
 
 	m_nSortBy = nSortBy;

@@ -88,8 +88,8 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 
 	if (!bRebuild && (m_nAttribsPos == m_nCommentsPos))
 	{
-		bRebuild = (Misc::StateChanged(m_bAllowStacking, bAllowStacking) ||
-					 Misc::StateChanged(m_bStackCommentsAbove, bStackCommentAbove));
+		bRebuild = (Misc::StatesDiffer(m_bAllowStacking, bAllowStacking) ||
+					 Misc::StatesDiffer(m_bStackCommentsAbove, bStackCommentAbove));
 	}
 
 	m_nAttribsPos = nAttribsPos;
@@ -181,7 +181,7 @@ BOOL CToDoCtrlLayout::SetMaximised(TDC_MAXSTATE nState, BOOL bShowCommentsAlways
 {
 	if (m_nMaxState == nState)
 	{
-		if (!Misc::StateChanged(m_bShowCommentsAlways, bShowCommentsAlways))
+		if (!Misc::StatesDiffer(m_bShowCommentsAlways, bShowCommentsAlways))
 			return FALSE;
 
 		switch (nState)

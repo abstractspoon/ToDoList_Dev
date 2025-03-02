@@ -559,7 +559,7 @@ TDCCAUI_UPDATERESULT CTDCCustomFilterAttributeUIHelper::GetControlData(const CWn
 
 			ctrl.ShowBuddy(pParent, bShowBuddy);
 
-			if (Misc::StateChanged(bWasShowingBuddy, bShowBuddy))
+			if (Misc::StatesDiffer(bWasShowingBuddy, bShowBuddy))
 				nRes = TDCCAUIRES_REPOSCTRLS;
 		}
 	}

@@ -418,7 +418,7 @@ void CTDLFilterBar::OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFil
 
 	UpdateData();
 
-	if (Misc::StateChanged(bWasShowingBuddy, bShowBuddy))
+	if (Misc::StatesDiffer(bWasShowingBuddy, bShowBuddy))
 		ReposControls();
 
 	NotifyParentFilterChange();

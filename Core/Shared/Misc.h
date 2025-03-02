@@ -224,7 +224,7 @@ namespace Misc
 	int GetNextValue(int nValue, int nIncrement);
 	BOOL IsNumber(const CString& sValue);
 	BOOL IsSymbol(const CString& sValue);
-	BOOL StateChanged(BOOL b1, BOOL b2);
+	BOOL StatesDiffer(BOOL bState1, BOOL bState2);
 
 	// These use regional settings
 	CString FormatNumber(int nVal, LPCTSTR szTrail = NULL);

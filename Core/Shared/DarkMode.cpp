@@ -101,7 +101,7 @@ void CDarkMode::Enable(BOOL bEnable)
 	if (!IsSupported())
 		return;
 
-	if (!Misc::StateChanged(bEnable, IsEnabled()))
+	if (!Misc::StatesDiffer(bEnable, IsEnabled()))
 		return;
 
 	if (bEnable)
@@ -572,7 +572,7 @@ protected:
 			{
 				const STYLESTRUCT* pSS = (const STYLESTRUCT*)lp;
 
-				if (Misc::StateChanged((pSS->styleOld & ES_READONLY), (pSS->styleNew & ES_READONLY)))
+				if (Misc::StatesDiffer((pSS->styleOld & ES_READONLY), (pSS->styleNew & ES_READONLY)))
 					InvalidateRect(GetParent(), NULL, TRUE);
 			}
 			break;

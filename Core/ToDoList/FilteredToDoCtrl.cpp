@@ -1019,7 +1019,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 		BOOL bWantShowItem = m_matcher.TaskMatches(dwModTaskID, query, FALSE, result);
 		BOOL bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwModTaskID);
 
-		bNeedRefilter = Misc::StateChanged(bWantShowItem, bTreeHasItem);
+		bNeedRefilter = Misc::StatesDiffer(bWantShowItem, bTreeHasItem);
 
 		// Special case: Modified task is a dependency of a hidden task
 		if (!bNeedRefilter && (nAttribID == TDCA_DONEDATE) && m_filter.HasCompletedDependencyFilter())
@@ -1034,7 +1034,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 				bWantShowItem = m_matcher.TaskMatches(dwDependID, query, FALSE, result);
 				bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwDependID);
 
-				bNeedRefilter = Misc::StateChanged(bWantShowItem, bTreeHasItem);
+				bNeedRefilter = Misc::StatesDiffer(bWantShowItem, bTreeHasItem);
 			}
 		}
 	}

@@ -951,7 +951,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetTypes(DWORD dwDataType, DWORD dwListType)
 	BOOL bIsCalc = IsDataType(TDCCA_CALCULATION);
 
 	// Clear calculation if switching to or from
-	if (Misc::StateChanged(bWasCalc, bIsCalc))
+	if (Misc::StatesDiffer(bWasCalc, bIsCalc))
 		calculation.Clear();
 
 	return TRUE;

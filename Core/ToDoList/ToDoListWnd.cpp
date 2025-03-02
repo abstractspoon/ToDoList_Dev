@@ -1059,7 +1059,7 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 BOOL CToDoListWnd::EnableLogging(BOOL bEnable)
 {
 	// Quick exit if state hasn't changed
-	if (!Misc::StateChanged(bEnable, FileMisc::IsLoggingEnabled()))
+	if (!Misc::StatesDiffer(bEnable, FileMisc::IsLoggingEnabled()))
 		return TRUE;
 
 	BOOL bRes = FileMisc::EnableLogging(bEnable, _T("Abstractspoon"));
@@ -11920,7 +11920,7 @@ LRESULT CToDoListWnd::OnSelchangeFilter(WPARAM wp, LPARAM lp)
 	// Refresh filter controls if we've switched 
 	// from a custom to default filter or vice versa
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	BOOL bUpdateFilterCtrls = Misc::StateChanged(sCustom.IsEmpty(), !tdc.HasAdvancedFilter());
+	BOOL bUpdateFilterCtrls = Misc::StatesDiffer(sCustom.IsEmpty(), !tdc.HasAdvancedFilter());
 
 	OnChangeFilter(filter, sCustom, dwCustomFlags, bUpdateFilterCtrls);
 
