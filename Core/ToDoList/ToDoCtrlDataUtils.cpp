@@ -3517,7 +3517,7 @@ BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, cons
 				BOOL bFirstIsDue = CustomAttributeOperandDerivesFromDueDate(calc.opFirst);
 				BOOL bSecondIsDue = CustomAttributeOperandDerivesFromDueDate(calc.opSecond);
 
-				if (Misc::StateChanged(bFirstIsDue, bSecondIsDue))
+				if (Misc::StatesDiffer(bFirstIsDue, bSecondIsDue))
 				{
 					if (bFirstIsDue && !CDateHelper::DateHasTime(dFirstVal))
 					{
