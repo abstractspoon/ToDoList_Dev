@@ -1153,8 +1153,13 @@ namespace DayViewUIExtension
 
 		public bool DisplayDatesInISO
 		{
-			get { return (AmPmDisplay == false); }
-			set { AmPmDisplay = (value == false); }
+			get { return m_RenderHelper.DisplayDatesInISO; }
+
+			set
+			{
+				m_RenderHelper.DisplayDatesInISO = value;
+				base.AmPmDisplay = (value == false);
+			}
 		}
 
 		private bool m_TaskColorIsBackground = false;

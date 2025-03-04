@@ -75,6 +75,7 @@ namespace LoggedTimeUIExtension
 			m_TaskItems = new TaskItems();
 //			m_DateSortedTasks = new DateSortedTasks(m_LogEntries);
 
+			base.NotifyDayWidth += new Calendar.DayWidthEventHandler(OnNotifyDayWidth);
 
 			// Create a 5 minute timer for updating the line indicating time of day 'today'
 			var timer = new System.Windows.Forms.Timer()
@@ -875,8 +876,13 @@ namespace LoggedTimeUIExtension
 
 		public bool DisplayDatesInISO
 		{
-			get { return (AmPmDisplay == false); }
-			set { AmPmDisplay = (value == false); }
+			get { return m_RenderHelper.DisplayDatesInISO; }
+
+			set
+			{
+				m_RenderHelper.DisplayDatesInISO = value;
+				base.AmPmDisplay = (value == false);
+			}
 		}
 
 		private bool m_TaskColorIsBackground = false;
