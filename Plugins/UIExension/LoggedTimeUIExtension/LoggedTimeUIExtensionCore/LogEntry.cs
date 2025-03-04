@@ -161,6 +161,17 @@ namespace LoggedTimeUIExtension
 
 		public bool IsEmpty { get { return (m_Entries?.Count == 0); } }
 
+		public bool Exists
+		{
+			get
+			{
+				if (string.IsNullOrEmpty(FilePath))
+					return false;
+
+				return File.Exists(FilePath);
+			}
+		}
+
 		private void Reset()
 		{
 			m_Entries.Clear();

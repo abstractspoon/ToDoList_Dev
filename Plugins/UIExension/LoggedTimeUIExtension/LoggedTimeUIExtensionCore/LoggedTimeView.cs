@@ -323,7 +323,7 @@ namespace LoggedTimeUIExtension
 
 				if (logFile == null)
 				{
-					Debug.Assert(logFile != null);
+					Debug.Assert((logFile != null) || (m_SelectedLogEntryId == 0));
 					return false;
 				}
 
@@ -377,7 +377,7 @@ namespace LoggedTimeUIExtension
 				Invalidate();
 			}
 
-			var logPath = TaskTimeLog.GetLogPath(m_TasklistPath, taskId);
+			var logPath = TaskTimeLog.GetLogPath(m_TasklistPath, (logSeparately ? taskId : 0));
 			HandleLogAccessResult(logPath, false);
 
 			return success;
@@ -800,8 +800,15 @@ namespace LoggedTimeUIExtension
 
 				string taskLogFolder = Path.ChangeExtension(m_TasklistPath, null);
 
-				m_TaskLogFileWatcher.Path = taskLogFolder;
-				m_TaskLogFileWatcher.EnableRaisingEvents = Directory.Exists(taskLogFolder);
+				if (Directory.Exists(taskLogFolder))
+				{
+					m_TaskLogFileWatcher.Path = taskLogFolder;
+					m_TaskLogFileWatcher.EnableRaisingEvents = true;
+				}
+				else
+				{
+					m_TaskLogFileWatcher.EnableRaisingEvents = false;
+				}
 			}
 			else
 			{
