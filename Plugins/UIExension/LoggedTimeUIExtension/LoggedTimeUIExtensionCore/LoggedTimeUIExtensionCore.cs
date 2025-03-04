@@ -41,7 +41,6 @@ namespace LoggedTimeUIExtension
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
-//		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
 
 // 		private LogEntry m_DefaultNewLogEntryAttributes;
@@ -169,7 +168,6 @@ namespace LoggedTimeUIExtension
 			m_ToolbarRenderer.SetUITheme(theme);
 
 			m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
-//			m_SelectedTaskDatesLabel.ForeColor = m_WeekLabel.ForeColor;
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -215,7 +213,6 @@ namespace LoggedTimeUIExtension
             if (appOnly)
 			{
 				UpdateWorkingHourDisplay();
-				//UpdatedSelectedTaskDatesText();
 			}
 			else
             {
@@ -302,7 +299,6 @@ namespace LoggedTimeUIExtension
 			CreateMonthYearCombos();
 			CreateToolbar();
 			CreateWeekLabel();
-			//CreateSelectedTaskDatesLabel();
 
 			// view always comes last
 			CreateTimeLogView();
@@ -316,17 +312,11 @@ namespace LoggedTimeUIExtension
 											DPIScaling.Scale(5));
 
 			m_TimeLog.SelectionChanged += new Calendar.AppointmentEventHandler(OnTimeLogSelectionChanged);
-// 			m_TimeLog.AppointmentMove += new TDLAppointmentEventHandler(OnTimeLogAppointmentChanged);
 			m_TimeLog.WeekChange += new Calendar.WeekChangeEventHandler(OnTimeLogWeekChanged);
 			m_TimeLog.MouseWheel += new MouseEventHandler(OnTimeLogMouseWheel);
 			m_TimeLog.MouseDoubleClick += new MouseEventHandler(OnTimeLogMouseDoubleClick);
 			m_TimeLog.ContextMenu += new TDLContextMenuEventHandler(OnTimeLogContextMenu);
 			m_TimeLog.LogAccessStatusChanged += new LogAccessStatusEventHandler(OnTimeLogAccessStatusChanged);
-
-			// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
-			// causes the edit icon dialog to fail to correctly get focus but
-			// counter-intuitively it works from 'MouseDown'
-			m_TimeLog.MouseDown += new MouseEventHandler(OnTimeLogMouseClick);
 
 			m_TimeLog.StartDate = DateTime.Now;
 			m_TimeLog.SetFont(FontName, 8);
@@ -406,32 +396,6 @@ namespace LoggedTimeUIExtension
 
 			Controls.Add(m_WeekLabel);
 		}
-
-/*
-		private void CreateSelectedTaskDatesLabel()
-		{
-			m_SelectedTaskDatesLabel = new LinkLabelEx.LinkLabelEx();
-
-			m_SelectedTaskDatesLabel.Font = m_ControlsFont;
-			m_SelectedTaskDatesLabel.Location = new Point(m_Toolbar.Right, m_Toolbar.Top);
-			m_SelectedTaskDatesLabel.Height = m_Toolbar.Height;
-			m_SelectedTaskDatesLabel.Width = 1024;
-			m_SelectedTaskDatesLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-			m_SelectedTaskDatesLabel.AutoSize = false;
-			m_SelectedTaskDatesLabel.ActiveLinkColor = m_SelectedTaskDatesLabel.LinkColor;
-			m_SelectedTaskDatesLabel.VisitedLinkColor = m_SelectedTaskDatesLabel.LinkColor;
-
-			m_SelectedTaskDatesLabel.LinkClicked += new LinkLabelLinkClickedEventHandler(OnClickSelectedTaskDatesLink);
-			
-			Controls.Add(m_SelectedTaskDatesLabel);
-		}
-*/
-
-// 		protected void OnClickSelectedTaskDatesLink(object sender, LinkLabelLinkClickedEventArgs e)
-// 		{
-// 			//m_TimeLog.EnsureSelectionVisible(false);
-// 			m_TimeLog.Focus();
-// 		}
 
 		private void CreateToolbar()
 		{
@@ -589,7 +553,6 @@ namespace LoggedTimeUIExtension
 			string format = m_Trans.Translate("Next/Previous {0} days", Translator.Type.ToolTip);
 			m_TimeLog.HScrollTooltipText = String.Format(format, m_TimeLog.HScrollStep);
 
-			//UpdatedSelectedTaskDatesPosition();
 			UpdateToolbarButtonStates();
 		}
 
@@ -774,8 +737,6 @@ namespace LoggedTimeUIExtension
 			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, LabelTop - 2);
 			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, LabelTop);
 
-			//UpdatedSelectedTaskDatesPosition(); // called elsewhere also
-
 			Rectangle dayViewRect = ClientRectangle;
 
 			dayViewRect.Y = ControlTop;
@@ -787,40 +748,15 @@ namespace LoggedTimeUIExtension
             Invalidate(true);
         }
 
-		private void HandleTimeLogLeftMouseClick(MouseEventArgs e, bool doubleClick)
-		{
-			var appt = m_TimeLog.GetAppointmentAt(e.Location.X, e.Location.Y);
-
-			if (appt == null)
-				return;
-
-// 			// Handle icon click on all types
-// 			var realAppt = m_TimeLog.GetRealAppointment(appt);
-// 
-// 			if (!m_TimeLog.ReadOnly && !realAppt.Locked &&
-// 				(m_TimeLog.IconHitTest(m_TimeLog.PointToScreen(e.Location)) > 0))
-// 			{
-// 				var notify = new UIExtension.ParentNotify(m_HwndParent);
-// 				notify.NotifyEditIcon();
-// 
-// 				return;
-// 			}
-
-			// Handle double-click differently for each type
-			if (doubleClick)
-				OnEditLogEntry(this, null);
-		}
-
-		private void OnTimeLogMouseClick(object sender, MouseEventArgs e)
-        {
-			if (e.Button == MouseButtons.Left)
-				HandleTimeLogLeftMouseClick(e, false);
-		}
-
 		private void OnTimeLogMouseDoubleClick(object sender, MouseEventArgs e)
 		{
 			if (e.Button == MouseButtons.Left)
-				HandleTimeLogLeftMouseClick(e, true);
+			{
+				var appt = m_TimeLog.GetAppointmentAt(e.Location.X, e.Location.Y);
+
+				if (appt != null)
+					OnEditLogEntry(this, null);
+			}
 		}
 
 		private void OnTimeLogMouseWheel(object sender, MouseEventArgs e)
@@ -836,33 +772,8 @@ namespace LoggedTimeUIExtension
 
 		private void OnTimeLogSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
-			//UpdatedSelectedTaskDatesText();
 			UpdateToolbarButtonStates();
 		}
-		/*
-				private void UpdatedSelectedTaskDatesText()
-				{
-					DateTime from, to;
-
-					if (m_TimeLog.GetSelectedTaskDates(out from, out to))
-					{
-						String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
-						String dateRange = DateUtil.FormatRange(from, to, true, m_TimeLog.DisplayDatesInISO);
-
-						m_SelectedTaskDatesLabel.Text = (label + dateRange);
-						m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
-					}
-					else
-					{
-						m_SelectedTaskDatesLabel.Text = String.Empty;
-					}
-				}
-
-				private void UpdatedSelectedTaskDatesPosition()
-				{
-					m_SelectedTaskDatesLabel.Location = new Point(m_WeekLabel.Right + 10, m_YearCombo.Bottom - m_SelectedTaskDatesLabel.Height);
-				}
-		*/
 
 		private void OnTimeLogWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
 		{
@@ -874,8 +785,6 @@ namespace LoggedTimeUIExtension
 
 				m_MonthCombo.SelectedMonth = args.StartDate.Month;
 				m_YearCombo.SelectedYear = args.StartDate.Year;
-
-				//UpdatedSelectedTaskDatesPosition();
 
 				m_SettingMonthYear = false;
 			}
@@ -889,8 +798,6 @@ namespace LoggedTimeUIExtension
 
 				m_TimeLog.StartDate = new DateTime(m_YearCombo.SelectedYear, m_MonthCombo.SelectedMonth, 1);
 				m_WeekLabel.StartDate = m_TimeLog.StartDate;
-
-				//UpdatedSelectedTaskDatesPosition();
 
 				m_SettingTimeLogStartDate = false;
 			}
@@ -919,6 +826,4 @@ namespace LoggedTimeUIExtension
 		}
 
 	}
-
-
 }

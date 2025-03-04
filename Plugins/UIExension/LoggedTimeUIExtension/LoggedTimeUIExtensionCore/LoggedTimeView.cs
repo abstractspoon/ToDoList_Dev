@@ -498,6 +498,7 @@ namespace LoggedTimeUIExtension
 
 		public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
 		{
+/*
 			bool forwards = true, topLevel = false;
 
 			switch (getTask)
@@ -521,7 +522,6 @@ namespace LoggedTimeUIExtension
 				break;
 			}
 
-/*
 			var sortedTasks = m_DateSortedTasks.Items;
 			int item = sortedTasks.NextIndex(taskID, forwards);
 
