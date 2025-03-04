@@ -2131,7 +2131,7 @@ namespace Calendar
 
 			image.Height += DayHeaderHeight;
 			image.Height += ((numLayers * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
-			image.Height += (VisibleStartHour * slotsPerHour * slotHeight);
+			image.Height += ((VisibleEndHour - VisibleStartHour) * slotsPerHour * slotHeight);
 
 			int dayWidth = ((ClientRectangle.Width - (minHourLabelWidth + hourLabelIndent)) / DaysShowing);
 			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * dayWidth));
