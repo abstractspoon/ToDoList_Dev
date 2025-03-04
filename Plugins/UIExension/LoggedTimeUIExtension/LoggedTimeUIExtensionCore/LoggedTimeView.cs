@@ -43,7 +43,6 @@ namespace LoggedTimeUIExtension
 
 //		private DateSortedTasks m_DateSortedTasks;
 
-		//private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
 		private Translator m_Trans;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
@@ -76,7 +75,6 @@ namespace LoggedTimeUIExtension
 			m_TaskItems = new TaskItems();
 //			m_DateSortedTasks = new DateSortedTasks(m_LogEntries);
 
-// 			base.NotifyDayWidth += new Calendar.DayWidthEventHandler(OnNotifyDayWidth);
 
 			// Create a 5 minute timer for updating the line indicating time of day 'today'
 			var timer = new System.Windows.Forms.Timer()
@@ -228,16 +226,6 @@ namespace LoggedTimeUIExtension
 
 			base.WndProc(ref m);
 		}
-
-// 		protected override Calendar.SelectionTool NewSelectionTool()
-// 		{
-// 			return new TDLSelectionTool();
-// 		}
-// 
-// 		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt)
-// 		{
-// 			return new TDLAppointmentView(appt);
-// 		}
 
 		protected void InitializeComponent()
 		{
