@@ -284,9 +284,9 @@ namespace LoggedTimeUIExtension
 												borderColor);
 		}
 
+		/*
 		void DrawTaskIconAndGripper(Graphics g, Calendar.AppointmentView apptView, bool isSelected, Color barColor, ref Rectangle rect)
 		{
-			/*
 			if (rect.Width <= 0)
 				return;
 
@@ -301,8 +301,8 @@ namespace LoggedTimeUIExtension
 
 			var tdlView = (apptView as TDLAppointmentView);
 			tdlView.IconRect = iconRect;
-			*/
 		}
+		*/
 
 		static string FormatTime(double hours, string hoursFormat, string minutesFormat, Translator trans)
 		{
@@ -361,16 +361,11 @@ namespace LoggedTimeUIExtension
 
 			isSelected = WantDrawAppointmentSelected(apptView.Appointment);
 
-// 			var tdlView = (apptView as TDLAppointmentView);
-// 			Rectangle startRect, endRect, todayRect;
-
 			var apptRect = apptView.Rectangle;
 
 			DrawTaskBackground(g, apptRect, apptView, isSelected, fillColor, borderColor);
-			DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref apptRect);
+			//DrawTaskIconAndGripper(g, apptView, isSelected, barColor, ref apptRect);
 			DrawTaskText(g, apptView, apptRect, textColor);
-
-// 			tdlView.TextHorzOffset = (apptView.Rectangle.X - apptRect.X);
 		}
 
 		protected void DrawTodayTime(PaintEventArgs e, Rectangle rect, DateTime date)
@@ -433,33 +428,8 @@ namespace LoggedTimeUIExtension
 
 		protected UIExtension.SelectionRect.Style GetAppointmentSelectedState(Calendar.Appointment appt)
 		{
-			if (base.SavingToImage)
-				return UIExtension.SelectionRect.Style.None;
-
-			if (m_SelectedLogEntryId == appt.Id)
+			if (!base.SavingToImage && (m_SelectedLogEntryId == appt.Id))
 				return (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
-
-			// Check interrelatedness of types
-/*
-			if (Focused)
-			{
-				var realAppt = GetRealAppointment(appt);
-				var selAppt = GetAppointment(m_SelectedEntryId);
-				var selRealAppt = GetRealAppointment(selAppt);
-
-				if (selRealAppt == realAppt)
-				{
-					// If this date's 'real' task is selected show the extension date as 'lightly' selected
-					if ((appt is TaskExtensionItem))
-						return UIExtension.SelectionRect.Style.DropHighlighted;
-
-					// If this is the real task for a selected custom date or time block, 
-					// show the real task as 'lightly' selected
-					if ((selAppt is TaskCustomDateAttribute) || (selAppt is TaskTimeBlock))
-						return UIExtension.SelectionRect.Style.DropHighlighted;
-				}
-			}
-*/
 
 			// else
 			return UIExtension.SelectionRect.Style.None;
