@@ -302,21 +302,7 @@ namespace LoggedTimeUIExtension
 
 		public bool CanModifySelectedLogEntry
 		{
-			get
-			{
-				if (ReadOnly)
-					return false;
-
-				var logFile = m_LogFiles.GetLogFile(m_SelectedLogEntryId);
-
-				if (logFile == null)
-				{
-					Debug.Assert((logFile != null) || (m_SelectedLogEntryId == 0));
-					return false;
-				}
-
-				return logFile.IsAccessible;
-			}
+			get { return CanModifyLogEntry(m_SelectedLogEntryId); }
 		}
 
 		public bool CanDeleteSelectedLogEntry
@@ -1009,7 +995,7 @@ namespace LoggedTimeUIExtension
 			base.OnMouseDown(e);
 
 			// Cancel resizing if our task is not editable
-			if (IsResizingAppointment() && !CanModifyAppointmentDates)
+			if (IsResizingAppointment() && !CanModifySelectedLogEntry)
 				CancelAppointmentResizing();
 		}
 
@@ -1023,7 +1009,7 @@ namespace LoggedTimeUIExtension
 
 		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appt, Point mousePos)
 		{
-			if (!CanModifyAppointmentDates || (appt == null))
+			if (!CanModifyLogEntry(appt.Id))
 				return Calendar.SelectionTool.Mode.None;
 
 			var selTool = (ActiveTool as Calendar.SelectionTool);
@@ -1048,9 +1034,21 @@ namespace LoggedTimeUIExtension
 			return false;
 		}
 
-		private bool CanModifyAppointmentDates
+		private bool CanModifyLogEntry(uint entryId)
 		{
-			get { return CanModifySelectedLogEntry; }
+			if (ReadOnly)
+				return false;
+
+			var logFile = m_LogFiles.GetLogFile(entryId);
+
+			if (logFile == null)
+			{
+				Debug.Assert((logFile != null) || (entryId == 0));
+				return false;
+			}
+
+			return logFile.IsAccessible;
+
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
@@ -1075,7 +1073,7 @@ namespace LoggedTimeUIExtension
 				return Cursor;
 
 			// Note: base class only shows 'resize' cursors for the currently
-			// selected item but we want them for all tasks
+			// selected item but we want them for all log entries
 			var appt = GetAppointmentAt(e.Location.X, e.Location.Y);
 
 			if (appt != null)
@@ -1090,7 +1088,7 @@ namespace LoggedTimeUIExtension
 
 				var mode = GetMode(appt, e.Location);
 
-				if (CanModifyAppointmentDates)
+				if (CanModifyLogEntry(appt.Id))
 				{
 					// Same as Calendar.SelectionTool
 					switch (mode)
