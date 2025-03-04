@@ -463,9 +463,18 @@ namespace LoggedTimeUIExtension
 				return false;
 			}
 
-			// TODO
-// 			m_LogFiles.DeleteEntry(m_CachedLogEntry.Id);
-// 			m_LogFiles.AddEntry(m_CachedLogEntry);
+			var logFile = m_LogFiles.GetLogFile(m_CachedLogEntry.Id);
+
+			if (logFile == null)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
+			uint unused = 0;
+
+			logFile.DeleteEntry(m_CachedLogEntry.Id);
+			logFile.AddEntry(m_CachedLogEntry, ref unused);
 
 			m_SelectedLogEntryId = m_CachedLogEntry.Id;
 
