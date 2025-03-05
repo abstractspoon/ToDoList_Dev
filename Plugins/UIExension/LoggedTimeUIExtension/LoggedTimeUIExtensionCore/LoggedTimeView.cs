@@ -727,7 +727,8 @@ namespace LoggedTimeUIExtension
 		{
 			string tasklistPath = tasks.GetFilePath();
 
-			if (!LogFiles.IsSamePath(tasklistPath, m_TasklistPath))
+			if (!string.IsNullOrWhiteSpace(tasklistPath) &&
+				!LogFiles.IsSamePath(tasklistPath, m_TasklistPath))
 			{
 				m_TasklistPath = tasklistPath;
 

@@ -408,6 +408,9 @@ namespace LoggedTimeUIExtension
 
 		public static bool IsSamePath(string path1, string path2)
 		{
+			if (string.IsNullOrWhiteSpace(path1) || string.IsNullOrWhiteSpace(path2))
+				return false;
+
 			return (string.Compare(Path.GetFullPath(path1), Path.GetFullPath(path2), StringComparison.InvariantCultureIgnoreCase) == 0);
 		}
 
