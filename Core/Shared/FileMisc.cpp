@@ -172,6 +172,11 @@ BOOL CFileBackup::RestoreBackup()
 	return FileMisc::CopyFile(m_sBackup, m_sFile, TRUE);
 }
 
+CString CFileBackup::GetBackupFolderPath() const 
+{ 
+	return FileMisc::GetFolderFromFilePath(m_sBackup); 
+}
+
 CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
 {
 	CString sBackup(sFile);
@@ -444,7 +449,7 @@ BOOL FileMisc::FindFirst(LPCTSTR szSearchSpec, CString& sPath)
 	return FALSE;
 }
 
-int FileMisc::FindFiles(const CString& sFolder, CStringArray& aFiles, BOOL bCheckSubFolders, LPCTSTR szPattern)
+int FileMisc::FindFiles(const CString& sFolder, CStringArray& aFilePaths, BOOL bCheckSubFolders, LPCTSTR szPattern)
 {
 	CFileFind ff;
 	CString sSearchSpec;
@@ -464,17 +469,52 @@ int FileMisc::FindFiles(const CString& sFolder, CStringArray& aFiles, BOOL bChec
 			if (ff.IsDirectory())
 			{
 				if (bCheckSubFolders)
-					FindFiles(sPath, aFiles, TRUE, szPattern);
+					FindFiles(sPath, aFilePaths, TRUE, szPattern);
 			}
 			else
 			{
-				aFiles.Add(sPath);
+				aFilePaths.Add(sPath);
 			}
 		}
 	}
 
-	return aFiles.GetSize();
+	return aFilePaths.GetSize();
 }
+
+//////////////////////////////////////////////////////////////
+
+// private string compare functions
+int LastModifiedAscendingSortProc(const void* v1, const void* v2)
+{
+	const CString* pFile1 = (CString*)v1;
+	const CString* pFile2 = (CString*)v2;
+
+	time64_t tMod1 = FileMisc::GetFileLastModified(*pFile1);
+	time64_t tMod2 = FileMisc::GetFileLastModified(*pFile2);
+
+	if (tMod1 > tMod2)
+		return 1;
+
+	if (tMod1 < tMod2)
+		return -1;
+
+	return 0;
+}
+
+int LastModifiedDescendingSortProc(const void* v1, const void* v2)
+{
+	return -LastModifiedAscendingSortProc(v1, v2);
+}
+
+void FileMisc::SortFilePathsByLastModified(CStringArray& aFilePaths, BOOL bOldestFirst)
+{
+	if (bOldestFirst)
+		Misc::SortArray(aFilePaths, LastModifiedAscendingSortProc);
+	else
+		Misc::SortArray(aFilePaths, LastModifiedDescendingSortProc);
+}
+
+//////////////////////////////////////////////////////////////
 
 int FileMisc::GetDropFilePaths(HDROP hDrop, CStringArray& aFiles)
 {

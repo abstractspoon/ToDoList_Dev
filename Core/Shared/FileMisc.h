@@ -111,11 +111,13 @@ public:
 					const CString& sExt = _T(".bak"));
 	BOOL RestoreBackup();
 
+	CString GetBackupFilePath() const { return m_sBackup; }
+	CString GetBackupFolderPath() const;
+
 	static CString BuildBackupPath(const CString& sFile, 
 									DWORD dwFlags = 0, 
 									const CString& sFolder = _T(""), 
 									const CString& sExt = _T(".bak"));
-
 protected:
 	CString m_sFile, m_sBackup;
 
@@ -189,8 +191,9 @@ namespace FileMisc
 
 	BOOL Find(LPCTSTR szSearchSpec);
 	BOOL FindFirst(LPCTSTR szSearchSpec, CString& sPath);
-	int FindFiles(const CString& sFolder, CStringArray& aFiles, BOOL bCheckSubFolders = TRUE, LPCTSTR szPattern = _T("*.*"));
 	BOOL FolderContainsFiles(LPCTSTR szFolder, BOOL bCheckSubFolders = TRUE, LPCTSTR szFilter = _T("*.*"));
+	int FindFiles(const CString& sFolder, CStringArray& aFilePaths, BOOL bCheckSubFolders = TRUE, LPCTSTR szPattern = _T("*.*"));
+	void SortFilePathsByLastModified(CStringArray& aFilePaths, BOOL bOldestFirst);
 
 	CString& ValidateFileName(CString& sFilename, LPCTSTR szReplace = _T(""));
 	CString& ValidateFilePath(CString& sFilepath, LPCTSTR szReplace = _T(""));

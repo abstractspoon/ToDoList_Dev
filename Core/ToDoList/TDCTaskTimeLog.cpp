@@ -34,6 +34,9 @@ static CString TAB			= _T("\t");
 static CString COMMA		= _T(",");
 static CString SEMICOLON	= _T(";");
 
+const int NUMBACKUPSTOKEEP	= 10;
+const LPCTSTR BACKUPFOLDER	= _T("Log.csv.Backup");
+
 //////////////////////////////////////////////////////////////////////
 
 enum CSVFMT_LOG_VERSION
@@ -541,15 +544,6 @@ BOOL CTDCTaskTimeLog::SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray
 		return FALSE;
 	}
 
-	CString sTempFile;
-
-	if (!bPreserveVersion)
-	{
-		// Rename the log file so it won't be found by 'Initialise'
-		sTempFile = FileMisc::GetTempFilePath(szLogPath, _T("bak"));
-		FileMisc::MoveFile(szLogPath, sTempFile);
-	}
-
 	CTDCTaskTimeLog log;
 
 	if (!log.Initialise(szLogPath))
@@ -574,14 +568,37 @@ BOOL CTDCTaskTimeLog::SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray
 
 	CString sFileContents = Misc::FormatArray(aLines, '\n') + '\n';
 
+	// Always permanently backup the log file 
+	CFileBackup backup(szLogPath, FBS_OVERWRITE | FBS_DATETIMESTAMP, BACKUPFOLDER);
+
+	// Save the log file
 	if (!FileMisc::SaveFile(szLogPath, sFileContents, nFormat)) 
 	{
-		if (!sTempFile.IsEmpty())
-			VERIFY(FileMisc::MoveFile(sTempFile, szLogPath));
-
+		VERIFY(backup.RestoreBackup());
 		return FALSE;
 	}
 
+	// Cull old backups
+	CString sPattern = CFileBackup::BuildBackupPath(szLogPath, FBS_OVERWRITE, BACKUPFOLDER);
+	CString sFolder = FileMisc::GetFolderFromFilePath(sPattern);
+
+	sPattern = FileMisc::GetFileNameFromPath(sPattern);
+	FileMisc::AddToFileName(sPattern, _T("*"));
+
+	CStringArray aFiles;
+	int nNumFiles = FileMisc::FindFiles(sFolder, aFiles, FALSE, sPattern);
+
+	if (nNumFiles >= NUMBACKUPSTOKEEP)
+	{
+		Misc::SortArray(aFiles); // sorts oldest backups first
+
+		while (aFiles.GetSize() >= NUMBACKUPSTOKEEP)
+		{
+			FileMisc::DeleteFile(aFiles[0], TRUE);
+			aFiles.RemoveAt(0);
+		}
+	}
+	
 	return TRUE;
 }
 
