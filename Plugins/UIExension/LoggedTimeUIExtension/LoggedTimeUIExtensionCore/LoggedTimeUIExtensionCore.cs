@@ -362,15 +362,15 @@ namespace LoggedTimeUIExtension
 			var menu = new ContextMenuStrip();
 
 			var item = AddMenuItem(menu, "New Log Entry", Keys.None, 6);
-			item.Enabled = (appt == null);
+			item.Enabled = (m_TimeLog.CanAddNewLogEntry && (appt == null));
 			item.Click += (s, a) => { OnCreateLogEntry(sender, e); };
 
 			item = AddMenuItem(menu, "Modify Log Entry", (Keys.Control | Keys.F2), 7);
-			item.Enabled = (appt != null);
+			item.Enabled = m_TimeLog.CanModifySelectedLogEntry;
 			item.Click += (s, a) => { OnEditLogEntry(sender, e); };
 
 			item = AddMenuItem(menu, "Delete Log Entry", Keys.Delete, 8);
-			item.Enabled = (appt != null);
+			item.Enabled = m_TimeLog.CanDeleteSelectedLogEntry;
 			item.Click += (s, a) => { OnDeleteLogEntry(sender, e); };
 
 			menu.Items.Add(new ToolStripSeparator());
