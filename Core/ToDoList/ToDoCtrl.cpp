@@ -4128,12 +4128,12 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 		return TDCF_NOTALLOWED;
 	}
 	
+	BOOL bFirstSave = (!HasFilePath() || !FileMisc::IsSamePath(m_sLastSavePath, sFilePath));
+
 	// can't save if not checked-out
 	// unless we're saving to another filename or this is our first save
 	if (m_sourceControl.IsSourceControlled() && !m_sourceControl.IsCheckedOut())
 	{
-		BOOL bFirstSave = (!HasFilePath() || !FileMisc::IsSamePath(m_sLastSavePath, sFilePath));
-		
 		if (!bFirstSave)
 			return TDCF_SSC_NOTCHECKEDOUT;
 	}
@@ -4183,8 +4183,10 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 	if (nResult == TDCF_SUCCESS)
 	{
 		SetFilePath(sSavePath);
-
 		m_bModified = FALSE;
+
+		if (bFirstSave)
+			OnFirstSave(tasks);
 	}
 
 	return nResult;
@@ -6995,6 +6997,17 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 {
 	if (!m_timeTracking.CanTrackTask(dwTaskID))
 		return FALSE;
+
+	// Verify that we have been saved
+	if (!HasFilePath())
+	{
+		CMessageBox::Show(AfxGetMainWnd(),
+						  CEnString(IDS_TITLE_TIMETRACKING), 
+						  _T(""),
+						  CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
+						  (MB_OK | MB_ICONEXCLAMATION));
+		return FALSE;
+	}
 
 	// if there's a current task being tracked then end it
 	EndTimeTracking(TRUE, bNotify);

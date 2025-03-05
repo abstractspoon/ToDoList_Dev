@@ -32,6 +32,7 @@ namespace LoggedTimeUIExtension
 
 		private bool m_SettingMonthYear = false;
 		private bool m_SettingTimeLogStartDate = false;
+		private bool m_TasklistIsSaved = false;
 
 		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
@@ -362,7 +363,7 @@ namespace LoggedTimeUIExtension
 			var menu = new ContextMenuStrip();
 
 			var item = AddMenuItem(menu, "New Log Entry", Keys.None, 6);
-			item.Enabled = (m_TimeLog.CanAddNewLogEntry && (appt == null));
+			item.Enabled = ((m_TimeLog.CanAddNewLogEntry || !m_TimeLog.HasTasklistPath) && (appt == null));
 			item.Click += (s, a) => { OnCreateLogEntry(sender, e); };
 
 			item = AddMenuItem(menu, "Modify Log Entry", (Keys.Control | Keys.F2), 7);
@@ -565,7 +566,16 @@ namespace LoggedTimeUIExtension
 		private void OnCreateLogEntry(object sender, EventArgs e)
 		{
 			if (!m_TimeLog.CanAddNewLogEntry)
+			{
+				if (!m_TimeLog.HasTasklistPath)
+				{
+					MessageBox.Show(m_Trans.Translate("To enable this view you first need to save your tasklist.", Translator.Type.Text),
+									m_Trans.Translate("Logged Time", Translator.Type.Text),
+									MessageBoxButtons.OK,
+									MessageBoxIcon.Exclamation);
+				}
 				return;
+			}
 
 			// Get initial attributes
 			var attrib = new LogEntry(0,
@@ -654,7 +664,7 @@ namespace LoggedTimeUIExtension
 			(m_Toolbar.Items["Show14TimeLog"] as ToolStripButton).Checked = (m_TimeLog.DaysShowing == 14);
             (m_Toolbar.Items["Show28TimeLog"] as ToolStripButton).Checked = (m_TimeLog.DaysShowing == 28);
 
-			m_Toolbar.Items["NewLogEntry"].Enabled = m_TimeLog.CanAddNewLogEntry;
+			m_Toolbar.Items["NewLogEntry"].Enabled = (m_TimeLog.CanAddNewLogEntry || !m_TimeLog.HasTasklistPath);
 			m_Toolbar.Items["EditLogEntry"].Enabled = m_TimeLog.CanModifySelectedLogEntry;
 			m_Toolbar.Items["DeleteLogEntry"].Enabled = m_TimeLog.CanDeleteSelectedLogEntry;
 		}

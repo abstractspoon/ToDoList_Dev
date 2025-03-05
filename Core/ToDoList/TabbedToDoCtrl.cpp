@@ -583,6 +583,29 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	return TRUE;
 }
 
+void CTabbedToDoCtrl::OnFirstSave(const CTaskFile& tasks)
+{
+	// First-time save - Update the extension views
+	FTC_VIEW nView = GetTaskView();
+
+	if (IsExtensionView(nView))
+	{
+		CWaitCursor cursor;
+
+		VIEWDATA* pVData = NULL;
+		IUIExtensionWindow* pExtWnd = NULL;
+
+		if (GetExtensionWnd(nView, pExtWnd, pVData))
+		{
+			pVData->bNeedFullTaskUpdate = FALSE;
+			UpdateExtensionView(pExtWnd, tasks, IUI_ALL);
+		}
+	}
+
+	// Mark all the rest as needing update
+	SetExtensionsNeedTaskUpdate(TRUE, nView);
+}
+
 void CTabbedToDoCtrl::LoadState()
 {
 	CPreferences prefs;

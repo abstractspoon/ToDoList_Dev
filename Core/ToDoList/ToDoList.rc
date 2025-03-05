@@ -5269,6 +5269,9 @@ BEGIN
     IDS_LOG_ALTCOLOR        "Colour"
     IDS_ATTRIBCTRL_CLEARATTRIBVALUE "Clear '%s' Value"
     IDS_ATTRIBCTRL_CLEARATTRIBVALUES "Clear '%s' Values"
+    IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE 
+                            "To enable this feature you first need to save your tasklist."
+    IDS_TITLE_TIMETRACKING  "Time Tracking"
 END
 
 STRINGTABLE

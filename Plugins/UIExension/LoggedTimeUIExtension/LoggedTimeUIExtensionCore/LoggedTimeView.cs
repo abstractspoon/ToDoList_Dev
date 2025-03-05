@@ -35,7 +35,7 @@ namespace LoggedTimeUIExtension
 		private LogFiles m_LogFiles;
 		private LogEntry m_CachedLogEntry;
 
-		private string m_TasklistPath = @"\."; // something valid
+		private string m_TasklistPath = string.Empty;
 
 		private FileSystemWatcher m_MainLogFileWatcher = new FileSystemWatcher();
 		private FileSystemWatcher m_TaskLogFolderWatcher = new FileSystemWatcher();
@@ -91,6 +91,7 @@ namespace LoggedTimeUIExtension
 
 		public IEnumerable<TaskItem> TaskItems { get { return m_TaskItems.Values; } }
 		public UIExtension.TaskIcon TaskIcons { get { return m_RenderHelper.TaskIcons; } }
+		public bool HasTasklistPath { get { return !string.IsNullOrWhiteSpace(m_TasklistPath); } }
 
 		public TaskItem GetTask(uint taskId) { return m_TaskItems.GetItem(taskId); }
 		public Control GetOwner() { return this; } // ILabelTipHandler implementation
@@ -283,10 +284,8 @@ namespace LoggedTimeUIExtension
 		{
 			get
 			{
-				if (string.IsNullOrEmpty(m_TasklistPath))
-				{
+				if (!HasTasklistPath)
 					return false;
-				}
 
 				if (LogTasksSeparately)
 				{
