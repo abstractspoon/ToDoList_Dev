@@ -4107,9 +4107,8 @@ BOOL CToDoCtrl::IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAt
 
 TDC_FILE CToDoCtrl::Save(const CString& sFilePath, BOOL bFlush)
 {
-	CTaskFile tasks;
-
-	return Save(tasks, sFilePath, bFlush);
+	CTaskFile unused;
+	return Save(unused, sFilePath, bFlush);
 }
 
 TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL bFlush)
@@ -4400,8 +4399,8 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 // thin wrapper
 TDC_FILE CToDoCtrl::Load(const CString& sFilePath, LPCTSTR szDefaultPassword)
 {
-	CTaskFile file;
-	return Load(sFilePath, file, szDefaultPassword);
+	CTaskFile unused;
+	return Load(sFilePath, unused, szDefaultPassword);
 }
 
 TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/, LPCTSTR szDefaultPassword)
