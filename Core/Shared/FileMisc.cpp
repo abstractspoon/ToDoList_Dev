@@ -262,10 +262,12 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 	return sBackup;
 }
 
-void CFileBackup::CullBackups(const CString& sPattern, int nNumToKeep)
+int CFileBackup::CullBackups(const CString& sPattern, int nNumToKeep)
 {
 	CString sFolder = FileMisc::GetFolderFromFilePath(sPattern);
 	CString sFilePattern = FileMisc::GetFileNameFromPath(sPattern);
+
+	ASSERT(sFilePattern.FindOneOf(_T("*?")) != -1);
 
 	CStringArray aFiles;
 	int nNumFiles = FileMisc::FindFiles(sFolder, aFiles, FALSE, sFilePattern);
@@ -277,6 +279,8 @@ void CFileBackup::CullBackups(const CString& sPattern, int nNumToKeep)
 		FileMisc::DeleteFile(aFiles[0]);
 		aFiles.RemoveAt(0);
 	}
+
+	return (nNumFiles - aFiles.GetSize());
 }
 
 int CFileBackup::FileDateSortProc(const void* v1, const void* v2)
