@@ -558,12 +558,14 @@ BOOL CPreferences::WriteIniString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTST
 
 double CPreferences::GetProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, double dDefault) const
 {
-	CString sValue = GetProfileString(lpszSection, lpszEntry, Misc::Format(dDefault, 6));
+	// we don't localise the default value
+	CString sValue = GetProfileString(lpszSection, lpszEntry);
 	
 	if (sValue.IsEmpty())
 		return dDefault;
-	else
-		return Misc::Atof(sValue);
+	
+	// else
+	return Misc::Atof(sValue);
 }
 
 bool CPreferences::WriteProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, double dValue)
