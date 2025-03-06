@@ -1637,18 +1637,26 @@ void CToDoCtrlMgr::BackupLogFiles(const CString& sTDLPath, const CString& sBacku
 #define MAGIC_TASKID	    999999999
 #define MAGIC_TASKIDSTR _T("999999999")
 		
-		// get a file filter
-		CString sLogPath = CTDCTaskTimeLog(sTDLPath).GetLogPath(MAGIC_TASKID, TRUE);
-		sLogPath.Replace(MAGIC_TASKIDSTR, _T("*"));
-		
-		CString sDrive, sFolder, sFName, sExt;
-		
-		FileMisc::SplitPath(sLogPath, &sDrive, &sFolder, &sFName, &sExt);
-		FileMisc::MakePath(sLogPath, sDrive, sFolder);
-		
+		CString sLogPattern = CTDCTaskTimeLog(sTDLPath).GetLogPath(MAGIC_TASKID, TRUE);
+		sLogPattern.Replace(MAGIC_TASKIDSTR, _T("*"));
+
+#ifdef _DEBUG
+		{
+			CString sDrive, sFolder, sFName, sExt;
+			FileMisc::SplitPath(sLogPattern, &sDrive, &sFolder, &sFName, &sExt);
+
+			CString sFolderCheck;
+			FileMisc::TerminatePath(FileMisc::MakePath(sFolderCheck, sDrive, sFolder), FALSE);
+
+			ASSERT(FileMisc::IsSamePath(sFolderCheck, FileMisc::GetFolderFromFilePath(sLogPattern)));
+			ASSERT((sFName + sExt) == FileMisc::GetFileNameFromPath(sLogPattern));
+		}
+#endif
 		CStringArray aLogFiles;
-		int nFile = FileMisc::FindFiles(sLogPath, aLogFiles, FALSE, sFName + sExt);
-		
+		int nFile = FileMisc::FindFiles(FileMisc::GetFolderFromFilePath(sLogPattern), 
+										aLogFiles, 
+										FALSE, 
+										FileMisc::GetFileNameFromPath(sLogPattern));
 		while (nFile--)
 			CreateBackup(aLogFiles[nFile], sBackupFolder, nKeepBackups);
 	}
@@ -1677,15 +1685,27 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 	// previous version's backups to a MINIMUM OF ONE.
 	if (nKeepBackups)
 	{
-		CString sBackupPath = CFileBackup::BuildBackupPath(sPath, FBS_APPVERSION, sBackupFolder, _T(""));
-		CString sDrive, sFolder, sFName, sExt;
-		
-		FileMisc::SplitPath(sBackupPath, &sDrive, &sFolder, &sFName, &sExt);
-		FileMisc::MakePath(sBackupPath, sDrive, sFolder);
-		
-		CStringArray aFiles;
-		int nNumFiles = FileMisc::FindFiles(sBackupPath, aFiles, FALSE, sFName + _T("*") + sExt);
+		// Cull backups of current version
+		CString sBackupPattern = CFileBackup::BuildBackupPath(sPath, FBS_APPVERSION, sBackupFolder, _T(""));
+		FileMisc::AddToFileName(sBackupPattern, _T("*"));
 
+#ifdef _DEBUG
+		{
+			CString sDrive, sFolder, sFName, sExt;
+			FileMisc::SplitPath(sBackupPattern, &sDrive, &sFolder, &sFName, &sExt);
+
+			CString sFolderCheck;
+			FileMisc::TerminatePath(FileMisc::MakePath(sFolderCheck, sDrive, sFolder), FALSE);
+
+			ASSERT(FileMisc::IsSamePath(sFolderCheck, FileMisc::GetFolderFromFilePath(sBackupPattern)));
+			ASSERT((sFName + sExt) == FileMisc::GetFileNameFromPath(sBackupPattern));
+		}
+#endif
+		CStringArray aFiles;
+		int nNumFiles = FileMisc::FindFiles(FileMisc::GetFolderFromFilePath(sBackupPattern),
+											aFiles,
+											FALSE,
+											FileMisc::GetFileNameFromPath(sBackupPattern));
 		if (nNumFiles >= nKeepBackups)
 		{
 			Misc::SortArray(aFiles); // sorts oldest backups first
@@ -1704,7 +1724,7 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 
 			// get current app version once only
 			CString sAppVer = FileMisc::GetAppVersion('_');
-			ASSERT(sFName.Find(sAppVer) != -1);
+			ASSERT(sBackupPattern.Find(sAppVer) != -1);
 
 			// find the first previous version having backups
 			CDWordArray aPrevVer;
@@ -1713,10 +1733,12 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 			{
 				// replace current app ver with previous ver in filename
 				CString sPrevVer = Misc::FormatArray(aPrevVer, '_');
-				sFName.Replace(sAppVer, sPrevVer);
+				sBackupPattern.Replace(sAppVer, sPrevVer);
 
-				nNumFiles = FileMisc::FindFiles(sBackupPath, aFiles, FALSE, sFName + _T("*") + sExt);
-
+				nNumFiles = FileMisc::FindFiles(FileMisc::GetFolderFromFilePath(sBackupPattern),
+												aFiles,
+												FALSE,
+												FileMisc::GetFileNameFromPath(sBackupPattern));
 				switch (nNumFiles)
 				{
 				case 0:
