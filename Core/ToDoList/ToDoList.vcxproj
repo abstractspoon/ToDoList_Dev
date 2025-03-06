@@ -116,6 +116,7 @@ mkdir $(SolutionDir)..\Plugins\debug
 copy unicode_debug\ToDoList.exe $(SolutionDir)..\Plugins\debug /y
 copy unicode_debug\ToDoList.pdb $(SolutionDir)..\Plugins\debug /y
 
+unicode_debug\TDLTest.exe
 
 </Command>
     </PostBuildEvent>

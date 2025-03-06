@@ -191,6 +191,37 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, String
 
 }
 
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, double value, bool append)
+	:
+	nAttrib(attrib),
+	dataType(DataType::Double),
+	dValue(value),
+	bAppend(append)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+	:
+	nAttrib(attrib),
+	dataType(DataType::Time),
+	dValue(time),
+	nTimeUnits(units),
+	bAppend(append)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, int value, bool append)
+	:
+	nAttrib(attrib),
+	dataType(DataType::Integer),
+	nValue(value),
+	bAppend(append)
+{
+
+}
+
 UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, String^ value, bool append)
 	:
 	nAttrib(attrib),
@@ -274,6 +305,40 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute
 
 }
 
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, double value, bool append)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Double),
+	dValue(value),
+	bAppend(append)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Time),
+	dValue(time),
+	nTimeUnits(units),
+	bAppend(append)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, int value, bool append)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Integer),
+	nValue(value),
+	bAppend(append)
+{
+
+}
+
 UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append)
 	:
 	dwSelectedTaskID(taskID),
@@ -306,6 +371,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 	{
 	case DataType::Double:
 		mod.dValue = dValue;
+		mod.bAppend = bAppend;
 		break;
 
 	case DataType::Date:
@@ -317,6 +383,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 
 	case DataType::Integer:
 		mod.nValue = nValue;
+		mod.bAppend = bAppend;
 		break;
 
 	case DataType::Bool:
@@ -348,6 +415,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 	case DataType::Time:
 		mod.dValue = dValue;
 		mod.nTimeUnits = Task::MapUnits(nTimeUnits);
+		mod.bAppend = bAppend;
 		break;
 	}
 
@@ -429,6 +497,33 @@ bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, String^ value)
 	return true;
 }
 
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, double value, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, value, append));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, time, units, append));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, int value, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, value, append));
+	return true;
+}
+
 bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, String^ value, bool append)
 {
 	if (Task::MapAttribute(attrib) == TDCA_NONE)
@@ -500,6 +595,33 @@ bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, St
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, double value, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value, append));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, time, units, append));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, int value, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value, append));
 	return true;
 }
 
@@ -600,6 +722,30 @@ bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, String^ value)
 {
 	ClearMods();
 	AddMod(attrib, value);
+
+	return NotifyMod(true);
+}
+
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, double value, bool append)
+{
+	ClearMods();
+	AddMod(attrib, value, append);
+
+	return NotifyMod(true);
+}
+
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+{
+	ClearMods();
+	AddMod(attrib, time, units, append);
+
+	return NotifyMod(true);
+}
+
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, int value, bool append)
+{
+	ClearMods();
+	AddMod(attrib, value, append);
 
 	return NotifyMod(true);
 }

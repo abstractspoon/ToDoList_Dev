@@ -17,15 +17,32 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 TaskComboBox::TaskComboBox()
+	:
+	m_NoneTask(nullptr)
 {
 	DrawMode = Windows::Forms::DrawMode::OwnerDrawFixed;
 }
 
-void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition, UIExtension::TaskIcon^ taskIcons, UInt32 selTaskId)
+void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition,
+							  UIExtension::TaskIcon^ taskIcons, UInt32 selTaskId)
+{
+	Initialise(taskItemsSortedByPosition, taskIcons, selTaskId, nullptr);
+}
+
+void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition, 
+							  UIExtension::TaskIcon^ taskIcons, UInt32 selTaskId, ITask^ noneTask)
 {
 	m_TaskIcons = taskIcons;
 
 	// Populate combo
+	Sorted = false;
+
+	if (noneTask != nullptr)
+	{
+		Items->Add(noneTask);
+		m_NoneTask = noneTask;
+	}
+
 	for each(auto task in taskItemsSortedByPosition)
 	{
 		Items->Add(task);
@@ -38,7 +55,16 @@ void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition, UI
 UInt32 TaskComboBox::SelectedTaskId::get()
 {
 	auto selItem = ASTYPE(SelectedItem, ITask);
+
 	return ((selItem == nullptr) ? 0 : selItem->Id);
+}
+
+String^ TaskComboBox::SelectedTaskTitle::get()
+{
+	if (SelectedTaskId::get() == 0)
+		return String::Empty;
+
+	return ASTYPE(SelectedItem, ITask)->Title;
 }
 
 void TaskComboBox::OnMeasureItem(MeasureItemEventArgs^ e)
@@ -60,22 +86,26 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 		e->DrawBackground();
 
 		auto rect = e->Bounds;
-		bool listItem = !(e->State.HasFlag(DrawItemState::ComboBoxEdit));
 
-		if (listItem)
+		if (taskItem != m_NoneTask)
 		{
-			for (int i = 0; i < taskItem->Depth; i++)
+			bool listItem = !(e->State.HasFlag(DrawItemState::ComboBoxEdit));
+
+			if (listItem)
+			{
+				for (int i = 0; i < taskItem->Depth; i++)
+					rect.X += UIExtension::TaskIcon::IconSize;
+			}
+
+			if (taskItem->HasIcon && m_TaskIcons->Get(taskItem->Id))
+			{
+				m_TaskIcons->Draw(e->Graphics, rect.X, rect.Y);
 				rect.X += UIExtension::TaskIcon::IconSize;
-		}
-
-		if (taskItem->HasIcon && m_TaskIcons->Get(taskItem->Id))
-		{
-			m_TaskIcons->Draw(e->Graphics, rect.X, rect.Y);
-			rect.X += UIExtension::TaskIcon::IconSize;
-		}
-		else if (listItem)
-		{
-			rect.X += UIExtension::TaskIcon::IconSize;
+			}
+			else if (listItem)
+			{
+				rect.X += UIExtension::TaskIcon::IconSize;
+			}
 		}
 
 		auto brush = gcnew SolidBrush(e->ForeColor);

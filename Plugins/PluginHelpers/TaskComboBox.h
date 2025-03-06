@@ -36,10 +36,16 @@ namespace Abstractspoon
 								UIExtension::TaskIcon^ taskIcons, 
 								UInt32 selTaskId);
 
+				void Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition,
+								UIExtension::TaskIcon^ taskIcons,
+								UInt32 selTaskId, ITask^ noneTask);
+
 				property UInt32 SelectedTaskId { UInt32 get(); }
+				property String^ SelectedTaskTitle { String^ get(); }
 
 			private:
 				UIExtension::TaskIcon^ m_TaskIcons;
+				ITask^ m_NoneTask;
 
 			protected:
 				void OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e) override;

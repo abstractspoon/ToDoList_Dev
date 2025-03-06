@@ -44,7 +44,6 @@ struct TASKTIMELOGITEM
 	COLORREF crAltColor;
 
 protected:
-	static double ParseTimeSpent(CString sValue);
 	static CString EncodeValue(const CString& sValue, const CString& sDelim, BOOL bEncodeNewLines = FALSE);
 	static CString DecodeValue(const CString& sValue, const CString& sDelim, BOOL bDecodeNewLines = FALSE);
 };
@@ -64,9 +63,11 @@ public:
 
 	CString GetLogPath() const;
 	CString GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const;
+
+	CString GetLogFileFilter(BOOL bLogSeparately) const;
 	
-	static int LoadLogFile(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
-	static BOOL SaveLogFile(const CString& sLogPath, const CTaskTimeLogItemArray& aLogItems, BOOL bPreserveVersion = TRUE);
+	static BOOL LoadLogFile(LPCTSTR szLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim);
+	static BOOL SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray& aLogItems, BOOL bPreserveVersion = TRUE);
 
 protected:
 	CString m_sRefPath;
@@ -79,7 +80,8 @@ protected:
 protected: 
 	CTDCTaskTimeLog();
 
-	void Initialise(const CString& sLogPath);
+	BOOL Initialise(const CString& sLogPath);
+	BOOL Initialise(const CStringArray& aLines);
 
 	CString GetLatestColumnHeader() const;
 	CString GetDelimiter(const CString& sLine = _T("")) const;

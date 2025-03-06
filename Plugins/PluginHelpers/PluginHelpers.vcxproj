@@ -64,8 +64,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Shared.lib;3rdParty.lib;Interfaces.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\Core\3rdParty\Unicode_Debug;$(SolutionDir)..\Core\Shared\Unicode_Debug;$(SolutionDir)..\Core\Interfaces\Unicode_Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Shared.lib;3rdParty.lib;Interfaces.lib;ToDoListLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\Core\3rdParty\Unicode_Debug;$(SolutionDir)..\Core\Shared\Unicode_Debug;$(SolutionDir)..\Core\ToDoListLib\Unicode_Debug;$(SolutionDir)..\Core\Interfaces\Unicode_Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4248 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
@@ -103,8 +103,8 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;comctl32.lib;3rdParty.lib;Shared.lib;Interfaces.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\Core\Interfaces\Unicode_Release;$(SolutionDir)..\Core\3rdParty\Unicode_Release;$(SolutionDir)..\Core\Shared\Unicode_Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;comctl32.lib;3rdParty.lib;Shared.lib;Interfaces.lib;ToDoListLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\Core\Interfaces\Unicode_Release;$(SolutionDir)..\Core\3rdParty\Unicode_Release;$(SolutionDir)..\Core\Shared\Unicode_Release;$(SolutionDir)..\Core\ToDoListLib\Unicode_Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
@@ -143,6 +143,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="Preferences.h" />
     <ClInclude Include="TaskComboBox.h" />
     <ClInclude Include="TaskList.h" />
+    <ClInclude Include="TaskTimeLog.h" />
     <ClInclude Include="TimeComboBox.h" />
     <ClInclude Include="Toolbars.h" />
     <ClInclude Include="Translator.h" />
@@ -176,6 +177,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="Preferences.cpp" />
     <ClCompile Include="TaskComboBox.cpp" />
     <ClCompile Include="TaskList.cpp" />
+    <ClCompile Include="TaskTimeLog.cpp" />
     <ClCompile Include="TimeComboBox.cpp" />
     <ClCompile Include="Toolbars.cpp" />
     <ClCompile Include="Translator.cpp" />
