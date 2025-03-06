@@ -247,6 +247,17 @@ BOOL CPreferences::IsInitialised()
 	return !s_sPrefsPath.IsEmpty();
 }
 
+void CPreferences::CullIniBackups(int nNumToKeep)
+{
+	if (!s_bIni)
+		return;
+
+	CString sPattern = CFileBackup::BuildBackupPath(s_sPrefsPath, 0, _T("ini.Backup"));
+	FileMisc::AddToFileName(sPattern, _T("*"));
+
+	CFileBackup::CullBackups(sPattern);
+}
+
 BOOL CPreferences::IsEmpty()
 {
 	return (s_mapSections.GetCount() == 0);

@@ -1105,7 +1105,10 @@ BOOL CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 		while (nTry--)
 		{
 			if (CPreferences::Initialise(szPrefs, TRUE))
+			{
+				CPreferences::CullIniBackups();
 				return TRUE;
+			}
 
 			FileMisc::LogText(_T("Existing ini file is not readable (%d)"), (10 - nTry));
 			Sleep(100);

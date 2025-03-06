@@ -116,6 +116,8 @@ public:
 									const CString& sFolder = _T(""), 
 									const CString& sExt = _T(".bak"));
 
+	static void CullBackups(const CString& sPattern, int nNumToKeep = 10);
+
 protected:
 	CString m_sFile, m_sBackup;
 
@@ -124,6 +126,9 @@ protected:
 						 DWORD dwFlags,
 						 const CString& sFolder,
 						 const CString& sExt);
+
+	static int FileDateSortProc(const void* pV1, const void* pV2);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
