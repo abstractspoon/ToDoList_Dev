@@ -71,9 +71,12 @@ namespace DayViewUIExtension
 			m_BoldFont = null;
 
 			// Update the visibility of the day of week component
-			using (Graphics g = Graphics.FromHwnd(handle))
+			if (daysWidth > 0)
 			{
-				UpdateHeaderStyles(g, daysWidth);
+				using (Graphics g = Graphics.FromHwnd(handle))
+				{
+					UpdateHeaderStyles(g, daysWidth);
+				}
 			}
 		}
 
@@ -125,6 +128,11 @@ namespace DayViewUIExtension
 			m_BoldFont?.Dispose();
 		}
 
+		public int CalculateMinimumDayWidthForImage(Graphics g)
+		{
+			return (int)Math.Ceiling(g.MeasureString("31/12", BaseFont).Width);
+		}
+
 		private static string FormatHeaderText(DateTime date, DowNameStyle dowStyle, MonthNameStyle monthStyle, bool firstDay, bool iso)
 		{
 			// Day of week
@@ -141,7 +149,10 @@ namespace DayViewUIExtension
 				break;
 			}
 
-			String day = (iso ? "dd" : "d");
+			// Note the trailing space in 'd ' required because
+			// otherwise .Net will return the whole short date
+			// if the format string ends up just as 'd'
+			String day = (iso ? "dd" : "d ");
 
 			// Day of month
 			if (firstDay || (date.Day == 1))
@@ -174,11 +185,6 @@ namespace DayViewUIExtension
 			}
 
 			return date.ToString(format);
-		}
-
-		public int CalculateMinimumDayWidthForImage(Graphics g)
-		{
-			return (int)Math.Ceiling(g.MeasureString("31/12", BaseFont).Width);
 		}
 
 		public void UpdateHeaderStyles(Graphics g, int dayWidth)
@@ -577,7 +583,6 @@ namespace DayViewUIExtension
 			if (rect.Width <= 0)
 				return;
 
-
 			if (selState != UIExtension.SelectionRect.Style.None)
 			{
 				UIExtension.SelectionRect.Draw(handle,
@@ -593,11 +598,7 @@ namespace DayViewUIExtension
 			{
 				using (SolidBrush brush = new SolidBrush(fillColor))
 				{
-					var fillRect = rect;
-					fillRect.Width++;
-					fillRect.Height++;
-
-					g.FillRectangle(brush, fillRect);
+					g.FillRectangle(brush, rect);
 				}
 
 				if (borderColor != Color.Empty)
@@ -606,7 +607,9 @@ namespace DayViewUIExtension
 					rect.Width--;
 
 					using (Pen pen = new Pen(borderColor, 1))
+					{
 						g.DrawRectangle(pen, rect);
+					}
 				}
 			}
 		}
@@ -805,11 +808,6 @@ namespace DayViewUIExtension
 		public Font BoldFont()
 		{
 			return m_RenderHelper.BoldFont;
-		}
-
-		private void UpdateHeaderStyles(Graphics g)
-		{
-			m_RenderHelper.UpdateHeaderStyles(g, m_DayWidth);
 		}
 
 		public int DayWidth { get { return m_DayWidth; } }
@@ -1100,11 +1098,7 @@ namespace DayViewUIExtension
 
 				using (SolidBrush brush = new SolidBrush(fillColor))
 				{
-					var fillRect = rect;
-					fillRect.Width++;
-					fillRect.Height++;
-
-					g.FillRectangle(brush, fillRect);
+					g.FillRectangle(brush, rect);
 				}
 
 				if (borderColor != Color.Empty)

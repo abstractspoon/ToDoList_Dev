@@ -28,24 +28,22 @@ namespace Calendar
 
     public class MoveAppointmentEventArgs : AppointmentEventArgs
     {
-        public MoveAppointmentEventArgs(Appointment appointment, SelectionTool.Mode mode, bool finished) : base(appointment)
+        public MoveAppointmentEventArgs(Appointment appointment, SelectionTool.Mode mode, SelectionTool.State state) : base(appointment)
         {
             m_Mode = mode;
-			m_Finished = finished;
-        }
-
-        private SelectionTool.Mode m_Mode;
-        public SelectionTool.Mode Mode
-        { 
-            get { return m_Mode; }
-        }
-
-		private bool m_Finished;
-		public bool Finished
-		{
-			get { return m_Finished; }
+			m_State = state;
 		}
-    }
 
-    public delegate void AppointmentEventHandler(object sender, AppointmentEventArgs args);
+		private SelectionTool.Mode m_Mode;
+		private SelectionTool.State m_State;
+
+		public SelectionTool.Mode Mode { get { return m_Mode; } }
+		public SelectionTool.State State { get { return m_State; } }
+
+		public bool Started { get { return (m_State == SelectionTool.State.Started); } }
+		public bool Moved { get { return (m_State == SelectionTool.State.Moved); } }
+		public bool Finished { get { return (m_State == SelectionTool.State.Finished); } }
+	}
+
+	public delegate void AppointmentEventHandler(object sender, AppointmentEventArgs args);
 }

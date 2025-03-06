@@ -708,6 +708,7 @@ protected:
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles) { m_taskTree.OnStylesUpdated(styles, TRUE); }
 	virtual void OnTaskIconsChanged() { m_taskTree.OnImageListChange(); }
 	virtual void OnCustomAttributesChanged();
+	virtual void OnFirstSave(const CTaskFile& /*tasks*/) {}
 	
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree = FALSE) const; // keyed by last filepath
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any

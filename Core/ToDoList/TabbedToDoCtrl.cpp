@@ -583,6 +583,29 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	return TRUE;
 }
 
+void CTabbedToDoCtrl::OnFirstSave(const CTaskFile& tasks)
+{
+	// First-time save - Update the extension views
+	FTC_VIEW nView = GetTaskView();
+
+	if (IsExtensionView(nView))
+	{
+		CWaitCursor cursor;
+
+		VIEWDATA* pVData = NULL;
+		IUIExtensionWindow* pExtWnd = NULL;
+
+		if (GetExtensionWnd(nView, pExtWnd, pVData))
+		{
+			pVData->bNeedFullTaskUpdate = FALSE;
+			UpdateExtensionView(pExtWnd, tasks, IUI_ALL);
+		}
+	}
+
+	// Mark all the rest as needing update
+	SetExtensionsNeedTaskUpdate(TRUE, nView);
+}
+
 void CTabbedToDoCtrl::LoadState()
 {
 	CPreferences prefs;
@@ -1819,9 +1842,9 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			TDCTIMEPERIOD time(mod.dValue, mod.nTimeUnits);
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, time));
+				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, time, mod.bAppend));
 			else
-				bChange = SetSelectedTaskTimeEstimate(time);
+				bChange = SetSelectedTaskTimeEstimate(time, mod.bAppend);
 		}
 		break;
 
@@ -1830,9 +1853,9 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			TDCTIMEPERIOD time(mod.dValue, mod.nTimeUnits);
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, time));
+				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, time, mod.bAppend));
 			else
-				bChange = SetSelectedTaskTimeSpent(time);
+				bChange = SetSelectedTaskTimeSpent(time, mod.bAppend);
 		}
 		break;
 
