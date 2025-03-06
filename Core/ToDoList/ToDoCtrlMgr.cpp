@@ -1647,7 +1647,7 @@ void CToDoCtrlMgr::BackupLogFiles(const CString& sTDLPath, const CString& sBacku
 		FileMisc::MakePath(sLogPath, sDrive, sFolder);
 		
 		CStringArray aLogFiles;
-		int nFile = FileMisc::FindFiles(sFolder, aLogFiles, FALSE, sFName + sExt);
+		int nFile = FileMisc::FindFiles(sLogPath, aLogFiles, FALSE, sFName + sExt);
 		
 		while (nFile--)
 			CreateBackup(aLogFiles[nFile], sBackupFolder, nKeepBackups);
