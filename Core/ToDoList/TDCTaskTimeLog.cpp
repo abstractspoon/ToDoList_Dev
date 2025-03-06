@@ -34,9 +34,6 @@ static CString TAB			= _T("\t");
 static CString COMMA		= _T(",");
 static CString SEMICOLON	= _T(";");
 
-const int NUMBACKUPSTOKEEP	= 10;
-const LPCTSTR BACKUPFOLDER	= _T("Log.csv.Backup");
-
 //////////////////////////////////////////////////////////////////////
 
 enum CSVFMT_LOG_VERSION
@@ -544,11 +541,20 @@ BOOL CTDCTaskTimeLog::SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray
 		return FALSE;
 	}
 
+	// Note: App is responsible for permanent backups
+	CTempFileBackup backup(szLogPath);
 	CTDCTaskTimeLog log;
+
+	// If we're not preserving the format we need to delete
+	// the existing log file to force adoption of the new 
+	// format in the following call to Initialise 
+	if (!bPreserveVersion)
+		VERIFY(!FileMisc::FileExists(szLogPath) || ::DeleteFile(szLogPath));
 
 	if (!log.Initialise(szLogPath))
 		return FALSE;
 
+	// Build the array of log lines
 	CString sDelim = log.GetDelimiter();
 	int nVersion = log.m_nVersion;
 	int nNumHeaderRows = log.GetNumHeaderRows();
@@ -568,9 +574,6 @@ BOOL CTDCTaskTimeLog::SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray
 
 	CString sFileContents = Misc::FormatArray(aLines, '\n') + '\n';
 
-	// Always permanently backup the log file 
-	CFileBackup backup(szLogPath, FBS_OVERWRITE | FBS_DATETIMESTAMP, BACKUPFOLDER);
-
 	// Save the log file
 	if (!FileMisc::SaveFile(szLogPath, sFileContents, nFormat)) 
 	{
@@ -578,27 +581,6 @@ BOOL CTDCTaskTimeLog::SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray
 		return FALSE;
 	}
 
-	// Cull old backups
-	CString sPattern = CFileBackup::BuildBackupPath(szLogPath, FBS_OVERWRITE, BACKUPFOLDER);
-	CString sFolder = FileMisc::GetFolderFromFilePath(sPattern);
-
-	sPattern = FileMisc::GetFileNameFromPath(sPattern);
-	FileMisc::AddToFileName(sPattern, _T("*"));
-
-	CStringArray aFiles;
-	int nNumFiles = FileMisc::FindFiles(sFolder, aFiles, FALSE, sPattern);
-
-	if (nNumFiles >= NUMBACKUPSTOKEEP)
-	{
-		Misc::SortArray(aFiles); // sorts oldest backups first
-
-		while (aFiles.GetSize() >= NUMBACKUPSTOKEEP)
-		{
-			FileMisc::DeleteFile(aFiles[0], TRUE);
-			aFiles.RemoveAt(0);
-		}
-	}
-	
 	return TRUE;
 }
 
