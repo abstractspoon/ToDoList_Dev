@@ -222,6 +222,8 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 	if (Misc::HasFlag(dwFlags, FBS_APPVERSION))
 	{
 		CString sVersion = FileMisc::GetAppVersion('_');
+		ASSERT(!sVersion.IsEmpty());
+
 		sFExt = ('.' + sVersion + sFExt);
 	}
 

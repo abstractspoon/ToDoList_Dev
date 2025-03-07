@@ -142,6 +142,9 @@ public:
 
 	int GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	BOOL AnyHasCustomAttributeFeature(DWORD dwFeature) const;
+	
+	// For testability
+	static BOOL CreateBackup(const CString& sPath, const CString& sBackupFolder, int nNumKeepBackups);
 
 	// Implementation
 protected:
@@ -197,7 +200,6 @@ protected:
 	int UpdateTabItemImage(int nIndex) const;
 	void BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nNumKeepBackups) const;
 
-	static BOOL CreateBackup(const CString& sPath, const CString& sBackupFolder, int nNumKeepBackups);
 	static CFilteredToDoCtrl& GetFallbackToDoCtrl();
 };
 

@@ -1662,6 +1662,10 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 	if (!FileMisc::FileExists(sPath))
 		return FALSE;
 	
+	// NOTE: We encode the app version in the backup name to ensure that
+	// in the event that an update contains a breaking bug which corrupts 
+	// files we haven't already deleted 'good' backups of the previous 
+	// version before the bug is discovered.
 	if (!CFileBackup().MakeBackup(sPath, FBS_APPVERSION | FBS_DATETIMESTAMP, sBackupFolder, _T("")))
 	{
 		ASSERT(0);
@@ -1670,11 +1674,6 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 
 	if (nNumKeepBackups > 0)
 	{
-		// NOTE: We encode the app version in the backup name to ensure that
-		// in the event that an update contains a breaking bug which corrupts 
-		// files we haven't already deleted 'good' backups of the previous 
-		// version before the bug is discovered.
-
 		// Cull backups of current version
 		CString sBackupPattern = CFileBackup::BuildBackupPath(sPath, FBS_APPVERSION, sBackupFolder, _T(""));
 		FileMisc::AddToFileName(sBackupPattern, _T("*"));
