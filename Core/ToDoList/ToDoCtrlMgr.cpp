@@ -1614,15 +1614,15 @@ BOOL CToDoCtrlMgr::DoBackup(int nIndex) const
 		return TRUE; // not yet saved
 
 	CString sBackupFolder(Prefs().GetBackupLocation(sTDLPath));
-	int nKeepBackups = Prefs().GetKeepBackupCount();
+	int nNumKeepBackups = Prefs().GetKeepBackupCount();
 
-	if (CreateBackup(sTDLPath, sBackupFolder, nKeepBackups))
+	if (CreateBackup(sTDLPath, sBackupFolder, nNumKeepBackups))
 	{
 		// Back up task time log files
 		FileMisc::TerminatePath(sBackupFolder);
 		sBackupFolder += FileMisc::GetFileNameFromPath(sTDLPath, FALSE);
 		
-		BackupLogFiles(sTDLPath, sBackupFolder, nKeepBackups);
+		BackupLogFiles(sTDLPath, sBackupFolder, nNumKeepBackups);
 
 		return TRUE;
 	}
@@ -1630,7 +1630,7 @@ BOOL CToDoCtrlMgr::DoBackup(int nIndex) const
 	return FALSE;
 }
 
-void CToDoCtrlMgr::BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nKeepBackups) const
+void CToDoCtrlMgr::BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nNumKeepBackups) const
 {
 	if (Prefs().GetLogTaskTimeSeparately())
 	{
@@ -1640,87 +1640,60 @@ void CToDoCtrlMgr::BackupLogFiles(const CString& sTDLPath, const CString& sBacku
 		CString sLogPattern = CTDCTaskTimeLog(sTDLPath).GetLogPath(MAGIC_TASKID, TRUE);
 		sLogPattern.Replace(MAGIC_TASKIDSTR, _T("*"));
 
-#ifdef _DEBUG
-		{
-			CString sDrive, sFolder, sFName, sExt;
-			FileMisc::SplitPath(sLogPattern, &sDrive, &sFolder, &sFName, &sExt);
-
-			CString sFolderCheck;
-			FileMisc::TerminatePath(FileMisc::MakePath(sFolderCheck, sDrive, sFolder), FALSE);
-
-			ASSERT(FileMisc::IsSamePath(sFolderCheck, FileMisc::GetFolderFromFilePath(sLogPattern)));
-			ASSERT((sFName + sExt) == FileMisc::GetFileNameFromPath(sLogPattern));
-		}
-#endif
 		CStringArray aLogFiles;
 		int nFile = FileMisc::FindFiles(FileMisc::GetFolderFromFilePath(sLogPattern), 
 										aLogFiles, 
 										FALSE, 
 										FileMisc::GetFileNameFromPath(sLogPattern));
 		while (nFile--)
-			CreateBackup(aLogFiles[nFile], sBackupFolder, nKeepBackups);
+			CreateBackup(aLogFiles[nFile], sBackupFolder, nNumKeepBackups);
 	}
 	else // single log file
 	{
 		CString sLogPath = CTDCTaskTimeLog(sTDLPath).GetLogPath();
 		
-		CreateBackup(sLogPath, sBackupFolder, nKeepBackups);
+		CreateBackup(sLogPath, sBackupFolder, nNumKeepBackups);
 	}
 }
 
-BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFolder, int nKeepBackups)
+BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFolder, int nNumKeepBackups)
 {
 	// No need to create a backup of non-existent file
 	if (!FileMisc::FileExists(sPath))
 		return FALSE;
-
-	// NOTE: We encode the app version in the backup name to ensure that
-	// in the event that an update contains a breaking bug which corrupts 
-	// tasklists we haven't already deleted 'good' backups of the previous 
-	// version before the bug is discovered.
-
-	// However, this means that we could accumulate 'nKeepBackups'
-	// for as many versions as this user has updated. ie. the number of 
-	// backups can grow indefinitely, so we also cull the number of the
-	// previous version's backups to a MINIMUM OF ONE.
-	if (nKeepBackups)
+	
+	if (!CFileBackup().MakeBackup(sPath, FBS_APPVERSION | FBS_DATETIMESTAMP, sBackupFolder, _T("")))
 	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (nNumKeepBackups > 0)
+	{
+		// NOTE: We encode the app version in the backup name to ensure that
+		// in the event that an update contains a breaking bug which corrupts 
+		// files we haven't already deleted 'good' backups of the previous 
+		// version before the bug is discovered.
+
 		// Cull backups of current version
 		CString sBackupPattern = CFileBackup::BuildBackupPath(sPath, FBS_APPVERSION, sBackupFolder, _T(""));
 		FileMisc::AddToFileName(sBackupPattern, _T("*"));
 
-#ifdef _DEBUG
-		{
-			CString sDrive, sFolder, sFName, sExt;
-			FileMisc::SplitPath(sBackupPattern, &sDrive, &sFolder, &sFName, &sExt);
+		int nNumFoundFiles;
+		int nNumCulled = CFileBackup::CullBackups(sBackupPattern, FBS_DATETIMESTAMP, nNumKeepBackups, nNumFoundFiles);
 
-			CString sFolderCheck;
-			FileMisc::TerminatePath(FileMisc::MakePath(sFolderCheck, sDrive, sFolder), FALSE);
+		ASSERT((nNumCulled == 0) || (nNumCulled == (nNumFoundFiles - nNumKeepBackups)));
 
-			ASSERT(FileMisc::IsSamePath(sFolderCheck, FileMisc::GetFolderFromFilePath(sBackupPattern)));
-			ASSERT((sFName + sExt) == FileMisc::GetFileNameFromPath(sBackupPattern));
-		}
-#endif
-		CStringArray aFiles;
-		int nNumFiles = FileMisc::FindFiles(FileMisc::GetFolderFromFilePath(sBackupPattern),
-											aFiles,
-											FALSE,
-											FileMisc::GetFileNameFromPath(sBackupPattern));
-		if (nNumFiles >= nKeepBackups)
-		{
-			Misc::SortArray(aFiles); // sorts oldest backups first
-			
-			// cull as required
-			while (aFiles.GetSize() >= nKeepBackups)
-			{
-				FileMisc::DeleteFile(aFiles[0], TRUE);
-				aFiles.RemoveAt(0);
-			}
-		}
-		else // cull previous version's backups except the last
-		{
-			nKeepBackups -= nNumFiles;
-			nNumFiles = 0;
+		// If anything got culled it means we've used up all
+		// of 'nNumKeepBackups' and we can therefore assume 
+		// that all previous versions have been culled.
+
+		// Otherwise we use the leftover amount to cull from 
+		// previous versions, but always leaving at least one 
+		// backup from each previous version
+		if (nNumCulled == 0)
+		{ 
+			ASSERT(nNumFoundFiles <= nNumKeepBackups);
 
 			// get current app version once only
 			CString sAppVer = FileMisc::GetAppVersion('_');
@@ -1729,42 +1702,38 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 			// find the first previous version having backups
 			CDWordArray aPrevVer;
 			
-			while (FileMisc::GetPrevAppVersion(aPrevVer, 10, 20) && !nNumFiles) 
+			while (FileMisc::GetPrevAppVersion(aPrevVer, 10, 20) && (nNumKeepBackups > 0)) 
 			{
-				// replace current app ver with previous ver in filename
 				CString sPrevVer = Misc::FormatArray(aPrevVer, '_');
 				sBackupPattern.Replace(sAppVer, sPrevVer);
 
-				nNumFiles = FileMisc::FindFiles(FileMisc::GetFolderFromFilePath(sBackupPattern),
-												aFiles,
-												FALSE,
-												FileMisc::GetFileNameFromPath(sBackupPattern));
-				switch (nNumFiles)
+				nNumKeepBackups = max(1, (nNumKeepBackups - nNumFoundFiles));
+				nNumFoundFiles = 0;
+
+				nNumCulled = CFileBackup::CullBackups(sBackupPattern, FBS_DATETIMESTAMP, nNumKeepBackups, nNumFoundFiles);
+
+				switch (nNumFoundFiles)
 				{
 				case 0:
-					// keep going
-					sAppVer = sPrevVer;
+					ASSERT(nNumCulled == 0);
+					sAppVer = sPrevVer; // Try next previous version
 					break;
 
 				case 1:
-					// always leave last backup of last version used
+					// We can assume that this version has been
+					// previously culled so we stop looking
+					ASSERT(nNumCulled == 0);
+					nNumKeepBackups = 0;
 					break;
 
 				default:
-					Misc::SortArray(aFiles); // see above
-					
-					// always leave last backup
-					while ((aFiles.GetSize() >= nKeepBackups) &&
-							(aFiles.GetSize() > 1))
-					{
-						FileMisc::DeleteFile(aFiles[0], TRUE);
-						aFiles.RemoveAt(0);
-					}
+					if (nNumCulled == 0)
+						sAppVer = sPrevVer; // Try next previous version
+					break;
 				}
 			}
 		}
 	}
-	
-	CFileBackup backup;
-	return backup.MakeBackup(sPath, FBS_APPVERSION | FBS_DATETIMESTAMP, sBackupFolder, _T(""));
+
+	return TRUE;
 }

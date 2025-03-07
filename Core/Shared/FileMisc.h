@@ -119,7 +119,14 @@ public:
 									const CString& sFolder = _T(""), 
 									const CString& sExt = _T(".bak"));
 
-	static int CullBackups(const CString& sPattern, int nNumToKeep = 10);
+	static int CullBackups(const CString& sPattern, 
+						   DWORD dwFlags = 0, 
+						   int nNumToKeep = 10);
+
+	static int CullBackups(const CString& sPattern, 
+						   DWORD dwFlags, 
+						   int nNumToKeep, 
+						   int& nNumFound);
 
 protected:
 	CString m_sFile, m_sBackup;

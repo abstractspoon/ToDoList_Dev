@@ -75,6 +75,7 @@ INISECTION::INISECTION(const INISECTION& other) : sSection(other.sSection)
 
 static CString ENDL = _T("\r\n");
 static CString NULLSTR;
+static LPCTSTR BACKUPFOLDER = _T("ini.Backup");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -118,7 +119,7 @@ CPreferences::CPreferences() : m_iPrefs(*this)
 	{
 		if (s_bIni)
 		{
-			// check for existing backup file first
+			// check for existing temporary backup file first
 			CString sBackupPath = CFileBackup::BuildBackupPath(s_sPrefsPath, FBS_OVERWRITE);
 			
 			if (FileMisc::FileExists(sBackupPath))
@@ -252,10 +253,10 @@ void CPreferences::CullIniBackups(int nNumToKeep)
 	if (!s_bIni)
 		return;
 
-	CString sPattern = CFileBackup::BuildBackupPath(s_sPrefsPath, 0, _T("ini.Backup"));
+	CString sPattern = CFileBackup::BuildBackupPath(s_sPrefsPath, 0, BACKUPFOLDER, NULLSTR);
 	FileMisc::AddToFileName(sPattern, _T("*"));
 
-	CFileBackup::CullBackups(sPattern);
+	CFileBackup::CullBackups(sPattern, FBS_DATETIMESTAMP);
 }
 
 BOOL CPreferences::IsEmpty()
@@ -357,7 +358,7 @@ BOOL CPreferences::SaveInternal(BOOL bExternal)
 	CString sPrefsContents = Misc::FormatArray(aSectionValues, ENDL);
 
 	// backup file first
-	CFileBackup backup(s_sPrefsPath, FBS_OVERWRITE | FBS_DATESTAMP, _T("ini.Backup"));
+	CFileBackup backup(s_sPrefsPath, FBS_OVERWRITE | FBS_DATESTAMP, BACKUPFOLDER, NULLSTR);
 	
 	// write prefs
 	{

@@ -195,9 +195,9 @@ protected:
 	BOOL AreToDoCtrlsSortedByName() const;
 
 	int UpdateTabItemImage(int nIndex) const;
-	void BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nKeepBackups) const;
+	void BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nNumKeepBackups) const;
 
-	static BOOL CreateBackup(const CString& sPath, const CString& sBackupFolder, int nKeepBackups);
+	static BOOL CreateBackup(const CString& sPath, const CString& sBackupFolder, int nNumKeepBackups);
 	static CFilteredToDoCtrl& GetFallbackToDoCtrl();
 };
 
