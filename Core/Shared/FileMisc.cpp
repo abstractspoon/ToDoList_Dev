@@ -281,7 +281,7 @@ int CFileBackup::CullBackups(const CString& sPattern, DWORD dwFlags, int nNumToK
 	if (!nNumFound)
 		return 0;
 
-	if (dwFlags & FBS_DATETIMESTAMP)
+	if (dwFlags & FBS_DATESTAMP)
 		Misc::SortArray(aFiles);
 	else
 		Misc::SortArray(aFiles, FileDateSortProc);
