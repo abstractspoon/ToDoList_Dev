@@ -1715,7 +1715,6 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 				{
 				case 0:
 					ASSERT(nNumCulled == 0);
-					sAppVer = sPrevVer; // Try next previous version
 					break;
 
 				case 1:
@@ -1726,10 +1725,10 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 					break;
 
 				default:
-					if (nNumCulled == 0)
-						sAppVer = sPrevVer; // Try next previous version
 					break;
 				}
+
+				sAppVer = sPrevVer; // Try next previous version
 			}
 		}
 	}
