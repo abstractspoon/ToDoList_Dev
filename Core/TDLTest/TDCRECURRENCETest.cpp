@@ -43,7 +43,7 @@ TESTRESULT CTDCRECURRENCETest::Run()
 
 void CTDCRECURRENCETest::TestSetRegularity()
 {
-	CTDCScopedTest test(*this, _T("CTDCRECURRENCETest::SetRegularity"));
+	CTDCScopedTest test(*this, _T("CTDCRECURRENCE::SetRegularity"));
 	
 	//  nRegularity										dwSpecific1				dwSpecific2
 	

@@ -245,6 +245,8 @@ void CFileMiscTest::TestSplitPath()
 
 void CFileMiscTest::TestFileBackupCullBackups()
 {
+	CTDCScopedTest test(*this, _T("CFileBackup::CullBackups"));
+
 	int nNumFound = 0;
 
 	// Keep NO backups

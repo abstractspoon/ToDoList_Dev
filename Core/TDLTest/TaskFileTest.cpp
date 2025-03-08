@@ -79,7 +79,7 @@ TESTRESULT CTaskFileTest::Run()
 
 void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 {
-	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(OverwriteAll)"));
+	CTDCScopedTest test(*this, _T("CTaskFile::MergeTaskAttributes(OverwriteAll)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -133,7 +133,7 @@ void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 
 void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
 {
-	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(ExcludeEmptySrcValues)"));
+	CTDCScopedTest test(*this, _T("CTaskFile::MergeTaskAttributes(ExcludeEmptySrcValues)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -186,7 +186,7 @@ void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
 
 void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 {
-	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValues)"));
+	CTDCScopedTest test(*this, _T("CTaskFile::MergeTaskAttributes(PreserveNonEmptyDestValues)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -256,7 +256,7 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 
 void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues()
 {
-	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValuesAndExcludeEmptySrcValues)"));
+	CTDCScopedTest test(*this, _T("CTaskFile::MergeTaskAttributes(PreserveNonEmptyDestValuesAndExcludeEmptySrcValues)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;

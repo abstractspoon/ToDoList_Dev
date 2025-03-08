@@ -56,7 +56,7 @@ TESTRESULT CTDCTaskTimeLogTest::Run()
 
 void CTDCTaskTimeLogTest::TestLogTime()
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskTimeLogTest::LogTime"));
+	CTDCScopedTest test(*this, _T("CTDCTaskTimeLog::LogTime"));
 
 	// NOT Logged separately
 	CTaskTimeLogItemArray aItems;
@@ -223,7 +223,7 @@ void CTDCTaskTimeLogTest::PopulateLogItem(TASKTIMELOGITEM& tli,
 
 void CTDCTaskTimeLogTest::TestLoadSaveLogFile()
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskTimeLogTest::Load/SaveLogFile"));
+	CTDCScopedTest test(*this, _T("CTDCTaskTimeLog::Load/SaveLogFile"));
 
 	CTaskTimeLogItemArray aItems, aCheckItems;
 	CString sHeaderDelim;

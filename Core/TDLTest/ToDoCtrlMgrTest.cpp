@@ -41,7 +41,7 @@ TESTRESULT CToDoCtrlMgrTest::Run()
 
 void CToDoCtrlMgrTest::TestCreateBackup()
 {
-	CTDCScopedTest test(*this, _T("CToDoCtrlMgrTest::CreateBackup"));
+	CTDCScopedTest test(*this, _T("CToDoCtrlMgr::CreateBackup"));
 	CStringArray aBackups;
 
 	// The file to backup
