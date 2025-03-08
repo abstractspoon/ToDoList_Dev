@@ -143,7 +143,7 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data, BOO
 
 void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskDueDate"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskDueDate"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned (unaffected by reference tasks)
@@ -195,7 +195,7 @@ void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data, BOOL 
 
 void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetLastModifiedDateAndUser"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetLastModifiedDate/By"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned (unaffected by reference tasks)
@@ -253,7 +253,7 @@ void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlD
 
 void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskPriority"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskPriority"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned (unaffected by reference tasks)
@@ -580,7 +580,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL
 
 void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskRisk"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskRisk"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
@@ -857,7 +857,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskPercentDone"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskPercentDone"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
@@ -1008,7 +1008,7 @@ void CTDCTaskCalculatorTest::TestGetTaskCost(const CToDoCtrlData& data, BOOL bIn
 
 void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeEstimate"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskTimeEstimate"));
 	CTDCTaskCalculator calc(data);
 
 	// No parental contributions
@@ -1122,7 +1122,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data, 
 
 void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeSpent"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskTimeSpent"));
 	CTDCTaskCalculator calc(data);
 
 	// No parental contributions
@@ -1174,7 +1174,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data, BOO
 
 void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeRemaining"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskTimeRemaining"));
 	CTDCTaskCalculator calc(data);
 
 	TDC_UNITS nUnits = TDCU_NULL;
@@ -1408,7 +1408,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 
 void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskFlag"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskFlag"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
@@ -1437,7 +1437,7 @@ void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data, BOOL bIn
 
 void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskLock"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskLock"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
@@ -1466,7 +1466,7 @@ void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data, BOOL bIn
 
 void CTDCTaskCalculatorTest::TestGetTaskCustomAttributeData(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskCustomAttributeData"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskCustomAttributeData"));
 	CTDCTaskCalculator calc(data);
 
 	InitialiseStyles(bIncludeRefs);

@@ -57,6 +57,7 @@ public:
 	static BOOL Initialise(LPCTSTR szPrefsPath, BOOL bIni);
 	static BOOL Save();
 	static void Release();
+	static void CullIniBackups(int nNumToKeep = 10);
 
 	static BOOL IsInitialised();
 	static BOOL UsesIni() { return s_bIni; }

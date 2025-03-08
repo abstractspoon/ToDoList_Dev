@@ -101,7 +101,7 @@ void CDateHelperTest::TestDecodeDate()
 
 void CDateHelperTest::TestDecodeRelativeDate()
 {
-	CTDCScopedTest test(*this, _T("CDateHelperTest::DecodeRelativeDate"));
+	CTDCScopedTest test(*this, _T("CDateHelper::DecodeRelativeDate"));
 	
 	const double TODAY(CDateHelper::GetDate(DHD_TODAY));
 	const double ENDTHISWEEK(CDateHelper::GetDate(DHD_ENDTHISWEEK));
@@ -181,7 +181,7 @@ void CDateHelperTest::TestDecodeRelativeDate()
 
 void CDateHelperTest::TestTruncateSeconds()
 {
-	CTDCScopedTest test(*this, _T("CDateHelperTest::TruncateSeconds"));
+	CTDCScopedTest test(*this, _T("CDateHelper::TruncateSeconds"));
 	
 	const COleDateTime dtPositive(45678.123456);
 	const COleDateTime dtNegative(-45678.123456);
@@ -202,7 +202,7 @@ void CDateHelperTest::TestTruncateSeconds()
 
 void CDateHelperTest::TestGetDateOnly()
 {
-	CTDCScopedTest test(*this, _T("CDateHelperTest::GetDateOnly"));
+	CTDCScopedTest test(*this, _T("CDateHelper::GetDateOnly"));
 
 	ExpectEQ(CDateHelper::GetDateOnly(44000.125).m_dt, 44000.0);
 	ExpectEQ(CDateHelper::GetDateOnly(44000.0).m_dt, 44000.0);
@@ -212,7 +212,7 @@ void CDateHelperTest::TestGetDateOnly()
 
 void CDateHelperTest::TestGetTimeOnly()
 {
-	CTDCScopedTest test(*this, _T("CDateHelperTest::GetTimeOnly"));
+	CTDCScopedTest test(*this, _T("CDateHelper::GetTimeOnly"));
 
 	// Note: time component is always positive
 	ExpectEQ(CDateHelper::GetTimeOnly(44000.125).m_dt, 0.125);
@@ -223,7 +223,7 @@ void CDateHelperTest::TestGetTimeOnly()
 
 void CDateHelperTest::TestMakeDate()
 {
-	CTDCScopedTest test(*this, _T("CDateHelperTest::MakeDate"));
+	CTDCScopedTest test(*this, _T("CDateHelper::MakeDate"));
 
 	{
 		COleDateTime dt1(44000.125), dt2(34000.375);
@@ -249,7 +249,7 @@ void CDateHelperTest::TestMakeDate()
 
 void CDateHelperTest::TestCompare()
 {
-	CTDCScopedTest test(*this, _T("CDateHelperTest::Compare"));
+	CTDCScopedTest test(*this, _T("CDateHelper::Compare"));
 
 	{
 		COleDateTime dt1(44000.125), dt2(44000.25);
@@ -293,7 +293,7 @@ void CDateHelperTest::TestCompare()
 
 void CDateHelperTest::Test64BitDates()
 {
-	CTDCScopedTest test(*this, _T("CDateHelperTest::64BitDates"));
+	CTDCScopedTest test(*this, _T("CDateHelper::64BitDates"));
 
 	COleDateTime dtNow = COleDateTime::GetCurrentTime();
 

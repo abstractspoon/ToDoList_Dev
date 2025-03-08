@@ -39,7 +39,7 @@ TESTRESULT CTimeHelperTest::Run()
 
 void CTimeHelperTest::TestGetTime()
 {
-	CTDCScopedTest test(*this, _T("CTimeHelperTest::GetTime"));
+	CTDCScopedTest test(*this, _T("CTimeHelper::GetTime"));
 
 	// -----------------------------------------------------------------------
 

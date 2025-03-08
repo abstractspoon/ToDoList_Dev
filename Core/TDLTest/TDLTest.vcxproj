@@ -196,6 +196,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ToDoCtrlMgrTest.cpp" />
     <ClCompile Include="ToDoCtrlTaskLinkTest.cpp" />
     <ClCompile Include="WorkingWeekTest.cpp" />
     <ClCompile Include="XmlFileTest.cpp" />
@@ -227,6 +228,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClInclude Include="TDLTestBase.h" />
     <ClInclude Include="TimeHelperTest.h" />
     <ClInclude Include="ToDoCtrlDataTest.h" />
+    <ClInclude Include="ToDoCtrlMgrTest.h" />
     <ClInclude Include="ToDoCtrlTaskLinkTest.h" />
     <ClInclude Include="WorkingWeekTest.h" />
     <ClInclude Include="XmlFileTest.h" />

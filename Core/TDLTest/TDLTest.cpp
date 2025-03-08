@@ -19,6 +19,7 @@
 #include "TDLTaskCtrlBaseTest.h"
 #include "TimeHelperTest.h"
 #include "ToDoCtrlDataTest.h"
+#include "ToDoCtrlMgrTest.h"
 #include "ToDoCtrlTaskLinkTest.h"
 #include "WorkingWeekTest.h"
 #include "XmlFileTest.h"
@@ -98,6 +99,7 @@ void DoTests(const CTestUtils& utils)
 	res += DOTEST(CTDLTaskCtrlBaseTest);
 	res += DOTEST(CTimeHelperTest);
 	res += DOTEST(CToDoCtrlDataTest);
+	res += DOTEST(CToDoCtrlMgrTest);
 	res += DOTEST(CToDoCtrlTaskLinkTest);
 	res += DOTEST(CWorkingDayTest);
 	res += DOTEST(CWorkingWeekTest);

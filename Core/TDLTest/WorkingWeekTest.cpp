@@ -40,7 +40,7 @@ TESTRESULT CWorkingWeekTest::Run()
 
 void CWorkingWeekTest::TestAddDuration()
 {
-	CTDCScopedTest test(*this, _T("CWorkingWeekTest::AddDuration"));
+	CTDCScopedTest test(*this, _T("CWorkingWeek::AddDurationInMinutes/Hours/Days/Weeks"));
 
 	// -----------------------------------------------------------------------
 
@@ -113,11 +113,11 @@ void CWorkingWeekTest::TestAddDuration()
 
 void CWorkingWeekTest::TestCalculateDuration()
 {
-	CTDCScopedTest test(*this, _T("CWorkingWeekTest::CalculateDuration"));
+	CTDCScopedTest test(*this, _T("CWorkingWeek::CalculateDuration"));
 
 	// -----------------------------------------------------------------------
 
-
+	// TODO
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ TESTRESULT CWorkingDayTest::Run()
 
 void CWorkingDayTest::TestAddDurationInHours()
 {
-	CTDCScopedTest test(*this, _T("CWorkingDayTest::AddDurationInHours"));
+	CTDCScopedTest test(*this, _T("CWorkingDay::AddDurationInHours"));
 
 	// -----------------------------------------------------------------------
 

@@ -222,6 +222,8 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 	if (Misc::HasFlag(dwFlags, FBS_APPVERSION))
 	{
 		CString sVersion = FileMisc::GetAppVersion('_');
+		ASSERT(!sVersion.IsEmpty());
+
 		sFExt = ('.' + sVersion + sFExt);
 	}
 
@@ -242,7 +244,7 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 		sBackupExt = '.' + sBackupExt;
 	}
 
-	FileMisc::ReplaceExtension(sBackup, (sBackupExt + sFExt));
+	FileMisc::ReplaceExtension(sBackup, (sFExt + sBackupExt));
 
 	// Make sure we're not overwriting an existing backup
 	if (!Misc::HasFlag(dwFlags, FBS_OVERWRITE) && FileMisc::FileExists(sBackup))
@@ -260,6 +262,47 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 	}
 
 	return sBackup;
+}
+
+int CFileBackup::CullBackups(const CString& sPattern, DWORD dwFlags, int nNumToKeep)
+{
+	int nUnused;
+	return CullBackups(sPattern, dwFlags, nNumToKeep, nUnused);
+}
+
+int CFileBackup::CullBackups(const CString& sPattern, DWORD dwFlags, int nNumToKeep, int& nNumFound)
+{
+	CString sFolder = FileMisc::GetFolderFromFilePath(sPattern);
+	CString sFilePattern = FileMisc::GetFileNameFromPath(sPattern);
+
+	ASSERT(sFilePattern.FindOneOf(_T("*?")) != -1);
+
+	CStringArray aFiles;
+	nNumFound = FileMisc::FindFiles(sFolder, aFiles, FALSE, sFilePattern);
+
+	if (!nNumFound)
+		return 0;
+
+	if (dwFlags & FBS_DATESTAMP)
+		Misc::SortArray(aFiles);
+	else
+		Misc::SortArray(aFiles, FileDateSortProc);
+
+	while (aFiles.GetSize() > nNumToKeep)
+	{
+		FileMisc::DeleteFile(aFiles[0]);
+		aFiles.RemoveAt(0);
+	}
+
+	return (nNumFound - aFiles.GetSize());
+}
+
+int CFileBackup::FileDateSortProc(const void* v1, const void* v2)
+{
+	const CString* pFile1 = (CString*)v1;
+	const CString* pFile2 = (CString*)v2;
+
+	return (int)(FileMisc::GetFileLastModified(*pFile2) - FileMisc::GetFileLastModified(*pFile1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -451,6 +494,8 @@ BOOL FileMisc::FindFirst(LPCTSTR szSearchSpec, CString& sPath)
 
 int FileMisc::FindFiles(const CString& sFolder, CStringArray& aFilePaths, BOOL bCheckSubFolders, LPCTSTR szPattern)
 {
+	aFilePaths.RemoveAll();
+
 	CFileFind ff;
 	CString sSearchSpec;
 
@@ -2282,7 +2327,7 @@ BOOL FileMisc::GetPrevAppVersion(CDWordArray& aVersionParts, DWORD nMaxVer2, DWO
 	int nPart = aVersionParts.GetSize();
 	ASSERT(nPart == 4);
 
-	UINT nMaxVers[4] = { 0, nMaxVer2, nMaxVer3, nMaxVer4 };
+	const UINT MAXVERS[4] = { 0, nMaxVer2, nMaxVer3, nMaxVer4 };
 
 	while (nPart--)
 	{
@@ -2292,7 +2337,7 @@ BOOL FileMisc::GetPrevAppVersion(CDWordArray& aVersionParts, DWORD nMaxVer2, DWO
 			return TRUE;
 		}
 
-		aVersionParts[nPart] = nMaxVers[nPart];
+		aVersionParts[nPart] = MAXVERS[nPart];
 	}
 
 	// all else
