@@ -34,14 +34,14 @@ TESTRESULT CToDoCtrlMgrTest::Run()
 {
 	ClearTotals();
 
-	TestCullBackups();
+	TestCreateBackup();
 
 	return GetTotals();
 }
 
-void CToDoCtrlMgrTest::TestCullBackups()
+void CToDoCtrlMgrTest::TestCreateBackup()
 {
-	CTDCScopedTest test(*this, _T("CToDoCtrlMgrTest::CullBackups"));
+	CTDCScopedTest test(*this, _T("CToDoCtrlMgrTest::CreateBackup"));
 	CStringArray aBackups;
 
 	// The file to backup
