@@ -25,13 +25,14 @@ namespace LoggedTimeUIExtension
 		public CreateLoggedEntryDlg(IEnumerable<TaskItem> taskItems, 
 									UIExtension.TaskIcon taskIcons, 
 									WorkingWeek workWeek,
+									bool isoDateTimes,
 									LogEntry attrib)
 			:
 			this()
 		{
 			m_TaskItems = taskItems;
 
-			m_Attributes.Initialise(attrib, workWeek, false, false);
+			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false);
 
 			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, attrib.TaskId, TaskItem.None);
 			m_TaskCombo.SelectedIndex = 0;
