@@ -468,6 +468,8 @@ void CMiscTest::TestIsNumber()
 
 void CMiscTest::TestRemoveDuplicates()
 {
+	CTDCScopedTest test(*this, _T("Misc::RemoveDuplicates"));
+
 	// CStringArray
 	{
 		// Case sensitive
@@ -537,7 +539,7 @@ void CMiscTest::TestRemoveDuplicates()
 			aItems.Add(_T("AbC"));
 			aItems.Add(_T("ABc"));
 
-			ExpectEQ(Misc::RemoveDuplicates(aItems, TRUE), 6);
+			ExpectEQ(Misc::RemoveDuplicates(aItems, FALSE), 6);
 			ExpectEQ(aItems.GetSize(), 1);
 
 			ExpectEQ(aItems[0], _T("abc")); // only the first item remains
@@ -602,6 +604,8 @@ void CMiscTest::TestRemoveDuplicates()
 
 void CMiscTest::TestRemoveItems()
 {
+	CTDCScopedTest test(*this, _T("Misc::RemoveItems"));
+
 	// Case sensitive
 	{
 		// No matches
@@ -679,6 +683,8 @@ void CMiscTest::TestRemoveItems()
 
 void CMiscTest::TestAppendItems()
 {
+	CTDCScopedTest test(*this, _T("Misc::AppendItems"));
+
 	// Because what's interesting about this function is that
 	// it can call RemoveDuplicates, we don't need to exhaustively
 	// test that aspect of it
