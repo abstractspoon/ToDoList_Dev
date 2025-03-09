@@ -31,7 +31,7 @@ struct TDCREMINDER
 	CString GetTaskComments() const;
 	CString GetTaskPath() const;
 
-	CString FormatNotification() const;
+	CString FormatNotification(BOOL bISODates) const;
 
 	BOOL IsValid() const;
 	BOOL IsTaskRecurring() const;

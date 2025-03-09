@@ -2523,6 +2523,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// reminders
 	m_dlgReminders.Initialize(this);
+	m_dlgReminders.SetISODateFormat(userPrefs.GetDisplayDatesInISO());
 
 	if (userPrefs.GetRemindersUseTreeFont())
 		m_dlgReminders.SetRemindersFont(m_fontTree);
@@ -2863,7 +2864,7 @@ void CToDoListWnd::RestoreVisibility()
 			// tray when minimized then hide here too
 			else if ((nDefShowState == SW_SHOWMINIMIZED) || (nDefShowState == SW_SHOWMINNOACTIVE))
 			{
-				if (Prefs().HasSysTrayOptions(STO_ONMINIMIZE, STO_ONMINCLOSE))
+				if (userPrefs.HasSysTrayOptions(STO_ONMINIMIZE, STO_ONMINCLOSE))
 				{
 					m_bVisible = FALSE;
 				}
@@ -5258,6 +5259,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		}
 
 		m_dlgReminders.EnableReducedFlashing(newPrefs.GetReduceReminderDialogFlashing());
+		m_dlgReminders.SetISODateFormat(newPrefs.GetDisplayDatesInISO());
 		
 		// active tasklist userPrefs
 		CheckUpdateActiveToDoCtrlPreferences();
@@ -12246,11 +12248,10 @@ void CToDoListWnd::OnUpdateAddtimetologfile(CCmdUI* pCmdUI)
 void CToDoListWnd::OnToolsAnalyseLoggedTime() 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	const CPreferencesDlg& userPrefs = Prefs();
 	const CTDCCustomAttribDefinitionArray& aCustAttribDefs = tdc.GetCustomAttributeDefs();
 
 	CString sTaskFile(tdc.GetFilePath());
-	CTDLAnalyseLoggedTimeDlg dialog(sTaskFile, aCustAttribDefs);
+	CTDLAnalyseLoggedTimeDlg dialog(sTaskFile, aCustAttribDefs, Prefs().GetDisplayDatesInISO());
 
 	BOOL bContinue = TRUE;
 
@@ -13307,7 +13308,7 @@ void CToDoListWnd::OnEditSetReminder(int nTDC, DWORD dwTaskID)
 		dwFlags |= TDCREM_NEWREMINDER;
 	}
 
-	CTDLSetReminderDlg dialog(CMDICON(ID_EDIT_SETREMINDER));
+	CTDLSetReminderDlg dialog(CMDICON(ID_EDIT_SETREMINDER), Prefs().GetDisplayDatesInISO());
 
 	switch (dialog.DoModal(rem, dwFlags))
 	{

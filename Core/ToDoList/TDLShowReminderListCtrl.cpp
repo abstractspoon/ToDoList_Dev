@@ -55,7 +55,8 @@ CTDLShowReminderListCtrl::CTDLShowReminderListCtrl(LPCTSTR szPrefsKey)
 	m_bHasIcons(FALSE),
 	m_dwNextReminderID(1),
 	m_sPrefsKey(szPrefsKey),
-	m_bModifyingReminders(FALSE)
+	m_bModifyingReminders(FALSE),
+	m_bISODateFormat(FALSE)
 {
 	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(17));
 }
@@ -223,7 +224,30 @@ void CTDLShowReminderListCtrl::UpdateReminder(const TDCREMINDER& rem, int nItem)
 	// But everything else can
 	SetItemText(nItem, TASK_COL, rem.GetTaskTitle());
 	SetItemText(nItem, TASKPARENT_COL, rem.GetParentTitle());
-	SetItemText(nItem, WHEN_COL, rem.FormatNotification());
+	SetItemText(nItem, WHEN_COL, rem.FormatNotification(m_bISODateFormat));
+}
+
+void CTDLShowReminderListCtrl::SetISODateFormat(BOOL bISODates)
+{
+	if (Misc::StatesDiffer(bISODates, m_bISODateFormat))
+	{
+		m_bISODateFormat = bISODates;
+
+		if (GetSafeHwnd())
+			ReformatReminderDates();
+	}
+}
+
+void CTDLShowReminderListCtrl::ReformatReminderDates()
+{
+	int nItem = GetItemCount();
+	TDCREMINDER rem;
+
+	while (nItem--)
+	{
+		if (m_mapReminders.Lookup(GetItemData(nItem), rem))
+			SetItemText(nItem, WHEN_COL, rem.FormatNotification(m_bISODateFormat));
+	}
 }
 
 BOOL CTDLShowReminderListCtrl::RemoveReminder(const TDCREMINDER& rem)

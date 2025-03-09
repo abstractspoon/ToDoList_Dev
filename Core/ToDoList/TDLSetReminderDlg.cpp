@@ -33,7 +33,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg dialog
 
-CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, CWnd* pParent /*=NULL*/)
+CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODates, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLSetReminderDlg::IDD, _T("Reminders"), pParent), 
 	m_cbAbsoluteTime(TCB_HALFHOURS | TCB_HOURSINDAY),
@@ -45,6 +45,7 @@ CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, CWnd* pParent /*=NULL*/)
 	m_dAbsoluteTime(CDateHelper::GetTimeOnly(m_dtAbsoluteDate))
 {
 	m_iconDlg.SetIcon(hIcon, FALSE); // not owned
+	m_dtcAbsolute.SetISOFormat(bISODates);
 }
 
 
@@ -54,6 +55,7 @@ void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CTDLSetReminderDlg)
 	DDX_Control(pDX, IDC_ABSOLUTETIME, m_cbAbsoluteTime);
 	DDX_Control(pDX, IDC_PLAYSOUND, m_ePlaySound);
+	DDX_Control(pDX, IDC_ABSOLUTEDATE, m_dtcAbsolute);
 	DDX_CBIndex(pDX, IDC_RELATIVEFROMWHERE, m_bRelativeFromDueDate);
 	DDX_Control(pDX, IDC_RELATIVELEADIN, m_cbLeadIn);
 	DDX_Text(pDX, IDC_PLAYSOUND, m_sSoundFile);

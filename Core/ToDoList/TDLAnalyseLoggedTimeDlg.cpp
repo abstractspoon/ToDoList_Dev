@@ -58,7 +58,10 @@ static int FindFormat(TDCTTL_FORMAT nFormat)
 // CTDLAnalyseLoggedTimeDlg dialog
 
 
-CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, CWnd* pParent /*=NULL*/)
+CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, 
+												   const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, 
+												   BOOL bISODates,
+												   CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLAnalyseLoggedTimeDlg::IDD, _T("AnalyseLog"), pParent), 
 	m_aCustomAttribDefs(aCustomAttribDefs),
@@ -79,6 +82,9 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 
 	m_bGroupBy = prefs.GetProfileInt(m_sPrefsKey, _T("GroupBy"), FALSE);
 	m_nGroupByAttrib = prefs.GetProfileEnum(m_sPrefsKey, _T("GroupByAttrib"), TDCA_STATUS);
+
+	m_dtcFrom.SetISOFormat(bISODates);
+	m_dtcTo.SetISOFormat(bISODates);
 
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(m_nGroupByAttrib))
 	{
@@ -114,7 +120,6 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 	m_sOutputFilePath += _T("_Report");
 }
 
-
 void CTDLAnalyseLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
@@ -124,6 +129,8 @@ void CTDLAnalyseLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_DateTimeCtrl(pDX, IDC_DATETO, m_dtTo);
 	DDX_Text(pDX, IDC_OUTPUTFILEPATH, m_sOutputFilePath);
 	//}}AFX_DATA_MAP
+	DDX_Control(pDX, IDC_DATEFROM, m_dtcFrom);
+	DDX_Control(pDX, IDC_DATETO, m_dtcTo);
 	DDX_Control(pDX, IDC_OUTPUTFILEPATH, m_eOutputFile);
 	DDX_Control(pDX, IDC_TIMEPERIODS, m_cbTimePeriod);
 	DDX_Control(pDX, IDC_BREAKDOWNS, m_cbBreakdown);

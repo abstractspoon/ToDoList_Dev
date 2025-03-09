@@ -389,6 +389,14 @@ BOOL CTDLShowReminderDlg::CanModifyReminders() const
 	return (!m_bModifyingReminder && (m_lcReminders.GetSelectedCount() == 1));
 }
 
+void CTDLShowReminderDlg::SetISODateFormat(BOOL bIso) 
+{ 
+	m_bISODateFormat = bIso;
+
+	m_dtcSnoozeDate.SetISOFormat(bIso); 
+	m_lcReminders.SetISODateFormat(bIso);
+}
+
 void CTDLShowReminderDlg::UpdateControls()
 {
 	TDCREMINDER rem;

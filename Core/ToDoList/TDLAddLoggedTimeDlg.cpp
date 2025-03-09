@@ -22,7 +22,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAddLoggedTimeDlg dialog
 
-CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, BOOL bEnableAddTimeToTimeSpent, double dHours, CWnd* pParent /*=NULL*/)
+CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
+										   BOOL bEnableAddTimeToTimeSpent, BOOL bISODates, 
+										   double dHours, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLAddLoggedTimeDlg::IDD, _T("AddLoggedTime"), pParent), 
 	m_cbTimeWhen(TCB_HALFHOURS | TCB_HOURSINDAY),
@@ -35,6 +37,7 @@ CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
 	//{{AFX_DATA_INIT(CTDLAddLoggedTimeDlg)
 	//}}AFX_DATA_INIT
 	m_dtWhen = COleDateTime::GetCurrentTime();
+	m_dtcWhen.SetISOFormat(bISODates);
 
 	if (m_bTracked)
 	{
@@ -64,7 +67,7 @@ void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLAddLoggedTimeDlg)
-	DDX_Control(pDX, IDC_WHENDATE, m_dateWhen);
+	DDX_Control(pDX, IDC_WHENDATE, m_dtcWhen);
 	DDX_Control(pDX, IDC_WHENTIME, m_cbTimeWhen);
 	DDX_Text(pDX, IDC_TASKID, m_dwTaskID);
 	DDX_Text(pDX, IDC_TASKTITLE, m_sTaskTitle);
@@ -78,14 +81,14 @@ void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		m_dateWhen.GetTime(m_dtWhen);
+		m_dtcWhen.GetTime(m_dtWhen);
 		COleDateTime time = m_cbTimeWhen.GetOleTime();
 
 		m_dtWhen = CDateHelper::GetDateOnly(m_dtWhen) + time;
 	}
 	else
 	{
-		m_dateWhen.SetTime(m_dtWhen);
+		m_dtcWhen.SetTime(m_dtWhen);
 		m_cbTimeWhen.SetOleTime(CDateHelper::GetTimeOnly(m_dtWhen));
 	}
 }
