@@ -2523,7 +2523,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// reminders
 	m_dlgReminders.Initialize(this);
-	m_dlgReminders.SetISODateFormat(userPrefs.GetDisplayDatesInISO());
+	m_dlgReminders.SetISODateTimeFormat(userPrefs.GetDisplayDatesInISO());
 
 	if (userPrefs.GetRemindersUseTreeFont())
 		m_dlgReminders.SetRemindersFont(m_fontTree);
@@ -5259,7 +5259,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		}
 
 		m_dlgReminders.EnableReducedFlashing(newPrefs.GetReduceReminderDialogFlashing());
-		m_dlgReminders.SetISODateFormat(newPrefs.GetDisplayDatesInISO());
+		m_dlgReminders.SetISODateTimeFormat(newPrefs.GetDisplayDatesInISO());
 		
 		// active tasklist userPrefs
 		CheckUpdateActiveToDoCtrlPreferences();

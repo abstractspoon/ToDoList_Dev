@@ -33,7 +33,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg dialog
 
-CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODates, CWnd* pParent /*=NULL*/)
+CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODateTimes, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLSetReminderDlg::IDD, _T("Reminders"), pParent), 
 	m_cbAbsoluteTime(TCB_HALFHOURS | TCB_HOURSINDAY),
@@ -45,7 +45,8 @@ CTDLSetReminderDlg::CTDLSetReminderDlg(HICON hIcon, BOOL bISODates, CWnd* pParen
 	m_dAbsoluteTime(CDateHelper::GetTimeOnly(m_dtAbsoluteDate))
 {
 	m_iconDlg.SetIcon(hIcon, FALSE); // not owned
-	m_dtcAbsolute.SetISOFormat(bISODates);
+	m_dtcAbsolute.SetISOFormat(bISODateTimes);
+	m_cbAbsoluteTime.SetISOFormat(bISODateTimes);
 }
 
 

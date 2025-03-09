@@ -49,7 +49,7 @@ public:
 protected:
 	BOOL m_bHasIcons;
 	BOOL m_bModifyingReminders;
-	BOOL m_bISODateFormat;
+	BOOL m_bISODates;
 
 	CString m_sPrefsKey;
 	DWORD m_dwNextReminderID;

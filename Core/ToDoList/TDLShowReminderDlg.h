@@ -38,7 +38,7 @@ public:
 
 	void ShowWindow();
 	BOOL IsForegroundWindow() const;
-	void SetISODateFormat(BOOL bIso);
+	void SetISODateTimeFormat(BOOL bIso);
 
 protected:
 // Dialog Data
@@ -49,7 +49,7 @@ protected:
 	int m_bSnoozeUntil;
 	BOOL m_bModifyingList;
 	BOOL m_bModifyingReminder;
-	BOOL m_bISODateFormat;
+	BOOL m_bISODateTimes;
 
 	CTDLReminderPeriodComboBox m_cbSnoozeFor;
 	CDateTimeCtrlEx m_dtcSnoozeDate;

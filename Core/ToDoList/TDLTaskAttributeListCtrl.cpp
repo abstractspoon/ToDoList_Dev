@@ -2776,10 +2776,7 @@ void CTDLTaskAttributeListCtrl::PrepareTimeOfDayCombo(int nRow)
 	else
 		m_cbTimeOfDay.SetOleTime(_ttof(sValue));
 
-	DWORD dwStyle = m_cbTimeOfDay.GetStyle();
-	Misc::SetFlag(dwStyle, TCB_ISO, m_data.HasStyle(TDCS_SHOWDATESINISO));
-
-	m_cbTimeOfDay.SetStyle(dwStyle);
+	m_cbTimeOfDay.SetISOFormat(m_data.HasStyle(TDCS_SHOWDATESINISO));
 }
 
 void CTDLTaskAttributeListCtrl::PrepareTimePeriodEdit(int nRow)
