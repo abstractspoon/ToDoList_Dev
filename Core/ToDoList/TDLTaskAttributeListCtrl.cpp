@@ -2764,6 +2764,7 @@ void CTDLTaskAttributeListCtrl::PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallb
 		m_datePicker.SetTime(_ttof(sValue));
 
 	m_datePicker.SetMonthCalStyle(MCS_WEEKNUMBERS);
+	m_datePicker.SetISOFormat(m_data.HasStyle(TDCS_SHOWDATESINISO));
 }
 
 void CTDLTaskAttributeListCtrl::PrepareTimeOfDayCombo(int nRow)

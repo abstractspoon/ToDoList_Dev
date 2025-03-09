@@ -29,13 +29,14 @@ class CTDLFilterDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLFilterDlg(FILTER_TITLE nTitleFilter, 
-				BOOL bMultiSelFilters, 
-				const CStringArray& aAdvancedFilterNames, 
-				const CFilteredToDoCtrl& tdc, 
-				const CDWordArray& aPriorityColors,
-				int nNumPriorityRiskLevels,
-				CWnd* pParent = NULL);
+	CTDLFilterDlg(FILTER_TITLE nTitleFilter,
+				  BOOL bMultiSelFilters,
+				  const CStringArray& aAdvancedFilterNames,
+				  const CFilteredToDoCtrl& tdc,
+				  const CDWordArray& aPriorityColors,
+				  int nNumPriorityRiskLevels,
+				  BOOL bISODateFormat,
+				  CWnd* pParent = NULL);
 
 	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
 

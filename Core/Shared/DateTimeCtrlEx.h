@@ -55,7 +55,8 @@ public:
 	DWORD SetMonthCalStyle(DWORD dwStyle);
 	void EnableInlineEditing(BOOL bEnable = TRUE) { m_bEnableInlineEditing = bEnable; }
 	void ShowCalendarOnCompleting(BOOL bShow = TRUE) { m_bShowCalendarOnCompleting = bShow; }
-	BOOL ShowSeconds(BOOL bShow);
+	void ShowSeconds(BOOL bShow);
+	void SetISOFormat(BOOL bEnable);
 
 	DWORD GetMonthCalStyle() const;
 	BOOL IsCalendarVisible() const;
@@ -69,6 +70,8 @@ protected:
 	DWORD m_dwMonthCalStyle;
 	BOOL m_bEnableInlineEditing;
 	BOOL m_bShowCalendarOnCompleting;
+	BOOL m_bISOFormat;
+	BOOL m_bShowSeconds;
 
 	CMonthCalCtrlEx m_monthCal;
 
@@ -107,6 +110,7 @@ protected:
 	CRect GetDropButtonRect() const;
 	CRect GetCheckboxRect() const;
 	void ResetCalendarHandling();
+	void UpdateFormat();
 
 };
 

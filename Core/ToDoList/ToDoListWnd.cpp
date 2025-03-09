@@ -1438,6 +1438,7 @@ BOOL CToDoListWnd::InitFilterbar()
 	const CPreferencesDlg& prefs = Prefs();
 
 	m_filterBar.EnableMultiSelection(prefs.GetMultiSelFilters());
+	m_filterBar.SetISODateFormat(prefs.GetDisplayDatesInISO());
 	m_filterBar.ShowDefaultFilters(prefs.GetShowDefaultFiltersInFilterBar());
 	m_filterBar.SetTitleFilterOption(prefs.GetTitleFilterOption());
 	m_filterBar.SetNumPriorityRiskLevels(prefs.GetNumPriorityRiskLevels());
@@ -5213,13 +5214,11 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 
 		m_filterBar.ShowDefaultFilters(newPrefs.GetShowDefaultFiltersInFilterBar());
 		m_filterBar.SetNumPriorityRiskLevels(newPrefs.GetNumPriorityRiskLevels());
+		m_filterBar.SetISODateFormat(newPrefs.GetDisplayDatesInISO());
 
-		BOOL bEnableMultiSel = newPrefs.GetMultiSelFilters();
-		BOOL bPrevMultiSel = oldPrefs.GetMultiSelFilters();
-
-		if (bPrevMultiSel != bEnableMultiSel)
+		if (Misc::StatesDiffer(newPrefs.GetMultiSelFilters(), oldPrefs.GetMultiSelFilters()))
 		{
-			m_filterBar.EnableMultiSelection(bEnableMultiSel);
+			m_filterBar.EnableMultiSelection(newPrefs.GetMultiSelFilters());
 			bRefreshFilter = TRUE;
 		}
 
@@ -5255,6 +5254,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			m_dlgFindTasks.SetGroupHeaderBackColor(newPrefs.GetGroupHeaderBackgroundColor());
 			m_dlgFindTasks.SetStrikeThroughCompletedTasks(newPrefs.GetStrikethroughDone());
 			m_dlgFindTasks.SetPriorityColors(aPriorityColors);
+			m_dlgFindTasks.SetISODateFormat(newPrefs.GetDisplayDatesInISO());
 		}
 
 		m_dlgReminders.EnableReducedFlashing(newPrefs.GetReduceReminderDialogFlashing());
@@ -10607,13 +10607,16 @@ BOOL CToDoListWnd::InitFindTasksDialog()
 		if (CThemed::IsAppThemed())
 			m_dlgFindTasks.SetUITheme(m_theme);
 
-		if (Prefs().GetFindTasksUseTreeFont())
+		const CPreferencesDlg& prefs = Prefs();
+
+		if (prefs.GetFindTasksUseTreeFont())
 			m_dlgFindTasks.SetResultsFont(m_fontTree);
 
-		m_dlgFindTasks.SetNumPriorityRiskLevels(Prefs().GetNumPriorityRiskLevels());
+		m_dlgFindTasks.SetNumPriorityRiskLevels(prefs.GetNumPriorityRiskLevels());
+		m_dlgFindTasks.SetISODateFormat(prefs.GetDisplayDatesInISO());
 
 		CDWordArray aColors;
-		Prefs().GetPriorityColors(aColors);
+		prefs.GetPriorityColors(aColors);
 
 		m_dlgFindTasks.SetPriorityColors(aColors);
 	}
@@ -11971,8 +11974,9 @@ void CToDoListWnd::OnViewFilter()
 						 prefs.GetMultiSelFilters(),
 						 m_filterBar.GetAdvancedFilterNames(),
 						 GetToDoCtrl(),
-						 aPriorityColors, 
-						 prefs.GetNumPriorityRiskLevels());
+						 aPriorityColors,
+						 prefs.GetNumPriorityRiskLevels(),
+						 prefs.GetDisplayDatesInISO());
 
 	if (dialog.DoModal(CMDICON(ID_VIEW_FILTER)) == IDOK)
 	{

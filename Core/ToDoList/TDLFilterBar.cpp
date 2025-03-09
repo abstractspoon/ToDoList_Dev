@@ -793,6 +793,12 @@ BOOL CTDLFilterBar::WantShowFilter(TDC_ATTRIBUTE nType) const
 	return (!m_filter.IsAdvanced() && m_mapVisibility.Has(nType));
 }
 
+void CTDLFilterBar::SetISODateFormat(BOOL bIso)
+{
+	m_dtcUserDue.SetISOFormat(bIso);
+	m_dtcUserStart.SetISOFormat(bIso);
+}
+
 void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)
 {
 	if (bEnable != m_bMultiSelection)

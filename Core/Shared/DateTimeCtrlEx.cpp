@@ -43,7 +43,9 @@ CDateTimeCtrlEx::CDateTimeCtrlEx(DWORD dwMonthCalStyle)
 	m_dwMonthCalStyle(dwMonthCalStyle), 
 	m_bNotifyingParent(FALSE), 
 	m_bEnableInlineEditing(TRUE),
-	m_bShowCalendarOnCompleting(TRUE)
+	m_bShowCalendarOnCompleting(TRUE),
+	m_bISOFormat(FALSE),
+	m_bShowSeconds(TRUE) // default
 {
 	// clear state
 	ResetCalendarHandling();
@@ -121,6 +123,8 @@ void CDateTimeCtrlEx::PreSubclassWindow()
 		SetMonthCalStyle(m_dwMonthCalStyle);
 		m_dwMonthCalStyle = 0;
 	}
+
+	UpdateFormat();
 
 	CDateTimeCtrl::PreSubclassWindow();
 }
@@ -543,14 +547,37 @@ void CDateTimeCtrlEx::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CDateTimeCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-BOOL CDateTimeCtrlEx::ShowSeconds(BOOL bShow)
+void CDateTimeCtrlEx::ShowSeconds(BOOL bShow)
 {
-	if (!(GetStyle() & DTS_TIMEFORMAT))
+	if (Misc::StatesDiffer(m_bShowSeconds, bShow))
 	{
-		ASSERT(0);
-		return FALSE;
-	}
+		m_bShowSeconds = bShow;
 
-	CString sFormat = Misc::GetTimeFormat(bShow);
-	return SetFormat(sFormat);
+		if (GetSafeHwnd())
+		{
+			ASSERT(GetStyle() & DTS_TIMEFORMAT);
+			UpdateFormat();
+		}
+	}	
+}
+
+void CDateTimeCtrlEx::SetISOFormat(BOOL bEnable)
+{
+	if (Misc::StatesDiffer(m_bISOFormat, bEnable))
+	{
+		m_bISOFormat = bEnable;
+
+		if (GetSafeHwnd())
+			UpdateFormat();
+	}
+}
+
+void CDateTimeCtrlEx::UpdateFormat()
+{
+	ASSERT(GetSafeHwnd());
+
+	if (GetStyle() & DTS_TIMEFORMAT)
+		SetFormat(Misc::GetTimeFormat(m_bShowSeconds, m_bISOFormat));
+	else
+		SetFormat(Misc::GetShortDateFormat(FALSE, m_bISOFormat));
 }

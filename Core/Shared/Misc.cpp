@@ -1600,8 +1600,12 @@ CString Misc::GetPM()
 	return GetLocaleInfo(LOCALE_S2359, 10);
 }
 
-CString Misc::GetTimeFormat(BOOL bIncSeconds)
+CString Misc::GetTimeFormat(BOOL bIncSeconds, BOOL bISO)
 {
+	if (bISO)
+		return (bIncSeconds ? _T("HH:mm:ss") : _T("HH:mm"));
+	
+	// else
 	CString sFormat = GetLocaleInfo(LOCALE_STIMEFORMAT, 100);
 
 	if (!bIncSeconds)
@@ -1645,8 +1649,12 @@ CString Misc::GetDateSeparator()
 	return sSep;
 }
 
-CString Misc::GetShortDateFormat(BOOL bIncDOW)
+CString Misc::GetShortDateFormat(BOOL bIncDOW, BOOL bISO)
 {
+	if (bISO)
+		return _T("yyyy-MM-dd");
+
+	// else
 	CString sFormat = GetLocaleInfo(LOCALE_SSHORTDATE, 100);
 
 	if (bIncDOW)

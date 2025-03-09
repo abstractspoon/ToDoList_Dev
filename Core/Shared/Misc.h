@@ -103,8 +103,8 @@ namespace Misc
 	CString GetAM();
 	CString GetPM();
 	CString GetTimeSeparator();
-	CString GetTimeFormat(BOOL bIncSeconds = TRUE);
-	CString GetShortDateFormat(BOOL bIncDOW = FALSE);
+	CString GetTimeFormat(BOOL bIncSeconds = TRUE, BOOL bIso = FALSE);
+	CString GetShortDateFormat(BOOL bIncDOW = FALSE, BOOL bIso = FALSE);
 	BOOL ShortDateFormatHasMonthBeforeDay();
 	CString GetDateSeparator();
 	CString GetLocaleInfo(LCTYPE lcType, int nBufSize = 1024);
