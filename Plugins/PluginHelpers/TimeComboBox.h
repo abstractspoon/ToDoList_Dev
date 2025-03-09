@@ -26,6 +26,7 @@ namespace Abstractspoon
 
 				void DrawItem(WPARAM wp, LPARAM lp);
 				void SetEnabled(bool enabled);
+				void SetISOFormat(bool iso);
 
 				static BOOL SetWorkingWeek(DWORD dwWeekendDays, double dLengthInHours, double dStartInHours, double dLunchStartInHours, double dLunchEndInHours);
 
@@ -47,6 +48,7 @@ namespace Abstractspoon
 				TimeSpan GetTime();
 				bool SetTime(TimeSpan time);
 				bool SetTime(DateTime date);
+				void SetISOFormat(bool iso);
 
 				property bool Enabled
 				{
@@ -61,6 +63,7 @@ namespace Abstractspoon
 			private:
 				IntPtr m_pMFCInfo = IntPtr::Zero;
 				TimeSpan m_Time;
+				bool m_IsoFormat;
 
 			protected:
 				void WndProc(Windows::Forms::Message% m) override;

@@ -15,6 +15,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 using namespace System::Collections::Generic;
 using namespace System::Drawing;
+using namespace System::Windows::Forms;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -404,4 +405,17 @@ bool DateUtil::IsAllDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days)
 		return false;
 
 	return (MapDaysOfWeek(days) == DHW_ALL);
+}
+
+void DateUtil::SetShortDateFormat(Windows::Forms::DateTimePicker^ ctrl, bool isoFormat)
+{
+	if (isoFormat)
+	{
+		ctrl->Format = DateTimePickerFormat::Custom;
+		ctrl->CustomFormat = gcnew String(Misc::GetShortDateFormat(FALSE, TRUE));
+	}
+	else
+	{
+		ctrl->Format = DateTimePickerFormat::Short;
+	}
 }
