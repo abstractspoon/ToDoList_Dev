@@ -269,6 +269,9 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_ctrlWorkload.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
 	m_ctrlWorkload.EnableColumnHeaderSorting(pPrefs->GetProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), TRUE));
 
+	m_dtcPeriodStart.SetISOFormat(m_ctrlWorkload.HasOption(WLCF_DISPLAYISODATES));
+	m_dtcPeriodEnd.SetISOFormat(m_ctrlWorkload.HasOption(WLCF_DISPLAYISODATES));
+
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
 
