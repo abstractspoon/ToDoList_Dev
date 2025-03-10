@@ -28,7 +28,8 @@ class CTDLAddLoggedTimeDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, BOOL bEnableAddTimeToTimeSpent, double dHours = 0.0, CWnd* pParent = NULL);   // standard constructor
+	CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, BOOL bEnableAddTimeToTimeSpent, 
+						 BOOL bISODates, double dHours, CWnd* pParent = NULL);
 
 	double GetLoggedHours() const; // in hours
 	COleDateTime GetWhen() const;
@@ -47,7 +48,7 @@ protected:
 	BOOL	m_bAddTimeToTimeSpent;
 	CString	m_sComment;
 	//}}AFX_DATA
-	CDateTimeCtrlEx	m_dateWhen;
+	CDateTimeCtrlEx m_dtcWhen;
 	CTimeEdit m_eLoggedTime;
 	COleDateTime m_dtWhen;
 	BOOL m_bEnableAddTimeToTimeSpent;

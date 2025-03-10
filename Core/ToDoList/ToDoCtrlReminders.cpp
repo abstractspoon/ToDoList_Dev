@@ -701,7 +701,7 @@ BOOL CToDoCtrlReminders::BuildStickiesRTFContent(const TDCREMINDER& rem, CString
 	}
 
 	sText += _T("\n\n");
-	sText += rem.FormatNotification();
+	sText += rem.FormatNotification(m_bISODateTimes);
 	sText += _T("\n\n");
 	sText += rem.GetTaskComments();
 
@@ -745,8 +745,8 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 
 			if (!bUseRTF)
 			{
-				CString sNotify(rem.FormatNotification()), 
-						sComments(rem.GetTaskComments());
+				CString sNotify(rem.FormatNotification(m_bISODateTimes));
+				CString sComments(rem.GetTaskComments());
 				
 				sContent = rem.GetTaskTitle();
 		

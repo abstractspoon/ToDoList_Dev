@@ -695,7 +695,11 @@ namespace DayViewUIExtension
 
 				if (series != null)
 				{
-					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, m_WorkWeek, series.Attributes, m_DefaultTimeBlockEditMask);
+					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, 
+																m_WorkWeek, 
+																m_DayView.DisplayDatesInISO,
+																series.Attributes, 
+																m_DefaultTimeBlockEditMask);
 					FormsUtil.SetFont(dlg, m_ControlsFont);
 					m_Trans.Translate(dlg);
 
@@ -762,6 +766,7 @@ namespace DayViewUIExtension
 			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
 													new UIExtension.TaskIcon(m_HwndParent),
 													m_WorkWeek,
+													m_DayView.DisplayDatesInISO,
 													m_DayView.SelectedTaskId,
 													attribs);
 

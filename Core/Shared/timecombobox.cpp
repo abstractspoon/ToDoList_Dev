@@ -23,9 +23,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox
 
-CTimeComboBox::CTimeComboBox(DWORD dwStyle) 
+CTimeComboBox::CTimeComboBox(DWORD dwStyles) 
 	: 
-	m_dwStyle(dwStyle), 
+	m_dwStyle(dwStyles), 
 	m_hwndListBox(NULL)
 {
 }
@@ -152,15 +152,15 @@ BOOL CTimeComboBox::SetOleTime(double dTime)
 	return Set24HourTime(dTime * 24.0);
 }
 
-void CTimeComboBox::SetStyle(DWORD dwStyle)
+void CTimeComboBox::SetISOFormat(BOOL bISO)
 {
-	BOOL bWasISO = (m_dwStyle & TCB_ISO);
-	BOOL bIsISO = (dwStyle & TCB_ISO);
+	DWORD dwNewStyle = m_dwStyle;
+	Misc::SetFlag(dwNewStyle, TCB_ISO, bISO);
 
-	m_dwStyle = dwStyle;
-
-	if (Misc::StatesDiffer(bWasISO, bIsISO))
+	if (dwNewStyle != m_dwStyle)
 	{
+		m_dwStyle = dwNewStyle;
+
 		double date = GetOleTime();
 
 		BuildCombo(TRUE);

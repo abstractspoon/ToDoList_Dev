@@ -28,6 +28,7 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 							 const CFilteredToDoCtrl& tdc,
 							 const CDWordArray& aPriorityColors,
 							 int nNumPriorityRiskLevels,
+							 BOOL bISODateFormat,
 							 CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLFilterDlg::IDD, _T("Filtering"), pParent), 
@@ -71,6 +72,9 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	m_cbPriorityFilter.SetNumLevels(nNumPriorityRiskLevels);
 	m_cbPriorityFilter.SetColors(aPriorityColors);
 	m_cbRiskFilter.SetNumLevels(nNumPriorityRiskLevels);
+
+	m_dtcUserDue.SetISOFormat(bISODateFormat);
+	m_dtcUserStart.SetISOFormat(bISODateFormat);
 }
 
 

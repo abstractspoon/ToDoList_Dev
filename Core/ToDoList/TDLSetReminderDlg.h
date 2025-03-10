@@ -15,6 +15,7 @@
 #include "..\shared\timecombobox.h"
 #include "..\shared\soundedit.h"
 #include "..\shared\enstatic.h"
+#include "..\shared\DateTimeCtrlEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +40,7 @@ class CTDLSetReminderDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLSetReminderDlg(HICON hIcon, CWnd* pParent = NULL);   // standard constructor
+	CTDLSetReminderDlg(HICON hIcon, BOOL bISODates, CWnd* pParent = NULL);   // standard constructor
 
 	int DoModal(TDCREMINDER& rem, DWORD dwFlags = 0);
 
@@ -48,10 +49,11 @@ protected:
 	//{{AFX_DATA(CTDLSetReminderDlg)
 	enum { IDD = IDD_SETREMINDER_DIALOG };
 	//}}AFX_DATA
-	CTimeComboBox	m_cbAbsoluteTime;
-	CSoundEdit	m_ePlaySound;
+	CTimeComboBox m_cbAbsoluteTime;
+	CSoundEdit m_ePlaySound;
 	CTDLReminderPeriodComboBox m_cbLeadIn;
 	CEnStatic m_stTaskTitle;
+	CDateTimeCtrlEx m_dtcAbsolute;
 
 	int		m_bRelativeFromDueDate;
 	double  m_dRelativeLeadInHours;

@@ -117,7 +117,7 @@ void TDCREMINDER::DrawIcon(CDC* pDC, const CRect& rIcon) const
 	}
 }
 
-CString TDCREMINDER::FormatNotification() const
+CString TDCREMINDER::FormatNotification(BOOL bISODates) const
 {
 	ASSERT(IsValid());
 
@@ -183,7 +183,12 @@ CString TDCREMINDER::FormatNotification() const
 	}
 
 	// Append date
-	sNotify += (_T(" (") + CDateHelper::FormatDate(date, (DHFD_DOW | DHFD_HASTIME | DHFD_TIME | DHFD_NOSEC)) + ')');
+	DWORD dwFlags = (DHFD_DOW | DHFD_HASTIME | DHFD_TIME | DHFD_NOSEC);
+
+	if (bISODates)
+		dwFlags |= DHFD_ISO;
+
+	sNotify += Misc::Format(_T(" (%s)"), CDateHelper::FormatDate(date, dwFlags));
 
 	return sNotify;
 }

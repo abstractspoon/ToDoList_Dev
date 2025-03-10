@@ -73,7 +73,8 @@ CTDLFindTaskExpressionListCtrl::CTDLFindTaskExpressionListCtrl(const CContentMgr
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
 	m_cbCustomIcons(m_ilIcons, TRUE, FALSE),
-	m_cbRecurrence(FALSE)
+	m_cbRecurrence(FALSE),
+	m_bIsoDateFormat(FALSE)
 {
 	m_eTimePeriod.EnableButtonPadding(FALSE);
 	m_eTimePeriod.SetDefaultButton(0);
@@ -189,6 +190,27 @@ void CTDLFindTaskExpressionListCtrl::SetPriorityColors(const CDWordArray& aColor
 	ASSERT(aColors.GetSize() >= m_cbPriority.GetNumLevels());
 
 	m_cbPriority.SetColors(aColors);
+}
+
+void CTDLFindTaskExpressionListCtrl::SetISODateFormat(BOOL bIso) 
+{ 
+	if (Misc::StatesDiffer(bIso, m_bIsoDateFormat))
+	{
+		m_bIsoDateFormat = bIso;
+		m_dtcDate.SetISOFormat(bIso);
+
+		if (GetSafeHwnd())
+		{
+			// Refresh the value text of all date rows
+			int nRow = m_aSearchParams.GetSize();
+
+			while (nRow--)
+			{
+				if (m_aSearchParams[nRow].GetAttribType() == FT_DATE)
+					UpdateValueColumnText(nRow);
+			}
+		}
+	}
 }
 
 void CTDLFindTaskExpressionListCtrl::SetSearchParams(const SEARCHPARAM& param)
@@ -1331,7 +1353,7 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 				break;
 
 			case FT_DATE:
-				sValue = rule.ValueAsDate().Format(VAR_DATEVALUEONLY);
+				sValue = CDateHelper::FormatDate(rule.ValueAsDate(), m_bIsoDateFormat ? DHFD_ISO : 0);
 				break;
 
 			case FT_TIMEPERIOD:

@@ -83,6 +83,7 @@ public:
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetResultsFont(HFONT hFont) { m_lcResults.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); }
 	void SetPriorityColors(const CDWordArray& aColors) { m_lcFindSetup.SetPriorityColors(aColors); }
+	void SetISODateFormat(BOOL bIso) { m_lcFindSetup.SetISODateFormat(bIso); }
 
 	BOOL IsDocked() const { return IsDocked(m_nDockPos); }
 	DM_POS GetDockPosition() const { return m_nDockPos; }

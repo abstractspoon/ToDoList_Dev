@@ -22,10 +22,15 @@ namespace LoggedTimeUIExtension
 			InitializeComponent();
 		}
 
-		public void Initialise(LogEntry entry, WorkingWeek workWeek, bool readonlyTask, bool editMode)
+		public void Initialise(LogEntry entry, WorkingWeek workWeek, bool isoDateTimes, bool readonlyTask, bool editMode)
 		{
 			TimeComboBox.SetWorkingWeek(workWeek);
 			SetDates(workWeek, entry);
+
+			m_FromTimeCombo.SetISOFormat(isoDateTimes);
+			m_ToTimeCombo.SetISOFormat(isoDateTimes);
+
+			DateUtil.SetShortDateFormat(m_FromDateCtrl, isoDateTimes);
 
 			m_EditMode = editMode;
 			ReadOnlyTask = readonlyTask;

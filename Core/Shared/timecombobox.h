@@ -26,7 +26,7 @@ class CTimeComboBox : public COwnerdrawComboBoxBase, public CSubclasser
 {
 // Construction
 public:
-	CTimeComboBox(DWORD dwStyle = 0);
+	CTimeComboBox(DWORD dwStyles = 0);
 	
 	double GetOleTime() const;
 	BOOL SetOleTime(double dTime); // 0-1 suitable for COleDateTime, -1 for 'no time'
@@ -34,8 +34,7 @@ public:
 	double Get24HourTime() const;
 	BOOL Set24HourTime(double dTime); // -1 for 'no time'
 	
-	DWORD GetStyle() { return m_dwStyle; }
-	void SetStyle(DWORD dwStyle);
+	void SetISOFormat(BOOL bISO);
 
 	void DDX(CDataExchange* pDX, double& dHours);
 	void DDX(CDataExchange* pDX, COleDateTime& dtTime);

@@ -62,6 +62,7 @@ public:
 	void SetNumPriorityRiskLevels(int nNumLevels);
 
 	void EnableMultiSelection(BOOL bEnable);
+	void SetISODateFormat(BOOL bIso);
 	void SetUITheme(const CUIThemeFile& theme);
 	COLORREF CalcUIBkgndColor() const;
 	BOOL CanPasteText() const; // into focused control

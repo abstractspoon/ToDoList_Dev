@@ -48,6 +48,7 @@ public:
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 	void SetNumPriorityRiskLevels(int nNumLevels);
 	void SetPriorityColors(const CDWordArray& aColors);
+	void SetISODateFormat(BOOL bIso);
 
 	BOOL AddRule();
 	BOOL DeleteSelectedRule();
@@ -80,6 +81,7 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aCustAttribDefs;
 	TDCAUTOLISTDATA					m_tldListContents;
 	CTDCImageList					m_ilIcons;
+	BOOL							m_bIsoDateFormat;
 
 	const CContentMgr&				m_mgrContent;
 

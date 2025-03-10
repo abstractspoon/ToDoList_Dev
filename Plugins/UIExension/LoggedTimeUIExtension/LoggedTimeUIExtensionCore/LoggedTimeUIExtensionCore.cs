@@ -32,7 +32,6 @@ namespace LoggedTimeUIExtension
 
 		private bool m_SettingMonthYear = false;
 		private bool m_SettingTimeLogStartDate = false;
-		private bool m_TasklistIsSaved = false;
 
 		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
@@ -590,7 +589,11 @@ namespace LoggedTimeUIExtension
 									"",
 									Color.Empty);
 
-			var dlg = new CreateLoggedEntryDlg(m_TimeLog.TaskItems, m_TimeLog.TaskIcons, m_WorkWeek, attrib);
+			var dlg = new CreateLoggedEntryDlg(m_TimeLog.TaskItems, 
+												m_TimeLog.TaskIcons, 
+												m_WorkWeek, 
+												m_TimeLog.DisplayDatesInISO, 
+												attrib);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 			m_Trans.Translate(dlg);
@@ -636,7 +639,10 @@ namespace LoggedTimeUIExtension
 			var entry = m_TimeLog.SelectedLogEntry;
 			var taskItem = m_TimeLog.SelectedLogEntryTaskItem;
 
-			var dlg = new EditLoggedEntryDlg(entry, m_WorkWeek, (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked));
+			var dlg = new EditLoggedEntryDlg(entry, 
+											 m_WorkWeek,
+											 m_TimeLog.DisplayDatesInISO,
+											 (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked));
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 			m_Trans.Translate(dlg);

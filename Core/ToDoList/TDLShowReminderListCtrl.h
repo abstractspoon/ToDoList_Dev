@@ -44,10 +44,13 @@ public:
 
 	void DeleteAllItems();
 	BOOL RestoreFocusToList(int nPrevSel);
+	void SetISODateFormat(BOOL bISODates);
 
 protected:
 	BOOL m_bHasIcons;
 	BOOL m_bModifyingReminders;
+	BOOL m_bISODates;
+
 	CString m_sPrefsKey;
 	DWORD m_dwNextReminderID;
 	CTDCReminderMap m_mapReminders;
@@ -68,6 +71,7 @@ protected:
 	void UpdateIconStatus();
 	void RecalcColumnWidths();
 	void UpdateReminder(const TDCREMINDER& rem, int nItem);
+	void ReformatReminderDates();
 
 };
 

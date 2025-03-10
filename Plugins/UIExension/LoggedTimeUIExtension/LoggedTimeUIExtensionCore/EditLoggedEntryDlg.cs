@@ -22,7 +22,10 @@ namespace LoggedTimeUIExtension
 			InitializeComponent();
 		}
 
-		public EditLoggedEntryDlg(LogEntry entry, WorkingWeek workWeek, bool readonlyTask)
+		public EditLoggedEntryDlg(LogEntry entry, 
+								  WorkingWeek workWeek, 
+								  bool isoDateTimes,
+								  bool readonlyTask)
 			:
 			this()
 		{
@@ -38,7 +41,7 @@ namespace LoggedTimeUIExtension
 				m_TaskId.Text = entry.TaskId.ToString();
 			}
 
-			m_Attributes.Initialise(entry, workWeek, readonlyTask, true);
+			m_Attributes.Initialise(entry, workWeek, isoDateTimes, readonlyTask, true);
 		}
 
 		public Calendar.AppointmentDates Dates
