@@ -41,6 +41,7 @@ protected:
 
 class CToDoCtrlData  
 {
+	friend class CTDCDataHelperBase;
 	friend class CTDCTaskMatcher;
 	friend class CTDCTaskComparer;
 	friend class CTDCTaskCalculator;
