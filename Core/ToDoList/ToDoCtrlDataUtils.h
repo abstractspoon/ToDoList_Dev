@@ -10,7 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "tdcreminder.h"
-#include "tdcstruct.h"
+#include "ToDoCtrlData.h"
 
 #include "..\Interfaces\ContentMgr.h"
 
@@ -18,7 +18,6 @@
 
 //////////////////////////////////////////////////////////////////////
 
-class CToDoCtrlData;
 class CBinaryData;
 class CToDoCtrl;
 class CTaskFile;
@@ -32,7 +31,23 @@ typedef void* HTASKITEM;
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskCalculator
+class CTDCDataHelperBase
+{
+protected:
+	CTDCDataHelperBase(const CToDoCtrlData& data) : m_data(data) {}
+
+protected:
+	const CToDoCtrlData& m_data;
+
+protected:
+	const CTDCCustomAttribDefinitionArray& CustomAttribDefs() const { return m_data.m_aCustomAttribDefs; }
+
+	BOOL HasStyle(TDC_STYLE nStyle) const { return m_data.HasStyle(nStyle); }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDCTaskCalculator : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskCalculator(const CToDoCtrlData& data);
@@ -98,9 +113,6 @@ public:
 	BOOL HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs) const;
 
 protected:
-	const CToDoCtrlData& m_data;
-
-protected:
 	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
 	BOOL IsTaskDue(DWORD dwTaskID, BOOL bToday) const;
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const;
@@ -148,7 +160,7 @@ enum // GetTaskTitlePaths
 
 // -------------------------------------------------------------------
 
-class CTDCTaskFormatter
+class CTDCTaskFormatter : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskFormatter(const CToDoCtrlData& data, const CContentMgr& mgrContent);
@@ -233,7 +245,6 @@ public:
 	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 	
 protected:
-	const CToDoCtrlData& m_data;
 	const CContentMgr& m_mgrContent;
 
 	CTDCTaskCalculator m_calculator;
@@ -241,7 +252,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskMatcher
+class CTDCTaskMatcher : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders, const CContentMgr& mgrContent);
@@ -260,7 +271,6 @@ public:
 	static int Convert(const CResultArray& aResults, CDWordArray& aTaskIDs);
 
 protected:
-	const CToDoCtrlData& m_data;
 	const CTDCReminderHelper& m_reminders;
 	const CContentMgr& m_mgrContent;
 
@@ -293,7 +303,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskComparer
+class CTDCTaskComparer : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskComparer(const CToDoCtrlData& data, const CContentMgr& mgrContent);
@@ -302,7 +312,6 @@ public:
 	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bAscending) const;
 
 protected:
-	const CToDoCtrlData& m_data;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
 
@@ -323,7 +332,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskExporter
+class CTDCTaskExporter : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskExporter(const CToDoCtrlData& data,
@@ -343,7 +352,6 @@ public:
 	BOOL ExportMatchingTaskAttributes(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 
 protected:
-	const CToDoCtrlData& m_data;
 	const CTDLTaskCtrlBase& m_colors;
 	const CContentMgr& m_mgrContent;
 
@@ -363,7 +371,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCMultiTasker
+class CTDCMultiTasker : protected CTDCDataHelperBase
 {
 public:
 	CTDCMultiTasker(const CToDoCtrlData& data, const CContentMgr& mgrContent);
@@ -438,8 +446,6 @@ public:
 	BOOL AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const;
 
 protected:
-	const CToDoCtrlData& m_data;
-
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;
 
@@ -465,9 +471,9 @@ public:
 	static BOOL IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 };
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------
 
-class CTDCTaskColumnSizer
+class CTDCTaskColumnSizer : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskColumnSizer(const CToDoCtrlData& data,
@@ -491,7 +497,6 @@ public:
 	int GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const;
 
 protected:
-	const CToDoCtrlData& m_data;
 	const CContentMgr& m_mgrContent;
 
 	CTDCTaskFormatter m_formatter;
@@ -522,7 +527,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskAttributeCopier
+class CTDCTaskAttributeCopier : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskAttributeCopier(const CToDoCtrlData& data,
@@ -538,8 +543,6 @@ public:
 	TDC_ATTRIBUTEGROUP GetAttributeGroup(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomCols = TRUE) const;
 
 protected:
-	const CToDoCtrlData& m_data;
-
 	CTDCTaskFormatter m_formatter;
 
 protected:
