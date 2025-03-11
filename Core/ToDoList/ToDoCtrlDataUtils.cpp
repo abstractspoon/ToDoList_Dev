@@ -6577,10 +6577,12 @@ int CTDCTaskColumnSizer::GetLongestValues(const CTDCColumnIDMap& mapCols, const 
 	return mapLongest.GetCount();
 }
 
+// static helper
 void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
 										   const TODOSTRUCTURE* pTDS,
 										   const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-										   CTDCLongestItemMap& mapLongest) const
+										   const CTDCTaskFormatter& formatter,
+										   CTDCLongestItemMap& mapLongest)
 {
 	if (!pTDI || !pTDS)
 	{
@@ -6606,34 +6608,34 @@ void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
 		// Note: Don't use CheckUpdateValue() because all the work
 		//       gets done up front and it might be wasted effort
 		if (mapLongest.HasColumn(TDCC_PATH))
-			mapLongest.UpdateValue(TDCC_PATH, m_formatter.GetTaskPath(pTDS));
+			mapLongest.UpdateValue(TDCC_PATH, formatter.GetTaskPath(pTDS));
 
 		if (mapLongest.HasColumn(TDCC_POSITION))
-			mapLongest.UpdateValue(TDCC_POSITION, m_formatter.GetTaskPosition(pTDS));
+			mapLongest.UpdateValue(TDCC_POSITION, formatter.GetTaskPosition(pTDS));
 
 		if (mapLongest.HasColumn(TDCC_FILELINK))
 			mapLongest.UpdateValue(TDCC_FILELINK, pTDI->aFileLinks.GetSize());
 
 		if (mapLongest.HasColumn(TDCC_COMMENTSSIZE))
-			mapLongest.UpdateValue(TDCC_COMMENTSSIZE, m_formatter.GetCommentSize(pTDI->GetCommentsSizeInKB()));
+			mapLongest.UpdateValue(TDCC_COMMENTSSIZE, formatter.GetCommentSize(pTDI->GetCommentsSizeInKB()));
 
 		if (mapLongest.HasColumn(TDCC_COMMENTSFORMAT))
-			mapLongest.UpdateValue(TDCC_COMMENTSFORMAT, m_formatter.GetTaskCommentsFormat(pTDI));
+			mapLongest.UpdateValue(TDCC_COMMENTSFORMAT, formatter.GetTaskCommentsFormat(pTDI));
 
 		if (mapLongest.HasColumn(TDCC_SUBTASKDONE))
-			mapLongest.UpdateValue(TDCC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+			mapLongest.UpdateValue(TDCC_SUBTASKDONE, formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
 
 		if (mapLongest.HasColumn(TDCC_COST))
-			mapLongest.UpdateValue(TDCC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
+			mapLongest.UpdateValue(TDCC_COST, formatter.GetTaskCost(pTDI, pTDS));
 
 		if (mapLongest.HasColumn(TDCC_TIMEESTIMATE))
-			mapLongest.UpdateValue(TDCC_TIMEESTIMATE, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
+			mapLongest.UpdateValue(TDCC_TIMEESTIMATE, formatter.GetTaskTimeEstimate(pTDI, pTDS));
 
 		if (mapLongest.HasColumn(TDCC_TIMESPENT))
-			mapLongest.UpdateValue(TDCC_TIMESPENT, m_formatter.GetTaskTimeSpent(pTDI, pTDS));
+			mapLongest.UpdateValue(TDCC_TIMESPENT, formatter.GetTaskTimeSpent(pTDI, pTDS));
 
 		if (mapLongest.HasColumn(TDCC_TIMEREMAINING))
-			mapLongest.UpdateValue(TDCC_TIMEREMAINING, m_formatter.GetTaskTimeRemaining(pTDI, pTDS));
+			mapLongest.UpdateValue(TDCC_TIMEREMAINING, formatter.GetTaskTimeRemaining(pTDI, pTDS));
 
 		// Rest of Custom columns
 		int nCust = aCustAttribDefs.GetSize();
@@ -6644,7 +6646,7 @@ void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
 
 			if (attribDef.bEnabled && mapLongest.HasColumn(attribDef.GetColumnID()))
 			{
-				CString sLongest = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, attribDef);
+				CString sLongest = formatter.GetTaskCustomAttributeData(pTDI, pTDS, attribDef);
 				mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
 			}
 		}

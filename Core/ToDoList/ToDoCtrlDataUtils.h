@@ -504,11 +504,6 @@ protected:
 
 protected:
 	// general
-	void GetLongestValues(const TODOITEM* pTDI,
-						  const TODOSTRUCTURE* pTDS,
-						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-						  CTDCLongestItemMap& mapLongest) const;
-
 	CString GetLongestValue(TDC_COLUMN nColID, const CString& sLongestPossible, const CDWordArray& aTaskIDs) const;
 
 	// specific
@@ -522,6 +517,13 @@ protected:
 	static CString GetLongerString(const CString& str1, const CString& str2);
 	static BOOL EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible);
 	static CString GetLongestRecurrenceOption();
+
+	static void GetLongestValues(const TODOITEM* pTDI,
+								 const TODOSTRUCTURE* pTDS,
+								 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+								 const CTDCTaskFormatter& formatter,
+								 CTDCLongestItemMap& mapLongest);
+
 };
 
 
