@@ -273,6 +273,7 @@ protected:
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
 	BOOL SetValueText(int nRow, const CString& sNewText, LPARAM bUnitsChange = FALSE);
+	void HandleDateEditCompletion();
 
 	BOOL GetAttributeToMoveBelow(TDC_ATTRIBUTE nAttribID, BOOL bUp, TDC_ATTRIBUTE& nBelowAttribID) const;
 	BOOL IsAttributeMoveLimited(TDC_ATTRIBUTE nAttribID, BOOL bUp) const;

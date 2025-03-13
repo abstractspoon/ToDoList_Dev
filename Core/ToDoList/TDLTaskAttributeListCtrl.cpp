@@ -1576,16 +1576,16 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 						sValue = data.AsString();
 						break;
 
+					case TDCCA_DATE:
+						sValue = Misc::Format(CDateHelper::GetDateOnly(data.AsDate()));
+						break;
+
 					case TDCCA_CALCULATION:
 						sValue = m_formatter.GetTaskCustomAttributeData(m_aSelectedTaskIDs[0], *pDef);
 						break;
 
 					case TDCCA_TIMEPERIOD:
 						sValue = pDef->FormatTimePeriod(data);
-						break;
-
-					case TDCCA_DATE:
-						sValue = data.FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO), FALSE);
 						break;
 
 					case TDCCA_BOOL:
@@ -1608,7 +1608,7 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 			TDCCADATA data;
 
 			if (m_multitasker.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data))
-				sValue = CTimeHelper::FormatClockTime(data.AsDate(), FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+				sValue = Misc::Format(CDateHelper::GetTimeOnly(data.AsDate()));
 			else
 				bValueVaries = TRUE;
 		}
@@ -1661,6 +1661,7 @@ BOOL CTDLTaskAttributeListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) c
 				break;
 			}
 		}
+		break;
 	}
 
 	return TRUE;
@@ -2129,6 +2130,14 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, pDef->FormatNumber(Misc::Atof(sText)), crText, nDrawTextFlags);
 				return;
 
+			case TDCCA_DATE:
+				if (!sText.IsEmpty())
+				{
+					CString sDate(FormatDate(_ttof(sText), FALSE));
+					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
+				}
+				return;
+
 			default:
 				if (pDef->IsMultiList())
 				{
@@ -2144,6 +2153,13 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				}
 				break;
 			}
+		}
+		else if (IsCustomTime(nAttribID))
+		{
+			CString sDate(FormatTime(_ttof(sText), FALSE));
+			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
+
+			return;
 		}
 		break;
 	}
@@ -2372,14 +2388,14 @@ BOOL CTDLTaskAttributeListCtrl::GetCustomAttributeData(const CString& sAttribID,
 	}
 	else if (pDef->IsDataType(TDCCA_DATE))
 	{
-		COleDateTime date;
+		COleDateTime date(_ttof(sValue));
 		
-		if (CDateHelper::DecodeDate(sValue, date, FALSE))
+		if (CDateHelper::IsDateSet(date))
 		{
 			if (pDef->HasFeature(TDCCAF_SHOWTIME))
 			{
 				TDC_ATTRIBUTE nTimeAttribID = CUSTOMTIMEATTRIBID(nAttribID);
-				date.m_dt += (CTimeHelper::DecodeClockTime(GetValueText(nTimeAttribID)) / 24);
+				date.m_dt += _ttof(GetValueText(nTimeAttribID));
 			}
 
 			data.Set(date);
@@ -2758,7 +2774,7 @@ void CTDLTaskAttributeListCtrl::PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallb
 		sValue = GetValueText(nFallbackDate);
 	}
 
-	if (sValue.IsEmpty())
+	if (sValue.IsEmpty() || (sValue == DATETIME_VARIES))
 		m_datePicker.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 	else
 		m_datePicker.SetTime(_ttof(sValue));
@@ -3247,6 +3263,7 @@ HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtn
 
 	default:
 		ASSERT(0);
+		break;
 	}
 
 	return NULL;
@@ -3284,6 +3301,7 @@ BOOL CTDLTaskAttributeListCtrl::CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtn
 
 	default:
 		ASSERT(0);
+		break;
 	}
 
 	return FALSE;
@@ -3596,24 +3614,21 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 			return;
 		}
 
+		// Note: HideControl will call HandleDateEditCompletion
+		// via OnDateKillFocus so we don't need to
 		HideControl(m_datePicker);
 	}
-
-	// If we've got multiple different values, DON'T notify
-	// our parent if the cell text has not actually changed
-	int nRow = GetCurSel();
-
-	if (RowValueVaries(nRow) && (GetItemText(nRow, VALUE_COL) == DATETIME_VARIES))
-		return;
-	
-	NotifyParentEdit(nRow);
+	else
+	{
+		HandleDateEditCompletion();
+	}
 
 	*pResult = 0;
 }
 
 void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	OnDateCloseUp(pNMHDR, pResult);
+	HandleDateEditCompletion();
 }
 
 void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
@@ -3631,7 +3646,7 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 			// Clear the text and end the edit, triggering a parent notification
 			VERIFY(SetItemText(GetCurSel(), VALUE_COL, _T("")));
 			
-			OnDateCloseUp(pNMHDR, pResult);
+			HandleDateEditCompletion();
 		}
 		else
 		{
@@ -3644,6 +3659,21 @@ void CTDLTaskAttributeListCtrl::OnDateChange(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 
 	*pResult = 0;
+}
+
+void CTDLTaskAttributeListCtrl::HandleDateEditCompletion()
+{
+	// If we've got multiple different values, DON'T notify
+	// our parent if the cell text has not actually changed
+	int nRow = GetCurSel();
+	CString sValue = GetItemText(nRow, VALUE_COL);
+
+	if (RowValueVaries(nRow) && (sValue == DATETIME_VARIES))
+		return;
+
+	TRACE(_T("\nCalling NotifyParentEdit(%d, \"%s\")\n"), nRow, sValue);
+
+	NotifyParentEdit(nRow);
 }
 
 LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
@@ -3675,6 +3705,7 @@ LRESULT CTDLTaskAttributeListCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM lp)
 			CDialogHelper::GetComboBoxItems(m_cbTextAndNumbers, pDef->aAutoListData);
 			Misc::RemoveItems(pDef->aDefaultListData, pDef->aAutoListData);
 		}
+		break;
 	}
 
 	return GetParent()->SendMessage(WM_TDCN_AUTOITEMADDEDDELETED, nAttribID);
