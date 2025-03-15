@@ -213,8 +213,13 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttri
 		if (pDef->IsList() && !pDef->IsDataType(TDCCA_ICON))
 			return FT_STRING;
 
+		DWORD dwAttribType = pDef->GetDataType();
+
+		if (dwAttribType == TDCCA_CALCULATION)
+			dwAttribType = aAttribDefs.GetCalculationResultDataType(pDef->Calculation());
+
 		// else
-		switch (pDef->GetDataType())
+		switch (dwAttribType)
 		{
 		case TDCCA_STRING:		return FT_STRING;
 		case TDCCA_INTEGER:		return FT_INTEGER;

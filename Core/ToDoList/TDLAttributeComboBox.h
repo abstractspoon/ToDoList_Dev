@@ -10,14 +10,16 @@
 #include "tdcenum.h"
 #include "tdcstruct.h"
 
+#include "..\shared\ownerdrawcomboboxbase.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeComboBox window
 
-class CTDLAttributeComboBox : public CComboBox
+class CTDLAttributeComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CTDLAttributeComboBox(BOOL bIncRelativeDates);
+	CTDLAttributeComboBox(BOOL bIncRelativeDates, BOOL bSeparateCustAttrib = TRUE);
 	virtual ~CTDLAttributeComboBox();
 
 // Operations
@@ -40,6 +42,7 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aAttribDefs;
 	CTDCAttributeMap m_mapWantedAttrib;
 	BOOL m_bIncRelativeDates;
+	BOOL m_bSeparateCustAttrib;
 
 	DECLARE_MESSAGE_MAP()
 
@@ -51,6 +54,28 @@ protected:
 	BOOL AttributeIsTimePeriod(TDC_ATTRIBUTE nAttribID) const;
 
 	virtual BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+
+	// -------------------------------------------------------------
+
+private:
+	struct SORTITEM
+	{
+		SORTITEM() : nAttribID(TDCA_NONE), bRelativeDate(FALSE) {}
+
+		CString sItem;
+		TDC_ATTRIBUTE nAttribID;
+		BOOL bRelativeDate;
+	};
+	typedef CArray<SORTITEM, SORTITEM&> CSortItemArray;
+
+	void CheckAddItem(TDC_ATTRIBUTE nAttribID, UINT nStrResID, CSortItemArray& aItems);
+	void CheckAddItem(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSortItemArray& aItems);
+	void AddItem(const CString& sItem, TDC_ATTRIBUTE nAttribID, CSortItemArray& aItems);
+	void AddItemsToCombo(const CSortItemArray& aItems);
+
+	static int SortProc(const void* v1, const void* v2);
 };
 
 /////////////////////////////////////////////////////////////////////////////
