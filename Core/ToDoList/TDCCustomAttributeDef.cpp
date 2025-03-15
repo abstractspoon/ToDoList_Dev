@@ -692,11 +692,16 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 				(dwFeature == TDCCAF_ONEDECIMAL));
 		
 	case TDCCA_INTEGER:
-	case TDCCA_TIMEPERIOD:
 		return ((dwFeature == TDCCAF_ACCUMULATE) ||
 				(dwFeature == TDCCAF_MAXIMIZE) ||
 				(dwFeature == TDCCAF_MINIMIZE) ||
 				(dwFeature == TDCCAF_HIDEZERO));
+
+	case TDCCA_TIMEPERIOD:
+		// 'Hide zero values' controlled by app preference
+		return ((dwFeature == TDCCAF_ACCUMULATE) ||
+				(dwFeature == TDCCAF_MAXIMIZE) ||
+				(dwFeature == TDCCAF_MINIMIZE));
 
 	case TDCCA_DATE:
 		return ((dwFeature == TDCCAF_MAXIMIZE) ||
@@ -704,8 +709,6 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 				(dwFeature == TDCCAF_SHOWTIME));
 
 	case TDCCA_BOOL:
-// 		return (dwFeature == TDCCAF_SHOWEDITFIELD);
-
 	case TDCCA_STRING:
 	case TDCCA_FILELINK:
 	case TDCCA_ICON:
@@ -1268,6 +1271,9 @@ BOOL CTDCCustomAttribDefinitionArray::AnyHasFeature(DWORD dwFeature) const
 		const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
 
 		if (def.HasFeature(dwFeature))
+			return TRUE;
+
+		if (def.IsCalculation() && CalculationHasFeature(def, dwFeature))
 			return TRUE;
 	}
 
