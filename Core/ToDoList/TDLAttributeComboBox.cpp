@@ -166,9 +166,14 @@ void CTDLAttributeComboBox::CheckAddItem(const TDCCUSTOMATTRIBUTEDEFINITION& att
 	if (!WantAttribute(attribDef.GetAttributeID()))
 		return;
 
-	AddItem(CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel),
-			attribDef.GetAttributeID(),
-			aItems);
+	CString sItem;
+
+	if (m_bSeparateCustAttrib)
+		sItem = attribDef.sLabel;
+	else
+		sItem = CEnString(IDS_CUSTOMCOLUMN, sItem);
+
+	AddItem(sItem, attribDef.GetAttributeID(), aItems);
 }
 
 void CTDLAttributeComboBox::AddItem(const CString& sItem, TDC_ATTRIBUTE nAttribID, CSortItemArray& aItems)
@@ -184,6 +189,12 @@ void CTDLAttributeComboBox::AddItem(const CString& sItem, TDC_ATTRIBUTE nAttribI
 	if (m_bIncRelativeDates && AttributeIsDate(nAttribID))
 	{
 		si.bRelativeDate = TRUE;
+
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && !m_bSeparateCustAttrib)
+			si.sItem = CEnString(IDS_CUSTOMRELDATECOLUMN, si.sItem);
+		else 
+			si.sItem += (' ' + CEnString(IDS_TDLBC_RELATIVESUFFIX));
+
 		aItems.Add(si);
 	}
 }
@@ -226,13 +237,13 @@ void CTDLAttributeComboBox::BuildCombo()
 		ASSERT((GetStyle() & CBS_OWNERDRAWFIXED) != 0);
 		ASSERT((GetStyle() & CBS_HASSTRINGS) != 0);
 
-		int nItem = AddString(_T("Custom"));
+		int nItem = AddString(CEnString(IDS_TDLBC_CUSTOMATTRIBS));
 		SetHeadingItem(nItem);
 
 		Misc::SortArrayT(aCustomItems, SortProc);
 		AddItemsToCombo(aCustomItems);
 
-		nItem = AddString(_T("Built-in"));
+		nItem = AddString(CEnString(IDS_DEFAULTATTRIBUTES));
 		SetHeadingItem(nItem);
 	}
 	else

@@ -1031,10 +1031,10 @@ void CTDLFindTaskExpressionListCtrl::ValidateListData() const
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRule];
 
-		// check matching attribute text 
+		// check matching attribute text less '(Custom/Relative)' suffixes
 		CString sRuleAttrib = m_cbAttributes.GetAttributeName(rule);
 		CString sListAttrib = GetItemText(nRule, ATTRIB_COL);
-		ASSERT (sRuleAttrib == sListAttrib);
+		ASSERT (Misc::SplitLeft(sRuleAttrib, '(') == Misc::SplitLeft(sListAttrib, '('));
 
 		// check matching operator text 
 		CString sRuleOp = GetOpName(rule.GetOperator());

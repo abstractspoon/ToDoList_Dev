@@ -5281,6 +5281,7 @@ BEGIN
     IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE 
                             "To enable this feature you first need to save your tasklist."
     IDS_TITLE_TIMETRACKING  "Time Tracking"
+    IDS_DEFAULTATTRIBUTES   "Default Attributes"
 END
 
 STRINGTABLE
