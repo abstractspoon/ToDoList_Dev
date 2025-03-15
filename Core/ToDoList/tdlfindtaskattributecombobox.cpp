@@ -22,7 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLFindTaskAttributeComboBox::CTDLFindTaskAttributeComboBox() 
 	: 
-	CTDLAttributeComboBox(TRUE) // want relative dates
+	CTDLAttributeComboBox(TDLACB_INCRELATIVEDATES | TDLACB_GROUPCUSTOMATTRIBS)
 {
 }
 

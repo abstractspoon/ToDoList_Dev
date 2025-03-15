@@ -15,11 +15,19 @@
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeComboBox window
 
+enum // options
+{
+	TDLACB_INCRELATIVEDATES		= 0x1,
+	TDLACB_GROUPCUSTOMATTRIBS	= 0x2,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTDLAttributeComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CTDLAttributeComboBox(BOOL bIncRelativeDates, BOOL bSeparateCustAttrib = TRUE);
+	CTDLAttributeComboBox(DWORD dwOptions = 0);
 	virtual ~CTDLAttributeComboBox();
 
 // Operations
@@ -41,8 +49,7 @@ public:
 protected:
 	CTDCCustomAttribDefinitionArray m_aAttribDefs;
 	CTDCAttributeMap m_mapWantedAttrib;
-	BOOL m_bIncRelativeDates;
-	BOOL m_bSeparateCustAttrib;
+	DWORD m_dwOptions;
 
 	DECLARE_MESSAGE_MAP()
 

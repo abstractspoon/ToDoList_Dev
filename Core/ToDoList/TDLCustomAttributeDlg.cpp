@@ -528,8 +528,8 @@ void CCustomAttributeListPage::OnBrowseimages()
 CCustomAttributeCalcPage::CCustomAttributeCalcPage() 
 	:
 	m_eSecondOperandValue(_T("-.0123456789"), ME_LOCALIZEDECIMAL),
-	m_cbFirstOperand(FALSE), // don't want relative tasks
-	m_cbSecondOperandAttrib(FALSE), // don't want relative tasks
+	m_cbFirstOperand(TDLACB_GROUPCUSTOMATTRIBS), // No relative tasks
+	m_cbSecondOperandAttrib(TDLACB_GROUPCUSTOMATTRIBS), // No relative tasks
 	m_bSecondOperandIsValue(TRUE)
 {
 	//{{AFX_DATA_INIT(CCustomAttributeCalcPage)

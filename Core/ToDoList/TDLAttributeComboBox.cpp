@@ -9,6 +9,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
+#include "..\shared\misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,10 +20,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeComboBox
 
-CTDLAttributeComboBox::CTDLAttributeComboBox(BOOL bIncRelativeDates, BOOL bSeparateCustAttrib)
+CTDLAttributeComboBox::CTDLAttributeComboBox(DWORD dwOptions)
 	:
-	m_bIncRelativeDates(bIncRelativeDates),
-	m_bSeparateCustAttrib(bSeparateCustAttrib)
+	m_dwOptions(dwOptions)
 {
 }
 
@@ -168,10 +168,10 @@ void CTDLAttributeComboBox::CheckAddItem(const TDCCUSTOMATTRIBUTEDEFINITION& att
 
 	CString sItem;
 
-	if (m_bSeparateCustAttrib)
-		sItem = attribDef.sLabel;
+	if (m_dwOptions & TDLACB_GROUPCUSTOMATTRIBS)
+		sItem = attribDef.sLabel; // No need to suffix
 	else
-		sItem = CEnString(IDS_CUSTOMCOLUMN, sItem);
+		sItem = CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 
 	AddItem(sItem, attribDef.GetAttributeID(), aItems);
 }
@@ -186,11 +186,11 @@ void CTDLAttributeComboBox::AddItem(const CString& sItem, TDC_ATTRIBUTE nAttribI
 
 	aItems.Add(si);
 
-	if (m_bIncRelativeDates && AttributeIsDate(nAttribID))
+	if (Misc::HasFlag(m_dwOptions, TDLACB_INCRELATIVEDATES) && AttributeIsDate(nAttribID))
 	{
 		si.bRelativeDate = TRUE;
 
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && !m_bSeparateCustAttrib)
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && !Misc::HasFlag(m_dwOptions, TDLACB_GROUPCUSTOMATTRIBS))
 			si.sItem = CEnString(IDS_CUSTOMRELDATECOLUMN, si.sItem);
 		else 
 			si.sItem += (' ' + CEnString(IDS_TDLBC_RELATIVESUFFIX));
@@ -231,7 +231,7 @@ void CTDLAttributeComboBox::BuildCombo()
 	if (WantAttribute(TDCA_TODAY))
 		CDialogHelper::AddStringT(*this, CEnString(IDS_TODAY), EncodeItemData(TDCA_TODAY));
 
-	if (m_bSeparateCustAttrib && aCustomItems.GetSize())
+	if (Misc::HasFlag(m_dwOptions, TDLACB_GROUPCUSTOMATTRIBS) && aCustomItems.GetSize())
 	{
 		ASSERT((GetStyle() & CBS_SORT) == 0);
 		ASSERT((GetStyle() & CBS_OWNERDRAWFIXED) != 0);
@@ -354,9 +354,13 @@ void CTDLAttributeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, 
 {
 	CRect rItem(rect);
 
-	// Don't indent <today>
-	if (bList && m_bSeparateCustAttrib && (dwItemData == TDCA_TODAY))
+	// Don't indent <today> when grouped
+	if (bList && 
+		(dwItemData == TDCA_TODAY) && 
+		Misc::HasFlag(m_dwOptions, TDLACB_GROUPCUSTOMATTRIBS))
+	{
 		rItem.left = 0;
+	}
 
 	COwnerdrawComboBoxBase::DrawItemText(dc, rItem, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
