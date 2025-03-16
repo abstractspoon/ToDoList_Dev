@@ -596,11 +596,6 @@ BOOL CCustomAttributeCalcPage::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	// disable localization because we do it ourselves by using CEnString
-	CLocalizer::EnableTranslation(m_cbFirstOperand, FALSE);
-	CLocalizer::EnableTranslation(m_cbOperators, FALSE);
-	CLocalizer::EnableTranslation(m_cbSecondOperandAttrib, FALSE);
-
 	BuildFirstOperandCombo();
 	BuildOperatorCombo();
 	BuildSecondOperandCombo();
@@ -612,7 +607,8 @@ BOOL CCustomAttributeCalcPage::OnInitDialog()
 
 void CCustomAttributeCalcPage::SetAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDef)
 {
-	m_aAttribDef.Copy(aAttribDef); // needed in OnInitDialog
+	m_aAttribDef.Copy(aAttribDef);
+
 	m_cbFirstOperand.SetCustomAttributes(m_aAttribDef);
 	m_cbSecondOperandAttrib.SetCustomAttributes(m_aAttribDef);
 
@@ -620,9 +616,24 @@ void CCustomAttributeCalcPage::SetAttributeDefinitions(const CTDCCustomAttribDef
 	{
 		UpdateData();
 
+		BuildFirstOperandCombo();
 		BuildOperatorCombo();
 		BuildSecondOperandCombo();
 		EnableControls();
+	}
+}
+
+void CCustomAttributeCalcPage::ExcludeCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+{
+	if (attribDef.sUniqueID != m_sExcludedCustAttribID)
+	{
+		m_sExcludedCustAttribID = attribDef.sUniqueID;
+
+		if (CDialogHelper::FindItemByDataT(m_cbFirstOperand, attribDef.GetAttributeID()) != -1)
+			BuildFirstOperandCombo();
+
+		if (CDialogHelper::FindItemByDataT(m_cbSecondOperandAttrib, attribDef.GetAttributeID()) != -1)
+			BuildSecondOperandCombo();
 	}
 }
 
@@ -712,6 +723,9 @@ int CCustomAttributeCalcPage::BuildFirstOperandFilter(CTDCAttributeMap& mapAttri
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDef[nDef];
 
+		if (m_sExcludedCustAttribID == attribDef.sUniqueID)
+			continue;
+
 		switch (attribDef.GetDataType())
 		{
 		case TDCCA_DATE:
@@ -745,6 +759,8 @@ void CCustomAttributeCalcPage::BuildFirstOperandCombo()
 
 void CCustomAttributeCalcPage::BuildOperatorCombo()
 {
+	CLocalizer::EnableTranslation(m_cbOperators, FALSE);
+
 	m_cbOperators.ResetContent();
 
 	// Add/subtract supported by all
@@ -1209,7 +1225,9 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* /*p
 		m_pageList.SetDataType(m_dwDataType);
 		m_pageList.SetListType(attrib.GetListType());
 		m_pageList.SetDefaultListData(attrib.aDefaultListData);
+
 		m_pageCalc.SetCalculation(attrib.Calculation());
+		m_pageCalc.ExcludeCustomAttribute(attrib);
 
 		if (attrib.IsDataType(TDCCA_CALCULATION))
 		{

@@ -112,7 +112,9 @@ public:
 	CCustomAttributeCalcPage();
 
 	BOOL Create(CWnd* pParent);
+
 	void SetAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDef);
+	void ExcludeCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
 	void SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc);
 	void GetCalculation(TDCCUSTOMATTRIBUTECALCULATION& calc) const;
@@ -127,6 +129,7 @@ protected:
 	//}}AFX_DATA
 	BOOL m_bSecondOperandIsValue;
 	CString m_sResultType;
+	CString m_sExcludedCustAttribID;
 
 	TDCCUSTOMATTRIBUTECALCULATION m_calc;
 	CTDCCustomAttribDefinitionArray m_aAttribDef;
