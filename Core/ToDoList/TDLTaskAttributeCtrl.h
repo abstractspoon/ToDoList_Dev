@@ -127,6 +127,8 @@ protected:
 	afx_msg void OnMoveAttributeUp();
 	afx_msg void OnMoveAttributeDown();
 	afx_msg void OnResetAttributeMoves();
+	afx_msg void OnSetLabelBkgndColor();
+	afx_msg void OnClearLabelBkgndColor();
 
 	afx_msg LRESULT OnEditTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditTaskReminder(WPARAM wParam, LPARAM lParam);

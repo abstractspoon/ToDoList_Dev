@@ -984,6 +984,21 @@ BOOL CTDLTaskAttributeListCtrl::CanEditSelectedAttribute() const
 	return CanEditCell(GetCurSel(), VALUE_COL);
 }
 
+void CTDLTaskAttributeListCtrl::SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd)
+{
+	m_aAttribState.SetLabelBkgndColor(GetSelectedAttributeID(), crBkgnd);
+}
+
+void CTDLTaskAttributeListCtrl::ClearSelectedAttributeLabelBackgroundColor()
+{
+	m_aAttribState.ClearLabelBkgndColor(GetSelectedAttributeID());
+}
+
+COLORREF CTDLTaskAttributeListCtrl::GetSelectedAttributeLabelBackgroundColor() const
+{
+	return m_aAttribState.GetLabelBkgndColor(GetSelectedAttributeID());
+}
+
 IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 {
 	if (nCol == ATTRIB_COL)
@@ -4760,7 +4775,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeState::SetLabelBkgndColor(TDC_ATTRIBUT
 
 	if (nPos == -1)
 	{
-		ASSERT(0);
+		ASSERT(nAttribID == TDCA_NONE);
 		return FALSE;
 	}
 
@@ -4782,7 +4797,7 @@ COLORREF CTDLTaskAttributeListCtrl::CAttributeState::GetLabelBkgndColor(TDC_ATTR
 
 	if (nPos == -1)
 	{
-		ASSERT(0);
+		ASSERT(nAttribID == TDCA_NONE);
 		return CLR_NONE;
 	}
 

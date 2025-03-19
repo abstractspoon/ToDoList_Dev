@@ -8,6 +8,7 @@
 
 #include "..\shared\Localizer.h"
 #include "..\shared\EnMenu.h"
+#include "..\shared\EnColorDialog.h"
 
 #include "..\3rdparty\XNamedColors.h"
 
@@ -55,6 +56,8 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBUP, OnMoveAttributeUp)
 	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBDOWN, OnMoveAttributeDown)
 	ON_COMMAND(ID_ATTRIBCTRL_RESETMOVES, OnResetAttributeMoves)
+	ON_COMMAND(ID_ATTRIBCTRL_SETLABELCOLOR, OnSetLabelBkgndColor)
+	ON_COMMAND(ID_ATTRIBCTRL_CLEARLABELCOLOR, OnClearLabelBkgndColor)
 
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_TASKATTRIBUTES, OnItemChanged)
 
@@ -197,6 +200,19 @@ void CTDLTaskAttributeCtrl::OnResetAttributeMoves()
 		UpdateToolbarButtons();
 }
 
+void CTDLTaskAttributeCtrl::OnSetLabelBkgndColor()
+{
+	CEnColorDialog dialog(m_lcAttributes.GetSelectedAttributeLabelBackgroundColor());
+
+	if (dialog.DoModal(CPreferences()) == IDOK)
+		m_lcAttributes.SetSelectedAttributeLabelBackgroundColor(dialog.GetColor());
+}
+
+void CTDLTaskAttributeCtrl::OnClearLabelBkgndColor()
+{
+	m_lcAttributes.ClearSelectedAttributeLabelBackgroundColor();
+}
+
 void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
 {
 	m_lcAttributes.LoadState(prefs, szKey);
@@ -216,6 +232,8 @@ void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
 	tb.EnableButton(ID_ATTRIBCTRL_RESETMOVES, m_lcAttributes.CanResetAttributeMoves());
+	tb.EnableButton(ID_ATTRIBCTRL_SETLABELCOLOR, (TDCA_NONE != m_lcAttributes.GetSelectedAttributeID()));
+	tb.EnableButton(ID_ATTRIBCTRL_CLEARLABELCOLOR, (CLR_NONE != m_lcAttributes.GetSelectedAttributeLabelBackgroundColor()));
 }
 
 void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)

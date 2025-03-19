@@ -90,6 +90,9 @@ public:
 	CString GetSelectedAttributeLabel() const;
 	CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const;
 	BOOL CanEditSelectedAttribute() const;
+	void SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd);
+	void ClearSelectedAttributeLabelBackgroundColor();
+	COLORREF GetSelectedAttributeLabelBackgroundColor() const;
 
 	void RefreshSelectedTasksValues();
 	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
