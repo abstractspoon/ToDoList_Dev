@@ -135,7 +135,7 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_fAttribColProportion(0.5f),
 	m_bGrouped(FALSE),
 	m_aSortedGroupedItems(*this),
-	m_aAttribOrder(aCustAttribDefs),
+	m_aAttribState(aCustAttribDefs),
 	m_reminders(rems),
 	m_eSingleFileLink(FES_GOBUTTON),
 	m_cbMultiFileLink(FES_GOBUTTON),
@@ -299,7 +299,7 @@ BOOL CTDLTaskAttributeListCtrl::GetAttributeToMoveBelow(TDC_ATTRIBUTE nAttribID,
 	{
 		TDC_ATTRIBUTE nNextAttribID;
 		
-		if (!m_aAttribOrder.GetNextAttribute(nBelowAttribID, bUp, m_bGrouped, nNextAttribID))
+		if (!m_aAttribState.GetNextAttribute(nBelowAttribID, bUp, m_bGrouped, nNextAttribID))
 		{
 			ASSERT(bUp);
 			ASSERT(nStep == 1);
@@ -311,7 +311,7 @@ BOOL CTDLTaskAttributeListCtrl::GetAttributeToMoveBelow(TDC_ATTRIBUTE nAttribID,
 			{
 				// Use whatever attribute is immediately above the topmost
 				// group item regardless of visibility
-				if (m_aAttribOrder.GetNextAttribute(nBelowAttribID, bUp, FALSE, nNextAttribID))
+				if (m_aAttribState.GetNextAttribute(nBelowAttribID, bUp, FALSE, nNextAttribID))
 				{
 					nBelowAttribID = nNextAttribID;
 					break;
@@ -340,7 +340,7 @@ BOOL CTDLTaskAttributeListCtrl::IsAttributeMoveLimited(TDC_ATTRIBUTE nAttribID, 
 {
 	TDC_ATTRIBUTE nNextAttribID = nAttribID;
 
-	while (m_aAttribOrder.GetNextAttribute(nNextAttribID, bUp, m_bGrouped, nNextAttribID))
+	while (m_aAttribState.GetNextAttribute(nNextAttribID, bUp, m_bGrouped, nNextAttribID))
 	{
 		if (GetRow(nNextAttribID) != -1)
 			return FALSE;
@@ -356,7 +356,7 @@ BOOL CTDLTaskAttributeListCtrl::MoveSelectedAttribute(BOOL bUp)
 	if (!GetAttributeToMoveBelow(nAttribID, bUp, nBelowAttribID))
 		return FALSE;
 
-	VERIFY(m_aAttribOrder.MoveAttribute(nAttribID, nBelowAttribID));
+	VERIFY(m_aAttribState.MoveAttribute(nAttribID, nBelowAttribID));
 	Sort();
 
 	return TRUE;
@@ -371,7 +371,7 @@ BOOL CTDLTaskAttributeListCtrl::CanMoveSelectedAttribute(BOOL bUp) const
 
 BOOL CTDLTaskAttributeListCtrl::ResetAttributeMoves()
 {
-	if (!m_aAttribOrder.ResetOrder())
+	if (!m_aAttribState.ResetOrder())
 		return FALSE;
 
 	Sort();
@@ -380,7 +380,7 @@ BOOL CTDLTaskAttributeListCtrl::ResetAttributeMoves()
 
 BOOL CTDLTaskAttributeListCtrl::CanResetAttributeMoves() const
 {
-	return m_aAttribOrder.CanResetOrder();
+	return m_aAttribState.CanResetOrder();
 }
 
 int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const
@@ -447,7 +447,7 @@ int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2
 		}
 	}
 
-	return m_aAttribOrder.CompareItems(nAttribID1, nAttribID2);
+	return m_aAttribState.CompareItems(nAttribID1, nAttribID2);
 }
 
 void CTDLTaskAttributeListCtrl::ToggleGrouping()
@@ -524,7 +524,7 @@ void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) co
 	prefs.WriteProfileInt(szKey, _T("AttribSortAscending"), m_bSortAscending);
 	prefs.WriteProfileInt(szKey, _T("AttribGrouped"), m_bGrouped);
 
-	m_aAttribOrder.SaveState(prefs, szKey);
+	m_aAttribState.Save(prefs, szKey);
 }
 
 void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
@@ -533,7 +533,7 @@ void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szK
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
 	m_bGrouped = prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE);
 
-	m_aAttribOrder.LoadState(prefs, szKey);
+	m_aAttribState.Load(prefs, szKey);
 
 	if (GetSafeHwnd())
 	{
@@ -584,7 +584,7 @@ void CTDLTaskAttributeListCtrl::SetTimeTrackTaskID(DWORD dwTaskID)
 
 void CTDLTaskAttributeListCtrl::OnCustomAttributesChange()
 {
-	m_aAttribOrder.OnCustomAttributesChange();
+	m_aAttribState.OnCustomAttributesChange();
 
 	Populate();
 }
@@ -4409,7 +4409,7 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::DescendingSortProc(con
 
 ////////////////////////////////////////////////////////////////////////////////
 
-CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(UINT nLabelResID, TDC_ATTRIBUTE attribID, TDC_ATTRIBUTEGROUP group)
+CTDLTaskAttributeListCtrl::ATTRIBSTATE::ATTRIBSTATE(UINT nLabelResID, TDC_ATTRIBUTE attribID, TDC_ATTRIBUTEGROUP group)
 	:
 	nAttribID(attribID),
 	nGroup(group),
@@ -4419,7 +4419,7 @@ CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(UINT nLabelResID, TDC_ATTRIBUT
 		sLabel = CEnString(nLabelResID);
 }
 
-CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCATTRIBUTE& attrib)
+CTDLTaskAttributeListCtrl::ATTRIBSTATE::ATTRIBSTATE(const TDCATTRIBUTE& attrib)
 	:
 	sLabel(CEnString(attrib.nLabelResID)),
 	nAttribID(attrib.nAttributeID),
@@ -4428,7 +4428,7 @@ CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCATTRIBUTE& attrib)
 {
 }
 
-CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+CTDLTaskAttributeListCtrl::ATTRIBSTATE::ATTRIBSTATE(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
 	:
 	sLabel(attribDef.sLabel),
 	nAttribID(attribDef.GetAttributeID()),
@@ -4438,36 +4438,36 @@ CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINI
 {
 }
 
-BOOL CTDLTaskAttributeListCtrl::ATTRIBITEM::IsCustom() const
+BOOL CTDLTaskAttributeListCtrl::ATTRIBSTATE::IsCustom() const
 {
 	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
 }
 
 // -----------------------------------------------------------------
 
-CTDLTaskAttributeListCtrl::CAttributeOrder::CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+CTDLTaskAttributeListCtrl::CAttributeState::CAttributeState(const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	:
 	m_aCustomAttribDefs(aCustAttribDefs)
 {
 	Populate();
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeOrder::Populate()
+void CTDLTaskAttributeListCtrl::CAttributeState::Populate()
 {
 	// Built-in attributes (excluding TDCA_NONE)
 	for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
 	{
-		m_aAttributeItems.Add(ATTRIBITEM(TASKATTRIBUTES[nAtt]));
+		m_aAttributeItems.Add(ATTRIBSTATE(TASKATTRIBUTES[nAtt]));
 	}
 
 	// Custom attributes
 	for (int nCust = 0; nCust < m_aCustomAttribDefs.GetSize(); nCust++)
 	{
-		m_aAttributeItems.Add(ATTRIBITEM(m_aCustomAttribDefs[nCust]));
+		m_aAttributeItems.Add(ATTRIBSTATE(m_aCustomAttribDefs[nCust]));
 	}
 
 	// Misc others
-	m_aAttributeItems.Add(ATTRIBITEM(IDS_TDLBC_REMINDER, TDCA_REMINDER, TDCAG_DATETIME));
+	m_aAttributeItems.Add(ATTRIBSTATE(IDS_TDLBC_REMINDER, TDCA_REMINDER, TDCAG_DATETIME));
 
 	// Sort 
 	Misc::SortArrayT(m_aAttributeItems, SortByNameProc);
@@ -4476,7 +4476,7 @@ void CTDLTaskAttributeListCtrl::CAttributeOrder::Populate()
 	RebuildItemPositions();
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow)
+BOOL CTDLTaskAttributeListCtrl::CAttributeState::MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow)
 {
 	ASSERT(nAttribID != TDCA_NONE);
 
@@ -4492,7 +4492,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::MoveAttribute(TDC_ATTRIBUTE nAt
 	if (nNewPos == nOldPos)
 		return FALSE;
 
-	ATTRIBITEM item = m_aAttributeItems.GetAt(nOldPos);
+	ATTRIBSTATE item = m_aAttributeItems.GetAt(nOldPos);
 	m_aAttributeItems.InsertAt(nNewPos, item);
 
 	if (nNewPos > nOldPos)
@@ -4504,7 +4504,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::MoveAttribute(TDC_ATTRIBUTE nAt
 	return TRUE;
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeOrder::GetAttribPos(TDC_ATTRIBUTE nAttribID) const
+int CTDLTaskAttributeListCtrl::CAttributeState::GetAttribPos(TDC_ATTRIBUTE nAttribID) const
 {
 	int nPos = -1;
 	
@@ -4517,7 +4517,7 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::GetAttribPos(TDC_ATTRIBUTE nAttr
 	return nPos;
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const
+BOOL CTDLTaskAttributeListCtrl::CAttributeState::GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const
 {
 	if (nAttribID == TDCA_NONE)
 		return FALSE;
@@ -4530,13 +4530,13 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::GetNextAttribute(TDC_ATTRIBUTE 
 
 	if (bSameGroup)
 	{
-		const ATTRIBITEM& attrib = m_aAttributeItems[nPos];
+		const ATTRIBSTATE& attrib = m_aAttributeItems[nPos];
 
 		if (bUp)
 		{
 			for (--nNextPos; nNextPos >= 0; nNextPos--)
 			{
-				const ATTRIBITEM& attribNext = m_aAttributeItems[nNextPos];
+				const ATTRIBSTATE& attribNext = m_aAttributeItems[nNextPos];
 
 				if (attribNext.nGroup == attrib.nGroup)
 				{
@@ -4549,7 +4549,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::GetNextAttribute(TDC_ATTRIBUTE 
 		{
 			for (++nNextPos; nNextPos < nNumItems; nNextPos++)
 			{
-				const ATTRIBITEM& attribNext = m_aAttributeItems[nNextPos];
+				const ATTRIBSTATE& attribNext = m_aAttributeItems[nNextPos];
 
 				if (attribNext.nGroup == attrib.nGroup)
 				{
@@ -4580,7 +4580,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::GetNextAttribute(TDC_ATTRIBUTE 
 	 return (nNextAttribID != nAttribID);
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeOrder::CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const
+int CTDLTaskAttributeListCtrl::CAttributeState::CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const
 {
 	ASSERT((nAttribID1 != TDCA_NONE) && (nAttribID2 != TDCA_NONE));
 
@@ -4596,10 +4596,10 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::CompareItems(TDC_ATTRIBUTE nAttr
 	return nCompare;
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByNameProc(const void* item1, const void* item2)
+int CTDLTaskAttributeListCtrl::CAttributeState::SortByNameProc(const void* item1, const void* item2)
 {
-	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
-	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
+	const ATTRIBSTATE* pItem1 = (const ATTRIBSTATE*)item1;
+	const ATTRIBSTATE* pItem2 = (const ATTRIBSTATE*)item2;
 
 	int nCompare = Misc::NaturalCompare(pItem1->sLabel, pItem2->sLabel);
 
@@ -4610,10 +4610,10 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByNameProc(const void* item1
 	return nCompare;
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByPosProc(const void* item1, const void* item2)
+int CTDLTaskAttributeListCtrl::CAttributeState::SortByPosProc(const void* item1, const void* item2)
 {
-	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
-	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
+	const ATTRIBSTATE* pItem1 = (const ATTRIBSTATE*)item1;
+	const ATTRIBSTATE* pItem2 = (const ATTRIBSTATE*)item2;
 
 	int nCompare = (pItem1->nPos - pItem2->nPos);
 
@@ -4624,7 +4624,7 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByPosProc(const void* item1,
 	return nCompare;
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeOrder::RebuildItemPositions()
+void CTDLTaskAttributeListCtrl::CAttributeState::RebuildItemPositions()
 {
 	m_mapPositions.RemoveAll();
 
@@ -4632,14 +4632,14 @@ void CTDLTaskAttributeListCtrl::CAttributeOrder::RebuildItemPositions()
 
 	while (nItem--)
 	{
-		ATTRIBITEM& item = m_aAttributeItems[nItem];
+		ATTRIBSTATE& item = m_aAttributeItems[nItem];
 
 		item.nPos = nItem;
 		m_mapPositions[item.nAttribID] = nItem;
 	}
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeOrder::OnCustomAttributesChange()
+void CTDLTaskAttributeListCtrl::CAttributeState::OnCustomAttributesChange()
 {
 	CStringArray aOrder;
 	VERIFY(GetOrder(aOrder));
@@ -4650,7 +4650,7 @@ void CTDLTaskAttributeListCtrl::CAttributeOrder::OnCustomAttributesChange()
 	SetOrder(aOrder);
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeOrder::SaveState(CPreferences& prefs, LPCTSTR szKey) const
+void CTDLTaskAttributeListCtrl::CAttributeState::Save(CPreferences& prefs, LPCTSTR szKey) const
 {
 	// Write the current order out as a delimited string
 	CStringArray aOrder;
@@ -4659,7 +4659,7 @@ void CTDLTaskAttributeListCtrl::CAttributeOrder::SaveState(CPreferences& prefs, 
 	prefs.WriteProfileString(szKey, _T("AttribOrder"), Misc::FormatArray(aOrder, ITEM_DELIM));
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeOrder::LoadState(const CPreferences& prefs, LPCTSTR szKey)
+void CTDLTaskAttributeListCtrl::CAttributeState::Load(const CPreferences& prefs, LPCTSTR szKey)
 {
 	CString sOrder = prefs.GetProfileString(szKey, _T("AttribOrder"));
 
@@ -4672,7 +4672,7 @@ void CTDLTaskAttributeListCtrl::CAttributeOrder::LoadState(const CPreferences& p
 	}
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeOrder::GetOrder(CStringArray& aOrder) const
+int CTDLTaskAttributeListCtrl::CAttributeState::GetOrder(CStringArray& aOrder) const
 {
 	aOrder.SetSize(m_aAttributeItems.GetSize());
 
@@ -4680,7 +4680,7 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::GetOrder(CStringArray& aOrder) c
 
 	while (nItem--)
 	{
-		const ATTRIBITEM& item = m_aAttributeItems[nItem];
+		const ATTRIBSTATE& item = m_aAttributeItems[nItem];
 
 		if (item.IsCustom())
 			aOrder[nItem] = item.sCustAttribID;
@@ -4691,7 +4691,7 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::GetOrder(CStringArray& aOrder) c
 	return aOrder.GetSize();
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeOrder::SetOrder(const CStringArray& aOrder)
+void CTDLTaskAttributeListCtrl::CAttributeState::SetOrder(const CStringArray& aOrder)
 {
 	for (int nItem = 0; nItem < aOrder.GetSize(); nItem++)
 	{
@@ -4713,7 +4713,7 @@ void CTDLTaskAttributeListCtrl::CAttributeOrder::SetOrder(const CStringArray& aO
 	RebuildItemPositions();
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::ResetOrder()
+BOOL CTDLTaskAttributeListCtrl::CAttributeState::ResetOrder()
 {
 	if (!CanResetOrder())
 		return FALSE;
@@ -4724,7 +4724,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::ResetOrder()
 	return TRUE;
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeOrder::CanResetOrder() const
+BOOL CTDLTaskAttributeListCtrl::CAttributeState::CanResetOrder() const
 {
 	CStringArray aOrder;
 	VERIFY(GetOrder(aOrder));

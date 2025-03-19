@@ -356,11 +356,11 @@ private:
 
 	// ---------------------------------------------------------------------
 
-	struct ATTRIBITEM
+	struct ATTRIBSTATE
 	{
-		ATTRIBITEM(UINT nLabelResID = 0, TDC_ATTRIBUTE nAttribID = TDCA_NONE, TDC_ATTRIBUTEGROUP nGroup = TDCAG_NONE);
-		ATTRIBITEM(const TDCATTRIBUTE& attrib);
-		ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
+		ATTRIBSTATE(UINT nLabelResID = 0, TDC_ATTRIBUTE nAttribID = TDCA_NONE, TDC_ATTRIBUTEGROUP nGroup = TDCAG_NONE);
+		ATTRIBSTATE(const TDCATTRIBUTE& attrib);
+		ATTRIBSTATE(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
 		BOOL IsCustom() const;
 
@@ -371,15 +371,15 @@ private:
 		int nPos;
 	};
 
-	class CAttributeOrder
+	class CAttributeState
 	{
 	public:
-		CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+		CAttributeState(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nBelowAttribID);
 
-		void SaveState(CPreferences& prefs, LPCTSTR szKey) const;
-		void LoadState(const CPreferences& prefs, LPCTSTR szKey);
+		void Save(CPreferences& prefs, LPCTSTR szKey) const;
+		void Load(const CPreferences& prefs, LPCTSTR szKey);
 
 		int GetOrder(CStringArray& aOrder) const;
 		void SetOrder(const CStringArray& aOrder);
@@ -394,7 +394,7 @@ private:
 	protected:
 		const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
-		CArray<ATTRIBITEM, ATTRIBITEM&> m_aAttributeItems;
+		CArray<ATTRIBSTATE, ATTRIBSTATE&> m_aAttributeItems;
 		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
 
 		CStringArray m_aDefaultOrder;
@@ -408,7 +408,7 @@ private:
 		static int SortByPosProc(const void* item1, const void* item2);
 	};
 
-	CAttributeOrder m_aAttribOrder;
+	CAttributeState m_aAttribState;
 
 	// ---------------------------------------------------------------------
 };
