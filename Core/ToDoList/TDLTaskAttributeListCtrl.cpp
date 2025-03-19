@@ -4601,7 +4601,7 @@ int CTDLTaskAttributeListCtrl::CAttributeOrder::SortByNameProc(const void* item1
 	const ATTRIBITEM* pItem1 = (const ATTRIBITEM*)item1;
 	const ATTRIBITEM* pItem2 = (const ATTRIBITEM*)item2;
 
-	int nCompare = Misc::NaturalCompare(pItem1->sName, pItem2->sName);
+	int nCompare = Misc::NaturalCompare(pItem1->sLabel, pItem2->sLabel);
 
 	// Sort by ID for a stable sort
 	if (nCompare == 0)
