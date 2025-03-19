@@ -358,13 +358,13 @@ private:
 
 	struct ATTRIBITEM
 	{
-		ATTRIBITEM(UINT nAttribResID = 0, TDC_ATTRIBUTE nAttribID = TDCA_NONE, TDC_ATTRIBUTEGROUP nGroup = TDCAG_NONE);
+		ATTRIBITEM(UINT nLabelResID = 0, TDC_ATTRIBUTE nAttribID = TDCA_NONE, TDC_ATTRIBUTEGROUP nGroup = TDCAG_NONE);
 		ATTRIBITEM(const TDCATTRIBUTE& attrib);
 		ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
 		BOOL IsCustom() const;
 
-		CString sName;
+		CString sLabel;
 		TDC_ATTRIBUTE nAttribID;
 		CString sCustAttribID;
 		TDC_ATTRIBUTEGROUP nGroup;

@@ -498,7 +498,7 @@ CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, c
 
 CString CTDLFindResultsListCtrl::GetAttributeName(TDC_ATTRIBUTE nAttribID, const CFilteredToDoCtrl* pTDC) const
 {
-	CString sAttrib = TDC::GetAttributeName(nAttribID);
+	CString sAttrib = TDC::GetAttributeLabel(nAttribID);
 
 	if (sAttrib.IsEmpty())
 	{

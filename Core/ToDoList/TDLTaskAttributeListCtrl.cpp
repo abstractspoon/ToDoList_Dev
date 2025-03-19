@@ -630,7 +630,7 @@ int CTDLTaskAttributeListCtrl::GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMa
 			const TDCATTRIBUTE& attrib = TASKATTRIBUTES[nAtt];
 
 			if ((attrib.nGroup == nGroup) && WantAddAttribute(attrib.nAttributeID))
-				mapAttrib[attrib.nAttributeID] = CEnString(attrib.nAttribResID);
+				mapAttrib[attrib.nAttributeID] = CEnString(attrib.nLabelResID);
 		}
 
 		// Unhandled fields
@@ -729,7 +729,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 		{
 			// Built-in attributes
 			for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
-				CheckAddAttribute(TASKATTRIBUTES[nAtt].nAttributeID, TASKATTRIBUTES[nAtt].nAttribResID);
+				CheckAddAttribute(TASKATTRIBUTES[nAtt].nAttributeID, TASKATTRIBUTES[nAtt].nLabelResID);
 
 			// Associated time fields
 			CheckAddAttribute(TDCA_STARTTIME, IDS_TDLBC_STARTTIME);
@@ -4409,19 +4409,19 @@ int CTDLTaskAttributeListCtrl::CSortedGroupedHeaderArray::DescendingSortProc(con
 
 ////////////////////////////////////////////////////////////////////////////////
 
-CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(UINT nAttribResID, TDC_ATTRIBUTE attribID, TDC_ATTRIBUTEGROUP group)
+CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(UINT nLabelResID, TDC_ATTRIBUTE attribID, TDC_ATTRIBUTEGROUP group)
 	:
 	nAttribID(attribID),
 	nGroup(group),
 	nPos(0)
 {
-	if (nAttribResID)
-		sName = CEnString(nAttribResID);
+	if (nLabelResID)
+		sLabel = CEnString(nLabelResID);
 }
 
 CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCATTRIBUTE& attrib)
 	:
-	sName(CEnString(attrib.nAttribResID)),
+	sLabel(CEnString(attrib.nLabelResID)),
 	nAttribID(attrib.nAttributeID),
 	nGroup(attrib.nGroup),
 	nPos(0)
@@ -4430,7 +4430,7 @@ CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCATTRIBUTE& attrib)
 
 CTDLTaskAttributeListCtrl::ATTRIBITEM::ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
 	:
-	sName(attribDef.sLabel),
+	sLabel(attribDef.sLabel),
 	nAttribID(attribDef.GetAttributeID()),
 	sCustAttribID(attribDef.sUniqueID),
 	nGroup(TDCAG_CUSTOM),

@@ -93,7 +93,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 			break;
 
 		default:
-			CDialogHelper::AddStringT(m_cbAttributes, CEnString(att.nAttribResID), att.nAttributeID);
+			CDialogHelper::AddStringT(m_cbAttributes, CEnString(att.nLabelResID), att.nAttributeID);
 			break;
 		}
 	}
@@ -177,7 +177,7 @@ CString CTDLImportExportAttributeMappingListCtrl::GetAttributeName(TDC_ATTRIBUTE
 	if (nAtt == TDCA_EXISTING_CUSTOMATTRIBUTE)
 		return CEnString(IDS_CSV_EXISTCUSTOMATTRIB);
 	
-	return TDC::GetAttributeName(nAtt);
+	return TDC::GetAttributeLabel(nAtt);
 }
 
 int CTDLImportExportAttributeMappingListCtrl::FindRow(TDC_ATTRIBUTE nAtt, int nIgnoreRow) const

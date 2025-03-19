@@ -212,7 +212,7 @@ void CTDLAttributeComboBox::BuildCombo()
 	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 	{
 		const TDCATTRIBUTE& ap = TASKATTRIBUTES[nAtt];
-		CheckAddItem(ap.nAttributeID, ap.nAttribResID, aItems);
+		CheckAddItem(ap.nAttributeID, ap.nLabelResID, aItems);
 	}
 
 	// custom attributes
