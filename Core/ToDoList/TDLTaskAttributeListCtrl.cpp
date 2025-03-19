@@ -1007,7 +1007,7 @@ BOOL CTDLTaskAttributeListCtrl::CanClearSelectedAttributeLabelBackgroundColor() 
 
 BOOL CTDLTaskAttributeListCtrl::CanSetSelectedAttributeLabelBackgroundColor() const
 {
-	return (m_nCurCol == LABEL_COL) && (GetSelectedAttributeID() != TDCA_NONE));
+	return ((m_nCurCol == LABEL_COL) && (GetSelectedAttributeID() != TDCA_NONE));
 }
 
 IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
@@ -1240,7 +1240,14 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	if (nCol == VALUE_COL)
+	if ((nCol == LABEL_COL) && !bSelected)
+	{
+		COLORREF crBkgnd = m_aAttribState.GetLabelBkgndColor(GetAttributeID(nItem));
+
+		if (crBkgnd != CLR_NONE)
+			return crBkgnd;
+	}
+	else if (nCol == VALUE_COL)
 	{
 		if (!CanEditCell(nItem, nCol))
 			return GetSysColor(COLOR_3DFACE);
@@ -1252,11 +1259,26 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL b
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	if (!CanEditCell(nItem, VALUE_COL))
-		return GetSysColor(COLOR_3DDKSHADOW);
-
-	if (nCol == VALUE_COL)
+	if (nCol == LABEL_COL)
 	{
+		COLORREF crBkgnd = m_aAttribState.GetLabelBkgndColor(GetAttributeID(nItem));
+
+		if (crBkgnd != CLR_NONE)
+		{
+			if (bSelected)
+				return GraphicsMisc::GetExplorerItemSelectionTextColor(crBkgnd, GMIS_SELECTED, 0);
+			
+			// else
+			return GraphicsMisc::GetBestTextColor(crBkgnd);
+		}
+	}
+	else
+	{
+		ASSERT(nCol == VALUE_COL);
+
+		if (!CanEditCell(nItem, nCol))
+			return GetSysColor(COLOR_3DDKSHADOW);
+
 		switch (GetAttributeID(nItem))
 		{
 		case TDCA_DEPENDENCY:
