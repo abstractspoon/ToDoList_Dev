@@ -4413,7 +4413,8 @@ CTDLTaskAttributeListCtrl::ATTRIBSTATE::ATTRIBSTATE(UINT nLabelResID, TDC_ATTRIB
 	:
 	nAttribID(attribID),
 	nGroup(group),
-	nPos(0)
+	nPos(0),
+	crLabelBkgnd(CLR_NONE)
 {
 	if (nLabelResID)
 		sLabel = CEnString(nLabelResID);
@@ -4424,7 +4425,8 @@ CTDLTaskAttributeListCtrl::ATTRIBSTATE::ATTRIBSTATE(const TDCATTRIBUTE& attrib)
 	sLabel(CEnString(attrib.nLabelResID)),
 	nAttribID(attrib.nAttributeID),
 	nGroup(attrib.nGroup),
-	nPos(0)
+	nPos(0),
+	crLabelBkgnd(CLR_NONE)
 {
 }
 
@@ -4434,7 +4436,8 @@ CTDLTaskAttributeListCtrl::ATTRIBSTATE::ATTRIBSTATE(const TDCCUSTOMATTRIBUTEDEFI
 	nAttribID(attribDef.GetAttributeID()),
 	sCustAttribID(attribDef.sUniqueID),
 	nGroup(TDCAG_CUSTOM),
-	nPos(0)
+	nPos(0),
+	crLabelBkgnd(CLR_NONE)
 {
 }
 
@@ -4732,5 +4735,39 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeState::CanResetOrder() const
 	return !Misc::MatchAll(aOrder, m_aDefaultOrder, TRUE);
 }
 
+BOOL CTDLTaskAttributeListCtrl::CAttributeState::SetLabelBkgndColor(TDC_ATTRIBUTE nAttribID, COLORREF crBkgnd)
+{
+	int nPos = GetAttribPos(nAttribID);
+
+	if (nPos == -1)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (crBkgnd == m_aAttributeItems[nPos].crLabelBkgnd)
+		return FALSE;
+
+	m_aAttributeItems[nPos].crLabelBkgnd = crBkgnd;
+	return TRUE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CAttributeState::ClearLabelBkgndColor(TDC_ATTRIBUTE nAttribID)
+{
+	return SetLabelBkgndColor(nAttribID, CLR_NONE);
+}
+
+COLORREF CTDLTaskAttributeListCtrl::CAttributeState::GetLabelBkgndColor(TDC_ATTRIBUTE nAttribID) const
+{
+	int nPos = GetAttribPos(nAttribID);
+
+	if (nPos == -1)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return m_aAttributeItems[nPos].crLabelBkgnd;
+}
 
 ////////////////////////////////////////////////////////////////////////////////

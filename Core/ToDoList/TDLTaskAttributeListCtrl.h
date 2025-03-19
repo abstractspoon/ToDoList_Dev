@@ -369,6 +369,7 @@ private:
 		CString sCustAttribID;
 		TDC_ATTRIBUTEGROUP nGroup;
 		int nPos;
+		COLORREF crLabelBkgnd;
 	};
 
 	class CAttributeState
@@ -377,17 +378,18 @@ private:
 		CAttributeState(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nBelowAttribID);
-
-		void Save(CPreferences& prefs, LPCTSTR szKey) const;
-		void Load(const CPreferences& prefs, LPCTSTR szKey);
-
-		int GetOrder(CStringArray& aOrder) const;
-		void SetOrder(const CStringArray& aOrder);
 		BOOL ResetOrder();
 		BOOL CanResetOrder() const;
 
+		BOOL SetLabelBkgndColor(TDC_ATTRIBUTE nAttribID, COLORREF crBkgnd);
+		BOOL ClearLabelBkgndColor(TDC_ATTRIBUTE nAttribID);
+		COLORREF GetLabelBkgndColor(TDC_ATTRIBUTE nAttribID) const;
+
 		int CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const;
 		BOOL GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const;
+
+		void Save(CPreferences& prefs, LPCTSTR szKey) const;
+		void Load(const CPreferences& prefs, LPCTSTR szKey);
 
 		void OnCustomAttributesChange();
 
@@ -403,6 +405,9 @@ private:
 		void RebuildItemPositions();
 		void Populate();
 		int GetAttribPos(TDC_ATTRIBUTE nAttribID) const;
+
+		int GetOrder(CStringArray& aOrder) const;
+		void SetOrder(const CStringArray& aOrder);
 
 		static int SortByNameProc(const void* item1, const void* item2);
 		static int SortByPosProc(const void* item1, const void* item2);
