@@ -396,18 +396,18 @@ private:
 	protected:
 		const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
-		CArray<ATTRIBSTATE, ATTRIBSTATE&> m_aAttributeItems;
+		CArray<ATTRIBSTATE, ATTRIBSTATE&> m_aAttribStates;
 		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
 
-		CStringArray m_aDefaultOrder;
+		CString m_sDefaultOrder;
 
 	private:
 		void RebuildItemPositions();
 		void Populate();
 		int GetAttribPos(TDC_ATTRIBUTE nAttribID) const;
 
-		int GetOrder(CStringArray& aOrder) const;
-		void SetOrder(const CStringArray& aOrder);
+		CString GetItemsState(BOOL bIncBkgndColors = TRUE) const;
+		void SetItemsState(const CString& sState, BOOL bIncBkgndColors = TRUE);
 
 		static int SortByNameProc(const void* item1, const void* item2);
 		static int SortByPosProc(const void* item1, const void* item2);
