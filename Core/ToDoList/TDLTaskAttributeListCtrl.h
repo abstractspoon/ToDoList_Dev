@@ -396,7 +396,7 @@ private:
 	protected:
 		const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
-		CArray<ATTRIBSTATE, ATTRIBSTATE&> m_aAttribStates;
+		CArray<ATTRIBSTATE, ATTRIBSTATE&> m_aAttributeItems;
 		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
 
 		CString m_sDefaultOrder;
