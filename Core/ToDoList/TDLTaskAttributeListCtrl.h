@@ -81,6 +81,12 @@ public:
 	BOOL ResetAttributeMoves();
 	BOOL CanResetAttributeMoves() const;
 
+	COLORREF GetSelectedAttributeLabelBackgroundColor() const;
+	void ClearSelectedAttributeLabelBackgroundColor();
+	BOOL CanClearSelectedAttributeLabelBackgroundColor() const;
+	void SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd);
+	BOOL CanSetSelectedAttributeLabelBackgroundColor() const;
+
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
 	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
@@ -90,10 +96,6 @@ public:
 	CString GetSelectedAttributeLabel() const;
 	CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const;
 	BOOL CanEditSelectedAttribute() const;
-	void SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd);
-	void ClearSelectedAttributeLabelBackgroundColor();
-	COLORREF GetSelectedAttributeLabelBackgroundColor() const;
-
 	void RefreshSelectedTasksValues();
 	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);

@@ -232,8 +232,8 @@ void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
 	tb.EnableButton(ID_ATTRIBCTRL_RESETMOVES, m_lcAttributes.CanResetAttributeMoves());
-	tb.EnableButton(ID_ATTRIBCTRL_SETLABELCOLOR, (TDCA_NONE != m_lcAttributes.GetSelectedAttributeID()));
-	tb.EnableButton(ID_ATTRIBCTRL_CLEARLABELCOLOR, (CLR_NONE != m_lcAttributes.GetSelectedAttributeLabelBackgroundColor()));
+	tb.EnableButton(ID_ATTRIBCTRL_SETLABELCOLOR, m_lcAttributes.CanSetSelectedAttributeLabelBackgroundColor());
+	tb.EnableButton(ID_ATTRIBCTRL_CLEARLABELCOLOR, m_lcAttributes.CanClearSelectedAttributeLabelBackgroundColor());
 }
 
 void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)

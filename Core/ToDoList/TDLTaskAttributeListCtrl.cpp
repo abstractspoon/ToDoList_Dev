@@ -38,7 +38,7 @@ static char THIS_FILE[] = __FILE__;
 
 enum 
 {
-	ATTRIB_COL,
+	LABEL_COL,
 	VALUE_COL
 };
 
@@ -789,11 +789,11 @@ void CTDLTaskAttributeListCtrl::RecalcColumnWidths(int nAttribColWidth, int cx)
 	if (nAttribColWidth == -1)
 		nAttribColWidth = (int)(m_fAttribColProportion * cx);
 
-	if (nAttribColWidth != GetColumnWidth(ATTRIB_COL))
+	if (nAttribColWidth != GetColumnWidth(LABEL_COL))
 	{
 		CHoldRedraw hr(*this);
 
-		SetColumnWidth(ATTRIB_COL, nAttribColWidth);
+		SetColumnWidth(LABEL_COL, nAttribColWidth);
 		SetColumnWidth(VALUE_COL, (cx - nAttribColWidth - 1));
 	}
 }
@@ -858,7 +858,7 @@ void CTDLTaskAttributeListCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		CRect rClient;
 		GetClientRect(rClient);
 
-		m_fAttribColProportion = ((float)GetColumnWidth(ATTRIB_COL)) / (rClient.Width() - 1);
+		m_fAttribColProportion = ((float)GetColumnWidth(LABEL_COL)) / (rClient.Width() - 1);
 	}
 
 	CInputListCtrl::OnLButtonUp(nFlags, point);
@@ -965,7 +965,7 @@ CString CTDLTaskAttributeListCtrl::GetSelectedAttributeLabel() const
 		return _T("");
 
 	// else
-	return GetItemText(nRow, ATTRIB_COL);
+	return GetItemText(nRow, LABEL_COL);
 }
 
 CString CTDLTaskAttributeListCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const
@@ -976,7 +976,7 @@ CString CTDLTaskAttributeListCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttribID) co
 		return _T("");
 
 	// else
-	return GetItemText(nRow, ATTRIB_COL);
+	return GetItemText(nRow, LABEL_COL);
 }
 
 BOOL CTDLTaskAttributeListCtrl::CanEditSelectedAttribute() const
@@ -999,9 +999,20 @@ COLORREF CTDLTaskAttributeListCtrl::GetSelectedAttributeLabelBackgroundColor() c
 	return m_aAttribState.GetLabelBkgndColor(GetSelectedAttributeID());
 }
 
+BOOL CTDLTaskAttributeListCtrl::CanClearSelectedAttributeLabelBackgroundColor() const
+{
+	return (CanSetSelectedAttributeLabelBackgroundColor() &&
+		   (CLR_NONE != GetSelectedAttributeLabelBackgroundColor()));
+}
+
+BOOL CTDLTaskAttributeListCtrl::CanSetSelectedAttributeLabelBackgroundColor() const
+{
+	return (m_nCurCol == LABEL_COL) && (GetSelectedAttributeID() != TDCA_NONE));
+}
+
 IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 {
-	if (nCol == ATTRIB_COL)
+	if (nCol == LABEL_COL)
 		return ILCT_TEXT;
 
 	// else
@@ -1859,7 +1870,7 @@ UINT CTDLTaskAttributeListCtrl::GetTextDrawFlags(int nCol) const
 {
 	UINT nFlags = CInputListCtrl::GetTextDrawFlags(nCol);
 
-	if (nCol == ATTRIB_COL)
+	if (nCol == LABEL_COL)
 		nFlags |= DT_END_ELLIPSIS;
 
 	return nFlags;
@@ -4083,7 +4094,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	// Value tooltips
 	switch (nCol)
 	{
-	case ATTRIB_COL:
+	case LABEL_COL:
 		if (IsCustomTime(nAttribID))
 			sTooltip.LoadString(IDS_ATTRIBTIP_TIMEOFDAY);
 		break;
