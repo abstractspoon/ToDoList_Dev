@@ -136,7 +136,7 @@ int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 	if (!m_toolbar.CreateEx(this, (TBSTYLE_FLAT | TBSTYLE_WRAPABLE), WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
 		return -1;
 		
-	if (!m_toolbar.LoadToolBar(IDR_TASK_ATTRIBUTE_TOOLBAR, IDB_TASKATTRIB_TOOLBAR, colorMagenta))
+	if (!m_toolbar.LoadToolBar(IDR_ATTRIBCTRL_TOOLBAR, IDB_ATTRIBCTRL_TOOLBAR, colorMagenta))
 		return -1;
 
 	if (!m_tbHelper.Initialize(&m_toolbar))
@@ -145,6 +145,9 @@ int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 	// Create List
 	if (!m_lcAttributes.Create(this, IDC_TASKATTRIBUTES))
 		return -1;
+
+	m_mgrMenuIcons.Initialize(this);
+	m_mgrMenuIcons.AddImages(m_toolbar);
 
 	return 0;
 }

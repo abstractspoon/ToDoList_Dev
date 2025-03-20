@@ -11,6 +11,7 @@
 
 #include "..\shared\EnToolBar.h"
 #include "..\shared\ToolBarHelper.h"
+#include "..\shared\MenuIconMgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -109,6 +110,7 @@ protected:
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CTDLTaskAttributeListCtrl m_lcAttributes;
+	CMenuIconMgr m_mgrMenuIcons;
 
 protected:
 	virtual int DoModal() { return IDCANCEL; }

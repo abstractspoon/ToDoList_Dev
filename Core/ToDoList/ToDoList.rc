@@ -2264,9 +2264,9 @@ IDB_UK_FLAG             BITMAP                  "res\\uk_flag.bmp"
 
 IDB_YOURLANG_FLAG       BITMAP                  "res\\yourlang_flag.bmp"
 
-IDR_TASK_ATTRIBUTE_TOOLBAR BITMAP                  "res\\taskattrib_toolbar.bmp"
+IDR_ATTRIBCTRL_TOOLBAR  BITMAP                  "res\\taskattrib_toolbar.bmp"
 
-IDB_TASKATTRIB_TOOLBAR  BITMAP                  "res\\taskattrib_toolbar_std.bmp"
+IDB_ATTRIBCTRL_TOOLBAR  BITMAP                  "res\\taskattrib_toolbar_std.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2383,7 +2383,7 @@ BEGIN
     BUTTON      ID_COMMENTS_INSERTDATETIME
 END
 
-IDR_TASK_ATTRIBUTE_TOOLBAR TOOLBAR 16, 15
+IDR_ATTRIBCTRL_TOOLBAR TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_ATTRIBCTRL_TOGGLEGROUP
     SEPARATOR
