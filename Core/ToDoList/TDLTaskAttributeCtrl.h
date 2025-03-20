@@ -129,6 +129,18 @@ protected:
 	afx_msg void OnResetAttributeMoves();
 	afx_msg void OnSetLabelBkgndColor();
 	afx_msg void OnClearLabelBkgndColor();
+	afx_msg void OnCopyAttributeValue();
+	afx_msg void OnPasteAttributeValue();
+	afx_msg void OnClearAttributeValue();
+
+	afx_msg void OnUpdateMoveAttributeUp(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateMoveAttributeDown(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateResetAttributeMoves(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSetLabelBkgndColor(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateClearLabelBkgndColor(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCopyAttributeValue(CCmdUI* pCmdUI);
+	afx_msg void OnUpdatePasteAttributeValue(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateClearAttributeValue(CCmdUI* pCmdUI);
 
 	afx_msg LRESULT OnEditTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditTaskReminder(WPARAM wParam, LPARAM lParam);

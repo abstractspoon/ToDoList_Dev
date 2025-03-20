@@ -9,6 +9,7 @@
 #include "..\shared\Localizer.h"
 #include "..\shared\EnMenu.h"
 #include "..\shared\EnColorDialog.h"
+#include "..\shared\ToolbarHelper.h"
 
 #include "..\3rdparty\XNamedColors.h"
 
@@ -58,6 +59,18 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_COMMAND(ID_ATTRIBCTRL_RESETMOVES, OnResetAttributeMoves)
 	ON_COMMAND(ID_ATTRIBCTRL_SETLABELCOLOR, OnSetLabelBkgndColor)
 	ON_COMMAND(ID_ATTRIBCTRL_CLEARLABELCOLOR, OnClearLabelBkgndColor)
+	ON_COMMAND(ID_ATTRIBCTRL_COPYATTRIBVALUES, OnCopyAttributeValue)
+	ON_COMMAND(ID_ATTRIBCTRL_PASTEATTRIBVALUES, OnPasteAttributeValue)
+	ON_COMMAND(ID_ATTRIBCTRL_CLEARATTRIBVALUES, OnClearAttributeValue)
+
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_MOVEATTRIBUP, OnUpdateMoveAttributeUp)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_MOVEATTRIBDOWN, OnUpdateMoveAttributeDown)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_RESETMOVES, OnUpdateResetAttributeMoves)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_SETLABELCOLOR, OnUpdateSetLabelBkgndColor)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_CLEARLABELCOLOR, OnUpdateClearLabelBkgndColor)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_COPYATTRIBVALUES, OnUpdateCopyAttributeValue)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_PASTEATTRIBVALUES, OnUpdatePasteAttributeValue)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_CLEARATTRIBVALUES, OnUpdateClearAttributeValue)
 
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_TASKATTRIBUTES, OnItemChanged)
 
@@ -182,6 +195,60 @@ void CTDLTaskAttributeCtrl::OnItemChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		UpdateToolbarButtons();
 }
 
+void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
+{
+	m_lcAttributes.LoadState(prefs, szKey);
+	UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
+{
+	m_lcAttributes.SaveState(prefs, szKey);
+}
+
+void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
+{
+	CToolBarCtrl& tb = m_toolbar.GetToolBarCtrl();
+	
+	tb.PressButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.IsGrouped());
+	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
+	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
+	tb.EnableButton(ID_ATTRIBCTRL_RESETMOVES, m_lcAttributes.CanResetAttributeMoves());
+	tb.EnableButton(ID_ATTRIBCTRL_SETLABELCOLOR, m_lcAttributes.CanSetSelectedAttributeLabelBackgroundColor());
+	tb.EnableButton(ID_ATTRIBCTRL_CLEARLABELCOLOR, m_lcAttributes.CanClearSelectedAttributeLabelBackgroundColor());
+}
+
+void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+{
+	int nRow, nCol;
+
+	if (!m_lcAttributes.GetCurSel(nRow, nCol))
+		return; // eat
+
+	if ((pos.x == -1) && (pos.y == -1))
+	{
+		CRect rCell;
+
+		if (nCol == 0)
+			m_lcAttributes.GetItemRect(nRow, rCell, LVIR_LABEL);
+		else
+			m_lcAttributes.GetSubItemRect(nRow, nCol, LVIR_BOUNDS, rCell);
+
+		m_lcAttributes.ClientToScreen(rCell);
+
+		pos.x = ((rCell.left + rCell.right) / 2);
+		pos.y = ((rCell.top + rCell.bottom) / 2);
+	}
+
+	CMenu menu;
+	VERIFY(menu.LoadMenu(IDR_MISC));
+
+	CMenu* pPopup = menu.GetSubMenu((nCol == 0) ? MM_ATTRIBUTECTRLLABEL : MM_ATTRIBUTECTRLVALUE);
+	CToolbarHelper::PrepareMenuItems(pPopup, this);
+
+	VERIFY(pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, pos.x, pos.y, this));
+}
+
 void CTDLTaskAttributeCtrl::OnMoveAttributeUp()
 {
 	if (m_lcAttributes.MoveSelectedAttribute(TRUE))
@@ -213,113 +280,105 @@ void CTDLTaskAttributeCtrl::OnClearLabelBkgndColor()
 	m_lcAttributes.ClearSelectedAttributeLabelBackgroundColor();
 }
 
-void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
+void CTDLTaskAttributeCtrl::OnCopyAttributeValue()
 {
-	m_lcAttributes.LoadState(prefs, szKey);
-	UpdateToolbarButtons();
+	GetParent()->SendMessage(WM_TDCM_COPYTASKATTRIBUTE, m_lcAttributes.GetSelectedAttributeID());
 }
 
-void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
+void CTDLTaskAttributeCtrl::OnPasteAttributeValue()
 {
-	m_lcAttributes.SaveState(prefs, szKey);
+	GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, m_lcAttributes.GetSelectedAttributeID());
 }
 
-void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
+void CTDLTaskAttributeCtrl::OnClearAttributeValue()
 {
-	CToolBarCtrl& tb = m_toolbar.GetToolBarCtrl();
-	
-	tb.PressButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.IsGrouped());
-	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
-	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
-	tb.EnableButton(ID_ATTRIBCTRL_RESETMOVES, m_lcAttributes.CanResetAttributeMoves());
-	tb.EnableButton(ID_ATTRIBCTRL_SETLABELCOLOR, m_lcAttributes.CanSetSelectedAttributeLabelBackgroundColor());
-	tb.EnableButton(ID_ATTRIBCTRL_CLEARLABELCOLOR, m_lcAttributes.CanClearSelectedAttributeLabelBackgroundColor());
+	GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, m_lcAttributes.GetSelectedAttributeID());
 }
 
-void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+void CTDLTaskAttributeCtrl::OnUpdateMoveAttributeUp(CCmdUI* pCmdUI)
 {
-	int nRow, nCol;
+	pCmdUI->Enable(m_lcAttributes.CanMoveSelectedAttribute(TRUE));
+}
 
-	if (!m_lcAttributes.GetCurSel(nRow, nCol) || (nCol == 0))
-		return; // eat
+void CTDLTaskAttributeCtrl::OnUpdateMoveAttributeDown(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcAttributes.CanMoveSelectedAttribute(FALSE));
+}
 
-	// Decide whether we should show a menu at all
+void CTDLTaskAttributeCtrl::OnUpdateResetAttributeMoves(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcAttributes.CanResetAttributeMoves());
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateSetLabelBkgndColor(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcAttributes.CanSetSelectedAttributeLabelBackgroundColor());
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateClearLabelBkgndColor(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcAttributes.CanClearSelectedAttributeLabelBackgroundColor());
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateCopyAttributeValue(CCmdUI* pCmdUI)
+{
 	TDC_ATTRIBUTE nAttribID = m_lcAttributes.GetSelectedAttributeID();
 
-	if (!GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
-		return; // eat
-
-	CMenu menu;
-
-	if (menu.LoadMenu(IDR_MISC))
+	if (GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
 	{
-		CMenu* pPopup = menu.GetSubMenu(MM_ATTRIBUTECTRL);
-
-		// Prepare menu items
 		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
 		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
 
-		// Copy command
-		CEnString sMenuText;
+		CString sMenuText;
+		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
 
-		if (GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
-		{
-			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
+		pCmdUI->SetText(sMenuText);
+		pCmdUI->Enable(TRUE);
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+}
 
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_COPYATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_COPYATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
-		}
-		else
-		{
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_COPYATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
-		}
+void CTDLTaskAttributeCtrl::OnUpdatePasteAttributeValue(CCmdUI* pCmdUI)
+{
+	TDC_ATTRIBUTE nAttribID = m_lcAttributes.GetSelectedAttributeID(), nFromAttribID = TDCA_NONE;
 
-		// Paste command
-		TDC_ATTRIBUTE nFromAttribID = TDCA_NONE;
+	if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
+	{
+		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
+		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
+		CString sFromAttrib = m_lcAttributes.GetAttributeLabel(nFromAttribID);
 
-		if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
-		{
-			CString sFromAttrib = m_lcAttributes.GetAttributeLabel(nFromAttribID);
-			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
+		CString sMenuText;
+		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
 
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_PASTEATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
-		}
-		else
-		{
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_PASTEATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
-		}
+		pCmdUI->SetText(sMenuText);
+		pCmdUI->Enable(TRUE);
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+}
 
-		// Clear command
-		if (m_lcAttributes.CanEditSelectedAttribute())
-		{
-			sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
+void CTDLTaskAttributeCtrl::OnUpdateClearAttributeValue(CCmdUI* pCmdUI)
+{
+	if (m_lcAttributes.CanEditSelectedAttribute())
+	{
+		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
+		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
 
-			CEnMenu::SetMenuString(*pPopup, ID_ATTRIBCTRL_CLEARATTRIBVALUES, sMenuText, MF_BYCOMMAND);
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_ENABLED);
-		}
-		else
-		{
-			pPopup->EnableMenuItem(ID_ATTRIBCTRL_CLEARATTRIBVALUES, MF_BYCOMMAND | MF_DISABLED);
-		}
+		CString sMenuText;
+		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
 
-		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON,
-									   pos.x, pos.y, 0, GetSafeHwnd(), NULL);
-
-		switch (nCmdID)
-		{
-		case ID_ATTRIBCTRL_COPYATTRIBVALUES:
-			GetParent()->SendMessage(WM_TDCM_COPYTASKATTRIBUTE, nAttribID);
-			break;
-
-		case ID_ATTRIBCTRL_PASTEATTRIBVALUES:
-			GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, nAttribID);
-			break;
-
-		case ID_ATTRIBCTRL_CLEARATTRIBVALUES:
-			GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, nAttribID);
-			break;
-		}
+		pCmdUI->SetText(sMenuText);
+		pCmdUI->Enable(TRUE);
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
 	}
 }
 
