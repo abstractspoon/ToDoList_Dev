@@ -175,6 +175,8 @@ BOOL CToDoCtrlLayout::IsVisible(TDC_SETFOCUSTO nLocation) const
 		ASSERT(0);
 		break;
 	}
+
+	return FALSE;
 }
 
 BOOL CToDoCtrlLayout::SetMaximised(TDC_MAXSTATE nState, BOOL bShowCommentsAlways, BOOL bRecalcLayout)

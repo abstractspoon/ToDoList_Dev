@@ -549,7 +549,7 @@ struct TDCATTRIBUTE
 {
 	TDC_ATTRIBUTE nAttributeID;
 	TDC_ATTRIBUTEGROUP nGroup;
-	UINT nAttribResID;
+	UINT nLabelResID;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////

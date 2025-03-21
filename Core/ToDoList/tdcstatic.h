@@ -231,18 +231,18 @@ static const int OP_COUNT = sizeof(OPERATORS) / sizeof(TDCOPERATOR);
 
 namespace TDC
 {
-	static CString GetAttributeName(TDC_ATTRIBUTE nAttribID)
+	static CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID)
 	{
 		for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 		{
 			if (nAttribID == TASKATTRIBUTES[nAtt].nAttributeID)
-				return CEnString(TASKATTRIBUTES[nAtt].nAttribResID);
+				return CEnString(TASKATTRIBUTES[nAtt].nLabelResID);
 		}
 
 		return _T("");
 	}
 
-	static CString GetAttributeName(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+	static CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	{
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
@@ -253,7 +253,7 @@ namespace TDC
 		}
 
 		// else
-		return GetAttributeName(nAttribID);
+		return GetAttributeLabel(nAttribID);
 	}
 
 	static BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID)

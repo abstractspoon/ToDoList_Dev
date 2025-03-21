@@ -2264,9 +2264,9 @@ IDB_UK_FLAG             BITMAP                  "res\\uk_flag.bmp"
 
 IDB_YOURLANG_FLAG       BITMAP                  "res\\yourlang_flag.bmp"
 
-IDR_TASK_ATTRIBUTE_TOOLBAR BITMAP                  "res\\taskattrib_toolbar.bmp"
+IDR_ATTRIBCTRL_TOOLBAR  BITMAP                  "res\\taskattrib_toolbar.bmp"
 
-IDB_TASKATTRIB_TOOLBAR  BITMAP                  "res\\taskattrib_toolbar_std.bmp"
+IDB_ATTRIBCTRL_TOOLBAR  BITMAP                  "res\\taskattrib_toolbar_std.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2383,7 +2383,7 @@ BEGIN
     BUTTON      ID_COMMENTS_INSERTDATETIME
 END
 
-IDR_TASK_ATTRIBUTE_TOOLBAR TOOLBAR 16, 15
+IDR_ATTRIBCTRL_TOOLBAR TOOLBAR 16, 15
 BEGIN
     BUTTON      ID_ATTRIBCTRL_TOGGLEGROUP
     SEPARATOR
@@ -2392,6 +2392,9 @@ BEGIN
     BUTTON      ID_ATTRIBCTRL_MOVEATTRIBUP
     BUTTON      ID_ATTRIBCTRL_MOVEATTRIBDOWN
     BUTTON      ID_ATTRIBCTRL_RESETMOVES
+    SEPARATOR
+    BUTTON      ID_ATTRIBCTRL_SETLABELCOLOR
+    BUTTON      ID_ATTRIBCTRL_CLEARLABELCOLOR
 END
 
 
@@ -3415,11 +3418,23 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "T&oday's Date",               ID_TOOLARG_TODAYSDATE
     END
-    POPUP "AttributeCtrl"
+    POPUP "AttributeCtrlLabels"
     BEGIN
+        MENUITEM "Move Attribute Up",           ID_ATTRIBCTRL_MOVEATTRIBUP
+        MENUITEM "Move Attribute Down",         ID_ATTRIBCTRL_MOVEATTRIBDOWN
+        MENUITEM "Reset Attribute Moves",       ID_ATTRIBCTRL_RESETMOVES
+        MENUITEM SEPARATOR
+        MENUITEM "Set Label Background Colour...", ID_ATTRIBCTRL_SETLABELCOLOR
+        MENUITEM "Clear Label Background Colour", ID_ATTRIBCTRL_CLEARLABELCOLOR
+    END
+    POPUP "AttributeCtrlValues"
+    BEGIN
+        MENUITEM "Move Attribute Up",           ID_ATTRIBCTRL_MOVEATTRIBUP
+        MENUITEM "Move Attribute Down",         ID_ATTRIBCTRL_MOVEATTRIBDOWN
+        MENUITEM "Reset Attribute Moves",       ID_ATTRIBCTRL_RESETMOVES
+        MENUITEM SEPARATOR
         MENUITEM "Copy Attribute Value",        ID_ATTRIBCTRL_COPYATTRIBVALUES
         MENUITEM "Paste Attribute Value",       ID_ATTRIBCTRL_PASTEATTRIBVALUES
-        MENUITEM SEPARATOR
         MENUITEM "Clear Attribute Value",       ID_ATTRIBCTRL_CLEARATTRIBVALUES
     END
 END
@@ -5290,6 +5305,12 @@ BEGIN
     ID_ATTRIBCTRL_MOVEATTRIBUP "\nMove Attribute Up"
     ID_ATTRIBCTRL_MOVEATTRIBDOWN "\nMove Attribute Down"
     ID_ATTRIBCTRL_RESETMOVES "\nReset Attribute Order"
+    ID_ATTRIBCTRL_SETLABELCOLOR "\nSet Label Background Colour"
+END
+
+STRINGTABLE
+BEGIN
+    ID_ATTRIBCTRL_CLEARLABELCOLOR "\nClear Label Background Colour"
 END
 
 #endif    // English (Australia) resources

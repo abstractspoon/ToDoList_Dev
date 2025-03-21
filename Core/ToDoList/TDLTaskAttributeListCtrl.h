@@ -81,6 +81,12 @@ public:
 	BOOL ResetAttributeMoves();
 	BOOL CanResetAttributeMoves() const;
 
+	COLORREF GetSelectedAttributeLabelBackgroundColor() const;
+	void ClearSelectedAttributeLabelBackgroundColor();
+	BOOL CanClearSelectedAttributeLabelBackgroundColor() const;
+	void SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd);
+	BOOL CanSetSelectedAttributeLabelBackgroundColor() const;
+
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
 	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
@@ -90,7 +96,6 @@ public:
 	CString GetSelectedAttributeLabel() const;
 	CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const;
 	BOOL CanEditSelectedAttribute() const;
-
 	void RefreshSelectedTasksValues();
 	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
@@ -356,59 +361,64 @@ private:
 
 	// ---------------------------------------------------------------------
 
-	struct ATTRIBITEM
+	struct ATTRIBSTATE
 	{
-		ATTRIBITEM(UINT nAttribResID = 0, TDC_ATTRIBUTE nAttribID = TDCA_NONE, TDC_ATTRIBUTEGROUP nGroup = TDCAG_NONE);
-		ATTRIBITEM(const TDCATTRIBUTE& attrib);
-		ATTRIBITEM(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
+		ATTRIBSTATE(UINT nLabelResID = 0, TDC_ATTRIBUTE nAttribID = TDCA_NONE, TDC_ATTRIBUTEGROUP nGroup = TDCAG_NONE);
+		ATTRIBSTATE(const TDCATTRIBUTE& attrib);
+		ATTRIBSTATE(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
 		BOOL IsCustom() const;
 
-		CString sName;
+		CString sLabel;
 		TDC_ATTRIBUTE nAttribID;
 		CString sCustAttribID;
 		TDC_ATTRIBUTEGROUP nGroup;
 		int nPos;
+		COLORREF crLabelBkgnd;
 	};
 
-	class CAttributeOrder
+	class CAttributeState
 	{
 	public:
-		CAttributeOrder(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+		CAttributeState(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nBelowAttribID);
-
-		void SaveState(CPreferences& prefs, LPCTSTR szKey) const;
-		void LoadState(const CPreferences& prefs, LPCTSTR szKey);
-
-		int GetOrder(CStringArray& aOrder) const;
-		void SetOrder(const CStringArray& aOrder);
 		BOOL ResetOrder();
 		BOOL CanResetOrder() const;
 
+		BOOL SetLabelBkgndColor(TDC_ATTRIBUTE nAttribID, COLORREF crBkgnd);
+		BOOL ClearLabelBkgndColor(TDC_ATTRIBUTE nAttribID);
+		COLORREF GetLabelBkgndColor(TDC_ATTRIBUTE nAttribID) const;
+
 		int CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const;
 		BOOL GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const;
+
+		void Save(CPreferences& prefs, LPCTSTR szKey) const;
+		void Load(const CPreferences& prefs, LPCTSTR szKey);
 
 		void OnCustomAttributesChange();
 
 	protected:
 		const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
-		CArray<ATTRIBITEM, ATTRIBITEM&> m_aAttributeItems;
+		CArray<ATTRIBSTATE, ATTRIBSTATE&> m_aAttributeItems;
 		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
 
-		CStringArray m_aDefaultOrder;
+		CString m_sDefaultOrder;
 
 	private:
 		void RebuildItemPositions();
 		void Populate();
 		int GetAttribPos(TDC_ATTRIBUTE nAttribID) const;
 
+		CString GetItemsState(BOOL bIncBkgndColors = TRUE) const;
+		void SetItemsState(const CString& sState, BOOL bIncBkgndColors = TRUE);
+
 		static int SortByNameProc(const void* item1, const void* item2);
 		static int SortByPosProc(const void* item1, const void* item2);
 	};
 
-	CAttributeOrder m_aAttribOrder;
+	CAttributeState m_aAttribState;
 
 	// ---------------------------------------------------------------------
 };
