@@ -3422,7 +3422,6 @@ BEGIN
     BEGIN
         MENUITEM "Move Attribute Up",           ID_ATTRIBCTRL_MOVEATTRIBUP
         MENUITEM "Move Attribute Down",         ID_ATTRIBCTRL_MOVEATTRIBDOWN
-        MENUITEM SEPARATOR
         MENUITEM "Reset Attribute Moves",       ID_ATTRIBCTRL_RESETMOVES
         MENUITEM SEPARATOR
         MENUITEM "Set Label Background Colour...", ID_ATTRIBCTRL_SETLABELCOLOR
@@ -3432,12 +3431,10 @@ BEGIN
     BEGIN
         MENUITEM "Move Attribute Up",           ID_ATTRIBCTRL_MOVEATTRIBUP
         MENUITEM "Move Attribute Down",         ID_ATTRIBCTRL_MOVEATTRIBDOWN
-        MENUITEM SEPARATOR
         MENUITEM "Reset Attribute Moves",       ID_ATTRIBCTRL_RESETMOVES
         MENUITEM SEPARATOR
         MENUITEM "Copy Attribute Value",        ID_ATTRIBCTRL_COPYATTRIBVALUES
         MENUITEM "Paste Attribute Value",       ID_ATTRIBCTRL_PASTEATTRIBVALUES
-        MENUITEM SEPARATOR
         MENUITEM "Clear Attribute Value",       ID_ATTRIBCTRL_CLEARATTRIBVALUES
     END
 END
