@@ -224,7 +224,40 @@ namespace LoggedTimeUIExtension
 				m_Entries.Clear();
 
 				foreach (var entry in logEntries)
-					m_Entries.Add(new LogEntry(nextEntryId++, entry));
+				{
+					// If the entry bridges midnight, split it into 2
+					if (entry.To.Date > entry.From.Date)
+					{
+						var dates = new Calendar.AppointmentDates();
+
+						// Calculate part before midnight
+						var beforeEntry = new LogEntry(nextEntryId++, entry);
+
+						dates.Start = entry.From;
+						dates.End = entry.To.Date;
+
+						var daysDuration = (entry.To - entry.From).TotalDays;
+						double hoursSpentBeforeMidnight = ((entry.TimeInHours * (entry.To.Date - entry.From).TotalDays) / daysDuration);
+
+						beforeEntry.Modify(dates, hoursSpentBeforeMidnight, beforeEntry.Comment, beforeEntry.FillColor);
+						m_Entries.Add(beforeEntry);
+
+						// Calculate proportion after midnight
+						var afterEntry = new LogEntry(nextEntryId++, entry);
+
+						dates.Start = entry.To.Date;
+						dates.End = entry.To;
+
+						double hoursSpentAfterMidnight = (entry.TimeInHours - hoursSpentBeforeMidnight);
+
+						afterEntry.Modify(dates, hoursSpentAfterMidnight, afterEntry.Comment, afterEntry.FillColor);
+						m_Entries.Add(afterEntry);
+					}
+					else
+					{
+						m_Entries.Add(new LogEntry(nextEntryId++, entry));
+					}
+				}
 
 				TaskId = taskId;
 				FilePath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
