@@ -377,10 +377,10 @@ private:
 		COLORREF crLabelBkgnd;
 	};
 
-	class CAttributeState
+	class CAttributeStates
 	{
 	public:
-		CAttributeState(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+		CAttributeStates(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 
 		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nBelowAttribID);
 		BOOL ResetOrder();
@@ -418,7 +418,7 @@ private:
 		static int SortByPosProc(const void* item1, const void* item2);
 	};
 
-	CAttributeState m_aAttribState;
+	CAttributeStates m_aAttribState;
 
 	// ---------------------------------------------------------------------
 };

@@ -4497,14 +4497,14 @@ BOOL CTDLTaskAttributeListCtrl::ATTRIBSTATE::IsCustom() const
 
 // -----------------------------------------------------------------
 
-CTDLTaskAttributeListCtrl::CAttributeState::CAttributeState(const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+CTDLTaskAttributeListCtrl::CAttributeStates::CAttributeStates(const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 	:
 	m_aCustomAttribDefs(aCustAttribDefs)
 {
 	Populate();
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeState::Populate()
+void CTDLTaskAttributeListCtrl::CAttributeStates::Populate()
 {
 	// Built-in attributes (excluding TDCA_NONE)
 	for (int nAtt = 1; nAtt < ATTRIB_COUNT; nAtt++)
@@ -4528,7 +4528,7 @@ void CTDLTaskAttributeListCtrl::CAttributeState::Populate()
 	RebuildItemPositions();
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeState::MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow)
+BOOL CTDLTaskAttributeListCtrl::CAttributeStates::MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nAttribIDBelow)
 {
 	ASSERT(nAttribID != TDCA_NONE);
 
@@ -4556,7 +4556,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeState::MoveAttribute(TDC_ATTRIBUTE nAt
 	return TRUE;
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeState::GetAttribPos(TDC_ATTRIBUTE nAttribID) const
+int CTDLTaskAttributeListCtrl::CAttributeStates::GetAttribPos(TDC_ATTRIBUTE nAttribID) const
 {
 	int nPos = -1;
 	
@@ -4569,7 +4569,7 @@ int CTDLTaskAttributeListCtrl::CAttributeState::GetAttribPos(TDC_ATTRIBUTE nAttr
 	return nPos;
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeState::GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const
+BOOL CTDLTaskAttributeListCtrl::CAttributeStates::GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const
 {
 	if (nAttribID == TDCA_NONE)
 		return FALSE;
@@ -4632,7 +4632,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeState::GetNextAttribute(TDC_ATTRIBUTE 
 	 return (nNextAttribID != nAttribID);
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeState::CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const
+int CTDLTaskAttributeListCtrl::CAttributeStates::CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const
 {
 	ASSERT((nAttribID1 != TDCA_NONE) && (nAttribID2 != TDCA_NONE));
 
@@ -4648,7 +4648,7 @@ int CTDLTaskAttributeListCtrl::CAttributeState::CompareItems(TDC_ATTRIBUTE nAttr
 	return nCompare;
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeState::SortByNameProc(const void* item1, const void* item2)
+int CTDLTaskAttributeListCtrl::CAttributeStates::SortByNameProc(const void* item1, const void* item2)
 {
 	const ATTRIBSTATE* pItem1 = (const ATTRIBSTATE*)item1;
 	const ATTRIBSTATE* pItem2 = (const ATTRIBSTATE*)item2;
@@ -4662,7 +4662,7 @@ int CTDLTaskAttributeListCtrl::CAttributeState::SortByNameProc(const void* item1
 	return nCompare;
 }
 
-int CTDLTaskAttributeListCtrl::CAttributeState::SortByPosProc(const void* item1, const void* item2)
+int CTDLTaskAttributeListCtrl::CAttributeStates::SortByPosProc(const void* item1, const void* item2)
 {
 	const ATTRIBSTATE* pItem1 = (const ATTRIBSTATE*)item1;
 	const ATTRIBSTATE* pItem2 = (const ATTRIBSTATE*)item2;
@@ -4676,7 +4676,7 @@ int CTDLTaskAttributeListCtrl::CAttributeState::SortByPosProc(const void* item1,
 	return nCompare;
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeState::RebuildItemPositions()
+void CTDLTaskAttributeListCtrl::CAttributeStates::RebuildItemPositions()
 {
 	m_mapPositions.RemoveAll();
 
@@ -4691,7 +4691,7 @@ void CTDLTaskAttributeListCtrl::CAttributeState::RebuildItemPositions()
 	}
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeState::OnCustomAttributesChange()
+void CTDLTaskAttributeListCtrl::CAttributeStates::OnCustomAttributesChange()
 {
 	CString sState = GetItemsState();
 	ASSERT(!sState.IsEmpty());
@@ -4702,7 +4702,7 @@ void CTDLTaskAttributeListCtrl::CAttributeState::OnCustomAttributesChange()
 	SetItemsState(sState);
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeState::Save(CPreferences& prefs, LPCTSTR szKey) const
+void CTDLTaskAttributeListCtrl::CAttributeStates::Save(CPreferences& prefs, LPCTSTR szKey) const
 {
 	prefs.WriteProfileString(szKey, _T("AttribState"), GetItemsState());
 
@@ -4711,7 +4711,7 @@ void CTDLTaskAttributeListCtrl::CAttributeState::Save(CPreferences& prefs, LPCTS
 	///////////////////////////////////////////////////////////////
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeState::Load(const CPreferences& prefs, LPCTSTR szKey)
+void CTDLTaskAttributeListCtrl::CAttributeStates::Load(const CPreferences& prefs, LPCTSTR szKey)
 {
 	CString sState = prefs.GetProfileString(szKey, _T("AttribState"));
 
@@ -4723,7 +4723,7 @@ void CTDLTaskAttributeListCtrl::CAttributeState::Load(const CPreferences& prefs,
 	SetItemsState(sState);
 }
 
-CString CTDLTaskAttributeListCtrl::CAttributeState::GetItemsState(BOOL bIncBkgndColors) const
+CString CTDLTaskAttributeListCtrl::CAttributeStates::GetItemsState(BOOL bIncBkgndColors) const
 {
 	CStringArray aStates;
 	aStates.SetSize(m_aAttributeItems.GetSize());
@@ -4749,7 +4749,7 @@ CString CTDLTaskAttributeListCtrl::CAttributeState::GetItemsState(BOOL bIncBkgnd
 	return Misc::FormatArray(aStates, ITEM_DELIM);
 }
 
-void CTDLTaskAttributeListCtrl::CAttributeState::SetItemsState(const CString& sState, BOOL bIncBkgndColors)
+void CTDLTaskAttributeListCtrl::CAttributeStates::SetItemsState(const CString& sState, BOOL bIncBkgndColors)
 {
 	CStringArray aStates;
 	int nNumItems = Misc::Split(sState, aStates, ITEM_DELIM);
@@ -4786,7 +4786,7 @@ void CTDLTaskAttributeListCtrl::CAttributeState::SetItemsState(const CString& sS
 	RebuildItemPositions();
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeState::ResetOrder()
+BOOL CTDLTaskAttributeListCtrl::CAttributeStates::ResetOrder()
 {
 	if (!CanResetOrder())
 		return FALSE;
@@ -4797,12 +4797,12 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeState::ResetOrder()
 	return TRUE;
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeState::CanResetOrder() const
+BOOL CTDLTaskAttributeListCtrl::CAttributeStates::CanResetOrder() const
 {
 	return (GetItemsState(FALSE) == m_sDefaultOrder);
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeState::SetLabelBkgndColor(TDC_ATTRIBUTE nAttribID, COLORREF crBkgnd)
+BOOL CTDLTaskAttributeListCtrl::CAttributeStates::SetLabelBkgndColor(TDC_ATTRIBUTE nAttribID, COLORREF crBkgnd)
 {
 	int nPos = GetAttribPos(nAttribID);
 
@@ -4819,12 +4819,12 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeState::SetLabelBkgndColor(TDC_ATTRIBUT
 	return TRUE;
 }
 
-BOOL CTDLTaskAttributeListCtrl::CAttributeState::ClearLabelBkgndColor(TDC_ATTRIBUTE nAttribID)
+BOOL CTDLTaskAttributeListCtrl::CAttributeStates::ClearLabelBkgndColor(TDC_ATTRIBUTE nAttribID)
 {
 	return SetLabelBkgndColor(nAttribID, CLR_NONE);
 }
 
-COLORREF CTDLTaskAttributeListCtrl::CAttributeState::GetLabelBkgndColor(TDC_ATTRIBUTE nAttribID) const
+COLORREF CTDLTaskAttributeListCtrl::CAttributeStates::GetLabelBkgndColor(TDC_ATTRIBUTE nAttribID) const
 {
 	int nPos = GetAttribPos(nAttribID);
 
