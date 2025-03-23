@@ -4560,10 +4560,27 @@ int CTDLTaskAttributeListCtrl::CAttributeStates::GetAttribPos(TDC_ATTRIBUTE nAtt
 {
 	int nPos = -1;
 	
-	if (!m_mapPositions.Lookup(nAttribID, nPos) && (nAttribID != TDCA_NONE))
+	if ((nAttribID == TDCA_NONE) || m_mapPositions.Lookup(nAttribID, nPos))
+		return nPos;
+
+	// Time of day uses their corresponding dates
+	switch (nAttribID)
 	{
-		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
-		nPos = (m_aAttributeItems.GetSize() - 1);
+	case TDCA_STARTTIME:	return GetAttribPos(TDCA_STARTDATE); // RECURSIVE CALL
+	case TDCA_DUETIME:		return GetAttribPos(TDCA_DUEDATE);   // RECURSIVE CALL
+	case TDCA_DONETIME:		return GetAttribPos(TDCA_DONEDATE);  // RECURSIVE CALL
+
+	default:
+		if (CTDLTaskAttributeListCtrl::IsCustomTime(nAttribID))
+		{
+			TDC_ATTRIBUTE nDateAttribID = (TDC_ATTRIBUTE)(nAttribID - CUSTOMTIMEATTRIBOFFSET);
+			return GetAttribPos(nDateAttribID); // RECURSIVE CALL
+		}
+		else // unknown custom attribute
+		{
+			ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
+			nPos = (m_aAttributeItems.GetSize() - 1);
+		}
 	}
 
 	return nPos;
