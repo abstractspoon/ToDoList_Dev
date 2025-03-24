@@ -70,6 +70,7 @@ IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTS
 	}
 
 	CXmlFile fileDest(_T("map"));
+	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
 	fileDest.SetItemValue(_T("version"), _T("0.9.0"));
 
 	CXmlItem *firstItem = fileDest.AddItem(_T("node"), _T(""));
@@ -98,6 +99,7 @@ IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTS
 IIMPORTEXPORT_RESULT CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	CXmlFile fileDest(_T("map"));
+	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
 	fileDest.SetItemValue(_T("version"), _T("0.9.0"));
 
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
