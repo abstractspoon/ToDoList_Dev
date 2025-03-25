@@ -40,6 +40,8 @@ void CMLOExporter::SetLocalizer(ITransText* /*pTT*/)
 
 IIMPORTEXPORT_RESULT CMLOExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CITaskListArray aTasklists;
 	aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE));
 
@@ -48,6 +50,8 @@ IIMPORTEXPORT_RESULT CMLOExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR
 
 IIMPORTEXPORT_RESULT CMLOExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CITaskListArray aTasklists;
 
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)

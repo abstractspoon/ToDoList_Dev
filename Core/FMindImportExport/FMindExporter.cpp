@@ -61,6 +61,8 @@ void CFMindExporter::SetLocalizer(ITransText* /*pTT*/)
 
 IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CITaskListArray aTasklists;
 	aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE));
 
@@ -69,6 +71,8 @@ IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTS
 
 IIMPORTEXPORT_RESULT CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CITaskListArray aTasklists;
 
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)

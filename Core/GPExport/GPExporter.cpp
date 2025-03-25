@@ -65,59 +65,28 @@ IIMPORTEXPORT_RESULT CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
+	CITaskListArray aTasklists;
+	aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE));
 
-	if (pTasks == NULL)
-	{
-		ASSERT(0);
-		return IIER_BADINTERFACE;
-	}
-
-	if (!InitConsts(pTasks, dwFlags, pPrefs, szKey))
-		return IIER_CANCELLED;
-
-	CXmlFile fileDest(_T("project"));
-	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
-
-	// export resource allocations
-	ExportResources(pTasks, fileDest.Root());
-
-	// clear the task map that will be populated in ExportTask
-	m_mapTasks.RemoveAll();
-
-	// export tasks
-	CXmlItem* pXITasks = fileDest.AddItem(_T("tasks"));
-	CXmlItem* pXIAllocations = fileDest.AddItem(_T("allocations"));
-
-	if (!ExportTask(pTasks, pSrcTaskFile->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
-		return IIER_SOMEFAILED;
-
-	ExportDependencies(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE);
-
-	// important display stuff for GP
-	SetupDisplay(fileDest.Root());
-	SetupCalendar(fileDest.Root());
-
-	// save result
-	if (!fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM))
-		return IIER_BADFILE;
-
-	return IIER_SUCCESS;
+	return ExportTasklists(aTasklists, szDestFilePath, dwFlags, pPrefs, szKey);
 }
 
 IIMPORTEXPORT_RESULT CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLISTBASE);
+	CITaskListArray aTasklists;
 
-	if (pTasks == NULL)
-	{
-		ASSERT(0);
-		return IIER_BADINTERFACE;
-	}
+	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
+		aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE));
 
-	if (!InitConsts(pTasks, dwFlags, pPrefs, szKey))
+	return ExportTasklists(aTasklists, szDestFilePath, dwFlags, pPrefs, szKey);
+}
+
+IIMPORTEXPORT_RESULT CGPExporter::ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath, 
+												  DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
+{
+	if (!InitConsts(aTasklists[0], dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	CXmlFile fileDest(_T("project"));
@@ -127,24 +96,27 @@ IIMPORTEXPORT_RESULT CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPC
 	CXmlItem* pXITasks = fileDest.AddItem(_T("tasks"));
 	CXmlItem* pXIAllocations = fileDest.AddItem(_T("allocations"));
 	
-	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
+	for (int nTaskList = 0; nTaskList < aTasklists.GetSize(); nTaskList++)
 	{
-		pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
+		const ITASKLISTBASE* pTasks = aTasklists[nTaskList];
 
-		if (pTasks)
+		if (pTasks == NULL)
 		{
-			// export resource allocations
-			ExportResources(pTasks, fileDest.Root());
-			
-			// clear the task map that will be populated in ExportTask
-			m_mapTasks.RemoveAll();
-
-			// export tasks
-			if (!ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
-				return IIER_SOMEFAILED;
-
-			ExportDependencies(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE);
+			ASSERT(0);
+			return IIER_BADINTERFACE;
 		}
+
+		// export resource allocations
+		ExportResources(pTasks, fileDest.Root());
+
+		// clear the task map that will be populated in ExportTask
+		m_mapTasks.RemoveAll();
+
+		// export tasks
+		if (!ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
+			return IIER_SOMEFAILED;
+
+		ExportDependencies(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE);
 	}
 
 	// important display stuff for GP

@@ -48,6 +48,10 @@ protected:
 	CString MILESTONETAG;
 
 protected:
+	typedef CArray<const ITASKLISTBASE*, const ITASKLISTBASE*> CITaskListArray;
+	IIMPORTEXPORT_RESULT ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath, 
+										 DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
+
 	bool ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, CXmlItem* pXIAllocations, BOOL bAndSiblings);
 	void BuildResourceMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings);
 	void ExportResources(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj);
