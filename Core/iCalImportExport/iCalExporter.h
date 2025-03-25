@@ -50,10 +50,13 @@ protected:
 	ICALEXPORTAS EXPORTFORMAT;
 
 protected:
-	int ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sParentUID, 
-					CStdioFile& fileOut, BOOL bAndSiblings);
-	bool InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
+	typedef CArray<const ITASKLISTBASE*, const ITASKLISTBASE*> CITaskListArray;
+	IIMPORTEXPORT_RESULT ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath,
+										 DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 
+	int ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sParentUID,
+				   CStdioFile& fileOut, BOOL bAndSiblings);
+	bool InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 	BOOL GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, COleDateTime& dtStart, COleDateTime& dtEnd, COleDateTime& dtDue) const;
 
 	static void __cdecl WriteString(CStdioFile& fileOut, LPCTSTR lpszFormat, ...);
