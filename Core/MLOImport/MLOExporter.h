@@ -45,10 +45,13 @@ protected:
 	CIcon m_icon;
 
 protected:
-	bool ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, BOOL bAndSiblings);
+	typedef CArray<const ITASKLISTBASE*, const ITASKLISTBASE*> CITaskListArray;
+	IIMPORTEXPORT_RESULT ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath) const;
 
-	void BuildPlacesMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CMapStringToString& mapPlaces, BOOL bAndSiblings);
-	void ExportPlaces(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj);
+	bool ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, BOOL bAndSiblings) const;
+
+	void BuildPlacesMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CMapStringToString& mapPlaces, BOOL bAndSiblings) const;
+	void ExportPlaces(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj) const;
 
 	CString FormatFileLinks(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask) const;
 	CString FormatDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestItem) const;
