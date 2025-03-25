@@ -43,11 +43,14 @@ protected:
 	CIcon m_icon;
 	
 protected:
-	void ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
-					CXmlItem* pXIDestParent, int LEVEL, BOOL bAndSiblings);
+	typedef CArray<const ITASKLISTBASE*, const ITASKLISTBASE*> CITaskListArray;
+	IIMPORTEXPORT_RESULT ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath) const;
 
-	static CString Translate(LPCTSTR szText);
-	static CString Export(const CXmlFile& file);
+	void ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
+					CXmlItem* pXIDestParent, int LEVEL, BOOL bAndSiblings) const;
+
+	static CString Encode(LPCTSTR szText);
+	static CString ExportContent(const CXmlFile& file);
 
 };
 

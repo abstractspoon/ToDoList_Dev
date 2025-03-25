@@ -61,72 +61,56 @@ void CFMindExporter::SetLocalizer(ITransText* /*pTT*/)
 
 IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
-	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
+	CITaskListArray aTasklists;
+	aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE));
 
-	if (pTasks == NULL)
-	{
-		ASSERT(0);
-		return IIER_BADINTERFACE;
-	}
-
-	CXmlFile fileDest(_T("map"));
-	fileDest.SetItemValue(_T("version"), _T("0.9.0"));
-
-	CXmlItem *firstItem = fileDest.AddItem(_T("node"), _T(""));
-	firstItem->AddItem(_T("TEXT"), pSrcTaskFile->GetProjectName());	
-
-	CXmlItem * hookItem = firstItem->AddItem(_T("hook"), _T(""));
-	hookItem->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
-
-	// Attrib Manager settings
-	// This will make the attribs not to be shown as a list view at every node;	
-	CXmlItem *attribManItem = firstItem->AddItem(_T("attribute_registry"),_T(""));	
-	attribManItem->AddItem(_T("SHOW_ATTRIBUTES"), _T("hide"));
-
-	// export first task
-	ExportTask(pTasks, pTasks->GetFirstTask(), firstItem , 0, TRUE);
-
-	// save output manually to restore non-escaping of & and <>
-	CString sOutput = Export(fileDest);
-
-	if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM))
-		return IIER_BADFILE;
-
-	return IIER_SUCCESS;
+	return ExportTasklists(aTasklists, szDestFilePath);
 }
 
 IIMPORTEXPORT_RESULT CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
-	CXmlFile fileDest(_T("map"));
-	fileDest.SetItemValue(_T("version"), _T("0.9.0"));
+	CITaskListArray aTasklists;
 
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
+		aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE));
+
+	return ExportTasklists(aTasklists, szDestFilePath);
+}
+
+IIMPORTEXPORT_RESULT CFMindExporter::ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath) const
+{
+	CXmlFile fileDest(_T("map"));
+
+	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
+	fileDest.SetItemValue(_T("version"), _T("0.9.0"));
+
+	for (int nTasklist = 0; nTasklist < aTasklists.GetSize(); nTasklist++)
 	{
-		const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
-		
+		const ITASKLISTBASE* pTasks = aTasklists[nTasklist];
+
 		if (pTasks == NULL)
 		{
 			ASSERT(0);
 			return IIER_BADINTERFACE;
 		}
 
-		CXmlItem *firstItem = fileDest.AddItem(_T("node"), _T(""));
-		firstItem->AddItem(_T("TEXT"), pTasks->GetProjectName());	
+		CXmlItem *pXINode = fileDest.AddItem(_T("node"), _T(""));
+		pXINode->AddItem(_T("TEXT"), pTasks->GetProjectName());	
 
-		CXmlItem * hookItem = firstItem->AddItem(_T("hook"), _T(""));
-		hookItem->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
+		CXmlItem * pXIHook = pXINode->AddItem(_T("hook"), _T(""));
+		pXIHook->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
 
-		//Attrib Manager settings
-		//This will make the attribs not to be shown as a list view at every node;	
-		CXmlItem *attribManItem = firstItem->AddItem(_T("attribute_registry"),_T(""));	
-		attribManItem->AddItem(_T("SHOW_ATTRIBUTES"), _T("hide"));
+		// Attrib Manager settings
+		// This will make the attribs not to be shown as a list view at every node;	
+		CXmlItem *pXIAttribMgr = pXINode->AddItem(_T("attribute_registry"),_T(""));	
+		pXIAttribMgr->AddItem(_T("SHOW_ATTRIBUTES"), _T("hide"));
 
 		// export first task
-		ExportTask(pTasks, pTasks->GetFirstTask(), firstItem, 0, TRUE);
+		ExportTask(pTasks, pTasks->GetFirstTask(), pXINode, 0, TRUE);
 	}
 
 	// save output manually to restore non-escaping of & and <>
-	CString sOutput = Export(fileDest);
+	CString sOutput = ExportContent(fileDest);
 
 	if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM))
 		return IIER_BADFILE;
@@ -134,7 +118,7 @@ IIMPORTEXPORT_RESULT CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, 
 	return IIER_SUCCESS;
 }
 
-CString CFMindExporter::Export(const CXmlFile& file)
+CString CFMindExporter::ExportContent(const CXmlFile& file)
 {
 	CString sOutput;
 	file.Export(sOutput);
@@ -152,7 +136,7 @@ CString CFMindExporter::Export(const CXmlFile& file)
 	return sOutput;
 }
 
-CString CFMindExporter::Translate(LPCTSTR szText)
+CString CFMindExporter::Encode(LPCTSTR szText)
 {
 	CString sTranslated;
 	int nLen = lstrlen(szText);
@@ -178,7 +162,7 @@ CString CFMindExporter::Translate(LPCTSTR szText)
 }
 
 void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
-								CXmlItem* pXIDestParent, int LEVEL, BOOL bAndSiblings)
+								CXmlItem* pXIDestParent, int LEVEL, BOOL bAndSiblings) const
 {
 	if (!hTask)
 		return;
@@ -187,7 +171,7 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 	CXmlItem* pXIDestItem = pXIDestParent->AddItem(_T("node"));
 
 	// copy across the appropriate attributes
-	pXIDestItem->AddItem(_T("TEXT"), Translate(pSrcTaskFile->GetTaskTitle(hTask)));
+	pXIDestItem->AddItem(_T("TEXT"), Encode(pSrcTaskFile->GetTaskTitle(hTask)));
 
 	time_t tLastMod = pSrcTaskFile->GetTaskLastModified(hTask);
 	pXIDestItem->AddItem(_T("MODIFIED"), Misc::Format((DWORD)tLastMod, _T("000")));
@@ -251,7 +235,7 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 
 		for (int nPara = 0; nPara < nNumPara; nPara++)
 		{
-			CString sPara = Translate(aParas[nPara]);
+			CString sPara = Encode(aParas[nPara]);
 			/*CXmlItem* pXIPara =*/ pXIBody->AddItem(_T("p"), sPara, XIT_ELEMENT);
 		}
 	}
