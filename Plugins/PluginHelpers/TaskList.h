@@ -347,6 +347,19 @@ namespace Abstractspoon
 				CustomAttributeDefinition::Attribute GetCustomAttributeType(int nIndex);
 				CustomAttributeDefinition::List GetCustomAttributeListType(int nIndex);
 			};
+
+			////////////////////////////////////////////////////////////////////////////////////////////////
+
+			public ref class MultiTaskList
+			{
+			public:
+				MultiTaskList(const IMultiTaskList* pMultiTaskList);  // GET ONLY
+
+				List<TaskList^>^ GetTaskLists();
+
+			private:
+				const IMultiTaskList* m_pMultiTaskList;
+			};
 		}
 	}
 }

@@ -17,6 +17,7 @@ namespace MarkdeepExporter
 
 		private List<Tuple<String, Task.Attribute>> m_Attributes;
 		private bool m_WantComments, m_WantPosition;
+		private string m_FontName;
 
 		// --------------------------------------------------------------------------------------
 
@@ -30,31 +31,61 @@ namespace MarkdeepExporter
 
 		public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
-			InitialiseAttributeList(srcTasks);
+			var tasklists = new List<TaskList>() { srcTasks };
+			
+			return ExportTasklists(tasklists, sDestFilePath, bSilent, prefs, sKey);
+        }
 
-            BulletedMarkdownContainer mdTasks = new BulletedMarkdownContainer();
-            Task task = srcTasks.GetFirstTask();
+		public bool Export(MultiTaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
+        {
+			var tasklists = srcTasks.GetTaskLists();
 
-            while (task.IsValid())
-            {
-                ExportTask(task, mdTasks, true);
+			return ExportTasklists(tasklists, sDestFilePath, bSilent, prefs, sKey);
+		}
 
-                task = task.GetNextTask();
-            }
+		private bool ExportTasklists(IList<TaskList> srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
+        {
+			m_FontName = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
 
-            StringBuilder mdFile = new StringBuilder();
+			InitialiseAttributeList(srcTasks[0]);
 
-            mdFile.AppendLine("<meta charset=\"utf-8\">");
-            mdFile.AppendLine(mdTasks.ToMarkdown());
+			bool multiTasklist = (srcTasks.Count > 1);
+			var mdFile = new MarkdownContainer();
 
-            mdFile.AppendLine("<!-- Markdeep: -->");
-            mdFile.AppendLine("<style class=\"fallback\">body{visibility:hidden;white-space:pre;font-family:monospace}</style>");
-            mdFile.AppendLine("<script src=\"markdeep.min.js\" charset=\"utf-8\"></script>");
-            mdFile.AppendLine("<script src=\"https://casual-effects.com/markdeep/latest/markdeep.min.js\" charset=\"utf-8\"></script>");
-            mdFile.AppendLine("<script>window.alreadyProcessedMarkdeep||(document.body.style.visibility=\"visible\")</script>");
+			foreach (var tasklist in srcTasks)
+			{
+				var mdTasks = new BulletedMarkdownContainer();
 
-            Debug.Write(mdFile.ToString());
-            System.IO.File.WriteAllText(sDestFilePath, mdFile.ToString(), Encoding.UTF8);
+				if (srcTasks.Count > 1)
+					mdFile.Append(new RawMarkdown("<h3>" + tasklist.GetFilePath() + "</h3>\n"));
+
+				Task task = tasklist.GetFirstTask();
+
+				while (task.IsValid())
+				{
+					ExportTask(task, mdTasks, true);
+					task = task.GetNextTask();
+				}
+
+				mdFile.Append(mdTasks);
+
+				if (srcTasks.Count > 1)
+					mdFile.Append(new RawMarkdown("---"));
+			}
+
+			StringBuilder fileContents = new StringBuilder();
+
+            fileContents.AppendLine("<meta charset=\"utf-8\">");
+            fileContents.AppendLine(mdFile.ToMarkdown());
+
+            fileContents.AppendLine("<!-- Markdeep: -->");
+            fileContents.AppendLine(string.Format("<style class=\"fallback\">body{{visibility:hidden;white-space:pre;font-family:{0}}}</style>", m_FontName));
+            fileContents.AppendLine("<script src=\"markdeep.min.js\" charset=\"utf-8\"></script>");
+            fileContents.AppendLine("<script src=\"https://casual-effects.com/markdeep/latest/markdeep.min.js\" charset=\"utf-8\"></script>");
+            fileContents.AppendLine("<script>window.alreadyProcessedMarkdeep||(document.body.style.visibility=\"visible\")</script>");
+
+            Debug.Write(fileContents.ToString());
+            System.IO.File.WriteAllText(sDestFilePath, fileContents.ToString(), Encoding.UTF8);
 
             return true;
         }
@@ -92,7 +123,12 @@ namespace MarkdeepExporter
 			taskAttrib.Append("**");
 
 			if (m_WantPosition)
-				taskAttrib.Append(task.GetPositionString()).Append(" ");
+			{
+				var pos = task.GetPositionString();
+
+				if (!string.IsNullOrWhiteSpace(pos))
+					taskAttrib.Append(pos).Append(" ");
+			}
 
 			taskAttrib.Append(task.GetTitle())
 					  .Append("**")
@@ -115,9 +151,19 @@ namespace MarkdeepExporter
 
 			// Comments
 			if (m_WantComments)
-				taskAttrib.Append("<blockquote>").Append(task.GetComments()).Append("</blockquote>");
+			{
+				var comments = task.GetComments().Trim().Replace("\n", "<br>");
 
-            return taskAttrib.AppendLine().ToString();
+				if (!string.IsNullOrWhiteSpace(comments))
+				{
+					// Italicise
+					taskAttrib.Append("  <br><i>")
+							  .Append(comments)
+							  .AppendLine("</i>  ");
+				}
+			}
+
+			return taskAttrib.ToString();
         }
 
 		private void InitialiseAttributeList(TaskList tasks)

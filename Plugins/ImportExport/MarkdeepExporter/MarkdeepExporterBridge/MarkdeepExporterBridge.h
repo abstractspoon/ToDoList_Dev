@@ -13,19 +13,19 @@ class CMarkdeepExporterBridge : public IExportTasklist
 public:
 	CMarkdeepExporterBridge();
 
-   void Release(); // releases the interface
+	void Release(); // releases the interface
 
-   void SetLocalizer(ITransText* pTT);
-   HICON GetIcon() const;
-   bool SupportsHtmlComments() const { return false; }
+	void SetLocalizer(ITransText* pTT);
+	HICON GetIcon() const;
+	bool SupportsHtmlComments() const { return false; }
 
-   LPCWSTR GetMenuText() const;
-   LPCWSTR GetFileFilter() const;
-   LPCWSTR GetFileExtension() const;
-   LPCWSTR GetTypeID() const;
+	LPCWSTR GetMenuText() const;
+	LPCWSTR GetFileFilter() const;
+	LPCWSTR GetFileExtension() const;
+	LPCWSTR GetTypeID() const;
 
-   IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey);
-   IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey);
 
 protected:
 	ITransText* m_pTT;
