@@ -220,16 +220,62 @@ namespace PDFExporter
 			m_AvailAttributes.Sort((a, b) => String.Compare(a.Name, b.Name));
 		}
 
-		public bool Export(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
+		public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
 		{
-			if (!InitConsts(tasks, destFilePath, silent, prefs, sKey))
+			var tasklists = new List<TaskList>() { srcTasks };
+
+			return ExportTasklists(tasklists, sDestFilePath, bSilent, prefs, sKey);
+		}
+
+		public bool Export(MultiTaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
+		{
+			var tasklists = srcTasks.GetTaskLists();
+
+			return ExportTasklists(tasklists, sDestFilePath, bSilent, prefs, sKey);
+		}
+
+		private bool ExportTasklists(IList<TaskList> srcTasks, string destFilePath, bool silent, Preferences prefs, string sKey)
+		{
+			if (!InitConsts(srcTasks[0], destFilePath, silent, prefs, sKey))
 				return false;
 
 			try
 			{
-				var pdfContent = CreatePDFDocument(tasks);
-			
-				File.WriteAllBytes(destFilePath, pdfContent);
+				MemoryStream workStream = new MemoryStream();
+				Document pdfDoc = new Document(PageSize.A4);
+				PdfWriter pdfWriter = PdfWriter.GetInstance(pdfDoc, workStream);
+				pdfWriter.CloseStream = false;
+				pdfWriter.PageEvent = new PDFBackgroundImage(m_WatermarkImagePath);
+
+				pdfDoc.Open();
+
+				if (srcTasks.Count == 1)
+				{
+					// Add top-level tasks
+					Task task = srcTasks[0].GetFirstTask();
+
+					while (task.IsValid())
+					{
+						pdfDoc.Add(CreateSection(task, null));
+						task = task.GetNextTask();
+					}
+				}
+				else
+				{
+					foreach (var tasklist in srcTasks)
+					{
+						pdfDoc.Add(CreateSection(tasklist));
+					}
+				}
+
+
+				pdfDoc.Close();
+
+				byte[] byteInfo = workStream.ToArray();
+				workStream.Write(byteInfo, 0, byteInfo.Length);
+				workStream.Position = 0;
+
+				File.WriteAllBytes(destFilePath, byteInfo);
 			}
 			catch (Exception /*e*/)
 			{
@@ -239,32 +285,29 @@ namespace PDFExporter
 			return true;
 		}
 
-		private byte[] CreatePDFDocument(TaskList tasks)
+		private Section CreateSection(TaskList tasklist)
 		{
-			MemoryStream workStream = new MemoryStream();
-			Document pdfDoc = new Document(PageSize.A4);
-			PdfWriter pdfWriter = PdfWriter.GetInstance(pdfDoc, workStream);
-			pdfWriter.CloseStream = false;
-			pdfWriter.PageEvent = new PDFBackgroundImage(m_WatermarkImagePath);
+			Section section = new Chapter(CreateTitleElement(tasklist), 0);
 
-			pdfDoc.Open();
+			string title = tasklist.GetProjectName();
 
-            // Add top-level tasks
-            Task task = tasks.GetFirstTask();
+			if (string.IsNullOrWhiteSpace(title))
+				title = Path.GetFileNameWithoutExtension(tasklist.GetFilePath());
+
+			section.NumberDepth = 0;
+			section.BookmarkTitle = title;
+			section.BookmarkOpen = true;
+
+			// Add tasks as nested Sections on new pages
+			var task = tasklist.GetFirstTask();
 
 			while (task.IsValid())
-            {
-				pdfDoc.Add(CreateSection(task, null));
+			{
+				CreateSection(task, section);
 				task = task.GetNextTask();
-            }
+			}
 
-			pdfDoc.Close();
-
-			byte[] byteInfo = workStream.ToArray();
-			workStream.Write(byteInfo, 0, byteInfo.Length);
-			workStream.Position = 0;
-
-			return byteInfo;
+			return section;
 		}
 
 		private Section CreateSection(Task task, Section parent)
@@ -332,7 +375,7 @@ namespace PDFExporter
 
 			while (subtask.IsValid())
 			{
-				CreateSection(subtask, section);
+				CreateSection(subtask, section); // RECURSIVE CALL
 				subtask = subtask.GetNextTask();
 			}
 
@@ -346,6 +389,15 @@ namespace PDFExporter
 
 			// else
             return task.GetTitle();
+		}
+
+		private Paragraph CreateTitleElement(TaskList tasklist)
+		{
+			var font = CreateFont(m_BaseFontName, (m_BaseFontSize * 1.75f), Font.BOLD | Font.UNDERLINE);
+			var chunk = new Chunk(tasklist.GetFilePath(), font);
+			chunk.setLineHeight(font.Size);
+
+			return new Paragraph(chunk);
 		}
 
 		private Paragraph CreateTitleElement(Task task)
