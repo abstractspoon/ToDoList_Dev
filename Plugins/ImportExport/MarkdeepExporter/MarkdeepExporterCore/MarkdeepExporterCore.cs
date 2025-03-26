@@ -13,10 +13,19 @@ namespace MarkdeepExporter
 {
     public class MarkdeepExporterCore
     {
+		private class AttribItem
+		{
+			public string Label = "";
+			public Task.Attribute AttribId = Task.Attribute.Unknown;
+			public string CustAttribId = "";
+			public CustomAttributeDefinition.Attribute CustAttribType = CustomAttributeDefinition.Attribute.Unknown;
+		}
+
+		// --------------------------------------------------------------------------------------
+
 		private Translator m_Trans;
 		private String m_TypeId;
 
-		private List<Tuple<String, Task.Attribute>> m_Attributes;
 		private bool m_WantComments, m_WantPosition;
 		private string m_FontName;
 
@@ -27,8 +36,6 @@ namespace MarkdeepExporter
 			m_TypeId = typeId;
 			m_Trans = trans;
 		}
-
-		// ------------------------------------------------------------------------
 
 		public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
@@ -48,8 +55,6 @@ namespace MarkdeepExporter
         {
 			m_FontName = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
 
-			InitialiseAttributeList(srcTasks[0]);
-
 			bool multiTasklist = (srcTasks.Count > 1);
 			var mdFile = new MarkdownContainer();
 
@@ -57,28 +62,20 @@ namespace MarkdeepExporter
 			{
 				var mdTasks = new BulletedMarkdownContainer();
 
-				if (srcTasks.Count > 1)
-				{
-					string title = tasklist.GetProjectName();
+				mdFile.Append(new Header(tasklist.GetReportTitle()));
+				mdFile.Append(new RawMarkdown(tasklist.GetReportDate()));
+				mdFile.Append(new RawMarkdown(tasklist.GetFilePath() + "\n"));
 
-					if (string.IsNullOrWhiteSpace(title))
-						title = Path.GetFileNameWithoutExtension(tasklist.GetFilePath());
-
-					mdFile.Append(new RawMarkdown("<h3>" + title + "</h3>\n"));
-				}
-
+				var attribList = GetAttributeList(tasklist);
 				Task task = tasklist.GetFirstTask();
 
 				while (task.IsValid())
 				{
-					ExportTask(task, mdTasks, true);
+					ExportTask(task, attribList, mdTasks, true);
 					task = task.GetNextTask();
 				}
 
 				mdFile.Append(mdTasks);
-
-				if (srcTasks.Count > 1)
-					mdFile.Append(new RawMarkdown("---"));
 			}
 
 			StringBuilder fileContents = new StringBuilder();
@@ -89,7 +86,7 @@ namespace MarkdeepExporter
             fileContents.AppendLine("<!-- Markdeep: -->");
             fileContents.AppendLine(string.Format("<style class=\"fallback\">body{{visibility:hidden;white-space:pre;font-family:{0}}}</style>", m_FontName));
             fileContents.AppendLine("<script src=\"markdeep.min.js\" charset=\"utf-8\"></script>");
-            fileContents.AppendLine("<script src=\"https://casual-effects.com/markdeep/latest/markdeep.min.js\" charset=\"utf-8\"></script>");
+            fileContents.AppendLine("<script src=\"https://morgan3d.github.io/markdeep/latest/markdeep.min.js\" charset=\"utf-8\"></script>");
             fileContents.AppendLine("<script>window.alreadyProcessedMarkdeep||(document.body.style.visibility=\"visible\")</script>");
 
             Debug.Write(fileContents.ToString());
@@ -98,10 +95,10 @@ namespace MarkdeepExporter
             return true;
         }
 
-        protected bool ExportTask(Task task, BulletedMarkdownContainer mdParent, bool root)
+        private bool ExportTask(Task task, IList<AttribItem> attribList, BulletedMarkdownContainer mdParent, bool root)
         {
             // add ourselves
-            mdParent.Append(new RawMarkdown(FormatTaskAttributes(task, root)));
+            mdParent.Append(new RawMarkdown(FormatTaskAttributes(task, attribList, root)));
 
             Task subtask = task.GetFirstSubtask();
 
@@ -112,7 +109,7 @@ namespace MarkdeepExporter
 
                 while (subtask.IsValid())
                 {
-                    ExportTask(subtask, mdSubtasks, false); // RECURSIVE CALL
+                    ExportTask(subtask, attribList, mdSubtasks, false); // RECURSIVE CALL
 
                     subtask = subtask.GetNextTask();
                 }
@@ -123,7 +120,7 @@ namespace MarkdeepExporter
             return true;
         }
 
-        protected string FormatTaskAttributes(Task task, bool root)
+        private string FormatTaskAttributes(Task task, IList<AttribItem> attribList, bool root)
         {
             StringBuilder taskAttrib = new StringBuilder();
 
@@ -143,16 +140,21 @@ namespace MarkdeepExporter
 					  .AppendLine("<br>");
 
 			// Rest of attributes
-			foreach (var item in m_Attributes)
+			foreach (var attrib in attribList)
 			{
-				var attribValue = task.GetAttributeValue(item.Item2, true, true);
+				var attribVal = string.Empty;
 
-				if (!String.IsNullOrWhiteSpace(attribValue))
+				if (attrib.AttribId == Task.Attribute.CustomAttribute)
+					attribVal = task.GetCustomAttributeValue(attrib.CustAttribId, true);
+				else
+					attribVal = task.GetAttributeValue(attrib.AttribId, true, true);
+
+				if (!String.IsNullOrWhiteSpace(attribVal))
 				{
 					taskAttrib.Append("  ")
-							  .Append(item.Item1)
+							  .Append(attrib.Label)
 							  .Append(": ")
-							  .Append(attribValue)
+							  .Append(attribVal)
 							  .AppendLine("<br>");
 				}
 			}
@@ -174,9 +176,10 @@ namespace MarkdeepExporter
 			return taskAttrib.ToString();
         }
 
-		private void InitialiseAttributeList(TaskList tasks)
+		private IList<AttribItem> GetAttributeList(TaskList tasks)
 		{
-			m_Attributes = new List<Tuple<String, Task.Attribute>>();
+			var attribList = new List<AttribItem>();
+
 			m_WantComments = m_WantPosition = false;
 
 			// Construct basic list of attributes
@@ -185,39 +188,69 @@ namespace MarkdeepExporter
 			{
 				switch (attrib)
 				{
-					case Task.Attribute.Title:
-						// Always first
-						break;
+				case Task.Attribute.Title:
+					// Always first
+					break;
 
-					case Task.Attribute.Comments:
-						// Always last if present
-						m_WantComments = true;
-						break;
+				case Task.Attribute.Comments:
+					// Always last if present
+					m_WantComments = true;
+					break;
 
-					case Task.Attribute.HtmlComments:
-						// Always last if present
-						m_WantComments = true;
-						break;
+				case Task.Attribute.HtmlComments:
+					// Always last if present
+					m_WantComments = true;
+					break;
 
-					case Task.Attribute.Position:
-						// Precedes task title
-						m_WantPosition = true;
-						break;
+				case Task.Attribute.Position:
+					// Precedes task title
+					m_WantPosition = true;
+					break;
 
-					case Task.Attribute.ProjectName:
-						// Not a task attribute
-						break;
+				case Task.Attribute.ProjectName:
+					// Not a task attribute
+					break;
 
-					default:
-						if (tasks.IsAttributeAvailable(attrib))
-							AddAttribute(attrib, m_Attributes, true);
-						break;
+				case Task.Attribute.CustomAttribute:
+					if (tasks.IsAttributeAvailable(attrib))
+					{
+						var custAttribs = tasks.GetCustomAttributes();
+
+						foreach (var custAttrib in custAttribs)
+						{
+							attribList.Add(new AttribItem()
+							{
+								Label = custAttrib.Label,
+								AttribId = attrib,
+								CustAttribId = custAttrib.Id,
+								CustAttribType = custAttrib.AttributeType
+							});
+						}
+					}
+					break;
+
+				default:
+					{
+						var attribName = TaskList.GetAttributeName(attrib);
+
+						if (!String.IsNullOrEmpty(attribName))
+						{
+							attribList.Add(new AttribItem()
+							{
+								Label = m_Trans.Translate(attribName, Translator.Type.Text),
+								AttribId = attrib
+							});
+						}
+					}
+					break;
 				}
 			}
 
 			// Sort alphabetically
-			if (m_Attributes.Count > 1)
-				m_Attributes.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+			if (attribList.Count > 1)
+				attribList.Sort((x, y) => x.Label.CompareTo(y.Label));
+
+			return attribList;
 		}
 
 		private void AddAttribute(Task.Attribute attrib, List<Tuple<String, Task.Attribute>> attribs, bool atEnd)
