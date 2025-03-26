@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 using System.Diagnostics;
 using System.Windows.Forms;
 using MarkdownLog;
@@ -57,7 +58,14 @@ namespace MarkdeepExporter
 				var mdTasks = new BulletedMarkdownContainer();
 
 				if (srcTasks.Count > 1)
-					mdFile.Append(new RawMarkdown("<h3>" + tasklist.GetFilePath() + "</h3>\n"));
+				{
+					string title = tasklist.GetProjectName();
+
+					if (string.IsNullOrWhiteSpace(title))
+						title = Path.GetFileNameWithoutExtension(tasklist.GetFilePath());
+
+					mdFile.Append(new RawMarkdown("<h3>" + title + "</h3>\n"));
+				}
 
 				Task task = tasklist.GetFirstTask();
 
