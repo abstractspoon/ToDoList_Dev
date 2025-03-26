@@ -28,6 +28,20 @@ namespace JSONExporterPlugin
 
 		public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
+			var tasklists = new List<TaskList>() { srcTasks };
+
+			return ExportTasklists(tasklists, sDestFilePath, bSilent, prefs, sKey);
+		}
+
+		public bool Export(MultiTaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
+		{
+			var tasklists = srcTasks.GetTaskLists();
+
+			return ExportTasklists(tasklists, sDestFilePath, bSilent, prefs, sKey);
+		}
+
+		private bool ExportTasklists(IList<TaskList> srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
+		{
 			var exporter = new JSONExporter();
 			var json = exporter.Export(srcTasks, bSilent, prefs, sKey, m_Trans);
 
@@ -38,7 +52,6 @@ namespace JSONExporterPlugin
 			System.IO.File.WriteAllBytes(sDestFilePath, utf8.GetBytes(json));
 
 			return true;
-        }
-
+		}
 	}
 }

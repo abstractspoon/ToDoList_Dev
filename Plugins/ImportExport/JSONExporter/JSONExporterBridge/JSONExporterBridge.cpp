@@ -100,6 +100,19 @@ IIMPORTEXPORT_RESULT CJSONExporterBridge::Export(const ITaskList* pSrcTaskFile, 
 
 IIMPORTEXPORT_RESULT CJSONExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
-	// TODO
+	// call into out sibling C# module to do the actual work
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<MultiTaskList^> srcTasks = gcnew MultiTaskList(pSrcTaskFile);
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<String^> typeID = gcnew String(JSONEXPORTER_GUID);
+
+	msclr::auto_gcroot<JSONExporterCore^> expCore = gcnew JSONExporterCore(typeID.get(), trans.get());
+
+	// do the export
+	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
+
+	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
+		return IIER_SUCCESS;
+
 	return IIER_OTHER;
 }
