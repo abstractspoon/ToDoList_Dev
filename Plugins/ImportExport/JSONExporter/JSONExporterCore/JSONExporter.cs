@@ -27,8 +27,6 @@ namespace JSONExporterPlugin
 		{
 		}
 
-		// ------------------------------------------------------------------------
-
 		public string Export(IList<TaskList> srcTasks, bool bSilent, Preferences prefs, string sKey, Translator trans)
         {
 			JArray jTasklists = new JArray();
