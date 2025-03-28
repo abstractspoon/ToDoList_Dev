@@ -558,6 +558,45 @@ void CTDLExportToPage::OnSelchangeFormatoptions()
 	UpdateHtmlOptionsVisibility();
 }
 
+void CTDLExportToPage::OnExportonefile()
+{
+	// save previous flag state
+	BOOL bPrevExportOneFile = m_bExportOneFile;
+
+	UpdateData();
+
+	// save off current export path depending
+	// on our previous state
+	if (bPrevExportOneFile)
+	{
+		m_sMultiFilePath = m_sExportPath;
+	}
+	else if (m_bExportAllTasklists)
+	{
+		m_sFolderPath = m_sExportPath;
+	}
+	else
+	{
+		m_sFilePath = m_sExportPath;
+	}
+
+	// set export path
+	BOOL bFolder = (m_bExportAllTasklists && !m_bExportOneFile && !m_bExportToClipboard);
+
+	m_eExportPath.EnableStyle(FES_FOLDERS, bFolder);
+	m_sPathLabel.LoadString(bFolder ? IDS_ED_FOLDER : IDS_ED_FILEPATH);
+
+	if (m_bExportAllTasklists)
+		m_sExportPath = (m_bExportOneFile ? m_sMultiFilePath : m_sFolderPath);
+	else
+		m_sExportPath = m_sFilePath;
+
+	if (!m_bExportAllTasklists || m_bExportOneFile)
+		EnsureExtension(m_sExportPath, m_sFormatTypeID);
+
+	UpdateData(FALSE);
+}
+
 void CTDLExportToPage::UpdateHtmlOptionsVisibility()
 {
 	BOOL bShowHtmlFormat = m_mgrImportExport.IsFormat(m_sFormatTypeID, TDCET_HTML);
@@ -625,45 +664,6 @@ void CTDLExportToPage::OnOK()
 		prefs.WriteProfileString(m_sPrefsKey, _T("LastMultiFilePath"), m_sMultiFilePath);
 		prefs.WriteProfileString(m_sPrefsKey, _T("LastFolder"), m_sFolderPath);
 	}
-}
-
-void CTDLExportToPage::OnExportonefile()
-{
-	// save previous flag state
-	BOOL bPrevExportOneFile = m_bExportOneFile;
-
-	UpdateData();
-
-	// save off current export path depending
-	// on our previous state
-	if (bPrevExportOneFile)
-	{
-		m_sMultiFilePath = m_sExportPath;
-	}
-	else if (m_bExportAllTasklists)
-	{
-		m_sFolderPath = m_sExportPath;
-	}
-	else
-	{
-		m_sFilePath = m_sExportPath;
-	}
-
-	// set export path
-	BOOL bFolder = (m_bExportAllTasklists && !m_bExportOneFile && !m_bExportToClipboard);
-
-	m_eExportPath.EnableStyle(FES_FOLDERS, bFolder);
-	m_sPathLabel.LoadString(bFolder ? IDS_ED_FOLDER : IDS_ED_FILEPATH);
-
-	if (m_bExportAllTasklists)
-		m_sExportPath = (m_bExportOneFile ? m_sMultiFilePath : m_sFolderPath);
-	else
-		m_sExportPath = m_sFilePath;
-
-	if (!m_bExportAllTasklists || m_bExportOneFile)
-		EnsureExtension(m_sExportPath, m_sFormatTypeID);
-
-	UpdateData(FALSE);
 }
 
 void CTDLExportToPage::OnExportToClipboardOrPath()
