@@ -82,9 +82,12 @@ protected:
 	afx_msg void OnSelChangeHtmlOption();
 	DECLARE_MESSAGE_MAP()
 
+	BOOL RemoveExtension(CString& sPathName, LPCTSTR szFormatTypeID) const;
 	void EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt = TRUE) const;
 	void UpdateExtension(CString& sPathName, LPCTSTR szFromTypeID, LPCTSTR szToTypeID) const;
+	CString GetExporterFileExtension(LPCTSTR szFromTypeID) const;
 	void UpdateHtmlOptionsVisibility();
+	BOOL WantSaveToFolder() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
