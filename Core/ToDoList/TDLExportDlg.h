@@ -73,7 +73,7 @@ protected:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CExportDlg)
-	afx_msg void OnSelchangeFormatoptions();
+	afx_msg void OnSelchangeExporterFormat();
 	afx_msg void OnSelchangeTasklistoptions();
 	afx_msg void OnExportonefile();
 	afx_msg void OnChangeExportpath();

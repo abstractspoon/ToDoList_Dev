@@ -428,7 +428,7 @@ void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLExportToPage, CCmdNotifyPropertyPage)
 	//{{AFX_MSG_MAP(CExportDlg)
-	ON_CBN_SELCHANGE(IDC_FORMATOPTIONS, OnSelchangeFormatoptions)
+	ON_CBN_SELCHANGE(IDC_FORMATOPTIONS, OnSelchangeExporterFormat)
 	ON_CBN_SELCHANGE(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
 	ON_BN_CLICKED(IDC_EXPORTONEFILE, OnExportonefile)
 	ON_EN_CHANGE(IDC_EXPORTPATH, OnChangeExportpath)
@@ -512,7 +512,7 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 	UpdateData(FALSE);
 }
 
-void CTDLExportToPage::OnSelchangeFormatoptions() 
+void CTDLExportToPage::OnSelchangeExporterFormat() 
 {
 	CString sPrevTypeID = m_sFormatTypeID;
 	UpdateData();
