@@ -328,6 +328,7 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 
 	m_bExportOneFile = prefs.GetProfileInt(m_sPrefsKey, _T("ExportOneFile"), FALSE);
 	m_bExportToClipboard = prefs.GetProfileInt(m_sPrefsKey, _T("ExportToClipboard"), FALSE);
+	m_bExportAllTasklists = (!m_bSingleTaskList && prefs.GetProfileInt(m_sPrefsKey, _T("ExportOption"), FALSE));
 
 	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("ExporterTypeID"));
 	m_sMultiFilePath = prefs.GetProfileString(m_sPrefsKey, _T("LastMultiFilePath"));
@@ -338,32 +339,18 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 	if (FileMisc::HasExtension(m_sMultiFilePath))
 		m_sMultiFilePath.Empty();
 	///////////////////////////////////////////////////////////////////////////
-	
-	if (m_bSingleTaskList)
-		m_bExportAllTasklists = FALSE;
-	else
-		m_bExportAllTasklists = prefs.GetProfileInt(m_sPrefsKey, _T("ExportOption"), FALSE);
 
-	// backwards compat
-	if (m_sFormatTypeID.IsEmpty())
-	{
-		int nFormat = prefs.GetProfileInt(m_sPrefsKey, _T("FormatOption"), -1);
-
-		if (nFormat != -1)
-			m_sFormatTypeID = mgr.GetExporterTypeID(nFormat);
-		else
-			m_sFormatTypeID = mgr.GetTypeID(TDCET_CSV);
-	}
-
+	// handle empty file/folder paths
 	if (m_sFolderPath.IsEmpty())
 	{
 		m_sFolderPath = prefs.GetProfileString(m_sPrefsKey, _T("LastFolder"));
 
 		if (m_sFolderPath.IsEmpty())
 			m_sFolderPath = FileMisc::GetFolderFromFilePath(szFilePath);
+
+		m_sOrgFolderPath = m_sFolderPath;
 	}
 
-	// handle empty filepaths
 	if (m_sMultiFilePath.IsEmpty())
 	{
 		CString sDrive, sFolder;
@@ -480,10 +467,12 @@ void CTDLExportToPage::OnSelChangeHtmlOption()
 
 void CTDLExportToPage::OnSelchangeTasklistoptions() 
 {
-	// save previous export option
+	// Check for actual change
 	BOOL bPrevExportAll = m_bExportAllTasklists;
-
 	UpdateData();
+
+	if (!Misc::StatesDiffer(bPrevExportAll, m_bExportAllTasklists))
+		return;
 
 	// save off current export path
 	if (bPrevExportAll)
@@ -509,7 +498,11 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 	m_eExportPath.EnableStyle(FES_FOLDERS, bFolder);
 	m_sPathLabel.LoadString(bFolder ? IDS_ED_FOLDER : IDS_ED_FILEPATH);
 	
-	if (m_bExportAllTasklists)
+	if (GetExporterFileExtension(m_sFormatTypeID).IsEmpty())
+	{
+		m_sExportPath.Empty();
+	}
+	else if (m_bExportAllTasklists)
 	{
 		if (m_bExportOneFile)
 		{
@@ -535,6 +528,7 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 
 void CTDLExportToPage::OnSelchangeExporterFormat() 
 {
+	// Check for actual change
 	CString sPrevTypeID = m_sFormatTypeID;
 	UpdateData();
 
@@ -568,7 +562,6 @@ void CTDLExportToPage::OnSelchangeExporterFormat()
 			}
 
 			UpdateExtension(m_sExportPath, sPrevTypeID, m_sFormatTypeID);
-			UpdateData(FALSE);
 		}
 		else if (m_sExportPath.IsEmpty())
 		{
@@ -577,23 +570,20 @@ void CTDLExportToPage::OnSelchangeExporterFormat()
 	}
 	else // disable path edit and remove file path
 	{
-		m_eExportPath.SetWindowText(_T(""));
+		m_sExportPath.Empty();
 		m_eExportPath.EnableWindow(FALSE);
 	}
 
+	UpdateData(FALSE);
 	UpdateHtmlOptionsVisibility();
 }
 
 void CTDLExportToPage::OnExportonefile()
 {
-	// save previous flag state
-	BOOL bPrevExportOneFile = m_bExportOneFile;
-
 	UpdateData();
 
-	// save off current export path depending
-	// on our previous state
-	if (bPrevExportOneFile)
+	// save off current export path depending on our previous state
+	if (!m_bExportOneFile)
 	{
 		// Previously we were saving to one file
 		m_sMultiFilePath = m_sExportPath;
@@ -614,13 +604,20 @@ void CTDLExportToPage::OnExportonefile()
 	m_eExportPath.EnableStyle(FES_FOLDERS, bFolder);
 	m_sPathLabel.LoadString(bFolder ? IDS_ED_FOLDER : IDS_ED_FILEPATH);
 
-	if (m_bExportAllTasklists)
-		m_sExportPath = (m_bExportOneFile ? m_sMultiFilePath : m_sFolderPath);
+	if (GetExporterFileExtension(m_sFormatTypeID).IsEmpty())
+	{
+		m_sExportPath.Empty();
+	}
 	else
-		m_sExportPath = m_sFilePath;
+	{
+		if (m_bExportAllTasklists)
+			m_sExportPath = (m_bExportOneFile ? m_sMultiFilePath : m_sFolderPath);
+		else
+			m_sExportPath = m_sFilePath;
 
-	if (!m_bExportAllTasklists || m_bExportOneFile)
-		EnsureExtension(m_sExportPath, m_sFormatTypeID);
+		if (!m_bExportAllTasklists || m_bExportOneFile)
+			EnsureExtension(m_sExportPath, m_sFormatTypeID);
+	}
 
 	UpdateData(FALSE);
 }
