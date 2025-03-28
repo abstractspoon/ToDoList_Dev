@@ -332,6 +332,13 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("ExporterTypeID"));
 	m_sMultiFilePath = prefs.GetProfileString(m_sPrefsKey, _T("LastMultiFilePath"));
 
+	///////////////////////////////////////////////////////////////////////////
+	// Backwards compatibility - we no longer persist the multi-path extension
+	// to fix an issue with double-barrelled extensions. Remove in 9.2+
+	if (FileMisc::HasExtension(m_sMultiFilePath))
+		m_sMultiFilePath.Empty();
+	///////////////////////////////////////////////////////////////////////////
+	
 	if (m_bSingleTaskList)
 		m_bExportAllTasklists = FALSE;
 	else
@@ -362,9 +369,9 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 		CString sDrive, sFolder;
 		FileMisc::SplitPath(m_sFilePath, &sDrive, &sFolder);
 
+		// See above - we no longer add a extension
 		FileMisc::MakePath(m_sMultiFilePath, sDrive, sFolder, CEnString(IDS_TDC_MULTIFILE));
 	}
-	EnsureExtension(m_sMultiFilePath, m_sFormatTypeID);
 
 	if ((m_sFilePath.IsEmpty() || PathIsRelative(m_sFilePath)) && !m_sFolderPath.IsEmpty())
 	{
@@ -390,7 +397,11 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 	}
 	else if (m_bExportAllTasklists && m_bExportOneFile)
 	{
-		m_sExportPath = m_sMultiFilePath; // default
+		ASSERT(!FileMisc::HasExtension(m_sMultiFilePath));
+
+		m_sExportPath = m_sMultiFilePath;
+		EnsureExtension(m_sExportPath, m_sFormatTypeID, FALSE);
+
 		m_sPathLabel.LoadString(IDS_ED_FILEPATH);
 	}
 	else // multiple files
@@ -474,13 +485,19 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 
 	UpdateData();
 
-	// save off current export path depending on our previous option
+	// save off current export path
 	if (bPrevExportAll)
 	{
+		// Previously we were saving all tasklists either to a single file or separately
 		if (m_bExportOneFile)
+		{
 			m_sMultiFilePath = m_sExportPath;
+			RemoveExtension(m_sMultiFilePath, m_sFormatTypeID);
+		}
 		else
+		{
 			m_sFolderPath = m_sExportPath;
+		}
 	}
 	else // single tasklist
 	{
@@ -496,11 +513,15 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 	{
 		if (m_bExportOneFile)
 		{
+			ASSERT(!FileMisc::HasExtension(m_sMultiFilePath));
+
 			m_sExportPath = m_sMultiFilePath;
 			EnsureExtension(m_sExportPath, m_sFormatTypeID);
 		}
 		else
+		{
 			m_sExportPath = m_sFolderPath;
+		}
 	}
 	else
 	{
@@ -536,9 +557,14 @@ void CTDLExportToPage::OnSelchangeExporterFormat()
 			if (m_sExportPath.IsEmpty())
 			{
 				if (m_bExportOneFile)
+				{
+					ASSERT(!FileMisc::HasExtension(m_sMultiFilePath));
 					m_sExportPath = m_sMultiFilePath;
+				}
 				else
+				{
 					m_sExportPath = m_sOrgFilePath;
+				}
 			}
 
 			UpdateExtension(m_sExportPath, sPrevTypeID, m_sFormatTypeID);
@@ -569,7 +595,9 @@ void CTDLExportToPage::OnExportonefile()
 	// on our previous state
 	if (bPrevExportOneFile)
 	{
+		// Previously we were saving to one file
 		m_sMultiFilePath = m_sExportPath;
+		RemoveExtension(m_sMultiFilePath, m_sFormatTypeID);
 	}
 	else if (m_bExportAllTasklists)
 	{
@@ -669,8 +697,11 @@ void CTDLExportToPage::OnOK()
 	if (!m_bSingleTaskList)
 	{
 		prefs.WriteProfileInt(m_sPrefsKey, _T("ExportOption"), m_bExportAllTasklists);
-		prefs.WriteProfileString(m_sPrefsKey, _T("LastMultiFilePath"), m_sMultiFilePath);
 		prefs.WriteProfileString(m_sPrefsKey, _T("LastFolder"), m_sFolderPath);
+
+		// We no longer persist the multi-path extension
+		ASSERT(!FileMisc::HasExtension(m_sMultiFilePath));
+		prefs.WriteProfileString(m_sPrefsKey, _T("LastMultiFilePath"), m_sMultiFilePath);
 	}
 }
 
