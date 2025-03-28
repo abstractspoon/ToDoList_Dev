@@ -428,14 +428,14 @@ void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLExportToPage, CCmdNotifyPropertyPage)
 	//{{AFX_MSG_MAP(CExportDlg)
-	ON_CBN_SELCHANGE(IDC_FORMATOPTIONS, OnSelchangeExporterFormat)
-	ON_CBN_SELCHANGE(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
+	ON_CBN_SELENDOK(IDC_FORMATOPTIONS, OnSelchangeExporterFormat)
+	ON_CBN_SELENDOK(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
 	ON_BN_CLICKED(IDC_EXPORTONEFILE, OnExportonefile)
 	ON_EN_CHANGE(IDC_EXPORTPATH, OnChangeExportpath)
 	ON_BN_CLICKED(IDC_TOPATH, OnExportToClipboardOrPath)
 	ON_BN_CLICKED(IDC_TOCLIPBOARD, OnExportToClipboardOrPath)
 	//}}AFX_MSG_MAP
-	ON_CBN_SELCHANGE(IDC_HTMLOPTIONS, OnSelChangeHtmlOption)
+	ON_CBN_SELENDOK(IDC_HTMLOPTIONS, OnSelChangeHtmlOption)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
