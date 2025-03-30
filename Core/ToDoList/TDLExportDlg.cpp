@@ -123,8 +123,7 @@ void CTDLExportDlg::OnExportToClipboardOrPath()
 
 void CTDLExportDlg::UpdateTitle()
 {
-	BOOL bWantMultiFileTitle = (m_pageTo.GetExportAllTasklists() &&
-								!m_pageTo.GetExportOneFile());
+	BOOL bWantMultiFileTitle = (GetExportAllTasklists() && !GetExportOneFile());
 
 	static CEnString MULTI_FILE_TITLE(IDS_EXPORTTITLE_MULTIPLEFILES);
 
@@ -138,7 +137,7 @@ void CTDLExportDlg::UpdateTitle()
 		m_sExportTitle = m_sSingleFileTitle;
 	}
 
-	GetDlgItemText(IDC_EXPORTTITLE, m_sExportTitle);
+	SetDlgItemText(IDC_EXPORTTITLE, m_sExportTitle);
 	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(GetExportOneFile());
 }
 
@@ -313,8 +312,8 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 	CCmdNotifyPropertyPage(CTDLExportToPage::IDD), 
 	m_mgrImportExport(mgr),
 	m_bSingleTaskList(bSingleTaskList), 
-	m_sFilePath(szFilePath), m_sOrgFilePath(szFilePath),
-	m_sFolderPath(szFolderPath), m_sOrgFolderPath(szFolderPath),
+	m_sFilePath(szFilePath),
+	m_sFolderPath(szFolderPath),
 	m_sPrefsKey(szPrefsKey),
 	m_eExportPath(FES_SAVEAS | FES_NOPROMPTOVERWRITE), // parent handles prompting
 	m_cbFormat(mgr, FALSE, FALSE),
@@ -334,8 +333,8 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 	m_sMultiFilePath = prefs.GetProfileString(m_sPrefsKey, _T("LastMultiFilePath"));
 
 	///////////////////////////////////////////////////////////////////////////
-	// Backwards compatibility - we no longer persist the multi-path extension
-	// to fix an issue with double-barrelled extensions. Remove in 9.2+
+	// Backwards compatibility - we no longer persist the path extensions
+	// to fix issues with double-barrelled extensions. Remove in 9.2+
 	if (FileMisc::HasExtension(m_sMultiFilePath))
 		m_sMultiFilePath.Empty();
 	///////////////////////////////////////////////////////////////////////////
@@ -347,8 +346,6 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 
 		if (m_sFolderPath.IsEmpty())
 			m_sFolderPath = FileMisc::GetFolderFromFilePath(szFilePath);
-
-		m_sOrgFolderPath = m_sFolderPath;
 	}
 
 	if (m_sMultiFilePath.IsEmpty())
@@ -374,27 +371,25 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 		
 		FileMisc::MakePath(m_sFilePath, NULL, m_sFolderPath, sFName);
 	}
-	EnsureExtension(m_sFilePath, m_sFormatTypeID);
+	FileMisc::RemoveExtension(m_sFilePath);
 
 	// prepare initial export path
-	if (m_bSingleTaskList || !m_bExportAllTasklists) 
-	{
-		m_sExportPath = m_sFilePath; // default
-		m_sPathLabel.LoadString(IDS_ED_FILEPATH);
-	}
-	else if (m_bExportAllTasklists && m_bExportOneFile)
-	{
-		ASSERT(!FileMisc::HasExtension(m_sMultiFilePath));
-
-		m_sExportPath = m_sMultiFilePath;
-		EnsureExtension(m_sExportPath, m_sFormatTypeID, FALSE);
-
-		m_sPathLabel.LoadString(IDS_ED_FILEPATH);
-	}
-	else // multiple files
+	if (WantSaveToFolder())
 	{
 		m_sExportPath = m_sFolderPath;
 		m_sPathLabel.LoadString(IDS_ED_FOLDER);
+	}
+	else // single or multiple files
+	{
+		if (m_bSingleTaskList || !m_bExportAllTasklists)
+			m_sExportPath = m_sFilePath;
+		else
+			m_sExportPath = m_sMultiFilePath;
+
+		ASSERT(!FileMisc::HasExtension(m_sExportPath));
+
+		EnsureExporterFileExtension(m_sExportPath, m_sFormatTypeID, FALSE);
+		m_sPathLabel.LoadString(IDS_ED_FILEPATH);
 	}
 
 	m_nHtmlStyle = prefs.GetProfileEnum(m_sPrefsKey, _T("HtmlStyle"), TDLPDS_WRAP);
@@ -443,21 +438,9 @@ BOOL CTDLExportToPage::OnInitDialog()
 {
 	CCmdNotifyPropertyPage::OnInitDialog();
 
-	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+	RefreshCtrlStates();
 
-	m_eExportPath.SetDefaultSaveAsFileExtension(m_mgrImportExport.GetExporterFileExtension(nFormat, FALSE));
-	m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
-	m_eExportPath.EnableStyle(FES_FOLDERS, (m_bExportAllTasklists && !m_bExportOneFile));
-
-	// set initial control states
-	GetDlgItem(IDC_TASKLISTOPTIONS)->EnableWindow(!m_bSingleTaskList);
-	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
-	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat) && !m_bExportToClipboard);
-
-	UpdateHtmlOptionsVisibility();
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLExportToPage::OnSelChangeHtmlOption()
@@ -467,167 +450,139 @@ void CTDLExportToPage::OnSelChangeHtmlOption()
 
 void CTDLExportToPage::OnSelchangeTasklistoptions() 
 {
-	// Check for actual change
 	BOOL bPrevExportAll = m_bExportAllTasklists;
+
+	// Must preserve export path before calling UpdateData()
+	PreserveExportPath();
 	UpdateData();
 
+	// Check for actual change
 	if (!Misc::StatesDiffer(bPrevExportAll, m_bExportAllTasklists))
 		return;
 
-	// save off current export path
-	if (bPrevExportAll)
+	RestoreExportPath();
+	RefreshCtrlStates();
+}
+
+void CTDLExportToPage::OnSelchangeExporterFormat() 
+{
+	CString sPrevTypeID = m_sFormatTypeID;
+
+	// Must preserve export path before calling UpdateData()
+	PreserveExportPath();
+	UpdateData();
+
+	// Check for actual change
+	if (m_sFormatTypeID == sPrevTypeID)
+		return;
+
+	RestoreExportPath();
+	RefreshCtrlStates();
+}
+
+void CTDLExportToPage::OnExportonefile()
+{
+	// Must preserve export path before calling UpdateData()
+	PreserveExportPath();
+	UpdateData();
+
+	RestoreExportPath();
+	RefreshCtrlStates();
+}
+
+void CTDLExportToPage::RefreshCtrlStates()
+{
+	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
+	BOOL bHasExt = m_mgrImportExport.ExporterHasFileExtension(nFormat);
+
+	m_eExportPath.SetDefaultSaveAsFileExtension(m_mgrImportExport.GetExporterFileExtension(nFormat, FALSE));
+	m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
+	m_eExportPath.EnableWindow(bHasExt && !m_bExportToClipboard);
+
+	BOOL bFolder = WantSaveToFolder();
+
+	m_eExportPath.EnableStyle(FES_FOLDERS, bFolder);
+	m_sPathLabel.LoadString(bFolder ? IDS_ED_FOLDER : IDS_ED_FILEPATH);
+
+	// set initial control states
+	GetDlgItem(IDC_TASKLISTOPTIONS)->EnableWindow(!m_bSingleTaskList);
+	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(bHasExt && !m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
+
+	BOOL bShowHtmlFormat = m_mgrImportExport.IsFormat(m_sFormatTypeID, TDCET_HTML);
+
+	m_cbHtmlOptions.ShowWindow(bShowHtmlFormat ? SW_SHOW : SW_HIDE);
+	m_stHtmlOptionIcon.ShowWindow(bShowHtmlFormat ? SW_SHOW : SW_HIDE);
+}
+
+void CTDLExportToPage::PreserveExportPath()
+{
+	// Don't save empty paths that are simply the result
+	// of the current exporter not being file-based
+	if (GetExporterFileExtension(m_sFormatTypeID).IsEmpty())
 	{
-		// Previously we were saving all tasklists either to a single file or separately
+		ASSERT(m_sExportPath.IsEmpty());
+		return;
+	}
+
+	if (m_bExportAllTasklists)
+	{
+		ASSERT(!m_bSingleTaskList);
+
 		if (m_bExportOneFile)
 		{
 			m_sMultiFilePath = m_sExportPath;
-			RemoveExtension(m_sMultiFilePath, m_sFormatTypeID);
+			RemoveExporterFileExtension(m_sMultiFilePath, m_sFormatTypeID);
 		}
 		else
 		{
 			m_sFolderPath = m_sExportPath;
 		}
 	}
-	else // single tasklist
+	else // active tasklist only
 	{
 		m_sFilePath = m_sExportPath;
+		RemoveExporterFileExtension(m_sFilePath, m_sFormatTypeID);
 	}
-
-	BOOL bFolder = WantSaveToFolder();
-
-	m_eExportPath.EnableStyle(FES_FOLDERS, bFolder);
-	m_sPathLabel.LoadString(bFolder ? IDS_ED_FOLDER : IDS_ED_FILEPATH);
-	
-	if (GetExporterFileExtension(m_sFormatTypeID).IsEmpty())
-	{
-		m_sExportPath.Empty();
-	}
-	else if (m_bExportAllTasklists)
-	{
-		if (m_bExportOneFile)
-		{
-			ASSERT(!FileMisc::HasExtension(m_sMultiFilePath));
-
-			m_sExportPath = m_sMultiFilePath;
-			EnsureExtension(m_sExportPath, m_sFormatTypeID);
-		}
-		else
-		{
-			m_sExportPath = m_sFolderPath;
-		}
-	}
-	else
-	{
-		m_sExportPath = m_sFilePath;
-		EnsureExtension(m_sExportPath, m_sFormatTypeID);
-	}
-
-	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
-	UpdateData(FALSE);
 }
 
-void CTDLExportToPage::OnSelchangeExporterFormat() 
+void CTDLExportToPage::RestoreExportPath()
 {
-	// Check for actual change
-	CString sPrevTypeID = m_sFormatTypeID;
-	UpdateData();
-
-	if (m_sFormatTypeID == sPrevTypeID)
-		return;
-
 	// check exporter has a file extension
 	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
 
 	if (m_mgrImportExport.ExporterHasFileExtension(nFormat))
 	{
-		// enable path edit
-		m_eExportPath.EnableWindow(TRUE);
-
-		// check file extension is correct
 		m_eExportPath.SetFilter(m_mgrImportExport.GetExporterFileFilter(nFormat));
 
-		if (!m_bExportAllTasklists || m_bExportOneFile)
+		if (m_bExportAllTasklists && !m_bExportOneFile)
 		{
-			if (m_sExportPath.IsEmpty())
-			{
-				if (m_bExportOneFile)
-				{
-					ASSERT(!FileMisc::HasExtension(m_sMultiFilePath));
-					m_sExportPath = m_sMultiFilePath;
-				}
-				else
-				{
-					m_sExportPath = m_sOrgFilePath;
-				}
-			}
-
-			UpdateExtension(m_sExportPath, sPrevTypeID, m_sFormatTypeID);
+			// Saving to a folder location
+			m_sExportPath = m_sFolderPath;
 		}
-		else if (m_sExportPath.IsEmpty())
+		else 
 		{
-			m_sExportPath = m_sOrgFolderPath;
+			// Saving to a file location
+			if (m_bExportAllTasklists && m_bExportOneFile)
+			{
+				ASSERT(!FileMisc::HasExtension(m_sMultiFilePath));
+				m_sExportPath = m_sMultiFilePath;
+			}
+			else
+			{
+				ASSERT(!FileMisc::HasExtension(m_sFilePath));
+				m_sExportPath = m_sFilePath;
+			}
+			ASSERT(!m_sExportPath.IsEmpty());
+
+			EnsureExporterFileExtension(m_sExportPath, m_sFormatTypeID);
 		}
 	}
 	else // disable path edit and remove file path
 	{
 		m_sExportPath.Empty();
-		m_eExportPath.EnableWindow(FALSE);
 	}
 
 	UpdateData(FALSE);
-	UpdateHtmlOptionsVisibility();
-}
-
-void CTDLExportToPage::OnExportonefile()
-{
-	UpdateData();
-
-	// save off current export path depending on our previous state
-	if (!m_bExportOneFile)
-	{
-		// Previously we were saving to one file
-		m_sMultiFilePath = m_sExportPath;
-		RemoveExtension(m_sMultiFilePath, m_sFormatTypeID);
-	}
-	else if (m_bExportAllTasklists)
-	{
-		m_sFolderPath = m_sExportPath;
-	}
-	else
-	{
-		m_sFilePath = m_sExportPath;
-	}
-
-	// set export path
-	BOOL bFolder = WantSaveToFolder();
-
-	m_eExportPath.EnableStyle(FES_FOLDERS, bFolder);
-	m_sPathLabel.LoadString(bFolder ? IDS_ED_FOLDER : IDS_ED_FILEPATH);
-
-	if (GetExporterFileExtension(m_sFormatTypeID).IsEmpty())
-	{
-		m_sExportPath.Empty();
-	}
-	else
-	{
-		if (m_bExportAllTasklists)
-			m_sExportPath = (m_bExportOneFile ? m_sMultiFilePath : m_sFolderPath);
-		else
-			m_sExportPath = m_sFilePath;
-
-		if (!m_bExportAllTasklists || m_bExportOneFile)
-			EnsureExtension(m_sExportPath, m_sFormatTypeID);
-	}
-
-	UpdateData(FALSE);
-}
-
-void CTDLExportToPage::UpdateHtmlOptionsVisibility()
-{
-	BOOL bShowHtmlFormat = m_mgrImportExport.IsFormat(m_sFormatTypeID, TDCET_HTML);
-
-	m_cbHtmlOptions.ShowWindow(bShowHtmlFormat ? SW_SHOW : SW_HIDE);
-	m_stHtmlOptionIcon.ShowWindow(bShowHtmlFormat ? SW_SHOW : SW_HIDE);
 }
 
 CString CTDLExportToPage::GetExporterFileExtension(LPCTSTR szFormatTypeID) const
@@ -637,21 +592,16 @@ CString CTDLExportToPage::GetExporterFileExtension(LPCTSTR szFormatTypeID) const
 	return m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE);
 }
 
-BOOL CTDLExportToPage::RemoveExtension(CString& sPathName, LPCTSTR szFormatTypeID) const
+BOOL CTDLExportToPage::RemoveExporterFileExtension(CString& sPathName, LPCTSTR szFormatTypeID) const
 {
 	if (sPathName.IsEmpty())
 		return FALSE;
 
 	CString sExt = GetExporterFileExtension(szFormatTypeID);
-
-	if (Misc::RemoveSuffix(sPathName, sExt, TRUE))
-		return TRUE;
-
-	ASSERT(sExt.IsEmpty());
-	return FALSE;
+	return Misc::RemoveSuffix(sPathName, sExt, TRUE);
 }
 
-void CTDLExportToPage::EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt) const
+void CTDLExportToPage::EnsureExporterFileExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt) const
 {
 	if (!sPathName.IsEmpty())
 	{
@@ -664,25 +614,13 @@ void CTDLExportToPage::EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeI
 	}
 }
 
-void CTDLExportToPage::UpdateExtension(CString& sPathName, LPCTSTR szFromTypeID, LPCTSTR szToTypeID) const
-{
-	if (!sPathName.IsEmpty())
-	{
-		BOOL bExtRemoved = RemoveExtension(sPathName, szFromTypeID);
-		ASSERT(bExtRemoved || GetExporterFileExtension(szFromTypeID).IsEmpty());
-
-		// Add new extension
-		EnsureExtension(sPathName, szToTypeID, !bExtRemoved);
-	}
-}
-
 void CTDLExportToPage::OnOK()
 {
 	CCmdNotifyPropertyPage::OnOK();
 
 	// make sure extension is right
 	if (!m_bExportAllTasklists || m_bExportOneFile)
-		EnsureExtension(m_sExportPath, m_sFormatTypeID);
+		EnsureExporterFileExtension(m_sExportPath, m_sFormatTypeID);
 
 	CPreferences prefs;
 
@@ -693,6 +631,8 @@ void CTDLExportToPage::OnOK()
 
 	if (!m_bSingleTaskList)
 	{
+		PreserveExportPath();
+
 		prefs.WriteProfileInt(m_sPrefsKey, _T("ExportOption"), m_bExportAllTasklists);
 		prefs.WriteProfileString(m_sPrefsKey, _T("LastFolder"), m_sFolderPath);
 
@@ -704,36 +644,17 @@ void CTDLExportToPage::OnOK()
 
 BOOL CTDLExportToPage::WantSaveToFolder() const
 {
-	return (m_bExportAllTasklists && !m_bExportOneFile && !m_bExportToClipboard);
+	return (!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportOneFile && !m_bExportToClipboard);
 }
 
 void CTDLExportToPage::OnExportToClipboardOrPath()
 {
 	UpdateData();
-
-	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
-
-	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat) && !m_bExportToClipboard);
-	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
+	RefreshCtrlStates();
 }
 
 void CTDLExportToPage::OnChangeExportpath() 
 {
 	UpdateData();
-
-	if (!m_bExportAllTasklists || m_bExportOneFile)
-		m_sFilePath = m_sExportPath;
-	else
-		m_sFolderPath = m_sExportPath;
-}
-
-CString CTDLExportToPage::GetExportPath() const
-{
-	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
-
-	if (m_mgrImportExport.ExporterHasFileExtension(nFormat))
-		return m_sExportPath;
-
-	// else
-	return _T("");
+	PreserveExportPath();
 }
