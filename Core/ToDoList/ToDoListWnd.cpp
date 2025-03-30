@@ -10149,6 +10149,8 @@ void CToDoListWnd::OnExport()
 	int nExporter = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 	ASSERT(nExporter != -1);
 
+	DWORD dwExportFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
+
 	BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nExporter);
 	CString sExportPath = (bExportToClipboard ? TEMP_CLIPBOARD_FILEPATH : dialog.GetExportPath());
 	
@@ -10171,9 +10173,7 @@ void CToDoListWnd::OnExport()
 		LogIntermediateTaskList(tasks);
 
 		// Do the export
-		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
-
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sExportPath, nExporter, dwFlags);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sExportPath, nExporter, dwExportFlags);
 
 		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	} 
@@ -10213,9 +10213,7 @@ void CToDoListWnd::OnExport()
 		Resize();
 
 		// Do the export
-		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
-
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(taskFiles, sExportPath, nExporter, dwFlags);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(taskFiles, sExportPath, nExporter, dwExportFlags);
 
 		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	}
@@ -10286,9 +10284,10 @@ void CToDoListWnd::OnExport()
 				LogIntermediateTaskList(tasks);
 
 				// Do the export
-				DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
+				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sFilePath, nExporter, dwExportFlags);
 
-				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sFilePath, nExporter, dwFlags);
+				// Every export after the first one should be silent
+				dwExportFlags |= IIEF_SILENT;
 
 				// Show error messages but that's all
 				HandleExportTasklistResult(nRes, _T(""), FALSE, FALSE);
