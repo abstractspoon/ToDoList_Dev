@@ -631,7 +631,7 @@ void CTDLExportToPage::OnOK()
 
 	if (!m_bSingleTaskList)
 	{
-		PreserveExportPath();
+		PreserveExportPath(); // Update m_sFolderPath/m_sMultiFilePath
 
 		prefs.WriteProfileInt(m_sPrefsKey, _T("ExportOption"), m_bExportAllTasklists);
 		prefs.WriteProfileString(m_sPrefsKey, _T("LastFolder"), m_sFolderPath);
