@@ -142,7 +142,7 @@ void CTDLExportDlg::UpdateTitle()
 	}
 
 	SetDlgItemText(IDC_EXPORTTITLE, m_sExportTitle);
-	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(GetExportOneFile());
+	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(!bMultiFileOutput);
 }
 
 void CTDLExportDlg::OnOK()
@@ -185,8 +185,9 @@ void CTDLExportDlg::OnOK()
 				m_ppHost.SetActivePage(0);
 				return;
 			}
-			else
-				sExportPath = sPath;
+			
+			// else
+			sExportPath = sPath;
 		}
 
 		// make sure the output folder is valid
@@ -200,17 +201,12 @@ void CTDLExportDlg::OnOK()
 			
 			UINT nRet = MessageBox(sMessage, CEnString(IDS_ED_NOMAKEEXPORTPATH_TITLE), MB_OKCANCEL);
 
-			// re-display dialog
 			if (nRet == IDOK)
-			{
-				m_ppHost.SetActivePage(0);
-				return;
-			}
+				m_ppHost.SetActivePage(0); // don't close dialog
 			else
-			{
 				EndDialog(IDCANCEL);
-				return;
-			}
+
+			return;
 		}
 	}
 
