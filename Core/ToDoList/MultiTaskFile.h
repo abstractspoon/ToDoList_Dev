@@ -18,7 +18,7 @@ class CTaskFile;
 class CMultiTaskFile : public IMultiTaskList  
 {
 public:
-	CMultiTaskFile();
+	CMultiTaskFile(LPCTSTR szReportTitle = NULL, const COleDateTime& dtReport = 0.0);
 	virtual ~CMultiTaskFile();
 
 	CTaskFile& GetTaskFile(int nTaskFile = 0);
@@ -28,6 +28,9 @@ public:
 	virtual int GetTaskListCount() const;
 	virtual const ITaskList* GetTaskList(int nTaskList = 0) const;
 
+	virtual LPCWSTR GetReportTitle() const { return m_sReportTitle; }
+	virtual LPCWSTR GetReportDate() const { return m_sReportDate; }
+
 	/////////////////////////////////////////////////////
 	// IUnknown implementation
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObject);
@@ -36,6 +39,8 @@ public:
 
 protected:
 	CArray<CTaskFile*, CTaskFile*&> m_aTaskFiles;
+
+	CString m_sReportDate, m_sReportTitle;
 };
 
 #endif // !defined(AFX_MULTITASKFILE_H__3896047E_FE76_4EDC_9F97_191CABB982C0__INCLUDED_)

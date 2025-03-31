@@ -10179,7 +10179,7 @@ void CToDoListWnd::OnExport()
 	} 
 	else if (dialog.GetExportOneFile())	// Multiple tasklists to one file --------------------------
 	{
-		CMultiTaskFile taskFiles;
+		CMultiTaskFile taskFiles(dialog.GetExportTitle(), dialog.GetExportDate());
 		
 		for (int nCtrl = 0; nCtrl < nTDCCount; nCtrl++)
 		{
