@@ -473,6 +473,7 @@ void CRTFContentControl::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_BULLET,			'L',		HOTKEYF_CONTROL | HOTKEYF_SHIFT); 
 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPYASHTML,		'C',		HOTKEYF_CONTROL | HOTKEYF_ALT); 
+	m_mgrShortcuts.AddShortcut(ID_EDIT_HORZRULE,		'L',		HOTKEYF_CONTROL | HOTKEYF_ALT); 
 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_GROWFONT,		0xBE,		HOTKEYF_CONTROL | HOTKEYF_EXT); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_SHRINKFONT,		0xBC,		HOTKEYF_CONTROL | HOTKEYF_EXT); 
