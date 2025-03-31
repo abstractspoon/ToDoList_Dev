@@ -123,22 +123,25 @@ void CTDLExportDlg::OnExportToClipboardOrPath()
 
 void CTDLExportDlg::UpdateTitle()
 {
-	BOOL bWantMultiFileTitle = (GetExportAllTasklists() && !GetExportOneFile());
+	BOOL bExportAllTasklists = GetExportAllTasklists();
 
 	static CEnString MULTI_FILE_TITLE(IDS_EXPORTTITLE_MULTIPLEFILES);
 
-	if (bWantMultiFileTitle && (m_sExportTitle != MULTI_FILE_TITLE))
+	if (bExportAllTasklists)
 	{
-		m_sSingleFileTitle = m_sExportTitle;
-		m_sExportTitle = MULTI_FILE_TITLE;
+		if (m_sExportTitle != MULTI_FILE_TITLE)
+		{
+			m_sSingleFileTitle = m_sExportTitle;
+			m_sExportTitle = MULTI_FILE_TITLE;
+		}
 	}
-	else if (!bWantMultiFileTitle && !m_sSingleFileTitle.IsEmpty())
+	else if (!m_sSingleFileTitle.IsEmpty())
 	{
 		m_sExportTitle = m_sSingleFileTitle;
 	}
 
 	SetDlgItemText(IDC_EXPORTTITLE, m_sExportTitle);
-	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(GetExportOneFile());
+	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(!bExportAllTasklists);
 }
 
 void CTDLExportDlg::OnOK()
