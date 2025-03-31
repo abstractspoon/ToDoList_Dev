@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using System.Diagnostics;
 using System.Web.UI;
+using System.Collections.Generic;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using UIComponents;
@@ -366,7 +367,6 @@ namespace HTMLReportExporter
                 UpdateCaption();
                 UpdateControls();
             }
-
         }
 
         private void UpdateToolbar()
@@ -464,10 +464,10 @@ namespace HTMLReportExporter
 					break;
 
 				case PageType.Tasks:
+					// Only update if the header row combo is NOT dropped down
+					// else it's inconsistent with the rest of the updates
 					if (!this.tableHeaderRowCombobox.DroppedDown)
 					{
-						// Only update if the header row combo is NOT dropped down
-						// else it's inconsistent with the rest of the updates
 						m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
 						m_Template.Task.Enabled = true; // always
 						m_Template.Task.TableHeaderRow = this.tableHeaderRowCombobox.SelectedOption;
@@ -580,9 +580,10 @@ namespace HTMLReportExporter
 
 		private bool BuildPreviewPage()
 		{
-			var report = new HtmlReportBuilder(m_Trans, m_Tasklist, m_Prefs, m_Template, true, m_Printing);
+			var tasklists = new List<TaskList>() { m_Tasklist };
+			var report = new HtmlReportBuilder(m_Trans, m_Prefs, m_Template, true, m_Printing);
 
-			return report.BuildReport(PreviewPageName);
+			return report.BuildReport(tasklists, PreviewPageName);
 		}
 
 		private void RefreshPreview()

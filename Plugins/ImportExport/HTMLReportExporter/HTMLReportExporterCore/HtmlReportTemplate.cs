@@ -643,9 +643,10 @@ namespace HTMLReportExporter
 
 		// ---------------------------------------------
 
-		public HtmlReportTemplate()
+		public HtmlReportTemplate(string filePath = null)
 		{
-			Clear();
+			if (!Load(filePath))
+				Clear();
 		}
 
 		public void Clear()
@@ -747,7 +748,7 @@ namespace HTMLReportExporter
 
 		public bool Load(String pathName)
 		{
-			if (!File.Exists(pathName))
+			if (string.IsNullOrEmpty(pathName) || !File.Exists(pathName))
 				return false;
 
 			// else

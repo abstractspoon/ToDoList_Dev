@@ -99,6 +99,20 @@ IIMPORTEXPORT_RESULT CHTMLReportExporterBridge::Export(const ITaskList* pSrcTask
 
 IIMPORTEXPORT_RESULT CHTMLReportExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
-	// TODO
+	// call into out sibling C# module to do the actual work
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<MultiTaskList^> srcTasks = gcnew MultiTaskList(pSrcTaskFile);
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<String^> typeID = gcnew String(HTMLREPORTER_GUID);
+
+	msclr::auto_gcroot<HTMLReportExporterCore^> expCore = gcnew HTMLReportExporterCore(typeID.get(), trans.get());
+
+	// do the export
+	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
+	bool bPrinting = ((dwFlags & IIEF_PRINTING) != 0);
+
+	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, bPrinting, prefs.get(), gcnew String(szKey)))
+		return IIER_SUCCESS;
+
 	return IIER_OTHER;
 }

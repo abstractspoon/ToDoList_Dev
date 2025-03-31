@@ -13,7 +13,6 @@ namespace HTMLReportExporter
 {
 	class HtmlReportBuilder
 	{
-		private TaskList m_Tasklist = null;
 		private HtmlReportTemplate m_Template = null;
 		
 		private String m_BodyFontStyle = "";
@@ -38,10 +37,9 @@ namespace HTMLReportExporter
 
 		// -------------------------------------------------------------
 
-		public HtmlReportBuilder(Translator trans, TaskList tasks, Preferences prefs, 
+		public HtmlReportBuilder(Translator trans, Preferences prefs, 
 								HtmlReportTemplate template, bool preview, bool printing)
 		{
-			m_Tasklist = tasks;
 			m_Template = template;
 			m_Printing = printing;
 
@@ -57,7 +55,7 @@ namespace HTMLReportExporter
 			Tasks = new TaskTemplateReporter(trans, template.Task, baseIndent, preview);
 		}
 
-		public bool BuildReport(string filePath)
+		public bool BuildReport(IList<TaskList> tasklists, string filePath)
 		{
 			try
 			{
@@ -69,8 +67,8 @@ namespace HTMLReportExporter
 						html.WriteLine();
 						html.RenderBeginTag(HtmlTextWriterTag.Html);
 
-						WriteHead(html);
-						WriteBody(html);
+						WriteHead(tasklists, html);
+						WriteBody(tasklists, html);
 
 						html.RenderEndTag(); // Html
 					}
@@ -84,18 +82,21 @@ namespace HTMLReportExporter
 			return true;
 		}
 
-		private void WriteHead(HtmlTextWriter html)
+		private void WriteHead(IList<TaskList> tasklists, HtmlTextWriter html)
 		{
 			html.RenderBeginTag(HtmlTextWriterTag.Head);
 
 			WriteStyles(html);
 			WriteMetadata(html);
 
-			html.RenderBeginTag(HtmlTextWriterTag.Title);
-			html.Write(m_Tasklist.GetReportTitle());
+			if (tasklists.Count == 1)
+			{
+				html.RenderBeginTag(HtmlTextWriterTag.Title);
+				html.Write(tasklists[0].GetReportTitle());
 
-			html.RenderEndTag(); // Title
-			html.WriteLine();
+				html.RenderEndTag(); // Title
+				html.WriteLine();
+			}
 
 			html.RenderEndTag(); // Head
 			html.WriteLine();
@@ -148,7 +149,7 @@ namespace HTMLReportExporter
 			html.WriteLine();
 		}
 		
-		private void WriteMetadata(HtmlTextWriter html)
+		static private void WriteMetadata(HtmlTextWriter html)
 		{
 			html.AddAttribute("http-equiv", "content-type");
 			html.AddAttribute("content", "text/html; charset=UTF-16");
@@ -163,13 +164,32 @@ namespace HTMLReportExporter
 			html.WriteLine();
 		}
 
-		private void WriteBody(HtmlTextWriter html)
+		private void WriteBody(IList<TaskList> tasklists, HtmlTextWriter html)
 		{
 			html.RenderBeginTag(HtmlTextWriterTag.Body);
 
-			Header.WriteBodyDiv(m_Tasklist, html);
-			Footer.WriteBodyDiv(m_Tasklist, html);
+			foreach (var tasks in tasklists)
+			{
+				if (tasklists.Count == 1)
+				{
+					Header.WriteBodyDiv(tasks, html);
+					Footer.WriteBodyDiv(tasks, html);
+				}
+				else
+				{
+					Header.WriteBodyDiv(null, html);
+					Footer.WriteBodyDiv(null, html);
+				}
 
+				WriteBody(tasks, html);
+			}
+
+			html.RenderEndTag(); // Body
+			html.WriteLine();
+		}
+
+		private void WriteBody(TaskList tasks, HtmlTextWriter html)
+		{
 			html.AddAttribute("width", "100%");
 			html.RenderBeginTag(HtmlTextWriterTag.Table);
 
@@ -178,17 +198,17 @@ namespace HTMLReportExporter
 
 			html.RenderBeginTag(HtmlTextWriterTag.Tbody);
 
-			if (Title.ContainsTaskAttributes(m_Tasklist))
+			if (Title.ContainsTaskAttributes(tasks))
 			{
 				// Each top-level task gets a new page
-				Task task = m_Tasklist.GetFirstTask();
+				Task task = tasks.GetFirstTask();
 
 				while (task.IsValid())
 				{
 					BeginContentRow(html, true);
 					
-					Title.WriteTitleContent(m_Tasklist, task, html);
-					Tasks.WriteSubtaskContent(m_Tasklist, task, html);
+					Title.WriteTitleContent(tasks, task, html);
+					Tasks.WriteSubtaskContent(tasks, task, html);
 
 					EndContentRow(html);
 
@@ -201,15 +221,14 @@ namespace HTMLReportExporter
 				// All tasks sit inside one row
 				BeginContentRow(html, false);
 
-				Title.WriteTitleContent(m_Tasklist, html);
-				Tasks.WriteTaskContent(m_Tasklist, html);
+				Title.WriteTitleContent(tasks, html);
+				Tasks.WriteTaskContent(tasks, html);
 
 				EndContentRow(html);
 			}
 
 			html.RenderEndTag(); // Tbody
 			html.RenderEndTag(); // Table
-			html.RenderEndTag(); // Body
 			html.WriteLine();
 		}
 
