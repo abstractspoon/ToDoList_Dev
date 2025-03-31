@@ -28,7 +28,7 @@ public:
 					 LPCTSTR szPrefsKey);
 
 	CString GetFormatTypeID() const { return m_sFormatTypeID; }
-	CString GetExportPath() const; // can be folder or file
+	CString GetExportPath() const { return m_sExportPath; } // can be folder or file
 	TDLPD_STYLE GetHtmlStyle() const { return m_nHtmlStyle; }
 
 	BOOL GetExportAllTasklists() const { return (!m_bSingleTaskList && m_bExportAllTasklists); }
@@ -53,7 +53,7 @@ protected:
 	//}}AFX_DATA
 
 	BOOL m_bSingleTaskList; 
-	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath;
+	CString m_sFolderPath, m_sFilePath, m_sMultiFilePath;
 	CString m_sFormatTypeID;
 	CString m_sPrefsKey;
 	TDLPD_STYLE m_nHtmlStyle;
@@ -73,7 +73,7 @@ protected:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CExportDlg)
-	afx_msg void OnSelchangeFormatoptions();
+	afx_msg void OnSelchangeExporterFormat();
 	afx_msg void OnSelchangeTasklistoptions();
 	afx_msg void OnExportonefile();
 	afx_msg void OnChangeExportpath();
@@ -82,9 +82,13 @@ protected:
 	afx_msg void OnSelChangeHtmlOption();
 	DECLARE_MESSAGE_MAP()
 
-	void EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt = TRUE) const;
-	void UpdateExtension(CString& sPathName, LPCTSTR szFromTypeID, LPCTSTR szToTypeID) const;
-	void UpdateHtmlOptionsVisibility();
+	BOOL RemoveExporterFileExtension(CString& sPathName, LPCTSTR szFormatTypeID) const;
+	void EnsureExporterFileExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt = TRUE) const;
+	CString GetExporterFileExtension(LPCTSTR szFromTypeID) const;
+	BOOL WantSaveToFolder() const;
+	void PreserveExportPath();
+	void RestoreExportPath();
+	void RefreshCtrlStates();
 };
 
 /////////////////////////////////////////////////////////////////////////////

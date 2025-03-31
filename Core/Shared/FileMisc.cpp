@@ -2427,6 +2427,11 @@ BOOL FileMisc::ExtractResource(LPCTSTR szModulePath, UINT nID, LPCTSTR szType, c
 	return ExtractResource(nID, szType, sTempFilePath, hModule);
 }
 
+BOOL FileMisc::HasExtension(LPCTSTR szFilePath)
+{
+	return !GetExtension(szFilePath, FALSE).IsEmpty();
+}
+
 BOOL FileMisc::HasExtension(LPCTSTR szFilePath, LPCTSTR szExt)
 {
 	if (Misc::IsEmpty(szExt) || Misc::IsEmpty(szFilePath))
