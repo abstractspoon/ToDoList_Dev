@@ -116,7 +116,7 @@ IIMPORTEXPORT_RESULT CGPExporter::ExportTasklists(const CITaskListArray& aTaskli
 
 		// For a multi-file export create a top-level node for each tasklist
 		if (bMulti)
-			pXITasks = CreateTaskNode(pTasks->GetReportTitle(), ((nTaskList + 1) * SHORT_MAX), pXIAllTasks);
+			pXITasks = CreateTaskNode(pTasks->GetReportTitle(), (nTaskList * SHORT_MAX), pXIAllTasks);
 
 		// clear the task map that will be populated in ExportTask
 		// for use in ExportDependencies
@@ -499,7 +499,7 @@ void CGPExporter::ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITE
 					
 					pXIDepends->AddItem(_T("id"), nDependeeID);
 					pXIDepends->AddItem(_T("type"), 2);
-					pXIDepends->AddItem(_T("hardness"), _T("Rubber"));
+					pXIDepends->AddItem(_T("hardness"), _T("Strong"));
 
 					if (nDaysLeadIn != 0)
 						pXIDepends->AddItem(_T("difference"), nDaysLeadIn);
