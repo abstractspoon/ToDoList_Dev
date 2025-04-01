@@ -90,10 +90,12 @@ IIMPORTEXPORT_RESULT CGPExporter::ExportTasklists(const CITaskListArray& aTaskli
 		return IIER_CANCELLED;
 
 	CXmlFile fileDest(_T("project"));
+	BOOL bMulti = (aTasklists.GetSize() > 1), bSomeFailed = FALSE;
+
 	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
 
 	// placeholders for tasks
-	CXmlItem* pXITasks = fileDest.AddItem(_T("tasks"));
+	CXmlItem* pXIAllTasks = fileDest.AddItem(_T("tasks"));
 	CXmlItem* pXIAllocations = fileDest.AddItem(_T("allocations"));
 	
 	for (int nTaskList = 0; nTaskList < aTasklists.GetSize(); nTaskList++)
@@ -109,12 +111,19 @@ IIMPORTEXPORT_RESULT CGPExporter::ExportTasklists(const CITaskListArray& aTaskli
 		// export resource allocations
 		ExportResources(pTasks, fileDest.Root());
 
+		// export tasks
+		CXmlItem* pXITasks = pXIAllTasks;
+
+		// For a multi-file export create a top-level node for each tasklist
+		if (bMulti)
+			pXITasks = CreateTaskNode(pTasks->GetReportTitle(), ((nTaskList + 1) * SHORT_MAX), pXIAllTasks);
+
 		// clear the task map that will be populated in ExportTask
+		// for use in ExportDependencies
 		m_mapTasks.RemoveAll();
 
-		// export tasks
-		if (!ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
-			return IIER_SOMEFAILED;
+		if (!pXITasks || !ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, pXIAllocations, TRUE))
+			bSomeFailed = TRUE;
 
 		ExportDependencies(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE);
 	}
@@ -127,7 +136,7 @@ IIMPORTEXPORT_RESULT CGPExporter::ExportTasklists(const CITaskListArray& aTaskli
 	if (!fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM))
 		return IIER_BADFILE;
 
-	return IIER_SUCCESS;
+	return (bSomeFailed ? IIER_SOMEFAILED : IIER_SUCCESS);
 }
 
 void CGPExporter::SetupDisplay(CXmlItem* pDestPrj)
@@ -190,6 +199,23 @@ void CGPExporter::SetupCalendar(CXmlItem* pDestPrj)
 	pXIWeek->SetItemValue(_T("sat"), _T("1"));
 }
 
+CXmlItem* CGPExporter::CreateTaskNode(LPCTSTR szTitle, int nGPID, CXmlItem* pXIDestParent)
+{
+	// create a new item corresponding to pXITask at the dest
+	CXmlItem* pXIDestItem = pXIDestParent->AddItem(_T("task"));
+
+	if (!pXIDestItem)
+		return false;
+
+	// copy across the appropriate attributes
+	pXIDestItem->AddItem(_T("id"), nGPID);
+	pXIDestItem->AddItem(_T("name"), szTitle);
+
+	// map the id to item for dependency
+	m_mapTasks[nGPID] = pXIDestItem;
+
+	return pXIDestItem;
+}
 
 bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
 							 CXmlItem* pXIDestParent, CXmlItem* pXIAllocations, BOOL bAndSiblings)
@@ -198,18 +224,13 @@ bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 		return true;
 
 	// create a new item corresponding to pXITask at the dest
-	CXmlItem* pXIDestItem = pXIDestParent->AddItem(_T("task"));
+	int nGPID = GetGPTaskID(pSrcTaskFile->GetTaskID(hTask));
 
+	CXmlItem* pXIDestItem = CreateTaskNode(pSrcTaskFile->GetTaskTitle(hTask), 
+										   nGPID,
+										   pXIDestParent);
 	if (!pXIDestItem)
 		return false;
-
-	// copy across the appropriate attributes
-	int nTaskID = GetGPTaskID(pSrcTaskFile->GetTaskID(hTask));
-	pXIDestItem->AddItem(_T("id"), nTaskID);
-	pXIDestItem->AddItem(_T("name"), pSrcTaskFile->GetTaskTitle(hTask));
-
-	// map the id to item for dependency
-	m_mapTasks[nTaskID] = pXIDestItem;
 
 	// colour
 	if (pSrcTaskFile->GetTaskTextColor(hTask) > 0)
@@ -330,7 +351,7 @@ bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 
 			if (pXIAllocTo)
 			{
-				pXIAllocTo->AddItem(_T("task-id"), nTaskID);
+				pXIAllocTo->AddItem(_T("task-id"), nGPID);
 				pXIAllocTo->AddItem(_T("resource-id"), nResID);
 				pXIAllocTo->AddItem(_T("responsible"), _T("true"));
 				pXIAllocTo->AddItem(_T("load"), _T("100.0"));
@@ -478,10 +499,10 @@ void CGPExporter::ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITE
 					
 					pXIDepends->AddItem(_T("id"), nDependeeID);
 					pXIDepends->AddItem(_T("type"), 2);
+					pXIDepends->AddItem(_T("hardness"), _T("Rubber"));
 
 					if (nDaysLeadIn != 0)
 						pXIDepends->AddItem(_T("difference"), nDaysLeadIn);
-
 				}
 			}
 		}
