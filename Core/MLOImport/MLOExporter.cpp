@@ -63,12 +63,12 @@ IIMPORTEXPORT_RESULT CMLOExporter::Export(const IMultiTaskList* pSrcTaskFile, LP
 IIMPORTEXPORT_RESULT CMLOExporter::ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath) const
 {
 	CXmlFile fileDest(_T("MyLifeOrganized-xml"));
+	BOOL bMulti = (aTasklists.GetSize() > 1), bSomeFailed = FALSE;
 
 	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
 	fileDest.AddItem(_T("ver"), _T("1.2"));
 
 	// export tasks
-	BOOL bMulti = (aTasklists.GetSize() > 1), bSomeFailed = FALSE;
 	CXmlItem* pXIAllTasks = fileDest.AddItem(_T("TaskTree"));
 
 	for (int nTaskList = 0; nTaskList < aTasklists.GetSize(); nTaskList++)
@@ -104,16 +104,16 @@ IIMPORTEXPORT_RESULT CMLOExporter::ExportTasklists(const CITaskListArray& aTaskl
 
 CXmlItem* CMLOExporter::CreateTaskNode(LPCTSTR szTitle, DWORD dwID, CXmlItem* pXIDestParent) const
 {
-	CXmlItem* pXITasks = pXIDestParent->AddItem(_T("TaskNode"));
-	ASSERT(pXITasks);
+	CXmlItem* pXITask = pXIDestParent->AddItem(_T("TaskNode"));
+	ASSERT(pXITask);
 
-	if (pXITasks)
+	if (pXITask)
 	{
-		pXITasks->AddItem(_T("Caption"), szTitle);
-		pXITasks->AddItem(_T("IDD"), FormatDestID(szTitle, dwID), XIT_ELEMENT);
+		pXITask->AddItem(_T("Caption"), szTitle);
+		pXITask->AddItem(_T("IDD"), FormatDestID(szTitle, dwID), XIT_ELEMENT);
 	}
 
-	return pXITasks;
+	return pXITask;
 }
 
 CString CMLOExporter::FormatDestID(const CString& sTitle, DWORD dwID)
