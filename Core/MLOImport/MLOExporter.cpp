@@ -68,8 +68,9 @@ IIMPORTEXPORT_RESULT CMLOExporter::ExportTasklists(const CITaskListArray& aTaskl
 	fileDest.AddItem(_T("ver"), _T("1.2"));
 
 	// export tasks
-	CXmlItem* pXITasks = fileDest.AddItem(_T("TaskTree"));
-	
+	BOOL bMulti = (aTasklists.GetSize() > 1), bSomeFailed = FALSE;
+	CXmlItem* pXIAllTasks = fileDest.AddItem(_T("TaskTree"));
+
 	for (int nTaskList = 0; nTaskList < aTasklists.GetSize(); nTaskList++)
 	{
 		const ITASKLISTBASE* pTasks = aTasklists[nTaskList];
@@ -80,10 +81,16 @@ IIMPORTEXPORT_RESULT CMLOExporter::ExportTasklists(const CITaskListArray& aTaskl
 			return IIER_BADINTERFACE;
 		}
 
+		CXmlItem* pXITasks = pXIAllTasks;
+		
+		// For a multi-file export create a top-level node for each tasklist
+		if (bMulti)
+			pXITasks = CreateTaskNode(pTasks->GetReportTitle(), (nTaskList * SHORT_MAX), pXIAllTasks);
+
 		// export tasks
-		if (!ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE))
-			return IIER_SOMEFAILED;
-			
+		if (!pXITasks || !ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE))
+			bSomeFailed = TRUE;
+
 		// export resource allocations
 		ExportPlaces(pTasks, fileDest.Root());
 	}
@@ -92,10 +99,24 @@ IIMPORTEXPORT_RESULT CMLOExporter::ExportTasklists(const CITaskListArray& aTaskl
 	if (!fileDest.Save(szDestFilePath, SFEF_UTF8WITHOUTBOM))
 		return IIER_BADFILE;
 
-	return IIER_SUCCESS;
+	return (bSomeFailed ? IIER_SOMEFAILED : IIER_SUCCESS);
 }
 
-CString CMLOExporter::FormatDestID(const CString& sTitle, DWORD dwID) const
+CXmlItem* CMLOExporter::CreateTaskNode(LPCTSTR szTitle, DWORD dwID, CXmlItem* pXIDestParent) const
+{
+	CXmlItem* pXITasks = pXIDestParent->AddItem(_T("TaskNode"));
+	ASSERT(pXITasks);
+
+	if (pXITasks)
+	{
+		pXITasks->AddItem(_T("Caption"), szTitle);
+		pXITasks->AddItem(_T("IDD"), FormatDestID(szTitle, dwID), XIT_ELEMENT);
+	}
+
+	return pXITasks;
+}
+
+CString CMLOExporter::FormatDestID(const CString& sTitle, DWORD dwID)
 {
 	unsigned long nTaskNameCode = sTitle.GetLength();
 	ASSERT(nTaskNameCode);
@@ -112,17 +133,15 @@ bool CMLOExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask
 	if (!hTask)
 		return true;
 	
-	// Create a new item corresponding to pXITask at the dest
-	CXmlItem* pXIDestItem = pXIDestParent->AddItem(_T("TaskNode"));
-	
+	CXmlItem* pXIDestItem = CreateTaskNode(pSrcTaskFile->GetTaskTitle(hTask), 
+										   pSrcTaskFile->GetTaskID(hTask),
+										   pXIDestParent);
+
 	if (!pXIDestItem)
+	{
+		ASSERT(0);
 		return false;
-	
-	// Copy across the appropriate attributes
-	CString sTitle = pSrcTaskFile->GetTaskTitle(hTask);
-	
-	pXIDestItem->AddItem(_T("Caption"), sTitle);
-	pXIDestItem->AddItem(_T("IDD"), FormatDestID(sTitle, pSrcTaskFile->GetTaskID(hTask)), XIT_ELEMENT);
+	}
 	
 	// Priority
 	int nPriority = pSrcTaskFile->GetTaskPriority(hTask, FALSE);

@@ -56,11 +56,13 @@ protected:
 	CString FormatFileLinks(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask) const;
 	CString FormatDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestItem) const;
 	CString FormatComments(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask) const;
-	CString FormatDestID(const CString& sTitle, DWORD dwID) const;
+
+	CXmlItem* CreateTaskNode(LPCTSTR szTitle, DWORD dwID, CXmlItem* pXIDestParent) const;
 
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 	static CString FormatDate(time64_t tDate);
 	static void AddSpacedContent(const CString& sSrc, CString& sDest);
+	static CString FormatDestID(const CString& sTitle, DWORD dwID);
 };
 
 #endif // !defined(AFX_MLOEXPORTER_H__F588E6B1_3646_4994_99A2_4223FDDA1A31__INCLUDED_)

@@ -99,7 +99,8 @@ IIMPORTEXPORT_RESULT CFMindExporter::ExportTasklists(const CITaskListArray& aTas
 		}
 
 		CXmlItem *pXINode = fileDest.AddItem(_T("node"), _T(""));
-		pXINode->AddItem(_T("TEXT"), pTasks->GetProjectName());	
+		pXINode->AddItem(_T("TEXT"), pTasks->GetReportTitle());	
+		pXINode->AddItem(_T("DATE"), pTasks->GetReportDate());
 
 		CXmlItem * pXIHook = pXINode->AddItem(_T("hook"), _T(""));
 		pXIHook->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
