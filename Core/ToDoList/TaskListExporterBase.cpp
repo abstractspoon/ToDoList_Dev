@@ -90,29 +90,31 @@ CTaskListExporterBase::~CTaskListExporterBase()
 	
 }
 
-IIMPORTEXPORT_RESULT CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const
+IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, 
+								   IPreferences* pPrefs, LPCTSTR szKey)
 {
-	if (sOutput.IsEmpty())
-		return IIER_SOMEFAILED;
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
+	ASSERT(pTasks);
+	
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return IIER_BADINTERFACE;
+	}
 
-	if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM))
-		return IIER_BADFILE;
+	if (!InitConsts(pTasks, szDestFilePath, dwFlags, pPrefs, szKey))
+		return IIER_CANCELLED;
 
-	return IIER_SUCCESS;
-}
-
-bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, DWORD dwFlags, 
-									   IPreferences* pPrefs, LPCTSTR /*szKey*/)
-{
-	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
-	PARENTTITLECOMMENTSNLY = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportParentTitleCommentsOnly"), FALSE);
-
-	PRINTING = Misc::HasFlag(dwFlags, IIEF_PRINTING);
-	TASKLISTPATH = pTasks->GetFileName(true);
-
-	BuildAttribList(pTasks);
-
-	return true;
+	// add title block
+	CString sOutput = FormatTitle(pTasks);
+	
+	// then header
+	sOutput += FormatHeader(pTasks);
+	
+	// then tasks
+	sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
+	
+	return ExportOutput(szDestFilePath, sOutput);
 }
 
 IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, 
@@ -162,31 +164,29 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTas
 	return ExportOutput(szDestFilePath, sOutput);
 }
 
-IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, 
-								   IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const
 {
-	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
-	ASSERT(pTasks);
-	
-	if (pTasks == NULL)
-	{
-		ASSERT(0);
-		return IIER_BADINTERFACE;
-	}
+	if (sOutput.IsEmpty())
+		return IIER_SOMEFAILED;
 
-	if (!InitConsts(pTasks, szDestFilePath, dwFlags, pPrefs, szKey))
-		return IIER_CANCELLED;
+	if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
 
-	// add title block
-	CString sOutput = FormatTitle(pTasks);
-	
-	// then header
-	sOutput += FormatHeader(pTasks);
-	
-	// then tasks
-	sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
-	
-	return ExportOutput(szDestFilePath, sOutput);
+	return IIER_SUCCESS;
+}
+
+bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, DWORD dwFlags, 
+									   IPreferences* pPrefs, LPCTSTR /*szKey*/)
+{
+	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
+	PARENTTITLECOMMENTSNLY = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportParentTitleCommentsOnly"), FALSE);
+
+	PRINTING = Misc::HasFlag(dwFlags, IIEF_PRINTING);
+	TASKLISTPATH = pTasks->GetFileName(true);
+
+	BuildAttribList(pTasks);
+
+	return true;
 }
 
 CString CTaskListExporterBase::FormatHeader(const ITASKLISTBASE* pTasks) const
