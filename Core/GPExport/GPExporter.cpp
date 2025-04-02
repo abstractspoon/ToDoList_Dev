@@ -89,9 +89,9 @@ IIMPORTEXPORT_RESULT CGPExporter::ExportTasklists(const CITaskListArray& aTaskli
 	if (!InitConsts(aTasklists[0], dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
-	CXmlFile fileDest(_T("project"));
 	BOOL bMulti = (aTasklists.GetSize() > 1), bSomeFailed = FALSE;
 
+	CXmlFile fileDest(_T("project"));
 	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
 
 	// placeholders for tasks

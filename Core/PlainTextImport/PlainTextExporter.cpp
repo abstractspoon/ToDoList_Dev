@@ -24,7 +24,7 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR ENDL = _T("\r\n");
+const CString ENDL(_T("\r\n"));
 
 CPlainTextExporter::CPlainTextExporter() : INDENT(_T("  ")), WANTPROJECT(FALSE)
 {
@@ -40,7 +40,7 @@ void CPlainTextExporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-bool CPlainTextExporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
+BOOL CPlainTextExporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -68,7 +68,7 @@ bool CPlainTextExporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR
 		COptionsDlg dlg(FALSE, WANTPROJECT, INDENT);
 
 		if (dlg.DoModal() != IDOK)
-			return false;
+			return FALSE;
 		
 		INDENT = dlg.GetIndent();
 		WANTPROJECT = dlg.GetWantProject();
@@ -77,7 +77,7 @@ bool CPlainTextExporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR
 		pPrefs->WriteProfileString(szKey, _T("Indent"), INDENT);
 	}
 
-	return true;
+	return TRUE;
 }
 
 IIMPORTEXPORT_RESULT CPlainTextExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
@@ -90,25 +90,8 @@ IIMPORTEXPORT_RESULT CPlainTextExporter::Export(const ITaskList* pSrcTaskFile, L
 	if (!fileOut.Open(szDestFilePath, CFile::modeCreate | CFile::modeWrite, SFEF_UTF8WITHOUTBOM))
 		return IIER_BADFILE;
 
-	// export report title as dummy task
-	const ITaskList4* pTasks = GetITLInterface<ITaskList4>(pSrcTaskFile, IID_TASKLIST4);
-
-	if (WANTPROJECT)
-	{
-		CString sTitle = pTasks->GetReportTitle();
-		
-		if (sTitle.IsEmpty())
-			sTitle = pTasks->GetProjectName();
-		
-		// note: we export the title even if it's empty
-		// to maintain consistency with the importer that the first line
-		// is always the outline name
-		sTitle += ENDL;
-		fileOut.WriteString(sTitle);
-	}
-	
-	// export first task
-	ExportTask(pSrcTaskFile, pSrcTaskFile->GetFirstTask(), fileOut, 0, TRUE);
+	if (!ExportTasklist(pSrcTaskFile, fileOut, 0))
+		return IIER_SOMEFAILED;
 	
 	return IIER_SUCCESS;
 }
@@ -119,45 +102,54 @@ IIMPORTEXPORT_RESULT CPlainTextExporter::Export(const IMultiTaskList* pSrcTaskFi
 		return IIER_CANCELLED;
 
 	CStdioFileEx fileOut;
+	BOOL bSomeFailed = FALSE;
 
 	if (!fileOut.Open(szDestFilePath, (CFile::modeCreate | CFile::modeWrite), SFEF_UTF8WITHOUTBOM))
 		return IIER_BADFILE;
 
+	if (WANTPROJECT)
+		fileOut.WriteString(pSrcTaskFile->GetReportTitle() + ENDL);
+
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{ 
-		// minimum interface
-		const ITaskList4* pTasks = GetITLInterface<ITaskList4>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLIST4);
-		
-		if (pTasks == NULL)
-		{
-			ASSERT(0);
-			return IIER_BADINTERFACE;
-		}
+		if (!ExportTasklist(pSrcTaskFile->GetTaskList(nTaskList), fileOut, 1))
+			bSomeFailed = TRUE;
+	}
+	
+	return (bSomeFailed ? IIER_SOMEFAILED : IIER_SUCCESS);
+}
 
-		// always export report title as dummy task 
-		CString sTitle = pTasks->GetReportTitle();
+BOOL CPlainTextExporter::ExportTasklist(const ITaskList* pSrcTaskFile, CStdioFile& fileOut, int nDepth)
+{
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
-		if (sTitle.IsEmpty())
-			sTitle = pTasks->GetProjectName();
+	if (!pTasks)
+		return FALSE;
 
+	if (WANTPROJECT)
+	{
 		// note: we export the title even if it's empty
 		// to maintain consistency with the importer that the first line
 		// is always the outline name
-		sTitle += ENDL;
-		fileOut.WriteString(sTitle);
+		CString sTitle = (pTasks->GetReportTitle() + ENDL);
 
-		// export first task at depth == 1 to indent 
-		// it from the project name
-		ExportTask(pTasks, pTasks->GetFirstTask(), fileOut, 1, TRUE);
-		
-		// add blank line before next tasklist
-		fileOut.WriteString(ENDL);
+		ASSERT(nDepth == 0 || nDepth == 1);
+
+		if (nDepth == 1)
+			sTitle = INDENT + sTitle;
+
+		fileOut.WriteString(sTitle);
 	}
-	
-	return IIER_SUCCESS;
+
+	// export first task indented from the project name
+	ExportTask(pTasks, pTasks->GetFirstTask(), fileOut, (nDepth + 1), TRUE);
+
+	// add blank line before next tasklist
+	fileOut.WriteString(ENDL);
+	return TRUE;
 }
 
-void CPlainTextExporter::ExportTask(const ITaskList* pSrcTaskFile, HTASKITEM hTask, 
+void CPlainTextExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 									CStdioFile& fileOut, int nDepth, BOOL bAndSiblings)
 {
 	if (!hTask)
