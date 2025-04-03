@@ -236,19 +236,15 @@ namespace HTMLReportExporter
 
 		// ----------------------------------------------------
 
-		public static String ReplaceReportAttributePlaceholders(TaskList tasks, String content)
+		public static String ReplaceReportAttributePlaceholders(string reportTitle, string reportDate, String content)
 		{
-			if (tasks == null)
-				return ClearReportAttributePlaceholders(content);
-
-			return content.Replace("$(reportTitle)", tasks.GetReportTitle())
-						  .Replace("$(reportDate)", tasks.GetReportDate());
+			return content.Replace("$(reportTitle)", reportTitle)
+						  .Replace("$(reportDate)", reportDate);
 		}
 
 		public static String ClearReportAttributePlaceholders(String content)
 		{
-			return content.Replace("$(reportTitle)", "")
-						  .Replace("$(reportDate)", "");
+			return ReplaceReportAttributePlaceholders("", "", content);
 		}
 
 		public static bool ContentContainsTaskAttributePlaceholders(String content, TaskList tasks)

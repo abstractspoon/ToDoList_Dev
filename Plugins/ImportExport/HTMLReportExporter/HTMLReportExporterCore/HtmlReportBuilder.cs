@@ -15,7 +15,10 @@ namespace HTMLReportExporter
 	{
 		private HtmlReportTemplate m_Template = null;
 		
-		private String m_BodyFontStyle = "";
+		private String m_BodyFontStyle = string.Empty;
+		private string m_ReportTitle = string.Empty;
+		private string m_ReportDate = string.Empty;
+
 		private bool m_StrikeThruDone = true;
 		private bool m_Printing = false;
 
@@ -37,18 +40,25 @@ namespace HTMLReportExporter
 
 		// -------------------------------------------------------------
 
-		public HtmlReportBuilder(Translator trans, Preferences prefs, 
-								HtmlReportTemplate template, bool preview, bool printing)
+		public HtmlReportBuilder(Translator trans, 
+								 Preferences prefs, 
+								 HtmlReportTemplate template,
+								 string reportTitle,
+								 string reportDate,
+								 bool preview, 
+								 bool printing)
 		{
 			m_Template = template;
 			m_Printing = printing;
+			m_ReportTitle = reportTitle;
+			m_ReportDate = reportDate;
 
 			m_StrikeThruDone = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_BodyFontStyle = HtmlReportUtils.FormatBodyFontStyle(prefs);
 
-			Header = new HeaderTemplateReporter(template.Header, template.BackColor);
+			Header = new HeaderTemplateReporter(template.Header, reportTitle, reportDate, template.BackColor);
+			Footer = new FooterTemplateReporter(template.Footer, reportTitle, reportDate, template.BackColor);
 			Title = new TitleTemplateReporter(trans, template.Title);
-			Footer = new FooterTemplateReporter(template.Footer, template.BackColor);
 
 			var baseIndent = HtmlReportUtils.FormatTaskBaseIndent(prefs);
 
@@ -89,10 +99,10 @@ namespace HTMLReportExporter
 			WriteStyles(html);
 			WriteMetadata(html);
 
-			if (tasklists.Count == 1)
+			if (string.IsNullOrEmpty(m_ReportTitle))
 			{
 				html.RenderBeginTag(HtmlTextWriterTag.Title);
-				html.Write(tasklists[0].GetReportTitle());
+				html.Write(m_ReportTitle);
 
 				html.RenderEndTag(); // Title
 				html.WriteLine();
@@ -170,16 +180,8 @@ namespace HTMLReportExporter
 
 			foreach (var tasks in tasklists)
 			{
-				if (tasklists.Count == 1)
-				{
-					Header.WriteBodyDiv(tasks, html);
-					Footer.WriteBodyDiv(tasks, html);
-				}
-				else
-				{
-					Header.WriteBodyDiv(null, html);
-					Footer.WriteBodyDiv(null, html);
-				}
+				Header.WriteBodyDiv(html);
+				Footer.WriteBodyDiv(html);
 
 				WriteBody(tasks, html);
 			}
@@ -254,13 +256,17 @@ namespace HTMLReportExporter
 
 		public class HeaderFooterTemplateReporter : HeaderFooterTemplateItem
 		{
+			private string ReportTitle, ReportDate;
+
 			// For deriving only
-			protected HeaderFooterTemplateReporter(HeaderFooterTemplateItem item, Color defbackColor)
+			protected HeaderFooterTemplateReporter(HeaderFooterTemplateItem item, string reportTitle, string reportDate, Color defbackColor)
 				:
 				base(item.XmlTag, item.Height)
 			{
 				Copy(item);
 
+				ReportTitle = reportTitle;
+				ReportDate = reportDate;
 				DefaultBackColor = defbackColor;
 			}
 
@@ -290,13 +296,31 @@ namespace HTMLReportExporter
 				get { return !DrawingColor.IsTransparent(DefaultBackColor, true); }
 			}
 
+			protected bool WriteBodyDiv(string type, HtmlTextWriter html)
+			{
+				if (!Enabled || (Height <= 0))
+					return false;
+
+				html.AddAttribute("class", type);
+
+				html.RenderBeginTag(HtmlTextWriterTag.Div);
+				html.Write(HtmlReportUtils.ReplaceReportAttributePlaceholders(ReportTitle, ReportDate, Text));
+				html.RenderEndTag(); // Div
+
+				html.WriteLine();
+
+				return true;
+			}
+
 		}
 
 		// --------------------------------------------------------------------------
 
 		public class HeaderTemplateReporter : HeaderFooterTemplateReporter
 		{
-			public HeaderTemplateReporter(HeaderTemplate header, Color defbackColor) : base(header, defbackColor)
+			public HeaderTemplateReporter(HeaderTemplate header, string reportTitle, string reportDate, Color defbackColor) 
+				: 
+				base(header, reportTitle, reportDate, defbackColor)
 			{
 				Copy(header);
 			}
@@ -322,20 +346,9 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			public bool WriteBodyDiv(TaskList tasks, HtmlTextWriter html)
+			public bool WriteBodyDiv(HtmlTextWriter html)
 			{
-				if (!Enabled || (Height <= 0))
-					return false;
-
-				html.AddAttribute("class", "page-header");
-
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks, Text));
-				html.RenderEndTag(); // Div
-
-				html.WriteLine();
-
-				return true;
+				return base.WriteBodyDiv("page-header", html);
 			}
 
 			public bool WriteHeaderContent(HtmlTextWriter html)
@@ -364,7 +377,9 @@ namespace HTMLReportExporter
 
 		public class FooterTemplateReporter : HeaderFooterTemplateReporter
 		{
-			public FooterTemplateReporter(FooterTemplate footer, Color defbackColor) : base(footer, defbackColor)
+			public FooterTemplateReporter(FooterTemplate footer, string reportTitle, string reportDate, Color defbackColor) 
+				: 
+				base(footer, reportTitle, reportDate, defbackColor)
 			{
 				Copy(footer);
 			}
@@ -390,20 +405,9 @@ namespace HTMLReportExporter
 				return true;
 			}
 
-			public bool WriteBodyDiv(TaskList tasks, HtmlTextWriter html)
+			public bool WriteBodyDiv(HtmlTextWriter html)
 			{
-				if (!Enabled || (Height <= 0))
-					return false;
-
-				html.AddAttribute("class", "page-footer");
-
-				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks, Text));
-				html.RenderEndTag(); // Div
-
-				html.WriteLine();
-
-				return true;
+				return base.WriteBodyDiv("page-footer", html);
 			}
 
 			public bool WriteFooterContent(HtmlTextWriter html)
@@ -520,7 +524,7 @@ namespace HTMLReportExporter
 					html.AddAttribute("class", "title-page");
 
 				html.RenderBeginTag(HtmlTextWriterTag.Div);
-				html.Write(HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks, Text));
+				html.Write(HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks.GetReportTitle(), tasks.GetReportDate(), Text));
 				html.RenderEndTag(); // Div
 
 				return true;
@@ -538,7 +542,7 @@ namespace HTMLReportExporter
 				if (SeparatePage)
 					html.AddAttribute("class", "title-page");
 
-				String content = HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks, Text);
+				String content = HtmlReportUtils.ReplaceReportAttributePlaceholders(tasks.GetReportTitle(), tasks.GetReportDate(), Text);
 				var custAttribs = HtmlReportUtils.GetCustomAttributes(tasks);
 
 				content = HtmlReportUtils.ReplaceTaskAttributePlaceholders(content, custAttribs, task, 1, false);

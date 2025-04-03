@@ -355,6 +355,8 @@ namespace Abstractspoon
 			public:
 				MultiTaskList(const IMultiTaskList* pMultiTaskList);  // GET ONLY
 
+				String^ GetReportTitle();
+				String^ GetReportDate();
 				List<TaskList^>^ GetTaskLists();
 
 			private:

@@ -29,6 +29,16 @@ MultiTaskList::MultiTaskList(const IMultiTaskList* pMultiTaskList)
 {
 }
 
+String^ MultiTaskList::GetReportTitle()
+{
+	return gcnew String(m_pMultiTaskList->GetReportTitle());
+}
+
+String^ MultiTaskList::GetReportDate()
+{
+	return gcnew String(m_pMultiTaskList->GetReportDate());
+}
+
 List<TaskList^>^ MultiTaskList::GetTaskLists()
 {
 	auto tasklists = gcnew List<TaskList^>();

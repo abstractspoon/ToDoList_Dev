@@ -38,10 +38,15 @@ namespace HTMLReportExporter
         private HtmlReportTemplate m_Template = null;
 		private HtmlReportTemplate m_PrevTemplate = null;
 		private Timer m_ChangeTimer = null;
-		private String m_TemplateFilePath = "";
+
+		private String m_TemplateFilePath = string.Empty;
+		private String m_ReportTitle = string.Empty;
+		private String m_ReportDate = string.Empty;
+
 		private bool m_FirstPreview = true;
 		private bool m_EditedSinceLastSave = false;
 		private bool m_Printing = false;
+
 		private HtmlReportUtils.CustomAttributes m_CustomAttributes = null;
 
 		private String PreviewPageName
@@ -61,7 +66,14 @@ namespace HTMLReportExporter
 
 		// --------------------------------------------------------------
 
-		public HtmlReportTemplateForm(String typeId, Translator trans, TaskList tasks, bool printing, Preferences prefs, String key)
+		public HtmlReportTemplateForm(String typeId, 
+									  Translator trans, 
+									  TaskList tasks,
+							 		  string reportTitle,
+									  string reportDate,
+									  bool printing, 
+									  Preferences prefs, 
+									  String key)
 		{
 			m_TypeId = typeId;
 			m_Trans = trans;
@@ -69,6 +81,8 @@ namespace HTMLReportExporter
 			m_Prefs = prefs;
 			m_PrefsKey = key;
 			m_Printing = printing;
+			m_ReportTitle = reportTitle;
+			m_ReportDate = reportDate;
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
@@ -581,7 +595,7 @@ namespace HTMLReportExporter
 		private bool BuildPreviewPage()
 		{
 			var tasklists = new List<TaskList>() { m_Tasklist };
-			var report = new HtmlReportBuilder(m_Trans, m_Prefs, m_Template, true, m_Printing);
+			var report = new HtmlReportBuilder(m_Trans, m_Prefs, m_Template, m_ReportTitle, m_ReportDate , true, m_Printing);
 
 			return report.BuildReport(tasklists, PreviewPageName);
 		}
