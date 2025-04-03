@@ -27,7 +27,13 @@ namespace JSONExporterPlugin
 		{
 		}
 
-		public string Export(IList<TaskList> srcTasks, bool bSilent, Preferences prefs, string sKey, Translator trans)
+		public string Export(IList<TaskList> srcTasks, 
+							 string reportTitle,
+							 string reportDate,
+							 bool bSilent, 
+							 Preferences prefs, 
+							 string sKey, 
+							 Translator trans)
         {
 			JArray jTasklists = new JArray();
 
@@ -60,6 +66,9 @@ namespace JSONExporterPlugin
 			}
 
 			JObject jRoot = new JObject();
+
+			jRoot.Add(new JProperty(trans.Translate("Report Name", Translator.Type.Text), reportTitle));
+			jRoot.Add(new JProperty(trans.Translate("Report Date", Translator.Type.Text), reportDate));
 			jRoot.Add(new JProperty(trans.Translate("Tasklists", Translator.Type.Text), jTasklists));
 
 			return jRoot.ToString();
