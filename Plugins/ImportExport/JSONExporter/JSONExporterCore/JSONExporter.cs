@@ -30,51 +30,64 @@ namespace JSONExporterPlugin
 		public string Export(IList<TaskList> srcTasks, 
 							 string reportTitle,
 							 string reportDate,
-							 bool bSilent, 
-							 Preferences prefs, 
-							 string sKey, 
 							 Translator trans)
         {
-			JArray jTasklists = new JArray();
-
-			foreach (var tasklist in srcTasks)
+			if (srcTasks.Count == 1)
 			{
-				var attribList = GetAttributeList(tasklist, trans);
+				JObject jTasklist = ExportTasklist(srcTasks[0], reportTitle, reportDate, trans);
 
-				JArray jTasks = new JArray();
-				Task task = tasklist.GetFirstTask();
+				return jTasklist.ToString();
+			}
+			else
+			{
+				JArray jTasklists = new JArray();
 
-				while (task.IsValid())
+				foreach (var tasklist in srcTasks)
 				{
-					ExportTask(tasklist, task, attribList, jTasks, trans);
-					task = task.GetNextTask();
+					JObject jTasklist = ExportTasklist(tasklist, 
+													   tasklist.GetReportTitle(), 
+													   tasklist.GetReportDate(), 
+													   trans);
+					jTasklists.Add(jTasklist);
 				}
 
-				JObject jTasklist = new JObject();
+				JObject jRoot = new JObject();
 
-				string title = tasklist.GetProjectName();
+				jRoot.Add(new JProperty(trans.Translate("Report Name", Translator.Type.Text), reportTitle));
+				jRoot.Add(new JProperty(trans.Translate("Report Date", Translator.Type.Text), reportDate));
+				jRoot.Add(new JProperty(trans.Translate("Tasklists", Translator.Type.Text), jTasklists));
 
-				if (string.IsNullOrWhiteSpace(title))
-					title = Path.GetFileNameWithoutExtension(tasklist.GetFilePath());
+				return jRoot.ToString();
+			}
+		}
 
-				jTasklist.Add(new JProperty(trans.Translate("Report Name", Translator.Type.Text), tasklist.GetReportTitle()));
-				jTasklist.Add(new JProperty(trans.Translate("Report Date", Translator.Type.Text), tasklist.GetReportDate()));
-				jTasklist.Add(new JProperty(trans.Translate("FilePath", Translator.Type.Text), tasklist.GetFilePath()));
-				jTasklist.Add(new JProperty(trans.Translate("Tasks", Translator.Type.Text), jTasks));
+		public JObject ExportTasklist(TaskList tasklist,
+									 string reportTitle,
+									 string reportDate,
+									 Translator trans)
+		{
+			var jTasks = new JArray();
 
-				jTasklists.Add(jTasklist);
+			var attribList = GetAttributeList(tasklist, trans);
+			var task = tasklist.GetFirstTask();
+
+			while (task.IsValid())
+			{
+				ExportTask(tasklist, task, attribList, jTasks, trans);
+				task = task.GetNextTask();
 			}
 
-			JObject jRoot = new JObject();
+			JObject jTasklist = new JObject();
 
-			jRoot.Add(new JProperty(trans.Translate("Report Name", Translator.Type.Text), reportTitle));
-			jRoot.Add(new JProperty(trans.Translate("Report Date", Translator.Type.Text), reportDate));
-			jRoot.Add(new JProperty(trans.Translate("Tasklists", Translator.Type.Text), jTasklists));
+			jTasklist.Add(new JProperty(trans.Translate("Report Name", Translator.Type.Text), reportTitle));
+			jTasklist.Add(new JProperty(trans.Translate("Report Date", Translator.Type.Text), reportDate));
+			jTasklist.Add(new JProperty(trans.Translate("FilePath", Translator.Type.Text), tasklist.GetFilePath()));
+			jTasklist.Add(new JProperty(trans.Translate("Tasks", Translator.Type.Text), jTasks));
 
-			return jRoot.ToString();
-        }
+			return jTasklist;
+		}
 
-        private bool ExportTask(TaskList tasks, Task task, IList<AttribItem> attribList, JArray jTasks, Translator trans)
+		private bool ExportTask(TaskList tasks, Task task, IList<AttribItem> attribList, JArray jTasks, Translator trans)
         {
             // add ourselves
 			JObject jTask = new JObject();
