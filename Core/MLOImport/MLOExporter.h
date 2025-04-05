@@ -63,6 +63,7 @@ protected:
 	static CString FormatDate(time64_t tDate);
 	static void AddSpacedContent(const CString& sSrc, CString& sDest);
 	static CString FormatDestID(const CString& sTitle, DWORD dwID);
+	static CString FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate);
 };
 
 #endif // !defined(AFX_MLOEXPORTER_H__F588E6B1_3646_4994_99A2_4223FDDA1A31__INCLUDED_)

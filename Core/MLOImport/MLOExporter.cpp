@@ -85,7 +85,10 @@ IIMPORTEXPORT_RESULT CMLOExporter::ExportTasklists(const CITaskListArray& aTaskl
 		
 		// For a multi-file export create a top-level node for each tasklist
 		if (bMulti)
-			pXITasks = CreateTaskNode(pTasks->GetReportTitle(), (nTaskList * SHORT_MAX), pXIAllTasks);
+		{
+			CString sTitle = FormatTitle(pTasks->GetReportTitle(), pTasks->GetReportDate());
+			pXITasks = CreateTaskNode(sTitle, (nTaskList * SHORT_MAX), pXIAllTasks);
+		}
 
 		// export tasks
 		if (!pXITasks || !ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, TRUE))
@@ -100,6 +103,17 @@ IIMPORTEXPORT_RESULT CMLOExporter::ExportTasklists(const CITaskListArray& aTaskl
 		return IIER_BADFILE;
 
 	return (bSomeFailed ? IIER_SOMEFAILED : IIER_SUCCESS);
+}
+
+CString CMLOExporter::FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate)
+{
+	if (Misc::IsEmpty(szReportDate))
+		return szReportTitle;
+
+	if (Misc::IsEmpty(szReportTitle))
+		return szReportDate;
+
+	return Misc::Format(_T("%s (%s)"), szReportTitle, szReportDate);
 }
 
 CXmlItem* CMLOExporter::CreateTaskNode(LPCTSTR szTitle, DWORD dwID, CXmlItem* pXIDestParent) const

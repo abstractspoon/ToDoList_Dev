@@ -42,7 +42,8 @@ protected:
 	BOOL ExportTasklist(const ITaskList* pSrcTaskFile, CStdioFile& fileOut, int nDepth);
 	void ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 					CStdioFile& fileOut, int nDepth, BOOL bAndSiblings);
-	CString FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate, BOOL bWantDate = TRUE);
+
+	static CString FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate, BOOL bWantDate = TRUE);
 };
 
 #endif // !defined(AFX_PLAINTEXTEXPORTER_H__69016DB3_5424_49DF_A877_962E83BC6E6B__INCLUDED_)
