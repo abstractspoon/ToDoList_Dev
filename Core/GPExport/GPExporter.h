@@ -64,6 +64,7 @@ protected:
 
 	static void GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, time64_t& tEarliestStart, time64_t& tLatestDue, time64_t& tLatestDone);
 	static int GetGPTaskID(DWORD dwTDLTaskID);
+	static CString FormatTitle(const ITASKLISTBASE* pSrcTaskFile);
 };
 
 #endif // !defined(AFX_GPEXPORTER_H__BD28EDEE_0F1F_4AC9_B083_9A033E473181__INCLUDED_)

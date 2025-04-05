@@ -116,7 +116,7 @@ IIMPORTEXPORT_RESULT CGPExporter::ExportTasklists(const CITaskListArray& aTaskli
 
 		// For a multi-file export create a top-level node for each tasklist
 		if (bMulti)
-			pXITasks = CreateTaskNode(pTasks->GetReportTitle(), (nTaskList * SHORT_MAX), pXIAllTasks);
+			pXITasks = CreateTaskNode(FormatTitle(pTasks), (nTaskList * SHORT_MAX), pXIAllTasks);
 
 		// clear the task map that will be populated in ExportTask
 		// for use in ExportDependencies
@@ -137,6 +137,20 @@ IIMPORTEXPORT_RESULT CGPExporter::ExportTasklists(const CITaskListArray& aTaskli
 		return IIER_BADFILE;
 
 	return (bSomeFailed ? IIER_SOMEFAILED : IIER_SUCCESS);
+}
+
+CString CGPExporter::FormatTitle(const ITASKLISTBASE* pSrcTaskFile)
+{
+	LPCTSTR szReportTitle = pSrcTaskFile->GetReportTitle();
+	LPCTSTR szReportDate = pSrcTaskFile->GetReportDate();
+
+	if (Misc::IsEmpty(szReportDate))
+		return szReportTitle;
+
+	if (Misc::IsEmpty(szReportTitle))
+		return szReportDate;
+
+	return Misc::Format(_T("%s (%s)"), szReportTitle, szReportDate);
 }
 
 void CGPExporter::SetupDisplay(CXmlItem* pDestPrj)
