@@ -88,6 +88,9 @@ IIMPORTEXPORT_RESULT CFMindExporter::ExportTasklists(const CITaskListArray& aTas
 	fileDest.SetXmlHeader(DEFAULT_UTF8_HEADER);
 	fileDest.SetItemValue(_T("version"), _T("0.9.0"));
 
+	// There can be only one node at the root
+	CXmlItem *pXIAllTasks = fileDest.AddItem(_T("node"), _T(""));
+
 	for (int nTasklist = 0; nTasklist < aTasklists.GetSize(); nTasklist++)
 	{
 		const ITASKLISTBASE* pTasks = aTasklists[nTasklist];
@@ -98,20 +101,24 @@ IIMPORTEXPORT_RESULT CFMindExporter::ExportTasklists(const CITaskListArray& aTas
 			return IIER_BADINTERFACE;
 		}
 
-		CXmlItem *pXINode = fileDest.AddItem(_T("node"), _T(""));
-		pXINode->AddItem(_T("TEXT"), pTasks->GetReportTitle());	
-		pXINode->AddItem(_T("DATE"), pTasks->GetReportDate());
+		CXmlItem *pXITasks = pXIAllTasks; // Only tasklists uses root node 
+		
+		if (aTasklists.GetSize() > 1)
+			pXITasks = pXIAllTasks->AddItem(_T("node"), _T("")); // sub node
 
-		CXmlItem * pXIHook = pXINode->AddItem(_T("hook"), _T(""));
+		pXITasks->AddItem(_T("TEXT"), pTasks->GetReportTitle());
+		pXITasks->AddItem(_T("DATE"), pTasks->GetReportDate());
+
+		CXmlItem * pXIHook = pXITasks->AddItem(_T("hook"), _T(""));
 		pXIHook->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
 
 		// Attrib Manager settings
 		// This will make the attribs not to be shown as a list view at every node;	
-		CXmlItem *pXIAttribMgr = pXINode->AddItem(_T("attribute_registry"),_T(""));	
+		CXmlItem *pXIAttribMgr = pXITasks->AddItem(_T("attribute_registry"),_T(""));
 		pXIAttribMgr->AddItem(_T("SHOW_ATTRIBUTES"), _T("hide"));
 
 		// export first task
-		ExportTask(pTasks, pTasks->GetFirstTask(), pXINode, 0, TRUE);
+		ExportTask(pTasks, pTasks->GetFirstTask(), pXITasks, 0, TRUE);
 	}
 
 	// save output manually to restore non-escaping of & and <>
