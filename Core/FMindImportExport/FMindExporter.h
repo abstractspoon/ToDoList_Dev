@@ -44,14 +44,14 @@ protected:
 	
 protected:
 	typedef CArray<const ITASKLISTBASE*, const ITASKLISTBASE*> CITaskListArray;
-	IIMPORTEXPORT_RESULT ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath) const;
+	IIMPORTEXPORT_RESULT ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szReportTitle, LPCTSTR szReportDate, LPCTSTR szDestFilePath) const;
 
 	void ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, 
 					CXmlItem* pXIDestParent, int LEVEL, BOOL bAndSiblings) const;
 
 	static CString Encode(LPCTSTR szText);
 	static CString ExportContent(const CXmlFile& file);
-
+	static CString FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate);
 };
 
 #endif // !defined(AFX_FMINDEXPORTER_H__49174123_010C_4E73_B1BF_5440AE766D46__INCLUDED_)

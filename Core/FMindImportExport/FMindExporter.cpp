@@ -63,10 +63,18 @@ IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTS
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	CITaskListArray aTasklists;
-	aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE));
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
-	return ExportTasklists(aTasklists, szDestFilePath);
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return IIER_BADINTERFACE;
+	}
+
+	CITaskListArray aTasklists;
+	aTasklists.Add(pTasks);
+
+	return ExportTasklists(aTasklists, pTasks->GetReportTitle(), pTasks->GetReportDate(), szDestFilePath);
 }
 
 IIMPORTEXPORT_RESULT CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
@@ -78,10 +86,10 @@ IIMPORTEXPORT_RESULT CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, 
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 		aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE));
 
-	return ExportTasklists(aTasklists, szDestFilePath);
+	return ExportTasklists(aTasklists, pSrcTaskFile->GetReportTitle(), pSrcTaskFile->GetReportDate(), szDestFilePath);
 }
 
-IIMPORTEXPORT_RESULT CFMindExporter::ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath) const
+IIMPORTEXPORT_RESULT CFMindExporter::ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szReportTitle, LPCTSTR szReportDate, LPCTSTR szDestFilePath) const
 {
 	CXmlFile fileDest(_T("map"));
 
@@ -90,6 +98,9 @@ IIMPORTEXPORT_RESULT CFMindExporter::ExportTasklists(const CITaskListArray& aTas
 
 	// There can be only one node at the root
 	CXmlItem *pXIAllTasks = fileDest.AddItem(_T("node"), _T(""));
+
+	pXIAllTasks->AddItem(_T("TEXT"), FormatTitle(szReportTitle, szReportDate));
+	pXIAllTasks->AddItem(_T("DATE"), szReportDate);
 
 	for (int nTasklist = 0; nTasklist < aTasklists.GetSize(); nTasklist++)
 	{
@@ -104,10 +115,13 @@ IIMPORTEXPORT_RESULT CFMindExporter::ExportTasklists(const CITaskListArray& aTas
 		CXmlItem *pXITasks = pXIAllTasks; // Only tasklists uses root node 
 		
 		if (aTasklists.GetSize() > 1)
+		{
 			pXITasks = pXIAllTasks->AddItem(_T("node"), _T("")); // sub node
 
-		pXITasks->AddItem(_T("TEXT"), pTasks->GetReportTitle());
-		pXITasks->AddItem(_T("DATE"), pTasks->GetReportDate());
+			// We don't include the date because it's either empty
+			// or already handled above
+			pXITasks->AddItem(_T("TEXT"), FormatTitle(pTasks->GetReportTitle(), NULL));
+		}
 
 		CXmlItem * pXIHook = pXITasks->AddItem(_T("hook"), _T(""));
 		pXIHook->AddItem(_T("NAME"), _T("accessories/plugins/AutomaticLayout.properties"));
@@ -128,6 +142,17 @@ IIMPORTEXPORT_RESULT CFMindExporter::ExportTasklists(const CITaskListArray& aTas
 		return IIER_BADFILE;
 
 	return IIER_SUCCESS;
+}
+
+CString CFMindExporter::FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate)
+{
+	if (Misc::IsEmpty(szReportDate))
+		return szReportTitle;
+
+	if (Misc::IsEmpty(szReportTitle))
+		return szReportDate;
+
+	return Misc::Format(_T("%s (%s)"), szReportTitle, szReportDate);
 }
 
 CString CFMindExporter::ExportContent(const CXmlFile& file)
