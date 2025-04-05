@@ -7,7 +7,7 @@
 #include "PlainTextExporter.h"
 #include "optionsdlg.h"
 
-//#include "..\shared\localizer.h"
+#include "..\shared\Misc.h"
 
 #include "..\Interfaces\IPreferences.h"
 #include "..\Interfaces\ITranstext.h"
@@ -108,7 +108,10 @@ IIMPORTEXPORT_RESULT CPlainTextExporter::Export(const IMultiTaskList* pSrcTaskFi
 		return IIER_BADFILE;
 
 	if (WANTPROJECT)
-		fileOut.WriteString(pSrcTaskFile->GetReportTitle() + ENDL);
+	{
+		fileOut.WriteString(FormatTitle(pSrcTaskFile->GetReportTitle(), pSrcTaskFile->GetReportDate()));
+		fileOut.WriteString(ENDL);
+	}
 
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{ 
@@ -128,17 +131,15 @@ BOOL CPlainTextExporter::ExportTasklist(const ITaskList* pSrcTaskFile, CStdioFil
 
 	if (WANTPROJECT)
 	{
-		// note: we export the title even if it's empty
-		// to maintain consistency with the importer that the first line
-		// is always the outline name
-		CString sTitle = (pTasks->GetReportTitle() + ENDL);
+		// note: we export the title even if it's empty to maintain consistency 
+		// with the importer that the first line is always the outline name
+		// Note: We don't export the date if we're part of a multi-file export
+		if (nDepth == 0)
+			fileOut.WriteString(FormatTitle(pTasks->GetReportTitle(), pTasks->GetReportDate()));
+		else
+			fileOut.WriteString(INDENT + FormatTitle(pTasks->GetReportTitle(), pTasks->GetReportDate(), FALSE));
 
-		ASSERT(nDepth == 0 || nDepth == 1);
-
-		if (nDepth == 1)
-			sTitle = INDENT + sTitle;
-
-		fileOut.WriteString(sTitle);
+		fileOut.WriteString(ENDL);
 	}
 
 	// export first task indented from the project name
@@ -147,6 +148,17 @@ BOOL CPlainTextExporter::ExportTasklist(const ITaskList* pSrcTaskFile, CStdioFil
 	// add blank line before next tasklist
 	fileOut.WriteString(ENDL);
 	return TRUE;
+}
+
+CString CPlainTextExporter::FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate, BOOL bWantDate)
+{
+	if (!bWantDate || Misc::IsEmpty(szReportDate))
+		return szReportTitle;
+
+	if (Misc::IsEmpty(szReportTitle))
+		return szReportDate;
+
+	return Misc::Format(_T("%s (%s)"), szReportTitle, szReportDate);
 }
 
 void CPlainTextExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
