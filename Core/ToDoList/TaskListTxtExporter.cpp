@@ -7,6 +7,7 @@
 #include "tdlrecurringtaskedit.h"
 
 #include "..\shared\enstring.h"
+#include "..\shared\Misc.h"
 
 #include "..\3rdparty\stdiofileex.h"
 
@@ -142,21 +143,19 @@ CString CTaskListTxtExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM 
 	return sTask;
 }
 
-CString CTaskListTxtExporter::FormatTitle(const ITASKLISTBASE* pTasks) const
+CString CTaskListTxtExporter::FormatTitle(const IMultiTaskList* pTasks) const
 {
-	CString sTitle = pTasks->GetReportTitle();
-	CString sDate = pTasks->GetReportDate();
-	CString sHeader;
+	CString sTitle = CTaskListExporterBase::FormatTitle(pTasks);
+	CString sUnderline = CString('=', sTitle.GetLength());
+	
+	return (sTitle + '\n' + sUnderline + _T("\n\n"));
+}
 
-	if (!sTitle.IsEmpty())
-	{
-		sHeader.Format(_T("%s\n%s\n"), sTitle, sDate);
-	}
-	else if (!sDate.IsEmpty())
-	{
-		sHeader.Format(_T("%s\n"), sDate);
-	}
+CString CTaskListTxtExporter::FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const
+{
+	CString sTitle = CTaskListExporterBase::FormatTitle(pTasks, bWantDate);
+	CString sUnderline = CString('-', sTitle.GetLength());
 
-	return sHeader;
+	return (sTitle + '\n' + sUnderline + '\n');
 }
 
