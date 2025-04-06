@@ -106,7 +106,7 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile
 		return IIER_CANCELLED;
 
 	// add title block
-	CString sOutput = FormatTitle(pTasks);
+	CString sOutput = FormatTitle(pTasks, TRUE);
 	
 	// then header
 	sOutput += FormatHeader(pTasks);
@@ -137,7 +137,7 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTas
 		return IIER_CANCELLED;
 	}
 
-	CString sOutput;
+	CString sOutput = FormatTitle(pSrcTaskFile);
 	
 	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
 	{
@@ -150,7 +150,8 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTas
 		}
 
 		// add title block
-		sOutput += FormatTitle(pTasks);
+		// Don't export date because either it's empty or handled already
+		sOutput += FormatTitle(pTasks, FALSE);
 		
 		// then header
 		sOutput += FormatHeader(pTasks);
@@ -680,3 +681,26 @@ CString CTaskListExporterBase::GetAttribLabel(TDC_ATTRIBUTE nAttribID)
 
 	return sLabel;
 }
+
+CString CTaskListExporterBase::FormatTitle(const IMultiTaskList* pTasks) const
+{
+	return FormatTitle(pTasks->GetReportTitle(), pTasks->GetReportDate(), TRUE);
+}
+
+CString CTaskListExporterBase::FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const
+{
+	return FormatTitle(pTasks->GetReportTitle(), pTasks->GetReportDate(), bWantDate);
+}
+
+// static helper
+CString CTaskListExporterBase::FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate, BOOL bWantDate)
+{
+	if (!bWantDate || Misc::IsEmpty(szReportDate))
+		return szReportTitle;
+
+	if (Misc::IsEmpty(szReportTitle))
+		return szReportDate;
+
+	return Misc::Format(_T("%s (%s)"), szReportTitle, szReportDate);
+}
+

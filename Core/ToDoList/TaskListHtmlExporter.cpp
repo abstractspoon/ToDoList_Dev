@@ -188,34 +188,31 @@ IIMPORTEXPORT_RESULT CTaskListHtmlExporter::Export(const IMultiTaskList* pSrcTas
 	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, dwFlags, pPrefs, szKey);
 }
 
-CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks) const
+CString CTaskListHtmlExporter::FormatTitle(const IMultiTaskList* pTasks) const
 {
-	CString sTitleBlock;
-			
-	// title and date
-	CString sTitle = pTasks->GetReportTitle();
-	CString sDate = pTasks->GetReportDate();
-			
-	if (!sTitle.IsEmpty())
-	{
-		CString sProjTitle;
-		sProjTitle.Format(_T("<h2>%s</h2>%s"), sTitle, sDate);
-		
-		sTitleBlock += DEFAULTFONT;
-		sTitleBlock += sProjTitle;
-	}
-	else if (!sDate.IsEmpty())
+	CString sTitleBlock, sTitleText = CTaskListExporterBase::FormatTitle(pTasks);
+
+	if (!sTitleText.IsEmpty())
 	{
 		sTitleBlock += DEFAULTFONT;
-		sTitleBlock += sDate;
+		sTitleBlock += Misc::Format(_T("<h1>%s</h1><p></p>"), sTitleText);
 	}
 
-	sTitleBlock += _T("<p/>");
-	
-	if (IsTableStyle())
+	return sTitleBlock;
+}
+
+CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const
+{
+	CString sTitleBlock, sTitleText = CTaskListExporterBase::FormatTitle(pTasks, bWantDate);
+
+	if (!sTitleText.IsEmpty())
 	{
-		sTitleBlock += _T("<table border=\"1\">\n");
+		sTitleBlock += DEFAULTFONT;
+		sTitleBlock += Misc::Format(_T("<h2>%s</h2><p></p>"), sTitleText);
 	}
+
+	if (IsTableStyle())
+		sTitleBlock += _T("<table border=\"1\">\n");
 
 	return sTitleBlock;
 }
