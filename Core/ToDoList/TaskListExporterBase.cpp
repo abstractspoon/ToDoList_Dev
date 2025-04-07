@@ -399,10 +399,6 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		sItem = FormatAttribute(pTasks, hTask, nAttribID, sAttribLabel, TDL_TASKHIGHESTPRIORITY, TDL_TASKPRIORITY);
 		break;
 
-	case TDCA_PROJECTNAME:
-		sItem = FormatAttribute(pTasks, NULL, nAttribID, sAttribLabel, TDL_PROJECTNAME, TDL_FILENAME);
-		break;
-
 	case TDCA_RISK:
 		sItem = FormatAttribute(pTasks, hTask, nAttribID, sAttribLabel, TDL_TASKHIGHESTRISK, TDL_TASKRISK);
 		break;
