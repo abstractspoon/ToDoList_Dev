@@ -132,10 +132,7 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTas
 	MULTIFILE = TRUE;
 
 	if (!InitConsts(pTasks, szDestFilePath, dwFlags, pPrefs, szKey))
-	{
-		ASSERT(0);
 		return IIER_CANCELLED;
-	}
 
 	CString sOutput = FormatTitle(pSrcTaskFile);
 	

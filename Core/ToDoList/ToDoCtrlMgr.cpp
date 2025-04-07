@@ -419,6 +419,16 @@ CString CToDoCtrlMgr::GetFriendlyProjectName(int nIndex) const
 	return GetTDCItem(nIndex).GetFriendlyProjectName();
 }
 
+CString CToDoCtrlMgr::FormatFriendlyProjectNames() const
+{
+	CStringArray aNames;
+
+	for (int nTDC = 0; nTDC < GetCount(); nTDC++)
+		aNames.Add(GetFriendlyProjectName(nTDC));
+
+	return Misc::FormatArray(aNames);
+}
+
 CString CToDoCtrlMgr::FormatProjectNameWithFileName(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, _T(""));

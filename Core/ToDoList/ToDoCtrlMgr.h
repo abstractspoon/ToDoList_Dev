@@ -73,6 +73,7 @@ public:
 	TDCM_PATHTYPE GetFilePathType(int nIndex) const;
 	TDCM_PATHTYPE RefreshPathType(int nIndex); 
 	CString GetFriendlyProjectName(int nIndex) const;
+	CString FormatFriendlyProjectNames() const;
 	CString GetDisplayPath(int nIndex) const;
 	CString FormatProjectNameWithFileName(int nIndex) const;
 	int GetNextMostSelectableToDoCtrl(int nIndex) const;

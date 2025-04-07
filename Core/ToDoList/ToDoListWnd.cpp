@@ -10110,6 +10110,7 @@ void CToDoListWnd::OnExport()
 	const CString sTasklistPath = m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE);
 
 	CTDLExportDlg dialog(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC),
+						 m_mgrToDoCtrls.FormatFriendlyProjectNames(),
 						 m_mgrImportExport,
 						 (nTDCCount == 1),
 						 (tdc.GetTaskView() != FTCV_TASKLIST),
