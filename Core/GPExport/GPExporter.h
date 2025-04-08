@@ -48,6 +48,10 @@ protected:
 	CString MILESTONETAG;
 
 protected:
+	typedef CArray<const ITASKLISTBASE*, const ITASKLISTBASE*> CITaskListArray;
+	IIMPORTEXPORT_RESULT ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath, 
+										 DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
+
 	bool ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, CXmlItem* pXIAllocations, BOOL bAndSiblings);
 	void BuildResourceMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings);
 	void ExportResources(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj);
@@ -56,8 +60,11 @@ protected:
 	void ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings);
 	bool InitConsts(const ITASKLISTBASE* pTaskFile, DWORD dwFlags, const IPreferences* pPrefs, LPCTSTR szKey);
 
+	CXmlItem* CreateTaskNode(LPCTSTR szTitle, int nGPID, CXmlItem* pXIDestParent);
+
 	static void GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, time64_t& tEarliestStart, time64_t& tLatestDue, time64_t& tLatestDone);
 	static int GetGPTaskID(DWORD dwTDLTaskID);
+	static CString FormatTitle(const ITASKLISTBASE* pSrcTaskFile);
 };
 
 #endif // !defined(AFX_GPEXPORTER_H__BD28EDEE_0F1F_4AC9_B083_9A033E473181__INCLUDED_)

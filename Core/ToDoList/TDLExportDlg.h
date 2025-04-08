@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // ExportDlg.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
 
 #include "TaskSelectionDlg.h"
 #include "TDLPrintDialog.h"
@@ -16,6 +17,8 @@
 #include "..\shared\tabbedpropertypagehost.h"
 
 #include "..\Interfaces\ImportExportComboBox.h"
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CTDLExportToPage : public CCmdNotifyPropertyPage
 {
@@ -141,8 +144,9 @@ class CTDLExportDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLExportDlg(LPCTSTR szTitle, 
-				  const CTDCImportExportMgr& mgr, 
+	CTDLExportDlg(LPCTSTR szSingleFileTitle, 
+				  LPCTSTR szMultiFileTitle,
+				  const CTDCImportExportMgr& mgr,
 				  BOOL bSingleTaskList, 
 				  BOOL bEnableSubtaskSelection,
 				  BOOL bVisibleColumnsOnly, 
@@ -171,7 +175,7 @@ protected:
 	CString	m_sExportTitle;
 	BOOL	m_bExportDate;
 	int		m_nPrevActiveTab;
-	CString m_sSingleFileTitle;
+	CString m_sSingleFileTitle, m_sMultiFileTitle;
 
 	CHistoryComboBox m_cbTitle;
 	CTDLExportToPage m_pageTo;
@@ -196,6 +200,7 @@ protected:
 	afx_msg void OnSelchangeTasklistoptions();
 	afx_msg void OnExportonefile();
 	afx_msg void OnChangeExportpath();
+	afx_msg void OnChangeExportTitle();
 	afx_msg void OnExportToClipboardOrPath();
 
 	DECLARE_MESSAGE_MAP()

@@ -1,7 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -21,41 +21,78 @@ namespace JSONExporterPlugin
 			public CustomAttributeDefinition.Attribute CustAttribType = CustomAttributeDefinition.Attribute.Unknown;
 		}
 
-		private List<AttribItem> m_Attributes;
-
 		// --------------------------------------------------------------------------------------
 
 		public JSONExporter()
 		{
 		}
 
-		// ------------------------------------------------------------------------
-
-		public string Export(TaskList srcTasks, bool bSilent, Preferences prefs, string sKey, Translator trans)
+		public string Export(IList<TaskList> srcTasks, 
+							 string reportTitle,
+							 string reportDate,
+							 Translator trans)
         {
-			InitialiseAttributeList(srcTasks, trans);
+			if (srcTasks.Count == 1)
+			{
+				JObject jTasklist = ExportTasklist(srcTasks[0], reportTitle, reportDate, trans);
 
-			JArray jTasks = new JArray();
-            Task task = srcTasks.GetFirstTask();
+				return jTasklist.ToString();
+			}
+			else
+			{
+				JArray jTasklists = new JArray();
 
-            while (task.IsValid())
-            {
-                ExportTask(srcTasks, task, jTasks, trans);
-                task = task.GetNextTask();
-            }
+				foreach (var tasklist in srcTasks)
+				{
+					JObject jTasklist = ExportTasklist(tasklist, 
+													   tasklist.GetReportTitle(), 
+													   tasklist.GetReportDate(), 
+													   trans);
+					jTasklists.Add(jTasklist);
+				}
 
-			JObject jRoot = new JObject();
-			jRoot.Add(new JProperty(trans.Translate("Tasks", Translator.Type.Text), jTasks));
+				JObject jRoot = new JObject();
 
-			return jRoot.ToString();
-        }
+				jRoot.Add(new JProperty(trans.Translate("Report Name", Translator.Type.Text), reportTitle));
+				jRoot.Add(new JProperty(trans.Translate("Report Date", Translator.Type.Text), reportDate));
+				jRoot.Add(new JProperty(trans.Translate("Tasklists", Translator.Type.Text), jTasklists));
 
-        private bool ExportTask(TaskList tasks, Task task, JArray jTasks, Translator trans)
+				return jRoot.ToString();
+			}
+		}
+
+		public JObject ExportTasklist(TaskList tasklist,
+									 string reportTitle,
+									 string reportDate,
+									 Translator trans)
+		{
+			var jTasks = new JArray();
+
+			var attribList = GetAttributeList(tasklist, trans);
+			var task = tasklist.GetFirstTask();
+
+			while (task.IsValid())
+			{
+				ExportTask(tasklist, task, attribList, jTasks, trans);
+				task = task.GetNextTask();
+			}
+
+			JObject jTasklist = new JObject();
+
+			jTasklist.Add(new JProperty(trans.Translate("Report Name", Translator.Type.Text), reportTitle));
+			jTasklist.Add(new JProperty(trans.Translate("Report Date", Translator.Type.Text), reportDate));
+			jTasklist.Add(new JProperty(trans.Translate("FilePath", Translator.Type.Text), tasklist.GetFilePath()));
+			jTasklist.Add(new JProperty(trans.Translate("Tasks", Translator.Type.Text), jTasks));
+
+			return jTasklist;
+		}
+
+		private bool ExportTask(TaskList tasks, Task task, IList<AttribItem> attribList, JArray jTasks, Translator trans)
         {
             // add ourselves
 			JObject jTask = new JObject();
 
-			foreach (var item in m_Attributes)
+			foreach (var item in attribList)
 			{
 				jTask.Add(new JProperty(item.Label, GetNativeAttributeValue(tasks, task, item)));
 			}
@@ -69,7 +106,7 @@ namespace JSONExporterPlugin
 
                 while (subtask.IsValid())
                 {
-                    ExportTask(tasks, subtask, jSubtasks, trans); // RECURSIVE CALL
+                    ExportTask(tasks, subtask, attribList, jSubtasks, trans); // RECURSIVE CALL
                     subtask = subtask.GetNextTask();
                 }
 
@@ -82,9 +119,9 @@ namespace JSONExporterPlugin
 			return true;
         }
 
-		private void InitialiseAttributeList(TaskList tasks, Translator trans)
+		private List<AttribItem> GetAttributeList(TaskList tasks, Translator trans)
 		{
-			m_Attributes = new List<AttribItem>();
+			var attribList = new List<AttribItem>();
 
 			// Construct basic list of attributes
 			// excluding those whose positions are fixed
@@ -107,7 +144,7 @@ namespace JSONExporterPlugin
 
 						foreach (var custAttrib in custAttribs)
 						{
-							m_Attributes.Add(new AttribItem()
+							attribList.Add(new AttribItem()
 							{
 								Label = custAttrib.Label,
 								AttribId = attrib,
@@ -125,7 +162,7 @@ namespace JSONExporterPlugin
 
 						if (!String.IsNullOrEmpty(attribName))
 						{
-							m_Attributes.Add(new AttribItem()
+							attribList.Add(new AttribItem()
 							{
 								Label = trans.Translate(attribName, Translator.Type.Text),
 								AttribId = attrib
@@ -137,8 +174,10 @@ namespace JSONExporterPlugin
 			}
 
 			// Sort alphabetically
-			if (m_Attributes.Count > 1)
-				m_Attributes.Sort((x, y) => string.Compare(x.Label, y.Label, true));
+			if (attribList.Count > 1)
+				attribList.Sort((x, y) => string.Compare(x.Label, y.Label, true));
+
+			return attribList;
 		}
 
 		private object GetNativeAttributeValue(TaskList tasks, Task task, AttribItem item)

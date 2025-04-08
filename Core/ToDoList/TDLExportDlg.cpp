@@ -26,7 +26,8 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog
 
-CTDLExportDlg::CTDLExportDlg(LPCTSTR szTitle,
+CTDLExportDlg::CTDLExportDlg(LPCTSTR szSingleFileTitle,
+							 LPCTSTR szMultiFileTitle,
 							 const CTDCImportExportMgr& mgr,
 							 BOOL bSingleTaskList,
 							 BOOL bEnableSubtaskSelection,
@@ -40,7 +41,8 @@ CTDLExportDlg::CTDLExportDlg(LPCTSTR szTitle,
 	m_pageTo(mgr, bSingleTaskList, szFilePath, szFolderPath, _T("Exporting")),
 	m_pageTaskSel(aAttribDefs, _T("Exporting"), bEnableSubtaskSelection, bVisibleColumnsOnly),
 	m_mgrImportExport(mgr),
-	m_sExportTitle(szTitle),
+	m_sSingleFileTitle(szSingleFileTitle),
+	m_sMultiFileTitle(szMultiFileTitle),
 	m_nPrevActiveTab(0)
 {
 	//{{AFX_DATA_INIT(CExportDlg)
@@ -80,6 +82,7 @@ BEGIN_MESSAGE_MAP(CTDLExportDlg, CTDLDialog)
 	ON_CBN_SELCHANGE(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
 	ON_BN_CLICKED(IDC_EXPORTONEFILE, OnExportonefile)
 	ON_EN_CHANGE(IDC_EXPORTPATH, OnChangeExportpath)
+	ON_CBN_EDITCHANGE(IDC_EXPORTTITLE, OnChangeExportTitle)
 	ON_BN_CLICKED(IDC_TOPATH, OnExportToClipboardOrPath)
 	ON_BN_CLICKED(IDC_TOCLIPBOARD, OnExportToClipboardOrPath)
 END_MESSAGE_MAP()
@@ -99,6 +102,23 @@ BOOL CTDLExportDlg::OnInitDialog()
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CTDLExportDlg::OnChangeExportTitle()
+{
+	UpdateData();
+
+	// Update our cached values as we go so that we know
+	// with certainty that they are always up to date
+	if (GetExportAllTasklists())
+	{
+		if (GetExportOneFile())
+			m_sMultiFileTitle = m_sExportTitle;
+	}
+	else
+	{
+		m_sSingleFileTitle = m_sExportTitle;
+	}
 }
 
 void CTDLExportDlg::OnChangeExportpath()
@@ -123,25 +143,22 @@ void CTDLExportDlg::OnExportToClipboardOrPath()
 
 void CTDLExportDlg::UpdateTitle()
 {
-	BOOL bExportAllTasklists = GetExportAllTasklists();
-
 	static CEnString MULTI_FILE_TITLE(IDS_EXPORTTITLE_MULTIPLEFILES);
 
-	if (bExportAllTasklists)
+	if (GetExportAllTasklists())
 	{
-		if (m_sExportTitle != MULTI_FILE_TITLE)
-		{
-			m_sSingleFileTitle = m_sExportTitle;
+		if (GetExportOneFile())
+			m_sExportTitle = m_sMultiFileTitle;
+		else
 			m_sExportTitle = MULTI_FILE_TITLE;
-		}
 	}
-	else if (!m_sSingleFileTitle.IsEmpty())
+	else
 	{
 		m_sExportTitle = m_sSingleFileTitle;
 	}
 
 	SetDlgItemText(IDC_EXPORTTITLE, m_sExportTitle);
-	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(!bExportAllTasklists);
+	GetDlgItem(IDC_EXPORTTITLE)->EnableWindow(m_sExportTitle != MULTI_FILE_TITLE);
 }
 
 void CTDLExportDlg::OnOK()
@@ -184,8 +201,9 @@ void CTDLExportDlg::OnOK()
 				m_ppHost.SetActivePage(0);
 				return;
 			}
-			else
-				sExportPath = sPath;
+			
+			// else
+			sExportPath = sPath;
 		}
 
 		// make sure the output folder is valid
@@ -199,17 +217,12 @@ void CTDLExportDlg::OnOK()
 			
 			UINT nRet = MessageBox(sMessage, CEnString(IDS_ED_NOMAKEEXPORTPATH_TITLE), MB_OKCANCEL);
 
-			// re-display dialog
 			if (nRet == IDOK)
-			{
-				m_ppHost.SetActivePage(0);
-				return;
-			}
+				m_ppHost.SetActivePage(0); // don't close dialog
 			else
-			{
 				EndDialog(IDCANCEL);
-				return;
-			}
+
+			return;
 		}
 	}
 

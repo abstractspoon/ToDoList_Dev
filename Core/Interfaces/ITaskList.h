@@ -87,6 +87,9 @@ class IMultiTaskList : public IUnknown
 public:
 	virtual int GetTaskListCount() const = 0;
 	virtual const ITaskList* GetTaskList(int nTaskList = 0) const = 0;
+
+	virtual LPCWSTR GetReportTitle() const = 0;
+	virtual LPCWSTR GetReportDate() const = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////////
