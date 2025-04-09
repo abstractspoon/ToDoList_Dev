@@ -64,7 +64,8 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	m_sizeDocked(0, 0), 
 	m_sizeDockedMax(0, 0),
 	m_rUndocked(0, 0, 0, 0),
-	m_lcFindSetup(mgrContent)
+	m_lcFindSetup(mgrContent),
+	m_hResultsFont(NULL)
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
@@ -174,6 +175,9 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 	m_icon.Load(IDI_FIND_DIALOG_STD);
 	SetIcon(m_icon, FALSE);
 
+	if (m_hResultsFont)
+		SetResultsFont(m_hResultsFont);
+
 	m_mgrPrompts.SetComboEditPrompt(m_cbSearches, IDS_FT_SAVESEARCHPROMPT);
 
 	// always add a default search
@@ -228,6 +232,14 @@ void CTDLFindTasksDlg::CheckIncludeOption(FIND_INCLUDE nOption, BOOL bCheck)
 
 	if (nItem != CB_ERR)
 		m_cbInclude.SetCheck(nItem, (bCheck ? CCBC_CHECKED : CCBC_UNCHECKED));
+}
+
+void CTDLFindTasksDlg::SetResultsFont(HFONT hFont) 
+{ 
+	m_hResultsFont = hFont;
+
+	if (m_lcResults.GetSafeHwnd())
+		m_lcResults.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); 
 }
 
 void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
@@ -362,15 +374,11 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 {
 	BOOL bWasDocked = IsDocked();
 	BOOL bIsDocked = IsDocked(nPos);
-	CFont* pOldResultsFont = NULL;
 
 	if (GetSafeHwnd())
 	{
 		if (nPos == m_nDockPos)
 			return TRUE;
-
-		// else
-		pOldResultsFont = m_lcResults.GetFont();
 
 		DestroyWindow();
 	}
@@ -419,9 +427,6 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 
 	if (!CRuntimeDlg::Create(CEnString(IDS_FIND_TASKS), dwStyle, dwExStyle, rect, AfxGetMainWnd(), IDC_STATIC))
 		return FALSE;
-
-	if (pOldResultsFont)
-		m_lcResults.SetFont(pOldResultsFont);
 
 	return TRUE;
 }

@@ -81,7 +81,7 @@ public:
 	void SetNumPriorityRiskLevels(int nNumLevels);
 	void SetGroupHeaderBackColor(COLORREF crBack);
 	void SetUITheme(const CUIThemeFile& theme);
-	void SetResultsFont(HFONT hFont) { m_lcResults.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); }
+	void SetResultsFont(HFONT hFont);
 	void SetPriorityColors(const CDWordArray& aColors) { m_lcFindSetup.SetPriorityColors(aColors); }
 	void SetISODateFormat(BOOL bIso) { m_lcFindSetup.SetISODateFormat(bIso); }
 
@@ -122,6 +122,7 @@ protected:
 	CIcon m_icon;
 	CSize m_sizeDocked, m_sizeDockedMax;
 	CRect m_rUndocked;
+	HFONT m_hResultsFont;
 
 // Overrides
 protected:
