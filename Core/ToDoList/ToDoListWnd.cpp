@@ -1275,9 +1275,10 @@ void CToDoListWnd::InitMenuIconManager()
 	}
 
 	if (!m_mgrMenuIcons.HasImages())
-		m_mgrMenuIcons.Populate(Prefs());
+		m_mgrMenuIcons.Populate(Prefs()); // Once only
 
 	m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
+	m_mgrMenuIcons.UpdateStaticDialogIcons();
 
 	m_idleTasks.UpdateMenuSourceControlStatus();
 }
@@ -1601,7 +1602,8 @@ BOOL CToDoListWnd::InitCustomToolbar()
 	}
 
 	m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
-	
+	m_mgrMenuIcons.UpdateStaticDialogIcons();
+
 	return TRUE;
 }
 
@@ -5286,6 +5288,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			InitCustomToolbar();
 
 			m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
+			m_mgrMenuIcons.UpdateStaticDialogIcons();
 		}
 		
 		if (bResizeDlg)
@@ -8467,6 +8470,7 @@ void CToDoListWnd::RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilter
 		VERIFY(m_toolbarCustom.ModifyButtonAttributes(aTBButtons, m_menubar));
 
 		m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
+		m_mgrMenuIcons.UpdateStaticDialogIcons();
 	}
 }
 

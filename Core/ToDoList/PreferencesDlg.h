@@ -7,6 +7,8 @@
 // PreferencesDlg.h : header file
 //
 
+#include "TDCMenuIconMgr.h"
+
 #include "preferencesgenpage.h"
 #include "preferencestaskpage.h"
 #include "preferencestaskdefpage.h"
@@ -343,6 +345,7 @@ protected:
 	CEnEdit m_eSearchText;
 	CIcon m_iconSearch, m_iconReset;
 	CWndPromptManager m_mgrPrompts;
+	CTDCMenuIconMgr m_mgrMenuIcons; // For m_pageShortcuts
 
 	CStringArray m_aSearchTerms;
 	CString m_sPageTitle;

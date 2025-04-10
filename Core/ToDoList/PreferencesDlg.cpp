@@ -120,7 +120,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 								 CWnd* pParent /*=NULL*/)
 	: 
 	CPreferencesDlgBase(IDD_PREFERENCES, IDC_HOSTFRAME, IDI_PREFERENCES_DIALOG_STD, 0, pParent), 
-	m_pageShortcuts(pShortcutMgr), 
+	m_pageShortcuts(m_mgrMenuIcons, pShortcutMgr), 
 	m_pageUI(pMgrUIExt), 
 	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
@@ -539,11 +539,16 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		{
 			m_pageTools.SetCustomAttributeDefs(m_aCustomAttribDefs);
 		}
+		else if (pPage == &m_pageShortcuts)
+		{
+			if (!m_mgrMenuIcons.HasImages())
+				m_mgrMenuIcons.Populate(*this);
+		}
 		
 		// update caption
 		m_sPageTitle = GetItemPath(htiSel);
-		UpdateData(FALSE);
 
+		UpdateData(FALSE);
 		UpdatePageTitleTextColors();
 	}
 	

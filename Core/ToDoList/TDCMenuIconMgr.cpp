@@ -34,11 +34,11 @@ CTDCMenuIconMgr::~CTDCMenuIconMgr()
 
 void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 {
-	if (!CMenuIconMgr::IsInitialized())
-	{
-		ASSERT(0);
-		return;
-	}
+// 	if (!CMenuIconMgr::IsInitialized())
+// 	{
+// 		ASSERT(0);
+// 		return;
+// 	}
 
 	if (HasImages())
 		return;
@@ -223,13 +223,16 @@ void CTDCMenuIconMgr::UpdateCustomToolbar(const CToolBar& toolbar)
 
 		if (mapNewIDs.GetDifferences(mapExistIDs, mapDiffIDs))
 			mapDiffIDs.CopyTo(m_aCustomToolbarCmdIDs);
-
-		// 5. Update static dialog icons
-		CToDoCtrl::SetDialogIcons(GetIcon(ID_EDIT_SETTASKICON),
-								  GetIcon(ID_EDIT_DEPENDENCY),
-								  GetIcon(ID_EDIT_RECURRENCE),
-								  GetIcon(ID_ADDTIMETOLOGFILE));
-
-		CPasswordDialog::SetIcon(GetIcon(ID_FILE_ENCRYPT));
 	}
 }
+
+void CTDCMenuIconMgr::UpdateStaticDialogIcons()
+{
+	CToDoCtrl::SetDialogIcons(GetIcon(ID_EDIT_SETTASKICON),
+							  GetIcon(ID_EDIT_DEPENDENCY),
+							  GetIcon(ID_EDIT_RECURRENCE),
+							  GetIcon(ID_ADDTIMETOLOGFILE));
+
+	CPasswordDialog::SetIcon(GetIcon(ID_FILE_ENCRYPT));
+}
+
