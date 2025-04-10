@@ -43,8 +43,6 @@ const LPCTSTR NO_SOUND	= _T("None");
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskDefPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesTaskDefPage, CPreferencesPageBase)
-
 CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDCContentMgr* pMgrContent) 
 	: 
 	CPreferencesPageBase(IDD_PREFTASKDEF_PAGE),

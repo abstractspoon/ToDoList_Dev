@@ -39,8 +39,6 @@ class CTDCContentMgr;
 
 class CPreferencesTaskDefPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesTaskDefPage)
-
 // Construction
 public:
 	CPreferencesTaskDefPage(const CTDCContentMgr* pMgrContent = NULL);

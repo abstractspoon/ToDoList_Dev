@@ -32,8 +32,6 @@ class CTDCCustomAttribDefinitionArray;
 
 class CPreferencesToolPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesToolPage)
-
 // Construction
 public:
 	CPreferencesToolPage(int nMaxNumTools = 50);

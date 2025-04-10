@@ -16,9 +16,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesToolbarPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesUICustomToolbarPage, CPreferencesPageBase)
-
-CPreferencesUICustomToolbarPage::CPreferencesUICustomToolbarPage() 
+CPreferencesUICustomToolbarPage::CPreferencesUICustomToolbarPage(const CTDCImageList& ilIcons)
 	: 
 	CPreferencesPageBase(IDD_PREFTOOLBAR_PAGE)
 {

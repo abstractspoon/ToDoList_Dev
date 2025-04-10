@@ -17,8 +17,6 @@
 
 class CPreferencesExportPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesExportPage)
-
 // Construction
 public:
 	CPreferencesExportPage();

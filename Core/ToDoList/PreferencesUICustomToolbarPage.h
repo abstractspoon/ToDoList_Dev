@@ -18,8 +18,6 @@
 
 class CPreferencesUICustomToolbarPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesUICustomToolbarPage)
-
 // Construction
 public:
 	CPreferencesUICustomToolbarPage();

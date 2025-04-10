@@ -22,8 +22,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUIPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesUIPage, CPreferencesPageBase)
-
 CPreferencesUIPage::CPreferencesUIPage(const CUIExtensionMgr* pMgrUIExt) 
 	: 
 	CPreferencesPageBase(IDD_PREFUI_PAGE),

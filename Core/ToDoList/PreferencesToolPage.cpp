@@ -59,8 +59,6 @@ const int BTN_SELECTICON = 101;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesToolPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesToolPage, CPreferencesPageBase)
-
 CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	: 
 	CPreferencesPageBase(IDD_PREFTOOLS_PAGE),

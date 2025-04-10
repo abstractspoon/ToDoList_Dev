@@ -33,8 +33,6 @@ enum // tray options
 
 class CPreferencesGenPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesGenPage)
-
 // Construction
 public:
 	CPreferencesGenPage();

@@ -27,8 +27,6 @@ const LPCTSTR ENDL = _T("\r\n");
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskDef2Page property page
 
-IMPLEMENT_DYNCREATE(CPreferencesTaskDef2Page, CPreferencesPageBase)
-
 CPreferencesTaskDef2Page::CPreferencesTaskDef2Page() 
 	: 
 	CPreferencesPageBase(IDD_PREFTASKDEF2_PAGE)
