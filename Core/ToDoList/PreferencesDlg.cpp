@@ -590,6 +590,7 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 					}
 
 					m_aCustomTBButtons.Copy(aButtons);
+					InvalidateAllCtrls(pPage);
 				}
 			}
 			break;
