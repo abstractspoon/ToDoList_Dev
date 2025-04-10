@@ -104,6 +104,15 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 
 	AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, colorMagenta);
 
+	// Insert date/time ------------------------------------
+	aCmdIDs.RemoveAll();
+
+	aCmdIDs.Add(ID_EDIT_INSERTDATE);
+	aCmdIDs.Add(ID_EDIT_INSERTTIME);
+	aCmdIDs.Add(ID_EDIT_INSERTDATETIME);
+
+	AddImages(aCmdIDs, IDB_DATETIME_TOOLBAR_STD, colorMagenta);
+
 	// Tray icon -------------------------------------------
 	AddImage(ID_TRAYICON_CREATETASK, GetNewTaskCmdID(prefs));
 	AddImage(ID_TRAYICON_CLOSE, ID_EXIT);
