@@ -18,7 +18,8 @@ static char THIS_FILE[] = __FILE__;
 
 CPreferencesUICustomToolbarPage::CPreferencesUICustomToolbarPage(const CTDCImageList& ilIcons)
 	: 
-	CPreferencesPageBase(IDD_PREFTOOLBAR_PAGE)
+	CPreferencesPageBase(IDD_PREFTOOLBAR_PAGE),
+	m_ilcButtons(ilIcons)
 {
 	//{{AFX_DATA_INIT(CPreferencesUICustomToolbarPage)
 	//}}AFX_DATA_INIT

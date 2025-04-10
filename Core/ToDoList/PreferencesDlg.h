@@ -8,6 +8,7 @@
 //
 
 #include "TDCMenuIconMgr.h"
+#include "TDCImageList.h"
 
 #include "preferencesgenpage.h"
 #include "preferencestaskpage.h"
@@ -346,6 +347,7 @@ protected:
 	CIcon m_iconSearch, m_iconReset;
 	CWndPromptManager m_mgrPrompts;
 	CTDCMenuIconMgr m_mgrMenuIcons; // For m_pageShortcuts
+	CTDCImageList m_ilIcons; // For m_pageShortcuts, m_pageUICustomToolbar
 
 	CStringArray m_aSearchTerms;
 	CString m_sPageTitle;

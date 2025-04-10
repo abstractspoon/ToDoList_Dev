@@ -20,7 +20,7 @@ class CPreferencesUICustomToolbarPage : public CPreferencesPageBase
 {
 // Construction
 public:
-	CPreferencesUICustomToolbarPage();
+	CPreferencesUICustomToolbarPage(const CTDCImageList& ilIcons);
 	~CPreferencesUICustomToolbarPage();
 
 	BOOL HasToolbarButtons() const;

@@ -124,6 +124,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_pageUI(pMgrUIExt), 
 	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
+	m_pageUICustomToolbar(m_ilIcons),
 	m_iconSearch(IDI_SEARCH_PREFS, 16, FALSE),
 	m_iconReset(IDI_RESET, 16, FALSE),
 	m_bInitialisingDialog(FALSE),
@@ -517,32 +518,60 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 			m_ppHost.ScrollToTop();
 
 		// special page handling
-		if (pPage == &m_pageTaskDef)
+		switch (m_ppHost.GetPageIndex(pPage))
 		{
-			// defaults page then update the priority colors
-			CDWordArray aColors;
+		case PREFPAGE_TASKDEF:
+			{
+				ASSERT(pPage == &m_pageTaskDef);
 
-			m_pageUITasklistColors.GetPriorityColors(aColors);
-			m_pageTaskDef.SetPriorityColors(aColors);
+				CDWordArray aColors;
 
-			UpdateTaskDefaultCommentsFont();
-		}
-		else if (pPage == &m_pageUITasklistColors)
-		{
-			TDCAUTOLISTDATA defaultListData;
-			GetDefaultListItems(defaultListData);
+				m_pageUITasklistColors.GetPriorityColors(aColors);
+				m_pageTaskDef.SetPriorityColors(aColors);
 
-			defaultListData.AppendUnique(m_autoListData, TDCA_ALL);
-			m_pageUITasklistColors.SetDefaultListData(defaultListData);
-		}
-		else if (pPage == &m_pageTools)
-		{
-			m_pageTools.SetCustomAttributeDefs(m_aCustomAttribDefs);
-		}
-		else if (pPage == &m_pageShortcuts)
-		{
-			if (!m_mgrMenuIcons.HasImages())
-				m_mgrMenuIcons.Populate(*this);
+				UpdateTaskDefaultCommentsFont();
+			}
+			break;
+
+		case PREFPAGE_UIFONTCOLOR:
+			{
+				ASSERT(pPage == &m_pageUITasklistColors);
+
+				TDCAUTOLISTDATA defaultListData;
+				GetDefaultListItems(defaultListData);
+
+				defaultListData.AppendUnique(m_autoListData, TDCA_ALL);
+				m_pageUITasklistColors.SetDefaultListData(defaultListData);
+			}
+			break;
+
+		case PREFPAGE_TOOL:
+			{
+				ASSERT(pPage == &m_pageTools);
+				m_pageTools.SetCustomAttributeDefs(m_aCustomAttribDefs);
+			}
+			break;
+
+		case PREFPAGE_SHORTCUT:
+			{
+				ASSERT(pPage == &m_pageShortcuts);
+
+				if (!m_mgrMenuIcons.HasImages())
+				{
+					m_mgrMenuIcons.Populate(*this);
+					m_ilIcons.LoadDefaultImages(TRUE);
+				}
+			}
+			break;
+
+		case PREFPAGE_TOOLBAR:
+			{
+				ASSERT(pPage == &m_pageUICustomToolbar);
+
+				if (!m_ilIcons.GetSafeHandle())
+					m_ilIcons.LoadDefaultImages(TRUE);
+			}
+			break;
 		}
 		
 		// update caption

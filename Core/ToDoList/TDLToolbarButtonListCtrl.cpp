@@ -31,7 +31,9 @@ const UINT IDC_MENUID_COMBO = 1001;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLToolbarButtonListCtrl
 
-CTDLToolbarButtonListCtrl::CTDLToolbarButtonListCtrl()
+CTDLToolbarButtonListCtrl::CTDLToolbarButtonListCtrl(const CTDCImageList& ilIcons)
+	:
+	m_ilImages(ilIcons)
 {
 }
 
@@ -108,8 +110,6 @@ void CTDLToolbarButtonListCtrl::InitState()
 	VERIFY(menu.LoadMenu());
 
 	VERIFY(m_cbMenuItems.Initialise(menu, IDS_TOOLBARMENUSEPARATOR));
-
-	m_ilImages.LoadDefaultImages(TRUE);
 
 	PopulateList();
 }

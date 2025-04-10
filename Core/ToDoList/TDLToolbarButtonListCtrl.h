@@ -7,7 +7,7 @@
 // TDLToolbarButtonListCtrl.h : header file
 //
 
-#include "TDLCustomToolbar.h"
+#include "TDLCustomToolbar.h" // for CToolbarButtonArray
 
 #include "..\Shared\MenuComboBox.h"
 #include "..\Shared\InputListCtrl.h"
@@ -19,7 +19,7 @@ class CTDLToolbarButtonListCtrl : public CInputListCtrl
 {
 // Construction
 public:
-	CTDLToolbarButtonListCtrl();
+	CTDLToolbarButtonListCtrl(const CTDCImageList& ilIcons);
 	virtual ~CTDLToolbarButtonListCtrl();
 
 	BOOL HasButtons() const;
@@ -41,7 +41,8 @@ public:
 protected:
 	CMenuComboBox m_cbMenuItems;
 	CToolbarButtonArray m_aButtons;
-	CTDCImageList m_ilImages;
+
+	const CTDCImageList& m_ilImages;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
