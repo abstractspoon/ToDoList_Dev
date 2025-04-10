@@ -251,7 +251,7 @@ public:
 
 	// CPreferencesUICustomToolbarPage
 	BOOL HasCustomToolbar() const { return m_pageUICustomToolbar.HasToolbarButtons(); }
-	int GetCustomToolbarButtons(CToolbarButtonArray& aButtons) const { return m_pageUICustomToolbar.GetToolbarButtons(aButtons); }
+	int GetCustomToolbarButtons(CTDCToolbarButtonArray& aButtons) const { return m_pageUICustomToolbar.GetToolbarButtons(aButtons); }
 	UINT GetLastCustomToolbarButtonID() const { return m_pageUICustomToolbar.GetLastCustomToolbarButtonID(); }
 
 	// CPreferencesUIVisibilityPage

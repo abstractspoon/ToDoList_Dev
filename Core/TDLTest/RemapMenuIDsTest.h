@@ -28,7 +28,7 @@ protected:
 	void TestShortcutsMgr();
 	void TestTDCFilter();
 
-	static void InitButtonArray(CToolbarButtonArray& aButtons, UINT nIDFrom, UINT nIDTo);
+	static void InitButtonArray(CTDCToolbarButtonArray& aButtons, UINT nIDFrom, UINT nIDTo);
 };
 
 #endif // !defined(AFX_REMAPMENUIDSTEST_H__96F4BFF1_37C7_4AB6_95D6_FEE032D025DA__INCLUDED_)

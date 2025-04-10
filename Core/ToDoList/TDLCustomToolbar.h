@@ -43,7 +43,7 @@ struct TOOLBARBUTTON
 	CString sImageID;
 };
 
-typedef CArray<TOOLBARBUTTON, TOOLBARBUTTON&> CToolbarButtonArray;
+typedef CArray<TOOLBARBUTTON, TOOLBARBUTTON&> CTDCToolbarButtonArray;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomToolbar window
@@ -56,7 +56,7 @@ public:
 
 // Operations
 public:
-	BOOL InitialiseButtons(const CToolbarButtonArray& aButtons,
+	BOOL InitialiseButtons(const CTDCToolbarButtonArray& aButtons,
 						   const CTDCMainMenu& mainMenu,
 						   const CShortcutManager& mgrShortcuts);
 
@@ -65,11 +65,11 @@ public:
 		
 	// Must have exact same arrangement of 
 	// buttons and separators as original initialisation
-	BOOL ModifyButtonAttributes(const CToolbarButtonArray& aButtons,
+	BOOL ModifyButtonAttributes(const CTDCToolbarButtonArray& aButtons,
 								const CTDCMainMenu& mainMenu);
 
 	static BOOL RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs,
-								 CToolbarButtonArray& aButtons);
+								 CTDCToolbarButtonArray& aButtons);
 
 protected:
 	CToolbarHelper m_tbHelper;

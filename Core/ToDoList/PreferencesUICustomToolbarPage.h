@@ -24,7 +24,7 @@ public:
 	~CPreferencesUICustomToolbarPage();
 
 	BOOL HasToolbarButtons() const;
-	int GetToolbarButtons(CToolbarButtonArray& aButtons) const;
+	int GetToolbarButtons(CTDCToolbarButtonArray& aButtons) const;
 	UINT GetLastCustomToolbarButtonID() const;
 
 	BOOL RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs);

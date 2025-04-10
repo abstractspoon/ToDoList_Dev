@@ -71,7 +71,7 @@ void CPreferencesUICustomToolbarPage::OnFirstShow()
 void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	// load tools
-	CToolbarButtonArray aButtons;
+	CTDCToolbarButtonArray aButtons;
 	CString sButtons = pPrefs->GetProfileString(_T("CustomToolbar"), _T("Buttons"));
 
 	if (!sButtons.IsEmpty())
@@ -135,7 +135,7 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 
 void CPreferencesUICustomToolbarPage::SavePreferences(IPreferences* pPrefs, LPCTSTR /*szKey*/) const
 {
-	CToolbarButtonArray aButtons;
+	CTDCToolbarButtonArray aButtons;
 	int nBtnCount = GetToolbarButtons(aButtons);
 
 	CString sButtons;
@@ -180,7 +180,7 @@ BOOL CPreferencesUICustomToolbarPage::HasToolbarButtons() const
 	return m_ilcButtons.HasButtons();
 }
 
-int CPreferencesUICustomToolbarPage::GetToolbarButtons(CToolbarButtonArray& aButtons) const
+int CPreferencesUICustomToolbarPage::GetToolbarButtons(CTDCToolbarButtonArray& aButtons) const
 {
 	return m_ilcButtons.GetButtons(aButtons);
 }
@@ -238,7 +238,7 @@ void CPreferencesUICustomToolbarPage::EnableDisableButtons()
 
 BOOL CPreferencesUICustomToolbarPage::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs)
 {
-	CToolbarButtonArray aButtons;
+	CTDCToolbarButtonArray aButtons;
 
 	if (!m_ilcButtons.GetButtons(aButtons))
 		return FALSE;

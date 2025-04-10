@@ -23,8 +23,8 @@ public:
 	virtual ~CTDLToolbarButtonListCtrl();
 
 	BOOL HasButtons() const;
-	int GetButtons(CToolbarButtonArray& aButtons) const;
-	void SetButtons(const CToolbarButtonArray& aButtons);
+	int GetButtons(CTDCToolbarButtonArray& aButtons) const;
+	void SetButtons(const CTDCToolbarButtonArray& aButtons);
 	UINT GetLastButtonID() const;
 
 	BOOL CanMoveSelectedButtonUp() const;
@@ -40,7 +40,7 @@ public:
 // Attributes
 protected:
 	CMenuComboBox m_cbMenuItems;
-	CToolbarButtonArray m_aButtons;
+	CTDCToolbarButtonArray m_aButtons;
 
 	const CTDCImageList& m_ilImages;
 

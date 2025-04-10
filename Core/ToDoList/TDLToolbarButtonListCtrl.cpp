@@ -59,13 +59,13 @@ BOOL CTDLToolbarButtonListCtrl::HasButtons() const
 	return (m_aButtons.GetSize() > 0);
 }
 
-int CTDLToolbarButtonListCtrl::GetButtons(CToolbarButtonArray& aButtons) const
+int CTDLToolbarButtonListCtrl::GetButtons(CTDCToolbarButtonArray& aButtons) const
 {
 	aButtons.Copy(m_aButtons);
 	return aButtons.GetSize();
 }
 
-void CTDLToolbarButtonListCtrl::SetButtons(const CToolbarButtonArray& aButtons)
+void CTDLToolbarButtonListCtrl::SetButtons(const CTDCToolbarButtonArray& aButtons)
 {
 	if (!Misc::MatchAllT(aButtons, m_aButtons, TRUE))
 	{

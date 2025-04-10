@@ -37,7 +37,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomToolbar message handlers
 
-BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
+BOOL CTDLCustomToolbar::InitialiseButtons(const CTDCToolbarButtonArray& aButtons,
 										  const CTDCMainMenu& mainMenu,
 										  const CShortcutManager& mgrShortcuts)
 {
@@ -125,7 +125,7 @@ void CTDLCustomToolbar::OnDestroy()
 	CEnToolBar::OnDestroy();
 }
 
-BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CToolbarButtonArray& aButtons,
+BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CTDCToolbarButtonArray& aButtons,
 												const CTDCMainMenu& mainMenu)
 {
 	// Must be created AND initialised
@@ -209,7 +209,7 @@ BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CToolbarButtonArray& aButto
 }
 
 BOOL CTDLCustomToolbar::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs,
-										 CToolbarButtonArray& aButtons)
+										 CTDCToolbarButtonArray& aButtons)
 {
 	// Work through the buttons updating as we go
 	BOOL bRemapped = FALSE;
