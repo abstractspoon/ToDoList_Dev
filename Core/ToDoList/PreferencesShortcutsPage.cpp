@@ -35,7 +35,7 @@ static char THIS_FILE[] = __FILE__;
 
 const int TEXT_PADDING			= 3;
 const int SHORTCUTCOL_MINWIDTH	= 75;
-const int ICON_WIDTH			= GraphicsMisc::ScaleByDPIFactor(16);
+const int ICON_OFFSET			= GraphicsMisc::ScaleByDPIFactor(20);
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesShortcutsPage property page
@@ -773,7 +773,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			pDC->SelectObject(hOldFont);
 
 			// Image
-			rText.OffsetRect(-ICON_WIDTH, 0);
+			rText.OffsetRect(-ICON_OFFSET, 0);
 			m_mgrMenuIcons.DrawImage(pTVCD->nmcd.hdc, nCmdID, rText.TopLeft());
 
 			*pResult |= CDRF_SKIPDEFAULT;
