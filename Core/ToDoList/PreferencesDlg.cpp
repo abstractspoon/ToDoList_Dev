@@ -218,6 +218,10 @@ void CPreferencesDlg::LoadPreferences(const IPreferences* prefs, LPCTSTR szKey)
 
 		OnColorPageTextOption(0, 0);
 		OnNumPriorityRiskLevels(0, 0);
+
+		// Snapshot the toolbar buttons so we can detect changes
+		//m_pageUICustomToolbar.GetToolbarButtons(m_aCustomTBButtons);
+		m_aCustomTBButtons.RemoveAll();
 	}
 }
 
@@ -560,6 +564,32 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 				{
 					m_mgrMenuIcons.Populate(*this);
 					m_ilIcons.LoadDefaultImages(TRUE);
+				}
+
+				// check for toolbar changes
+				CTDCToolbarButtonArray aButtons;
+				m_pageUICustomToolbar.GetToolbarButtons(aButtons);
+
+				if (!Misc::MatchAllT(m_aCustomTBButtons, aButtons, FALSE))
+				{
+					// Remove the old menu icons
+					int nBtn = m_aCustomTBButtons.GetSize();
+
+					while (nBtn--)
+						m_mgrMenuIcons.RemoveImage(m_aCustomTBButtons[nBtn].nMenuID);
+
+					// Add the new menu icons
+					nBtn = aButtons.GetSize();
+
+					while (nBtn--)
+					{
+						const TOOLBARBUTTON& tbb = aButtons[nBtn];
+
+						if (!tbb.IsSeparator())
+							m_mgrMenuIcons.AddImage(tbb.nMenuID, m_ilIcons, m_ilIcons.GetImageIndex(tbb.sImageID));
+					}
+
+					m_aCustomTBButtons.Copy(aButtons);
 				}
 			}
 			break;
