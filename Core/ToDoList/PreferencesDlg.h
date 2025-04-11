@@ -315,8 +315,8 @@ public:
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const { return m_pageUITasklistColors.GetAttributeColors(colors); }
 
 	// CPreferencesToolPage
-	int GetUserTools(CUserToolArray& aTools) const { return m_pageTools.GetUserTools(aTools); }
-	BOOL GetUserTool(int nTool, USERTOOL& tool) const { return m_pageTools.GetUserTool(nTool, tool); } 
+	int GetUserTools(CTDCUserToolArray& aTools) const { return m_pageTools.GetUserTools(aTools); }
+	BOOL GetUserTool(int nTool, TDCUSERTOOL& tool) const { return m_pageTools.GetUserTool(nTool, tool); } 
 	BOOL GetDisplayUDTsInToolbar() const { return m_pageTools.GetDisplayUDTsInToolbar(); }
 
 //	BOOL Get() const { return m_b; }

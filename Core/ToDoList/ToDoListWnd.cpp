@@ -5312,7 +5312,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 
 		if (!bUpdateUDTs)
 		{
-			CUserToolArray aOldTools, aNewTools;
+			CTDCUserToolArray aOldTools, aNewTools;
 
 			if (oldPrefs.GetDisplayUDTsInToolbar())
 				oldPrefs.GetUserTools(aOldTools);
@@ -7493,7 +7493,7 @@ void CToDoListWnd::OnUpdateUserTool(CCmdUI* pCmdUI)
 		ASSERT(CTDCToolsHelper::IsToolCmdID(pCmdUI->m_nID));
 		int nTool = (pCmdUI->m_nID - ID_TOOLS_USERTOOL1);
 
-		USERTOOL tool;
+		TDCUSERTOOL tool;
 		pCmdUI->Enable(Prefs().GetUserTool(nTool, tool));
 	}
 }
@@ -7504,7 +7504,7 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 	int nTool = (nCmdID - ID_TOOLS_USERTOOL1);
 
 	const CPreferencesDlg& prefs = Prefs();
-	USERTOOL tool;
+	TDCUSERTOOL tool;
 	
 	if (prefs.GetUserTool(nTool, tool))
 	{
@@ -7916,7 +7916,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 
 	if (bWantInToolbar && (bAddToMainToolbar || bAddToCustomToolbar))
 	{
-		CUserToolArray aTools;
+		CTDCUserToolArray aTools;
 		prefs.GetUserTools(aTools);
 
 		if (bAddToMainToolbar)
@@ -9621,7 +9621,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 
 LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
 {
-	USERTOOL* pTool = (USERTOOL*)lp;
+	TDCUSERTOOL* pTool = (TDCUSERTOOL*)lp;
 	
 	if (pTool)
 	{

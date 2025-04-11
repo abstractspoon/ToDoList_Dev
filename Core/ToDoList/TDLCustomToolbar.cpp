@@ -60,7 +60,7 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CTDCToolbarButtonArray& aButtons
 
 	for (int nBtn = 0; nBtn < aButtons.GetSize(); nBtn++)
 	{
-		const TOOLBARBUTTON& tb = aButtons[nBtn];
+		const TDCCUSTOMTOOLBARBUTTON& tb = aButtons[nBtn];
 		TBBUTTON tbb = { -1, (int)tb.nMenuID, 0, TBSTYLE_SEP, 0, 0, (UINT)-1 };
 		
 		if (tb.nMenuID > 0)
@@ -86,7 +86,7 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CTDCToolbarButtonArray& aButtons
 	
 	for (int nTip = 0; nTip < aButtons.GetSize(); nTip++)
 	{
-		const TOOLBARBUTTON& tb = aButtons[nTip];
+		const TDCCUSTOMTOOLBARBUTTON& tb = aButtons[nTip];
 		CString sTooltip;
 				
 		if (GetItemTooltip(tb.nMenuID, mainMenu, sTooltip))
@@ -169,7 +169,7 @@ BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CTDCToolbarButtonArray& aBu
 		if (IsItemSeparator(nBtn))
 			continue;
 
-		const TOOLBARBUTTON& tbNew = aButtons[nBtn];
+		const TDCCUSTOMTOOLBARBUTTON& tbNew = aButtons[nBtn];
 
 		// Update commandl ID
 		UINT nOldCmdID = GetItemID(nBtn);
@@ -217,7 +217,7 @@ BOOL CTDLCustomToolbar::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& ma
 
 	while (nBtn--)
 	{
-		TOOLBARBUTTON& tb = aButtons[nBtn];
+		TDCCUSTOMTOOLBARBUTTON& tb = aButtons[nBtn];
 
 		// Ignore separators
 		if (tb.nMenuID == 0)
@@ -238,7 +238,7 @@ BOOL CTDLCustomToolbar::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& ma
 	return bRemapped;
 }
 
-BOOL CTDLCustomToolbar::AppendTools(const CUserToolArray& aTools, BOOL bGrouped)
+BOOL CTDLCustomToolbar::AppendTools(const CTDCUserToolArray& aTools, BOOL bGrouped)
 {
 	if (m_nInitBtnCount == 0)
 	{

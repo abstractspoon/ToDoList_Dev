@@ -78,7 +78,7 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 	{
 		CStringArray aBtnPairs;
 		int nPair = Misc::Split(sButtons, aBtnPairs, '|');
-		TOOLBARBUTTON tb;
+		TDCCUSTOMTOOLBARBUTTON tb;
 
 		while (nPair--)
 		{
@@ -96,7 +96,7 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 	else // backward compatibility
 	{
 		int nBtn = pPrefs->GetProfileInt(_T("CustomToolbar"), _T("ButtonCount"), 0);
-		TOOLBARBUTTON tb;
+		TDCCUSTOMTOOLBARBUTTON tb;
 
 		while (nBtn--)
 		{
@@ -112,22 +112,22 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 	// If no tools and 'first time' then create a toolbar to showcase the feature
 	if (!aButtons.GetSize() && pPrefs->GetProfileInt(_T("CustomToolbar"), _T("FirstTime"), TRUE))
 	{
-		aButtons.Add(TOOLBARBUTTON(ID_NEW,						_T("28")));
-		aButtons.Add(TOOLBARBUTTON(ID_PRINTPREVIEW,				_T("82")));
-		aButtons.Add(TOOLBARBUTTON(ID_SENDTASKS,				_T("39")));
-		aButtons.Add(TOOLBARBUTTON());							// separator
-		aButtons.Add(TOOLBARBUTTON(ID_EDIT_FLAGTASK,			_T("49")));
-		aButtons.Add(TOOLBARBUTTON(ID_EDIT_LOCKTASK,			_T("100")));
-		aButtons.Add(TOOLBARBUTTON(ID_EDIT_PASTEATTRIBUTES,		_T("258")));
-		aButtons.Add(TOOLBARBUTTON());							// separator
-		aButtons.Add(TOOLBARBUTTON(ID_VIEW_CLEARFILTER,			_T("62")));
-		aButtons.Add(TOOLBARBUTTON(ID_VIEW_REFRESHFILTER,		_T("99")));
-		aButtons.Add(TOOLBARBUTTON());							// separator
-		aButtons.Add(TOOLBARBUTTON(ID_TOOLS_ANALYSELOGGEDTIME,	_T("93")));
-		aButtons.Add(TOOLBARBUTTON());							// separator
-		aButtons.Add(TOOLBARBUTTON(ID_HELP_DONATE,				_T("16")));
-		aButtons.Add(TOOLBARBUTTON());							// separator
-		aButtons.Add(TOOLBARBUTTON(ID_TOOLS_CHECKFORUPDATES,	_T("83")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_NEW,						_T("28")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_PRINTPREVIEW,				_T("82")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_SENDTASKS,				_T("39")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON());							// separator
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_EDIT_FLAGTASK,			_T("49")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_EDIT_LOCKTASK,			_T("100")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_EDIT_PASTEATTRIBUTES,		_T("258")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON());							// separator
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_VIEW_CLEARFILTER,			_T("62")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_VIEW_REFRESHFILTER,		_T("99")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON());							// separator
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_TOOLS_ANALYSELOGGEDTIME,	_T("93")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON());							// separator
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_HELP_DONATE,				_T("16")));
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON());							// separator
+		aButtons.Add(TDCCUSTOMTOOLBARBUTTON(ID_TOOLS_CHECKFORUPDATES,	_T("83")));
 	}
 	
 	m_ilcButtons.SetButtons(aButtons);
@@ -142,7 +142,7 @@ void CPreferencesUICustomToolbarPage::SavePreferences(IPreferences* pPrefs, LPCT
 
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
-		const TOOLBARBUTTON& tb = aButtons[nBtn];
+		const TDCCUSTOMTOOLBARBUTTON& tb = aButtons[nBtn];
  		sButtons += Misc::Format(_T("%d:%s|"), tb.nMenuID, tb.sImageID);
 	}
 	sButtons.TrimRight('|');

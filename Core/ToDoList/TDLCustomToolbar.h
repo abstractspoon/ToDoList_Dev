@@ -21,14 +21,14 @@ class CTDCMainMenu;
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct TOOLBARBUTTON
+struct TDCCUSTOMTOOLBARBUTTON
 {
-	TOOLBARBUTTON(UINT nID = 0, LPCTSTR szImage = NULL) 
+	TDCCUSTOMTOOLBARBUTTON(UINT nID = 0, LPCTSTR szImage = NULL) 
 		: nMenuID(nID), sImageID(szImage) 
 	{
 	}
 
-	BOOL operator==(const TOOLBARBUTTON& tbOther) const
+	BOOL operator==(const TDCCUSTOMTOOLBARBUTTON& tbOther) const
 	{
 		return ((nMenuID == tbOther.nMenuID) &&
 				(sImageID == tbOther.sImageID));
@@ -43,7 +43,7 @@ struct TOOLBARBUTTON
 	CString sImageID;
 };
 
-typedef CArray<TOOLBARBUTTON, TOOLBARBUTTON&> CTDCToolbarButtonArray;
+typedef CArray<TDCCUSTOMTOOLBARBUTTON, TDCCUSTOMTOOLBARBUTTON&> CTDCToolbarButtonArray;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomToolbar window
@@ -60,7 +60,7 @@ public:
 						   const CTDCMainMenu& mainMenu,
 						   const CShortcutManager& mgrShortcuts);
 
-	BOOL AppendTools(const CUserToolArray& aTools, BOOL bGrouped = TRUE);
+	BOOL AppendTools(const CTDCUserToolArray& aTools, BOOL bGrouped = TRUE);
 	int RemoveTools();
 		
 	// Must have exact same arrangement of 
