@@ -591,19 +591,22 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 				{
 					const TDCUSERTOOL& tut = aTools[nTool];
 
-					int nCmdID = (nTool + ID_TOOLS_USERTOOL1);
-					int nImage = m_ilIcons.GetImageIndex(tut.sIconPath);
+					// Try built-in icons first (simple numbers)
+					HICON hIcon = m_ilIcons.ExtractIcon(m_ilIcons.GetImageIndex(tut.sIconPath));
 
-					if (nImage != -1)
+					if (!hIcon)
 					{
-						m_mgrMenuIcons.AddImage(nCmdID, m_ilIcons, nImage);
-					}
-					else
-					{
-						CString sImagePath = (tut.sIconPath.IsEmpty() ? tut.sToolPath : tut.sIconPath);
+						// Then image path
+						if (!tut.sIconPath.IsEmpty())
+							hIcon = CFileIcons::ExtractIcon(tut.sIconPath);
 
-						m_mgrMenuIcons.SetImage(nCmdID, CFileIcons::ExtractIcon(sImagePath));
+						// Then tool path
+						if (!hIcon)
+							hIcon = CFileIcons::ExtractIcon(CTDCToolsHelper::GetToolPath(tut));
 					}
+
+					if (hIcon)
+						m_mgrMenuIcons.SetImage((nTool + ID_TOOLS_USERTOOL1), hIcon);
 				}
 
 				InvalidateAllCtrls(pPage);

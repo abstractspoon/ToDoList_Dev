@@ -24,7 +24,9 @@ class CTDCMainMenu;
 struct TDCCUSTOMTOOLBARBUTTON
 {
 	TDCCUSTOMTOOLBARBUTTON(UINT nID = 0, LPCTSTR szImage = NULL) 
-		: nMenuID(nID), sImageID(szImage) 
+		: 
+		nMenuID(nID), 
+		sImageID(szImage) 
 	{
 	}
 
