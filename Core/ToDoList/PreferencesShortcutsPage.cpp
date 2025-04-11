@@ -555,10 +555,9 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		else
 		{
 			if (bSubMenu)
-				pNCGDI->pDC->FillSolidRect(rItem, GetSysColor(COLOR_3DSHADOW));
-			else
-				GraphicsMisc::DrawVertLine(pNCGDI->pDC, rItem.top, rItem.bottom, rItem.right - 1, m_tcCommands.GetGridlineColor());
+				pNCGDI->pDC->FillSolidRect(rItem, GetSysColor(COLOR_3DFACE));
 
+			GraphicsMisc::DrawVertLine(pNCGDI->pDC, rItem.top, rItem.bottom, rItem.right - 1, m_tcCommands.GetGridlineColor());
 			GraphicsMisc::DrawHorzLine(pNCGDI->pDC, rItem.left, rItem.right, rItem.bottom - 1, m_tcCommands.GetGridlineColor());
 		}
 
@@ -712,7 +711,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			// Note: we set text color to same as back color 
 			// so default text rendering does not show
 			BOOL bSubMenu = (pTVCD->nmcd.lItemlParam == ID_SUBMENU);
-			pTVCD->clrText = pTVCD->clrTextBk = GetSysColor(bSubMenu ? COLOR_3DSHADOW : COLOR_WINDOW);
+			pTVCD->clrText = pTVCD->clrTextBk = GetSysColor(bSubMenu ? COLOR_3DFACE : COLOR_WINDOW);
 		}
 		break;
 
@@ -728,7 +727,6 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 
 			// Selection colouring
 			BOOL bSubMenu = (pTVCD->nmcd.lItemlParam == ID_SUBMENU);
-			COLORREF crText = GetSysColor(bSubMenu ? COLOR_3DHILIGHT : COLOR_WINDOWTEXT);
 
 			BOOL bSelected = (pTVCD->nmcd.uItemState & CDIS_SELECTED);
 
@@ -736,19 +734,11 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			{
 				GM_ITEMSTATE nState = ((GetFocus() == &m_tcCommands) ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED) ;
 				GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcCommands, nState, pTVCD->nmcd.rc, GMIB_CLIPLEFT | GMIB_THEMECLASSIC, &pTVCD->nmcd.rc);
-
-				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 			}
 
 			// Text
-			DWORD dwShortcut = 0;
-			m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+			COLORREF crText = COLOR_WINDOWTEXT;
 
-			if (dwShortcut && CToDoCtrl::IsReservedShortcut(dwShortcut) && !IsMiscCommandID(nCmdID))
-			{
-				pDC->SetTextColor(255);
-			}
-			
 			CRect rText;
 			m_tcCommands.GetItemRect(hti, rText, TRUE);
 
@@ -762,6 +752,14 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 
 				pDC->FillSolidRect(rText, m_ctrlHighlighter.GetBkColor());
 				crText = m_ctrlHighlighter.GetTextColor();
+			}
+
+			DWORD dwShortcut = 0;
+			m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+
+			if (dwShortcut && CToDoCtrl::IsReservedShortcut(dwShortcut) && !IsMiscCommandID(nCmdID))
+			{
+				crText = colorRed;
 			}
 
 			BOOL bBold = (m_tcCommands.GetItemState(hti, TVIS_BOLD) & TVIS_BOLD);
