@@ -66,6 +66,10 @@ enum // RemapAdvancedFilterNames
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CTasklistStorageMgr;
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlg dialog
 
 class CPreferencesDlg : public CPreferencesDlgBase
@@ -76,7 +80,8 @@ public:
 					const CTDCContentMgr* pContentMgr = NULL, 
 					const CTDCImportExportMgr* pExportMgr = NULL, 
 					const CUIExtensionMgr* pMgrUIExt = NULL,
-					CWnd* pParent = NULL);   // standard constructor
+					const CTasklistStorageMgr* pMgrStorage = NULL,
+					CWnd* pParent = NULL);
 	virtual ~CPreferencesDlg();
 
 	void InitializePreferences(); // one time only
@@ -347,8 +352,10 @@ protected:
 	CEnEdit m_eSearchText;
 	CIcon m_iconSearch, m_iconReset;
 	CWndPromptManager m_mgrPrompts;
+
 	CTDCMenuIconMgr m_mgrMenuIcons; // For m_pageShortcuts
 	CTDCImageList m_ilIcons; // For m_pageShortcuts, m_pageUICustomToolbar
+	const CTasklistStorageMgr* m_pMgrStorage; // For m_pageShortcuts
 
 	CStringArray m_aSearchTerms;
 	CString m_sPageTitle;
@@ -391,6 +398,9 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnCopy(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
+
+	// Pseudo-handler
+	void OnShowPage(CPreferencesPageBase* pPage);
 
 protected:
 	void AddPagesToTree(BOOL bDoSearch);

@@ -20,6 +20,8 @@
 #include "..\shared\CtrlTextHighlighter.h"
 #include "..\shared\FileIcons.h"
 
+#include "..\Interfaces\TasklistStorageMgr.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -118,6 +120,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 								 const CTDCContentMgr* pContentMgr, 
 								 const CTDCImportExportMgr* pExportMgr,
 								 const CUIExtensionMgr* pMgrUIExt,
+								 const CTasklistStorageMgr* pMgrStorage,
 								 CWnd* pParent /*=NULL*/)
 	: 
 	CPreferencesDlgBase(IDD_PREFERENCES, IDC_HOSTFRAME, IDI_PREFERENCES_DIALOG_STD, 0, pParent), 
@@ -129,7 +132,8 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_iconSearch(IDI_SEARCH_PREFS, 16, FALSE),
 	m_iconReset(IDI_RESET, 16, FALSE),
 	m_bInitialisingDialog(FALSE),
-	m_bBuildingTree(FALSE)
+	m_bBuildingTree(FALSE),
+	m_pMgrStorage(pMgrStorage)
 {
 	m_eSearchText.AddButton(BTN_UPDATE, m_iconSearch, CEnString(IDS_SEARCHPREFS_PROMPT));
 	m_eSearchText.AddButton(BTN_CLEAR, m_iconReset, CEnString(IDS_CLEARSEARCH_TIP));
@@ -569,6 +573,19 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 				{
 					m_mgrMenuIcons.Populate(*this);
 					m_ilIcons.LoadDefaultImages(TRUE);
+
+					if (m_pMgrStorage)
+					{
+						int nStorage = m_pMgrStorage->GetNumStorage();
+
+						while (nStorage--)
+						{
+							HICON hIcon = m_pMgrStorage->GetStorageIcon(nStorage);
+
+							m_mgrMenuIcons.AddImage(ID_FILE_OPEN_USERSTORAGE1 + nStorage, hIcon); 
+							m_mgrMenuIcons.AddImage(ID_FILE_SAVE_USERSTORAGE1 + nStorage, hIcon); 
+						}
+					}
 				}
 
 				// Add toolbar images

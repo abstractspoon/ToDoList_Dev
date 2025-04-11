@@ -11076,9 +11076,10 @@ void CToDoListWnd::ResetPrefs()
 	delete m_pPrefs;
 
 	m_pPrefs = new CPreferencesDlg(&m_mgrShortcuts, 
-									&m_mgrContent, 
-									&m_mgrImportExport,
-									&m_mgrUIExtensions);
+								   &m_mgrContent, 
+								   &m_mgrImportExport,
+								   &m_mgrUIExtensions,
+								   &m_mgrStorage);
 	
 	// update
 	m_pPrefs->SetUITheme(m_theme);
