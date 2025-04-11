@@ -400,7 +400,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	// Pseudo-handler
-	void OnShowPage(CPreferencesPageBase* pPage);
+	void OnShowPage(const CPreferencesPageBase* pPage);
 
 protected:
 	void AddPagesToTree(BOOL bDoSearch);
