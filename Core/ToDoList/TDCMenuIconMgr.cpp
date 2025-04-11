@@ -201,7 +201,7 @@ void CTDCMenuIconMgr::UpdateNewTaskIcons(const CPreferencesDlg& prefs)
 	{
 		UINT nPrevID = m_nNewTaskCmdID;
 		m_nNewTaskCmdID = GetNewTaskCmdID(prefs);
-		ChangeImageID(nPrevID, m_nNewSubtaskCmdID);
+		ChangeImageID(nPrevID, m_nNewTaskCmdID);
 
 		nPrevID = m_nNewSubtaskCmdID;
 		m_nNewSubtaskCmdID = GetNewSubtaskCmdID(prefs);
