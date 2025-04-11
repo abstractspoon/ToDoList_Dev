@@ -18,6 +18,7 @@
 #include "..\shared\HookMgr.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\CtrlTextHighlighter.h"
+#include "..\shared\FileIcons.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -218,10 +219,6 @@ void CPreferencesDlg::LoadPreferences(const IPreferences* prefs, LPCTSTR szKey)
 
 		OnColorPageTextOption(0, 0);
 		OnNumPriorityRiskLevels(0, 0);
-
-		// Snapshot the toolbar buttons so we can detect changes
-		//m_pageUICustomToolbar.GetToolbarButtons(m_aCustomTBButtons);
-		m_aCustomTBButtons.RemoveAll();
 	}
 }
 
@@ -553,6 +550,14 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 			{
 				ASSERT(pPage == &m_pageTools);
 				m_pageTools.SetCustomAttributeDefs(m_aCustomAttribDefs);
+
+				// Remove all UDT icons from menu icons mgr
+				// will get re-added if/when m_pageShortcuts is shown
+				if (m_mgrMenuIcons.HasImages())
+				{
+					for (int nCmdID = ID_TOOLS_USERTOOL1; nCmdID <= ID_TOOLS_USERTOOL50; nCmdID++)
+						m_mgrMenuIcons.RemoveImage(nCmdID);
+				}
 			}
 			break;
 
@@ -566,32 +571,42 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 					m_ilIcons.LoadDefaultImages(TRUE);
 				}
 
-				// check for toolbar changes
+				// Add toolbar images
 				CTDCToolbarButtonArray aButtons;
-				m_pageUICustomToolbar.GetToolbarButtons(aButtons);
+				int nBtn = GetCustomToolbarButtons(aButtons);
 
-				if (!Misc::MatchAllT(m_aCustomTBButtons, aButtons, FALSE))
+				while (nBtn--)
 				{
-					// Remove the old menu icons
-					int nBtn = m_aCustomTBButtons.GetSize();
+					const TDCCUSTOMTOOLBARBUTTON& tbb = aButtons[nBtn];
 
-					while (nBtn--)
-						m_mgrMenuIcons.RemoveImage(m_aCustomTBButtons[nBtn].nMenuID);
-
-					// Add the new menu icons
-					nBtn = aButtons.GetSize();
-
-					while (nBtn--)
-					{
-						const TOOLBARBUTTON& tbb = aButtons[nBtn];
-
-						if (!tbb.IsSeparator())
-							m_mgrMenuIcons.AddImage(tbb.nMenuID, m_ilIcons, m_ilIcons.GetImageIndex(tbb.sImageID));
-					}
-
-					m_aCustomTBButtons.Copy(aButtons);
-					InvalidateAllCtrls(pPage);
+					if (!tbb.IsSeparator())
+						m_mgrMenuIcons.AddImage(tbb.nMenuID, m_ilIcons, m_ilIcons.GetImageIndex(tbb.sImageID));
 				}
+
+				// Add UDT images
+				CTDCUserToolArray aTools;
+				int nTool = GetUserTools(aTools);
+
+				while (nTool--)
+				{
+					const TDCUSERTOOL& tut = aTools[nTool];
+
+					int nCmdID = (nTool + ID_TOOLS_USERTOOL1);
+					int nImage = m_ilIcons.GetImageIndex(tut.sIconPath);
+
+					if (nImage != -1)
+					{
+						m_mgrMenuIcons.AddImage(nCmdID, m_ilIcons, nImage);
+					}
+					else
+					{
+						CString sImagePath = (tut.sIconPath.IsEmpty() ? tut.sToolPath : tut.sIconPath);
+
+						m_mgrMenuIcons.SetImage(nCmdID, CFileIcons::ExtractIcon(sImagePath));
+					}
+				}
+
+				InvalidateAllCtrls(pPage);
 			}
 			break;
 
@@ -601,6 +616,17 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 				if (!m_ilIcons.GetSafeHandle())
 					m_ilIcons.LoadDefaultImages(TRUE);
+
+				// Remove all toolbar icons from menu icons mgr
+				// will get re-added if/when m_pageShortcuts is shown
+				if (m_mgrMenuIcons.HasImages())
+				{
+					CTDCToolbarButtonArray aButtons;
+					int nBtn = m_pageUICustomToolbar.GetToolbarButtons(aButtons);
+
+					while (nBtn--)
+						m_mgrMenuIcons.RemoveImage(aButtons[nBtn].nMenuID);
+				}
 			}
 			break;
 		}

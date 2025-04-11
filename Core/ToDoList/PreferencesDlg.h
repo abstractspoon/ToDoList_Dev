@@ -355,7 +355,6 @@ protected:
 	CUIThemeFile m_theme;
 	TDCAUTOLISTDATA m_autoListData;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
-	CTDCToolbarButtonArray m_aCustomTBButtons;
 
 	BOOL m_bInitialisingDialog;
 	BOOL m_bBuildingTree;
