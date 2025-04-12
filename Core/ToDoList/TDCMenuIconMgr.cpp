@@ -34,11 +34,11 @@ CTDCMenuIconMgr::~CTDCMenuIconMgr()
 
 void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 {
-	if (!CMenuIconMgr::IsInitialized())
-	{
-		ASSERT(0);
-		return;
-	}
+// 	if (!CMenuIconMgr::IsInitialized())
+// 	{
+// 		ASSERT(0);
+// 		return;
+// 	}
 
 	if (HasImages())
 		return;
@@ -103,6 +103,15 @@ void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 	aCmdIDs.Add(ID_HELP_FORUM);
 
 	AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, colorMagenta);
+
+	// Insert date/time ------------------------------------
+	aCmdIDs.RemoveAll();
+
+	aCmdIDs.Add(ID_EDIT_INSERTDATE);
+	aCmdIDs.Add(ID_EDIT_INSERTTIME);
+	aCmdIDs.Add(ID_EDIT_INSERTDATETIME);
+
+	AddImages(aCmdIDs, IDB_DATETIME_TOOLBAR_STD, colorMagenta);
 
 	// Tray icon -------------------------------------------
 	AddImage(ID_TRAYICON_CREATETASK, GetNewTaskCmdID(prefs));
@@ -223,13 +232,16 @@ void CTDCMenuIconMgr::UpdateCustomToolbar(const CToolBar& toolbar)
 
 		if (mapNewIDs.GetDifferences(mapExistIDs, mapDiffIDs))
 			mapDiffIDs.CopyTo(m_aCustomToolbarCmdIDs);
-
-		// 5. Update static dialog icons
-		CToDoCtrl::SetDialogIcons(GetIcon(ID_EDIT_SETTASKICON),
-								  GetIcon(ID_EDIT_DEPENDENCY),
-								  GetIcon(ID_EDIT_RECURRENCE),
-								  GetIcon(ID_ADDTIMETOLOGFILE));
-
-		CPasswordDialog::SetIcon(GetIcon(ID_FILE_ENCRYPT));
 	}
 }
+
+void CTDCMenuIconMgr::UpdateStaticDialogIcons()
+{
+	CToDoCtrl::SetDialogIcons(GetIcon(ID_EDIT_SETTASKICON),
+							  GetIcon(ID_EDIT_DEPENDENCY),
+							  GetIcon(ID_EDIT_RECURRENCE),
+							  GetIcon(ID_ADDTIMETOLOGFILE));
+
+	CPasswordDialog::SetIcon(GetIcon(ID_FILE_ENCRYPT));
+}
+

@@ -22,8 +22,6 @@ const UINT RESETBTN = 0xc4;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesExportPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesExportPage, CPreferencesPageBase)
-
 CPreferencesExportPage::CPreferencesExportPage() 
 	: 
 	CPreferencesPageBase(IDD_PREFEXPORT_PAGE),

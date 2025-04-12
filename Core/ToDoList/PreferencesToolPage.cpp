@@ -59,8 +59,6 @@ const int BTN_SELECTICON = 101;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesToolPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesToolPage, CPreferencesPageBase)
-
 CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	: 
 	CPreferencesPageBase(IDD_PREFTOOLS_PAGE),
@@ -177,7 +175,7 @@ void CPreferencesToolPage::OnFirstShow()
 	// add tools we loaded from the registry
 	for (int nTool = 0; nTool < m_aTools.GetSize(); nTool++)
 	{
-		const USERTOOL& tool = m_aTools[nTool];
+		const TDCUSERTOOL& tool = m_aTools[nTool];
 		VERIFY(AddToolToList(tool) != -1);
 
 	}
@@ -198,7 +196,7 @@ void CPreferencesToolPage::OnOK()
 
 #ifdef _DEBUG
 	// Check we kept things properly synchronised
-	CUserToolArray aTools;
+	CTDCUserToolArray aTools;
 	aTools.Copy(m_aTools);
 
 	RebuildToolsFromList();
@@ -209,7 +207,7 @@ void CPreferencesToolPage::OnOK()
 	RebuildToolsFromList(TRUE);
 }
 
-int CPreferencesToolPage::AddToolToList(const USERTOOL& tool, int nPos, BOOL bRebuildImages)
+int CPreferencesToolPage::AddToolToList(const TDCUSERTOOL& tool, int nPos, BOOL bRebuildImages)
 {
 	// special case
 	if (nPos == -1)
@@ -269,7 +267,7 @@ int CPreferencesToolPage::AddNewTool(BOOL bTDLTool)
 	int nIndex = m_lcTools.InsertItem(m_lcTools.GetItemCount(), sToolName, -1);
 	ASSERT(nIndex != -1);
 
-	USERTOOL tool;
+	TDCUSERTOOL tool;
 	tool.sToolName = sToolName;
 	VERIFY(m_aTools.Add(tool) == nIndex);
 
@@ -355,7 +353,7 @@ void CPreferencesToolPage::OnCopyTool()
 	
 	if (nSel != -1)
 	{
-		USERTOOL tool = m_aTools[nSel];
+		TDCUSERTOOL tool = m_aTools[nSel];
 		m_aTools.InsertAt(nSel + 1, tool);
 
 		int nCopy = AddToolToList(tool, (nSel + 1), TRUE);
@@ -381,7 +379,7 @@ void CPreferencesToolPage::OnMoveToolUp()
 	
 	if (nSel > 0)
 	{
-		USERTOOL tool = m_aTools[nSel]; // copy
+		TDCUSERTOOL tool = m_aTools[nSel]; // copy
 
 		m_aTools.RemoveAt(nSel);
 		m_aTools.InsertAt(nSel - 1, tool);
@@ -409,7 +407,7 @@ void CPreferencesToolPage::OnMoveToolDown()
 	
 	if ((nSel >= 0) && (nSel < (m_lcTools.GetItemCount() - 1)))
 	{
-		USERTOOL tool = m_aTools[nSel]; // copy
+		TDCUSERTOOL tool = m_aTools[nSel]; // copy
 
 		m_aTools.RemoveAt(nSel);
 		m_aTools.InsertAt(nSel + 1, tool);
@@ -568,14 +566,14 @@ void CPreferencesToolPage::OnChangeIconPath()
 	CPreferencesPageBase::OnControlChange();
 }
 
-int CPreferencesToolPage::GetUserTools(CUserToolArray& aTools) const
+int CPreferencesToolPage::GetUserTools(CTDCUserToolArray& aTools) const
 {
 	aTools.Copy(m_aTools);
 
 	return aTools.GetSize();
 }
 
-BOOL CPreferencesToolPage::GetUserTool(int nTool, USERTOOL& tool) const
+BOOL CPreferencesToolPage::GetUserTool(int nTool, TDCUSERTOOL& tool) const
 {
 	if (nTool >= 0 && nTool < m_aTools.GetSize())
 	{
@@ -593,7 +591,7 @@ void CPreferencesToolPage::RebuildToolsFromList(BOOL bSafeQuotes)
 
 	for (int nTool = 0; nTool < nToolCount; nTool++)
 	{
-		USERTOOL ut;
+		TDCUSERTOOL ut;
 		VERIFY(GetToolFromList(nTool, ut));
 
 		// GetPrivateProfileString strips a leading/trailing quote pairs if 
@@ -605,7 +603,7 @@ void CPreferencesToolPage::RebuildToolsFromList(BOOL bSafeQuotes)
 	}
 }
 
-BOOL CPreferencesToolPage::GetToolFromList(int nTool, USERTOOL& ut) const
+BOOL CPreferencesToolPage::GetToolFromList(int nTool, TDCUSERTOOL& ut) const
 {
 	if ((nTool < 0) || (nTool >= m_lcTools.GetItemCount()))
 	{
@@ -1011,7 +1009,7 @@ void CPreferencesToolPage::OnImportTools()
 				for (int nTool = 0; nTool < nNumTools; nTool++)
 				{
 					CString sKey = Misc::MakeKey(_T("Tools\\Tool%d"), nTool + 1);
-					USERTOOL ut;
+					TDCUSERTOOL ut;
 
 					ut.sToolName = ini.GetString(sKey, _T("Name"));
 					ut.sToolPath = ini.GetString(sKey, _T("Path"));
@@ -1046,7 +1044,7 @@ void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 	{
 		CString sKey = Misc::MakeKey(_T("Tools\\Tool%d"), nTool);
 
-		USERTOOL ut;
+		TDCUSERTOOL ut;
 		ut.sToolName = pPrefs->GetProfileString(sKey, _T("Name"), _T(""));
 		ut.sToolPath = pPrefs->GetProfileString(sKey, _T("Path"), _T(""));
 		ut.sCmdline = pPrefs->GetProfileString(sKey, _T("CmdLine"), _T("")); 
@@ -1069,7 +1067,7 @@ void CPreferencesToolPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) 
 
 	for (int nTool = 0; nTool < nToolCount; nTool++)
 	{
-		USERTOOL ut = m_aTools[nTool];
+		TDCUSERTOOL ut = m_aTools[nTool];
 
         CString sKey = Misc::MakeKey(_T("Tools\\Tool%d"), nTool + 1);
 		

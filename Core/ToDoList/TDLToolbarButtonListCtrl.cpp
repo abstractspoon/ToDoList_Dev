@@ -31,7 +31,9 @@ const UINT IDC_MENUID_COMBO = 1001;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLToolbarButtonListCtrl
 
-CTDLToolbarButtonListCtrl::CTDLToolbarButtonListCtrl()
+CTDLToolbarButtonListCtrl::CTDLToolbarButtonListCtrl(const CTDCImageList& ilIcons)
+	:
+	m_ilImages(ilIcons)
 {
 }
 
@@ -57,13 +59,13 @@ BOOL CTDLToolbarButtonListCtrl::HasButtons() const
 	return (m_aButtons.GetSize() > 0);
 }
 
-int CTDLToolbarButtonListCtrl::GetButtons(CToolbarButtonArray& aButtons) const
+int CTDLToolbarButtonListCtrl::GetButtons(CTDCToolbarButtonArray& aButtons) const
 {
 	aButtons.Copy(m_aButtons);
 	return aButtons.GetSize();
 }
 
-void CTDLToolbarButtonListCtrl::SetButtons(const CToolbarButtonArray& aButtons)
+void CTDLToolbarButtonListCtrl::SetButtons(const CTDCToolbarButtonArray& aButtons)
 {
 	if (!Misc::MatchAllT(aButtons, m_aButtons, TRUE))
 	{
@@ -109,8 +111,6 @@ void CTDLToolbarButtonListCtrl::InitState()
 
 	VERIFY(m_cbMenuItems.Initialise(menu, IDS_TOOLBARMENUSEPARATOR));
 
-	m_ilImages.LoadDefaultImages(TRUE);
-
 	PopulateList();
 }
 
@@ -120,7 +120,7 @@ void CTDLToolbarButtonListCtrl::PopulateList()
 
 	for (int nBtn = 0; nBtn < m_aButtons.GetSize(); nBtn++)
 	{
-		const TOOLBARBUTTON& tb = m_aButtons[nBtn];
+		const TDCCUSTOMTOOLBARBUTTON& tb = m_aButtons[nBtn];
 
 		int nRow = AddRow(m_cbMenuItems.GetMenuItemText(tb.nMenuID, TRUE));
 		SetItemText(nRow, IMAGE_COL, tb.sImageID);
@@ -136,7 +136,7 @@ void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	if ((nItem == m_aButtons.GetSize()) && (nCol == MENUID_COL))
 	{ 
 		// separator
-		m_aButtons.Add(TOOLBARBUTTON());
+		m_aButtons.Add(TDCCUSTOMTOOLBARBUTTON());
 		int nRow = AddRow(CDialogHelper::GetItem(m_cbMenuItems, 0));
 
 		SetCurSel(nRow, MENUID_COL);
@@ -155,7 +155,7 @@ void CTDLToolbarButtonListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 		
 	case IMAGE_COL:
 		{
-			TOOLBARBUTTON& tb = m_aButtons[nItem];
+			TDCCUSTOMTOOLBARBUTTON& tb = m_aButtons[nItem];
 			CTDLTaskIconDlg dialog(m_ilImages, tb.sImageID, FALSE);
 			
 			if (dialog.DoModal(IDS_TOOLBARICONDLG_TITLE) == IDOK)
@@ -175,7 +175,7 @@ void CTDLToolbarButtonListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	if (!m_aButtons.GetSize())
 		return;
 	
-	const TOOLBARBUTTON& tb = m_aButtons[nRow];
+	const TDCCUSTOMTOOLBARBUTTON& tb = m_aButtons[nRow];
 	
 	switch (nCol)
 	{
@@ -204,7 +204,7 @@ void CTDLToolbarButtonListCtrl::OnMenuItemOK()
 	
 	if (nRow != CB_ERR)
 	{
-		TOOLBARBUTTON& tb = m_aButtons[nRow];
+		TDCCUSTOMTOOLBARBUTTON& tb = m_aButtons[nRow];
 
 		int nItem = m_cbMenuItems.GetCurSel();
 		tb.nMenuID = m_cbMenuItems.GetItemData(nItem);
@@ -258,7 +258,7 @@ BOOL CTDLToolbarButtonListCtrl::MoveButton(int nBtn, int nRows)
 	if (!CanMoveButton(nBtn, nRows))
 		return FALSE;
 
-	TOOLBARBUTTON tb = m_aButtons[nBtn]; // copy
+	TDCCUSTOMTOOLBARBUTTON tb = m_aButtons[nBtn]; // copy
 	m_aButtons.RemoveAt(nBtn);
 
 	CString sMenuItem = GetItemText(nBtn, MENUID_COL);
@@ -344,7 +344,7 @@ BOOL CTDLToolbarButtonListCtrl::DuplicateSelectedButton()
 	{
 		int nRow = GetCurSel();
 		
-		TOOLBARBUTTON tb = m_aButtons[nRow]; // copy
+		TDCCUSTOMTOOLBARBUTTON tb = m_aButtons[nRow]; // copy
 		m_aButtons.InsertAt(nRow + 1, tb);
 
 		int nDupeRow = InsertRow(GetItemText(nRow, MENUID_COL), nRow + 1);

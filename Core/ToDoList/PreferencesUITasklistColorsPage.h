@@ -64,8 +64,6 @@ enum PUITCP_PRIORITYCOLOROPTION
 
 class CPreferencesUITasklistColorsPage : public CPreferencesPageBase
 {
-	//DECLARE_DYNCREATE(CPreferencesUITasklistColorsPage)
-
 // Construction
 public:
 	CPreferencesUITasklistColorsPage();

@@ -29,8 +29,6 @@ const UINT WM_PTP_ENABLEDISABLE = (WM_APP + 1);
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesTaskPage, CPreferencesPageBase)
-
 CPreferencesTaskPage::CPreferencesTaskPage() 
 	: 
 	CPreferencesPageBase(IDD_PREFTASK_PAGE),

@@ -16,8 +16,6 @@
 
 class CPreferencesUIVisibilityPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesUIVisibilityPage)
-
 // Construction
 public:
 	CPreferencesUIVisibilityPage();

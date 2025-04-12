@@ -19,8 +19,6 @@ class CTDCImportExportMgr;
 
 class CPreferencesFile2Page : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesFile2Page)
-
 // Construction
 public:
 	CPreferencesFile2Page(const CTDCImportExportMgr* pExportMgr = NULL);

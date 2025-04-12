@@ -16,8 +16,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUIVisibilityPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesUIVisibilityPage, CPreferencesPageBase)
-
 CPreferencesUIVisibilityPage::CPreferencesUIVisibilityPage() 
 	: 
 	CPreferencesPageBase(IDD_PREFUIVISIBILITY_PAGE)

@@ -20,8 +20,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesFilePage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesFilePage, CPreferencesPageBase)
-
 CPreferencesFilePage::CPreferencesFilePage() 
 	: 
 	CPreferencesPageBase(IDD_PREFFILE_PAGE),

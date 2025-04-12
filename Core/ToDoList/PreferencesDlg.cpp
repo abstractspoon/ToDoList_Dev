@@ -18,6 +18,9 @@
 #include "..\shared\HookMgr.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\CtrlTextHighlighter.h"
+#include "..\shared\FileIcons.h"
+
+#include "..\Interfaces\TasklistStorageMgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -117,17 +120,20 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 								 const CTDCContentMgr* pContentMgr, 
 								 const CTDCImportExportMgr* pExportMgr,
 								 const CUIExtensionMgr* pMgrUIExt,
+								 const CTasklistStorageMgr* pMgrStorage,
 								 CWnd* pParent /*=NULL*/)
 	: 
 	CPreferencesDlgBase(IDD_PREFERENCES, IDC_HOSTFRAME, IDI_PREFERENCES_DIALOG_STD, 0, pParent), 
-	m_pageShortcuts(pShortcutMgr), 
+	m_pageShortcuts(m_mgrMenuIcons, pShortcutMgr), 
 	m_pageUI(pMgrUIExt), 
 	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
+	m_pageUICustomToolbar(m_ilIcons),
 	m_iconSearch(IDI_SEARCH_PREFS, 16, FALSE),
 	m_iconReset(IDI_RESET, 16, FALSE),
 	m_bInitialisingDialog(FALSE),
-	m_bBuildingTree(FALSE)
+	m_bBuildingTree(FALSE),
+	m_pMgrStorage(pMgrStorage)
 {
 	m_eSearchText.AddButton(BTN_UPDATE, m_iconSearch, CEnString(IDS_SEARCHPREFS_PROMPT));
 	m_eSearchText.AddButton(BTN_CLEAR, m_iconReset, CEnString(IDS_CLEARSEARCH_TIP));
@@ -516,34 +522,13 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		else
 			m_ppHost.ScrollToTop();
 
-		// special page handling
-		if (pPage == &m_pageTaskDef)
-		{
-			// defaults page then update the priority colors
-			CDWordArray aColors;
-
-			m_pageUITasklistColors.GetPriorityColors(aColors);
-			m_pageTaskDef.SetPriorityColors(aColors);
-
-			UpdateTaskDefaultCommentsFont();
-		}
-		else if (pPage == &m_pageUITasklistColors)
-		{
-			TDCAUTOLISTDATA defaultListData;
-			GetDefaultListItems(defaultListData);
-
-			defaultListData.AppendUnique(m_autoListData, TDCA_ALL);
-			m_pageUITasklistColors.SetDefaultListData(defaultListData);
-		}
-		else if (pPage == &m_pageTools)
-		{
-			m_pageTools.SetCustomAttributeDefs(m_aCustomAttribDefs);
-		}
+		// Custom page handling
+		OnShowPage(pPage);
 		
 		// update caption
 		m_sPageTitle = GetItemPath(htiSel);
-		UpdateData(FALSE);
 
+		UpdateData(FALSE);
 		UpdatePageTitleTextColors();
 	}
 	
@@ -551,6 +536,141 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	
 	*pResult = 0;
 }
+
+void CPreferencesDlg::OnShowPage(const CPreferencesPageBase* pPage)
+{
+	switch (m_ppHost.GetPageIndex(pPage))
+	{
+	case PREFPAGE_TASKDEF:
+		{
+			ASSERT(pPage == &m_pageTaskDef);
+
+			CDWordArray aColors;
+
+			m_pageUITasklistColors.GetPriorityColors(aColors);
+			m_pageTaskDef.SetPriorityColors(aColors);
+
+			UpdateTaskDefaultCommentsFont();
+		}
+		break;
+
+	case PREFPAGE_UIFONTCOLOR:
+		{
+			ASSERT(pPage == &m_pageUITasklistColors);
+
+			TDCAUTOLISTDATA defaultListData;
+			GetDefaultListItems(defaultListData);
+
+			defaultListData.AppendUnique(m_autoListData, TDCA_ALL);
+			m_pageUITasklistColors.SetDefaultListData(defaultListData);
+		}
+		break;
+
+	case PREFPAGE_TOOL:
+		{
+			ASSERT(pPage == &m_pageTools);
+			m_pageTools.SetCustomAttributeDefs(m_aCustomAttribDefs);
+
+			// Remove all UDT icons from menu icons mgr
+			// will get re-added if/when m_pageShortcuts is shown
+			if (m_mgrMenuIcons.HasImages())
+			{
+				for (int nCmdID = ID_TOOLS_USERTOOL1; nCmdID <= ID_TOOLS_USERTOOL50; nCmdID++)
+					m_mgrMenuIcons.RemoveImage(nCmdID);
+			}
+		}
+		break;
+
+	case PREFPAGE_SHORTCUT:
+		{
+			ASSERT(pPage == &m_pageShortcuts);
+
+			if (!m_mgrMenuIcons.HasImages())
+			{
+				m_mgrMenuIcons.Populate(*this);
+				m_ilIcons.LoadDefaultImages(TRUE);
+
+				if (m_pMgrStorage)
+				{
+					int nStorage = m_pMgrStorage->GetNumStorage();
+
+					while (nStorage--)
+					{
+						HICON hIcon = m_pMgrStorage->GetStorageIcon(nStorage);
+
+						m_mgrMenuIcons.AddImage(ID_FILE_OPEN_USERSTORAGE1 + nStorage, hIcon);
+						m_mgrMenuIcons.AddImage(ID_FILE_SAVE_USERSTORAGE1 + nStorage, hIcon);
+					}
+				}
+			}
+
+			// Add toolbar images
+			CTDCToolbarButtonArray aButtons;
+			int nBtn = GetCustomToolbarButtons(aButtons);
+
+			while (nBtn--)
+			{
+				const TDCCUSTOMTOOLBARBUTTON& tbb = aButtons[nBtn];
+
+				if (!tbb.IsSeparator())
+					m_mgrMenuIcons.AddImage(tbb.nMenuID, m_ilIcons, m_ilIcons.GetImageIndex(tbb.sImageID));
+			}
+
+			// Add UDT images
+			CTDCUserToolArray aTools;
+			int nTool = GetUserTools(aTools);
+
+			while (nTool--)
+			{
+				const TDCUSERTOOL& tut = aTools[nTool];
+
+				// Try built-in icons first (simple numbers)
+				HICON hIcon = m_ilIcons.ExtractIcon(m_ilIcons.GetImageIndex(tut.sIconPath));
+
+				if (!hIcon)
+				{
+					// Then image path
+					if (!tut.sIconPath.IsEmpty())
+						hIcon = CFileIcons::ExtractIcon(tut.sIconPath);
+
+					// Then tool path
+					if (!hIcon)
+						hIcon = CFileIcons::ExtractIcon(CTDCToolsHelper::GetToolPath(tut));
+				}
+
+				if (hIcon)
+					m_mgrMenuIcons.SetImage((nTool + ID_TOOLS_USERTOOL1), hIcon);
+			}
+
+			// Refresh 'New Task' icons
+			m_mgrMenuIcons.UpdateNewTaskIcons(*this);
+
+			InvalidateAllCtrls(pPage);
+		}
+		break;
+
+	case PREFPAGE_TOOLBAR:
+		{
+			ASSERT(pPage == &m_pageUICustomToolbar);
+
+			if (!m_ilIcons.GetSafeHandle())
+				m_ilIcons.LoadDefaultImages(TRUE);
+
+			// Remove all toolbar icons from menu icons mgr
+			// will get re-added if/when m_pageShortcuts is shown
+			if (m_mgrMenuIcons.HasImages())
+			{
+				CTDCToolbarButtonArray aButtons;
+				int nBtn = m_pageUICustomToolbar.GetToolbarButtons(aButtons);
+
+				while (nBtn--)
+					m_mgrMenuIcons.RemoveImage(aButtons[nBtn].nMenuID);
+			}
+		}
+		break;
+	}
+}
+
 
 BOOL CPreferencesDlg::SetActivePage(int nPage)
 {

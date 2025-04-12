@@ -22,8 +22,6 @@ enum RELOAD_OPTION
 
 class CPreferencesMultiUserPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesMultiUserPage)
-
 // Construction
 public:
 	CPreferencesMultiUserPage();

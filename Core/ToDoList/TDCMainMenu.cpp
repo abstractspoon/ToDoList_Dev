@@ -177,7 +177,7 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	}
 	else if (IsInRange(nMenuID, ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50))
 	{
-		USERTOOL tool;
+		TDCUSERTOOL tool;
 		int nTool = (nMenuID - ID_TOOLS_USERTOOL1);
 
 		if (prefs.GetUserTool(nTool, tool))
@@ -919,7 +919,7 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 	if (!pMenu)
 		return;
 
-	CUserToolArray aTools;
+	CTDCUserToolArray aTools;
 	prefs.GetUserTools(aTools);
 
 	CTDCToolsHelper(FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons);

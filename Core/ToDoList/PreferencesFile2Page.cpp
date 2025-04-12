@@ -31,8 +31,6 @@ enum
 	PFP_FULLPATH,
 };
 
-IMPLEMENT_DYNCREATE(CPreferencesFile2Page, CPreferencesPageBase)
-
 CPreferencesFile2Page::CPreferencesFile2Page(const CTDCImportExportMgr* pExportMgr)
 	:
 	CPreferencesPageBase(IDD_PREFFILE2_PAGE),

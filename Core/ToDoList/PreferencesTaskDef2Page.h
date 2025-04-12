@@ -29,8 +29,6 @@
 
 class CPreferencesTaskDef2Page : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesTaskDef2Page)
-
 // Construction
 public:
 	CPreferencesTaskDef2Page();

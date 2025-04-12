@@ -17,8 +17,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesMultiUserPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesMultiUserPage, CPreferencesPageBase)
-
 CPreferencesMultiUserPage::CPreferencesMultiUserPage() 
 	:
 	CPreferencesPageBase(IDD_PREFMULTIUSER_PAGE)

@@ -1275,9 +1275,10 @@ void CToDoListWnd::InitMenuIconManager()
 	}
 
 	if (!m_mgrMenuIcons.HasImages())
-		m_mgrMenuIcons.Populate(Prefs());
+		m_mgrMenuIcons.Populate(Prefs()); // Once only
 
 	m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
+	m_mgrMenuIcons.UpdateStaticDialogIcons();
 
 	m_idleTasks.UpdateMenuSourceControlStatus();
 }
@@ -1577,7 +1578,7 @@ BOOL CToDoListWnd::InitCustomToolbar()
 	if (!m_bShowingCustomToolbar || m_toolbarCustom.GetSafeHwnd())
 		return TRUE;
 
-	CToolbarButtonArray aTBButtons;
+	CTDCToolbarButtonArray aTBButtons;
 
 	if (!Prefs().GetCustomToolbarButtons(aTBButtons))
 		return TRUE; // not an error
@@ -1601,7 +1602,8 @@ BOOL CToDoListWnd::InitCustomToolbar()
 	}
 
 	m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
-	
+	m_mgrMenuIcons.UpdateStaticDialogIcons();
+
 	return TRUE;
 }
 
@@ -5273,7 +5275,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		RefreshFilterBarControls();
 
 		// Recreate custom toolbar as required before any resize
-		CToolbarButtonArray aOldButtons, aNewButtons;
+		CTDCToolbarButtonArray aOldButtons, aNewButtons;
 
 		oldPrefs.GetCustomToolbarButtons(aOldButtons);
 		newPrefs.GetCustomToolbarButtons(aNewButtons);
@@ -5286,6 +5288,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			InitCustomToolbar();
 
 			m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
+			m_mgrMenuIcons.UpdateStaticDialogIcons();
 		}
 		
 		if (bResizeDlg)
@@ -5309,7 +5312,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 
 		if (!bUpdateUDTs)
 		{
-			CUserToolArray aOldTools, aNewTools;
+			CTDCUserToolArray aOldTools, aNewTools;
 
 			if (oldPrefs.GetDisplayUDTsInToolbar())
 				oldPrefs.GetUserTools(aOldTools);
@@ -7490,7 +7493,7 @@ void CToDoListWnd::OnUpdateUserTool(CCmdUI* pCmdUI)
 		ASSERT(CTDCToolsHelper::IsToolCmdID(pCmdUI->m_nID));
 		int nTool = (pCmdUI->m_nID - ID_TOOLS_USERTOOL1);
 
-		USERTOOL tool;
+		TDCUSERTOOL tool;
 		pCmdUI->Enable(Prefs().GetUserTool(nTool, tool));
 	}
 }
@@ -7501,7 +7504,7 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 	int nTool = (nCmdID - ID_TOOLS_USERTOOL1);
 
 	const CPreferencesDlg& prefs = Prefs();
-	USERTOOL tool;
+	TDCUSERTOOL tool;
 	
 	if (prefs.GetUserTool(nTool, tool))
 	{
@@ -7913,7 +7916,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 
 	if (bWantInToolbar && (bAddToMainToolbar || bAddToCustomToolbar))
 	{
-		CUserToolArray aTools;
+		CTDCUserToolArray aTools;
 		prefs.GetUserTools(aTools);
 
 		if (bAddToMainToolbar)
@@ -8461,12 +8464,13 @@ void CToDoListWnd::RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilter
 
 	if (m_pPrefs->RemapMenuItemIDs(mapMenuIDs) & PREFS_REMAPPEDTOOLBAR)
 	{
-		CToolbarButtonArray aTBButtons;
+		CTDCToolbarButtonArray aTBButtons;
 		VERIFY(Prefs().GetCustomToolbarButtons(aTBButtons));
 
 		VERIFY(m_toolbarCustom.ModifyButtonAttributes(aTBButtons, m_menubar));
 
 		m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
+		m_mgrMenuIcons.UpdateStaticDialogIcons();
 	}
 }
 
@@ -9617,7 +9621,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 
 LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
 {
-	USERTOOL* pTool = (USERTOOL*)lp;
+	TDCUSERTOOL* pTool = (TDCUSERTOOL*)lp;
 	
 	if (pTool)
 	{
@@ -11072,9 +11076,10 @@ void CToDoListWnd::ResetPrefs()
 	delete m_pPrefs;
 
 	m_pPrefs = new CPreferencesDlg(&m_mgrShortcuts, 
-									&m_mgrContent, 
-									&m_mgrImportExport,
-									&m_mgrUIExtensions);
+								   &m_mgrContent, 
+								   &m_mgrImportExport,
+								   &m_mgrUIExtensions,
+								   &m_mgrStorage);
 	
 	// update
 	m_pPrefs->SetUITheme(m_theme);

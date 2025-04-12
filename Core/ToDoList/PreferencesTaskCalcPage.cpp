@@ -18,8 +18,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskCalcPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesTaskCalcPage, CPreferencesPageBase)
-
 CPreferencesTaskCalcPage::CPreferencesTaskCalcPage() 
 	: 
 	CPreferencesPageBase(IDD_PREFTASKCALC_PAGE)

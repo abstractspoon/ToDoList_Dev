@@ -36,8 +36,6 @@ const LPCTSTR DEFAULT_STICKIES_PATH = _T("C:\\Program Files (x86)\\Stickies\\sti
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesGenPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesGenPage, CPreferencesPageBase)
-
 CPreferencesGenPage::CPreferencesGenPage()
 	:
 	CPreferencesPageBase(IDD_PREFGEN_PAGE),
