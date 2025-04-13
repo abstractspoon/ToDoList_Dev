@@ -2401,6 +2401,27 @@ void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CS
 		CRect rText(rRow);
 		rText.left = ScaleByDPIFactor(10);
 
+		{
+			// We share a single font across the entire app
+			// and if ever the font changes for a given window
+			// we just recreate the font
+			static HFONT hFontGroup = NULL;
+
+			HFONT hFont = GetFont(hWnd);
+
+			if (hFont && !SameFontNameSize(hFont, hFontGroup))
+			{
+				VerifyDeleteObject(hFontGroup);
+
+				hFontGroup = CreateFont(hFont, GMFS_BOLD);
+				ASSERT(hFontGroup);
+			}
+			pDC->SelectObject(hFontGroup);
+
+			// Note: The CSaveDC at the top will de-select the 
+			// font from the dc when it goes out of scope
+		}
+
 		pDC->SetTextColor(crText);
 		pDC->SetBkColor(crBack);
 		pDC->SetBkMode(OPAQUE);

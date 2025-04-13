@@ -278,12 +278,6 @@ HTREEITEM CPreferencesShortcutsPage::InsertItem(const CString& sItem, UINT nCmdI
 
 	m_tcCommands.SetItemData(hti, nCmdID);
 
-	if (htiParent == TVI_ROOT)
-	{
-		ASSERT(bSubMenu);
-		m_tcCommands.SetItemState(hti, TVIS_BOLD, TVIS_BOLD);
-	}
-
 	return hti;
 }
 
@@ -726,8 +720,6 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			pDC->FillSolidRect(pNMCD->rc.left, pNMCD->rc.bottom - 1, pNMCD->rc.right - pNMCD->rc.left, 1, m_tcCommands.GetGridlineColor());
 
 			// Selection colouring
-			BOOL bSubMenu = (pTVCD->nmcd.lItemlParam == ID_SUBMENU);
-
 			BOOL bSelected = (pTVCD->nmcd.uItemState & CDIS_SELECTED);
 
 			if (bSelected)
@@ -762,12 +754,12 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 				crText = colorRed;
 			}
 
-			BOOL bBold = (m_tcCommands.GetItemState(hti, TVIS_BOLD) & TVIS_BOLD);
+			BOOL bBold = (pTVCD->nmcd.lItemlParam == ID_SUBMENU);
 			HGDIOBJ hOldFont = pDC->SelectObject(m_fonts.GetHFont(bBold, FALSE, FALSE, FALSE));
 
 			pDC->SetTextColor(crText);
 			pDC->SetBkMode(TRANSPARENT);
-			pDC->DrawText(sItem, rText, (DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX));
+			pDC->DrawText(sItem, rText, (DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_NOCLIP));
 			pDC->SelectObject(hOldFont);
 
 			// Image

@@ -51,6 +51,7 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
+	ON_WM_PAINT()
 
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
@@ -161,6 +162,14 @@ void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwI
 	}
 }
 
+void COwnerdrawComboBoxBase::OnPaint()
+{
+	CPaintDC dc(this);
+
+	// default drawing
+	DefWindowProc(WM_PAINT, (WPARAM)dc.m_hDC, 0);
+}
+
 void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
 {
 	CDC dc;
@@ -185,8 +194,9 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	// Indent items below their heading
 	BOOL bListItem = !(lpDrawItemStruct->itemState & ODS_COMBOBOXEDIT);
+	BOOL bHeading = (bListItem && IsHeadingItem(nItem));
 
-	if (bListItem && m_nNumHeadings && !IsHeadingItem(nItem))
+	if (bListItem && m_nNumHeadings && !bHeading)
 	{
 		rItem.left += m_nItemIndentBelowHeadings;
 	}
@@ -204,7 +214,28 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		GetWindowText(sText);
 	}
 
-	//TRACE(_T("COwnerdrawComboBoxBase::DrawItem(%s, hwnd=%s, list = %d)\n"), sText, CWinClasses::GetClass(hwndDC), bListItem);
+	// Show headings in bold
+	if (bHeading)
+	{
+		// We share a single font across the entire app
+		// and if ever the font changes for a given window
+		// we just recreate the font
+		static HFONT hFontHeadings = NULL;
+
+		HFONT hFont = GraphicsMisc::GetFont(lpDrawItemStruct->hwndItem);
+
+		if (hFont && !GraphicsMisc::SameFontNameSize(hFont, hFontHeadings))
+		{
+			GraphicsMisc::VerifyDeleteObject(hFontHeadings);
+
+			hFontHeadings = GraphicsMisc::CreateFont(hFont, GMFS_BOLD);
+			ASSERT(hFontHeadings);
+		}
+		dc.SelectObject(hFontHeadings);
+
+		// Note: No need to manually de-select the font from the dc
+		// because this will be handled by the call to RestoreDC below
+	}
 
 	// virtual call
 	DrawItemText(dc, rItem, nItem, lpDrawItemStruct->itemState, dwItemData,	sText, bListItem, crText);

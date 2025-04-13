@@ -75,6 +75,7 @@ protected:
 	afx_msg BOOL OnSelEndOK();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnDestroy();
+	afx_msg void OnPaint();
 
 	// These are for extending the item data
 	afx_msg LRESULT OnCBGetItemData(WPARAM wParam, LPARAM lParam);
