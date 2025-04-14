@@ -1760,7 +1760,7 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 	ASSERT(hFont);
 
 	HFONT hTaskFont = GetFont();
-	BOOL bChange = !GraphicsMisc::SameFontNameSize(hFont, hTaskFont);
+	BOOL bChange = !GraphicsMisc::IsSameFontNameAndSize(hFont, hTaskFont);
 	
 	if (bChange)
 	{

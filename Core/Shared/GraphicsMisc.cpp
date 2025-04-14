@@ -329,7 +329,7 @@ HFONT GraphicsMisc::CreateFont(HFONT hFont, DWORD dwFlags, DWORD dwMask)
 	HFONT hFontOut = CreateFontIndirect(&lf);
 	
 	// verify the font creation
-	if (!SameFontNameSize(hFont, hFontOut))
+	if (!IsSameFontNameAndSize(hFont, hFontOut))
 	{
 		VerifyDeleteObject(hFontOut);
 		hFontOut = NULL;
@@ -521,7 +521,7 @@ BOOL GraphicsMisc::SameFont(HFONT hFont, LPCTSTR szFaceName, int nPoint)
 			(!szFaceName || sFontName.CompareNoCase(szFaceName) == 0));
 }
 
-BOOL GraphicsMisc::SameFontNameSize(HFONT hFont1, HFONT hFont2)
+BOOL GraphicsMisc::IsSameFontNameAndSize(HFONT hFont1, HFONT hFont2)
 {
 	if (!hFont1 || !hFont2)
 		return FALSE;
@@ -2409,7 +2409,7 @@ void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CS
 
 			HFONT hFont = GetFont(hWnd);
 
-			if (hFont && !SameFontNameSize(hFont, hFontGroup))
+			if (hFont && !IsSameFontNameAndSize(hFont, hFontGroup))
 			{
 				VerifyDeleteObject(hFontGroup);
 

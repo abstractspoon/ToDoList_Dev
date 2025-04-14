@@ -73,6 +73,11 @@ void CFontCache::Release()
 	Clear();
 }
 
+BOOL CFontCache::IsSameFontNameAndSize(HFONT hFont) const
+{
+	return GraphicsMisc::IsSameFontNameAndSize(GetBaseFont(), hFont);
+}
+
 CFont* CFontCache::GetFont(BOOL bBold, BOOL bItalic, BOOL bUnderline, BOOL bStrikeThru)
 {
 	HFONT hFont = GetHFont(bBold, bItalic, bUnderline, bStrikeThru);

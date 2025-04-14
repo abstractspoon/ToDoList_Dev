@@ -224,7 +224,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 		HFONT hFont = GraphicsMisc::GetFont(lpDrawItemStruct->hwndItem);
 
-		if (hFont && !GraphicsMisc::SameFontNameSize(hFont, hFontHeadings))
+		if (hFont && !GraphicsMisc::IsSameFontNameAndSize(hFont, hFontHeadings))
 		{
 			GraphicsMisc::VerifyDeleteObject(hFontHeadings);
 

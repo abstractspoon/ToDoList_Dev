@@ -29,8 +29,10 @@ public:
 	BOOL Initialise(HWND hWnd);
 	BOOL Initialise(HFONT hFont, BOOL bAutoCleanup = FALSE);
 	BOOL Initialise(const CString& sFaceName, int nPointSize);
+
 	void Release();
 	void Clear();
+	BOOL IsSameFontNameAndSize(HFONT hFont) const;
 
 	HWND GetHwnd() const { return m_hWnd; }
 
