@@ -629,7 +629,7 @@ BOOL CToDoCtrl::SetTreeFont(HFONT hFont)
 {
 	ASSERT(hFont);
 
-	if (hFont && !GraphicsMisc::SameFontNameSize(hFont, m_hFontTree))
+	if (hFont && !GraphicsMisc::IsSameFontNameAndSize(hFont, m_hFontTree))
 	{
 		m_hFontTree = hFont;
 
@@ -648,7 +648,7 @@ BOOL CToDoCtrl::SetCommentsFont(HFONT hFont)
 {
 	ASSERT(hFont);
 
-	if (hFont && !GraphicsMisc::SameFontNameSize(hFont, m_hFontComments))
+	if (hFont && !GraphicsMisc::IsSameFontNameAndSize(hFont, m_hFontComments))
 	{
 		m_hFontComments = hFont;
 

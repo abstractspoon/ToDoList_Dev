@@ -2804,9 +2804,18 @@ void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 	ASSERT(nNumCols == GetVisibleColumnCount());
 
 	CRect rNewHeader(rAvail);
-	rAvail.top = (rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT));
+
+	WINDOWPOS wp = { 0 };
+	HDLAYOUT hdl = { &rAvail, &wp };
+
+	if (m_header.Layout(&hdl))
+		rNewHeader.bottom = (rNewHeader.top + wp.cy);
+	else
+		rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
 
 	dwm.MoveWindow(&m_header, rNewHeader, TRUE);
+
+	rAvail.top = rNewHeader.bottom;
 		
 	// -1 to compensate for the +1 to hide the last divider
 	int nCurTotalWidth = (m_header.CalcTotalItemWidth() - 1);
@@ -4080,9 +4089,17 @@ BOOL CKanbanCtrl::CanSaveToImage() const
 
 LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 {
-	m_fonts.Initialise((HFONT)wp, FALSE);
-	m_aColumns.SetFont((HFONT)wp);
-	m_header.SendMessage(WM_SETFONT, wp, lp);
+	HFONT hFont = (HFONT)wp;
+
+	if (!m_fonts.IsSameFontNameAndSize(hFont))
+	{
+		m_fonts.Initialise(hFont, FALSE);
+		m_aColumns.SetFont(hFont);
+		m_header.SendMessage(WM_SETFONT, wp, lp);
+
+		// Recalculate the header height
+		Resize();
+	}
 
 	return 0L;
 }
