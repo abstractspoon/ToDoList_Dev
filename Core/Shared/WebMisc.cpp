@@ -56,17 +56,7 @@ BOOL WebMisc::IsOnline()
 
 BOOL WebMisc::DeleteCacheEntry(LPCTSTR szURI)
 {
-	BOOL bSuccess = FALSE;
-
-#if _MSC_VER >= 1400
-	bSuccess = DeleteUrlCacheEntry(szURI);
-#elif _UNICODE
-	LPSTR szAnsiPath = Misc::WideToMultiByte(szURI);
-	bSuccess = DeleteUrlCacheEntry(szAnsiPath);
-	delete [] szAnsiPath;
-#else
-	bSuccess = DeleteUrlCacheEntry(szURI);
-#endif
+	BOOL bSuccess = DeleteUrlCacheEntry(szURI);
 
 	if (!bSuccess && (GetLastError() == ERROR_FILE_NOT_FOUND))
 		bSuccess = TRUE;

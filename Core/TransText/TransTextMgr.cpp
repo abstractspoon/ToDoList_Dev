@@ -303,6 +303,7 @@ BOOL CTransTextMgr::HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM /*wp*/, LP
 
 	if (pNMHDR->code == TTN_NEEDTEXTA)
 	{
+		// CString implicitly handles ANSI to unicode conversions
 		strTipText = pTTTA->szText;
 
 		if (strTipText.IsEmpty())
@@ -337,33 +338,12 @@ BOOL CTransTextMgr::HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM /*wp*/, LP
 	// copy back to TOOLTIPTEXT
 	const int MAX_TIP_LEN = ((sizeof(pTTTW->szText) / sizeof(pTTTW->szText[0])) - 1);
 
-#ifndef _UNICODE
-	if (pNMHDR->code == TTN_NEEDTEXTW)
-	{
-#if _MSC_VER >= 1400
-		strncpy_s(pTTTA->szText, MAX_TIP_LEN, strTipText, MAX_TIP_LEN);
-#else
-		strncpy(pTTTA->szText, strTipText, MAX_TIP_LEN);
-#endif
-		pTTTA->lpszText = (LPSTR)(LPCSTR)strTipText;
-	}
-	else // TTN_NEEDTEXTW
-	{
-		Misc::EncodeAsUnicode(strTipText);
-
-		lstrcpyn(pTTTW->szText, (LPCWSTR)(LPCSTR)strTipText, MAX_TIP_LEN);
-		pTTTW->lpszText = (LPWSTR)(LPCWSTR)(LPCSTR)strTipText;
-	}
-#else
 	if (pNMHDR->code == TTN_NEEDTEXTA)
 	{
+		// Convert back from unicode
 		Misc::EncodeAsMultiByte(strTipText);
 
-#if _MSC_VER >= 1400
 		strncpy_s(pTTTA->szText, MAX_TIP_LEN, (LPCSTR)(LPCWSTR)strTipText, MAX_TIP_LEN);
-#else
-		strncpy(pTTTA->szText, (LPCSTR)(LPCWSTR)strTipText, MAX_TIP_LEN);
-#endif
 		pTTTA->lpszText = (LPSTR)(LPCSTR)(LPCWSTR)strTipText;
 	}
 	else // TTN_NEEDTEXTW
@@ -371,7 +351,6 @@ BOOL CTransTextMgr::HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM /*wp*/, LP
 		lstrcpyn(pTTTW->szText, strTipText, MAX_TIP_LEN);
 		pTTTW->lpszText = (LPWSTR)(LPCWSTR)strTipText;
 	}
-#endif
 	
 	return TRUE; // handled
 }

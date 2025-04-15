@@ -23,16 +23,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-#if _MSC_VER < 1400
-#	define RPC_WSTR LPWSTR
-#	define RPC_CSTR LPSTR
-#endif
-
-#ifdef _UNICODE
-#	define RPC_TSTR RPC_WSTR
-#else
-#	define RPC_TSTR RPC_CSTR
-#endif
+#define RPC_TSTR RPC_WSTR
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1697,11 +1688,7 @@ BOOL Misc::IsMetricMeasurementSystem()
 CString& Misc::EncodeAsMultiByte(CString& sUnicode, UINT nCodePage)
 {
 	// calc number of unicode chars in string
-#ifdef _UNICODE
 	int nLen = sUnicode.GetLength();
-#else
-	int nLen = ((sUnicode.GetLength() + 1) / sizeof(WCHAR));
-#endif
 	
 	char* szMB = WideToMultiByte((LPCWSTR)(LPCTSTR)sUnicode, nLen, nCodePage);
 	// nLen is now the number of returned multibyte chars
@@ -1709,10 +1696,8 @@ CString& Misc::EncodeAsMultiByte(CString& sUnicode, UINT nCodePage)
 	// calc number of bytes required to hold multibyte chars
 	int nBytes = nLen;
 	
-#ifdef _UNICODE
 	// calc number of chars required to hold multibyte chars
 	nLen = ((nLen + 1) / sizeof(WCHAR));
-#endif
 	
 	LPTSTR szOutput = sUnicode.GetBuffer(nLen);
 	
@@ -1735,11 +1720,6 @@ CString& Misc::EncodeAsUnicode(CString& sMultibyte, UINT nCodePage)
 	
 	// calc number of bytes required to hold unicode chars
 	int nBytes = (nLen * sizeof(WCHAR));
-	
-	// calc number of chars needed to hold unicode chars
-#ifndef _UNICODE
-	nLen *= sizeof(WCHAR);
-#endif
 	
 	LPTSTR szOutput = sMultibyte.GetBuffer(nLen);
 	
@@ -2047,21 +2027,7 @@ BOOL Misc::ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason)
 		static PFNSHUTDOWNBLOCKREASONCREATE fnCreate = (PFNSHUTDOWNBLOCKREASONCREATE)GetProcAddress(hUser32, "ShutdownBlockReasonCreate");
 
 		if (fnCreate)
-		{
-#ifdef _UNICODE
-			LPCWSTR wszReason = szReason;
-#else
-			int nLength = lstrlen(szReason);
-			LPWSTR wszReason = MultiByteToWide(szReason, nLength);
-#endif
-
-			BOOL bRes = fnCreate(hWnd, wszReason);
-
-#ifndef _UNICODE
-			delete [] wszReason;
-#endif
-			return bRes;
-		}
+			return fnCreate(hWnd, szReason);
 	}
 
 	// must be < XP
@@ -2638,7 +2604,6 @@ int Misc::NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBe
 			return (bEmpty1 ? 1 : -1);
 	}
 
-#ifdef _UNICODE
 	// initialize once only per session
 	static HMODULE hShlwapi = ::LoadLibrary(_T("Shlwapi.dll"));
 	   
@@ -2647,7 +2612,6 @@ int Misc::NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBe
 	
 	if (pFn)
 		return pFn(szString1, szString2);
-#endif
 	
 	// all else
 	return _tcsicmp(szString1, szString2);

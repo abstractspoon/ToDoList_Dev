@@ -945,10 +945,8 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CString& sTaskFile,
 	m_dwFeatures = TDCCAF_SORT;
 	m_nAlignment = DT_LEFT;
 	
-#ifdef _UNICODE
 	m_eColumnTitle.AddButton(1, 0x2211, CEnString(IDS_SYMBOLS), EE_BTNWIDTH_CALCULATE);
 	m_eColumnTitle.SetDropMenuButton(1);
-#endif
 
 	m_pageCalc.SetAttributeDefinitions(aAttribDef);
 }

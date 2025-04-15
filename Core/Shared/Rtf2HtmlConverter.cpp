@@ -518,9 +518,7 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtmlWithSautin(LPCTSTR szRtfFile, LPCTSTR /*
 	CString sTempHtml(sOutputDir + _T("Rtf2Html.htm"));
 
 	// output folder must be ansi
-#ifdef _UNICODE
 	Misc::EncodeAsMultiByte(sOutputDir, CP_UTF8);
-#endif
 
 	sautin_rtf2html_options opt = { 0 };
 	
@@ -541,9 +539,7 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtmlWithSautin(LPCTSTR szRtfFile, LPCTSTR /*
 
 	// input file must be ansi encoded
 	CString sRtfFile(szRtfFile);
-#ifdef _UNICODE
 	Misc::EncodeAsMultiByte(sRtfFile, CP_UTF8);
-#endif
 	
 	// converting
 	if (0 == pfnConvert((LPSTR)(LPCTSTR)sRtfFile, (LPSTR)(LPCTSTR)sOutputDir, opt))
@@ -749,9 +745,7 @@ BOOL CRtfHtmlConverter::ConvertHtmlToRtfWithSautin(LPCTSTR szHtmlFile, LPCTSTR /
 
 	// input file must be ansi encoded
 	CString sHtmlFile(szHtmlFile);
-#ifdef _UNICODE
 	Misc::EncodeAsMultiByte(sHtmlFile, CP_UTF8);
-#endif
 
 	// converting
 	if (0 == pfnConvert((LPSTR)(LPCTSTR)sHtmlFile, (LPSTR)(LPCTSTR)sTempRtf, opt))

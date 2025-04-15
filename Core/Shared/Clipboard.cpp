@@ -400,11 +400,10 @@ BOOL CClipboard::GetHTMLSourceLink(CString& sLink, BOOL bIgnoreAboutBlank) const
 	// Chrome and Firefox use CF_HTML encoded as multibyte
 	else if (GetText(sLink, CBF_HTML))
 	{
-#ifdef _UNICODE
 		// convert to unicode for unpackaging because
 		// CF_HTML is saved to the clipboard as UTF8
 		Misc::EncodeAsUnicode(sLink, CP_UTF8);
-#endif
+
 		CString sUrl;
 		UnpackageHTMLFragment(sLink, sUrl);
 

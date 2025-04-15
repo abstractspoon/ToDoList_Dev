@@ -36,6 +36,7 @@ static LPCTSTR COMMENTS_DONECOLOR = _T("#808080");
 static LPCTSTR DOCTYPE = _T("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n\n");
 static LPCTSTR TAB = _T("&nbsp;&nbsp;&nbsp;&nbsp;");
 static LPCTSTR SPACE = _T("&nbsp;");
+static LPCTSTR CHARSET = _T("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-16\">\n");
 
 CTaskListHtmlExporter::CTaskListHtmlExporter() 
 	: 
@@ -127,16 +128,6 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 		INDENT = TAB;
 	}
 	
-	// charset
-#ifdef _UNICODE
-	CString sCS = "UTF-16"; 
-#else
-	CString sCS = pTasks->GetHtmlCharSet();
-#endif
-	
-	if (!sCS.IsEmpty())
-		CHARSET.Format(_T("<meta http-equiv=\"content-type\" content=\"text/html; charset=%s\">\n"), sCS);
-
 	if (WantAttribute(TDCA_COMMENTS))
 	{
 		COMMENTSPERCENTWIDTH = 30; // minimum

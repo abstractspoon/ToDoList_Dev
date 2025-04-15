@@ -49,14 +49,6 @@ typedef HRESULT (STDAPICALLTYPE *PFNENDBUFFEREDPAINT)(HPAINTBUFFER, BOOL);
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _UNICODE
-#	define WSTR(string) (string)
-#else
-#	define WSTR(string) (LPCWSTR)COleVariant(string).bstrVal
-#endif
-
-//////////////////////////////////////////////////////////////////////
-
 #ifndef DFCS_TRANSPARENT
 #	define DFCS_TRANSPARENT        0x0800
 #	define DFCS_HOT                0x1000
@@ -170,7 +162,7 @@ BOOL CThemed::Open(HWND hWnd, LPCTSTR szClassList)
 			sClassList.ReleaseBuffer();
 		}
 		
-		m_hTheme = OpenThemeData(hWnd, WSTR(sClassList));
+		m_hTheme = OpenThemeData(hWnd, sClassList);
 		m_hWnd = hWnd;
 		
 		return (NULL != m_hTheme);
@@ -366,7 +358,7 @@ BOOL CThemed::DrawText(CDC* pDC, int nPart, int nState, const CString& sText, DW
 	ASSERT (m_hTheme);
 	ASSERT_VALID (pDC);
 	
-	return DrawThemeText(*pDC, nPart, nState, WSTR(sText), sText.GetLength(), dwTextFlags, dwTextFlags2, rect);
+	return DrawThemeText(*pDC, nPart, nState, sText, sText.GetLength(), dwTextFlags, dwTextFlags2, rect);
 }
 
 BOOL CThemed::DrawEdge(CDC* pDC, int nPart, int nState, const CRect& rDest, UINT nEdge, UINT nFlags, LPRECT prContent)
@@ -405,7 +397,7 @@ BOOL CThemed::GetTextExtent(CDC* pDC, int nPart, int nState, const CString& sTex
 {
 	ASSERT (m_hTheme);
 	
-	return GetThemeTextExtent(pDC ? *pDC : (HDC)NULL, nPart, nState, WSTR(sText), sText.GetLength(), dwTextFlags, prBounding, rExtent);
+	return GetThemeTextExtent(pDC ? *pDC : (HDC)NULL, nPart, nState, sText, sText.GetLength(), dwTextFlags, prBounding, rExtent);
 }
 
 BOOL CThemed::BuildImageList(CImageList& il, int nPart, const int nStates[], int nNumStates, COLORREF crMask, LPCRECT prPadding)

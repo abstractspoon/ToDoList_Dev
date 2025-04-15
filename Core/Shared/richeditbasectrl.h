@@ -16,20 +16,10 @@
 // Override afxwin.h definitions
 
 #undef TEXTRANGE
-
-#ifdef _UNICODE
-#	define TEXTRANGE	TEXTRANGEW
-#else
-#	define TEXTRANGE	TEXTRANGEA
-#endif
+#define TEXTRANGE	TEXTRANGEW
 
 #undef FINDTEXTEX
-
-#ifdef _UNICODE
-#	define FINDTEXTEX	FINDTEXTEXW
-#else
-#	define FINDTEXTEX	FINDTEXTEXA
-#endif
+#define FINDTEXTEX	FINDTEXTEXW
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -649,11 +649,8 @@ HRESULT CXPTabCtrl::DrawThemesPart(HDC hDC, int iPartId, int iStateId, LPCTSTR u
 		if (sPartName.GetLength() > 0)
 		{
 			WCHAR swPartName[128];
-#ifdef _UNICODE
 			lstrcpy(swPartName, (LPCTSTR)sPartName);
-#else
-			MultiByteToWideChar(CP_ACP, 0, (LPCTSTR)sPartName, -1, swPartName, sizeof(swPartName) / sizeof(WCHAR));
-#endif
+
 			UINT(PASCAL* pfnOpenThemeData)(HWND hwnd, LPCWSTR pszClassList);
 			(FARPROC&)pfnOpenThemeData = GetProcAddress(hDll, IDS_UTIL_THEMEOPN);
 

@@ -178,23 +178,9 @@ CString CFMindExporter::Encode(LPCTSTR szText)
 	CString sTranslated;
 	int nLen = lstrlen(szText);
 	
-#ifdef _UNICODE
-	WCHAR* wszText = (LPTSTR)szText;
-#else
-	WCHAR* wszText = Misc::MultiByteToWide(szText, nLen);
-#endif
-	
 	for (int i = 0; i < nLen; i++)
-	{
-		CString str;
-		str.Format(_T("&#%d;"), wszText[i]);
-		sTranslated += str;
-	}
+		sTranslated += Misc::Format(_T("&#%d;"), szText[i]);
 	
-#ifndef _UNICODE
-	delete [] wszText;
-#endif
-
 	return sTranslated;
 }
 

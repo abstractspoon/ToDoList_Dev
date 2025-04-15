@@ -208,17 +208,11 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 		if (pFn)
 		{
 			// convert string to unicode as required
-#ifdef _UNICODE
 			LPCWSTR wszCaption = sCaption;
 			LPCWSTR wszInstruction = sInstruction;
 
 			// copy because we will modify
 			LPWSTR wszText = _tcsdup(sText);
-#else
-			LPWSTR wszCaption = Misc::MultiByteToWide(szCaption);
-			LPWSTR wszText = Misc::MultiByteToWide(szText);
-			LPWSTR wszInstruction = Misc::MultiByteToWide(szInstruction);
-#endif
 			
 			int nResult = 0;
 
@@ -311,13 +305,7 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 			HRESULT hr = pFn(&tdc, &nResult, NULL, NULL);
 			
 			// clean up
-#ifdef _UNICODE
 			free(wszText);
-#else
-			delete [] wszText;
-			delete [] wszCaption;
-			delete [] wszInstruction;
-#endif
 			
 			return SUCCEEDED(hr) ? nResult : IDCANCEL;
 		}

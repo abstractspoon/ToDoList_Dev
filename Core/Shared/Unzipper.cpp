@@ -112,17 +112,11 @@ bool CUnzipper::OpenZip(LPCTSTR szFilePath)
 	if (!GetFullPathName(szFilePath, MAX_PATH, szFullPath, NULL))
 		return false;
 
-	// convert unicode to ansi as required
-#ifdef _UNICODE
+	// Path names must be ANSI
 	char szAnsiPath[MAX_PATH] = { 0 };
-
 	::WideCharToMultiByte(CP_ACP, 0, szFullPath, lstrlen(szFullPath), szAnsiPath, MAX_PATH, NULL, NULL);
-	const char* pPath = szAnsiPath;
-#else
-	const char* pPath = szFullPath;
-#endif
-	
-	m_uzFile = unzOpen(pPath);
+
+	m_uzFile = unzOpen(szAnsiPath);
 	
 	if (m_uzFile)
 	{
@@ -278,12 +272,8 @@ bool CUnzipper::GetFileInfo(UZ_FileInfo& info)
 	info.dwInternalAttrib = uzfi.internal_fa; 
 	info.dwExternalAttrib = uzfi.external_fa; 
 
-#if _UNICODE
 	::MultiByteToWideChar(CP_ACP, 0, szAnsiPath, strlen(szAnsiPath), info.szFileName, MAX_PATH);
 	::MultiByteToWideChar(CP_ACP, 0, szAnsiComment, strlen(szAnsiComment), info.szComment, MAX_COMMENT);
-#else
-	strcpy(info.szComment, szAnsiComment);
-#endif
 
 	// replace filename forward slashes with backslashes
 	int nLen = lstrlen(info.szFileName);
@@ -417,16 +407,10 @@ bool CUnzipper::GotoFile(LPCTSTR szFileName, bool bIgnoreFilePath)
 		return FALSE;
 
 	// try the simple approach
-#ifdef _UNICODE
 	char szAnsiPath[MAX_PATH] = { 0 };
-
 	::WideCharToMultiByte(CP_ACP, 0, szFileName, lstrlen(szFileName), szAnsiPath, MAX_PATH, NULL, NULL);
-	char* pPath = szAnsiPath;
-#else
-	char* pPath = szFileName;
-#endif
 
-	if (unzLocateFile(m_uzFile, pPath, 2) == UNZ_OK)
+	if (unzLocateFile(m_uzFile, szAnsiPath, 2) == UNZ_OK)
 		return TRUE;
 
 	else if (bIgnoreFilePath)

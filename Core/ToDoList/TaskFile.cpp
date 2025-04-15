@@ -2172,21 +2172,12 @@ BOOL CTaskFile::GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CSt
 
 	Base64Coder b64;
 
-#ifdef _UNICODE
-
-	// if text is unicode then we need to convert it back to multibyte
+	// Convert unicode back to multibyte
 	// to read the binary stream as unsigned chars
 	int nLen = sTemp.GetLength();
 	unsigned char* pBinary = (unsigned char*)Misc::WideToMultiByte((LPCTSTR)sTemp, nLen);
 	b64.Decode(pBinary, nLen);
 	delete [] pBinary;
-
-#else
-
-	b64.Decode(sTemp);
-
-#endif
-
 
 	unsigned long nLenContent;
 	PBYTE pContent = b64.DecodedMessage(nLenContent);

@@ -218,12 +218,8 @@ CString Base64Coder::Decode(const CString& sMessage)
 	DWORD dwLen = sMessage.GetLength();
 	Base64Coder b64;
 	
-#ifdef _UNICODE
 	USES_CONVERSION;
 	b64.Decode((const PBYTE)W2A(sMessage), dwLen);
-#else
-	b64.Decode(sMessage, dwLen);
-#endif
 
 	return (LPCTSTR)b64.DecodedMessage(dwLen);
 }

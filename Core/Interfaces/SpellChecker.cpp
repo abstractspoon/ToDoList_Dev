@@ -13,8 +13,6 @@
 CSpellChecker::CSpellChecker(LPCTSTR szAffPath, LPCTSTR szDicPath) : m_pMySpell(NULL)
 {
 	// convert to multibyte strings because MySpell library is not UNICODE aware
-#ifdef _UNICODE
-
 	int nLen = lstrlen(szAffPath);
 	char* szAffPathMulti = WideToMultiByte(szAffPath, nLen);
 
@@ -25,10 +23,6 @@ CSpellChecker::CSpellChecker(LPCTSTR szAffPath, LPCTSTR szDicPath) : m_pMySpell(
 
 	delete [] szAffPathMulti;
 	delete [] szDicPathMulti;
-
-#else
-	m_pMySpell = new MySpell(szAffPath, szDicPath);
-#endif
 }
 
 CSpellChecker::~CSpellChecker()
@@ -48,18 +42,12 @@ void CSpellChecker::Release()
 
 bool CSpellChecker::CheckSpelling(LPCTSTR szWord)
 {
-#ifdef _UNICODE
-
 	int nLen = lstrlen(szWord);
 	char* szWordMulti = WideToMultiByte(szWord, nLen);
 
 	bool bResult = (m_pMySpell && m_pMySpell->spell(szWordMulti) > 0);
 
 	delete [] szWordMulti;
-
-#else
-	bool bResult = (m_pMySpell && m_pMySpell->spell(szWord) > 0);
-#endif
 
 	return bResult;
 }
@@ -70,32 +58,26 @@ bool CSpellChecker::CheckSpelling(LPCTSTR szWord, LPTSTR*& pSuggestions, int& nN
 
 	if (!bResult && m_pMySpell)
 	{
-#ifdef _UNICODE
+		// must make the spell check calls in ANSI
+		int nLen = lstrlen(szWord);
+		char* szWordMulti = WideToMultiByte(szWord, nLen);
 
-	// must make the spell check calls in ANSI
-	int nLen = lstrlen(szWord);
-	char* szWordMulti = WideToMultiByte(szWord, nLen);
+		char** pSuggestionsMulti = NULL;
+		nNumSuggestions = m_pMySpell->suggest(&pSuggestionsMulti, szWordMulti);
 
-	char** pSuggestionsMulti = NULL;
-	nNumSuggestions = m_pMySpell->suggest(&pSuggestionsMulti, szWordMulti);
-
-	if (pSuggestionsMulti)
-	{
-		// convert back to unicode
-		pSuggestions = new LPTSTR[nNumSuggestions];
-
-		for (int nSuggest = 0; nSuggest < nNumSuggestions; nSuggest++)
+		if (pSuggestionsMulti)
 		{
-			nLen = strlen(pSuggestionsMulti[nSuggest]);
-			pSuggestions[nSuggest] = MultiByteToWide(pSuggestionsMulti[nSuggest], nLen);
+			// convert back to unicode
+			pSuggestions = new LPTSTR[nNumSuggestions];
+
+			for (int nSuggest = 0; nSuggest < nNumSuggestions; nSuggest++)
+			{
+				nLen = strlen(pSuggestionsMulti[nSuggest]);
+				pSuggestions[nSuggest] = MultiByteToWide(pSuggestionsMulti[nSuggest], nLen);
+			}
 		}
-	}
 
-	delete [] szWordMulti;
-
-#else
-		nNumSuggestions = m_pMySpell->suggest(&pSuggestions, szWord);
-#endif
+		delete [] szWordMulti;
 	}
 
 	return bResult;
@@ -109,8 +91,6 @@ void CSpellChecker::FreeSuggestions(LPTSTR*& pSuggestions, int nNumSuggestions)
 	delete [] pSuggestions;
 	pSuggestions = NULL;
 }
-
-#ifdef _UNICODE
 
 WCHAR* CSpellChecker::MultiByteToWide(const char* szFrom, int& nLength, UINT nCodepage)
 {
@@ -155,4 +135,3 @@ char* CSpellChecker::WideToMultiByte(const WCHAR* szFrom, int& nLength, UINT nCo
 	return cTo;
 }
 
-#endif // _UNICODE

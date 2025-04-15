@@ -332,19 +332,10 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 	int nTextLen = sText.GetLength();
 	BOOL bWantUnicode = (nCodePage == CP_UNICODE);
 
-#ifdef _UNICODE
 	if (bWantUnicode)
 		szText = (LPWSTR)(LPCTSTR)sText;
-
-	else // ansi
-		szText = (LPWSTR)Misc::WideToMultiByte(sText, nTextLen, nCodePage);
-#else
-	if (bWantUnicode)
-		szText = (LPSTR)Misc::MultiByteToWide(sText, nTextLen, nCodePage);
-
-	else // ansi
-		szText = (LPSTR)(LPCSTR)sText;
-#endif
+	else
+		szText = (LPWSTR)Misc::WideToMultiByte(sText, nTextLen, nCodePage); // ansi
 
 	SETTEXTEX stex = { dwFlags, nCodePage };
 	BOOL bResult = SendMessage(EM_SETTEXTEX, (WPARAM)&stex, (LPARAM)szText);
@@ -433,30 +424,6 @@ CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr) const
     LPTSTR szChar = new TCHAR[nLength];
 	ZeroMemory(szChar, nLength * sizeof(TCHAR));
 
-#ifndef _UNICODE
-	if (CWinClasses::IsClass(*this, WC_RICHEDIT50)) // must handle unicode 
-	{
-		// create a Unicode (Wide Character) buffer of the same length
-		LPWSTR lpszWChar = new WCHAR[nLength];
-
-		TEXTRANGEW tr;
-		tr.chrg = cr;
-		tr.lpstrText = lpszWChar;
-		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
-
-		// Convert the Unicode text to ANSI.
-		WideCharToMultiByte(CP_ACP, 0, lpszWChar, -1, szChar, nLength, NULL, NULL);
-
-		delete lpszWChar;
-	}
-	else 
-	{
-		TEXTRANGE tr;
-		tr.chrg = cr;
-		tr.lpstrText = szChar;
-		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
-	}
-#else
 	if (CWinClasses::IsClass(*this, WC_RICHEDIT50)) 
 	{
 		TEXTRANGE tr;
@@ -479,7 +446,6 @@ CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr) const
 
 		delete lpszChar;
 	}
-#endif
 
 	CString sText(szChar);
 	delete [] szChar;
@@ -900,11 +866,7 @@ BOOL CRichEditBaseCtrl::FindText(LPCTSTR lpszFind, BOOL bNext, BOOL bCase, BOOL 
 	GetSel(ft.chrg);
 
 	// convert text to multibyte string for RichEdit50W
-#ifdef _UNICODE
 	ft.lpstrText = (LPTSTR)lpszFind;
-#else
-	ft.lpstrText = (LPTSTR)A2BSTR((LPTSTR)lpszFind);
-#endif
 
 	// is there is a selection? for instance, previously found text
 	if (ft.chrg.cpMin < ft.chrg.cpMax) 
@@ -1275,10 +1237,8 @@ BOOL CRichEditBaseCtrl::Load(const CString& filename)
 	
 	if (!str.IsEmpty())
 	{
-#ifdef _UNICODE
 		// str is unicode but RTF must be multibyte
 		Misc::EncodeAsMultiByte(str);
-#endif
 		
 		SetRTF(str);
 	}

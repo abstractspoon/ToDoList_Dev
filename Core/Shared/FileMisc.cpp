@@ -2811,22 +2811,16 @@ BOOL FileMisc::CreateShortCut(LPCTSTR szTargetFile, LPCTSTR szShortcut,
 
 			if (!Misc::IsEmpty(szTargetArgs))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szTargetArgs, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szTargetArgs);
-#endif
+
 				if (FAILED(pShellLink->SetArguments(wsz)))
 					break;
 			}
 
 			if (!Misc::IsEmpty(szDescription))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szDescription, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szDescription);
-#endif
+
 				if (FAILED(pShellLink->SetDescription(wsz)))
 					break;
 			}
@@ -2839,22 +2833,16 @@ BOOL FileMisc::CreateShortCut(LPCTSTR szTargetFile, LPCTSTR szShortcut,
 
 			if (!Misc::IsEmpty(szCurDir))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szCurDir, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szCurDir);
-#endif
+
 				if (FAILED(pShellLink->SetWorkingDirectory(wsz)))
 					break;
 			}
 
 			if (!Misc::IsEmpty(szIconFile) && (iIconIndex >= 0))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szIconFile, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szIconFile);
-#endif
+
 				if (FAILED(pShellLink->SetIconLocation(wsz, iIconIndex)))
 					break;
 			}
@@ -2865,11 +2853,7 @@ BOOL FileMisc::CreateShortCut(LPCTSTR szTargetFile, LPCTSTR szShortcut,
 
 			if (SUCCEEDED(hr))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szShortcut, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szShortcut);
-#endif
 
 				hr = pPersistFile->Save(wsz, TRUE);
 				pPersistFile->Release();
@@ -2944,31 +2928,6 @@ BOOL FileMisc::ResolveShortcut(LPCTSTR szShortcut, CString& sTargetPath)
 
 CString FileMisc::GetLongPathName(LPCTSTR szShortPath)
 {
-// 	CString sLongPath(szShortPath);
-// 
-// 	// must link dynamically to kernel32 else problem with win95/NT4
-// 	static HMODULE hLib = LoadLibrary(_T("kernel32.dll"));
-// 
-// 	if (hLib)
-// 	{
-// 		typedef DWORD (WINAPI *FNGETLONGPATHNAME)(LPCTSTR, LPTSTR, DWORD);
-// 
-// #ifdef _UNICODE
-// 		FNGETLONGPATHNAME pFN = (FNGETLONGPATHNAME)GetProcAddress(hLib, "GetLongPathNameW");
-// #else
-// 		FNGETLONGPATHNAME pFN = (FNGETLONGPATHNAME)GetProcAddress(hLib, "GetLongPathNameA");
-// #endif
-// 		if (pFN)
-// 		{
-// 			TCHAR szLongPath[MAX_PATH+1] = { 0 };
-// 			pFN(szShortPath, szLongPath, MAX_PATH);
-// 
-// 			sLongPath = szLongPath;
-// 		}
-// 	}
-// 
-// 	return sLongPath;
-
 	TCHAR szLongPath[MAX_PATH+1] = { 0 };
 	::GetLongPathName(szShortPath, szLongPath, MAX_PATH);
 
