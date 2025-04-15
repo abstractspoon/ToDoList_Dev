@@ -534,7 +534,7 @@ void CTDLExportToPage::PreserveExportPath()
 {
 	// Don't save empty paths that are simply the result
 	// of the current exporter not being file-based
-	if (GetExporterFileExtension(m_sFormatTypeID).IsEmpty())
+	if (!m_sFormatTypeID.IsEmpty() && GetExporterFileExtension(m_sFormatTypeID).IsEmpty())
 	{
 		ASSERT(m_sExportPath.IsEmpty());
 		return;
