@@ -13110,7 +13110,7 @@ void CToDoListWnd::OnEditUndoRedo(BOOL bUndo)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	if (tdc.UndoLastAction(bUndo))
+	if (tdc.UndoLastAction(bUndo) && !tdc.HasFocus(TDCSF_COMMENTS))
 	{
 		m_idleTasks.UpdateStatusBar();
 		m_idleTasks.UpdateTimeTrackerTasks(TRUE);
