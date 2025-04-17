@@ -398,7 +398,6 @@ protected:
 	afx_msg void OnTrayiconShowDueTasks(UINT nCmdID);
 	afx_msg void OnUnmaximizeTasklistAndComments();
 	afx_msg void OnUserTool(UINT nCmdID);
-	afx_msg void OnViewActivateAdvancedFilter(UINT nCmdID);
 	afx_msg void OnViewActivateFilter(UINT nCmdID);
 	afx_msg void OnViewClearfilter();
 	afx_msg void OnViewCustomToolbar();
@@ -549,6 +548,7 @@ protected:
 	afx_msg void OnUpdateToolsViewLogFile(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateUnmaximizeTasklistAndComments(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateUserTool(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewActivateFilter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewClearfilter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewCustomToolbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewDecrementTaskViewFontSize(CCmdUI* pCmdUI);

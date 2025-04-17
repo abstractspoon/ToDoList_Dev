@@ -222,8 +222,8 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	{
 		int nFilter = (nMenuID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
 
-		if (nFilter < filterBar.GetAdvancedFilterNames().GetSize())
-			sTipText = filterBar.GetAdvancedFilterNames().GetAt(nFilter);
+		if (nFilter < filterBar.AdvancedFilterNames().GetSize())
+			sTipText = filterBar.AdvancedFilterNames().GetAt(nFilter);
 	}
 	else
 	{
@@ -352,7 +352,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 			return TRUE;
 
 		case ID_VIEW_ACTIVATEFILTER1:
-			PrepareFiltersActivationMenu(pPopupMenu, filterBar);
+			PrepareFiltersActivationMenu(pPopupMenu, filterBar, prefs);
 			return TRUE;
 
 		case ID_ACTIVATEVIEW_TASKTREE:
@@ -370,7 +370,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 
 void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 										  const CFilteredToDoCtrl& tdc,
-										  const CPreferencesDlg& prefs) const
+										  const CPreferencesDlg& prefs)
 {
 	PrepareEditMenu(pMenu, tdc, prefs);
 
@@ -419,7 +419,7 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 
 void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
 											 const CFilteredToDoCtrl& tdc,
-											 const CPreferencesDlg& prefs) const
+											 const CPreferencesDlg& prefs)
 {
 	PrepareFileMenu(pMenu, prefs);
 	PrepareEditMenu(pMenu, tdc, prefs);
@@ -809,27 +809,24 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 	}
 }
 
-void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar)
+void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar, const CPreferencesDlg& prefs)
 {
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, CTDCFilter::GetDefaultFilterNames(), IDS_FILTERPLACEHOLDER);
-	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.GetAdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
+	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.AdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
 
-	// Restore selection
-	int nSelFilter = filterBar.GetSelectedFilter();
+	// Enable state
+	BOOL bWantDefFilters = prefs.GetShowDefaultFiltersInFilterBar();
 
-	if (filterBar.GetFilter() == FS_ADVANCED)
+	for (int nFilter = 0; nFilter < NUM_SHOWFILTER; nFilter++)
 	{
-		CString sFilter;
-		VERIFY((filterBar.GetFilter(sFilter) == FS_ADVANCED) && !sFilter.IsEmpty());
-
-		int nFilter = Misc::Find(sFilter, filterBar.GetAdvancedFilterNames(), FALSE, TRUE);
-		ASSERT(nFilter != -1);
-
-		nSelFilter = (NUM_SHOWFILTER + 1 + nFilter); // +1 for separator
+		BOOL bEnable = (bWantDefFilters || (nFilter == 0));
+		pMenu->EnableMenuItem(ID_VIEW_ACTIVATEFILTER1 + nFilter, (bEnable ? MF_ENABLED : MF_DISABLED));
 	}
 
-	if (nSelFilter != -1)
-		pMenu->CheckMenuRadioItem(0, pMenu->GetMenuItemCount(), nSelFilter, MF_BYPOSITION);
+	// Restore selection
+	UINT nSelMenuID = GetSelectedFilterMenuID(filterBar);
+
+	pMenu->CheckMenuRadioItem(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, nSelMenuID, MF_BYCOMMAND);
 }
 
 void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID)
@@ -864,6 +861,64 @@ void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const 
 	{
 		pMenu->InsertMenu(nStartPos, MF_BYPOSITION | MF_STRING | MF_GRAYED, nStart, CEnString(nPlaceholderStrID));
 	}
+}
+
+BOOL CTDCMainMenu::GetFilterToActivate(UINT nMenuID,
+									   const CTDLFilterBar& filterBar,
+									   const CPreferencesDlg& prefs,
+									   FILTER_SHOW& nShow,
+									   CString& sAdvFilter)
+{
+	if (IsInRange(nMenuID, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24))
+	{
+		int nFilter = (nMenuID - ID_VIEW_ACTIVATEFILTER1);
+
+		if ((nFilter >= 0) && (nFilter < NUM_SHOWFILTER))
+		{
+			nShow = (FILTER_SHOW)SHOW_FILTERS[nFilter][1];
+			sAdvFilter.Empty();
+
+			if (!prefs.GetShowDefaultFiltersInFilterBar())
+				return (nShow == FS_ALL);
+
+			// else
+			return TRUE;
+		}
+	}
+	else if (IsInRange(nMenuID, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24))
+	{
+		int nFilter = (nMenuID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
+
+		if ((nFilter >= 0) && (nFilter < filterBar.AdvancedFilterNames().GetSize()))
+		{
+			nShow = FS_ADVANCED;
+
+			sAdvFilter = filterBar.AdvancedFilterNames()[nFilter];
+			ASSERT(!sAdvFilter.IsEmpty());
+
+			return TRUE;
+		}
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
+UINT CTDCMainMenu::GetSelectedFilterMenuID(const CTDLFilterBar& filterBar)
+{
+	CString sAdvFilter;
+	FILTER_SHOW nShow = filterBar.GetFilter(sAdvFilter);
+
+	if (nShow == FS_ADVANCED)
+	{
+		int nFilter = Misc::Find(sAdvFilter, filterBar.AdvancedFilterNames(), FALSE, TRUE);
+		ASSERT(nFilter != -1);
+
+		return (ID_VIEW_ACTIVATEADVANCEDFILTER1 + nFilter);
+	}
+
+	// else
+	return (ID_VIEW_ACTIVATEFILTER1 + nShow - FS_ALL);
 }
 
 void CTDCMainMenu::PrepareUserStorageMenu(CMenu* pMenu, const CTDLTasklistStorageMgr& mgrStorage, CMenuIconMgr& mgrMenuIcons)

@@ -100,8 +100,10 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CTDCToolbarButtonArray& aButtons
 
 BOOL CTDLCustomToolbar::GetItemTooltip(UINT nMenuID, const CTDCMainMenu& mainMenu, CString& sTooltip)
 {
+	sTooltip.Empty();
+
 	// Only handle static non-separator items
-	if (nMenuID && !mainMenu.IsDynamicItem(nMenuID))
+	if (nMenuID && !CTDCMainMenu::IsDynamicItem(nMenuID))
 	{
 		HMENU hItemMenu = NULL;
 		int nPos = CEnMenu::FindMenuItem(mainMenu, nMenuID, hItemMenu);
@@ -109,10 +111,6 @@ BOOL CTDLCustomToolbar::GetItemTooltip(UINT nMenuID, const CTDCMainMenu& mainMen
 		ASSERT((nPos != -1) && (hItemMenu != NULL));
 
 		sTooltip = CEnMenu::GetMenuString(hItemMenu, nPos, MF_BYPOSITION);
-	}
-	else
-	{
-		sTooltip.Empty();
 	}
 
 	return !sTooltip.IsEmpty();
