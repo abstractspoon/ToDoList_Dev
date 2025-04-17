@@ -34,12 +34,6 @@ CTDCMenuIconMgr::~CTDCMenuIconMgr()
 
 void CTDCMenuIconMgr::Populate(const CPreferencesDlg& prefs)
 {
-// 	if (!CMenuIconMgr::IsInitialized())
-// 	{
-// 		ASSERT(0);
-// 		return;
-// 	}
-
 	if (HasImages())
 		return;
 
