@@ -459,12 +459,14 @@ void CToolbarHelper::InitTooltips()
 	// set up tools for each of the toolbar buttons
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
-		if (m_pToolbar->GetItemID(nBtn) != ID_SEPARATOR)
+		UINT nCmdID = m_pToolbar->GetItemID(nBtn);
+
+		if (nCmdID != ID_SEPARATOR)
 		{
 			CRect rBtn;
 			m_pToolbar->GetItemRect(nBtn, rBtn);
 
-			m_tt.AddTool(m_pToolbar, LPSTR_TEXTCALLBACK, rBtn, m_pToolbar->GetItemID(nBtn));
+			m_tt.AddTool(m_pToolbar, LPSTR_TEXTCALLBACK, rBtn, nCmdID);
 		}
 	}
 }
