@@ -1343,35 +1343,53 @@ void CInputListCtrl::EndEdit()
 		SetFocus();
 }
 
-void CInputListCtrl::CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles)
+BOOL CInputListCtrl::CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles)
 {
 	dwComboStyles |= (WS_CHILD | WS_VSCROLL);
 
 	if ((dwComboStyles & 0xf) == 0)
 		dwComboStyles |= CBS_DROPDOWNLIST;
 
-	if (ctrl.Create(dwComboStyles, CRect(0, 0, 0, 0), this, nID))
-		PostCreateControl(ctrl);
+	if (!ctrl.Create(dwComboStyles, CRect(0, 0, 0, 0), this, nID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// else
+	PostCreateControl(ctrl);
+	return TRUE;
 }
 
-void CInputListCtrl::CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles)
+BOOL CInputListCtrl::CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles)
 {
 	dwEditStyles |= WS_CHILD;
 
-	if (ctrl.Create(dwEditStyles, CRect(0, 0, 0, 0), this, nID))
+	if (!ctrl.Create(dwEditStyles, CRect(0, 0, 0, 0), this, nID))
 	{
-		ctrl.ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
-
-		PostCreateControl(ctrl);
+		ASSERT(0);
+		return FALSE;
 	}
+
+	ctrl.ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
+	PostCreateControl(ctrl);
+
+	return TRUE;
 }
 
-void CInputListCtrl::CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles)
+BOOL CInputListCtrl::CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles)
 {
 	dwDateTimeStyles |= WS_CHILD;
 
-	if (ctrl.Create(dwDateTimeStyles, CRect(0, 0, 0, 0), this, nID))
-		PostCreateControl(ctrl);
+	if (!ctrl.Create(dwDateTimeStyles, CRect(0, 0, 0, 0), this, nID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// else
+	PostCreateControl(ctrl);
+	return TRUE;
 }
 
 void CInputListCtrl::PostCreateControl(CWnd& ctrl)
