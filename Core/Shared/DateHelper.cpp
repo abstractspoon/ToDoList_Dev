@@ -411,10 +411,13 @@ CString COleDateTimeRange::Format(DWORD dwFlags, TCHAR cDelim) const
 
 	if (IsValid())
 	{
+		CString sStart = CDateHelper::FormatDate(m_dtStart, dwFlags);
+		CString sEnd = CDateHelper::FormatDate(m_dtEnd, dwFlags);
+
 		if (cDelim)
-			sRange.Format(_T("%s %c %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), cDelim, CDateHelper::FormatDate(m_dtEnd, dwFlags));
+			sRange.Format(_T(" %s %c %s"), sStart, cDelim, sEnd);
 		else
-			sRange.Format(_T("%s %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), CDateHelper::FormatDate(m_dtEnd, dwFlags));
+			sRange.Format(_T(" %s %s"), sStart, sEnd);
 	}
 
 	return sRange;
@@ -1575,19 +1578,9 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 			Misc::Trim(sFormat, sSep);
 			sFormat.Replace((sSep + sSep), sSep);
 		}
-
-		// RTL dates
-		switch (Misc::GetPrimaryLanguage())
-		{
-		case LANG_ARABIC:
-		case LANG_PERSIAN:
-			Misc::Reverse(sFormat);
-			break;
-		}
 	}
 
-	::GetDateFormat(0, 0, &st, sFormat, sDate.GetBuffer(50), 49);
-	sDate.ReleaseBuffer();
+	sDate = FormatDateOnly(date, sFormat);
 
 	// Day of week
 	if (dwFlags & DHFD_DOW)
@@ -1602,6 +1595,39 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 		sTime.Empty();
 	
 	return TRUE;
+}
+
+CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
+{
+	CString sDate;
+
+	if (IsDateSet(date))
+	{
+		SYSTEMTIME st;
+
+		if (date.GetAsSystemTime(st))
+		{
+			CString sFormat;
+
+			// RTL dates
+			switch (Misc::GetPrimaryLanguage())
+			{
+			case LANG_ARABIC:
+			case LANG_PERSIAN:
+				sFormat = szFormat;
+				Misc::Reverse(sFormat);
+				szFormat = sFormat;
+				break;
+			}
+
+			const LCID lcid = LOCALE_CUSTOM_UI_DEFAULT;
+
+			::GetDateFormat(lcid, 0, &st, szFormat, sDate.GetBuffer(50), 49);
+			sDate.ReleaseBuffer();
+		}
+	}
+
+	return sDate;
 }
 
 BOOL CDateHelper::FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow)

@@ -755,8 +755,9 @@ CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecad
 {
 	COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
 
-	CString sRange, sStart;
-	sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
+	CString sRange;
+	CString sStart = CDateHelper::FormatDateOnly(dtStart, _T("MMM yyyy"));
+//	sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
 
 	if (CDateHelper::GetDateInMonths(dtStart) == CDateHelper::GetDateInMonths(dtEnd))
 	{
@@ -764,10 +765,11 @@ CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecad
 	}
 	else
 	{
-		CString sEnd;
-		sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
+		//CString sEnd;
+		CString sEnd = CDateHelper::FormatDateOnly(dtEnd, _T("MMM yyyy"));
+		//sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
 
-		sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
+		sRange = sStart + cDelim + sEnd;
 	}
 
 	return sRange;

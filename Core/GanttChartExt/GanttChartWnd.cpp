@@ -1158,7 +1158,7 @@ void CGanttChartWnd::UpdateActiveRangeLabel()
 {
 	CString sRange = m_sliderDateRange.FormatRange();
 
-	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
+	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, /*CEnString(IDS_ACTIVEDATERANGE,*/ sRange/*)*/);
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM /*wp*/, LPARAM /*lp*/)

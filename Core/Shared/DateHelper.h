@@ -126,6 +126,7 @@ public:
 
 	static CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0, TCHAR cDateTimeSep = ' ');
 	static CString FormatCurrentDate(DWORD dwFlags = 0);
+	static CString FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat);
 	
 	// DOW = 'day of week'
 	static BOOL FormatDate(const COleDateTime& date, DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
