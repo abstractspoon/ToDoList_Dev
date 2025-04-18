@@ -184,7 +184,17 @@ BOOL CTDLFilterComboBox::SelectFilter(FILTER_SHOW nFilter, LPCTSTR szAdvFilter)
 	ASSERT((nFilter != FS_ADVANCED) || !Misc::IsEmpty(szAdvFilter));
 
 	if (nFilter != FS_ADVANCED)
-		return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, (DWORD)nFilter));
+	{
+		// This can fail if the default filters have been omitted
+		// so we don't want to change the selection in such cases
+		int nItem = CDialogHelper::FindItemByDataT(*this, (DWORD)nFilter);
+
+		if (nItem == CB_ERR)
+			return FALSE;
+
+		SetCurSel(nItem);
+		return TRUE;
+	}
 
 	// else lookup advanced filter by name
 	int nAdvFilter = Misc::Find(szAdvFilter, m_aAdvancedFilterNames, TRUE, TRUE);
