@@ -2516,9 +2516,11 @@ int CTDLTaskAttributeListCtrl::ParseMultiSelValues(const CString& sValues, CStri
 	return aMatched.GetSize();
 }
 
-BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& combo)
+BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& combo, BOOL bWantSort)
 {
 	BOOL bIsReadOnly = !CDialogHelper::ComboHasEdit(combo), bWantReadOnly(bIsReadOnly);
+	BOOL bIsSorted = CDialogHelper::HasStyle(combo, CBS_SORT);
+
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 
 	switch (nAttribID)
@@ -2545,21 +2547,38 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 
 	if (Misc::StatesDiffer(bIsReadOnly, bWantReadOnly))
 	{
+		// Update the combo sort style for when it's recreated
+		combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
+
 		if (!CDialogHelper::SetAutoComboReadOnly(combo, TRUE, bWantReadOnly, COMBO_DROPHEIGHT))
 		{
 			ASSERT(0);
 			return FALSE;
 		}
-	}
 
-	combo.ModifyFlags((bWantReadOnly ? (ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE) : 0),
-						(bWantReadOnly ? 0 : (ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE)));
+		combo.ModifyFlags((bWantReadOnly ? (ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE) : 0),
+							(bWantReadOnly ? 0 : (ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE)));
+	}
+	else if (Misc::StatesDiffer(bIsSorted, bWantSort))
+	{
+		int nCtrlID = combo.GetDlgCtrlID();
+
+		DWORD dwStyle = combo.GetStyle();
+		Misc::SetFlag(dwStyle, CBS_SORT, bWantSort);
+
+		combo.DestroyWindow();
+		
+		if (!CreateControl(combo, nCtrlID, dwStyle))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+	}
 	return TRUE;
 }
 
-void CTDLTaskAttributeListCtrl::RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel, BOOL bWantSort)
+void CTDLTaskAttributeListCtrl::RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel)
 {
-	combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
 	combo.EnableMultiSelection(bMultiSel);
 
 	CStringArray aAllValues;
@@ -2574,8 +2593,8 @@ void CTDLTaskAttributeListCtrl::RebuildCombo(CEnCheckComboBox& combo, const CStr
 void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
 	// Populate
-	CheckRecreateCombo(nRow, combo);
-	RebuildCombo(combo, aDefValues, aUserValues, TRUE, bWantSort);
+	CheckRecreateCombo(nRow, combo, bWantSort);
+	RebuildCombo(combo, aDefValues, aUserValues, TRUE);
 
 	// Set selection
 	CStringArray aMatched, aMixed;
@@ -2587,8 +2606,8 @@ void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArra
 void CTDLTaskAttributeListCtrl::PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
 {
 	// Populate
-	CheckRecreateCombo(nRow, combo);
-	RebuildCombo(combo, aDefValues, aUserValues, FALSE, bWantSort);
+	CheckRecreateCombo(nRow, combo, bWantSort);
+	RebuildCombo(combo, aDefValues, aUserValues, FALSE);
 
 	// Set selection
 	CString sValue = GetItemText(nRow, VALUE_COL);
@@ -4676,7 +4695,7 @@ int CTDLTaskAttributeListCtrl::CAttributeStates::SortByNameProc(const void* item
 
 	// Sort by ID for a stable sort
 	if (nCompare == 0)
-		nCompare = (pItem1->nAttribID - pItem2->nAttribID);
+		nCompare = pItem1->sLabel.Compare(pItem2->sLabel);
 
 	return nCompare;
 }
@@ -4712,13 +4731,19 @@ void CTDLTaskAttributeListCtrl::CAttributeStates::RebuildItemPositions()
 
 void CTDLTaskAttributeListCtrl::CAttributeStates::OnCustomAttributesChange()
 {
-	CString sState = GetItemsState();
-	ASSERT(!sState.IsEmpty());
+	CString sState;
+
+	if (CanResetOrder())
+	{
+		sState = GetItemsState();
+		ASSERT(!sState.IsEmpty());
+	}
 
 	m_aAttributeItems.RemoveAll();
 	Populate();
 
-	SetItemsState(sState);
+	if (!sState.IsEmpty())
+		SetItemsState(sState);
 }
 
 void CTDLTaskAttributeListCtrl::CAttributeStates::Save(CPreferences& prefs, LPCTSTR szKey) const
@@ -4818,7 +4843,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeStates::ResetOrder()
 
 BOOL CTDLTaskAttributeListCtrl::CAttributeStates::CanResetOrder() const
 {
-	return (GetItemsState(FALSE) == m_sDefaultOrder);
+	return (GetItemsState(FALSE) != m_sDefaultOrder);
 }
 
 BOOL CTDLTaskAttributeListCtrl::CAttributeStates::SetLabelBkgndColor(TDC_ATTRIBUTE nAttribID, COLORREF crBkgnd)

@@ -273,7 +273,7 @@ protected:
 	void HandleTimePeriodEdit(int nRow, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
-	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo);
+	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo, BOOL bWantSort);
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
@@ -306,7 +306,7 @@ protected:
 	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
 	static CString FormatValueArray(const CStringArray& aValues);
 	static int SplitValueArray(const CString& sValues, CStringArray& aValues);
-	static void RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel, BOOL bWantSort);
+	static void RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel);
 
 private:
 	// ---------------------------------------------------------------------
