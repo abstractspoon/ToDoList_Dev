@@ -1,0 +1,536 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "3rdParty"=.\3rdParty\3rdParty.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "BurndownExt"=.\BurndownExt\BurndownExt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "CalendarExt"=.\CalendarExt\CalendarExt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ConvertRTFToHTML"=.\ConvertRTFToHTML\ConvertRTFToHTML.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Interfaces
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ToDoListLib
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Detours"=.\3rdParty\Detours\Detours.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "EncryptDecrypt"=.\EncryptDecrypt\EncryptDecrypt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "FMindImportExport"=.\FMindImportExport\FMindImportExport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "FtpStorage"=.\FtpStorage\FtpStorage.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "GPExport"=.\GPExport\GPExport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "GanttChartExt"=.\GanttChartExt\GanttChartExt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Interfaces"=.\Interfaces\Interfaces.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "KanbanBoard"=.\KanbanBoard\KanbanBoard.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "MLOImport"=.\MLOImport\MLOImport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "MySpellCheck"=.\MySpellCheck\MySpellCheck.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Interfaces
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "PlainTextImport"=.\PlainTextImport\PlainTextImport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "RTFContentCtrl"=.\RTFContentCtrl\RTFContentCtrl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Interfaces
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Shared"=.\Shared\Shared.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "TDLTest"=.\TDLTest\TDLTest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Interfaces
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ToDoListLib
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "TDLTransEdit"=.\TDLTransEdit\TDLTransEdit.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TransText
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "TDLUninstall"=.\TDLUninstall\TDLUninstall.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "TDLUpdate"=.\TDLUpdate\TDLUpdate.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ToDoList"=.\ToDoList\ToDoList.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name EncryptDecrypt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name GPExport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name MySpellCheck
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name iCalImportExport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name RTFContentCtrl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name PlainTextImport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name MLOImport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name FMindImportExport
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name CalendarExt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TransText
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name FtpStorage
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name GanttChartExt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name StatisticsExt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TDLUpdate
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TDLUninstall
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name KanbanBoard
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name BurndownExt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TDLTransEdit
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name WorkloadExt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Interfaces
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TDLTest
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ToDoListLib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ConvertRTFToHTML
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ToDoListLib"=.\ToDoListLib\ToDoListLib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "TransText"=.\TransText\TransText.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "WorkloadExt"=.\WorkloadExt\WorkloadExt.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "iCalImportExport"=.\iCalImportExport\iCalImportExport.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

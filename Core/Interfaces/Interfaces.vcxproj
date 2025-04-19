@@ -45,13 +45,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
-    <OutDir>.\Unicode_Release\</OutDir>
-    <IntDir>.\Unicode_Release\</IntDir>
+    <OutDir>$(SolutionDir)$(ProjectName)\Unicode_Release\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\Unicode_Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
-    <OutDir>.\Unicode_Debug\</OutDir>
-    <IntDir>.\Unicode_Debug\</IntDir>
+    <OutDir>$(SolutionDir)$(ProjectName)\Unicode_Debug\</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\Unicode_Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">

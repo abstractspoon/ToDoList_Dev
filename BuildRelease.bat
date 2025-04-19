@@ -16,19 +16,24 @@ REM - Remember to update ToDoList version number
 REM - Remember to pull latest translations
 pause
 
-SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
-
-REM - Build core app
+REM - Build core app in VC6
 cd %REPO%\Core
 
-set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Build_Output.txt
-del %OUTPUT_FILE%
+REM - Detours
+REM "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\3rdParty\Detours\Detours.dsw /MAKE "ALL - Win32 Unicode Release"
 
-%MSBUILD% .\ToDoList_Core.sln /t:Build /p:Configuration="Unicode Release" /m /v:normal > %OUTPUT_FILE%
+REM - Core app
+set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Core_Build_Output.txt
+"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
 
-REM - Check for build errors
+REM - Check for compile errors
 ECHO OFF
-findstr /C:"Build FAILED." %OUTPUT_FILE%
+
+findstr /C:") : error" %OUTPUT_FILE%
+if %errorlevel%==1 (
+REM - Check for link errors
+findstr /C:"Error executing link.exe" %OUTPUT_FILE%
+)
 
 if %errorlevel%==1 (
 echo [42m Build SUCCEEDED[0m
@@ -71,9 +76,10 @@ pause
 exit
 )
 
-REM - Build plugins
+REM - Build plugins using MSBuild for reliability
 ECHO ON
 
+SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 cd %REPO%\Plugins
 
 set OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
