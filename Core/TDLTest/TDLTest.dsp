@@ -174,6 +174,10 @@ SOURCE=.\ToDoCtrlDataTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\ToDoCtrlMgrTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ToDoCtrlTaskLinkTest.cpp
 # End Source File
 # Begin Source File
@@ -263,6 +267,10 @@ SOURCE=.\TimeHelperTest.h
 # Begin Source File
 
 SOURCE=.\ToDoCtrlDataTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ToDoCtrlMgrTest.h
 # End Source File
 # Begin Source File
 
