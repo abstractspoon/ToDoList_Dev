@@ -66,6 +66,8 @@ SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlCore.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterCore.dll
+SET TDLFILELIST=%TDLFILELIST%;JSONExporterBridge.dll
+SET TDLFILELIST=%TDLFILELIST%;JSONExporterCore.dll
 SET TDLFILELIST=%TDLFILELIST%;LoggedTimeUIExtensionBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;LoggedTimeUIExtensionCore.dll
 SET TDLFILELIST=%TDLFILELIST%;MDContentControlBridge.dll
@@ -123,6 +125,7 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MySql.Data.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Newtonsoft.Json.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\RadialTree.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
