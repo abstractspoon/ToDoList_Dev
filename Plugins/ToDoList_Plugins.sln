@@ -237,6 +237,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JSONExporterBridge", "Impor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JSONExporterCore", "ImportExport\JSONExporter\JSONExporterCore\JSONExporterCore.csproj", "{5DB1F8CD-27F8-453B-B2FB-2875F71AA325}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoListLib", "..\Core\ToDoListLib\ToDoListLib.vcxproj", "{940BE78E-1486-7F9B-02B3-6F0113741A6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -2277,6 +2279,42 @@ Global
 		{5DB1F8CD-27F8-453B-B2FB-2875F71AA325}.Unicode Release|x64.Build.0 = Release|Any CPU
 		{5DB1F8CD-27F8-453B-B2FB-2875F71AA325}.Unicode Release|x86.ActiveCfg = Release|Any CPU
 		{5DB1F8CD-27F8-453B-B2FB-2875F71AA325}.Unicode Release|x86.Build.0 = Release|Any CPU
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|Any CPU.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|Any CPU.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|Mixed Platforms.ActiveCfg = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|Mixed Platforms.Build.0 = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|Win32.Build.0 = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|x64.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|x64.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|x86.ActiveCfg = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Debug|x86.Build.0 = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|Any CPU.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|Any CPU.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|Mixed Platforms.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|Mixed Platforms.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|Win32.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|Win32.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|x64.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|x64.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|x86.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Release|x86.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|Any CPU.ActiveCfg = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|Mixed Platforms.ActiveCfg = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|Mixed Platforms.Build.0 = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|x64.ActiveCfg = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|x86.ActiveCfg = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|x86.Build.0 = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|Any CPU.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|Mixed Platforms.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|Mixed Platforms.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|x64.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|x86.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|x86.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2351,5 +2389,6 @@ Global
 		{9BA2ED13-1849-4341-A0D3-F5F364B2612D} = {29C7E7EF-09EE-497E-8BB2-FAEC0F532ABC}
 		{3122F292-3C62-4EC8-A68A-5741C5E7F5B8} = {9BA2ED13-1849-4341-A0D3-F5F364B2612D}
 		{5DB1F8CD-27F8-453B-B2FB-2875F71AA325} = {9BA2ED13-1849-4341-A0D3-F5F364B2612D}
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A} = {D601EFAA-08D0-457C-A5BF-BB6FD692F633}
 	EndGlobalSection
 EndGlobal
