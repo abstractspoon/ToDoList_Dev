@@ -152,6 +152,8 @@ public:
 	void OnCustomAttributesChange();
 	void OnAttributeVisibilityChange();
 
+	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
+
 protected:
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
@@ -301,7 +303,6 @@ protected:
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
 	static CPoint GetIconPos(const CRect& rText);
-	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 	static int HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns);
 	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
 	static CString FormatValueArray(const CStringArray& aValues);

@@ -22,6 +22,10 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+#ifndef SHORT_MAX
+#	define SHORT_MAX SHRT_MAX
+#endif
+
 //////////////////////////////////////////////////////////////////////
 
 const UINT ONEDAY = 24 * 60 * 60;
@@ -116,7 +120,7 @@ IIMPORTEXPORT_RESULT CGPExporter::ExportTasklists(const CITaskListArray& aTaskli
 
 		// For a multi-file export create a top-level node for each tasklist
 		if (bMulti)
-			pXITasks = CreateTaskNode(FormatTitle(pTasks), (nTaskList * SHORT_MAX), pXIAllTasks);
+			pXITasks = CreateTaskNode(FormatTitle(pTasks), (nTaskList * SHRT_MAX), pXIAllTasks);
 
 		// clear the task map that will be populated in ExportTask
 		// for use in ExportDependencies

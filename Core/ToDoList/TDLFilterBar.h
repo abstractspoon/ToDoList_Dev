@@ -35,19 +35,18 @@ class CTDLFilterBar : public CDialog, public CDialogHelper
 // Construction
 public:
 	CTDLFilterBar(CWnd* pParent = NULL);   // standard constructor
-	~CTDLFilterBar();
+	virtual ~CTDLFilterBar();
 
 	BOOL Create(CWnd* pParentWnd, UINT nID = 0, BOOL bVisible = TRUE);
 
 	FILTER_SHOW GetFilter() const;
-	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
-	FILTER_SHOW GetFilter(CString& sCustom) const;
+	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sAdvFilter, DWORD& dwCustomFlags) const;
+	FILTER_SHOW GetFilter(CString& sAdvFilter) const;
 
-	BOOL SelectFilter(int nFilter);
-	int GetSelectedFilter() const;
+	BOOL SelectFilter(FILTER_SHOW nShow, LPCTSTR szAdvFilter = NULL);
 
-	void AddAdvancedFilters(const CStringArray& aFilters);
-	const CStringArray& GetAdvancedFilterNames() const;
+	void SetAdvancedFilters(const CStringArray& aFilters);
+	const CStringArray& AdvancedFilterNames() const;
 	BOOL SetAdvancedFilterIncludesDoneTasks(const CString& sCustom, BOOL bIncDone);
 
 	void ShowDefaultFilters(BOOL bShow);
@@ -152,7 +151,6 @@ protected:
 	void OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFilterDateComboBox& combo);
 
 protected:
-	void RemoveAdvancedFilters();
 	int ReposControls(int nWidth = -1, BOOL bCalcOnly = FALSE);
 	BOOL WantShowFilter(TDC_ATTRIBUTE nType) const;
 	void RefreshUIBkgndBrush();

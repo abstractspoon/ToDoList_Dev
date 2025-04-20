@@ -66,6 +66,8 @@ SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlCore.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterCore.dll
+SET TDLFILELIST=%TDLFILELIST%;JSONExporterBridge.dll
+SET TDLFILELIST=%TDLFILELIST%;JSONExporterCore.dll
 SET TDLFILELIST=%TDLFILELIST%;LoggedTimeUIExtensionBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;LoggedTimeUIExtensionCore.dll
 SET TDLFILELIST=%TDLFILELIST%;MDContentControlBridge.dll
@@ -123,6 +125,7 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MySql.Data.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Newtonsoft.Json.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\RadialTree.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
@@ -135,19 +138,19 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\XmlDiffView.exe
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ZstdNet.dll
 
-REM REquired MS components
+REM REquired MS components for C# plugins
 %PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\MFC140U.dll
 %PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\VCRUNTIME140.dll
 
 REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest
 
-REM - Copy latest Resources to output directory
+REM - Copy latest Resources
 del %OUTDIR%\Resources\ /Q /S
 del %OUTDIR%\Resources\Translations\backup\ /Q
 xcopy %RESREPO%\*.* %OUTDIR%\Resources\ /Y /D /E /EXCLUDE:%REPO%\BuildReleaseZip_Exclude.txt
 
-REM - Add install instructions to root
+REM - Zip install instructions to root
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Windows.txt
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Linux.txt
 
@@ -155,7 +158,7 @@ REM - And remove from resources to avoid duplication
 del %OUTDIR%\Resources\Install.Windows.txt
 del %OUTDIR%\Resources\Install.Linux.txt
 
-REM - Add Resources
+REM - Zip Resources
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\ -x!.git*
 
 REM - Copy the zip file to the download folder

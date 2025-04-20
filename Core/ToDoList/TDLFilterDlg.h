@@ -31,6 +31,7 @@ class CTDLFilterDlg : public CTDLDialog
 public:
 	CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 				  BOOL bMultiSelFilters,
+				  BOOL bShowDefaultFilters,
 				  const CStringArray& aAdvancedFilterNames,
 				  const CFilteredToDoCtrl& tdc,
 				  const CDWordArray& aPriorityColors,

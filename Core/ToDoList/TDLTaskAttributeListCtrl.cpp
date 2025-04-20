@@ -4276,7 +4276,7 @@ void CTDLTaskAttributeListCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	HideAllControls();
 
-	LVHITTESTINFO lvHit = { point, 0 };
+	LVHITTESTINFO lvHit = { { point.x, point.y }, 0 };
 
 	int nRow = SubItemHitTest(&lvHit);
 	int nCol = lvHit.iSubItem;
@@ -4540,10 +4540,11 @@ void CTDLTaskAttributeListCtrl::CAttributeStates::Populate()
 	}
 
 	// Misc others
-	m_aAttributeItems.Add(ATTRIBSTATE(IDS_TDLBC_REMINDER, TDCA_REMINDER, TDCAG_DATETIME));
+	TDCATTRIBUTE att = { TDCA_REMINDER, TDCAG_DATETIME, IDS_TDLBC_REMINDER };
+	m_aAttributeItems.Add(ATTRIBSTATE(att));
 
 	// Sort 
-	Misc::SortArrayT(m_aAttributeItems, SortByNameProc);
+	Misc::SortArrayT<ATTRIBSTATE>(m_aAttributeItems, SortByNameProc);
 	m_sDefaultOrder = GetItemsState(FALSE);
 
 	RebuildItemPositions();
@@ -4826,7 +4827,7 @@ void CTDLTaskAttributeListCtrl::CAttributeStates::SetItemsState(const CString& s
 		}
 	}
 
-	Misc::SortArrayT(m_aAttributeItems, SortByPosProc);
+	Misc::SortArrayT<ATTRIBSTATE>(m_aAttributeItems, SortByPosProc);
 	RebuildItemPositions();
 }
 
@@ -4835,7 +4836,7 @@ BOOL CTDLTaskAttributeListCtrl::CAttributeStates::ResetOrder()
 	if (!CanResetOrder())
 		return FALSE;
 
-	Misc::SortArrayT(m_aAttributeItems, SortByNameProc);
+	Misc::SortArrayT<ATTRIBSTATE>(m_aAttributeItems, SortByNameProc);
 	RebuildItemPositions();
 
 	return TRUE;

@@ -80,11 +80,6 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
-    <PostBuildEvent>
-      <Command>mkdir ..\ToDoList
-mkdir ..\ToDoList\unicode_debug
-copy unicode_debug\ConvertRTFToHTML.exe ..\todolist\unicode_debug /y</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
     <ClCompile>
@@ -113,11 +108,6 @@ copy unicode_debug\ConvertRTFToHTML.exe ..\todolist\unicode_debug /y</Command>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
-    <PostBuildEvent>
-      <Command>mkdir ..\ToDoList
-mkdir ..\ToDoList\unicode_release
-copy unicode_debug\ConvertRTFToHTML.exe ..\todolist\unicode_release /y</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
