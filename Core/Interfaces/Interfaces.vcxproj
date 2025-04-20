@@ -65,7 +65,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>$(SolutionDir)$(ProjectName)\Unicode_Release\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Unicode_Release\Interfaces.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(SolutionDir)$(ProjectName)\Unicode_Release\Interfaces.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>$(SolutionDir)$(ProjectName)\Unicode_Release\</ObjectFileName>
       <ProgramDataBaseFileName>$(SolutionDir)$(ProjectName)\Unicode_Release\</ProgramDataBaseFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -76,7 +76,7 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Unicode_Release\Interfaces.bsc</OutputFile>
+      <OutputFile>$(SolutionDir)$(ProjectName)\Unicode_Release\Interfaces.bsc</OutputFile>
     </Bscmake>
     <Lib>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -95,7 +95,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>$(SolutionDir)$(ProjectName)\Unicode_Debug\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Unicode_Debug\Interfaces.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(SolutionDir)$(ProjectName)\Unicode_Debug\Interfaces.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>$(SolutionDir)$(ProjectName)\Unicode_Debug\</ObjectFileName>
       <ProgramDataBaseFileName>$(SolutionDir)$(ProjectName)\Unicode_Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -107,7 +107,7 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Unicode_Debug\Interfaces.bsc</OutputFile>
+      <OutputFile>$(SolutionDir)$(ProjectName)\Unicode_Debug\Interfaces.bsc</OutputFile>
     </Bscmake>
     <Lib>
       <SuppressStartupBanner>true</SuppressStartupBanner>

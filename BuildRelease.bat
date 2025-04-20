@@ -23,7 +23,10 @@ REM - Detours
 REM "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\3rdParty\Detours\Detours.dsw /MAKE "ALL - Win32 Unicode Release"
 
 REM - Core app
+MKDIR %REPO%\Core\ToDoList\Unicode_Release
 set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Core_Build_Output.txt
+del %OUTPUT_FILE%
+
 "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
 
 REM - Check for compile errors
@@ -82,6 +85,7 @@ ECHO ON
 SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 cd %REPO%\Plugins
 
+MKDIR %REPO%\Plugins\Release
 set OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
 del %OUTPUT_FILE%
 
