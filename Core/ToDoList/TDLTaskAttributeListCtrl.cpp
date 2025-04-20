@@ -4521,7 +4521,8 @@ void CTDLTaskAttributeListCtrl::CAttributeStates::Populate()
 	}
 
 	// Misc others
-	m_aAttributeItems.Add(ATTRIBSTATE(IDS_TDLBC_REMINDER, TDCA_REMINDER, TDCAG_DATETIME));
+	TDCATTRIBUTE att = { TDCA_REMINDER, TDCAG_DATETIME, IDS_TDLBC_REMINDER };
+	m_aAttributeItems.Add(ATTRIBSTATE(att));
 
 	// Sort 
 	Misc::SortArrayT<ATTRIBSTATE>(m_aAttributeItems, SortByNameProc);
