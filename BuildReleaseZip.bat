@@ -138,6 +138,10 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\XmlDiffView.exe
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ZstdNet.dll
 
+REM REquired MS components for C# plugins
+%PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\MFC140U.dll
+%PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\VCRUNTIME140.dll
+
 REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest
 
