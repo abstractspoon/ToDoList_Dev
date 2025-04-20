@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,0,997,5
+ FILEVERSION 9,0,997,4
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -4680,7 +4680,7 @@ END
 // 24
 //
 
-IDR_MANIFEST            24      DISCARDABLE   "res\\todolist.exe.manifest"
+IDR_MANIFEST            24      DISCARDABLE     "res\\todolist.exe.manifest"
 
 /////////////////////////////////////////////////////////////////////////////
 //
