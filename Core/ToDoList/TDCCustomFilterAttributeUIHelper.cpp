@@ -56,6 +56,9 @@ CWnd* CTDCCustomFilterAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent,
 		szClass = WC_COMBOBOX;
 		dwStyle |= (CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL);
 
+		if (!attribDef.IsFixedList())
+			dwStyle |= CBS_SORT;
+
 		if (attribDef.IsDataType(TDCCA_ICON))
 			pControl = new CTDLIconComboBox(ilImages, bMultiSelectionFilter, TRUE);
 		else

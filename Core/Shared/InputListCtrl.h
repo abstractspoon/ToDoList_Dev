@@ -156,9 +156,9 @@ protected:
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual UINT GetTextDrawFlags(int nCol) const;
 
-	void CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles = CBS_DROPDOWNLIST | CBS_SORT);
-	void CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles = ES_AUTOHSCROLL);
-	void CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles = DTS_SHORTDATEFORMAT);
+	BOOL CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles = CBS_DROPDOWNLIST | CBS_SORT);
+	BOOL CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles = ES_AUTOHSCROLL);
+	BOOL CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles = DTS_SHORTDATEFORMAT);
 	void PostCreateControl(CWnd& ctrl);
 	void HideControl(CWnd& ctrl, const CWnd* pWndIgnore = NULL);
 	void ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick = FALSE);
