@@ -1,15 +1,23 @@
 ECHO OFF
 
-pushd %~dp0
-set REPO=%CD%
-ECHO REPO=%REPO%
+PUSHD %~dp0
 
-REM ProjectZip Location
-set PATHPZIP="D:\Tools\ProjectZip.exe"
+ECHO Zipping Code
+ECHO ============
+ECHO:
 
-if NOT EXIST %PATHPZIP% exit
+SET REPO=%CD%
+SET PATHPZIP="D:\Tools\ProjectZip.exe"
 
-ECHO PATH7ZIP=%PATHPZIP%
+ECHO REPO     = %REPO%
+ECHO PATHPZIP = %PATHPZIP%
+ECHO:
+
+IF NOT EXIST %PATHPZIP% (
+ECHO Unable to locate ProjectZip.exe!!
+PAUSE
+EXIT
+)
 
 REM Options
 REM ZP - Zip Path
@@ -22,4 +30,8 @@ ECHO Zipping %REPO%\Core\ToDoList_Core.sln
 ECHO Zipping %REPO%\Plugins\ToDoList_Plugins.sln
 %PATHPZIP% %REPO%\Plugins\ToDoList_Plugins.sln /ZP %REPO%\..\ToDoList_Prev\9.1\ToDoList_src_Plugins.9.1._.zip /ML /NM
 
-popd
+ECHO:
+ECHO [42m Zipping Code SUCCEEDED[0m
+ECHO:
+
+POPD
