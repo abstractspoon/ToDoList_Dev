@@ -1,5 +1,7 @@
 ECHO OFF
 
+REM - WE USE FULL PATHS THROUGHOUT - NO 'CD' WITH RELATIVE PATHS
+
 PUSHD %~dp0
 
 ECHO Zipping Code
@@ -14,7 +16,7 @@ ECHO PATHPZIP = %PATHPZIP%
 ECHO:
 
 IF NOT EXIST %PATHPZIP% (
-ECHO Unable to locate ProjectZip.exe!!
+ECHO [41m Unable to locate ProjectZip.exe!![0m
 PAUSE
 EXIT
 )

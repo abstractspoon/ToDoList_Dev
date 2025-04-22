@@ -1,37 +1,49 @@
 ECHO OFF
 ECHO:
 
+REM - WE USE FULL PATHS THROUGHOUT - NO 'CD' WITH RELATIVE PATHS
+
 PUSHD %~dp0
 
-SET REPO=%CD%
-SET RESREPO=%REPO%\..\ToDoList_Resources
-
-ECHO REPO    = %REPO%
-ECHO RESREPO = %RESREPO%
-
-SET OUTDIR=%REPO%\Core\ToDoList\Unicode_Release
-
-REM - Extract version from core app
 ECHO:
 ECHO Versioning Binaries
 ECHO ===================
 ECHO:
 
-%REPO%\Core\ToDoList\Unicode_Release\ToDoList.exe -ver
-SET /P TDLVER=< .\ver.txt
+SET REPO=%CD%
+SET RESREPO=%REPO%\..\ToDoList_Resources
+SET OUTDIR=%REPO%\Core\ToDoList\Unicode_Release
 SET PATHVEREDIT=D:\tools\rcedit-x64.exe
+SET VERFILE=%OUTDIR%\ver.txt
 
+REM - Extract version from core app
+DEL %VERFILE% 2> NUL
+%OUTDIR%\ToDoList.exe -ver %VERFILE%
+
+IF NOT EXIST %VERFILE% (
+ECHO [41m Unable to locate ver.txt!![0m
+ECHO:
+PAUSE
+EXIT
+)
+
+SET /P TDLVER=< %VERFILE%
+
+ECHO REPO        = %REPO%
+ECHO OUTDIR      = %OUTDIR%
+ECHO RESREPO     = %RESREPO%
 ECHO PATHVEREDIT = %PATHVEREDIT%
 ECHO TDLVER      = %TDLVER%
 ECHO:
 
 IF NOT EXIST %PATHVEREDIT% (
-ECHO Unable to locate rcedit-x64.exe!!
+ECHO [41m Unable to locate rcedit-x64.exe!!
+ECHO:
 PAUSE
 EXIT
 )
 
-DEL  .\ver.txt 2> NUL
+DEL %OUTDIR%\ver.txt 2> NUL
 
 REM - Update all TDL components with version from core app
 REM - Excludes all dlls we DON'T own the copyright to
@@ -92,7 +104,7 @@ SET FILELIST=%FILELIST%;WordCloudUIExtensionBridge.dll
 SET FILELIST=%FILELIST%;WordCloudUIExtensionCore.dll
 
 SET OUTPUT_FILE=%OUTDIR%\Versioning_Output.txt
-DEL  %OUTPUT_FILE% 2> NUL
+DEL %OUTPUT_FILE% 2> NUL
 
 FOR %%f IN (%FILELIST%) DO ( 
 %PATHVEREDIT% %OUTDIR%\%%f --set-file-version "%TDLVER%" 2>> %OUTPUT_FILE%
@@ -103,6 +115,7 @@ FINDSTR /C:"Unable to load file:" %OUTPUT_FILE%
    
 IF %errorlevel%==0 (
 ECHO [41m Versioning FAILED[0m
+ECHO:
 PAUSE
 EXIT
 )
@@ -123,7 +136,8 @@ ECHO PATH7ZIP = %PATH7ZIP%
 ECHO:
 
 IF NOT EXIST %PATH7ZIP% (
-ECHO Unable to locate 7z.exe!!
+ECHO [41m Unable to locate 7z.exe!![0m
+ECHO:
 PAUSE
 EXIT
 )
@@ -140,6 +154,7 @@ FINDSTR /C:"The system cannot find the file specified." %OUTPUT_FILE%
    
 IF %errorlevel%==0 (
 ECHO [41m Symbols FAILED[0m
+ECHO:
 PAUSE
 EXIT
 )
@@ -160,8 +175,8 @@ ECHO OUTZIP = %OUTZIP%
 ECHO OUTDIR = %OUTDIR%
 ECHO:
 
-DEL  %OUTPUT_FILE% 2> NUL
-DEL  %OUTZIP% 2> NUL
+DEL %OUTPUT_FILE% 2> NUL
+DEL %OUTZIP% 2> NUL
 
 REM - Add all other components which we don't own
 SET FILELIST=%FILELIST%;BouncyCastle.Crypto.dll
@@ -170,7 +185,11 @@ SET FILELIST=%FILELIST%;CustomComboBox.dll
 SET FILELIST=%FILELIST%;Gma.CodeCloud.Controls.dll
 SET FILELIST=%FILELIST%;Google.Protobuf.dll
 SET FILELIST=%FILELIST%;HtmlAgilityPack.dll
-SET FILELIST=%FILELIST%;Itenso.*.dll
+SET FILELIST=%FILELIST%;Itenso.Rtf.Converter.Html.dll
+SET FILELIST=%FILELIST%;Itenso.Rtf.Interpreter.dll
+SET FILELIST=%FILELIST%;Itenso.Rtf.Parser.dll
+SET FILELIST=%FILELIST%;Itenso.Solutions.Community.Rtf2Html.dll
+SET FILELIST=%FILELIST%;Itenso.Sys.dll
 SET FILELIST=%FILELIST%;iTextSharp.dll
 SET FILELIST=%FILELIST%;LinkLabelEx.dll
 SET FILELIST=%FILELIST%;K4os.Compression.LZ4.dll
@@ -205,28 +224,29 @@ REM - Manifest for XP only (Updater will DEL ete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest >> %OUTPUT_FILE%
 
 REM - DEL ete and recreate Resources folder
-rmdir %OUTDIR%\Resources /Q /S > NUL
-mkdir %OUTDIR%\Resources 2> NUL
+RMDIR %OUTDIR%\Resources /Q /S > NUL
+MKDIR %OUTDIR%\Resources 2> NUL
 
 REM - Copy latest Resources
-xcopy %RESREPO%\*.* %OUTDIR%\Resources\ /Y /D /E /EXCLUDE:%REPO%\BuildReleaseZip_Exclude.txt > NUL
+XCOPY %RESREPO%\*.* %OUTDIR%\Resources\ /Y /D /E /EXCLUDE:%REPO%\BuildReleaseZip_Exclude.txt > NUL
 
 REM - Zip install instructions to root
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Windows.txt >> %OUTPUT_FILE%
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Linux.txt >> %OUTPUT_FILE%
 
 REM - And remove from resources to avoid duplication
-DEL  %OUTDIR%\Resources\Install.Windows.txt > NUL
-DEL  %OUTDIR%\Resources\Install.Linux.txt > NUL
+DEL %OUTDIR%\Resources\Install.Windows.txt > NUL
+DEL %OUTDIR%\Resources\Install.Linux.txt > NUL
 
 REM - Zip Resources
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\ -x!.git* >> %OUTPUT_FILE%
 
 REM Check for errors
-FINDSTR /C:"The system cannot find the file specified." %OUTPUT_FILE%
+FINDSTR /C:"The system cannot find the file specified." %OUTPUT_FILE% > NUL
    
 IF %errorlevel%==0 (
 ECHO [41m Zipping Binaries FAILED[0m
+ECHO:
 PAUSE
 EXIT
 )
@@ -237,13 +257,13 @@ ECHO:
 
 REM - Copy the zip file to the download folder
 ECHO Copy todolist_exe_.zip to %REPO%\..\ToDoList_Downloads\Latest\
-copy %OUTZIP% %REPO%\..\ToDoList_Downloads\Latest\
+COPY %OUTZIP% %REPO%\..\ToDoList_Downloads\Latest\
 ECHO:
    
 REM - And then move it to ToDoList_Prev\9.1
 MKDIR %REPO%\..\ToDoList_Prev\9.1 2> NUL
 ECHO Rename todolist_exe_.zip to %REPO%\..\ToDoList_Prev\9.1\ToDoList_exe.9.1._.zip
-move %OUTZIP% %REPO%\..\ToDoList_Prev\9.1\ToDoList_exe.9.1._.zip
+MOVE %OUTZIP% %REPO%\..\ToDoList_Prev\9.1\ToDoList_exe.9.1._.zip
 ECHO:
    
 POPD

@@ -20,33 +20,37 @@ ECHO [106m[30m Remember to pull latest translations[0m
 ECHO:
 PAUSE
 
-REM - Build core app in VC6
-CD %REPO%\Core
-
 REM - Detours
 REM "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\3rdParty\Detours\Detours.dsw /MAKE "ALL - Win32 Unicode Release"
 
-REM - Core app
+REM - Build core app in VC6
 ECHO:
 ECHO Building ToDoList Core 
 ECHO ======================
 ECHO:
 
-MKDIR %REPO%\Core\ToDoList\Unicode_Release 2> NUL
-SET OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Core_Build_Output.txt
-DEL  %OUTPUT_FILE% > NUL
-
 SET MSDEV="C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe"
+SET OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Core_Build_Output.txt
+
+REM - WE USE FULL PATHS EVERYWHERE ELSE EXCEPT HERE BECAUSE 
+REM - MSDEV ASSUMES THAT THE SOLUTION IS PROVIDED BY NAME ONLY
+SET SOLUTION=ToDoList_Core.dsw
+
+ECHO MSDEV    = %MSDEV%
+ECHO SOLUTION = %REPO%\Core\%SOLUTION%
 
 IF NOT EXIST %MSDEV% (
-ECHO Unable to locate MSDev.exe!!
+ECHO [41m Unable to locate MSDev.exe!![0m
+ECHO:
 PAUSE
 EXIT
 )
 
-ECHO MSDEV = %MSDEV%
+MKDIR %REPO%\Core\ToDoList\Unicode_Release 2> NUL
+DEL %OUTPUT_FILE% 2> NUL
 
-%MSDEV% .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
+cd %REPO%\Core
+%MSDEV% ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
 ECHO:
 
 REM - Check for compile errors
@@ -58,6 +62,7 @@ FINDSTR /C:"Error executing link.exe" %OUTPUT_FILE%
 
 IF %errorlevel%==0 (
 ECHO [41m Build FAILED[0m
+ECHO:
 PAUSE
 EXIT
 )
@@ -71,18 +76,19 @@ ECHO Running Unit Tests
 ECHO ==================
 ECHO:
 
-CD TDLTest\Unicode_Release
-
+SET TDLTEST=%REPO%\Core\TDLTest\Unicode_Release\TDLTest.exe
 SET OUTPUT_FILE=%REPO%\Core\TDLTest\Unicode_Release\Test_Output.txt
-DEL  %OUTPUT_FILE% > NUL
 
-TDLTest > %OUTPUT_FILE%
+DEL %OUTPUT_FILE% 2> NUL
+
+%TDLTEST% > %OUTPUT_FILE%
 
 REM - Check for test errors
 FINDSTR /C:"tests FAILED" %OUTPUT_FILE%
 
 IF %errorlevel%==0 (
 ECHO [41m Tests FAILED[0m
+ECHO:
 PAUSE
 EXIT
 )
@@ -92,6 +98,7 @@ FINDSTR /C:"tests SUCCEEDED" %OUTPUT_FILE% > nul
 
 IF %errorlevel%==1 (
 ECHO [41m Test Results EMPTY[0m
+ECHO:
 PAUSE
 EXIT
 )
@@ -99,36 +106,48 @@ EXIT
 REM SUCCESS!
 ECHO [42m Tests SUCCEEDED[0m
 
-REM - Build plugins using MSBuild for reliability
+REM - Build plugins using MSBuild
 ECHO:
 ECHO Building ToDoList Plugins
 ECHO =========================
 ECHO:
 
 SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
+SET SOLUTION=%REPO%\Plugins\ToDoList_Plugins.sln
+SET OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
+
+ECHO MSBUILD  = %MSBUILD%
+ECHO SOLUTION = %SOLUTION%
+ECHO:
 
 IF NOT EXIST %MSBUILD% (
-ECHO Unable to locate MSBuild.exe!!
+ECHO [41m Unable to locate MSBuild.exe!![0m
+ECHO:
 PAUSE
 EXIT
 )
 
-ECHO MSBUILD = %MSBUILD%
-ECHO:
+MKDIR %REPO%\Plugins\Release 2> NUL
+DEL %OUTPUT_FILE% 2> NUL
 
-CD %REPO%\Plugins
-MKDIR .\Release 2> NUL
+%MSBUILD% %SOLUTION% /t:Build /p:Configuration=Release /m /v:normal > %OUTPUT_FILE%
 
-SET OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
-DEL  %OUTPUT_FILE% > NUL
+REM - Check for compile errors
+FINDSTR /C:"): error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
 
-%MSBUILD% .\ToDoList_Plugins.sln /t:Build /p:Configuration=Release /m /v:normal > %OUTPUT_FILE%
+REM - Check for link errors
+FINDSTR /C:": fatal error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
 
-REM - Check for build errors
+REM - Check for general errors
 FINDSTR /C:"Build FAILED." %OUTPUT_FILE%
+)
+)
 
 IF %errorlevel%==0 (
 ECHO [41m Build FAILED[0m
+ECHO:
 PAUSE
 EXIT
 )
