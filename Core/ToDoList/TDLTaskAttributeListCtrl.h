@@ -34,29 +34,6 @@ class CTDCImageList;
 
 class CTDLTaskAttributeListCtrl : public CInputListCtrl
 {
-	// Private helper
-	class CFileDropTarget : public COleDropTargetEx
-	{
-	public:
-		CFileDropTarget(CTDLTaskAttributeListCtrl* pAtributeList);
-		
-	protected:
-		CTDLTaskAttributeListCtrl* m_pAttributeList;
-		int m_nDropHighlightedRow;
-		
-	protected:
-		virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-		virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-		virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
-		virtual void OnDragLeave(CWnd* pWnd);
-		virtual DROPEFFECT OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
-		
-		BOOL CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const;
-		BOOL CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const;
-	};
-	
-	friend class CFileDropTarget;
-
 // Construction -------------------------------------------------------------
 public:
 	CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
@@ -190,7 +167,6 @@ protected:
 	CFileEdit m_eSingleFileLink;
 	CTDLIconComboBox m_cbCustomIcons;
 	CToolTipCtrlEx m_tooltip;
-	CFileDropTarget m_dropFiles;
 	
 	mutable CIconCache m_iconCache;
 
@@ -312,6 +288,30 @@ protected:
 private:
 	// ---------------------------------------------------------------------
 
+	class CFileDropTarget : public COleDropTargetEx
+	{
+	public:
+		CFileDropTarget(CTDLTaskAttributeListCtrl* pAtributeList);
+		
+	protected:
+		CTDLTaskAttributeListCtrl* m_pAttributeList;
+		int m_nDropHighlightedRow;
+		
+	protected:
+		virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+		virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+		virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
+		virtual void OnDragLeave(CWnd* pWnd);
+		virtual DROPEFFECT OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
+		
+		BOOL CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const;
+		BOOL CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const;
+	};
+	
+	friend class CFileDropTarget;
+	
+	// ---------------------------------------------------------------------
+
 	struct GROUPITEM
 	{
 		GROUPITEM() : dwItemData(0), nGroupID(0), rItem(0, 0, 0, 0) {}
@@ -320,6 +320,8 @@ private:
 		int nGroupID;
 		CRect rItem;
 	};
+	
+	// ---------------------------------------------------------------------
 
 	class CSortedGroupItemArray : CArray<GROUPITEM, GROUPITEM&>
 	{
@@ -340,8 +342,6 @@ private:
 		static int SortProc(const void* item1, const void* item2);
 	};
 
-	CSortedGroupItemArray m_aSortedGroupedItems;
-
 	// ---------------------------------------------------------------------
 
 	struct ATTRIBGROUP
@@ -349,6 +349,8 @@ private:
 		TDC_ATTRIBUTEGROUP nGroup;
 		CString sName;
 	};
+	
+	// ---------------------------------------------------------------------
 
 	class CSortedGroupedHeaderArray : public CArray<ATTRIBGROUP, ATTRIBGROUP&>
 	{
@@ -377,6 +379,8 @@ private:
 		int nPos;
 		COLORREF crLabelBkgnd;
 	};
+
+	// ---------------------------------------------------------------------
 
 	class CAttributeStates
 	{
@@ -419,9 +423,12 @@ private:
 		static int SortByPosProc(const void* item1, const void* item2);
 	};
 
+	// ---------------------------------------------------------------------
+	
+	CFileDropTarget m_dropFiles;
+	CSortedGroupItemArray m_aSortedGroupedItems;
 	CAttributeStates m_aAttribState;
 
-	// ---------------------------------------------------------------------
 };
 
 /////////////////////////////////////////////////////////////////////////////
