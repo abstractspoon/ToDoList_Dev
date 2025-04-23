@@ -19,12 +19,12 @@ ECHO [106m[30m Remember to update ToDoList version number[0m
 ECHO [106m[30m Remember to pull latest translations[0m
 ECHO:
 PAUSE
+ECHO:
 
 REM - Detours
 REM "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\3rdParty\Detours\Detours.dsw /MAKE "ALL - Win32 Unicode Release"
 
 REM - Build core app in VC6
-ECHO:
 ECHO Building ToDoList Core 
 ECHO ======================
 ECHO:
@@ -69,9 +69,9 @@ EXIT
 
 REM SUCCESS!
 ECHO [42m Build SUCCEEDED[0m
+ECHO:
 
 REM Run units tests
-ECHO:
 ECHO Running Unit Tests
 ECHO ==================
 ECHO:
@@ -105,9 +105,9 @@ EXIT
 
 REM SUCCESS!
 ECHO [42m Tests SUCCEEDED[0m
+ECHO:
 
 REM - Build plugins using MSBuild
-ECHO:
 ECHO Building ToDoList Plugins
 ECHO =========================
 ECHO:
@@ -154,8 +154,8 @@ EXIT
 
 REM SUCCESS!
 ECHO [42m Build SUCCEEDED[0m
-
 ECHO:
+
 ECHO [106m[30m Allow caller to cancel building Zip[0m
 ECHO:
 PAUSE
