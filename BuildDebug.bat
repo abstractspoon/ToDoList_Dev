@@ -1,89 +1,148 @@
 title ToDoList_Dev Debug Build
 
-pushd %~dp0
-set REPO=%CD%
-ECHO REPO=%REPO%
-
-if NOT EXIST %REPO%\Core exit
-if NOT EXIST %REPO%\Plugins exit
-
-SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
-
-REM - Build core app
-cd %REPO%\Core
-
-set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Debug\Build_Output.txt
-del %OUTPUT_FILE%
-
-%MSBUILD% .\ToDoList_Core.sln /t:Build /p:Configuration="Unicode Debug" /m /v:normal > %OUTPUT_FILE%
-
-REM - Check for build errors
 ECHO OFF
-findstr /C:"Build FAILED." %OUTPUT_FILE%
+CLS
 
-if %errorlevel%==1 (
-echo [42m Build SUCCEEDED[0m
+ECHO ToDoList_Dev Debug Build
+ECHO ========================
+ECHO:
+
+PUSHD %~dp0
+SET REPO=%CD%
+ECHO REPO    = %REPO%
+
+REM - WE USE FULL PATHS EVERYWHERE
+
+IF NOT EXIST %REPO%\Core EXIT
+IF NOT EXIST %REPO%\Plugins EXIT
+
+REM - Use MSBuild for both core and plugins
+SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
+ECHO MSBUILD = %MSBUILD%
+ECHO:
+
+IF NOT EXIST %MSBUILD% (
+ECHO [41m Unable to locate MSBuild.exe!![0m
+ECHO:
+PAUSE
+EXIT
 )
-if %errorlevel%==0 (
-echo [41m Build FAILED[0m
-pause
-exit
+
+REM - Core app
+ECHO Building ToDoList Core 
+ECHO ======================
+ECHO:
+
+SET SOLUTION=%REPO%\Core\ToDoList_Core.sln
+SET OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Debug\Core_Build_Output.txt
+
+ECHO SOLUTION = %SOLUTION%
+
+MKDIR %REPO%\Core\ToDoList\Unicode_Debug 2> NUL
+DEL %OUTPUT_FILE% 2> NUL
+
+%MSBUILD% %SOLUTION% /t:Build /p:Configuration="Unicode Debug" /m /v:normal > %OUTPUT_FILE%
+ECHO:
+
+REM - Check for compile errors
+FINDSTR /C:"): error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
+
+REM - Check for link errors
+FINDSTR /C:": fatal error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
+
+REM - Check for general errors
+FINDSTR /C:"Build FAILED." %OUTPUT_FILE%
 )
+)
+
+IF %errorlevel%==0 (
+ECHO [41m Build FAILED[0m
+ECHO:
+PAUSE
+EXIT
+)
+
+REM SUCCESS!
+ECHO [42m Build SUCCEEDED[0m
 
 REM Run units tests
-ECHO ON
+ECHO:
+ECHO Running Unit Tests
+ECHO ==================
+ECHO:
 
-cd TDLTest\Unicode_Debug
+SET TDLTEST=%REPO%\Core\TDLTest\Unicode_Debug\TDLTest.exe
+SET OUTPUT_FILE=%REPO%\Core\TDLTest\Unicode_Debug\Test_Output.txt
 
-set OUTPUT_FILE=%REPO%\Core\TDLTest\Unicode_Debug\Test_Output.txt
-del %OUTPUT_FILE%
+DEL %OUTPUT_FILE% 2> NUL
 
-TDLTest > %OUTPUT_FILE%
+%TDLTEST% > %OUTPUT_FILE%
 
 REM - Check for test errors
-ECHO OFF
-findstr /C:"tests FAILED" %OUTPUT_FILE%
+FINDSTR /C:"tests FAILED" %OUTPUT_FILE%
 
-if %errorlevel%==0 (
-echo [41m Tests FAILED[0m
-pause
-exit
+IF %errorlevel%==0 (
+ECHO [41m Tests FAILED[0m
+ECHO:
+PAUSE
+EXIT
 )
 
 REM - Check for test success
-findstr /C:"tests SUCCEEDED" %OUTPUT_FILE% > nul
+FINDSTR /C:"tests SUCCEEDED" %OUTPUT_FILE% > nul
 
-if %errorlevel%==0 (
-echo [42m Tests SUCCEEDED[0m
-)
-if %errorlevel%==1 (
-echo [41m Test Results EMPTY[0m
-pause
-exit
+IF %errorlevel%==1 (
+ECHO [41m Test Results EMPTY[0m
+ECHO:
+PAUSE
+EXIT
 )
 
-REM - Build plugins
-ECHO ON
+REM SUCCESS!
+ECHO [42m Tests SUCCEEDED[0m
+ECHO:
 
-cd %REPO%\Plugins
+REM - Build plugins using MSBuild
+ECHO Building ToDoList Plugins
+ECHO =========================
+ECHO:
 
-set OUTPUT_FILE=%REPO%\Plugins\Debug\Build_Output.txt
-del %OUTPUT_FILE%
+SET SOLUTION=%REPO%\Plugins\ToDoList_Plugins.sln
+SET OUTPUT_FILE=%REPO%\Plugins\Debug\Build_Output.txt
 
-%MSBUILD% .\ToDoList_Plugins.sln /t:Build /p:Configuration=Debug /m /v:normal > %OUTPUT_FILE%
+ECHO SOLUTION = %SOLUTION%
+ECHO:
 
-REM - Check for build errors
-ECHO OFF
-findstr /C:"Build FAILED." %OUTPUT_FILE%
+MKDIR %REPO%\Plugins\Debug 2> NUL
+DEL %OUTPUT_FILE% 2> NUL
 
-if %errorlevel%==1 (
-echo [42m Build SUCCEEDED[0m
+%MSBUILD% %SOLUTION% /t:Build /p:Configuration=Debug /m /v:normal > %OUTPUT_FILE%
+
+REM - Check for compile errors
+FINDSTR /C:"): error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
+
+REM - Check for link errors
+FINDSTR /C:": fatal error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
+
+REM - Check for general errors
+FINDSTR /C:"Build FAILED." %OUTPUT_FILE%
 )
-if %errorlevel%==0 (
-echo [41m Build FAILED[0m
-pause
-exit
 )
 
-popd
-pause
+IF %errorlevel%==0 (
+ECHO [41m Build FAILED[0m
+ECHO:
+PAUSE
+EXIT
+)
+
+REM SUCCESS!
+ECHO [42m Build SUCCEEDED[0m
+ECHO:
+
+PAUSE
+POPD
