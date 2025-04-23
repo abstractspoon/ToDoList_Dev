@@ -220,10 +220,10 @@ REM REquired MS components for C# plugins
 %PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\MFC140U.dll >> %OUTPUT_FILE%
 %PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\VCRUNTIME140.dll >> %OUTPUT_FILE%
 
-REM - Manifest for XP only (Updater will DEL ete for other OSes)
+REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest >> %OUTPUT_FILE%
 
-REM - DEL ete and recreate Resources folder
+REM - Delete and recreate Resources folder
 RMDIR %OUTDIR%\Resources /Q /S > NUL
 MKDIR %OUTDIR%\Resources 2> NUL
 
