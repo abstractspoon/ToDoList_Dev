@@ -31,7 +31,7 @@ TDCCOLEDITFILTERVISIBILITY visDefault;
 
 CToDoCtrlTaskLinkTest::CToDoCtrlTaskLinkTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(utils),
+	CTDLTestBase(_T("CToDoCtrlTaskLinkTest"), utils),
 	m_tdc(mgrContent, mgrShortcuts, cfDefault, visDefault)
 {
 

@@ -19,7 +19,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFileMiscTest::CFileMiscTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CFileMiscTest::CFileMiscTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CFileMiscTest"), utils)
 {
 
 }

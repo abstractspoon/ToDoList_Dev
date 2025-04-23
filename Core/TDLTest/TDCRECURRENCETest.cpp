@@ -21,7 +21,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCRECURRENCETest::CTDCRECURRENCETest(const CTestUtils& utils) : CTDLTestBase(utils)
+CTDCRECURRENCETest::CTDCRECURRENCETest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CTDCRECURRENCETest"), utils)
 {
 
 }
@@ -176,7 +178,7 @@ void CTDCRECURRENCETest::TestSetRegularity()
 
 void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CTDCRECURRENCETest::CalcNextOccurrencesPerformance\n"));
 		return;
