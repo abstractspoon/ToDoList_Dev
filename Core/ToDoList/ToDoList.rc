@@ -1449,7 +1449,7 @@ END
 
 IDD_ADDLOGGEDTIME_DIALOG DIALOG DISCARDABLE  0, 0, 234, 142
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Log Task Time"
+CAPTION "Add Time to Task Log File"
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Time Spent",IDC_STATIC,7,10,63,8
@@ -3170,7 +3170,7 @@ BEGIN
             MENUITEM "I&ncrement Task Priority",    ID_EDIT_INCTASKPRIORITY
             MENUITEM "Decre&ment Task Priority",    ID_EDIT_DECTASKPRIORITY
             MENUITEM SEPARATOR
-            MENUITEM "Trac&k Time Spent",           ID_EDIT_CLOCK_TASK
+            MENUITEM "Start/Stop Time Trac&king",   ID_EDIT_CLOCK_TASK
             MENUITEM "&Add Time to Task Log File",  ID_ADDTIMETOLOGFILE
             MENUITEM SEPARATOR
             MENUITEM "&Offset Task Dates...",       ID_EDIT_OFFSETDATES
@@ -3941,7 +3941,7 @@ BEGIN
             MENUITEM "I&ncrement Task Priority",    ID_EDIT_INCTASKPRIORITY
             MENUITEM "Decre&ment Task Priority",    ID_EDIT_DECTASKPRIORITY
             MENUITEM SEPARATOR
-            MENUITEM "Trac&k Time Spent",           ID_EDIT_CLOCK_TASK
+            MENUITEM "Start/Stop Time Trac&king",   ID_EDIT_CLOCK_TASK
             MENUITEM "&Add Time to Task Log File",  ID_ADDTIMETOLOGFILE
             MENUITEM SEPARATOR
             MENUITEM "&Offset Task Dates...",       ID_EDIT_OFFSETDATES
@@ -5087,7 +5087,7 @@ BEGIN
     IDS_TDC_ZEROINVALIDTASKID "0 (zero) is not a valid task ID"
     IDS_TDC_ZEROINVALIDTASKID_TITLE "Invalid Task ID"
     IDS_TDC_SEECOMMENTS     "[...]"
-    IDS_TDC_STARTSTOPCLOCK  "Start/Stop Tracking"
+    IDS_TDC_STARTSTOPCLOCK  "Start/Stop Time Tracking"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5838,7 +5838,7 @@ BEGIN
                             "There is currently no tasklist information which can be removed from your ini file."
     IDS_EXPORT_SOMEFAILED   "One or more tasks could not be exported."
     IDS_EXPORT_CANTSAVE     "The exported content could not be saved to '%s'"
-    IDS_TDC_ADDLOGGEDTIME   "Add Tracked Time"
+    IDS_TDC_ADDLOGGEDTIME   "Add Time to Task Log File"
     IDS_STICKIES_LINK       "link"
     IDS_REPLACEINTASKTITLES "Replace in Task Titles"
     IDS_FINDINTASKTITLES    "Find in Task Titles"
