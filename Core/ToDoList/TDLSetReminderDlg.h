@@ -63,6 +63,7 @@ protected:
 	CString	m_sTaskTitle;
 	double	m_dAbsoluteTime; // must come after absolute date
 	CString m_sModifyDlgTitle;
+	BOOL	m_bPlaySound;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -74,17 +75,20 @@ protected:
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLSetReminderDlg)
 	afx_msg void OnSelchangeLeadin();
 	afx_msg void OnChangeRelative();
 	//}}AFX_MSG
+	afx_msg void OnClickPlaySound();
+	afx_msg void OnDismissReminder();
 	DECLARE_MESSAGE_MAP()
 
+protected:
+	void LoadPreferences(const CPreferences& prefs);
+	void SavePreferences(CPreferences& prefs) const;
+
 	static COleDateTime GetNextNearestHour();
-public:
-	afx_msg void OnDismissReminder();
 };
 
 //{{AFX_INSERT_LOCATION}}
