@@ -13300,23 +13300,19 @@ void CToDoListWnd::OnEditSetReminder(int nTDC, DWORD dwTaskID)
 		return;
 	}
 
-	DWORD dwFlags = (nNumSel == 1) ? 0 : TDCREM_MULTIPLETASKS;
-	
 	// get the first reminder as a reference
 	TDCREMINDER rem;
-	
-	// handle new reminder
-	if (!m_dlgReminders.GetFirstTaskReminder(&tdc, aTaskIDs, rem))
+	BOOL bNewReminder = (FALSE == m_dlgReminders.GetFirstTaskReminder(&tdc, aTaskIDs, rem));
+
+	if (bNewReminder)
 	{
 		rem.dwTaskID = aTaskIDs[0];
 		rem.pTDC = &tdc;
-
-		dwFlags |= TDCREM_NEWREMINDER;
 	}
 
 	CTDLSetReminderDlg dialog(CMDICON(ID_EDIT_SETREMINDER), Prefs().GetDisplayDatesInISO());
 
-	switch (dialog.DoModal(rem, dwFlags))
+	switch (dialog.DoModal(rem, bNewReminder))
 	{
 	case IDOK:
 		{

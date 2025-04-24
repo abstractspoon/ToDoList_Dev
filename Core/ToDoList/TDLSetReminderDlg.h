@@ -26,14 +26,6 @@ struct TDCREMINDER;
 #define IDDISMISS 0xff
 
 /////////////////////////////////////////////////////////////////////////////
-
-enum // DoModal flags
-{
-	TDCREM_NEWREMINDER		= 0x1,
-	TDCREM_MULTIPLETASKS	= 0x2,
-};
-
-/////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg dialog
 
 class CTDLSetReminderDlg : public CTDLDialog
@@ -42,7 +34,7 @@ class CTDLSetReminderDlg : public CTDLDialog
 public:
 	CTDLSetReminderDlg(HICON hIcon, BOOL bISODates, CWnd* pParent = NULL);   // standard constructor
 
-	int DoModal(TDCREMINDER& rem, DWORD dwFlags = 0);
+	int DoModal(TDCREMINDER& rem, BOOL bNewReminder);
 
 protected:
 // Dialog Data
@@ -52,7 +44,6 @@ protected:
 	CTimeComboBox m_cbAbsoluteTime;
 	CSoundEdit m_ePlaySound;
 	CTDLReminderPeriodComboBox m_cbLeadIn;
-	CEnStatic m_stTaskTitle;
 	CDateTimeCtrlEx m_dtcAbsolute;
 
 	int		m_bRelativeFromDueDate;
@@ -60,7 +51,6 @@ protected:
 	CString	m_sSoundFile;
 	int		m_bRelative;
 	COleDateTime m_dtAbsoluteDate;
-	CString	m_sTaskTitle;
 	double	m_dAbsoluteTime; // must come after absolute date
 	CString m_sModifyDlgTitle;
 	BOOL	m_bPlaySound;
@@ -68,7 +58,7 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLSetReminderDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL

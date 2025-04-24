@@ -22,15 +22,13 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAddLoggedTimeDlg dialog
 
-CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
-										   BOOL bEnableAddTimeToTimeSpent, BOOL bISODates, 
-										   double dHours, CWnd* pParent /*=NULL*/)
+CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, BOOL bEnableAddTimeToTimeSpent, 
+										   BOOL bISODates, double dHours, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLAddLoggedTimeDlg::IDD, _T("AddLoggedTime"), pParent), 
 	m_cbTimeWhen(TCB_HALFHOURS | TCB_HOURSINDAY),
 	m_loggedTime(dHours, TDCU_HOURS),
 	m_dwTaskID(dwTaskID),
-	m_sTaskTitle(szTaskTitle),
 	m_bEnableAddTimeToTimeSpent(bEnableAddTimeToTimeSpent),
 	m_bTracked(dHours != 0.0)
 {
@@ -69,13 +67,10 @@ void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CTDLAddLoggedTimeDlg)
 	DDX_Control(pDX, IDC_WHENDATE, m_dtcWhen);
 	DDX_Control(pDX, IDC_WHENTIME, m_cbTimeWhen);
-	DDX_Text(pDX, IDC_TASKID, m_dwTaskID);
-	DDX_Text(pDX, IDC_TASKTITLE, m_sTaskTitle);
 	DDX_Control(pDX, IDC_LOGGEDTIME, m_eLoggedTime);
 	DDX_Check(pDX, IDC_ADDTIMETOTIMESPENT, m_bAddTimeToTimeSpent);
 	DDX_Text(pDX, IDC_COMMENT, m_sComment);
 	//}}AFX_DATA_MAP
-	DDX_Control(pDX, IDC_TASKTITLE, m_stTaskTitle);
 
 	CTDCDialogHelper::DDX_Text(pDX, m_eLoggedTime, m_loggedTime);
 
@@ -157,8 +152,6 @@ BOOL CTDLAddLoggedTimeDlg::OnInitDialog()
 		CDialogHelper::OffsetCtrl(this, IDCANCEL, nXOffset, 0);
 	}
 	
-	m_stTaskTitle.SetFontStyle(TRUE);
-
 	// set focus to time spent if no time specified
 	if (m_loggedTime.dAmount == 0.0)
 	{

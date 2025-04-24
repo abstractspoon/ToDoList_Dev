@@ -57,9 +57,7 @@ void CTDLSetReminderDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_SOUNDFILE, m_sSoundFile);
 	DDX_Radio(pDX, IDC_ABSOLUTE, m_bRelative);
 	DDX_DateTimeCtrl(pDX, IDC_ABSOLUTEDATE, m_dtAbsoluteDate);
-	DDX_Text(pDX, IDC_TASKTITLE, m_sTaskTitle);
 	//}}AFX_DATA_MAP
-	DDX_Control(pDX, IDC_TASKTITLE, m_stTaskTitle);
 	DDX_Check(pDX, IDC_PLAYSOUND, m_bPlaySound);
 
 	if (pDX->m_bSaveAndValidate)
@@ -87,14 +85,14 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg message handlers
 
-int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, DWORD dwFlags)
+int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 {
 	CPreferences prefs;
 	LoadPreferences(prefs);
 
 	// If it's not a new reminder overwrite the 
-	// loaded state with actual reminder's state
-	if (!Misc::HasFlag(dwFlags, TDCREM_NEWREMINDER))
+	// loaded state with reminder's actual state
+	if (!bNewReminder)
 	{
 		m_bRelative = rem.bRelative;
 
@@ -119,16 +117,6 @@ int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, DWORD dwFlags)
 			m_sSoundFile = rem.sSoundFile;
 	}
 
-	if (dwFlags & TDCREM_MULTIPLETASKS)
-	{
-		m_sTaskTitle = CEnString(IDS_TDC_EDITPROMPT_MULTIPLETASKS);
-	}
-	else
-	{
-		m_sTaskTitle = rem.GetTaskTitle();
-		m_sTaskTitle.Replace(_T("&"), _T("&&"));
-	}
-		
 	int nRes = CTDLDialog::DoModal();
 
 	if (nRes == IDOK)
@@ -168,9 +156,6 @@ BOOL CTDLSetReminderDlg::OnInitDialog()
 	GetDlgItem(IDC_RELATIVELEADIN)->EnableWindow(m_bRelative);
 	GetDlgItem(IDC_SOUNDFILE)->EnableWindow(m_bPlaySound);
 	
-	// embolden task title
-	m_stTaskTitle.SetFontStyle(TRUE);
-
 	if (!m_sModifyDlgTitle.IsEmpty())
 	{
 		SetWindowText(m_sModifyDlgTitle);

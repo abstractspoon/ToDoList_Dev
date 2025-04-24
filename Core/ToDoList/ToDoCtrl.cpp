@@ -7110,7 +7110,7 @@ BOOL CToDoCtrl::DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDial
 		// the dialog showing 'Add time to time spent'
 		BOOL bShowAddToTimeSpent = (CanEditSelectedTask(TDCA_TIMESPENT) && !bTracked);
 
-		CTDLAddLoggedTimeDlg dialog(dwTaskID, sTaskTitle, bShowAddToTimeSpent, HasStyle(TDCS_SHOWDATESINISO), dHours, this);
+		CTDLAddLoggedTimeDlg dialog(dwTaskID, bShowAddToTimeSpent, HasStyle(TDCS_SHOWDATESINISO), dHours, this);
 
 		if (dialog.DoModal(s_hIconAddLogDlg) != IDOK)
 			return FALSE;
