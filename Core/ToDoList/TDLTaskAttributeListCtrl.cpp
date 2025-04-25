@@ -1490,7 +1490,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		case TDCA_CREATEDBY:		GETMULTIVALUE_STR(GetTasksCreatedBy);		break;
 		case TDCA_LASTMODBY:		GETMULTIVALUE_STR(GetTasksLastModifiedBy);	break;
 		case TDCA_COMMENTSFORMAT:	GETMULTIVALUE_STR(GetTasksCommentsFormat);	break;
-		case TDCA_COMMENTSSIZE:		GETMULTIVALUE_STR(GetTasksCommentsSize);	break;
 		case TDCA_SUBTASKDONE:		GETMULTIVALUE_STR(GetTasksSubtaskCompletion); break;
 
 		case TDCA_ALLOCTO:			GETMULTIVALUE_LIST(GetTasksAllocatedTo);	break;
@@ -1500,15 +1499,24 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		case TDCA_FLAG:				GETMULTIVALUE_BOOL(GetTasksFlagState);		break;
 		case TDCA_LOCK:				GETMULTIVALUE_BOOL(GetTasksLockState);		break;
 
-		case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority, int, Misc::Format(value));	break;
-		case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk, int, Misc::Format(value));	break;
+		case TDCA_PRIORITY:			GETMULTIVALUE_FMT(GetTasksPriority, int, Misc::Format(value));		break;
+		case TDCA_RISK:				GETMULTIVALUE_FMT(GetTasksRisk, int, Misc::Format(value));			break;
 		case TDCA_COLOR:			GETMULTIVALUE_FMT(GetTasksColor, COLORREF, Misc::Format(value));	break;
 		case TDCA_PARENTID:			GETMULTIVALUE_FMT(GetTasksParentID, DWORD, Misc::Format(value));	break;
-
 		case TDCA_COST:				GETMULTIVALUE_FMT(GetTasksCost, TDCCOST, value.Format(2));			break;
+
 		case TDCA_RECURRENCE:		GETMULTIVALUE_FMT(GetTasksRecurrence, TDCRECURRENCE, value.GetRegularityText());	break;
-		case TDCA_DEPENDENCY:		GETMULTIVALUE_FMT(GetTasksDependencies, CTDCDependencyArray, value.Format());			break;
+		case TDCA_DEPENDENCY:		GETMULTIVALUE_FMT(GetTasksDependencies, CTDCDependencyArray, value.Format());		break;
 		case TDCA_TIMEREMAINING:	GETMULTIVALUE_FMT(GetTasksTimeRemaining, TDCTIMEPERIOD, value.Format(2));			break;
+		
+		case TDCA_COMMENTSSIZE:		
+			{
+				GETMULTIVALUE_STR(GetTasksCommentsSize);
+
+				if (!bValueVaries && !sValue.IsEmpty())
+					sValue += _T(" KB");
+			}
+			break;
 
 		case TDCA_FILELINK:
 			{
