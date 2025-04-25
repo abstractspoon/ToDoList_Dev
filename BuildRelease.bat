@@ -3,111 +3,162 @@ title ToDoList_Dev Release Build
 ECHO OFF
 CLS
 
-pushd %~dp0
-set REPO=%CD%
-ECHO REPO=%REPO%
+ECHO ToDoList_Dev Release Build
+ECHO ==========================
+ECHO:
 
-if NOT EXIST %REPO%\Core exit
-if NOT EXIST %REPO%\Plugins exit
+PUSHD %~dp0
+SET REPO=%CD%
+ECHO REPO = %REPO%
+ECHO:
 
-ECHO ON
+IF NOT EXIST %REPO%\Core EXIT
+IF NOT EXIST %REPO%\Plugins EXIT
 
-REM - Remember to update ToDoList version number
-REM - Remember to pull latest translations
-pause
-
-REM - Build core app in VC6
-cd %REPO%\Core
+ECHO [106m[30m Remember to update ToDoList version number[0m
+ECHO [106m[30m Remember to pull latest translations[0m
+ECHO:
+PAUSE
+ECHO:
 
 REM - Detours
 REM "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\3rdParty\Detours\Detours.dsw /MAKE "ALL - Win32 Unicode Release"
 
-REM - Core app
-MKDIR %REPO%\Core\ToDoList\Unicode_Release
-set OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Core_Build_Output.txt
-del %OUTPUT_FILE%
+REM - Build core app in VC6
+ECHO Building ToDoList Core 
+ECHO ======================
+ECHO:
 
-"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
+SET MSDEV="C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe"
+SET OUTPUT_FILE=%REPO%\Core\ToDoList\Unicode_Release\Core_Build_Output.txt
+
+REM - WE USE FULL PATHS EVERYWHERE ELSE EXCEPT HERE BECAUSE 
+REM - MSDEV ASSUMES THAT THE SOLUTION IS PROVIDED BY NAME ONLY
+SET SOLUTION=ToDoList_Core.dsw
+
+ECHO MSDEV    = %MSDEV%
+ECHO SOLUTION = %REPO%\Core\%SOLUTION%
+
+IF NOT EXIST %MSDEV% (
+ECHO [41m Unable to locate MSDev.exe!![0m
+ECHO:
+PAUSE
+EXIT
+)
+
+MKDIR %REPO%\Core\ToDoList\Unicode_Release 2> NUL
+DEL %OUTPUT_FILE% 2> NUL
+
+cd %REPO%\Core
+%MSDEV% ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
+ECHO:
 
 REM - Check for compile errors
-ECHO OFF
-
-findstr /C:") : error" %OUTPUT_FILE%
-if %errorlevel%==1 (
+FINDSTR /C:") : error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
 REM - Check for link errors
-findstr /C:"Error executing link.exe" %OUTPUT_FILE%
+FINDSTR /C:"Error executing link.exe" %OUTPUT_FILE%
 )
 
-if %errorlevel%==1 (
-echo [42m Build SUCCEEDED[0m
+IF %errorlevel%==0 (
+ECHO [41m Build FAILED[0m
+ECHO:
+PAUSE
+EXIT
 )
-if %errorlevel%==0 (
-echo [41m Build FAILED[0m
-pause
-exit
-)
+
+REM SUCCESS!
+ECHO [42m Build SUCCEEDED[0m
+ECHO:
 
 REM Run units tests
-ECHO ON
+ECHO Running Unit Tests
+ECHO ==================
+ECHO:
 
-cd TDLTest\Unicode_Release
+SET TDLTEST=%REPO%\Core\TDLTest\Unicode_Release\TDLTest.exe
+SET OUTPUT_FILE=%REPO%\Core\TDLTest\Unicode_Release\Test_Output.txt
 
-set OUTPUT_FILE=%REPO%\Core\TDLTest\Unicode_Release\Test_Output.txt
-del %OUTPUT_FILE%
+DEL %OUTPUT_FILE% 2> NUL
 
-TDLTest > %OUTPUT_FILE%
+%TDLTEST% > %OUTPUT_FILE%
 
 REM - Check for test errors
-ECHO OFF
-findstr /C:"tests FAILED" %OUTPUT_FILE%
+FINDSTR /C:"tests FAILED" %OUTPUT_FILE%
 
-if %errorlevel%==0 (
-echo [41m Tests FAILED[0m
-pause
-exit
+IF %errorlevel%==0 (
+ECHO [41m Tests FAILED[0m
+ECHO:
+PAUSE
+EXIT
 )
 
 REM - Check for test success
-findstr /C:"tests SUCCEEDED" %OUTPUT_FILE% > nul
+FINDSTR /C:"tests SUCCEEDED" %OUTPUT_FILE% > nul
 
-if %errorlevel%==0 (
-echo [42m Tests SUCCEEDED[0m
-)
-if %errorlevel%==1 (
-echo [41m Test Results EMPTY[0m
-pause
-exit
+IF %errorlevel%==1 (
+ECHO [41m Test Results EMPTY[0m
+ECHO:
+PAUSE
+EXIT
 )
 
-REM - Build plugins using MSBuild for reliability
-ECHO ON
+REM SUCCESS!
+ECHO [42m Tests SUCCEEDED[0m
+ECHO:
+
+REM - Build plugins using MSBuild
+ECHO Building ToDoList Plugins
+ECHO =========================
+ECHO:
 
 SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
-cd %REPO%\Plugins
+SET SOLUTION=%REPO%\Plugins\ToDoList_Plugins.sln
+SET OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
 
-MKDIR %REPO%\Plugins\Release
-set OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
-del %OUTPUT_FILE%
+ECHO MSBUILD  = %MSBUILD%
+ECHO SOLUTION = %SOLUTION%
+ECHO:
 
-%MSBUILD% .\ToDoList_Plugins.sln /t:Build /p:Configuration=Release /m /v:normal > %OUTPUT_FILE%
-
-REM - Check for build errors
-ECHO OFF
-findstr /C:"Build FAILED." %OUTPUT_FILE%
-
-if %errorlevel%==1 (
-echo [42m Build SUCCEEDED[0m
-)
-if %errorlevel%==0 (
-echo [41m Build FAILED[0m
-pause
-exit
+IF NOT EXIST %MSBUILD% (
+ECHO [41m Unable to locate MSBuild.exe!![0m
+ECHO:
+PAUSE
+EXIT
 )
 
-ECHO ON
+MKDIR %REPO%\Plugins\Release 2> NUL
+DEL %OUTPUT_FILE% 2> NUL
 
-REM - Allow caller to cancel building Zip
-pause
+%MSBUILD% %SOLUTION% /t:Build /p:Configuration=Release /m /v:normal > %OUTPUT_FILE%
+
+REM - Check for compile errors
+FINDSTR /C:"): error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
+
+REM - Check for link errors
+FINDSTR /C:": fatal error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
+
+REM - Check for general errors
+FINDSTR /C:"Build FAILED." %OUTPUT_FILE%
+)
+)
+
+IF %errorlevel%==0 (
+ECHO [41m Build FAILED[0m
+ECHO:
+PAUSE
+EXIT
+)
+
+REM SUCCESS!
+ECHO [42m Build SUCCEEDED[0m
+ECHO:
+
+ECHO [106m[30m Allow caller to cancel building Zip[0m
+ECHO:
+PAUSE
 
 CALL %REPO%\BuildReleaseZip.bat
 CALL %REPO%\BuildCodeZip.bat
@@ -115,5 +166,5 @@ CALL %REPO%\BuildCodeZip.bat
 REM - Open Downloads folder
 Explorer.exe "%REPO%\..\ToDoList_Downloads\Latest"
 
-popd
-pause
+PAUSE
+POPD

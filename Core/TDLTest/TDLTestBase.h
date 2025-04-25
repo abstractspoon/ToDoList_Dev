@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "..\shared\EnCommandlineInfo.h"
+#include "..\shared\Misc.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -22,7 +23,8 @@ public:
 	CTestUtils(const CTestUtils& utils);
 	
 	BOOL Initialise(const CString& sOutputDir, const CString& sControlDir);
-	BOOL HasCommandlineFlag(TCHAR cFlag) const;
+	
+	BOOL GetWantPerformanceTests() const { return HasCommandlineFlag(_T("p")); }
 	
 	CString GetOutputFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const;
 	CString GetControlFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const;
@@ -38,6 +40,8 @@ public:
 	
 	int Compare(const CString& s1, const CString& s2, BOOL bCaseSensitive = TRUE) const;
 	int Compare(LPCTSTR sz1, LPCTSTR sz2, BOOL bCaseSensitive = TRUE) const;
+
+	BOOL HasCommandlineFlag(LPCTSTR szFlag) const;
 
 protected:
 	CString m_sOutputDir;
@@ -82,7 +86,7 @@ struct TESTRESULT
 		return ((nNumError != other.nNumError) || (nNumSuccess != other.nNumSuccess));
 	}
 
-	void ReportResults() const
+	void ReportResults(LPCTSTR szTest, BOOL bAssertErrors) const
 	{
 		if (!GetTotal())
 		{
@@ -90,14 +94,18 @@ struct TESTRESULT
 		}
 		else
 		{
+			ASSERT(!Misc::IsEmpty(szTest));
+
 			if (nNumError)
 			{
-				_tprintf(_T("\n  %2d/%2d tests FAILED\n"), nNumError, GetTotal());
-				DebugBreak();
+				_tprintf(_T("\n  %2d/%2d of '%s' tests FAILED\n"), nNumError, GetTotal(), szTest);
+
+				if (bAssertErrors && ::IsDebuggerPresent())
+					ASSERT(0);
 			}
 
 			if (nNumSuccess)
-				_tprintf(_T("\n  %2d/%2d tests SUCCEEDED\n"), nNumSuccess, GetTotal());
+				_tprintf(_T("\n  %2d/%2d of '%s' tests SUCCEEDED\n"), nNumSuccess, GetTotal(), szTest);
 		}
 	}
 
@@ -134,7 +142,7 @@ public:
 	static BOOL SelfTest();
 	
 protected:
-	CTDLTestBase(const CTestUtils& utils);
+	CTDLTestBase(LPCTSTR szName, const CTestUtils& utils);
 
 	BOOL BeginTest(LPCTSTR szTest);
 	BOOL EndTest();
@@ -219,7 +227,7 @@ private:
 	TESTRESULT m_resTotal;
 
 	mutable UINT m_nCurTest;
-	CString m_sCurTest, m_sCurSubTest;
+	CString m_sName, m_sCurTest, m_sCurSubTest;
 
 private:
 	CTDLTestBase();
@@ -311,7 +319,6 @@ private:
 				sOutput.Format(_T("  Test [%2d] failed:    Expected \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
 			else
 				sOutput.Format(_T("  Test [%s] failed:    Expected \"%s\" %s \"%s\""), m_sCurSubTest, szFmt1, sOp, szFmt2);
-
 
 			if (!Misc::IsEmpty(szTrail))
 			{
