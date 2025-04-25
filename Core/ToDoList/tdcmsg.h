@@ -51,6 +51,7 @@ const UINT WM_TDCM_ADDTIMETOLOGFILE			= ::RegisterWindowMessage(_T("WM_TDCM_ADDT
 const UINT WM_TDCM_TOGGLETIMETRACKING		= ::RegisterWindowMessage(_T("WM_TDCM_TOGGLETIMETRACKING"));		
 const UINT WM_TDCM_SELECTDEPENDENCIES		= ::RegisterWindowMessage(_T("WM_TDCM_SELECTDEPENDENCIES"));		
 const UINT WM_TDCM_EDITTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_EDITTASKREMINDER"));		// wParam = taskID OR zero for 'selected tasks', lParam = taskfile path or empty for selected tasklist
+const UINT WM_TDCM_CLEARTASKREMINDER		= ::RegisterWindowMessage(_T("WM_TDCM_CLEARTASKREMINDER"));		// wParam = taskID OR zero for 'selected tasks', lParam = taskfile path or empty for selected tasklist
 
 // CTDLFilterBar
 const UINT WM_FBN_FILTERCHANGE				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHANGE")); 

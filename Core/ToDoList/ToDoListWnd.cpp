@@ -627,6 +627,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_LENGTHYOPERATION, OnToDoCtrlDoLengthyOperation)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnToDoCtrlEditTaskReminder)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKREMINDER, OnToDoCtrlClearTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
 	ON_REGISTERED_MESSAGE(WM_TDCN_FILTERCHANGE, OnToDoCtrlNotifyFilterChange)
@@ -13250,6 +13251,12 @@ LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 	return (LRESULT)tRem;
 }
 
+LRESULT CToDoListWnd::OnToDoCtrlClearTaskReminder(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	OnEditClearReminder();
+	return 0L;
+}
+
 LRESULT CToDoListWnd::OnToDoCtrlEditTaskReminder(WPARAM wp, LPARAM lp)
 {
 	if (wp && lp)
@@ -13267,9 +13274,9 @@ LRESULT CToDoListWnd::OnToDoCtrlEditTaskReminder(WPARAM wp, LPARAM lp)
 
 		OnEditSetReminder(nTDC, dwTaskID);
 	}
-	else if (!wp && !lp) // active tasklist and its selection
+	else if (!wp && !lp)
 	{
-		OnEditSetReminder(GetSelToDoCtrl(), 0);
+		OnEditSetReminder();
 	}
 	else
 	{

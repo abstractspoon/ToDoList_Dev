@@ -371,6 +371,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_DISPLAYLINK, OnTDCDisplayLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnTDCEditTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnTDCEditTaskReminder)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKREMINDER, OnTDCClearTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnTDCClearTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnTDCToggleTimeTracking)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnTDCAddTimeToLogFile)
@@ -6820,6 +6821,11 @@ LRESULT CToDoCtrl::OnTDCEditTaskReminder(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return GetParent()->SendMessage(WM_TDCM_EDITTASKREMINDER);
 }
 
+LRESULT CToDoCtrl::OnTDCClearTaskReminder(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	return GetParent()->SendMessage(WM_TDCM_CLEARTASKREMINDER);
+}
+
 LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 {
 	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)wParam;
@@ -6837,6 +6843,10 @@ LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 
 	case TDCA_RECURRENCE:
 		return EditSelectedTaskRecurrence();
+
+	case TDCA_REMINDER:
+		// Use WM_TDCM_EDITTASKREMINDER instead
+		break;
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -10166,13 +10176,20 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_TASKNAME:
 		ASSERT(0);
 		return FALSE;
+
+	case TDCA_REMINDER:		
+		// Handled by WM_TDCM_CLEARTASKREMINDER
+		break;
+
+	default:
+		{
+			CString sCustomAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+
+			if (!sCustomAttribID.IsEmpty())
+				return SetSelectedTaskCustomAttributeData(sCustomAttribID, TDCCADATA());
+		}
+		break;
 	}
-
-	// fall thru to custom attributes
-	CString sCustomAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
-
-	if (!sCustomAttribID.IsEmpty())
-		return SetSelectedTaskCustomAttributeData(sCustomAttribID, TDCCADATA());
 
 	// else something we've missed
 	ASSERT(0);

@@ -2570,6 +2570,7 @@
 #define IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE 51674
 #define IDS_TITLE_TIMETRACKING          51675
 #define IDS_DEFAULTATTRIBUTES           51676
+#define IDS_ATTRIBTIP_DISMISS           51677
 
 // Next default values for new objects
 // 
