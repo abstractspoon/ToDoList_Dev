@@ -10126,6 +10126,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 			time.dAmount = 0.0;
 			return SetSelectedTaskTimeEstimate(time);
 		}
+		break;
 
 	case TDCA_TIMESPENT:
 		{
@@ -10136,6 +10137,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 			time.dAmount = 0.0;
 			return SetSelectedTaskTimeSpent(time);
 		}
+		break;
 
 	case TDCA_COST:
 		{ 
@@ -10146,6 +10148,8 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 			cost.dAmount = 0.0;
 			return SetSelectedTaskCost(cost);
 		}
+		break;
+
 
 	// These cannot be cleared
 	case TDCA_SUBTASKDONE:
