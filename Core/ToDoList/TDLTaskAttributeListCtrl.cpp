@@ -988,12 +988,18 @@ BOOL CTDLTaskAttributeListCtrl::CanEditSelectedAttribute() const
 
 void CTDLTaskAttributeListCtrl::SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd)
 {
-	m_aAttribState.SetLabelBkgndColor(GetSelectedAttributeID(), crBkgnd);
+	int nSel = GetCurSel();
+
+	if (m_aAttribState.SetLabelBkgndColor(GetAttributeID(nSel), crBkgnd))
+		RedrawCell(nSel, VALUE_COL);
 }
 
 void CTDLTaskAttributeListCtrl::ClearSelectedAttributeLabelBackgroundColor()
 {
-	m_aAttribState.ClearLabelBkgndColor(GetSelectedAttributeID());
+	int nSel = GetCurSel();
+
+	if (m_aAttribState.ClearLabelBkgndColor(GetAttributeID(nSel)))
+		RedrawCell(nSel, VALUE_COL);
 }
 
 COLORREF CTDLTaskAttributeListCtrl::GetSelectedAttributeLabelBackgroundColor() const
@@ -1242,9 +1248,11 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nItem);
+
 	if ((nCol == LABEL_COL) && !bSelected)
 	{
-		COLORREF crBkgnd = m_aAttribState.GetLabelBkgndColor(GetAttributeID(nItem));
+		COLORREF crBkgnd = m_aAttribState.GetLabelBkgndColor(nAttribID);
 
 		if (crBkgnd != CLR_NONE)
 			return crBkgnd;
@@ -1253,6 +1261,26 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL b
 	{
 		if (!CanEditCell(nItem, nCol))
 			return GetSysColor(COLOR_3DFACE);
+
+		switch (nAttribID)
+		{
+		case TDCA_COLOR:
+			if (!bSelected && m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
+			{
+				COLORREF color = _ttoi(GetItemText(nItem, VALUE_COL));
+
+				switch (color)
+				{
+				case CLR_NONE:
+				case 0:
+					break;
+
+				default:
+					return color;
+				}
+			}
+			break;
+		}
 	}
 
 	// All else
@@ -1286,6 +1314,28 @@ COLORREF CTDLTaskAttributeListCtrl::GetItemTextColor(int nItem, int nCol, BOOL b
 		case TDCA_DEPENDENCY:
  			if (m_multitasker.AnyTaskHasLocalCircularDependencies(m_aSelectedTaskIDs))
  				return colorRed;
+			break;
+
+		case TDCA_COLOR:
+			{
+				COLORREF color = _ttoi(GetItemText(nItem, VALUE_COL));
+
+				switch (color)
+				{
+				case CLR_NONE:
+				case 0:
+					break;
+
+				default:
+					{
+						if (!bSelected && m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
+							return GraphicsMisc::GetBestTextColor(color);
+
+						return color;
+					}
+					break;
+				}
+			}
 			break;
 		}
 	}
@@ -2051,34 +2101,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		return;
 
 	case TDCA_COLOR:
-		{
-			COLORREF color = _ttoi(sText);
-
-			switch (color)
-			{
-			case CLR_NONE:
-			case 0:
-				break;
-
-			default:
-				if (m_data.HasStyle(TDCS_TASKCOLORISBACKGROUND))
-				{
-					// Use the entire cell rect for the background colour
-					CRect rCell;
-					GetCellRect(nRow, nCol, rCell);
-
-					pDC->FillSolidRect(rCell, color);
-					crText = GraphicsMisc::GetBestTextColor(color);
-				}
-				else
-				{
-					crText = color;
-				}
-				break;
-			}
-
-			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, CEnString(IDS_COLOR_SAMPLETEXT), crText, nDrawTextFlags);
-		}
+		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, CEnString(IDS_COLOR_SAMPLETEXT), crText, nDrawTextFlags);
 		return;
 
 	case TDCA_ALLOCTO:
