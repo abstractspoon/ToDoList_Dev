@@ -167,9 +167,6 @@ class CTDCTaskFormatter : protected CTDCDataHelperBase
 public:
 	CTDCTaskFormatter(const CToDoCtrlData& data, const CContentMgr& mgrContent);
 	
-	CString GetCommentSize(float fSize) const;
-	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
-
 	CString GetTaskTitlePath(DWORD dwTaskID, DWORD dwFlags) const;
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const;
 	CString GetTaskSubtaskCompletion(DWORD dwTaskID) const;
@@ -178,7 +175,7 @@ public:
 	CString GetTaskTimeSpent(DWORD dwTaskID) const;
 	CString GetTaskTimeRemaining(DWORD dwTaskID) const;
 	CString GetTaskPercentDone(DWORD dwTaskID) const;
-	CString GetTaskCommentsSize(DWORD dwTaskID) const;
+	CString GetTaskCommentsSizeInKB(DWORD dwTaskID) const;
 	CString GetTaskCommentsFormat(DWORD dwTaskID, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(DWORD dwTaskID) const;
 	CString GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const;
@@ -208,7 +205,7 @@ public:
 	CString GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskCommentsSize(const TODOITEM* pTDI) const;
+	CString GetTaskCommentsSizeInKB(const TODOITEM* pTDI) const;
 	CString GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const;
@@ -246,6 +243,9 @@ public:
 	CString GetDependencies(const CTDCDependencyArray& aDepends, TCHAR cSep = 0) const;
 	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 	
+	CString GetCommentSizeInKB(float fSize) const;
+	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
+
 	BOOL WantFormatValue(double dValue, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 	
 protected:

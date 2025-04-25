@@ -3838,7 +3838,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 	case TDCC_TIMESPENT:		return m_formatter.GetTaskTimeSpent(pTDI, pTDS);
 	case TDCC_PATH:				return m_formatter.GetTaskPath(pTDS);
 	case TDCC_SUBTASKDONE:		return m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS);
-	case TDCC_COMMENTSSIZE:		return m_formatter.GetTaskCommentsSize(pTDI);
+	case TDCC_COMMENTSSIZE:		return m_formatter.GetTaskCommentsSizeInKB(pTDI);
 	case TDCC_COMMENTSFORMAT:	return m_formatter.GetTaskCommentsFormat(pTDI);
 
 	case TDCC_ID:				return m_formatter.GetID(dwTaskID, pTDS->GetTaskID());

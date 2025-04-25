@@ -1220,39 +1220,38 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,318,231,50,14
 END
 
-IDD_SETREMINDER_DIALOG DIALOG DISCARDABLE  0, 0, 236, 216
+IDD_SETREMINDER_DIALOG DIALOG DISCARDABLE  0, 0, 236, 191
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Set Task Reminder"
 FONT 8, "Tahoma"
 BEGIN
-    GROUPBOX        "",IDC_STATIC,7,31,221,52
-    GROUPBOX        "",IDC_STATIC,7,91,221,52
+    GROUPBOX        "",IDC_STATIC,7,7,221,52
+    GROUPBOX        "",IDC_STATIC,7,67,221,52
     CONTROL         "&At this date and time",IDC_ABSOLUTE,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,10,31,105,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,10,7,105,10
     CONTROL         "&Relative to due/start date",IDC_RELATIVE,"Button",
-                    BS_AUTORADIOBUTTON,10,91,160,10
-    LTEXT           "&Date",IDC_STATIC,17,48,85,8
+                    BS_AUTORADIOBUTTON,10,67,160,10
+    LTEXT           "&Date",IDC_STATIC,17,24,85,8
     CONTROL         "DateTimePicker1",IDC_ABSOLUTEDATE,"SysDateTimePick32",
-                    DTS_RIGHTALIGN | WS_TABSTOP,17,60,97,13
-    LTEXT           "&Time",IDC_STATIC,122,48,87,8
-    COMBOBOX        IDC_ABSOLUTETIME,122,60,97,30,CBS_DROPDOWN | 
+                    DTS_RIGHTALIGN | WS_TABSTOP,17,36,97,13
+    LTEXT           "&Time",IDC_STATIC,122,24,87,8
+    COMBOBOX        IDC_ABSOLUTETIME,122,36,97,30,CBS_DROPDOWN | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "R&emind me ",IDC_STATIC,17,108,84,8
-    COMBOBOX        IDC_RELATIVELEADIN,17,120,97,30,CBS_DROPDOWNLIST | 
+    LTEXT           "R&emind me ",IDC_STATIC,17,84,84,8
+    COMBOBOX        IDC_RELATIVELEADIN,17,96,97,30,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "&Before this task",IDC_STATIC,122,108,84,8
-    COMBOBOX        IDC_RELATIVEFROMWHERE,122,120,97,30,CBS_DROPDOWNLIST | 
+    LTEXT           "&Before this task",IDC_STATIC,122,84,84,8
+    COMBOBOX        IDC_RELATIVEFROMWHERE,122,96,97,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Play this sound",IDC_STATIC,7,151,221,8
-    EDITTEXT        IDC_PLAYSOUND,7,163,221,14,ES_AUTOHSCROLL
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,8,186,220,1
-    PUSHBUTTON      "&Dismiss",IDC_DISMISS,26,195,50,14
-    DEFPUSHBUTTON   "OK",IDOK,122,195,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,178,195,50,14
-    LTEXT           "Task",IDC_STATIC,7,5,38,8
-    LTEXT           "something\nelsey",IDC_TASKTITLE,47,5,181,19
+    EDITTEXT        IDC_SOUNDFILE,17,139,211,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,8,161,219,1
+    PUSHBUTTON      "&Dismiss",IDC_DISMISS,26,170,50,14
+    DEFPUSHBUTTON   "OK",IDOK,122,170,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,178,170,50,14
+    CONTROL         "&Play this sound",IDC_PLAYSOUND,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,126,221,10
 END
 
 IDD_REUSERECURRINGTASK_DIALOG DIALOG DISCARDABLE  0, 0, 186, 126
@@ -1448,33 +1447,29 @@ BEGIN
                     BS_AUTORADIOBUTTON,15,525,351,10
 END
 
-IDD_ADDLOGGEDTIME_DIALOG DIALOG DISCARDABLE  0, 0, 234, 178
+IDD_ADDLOGGEDTIME_DIALOG DIALOG DISCARDABLE  0, 0, 234, 142
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Log Task Time"
+CAPTION "Add Time to Task Log File"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Task",IDC_STATIC,7,7,62,8
-    LTEXT           "Static",IDC_TASKTITLE,73,7,153,17
-    LTEXT           "Task ID",IDC_STATIC,7,30,64,8
-    LTEXT           "Static",IDC_TASKID,73,30,151,8
-    LTEXT           "&Time Spent",IDC_STATIC,7,46,63,8
-    EDITTEXT        IDC_LOGGEDTIME,73,43,74,13,ES_AUTOHSCROLL
+    LTEXT           "&Time Spent",IDC_STATIC,7,10,63,8
+    EDITTEXT        IDC_LOGGEDTIME,73,7,74,13,ES_AUTOHSCROLL
     CONTROL         "Also add time to task's 'Time Spent'",
                     IDC_ADDTIMETOTIMESPENT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,73,60,152,10
-    LTEXT           "&When",IDC_STATIC,7,78,64,8
+                    WS_TABSTOP,73,24,152,10
+    LTEXT           "&When",IDC_STATIC,7,42,64,8
     CONTROL         "DateTimePicker1",IDC_WHENDATE,"SysDateTimePick32",
-                    DTS_RIGHTALIGN | WS_TABSTOP,73,76,74,13
-    COMBOBOX        IDC_WHENTIME,151,76,74,30,CBS_DROPDOWN | 
+                    DTS_RIGHTALIGN | WS_TABSTOP,73,40,74,13
+    COMBOBOX        IDC_WHENTIME,151,40,74,30,CBS_DROPDOWN | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "&Comment",IDC_COMMENTLABEL,7,95,65,8
-    EDITTEXT        IDC_COMMENT,73,95,152,48,ES_MULTILINE | ES_AUTOVSCROLL | 
+    LTEXT           "&Comment",IDC_COMMENTLABEL,7,59,65,8
+    EDITTEXT        IDC_COMMENT,73,59,152,48,ES_MULTILINE | ES_AUTOVSCROLL | 
                     ES_WANTRETURN | WS_VSCROLL
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,149,219,1
-    DEFPUSHBUTTON   "OK",IDOK,64,157,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,120,157,50,14
-    PUSHBUTTON      "&Apply",IDAPPLY,176,157,50,14
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,113,218,1
+    DEFPUSHBUTTON   "OK",IDOK,64,121,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,120,121,50,14
+    PUSHBUTTON      "&Apply",IDAPPLY,176,121,50,14
 END
 
 IDD_CSVIMPORTEXPORT_DIALOG DIALOG DISCARDABLE  0, 0, 400, 270
@@ -3175,7 +3170,7 @@ BEGIN
             MENUITEM "I&ncrement Task Priority",    ID_EDIT_INCTASKPRIORITY
             MENUITEM "Decre&ment Task Priority",    ID_EDIT_DECTASKPRIORITY
             MENUITEM SEPARATOR
-            MENUITEM "Trac&k Time Spent",           ID_EDIT_CLOCK_TASK
+            MENUITEM "Start/Stop Time Trac&king",   ID_EDIT_CLOCK_TASK
             MENUITEM "&Add Time to Task Log File",  ID_ADDTIMETOLOGFILE
             MENUITEM SEPARATOR
             MENUITEM "&Offset Task Dates...",       ID_EDIT_OFFSETDATES
@@ -3946,7 +3941,7 @@ BEGIN
             MENUITEM "I&ncrement Task Priority",    ID_EDIT_INCTASKPRIORITY
             MENUITEM "Decre&ment Task Priority",    ID_EDIT_DECTASKPRIORITY
             MENUITEM SEPARATOR
-            MENUITEM "Trac&k Time Spent",           ID_EDIT_CLOCK_TASK
+            MENUITEM "Start/Stop Time Trac&king",   ID_EDIT_CLOCK_TASK
             MENUITEM "&Add Time to Task Log File",  ID_ADDTIMETOLOGFILE
             MENUITEM SEPARATOR
             MENUITEM "&Offset Task Dates...",       ID_EDIT_OFFSETDATES
@@ -4372,11 +4367,6 @@ BEGIN
         BOTTOMMARGIN, 675
     END
 
-    IDD_PREFUITASKLIST_PAGE, DIALOG
-    BEGIN
-        BOTTOMMARGIN, 586
-    END
-
     IDD_PREFUITASKLISTCOLORS_PAGE, DIALOG
     BEGIN
         BOTTOMMARGIN, 599
@@ -4439,8 +4429,8 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 228
-        TOPMARGIN, 5
-        BOTTOMMARGIN, 209
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 184
     END
 
     IDD_REUSERECURRINGTASK_DIALOG, DIALOG
@@ -4467,7 +4457,8 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 226
-        BOTTOMMARGIN, 171
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 135
     END
 
     IDD_CSVIMPORTEXPORT_DIALOG, DIALOG
@@ -5096,7 +5087,7 @@ BEGIN
     IDS_TDC_ZEROINVALIDTASKID "0 (zero) is not a valid task ID"
     IDS_TDC_ZEROINVALIDTASKID_TITLE "Invalid Task ID"
     IDS_TDC_SEECOMMENTS     "[...]"
-    IDS_TDC_STARTSTOPCLOCK  "Start/Stop Tracking"
+    IDS_TDC_STARTSTOPCLOCK  "Start/Stop Time Tracking"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5847,7 +5838,7 @@ BEGIN
                             "There is currently no tasklist information which can be removed from your ini file."
     IDS_EXPORT_SOMEFAILED   "One or more tasks could not be exported."
     IDS_EXPORT_CANTSAVE     "The exported content could not be saved to '%s'"
-    IDS_TDC_ADDLOGGEDTIME   "Add Tracked Time"
+    IDS_TDC_ADDLOGGEDTIME   "Add Time to Task Log File"
     IDS_STICKIES_LINK       "link"
     IDS_REPLACEINTASKTITLES "Replace in Task Titles"
     IDS_FINDINTASKTITLES    "Find in Task Titles"
@@ -6076,6 +6067,7 @@ BEGIN
                             "To enable this feature you first need to save your tasklist."
     IDS_TITLE_TIMETRACKING  "Time Tracking"
     IDS_DEFAULTATTRIBUTES   "Default Attributes"
+    IDS_ATTRIBTIP_DISMISS   "Dismiss"
 END
 
 STRINGTABLE DISCARDABLE 
