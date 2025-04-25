@@ -224,7 +224,7 @@ BOOL CToDoCtrlReminders::DismissReminder(int nRem)
 	}
 
 	// Notify
-	NotifyReminder(rem, WM_TDCN_REMINDERDISMISS);
+	NotifyReminder(rem, WM_TDCN_REMINDERDISMISSED);
 
 	return TRUE;
 }
@@ -839,7 +839,7 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 	}
 
 	RemoveListReminder(rem);
-	NotifyReminder(rem, WM_TDCN_REMINDERSNOOZE);
+	NotifyReminder(rem, WM_TDCN_REMINDERSNOOZED);
 }
 
 void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem)

@@ -56,8 +56,8 @@ const UINT WM_TDCM_EDITTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_EDIT
 const UINT WM_FBN_FILTERCHANGE				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHANGE")); 
 
 // CToDoCtrlReminders
-const UINT WM_TDCN_REMINDERDISMISS			= ::RegisterWindowMessage(_T("WM_TDCN_REMINDERDISMISS"));		// wParam = hwnd, lParam = TaskID
-const UINT WM_TDCN_REMINDERSNOOZE			= ::RegisterWindowMessage(_T("WM_TDCN_REMINDERSNOOZE"));		// wParam = hwnd, lParam = TaskID
+const UINT WM_TDCN_REMINDERDISMISSED		= ::RegisterWindowMessage(_T("WM_TDCN_REMINDERDISMISSED"));		// wParam = hwnd, lParam = TaskID
+const UINT WM_TDCN_REMINDERSNOOZED			= ::RegisterWindowMessage(_T("WM_TDCN_REMINDERSNOOZED"));		// wParam = hwnd, lParam = TaskID
 
 // CTDLFindTasksDlg
 const UINT WM_FTD_FIND						= ::RegisterWindowMessage(_T("WM_FTD_FIND"));
