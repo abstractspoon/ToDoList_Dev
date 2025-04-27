@@ -270,15 +270,13 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 					sItem = FormatAttribute(nAttribID, sAttribLabel, FormatDateWithSeconds(timeT));
 			}
 			break;
+		}
 
-		default:
-			// If we're a multi-file export we need to prefix 
-			// the value with 'Tasklist' as the first column
-			if (MULTIFILE && (nAttribID == m_nFirstAttribID))
-			{
-				sItem = (CTaskListExporterBase::FormatTitle(pTasks, FALSE) + DELIM + sItem);
-			}
-			break;
+		// If we're a multi-file export and this is the first attribute 
+		// we need to prefix the value with 'Tasklist' as the first column
+		if (MULTIFILE && (nAttribID == m_nFirstAttribID))
+		{
+			sItem = (CTaskListExporterBase::FormatTitle(pTasks, FALSE) + DELIM + sItem);
 		}
 	}
 
