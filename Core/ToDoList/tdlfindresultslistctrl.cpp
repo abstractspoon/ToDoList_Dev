@@ -47,15 +47,15 @@ int FTDRESULT::HasIcon() const
 	return (pTDC->GetTaskIconIndex(dwTaskID) != -1); 
 }
 
-void FTDRESULT::DrawIcon(CDC* pDC, const CRect& rIcon) const
+void FTDRESULT::DrawIcon(CDC* pDC, const CRect& rText) const
 {
 	int nImage = pTDC->GetTaskIconIndex(dwTaskID);
 
 	if (nImage != -1)
-		pTDC->GetTaskIconImageList().Draw(pDC, nImage, rIcon.TopLeft());
+		pTDC->GetTaskIconImageList().DrawVerticallyCentred(pDC, nImage, rText);
 
 	if (IsReference())
-		GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
+		GraphicsMisc::DrawShortcutOverlay(pDC, rText);
 }
 
 /////////////////////////////////////////////////////////////////////////////

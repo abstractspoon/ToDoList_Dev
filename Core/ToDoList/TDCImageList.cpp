@@ -205,6 +205,16 @@ BOOL CTDCImageList::Draw(CDC* pDC, int nImage, POINT pt, UINT nStyle) const
 	return pThis->CImageList::Draw(pDC, nImage, pt, nStyle);
 }
 
+BOOL CTDCImageList::DrawVerticallyCentred(CDC* pDC, int nImage, LPCRECT pRect, UINT nStyle) const
+{
+	CRect rIcon(pRect);
+	rIcon.bottom = (rIcon.top + GetImageHeight());
+
+	GraphicsMisc::CentreRect(&rIcon, pRect, FALSE, TRUE);
+	
+	return Draw(pDC, nImage, rIcon.TopLeft(), nStyle);
+}
+
 BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORREF crTransparent, 
 							 CTDCImageList* pImages, int& nNextNameIndex)
 {
