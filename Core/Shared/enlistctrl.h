@@ -176,6 +176,7 @@ private:
 	//{{AFX_VIRTUAL(CEnListCtrl)
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+	afx_msg void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void PreSubclassWindow();
@@ -187,7 +188,6 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnDestroy();
@@ -199,6 +199,7 @@ protected:
 	afx_msg BOOL OnColumnClick(NMHDR* pNMHDR, LPARAM* lResult);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);
 	afx_msg BOOL OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 	// helpers
@@ -233,6 +234,7 @@ protected:
 	BOOL IsSelectionThemed(BOOL bClassic) const;
 	BOOL WantSelChange(int nSel) const;
 	int CompareEmptiness(BOOL bItem1Empty, BOOL bItem2Empty) const;
+	void ForceResize();
 
 private:
 	BOOL BuildSortMap(int nCol);

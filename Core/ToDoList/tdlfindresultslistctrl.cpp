@@ -149,7 +149,7 @@ LRESULT CTDLFindResultsListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 	else
 		m_fonts.Initialise(GetSafeHwnd());
 
-	return Default();
+	return CEnListCtrl::OnSetFont(wp, lp);
 }
 
 int CTDLFindResultsListCtrl::GetColumnWidths(CIntArray& aWidths) const

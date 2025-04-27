@@ -297,6 +297,7 @@ BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
 	ON_WM_ERASEBKGND()
 	ON_WM_WINDOWPOSCHANGED()
 	//}}AFX_MSG_MAP
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_WM_TIMER()
 	ON_NOTIFY_REFLECT_EX(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT_EX(NM_CUSTOMDRAW, OnListCustomDraw)
@@ -1094,8 +1095,7 @@ void CEnListCtrl::SetView(int nView)
 	Invalidate(FALSE);
 
 	// force a resize to ensure that the column headers are correct
-	WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER };
-	PostMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp); 
+	ForceResize();
 }
 
 int CEnListCtrl::GetItemImage(int nItem, int nSubItem) const
@@ -1215,9 +1215,26 @@ void CEnListCtrl::SetLastColumnStretchy(BOOL bStretchy)
 	// invoke a resize to update last column
 	if (m_bLastColStretchy && (m_nCurView == LVS_REPORT) && GetSafeHwnd())
 	{
-		WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER };
-		PostMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp); 
+		ForceResize();
 	}
+}
+
+LRESULT CEnListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	LRESULT lr = Default();
+
+	ForceResize();
+
+	return lr;
+}
+
+void CEnListCtrl::ForceResize()
+{
+	CRect rClient;
+	GetClientRect(rClient);
+
+	WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, rClient.Width(), rClient.Height(), SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER };
+	SendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
 }
 
 void CEnListCtrl::OnWindowPosChanged(WINDOWPOS* lpwndpos)
@@ -1235,8 +1252,7 @@ void CEnListCtrl::SetFirstColumnStretchy(BOOL bStretchy)
 	// invoke a resize to update first column
 	if (m_bFirstColStretchy && m_nCurView == LVS_REPORT && GetSafeHwnd())
 	{
-		WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER };
-		PostMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp); 
+		ForceResize();
 	}
 }
 
