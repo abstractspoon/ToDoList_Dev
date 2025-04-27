@@ -15,7 +15,7 @@ ECHO:
 IF NOT EXIST %REPO%\Core EXIT
 IF NOT EXIST %REPO%\Plugins EXIT
 
-// REM - Use MSBuild for both core and plugins
+REM - Use MSBuild for both core and plugins
 SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 
 ECHO MSBUILD  = %MSBUILD%
