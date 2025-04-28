@@ -92,7 +92,7 @@ CTDLFindResultsListCtrl::CTDLFindResultsListCtrl()
 	m_nCurGroupID(-1),
 	m_nHotItem(-1),
 	m_bStrikeThruDone(FALSE),
-	m_bHasIconsOrRefs(FALSE)
+	m_nTextOffset(0)
 {
 	SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(17));
 }
@@ -129,17 +129,23 @@ void CTDLFindResultsListCtrl::PreSubclassWindow()
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 }
 
-void CTDLFindResultsListCtrl::UpdateIconAndReferenceStatus()
+void CTDLFindResultsListCtrl::RecalcTextOffset()
 {
-	m_bHasIconsOrRefs = FALSE;
+	m_nTextOffset = 0;
 
 	int nItem = GetItemCount();
+	
+	while (nItem-- && (m_nTextOffset == 0))
+		m_nTextOffset = GetTextOffset(GetResult(nItem));
+}
 
-	while (nItem-- && !m_bHasIconsOrRefs)
-	{
-		FTDRESULT* pRes = GetResult(nItem);
-		m_bHasIconsOrRefs = (pRes && (pRes->HasIcon() || pRes->IsReference()));
-	}
+int CTDLFindResultsListCtrl::GetTextOffset(const FTDRESULT* pRes) const
+{
+	if (pRes && (pRes->HasIcon() || pRes->IsReference()))
+		return (pRes->pTDC->GetTaskIconImageList().GetImageWidth() + 2);
+
+	// else
+	return NULL;
 }
 
 LRESULT CTDLFindResultsListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
@@ -254,7 +260,7 @@ void CTDLFindResultsListCtrl::DeleteResults(const CFilteredToDoCtrl* pTDC)
 		}
 	}
 
-	UpdateIconAndReferenceStatus();
+	RecalcTextOffset();
 }
 
 void CTDLFindResultsListCtrl::DeleteAllResults()
@@ -265,7 +271,7 @@ void CTDLFindResultsListCtrl::DeleteAllResults()
 	while (nItem--)
 		delete GetResult(nItem);
 
-	m_bHasIconsOrRefs = FALSE;
+	m_nTextOffset = 0;
 	m_nCurGroupID = m_nHotItem = -1;
 
 	DeleteAllItems();
@@ -357,25 +363,34 @@ COLORREF CTDLFindResultsListCtrl::GetItemBackColor(int nItem, BOOL bSelected, BO
 
 void CTDLFindResultsListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags)
 {
-	if (nCol == COL_TASKTITLE)
+	if ((nCol != COL_TASKTITLE) || (m_nTextOffset == 0))
 	{
-		FTDRESULT* pRes = GetResult(nItem);
-		ASSERT(pRes);
-
-		if (pRes && m_bHasIconsOrRefs)
-		{
-			pRes->DrawIcon(pDC, rText);
-
-			CRect rRest(rText);
-			rRest.left += (pRes->pTDC->GetTaskIconImageList().GetImageWidth() + 2);
-
-			CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
-			return;
-		}
+		CEnListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
+		return;
 	}
 
 	// else
-	CEnListCtrl::DrawCellText(pDC, nItem, nCol, rText, sText, crText, nDrawTextFlags);
+	FTDRESULT* pRes = GetResult(nItem);
+	ASSERT(pRes);
+
+	if (pRes)
+		pRes->DrawIcon(pDC, rText);
+
+	CRect rRest(rText);
+	rRest.left += m_nTextOffset;
+
+	CEnListCtrl::DrawCellText(pDC, nItem, nCol, rRest, sText, crText, nDrawTextFlags);
+}
+
+void CTDLFindResultsListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
+{
+	if (m_nTextOffset == 0)
+		CEnListCtrl::DrawItemBackground(pDC, nItem, rItem, crBack, bSelected, bDropHighlighted, bFocused);
+
+	CRect rText(rItem);
+	rText.left += m_nTextOffset;
+
+	CEnListCtrl::DrawItemBackground(pDC, nItem, rText, crBack, bSelected, bDropHighlighted, bFocused);
 }
 
 CFont* CTDLFindResultsListCtrl::GetItemFont(int nItem, int nSubItem) const
@@ -436,7 +451,8 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 	FTDRESULT* pRes = new FTDRESULT(result, pTDC);
 	SetItemData(nIndex, (DWORD)pRes);
 
-	m_bHasIconsOrRefs |= (pRes->HasIcon() || pRes->IsReference());
+	if (m_nTextOffset == 0)
+		m_nTextOffset = GetTextOffset(pRes);
 
 	if (m_nCurGroupID != -1)
 		GetGrouping().SetItemGroupId(nIndex, m_nCurGroupID);
