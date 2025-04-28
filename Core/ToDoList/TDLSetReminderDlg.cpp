@@ -218,18 +218,17 @@ void CTDLSetReminderDlg::LoadPreferences(const CPreferences& prefs)
 	m_sSoundFile = prefs.GetProfileString(m_sPrefsKey, _T("SoundFile"), m_sSoundFile);
 
 	// Backwards compatibility
-	if (m_bPlaySound == -1)
-	{
-		const LPCTSTR NO_SOUND = _T("None");
+	const LPCTSTR NO_SOUND = _T("None");
 
-		if (m_sSoundFile == NO_SOUND)
-		{
-			m_sSoundFile.Empty();
-		}
-		else if (m_sSoundFile.IsEmpty()) // First time only
-		{
+	if (m_sSoundFile == NO_SOUND)
+	{
+		m_sSoundFile.Empty();
+		m_bPlaySound = FALSE;
+	}
+	else if (m_bPlaySound == -1) // First time only
+	{
+		if (m_sSoundFile.IsEmpty())
 			m_sSoundFile = CSoundEdit::GetWindowsSound(_T("tada"));
-		}
 
 		m_bPlaySound = !m_sSoundFile.IsEmpty();
 	}
