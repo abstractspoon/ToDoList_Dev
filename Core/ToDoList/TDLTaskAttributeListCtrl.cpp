@@ -95,6 +95,7 @@ const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
 const TCHAR ITEM_DELIM[2]  = { 14, 0 };
 const TCHAR MIXED_DELIM[2] = { 15, 0 };
 const TCHAR STATE_DELIM[2] = { 16, 0 };
+const TCHAR TOOLTIP_DELIM  = '\n';
 
 const LPCTSTR DATETIME_VARIES = _T("-1");
 
@@ -948,10 +949,14 @@ TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::GetAttributeID(int nRow, BOOL bResolveC
 
 	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)GetItemData(nRow); 
 
-	if (bResolveCustomTimeFields && IsCustomTime(nAttribID))
-		nAttribID = MapTimeToDate(nAttribID);
+	if (!IsCustomTime(nAttribID) || !bResolveCustomTimeFields)
+		return nAttribID;
 
-	return nAttribID;
+	// else
+	TDC_ATTRIBUTE nDateAttribID = (TDC_ATTRIBUTE)GetItemData(nRow - 1);
+	ASSERT(MapTimeToDate(nAttribID) == nDateAttribID);
+
+	return nDateAttribID;
 }
 
 TDC_ATTRIBUTE CTDLTaskAttributeListCtrl::GetSelectedAttributeID() const
@@ -1236,9 +1241,10 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		}
 		else if (IsCustomTime(nAttribID))
 		{
-			TDC_ATTRIBUTE nDateAttribID = GetAttributeID(nRow, TRUE);
+			int nDateRow = (nRow - 1);
+			ASSERT(GetDateRow(nAttribID) == nDateRow);
 
-			return !GetValueText(nDateAttribID).IsEmpty();
+			return !GetItemText(nDateRow, VALUE_COL).IsEmpty();
 		}
 		break;
 	}
@@ -1692,7 +1698,8 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 							break;
 
 						case TDCCA_DATE:
-							sValue = Misc::Format(CDateHelper::GetDateOnly(data.AsDate()));
+							if (!data.IsEmpty())
+								sValue = Misc::Format(CDateHelper::GetDateOnly(data.AsDate()));
 							break;
 
 						case TDCCA_CALCULATION:
@@ -1723,9 +1730,14 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 				TDCCADATA data;
 
 				if (m_multitasker.GetTasksCustomAttributeData(m_aSelectedTaskIDs, *pDef, data))
-					sValue = Misc::Format(CDateHelper::GetTimeOnly(data.AsDate()));
+				{
+					if (!bValueVaries && !data.IsEmpty())
+						sValue = Misc::Format(CDateHelper::GetTimeOnly(data.AsDate()));
+				}
 				else
+				{
 					bValueVaries = TRUE;
+				}
 			}
 			break;
 		}
@@ -1923,12 +1935,25 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 		{
 		case TDCA_DUETIME:
 			if (sText.IsEmpty())
-				sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+			{
+				// Only provide a prompt if the date value is set
+				if (!GetItemText(nRow - 1, VALUE_COL).IsEmpty())
+					sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+
+				return TRUE; // Prevent default prompt
+			}
 			break;
 
 		case TDCA_STARTTIME:
+		case TDCA_DONETIME:
 			if (sText.IsEmpty())
-				sPrompt = CTimeHelper::FormatClockTime(0, 0, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+			{
+				// Only provide a prompt if the date value is set
+				if (!GetItemText(nRow - 1, VALUE_COL).IsEmpty())
+					sPrompt = CTimeHelper::FormatClockTime(0, 0, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+
+				return TRUE; // Prevent default prompt
+			}
 			break;
 
 		case TDCA_REMINDER:
@@ -1953,10 +1978,13 @@ BOOL CTDLTaskAttributeListCtrl::GetCellPrompt(int nRow, const CString& sText, CS
 				if (pDef->IsList())
 					bValueVaries = (sText.Find(MIXED_DELIM) != -1);
 			}
-			else if (IsCustomTime(nAttribID))
+			else if (IsCustomTime(nAttribID) && sText.IsEmpty())
 			{
-				if (sText.IsEmpty())
+				// Only provide a prompt if the date value is set
+				if (!GetItemText(nRow - 1, VALUE_COL).IsEmpty())
 					sPrompt = CTimeHelper::FormatClockTime(23, 59, 0, FALSE, m_data.HasStyle(TDCS_SHOWDATESINISO));
+				
+				return TRUE; // Prevent default prompt
 			}
 			break;
 		}
@@ -4214,7 +4242,6 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					}
 				}
 				break;
-
 			}
 			break;
 		}
@@ -4244,7 +4271,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					CStringArray aValues;
 
 					if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
-						sTooltip = Misc::FormatArray(aValues, ITEM_DELIM);
+						sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
 				}
 				break;
 
@@ -4271,7 +4298,8 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			case TDCA_DUETIME:
 			case TDCA_STARTTIME:
 				{
-					int nDateRow = GetDateRow(nAttribID);
+					int nDateRow = (nRow - 1);
+					ASSERT(GetDateRow(nAttribID) == nDateRow);
 
 					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
 						sTooltip.LoadString(IDS_ATTRIBTIP_NODATESET);
@@ -4289,7 +4317,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					CTDCDependencyArray aDepends;
 					
 					if (aDepends.Parse(GetItemText(nRow, nCol)) > 1)
-						sTooltip = m_formatter.GetDependencies(aDepends, '\n');
+						sTooltip = m_formatter.GetDependencies(aDepends, TOOLTIP_DELIM);
 				}
 				break;
 
@@ -4299,30 +4327,31 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 					GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, NULL);
 
-					if (pDef->IsMultiList())
+					if (pDef->IsCalculation())
 					{
-						switch (pDef->GetDataType())
-						{
-						case TDCCA_STRING:
-							{
-								CStringArray aValues;
+						sTooltip.LoadString(IDS_CAD_CALCULATION);
+					}
+					else if (pDef->IsMultiList() && pDef->IsDataType(TDCCA_STRING))
+					{
+						CStringArray aValues;
 
-								if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
-									sTooltip = Misc::FormatArray(aValues, ITEM_DELIM);
-							}
-							break;
-						}
+						if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
+							sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
 					}
 				}
 				else if (IsCustomTime(nAttribID))
 				{
-					int nDateRow = GetDateRow(nAttribID);
+					int nDateRow = (nRow - 1);
+					ASSERT(GetDateRow(nAttribID) == nDateRow);
 
 					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
 						sTooltip.LoadString(IDS_ATTRIBTIP_NODATESET);
 				}
 				break;
 			}
+
+			if (sTooltip.IsEmpty() && !CanEditCell(nRow, nCol) && m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
+				sTooltip.LoadString(IDS_STATUSREADONLY);
 		}
 		break;
 	}
