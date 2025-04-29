@@ -162,7 +162,7 @@ BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CS
 	lvg.state = LVGS_NORMAL;
 	lvg.mask = LVGF_GROUPID | LVGF_HEADER | LVGF_STATE | LVGF_ALIGN;
 	lvg.uAlign = LVGA_HEADER_LEFT;
-	lvg.pszHeader = (LPWSTR)(LPCTSTR)strHeader;
+	lvg.pszHeader = (LPTSTR)(LPCTSTR)strHeader;
 	lvg.cchHeader = strHeader.GetLength();
 
 	return (-1 != ::SendMessage(m_hwndList, LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));

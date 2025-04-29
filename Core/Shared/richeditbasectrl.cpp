@@ -333,9 +333,9 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 	BOOL bWantUnicode = (nCodePage == CP_UNICODE);
 
 	if (bWantUnicode)
-		szText = (LPWSTR)(LPCTSTR)sText;
+		szText = (LPTSTR)(LPCTSTR)sText;
 	else
-		szText = (LPWSTR)Misc::WideToMultiByte(sText, nTextLen, nCodePage); // ansi
+		szText = (LPTSTR)Misc::WideToMultiByte(sText, nTextLen, nCodePage); // ansi
 
 	SETTEXTEX stex = { dwFlags, nCodePage };
 	BOOL bResult = SendMessage(EM_SETTEXTEX, (WPARAM)&stex, (LPARAM)szText);
