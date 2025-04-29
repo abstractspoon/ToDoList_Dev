@@ -250,11 +250,6 @@ CEnListCtrl::CColumnData::CColumnData()
 
 IMPLEMENT_DYNAMIC(CEnListCtrl, CListCtrl)
 
-#define IDC_HEADERCTRL 10001
-#define WM_SHOWPOPUPMENU (WM_APP+1001)
-#define ID_TIMER_HEADERPOS 1
-const int MAX_HEADING_SIZE = 100;
-
 CEnListCtrl::CEnListCtrl() 
 	: 
 	m_dwSelectionTheming(NOTSET),
