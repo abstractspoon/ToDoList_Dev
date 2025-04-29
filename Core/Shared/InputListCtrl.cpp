@@ -26,7 +26,6 @@ IMPLEMENT_DYNAMIC(CInputListCtrl, CEnListCtrl)
 #define MAXCOLWIDTH 600
 #define MINCOLWIDTH 80
 #define IDC_EDITBOX 101
-#define WM_SHOWPOPUPMENU (WM_APP+1001)
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -94,7 +93,6 @@ void CInputListCtrl::InitState()
 	m_sAutoColPrompt = "(new col)";
 	m_bAllowDuplication = TRUE;
 	m_bNotifyDuplicates = FALSE;
-	m_bBaseClassEdit = FALSE;
 	m_nCurCol = -1;
 	m_nLastEditCol = m_nLastEditRow = -1;
 
@@ -194,9 +192,13 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
 
+			// Draw button pressed (unpressing handled in OnLButtonUp)
+			InvalidateRect(rBtn);
+			UpdateWindow();
+
 			EditCell(nItem, nCol, TRUE);
 		}
-		else if (CanEditSelectedCell() && bHadFocus && nItem == nSelItem && nCol == nSelCol)
+		else if (CanEditSelectedCell() && bHadFocus && (nItem == nSelItem) && (nCol == nSelCol))
 		{
 			EditCell(nItem, nCol, FALSE);
 		}
@@ -281,10 +283,6 @@ void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 				ClientToScreen(rEdit);
 			
 			GetEditControl()->Show(rEdit, FALSE);
-
-			// this says that we are handling the edit
-			// not a derived class.
-			m_bBaseClassEdit = TRUE;
 		}
 	}
 }
@@ -583,6 +581,8 @@ IL_COLUMNTYPE CInputListCtrl::GetCellType(int /*nRow*/, int nCol) const
 
 DWORD CInputListCtrl::GetButtonState(int nRow, int nCol, BOOL bSelected) const
 {
+	ASSERT(CellHasButton(nRow, nCol));
+
 	if (!IsButtonEnabled(nRow, nCol))
 		return DFCS_INACTIVE;
 
@@ -622,8 +622,28 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType
 	return FALSE;
 }
 
+void CInputListCtrl::CheckApplyPushedState(const CRect& rBtn, DWORD& dwState) const
+{
+	Misc::SetFlag(dwState, DFCS_PUSHED, FALSE);
+
+	if (Misc::IsKeyPressed(VK_LBUTTON))
+	{
+		CPoint pt(GetMessagePos());
+		ScreenToClient(&pt);
+
+		if (rBtn.PtInRect(pt))
+		{
+			// Replace 'hot' with 'pushed'
+			Misc::SetFlag(dwState, DFCS_PUSHED, TRUE);
+			Misc::SetFlag(dwState, DFCS_HOT, FALSE);
+		}
+	}
+}
+
 void CInputListCtrl::DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
+	CheckApplyPushedState(rBtn, dwState);
+
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, dwState);
 }
 
@@ -641,8 +661,6 @@ void CInputListCtrl::DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DW
 
 void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
-	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
-
 	if (CThemed::AreControlsThemed() && (COSVersion() >= OSV_WIN7))
 	{
 		// Draw underlying button
@@ -652,10 +670,13 @@ void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) 
 		CThemed th;
 		th.Open(this, _T("DATEPICKER"));
 
+		BOOL bEnabled = !Misc::HasFlag(dwState, DFCS_INACTIVE);
 		th.DrawBackground(pDC, DP_SHOWCALENDARBUTTONRIGHT, (bEnabled ? DPSCBR_NORMAL : DPSCBR_DISABLED), rBtn);
 	}
 	else
 	{
+		CheckApplyPushedState(rBtn, dwState);
+
 		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBO, dwState);
 	}
 }
@@ -665,8 +686,7 @@ void CInputListCtrl::DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState) 
 	DrawBlankButton(pDC, rBtn, dwState);
 
 	// Draw arrow
-	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
-
+	BOOL bEnabled = !Misc::HasFlag(dwState, DFCS_INACTIVE);
 	pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 
 	UINT nFlags = DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
@@ -683,7 +703,7 @@ void CInputListCtrl::DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState
 	rText.left += (rText.Width() % 2);
 	rText.top += (rText.Height() % 2);
 
-	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
+	BOOL bEnabled = !Misc::HasFlag(dwState, DFCS_INACTIVE);
 
 	pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 	pDC->DrawText(_T("..."), rText, DT_CENTER | DT_VCENTER);
@@ -691,25 +711,31 @@ void CInputListCtrl::DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState
 
 void CInputListCtrl::DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
+	CheckApplyPushedState(rBtn, dwState);
+
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBO, dwState);
 }
 
 void CInputListCtrl::DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
+	CheckApplyPushedState(rBtn, dwState);
+
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));
 }
 
 BOOL CInputListCtrl::CellHasButton(int nRow, int nCol) const
 {
-	CRect rUnused;
-	return GetButtonRect(nRow, nCol, rUnused);
+	if (!CanEditCell(nRow, nCol))
+		return FALSE;
+
+	return (GetCellType(nRow, nCol) != ILCT_TEXT);
 }
 
 BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) const
 {
 	rBtn.SetRectEmpty();
 
-	if (!CanEditCell(nRow, nCol))
+	if (!CellHasButton(nRow, nCol))
 		return FALSE;
 
 	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
@@ -739,9 +765,6 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) const
 		rBtn.left += ((rBtn.Width() - EE_BTNWIDTH_DEFAULT) / 2);
 		rBtn.right = (rBtn.left + EE_BTNWIDTH_DEFAULT);
 		break;
-
-	case ILCT_TEXT:
-		return FALSE;
 
 	default:
 		ASSERT(0);
@@ -1627,16 +1650,20 @@ void CInputListCtrl::OnCancelEdit()
 
 void CInputListCtrl::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-	CWnd* pFocus;
-
 	// note: if we are currently editing then don't pass on
 	// else the edit box loses the focus
-	pFocus = GetFocus();
+	CWnd* pFocus = GetFocus();
 
 	if (m_editBox.m_hWnd && (pFocus == &m_editBox || m_editBox.IsWindowVisible()))
 		return;
 
 	CEnListCtrl::OnLButtonUp(nFlags, point);
+
+	// Redraw previously pressed button
+	CRect rBtn;
+
+	if (GetButtonRect(GetCurSel(), m_nCurCol, rBtn))
+		InvalidateRect(rBtn);
 }
 
 BOOL CInputListCtrl::IsPrompt(int nItem, int nCol) const
@@ -1851,9 +1878,7 @@ void CInputListCtrl::RecalcHotButtonRects()
 
 BOOL CInputListCtrl::IsButtonHot(int nRow, int nCol) const
 {
-	CRect rBtn;
-
-	if (!GetButtonRect(nRow, nCol, rBtn))
+	if (!CellHasButton(nRow, nCol))
 		return FALSE;
 
 	int nButton = ((nRow * GetColumnCount()) + nCol);

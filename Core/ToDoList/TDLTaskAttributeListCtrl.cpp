@@ -1819,9 +1819,10 @@ BOOL CTDLTaskAttributeListCtrl::DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID
 
 	if (nBtnID != ID_BTN_DEFAULT)
 	{
-		// We always get button zero because we advance the button rect each time
+		// We always get button zero because we advance the button rect each time LTR
 		GetExtraButtonRect(rBtn, 0, rCellBtn);
 	}
+
 	CInputListCtrl::DrawIconButton(pDC, rCellBtn, hIcon, dwState);
 
 	// Advance the button rect
@@ -3296,7 +3297,9 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 int CTDLTaskAttributeListCtrl::HitTestButtonID(int nRow) const
 {
 	CRect rBtn;
-	GetButtonRect(nRow, VALUE_COL, rBtn);
+	
+	if (!GetButtonRect(nRow, VALUE_COL, rBtn))
+		return ID_BTN_NONE;
 
 	return HitTestButtonID(nRow, rBtn);
 }
@@ -3404,7 +3407,7 @@ HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtn
 {
 	ASSERT(CanEditCell(GetRow(nAttribID), VALUE_COL));
 
-	BOOL bDisabled = (dwState & DFCS_INACTIVE);
+	BOOL bDisabled = Misc::HasFlag(dwState, DFCS_INACTIVE);
 
 	switch (nBtnID)
 	{
@@ -3449,7 +3452,7 @@ BOOL CTDLTaskAttributeListCtrl::CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtn
 	switch (nBtnID)
 	{
 	case ID_BTN_TIMETRACK:
-		return (m_aSelectedTaskIDs.GetSize() == 1);
+		return ((m_aSelectedTaskIDs.GetSize() == 1) && !m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs));
 
 	case ID_BTN_ADDLOGGEDTIME:
 		return ((m_aSelectedTaskIDs.GetSize() == 1) && (m_aSelectedTaskIDs[0] != m_dwTimeTrackingTask));

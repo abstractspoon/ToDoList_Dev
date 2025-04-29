@@ -102,8 +102,6 @@ protected:
 	CPoint m_ptPopupPos;
 
 private:
-	BOOL m_bBaseClassEdit; // for our use ONLY
-
 	CHotTracker m_hotTrack;
 
 protected:
@@ -176,6 +174,7 @@ protected:
 	DWORD GetButtonState(int nRow, int nCol, BOOL bSelected) const;
 	BOOL CellHasButton(int nRow, int nCol) const;
 	BOOL IsCellSelected(int nRow, int nCol, BOOL bVisually = FALSE) const;
+	void CheckApplyPushedState(const CRect& rBtn, DWORD& dwState) const;
 
 	void DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
 	void DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DWORD dwState) const;
