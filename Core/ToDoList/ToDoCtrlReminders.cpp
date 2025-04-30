@@ -295,7 +295,7 @@ BOOL CToDoCtrlReminders::UpdateRecurringTaskReminders(DWORD dwOldTaskID, DWORD d
 		}
 	}
 
-	return FALSE;
+	return bUpdated;
 }
 
 BOOL CToDoCtrlReminders::NonRecurringReminderHasRecurringParent(const TDCREMINDER& rem, DWORD dwParentID, const CFilteredToDoCtrl* pTDC) const
