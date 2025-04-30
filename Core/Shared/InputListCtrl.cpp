@@ -1264,7 +1264,7 @@ void CInputListCtrl::PreSubclassWindow()
 	ModifyStyle(0, WS_CLIPCHILDREN);
 
 	InitState();
-	RefreshItemHeight();
+	ForceResize();
 }
 
 int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -1273,7 +1273,7 @@ int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	
 	InitState();
-	RefreshItemHeight();
+	ForceResize();
 	
 	return 0;
 }
@@ -1421,11 +1421,12 @@ void CInputListCtrl::PostCreateControl(CWnd& ctrl)
 	ctrl.ShowWindow(SW_HIDE);
 
 	CRect rWnd;
-	ctrl.GetClientRect(rWnd);
+	ctrl.GetWindowRect(rWnd);
 
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)) ||
 		ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
 	{
+		// Reduce a bit else the row height can seem excessive
  		rWnd.bottom -= 2;
 	}
 
@@ -1734,7 +1735,7 @@ void CInputListCtrl::SetColumnType(int nCol, IL_COLUMNTYPE nType)
 	
 		// Recalc the minimum height
 		int nCol = GetColumnCount();
-		int nNewMinHeight = 0;
+		int nNewMinHeight = GetMinItemHeight();
 
 		while (nCol--)
 		{

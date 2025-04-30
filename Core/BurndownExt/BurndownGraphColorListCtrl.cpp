@@ -80,8 +80,6 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CGraphsMap& mapGraphs, BURNDO
 	while (nColor--)
 		AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(50), ILCT_BROWSE);
 
-	RefreshItemHeight();
-
 	if (nSelRow != -1)
 	{
 		SetCurSel(nSelRow, 0);

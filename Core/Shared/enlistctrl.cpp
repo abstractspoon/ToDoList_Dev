@@ -17,7 +17,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
 /////////////////////////////////////////////////////////////////////////////
 
 #if _MSC_VER >= 1400
@@ -310,7 +309,7 @@ BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
 	if (!m_grouping.EnableGroupView(GetSafeHwnd(), bEnable))
 		return FALSE;
 
-	RefreshItemHeight();
+	ForceResize();
 	return TRUE;
 }
 
@@ -1223,15 +1222,6 @@ LRESULT CEnListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 	return lr;
 }
 
-void CEnListCtrl::ForceResize()
-{
-	CRect rClient;
-	GetClientRect(rClient);
-
-	WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, rClient.Width(), rClient.Height(), SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER };
-	SendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
-}
-
 void CEnListCtrl::OnWindowPosChanged(WINDOWPOS* lpwndpos)
 {
 	CListCtrl::OnWindowPosChanged(lpwndpos);
@@ -1407,23 +1397,13 @@ void CEnListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
     lpMeasureItemStruct->itemHeight = CalcItemHeight(); 
 }
 
-void CEnListCtrl::RefreshItemHeight()
+void CEnListCtrl::ForceResize()
 {
-	if (GetSafeHwnd())
-	{
-		// I've tried everything I can think of but the only thing 
-		// that seems to trigger a WM_MEASUREITEM message is a size change
-		CRect rWindow;
+	CRect rClient;
+	GetClientRect(rClient);
 
-		GetWindowRect(rWindow);
-		GetParent()->ScreenToClient(rWindow);
-
-		rWindow.right--;
-		MoveWindow(rWindow);
-
-		rWindow.right++;
-		MoveWindow(rWindow);
-	}
+	WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, rClient.Width(), rClient.Height(), SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER };
+	SendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
 }
 
 BOOL CEnListCtrl::SetMinItemHeight(int nHeight)
@@ -1446,11 +1426,11 @@ BOOL CEnListCtrl::SetMinItemHeight(int nHeight)
 				GetItemRect(0, rItem, LVIR_BOUNDS);
 
 				if (nHeight != rItem.Height())
-					RefreshItemHeight();
+					ForceResize();
 			}
 			else
 			{
-				RefreshItemHeight();
+				ForceResize();
 			}
 		}
 	}
@@ -1873,7 +1853,7 @@ void CEnListCtrl::PreSubclassWindow()
 		m_nCurView = (GetStyle() & LVS_TYPEMASK);
 
 	if (m_nMinItemHeight != -1)
-		RefreshItemHeight();
+		ForceResize();
 }
 
 BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC) 
