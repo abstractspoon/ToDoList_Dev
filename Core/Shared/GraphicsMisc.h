@@ -171,6 +171,7 @@ namespace GraphicsMisc
 	int GetFontPixelSize(HFONT hFont);
 	int GetFontPointSize(HWND hWnd);
 	int GetFontPixelSize(HWND hWnd);
+	BOOL GetFontMetrics(HWND hWnd, TEXTMETRIC& tm);
 	HFONT GetFont(HWND hWnd, BOOL bFallback = TRUE);
 	BOOL SameFont(HFONT hFont, LPCTSTR szFaceName, int nPoint);
 	BOOL IsSameFontNameAndSize(HFONT hFont1, HFONT hFont2);

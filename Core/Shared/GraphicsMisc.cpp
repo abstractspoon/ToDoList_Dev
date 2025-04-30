@@ -494,6 +494,25 @@ int GraphicsMisc::GetFontPixelSize(HWND hWnd)
 	return GetFontPixelSize(GetFont(hWnd));
 }
 
+BOOL GraphicsMisc::GetFontMetrics(HWND hWnd, TEXTMETRIC& tm)
+{
+	ASSERT(hWnd);
+
+	BOOL bResult = FALSE;
+
+	if (hWnd)
+	{
+		CClientDC dc(CWnd::FromHandle(hWnd));
+		CFont* pOldFont = PrepareDCFont(&dc, hWnd);
+
+		bResult = dc.GetTextMetrics(&tm);
+
+		dc.SelectObject(pOldFont);
+	}
+
+	return bResult;
+}
+
 HFONT GraphicsMisc::GetFont(HWND hWnd, BOOL bFallback)
 {
 	ASSERT(hWnd || bFallback);

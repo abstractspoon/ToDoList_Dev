@@ -1380,10 +1380,17 @@ BOOL CEnListCtrl::PreTranslateMessage(MSG* pMsg)
 int CEnListCtrl::CalcItemHeight() const
 {
 	ASSERT(GetSafeHwnd());
+ 
+	// Default edit height
+	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9);
 
-	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9); // default edit height
-	int nFontHeight = GraphicsMisc::GetFontPixelSize(GetSafeHwnd());
+	// Font height
+	TEXTMETRIC tm = { 0 };
+	VERIFY(GraphicsMisc::GetFontMetrics(*this, tm));
 
+	int nFontHeight = (tm.tmHeight + tm.tmExternalLeading);
+
+	// Item height
 	int nItemHeight = max(m_nMinItemHeight, max(nBaseHeight, nFontHeight));
 
 	if (m_grouping.IsEnabled())
