@@ -1225,11 +1225,13 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 
 					if ((dwListType != TDCCA_NOTALIST) && (dwDataType != TDCCA_ICON))
 					{
-						BOOL bMultiList = ((dwListType == TDCCA_FIXEDMULTILIST) || 
-											(dwListType == TDCCA_AUTOMULTILIST));
-
 						if (nExist == -1)
+						{
+							BOOL bMultiList = ((dwListType == TDCCA_FIXEDMULTILIST) || 
+												(dwListType == TDCCA_AUTOMULTILIST));
+
 							nExist = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
+						}
 
 						// Update mapped 'default' values
 						CKanbanValueMap* pDefValues = m_mapGlobalAttributeValues.GetAddMapping(sAttribID);
