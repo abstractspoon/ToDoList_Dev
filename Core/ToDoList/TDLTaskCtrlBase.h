@@ -369,7 +369,7 @@ protected:
 	time_t GetTaskReminder(DWORD dwTaskID) const;
 	TDC_COLUMN GetColumnID(int nCol) const; // zero is always 'tasks'
 	int GetColumnIndex(TDC_COLUMN nColID) const;
-	CFont* PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bTitleLabel);
+	HFONT PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bTitleLabel);
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;

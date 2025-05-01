@@ -115,7 +115,7 @@ void CEnStatic::OnPaint()
 				GetClientRect(rText);
 				rText.DeflateRect(6, 0); // padding
 
-				CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, GetSafeHwnd());
+				HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, GetSafeHwnd());
 				UINT nFlags = (DT_VCENTER | DT_SINGLELINE | GetHorzTextAlignment());
 
 				if (m_crTextFore != CLR_NONE)
@@ -136,7 +136,7 @@ void CEnStatic::OnPaint()
 				
 				dc.SetBkMode(TRANSPARENT);
 				dc.DrawText(sText, rText, nFlags);
-				dc.SelectObject(pOldFont);
+				dc.SelectObject(hOldFont);
 			}
 		}
 		else // default

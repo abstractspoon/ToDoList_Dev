@@ -454,10 +454,10 @@ float CKanbanColumnCtrlArray::GetAverageCharWidth()
 	CWnd* pRef = GetAt(0);
 	CClientDC dc(pRef);
 
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, *pRef);
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, *pRef);
 	float fAveCharWidth = GraphicsMisc::GetAverageCharWidth(&dc);
 
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 
 	return fAveCharWidth;
 }

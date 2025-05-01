@@ -494,7 +494,7 @@ int GraphicsMisc::GetFontPixelSize(HWND hWnd)
 	return GetFontPixelSize(GetFont(hWnd));
 }
 
-BOOL GraphicsMisc::GetFontMetrics(HWND hWnd, TEXTMETRIC& tm)
+BOOL GraphicsMisc::GetFontMetrics(HWND hWnd, TEXTMETRIC& tm, HFONT hFont)
 {
 	ASSERT(hWnd);
 
@@ -503,11 +503,15 @@ BOOL GraphicsMisc::GetFontMetrics(HWND hWnd, TEXTMETRIC& tm)
 	if (hWnd)
 	{
 		CClientDC dc(CWnd::FromHandle(hWnd));
-		CFont* pOldFont = PrepareDCFont(&dc, hWnd);
+
+		if (!hFont)
+			hFont = GetFont(hWnd);
+
+		HFONT hOldFont = PrepareDCFont(&dc, hWnd);
 
 		bResult = dc.GetTextMetrics(&tm);
 
-		dc.SelectObject(pOldFont);
+		dc.SelectObject(hOldFont);
 	}
 
 	return bResult;
@@ -857,22 +861,22 @@ int GraphicsMisc::GetAverageMaxStringWidth(const CString& sText, CDC* pDC, CFont
 	return max(nAveWidth, nActualWidth);
 }
 
-CFont* GraphicsMisc::PrepareDCFont(CDC* pDC, HWND hwndRef, CFont* pFont, int nStockFont)
+HFONT GraphicsMisc::PrepareDCFont(CDC* pDC, HWND hwndRef, HFONT hFont, int nStockFont)
 {
-	if ((pFont == NULL) && (hwndRef != NULL))
-		pFont = CFont::FromHandle(GetFont(hwndRef));
+	if ((hFont == NULL) && (hwndRef != NULL))
+		hFont = GetFont(hwndRef);
 
-	if (pFont)
+	if (hFont)
 	{
 #ifdef _DEBUG
 		CString sFont;
-		int nPoint = GetFontNameAndPointSize(*pFont, sFont);
+		int nPoint = GetFontNameAndPointSize(hFont, sFont);
 #endif
-		return pDC->SelectObject(pFont);
+		return (HFONT)pDC->SelectObject(hFont);
 	}
 	
 	// else
-	return (CFont*)pDC->SelectStockObject(nStockFont);
+	return (HFONT)pDC->SelectObject(::GetStockObject(nStockFont));
 }
 
 COLORREF GraphicsMisc::GetBestTextColor(COLORREF crBack, BOOL bEnabled)

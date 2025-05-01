@@ -171,14 +171,14 @@ namespace GraphicsMisc
 	int GetFontPixelSize(HFONT hFont);
 	int GetFontPointSize(HWND hWnd);
 	int GetFontPixelSize(HWND hWnd);
-	BOOL GetFontMetrics(HWND hWnd, TEXTMETRIC& tm);
+	BOOL GetFontMetrics(HWND hWnd, TEXTMETRIC& tm, HFONT hFont = NULL);
 	HFONT GetFont(HWND hWnd, BOOL bFallback = TRUE);
 	BOOL SameFont(HFONT hFont, LPCTSTR szFaceName, int nPoint);
 	BOOL IsSameFontNameAndSize(HFONT hFont1, HFONT hFont2);
 	CFont& WingDings();
 	CFont& Marlett();
 	int DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UINT nFlags, CFont* pFont = NULL);
-	CFont* PrepareDCFont(CDC* pDC, HWND hwndRef = NULL, CFont* pFont = NULL, int nStockFont = DEFAULT_GUI_FONT); // returns 'old' font
+	HFONT PrepareDCFont(CDC* pDC, HWND hwndRef = NULL, HFONT hFont = NULL, int nStockFont = DEFAULT_GUI_FONT); // returns 'old' font
 	
 	int GetTextWidth(const CString& sText, HWND hWndRef, HFONT hFontRef = NULL);
 	int GetTextWidth(const CString& sText, CWnd& wndRef, CFont* pRefFont = NULL);

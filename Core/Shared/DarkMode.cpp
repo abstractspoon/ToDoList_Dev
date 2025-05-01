@@ -395,7 +395,7 @@ public:
 		CString sText;
 		pWnd->GetWindowText(sText);
 
-		CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, *pWnd);
+		HFONT hOldFont = GraphicsMisc::PrepareDCFont(pDC, *pWnd);
 
 		if (nAlign & DT_VCENTER)
 		{
@@ -406,7 +406,7 @@ public:
 		pDC->SetTextColor(GetTextColor(*pWnd));
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->DrawText(sText, rText, nAlign);
-		pDC->SelectObject(pOldFont);
+		pDC->SelectObject(hOldFont);
 	}
 
 private:
