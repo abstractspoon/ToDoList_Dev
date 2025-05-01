@@ -1264,7 +1264,7 @@ void CInputListCtrl::PreSubclassWindow()
 	ModifyStyle(0, WS_CLIPCHILDREN);
 
 	InitState();
-	ForceResize();
+//	ForceResize();
 }
 
 int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -1273,7 +1273,7 @@ int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	
 	InitState();
-	ForceResize();
+//	ForceResize();
 	
 	return 0;
 }
