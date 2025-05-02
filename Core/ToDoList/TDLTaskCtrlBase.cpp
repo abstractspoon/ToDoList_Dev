@@ -1328,7 +1328,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	CHoldRedraw hr(m_lcColumns);
 	CClientDC dc(&m_lcColumns);
 
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 	m_dateTimeWidths.Initialise(&dc);
 
 	// Optimise for single columns
@@ -1403,7 +1403,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	}
 
 	// cleanup
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 
 	if (m_bAutoFitSplitter)
 		AdjustSplitterToFitAttributeColumns();
@@ -2361,7 +2361,7 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 	}
 }
 
-CFont* CTDLTaskCtrlBase::PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bTitleLabel)
+HFONT CTDLTaskCtrlBase::PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bTitleLabel)
 {
 	if (!m_fonts.GetHwnd() && !m_fonts.Initialise(Tasks()))
 		return NULL;
@@ -2369,7 +2369,7 @@ CFont* CTDLTaskCtrlBase::PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TOD
 	BOOL bStrikeThru = (HasStyle(TDCS_STRIKETHOUGHDONETASKS) && pTDI->IsDone());
 	BOOL bBold = (bTitleLabel && pTDS->ParentIsRoot());
 
-	return pDC->SelectObject(m_fonts.GetFont(bBold, FALSE, FALSE, bStrikeThru));
+	return (HFONT)pDC->SelectObject(m_fonts.GetHFont(bBold, FALSE, FALSE, bStrikeThru));
 }
 
 BOOL CTDLTaskCtrlBase::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
@@ -2520,12 +2520,12 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 					}
 
 					// draw row text and column dividers
-					CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
+					HFONT hOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
 					
 					DrawColumnsRowText(pDC, nItem, aColOrder, aColWidths, 
 									   dwTaskID, pTDI, pTDS, crText, bSelected);
 
-					pDC->SelectObject(pOldFont);
+					pDC->SelectObject(hOldFont);
 				}
 			}
 			return CDRF_SKIPDEFAULT;
@@ -2614,7 +2614,7 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 			CRect rText;
 			GetItemTitleRect(nmcd, TDCTR_TEXT, rText);
 
-			CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, TRUE);
+			HFONT hOldFont = PrepareDCFont(pDC, pTDI, pTDS, TRUE);
 			DrawColumnText(pDC, pTDI->sTitle, rText, DT_LEFT, crText, TRUE);
 
 			// draw shortcut for references --------------------------
@@ -2635,12 +2635,12 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				// Get the actual text extent this time
 				GetItemTitleRect(nmcd, TDCTR_TEXT, rText, pDC, pTDI->sTitle);
 
-				pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
+				hOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
 				DrawCommentsText(pDC, rBack, rText, pTDI, pTDS, crBack);
 			}
 			
 			// Cleanup -----------------------------------------------
-			pDC->SelectObject(pOldFont);
+			pDC->SelectObject(hOldFont);
 		}
 	}
 
@@ -4211,7 +4211,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						if (m_hdrColumns.IsItemVisible(nItem))
 						{
 							CClientDC dc(&m_lcColumns);
-							CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
+							HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 
 							CDWordArray aTaskIDs;
 							GetColumnTaskIDs(aTaskIDs);
@@ -4221,7 +4221,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							m_hdrColumns.SetItemWidth(nItem, nColWidth);
 							m_hdrColumns.SetItemTracked(nItem, FALSE); // width now auto-calc'ed
 							
-							dc.SelectObject(pOldFont);
+							dc.SelectObject(hOldFont);
 						}
 						return 0L;
 					}

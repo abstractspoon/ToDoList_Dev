@@ -258,6 +258,7 @@ CEnListCtrl::CEnListCtrl()
 	m_bLastColStretchy(FALSE),
 	m_bFirstColStretchy(FALSE),
 	m_nMinItemHeight(-1),
+	m_nItemHeight(-1),
 	m_bReadOnly(FALSE),
 	m_nItemDropHilite(-1),
 	m_bDropHiliteItemSelected(FALSE),
@@ -309,7 +310,7 @@ BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
 	if (!m_grouping.EnableGroupView(GetSafeHwnd(), bEnable))
 		return FALSE;
 
-	ForceResize();
+	ForceResize(TRUE);
 	return TRUE;
 }
 
@@ -1069,18 +1070,18 @@ void CEnListCtrl::SetView(int nView)
     if ((dwStyle & LVS_TYPEMASK) != (DWORD)nView) 
 		SetWindowLong(GetSafeHwnd(), GWL_STYLE, (dwStyle & ~LVS_TYPEMASK) | (DWORD)nView); 
 
-	// if we are in report view then we want to be ownerdraw 
-	// so we can take advatage of the special drawing
+	// if we are in report view then we want to be owner-draw 
+	// so we can take advantage of the special drawing
 	if (nView == LVS_REPORT)
 	{
-		// make ownerdraw
+		// make owner-draw
 		if (!(dwStyle & LVS_OWNERDRAWFIXED))
 			ModifyStyle(0, LVS_OWNERDRAWFIXED); 
 	}
 	// else we want default drawing
 	else
 	{
-		// make non-ownerdraw
+		// make non-owner-draw
 		if (dwStyle & LVS_OWNERDRAWFIXED)
 			ModifyStyle(LVS_OWNERDRAWFIXED, 0); 
 	}
@@ -1089,7 +1090,7 @@ void CEnListCtrl::SetView(int nView)
 	Invalidate(FALSE);
 
 	// force a resize to ensure that the column headers are correct
-	ForceResize();
+	ForceResize(FALSE);
 }
 
 int CEnListCtrl::GetItemImage(int nItem, int nSubItem) const
@@ -1209,7 +1210,7 @@ void CEnListCtrl::SetLastColumnStretchy(BOOL bStretchy)
 	// invoke a resize to update last column
 	if (m_bLastColStretchy && (m_nCurView == LVS_REPORT) && GetSafeHwnd())
 	{
-		ForceResize();
+		ForceResize(FALSE);
 	}
 }
 
@@ -1217,7 +1218,7 @@ LRESULT CEnListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 {
 	LRESULT lr = Default();
 
-	ForceResize();
+	ForceResize(TRUE); // Recalc item height
 
 	return lr;
 }
@@ -1237,7 +1238,7 @@ void CEnListCtrl::SetFirstColumnStretchy(BOOL bStretchy)
 	// invoke a resize to update first column
 	if (m_bFirstColStretchy && m_nCurView == LVS_REPORT && GetSafeHwnd())
 	{
-		ForceResize();
+		ForceResize(FALSE);
 	}
 }
 
@@ -1377,33 +1378,42 @@ BOOL CEnListCtrl::PreTranslateMessage(MSG* pMsg)
 	return CListCtrl::PreTranslateMessage(pMsg);
 }
 
-int CEnListCtrl::CalcItemHeight() const
-{
-	ASSERT(GetSafeHwnd());
-
-	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9); // default edit height
-	int nFontHeight = GraphicsMisc::GetFontPixelSize(GetSafeHwnd());
-
-	int nItemHeight = max(m_nMinItemHeight, max(nBaseHeight, nFontHeight));
-
-	if (m_grouping.IsEnabled())
-		nItemHeight--;
-
-	return nItemHeight;
-}
-
 void CEnListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
-    lpMeasureItemStruct->itemHeight = CalcItemHeight(); 
+	if (m_nItemHeight == -1)
+	{
+		// Default edit height
+		int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9);
+
+		// Font height
+		TEXTMETRIC tm = { 0 };
+		VERIFY(GraphicsMisc::GetFontMetrics(*this, tm));
+
+		int nFontHeight = (tm.tmHeight + tm.tmExternalLeading);
+
+		// Item height
+		m_nItemHeight = max(m_nMinItemHeight, max(nBaseHeight, nFontHeight));
+
+		if (m_grouping.IsEnabled())
+			m_nItemHeight--;
+	}
+
+    lpMeasureItemStruct->itemHeight = m_nItemHeight; 
 }
 
-void CEnListCtrl::ForceResize()
+void CEnListCtrl::ForceResize(BOOL bRecalcItemHeight)
 {
-	CRect rClient;
-	GetClientRect(rClient);
+	if (bRecalcItemHeight)
+		m_nItemHeight = -1;
 
-	WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, rClient.Width(), rClient.Height(), SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER };
-	SendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
+	if (GetSafeHwnd())
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, rClient.Width(), rClient.Height(), SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER };
+		SendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
+	}
 }
 
 BOOL CEnListCtrl::SetMinItemHeight(int nHeight)
@@ -1417,22 +1427,7 @@ BOOL CEnListCtrl::SetMinItemHeight(int nHeight)
 	if (nHeight != m_nMinItemHeight)
 	{
 		m_nMinItemHeight = nHeight;
-
-		if (GetSafeHwnd())
-		{
-			if (GetItemCount())
-			{
-				CRect rItem;
-				GetItemRect(0, rItem, LVIR_BOUNDS);
-
-				if (nHeight != rItem.Height())
-					ForceResize();
-			}
-			else
-			{
-				ForceResize();
-			}
-		}
+		ForceResize(m_nItemHeight != m_nMinItemHeight);
 	}
 
 	return TRUE;
@@ -1735,10 +1730,6 @@ CString CEnListCtrl::GetSortString(DWORD dwItemData) const
 
 int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortColumn*/) const
 {
-	// -1 if dwItemData1 should go BEFORE dwItemData2
-	//  1 if dwItemData1 should go AFTER dwItemData2
-	//  0 if it doesn't matter
-
 	// default comparison just compares text
 	CString sItem1, sItem2;
 
@@ -1851,9 +1842,6 @@ void CEnListCtrl::PreSubclassWindow()
 
 	if (m_nCurView == -1)
 		m_nCurView = (GetStyle() & LVS_TYPEMASK);
-
-	if (m_nMinItemHeight != -1)
-		ForceResize();
 }
 
 BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC) 

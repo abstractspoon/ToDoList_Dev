@@ -145,7 +145,7 @@ void CGanttDisplayComboBox::FixupTabOffsets(const CStringArray& aItems, CStringA
 
 	// Keep track of the widest option
 	CClientDC dc(const_cast<CGanttDisplayComboBox*>(this));
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, *this);
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, *this);
 
 	CArray<int, int> aOptionWidths;
 	aOptionWidths.SetSize(aOptions.GetSize());
@@ -182,7 +182,7 @@ void CGanttDisplayComboBox::FixupTabOffsets(const CStringArray& aItems, CStringA
 		}
 	}
 
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 }
 
 BOOL CGanttDisplayComboBox::OnSelChange()

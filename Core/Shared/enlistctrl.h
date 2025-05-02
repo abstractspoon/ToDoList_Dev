@@ -166,7 +166,7 @@ private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 
 	CMap<DWORD, DWORD, CString, CString&> m_mapSortStrings; 
 	
-	int m_nMinItemHeight;
+	int m_nMinItemHeight, m_nItemHeight;
 	DWORD m_dwSelectionTheming;
 	CListCtrlItemGrouping m_grouping;
 
@@ -233,11 +233,11 @@ protected:
 	BOOL IsSelectionThemed(BOOL bClassic) const;
 	BOOL WantSelChange(int nSel) const;
 	int CompareEmptiness(BOOL bItem1Empty, BOOL bItem2Empty) const;
-	void ForceResize();
+	void ForceResize(BOOL bRecalcItemHeight);
 
 private:
 	BOOL BuildSortMap(int nCol);
-	int CalcItemHeight() const;
+
 	static int CALLBACK CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam);
 };
 
