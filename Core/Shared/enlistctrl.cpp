@@ -10,6 +10,7 @@
 #include "graphicsmisc.h"
 #include "enimagelist.h"
 #include "enstring.h"
+#include "OsVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -125,6 +126,12 @@ CListCtrlItemGrouping::CListCtrlItemGrouping(HWND hwndList)
 {
 }
 
+BOOL CListCtrlItemGrouping::IsSupported()
+{
+	// XP's API support for grouping is poor
+	return (COSVersion() > OSV_XPP);
+}
+
 BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 {
 	if (!m_hwndList)
@@ -132,6 +139,9 @@ BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 		ASSERT(0);
 		return FALSE;
 	}
+
+	if (!IsSupported())
+		return FALSE;
 
 	if (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) == -1)
 		return FALSE;
@@ -154,6 +164,9 @@ BOOL CListCtrlItemGrouping::EnableGroupView(HWND hwndList, BOOL bEnable)
 
 BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader)
 {
+	if (!m_bEnabled)
+		return FALSE;
+
 	LVGROUP lvg = { 0 };
 
 	lvg.cbSize = sizeof(lvg);
@@ -169,6 +182,9 @@ BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CS
 
 CString CListCtrlItemGrouping::GetGroupHeaderText(int nGroupID) const
 {
+	if (!m_bEnabled)
+		return _T("");
+	
 	LVGROUP lvg = { 0 };
 	TCHAR szHeader[256] = { 0 };
 
@@ -184,6 +200,9 @@ CString CListCtrlItemGrouping::GetGroupHeaderText(int nGroupID) const
 
 int CListCtrlItemGrouping::GetItemGroupId(int nRow) const
 {
+	if (!m_bEnabled)
+		return -1;
+	
 	LVGROUPITEM lvgi = { 0 };
 
 	lvgi.mask = LVIF_GROUPID;
@@ -196,6 +215,9 @@ int CListCtrlItemGrouping::GetItemGroupId(int nRow) const
 
 BOOL CListCtrlItemGrouping::SetItemGroupId(int nRow, int nGroupID)
 {
+	if (!m_bEnabled)
+		return FALSE;
+	
 	LVGROUPITEM lvgi = { 0 };
 
 	lvgi.mask = LVIF_GROUPID;
@@ -208,6 +230,9 @@ BOOL CListCtrlItemGrouping::SetItemGroupId(int nRow, int nGroupID)
 
 BOOL CListCtrlItemGrouping::HasGroups() const
 {
+	if (!m_bEnabled)
+		return FALSE;
+
 	return (::SendMessage(m_hwndList, LVM_GETGROUPCOUNT, 0, 0) > 0);
 }
 

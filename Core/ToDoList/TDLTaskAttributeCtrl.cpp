@@ -218,6 +218,8 @@ void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 	CToolBarCtrl& tb = m_toolbar.GetToolBarCtrl();
 	
 	tb.PressButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.IsGrouped());
+
+	tb.EnableButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.SupportsGrouping());
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
 	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
 	tb.EnableButton(ID_ATTRIBCTRL_RESETMOVES, m_lcAttributes.CanResetAttributeMoves());

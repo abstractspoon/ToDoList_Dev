@@ -40,6 +40,8 @@ public:
 	void SetGroupHeaderBackColor(COLORREF crBack);
 	COLORREF GetGroupHeaderBackColor() const { return m_crBkgnd; }
 
+	static BOOL IsSupported();
+
 protected:
 	HWND m_hwndList;
 	BOOL m_bEnabled;

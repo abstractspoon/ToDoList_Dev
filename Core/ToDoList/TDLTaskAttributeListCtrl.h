@@ -48,10 +48,12 @@ public:
 public:
 	BOOL Create(CWnd* pParent, UINT nID);
 	void ToggleSortDirection();
-	void ToggleGrouping();
-	BOOL IsGrouped() const { return m_bGrouped; }
 	BOOL HasMultiSelection() const { return (m_aSelectedTaskIDs.GetSize() > 1); }
 	BOOL HasFocus() const;
+
+	void ToggleGrouping();
+	BOOL IsGrouped() const { return m_bGrouped; }
+	BOOL SupportsGrouping() const { return CListCtrlItemGrouping::IsSupported(); }
 
 	BOOL MoveSelectedAttribute(BOOL bUp);
 	BOOL CanMoveSelectedAttribute(BOOL bUp) const;

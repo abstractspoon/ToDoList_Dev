@@ -456,12 +456,15 @@ int CTDLTaskAttributeListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2
 
 void CTDLTaskAttributeListCtrl::ToggleGrouping()
 {
-	m_bGrouped = !m_bGrouped;
-
-	if (GetSafeHwnd())
+	if (SupportsGrouping())
 	{
-		EnableGroupView(m_bGrouped);
-		Populate();
+		m_bGrouped = !m_bGrouped;
+		
+		if (GetSafeHwnd())
+		{
+			EnableGroupView(m_bGrouped);
+			Populate();
+		}
 	}
 }
 
@@ -535,7 +538,7 @@ void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szK
 {
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
-	m_bGrouped = prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE);
+	m_bGrouped = (SupportsGrouping() && prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE));
 
 	m_aAttribState.Load(prefs, szKey);
 
