@@ -583,9 +583,12 @@ void CTDLTaskAttributeListCtrl::SetPercentDoneIncrement(int nAmount)
 
 void CTDLTaskAttributeListCtrl::SetTimeTrackTaskID(DWORD dwTaskID)
 {
+	BOOL bRedraw = ((m_dwTimeTrackingTask && !dwTaskID) ||
+					m_multitasker.AnyTaskHasID(m_aSelectedTaskIDs, dwTaskID, FALSE));
+
 	m_dwTimeTrackingTask = dwTaskID;
 
-	if (m_multitasker.AnyTaskHasID(m_aSelectedTaskIDs, dwTaskID, FALSE))
+	if (bRedraw)
 		RedrawValue(TDCA_TIMESPENT);
 }
 

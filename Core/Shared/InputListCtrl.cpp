@@ -623,9 +623,7 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType
 
 void CInputListCtrl::CheckApplyPushedState(const CRect& rBtn, DWORD& dwState) const
 {
-	Misc::SetFlag(dwState, DFCS_PUSHED, FALSE);
-
-	if (Misc::IsKeyPressed(VK_LBUTTON))
+	if (!Misc::HasFlag(dwState, DFCS_PUSHED) && Misc::IsKeyPressed(VK_LBUTTON))
 	{
 		CPoint pt(GetMessagePos());
 		ScreenToClient(&pt);
