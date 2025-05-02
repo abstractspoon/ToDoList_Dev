@@ -237,7 +237,7 @@ protected:
 
 private:
 	BOOL BuildSortMap(int nCol);
-//	int CalcItemHeight() const;
+
 	static int CALLBACK CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam);
 };
 

@@ -60,7 +60,6 @@ BEGIN_MESSAGE_MAP(CInputListCtrl, CEnListCtrl)
 	ON_WM_SETFOCUS()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
-// 	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	//}}AFX_MSG_MAP
@@ -1265,16 +1264,6 @@ void CInputListCtrl::PreSubclassWindow()
 
 	InitState();
 }
-
-// int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CEnListCtrl::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// // 	InitState();
-// 	
-// 	return 0;
-// }
 
 void CInputListCtrl::HideControl(CWnd& ctrl, const CWnd* pWndIgnore)
 {

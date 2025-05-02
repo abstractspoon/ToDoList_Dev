@@ -1378,30 +1378,6 @@ BOOL CEnListCtrl::PreTranslateMessage(MSG* pMsg)
 	return CListCtrl::PreTranslateMessage(pMsg);
 }
 
-/*
-int CEnListCtrl::CalcItemHeight() const
-{
-	ASSERT(GetSafeHwnd());
- 
-	// Default edit height
-	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9);
-
-	// Font height
-	TEXTMETRIC tm = { 0 };
-	VERIFY(GraphicsMisc::GetFontMetrics(*this, tm));
-
-	int nFontHeight = (tm.tmHeight + tm.tmExternalLeading);
-
-	// Item height
-	int nItemHeight = max(m_nMinItemHeight, max(nBaseHeight, nFontHeight));
-
-	if (m_grouping.IsEnabled())
-		nItemHeight--;
-
-	return nItemHeight;
-}
-*/
-
 void CEnListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
 	if (m_nItemHeight == -1)
@@ -1754,10 +1730,6 @@ CString CEnListCtrl::GetSortString(DWORD dwItemData) const
 
 int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortColumn*/) const
 {
-	// -1 if dwItemData1 should go BEFORE dwItemData2
-	//  1 if dwItemData1 should go AFTER dwItemData2
-	//  0 if it doesn't matter
-
 	// default comparison just compares text
 	CString sItem1, sItem2;
 
@@ -1870,9 +1842,6 @@ void CEnListCtrl::PreSubclassWindow()
 
 	if (m_nCurView == -1)
 		m_nCurView = (GetStyle() & LVS_TYPEMASK);
-
-// 	if (m_nMinItemHeight != -1)
-// 		ForceResize(TRUE);
 }
 
 BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC) 
