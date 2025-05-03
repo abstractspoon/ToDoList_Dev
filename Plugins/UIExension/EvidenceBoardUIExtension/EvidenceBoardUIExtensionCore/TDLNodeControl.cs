@@ -2799,6 +2799,8 @@ namespace EvidenceBoardUIExtension
 			return this;
 		}
 
+		const uint NoTip = 0xffffffff;
+
 		enum TipId
 		{
 			TaskTitle,
@@ -2835,6 +2837,10 @@ namespace EvidenceBoardUIExtension
 			{
 				tip.Text = m_Trans.Translate("New Connection", Translator.Type.ToolTip);
 				tip.Id = TooltipId(taskItem, TipId.CreateLinkPin);
+			}
+			else if (CalcExpansionButtonRect(nodeRect).Contains(clientPos))
+			{
+				tip.Id = NoTip;
 			}
 			else if (taskItem.HasImage)
 			{
@@ -2874,13 +2880,16 @@ namespace EvidenceBoardUIExtension
 
 			if (tip.Id != 0)
 			{
-				// These are really tooltips not label tips so offset them
-				clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+				if (tip.Id != NoTip)
+				{
+					// These are really tooltips not label tips so offset them
+					clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
 
-				tip.Rect.Location = clientPos;
-				tip.InitialDelay = 500;
-				tip.MultiLine = false;
-				tip.Font = Font;
+					tip.Rect.Location = clientPos;
+					tip.InitialDelay = 500;
+					tip.MultiLine = false;
+					tip.Font = Font;
+				}
 			}
 			else // check for title tip
 			{
