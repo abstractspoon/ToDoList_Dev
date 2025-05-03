@@ -166,7 +166,7 @@ namespace EvidenceBoardUIExtension
 			m_TaskItems = null;
 			m_DependencyColor = Color.CornflowerBlue;
 
-			int nodeHeight = (int)Math.Max((2 * BaseFontHeight), (BaseFontHeight + UIExtension.TaskIcon.IconSize)) + (3 * LabelPadding);
+			int nodeHeight = (int)(2 * Math.Max(BaseFontHeight, UIExtension.TaskIcon.IconSize)) + (3 * LabelPadding);
 			int nodeWidth  = (4 * nodeHeight);
 
 			base.NodeSize = DPIScaling.UnScale(new Size(nodeWidth, nodeHeight));
@@ -1750,7 +1750,7 @@ namespace EvidenceBoardUIExtension
 		private Rectangle CalcImageExpansionButtonRect(Rectangle labelRect)
 		{
 			var rect = CalcIconRect(labelRect);
-			rect.Y += rect.Height;
+			rect.Y += rect.Height + LabelPadding;
 			rect.Height--;
 
 			return rect;
