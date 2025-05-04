@@ -145,7 +145,9 @@ protected:
 	afx_msg void OnUpdateClearAttributeValue(CCmdUI* pCmdUI);
 
 	afx_msg LRESULT OnEditTaskAttribute(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnClearTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditTaskReminder(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnClearTaskReminder(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAttributeEdited(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAutoItemAddedOrDeleted(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToggleTimeTracking(WPARAM wParam, LPARAM lParam);

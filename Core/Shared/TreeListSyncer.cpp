@@ -2353,6 +2353,10 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	}
 	else if (!IsResyncEnabled())
 	{
+		// Eat all paint messages until syncing is re-enabled
+		if (msg == WM_PAINT)
+			return 0L;
+
 		return ScDefault(hRealWnd);
 	}
 

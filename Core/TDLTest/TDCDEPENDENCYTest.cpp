@@ -32,7 +32,7 @@ const CString FOLDERPATH(_T("C:\\Users\\Daniel Godson\\AppData"));
 
 CTDCDEPENDENCYTest::CTDCDEPENDENCYTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(utils)
+	CTDLTestBase(_T("CTDCDEPENDENCYTest"), utils)
 {
 
 }

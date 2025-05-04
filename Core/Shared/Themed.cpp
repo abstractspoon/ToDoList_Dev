@@ -57,6 +57,11 @@ typedef HRESULT (STDAPICALLTYPE *PFNENDBUFFEREDPAINT)(HPAINTBUFFER, BOOL);
 
 //////////////////////////////////////////////////////////////////////
 
+#define HASSTATE(state) ((nState & state) == state)
+#define ISTYPE(type) ((nState & type) == type)
+
+//////////////////////////////////////////////////////////////////////
+
 HMODULE CThemed::s_hUxTheme = HMODULE(-1);
 
 //////////////////////////////////////////////////////////////////////
@@ -282,13 +287,13 @@ BOOL CThemed::DrawUnthemedFrameControl(CDC* pDC, const CRect& rect, UINT nType, 
 		// fall through
 
 	case DFC_BUTTON:
-		if (nState & DFCS_BUTTONPUSH)
+		if (ISTYPE(DFCS_BUTTONPUSH))
 		{
 			// We draw push buttons ourselves to be consistent with how 
 			// DrawFrameControl draws the combo/scroll button
 			CRect rFrame(rect);
 
-			if (nState & DFCS_PUSHED)
+			if (HASSTATE(DFCS_PUSHED))
 			{
 				pDC->Draw3dRect(rFrame, GetSysColor(COLOR_3DSHADOW), GetSysColor(COLOR_3DSHADOW));
 			}
@@ -715,73 +720,104 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 			sThClass = "BUTTON";
 			nThState = PBS_NORMAL;
 			
-			if (nState & DFCS_BUTTONPUSH) 
+			if (ISTYPE(DFCS_BUTTONPUSH))
 			{
 				nThPart = BP_PUSHBUTTON;
 				
-				if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+				if (HASSTATE(DFCS_INACTIVE))
 				{
 					nThState = PBS_DISABLED;
 				}
-				else if (nState & (DFCS_CHECKED | DFCS_PUSHED))
-				{
-					nThState = PBS_PRESSED;
-				}
-				else if ((nState & DFCS_HOT) == DFCS_HOT)
+				else if (HASSTATE(DFCS_HOT))
 				{
 					nThState = PBS_HOT;
 				}
+				else if (HASSTATE(DFCS_CHECKED) || HASSTATE(DFCS_PUSHED))
+				{
+					nThState = PBS_PRESSED;
+				}
 			}
-			else if (nState & DFCS_BUTTONRADIO) 
+			else if (ISTYPE(DFCS_BUTTONRADIO))
 			{
 				nThPart = BP_RADIOBUTTON;
 
-				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+				if (HASSTATE(DFCS_CHECKED))
 				{
-					if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+					if (HASSTATE(DFCS_INACTIVE))
 					{
 						nThState = RBS_CHECKEDDISABLED;
 					}
-					else if ((nState & DFCS_HOT) == DFCS_HOT)
+					else if (HASSTATE(DFCS_HOT))
 					{
 						nThState = RBS_CHECKEDHOT;
 					}
-					else
+					else if (HASSTATE(DFCS_PUSHED))
+					{
+						nThState = RBS_CHECKEDPRESSED;
+					}
+					else // Normal
 					{
 						nThState = RBS_CHECKEDNORMAL;
 					}
 				}
+				else // Unchecked
+				{
+					if (HASSTATE(DFCS_INACTIVE))
+					{
+						nThState = RBS_UNCHECKEDDISABLED;
+					}
+					else if (HASSTATE(DFCS_HOT))
+					{
+						nThState = RBS_UNCHECKEDHOT;
+					}
+					else if (HASSTATE(DFCS_PUSHED))
+					{
+						nThState = RBS_UNCHECKEDPRESSED;
+					}
+					else
+					{
+						nThState = RBS_UNCHECKEDNORMAL;
+					}
+				}
 			}
-			else if ((nState & DFCS_BUTTONCHECK) == DFCS_BUTTONCHECK) 
+			else if (ISTYPE(DFCS_BUTTONCHECK)) 
 			{
 				nThPart = BP_CHECKBOX;
 				
-				if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+				if (HASSTATE(DFCS_CHECKED))
 				{
-					if ((nState & DFCS_MIXED) == DFCS_MIXED)
+					if (HASSTATE(DFCS_MIXED))
 					{
-						if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+						if (HASSTATE(DFCS_INACTIVE))
 						{
 							nThState = CBS_MIXEDDISABLED;
 						}
-						else if ((nState & DFCS_HOT) == DFCS_HOT)
+						else if (HASSTATE(DFCS_HOT))
 						{
 							nThState = CBS_MIXEDHOT;
+						}
+						else if (HASSTATE(DFCS_PUSHED))
+						{
+							nThState = CBS_MIXEDPRESSED;
 						}
 						else
 						{
 							nThState = CBS_MIXEDNORMAL;
 						}
 					}
-					else
+					else // Normal
 					{
-						if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+						if (HASSTATE(DFCS_INACTIVE))
 						{
 							nThState = CBS_CHECKEDDISABLED;
 						}
-						else if ((nState & DFCS_HOT) == DFCS_HOT)
+						else if (HASSTATE(DFCS_HOT))
 						{
 							nThState = CBS_CHECKEDHOT;
+						}
+						else if (HASSTATE(DFCS_PUSHED))
+						{
+							nThState = CBS_CHECKEDPRESSED;
 						}
 						else
 						{
@@ -789,24 +825,30 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 						}
 					}
 				}
-				else
+				else // Unchecked
 				{
-					if ((nState & DFCS_INACTIVE) == DFCS_INACTIVE)
+					if (HASSTATE(DFCS_INACTIVE))
 					{
 						nThState = CBS_UNCHECKEDDISABLED;
 					}
-					else if ((nState & DFCS_HOT) == DFCS_HOT)
+					else if (HASSTATE(DFCS_HOT))
 					{
 						nThState = CBS_UNCHECKEDHOT;
 					}
-					else
+					else if (HASSTATE(DFCS_PUSHED))
+					{
+						nThState = CBS_UNCHECKEDPRESSED;
+					}
+					else // Normal
 					{
 						nThState = CBS_UNCHECKEDNORMAL;
 					}
 				}
 			}
 			else 
+			{
 				return FALSE;
+			}
 		}
 		break;
 
@@ -820,17 +862,17 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 		break;
 		
 	case DFC_SCROLL:
-		if (nState & DFCS_SCROLLCOMBOBOX)
+		if (ISTYPE(DFCS_SCROLLCOMBOBOX))
 		{
 			VERIFY(GetThemeClassPartState(DFC_COMBO, nState, sThClass, nThPart, nThState)); // RECURSIVE CALL
 		}
-		else if (nState & DFCS_SCROLLSIZEGRIP)
+		else if (ISTYPE(DFCS_SCROLLSIZEGRIP))
 		{
 			sThClass = "SCROLLBAR";
 			nThPart = SBP_SIZEBOX;
-			nThState = (nState & DFCS_SCROLLLEFT) ? SZB_LEFTALIGN : SZB_RIGHTALIGN;
+			nThState = (HASSTATE(DFCS_SCROLLLEFT) ? SZB_LEFTALIGN : SZB_RIGHTALIGN);
 		}
-		else if (nState & DFCS_SCROLLDOWN)
+		else if (ISTYPE(DFCS_SCROLLDOWN))
 		{
 			sThClass = "SCROLLBAR";
 			nThPart = SBP_LOWERTRACKVERT;
@@ -849,15 +891,15 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 			nThPart = (nType == DFC_COMBO ? CP_DROPDOWNBUTTON : CP_READONLY);
 			nThState = CBXS_NORMAL;
 
-			if (nState & DFCS_INACTIVE)
+			if (HASSTATE(DFCS_INACTIVE))
 			{
 				nThState = CBXS_DISABLED;
 			}
-			else if (nState & (DFCS_CHECKED | DFCS_PUSHED))
+			else if (HASSTATE(DFCS_CHECKED) || HASSTATE(DFCS_PUSHED))
 			{
 				nThState = CBXS_PRESSED;
 			}
-			else if (nState & DFCS_HOT)
+			else if (HASSTATE(DFCS_HOT))
 			{
 				nThState = CBXS_HOT;
 			}

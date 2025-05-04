@@ -18,7 +18,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // COrderedTreeCtrl
 
-const UINT MINGUTTER = 16;
+const int MINGUTTER = 16;
 
 static CMap<int, int&, UINT, UINT&> g_mapWidths;
 

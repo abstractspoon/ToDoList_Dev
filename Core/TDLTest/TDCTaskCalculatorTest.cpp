@@ -32,7 +32,7 @@ const LPCTSTR ID_INTEGER = _T("Integer");
 
 CTDCTaskCalculatorTest::CTDCTaskCalculatorTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(utils)
+	CTDLTestBase(_T("CTDCTaskCalculatorTest"), utils)
 {
 	// Simple custom attributes
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;

@@ -161,10 +161,13 @@ void CTimeComboBox::SetISOFormat(BOOL bISO)
 	{
 		m_dwStyle = dwNewStyle;
 
-		double date = GetOleTime();
+		if (GetSafeHwnd())
+		{
+			double date = GetOleTime();
 
-		BuildCombo(TRUE);
-		SetOleTime(date);
+			BuildCombo(TRUE);
+			SetOleTime(date);
+		}
 	}
 }
 

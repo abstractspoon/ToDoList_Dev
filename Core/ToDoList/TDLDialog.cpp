@@ -204,7 +204,8 @@ BOOL CTDLDialog::SetIcon(UINT nIconID)
 
 int CTDLDialog::DoModal(HICON hIcon)
 {
-	m_iconDlg.SetIcon(hIcon, FALSE); // Not owned
+	if (hIcon)
+		m_iconDlg.SetIcon(hIcon, FALSE); // Not owned
 
 	return CDialog::DoModal();
 }

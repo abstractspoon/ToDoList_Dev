@@ -40,6 +40,8 @@ public:
 	void SetGroupHeaderBackColor(COLORREF crBack);
 	COLORREF GetGroupHeaderBackColor() const { return m_crBkgnd; }
 
+	static BOOL IsSupported();
+
 protected:
 	HWND m_hwndList;
 	BOOL m_bEnabled;
@@ -166,7 +168,7 @@ private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 
 	CMap<DWORD, DWORD, CString, CString&> m_mapSortStrings; 
 	
-	int m_nMinItemHeight;
+	int m_nMinItemHeight, m_nItemHeight;
 	DWORD m_dwSelectionTheming;
 	CListCtrlItemGrouping m_grouping;
 
@@ -176,6 +178,7 @@ private:
 	//{{AFX_VIRTUAL(CEnListCtrl)
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+	afx_msg void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void PreSubclassWindow();
@@ -187,7 +190,6 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnDestroy();
@@ -199,6 +201,7 @@ protected:
 	afx_msg BOOL OnColumnClick(NMHDR* pNMHDR, LPARAM* lResult);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);
 	afx_msg BOOL OnListCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 	// helpers
@@ -226,17 +229,17 @@ protected:
 	CColumnData* CreateColumnData(int nCol);
 	const CColumnData* GetColumnData(int nCol) const;
 	CString GetSortText(DWORD dwItemData) const;
-	void RefreshItemHeight();
 	void ResizeStretchyColumns();
 	CString GetSortString(DWORD dwItemData) const;
 	BOOL BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
 	BOOL IsSelectionThemed(BOOL bClassic) const;
 	BOOL WantSelChange(int nSel) const;
 	int CompareEmptiness(BOOL bItem1Empty, BOOL bItem2Empty) const;
+	void ForceResize(BOOL bRecalcItemHeight);
 
 private:
 	BOOL BuildSortMap(int nCol);
-	int CalcItemHeight() const;
+
 	static int CALLBACK CompareProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam);
 };
 

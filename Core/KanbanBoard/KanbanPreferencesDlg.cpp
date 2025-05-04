@@ -66,7 +66,7 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CKanbanPreferencesPage)
-	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeAttribute)
+	ON_CBN_SELENDOK(IDC_ATTRIBUTES, OnSelchangeAttribute)
 	ON_BN_CLICKED(IDC_MOVECOL_DOWN, OnMoveFixedColDown)
 	ON_BN_CLICKED(IDC_MOVECOL_UP, OnMoveFixedColUp)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COLUMNDEFS, OnItemchangedColumndefs)
@@ -150,10 +150,8 @@ BOOL CKanbanPreferencesPage::IsCustomFixedAttribute() const
 
 void CKanbanPreferencesPage::UpdateFixedAttributeValueCombo()
 {
-	if (HasFixedColumns())
+	if (m_nFixedAttrib != TDCA_NONE)
 	{
-		UpdateData();
-
 		CString sAttribID = (IsCustomFixedAttribute() ? m_sFixedCustomAttribID : KBUtils::GetAttributeID(m_nFixedAttrib));
 		ASSERT(!sAttribID.IsEmpty());
 
@@ -173,6 +171,8 @@ void CKanbanPreferencesPage::UpdateFixedAttributeValueCombo()
 				if (!sValue.IsEmpty())
 					aValues.Add(sValue);
 			}
+
+			Misc::SortArray(aValues);
 		}
 
 		m_lcFixedColumnDefs.SetAttributeValues(aValues);

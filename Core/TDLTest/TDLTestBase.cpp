@@ -57,9 +57,9 @@ BOOL CTestUtils::Initialise(const CString& sOutputDir, const CString& sControlDi
 	return TRUE;
 }
 
-BOOL CTestUtils::HasCommandlineFlag(TCHAR cFlag) const
+BOOL CTestUtils::HasCommandlineFlag(LPCTSTR szFlag) const
 {
-	return m_cmdInfo.HasOption(cFlag);
+	return m_cmdInfo.HasOption(szFlag);
 }
 
 CString CTestUtils::GetOutputFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const
@@ -76,7 +76,6 @@ CString CTestUtils::GetFilePath(const CString& sRoot, const CString& sSubDir,
 								const CString& sFilename, const CString& sExt)
 {
 	ASSERT(FileMisc::IsPath(sRoot) && !sSubDir.IsEmpty() && !sFilename.IsEmpty() && !sExt.IsEmpty());
-	
 	
 	if (FileMisc::IsPath(sRoot) && !sSubDir.IsEmpty() && !sFilename.IsEmpty() && !sExt.IsEmpty())
 	{
@@ -305,18 +304,19 @@ CTDLTestBase::CTDLTestBase()
 {
 }
 
-CTDLTestBase::CTDLTestBase(const CTestUtils& utils) 
+CTDLTestBase::CTDLTestBase(LPCTSTR szName, const CTestUtils& utils)
 	: 
+	m_sName(szName),
 	m_utils(utils),
 	m_nCurTest(0)
 {
-
+	ASSERT(!m_sName.IsEmpty());
 }
 
 CTDLTestBase::~CTDLTestBase()
 {
 	if (m_resTotal != m_resTest)
-		m_resTotal.ReportResults();
+		m_resTotal.ReportResults(m_sName, FALSE);
 }
 
 BOOL CTDLTestBase::BeginTest(LPCTSTR szTest) 
@@ -350,7 +350,7 @@ BOOL CTDLTestBase::EndTest()
 		return FALSE;
 	}
 
-	m_resTest.ReportResults();
+	m_resTest.ReportResults(m_sCurTest, TRUE);
 	m_resTotal += m_resTest;
 	
 	_tprintf(_T("\nTest '%s' ended ----------\n"), (LPCTSTR)m_sCurTest);

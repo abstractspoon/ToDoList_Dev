@@ -18,7 +18,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CDateHelperTest::CDateHelperTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CDateHelperTest::CDateHelperTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CDateHelperTest"), utils)
 {
 
 }

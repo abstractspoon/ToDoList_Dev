@@ -107,5 +107,10 @@ void DoTests(const CTestUtils& utils)
 
 	// More...
 
-	res.ReportResults();
+	res.ReportResults(_T("All"), FALSE);
+
+	// When we are NOT DEBUGGING we just assert once at the end
+	// else we assert in the actual test that failed
+	if (!::IsDebuggerPresent())
+		ASSERT(res.nNumError == 0);
 }

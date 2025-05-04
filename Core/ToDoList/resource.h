@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by ToDoList.rc
 //
 #define IDR_MANIFEST                    1
@@ -874,6 +874,7 @@
 #define IDC_SHOWMIXEDDONECHECKBOX       1582
 #define IDC_NUMPRORITYRISKLEVELS        1587
 #define IDC_SETNUMPRIORITYRISKLEVELS    1588
+#define IDC_SOUNDFILE                   1589
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -2569,6 +2570,7 @@
 #define IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE 51674
 #define IDS_TITLE_TIMETRACKING          51675
 #define IDS_DEFAULTATTRIBUTES           51676
+#define IDS_ATTRIBTIP_DISMISS           51677
 
 // Next default values for new objects
 // 
@@ -2576,7 +2578,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        337
 #define _APS_NEXT_COMMAND_VALUE         34785
-#define _APS_NEXT_CONTROL_VALUE         1589
+#define _APS_NEXT_CONTROL_VALUE         1591
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

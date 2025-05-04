@@ -18,7 +18,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CWorkingWeekTest::CWorkingWeekTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CWorkingWeekTest::CWorkingWeekTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CWorkingWeekTest"), utils)
 {
 
 }
@@ -122,7 +124,9 @@ void CWorkingWeekTest::TestCalculateDuration()
 
 //////////////////////////////////////////////////////////////////////
 
-CWorkingDayTest::CWorkingDayTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CWorkingDayTest::CWorkingDayTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CWorkingDayTest"), utils)
 {
 
 }

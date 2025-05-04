@@ -104,7 +104,7 @@ BOOL TDCREMINDER::HasIcon() const
 	return (pTDC && pTDC->GetTaskIconIndex(dwTaskID) != -1);
 }
 
-void TDCREMINDER::DrawIcon(CDC* pDC, const CRect& rIcon) const
+void TDCREMINDER::DrawIcon(CDC* pDC, const CRect& rText) const
 {
 	ASSERT(IsValid());
 
@@ -113,7 +113,7 @@ void TDCREMINDER::DrawIcon(CDC* pDC, const CRect& rIcon) const
 		int nImage = pTDC->GetTaskIconIndex(dwTaskID);
 
 		if (nImage != -1)
-			pTDC->GetTaskIconImageList().Draw(pDC, nImage, rIcon.TopLeft());
+			pTDC->GetTaskIconImageList().DrawVerticallyCentred(pDC, nImage, rText);
 	}
 }
 

@@ -73,8 +73,8 @@ public:
 protected:
 	int m_nCurGroupID;
 	int m_nHotItem;
+	int m_nTextOffset;
 	BOOL m_bStrikeThruDone;
-	BOOL m_bHasIconsOrRefs;
 
 	mutable CFontCache m_fonts;
 
@@ -106,11 +106,13 @@ protected:
 	virtual COLORREF GetItemBackColor(int nItem, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual CFont* GetItemFont(int nItem, int nSubItem) const;
 	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
 
 	CString FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const;
 	CString GetAttributeName(TDC_ATTRIBUTE nAttribID, const CFilteredToDoCtrl* pTDC) const;
 	void UpdateHotItem(CPoint point);
-	void UpdateIconAndReferenceStatus();
+	void RecalcTextOffset();
+	int GetTextOffset(const FTDRESULT* pRes) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

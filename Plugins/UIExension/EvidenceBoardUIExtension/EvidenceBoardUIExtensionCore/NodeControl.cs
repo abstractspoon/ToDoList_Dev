@@ -130,7 +130,7 @@ namespace EvidenceBoardUIExtension
 			m_InitialRadius = DefaultInitialRadius;
 			m_RadialIncrementOrSpacing = DefaultInitialRadius;
 			m_NodeSize = DefaulttNodeSize;
-			m_TextFont = new Font("Tahoma", 8.25f);
+			m_TextFont = new Font("Tahoma", 8f);
 			m_BaseFontHeight = m_TextFont.Height;
 			m_SelectedNodes = new List<BaseNode>();
 			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)ScaleByDpi(20) };

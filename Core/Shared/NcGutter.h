@@ -262,7 +262,7 @@ protected:
 
 	static BOOL PrepareBitmap(CDC* pDC, CBitmap* pBitmap, const CRect& rect);
 	static BOOL BitmapNeedsRecreate(CDC* pDC, CBitmap* pBitmap, const CRect& rect);
-	CFont* PrepareFont(CDC* pDC, BOOL bHeader, HFONT hFont = NULL); // returns 'old' font
+	HFONT PrepareFont(CDC* pDC, BOOL bHeader, HFONT hFont = NULL); // returns 'old' font
 
 	enum GHR_WHAT { GHR_NONCLIENT, GHR_CLIENT, GHR_ALL }; // private
 

@@ -135,6 +135,7 @@ void CPreferencesShortcutsPage::BuildMenuTree()
 	m_tcCommands.SendMessage(WM_NULL);
 	m_tcCommands.SetRedraw(FALSE);
 	m_tcCommands.DeleteAllItems();
+	m_tcCommands.SetIndent(ICON_OFFSET);
 
 	CWaitCursor cursor;
 	HTREEITEM htiFirst = NULL;

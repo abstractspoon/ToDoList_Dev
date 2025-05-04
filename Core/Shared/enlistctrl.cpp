@@ -10,13 +10,13 @@
 #include "graphicsmisc.h"
 #include "enimagelist.h"
 #include "enstring.h"
+#include "OsVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -126,6 +126,12 @@ CListCtrlItemGrouping::CListCtrlItemGrouping(HWND hwndList)
 {
 }
 
+BOOL CListCtrlItemGrouping::IsSupported()
+{
+	// XP's API support for grouping is poor
+	return (COSVersion() > OSV_XPP);
+}
+
 BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 {
 	if (!m_hwndList)
@@ -133,6 +139,9 @@ BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
 		ASSERT(0);
 		return FALSE;
 	}
+
+	if (!IsSupported())
+		return FALSE;
 
 	if (::SendMessage(m_hwndList, LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) == -1)
 		return FALSE;
@@ -155,6 +164,9 @@ BOOL CListCtrlItemGrouping::EnableGroupView(HWND hwndList, BOOL bEnable)
 
 BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader)
 {
+	if (!m_bEnabled)
+		return FALSE;
+
 	LVGROUP lvg = { 0 };
 
 	lvg.cbSize = sizeof(lvg);
@@ -162,7 +174,7 @@ BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CS
 	lvg.state = LVGS_NORMAL;
 	lvg.mask = LVGF_GROUPID | LVGF_HEADER | LVGF_STATE | LVGF_ALIGN;
 	lvg.uAlign = LVGA_HEADER_LEFT;
-	lvg.pszHeader = (LPWSTR)(LPCTSTR)strHeader;
+	lvg.pszHeader = (LPTSTR)(LPCTSTR)strHeader;
 	lvg.cchHeader = strHeader.GetLength();
 
 	return (-1 != ::SendMessage(m_hwndList, LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
@@ -170,6 +182,9 @@ BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CS
 
 CString CListCtrlItemGrouping::GetGroupHeaderText(int nGroupID) const
 {
+	if (!m_bEnabled)
+		return _T("");
+	
 	LVGROUP lvg = { 0 };
 	TCHAR szHeader[256] = { 0 };
 
@@ -185,6 +200,9 @@ CString CListCtrlItemGrouping::GetGroupHeaderText(int nGroupID) const
 
 int CListCtrlItemGrouping::GetItemGroupId(int nRow) const
 {
+	if (!m_bEnabled)
+		return -1;
+	
 	LVGROUPITEM lvgi = { 0 };
 
 	lvgi.mask = LVIF_GROUPID;
@@ -197,6 +215,9 @@ int CListCtrlItemGrouping::GetItemGroupId(int nRow) const
 
 BOOL CListCtrlItemGrouping::SetItemGroupId(int nRow, int nGroupID)
 {
+	if (!m_bEnabled)
+		return FALSE;
+	
 	LVGROUPITEM lvgi = { 0 };
 
 	lvgi.mask = LVIF_GROUPID;
@@ -209,6 +230,9 @@ BOOL CListCtrlItemGrouping::SetItemGroupId(int nRow, int nGroupID)
 
 BOOL CListCtrlItemGrouping::HasGroups() const
 {
+	if (!m_bEnabled)
+		return FALSE;
+
 	return (::SendMessage(m_hwndList, LVM_GETGROUPCOUNT, 0, 0) > 0);
 }
 
@@ -250,11 +274,6 @@ CEnListCtrl::CColumnData::CColumnData()
 
 IMPLEMENT_DYNAMIC(CEnListCtrl, CListCtrl)
 
-#define IDC_HEADERCTRL 10001
-#define WM_SHOWPOPUPMENU (WM_APP+1001)
-#define ID_TIMER_HEADERPOS 1
-const int MAX_HEADING_SIZE = 100;
-
 CEnListCtrl::CEnListCtrl() 
 	: 
 	m_dwSelectionTheming(NOTSET),
@@ -264,6 +283,7 @@ CEnListCtrl::CEnListCtrl()
 	m_bLastColStretchy(FALSE),
 	m_bFirstColStretchy(FALSE),
 	m_nMinItemHeight(-1),
+	m_nItemHeight(-1),
 	m_bReadOnly(FALSE),
 	m_nItemDropHilite(-1),
 	m_bDropHiliteItemSelected(FALSE),
@@ -297,6 +317,7 @@ BEGIN_MESSAGE_MAP(CEnListCtrl, CListCtrl)
 	ON_WM_ERASEBKGND()
 	ON_WM_WINDOWPOSCHANGED()
 	//}}AFX_MSG_MAP
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_WM_TIMER()
 	ON_NOTIFY_REFLECT_EX(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT_EX(NM_CUSTOMDRAW, OnListCustomDraw)
@@ -314,7 +335,7 @@ BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
 	if (!m_grouping.EnableGroupView(GetSafeHwnd(), bEnable))
 		return FALSE;
 
-	RefreshItemHeight();
+	ForceResize(TRUE);
 	return TRUE;
 }
 
@@ -1074,18 +1095,18 @@ void CEnListCtrl::SetView(int nView)
     if ((dwStyle & LVS_TYPEMASK) != (DWORD)nView) 
 		SetWindowLong(GetSafeHwnd(), GWL_STYLE, (dwStyle & ~LVS_TYPEMASK) | (DWORD)nView); 
 
-	// if we are in report view then we want to be ownerdraw 
-	// so we can take advatage of the special drawing
+	// if we are in report view then we want to be owner-draw 
+	// so we can take advantage of the special drawing
 	if (nView == LVS_REPORT)
 	{
-		// make ownerdraw
+		// make owner-draw
 		if (!(dwStyle & LVS_OWNERDRAWFIXED))
 			ModifyStyle(0, LVS_OWNERDRAWFIXED); 
 	}
 	// else we want default drawing
 	else
 	{
-		// make non-ownerdraw
+		// make non-owner-draw
 		if (dwStyle & LVS_OWNERDRAWFIXED)
 			ModifyStyle(LVS_OWNERDRAWFIXED, 0); 
 	}
@@ -1094,8 +1115,7 @@ void CEnListCtrl::SetView(int nView)
 	Invalidate(FALSE);
 
 	// force a resize to ensure that the column headers are correct
-	WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER };
-	PostMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp); 
+	ForceResize(FALSE);
 }
 
 int CEnListCtrl::GetItemImage(int nItem, int nSubItem) const
@@ -1215,9 +1235,17 @@ void CEnListCtrl::SetLastColumnStretchy(BOOL bStretchy)
 	// invoke a resize to update last column
 	if (m_bLastColStretchy && (m_nCurView == LVS_REPORT) && GetSafeHwnd())
 	{
-		WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER };
-		PostMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp); 
+		ForceResize(FALSE);
 	}
+}
+
+LRESULT CEnListCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	LRESULT lr = Default();
+
+	ForceResize(TRUE); // Recalc item height
+
+	return lr;
 }
 
 void CEnListCtrl::OnWindowPosChanged(WINDOWPOS* lpwndpos)
@@ -1235,8 +1263,7 @@ void CEnListCtrl::SetFirstColumnStretchy(BOOL bStretchy)
 	// invoke a resize to update first column
 	if (m_bFirstColStretchy && m_nCurView == LVS_REPORT && GetSafeHwnd())
 	{
-		WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER };
-		PostMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp); 
+		ForceResize(FALSE);
 	}
 }
 
@@ -1376,42 +1403,41 @@ BOOL CEnListCtrl::PreTranslateMessage(MSG* pMsg)
 	return CListCtrl::PreTranslateMessage(pMsg);
 }
 
-int CEnListCtrl::CalcItemHeight() const
-{
-	ASSERT(GetSafeHwnd());
-
-	int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9); // default edit height
-	int nFontHeight = GraphicsMisc::GetFontPixelSize(GetSafeHwnd());
-
-	int nItemHeight = max(m_nMinItemHeight, max(nBaseHeight, nFontHeight));
-
-	if (m_grouping.IsEnabled())
-		nItemHeight--;
-
-	return nItemHeight;
-}
-
 void CEnListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
-    lpMeasureItemStruct->itemHeight = CalcItemHeight(); 
+	if (m_nItemHeight == -1)
+	{
+		// Default edit height
+		int nBaseHeight = CDlgUnits(this, TRUE).ToPixelsY(9);
+
+		// Font height
+		TEXTMETRIC tm = { 0 };
+		VERIFY(GraphicsMisc::GetFontMetrics(*this, tm));
+
+		int nFontHeight = (tm.tmHeight + tm.tmExternalLeading);
+
+		// Item height
+		m_nItemHeight = max(m_nMinItemHeight, max(nBaseHeight, nFontHeight));
+
+		if (m_grouping.IsEnabled())
+			m_nItemHeight--;
+	}
+
+    lpMeasureItemStruct->itemHeight = m_nItemHeight; 
 }
 
-void CEnListCtrl::RefreshItemHeight()
+void CEnListCtrl::ForceResize(BOOL bRecalcItemHeight)
 {
+	if (bRecalcItemHeight)
+		m_nItemHeight = -1;
+
 	if (GetSafeHwnd())
 	{
-		// I've tried everything I can think of but the only thing 
-		// that seems to trigger a WM_MEASUREITEM message is a size change
-		CRect rWindow;
+		CRect rClient;
+		GetClientRect(rClient);
 
-		GetWindowRect(rWindow);
-		GetParent()->ScreenToClient(rWindow);
-
-		rWindow.right--;
-		MoveWindow(rWindow);
-
-		rWindow.right++;
-		MoveWindow(rWindow);
+		WINDOWPOS wp = { GetSafeHwnd(), NULL, 0, 0, rClient.Width(), rClient.Height(), SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOZORDER };
+		SendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
 	}
 }
 
@@ -1426,22 +1452,7 @@ BOOL CEnListCtrl::SetMinItemHeight(int nHeight)
 	if (nHeight != m_nMinItemHeight)
 	{
 		m_nMinItemHeight = nHeight;
-
-		if (GetSafeHwnd())
-		{
-			if (GetItemCount())
-			{
-				CRect rItem;
-				GetItemRect(0, rItem, LVIR_BOUNDS);
-
-				if (nHeight != rItem.Height())
-					RefreshItemHeight();
-			}
-			else
-			{
-				RefreshItemHeight();
-			}
-		}
+		ForceResize(m_nItemHeight != m_nMinItemHeight);
 	}
 
 	return TRUE;
@@ -1744,10 +1755,6 @@ CString CEnListCtrl::GetSortString(DWORD dwItemData) const
 
 int CEnListCtrl::CompareItems(DWORD dwItemData1, DWORD dwItemData2, int /*nSortColumn*/) const
 {
-	// -1 if dwItemData1 should go BEFORE dwItemData2
-	//  1 if dwItemData1 should go AFTER dwItemData2
-	//  0 if it doesn't matter
-
 	// default comparison just compares text
 	CString sItem1, sItem2;
 
@@ -1860,9 +1867,6 @@ void CEnListCtrl::PreSubclassWindow()
 
 	if (m_nCurView == -1)
 		m_nCurView = (GetStyle() & LVS_TYPEMASK);
-
-	if (m_nMinItemHeight != -1)
-		RefreshItemHeight();
 }
 
 BOOL CEnListCtrl::OnEraseBkgnd(CDC* pDC) 

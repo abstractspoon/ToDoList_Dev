@@ -612,6 +612,7 @@ protected:
 	afx_msg LRESULT OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCEditTaskReminder(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCClearTaskReminder(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCClearTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCNotifyAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCToggleTimeTracking(WPARAM wParam, LPARAM lParam);

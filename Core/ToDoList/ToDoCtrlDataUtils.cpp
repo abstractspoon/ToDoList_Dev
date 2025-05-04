@@ -4019,12 +4019,12 @@ CString CTDCTaskFormatter::GetTaskPercentDone(const TODOITEM* pTDI, const TODOST
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskCommentsSize(DWORD dwTaskID) const
+CString CTDCTaskFormatter::GetTaskCommentsSizeInKB(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
 
-	return GetTaskCommentsSize(pTDI);
+	return GetTaskCommentsSizeInKB(pTDI);
 }
 
 CString CTDCTaskFormatter::GetTaskCommentsFormat(DWORD dwTaskID, BOOL bEmptyIsBlank) const
@@ -4074,7 +4074,7 @@ CString CTDCTaskFormatter::GetTaskRecurrence(const TODOITEM* pTDI) const
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetCommentSize(float fSize) const
+CString CTDCTaskFormatter::GetCommentSizeInKB(float fSize) const
 {
 	if (fSize >= 1)
 		return Misc::FormatNumber(max(1, (int)fSize));
@@ -4086,12 +4086,12 @@ CString CTDCTaskFormatter::GetCommentSize(float fSize) const
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskCommentsSize(const TODOITEM* pTDI) const
+CString CTDCTaskFormatter::GetTaskCommentsSizeInKB(const TODOITEM* pTDI) const
 {
 	ASSERT(pTDI);
 
 	if (pTDI)
-		return GetCommentSize(pTDI->GetCommentsSizeInKB());
+		return GetCommentSizeInKB(pTDI->GetCommentsSizeInKB());
 
 	// else
 	return EMPTY_STR;
@@ -5529,7 +5529,7 @@ BOOL CTDCMultiTasker::GetTaskPosition(const CDWordArray& aTaskIDs, CString& sVal
 
 BOOL CTDCMultiTasker::GetTasksCommentsSize(const CDWordArray& aTaskIDs, CString& sValue) const
 {
-	GETTASKSVAL_SIMPLE(m_formatter.GetTaskCommentsSize, sValue, CString);
+	GETTASKSVAL_SIMPLE(m_formatter.GetTaskCommentsSizeInKB, sValue, CString);
 }
 
 BOOL CTDCMultiTasker::GetTasksSubtaskCompletion(const CDWordArray& aTaskIDs, CString& sValue) const
@@ -6262,7 +6262,7 @@ CString CTDCTaskColumnSizer::GetLongestValue(TDC_COLUMN nColID, const CString& s
 		case TDCC_CATEGORY:			sTaskVal = m_formatter.GetTaskCategories(dwTaskID);		break;
 		case TDCC_TAGS:				sTaskVal = m_formatter.GetTaskTags(dwTaskID);			break;
 		case TDCC_COMMENTSFORMAT:	sTaskVal = m_formatter.GetTaskCommentsFormat(dwTaskID);	break;
-		case TDCC_COMMENTSSIZE:		sTaskVal = m_formatter.GetTaskCommentsSize(dwTaskID);	break;
+		case TDCC_COMMENTSSIZE:		sTaskVal = m_formatter.GetTaskCommentsSizeInKB(dwTaskID);	break;
 		case TDCC_RECURRENCE:		sTaskVal = m_formatter.GetTaskRecurrence(dwTaskID);		break;
 
 		case TDCC_ALLOCBY:			sTaskVal = m_data.GetTaskAllocBy(dwTaskID);				break;
@@ -6442,7 +6442,7 @@ CString CTDCTaskColumnSizer::GetLargestCommentsSizeInKB(const CDWordArray& aTask
 
 	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 	{
-		CString sTaskVal = m_formatter.GetTaskCommentsSize(aTaskIDs[nID]);
+		CString sTaskVal = m_formatter.GetTaskCommentsSizeInKB(aTaskIDs[nID]);
 		sLargest = GetLongerString(sTaskVal, sLargest);
 	}
 
@@ -6633,7 +6633,7 @@ void CTDCTaskColumnSizer::GetLongestValues(const TODOITEM* pTDI,
 			mapLongest.UpdateValue(TDCC_FILELINK, pTDI->aFileLinks.GetSize());
 
 		if (mapLongest.HasColumn(TDCC_COMMENTSSIZE))
-			mapLongest.UpdateValue(TDCC_COMMENTSSIZE, formatter.GetCommentSize(pTDI->GetCommentsSizeInKB()));
+			mapLongest.UpdateValue(TDCC_COMMENTSSIZE, formatter.GetCommentSizeInKB(pTDI->GetCommentsSizeInKB()));
 
 		if (mapLongest.HasColumn(TDCC_COMMENTSFORMAT))
 			mapLongest.UpdateValue(TDCC_COMMENTSFORMAT, formatter.GetTaskCommentsFormat(pTDI));

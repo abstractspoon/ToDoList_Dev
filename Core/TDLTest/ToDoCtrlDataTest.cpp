@@ -31,7 +31,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CToDoCtrlDataTest::CToDoCtrlDataTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CToDoCtrlDataTest::CToDoCtrlDataTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CToDoCtrlDataTest"), utils)
 {
 	m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 //	m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
@@ -85,7 +87,7 @@ void CToDoCtrlDataTest::BeginPerformanceTest(LPCTSTR szFunction, BOOL bWithAttri
 
 void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CToDoCtrlDataTest::HierarchyDataModelCreationPerformance\n"));
 		return;
@@ -117,7 +119,7 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 
 void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CToDoCtrlDataTest::FlatListDataModelPerformance\n"));
 		return;
@@ -152,7 +154,7 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 
 void CToDoCtrlDataTest::TestDataModelCreationPerformance(const CTaskFile& tasks, CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 
@@ -168,7 +170,7 @@ void CToDoCtrlDataTest::TestDataModelCreationPerformance(const CTaskFile& tasks,
 
 void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 
@@ -210,7 +212,7 @@ void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData&
 
 void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 
@@ -257,7 +259,7 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 
 void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 
@@ -284,7 +286,7 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlD
 
 void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	// Mocks ----------------------------------------
 	CTreeCtrl tree;
@@ -320,7 +322,7 @@ void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& da
 
 void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 	DWORD dwMaxTaskID = data.GetTaskCount();

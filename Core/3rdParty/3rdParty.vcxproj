@@ -48,10 +48,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">.\Unicode_Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">.\Unicode_Debug\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">.\Unicode_Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">.\Unicode_Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(SolutionDir)$(ProjectName)\Unicode_Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(SolutionDir)$(ProjectName)\Unicode_Debug\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">$(SolutionDir)$(ProjectName)\Unicode_Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">$(SolutionDir)$(ProjectName)\Unicode_Release\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
     <ClCompile>
@@ -60,7 +60,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>.\Unicode_Debug/3rdParty.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(SolutionDir)$(ProjectName)\Unicode_Debug/3rdParty.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(SolutionDir)$(ProjectName)\Unicode_Debug\</AssemblerListingLocation>
       <ObjectFileName>$(SolutionDir)$(ProjectName)\Unicode_Debug\</ObjectFileName>
       <ProgramDataBaseFileName>$(SolutionDir)$(ProjectName)\Unicode_Debug\</ProgramDataBaseFileName>
@@ -80,7 +80,7 @@
     </Lib>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Unicode_Debug/3rdParty.bsc</OutputFile>
+      <OutputFile>$(SolutionDir)$(ProjectName)\Unicode_Debug/3rdParty.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
       <Command>
@@ -95,7 +95,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>.\Unicode_Release/3rdParty.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(SolutionDir)$(ProjectName)\Unicode_Release/3rdParty.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>$(SolutionDir)$(ProjectName)\Unicode_Release\</AssemblerListingLocation>
       <ObjectFileName>$(SolutionDir)$(ProjectName)\Unicode_Release\</ObjectFileName>
       <ProgramDataBaseFileName>$(SolutionDir)$(ProjectName)\Unicode_Release\</ProgramDataBaseFileName>
@@ -114,7 +114,7 @@
     </Lib>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Unicode_Release/3rdParty.bsc</OutputFile>
+      <OutputFile>$(SolutionDir)$(ProjectName)\Unicode_Release/3rdParty.bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>

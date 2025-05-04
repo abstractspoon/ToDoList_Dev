@@ -137,8 +137,7 @@ void CKanbanFixedColumnListCtrl::InitState()
 	CInputListCtrl::InitState();
 
 	// create child controls 
-	// we need combo to be created first
-	CreateControl(m_cbValues, IDC_VALUES);
+	CreateControl(m_cbValues, IDC_VALUES, CBS_DROPDOWNLIST);
 	CLocalizer::EnableTranslation(m_cbValues, FALSE);
 
 	CRect rClient;

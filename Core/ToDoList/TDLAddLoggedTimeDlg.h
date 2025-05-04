@@ -28,7 +28,7 @@ class CTDLAddLoggedTimeDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, BOOL bEnableAddTimeToTimeSpent, 
+	CTDLAddLoggedTimeDlg(DWORD dwTaskID, BOOL bEnableAddTimeToTimeSpent,
 						 BOOL bISODates, double dHours, CWnd* pParent = NULL);
 
 	double GetLoggedHours() const; // in hours
@@ -44,7 +44,6 @@ protected:
 	CTimeComboBox	m_cbTimeWhen;
 	TDCTIMEPERIOD	m_loggedTime;
 	DWORD	m_dwTaskID;
-	CString	m_sTaskTitle;
 	BOOL	m_bAddTimeToTimeSpent;
 	CString	m_sComment;
 	//}}AFX_DATA
@@ -52,20 +51,18 @@ protected:
 	CTimeEdit m_eLoggedTime;
 	COleDateTime m_dtWhen;
 	BOOL m_bEnableAddTimeToTimeSpent;
-	CEnStatic m_stTaskTitle;
 	BOOL m_bTracked;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLAddLoggedTimeDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void OnOK();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLAddLoggedTimeDlg)
 	virtual BOOL OnInitDialog();

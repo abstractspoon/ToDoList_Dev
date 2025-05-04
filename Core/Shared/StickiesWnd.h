@@ -23,7 +23,7 @@ public:
 	void Release();
 	BOOL IsValid() const { return m_stickies.IsValid(); }
 
-	BOOL CreateSticky(const CString& sTitle, CString& sStickyID, const CString& sContent = _T(""), BOOL bRTF = FALSE, time_t tAlarm = 0, COLORREF color = 0); // returns sticky ID
+	BOOL CreateSticky(const CString& sTitle, CString& sStickyID, const CString& sContent = _T(""), BOOL bRTF = FALSE); // returns sticky ID
 	BOOL DeleteSticky(const CString& sStickyID); 
 	BOOL HasSticky(const CString& sStickyID);
 

@@ -3222,7 +3222,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	CSaveDC sdc(pDC);
 
 	double dMonthWidth = GetMonthWidth(rItem.Width());
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_listHeader);
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(pDC, m_listHeader);
 	
 	CThemed th;
 	BOOL bThemed = (th.AreControlsThemed() && th.Open(&m_listHeader, _T("HEADER")));
@@ -3424,7 +3424,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 		break;
 	}
 
-	pDC->SelectObject(pOldFont); // not sure if this is necessary but play safe
+	pDC->SelectObject(hOldFont); // not sure if this is necessary but play safe
 }
 
 void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme, BOOL bEnsureLabelVisible, LPCRECT prcToday)
@@ -4772,7 +4772,7 @@ int CGanttCtrl::GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const
 void CGanttCtrl::CalcMinMonthWidths()
 {
 	CClientDC dcClient(&m_list);
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dcClient, m_list);
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dcClient, m_list);
 
 	for (int nMode = 0; nMode < NUM_DISPLAYMODES; nMode++)
 	{
@@ -4894,7 +4894,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 		}
 	}
 
-	dcClient.SelectObject(pOldFont);
+	dcClient.SelectObject(hOldFont);
 }
 
 GTLC_MONTH_DISPLAY CGanttCtrl::GetColumnDisplay(int nMonthWidth) const

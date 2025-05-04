@@ -240,7 +240,7 @@ void CTDLAttributeComboBox::BuildCombo()
 		int nItem = AddString(CEnString(IDS_TDLBC_CUSTOMATTRIBS));
 		SetHeadingItem(nItem);
 
-		Misc::SortArrayT(aCustomItems, SortProc);
+		Misc::SortArrayT<SORTITEM>(aCustomItems, SortProc);
 		AddItemsToCombo(aCustomItems);
 
 		nItem = AddString(CEnString(IDS_DEFAULTATTRIBUTES));
@@ -251,7 +251,7 @@ void CTDLAttributeComboBox::BuildCombo()
 		aItems.Append(aCustomItems);
 	}
 
-	Misc::SortArrayT(aItems, SortProc);
+	Misc::SortArrayT<SORTITEM>(aItems, SortProc);
 	AddItemsToCombo(aItems);
 
 	// restore selection

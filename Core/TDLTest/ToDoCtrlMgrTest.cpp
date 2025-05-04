@@ -21,7 +21,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CToDoCtrlMgrTest::CToDoCtrlMgrTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CToDoCtrlMgrTest::CToDoCtrlMgrTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CToDoCtrlMgrTest"), utils)
 {
 
 }

@@ -2487,7 +2487,7 @@ void CWorkloadCtrl::RecalcListColumnsToFit()
 {
 	// Calc widest column first
 	CClientDC dc(&m_list);
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_list);
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, m_list);
 
 	int nMaxHeaderWidth = dc.GetTextExtent("100.0%").cx;
 	int nCol = GetRequiredListColumnCount();
@@ -2505,7 +2505,7 @@ void CWorkloadCtrl::RecalcListColumnsToFit()
 	nMaxHeaderWidth += (2 * HD_COLPADDING);
 
 	// cleanup
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 
 	// Resize all columns to that width (except first column)
 	int nNumCols = GetRequiredListColumnCount();

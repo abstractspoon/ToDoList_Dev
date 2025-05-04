@@ -573,7 +573,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_TOOLS_SHOWTASKS_DUETODAY, ID_TOOLS_SHOWTASKS_DUEENDNEXTMONTH, OnToolsShowtasksDue)
 	ON_COMMAND_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, OnUserTool)
 	ON_COMMAND_RANGE(ID_TRAYICON_SHOWDUETASKS1, ID_TRAYICON_SHOWDUETASKS20, OnTrayiconShowDueTasks)
-	ON_COMMAND_RANGE(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, OnViewActivateAdvancedFilter)
+	ON_COMMAND_RANGE(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, OnViewActivateFilter)
 	ON_COMMAND_RANGE(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, OnViewActivateFilter)
 	ON_COMMAND_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnViewExpandTasks)
 	ON_COMMAND_RANGE(ID_VIEW_EXPANDTASK, ID_VIEW_COLLAPSEALL, OnViewExpandTasks)
@@ -627,12 +627,13 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_LENGTHYOPERATION, OnToDoCtrlDoLengthyOperation)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnToDoCtrlEditTaskReminder)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKREMINDER, OnToDoCtrlClearTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
 	ON_REGISTERED_MESSAGE(WM_TDCN_FILTERCHANGE, OnToDoCtrlNotifyFilterChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_RECREATERECURRINGTASK, OnToDoCtrlNotifyRecreateRecurringTask)
-	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERDISMISS, OnNotifyReminderModified)
-	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERSNOOZE, OnNotifyReminderModified)
+	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERDISMISSED, OnNotifyReminderModified)
+	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERSNOOZED, OnNotifyReminderModified)
 	ON_REGISTERED_MESSAGE(WM_TDCN_SELECTIONCHANGE, OnToDoCtrlNotifySelChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_SOURCECONTROLSAVE, OnToDoCtrlNotifySourceControlSave)
 	ON_REGISTERED_MESSAGE(WM_TDCN_TIMETRACK, OnToDoCtrlNotifyTimeTrack)
@@ -817,6 +818,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnUpdateSortBy)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SPLITTASKINTO_TWO, ID_SPLITTASKINTO_FIVE, OnUpdateSplitTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, OnUpdateUserTool)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, OnUpdateViewActivateFilter)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, OnUpdateViewActivateFilter)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnUpdateViewExpandTasks)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDTASK, ID_VIEW_COLLAPSEALL, OnUpdateViewExpandTasks)
 
@@ -4070,11 +4073,11 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				switch (nMenuID)
 				{
 				case MM_TASKCONTEXT:
-					m_menubar.PrepareTaskContextMenu(pPopup, tdc, Prefs());
+					CTDCMainMenu::PrepareTaskContextMenu(pPopup, tdc, Prefs());
 					break;
 
 				case MM_TABCTRLCONTEXT:
-					m_menubar.PrepareTabCtrlContextMenu(pPopup, tdc, Prefs());
+					CTDCMainMenu::PrepareTabCtrlContextMenu(pPopup, tdc, Prefs());
 					break;
 				}
 				
@@ -7547,30 +7550,27 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 
 void CToDoListWnd::OnViewActivateFilter(UINT nCmdID)
 {
-	int nFilter = (nCmdID - ID_VIEW_ACTIVATEFILTER1);
+	FILTER_SHOW nShow = FS_ALL;
+	CString sAdvFilter;
 
-	if ((nFilter < 0) || (nFilter >= 24))
-	{
-		ASSERT(0);
-		return;
-	}
-
-	VERIFY(m_filterBar.SelectFilter(nFilter));
+	if (m_menubar.GetFilterToActivate(nCmdID, m_filterBar, Prefs(), nShow, sAdvFilter))
+		VERIFY(m_filterBar.SelectFilter(nShow, sAdvFilter));
 }
 
-void CToDoListWnd::OnViewActivateAdvancedFilter(UINT nCmdID)
+void CToDoListWnd::OnUpdateViewActivateFilter(CCmdUI* pCmdUI)
 {
-	int nCustomFilter = (nCmdID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
-
-	if ((nCustomFilter < 0) || (nCustomFilter >= 24))
+	// For toolbar only. CTDCMainMenu handles menu state.
+	if (pCmdUI->m_pMenu == NULL)
 	{
-		ASSERT(0);
-		return;
+		FILTER_SHOW nUnused;
+		CString sUnused;
+
+		BOOL bEnable = CTDCMainMenu::GetFilterToActivate(pCmdUI->m_nID, m_filterBar, Prefs(), nUnused, sUnused);
+		BOOL bCheck = (pCmdUI->m_nID == CTDCMainMenu::GetSelectedFilterMenuID(m_filterBar));
+
+		pCmdUI->Enable(bEnable);
+		pCmdUI->SetCheck(bCheck);
 	}
-
-	int nNumDefaultFilters = (Prefs().GetShowDefaultFiltersInFilterBar() ? NUM_SHOWFILTER : 1);
-
-	VERIFY(m_filterBar.SelectFilter(nNumDefaultFilters + nCustomFilter));
 }
 
 void CToDoListWnd::OnShowTaskView(UINT nCmdID) 
@@ -7770,6 +7770,9 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 
 void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
 {
+	// Do default first so that menubar can override
+	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+
 	if (!bSysMenu)
 	{
 		m_menubar.HandleInitMenuPopup(pPopupMenu,
@@ -7780,8 +7783,6 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 									  m_mgrUIExtensions,
 									  m_mgrMenuIcons);
 	}
-
-	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
 }
 
 LRESULT CToDoListWnd::OnPostTranslateMenu(WPARAM /*wp*/, LPARAM lp)
@@ -10902,11 +10903,11 @@ LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM lp)
 
 	// See RemapAdvancedFilterMenuItemIDs for more detail
 	CStringArray aPrevFilters;
-	aPrevFilters.Copy(m_filterBar.GetAdvancedFilterNames());
+	aPrevFilters.Copy(m_filterBar.AdvancedFilterNames());
 
 	VERIFY(Misc::RemoveItem(szFilter, aPrevFilters));
 
-	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.GetAdvancedFilterNames());
+	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.AdvancedFilterNames());
 
 	return 0;
 }
@@ -10926,12 +10927,12 @@ LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM lp)
 
 	// See RemapAdvancedFilterMenuItemIDs for more detail
 	CStringArray aPrevFilters;
-	aPrevFilters.Copy(m_filterBar.GetAdvancedFilterNames());
+	aPrevFilters.Copy(m_filterBar.AdvancedFilterNames());
 
 	VERIFY(Misc::AddUniqueItem(szFilter, aPrevFilters));
 	Misc::SortArray(aPrevFilters);
 
-	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.GetAdvancedFilterNames());
+	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.AdvancedFilterNames());
 
 	CPreferences::Save();
 
@@ -11979,7 +11980,8 @@ void CToDoListWnd::OnViewFilter()
 	
 	CTDLFilterDlg dialog(prefs.GetTitleFilterOption(),
 						 prefs.GetMultiSelFilters(),
-						 m_filterBar.GetAdvancedFilterNames(),
+						 prefs.GetShowDefaultFiltersInFilterBar(),
+						 m_filterBar.AdvancedFilterNames(),
 						 GetToDoCtrl(),
 						 aPriorityColors,
 						 prefs.GetNumPriorityRiskLevels(),
@@ -13249,6 +13251,12 @@ LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 	return (LRESULT)tRem;
 }
 
+LRESULT CToDoListWnd::OnToDoCtrlClearTaskReminder(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	OnEditClearReminder();
+	return 0L;
+}
+
 LRESULT CToDoListWnd::OnToDoCtrlEditTaskReminder(WPARAM wp, LPARAM lp)
 {
 	if (wp && lp)
@@ -13266,9 +13274,9 @@ LRESULT CToDoListWnd::OnToDoCtrlEditTaskReminder(WPARAM wp, LPARAM lp)
 
 		OnEditSetReminder(nTDC, dwTaskID);
 	}
-	else if (!wp && !lp) // active tasklist and its selection
+	else if (!wp && !lp)
 	{
-		OnEditSetReminder(GetSelToDoCtrl(), 0);
+		OnEditSetReminder();
 	}
 	else
 	{
@@ -13299,23 +13307,19 @@ void CToDoListWnd::OnEditSetReminder(int nTDC, DWORD dwTaskID)
 		return;
 	}
 
-	DWORD dwFlags = (nNumSel == 1) ? 0 : TDCREM_MULTIPLETASKS;
-	
 	// get the first reminder as a reference
 	TDCREMINDER rem;
-	
-	// handle new reminder
-	if (!m_dlgReminders.GetFirstTaskReminder(&tdc, aTaskIDs, rem))
+	BOOL bNewReminder = (FALSE == m_dlgReminders.GetFirstTaskReminder(&tdc, aTaskIDs, rem));
+
+	if (bNewReminder)
 	{
 		rem.dwTaskID = aTaskIDs[0];
 		rem.pTDC = &tdc;
-
-		dwFlags |= TDCREM_NEWREMINDER;
 	}
 
 	CTDLSetReminderDlg dialog(CMDICON(ID_EDIT_SETREMINDER), Prefs().GetDisplayDatesInISO());
 
-	switch (dialog.DoModal(rem, dwFlags))
+	switch (dialog.DoModal(rem, bNewReminder))
 	{
 	case IDOK:
 		{

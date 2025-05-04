@@ -25,7 +25,9 @@ const LPCTSTR NULLSTRING = NULL;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CMiscTest::CMiscTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CMiscTest::CMiscTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CMiscTest"), utils)
 {
 
 }
@@ -775,7 +777,7 @@ void CMiscTest::TestAppendItems()
 
 void CMiscTest::TestRegionalSettingsRetrievalPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CMiscTest::TestRegionalSettingsPerformance\n"));
 		return;

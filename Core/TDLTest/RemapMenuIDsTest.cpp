@@ -23,7 +23,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CRemapMenuIDsTest::CRemapMenuIDsTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CRemapMenuIDsTest::CRemapMenuIDsTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CRemapMenuIDsTest"), utils)
 {
 
 }

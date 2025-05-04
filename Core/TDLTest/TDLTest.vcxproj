@@ -154,6 +154,8 @@ copy unicode_release\TDLTest.exe ..\todolist\unicode_release /y
       <Command>mkdir ..\ToDoList
 mkdir ..\ToDoList\unicode_debug
 copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
+
+unicode_debug\TDLTest.exe
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

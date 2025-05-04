@@ -32,7 +32,9 @@ const BOOL USEEXCELFORCSV = CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCTaskTimeLogTest::CTDCTaskTimeLogTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CTDCTaskTimeLogTest::CTDCTaskTimeLogTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CTDCTaskTimeLogTest"), utils)
 {
 #ifdef _DEBUG
 	CString sCwd = FileMisc::GetCwd();

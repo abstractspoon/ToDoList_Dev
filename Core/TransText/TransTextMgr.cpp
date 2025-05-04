@@ -343,7 +343,11 @@ BOOL CTransTextMgr::HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM /*wp*/, LP
 		// Convert back from unicode
 		Misc::EncodeAsMultiByte(strTipText);
 
+#if _MSC_VER >= 1400
 		strncpy_s(pTTTA->szText, MAX_TIP_LEN, (LPCSTR)(LPCWSTR)strTipText, MAX_TIP_LEN);
+#else
+		strncpy(pTTTA->szText, (LPCSTR)(LPCWSTR)strTipText, MAX_TIP_LEN);
+#endif
 		pTTTA->lpszText = (LPSTR)(LPCSTR)(LPCWSTR)strTipText;
 	}
 	else // TTN_NEEDTEXTW

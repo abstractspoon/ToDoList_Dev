@@ -31,7 +31,7 @@ void CTDCFindFilterHelper::RefreshFilterBarAdvancedFilters()
 	CStringArray aFilters;
 
 	m_findDlg.GetSavedSearches(aFilters);
-	m_filterBar.AddAdvancedFilters(aFilters);
+	m_filterBar.SetAdvancedFilters(aFilters);
 
 	int nFilter = aFilters.GetSize();
 
