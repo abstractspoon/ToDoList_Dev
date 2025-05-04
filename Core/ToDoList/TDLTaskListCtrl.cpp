@@ -1038,7 +1038,10 @@ void CTDLTaskListCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 	NMLISTVIEW nmlv = { 0 };
 	
 	nmlv.hdr.code = LVN_ITEMCHANGED;
+	nmlv.uChanged = LVIF_STATE;
 	nmlv.iItem = nmlv.iSubItem = -1;
+	nmlv.uOldState = 0;
+	nmlv.uNewState = LVIS_SELECTED;
 	
 	RepackageAndSendToParent(WM_NOTIFY, 0, (LPARAM)&nmlv);
 }
