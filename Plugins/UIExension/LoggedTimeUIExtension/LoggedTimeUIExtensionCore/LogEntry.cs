@@ -472,12 +472,9 @@ namespace LoggedTimeUIExtension
 
 		public bool ReloadLogFile(string logPath)
 		{
-			uint taskId;
+			uint taskId = 0;
+			ExtractTaskIdFromLogPath(logPath, out taskId);
 
-			if (!ExtractTaskIdFromLogPath(logPath, out taskId))
-				return false;
-
-			// else
 			return LoadLogFile(TasklistPath, taskId);
 		}
 

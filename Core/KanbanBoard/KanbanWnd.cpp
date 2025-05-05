@@ -269,20 +269,13 @@ void CKanbanWnd::UpdatePriorityColors(const IPreferences* pPrefs)
 		switch (pPrefs->GetProfileInt(_T("Preferences"), _T("PriorityColorOption"), 0))
 		{
 		case 0:	// Individual colours
-			if (pPrefs->GetProfileInt(COLORKEY, _T("P0"), -1) != -1)
-			{
-				for (int nColor = 0; nColor < nNumLevels; nColor++)
-				{
-					CString sKey = Misc::MakeKey(_T("P%d"), nColor);
-					aPriorityColors.Add(pPrefs->GetProfileInt(COLORKEY, sKey));
-				}
-			}
+			Misc::Split(pPrefs->GetProfileString(COLORKEY, _T("PriorityColors")), aPriorityColors, '|');
 			break;
 
 		case 1:	// Colour range
 			{
-				COLORREF crFrom = pPrefs->GetProfileInt(COLORKEY, _T("Low"));
-				COLORREF crTo = pPrefs->GetProfileInt(COLORKEY, _T("High"));
+				COLORREF crFrom = pPrefs->GetProfileInt(COLORKEY, _T("PriorityLow"));
+				COLORREF crTo = pPrefs->GetProfileInt(COLORKEY, _T("PriorityHigh"));
 				BOOL bRGB = !pPrefs->GetProfileInt(_T("Preferences"), _T("HLSColorGradient"));
 
 				GraphicsMisc::CalculateColorGradient(crFrom, crTo, nNumLevels, aPriorityColors, bRGB);
@@ -290,14 +283,7 @@ void CKanbanWnd::UpdatePriorityColors(const IPreferences* pPrefs)
 			break;
 
 		case 2:	// Scheme colours
-			if (pPrefs->GetProfileInt(COLORKEY, _T("S0"), -1) != -1)
-			{
-				for (int nColor = 0; nColor < nNumLevels; nColor++)
-				{
-					CString sKey = Misc::MakeKey(_T("S%d"), nColor);
-					aPriorityColors.Add(pPrefs->GetProfileInt(COLORKEY, sKey));
-				}
-			}
+			Misc::Split(pPrefs->GetProfileString(COLORKEY, _T("PriorityScheme")), aPriorityColors, '|');
 			break;
 		}
 	}
