@@ -197,7 +197,8 @@ CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
 	m_bRefreshTimeTrackStatus(FALSE),
 	m_bUpdateMenuSSCStatus(FALSE),
 	m_bRefreshPauseTimeTracking(FALSE),
-	m_nUpdateAutoListDataAttribID(TDCA_NONE)
+	m_nUpdateAutoListDataAttribID(TDCA_NONE),
+	m_bUpdateFocusedControl(FALSE)
 {
 }
 
@@ -278,6 +279,12 @@ BOOL CToDoListWnd::IDLETASKS::Process()
 			m_tdl.RefreshTabOrder();
 
 			m_bRefreshTabOrder = FALSE;
+		}
+		else if (m_bUpdateFocusedControl)
+		{
+			CFocusWatcher::UpdateFocus();
+
+			m_bUpdateFocusedControl = FALSE;
 		}
 	}
 
@@ -3488,10 +3495,10 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyViewChange(WPARAM wp, LPARAM lp)
 	{
 		if (lp != (LPARAM)wp)
 		{
-			CFocusWatcher::UpdateFocus();
-
 			RefreshFilterBarControls(TDCA_ALL);
+
 			m_idleTasks.UpdateStatusBar();
+			m_idleTasks.UpdateFocusedControl();
 		}
 		else
 		{
@@ -6871,6 +6878,8 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 
 		Invalidate();
 		UpdateWindow();
+
+		m_idleTasks.UpdateFocusedControl();
 	}
 	else
 	{
@@ -8287,9 +8296,6 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 		// update the filter selection
  		RefreshFilterBarControls();
- 		
-		m_idleTasks.UpdateCaption();
-		m_idleTasks.UpdateStatusBar();
 
 		if (Prefs().GetShareCommentsSize() && (m_nLastSelItem != -1))
 		{
@@ -8345,6 +8351,9 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		UpdateAeroFeatures();
 	}
 
+	m_idleTasks.UpdateCaption();
+	m_idleTasks.UpdateStatusBar();
+	m_idleTasks.UpdateFocusedControl();
 	m_idleTasks.UpdateMenuSourceControlStatus();
 	m_idleTasks.RefreshPauseTimeTracking();
 	m_idleTasks.UpdateAutoListData();
@@ -8623,6 +8632,8 @@ BOOL CToDoListWnd::CloseToDoCtrl(int nIndex)
 
 			Invalidate();
 			GetToDoCtrl().Invalidate();
+
+			m_idleTasks.UpdateFocusedControl();
 		}
 	}
 	
