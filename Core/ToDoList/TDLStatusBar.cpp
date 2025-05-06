@@ -82,19 +82,16 @@ int CTDLStatusBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// prevent translation because we handle it manually
 	CLocalizer::EnableTranslation(*this, FALSE);
 
-	for (int nPane = 0; nPane < SB_PANECOUNT; nPane++)
-		VERIFY(CString().LoadString(SB_PANES[nPane].nID));
-
 	if (!SetPanes(SB_PANES, SB_PANECOUNT))
 		return -1;
 
-	// Translate tooltips
-	if (CLocalizer::IsInitialized())
-	{
-		int nPane = SB_PANECOUNT;
+	// Initialise pane text and tooltips
+	int nPane = SB_PANECOUNT;
 
-		while (nPane--)
-			SetPaneTooltip(SB_PANES[nPane].nID, CEnString((UINT)SB_PANES[nPane].lpszTip));
+	while (nPane--)
+	{
+		SetPaneText(nPane, CEnString(SB_PANES[nPane].nID, _T("")));
+		SetPaneTooltip(nPane, CEnString((UINT)SB_PANES[nPane].lpszTip));
 	}
 
 	return 0;

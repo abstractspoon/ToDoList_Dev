@@ -80,6 +80,7 @@ private:
 		void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 		void UpdateMenuSourceControlStatus() { m_bUpdateMenuSSCStatus = TRUE; }
 		void UpdateAutoListData(TDC_ATTRIBUTE nAttribID = TDCA_ALL) { m_nUpdateAutoListDataAttribID = nAttribID; }
+		void UpdateFocusedControl() { m_bUpdateFocusedControl = TRUE; }
 
 		void RefreshTimeTrackingStatus() { m_bRefreshTimeTrackStatus = TRUE; }
 		void RefreshPauseTimeTracking() { m_bRefreshPauseTimeTracking = TRUE; }
@@ -96,6 +97,7 @@ private:
 		BOOL m_bUpdateMenuSSCStatus;
 		BOOL m_bRefreshPauseTimeTracking;
 		BOOL m_bRefreshTabOrder;
+		BOOL m_bUpdateFocusedControl;
 
 		TDC_ATTRIBUTE m_nUpdateAutoListDataAttribID;
 
