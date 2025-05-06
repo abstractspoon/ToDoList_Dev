@@ -4758,7 +4758,7 @@ BEGIN
     IDS_FOCUS_TIMETRACKER   "Time Tracker"
     IDS_FILTER_ANYSTATUS    "Any status can match"
     IDS_FILTER_ANYVERSION   "Any version can match"
-    ID_SB_TASKCOUNT         "Task count"
+    ID_SB_TASKCOUNT         "0 / 0"
     ID_SB_FOCUS             "Focus"
 END
 
