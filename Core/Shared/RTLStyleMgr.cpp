@@ -14,10 +14,6 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-
-const DWORD RTL_STYLES			= (WS_EX_RTLREADING | WS_EX_RIGHT);
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -56,30 +52,34 @@ BOOL CRTLStyleMgr::OnCallWndProc(const MSG& msg)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 #endif
 
-#ifdef _DEBUG
-	CString sClass = CWinClasses::GetClass(msg.hwnd);
-#endif
-	
 	switch (msg.message)
 	{
 	case WM_CREATE:
- 		if (IsClass(msg.hwnd, WC_HEADER))
 		{
-			// don't change header controls because they don't like it!
-		}
-		else // all else
-		{
-			DWORD dwExStyle = (DWORD)::GetWindowLong(msg.hwnd, GWL_EXSTYLE);
-			
-			if ((dwExStyle & RTL_STYLES) != RTL_STYLES)
-				::SetWindowLong(msg.hwnd, GWL_EXSTYLE, (dwExStyle | RTL_STYLES));
+			CString sClass = CWinClasses::GetClass(msg.hwnd);
 
-			// extra for trees
-			if (IsClass(msg.hwnd, WC_TREEVIEW))
+ 			if (CWinClasses::IsClass(sClass, WC_HEADER))
 			{
-				DWORD dwStyle = (DWORD)::GetWindowLong(msg.hwnd, GWL_STYLE);
+				// don't change header controls because they don't like it!
+			}
+			else if (!CWinClasses::IsClass(sClass, WC_STATIC)) // all else except static text
+			{
+				DWORD dwExStyle = (DWORD)::GetWindowLong(msg.hwnd, GWL_EXSTYLE);
+				dwExStyle |= WS_EX_RTLREADING;
 
-				::SetWindowLong(msg.hwnd, GWL_STYLE, (dwStyle | TVS_RTLREADING));
+				// extra for edits
+				if (CWinClasses::IsEditControl(sClass, FALSE))
+					dwExStyle |= WS_EX_RIGHT;
+
+				::SetWindowLong(msg.hwnd, GWL_EXSTYLE, dwExStyle);
+
+				// extra for trees
+				if (IsClass(msg.hwnd, WC_TREEVIEW))
+				{
+					DWORD dwStyle = (DWORD)::GetWindowLong(msg.hwnd, GWL_STYLE);
+
+					::SetWindowLong(msg.hwnd, GWL_STYLE, (dwStyle | TVS_RTLREADING));
+				}
 			}
 		}
 		break;
