@@ -62,7 +62,7 @@ BOOL CRTLStyleMgr::OnCallWndProc(const MSG& msg)
 			{
 				// don't change header controls because they don't like it!
 			}
-			else if (!CWinClasses::IsClass(sClass, WC_STATIC)) // all else except static text
+			else // all else
 			{
 				DWORD dwExStyle = (DWORD)::GetWindowLong(msg.hwnd, GWL_EXSTYLE);
 				dwExStyle |= WS_EX_RTLREADING;
