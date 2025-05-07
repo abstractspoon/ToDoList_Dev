@@ -1914,20 +1914,20 @@ void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
 	}
 }
 
-void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef)
+int CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef)
 {
-	ResizeButtonStaticTextToFit(pParent, pParent->GetDlgItem(nCtrlID), pDCRef);
+	return ResizeButtonStaticTextToFit(pParent, pParent->GetDlgItem(nCtrlID), pDCRef);
 }
 
-void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef)
+int CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef)
 {
 	ASSERT(pParent && pParent->GetSafeHwnd() && pCtrl && pCtrl->GetSafeHwnd());
 
 	if (!pParent ||! pParent->GetSafeHwnd() || !pCtrl || !pCtrl->GetSafeHwnd())
-		return;
+		return 0;
 
 	if (!pCtrl->GetWindowTextLength())
-		return;
+		return 0;
 
 	BOOL bRightAligned = FALSE;
 
@@ -1946,19 +1946,19 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 			{
 				// must be single line
 				if (dwStyle & BS_MULTILINE)
-					return;
+					return 0;
 
 				bRightAligned = (dwStyle & BS_RIGHT);
 			}
 			break; // all good
 			
 		default:
-			return; // push button
+			return 0; // push button
 		}
 	}
-	else // not a button
+	else if (!CWinClasses::IsClass(*pCtrl, WC_STATIC)) // not static text
 	{
-		return;
+		return FALSE;
 	}
 
 	// prepare DC
@@ -1976,6 +1976,8 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 	CRect rText;
 	pCtrl->GetWindowRect(rText);
 	pParent->ScreenToClient(rText);	
+
+	CRect rOrgText(rText);
 	
 	CString sText;
 	pCtrl->GetWindowText(sText);
@@ -1996,7 +1998,10 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 		rText.right = (rText.left + nExtent + rText.Height());
 	
 	// resize window
-	pCtrl->MoveWindow(rText);
+	int nDiff = (rText.Width() - rOrgText.Width());
+
+	if (nDiff)
+		pCtrl->MoveWindow(rText);
 
 	// restore DC
 	if (!bCallerDC)
@@ -2004,6 +2009,8 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 		pDCRef->SelectObject(hOldFont);
 		pCtrl->ReleaseDC(pDCRef);
 	}
+
+	return nDiff;
 }
 
 void CDialogHelper::ExcludeCtrls(const CWnd* pParent, CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo)

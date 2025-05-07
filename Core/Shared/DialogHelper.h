@@ -112,8 +112,10 @@ public:
 
 	// covers static text, radiobuttons, checkboxes
 	static void ResizeButtonStaticTextFieldsToFit(CWnd* pParent);
-	static void ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef = NULL);
-	static void ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef = NULL);
+
+	// Returns the width difference
+	static int ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef = NULL);
+	static int ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef = NULL);
 
 	// CEdit and CRichEditCtrl
 	static BOOL SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen);
