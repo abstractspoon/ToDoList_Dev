@@ -628,17 +628,21 @@ BOOL CHMXChart::DrawXScale(CDC & dc)
 
 					if (m_nXLabelDegrees > 0)
 					{
-						dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
+						// Must use CDC::TextOut for rotated fonts
+						dc.SetTextAlign(TA_BASELINE | TA_RIGHT | GetExtraLabelDrawFlags(TRUE));
 						dc.TextOut(rText.left, rText.top, sLabel);
 					}
 					else
 					{
 						rText.right = rText.left + (int)(dX * m_nXLabelStep);
 
+						UINT nFlags = (DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+						nFlags |= GetExtraLabelDrawFlags(FALSE);
+
 						if (m_bXLabelsAreTicks)
-							dc.DrawText(sLabel, rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+							dc.DrawText(sLabel, rText, DT_LEFT | nFlags);
 						else
-							dc.DrawText(sLabel, rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+							dc.DrawText(sLabel, rText, DT_CENTER | nFlags);
 					}
 				}
 			}
@@ -654,8 +658,9 @@ BOOL CHMXChart::DrawXScale(CDC & dc)
 		VERIFY(CreateXAxisFont(TRUE, font));
 
 		CFont* pFontOld = dc.SelectObject(&font);
-		dc.DrawText(m_strXText, m_rectXAxis, DT_CENTER | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX);
+		UINT nFlags = (DT_CENTER | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | GetExtraLabelDrawFlags(FALSE));
 
+		dc.DrawText(m_strXText, m_rectXAxis, nFlags);
 		dc.SelectObject(pFontOld);
 	}
 
@@ -710,7 +715,11 @@ BOOL CHMXChart::DrawYScale(CDC & dc)
 					ASSERT(nBot > nTop);
 
 					CRect rTick(m_rectYAxis.left, nTop, m_rectYAxis.right - 4, nBot);
-					dc.DrawText(sTick, &rTick, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_NOCLIP);
+
+					UINT nFlags = (DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_NOCLIP);
+					nFlags |= GetExtraLabelDrawFlags(FALSE);
+
+					dc.DrawText(sTick, &rTick, nFlags);
 
 					int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sTick).cx);
 					rTitle.right = min(rTitle.right, nLabelLeft);
@@ -739,14 +748,14 @@ BOOL CHMXChart::DrawYScale(CDC & dc)
 			if (nTitleExtent < rTitle.Height())
 			{
 				// Must use CDC::TextOut for rotated fonts
-				dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
+				dc.SetTextAlign(TA_BASELINE | TA_RIGHT | GetExtraLabelDrawFlags(TRUE));
 				dc.TextOut(rTitle.CenterPoint().x, rTitle.top, m_strYText);
 			}
 		}
 		else
 		{
 			// Must use CDC::TextOut for rotated fonts
-			dc.SetTextAlign(TA_BASELINE | TA_CENTER);
+			dc.SetTextAlign(TA_BASELINE | TA_CENTER | GetExtraLabelDrawFlags(TRUE));
 			dc.TextOut(rTitle.CenterPoint().x, rTitle.CenterPoint().y, m_strYText);
 		}
 
