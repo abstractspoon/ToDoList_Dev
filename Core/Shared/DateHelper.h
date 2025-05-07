@@ -131,6 +131,7 @@ public:
 	// DOW = 'day of week'
 	static BOOL FormatDate(const COleDateTime& date, DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
 	static BOOL FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
+	static BOOL WantRTLDates();
 
 	static BOOL DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime);
 	static BOOL DecodeDate(const CString& sDate, double& date, BOOL bAndTime);

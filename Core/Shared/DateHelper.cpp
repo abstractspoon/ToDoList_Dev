@@ -1615,17 +1615,14 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 
 		if (date.GetAsSystemTime(st))
 		{
+			// RTL dates
 			CString sFormat;
 
-			// RTL dates
-			switch (Misc::GetPrimaryLanguage())
+			if (WantRTLDates())
 			{
-			case LANG_ARABIC:
-			case LANG_PERSIAN:
 				sFormat = szFormat;
 				Misc::Reverse(sFormat);
 				szFormat = sFormat;
-				break;
 			}
 
 			const LCID lcid = LOCALE_CUSTOM_UI_DEFAULT;
@@ -1636,6 +1633,18 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 	}
 
 	return sDate;
+}
+
+BOOL CDateHelper::WantRTLDates()
+{
+	switch (Misc::GetPrimaryLanguage())
+	{
+	case LANG_ARABIC:
+	case LANG_PERSIAN:
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CDateHelper::FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow)
