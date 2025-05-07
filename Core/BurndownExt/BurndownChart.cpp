@@ -398,3 +398,10 @@ BOOL CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	return CHMXChartEx::DrawDataset(dc, m_datasets[nDatasetIndex], m_pGraph->GetColors(), alpha);
 }
 
+UINT CBurndownChart::GetExtraLabelDrawFlags(BOOL bAngledText) const
+{
+	if (CDateHelper::WantRTLDates())
+		return (bAngledText ? TA_RTLREADING : DT_RTLREADING);
+
+	return 0;
+}

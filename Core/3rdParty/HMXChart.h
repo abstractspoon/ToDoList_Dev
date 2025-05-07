@@ -155,6 +155,7 @@ protected:
 	virtual COLORREF GetLineColor(int nDatasetIndex, double dValue) const;
 	virtual COLORREF GetFillColor(int nDatasetIndex, double dValue) const;
 	virtual CString GetYTickText(int nTick, double dValue) const;
+	virtual UINT GetExtraLabelDrawFlags(BOOL /*bAngledText*/) const { return 0; }
 	
 	virtual int CalcXScaleFontSize(BOOL bTitle) const;
 	virtual int CalcYScaleFontSize(BOOL bTitle) const;

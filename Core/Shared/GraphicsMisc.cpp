@@ -1913,29 +1913,55 @@ void GraphicsMisc::DrawVertLine(CDC* pDC, int nYFrom, int nYTo, int nXPos, COLOR
 
 UINT GraphicsMisc::GetRTLDrawTextFlags(HWND hwnd)
 {
-	ASSERT(hwnd);
-
-	if (hwnd)
+	if (!IsWindow(hwnd))
 	{
-		DWORD dwStyle = (DWORD)GetWindowLong(hwnd, GWL_EXSTYLE);
-		BOOL bRTLLayout = ((dwStyle & WS_EX_LAYOUTRTL) ? TRUE : FALSE);
-		BOOL bRTLReading = ((dwStyle & WS_EX_RTLREADING) ? TRUE : FALSE);
-		
-		return ((bRTLReading != bRTLLayout) ? DT_RTLREADING : 0);
+		ASSERT(0);
+		return 0;
 	}
 
+	DWORD dwStyle = (DWORD)GetWindowLong(hwnd, GWL_EXSTYLE);
+
+	BOOL bRTLLayout = Misc::HasFlag(dwStyle, WS_EX_LAYOUTRTL);
+	BOOL bRTLReading = Misc::HasFlag(dwStyle, WS_EX_RTLREADING);
+
+	if (!Misc::StatesDiffer(bRTLLayout, bRTLReading))
+		return 0;
+
 	// else
-	return 0;
+	return DT_RTLREADING;
 }
 
 UINT GraphicsMisc::GetRTLDrawTextFlags(CDC* pDC)
 {
-	if (pDC)
-		return GetRTLDrawTextFlags(::WindowFromDC(*pDC));
+	if (!pDC || !pDC->GetSafeHdc())
+	{
+		ASSERT(0);
+		return 0;
+	}
+	
+	// else
+	return GetRTLDrawTextFlags(::WindowFromDC(*pDC));
+}
+
+UINT GraphicsMisc::GetRTLTextOutFlags(HWND hwnd)
+{
+	if (GetRTLDrawTextFlags(hwnd) == 0)
+		return 0;
 
 	// else
-	ASSERT(0);
-	return 0;
+	return TA_RTLREADING;
+}
+
+UINT GraphicsMisc::GetRTLTextOutFlags(CDC* pDC)
+{
+	if (!pDC || !pDC->GetSafeHdc())
+	{
+		ASSERT(0);
+		return 0;
+	}
+	
+	// else
+	return GetRTLDrawTextFlags(::WindowFromDC(*pDC));
 }
 
 CString GraphicsMisc::GetWebColor(COLORREF color)

@@ -57,6 +57,7 @@ protected:
 	virtual BOOL GetMinMax(double& dMin, double& dMax, BOOL bDataOnly) const;
 	virtual CString GetYTickText(int nTick, double dValue) const;
 	virtual BOOL DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);
+	virtual UINT GetExtraLabelDrawFlags(BOOL bAngledText) const;
 
 	// CHMXChartEx overrides
 	virtual int GetNumYSubTicks(double dInterval) const;

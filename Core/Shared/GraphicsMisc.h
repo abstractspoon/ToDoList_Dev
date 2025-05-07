@@ -133,6 +133,8 @@ namespace GraphicsMisc
 
 	UINT GetRTLDrawTextFlags(HWND hwnd);
 	UINT GetRTLDrawTextFlags(CDC* pDC);
+	UINT GetRTLTextOutFlags(HWND hwnd);
+	UINT GetRTLTextOutFlags(CDC* pDC);
 	
 	HICON LoadIcon(UINT nIDIcon, int nSize = 16);
 	HBITMAP IconToPARGB32Bitmap(HICON hIcon);
