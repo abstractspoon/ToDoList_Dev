@@ -22,7 +22,6 @@ public:
 	static void Release();
 
 	static BOOL IsRTL();
-	static BOOL IsSystemFontRTL();
 
 protected:
 	CRTLStyleMgr();

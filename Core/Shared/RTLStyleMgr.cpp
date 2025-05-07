@@ -123,42 +123,6 @@ BOOL CRTLStyleMgr::OnCallWndProc(const MSG& msg)
 	return FALSE; // continue routing
 }
 
-BOOL CRTLStyleMgr::IsSystemFontRTL()
-{
-	LOGFONT lf = { 0 };
-	
-	if (::GetObject(::GetStockObject(SYSTEM_FONT), sizeof(lf), &lf))
-	{
-		switch (lf.lfCharSet)
-		{
-		case HEBREW_CHARSET:
-		case ARABIC_CHARSET:
-			return TRUE;
-
-		case ANSI_CHARSET:
-		case DEFAULT_CHARSET:
-		case SYMBOL_CHARSET:
-		case SHIFTJIS_CHARSET:
-		case HANGUL_CHARSET:
-		case GB2312_CHARSET:
-		case CHINESEBIG5_CHARSET:
-		case OEM_CHARSET:
-		case JOHAB_CHARSET:
-		case GREEK_CHARSET:
-		case TURKISH_CHARSET:
-		case VIETNAMESE_CHARSET:
-		case THAI_CHARSET:
-		case EASTEUROPE_CHARSET:
-		case RUSSIAN_CHARSET:
-		case MAC_CHARSET:
-		case BALTIC_CHARSET:
-			break;
-		}
-	}
-
-	return FALSE;
-}
-
 BOOL CRTLStyleMgr::IsClass(HWND hWnd, LPCTSTR szClass)
 {
 	static TCHAR szWndClass[512] = { 0 };
