@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "RTLStyleMgr.h"
+#include "WinClasses.h"
 #include "wclassdefines.h"
 
 #ifdef _DEBUG
@@ -53,6 +54,10 @@ BOOL CRTLStyleMgr::OnCallWndProc(const MSG& msg)
 #ifdef _USRDLL
 	// If this is a DLL, need to set up MFC state
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+#endif
+
+#ifdef _DEBUG
+	CString sClass = CWinClasses::GetClass(msg.hwnd);
 #endif
 	
 	switch (msg.message)
