@@ -413,7 +413,7 @@ BOOL COleDateTimeRange::OffsetEnd(int nAmount, DH_UNITS nUnits)
 	return TRUE;
 }
 
-CString COleDateTimeRange::Format(DWORD dwFlags, TCHAR cDelim) const
+CString COleDateTimeRange::Format(DWORD dwFlags, LPCTSTR szDelim) const
 {
 	CString sRange;
 
@@ -422,10 +422,10 @@ CString COleDateTimeRange::Format(DWORD dwFlags, TCHAR cDelim) const
 		CString sStart = CDateHelper::FormatDate(m_dtStart, dwFlags);
 		CString sEnd = CDateHelper::FormatDate(m_dtEnd, dwFlags);
 
-		if (cDelim)
-			sRange.Format(_T(" %s %c %s"), sStart, cDelim, sEnd);
-		else
-			sRange.Format(_T(" %s %s"), sStart, sEnd);
+		if (Misc::IsEmpty(szDelim))
+			szDelim = _T(" ");
+	
+		sRange = (sStart + szDelim + sEnd);
 	}
 
 	return sRange;
