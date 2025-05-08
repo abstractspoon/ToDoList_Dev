@@ -3480,22 +3480,24 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 	HWND hwndHdr = pNMCD->hdr.hwndFrom;
 	ASSERT(hwndHdr == m_header);
+
+	BOOL bSorting = (IsSorting() && (m_nSortBy != m_nTrackedAttributeID));
 	
 	switch (pNMCD->dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		// Handle RTL text column headers and selected column
-		*pResult = CDRF_NOTIFYITEMDRAW;
+		if (!m_bSavingToImage)
+		{
+			if (m_pSelectedColumn || bSorting)
+				*pResult = CDRF_NOTIFYITEMDRAW;
+		}
 		break;
 		
 	case CDDS_ITEMPREPAINT:
-		if (CDateHelper::WantRTLDates())
 		{
-			*pResult = CDRF_NOTIFYPOSTPAINT;
-		}
-		else
-		{
-			if (!m_bSavingToImage && m_pSelectedColumn)
+			ASSERT(!m_bSavingToImage);
+
+			if (m_pSelectedColumn)
 			{
 				// Show the text of the selected column in bold
 				if (pNMCD->lItemlParam == (LPARAM)m_pSelectedColumn)
@@ -3506,44 +3508,17 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				*pResult = CDRF_NEWFONT;
 			}
 
-			if (IsSorting())
+			if (bSorting)
 				*pResult |= CDRF_NOTIFYPOSTPAINT;
 		}
 		break;
 		
 	case CDDS_ITEMPOSTPAINT:
 		{
+			ASSERT(bSorting);
+
 			CDC* pDC = CDC::FromHandle(pNMCD->hdc);
-
-			if (CDateHelper::WantRTLDates())
-			{
-				CRect rItem(pNMCD->rc);
-				rItem.DeflateRect(3, 0);
-
-				pDC->SetBkMode(TRANSPARENT);
-
-				// Show the text of the selected column in bold
-				HGDIOBJ hPrev = NULL;
-
-				if (!m_bSavingToImage)
-				{
-					if (pNMCD->lItemlParam == (LPARAM)m_pSelectedColumn)
-						hPrev = pDC->SelectObject(m_fonts.GetHFont(GMFS_BOLD));
-					else
-						hPrev = pDC->SelectObject(m_fonts.GetHFont());
-				}
-			
-				UINT nFlags = (DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_RTLREADING);
-				pDC->DrawText(m_header.GetItemText(pNMCD->dwItemSpec), rItem, nFlags);
-
-				if (!m_bSavingToImage)
-					pDC->SelectObject(hPrev);
-			
-				*pResult = CDRF_SKIPDEFAULT;
-			}
-
-			if (IsSorting() && (m_nSortBy != m_nTrackedAttributeID))
-				m_header.DrawItemSortArrow(pDC, (int)pNMCD->dwItemSpec, m_bSortAscending);
+			m_header.DrawItemSortArrow(pDC, (int)pNMCD->dwItemSpec, m_bSortAscending);
 		}
 		break;
 	}
