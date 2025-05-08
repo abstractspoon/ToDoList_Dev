@@ -1227,10 +1227,11 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 					{
 						if (nExist == -1)
 						{
+							BOOL bDate = (dwDataType == TDCCA_DATE);
 							BOOL bMultiList = ((dwListType == TDCCA_FIXEDMULTILIST) || 
 												(dwListType == TDCCA_AUTOMULTILIST));
 
-							nExist = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
+							nExist = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList, bDate);
 						}
 
 						// Update mapped 'default' values

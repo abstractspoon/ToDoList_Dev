@@ -32,6 +32,7 @@ struct KANBANCUSTOMATTRIBDEF
 
 	CString sAttribID, sAttribName;
 	BOOL bMultiValue;
+	BOOL bDate;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -39,7 +40,7 @@ struct KANBANCUSTOMATTRIBDEF
 class CKanbanCustomAttributeDefinitionArray : public CArray<KANBANCUSTOMATTRIBDEF, KANBANCUSTOMATTRIBDEF&>
 {
 public:
-	int AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal = FALSE);
+	int AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal, BOOL bDate);
 	BOOL HasDefinition(const CString& sAttribID) const;
 	int FindDefinition(const CString& sAttribID) const;
 
@@ -71,11 +72,12 @@ namespace KBUtils
 	BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttribID);
 	BOOL IsSortableAttribute(TDC_ATTRIBUTE nAttribID);
+	BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribs);
 
 	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 	BOOL IsGroupableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 
-	static BOOL IsPriorityOrRisk(const CString& sAttribID);
+	BOOL IsPriorityOrRisk(const CString& sAttribID);
 }
 
 /////////////////////////////////////////////////////////////////////////////

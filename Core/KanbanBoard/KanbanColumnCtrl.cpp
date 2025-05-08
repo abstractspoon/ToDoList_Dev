@@ -1381,14 +1381,41 @@ BOOL CKanbanColumnCtrl::GetItemTooltipRect(HTREEITEM hti, CRect& rTip) const
 void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttribID, const CString& sValue, int nFlags, COLORREF crText) const
 {
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
+
+	// Common code
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(crText);
+
+	// Special handling for RTL dates - avoid where possible
+	if (!sValue.IsEmpty() && KBUtils::IsDateAttribute(nAttribID, m_aCustAttribDefs) && CDateHelper::WantRTLDates())
+	{
+		// Draw date separately from label
+		CRect rAttrib(rLine);
+		CString sLabel = KBUtils::GetAttributeLabel(nAttribID, nLabelVis, m_aCustAttribDefs);
+
+		if (!sLabel.IsEmpty())
+		{
+			sLabel += _T(": "); // to match KBUtils::FormatAttribute
+
+			pDC->DrawText(sLabel, rAttrib, (nFlags | DT_CALCRECT));
+			pDC->DrawText(sLabel, rLine, nFlags);
+
+			rAttrib.left = rAttrib.right;
+			rAttrib.right = rLine.right;
+		}
+
+		pDC->DrawText(sValue, rAttrib, (nFlags | DT_RTLREADING));
+		rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
+
+		return;
+	}
+
+	// all else
 	CString sAttrib = KBUtils::FormatAttribute(nAttribID, sValue, nLabelVis, m_aCustAttribDefs);
 
 	if (!sAttrib.IsEmpty())
 	{
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(crText);
 		pDC->DrawText(sAttrib, rLine, nFlags);
-
 		rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
 	}
 }
