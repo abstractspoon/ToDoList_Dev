@@ -5365,9 +5365,8 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 			}
 		}
 	}
-	
 	// RTL change requires a restart
-	if (oldPrefs.GetEnableRTLInput() != bEnableRTL)
+	else if (oldPrefs.GetEnableRTLInput() != bEnableRTL)
 	{
 		// if the language file exists and has changed then inform the user that they need to restart
 		if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGERTLINPUT, MB_YESNO) == IDYES)
