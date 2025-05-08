@@ -259,9 +259,6 @@
     <ClCompile Include="Rtf2HtmlConverter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RTLStyleMgr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RuntimeDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -497,6 +494,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OleDropTargetEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RTLInputMgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -774,9 +774,6 @@
     <ClInclude Include="Rtf2HtmlConverter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RTLStyleMgr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RuntimeDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1042,6 +1039,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OleDropTargetEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RTLInputMgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

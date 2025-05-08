@@ -12,7 +12,7 @@
 #include "..\shared\webmisc.h"
 #include "..\shared\localizer.h"
 #include "..\shared\misc.h"
-#include "..\shared\rtlstylemgr.h"
+#include "..\shared\rtlInputmgr.h"
 #include "..\shared\OSVersion.h"
 #include "..\shared\DarkMode.h"
 
@@ -69,7 +69,7 @@ BOOL CTDLUpdateApp::InitInstance()
 		CDarkMode::Enable();
 
 	if (cmdInfo.HasOption(SWITCH_RTL))
-		CRTLStyleMgr::Initialize();
+		CRTLInputMgr::Initialize();
 
 	// position for more than one screen
 	CPoint ptPos(_ttol(cmdInfo.GetOption(SWITCH_POSITION)));
@@ -130,7 +130,7 @@ BOOL CTDLUpdateApp::InitInstance()
 			params.SetOption(SWITCH_CMDLINE, cmdInfo.GetOption(SWITCH_CMDLINE));
 			params.SetOption(SWITCH_POSITION, cmdInfo.GetOption(SWITCH_POSITION));
 
-			if (CRTLStyleMgr::IsRTL())
+			if (CRTLInputMgr::IsEnabled())
 				params.SetOption(SWITCH_RTL);
 	
 			if (CDarkMode::IsEnabled())

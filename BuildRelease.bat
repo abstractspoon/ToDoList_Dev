@@ -56,8 +56,14 @@ ECHO:
 REM - Check for compile errors
 FINDSTR /C:") : error" %OUTPUT_FILE%
 IF %errorlevel%==1 (
-REM - Check for link errors
-FINDSTR /C:"Error executing link.exe" %OUTPUT_FILE%
+
+REM - Check for include errors
+FINDSTR /C:") : fatal error" %OUTPUT_FILE%
+IF %errorlevel%==1 (
+
+REM - All other errors
+FINDSTR /C:"Error " %OUTPUT_FILE%
+)
 )
 
 IF %errorlevel%==0 (
@@ -140,7 +146,7 @@ REM - Check for link errors
 FINDSTR /C:": fatal error" %OUTPUT_FILE%
 IF %errorlevel%==1 (
 
-REM - Check for general errors
+REM - All other errors
 FINDSTR /C:"Build FAILED." %OUTPUT_FILE%
 )
 )
