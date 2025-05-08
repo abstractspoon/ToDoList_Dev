@@ -115,11 +115,22 @@ void CStaticLink::OnChar(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
 //
 BOOL CStaticLink::Navigate()
 {
+	// See if our parent wants to handle it
+	if (m_link.IsEmpty() && (GetStyle() & SS_NOTIFY))
+	{
+		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), STN_CLICKED), (LPARAM)GetSafeHwnd());
+		return FALSE;
+	}
+
 	// first try whatever the hyperlink is
-	if (m_link.IsEmpty() || !m_link.Navigate()) {
-		if (!m_link.LoadString(GetDlgCtrlID()) || !m_link.Navigate()) {
+	if (m_link.IsEmpty() || !m_link.Navigate()) 
+	{
+		if (!m_link.LoadString(GetDlgCtrlID()) || !m_link.Navigate()) 
+		{
 			GetWindowText(m_link);
-			if (!m_link.Navigate()) {
+
+			if (!m_link.Navigate()) 
+			{
 				MessageBeep(0); // unable to navigate!
 				TRACE(_T("*** CStaticLink: can't navigate %s ***\n"), (LPCTSTR)m_link);
 				return FALSE;

@@ -15,7 +15,7 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 
-#include "..\3rdParty\XHTMLStatic.h"
+#include "..\3rdParty\StatLink.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -35,7 +35,6 @@ public:
 	virtual ~CCalendarWnd();
 
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
-	void Release();
 
 	// IUIExtensionWindow
 	LPCTSTR GetTypeID() const { return CAL_TYPEID; }
@@ -78,7 +77,7 @@ protected:
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CComboBox m_cbSnapModes;
-	CXHTMLStatic m_stSelectedTaskDates;
+	CStaticLink m_stSelectedTaskDates;
 
 	CBrush m_brBack;
 	UITHEME m_theme;
