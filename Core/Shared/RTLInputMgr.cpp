@@ -55,7 +55,8 @@ LPCTSTR EXCLUSIONS[] =
 	WC_CONTROLBAR,
 	WC_MENU,
 	WC_DIRECTUIHWND,
-	WC_CTRLNOTIFYSINK   
+	WC_CTRLNOTIFYSINK,
+	_T("sysshadow")
 };
 
 const int NUM_EXCLUSIONS = (sizeof(EXCLUSIONS) / sizeof(EXCLUSIONS[0]));
@@ -68,7 +69,12 @@ BOOL WantClass(const CString& sClass)
 
 	while (nClass--)
 	{
-		if (CWinClasses::IsClass(sClass, EXCLUSIONS[nClass]))
+		LPCTSTR szExcludeClass = EXCLUSIONS[nClass];
+
+		if (CWinClasses::IsClass(sClass, szExcludeClass))
+			return FALSE;
+
+		if (CWinClasses::IsWinFormsControl(sClass, szExcludeClass))
 			return FALSE;
 	}
 
@@ -126,12 +132,10 @@ BOOL CRTLInputMgr::OnCallWndProc(const MSG& msg)
 				dwExStyle |= WS_EX_RTLREADING;
 
 				// extra for edits
-				if (CWinClasses::IsClass(sClass, WC_EDIT))
-					dwExStyle |= WS_EX_RIGHT;
-
-				if (CWinClasses::IsWindowsFormsControl(sClass))
+				if (CWinClasses::IsClass(sClass, WC_EDIT) ||
+					CWinClasses::IsWinFormsControl(sClass, WC_EDIT))
 				{
-					int breakpoint = 0;
+					dwExStyle |= WS_EX_RIGHT;
 				}
 
 				::SetWindowLong(msg.hwnd, GWL_EXSTYLE, dwExStyle);
