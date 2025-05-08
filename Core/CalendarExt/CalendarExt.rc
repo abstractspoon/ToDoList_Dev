@@ -177,8 +177,8 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,172,12,55,17
-    LTEXT           "Selected Task Date Range",IDC_SELECTEDTASKDATESLABEL,
-                    234,15,85,8,SS_NOTIFY | SS_CENTERIMAGE
+    LTEXT           "Selected Task Date Range:",IDC_SELECTEDTASKDATESLABEL,
+                    234,15,88,8,SS_NOTIFY | SS_CENTERIMAGE
     LTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
                     IDC_SELECTEDTASKDATES,325,14,204,8,SS_NOTIFY | 
                     SS_CENTERIMAGE
