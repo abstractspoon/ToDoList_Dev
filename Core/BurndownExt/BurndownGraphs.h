@@ -40,6 +40,8 @@ public:
 	BOOL HasOption(BURNDOWN_GRAPHOPTION nOption) const;
 	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption);
 
+	CString FormatDate(const COleDateTime& date) const;
+
 protected:
 	CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHTYPE nType, BURNDOWN_GRAPHOPTION nOption = BGO_INVALID);
 	
@@ -51,7 +53,6 @@ protected:
 	BOOL InitColorPalette(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);
 	COLORREF GetColor(int nColor) const;
 	void RecalcDataMinMax(const CHMXDataset datasets[HMX_MAX_DATASET], double dIgnoreVal = HMX_DATASET_VALUE_NOIGNORE) const;
-	CString FormatDate(const COleDateTime& date) const;
 
 private:
 	BURNDOWN_GRAPH m_nGraph;

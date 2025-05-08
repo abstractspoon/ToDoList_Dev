@@ -160,6 +160,9 @@ protected:
 	virtual int CalcYScaleFontSize(BOOL bTitle) const;
 	virtual int CalcTitleFontSize() const;
 
+	virtual BOOL XScaleHasRTLDates() const { return FALSE; }
+	virtual BOOL YScaleHasRTLDates() const { return FALSE; }
+
 	CStringArray	m_strarrScaleXLabel;					// x labels
 
 	int				m_nXLabelStep;							// x label step
@@ -211,6 +214,8 @@ protected:
 	BOOL CreateXAxisFont(BOOL bTitle, CFont& font) const;
 	BOOL CreateYAxisFont(BOOL bTitle, CFont& font) const;
 	BOOL GetMinMax(double& dMin, double& dMax, BOOL bDataOnly, double dIgnoreVal) const;
+	UINT GetXScaleDrawFlags() const;
+	UINT GetYScaleDrawFlags() const;
 
 	BOOL DrawDataset(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltItemColors, BYTE fillOpacity = 255);
 	BOOL DrawLineGraph(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltMarkerColors, BYTE fillOpacity = 255);

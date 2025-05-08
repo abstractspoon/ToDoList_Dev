@@ -204,12 +204,10 @@ CString CBurndownChart::GetYTickText(int nTick, double dValue) const
 	// by CHMXChart before m_pGraph is set so we don't assert
 	if (m_pGraph)
 	{
-		BURNDOWN_GRAPH nGraph = m_pGraph->GetGraph();
-
-		switch (nGraph)
+		switch (m_pGraph->GetGraph())
 		{
 		case BCG_MINMAX_DUEDONEDATES:
-			return COleDateTime(dValue).Format(VAR_DATEVALUEONLY);
+			return m_pGraph->FormatDate(dValue);
 		}
 	}
 
@@ -398,3 +396,25 @@ BOOL CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	return CHMXChartEx::DrawDataset(dc, m_datasets[nDatasetIndex], m_pGraph->GetColors(), alpha);
 }
 
+BOOL CBurndownChart::XScaleHasRTLDates() const 
+{ 
+	switch (m_pGraph->GetType())
+	{
+	case BCT_TIMESERIES:
+	case BCT_MINMAX:
+		return CDateHelper::WantRTLDates();
+	}
+
+	return FALSE; 
+}
+
+BOOL CBurndownChart::YScaleHasRTLDates() const 
+{ 
+	switch (m_pGraph->GetGraph())
+	{
+	case BCG_MINMAX_DUEDONEDATES:
+		return CDateHelper::WantRTLDates();
+	}
+
+	return FALSE; 
+}
