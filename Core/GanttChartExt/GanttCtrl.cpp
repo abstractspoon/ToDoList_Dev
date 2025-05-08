@@ -3475,7 +3475,7 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 
-		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER);
+		UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER);
 
 		if (CDateHelper::WantRTLDates())
 			nFlags |= DT_RTLREADING;
