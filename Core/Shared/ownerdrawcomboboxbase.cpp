@@ -280,8 +280,7 @@ void COwnerdrawComboBoxBase::DrawItemText(CDC& dc, const CRect& rect, int /*nIte
 		if (crText != CLR_NONE)
 			dc.SetTextColor(crText);
 
-		UINT nFlags = (DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_NOCLIP | GetDrawEllipsis() | GraphicsMisc::GetRTLDrawTextFlags(*this));
-
+		UINT nFlags = (DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_NOCLIP | GetDrawEllipsis());
 		dc.DrawText(sItem, (LPRECT)(LPCRECT)rect, nFlags);
 	}
 }

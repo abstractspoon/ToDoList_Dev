@@ -1607,7 +1607,7 @@ void CNcGutter::NcDrawHeaderColumn(CDC* pDC, int nCol, CRect rColumn, CThemed* p
 		if (bSorted)
 			rText.right -= (SORTWIDTH + 2);
 
-		UINT nFlags = (DEFTEXTFLAGS | pCD->nTextAlign | GraphicsMisc::GetRTLDrawTextFlags(GetHwnd()));
+		UINT nFlags = (DEFTEXTFLAGS | pCD->nTextAlign);
 		
 		if (pCD->hFont)
 		{

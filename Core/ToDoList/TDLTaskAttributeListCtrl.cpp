@@ -2043,6 +2043,10 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		if (!sText.IsEmpty())
 		{
 			CString sDate(FormatDate(_ttof(sText), FALSE));
+
+			if (CDateHelper::WantRTLDates())
+				nDrawTextFlags |= DT_RTLREADING;
+
 			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
 		}
 		return;
@@ -2060,6 +2064,10 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 	case TDCA_CREATIONDATE:
 		{
 			CString sDate(FormatDate(_ttof(sText), TRUE));
+
+			if (CDateHelper::WantRTLDates())
+				nDrawTextFlags |= DT_RTLREADING;
+
 			CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
 		}
 		return;
@@ -2271,6 +2279,10 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 				if (!sText.IsEmpty())
 				{
 					CString sDate(FormatDate(_ttof(sText), FALSE));
+
+					if (CDateHelper::WantRTLDates())
+						nDrawTextFlags |= DT_RTLREADING;
+
 					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sDate, crText, nDrawTextFlags);
 				}
 				return;

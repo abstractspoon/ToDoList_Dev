@@ -1457,7 +1457,7 @@ void CTreeListCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CStri
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
-		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER | GraphicsMisc::GetRTLDrawTextFlags(m_listHeader));
+		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER);
 		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rItem, nFlags);
 	}
 }

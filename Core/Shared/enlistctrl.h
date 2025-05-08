@@ -222,7 +222,7 @@ protected:
 	virtual void DrawCellText(CDC* pDC, int nItem, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, const CString& sText, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
 	virtual void DrawGroupHeader(CDC* pDC, CRect& rRow, const CString& sText, COLORREF crBack);
-	virtual UINT GetTextDrawFlags(int nCol) const;
+	virtual UINT GetTextDrawFlags(int nCol, BOOL bDate = FALSE) const;
 
 	void NotifySelChange();
 	void DeleteAllColumnData();

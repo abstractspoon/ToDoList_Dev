@@ -3488,7 +3488,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		break;
 		
 	case CDDS_ITEMPREPAINT:
-		if (GraphicsMisc::GetRTLDrawTextFlags(hwndHdr) == DT_RTLREADING)
+		if (CDateHelper::WantRTLDates())
 		{
 			*pResult = CDRF_NOTIFYPOSTPAINT;
 		}
@@ -3514,7 +3514,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			CDC* pDC = CDC::FromHandle(pNMCD->hdc);
 
-			if (GraphicsMisc::GetRTLDrawTextFlags(hwndHdr) == DT_RTLREADING)
+			if (CDateHelper::WantRTLDates())
 			{
 				CRect rItem(pNMCD->rc);
 				rItem.DeflateRect(3, 0);
@@ -3532,7 +3532,7 @@ void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 						hPrev = pDC->SelectObject(m_fonts.GetHFont());
 				}
 			
-				UINT nFlags = (DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(hwndHdr));
+				UINT nFlags = (DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_RTLREADING);
 				pDC->DrawText(m_header.GetItemText(pNMCD->dwItemSpec), rItem, nFlags);
 
 				if (!m_bSavingToImage)

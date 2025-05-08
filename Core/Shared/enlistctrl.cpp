@@ -11,6 +11,7 @@
 #include "enimagelist.h"
 #include "enstring.h"
 #include "OsVersion.h"
+#include "DateHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -685,9 +686,12 @@ void CEnListCtrl::DrawCellText(CDC* pDC, int /*nItem*/, int /*nCol*/,
 	}
 }
 
-UINT CEnListCtrl::GetTextDrawFlags(int nCol) const
+UINT CEnListCtrl::GetTextDrawFlags(int nCol, BOOL bDate) const
 {
-	UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | GraphicsMisc::GetRTLDrawTextFlags(*this));
+	UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+
+	if (bDate && CDateHelper::WantRTLDates())
+		nFlags |= DT_RTLREADING;
 
 	LV_COLUMN lvc = { 0 };
 	lvc.mask = LVCF_FMT;

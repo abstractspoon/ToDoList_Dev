@@ -131,9 +131,6 @@ namespace GraphicsMisc
 	BOOL CreateFont(CFont& font, LPCTSTR szFaceName, int nPoint = -1, DWORD dwFlags = 0);
 	BOOL CreateFont(CFont& fontOut, HFONT fontIn, DWORD dwFlags = 0, DWORD dwMask = GMFS_ALL);
 
-	UINT GetRTLDrawTextFlags(HWND hwnd);
-	UINT GetRTLDrawTextFlags(CDC* pDC);
-	
 	HICON LoadIcon(UINT nIDIcon, int nSize = 16);
 	HBITMAP IconToPARGB32Bitmap(HICON hIcon);
 	CSize GetIconSize(HICON hIcon);
