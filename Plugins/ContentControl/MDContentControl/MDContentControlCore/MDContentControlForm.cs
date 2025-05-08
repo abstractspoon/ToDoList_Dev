@@ -35,6 +35,11 @@ namespace MDContentControl
 
 		// -----------------------------------------------------------------
 
+		const int WS_EX_RTLREADING = 0x00002000;
+		const int WS_EX_LEFTSCROLLBAR = 0x00004000;
+
+		// -----------------------------------------------------------------
+
 		public MDContentControlForm()
 		{
 			InitializeComponent();
@@ -48,6 +53,12 @@ namespace MDContentControl
 
 			contextMenuStrip1.ImageScalingSize = new Size(imageSize, imageSize);
 			contextMenuStrip1.Renderer = new UIThemeToolbarRenderer();
+
+			if (Win32.HasStyle(Handle, WS_EX_RTLREADING, true))
+			{
+				InputTextCtrl.RightToLeft = RightToLeft.Yes;
+				Win32.RemoveStyle(InputTextCtrl.Handle, WS_EX_LEFTSCROLLBAR, true);
+			}
 
 			Win32.SetEditMargins(InputTextCtrl.Handle, DPIScaling.Scale(4));
 			Win32.RemoveClientEdge(InputTextCtrl.Handle);
