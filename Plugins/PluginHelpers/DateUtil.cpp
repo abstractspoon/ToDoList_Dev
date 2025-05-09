@@ -419,3 +419,8 @@ void DateUtil::SetShortDateFormat(Windows::Forms::DateTimePicker^ ctrl, bool iso
 		ctrl->Format = DateTimePickerFormat::Short;
 	}
 }
+
+bool DateUtil::WantRTLDates()
+{
+	return (CDateHelper::WantRTLDates() != FALSE);
+}

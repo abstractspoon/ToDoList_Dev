@@ -98,6 +98,7 @@ namespace Abstractspoon
 				static bool IsAllDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days);
 
 				static void SetShortDateFormat(Windows::Forms::DateTimePicker^ ctrl, bool isoFormat);
+				static bool WantRTLDates();
 			};
 		}
 	}
