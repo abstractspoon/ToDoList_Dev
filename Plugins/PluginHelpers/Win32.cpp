@@ -109,6 +109,38 @@ bool Win32::AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
 	return HasStyle(hWnd, nStyle, bExStyle);
 }
 
+bool Win32::SetRTLReading(IntPtr hWnd, bool rtl)
+{
+	Control^ ctrl = Control::FromHandle(hWnd);
+
+	if (ctrl == nullptr)
+		return false;
+
+	if (rtl)
+	{
+		ctrl->RightToLeft = RightToLeft::Yes;
+		RemoveStyle(hWnd, WS_EX_LEFTSCROLLBAR, true);
+	}
+	else
+	{
+		ctrl->RightToLeft = RightToLeft::No;
+	}
+
+	return true;
+}
+
+bool Win32::SyncRTLReadingWithParent(IntPtr hWnd)
+{
+	HWND hwndParent = ::GetParent(GetHwnd(hWnd));
+
+	return SetRTLReading(hWnd, HasRTLReading(IntPtr(hWnd)));
+}
+
+bool Win32::HasRTLReading(IntPtr hWnd)
+{
+	return HasStyle(hWnd, WS_EX_RTLREADING, true);
+}
+
 int Win32::GetVScrollPos(IntPtr hWnd)
 {
 	return ::GetScrollPos(GetHwnd(hWnd), SB_VERT);

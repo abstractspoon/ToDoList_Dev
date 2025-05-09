@@ -54,12 +54,7 @@ namespace MDContentControl
 			contextMenuStrip1.ImageScalingSize = new Size(imageSize, imageSize);
 			contextMenuStrip1.Renderer = new UIThemeToolbarRenderer();
 
-			if (Win32.HasStyle(Handle, WS_EX_RTLREADING, true))
-			{
-				InputTextCtrl.RightToLeft = RightToLeft.Yes;
-				Win32.RemoveStyle(InputTextCtrl.Handle, WS_EX_LEFTSCROLLBAR, true);
-			}
-
+			Win32.SyncRTLReadingWithParent(InputTextCtrl.Handle);
 			Win32.SetEditMargins(InputTextCtrl.Handle, DPIScaling.Scale(4));
 			Win32.RemoveClientEdge(InputTextCtrl.Handle);
 			Win32.AddBorder(InputTextCtrl.Handle);
