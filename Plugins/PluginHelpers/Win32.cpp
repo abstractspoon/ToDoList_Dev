@@ -117,14 +117,9 @@ bool Win32::SetRTLReading(IntPtr hWnd, bool rtl)
 		return false;
 
 	if (rtl)
-	{
 		ctrl->RightToLeft = RightToLeft::Yes;
-		RemoveStyle(hWnd, WS_EX_LEFTSCROLLBAR, true);
-	}
 	else
-	{
 		ctrl->RightToLeft = RightToLeft::No;
-	}
 
 	return true;
 }
