@@ -37,11 +37,12 @@ namespace DayViewUIExtension
 		private MonthComboBox m_MonthCombo;
 		private YearComboBox m_YearCombo;
         private DayViewPreferencesDlg m_PrefsDlg;
+		private DateRangeLink m_SelectedTaskDates;
+		private Label m_SelectedTaskDatesLabel;
 
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
-		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
 
 		private TimeBlockSeriesAttributes m_DefaultNewTimeBlockAttributes;
@@ -219,7 +220,11 @@ namespace DayViewUIExtension
 			m_ToolbarRenderer.SetUITheme(theme);
 
 			m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			m_WeekLabel.BackColor = BackColor;
+
 			m_SelectedTaskDatesLabel.ForeColor = m_WeekLabel.ForeColor;
+			m_SelectedTaskDatesLabel.BackColor = BackColor;
+			m_SelectedTaskDates.BackColor = BackColor;
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -252,6 +257,8 @@ namespace DayViewUIExtension
 			m_DayView.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
 			m_DayView.DisplayDatesInISO = prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false);
 
+			m_SelectedTaskDates.SetISOFormat(m_DayView.DisplayDatesInISO);
+
 			m_AllowModifyTimeEstimate = !prefs.GetProfileBool("Preferences", "SyncTimeEstAndDates", false);
 
 			m_WorkWeek.Load(prefs);
@@ -266,8 +273,7 @@ namespace DayViewUIExtension
             
             if (appOnly)
 			{
-				UpdateWorkingHourDisplay();
-				UpdatedSelectedTaskDatesText();
+				UpdateWorkingHourDisplay(); // else called in UpdateDayViewPreferences
 			}
 			else
             {
@@ -354,7 +360,7 @@ namespace DayViewUIExtension
 			CreateMonthYearCombos();
 			CreateToolbar();
 			CreateWeekLabel();
-			CreateSelectedTaskDatesLabel();
+			CreateSelectedTaskDates();
 
 			// Day view always comes last
 			CreateDayView();
@@ -469,25 +475,33 @@ namespace DayViewUIExtension
 			Controls.Add(m_WeekLabel);
 		}
 
-		private void CreateSelectedTaskDatesLabel()
+		private void CreateSelectedTaskDates()
 		{
-			m_SelectedTaskDatesLabel = new LinkLabelEx.LinkLabelEx();
+			// label
+			m_SelectedTaskDatesLabel = new Label()
+			{
+				Text = m_Trans.Translate("Selected Task Date Range", Translator.Type.Label),
+				Font = m_ControlsFont,
+				BackColor = BackColor,
+				AutoSize = true
+			};
 
-			m_SelectedTaskDatesLabel.Font = m_ControlsFont;
-			m_SelectedTaskDatesLabel.Location = new Point(m_Toolbar.Right, m_Toolbar.Top);
-			m_SelectedTaskDatesLabel.Height = m_Toolbar.Height;
-			m_SelectedTaskDatesLabel.Width = 1024;
-			m_SelectedTaskDatesLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-			m_SelectedTaskDatesLabel.AutoSize = false;
-			m_SelectedTaskDatesLabel.ActiveLinkColor = m_SelectedTaskDatesLabel.LinkColor;
-			m_SelectedTaskDatesLabel.VisitedLinkColor = m_SelectedTaskDatesLabel.LinkColor;
+			// Date range
+			m_SelectedTaskDates = new DateRangeLink()
+			{
+				Font = m_ControlsFont,
+				Width = 1024,
+				BackColor = BackColor,
+				AutoSize = false
+			};
 
-			m_SelectedTaskDatesLabel.LinkClicked += new LinkLabelLinkClickedEventHandler(OnClickSelectedTaskDatesLink);
-			
+			m_SelectedTaskDates.ClickEvent += new EventHandler(OnClickSelectedTaskDatesLink);
+
 			Controls.Add(m_SelectedTaskDatesLabel);
+			Controls.Add(m_SelectedTaskDates);
 		}
 
-		protected void OnClickSelectedTaskDatesLink(object sender, LinkLabelLinkClickedEventArgs e)
+		protected void OnClickSelectedTaskDatesLink(object sender, EventArgs e)
 		{
 			m_DayView.EnsureSelectionVisible(false);
 			m_DayView.Focus();
@@ -994,22 +1008,25 @@ namespace DayViewUIExtension
 			DateTime from, to;
 
 			if (m_DayView.GetSelectedTaskDates(out from, out to))
-			{
-				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range", Translator.Type.Label));
-				String dateRange = DateUtil.FormatRange(from, to, true, m_DayView.DisplayDatesInISO);
-
-				m_SelectedTaskDatesLabel.Text = (label + dateRange);
-				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
-			}
+				m_SelectedTaskDates.SetRange(from, to);
 			else
-			{
-				m_SelectedTaskDatesLabel.Text = String.Empty;
-			}
+				m_SelectedTaskDates.ClearRange();
 		}
 
 		private void UpdatedSelectedTaskDatesPosition()
 		{
-			m_SelectedTaskDatesLabel.Location = new Point(m_WeekLabel.Right + 10, m_YearCombo.Bottom - m_SelectedTaskDatesLabel.Height);
+			// Align with the base of the combo text
+			Point pt = new Point(m_WeekLabel.Right + 10, RectUtil.CentreY(m_YearCombo.Bounds));
+			pt.Y += m_YearCombo.ItemHeight / 2;
+			pt.Y -= m_SelectedTaskDates.Height;
+
+			m_SelectedTaskDatesLabel.Location = pt;
+
+			pt.X = (m_SelectedTaskDatesLabel.Right + 10);
+			pt.Y--;
+
+			m_SelectedTaskDates.Location = pt;
+			m_SelectedTaskDates.Height = m_SelectedTaskDatesLabel.Height;
 		}
 
 		private void OnDayViewWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
