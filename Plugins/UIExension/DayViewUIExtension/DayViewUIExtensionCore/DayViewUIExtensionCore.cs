@@ -35,7 +35,7 @@ namespace DayViewUIExtension
 
 		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
-		private YearComboBox m_YearCombo;
+		private YearComboBoxEx m_YearCombo;
         private DayViewPreferencesDlg m_PrefsDlg;
 		private DateRangeLink m_SelectedTaskDates;
 		private Label m_SelectedTaskDatesLabel;
@@ -883,7 +883,7 @@ namespace DayViewUIExtension
 			
 			Controls.Add(m_MonthCombo);
 
-			m_YearCombo = new YearComboBox();
+			m_YearCombo = new YearComboBoxEx();
 
 			m_YearCombo.Font = m_ControlsFont;
             m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);
@@ -891,7 +891,9 @@ namespace DayViewUIExtension
 
 			m_YearCombo.SelectedYear = DateTime.Now.Year;
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
-			
+
+//			Win32.SetRTLReading(m_YearCombo.Handle, DateUtil.WantRTLDates());
+					
 			Controls.Add(m_YearCombo);
 		}
 
