@@ -162,14 +162,6 @@ void RichTextBoxEx::OnLinkClicked(LinkClickedEventArgs^ e)
 	ContentControlWnd::GoToLink(e->LinkText, Parent->Handle, Handle);
 }
 
-void RichTextBoxEx::OnRightToLeftChanged(EventArgs^ e)
-{
-	RichTextBox::OnRightToLeftChanged(e);
-
-	// For consistency with core app
-	Win32::RemoveStyle(Handle, WS_EX_LEFTSCROLLBAR, true);
-}
-
 bool RichTextBoxEx::SelectionContainsPos(Point ptClient)
 {
 	if (SelectionLength == 0)

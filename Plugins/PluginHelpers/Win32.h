@@ -63,7 +63,14 @@ namespace Abstractspoon
 				static void EnableExplorerTheming(IntPtr hWnd);
 
 			protected:
-				static void DoFrameChange(IntPtr hWnd);
+				static void DoFrameChange(IntPtr hWnd) { DoFrameChangeEx(hWnd, false); }
+				static void DoFrameChangeEx(IntPtr hWnd, bool bIncrementWidth);
+
+				ref class RTLChangeEventReceiver
+				{
+				public:
+					static void Handler(Object^ sender, EventArgs^ e);
+				};
 			};
 
 			public ref class DlgUnits
