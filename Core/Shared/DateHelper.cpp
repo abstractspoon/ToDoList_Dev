@@ -34,14 +34,6 @@ const double START_OF_DAY = ONE_SECOND;
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef LOCALE_CUSTOM_UI_DEFAULT
-#	define SUBLANG_UI_CUSTOM_DEFAULT 0x05
-#	define LOCALE_CUSTOM_UI_DEFAULT                                              \
-          (MAKELCID(MAKELANGID(LANG_NEUTRAL, SUBLANG_UI_CUSTOM_DEFAULT), SORT_DEFAULT))
-#endif
-
-//////////////////////////////////////////////////////////////////////
-
 COleDateTimeRange::COleDateTimeRange()
 {
 	Reset();
@@ -1625,9 +1617,7 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 				szFormat = sFormat;
 			}
 
-			const LCID lcid = LOCALE_CUSTOM_UI_DEFAULT;
-
-			::GetDateFormat(lcid, 0, &st, szFormat, sDate.GetBuffer(50), 49);
+			::GetDateFormat(0, 0, &st, szFormat, sDate.GetBuffer(50), 49);
 			sDate.ReleaseBuffer();
 		}
 	}
