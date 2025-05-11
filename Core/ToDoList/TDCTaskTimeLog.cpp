@@ -118,6 +118,8 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 {
 	CString sItem, sRowFormat(GetRowFormat(nRowVer, sDelim));
 	
+	// Note: We format dates as ISO manually to avoid any localisation
+	// that might take place in CDateHelper::FormatDate
 	switch (nRowVer)
 	{
 	case VER_0:
@@ -126,8 +128,8 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 					 EncodeValue(sTaskTitle, sDelim),
 					 EncodeValue(Misc::Format(dHours, 3), sDelim),
 					 EncodeValue(sPerson, sDelim),
-					 CDateHelper::FormatDate(dtTo, DHFD_TIME),
-					 CDateHelper::FormatDate(dtFrom, DHFD_TIME));
+					 dtTo.Format(_T("%Y-%m-%d %H:%M")),		// ISO
+					 dtFrom.Format(_T("%Y-%m-%d %H:%M")));	// ISO
 		break;
 		
 	case VER_LATEST:
