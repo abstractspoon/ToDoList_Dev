@@ -135,10 +135,10 @@ CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 					 Misc::Format(dwTaskID),
 					 EncodeValue(sTaskTitle, sDelim),
 					 EncodeValue(sPerson, sDelim),
-					 CDateHelper::FormatDate(dtFrom, DHFD_ISO),
-					 CTimeHelper::FormatClockTime(dtFrom, FALSE, TRUE),
-					 CDateHelper::FormatDate(dtTo, DHFD_ISO),
-					 CTimeHelper::FormatClockTime(dtTo, FALSE, TRUE),
+					 dtFrom.Format(_T("%Y-%m-%d")), // ISO
+					 dtFrom.Format(_T("%H:%M")),	// ISO
+					 dtTo.Format(_T("%Y-%m-%d")),	// ISO
+					 dtTo.Format(_T("%H:%M")),		// ISO
 					 EncodeValue(Misc::Format(dHours, 3), sDelim),
 					 EncodeValue(sComment, sDelim, TRUE),
 					 EncodeValue(sType, sDelim),
@@ -185,9 +185,13 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 			// NOTE: 'To' precedes 'From' because 'From' was added later
 			if (CDateHelper::DecodeDate(aFields[4], date, TRUE))
 				dtTo = date;
+			else
+				ASSERT(0);
 			
 			if (CDateHelper::DecodeDate(aFields[5], date, TRUE))
 				dtFrom = date;
+			else
+				ASSERT(0);
 		}
 		else
 		{
@@ -204,9 +208,13 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 			
 			if (CDateHelper::DecodeDate((aFields[3] + ' ' + aFields[4]), date, TRUE))
 				dtFrom = date;
+			else
+				ASSERT(0);
 			
 			if (CDateHelper::DecodeDate((aFields[5] + ' ' + aFields[6]), date, TRUE))
 				dtTo = date;
+			else
+				ASSERT(0);
 			
 			dHours = Misc::Atof(DecodeValue(aFields[7], sDelim));
 			
