@@ -24,7 +24,7 @@ void YearComboBoxEx::WndProc(Message% m)
 	case WM_CTLCOLORLISTBOX:
 		if (!m_ListBoxHandled)
 		{ 
-			// Clear first prevent re-entrancy
+			// Clear first to prevent re-entrancy
 			m_ListBoxHandled = true;
 
 			if (CDateHelper::WantRTLDates())

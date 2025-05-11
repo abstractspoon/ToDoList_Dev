@@ -21,7 +21,7 @@ namespace Abstractspoon
 				
 				void Detach();
 
-				void SetText(LPCTSTR szText);
+				int SetText(LPCTSTR szText); // Returns the width of the link
 				HBRUSH CtlColor(HDC hDC);
 				void SetBackColor(COLORREF crBack);
 
