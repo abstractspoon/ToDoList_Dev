@@ -1929,7 +1929,7 @@ int CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* 
 	if (!pCtrl->GetWindowTextLength())
 		return 0;
 
-	BOOL bRightAligned = FALSE;
+	BOOL bRightAligned = FALSE, bStatic = FALSE;
 
 	if (CWinClasses::IsClass(*pCtrl, WC_BUTTON))
 	{
@@ -1956,9 +1956,16 @@ int CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* 
 			return 0; // push button
 		}
 	}
-	else if (!CWinClasses::IsClass(*pCtrl, WC_STATIC)) // not static text
+	else if (CWinClasses::IsClass(*pCtrl, WC_STATIC)) 
 	{
-		return FALSE;
+		DWORD dwStyle = pCtrl->GetStyle();
+
+		bRightAligned = (dwStyle & SS_RIGHT);
+		bStatic = TRUE;
+	}
+	else 
+	{
+		return 0;
 	}
 
 	// prepare DC
@@ -1989,13 +1996,14 @@ int CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* 
 	// just add a smidgin
 	nExtent += CLASSICTHEMETEXTFUDGE;
 
-	// adjust the appropriate side of the control rect,
-	// adding the height of the rect to allow
-	// for the checkbox or radiobutton
+	// Adjust extent for the checkbox or radio-button
+	if (!bStatic)
+		nExtent += rText.Height();
+
 	if (bRightAligned)
-		rText.left = (rText.right - nExtent - rText.Height());
+		rText.left = (rText.right - nExtent);
 	else
-		rText.right = (rText.left + nExtent + rText.Height());
+		rText.right = (rText.left + nExtent);
 	
 	// resize window
 	int nDiff = (rText.Width() - rOrgText.Width());

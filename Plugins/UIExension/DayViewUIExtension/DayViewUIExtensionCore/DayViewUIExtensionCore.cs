@@ -490,7 +490,7 @@ namespace DayViewUIExtension
 			m_SelectedTaskDates = new DateRangeLink()
 			{
 				Font = m_ControlsFont,
-				Width = 1024,
+				Width = 300,
 				BackColor = BackColor,
 				AutoSize = false
 			};
@@ -1010,9 +1010,15 @@ namespace DayViewUIExtension
 			DateTime from, to;
 
 			if (m_DayView.GetSelectedTaskDates(out from, out to))
+			{
 				m_SelectedTaskDates.SetRange(from, to);
+				m_SelectedTaskDatesLabel.Visible = true;
+			}
 			else
+			{
 				m_SelectedTaskDates.ClearRange();
+				m_SelectedTaskDatesLabel.Visible = false;
+			}
 		}
 
 		private void UpdatedSelectedTaskDatesPosition()

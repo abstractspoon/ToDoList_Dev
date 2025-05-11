@@ -36,7 +36,7 @@ HostedDateRangeLink* HostedDateRangeLink::Attach(HWND hwndParent, HFONT hFont)
 	CRect rClient;
 	pCtrl->m_WndOfManagedHandle.GetClientRect(rClient);
 
-	DWORD dwFlags = (WS_CHILD | WS_VISIBLE | WS_VSCROLL | SS_CENTERIMAGE | SS_NOTIFY);
+	DWORD dwFlags = (WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE | SS_NOTIFY);
 
 	pCtrl->m_LinkLabel.Create(NULL, dwFlags, rClient, &(pCtrl->m_WndOfManagedHandle));
 	pCtrl->m_LinkLabel.SendMessage(WM_SETFONT, (WPARAM)hFont, 0);
