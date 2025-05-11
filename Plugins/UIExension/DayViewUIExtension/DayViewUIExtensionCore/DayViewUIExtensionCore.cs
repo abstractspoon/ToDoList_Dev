@@ -1017,15 +1017,17 @@ namespace DayViewUIExtension
 
 		private void UpdatedSelectedTaskDatesPosition()
 		{
-			// Align with the base of the combo text
-			Point pt = new Point(m_WeekLabel.Right + 10, RectUtil.CentreY(m_YearCombo.Bounds));
-			pt.Y += m_YearCombo.ItemHeight / 2;
-			pt.Y -= m_SelectedTaskDates.Height;
+			// Align with the base of the combo text to match core app
+			Point pt = new Point(m_WeekLabel.Right + 10, 0);
 
+			pt.Y = (m_YearCombo.Top + m_YearCombo.Bottom + m_YearCombo.ItemHeight) / 2;
+			pt.Y -= m_SelectedTaskDatesLabel.Height;
+
+			// Label part
 			m_SelectedTaskDatesLabel.Location = pt;
 
+			// Link part
 			pt.X = (m_SelectedTaskDatesLabel.Right + 10);
-			pt.Y--;
 
 			m_SelectedTaskDates.Location = pt;
 			m_SelectedTaskDates.Height = m_SelectedTaskDatesLabel.Height;
@@ -1212,7 +1214,7 @@ namespace DayViewUIExtension
             get
             {
                 if (m_MonthCombo != null)
-                    return m_MonthCombo.Bounds.Bottom + DPIScaling.Scale(4);
+                    return m_MonthCombo.Bounds.Bottom + DPIScaling.Scale(3);
 
                 // else
                 return 0;
