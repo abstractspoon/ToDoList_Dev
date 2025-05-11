@@ -3534,7 +3534,13 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		int nAlign = DT_RIGHT;
 
 		if (CDateHelper::WantRTLDates())
+		{
 			nAlign |= DT_RTLREADING;
+
+			// FUDGE for RTL dates which get rendered too far to
+			// the right for reasons I haven't yet determined
+			rDraw.OffsetRect(-LV_COLPADDING, 0);
+		}
 
 		DrawColumnText(pDC, sDate, rDraw, nAlign, crText);
 		rDraw.right -= (nMaxDateWidth + nSepWidth);
