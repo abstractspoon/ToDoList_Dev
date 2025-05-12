@@ -884,6 +884,7 @@ void CCalendarWnd::UpdateSelectedTaskDates()
 	}
 
 	m_stSelectedTaskDates.SetWindowText(sSelectedTaskDates);
+	CDialogHelper::ResizeButtonStaticTextToFit(this, &m_stSelectedTaskDates);
 }
 
 void CCalendarWnd::OnClickSelectedTaskDates()

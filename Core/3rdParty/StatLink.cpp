@@ -30,6 +30,7 @@ BEGIN_MESSAGE_MAP(CStaticLink, CStatic)
 	ON_WM_CHAR()
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
+	ON_MESSAGE(WM_SETTEXT, OnSetText)
 END_MESSAGE_MAP()
 
 ///////////////////
@@ -98,6 +99,18 @@ HBRUSH CStaticLink::CtlColor(CDC* pDC, UINT nCtlColor)
 void CStaticLink::OnLButtonDown(UINT /*nFlags*/, CPoint /*point*/)
 {
 	Navigate();
+}
+
+LRESULT CStaticLink::OnSetText(WPARAM wp, LPARAM lp)
+{
+	// Invalidate our background rect
+	CRect rLink;
+	GetWindowRect(rLink);
+
+	GetParent()->ScreenToClient(rLink);
+	GetParent()->InvalidateRect(rLink);
+
+	return Default();
 }
 
 //////////////////
