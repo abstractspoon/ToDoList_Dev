@@ -693,10 +693,10 @@ void CCalendarWnd::ResizeControls(int cx, int cy)
 {
 	if (CLocalizer::IsInitialized())
 	{
-		int nOffset = CDialogHelper::ResizeButtonStaticTextToFit(this, IDC_SELECTEDTASKDATESLABEL);
+		int nOffset = CDialogHelper::ResizeStaticTextToFit(this, IDC_SELECTEDTASKDATESLABEL);
 
 		if (nOffset != 0)
-			CDialogHelper::OffsetCtrl(this, IDC_SELECTEDTASKDATES, nOffset, 0);
+			CDialogHelper::OffsetChild(&m_stSelectedTaskDates, nOffset, 0);
 	}
 
 	// calendar frame
@@ -884,7 +884,7 @@ void CCalendarWnd::UpdateSelectedTaskDates()
 	}
 
 	m_stSelectedTaskDates.SetWindowText(sSelectedTaskDates);
-	CDialogHelper::ResizeButtonStaticTextToFit(this, &m_stSelectedTaskDates);
+	CDialogHelper::ResizeStaticTextToFit(this, &m_stSelectedTaskDates);
 }
 
 void CCalendarWnd::OnClickSelectedTaskDates()

@@ -64,15 +64,12 @@ int HostedDateRangeLink::SetText(LPCWSTR szText)
 	m_LinkLabel.SetWindowTextW(szText);
 
 	// Resize and return the new width
-	CDialogHelper::ResizeButtonStaticTextToFit(&m_WndOfManagedHandle, &m_LinkLabel);
+	CDialogHelper::ResizeStaticTextToFit(&m_WndOfManagedHandle, &m_LinkLabel);
 
 	if (Misc::IsEmpty(szText))
 		return 0;
 
-	CRect rLink;
-	m_LinkLabel.GetClientRect(rLink);
-
-	return rLink.Width();
+	return CDialogHelper::GetChildWidth(&m_LinkLabel);
 }
 
 void HostedDateRangeLink::SetBackColor(COLORREF crBack)

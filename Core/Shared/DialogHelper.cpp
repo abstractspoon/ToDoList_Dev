@@ -1433,6 +1433,22 @@ int CDialogHelper::GetChildHeight(const CWnd* pChild)
 	return 0;
 }
 
+int CDialogHelper::GetChildWidth(const CWnd* pChild)
+{
+	ASSERT(pChild);
+
+	if (pChild)
+	{
+		CRect rChild;
+		pChild->GetWindowRect(rChild);
+
+		return rChild.Width();
+	}
+
+	// all else
+	return 0;
+}
+
 CRect CDialogHelper::GetChildRect(const CWnd* pChild) 
 { 
 	ASSERT(pChild && pChild->GetParent());
@@ -1905,7 +1921,9 @@ void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
 		// resize children
 		while (pChild)
 		{
-			ResizeButtonStaticTextToFit(pParent, pChild, &dc);
+			if (CWinClasses::IsClass(*pChild, WC_BUTTON))
+				ResizeStaticTextToFit(pParent, pChild, &dc);
+
 			pChild = pChild->GetWindow(GW_HWNDNEXT);
 		}
 
@@ -1914,12 +1932,12 @@ void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
 	}
 }
 
-int CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef)
+int CDialogHelper::ResizeStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef)
 {
-	return ResizeButtonStaticTextToFit(pParent, pParent->GetDlgItem(nCtrlID), pDCRef);
+	return ResizeStaticTextToFit(pParent, pParent->GetDlgItem(nCtrlID), pDCRef);
 }
 
-int CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef)
+int CDialogHelper::ResizeStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef)
 {
 	ASSERT(pParent && pParent->GetSafeHwnd() && pCtrl && pCtrl->GetSafeHwnd());
 

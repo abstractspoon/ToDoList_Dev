@@ -110,12 +110,13 @@ public:
 	static void SetStyle(CWnd* pWnd, DWORD dwStyle, BOOL bSet = TRUE);
 	static BOOL HasStyle(HWND hWnd, DWORD dwStyle, BOOL bExStyle = FALSE);
 
-	// covers static text, radiobuttons, checkboxes
+	// covers radiobuttons and checkboxes
 	static void ResizeButtonStaticTextFieldsToFit(CWnd* pParent);
 
+	// covers static text, radiobuttons and checkboxes
 	// Returns the width difference
-	static int ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef = NULL);
-	static int ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef = NULL);
+	static int ResizeStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef = NULL);
+	static int ResizeStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef = NULL);
 
 	// CEdit and CRichEditCtrl
 	static BOOL SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen);
@@ -252,6 +253,7 @@ public:
 	static CRect GetCtrlRect(const CWnd* pParent, UINT nCtrlID);
 	static CRect GetChildRect(const CWnd* pChild);
 	static int GetChildHeight(const CWnd* pChild);
+	static int GetChildWidth(const CWnd* pChild);
 
 	static void SetCtrlState(const CWnd* pParent, UINT nCtrlID, RT_CTRLSTATE nState);
 	static void SetCtrlState(HWND hCtrl, RT_CTRLSTATE nState);
