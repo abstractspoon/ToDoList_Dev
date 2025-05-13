@@ -63,14 +63,14 @@ public:
 	static BOOL IsRichEditControl(HWND hWnd);
 	static BOOL IsComboBox(HWND hWnd);
 	static BOOL IsListBox(HWND hWnd);
-	static BOOL IsWindowsFormsControl(HWND hWnd);
+	static BOOL IsWinFormsControl(HWND hWnd, LPCTSTR szWndClass = NULL);
 	static BOOL IsChild(HWND hWnd);
 
 	static BOOL IsEditControl(LPCTSTR szClass, BOOL bOrRichEdit = TRUE);
 	static BOOL IsRichEditControl(LPCTSTR szClass);
 	static BOOL IsComboBox(LPCTSTR szClass);
 	static BOOL IsListBox(LPCTSTR szClass);
-	static BOOL IsWindowsFormsControl(LPCTSTR szClass);
+	static BOOL IsWinFormsControl(LPCTSTR szClass, LPCTSTR szWndClass = NULL);
 
 	static int GetStyleType(HWND hWnd, DWORD dwTypeMask);
 	

@@ -1433,6 +1433,22 @@ int CDialogHelper::GetChildHeight(const CWnd* pChild)
 	return 0;
 }
 
+int CDialogHelper::GetChildWidth(const CWnd* pChild)
+{
+	ASSERT(pChild);
+
+	if (pChild)
+	{
+		CRect rChild;
+		pChild->GetWindowRect(rChild);
+
+		return rChild.Width();
+	}
+
+	// all else
+	return 0;
+}
+
 CRect CDialogHelper::GetChildRect(const CWnd* pChild) 
 { 
 	ASSERT(pChild && pChild->GetParent());
@@ -1905,7 +1921,9 @@ void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
 		// resize children
 		while (pChild)
 		{
-			ResizeButtonStaticTextToFit(pParent, pChild, &dc);
+			if (CWinClasses::IsClass(*pChild, WC_BUTTON))
+				ResizeStaticTextToFit(pParent, pChild, &dc);
+
 			pChild = pChild->GetWindow(GW_HWNDNEXT);
 		}
 
@@ -1914,22 +1932,22 @@ void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
 	}
 }
 
-void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef)
+int CDialogHelper::ResizeStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef)
 {
-	ResizeButtonStaticTextToFit(pParent, pParent->GetDlgItem(nCtrlID), pDCRef);
+	return ResizeStaticTextToFit(pParent, pParent->GetDlgItem(nCtrlID), pDCRef);
 }
 
-void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef)
+int CDialogHelper::ResizeStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef)
 {
 	ASSERT(pParent && pParent->GetSafeHwnd() && pCtrl && pCtrl->GetSafeHwnd());
 
 	if (!pParent ||! pParent->GetSafeHwnd() || !pCtrl || !pCtrl->GetSafeHwnd())
-		return;
+		return 0;
 
 	if (!pCtrl->GetWindowTextLength())
-		return;
+		return 0;
 
-	BOOL bRightAligned = FALSE;
+	BOOL bRightAligned = FALSE, bStatic = FALSE;
 
 	if (CWinClasses::IsClass(*pCtrl, WC_BUTTON))
 	{
@@ -1946,19 +1964,26 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 			{
 				// must be single line
 				if (dwStyle & BS_MULTILINE)
-					return;
+					return 0;
 
 				bRightAligned = (dwStyle & BS_RIGHT);
 			}
 			break; // all good
 			
 		default:
-			return; // push button
+			return 0; // push button
 		}
 	}
-	else // not a button
+	else if (CWinClasses::IsClass(*pCtrl, WC_STATIC)) 
 	{
-		return;
+		DWORD dwStyle = pCtrl->GetStyle();
+
+		bRightAligned = (dwStyle & SS_RIGHT);
+		bStatic = TRUE;
+	}
+	else 
+	{
+		return 0;
 	}
 
 	// prepare DC
@@ -1976,6 +2001,8 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 	CRect rText;
 	pCtrl->GetWindowRect(rText);
 	pParent->ScreenToClient(rText);	
+
+	CRect rOrgText(rText);
 	
 	CString sText;
 	pCtrl->GetWindowText(sText);
@@ -1987,16 +2014,20 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 	// just add a smidgin
 	nExtent += CLASSICTHEMETEXTFUDGE;
 
-	// adjust the appropriate side of the control rect,
-	// adding the height of the rect to allow
-	// for the checkbox or radiobutton
+	// Adjust extent for the checkbox or radio-button
+	if (!bStatic)
+		nExtent += rText.Height();
+
 	if (bRightAligned)
-		rText.left = (rText.right - nExtent - rText.Height());
+		rText.left = (rText.right - nExtent);
 	else
-		rText.right = (rText.left + nExtent + rText.Height());
+		rText.right = (rText.left + nExtent);
 	
 	// resize window
-	pCtrl->MoveWindow(rText);
+	int nDiff = (rText.Width() - rOrgText.Width());
+
+	if (nDiff)
+		pCtrl->MoveWindow(rText);
 
 	// restore DC
 	if (!bCallerDC)
@@ -2004,6 +2035,8 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 		pDCRef->SelectObject(hOldFont);
 		pCtrl->ReleaseDC(pDCRef);
 	}
+
+	return nDiff;
 }
 
 void CDialogHelper::ExcludeCtrls(const CWnd* pParent, CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo)

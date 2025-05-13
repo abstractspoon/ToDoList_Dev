@@ -595,6 +595,42 @@ int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 //
 //		TRUE if ok, else FALSE
 //
+
+UINT CHMXChart::GetXScaleDrawFlags() const
+{
+	if (m_nXLabelDegrees > 0) // => CDC::TextOut for rotated fonts
+	{
+		UINT nDrawFlags = (TA_BASELINE | TA_RIGHT);
+
+		if (XScaleHasRTLDates())
+			nDrawFlags |= TA_RTLREADING;
+
+		return nDrawFlags;
+	}
+
+	// else => CDC::DrawText
+	UINT nDrawFlags = (DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+
+	if (XScaleHasRTLDates())
+		nDrawFlags |= DT_RTLREADING;
+
+	if (!m_bXLabelsAreTicks)
+		nDrawFlags |= DT_CENTER;
+
+	return nDrawFlags;
+}
+
+UINT CHMXChart::GetYScaleDrawFlags() const
+{
+	// Y scale labels are always horizontal
+	UINT nDrawFlags = (DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_NOCLIP);
+
+	if (YScaleHasRTLDates())
+		nDrawFlags |= DT_RTLREADING;
+
+	return nDrawFlags;
+}
+
 BOOL CHMXChart::DrawXScale(CDC & dc)
 {
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
@@ -614,6 +650,8 @@ BOOL CHMXChart::DrawXScale(CDC & dc)
 
 			// dX is the size of a division
 			double dX = (double)m_rectData.Width()/m_nXMax;
+			
+			UINT nFlags = GetXScaleDrawFlags();
 
 			for(int f=0; f<nCount; f=f+m_nXLabelStep) 
 			{
@@ -628,17 +666,14 @@ BOOL CHMXChart::DrawXScale(CDC & dc)
 
 					if (m_nXLabelDegrees > 0)
 					{
-						dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
+						// Must use CDC::TextOut for rotated fonts
+						dc.SetTextAlign(nFlags);
 						dc.TextOut(rText.left, rText.top, sLabel);
 					}
 					else
 					{
-						rText.right = rText.left + (int)(dX * m_nXLabelStep);
-
-						if (m_bXLabelsAreTicks)
-							dc.DrawText(sLabel, rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
-						else
-							dc.DrawText(sLabel, rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+						rText.right = (rText.left + (int)(dX * m_nXLabelStep));
+						dc.DrawText(sLabel, rText, nFlags);
 					}
 				}
 			}
@@ -654,8 +689,9 @@ BOOL CHMXChart::DrawXScale(CDC & dc)
 		VERIFY(CreateXAxisFont(TRUE, font));
 
 		CFont* pFontOld = dc.SelectObject(&font);
-		dc.DrawText(m_strXText, m_rectXAxis, DT_CENTER | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX);
+		UINT nFlags = (DT_CENTER | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX);
 
+		dc.DrawText(m_strXText, m_rectXAxis, nFlags);
 		dc.SelectObject(pFontOld);
 	}
 
@@ -699,6 +735,8 @@ BOOL CHMXChart::DrawYScale(CDC & dc)
 			int nFontSize = CalcYScaleFontSize(FALSE);
 
 			// draw text
+			UINT nFlags = GetYScaleDrawFlags();
+
 			for(int f=0; f<=nTicks; f++) 
 			{
 				CString sTick = GetYTickText(f, (m_dYMin + dY*f));
@@ -710,7 +748,7 @@ BOOL CHMXChart::DrawYScale(CDC & dc)
 					ASSERT(nBot > nTop);
 
 					CRect rTick(m_rectYAxis.left, nTop, m_rectYAxis.right - 4, nBot);
-					dc.DrawText(sTick, &rTick, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_NOCLIP);
+					dc.DrawText(sTick, &rTick, nFlags);
 
 					int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sTick).cx);
 					rTitle.right = min(rTitle.right, nLabelLeft);

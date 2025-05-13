@@ -181,20 +181,23 @@ void CTDCTaskTimeLogTest::TestLogTime()
 			ExpectTrue(CTDCTaskTimeLog::LoadLogFile(TEMP_LOGFILE, aItems, FALSE, sHeaderDelim));
 			ExpectEQ(2, aItems.GetSize());
 			ExpectTrue(sHeaderDelim == _T(","));
-			ExpectFalse(tli == aItems[1]);
 
-			ExpectTrue(aItems[1].dwTaskID == tli.dwTaskID);
-			ExpectTrue(aItems[1].sTaskTitle == tli.sTaskTitle);
-			ExpectTrue(aItems[1].sPerson == tli.sPerson);
-			ExpectTrue(aItems[1].dtFrom == tli.dtFrom);
-			ExpectTrue(aItems[1].dtTo == tli.dtTo);
-			ExpectTrue(aItems[1].dHours == tli.dHours);
+			const TASKTIMELOGITEM& tli1 = aItems[1];
+
+			ExpectFalse(tli == tli1); // Extended fields not logged
+
+			ExpectTrue(tli1.dwTaskID == tli.dwTaskID);
+			ExpectTrue(tli1.sTaskTitle == tli.sTaskTitle);
+			ExpectTrue(tli1.sPerson == tli.sPerson);
+			ExpectTrue(tli1.dtFrom == tli.dtFrom);
+			ExpectTrue(tli1.dtTo == tli.dtTo);
+			ExpectTrue(tli1.dHours == tli.dHours);
 
 			// Extended fields not logged
-			ExpectTrue(aItems[1].sComment.IsEmpty());
-			ExpectTrue(aItems[1].sType.IsEmpty());
-			ExpectTrue(aItems[1].sPath.IsEmpty());
-			ExpectTrue(aItems[1].crAltColor == CLR_NONE);
+			ExpectTrue(tli1.sComment.IsEmpty());
+			ExpectTrue(tli1.sType.IsEmpty());
+			ExpectTrue(tli1.sPath.IsEmpty());
+			ExpectTrue(tli1.crAltColor == CLR_NONE);
 		}
 	}
 }

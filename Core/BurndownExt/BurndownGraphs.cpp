@@ -423,9 +423,9 @@ CString CGraphBase::FormatDate(const COleDateTime& date) const
 		return _T("");
 
 	if (m_bISODates)
-		return date.Format(_T("%Y-%m-%d"));
+		return CDateHelper::FormatDate(date, DHFD_ISO);
 
-	return date.Format(VAR_DATEVALUEONLY);
+	return CDateHelper::FormatDate(date);
 }
 
 COLORREF CGraphBase::GetColor(int nColor) const

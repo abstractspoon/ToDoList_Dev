@@ -2495,7 +2495,7 @@ void CGanttCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, 
 
 		// text color and alignment
 		BOOL bLighter = FALSE; 
-		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_tree));
+		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX);
 
 		// Must set font before calling GetTextExtent
 		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, *pGI, nColID));
@@ -2532,6 +2532,9 @@ void CGanttCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, 
 				// else keep left align to ensure day and month remain visible
 				if (rText.Width() >= pDC->GetTextExtent(sItem).cx)
 					nFlags |= DT_RIGHT;
+
+				if (CDateHelper::WantRTLDates())
+					nFlags |= DT_RTLREADING;
 			}
 			break;
 			
@@ -3075,7 +3078,7 @@ void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rI
 	
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(crBorder);
-	pDC->DrawText(sTrailing, rText, (DT_LEFT | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_list)));
+	pDC->DrawText(sTrailing, rText, (DT_LEFT | DT_NOPREFIX));
 
 	pDC->SelectObject(hFontOld);
 }
@@ -3445,9 +3448,6 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 	// text
 	if (!sItem.IsEmpty())
 	{
-		// Special case: We're a 2-row header and the upper text 
-		// wants always to be visible regardless of scroll pos
-		int nHorzHAlign = DT_CENTER;
 		CRect rDraw(rItem);
 
 		if (bEnsureLabelVisible)
@@ -3475,7 +3475,11 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 
-		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | nHorzHAlign | GraphicsMisc::GetRTLDrawTextFlags(m_listHeader));
+		UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_CENTER);
+
+		if (CDateHelper::WantRTLDates())
+			nFlags |= DT_RTLREADING;
+
 		pDC->DrawText(sItem, &rDraw, nFlags);
 	}
 }

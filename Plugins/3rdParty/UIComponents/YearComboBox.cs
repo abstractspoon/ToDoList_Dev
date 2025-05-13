@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Globalization;
 
 namespace UIComponents
 {
@@ -44,14 +44,14 @@ namespace UIComponents
 			}
 		}
 
-
-		private void BuildCombo()
+		protected virtual void BuildCombo()
 		{
 			Items.Clear();
 
 			for (int year = m_MinYear; year <= m_MaxYear; year++)
 			{
-				Items.Add(String.Format("{0}", year));
+				var date = new DateTime(year, 1, 1);
+				Items.Add(date.ToString("yyyy", CultureInfo.CurrentCulture));
 			}
 		}
 

@@ -156,7 +156,7 @@ void CCalendarPreferencesPage::EnableDisableControls()
 	if (sNewLabel != sCurLabel)
 	{
 		GetDlgItem(IDC_SHOWDONEDATES)->SetWindowText(sNewLabel);
-		CDialogHelper::ResizeButtonStaticTextToFit(this, GetDlgItem(IDC_SHOWDONEDATES));
+		CDialogHelper::ResizeStaticTextToFit(this, IDC_SHOWDONEDATES);
 	}
 }
 

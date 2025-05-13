@@ -1205,7 +1205,7 @@ void CWorkloadCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemDat
 
 		// text color and alignment
 		BOOL bLighter = FALSE;
-		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_tree));
+		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX);
 
 		// Must set font before calling GetTextExtent
 		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, *pWI, nColID));
@@ -1229,6 +1229,9 @@ void CWorkloadCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemDat
 				// else keep left align to ensure day and month remain visible
 				if (rText.Width() >= pDC->GetTextExtent(sItem).cx)
 					nFlags |= DT_RIGHT;
+
+				if (CDateHelper::WantRTLDates())
+					nFlags |= DT_RTLREADING;
 			}
 			break;
 

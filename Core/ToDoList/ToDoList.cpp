@@ -31,7 +31,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\fileregister.h"
 #include "..\shared\osversion.h"
-#include "..\shared\rtlstylemgr.h"
+#include "..\shared\rtlInputmgr.h"
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
@@ -1594,7 +1594,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	if (CTDCDarkMode::IsEnabled())
 		params.SetOption(SWITCH_DARKMODE);
 
-	if (CRTLStyleMgr::IsRTL())
+	if (CRTLInputMgr::IsEnabled())
 		params.SetOption(SWITCH_RTL);
 
 	if (bPreRelease)

@@ -1911,33 +1911,6 @@ void GraphicsMisc::DrawVertLine(CDC* pDC, int nYFrom, int nYTo, int nXPos, COLOR
 		DrawGradient(pDC, rLine, crFrom, crTo, FALSE, -1);
 }
 
-UINT GraphicsMisc::GetRTLDrawTextFlags(HWND hwnd)
-{
-	ASSERT(hwnd);
-
-	if (hwnd)
-	{
-		DWORD dwStyle = (DWORD)GetWindowLong(hwnd, GWL_EXSTYLE);
-		BOOL bRTLLayout = ((dwStyle & WS_EX_LAYOUTRTL) ? TRUE : FALSE);
-		BOOL bRTLReading = ((dwStyle & WS_EX_RTLREADING) ? TRUE : FALSE);
-		
-		return ((bRTLReading != bRTLLayout) ? DT_RTLREADING : 0);
-	}
-
-	// else
-	return 0;
-}
-
-UINT GraphicsMisc::GetRTLDrawTextFlags(CDC* pDC)
-{
-	if (pDC)
-		return GetRTLDrawTextFlags(::WindowFromDC(*pDC));
-
-	// else
-	ASSERT(0);
-	return 0;
-}
-
 CString GraphicsMisc::GetWebColor(COLORREF color)
 {
 	unsigned char cRed = GetRValue(color);

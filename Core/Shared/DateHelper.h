@@ -75,7 +75,7 @@ public:
 	BOOL OffsetEnd(int nAmount, DH_UNITS nUnits);
 	BOOL Expand(int nAmount, DH_UNITS nUnits);
 
-	CString Format(DWORD dwFlags = 0, TCHAR cDelim = '-') const;
+	CString Format(DWORD dwFlags = 0, LPCTSTR szDelim = _T(" - ")) const;
 	double CalcProportion(const COleDateTime& date) const; // returns 0.0-1.0
 
 	// returns 'end of day' if bInclusive is TRUE and date has no time
@@ -126,10 +126,12 @@ public:
 
 	static CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0, TCHAR cDateTimeSep = ' ');
 	static CString FormatCurrentDate(DWORD dwFlags = 0);
+	static CString FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat);
 	
 	// DOW = 'day of week'
 	static BOOL FormatDate(const COleDateTime& date, DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
 	static BOOL FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
+	static BOOL WantRTLDates();
 
 	static BOOL DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime);
 	static BOOL DecodeDate(const CString& sDate, double& date, BOOL bAndTime);

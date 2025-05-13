@@ -488,7 +488,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="RTLStyleMgr.cpp">
+    <ClCompile Include="RTLInputMgr.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -772,7 +772,7 @@
     <ClInclude Include="RichEditHelper.h" />
     <ClInclude Include="RichEditNcBorder.h" />
     <ClInclude Include="Rtf2HtmlConverter.h" />
-    <ClInclude Include="RTLStyleMgr.h" />
+    <ClInclude Include="RTLInputMgr.h" />
     <ClInclude Include="RuntimeDlg.h" />
     <ClInclude Include="SaveFocus.h" />
     <ClInclude Include="ScopedTimer.h" />

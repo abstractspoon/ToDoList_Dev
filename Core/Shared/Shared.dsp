@@ -557,7 +557,7 @@ SOURCE=.\Rtf2HtmlConverter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\RTLStyleMgr.cpp
+SOURCE=.\RTLInputMgr.cpp
 # End Source File
 # Begin Source File
 
@@ -1257,7 +1257,7 @@ SOURCE=.\Rtf2HtmlConverter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\RTLStyleMgr.h
+SOURCE=.\RTLInputMgr.h
 # End Source File
 # Begin Source File
 

@@ -3531,7 +3531,18 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 
 	if (bDrawDate)
 	{
-		DrawColumnText(pDC, sDate, rDraw, DT_RIGHT, crText);
+		int nAlign = DT_RIGHT;
+
+		if (CDateHelper::WantRTLDates())
+		{
+			nAlign |= DT_RTLREADING;
+
+			// FUDGE for RTL dates which get rendered too far to
+			// the right for reasons I haven't yet determined
+			rDraw.OffsetRect(-LV_COLPADDING, 0);
+		}
+
+		DrawColumnText(pDC, sDate, rDraw, nAlign, crText);
 		rDraw.right -= (nMaxDateWidth + nSepWidth);
 	}
 	
@@ -3601,7 +3612,7 @@ void CTDLTaskCtrlBase::DrawColumnText(CDC* pDC, const CString& sText, const CRec
 		}
 	}
 	
-	UINT nFlags = (nAlign | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(Tasks()));
+	UINT nFlags = (nAlign | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX);
 
 	if (!m_bSavingToImage && bTaskTitle)
 		nFlags |= DT_END_ELLIPSIS;
@@ -3713,7 +3724,7 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 				}
 
 				// Handle text for RTL or context column headers
-				if (bContextItem || (GraphicsMisc::GetRTLDrawTextFlags(pNMCD->hdr.hwndFrom) == DT_RTLREADING))
+				if (bContextItem)
 				{
 					CEnString sColumn(GetColumnHeaderCtrl(nColID).GetItemText(nCol));
 		

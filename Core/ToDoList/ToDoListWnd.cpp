@@ -70,7 +70,7 @@
 #include "..\shared\passworddialog.h"
 #include "..\shared\regkey.h"
 #include "..\shared\remotefile.h"
-#include "..\shared\rtlstylemgr.h"
+#include "..\shared\rtlInputmgr.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\sendfiletoEx.h"
 #include "..\shared\serverdlg.h"
@@ -361,7 +361,7 @@ CToDoListWnd::CToDoListWnd()
 
 	// RTL keyboard input
 	if (Prefs().GetEnableRTLInput())
-		CRTLStyleMgr::Initialize();
+		CRTLInputMgr::Initialize();
 
 	CFilteredToDoCtrl::EnableExtendedSelection(FALSE, TRUE);
 	CEnListCtrl::EnableSelectionTheming(TRUE, TRUE);
@@ -5365,9 +5365,8 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 			}
 		}
 	}
-	
 	// RTL change requires a restart
-	if (oldPrefs.GetEnableRTLInput() != bEnableRTL)
+	else if (oldPrefs.GetEnableRTLInput() != bEnableRTL)
 	{
 		// if the language file exists and has changed then inform the user that they need to restart
 		if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGERTLINPUT, MB_YESNO) == IDYES)

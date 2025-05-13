@@ -37,9 +37,9 @@ CString KBUtils::FormatDate(const COleDateTime& date, BOOL bISODates)
 		return _T("");
 
 	if (bISODates)
-		return date.Format(_T("%Y-%m-%d"));
+		return CDateHelper::FormatDate(date, DHFD_ISO);
 
-	return date.Format(VAR_DATEVALUEONLY);
+	return CDateHelper::FormatDate(date);
 }
 
 CString KBUtils::GetAttributeLabel(TDC_ATTRIBUTE nAttribID, KBC_ATTRIBLABELS nLabelVis,
@@ -134,6 +134,32 @@ BOOL KBUtils::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
 	return ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST));
 }
 
+BOOL KBUtils::IsDateAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribs)
+{
+	switch (nAttribID)
+	{
+	case TDCA_DONEDATE:		
+	case TDCA_DUEDATE:		
+	case TDCA_STARTDATE:	
+	case TDCA_CREATIONDATE:	
+	case TDCA_LASTMODDATE:	
+		return TRUE;
+
+	default:
+		if (IsCustomAttribute(nAttribID))
+		{
+			int nCust = aCustAttribs.FindDefinition(aCustAttribs.GetDefinitionID(nAttribID));
+			ASSERT(nCust != -1);
+
+			if (nCust != -1)
+				return aCustAttribs[nCust].bDate;
+		}
+	}
+
+	// all else
+	return FALSE;
+}
+
 BOOL KBUtils::IsTrackableAttribute(TDC_ATTRIBUTE nAttribID)
 {
 	switch (nAttribID)
@@ -183,7 +209,10 @@ BOOL KBUtils::IsSortableAttribute(TDC_ATTRIBUTE nAttribID)
 
 //////////////////////////////////////////////////////////////////////
 
-KANBANCUSTOMATTRIBDEF::KANBANCUSTOMATTRIBDEF() : bMultiValue(FALSE) 
+KANBANCUSTOMATTRIBDEF::KANBANCUSTOMATTRIBDEF() 
+	: 
+	bMultiValue(FALSE), 
+	bDate(FALSE) 
 {
 }
 
@@ -191,10 +220,11 @@ BOOL KANBANCUSTOMATTRIBDEF::operator==(const KANBANCUSTOMATTRIBDEF& kca) const
 {
 	return ((sAttribID == kca.sAttribID) &&
 			(sAttribName == kca.sAttribName) &&
-			(bMultiValue == kca.bMultiValue));
+			(bMultiValue == kca.bMultiValue) &&
+			(bDate == kca.bDate));
 }
 
-int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal)
+int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal, BOOL bDate)
 {
 	ASSERT(!sAttribID.IsEmpty());
 
@@ -207,6 +237,7 @@ int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribI
 		def.sAttribID = sAttribID;
 		def.sAttribName = sAttribName;
 		def.bMultiValue = bMultiVal;
+		def.bDate = bDate;
 
 		nFind = Add(def);
 	}
@@ -216,6 +247,9 @@ int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribI
 
 		def.sAttribName = sAttribName;
 		def.bMultiValue = bMultiVal;
+
+		// Assume attribute type cannot change
+		ASSERT(def.bDate == bDate);
 	}
 
 	return nFind;

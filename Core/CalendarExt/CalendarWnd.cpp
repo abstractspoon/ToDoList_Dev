@@ -45,7 +45,6 @@ IMPLEMENT_DYNAMIC(CCalendarWnd, CDialog)
 CCalendarWnd::CCalendarWnd()
 	:	
 	m_bReadOnly(FALSE),
-	m_stSelectedTaskDates(TRUE), // we handle the click
 	m_MiniCalendar(m_BigCalendar.Data()),
 	m_dlgPrefs(this)
 {
@@ -153,7 +152,10 @@ BOOL CCalendarWnd::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// non-translatables
-	CLocalizer::EnableTranslation(*GetDlgItem(IDC_SELECTEDTASKDATES), FALSE);
+	CLocalizer::EnableTranslation(m_stSelectedTaskDates, FALSE);
+
+	if (CDateHelper::WantRTLDates())
+		m_stSelectedTaskDates.ModifyStyleEx(0, WS_EX_RTLREADING);
 
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
@@ -331,9 +333,6 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 
 		m_BigCalendar.SetUITheme(m_theme);
 		m_MiniCalendar.SetUITheme(m_theme);
-
-		m_stSelectedTaskDates.SetBkColor(m_theme.crAppBackLight);
-		m_stSelectedTaskDates.SetTextColor(m_theme.crAppText);
 
 		if (CThemed::IsAppThemed())
 		{
@@ -636,7 +635,7 @@ HBRUSH CCalendarWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 	
-	if (nCtlColor == CTLCOLOR_STATIC && m_brBack.GetSafeHandle())
+	if ((nCtlColor == CTLCOLOR_STATIC) && (pWnd != &m_stSelectedTaskDates) && m_brBack.GetSafeHandle())
 	{
 		pDC->SetTextColor(m_theme.crAppText);
 		pDC->SetBkMode(TRANSPARENT);
@@ -650,6 +649,8 @@ BOOL CCalendarWnd::OnEraseBkgnd(CDC* pDC)
 {
 	// clip out children
 	CDialogHelper::ExcludeCtrl(this, IDC_CALENDAR_FRAME, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_NUMWEEKS, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_SNAPMODES, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())
@@ -690,6 +691,14 @@ void CCalendarWnd::OnPreferences()
 
 void CCalendarWnd::ResizeControls(int cx, int cy)
 {
+	if (CLocalizer::IsInitialized())
+	{
+		int nOffset = CDialogHelper::ResizeStaticTextToFit(this, IDC_SELECTEDTASKDATESLABEL);
+
+		if (nOffset != 0)
+			CDialogHelper::OffsetChild(&m_stSelectedTaskDates, nOffset, 0);
+	}
+
 	// calendar frame
 	CRect rFrame = CDialogHelper::GetCtrlRect(this, IDC_CALENDAR_FRAME);
 
@@ -871,11 +880,11 @@ void CCalendarWnd::UpdateSelectedTaskDates()
 		DWORD dwFlags = (DHFD_TIME | DHFD_NOSEC);
 		dwFlags |= (m_BigCalendar.HasOption(TCCO_SHOWISODATES) ? DHFD_ISO : 0);
 
-		CString sDateRange = COleDateTimeRange(dtStart, dtDue).Format(dwFlags);
-		sSelectedTaskDates.Format(_T("%s: <a href=>%s</a>"), CEnString(IDS_SELTASKDATES_LABEL), sDateRange);
+		sSelectedTaskDates = COleDateTimeRange(dtStart, dtDue).Format(dwFlags);
 	}
 
 	m_stSelectedTaskDates.SetWindowText(sSelectedTaskDates);
+	CDialogHelper::ResizeStaticTextToFit(this, &m_stSelectedTaskDates);
 }
 
 void CCalendarWnd::OnClickSelectedTaskDates()

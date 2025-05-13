@@ -166,7 +166,7 @@ void CPreferencesGenPage::OnFirstShow()
 			sCtrlText.Format(_T("%s (%s)"), sCtrlText, CEnString(IDS_REQUIRESADMINTOMODIFY));
 			pCtrl->SetWindowText(sCtrlText);
 
-			ResizeButtonStaticTextToFit(this, pCtrl);
+			ResizeStaticTextToFit(this, pCtrl);
 
 			pCtrl->EnableWindow(FALSE);
 		}

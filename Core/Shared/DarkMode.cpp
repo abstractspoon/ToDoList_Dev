@@ -841,7 +841,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			else
 			{
 				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
-				RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
+				RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
 			}
 		}
 		break;
@@ -852,14 +852,16 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			::SetBkColor((HDC)wp, DM_WINDOW);
 			::SetBkMode((HDC)wp, OPAQUE);
 
-			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW)
+			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
 		}
 		break;
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
 		{
-			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
+			if (::GetTextColor((HDC)wp) == TrueGetSysColor(COLOR_WINDOWTEXT))
+				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
+
 			::SetBkMode((HDC)wp, TRANSPARENT);
 
 			if (IsParentPreferencePage((HWND)lp))
@@ -1011,6 +1013,7 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 
 	case WM_CTLCOLOREDIT:
 	case WM_CTLCOLORLISTBOX:
+	case WM_CTLCOLORSTATIC:
 		{
 			// Always do default first to allow CAutoComboBox hooking
 			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);

@@ -405,16 +405,19 @@ BOOL COleDateTimeRange::OffsetEnd(int nAmount, DH_UNITS nUnits)
 	return TRUE;
 }
 
-CString COleDateTimeRange::Format(DWORD dwFlags, TCHAR cDelim) const
+CString COleDateTimeRange::Format(DWORD dwFlags, LPCTSTR szDelim) const
 {
 	CString sRange;
 
 	if (IsValid())
 	{
-		if (cDelim)
-			sRange.Format(_T("%s %c %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), cDelim, CDateHelper::FormatDate(m_dtEnd, dwFlags));
-		else
-			sRange.Format(_T("%s %s"), CDateHelper::FormatDate(m_dtStart, dwFlags), CDateHelper::FormatDate(m_dtEnd, dwFlags));
+		CString sStart = CDateHelper::FormatDate(m_dtStart, dwFlags);
+		CString sEnd = CDateHelper::FormatDate(m_dtEnd, dwFlags);
+
+		if (Misc::IsEmpty(szDelim))
+			szDelim = _T(" ");
+	
+		sRange = (sStart + szDelim + sEnd);
 	}
 
 	return sRange;
@@ -1575,19 +1578,9 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 			Misc::Trim(sFormat, sSep);
 			sFormat.Replace((sSep + sSep), sSep);
 		}
-
-		// RTL dates
-		switch (Misc::GetPrimaryLanguage())
-		{
-		case LANG_ARABIC:
-		case LANG_PERSIAN:
-			Misc::Reverse(sFormat);
-			break;
-		}
 	}
 
-	::GetDateFormat(0, 0, &st, sFormat, sDate.GetBuffer(50), 49);
-	sDate.ReleaseBuffer();
+	sDate = FormatDateOnly(date, sFormat);
 
 	// Day of week
 	if (dwFlags & DHFD_DOW)
@@ -1602,6 +1595,46 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 		sTime.Empty();
 	
 	return TRUE;
+}
+
+CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
+{
+	CString sDate;
+
+	if (IsDateSet(date))
+	{
+		SYSTEMTIME st;
+
+		if (date.GetAsSystemTime(st))
+		{
+			// RTL dates
+			CString sFormat;
+
+			if (WantRTLDates())
+			{
+				sFormat = szFormat;
+				Misc::Reverse(sFormat);
+				szFormat = sFormat;
+			}
+
+			::GetDateFormat(0, 0, &st, szFormat, sDate.GetBuffer(50), 49);
+			sDate.ReleaseBuffer();
+		}
+	}
+
+	return sDate;
+}
+
+BOOL CDateHelper::WantRTLDates()
+{
+	switch (Misc::GetPrimaryLanguage())
+	{
+	case LANG_ARABIC:
+	case LANG_PERSIAN:
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CDateHelper::FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow)

@@ -531,20 +531,20 @@ namespace DayViewUIExtension
 			// Use bold font for first-day-of-month
 			Font font = ((date.Day == 1) ? BoldFont : BaseFont);
 
-			var fmt = new StringFormat()
-			{
-				LineAlignment = StringAlignment.Center,
-				Alignment = StringAlignment.Near,
-				FormatFlags = StringFormatFlags.NoWrap | StringFormatFlags.NoClip
-			};
-
 			Rectangle rText = rect;
 			rText.X += HeaderPadding;
 			rText.Width -= HeaderPadding;
 
 			string text = FormatHeaderText(date, DowStyle, MonthStyle, firstDay, DisplayDatesInISO);
 
-			g.DrawString(text, font, SystemBrushes.ControlText, rText, fmt);
+			// Note: We use TextRenderer because it handle RTL drawing
+			// in a way that is consistent with the core app
+			var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoClipping | TextFormatFlags.SingleLine;
+
+			if (DateUtil.WantRTLDates())
+				flags |= TextFormatFlags.RightToLeft;
+
+			TextRenderer.DrawText(g, text, font, rText, SystemColors.ControlText, Color.Empty, flags);
 		}
 
 		public virtual void DrawDayBackground(Graphics g, Rectangle rect)

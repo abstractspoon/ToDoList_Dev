@@ -1666,6 +1666,11 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 				pDC->FillSolidRect(rColor, color);
 			}
 			return;
+
+		case FT_DATE:
+			if (CDateHelper::WantRTLDates())
+				nDrawTextFlags |= DT_RTLREADING;
+			break;
 		}
 	}
 

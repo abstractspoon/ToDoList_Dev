@@ -1528,7 +1528,9 @@ BOOL FileMisc::AppendLineToFile(LPCTSTR szPathname, const CString& sLine, SFE_FO
 		file.WriteString(sLine);
 
 		// add trailing new line as necessary
-		if (sLine.Find(ENDL) != (sLine.GetLength() - 2))
+		int nLen = sLine.GetLength();
+
+		if (sLine.Find(ENDL, (nLen - 2)) != (nLen - 2))
 			file.WriteString(ENDL);
 
 		file.Flush();

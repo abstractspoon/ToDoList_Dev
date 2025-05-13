@@ -125,6 +125,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
   <ItemGroup>
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="Compression.h" />
+    <ClInclude Include="DateRangeLink.h" />
     <ClInclude Include="DateUtil.h" />
     <ClInclude Include="DaysOfWeekCheckListBox.h" />
     <ClInclude Include="DPIScaling.h" />
@@ -153,10 +154,12 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="UrlParser.h" />
     <ClInclude Include="WeekLabel.h" />
     <ClInclude Include="Win32.h" />
+    <ClInclude Include="YearComboBoxEx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="Compression.cpp" />
+    <ClCompile Include="DateRangeLink.cpp" />
     <ClCompile Include="DateUtil.cpp" />
     <ClCompile Include="DaysOfWeekCheckListBox.cpp" />
     <ClCompile Include="DPIScaling.cpp" />
@@ -187,6 +190,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="UrlParser.cpp" />
     <ClCompile Include="WeekLabel.cpp" />
     <ClCompile Include="Win32.cpp" />
+    <ClCompile Include="YearComboBoxEx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Office.Interop.Outlook">
@@ -222,6 +226,9 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     </ProjectReference>
     <ProjectReference Include="..\3rdParty\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\3rdParty\UIComponents\UIComponents.csproj">
+      <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

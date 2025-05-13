@@ -10,6 +10,8 @@
 #include <Shared\MessageBox.h>
 #include <Shared\GraphicsMisc.h>
 #include <Shared\Themed.h>
+#include <Shared\WinClasses.h>
+#include <Shared\wclassdefines.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -64,11 +66,24 @@ void Win32::AddBorder(IntPtr hWnd)
 		DoFrameChange(hWnd);
 }
 
-void Win32::DoFrameChange(IntPtr hWnd)
+void Win32::DoFrameChangeEx(IntPtr hWnd, bool bIncrementWidth)
 {
-	SetWindowPos(GetHwnd(hWnd), NULL, 0, 0, 0, 0,
-			SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
-			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+	HWND hwnd = GetHwnd(hWnd);
+	int nWidth = 0;
+
+	DWORD dwFlags = (SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | 
+					 SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+
+	if (bIncrementWidth)
+	{
+		CRect rWnd;
+		::GetWindowRect(hwnd, rWnd);
+
+		nWidth = (rWnd.Width() + 1);
+		dwFlags &= ~SWP_NOSIZE;
+	}
+
+	SetWindowPos(GetHwnd(hWnd), NULL, 0, 0, nWidth, 0, dwFlags);
 }
 
 bool Win32::HasStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
@@ -107,6 +122,78 @@ bool Win32::AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
 
 	// Sanity check
 	return HasStyle(hWnd, nStyle, bExStyle);
+}
+
+bool Win32::SetRTLReading(IntPtr hWnd, bool rtl)
+{
+	if (!::IsWindow(GetHwnd(hWnd)))
+		return false;
+
+	Control^ ctrl = Control::FromHandle(hWnd);
+
+	if (ctrl == nullptr)
+	{
+		// Unwrapped HWND
+		if (rtl)
+		{
+			AddStyle(hWnd, WS_EX_RTLREADING, true);
+			RemoveStyle(hWnd, WS_EX_LEFTSCROLLBAR, true);
+			RemoveStyle(hWnd, WS_EX_RIGHT, true);
+
+			if (CWinClasses::IsClass(GetHwnd(hWnd), WC_COMBOLBOX))
+			{
+				DoFrameChangeEx(hWnd, true);
+// 				// Force a resize/redraw of the listbox
+// 				::SetWindowPos(Win32::GetHwnd(m.LParam),
+// 							   NULL,
+// 							   0,
+// 							   0,
+// 							   (Width + 1),
+// 							   0,
+// 							   SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+			}
+		}
+		else
+		{
+			RemoveStyle(hWnd, WS_EX_RTLREADING, true);
+		}
+	}
+	else if (rtl)
+	{
+		auto handler = gcnew EventHandler(&RTLChangeEventReceiver::Handler);
+
+		ctrl->RightToLeftChanged += handler;
+		ctrl->RightToLeft = RightToLeft::Yes;
+		ctrl->RightToLeftChanged -= handler;
+	}
+	else
+	{
+		ctrl->RightToLeft = RightToLeft::No;
+	}
+	
+	return true;
+}
+
+void Win32::RTLChangeEventReceiver::Handler(Object^ sender, EventArgs^ e)
+{
+	if (ISTYPE(sender, Control))
+	{
+		// For consistency with core app
+		Win32::RemoveStyle(ASTYPE(sender, Control)->Handle, WS_EX_LEFTSCROLLBAR, true);
+		Win32::RemoveStyle(ASTYPE(sender, Control)->Handle, WS_EX_RIGHT, true);
+	}
+}
+
+bool Win32::SyncRTLReadingWithParent(IntPtr hWnd)
+{
+	HWND hwndParent = ::GetParent(GetHwnd(hWnd));
+
+	return SetRTLReading(hWnd, HasRTLReading(IntPtr(hWnd)));
+}
+
+bool Win32::HasRTLReading(IntPtr hWnd)
+{
+	return HasStyle(hWnd, WS_EX_RTLREADING, true);
 }
 
 int Win32::GetVScrollPos(IntPtr hWnd)

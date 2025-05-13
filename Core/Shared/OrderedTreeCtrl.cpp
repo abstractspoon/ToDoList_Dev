@@ -569,8 +569,7 @@ void COrderedTreeCtrl::NcDrawItemColumn(CDC* pDC, DWORD dwItem, DWORD dwParentIt
 		{
 			rItem.left += NCG_COLPADDING;
 
-			UINT nFlags = (DT_SINGLELINE | DT_NOPREFIX | DT_VCENTER | DT_LEFT | GraphicsMisc::GetRTLDrawTextFlags(*this));
-			pDC->DrawText(sPos, rItem, nFlags);
+			pDC->DrawText(sPos, rItem, (DT_SINGLELINE | DT_NOPREFIX | DT_VCENTER | DT_LEFT));
 			
 			// vertical divider
 			if (m_crGridlines != CLR_NONE)
