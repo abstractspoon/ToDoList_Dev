@@ -16,8 +16,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-COLORREF CStaticLink::g_colorUnvisited = RGB(0,0,255);		 // blue
-COLORREF CStaticLink::g_colorVisited   = RGB(128,0,128);		 // purple
+COLORREF CStaticLink::g_colorUnvisited = CLR_NONE; // equivalent to COLOR_HOTLIGHT
+COLORREF CStaticLink::g_colorVisited   = RGB(128,0,128);  // purple
 HCURSOR	CStaticLink::g_hCursorLink = NULL;
 
 IMPLEMENT_DYNAMIC(CStaticLink, CStatic)
@@ -39,7 +39,7 @@ END_MESSAGE_MAP()
 CStaticLink::CStaticLink(LPCTSTR lpText, BOOL bDeleteOnDestroy)
 {
 	m_link = lpText;								// link text (NULL ==> window text)
-	m_color = g_colorUnvisited;				// not visited yet
+	m_color = (g_colorUnvisited == CLR_NONE ? GetSysColor(COLOR_HOTLIGHT) : g_colorUnvisited);
 	m_bDeleteOnDestroy = bDeleteOnDestroy;	// delete object with window?
 }
 
