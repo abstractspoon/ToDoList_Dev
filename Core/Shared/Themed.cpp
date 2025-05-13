@@ -706,36 +706,33 @@ BOOL CThemed::GetThemeBackgroundContentRect(HDC hdc, int iPartId, int iStateId, 
 
 // -----------------------------------------------------------------------------------------------------------
 
+// Note: 'Disabled' takes priority
+#define HANDLESTATE(prefix)        \
+if (HASSTATE(DFCS_INACTIVE))       \
+{	nThState = prefix##DISABLED; } \
+else if (HASSTATE(DFCS_HOT))       \
+{	nThState = prefix##HOT; }      \
+else if (HASSTATE(DFCS_PUSHED))    \
+{	nThState = prefix##PRESSED; }  \
+else nThState = prefix##NORMAL
+
+// -----------------------------------------------------------------------------------------------------------
+
 BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, int& nThPart, int& nThState)
 {
 	sThClass.Empty();
 	nThPart = 0;
 	nThState = 0;
 
-	// Note: 'Disabled' takes priority
 	switch (nType)
 	{
 	case DFC_BUTTON:
 		{
 			sThClass = "BUTTON";
-			nThState = PBS_NORMAL;
 			
 			if (ISTYPE(DFCS_BUTTONPUSH))
 			{
-				nThPart = BP_PUSHBUTTON;
-				
-				if (HASSTATE(DFCS_INACTIVE))
-				{
-					nThState = PBS_DISABLED;
-				}
-				else if (HASSTATE(DFCS_HOT))
-				{
-					nThState = PBS_HOT;
-				}
-				else if (HASSTATE(DFCS_CHECKED) || HASSTATE(DFCS_PUSHED))
-				{
-					nThState = PBS_PRESSED;
-				}
+				HANDLESTATE(PBS_);
 			}
 			else if (ISTYPE(DFCS_BUTTONRADIO))
 			{
@@ -743,41 +740,11 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 
 				if (HASSTATE(DFCS_CHECKED))
 				{
-					if (HASSTATE(DFCS_INACTIVE))
-					{
-						nThState = RBS_CHECKEDDISABLED;
-					}
-					else if (HASSTATE(DFCS_HOT))
-					{
-						nThState = RBS_CHECKEDHOT;
-					}
-					else if (HASSTATE(DFCS_PUSHED))
-					{
-						nThState = RBS_CHECKEDPRESSED;
-					}
-					else // Normal
-					{
-						nThState = RBS_CHECKEDNORMAL;
-					}
+					HANDLESTATE(RBS_CHECKED);
 				}
 				else // Unchecked
 				{
-					if (HASSTATE(DFCS_INACTIVE))
-					{
-						nThState = RBS_UNCHECKEDDISABLED;
-					}
-					else if (HASSTATE(DFCS_HOT))
-					{
-						nThState = RBS_UNCHECKEDHOT;
-					}
-					else if (HASSTATE(DFCS_PUSHED))
-					{
-						nThState = RBS_UNCHECKEDPRESSED;
-					}
-					else
-					{
-						nThState = RBS_UNCHECKEDNORMAL;
-					}
+					HANDLESTATE(RBS_UNCHECKED);
 				}
 			}
 			else if (ISTYPE(DFCS_BUTTONCHECK)) 
@@ -788,61 +755,16 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 				{
 					if (HASSTATE(DFCS_MIXED))
 					{
-						if (HASSTATE(DFCS_INACTIVE))
-						{
-							nThState = CBS_MIXEDDISABLED;
-						}
-						else if (HASSTATE(DFCS_HOT))
-						{
-							nThState = CBS_MIXEDHOT;
-						}
-						else if (HASSTATE(DFCS_PUSHED))
-						{
-							nThState = CBS_MIXEDPRESSED;
-						}
-						else
-						{
-							nThState = CBS_MIXEDNORMAL;
-						}
+						HANDLESTATE(CBS_MIXED);
 					}
-					else // Normal
+					else // Normal checked
 					{
-						if (HASSTATE(DFCS_INACTIVE))
-						{
-							nThState = CBS_CHECKEDDISABLED;
-						}
-						else if (HASSTATE(DFCS_HOT))
-						{
-							nThState = CBS_CHECKEDHOT;
-						}
-						else if (HASSTATE(DFCS_PUSHED))
-						{
-							nThState = CBS_CHECKEDPRESSED;
-						}
-						else
-						{
-							nThState = CBS_CHECKEDNORMAL;
-						}
+						HANDLESTATE(CBS_CHECKED);
 					}
 				}
 				else // Unchecked
 				{
-					if (HASSTATE(DFCS_INACTIVE))
-					{
-						nThState = CBS_UNCHECKEDDISABLED;
-					}
-					else if (HASSTATE(DFCS_HOT))
-					{
-						nThState = CBS_UNCHECKEDHOT;
-					}
-					else if (HASSTATE(DFCS_PUSHED))
-					{
-						nThState = CBS_UNCHECKEDPRESSED;
-					}
-					else // Normal
-					{
-						nThState = CBS_UNCHECKEDNORMAL;
-					}
+					HANDLESTATE(CBS_UNCHECKED);
 				}
 			}
 			else 
@@ -866,21 +788,41 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 		{
 			VERIFY(GetThemeClassPartState(DFC_COMBO, nState, sThClass, nThPart, nThState)); // RECURSIVE CALL
 		}
-		else if (ISTYPE(DFCS_SCROLLSIZEGRIP))
-		{
-			sThClass = "SCROLLBAR";
-			nThPart = SBP_SIZEBOX;
-			nThState = (HASSTATE(DFCS_SCROLLLEFT) ? SZB_LEFTALIGN : SZB_RIGHTALIGN);
-		}
-		else if (ISTYPE(DFCS_SCROLLDOWN))
-		{
-			sThClass = "SCROLLBAR";
-			nThPart = SBP_LOWERTRACKVERT;
-			nThState = SCRBS_NORMAL;
-		}
 		else
 		{
-			ASSERT(0);
+			sThClass = "SCROLLBAR";
+
+			if (ISTYPE(DFCS_SCROLLSIZEGRIP))
+			{
+				nThPart = SBP_SIZEBOX;
+				nThState = SZB_RIGHTALIGN;
+			}
+			else if (ISTYPE(DFCS_SCROLLSIZEGRIPRIGHT))
+			{
+				nThPart = SBP_SIZEBOX;
+				nThState = SZB_LEFTALIGN;
+			}
+			else
+			{
+				nThPart = SBP_ARROWBTN;
+
+				if (ISTYPE(DFCS_SCROLLDOWN))
+				{
+					HANDLESTATE(ABS_DOWN);
+				}
+				else if (ISTYPE(DFCS_SCROLLLEFT))
+				{
+					HANDLESTATE(ABS_LEFT);
+				}
+				else if (ISTYPE(DFCS_SCROLLRIGHT))
+				{
+					HANDLESTATE(ABS_RIGHT);
+				}
+				else // if (ISTYPE(DFCS_SCROLLUP))
+				{
+					HANDLESTATE(ABS_UP);
+				}
+			}
 		}
 		break;
 
@@ -889,20 +831,8 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 		{
 			sThClass = "COMBOBOX";
 			nThPart = (nType == DFC_COMBO ? CP_DROPDOWNBUTTON : CP_READONLY);
-			nThState = CBXS_NORMAL;
 
-			if (HASSTATE(DFCS_INACTIVE))
-			{
-				nThState = CBXS_DISABLED;
-			}
-			else if (HASSTATE(DFCS_CHECKED) || HASSTATE(DFCS_PUSHED))
-			{
-				nThState = CBXS_PRESSED;
-			}
-			else if (HASSTATE(DFCS_HOT))
-			{
-				nThState = CBXS_HOT;
-			}
+			HANDLESTATE(CBXS_);
 		}
 		break;
 	}
