@@ -1121,16 +1121,14 @@ BOOL CTabbedToDoCtrl::DoIdleProcessing()
 	if (InTreeView())
 		return CToDoCtrl::DoIdleProcessing();
 
-	// else
-	if (m_ctrlComments.HasFocus() && m_ctrlComments.DoIdleProcessing())
-		return TRUE;
-
 	FTC_VIEW nView = GetTaskView();
 	
 	switch (nView)
 	{
 	case FTCV_TASKLIST:
-		return m_taskList.DoIdleProcessing();
+		if (m_taskList.DoIdleProcessing())
+			return TRUE;
+		break;
 		
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
@@ -1152,12 +1150,14 @@ BOOL CTabbedToDoCtrl::DoIdleProcessing()
 			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 			ASSERT(pExtWnd && pExtWnd->GetHwnd());
 
-			return pExtWnd->DoIdleProcessing();
+			if (pExtWnd->DoIdleProcessing())
+				return TRUE;
 		}
 		break;
 	}
 
-	return FALSE;
+	// Not in tree view and nothing else to do
+	return CToDoCtrl::DoIdleProcessing();
 }
 
 void CTabbedToDoCtrl::ShowListViewSpecificCtrls(BOOL bShow)

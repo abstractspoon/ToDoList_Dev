@@ -175,6 +175,8 @@ CToDoCtrl::IDLETASKS::IDLETASKS(CToDoCtrl& tdc) : m_tdc(tdc)
 
 void CToDoCtrl::IDLETASKS::RefreshAttributeValues(const CTDCAttributeMap& mapAttribIDs)
 {
+	ASSERT(!mapAttribIDs.IsEmpty());
+
 	if (mapAttribIDs.Has(TDCA_ALL))
 	{
 		m_mapRefreshAttribIDs.Set(TDCA_ALL);
