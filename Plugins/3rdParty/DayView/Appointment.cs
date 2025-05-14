@@ -312,7 +312,7 @@ namespace Calendar
 
 		public bool Intersects(Appointment other)
 		{
-			if (!dates.Intersects(other.dates))
+			if (!Dates.Intersects(other.Dates))
 				return false;
 
 			if (IsLongAppt() != other.IsLongAppt())
