@@ -395,22 +395,6 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool Intersects(Calendar.Appointment other, bool displayLongAppointmentsContinuous)
-		{
-			if (!base.Intersects(other))
-				return false;
-
-			if (IsLongAppt() && !displayLongAppointmentsContinuous)
-			{
-				return ((StartDate.Date == other.StartDate.Date) ||
-						(StartDate.Date == other.EndDate.Date) ||
-						(EndDate.Date == other.EndDate.Date) ||
-						(EndDate.Date == other.StartDate.Date));
-			}
-
-			return true;
-		}
-
 		private void UpdateCustomDateAttributes(Task task, List<CustomAttributeDefinition> dateAttribs)
 		{
 			CustomDates = new Dictionary<string, DateTime>();

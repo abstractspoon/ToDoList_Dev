@@ -1458,13 +1458,18 @@ namespace Calendar
 			return apptView;
 		}
 
+		virtual protected bool AppointmentViewContains(AppointmentView view, int x, int y)
+		{
+			return view.Rectangle.Contains(x, y);
+		}
+
 		virtual protected AppointmentView GetAppointmentViewAt(int x, int y)
 		{
 			if (GetFullDayApptsRectangle().Contains(x, y))
 			{
 				foreach (AppointmentView view in longAppointmentViews.Values)
 				{
-					if (view.Rectangle.Contains(x, y))
+					if (AppointmentViewContains(view, x, y))
 						return view;
 				}
 			}
@@ -1472,7 +1477,7 @@ namespace Calendar
 			{
 				foreach (AppointmentView view in appointmentViews.Values)
 				{
-					if (view.Rectangle.Contains(x, y))
+					if (AppointmentViewContains(view, x, y))
 						return view;
 				}
 			}

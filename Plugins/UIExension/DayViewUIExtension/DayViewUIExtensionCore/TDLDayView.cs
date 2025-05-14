@@ -805,25 +805,28 @@ namespace DayViewUIExtension
 			return view;
 		}
 
-		override protected Calendar.AppointmentView GetAppointmentViewAt(int x, int y)
+		override protected bool AppointmentViewContains(Calendar.AppointmentView view, int x, int y)
 		{
-			var view = base.GetAppointmentViewAt(x, y);
+			if ((view == null) || !view.Rectangle.Contains(x, y))
+				return false;
 
-			if ((view != null) && view.IsLong && !DisplayLongTasksContinuous)
+			if (view.IsLong && !DisplayLongTasksContinuous)
 			{
 				var tdlView = (view as TDLAppointmentView);
 
 				if ((x < tdlView.EndOfStart) || (x > tdlView.StartOfEnd))
-					return view;
+					return true;
 
 				if (DisplayActiveTasksToday && IsTodayVisible)
 				{
 					if ((x > tdlView.StartOfToday) && (x < tdlView.EndOfToday))
-						return view;
+						return true;
 				}
+
+				return false;
 			}
 
-			return view;
+			return true;
 		}
 
 		public Calendar.Appointment GetAppointment(uint taskID)
@@ -1261,6 +1264,62 @@ namespace DayViewUIExtension
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
 		{
 			args.Appointments = GetMatchingAppointments(args.StartDate, args.EndDate);
+		}
+
+		protected override bool AppointmentsIntersect(Calendar.Appointment appt, Calendar.Appointment apptOther)
+		{
+			if (!base.AppointmentsIntersect(appt, apptOther))
+				return false;
+
+			if (appt.IsLongAppt() && !DisplayLongTasksContinuous)
+			{
+				// Note: TaskItem.EndDate already takes account of TreatOverdueTasksAsDueToday
+
+				// Test if one appointment's start/end dates 
+				// match the start/end dates of the other
+				if ((appt.StartDate.Date == apptOther.StartDate.Date) ||
+					(appt.StartDate.Date == apptOther.EndDate.Date) ||
+					(appt.EndDate.Date == apptOther.EndDate.Date) ||
+					(appt.EndDate.Date == apptOther.StartDate.Date))
+				{
+					return true;
+				}
+
+				if (DisplayActiveTasksToday)
+				{
+					// If one appointment intersects with today, test if 
+					// the other's start/end dates also matches today
+					if (appt.IntersectsToday)
+					{
+						if (apptOther.IntersectsToday)
+							return true;
+
+						DateTime today = DateTime.Today;
+
+						if ((today == appt.StartDate.Date) || 
+							(today == appt.EndDate.Date))
+						{
+							return true;
+						}
+					}
+					else if (apptOther.IntersectsToday)
+					{
+						DateTime today = DateTime.Today;
+
+						if ((today == apptOther.StartDate.Date) ||
+							(today == apptOther.EndDate.Date))
+						{
+							return true;
+						}
+					}
+				}
+
+				// else
+				return false;
+			}
+
+			// else
+			return true;
 		}
 
 		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end)
