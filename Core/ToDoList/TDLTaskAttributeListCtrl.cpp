@@ -144,7 +144,8 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_eSingleFileLink(FES_GOBUTTON),
 	m_cbMultiFileLink(FES_GOBUTTON),
 	m_iconCache(FALSE), // small icons
-	m_dwTimeTrackingTask(0)
+	m_dwTimeTrackingTask(0),
+	m_bTaskIDChangeSinceLastEdit(FALSE)
 {
 	SetSortColumn(0, FALSE);
 
@@ -1407,7 +1408,9 @@ BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 	if (Misc::MatchAll(aTaskIDs, m_aSelectedTaskIDs))
 		return FALSE;
 
+	m_bTaskIDChangeSinceLastEdit = TRUE;
 	m_aSelectedTaskIDs.Copy(aTaskIDs);
+
 	RefreshSelectedTasksValues();
 
 	return TRUE;
@@ -3111,6 +3114,8 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 {
 	ASSERT(CanEditCell(nRow, nCol));
 
+	m_bTaskIDChangeSinceLastEdit = FALSE;
+
 	CWnd* pCtrl = GetEditControl(nRow, bBtnClick);
 
 	if (pCtrl != NULL)
@@ -3691,6 +3696,9 @@ void CTDLTaskAttributeListCtrl::OnComboSelChange(UINT nCtrlID)
 
 void CTDLTaskAttributeListCtrl::NotifyParentEdit(int nRow, LPARAM bUnitsChange)
 {
+	if (m_bTaskIDChangeSinceLastEdit)
+		return;
+
 	UpdateWindow();
 
 	// Refresh the cell text only if the edit failed
@@ -3726,6 +3734,9 @@ void CTDLTaskAttributeListCtrl::OnSingleFileLinkKillFocus()
 
 BOOL CTDLTaskAttributeListCtrl::SetValueText(int nRow, const CString& sNewText, LPARAM bUnitsChange)
 {
+	if (m_bTaskIDChangeSinceLastEdit)
+		return FALSE;
+
 	if (sNewText == GetItemText(nRow, VALUE_COL))
 		return FALSE;
 
