@@ -4342,6 +4342,15 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				}
 				break;
 
+			case TDCA_PERCENT:
+				if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE) ||
+					(m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) &&
+					 m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs)))
+				{
+					sTooltip.LoadString(IDS_CAD_CALCULATION);
+				}
+				break;
+
 			default:
 				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 				{
