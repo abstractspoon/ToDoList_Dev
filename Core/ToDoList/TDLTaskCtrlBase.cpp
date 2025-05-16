@@ -5543,6 +5543,16 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 
 // -----------------------------------------------------------------
 
+BOOL CTDLTaskCtrlBase::SelectionAreAllDone(BOOL bIncGoodAsDone) const
+{
+	CDWordArray aTaskIDs;
+	GetSelectedTaskIDs(aTaskIDs, FALSE);
+
+	return m_multitasker.AllTasksAreDone(aTaskIDs, bIncGoodAsDone);
+}
+
+// -----------------------------------------------------------------
+
 #define SELECTIONHAS(FUNCTION)                             \
 CDWordArray aTaskIDs; GetSelectedTaskIDs(aTaskIDs, FALSE); \
 return m_multitasker.FUNCTION(aTaskIDs)
@@ -5562,11 +5572,6 @@ BOOL CTDLTaskCtrlBase::SelectionHasIcon() const
 BOOL CTDLTaskCtrlBase::SelectionHasParents() const
 {
 	SELECTIONHAS(AnyTaskIsParent);
-}
-
-BOOL CTDLTaskCtrlBase::SelectionAreAllDone() const
-{
-	SELECTIONHAS(AllTasksAreDone);
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasDependents() const

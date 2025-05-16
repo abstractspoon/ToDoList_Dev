@@ -13371,7 +13371,7 @@ void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	BOOL bEnable = (tdc.HasSelection() && !tdc.SelectedTasksAreAllDone());
+	BOOL bEnable = (tdc.HasSelection() && !tdc.SelectedTasksAreAllDone(TRUE));
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable && pCmdUI->m_pMenu)

@@ -259,7 +259,7 @@ public:
 	int GetSelectedTaskFileLinks(CStringArray& aFiles) const { return m_ctrlAttributes.GetFileLinks(aFiles); }
 
 	BOOL SelectedTasksHaveIcon() const { return m_taskTree.SelectionHasIcon(); }
-	BOOL SelectedTasksAreAllDone() const { return m_taskTree.SelectionAreAllDone(); }
+	BOOL SelectedTasksAreAllDone(BOOL bIncGoodAsDone) const { return m_taskTree.SelectionAreAllDone(bIncGoodAsDone); }
 	BOOL SelectedTasksHaveDependencies() const { return m_taskTree.SelectionHasDependencies(); }
 	BOOL SelectedTasksHaveDependents() const { return m_taskTree.SelectionHasDependents(); }
 	BOOL SelectedTasksHaveFlagged() const { return m_taskTree.SelectionHasFlagged(); }

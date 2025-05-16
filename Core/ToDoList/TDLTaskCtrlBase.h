@@ -154,7 +154,7 @@ public:
 	BOOL SelectionHasLockedParents(BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL SelectionHasParents() const;
 	BOOL SelectionHasDone() const;
-	BOOL SelectionAreAllDone() const;
+	BOOL SelectionAreAllDone(BOOL bIncGoodAsDone) const;
 	BOOL SelectionHasTaskColor() const;
 	BOOL SelectionHasFlagged() const;
 
