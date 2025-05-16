@@ -444,7 +444,7 @@ public:
 	BOOL AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const;
 
 	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;
-	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs) const;
+	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone = FALSE) const;
 	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
 	BOOL AllTasksAreParents(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
