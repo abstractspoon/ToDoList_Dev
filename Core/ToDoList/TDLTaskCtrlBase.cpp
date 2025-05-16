@@ -4627,8 +4627,9 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 			// check tasklist is editable, task is trackable and 
 			// neither the ctrl not shift keys are pressed (ie => multiple selection)
 			// and either the task is not selected or it's only singly selected
-			return (bNoModifiers && !bLocked &&
-					m_data.IsTaskTimeTrackable(dwTaskID) &&
+			return (bNoModifiers && 
+					!bLocked &&
+					m_calculator.IsTaskTimeTrackable(dwTaskID) &&
 					(!bTaskSelected || bSingleSelection));
 
 		default: // try custom columns

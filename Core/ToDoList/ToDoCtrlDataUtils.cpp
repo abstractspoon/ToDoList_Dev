@@ -2429,6 +2429,25 @@ BOOL CTDCTaskCalculator::GetSubtask(const TODOSTRUCTURE* pTDSParent, int nSubtas
 
 // ---------------------------------------------------------------------
 
+BOOL CTDCTaskCalculator::IsTaskTimeTrackable(DWORD dwTaskID) const
+{
+	if (dwTaskID == 0)
+		return FALSE;
+
+	// Not trackable if complete or 'good as done'
+	if (IsTaskDone(dwTaskID))
+		return FALSE;
+
+	// Check for non-trackable parents
+	if (m_data.IsTaskParent(dwTaskID))
+		return HasStyle(TDCS_ALLOWPARENTTIMETRACKING);
+
+	// all else
+	return TRUE;
+}
+
+// ---------------------------------------------------------------------
+
 double CTDCTaskCalculator::GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const
 {
 	const TODOITEM* pTDI = NULL;

@@ -65,6 +65,7 @@ public:
 	BOOL IsTaskStarted(DWORD dwTaskID, BOOL bToday = FALSE) const;
 	BOOL IsTaskDueToday(DWORD dwTaskID) const;
 	BOOL IsTaskOverDue(DWORD dwTaskID) const;
+	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
 
 	double GetTaskDueDate(DWORD dwTaskID) const;
 	double GetTaskStartDate(DWORD dwTaskID) const;
