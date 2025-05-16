@@ -4611,9 +4611,11 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 		{
 		case TDCC_DONE:
 		case TDCC_FLAG:
-		case TDCC_RECURRENCE:
 		case TDCC_ICON:
 			return !bLocked;
+
+		case TDCC_RECURRENCE:
+			return (!bLocked && !m_data.IsTaskDone(dwTaskID));
 
 		case TDCC_LOCK:
 			// Prevent editing of subtasks inheriting parent lock state
@@ -5862,7 +5864,7 @@ BOOL CTDLTaskCtrlBase::CanSplitSelectedTask() const
 	
 	if (nSelCount == 1)
 	{
-		if (SelectionHasDone() || SelectionHasSubtasks())
+		if (SelectionHasDone(FALSE) || SelectionHasSubtasks())
 			return FALSE;
 	}
 	

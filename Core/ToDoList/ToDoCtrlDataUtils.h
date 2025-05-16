@@ -442,9 +442,10 @@ public:
 	BOOL AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL AnyTaskIsUnlocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskIsDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone) const;
 
 	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;
-	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone = FALSE) const;
+	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone) const;
 	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
 	BOOL AllTasksAreParents(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;

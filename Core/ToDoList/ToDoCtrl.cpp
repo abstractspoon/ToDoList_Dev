@@ -9300,7 +9300,7 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 
 BOOL CToDoCtrl::EditSelectedTaskRecurrence()
 {
-	if (CanEditSelectedTask(TDCA_RECURRENCE) && !IsSelectedTaskDone())
+	if (CanEditSelectedTask(TDCA_RECURRENCE))
 	{
 		TDCRECURRENCE tr;
 		GetSelectedTaskRecurrence(tr);
@@ -10283,7 +10283,6 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_METADATA:
 	case TDCA_OFFSETTASK:
 	case TDCA_PRIORITY:		
-	case TDCA_RECURRENCE:	
 	case TDCA_RISK:			
 	case TDCA_STATUS:		
 	case TDCA_TAGS:			
@@ -10291,6 +10290,9 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_TASKNAMEORCOMMENTS:		
 	case TDCA_VERSION:		
 		return bEditableTask;
+
+	case TDCA_RECURRENCE:	
+		return (bEditableTask && !SelectedTasksAreAllDone(FALSE)); // exclude 'good as done'
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
