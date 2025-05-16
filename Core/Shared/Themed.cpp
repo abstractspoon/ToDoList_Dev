@@ -713,8 +713,6 @@ else if (HASSTATE(DFCS_HOT))       \
 {	nThState = prefix##HOT; }      \
 else if (HASSTATE(DFCS_PUSHED))    \
 {	nThState = prefix##PRESSED; }  \
-else if (HASSTATE(DFCS_CHECKED))   \
-{	nThState = prefix##PRESSED; }  \
 else nThState = prefix##NORMAL
 
 // -----------------------------------------------------------------------------------------------------------
