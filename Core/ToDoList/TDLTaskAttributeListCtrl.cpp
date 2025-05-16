@@ -1157,35 +1157,26 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	return nColType;
 }
 
-BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
+BOOL CTDLTaskAttributeListCtrl::CanEditCell(const CToDoCtrlData& data, const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID)
 {
-	if (nCol != VALUE_COL)
-		return FALSE;
-	
-	if (m_data.HasStyle(TDCS_READONLY))
+	if (data.HasStyle(TDCS_READONLY))
 		return FALSE;
 
-	if (!CInputListCtrl::CanEditCell(nRow, nCol))
+	if (aTaskIDs.GetSize() == 0)
 		return FALSE;
 
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	CTDCMultiTasker multiTasker(data, CContentMgr());
 
-	if (!m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
-	{
-		switch (nAttribID)
-		{
-		case TDCA_LOCK:
-		case TDCA_REMINDER:
-			break;
-
-		default:
-			return FALSE;
-		}
-	}
+	BOOL bEditable = multiTasker.AnyTaskIsUnlocked(aTaskIDs);
 
 	// else
 	switch (nAttribID)
 	{
+	// Permanently editable fields
+	case TDCA_LOCK:
+		return TRUE;
+
+	// Permanently read-only fields
 	case TDCA_CREATEDBY:
 	case TDCA_PATH:
 	case TDCA_POSITION:
@@ -1198,49 +1189,102 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	case TDCA_ID:
 	case TDCA_PARENTID:
 	case TDCA_TIMEREMAINING:
-		// Permanently read-only fields
 		return FALSE;
 
+	// Editable fields requiring no special handling
+	case TDCA_ALLOCBY:
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_COLOR:
+	case TDCA_COST:
+	case TDCA_DEPENDENCY:
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_EXTERNALID:
+	case TDCA_FILELINK:
+	case TDCA_FLAG:
+	case TDCA_ICON:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+	case TDCA_STATUS:
+	case TDCA_TAGS:
+	case TDCA_TASKNAME:
+	case TDCA_VERSION:
+		return bEditable;
+
+	// Editable fields requiring extra checks
 	case TDCA_RECURRENCE:
-		return !m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, FALSE); // excludes 'good as done'
+		if (bEditable)
+			return !multiTasker.AllTasksAreDone(aTaskIDs, FALSE); // excludes 'good as done'
+		break;
 
 	case TDCA_REMINDER:
-		return !m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, TRUE); // includes 'good as done'
+		if (bEditable)
+			return !multiTasker.AllTasksAreDone(aTaskIDs, TRUE); // includes 'good as done'
+		break;
 
 	case TDCA_PERCENT:
-		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
+		if (bEditable)
 		{
-			return FALSE;
-		}
-		else if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && 
-				 m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs))
-		{
-			return FALSE;
+			if (data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
+				return FALSE;
+
+			if (data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && multiTasker.AnyTaskIsParent(aTaskIDs))
+				return FALSE;
+
+			return TRUE;
 		}
 		break;
 
-	case TDCA_LOCK:
-		return TRUE;
-
 	case TDCA_STARTTIME:
-		if (!m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_STARTDATE))
-			return FALSE;
-		// else fall through to TDCA_STARTDATE
+		if (bEditable)
+		{
+			if (!multiTasker.AnyTaskHasDate(aTaskIDs, TDCD_STARTDATE))
+				return FALSE;
+		}
+		return CanEditCell(data, aTaskIDs, TDCA_STARTDATE); // RECURSIVE CALL
 
 	case TDCA_STARTDATE:
-		return (!m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs));
+		if (bEditable)
+			return (!data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !multiTasker.AllTasksHaveDependencies(aTaskIDs));
+		break;
 
-	case TDCA_DUETIME:		
-		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
+	case TDCA_DUETIME:
+		if (bEditable)
+			return multiTasker.AnyTaskHasDate(aTaskIDs, TDCD_DUEDATE);
+		break;
 
-	case TDCA_DONETIME:		
-		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
+	case TDCA_DONETIME:
+		if (bEditable)
+			return multiTasker.AnyTaskHasDate(aTaskIDs, TDCD_DONEDATE);
+		break;
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
-		return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.AllTasksAreParents(m_aSelectedTaskIDs));
+		if (bEditable)
+			return (data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !multiTasker.AllTasksAreParents(aTaskIDs));
+		break;
+	}
 
-	default:
+	// Any other attributes are the callers responsibility
+	return FALSE;
+}
+
+BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
+{
+	if (nCol != VALUE_COL)
+		return FALSE;
+	
+	if (!CInputListCtrl::CanEditCell(nRow, nCol))
+		return FALSE;
+
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
+	if (CanEditCell(m_data, m_aSelectedTaskIDs, nAttribID))
+		return TRUE;
+
+	if (m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
+	{
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
@@ -1255,10 +1299,9 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 
 			return !GetItemText(nDateRow, VALUE_COL).IsEmpty();
 		}
-		break;
 	}
-	
-	return TRUE;
+
+	return FALSE;
 }
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
