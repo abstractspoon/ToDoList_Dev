@@ -455,7 +455,7 @@ void CTDLTimeTrackerDlg::UpdateSelectedTasks(const CToDoCtrl* pTDC, const CTDCAt
 	if (mapAttrib.Has(TDCA_PASTE) ||
 		mapAttrib.Has(TDCA_POSITION_SAMEPARENT) ||
 		mapAttrib.Has(TDCA_POSITION_DIFFERENTPARENT) ||
-		(mapAttrib.Has(TDCA_DONEDATE) && !pTDC->SelectedTasksAreAllDone()) ||
+		(mapAttrib.Has(TDCA_DONEDATE) && !pTDC->SelectedTasksAreAllDone(TRUE)) ||
 		(mapAttrib.Has(TDCA_NEWTASK) && !pTDC->IsTaskLabelEditing()))
 	{
 		UpdateAllTasks(pTDC);

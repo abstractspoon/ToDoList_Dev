@@ -1202,8 +1202,10 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		return FALSE;
 
 	case TDCA_RECURRENCE:
-	case TDCA_REMINDER:
 		return !m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs);
+
+	case TDCA_REMINDER:
+		return !m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, TRUE);
 
 	case TDCA_PERCENT:
 		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -4343,8 +4345,12 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				break;
 
 			case TDCA_RECURRENCE:
-			case TDCA_REMINDER:
 				if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs))
+					sTooltip.LoadString(IDS_ATTRIBTIP_COMPLETEDTASK);
+				break;
+
+			case TDCA_REMINDER:
+				if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, TRUE))
 					sTooltip.LoadString(IDS_ATTRIBTIP_COMPLETEDTASK);
 				break;
 
