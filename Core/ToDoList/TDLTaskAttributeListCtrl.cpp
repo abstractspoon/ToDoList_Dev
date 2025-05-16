@@ -1157,119 +1157,6 @@ IL_COLUMNTYPE CTDLTaskAttributeListCtrl::GetCellType(int nRow, int nCol) const
 	return nColType;
 }
 
-BOOL CTDLTaskAttributeListCtrl::CanEditCell(const CToDoCtrlData& data, const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID)
-{
-	if (data.HasStyle(TDCS_READONLY))
-		return FALSE;
-
-	if (aTaskIDs.GetSize() == 0)
-		return FALSE;
-
-	CTDCMultiTasker multiTasker(data, CContentMgr());
-
-	BOOL bEditable = multiTasker.AnyTaskIsUnlocked(aTaskIDs);
-
-	// else
-	switch (nAttribID)
-	{
-	// Permanently editable fields
-	case TDCA_LOCK:
-		return TRUE;
-
-	// Permanently read-only fields
-	case TDCA_CREATEDBY:
-	case TDCA_PATH:
-	case TDCA_POSITION:
-	case TDCA_CREATIONDATE:
-	case TDCA_LASTMODDATE:
-	case TDCA_COMMENTSSIZE:
-	case TDCA_COMMENTSFORMAT:
-	case TDCA_SUBTASKDONE:
-	case TDCA_LASTMODBY:
-	case TDCA_ID:
-	case TDCA_PARENTID:
-	case TDCA_TIMEREMAINING:
-		return FALSE;
-
-	// Editable fields requiring no special handling
-	case TDCA_ALLOCBY:
-	case TDCA_ALLOCTO:
-	case TDCA_CATEGORY:
-	case TDCA_COLOR:
-	case TDCA_COST:
-	case TDCA_DEPENDENCY:
-	case TDCA_DONEDATE:
-	case TDCA_DUEDATE:
-	case TDCA_EXTERNALID:
-	case TDCA_FILELINK:
-	case TDCA_FLAG:
-	case TDCA_ICON:
-	case TDCA_PRIORITY:
-	case TDCA_RISK:
-	case TDCA_STATUS:
-	case TDCA_TAGS:
-	case TDCA_TASKNAME:
-	case TDCA_VERSION:
-		return bEditable;
-
-	// Editable fields requiring extra checks
-	case TDCA_RECURRENCE:
-		if (bEditable)
-			return !multiTasker.AllTasksAreDone(aTaskIDs, FALSE); // excludes 'good as done'
-		break;
-
-	case TDCA_REMINDER:
-		if (bEditable)
-			return !multiTasker.AllTasksAreDone(aTaskIDs, TRUE); // includes 'good as done'
-		break;
-
-	case TDCA_PERCENT:
-		if (bEditable)
-		{
-			if (data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
-				return FALSE;
-
-			if (data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && multiTasker.AnyTaskIsParent(aTaskIDs))
-				return FALSE;
-
-			return TRUE;
-		}
-		break;
-
-	case TDCA_STARTTIME:
-		if (bEditable)
-		{
-			if (!multiTasker.AnyTaskHasDate(aTaskIDs, TDCD_STARTDATE))
-				return FALSE;
-		}
-		return CanEditCell(data, aTaskIDs, TDCA_STARTDATE); // RECURSIVE CALL
-
-	case TDCA_STARTDATE:
-		if (bEditable)
-			return (!data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !multiTasker.AllTasksHaveDependencies(aTaskIDs));
-		break;
-
-	case TDCA_DUETIME:
-		if (bEditable)
-			return multiTasker.AnyTaskHasDate(aTaskIDs, TDCD_DUEDATE);
-		break;
-
-	case TDCA_DONETIME:
-		if (bEditable)
-			return multiTasker.AnyTaskHasDate(aTaskIDs, TDCD_DONEDATE);
-		break;
-
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
-		if (bEditable)
-			return (data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !multiTasker.AllTasksAreParents(aTaskIDs));
-		break;
-	}
-
-	// Any other attributes are the callers responsibility
-	return FALSE;
-}
-
 BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 {
 	if (nCol != VALUE_COL)
@@ -1279,29 +1166,31 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 		return FALSE;
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	BOOL bCanEdit = m_multitasker.CanEditAnyTask(m_aSelectedTaskIDs, nAttribID);
 
-	if (CanEditCell(m_data, m_aSelectedTaskIDs, nAttribID))
-		return TRUE;
-
-	if (m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
+	if (bCanEdit == -1) // Unhandled by multi-tasker
 	{
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
+		bCanEdit = m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs);
 
-			return (pDef->IsList() || !pDef->IsDataType(TDCCA_CALCULATION));
-		}
-		else if (IsCustomTime(nAttribID))
+		if (bCanEdit)
 		{
-			int nDateRow = (nRow - 1);
-			ASSERT(GetDateRow(nAttribID) == nDateRow);
+			if (IsCustomTime(nAttribID))
+			{
+				int nDateRow = (nRow - 1);
+				ASSERT(GetDateRow(nAttribID) == nDateRow);
 
-			return !GetItemText(nDateRow, VALUE_COL).IsEmpty();
+				bCanEdit = !GetItemText(nDateRow, VALUE_COL).IsEmpty();
+			}
+			else
+			{
+				ASSERT(0); // Unhandled by 'us'
+				bCanEdit = FALSE;
+			}
 		}
 	}
 
-	return FALSE;
+	ASSERT(bCanEdit != -1);
+	return bCanEdit;
 }
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const

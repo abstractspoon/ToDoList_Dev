@@ -451,6 +451,9 @@ public:
 	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const;
 
+	// Returns -1 if attribute not handled
+	BOOL CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID) const;
+
 protected:
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;

@@ -6076,6 +6076,136 @@ BOOL CTDCMultiTasker::AllTasksHaveDependencies(const CDWordArray& aTaskIDs) cons
 	GETALLTASKHAS(TaskHasDependencies);
 }
 
+// -----------------------------------------------------------------
+
+BOOL CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID) const
+{
+	if (HasStyle(TDCS_READONLY))
+		return FALSE;
+
+	if (aTaskIDs.GetSize() == 0)
+		return FALSE;
+
+	BOOL bEditable = AnyTaskIsUnlocked(aTaskIDs);
+
+	// else
+	switch (nAttribID)
+	{
+		// Permanently editable fields
+	case TDCA_LOCK:
+		return TRUE;
+
+		// Permanently read-only fields
+	case TDCA_CREATEDBY:
+	case TDCA_PATH:
+	case TDCA_POSITION:
+	case TDCA_CREATIONDATE:
+	case TDCA_LASTMODDATE:
+	case TDCA_COMMENTSSIZE:
+	case TDCA_COMMENTSFORMAT:
+	case TDCA_SUBTASKDONE:
+	case TDCA_LASTMODBY:
+	case TDCA_ID:
+	case TDCA_PARENTID:
+	case TDCA_TIMEREMAINING:
+		return FALSE;
+
+		// Editable fields requiring no special handling
+	case TDCA_ALLOCBY:
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_COLOR:
+	case TDCA_COST:
+	case TDCA_DEPENDENCY:
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_EXTERNALID:
+	case TDCA_FILELINK:
+	case TDCA_FLAG:
+	case TDCA_ICON:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+	case TDCA_STATUS:
+	case TDCA_TAGS:
+	case TDCA_TASKNAME:
+	case TDCA_VERSION:
+		return bEditable;
+
+		// Editable fields requiring extra checks
+	case TDCA_RECURRENCE:
+		if (bEditable)
+			return !AllTasksAreDone(aTaskIDs, FALSE); // excludes 'good as done'
+		break;
+
+	case TDCA_REMINDER:
+		if (bEditable)
+			return !AllTasksAreDone(aTaskIDs, TRUE); // includes 'good as done'
+		break;
+
+	case TDCA_PERCENT:
+		if (bEditable)
+		{
+			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
+				return FALSE;
+
+			if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && AnyTaskIsParent(aTaskIDs))
+				return FALSE;
+
+			return TRUE;
+		}
+		break;
+
+	case TDCA_STARTTIME:
+		if (bEditable)
+		{
+			if (AnyTaskHasDate(aTaskIDs, TDCD_STARTDATE))
+				return CanEditAnyTask(aTaskIDs, TDCA_STARTDATE); // RECURSIVE CALL
+		}
+		break;
+
+	case TDCA_STARTDATE:
+		if (bEditable)
+			return (!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !AllTasksHaveDependencies(aTaskIDs));
+		break;
+
+	case TDCA_DUETIME:
+		if (bEditable)
+			return AnyTaskHasDate(aTaskIDs, TDCD_DUEDATE);
+		break;
+
+	case TDCA_DONETIME:
+		if (bEditable)
+			return AnyTaskHasDate(aTaskIDs, TDCD_DONEDATE);
+		break;
+
+	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
+		if (bEditable)
+			return (HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !AllTasksAreParents(aTaskIDs));
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			if (bEditable)
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_CUSTDEF_RET(CustomAttribDefs(), nAttribID, pDef, FALSE);
+
+				return (pDef->IsList() || !pDef->IsDataType(TDCCA_CALCULATION));
+			}
+		}
+		else
+		{
+			// Anything else is the caller's responsibility
+			return -1;
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 BOOL CTDCLongestItemMap::Initialise(const CTDCColumnIDMap& mapCols, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)

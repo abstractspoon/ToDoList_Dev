@@ -289,7 +289,6 @@ protected:
 	static CString FormatValueArray(const CStringArray& aValues);
 	static int SplitValueArray(const CString& sValues, CStringArray& aValues);
 	static void RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel);
-	static BOOL CanEditCell(const CToDoCtrlData& data, const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID);
 
 private:
 	// ---------------------------------------------------------------------
