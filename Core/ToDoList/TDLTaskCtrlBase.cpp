@@ -5553,6 +5553,14 @@ BOOL CTDLTaskCtrlBase::SelectionAreAllDone(BOOL bIncGoodAsDone) const
 	return m_multitasker.AllTasksAreDone(aTaskIDs, bIncGoodAsDone);
 }
 
+BOOL CTDLTaskCtrlBase::SelectionHasDone(BOOL bIncGoodAsDone) const
+{
+	CDWordArray aTaskIDs;
+	GetSelectedTaskIDs(aTaskIDs, FALSE);
+
+	return m_multitasker.AnyTaskIsDone(aTaskIDs, bIncGoodAsDone);
+}
+
 // -----------------------------------------------------------------
 
 #define SELECTIONHAS(FUNCTION)                             \
@@ -5633,11 +5641,6 @@ CDWordArray aTaskIDs; GetSelectedTaskIDs(aTaskIDs, FALSE); \
 return m_multitasker.FUNCTION(aTaskIDs, ARG)
 
 // -----------------------------------------------------------------
-
-BOOL CTDLTaskCtrlBase::SelectionHasDone() const
-{
-	SELECTIONHAS_1ARG(AnyTaskHasDate, TDCD_DONE);
-}
 
 BOOL CTDLTaskCtrlBase::SelectionHasUnlocked(BOOL bTreatRefsAsUnlocked) const
 {
