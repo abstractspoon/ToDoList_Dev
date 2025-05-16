@@ -154,7 +154,6 @@ public:
 	DWORD GetTaskReferenceID(DWORD dwTaskID) const;
 	int GetReferencesToTask(DWORD dwTaskID, CDWordArray& aRefIDs) const;
 	BOOL IsReferenceToTask(DWORD dwTestID, DWORD dwTaskID) const;
-	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
 	BOOL IsTaskParent(DWORD dwTaskID) const;
 	int GetTaskParentIDs(DWORD dwTaskID, CDWordArray& aTaskIDs) const;
 

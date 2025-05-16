@@ -2917,16 +2917,10 @@ BOOL CToDoCtrl::TimeTrackSelectedTask()
 
 BOOL CToDoCtrl::CanTimeTrackSelectedTask() const
 {
-	if (!CanEditSelectedTask(TDCA_TIMESPENT) || (GetSelectedTaskCount() != 1))
+	if (!CanEditSelectedTask(TDCA_TIMESPENT))
 		return FALSE;
 
-	DWORD dwTaskID = GetSelectedTaskID();
-	
-	if (dwTaskID)
-		return m_timeTracking.CanTrackTask(dwTaskID);
-
-	// else
-	return FALSE;
+	return m_timeTracking.CanTrackSelectedTask();
 }
 
 BOOL CToDoCtrl::IsSelectedTaskBeingTimeTracked() const

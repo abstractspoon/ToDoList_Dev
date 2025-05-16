@@ -3839,33 +3839,6 @@ BOOL CToDoCtrlData::IsTaskDone(DWORD dwTaskID) const
 	return pTDI->IsDone();
 }
 
-BOOL CToDoCtrlData::IsTaskTimeTrackable(DWORD dwTaskID) const
-{
-	// Not trackable if complete
-	if (IsTaskDone(dwTaskID))
-		return FALSE;
-
-	// Not trackable if task is parent
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDS(dwTaskID, pTDS, FALSE);
-	
-	if (pTDS->HasSubTasks() && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-		return FALSE;
-
-	// Not trackable if any of its parents are complete
-	pTDS = pTDS->GetParentTask();
-
-	while (pTDS && !pTDS->IsRoot())
-	{
-		if (IsTaskDone(pTDS->GetTaskID()))
-			return FALSE;
-
-		pTDS = pTDS->GetParentTask();
-	}
-
-	return TRUE;
-}
-
 BOOL CToDoCtrlData::IsTaskParent(DWORD dwTaskID) const
 {
 	const TODOSTRUCTURE* pTDS = NULL;
