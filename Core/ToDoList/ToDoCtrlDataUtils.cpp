@@ -6004,6 +6004,8 @@ BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
 	return GetTasksParentID(aTaskIDs, dwUnused);
 }
 
+// -----------------------------------------------------------------
+
 BOOL CTDCMultiTasker::AllTasksAreDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone) const
 {
 	if (!aTaskIDs.GetSize())
@@ -6018,6 +6020,22 @@ BOOL CTDCMultiTasker::AllTasksAreDone(const CDWordArray& aTaskIDs, BOOL bIncGood
 	}
 
 	return TRUE;
+}
+
+BOOL CTDCMultiTasker::AnyTaskIsDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone) const
+{
+	if (!aTaskIDs.GetSize())
+		return FALSE;
+
+	DWORD dwExtraCheck = (bIncGoodAsDone ? TDCCHECKALL : 0);
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (m_calculator.IsTaskDone(aTaskIDs[nID], dwExtraCheck))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 // -----------------------------------------------------------------

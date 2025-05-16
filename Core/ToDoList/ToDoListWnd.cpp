@@ -11832,7 +11832,7 @@ void CToDoListWnd::OnUpdateEditRecurrence(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_RECURRENCE) && !tdc.IsSelectedTaskDone());	
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_RECURRENCE));
 }
 
 void CToDoListWnd::OnFileOpenarchive() 
