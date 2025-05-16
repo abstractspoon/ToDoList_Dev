@@ -10234,12 +10234,12 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
+BOOL CToDoCtrl::CanEditTask(const CToDoCtrlData& data, DWORD dwTaskID, TDC_ATTRIBUTE nAttribID)
 {
-	if (IsReadOnly())
+	if (data.HasStyle(TDCS_READONLY))
 		return FALSE;
 
-	BOOL bEditableTask = (dwTaskID && !m_calculator.IsTaskLocked(dwTaskID));
+	BOOL bEditableTask = (dwTaskID && !CTDCTaskCalculator(data).IsTaskLocked(dwTaskID));
 
 	switch (nAttribID)
 	{
@@ -10251,11 +10251,11 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		{
 			return FALSE;
 		}
-		else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
+		else if (data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
 			return FALSE;
 		}
-		else if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_data.IsTaskParent(dwTaskID))
+		else if (data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && data.IsTaskParent(dwTaskID))
 		{
 			return FALSE;
 		}
@@ -10292,7 +10292,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		return bEditableTask;
 
 	case TDCA_RECURRENCE:	
-		return (bEditableTask && !SelectedTasksAreAllDone(FALSE)); // exclude 'good as done'
+		return (bEditableTask && !data.IsTaskDone(dwTaskID)); // exclude 'good as done'
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
@@ -10300,7 +10300,7 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		{
 			return FALSE;
 		}
-		else if (!HasStyle(TDCS_ALLOWPARENTTIMETRACKING) && m_data.IsTaskParent(dwTaskID))
+		else if (!data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) && data.IsTaskParent(dwTaskID))
 		{
 			return FALSE;
 		}
@@ -10312,13 +10312,13 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		{
 			return FALSE;
 		}
-		else if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && m_data.TaskHasDependencies(dwTaskID))
+		else if (data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && data.TaskHasDependencies(dwTaskID))
 		{
 			// Ignore tasks with dependencies where their dates 
 			// are automatically calculated
 			return FALSE;
 		}
-		else if ((nAttribID == TDCA_STARTTIME) && !m_data.TaskHasDate(dwTaskID, TDCD_START))
+		else if ((nAttribID == TDCA_STARTTIME) && !data.TaskHasDate(dwTaskID, TDCD_START))
 		{
 			// Ignore tasks without a start date set
 			return FALSE;
@@ -10326,12 +10326,12 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		return TRUE;
 
 	case TDCA_DELETE:
-		if (!bEditableTask && !m_data.IsTaskReference(dwTaskID))
+		if (!bEditableTask && !data.IsTaskReference(dwTaskID))
 		{
 			// Can't delete locked tasks unless they are references
 			return FALSE;
 		}
-		else if (m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
+		else if (data.IsTaskLocked(data.GetTaskParentID(dwTaskID)))
 		{
 			// Can't delete subtasks if immediate parent is locked
 			return FALSE;
@@ -10358,6 +10358,11 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 
 	// all else
 	return FALSE;
+}
+
+BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
+{
+	return CanEditTask(m_data, dwTaskID, nAttribID);
 }
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID)
