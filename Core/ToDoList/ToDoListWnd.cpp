@@ -3049,7 +3049,7 @@ void CToDoListWnd::OnUpdateEditToggleTaskDone(CCmdUI* pCmdUI)
 	int nSelCount = tdc.GetSelectedTaskCount();
 	
 	if (nSelCount == 1)
-		pCmdUI->SetCheck(tdc.IsSelectedTaskDone() ? 1 : 0);
+		pCmdUI->SetCheck(tdc.SelectedTasksAreAllDone(FALSE) ? 1 : 0);
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_DONEDATE));	
 }

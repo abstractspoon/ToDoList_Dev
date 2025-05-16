@@ -239,7 +239,6 @@ public:
 	BOOL ClearSelectedTaskIcon(); 
 
 	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
-	BOOL IsSelectedTaskDone() const { return m_taskTree.SelectionHasDone(); }
 
 	BOOL OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount, TDC_UNITS nUnits, DWORD dwFlags = 0);
 	BOOL CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const;
