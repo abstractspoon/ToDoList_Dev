@@ -408,7 +408,7 @@ public:
 	BOOL SelectTasksInHistory(BOOL bForward);
 	void SelectAll(BOOL bVisibleOnly = TRUE);
 	BOOL CanSelectAll() const { return (GetTaskCount() > 0); }
-	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID = 0) const;
+	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const { return CanEditSelectedTask(nAttribID, 0); }
 
 	BOOL SetTreeFont(HFONT hFont); // setter responsible for deleting
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting
@@ -751,6 +751,7 @@ protected:
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_ctrlAttributes.GetCustomAttributeData(sAttribID, data, bFormatted); }
 
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
+	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const;
 	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const;
 	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const;
 	BOOL ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID);
