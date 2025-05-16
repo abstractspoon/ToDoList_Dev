@@ -377,59 +377,58 @@ BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, cons
 		bUpdated = RemoveCompletedTasks(pTDC); // removes from list too
 	}
 
-	if (!bAllAttribModified && !mapAttrib.Has(TDCA_DUEDATE) && !mapAttrib.Has(TDCA_STARTDATE) && !mapAttrib.Has(TDCA_TASKNAME))
+	// Remove any relative reminders whose dates have changed 
+	// and which are now in the future. 
+	// Also update any reminders whose task title has changed
+	if (bAllAttribModified || mapAttrib.Has(TDCA_DUEDATE) || mapAttrib.Has(TDCA_STARTDATE) || mapAttrib.Has(TDCA_TASKNAME))
 	{
-		return FALSE;
-	}
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
 
-	// Look for visible relative task reminders 
-	// whose reminder dates are in the future
-	COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CTDCReminderArray aRem;
+		int nRem = GetListReminders(*pTDC, aRem);
 
-	CTDCReminderArray aRem;
-	int nRem = GetListReminders(*pTDC, aRem);
-
-	while (nRem--)
-	{
-		TDCREMINDER& rem = aRem[nRem];
-
-		if (!rem.bRelative)
-			continue;
-
-		if (!Misc::HasT(rem.dwTaskID, aTaskIDs))
-			continue;
-
-		if (!bAllAttribModified)
+		while (nRem--)
 		{
-			if (rem.nRelativeFromWhen == TDCR_STARTDATE)
+			TDCREMINDER& rem = aRem[nRem];
+
+			if (!rem.bRelative)
+				continue;
+
+			if (!Misc::HasT(rem.dwTaskID, aTaskIDs))
+				continue;
+
+			if (!bAllAttribModified)
 			{
-				if (!mapAttrib.Has(TDCA_STARTDATE))
-					continue;
+				if (rem.nRelativeFromWhen == TDCR_STARTDATE)
+				{
+					if (!mapAttrib.Has(TDCA_STARTDATE))
+						continue;
+				}
+				else // due date
+				{
+					if (!mapAttrib.Has(TDCA_DUEDATE))
+						continue;
+				}
 			}
-			else // due date
+
+			COleDateTime dtRem;
+
+			// If the reminder date without snooze is in the future,
+			// or the reminder is no longer valid, then clear the 
+			// snooze and remove the reminder from the list
+			if (!rem.GetReminderDate(dtRem, FALSE) || (dtRem > dtNow))
 			{
-				if (!mapAttrib.Has(TDCA_DUEDATE))
-					continue;
+				rem.dDaysSnooze = 0.0;
+
+				RemoveListReminder(rem);
 			}
-		}
-
-		COleDateTime dtRem;
-
-		// If the reminder date without snooze is in the future,
-		// or the reminder is no longer valid, then clear the 
-		// snooze and remove the reminder from the list
-		if (!rem.GetReminderDate(dtRem, FALSE) || (dtRem > dtNow))
-		{
-			rem.dDaysSnooze = 0.0;
-
-			RemoveListReminder(rem);
-		}
-		else
-		{
-			UpdateListReminder(rem);
+			else
+			{
+				UpdateListReminder(rem);
+			}
 		}
 	}
-
+	
 	CheckReminders();
 
 	return bUpdated;
