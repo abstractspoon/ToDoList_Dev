@@ -751,7 +751,7 @@ protected:
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_ctrlAttributes.GetCustomAttributeData(sAttribID, data, bFormatted); }
 
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
-	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID = 0) const;
+	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const;
 	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const;
 	BOOL ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID);
 

@@ -10197,7 +10197,7 @@ CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMax
 	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep, nMaxTasks); 
 }
 
-BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID) const
+BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const
 {
 	if (mapAttribs.IsEmpty())
 		return FALSE;
@@ -10206,7 +10206,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dw
 
 	while (pos)
 	{
-		if (!CanEditSelectedTask(mapAttribs.GetNext(pos)), dwTaskID)
+		if (!CanEditSelectedTask(mapAttribs.GetNext(pos), 0))
 			return FALSE;
 	}
 
