@@ -2161,7 +2161,7 @@ COLORREF CTDLTaskCtrlBase::GetTaskCommentsTextColor(const TODOITEM* pTDI, const 
 {
 	COLORREF crText = ((RGBX(crBack).Luminance() > 128) ? COMMENTSCOLOR : ALTCOMMENTSCOLOR);
 	
-	if (HasColor(m_crDone) && m_calculator.IsTaskDone(pTDI, pTDS, TDCCHECKALL))
+	if (HasColor(m_crDone) && m_calculator.IsTaskDone(pTDI, pTDS))
 		return m_crDone;
 	
 	return crText;
