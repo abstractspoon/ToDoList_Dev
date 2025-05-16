@@ -6004,6 +6004,22 @@ BOOL CTDCMultiTasker::AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const
 	return GetTasksParentID(aTaskIDs, dwUnused);
 }
 
+BOOL CTDCMultiTasker::AllTasksAreDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone) const
+{
+	if (!aTaskIDs.GetSize())
+		return FALSE;
+
+	DWORD dwExtraCheck = (bIncGoodAsDone ? TDCCHECKALL : 0);
+	
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (!m_calculator.IsTaskDone(aTaskIDs[nID], dwExtraCheck)) 
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 // -----------------------------------------------------------------
 
 #define GETALLTASKHAS(FUNCTION)                    \
@@ -6021,11 +6037,6 @@ if (!m_data.FUNCTION(aTaskIDs[nID], ARG)) return FALSE; \
 return TRUE
 
 // -----------------------------------------------------------------
-
-BOOL CTDCMultiTasker::AllTasksAreDone(const CDWordArray& aTaskIDs) const
-{
-	GETALLTASKHAS(IsTaskDone);
-}
 
 BOOL CTDCMultiTasker::AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const
 {
