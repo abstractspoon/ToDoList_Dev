@@ -1520,7 +1520,7 @@ bValueVaries = aMixed.GetSize(); }
 
 #define GETUNIQUEVALUE(FUNCTION)								\
 { if (dwSingleSelTaskID) sValue = FUNCTION(dwSingleSelTaskID);	\
-else if (nSelCount > 1) bValueVaries = TRUE; }
+else { ASSERT(m_aSelectedTaskIDs.GetSize() > 1); bValueVaries = TRUE; } }
 
 // -----------------------------------------------------------------------------------------
 
@@ -1534,15 +1534,14 @@ else bValueVaries = TRUE; }
 
 void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 {
-	int nSelCount = m_aSelectedTaskIDs.GetSize();
-	DWORD dwSingleSelTaskID = ((nSelCount == 1) ? m_aSelectedTaskIDs[0] : 0);
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-
 	CString sValue;
 	BOOL bValueVaries = FALSE;
 
-	if (nSelCount)
+	if (m_aSelectedTaskIDs.GetSize())
 	{
+		DWORD dwSingleSelTaskID = GetSingleSelectedTaskID();
+		TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+
 		switch (nAttribID)
 		{
 		case TDCA_TASKNAME:			GETMULTIVALUE_STR(GetTasksTitle);			break;
@@ -3468,17 +3467,24 @@ HICON CTDLTaskAttributeListCtrl::GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtn
 	return NULL;
 }
 
+DWORD CTDLTaskAttributeListCtrl::GetSingleSelectedTaskID() const
+{
+	return ((m_aSelectedTaskIDs.GetSize() == 1) ? m_aSelectedTaskIDs[0] : 0);
+}
+
 BOOL CTDLTaskAttributeListCtrl::CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sCellText) const
 {
 	ASSERT(CanEditCell(GetRow(nAttribID), VALUE_COL));
 
+	DWORD dwSingleTaskID = GetSingleSelectedTaskID();
+
 	switch (nBtnID)
 	{
 	case ID_BTN_TIMETRACK:
-		return ((m_aSelectedTaskIDs.GetSize() == 1) && !m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs));
+		return (dwSingleTaskID && !m_calculator.IsTaskDone(dwSingleTaskID)); // Include 'good as done'
 
 	case ID_BTN_ADDLOGGEDTIME:
-		return ((m_aSelectedTaskIDs.GetSize() == 1) && (m_aSelectedTaskIDs[0] != m_dwTimeTrackingTask));
+		return (dwSingleTaskID && (dwSingleTaskID != m_dwTimeTrackingTask));
 
 	case ID_BTN_VIEWDEPENDS:
 	case ID_BTN_VIEWFILE:
@@ -3493,9 +3499,7 @@ BOOL CTDLTaskAttributeListCtrl::CanClickButton(TDC_ATTRIBUTE nAttribID, int nBtn
 		switch (nAttribID)
 		{
 		case TDCA_TIMESPENT:
-			if ((m_aSelectedTaskIDs.GetSize() == 1) && (m_aSelectedTaskIDs[0] == m_dwTimeTrackingTask))
-				return FALSE;
-			break;
+			return (!dwSingleTaskID || (dwSingleTaskID != m_dwTimeTrackingTask));
 		}
 		return TRUE;
 
