@@ -3033,9 +3033,8 @@ void CToDoListWnd::OnUpdateDeletetask(CCmdUI* pCmdUI)
 void CToDoListWnd::OnUpdateEditTasktext(CCmdUI* pCmdUI) 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSelCount = tdc.GetSelectedTaskCount();
 	
-	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_TASKNAME) && (nSelCount == 1));	
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_TASKNAME) && (tdc.GetSelectedTaskCount() == 1));
 }
 
 void CToDoListWnd::OnUpdateTaskcolor(CCmdUI* pCmdUI) 
