@@ -6078,23 +6078,46 @@ BOOL CTDCMultiTasker::AllTasksHaveDependencies(const CDWordArray& aTaskIDs) cons
 
 // -----------------------------------------------------------------
 
-BOOL CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID) const
+int CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID) const
 {
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (CanEditTask(aTaskIDs[nID], nAttribID))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+int CTDCMultiTasker::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
+{
+	if (dwTaskID == 0)
+		return FALSE;
+
+	// Reminders are unaffected by readonly status
+	if (nAttribID == TDCA_REMINDER)
+		return !m_calculator.IsTaskDone(dwTaskID); // includes 'good as done'
+
 	if (HasStyle(TDCS_READONLY))
 		return FALSE;
 
-	if (aTaskIDs.GetSize() == 0)
-		return FALSE;
+	// Locks are only affected by parent lock state
+	if (nAttribID == TDCA_LOCK)
+	{
+		if (HasStyle(TDCS_SUBTASKSINHERITLOCK))
+			return !m_calculator.IsTaskLocked(m_data.GetTaskParentID(dwTaskID));
 
-	BOOL bEditable = AnyTaskIsUnlocked(aTaskIDs);
+		// else
+		return TRUE;
+	}
 
-	// else
+	// Note: We DON'T do a quick exit here because we want
+	// the switch statement to be able to detect attributes
+	// which we don't know about so that we can return -1
+	BOOL bEditable = !m_calculator.IsTaskLocked(dwTaskID);
+
 	switch (nAttribID)
 	{
-		// Permanently editable fields
-	case TDCA_LOCK:
-		return TRUE;
-
 		// Permanently read-only fields
 	case TDCA_CREATEDBY:
 	case TDCA_PATH:
@@ -6134,12 +6157,7 @@ BOOL CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE 
 		// Editable fields requiring extra checks
 	case TDCA_RECURRENCE:
 		if (bEditable)
-			return !AllTasksAreDone(aTaskIDs, FALSE); // excludes 'good as done'
-		break;
-
-	case TDCA_REMINDER:
-		if (bEditable)
-			return !AllTasksAreDone(aTaskIDs, TRUE); // includes 'good as done'
+			return !m_data.IsTaskDone(dwTaskID); // excludes 'good as done'
 		break;
 
 	case TDCA_PERCENT:
@@ -6148,7 +6166,7 @@ BOOL CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE 
 			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 				return FALSE;
 
-			if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && AnyTaskIsParent(aTaskIDs))
+			if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_data.IsTaskParent(dwTaskID))
 				return FALSE;
 
 			return TRUE;
@@ -6158,30 +6176,30 @@ BOOL CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE 
 	case TDCA_STARTTIME:
 		if (bEditable)
 		{
-			if (AnyTaskHasDate(aTaskIDs, TDCD_STARTDATE))
-				return CanEditAnyTask(aTaskIDs, TDCA_STARTDATE); // RECURSIVE CALL
+			if (m_data.TaskHasDate(dwTaskID, TDCD_STARTDATE))
+				return CanEditTask(dwTaskID, TDCA_STARTDATE); // RECURSIVE CALL
 		}
 		break;
 
 	case TDCA_STARTDATE:
 		if (bEditable)
-			return (!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !AllTasksHaveDependencies(aTaskIDs));
+			return (!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_data.TaskHasDependencies(dwTaskID));
 		break;
 
 	case TDCA_DUETIME:
 		if (bEditable)
-			return AnyTaskHasDate(aTaskIDs, TDCD_DUEDATE);
+			return m_data.TaskHasDate(dwTaskID, TDCD_DUEDATE);
 		break;
 
 	case TDCA_DONETIME:
 		if (bEditable)
-			return AnyTaskHasDate(aTaskIDs, TDCD_DONEDATE);
+			return m_data.TaskHasDate(dwTaskID, TDCD_DONEDATE);
 		break;
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
 		if (bEditable)
-			return (HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !AllTasksAreParents(aTaskIDs));
+			return (HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_data.IsTaskParent(dwTaskID));
 		break;
 
 	default:
