@@ -23,6 +23,7 @@
 #include "TDCTaskCompletion.h"
 #include "tdccontentmgr.h"
 #include "TDLRecurringTaskEdit.h"
+#include "ToDoCtrlDataUtils.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -257,6 +258,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_attribCopier(m_data, mgrContent),
 	m_exporter(m_data, m_taskTree, mgrContent),
 	m_matcher(m_data, m_reminders, mgrContent),
+	m_multitasker(m_data, mgrContent),
 
 	m_ctrlComments(TRUE,
 				   TRUE,
@@ -10234,135 +10236,58 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanEditTask(const CToDoCtrlData& data, DWORD dwTaskID, TDC_ATTRIBUTE nAttribID)
-{
-	if (data.HasStyle(TDCS_READONLY))
-		return FALSE;
-
-	BOOL bEditableTask = (dwTaskID && !CTDCTaskCalculator(data).IsTaskLocked(dwTaskID));
-
-	switch (nAttribID)
-	{
-	case TDCA_NONE:
-		return FALSE;
-
-	case TDCA_PERCENT:
-		if (!bEditableTask)
-		{
-			return FALSE;
-		}
-		else if (data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			return FALSE;
-		}
-		else if (data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && data.IsTaskParent(dwTaskID))
-		{
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_ALL:		
-	case TDCA_ALLOCBY:		
-	case TDCA_ALLOCTO:		
-	case TDCA_ANYTEXTATTRIBUTE:		
-	case TDCA_CATEGORY:		
-	case TDCA_COLOR:		
-	case TDCA_COMMENTS:		
-	case TDCA_COST:			
-	case TDCA_CREATEDBY:	
-	case TDCA_CREATIONDATE:	
-	case TDCA_DEPENDENCY:	
-	case TDCA_DONEDATE:		
-	case TDCA_DONETIME:		
-	case TDCA_DUEDATE:		
-	case TDCA_DUETIME:		
-	case TDCA_EXTERNALID:	
-	case TDCA_FILELINK:		
-	case TDCA_FLAG:			
-	case TDCA_ICON:		
-	case TDCA_METADATA:
-	case TDCA_OFFSETTASK:
-	case TDCA_PRIORITY:		
-	case TDCA_RISK:			
-	case TDCA_STATUS:		
-	case TDCA_TAGS:			
-	case TDCA_TASKNAME:		
-	case TDCA_TASKNAMEORCOMMENTS:		
-	case TDCA_VERSION:		
-		return bEditableTask;
-
-	case TDCA_RECURRENCE:	
-		return (bEditableTask && !data.IsTaskDone(dwTaskID)); // exclude 'good as done'
-
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
-		if (!bEditableTask)
-		{
-			return FALSE;
-		}
-		else if (!data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) && data.IsTaskParent(dwTaskID))
-		{
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_STARTDATE:
-	case TDCA_STARTTIME:
-		if (!bEditableTask)
-		{
-			return FALSE;
-		}
-		else if (data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && data.TaskHasDependencies(dwTaskID))
-		{
-			// Ignore tasks with dependencies where their dates 
-			// are automatically calculated
-			return FALSE;
-		}
-		else if ((nAttribID == TDCA_STARTTIME) && !data.TaskHasDate(dwTaskID, TDCD_START))
-		{
-			// Ignore tasks without a start date set
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_DELETE:
-		if (!bEditableTask && !data.IsTaskReference(dwTaskID))
-		{
-			// Can't delete locked tasks unless they are references
-			return FALSE;
-		}
-		else if (data.IsTaskLocked(data.GetTaskParentID(dwTaskID)))
-		{
-			// Can't delete subtasks if immediate parent is locked
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_NEWTASK:
-	case TDCA_PASTE:
-	case TDCA_UNDO:
-	case TDCA_CUSTOMATTRIB_DEFS:
-	case TDCA_POSITION:
-	case TDCA_ENCRYPT:
-	case TDCA_PROJECTNAME:
-		return TRUE;
-
-	case TDCA_LOCK:
-		return TRUE;
-
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-			return bEditableTask;
-		break;
-	}
-
-	// all else
-	return FALSE;
-}
-
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {
-	return CanEditTask(m_data, dwTaskID, nAttribID);
+	BOOL bCanEdit = m_multitasker.CanEditTask(dwTaskID, nAttribID);
+
+	if (bCanEdit == -1) // Unhandled by multi-tasker
+	{
+		if (m_data.HasStyle(TDCS_READONLY))
+			return FALSE;
+
+		bCanEdit = !m_calculator.IsTaskLocked(dwTaskID);
+
+		switch (nAttribID)
+		{
+		case TDCA_DELETE:
+			if (!bCanEdit && !m_data.IsTaskReference(dwTaskID))
+			{
+				// Can't delete locked tasks unless they are references
+				bCanEdit = FALSE;
+			}
+			else if (m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
+			{
+				// Can't delete subtasks if immediate parent is locked
+				bCanEdit = FALSE;
+			}
+			else
+			{
+				bCanEdit = TRUE;
+			}
+			break;
+
+		case TDCA_NEWTASK:
+		case TDCA_PASTE:
+		case TDCA_UNDO:
+		case TDCA_CUSTOMATTRIB_DEFS:
+		case TDCA_POSITION:
+		case TDCA_ENCRYPT:
+		case TDCA_PROJECTNAME:
+			bCanEdit = TRUE;
+			break;
+
+		default:
+			if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			{
+				ASSERT(0); // Unhandled by 'us'
+				bCanEdit = FALSE;
+			}
+			break;
+		}
+	}
+
+	ASSERT(bCanEdit != -1);
+	return bCanEdit;
 }
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID)

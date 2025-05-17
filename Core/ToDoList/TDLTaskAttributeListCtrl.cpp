@@ -169,7 +169,6 @@ CTDLTaskAttributeListCtrl::~CTDLTaskAttributeListCtrl()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	//{{AFX_MSG_MAP(CTDLTaskAttributeListCtrl)
 	ON_WM_CREATE()

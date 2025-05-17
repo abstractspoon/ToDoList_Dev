@@ -531,6 +531,7 @@ protected:
 	CTDCSourceControl m_sourceControl;
 	CTDCFindReplace m_findReplace;
 	CTDCReminderHelper m_reminders;
+	CTDCMultiTasker m_multitasker;
 
 	CString m_sProjectName;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
@@ -752,7 +753,6 @@ protected:
 
 	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const;
 	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const;
-	static BOOL CanEditTask(const CToDoCtrlData& data, DWORD dwTaskID, TDC_ATTRIBUTE nAttribID);
 
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const;

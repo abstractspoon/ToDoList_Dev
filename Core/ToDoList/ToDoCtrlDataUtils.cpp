@@ -6094,6 +6094,9 @@ int CTDCMultiTasker::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	if (dwTaskID == 0)
 		return FALSE;
 
+	if (nAttribID == TDCA_NONE)
+		return FALSE;
+
 	// Reminders are unaffected by readonly status
 	if (nAttribID == TDCA_REMINDER)
 		return !m_calculator.IsTaskDone(dwTaskID); // includes 'good as done'
@@ -6112,8 +6115,8 @@ int CTDCMultiTasker::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	}
 
 	// Note: We DON'T do a quick exit here because we want
-	// the switch statement to be able to detect attributes
-	// which we don't know about so that we can return -1
+	// the switch statement to be able to catch unhandled 
+	// attributes so that we can return -1 to the caller
 	BOOL bEditable = !m_calculator.IsTaskLocked(dwTaskID);
 
 	switch (nAttribID)
