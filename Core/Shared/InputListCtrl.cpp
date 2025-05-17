@@ -722,10 +722,19 @@ void CInputListCtrl::DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwSta
 
 BOOL CInputListCtrl::CellHasButton(int nRow, int nCol) const
 {
-	if (!CanEditCell(nRow, nCol))
+	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
+	
+	switch (nType)
+	{
+	case ILCT_TEXT:
 		return FALSE;
 
-	return (GetCellType(nRow, nCol) != ILCT_TEXT);
+	case ILCT_CHECK:
+		return TRUE;
+	}
+
+	// All else
+	return CanEditCell(nRow, nCol);
 }
 
 BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) const

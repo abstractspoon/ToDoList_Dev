@@ -706,6 +706,7 @@ BOOL CThemed::GetThemeBackgroundContentRect(HDC hdc, int iPartId, int iStateId, 
 
 // -----------------------------------------------------------------------------------------------------------
 
+// Note: 'Disabled' takes priority
 #define HANDLESTATE(prefix)        \
 if (HASSTATE(DFCS_INACTIVE))       \
 {	nThState = prefix##DISABLED; } \
@@ -723,7 +724,6 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 	nThPart = 0;
 	nThState = 0;
 
-	// Note: 'Disabled' takes priority
 	switch (nType)
 	{
 	case DFC_BUTTON:
