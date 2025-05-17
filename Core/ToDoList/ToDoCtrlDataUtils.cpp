@@ -6056,16 +6056,6 @@ return TRUE
 
 // -----------------------------------------------------------------
 
-BOOL CTDCMultiTasker::AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const
-{
-	GETALLTASKHAS_ARG(TaskHasDate, nDate);
-}
-
-BOOL CTDCMultiTasker::AllTasksAreReferences(const CDWordArray& aTaskIDs) const
-{
-	GETALLTASKHAS(IsTaskReference);
-}
-
 BOOL CTDCMultiTasker::AllTasksAreParents(const CDWordArray& aTaskIDs) const
 {
 	GETALLTASKHAS(IsTaskParent);
