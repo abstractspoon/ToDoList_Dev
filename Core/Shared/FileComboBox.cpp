@@ -191,7 +191,21 @@ BOOL CFileComboBox::InitFileEdit()
 
 BOOL CFileComboBox::DoBrowse() 
 { 
-	InitFileEdit();
+	if (!InitFileEdit())
+		return FALSE;
+
+	// If necessary, initialise base class hook by faking a WM_CTLCOLOR message
+	if (!m_scEdit.GetHwnd())
+	{
+		CClientDC dc(this);
+		SendMessage(WM_CTLCOLOREDIT, (WPARAM)dc.GetSafeHdc(), (LPARAM)m_fileEdit.GetSafeHwnd());
+
+		if (!m_scEdit.GetHwnd())
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+	}
 
 	return m_fileEdit.DoBrowse(GetFirstFile()); 
 }
