@@ -10,6 +10,7 @@
 #include "TDLColumnListBox.h"
 
 #include "..\shared\preferencesbase.h"
+#include "..\shared\TabbedComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -62,6 +63,8 @@ protected:
 	//{{AFX_DATA(CPreferencesUITasklistPage)
 	//}}AFX_DATA
 	CComboBox	m_cbPercentIncrement;
+	CTabbedComboBox m_cbPriorityRiskLevels;
+
 	BOOL	m_bShowRemindersAsDateAndTime;
 	BOOL	m_bUseISOForDates;
 	BOOL	m_bShowWeekdayInDates;
