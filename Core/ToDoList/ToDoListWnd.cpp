@@ -12126,9 +12126,11 @@ void CToDoListWnd::OnEditOffsetDates()
 		Misc::SetFlag(dwFlags, TDCOTD_OFFSETSUBTASKREFS,	dialog.GetOffsetSubtaskReferences());
 		Misc::SetFlag(dwFlags, TDCOTD_OFFSETFROMTODAY,		dialog.GetOffsetFromToday());
 		Misc::SetFlag(dwFlags, TDCOTD_PRESERVEENDOFMONTH,	dialog.GetPreserveEndOfMonth());
+		
+		DWORD dwWhat = dialog.GetOffsetWhat();
+		ASSERT(dwWhat);
 
 		CTDCDateSet mapDates;
-		DWORD dwWhat = dialog.GetOffsetWhat();
 
 		if (dwWhat & ODD_STARTDATE)
 			mapDates.Add(TDCD_START);
@@ -12140,7 +12142,9 @@ void CToDoListWnd::OnEditOffsetDates()
 			mapDates.Add(TDCD_DONE);
 
 		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-		tdc.OffsetSelectedTaskDates(mapDates, nAmount, nUnits, dwFlags);
+
+		if (!mapDates.IsEmpty())
+			tdc.OffsetSelectedTaskDates(mapDates, nAmount, nUnits, dwFlags);
 		
 		if (dwWhat & ODD_REMINDER)
 		{
