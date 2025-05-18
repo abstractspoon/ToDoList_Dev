@@ -2104,7 +2104,8 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 	CScopedLogTimer log(_T("CleanupAppFolder"));
 
 	CString sAppFolder = FileMisc::GetAppFolder();
-	CString sTasklists = FileMisc::GetAppResourceFolder(_T("Resources\\TaskLists"));
+	CString sTasklistsFolder = FileMisc::GetAppResourceFolder(_T("Resources\\TaskLists"));
+	CString sTranslationsFolder = FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("7.0")) < 0)
 	{
@@ -2131,9 +2132,9 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		FileMisc::DeleteFolderContents(sTranslations, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY, _T("*.gif"));
 
 		// Wrongly installed resource files
-		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.txt")), 395, TRUE);
-		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.csv")), 10602, TRUE);
-		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.xml")), 177520, TRUE);
+		FileMisc::DeleteFileBySize((sTasklistsFolder + _T("\\Introduction.txt")), 395, TRUE);
+		FileMisc::DeleteFileBySize((sTasklistsFolder + _T("\\Introduction.csv")), 10602, TRUE);
+		FileMisc::DeleteFileBySize((sTasklistsFolder + _T("\\Introduction.xml")), 177520, TRUE);
 	}
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("7.2.11")) < 0)
@@ -2145,11 +2146,11 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		CString sExamples = FileMisc::GetAppResourceFolder(_T("Resources\\Examples"));
 		FileMisc::CreateFolder(sExamples);
 
-		FileMisc::MoveFile(sTasklists + _T("\\Introduction.tdl"), sExamples + _T("\\Introduction.tdl"), TRUE, TRUE);
-		FileMisc::MoveFile(sTasklists + _T("\\ToDoListDocumentation.tdl"), sExamples + _T("\\ToDoListDocumentation.tdl"), TRUE, TRUE);
+		FileMisc::MoveFile(sTasklistsFolder + _T("\\Introduction.tdl"), sExamples + _T("\\Introduction.tdl"), TRUE, TRUE);
+		FileMisc::MoveFile(sTasklistsFolder + _T("\\ToDoListDocumentation.tdl"), sExamples + _T("\\ToDoListDocumentation.tdl"), TRUE, TRUE);
 
 		// Intentionally use raw API call so it will fail if any files remain in the folder
-		RemoveDirectory(sTasklists);
+		::RemoveDirectory(sTasklistsFolder);
 
 		// Rename/move install instructions
 		CString sResources = FileMisc::GetAppResourceFolder();
@@ -2159,7 +2160,7 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		FileMisc::DeleteFileBySize(sReadmes + _T("\\Readme.Linux.txt"), 3260, TRUE);
 
 		// Intentionally use raw API call so it will fail if any files remain in the folder
-		RemoveDirectory(sReadmes);
+		::RemoveDirectory(sReadmes);
 	}
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("8.1")) < 0)
@@ -2172,6 +2173,12 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 	{
 		// remove old components
 		FileMisc::DeleteFile(sAppFolder + _T("\\MarkdownSharp.dll"), TRUE);
+	}
+
+	if (FileMisc::CompareVersions(szPrevVer, _T("9.1")) < 0)
+	{
+		// remove unwanted translations
+		FileMisc::DeleteFile(sTranslationsFolder + _T("\\Brazilian Portuguese (PT-BR).csv"), TRUE);
 	}
 }
 
