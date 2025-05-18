@@ -1751,7 +1751,7 @@ namespace EvidenceBoardUIExtension
 		{
 			var rect = CalcIconRect(labelRect);
 			rect.Y += rect.Height + LabelPadding;
-			rect.Height--;
+//			rect.Height--;
 
 			return rect;
 		}
@@ -1921,8 +1921,8 @@ namespace EvidenceBoardUIExtension
 				else
 					visualStyleRenderer.SetParameters(vsBtn.ClassName, vsBtn.Part, vsBtn.State);
 
-				// spin buttons have a border
-
+				// spin buttons have a 1-pixel border so we draw slightly larger
+				rect.Inflate(1, 1);
 				visualStyleRenderer.DrawBackground(graphics, rect);
 
 				// Try to match core app with a border
