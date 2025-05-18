@@ -1863,56 +1863,70 @@ namespace EvidenceBoardUIExtension
 			DrawTaskImageScrollButton(graphics, forwardRect, ScrollButton.Right, mousePos, forwardEnabled);
 		}
 
+		private static VisualStyleRenderer visualStyleRenderer = null;
+
 		static void DrawTaskImageScrollButton(Graphics graphics, Rectangle rect, ScrollButton btn, Point mousePos, bool enabled)
 		{
 			bool pressed = (MouseButtons.HasFlag(MouseButtons.Left) && rect.Contains(mousePos));
 
 			if (VisualStyleRenderer.IsSupported)
 			{
-				// Map to visual styles
-				ScrollBarArrowButtonState vsBtn;
+				// Map to spin button visual styles (nicer than scroll buttons)
+				VisualStyleElement vsBtn;
 
 				switch (btn)
 				{
 				case ScrollButton.Down:
-					if (pressed)
-						vsBtn = ScrollBarArrowButtonState.DownPressed;
+					if (!enabled)
+						vsBtn = VisualStyleElement.Spin.Down.Disabled;
+					else if (pressed)
+						vsBtn = VisualStyleElement.Spin.Down.Pressed;
 					else
-						vsBtn = ScrollBarArrowButtonState.DownNormal;
+						vsBtn = VisualStyleElement.Spin.Down.Normal;
 					break;
 
 				case ScrollButton.Up:
-					if (pressed)
-						vsBtn = ScrollBarArrowButtonState.UpPressed;
+					if (!enabled)
+						vsBtn = VisualStyleElement.Spin.Up.Disabled;
+					else if (pressed)
+						vsBtn = VisualStyleElement.Spin.Up.Pressed;
 					else
-						vsBtn = ScrollBarArrowButtonState.UpNormal;
+						vsBtn = VisualStyleElement.Spin.Up.Normal;
 					break;
 
 				case ScrollButton.Left:
 					if (!enabled)
-						vsBtn = ScrollBarArrowButtonState.LeftDisabled;
+						vsBtn = VisualStyleElement.Spin.DownHorizontal.Disabled;
 					else if (pressed)
-						vsBtn = ScrollBarArrowButtonState.LeftPressed;
+						vsBtn = VisualStyleElement.Spin.DownHorizontal.Pressed;
 					else
-						vsBtn = ScrollBarArrowButtonState.LeftNormal;
+						vsBtn = VisualStyleElement.Spin.DownHorizontal.Normal;
 					break;
 
 				case ScrollButton.Right:
 					if (!enabled)
-						vsBtn = ScrollBarArrowButtonState.RightDisabled;
+						vsBtn = VisualStyleElement.Spin.UpHorizontal.Disabled;
 					else if (pressed)
-						vsBtn = ScrollBarArrowButtonState.RightPressed;
+						vsBtn = VisualStyleElement.Spin.UpHorizontal.Pressed;
 					else
-						vsBtn = ScrollBarArrowButtonState.RightNormal;
+						vsBtn = VisualStyleElement.Spin.UpHorizontal.Normal;
 					break;
 
 				default:
 					return;
 				}
-				ScrollBarRenderer.DrawArrowButton(graphics, rect, vsBtn);
+
+				if (visualStyleRenderer == null)
+					visualStyleRenderer = new VisualStyleRenderer(vsBtn.ClassName, vsBtn.Part, vsBtn.State);
+				else
+					visualStyleRenderer.SetParameters(vsBtn.ClassName, vsBtn.Part, vsBtn.State);
+
+				// spin buttons have a border
+
+				visualStyleRenderer.DrawBackground(graphics, rect);
 
 				// Try to match core app with a border
-				graphics.DrawRectangle(Pens.LightGray, rect);
+//				graphics.DrawRectangle(Pens.LightGray, rect);
 			}
 			else
 			{
