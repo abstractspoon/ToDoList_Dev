@@ -10240,54 +10240,41 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {
 	BOOL bCanEdit = m_multitasker.CanEditTask(dwTaskID, nAttribID);
 
-	if (bCanEdit == -1) // Unhandled by multi-tasker
+	if (bCanEdit != -1) // Unhandled by multi-tasker
+		return bCanEdit;
+
+	if (m_data.HasStyle(TDCS_READONLY))
+		return FALSE;
+
+	BOOL bEditableTask = !m_calculator.IsTaskLocked(dwTaskID);
+
+	switch (nAttribID)
 	{
-		if (m_data.HasStyle(TDCS_READONLY))
-			return FALSE;
+	case TDCA_DELETE:
+		// Can only delete tasks if:
+		// 1. Their immediate parent is UNLOCKED
+		// AND
+		// 2. task is UNLOCKED 
+		// OR 
+		// 3. task is a reference to a locked task
+		return (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)) &&
+				(bEditableTask || m_data.IsTaskReference(dwTaskID)));
 
-		bCanEdit = !m_calculator.IsTaskLocked(dwTaskID);
+	case TDCA_NEWTASK:
+	case TDCA_PASTE:
+	case TDCA_UNDO:
+	case TDCA_CUSTOMATTRIB_DEFS:
+	case TDCA_POSITION:
+	case TDCA_ENCRYPT:
+	case TDCA_PROJECTNAME:
+		return TRUE;
 
-		switch (nAttribID)
-		{
-		case TDCA_DELETE:
-			if (!bCanEdit && !m_data.IsTaskReference(dwTaskID))
-			{
-				// Can't delete locked tasks unless they are references
-				bCanEdit = FALSE;
-			}
-			else if (m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
-			{
-				// Can't delete subtasks if immediate parent is locked
-				bCanEdit = FALSE;
-			}
-			else
-			{
-				bCanEdit = TRUE;
-			}
-			break;
-
-		case TDCA_NEWTASK:
-		case TDCA_PASTE:
-		case TDCA_UNDO:
-		case TDCA_CUSTOMATTRIB_DEFS:
-		case TDCA_POSITION:
-		case TDCA_ENCRYPT:
-		case TDCA_PROJECTNAME:
-			bCanEdit = TRUE;
-			break;
-
-		default:
-			if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-			{
-				ASSERT(0); // Unhandled by 'us'
-				bCanEdit = FALSE;
-			}
-			break;
-		}
+	default:
+		ASSERT(0); // Unexpectedly unhandled
+		break;
 	}
 
-	ASSERT(bCanEdit != -1);
-	return bCanEdit;
+	return FALSE;
 }
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeValue(TDC_ATTRIBUTE nFromAttribID, TDC_ATTRIBUTE nToAttribID)

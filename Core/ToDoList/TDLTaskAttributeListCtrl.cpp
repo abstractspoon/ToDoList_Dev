@@ -1167,29 +1167,22 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	BOOL bCanEdit = m_multitasker.CanEditAnyTask(m_aSelectedTaskIDs, nAttribID);
 
-	if (bCanEdit == -1) // Unhandled by multi-tasker
+	if (bCanEdit != -1) // Unhandled by multi-tasker
+		return bCanEdit;
+
+	if (IsCustomTime(nAttribID))
 	{
-		bCanEdit = m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs);
+		if (!m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
+			return FALSE;
 
-		if (bCanEdit)
-		{
-			if (IsCustomTime(nAttribID))
-			{
-				int nDateRow = (nRow - 1);
-				ASSERT(GetDateRow(nAttribID) == nDateRow);
+		int nDateRow = (nRow - 1);
+		ASSERT(GetDateRow(nAttribID) == nDateRow);
 
-				bCanEdit = !GetItemText(nDateRow, VALUE_COL).IsEmpty();
-			}
-			else
-			{
-				ASSERT(0); // Unhandled by 'us'
-				bCanEdit = FALSE;
-			}
-		}
+		return !GetItemText(nDateRow, VALUE_COL).IsEmpty();
 	}
 
-	ASSERT(bCanEdit != -1);
-	return bCanEdit;
+	ASSERT(0); // Unexpectedly unhandled
+	return FALSE;
 }
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
