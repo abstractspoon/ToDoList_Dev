@@ -4370,7 +4370,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					(m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) &&
 					 m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs)))
 				{
-					sTooltip.LoadString(IDS_CAD_CALCULATION);
+					sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
 				}
 				break;
 
@@ -4382,7 +4382,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 					if (pDef->IsCalculation())
 					{
-						sTooltip.LoadString(IDS_CAD_CALCULATION);
+						sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
 					}
 					else if (pDef->IsMultiList() && pDef->IsDataType(TDCCA_STRING))
 					{
