@@ -13,6 +13,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 using IIControls;
 using ImageHelper;
+using UIComponents;
 
 using BaseNode = RadialTree.TreeNode<uint>;
 
@@ -1708,7 +1709,7 @@ namespace EvidenceBoardUIExtension
 				graphics.DrawImage(taskItem.ActiveImage, imageRect);
 
 				// Image spin button
-				DrawTaskImageSpinButtons(graphics, taskItem, imageRect);
+				DrawTaskImageNavigationButtons(graphics, taskItem, imageRect);
 			}
 
 
@@ -1751,7 +1752,6 @@ namespace EvidenceBoardUIExtension
 		{
 			var rect = CalcIconRect(labelRect);
 			rect.Y += rect.Height + LabelPadding;
-//			rect.Height--;
 
 			return rect;
 		}
@@ -1764,14 +1764,14 @@ namespace EvidenceBoardUIExtension
 			if (!taskItem.HasImage)
 				return;
 
-			var iconRect = CalcImageExpansionButtonRect(nodeRect);
+			var btnRect = CalcImageExpansionButtonRect(nodeRect);
 
 			var mousePos = PointToClient(MousePosition);
-			ScrollButton btn = (taskItem.IsImageCollapsed ? ScrollButton.Down : ScrollButton.Up);
+			var btn = (taskItem.IsImageCollapsed ? SpinButton.Down : SpinButton.Up);
 
 			if (!IsZoomed)
 			{
-				DrawTaskImageScrollButton(graphics, iconRect, btn, mousePos, true);
+				DrawSpinButton(graphics, btnRect, btn, mousePos, true);
 			}
 			else
 			{
@@ -1786,8 +1786,8 @@ namespace EvidenceBoardUIExtension
 						var tempRect = new Rectangle(0, 0, imageSize, imageSize);
 						gTemp.Clear(backColor);
 
-						DrawTaskImageScrollButton(gTemp, tempRect, btn, mousePos, true);
-						ImageUtils.DrawZoomedImage(tempImage, graphics, iconRect, nodeRect);
+						DrawSpinButton(gTemp, tempRect, btn, mousePos, true);
+						ImageUtils.DrawZoomedImage(tempImage, graphics, btnRect, nodeRect);
 					}
 				}
 			}
@@ -1814,7 +1814,7 @@ namespace EvidenceBoardUIExtension
 			return rect;
 		}
 
-		void DrawTaskImageSpinButtons(Graphics graphics, TaskItem taskItem, Rectangle imageRect)
+		void DrawTaskImageNavigationButtons(Graphics graphics, TaskItem taskItem, Rectangle imageRect)
 		{
 			Debug.Assert(taskItem.IsImageExpanded);
 
@@ -1829,7 +1829,7 @@ namespace EvidenceBoardUIExtension
 
 			if (!IsZoomed)
 			{
-				DrawTaskImageSpinButtons(graphics, spinRect, mousePos, backEnabled, forwardEnabled);
+				DrawTaskImageNavigationButtons(graphics, spinRect, mousePos, backEnabled, forwardEnabled);
 			}
 			else
 			{
@@ -1843,97 +1843,32 @@ namespace EvidenceBoardUIExtension
 					{
 						var tempRect = new Rectangle(0, 0, spinRect.Width, spinRect.Height);
 
-						DrawTaskImageSpinButtons(gTemp, tempRect, mousePos, backEnabled, forwardEnabled);
+						DrawTaskImageNavigationButtons(gTemp, tempRect, mousePos, backEnabled, forwardEnabled);
 						ImageUtils.DrawZoomedImage(tempImage, graphics, spinRect, imageRect);
 					}
 				}
 			}
 		}
 
-		static void DrawTaskImageSpinButtons(Graphics graphics, Rectangle spinRect, Point mousePos, bool backEnabled, bool forwardEnabled)
+		static void DrawTaskImageNavigationButtons(Graphics graphics, Rectangle spinRect, Point mousePos, bool backEnabled, bool forwardEnabled)
 		{
 			var backRect = spinRect;
 			backRect.Width /= 2;
 
-			DrawTaskImageScrollButton(graphics, backRect, ScrollButton.Left, mousePos, backEnabled);
+			DrawSpinButton(graphics, backRect, SpinButton.Left, mousePos, backEnabled);
 
 			var forwardRect = backRect;
-			forwardRect.X = forwardRect.Right;
+			forwardRect.X = forwardRect.Right + 2;
 
-			DrawTaskImageScrollButton(graphics, forwardRect, ScrollButton.Right, mousePos, forwardEnabled);
+			DrawSpinButton(graphics, forwardRect, SpinButton.Right, mousePos, forwardEnabled);
 		}
 
-		private static VisualStyleRenderer visualStyleRenderer = null;
-
-		static void DrawTaskImageScrollButton(Graphics graphics, Rectangle rect, ScrollButton btn, Point mousePos, bool enabled)
+		static void DrawSpinButton(Graphics graphics, Rectangle rect, SpinButton btn, Point mousePos, bool enabled)
 		{
 			bool pressed = (MouseButtons.HasFlag(MouseButtons.Left) && rect.Contains(mousePos));
+			var state = (!enabled ? SpinState.Disabled : (pressed ? SpinState.Pressed : SpinState.Normal));
 
-			if (VisualStyleRenderer.IsSupported)
-			{
-				// Map to spin button visual styles (nicer than scroll buttons)
-				VisualStyleElement vsBtn;
-
-				switch (btn)
-				{
-				case ScrollButton.Down:
-					if (!enabled)
-						vsBtn = VisualStyleElement.Spin.Down.Disabled;
-					else if (pressed)
-						vsBtn = VisualStyleElement.Spin.Down.Pressed;
-					else
-						vsBtn = VisualStyleElement.Spin.Down.Normal;
-					break;
-
-				case ScrollButton.Up:
-					if (!enabled)
-						vsBtn = VisualStyleElement.Spin.Up.Disabled;
-					else if (pressed)
-						vsBtn = VisualStyleElement.Spin.Up.Pressed;
-					else
-						vsBtn = VisualStyleElement.Spin.Up.Normal;
-					break;
-
-				case ScrollButton.Left:
-					if (!enabled)
-						vsBtn = VisualStyleElement.Spin.DownHorizontal.Disabled;
-					else if (pressed)
-						vsBtn = VisualStyleElement.Spin.DownHorizontal.Pressed;
-					else
-						vsBtn = VisualStyleElement.Spin.DownHorizontal.Normal;
-					break;
-
-				case ScrollButton.Right:
-					if (!enabled)
-						vsBtn = VisualStyleElement.Spin.UpHorizontal.Disabled;
-					else if (pressed)
-						vsBtn = VisualStyleElement.Spin.UpHorizontal.Pressed;
-					else
-						vsBtn = VisualStyleElement.Spin.UpHorizontal.Normal;
-					break;
-
-				default:
-					return;
-				}
-
-				if (visualStyleRenderer == null)
-					visualStyleRenderer = new VisualStyleRenderer(vsBtn.ClassName, vsBtn.Part, vsBtn.State);
-				else
-					visualStyleRenderer.SetParameters(vsBtn.ClassName, vsBtn.Part, vsBtn.State);
-
-				// spin buttons have a 1-pixel border so we draw slightly larger
-				rect.Inflate(1, 1);
-				visualStyleRenderer.DrawBackground(graphics, rect);
-
-				// Try to match core app with a border
-//				graphics.DrawRectangle(Pens.LightGray, rect);
-			}
-			else
-			{
-				ButtonState state = (!enabled ? ButtonState.Inactive : (pressed ? ButtonState.Pushed : ButtonState.Normal));
-
-				ControlPaint.DrawScrollButton(graphics, rect, btn, state);
-			}
+			SpinButtonRenderer.Draw(graphics, rect, btn, state);
 		}
 
 		protected override void DrawSelectionBox(Graphics graphics, Rectangle rect)
