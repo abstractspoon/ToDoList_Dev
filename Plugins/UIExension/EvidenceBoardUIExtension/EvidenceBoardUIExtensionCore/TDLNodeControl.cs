@@ -1793,7 +1793,7 @@ namespace EvidenceBoardUIExtension
 			}
 		}
 
-		private Rectangle CalcImageSpinButtonRect(Rectangle imageRect)
+		private Rectangle CalcImageNavigationButtonsRect(Rectangle imageRect)
 		{
 			imageRect.Inflate(1, 1);
 
@@ -1803,9 +1803,9 @@ namespace EvidenceBoardUIExtension
 			return rect;
 		}
 
-		private Rectangle CalcImageSpinButtonRect(Rectangle imageRect, bool forward)
+		private Rectangle CalcImageNavigationButtonRect(Rectangle imageRect, bool forward)
 		{
-			var rect = CalcImageSpinButtonRect(imageRect);
+			var rect = CalcImageNavigationButtonsRect(imageRect);
 			rect.Width /= 2;
 
 			if (forward)
@@ -1822,7 +1822,7 @@ namespace EvidenceBoardUIExtension
 				return;
 
 			var mousePos = PointToClient(MousePosition);
-			var spinRect = CalcImageSpinButtonRect(imageRect);
+			var spinRect = CalcImageNavigationButtonsRect(imageRect);
 
 			bool backEnabled = taskItem.CanSelectNextImage(false);
 			bool forwardEnabled = taskItem.CanSelectNextImage(true);
@@ -2098,7 +2098,7 @@ namespace EvidenceBoardUIExtension
 				if ((taskItem != null) && taskItem.CanSelectNextImage(forwardBtn))
 				{
 					// Redraw the spin control
-					Invalidate(CalcImageSpinButtonRect(CalcImageRect(taskItem, GetNodeClientRect(node), false)));
+					Invalidate(CalcImageNavigationButtonsRect(CalcImageRect(taskItem, GetNodeClientRect(node), false)));
 					Update();
 
 					SelectNode(taskItem.TaskId, true, false);
@@ -2172,7 +2172,7 @@ namespace EvidenceBoardUIExtension
 				taskItem = GetTaskItem(hit);
 				var imageRect = CalcImageRect(taskItem, GetNodeClientRect(hit), false);
 
-				if ((taskItem.ImageCount < 2) || !CalcImageSpinButtonRect(imageRect).Contains(e.Location))
+				if ((taskItem.ImageCount < 2) || !CalcImageNavigationButtonsRect(imageRect).Contains(e.Location))
 				{
 					if (imageRect.Contains(e.Location))
 					{
@@ -2344,13 +2344,13 @@ namespace EvidenceBoardUIExtension
 
 			var imageRect = CalcImageRect(taskItem, GetNodeClientRect(node), false);
 
-			if (CalcImageSpinButtonRect(imageRect, true).Contains(ptClient)) // forward button
+			if (CalcImageNavigationButtonRect(imageRect, true).Contains(ptClient)) // forward button
 			{
 				forward = true;
 				return taskItem;
 			}
 
-			if (CalcImageSpinButtonRect(imageRect, false).Contains(ptClient)) // back button
+			if (CalcImageNavigationButtonRect(imageRect, false).Contains(ptClient)) // back button
 			{
 				forward = false;
 				return taskItem;
@@ -2807,7 +2807,7 @@ namespace EvidenceBoardUIExtension
 				{
 					// Image spin buttons
 					// Forward button
-					tip.Rect = CalcImageSpinButtonRect(imageRect, true);
+					tip.Rect = CalcImageNavigationButtonRect(imageRect, true);
 
 					if (tip.Rect.Contains(clientPos))
 					{
@@ -2816,7 +2816,7 @@ namespace EvidenceBoardUIExtension
 					}
 					else // Back button
 					{
-						tip.Rect = CalcImageSpinButtonRect(imageRect, false);
+						tip.Rect = CalcImageNavigationButtonRect(imageRect, false);
 
 						if (tip.Rect.Contains(clientPos))
 						{
