@@ -104,6 +104,8 @@ namespace EvidenceBoardUIExtension
 		protected int DefaultPinRadius { get { return DPIScaling.Scale(3); } }
 		protected int LinkOffset { get { return DPIScaling.Scale(6); } }
 
+		protected const int BorderAndPadding = 2;
+
 		// -------------------------------------------------------------------------
 
 		// From Parent
@@ -167,7 +169,7 @@ namespace EvidenceBoardUIExtension
 			m_TaskItems = null;
 			m_DependencyColor = Color.CornflowerBlue;
 
-			int nodeHeight = (int)(2 * Math.Max(BaseFontHeight, UIExtension.TaskIcon.IconSize)) + (3 * LabelPadding);
+			int nodeHeight = (int)(2 * Math.Max(BaseFontHeight, UIExtension.TaskIcon.IconSize)) + (3 * BorderAndPadding);
 			int nodeWidth  = (4 * nodeHeight);
 
 			base.NodeSize = DPIScaling.UnScale(new Size(nodeWidth, nodeHeight));
@@ -1751,7 +1753,7 @@ namespace EvidenceBoardUIExtension
 		private Rectangle CalcImageExpansionButtonRect(Rectangle labelRect)
 		{
 			var rect = CalcIconRect(labelRect);
-			rect.Y += rect.Height + LabelPadding;
+			rect.Y += rect.Height + BorderAndPadding;
 
 			return rect;
 		}
@@ -1914,10 +1916,10 @@ namespace EvidenceBoardUIExtension
 			return (task.HasIcon || (m_ShowParentAsFolder && task.IsParent));
 		}
 
-        private Rectangle CalcIconRect(Rectangle labelRect)
+        private Rectangle CalcIconRect(Rectangle nodeRect)
 		{
-            Point topLeft = labelRect.Location;
-			topLeft.Offset(2, 2); // border and padding
+            Point topLeft = nodeRect.Location;
+			topLeft.Offset(BorderAndPadding, BorderAndPadding);
 
 			int width = (int)(UIExtension.TaskIcon.IconSize * ZoomFactor);
 			int height = width;
