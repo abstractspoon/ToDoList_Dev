@@ -3593,6 +3593,12 @@ void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID)
 
 		if (pEdit && CDialogHelper::IsMouseDownInWindow(*pEdit))
 			return;
+
+		// Else if this is the core File Link field and the user
+		// clicked on one of the button, perform the required action
+		// before hiding the combo
+		if ((pCombo == &m_cbMultiFileLink) && CDialogHelper::IsMouseDownInWindow(*pCombo))
+			EditCell(GetRow(TDCA_FILELINK), VALUE_COL, TRUE);
 	}
 
 	// All else
@@ -4251,10 +4257,6 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			case TDCA_TIMESPENT:
 			case TDCA_TIMEREMAINING:
 				sTooltip.LoadString(IDS_TIMEUNITS);
-				break;
-
-			case TDCA_FILELINK:
-				sTooltip.LoadString(IDS_BROWSE);
 				break;
 
 			default:
