@@ -1858,7 +1858,7 @@ namespace EvidenceBoardUIExtension
 			DrawSpinButton(graphics, backRect, SpinButton.Left, mousePos, backEnabled);
 
 			var forwardRect = backRect;
-			forwardRect.X = forwardRect.Right + 2;
+			forwardRect.X = forwardRect.Right;
 
 			DrawSpinButton(graphics, forwardRect, SpinButton.Right, mousePos, forwardEnabled);
 		}
