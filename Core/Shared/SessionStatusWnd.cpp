@@ -148,11 +148,11 @@ BOOL CSessionStatusWnd::RegisterForSessionNotification(HWND hwnd)
 	typedef BOOL (WINAPI *PFNWTSREGISTERSESSIONNOTIFICATION)(HWND, DWORD);
 
 	// load dll once only
-	static HMODULE hDll = LoadLibrary(_T("Wtsapi32.dll"));
+	HMODULE hDll = LoadLibrary(_T("Wtsapi32.dll"));
 
 	if (hDll)
 	{
-		static PFNWTSREGISTERSESSIONNOTIFICATION fnRegister = 
+		PFNWTSREGISTERSESSIONNOTIFICATION fnRegister = 
 			(PFNWTSREGISTERSESSIONNOTIFICATION)GetProcAddress(hDll, "WTSRegisterSessionNotification");
 
 		if (fnRegister)
@@ -168,11 +168,11 @@ BOOL CSessionStatusWnd::UnregisterForSessionNotification(HWND hwnd)
 	typedef BOOL (WINAPI *PFNWTSUNREGISTERSESSIONNOTIFICATION)(HWND);
 
 	// load dll once only
-	static HMODULE hDll = LoadLibrary(_T("Wtsapi32.dll"));
+	HMODULE hDll = LoadLibrary(_T("Wtsapi32.dll"));
 
 	if (hDll)
 	{
-		static PFNWTSUNREGISTERSESSIONNOTIFICATION fnUnregister = 
+		PFNWTSUNREGISTERSESSIONNOTIFICATION fnUnregister = 
 			(PFNWTSUNREGISTERSESSIONNOTIFICATION)GetProcAddress(hDll, "WTSUnRegisterSessionNotification");
 
 		if (fnUnregister)

@@ -437,7 +437,7 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtmlWithIntenso(LPCTSTR szRtfFile, LPCTSTR s
 	BOOL bSuccess = FALSE;
 	
 	CString sRtf2HtmlPath = FileMisc::GetAppFolder() + _T("\\rtf2htmlbridge.dll");
-	static HMODULE hMod = LoadLibrary(sRtf2HtmlPath);
+	HMODULE hMod = LoadLibrary(sRtf2HtmlPath);
 	
 	CString sTempHtml = FileMisc::GetTempFilePath(RTF2HTML_FNAME, _T("html"));
 
@@ -684,7 +684,7 @@ BOOL CRtfHtmlConverter::ConvertHtmlToRtfWithViskoe(LPCTSTR szHtmlFile, LPCTSTR /
 BOOL CRtfHtmlConverter::ConvertHtmlToRtfWithSautin(LPCTSTR szHtmlFile, LPCTSTR /*szCharSet*/, CString& sRtf, LPCTSTR szUniqueDir)
 {
 	// load library
-	static HINSTANCE hMod = LoadLibrary(_T("htmltortf_sautinsoft.dll"));
+	HINSTANCE hMod = LoadLibrary(_T("htmltortf_sautinsoft.dll"));
 	
 	if (hMod == NULL) 
 		return FALSE;
