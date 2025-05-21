@@ -121,7 +121,6 @@ protected:
 
 	static LRESULT CALLBACK HookWndProc(HWND, UINT, WPARAM, LPARAM);
 
-	static CMapPtrToPtr& GetValidMap(); // map containing every CSubclassWnd
 	static BOOL IsValid(const CSubclassWnd* pScWnd);
 
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
