@@ -78,6 +78,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CDateTimeCtrlEx m_dtcPeriodStart, m_dtcPeriodEnd;
 	CRangeSliderCtrl m_sliderDateRange;
+	CStatic m_stDateRange;
 
 	CIcon m_icon;
 	CBrush m_brBack;

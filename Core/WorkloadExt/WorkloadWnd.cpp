@@ -76,6 +76,7 @@ void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PERIODBEGIN, m_dtcPeriodStart);
 	DDX_Control(pDX, IDC_PERIODENDINCLUSIVE, m_dtcPeriodEnd);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
+	DDX_Control(pDX, IDC_ACTIVEDATERANGE_LABEL, m_stDateRange);
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
@@ -679,7 +680,10 @@ BOOL CWorkloadWnd::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// non-translatables
-	CLocalizer::EnableTranslation(*GetDlgItem(IDC_SELECTEDTASKDATES), FALSE);
+	CLocalizer::EnableTranslation(m_stDateRange, FALSE);
+
+	if (CDateHelper::WantRTLDates())
+		m_stDateRange.ModifyStyleEx(0, WS_EX_RTLREADING);
 
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
@@ -1029,7 +1033,11 @@ void CWorkloadWnd::UpdatePeriod()
 		m_sPeriodDuration.Empty();
 
 	m_toolbar.RefreshButtonStates(FALSE);
-	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, m_dtPeriod.Format()));
+
+	DWORD dwFlags = (m_ctrlWorkload.HasOption(WLCF_DISPLAYISODATES) ? DHFD_ISO : 0);
+
+	m_stDateRange.SetWindowText(Misc::Format(_T("(%s)"), m_dtPeriod.Format(dwFlags)));
+	CDialogHelper::ResizeStaticTextToFit(this, &m_stDateRange);
 
 	UpdateData(FALSE);
 }
