@@ -756,7 +756,9 @@ CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecad
 	COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
 
 	CString sRange, sStart;
-	sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
+	sStart.Format(_T("%s %s"), 
+				  CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), 
+				  CDateHelper::FormatYear(dtStart.GetYear()));
 
 	if (CDateHelper::GetDateInMonths(dtStart) == CDateHelper::GetDateInMonths(dtEnd))
 	{
@@ -765,7 +767,9 @@ CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecad
 	else
 	{
 		CString sEnd;
-		sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
+		sEnd.Format(_T("%s %s"), 
+					CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), 
+					CDateHelper::FormatYear(dtEnd.GetYear()));
 
 		sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
 	}
