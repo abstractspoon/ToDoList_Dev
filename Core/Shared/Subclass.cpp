@@ -27,18 +27,16 @@ class CSubclassWndMap : private CMapPtrToPtr
 public:
 	CSubclassWndMap();
 	~CSubclassWndMap();
-	static CSubclassWndMap& GetHookMap();
+
 	void Add(HWND hwnd, CSubclassWnd* pSubclassWnd);
 	void Remove(CSubclassWnd* pSubclassWnd);
 	void RemoveAll(HWND hwnd);
+
 	CSubclassWnd* Lookup(HWND hwnd);
 };
 
-// This trick is used so the hook map isn't
-// instantiated until someone actually requests it.
-//
-#define	theHookMap	(CSubclassWndMap::GetHookMap())
-#define	theSafeMap	(CSubclassWnd::GetValidMap())
+static CSubclassWndMap theHookMap;
+static CMapPtrToPtr theSafeMap;
 
 ISubclassCallback* CSubclassWnd::s_pCallback = NULL;
 
@@ -261,15 +259,6 @@ BOOL CSubclassWnd::SendMessage(UINT message, WPARAM wParam, LPARAM lParam) const
 	return FALSE;
 }
 
-CMapPtrToPtr& CSubclassWnd::GetValidMap()
-{
-	// By creating theMap here, C++ doesn't instantiate it until/unless
-	// it's ever used! This is a good trick to use in C++, to
-	// instantiate/initialize a static object the first time it's used.
-	static CMapPtrToPtr theMap;
-	return theMap;
-}
-
 BOOL CSubclassWnd::IsValid(const CSubclassWnd* pScWnd)
 {
 	void* pResult;
@@ -337,19 +326,6 @@ CSubclassWndMap::CSubclassWndMap()
 CSubclassWndMap::~CSubclassWndMap()
 {
 //	ASSERT(IsEmpty());	// all hooks should be removed!	
-}
-
-//////////////////
-// Get the one and only global hook map
-// 
-CSubclassWndMap& CSubclassWndMap::GetHookMap()
-{
-	// By creating theMap here, C++ doesn't instantiate it until/unless
-	// it's ever used! This is a good trick to use in C++, to
-	// instantiate/initialize a static object the first time it's used.
-	//
-	static CSubclassWndMap theMap;
-	return theMap;
 }
 
 /////////////////

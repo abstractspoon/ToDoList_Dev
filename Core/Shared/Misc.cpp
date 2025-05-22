@@ -98,11 +98,11 @@ BOOL Misc::Is64BitWindows()
 	typedef BOOL (WINAPI *PFNISWOW64PROCESS)(HANDLE, PBOOL);
 	
 	// load dll once only
-	static HMODULE hKernel32 = LoadLibrary(_T("kernel32.dll"));
+	HMODULE hKernel32 = LoadLibrary(_T("kernel32.dll"));
 	
 	if (hKernel32)
 	{
-		static PFNISWOW64PROCESS fnIsWow64 = (PFNISWOW64PROCESS)GetProcAddress(hKernel32, "IsWow64Process");
+		PFNISWOW64PROCESS fnIsWow64 = (PFNISWOW64PROCESS)GetProcAddress(hKernel32, "IsWow64Process");
 		
 		if (fnIsWow64)
 		{
@@ -2032,11 +2032,11 @@ BOOL Misc::ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason)
 	typedef BOOL (WINAPI *PFNSHUTDOWNBLOCKREASONCREATE)(HWND, LPCWSTR);
 
 	// load user32.dll once only
-	static HMODULE hUser32 = LoadLibrary(_T("user32.dll"));
+	HMODULE hUser32 = LoadLibrary(_T("user32.dll"));
 
 	if (hUser32)
 	{
-		static PFNSHUTDOWNBLOCKREASONCREATE fnCreate = (PFNSHUTDOWNBLOCKREASONCREATE)GetProcAddress(hUser32, "ShutdownBlockReasonCreate");
+		PFNSHUTDOWNBLOCKREASONCREATE fnCreate = (PFNSHUTDOWNBLOCKREASONCREATE)GetProcAddress(hUser32, "ShutdownBlockReasonCreate");
 
 		if (fnCreate)
 			return fnCreate(hWnd, szReason);
@@ -2051,11 +2051,11 @@ BOOL Misc::ShutdownBlockReasonDestroy(HWND hWnd)
 	typedef BOOL (WINAPI *PFNSHUTDOWNBLOCKREASONDESTROY)(HWND);
 
 	// load user32.dll once only
-	static HMODULE hUser32 = LoadLibrary(_T("user32.dll"));
+	HMODULE hUser32 = LoadLibrary(_T("user32.dll"));
 
 	if (hUser32)
 	{
-		static PFNSHUTDOWNBLOCKREASONDESTROY fnDestroy = (PFNSHUTDOWNBLOCKREASONDESTROY)GetProcAddress(hUser32, "ShutdownBlockReasonDestroy");
+		PFNSHUTDOWNBLOCKREASONDESTROY fnDestroy = (PFNSHUTDOWNBLOCKREASONDESTROY)GetProcAddress(hUser32, "ShutdownBlockReasonDestroy");
 
 		if (fnDestroy)
 			return fnDestroy(hWnd);
@@ -2118,7 +2118,7 @@ LANGID Misc::GetUserDefaultUILanguage()
 {
 	typedef LANGID (WINAPI *FNGETUSERDEFAULTUILANGUAGE)(VOID);
 
-	static HMODULE hLib = LoadLibrary(_T("kernel32.dll"));
+	HMODULE hLib = LoadLibrary(_T("kernel32.dll"));
 	LANGID nLangID = 0;
 
 	if (hLib)
@@ -2136,7 +2136,7 @@ BOOL Misc::IsFullScreenAppActive()
 {
 	typedef HRESULT (*FNSHQUERYUSERNOTIFICATIONSTATE)(int*);
 
-	static HMODULE hLib = LoadLibrary(_T("Shell32.dll"));
+	HMODULE hLib = LoadLibrary(_T("Shell32.dll"));
 
 	if (hLib)
 	{
@@ -2617,10 +2617,10 @@ int Misc::NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBe
 	}
 
 	// initialize once only per session
-	static HMODULE hShlwapi = ::LoadLibrary(_T("Shlwapi.dll"));
+	HMODULE hShlwapi = ::LoadLibrary(_T("Shlwapi.dll"));
 	   
 	typedef int (WINAPI *PFNSTRCMPLOGICAL)(PCWSTR, PCWSTR);
-	static PFNSTRCMPLOGICAL pFn = (PFNSTRCMPLOGICAL)::GetProcAddress(hShlwapi, "StrCmpLogicalW");
+	PFNSTRCMPLOGICAL pFn = (PFNSTRCMPLOGICAL)::GetProcAddress(hShlwapi, "StrCmpLogicalW");
 	
 	if (pFn)
 		return pFn(szString1, szString2);
