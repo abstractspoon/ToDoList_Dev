@@ -1625,6 +1625,13 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 	return sDate;
 }
 
+CString CDateHelper::FormatYear(int nYear, BOOL bShort)
+{
+	COleDateTime dtYear(nYear, 1, 1, 0, 0, 0);
+
+	return FormatDateOnly(dtYear, (bShort ? _T("yy") : _T("yyyy")));
+}
+
 BOOL CDateHelper::WantRTLDates()
 {
 	switch (Misc::GetPrimaryLanguage())
