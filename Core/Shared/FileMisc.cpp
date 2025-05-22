@@ -2156,8 +2156,6 @@ int FileMisc::GetAppModuleHandles(CDWordArray& aHandles, BOOL bSorted)
 			if (bSorted)
 				Misc::SortArray(aHandles);
 		}
-
-		FreeLibrary(hPsapi);
 	}
 
 	return aHandles.GetSize();
@@ -2182,8 +2180,6 @@ CString FileMisc::GetProcessFilePath(HANDLE hProcess)
 			if (!dwRes)
 				dwRes = GetLastError();
 		}
-
-		FreeLibrary(hPsapi);
 	}
 
 	return sPath;
