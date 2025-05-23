@@ -3033,9 +3033,8 @@ void CToDoListWnd::OnUpdateDeletetask(CCmdUI* pCmdUI)
 void CToDoListWnd::OnUpdateEditTasktext(CCmdUI* pCmdUI) 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSelCount = tdc.GetSelectedTaskCount();
 	
-	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_TASKNAME) && (nSelCount == 1));	
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_TASKNAME) && (tdc.GetSelectedTaskCount() == 1));
 }
 
 void CToDoListWnd::OnUpdateTaskcolor(CCmdUI* pCmdUI) 
@@ -3046,9 +3045,8 @@ void CToDoListWnd::OnUpdateTaskcolor(CCmdUI* pCmdUI)
 void CToDoListWnd::OnUpdateEditToggleTaskDone(CCmdUI* pCmdUI) 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSelCount = tdc.GetSelectedTaskCount();
 	
-	if (nSelCount == 1)
+	if (tdc.GetSelectedTaskCount() == 1)
 		pCmdUI->SetCheck(tdc.SelectedTasksAreAllDone(FALSE) ? 1 : 0);
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_DONEDATE));	
@@ -11806,9 +11804,9 @@ void CToDoListWnd::OnEditGotoDependency()
 
 void CToDoListWnd::OnUpdateEditGotoDependency(CCmdUI* pCmdUI) 
 {
-	CTDCDependencyArray aDepends;
+	CTDCDependencyArray aUnused;
 
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskDependencies(aDepends) > 0);	
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskDependencies(aUnused) > 0);	
 }
 
 void CToDoListWnd::OnEditDependency()
@@ -13375,7 +13373,7 @@ void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	BOOL bEnable = (tdc.HasSelection() && !tdc.SelectedTasksAreAllDone(TRUE));
+	BOOL bEnable = tdc.CanEditSelectedTask(TDCA_REMINDER);
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable && pCmdUI->m_pMenu)

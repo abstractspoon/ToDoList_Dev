@@ -6056,16 +6056,6 @@ return TRUE
 
 // -----------------------------------------------------------------
 
-BOOL CTDCMultiTasker::AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const
-{
-	GETALLTASKHAS_ARG(TaskHasDate, nDate);
-}
-
-BOOL CTDCMultiTasker::AllTasksAreReferences(const CDWordArray& aTaskIDs) const
-{
-	GETALLTASKHAS(IsTaskReference);
-}
-
 BOOL CTDCMultiTasker::AllTasksAreParents(const CDWordArray& aTaskIDs) const
 {
 	GETALLTASKHAS(IsTaskParent);
@@ -6074,6 +6064,157 @@ BOOL CTDCMultiTasker::AllTasksAreParents(const CDWordArray& aTaskIDs) const
 BOOL CTDCMultiTasker::AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const
 {
 	GETALLTASKHAS(TaskHasDependencies);
+}
+
+// -----------------------------------------------------------------
+
+int CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID) const
+{
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (CanEditTask(aTaskIDs[nID], nAttribID))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+int CTDCMultiTasker::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
+{
+	if (dwTaskID == 0)
+		return FALSE;
+
+	if (nAttribID == TDCA_NONE)
+		return FALSE;
+
+	// Reminders are unaffected by readonly status
+	if (nAttribID == TDCA_REMINDER)
+		return !m_calculator.IsTaskDone(dwTaskID); // includes 'good as done'
+
+	if (HasStyle(TDCS_READONLY))
+		return FALSE;
+
+	// Locks are only affected by parent lock state
+	if (nAttribID == TDCA_LOCK)
+	{
+		if (HasStyle(TDCS_SUBTASKSINHERITLOCK))
+			return !m_calculator.IsTaskLocked(m_data.GetTaskParentID(dwTaskID));
+
+		// else
+		return TRUE;
+	}
+
+	// Note: We DON'T do a quick exit here because we want
+	// the switch statement to be able to catch unhandled 
+	// attributes so that we can return -1 to the caller
+	BOOL bEditable = !m_calculator.IsTaskLocked(dwTaskID);
+
+	switch (nAttribID)
+	{
+		// Permanently read-only fields
+	case TDCA_CREATEDBY:
+	case TDCA_PATH:
+	case TDCA_POSITION:
+	case TDCA_CREATIONDATE:
+	case TDCA_LASTMODDATE:
+	case TDCA_COMMENTSSIZE:
+	case TDCA_COMMENTSFORMAT:
+	case TDCA_SUBTASKDONE:
+	case TDCA_LASTMODBY:
+	case TDCA_ID:
+	case TDCA_PARENTID:
+	case TDCA_TIMEREMAINING:
+		return FALSE;
+
+		// Editable fields requiring no special handling
+	case TDCA_ALLOCBY:
+	case TDCA_ALLOCTO:
+	case TDCA_CATEGORY:
+	case TDCA_COLOR:
+	case TDCA_COST:
+	case TDCA_DEPENDENCY:
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_EXTERNALID:
+	case TDCA_FILELINK:
+	case TDCA_FLAG:
+	case TDCA_ICON:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+	case TDCA_STATUS:
+	case TDCA_TAGS:
+	case TDCA_TASKNAME:
+	case TDCA_VERSION:
+		return bEditable;
+
+		// Editable fields requiring extra checks
+	case TDCA_RECURRENCE:
+		if (bEditable)
+			return !m_data.IsTaskDone(dwTaskID); // excludes 'good as done'
+		break;
+
+	case TDCA_PERCENT:
+		if (bEditable)
+		{
+			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
+				return FALSE;
+
+			if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_data.IsTaskParent(dwTaskID))
+				return FALSE;
+
+			return TRUE;
+		}
+		break;
+
+	case TDCA_STARTTIME:
+		if (bEditable)
+		{
+			if (m_data.TaskHasDate(dwTaskID, TDCD_STARTDATE))
+				return CanEditTask(dwTaskID, TDCA_STARTDATE); // RECURSIVE CALL
+		}
+		break;
+
+	case TDCA_STARTDATE:
+		if (bEditable)
+			return (!HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_data.TaskHasDependencies(dwTaskID));
+		break;
+
+	case TDCA_DUETIME:
+		if (bEditable)
+			return m_data.TaskHasDate(dwTaskID, TDCD_DUEDATE);
+		break;
+
+	case TDCA_DONETIME:
+		if (bEditable)
+			return m_data.TaskHasDate(dwTaskID, TDCD_DONEDATE);
+		break;
+
+	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
+		if (bEditable)
+			return (HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_data.IsTaskParent(dwTaskID));
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			if (bEditable)
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_CUSTDEF_RET(CustomAttribDefs(), nAttribID, pDef, FALSE);
+
+				return (pDef->IsList() || !pDef->IsDataType(TDCCA_CALCULATION));
+			}
+		}
+		else
+		{
+			// Anything else is the caller's responsibility
+			return -1;
+		}
+		break;
+	}
+
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

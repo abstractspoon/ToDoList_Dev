@@ -531,6 +531,7 @@ protected:
 	CTDCSourceControl m_sourceControl;
 	CTDCFindReplace m_findReplace;
 	CTDCReminderHelper m_reminders;
+	CTDCMultiTasker m_multitasker;
 
 	CString m_sProjectName;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
@@ -750,9 +751,10 @@ protected:
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const { return m_taskTree.SelectedTaskHasDate(nDate); }
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_ctrlAttributes.GetCustomAttributeData(sAttribID, data, bFormatted); }
 
-	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const;
 	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const;
+
+	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const;
 	BOOL ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID);
 

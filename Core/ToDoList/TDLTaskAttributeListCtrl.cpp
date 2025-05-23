@@ -169,7 +169,6 @@ CTDLTaskAttributeListCtrl::~CTDLTaskAttributeListCtrl()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLTaskAttributeListCtrl, CInputListCtrl)
 	//{{AFX_MSG_MAP(CTDLTaskAttributeListCtrl)
 	ON_WM_CREATE()
@@ -1162,103 +1161,28 @@ BOOL CTDLTaskAttributeListCtrl::CanEditCell(int nRow, int nCol) const
 	if (nCol != VALUE_COL)
 		return FALSE;
 	
-	if (m_data.HasStyle(TDCS_READONLY))
-		return FALSE;
-
 	if (!CInputListCtrl::CanEditCell(nRow, nCol))
 		return FALSE;
 
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	BOOL bCanEdit = m_multitasker.CanEditAnyTask(m_aSelectedTaskIDs, nAttribID);
 
-	if (!m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
+	if (bCanEdit != -1) // Unhandled by multi-tasker
+		return bCanEdit;
+
+	if (IsCustomTime(nAttribID))
 	{
-		switch (nAttribID)
-		{
-		case TDCA_LOCK:
-		case TDCA_REMINDER:
-			break;
-
-		default:
+		if (!m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
 			return FALSE;
-		}
+
+		int nDateRow = (nRow - 1);
+		ASSERT(GetDateRow(nAttribID) == nDateRow);
+
+		return !GetItemText(nDateRow, VALUE_COL).IsEmpty();
 	}
 
-	// else
-	switch (nAttribID)
-	{
-	case TDCA_CREATEDBY:
-	case TDCA_PATH:
-	case TDCA_POSITION:
-	case TDCA_CREATIONDATE:
-	case TDCA_LASTMODDATE:
-	case TDCA_COMMENTSSIZE:
-	case TDCA_COMMENTSFORMAT:
-	case TDCA_SUBTASKDONE:
-	case TDCA_LASTMODBY:
-	case TDCA_ID:
-	case TDCA_PARENTID:
-	case TDCA_TIMEREMAINING:
-		// Permanently read-only fields
-		return FALSE;
-
-	case TDCA_RECURRENCE:
-		return !m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, FALSE); // excludes 'good as done'
-
-	case TDCA_REMINDER:
-		return !m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, TRUE); // includes 'good as done'
-
-	case TDCA_PERCENT:
-		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			return FALSE;
-		}
-		else if (m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && 
-				 m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs))
-		{
-			return FALSE;
-		}
-		break;
-
-	case TDCA_LOCK:
-		return TRUE;
-
-	case TDCA_STARTTIME:
-		if (!m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_STARTDATE))
-			return FALSE;
-		// else fall through to TDCA_STARTDATE
-
-	case TDCA_STARTDATE:
-		return (!m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) || !m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs));
-
-	case TDCA_DUETIME:		
-		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DUEDATE);
-
-	case TDCA_DONETIME:		
-		return m_multitasker.AnyTaskHasDate(m_aSelectedTaskIDs, TDCD_DONEDATE);
-
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
-		return (m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !m_multitasker.AllTasksAreParents(m_aSelectedTaskIDs));
-
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-			GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, FALSE);
-
-			return (pDef->IsList() || !pDef->IsDataType(TDCCA_CALCULATION));
-		}
-		else if (IsCustomTime(nAttribID))
-		{
-			int nDateRow = (nRow - 1);
-			ASSERT(GetDateRow(nAttribID) == nDateRow);
-
-			return !GetItemText(nDateRow, VALUE_COL).IsEmpty();
-		}
-		break;
-	}
-	
-	return TRUE;
+	ASSERT(0); // Unexpectedly unhandled
+	return FALSE;
 }
 
 COLORREF CTDLTaskAttributeListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const

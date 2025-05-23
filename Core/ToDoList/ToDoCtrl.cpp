@@ -23,6 +23,7 @@
 #include "TDCTaskCompletion.h"
 #include "tdccontentmgr.h"
 #include "TDLRecurringTaskEdit.h"
+#include "ToDoCtrlDataUtils.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -257,6 +258,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_attribCopier(m_data, mgrContent),
 	m_exporter(m_data, m_taskTree, mgrContent),
 	m_matcher(m_data, m_reminders, mgrContent),
+	m_multitasker(m_data, mgrContent),
 
 	m_ctrlComments(TRUE,
 				   TRUE,
@@ -10236,107 +10238,27 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {
-	if (IsReadOnly())
+	BOOL bCanEdit = m_multitasker.CanEditTask(dwTaskID, nAttribID);
+
+	if (bCanEdit != -1) // Unhandled by multi-tasker
+		return bCanEdit;
+
+	if (m_data.HasStyle(TDCS_READONLY))
 		return FALSE;
 
-	BOOL bEditableTask = (dwTaskID && !m_calculator.IsTaskLocked(dwTaskID));
+	BOOL bEditableTask = !m_calculator.IsTaskLocked(dwTaskID);
 
 	switch (nAttribID)
 	{
-	case TDCA_NONE:
-		return FALSE;
-
-	case TDCA_PERCENT:
-		if (!bEditableTask)
-		{
-			return FALSE;
-		}
-		else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			return FALSE;
-		}
-		else if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_data.IsTaskParent(dwTaskID))
-		{
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_ALL:		
-	case TDCA_ALLOCBY:		
-	case TDCA_ALLOCTO:		
-	case TDCA_ANYTEXTATTRIBUTE:		
-	case TDCA_CATEGORY:		
-	case TDCA_COLOR:		
-	case TDCA_COMMENTS:		
-	case TDCA_COST:			
-	case TDCA_CREATEDBY:	
-	case TDCA_CREATIONDATE:	
-	case TDCA_DEPENDENCY:	
-	case TDCA_DONEDATE:		
-	case TDCA_DONETIME:		
-	case TDCA_DUEDATE:		
-	case TDCA_DUETIME:		
-	case TDCA_EXTERNALID:	
-	case TDCA_FILELINK:		
-	case TDCA_FLAG:			
-	case TDCA_ICON:		
-	case TDCA_METADATA:
-	case TDCA_OFFSETTASK:
-	case TDCA_PRIORITY:		
-	case TDCA_RISK:			
-	case TDCA_STATUS:		
-	case TDCA_TAGS:			
-	case TDCA_TASKNAME:		
-	case TDCA_TASKNAMEORCOMMENTS:		
-	case TDCA_VERSION:		
-		return bEditableTask;
-
-	case TDCA_RECURRENCE:	
-		return (bEditableTask && !SelectedTasksAreAllDone(FALSE)); // exclude 'good as done'
-
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
-		if (!bEditableTask)
-		{
-			return FALSE;
-		}
-		else if (!HasStyle(TDCS_ALLOWPARENTTIMETRACKING) && m_data.IsTaskParent(dwTaskID))
-		{
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_STARTDATE:
-	case TDCA_STARTTIME:
-		if (!bEditableTask)
-		{
-			return FALSE;
-		}
-		else if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && m_data.TaskHasDependencies(dwTaskID))
-		{
-			// Ignore tasks with dependencies where their dates 
-			// are automatically calculated
-			return FALSE;
-		}
-		else if ((nAttribID == TDCA_STARTTIME) && !m_data.TaskHasDate(dwTaskID, TDCD_START))
-		{
-			// Ignore tasks without a start date set
-			return FALSE;
-		}
-		return TRUE;
-
 	case TDCA_DELETE:
-		if (!bEditableTask && !m_data.IsTaskReference(dwTaskID))
-		{
-			// Can't delete locked tasks unless they are references
-			return FALSE;
-		}
-		else if (m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
-		{
-			// Can't delete subtasks if immediate parent is locked
-			return FALSE;
-		}
-		return TRUE;
+		// Can only delete tasks if:
+		// 1. Their immediate parent is UNLOCKED
+		// AND
+		// 2. task is UNLOCKED 
+		// OR 
+		// 3. task is a reference to a locked task
+		return (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)) &&
+				(bEditableTask || m_data.IsTaskReference(dwTaskID)));
 
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
@@ -10347,16 +10269,11 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_PROJECTNAME:
 		return TRUE;
 
-	case TDCA_LOCK:
-		return TRUE;
-
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-			return bEditableTask;
+		ASSERT(0); // Unexpectedly unhandled
 		break;
 	}
 
-	// all else
 	return FALSE;
 }
 
