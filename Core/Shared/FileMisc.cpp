@@ -38,12 +38,11 @@ static CString s_sLogAppDataKey;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-static LPCTSTR ENDL = _T("\r\n");
-static CString EMPTYSTRING;
+const LPCTSTR ENDL = _T("\r\n");
+const CString EMPTYSTRING;
+const LPCTSTR ALLFILESMASK = _T("*.*");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-static LPCTSTR ALLFILESMASK = _T("*.*");
 
 static BOOL IsAllFileMask(LPCTSTR szFileMask)
 {

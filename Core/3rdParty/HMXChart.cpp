@@ -48,6 +48,10 @@ static char THIS_FILE[] = __FILE__;
 #define DEG2RAD(d) ((d) * 3.141592654f / 180)
 
 /////////////////////////////////////////////////////////////////////////////
+
+static float s_fScaleFactor = 0.0f;
+
+/////////////////////////////////////////////////////////////////////////////
 // CHMXChart
 
 CHMXChart::CHMXChart() 
@@ -1342,18 +1346,16 @@ float CHMXChart::NormaliseAngle(float fDegrees)
 
 float CHMXChart::ScaleByDPIFactor(int nValue)
 {
-	static float fScaleFactor = 0.0f;
-
-	if (fScaleFactor == 0.0f)
+	if (s_fScaleFactor == 0.0f)
 	{
 		HDC hDC = ::GetDC(NULL);
 		int nPPI = GetDeviceCaps(hDC, LOGPIXELSY);
 		::ReleaseDC(NULL, hDC);
 
-		fScaleFactor = (nPPI / 96.0f);
+		s_fScaleFactor = (nPPI / 96.0f);
 	}
 
-	return (nValue * fScaleFactor);
+	return (nValue * s_fScaleFactor);
 }
 
 void CHMXChart::DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIESEGMENT, PIESEGMENT&>& aSegments)

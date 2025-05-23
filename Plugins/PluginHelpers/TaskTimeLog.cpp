@@ -17,6 +17,10 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+const CString EMPTY_STR;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 List<TaskTimeLogEntry^>^ TaskTimeLog::LoadEntries(String^ tasklistPath)
 {
 	return LoadEntries(tasklistPath, 0);
@@ -147,8 +151,6 @@ void TaskTimeLog::Copy(TaskTimeLogEntry^ from, TASKTIMELOGITEM& to)
 
 CString TaskTimeLog::ToString(String^ str)
 {
-	static CString EMPTY_STR;
-
 	if (String::IsNullOrWhiteSpace(str))
 		return EMPTY_STR;
 

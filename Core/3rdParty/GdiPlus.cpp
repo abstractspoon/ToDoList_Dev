@@ -38,7 +38,7 @@ struct IMAGEMIMETYPE
 	LPCWSTR szMimeType;
 };
 
-static IMAGEMIMETYPE IMAGEMIMETYPES[] = 
+const IMAGEMIMETYPE IMAGEMIMETYPES[] = 
 {
 	{ L"gif", L"gif" },
 	{ L"jpg", L"jpeg" },

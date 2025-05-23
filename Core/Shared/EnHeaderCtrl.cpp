@@ -24,6 +24,10 @@ enum // item flags
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+static CThemed s_thSortArrow;
+
+/////////////////////////////////////////////////////////////////////////////
 // CEnHeaderCtrl
 
 CEnHeaderCtrl::CEnHeaderCtrl() : m_nRowCount(1), m_bEnableTracking(TRUE)
@@ -495,19 +499,20 @@ BOOL CEnHeaderCtrl::DrawItemSortArrow(CDC* pDC, int nItem, BOOL bUp) const
 	if (!GetItemRect(nItem, rItem))
 		return FALSE;
 
-	static CThemed th(this, _T("Header"));
-	
-	if (th.AreControlsThemed())
+	if (!s_thSortArrow.IsValid())
+		s_thSortArrow.Open(this, _T("Header"));
+
+	if (s_thSortArrow.AreControlsThemed())
 	{
 		CSize size;
-		th.GetSize(HP_HEADERSORTARROW, 1, size);
+		s_thSortArrow.GetSize(HP_HEADERSORTARROW, 1, size);
 		
 		CRect rArrow(rItem.TopLeft(), size);
 
 		rArrow.OffsetRect((rItem.Width() - size.cx - 1) / 2, 0);
 		rArrow.bottom = rArrow.top + 8;
 		
-		return th.DrawBackground(pDC, HP_HEADERSORTARROW, (bUp ? HSAS_SORTEDUP : HSAS_SORTEDDOWN), rArrow);
+		return s_thSortArrow.DrawBackground(pDC, HP_HEADERSORTARROW, (bUp ? HSAS_SORTEDUP : HSAS_SORTEDDOWN), rArrow);
 	}
 	
 	// else

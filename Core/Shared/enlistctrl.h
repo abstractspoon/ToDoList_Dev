@@ -163,6 +163,7 @@ protected:
 	BOOL m_bAlternateRowColoring;
 	BOOL m_bAllowOffItemClickDeslection;
 	BOOL m_bSortEmptyBelow;
+	BOOL m_bResizingCols;
 
 private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 

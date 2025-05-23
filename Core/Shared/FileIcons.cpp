@@ -30,7 +30,15 @@ CIconCache CFileIcons::s_fallbackSmall(FALSE);
 
 //////////////////////////////////////////////////////////////////////
 
-static LPCTSTR UNKNOWNFILETYPE_EXTENSION = _T(".{E7CC2F59-37FD-42C9-B3B9-275C6F9B9DBA}");
+// From <commoncontrols.h>
+// {46EB5926-582E-4017-9FDF-E8998DAA0950}
+const GUID IID_IIMAGELIST = { 0x46EB5926, 0x582E, 0x4017,{ 0x9F, 0xDF, 0xE8, 0x99, 0x8D, 0xAA, 0x09, 0x50 } };
+
+const LPCTSTR UNKNOWNFILETYPE_EXTENSION = _T(".{E7CC2F59-37FD-42C9-B3B9-275C6F9B9DBA}");
+
+static BOOL s_bInitialised = FALSE;
+static int s_nUnknownLargeIndex = -1, s_nUnknownSmallIndex = -1;
+
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -270,20 +278,18 @@ int CFileIcons::GetFolderIndex(BOOL bLargeIcon)
 
 int CFileIcons::GetUnknownFileTypeIndex(BOOL bLargeIcon)
 {
-	static int nLargeIndex = -1, nSmallIndex = -1;
-
 	if (bLargeIcon)
 	{
-		if (nLargeIndex == -1)
-			nLargeIndex = GetIndex(UNKNOWNFILETYPE_EXTENSION, TRUE);
+		if (s_nUnknownLargeIndex == -1)
+			s_nUnknownLargeIndex = GetIndex(UNKNOWNFILETYPE_EXTENSION, TRUE);
 	}
 	else
 	{
-		if (nSmallIndex == -1)
-			nSmallIndex = GetIndex(UNKNOWNFILETYPE_EXTENSION, FALSE);
+		if (s_nUnknownSmallIndex == -1)
+			s_nUnknownSmallIndex = GetIndex(UNKNOWNFILETYPE_EXTENSION, FALSE);
 	}
 
-	return (bLargeIcon ? nLargeIndex : nSmallIndex);
+	return (bLargeIcon ? s_nUnknownLargeIndex : s_nUnknownSmallIndex);
 }
 
 HIMAGELIST CFileIcons::GetImageList(BOOL bLargeIcons) 
@@ -299,10 +305,6 @@ HIMAGELIST CFileIcons::GetImageList(BOOL bLargeIcons)
 	if (GetFolderImage(bLargeIcons, hIL, nUnused))
 		return hIL;
 #else
-	// From <commoncontrols.h>
-	// {46EB5926-582E-4017-9FDF-E8998DAA0950}
-	static const GUID IID_IIMAGELIST = { 0x46EB5926, 0x582E, 0x4017, { 0x9F, 0xDF, 0xE8, 0x99, 0x8D, 0xAA, 0x09, 0x50 } };
-
 	if (S_OK == SHGetImageList((bLargeIcons ? SHIL_LARGE : SHIL_SMALL), IID_IIMAGELIST, reinterpret_cast<void**>(&hIL)))
 		return reinterpret_cast<HIMAGELIST>(hIL);
 #endif
@@ -313,20 +315,18 @@ HIMAGELIST CFileIcons::GetImageList(BOOL bLargeIcons)
 
 BOOL CFileIcons::Initialise(BOOL bReInit)
 {
-	static BOOL bInitialised = FALSE;
-
-	if (!bInitialised || bReInit)
+	if (!s_bInitialised || bReInit)
 	{
 		typedef BOOL(WINAPI* PFNFILEICONINIT)(BOOL fFullInit);
 
 		PFNFILEICONINIT pfnFileIconInit = (PFNFILEICONINIT)GetProcAddress(LoadLibrary(_T("shell32.dll")), (LPCSTR)660);
 
 		if (pfnFileIconInit)
-			bInitialised = pfnFileIconInit(TRUE);
+			s_bInitialised = pfnFileIconInit(TRUE);
 
 		s_fallbackBig.Clear();
 		s_fallbackSmall.Clear();
 	}
 	
-	return bInitialised;
+	return s_bInitialised;
 }

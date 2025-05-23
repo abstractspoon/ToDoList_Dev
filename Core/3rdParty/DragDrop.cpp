@@ -21,6 +21,8 @@ static char THIS_FILE[] = __FILE__;
 // Macro to get point from WM_ mouse messages
 #define GETPOINT(lp) (CPoint(GET_X_LPARAM(lp), GET_Y_LPARAM(lp)))
 
+static const CPoint JOG(GetSystemMetrics(SM_CXDRAG), GetSystemMetrics(SM_CYDRAG));
+
 CDragDropMgr::CDragDropMgr() : m_hInstOle32(NULL)
 {
 	m_pMainWnd = NULL;
@@ -288,9 +290,8 @@ BOOL CDragDropMgr::OnMouseMove(const MSG& msg)
     {
 		// Not dragging yet: enter drag mode if mouse moves beyond threshhold.
 		CPoint delta = pt - m_ptOrg;
-		static CPoint jog(GetSystemMetrics(SM_CXDRAG), GetSystemMetrics(SM_CYDRAG));
 
-		if (abs(delta.x) > jog.x || abs(delta.y) > jog.y) 
+		if (abs(delta.x) > JOG.x || abs(delta.y) > JOG.y) 
         {
 			m_ddi.hwndSource = m_hwndTracking;
 			m_ddi.pt = m_ptOrg;	// start from ORIGINAL point, not where now

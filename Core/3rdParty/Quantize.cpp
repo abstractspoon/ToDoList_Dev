@@ -221,7 +221,7 @@ int CQuantizer::GetRightShiftCount(DWORD dwVal)
 void CQuantizer::AddColor(PNODE* ppNode, BYTE r, BYTE g, BYTE b,
     UINT nColorBits, UINT nLevel, UINT* pLeafCount, PNODE* pReducibleNodes)
 {
-    static BYTE mask[8] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+	const BYTE mask[8] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
 
     //
     // If the node doesn't exist, create it.

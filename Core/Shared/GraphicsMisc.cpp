@@ -73,7 +73,20 @@ const COLORREF NOTHEME_SELNOFOCUS_BKCOLOR			= GetSysColor(COLOR_3DFACE);
 
 static int PointsPerInch() { return 72; }
 
-const static int DEFAULT_DPI = 96;
+const int DEFAULT_DPI = 96;
+
+//////////////////////////////////////////////////////////////////////
+
+static int s_nPPI = 0;
+static BOOL s_bWantDPIScaling = -1;
+
+static HCURSOR s_curDragDrop[GMOC_COUNT] = { 0 };
+static HFONT s_hFontGroup = NULL;
+
+static CMap<CString, LPCTSTR, HCURSOR, HCURSOR> s_mapAppCursors;
+static CFont s_fontWingDings;
+static CFont m_fontMarlett;
+static CEnImageList s_ilShortcutOverlay;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -456,16 +469,14 @@ int GraphicsMisc::PixelToPoint(int nPixels)
 
 int GraphicsMisc::PixelsPerInch()
 {
-	static int nPPI = 0;
-
-	if (nPPI == 0)
+	if (s_nPPI == 0)
 	{
 		HDC hDC = ::GetDC(NULL);
-		nPPI = GetDeviceCaps(hDC, LOGPIXELSY);
+		s_nPPI = GetDeviceCaps(hDC, LOGPIXELSY);
 		::ReleaseDC(NULL, hDC);
 	}
 
-	return nPPI;
+	return s_nPPI;
 }
 
 int GraphicsMisc::GetFontPointSize(HFONT hFont)
@@ -601,7 +612,7 @@ BOOL GraphicsMisc::SetAfxCursor(int nCursorID)
 
 HCURSOR GraphicsMisc::LoadHandCursor()
 {
-	static HCURSOR cursor = ::LoadCursor(NULL, IDC_HAND);
+	HCURSOR cursor = ::LoadCursor(NULL, IDC_HAND);
 
 	return cursor;
 }
@@ -618,10 +629,8 @@ BOOL GraphicsMisc::SetHandCursor()
 
 HCURSOR GraphicsMisc::LoadDragDropCursor(GM_OLECURSOR nCursor)
 {
-	static HCURSOR cursors[GMOC_COUNT] = { 0 };
-
 	// load once only
-	if (cursors[nCursor] == NULL)
+	if (s_curDragDrop[nCursor] == NULL)
 	{
 		HMODULE hMod = LoadLibrary(_T("Ole32.dll"));
 		
@@ -640,11 +649,11 @@ HCURSOR GraphicsMisc::LoadDragDropCursor(GM_OLECURSOR nCursor)
 				ASSERT(0);
 				return NULL;
 			}
-			cursors[nCursor] = ::LoadCursor(hMod, MAKEINTRESOURCE(nIDCursor));
+			s_curDragDrop[nCursor] = ::LoadCursor(hMod, MAKEINTRESOURCE(nIDCursor));
 		}
 	}
 
-	return cursors[nCursor];
+	return s_curDragDrop[nCursor];
 }
 
 BOOL GraphicsMisc::SetDragDropCursor(GM_OLECURSOR nCursor)
@@ -659,8 +668,6 @@ BOOL GraphicsMisc::SetDragDropCursor(GM_OLECURSOR nCursor)
 
 HCURSOR GraphicsMisc::LoadAppCursor(LPCTSTR szName, LPCTSTR szSubFolder)
 {
-	static CMap<CString, LPCTSTR, HCURSOR, HCURSOR> mapCursors;
-
 	CString sCursorPath = FileMisc::TerminatePath(FileMisc::GetAppFolder(szSubFolder));
 	sCursorPath += szName;
 
@@ -669,7 +676,7 @@ HCURSOR GraphicsMisc::LoadAppCursor(LPCTSTR szName, LPCTSTR szSubFolder)
 	if (FileMisc::FileExists(sCursorPath))
 	{
 		HCURSOR hCursor = NULL;
-		mapCursors.Lookup(sCursorPath, hCursor);
+		s_mapAppCursors.Lookup(sCursorPath, hCursor);
 
 		if (!hCursor)
 		{
@@ -680,7 +687,7 @@ HCURSOR GraphicsMisc::LoadAppCursor(LPCTSTR szName, LPCTSTR szSubFolder)
 										   GetSystemMetrics(SM_CYCURSOR),
 										   LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
 
-			mapCursors[sCursorPath] = hCursor;
+			s_mapAppCursors[sCursorPath] = hCursor;
 		}
 
 		return hCursor;
@@ -701,22 +708,18 @@ BOOL GraphicsMisc::SetAppCursor(LPCTSTR szName, LPCTSTR szSubFolder)
 
 CFont& GraphicsMisc::WingDings()
 {
-	static CFont font;
-				
-	if (!font.GetSafeHandle())
-		font.Attach(CreateFont(_T("Wingdings"), -1, GMFS_SYMBOL));
+	if (!s_fontWingDings.GetSafeHandle())
+		s_fontWingDings.Attach(CreateFont(_T("Wingdings"), -1, GMFS_SYMBOL));
 
-	return font;
+	return s_fontWingDings;
 }
 
 CFont& GraphicsMisc::Marlett()
 {
-	static CFont font;
-				
-	if (!font.GetSafeHandle())
-		font.Attach(CreateFont(_T("Marlett"), -1, GMFS_SYMBOL));
+	if (!m_fontMarlett.GetSafeHandle())
+		m_fontMarlett.Attach(CreateFont(_T("Marlett"), -1, GMFS_SYMBOL));
 
-	return font;
+	return m_fontMarlett;
 }
 
 int GraphicsMisc::GetTextWidth(const CString& sText, CWnd& wndRef, CFont* pRefFont)
@@ -2203,7 +2206,7 @@ BOOL GraphicsMisc::FlashWindowEx(HWND hWnd, DWORD dwFlags, UINT uCount, DWORD dw
 {
 	ASSERT(::IsWindow(hWnd));
 
-	static HMODULE hMod = ::LoadLibrary(_T("User32.dll"));
+	HMODULE hMod = ::LoadLibrary(_T("User32.dll"));
 	
 	if (hMod)
 	{
@@ -2292,12 +2295,10 @@ BOOL GraphicsMisc::WantDPIScaling()
 
 	typedef HRESULT (WINAPI *PFNGETPROCESSDPIAWARENESS)(HANDLE, PROCESSDPIAWARENESS*);
 
-	static BOOL bWantDPIScaling = -1;
-
-	if (bWantDPIScaling == -1)
+	if (s_bWantDPIScaling == -1)
 	{
 		HMODULE hMod = ::LoadLibrary(_T("Shcore.dll"));
-		bWantDPIScaling = FALSE;
+		s_bWantDPIScaling = FALSE;
 
 		if (hMod)
 		{
@@ -2310,13 +2311,13 @@ BOOL GraphicsMisc::WantDPIScaling()
 				if (pFn(NULL, &nAwareness) == S_OK)
 				{
 					if (nAwareness != DPI_UNAWARE)
-						bWantDPIScaling = (GetDPIScaleFactor() > 1.0);
+						s_bWantDPIScaling = (GetDPIScaleFactor() > 1.0);
 				}
 			}
 		}
 	}
 
-	return bWantDPIScaling;
+	return s_bWantDPIScaling;
 }
 
 BOOL GraphicsMisc::ScaleByDPIFactor(LPRECT pRect)
@@ -2401,18 +2402,16 @@ void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CS
 			// We share a single font across the entire app
 			// and if ever the font changes for a given window
 			// we just recreate the font
-			static HFONT hFontGroup = NULL;
-
 			HFONT hFont = GetFont(hWnd);
 
-			if (hFont && !IsSameFontNameAndSize(hFont, hFontGroup))
+			if (hFont && !IsSameFontNameAndSize(hFont, s_hFontGroup))
 			{
-				VerifyDeleteObject(hFontGroup);
+				VerifyDeleteObject(s_hFontGroup);
 
-				hFontGroup = CreateFont(hFont, GMFS_BOLD);
-				ASSERT(hFontGroup);
+				s_hFontGroup = CreateFont(hFont, GMFS_BOLD);
+				ASSERT(s_hFontGroup);
 			}
-			pDC->SelectObject(hFontGroup);
+			pDC->SelectObject(s_hFontGroup);
 
 			// Note: The CSaveDC at the top will de-select the 
 			// font from the dc when it goes out of scope
@@ -2431,10 +2430,9 @@ void GraphicsMisc::DrawGroupHeaderRow(CDC* pDC, HWND hWnd, CRect& rRow, const CS
 
 BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)
 {
-	static CEnImageList ilShortcut;
 	int nSize = 0;
 
-	if (!ilShortcut.GetSafeHandle())
+	if (!s_ilShortcutOverlay.GetSafeHandle())
 	{
 		// Try first for small version of high-res shortcut
 		UINT nFlags = ILC_MASK;
@@ -2453,15 +2451,15 @@ BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)
 			nFlags |= ILC_COLOR32; // transparent
 		}
 
-		VERIFY(ilShortcut.Create(nSize, nSize, nFlags, 0, 1));
-		VERIFY(ilShortcut.Add(hIcon) == 0);
+		VERIFY(s_ilShortcutOverlay.Create(nSize, nSize, nFlags, 0, 1));
+		VERIFY(s_ilShortcutOverlay.Add(hIcon) == 0);
 	}
 	else
 	{
-		nSize = ilShortcut.GetImageSize();
+		nSize = s_ilShortcutOverlay.GetImageSize();
 	}
 
 	CPoint ptPos(pRect->left, (pRect->bottom - nSize));
 
-	return ilShortcut.Draw(pDC, 0, ptPos, ILD_TRANSPARENT);
+	return s_ilShortcutOverlay.Draw(pDC, 0, ptPos, ILD_TRANSPARENT);
 }

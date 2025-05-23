@@ -36,6 +36,7 @@ const CString DELIMS(_T(".,;:-?"));
 const int FLOATBUFLEN = 400;
 
 const int CLASSICTHEMETEXTFUDGE = GraphicsMisc::ScaleByDPIFactor(2);
+const BOOL WANTROUNDCORNERS = (COSVersion() < OSV_WIN8);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -2071,9 +2072,8 @@ void CDialogHelper::ExcludeChild(const CWnd* pChild, CDC* pDC)
 	if (pChild->IsWindowVisible() && !(dwExStyle & WS_EX_TRANSPARENT))
 	{
 		CRect rClip = GetChildRect(pChild);
-		static BOOL bRoundCorners = (COSVersion() < OSV_WIN8);
 
-		if (bRoundCorners)
+		if (WANTROUNDCORNERS)
 		{
 			rClip.DeflateRect(1, 0);
 			pDC->ExcludeClipRect(rClip);

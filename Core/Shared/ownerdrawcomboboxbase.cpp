@@ -18,6 +18,10 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+static HFONT s_hFontHeadings = NULL;
+
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef CB_GETMINVISIBLE
 #	define CBM_FIRST         0x1700
 #	define CB_GETMINVISIBLE  (CBM_FIRST + 2)
@@ -220,18 +224,16 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		// We share a single font across the entire app
 		// and if ever the font changes for a given window
 		// we just recreate the font
-		static HFONT hFontHeadings = NULL;
-
 		HFONT hFont = GraphicsMisc::GetFont(lpDrawItemStruct->hwndItem);
 
-		if (hFont && !GraphicsMisc::IsSameFontNameAndSize(hFont, hFontHeadings))
+		if (hFont && !GraphicsMisc::IsSameFontNameAndSize(hFont, s_hFontHeadings))
 		{
-			GraphicsMisc::VerifyDeleteObject(hFontHeadings);
+			GraphicsMisc::VerifyDeleteObject(s_hFontHeadings);
 
-			hFontHeadings = GraphicsMisc::CreateFont(hFont, GMFS_BOLD);
-			ASSERT(hFontHeadings);
+			s_hFontHeadings = GraphicsMisc::CreateFont(hFont, GMFS_BOLD);
+			ASSERT(s_hFontHeadings);
 		}
-		dc.SelectObject(hFontHeadings);
+		dc.SelectObject(s_hFontHeadings);
 
 		// Note: No need to manually de-select the font from the dc
 		// because this will be handled by the call to RestoreDC below

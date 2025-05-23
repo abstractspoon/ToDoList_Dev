@@ -26,6 +26,8 @@ static char THIS_FILE[] = __FILE__;
 
 const UINT WM_REFRESHBUTTONSTATES = WM_APP+1;
 
+const int CORNER_RADIUS = ((COSVersion() < OSV_WIN8) ? 3 : 0);
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef TBCDRF_NOBACKGROUND
@@ -427,11 +429,9 @@ COLORREF CEnToolBar::GetButtonHotColor() const
 
 void CEnToolBar::DrawButtonBackground(CDC* pDC, const CRect& rBtn, COLORREF crFill)
 {
-	static int nRadius = ((COSVersion() >= OSV_WIN8) ? 0 : 3);
-
 	COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.2, FALSE);
 
-	GraphicsMisc::DrawRect(pDC, rBtn, crFill, crBorder, nRadius);
+	GraphicsMisc::DrawRect(pDC, rBtn, crFill, crBorder, CORNER_RADIUS);
 }
 
 LRESULT CEnToolBar::OnButtonPostPaint(LPNMTBCUSTOMDRAW /*lpNMCustomDraw*/) 
