@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "EnHeaderCtrl.h"
 #include "themed.h"
+#include "osversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -499,16 +500,16 @@ BOOL CEnHeaderCtrl::DrawItemSortArrow(CDC* pDC, int nItem, BOOL bUp) const
 	if (!GetItemRect(nItem, rItem))
 		return FALSE;
 
-	if (!s_thSortArrow.IsValid())
-		s_thSortArrow.Open(this, _T("Header"));
-
-	if (s_thSortArrow.AreControlsThemed())
+	if ((COSVersion() >= OSV_VISTA) && CThemed::AreControlsThemed())
 	{
+		if (!s_thSortArrow.IsValid())
+			s_thSortArrow.Open(this, _T("Header"));
+		
 		CSize size;
 		s_thSortArrow.GetSize(HP_HEADERSORTARROW, 1, size);
 		
 		CRect rArrow(rItem.TopLeft(), size);
-
+		
 		rArrow.OffsetRect((rItem.Width() - size.cx - 1) / 2, 0);
 		rArrow.bottom = rArrow.top + 8;
 		
