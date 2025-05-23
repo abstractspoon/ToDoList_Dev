@@ -141,8 +141,8 @@ CTDLTaskAttributeListCtrl::CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
 	m_aSortedGroupedItems(*this),
 	m_aAttribState(aCustAttribDefs),
 	m_reminders(rems),
-	m_eSingleFileLink(FES_GOBUTTON),
-	m_cbMultiFileLink(FES_GOBUTTON),
+	m_eSingleFileLink(FES_GOBUTTON | FES_RELATIVEPATHS),
+	m_cbMultiFileLink(FES_GOBUTTON | FES_RELATIVEPATHS),
 	m_iconCache(FALSE), // small icons
 	m_dwTimeTrackingTask(0),
 	m_bTaskIDChangeSinceLastEdit(FALSE)
@@ -3517,6 +3517,12 @@ void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID)
 
 		if (pEdit && CDialogHelper::IsMouseDownInWindow(*pEdit))
 			return;
+
+		// Else if this is the core File Link field and the user
+		// clicked on one of the button, perform the required action
+		// before hiding the combo
+		if ((pCombo == &m_cbMultiFileLink) && CDialogHelper::IsMouseDownInWindow(*pCombo))
+			EditCell(GetRow(TDCA_FILELINK), VALUE_COL, TRUE);
 	}
 
 	// All else
@@ -4177,10 +4183,6 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				sTooltip.LoadString(IDS_TIMEUNITS);
 				break;
 
-			case TDCA_FILELINK:
-				sTooltip.LoadString(IDS_BROWSE);
-				break;
-
 			default:
 				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 				{
@@ -4292,7 +4294,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					(m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) &&
 					 m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs)))
 				{
-					sTooltip.LoadString(IDS_CAD_CALCULATION);
+					sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
 				}
 				break;
 
@@ -4304,7 +4306,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 					if (pDef->IsCalculation())
 					{
-						sTooltip.LoadString(IDS_CAD_CALCULATION);
+						sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
 					}
 					else if (pDef->IsMultiList() && pDef->IsDataType(TDCCA_STRING))
 					{

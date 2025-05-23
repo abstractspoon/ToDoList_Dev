@@ -332,6 +332,8 @@ int COwnerdrawComboBoxBase::CalcMinItemHeight(BOOL bList) const
 
 void COwnerdrawComboBoxBase::PreSubclassWindow() 
 {
+	ASSERT(GetStyle() & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE));
+
 	InitItemHeight();
 
 	CComboBox::PreSubclassWindow();

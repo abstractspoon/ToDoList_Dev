@@ -2135,7 +2135,7 @@ int FileMisc::GetAppModuleHandles(CDWordArray& aHandles, BOOL bSorted)
 	HMODULE hMods[1024] = { 0 };
     DWORD cbNeeded = 0;
 
-	static HMODULE hPsapi = LoadLibrary(_T("psapi.dll"));
+	HMODULE hPsapi = LoadLibrary(_T("psapi.dll"));
 
 	if (hPsapi)
 	{
@@ -2164,7 +2164,7 @@ int FileMisc::GetAppModuleHandles(CDWordArray& aHandles, BOOL bSorted)
 CString FileMisc::GetProcessFilePath(HANDLE hProcess)
 {
 	CString sPath;
-	static HMODULE hPsapi = LoadLibrary(_T("psapi.dll"));
+	HMODULE hPsapi = LoadLibrary(_T("psapi.dll"));
 
 	if (hPsapi)
 	{
@@ -2178,10 +2178,7 @@ CString FileMisc::GetProcessFilePath(HANDLE hProcess)
 			sPath.ReleaseBuffer();
 
 			if (!dwRes)
-			{
 				dwRes = GetLastError();
-				int breakpoint = 0;
-			}
 		}
 	}
 
@@ -2218,14 +2215,16 @@ BOOL FileMisc::IsAdminProcess(HANDLE hProcess)
 		typedef BOOL (WINAPI *PFNISUSERANADMIN)(void);
 		
 		// load shell32.dll once only
-		static HMODULE hShell32 = LoadLibrary(_T("shell32.dll"));
+		HMODULE hShell32 = LoadLibrary(_T("shell32.dll"));
 		
 		if (hShell32)
 		{
-			static PFNISUSERANADMIN fnIsUserAdmin = (PFNISUSERANADMIN)GetProcAddress(hShell32, "IsUserAnAdmin");
+			PFNISUSERANADMIN fnIsUserAdmin = (PFNISUSERANADMIN)GetProcAddress(hShell32, "IsUserAnAdmin");
 			
 			if (fnIsUserAdmin)
 				bAdmin = fnIsUserAdmin();
+
+			FreeLibrary(hShell32);
 		}
 	}
 

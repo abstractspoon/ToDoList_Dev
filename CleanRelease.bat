@@ -19,6 +19,7 @@ REM - Use MSBuild for both core and plugins
 SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 
 ECHO MSBUILD  = %MSBUILD%
+ECHO:
 
 IF NOT EXIST %MSBUILD% (
 ECHO [41m Unable to locate MSBuild.exe!![0m
@@ -27,8 +28,6 @@ PAUSE
 EXIT
 )
 
-REM - Build core app in VC6
-ECHO:
 ECHO Cleaning ToDoList Core 
 ECHO ======================
 ECHO:
@@ -39,9 +38,8 @@ ECHO SOLUTION = %SOLUTION%
 ECHO:
 
 %MSBUILD% %SOLUTION% /t:Clean /p:Configuration="Unicode Release" /m /v:normal
-
-REM - Clean plugins using MSBuild
 ECHO:
+
 ECHO Cleaning ToDoList Plugins
 ECHO =========================
 ECHO:

@@ -129,7 +129,7 @@ namespace EvidenceBoardUIExtension
 
 			m_InitialRadius = DefaultInitialRadius;
 			m_RadialIncrementOrSpacing = DefaultInitialRadius;
-			m_NodeSize = DefaulttNodeSize;
+			m_NodeSize = DefaultNodeSize;
 			m_TextFont = new Font("Tahoma", 8f);
 			m_BaseFontHeight = m_TextFont.Height;
 			m_SelectedNodes = new List<BaseNode>();
@@ -502,10 +502,10 @@ namespace EvidenceBoardUIExtension
 
 		public float DefaultInitialRadius
 		{
-			get { return ((2 * DefaulttNodeSize.Width) + NodeSpacing); }
+			get { return ((2 * DefaultNodeSize.Width) + NodeSpacing); }
 		}
 
-		public Size DefaulttNodeSize
+		public Size DefaultNodeSize
 		{
 			get { return new Size(50, 25); }
 		}

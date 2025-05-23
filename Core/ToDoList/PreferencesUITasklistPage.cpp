@@ -20,7 +20,8 @@ static char THIS_FILE[] = __FILE__;
 
 CPreferencesUITasklistPage::CPreferencesUITasklistPage() 
 	: 
-	CPreferencesPageBase(IDD_PREFUITASKLIST_PAGE)
+	CPreferencesPageBase(IDD_PREFUITASKLIST_PAGE),
+	m_cbPriorityRiskLevels(-1)
 {
 	//{{AFX_DATA_INIT(CPreferencesUITasklistPage)
 	//}}AFX_DATA_INIT
@@ -35,7 +36,6 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 { 
 	CPreferencesPageBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPreferencesUITasklistPage)
-	DDX_Control(pDX, IDC_PERCENTINCREMENT, m_cbPercentIncrement);
 	DDX_Check(pDX, IDC_USEISODATEFORMAT, m_bUseISOForDates);
 	DDX_Check(pDX, IDC_SHOWWEEKDAYINDATES, m_bShowWeekdayInDates);
 	DDX_Check(pDX, IDC_SHOWPARENTSASFOLDERS, m_bShowParentsAsFolders);
@@ -70,8 +70,11 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SHOWMIXEDDONECHECKBOX, m_bShowMixedCompletionState);
 	DDX_Check(pDX, IDC_SETNUMPRIORITYRISKLEVELS, m_bSetNumPriorityRiskLevels);
 
+	DDX_Control(pDX, IDC_PERCENTINCREMENT, m_cbPercentIncrement);
+	DDX_Control(pDX, IDC_NUMPRORITYRISKLEVELS, m_cbPriorityRiskLevels);
+
 	CDialogHelper::DDX_CBValue(pDX, m_cbPercentIncrement, m_nPercentIncrement, 5);
-	CDialogHelper::DDX_CBValue(pDX, IDC_NUMPRORITYRISKLEVELS, m_nNumPriorityRiskLevels, 5);
+	CDialogHelper::DDX_CBValue(pDX, m_cbPriorityRiskLevels, m_nNumPriorityRiskLevels, 5);
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesUITasklistPage, CPreferencesPageBase)

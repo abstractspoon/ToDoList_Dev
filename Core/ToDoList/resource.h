@@ -2571,6 +2571,7 @@
 #define IDS_TITLE_TIMETRACKING          51675
 #define IDS_DEFAULTATTRIBUTES           51676
 #define IDS_ATTRIBTIP_DISMISS           51677
+#define IDS_ATTRIBTIP_CALCULATEDVALUE   51678
 
 // Next default values for new objects
 // 
