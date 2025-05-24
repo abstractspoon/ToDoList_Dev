@@ -979,18 +979,18 @@ struct COLORMAPPING
    UINT nSysColor;
 };
 
-static COLORMAPPING COLORMAPPINGS[] = 
+const COLORMAPPING COLORMAPPINGS[] = 
 {
    { 0x000000, COLOR_3DDKSHADOW }, // black
    { 0x808080, COLOR_3DSHADOW },   // dark gray
    { 0xC0C0C0, COLOR_3DLIGHT },    // light gray
    { 0xFFFFFF, COLOR_3DHIGHLIGHT } // white
 };
+const int NUMCOLORMAPS = sizeof(COLORMAPPINGS) / sizeof(COLORMAPPING);
 
 BOOL CImageSysColorMapper::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
-	static int NUMCOLORMAPS = sizeof(COLORMAPPINGS) / sizeof(COLORMAPPING);
 
 	for (int nMap = 0; nMap < NUMCOLORMAPS; nMap++)
 	{
