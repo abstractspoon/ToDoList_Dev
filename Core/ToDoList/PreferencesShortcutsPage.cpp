@@ -730,7 +730,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			}
 
 			// Text
-			COLORREF crText = COLOR_WINDOWTEXT;
+			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
 
 			CRect rText;
 			m_tcCommands.GetItemRect(hti, rText, TRUE);
