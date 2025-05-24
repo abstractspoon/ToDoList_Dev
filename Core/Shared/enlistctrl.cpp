@@ -296,7 +296,8 @@ CEnListCtrl::CEnListCtrl()
 	m_bInitColumns(FALSE),
 	m_bAlternateRowColoring(FALSE),
 	m_bSortEmptyBelow(TRUE),
-	m_bAllowOffItemClickDeslection(TRUE)
+	m_bAllowOffItemClickDeslection(TRUE),
+	m_bResizingCols(FALSE)
 {
 }
 
@@ -1285,12 +1286,10 @@ void CEnListCtrl::OnSize(UINT nType, int cx, int cy)
 
 void CEnListCtrl::ResizeStretchyColumns()
 {
-	static BOOL bResizingCols = FALSE;
-
-	if (bResizingCols)
+	if (m_bResizingCols)
 		return;
 
-	bResizingCols = TRUE;
+	m_bResizingCols = TRUE;
 
 	// get header state
 	CRect rClient;
@@ -1353,7 +1352,7 @@ void CEnListCtrl::ResizeStretchyColumns()
 	if (!GetItemCount())
 		Invalidate(FALSE);
 
-	bResizingCols = FALSE;
+	m_bResizingCols = FALSE;
 }
 
 int CEnListCtrl::FindItemFromData(DWORD dwItemData) const

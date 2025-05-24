@@ -266,6 +266,11 @@ typedef char* (*FNHTML2RTF_STRING)(char* html, char* rtf, struct sautin_html2rtf
 typedef int (*FNFLUSHLIST)(); //release memory
 
 //////////////////////////////////////////////////////////////////////
+
+// create a unique image folder every time this is called for this session
+static int s_nImgCount = 1;
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -334,11 +339,8 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtml(LPCSTR szRTF, LPCTSTR szCharSet, CStrin
 	if (bTempImageDir)
 		sImageDir = FileMisc::GetTempFolder();
 	
-	// create a unique image folder every time this is called for this session
-	static int nImgCount = 1;
-	
 	FileMisc::TerminatePath(sImageDir);
-	sUniqueDir.Format(_T("%simg%d"), sImageDir, nImgCount++);
+	sUniqueDir.Format(_T("%simg%d"), sImageDir, s_nImgCount++);
 
 	FileMisc::DeleteFolder(sUniqueDir);
 	FileMisc::CreateFolder(sUniqueDir);

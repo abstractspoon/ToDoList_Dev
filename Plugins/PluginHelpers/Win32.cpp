@@ -21,6 +21,10 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+static int s_nDPI = 0;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 HWND Win32::GetHwnd(IntPtr hWnd)
 {
 	return static_cast<HWND>(hWnd.ToPointer());
@@ -208,16 +212,14 @@ int Win32::GetHScrollPos(IntPtr hWnd)
 
 int Win32::GetSystemDPI()
 {
-	static int nDPI = 0;
-
-	if (nDPI == 0)
+	if (s_nDPI == 0)
 	{
 		HDC	hdc = ::GetDC(NULL);
-		nDPI = GetDeviceCaps(hdc, LOGPIXELSX);
+		s_nDPI = GetDeviceCaps(hdc, LOGPIXELSX);
 		::ReleaseDC(NULL, hdc);
 	}
 
-	return nDPI;
+	return s_nDPI;
 }
 
 String^ Win32::GetFaceName(HFONT hFont)

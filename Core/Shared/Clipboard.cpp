@@ -12,6 +12,12 @@
 #include <AFXOLE.H>
 
 //////////////////////////////////////////////////////////////////////
+
+const CString STARTHTML = _T("StartHTML:");
+const CString ENDHTML = _T("EndHTML:");
+const CString SRCURL = _T("SourceURL:");
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -221,10 +227,6 @@ CString& CClipboard::PackageHTMLFragment(CString& sContent, const CString& sSour
 
 CString& CClipboard::UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl)
 {
-	static CString STARTHTML = _T("StartHTML:");
-	static CString ENDHTML = _T("EndHTML:");
-	static CString SRCURL = _T("SourceURL:");
-
 	// check that it is packaged
 	int nStart = sContent.Find(STARTHTML);
 	

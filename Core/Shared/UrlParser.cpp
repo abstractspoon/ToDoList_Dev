@@ -14,6 +14,20 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const LPCTSTR BASEDELIMS[] =
+{
+	_T(" "),
+	_T("\n"),
+	_T("\r"),
+	_T("\t"),
+	_T(", "),
+	_T(". "),
+	_T("<"),
+};
+const int NUM_DEMIM = sizeof(BASEDELIMS) / sizeof(LPCTSTR);
+
+/////////////////////////////////////////////////////////////////////////////
 // CUrlRichEditCtrl
 
 CUrlParser::CUrlParser()
@@ -169,18 +183,6 @@ BOOL CUrlParser::IsBaseDelim(LPCTSTR szText)
 {
 	if (Misc::IsEmpty(szText))
 		return TRUE; // end of string
-
-	static LPCTSTR BASEDELIMS[] = 
-	{ 
-		_T(" "), 
-		_T("\n"),
-		_T("\r"),
-		_T("\t"),
-		_T(", "),
-		_T(". "),
-		_T("<"),
-	};
-	const int NUM_DEMIM = sizeof(BASEDELIMS) / sizeof(LPCTSTR);
 
 	for (int nDelim = 0; nDelim < NUM_DEMIM; nDelim++)
 	{

@@ -824,14 +824,12 @@ void CTreeListSyncer::InitItemHeights()
 
 BOOL CTreeListSyncer::OsIsXP()
 {
-	static BOOL bXP(COSVersion() < OSV_VISTA);
-	return bXP;
+	return (COSVersion() < OSV_VISTA);
 }
 
 BOOL CTreeListSyncer::OsIsLinux()
 {
-	static BOOL bLinux(COSVersion() == OSV_LINUX);
-	return bLinux;
+	return (COSVersion() == OSV_LINUX);
 }
 
 int CTreeListSyncer::GetItemHeight(HWND hwnd)
