@@ -6073,7 +6073,18 @@ int CTDCMultiTasker::CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE n
 	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 	{
 		if (CanEditTask(aTaskIDs[nID], nAttribID))
+		{
+			// special handling
+			switch (nAttribID)
+			{
+			case TDCA_COMMENTS:
+				// All must have the same format
+				return GetTasksCommentsFormat(aTaskIDs, CString());
+			}
+
+			// else
 			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -6131,6 +6142,7 @@ int CTDCMultiTasker::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_ALLOCTO:
 	case TDCA_CATEGORY:
 	case TDCA_COLOR:
+	case TDCA_COMMENTS:
 	case TDCA_COST:
 	case TDCA_DEPENDENCY:
 	case TDCA_DONEDATE:

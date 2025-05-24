@@ -10224,16 +10224,11 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 	if (dwTaskID)
 		return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, nAttribID));
 
-	// else look for first editable task
-	POSITION pos = TSH().GetFirstItemPos();
+	// else
+	CDWordArray aTaskIDs;
+	m_taskTree.GetSelectedTaskIDs(aTaskIDs, TRUE);
 
-	while (pos)
-	{
-		if (CanEditTask(TSH().GetNextItemData(pos), nAttribID))
-			return TRUE;
-	}
-
-	return FALSE;
+	return m_multitasker.CanEditAnyTask(aTaskIDs, nAttribID);
 }
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
