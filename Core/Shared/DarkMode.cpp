@@ -725,7 +725,24 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 //////////////////////////////////////////////////////////////////////
 
-#define RETURN_STATIC_COLOR_OR_BRUSH(color) if (bColor) return color; else { static HBRUSH hbr = CreateSolidBrush(color); return (DWORD)hbr; }
+static CMap<COLORREF, COLORREF, HBRUSH, HBRUSH> s_mapBrushes;
+
+DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
+{
+	if (bColor) 
+		return color; 
+	
+	// else
+	HBRUSH hbr = NULL;
+	
+	if (!s_mapBrushes.Lookup(color, hbr) || !hbr)
+	{
+		hbr = ::CreateSolidBrush(color); 
+		s_mapBrushes.SetAt(color, hbr);
+	}
+	
+	return (DWORD)hbr; 
+}
 
 DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 {
@@ -740,21 +757,21 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_HOTLIGHT: // Used for Web Browser links
-		RETURN_STATIC_COLOR_OR_BRUSH(DM_HOTLIGHT);
+		return GetColorOrBrush(DM_HOTLIGHT, bColor);
 
 	case COLOR_GRAYTEXT:
 		if (s_hwndCurrentComboBox || s_hwndCurrentDateTime || s_hwndCurrentEdit)
-			RETURN_STATIC_COLOR_OR_BRUSH(DM_GRAY3DFACETEXT);
+			return GetColorOrBrush(DM_GRAY3DFACETEXT, bColor);
 		break;
 
 	case COLOR_WINDOWTEXT:
-		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOWTEXT);
+		return GetColorOrBrush(DM_WINDOWTEXT, bColor);
 
 	case COLOR_WINDOW:
-		RETURN_STATIC_COLOR_OR_BRUSH(DM_WINDOW);
+		return GetColorOrBrush(DM_WINDOW, bColor);
 
 	case COLOR_3DFACE:
-		RETURN_STATIC_COLOR_OR_BRUSH(DM_3DFACE);
+		return GetColorOrBrush(DM_3DFACE, bColor);
 
 	case COLOR_3DDKSHADOW:
 		nTrueColor = COLOR_3DHIGHLIGHT;
@@ -773,10 +790,10 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_HIGHLIGHT:
-		RETURN_STATIC_COLOR_OR_BRUSH(DM_HIGHLIGHT);
+		return GetColorOrBrush(DM_HIGHLIGHT, bColor);
 
 	case COLOR_HIGHLIGHTTEXT:
-		RETURN_STATIC_COLOR_OR_BRUSH(DM_HIGHLIGHTTEXT);
+		return GetColorOrBrush(DM_HIGHLIGHTTEXT, bColor);
 
 	case COLOR_WINDOWFRAME:
 		nTrueColor = COLOR_BTNHIGHLIGHT;
@@ -794,7 +811,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_ACTIVEBORDER:
 	case COLOR_INACTIVEBORDER:
 	case COLOR_INACTIVECAPTION:	
-		RETURN_STATIC_COLOR_OR_BRUSH(colorBlue);
+		return GetColorOrBrush(colorBlue, bColor);
 
 	case COLOR_CAPTIONTEXT:
 	case COLOR_ACTIVECAPTION:
@@ -805,7 +822,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 // 	case COLOR_MENUHILIGHT:
 // 	case COLOR_MENUBAR:
 	case COLOR_BACKGROUND:
-		RETURN_STATIC_COLOR_OR_BRUSH(colorRed);
+		return GetColorOrBrush(colorRed, bColor);
 #endif
 	}
 
@@ -818,8 +835,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 
 //////////////////////////////////////////////////////////////////////
 
-#define RETURN_LRESULT_STATIC_BRUSH(color) { static HBRUSH hbr = CreateSolidBrush(color); lr = (LRESULT)hbr; return TRUE; }
-
 BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
@@ -827,34 +842,33 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	switch (nMsg)
 	{
 	case WM_CTLCOLORDLG:
-		RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
+		lr = GetColorOrBrush(DM_3DFACE, FALSE);
+		return TRUE;
 
 	case WM_CTLCOLORLISTBOX:
 		{
-			::SetBkMode((HDC)wp, TRANSPARENT);
+			COLORREF crText = DM_WINDOWTEXT, crBack = DM_WINDOW;
 
 			if (!IsWindowEnabled((HWND)lp))
 			{
-				::SetTextColor((HDC)wp, DM_GRAY3DFACETEXT);
-				RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
+				crText = DM_GRAY3DFACETEXT;
+				crBack = DM_3DFACE;
 			}
-			else
-			{
-				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
-				RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
-			}
+
+			lr = GetColorOrBrush(crBack, FALSE);
+			::SetTextColor((HDC)wp, crText);
+			::SetBkMode((HDC)wp, TRANSPARENT);
 		}
-		break;
+		return TRUE;
 
 	case WM_CTLCOLOREDIT:
 		{
+			lr = GetColorOrBrush(DM_WINDOW, FALSE);
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 			::SetBkColor((HDC)wp, DM_WINDOW);
 			::SetBkMode((HDC)wp, OPAQUE);
-
-			RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
 		}
-		break;
+		return TRUE;
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
@@ -864,13 +878,19 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 			::SetBkMode((HDC)wp, TRANSPARENT);
 
+			// There's a very strange occurrence that if we return
+			// the existing cached DM_WINDOW brush here then it 
+			// somehow fails to get used and instead the DM_3DFACE
+			// brush gets used even though it's not the returned 
+			// brush. Through trial and error I determined that
+			// modifying the color to be unique and hence return a
+			// unique brush is sufficient to 'fix' the issue.
 			if (IsParentPreferencePage((HWND)lp))
-				RETURN_LRESULT_STATIC_BRUSH(DM_WINDOW);
-			
-			// else
-			RETURN_LRESULT_STATIC_BRUSH(DM_3DFACE);
+				lr = GetColorOrBrush(DM_WINDOW + 1, FALSE);
+			else
+				lr = GetColorOrBrush(DM_3DFACE, FALSE);
 		}
-		break;
+		return TRUE;
 
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
 		if (wp)

@@ -22,10 +22,17 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+//////////////////////////////////////////////////////////////////////
+
 EXTERN_C const GUID CDECL IID_ITextDocument = 
 	{ 0x8CC497C0, 0xA1DF, 0x11CE, { 0x80, 0x98, 0x00, 0xAA, 0x00, 0x47, 0xBE, 0x5D} };
 
 #define RELEASE_INTERFACE(i) if (i) { i->Release(); i = NULL; }
+
+//////////////////////////////////////////////////////////////////////
+
+static HINSTANCE s_hRichEdit20 = NULL;
+static HINSTANCE s_hRichEdit50 = NULL;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -139,19 +146,16 @@ BOOL CRichEditHelper::CreateRichEdit(CWnd& wnd, LPCTSTR szClass, DWORD dwStyle, 
 
 BOOL CRichEditHelper::InitRichEdit()
 {
-	static HINSTANCE hRichEdit20 = NULL;
-	static HINSTANCE hRichEdit50 = NULL;
-
 	if (!AfxInitRichEdit())
 		return FALSE;
 
-	if (!hRichEdit20)
-		hRichEdit20 = LoadLibrary(_T("riched20.dll"));
+	if (!s_hRichEdit20)
+		s_hRichEdit20 = LoadLibrary(_T("riched20.dll"));
 
-	if (!hRichEdit50)
-		hRichEdit50 = LoadLibrary(_T("msftedit.dll"));
+	if (!s_hRichEdit50)
+		s_hRichEdit50 = LoadLibrary(_T("msftedit.dll"));
 
-	return (hRichEdit20 != NULL || hRichEdit50 != NULL);
+	return (s_hRichEdit20 != NULL || s_hRichEdit50 != NULL);
 }
 
 void CRichEditHelper::ClearUndo(HWND hWnd)
