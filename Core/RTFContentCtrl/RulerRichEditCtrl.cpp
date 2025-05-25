@@ -1171,7 +1171,7 @@ void CRulerRichEditCtrl::SetCurrentFontColor(COLORREF color, BOOL bForeground)
 		{
 			cf.dwEffects = CFE_AUTOCOLOR;
 		}
-		else if (CDarkMode::IsEnabled() && (color == colorWhite))
+		else if ((color == colorWhite) && CDarkMode::IsEnabled())
 		{
 			cf.dwEffects = CFE_AUTOCOLOR;
 		}
