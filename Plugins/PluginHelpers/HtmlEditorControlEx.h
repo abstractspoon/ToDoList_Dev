@@ -52,6 +52,7 @@ namespace Abstractspoon
 
 			protected:
 				virtual void OnLoad(EventArgs^ args) override;
+				virtual bool ExecuteCommandRange(MSHTML::IHTMLTxtRange^ range, String^ command, Object^ data) override;
 
 			protected:
 				void InitializeComponentEx();

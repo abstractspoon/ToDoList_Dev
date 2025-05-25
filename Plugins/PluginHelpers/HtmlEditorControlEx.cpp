@@ -11,6 +11,7 @@
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
 #include <shared\Rtf2HtmlConverter.h>
+#include <shared\DarkMode.h>
 
 #include <3rdParty\ClipboardBackup.h>
 
@@ -22,6 +23,7 @@ using namespace System::Windows::Forms;
 using namespace MSDN::Html::Editor;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 using namespace Command::Handling;
+using namespace System::Collections::Generic;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -376,4 +378,57 @@ bool HtmlEditorControlEx::InitialiseClipboardSupport()
 	}
 
 	return (s_ClipboardEnabled != -1);
+}
+
+bool HtmlEditorControlEx::ExecuteCommandRange(MSHTML::IHTMLTxtRange^ range, String^ command, Object^ data)
+{
+	// Replace white text in Dark Mode with 'auto-colour'
+	if (command->Equals(HtmlEditorControl::HTML_COMMAND_FORE_COLOR) && CDarkMode::IsEnabled())
+	{
+		String^ color = ASTYPE(data, String);
+
+		if (color->Equals("White"))
+		{
+			cli::array<String^>^ AttribCmds = 
+			{
+			HTML_COMMAND_BOLD,
+			HTML_COMMAND_UNDERLINE,
+			HTML_COMMAND_ITALIC,
+			HTML_COMMAND_SUBSCRIPT,
+			HTML_COMMAND_SUPERSCRIPT,
+			HTML_COMMAND_STRIKE_THROUGH,
+			HTML_COMMAND_FONT_NAME,
+			HTML_COMMAND_FONT_SIZE,
+			};
+
+			cli::array<Object^>^ AttribVals = gcnew cli::array<Object ^>(AttribCmds->Length);
+
+			for (int attrib = 0; attrib < AttribCmds->Length; attrib++)
+			{
+				AttribVals[attrib] = QueryCommandRange(range, AttribCmds[attrib]);
+			}
+
+			if (HtmlEditorControl::ExecuteCommandRange(range, HtmlEditorControl::HTML_COMMAND_REMOVE_FORMAT, nullptr))
+			{
+				// restore all the other removed attributes
+				for (int attrib = 0; attrib < AttribCmds->Length; attrib++)
+				{
+					// Only re-apply boolean attributes if they are true
+					if (ISTYPE(AttribVals[attrib], bool))
+					{
+						bool^ val = ASTYPE(AttribVals[attrib], bool);
+
+						if (!(*val))
+							continue;
+					}
+
+					ExecuteCommandRange(range, AttribCmds[attrib], AttribVals[attrib]);
+				}
+
+				return true;
+			}
+		}
+	}
+
+	return HtmlEditorControl::ExecuteCommandRange(range, command, data);
 }
