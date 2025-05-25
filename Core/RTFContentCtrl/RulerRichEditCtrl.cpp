@@ -1085,7 +1085,6 @@ void CRulerRichEditCtrl::DoFont()
 		height = cf.yHeight;
 		height = -(int) ((double) height * twip +.5);
 		lf.lfHeight = height;
-
 	}
 
 	// Effects
@@ -1114,14 +1113,15 @@ void CRulerRichEditCtrl::DoFont()
 
 	if (dlg.DoModal() == IDOK)
 	{
+		cf.dwMask = cf.dwEffects = 0;
+		PrepareCharFormat(cf, dlg.GetColor(), TRUE);
+
 		// Apply new font
 		cf.yHeight = dlg.GetSize() * 2;
 		lstrcpy(cf.szFaceName, dlg.GetFaceName());
 
-		cf.dwMask = CFM_FACE | CFM_SIZE | CFM_COLOR | CFM_BOLD | 
-					CFM_ITALIC | CFM_UNDERLINE | CFM_STRIKEOUT;
-		cf.dwEffects = 0;
-		cf.crTextColor = dlg.GetColor();
+		cf.dwMask |= CFM_FACE | CFM_SIZE | CFM_BOLD | 
+					 CFM_ITALIC | CFM_UNDERLINE | CFM_STRIKEOUT;
 
 		if (dlg.IsBold())
 			cf.dwEffects |= CFE_BOLD;
@@ -1136,18 +1136,14 @@ void CRulerRichEditCtrl::DoFont()
 			cf.dwEffects |= CFE_STRIKEOUT;
 
 		m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
-/*
-		m_toolbar.SetFontColor(cf.crTextColor, TRUE);
-*/
 	}
 
 	m_rtf.SetFocus();
-
 }
 
 void CRulerRichEditCtrl::SetCurrentFontName(const CString& font)
 {
-	CharFormat	cf(CFM_FACE);
+	CharFormat cf(CFM_FACE);
 	lstrcpy(cf.szFaceName, font);
 
 	m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
@@ -1155,7 +1151,7 @@ void CRulerRichEditCtrl::SetCurrentFontName(const CString& font)
 
 void CRulerRichEditCtrl::SetCurrentFontSize(int size)
 {
-	CharFormat	cf(CFM_SIZE);
+	CharFormat cf(CFM_SIZE);
 	cf.yHeight = size * 20;
 
 	m_rtf.SetSelectionCharFormat(cf);
@@ -1163,10 +1159,18 @@ void CRulerRichEditCtrl::SetCurrentFontSize(int size)
 
 void CRulerRichEditCtrl::SetCurrentFontColor(COLORREF color, BOOL bForeground)
 {
-	CharFormat	cf(bForeground ? CFM_COLOR : CFM_BACKCOLOR);
+	CharFormat cf;
+	PrepareCharFormat(cf, color, bForeground);
 
+	m_rtf.SetSelectionCharFormat(cf);
+}
+
+void CRulerRichEditCtrl::PrepareCharFormat(CharFormat& cf, COLORREF color, BOOL bForeground)
+{
 	if (bForeground)
 	{
+		cf.dwMask |= CFM_COLOR;
+
 		if (color == CLR_DEFAULT)
 		{
 			cf.dwEffects = CFE_AUTOCOLOR;
@@ -1177,18 +1181,24 @@ void CRulerRichEditCtrl::SetCurrentFontColor(COLORREF color, BOOL bForeground)
 		}
 		else
 		{
+			cf.dwEffects &= ~CFE_AUTOCOLOR;
 			cf.crTextColor = color;
 		}
 	}
 	else // background
 	{
-		if (color == CLR_DEFAULT)
-			cf.dwEffects = CFE_AUTOBACKCOLOR;
-		else
-			cf.crBackColor = color;
-	}
+		cf.dwMask |= CFM_BACKCOLOR;
 
-	m_rtf.SetSelectionCharFormat(cf);
+		if (color == CLR_DEFAULT)
+		{
+			cf.dwEffects = CFE_AUTOBACKCOLOR;
+		}
+		else
+		{
+			cf.dwEffects &= ~CFE_AUTOCOLOR;
+			cf.crBackColor = color;
+		}
+	}
 }
 
 void CRulerRichEditCtrl::DoColor()
@@ -1208,9 +1218,7 @@ void CRulerRichEditCtrl::DoColor()
 	if (dlg.DoModal() == IDOK)
 	{
 		// Apply new color
-		cf.dwMask = CFM_COLOR;
-		cf.dwEffects = 0;
-		cf.crTextColor = dlg.GetColor();
+		PrepareCharFormat(cf, dlg.GetColor(), TRUE);
 
 		m_rtf.SetSelectionCharFormat(cf);
 	}
