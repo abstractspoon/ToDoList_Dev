@@ -64,6 +64,7 @@ IIMPORTEXPORT_RESULT CTaskListHtmlExporter::ExportOutput(LPCTSTR szDestFilePath,
 	sHtmlOutput += _T("<style type=\"text/css\">\n");
 	sHtmlOutput += _T("@media print { thead {display: table-header-group;} }\n");
 	sHtmlOutput += _T("table { border-collapse: collapse; }\n");
+	sHtmlOutput += _T("body { color:Black;background-color:White; } \n");
 	sHtmlOutput += _T("</style>\n");
 	sHtmlOutput += _T("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n");
 	sHtmlOutput += CHARSET;
