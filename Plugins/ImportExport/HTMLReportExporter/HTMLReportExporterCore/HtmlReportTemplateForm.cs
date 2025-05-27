@@ -296,7 +296,7 @@ namespace HTMLReportExporter
 				var tbHotColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarHot);
 
 				// Windows doesn't report the actual tab control back colour
-				if (!theme.IsDarkMode())
+				if (!UITheme.IsDarkMode())
 				{
 					tbBackColor = SystemColors.Window;
 					tbHotColor = SystemColors.Control;

@@ -20,6 +20,7 @@
 
 using namespace System::Runtime::InteropServices;
 using namespace System::Windows::Forms;
+using namespace System::Windows::Forms::VisualStyles;
 using namespace System::Drawing;
 using namespace System::Drawing::Drawing2D;
 
@@ -283,19 +284,39 @@ void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventAr
 		BaseToolbarRenderer::OnRenderButtonBackground(e);
 }
 
+Drawing::Brush^ UIThemeToolbarRenderer::GetMenuBrush(bool bMenuBar, bool bSelection)
+{
+	if ((COSVersion() >= OSV_WIN10) && bMenuBar)
+		return Drawing::Brushes::White;
+
+	if (UITheme::IsDarkMode())
+	{
+		// Best estimates
+		if (bSelection)
+		{
+			const Drawing::Color MenuSelection = Drawing::Color::FromArgb(128, 160, 215, 255);
+			return gcnew SolidBrush(MenuSelection);
+		}
+
+		const Drawing::Color MenuBack = Drawing::Color::FromArgb(240, 240, 240);
+		return gcnew SolidBrush(MenuBack);
+	}
+
+	if (bSelection)
+		return gcnew SolidBrush(Drawing::Color::FromArgb(128, Drawing::SystemColors::MenuHighlight));
+
+	return Drawing::SystemBrushes::Menu;
+}
+
 void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEventArgs^ e)
 {
-	if ((COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
+	if (!SystemInformation::HighContrast && VisualStyleRenderer::IsSupported)
 	{
 		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
 		bool isMenuBar = (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip));
 
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
-
-		if (isMenuBar)
-			e->Graphics->FillRectangle(Drawing::Brushes::White, rect); // to match core app
-		else
-			e->Graphics->FillRectangle(Drawing::SystemBrushes::Menu, rect);
+		e->Graphics->FillRectangle(GetMenuBrush(isMenuBar, false), rect);
 
 		auto itemState = Toolbars::GetItemState(e->Item);
 
@@ -307,7 +328,7 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 				rect.Width--;
 			}
 
-			if (isMenuBar) 
+			if (isMenuBar)
 			{
 				// If we're a top-level item use themed selection
 				UIExtension::SelectionRect::Draw(e->ToolStrip->Handle, e->Graphics, rect.X, rect.Y, rect.Width, rect.Height, true);
@@ -315,9 +336,7 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 			else
 			{
 				rect.Inflate(-1, 0);
-				auto selColor = Drawing::Color::FromArgb(128, Drawing::SystemColors::MenuHighlight);
-
-				e->Graphics->FillRectangle(gcnew Drawing::SolidBrush(selColor), rect);
+				e->Graphics->FillRectangle(GetMenuBrush(isMenuBar, true), rect);
 			}
 		}
 	}
@@ -329,18 +348,15 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 
 void UIThemeToolbarRenderer::OnRenderItemCheck(ToolStripItemImageRenderEventArgs^ e)
 {
-	if ((COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
+	if (!SystemInformation::HighContrast && VisualStyleRenderer::IsSupported)
 	{
-		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
-		bool isMenuBar = (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip));
+		Drawing::Rectangle checkRect(Point(2, 0), Drawing::Size(e->Item->Size.Height, e->Item->Size.Height));
 
-		Drawing::Rectangle checkRect(Point::Empty, Drawing::Size(e->Item->Size.Height, e->Item->Size.Height));
-		Drawing::Rectangle imageRect(Point::Empty, DPIScaling::UnScale(e->ImageRectangle.Size));
+		VisualStyleRenderer^ vsr = gcnew VisualStyleRenderer(L"MENU", MENU_POPUPCHECKBACKGROUND, MCB_NORMAL);
+		vsr->DrawBackground(e->Graphics, checkRect);
 
-		e->Graphics->DrawImage(e->Image, checkRect, imageRect, System::Drawing::GraphicsUnit::Pixel);
-
-		auto selColor = Color::FromArgb(128, Drawing::SystemColors::MenuHighlight);
-		e->Graphics->FillRectangle(gcnew Drawing::SolidBrush(selColor), checkRect);
+		vsr->SetParameters(L"MENU", MENU_POPUPCHECK, MC_CHECKMARKNORMAL);
+		vsr->DrawBackground(e->Graphics, checkRect);
 	}
 	else
 	{
@@ -348,13 +364,31 @@ void UIThemeToolbarRenderer::OnRenderItemCheck(ToolStripItemImageRenderEventArgs
 	}
 }
 
+void UIThemeToolbarRenderer::OnRenderItemImage(Windows::Forms::ToolStripItemImageRenderEventArgs^ e)
+{
+	// Don't draw menu item image if the item is checked
+	// else if will conceal the checkbox
+	if (!SystemInformation::HighContrast && VisualStyleRenderer::IsSupported)
+	{
+ 		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
+
+		if ((menuItem != nullptr) && menuItem->Checked)
+			return;
+	}
+
+	// all else
+	BaseToolbarRenderer::OnRenderItemImage(e);
+}
+
 void UIThemeToolbarRenderer::OnRenderSeparator(ToolStripSeparatorRenderEventArgs^ e)
 {
-	if (!e->Vertical && ISTYPE(e->ToolStrip, ToolStripDropDownMenu) && 
-		(COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
+	if (!e->Vertical && 
+		ISTYPE(e->ToolStrip, ToolStripDropDownMenu) && 
+		!SystemInformation::HighContrast &&
+		VisualStyleRenderer::IsSupported)
 	{
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
-		e->Graphics->FillRectangle(Drawing::SystemBrushes::Menu, rect);
+		e->Graphics->FillRectangle(GetMenuBrush(false, false), rect);
 
 		rect.Y += (rect.Height / 2);
 		e->Graphics->DrawLine(Pens::LightGray, rect.Left, rect.Y, rect.Right, rect.Y);
@@ -371,7 +405,8 @@ void UIThemeToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e
 
 	// Mimic core app menu border rendering
 	if (ISTYPE(e->ToolStrip, ToolStripDropDownMenu) &&
-		(COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
+		!SystemInformation::HighContrast &&
+		VisualStyleRenderer::IsSupported)
 	{
 		auto rect = e->AffectedBounds;
 

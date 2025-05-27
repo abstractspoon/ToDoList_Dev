@@ -65,9 +65,9 @@ namespace Abstractspoon
 
 				bool HasAppColor(AppColor color);
 				void RecalcToolbarHotColor();
-				bool IsDarkMode();
 
 				static void DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style);
+				static bool IsDarkMode();
 
 			private:
 				CUIThemeFile* m_pTheme;
@@ -97,6 +97,7 @@ namespace Abstractspoon
 				virtual void OnRenderToolStripBorder(Windows::Forms::ToolStripRenderEventArgs^ e) override;
 				virtual void OnRenderItemText(Windows::Forms::ToolStripItemTextRenderEventArgs^ e) override;
 				virtual void OnRenderItemCheck(Windows::Forms::ToolStripItemImageRenderEventArgs^ e) override;
+				virtual void OnRenderItemImage(Windows::Forms::ToolStripItemImageRenderEventArgs^ e) override;
 
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow, bool isMenuBar) override;
 				virtual Drawing::Pen^ GetSeperatorLightPen() override;
@@ -116,6 +117,7 @@ namespace Abstractspoon
 				void DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ arrowRect);
 				bool DrawButtonBackground(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect, Toolbars::ItemState state);
 
+				static Drawing::Brush^ GetMenuBrush(bool bMenuBar, bool bSelection);
 			};
 
 		}
