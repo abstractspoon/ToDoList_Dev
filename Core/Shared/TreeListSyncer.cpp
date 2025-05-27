@@ -1398,6 +1398,9 @@ void CTreeListSyncer::ResyncListHeader(HWND hwnd)
 
 BOOL CTreeListSyncer::GetHScrollDeadSpace(CRect& rDead) const
 {
+	if (!m_scLeft.IsWindowVisible() || !m_scRight.IsWindowVisible())
+		return FALSE;
+
 	rDead.SetRectEmpty();
 
 	CRect rLeft;
@@ -1414,7 +1417,7 @@ BOOL CTreeListSyncer::GetHScrollDeadSpace(CRect& rDead) const
 		rDead.top = rDead.bottom;
 		rDead.bottom = rLeft.bottom;
 	}
-	else // rRight.bottomrLeft > .bottom
+	else // rRight.bottom > rLeft.bottom
 	{
 		rDead = rLeft;
 		rDead.top = rDead.bottom;
@@ -1434,6 +1437,16 @@ void CTreeListSyncer::SetSplitBarColor(COLORREF crSplitBar)
 
 BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 {
+	// If everything is hidden then don't proceed
+	HWND hwndPrimary = PrimaryWnd();
+
+	if (!::IsWindowVisible(hwndPrimary) &&
+		!::IsWindowVisible(OtherWnd(hwndPrimary)) &&
+		!::IsWindowVisible(m_hwndPrimaryHeader))
+	{
+		return FALSE;
+	}
+
 	BOOL bHandled = FALSE;
 	CRect rDead;
 
@@ -1444,7 +1457,7 @@ BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 #else
 		CThemed th;
 		
-		if (th.IsNonClientThemed() && th.Open(GetCWnd(), _T("SCROLLBAR")))
+		if (th.IsNonClientThemed() && th.Open(hwndPrimary, _T("SCROLLBAR")))
 			th.DrawBackground(pDC, SBP_LOWERTRACKHORZ, SCRBS_NORMAL, rDead);
 		else
 			pDC->FillSolidRect(rDead, ::GetSysColor(COLOR_SCROLLBAR));
@@ -1456,7 +1469,7 @@ BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 
 	CRect rHeader;
 
-	if (OsIsLinux() && GetHeaderRect(PrimaryWnd(), rHeader, NULL))
+	if (OsIsLinux() && GetHeaderRect(hwndPrimary, rHeader, NULL))
 	{
 		rHeader.top = (rHeader.bottom - LINUX_VOFFSET_FUDGE);
 
