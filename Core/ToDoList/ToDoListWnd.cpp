@@ -6754,9 +6754,12 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg)
 
 				sHtmlOutput += _T("<html>\n<head>\n");
 				sHtmlOutput += _T("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-16\">\n");
-				sHtmlOutput += _T("</head>\n<style>\n");
+				sHtmlOutput += _T("</head>\n");
+				sHtmlOutput += _T("<style>\n");
+ 				sHtmlOutput += _T("body { color:Black;background-color:White; } \n");
 				sHtmlOutput += _T("img { max-width: 100%; } \n");
-				sHtmlOutput += _T("</style>\n<body>\n");
+				sHtmlOutput += _T("</style>\n");
+				sHtmlOutput += _T("<body>\n");
 
 				CString sTitle = dlg.GetTitle(), sDate = CDateHelper::FormatDate(dlg.GetDate());
 
