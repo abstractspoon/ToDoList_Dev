@@ -120,9 +120,7 @@ namespace Abstractspoon
 				void DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ arrowRect);
 				bool DrawButtonBackground(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect, Toolbars::ItemState state);
 
-				static Drawing::Brush^ GetMenuBackBrush();
-				static Drawing::Pen^ GetMenuBackPen();
-				static void DrawThemedMenu(Drawing::Graphics^ g, Drawing::Rectangle^ rect, int part, int state);
+				static bool DrawStyledMenu(Drawing::Graphics^ g, Drawing::Rectangle^ rect, int part, int state);
 				static bool IsStyled();
 			};
 

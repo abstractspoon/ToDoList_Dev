@@ -284,30 +284,18 @@ void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventAr
 		BaseToolbarRenderer::OnRenderButtonBackground(e);
 }
 
-Drawing::Brush^ UIThemeToolbarRenderer::GetMenuBackBrush()
-{
-	if (UITheme::IsDarkMode())
-		return gcnew SolidBrush(Drawing::Color::FromArgb(240, 240, 240));
+bool UIThemeToolbarRenderer::DrawStyledMenu(Drawing::Graphics^ g, Drawing::Rectangle^ rect, int part, int state)
+{ 
+	if (COSVersion() < OSV_VISTA)
+		return false;
 
-	return Drawing::SystemBrushes::Menu;
-}
-
-Drawing::Pen^ UIThemeToolbarRenderer::GetMenuBackPen()
-{
-	if (UITheme::IsDarkMode())
-		return gcnew Pen(Drawing::Color::FromArgb(240, 240, 240));
-
-	return Drawing::SystemPens::Menu;
-}
-
-void UIThemeToolbarRenderer::DrawThemedMenu(Drawing::Graphics^ g, Drawing::Rectangle^ rect, int part, int state)
-{
 	if (s_vsRenderer == nullptr)
 		s_vsRenderer = gcnew VisualStyleRenderer(L"MENU", part, state);
 	else
 		s_vsRenderer->SetParameters(L"MENU", part, state);
 
 	s_vsRenderer->DrawBackground(g, *rect);
+	return true;
 }
 
 bool UIThemeToolbarRenderer::IsStyled()
@@ -323,7 +311,7 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
 
 		if (!isMenuBar)
-			e->Graphics->FillRectangle(GetMenuBackBrush(), rect);
+			e->Graphics->FillRectangle(Drawing::SystemBrushes::Menu, rect);
 
 		auto itemState = Toolbars::GetItemState(e->Item);
 
@@ -339,7 +327,12 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 				rect.Height--;
 			}
 
-			DrawThemedMenu(e->Graphics, rect, part, state);
+			if (!DrawStyledMenu(e->Graphics, rect, part, state))
+			{
+				// Handle XP
+				rect.Height--;
+ 				e->Graphics->FillRectangle(SystemBrushes::MenuHighlight, rect);
+			}
 		}
 	}
 	else
@@ -354,8 +347,15 @@ void UIThemeToolbarRenderer::OnRenderItemCheck(ToolStripItemImageRenderEventArgs
 	{
 		Drawing::Rectangle checkRect(Point(2, 0), Drawing::Size(e->Item->Size.Height, e->Item->Size.Height));
 
-		DrawThemedMenu(e->Graphics, checkRect, MENU_POPUPCHECKBACKGROUND, MCB_NORMAL);
-		DrawThemedMenu(e->Graphics, checkRect, MENU_POPUPCHECK, MC_CHECKMARKNORMAL);
+		if (DrawStyledMenu(e->Graphics, checkRect, MENU_POPUPCHECKBACKGROUND, MCB_NORMAL))
+		{
+			DrawStyledMenu(e->Graphics, checkRect, MENU_POPUPCHECK, MC_CHECKMARKNORMAL);
+		}
+		else
+		{
+			// Handle XP by bypassing ToolStripProfessionalRenderer
+			ToolStripRenderer::OnRenderItemCheck(e);
+		}
 	}
 	else
 	{
@@ -365,7 +365,7 @@ void UIThemeToolbarRenderer::OnRenderItemCheck(ToolStripItemImageRenderEventArgs
 
 void UIThemeToolbarRenderer::OnRenderItemImage(Windows::Forms::ToolStripItemImageRenderEventArgs^ e)
 {
-	// Don't draw menu item image if the item already has a checkbox
+	// Don't draw menu item image if the item already has a check-box
 	if (IsStyled())
 	{
  		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
@@ -385,7 +385,7 @@ void UIThemeToolbarRenderer::OnRenderSeparator(ToolStripSeparatorRenderEventArgs
 		IsStyled())
 	{
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
-		e->Graphics->FillRectangle(GetMenuBackBrush(), rect);
+		e->Graphics->FillRectangle(Drawing::SystemBrushes::Menu, rect);
 
 		rect.Y += (rect.Height / 2);
 		e->Graphics->DrawLine(Pens::LightGray, rect.Left, rect.Y, rect.Right, rect.Y);
@@ -410,7 +410,7 @@ void UIThemeToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e
 		e->Graphics->DrawRectangle(Pens::LightGray, rect);
 		
 		rect.Inflate(-1, -1);
-		e->Graphics->DrawRectangle(GetMenuBackPen(), rect);
+		e->Graphics->DrawRectangle(Drawing::SystemPens::Menu, rect);
 	}
 }
 
@@ -418,39 +418,42 @@ void UIThemeToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArg
 {
 	BaseToolbarRenderer::OnRenderToolStripBackground(e);
 
-	// Mimic core app menu border rendering
 	if (IsStyled())
 	{
-		if (ISTYPE(e->ToolStrip, ToolStripDropDownMenu))
+		if (ISTYPE(e->ToolStrip, MenuStrip))
 		{
-			auto rect = e->AffectedBounds;
-
-			rect.Width--;
-			rect.Height--;
-			e->Graphics->DrawRectangle(Pens::LightGray, rect);
-
-			rect.Inflate(-1, -1);
-			e->Graphics->DrawRectangle(GetMenuBackPen(), rect);
-		}
-		else if (ISTYPE(e->ToolStrip, MenuStrip))
-		{
-			DrawThemedMenu(e->Graphics, e->AffectedBounds, MENU_BARBACKGROUND, MB_ACTIVE);
+			if (!DrawStyledMenu(e->Graphics, e->AffectedBounds, MENU_BARBACKGROUND, MB_ACTIVE))
+			{
+ 				// Handle XP
+ 				e->Graphics->FillRectangle(SystemBrushes::MenuBar, e->AffectedBounds);
+			}
 		}
 	}
 }
 
 void UIThemeToolbarRenderer::OnRenderItemText(ToolStripItemTextRenderEventArgs^ e)
 {
+	// Buttons wih text
 	if (!ISTYPE(e->Item->Owner, ToolStripDropDownMenu) && !e->Item->Enabled)
 	{
 		auto brush = gcnew SolidBrush(DrawingColor::GetBestTextColor(m_BkgndLightColor, false));
-		
 		e->Graphics->DrawString(e->Text, e->TextFont, brush, e->TextRectangle);
+
+		return;
 	}
-	else
+
+	// Handle XP menu items by bypassing ToolStripProfessionalRenderer
+	if (COSVersion() < OSV_VISTA)
 	{
-		BaseToolbarRenderer::OnRenderItemText(e);
+		if (ISTYPE(e->ToolStrip, ToolStripDropDownMenu) || ISTYPE(e->ToolStrip, MenuStrip))
+ 		{
+			ToolStripRenderer::OnRenderItemText(e);
+			return;
+ 		}
 	}
+	
+	// All else
+	BaseToolbarRenderer::OnRenderItemText(e);
 }
 
 void UIThemeToolbarRenderer::OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs^ e)
