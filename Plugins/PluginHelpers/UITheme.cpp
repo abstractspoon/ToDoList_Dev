@@ -524,7 +524,7 @@ void UIThemeToolbarRenderer::DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectan
 	int arrowX = arrowRect->Left + ((arrowRect->Width - dX) / 2);
 	int arrowY = arrowRect->Top + ((arrowRect->Height / 2) - 1);
 
-	auto arrowBrush = (/*Enabled ?*/ SystemBrushes::ControlText/* : SystemBrushes.ButtonShadow*/);
+	auto arrowBrush = SystemBrushes::WindowText;
 
 	cli::array<Drawing::Point>^ arrow = gcnew cli::array<Drawing::Point>(3)
  	{
