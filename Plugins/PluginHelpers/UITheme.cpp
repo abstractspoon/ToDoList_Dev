@@ -284,28 +284,25 @@ void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventAr
 		BaseToolbarRenderer::OnRenderButtonBackground(e);
 }
 
-Drawing::Brush^ UIThemeToolbarRenderer::GetMenuBrush(bool bMenuBar, bool bSelection)
+Drawing::Brush^ UIThemeToolbarRenderer::GetMenuBrush(bool bMenuBar)
 {
 	if ((COSVersion() >= OSV_WIN10) && bMenuBar)
 		return Drawing::Brushes::White;
 
 	if (UITheme::IsDarkMode())
-	{
-		// Best estimates
-		if (bSelection)
-		{
-			const Drawing::Color MenuSelection = Drawing::Color::FromArgb(128, 160, 215, 255);
-			return gcnew SolidBrush(MenuSelection);
-		}
-
-		const Drawing::Color MenuBack = Drawing::Color::FromArgb(240, 240, 240);
-		return gcnew SolidBrush(MenuBack);
-	}
-
-	if (bSelection)
-		return gcnew SolidBrush(Drawing::Color::FromArgb(128, Drawing::SystemColors::MenuHighlight));
+		return gcnew SolidBrush(Drawing::Color::FromArgb(240, 240, 240));
 
 	return Drawing::SystemBrushes::Menu;
+}
+
+void UIThemeToolbarRenderer::DrawThemedMenu(Drawing::Graphics^ g, Drawing::Rectangle^ rect, int part, int state)
+{
+	if (s_vsRenderer == nullptr)
+		s_vsRenderer = gcnew VisualStyleRenderer(L"MENU", part, state);
+	else
+		s_vsRenderer->SetParameters(L"MENU", part, state);
+
+	s_vsRenderer->DrawBackground(g, *rect);
 }
 
 void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEventArgs^ e)
@@ -316,28 +313,21 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 		bool isMenuBar = (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip));
 
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
-		e->Graphics->FillRectangle(GetMenuBrush(isMenuBar, false), rect);
+
+		if (isMenuBar)
+			DrawThemedMenu(e->Graphics, rect, MENU_BARBACKGROUND, MB_ACTIVE);
+		else
+			e->Graphics->FillRectangle(GetMenuBrush(false), rect);
 
 		auto itemState = Toolbars::GetItemState(e->Item);
 
-		if ((itemState == Toolbars::ItemState::Hot) || (itemState == Toolbars::ItemState::Pressed))
+		if ((itemState == Toolbars::ItemState::Hot) || 
+			(itemState == Toolbars::ItemState::Pressed))
 		{
-			if (menuItem->Bounds.X > 0)
-			{
-				rect.X++;
-				rect.Width--;
-			}
-
-			if (isMenuBar)
-			{
-				// If we're a top-level item use themed selection
-				UIExtension::SelectionRect::Draw(e->ToolStrip->Handle, e->Graphics, rect.X, rect.Y, rect.Width, rect.Height, true);
-			}
-			else
-			{
-				rect.Inflate(-1, 0);
-				e->Graphics->FillRectangle(GetMenuBrush(isMenuBar, true), rect);
-			}
+			DrawThemedMenu(e->Graphics, 
+						   rect, 
+						   (isMenuBar ? MENU_BARITEM : MENU_POPUPITEM), 
+						   (isMenuBar ? MBI_HOT : MPI_HOT));
 		}
 	}
 	else
@@ -352,11 +342,8 @@ void UIThemeToolbarRenderer::OnRenderItemCheck(ToolStripItemImageRenderEventArgs
 	{
 		Drawing::Rectangle checkRect(Point(2, 0), Drawing::Size(e->Item->Size.Height, e->Item->Size.Height));
 
-		VisualStyleRenderer^ vsr = gcnew VisualStyleRenderer(L"MENU", MENU_POPUPCHECKBACKGROUND, MCB_NORMAL);
-		vsr->DrawBackground(e->Graphics, checkRect);
-
-		vsr->SetParameters(L"MENU", MENU_POPUPCHECK, MC_CHECKMARKNORMAL);
-		vsr->DrawBackground(e->Graphics, checkRect);
+		DrawThemedMenu(e->Graphics, checkRect, MENU_POPUPCHECKBACKGROUND, MCB_NORMAL);
+		DrawThemedMenu(e->Graphics, checkRect, MENU_POPUPCHECK, MC_CHECKMARKNORMAL);
 	}
 	else
 	{
@@ -388,7 +375,7 @@ void UIThemeToolbarRenderer::OnRenderSeparator(ToolStripSeparatorRenderEventArgs
 		VisualStyleRenderer::IsSupported)
 	{
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
-		e->Graphics->FillRectangle(GetMenuBrush(false, false), rect);
+		e->Graphics->FillRectangle(GetMenuBrush(false), rect);
 
 		rect.Y += (rect.Height / 2);
 		e->Graphics->DrawLine(Pens::LightGray, rect.Left, rect.Y, rect.Right, rect.Y);

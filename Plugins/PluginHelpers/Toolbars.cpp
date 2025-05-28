@@ -122,11 +122,11 @@ Toolbars::ItemState Toolbars::GetItemState(ToolStripItem^ item)
 	if (!item->Enabled)
 		return Toolbars::ItemState::Disabled;
 
-	if (item->Pressed)
-		return Toolbars::ItemState::Pressed;
-
 	if (item->Selected)
 		return Toolbars::ItemState::Hot;
+
+	if (item->Pressed)
+		return Toolbars::ItemState::Pressed;
 
 	if (ISTYPE(item, ToolStripButton) && ASTYPE(item, ToolStripButton)->Checked)
 		return Toolbars::ItemState::Checked;

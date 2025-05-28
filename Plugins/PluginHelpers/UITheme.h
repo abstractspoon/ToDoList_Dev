@@ -112,12 +112,15 @@ namespace Abstractspoon
 
 				UITheme::RenderStyle m_Style;
 
+				static System::Windows::Forms::VisualStyles::VisualStyleRenderer^ s_vsRenderer = nullptr;
+
 				bool ValidColours();
 				bool RenderButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e);
 				void DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ arrowRect);
 				bool DrawButtonBackground(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect, Toolbars::ItemState state);
 
-				static Drawing::Brush^ GetMenuBrush(bool bMenuBar, bool bSelection);
+				static Drawing::Brush^ GetMenuBrush(bool bMenuBar);
+				static void DrawThemedMenu(Drawing::Graphics^ g, Drawing::Rectangle^ rect, int part, int state);
 			};
 
 		}
