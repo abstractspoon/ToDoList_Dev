@@ -38,8 +38,6 @@ public:
 
 	BOOL LoadMenu();
 	BOOL LoadMenu(const CPreferencesDlg& prefs);
-	void UpdateBackgroundColor();
-	void SetUITheme(const UITHEME& theme);
 
 	BOOL HandleInitMenuPopup(CMenu* pPopupMenu, 
 							 const CFilteredToDoCtrl& tdc, 

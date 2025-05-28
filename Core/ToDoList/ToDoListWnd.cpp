@@ -958,7 +958,6 @@ void CToDoListWnd::InitUITheme()
 		m_theme.Reset();
 
 	m_pPrefs->SetUITheme(m_theme);
-	m_menubar.SetUITheme(m_theme);
 }
 	
 void CToDoListWnd::UpdateUITheme()
