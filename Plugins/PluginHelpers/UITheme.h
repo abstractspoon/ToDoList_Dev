@@ -94,12 +94,13 @@ namespace Abstractspoon
 				virtual void OnRenderOverflowButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderSplitButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e) override;
+				virtual void OnRenderToolStripBackground(Windows::Forms::ToolStripRenderEventArgs^ e) override;
 				virtual void OnRenderToolStripBorder(Windows::Forms::ToolStripRenderEventArgs^ e) override;
 				virtual void OnRenderItemText(Windows::Forms::ToolStripItemTextRenderEventArgs^ e) override;
 				virtual void OnRenderItemCheck(Windows::Forms::ToolStripItemImageRenderEventArgs^ e) override;
 				virtual void OnRenderItemImage(Windows::Forms::ToolStripItemImageRenderEventArgs^ e) override;
 
-				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow, bool isMenuBar) override;
+				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow/*, bool isMenuBar*/) override;
 				virtual Drawing::Pen^ GetSeperatorLightPen() override;
 				virtual Drawing::Pen^ GetSeperatorDarkPen() override;
 
@@ -119,8 +120,10 @@ namespace Abstractspoon
 				void DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ arrowRect);
 				bool DrawButtonBackground(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect, Toolbars::ItemState state);
 
-				static Drawing::Brush^ GetMenuBrush(bool bMenuBar);
+				static Drawing::Brush^ GetMenuBackBrush();
+				static Drawing::Pen^ GetMenuBackPen();
 				static void DrawThemedMenu(Drawing::Graphics^ g, Drawing::Rectangle^ rect, int part, int state);
+				static bool IsStyled();
 			};
 
 		}
