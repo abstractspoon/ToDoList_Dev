@@ -902,7 +902,8 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
 			}
-			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
+			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
+					 CWinClasses::IsWinFormsControl(sClass, WC_COMBOBOX))
 			{
 				DWORD dwStyle = ::GetWindowLong(hWnd, GWL_STYLE);
 
@@ -925,7 +926,8 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					HookWindow(hWnd, new CDarkModeComboBox());
 				}
 			}
-			else if (CWinClasses::IsClass(sClass, WC_EDIT) || (sClass.Find(_T(".edit.app.")) != -1))
+			else if (CWinClasses::IsClass(sClass, WC_EDIT) || 
+					 CWinClasses::IsWinFormsControl(sClass, WC_EDIT))
 			{
 				// Required to handle COLOR_GRAYTEXT correctly
 				HookWindow(hWnd, new CDarkModeEditCtrl());
@@ -958,7 +960,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					break;
 				}
 			}
-			else if (sClass.Find(_T(".button.app.")) != -1)
+			else if (CWinClasses::IsWinFormsControl(sClass, WC_BUTTON))
 			{
 				// Required to handle disabled checkbox text correctly
 				HookWindow(hWnd, new CDarkModeManagedButtonStaticText());
@@ -1010,7 +1012,9 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 		{
 			CString sClass = CWinClasses::GetClass(hWnd);
 
-			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || CWinClasses::IsClass(sClass, WC_COMBOBOXEX) || (sClass.Find(_T(".combobox.app.")) != -1))
+			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
+				CWinClasses::IsClass(sClass, WC_COMBOBOXEX) || 
+				CWinClasses::IsWinFormsControl(sClass, WC_COMBOBOX))
 			{
 				if (!IsHooked(hWnd) && !s_hwndCurrentComboBox)
 				{
@@ -1018,7 +1022,8 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 					return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 				}
 			}
-			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || (sClass.Find(_T(".sysdatetimepick32.app.")) != -1))
+			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || 
+					 CWinClasses::IsWinFormsControl(sClass, WC_DATETIMEPICK))
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentDateTime, hWnd);
 				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
