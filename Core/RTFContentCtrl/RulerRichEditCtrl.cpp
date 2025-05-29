@@ -1175,14 +1175,22 @@ void CRulerRichEditCtrl::PrepareCharFormat(CharFormat& cf, COLORREF color, BOOL 
 		{
 			cf.dwEffects = CFE_AUTOCOLOR;
 		}
-		else if ((color == colorWhite) && CDarkMode::IsEnabled())
-		{
-			cf.dwEffects = CFE_AUTOCOLOR;
-		}
 		else
 		{
-			cf.dwEffects &= ~CFE_AUTOCOLOR;
-			cf.crTextColor = color;
+			// Replace white text in Dark Mode, and black
+			// text in non Dark Mode, with 'auto colour'
+			BOOL bDarkMode = CDarkMode::IsEnabled();
+			
+			if ((bDarkMode && (color == colorWhite)) || 
+				(!bDarkMode && (color == colorBlack)))
+			{
+				cf.dwEffects = CFE_AUTOCOLOR;
+			}
+			else
+			{
+				cf.dwEffects &= ~CFE_AUTOCOLOR;
+				cf.crTextColor = color;
+			}
 		}
 	}
 	else // background
