@@ -382,15 +382,25 @@ bool HtmlEditorControlEx::InitialiseClipboardSupport()
 
 bool HtmlEditorControlEx::ExecuteCommandRange(MSHTML::IHTMLTxtRange^ range, String^ command, Object^ data)
 {
-	// Replace white text in Dark Mode with 'auto-colour'
-	if (command->Equals(HtmlEditorControl::HTML_COMMAND_FORE_COLOR) && CDarkMode::IsEnabled())
+	if (command->Equals(HtmlEditorControl::HTML_COMMAND_FORE_COLOR))
 	{
-		String^ color = ASTYPE(data, String);
+		Color color = Color::FromName(ASTYPE(data, String));
 
-		if (color->Equals("White"))
+		if (OnSetForeColor(range, color))
+			return true;
+	}
+
+	return HtmlEditorControl::ExecuteCommandRange(range, command, data);
+}
+
+bool HtmlEditorControlEx::OnSetForeColor(MSHTML::IHTMLTxtRange^ range, Drawing::Color color)
+{
+	// Replace white text in Dark Mode, and black text in non Dark Mode, with 'auto-colour'
+	if ((CDarkMode::IsEnabled() && (color == Color::White)) ||
+		(!CDarkMode::IsEnabled() && (color == Color::Black)))
+	{
+		cli::array<String^>^ AttribCmds =
 		{
-			cli::array<String^>^ AttribCmds = 
-			{
 			HTML_COMMAND_BOLD,
 			HTML_COMMAND_UNDERLINE,
 			HTML_COMMAND_ITALIC,
@@ -399,36 +409,35 @@ bool HtmlEditorControlEx::ExecuteCommandRange(MSHTML::IHTMLTxtRange^ range, Stri
 			HTML_COMMAND_STRIKE_THROUGH,
 			HTML_COMMAND_FONT_NAME,
 			HTML_COMMAND_FONT_SIZE,
-			};
+		};
 
-			cli::array<Object^>^ AttribVals = gcnew cli::array<Object ^>(AttribCmds->Length);
+		cli::array<Object^>^ AttribVals = gcnew cli::array<Object ^>(AttribCmds->Length);
 
+		for (int attrib = 0; attrib < AttribCmds->Length; attrib++)
+		{
+			AttribVals[attrib] = QueryCommandRange(range, AttribCmds[attrib]);
+		}
+
+		if (HtmlEditorControl::ExecuteCommandRange(range, HtmlEditorControl::HTML_COMMAND_REMOVE_FORMAT, nullptr))
+		{
+			// restore all the other removed attributes
 			for (int attrib = 0; attrib < AttribCmds->Length; attrib++)
 			{
-				AttribVals[attrib] = QueryCommandRange(range, AttribCmds[attrib]);
-			}
-
-			if (HtmlEditorControl::ExecuteCommandRange(range, HtmlEditorControl::HTML_COMMAND_REMOVE_FORMAT, nullptr))
-			{
-				// restore all the other removed attributes
-				for (int attrib = 0; attrib < AttribCmds->Length; attrib++)
+				// Only re-apply boolean attributes if they are true
+				if (ISTYPE(AttribVals[attrib], bool))
 				{
-					// Only re-apply boolean attributes if they are true
-					if (ISTYPE(AttribVals[attrib], bool))
-					{
-						bool^ val = ASTYPE(AttribVals[attrib], bool);
+					bool^ val = ASTYPE(AttribVals[attrib], bool);
 
-						if (!(*val))
-							continue;
-					}
-
-					ExecuteCommandRange(range, AttribCmds[attrib], AttribVals[attrib]);
+					if (!(*val))
+						continue;
 				}
 
-				return true;
+				ExecuteCommandRange(range, AttribCmds[attrib], AttribVals[attrib]);
 			}
+
+			return true;
 		}
 	}
 
-	return HtmlEditorControl::ExecuteCommandRange(range, command, data);
+	return false; // not handled
 }
