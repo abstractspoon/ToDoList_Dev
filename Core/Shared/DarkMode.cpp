@@ -835,6 +835,53 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 
 //////////////////////////////////////////////////////////////////////
 
+BOOL IsFontCommonDialog(HWND hWnd)
+{
+	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT))
+		return TRUE;
+
+	// Heuristic for Internet Explorer Print Preview
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+
+	// Check grandparent class
+	// Parent is 'Page Setup dialog
+	if (!CWinClasses::IsClass(::GetParent(::GetParent(hWnd)), WC_IEPRINTPREVIEW))
+		return FALSE;
+	
+	const UINT NONCOMBOS[] = { 1073, IDOK, IDCANCEL };
+	const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
+
+	const UINT OWNERDRAWCOMBOS[] = { 1136, 1138, 1139 };
+	const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
+
+	for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
+	{
+		if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
+			return FALSE;
+	}
+
+	for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
+	{
+		HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
+
+		if (hwndCombo == NULL)
+			return FALSE;
+
+		if (!CWinClasses::IsComboBox(hwndCombo))
+			return FALSE;
+
+		BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
+
+		if (!bOwnerDraw)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
@@ -891,6 +938,14 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				lr = GetColorOrBrush(DM_3DFACE, FALSE);
 		}
 		return TRUE;
+
+	case WM_INITDIALOG:	// Leave hooking as late as possible
+		if (IsFontCommonDialog(hWnd))
+		{
+			// Combos in the font dialog do not play by the rules
+			HookWindow(hWnd, new CDarkModeFontDialog());
+		}
+		break;
 
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
 		if (wp)
@@ -964,11 +1019,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			{
 				// Required to handle disabled checkbox text correctly
 				HookWindow(hWnd, new CDarkModeManagedButtonStaticText());
-			}
-			else if (CWinClasses::IsCommonDialog(hWnd, WCD_FONT))
-			{
-				// Combos in the font dialog do not play by the rules
-				HookWindow(hWnd, new CDarkModeFontDialog());
 			}
 		}
 		else
