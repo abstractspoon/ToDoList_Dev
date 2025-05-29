@@ -633,7 +633,7 @@ protected:
 				{
 					CThemed th;
 
-					if (th.Open(hRealWnd, _T("BUTTON")) && th.AreControlsThemed())
+					if (th.Open(hRealWnd, TC_BUTTON) && th.AreControlsThemed())
 					{
 						// Calculate the size of the checkbox/radiobutton portion
 						if (s_nCheckOffset == -1)
