@@ -91,10 +91,10 @@ namespace unvell.UIControls
 			rectColor.Offset(3, 3);
 			rectColor.Height = rectColor.Width = (new DpiScaler(g).X(13)); 
 
-			if (currentColor == null || currentColor.IsEmpty)
+			if (currentColor == null || currentColor.IsEmpty || currentColor.CompliantSolidColor == Color.Black)
 			{
-				g.DrawRectangle(Pens.Black, rectColor);
-				g.DrawLine(Pens.Black, rectColor.Left, rectColor.Bottom, rectColor.Right, rectColor.Top);
+				g.DrawRectangle(SystemPens.WindowText, rectColor);
+				g.DrawLine(SystemPens.WindowText, rectColor.Left, rectColor.Bottom, rectColor.Right, rectColor.Top);
 			}
 			else
 			{
