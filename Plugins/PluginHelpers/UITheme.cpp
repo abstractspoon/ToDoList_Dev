@@ -451,6 +451,14 @@ void UIThemeToolbarRenderer::OnRenderItemText(ToolStripItemTextRenderEventArgs^ 
 			return;
  		}
 	}
+	else if (ISTYPE(e->ToolStrip, MenuStrip) && SystemInformation::HighContrast)
+	{
+		auto format = gcnew StringFormat();
+		format->HotkeyPrefix = Drawing::Text::HotkeyPrefix::Show;
+
+		e->Graphics->DrawString(e->Text, e->TextFont, SystemBrushes::WindowText, e->TextRectangle, format);
+		return;
+	}
 	
 	// All else
 	BaseToolbarRenderer::OnRenderItemText(e);
