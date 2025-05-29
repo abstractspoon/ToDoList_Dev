@@ -295,7 +295,7 @@ BOOL CWinClasses::IsDialog(HWND hWnd)
 	return IsClass(hWnd, WC_DIALOGBOX);
 }
 
-BOOL CWinClasses::IsPropertyPage(HWND hWnd)
+BOOL CWinClasses::IsMFCPropertyPage(HWND hWnd)
 {
 	return IsKindOf(hWnd, RUNTIME_CLASS(CPropertyPage));
 }
@@ -336,71 +336,28 @@ BOOL CWinClasses::IsChild(HWND hWnd)
 	return (::GetWindowLong(hWnd, GWL_STYLE) & WS_CHILD);
 }
 
-BOOL CWinClasses::IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
+BOOL CWinClasses::IsMFCCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 {
 	// special case
 	if (nType == WCD_ANY)
 	{
-		return IsCommonDialog(hWnd, WCD_PRINT) ||
-				IsCommonDialog(hWnd, WCD_PAGESETUP) ||
-				IsCommonDialog(hWnd, WCD_FONT) ||
-				IsCommonDialog(hWnd, WCD_COLOR) ||
-				IsCommonDialog(hWnd, WCD_FINDREPLACE) ||
-				IsCommonDialog(hWnd, WCD_OPENSAVE) ||
-				IsCommonDialog(hWnd, WCD_BROWSEFOLDER);
+		return IsMFCCommonDialog(hWnd, WCD_PRINT) ||
+				IsMFCCommonDialog(hWnd, WCD_PAGESETUP) ||
+				IsMFCCommonDialog(hWnd, WCD_FONT) ||
+				IsMFCCommonDialog(hWnd, WCD_COLOR) ||
+				IsMFCCommonDialog(hWnd, WCD_FINDREPLACE) ||
+				IsMFCCommonDialog(hWnd, WCD_OPENSAVE) ||
+				IsMFCCommonDialog(hWnd, WCD_BROWSEFOLDER);
 	}
 
 	// all else
 	if (!IsDialog(hWnd))
 		return FALSE;
 
-	// special cases
+	// The open save dialog we are interested in is actually
+	// a child of the dialog that users see
 	if (nType == WCD_OPENSAVE)
-	{
-		// The open save dialog we are interested in is actually
-		// a child of the dialog that users see
-		CWnd* pChild = CWnd::FromHandle(hWnd)->GetDlgItem(0);
-		return (pChild && pChild->IsKindOf(RUNTIME_CLASS(CFileDialog)));
-	}
-	/*
-	// For a while the method of getting the runtime class was not working
-	// for unknown reasons. So I used this heuristic to solve the problem.
-	// But I still want to preserve it because I don't know when it might
-	// stop working again.
-	else if (nType == WCD_FONT)
-	{
-		// Can't get method below to work so we try a heuristic
-		const UINT NONCOMBOS[] = { 1088, 1089, 1090, 1072, 1040, 1041, 1094, 1073 };
-		const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
-
-		const UINT OWNERDRAWCOMBOS[] = { 1140, 1136, 1137, 1138, 1139 };
-		const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
-
-		for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
-		{
-			if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
-				return FALSE;
-		}
-
-		for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
-		{
-			HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
-
-			if (hwndCombo == NULL)
-				return FALSE;
-
-			if (!IsClass(hwndCombo, WC_COMBOBOX))
-				return FALSE;
-
-			BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
-
-			if (!bOwnerDraw)
-				return FALSE;
-		}
-
-		return TRUE;
-	}
-	*/
+		hWnd = ::GetDlgItem(hWnd, 0);
 
 	// get permanent window mapping so we can
 	// lookup runtime class type. 
