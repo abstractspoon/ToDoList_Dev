@@ -356,6 +356,7 @@ BOOL CWinClasses::IsMFCCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 
 	// The open save dialog we are interested in is actually
 	// a child of the dialog that users see
+	// Note: this won't work with IFileDialog
 	if (nType == WCD_OPENSAVE)
 		hWnd = ::GetDlgItem(hWnd, 0);
 
