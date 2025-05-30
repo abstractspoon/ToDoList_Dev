@@ -348,6 +348,8 @@ static HWND s_hwndCurrentDateTime			= NULL;
 static HWND s_hwndCurrentBtnStatic			= NULL;
 static HWND s_hwndCurrentManagedBtnStatic	= NULL;
 static HWND s_hwndCurrentExplorerTreeOrList = NULL;
+static HWND s_hwndCurrent					= NULL;
+static HWND s_hwndCurrentFileDlg			= NULL;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -725,6 +727,72 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 //////////////////////////////////////////////////////////////////////
 
+BOOL IsFontCommonDialog(HWND hWnd)
+{
+	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT))
+		return TRUE;
+	
+	// Heuristic for Internet Explorer Print Preview
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+	
+	// Check grandparent class
+	// Parent is 'Page Setup dialog
+	if (!CWinClasses::IsClass(::GetParent(::GetParent(hWnd)), WC_IEPRINTPREVIEW))
+		return FALSE;
+	
+	const UINT NONCOMBOS[] = { 1073, IDOK, IDCANCEL };
+	const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
+	
+	const UINT OWNERDRAWCOMBOS[] = { 1136, 1138, 1139 };
+	const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
+	
+	for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
+	{
+		if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
+			return FALSE;
+	}
+	
+	for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
+	{
+		HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
+		
+		if (hwndCombo == NULL)
+			return FALSE;
+		
+		if (!CWinClasses::IsComboBox(hwndCombo))
+			return FALSE;
+		
+		BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
+		
+		if (!bOwnerDraw)
+			return FALSE;
+	}
+	
+	return TRUE;
+}
+
+BOOL IsFileCommonDialog(HWND hWnd)
+{
+	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_OPENSAVE))
+		return TRUE;
+	
+	if (COSVersion() < OSV_VISTA)
+		return FALSE;
+	
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+	
+	HWND hwndFirstChild = ::GetDlgItem(hWnd, 0);
+	
+	if (!hwndFirstChild)
+		return FALSE;
+	
+	return CWinClasses::IsClass(hwndFirstChild, L"duiviewwndclassname");
+}
+
+//////////////////////////////////////////////////////////////////////
+
 static CMap<COLORREF, COLORREF, HBRUSH, HBRUSH> s_mapBrushes;
 
 DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
@@ -746,6 +814,11 @@ DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
 
 DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 {
+	// Vista+ File dialog always wants true colors
+	if (s_hwndCurrentFileDlg && (!s_hwndCurrent || ::IsChild(s_hwndCurrentFileDlg, s_hwndCurrent)))
+		return (bColor ? TrueGetSysColor(nColor) : (DWORD)TrueGetSysColorBrush(nColor));
+	
+	CString sClass = CWinClasses::GetClass(s_hwndCurrent);
 	int nTrueColor = nColor;
 
 	switch (nColor)
@@ -765,7 +838,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_WINDOWTEXT:
-		return GetColorOrBrush(DM_WINDOWTEXT, bColor);
+			return GetColorOrBrush(DM_WINDOWTEXT, bColor);
+		break;
 
 	case COLOR_WINDOW:
 		return GetColorOrBrush(DM_WINDOW, bColor);
@@ -839,6 +913,12 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
 
+	if (s_hwndCurrentFileDlg && !::IsWindow(s_hwndCurrentFileDlg))
+		s_hwndCurrentFileDlg = NULL;
+
+	if (s_hwndCurrentFileDlg && CDialogHelper::IsChildOrSame(s_hwndCurrentFileDlg, hWnd))
+		return FALSE;
+		
 	switch (nMsg)
 	{
 	case WM_CTLCOLORDLG:
@@ -1007,7 +1087,9 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 	switch (nMsg)
 	{
 	case WM_PAINT:
+		if (!s_hwndCurrentFileDlg || !::IsChild(s_hwndCurrentFileDlg, hWnd))
 		{
+			CAutoFlagT<HWND> af(s_hwndCurrent, hWnd);
 			CString sClass = CWinClasses::GetClass(hWnd);
 
 			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || CWinClasses::IsClass(sClass, WC_COMBOBOXEX) || (sClass.Find(_T(".combobox.app.")) != -1))
@@ -1028,12 +1110,32 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 				CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hWnd);
 				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 			}
+
+			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+		}
+		break;
+		
+	case WM_INITDIALOG:
+		if (IsFontCommonDialog(hWnd))
+		{
+			// Combos in the font dialog do not play by the rules
+			HookWindow(hWnd, new CDarkModeFontDialog());
+		}
+		else
+		{
+			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+			
+			if (IsFileCommonDialog(hWnd))
+				s_hwndCurrentFileDlg = hWnd;
+
+			return lr;
 		}
 		break;
 
 	case WM_CTLCOLOREDIT:
 	case WM_CTLCOLORLISTBOX:
 	case WM_CTLCOLORSTATIC:
+		if (!s_hwndCurrentFileDlg || !::IsChild(s_hwndCurrentFileDlg, hWnd))
 		{
 			// Always do default first to allow CAutoComboBox hooking
 			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
@@ -1068,8 +1170,14 @@ HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWST
 
 	if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
 	{
-		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW) || 
-			CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		CString sClass = CWinClasses::GetClass(hwnd);
+
+		if (CWinClasses::IsClass(sClass, WC_TREEVIEW))
+		{
+			s_mapExplorerThemedWnds.Add(hwnd);
+		}
+		else if (CWinClasses::IsClass(sClass, WC_LISTVIEW)/* &&
+				!CWinClasses::IsClass(::GetParent(hwnd), WC_SHELLDLLDEFVIEW)*/)
 		{
 			s_mapExplorerThemedWnds.Add(hwnd);
 		}
