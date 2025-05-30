@@ -314,11 +314,6 @@ CString GetClass(HTHEME hTheme)
 	return elm.sClass;
 }
 
-BOOL IsClass(HTHEME hTheme, LPCWSTR szClass)
-{
-	return CWinClasses::IsClass(GetClass(hTheme), szClass);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 BOOL IsParentPreferencePage(HWND hWnd)
@@ -844,9 +839,7 @@ BOOL IsFontCommonDialog(HWND hWnd)
 	if (!CWinClasses::IsDialog(hWnd))
 		return FALSE;
 
-	// Check grandparent class
-	// Parent is 'Page Setup dialog
-	if (!CWinClasses::IsClass(::GetParent(::GetParent(hWnd)), WC_IEPRINTPREVIEW))
+	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
 		return FALSE;
 	
 	const UINT NONCOMBOS[] = { 1073, IDOK, IDCANCEL };
@@ -1119,18 +1112,29 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 
 HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList)
 {
-	HRESULT hr = TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
-
 	if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
 	{
-		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW) || 
-			CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW))
 		{
+			s_mapExplorerThemedWnds.Add(hwnd);
+		}
+		else if (CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		{
+			// DON'T add the list view if it forms part of the
+			// Internet Explorer > Print dialog, and disallow setting 
+			// the Explorer theme all to fix a text color issue
+			if (CWinClasses::HasParentClass(hwnd, WC_SHELLDLLDEFVIEW) &&
+				(CWinClasses::HasParentClass(hwnd, WC_IEPRINTPREVIEW, TRUE) ||
+				 CWinClasses::HasParentClass(hwnd, WC_DIALOG, TRUE)))
+			{
+				return 0L;
+			}
+
 			s_mapExplorerThemedWnds.Add(hwnd);
 		}
 	}
 
-	return hr;
+	return TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
 }
 
 HTHEME STDAPICALLTYPE MyOpenThemeData(HWND hWnd, LPCWSTR pszClassList)

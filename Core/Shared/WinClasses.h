@@ -64,6 +64,8 @@ public:
 	static BOOL IsClass(HWND hWnd, LPCTSTR szClass);
 	static BOOL IsClass(LPCTSTR szClass, LPCTSTR szWndClass);
 
+	static BOOL HasParentClass(HWND hWnd, LPCTSTR szClass, BOOL bRecursive = FALSE);
+
 	static CString GetClassEx(HWND hWnd);
 	static BOOL IsClassEx(HWND hWnd, LPCTSTR szClass);
 	static BOOL IsClassEx(LPCTSTR szClass, LPCTSTR szWndClass);

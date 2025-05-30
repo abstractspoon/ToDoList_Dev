@@ -196,6 +196,25 @@ CString CWinClasses::GetClassEx(HWND hWnd)
 	return sClass;
 }
 
+BOOL CWinClasses::HasParentClass(HWND hWnd, LPCTSTR szClass, BOOL bRecursive)
+{
+	HWND hwndParent = ::GetParent(hWnd);
+
+	while (hwndParent)
+	{
+		if (IsClass(hwndParent, szClass))
+			return TRUE;
+
+		if (!bRecursive)
+			break;
+
+		// else
+		hwndParent = ::GetParent(hwndParent);
+	}
+
+	return FALSE;
+}
+
 BOOL CWinClasses::IsControlClass(HWND hWnd)
 {
 	return IsControlClass(GetClass(hWnd));
