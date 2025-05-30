@@ -185,7 +185,7 @@ void CDarkMode::Enable(BOOL bEnable)
 
 static CMap<HWND, HWND, CSubclassWnd*, CSubclassWnd*&> s_mapScWnds;
 
-// ----------------------------------------------------
+//////////////////////////////////////////////////////////////////////
 
 struct THEMEELEMENT
 {
@@ -778,10 +778,11 @@ BOOL IsFontCommonDialog(HWND hWnd)
 	return TRUE;
 }
 
+static BOOL s_bVistaOrWin7 = ((COSVersion() >= OSV_VISTA) && (COSVersion() <= OSV_WIN7));
+
 BOOL IsVistaFileCommonDialog(HWND hWnd)
 {
-	if ((COSVersion() < OSV_VISTA) || (COSVersion() > OSV_WIN7))
-		return FALSE;
+	ASSERT(s_bVistaOrWin7);
 	
 	if (!IsPopupDialog(hWnd))
 		return FALSE;
@@ -837,16 +838,26 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_WINDOWTEXT:
-		if (!s_hwndCurrentVistaFileDlg)
+		// Dark Mode is only partially able to handle the Vista/Win7 File dialog
+		// such that the tree and list background colours remain white which causes
+		// its use of COLOR_WINDOWTEXT to be white-on-white.
+		// The following fix gets around it somewhat by forcing the return of the 
+		// TRUE window text colour, so we try to optimise for every other OS to 
+		// avoid any performance penalty.
+		if (s_bVistaOrWin7)
 		{
+			//if (s_hwndCurrentVistaFileDlg)
+				//break; // Use TRUE colour
+
 			HWND hwndForeground = GetForegroundWindow();
 
 			if (IsVistaFileCommonDialog(hwndForeground))
+			{
 				s_hwndCurrentVistaFileDlg = hwndForeground;
-			else
-				return GetColorOrBrush(DM_WINDOWTEXT, bColor);
+				//break; // Use TRUE colour
+			}
 		}
-		break;
+		return GetColorOrBrush(DM_WINDOWTEXT, bColor);
 
 	case COLOR_WINDOW:
 		return GetColorOrBrush(DM_WINDOW, bColor);
@@ -920,9 +931,22 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
 
-	if (s_hwndCurrentVistaFileDlg && !::IsWindow(s_hwndCurrentVistaFileDlg))
-		s_hwndCurrentVistaFileDlg = NULL;
-		
+	if (s_hwndCurrentVistaFileDlg)
+	{
+		if (!::IsWindow(s_hwndCurrentVistaFileDlg))
+		{
+			s_hwndCurrentVistaFileDlg = NULL;
+		}
+		else if (CDialogHelper::IsChildOrSame(s_hwndCurrentVistaFileDlg, hWnd))
+		{
+			return FALSE;
+		}
+		else if (::GetParent(hWnd) == ::GetDesktopWindow())
+		{
+			return FALSE;
+		}
+	}
+
 	switch (nMsg)
 	{
 	case WM_CTLCOLORDLG:
