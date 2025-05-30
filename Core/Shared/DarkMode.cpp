@@ -1125,7 +1125,7 @@ HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWST
 			// the Explorer theme all to fix a text color issue
 			if (CWinClasses::HasParentClass(hwnd, WC_SHELLDLLDEFVIEW) &&
 				(CWinClasses::HasParentClass(hwnd, WC_IEPRINTPREVIEW, TRUE) ||
-				 CWinClasses::HasParentClass(hwnd, WC_DIALOG, TRUE)))
+				 CWinClasses::HasParentClass(hwnd, WC_DIALOGBOX, TRUE)))
 			{
 				return 0L;
 			}
