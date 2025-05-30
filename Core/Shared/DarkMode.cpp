@@ -726,44 +726,42 @@ BOOL IsFontCommonDialog(HWND hWnd)
 {
 	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT))
 		return TRUE;
-	
+
 	// Heuristic for Internet Explorer Print Preview
 	if (!CWinClasses::IsDialog(hWnd))
 		return FALSE;
-	
-	// Check grandparent class
-	// Parent is 'Page Setup dialog
-	if (!CWinClasses::IsClass(::GetParent(::GetParent(hWnd)), WC_IEPRINTPREVIEW))
+
+	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
 		return FALSE;
-	
+
 	const UINT NONCOMBOS[] = { 1073, IDOK, IDCANCEL };
 	const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
-	
+
 	const UINT OWNERDRAWCOMBOS[] = { 1136, 1138, 1139 };
 	const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
-	
+
 	for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
 	{
 		if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
 			return FALSE;
 	}
-	
+
 	for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
 	{
 		HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
-		
+
 		if (hwndCombo == NULL)
 			return FALSE;
-		
+
 		if (!CWinClasses::IsComboBox(hwndCombo))
 			return FALSE;
-		
+
 		BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
-		
+
 		if (!bOwnerDraw)
 			return FALSE;
 	}
-	
+
 	return TRUE;
 }
 
@@ -900,51 +898,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	
 	// else
 	return (DWORD)TrueGetSysColorBrush(nTrueColor);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-BOOL IsFontCommonDialog(HWND hWnd)
-{
-	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT))
-		return TRUE;
-
-	// Heuristic for Internet Explorer Print Preview
-	if (!CWinClasses::IsDialog(hWnd))
-		return FALSE;
-
-	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
-		return FALSE;
-	
-	const UINT NONCOMBOS[] = { 1073, IDOK, IDCANCEL };
-	const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
-
-	const UINT OWNERDRAWCOMBOS[] = { 1136, 1138, 1139 };
-	const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
-
-	for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
-	{
-		if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
-			return FALSE;
-	}
-
-	for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
-	{
-		HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
-
-		if (hwndCombo == NULL)
-			return FALSE;
-
-		if (!CWinClasses::IsComboBox(hwndCombo))
-			return FALSE;
-
-		BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
-
-		if (!bOwnerDraw)
-			return FALSE;
-	}
-
-	return TRUE;
 }
 
 //////////////////////////////////////////////////////////////////////
