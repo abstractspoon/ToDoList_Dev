@@ -343,8 +343,8 @@ static HWND s_hwndCurrentDateTime			= NULL;
 static HWND s_hwndCurrentBtnStatic			= NULL;
 static HWND s_hwndCurrentManagedBtnStatic	= NULL;
 static HWND s_hwndCurrentExplorerTreeOrList = NULL;
-static HWND s_hwndCurrent					= NULL;
-static HWND s_hwndCurrentFileDlg			= NULL;
+// static HWND s_hwndCurrent					= NULL;
+// static HWND s_hwndCurrentFileDlg			= NULL;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -765,12 +765,12 @@ BOOL IsFontCommonDialog(HWND hWnd)
 	return TRUE;
 }
 
-BOOL IsFileCommonDialog(HWND hWnd)
+BOOL IsVistaFileCommonDialog(HWND hWnd)
 {
 	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_OPENSAVE))
 		return TRUE;
 	
-	if (COSVersion() < OSV_VISTA)
+	if ((COSVersion() < OSV_VISTA) || (COSVersion() > OSV_WIN7))
 		return FALSE;
 	
 	if (!CWinClasses::IsDialog(hWnd))
@@ -807,11 +807,6 @@ DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
 
 DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 {
-	// Vista+ File dialog always wants true colors
-	if (s_hwndCurrentFileDlg && (!s_hwndCurrent || ::IsChild(s_hwndCurrentFileDlg, s_hwndCurrent)))
-		return (bColor ? TrueGetSysColor(nColor) : (DWORD)TrueGetSysColorBrush(nColor));
-	
-	CString sClass = CWinClasses::GetClass(s_hwndCurrent);
 	int nTrueColor = nColor;
 
 	switch (nColor)
@@ -831,6 +826,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_WINDOWTEXT:
+		if (!IsVistaFileCommonDialog(GetForegroundWindow()))//(!s_hwndCurrentFileDlg)
 			return GetColorOrBrush(DM_WINDOWTEXT, bColor);
 		break;
 
@@ -906,11 +902,8 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
 
-	if (s_hwndCurrentFileDlg && !::IsWindow(s_hwndCurrentFileDlg))
-		s_hwndCurrentFileDlg = NULL;
-
-	if (s_hwndCurrentFileDlg && CDialogHelper::IsChildOrSame(s_hwndCurrentFileDlg, hWnd))
-		return FALSE;
+// 	if (s_hwndCurrentFileDlg && !::IsWindow(s_hwndCurrentFileDlg))
+// 		s_hwndCurrentFileDlg = NULL;
 		
 	switch (nMsg)
 	{
@@ -971,6 +964,11 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			// Combos in the font dialog do not play by the rules
 			HookWindow(hWnd, new CDarkModeFontDialog());
 		}
+// 		else
+// 		{
+// 			if (IsVistaFileCommonDialog(hWnd))
+// 				s_hwndCurrentFileDlg = hWnd;
+// 		}
 		break;
 
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
@@ -1082,12 +1080,12 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 {
 	LRESULT lr = 0;
 
+	// Put all custom message handling in WindowProcEx except where we need
+	// to set auto-flags or otherwise call TrueCallWindowProc directly
 	switch (nMsg)
 	{
 	case WM_PAINT:
-		if (!s_hwndCurrentFileDlg || !::IsChild(s_hwndCurrentFileDlg, hWnd))
 		{
-			CAutoFlagT<HWND> af(s_hwndCurrent, hWnd);
 			CString sClass = CWinClasses::GetClass(hWnd);
 
 			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
@@ -1115,28 +1113,10 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 		}
 		break;
-		
-	case WM_INITDIALOG:
-		if (IsFontCommonDialog(hWnd))
-		{
-			// Combos in the font dialog do not play by the rules
-			HookWindow(hWnd, new CDarkModeFontDialog());
-		}
-		else
-		{
-			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
-			
-			if (IsFileCommonDialog(hWnd))
-				s_hwndCurrentFileDlg = hWnd;
-
-			return lr;
-		}
-		break;
 
 	case WM_CTLCOLOREDIT:
 	case WM_CTLCOLORLISTBOX:
 	case WM_CTLCOLORSTATIC:
-		if (!s_hwndCurrentFileDlg || !::IsChild(s_hwndCurrentFileDlg, hWnd))
 		{
 			// Always do default first to allow CAutoComboBox hooking
 			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
