@@ -314,11 +314,6 @@ CString GetClass(HTHEME hTheme)
 	return elm.sClass;
 }
 
-BOOL IsClass(HTHEME hTheme, LPCWSTR szClass)
-{
-	return CWinClasses::IsClass(GetClass(hTheme), szClass);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 BOOL IsParentPreferencePage(HWND hWnd)
@@ -633,7 +628,7 @@ protected:
 				{
 					CThemed th;
 
-					if (th.Open(hRealWnd, _T("BUTTON")) && th.AreControlsThemed())
+					if (th.Open(hRealWnd, TC_BUTTON) && th.AreControlsThemed())
 					{
 						// Calculate the size of the checkbox/radiobutton portion
 						if (s_nCheckOffset == -1)
@@ -835,6 +830,51 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 
 //////////////////////////////////////////////////////////////////////
 
+BOOL IsFontCommonDialog(HWND hWnd)
+{
+	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT))
+		return TRUE;
+
+	// Heuristic for Internet Explorer Print Preview
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+
+	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
+		return FALSE;
+	
+	const UINT NONCOMBOS[] = { 1073, IDOK, IDCANCEL };
+	const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
+
+	const UINT OWNERDRAWCOMBOS[] = { 1136, 1138, 1139 };
+	const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
+
+	for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
+	{
+		if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
+			return FALSE;
+	}
+
+	for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
+	{
+		HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
+
+		if (hwndCombo == NULL)
+			return FALSE;
+
+		if (!CWinClasses::IsComboBox(hwndCombo))
+			return FALSE;
+
+		BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
+
+		if (!bOwnerDraw)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
@@ -892,6 +932,14 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		}
 		return TRUE;
 
+	case WM_INITDIALOG:	// Leave hooking as late as possible
+		if (IsFontCommonDialog(hWnd))
+		{
+			// Combos in the font dialog do not play by the rules
+			HookWindow(hWnd, new CDarkModeFontDialog());
+		}
+		break;
+
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
 		if (wp)
 		{
@@ -902,7 +950,8 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
 			}
-			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || (sClass.Find(_T(".combobox.app.")) != -1))
+			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
+					 CWinClasses::IsWinFormsControl(sClass, WC_COMBOBOX))
 			{
 				DWORD dwStyle = ::GetWindowLong(hWnd, GWL_STYLE);
 
@@ -925,7 +974,8 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					HookWindow(hWnd, new CDarkModeComboBox());
 				}
 			}
-			else if (CWinClasses::IsClass(sClass, WC_EDIT) || (sClass.Find(_T(".edit.app.")) != -1))
+			else if (CWinClasses::IsClass(sClass, WC_EDIT) || 
+					 CWinClasses::IsWinFormsControl(sClass, WC_EDIT))
 			{
 				// Required to handle COLOR_GRAYTEXT correctly
 				HookWindow(hWnd, new CDarkModeEditCtrl());
@@ -958,15 +1008,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 					break;
 				}
 			}
-			else if (sClass.Find(_T(".button.app.")) != -1)
+			else if (CWinClasses::IsWinFormsControl(sClass, WC_BUTTON))
 			{
 				// Required to handle disabled checkbox text correctly
 				HookWindow(hWnd, new CDarkModeManagedButtonStaticText());
-			}
-			else if (CWinClasses::IsCommonDialog(hWnd, WCD_FONT))
-			{
-				// Combos in the font dialog do not play by the rules
-				HookWindow(hWnd, new CDarkModeFontDialog());
 			}
 		}
 		else
@@ -1010,7 +1055,9 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 		{
 			CString sClass = CWinClasses::GetClass(hWnd);
 
-			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || CWinClasses::IsClass(sClass, WC_COMBOBOXEX) || (sClass.Find(_T(".combobox.app.")) != -1))
+			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
+				CWinClasses::IsClass(sClass, WC_COMBOBOXEX) || 
+				CWinClasses::IsWinFormsControl(sClass, WC_COMBOBOX))
 			{
 				if (!IsHooked(hWnd) && !s_hwndCurrentComboBox)
 				{
@@ -1018,7 +1065,8 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 					return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 				}
 			}
-			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || (sClass.Find(_T(".sysdatetimepick32.app.")) != -1))
+			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || 
+					 CWinClasses::IsWinFormsControl(sClass, WC_DATETIMEPICK))
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentDateTime, hWnd);
 				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
@@ -1064,18 +1112,29 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 
 HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList)
 {
-	HRESULT hr = TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
-
 	if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
 	{
-		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW) || 
-			CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW))
 		{
+			s_mapExplorerThemedWnds.Add(hwnd);
+		}
+		else if (CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+		{
+			// DON'T add the list view if it forms part of the
+			// Internet Explorer > Print dialog, and disallow setting 
+			// the Explorer theme all to fix a text color issue
+			if (CWinClasses::HasParentClass(hwnd, WC_SHELLDLLDEFVIEW) &&
+				(CWinClasses::HasParentClass(hwnd, WC_IEPRINTPREVIEW, TRUE) ||
+				 CWinClasses::HasParentClass(hwnd, WC_DIALOGBOX, TRUE)))
+			{
+				return 0L;
+			}
+
 			s_mapExplorerThemedWnds.Add(hwnd);
 		}
 	}
 
-	return hr;
+	return TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
 }
 
 HTHEME STDAPICALLTYPE MyOpenThemeData(HWND hWnd, LPCWSTR pszClassList)
