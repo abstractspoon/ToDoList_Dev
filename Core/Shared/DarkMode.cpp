@@ -343,8 +343,7 @@ static HWND s_hwndCurrentDateTime			= NULL;
 static HWND s_hwndCurrentBtnStatic			= NULL;
 static HWND s_hwndCurrentManagedBtnStatic	= NULL;
 static HWND s_hwndCurrentExplorerTreeOrList = NULL;
-// static HWND s_hwndCurrent					= NULL;
-// static HWND s_hwndCurrentFileDlg			= NULL;
+static HWND s_hwndCurrentVistaFileDlg		= NULL;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -722,15 +721,29 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 //////////////////////////////////////////////////////////////////////
 
+BOOL IsPopupDialog(HWND hWnd)
+{
+	// Must be a captioned popup
+	if (!CDialogHelper::HasStyle(hWnd, WS_POPUPWINDOW | WS_CAPTION))
+		return FALSE;
+
+	// Parent must be disabled
+	if (::IsWindowEnabled(::GetParent(hWnd)))
+		return FALSE;
+
+	// Must be a dialog
+	return CWinClasses::IsDialog(hWnd);
+}
+
 BOOL IsFontCommonDialog(HWND hWnd)
 {
 	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT))
 		return TRUE;
 
-	// Heuristic for Internet Explorer Print Preview
-	if (!CWinClasses::IsDialog(hWnd))
+	if (!IsPopupDialog(hWnd))
 		return FALSE;
 
+	// Heuristic for Internet Explorer Print Preview
 	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
 		return FALSE;
 
@@ -767,15 +780,13 @@ BOOL IsFontCommonDialog(HWND hWnd)
 
 BOOL IsVistaFileCommonDialog(HWND hWnd)
 {
-	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_OPENSAVE))
-		return TRUE;
-	
 	if ((COSVersion() < OSV_VISTA) || (COSVersion() > OSV_WIN7))
 		return FALSE;
 	
-	if (!CWinClasses::IsDialog(hWnd))
+	if (!IsPopupDialog(hWnd))
 		return FALSE;
-	
+
+	// Heuristic
 	HWND hwndFirstChild = ::GetDlgItem(hWnd, 0);
 	
 	if (!hwndFirstChild)
@@ -826,8 +837,15 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		break;
 
 	case COLOR_WINDOWTEXT:
-		if (!IsVistaFileCommonDialog(GetForegroundWindow()))//(!s_hwndCurrentFileDlg)
-			return GetColorOrBrush(DM_WINDOWTEXT, bColor);
+		if (!s_hwndCurrentVistaFileDlg)
+		{
+			HWND hwndForeground = GetForegroundWindow();
+
+			if (IsVistaFileCommonDialog(hwndForeground))
+				s_hwndCurrentVistaFileDlg = hwndForeground;
+			else
+				return GetColorOrBrush(DM_WINDOWTEXT, bColor);
+		}
 		break;
 
 	case COLOR_WINDOW:
@@ -902,8 +920,8 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
 
-// 	if (s_hwndCurrentFileDlg && !::IsWindow(s_hwndCurrentFileDlg))
-// 		s_hwndCurrentFileDlg = NULL;
+	if (s_hwndCurrentVistaFileDlg && !::IsWindow(s_hwndCurrentVistaFileDlg))
+		s_hwndCurrentVistaFileDlg = NULL;
 		
 	switch (nMsg)
 	{
@@ -964,11 +982,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			// Combos in the font dialog do not play by the rules
 			HookWindow(hWnd, new CDarkModeFontDialog());
 		}
-// 		else
-// 		{
-// 			if (IsVistaFileCommonDialog(hWnd))
-// 				s_hwndCurrentFileDlg = hWnd;
-// 		}
 		break;
 
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
