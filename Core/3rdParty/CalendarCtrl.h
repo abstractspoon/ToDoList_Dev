@@ -75,7 +75,7 @@ public:
 	void EnableMultiSelection(BOOL bEnable) { m_bEnableMultiSel = bEnable; }
 	BOOL IsMultiSelectionEnabled() const { return m_bEnableMultiSel; }
 
-	int GetSelectedItems(CArray<double, double>& aSelection) const;
+	int GetSelectedItems(CArray<COleDateTime, COleDateTime>& aSelection) const;
 	double GetFirstSelectedItem() const;
 
 	COleDateTime GetMinDate() const;
@@ -169,7 +169,7 @@ protected:
 	BOOL			m_bDrawGridOverCells;
 
 	double			m_SelectionRange[3];
-	CMap<double, double, bool, bool> m_SingleSelection;
+	CMap<COleDateTime, COleDateTime, bool, bool> m_SingleSelection;
 
 	LPFN_CALENDAR_DATA_CALLBACK	m_pfnDataCallback;
 };

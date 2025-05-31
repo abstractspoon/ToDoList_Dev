@@ -1322,7 +1322,7 @@ double CCalendarCtrl::GetFirstSelectedItem() const
 		ASSERT(pos);
 
 		bool bSelected;
-		double date;
+		COleDateTime date;
 
 		m_SingleSelection.GetNextAssoc(pos, date, bSelected);
 		ASSERT(bSelected);
@@ -1339,18 +1339,19 @@ double CCalendarCtrl::GetFirstSelectedItem() const
 }
 
 
-int CCalendarCtrl::GetSelectedItems(CArray<double, double>& dwaSelection) const
+int CCalendarCtrl::GetSelectedItems(CArray<COleDateTime, COleDateTime>& dwaSelection) const
 {
 	if (m_SingleSelection.GetCount())
 	{
 		POSITION pos = m_SingleSelection.GetStartPosition();
 		bool bSelected;
-		double date;
+		COleDateTime date;
 
 		while (pos)
 		{
 			m_SingleSelection.GetNextAssoc(pos, date, bSelected);
 			ASSERT(bSelected);
+			ASSERT(date == WholeDays(date));
 
 			dwaSelection.Add(date);
 		}
@@ -1371,9 +1372,10 @@ int CCalendarCtrl::GetSelectedItems(CArray<double, double>& dwaSelection) const
 
 			while(dcur <= dmax)
 			{	
+				ASSERT(dcur == WholeDays(dcur));
 				dwaSelection.Add(dcur);
-				dcur = dmin + COleDateTimeSpan(nDays,0,0,0);				
 
+				dcur = dmin + COleDateTimeSpan(nDays,0,0,0);				
 				nDays++;
 			}
 		}
@@ -1402,12 +1404,14 @@ void CCalendarCtrl::AdjustSelection()
 		{
 			COleDateTime dMin(m_SelectionRange[1]);
 			dMin -= COleDateTimeSpan(m_nMaxSel-1,0,0,0);
+
 			m_SelectionRange[0] = dMin;
 		}
 		else if (m_SelectionRange[1] < m_SelectionRange[0])
 		{
 			COleDateTime dMax(m_SelectionRange[1]);
 			dMax += COleDateTimeSpan(m_nMaxSel-1,0,0,0);
+
 			m_SelectionRange[0] = dMax;
 		}
 	}
