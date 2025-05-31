@@ -27,7 +27,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-typedef HRESULT (CALLBACK FAR * LPFN_CALENDAR_DATA_CALLBACK)(CWnd*,time_t);
+typedef HRESULT (CALLBACK FAR * LPFN_CALENDAR_DATA_CALLBACK)(CWnd*,double/*time_t*/);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +75,8 @@ public:
 	void EnableMultiSelection(BOOL bEnable) { m_bEnableMultiSel = bEnable; }
 	BOOL IsMultiSelectionEnabled() const { return m_bEnableMultiSel; }
 
-	int GetSelectedItems(CDWordArray& dwaSelection) const;
-	time_t GetFirstSelectedItem() const;
+	int GetSelectedItems(CArray<double, double>/*CDWordArray*/& dwaSelection) const;
+	double/*time_t*/ GetFirstSelectedItem() const;
 
 	COleDateTime GetMinDate() const;
 	COleDateTime GetMaxDate() const;
@@ -135,7 +135,7 @@ protected:
 	COleDateTime GetMaxDate(int nRow) const;
 
 	// helper func
-	static time_t DateToSeconds(const COleDateTime& date);
+	//static time_t DateToSeconds(const COleDateTime& date);
 	static COleDateTime WholeDays(const COleDateTime& date) { return (double)(int)date.m_dt; }
 
 	//{{AFX_MSG(CCalendarCtrl)
@@ -158,12 +158,12 @@ protected:
 	CFont			m_DefaultFont;
 	CCalendarCell	m_dayCells[CALENDAR_MAX_ROWS][CALENDAR_NUM_COLUMNS];
 	int				m_nMaxSel;
-	COleDateTime	m_BoundUp;
-	COleDateTime	m_BoundDown;
+// 	COleDateTime	m_BoundUp;
+// 	COleDateTime	m_BoundDown;
 	COleDateTime	m_DateCurrent;
 	BOOL			m_bSelectionStarted;
-	time_t			m_SelectionRange[3];
-	CMap<time_t, time_t, bool, bool> m_SingleSelection;
+	double/*time_t*/			m_SelectionRange[3];
+	CMap<double/*time_t*/, double/*time_t*/, bool, bool> m_SingleSelection;
 	int				m_nFirstWeekDay; // 1 = sunday	
 	bool			m_bMonthIsOdd;
 	int				m_nVscrollPos;

@@ -732,8 +732,8 @@ void CCalendarWnd::SyncMiniCalendar(BOOL bScroll)
 	}
 	else
 	{
-		time_t tSel =  m_BigCalendar.GetFirstSelectedItem();
-		COleDateTime dtSel(tSel);
+	//	time_t tSel =  m_BigCalendar.GetFirstSelectedItem();
+		COleDateTime dtSel =  m_BigCalendar.GetFirstSelectedItem();//(tSel)
 		
 		m_MiniCalendar.SetDateSel(dtSel, dtSel);
 		m_MiniCalendar.SetCurrentMonthAndYear(dtSel);
