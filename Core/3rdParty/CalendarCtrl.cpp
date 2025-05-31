@@ -61,8 +61,6 @@ CCalendarCtrl::CCalendarCtrl()
 	m_SelectionRange[2]	= 0;
 	m_nVscrollMax		= 110;
 	m_nVscrollPos		= m_nVscrollMax/2;
-// 	m_BoundDown			= COleDateTime(1999,12,31,0,0,0); 
-// 	m_BoundUp			= COleDateTime(2036,1,1,0,0,0);
 	m_nMaxSel			= 42;
 	m_nFirstWeekDay		= 1;
 	m_pfnDataCallback	= NULL;
@@ -124,19 +122,13 @@ void CCalendarCtrl::Reset()
 	COleDateTime today(time(NULL));
 	COleDateTime dtFirstDay(today.GetYear(), today.GetMonth(), 1,0,0,0); 
 	
-// 	if (dtFirstDay > m_BoundUp) 
-// 		dtFirstDay = m_BoundUp;
-// 
-// 	else if (dtFirstDay < m_BoundDown)	
-// 		dtFirstDay = m_BoundDown;
-
 	if (dtFirstDay.GetMonth()%2) 
 		m_bMonthIsOdd = true;
 
 	Goto(dtFirstDay);
 
 	// Reset selection
-	m_SelectionRange[1] = /*DateToSeconds*/(COleDateTime(today.GetYear(), today.GetMonth(), today.GetDay(),0,0,0));
+	m_SelectionRange[1] = WholeDays(today);
 	m_SelectionRange[0] = m_SelectionRange[1];
 
 	// Reset scroll pos
@@ -151,9 +143,6 @@ void CCalendarCtrl::GotoToday(bool bSelect)
 
 void CCalendarCtrl::Goto(const COleDateTime& dtDate, bool bSelect)
 {
-// 	if ((dtDate < m_BoundUp) && 
-// 		(dtDate > m_BoundDown))
-	{
 		m_DateCurrent = WholeDays(dtDate);	
 		
 		if (m_nFirstWeekDay<1 || m_nFirstWeekDay>7)
@@ -181,7 +170,7 @@ void CCalendarCtrl::Goto(const COleDateTime& dtDate, bool bSelect)
 				m_dayCells[i][u].csaLines.RemoveAll();
 
 				if (m_pfnDataCallback)
-					m_pfnDataCallback(this, /*DateToSeconds*/(m_dayCells[i][u].date));
+					m_pfnDataCallback(this, m_dayCells[i][u].date);
 
 				dtIte += COleDateTimeSpan(1,0,0,0);
 			}
@@ -192,7 +181,7 @@ void CCalendarCtrl::Goto(const COleDateTime& dtDate, bool bSelect)
 			m_SingleSelection.RemoveAll();
 
 			m_SelectionRange[2] = 0;
-			m_SelectionRange[1] = /*DateToSeconds*/(m_DateCurrent);
+			m_SelectionRange[1] = m_DateCurrent;
 			m_SelectionRange[0] = m_SelectionRange[1];
 
 			// Scrolling pos
@@ -204,7 +193,6 @@ void CCalendarCtrl::Goto(const COleDateTime& dtDate, bool bSelect)
 		}
 
 		OnVisibleDateRangeChanged(); // for derived classes
-	}
 
 	Invalidate(true);
 }
@@ -433,7 +421,7 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 
 				// test for selected
 				bool bSelected = false;
-				double/*time_t*/ tcur = /*DateToSeconds*/(pCell->date);	
+				double tcur = pCell->date;	
 				
 				if (m_SingleSelection.GetCount())
 				{	
@@ -441,8 +429,8 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 				}
 				else
 				{
-					double/*time_t*/ tmax = max(m_SelectionRange[0], m_SelectionRange[1]);
-					double/*time_t*/ tmin = min(m_SelectionRange[0], m_SelectionRange[1]);		
+					double tmax = max(m_SelectionRange[0], m_SelectionRange[1]);
+					double tmin = min(m_SelectionRange[0], m_SelectionRange[1]);		
 					
 					bSelected = ((tmax >= tcur) && (tcur >= tmin));
 				}
@@ -524,13 +512,6 @@ void CCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CR
 
 		pDC->FillSolidRect(rCell, GetFadedThemeColour(40));
 	}
-	
-// 	// Out of range
-// 	if ((pCell->date >= m_BoundUp) || 
-// 		(pCell->date <= m_BoundDown))	
-// 	{
-// 		pDC->FillSolidRect(rCell, RGB(255,225,225));
-// 	}
 }
 
 void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
@@ -807,19 +788,13 @@ BOOL CCalendarCtrl::SelectDate(const COleDateTime& dtDate, BOOL bAutoScroll)
 	}
 	else // just select
 	{
-//		m_DateCurrent = WholeDays(dtDate);
 		m_SingleSelection.RemoveAll();
 		
 		m_SelectionRange[2] = 0;
-		m_SelectionRange[1] = /*DateToSeconds*/(WholeDays(dtDate));
+		m_SelectionRange[1] = WholeDays(dtDate);
 		m_SelectionRange[0] = m_SelectionRange[1];
 		
-		// Scrolling pos
-// 		COleDateTime today = WholeDays(COleDateTime::GetCurrentTime());
-// 		m_nVscrollPos = (m_nVscrollMax/2) + (m_DateCurrent -today).GetDays()/7;
-// 		
-// 		SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
-// 		Invalidate(FALSE);
+ 		Invalidate(FALSE);
 	}
 
 	return TRUE;
@@ -833,7 +808,7 @@ bool CCalendarCtrl::GetLastSelectedGridCell(int &nRow, int &nCol) const
 	{
 		for(int u=0; u<CALENDAR_NUM_COLUMNS ; u++)
 		{
-			if (m_SelectionRange[1] == /*DateToSeconds*/(GetCell(i, u)->date))
+			if (m_SelectionRange[1] == GetCell(i, u)->date)
 			{
 				nRow = i; 
 				nCol = u;
@@ -852,7 +827,7 @@ bool CCalendarCtrl::IsGridCellSelected(const CCalendarCell* pCell) const
 	if (!pCell)
 		return FALSE;
 
-	double/*time_t*/ tDate = /*DateToSeconds*/(pCell->date);
+	double tDate = pCell->date;
 	ASSERT(tDate);
 
 	if (m_SingleSelection.GetCount())
@@ -898,10 +873,8 @@ void CCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 
 			m_SingleSelection.RemoveAll();
 
-			double/*time_t*/ tDate = /*DateToSeconds*/(pCell->date);
-
 			m_SelectionRange[2] = 0;
-			m_SelectionRange[0] = tDate;
+			m_SelectionRange[0] = pCell->date;
 			m_SelectionRange[1] = m_SelectionRange[0];
 
 			Invalidate(FALSE);
@@ -925,23 +898,19 @@ void CCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 	if (HitTestGridCell(point, nRow, nCol) && !bCtrl)
 	{
-// 		if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
-// 			(m_dayCells[nRow][nCol].date > m_BoundDown))
+		m_SingleSelection.RemoveAll();
+
+		m_SelectionRange[2] = 0;
+		m_SelectionRange[0] = GetCell(nRow, nCol)->date;
+		m_SelectionRange[1] = m_SelectionRange[0];
+
+		if (m_bEnableMultiSel)
 		{
-			m_SingleSelection.RemoveAll();
-
-			m_SelectionRange[2] = 0;
-			m_SelectionRange[0] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
-			m_SelectionRange[1] = m_SelectionRange[0];
-
-			if (m_bEnableMultiSel)
-			{
-				m_bSelectionStarted = true;
-				SetCapture();
-			}
-
-			Invalidate(true);
+			m_bSelectionStarted = true;
+			SetCapture();
 		}
+
+		Invalidate(true);
 	}	
 	
 	SetFocus();
@@ -962,39 +931,35 @@ void CCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	{
 		if (bCtrl)
 		{
-// 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
-// 				(m_dayCells[nRow][nCol].date > m_BoundDown))	
+			if (m_SelectionRange[2])
 			{
-				if (m_SelectionRange[2])
-				{				
-					m_SelectionRange[1] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
-					m_SelectionRange[0] = m_SelectionRange[1];
-					
-					bool bSelected;
-					
-					if (m_SingleSelection.Lookup(m_SelectionRange[1], bSelected))
-					{
-						m_SingleSelection.RemoveKey(m_SelectionRange[1]);
-					}
-					else if (m_SingleSelection.GetCount() < m_nMaxSel)
-					{
-						m_SingleSelection.SetAt(m_SelectionRange[1], true);
-					}
-					m_SelectionRange[2] = m_SelectionRange[1];
-				}
-				else
+				m_SelectionRange[1] = GetCell(nRow, nCol)->date;
+				m_SelectionRange[0] = m_SelectionRange[1];
+
+				bool bSelected;
+
+				if (m_SingleSelection.Lookup(m_SelectionRange[1], bSelected))
 				{
-					if (m_SingleSelection.GetCount() < m_nMaxSel)
-						m_SingleSelection.SetAt(m_SelectionRange[1], true);
-					
-					m_SelectionRange[1] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
-					m_SelectionRange[0] = m_SelectionRange[1];
-					
-					if (m_SingleSelection.GetCount() < m_nMaxSel)
-						m_SingleSelection.SetAt(m_SelectionRange[1], true);
-					
-					m_SelectionRange[2] = m_SelectionRange[1];
-				}			
+					m_SingleSelection.RemoveKey(m_SelectionRange[1]);
+				}
+				else if (m_SingleSelection.GetCount() < m_nMaxSel)
+				{
+					m_SingleSelection.SetAt(m_SelectionRange[1], true);
+				}
+				m_SelectionRange[2] = m_SelectionRange[1];
+			}
+			else
+			{
+				if (m_SingleSelection.GetCount() < m_nMaxSel)
+					m_SingleSelection.SetAt(m_SelectionRange[1], true);
+
+				m_SelectionRange[1] = GetCell(nRow, nCol)->date;
+				m_SelectionRange[0] = m_SelectionRange[1];
+
+				if (m_SingleSelection.GetCount() < m_nMaxSel)
+					m_SingleSelection.SetAt(m_SelectionRange[1], true);
+
+				m_SelectionRange[2] = m_SelectionRange[1];
 			}
 		}
 		else if (m_bSelectionStarted)
@@ -1004,27 +969,17 @@ void CCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 			m_SingleSelection.RemoveAll();
 			m_bSelectionStarted = false;
 
-// 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) &&
-// 				(m_dayCells[nRow][nCol].date > m_BoundDown))
-			{
-				m_SelectionRange[1] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
-			}
-// 			else
-// 				m_SelectionRange[1] = m_SelectionRange[0];
+			m_SelectionRange[1] = GetCell(nRow, nCol)->date;
 			
 			AdjustSelection();
 		}
 		else // single selection
 		{
-// 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
-// 				(m_dayCells[nRow][nCol].date > m_BoundDown))
-			{
-				m_SingleSelection.RemoveAll();
+			m_SingleSelection.RemoveAll();
 
-				m_SelectionRange[2] = 0;
-				m_SelectionRange[0] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
-				m_SelectionRange[1] = m_SelectionRange[0];
-			}
+			m_SelectionRange[2] = 0;
+			m_SelectionRange[0] = GetCell(nRow, nCol)->date;
+			m_SelectionRange[1] = m_SelectionRange[0];
 		}
 
 		// always release capture
@@ -1053,15 +1008,11 @@ void CCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point)
 
 		if (HitTestGridCell(point, nRow, nCol))
 		{
-// 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
-// 				(m_dayCells[nRow][nCol].date > m_BoundDown))	
-			{
-				m_SingleSelection.RemoveAll();
-				m_SelectionRange[1] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
+			m_SingleSelection.RemoveAll();
+			m_SelectionRange[1] = GetCell(nRow, nCol)->date;
 
-				AdjustSelection();
-				Invalidate(true);
-			}
+			AdjustSelection();
+			Invalidate(true);
 		}
 	}	
 	CWnd::OnMouseMove(nFlags, point);
@@ -1100,11 +1051,7 @@ void CCalendarCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		COleDateTime newDate = m_DateCurrent;
 		newDate += COleDateTimeSpan(7*nInc, 0, 0, 0); 
 
-// 		if ((m_BoundUp > newDate) && (newDate > m_BoundDown))
-			Goto(newDate);
-// 		else
-// 			m_nVscrollPos -= nInc;
-
+		Goto(newDate);
 		SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
 	}
 	
@@ -1152,32 +1099,6 @@ BOOL CCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
 }
 
-/*
-time_t CCalendarCtrl::DateToSeconds(const COleDateTime& date)
-{
-	// FIX : We need to find the gmt bias for the zone	
-	time_t t = (time_t)(date - COleDateTime(1970, 1, 1, 0, 0, 0)).GetTotalSeconds();
-	
-	COleDateTime diffdate(t);
-	int gmtbias = 0;
-	
-	if (diffdate > date) 
-		gmtbias = -((int)(diffdate-date).GetTotalSeconds());
-	else 
-		gmtbias =  ((int)(date-diffdate).GetTotalSeconds());
-	
-	// The next check is to handle the case when system is adjusting the clock 
-	// and we meet a time change
-	// Note: for the missing hour case, bias is left untouched so the date may have a time > 0
-	COleDateTime v((time_t)(t/86400*86400 + gmtbias));
-
-	if (v < date) 
-		gmtbias += 3600;
-	
-	return (time_t)(t/86400*86400 + gmtbias);
-}
-*/
-
 UINT CCalendarCtrl::OnGetDlgCode()
 {
 	return DLGC_WANTARROWS;
@@ -1188,12 +1109,6 @@ void CCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	int nRow, nCol;
 	GetLastSelectedGridCell(nRow, nCol);
 	
-// 	if ((m_dayCells[nRow][nCol].date >= m_BoundUp) || 
-// 		(m_dayCells[nRow][nCol].date <= m_BoundDown))
-// 	{
-// 		return;
-// 	}
-
 	COleDateTime newDate = m_DateCurrent;
 	
 	bool bHold = (GetKeyState(VK_SHIFT)>>8 == -1)?true:false;
@@ -1208,7 +1123,7 @@ void CCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		if (bCtrl)
 		{
 			bool bSelected; 
-			double/*time_t*/ t = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
+			double t = GetCell(nRow, nCol)->date;
 			
 			if (m_SingleSelection.Lookup(t, bSelected))
 			{
@@ -1238,33 +1153,25 @@ void CCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			
 			if (nRow == 0)
 			{
+				m_nVscrollPos--;
+				SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
+
 				newDate -= COleDateTimeSpan(7,0,0,0);
-				
-// 				if ((m_BoundUp > newDate) && (newDate > m_BoundDown))
-				{
-					m_nVscrollPos--;
-					SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
-					Goto(newDate);
-				}
+				Goto(newDate);
 			}
 			else
 				nRow--;	
 			
-// 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
-// 				(m_dayCells[nRow][nCol].date > m_BoundDown))	
-			{
-				m_SelectionRange[1] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
+			m_SelectionRange[1] = GetCell(nRow, nCol)->date;
 				
-				if (bCtrl)
-					m_SelectionRange[2] = m_SelectionRange[1];
+			if (bCtrl)
+				m_SelectionRange[2] = m_SelectionRange[1];
 				
-				if (!bHold)
-					m_SelectionRange[0] = m_SelectionRange[1];
+			if (!bHold)
+				m_SelectionRange[0] = m_SelectionRange[1];
 				
-				AdjustSelection();
-				Invalidate(true);
-			}
-			
+			AdjustSelection();
+			Invalidate(true);
 			NotifyParentClick();
 		}
 		break;
@@ -1283,33 +1190,27 @@ void CCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			
 			if (nRow == GetVisibleWeeks()-1)
 			{
+				m_nVscrollPos++;
+				SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
+
 				newDate += COleDateTimeSpan(7,0,0,0);
-				
-// 				if ((m_BoundUp > newDate) && (newDate > m_BoundDown))
-				{
-					m_nVscrollPos++;
-					SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
-					Goto(newDate);
-				}
+				Goto(newDate);
 			}
 			else
+			{
 				nRow++;
-			
-// 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
-// 				(m_dayCells[nRow][nCol].date > m_BoundDown))	
-			{	
-				m_SelectionRange[1] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
-				
-				if (bCtrl)
-					m_SelectionRange[2] = m_SelectionRange[1];
-				
-				if (!bHold)
-					m_SelectionRange[0] = m_SelectionRange[1];
-				
-				AdjustSelection();
-				Invalidate(true);
 			}
 			
+			m_SelectionRange[1] = GetCell(nRow, nCol)->date;
+				
+			if (bCtrl)
+				m_SelectionRange[2] = m_SelectionRange[1];
+				
+			if (!bHold)
+				m_SelectionRange[0] = m_SelectionRange[1];
+				
+			AdjustSelection();
+			Invalidate(true);
 			NotifyParentClick();
 		}
 		break;
@@ -1336,36 +1237,28 @@ void CCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 				
 				if (nRow == 0)
 				{
-					newDate -= COleDateTimeSpan(7,0,0,0);
+					m_nVscrollPos--;
+					SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
 					
-// 					if ((m_BoundUp > newDate) && (newDate > m_BoundDown))
-					{
-						m_nVscrollPos--;
-						SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
-						Goto(newDate);
-					}
-// 					else
-// 						nCol = 0;
+					newDate -= COleDateTimeSpan(7,0,0,0);
+					Goto(newDate);
 				}
 				else
+				{
 					nRow--;
+				}
 			}
 			
-// 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
-// 				(m_dayCells[nRow][nCol].date > m_BoundDown))	
-			{					
-				m_SelectionRange[1] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
+			m_SelectionRange[1] = GetCell(nRow, nCol)->date;
 				
-				if (bCtrl)
-					m_SelectionRange[2] = m_SelectionRange[1];
+			if (bCtrl)
+				m_SelectionRange[2] = m_SelectionRange[1];
 				
-				if (!bHold)
-					m_SelectionRange[0] = m_SelectionRange[1];
+			if (!bHold)
+				m_SelectionRange[0] = m_SelectionRange[1];
 				
-				AdjustSelection();
-				Invalidate(true);
-			}
-			
+			AdjustSelection();
+			Invalidate(true);
 			NotifyParentClick();
 		}
 		break;
@@ -1391,36 +1284,28 @@ void CCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 				nCol = 0;
 				if (nRow == GetVisibleWeeks()-1)
 				{
-					newDate += COleDateTimeSpan(7,0,0,0);
+					m_nVscrollPos++;
+					SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
 					
-// 					if ((m_BoundUp > newDate) && (newDate > m_BoundDown))
-					{
-						m_nVscrollPos++;
-						SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
-						Goto(newDate);
-					}
-// 					else
-// 						nCol = CALENDAR_NUM_COLUMNS-1;
+					newDate += COleDateTimeSpan(7,0,0,0);
+					Goto(newDate);
 				}
 				else
+				{
 					nRow++;
+				}
 			}
 			
-// 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
-// 				(m_dayCells[nRow][nCol].date > m_BoundDown))	
-			{
-				m_SelectionRange[1] = /*DateToSeconds*/(GetCell(nRow, nCol)->date);
+			m_SelectionRange[1] = GetCell(nRow, nCol)->date;
 				
-				if (bCtrl)
-					m_SelectionRange[2] = m_SelectionRange[1];
+			if (bCtrl)
+				m_SelectionRange[2] = m_SelectionRange[1];
 				
-				if (!bHold)
-					m_SelectionRange[0] = m_SelectionRange[1];
+			if (!bHold)
+				m_SelectionRange[0] = m_SelectionRange[1];
 				
-				AdjustSelection();
-				Invalidate(true);
-			}
-			
+			AdjustSelection();
+			Invalidate(true);
 			NotifyParentClick();
 		}
 		break;
@@ -1429,7 +1314,7 @@ void CCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-double/*time_t*/ CCalendarCtrl::GetFirstSelectedItem() const
+double CCalendarCtrl::GetFirstSelectedItem() const
 {
 	if (m_SingleSelection.GetCount())
 	{
@@ -1437,7 +1322,7 @@ double/*time_t*/ CCalendarCtrl::GetFirstSelectedItem() const
 		ASSERT(pos);
 
 		bool bSelected;
-		double/*time_t*/ date;
+		double date;
 
 		m_SingleSelection.GetNextAssoc(pos, date, bSelected);
 		ASSERT(bSelected);
@@ -1454,20 +1339,20 @@ double/*time_t*/ CCalendarCtrl::GetFirstSelectedItem() const
 }
 
 
-int CCalendarCtrl::GetSelectedItems(CArray<double, double>/*CDWordArray*/& dwaSelection) const
+int CCalendarCtrl::GetSelectedItems(CArray<double, double>& dwaSelection) const
 {
 	if (m_SingleSelection.GetCount())
 	{
 		POSITION pos = m_SingleSelection.GetStartPosition();
 		bool bSelected;
-		double/*time_t*/ date;
+		double date;
 
 		while (pos)
 		{
 			m_SingleSelection.GetNextAssoc(pos, date, bSelected);
 			ASSERT(bSelected);
 
-			dwaSelection.Add(/*(DWORD)*/date);
+			dwaSelection.Add(date);
 		}
 	}
 	else
@@ -1478,7 +1363,7 @@ int CCalendarCtrl::GetSelectedItems(CArray<double, double>/*CDWordArray*/& dwaSe
 			COleDateTime dmin(min(m_SelectionRange[0], m_SelectionRange[1]));			
 			COleDateTime dcur = dmin;
 
-			// FIX : Remove added hour if any
+			// Remove added hour if any
 			if (dmin.GetHour())	
 				dmin -= COleDateTimeSpan(0,1,0,0);
 
@@ -1486,9 +1371,8 @@ int CCalendarCtrl::GetSelectedItems(CArray<double, double>/*CDWordArray*/& dwaSe
 
 			while(dcur <= dmax)
 			{	
-				dwaSelection.Add(/*(DWORD)*//*DateToSeconds*/(dcur));
+				dwaSelection.Add(dcur);
 				dcur = dmin + COleDateTimeSpan(nDays,0,0,0);				
-				dcur = /*COleDateTime*/(/*DateToSeconds*/(dcur));
 
 				nDays++;
 			}
@@ -1516,15 +1400,15 @@ void CCalendarCtrl::AdjustSelection()
 	{
 		if (m_SelectionRange[1] > m_SelectionRange[0])
 		{
-			COleDateTime dMin(/*(time_t)*/m_SelectionRange[1]);
+			COleDateTime dMin(m_SelectionRange[1]);
 			dMin -= COleDateTimeSpan(m_nMaxSel-1,0,0,0);
-			m_SelectionRange[0] = /*DateToSeconds*/(dMin);
+			m_SelectionRange[0] = dMin;
 		}
 		else if (m_SelectionRange[1] < m_SelectionRange[0])
 		{
-			COleDateTime dMax(/*(time_t)*/m_SelectionRange[1]);
+			COleDateTime dMax(m_SelectionRange[1]);
 			dMax += COleDateTimeSpan(m_nMaxSel-1,0,0,0);
-			m_SelectionRange[0] = /*DateToSeconds*/(dMax);
+			m_SelectionRange[0] = dMax;
 		}
 	}
 }
