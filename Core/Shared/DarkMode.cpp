@@ -812,9 +812,6 @@ BOOL IsIEPrintDialog(HWND hWnd)
 	if (!CWinClasses::IsDialog(hWnd))
 		return FALSE;
 
-// 	CString sText;
-// 	CWnd::FromHandle(hWnd)->GetWindowText(sText);
-
 	if (!CWinClasses::IsClass(GetDlgItem(hWnd, 12320), WC_TABCONTROL))
 		return FALSE;
 
@@ -849,20 +846,7 @@ HWND GetParentIEPrintDialog(HWND hWnd)
 
 BOOL IsIEPrintDialogOrChild(HWND hWnd)
 {
-	ASSERT(hWnd);
-
-	if (!s_bIEPrintMode)
-		return FALSE;
-
-	while (hWnd)
-	{
-		if (IsIEPrintDialog(hWnd))
-			return TRUE;
-
-		hWnd = ::GetParent(hWnd);
-	}
-
-	return FALSE;
+	return (s_hwndIEPrintDialog && CDialogHelper::IsChildOrSame(s_hwndIEPrintDialog, hWnd));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -913,7 +897,7 @@ DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
 
 //////////////////////////////////////////////////////////////////////
 
-DWORD GetTrueSysColorOrBrush(int nColor, BOOL bColor)
+DWORD TrueGetSysColorOrBrush(int nColor, BOOL bColor)
 {
 	if (bColor)
 		return TrueGetSysColor(nColor);
@@ -924,7 +908,7 @@ DWORD GetTrueSysColorOrBrush(int nColor, BOOL bColor)
 DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 {
 	if (WantTrueColors())
-		return GetTrueSysColorOrBrush(nColor, bColor);
+		return TrueGetSysColorOrBrush(nColor, bColor);
 
 	// else
 	int nTrueColor = nColor;
@@ -1007,7 +991,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 #endif
 	}
 
-	return GetTrueSysColorOrBrush(nTrueColor, bColor);
+	return TrueGetSysColorOrBrush(nTrueColor, bColor);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1027,6 +1011,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_CTLCOLORLISTBOX:
+		if (!IsIEPrintDialogOrChild(hWnd))
 		{
 			COLORREF crText = DM_WINDOWTEXT, crBack = DM_WINDOW;
 
@@ -1043,6 +1028,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		return TRUE;
 
 	case WM_CTLCOLOREDIT:
+		if (!IsIEPrintDialogOrChild(hWnd))
 		{
 			lr = GetColorOrBrush(DM_WINDOW, FALSE);
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
@@ -1053,6 +1039,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
+		if (!IsIEPrintDialogOrChild(hWnd))
 		{
 			if (::GetTextColor((HDC)wp) == TrueGetSysColor(COLOR_WINDOWTEXT))
 				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
@@ -1084,25 +1071,23 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
 		if (wp)
 		{
-			CString sClass = CWinClasses::GetClass(hWnd), sText;
-			CWnd::FromHandle(hWnd)->GetWindowText(sText);
-
-			if (s_bIEPrintMode && !s_hwndIEPrintDialog)
+			if (s_bIEPrintMode)
 			{
-				if (IsIEPrintDialog(hWnd))
-					hWnd = GetParentIEPrintDialog(hWnd);
+				if (!s_hwndIEPrintDialog)
+				{
+					if (!IsIEPrintDialog(hWnd))
+						hWnd = GetParentIEPrintDialog(hWnd);
 
-				s_hwndIEPrintDialog = hWnd;
-				return FALSE;
+					s_hwndIEPrintDialog = hWnd;
+				}
+
+				if (s_hwndIEPrintDialog)
+					return FALSE;
 			}
 
-			if (CWinClasses::IsClass(sClass, WC_LISTVIEW))
-			{
-				int breakpoint = 0;
-// 				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
-// 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
-			}
-			else if (CWinClasses::IsClass(sClass, WC_TREEVIEW))
+			CString sClass = CWinClasses::GetClass(hWnd);
+
+			if (CWinClasses::IsClass(sClass, WC_TREEVIEW))
 			{
 				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
@@ -1215,15 +1200,6 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 
 	switch (nMsg)
 	{
-	case WM_ERASEBKGND:
-		if (IsIEPrintDialogOrChild(hWnd))
-		{
-			CString sClass = CWinClasses::GetClass(hWnd);
-			CAutoFlagT<HWND> af(s_hwndCurrent, hWnd);
-
-// 			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
-		}
-		break;
 	case WM_PAINT:
 		{
 			CAutoFlagT<HWND> af(s_hwndCurrent, hWnd);
@@ -1288,6 +1264,9 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 
 HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList)
 {
+	if (IsIEPrintDialogOrChild(hwnd))
+		return TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
+
 	if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
 	{
 		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW))
@@ -1296,16 +1275,6 @@ HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWST
 		}
 		else if (CWinClasses::IsClass(hwnd, WC_LISTVIEW))
 		{
-			// DON'T add the list view if it forms part of the
-			// Internet Explorer > Print dialog, and disallow setting 
-			// the Explorer theme all to fix a text color issue
-// 			if (CWinClasses::HasParentClass(hwnd, WC_SHELLDLLDEFVIEW) &&
-// 				(CWinClasses::HasParentClass(hwnd, WC_IEPRINTPREVIEW, TRUE) ||
-// 				 CWinClasses::HasParentClass(hwnd, WC_DIALOGBOX, TRUE)))
-// 			{
-// 				return 0L;
-// 			}
-
 			s_mapExplorerThemedWnds.Add(hwnd);
 		}
 	}
@@ -1331,6 +1300,9 @@ HRESULT STDAPICALLTYPE MyCloseThemeData(HTHEME hTheme)
 
 HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor)
 {
+	if (WantTrueColors())
+		return TrueGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
+
 	CString sThClass = GetClass(hTheme);
 
 	if (CWinClasses::IsClass(sThClass, TC_EDIT))
@@ -1344,7 +1316,7 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 				case ETS_CUEBANNER:
 					if (iPropId == TMT_TEXTCOLOR)
 					{
-						*pColor = TrueGetSysColor(COLOR_3DHIGHLIGHT);
+						*pColor = GetColorOrBrush(COLOR_WINDOWTEXT, TRUE);
 						return S_OK;
 					}
 					break;
@@ -1359,6 +1331,9 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 
 HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect)
 {
+	if (WantTrueColors())
+		return TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+
 	CString sThClass = GetClass(hTheme);
 
 	if (s_hwndCurrentDateTime && CWinClasses::IsClass(sThClass, TC_DATETIMEPICK))
@@ -1557,6 +1532,9 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 
 HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect)
 {
+	if (WantTrueColors())
+		return TrueDrawThemeText(hTheme, hdc, iPartId, iStateId, szText, nTextLen, dwTextFlags, dwTextFlags2, pRect);
+	
 	CString sThClass = GetClass(hTheme);
 
 	if (s_hwndCurrentBtnStatic)
