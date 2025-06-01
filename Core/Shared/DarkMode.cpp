@@ -42,6 +42,13 @@ const COLORREF DM_HOTLIGHT			= RGB(190, 210, 225);
 
 //////////////////////////////////////////////////////////////////////
 
+#ifndef COLOR_MENUHILIGHT
+#	define COLOR_MENUHILIGHT 29
+#	define COLOR_MENUBAR 30
+#endif
+
+//////////////////////////////////////////////////////////////////////
+
 // Replacement function declarations
 static DWORD WINAPI MyGetSysColor(int nColor);
 static HBRUSH WINAPI MyGetSysColorBrush(int nColor);
@@ -730,6 +737,109 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 //////////////////////////////////////////////////////////////////////
 
+BOOL IsIEFontDialog(HWND hWnd)
+{
+	// Heuristic for Internet Explorer Print Preview
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+
+	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
+		return FALSE;
+
+	const UINT NONCOMBOS[] = { 1073, IDOK, IDCANCEL };
+	const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
+
+	const UINT OWNERDRAWCOMBOS[] = { 1136, 1138, 1139 };
+	const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
+
+	for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
+	{
+		if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
+			return FALSE;
+	}
+
+	for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
+	{
+		HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
+
+		if (hwndCombo == NULL)
+			return FALSE;
+
+		if (!CWinClasses::IsComboBox(hwndCombo))
+			return FALSE;
+
+		BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
+
+		if (!bOwnerDraw)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL IsIEPrintDialog(HWND hWnd)
+{
+	// Note: Only the print preview windows has WC_IEPRINTPREVIEW as its
+	// parent. The Print dialog is parented to the main app
+	HWND hwndParent = ::GetParent(hWnd);
+
+	if (!CWinClasses::IsClass(hwndParent, WC_IEPRINTPREVIEW) || (hwndParent != *AfxGetMainWnd()))
+	{
+		return FALSE;
+	}
+
+	// Heuristic
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+
+	if (!CWinClasses::IsClass(GetDlgItem(hWnd, 12320), WC_TABCONTROL))
+		return FALSE;
+
+	HWND hwndGenTab = GetDlgItem(hWnd, 0);
+
+	if (!CWinClasses::IsClass(hwndGenTab, WC_DIALOGBOX))
+
+		if (!CWinClasses::IsClass(GetDlgItem(hwndGenTab, 0), WC_SHELLDLLDEFVIEW))
+			return FALSE;
+
+	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+static BOOL s_bIEPrintMode = FALSE;
+
+void CDarkMode::PrepareForIEPrintOrPreview()
+{
+	ASSERT(IsEnabled());
+
+	s_bIEPrintMode = TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+BOOL WantTrueColors()
+{
+	if (!s_bIEPrintMode)
+		return FALSE;
+	
+	if (!s_hwndCurrent)
+		return TRUE;
+	
+// 	if (IsIEPrintDialog(s_hwndCurrent))
+// 		return TRUE;
+
+	if (!CWinClasses::HasParentClass(s_hwndCurrent, WC_IEPRINTPREVIEW, TRUE))
+		return FALSE;
+
+	if (CWinClasses::HasParentClass(s_hwndCurrent, WC_DIALOGBOX, TRUE))
+		return FALSE;
+
+	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 static CMap<COLORREF, COLORREF, HBRUSH, HBRUSH> s_mapBrushes;
 
 DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
@@ -749,31 +859,7 @@ DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
 	return (DWORD)hbr; 
 }
 
-static BOOL s_bIEPrintPreviewMode = FALSE;
-
-void CDarkMode::PrepareForIEPrintPreview()
-{
-	ASSERT(IsEnabled());
-
-	s_bIEPrintPreviewMode = TRUE;
-}
-
-BOOL WantTrueColors()
-{
-	if (!s_bIEPrintPreviewMode)
-		return FALSE;
-	
-	if (!s_hwndCurrent)
-		return TRUE;
-	
-	if (!CWinClasses::HasParentClass(s_hwndCurrent, WC_IEPRINTPREVIEW, TRUE))
-		return FALSE;
-	
-	if (CWinClasses::HasParentClass(s_hwndCurrent, WC_DIALOGBOX, TRUE))
-		return FALSE;
-
-	return TRUE;
-}
+//////////////////////////////////////////////////////////////////////
 
 DWORD GetTrueSysColorOrBrush(int nColor, BOOL bColor)
 {
@@ -874,51 +960,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 
 //////////////////////////////////////////////////////////////////////
 
-BOOL IsFontCommonDialog(HWND hWnd)
-{
-	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT))
-		return TRUE;
-
-	// Heuristic for Internet Explorer Print Preview
-	if (!CWinClasses::IsDialog(hWnd))
-		return FALSE;
-
-	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
-		return FALSE;
-	
-	const UINT NONCOMBOS[] = { 1073, IDOK, IDCANCEL };
-	const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
-
-	const UINT OWNERDRAWCOMBOS[] = { 1136, 1138, 1139 };
-	const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
-
-	for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
-	{
-		if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
-			return FALSE;
-	}
-
-	for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
-	{
-		HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
-
-		if (hwndCombo == NULL)
-			return FALSE;
-
-		if (!CWinClasses::IsComboBox(hwndCombo))
-			return FALSE;
-
-		BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
-
-		if (!bOwnerDraw)
-			return FALSE;
-	}
-
-	return TRUE;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
@@ -926,6 +967,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	switch (nMsg)
 	{
 	case WM_CTLCOLORDLG:
+		if (!IsIEPrintDialog(hWnd))
 		{
 			lr = GetColorOrBrush(DM_3DFACE, FALSE);
 		}
@@ -979,7 +1021,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		return TRUE;
 
 	case WM_INITDIALOG:	// Leave hooking as late as possible
-		if (IsFontCommonDialog(hWnd))
+		if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT) || IsIEFontDialog(hWnd))
 		{
 			// Combos in the font dialog do not play by the rules
 			HookWindow(hWnd, new CDarkModeFontDialog());
@@ -1075,8 +1117,8 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	case WM_ENABLE:
 		{
-			if (s_bIEPrintPreviewMode && wp && (hWnd == *AfxGetMainWnd()))
-				s_bIEPrintPreviewMode = FALSE;
+			if (s_bIEPrintMode && wp && (hWnd == *AfxGetMainWnd()))
+				s_bIEPrintMode = FALSE;
 
 			CDialogHelper::InvalidateAllCtrls(CWnd::FromHandle(hWnd), FALSE);
 		}
