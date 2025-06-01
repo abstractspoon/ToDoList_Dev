@@ -5,6 +5,7 @@
 #include "enbrowserctrl.h"
 #include "regkey.h"
 #include "misc.h"
+#include "DarkMode.h"
 
 //fabio_2005
 #if _MSC_VER >= 1300
@@ -139,6 +140,9 @@ void CEnBrowserCtrl::Print(LPCTSTR szFile, BOOL bPrintBkgnd)
 
 void CEnBrowserCtrl::PrintPreview(LPCTSTR szFile, BOOL bPrintBkgnd)
 {
+	if (CDarkMode::IsEnabled())
+		CDarkMode::PrepareForIEPrintPreview();
+
 	InitPrintBkgnd(bPrintBkgnd);
 	
 	if (Misc::IsEmpty(szFile))

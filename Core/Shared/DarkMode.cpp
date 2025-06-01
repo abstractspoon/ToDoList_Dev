@@ -343,6 +343,7 @@ static HWND s_hwndCurrentDateTime			= NULL;
 static HWND s_hwndCurrentBtnStatic			= NULL;
 static HWND s_hwndCurrentManagedBtnStatic	= NULL;
 static HWND s_hwndCurrentExplorerTreeOrList = NULL;
+static HWND s_hwndCurrent					= NULL;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -478,8 +479,17 @@ class CDarkModeFontDialog : public CDarkModeCtrlBase
 protected:
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
+		CAutoFlagT<HWND> af(s_hwndCurrent, GetHwnd());
+
 		switch (msg)
 		{
+		case WM_PAINT:
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrent, GetHwnd());
+				return Default();
+			}
+			break;
+
 		case WM_DRAWITEM:
 			switch (wp)
 			{
@@ -739,8 +749,46 @@ DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
 	return (DWORD)hbr; 
 }
 
+static BOOL s_bIEPrintPreviewMode = FALSE;
+
+void CDarkMode::PrepareForIEPrintPreview()
+{
+	ASSERT(IsEnabled());
+
+	s_bIEPrintPreviewMode = TRUE;
+}
+
+BOOL WantTrueColors()
+{
+	if (!s_bIEPrintPreviewMode)
+		return FALSE;
+	
+	if (!s_hwndCurrent)
+		return TRUE;
+	
+	if (!CWinClasses::HasParentClass(s_hwndCurrent, WC_IEPRINTPREVIEW, TRUE))
+		return FALSE;
+	
+	if (CWinClasses::HasParentClass(s_hwndCurrent, WC_DIALOGBOX, TRUE))
+		return FALSE;
+
+	return TRUE;
+}
+
+DWORD GetTrueSysColorOrBrush(int nColor, BOOL bColor)
+{
+	if (bColor)
+		return TrueGetSysColor(nColor);
+
+	return (DWORD)TrueGetSysColorBrush(nColor);
+}
+
 DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 {
+	if (WantTrueColors())
+		return GetTrueSysColorOrBrush(nColor, bColor);
+
+	// else
 	int nTrueColor = nColor;
 
 	switch (nColor)
@@ -749,6 +797,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_BTNTEXT:
 	case COLOR_MENUTEXT:
 	case COLOR_MENU:
+	case COLOR_MENUHILIGHT:
+	case COLOR_MENUBAR:
 		break;
 
 	case COLOR_HOTLIGHT: // Used for Web Browser links
@@ -814,18 +864,12 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_INACTIVECAPTIONTEXT:
 	case COLOR_GRADIENTACTIVECAPTION:
 	case COLOR_GRADIENTINACTIVECAPTION:
-// 	case COLOR_MENUHILIGHT:
-// 	case COLOR_MENUBAR:
 	case COLOR_BACKGROUND:
 		return GetColorOrBrush(colorRed, bColor);
 #endif
 	}
 
-	if (bColor)
-		return TrueGetSysColor(nTrueColor);
-	
-	// else
-	return (DWORD)TrueGetSysColorBrush(nTrueColor);
+	return GetTrueSysColorOrBrush(nTrueColor, bColor);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -878,11 +922,13 @@ BOOL IsFontCommonDialog(HWND hWnd)
 BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
-
+	
 	switch (nMsg)
 	{
 	case WM_CTLCOLORDLG:
-		lr = GetColorOrBrush(DM_3DFACE, FALSE);
+		{
+			lr = GetColorOrBrush(DM_3DFACE, FALSE);
+		}
 		return TRUE;
 
 	case WM_CTLCOLORLISTBOX:
@@ -1021,12 +1067,19 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_NCDESTROY:
-		UnhookWindow(hWnd);
-		s_mapExplorerThemedWnds.Remove(hWnd);
+		{
+			UnhookWindow(hWnd);
+			s_mapExplorerThemedWnds.Remove(hWnd);
+		}
 		break;
 
 	case WM_ENABLE:
-		CDialogHelper::InvalidateAllCtrls(CWnd::FromHandle(hWnd), FALSE);
+		{
+			if (s_bIEPrintPreviewMode && wp && (hWnd == *AfxGetMainWnd()))
+				s_bIEPrintPreviewMode = FALSE;
+
+			CDialogHelper::InvalidateAllCtrls(CWnd::FromHandle(hWnd), FALSE);
+		}
 		break;
 	}
 
@@ -1053,6 +1106,7 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 	{
 	case WM_PAINT:
 		{
+			CAutoFlagT<HWND> af(s_hwndCurrent, hWnd);
 			CString sClass = CWinClasses::GetClass(hWnd);
 
 			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
@@ -1076,6 +1130,8 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 				CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hWnd);
 				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 			}
+
+			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 		}
 		break;
 
@@ -1123,12 +1179,12 @@ HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWST
 			// DON'T add the list view if it forms part of the
 			// Internet Explorer > Print dialog, and disallow setting 
 			// the Explorer theme all to fix a text color issue
-			if (CWinClasses::HasParentClass(hwnd, WC_SHELLDLLDEFVIEW) &&
-				(CWinClasses::HasParentClass(hwnd, WC_IEPRINTPREVIEW, TRUE) ||
-				 CWinClasses::HasParentClass(hwnd, WC_DIALOGBOX, TRUE)))
-			{
-				return 0L;
-			}
+// 			if (CWinClasses::HasParentClass(hwnd, WC_SHELLDLLDEFVIEW) &&
+// 				(CWinClasses::HasParentClass(hwnd, WC_IEPRINTPREVIEW, TRUE) ||
+// 				 CWinClasses::HasParentClass(hwnd, WC_DIALOGBOX, TRUE)))
+// 			{
+// 				return 0L;
+// 			}
 
 			s_mapExplorerThemedWnds.Add(hwnd);
 		}
