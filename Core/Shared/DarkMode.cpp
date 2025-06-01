@@ -737,8 +737,21 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 //////////////////////////////////////////////////////////////////////
 
+static BOOL s_bIEPrintMode = FALSE;
+static HWND s_hwndIEPrintDialog = NULL;
+
+void CDarkMode::PrepareForIEPrintOrPreview()
+{
+	ASSERT(IsEnabled());
+
+	s_bIEPrintMode = TRUE;
+}
+
 BOOL IsIEFontDialog(HWND hWnd)
 {
+	if (!s_bIEPrintMode)
+		return FALSE;
+
 	// Heuristic for Internet Explorer Print Preview
 	if (!CWinClasses::IsDialog(hWnd))
 		return FALSE;
@@ -779,18 +792,28 @@ BOOL IsIEFontDialog(HWND hWnd)
 
 BOOL IsIEPrintDialog(HWND hWnd)
 {
+	if (!s_bIEPrintMode)
+		return FALSE;
+
 	// Note: Only the print preview windows has WC_IEPRINTPREVIEW as its
 	// parent. The Print dialog is parented to the main app
 	HWND hwndParent = ::GetParent(hWnd);
 
-	if (!CWinClasses::IsClass(hwndParent, WC_IEPRINTPREVIEW) || (hwndParent != *AfxGetMainWnd()))
+	if (hwndParent)
 	{
-		return FALSE;
+		if (!CWinClasses::IsClass(hwndParent, WC_IEPRINTPREVIEW) &&
+			(hwndParent != *AfxGetMainWnd()))
+		{
+			return FALSE;
+		}
 	}
 
 	// Heuristic
 	if (!CWinClasses::IsDialog(hWnd))
 		return FALSE;
+
+// 	CString sText;
+// 	CWnd::FromHandle(hWnd)->GetWindowText(sText);
 
 	if (!CWinClasses::IsClass(GetDlgItem(hWnd, 12320), WC_TABCONTROL))
 		return FALSE;
@@ -798,22 +821,48 @@ BOOL IsIEPrintDialog(HWND hWnd)
 	HWND hwndGenTab = GetDlgItem(hWnd, 0);
 
 	if (!CWinClasses::IsClass(hwndGenTab, WC_DIALOGBOX))
+		return FALSE;
 
-		if (!CWinClasses::IsClass(GetDlgItem(hwndGenTab, 0), WC_SHELLDLLDEFVIEW))
-			return FALSE;
+	if (!CWinClasses::IsClass(GetDlgItem(hwndGenTab, 0), WC_SHELLDLLDEFVIEW))
+		return FALSE;
 
 	return TRUE;
 }
 
-//////////////////////////////////////////////////////////////////////
-
-static BOOL s_bIEPrintMode = FALSE;
-
-void CDarkMode::PrepareForIEPrintOrPreview()
+HWND GetParentIEPrintDialog(HWND hWnd)
 {
-	ASSERT(IsEnabled());
+	if (!s_bIEPrintMode)
+		return NULL;
 
-	s_bIEPrintMode = TRUE;
+	HWND hwndParent = ::GetParent(hWnd);
+
+	while (hwndParent)
+	{
+		if (IsIEPrintDialog(hwndParent))
+			break;
+
+		hwndParent = ::GetParent(hwndParent);
+	}
+
+	return hwndParent;
+}
+
+BOOL IsIEPrintDialogOrChild(HWND hWnd)
+{
+	ASSERT(hWnd);
+
+	if (!s_bIEPrintMode)
+		return FALSE;
+
+	while (hWnd)
+	{
+		if (IsIEPrintDialog(hWnd))
+			return TRUE;
+
+		hWnd = ::GetParent(hWnd);
+	}
+
+	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -822,12 +871,15 @@ BOOL WantTrueColors()
 {
 	if (!s_bIEPrintMode)
 		return FALSE;
-	
+
+	// Assume that any calls to GetSysColor which do not have
+	// an attendant control being drawn are coming from IE
+	// internally so we return TRUE to use the unthemed colours
 	if (!s_hwndCurrent)
 		return TRUE;
 	
-// 	if (IsIEPrintDialog(s_hwndCurrent))
-// 		return TRUE;
+	if (s_hwndIEPrintDialog && CDialogHelper::IsChildOrSame(s_hwndIEPrintDialog, s_hwndCurrent))
+ 		return TRUE;
 
 	if (!CWinClasses::HasParentClass(s_hwndCurrent, WC_IEPRINTPREVIEW, TRUE))
 		return FALSE;
@@ -963,15 +1015,16 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 {
 	lr = 0;
-	
+
 	switch (nMsg)
 	{
 	case WM_CTLCOLORDLG:
-		if (!IsIEPrintDialog(hWnd))
+		if (!IsIEPrintDialogOrChild(hWnd))
 		{
 			lr = GetColorOrBrush(DM_3DFACE, FALSE);
+			return TRUE;
 		}
-		return TRUE;
+		break;
 
 	case WM_CTLCOLORLISTBOX:
 		{
@@ -1031,9 +1084,25 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
 		if (wp)
 		{
-			CString sClass = CWinClasses::GetClass(hWnd);
+			CString sClass = CWinClasses::GetClass(hWnd), sText;
+			CWnd::FromHandle(hWnd)->GetWindowText(sText);
 
-			if (CWinClasses::IsClass(sClass, WC_TREEVIEW))
+			if (s_bIEPrintMode && !s_hwndIEPrintDialog)
+			{
+				if (IsIEPrintDialog(hWnd))
+					hWnd = GetParentIEPrintDialog(hWnd);
+
+				s_hwndIEPrintDialog = hWnd;
+				return FALSE;
+			}
+
+			if (CWinClasses::IsClass(sClass, WC_LISTVIEW))
+			{
+				int breakpoint = 0;
+// 				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
+// 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
+			}
+			else if (CWinClasses::IsClass(sClass, WC_TREEVIEW))
 			{
 				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
@@ -1146,6 +1215,15 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 
 	switch (nMsg)
 	{
+	case WM_ERASEBKGND:
+		if (IsIEPrintDialogOrChild(hWnd))
+		{
+			CString sClass = CWinClasses::GetClass(hWnd);
+			CAutoFlagT<HWND> af(s_hwndCurrent, hWnd);
+
+// 			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+		}
+		break;
 	case WM_PAINT:
 		{
 			CAutoFlagT<HWND> af(s_hwndCurrent, hWnd);
