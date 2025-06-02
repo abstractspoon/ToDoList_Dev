@@ -481,6 +481,9 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+#define IDC_FONTNAME_COMBO  1136
+#define IDC_FONTSTYLE_COMBO 1137
+
 class CDarkModeFontDialog : public CDarkModeCtrlBase
 {
 protected:
@@ -500,8 +503,8 @@ protected:
 		case WM_DRAWITEM:
 			switch (wp)
 			{
-			case 1136:
-			case 1137:
+			case IDC_FONTNAME_COMBO:
+			case IDC_FONTSTYLE_COMBO:
 				{
 					LPDRAWITEMSTRUCT pDIS = (LPDRAWITEMSTRUCT)lp;
 					ASSERT(CWinClasses::IsClass(pDIS->hwndItem, WC_COMBOBOX));
@@ -724,7 +727,7 @@ protected:
 		{
 			nAlign |= DT_BOTTOM;
 		}
-		else //if (Misc::HasFlag(dwStyle, BS_VCENTER))
+		else // BS_VCENTER
 		{
 			nAlign |= DT_VCENTER;
 		}
@@ -743,6 +746,7 @@ static HWND s_hwndIEPrintDialog = NULL;
 void CDarkMode::PrepareForIEPrintOrPreview()
 {
 	ASSERT(IsEnabled());
+	ASSERT(s_hwndIEPrintDialog == NULL);
 
 	s_bIEPrintMode = TRUE;
 }
@@ -826,49 +830,38 @@ BOOL IsIEPrintDialog(HWND hWnd)
 	return TRUE;
 }
 
-HWND GetParentIEPrintDialog(HWND hWnd)
-{
-	if (!s_bIEPrintMode)
-		return NULL;
-
-	HWND hwndParent = ::GetParent(hWnd);
-
-	while (hwndParent)
-	{
-		if (IsIEPrintDialog(hwndParent))
-			break;
-
-		hwndParent = ::GetParent(hwndParent);
-	}
-
-	return hwndParent;
-}
-
-BOOL IsIEPrintDialogOrChild(HWND hWnd)
-{
-	return (s_hwndIEPrintDialog && CDialogHelper::IsChildOrSame(s_hwndIEPrintDialog, hWnd));
-}
-
 //////////////////////////////////////////////////////////////////////
 
-BOOL WantTrueColors()
+BOOL WantTrueColors(HWND hwndCurrent = NULL)
 {
 	if (!s_bIEPrintMode)
 		return FALSE;
 
 	// Assume that any calls to GetSysColor which do not have
 	// an attendant control being drawn are coming from IE
-	// internally so we return TRUE to use the unthemed colours
-	if (!s_hwndCurrent)
+	// internally so we return TRUE to use the 'True' colours
+	if (hwndCurrent == NULL)
+		hwndCurrent = s_hwndCurrent;
+
+	if (!hwndCurrent)
 		return TRUE;
 	
-	if (s_hwndIEPrintDialog && CDialogHelper::IsChildOrSame(s_hwndIEPrintDialog, s_hwndCurrent))
+	// We definitely want 'True' colours for IE's 'Print' dialog
+	if (CDialogHelper::IsChildOrSame(s_hwndIEPrintDialog, hwndCurrent))
  		return TRUE;
 
-	if (!CWinClasses::HasParentClass(s_hwndCurrent, WC_IEPRINTPREVIEW, TRUE))
+	// We definitely DON'T want 'True' colours for any control
+	// NOT having the IE Print Preview class as its parent
+	if (!CWinClasses::HasParentClass(hwndCurrent, WC_IEPRINTPREVIEW, TRUE))
 		return FALSE;
 
-	if (CWinClasses::HasParentClass(s_hwndCurrent, WC_DIALOGBOX, TRUE))
+	// We definitely want all other controls having a dialog
+	// as its parent or the dialog itself.
+	// This handles IE's 'Page Setup' and 'Font' dialogs
+	if (CWinClasses::IsClass(hwndCurrent, WC_DIALOGBOX))
+		return FALSE;
+
+	if (CWinClasses::HasParentClass(hwndCurrent, WC_DIALOGBOX, TRUE))
 		return FALSE;
 
 	return TRUE;
@@ -1003,7 +996,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	switch (nMsg)
 	{
 	case WM_CTLCOLORDLG:
-		if (!IsIEPrintDialogOrChild(hWnd))
+		if (!WantTrueColors(hWnd))
 		{
 			lr = GetColorOrBrush(DM_3DFACE, FALSE);
 			return TRUE;
@@ -1011,7 +1004,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_CTLCOLORLISTBOX:
-		if (!IsIEPrintDialogOrChild(hWnd))
+		if (!WantTrueColors(hWnd))
 		{
 			COLORREF crText = DM_WINDOWTEXT, crBack = DM_WINDOW;
 
@@ -1028,7 +1021,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		return TRUE;
 
 	case WM_CTLCOLOREDIT:
-		if (!IsIEPrintDialogOrChild(hWnd))
+		if (!WantTrueColors(hWnd))
 		{
 			lr = GetColorOrBrush(DM_WINDOW, FALSE);
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
@@ -1039,7 +1032,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
-		if (!IsIEPrintDialogOrChild(hWnd))
+		if (!WantTrueColors(hWnd))
 		{
 			if (::GetTextColor((HDC)wp) == TrueGetSysColor(COLOR_WINDOWTEXT))
 				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
@@ -1073,16 +1066,14 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		{
 			if (s_bIEPrintMode)
 			{
-				if (!s_hwndIEPrintDialog)
-				{
-					if (!IsIEPrintDialog(hWnd))
-						hWnd = GetParentIEPrintDialog(hWnd);
-
-					s_hwndIEPrintDialog = hWnd;
-				}
-
 				if (s_hwndIEPrintDialog)
 					return FALSE;
+
+				if (IsIEPrintDialog(hWnd))
+				{
+					s_hwndIEPrintDialog = hWnd;
+					return FALSE;
+				}
 			}
 
 			CString sClass = CWinClasses::GetClass(hWnd);
@@ -1163,6 +1154,11 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_NCDESTROY:
+		if (s_bIEPrintMode && (hWnd == s_hwndIEPrintDialog))
+		{
+			s_hwndIEPrintDialog = NULL;
+		}
+		else
 		{
 			UnhookWindow(hWnd);
 			s_mapExplorerThemedWnds.Remove(hWnd);
@@ -1171,8 +1167,14 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	case WM_ENABLE:
 		{
+			// In the case of 'Print' we receive this message before
+			// WM_NCDESTROY so we need to clear s_hwndIEPrintDialog 
+			// now else the above check will fail.
 			if (s_bIEPrintMode && wp && (hWnd == *AfxGetMainWnd()))
+			{
 				s_bIEPrintMode = FALSE;
+				s_hwndIEPrintDialog = NULL;
+			}
 
 			CDialogHelper::InvalidateAllCtrls(CWnd::FromHandle(hWnd), FALSE);
 		}
@@ -1264,7 +1266,7 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 
 HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList)
 {
-	if (IsIEPrintDialogOrChild(hwnd))
+	if (WantTrueColors(hwnd))
 		return TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
 
 	if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
@@ -1548,10 +1550,6 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 		::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
 
 		return S_OK;
-	}
-	else if (CWinClasses::IsClass(sThClass, TC_EDIT))
-	{
-		int breakpoint = 0;
 	}
 	else if (s_hwndCurrentDateTime && CWinClasses::IsClass(sThClass, TC_DATETIMEPICK))
 	{
