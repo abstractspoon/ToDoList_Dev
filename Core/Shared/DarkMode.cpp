@@ -493,13 +493,6 @@ protected:
 
 		switch (msg)
 		{
-		case WM_PAINT:
-			{
-				CAutoFlagT<HWND> af(s_hwndCurrent, GetHwnd());
-				return Default();
-			}
-			break;
-
 		case WM_DRAWITEM:
 			switch (wp)
 			{
