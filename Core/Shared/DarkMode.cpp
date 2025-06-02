@@ -784,18 +784,27 @@ BOOL IsIEFontDialog(HWND hWnd)
 	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
 		return FALSE;
 
+	const int IDC_SAMPLEGROUP	= 1073;
+	const int IDC_SAMPLETEXT	= 1092;
+	const int IDC_FONTLABEL		= 1088;
+	const int IDC_STYLELABEL	= 1089;
+	const int IDC_FONTLIST		= 1136;
+	const int IDC_FONTSTYLE		= 1137;
+	const int IDC_FONTSIZE		= 1138;
+	const int IDC_FONTCOLOR		= 1139;
+
 	const DLGCTRL CTRLS[] = 
 	{
-		{ 1073,		WC_BUTTON, 0 }, // Sample group-box
-		{ 1092,		WC_STATIC, 0 }, // Sample text
-		{ 1088,		WC_STATIC, 0 }, // Font label
-		{ 1089,		WC_STATIC, 0 }, // Font style label
-		{ IDOK,		WC_BUTTON, 0 },
-		{ IDCANCEL, WC_BUTTON, 0 },
-		{ 1136,		WC_COMBOBOX, CBS_OWNERDRAWFIXED },	// Font combo
-		{ 1137,		WC_COMBOBOX, 0 },					// Style combo
-		{ 1138,		WC_COMBOBOX, CBS_OWNERDRAWFIXED },	// Size combo
-		{ 1139,		WC_COMBOBOX, CBS_OWNERDRAWFIXED },	// Colour combo
+		{ IDC_SAMPLEGROUP,	WC_BUTTON,		0 }, 
+		{ IDC_SAMPLETEXT,	WC_STATIC,		0 }, 
+		{ IDC_FONTLABEL,	WC_STATIC,		0 }, 
+		{ IDC_STYLELABEL,	WC_STATIC,		0 }, 
+		{ IDOK,				WC_BUTTON,		0 },
+		{ IDCANCEL,			WC_BUTTON,		0 },
+		{ IDC_FONTLIST,		WC_COMBOBOX,	CBS_OWNERDRAWFIXED },
+		{ IDC_FONTSTYLE,	WC_COMBOBOX,	0 },				
+		{ IDC_FONTSIZE,		WC_COMBOBOX,	CBS_OWNERDRAWFIXED },
+		{ IDC_FONTCOLOR,	WC_COMBOBOX,	CBS_OWNERDRAWFIXED },
 	};
 	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
@@ -826,20 +835,33 @@ BOOL IsIEPrintDialog(HWND hWnd)
 
 	HWND hwndGenTab = GetDlgItem(hWnd, 0);
 
+	// Printer list ctrl ID changes after XP
+	const int IDC_PRINTERLIST	= ((COSVersion() < OSV_VISTA) ? 1001 : 0);
+	const int IDC_FINDPRINTER	= 1003;
+	const int IDC_PREFERENCES	= 1010;
+	const int IDC_SELECTPRINTER = 1072;
+	const int IDC_PRINTTOFILE	= 1002;
+	const int IDC_STATUS		= 1005;
+	const int IDC_LOCATION		= 1007;
+	const int IDC_COMMENT		= 1009;
+	const int IDC_STATUSLABEL	= 1004;
+	const int IDC_LOCATIONLABEL = 1006;
+	const int IDC_COMMENTLABEL	= 1008;
+	
 	const DLGCTRL CTRLS[] =
 	{
-		{ 0,		WC_SHELLDLLDEFVIEW, 0 },	// Printer list
-		{ 1003,		WC_BUTTON, BS_TEXT },		// Find Printer button
-		{ 1010,		WC_BUTTON, BS_TEXT },		// Preferences button
-		{ 1072,		WC_BUTTON, BS_TEXT },		// Select Printer group-box
-		{ 1002,		WC_BUTTON, BS_TEXT },		// Print to File checkbox
-		{ 1005,		WC_EDIT, ES_LEFT | ES_AUTOHSCROLL | ES_READONLY }, // Current status
-		{ 1007,		WC_EDIT, ES_LEFT | ES_AUTOHSCROLL | ES_READONLY }, // Current location
-		{ 1009,		WC_EDIT, ES_LEFT | ES_AUTOHSCROLL | ES_READONLY }, // Current comment
-		{ 1004,		WC_STATIC, SS_LEFT | SS_NOPREFIX },	// Status label
-		{ 1006,		WC_STATIC, SS_LEFT | SS_NOPREFIX },	// Location label
-		{ 1008,		WC_STATIC, SS_LEFT | SS_NOPREFIX },	// Comment label
-		{ 1000,		WC_LISTBOX, LBS_NOINTEGRALHEIGHT },
+		{ IDC_PRINTERLIST,			WC_SHELLDLLDEFVIEW, 0 },
+		{ IDC_FINDPRINTER,		WC_BUTTON,			BS_TEXT },
+		{ IDC_PREFERENCES,		WC_BUTTON,			BS_TEXT },
+		{ IDC_SELECTPRINTER,	WC_BUTTON,			BS_TEXT },
+		{ IDC_PRINTTOFILE,		WC_BUTTON,			BS_TEXT },
+		{ IDC_STATUS,			WC_EDIT,			ES_LEFT | ES_AUTOHSCROLL | ES_READONLY },
+		{ IDC_LOCATION,			WC_EDIT,			ES_LEFT | ES_AUTOHSCROLL | ES_READONLY },
+		{ IDC_COMMENT,			WC_EDIT,			ES_LEFT | ES_AUTOHSCROLL | ES_READONLY },
+		{ IDC_STATUSLABEL,		WC_STATIC,			SS_LEFT | SS_NOPREFIX },
+		{ IDC_LOCATIONLABEL,	WC_STATIC,			SS_LEFT | SS_NOPREFIX },
+		{ IDC_COMMENTLABEL,		WC_STATIC,			SS_LEFT | SS_NOPREFIX },
+		{ 1000,					WC_LISTBOX,			LBS_NOINTEGRALHEIGHT }, // Unknown purpose
 	};
 	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
