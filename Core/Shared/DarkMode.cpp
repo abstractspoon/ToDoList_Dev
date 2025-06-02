@@ -88,6 +88,37 @@ PFNDRAWTHEMETEXT TrueDrawThemeText = NULL;
 
 //////////////////////////////////////////////////////////////////////
 
+struct DLGCTRL
+{
+	UINT nCtrlID;
+	LPCTSTR szClass;
+	UINT nReqStyles;
+};
+
+BOOL IsDialog(HWND hWnd, const DLGCTRL ctrls[], int nNumCtrls)
+{
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+
+	for (int nCtrl = 0; nCtrl < nNumCtrls; nCtrl++)
+	{
+		HWND hwndCtrl = ::GetDlgItem(hWnd, ctrls[nCtrl].nCtrlID);
+
+		if (!hwndCtrl)
+			return FALSE;
+
+		if (!CWinClasses::IsClass(hwndCtrl, ctrls[nCtrl].szClass))
+			return FALSE;
+
+		if (ctrls[nCtrl].nReqStyles && !CDialogHelper::HasStyle(hwndCtrl, ctrls[nCtrl].nReqStyles))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void UnhookAll();
 
 //////////////////////////////////////////////////////////////////////
@@ -750,41 +781,25 @@ BOOL IsIEFontDialog(HWND hWnd)
 		return FALSE;
 
 	// Heuristic for Internet Explorer Print Preview
-	if (!CWinClasses::IsDialog(hWnd))
-		return FALSE;
-
 	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
 		return FALSE;
 
-	const UINT NONCOMBOS[] = { 1073, IDOK, IDCANCEL };
-	const int NUM_NONCOMBOS = sizeof(NONCOMBOS) / sizeof(UINT);
-
-	const UINT OWNERDRAWCOMBOS[] = { 1136, 1138, 1139 };
-	const int NUM_OWNERDRAWCOMBOS = sizeof(OWNERDRAWCOMBOS) / sizeof(UINT);
-
-	for (int nNonCombo = 0; nNonCombo < NUM_NONCOMBOS; nNonCombo++)
+	const DLGCTRL CTRLS[] = 
 	{
-		if (::GetDlgItem(hWnd, NONCOMBOS[nNonCombo]) == NULL)
-			return FALSE;
-	}
+		{ 1073,		WC_BUTTON, 0 }, // Sample group-box
+		{ 1092,		WC_STATIC, 0 }, // Sample text
+		{ 1088,		WC_STATIC, 0 }, // Font label
+		{ 1089,		WC_STATIC, 0 }, // Font style label
+		{ IDOK,		WC_BUTTON, 0 },
+		{ IDCANCEL, WC_BUTTON, 0 },
+		{ 1136,		WC_COMBOBOX, CBS_OWNERDRAWFIXED },	// Font combo
+		{ 1137,		WC_COMBOBOX, 0 },					// Style combo
+		{ 1138,		WC_COMBOBOX, CBS_OWNERDRAWFIXED },	// Size combo
+		{ 1139,		WC_COMBOBOX, CBS_OWNERDRAWFIXED },	// Colour combo
+	};
+	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
-	for (int nCombo = 0; nCombo < NUM_OWNERDRAWCOMBOS; nCombo++)
-	{
-		HWND hwndCombo = ::GetDlgItem(hWnd, OWNERDRAWCOMBOS[nCombo]);
-
-		if (hwndCombo == NULL)
-			return FALSE;
-
-		if (!CWinClasses::IsComboBox(hwndCombo))
-			return FALSE;
-
-		BOOL bOwnerDraw = (::GetWindowLong(hwndCombo, GWL_STYLE) & CBS_OWNERDRAWFIXED);
-
-		if (!bOwnerDraw)
-			return FALSE;
-	}
-
-	return TRUE;
+	return IsDialog(hWnd, CTRLS, NUM_CTRLS);
 }
 
 BOOL IsIEPrintDialog(HWND hWnd)
@@ -792,8 +807,8 @@ BOOL IsIEPrintDialog(HWND hWnd)
 	if (!s_bIEPrintMode)
 		return FALSE;
 
-	// Note: Only the print preview windows has WC_IEPRINTPREVIEW as its
-	// parent. The Print dialog is parented to the main app
+	// Note: The Print dialog will be parented by either
+	// WC_IEPRINTPREVIEW or the main app
 	HWND hwndParent = ::GetParent(hWnd);
 
 	if (hwndParent)
@@ -809,18 +824,26 @@ BOOL IsIEPrintDialog(HWND hWnd)
 	if (!CWinClasses::IsDialog(hWnd))
 		return FALSE;
 
-	if (!CWinClasses::IsClass(GetDlgItem(hWnd, 12320), WC_TABCONTROL))
-		return FALSE;
-
 	HWND hwndGenTab = GetDlgItem(hWnd, 0);
 
-	if (!CWinClasses::IsClass(hwndGenTab, WC_DIALOGBOX))
-		return FALSE;
+	const DLGCTRL CTRLS[] =
+	{
+		{ 0,		WC_SHELLDLLDEFVIEW, 0 },	// Printer list
+		{ 1003,		WC_BUTTON, BS_TEXT },		// Find Printer button
+		{ 1010,		WC_BUTTON, BS_TEXT },		// Preferences button
+		{ 1072,		WC_BUTTON, BS_TEXT },		// Select Printer group-box
+		{ 1002,		WC_BUTTON, BS_TEXT },		// Print to File checkbox
+		{ 1005,		WC_EDIT, ES_LEFT | ES_AUTOHSCROLL | ES_READONLY }, // Current status
+		{ 1007,		WC_EDIT, ES_LEFT | ES_AUTOHSCROLL | ES_READONLY }, // Current location
+		{ 1009,		WC_EDIT, ES_LEFT | ES_AUTOHSCROLL | ES_READONLY }, // Current comment
+		{ 1004,		WC_STATIC, SS_LEFT | SS_NOPREFIX },	// Status label
+		{ 1006,		WC_STATIC, SS_LEFT | SS_NOPREFIX },	// Location label
+		{ 1008,		WC_STATIC, SS_LEFT | SS_NOPREFIX },	// Comment label
+		{ 1000,		WC_LISTBOX, LBS_NOINTEGRALHEIGHT },
+	};
+	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
-	if (!CWinClasses::IsClass(GetDlgItem(hwndGenTab, 0), WC_SHELLDLLDEFVIEW))
-		return FALSE;
-
-	return TRUE;
+	return IsDialog(hwndGenTab, CTRLS, NUM_CTRLS);
 }
 
 //////////////////////////////////////////////////////////////////////
