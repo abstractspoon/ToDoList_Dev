@@ -9842,10 +9842,11 @@ BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependen
 
 	if ((tdc.GetTaskCount() == 0) && !bDependent)
 	{
-		// Special case: Map to the default position
-		UINT nNewTaskID = GetNewTaskCmdID();
+		// Special case: Always allow if the default 
+		// command ID maps to the same location
+		UINT nNewTaskCmdID = GetNewTaskCmdID();
 		
-		if (TDC::MapInsertIDToInsertWhere(nNewTaskID) == nInsertWhere)
+		if (TDC::MapInsertIDToInsertWhere(nNewTaskCmdID) == nInsertWhere)
 			return TRUE;
 	}
 
