@@ -42,6 +42,10 @@ const COLORREF DM_HOTLIGHT			= RGB(190, 210, 225);
 
 //////////////////////////////////////////////////////////////////////
 
+const BOOL OSVER = COSVersion();
+
+//////////////////////////////////////////////////////////////////////
+
 #ifndef COLOR_MENUHILIGHT
 #	define COLOR_MENUHILIGHT 29
 #	define COLOR_MENUBAR 30
@@ -836,7 +840,7 @@ BOOL IsIEPrintDialog(HWND hWnd)
 	HWND hwndGenTab = GetDlgItem(hWnd, 0);
 
 	// Printer list ctrl ID changes after XP
-	const int IDC_PRINTERLIST	= ((COSVersion() < OSV_VISTA) ? 1001 : 0);
+	const int IDC_PRINTERLIST	= ((OSVER >= OSV_VISTA) ? 0 : 1001);
 	const int IDC_FINDPRINTER	= 1003;
 	const int IDC_PREFERENCES	= 1010;
 	const int IDC_SELECTPRINTER = 1072;
@@ -1195,6 +1199,13 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		if (s_bIEPrintMode && (hWnd == s_hwndIEPrintDialog))
 		{
 			s_hwndIEPrintDialog = NULL;
+
+			// In XP, when NOT previewing, the main wnd is not 
+			// disabled when the print dialog is shown so a 
+			// WM_ENABLE will never get sent and we'll never know 
+			// that IE print mode is over
+			if ((OSVER < OSV_VISTA) && AfxGetMainWnd()->IsWindowEnabled())
+				s_bIEPrintMode = FALSE;
 		}
 		else
 		{
