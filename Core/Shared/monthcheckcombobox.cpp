@@ -76,7 +76,7 @@ void CMonthCheckComboBox::InitCombo()
 
 DWORD CMonthCheckComboBox::GetSelectedMonths() const
 {
-	return CDialogHelper::GetSelectedItemDataT(*this);
+	return CDialogHelper::GetSelectedItemData(*this);
 }
 
 int CMonthCheckComboBox::SetSelectedMonths(DWORD dwMonths)
