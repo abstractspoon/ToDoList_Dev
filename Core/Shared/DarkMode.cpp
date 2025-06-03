@@ -46,6 +46,29 @@ const OSVERSION OSVER = COSVersion();
 
 //////////////////////////////////////////////////////////////////////
 
+const int IDC_FONTDLG_SAMPLEGROUP		= 1073;
+const int IDC_FONTDLG_SAMPLETEXT		= 1092;
+const int IDC_FONTDLG_FONTLABEL			= 1088;
+const int IDC_FONTDLG_STYLELABEL		= 1089;
+const int IDC_FONTDLG_FONTLIST			= 1136;
+const int IDC_FONTDLG_FONTSTYLE			= 1137;
+const int IDC_FONTDLG_FONTSIZE			= 1138;
+const int IDC_FONTDLG_TEXTCOLOR			= 1139;
+
+const int IDC_PRINTDLG_PRINTERLIST		= ((OSVER >= OSV_VISTA) ? 0 : 1001);
+const int IDC_PRINTDLG_FINDPRINTER		= 1003;
+const int IDC_PRINTDLG_PREFERENCES		= 1010;
+const int IDC_PRINTDLG_SELECTPRINTER	= 1072;
+const int IDC_PRINTDLG_PRINTTOFILE		= 1002;
+const int IDC_PRINTDLG_STATUS			= 1005;
+const int IDC_PRINTDLG_LOCATION			= 1007;
+const int IDC_PRINTDLG_COMMENT			= 1009;
+const int IDC_PRINTDLG_STATUSLABEL		= 1004;
+const int IDC_PRINTDLG_LOCATIONLABEL	= 1006;
+const int IDC_PRINTDLG_COMMENTLABEL		= 1008;
+
+//////////////////////////////////////////////////////////////////////
+
 #ifndef COLOR_MENUHILIGHT
 #	define COLOR_MENUHILIGHT 29
 #	define COLOR_MENUBAR 30
@@ -379,6 +402,19 @@ COLORREF GetParentBkgndColor(HWND hWnd)
 
 //////////////////////////////////////////////////////////////////////
 
+static BOOL s_bIEPrintMode = FALSE;
+static HWND s_hwndIEPrintDialog = NULL;
+
+void CDarkMode::PrepareForIEPrintOrPreview()
+{
+	ASSERT(IsEnabled());
+	ASSERT(s_hwndIEPrintDialog == NULL);
+
+	s_bIEPrintMode = TRUE;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 static HWND s_hwndCurrentComboBox			= NULL;
 static HWND s_hwndCurrentEdit				= NULL;
 static HWND s_hwndCurrentDateTime			= NULL;
@@ -516,11 +552,11 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-#define IDC_FONTNAME_COMBO  1136
-#define IDC_FONTSTYLE_COMBO 1137
-
 class CDarkModeFontDialog : public CDarkModeCtrlBase
 {
+protected:
+	CFont m_fontSample;
+
 protected:
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
@@ -531,8 +567,8 @@ protected:
 		case WM_DRAWITEM:
 			switch (wp)
 			{
-			case IDC_FONTNAME_COMBO:
-			case IDC_FONTSTYLE_COMBO:
+			case IDC_FONTDLG_FONTLIST:
+			case IDC_FONTDLG_FONTSTYLE:
 				{
 					LPDRAWITEMSTRUCT pDIS = (LPDRAWITEMSTRUCT)lp;
 					ASSERT(CWinClasses::IsClass(pDIS->hwndItem, WC_COMBOBOX));
@@ -559,6 +595,60 @@ protected:
 				}
 				break;
 			}
+			break;
+
+		case WM_PAINT:
+			// The reason we've taken over rendering the 'Sample' text
+			// is because we need to display the text on a white (page)
+			// background and there was no simple way to hook into the
+			// default drawing to achieve this.
+ 			if (s_bIEPrintMode)
+			{
+				// Note: The Font dialog renders the sample text direct 
+				// to the dialog's background. The static text control
+				// is just a positional placeholder
+				CWnd* pSample = GetCWnd()->GetDlgItem(IDC_FONTDLG_SAMPLETEXT);
+
+				// Paint the text background white
+  				CDC* pDC = GetPaintDC(wp);
+
+				CRect rText = CDialogHelper::GetChildRect(pSample);
+ 				pDC->FillSolidRect(rText, colorWhite);
+
+				// Prepare sample font
+				LOGFONT lfNew = { 0 };
+				SendMessage(WM_CHOOSEFONT_GETLOGFONT, 0, (LPARAM)(LPVOID)&lfNew);
+				
+				if (m_fontSample.GetSafeHandle())
+				{
+					LOGFONT  lfPrev = { 0 };
+					m_fontSample.GetLogFont(&lfPrev);
+
+					if (memcmp(&lfNew, &lfPrev, sizeof(LOGFONT)) != 0)
+						m_fontSample.DeleteObject();
+				}
+
+				if (!m_fontSample.GetSafeHandle())
+					VERIFY(m_fontSample.CreateFontIndirect(&lfNew));
+				
+				CFont* pOldFont = pDC->SelectObject(&m_fontSample);
+
+				CString sSample;
+				pSample->GetWindowText(sSample);
+
+				CComboBox* pCBColor = (CComboBox*)GetCWnd()->GetDlgItem(IDC_FONTDLG_TEXTCOLOR);
+				COLORREF crSample = CDialogHelper::GetSelectedItemData(*pCBColor);
+
+				pDC->SetBkColor(colorWhite);
+				pDC->SetTextColor(crSample);
+				pDC->DrawText(sSample, rText, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+				pDC->SelectObject(pOldFont);
+
+				CleanupDC(wp, pDC);
+
+ 				return 0L;
+			}
+			break;
 		}
 
 		return Default();
@@ -768,17 +858,6 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 //////////////////////////////////////////////////////////////////////
 
-static BOOL s_bIEPrintMode = FALSE;
-static HWND s_hwndIEPrintDialog = NULL;
-
-void CDarkMode::PrepareForIEPrintOrPreview()
-{
-	ASSERT(IsEnabled());
-	ASSERT(s_hwndIEPrintDialog == NULL);
-
-	s_bIEPrintMode = TRUE;
-}
-
 BOOL IsIEFontDialog(HWND hWnd)
 {
 	if (!s_bIEPrintMode)
@@ -788,27 +867,18 @@ BOOL IsIEFontDialog(HWND hWnd)
 	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
 		return FALSE;
 
-	const int IDC_SAMPLEGROUP	= 1073;
-	const int IDC_SAMPLETEXT	= 1092;
-	const int IDC_FONTLABEL		= 1088;
-	const int IDC_STYLELABEL	= 1089;
-	const int IDC_FONTLIST		= 1136;
-	const int IDC_FONTSTYLE		= 1137;
-	const int IDC_FONTSIZE		= 1138;
-	const int IDC_FONTCOLOR		= 1139;
-
-	const DLGCTRL CTRLS[] = 
+	const DLGCTRL CTRLS[] =
 	{
-		{ IDC_SAMPLEGROUP,	WC_BUTTON,		0 }, 
-		{ IDC_SAMPLETEXT,	WC_STATIC,		0 }, 
-		{ IDC_FONTLABEL,	WC_STATIC,		0 }, 
-		{ IDC_STYLELABEL,	WC_STATIC,		0 }, 
-		{ IDOK,				WC_BUTTON,		0 },
-		{ IDCANCEL,			WC_BUTTON,		0 },
-		{ IDC_FONTLIST,		WC_COMBOBOX,	CBS_OWNERDRAWFIXED },
-		{ IDC_FONTSTYLE,	WC_COMBOBOX,	0 },				
-		{ IDC_FONTSIZE,		WC_COMBOBOX,	CBS_OWNERDRAWFIXED },
-		{ IDC_FONTCOLOR,	WC_COMBOBOX,	CBS_OWNERDRAWFIXED },
+		{ IDC_FONTDLG_SAMPLEGROUP,	WC_BUTTON,		0 },
+		{ IDC_FONTDLG_SAMPLETEXT,	WC_STATIC,		0 },
+		{ IDC_FONTDLG_FONTLABEL,	WC_STATIC,		0 },
+		{ IDC_FONTDLG_STYLELABEL,	WC_STATIC,		0 },
+		{ IDOK,						WC_BUTTON,		0 },
+		{ IDCANCEL,					WC_BUTTON,		0 },
+		{ IDC_FONTDLG_FONTLIST,		WC_COMBOBOX,	CBS_OWNERDRAWFIXED },
+		{ IDC_FONTDLG_FONTSTYLE,	WC_COMBOBOX,	0 },
+		{ IDC_FONTDLG_FONTSIZE,		WC_COMBOBOX,	CBS_OWNERDRAWFIXED },
+		{ IDC_FONTDLG_TEXTCOLOR,	WC_COMBOBOX,	CBS_OWNERDRAWFIXED },
 	};
 	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
@@ -840,32 +910,20 @@ BOOL IsIEPrintDialog(HWND hWnd)
 	HWND hwndGenTab = GetDlgItem(hWnd, 0);
 
 	// Printer list ctrl ID changes after XP
-	const int IDC_PRINTERLIST	= ((OSVER >= OSV_VISTA) ? 0 : 1001);
-	const int IDC_FINDPRINTER	= 1003;
-	const int IDC_PREFERENCES	= 1010;
-	const int IDC_SELECTPRINTER = 1072;
-	const int IDC_PRINTTOFILE	= 1002;
-	const int IDC_STATUS		= 1005;
-	const int IDC_LOCATION		= 1007;
-	const int IDC_COMMENT		= 1009;
-	const int IDC_STATUSLABEL	= 1004;
-	const int IDC_LOCATIONLABEL = 1006;
-	const int IDC_COMMENTLABEL	= 1008;
-	
 	const DLGCTRL CTRLS[] =
 	{
-		{ IDC_PRINTERLIST,		WC_SHELLDLLDEFVIEW, 0 },
-		{ IDC_FINDPRINTER,		WC_BUTTON,			BS_TEXT },
-		{ IDC_PREFERENCES,		WC_BUTTON,			BS_TEXT },
-		{ IDC_SELECTPRINTER,	WC_BUTTON,			BS_TEXT },
-		{ IDC_PRINTTOFILE,		WC_BUTTON,			BS_TEXT },
-		{ IDC_STATUS,			WC_EDIT,			ES_LEFT | ES_AUTOHSCROLL | ES_READONLY },
-		{ IDC_LOCATION,			WC_EDIT,			ES_LEFT | ES_AUTOHSCROLL | ES_READONLY },
-		{ IDC_COMMENT,			WC_EDIT,			ES_LEFT | ES_AUTOHSCROLL | ES_READONLY },
-		{ IDC_STATUSLABEL,		WC_STATIC,			SS_LEFT | SS_NOPREFIX },
-		{ IDC_LOCATIONLABEL,	WC_STATIC,			SS_LEFT | SS_NOPREFIX },
-		{ IDC_COMMENTLABEL,		WC_STATIC,			SS_LEFT | SS_NOPREFIX },
-		{ 1000,					WC_LISTBOX,			LBS_NOINTEGRALHEIGHT }, // Unknown purpose
+		{ IDC_PRINTDLG_PRINTERLIST,		WC_SHELLDLLDEFVIEW, 0 },
+		{ IDC_PRINTDLG_FINDPRINTER,		WC_BUTTON,			BS_TEXT },
+		{ IDC_PRINTDLG_PREFERENCES,		WC_BUTTON,			BS_TEXT },
+		{ IDC_PRINTDLG_SELECTPRINTER,	WC_BUTTON,			BS_TEXT },
+		{ IDC_PRINTDLG_PRINTTOFILE,		WC_BUTTON,			BS_TEXT },
+		{ IDC_PRINTDLG_STATUS,			WC_EDIT,			ES_LEFT | ES_AUTOHSCROLL | ES_READONLY },
+		{ IDC_PRINTDLG_LOCATION,		WC_EDIT,			ES_LEFT | ES_AUTOHSCROLL | ES_READONLY },
+		{ IDC_PRINTDLG_COMMENT,			WC_EDIT,			ES_LEFT | ES_AUTOHSCROLL | ES_READONLY },
+		{ IDC_PRINTDLG_STATUSLABEL,		WC_STATIC,			SS_LEFT | SS_NOPREFIX },
+		{ IDC_PRINTDLG_LOCATIONLABEL,	WC_STATIC,			SS_LEFT | SS_NOPREFIX },
+		{ IDC_PRINTDLG_COMMENTLABEL,	WC_STATIC,			SS_LEFT | SS_NOPREFIX },
+		{ 1000,							WC_LISTBOX,			LBS_NOINTEGRALHEIGHT }, // Unknown purpose
 	};
 	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
