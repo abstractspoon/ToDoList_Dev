@@ -45,7 +45,7 @@ END_MESSAGE_MAP()
 
 DWORD CTDLTaskComboBox::GetSelectedTaskID() const
 {
-	return CDialogHelper::GetSelectedItemDataT(*this);
+	return CDialogHelper::GetSelectedItemData(*this);
 }
 
 BOOL CTDLTaskComboBox::SetSelectedTaskID(DWORD dwTaskID)
