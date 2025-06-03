@@ -3275,6 +3275,7 @@ BOOL CToDoListWnd::CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertW
 	{
 		// This location always works
 		nInsertWhere = TDC::MapInsertIDToInsertWhere(ID_NEWTASK_ATTOP);
+		ASSERT(tdc.CanCreateNewTask(nInsertWhere));
 	}
 
 	if (!tdc.CreateNewTask(sTitle, nInsertWhere, bEdit, dwDependency))
@@ -9839,9 +9840,9 @@ BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependen
 	if (tdc.CanCreateNewTask(nInsertWhere))
 		return TRUE;
 
-	// Special case: Map to the default position
 	if ((tdc.GetTaskCount() == 0) && !bDependent)
 	{
+		// Special case: Map to the default position
 		UINT nNewTaskID = GetNewTaskCmdID();
 		
 		if (TDC::MapInsertIDToInsertWhere(nNewTaskID) == nInsertWhere)
