@@ -2991,9 +2991,14 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 	
 	Flush();
 
+	// CToDoListWnd already handles empty tasklists
+	// so this should be unnecessary.
+	// Commenting out to see what happens...
+/*
 	// handle special case when tasklist is empty
 	if (GetTaskCount() == 0)
 		nWhere = TDC_INSERTATBOTTOM;
+*/
 	
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
@@ -10233,28 +10238,9 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {
-	BOOL bCanEdit = m_multitasker.CanEditTask(dwTaskID, nAttribID);
-
-	if (bCanEdit != -1) // Unhandled by multi-tasker
-		return bCanEdit;
-
-	if (m_data.HasStyle(TDCS_READONLY))
-		return FALSE;
-
-	BOOL bEditableTask = !m_calculator.IsTaskLocked(dwTaskID);
-
+	// These do not depend on a specific task
 	switch (nAttribID)
 	{
-	case TDCA_DELETE:
-		// Can only delete tasks if:
-		// 1. Their immediate parent is UNLOCKED
-		// AND
-		// 2. task is UNLOCKED 
-		// OR 
-		// 3. task is a reference to a locked task
-		return (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)) &&
-				(bEditableTask || m_data.IsTaskReference(dwTaskID)));
-
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
 	case TDCA_UNDO:
@@ -10263,6 +10249,31 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_ENCRYPT:
 	case TDCA_PROJECTNAME:
 		return TRUE;
+	}
+
+	// Task specific editing
+	BOOL bCanEdit = m_multitasker.CanEditTask(dwTaskID, nAttribID);
+
+	if (bCanEdit != -1)
+		return bCanEdit; // Handled by multi-tasker
+
+	if (m_data.HasStyle(TDCS_READONLY))
+		return FALSE;
+
+	switch (nAttribID)
+	{
+	case TDCA_DELETE:
+		// Can only delete tasks if their immediate parent is UNLOCKED
+		if (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
+		{
+			// AND the task is UNLOCKED 
+			if (!m_calculator.IsTaskLocked(dwTaskID))
+				return TRUE;
+
+			// OR the task is a REFERENCE to the locked task
+			return m_data.IsTaskReference(dwTaskID);
+		}
+		break;
 
 	default:
 		ASSERT(0); // Unexpectedly unhandled
