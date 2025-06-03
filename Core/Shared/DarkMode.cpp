@@ -937,12 +937,12 @@ BOOL WantTrueColors(HWND hwndCurrent = NULL)
 	if (!s_bIEPrintMode)
 		return FALSE;
 
-	// Assume that any calls to GetSysColor which do not have
-	// an attendant control being drawn are coming from IE
-	// internally so we return TRUE to use the 'True' colours
 	if (hwndCurrent == NULL)
 		hwndCurrent = s_hwndCurrent;
 
+	// Assume that any calls to GetSysColor which do not have
+	// an attendant control being drawn are coming from IE
+	// internally so we return TRUE to use the 'True' colours
 	if (!hwndCurrent)
 		return TRUE;
 	
