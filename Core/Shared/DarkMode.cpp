@@ -860,6 +860,9 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 BOOL IsFileOpenDialog(HWND hWnd)
 {
+	if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_OPENSAVE))
+		return TRUE;
+
 	const DLGCTRL CTRLS[] =
 	{
 		{ 0,	_T("DUIViewWndClassName"), 0 },
@@ -871,7 +874,6 @@ BOOL IsFileOpenDialog(HWND hWnd)
 		{ 1148,	WC_COMBOBOXEX, CBS_AUTOHSCROLL },
 		{ 1089,	WC_STATIC, SS_NOTIFY },
 		{ 1136,	WC_COMBOBOX, CBS_HASSTRINGS },
-//		{ 1138,	WC_BUTTON, BS_TEXT },
 		{ IDOK,						WC_BUTTON,		BS_TEXT },
 		{ IDCANCEL,					WC_BUTTON,		BS_TEXT },
  		{ -1,	WC_SCROLLBAR, SBS_SIZEGRIP | SBS_SIZEBOXBOTTOMRIGHTALIGN },
@@ -1356,11 +1358,10 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 				ASSERT(!s_hwndCurrentExclusion);
 				s_hwndCurrentExclusion = hWnd;
 			}
-			else if (IsFileOpenDialog(hWnd))
-			{
-				ASSERT(!s_hwndCurrentExclusion);
-				s_hwndCurrentExclusion = hWnd;
-			}
+
+			// Note: File Open/Save dialogs are handled in MySetWindowTheme 
+			// because that happens earlier than WM_INITDIALOG and it's too
+			// late by the time we arrive here
 			return lr;
 		}
 		break;
@@ -1415,18 +1416,33 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 
 HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList)
 {
-	if (WantTrueColors(hwnd))
-		return TrueSetWindowTheme(hwnd, pszSubAppName, pszSubIdList);
-
-	if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
+	// For the File Open/Save dialogs it's too late to
+	// wait for WM_INITDIALOG because by that time the 
+	// dialogs have already called methods which have
+	// returned Dark Mode colours, so this is the only
+	// safe place to detect those dialogs. But we want
+	// to do it as efficiently as possible.
+	// Note: the List-View part of the dialog is not a
+	// real list-view but the tree-view is!
+	if (WantDarkMode(hwnd))
 	{
-		if (CWinClasses::IsClass(hwnd, WC_TREEVIEW))
+		if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
 		{
-			s_mapExplorerThemedWnds.Add(hwnd);
-		}
-		else if (CWinClasses::IsClass(hwnd, WC_LISTVIEW))
-		{
-			s_mapExplorerThemedWnds.Add(hwnd);
+			if (CWinClasses::IsClass(hwnd, WC_TREEVIEW))
+			{
+				ASSERT(!s_hwndCurrentExclusion);
+
+				HWND hwndDlg = CDialogHelper::GetParentDialog(hwnd);
+
+				if (hwndDlg && IsFileOpenDialog(hwndDlg))
+					s_hwndCurrentExclusion = hwndDlg;
+				else
+					s_mapExplorerThemedWnds.Add(hwnd);
+			}
+			else if (CWinClasses::IsClass(hwnd, WC_LISTVIEW))
+			{
+				s_mapExplorerThemedWnds.Add(hwnd);
+			}
 		}
 	}
 

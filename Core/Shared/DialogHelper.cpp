@@ -2128,6 +2128,24 @@ HWND CDialogHelper::GetParentOwner(HWND hWnd)
 	return pParent->GetSafeHwnd();
 }
 
+HWND CDialogHelper::GetParentDialog(HWND hWnd, DWORD dwReqStyles)
+{
+	HWND hwndParent = hWnd;
+
+	while (hwndParent)
+	{
+		if (CWinClasses::IsDialog(hwndParent))
+		{
+			if (!dwReqStyles || HasStyle(hwndParent, dwReqStyles))
+				break;
+		}
+	
+		hwndParent = ::GetParent(hwndParent);
+	}
+
+	return hwndParent;
+}
+
 BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonClient)
 {
 	DWORD dwFlags = (TME_LEAVE | (bIncludeNonClient ? TME_NONCLIENT : 0));
