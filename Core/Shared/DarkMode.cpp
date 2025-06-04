@@ -858,6 +858,30 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 //////////////////////////////////////////////////////////////////////
 
+BOOL IsFileOpenDialog(HWND hWnd)
+{
+	const DLGCTRL CTRLS[] =
+	{
+		{ 0,	_T("DUIViewWndClassName"), 0 },
+		{ 1090,	WC_STATIC, SS_NOTIFY },
+		{ 1091,	WC_STATIC, 0 },
+		{ 1092,	WC_STATIC, 0 },
+		{ 1093,	WC_STATIC, 0 },
+		{ 1095,	WC_STATIC, 0 },
+		{ 1148,	WC_COMBOBOXEX, CBS_AUTOHSCROLL },
+		{ 1089,	WC_STATIC, SS_NOTIFY },
+		{ 1136,	WC_COMBOBOX, CBS_HASSTRINGS },
+//		{ 1138,	WC_BUTTON, BS_TEXT },
+		{ IDOK,						WC_BUTTON,		BS_TEXT },
+		{ IDCANCEL,					WC_BUTTON,		BS_TEXT },
+ 		{ -1,	WC_SCROLLBAR, SBS_SIZEGRIP | SBS_SIZEBOXBOTTOMRIGHTALIGN },
+		{ 1120,	WC_LISTBOX, LBS_NOTIFY | LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN },
+	};
+	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
+
+	return IsDialog(hWnd, CTRLS, NUM_CTRLS);
+}
+
 BOOL IsIEFontDialog(HWND hWnd)
 {
 	if (!s_bIEPrintMode)
@@ -934,7 +958,7 @@ BOOL IsIEPrintDialog(HWND hWnd)
 
 BOOL WantTrueColors(HWND hwndCurrent = NULL)
 {
-	if (!s_bIEPrintMode)
+	if (!s_bIEPrintMode && !s_hwndCurrentExclusion)
 		return FALSE;
 
 	if (hwndCurrent == NULL)
@@ -1311,6 +1335,7 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 		break;
 
 	case WM_INITDIALOG:
+		if (CDialogHelper::HasStyle(hWnd, (WS_POPUP | WS_CAPTION)))
 		{
 			// Always do default first to allow dialogs to be 
 			// properly initialised before we test for them
@@ -1321,10 +1346,15 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 				// Combos in the font dialog do not play by the rules
 				HookWindow(hWnd, new CDarkModeFontDialog());
 			}
-			else if (s_bIEPrintMode)
+			else if (s_bIEPrintMode && IsIEPrintDialog(hWnd))
 			{
-				if (!s_hwndCurrentExclusion && IsIEPrintDialog(hWnd))
-					s_hwndCurrentExclusion = hWnd;
+				ASSERT(!s_hwndCurrentExclusion);
+				s_hwndCurrentExclusion = hWnd;
+			}
+			else if (IsFileOpenDialog(hWnd))
+			{
+				ASSERT(!s_hwndCurrentExclusion);
+				s_hwndCurrentExclusion = hWnd;
 			}
 			return lr;
 		}
@@ -1352,7 +1382,7 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 		// now else the above check will fail.
 		if (s_bIEPrintMode && wp && (hWnd == *AfxGetMainWnd()))
 		{
-			ASSERT(IsIEPrintDialog(s_hwndCurrentExclusion));
+			ASSERT(!s_hwndCurrentExclusion || IsIEPrintDialog(s_hwndCurrentExclusion));
 
 			s_bIEPrintMode = FALSE;
 			s_hwndCurrentExclusion = NULL;
