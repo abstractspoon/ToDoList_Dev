@@ -47,45 +47,33 @@ const OSVERSION OSVER = COSVersion();
 //////////////////////////////////////////////////////////////////////
 
 const int IDC_FONTDLG_SAMPLEGROUP		= 1073;
-const int IDC_FONTDLG_SAMPLETEXT		= 1092;
 const int IDC_FONTDLG_FONTLABEL			= 1088;
 const int IDC_FONTDLG_STYLELABEL		= 1089;
+const int IDC_FONTDLG_SAMPLETEXT		= 1092;
 const int IDC_FONTDLG_FONTLIST			= 1136;
 const int IDC_FONTDLG_FONTSTYLE			= 1137;
 const int IDC_FONTDLG_FONTSIZE			= 1138;
 const int IDC_FONTDLG_TEXTCOLOR			= 1139;
 
 const int IDC_PRINTDLG_PRINTERLIST		= ((OSVER >= OSV_VISTA) ? 0 : 1001);
+const int IDC_PRINTDLG_PRINTTOFILE		= 1002;
 const int IDC_PRINTDLG_FINDPRINTER		= 1003;
+const int IDC_PRINTDLG_STATUSLABEL		= 1004;
+const int IDC_PRINTDLG_STATUS			= 1005;
+const int IDC_PRINTDLG_LOCATIONLABEL	= 1006;
+const int IDC_PRINTDLG_LOCATION			= 1007;
+const int IDC_PRINTDLG_COMMENTLABEL		= 1008;
+const int IDC_PRINTDLG_COMMENT			= 1009;
 const int IDC_PRINTDLG_PREFERENCES		= 1010;
 const int IDC_PRINTDLG_SELECTPRINTER	= 1072;
-const int IDC_PRINTDLG_PRINTTOFILE		= 1002;
-const int IDC_PRINTDLG_STATUS			= 1005;
-const int IDC_PRINTDLG_LOCATION			= 1007;
-const int IDC_PRINTDLG_COMMENT			= 1009;
-const int IDC_PRINTDLG_STATUSLABEL		= 1004;
-const int IDC_PRINTDLG_LOCATIONLABEL	= 1006;
-const int IDC_PRINTDLG_COMMENTLABEL		= 1008;
 
-const int IDC_OPENDLG_TREELIST			= 0;
-const int IDC_OPENDLG_FILENAMELABEL		= 1090;
-const int IDC_OPENDLG_FILENAME			= 1148;
-const int IDC_OPENDLG_FILETYPELABEL		= 1089;
-const int IDC_OPENDLG_FILETYPES			= 1136;
-const int IDC_OPENDLG_STATIC1			= 1091;
-const int IDC_OPENDLG_STATIC2			= 1092;
-const int IDC_OPENDLG_STATIC3			= 1093;
-const int IDC_OPENDLG_STATIC4			= 1095;
-const int IDC_OPENDLG_RESIZE			= -1;
-const int IDC_OPENDLG_LISTBOX			= 1120;
-
-const int IDC_SAVEDLG_TREELIST			= 0;
-const int IDC_SAVEDLG_STATIC1			= 1091;
-const int IDC_SAVEDLG_STATIC2			= 1092;
-const int IDC_SAVEDLG_STATIC3			= 1093;
-const int IDC_SAVEDLG_STATIC4			= 1095;
-const int IDC_SAVEDLG_RESIZE			= -1;
-const int IDC_SAVEDLG_LISTBOX			= 1120;
+const int IDC_FILEDLG_RESIZE			= -1;
+const int IDC_FILEDLG_TREELIST			= 0;
+const int IDC_FILEDLG_STATIC1			= 1091;
+const int IDC_FILEDLG_STATIC2			= 1092;
+const int IDC_FILEDLG_STATIC3			= 1093;
+const int IDC_FILEDLG_STATIC4			= 1095;
+const int IDC_FILEDLG_LISTBOX			= 1120;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -847,40 +835,20 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 //////////////////////////////////////////////////////////////////////
 
-BOOL IsFileOpenDialog(HWND hWnd)
+BOOL IsFileDialog(HWND hWnd)
 {
+	ASSERT(hWnd);
+
+	// These are common to both open and save dialogs
 	const CDialogHelper::DLGCTRL CTRLS[] =
 	{
-		{ IDC_OPENDLG_TREELIST,			WC_DIRECTUIVIEWWND,	0 },
-		{ IDC_OPENDLG_FILENAMELABEL,	WC_STATIC,			SS_NOTIFY },
-		{ IDC_OPENDLG_FILENAME,			WC_COMBOBOXEX,		CBS_AUTOHSCROLL },
-		{ IDC_OPENDLG_FILETYPELABEL,	WC_STATIC,			SS_NOTIFY },
-		{ IDC_OPENDLG_FILETYPES,		WC_COMBOBOX,		CBS_HASSTRINGS },
-		{ IDC_OPENDLG_STATIC1,			WC_STATIC,			0 },
-		{ IDC_OPENDLG_STATIC2,			WC_STATIC,			0 },
-		{ IDC_OPENDLG_STATIC3,			WC_STATIC,			0 },
-		{ IDC_OPENDLG_STATIC4,			WC_STATIC,			0 },
- 		{ IDC_OPENDLG_RESIZE,			WC_SCROLLBAR,		SBS_SIZEGRIP | SBS_SIZEBOXBOTTOMRIGHTALIGN },
-		{ IDC_OPENDLG_LISTBOX,			WC_LISTBOX,			LBS_NOTIFY | LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN },
-		{ IDOK,							WC_BUTTON,			BS_TEXT },
-		{ IDCANCEL,						WC_BUTTON,			BS_TEXT },
-	};
-	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
-
-	return CDialogHelper::IsDialog(hWnd, CTRLS, NUM_CTRLS);
-}
-
-BOOL IsFileSaveDialog(HWND hWnd)
-{
-	const CDialogHelper::DLGCTRL CTRLS[] =
-	{
-		{ IDC_SAVEDLG_TREELIST,	WC_DIRECTUIVIEWWND,	0 },
-		{ IDC_SAVEDLG_STATIC1,	WC_STATIC,			0 },
-		{ IDC_SAVEDLG_STATIC2,	WC_STATIC,			0 },
-		{ IDC_SAVEDLG_STATIC3,	WC_STATIC,			0 },
-		{ IDC_SAVEDLG_STATIC4,	WC_STATIC,			0 },
-		{ IDC_SAVEDLG_RESIZE,	WC_SCROLLBAR,		SBS_SIZEGRIP | SBS_SIZEBOXBOTTOMRIGHTALIGN },
-		{ IDC_SAVEDLG_LISTBOX,	WC_LISTBOX,			LBS_NOTIFY | LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN },
+		{ IDC_FILEDLG_TREELIST,	WC_DIRECTUIVIEWWND,	0 },
+		{ IDC_FILEDLG_STATIC1,	WC_STATIC,			0 },
+		{ IDC_FILEDLG_STATIC2,	WC_STATIC,			0 },
+		{ IDC_FILEDLG_STATIC3,	WC_STATIC,			0 },
+		{ IDC_FILEDLG_STATIC4,	WC_STATIC,			0 },
+		{ IDC_FILEDLG_RESIZE,	WC_SCROLLBAR,		SBS_SIZEGRIP | SBS_SIZEBOXBOTTOMRIGHTALIGN },
+		{ IDC_FILEDLG_LISTBOX,	WC_LISTBOX,			LBS_NOTIFY | LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN },
 		{ IDOK,					WC_BUTTON,			BS_TEXT },
 		{ IDCANCEL,				WC_BUTTON,			BS_TEXT },
 	};
@@ -1416,28 +1384,31 @@ static LRESULT WINAPI MyDefWindowProc(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp
 
 HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList)
 {
-	// For the File Open/Save dialogs it's too late to
-	// wait for WM_INITDIALOG because by that time the 
-	// dialogs have already called methods which have
-	// returned Dark Mode colours, so this is the only
-	// safe place to detect those dialogs. But we want
-	// to do it as efficiently as possible.
-	// Note: the List-View part of the dialog is not a
-	// real list-view but the tree-view is!
+	// For the File Open/Save dialogs it's too late to wait for WM_INITDIALOG 
+	// because by that time the dialogs have already called methods which have
+	// returned Dark Mode colours, so this is the only safe place to detect 
+	// those dialogs. But we want to do it as efficiently as possible.
+	// Note: The only reliable test is tree-view because the List-View part of 
+	// the dialog is not a real list-view and never calls into here.
 	if (WantDarkMode(hwnd))
 	{
 		if (CWinClasses::IsClass(pszSubAppName, TC_EXPLORER))
 		{
 			if (CWinClasses::IsClass(hwnd, WC_TREEVIEW))
 			{
-				ASSERT(!s_hwndCurrentExclusion);
+				if (!s_hwndCurrentExclusion)
+				{
+					HWND hwndDlg = CDialogHelper::GetParentDialog(hwnd);
 
-				HWND hwndDlg = CDialogHelper::GetParentDialog(hwnd);
-
-				if (hwndDlg && (IsFileOpenDialog(hwndDlg) || IsFileSaveDialog(hwndDlg)))
-					s_hwndCurrentExclusion = hwndDlg;
-				else
+					if (hwndDlg && IsFileDialog(hwndDlg))
+						s_hwndCurrentExclusion = hwndDlg;
+					else
+						s_mapExplorerThemedWnds.Add(hwnd);
+				}
+				else if (!CDialogHelper::IsChildOrSame(s_hwndCurrentExclusion, hwnd))
+				{
 					s_mapExplorerThemedWnds.Add(hwnd);
+				}
 			}
 			else if (CWinClasses::IsClass(hwnd, WC_LISTVIEW))
 			{
