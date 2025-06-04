@@ -75,6 +75,15 @@ const int IDC_FILEDLG_STATIC3			= 1093;
 const int IDC_FILEDLG_STATIC4			= 1095;
 const int IDC_FILEDLG_LISTBOX			= 1120;
 
+const int IDC_FOLDERDLG_FOLDERVIEW		= 0;
+const int IDC_FOLDERDLG_STATIC1			= 14145;
+const int IDC_FOLDERDLG_SELECTFOLDERLABEL = 14146;
+const int IDC_FOLDERDLG_CURRENTFOLDER	= 14148;
+const int IDC_FOLDERDLG_MAKENEWFOLDER	= 14150;
+const int IDC_FOLDERDLG_RESIZE			= 14151;
+const int IDC_FOLDERDLG_FOLDERLABEL		= 14152;
+const int IDC_FOLDERDLG_HELPTEXT		= 14153;
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef COLOR_MENUHILIGHT
@@ -857,8 +866,32 @@ BOOL IsFileDialog(HWND hWnd)
 	return CDialogHelper::IsDialog(hWnd, CTRLS, NUM_CTRLS);
 }
 
+BOOL IsFolderDialog(HWND hWnd)
+{
+	ASSERT(hWnd);
+
+	const CDialogHelper::DLGCTRL CTRLS[] =
+	{
+		{ IDC_FOLDERDLG_FOLDERVIEW,			WC_SHELLFOLDERVIEW,	0 },
+		{ IDC_FOLDERDLG_SELECTFOLDERLABEL,	WC_STATIC,			0 },
+		{ IDC_FOLDERDLG_STATIC1,			WC_STATIC,			0 },
+		{ IDC_FOLDERDLG_FOLDERLABEL,		WC_STATIC,			0 },
+		{ IDC_FOLDERDLG_HELPTEXT,			WC_STATIC,			0 },
+		{ IDC_FOLDERDLG_RESIZE,				WC_SCROLLBAR,		SBS_SIZEGRIP | SBS_SIZEBOXBOTTOMRIGHTALIGN },
+		{ IDC_FOLDERDLG_CURRENTFOLDER,		WC_EDIT,			ES_AUTOHSCROLL },
+		{ IDC_FOLDERDLG_MAKENEWFOLDER,		WC_BUTTON,			BS_TEXT },
+		{ IDOK,								WC_BUTTON,			BS_TEXT },
+		{ IDCANCEL,							WC_BUTTON,			BS_TEXT },
+	};
+	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
+
+	return CDialogHelper::IsDialog(hWnd, CTRLS, NUM_CTRLS);
+}
+
 BOOL IsIEFontDialog(HWND hWnd)
 {
+	ASSERT(hWnd);
+
 	if (!s_bIEPrintMode)
 		return FALSE;
 
@@ -886,6 +919,8 @@ BOOL IsIEFontDialog(HWND hWnd)
 
 BOOL IsIEPrintDialog(HWND hWnd)
 {
+	ASSERT(hWnd);
+
 	if (!s_bIEPrintMode)
 		return FALSE;
 
@@ -1152,6 +1187,26 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		}
 		return TRUE;
 
+	case WM_INITDIALOG:
+		if (CDialogHelper::HasStyle(hWnd, (WS_POPUP | WS_CAPTION)))
+		{
+			if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT) || IsIEFontDialog(hWnd))
+			{
+				// Combos in the font dialog do not play by the rules
+				HookWindow(hWnd, new CDarkModeFontDialog());
+			}
+			else if (s_bIEPrintMode && IsIEPrintDialog(hWnd))
+			{
+				ASSERT(!s_hwndCurrentExclusion);
+				s_hwndCurrentExclusion = hWnd;
+			}
+
+			// Note1: See MySetWindowTheme for the Open/Save dialog detection
+			// Note2: See WM_SHOWWINDOW::WC_TREEVIEW handling below for folder dialog detection
+			return lr;
+		}
+		break;
+
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
 		if (wp)
 		{
@@ -1162,6 +1217,22 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 			if (CWinClasses::IsClass(sClass, WC_TREEVIEW))
 			{
+				// Unfortunately there's no where else to fix up the tree's 
+				// text and background colours but we don't want to do it 
+				// if the tree's parent is the folder dialog but we don't know 
+				// that yet so we have to check that here.
+				if (!s_hwndCurrentExclusion)
+				{
+					HWND hwndDlg = CDialogHelper::GetParentDialog(hWnd);
+
+					if (hwndDlg && IsFolderDialog(hwndDlg))
+					{
+						s_hwndCurrentExclusion = hwndDlg;
+						break;
+					}
+				}
+
+				// else
 				::SendMessage(hWnd, TVM_SETBKCOLOR, 0, (LPARAM)DM_WINDOW);
 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
 			}
@@ -1300,36 +1371,13 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 	case WM_CTLCOLOREDIT:
 	case WM_CTLCOLORLISTBOX:
 	case WM_CTLCOLORSTATIC:
+	case WM_INITDIALOG:
 		{
 			// Always do default first to allow CAutoComboBox hooking
+			// and dialog initialisation
 			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 	
 			WindowProcEx(hWnd, nMsg, wp, lp, lr);
-			return lr;
-		}
-		break;
-
-	case WM_INITDIALOG:
-		if (CDialogHelper::HasStyle(hWnd, (WS_POPUP | WS_CAPTION)))
-		{
-			// Always do default first to allow dialogs to be 
-			// properly initialised before we test for them
-			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
-	
-			if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT) || IsIEFontDialog(hWnd))
-			{
-				// Combos in the font dialog do not play by the rules
-				HookWindow(hWnd, new CDarkModeFontDialog());
-			}
-			else if (s_bIEPrintMode && IsIEPrintDialog(hWnd))
-			{
-				ASSERT(!s_hwndCurrentExclusion);
-				s_hwndCurrentExclusion = hWnd;
-			}
-
-			// Note: File Open/Save dialogs are handled in MySetWindowTheme 
-			// because that happens earlier than WM_INITDIALOG and it's too
-			// late by the time we arrive here
 			return lr;
 		}
 		break;

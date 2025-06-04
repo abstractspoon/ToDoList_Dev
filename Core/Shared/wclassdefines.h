@@ -59,6 +59,7 @@
 #define WC_SHDOCOBJVW		L"Shell DocObject View"
 #define WC_SHELLDLLDEFVIEW	L"SHELLDLL_DefView"
 #define WC_SHELLEMBEDDING	L"Shell Embedding"
+#define WC_SHELLFOLDERVIEW	L"SHBrowseForFolder ShellNameSpace Control"
 #define WC_SLIDER			L"msctls_trackbar32"
 #define WC_SPIN				L"msctls_updown32"
 
