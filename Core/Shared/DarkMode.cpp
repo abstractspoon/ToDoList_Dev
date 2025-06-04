@@ -1153,28 +1153,11 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		}
 		return TRUE;
 
-	case WM_INITDIALOG:	// Leave hooking as late as possible
-		if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT) || IsIEFontDialog(hWnd))
-		{
-			// Combos in the font dialog do not play by the rules
-			HookWindow(hWnd, new CDarkModeFontDialog());
-		}
-		break;
-
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
 		if (wp)
 		{
-			if (s_bIEPrintMode)
-			{
-				if (s_hwndIEPrintDialog)
-					return FALSE;
-
-				if (IsIEPrintDialog(hWnd))
-				{
-					s_hwndIEPrintDialog = hWnd;
-					return FALSE;
-				}
-			}
+			if (CDialogHelper::IsChildOrSame(s_hwndIEPrintDialog, hWnd))
+				return FALSE;
 
 			CString sClass = CWinClasses::GetClass(hWnd);
 
@@ -1351,6 +1334,26 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 			return lr;
 		}
 		break;
+
+	case WM_INITDIALOG:
+		{
+			// Always do default first to allow dialogs to be 
+			// properly initialised before we test for them
+			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+	
+			if (CWinClasses::IsMFCCommonDialog(hWnd, WCD_FONT) || IsIEFontDialog(hWnd))
+			{
+				// Combos in the font dialog do not play by the rules
+				HookWindow(hWnd, new CDarkModeFontDialog());
+			}
+			else if (s_bIEPrintMode && !s_hwndIEPrintDialog && IsIEPrintDialog(hWnd))
+			{
+				s_hwndIEPrintDialog = hWnd;
+			}
+			return lr;
+		}
+		break;
+
 	}
 
 	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
