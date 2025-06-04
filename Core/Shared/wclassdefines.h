@@ -29,6 +29,7 @@
 #define WC_DATETIMEPICK		L"SysDateTimePick32"
 #define WC_DIALOGBOX		L"#32770"
 #define WC_DIRECTUIHWND		L"DirectUIHWND"
+#define WC_DIRECTUIVIEWWND	L"DUIViewWndClassName"
 
 #ifndef WC_EDIT
 #	define WC_EDIT			L"Edit"
