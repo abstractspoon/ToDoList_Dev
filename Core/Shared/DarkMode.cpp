@@ -79,6 +79,14 @@ const int IDC_OPENDLG_STATIC4			= 1095;
 const int IDC_OPENDLG_RESIZE			= -1;
 const int IDC_OPENDLG_LISTBOX			= 1120;
 
+const int IDC_SAVEDLG_TREELIST			= 0;
+const int IDC_SAVEDLG_STATIC1			= 1091;
+const int IDC_SAVEDLG_STATIC2			= 1092;
+const int IDC_SAVEDLG_STATIC3			= 1093;
+const int IDC_SAVEDLG_STATIC4			= 1095;
+const int IDC_SAVEDLG_RESIZE			= -1;
+const int IDC_SAVEDLG_LISTBOX			= 1120;
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef COLOR_MENUHILIGHT
@@ -893,6 +901,25 @@ BOOL IsFileOpenDialog(HWND hWnd)
 	return IsDialog(hWnd, CTRLS, NUM_CTRLS);
 }
 
+BOOL IsFileSaveDialog(HWND hWnd)
+{
+	const DLGCTRL CTRLS[] =
+	{
+		{ IDC_SAVEDLG_TREELIST,	WC_DIRECTUIVIEWWND,	0 },
+		{ IDC_SAVEDLG_STATIC1,	WC_STATIC,			0 },
+		{ IDC_SAVEDLG_STATIC2,	WC_STATIC,			0 },
+		{ IDC_SAVEDLG_STATIC3,	WC_STATIC,			0 },
+		{ IDC_SAVEDLG_STATIC4,	WC_STATIC,			0 },
+		{ IDC_SAVEDLG_RESIZE,	WC_SCROLLBAR,		SBS_SIZEGRIP | SBS_SIZEBOXBOTTOMRIGHTALIGN },
+		{ IDC_SAVEDLG_LISTBOX,	WC_LISTBOX,			LBS_NOTIFY | LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN },
+		{ IDOK,					WC_BUTTON,			BS_TEXT },
+		{ IDCANCEL,				WC_BUTTON,			BS_TEXT },
+	};
+	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
+
+	return IsDialog(hWnd, CTRLS, NUM_CTRLS);
+}
+
 BOOL IsIEFontDialog(HWND hWnd)
 {
 	if (!s_bIEPrintMode)
@@ -1443,7 +1470,7 @@ HRESULT STDAPICALLTYPE MySetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWST
 
 				HWND hwndDlg = CDialogHelper::GetParentDialog(hwnd);
 
-				if (hwndDlg && IsFileOpenDialog(hwndDlg))
+				if (hwndDlg && (IsFileOpenDialog(hwndDlg) || IsFileSaveDialog(hwndDlg)))
 					s_hwndCurrentExclusion = hwndDlg;
 				else
 					s_mapExplorerThemedWnds.Add(hwnd);
