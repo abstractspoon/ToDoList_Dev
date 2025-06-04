@@ -402,19 +402,6 @@ COLORREF GetParentBkgndColor(HWND hWnd)
 
 //////////////////////////////////////////////////////////////////////
 
-static BOOL s_bIEPrintMode = FALSE;
-static HWND s_hwndIEPrintDialog = NULL;
-
-void CDarkMode::PrepareForIEPrintOrPreview()
-{
-	ASSERT(IsEnabled());
-	ASSERT(s_hwndIEPrintDialog == NULL);
-
-	s_bIEPrintMode = TRUE;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 static HWND s_hwndCurrentComboBox			= NULL;
 static HWND s_hwndCurrentEdit				= NULL;
 static HWND s_hwndCurrentDateTime			= NULL;
@@ -422,6 +409,19 @@ static HWND s_hwndCurrentBtnStatic			= NULL;
 static HWND s_hwndCurrentManagedBtnStatic	= NULL;
 static HWND s_hwndCurrentExplorerTreeOrList = NULL;
 static HWND s_hwndCurrent					= NULL;
+static HWND s_hwndCurrentExclusion			= NULL;
+
+//////////////////////////////////////////////////////////////////////
+
+static BOOL s_bIEPrintMode = FALSE;
+
+void CDarkMode::PrepareForIEPrintOrPreview()
+{
+	ASSERT(IsEnabled());
+	ASSERT(s_hwndCurrentExclusion == NULL);
+
+	s_bIEPrintMode = TRUE;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -946,8 +946,8 @@ BOOL WantTrueColors(HWND hwndCurrent = NULL)
 	if (!hwndCurrent)
 		return TRUE;
 	
-	// We definitely want 'True' colours for IE's 'Print' dialog
-	if (CDialogHelper::IsChildOrSame(s_hwndIEPrintDialog, hwndCurrent))
+	// We definitely want 'True' colours for any excluded dialogs
+	if (CDialogHelper::IsChildOrSame(s_hwndCurrentExclusion, hwndCurrent))
  		return TRUE;
 
 	// We definitely DON'T want 'True' colours for any control
@@ -1156,7 +1156,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_SHOWWINDOW:	// Leave hooking as late as possible
 		if (wp)
 		{
-			if (CDialogHelper::IsChildOrSame(s_hwndIEPrintDialog, hWnd))
+			if (CDialogHelper::IsChildOrSame(s_hwndCurrentExclusion, hWnd))
 				return FALSE;
 
 			CString sClass = CWinClasses::GetClass(hWnd);
@@ -1323,37 +1323,39 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 			}
 			else if (s_bIEPrintMode)
 			{
-				if (!s_hwndIEPrintDialog && IsIEPrintDialog(hWnd))
-					s_hwndIEPrintDialog = hWnd;
+				if (!s_hwndCurrentExclusion && IsIEPrintDialog(hWnd))
+					s_hwndCurrentExclusion = hWnd;
 			}
 			return lr;
 		}
 		break;
 
 	case WM_DESTROY:
-		if (hWnd == s_hwndIEPrintDialog)
+		if (hWnd == s_hwndCurrentExclusion)
 		{
 			ASSERT(!s_bIEPrintMode || IsIEPrintDialog(hWnd));
 
-			s_hwndIEPrintDialog = NULL;
+			s_hwndCurrentExclusion = NULL;
 
 			// In XP, when NOT previewing, the main wnd is not 
 			// disabled when the print dialog is shown so a 
 			// WM_ENABLE will never get sent and we'll never know 
 			// that IE print mode is over
-			if ((OSVER < OSV_VISTA) && AfxGetMainWnd()->IsWindowEnabled())
+			if (s_bIEPrintMode && (OSVER < OSV_VISTA) && AfxGetMainWnd()->IsWindowEnabled())
 				s_bIEPrintMode = FALSE;
 		}
 		break;
 
 	case WM_ENABLE:
 		// In the case of 'Print' we receive this message before
-		// WM_NCDESTROY so we need to clear s_hwndIEPrintDialog 
+		// WM_DESTROY so we need to clear s_hwndIEPrintDialog 
 		// now else the above check will fail.
 		if (s_bIEPrintMode && wp && (hWnd == *AfxGetMainWnd()))
 		{
+			ASSERT(IsIEPrintDialog(s_hwndCurrentExclusion));
+
 			s_bIEPrintMode = FALSE;
-			s_hwndIEPrintDialog = NULL;
+			s_hwndCurrentExclusion = NULL;
 		}
 		break;
 	}
