@@ -1237,37 +1237,12 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_NCDESTROY:
-		if (s_bIEPrintMode && (hWnd == s_hwndIEPrintDialog))
-		{
-			s_hwndIEPrintDialog = NULL;
-
-			// In XP, when NOT previewing, the main wnd is not 
-			// disabled when the print dialog is shown so a 
-			// WM_ENABLE will never get sent and we'll never know 
-			// that IE print mode is over
-			if ((OSVER < OSV_VISTA) && AfxGetMainWnd()->IsWindowEnabled())
-				s_bIEPrintMode = FALSE;
-		}
-		else
-		{
-			UnhookWindow(hWnd);
-			s_mapExplorerThemedWnds.Remove(hWnd);
-		}
+		UnhookWindow(hWnd);
+		s_mapExplorerThemedWnds.Remove(hWnd);
 		break;
 
 	case WM_ENABLE:
-		{
-			// In the case of 'Print' we receive this message before
-			// WM_NCDESTROY so we need to clear s_hwndIEPrintDialog 
-			// now else the above check will fail.
-			if (s_bIEPrintMode && wp && (hWnd == *AfxGetMainWnd()))
-			{
-				s_bIEPrintMode = FALSE;
-				s_hwndIEPrintDialog = NULL;
-			}
-
-			CDialogHelper::InvalidateAllCtrls(CWnd::FromHandle(hWnd), FALSE);
-		}
+		CDialogHelper::InvalidateAllCtrls(CWnd::FromHandle(hWnd), FALSE);
 		break;
 	}
 
@@ -1354,6 +1329,32 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 		}
 		break;
 
+	case WM_NCDESTROY:
+		if (hWnd == s_hwndIEPrintDialog)
+		{
+			ASSERT(s_bIEPrintMode);
+
+			s_hwndIEPrintDialog = NULL;
+
+			// In XP, when NOT previewing, the main wnd is not 
+			// disabled when the print dialog is shown so a 
+			// WM_ENABLE will never get sent and we'll never know 
+			// that IE print mode is over
+			if ((OSVER < OSV_VISTA) && AfxGetMainWnd()->IsWindowEnabled())
+				s_bIEPrintMode = FALSE;
+		}
+		break;
+
+	case WM_ENABLE:
+		// In the case of 'Print' we receive this message before
+		// WM_NCDESTROY so we need to clear s_hwndIEPrintDialog 
+		// now else the above check will fail.
+		if (s_bIEPrintMode && wp && (hWnd == *AfxGetMainWnd()))
+		{
+			s_bIEPrintMode = FALSE;
+			s_hwndIEPrintDialog = NULL;
+		}
+		break;
 	}
 
 	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
