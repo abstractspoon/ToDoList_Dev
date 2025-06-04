@@ -956,39 +956,44 @@ BOOL IsIEPrintDialog(HWND hWnd)
 
 //////////////////////////////////////////////////////////////////////
 
-BOOL WantTrueColors(HWND hwndCurrent = NULL)
+BOOL WantDarkMode(HWND hwnd = NULL)
 {
 	if (!s_bIEPrintMode && !s_hwndCurrentExclusion)
-		return FALSE;
+		return TRUE;
 
-	if (hwndCurrent == NULL)
-		hwndCurrent = s_hwndCurrent;
+	if (hwnd == NULL)
+		hwnd = s_hwndCurrent;
 
 	// Assume that any calls to GetSysColor which do not have
 	// an attendant control being drawn are coming from IE
 	// internally so we return TRUE to use the 'True' colours
-	if (!hwndCurrent)
-		return TRUE;
+	if (!hwnd)
+		return FALSE;
 	
-	// We definitely want 'True' colours for any excluded dialogs
-	if (CDialogHelper::IsChildOrSame(s_hwndCurrentExclusion, hwndCurrent))
- 		return TRUE;
+	// We DON'T want dark mode for excluded dialogs
+	if (CDialogHelper::IsChildOrSame(s_hwndCurrentExclusion, hwnd))
+ 		return FALSE;
 
-	// We definitely DON'T want 'True' colours for any control
-	// NOT having the IE Print Preview class as its parent
-	if (!CWinClasses::HasParentClass(hwndCurrent, WC_IEPRINTPREVIEW, TRUE))
+	if (s_bIEPrintMode)
+	{
+		// We DO want dark mode for any control NOT having the IE 
+		// Print Preview class as its parent
+		if (!CWinClasses::HasParentClass(hwnd, WC_IEPRINTPREVIEW, TRUE))
+			return TRUE;
+
+		// We DO want dark mode for all other controls having 
+		// a dialog as its parent or being the dialog itself.
+		// This handles IE's 'Page Setup' and 'Font' dialogs
+		if (CWinClasses::IsClass(hwnd, WC_DIALOGBOX))
+			return TRUE;
+
 		return FALSE;
+	}
 
-	// We definitely want all other controls having a dialog
-	// as its parent or the dialog itself.
-	// This handles IE's 'Page Setup' and 'Font' dialogs
-	if (CWinClasses::IsClass(hwndCurrent, WC_DIALOGBOX))
-		return FALSE;
+// 	if (CWinClasses::HasParentClass(hwnd, WC_DIALOGBOX, TRUE))
+		return TRUE;
 
-	if (CWinClasses::HasParentClass(hwndCurrent, WC_DIALOGBOX, TRUE))
-		return FALSE;
-
-	return TRUE;
+// 	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1024,7 +1029,7 @@ DWORD TrueGetSysColorOrBrush(int nColor, BOOL bColor)
 
 DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 {
-	if (WantTrueColors())
+	if (!WantDarkMode())
 		return TrueGetSysColorOrBrush(nColor, bColor);
 
 	// else
@@ -1120,7 +1125,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	switch (nMsg)
 	{
 	case WM_CTLCOLORDLG:
-		if (!WantTrueColors(hWnd))
+		if (WantDarkMode(hWnd))
 		{
 			lr = GetColorOrBrush(DM_3DFACE, FALSE);
 			return TRUE;
@@ -1128,7 +1133,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		break;
 
 	case WM_CTLCOLORLISTBOX:
-		if (!WantTrueColors(hWnd))
+		if (WantDarkMode(hWnd))
 		{
 			COLORREF crText = DM_WINDOWTEXT, crBack = DM_WINDOW;
 
@@ -1145,7 +1150,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		return TRUE;
 
 	case WM_CTLCOLOREDIT:
-		if (!WantTrueColors(hWnd))
+		if (WantDarkMode(hWnd))
 		{
 			lr = GetColorOrBrush(DM_WINDOW, FALSE);
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
@@ -1156,7 +1161,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
-		if (!WantTrueColors(hWnd))
+		if (WantDarkMode(hWnd))
 		{
 			if (::GetTextColor((HDC)wp) == TrueGetSysColor(COLOR_WINDOWTEXT))
 				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
@@ -1446,29 +1451,29 @@ HRESULT STDAPICALLTYPE MyCloseThemeData(HTHEME hTheme)
 
 HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, OUT COLORREF *pColor)
 {
-	if (WantTrueColors())
-		return TrueGetThemeColor(hTheme, iPartId, iStateId, iPropId, pColor);
-
-	CString sThClass = GetClass(hTheme);
-
-	if (CWinClasses::IsClass(sThClass, TC_EDIT))
+	if (WantDarkMode())
 	{
-		switch (iPartId)
+		CString sThClass = GetClass(hTheme);
+
+		if (CWinClasses::IsClass(sThClass, TC_EDIT))
 		{
-		case EP_EDITTEXT:
+			switch (iPartId)
 			{
-				switch (iStateId)
+			case EP_EDITTEXT:
 				{
-				case ETS_CUEBANNER:
-					if (iPropId == TMT_TEXTCOLOR)
+					switch (iStateId)
 					{
-						*pColor = GetColorOrBrush(COLOR_WINDOWTEXT, TRUE);
-						return S_OK;
+					case ETS_CUEBANNER:
+						if (iPropId == TMT_TEXTCOLOR)
+						{
+							*pColor = GetColorOrBrush(COLOR_WINDOWTEXT, TRUE);
+							return S_OK;
+						}
+						break;
 					}
-					break;
 				}
+				break;
 			}
-			break;
 		}
 	}
 
@@ -1477,198 +1482,200 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 
 HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect)
 {
-	if (WantTrueColors())
-		return TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
-
-	CString sThClass = GetClass(hTheme);
-
-	if (s_hwndCurrentDateTime && CWinClasses::IsClass(sThClass, TC_DATETIMEPICK))
+	if (WantDarkMode())
 	{
-		switch (iPartId)
+		CString sThClass = GetClass(hTheme);
+
+		if (s_hwndCurrentDateTime && CWinClasses::IsClass(sThClass, TC_DATETIMEPICK))
 		{
-		case DP_DATEBORDER:
+			switch (iPartId)
 			{
-				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
-
-				if (hr == S_OK)
+			case DP_DATEBORDER:
 				{
-					DATETIMEPICKERINFO dtpi = { sizeof(dtpi), 0 };
+					HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
 
-					if (!SendMessage(s_hwndCurrentDateTime, DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi))
+					if (hr == S_OK)
 					{
-						ASSERT(0);
-					}
-					else
-					{
-						// Clip out the drop button
-						CRect Bkgnd(pRect);
+						DATETIMEPICKERINFO dtpi = { sizeof(dtpi), 0 };
 
-						if (dtpi.rcButton.left == 0)
+						if (!SendMessage(s_hwndCurrentDateTime, DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)&dtpi))
 						{
-							Bkgnd.left = dtpi.rcButton.right;
-							Bkgnd.right -= 2;
+							ASSERT(0);
 						}
 						else
 						{
-							Bkgnd.left += 2;
-							Bkgnd.right = dtpi.rcButton.left;
+							// Clip out the drop button
+							CRect Bkgnd(pRect);
+
+							if (dtpi.rcButton.left == 0)
+							{
+								Bkgnd.left = dtpi.rcButton.right;
+								Bkgnd.right -= 2;
+							}
+							else
+							{
+								Bkgnd.left += 2;
+								Bkgnd.right = dtpi.rcButton.left;
+							}
+							Bkgnd.DeflateRect(0, 2);
+
+							BOOL bEnabled = ::IsWindowEnabled(s_hwndCurrentDateTime);
+
+							if (bEnabled)
+							{
+								SYSTEMTIME st;
+								bEnabled = (GDT_VALID == SendMessage(s_hwndCurrentDateTime, DTM_GETSYSTEMTIME, 0, (LPARAM)&st));
+							}
+
+							CDC::FromHandle(hdc)->FillSolidRect(Bkgnd, (bEnabled ? DM_WINDOW : DM_3DFACE));
 						}
-						Bkgnd.DeflateRect(0, 2);
-
-						BOOL bEnabled = ::IsWindowEnabled(s_hwndCurrentDateTime);
-
-						if (bEnabled)
-						{
-							SYSTEMTIME st;
-							bEnabled = (GDT_VALID == SendMessage(s_hwndCurrentDateTime, DTM_GETSYSTEMTIME, 0, (LPARAM)&st));
-						}
-
- 						CDC::FromHandle(hdc)->FillSolidRect(Bkgnd, (bEnabled ? DM_WINDOW : DM_3DFACE));
 					}
-				}
 
-				return hr;
+					return hr;
+				}
+				break;
 			}
-			break;
 		}
-	}
-	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sThClass, TC_COMBOBOX))
-	{
-		switch (iPartId)
+		else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sThClass, TC_COMBOBOX))
 		{
-		case CP_BORDER:
+			switch (iPartId)
 			{
-				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
-
-				if (hr == S_OK)
+			case CP_BORDER:
 				{
-					switch (CWinClasses::GetStyleType(s_hwndCurrentComboBox, CBS_TYPEMASK))
+					HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+
+					if (hr == S_OK)
 					{
-					case CBS_DROPDOWN:
-					case CBS_SIMPLE:
+						switch (CWinClasses::GetStyleType(s_hwndCurrentComboBox, CBS_TYPEMASK))
 						{
-							HWND hwndEdit = ::GetDlgItem(s_hwndCurrentComboBox, 1001);
-							BOOL bDisabled = ((iStateId == CBB_DISABLED) || CDialogHelper::HasStyle(hwndEdit, ES_READONLY));
+						case CBS_DROPDOWN:
+						case CBS_SIMPLE:
+							{
+								HWND hwndEdit = ::GetDlgItem(s_hwndCurrentComboBox, 1001);
+								BOOL bDisabled = ((iStateId == CBB_DISABLED) || CDialogHelper::HasStyle(hwndEdit, ES_READONLY));
 
-							CRect rEdit = CDialogHelper::GetChildRect(CWnd::FromHandle(hwndEdit));
-							rEdit.InflateRect(1, 1);
+								CRect rEdit = CDialogHelper::GetChildRect(CWnd::FromHandle(hwndEdit));
+								rEdit.InflateRect(1, 1);
 
-							CDC::FromHandle(hdc)->FillSolidRect(rEdit, (bDisabled ? DM_3DFACE : DM_WINDOW));
+								CDC::FromHandle(hdc)->FillSolidRect(rEdit, (bDisabled ? DM_3DFACE : DM_WINDOW));
+							}
+							break;
 						}
-						break;
 					}
+
+					return hr;
 				}
+				break;
 
-				return hr;
-			}
-			break;
-
-		case CP_READONLY:
-			{
-				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
-
-				if (hr == S_OK)
+			case CP_READONLY:
 				{
-					CRect rBkgnd;
-					GetClientRect(s_hwndCurrentComboBox, rBkgnd);
+					HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
 
-					rBkgnd.right -= GetSystemMetrics(SM_CXVSCROLL);
-					rBkgnd.DeflateRect(2, 2);
+					if (hr == S_OK)
+					{
+						CRect rBkgnd;
+						GetClientRect(s_hwndCurrentComboBox, rBkgnd);
 
-					COLORREF crBkgnd = DM_WINDOW;
+						rBkgnd.right -= GetSystemMetrics(SM_CXVSCROLL);
+						rBkgnd.DeflateRect(2, 2);
+
+						COLORREF crBkgnd = DM_WINDOW;
+
+						switch (iStateId)
+						{
+						case CBRO_DISABLED:
+							crBkgnd = DM_3DFACE;
+							break;
+
+						default:
+							if (::GetFocus() == s_hwndCurrentComboBox)
+								crBkgnd = GetSysColor(COLOR_HIGHLIGHT);
+							break;
+						}
+
+						CDC::FromHandle(hdc)->FillSolidRect(rBkgnd, crBkgnd);
+					}
+					return hr;
+				}
+				break;
+			}
+		}
+		else if (CWinClasses::IsClass(sThClass, TC_TABCTRL))
+		{
+			switch (iPartId)
+			{
+			case TABP_PANE:
+				{
+					CRect rBkgnd(pRect);
+					rBkgnd.DeflateRect(1, 1);
+
+					CDC* pDC = CDC::FromHandle(hdc);
+
+					pDC->FillSolidRect(rBkgnd, DM_3DFACE);
+					pDC->ExcludeClipRect(rBkgnd);
+				}
+				break;
+			}
+		}
+		else if (CWinClasses::IsClass(sThClass, TC_EDIT))
+		{
+			switch (iPartId)
+			{
+			case EP_BACKGROUND:
+				{
+					HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
+					COLORREF crBack = DM_WINDOW;
 
 					switch (iStateId)
 					{
-					case CBRO_DISABLED:
-						crBkgnd = DM_3DFACE;
-						break;
-
-					default:
-						if (::GetFocus() == s_hwndCurrentComboBox)
-							crBkgnd = GetSysColor(COLOR_HIGHLIGHT);
+					case EBS_DISABLED:
+					case EBS_READONLY:
+						crBack = DM_3DFACE;
 						break;
 					}
+					CDC::FromHandle(hdc)->FillSolidRect(pRect, crBack);
 
-					CDC::FromHandle(hdc)->FillSolidRect(rBkgnd, crBkgnd);
+					return hr;
 				}
-				return hr;
+				break;
 			}
-			break;
 		}
-	}
-	else if (CWinClasses::IsClass(sThClass, TC_TABCTRL))
-	{
-		switch (iPartId)
+		else if (s_hwndCurrentManagedBtnStatic && CWinClasses::IsClass(sThClass, TC_BUTTON))
 		{
-		case TABP_PANE:
+			switch (iPartId)
 			{
-				CRect rBkgnd(pRect);
-				rBkgnd.DeflateRect(1, 1);
-
-				CDC* pDC = CDC::FromHandle(hdc);
-
-				pDC->FillSolidRect(rBkgnd, DM_3DFACE);
-				pDC->ExcludeClipRect(rBkgnd);
-			}
-			break;
-		}
-	}
-	else if (CWinClasses::IsClass(sThClass, TC_EDIT))
-	{
-		switch (iPartId)
-		{
-		case EP_BACKGROUND:
-			{
-				HRESULT hr = TrueDrawThemeBackground(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
-				COLORREF crBack = DM_WINDOW;
-
-				switch (iStateId)
+			case BP_CHECKBOX:
+			case BP_RADIOBUTTON:
 				{
-				case EBS_DISABLED:
-				case EBS_READONLY:
-					crBack = DM_3DFACE;
+					CSubclassWnd* pHook = NULL;
+
+					if (s_mapScWnds.Lookup(s_hwndCurrentManagedBtnStatic, pHook) && pHook)
+						((CDarkModeManagedButtonStaticText*)pHook)->SetIsCheckBoxOrRadioButton();
+				}
+				break;
+			}
+		}
+		else if (s_hwndCurrentExplorerTreeOrList)
+		{
+			// This ensures that when the themed selection is drawn
+			// that it shows up correctly
+			if (CWinClasses::IsClass(sThClass, TC_TREEVIEW))
+			{
+				switch (iPartId)
+				{
+				case TVP_TREEITEM:
+					CDC::FromHandle(hdc)->FillSolidRect(pRect, colorWhite);
 					break;
 				}
-				CDC::FromHandle(hdc)->FillSolidRect(pRect, crBack);
-
-				return hr;
 			}
-			break;
-		}
-	}
-	else if (s_hwndCurrentManagedBtnStatic && CWinClasses::IsClass(sThClass, TC_BUTTON))
-	{
-		switch (iPartId)
-		{
-		case BP_CHECKBOX:
-		case BP_RADIOBUTTON:
+			else if (sThClass.IsEmpty() || CWinClasses::IsClass(sThClass, TC_LISTVIEW))
 			{
-				CSubclassWnd* pHook = NULL;
-
-				if (s_mapScWnds.Lookup(s_hwndCurrentManagedBtnStatic, pHook) && pHook)
-					((CDarkModeManagedButtonStaticText*)pHook)->SetIsCheckBoxOrRadioButton();
-			}
-			break;
-		}
-	}
-	else if (s_hwndCurrentExplorerTreeOrList)
-	{
-		if (CWinClasses::IsClass(sThClass, TC_TREEVIEW))
-		{
-			switch (iPartId)
-			{
-			case TVP_TREEITEM:
-				CDC::FromHandle(hdc)->FillSolidRect(pRect, colorWhite);
-				break;
-			}
-		}
-		else if (sThClass.IsEmpty() || CWinClasses::IsClass(sThClass, TC_LISTVIEW))
-		{
-			switch (iPartId)
-			{
-			case LVP_LISTITEM:
-				CDC::FromHandle(hdc)->FillSolidRect(pRect, colorWhite);
-				break;
+				switch (iPartId)
+				{
+				case LVP_LISTITEM:
+					CDC::FromHandle(hdc)->FillSolidRect(pRect, colorWhite);
+					break;
+				}
 			}
 		}
 	}
@@ -1678,72 +1685,72 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 
 HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, LPCWSTR szText, int nTextLen, DWORD dwTextFlags, DWORD dwTextFlags2, LPCRECT pRect)
 {
-	if (WantTrueColors())
-		return TrueDrawThemeText(hTheme, hdc, iPartId, iStateId, szText, nTextLen, dwTextFlags, dwTextFlags2, pRect);
-	
-	CString sThClass = GetClass(hTheme);
-
-	if (s_hwndCurrentBtnStatic)
+	if (WantDarkMode())
 	{
-		ASSERT(CWinClasses::IsClass(sThClass, TC_BUTTON));
+		CString sThClass = GetClass(hTheme);
 
-		// Get the appropriate text colour
-		::SendMessage(::GetParent(s_hwndCurrentBtnStatic), WM_CTLCOLORSTATIC, (WPARAM)hdc, (LPARAM)s_hwndCurrentBtnStatic);
-
-		//::SetBkMode(hdc, TRANSPARENT);
-		::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
-
-		return S_OK;
-	}
-	else if (s_hwndCurrentDateTime && CWinClasses::IsClass(sThClass, TC_DATETIMEPICK))
-	{
-		switch (iPartId)
+		if (s_hwndCurrentBtnStatic)
 		{
-		case DP_DATETEXT:
-			{
-				switch (iStateId)
-				{
-				case DPDT_NORMAL:
-					::SetTextColor(hdc, DM_WINDOWTEXT);
-					break;
+			ASSERT(CWinClasses::IsClass(sThClass, TC_BUTTON));
 
-				case DPDT_DISABLED:
-					::SetTextColor(hdc, DM_GRAY3DFACETEXT);
-					break;
+			// Get the appropriate text colour
+			::SendMessage(::GetParent(s_hwndCurrentBtnStatic), WM_CTLCOLORSTATIC, (WPARAM)hdc, (LPARAM)s_hwndCurrentBtnStatic);
 
-				case DPDT_SELECTED:
-					::SetTextColor(hdc, MyGetSysColor(COLOR_HIGHLIGHTTEXT));
-					break;
-				}
+			//::SetBkMode(hdc, TRANSPARENT);
+			::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
 
-				::SetBkMode(hdc, TRANSPARENT);
-				::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
-				return S_OK;
-			}
-			break;
-
-		default:
-			break;
+			return S_OK;
 		}
-	}
-	else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sThClass, TC_COMBOBOX))
-	{
-		switch (iPartId)
+		else if (s_hwndCurrentDateTime && CWinClasses::IsClass(sThClass, TC_DATETIMEPICK))
 		{
-		case CP_READONLY:
+			switch (iPartId)
 			{
-				COLORREF crText = DM_WINDOWTEXT;
+			case DP_DATETEXT:
+				{
+					switch (iStateId)
+					{
+					case DPDT_NORMAL:
+						::SetTextColor(hdc, DM_WINDOWTEXT);
+						break;
 
-				if (::GetFocus() == s_hwndCurrentComboBox)
-					crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
+					case DPDT_DISABLED:
+						::SetTextColor(hdc, DM_GRAY3DFACETEXT);
+						break;
 
-				::SetTextColor(hdc, crText);
-				::SetBkMode(hdc, TRANSPARENT);
-				::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
+					case DPDT_SELECTED:
+						::SetTextColor(hdc, MyGetSysColor(COLOR_HIGHLIGHTTEXT));
+						break;
+					}
 
-				return S_OK;
+					::SetBkMode(hdc, TRANSPARENT);
+					::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
+					return S_OK;
+				}
+				break;
+
+			default:
+				break;
 			}
-			break;
+		}
+		else if (s_hwndCurrentComboBox && CWinClasses::IsClass(sThClass, TC_COMBOBOX))
+		{
+			switch (iPartId)
+			{
+			case CP_READONLY:
+				{
+					COLORREF crText = DM_WINDOWTEXT;
+
+					if (::GetFocus() == s_hwndCurrentComboBox)
+						crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
+
+					::SetTextColor(hdc, crText);
+					::SetBkMode(hdc, TRANSPARENT);
+					::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
+
+					return S_OK;
+				}
+				break;
+			}
 		}
 	}
 
