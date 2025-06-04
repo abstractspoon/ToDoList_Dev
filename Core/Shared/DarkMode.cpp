@@ -1321,18 +1321,19 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 				// Combos in the font dialog do not play by the rules
 				HookWindow(hWnd, new CDarkModeFontDialog());
 			}
-			else if (s_bIEPrintMode && !s_hwndIEPrintDialog && IsIEPrintDialog(hWnd))
+			else if (s_bIEPrintMode)
 			{
-				s_hwndIEPrintDialog = hWnd;
+				if (!s_hwndIEPrintDialog && IsIEPrintDialog(hWnd))
+					s_hwndIEPrintDialog = hWnd;
 			}
 			return lr;
 		}
 		break;
 
-	case WM_NCDESTROY:
+	case WM_DESTROY:
 		if (hWnd == s_hwndIEPrintDialog)
 		{
-			ASSERT(s_bIEPrintMode);
+			ASSERT(!s_bIEPrintMode || IsIEPrintDialog(hWnd));
 
 			s_hwndIEPrintDialog = NULL;
 
