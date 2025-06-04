@@ -976,31 +976,26 @@ BOOL WantDarkMode(HWND hwnd = NULL)
 	// internally so we return TRUE to use the 'True' colours
 	if (!hwnd)
 		return FALSE;
-	
-	// We DON'T want dark mode for excluded dialogs
+
+	// We definitely want 'True' colours for any excluded dialogs
 	if (CDialogHelper::IsChildOrSame(s_hwndCurrentExclusion, hwnd))
- 		return FALSE;
-
-	if (s_bIEPrintMode)
-	{
-		// We DO want dark mode for any control NOT having the IE 
-		// Print Preview class as its parent
-		if (!CWinClasses::HasParentClass(hwnd, WC_IEPRINTPREVIEW, TRUE))
-			return TRUE;
-
-		// We DO want dark mode for all other controls having 
-		// a dialog as its parent or being the dialog itself.
-		// This handles IE's 'Page Setup' and 'Font' dialogs
-		if (CWinClasses::IsClass(hwnd, WC_DIALOGBOX))
-			return TRUE;
-
 		return FALSE;
-	}
 
-// 	if (CWinClasses::HasParentClass(hwnd, WC_DIALOGBOX, TRUE))
+	// We definitely DON'T want 'True' colours for any control
+	// NOT having the IE Print Preview class as its parent
+	if (!CWinClasses::HasParentClass(hwnd, WC_IEPRINTPREVIEW, TRUE))
 		return TRUE;
 
-// 	return FALSE;
+	// We definitely want all other controls having a dialog
+	// as its parent or the dialog itself.
+	// This handles IE's 'Page Setup' and 'Font' dialogs
+	if (CWinClasses::IsClass(hwnd, WC_DIALOGBOX))
+		return TRUE;
+
+	if (CWinClasses::HasParentClass(hwnd, WC_DIALOGBOX, TRUE))
+		return TRUE;
+
+	return FALSE;
 }
 
 //////////////////////////////////////////////////////////////////////
