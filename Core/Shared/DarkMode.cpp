@@ -135,37 +135,6 @@ PFNDRAWTHEMETEXT TrueDrawThemeText = NULL;
 
 //////////////////////////////////////////////////////////////////////
 
-struct DLGCTRL
-{
-	int nCtrlID;
-	LPCTSTR szClass;
-	UINT nReqStyles;
-};
-
-BOOL IsDialog(HWND hWnd, const DLGCTRL ctrls[], int nNumCtrls)
-{
-	if (!CWinClasses::IsDialog(hWnd))
-		return FALSE;
-
-	for (int nCtrl = 0; nCtrl < nNumCtrls; nCtrl++)
-	{
-		HWND hwndCtrl = ::GetDlgItem(hWnd, ctrls[nCtrl].nCtrlID);
-
-		if (!hwndCtrl)
-			return FALSE;
-
-		if (!CWinClasses::IsClass(hwndCtrl, ctrls[nCtrl].szClass))
-			return FALSE;
-
-		if (ctrls[nCtrl].nReqStyles && !CDialogHelper::HasStyle(hwndCtrl, ctrls[nCtrl].nReqStyles))
-			return FALSE;
-	}
-
-	return TRUE;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void UnhookAll();
 
 //////////////////////////////////////////////////////////////////////
@@ -880,7 +849,7 @@ BOOL CDarkModeManagedButtonStaticText::s_nCheckOffset = -1;
 
 BOOL IsFileOpenDialog(HWND hWnd)
 {
-	const DLGCTRL CTRLS[] =
+	const CDialogHelper::DLGCTRL CTRLS[] =
 	{
 		{ IDC_OPENDLG_TREELIST,			WC_DIRECTUIVIEWWND,	0 },
 		{ IDC_OPENDLG_FILENAMELABEL,	WC_STATIC,			SS_NOTIFY },
@@ -898,12 +867,12 @@ BOOL IsFileOpenDialog(HWND hWnd)
 	};
 	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
-	return IsDialog(hWnd, CTRLS, NUM_CTRLS);
+	return CDialogHelper::IsDialog(hWnd, CTRLS, NUM_CTRLS);
 }
 
 BOOL IsFileSaveDialog(HWND hWnd)
 {
-	const DLGCTRL CTRLS[] =
+	const CDialogHelper::DLGCTRL CTRLS[] =
 	{
 		{ IDC_SAVEDLG_TREELIST,	WC_DIRECTUIVIEWWND,	0 },
 		{ IDC_SAVEDLG_STATIC1,	WC_STATIC,			0 },
@@ -917,7 +886,7 @@ BOOL IsFileSaveDialog(HWND hWnd)
 	};
 	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
-	return IsDialog(hWnd, CTRLS, NUM_CTRLS);
+	return CDialogHelper::IsDialog(hWnd, CTRLS, NUM_CTRLS);
 }
 
 BOOL IsIEFontDialog(HWND hWnd)
@@ -929,7 +898,7 @@ BOOL IsIEFontDialog(HWND hWnd)
 	if (!CWinClasses::HasParentClass(hWnd, WC_IEPRINTPREVIEW, TRUE))
 		return FALSE;
 
-	const DLGCTRL CTRLS[] =
+	const CDialogHelper::DLGCTRL CTRLS[] =
 	{
 		{ IDC_FONTDLG_SAMPLEGROUP,	WC_BUTTON,		0 },
 		{ IDC_FONTDLG_SAMPLETEXT,	WC_STATIC,		0 },
@@ -944,7 +913,7 @@ BOOL IsIEFontDialog(HWND hWnd)
 	};
 	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
-	return IsDialog(hWnd, CTRLS, NUM_CTRLS);
+	return CDialogHelper::IsDialog(hWnd, CTRLS, NUM_CTRLS);
 }
 
 BOOL IsIEPrintDialog(HWND hWnd)
@@ -972,7 +941,7 @@ BOOL IsIEPrintDialog(HWND hWnd)
 	HWND hwndGenTab = GetDlgItem(hWnd, 0);
 
 	// Printer list ctrl ID changes after XP
-	const DLGCTRL CTRLS[] =
+	const CDialogHelper::DLGCTRL CTRLS[] =
 	{
 		{ IDC_PRINTDLG_PRINTERLIST,		WC_SHELLDLLDEFVIEW, 0 },
 		{ IDC_PRINTDLG_FINDPRINTER,		WC_BUTTON,			BS_TEXT },
@@ -989,7 +958,7 @@ BOOL IsIEPrintDialog(HWND hWnd)
 	};
 	const int NUM_CTRLS = (sizeof(CTRLS) / sizeof(CTRLS[0]));
 
-	return IsDialog(hwndGenTab, CTRLS, NUM_CTRLS);
+	return CDialogHelper::IsDialog(hwndGenTab, CTRLS, NUM_CTRLS);
 }
 
 //////////////////////////////////////////////////////////////////////

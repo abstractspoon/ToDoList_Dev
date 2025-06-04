@@ -2146,6 +2146,28 @@ HWND CDialogHelper::GetParentDialog(HWND hWnd, DWORD dwReqStyles)
 	return hwndParent;
 }
 
+BOOL CDialogHelper::IsDialog(HWND hWnd, const DLGCTRL ctrls[], int nNumCtrls)
+{
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+
+	for (int nCtrl = 0; nCtrl < nNumCtrls; nCtrl++)
+	{
+		HWND hwndCtrl = ::GetDlgItem(hWnd, ctrls[nCtrl].nCtrlID);
+
+		if (!hwndCtrl)
+			return FALSE;
+
+		if (!CWinClasses::IsClass(hwndCtrl, ctrls[nCtrl].szClass))
+			return FALSE;
+
+		if (ctrls[nCtrl].nReqStyles && !HasStyle(hwndCtrl, ctrls[nCtrl].nReqStyles))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonClient)
 {
 	DWORD dwFlags = (TME_LEAVE | (bIncludeNonClient ? TME_NONCLIENT : 0));

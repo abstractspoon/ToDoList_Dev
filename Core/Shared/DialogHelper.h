@@ -84,6 +84,14 @@ public:
 	static HWND GetParentOwner(HWND hWnd);
 	static HWND GetParentDialog(HWND hWnd, DWORD dwReqStyles = WS_POPUP | WS_CAPTION);
 
+	struct DLGCTRL
+	{
+		int nCtrlID;
+		LPCTSTR szClass;
+		UINT nReqStyles;
+	};
+	static BOOL IsDialog(HWND hWnd, const DLGCTRL ctrls[], int nNumCtrls);
+
 	static int GetCtrlsCount(const CWnd* pParent, LPCTSTR szClass = NULL);
 	static int GetCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass = NULL);
 	static void RemoveCtrlID(UINT nCtrlID, CUIntArray& aCtrlIDs);
