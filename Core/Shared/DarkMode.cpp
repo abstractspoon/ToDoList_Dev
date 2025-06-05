@@ -1227,7 +1227,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				// text and background colours but we don't want to do it 
 				// if the tree's parent is the folder dialog but we don't know 
 				// that yet so we have to check that here.
-				if (!s_hwndCurrentExclusion)
+				if (!s_hwndCurrentExclusion && (OSVER >= OSV_VISTA))
 				{
 					HWND hwndDlg = CDialogHelper::GetParentDialog(hWnd);
 
