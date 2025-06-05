@@ -1363,7 +1363,31 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 				CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hWnd);
 				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 			}
+			else if ((GetDlgCtrlID(hWnd) == IDC_FOLDERDLG_SELECTFOLDERLABEL) &&
+					 ::IsChild(s_hwndCurrentExclusion, hWnd))
+			{
+				// Temporary handling of Folder dialog static text background
+				ASSERT(IsFolderDialog(::GetParent(hWnd)));
 
+				CWnd* pStatic = CWnd::FromHandle(hWnd);
+
+				CPaintDC dc(pStatic);
+				CRect rClient;
+
+				pStatic->GetClientRect(rClient);
+				dc.FillSolidRect(rClient, TrueGetSysColor(COLOR_3DFACE));
+
+				CString sText;
+				pStatic->GetWindowText(sText);
+
+				HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, hWnd);
+				dc.SetBkMode(TRANSPARENT);
+				dc.DrawText(sText, rClient, DT_LEFT | DT_TOP | DT_WORDBREAK);
+				dc.SelectObject(hOldFont);
+
+				return 0L;
+			}
+			
 			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 		}
 		break;
