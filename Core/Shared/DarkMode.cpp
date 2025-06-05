@@ -1151,8 +1151,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			lr = GetColorOrBrush(crBack, FALSE);
 			::SetTextColor((HDC)wp, crText);
 			::SetBkMode((HDC)wp, TRANSPARENT);
+			
+			return TRUE;
 		}
-		return TRUE;
+		break;
 
 	case WM_CTLCOLOREDIT:
 		if (WantDarkMode(hWnd))
@@ -1161,8 +1163,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 			::SetBkColor((HDC)wp, DM_WINDOW);
 			::SetBkMode((HDC)wp, OPAQUE);
+		
+			return TRUE;
 		}
-		return TRUE;
+		break;
 
 	case WM_CTLCOLORBTN:
  	case WM_CTLCOLORSTATIC:
@@ -1184,8 +1188,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				lr = GetColorOrBrush(DM_WINDOW + 1, FALSE);
 			else
 				lr = GetColorOrBrush(DM_3DFACE, FALSE);
+
+			return TRUE;
 		}
-		return TRUE;
+		break;
 
 	case WM_INITDIALOG:
 		if (CDialogHelper::HasStyle(hWnd, (WS_POPUP | WS_CAPTION)))
@@ -1333,8 +1339,6 @@ HBRUSH WINAPI MyGetSysColorBrush(int nColor)
 
 LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
 {
-	LRESULT lr = 0;
-
 	switch (nMsg)
 	{
 	case WM_PAINT:
@@ -1363,30 +1367,6 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 				CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hWnd);
 				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 			}
-			else if ((GetDlgCtrlID(hWnd) == IDC_FOLDERDLG_SELECTFOLDERLABEL) &&
-					 ::IsChild(s_hwndCurrentExclusion, hWnd))
-			{
-				// Temporary handling of Folder dialog static text background
-				ASSERT(IsFolderDialog(::GetParent(hWnd)));
-
-				CWnd* pStatic = CWnd::FromHandle(hWnd);
-
-				CPaintDC dc(pStatic);
-				CRect rClient;
-
-				pStatic->GetClientRect(rClient);
-				dc.FillSolidRect(rClient, TrueGetSysColor(COLOR_3DFACE));
-
-				CString sText;
-				pStatic->GetWindowText(sText);
-
-				HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, hWnd);
-				dc.SetBkMode(TRANSPARENT);
-				dc.DrawText(sText, rClient, DT_LEFT | DT_TOP | DT_WORDBREAK);
-				dc.SelectObject(hOldFont);
-
-				return 0L;
-			}
 			
 			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 		}
@@ -1399,10 +1379,13 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 		{
 			// Always do default first to allow CAutoComboBox hooking
 			// and dialog initialisation
-			LRESULT lr = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
-	
-			WindowProcEx(hWnd, nMsg, wp, lp, lr);
-			return lr;
+			LRESULT lrTrue = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp), lr = 0;
+
+			if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+				return lr;
+
+			// else
+			return lrTrue;
 		}
 		break;
 
@@ -1435,6 +1418,8 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 		}
 		break;
 	}
+
+	LRESULT lr = 0;
 
 	if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
 		return lr;
