@@ -457,9 +457,13 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 		
 		// arrays
 // ---------------------------------------------------------------
-#define SETTASKATTRIBARRAY(fn) \
-	{ CStringArray aItems; if (Misc::Split(sValue, aItems, '+')) \
-	for (int nItem = 0; nItem < aItems.GetSize(); nItem++) pTasks->fn(hTask, aItems[nItem]); }
+#define SETTASKATTRIBARRAY(fn)                         \
+{ CStringArray aItems;                                 \
+if (sValue.Find('+') >= 0)                             \
+	Misc::Split(sValue, aItems, '+');                  \
+else Misc::Split(sValue, aItems);                      \
+for (int nItem = 0; nItem < aItems.GetSize(); nItem++) \
+		pTasks->fn(hTask, aItems[nItem]); }
 // ---------------------------------------------------------------
 
 	case TDCA_CATEGORY: 
