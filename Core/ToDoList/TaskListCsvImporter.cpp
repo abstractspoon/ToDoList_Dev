@@ -87,9 +87,14 @@ IIMPORTEXPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskLi
 	CStringArray aLines;
 	FileMisc::LoadFile(szSrcFilePath, aLines);
 
-	// remove header line
+	// Remove leading blank lines
+	while (aLines[0].IsEmpty())
+		aLines.RemoveAt(0);
+
+	// Remove header line
 	aLines.RemoveAt(0);
 
+	// Do the import
 	AddCustomAttributeDefinitions(pTasks);
 
 	BOOL bSomeFailed = FALSE;
