@@ -395,7 +395,9 @@ bool HtmlEditorControlEx::ExecuteCommandRange(MSHTML::IHTMLTxtRange^ range, Stri
 
 bool HtmlEditorControlEx::OnSetForeColor(MSHTML::IHTMLTxtRange^ range, Drawing::Color color)
 {
-	// Replace white text in Dark Mode, and black text in non Dark Mode, with 'auto-colour'
+	// Intercept setting white text in Dark Mode, and black text in non Dark Mode, 
+	// and instead remove any colour definition by removing all attributes and 
+	// then adding back eveything that was there before except for the colour
 	if ((CDarkMode::IsEnabled() && (color == Color::White)) ||
 		(!CDarkMode::IsEnabled() && (color == Color::Black)))
 	{
