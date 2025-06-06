@@ -199,6 +199,7 @@ protected:
 	void LayoutControls(int width, int height);
 
 	static void PrepareCharFormat(CharFormat& cf, COLORREF color, BOOL bForeground);
+	static void PrepareDlgTextColor(COLORREF& color, const CharFormat& cf);
 };
 
 #endif // !defined(AFX_RULERRICHEDITCTRL_H__4CD13283_82E4_484A_83B4_DBAD5B64F17C__INCLUDED_)

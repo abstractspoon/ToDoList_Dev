@@ -1107,9 +1107,7 @@ void CRulerRichEditCtrl::DoFont()
 
 	// Show font dialog
 	CFontDialog	dlg(&lf);
-
-	// color
-	dlg.m_cf.rgbColors = cf.crTextColor;
+	PrepareDlgTextColor(dlg.m_cf.rgbColors, cf);
 
 	if (dlg.DoModal() == IDOK)
 	{
@@ -1163,6 +1161,14 @@ void CRulerRichEditCtrl::SetCurrentFontColor(COLORREF color, BOOL bForeground)
 	PrepareCharFormat(cf, color, bForeground);
 
 	m_rtf.SetSelectionCharFormat(cf);
+}
+
+void CRulerRichEditCtrl::PrepareDlgTextColor(COLORREF& crText, const CharFormat& cf)
+{
+	if ((cf.dwMask & CFM_COLOR) && !(cf.dwEffects & CFE_AUTOCOLOR))
+		crText = cf.crTextColor;
+	else
+		crText = (CDarkMode::IsEnabled() ? colorWhite : colorBlack);
 }
 
 void CRulerRichEditCtrl::PrepareCharFormat(CharFormat& cf, COLORREF color, BOOL bForeground)
