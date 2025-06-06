@@ -68,13 +68,16 @@ namespace unvell.ReoGrid.Events
 		/// </summary>
 		public IAction Action { get; private set; }
 
+		public bool UndoRedo { get; private set; }
+
 		/// <summary>
 		/// Create this event argument with specified action
 		/// </summary>
 		/// <param name="action">instance of action</param>
-		public WorkbookActionEventArgs(IAction action)
+		public WorkbookActionEventArgs(IAction action, bool undoRedo = false)
 		{
 			this.Action = action;
+			this.UndoRedo = undoRedo;
 		}
 	}
 

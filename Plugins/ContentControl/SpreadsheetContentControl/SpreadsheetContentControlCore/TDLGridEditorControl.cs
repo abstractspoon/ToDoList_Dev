@@ -13,6 +13,7 @@ using System.Threading;
 using System.Diagnostics;
 
 using unvell.ReoGrid;
+using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Editor;
 using unvell.ReoGrid.CellTypes;
@@ -31,6 +32,7 @@ namespace SpreadsheetContentControl
 	[System.ComponentModel.DesignerCategory("")]
 	public class TDLGridEditorControl : ReoGridEditorControl
 	{
+		private UITheme m_theme;
 		private UIThemeToolbarRenderer m_toolbarRenderer;
 		private Font m_ControlsFont;
 		private Translator m_Trans;
@@ -101,6 +103,9 @@ namespace SpreadsheetContentControl
 				e.Worksheet.CellMouseLeave -= new EventHandler<CellMouseEventArgs>(OnCellMouseLeave);
 				e.Worksheet.CellMouseMove -= new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
 			};
+
+			// For handling Dark Mode text colour changes
+			GridControl.ActionPerformed += new EventHandler<WorkbookActionEventArgs>(OnActionPerformed);
 
 			this.SizeChanged += (s, e) => Invalidate(true);
 
@@ -703,6 +708,46 @@ namespace SpreadsheetContentControl
 
 		}
 
+		private void OnActionPerformed(object sender, WorkbookActionEventArgs e)
+		{
+			// Prevent re-entrancy
+			if (e.UndoRedo)
+				return;
+
+			var action = (e.Action as SetRangeStyleAction);
+
+			if (action != null)
+			{
+				bool darkMode = m_theme.IsDarkMode();
+
+				switch (action.Style.Flag)
+				{
+				case PlainStyleFlag.TextColor:
+					// Intercept setting white text in Dark Mode, and black text in non Dark Mode, 
+					// and instead undo it and then remove any colour definition
+					{
+						var color = action.Style.TextColor;
+
+						if ((darkMode && (color == Color.White)) || (!darkMode && (color == Color.Black)))
+						{
+							Undo();
+							GridControl.DoAction(new RemoveRangeStyleAction(this.CurrentWorksheet.SelectionRange, PlainStyleFlag.TextColor));
+						}
+					}
+					break;
+
+				case PlainStyleFlag.BackColor:
+					// Intercept setting black background in Dark Mode, and white background in non Dark Mode, 
+					// and instead undo it and then remove any colour definition
+					break;
+
+				case PlainStyleFlag.FillPatternColor:
+					// ??
+					break;
+				}
+			}
+		}
+
 		private void OnAfterPaste(object sender, RangeEventArgs e)
 		{
 			for (int row = e.Range.Row; row <= e.Range.EndRow; row++)
@@ -966,6 +1011,7 @@ namespace SpreadsheetContentControl
 
 		public void SetUITheme(UITheme theme)
 		{
+			m_theme = theme;
 			m_toolbarRenderer.SetUITheme(theme);
 
 			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
