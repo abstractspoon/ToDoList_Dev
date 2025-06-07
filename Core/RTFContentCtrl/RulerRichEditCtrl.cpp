@@ -55,6 +55,9 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\encolordialog.h"
+#include "..\shared\DarkMode.h"
+
+#include "..\3rdparty\XNamedColors.h"
 
 #include <afxpriv.h>
 
