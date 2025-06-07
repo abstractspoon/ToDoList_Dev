@@ -60,7 +60,7 @@ public:
 
 		if (pDX->m_bSaveAndValidate)
 		{
-			value = (T)GetSelectedItemDataT(combo);
+			value = (T)GetSelectedItemData(combo);
 		}
 		else
 		{
@@ -82,6 +82,15 @@ public:
 	static CString GetCtrlText(const CWnd* pWnd, BOOL bStripAccelerator = TRUE);
 	static HWND GetWindowFromPoint(HWND hwndParent, POINT ptScreen);
 	static HWND GetParentOwner(HWND hWnd);
+	static HWND GetParentDialog(HWND hWnd, DWORD dwReqStyles = WS_POPUP | WS_CAPTION);
+
+	struct DLGCTRL
+	{
+		int nCtrlID;
+		LPCTSTR szClass;
+		UINT nReqStyles;
+	};
+	static BOOL IsDialog(HWND hWnd, const DLGCTRL ctrls[], int nNumCtrls);
 
 	static int GetCtrlsCount(const CWnd* pParent, LPCTSTR szClass = NULL);
 	static int GetCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass = NULL);
@@ -213,7 +222,7 @@ public:
 	static int CalcMaxTextWidth(CComboBox& combo, int nMinWidth = 0, BOOL bDropped = FALSE, CDC* pDCRef = NULL, int nTabWidth = 0);
 	static int SelectItemByValue(CComboBox& combo, int nValue);
 	static int SelectItemExact(CComboBox& combo, LPCTSTR szItem);
-	static DWORD GetSelectedItemDataT(const CComboBox& combo);
+	static DWORD GetSelectedItemData(const CComboBox& combo);
 	static int GetSelectedItemAsValue(const CComboBox& combo);
 	static CString GetSelectedItem(const CComboBox& combo);
 	static CString GetItem(const CComboBox& combo, int nItem);

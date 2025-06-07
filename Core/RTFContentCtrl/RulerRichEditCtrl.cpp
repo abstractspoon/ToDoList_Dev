@@ -55,9 +55,6 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\encolordialog.h"
-#include "..\shared\DarkMode.h"
-
-#include "..\3rdparty\XNamedColors.h"
 
 #include <afxpriv.h>
 
@@ -97,7 +94,7 @@ UINT urm_SETCURRENTFONTCOLOR = ::RegisterWindowMessage(_T("_RULERRICHEDITCTRL_SE
 
 CRulerRichEditCtrl::CRulerRichEditCtrl(CRtfHtmlConverter& rtfHtml) 
 	: 
-	m_pen(PS_DOT, 0, colorBlack), 
+	m_pen(PS_DOT, 0, RGB(0, 0, 0)), 
 	m_rtf(rtfHtml),
 	m_bLockedColours(TRUE)
 {
@@ -1218,7 +1215,7 @@ void CRulerRichEditCtrl::PrepareCharFormat(CharFormat& cf, COLORREF color, BOOL 
 void CRulerRichEditCtrl::DoColor()
 {
 	// Get the current color
-	COLORREF	clr(colorBlack);
+	COLORREF	clr(RGB(0, 0, 0));
 	CharFormat	cf;
 
 	m_rtf.GetSelectionCharFormat(cf);

@@ -46,14 +46,6 @@ CTDCMainMenu::~CTDCMainMenu()
 {
 }
 
-void CTDCMainMenu::SetUITheme(const UITHEME& theme)
-{
-	m_theme = theme;
-
-	if (GetSafeHmenu())
-		UpdateBackgroundColor();
-}
-
 BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 {
 	CWnd* pMainWnd = AfxGetMainWnd();
@@ -88,8 +80,6 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 	}
 #endif
 
-	UpdateBackgroundColor();
-	
 	return TRUE;
 }
 
@@ -275,40 +265,6 @@ void CTDCMainMenu::LoadMenuCommon()
 		// and the following separator
 		if (pSubMenu->GetMenuItemID(nPos) == 0)
 			pSubMenu->DeleteMenu(nPos, MF_BYPOSITION);
-	}
-}
-
-void CTDCMainMenu::UpdateBackgroundColor()
-{
-	// set the menu background colour
-	// Note: On XP and classic, the menu bar is not distinctive
-	// so we set the menu color a little darker than 3DFACE
-	if (!CThemed::IsAppThemed())
-	{
-		SetBackgroundColor(GraphicsMisc::Darker(GetSysColor(COLOR_3DFACE), 0.1));
-	}
-	else if (COSVersion() < OSV_VISTA)
-	{
-		if (m_theme.crMenuBack == m_theme.crAppBackLight)
-		{
-			if (m_theme.crAppBackDark != m_theme.crAppBackLight)
-			{
-				SetBackgroundColor(m_theme.crAppBackDark);
-			}
-			else
-			{
-				SetBackgroundColor(GraphicsMisc::Darker(m_theme.crAppBackLight, 0.1));
-			}
-		}
-		else
-		{
-			SetBackgroundColor(m_theme.crMenuBack);
-		}
-
-	}
-	else // Vista+ with themes
-	{
-		SetBackgroundColor(m_theme.crMenuBack);
 	}
 }
 

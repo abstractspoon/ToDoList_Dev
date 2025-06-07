@@ -4177,6 +4177,11 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				sTooltip.LoadString(IDS_ATTRIBTIP_MODIFY);
 				break;
 
+			case TDCA_FILELINK:
+				if (GetItemText(nRow, VALUE_COL).IsEmpty())
+					sTooltip.LoadString(IDS_BROWSE);
+				break;
+
 			case TDCA_TIMEESTIMATE:
 			case TDCA_TIMESPENT:
 			case TDCA_TIMEREMAINING:

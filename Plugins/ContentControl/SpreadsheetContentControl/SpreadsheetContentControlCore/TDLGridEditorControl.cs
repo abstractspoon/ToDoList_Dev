@@ -68,6 +68,8 @@ namespace SpreadsheetContentControl
 		public TDLGridEditorControl(Font font, Translator trans)
 		{
 			m_toolbarRenderer = new UIThemeToolbarRenderer();
+			m_toolbarRenderer.SetUITheme(new UITheme());
+
 			m_ControlsFont = font;
 			m_Trans = trans;
 

@@ -537,14 +537,18 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		BOOL bSelected = (hti == m_tcCommands.GetSelectedItem());
 		BOOL bSubMenu = (m_tcCommands.GetItemData(hti) == ID_SUBMENU);
 
+		GM_ITEMSTATE nState = GMIS_NONE; 
+		DWORD dwDrawFlags = 0;
+
 		if (bSelected)
 		{
-			DWORD dwFlags = GMIB_CLIPRIGHT | GMIB_THEMECLASSIC;
+			nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+			dwDrawFlags = (GMIB_CLIPRIGHT | GMIB_THEMECLASSIC);
 
 			if (pNCGDI->nColID == PSP_COMMANDIDCOLUMNID)
-				dwFlags |= GMIB_CLIPLEFT;
+				dwDrawFlags |= GMIB_CLIPLEFT;
 
-			GraphicsMisc::DrawExplorerItemSelection(pNCGDI->pDC, m_tcCommands, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), rItem, dwFlags, &rItem);
+			GraphicsMisc::DrawExplorerItemSelection(pNCGDI->pDC, m_tcCommands, nState, rItem, dwDrawFlags, &rItem);
 			GraphicsMisc::DrawVertLine(pNCGDI->pDC, rItem.top, rItem.bottom, rItem.right - 1, m_tcCommands.GetGridlineColor());
 		}
 		else
@@ -563,7 +567,7 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
 
 			if (bSelected)
-				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), GMIB_THEMECLASSIC);
+				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwDrawFlags);
 
 			pNCGDI->pDC->SetTextColor(crText);
 
@@ -722,16 +726,18 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 
 			// Selection colouring
 			BOOL bSelected = (pTVCD->nmcd.uItemState & CDIS_SELECTED);
+			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
 
 			if (bSelected)
 			{
-				GM_ITEMSTATE nState = ((GetFocus() == &m_tcCommands) ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED) ;
-				GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcCommands, nState, pTVCD->nmcd.rc, GMIB_CLIPLEFT | GMIB_THEMECLASSIC, &pTVCD->nmcd.rc);
+				GM_ITEMSTATE nState = ((GetFocus() == &m_tcCommands) ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+				DWORD dwDrawFlags = (GMIB_CLIPLEFT | GMIB_THEMECLASSIC);
+
+				GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcCommands, nState, pTVCD->nmcd.rc, dwDrawFlags, &pTVCD->nmcd.rc);
+				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwDrawFlags);
 			}
 
 			// Text
-			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
-
 			CRect rText;
 			m_tcCommands.GetItemRect(hti, rText, TRUE);
 

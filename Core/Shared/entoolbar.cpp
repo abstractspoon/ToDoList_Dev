@@ -173,10 +173,10 @@ BOOL CEnToolBar::SetImage(CEnBitmapEx* pBitmap, COLORREF crMask)
 {
 	CHoldRedraw hr(*this);
 
-	CEnBitmapEx bmDis;
-	bmDis.CopyImage(pBitmap); // for later
-	
     pBitmap->RemapSysColors();
+	
+	CEnBitmapEx bmDis;
+	bmDis.CopyImage(pBitmap); // for disabled image list
 	
 	int nCount = GetButtonCount(TRUE);
 	ASSERT (nCount);

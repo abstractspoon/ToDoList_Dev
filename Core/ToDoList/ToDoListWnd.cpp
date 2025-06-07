@@ -958,7 +958,6 @@ void CToDoListWnd::InitUITheme()
 		m_theme.Reset();
 
 	m_pPrefs->SetUITheme(m_theme);
-	m_menubar.SetUITheme(m_theme);
 }
 	
 void CToDoListWnd::UpdateUITheme()
@@ -3276,6 +3275,7 @@ BOOL CToDoListWnd::CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertW
 	{
 		// This location always works
 		nInsertWhere = TDC::MapInsertIDToInsertWhere(ID_NEWTASK_ATTOP);
+		ASSERT(tdc.CanCreateNewTask(nInsertWhere));
 	}
 
 	if (!tdc.CreateNewTask(sTitle, nInsertWhere, bEdit, dwDependency))
@@ -6754,9 +6754,12 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg)
 
 				sHtmlOutput += _T("<html>\n<head>\n");
 				sHtmlOutput += _T("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-16\">\n");
-				sHtmlOutput += _T("</head>\n<style>\n");
+				sHtmlOutput += _T("</head>\n");
+				sHtmlOutput += _T("<style>\n");
+ 				sHtmlOutput += _T("body { color:Black;background-color:White; } \n");
 				sHtmlOutput += _T("img { max-width: 100%; } \n");
-				sHtmlOutput += _T("</style>\n<body>\n");
+				sHtmlOutput += _T("</style>\n");
+				sHtmlOutput += _T("<body>\n");
 
 				CString sTitle = dlg.GetTitle(), sDate = CDateHelper::FormatDate(dlg.GetDate());
 
@@ -9837,12 +9840,13 @@ BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependen
 	if (tdc.CanCreateNewTask(nInsertWhere))
 		return TRUE;
 
-	// Special case: Map to the default position
 	if ((tdc.GetTaskCount() == 0) && !bDependent)
 	{
-		UINT nNewTaskID = GetNewTaskCmdID();
+		// Special case: Always allow if the default 
+		// command ID maps to the same location
+		UINT nNewTaskCmdID = GetNewTaskCmdID();
 		
-		if (TDC::MapInsertIDToInsertWhere(nNewTaskID) == nInsertWhere)
+		if (TDC::MapInsertIDToInsertWhere(nNewTaskCmdID) == nInsertWhere)
 			return TRUE;
 	}
 

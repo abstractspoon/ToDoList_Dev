@@ -69,6 +69,8 @@ FINDSTR /C:"Error " %OUTPUT_FILE%
 IF %errorlevel%==0 (
 ECHO [41m Build FAILED[0m
 ECHO:
+REM Open the build log
+%OUTPUT_FILE%
 PAUSE
 EXIT
 )
@@ -95,6 +97,8 @@ FINDSTR /C:"tests FAILED" %OUTPUT_FILE%
 IF %errorlevel%==0 (
 ECHO [41m Tests FAILED[0m
 ECHO:
+REM Open the test log
+%OUTPUT_FILE%
 PAUSE
 EXIT
 )
@@ -154,6 +158,8 @@ FINDSTR /C:"Build FAILED." %OUTPUT_FILE%
 IF %errorlevel%==0 (
 ECHO [41m Build FAILED[0m
 ECHO:
+REM Open the build log
+%OUTPUT_FILE%
 PAUSE
 EXIT
 )

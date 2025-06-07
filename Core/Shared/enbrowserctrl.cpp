@@ -5,6 +5,7 @@
 #include "enbrowserctrl.h"
 #include "regkey.h"
 #include "misc.h"
+#include "DarkMode.h"
 
 //fabio_2005
 #if _MSC_VER >= 1300
@@ -55,7 +56,6 @@ END_MESSAGE_MAP()
 BEGIN_EVENTSINK_MAP(CEnBrowserCtrl, CWebBrowserCtrl)
     //{{AFX_EVENTSINK_MAP(CBrowserDlg)
 	//}}AFX_EVENTSINK_MAP
-//	ON_EVENT_REFLECT(CEnBrowserCtrl, 252, OnNavigateComplete2, VTS_DISPATCH VTS_PVARIANT)
 	ON_EVENT_REFLECT(CEnBrowserCtrl, 259, OnDocumentComplete, VTS_DISPATCH VTS_PVARIANT)
 END_EVENTSINK_MAP()
 
@@ -82,6 +82,9 @@ BOOL CEnBrowserCtrl::Create(LPCTSTR lpszWindowName, DWORD dwStyle,
 
 void CEnBrowserCtrl::InitPrintBkgnd(BOOL bPrintBkgnd)
 {
+	if (CDarkMode::IsEnabled())
+		CDarkMode::PrepareForIEPrintOrPreview();
+
 	RestorePrintBkgnd();
 
 	if (bPrintBkgnd != -1)
@@ -156,7 +159,6 @@ void CEnBrowserCtrl::PrintPreview(LPCTSTR szFile, BOOL bPrintBkgnd)
 }
 
 void CEnBrowserCtrl::OnDocumentComplete(LPDISPATCH /*pDisp*/, VARIANT FAR* /*URL*/) 
-//void CEnBrowserCtrl::OnNavigateComplete2(LPDISPATCH /*pDisp*/, VARIANT FAR* /*URL*/) 
 {
 	switch (m_nAction)
 	{
