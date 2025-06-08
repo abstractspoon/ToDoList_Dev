@@ -33,7 +33,6 @@ namespace SpreadsheetContentControl
 	[System.ComponentModel.DesignerCategory("")]
 	public class TDLGridEditorControl : ReoGridEditorControl
 	{
-		private UITheme m_theme;
 		private UIThemeToolbarRenderer m_toolbarRenderer;
 		private Font m_ControlsFont;
 		private Translator m_Trans;
@@ -744,7 +743,7 @@ namespace SpreadsheetContentControl
 			{
 				// Intercept setting white/black back/pattern colours for in Non/Dark Mode, 
 				// and replace instead with removing the appropriate colour definition
-				bool darkMode = m_theme.IsDarkMode();
+				bool darkMode = UITheme.IsDarkMode();
 
 				foreach (var action in actions)
 				{
@@ -786,7 +785,7 @@ namespace SpreadsheetContentControl
 			{
 				// Intercept setting white/black text colours for in Non/Dark Mode, 
 				// and replace instead with removing the appropriate colour definition
-				bool darkMode = m_theme.IsDarkMode();
+				bool darkMode = UITheme.IsDarkMode();
 
 				var redoGroup = new WorksheetReusableActionGroup(actions[0].Range);
 				var removeAction = new RemoveRangeStyleAction(redoGroup.Range, PlainStyleFlag.None);
@@ -1090,7 +1089,6 @@ namespace SpreadsheetContentControl
 
 		public void SetUITheme(UITheme theme)
 		{
-			m_theme = theme;
 			m_toolbarRenderer.SetUITheme(theme);
 
 			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
