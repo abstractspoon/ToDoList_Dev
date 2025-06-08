@@ -19,11 +19,12 @@
 
 using namespace System::Drawing;
 using namespace System::Windows::Forms;
+using namespace System::Collections::Generic;
 
 using namespace MSDN::Html::Editor;
-using namespace Abstractspoon::Tdl::PluginHelpers;
 using namespace Command::Handling;
-using namespace System::Collections::Generic;
+
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
