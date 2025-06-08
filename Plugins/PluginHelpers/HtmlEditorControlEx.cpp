@@ -397,9 +397,11 @@ bool HtmlEditorControlEx::OnSetForeColor(MSHTML::IHTMLTxtRange^ range, Drawing::
 {
 	// Intercept setting white text in Dark Mode, and black text in non Dark Mode, 
 	// and instead remove any colour definition by removing all attributes and 
-	// then adding back eveything that was there before except for the colour
-	if ((CDarkMode::IsEnabled() && (color == Color::White)) ||
-		(!CDarkMode::IsEnabled() && (color == Color::Black)))
+	// then adding back everything that was there before except for the colour
+	bool darkMode = (CDarkMode::IsEnabled() != FALSE);
+	bool isWhite = (color == Color::White), isBlack = (color == Color::Black);
+
+	if ((darkMode && isWhite) || (!darkMode && isBlack))
 	{
 		cli::array<String^>^ AttribCmds =
 		{
