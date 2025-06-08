@@ -12,6 +12,7 @@ using System.Net;
 using System.Threading;
 using System.Diagnostics;
 
+using unvell.Common;
 using unvell.ReoGrid;
 using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.Events;
@@ -38,6 +39,7 @@ namespace SpreadsheetContentControl
 		private Translator m_Trans;
 
 		private Byte[] m_PrevContent;
+		private bool m_HandlingColorChanges = false;
 
 		// --------------------------------------------
 
@@ -107,7 +109,8 @@ namespace SpreadsheetContentControl
 			};
 
 			// For handling Dark Mode text colour changes
-			GridControl.ActionPerformed += new EventHandler<WorkbookActionEventArgs>(OnActionPerformed);
+			GridControl.BeforeActionPerform += new EventHandler<WorkbookActionEventArgs>(OnBeforeActionPerformed);
+			GridControl.ActionPerformed += new EventHandler<WorkbookActionEventArgs>(OnAfterActionPerformed);
 
 			this.SizeChanged += (s, e) => Invalidate(true);
 
@@ -710,42 +713,116 @@ namespace SpreadsheetContentControl
 
 		}
 
-		private void OnActionPerformed(object sender, WorkbookActionEventArgs e)
+		private List<WorksheetReusableAction> PrepareStyleActions(IAction action)
+		{
+			List<WorksheetReusableAction> actions = null;
+
+			if (action is WorksheetReusableActionGroup)
+			{
+				actions = (action as WorksheetReusableActionGroup).Actions;
+
+				if (actions.Find(x => (x is SetRangeStyleAction)) == null)
+					actions = null;
+			}
+			else if (action is SetRangeStyleAction)
+			{
+				actions = new List<WorksheetReusableAction>() { (action as WorksheetReusableAction) };
+			}
+
+			return actions;
+		}
+
+		private void OnBeforeActionPerformed(object sender, WorkbookActionEventArgs e)
 		{
 			// Prevent re-entrancy
-			if (e.UndoRedo)
+			if (m_HandlingColorChanges)
 				return;
 
-			var action = (e.Action as SetRangeStyleAction);
+			var actions = PrepareStyleActions(e.Action);
 
-			if (action != null)
+			if (actions != null)
 			{
+				// Intercept setting white/black back/pattern colours for in Non/Dark Mode, 
+				// and replace instead with removing the appropriate colour definition
 				bool darkMode = m_theme.IsDarkMode();
 
-				switch (action.Style.Flag)
+				foreach (var action in actions)
 				{
-				case PlainStyleFlag.TextColor:
-					// Intercept setting white text in Dark Mode, and black text in non Dark Mode, 
-					// and instead undo it and then remove any colour definition
+					if (action is SetRangeStyleAction)
 					{
-						var color = action.Style.TextColor;
+						var styleAction = (action as SetRangeStyleAction);
 
-						if ((darkMode && (color == Color.White)) || (!darkMode && (color == Color.Black)))
+						if (styleAction.Style.Flag.HasFlag(PlainStyleFlag.BackColor))
 						{
-							Undo();
-							GridControl.DoAction(new RemoveRangeStyleAction(this.CurrentWorksheet.SelectionRange, PlainStyleFlag.TextColor));
+							if ((darkMode && (styleAction.Style.BackColor == Color.Black)) ||
+								(!darkMode && (styleAction.Style.BackColor == Color.White)))
+							{
+								styleAction.Style.BackColor = new unvell.ReoGrid.Graphics.SolidColor(Color.Empty);
+							}
+						}
+
+						if (styleAction.Style.Flag.HasFlag(PlainStyleFlag.FillPatternColor))
+						{
+							if ((darkMode && (styleAction.Style.FillPatternColor == Color.White)) ||
+								(!darkMode && (styleAction.Style.FillPatternColor == Color.Black)))
+							{
+								styleAction.Style.FillPatternColor = new unvell.ReoGrid.Graphics.SolidColor(Color.Empty);
+							}
 						}
 					}
-					break;
+				}
+			}
+		}
 
-				case PlainStyleFlag.BackColor:
-					// Intercept setting black background in Dark Mode, and white background in non Dark Mode, 
-					// and instead undo it and then remove any colour definition
-					break;
+		private void OnAfterActionPerformed(object sender, WorkbookActionEventArgs e)
+		{
+			// Prevent re-entrancy
+			if (m_HandlingColorChanges)
+				return;
 
-				case PlainStyleFlag.FillPatternColor:
-					// ??
-					break;
+			var actions = PrepareStyleActions(e.Action);
+
+			if (actions != null)
+			{
+				// Intercept setting white/black text colours for in Non/Dark Mode, 
+				// and replace instead with removing the appropriate colour definition
+				bool darkMode = m_theme.IsDarkMode();
+
+				var redoGroup = new WorksheetReusableActionGroup(actions[0].Range);
+				var removeAction = new RemoveRangeStyleAction(redoGroup.Range, PlainStyleFlag.None);
+
+				foreach (var action in actions)
+				{
+					if (action is SetRangeStyleAction)
+					{
+						var styleAction = (action as SetRangeStyleAction);
+
+						if (styleAction.Style.Flag.HasFlag(PlainStyleFlag.TextColor))
+						{
+							if ((darkMode && (styleAction.Style.TextColor == Color.White)) ||
+								(!darkMode && (styleAction.Style.TextColor == Color.Black)))
+							{
+								removeAction.Flag |= PlainStyleFlag.TextColor;
+								styleAction.Style.Flag &= ~PlainStyleFlag.TextColor;
+							}
+						}
+					}
+
+					redoGroup.Actions.Add(action);
+					// We wait until the end for adding the 'remove' action
+				}
+
+				if (removeAction.Flag != PlainStyleFlag.None)
+				{
+					m_HandlingColorChanges = true;
+
+					// Undo the entire action
+					Undo();
+
+					redoGroup.Actions.Add(removeAction);
+					GridControl.DoAction(redoGroup);
+
+					m_HandlingColorChanges = false;
 				}
 			}
 		}
