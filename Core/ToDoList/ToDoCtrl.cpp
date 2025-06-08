@@ -1025,7 +1025,7 @@ void CToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	if (!bShow)
 		m_ctrlComments.SetFocus();
 
-	m_taskTree.Show(bShow);
+	m_taskTree.ShowWindow(bShow ? SW_SHOW : SW_HIDE);
 	m_taskTree.EnableWindow(bShow);
 }
 
