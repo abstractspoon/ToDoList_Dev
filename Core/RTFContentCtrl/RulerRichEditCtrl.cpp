@@ -1173,46 +1173,37 @@ void CRulerRichEditCtrl::PrepareDlgTextColor(COLORREF& crText, const CharFormat&
 
 void CRulerRichEditCtrl::PrepareCharFormat(CharFormat& cf, COLORREF color, BOOL bForeground)
 {
-	if (bForeground)
-	{
-		cf.dwMask |= CFM_COLOR;
+	BOOL bDarkMode = CDarkMode::IsEnabled();
+	BOOL bIsWhite = (color == colorWhite), bIsBlack = (color == colorBlack);
 
-		if (color == CLR_DEFAULT)
-		{
-			cf.dwEffects = CFE_AUTOCOLOR;
-		}
-		else
-		{
-			// Replace white text in Dark Mode, and black
-			// text in non Dark Mode, with 'auto colour'
-			BOOL bDarkMode = CDarkMode::IsEnabled();
-			
-			if ((bDarkMode && (color == colorWhite)) || 
-				(!bDarkMode && (color == colorBlack)))
-			{
-				cf.dwEffects = CFE_AUTOCOLOR;
-			}
-			else
-			{
-				cf.dwEffects &= ~CFE_AUTOCOLOR;
-				cf.crTextColor = color;
-			}
-		}
+	if (color == CLR_DEFAULT)
+	{
+		color = CLR_NONE;
+	}
+	else if (bForeground)
+	{
+		if ((bDarkMode && bIsWhite) || (!bDarkMode && bIsBlack))
+			color = CLR_NONE;
 	}
 	else // background
 	{
-		cf.dwMask |= CFM_BACKCOLOR;
-
-		if (color == CLR_DEFAULT)
-		{
-			cf.dwEffects = CFE_AUTOBACKCOLOR;
-		}
-		else
-		{
-			cf.dwEffects &= ~CFE_AUTOCOLOR;
-			cf.crBackColor = color;
-		}
+		if ((bDarkMode && bIsBlack) || (!bDarkMode && bIsWhite))
+			color = CLR_NONE;
 	}
+	
+	DWORD dwColorAutoEffect = (bForeground ? CFE_AUTOCOLOR : CFE_AUTOBACKCOLOR);
+
+	if (color != CLR_NONE)
+	{
+		cf.dwEffects &= ~dwColorAutoEffect;
+		cf.crTextColor = color;
+	}
+	else
+	{
+		cf.dwEffects = dwColorAutoEffect;
+	}
+
+	cf.dwMask |= (bForeground ? CFM_COLOR : CFM_BACKCOLOR);
 }
 
 void CRulerRichEditCtrl::DoColor()
