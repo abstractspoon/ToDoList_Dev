@@ -28,18 +28,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-#ifndef BINDSTATUS_ACCEPTRANGES
-#	define BINDSTATUS_ACCEPTRANGES (BINDSTATUS_LOADINGMIMEHANDLER + 8)
-#endif
-
-enum
-{
-	UF_BINDSTATUS_FIRST = BINDSTATUS_FINDINGRESOURCE,
-	UF_BINDSTATUS_LAST = BINDSTATUS_ACCEPTRANGES
-};
-
-/////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdateProgressDlg dialog
 
 CTDLWebUpdateProgressDlg::CTDLWebUpdateProgressDlg(const CPoint& ptPos)
@@ -85,9 +73,9 @@ void CTDLWebUpdateProgressDlg::OnCancel()
 		EndDialog(IDCANCEL);
 }
 
-void CTDLWebUpdateProgressDlg::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus)
+void CTDLWebUpdateProgressDlg::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus, int nPercent)
 {
-	m_page.SetProgressStatus(nStatus);
+	m_page.SetProgressStatus(nStatus, nPercent);
 
 	// extra handling
 	switch (nStatus)
@@ -162,179 +150,6 @@ BOOL CTDLWebUpdateProgressDlg::IsCancelled() const
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// IUnknown
-STDMETHODIMP CTDLWebUpdateProgressDlg::QueryInterface(REFIID riid, void **ppvObject)
-{
-	TRACE(_T("IUnknown::QueryInterface\n"));
-
-	*ppvObject = NULL;
-	
-	// IUnknown
-	if (::IsEqualIID(riid, __uuidof(IUnknown)))
-	{
-		TRACE(_T("IUnknown::QueryInterface(IUnknown)\n"));
-
-		*ppvObject = this;
-	}
-	// IBindStatusCallback
-	else if (::IsEqualIID(riid, __uuidof(IBindStatusCallback)))
-	{
-		TRACE(_T("IUnknown::QueryInterface(IBindStatusCallback)\n"));
-
-		*ppvObject = static_cast<IBindStatusCallback *>(this);
-	}
-
-	if (*ppvObject)
-	{
-		(*reinterpret_cast<LPUNKNOWN *>(ppvObject))->AddRef();
-
-		return S_OK;
-	}
-	
-	return E_NOINTERFACE;
-}                                             
-
-STDMETHODIMP_(ULONG) CTDLWebUpdateProgressDlg::AddRef()
-{
-	TRACE(_T("IUnknown::AddRef\n"));
-
-	return ++m_ulObjRefCount;
-}
-
-STDMETHODIMP_(ULONG) CTDLWebUpdateProgressDlg::Release()
-{
-	TRACE(_T("IUnknown::Release\n"));
-
-	return --m_ulObjRefCount;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// IBindStatusCallback
-STDMETHODIMP CTDLWebUpdateProgressDlg::OnStartBinding(DWORD, IBinding *)
-{
-	TRACE(_T("IBindStatusCallback::OnStartBinding\n"));
-
-	return S_OK;
-}
-
-STDMETHODIMP CTDLWebUpdateProgressDlg::GetPriority(LONG *)
-{
-	TRACE(_T("IBindStatusCallback::GetPriority\n"));
-
-	return E_NOTIMPL;
-}
-
-STDMETHODIMP CTDLWebUpdateProgressDlg::OnLowResource(DWORD)
-{
-	TRACE(_T("IBindStatusCallback::OnLowResource\n"));
-
-	return S_OK;
-}
-
-STDMETHODIMP CTDLWebUpdateProgressDlg::OnProgress(ULONG ulProgress,
-										 ULONG ulProgressMax,
-										 ULONG ulStatusCode,
-										 LPCWSTR /*szStatusText*/)
-{
-#ifdef _DEBUG
-	static const LPCTSTR plpszStatus[] = 
-	{
-		_T("BINDSTATUS_FINDINGRESOURCE"),  // 1
-		_T("BINDSTATUS_CONNECTING"),
-		_T("BINDSTATUS_REDIRECTING"),
-		_T("BINDSTATUS_BEGINDOWNLOADDATA"),
-		_T("BINDSTATUS_DOWNLOADINGDATA"),
-		_T("BINDSTATUS_ENDDOWNLOADDATA"),
-		_T("BINDSTATUS_BEGINDOWNLOADCOMPONENTS"),
-		_T("BINDSTATUS_INSTALLINGCOMPONENTS"),
-		_T("BINDSTATUS_ENDDOWNLOADCOMPONENTS"),
-		_T("BINDSTATUS_USINGCACHEDCOPY"),
-		_T("BINDSTATUS_SENDINGREQUEST"),
-		_T("BINDSTATUS_CLASSIDAVAILABLE"),
-		_T("BINDSTATUS_MIMETYPEAVAILABLE"),
-		_T("BINDSTATUS_CACHEFILENAMEAVAILABLE"),
-		_T("BINDSTATUS_BEGINSYNCOPERATION"),
-		_T("BINDSTATUS_ENDSYNCOPERATION"),
-		_T("BINDSTATUS_BEGINUPLOADDATA"),
-		_T("BINDSTATUS_UPLOADINGDATA"),
-		_T("BINDSTATUS_ENDUPLOADINGDATA"),
-		_T("BINDSTATUS_PROTOCOLCLASSID"),
-		_T("BINDSTATUS_ENCODING"),
-		_T("BINDSTATUS_VERFIEDMIMETYPEAVAILABLE"),
-		_T("BINDSTATUS_CLASSINSTALLLOCATION"),
-		_T("BINDSTATUS_DECODING"),
-		_T("BINDSTATUS_LOADINGMIMEHANDLER"),
-		_T("BINDSTATUS_CONTENTDISPOSITIONATTACH"),
-		_T("BINDSTATUS_FILTERREPORTMIMETYPE"),
-		_T("BINDSTATUS_CLSIDCANINSTANTIATE"),
-		_T("BINDSTATUS_IUNKNOWNAVAILABLE"),
-		_T("BINDSTATUS_DIRECTBIND"),
-		_T("BINDSTATUS_RAWMIMETYPE"),
-		_T("BINDSTATUS_PROXYDETECTING"),
-		_T("BINDSTATUS_ACCEPTRANGES"),
-		_T("???")  // unknown
-	};
-
-// 	TRACE(_T("IBindStatusCallback::OnProgress\n"));
-// 	TRACE(_T("ulProgress: %lu, ulProgressMax: %lu\n"), ulProgress, ulProgressMax);
-// 	TRACE(_T("ulStatusCode: %lu "), ulStatusCode);
-#endif
-
-	if (ulStatusCode < UF_BINDSTATUS_FIRST ||
-		ulStatusCode > UF_BINDSTATUS_LAST)
-	{
-		ulStatusCode = UF_BINDSTATUS_LAST + 1;
-	}
-	
-//	TRACE(_T("(%s), szStatusText: %ls\n"), plpszStatus[ulStatusCode - UF_BINDSTATUS_FIRST], szStatusText);
-
-	if (m_hWnd && m_page.IsDownloading())
-	{
-		switch (ulStatusCode)
-		{
-		case BINDSTATUS_BEGINDOWNLOADDATA:
-		case BINDSTATUS_DOWNLOADINGDATA:
-		case BINDSTATUS_ENDDOWNLOADDATA:
-			m_page.SetDownloadPercent((int)MulDiv(ulProgress, 100, ulProgressMax));
-			break;
-		}
-		
-		Misc::ProcessMsgLoop();
-	}
-
-	return S_OK;
-}
-
-STDMETHODIMP CTDLWebUpdateProgressDlg::OnStopBinding(HRESULT, LPCWSTR)
-{
-	TRACE(_T("IBindStatusCallback::OnStopBinding\n"));
-
-	return S_OK;
-}
-
-STDMETHODIMP CTDLWebUpdateProgressDlg::GetBindInfo(DWORD *, BINDINFO *)
-{
-	TRACE(_T("IBindStatusCallback::GetBindInfo\n"));
-
-	return S_OK;
-}
-
-STDMETHODIMP CTDLWebUpdateProgressDlg::OnDataAvailable(DWORD, DWORD,
-											  FORMATETC *, STGMEDIUM *)
-{
-	TRACE(_T("IBindStatusCallback::OnDataAvailable\n"));
-
-	return S_OK;
-}
-
-STDMETHODIMP CTDLWebUpdateProgressDlg::OnObjectAvailable(REFIID, IUnknown *)
-{
-	TRACE(_T("IBindStatusCallback::OnObjectAvailable\n"));
-
-	return S_OK;
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdateProgressPage dialog
 
 const int PADDING = 10;
@@ -351,7 +166,9 @@ enum // list columns
 IMPLEMENT_DYNCREATE(CTDLWebUpdateProgressPage, CPropertyPageEx)
 
 CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
-: CPropertyPageEx(IDD_WEBUPDATE_PROGRESS_PAGE, 0)
+	: 
+	CPropertyPageEx(IDD_WEBUPDATE_PROGRESS_PAGE, 0),
+	m_nStatus(TDLWP_NONE)
 {
 	//{{AFX_DATA_INIT(CTDLWebUpdateProgressPage)
 	//}}AFX_DATA_INIT
@@ -394,6 +211,8 @@ END_MESSAGE_MAP()
 BOOL CTDLWebUpdateProgressPage::OnInitDialog() 
 {
 	CPropertyPageEx::OnInitDialog();
+
+	m_nStatus = TDLWP_NONE;
 
 	CDialogHelper::SetFont(this, m_hFont);
 
@@ -452,43 +271,41 @@ BOOL CTDLWebUpdateProgressPage::OnSetActive()
 	return TRUE;
 }
 
-void CTDLWebUpdateProgressPage::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus)
+void CTDLWebUpdateProgressPage::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus, int nPercent)
 {
 	ASSERT(nStatus < m_aProgressDescriptions.GetSize());
 
-	m_nStatus = nStatus;
-
-	// Finish off previous item
 	int nCurItem = (m_lcProgress.GetItemCount() - 1);
 
-	if (nCurItem >= 0)
-		m_lcProgress.SetItemText(nCurItem, STATUS_COL, m_sDone);
-	
-	// Add new item
-	if (nStatus != TDLWP_COMPLETE)
+	if (nStatus != m_nStatus)
 	{
-		int nNewItem = m_lcProgress.InsertItem((nCurItem + 1), _T(""));
+		ASSERT(nPercent == 0);
 
-		m_lcProgress.SetItemText(nNewItem, ITEM_COL, Misc::Format(_T("%d."), nNewItem + 1)); // one-based
-		m_lcProgress.SetItemText(nNewItem, DESCRIPTION_COL, m_aProgressDescriptions[nNewItem]);
+		if (m_nStatus != TDLWP_NONE)
+		{
+			// Set previous item done
+			ASSERT(nCurItem == (nStatus - 1));
 
-		if (nNewItem == 0)
-			m_lcProgress.SetItemText(nNewItem, STATUS_COL, _T("0%"));
+			m_lcProgress.SetItemText(nCurItem, STATUS_COL, m_sDone);
+		}
+
+		// Add new item
+		m_nStatus = nStatus;
+
+		if (nStatus != TDLWP_COMPLETE)
+		{
+			nCurItem = m_lcProgress.InsertItem((m_lcProgress.GetItemCount()), _T(""));
+
+			m_lcProgress.SetItemData(nCurItem, nStatus);
+			m_lcProgress.SetItemText(nCurItem, ITEM_COL, Misc::Format(_T("%d."), nCurItem + 1)); // one-based
+			m_lcProgress.SetItemText(nCurItem, DESCRIPTION_COL, m_aProgressDescriptions[nCurItem]);
+		}
 	}
+
+	if ((nStatus == TDLWP_DOWNLOAD) || (nStatus == TDLWP_UNZIP))
+		m_lcProgress.SetItemText(nCurItem, STATUS_COL, Misc::Format(_T("%d%%"), nPercent));
 
 	m_lcProgress.UpdateWindow();
-}
-
-BOOL CTDLWebUpdateProgressPage::SetDownloadPercent(int nPercent)
-{
-	if (!IsDownloading() || (nPercent < 0) || (nPercent > 100))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	m_lcProgress.SetItemText(0, STATUS_COL, Misc::Format(_T("%d%%"), nPercent));
-	return TRUE;
 }
 
 void CTDLWebUpdateProgressPage::OnProgressCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)

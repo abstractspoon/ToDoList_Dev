@@ -38,10 +38,8 @@ public:
 	
 	void AttachFont(HFONT hFont) { m_hFont = hFont; }
 	
-	void SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus);
+	void SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus, int nPercent = 0);
 	TDL_WEBUPDATE_PROGRESS GetProgressStatus() const { return m_nStatus; }
-	BOOL IsDownloading() const { return (m_nStatus == TDLWP_DOWNLOAD); }
-	BOOL SetDownloadPercent(int nPercent);
 	
 protected:
 	TDL_WEBUPDATE_PROGRESS m_nStatus;
@@ -77,40 +75,22 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdateProgressDlg dialog
 
-class CTDLWebUpdateProgressDlg : public CPropertySheetEx, public IBindStatusCallback
+class CTDLWebUpdateProgressDlg : public CPropertySheetEx
 {
 // Construction
 public:
 	CTDLWebUpdateProgressDlg(const CPoint& ptPos);
 	virtual ~CTDLWebUpdateProgressDlg();
 
-	void SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus);
+	void SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus, int nPercent = 0);
 	TDL_WEBUPDATE_PROGRESS GetProgressStatus() const;
 	
 	BOOL IsCancelled() const;
-
-	// IBindStatusCallback interface
-	STDMETHOD(QueryInterface)(REFIID riid, void **ppvObject);
-	STDMETHOD_(ULONG, AddRef)();
-	STDMETHOD_(ULONG, Release)();
-
-	STDMETHOD(OnStartBinding)(DWORD, IBinding *);
-	STDMETHOD(GetPriority)(LONG *);
-	STDMETHOD(OnLowResource)(DWORD);
-	STDMETHOD(OnProgress)(ULONG ulProgress,
-						  ULONG ulProgressMax,
-						  ULONG ulStatusCode,
-						  LPCWSTR szStatusText);
-	STDMETHOD(OnStopBinding)(HRESULT, LPCWSTR);
-	STDMETHOD(GetBindInfo)(DWORD *, BINDINFO *);
-	STDMETHOD(OnDataAvailable)(DWORD, DWORD, FORMATETC *, STGMEDIUM *);
-	STDMETHOD(OnObjectAvailable)(REFIID, IUnknown *);
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLWebUpdateProgressDlg)
 	//}}AFX_DATA
-	ULONG m_ulObjRefCount;
 	CTDLWebUpdateProgressPage m_page;
 	HFONT m_hFont;
 	BOOL m_bCancelled;
@@ -132,8 +112,6 @@ protected:
 	afx_msg void OnClose();
 	afx_msg void OnCancel();
 	DECLARE_MESSAGE_MAP()
-
-protected:
 };
 
 //{{AFX_INSERT_LOCATION}}
