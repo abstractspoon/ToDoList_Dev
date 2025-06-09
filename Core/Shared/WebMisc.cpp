@@ -436,14 +436,20 @@ BOOL WebMisc::DownloadFile(LPCTSTR szDownloadUri, LPCTSTR szDownloadFile, IBindS
 {
 	HRESULT hr = ::URLDownloadToFile(NULL, szDownloadUri, szDownloadFile, 0, pCallback);
 
-	if (hr == S_OK)
+	switch (hr)
+	{
+	case S_OK:
 		return TRUE;
+		
+	case E_ABORT:
+		FileMisc::LogText(_T("WebMisc::DownloadFile(Downloading %s to %s was cancelled)"), szDownloadUri, szDownloadFile);
+		break;
 
-	// else
-	FileMisc::LogText(_T("WebMisc::DownloadFile(failed to download %s to %s)"), szDownloadUri, szDownloadFile);
-
-	_com_error err(hr);
-	FileMisc::LogText(_T("\tURLDownloadToFile reported %s"), err.ErrorMessage());
+	default:
+		FileMisc::LogText(_T("WebMisc::DownloadFile(failed to download %s to %s)"), szDownloadUri, szDownloadFile);
+		FileMisc::LogText(_T("\tURLDownloadToFile reported %s"), _com_error(hr).ErrorMessage());
+		break;
+	}
 
 	return FALSE;
 }

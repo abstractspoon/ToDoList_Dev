@@ -403,7 +403,8 @@ bool CUnzipper::UnzipFile(LPCTSTR szFolder, bool bIgnoreFilePath)
 		SetFileModTime(szFilePath, info.dwDosDate);
 		SetFileAttributes(szFilePath, info.dwExternalAttrib);
 
-		CheckUpdateProgress();
+		if (!CheckUpdateProgress())
+			return false;
 	}
 
 	return (nRet == UNZ_OK);

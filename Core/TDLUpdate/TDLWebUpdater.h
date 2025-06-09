@@ -82,25 +82,23 @@ protected:
 	static bool UnzipCallback(int nPercent, DWORD dwUserData);
 
 protected:
-	// IBindStatusCallback interface
-	ULONG m_ulObjRefCount;
-
-	STDMETHOD(QueryInterface)(REFIID riid, void **ppvObject);
-	STDMETHOD_(ULONG, AddRef)();
-	STDMETHOD_(ULONG, Release)();
-
+	// IBindStatusCallback progress
 	STDMETHOD(OnProgress)(ULONG ulProgress,
 						  ULONG ulProgressMax,
 						  ULONG ulStatusCode,
 						  LPCWSTR szStatusText);
 
-	STDMETHOD(OnStartBinding)(DWORD, IBinding *) { return S_OK; }
-	STDMETHOD(GetPriority)(LONG *) { return S_OK; }
-	STDMETHOD(OnLowResource)(DWORD) { return S_OK; }
-	STDMETHOD(OnStopBinding)(HRESULT, LPCWSTR) { return S_OK; }
-	STDMETHOD(GetBindInfo)(DWORD *, BINDINFO *) { return S_OK; }
-	STDMETHOD(OnDataAvailable)(DWORD, DWORD, FORMATETC *, STGMEDIUM *) { return S_OK; }
-	STDMETHOD(OnObjectAvailable)(REFIID, IUnknown *) { return S_OK; }
+	// Minimum implementation
+	STDMETHOD(QueryInterface)(REFIID, void **) { return E_NOINTERFACE; }
+	STDMETHOD_(ULONG, AddRef)() { return 1; }
+	STDMETHOD_(ULONG, Release)() { return 1; }
+	STDMETHOD(OnStartBinding)(DWORD, IBinding *) { return E_NOTIMPL; }
+	STDMETHOD(GetPriority)(LONG *) { return E_NOTIMPL; }
+	STDMETHOD(OnLowResource)(DWORD) { return E_NOTIMPL; }
+	STDMETHOD(OnStopBinding)(HRESULT, LPCWSTR) { return E_NOTIMPL; }
+	STDMETHOD(GetBindInfo)(DWORD *, BINDINFO *) { return E_NOTIMPL; }
+	STDMETHOD(OnDataAvailable)(DWORD, DWORD, FORMATETC *, STGMEDIUM *) { return E_NOTIMPL; }
+	STDMETHOD(OnObjectAvailable)(REFIID, IUnknown *) { return E_NOTIMPL; }
 
 };
 

@@ -352,7 +352,9 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 
 	if (!WebMisc::DownloadFile(m_sDownloadUri, m_sDownloadFile, this))
 	{
-		m_nResUpdate = TDLWUR_ERR_DOWNLOADZIP;
+		if (!CheckUpdateCancelled())
+			m_nResUpdate = TDLWUR_ERR_DOWNLOADZIP;
+
 		return FALSE;
 	}
 
@@ -581,8 +583,6 @@ BOOL CTDLWebUpdater::OnUnzipProgress(int nPercent)
 	if (m_dlgProgress.GetSafeHwnd() && (m_dlgProgress.GetProgressStatus() == TDLWP_UNZIP))
 	{
 		m_dlgProgress.SetProgressStatus(TDLWP_UNZIP, nPercent);
-		Misc::ProcessMsgLoop();
-
 		return !m_dlgProgress.IsCancelled();
 	}
 
@@ -594,6 +594,7 @@ BOOL CTDLWebUpdater::OnUnzipProgress(int nPercent)
 // IBindStatusCallback
 
 // IUnknown
+/*
 STDMETHODIMP CTDLWebUpdater::QueryInterface(REFIID riid, void **ppvObject)
 {
 	TRACE(_T("IUnknown::QueryInterface\n"));
@@ -638,11 +639,12 @@ STDMETHODIMP_(ULONG) CTDLWebUpdater::Release()
 
 	return --m_ulObjRefCount;
 }
+*/
 
 STDMETHODIMP CTDLWebUpdater::OnProgress(ULONG ulProgress,
-												  ULONG ulProgressMax,
-												  ULONG ulStatusCode,
-												  LPCWSTR /*szStatusText*/)
+										ULONG ulProgressMax,
+										ULONG ulStatusCode,
+										LPCWSTR /*szStatusText*/)
 {
 #ifdef _DEBUG
 /*
@@ -705,11 +707,14 @@ STDMETHODIMP CTDLWebUpdater::OnProgress(ULONG ulProgress,
 		case BINDSTATUS_BEGINDOWNLOADDATA:
 		case BINDSTATUS_DOWNLOADINGDATA:
 		case BINDSTATUS_ENDDOWNLOADDATA:
-			m_dlgProgress.SetProgressStatus(TDLWP_DOWNLOAD, (int)MulDiv(ulProgress, 100, ulProgressMax));
+			{
+				m_dlgProgress.SetProgressStatus(TDLWP_DOWNLOAD, (int)MulDiv(ulProgress, 100, ulProgressMax));
+
+				if (m_dlgProgress.IsCancelled())
+					return E_ABORT;
+			}
 			break;
 		}
-
-		Misc::ProcessMsgLoop();
 	}
 
 	return S_OK;
