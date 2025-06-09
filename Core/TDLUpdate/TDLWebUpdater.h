@@ -77,6 +77,10 @@ protected:
 	TDL_WEBUPDATE_RESULT LogError(const CString& sAppFolder) const;
 	void RestoreBackup(TDL_WEBUPDATE_PROGRESS nCancelled);
 
+	BOOL OnUnzipProgress(int nPercent);
+
+	static bool UnzipCallback(int nPercent, DWORD dwUserData);
+
 protected:
 	// IBindStatusCallback interface
 	ULONG m_ulObjRefCount;

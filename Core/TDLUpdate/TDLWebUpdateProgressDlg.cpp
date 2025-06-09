@@ -302,7 +302,7 @@ void CTDLWebUpdateProgressPage::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus
 		}
 	}
 
-	if (nStatus == TDLWP_DOWNLOAD)
+	if ((nStatus == TDLWP_DOWNLOAD) || (nStatus == TDLWP_UNZIP))
 		m_lcProgress.SetItemText(nCurItem, STATUS_COL, Misc::Format(_T("%d%%"), nPercent));
 
 	m_lcProgress.UpdateWindow();

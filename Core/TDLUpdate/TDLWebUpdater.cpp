@@ -368,7 +368,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 	// scope so unzipper releases any file handles
 	try
 	{
-		CUnzipper unzip;
+		CUnzipper unzip(NULL, UnzipCallback, (DWORD)this);
 		
 		FileMisc::LogText(_T("The unzip component was successfully initialised."));
 
@@ -395,7 +395,9 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 		// check we can do the unzip
 		if (!unzip.UnzipTo(m_sUnzipFolder))
 		{
-			m_nResUpdate = TDLWUR_ERR_UNZIP;
+			if (!CheckUpdateCancelled())
+				m_nResUpdate = TDLWUR_ERR_UNZIP;
+
 			return FALSE;
 		}
 	}
@@ -558,6 +560,32 @@ void CTDLWebUpdater::RestoreBackup(TDL_WEBUPDATE_PROGRESS nCancelled)
 	{
 		m_nResUpdate = TDLWUR_ERR_RUNRESTORE;
 	}
+}
+
+bool CTDLWebUpdater::UnzipCallback(int nPercent, DWORD dwUserData)
+{
+	if (dwUserData)
+	{
+		CTDLWebUpdater* pThis = (CTDLWebUpdater*)dwUserData;
+		return (pThis->OnUnzipProgress(nPercent) != FALSE);
+	}
+
+	ASSERT(0);
+	return false;
+}
+
+BOOL CTDLWebUpdater::OnUnzipProgress(int nPercent)
+{
+	if (m_dlgProgress.GetSafeHwnd() && (m_dlgProgress.GetProgressStatus() == TDLWP_UNZIP))
+	{
+		m_dlgProgress.SetProgressStatus(TDLWP_UNZIP, nPercent);
+		Misc::ProcessMsgLoop();
+
+		return !m_dlgProgress.IsCancelled();
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
