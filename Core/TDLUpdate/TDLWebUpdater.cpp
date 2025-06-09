@@ -423,8 +423,10 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 	
 	// backup existing installation binaries and prefs
 	m_dlgProgress.SetProgressStatus(TDLWP_BACKUP);
+
+	DWORD dwBaseFlags = (FMDF_HIDDENREADONLY | FMDF_PROCESSMSGLOOP);
 	
-	if (!FileMisc::CopyFolder(m_sAppFolder, m_sBackupFolder, _T("*.exe;*.dll;*.ini"), FMDF_HIDDENREADONLY))
+	if (!FileMisc::CopyFolder(m_sAppFolder, m_sBackupFolder, _T("*.exe;*.dll;*.ini"), dwBaseFlags))
 	{
 		m_nResUpdate = TDLWUR_ERR_DOBACKUP;
 		return FALSE;
@@ -441,7 +443,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 	m_dlgProgress.SetProgressStatus(TDLWP_COPY);
 
 	// binaries (overwrite)
-	if (!FileMisc::CopyFolder(m_sUnzipFolder, m_sAppFolder, NULL, (FMDF_HIDDENREADONLY | FMDF_OVERWRITE)))
+	if (!FileMisc::CopyFolder(m_sUnzipFolder, m_sAppFolder, NULL, (dwBaseFlags | FMDF_OVERWRITE)))
 	{
 		m_nResUpdate = TDLWUR_ERR_DOUPDATE;
 		return FALSE;
@@ -451,7 +453,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 	CString sSrcResources = (FileMisc::TerminatePath(m_sUnzipFolder) + _T("Resources"));
 	CString sDestResources = (FileMisc::TerminatePath(m_sAppFolder) + _T("Resources"));
 
-	if (!FileMisc::CopyFolder(sSrcResources, sDestResources, NULL, (FMDF_SUBFOLDERS | FMDF_HIDDENREADONLY | FMDF_NEWER)))
+	if (!FileMisc::CopyFolder(sSrcResources, sDestResources, NULL, (dwBaseFlags | FMDF_SUBFOLDERS | FMDF_NEWER)))
 	{
 		m_nResUpdate = TDLWUR_ERR_DOUPDATE;
 		return FALSE;
