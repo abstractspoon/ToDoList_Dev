@@ -32,7 +32,13 @@ static char THIS_FILE[]=__FILE__;
 
 const UINT BUFFERSIZE = 2048;
 
-CUnzipper::CUnzipper(LPCTSTR szFilePath) : m_uzFile(0)
+CUnzipper::CUnzipper(LPCTSTR szFilePath, PFNUNZIPPROGRESS pCallback, DWORD dwUserData) 
+	: 
+	m_uzFile(0),
+	m_pCBProgress(pCallback),
+	m_dwCBUserData(dwUserData),
+	m_nFileCount(-1),
+	m_nCurFile(0)
 {
 	OpenZip(szFilePath);
 }
@@ -116,6 +122,9 @@ bool CUnzipper::OpenZip(LPCTSTR szFilePath)
 	char szAnsiPath[MAX_PATH] = { 0 };
 	::WideCharToMultiByte(CP_ACP, 0, szFullPath, lstrlen(szFullPath), szAnsiPath, MAX_PATH, NULL, NULL);
 
+	m_nFileCount = -1;
+	m_nCurFile = 0;
+
 	m_uzFile = unzOpen(szAnsiPath);
 	
 	if (m_uzFile)
@@ -124,6 +133,8 @@ bool CUnzipper::OpenZip(LPCTSTR szFilePath)
 		
 		zsplitpath(szFullPath, szDrive, szFolder, szFName, NULL);
 		zmakepath(m_szOutputFolder, szDrive, szFolder, szFName, NULL);
+
+		m_nFileCount = GetFileCount();
 	}
 
 	return (m_uzFile != NULL);
@@ -146,11 +157,15 @@ int CUnzipper::GetFileCount()
 	if (!m_uzFile)
 		return 0;
 
+	if (m_nFileCount != -1)
+		return m_nFileCount;
+
 	unz_global_info info;
 
 	if (unzGetGlobalInfo(m_uzFile, &info) == UNZ_OK)
 	{
-		return (int)info.number_entry;
+		m_nFileCount = (int)info.number_entry;
+		return m_nFileCount;
 	}
 
 	return 0;
@@ -186,6 +201,8 @@ bool CUnzipper::GotoFirstFile(LPCTSTR szExt)
 	if (!m_uzFile)
 		return false;
 
+	m_nCurFile = 0;
+
 	if (!szExt || !lstrlen(szExt))
 		return (unzGoToFirstFile(m_uzFile) == UNZ_OK);
 
@@ -219,7 +236,13 @@ bool CUnzipper::GotoNextFile(LPCTSTR szExt)
 		return false;
 
 	if (!szExt || !lstrlen(szExt))
-		return (unzGoToNextFile(m_uzFile) == UNZ_OK);
+	{
+		if (unzGoToNextFile(m_uzFile) != UNZ_OK)
+			return false;
+
+		m_nCurFile++;
+		return true;
+	}
 
 	// else
 	UZ_FileInfo info;
@@ -379,9 +402,25 @@ bool CUnzipper::UnzipFile(LPCTSTR szFolder, bool bIgnoreFilePath)
 	{
 		SetFileModTime(szFilePath, info.dwDosDate);
 		SetFileAttributes(szFilePath, info.dwExternalAttrib);
+
+		CheckUpdateProgress();
 	}
 
 	return (nRet == UNZ_OK);
+}
+
+bool CUnzipper::CheckUpdateProgress()
+{
+	if (m_pCBProgress)
+	{
+		int nPrevPercent = (((m_nCurFile - 1) * 100) / m_nFileCount);
+		int nCurPercent = ((m_nCurFile * 100) / m_nFileCount);
+
+		if (nCurPercent != nPrevPercent)
+			return m_pCBProgress(nCurPercent, m_dwCBUserData);
+	}
+
+	return true;
 }
 
 bool CUnzipper::GotoFile(int nFile)
@@ -408,6 +447,12 @@ bool CUnzipper::GotoFile(LPCTSTR szFileName, bool bIgnoreFilePath)
 {
 	if (!m_uzFile)
 		return false;
+
+	if (m_pCBProgress)
+	{
+		ASSERT(0);
+		return false;
+	}
 
 	// try the simple approach
 	char szAnsiPath[MAX_PATH] = { 0 };
