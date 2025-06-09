@@ -956,6 +956,12 @@ void GraphicsMisc::CalculateBoxColors(COLORREF crBase, BOOL bEnabled, COLORREF& 
 
 COLORREF GraphicsMisc::Blend(COLORREF color1, COLORREF color2, double dAmount)
 {
+	if ((dAmount < 0) || (dAmount > 1.0))
+	{
+		ASSERT(0);
+		return CLR_NONE;
+	}
+
 	if (color1 == CLR_NONE || color2 == CLR_NONE)
 		return CLR_NONE;
 
@@ -967,9 +973,9 @@ COLORREF GraphicsMisc::Blend(COLORREF color1, COLORREF color2, double dAmount)
 	int green2 = GetGValue(color2);
 	int blue2 = GetBValue(color2);
 	
-	int redBlend = (int)((red1 + red2) * dAmount);
-	int greenBlend = (int)((green1 + green2) * dAmount);
-	int blueBlend = (int)((blue1 + blue2) * dAmount);
+	int redBlend = (int)((red1 * dAmount) + (red2 * (1.0 - dAmount)));
+	int greenBlend = (int)((green1 * dAmount) + (green2 * (1.0 - dAmount)));
+	int blueBlend = (int)((blue1 * dAmount) + (blue2 * (1.0 - dAmount)));
 
 	return RGB(redBlend, greenBlend, blueBlend);
 }
