@@ -47,7 +47,7 @@ enum TDL_WEBUPDATE_RESULT
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDLWebUpdater  
+class CTDLWebUpdater : public IBindStatusCallback
 {
 public:
 	CTDLWebUpdater(const CPoint& ptPos, BOOL bPreRelease);
@@ -76,6 +76,28 @@ protected:
 	BOOL CheckUpdateCancelled();
 	TDL_WEBUPDATE_RESULT LogError(const CString& sAppFolder) const;
 	void RestoreBackup(TDL_WEBUPDATE_PROGRESS nCancelled);
+
+protected:
+	// IBindStatusCallback interface
+	ULONG m_ulObjRefCount;
+
+	STDMETHOD(QueryInterface)(REFIID riid, void **ppvObject);
+	STDMETHOD_(ULONG, AddRef)();
+	STDMETHOD_(ULONG, Release)();
+
+	STDMETHOD(OnProgress)(ULONG ulProgress,
+						  ULONG ulProgressMax,
+						  ULONG ulStatusCode,
+						  LPCWSTR szStatusText);
+
+	STDMETHOD(OnStartBinding)(DWORD, IBinding *) { return S_OK; }
+	STDMETHOD(GetPriority)(LONG *) { return S_OK; }
+	STDMETHOD(OnLowResource)(DWORD) { return S_OK; }
+	STDMETHOD(OnStopBinding)(HRESULT, LPCWSTR) { return S_OK; }
+	STDMETHOD(GetBindInfo)(DWORD *, BINDINFO *) { return S_OK; }
+	STDMETHOD(OnDataAvailable)(DWORD, DWORD, FORMATETC *, STGMEDIUM *) { return S_OK; }
+	STDMETHOD(OnObjectAvailable)(REFIID, IUnknown *) { return S_OK; }
+
 };
 
 #endif // !defined(AFX_TDLWEBUPDATER_H__B88C8F13_1903_43B9_A9CC_BAF526C661E9__INCLUDED_)

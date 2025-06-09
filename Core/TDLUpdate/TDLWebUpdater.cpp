@@ -20,6 +20,18 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
+#ifndef BINDSTATUS_ACCEPTRANGES
+#	define BINDSTATUS_ACCEPTRANGES (BINDSTATUS_LOADINGMIMEHANDLER + 8)
+#endif
+
+enum
+{
+	UF_BINDSTATUS_FIRST = BINDSTATUS_FINDINGRESOURCE,
+	UF_BINDSTATUS_LAST = BINDSTATUS_ACCEPTRANGES
+};
+
 //////////////////////////////////////////////////////////////////////
 
 CTDLWebUpdater::CTDLWebUpdater(const CPoint& ptPos, BOOL bPreRelease)
@@ -338,7 +350,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 		}
 	}
 
-	if (!WebMisc::DownloadFile(m_sDownloadUri, m_sDownloadFile, &m_dlgProgress))
+	if (!WebMisc::DownloadFile(m_sDownloadUri, m_sDownloadFile, this))
 	{
 		m_nResUpdate = TDLWUR_ERR_DOWNLOADZIP;
 		return FALSE;
@@ -546,4 +558,129 @@ void CTDLWebUpdater::RestoreBackup(TDL_WEBUPDATE_PROGRESS nCancelled)
 	{
 		m_nResUpdate = TDLWUR_ERR_RUNRESTORE;
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// IBindStatusCallback
+
+// IUnknown
+STDMETHODIMP CTDLWebUpdater::QueryInterface(REFIID riid, void **ppvObject)
+{
+	TRACE(_T("IUnknown::QueryInterface\n"));
+
+	*ppvObject = NULL;
+
+	// IUnknown
+	if (::IsEqualIID(riid, __uuidof(IUnknown)))
+	{
+		TRACE(_T("IUnknown::QueryInterface(IUnknown)\n"));
+
+		*ppvObject = this;
+	}
+	// IBindStatusCallback
+	else if (::IsEqualIID(riid, __uuidof(IBindStatusCallback)))
+	{
+		TRACE(_T("IUnknown::QueryInterface(IBindStatusCallback)\n"));
+
+		*ppvObject = static_cast<IBindStatusCallback *>(this);
+	}
+
+	if (*ppvObject)
+	{
+		(*reinterpret_cast<LPUNKNOWN *>(ppvObject))->AddRef();
+
+		return S_OK;
+	}
+
+	return E_NOINTERFACE;
+}
+
+STDMETHODIMP_(ULONG) CTDLWebUpdater::AddRef()
+{
+	TRACE(_T("IUnknown::AddRef\n"));
+
+	return ++m_ulObjRefCount;
+}
+
+STDMETHODIMP_(ULONG) CTDLWebUpdater::Release()
+{
+	TRACE(_T("IUnknown::Release\n"));
+
+	return --m_ulObjRefCount;
+}
+
+STDMETHODIMP CTDLWebUpdater::OnProgress(ULONG ulProgress,
+												  ULONG ulProgressMax,
+												  ULONG ulStatusCode,
+												  LPCWSTR /*szStatusText*/)
+{
+#ifdef _DEBUG
+/*
+	static const LPCTSTR plpszStatus[] =
+	{
+		_T("BINDSTATUS_FINDINGRESOURCE"),  // 1
+		_T("BINDSTATUS_CONNECTING"),
+		_T("BINDSTATUS_REDIRECTING"),
+		_T("BINDSTATUS_BEGINDOWNLOADDATA"),
+		_T("BINDSTATUS_DOWNLOADINGDATA"),
+		_T("BINDSTATUS_ENDDOWNLOADDATA"),
+		_T("BINDSTATUS_BEGINDOWNLOADCOMPONENTS"),
+		_T("BINDSTATUS_INSTALLINGCOMPONENTS"),
+		_T("BINDSTATUS_ENDDOWNLOADCOMPONENTS"),
+		_T("BINDSTATUS_USINGCACHEDCOPY"),
+		_T("BINDSTATUS_SENDINGREQUEST"),
+		_T("BINDSTATUS_CLASSIDAVAILABLE"),
+		_T("BINDSTATUS_MIMETYPEAVAILABLE"),
+		_T("BINDSTATUS_CACHEFILENAMEAVAILABLE"),
+		_T("BINDSTATUS_BEGINSYNCOPERATION"),
+		_T("BINDSTATUS_ENDSYNCOPERATION"),
+		_T("BINDSTATUS_BEGINUPLOADDATA"),
+		_T("BINDSTATUS_UPLOADINGDATA"),
+		_T("BINDSTATUS_ENDUPLOADINGDATA"),
+		_T("BINDSTATUS_PROTOCOLCLASSID"),
+		_T("BINDSTATUS_ENCODING"),
+		_T("BINDSTATUS_VERFIEDMIMETYPEAVAILABLE"),
+		_T("BINDSTATUS_CLASSINSTALLLOCATION"),
+		_T("BINDSTATUS_DECODING"),
+		_T("BINDSTATUS_LOADINGMIMEHANDLER"),
+		_T("BINDSTATUS_CONTENTDISPOSITIONATTACH"),
+		_T("BINDSTATUS_FILTERREPORTMIMETYPE"),
+		_T("BINDSTATUS_CLSIDCANINSTANTIATE"),
+		_T("BINDSTATUS_IUNKNOWNAVAILABLE"),
+		_T("BINDSTATUS_DIRECTBIND"),
+		_T("BINDSTATUS_RAWMIMETYPE"),
+		_T("BINDSTATUS_PROXYDETECTING"),
+		_T("BINDSTATUS_ACCEPTRANGES"),
+		_T("???")  // unknown
+	};
+
+	TRACE(_T("IBindStatusCallback::OnProgress\n"));
+	TRACE(_T("ulProgress: %lu, ulProgressMax: %lu\n"), ulProgress, ulProgressMax);
+	TRACE(_T("ulStatusCode: %lu "), ulStatusCode);
+*/
+#endif
+
+	if (ulStatusCode < UF_BINDSTATUS_FIRST ||
+		ulStatusCode > UF_BINDSTATUS_LAST)
+	{
+		ulStatusCode = UF_BINDSTATUS_LAST + 1;
+	}
+
+	//	TRACE(_T("(%s), szStatusText: %ls\n"), plpszStatus[ulStatusCode - UF_BINDSTATUS_FIRST], szStatusText);
+
+	if (m_dlgProgress.GetSafeHwnd()	&& (m_dlgProgress.GetProgressStatus() == TDLWP_DOWNLOAD))
+	{
+		switch (ulStatusCode)
+		{
+		case BINDSTATUS_BEGINDOWNLOADDATA:
+		case BINDSTATUS_DOWNLOADINGDATA:
+		case BINDSTATUS_ENDDOWNLOADDATA:
+			m_dlgProgress.SetProgressStatus(TDLWP_DOWNLOAD, (int)MulDiv(ulProgress, 100, ulProgressMax));
+			break;
+		}
+
+		Misc::ProcessMsgLoop();
+	}
+
+	return S_OK;
 }
