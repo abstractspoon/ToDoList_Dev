@@ -445,9 +445,10 @@ public:
 		if (::IsWindowEnabled(hWnd))
 			return DM_WINDOWTEXT;
 
-		COLORREF crParent = GetParentBkgndColor(hWnd);
-
-		return GraphicsMisc::GetBestTextColor(crParent, FALSE);
+		// Because we don't know what the parent background colour
+		// in WinForms plugins will be we need to pick a single colour
+		// that will work on both DM_WINDOW and DM_3DFACE.
+		return GraphicsMisc::Darker(DM_WINDOWTEXT, 0.3);
 	}
 
 	static void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
@@ -1043,7 +1044,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	switch (nColor)
 	{
 	case COLOR_SCROLLBAR:		
-	case COLOR_BTNTEXT:
 	case COLOR_MENUTEXT:
 	case COLOR_MENU:
 	case COLOR_MENUHILIGHT:
@@ -1056,6 +1056,11 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_GRAYTEXT:
 		if (s_hwndCurrentComboBox || s_hwndCurrentDateTime || s_hwndCurrentEdit)
 			return GetColorOrBrush(DM_GRAY3DFACETEXT, bColor);
+		break;
+
+	case COLOR_BTNTEXT:
+		if (s_hwndCurrentBtnStatic)
+			return CDarkModeStaticText::GetTextColor(s_hwndCurrentBtnStatic);
 		break;
 
 	case COLOR_WINDOWTEXT:
@@ -1160,6 +1165,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		if (WantDarkMode(hWnd))
 		{
 			lr = GetColorOrBrush(DM_WINDOW, FALSE);
+
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 			::SetBkColor((HDC)wp, DM_WINDOW);
 			::SetBkMode((HDC)wp, OPAQUE);
@@ -1172,10 +1178,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
  	case WM_CTLCOLORSTATIC:
 		if (WantDarkMode(hWnd))
 		{
-			if (::GetTextColor((HDC)wp) == TrueGetSysColor(COLOR_WINDOWTEXT))
-				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
+// 			if (::GetTextColor((HDC)wp) == TrueGetSysColor(COLOR_WINDOWTEXT))
+// 				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 
-			::SetBkMode((HDC)wp, TRANSPARENT);
+			::SetTextColor((HDC)wp, CDarkModeStaticText::GetTextColor((HWND)lp));
 
 			// There's a very strange occurrence that if we return
 			// the existing cached DM_WINDOW brush here then it 
@@ -1184,11 +1190,15 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			// brush. Through trial and error I determined that
 			// modifying the color to be unique and hence return a
 			// unique brush is sufficient to 'fix' the issue.
-			if (IsParentPreferencePage((HWND)lp))
-				lr = GetColorOrBrush(DM_WINDOW + 1, FALSE);
-			else
-				lr = GetColorOrBrush(DM_3DFACE, FALSE);
+			COLORREF crBack = DM_3DFACE;
 
+			if (IsParentPreferencePage((HWND)lp))
+				crBack = (DM_WINDOW + 1);
+
+			::SetBkMode((HDC)wp, TRANSPARENT);
+			//::SetBkColor((HDC)wp, crBack);
+
+			lr = GetColorOrBrush(crBack, FALSE);
 			return TRUE;
 		}
 		break;
