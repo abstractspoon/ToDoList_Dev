@@ -442,7 +442,7 @@ BOOL WebMisc::DownloadFile(LPCTSTR szDownloadUri, LPCTSTR szDownloadFile, IBindS
 		return TRUE;
 		
 	case E_ABORT:
-		FileMisc::LogText(_T("WebMisc::DownloadFile(Downloading %s to %s was cancelled)"), szDownloadUri, szDownloadFile);
+		FileMisc::LogText(_T("WebMisc::DownloadFile(cancelled download of %s to %s)"), szDownloadUri, szDownloadFile);
 		break;
 
 	default:

@@ -20,18 +20,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-/////////////////////////////////////////////////////////////////////////////
-
-#ifndef BINDSTATUS_ACCEPTRANGES
-#	define BINDSTATUS_ACCEPTRANGES (BINDSTATUS_LOADINGMIMEHANDLER + 8)
-#endif
-
-enum
-{
-	UF_BINDSTATUS_FIRST = BINDSTATUS_FINDINGRESOURCE,
-	UF_BINDSTATUS_LAST = BINDSTATUS_ACCEPTRANGES
-};
-
 //////////////////////////////////////////////////////////////////////
 
 CTDLWebUpdater::CTDLWebUpdater(const CPoint& ptPos, BOOL bPreRelease)
@@ -648,6 +636,16 @@ STDMETHODIMP CTDLWebUpdater::OnProgress(ULONG ulProgress,
 {
 #ifdef _DEBUG
 /*
+#ifndef BINDSTATUS_ACCEPTRANGES
+#	define BINDSTATUS_ACCEPTRANGES (BINDSTATUS_LOADINGMIMEHANDLER + 8)
+#endif
+
+	enum
+	{
+		UF_BINDSTATUS_FIRST = BINDSTATUS_FINDINGRESOURCE,
+		UF_BINDSTATUS_LAST = BINDSTATUS_ACCEPTRANGES
+	};
+
 	static const LPCTSTR plpszStatus[] =
 	{
 		_T("BINDSTATUS_FINDINGRESOURCE"),  // 1
@@ -689,8 +687,6 @@ STDMETHODIMP CTDLWebUpdater::OnProgress(ULONG ulProgress,
 	TRACE(_T("IBindStatusCallback::OnProgress\n"));
 	TRACE(_T("ulProgress: %lu, ulProgressMax: %lu\n"), ulProgress, ulProgressMax);
 	TRACE(_T("ulStatusCode: %lu "), ulStatusCode);
-*/
-#endif
 
 	if (ulStatusCode < UF_BINDSTATUS_FIRST ||
 		ulStatusCode > UF_BINDSTATUS_LAST)
@@ -698,7 +694,9 @@ STDMETHODIMP CTDLWebUpdater::OnProgress(ULONG ulProgress,
 		ulStatusCode = UF_BINDSTATUS_LAST + 1;
 	}
 
-	//	TRACE(_T("(%s), szStatusText: %ls\n"), plpszStatus[ulStatusCode - UF_BINDSTATUS_FIRST], szStatusText);
+	TRACE(_T("(%s), szStatusText: %ls\n"), plpszStatus[ulStatusCode - UF_BINDSTATUS_FIRST], szStatusText);
+*/
+#endif
 
 	if (m_dlgProgress.GetSafeHwnd()	&& (m_dlgProgress.GetProgressStatus() == TDLWP_DOWNLOAD))
 	{

@@ -133,8 +133,6 @@ bool CUnzipper::OpenZip(LPCTSTR szFilePath)
 		
 		zsplitpath(szFullPath, szDrive, szFolder, szFName, NULL);
 		zmakepath(m_szOutputFolder, szDrive, szFolder, szFName, NULL);
-
-		m_nFileCount = GetFileCount();
 	}
 
 	return (m_uzFile != NULL);
@@ -157,18 +155,15 @@ int CUnzipper::GetFileCount()
 	if (!m_uzFile)
 		return 0;
 
-	if (m_nFileCount != -1)
-		return m_nFileCount;
-
-	unz_global_info info;
-
-	if (unzGetGlobalInfo(m_uzFile, &info) == UNZ_OK)
+	if (m_nFileCount == -1)
 	{
-		m_nFileCount = (int)info.number_entry;
-		return m_nFileCount;
+		unz_global_info info;
+
+		if (unzGetGlobalInfo(m_uzFile, &info) == UNZ_OK)
+			m_nFileCount = (int)info.number_entry;
 	}
 
-	return 0;
+	return ((m_nFileCount == -1) ? 0 : m_nFileCount);
 }
 
 bool CUnzipper::GetFileInfo(int nFile, UZ_FileInfo& info)
@@ -414,8 +409,10 @@ bool CUnzipper::CheckUpdateProgress()
 {
 	if (m_pCBProgress)
 	{
-		int nPrevPercent = (((m_nCurFile - 1) * 100) / m_nFileCount);
-		int nCurPercent = ((m_nCurFile * 100) / m_nFileCount);
+		int nNumFiles = GetFileCount();
+
+		int nPrevPercent = (((m_nCurFile - 1) * 100) / nNumFiles);
+		int nCurPercent = ((m_nCurFile * 100) / nNumFiles);
 
 		if (nCurPercent != nPrevPercent)
 			return m_pCBProgress(nCurPercent, m_dwCBUserData);
@@ -451,6 +448,9 @@ bool CUnzipper::GotoFile(LPCTSTR szFileName, bool bIgnoreFilePath)
 
 	if (m_pCBProgress)
 	{
+		// We disallow this method if a callback has been
+		// specified because there's no way to back-calculate
+		// the current file index 
 		ASSERT(0);
 		return false;
 	}
@@ -460,8 +460,9 @@ bool CUnzipper::GotoFile(LPCTSTR szFileName, bool bIgnoreFilePath)
 	::WideCharToMultiByte(CP_ACP, 0, szFileName, lstrlen(szFileName), szAnsiPath, MAX_PATH, NULL, NULL);
 
 	if (unzLocateFile(m_uzFile, szAnsiPath, 2) == UNZ_OK)
+	{
 		return true;
-
+	}
 	else if (bIgnoreFilePath)
 	{ 
 		// brute force way
