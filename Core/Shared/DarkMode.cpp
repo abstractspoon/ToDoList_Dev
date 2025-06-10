@@ -34,9 +34,9 @@ LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 
 //////////////////////////////////////////////////////////////////////
 
-const COLORREF DM_GRAY3DFACETEXT	= GraphicsMisc::GetBestTextColor(DM_3DFACE, FALSE);
 const COLORREF DM_WINDOWTEXT		= RGB(253, 254, 255);
 const COLORREF DM_HIGHLIGHTTEXT		= DM_WINDOWTEXT;
+const COLORREF DM_GRAY3DFACETEXT	= RGB(177, 178, 179); // 70% of DM_WINDOWTEXT
 const COLORREF DM_HIGHLIGHT			= RGB(45, 105, 150);
 const COLORREF DM_HOTLIGHT			= RGB(190, 210, 225);
 
@@ -445,9 +445,7 @@ public:
 		if (::IsWindowEnabled(hWnd))
 			return DM_WINDOWTEXT;
 
-		COLORREF crParent = GetParentBkgndColor(hWnd);
-
-		return GraphicsMisc::GetBestTextColor(crParent, FALSE);
+		return DM_GRAY3DFACETEXT;
 	}
 
 	static void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
@@ -463,8 +461,11 @@ public:
 			rText.OffsetRect(0, ((rText.Height() - sizeText.cy) / 2));
 		}
 
-		pDC->SetTextColor(GetTextColor(*pWnd));
+		// Because we don't know what the parent background colour
+		// will be in WinForms plugins we have to draw TRANSPARENT
 		pDC->SetBkMode(TRANSPARENT);
+
+		pDC->SetTextColor(GetTextColor(*pWnd));
 		pDC->DrawText(sText, rText, nAlign);
 		pDC->SelectObject(hOldFont);
 	}
@@ -1042,8 +1043,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 
 	switch (nColor)
 	{
-	case COLOR_SCROLLBAR:		
 	case COLOR_BTNTEXT:
+	case COLOR_SCROLLBAR:		
 	case COLOR_MENUTEXT:
 	case COLOR_MENU:
 	case COLOR_MENUHILIGHT:
@@ -1148,9 +1149,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				crBack = DM_3DFACE;
 			}
 
-			lr = GetColorOrBrush(crBack, FALSE);
 			::SetTextColor((HDC)wp, crText);
 			::SetBkMode((HDC)wp, TRANSPARENT);
+
+			lr = GetColorOrBrush(crBack, FALSE);
 			
 			return TRUE;
 		}
@@ -1159,11 +1161,12 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLOREDIT:
 		if (WantDarkMode(hWnd))
 		{
-			lr = GetColorOrBrush(DM_WINDOW, FALSE);
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 			::SetBkColor((HDC)wp, DM_WINDOW);
 			::SetBkMode((HDC)wp, OPAQUE);
 		
+			lr = GetColorOrBrush(DM_WINDOW, FALSE);
+
 			return TRUE;
 		}
 		break;
@@ -1172,10 +1175,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
  	case WM_CTLCOLORSTATIC:
 		if (WantDarkMode(hWnd))
 		{
-			if (::GetTextColor((HDC)wp) == TrueGetSysColor(COLOR_WINDOWTEXT))
-				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
-
-			::SetBkMode((HDC)wp, TRANSPARENT);
+			::SetTextColor((HDC)wp, CDarkModeStaticText::GetTextColor((HWND)lp));
 
 			// There's a very strange occurrence that if we return
 			// the existing cached DM_WINDOW brush here then it 
@@ -1184,11 +1184,14 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			// brush. Through trial and error I determined that
 			// modifying the color to be unique and hence return a
 			// unique brush is sufficient to 'fix' the issue.
-			if (IsParentPreferencePage((HWND)lp))
-				lr = GetColorOrBrush(DM_WINDOW + 1, FALSE);
-			else
-				lr = GetColorOrBrush(DM_3DFACE, FALSE);
+			COLORREF crBack = DM_3DFACE;
 
+			if (IsParentPreferencePage((HWND)lp))
+				crBack = (DM_WINDOW + 1);
+
+			::SetBkMode((HDC)wp, TRANSPARENT);
+
+			lr = GetColorOrBrush(crBack, FALSE);
 			return TRUE;
 		}
 		break;
