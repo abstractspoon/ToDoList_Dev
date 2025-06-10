@@ -464,8 +464,11 @@ public:
 			rText.OffsetRect(0, ((rText.Height() - sizeText.cy) / 2));
 		}
 
-		pDC->SetTextColor(GetTextColor(*pWnd));
+		// Because we don't know what the parent background colour
+		// in WinForms plugins will be we can only support TRANSPARENT
 		pDC->SetBkMode(TRANSPARENT);
+
+		pDC->SetTextColor(GetTextColor(*pWnd));
 		pDC->DrawText(sText, rText, nAlign);
 		pDC->SelectObject(hOldFont);
 	}
