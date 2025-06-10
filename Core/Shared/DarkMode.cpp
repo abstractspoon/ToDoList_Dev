@@ -1060,7 +1060,10 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 
 	case COLOR_BTNTEXT:
 		if (s_hwndCurrentBtnStatic)
+		{
+			ASSERT(0);
 			return CDarkModeStaticText::GetTextColor(s_hwndCurrentBtnStatic);
+		}
 		break;
 
 	case COLOR_WINDOWTEXT:
@@ -1153,9 +1156,10 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				crBack = DM_3DFACE;
 			}
 
-			lr = GetColorOrBrush(crBack, FALSE);
 			::SetTextColor((HDC)wp, crText);
 			::SetBkMode((HDC)wp, TRANSPARENT);
+
+			lr = GetColorOrBrush(crBack, FALSE);
 			
 			return TRUE;
 		}
@@ -1164,12 +1168,12 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLOREDIT:
 		if (WantDarkMode(hWnd))
 		{
-			lr = GetColorOrBrush(DM_WINDOW, FALSE);
-
 			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
 			::SetBkColor((HDC)wp, DM_WINDOW);
 			::SetBkMode((HDC)wp, OPAQUE);
 		
+			lr = GetColorOrBrush(DM_WINDOW, FALSE);
+
 			return TRUE;
 		}
 		break;
@@ -1178,9 +1182,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
  	case WM_CTLCOLORSTATIC:
 		if (WantDarkMode(hWnd))
 		{
-// 			if (::GetTextColor((HDC)wp) == TrueGetSysColor(COLOR_WINDOWTEXT))
-// 				::SetTextColor((HDC)wp, DM_WINDOWTEXT);
-
 			::SetTextColor((HDC)wp, CDarkModeStaticText::GetTextColor((HWND)lp));
 
 			// There's a very strange occurrence that if we return
@@ -1196,7 +1197,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				crBack = (DM_WINDOW + 1);
 
 			::SetBkMode((HDC)wp, TRANSPARENT);
-			//::SetBkColor((HDC)wp, crBack);
 
 			lr = GetColorOrBrush(crBack, FALSE);
 			return TRUE;
