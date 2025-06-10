@@ -711,7 +711,7 @@ protected:
 					GetClientRect(rBorder);
 
 					CClientDC dc(pEdit);
-					GraphicsMisc::DrawRect(&dc, rBorder, DM_3DFACE, DM_HOTLIGHT);
+					GraphicsMisc::DrawRect(&dc, rBorder, CLR_NONE, DM_HOTLIGHT);
 
 					return lr;
 				}
@@ -745,7 +745,6 @@ protected:
 					}
 
 					CleanupDC(wp, pDC);
-
 					return 0L;
 				}
 			}
