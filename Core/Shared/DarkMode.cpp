@@ -1120,7 +1120,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 
 	case COLOR_GRAYTEXT:
 		if (s_hwndCurrentComboBox || s_hwndCurrentDateTime || s_hwndCurrentEdit)
-			return GetColorOrBrush(DM_GRAY3DFACETEXT, bColor);
+			return GetColorOrBrush(DM_DISABLEDEDITTEXT, bColor);
 		break;
 
 	case COLOR_WINDOWTEXT:
@@ -1209,7 +1209,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 			if (!IsWindowEnabled((HWND)lp))
 			{
-				crText = DM_GRAY3DFACETEXT;
+				crText = DM_DISABLEDEDITTEXT;
 				crBack = DM_3DFACE;
 			}
 
