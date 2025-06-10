@@ -545,6 +545,28 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
+class CDarkModeMonthCal : public CDarkModeCtrlBase
+{
+protected:
+	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+	{
+		switch (msg)
+		{
+		case WM_PAINT:
+			if (!s_hwndCurrentExclusion)
+			{
+				CAutoFlagT<HWND> af(s_hwndCurrentExclusion, hRealWnd);
+				return Default();
+			}
+			break;
+		}
+
+		return Default();
+	}
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CDarkModeFontDialog : public CDarkModeCtrlBase
 {
 protected:
@@ -1351,6 +1373,19 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			{
 				// Required to handle disabled checkbox text correctly
 				HookWindow(hWnd, new CDarkModeManagedButtonStaticText());
+			}
+			else if (CWinClasses::IsClass(sClass, WC_MONTHCALDROPDOWN))
+			{
+				HWND hwndMonthCal = ::GetDlgItem(hWnd, 0);
+
+				// Because the MonthCal class is best left unmodified
+				// we also want to avoid Dark Mode colours being used 
+				// for drawing custom week numbers
+				if (CDialogHelper::HasStyle(hwndMonthCal, MCS_WEEKNUMBERS) &&
+					CWinClasses::IsKindOf(hwndMonthCal, RUNTIME_CLASS(CMonthCalCtrlEx)))
+				{
+					HookWindow(hwndMonthCal, new CDarkModeMonthCal());
+				}
 			}
 		}
 		else

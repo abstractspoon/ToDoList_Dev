@@ -46,6 +46,7 @@
 #define WC_MDICLIENT		L"MDIClient"
 #define WC_MENU				L"#32768"
 #define WC_MONTHCAL			L"SysMonthCal32"
+#define WC_MONTHCALDROPDOWN L"dropdown"
 #define WC_PROGRESS			L"msctls_progress32"
 #define WC_REBAR			L"ReBarWindow32"
 #define WC_RICHEDIT			L"Richedit"

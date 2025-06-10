@@ -5,7 +5,7 @@
 
 class CMonthCalCtrlEx : public CMonthCalCtrl
 {
-// 	DECLARE_DYNAMIC(CMonthCalCtrlEx)
+ 	DECLARE_DYNAMIC(CMonthCalCtrlEx)
 
 public:
 	CMonthCalCtrlEx();
