@@ -1043,6 +1043,7 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 
 	switch (nColor)
 	{
+	case COLOR_BTNTEXT:
 	case COLOR_SCROLLBAR:		
 	case COLOR_MENUTEXT:
 	case COLOR_MENU:
@@ -1056,14 +1057,6 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_GRAYTEXT:
 		if (s_hwndCurrentComboBox || s_hwndCurrentDateTime || s_hwndCurrentEdit)
 			return GetColorOrBrush(DM_GRAY3DFACETEXT, bColor);
-		break;
-
-	case COLOR_BTNTEXT:
-		if (s_hwndCurrentBtnStatic)
-		{
-			ASSERT(0);
-			return CDarkModeStaticText::GetTextColor(s_hwndCurrentBtnStatic);
-		}
 		break;
 
 	case COLOR_WINDOWTEXT:
