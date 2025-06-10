@@ -34,9 +34,9 @@ LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 
 //////////////////////////////////////////////////////////////////////
 
-const COLORREF DM_GRAY3DFACETEXT	= GraphicsMisc::GetBestTextColor(DM_3DFACE, FALSE);
 const COLORREF DM_WINDOWTEXT		= RGB(253, 254, 255);
 const COLORREF DM_HIGHLIGHTTEXT		= DM_WINDOWTEXT;
+const COLORREF DM_GRAY3DFACETEXT	= RGB(177, 178, 179); // 70% of DM_WINDOWTEXT
 const COLORREF DM_HIGHLIGHT			= RGB(45, 105, 150);
 const COLORREF DM_HOTLIGHT			= RGB(190, 210, 225);
 
@@ -445,10 +445,7 @@ public:
 		if (::IsWindowEnabled(hWnd))
 			return DM_WINDOWTEXT;
 
-		// Because we don't know what the parent background colour
-		// in WinForms plugins will be we need to pick a single colour
-		// that will work on both DM_WINDOW and DM_3DFACE.
-		return GraphicsMisc::Darker(DM_WINDOWTEXT, 0.3);
+		return DM_GRAY3DFACETEXT;
 	}
 
 	static void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
@@ -465,7 +462,7 @@ public:
 		}
 
 		// Because we don't know what the parent background colour
-		// in WinForms plugins will be we can only support TRANSPARENT
+		// will be in WinForms plugins we have to draw TRANSPARENT
 		pDC->SetBkMode(TRANSPARENT);
 
 		pDC->SetTextColor(GetTextColor(*pWnd));
