@@ -1077,12 +1077,8 @@ DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
 	
 	// else
 	HBRUSH hbr = NULL;
-
-	if (color == CLR_NONE)
-	{
-		hbr = (HBRUSH)::GetStockObject(NULL_BRUSH);
-	} 
-	else if (!s_mapBrushes.Lookup(color, hbr) || !hbr)
+	
+	if (!s_mapBrushes.Lookup(color, hbr) || !hbr)
 	{
 		hbr = ::CreateSolidBrush(color); 
 		s_mapBrushes.SetAt(color, hbr);
@@ -1209,20 +1205,18 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLORLISTBOX:
 		if (WantDarkMode(hWnd))
 		{
-			COLORREF crText = DM_WINDOWTEXT/*, crBack = DM_WINDOW*/;
+			COLORREF crText = DM_WINDOWTEXT, crBack = DM_WINDOW;
 
 			if (!IsWindowEnabled((HWND)lp))
 			{
 				crText = DM_GRAY3DFACETEXT;
 				crBack = DM_3DFACE;
-				crText = DM_DISABLEDEDITTEXT;
-				//crBack = DM_3DFACE;
 			}
 
 			::SetTextColor((HDC)wp, crText);
 			::SetBkMode((HDC)wp, TRANSPARENT);
 
-			lr = GetColorOrBrush(CLR_NONE/*crBack*/, FALSE);
+			lr = GetColorOrBrush(crBack, FALSE);
 			
 			return TRUE;
 		}
