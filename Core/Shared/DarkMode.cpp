@@ -34,11 +34,13 @@ LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 
 //////////////////////////////////////////////////////////////////////
 
-const COLORREF DM_WINDOWTEXT		= RGB(253, 254, 255);
-const COLORREF DM_HIGHLIGHTTEXT		= DM_WINDOWTEXT;
-const COLORREF DM_GRAY3DFACETEXT	= RGB(177, 178, 179); // 70% of DM_WINDOWTEXT
-const COLORREF DM_HIGHLIGHT			= RGB(45, 105, 150);
-const COLORREF DM_HOTLIGHT			= RGB(190, 210, 225);
+const COLORREF DM_WINDOWTEXT			= RGB(253, 254, 255);
+const COLORREF DM_HIGHLIGHTTEXT			= DM_WINDOWTEXT;
+const COLORREF DM_HIGHLIGHT				= RGB(45, 105, 150);
+const COLORREF DM_HOTLIGHT				= RGB(190, 210, 225);
+
+const COLORREF DM_DISABLEDSTATICTEXT	= RGB(177, 178, 179); // 70% of DM_WINDOWTEXT
+const COLORREF DM_DISABLEDEDITTEXT		= RGB(228, 229, 230); // 90% of DM_WINDOWTEXT
 
 //////////////////////////////////////////////////////////////////////
 
@@ -445,7 +447,7 @@ public:
 		if (::IsWindowEnabled(hWnd))
 			return DM_WINDOWTEXT;
 
-		return DM_GRAY3DFACETEXT;
+		return DM_DISABLEDSTATICTEXT;
 	}
 
 	static void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText, COLORREF crText = CLR_NONE)
@@ -739,7 +741,7 @@ protected:
 							nAlign |= DT_CENTER;
 						}
 
-						CDarkModeStaticText::DrawText(pDC, pEdit, nAlign, rText, DM_GRAY3DFACETEXT);
+						CDarkModeStaticText::DrawText(pDC, pEdit, nAlign, rText, DM_DISABLEDEDITTEXT);
 					}
 
 					CleanupDC(wp, pDC);
@@ -1075,8 +1077,12 @@ DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
 	
 	// else
 	HBRUSH hbr = NULL;
-	
-	if (!s_mapBrushes.Lookup(color, hbr) || !hbr)
+
+	if (color == CLR_NONE)
+	{
+		hbr = (HBRUSH)::GetStockObject(NULL_BRUSH);
+	} 
+	else if (!s_mapBrushes.Lookup(color, hbr) || !hbr)
 	{
 		hbr = ::CreateSolidBrush(color); 
 		s_mapBrushes.SetAt(color, hbr);
@@ -1203,18 +1209,20 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLORLISTBOX:
 		if (WantDarkMode(hWnd))
 		{
-			COLORREF crText = DM_WINDOWTEXT, crBack = DM_WINDOW;
+			COLORREF crText = DM_WINDOWTEXT/*, crBack = DM_WINDOW*/;
 
 			if (!IsWindowEnabled((HWND)lp))
 			{
 				crText = DM_GRAY3DFACETEXT;
 				crBack = DM_3DFACE;
+				crText = DM_DISABLEDEDITTEXT;
+				//crBack = DM_3DFACE;
 			}
 
 			::SetTextColor((HDC)wp, crText);
 			::SetBkMode((HDC)wp, TRANSPARENT);
 
-			lr = GetColorOrBrush(crBack, FALSE);
+			lr = GetColorOrBrush(CLR_NONE/*crBack*/, FALSE);
 			
 			return TRUE;
 		}
@@ -1840,7 +1848,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 						break;
 
 					case DPDT_DISABLED:
-						::SetTextColor(hdc, DM_GRAY3DFACETEXT);
+						::SetTextColor(hdc, DM_DISABLEDEDITTEXT);
 						break;
 
 					case DPDT_SELECTED:
