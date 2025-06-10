@@ -448,26 +448,32 @@ public:
 		return DM_GRAY3DFACETEXT;
 	}
 
-	static void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText)
+	static void DrawText(CDC* pDC, CWnd* pWnd, int nAlign, CRect& rText, COLORREF crText = CLR_NONE)
 	{
-		CString sText;
-		pWnd->GetWindowText(sText);
-
-		HFONT hOldFont = GraphicsMisc::PrepareDCFont(pDC, *pWnd);
-
-		if (nAlign & DT_VCENTER)
+		if (pWnd->GetWindowTextLength())
 		{
-			CSize sizeText = pDC->GetTextExtent(sText);
-			rText.OffsetRect(0, ((rText.Height() - sizeText.cy) / 2));
+			HFONT hOldFont = GraphicsMisc::PrepareDCFont(pDC, *pWnd);
+
+			// Because we don't know what the parent background colour
+			// will be in WinForms plugins we have to draw TRANSPARENT
+			pDC->SetBkMode(TRANSPARENT);
+
+			CString sText;
+			pWnd->GetWindowText(sText);
+
+			if (nAlign & DT_VCENTER)
+			{
+				CSize sizeText = pDC->GetTextExtent(sText);
+				rText.OffsetRect(0, ((rText.Height() - sizeText.cy) / 2));
+			}
+
+			if (crText == CLR_NONE)
+				crText = GetTextColor(*pWnd);
+
+			pDC->SetTextColor(crText);
+			pDC->DrawText(sText, rText, nAlign);
+			pDC->SelectObject(hOldFont);
 		}
-
-		// Because we don't know what the parent background colour
-		// will be in WinForms plugins we have to draw TRANSPARENT
-		pDC->SetBkMode(TRANSPARENT);
-
-		pDC->SetTextColor(GetTextColor(*pWnd));
-		pDC->DrawText(sText, rText, nAlign);
-		pDC->SelectObject(hOldFont);
 	}
 
 private:
@@ -670,20 +676,54 @@ protected:
 			if (s_hwndCurrentEdit == NULL)
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentEdit, hRealWnd);
-				LRESULT lr = Default();
-
 				CWnd* pEdit = CWnd::FromHandle(hRealWnd);
 
 				if (pEdit->IsKindOf(RUNTIME_CLASS(CPopupEditCtrl)))
 				{
+					LRESULT lr = Default();
+
+					// Give the control a highlighted border
 					CRect rBorder;
 					GetClientRect(rBorder);
 
 					CClientDC dc(pEdit);
-					GraphicsMisc::DrawRect(&dc, rBorder, CLR_NONE, DM_HOTLIGHT);
-				}
+					GraphicsMisc::DrawRect(&dc, rBorder, DM_3DFACE, DM_HOTLIGHT);
 
-				return lr;
+					return lr;
+				}
+				else if (!m_bParentIsCombo && !IsWindowEnabled())
+				{
+					// Show the background in DM_3DFACE
+					CRect rClient;
+					GetClientRect(rClient);
+
+					CDC* pDC = GetPaintDC(wp);
+					pDC->FillSolidRect(rClient, DM_3DFACE);
+
+					if (pEdit->GetWindowTextLength())
+					{
+						CRect rText;
+						SendMessage(EM_GETRECT, 0, (LPARAM)(LPRECT)&rText);
+
+						DWORD dwStyle = GetStyle();
+						int nAlign = DT_LEFT;
+
+						if (dwStyle & ES_RIGHT)
+						{
+							nAlign |= DT_RIGHT;
+						}
+						else if (dwStyle & ES_CENTER)
+						{
+							nAlign |= DT_CENTER;
+						}
+
+						CDarkModeStaticText::DrawText(pDC, pEdit, nAlign, rText, DM_GRAY3DFACETEXT);
+					}
+
+					CleanupDC(wp, pDC);
+
+					return 0L;
+				}
 			}
 			break;
 
@@ -1175,19 +1215,23 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
  	case WM_CTLCOLORSTATIC:
 		if (WantDarkMode(hWnd))
 		{
-			::SetTextColor((HDC)wp, CDarkModeStaticText::GetTextColor((HWND)lp));
+			HWND hwndChild = (HWND)lp;
+			::SetTextColor((HDC)wp, CDarkModeStaticText::GetTextColor(hwndChild));
 
-			// There's a very strange occurrence that if we return
-			// the existing cached DM_WINDOW brush here then it 
-			// somehow fails to get used and instead the DM_3DFACE
-			// brush gets used even though it's not the returned 
-			// brush. Through trial and error I determined that
-			// modifying the color to be unique and hence return a
-			// unique brush is sufficient to 'fix' the issue.
 			COLORREF crBack = DM_3DFACE;
 
-			if (IsParentPreferencePage((HWND)lp))
-				crBack = (DM_WINDOW + 1);
+			//if (hwndChild != s_hwndCurrentEdit)
+			{
+				// There's a very strange occurrence that if we return
+				// the existing cached DM_WINDOW brush here then it 
+				// somehow fails to get used and instead the DM_3DFACE
+				// brush gets used even though it's not the returned 
+				// brush. Through trial and error I determined that
+				// modifying the color to be unique and hence return a
+				// unique brush is sufficient to 'fix' the issue.
+				if (IsParentPreferencePage(hwndChild))
+					crBack = (DM_WINDOW + 1);
+			}
 
 			::SetBkMode((HDC)wp, TRANSPARENT);
 
@@ -1272,7 +1316,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			else if (CWinClasses::IsClass(sClass, WC_EDIT) || 
 					 CWinClasses::IsWinFormsControl(sClass, WC_EDIT))
 			{
-				// Required to handle COLOR_GRAYTEXT correctly
+				// For handling disabled state correctly
 				HookWindow(hWnd, new CDarkModeEditCtrl());
 			}
 			else if (CWinClasses::IsClass(sClass, WC_STATIC))
