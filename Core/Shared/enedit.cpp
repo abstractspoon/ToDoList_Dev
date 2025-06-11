@@ -585,7 +585,7 @@ void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 		{
 			// Background
 			CBitmap* pOld = dcTemp.SelectObject(&bmTemp);
-			dcTemp.FillSolidRect(0, 0, rButtons.Width(), rButtons.Height(), GetSysColor(COLOR_WINDOW));
+			::FillRect(dcTemp, CRect(0, 0, rButtons.Width(), rButtons.Height()), PrepareColors(&dcTemp));
 			
 			// Buttons
 			CPoint ptCursor(::GetMessagePos());
@@ -602,6 +602,25 @@ void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 			dcTemp.SelectObject(pOld);
 		}
 	}
+}
+
+HBRUSH CEnEdit::PrepareColors(CDC* pDC) const
+{
+	UINT nMsgID = WM_CTLCOLOREDIT;
+
+	if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
+		nMsgID = WM_CTLCOLORSTATIC;
+
+	HBRUSH hBkgnd = (HBRUSH)::SendMessage(::GetParent(GetSafeHwnd()), nMsgID, (WPARAM)pDC->GetSafeHdc(), (LPARAM)(HWND)GetSafeHwnd());
+
+	if (!hBkgnd)
+	{
+		ASSERT(0);
+		hBkgnd = ::GetSysColorBrush(COLOR_WINDOW);
+		pDC->SetBkColor(::GetSysColor(COLOR_WINDOW));
+	}
+
+	return hBkgnd;
 }
 
 int CEnEdit::ButtonHitTest(CPoint ptScreen) const
