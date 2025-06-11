@@ -1216,7 +1216,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			::SetBkMode((HDC)wp, TRANSPARENT);
 
 			lr = GetColorOrBrush(crBack, FALSE);
-			
 			return TRUE;
 		}
 		break;
@@ -1229,7 +1228,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			::SetBkMode((HDC)wp, OPAQUE);
 		
 			lr = GetColorOrBrush(DM_WINDOW, FALSE);
-
 			return TRUE;
 		}
 		break;
@@ -1239,12 +1237,19 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 		if (WantDarkMode(hWnd))
 		{
 			HWND hwndChild = (HWND)lp;
-			::SetTextColor((HDC)wp, CDarkModeStaticText::GetTextColor(hwndChild));
 
-			COLORREF crBack = DM_3DFACE;
-
-			//if (hwndChild != s_hwndCurrentEdit)
+			if (CWinClasses::IsEditControl(hwndChild))
 			{
+				::SetTextColor((HDC)wp, DM_DISABLEDEDITTEXT);
+				::SetBkColor((HDC)wp, DM_3DFACE);
+				::SetBkMode((HDC)wp, OPAQUE);
+		
+				lr = GetColorOrBrush(DM_3DFACE, FALSE);
+			}
+			else // static text, checkboxes and radiobuttons
+			{
+				::SetTextColor((HDC)wp, CDarkModeStaticText::GetTextColor(hwndChild));
+
 				// There's a very strange occurrence that if we return
 				// the existing cached DM_WINDOW brush here then it 
 				// somehow fails to get used and instead the DM_3DFACE
@@ -1252,13 +1257,15 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				// brush. Through trial and error I determined that
 				// modifying the color to be unique and hence return a
 				// unique brush is sufficient to 'fix' the issue.
+				COLORREF crBack = DM_3DFACE;
+
 				if (IsParentPreferencePage(hwndChild))
 					crBack = (DM_WINDOW + 1);
+
+				::SetBkMode((HDC)wp, TRANSPARENT);
+
+				lr = GetColorOrBrush(crBack, FALSE);
 			}
-
-			::SetBkMode((HDC)wp, TRANSPARENT);
-
-			lr = GetColorOrBrush(crBack, FALSE);
 			return TRUE;
 		}
 		break;
@@ -1823,7 +1830,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, int 
 			// Get the appropriate text colour
 			::SendMessage(::GetParent(s_hwndCurrentBtnStatic), WM_CTLCOLORSTATIC, (WPARAM)hdc, (LPARAM)s_hwndCurrentBtnStatic);
 
-			//::SetBkMode(hdc, TRANSPARENT);
+			::SetBkMode(hdc, TRANSPARENT);
 			::DrawText(hdc, szText, nTextLen, (LPRECT)pRect, dwTextFlags);
 
 			return S_OK;
