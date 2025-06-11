@@ -1286,7 +1286,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 
 			// Note1: See MySetWindowTheme for the Open/Save dialog detection
 			// Note2: See WM_SHOWWINDOW::WC_TREEVIEW handling below for folder dialog detection
-			return lr;
 		}
 		break;
 
