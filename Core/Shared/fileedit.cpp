@@ -234,7 +234,6 @@ void CFileEdit::OnPaint()
 			rClient.DeflateRect(4, 1, 1, 1);
 
 			dc.SetBkMode(TRANSPARENT);
-			//dc.SetTextColor(::GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_GRAYTEXT));
 			dc.DrawText(sText, rClient, DT_PATH_ELLIPSIS);
 
 			m_bTipNeeded = TRUE;
@@ -280,14 +279,7 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	CRect rBkgnd(rIcon);
 	rBkgnd.InflateRect(1, 1);
 
-	HBRUSH hbr = PrepareColors(pDC);
-
-	LOGBRUSH lbr = { 0 };
-	::GetObject(hbr, sizeof(lbr), &lbr);
-
-	ASSERT(lbr.lbColor == pDC->GetBkColor());
-
-	::FillRect(*pDC, rBkgnd, hbr);
+	::FillRect(*pDC, rBkgnd, PrepareColors(pDC));
 	DrawFileIcon(pDC, sFilePath, rIcon);
 
 	if (bReleaseDC)
