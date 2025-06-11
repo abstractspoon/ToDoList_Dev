@@ -177,7 +177,7 @@
 			this.m_FillColorButton.Size = new System.Drawing.Size(75, 23);
 			this.m_FillColorButton.TabIndex = 43;
 			this.m_FillColorButton.Text = "Set...";
-			this.m_FillColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_FillColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_FillColorButton.UseVisualStyleBackColor = true;
 			// 
 			// LoggedEntryAttributesPage
