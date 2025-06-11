@@ -585,7 +585,7 @@ void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 		{
 			// Background
 			CBitmap* pOld = dcTemp.SelectObject(&bmTemp);
-			::FillRect(*pDC, CRect(0, 0, rButtons.Width(), rButtons.Height()), PrepareColors(&dcTemp));
+			::FillRect(dcTemp, CRect(0, 0, rButtons.Width(), rButtons.Height()), PrepareColors(&dcTemp));
 			
 			// Buttons
 			CPoint ptCursor(::GetMessagePos());
