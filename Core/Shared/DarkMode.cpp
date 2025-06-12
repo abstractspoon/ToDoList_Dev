@@ -37,7 +37,7 @@ LPCTSTR TC_COMBOBOX		= _T("COMBOBOX");
 const COLORREF DM_WINDOWTEXT			= RGB(253, 254, 255);
 const COLORREF DM_HIGHLIGHTTEXT			= DM_WINDOWTEXT;
 const COLORREF DM_HIGHLIGHT				= RGB(45, 105, 150);
-const COLORREF DM_HOTLIGHT				= RGB(190, 210, 225);
+const COLORREF DM_HOTLIGHT				= RGB(190, 210, 225); // Web Browser links
 
 const COLORREF DM_DISABLEDSTATICTEXT	= RGB(177, 178, 179); // 70% of DM_WINDOWTEXT
 const COLORREF DM_DISABLEDEDITTEXT		= RGB(228, 229, 230); // 90% of DM_WINDOWTEXT
@@ -391,6 +391,7 @@ COLORREF GetParentBkgndColor(HWND hWnd)
 //////////////////////////////////////////////////////////////////////
 
 static HWND s_hwndCurrentComboBox			= NULL;
+static HWND s_hwndCurrentSimpleComboListBox	= NULL;
 static HWND s_hwndCurrentEdit				= NULL;
 static HWND s_hwndCurrentDateTime			= NULL;
 static HWND s_hwndCurrentBtnStatic			= NULL;
@@ -1103,9 +1104,12 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 
 	// else
 	int nTrueColor = nColor;
+	COLORREF crCustom = CLR_NONE;
 
 	switch (nColor)
 	{
+		// No change -------------------------------------------------
+
 	case COLOR_BTNTEXT:
 	case COLOR_SCROLLBAR:		
 	case COLOR_MENUTEXT:
@@ -1114,62 +1118,54 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_MENUBAR:
 		break;
 
-	case COLOR_HOTLIGHT: // Used for Web Browser links
-		return GetColorOrBrush(DM_HOTLIGHT, bColor);
+		// Different 'true' colours ----------------------------------
+
+	case COLOR_3DDKSHADOW:		nTrueColor = COLOR_3DHIGHLIGHT;	break;
+	case COLOR_3DSHADOW:		nTrueColor = COLOR_3DLIGHT;		break;
+	case COLOR_3DLIGHT:			nTrueColor = COLOR_3DSHADOW;	break;
+	case COLOR_3DHIGHLIGHT:		nTrueColor = COLOR_3DDKSHADOW;	break;
+	case COLOR_WINDOWFRAME:		nTrueColor = COLOR_BTNHIGHLIGHT;break;
+	case COLOR_INFOTEXT:		nTrueColor = COLOR_3DDKSHADOW;	break;
+	case COLOR_INFOBK:			nTrueColor = COLOR_WINDOW;		break;
+
+		// Dark Mode custom colours ----------------------------------
+
+	case COLOR_HOTLIGHT:		crCustom = DM_HOTLIGHT;			break;
+	case COLOR_WINDOWTEXT:		crCustom = DM_WINDOWTEXT;		break;
+	case COLOR_3DFACE:			crCustom = DM_3DFACE;			break;
+	case COLOR_HIGHLIGHT:		crCustom = DM_HIGHLIGHT;		break;
+	case COLOR_HIGHLIGHTTEXT:	crCustom = DM_HIGHLIGHTTEXT;	break;
 
 	case COLOR_GRAYTEXT:
-		if (s_hwndCurrentComboBox || s_hwndCurrentDateTime || s_hwndCurrentEdit)
-			return GetColorOrBrush(DM_DISABLEDEDITTEXT, bColor);
+		if (s_hwndCurrentComboBox || 
+			s_hwndCurrentDateTime || 
+			s_hwndCurrentEdit || 
+			s_hwndCurrentSimpleComboListBox)
+		{
+			crCustom = DM_DISABLEDEDITTEXT;
+		}
 		break;
-
-	case COLOR_WINDOWTEXT:
-		return GetColorOrBrush(DM_WINDOWTEXT, bColor);
 
 	case COLOR_WINDOW:
-		return GetColorOrBrush(DM_WINDOW, bColor);
-
-	case COLOR_3DFACE:
-		return GetColorOrBrush(DM_3DFACE, bColor);
-
-	case COLOR_3DDKSHADOW:
-		nTrueColor = COLOR_3DHIGHLIGHT;
-		break;
-
-	case COLOR_3DSHADOW:
-		nTrueColor = COLOR_3DLIGHT;
-		break;
-
-	case COLOR_3DLIGHT:		
-		nTrueColor = COLOR_3DSHADOW;
-		break;
-
-	case COLOR_3DHIGHLIGHT:
-		nTrueColor = COLOR_3DDKSHADOW;
-		break;
-
-	case COLOR_HIGHLIGHT:
-		return GetColorOrBrush(DM_HIGHLIGHT, bColor);
-
-	case COLOR_HIGHLIGHTTEXT:
-		return GetColorOrBrush(DM_HIGHLIGHTTEXT, bColor);
-
-	case COLOR_WINDOWFRAME:
-		nTrueColor = COLOR_BTNHIGHLIGHT;
-		break;
-
-	case COLOR_INFOTEXT:
-		nTrueColor = COLOR_3DDKSHADOW;
-		break;
-
-	case COLOR_INFOBK:
-		nTrueColor = COLOR_WINDOW;
+		if (s_hwndCurrentSimpleComboListBox && 
+			!::IsWindowEnabled(s_hwndCurrentSimpleComboListBox))
+		{
+			crCustom = DM_3DFACE;
+		}
+		else
+		{
+			crCustom = DM_WINDOW;
+		}
 		break;
 
 #ifdef _DEBUG
+		// Apparently no longer used so we call them -----------------
+		// out in debug mode to be sure
 	case COLOR_ACTIVEBORDER:
 	case COLOR_INACTIVEBORDER:
 	case COLOR_INACTIVECAPTION:	
-		return GetColorOrBrush(colorBlue, bColor);
+		crCustom = colorBlue;
+		break;
 
 	case COLOR_CAPTIONTEXT:
 	case COLOR_ACTIVECAPTION:
@@ -1178,9 +1174,13 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 	case COLOR_GRADIENTACTIVECAPTION:
 	case COLOR_GRADIENTINACTIVECAPTION:
 	case COLOR_BACKGROUND:
-		return GetColorOrBrush(colorRed, bColor);
+		crCustom = colorRed;
+		break;
 #endif
 	}
+
+	if (crCustom != CLR_NONE)
+		return GetColorOrBrush(crCustom, bColor);
 
 	return TrueGetSysColorOrBrush(nTrueColor, bColor);
 }
@@ -1437,7 +1437,6 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 
 			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
 				CWinClasses::IsClass(sClass, WC_COMBOBOXEX) || 
-				CWinClasses::IsClass(sClass, WC_COMBOLBOX) || 
 				CWinClasses::IsWinFormsControl(sClass, WC_COMBOBOX))
 			{
 				if (!IsHooked(hWnd) && !s_hwndCurrentComboBox)
@@ -1445,6 +1444,14 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 					CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hWnd);
 					return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 				}
+			}
+			else if (CWinClasses::IsClass(sClass, WC_COMBOLBOX))
+			{
+				// We only get here with simple combos (CBS_SIMPLE)
+				ASSERT(CWinClasses::GetStyleType(::GetParent(hWnd), CBS_TYPEMASK) == CBS_SIMPLE);
+
+				CAutoFlagT<HWND> af(s_hwndCurrentSimpleComboListBox, hWnd);
+				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 			}
 			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || 
 					 CWinClasses::IsWinFormsControl(sClass, WC_DATETIMEPICK))
