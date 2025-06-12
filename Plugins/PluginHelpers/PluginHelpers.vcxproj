@@ -137,6 +137,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="PluginHelpers.h" />
     <ClInclude Include="GeometryUtil.h" />
     <ClInclude Include="RangeSliderCtrl.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="RichTextBoxEx.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -230,6 +231,9 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ProjectReference Include="..\3rdParty\UIComponents\UIComponents.csproj">
       <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PluginHelpers.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
