@@ -1437,6 +1437,7 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 
 			if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
 				CWinClasses::IsClass(sClass, WC_COMBOBOXEX) || 
+				CWinClasses::IsClass(sClass, WC_COMBOLBOX) || 
 				CWinClasses::IsWinFormsControl(sClass, WC_COMBOBOX))
 			{
 				if (!IsHooked(hWnd) && !s_hwndCurrentComboBox)
