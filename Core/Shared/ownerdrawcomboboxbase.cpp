@@ -55,7 +55,7 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
-//	ON_WM_PAINT()
+	ON_WM_PAINT()
 
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
@@ -155,9 +155,9 @@ void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwI
 	crBack = GetSysColor(bDisabled ? COLOR_3DFACE : (bItemSelected ? COLOR_HIGHLIGHT : COLOR_WINDOW));
 	crText = GetSysColor(bItemDisabled ? COLOR_GRAYTEXT : (bItemSelected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
 
-	// Special case
-// 	if (IsType(CBS_SIMPLE) && bDisabled)
-// 		crBack = GetSysColor(COLOR_WINDOW);
+	// Special case to match themed windows
+	if (IsType(CBS_SIMPLE) && bDisabled)
+		crBack = GetSysColor(COLOR_WINDOW);
 
 	if (IsHeadingItem(nItem))
 	{
