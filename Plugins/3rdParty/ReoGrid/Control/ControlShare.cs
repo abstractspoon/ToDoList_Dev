@@ -222,7 +222,7 @@ namespace unvell.ReoGrid
 					this.lastReusableAction = e.Action as WorksheetReusableAction;
 				}
 
-				this.ActionPerformed?.Invoke(this, new WorkbookActionEventArgs(e.Action, (e.Behavior != ActionBehavior.Do)));
+				this.ActionPerformed?.Invoke(this, new WorkbookActionEventArgs(e.Action));
 			};
 		}
 
