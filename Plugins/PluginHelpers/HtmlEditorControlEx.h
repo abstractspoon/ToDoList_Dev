@@ -58,6 +58,7 @@ namespace Abstractspoon
 				void InitializeComponentEx();
 				void InitialiseFeatures(bool hideDocumentCommands);
 
+				// Pseudo event handler
 				bool OnSetForeColor(MSHTML::IHTMLTxtRange^ range, Drawing::Color color);
 
 				Windows::Forms::DialogResult ShowDialog(Windows::Forms::Form^ dialog, Drawing::Icon^ icon);

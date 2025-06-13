@@ -741,8 +741,8 @@ namespace SpreadsheetContentControl
 
 			if (actions != null)
 			{
-				// Intercept setting white/black back/pattern colours for in Non/Dark Mode, 
-				// and replace instead with removing the appropriate colour definition
+				// Intercept setting white/black back/pattern colours in Non/Dark Mode, 
+				// and replace the relevant colour with Color.Empty
 				bool darkMode = UITheme.IsDarkMode();
 
 				foreach (var action in actions)
