@@ -30,7 +30,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const COLORREF HILITE_COLOUR = RGB(255, 255, 64); // yellow
+const COLORREF HILITE_BACKCOLOUR = RGB(255, 255, 64); // yellow
+const COLORREF HILITE_TEXTCOLOUR = GraphicsMisc::GetBestTextColor(HILITE_BACKCOLOUR);
 
 /////////////////////////////////////////////////////////////////////////////
 // Private class for tracking mouse middle-button clicking
@@ -420,7 +421,7 @@ BOOL CPreferencesDlg::AddPageToTree(CPreferencesPageBase* pPage, UINT nIDPath, U
 					break;
 			}
 
-			if (!pPage->HighlightUIText(m_aSearchTerms, HILITE_COLOUR) && (nPath == -1))
+			if (!pPage->HighlightUIText(m_aSearchTerms, HILITE_BACKCOLOUR) && (nPath == -1))
 				return FALSE;
 		}
 		else
@@ -864,7 +865,7 @@ void CPreferencesDlg::UpdatePageTitleTextColors()
 	if (CCtrlTextHighlighter::TextContainsOneOf(m_sPageTitle, m_aSearchTerms))
 	{
 		crText = 0;
-		crBack = HILITE_COLOUR;
+		crBack = HILITE_BACKCOLOUR;
 	}
 
 	m_stPageTitle.SetTextColors(crText, crBack);
@@ -1060,18 +1061,38 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 
 			if (CCtrlTextHighlighter::TextContainsOneOf(sPage, m_aSearchTerms))
 			{
-				pTVCD->clrTextBk = HILITE_COLOUR;
-				pTVCD->clrText = GraphicsMisc::GetBestTextColor(HILITE_COLOUR);
+				pTVCD->clrTextBk = HILITE_BACKCOLOUR;
+				pTVCD->clrText = HILITE_TEXTCOLOUR;
 
 				*pResult = CDRF_NEWFONT;
 				break;
 			}
 		}
-		// All else
+
+		// Select item
 		if (m_tcPages.GetSelectedItem() == hti)
 		{
 			pTVCD->clrText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
-			*pResult = CDRF_NEWFONT;
+
+			if (!CThemed::AreControlsThemed())
+			{
+				BOOL bFocused = (GetFocus() == &m_tcPages);
+				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
+
+				GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcPages, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), pTVCD->nmcd.rc, GMIB_THEMECLASSIC); 
+
+				CRect rText;
+				m_tcPages.GetItemRect(hti, rText, TRUE);
+
+				pDC->SetTextColor(pTVCD->clrText);
+				pDC->DrawText(m_tcPages.GetItemText(hti), rText, (DT_CENTER | DT_VCENTER | DT_SINGLELINE));
+
+				*pResult = CDRF_SKIPDEFAULT;
+			}
+			else
+			{
+				*pResult = CDRF_NEWFONT;
+			}
 		}
 		break;
 	}
