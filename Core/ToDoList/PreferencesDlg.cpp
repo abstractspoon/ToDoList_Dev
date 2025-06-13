@@ -1055,43 +1055,59 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		break;
 
 	case CDDS_ITEMPREPAINT:
-		if (m_aSearchTerms.GetSize())
-		{
-			CString sPage = m_tcPages.GetItemText(hti);
-
-			if (CCtrlTextHighlighter::TextContainsOneOf(sPage, m_aSearchTerms))
-			{
-				pTVCD->clrTextBk = HILITE_BACKCOLOUR;
-				pTVCD->clrText = HILITE_TEXTCOLOUR;
-
-				*pResult = CDRF_NEWFONT;
-				break;
-			}
-		}
-
-		// Select item
 		if (m_tcPages.GetSelectedItem() == hti)
 		{
 			pTVCD->clrText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
 			if (!CThemed::AreControlsThemed())
 			{
-				BOOL bFocused = (GetFocus() == &m_tcPages);
 				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
+				BOOL bFocused = (GetFocus() == &m_tcPages);
+				GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 
-				GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcPages, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), pTVCD->nmcd.rc, GMIB_THEMECLASSIC); 
+				GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcPages, nState, pTVCD->nmcd.rc, GMIB_THEMECLASSIC);
 
+				pTVCD->clrTextBk = GraphicsMisc::GetExplorerItemSelectionBackColor(nState, GMIB_THEMECLASSIC);
+// 				CRect rText;
+// 				m_tcPages.GetItemRect(hti, rText, TRUE);
+// 
+// 				pDC->SetTextColor(pTVCD->clrText);
+// 				pDC->DrawText(m_tcPages.GetItemText(hti), rText, (DT_CENTER | DT_VCENTER | DT_SINGLELINE));
+// 
+// 				*pResult = CDRF_SKIPDEFAULT;
+			}
+// 			else
+			{
+				*pResult = CDRF_NEWFONT;
+			}
+		}
+		
+		if (m_aSearchTerms.GetSize())
+		{
+			*pResult |= CDRF_NOTIFYPOSTPAINT;
+		};
+		break;
+
+	case CDDS_ITEMPOSTPAINT:
+		{
+			ASSERT(m_aSearchTerms.GetSize());
+
+			CString sPage = m_tcPages.GetItemText(hti);
+
+			if (CCtrlTextHighlighter::TextContainsOneOf(sPage, m_aSearchTerms))
+			{
 				CRect rText;
 				m_tcPages.GetItemRect(hti, rText, TRUE);
 
-				pDC->SetTextColor(pTVCD->clrText);
-				pDC->DrawText(m_tcPages.GetItemText(hti), rText, (DT_CENTER | DT_VCENTER | DT_SINGLELINE));
+				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
+				
+				pDC->SetTextColor(HILITE_TEXTCOLOUR);
+				pDC->SetBkColor(HILITE_BACKCOLOUR);
+				pDC->SetBkMode(OPAQUE);
+				pDC->DrawText(sPage, rText, (DT_CENTER | DT_VCENTER | DT_SINGLELINE));
 
 				*pResult = CDRF_SKIPDEFAULT;
-			}
-			else
-			{
-				*pResult = CDRF_NEWFONT;
+				break;
 			}
 		}
 		break;
