@@ -155,7 +155,7 @@ void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwI
 	crBack = GetSysColor(bDisabled ? COLOR_3DFACE : (bItemSelected ? COLOR_HIGHLIGHT : COLOR_WINDOW));
 	crText = GetSysColor(bItemDisabled ? COLOR_GRAYTEXT : (bItemSelected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
 
-	// Special case
+	// Special case to match Windows
 	if (IsType(CBS_SIMPLE) && bDisabled)
 		crBack = GetSysColor(COLOR_WINDOW);
 
