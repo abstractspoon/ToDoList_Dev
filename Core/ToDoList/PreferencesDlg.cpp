@@ -1058,6 +1058,7 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		if (m_tcPages.GetSelectedItem() == hti)
 		{
 			pTVCD->clrText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
+			*pResult = CDRF_NEWFONT;
 
 			if (!CThemed::AreControlsThemed())
 			{
@@ -1068,17 +1069,6 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcPages, nState, pTVCD->nmcd.rc, GMIB_THEMECLASSIC);
 
 				pTVCD->clrTextBk = GraphicsMisc::GetExplorerItemSelectionBackColor(nState, GMIB_THEMECLASSIC);
-// 				CRect rText;
-// 				m_tcPages.GetItemRect(hti, rText, TRUE);
-// 
-// 				pDC->SetTextColor(pTVCD->clrText);
-// 				pDC->DrawText(m_tcPages.GetItemText(hti), rText, (DT_CENTER | DT_VCENTER | DT_SINGLELINE));
-// 
-// 				*pResult = CDRF_SKIPDEFAULT;
-			}
-// 			else
-			{
-				*pResult = CDRF_NEWFONT;
 			}
 		}
 		
