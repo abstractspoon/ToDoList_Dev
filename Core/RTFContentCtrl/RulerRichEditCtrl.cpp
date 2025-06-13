@@ -1173,6 +1173,8 @@ void CRulerRichEditCtrl::PrepareDlgTextColor(COLORREF& crText, const CharFormat&
 
 void CRulerRichEditCtrl::PrepareCharFormat(CharFormat& cf, COLORREF color, BOOL bForeground)
 {
+	// Intercept setting white text in Dark Mode, and black text in non Dark Mode, 
+	// and instead replace such colours with CFE_AUTOBACKCOLOR
 	BOOL bDarkMode = CDarkMode::IsEnabled();
 	BOOL bIsWhite = (color == colorWhite), bIsBlack = (color == colorBlack);
 

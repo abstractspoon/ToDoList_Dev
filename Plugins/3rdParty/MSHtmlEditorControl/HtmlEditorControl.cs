@@ -4069,7 +4069,7 @@ namespace MSDN.Html.Editor
                 throw new HtmlEditorException("Unknown MSHTML Error.", command, ex);
             }
 
-            // all elsee
+            // all else
             return false;
 
         } // ExecuteCommandQuery
