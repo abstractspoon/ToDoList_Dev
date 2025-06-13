@@ -1112,7 +1112,7 @@ void CRulerRichEditCtrl::DoFont()
 	if (dlg.DoModal() == IDOK)
 	{
 		cf.dwMask = cf.dwEffects = 0;
-		PrepareCharFormat(cf, dlg.GetColor(), TRUE);
+		PrepareTextCharFormat(cf, dlg.GetColor());
 
 		// Apply new font
 		cf.yHeight = dlg.GetSize() * 2;
@@ -1158,7 +1158,11 @@ void CRulerRichEditCtrl::SetCurrentFontSize(int size)
 void CRulerRichEditCtrl::SetCurrentFontColor(COLORREF color, BOOL bForeground)
 {
 	CharFormat cf;
-	PrepareCharFormat(cf, color, bForeground);
+
+	if (bForeground)
+		PrepareTextCharFormat(cf, color);
+	else
+		PrepareBkgndCharFormat(cf, color);
 
 	m_rtf.SetSelectionCharFormat(cf);
 }
@@ -1171,43 +1175,47 @@ void CRulerRichEditCtrl::PrepareDlgTextColor(COLORREF& crText, const CharFormat&
 		crText = (CDarkMode::IsEnabled() ? colorWhite : colorBlack);
 }
 
-void CRulerRichEditCtrl::PrepareCharFormat(CharFormat& cf, COLORREF color, BOOL bForeground)
+void CRulerRichEditCtrl::PrepareTextCharFormat(CharFormat& cf, COLORREF color)
 {
-	// Intercept setting white text in Dark Mode, and black text in non Dark Mode, 
+	// Intercept setting black/white text colours in Non/Dark Mode,
 	// and instead replace such colours with CFE_AUTOBACKCOLOR
 	BOOL bDarkMode = CDarkMode::IsEnabled();
 	BOOL bIsWhite = (color == colorWhite), bIsBlack = (color == colorBlack);
 
-	if (color == CLR_DEFAULT)
+	if ((color == CLR_DEFAULT) || (bDarkMode && bIsWhite) || (!bDarkMode && bIsBlack))
 	{
-		color = CLR_NONE;
-	}
-	else if (bForeground)
-	{
-		if ((bDarkMode && bIsWhite) || (!bDarkMode && bIsBlack))
-			color = CLR_NONE;
-	}
-	else // background
-	{
-		if ((bDarkMode && bIsBlack) || (!bDarkMode && bIsWhite))
-			color = CLR_NONE;
-	}
-	
-	DWORD dwColorAutoEffect = (bForeground ? CFE_AUTOCOLOR : CFE_AUTOBACKCOLOR);
-
-	if (color != CLR_NONE)
-	{
-		cf.dwEffects &= ~dwColorAutoEffect;
-		cf.crTextColor = color;
+		cf.dwEffects = CFE_AUTOCOLOR;
 	}
 	else
 	{
-		cf.dwEffects = dwColorAutoEffect;
+		cf.dwEffects &= ~CFE_AUTOCOLOR;
+		cf.crTextColor = color;
 	}
 
-	cf.dwMask |= (bForeground ? CFM_COLOR : CFM_BACKCOLOR);
+	cf.dwMask |= CFM_COLOR;
 }
 
+void CRulerRichEditCtrl::PrepareBkgndCharFormat(CharFormat& cf, COLORREF color)
+{
+	// Intercept setting white/black background colours in Non/Dark Mode,
+	// and instead replace such colours with CFE_AUTOBACKCOLOR
+	BOOL bDarkMode = CDarkMode::IsEnabled();
+	BOOL bIsWhite = (color == colorWhite), bIsBlack = (color == colorBlack);
+
+	if ((color == CLR_DEFAULT) || (bDarkMode && bIsBlack) || (!bDarkMode && bIsWhite))
+	{
+		cf.dwEffects = CFE_AUTOBACKCOLOR;
+	}	
+	else
+	{
+		cf.dwEffects &= ~CFE_AUTOBACKCOLOR;
+		cf.crBackColor = color;
+	}
+
+	cf.dwMask |= CFM_BACKCOLOR;
+}
+
+// This functionality seems to be obsolete
 void CRulerRichEditCtrl::DoColor()
 {
 	// Get the current color
@@ -1225,7 +1233,7 @@ void CRulerRichEditCtrl::DoColor()
 	if (dlg.DoModal() == IDOK)
 	{
 		// Apply new color
-		PrepareCharFormat(cf, dlg.GetColor(), TRUE);
+		PrepareTextCharFormat(cf, dlg.GetColor());
 
 		m_rtf.SetSelectionCharFormat(cf);
 	}

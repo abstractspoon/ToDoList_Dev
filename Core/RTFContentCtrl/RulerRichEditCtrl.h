@@ -198,7 +198,8 @@ protected:
 
 	void LayoutControls(int width, int height);
 
-	static void PrepareCharFormat(CharFormat& cf, COLORREF color, BOOL bForeground);
+	static void PrepareTextCharFormat(CharFormat& cf, COLORREF color);
+	static void PrepareBkgndCharFormat(CharFormat& cf, COLORREF color);
 	static void PrepareDlgTextColor(COLORREF& color, const CharFormat& cf);
 };
 
