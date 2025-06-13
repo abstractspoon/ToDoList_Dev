@@ -4052,7 +4052,7 @@ namespace MSDN.Html.Editor
             {
                 if (range != null)
                 {
-                    // ensure command is a valiprotected virtuald command and then enabled for the selection
+                    // ensure command is a valid command and then enabled for the selection
                     if (range.queryCommandSupported(command))
                     {
                         if (range.queryCommandEnabled(command))
