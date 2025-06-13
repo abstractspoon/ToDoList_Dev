@@ -19,6 +19,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\CtrlTextHighlighter.h"
 #include "..\shared\FileIcons.h"
+#include "..\shared\OSVersion.h"
 
 #include "..\Interfaces\TasklistStorageMgr.h"
 
@@ -1060,7 +1061,7 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 			pTVCD->clrText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
 			*pResult = CDRF_NEWFONT;
 
-			if (!CThemed::AreControlsThemed())
+			if (!CThemed::AreControlsThemed() || (COSVersion() < OSV_VISTA))
 			{
 				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 				BOOL bFocused = (GetFocus() == &m_tcPages);
@@ -1075,7 +1076,7 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		if (m_aSearchTerms.GetSize())
 		{
 			*pResult |= CDRF_NOTIFYPOSTPAINT;
-		};
+		}
 		break;
 
 	case CDDS_ITEMPOSTPAINT:
