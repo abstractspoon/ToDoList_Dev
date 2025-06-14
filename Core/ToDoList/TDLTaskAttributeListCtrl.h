@@ -67,6 +67,7 @@ public:
 	BOOL CanSetSelectedAttributeLabelBackgroundColor() const;
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
+	void GetDefaultAutoListData(TDCAUTOLISTDATA& tldDefault) const;
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
 	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
 	void SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly);

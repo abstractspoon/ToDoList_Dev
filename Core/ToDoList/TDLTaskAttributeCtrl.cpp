@@ -466,6 +466,11 @@ CONST_FWD_FUNC_RET_2ARG(int, GetCustomAttributeAutoListData, const CString&, CSt
 // -----------------------------------------------------------------------
 
 // Others having unique patterns
+void CTDLTaskAttributeCtrl::GetDefaultAutoListData(TDCAUTOLISTDATA& arg) const 
+{ 
+	m_lcAttributes.GetDefaultAutoListData(arg); 
+}
+
 void CTDLTaskAttributeCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
 {
 	m_lcAttributes.GetAutoListData(nAttribID, tld);

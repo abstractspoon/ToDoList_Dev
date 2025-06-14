@@ -1287,7 +1287,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 	m_ctrlAttributes.SetDefaultAutoListData(tld);
 	m_ctrlAttributes.GetAutoListData(TDCA_ALL, m_tldAll);
 
-	m_tldDefault.Copy(tld, TDCA_ALL);
+//	m_tldDefault.Copy(tld, TDCA_ALL);
 }
 
 void CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly)
@@ -3980,12 +3980,15 @@ void CToDoCtrl::SetCompletionStatus(const CString& sStatus)
 		m_sCompletionStatus = sStatus; 
 		m_taskTree.SetCompletionStatus(sStatus);
 
-		if (!m_sCompletionStatus.IsEmpty())
-			Misc::AddUniqueItem(m_sCompletionStatus, m_tldDefault.aStatus);
-		else
-			Misc::RemoveItem(m_sCompletionStatus, m_tldDefault.aStatus);
+		TDCAUTOLISTDATA tldDefault;
+		m_ctrlAttributes.GetDefaultAutoListData(tldDefault);
 
-		m_ctrlAttributes.SetDefaultAutoListData(m_tldDefault);
+		if (!m_sCompletionStatus.IsEmpty())
+			Misc::AddUniqueItem(m_sCompletionStatus, tldDefault.aStatus);
+		else
+			Misc::RemoveItem(m_sCompletionStatus, tldDefault.aStatus);
+
+		m_ctrlAttributes.SetDefaultAutoListData(tldDefault);
 	}
 }
 
