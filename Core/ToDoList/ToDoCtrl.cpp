@@ -1276,11 +1276,6 @@ int CToDoCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) co
 	return tld.Copy(m_tldAll, nAttribID);
 }
 
-void CToDoCtrl::UpdateAutoListData(TDC_ATTRIBUTE nAttribID)
-{
-	m_ctrlAttributes.GetAutoListData(nAttribID, m_tldAll);
-}
-
 void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 {
 	// update the combos before copying over the current defaults
@@ -4257,11 +4252,8 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 {
-	if (tasks.GetAutoListData(m_tldAll))
-	{
-		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
-		UpdateAutoListData();
-	}
+	tasks.GetAutoListData(m_tldAll);
+	m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 }
 
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
@@ -5161,9 +5153,6 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	
 	SetModified(TRUE);
 
-	if (mapAttribIDs.Has(TDCA_PASTE))
-		UpdateAutoListData();
-	
 	// For new tasks we want to do as little processing as possible 
 	// so as not to delay the appearance of the title edit field.
 	BOOL bNewTask = IsNewTaskMod(mapAttribIDs, aModTaskIDs);
@@ -6105,7 +6094,8 @@ LRESULT CToDoCtrl::OnTDCNotifyAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 	case TDCA_ALLOCTO:
 	case TDCA_ALLOCBY:
 	case TDCA_VERSION:
-		UpdateAutoListData(nAttribID);
+		// Update our copy of the data for the tree's benefit
+		m_ctrlAttributes.GetAutoListData(nAttribID, m_tldAll);
 		GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, nAttribID);
 		break;
 

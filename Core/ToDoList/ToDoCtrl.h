@@ -860,7 +860,6 @@ protected:
 
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;
 	void BuildTasksForSave(CTaskFile& tasks) const;
-	void UpdateAutoListData(TDC_ATTRIBUTE nAttribID = TDCA_ALL);
 	void UpdateDefaultTaskCustomAttributeValues();
 	void SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs = CDWordArray());
 	BOOL IsNewTaskMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const;
