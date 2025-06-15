@@ -1607,7 +1607,7 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 					case ETS_CUEBANNER:
 						if (iPropId == TMT_TEXTCOLOR)
 						{
-							*pColor = GetColorOrBrush(COLOR_WINDOWTEXT, TRUE);
+							*pColor = GetSysColorOrBrush(COLOR_WINDOWTEXT, TRUE);
 							return S_OK;
 						}
 						break;
