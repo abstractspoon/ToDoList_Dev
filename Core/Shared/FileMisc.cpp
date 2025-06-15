@@ -1617,46 +1617,42 @@ BOOL FileMisc::LoadFile(LPCTSTR szPathname, CString& sText, BOOL bDenyWrite, UIN
 
 BOOL FileMisc::IsTempFilePath(LPCTSTR szFilename)
 {
-	CString sFilename(szFilename);
-	sFilename.MakeLower();
+	if (Misc::Find(GetTempFolder(), szFilename) == 0)
+		return TRUE;
 
-	CString sTempFolder = GetTempFolder();
-	sTempFolder.MakeLower();
-
-	return (sFilename.Find(sTempFolder) == 0);
+	// else try short version
+	return (Misc::Find(GetTempFolder(FALSE), szFilename) == 0);
 }
 
-CString FileMisc::GetTempFolder()
+CString FileMisc::GetTempFolder(BOOL bLong)
 {
 	TCHAR szTempPath[MAX_PATH+1] = { 0 };
 	
-	if (::GetTempPath(MAX_PATH, szTempPath))
-		::GetLongPathName(szTempPath, szTempPath, MAX_PATH);
-	else
-		lstrcpy(szTempPath, _T("C:\\Temp"));
+	if (!::GetTempPath(MAX_PATH, szTempPath))
+		return _T("C:\\Temp");
 
-	return szTempPath;
+	// else
+	return (bLong ? GetLongPathName(szTempPath) : szTempPath);
 }
 
-CString FileMisc::GetTempFilePath(LPCTSTR szPrefix, UINT uUnique)
+CString FileMisc::GetTempFilePath(LPCTSTR szPrefix, UINT uUnique, BOOL bLong)
 {
-	CString sTempPath = GetTempFolder();
+	CString sTempPath = GetTempFolder(bLong);
 	TCHAR szTempFile[MAX_PATH+1] = { 0 };
 	
-	if (::GetTempFileName(sTempPath, szPrefix, uUnique, szTempFile))
-		::GetLongPathName(szTempFile, szTempFile, MAX_PATH);
-	else
-		szTempFile[0] = 0;
+	if (::GetTempFileName(sTempPath, szPrefix, uUnique, szTempFile) && bLong)
+		return GetLongPathName(szTempFile);
 
+	// else
 	return szTempFile;
 }
 
-CString FileMisc::GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt)
+CString FileMisc::GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt, BOOL bLong)
 {
-	CString sTempFile, sTempPath = GetTempFolder();
-	MakePath(sTempFile, NULL, sTempPath, szFilename, szExt);
+	CString sTempFile;
+	MakePath(sTempFile, NULL, GetTempFolder(bLong), szFilename, szExt);
 
-	return sTempFile;
+	return (bLong ? GetLongPathName(sTempFile) : sTempFile);
 }
 
 BOOL FileMisc::SelectFileInExplorer(LPCTSTR szFilePath)
@@ -2929,9 +2925,11 @@ BOOL FileMisc::ResolveShortcut(LPCTSTR szShortcut, CString& sTargetPath)
 CString FileMisc::GetLongPathName(LPCTSTR szShortPath)
 {
 	TCHAR szLongPath[MAX_PATH+1] = { 0 };
-	::GetLongPathName(szShortPath, szLongPath, MAX_PATH);
+	
+	if (::GetLongPathName(szShortPath, szLongPath, MAX_PATH))
+		return szLongPath;
 
-	return szLongPath;
+	return szShortPath;
 }
 
 int FileMisc::GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles)

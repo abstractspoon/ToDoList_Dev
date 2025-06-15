@@ -140,7 +140,7 @@ static CEnString TDL_FILEFILTER;
 /////////////////////////////////////////////////////////////////////////////
 
 const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
-const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print\\Print"), _T("html"));
+const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print\\Print"), _T("html"), FALSE); // IE is very fussy about embedded paths
 const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("png"));
 
 /////////////////////////////////////////////////////////////////////////////
