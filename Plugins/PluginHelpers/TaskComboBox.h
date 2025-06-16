@@ -27,7 +27,7 @@ namespace Abstractspoon
 				virtual property bool HasIcon	{ bool get(); }
 			};
 
-			public ref class TaskComboBox : Windows::Forms::ComboBox
+			public ref class TaskComboBox : UIComponents::OwnerdrawComboBoxBase
 			{
 			public:
 				TaskComboBox();

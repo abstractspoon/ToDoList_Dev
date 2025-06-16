@@ -36,6 +36,8 @@ namespace MySqlStorage
 			m_NameColumn.SelectColumn(connInfo.NameColumn);
 			m_XmlColumn.SelectColumn(connInfo.XmlColumn);
 
+			m_IdColumn.Enabled = false; // MUST REVERT FOR PR
+
 			VisibleChanged += (s, e) =>
 			{
 				if (Visible)
