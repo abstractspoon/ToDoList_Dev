@@ -374,20 +374,6 @@ BOOL IsParentPreferencePage(HWND hWnd)
 	return CWinClasses::IsKindOf(::GetParent(hWnd), RUNTIME_CLASS(CPreferencesPageBase));
 }
 
-COLORREF GetParentBkgndColor(HWND hWnd)
-{
-	if (IsParentPreferencePage(hWnd))
-	{
-		HWND hwndParent = ::GetParent(hWnd);
-		CPreferencesPageBase* pParent = (CPreferencesPageBase*)CWnd::FromHandle(hwndParent);
-
-		return pParent->GetBackgroundColor();
-	}
-
-	// else
-	return DM_3DFACE;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 static HWND s_hwndCurrentComboBox			= NULL;
@@ -1256,17 +1242,19 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 			{
 				::SetTextColor(hdc, CDarkModeStaticText::GetTextColor(hwndChild));
 
-				// There's a very strange occurrence that if we return
-				// the existing cached DM_WINDOW brush here then it 
-				// somehow fails to get used and instead the DM_3DFACE
-				// brush gets used even though it's not the returned 
-				// brush. Through trial and error I determined that
-				// modifying the color to be unique and hence return a
-				// unique brush is sufficient to 'fix' the issue.
 				COLORREF crBack = DM_3DFACE;
 
 				if (IsParentPreferencePage(hwndChild))
+				{
+					// There's a very strange occurrence that if we return
+					// the existing cached DM_WINDOW brush here then it 
+					// somehow fails to get used and instead the DM_3DFACE
+					// brush gets used even though it's not the returned 
+					// brush. Through trial and error I determined that
+					// modifying the colour to be unique and hence return a
+					// unique brush is sufficient to 'fix' the issue.
 					crBack = (DM_WINDOW + 1);
+				}
 
 				::SetBkMode(hdc, TRANSPARENT);
 
