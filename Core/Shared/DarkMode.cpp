@@ -1204,16 +1204,19 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLORLISTBOX:
 		if (WantDarkMode(hWnd))
 		{
+			HDC hdc = (HDC)wp;
+			HWND hwndChild = (HWND)lp;
+
 			COLORREF crText = DM_WINDOWTEXT, crBack = DM_WINDOW;
 
-			if (!IsWindowEnabled((HWND)lp))
+			if (!IsWindowEnabled(hwndChild))
 			{
 				crText = DM_DISABLEDEDITTEXT;
 				crBack = DM_3DFACE;
 			}
 
-			::SetTextColor((HDC)wp, crText);
-			::SetBkMode((HDC)wp, TRANSPARENT);
+			::SetTextColor(hdc, crText);
+			::SetBkMode(hdc, TRANSPARENT);
 
 			lr = GetColorOrBrush(crBack, FALSE);
 			return TRUE;
@@ -1223,9 +1226,11 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLOREDIT:
 		if (WantDarkMode(hWnd))
 		{
-			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
-			::SetBkColor((HDC)wp, DM_WINDOW);
-			::SetBkMode((HDC)wp, OPAQUE);
+			HDC hdc = (HDC)wp;
+
+			::SetTextColor(hdc, DM_WINDOWTEXT);
+			::SetBkColor(hdc, DM_WINDOW);
+			::SetBkMode(hdc, OPAQUE);
 		
 			lr = GetColorOrBrush(DM_WINDOW, FALSE);
 			return TRUE;
@@ -1236,19 +1241,20 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
  	case WM_CTLCOLORSTATIC:
 		if (WantDarkMode(hWnd))
 		{
+			HDC hdc = (HDC)wp;
 			HWND hwndChild = (HWND)lp;
 
 			if (CWinClasses::IsEditControl(hwndChild))
 			{
-				::SetTextColor((HDC)wp, DM_DISABLEDEDITTEXT);
-				::SetBkColor((HDC)wp, DM_3DFACE);
-				::SetBkMode((HDC)wp, OPAQUE);
+				::SetTextColor(hdc, DM_DISABLEDEDITTEXT);
+				::SetBkColor(hdc, DM_3DFACE);
+				::SetBkMode(hdc, OPAQUE);
 		
 				lr = GetColorOrBrush(DM_3DFACE, FALSE);
 			}
 			else // static text, checkboxes and radiobuttons
 			{
-				::SetTextColor((HDC)wp, CDarkModeStaticText::GetTextColor(hwndChild));
+				::SetTextColor(hdc, CDarkModeStaticText::GetTextColor(hwndChild));
 
 				// There's a very strange occurrence that if we return
 				// the existing cached DM_WINDOW brush here then it 
@@ -1262,7 +1268,7 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				if (IsParentPreferencePage(hwndChild))
 					crBack = (DM_WINDOW + 1);
 
-				::SetBkMode((HDC)wp, TRANSPARENT);
+				::SetBkMode(hdc, TRANSPARENT);
 
 				lr = GetColorOrBrush(crBack, FALSE);
 			}
