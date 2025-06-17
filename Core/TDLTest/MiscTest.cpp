@@ -833,7 +833,8 @@ void CMiscTest::TestSplitLines()
 
 			for (int nLine = 0; nLine < aLines.GetSize(); nLine++)
 			{
-				ExpectTrue(aLines[nLine].GetLength() < MAXLINELEN);
+				// The line length can include the trailing delimiter
+				ExpectTrue(aLines[nLine].GetLength() <= (MAXLINELEN + 1));
 				nTotalLen += (aLines[nLine].GetLength());
 			}
 
@@ -858,7 +859,8 @@ void CMiscTest::TestSplitLines()
 
 			for (int nLine = 0; nLine < aLines.GetSize(); nLine++)
 			{
-				ExpectTrue(aLines[nLine].GetLength() < MAXLINELEN);
+				// The line length can include the trailing delimiter
+				ExpectTrue(aLines[nLine].GetLength() <= (MAXLINELEN + 1));
 				nTotalLen += (aLines[nLine].GetLength());
 			}
 
