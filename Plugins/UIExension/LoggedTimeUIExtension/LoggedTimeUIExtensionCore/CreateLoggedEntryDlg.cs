@@ -39,8 +39,6 @@ namespace LoggedTimeUIExtension
 
 			m_TaskCombo.SelectedIndexChanged += OnSelectedTaskChange;
 			OnSelectedTaskChange(this, null);
-
-			m_TaskCombo.Enabled = false; // MUST REVERT FOR PR
 		}
 
 		protected void OnSelectedTaskChange(object sender, EventArgs e)

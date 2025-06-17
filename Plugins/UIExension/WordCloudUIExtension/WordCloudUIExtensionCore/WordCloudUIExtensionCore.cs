@@ -678,8 +678,6 @@ namespace WordCloudUIExtension
 			// Combo
 			m_ColorsCombo = (ColorSchemeComboBox)InitialiseCombo(new ColorSchemeComboBox(), m_AttributeCombo);
 
-			m_ColorsCombo.Enabled = false; // MUST REVERT FOR PR
-
 			// Add selection change handler
 			m_ColorsCombo.SelectedIndexChanged += new EventHandler(OnColorSchemeSelChanged);
 		}

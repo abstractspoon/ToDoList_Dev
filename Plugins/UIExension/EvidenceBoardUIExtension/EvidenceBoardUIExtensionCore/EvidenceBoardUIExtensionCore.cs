@@ -403,8 +403,6 @@ namespace EvidenceBoardUIExtension
 			InitialiseCtrl(m_OptionsCombo, m_OptionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
 
-			m_OptionsCombo.Enabled = false; // MUST REVERT FOR PR
-
 			// Link vis combo and label
 			m_LinkVisibilityLabel = CreateLabel("Connection Visibility", m_OptionsCombo);
 			this.Controls.Add(m_LinkVisibilityLabel);
