@@ -4220,6 +4220,8 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	}
 	
 	// Value tooltips
+	BOOL bMultilineText = FALSE;
+
 	switch (nCol)
 	{
 	case LABEL_COL:
@@ -4232,6 +4234,10 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		{
 			switch (nAttribID)
 			{
+			case TDCA_TASKNAME:
+				bMultilineText = TRUE;
+				break;
+
 			case TDCA_ALLOCTO:
 			case TDCA_CATEGORY:
 			case TDCA_TAGS:
@@ -4313,12 +4319,21 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					{
 						sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
 					}
-					else if (pDef->IsMultiList() && pDef->IsDataType(TDCCA_STRING))
+					else if (pDef->IsDataType(TDCCA_STRING))
 					{
-						CStringArray aValues;
+						CString sText = GetItemText(nRow, nCol);
 
-						if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
-							sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
+						if (pDef->IsMultiList())
+						{
+							CStringArray aValues;
+
+							if (SplitValueArray(sText, aValues) > 1)
+								sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
+						}
+						else
+						{
+							bMultilineText = !pDef->IsList();
+						}
 					}
 				}
 				else if (IsCustomTime(nAttribID))
@@ -4332,8 +4347,36 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				break;
 			}
 
-			if (sTooltip.IsEmpty() && !CanEditCell(nRow, nCol) && m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
-				sTooltip.LoadString(IDS_STATUSREADONLY);
+			if (sTooltip.IsEmpty())
+			{
+				if (!CanEditCell(nRow, nCol) && m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
+				{
+					sTooltip.LoadString(IDS_STATUSREADONLY);
+				}
+				else if (bMultilineText)
+				{
+					CClientDC dc(CWnd::FromHandle(*this)); // get around constness
+					GraphicsMisc::PrepareDCFont(&dc, *this);
+
+					CString sText = GetItemText(nRow, nCol);
+					int nTextWidth = dc.GetTextExtent(sText).cx;
+
+					if (nTextWidth >= GetColumnWidth(VALUE_COL))
+					{
+						if (nTextWidth <= 200)
+						{
+							sTooltip = sText;
+						}
+						else
+						{
+							CStringArray aLines;
+							int nNumLines = Misc::SplitLines(sText, aLines, 200 / GraphicsMisc::GetAverageCharWidth(&dc));
+
+							sTooltip = Misc::FormatArray(aLines, TOOLTIP_DELIM);
+						}
+					}
+				}
+			}
 		}
 		break;
 	}
