@@ -386,6 +386,8 @@ static HWND s_hwndCurrentExplorerTreeOrList = NULL;
 static HWND s_hwndCurrent					= NULL;
 static HWND s_hwndCurrentExclusion			= NULL;
 
+static CSet<HWND> s_mapExplorerThemedWnds;
+
 //////////////////////////////////////////////////////////////////////
 
 static BOOL s_bIEPrintMode = FALSE;
@@ -400,7 +402,24 @@ void CDarkMode::PrepareForIEPrintOrPreview()
 
 //////////////////////////////////////////////////////////////////////
 
-static CSet<HWND> s_mapExplorerThemedWnds;
+static CMap<COLORREF, COLORREF, HBRUSH, HBRUSH> s_mapBrushes;
+
+DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
+{
+	if (bColor)
+		return color;
+
+	// else
+	HBRUSH hbr = NULL;
+
+	if (!s_mapBrushes.Lookup(color, hbr) || !hbr)
+	{
+		hbr = ::CreateSolidBrush(color);
+		s_mapBrushes.SetAt(color, hbr);
+	}
+
+	return (DWORD)hbr;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -514,6 +533,39 @@ private:
 
 class CDarkModeComboBox : public CDarkModeCtrlBase
 {
+public:
+	CDarkModeComboBox() : m_bOwnerDraw(FALSE) 
+	{
+	}
+
+	BOOL HookWindow(HWND hWnd, CSubclasser* pSubclasser)
+	{
+		if (!CDarkModeCtrlBase::HookWindow(hWnd, pSubclasser))
+			return FALSE;
+
+		if (hWnd)
+		{
+			DWORD dwStyle = GetStyle();
+			ASSERT((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST);
+
+			m_bOwnerDraw = (Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) ||
+							Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE));
+		}
+
+		return TRUE;
+	}
+
+	static void GetEffectiveClientRect(HWND hwnd, CRect& rClient)
+	{
+		::GetClientRect(hwnd, rClient);
+
+		rClient.right -= GetSystemMetrics(SM_CXVSCROLL);
+		rClient.DeflateRect(2, 2);
+	}
+
+protected:
+	BOOL m_bOwnerDraw;
+
 protected:
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
@@ -523,7 +575,23 @@ protected:
 			if (s_hwndCurrentComboBox == NULL)
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hRealWnd);
-				return Default();
+				
+				LRESULT lr = Default();
+
+				// Disabled owner-draw combos get a COLOR_WINDOW border
+				// around the client region which I've not been able to 
+				// handle by the usual methods so we draw over it instead
+				if (m_bOwnerDraw && !IsWindowEnabled())
+				{
+					CClientDC dc(GetCWnd());
+
+					CRect rClient;
+					GetEffectiveClientRect(hRealWnd, rClient);
+
+					::FrameRect(dc, rClient, (HBRUSH)GetColorOrBrush(DM_3DFACE, FALSE));
+				}
+
+				return lr;
 			}
 			break;
 		}
@@ -1054,27 +1122,6 @@ BOOL WantDarkMode(HWND hwnd = NULL)
 
 //////////////////////////////////////////////////////////////////////
 
-static CMap<COLORREF, COLORREF, HBRUSH, HBRUSH> s_mapBrushes;
-
-DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
-{
-	if (bColor) 
-		return color; 
-	
-	// else
-	HBRUSH hbr = NULL;
-	
-	if (!s_mapBrushes.Lookup(color, hbr) || !hbr)
-	{
-		hbr = ::CreateSolidBrush(color); 
-		s_mapBrushes.SetAt(color, hbr);
-	}
-	
-	return (DWORD)hbr; 
-}
-
-//////////////////////////////////////////////////////////////////////
-
 DWORD TrueGetSysColorOrBrush(int nColor, BOOL bColor)
 {
 	if (bColor)
@@ -1313,26 +1360,12 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
+					 CWinClasses::IsClass(sClass, WC_COMBOBOXEX) ||
 					 CWinClasses::IsWinFormsControl(sClass, WC_COMBOBOX))
 			{
-				DWORD dwStyle = ::GetWindowLong(hWnd, GWL_STYLE);
-
-				if ((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST)
-				{
-					if (!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) &&
-						!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE))
-					{
-						// To make read-only combos consistent with others
-						HookWindow(hWnd, new CDarkModeComboBox());
-					}
-					break;
-				}
-			}
-			else if (CWinClasses::IsClass(sClass, WC_COMBOBOXEX))
-			{
+				// Make read-only combos consistent with others
 				if (CWinClasses::GetStyleType(hWnd, CBS_TYPEMASK) == CBS_DROPDOWNLIST)
 				{
-					// To make read-only combos consistent with others
 					HookWindow(hWnd, new CDarkModeComboBox());
 				}
 			}
@@ -1709,10 +1742,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 					if (hr == S_OK)
 					{
 						CRect rBkgnd;
-						GetClientRect(s_hwndCurrentComboBox, rBkgnd);
-
-						rBkgnd.right -= GetSystemMetrics(SM_CXVSCROLL);
-						rBkgnd.DeflateRect(2, 2);
+						CDarkModeComboBox::GetEffectiveClientRect(s_hwndCurrentComboBox, rBkgnd);
 
 						COLORREF crBkgnd = DM_WINDOW;
 
