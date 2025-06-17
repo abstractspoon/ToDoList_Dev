@@ -40,7 +40,7 @@ const CString EMPTY_STR;
 CString FALLBACK_STR;
 
 const CString DELIMS(_T("()-\\/{}[]:;,. ?\"'\n\r\t"));
-const CString BACKWARD_DELIMS(_T(")-\\/}]:;,. ?\"'\r\t")); // opening braces
+const CString BACKWARD_DELIMS(_T(")-\\/}]:;,. ?\"'\r\t"));
 
 const GUID NULLGUID = { 0 };
 
@@ -1153,46 +1153,45 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 	return aValues.GetSize();
 }
 
-int Misc::SplitLines(const CString& sText, CStringArray& aLines, int nMaxLineLength)
+int Misc::SplitLines(const CString& sText, CStringArray& aLines, int nMaxLineLengthInChars)
 {
 	int nNumLines = Split(sText, aLines, '\n', TRUE, TRUE);
+	const int MAXCHARS = nMaxLineLengthInChars;
 
-	if ((nNumLines == 0) || (nMaxLineLength <= 0) && (nMaxLineLength != -1))
+	if ((nNumLines == 0) || (MAXCHARS <= 0) && (MAXCHARS != -1))
 	{
 		ASSERT(0);
 		return 0;
 	}
 
-	if (nMaxLineLength != -1)
+	if (MAXCHARS != -1)
 	{
 		// Extra over processing
 		int nLine = nNumLines;
 
-		while (nLine--)
+		while (nLine--) // Reverse order so we can add sub-lines as we go
 		{
-			CString& sLine = aLines[nLine];
+			CString sLine = aLines[nLine];
 
-			if (sLine.GetLength() > nMaxLineLength)
+			if (sLine.GetLength() > MAXCHARS)
 			{
-				CStringArray aSubLines;
+				int nSubline = nLine;
 
 				do
 				{
 					// Find nearest word-break
-					CString sSubLine = Left(sLine, nMaxLineLength, TRUE);
+					CString sSubLine = Left(sLine, MAXCHARS, TRUE);
 
-					aSubLines.Add(sSubLine);
+					aLines.InsertAt(nSubline++, sSubLine);
 					sLine = sLine.Mid(sSubLine.GetLength());
 				}
-				while (sLine.GetLength() > nMaxLineLength);
+				while (sLine.GetLength() > MAXCHARS);
 				
-				// Add whatever's left over
-				if (!sLine.IsEmpty())
-					aSubLines.Add(sLine);
-
-				// Replace the existing string with the sub strings
-				aLines.RemoveAt(nLine);
-				aLines.InsertAt(nLine, &aSubLines);
+				// Whatever is left over is the last line
+				if (sLine.IsEmpty())
+					aLines.RemoveAt(nSubline);
+				else
+					aLines[nSubline] = sLine;
 			}
 		}
 	}
@@ -1204,8 +1203,7 @@ CString Misc::Left(const CString& sText, int nLength, BOOL bNearestWord)
 {
 	if (bNearestWord && (nLength < sText.GetLength()))
 	{
-		// Look forwards and backwards for word break
-
+		// Look backwards for word break
 		int nFindPrev = FindNextOneOf(BACKWARD_DELIMS, sText, FALSE, nLength);
 
 		// Only accept the delimiter position if it falls
