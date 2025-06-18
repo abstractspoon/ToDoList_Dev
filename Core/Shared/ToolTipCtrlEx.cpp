@@ -41,7 +41,9 @@ IMPLEMENT_DYNAMIC(CToolTipCtrlEx, CToolTipCtrl)
 CToolTipCtrlEx::CToolTipCtrlEx() 
 	: 
 	m_bUsingRelayEvent(-1), 
-	m_nLastHit(-1)
+	m_nLastHit(-1),
+	m_ptTrackingOffset(0, 0),
+	m_sizeTooltip(0, 0)
 {
 	InitToolInfo(m_tiLast, FALSE);
 }
@@ -76,7 +78,7 @@ void CToolTipCtrlEx::EnableTracking(BOOL bTracking, int nXOffset, int nYOffset)
 {
 	ASSERT(m_bUsingRelayEvent <= 0);
 
-	// Temporarily disable tracking tooltips below Windows 8
+	// Don't allow tracking tooltips below Windows 8
 	// because they don't resize and paint correctly
 	if (bTracking && (COSVersion() >= OSV_WIN8))
 	{
@@ -88,6 +90,9 @@ void CToolTipCtrlEx::EnableTracking(BOOL bTracking, int nXOffset, int nYOffset)
 	else
 	{
 		m_nFlags &= ~WF_TRACKINGTOOLTIPS;
+
+		m_ptTrackingOffset.x = 0;
+		m_ptTrackingOffset.y = 0;
 	}
 
 	SetDelayTime(TTDT_AUTOPOP, (bTracking ? 100000 : 10000));
