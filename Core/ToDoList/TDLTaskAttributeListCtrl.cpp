@@ -86,8 +86,11 @@ const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int ICON_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
-const int MAX_TIP_LINELEN	= GraphicsMisc::ScaleByDPIFactor(200);
+const int MIN_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(100);
+const int MAX_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
+
 const int MIN_COL_WIDTH		= (4 * EE_BTNWIDTH_DEFAULT);
+const int MAX_TIP_LINELEN	= MAX_EDIT_WIDTH;
 
 const int VALUE_VARIES = 1;
 const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
@@ -3036,6 +3039,49 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 	return NULL;
 }
 
+void CTDLTaskAttributeListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
+{
+	CInputListCtrl::GetCellEditRect(nRow, nCol, rCell);
+
+	// Ensure a big-enough edit field for 'free-text'
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	CString sValue = GetItemText(nRow, VALUE_COL);
+
+	switch (nAttribID)
+	{
+	case TDCA_TASKNAME:
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+
+			// Custom attributes not handled by default
+			if (!pDef->IsList() && (pDef->GetDataType() == TDCCA_STRING))
+				break;
+		}
+		return;
+	}
+//	ASSERT(GetEditControl(nRow, FALSE) == CInputListCtrl::GetEditControl());
+
+	// Progressively enlarge the edit box until the maximum is reached
+	rCell.right = (rCell.left + MIN_EDIT_WIDTH);
+
+	int nTextWidth = GraphicsMisc::GetTextWidth(GetItemText(nRow, nCol), *this);
+
+	if (nTextWidth >= rCell.Width())
+	{
+		rCell.right = (rCell.left + MAX_EDIT_WIDTH);
+
+		if (nTextWidth > MAX_EDIT_WIDTH)
+			rCell.bottom += 50;
+
+		GraphicsMisc::FitRectToWindow(rCell, *this);
+	}
+}
+
 void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 {
 	ASSERT(CanEditCell(nRow, nCol));
@@ -3048,7 +3094,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	{
 		if (pCtrl == CInputListCtrl::GetEditControl())
 		{
-			PrepareControl(m_editBox, nRow, nCol);
+			PrepareControl(*pCtrl, nRow, nCol);
 			CInputListCtrl::EditCell(nRow, nCol, bBtnClick);
 		}
 		else if (pCtrl == &m_eTimePeriod)
