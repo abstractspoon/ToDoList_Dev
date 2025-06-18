@@ -4267,8 +4267,6 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	}
 	
 	// Value tooltips
-	BOOL bMultilineText = FALSE;
-
 	switch (nCol)
 	{
 	case LABEL_COL:
@@ -4279,6 +4277,8 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	case VALUE_COL:
 		if (!RowValueVaries(nRow))
 		{
+			BOOL bMultilineText = FALSE;
+
 			switch (nAttribID)
 			{
 			case TDCA_TASKNAME:
