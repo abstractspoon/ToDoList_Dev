@@ -86,6 +86,7 @@ const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int ICON_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
+const int MAX_TIP_LINELEN	= GraphicsMisc::ScaleByDPIFactor(200);
 const int MIN_COL_WIDTH		= (4 * EE_BTNWIDTH_DEFAULT);
 
 const int VALUE_VARIES = 1;
@@ -4363,14 +4364,16 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 					if (nTextWidth >= GetColumnWidth(VALUE_COL))
 					{
-						if (nTextWidth <= 200)
+						if (nTextWidth <= MAX_TIP_LINELEN)
 						{
 							sTooltip = sText;
 						}
 						else
 						{
 							CStringArray aLines;
-							int nNumLines = Misc::SplitLines(sText, aLines, 200 / GraphicsMisc::GetAverageCharWidth(&dc));
+
+							int nMaxCharLineLen = (int)(MAX_TIP_LINELEN / GraphicsMisc::GetAverageCharWidth(&dc));
+							int nNumLines = Misc::SplitLines(sText, aLines, nMaxCharLineLen);
 
 							sTooltip = Misc::FormatArray(aLines, TOOLTIP_DELIM);
 						}
