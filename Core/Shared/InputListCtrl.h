@@ -137,7 +137,7 @@ protected:
 	virtual BOOL IsButtonEnabled(int nRow, int nCol) const;
 	virtual CColumnData* GetNewColumnData() const { return new CColumnData2; }
 	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
-	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell);
+	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell) const;
 	virtual void PrepareControl(CWnd& /*ctrl*/, int /*nRow*/, int /*nCol*/) {}
 	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rButton) const;
 	virtual BOOL DrawButton(CDC* pDC, int nRow, int nCol, const CString& sText, BOOL bSelected, CRect& rButton);

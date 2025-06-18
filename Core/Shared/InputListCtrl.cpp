@@ -1248,7 +1248,7 @@ CRect CInputListCtrl::ScrollCellIntoView(int nRow, int nCol)
 	return rCell;
 }
 
-void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell)
+void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
 {
 	CEnListCtrl::GetCellEditRect(nRow, nCol, rCell);
 }
