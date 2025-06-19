@@ -87,9 +87,9 @@ const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int ICON_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
 const int MIN_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(100);
-const int MAX_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
 
 const int MIN_COL_WIDTH		= (4 * EE_BTNWIDTH_DEFAULT);
+const int MAX_EDIT_WIDTH	= (2 * MIN_EDIT_WIDTH);
 const int MAX_TIP_LINELEN	= MAX_EDIT_WIDTH;
 
 const int VALUE_VARIES = 1;
