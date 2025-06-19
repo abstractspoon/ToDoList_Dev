@@ -755,7 +755,7 @@ protected:
 			if (s_hwndCurrentEdit == NULL)
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentEdit, hRealWnd);
-				CWnd* pEdit = CWnd::FromHandle(hRealWnd);
+				CWnd* pEdit = GetCWnd();
 
 				if (pEdit->IsKindOf(RUNTIME_CLASS(CPopupEditCtrl)))
 				{
@@ -763,9 +763,10 @@ protected:
 
 					// Give the control a highlighted border
 					CRect rBorder;
-					GetClientRect(rBorder);
+					GetWindowRect(rBorder);
+					ScreenToWindow(rBorder);
 
-					CClientDC dc(pEdit);
+					CWindowDC dc(pEdit);
 					GraphicsMisc::DrawRect(&dc, rBorder, CLR_NONE, DM_HOTLIGHT);
 
 					return lr;
