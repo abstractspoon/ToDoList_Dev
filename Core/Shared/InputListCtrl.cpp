@@ -1458,14 +1458,21 @@ BOOL CInputListCtrl::CheckRecreateEditControl(BOOL bMultiline)
 
 		if (!m_editBox.m_hWnd)
 		{
-			UINT dwStyle = (WS_CHILD | WS_BORDER | ES_LEFT);
+			// Note: The default client border (WS_BORDER) is generally
+			// preferred because it is more distinctive but in the case
+			// of multiline we use a non-client border (WS_EX_CLIENTEDGE)
+			// because otherwise the vertical scrollbar appears detached
+			UINT dwStyle = (WS_CHILD | ES_LEFT);
 
 			if (bMultiline)
-				dwStyle |= (ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL);
+			{
+				m_editBox.Create(this, IDC_EDITBOX, (dwStyle | ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL));
+				m_editBox.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
+			}
 			else
-				dwStyle |= ES_AUTOHSCROLL;
-
-			m_editBox.Create(this, IDC_EDITBOX, dwStyle);
+			{
+				m_editBox.Create(this, IDC_EDITBOX, (dwStyle | WS_BORDER | ES_AUTOHSCROLL));
+			}
 		}
 	}
 
