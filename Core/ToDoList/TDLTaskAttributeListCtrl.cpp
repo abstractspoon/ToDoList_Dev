@@ -4298,12 +4298,12 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	case VALUE_COL:
 		if (!RowValueVaries(nRow))
 		{
-			BOOL bMultilineText = FALSE;
+			BOOL bCheckWantMultilineTip = FALSE;
 
 			switch (nAttribID)
 			{
 			case TDCA_TASKNAME:
-				bMultilineText = TRUE;
+				bCheckWantMultilineTip = TRUE;
 				break;
 
 			case TDCA_ALLOCTO:
@@ -4400,7 +4400,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 						}
 						else
 						{
-							bMultilineText = !pDef->IsList();
+							bCheckWantMultilineTip = !pDef->IsList();
 						}
 					}
 				}
@@ -4421,7 +4421,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				{
 					sTooltip.LoadString(IDS_STATUSREADONLY);
 				}
-				else if (bMultilineText)
+				else if (bCheckWantMultilineTip)
 				{
 					CClientDC dc(CWnd::FromHandle(*this)); // get around constness
 					GraphicsMisc::PrepareDCFont(&dc, *this);
