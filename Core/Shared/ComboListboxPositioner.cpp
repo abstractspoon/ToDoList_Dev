@@ -32,7 +32,7 @@ CComboListboxPositioner::~CComboListboxPositioner()
 BOOL CComboListboxPositioner::Initialize()
 {
 	// We don't pass WC_COMBOLBOX here because it's more
-	// efficient to do it in OnCallWndRetProc
+	// efficient to check the class in OnCallWndRetProc
 	return Instance().InitHooks(HM_CALLWNDPROCRET);
 }
 

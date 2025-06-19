@@ -156,7 +156,6 @@ LRESULT CPopupEditCtrl::OnPECShow(WPARAM wp, LPARAM /*lp*/)
 	{
 		// Prevent any window scrolling except ourselves 
 		// if we have a vertical scrollbar
-		// But allow it on us if we are multiline
 		if (GetStyle() & WS_VSCROLL)
 			CDisableMouseWheel::Initialize(*this);
 		else
