@@ -86,7 +86,11 @@ const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int ICON_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(100);
+
 const int MIN_COL_WIDTH		= (4 * EE_BTNWIDTH_DEFAULT);
+const int MAX_EDIT_WIDTH	= (2 * MIN_EDIT_WIDTH);
+const int MAX_TIP_LINELEN	= MAX_EDIT_WIDTH;
 
 const int VALUE_VARIES = 1;
 const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
@@ -2652,8 +2656,14 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	m_editBox.ClearMask();
 
+	BOOL bCheckWantMultilineEdit = FALSE;
+
 	switch (nAttribID)
 	{
+	case TDCA_TASKNAME:
+		bCheckWantMultilineEdit = TRUE;
+		break;
+
 	case TDCA_ALLOCBY:	PrepareSingleSelCombo(nRow, m_tldDefault.aAllocBy, m_tldAll.aAllocBy, m_cbTextAndNumbers);	break;
 	case TDCA_STATUS: 	PrepareSingleSelCombo(nRow, m_tldDefault.aStatus, m_tldAll.aStatus, m_cbTextAndNumbers);	break;
 	case TDCA_VERSION: 	PrepareSingleSelCombo(nRow, m_tldDefault.aVersion, m_tldAll.aVersion, m_cbTextAndNumbers);	break;
@@ -2697,7 +2707,6 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_LOCK: 
 	case TDCA_COLOR:
 	case TDCA_RECURRENCE:
-	case TDCA_TASKNAME:
 	case TDCA_EXTERNALID: 
 		break; // Nothing to do
 
@@ -2822,6 +2831,9 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 					break;
 
 				case TDCCA_STRING:
+					bCheckWantMultilineEdit = TRUE;
+					break;
+
 				case TDCCA_ICON:
 				case TDCCA_BOOL:
 					break; // Handled by CInputListCtrl
@@ -2848,6 +2860,19 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			PrepareTimeOfDayCombo(nRow);
 		}
 		break;
+	}
+
+	if (&ctrl == &m_editBox)
+	{
+		BOOL bMultiline = FALSE;
+
+		if (bCheckWantMultilineEdit)
+		{
+			int nTextWidth = GraphicsMisc::GetTextWidth(GetItemText(nRow, nCol), *this);
+			bMultiline = (nTextWidth >= MAX_EDIT_WIDTH);
+		}
+
+		VERIFY(CInputListCtrl::CheckRecreateEditControl(bMultiline));
 	}
 }
 
@@ -3035,6 +3060,49 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 	return NULL;
 }
 
+void CTDLTaskAttributeListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
+{
+	CInputListCtrl::GetCellEditRect(nRow, nCol, rCell);
+
+	// Ensure a big-enough edit field for 'free-text'
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	CString sValue = GetItemText(nRow, VALUE_COL);
+
+	switch (nAttribID)
+	{
+	case TDCA_TASKNAME:
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+
+			// Custom attributes not handled by default
+			if (!pDef->IsList() && (pDef->GetDataType() == TDCCA_STRING))
+				break;
+		}
+		return;
+	}
+//	ASSERT(GetEditControl(nRow, FALSE) == CInputListCtrl::GetEditControl());
+
+	// Progressively enlarge the edit box until the maximum is reached
+	rCell.right = (rCell.left + MIN_EDIT_WIDTH);
+
+	int nTextWidth = GraphicsMisc::GetTextWidth(GetItemText(nRow, nCol), *this);
+
+	if (nTextWidth >= rCell.Width())
+	{
+		rCell.right = (rCell.left + MAX_EDIT_WIDTH);
+
+		if (nTextWidth > MAX_EDIT_WIDTH)
+			rCell.bottom += 50;
+
+		GraphicsMisc::FitRectToWindow(rCell, *this);
+	}
+}
+
 void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 {
 	ASSERT(CanEditCell(nRow, nCol));
@@ -3047,7 +3115,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	{
 		if (pCtrl == CInputListCtrl::GetEditControl())
 		{
-			PrepareControl(m_editBox, nRow, nCol);
+			PrepareControl(*pCtrl, nRow, nCol);
 			CInputListCtrl::EditCell(nRow, nCol, bBtnClick);
 		}
 		else if (pCtrl == &m_eTimePeriod)
@@ -4230,8 +4298,14 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	case VALUE_COL:
 		if (!RowValueVaries(nRow))
 		{
+			BOOL bCheckWantMultilineTip = FALSE;
+
 			switch (nAttribID)
 			{
+			case TDCA_TASKNAME:
+				bCheckWantMultilineTip = TRUE;
+				break;
+
 			case TDCA_ALLOCTO:
 			case TDCA_CATEGORY:
 			case TDCA_TAGS:
@@ -4313,12 +4387,21 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					{
 						sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
 					}
-					else if (pDef->IsMultiList() && pDef->IsDataType(TDCCA_STRING))
+					else if (pDef->IsDataType(TDCCA_STRING))
 					{
-						CStringArray aValues;
+						CString sText = GetItemText(nRow, nCol);
 
-						if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
-							sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
+						if (pDef->IsMultiList())
+						{
+							CStringArray aValues;
+
+							if (SplitValueArray(sText, aValues) > 1)
+								sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
+						}
+						else
+						{
+							bCheckWantMultilineTip = !pDef->IsList();
+						}
 					}
 				}
 				else if (IsCustomTime(nAttribID))
@@ -4332,8 +4415,38 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				break;
 			}
 
-			if (sTooltip.IsEmpty() && !CanEditCell(nRow, nCol) && m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
-				sTooltip.LoadString(IDS_STATUSREADONLY);
+			if (sTooltip.IsEmpty())
+			{
+				if (!CanEditCell(nRow, nCol) && m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
+				{
+					sTooltip.LoadString(IDS_STATUSREADONLY);
+				}
+				else if (bCheckWantMultilineTip)
+				{
+					CClientDC dc(CWnd::FromHandle(*this)); // get around constness
+					GraphicsMisc::PrepareDCFont(&dc, *this);
+
+					CString sText = GetItemText(nRow, nCol);
+					int nTextWidth = dc.GetTextExtent(sText).cx;
+
+					if (nTextWidth >= GetColumnWidth(VALUE_COL))
+					{
+						if (nTextWidth <= MAX_TIP_LINELEN)
+						{
+							sTooltip = sText;
+						}
+						else
+						{
+							CStringArray aLines;
+
+							int nMaxCharLineLen = (int)(MAX_TIP_LINELEN / GraphicsMisc::GetAverageCharWidth(&dc));
+							int nNumLines = Misc::SplitLines(sText, aLines, nMaxCharLineLen);
+
+							sTooltip = Misc::FormatArray(aLines, TOOLTIP_DELIM);
+						}
+					}
+				}
+			}
 		}
 		break;
 	}

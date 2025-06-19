@@ -1827,6 +1827,59 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionBorderColor(GM_ITEMSTATE nState, 
 	return GetSysColor(COLOR_WINDOW);
 }
 
+BOOL GraphicsMisc::FitRect(CRect& rect, const CRect& rOther)
+{
+	int nXOffset = 0, nYOffset = 0;
+
+	if (rect.left < rOther.left)
+	{
+		nXOffset = (rOther.left - rect.left);
+	}
+	else if (rect.right > rOther.right)
+	{
+		nXOffset = (rOther.right - rect.right);
+	}
+
+	if (rect.top < rOther.top)
+	{
+		nYOffset = (rOther.top - rect.top);
+	}
+	else if (rect.bottom > rOther.bottom)
+	{
+		nYOffset = (rOther.bottom - rect.bottom);
+	}
+
+	if (!nXOffset && !nYOffset)
+		return FALSE;
+
+	rect.OffsetRect(nXOffset, nYOffset);
+	return TRUE;
+}
+
+BOOL GraphicsMisc::FitRectToWindow(CRect& rect, HWND hWnd, BOOL bScreen)
+{
+	CRect rWnd;
+
+	if (bScreen)
+		::GetWindowRect(hWnd, rWnd);
+	else
+		::GetClientRect(hWnd, rWnd);
+
+	return FitRect(rect, rWnd);
+}
+
+BOOL GraphicsMisc::FitRectToScreen(CRect& rect, LPPOINT pPtRef, UINT nFallback)
+{
+	CRect rScreen;
+
+	if (pPtRef)
+		GetAvailableScreenSpace(*pPtRef, rScreen, nFallback);
+	else
+		GetAvailableScreenSpace(rect, rScreen, nFallback);
+
+	return FitRect(rect, rScreen);
+}
+
 BOOL GraphicsMisc::GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen, UINT nFallback)
 {
 	if (hMon && GetMonitorAvailableScreenSpace(hMon, rScreen))

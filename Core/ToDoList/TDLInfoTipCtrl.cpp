@@ -8,6 +8,7 @@
 #include "ToDoCtrlDataDefines.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataUtils.h"
+#include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
@@ -118,6 +119,16 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 			break;
 
 		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(iti.nAttributeID))
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_CUSTDEF_ALT(m_aCustomAttribDefs, iti.nAttributeID, pDef, break);
+
+				if (pDef->IsDataType(TDCCA_STRING) && !pDef->IsList())
+					break;
+			}
+
+			// All else
 			nMaxValueLen = max(nMaxValueLen, iti.sValue.GetLength());
 			break;
 		}
