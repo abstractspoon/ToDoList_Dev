@@ -159,7 +159,9 @@ protected:
 	void PostCreateControl(CWnd& ctrl);
 	void HideControl(CWnd& ctrl, const CWnd* pWndIgnore = NULL);
 	void ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick = FALSE);
+
 	CPopupEditCtrl* GetEditControl();
+	BOOL CheckRecreateEditControl(BOOL bMultiline);
 
 	BOOL IsDuplicateRow(CString sRow, int nRowToIgnore) const;
 	BOOL IsDuplicateCol(CString sCol, int nColToIgnore) const;

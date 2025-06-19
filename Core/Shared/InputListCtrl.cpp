@@ -1435,9 +1435,41 @@ CPopupEditCtrl* CInputListCtrl::GetEditControl()
 		return NULL;
 
 	if (!m_editBox.m_hWnd)
-		m_editBox.Create(this, IDC_EDITBOX, (WS_CHILD | WS_BORDER));
+		VERIFY(CheckRecreateEditControl(FALSE));
 
 	return &m_editBox;
+}
+
+BOOL CInputListCtrl::CheckRecreateEditControl(BOOL bMultiline)
+{
+	ASSERT (m_hWnd);
+
+	if (m_hWnd)
+	{
+		// Seems the only way to change the ES_MULTILINE style
+		// is to recreate the edit box
+		if (m_editBox.m_hWnd)
+		{
+			BOOL bIsMultiline = (m_editBox.GetStyle() & ES_MULTILINE);
+
+			if (Misc::StatesDiffer(bMultiline, bIsMultiline))
+				m_editBox.DestroyWindow();
+		}
+
+		if (!m_editBox.m_hWnd)
+		{
+			UINT dwStyle = (WS_CHILD | WS_BORDER | ES_LEFT);
+
+			if (bMultiline)
+				dwStyle |= (ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL);
+			else
+				dwStyle |= ES_AUTOHSCROLL;
+
+			m_editBox.Create(this, IDC_EDITBOX, dwStyle);
+		}
+	}
+
+	return (!m_editBox.GetSafeHwnd() == NULL);
 }
 
 void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)

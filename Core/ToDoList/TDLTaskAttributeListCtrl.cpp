@@ -2656,8 +2656,14 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	m_editBox.ClearMask();
 
+	BOOL bCheckWantMultilineEdit = FALSE;
+
 	switch (nAttribID)
 	{
+	case TDCA_TASKNAME:
+		bCheckWantMultilineEdit = TRUE;
+		break;
+
 	case TDCA_ALLOCBY:	PrepareSingleSelCombo(nRow, m_tldDefault.aAllocBy, m_tldAll.aAllocBy, m_cbTextAndNumbers);	break;
 	case TDCA_STATUS: 	PrepareSingleSelCombo(nRow, m_tldDefault.aStatus, m_tldAll.aStatus, m_cbTextAndNumbers);	break;
 	case TDCA_VERSION: 	PrepareSingleSelCombo(nRow, m_tldDefault.aVersion, m_tldAll.aVersion, m_cbTextAndNumbers);	break;
@@ -2701,7 +2707,6 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_LOCK: 
 	case TDCA_COLOR:
 	case TDCA_RECURRENCE:
-	case TDCA_TASKNAME:
 	case TDCA_EXTERNALID: 
 		break; // Nothing to do
 
@@ -2826,6 +2831,9 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 					break;
 
 				case TDCCA_STRING:
+					bCheckWantMultilineEdit = TRUE;
+					break;
+
 				case TDCCA_ICON:
 				case TDCCA_BOOL:
 					break; // Handled by CInputListCtrl
@@ -2852,6 +2860,19 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			PrepareTimeOfDayCombo(nRow);
 		}
 		break;
+	}
+
+	if (&ctrl == &m_editBox)
+	{
+		BOOL bMultiline = FALSE;
+
+		if (bCheckWantMultilineEdit)
+		{
+			int nTextWidth = GraphicsMisc::GetTextWidth(GetItemText(nRow, nCol), *this);
+			bMultiline = (nTextWidth >= MAX_EDIT_WIDTH);
+		}
+
+		VERIFY(CInputListCtrl::CheckRecreateEditControl(bMultiline));
 	}
 }
 
