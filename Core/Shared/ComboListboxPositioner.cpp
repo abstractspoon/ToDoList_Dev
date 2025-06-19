@@ -70,7 +70,7 @@ void CComboListboxPositioner::FixupListBoxPosition(HWND hwndListbox, const WINDO
  	CRect rNewPos(CPoint(wpos.x, wpos.y), CSize(wpos.cx, wpos.cy));
 	CPoint ptCursor(::GetMessagePos());
 
-	// WE only fixup the X position
+	// We only fixup the X position because Windows handles the Y pos
 	if (GraphicsMisc::FitRectToScreen(rNewPos, &ptCursor) && (rNewPos.left != wpos.x))
 	{
 		::MoveWindow(hwndListbox, rNewPos.left, wpos.y, wpos.cx, wpos.cy, TRUE);
