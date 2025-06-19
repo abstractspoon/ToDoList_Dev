@@ -15,7 +15,7 @@ const UINT WM_TTC_TOOLHITTEST = ::RegisterWindowMessage(_T("WM_TTC_TOOLHITTEST")
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CToolTipCtrlEx : public CToolTipCtrl/*, protected CSubclasser*/
+class CToolTipCtrlEx : public CToolTipCtrl, protected CSubclasser
 {
 	DECLARE_DYNAMIC(CToolTipCtrlEx)
 
@@ -45,7 +45,7 @@ public:
 protected:
 	BOOL m_bUsingRelayEvent;
 	CPoint m_ptTrackingOffset;
-	//CSubclassWnd m_scTracking;
+	CSubclassWnd m_scTracking;
 
 	int m_nLastHit;
 	TOOLINFO m_tiLast;
@@ -55,12 +55,11 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg int OnCreate(LPCREATESTRUCT pCreateStruct);
-	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
-//	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
+	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	CPoint FitTooltipRectToScreen(const CRect& rTooltip) const;
 
