@@ -4285,7 +4285,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			break;
 		}
 	}
-	else // Value tooltips
+	else // Label/Value tooltips
 	{
 		GetCellRect(nRow, nCol, rBounds);
 
