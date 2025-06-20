@@ -185,8 +185,6 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 				// add new tool and activate the tip
 				TOOLINFO ti = tiHit;
 
-//				ti.uFlags &= ~(TTF_NOTBUTTON|TTF_ALWAYSTIP);
-
  				if (IsTracking())
 					ti.uFlags |= TTF_TRACK | TTF_ABSOLUTE | TTF_NOTBUTTON;
 
@@ -206,7 +204,8 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 					{
  						SendMessage(TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
 
-						// Hook the hit tested window so we can handle the TTN_SHOW message
+						// Hook the hit tested window (which may be different from pOwner)
+						// so we can handle the TTN_SHOW message for 'fitting' the tip
 						m_scTracking.HookWindow(ti.hwnd, this);
 					}
 
@@ -235,7 +234,9 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 				if (m_scTracking.IsValid())
 				{
 					CRect rTooltip(ptTip, m_sizeTooltip);
-					ptTip = FitTooltipRectToScreen(rTooltip);
+
+					if (FitTooltipToScreen(rTooltip))
+						ptTip = rTooltip.TopLeft();
 				}
 
 				SendMessage(TTM_TRACKPOSITION, 0, MAKELPARAM(ptTip.x, ptTip.y));
@@ -269,8 +270,8 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 					CRect rTooltip;
 					GetWindowRect(rTooltip);
 
-					CPoint ptTip = FitTooltipRectToScreen(rTooltip);
-					SetWindowPos(NULL, ptTip.x, ptTip.y, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
+					if (FitTooltipToScreen(rTooltip))
+						SetWindowPos(NULL, rTooltip.left, rTooltip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
 
 					m_sizeTooltip = rTooltip.Size();
 				}
@@ -283,40 +284,24 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	return ScDefault(m_scTracking);
 }
 
-CPoint CToolTipCtrlEx::FitTooltipRectToScreen(const CRect& rTooltip) const
+BOOL CToolTipCtrlEx::FitTooltipToScreen(CRect& rTooltip) const
 {
-	CPoint ptCursor(::GetMessagePos()), ptTooltip(rTooltip.TopLeft());
+	CPoint ptCursor(::GetMessagePos());
+	CRect rFixedPos(rTooltip);
 
-	CRect rMonitor;
-	GraphicsMisc::GetAvailableScreenSpace(ptCursor, rMonitor, MONITOR_DEFAULTTONEAREST);
+	if (!GraphicsMisc::FitRectToScreen(rFixedPos, &ptCursor, MONITOR_DEFAULTTONEAREST))
+		return FALSE;
 
-	BOOL bHorzMove = FALSE;
+	CPoint ptOffset = (rFixedPos.TopLeft() - rTooltip.TopLeft());
 
-	if (rTooltip.right > rMonitor.right)
-	{
-		ptTooltip.x = rMonitor.right - rTooltip.Width();
-		bHorzMove = TRUE;
-	}
-	else if (rTooltip.left < rMonitor.left)
-	{
-		// It shouldn't be possible for the tooltip to be off the left side
-		// of the screen because we always place it to the right of the cursor
-		// but with a multi-monitor setup with different screen resolutions
-		// and the app window spanning two screens, Windows can tell us that
-		// we're on a different screen from the one we 'know is right'
-		ptTooltip.x = rMonitor.left;
-		bHorzMove = TRUE;
-	}
+	if (ptOffset.x && ptOffset.y)
+		ptOffset.y = (ptCursor.y - rTooltip.Height() - (m_ptTrackingOffset.y / 2) - rTooltip.top); // flip above
 
-	if (rTooltip.bottom > rMonitor.bottom)
-	{
-		if (bHorzMove)
-			ptTooltip.y = (ptCursor.y - rTooltip.Height() - (m_ptTrackingOffset.y / 2)); // flip above
-		else
-			ptTooltip.y = (rMonitor.bottom - rTooltip.Height());
-	}
+	if (!ptOffset.x && !ptOffset.y)
+		return FALSE;
 
-	return ptTooltip;
+	rTooltip.OffsetRect(ptOffset);
+	return TRUE;
 }
 
 BOOL CToolTipCtrlEx::IsMouseDown(UINT nMsgID)
@@ -505,7 +490,7 @@ const TOOLINFO& CToolTipCtrlEx::GetLastHitToolInfo() const
 	return m_tiLast; 
 }
 
-BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const
+BOOL CToolTipCtrlEx::AdjustRect(LPRECT lprc, BOOL bLarger) const
 { 
 	ASSERT(::IsWindow(m_hWnd));  
 	

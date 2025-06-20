@@ -25,7 +25,7 @@ public:
 
 	void RelayEvent(LPMSG lpMsg);
 	void FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage = FALSE);
-	BOOL AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const;
+	BOOL AdjustRect(LPRECT lprc, BOOL bLarger) const;
 	void Activate(BOOL bActivate);
 	void EnableMultilineTips() { SetMaxTipWidth(SHRT_MAX); }
 	void EnableTracking(BOOL bTracking = TRUE, int nXOffset = 0, int nYOffset = 0);
@@ -61,7 +61,7 @@ protected:
 protected:
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
-	CPoint FitTooltipRectToScreen(const CRect& rTooltip) const;
+	BOOL FitTooltipToScreen(CRect& rTooltip) const;
 
 	static void InitToolInfo(TOOLINFO& ti, BOOL bInitSize);
 	static int DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti, BOOL bSendHitTestMessage);
