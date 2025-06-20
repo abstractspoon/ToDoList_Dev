@@ -15,6 +15,11 @@ const UINT WM_TTC_TOOLHITTEST = ::RegisterWindowMessage(_T("WM_TTC_TOOLHITTEST")
 
 /////////////////////////////////////////////////////////////////////////////
 
+// Ensures the tip does not overlap TOOLINFO::rect
+#define TTF_EXCLUDEBOUNDS 0x2000
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CToolTipCtrlEx : public CToolTipCtrl, protected CSubclasser
 {
 	DECLARE_DYNAMIC(CToolTipCtrlEx)
@@ -55,6 +60,7 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg int OnCreate(LPCREATESTRUCT pCreateStruct);
+	afx_msg BOOL OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
