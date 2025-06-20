@@ -258,6 +258,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	VERIFY(m_spinPercent.Create(WS_CHILD | UDS_SETBUDDYINT | UDS_ARROWKEYS| UDS_ALIGNRIGHT, CRect(0, 0, 0, 0), this, IDC_PERCENT_SPIN));
 
+	// Misc initialisation
 	CLocalizer::EnableTranslation(m_cbTextAndNumbers, FALSE);
 	CLocalizer::EnableTranslation(m_cbPriority, FALSE);
 	CLocalizer::EnableTranslation(m_cbRisk, FALSE);
@@ -852,6 +853,8 @@ void CTDLTaskAttributeListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 	if (rSplitBar.PtInRect(point) && ::DragDetect(*this, point))
 	{
+		OnCancelEdit();
+
 		m_bSplitting = TRUE;
 		SetCapture();
 
@@ -2868,8 +2871,13 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 
 		if (bCheckWantMultilineEdit)
 		{
+			CRect rClient;
+			GetClientRect(rClient);
+
+			int nMaxWidth = rClient.Width();
 			int nTextWidth = GraphicsMisc::GetTextWidth(GetItemText(nRow, nCol), *this);
-			bMultiline = (nTextWidth >= MAX_EDIT_WIDTH);
+
+			bMultiline = (nTextWidth >= min(nMaxWidth, MAX_EDIT_WIDTH));
 		}
 
 		VERIFY(CInputListCtrl::CheckRecreateEditControl(bMultiline));
@@ -3062,15 +3070,18 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 
 void CTDLTaskAttributeListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
 {
+	ASSERT(nCol == VALUE_COL);
+
 	CInputListCtrl::GetCellEditRect(nRow, nCol, rCell);
 
 	// Ensure a big-enough edit field for 'free-text'
-	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-	CString sValue = GetItemText(nRow, VALUE_COL);
+	BOOL bCheckTextWidth = FALSE;
 
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:
+		bCheckTextWidth = TRUE;
 		break;
 
 	default:
@@ -3079,27 +3090,37 @@ void CTDLTaskAttributeListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
 
-			// Custom attributes not handled by default
-			if (!pDef->IsList() && (pDef->GetDataType() == TDCCA_STRING))
-				break;
+			bCheckTextWidth = (!pDef->IsList() && (pDef->GetDataType() == TDCCA_STRING));
 		}
-		return;
+		break;
 	}
-//	ASSERT(GetEditControl(nRow, FALSE) == CInputListCtrl::GetEditControl());
 
-	// Progressively enlarge the edit box until the maximum is reached
-	rCell.right = (rCell.left + MIN_EDIT_WIDTH);
-
-	int nTextWidth = GraphicsMisc::GetTextWidth(GetItemText(nRow, nCol), *this);
-
-	if (nTextWidth >= rCell.Width())
+	if (bCheckTextWidth)
 	{
-		rCell.right = (rCell.left + MAX_EDIT_WIDTH);
+		// Progressively enlarge the edit box until the maximum is reached
+		// Prevent edit width exceeding 'ours' because it's a child
+		CRect rClient, rEdit(rCell);
+		GetClientRect(rClient);
 
-		if (nTextWidth > MAX_EDIT_WIDTH)
-			rCell.bottom += 50;
+		int nMaxWidth = rClient.Width(), nCellWidth = rCell.Width();
+		rEdit.right = (rEdit.left + max(nCellWidth, min(nMaxWidth, MIN_EDIT_WIDTH)));
 
-		GraphicsMisc::FitRectToWindow(rCell, *this);
+		CString sValue = GetItemText(nRow, VALUE_COL);
+		int nTextWidth = GraphicsMisc::GetTextWidth(sValue, *this);
+
+		if (nTextWidth >= rEdit.Width())
+		{
+			rEdit.right = (rEdit.left + max(nCellWidth, min(nMaxWidth, MAX_EDIT_WIDTH)));
+
+			if (nTextWidth > MAX_EDIT_WIDTH)
+			{
+				// Make the height not a row-multiple to be clearly visible
+				rEdit.bottom += ((GetItemHeight() * 5) / 2);
+			}
+		}
+
+		GraphicsMisc::FitRectToWindow(rEdit, *this);
+		rCell = rEdit;
 	}
 }
 
@@ -4424,11 +4445,8 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					}
 					else if (bCheckWantMultilineTip)
 					{
-						CClientDC dc(CWnd::FromHandle(*this)); // get around constness
-						GraphicsMisc::PrepareDCFont(&dc, *this);
-
 						CString sText = GetItemText(nRow, nCol);
-						int nTextWidth = dc.GetTextExtent(sText).cx;
+						int nTextWidth = GraphicsMisc::GetTextWidth(sText, *this);
 
 						if (nTextWidth >= GetColumnWidth(VALUE_COL))
 						{
@@ -4440,7 +4458,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 							{
 								CStringArray aLines;
 
-								int nMaxCharLineLen = (int)(MAX_TIP_LINELEN / GraphicsMisc::GetAverageCharWidth(&dc));
+								int nMaxCharLineLen = (int)(MAX_TIP_LINELEN / GraphicsMisc::GetAverageCharWidth(*this));
 								int nNumLines = Misc::SplitLines(sText, aLines, nMaxCharLineLen);
 
 								sTooltip = Misc::FormatArray(aLines, TOOLTIP_DELIM);
