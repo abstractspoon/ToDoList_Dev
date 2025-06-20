@@ -58,6 +58,7 @@ BEGIN_MESSAGE_MAP(CToolTipCtrlEx, CToolTipCtrl)
 	ON_WM_PAINT()
 	ON_WM_TIMER()
 	ON_WM_CREATE()
+	ON_NOTIFY_REFLECT_EX(TTN_SHOW, OnNotifyShow)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -266,6 +267,8 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			{
 			case TTN_SHOW:
 				{
+					ASSERT(IsTracking());
+
 					// Ensure the tooltip is wholly on the same monitor as the cursor
 					CRect rTooltip;
 					GetWindowRect(rTooltip);
@@ -284,18 +287,62 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	return ScDefault(m_scTracking);
 }
 
+BOOL CToolTipCtrlEx::OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	if (!IsTracking()) 
+	{
+		CRect rTooltip;
+		GetWindowRect(rTooltip);
+
+		if (FitTooltipToScreen(rTooltip))
+		{
+			SetWindowPos(NULL, rTooltip.left, rTooltip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
+			*pResult = 1;
+
+			return TRUE;
+		}
+	}
+	
+	return FALSE; // Route to parent
+}
+
 BOOL CToolTipCtrlEx::FitTooltipToScreen(CRect& rTooltip) const
 {
-	CPoint ptCursor(::GetMessagePos());
-	CRect rFixedPos(rTooltip);
+	CPoint ptOffset(0, 0);
 
-	if (!GraphicsMisc::FitRectToScreen(rFixedPos, &ptCursor, MONITOR_DEFAULTTONEAREST))
-		return FALSE;
+	if (IsTracking())
+	{
+		// We are responsible for ensuring that tracking 
+		// tooltips remain wholly within the screen area
+		CPoint ptCursor(::GetMessagePos());
+		CRect rFixedPos(rTooltip);
 
-	CPoint ptOffset = (rFixedPos.TopLeft() - rTooltip.TopLeft());
+		GraphicsMisc::FitRectToScreen(rFixedPos, &ptCursor, MONITOR_DEFAULTTONEAREST);
+		ptOffset = (rFixedPos.TopLeft() - rTooltip.TopLeft());
 
-	if (ptOffset.x && ptOffset.y)
-		ptOffset.y = (ptCursor.y - rTooltip.Height() - (m_ptTrackingOffset.y / 2) - rTooltip.top); // flip above
+		if (ptOffset.x && ptOffset.y)
+			ptOffset.y = (ptCursor.y - rTooltip.Height() - (m_ptTrackingOffset.y / 2) - rTooltip.top); // flip above
+	}
+	else
+	{
+		// Also, even though Windows does ensure that regular tooltips
+		// remain on the screen, that doesn't prevent the tooltip from
+		// subsequently overlapping the area of interest
+		if ((m_tiLast.uFlags & TTF_EXCLUDEBOUNDS) && !::IsRectEmpty(&m_tiLast.rect))
+		{
+			CRect rExclude(m_tiLast.rect);
+			::ClientToScreen(m_tiLast.hwnd, &(rExclude.TopLeft()));
+			::ClientToScreen(m_tiLast.hwnd, &(rExclude.BottomRight()));
+
+			if (CRect().IntersectRect(rTooltip, rExclude))
+			{
+				const int PADDING = 4;
+
+				ptOffset.y = (rExclude.top - rTooltip.bottom - PADDING); // move just above
+				TRACE(_T("\nRegular tooltip offset by %d\n"), ptOffset.y);
+			}
+		}
+	}
 
 	if (!ptOffset.x && !ptOffset.y)
 		return FALSE;
