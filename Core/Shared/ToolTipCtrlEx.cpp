@@ -337,9 +337,7 @@ BOOL CToolTipCtrlEx::FitTooltipToScreen(CRect& rTooltip) const
 			if (CRect().IntersectRect(rTooltip, rExclude))
 			{
 				const int PADDING = 4;
-
 				ptOffset.y = (rExclude.top - rTooltip.bottom - PADDING); // move just above
-				TRACE(_T("\nRegular tooltip offset by %d\n"), ptOffset.y);
 			}
 		}
 	}
