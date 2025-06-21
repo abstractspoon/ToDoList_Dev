@@ -307,7 +307,7 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_SHOWISODATES,						m_BigCalendar.HasOption(TCCO_SHOWISODATES));
 
 	m_BigCalendar.SetOptions(dwOptions);
-	//m_MiniCalendar.SetOptions(dwOptions);
+	m_MiniCalendar.SetOptions(dwOptions);
 
 	CString sHideParentTag;
 	BOOL bHideParents = m_dlgPrefs.GetHideParentTasks(sHideParentTag);
