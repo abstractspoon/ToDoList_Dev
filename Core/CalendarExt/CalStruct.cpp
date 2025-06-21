@@ -575,6 +575,17 @@ BOOL TASKCALITEM::IsCalculatedParent() const
 	return TRUE;
 }
 
+BOOL TASKCALITEM::IsHiddenParent(BOOL bHide, LPCTSTR szHideParentTag) const
+{
+	if (!IsParent())
+		return FALSE;
+
+	if (!bHide)
+		return FALSE;
+
+	return (Misc::IsEmpty(szHideParentTag) || HasTag(szHideParentTag));
+}
+
 BOOL TASKCALITEM::HasIcon(BOOL bShowParentsAsFolder) const
 {
 	return (bHasIcon || (bIsParent && bShowParentsAsFolder));
@@ -1063,11 +1074,13 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib
 		mapData.GetNextAssoc(pos, dwTaskID, pTCI);
 
 //		if (pTCI->IsParent() && Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS))
-		if (pTCI->IsParent() && bHideParents)
-		{
-			if (sHideParentTag.IsEmpty() || pTCI->HasTag(sHideParentTag))
-				continue;
-		}
+// 		if (pTCI->IsParent() && bHideParents)
+// 		{
+// 			if (sHideParentTag.IsEmpty() || pTCI->HasTag(sHideParentTag))
+// 				continue;
+// 		}
+		if (pTCI->IsHiddenParent(bHideParents, sHideParentTag))
+			continue;
 
 		switch (nAttribID)
 		{

@@ -102,10 +102,10 @@ public:
 
 	BOOL IsParent() const;
 	BOOL IsCalculatedParent() const;
+	BOOL IsHiddenParent(BOOL bHide, LPCTSTR szHideParentTag) const;
 
 	BOOL HasIcon(BOOL bShowParentsAsFolder) const;
 	void DisableIcon() { bHasIcon = FALSE; }
-	BOOL HasTag(LPCTSTR szTag) const;
 
 	// Date wrappers
 	void RecalcDates(DWORD dwCalcDates) { dates.Recalc(dwCalcDates); }
@@ -150,6 +150,7 @@ protected:
 
 protected:
 	void ReformatName();
+	BOOL HasTag(LPCTSTR szTag) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

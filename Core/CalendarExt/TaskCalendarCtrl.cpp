@@ -2468,11 +2468,13 @@ BOOL CTaskCalendarCtrl::IsHiddenTask(const TASKCALITEM* pTCI, BOOL bCheckValid) 
 	if (bCheckValid && !pTCI->IsValid())
 		return TRUE;
 
-	if (pTCI->IsParent() && m_bHideParentTasks/*HasOption(TCCO_HIDEPARENTTASKS)*/)
-	{
-		if (m_sHideParentTag.IsEmpty() || pTCI->HasTag(m_sHideParentTag))
-			return TRUE;
-	}
+// 	if (pTCI->IsParent() && m_bHideParentTasks/*HasOption(TCCO_HIDEPARENTTASKS)*/)
+// 	{
+// 		if (m_sHideParentTag.IsEmpty() || pTCI->HasTag(m_sHideParentTag))
+// 			return TRUE;
+// 	}
+	if (pTCI->IsHiddenParent(m_bHideParentTasks, m_sHideParentTag))
+		return TRUE;
 
 	if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
 		return TRUE;
