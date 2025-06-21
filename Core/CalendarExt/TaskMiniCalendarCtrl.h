@@ -31,6 +31,7 @@ public:
 	void DisableHeatMap();
 
 	void SetOptions(DWORD dwOptions);
+	void SetHideParentTasks(BOOL bHide, const CString& sTag);
 	void SetBorderColor(COLORREF crBorder);
 	void SetUITheme(const UITHEME& theme);
 
@@ -45,7 +46,9 @@ protected:
 	CToolTipCtrlEx m_tooltip;
 	
 	TDC_ATTRIBUTE m_nHeatMapAttribute;
-	DWORD m_dwOptions;
+ 	DWORD m_dwOptions;
+	BOOL m_bHideParents;
+	CString m_sHideParentTag;
 	COLORREF m_crBorder, m_crWeekend, m_crToday, m_crSelected;
 
 	// Generated message map functions

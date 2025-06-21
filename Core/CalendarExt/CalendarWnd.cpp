@@ -307,10 +307,13 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_SHOWISODATES,						m_BigCalendar.HasOption(TCCO_SHOWISODATES));
 
 	m_BigCalendar.SetOptions(dwOptions);
-	m_MiniCalendar.SetOptions(dwOptions);
+	//m_MiniCalendar.SetOptions(dwOptions);
 
 	CString sHideParentTag;
-	m_BigCalendar.SetHideParentTasks(m_dlgPrefs.GetHideParentTasks(sHideParentTag), sHideParentTag);
+	BOOL bHideParents = m_dlgPrefs.GetHideParentTasks(sHideParentTag);
+
+	m_BigCalendar.SetHideParentTasks(bHideParents, sHideParentTag);
+	m_MiniCalendar.SetHideParentTasks(bHideParents, sHideParentTag);
 
 	CDWordArray aHeatMapPalette;
 	TDC_ATTRIBUTE nHeatMapAttrib = TDCA_NONE;

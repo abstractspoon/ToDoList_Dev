@@ -1046,7 +1046,8 @@ BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
 	return TRUE;
 }
 
-BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions)
+BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, 
+						   /*DWORD dwOptions,*/ BOOL bHideParents, const CString& sHideParentTag)
 {
 	m_mapHeat.RemoveAll();
 
@@ -1061,8 +1062,12 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib
 	{
 		mapData.GetNextAssoc(pos, dwTaskID, pTCI);
 
-		if (pTCI->IsParent() && Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS))
-			continue;
+//		if (pTCI->IsParent() && Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS))
+		if (pTCI->IsParent() && bHideParents)
+		{
+			if (sHideParentTag.IsEmpty() || pTCI->HasTag(sHideParentTag))
+				continue;
+		}
 
 		switch (nAttribID)
 		{

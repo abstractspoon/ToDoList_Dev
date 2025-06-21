@@ -65,6 +65,14 @@ void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions)
 	}
 }
 
+void CTaskMiniCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
+{
+	if (Misc::StatesDiffer(bHide, m_bHideParents) ||
+		(bHide && (sTag != m_sHideParentTag)))
+	{
+	}
+}
+
 void CTaskMiniCalendarCtrl::SetBorderColor(COLORREF crBorder)
 {
 	if (crBorder != m_crBorder)
@@ -119,7 +127,7 @@ void CTaskMiniCalendarCtrl::RecalcSpecialDates()
 
 void CTaskMiniCalendarCtrl::RecalcHeatMap()
 {
-	if (m_mapHeatMap.Recalculate(m_mapData, m_nHeatMapAttribute, m_dwOptions))
+	if (m_mapHeatMap.Recalculate(m_mapData, m_nHeatMapAttribute/*, m_dwOptions*/, m_bHideParents, m_sHideParentTag))
 		Invalidate();
 }
 

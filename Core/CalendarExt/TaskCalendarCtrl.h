@@ -95,6 +95,7 @@ protected:
 	BOOL m_bStrikeThruDone;
 	BOOL m_bSavingToImage;
 	BOOL m_bSortAscending;
+	BOOL m_bHideParentTasks;
 
 	CScrollBar m_sbCellVScroll;
 	CToolTipCtrlEx m_tooltip;
