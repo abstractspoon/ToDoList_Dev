@@ -1331,11 +1331,13 @@ void CToDoListApp::OnToolsToggleDarkMode()
 	// Prompt to restart the app
 	CPreferences prefs;
 
+	BOOL bDarkMode = CTDCDarkMode::IsEnabled();
+
 	switch (CMessageBox::AfxShow(IDS_RESTARTTOCHANGEDARKMODE, MB_YESNOCANCEL))
 	{
 	case IDYES:
 		{
-			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CTDCDarkMode::IsEnabled());
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
 			
 			// Restart
 			HWND hwndMain = *AfxGetMainWnd();
@@ -1356,7 +1358,7 @@ void CToDoListApp::OnToolsToggleDarkMode()
 		break;
 
 	case IDNO:
-		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CTDCDarkMode::IsEnabled());
+		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
 		break;
 
 	case IDCANCEL:
