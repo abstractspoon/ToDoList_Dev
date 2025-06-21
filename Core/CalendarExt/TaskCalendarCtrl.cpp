@@ -151,16 +151,10 @@ BOOL CTaskCalendarCtrl::HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew)
 
 void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 {
-	// Now handled by 'SetHideParentTasks'
-//	dwNewOptions &= ~TCCO_HIDEPARENTTASKS;
-
-//	DWORD dwCurOptions = (m_dwOptions & ~TCCO_HIDEPARENTTASKS);
-
-//	if (dwCurOptions != dwNewOptions)
 	if (m_dwOptions != dwNewOptions)
 	{
 		DWORD dwPrev = m_dwOptions;
-		m_dwOptions = dwNewOptions;// | (dwPrev & TCCO_HIDEPARENTTASKS); // preserve parent status
+		m_dwOptions = dwNewOptions;
 
 		RecalcCellHeaderDateFormats();
 		RecalcTaskDates();
@@ -185,9 +179,6 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 
 void CTaskCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
 {
-//	BOOL bIsHidden = HasOption(TCCO_HIDEPARENTTASKS);
-//	BOOL bChange = (Misc::StatesDiffer(bHide, bIsHidden) || 
-//					(bHide && (m_sHideParentTag != sTag)));
 	BOOL bChange = (Misc::StatesDiffer(bHide, m_bHideParentTasks) || 
 					(bHide && (m_sHideParentTag != sTag)));
 
@@ -195,16 +186,6 @@ void CTaskCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
 	{
 		m_bHideParentTasks = bHide;
 		m_sHideParentTag = (bHide ? sTag : _T(""));
-// 		if (bHide)
-// 		{
-// 			m_dwOptions |= TCCO_HIDEPARENTTASKS;
-// 			m_sHideParentTag = sTag;
-// 		}
-// 		else
-// 		{
-// 			m_dwOptions &= ~TCCO_HIDEPARENTTASKS;
-// 			m_sHideParentTag.Empty();
-// 		}
 
 		RecalcTaskDates();
 		RebuildCellTasks();
@@ -2468,11 +2449,6 @@ BOOL CTaskCalendarCtrl::IsHiddenTask(const TASKCALITEM* pTCI, BOOL bCheckValid) 
 	if (bCheckValid && !pTCI->IsValid())
 		return TRUE;
 
-// 	if (pTCI->IsParent() && m_bHideParentTasks/*HasOption(TCCO_HIDEPARENTTASKS)*/)
-// 	{
-// 		if (m_sHideParentTag.IsEmpty() || pTCI->HasTag(m_sHideParentTag))
-// 			return TRUE;
-// 	}
 	if (pTCI->IsHiddenParent(m_bHideParentTasks, m_sHideParentTag))
 		return TRUE;
 

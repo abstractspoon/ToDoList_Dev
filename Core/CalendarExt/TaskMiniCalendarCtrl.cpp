@@ -69,7 +69,7 @@ void CTaskMiniCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
 		(bHide && (sTag != m_sHideParentTag)))
 	{
 		m_bHideParents = bHide;
-		m_sHideParentTag = sTag;
+		m_sHideParentTag = (bHide ? sTag : _T(""));
 
 		if (m_dwOptions & TCCO_DATEDISPLAYOPTIONS)
 			RecalcSpecialDates();
@@ -136,7 +136,7 @@ void CTaskMiniCalendarCtrl::RecalcSpecialDates()
 
 void CTaskMiniCalendarCtrl::RecalcHeatMap()
 {
-	if (m_mapHeatMap.Recalculate(m_mapData, m_nHeatMapAttribute/*, m_dwOptions*/, m_bHideParents, m_sHideParentTag))
+	if (m_mapHeatMap.Recalculate(m_mapData, m_nHeatMapAttribute, m_bHideParents, m_sHideParentTag))
 		Invalidate();
 }
 

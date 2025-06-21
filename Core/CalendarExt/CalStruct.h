@@ -269,7 +269,7 @@ public:
 
 	BOOL SetColorPalette(const CDWordArray& aColors);
 	BOOL Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, 
-					 /*DWORD dwOptions,*/ BOOL bHideParents, const CString& sHideParentTag);
+					 BOOL bHideParents, const CString& sHideParentTag);
 
 	int GetHeat(const COleDateTime& date) const;
 	COLORREF GetColor(const COleDateTime& date) const;
