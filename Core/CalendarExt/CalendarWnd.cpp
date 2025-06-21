@@ -226,7 +226,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	// app preferences
+	// App-specific preferences
 	DWORD dwPrefs = m_BigCalendar.GetOptions(); // preserve calendar-specific prefs
 
 	Misc::SetFlag(dwPrefs, TCCO_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
