@@ -237,6 +237,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	Misc::SetFlag(dwPrefs, TCCO_SHOWISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 
 	m_BigCalendar.SetOptions(dwPrefs);
+	m_MiniCalendar.SetOptions(dwPrefs);
 
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	CWeekend::Initialise(dwWeekends);
