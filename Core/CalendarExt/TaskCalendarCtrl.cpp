@@ -144,30 +144,29 @@ int CTaskCalendarCtrl::GetDefaultTaskHeight()
 	return DEF_TASK_HEIGHT;
 }
 
-BOOL CTaskCalendarCtrl::HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew)
+BOOL CTaskCalendarCtrl::HasOptionChanged(DWORD dwOption, DWORD dwOldOptions, DWORD dwNewOptions)
 {
-	return ((dwOld & TCCO_DATEDISPLAYOPTIONS) == (dwNew & TCCO_DATEDISPLAYOPTIONS));
+	return Misc::StatesDiffer(Misc::HasFlag(dwOldOptions, dwOption),
+							  Misc::HasFlag(dwNewOptions, dwOption));
 }
 
-void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
+void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
 {
-	// Now handled by 'SetHideParentTasks'
-	dwNewOptions &= ~TCCO_HIDEPARENTTASKS;
+	BOOL bHideParentChange = (HasOptionChanged(TCCO_HIDEPARENTTASKS, m_dwOptions, dwNewOptions) ||
+							  (HasOption(TCCO_HIDEPARENTTASKS) && (m_sHideParentTag != szHideParentTag)));
+	BOOL bOtherOptionsChange = ((m_dwOptions & ~TCCO_HIDEPARENTTASKS) != (dwNewOptions & ~TCCO_HIDEPARENTTASKS));
 
-	DWORD dwCurOptions = (m_dwOptions & ~TCCO_HIDEPARENTTASKS);
+	if (!bHideParentChange && !bOtherOptionsChange)
+		return;
 
-	if (dwCurOptions != dwNewOptions)
+	m_dwOptions = dwNewOptions;
+	m_sHideParentTag = szHideParentTag;
+
+	BOOL bScrollToTask = FALSE;
+
+	if (bOtherOptionsChange)
 	{
-		DWORD dwPrev = m_dwOptions;
-		m_dwOptions = dwNewOptions | (dwPrev & TCCO_HIDEPARENTTASKS); // preserve parent status
-
 		RecalcCellHeaderDateFormats();
-		RecalcTaskDates();
-		RebuildCellTasks();
-
-		BOOL bScrollToTask = !HasSameDateDisplayOptions(m_dwOptions, dwPrev);
-		FixupSelection(bScrollToTask);
-
 		EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
 
 		if (HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
@@ -179,35 +178,19 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 		{
 			m_timerMidnight.Disable();
 		}
+
+		// Scroll to task if the date visibility options have changed
+		bScrollToTask = HasOptionChanged(TCCO_DATEDISPLAYOPTIONS, m_dwOptions, dwNewOptions);
 	}
-}
-
-void CTaskCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
-{
-	BOOL bIsHidden = HasOption(TCCO_HIDEPARENTTASKS);
-	BOOL bChange = (Misc::StatesDiffer(bHide, bIsHidden) || 
-					(bHide && (m_sHideParentTag != sTag)));
-
-	if (bChange)
+	else
 	{
-		if (bHide)
-		{
-			m_dwOptions |= TCCO_HIDEPARENTTASKS;
-			m_sHideParentTag = sTag;
-		}
-		else
-		{
-			m_dwOptions &= ~TCCO_HIDEPARENTTASKS;
-			m_sHideParentTag.Empty();
-		}
-
-		RecalcTaskDates();
-		RebuildCellTasks();
-
-		// Scroll to task if hidden parent is being reshown
-		BOOL bScrollToTask = (!bHide && m_mapData.IsParentTask(GetSelectedTaskID()));
-		FixupSelection(bScrollToTask);
+		// Scroll to task parent visibility has changed and selected task is a parent
+		bScrollToTask = m_mapData.IsParentTask(GetSelectedTaskID());
 	}
+	
+	RecalcTaskDates();
+	RebuildCellTasks();
+	FixupSelection(bScrollToTask);
 }
 
 void CTaskCalendarCtrl::RecalcTaskDates()
@@ -2463,16 +2446,7 @@ BOOL CTaskCalendarCtrl::IsHiddenTask(const TASKCALITEM* pTCI, BOOL bCheckValid) 
 	if (bCheckValid && !pTCI->IsValid())
 		return TRUE;
 
-	if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
-	{
-		if (m_sHideParentTag.IsEmpty() || pTCI->HasTag(m_sHideParentTag))
-			return TRUE;
-	}
-
-	if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
-		return TRUE;
-
-	return FALSE;
+	return CTaskCalItemMap::WantHideTask(pTCI, m_dwOptions, m_sHideParentTag);
 }
 
 BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const

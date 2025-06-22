@@ -210,6 +210,9 @@ public:
 	DWORD GetNextTaskID(POSITION& pos) const;
 	BOOL HasTask(DWORD dwTaskID) const;
 	BOOL IsParentTask(DWORD dwTaskID) const;
+
+	static BOOL WantHideTask(const TASKCALITEM* pTCI, DWORD dwOptions, LPCTSTR szHideParentTag);
+
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -267,7 +270,7 @@ public:
 	BOOL HasHeat() const { return m_mapHeat.GetCount(); }
 
 	BOOL SetColorPalette(const CDWordArray& aColors);
-	BOOL Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions);
+	BOOL Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOption, LPCTSTR szHideParentTag);
 
 	int GetHeat(const COleDateTime& date) const;
 	COLORREF GetColor(const COleDateTime& date) const;
