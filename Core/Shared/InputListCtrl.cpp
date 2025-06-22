@@ -64,6 +64,7 @@ BEGIN_MESSAGE_MAP(CInputListCtrl, CEnListCtrl)
 	ON_WM_LBUTTONUP()
 	//}}AFX_MSG_MAP
 	ON_WM_SIZE()
+	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEWHEEL()
@@ -219,6 +220,13 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 	{
 		HideAllControls();
 	}
+}
+
+void CInputListCtrl::OnDestroy()
+{
+	OnCancelEdit();
+
+	CEnListCtrl::OnDestroy();
 }
 
 void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)

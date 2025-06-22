@@ -128,6 +128,7 @@ protected:
 	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSelItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNotifyKillFocus(UINT nCtrlID, NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDestroy();
 
 	DECLARE_MESSAGE_MAP()
 		
