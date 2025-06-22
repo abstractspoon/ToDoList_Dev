@@ -909,18 +909,25 @@ void CTDLTaskAttributeListCtrl::OnCaptureChanged(CWnd* pWnd)
 
 BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
 {
+	// Check for mouse over a child editing control
+	CPoint point(::GetMessagePos());
+
+	if (IsEditing() && (WindowFromPoint(point) != this))
+		return FALSE;
+
+	// Check for mouse over splitter
 	CRect rSplitBar;
 	GetSplitterRect(rSplitBar);
 
-	CPoint ptClient(::GetMessagePos());
-	ScreenToClient(&ptClient);
+	ScreenToClient(&point);
 
-	if (rSplitBar.PtInRect(ptClient))
+	if (rSplitBar.PtInRect(point))
 		return GraphicsMisc::SetAfxCursor(AFX_IDC_HSPLITBAR);
 
+	// Check for read-only or locked fields
 	if (m_aSelectedTaskIDs.GetSize())
 	{
-		LVHITTESTINFO lvHit = { { ptClient.x, ptClient.y }, 0 };
+		LVHITTESTINFO lvHit = { { point.x, point.y }, 0 };
 
 		int nRow = SubItemHitTest(&lvHit);
 		int nCol = lvHit.iSubItem;
@@ -4208,6 +4215,16 @@ int CTDLTaskAttributeListCtrl::GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const
 
 int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
+	// Check for mouse over a child editing control
+	if (IsEditing())
+	{
+		CPoint ptScreen(point);
+		ClientToScreen(&ptScreen);
+
+		if (WindowFromPoint(ptScreen) != this)
+			return 0;
+	}
+
 	LVHITTESTINFO lvHit = { { point.x, point.y }, 0 };
 
 	// Get around constness
