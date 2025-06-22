@@ -3104,12 +3104,21 @@ void CTDLTaskAttributeListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell
 
 	if (bCheckTextWidth)
 	{
-		// Progressively enlarge the edit box until the maximum is reached
-		// Prevent edit width exceeding 'ours' because it's a child
-		CRect rClient, rEdit(rCell);
-		GetClientRect(rClient);
+		// Prevent child edit extending beyond visible client 
+		// rect else those parts will not be visible
+		CRect rScreen, rClient;
 
-		int nMaxWidth = rClient.Width(), nCellWidth = rCell.Width();
+		GraphicsMisc::GetAvailableScreenSpace(*this, rScreen);
+		ScreenToClient(rScreen);
+
+		GetClientRect(rClient);
+		rClient.IntersectRect(rClient, rScreen);
+
+		// Progressively enlarge the edit box until the maximum is reached
+		int nMaxWidth = rClient.Width();
+		int nCellWidth = rCell.Width();
+
+		CRect rEdit(rCell);
 		rEdit.right = (rEdit.left + max(nCellWidth, min(nMaxWidth, MIN_EDIT_WIDTH)));
 
 		CString sValue = GetItemText(nRow, VALUE_COL);
@@ -3121,12 +3130,14 @@ void CTDLTaskAttributeListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell
 
 			if (nTextWidth > MAX_EDIT_WIDTH)
 			{
-				// Make the height not a row-multiple to be clearly visible
+				// Make the height not a row-multiple so it's clearly 
+				// distinguishable from the attributes behind
 				rEdit.bottom += ((GetItemHeight() * 5) / 2);
 			}
 		}
 
-		GraphicsMisc::FitRectToWindow(rEdit, *this);
+		// Fit to visible client rect
+		GraphicsMisc::FitRect(rEdit, rClient);
 		rCell = rEdit;
 	}
 }
