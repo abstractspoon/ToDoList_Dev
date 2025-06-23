@@ -155,6 +155,7 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
 	BOOL bHideParentChange = (HasOptionChanged(TCCO_HIDEPARENTTASKS, m_dwOptions, dwNewOptions) ||
 							  (HasOption(TCCO_HIDEPARENTTASKS) && (m_sHideParentTag != szHideParentTag)));
 	BOOL bOtherOptionsChange = ((m_dwOptions & ~TCCO_HIDEPARENTTASKS) != (dwNewOptions & ~TCCO_HIDEPARENTTASKS));
+	BOOL bDisplayChange = ((m_dwOptions & TCCO_DATEDISPLAYOPTIONS) != (dwNewOptions & TCCO_DATEDISPLAYOPTIONS));
 
 	if (!bHideParentChange && !bOtherOptionsChange)
 		return;
@@ -162,7 +163,8 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
 	m_dwOptions = dwNewOptions;
 	m_sHideParentTag = szHideParentTag;
 
-	BOOL bScrollToTask = FALSE;
+	// Scroll to task if the date visibility options have changed
+	BOOL bScrollToTask = bDisplayChange;
 
 	if (bOtherOptionsChange)
 	{
@@ -178,18 +180,10 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
 		{
 			m_timerMidnight.Disable();
 		}
-
-		// Scroll to task if the date visibility options have changed
-		bScrollToTask = HasOptionChanged(TCCO_DATEDISPLAYOPTIONS, m_dwOptions, dwNewOptions);
 	}
 
-	if (!bScrollToTask)
-	{
-		ASSERT(bHideParentChange);
-
-		// Scroll to task parent visibility has changed and selected task is a parent
-		bScrollToTask = m_mapData.IsParentTask(GetSelectedTaskID());
-	}
+	// Alternatively scroll to task parent visibility has changed and selected task is a parent
+	bScrollToTask |= (bHideParentChange && m_mapData.IsParentTask(GetSelectedTaskID()));
 	
 	RecalcTaskDates();
 	RebuildCellTasks();
