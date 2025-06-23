@@ -182,8 +182,11 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
 		// Scroll to task if the date visibility options have changed
 		bScrollToTask = HasOptionChanged(TCCO_DATEDISPLAYOPTIONS, m_dwOptions, dwNewOptions);
 	}
-	else
+
+	if (!bScrollToTask)
 	{
+		ASSERT(bHideParentChange);
+
 		// Scroll to task parent visibility has changed and selected task is a parent
 		bScrollToTask = m_mapData.IsParentTask(GetSelectedTaskID());
 	}

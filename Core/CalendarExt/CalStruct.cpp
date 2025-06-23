@@ -853,7 +853,7 @@ BOOL CTaskCalItemMap::WantHideTask(const TASKCALITEM* pTCI, DWORD dwOptions, LPC
 {
 	if (!pTCI)
 	{
-		ASSERT(pTCI);
+		ASSERT(0);
 		return FALSE;
 	}
 
