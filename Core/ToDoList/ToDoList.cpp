@@ -1264,48 +1264,11 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 
 int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/) 
 {
-	HWND hwndMain = NULL;
-
 	// make sure app window is visible
-	if (m_pMainWnd)
-	{
-		hwndMain = *m_pMainWnd;
-
-		if (::GetForegroundWindow() != hwndMain)
-			m_pMainWnd->SendMessage(WM_TDL_SHOWWINDOW, 0, 0);
-	}
-	else
-	{
-		hwndMain = ::GetDesktopWindow();
-	}
+	if (m_pMainWnd && (::GetForegroundWindow() != *m_pMainWnd))
+		m_pMainWnd->SendMessage(WM_TDL_SHOWWINDOW, 0, 0);
 	
-	CString sTitle(AfxGetAppName()), sInstruction, sText(lpszPrompt);
-	CStringArray aPrompt;
-	
-	int nNumInputs = Misc::Split(lpszPrompt, aPrompt, '|');
-	
-	switch (nNumInputs)
-	{
-	case 0:
-		ASSERT(0);
-		break;
-		
-	case 1:
-		// do nothing
-		break;
-		
-	case 2:
-		sInstruction = aPrompt[0];
-		sText = aPrompt[1];
-		break;
-		
-	case 3:
-		sTitle = aPrompt[0];
-		sInstruction = aPrompt[1];
-		sText = aPrompt[2];
-	}
-	
-	return CMessageBox::Show(hwndMain, sTitle, sInstruction, sText, nType);
+	return CMessageBox::AfxShow(lpszPrompt, nType);
 }
 
 void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs)
@@ -1801,7 +1764,7 @@ void CToDoListApp::OnHelpCheckForUpdates()
 TDL_WEBUPDATE_CHECK CToDoListApp::CheckForUpdates(BOOL bManual)
 {
 //  FOR DEBUGGING
-// 	return TDLWUC_WANTUPDATE;
+ 	return TDLWUC_WANTUPDATE;
 
 	CPreferences prefs;
 

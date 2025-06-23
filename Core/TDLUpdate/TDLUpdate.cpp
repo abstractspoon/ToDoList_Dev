@@ -15,6 +15,7 @@
 #include "..\shared\rtlInputmgr.h"
 #include "..\shared\OSVersion.h"
 #include "..\shared\DarkMode.h"
+#include "..\shared\MessageBox.h"
 
 #include "..\todolist\tdcswitch.h"
 
@@ -184,7 +185,7 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 	switch (nRes)
 	{
 	case TDLWUR_CANCELLED:
-		AfxMessageBox(CEnString(IDS_WEBUPDATE_CANCEL), MB_ICONINFORMATION);
+		CMessageBox::AfxShow(IDS_WEBUPDATE_CANCEL, MB_ICONINFORMATION);
 		break;
 		
 	case TDLWUR_SUCCESS:
@@ -227,7 +228,7 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 	case TDLWUR_ERR_UNZIP:
 	case TDLWUR_ERR_UPDATERFOLDER:
 		// prompt to display update log
-		if (IDYES == AfxMessageBox(CEnString(IDS_WEBUPDATE_FAILURE), MB_YESNO | MB_ICONINFORMATION))
+		if (IDYES == CMessageBox::AfxShow(IDS_WEBUPDATE_FAILURE, MB_YESNO | MB_ICONINFORMATION))
 		{
 			FileMisc::Run(NULL, sUpdateLog);
 		}

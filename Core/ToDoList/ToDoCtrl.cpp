@@ -7014,11 +7014,9 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 	// Verify that we have been saved
 	if (!HasFilePath())
 	{
-		CMessageBox::Show(AfxGetMainWnd(),
-						  CEnString(IDS_TITLE_TIMETRACKING), 
-						  _T(""),
-						  CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
-						  (MB_OK | MB_ICONEXCLAMATION));
+		CMessageBox::AfxShow(CEnString(IDS_TITLE_TIMETRACKING), 
+							 CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
+							 (MB_OK | MB_ICONEXCLAMATION));
 		return FALSE;
 	}
 
