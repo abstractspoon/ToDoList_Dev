@@ -365,30 +365,26 @@ void COwnerdrawComboBoxBase::RefreshDropWidth()
 
 void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 {
-	int nWidth = 0;
-	
 	if (bRecalc)
+		m_nMaxTextWidth = CDialogHelper::CalcMaxTextWidth(*this, 0, TRUE);
+
+	int nDefaultWidth = CDialogHelper::GetChildWidth(this);
+	int nReqWidth = 0;
+
+	if (m_nMaxTextWidth > 0)
 	{
-		m_nMaxTextWidth = nWidth = CDialogHelper::CalcMaxTextWidth(*this, 0, TRUE);
-	}
-	else if (m_nMaxTextWidth > 0)
-	{
-		nWidth = m_nMaxTextWidth;
-	}
-	else
-	{
-		CRect rWindow;
-		GetWindowRect(rWindow);
-		
-		nWidth = rWindow.Width();
-	}
+		// Derived classes can request extra space for drawing
+		nReqWidth = (m_nMaxTextWidth + GetExtraListboxWidth());
 	
-	int nMaxWidth = GetMaxDropWidth();
+		// And can set a maximum width
+		int nMaxWidth = GetMaxDropWidth();
 	
-	if (nMaxWidth > 0)
-		nWidth = min(nWidth, nMaxWidth);
-	
-	SetDroppedWidth(nWidth + GetExtraListboxWidth());
+		if (nMaxWidth > 0)
+			nReqWidth = min(nReqWidth, nMaxWidth);
+	}
+
+	SetDroppedWidth(max(nDefaultWidth, nReqWidth));
+}
 
 void COwnerdrawComboBoxBase::OnSize(UINT nType, int cx, int cy)
 {
