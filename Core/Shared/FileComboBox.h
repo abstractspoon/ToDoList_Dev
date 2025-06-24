@@ -75,7 +75,7 @@ protected:
 						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
-	virtual int GetMaxDropWidth() const { return 400; }
+	virtual int GetMaxDropWidth() const;
 	virtual UINT GetDrawEllipsis() const { return DT_PATH_ELLIPSIS; }
 	virtual void HandleReturnKey();
 

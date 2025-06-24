@@ -226,7 +226,7 @@ void CInputListCtrl::OnDestroy()
 {
 	OnCancelEdit();
 
-	return CEnListCtrl::OnDestroy();
+	CEnListCtrl::OnDestroy();
 }
 
 void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)

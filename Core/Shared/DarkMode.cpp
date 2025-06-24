@@ -1475,11 +1475,11 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOLBOX))
 			{
-				// We only get here with simple combos (CBS_SIMPLE)
-				ASSERT(CWinClasses::GetStyleType(::GetParent(hWnd), CBS_TYPEMASK) == CBS_SIMPLE);
-
-				CAutoFlagT<HWND> af(s_hwndCurrentSimpleComboListBox, hWnd);
-				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+				if (CWinClasses::GetStyleType(::GetParent(hWnd), CBS_TYPEMASK) == CBS_SIMPLE)
+				{
+					CAutoFlagT<HWND> af(s_hwndCurrentSimpleComboListBox, hWnd);
+					return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+				}
 			}
 			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || 
 					 CWinClasses::IsWinFormsControl(sClass, WC_DATETIMEPICK))

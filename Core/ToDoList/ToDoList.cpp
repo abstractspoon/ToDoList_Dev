@@ -1560,6 +1560,11 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		params.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
 	
+	// Check dark mode before closing the main window
+	// because it turns off dark mode as its last action
+	if (CTDCDarkMode::IsEnabled())
+		params.SetOption(SWITCH_DARKMODE);
+	
 #ifdef _DEBUG // ----------------------------------------------------
 	if (bTestDownload)
 		params.SetOption(SWITCH_TESTDOWNLOAD);
@@ -1592,9 +1597,6 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 			CLocalizer::Release();
 		}
 	}
-
-	if (CTDCDarkMode::IsEnabled())
-		params.SetOption(SWITCH_DARKMODE);
 
 	if (CRTLInputMgr::IsEnabled())
 		params.SetOption(SWITCH_RTL);
