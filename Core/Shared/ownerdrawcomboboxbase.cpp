@@ -56,6 +56,7 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
 	ON_WM_PAINT()
+	ON_WM_SIZE()
 
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
@@ -388,6 +389,12 @@ void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 		nWidth = min(nWidth, nMaxWidth);
 	
 	SetDroppedWidth(nWidth + GetExtraListboxWidth());
+
+void COwnerdrawComboBoxBase::OnSize(UINT nType, int cx, int cy)
+{
+	CComboBox::OnSize(nType, cx, cy);
+
+	RefreshDropWidth(FALSE);
 }
 
 BOOL COwnerdrawComboBoxBase::IsType(UINT nComboType) const
