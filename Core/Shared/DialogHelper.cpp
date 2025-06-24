@@ -885,7 +885,7 @@ UINT CDialogHelper::MessageBoxEx(const CWnd* pWnd, LPCTSTR szText, UINT nIDCapti
 	return ::MessageBox(*pWnd, szText, sCaption, nType);
 }
 
-int CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth)
+void CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth)
 {
 	if (combo.IsKindOf(RUNTIME_CLASS(COwnerdrawComboBoxBase)))
 	{
@@ -896,8 +896,6 @@ int CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWi
 	   int nWidth = CalcMaxTextWidth(combo, 0, TRUE, pDCRef, nTabWidth);
 	   combo.SetDroppedWidth(nWidth);
 	}
-
-	return combo.GetDroppedWidth();
 }
 
 int CDialogHelper::CalcMaxTextWidth(CComboBox& combo, int nMinWidth, BOOL bDropped, CDC* pDCRef, int nTabWidth)
