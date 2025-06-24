@@ -3626,10 +3626,15 @@ void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID)
 			return;
 
 		// Else if this is the core File Link field and the user
-		// clicked on one of the button, perform the required action
-		// before hiding the combo
+		// clicked on one of the buttons (except for the drop button),
+		// perform the required action before hiding the combo
 		if ((pCombo == &m_cbMultiFileLink) && CDialogHelper::IsMouseDownInWindow(*pCombo))
-			EditCell(GetRow(TDCA_FILELINK), VALUE_COL, TRUE);
+		{
+			int nRow = GetRow(TDCA_FILELINK);
+
+			if (HitTestButtonID(nRow) != ID_BTN_DEFAULT)
+				EditCell(nRow, VALUE_COL, TRUE);
+		}
 	}
 
 	// All else
