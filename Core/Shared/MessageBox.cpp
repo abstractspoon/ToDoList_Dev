@@ -33,7 +33,7 @@ const CString DELIMS(_T(".,;:-?"));
 
 //////////////////////////////////////////////////////////////////////
 
-typedef HRESULT (CALLBACK *PFNTASKDIALOGCALLBACK)(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, __int64/*LONG_PTR*/ lpRefData);
+typedef HRESULT (CALLBACK *PFNTASKDIALOGCALLBACK)(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, LONG/*LONG_PTR*/ lpRefData);
 
 struct TASKDIALOGBUTTON
 {
@@ -73,7 +73,7 @@ struct TASKDIALOGCONFIGEX
 	};
 	PCWSTR                         pszFooter;
 	PFNTASKDIALOGCALLBACK          pfCallback;
-	__int64/*LONG_PTR*/            lpCallbackData;
+	LONG/*LONG_PTR*/			   lpCallbackData;
 	UINT                           cxWidth;
 };
 
