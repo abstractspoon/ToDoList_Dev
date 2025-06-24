@@ -181,12 +181,12 @@ int CMessageBox::AfxShow(const CString& sInstruction, const CString& sText, UINT
 
 int CMessageBox::AfxShow(UINT nInstructionID, const CString& sText, UINT nFlags)
 {
-	return AfxShow(CEnString(nInstructionID), sText, nFlags); // RECURSIVE CALL
+	return AfxShow(CEnString(nInstructionID), sText, nFlags); // Calls prior function
 }
 
 int CMessageBox::AfxShow(UINT nInstructionID, UINT nTextID, UINT nFlags)
 {
-	return AfxShow(nInstructionID, CEnString(nTextID), nFlags); // RECURSIVE CALL
+	return AfxShow(nInstructionID, CEnString(nTextID), nFlags); // Calls prior function
 }
 
 // --------------------------------------
@@ -201,7 +201,7 @@ int CMessageBox::AfxShow(const CString& sMessage, UINT nFlags)
 
 int CMessageBox::AfxShow(UINT nTextID, UINT nFlags)
 {
-	return AfxShow(CEnString(nTextID), nFlags); // RECURSIVE CALL
+	return AfxShow(CEnString(nTextID), nFlags); // Calls prior function
 }
 
 // --------------------------------------
@@ -215,22 +215,20 @@ int CMessageBox::AfxShow(HWND hwndParent, const CString& sInstruction, const CSt
 	return Show(hwndParent, GetAppName(), sInstruction, sText, nFlags);
 }
 
-int CMessageBox::AfxShow(const CWnd* pWnd, const CString& sInstruction, const CString& sText, UINT nFlags)
+int CMessageBox::AfxShow(const CWnd* pWndParent, const CString& sInstruction, const CString& sText, UINT nFlags)
 {
-	if (!pWnd)
-		return AfxShow(sInstruction, sText, nFlags);
+	HWND hwndParent = (pWndParent ? pWndParent->GetSafeHwnd() : NULL);
 
-	// else
-	return Show(pWnd, GetAppName(), sInstruction, sText, nFlags);
+	return AfxShow(hwndParent, sInstruction, sText, nFlags); // Calls prior function
 }
 
-int CMessageBox::Show(const CWnd* pWnd, const CString& sCaption, const CString& sInstruction, const CString& sText, UINT nFlags)
-{
-	if (!pWnd)
-		return Show((HWND)NULL, sCaption, sInstruction, sText, nFlags);
+// --------------------------------------
 
-	// else
-	return Show(*pWnd, sCaption, sInstruction, sText, nFlags);
+int CMessageBox::Show(const CWnd* pWndParent, const CString& sCaption, const CString& sInstruction, const CString& sText, UINT nFlags)
+{
+	HWND hwndParent = (pWndParent ? pWndParent->GetSafeHwnd() : NULL);
+
+	return Show(hwndParent, sCaption, sInstruction, sText, nFlags);
 }
 
 int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& sInstruction, const CString& sText, UINT nFlags)
