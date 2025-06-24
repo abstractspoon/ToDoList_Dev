@@ -884,10 +884,10 @@ UINT CDialogHelper::MessageBoxEx(const CWnd* pWnd, LPCTSTR szText, UINT nIDCapti
 	return ::MessageBox(*pWnd, szText, sCaption, nType);
 }
 
-int CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth, int nExtra)
+int CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth/*, int nExtra*/)
 {
    int nWidth = CalcMaxTextWidth(combo, 0, TRUE, pDCRef, nTabWidth);
-   combo.SetDroppedWidth(nWidth + nExtra);
+   combo.SetDroppedWidth(nWidth/* + nExtra*/);
 
    return nWidth;
 }
