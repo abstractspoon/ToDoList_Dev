@@ -6,6 +6,8 @@
 #include "tdlwebupdater.h"
 #include "tdlwebupdateprogressdlg.h"
 
+#include "..\todolist\tdcswitch.h"
+
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\EnCommandLineInfo.h"
@@ -16,8 +18,6 @@
 #include "..\shared\OSVersion.h"
 #include "..\shared\DarkMode.h"
 #include "..\shared\MessageBox.h"
-
-#include "..\todolist\tdcswitch.h"
 
 #include "..\3rdparty\base64coder.h"
 
@@ -184,10 +184,6 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 	// error handling
 	switch (nRes)
 	{
-	case TDLWUR_CANCELLED:
-		CMessageBox::AfxShow(IDS_WEBUPDATE_CANCEL, MB_ICONINFORMATION);
-		break;
-		
 	case TDLWUR_SUCCESS:
 		{
 			// Enable/Delete the XP-specific manifest
@@ -210,6 +206,10 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 		}
 		break;
 		
+	case TDLWUR_CANCELLED:
+		AfxMessageBox(CEnString(IDS_WEBUPDATE_CANCEL), MB_ICONINFORMATION);
+		break;
+
 	case TDLWUR_ERR_APPFOLDER:
 	case TDLWUR_ERR_CREATEPROGRESSDLG:
 	case TDLWUR_ERR_DELETEBACKUPFOLDER:
@@ -228,7 +228,7 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 	case TDLWUR_ERR_UNZIP:
 	case TDLWUR_ERR_UPDATERFOLDER:
 		// prompt to display update log
-		if (IDYES == CMessageBox::AfxShow(IDS_WEBUPDATE_FAILURE, MB_YESNO | MB_ICONINFORMATION))
+		if (IDYES == AfxMessageBox(CEnString(IDS_WEBUPDATE_FAILURE), MB_YESNO | MB_ICONINFORMATION))
 		{
 			FileMisc::Run(NULL, sUpdateLog);
 		}
@@ -240,3 +240,7 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 	}
 }
 
+int CTDLUpdateApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/)
+{
+	return CMessageBox::AfxShow(lpszPrompt, nType);
+}
