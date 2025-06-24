@@ -156,6 +156,7 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
 
 	BOOL bOtherOptionsChange = HasOptionChanged(~TCCO_HIDEPARENTTASKS, m_dwOptions, dwNewOptions);
 	BOOL bDateDisplayChange = HasOptionChanged(TCCO_DATEDISPLAYOPTIONS, m_dwOptions, dwNewOptions);
+	BOOL bDateFormatChange = HasOptionChanged(TCCO_DATEFORMATOPTIONS, m_dwOptions, dwNewOptions);
 
 	if (!bHideParentChange && !bOtherOptionsChange)
 		return;
@@ -168,7 +169,9 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
 
 	if (bOtherOptionsChange)
 	{
-		RecalcCellHeaderDateFormats();
+		if (bDateFormatChange)
+			RecalcCellHeaderDateFormats();
+
 		EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
 
 		if (HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
