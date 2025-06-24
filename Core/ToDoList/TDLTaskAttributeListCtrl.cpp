@@ -4348,12 +4348,12 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		case VALUE_COL:
 			if (!RowValueVaries(nRow))
 			{
-				BOOL bCheckWantMultilineTip = FALSE;
+				BOOL bCheckTextNeedsTip = FALSE;
 
 				switch (nAttribID)
 				{
 				case TDCA_TASKNAME:
-					bCheckWantMultilineTip = TRUE;
+					bCheckTextNeedsTip = TRUE;
 					break;
 
 				case TDCA_ALLOCTO:
@@ -4365,6 +4365,8 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 						if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
 							sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
+						else
+							bCheckTextNeedsTip = (nAttribID == TDCA_FILELINK);
 					}
 					break;
 
@@ -4391,7 +4393,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				case TDCA_DUETIME:
 				case TDCA_STARTTIME:
 					{
-						int nDateRow = (nRow - 1);
+						int nDateRow = (nRow - 1); // Always
 						ASSERT(GetDateRow(nAttribID) == nDateRow);
 
 						if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
@@ -4439,18 +4441,16 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 						}
 						else if (pDef->IsDataType(TDCCA_STRING))
 						{
-							CString sText = GetItemText(nRow, nCol);
-
 							if (pDef->IsMultiList())
 							{
 								CStringArray aValues;
 
-								if (SplitValueArray(sText, aValues) > 1)
+								if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
 									sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
 							}
 							else
 							{
-								bCheckWantMultilineTip = !pDef->IsList();
+								bCheckTextNeedsTip = !pDef->IsList();
 							}
 						}
 					}
@@ -4471,7 +4471,7 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 					{
 						sTooltip.LoadString(IDS_STATUSREADONLY);
 					}
-					else if (bCheckWantMultilineTip)
+					else if (bCheckTextNeedsTip)
 					{
 						CString sText = GetItemText(nRow, nCol);
 						int nTextWidth = GraphicsMisc::GetTextWidth(sText, *this);
