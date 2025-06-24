@@ -245,7 +245,7 @@ protected:
 
 	// helpers
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
-	static BOOL HasOptionChanged(DWORD dwOption, DWORD dwOldOptions, DWORD dwNewOptions);
+	static BOOL HasOptionChanged(int nOption, DWORD dwOldOptions, DWORD dwNewOptions);
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 	static BOOL IsExtensionItem(const TASKCALITEM* pTCI);
 	static BOOL IsFutureOccurrence(const TASKCALITEM* pTCI);
