@@ -237,6 +237,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	Misc::SetFlag(dwPrefs, TCCO_SHOWISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 
 	m_BigCalendar.SetOptions(dwPrefs);
+	m_MiniCalendar.SetOptions(dwPrefs);
 
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	CWeekend::Initialise(dwWeekends);
@@ -298,6 +299,9 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_SHOWDATEINEVERYCELL,				m_dlgPrefs.GetDisplayDateInEveryCell());
 	Misc::SetFlag(dwOptions, TCCO_SHOWWEEKNUMINCELLDATE,			m_dlgPrefs.GetDisplayWeekNumberInCell());
 
+	CString sHideParentTag;
+	Misc::SetFlag(dwOptions, TCCO_HIDEPARENTTASKS,					m_dlgPrefs.GetHideParentTasks(sHideParentTag));
+
 	// Preserve app preferences
 	Misc::SetFlag(dwOptions, TCCO_TASKTEXTCOLORISBKGND,				m_BigCalendar.HasOption(TCCO_TASKTEXTCOLORISBKGND));
 	Misc::SetFlag(dwOptions, TCCO_STRIKETHRUDONETASKS,				m_BigCalendar.HasOption(TCCO_STRIKETHRUDONETASKS));
@@ -306,11 +310,8 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_ENABLELABELTIPS,					m_BigCalendar.HasOption(TCCO_ENABLELABELTIPS));
 	Misc::SetFlag(dwOptions, TCCO_SHOWISODATES,						m_BigCalendar.HasOption(TCCO_SHOWISODATES));
 
-	m_BigCalendar.SetOptions(dwOptions);
-	m_MiniCalendar.SetOptions(dwOptions);
-
-	CString sHideParentTag;
-	m_BigCalendar.SetHideParentTasks(m_dlgPrefs.GetHideParentTasks(sHideParentTag), sHideParentTag);
+	m_BigCalendar.SetOptions(dwOptions, sHideParentTag);
+	m_MiniCalendar.SetOptions(dwOptions, sHideParentTag);
 
 	CDWordArray aHeatMapPalette;
 	TDC_ATTRIBUTE nHeatMapAttrib = TDCA_NONE;

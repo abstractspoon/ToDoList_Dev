@@ -849,6 +849,25 @@ BOOL CTaskCalItemMap::IsParentTask(DWORD dwTaskID) const
 	return (pTCI ? pTCI->IsParent() : FALSE);
 }
 
+BOOL CTaskCalItemMap::WantHideTask(const TASKCALITEM* pTCI, DWORD dwOptions, LPCTSTR szHideParentTag)
+{
+	if (!pTCI)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	BOOL bHide = FALSE;
+
+	if (Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS) && pTCI->IsParent())
+		bHide = (Misc::IsEmpty(szHideParentTag) || pTCI->HasTag(szHideParentTag));
+
+	if (!bHide && Misc::HasFlag(dwOptions, !TCCO_DISPLAYDONE))
+		bHide = pTCI->IsDone(TRUE);
+
+	return bHide;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 DWORD CTaskCalExtensionItemMap::GetRealTaskID(DWORD dwTaskID) const
@@ -1046,7 +1065,7 @@ BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
 	return TRUE;
 }
 
-BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions)
+BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions, LPCTSTR szHideParentTask)
 {
 	m_mapHeat.RemoveAll();
 
@@ -1061,7 +1080,7 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib
 	{
 		mapData.GetNextAssoc(pos, dwTaskID, pTCI);
 
-		if (pTCI->IsParent() && Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS))
+		if (CTaskCalItemMap::WantHideTask(pTCI, dwOptions, szHideParentTask))
 			continue;
 
 		switch (nAttribID)
