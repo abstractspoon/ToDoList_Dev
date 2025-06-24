@@ -291,14 +291,15 @@ int CAutoComboBox::InsertUniqueItem(int nIndex, const CString& sNewItem)
 				else
 					nIndex = COwnerdrawComboBoxBase::InsertString(nIndex, sItem); // re-insert
 
-				SetItemData(nIndex, dwItemData);
-				
 				if (nIndex != CB_ERR)
+				{
+					SetItemData(nIndex, dwItemData);
 					RefreshDropWidth();
 				
-				// restore selection
-				if (!sSelItem.IsEmpty())
-					SelectString(-1, sSelItem);
+					// restore selection
+					if (!sSelItem.IsEmpty())
+						SelectString(-1, sSelItem);
+				}
 			}
 			
 			return nIndex;
@@ -423,13 +424,11 @@ void CAutoComboBox::OnSize(UINT nType, int cx, int cy)
 		COwnerdrawComboBoxBase::OnSize(nType, cx, cy);
 	
 		pEdit->SendMessage(EM_SETSEL, (UINT)-1, 0);
-	}
-	else
-	{
-		COwnerdrawComboBoxBase::OnSize(nType, cx, cy);
+		return;
 	}
 
-	RefreshDropWidth(FALSE);
+	// else
+	COwnerdrawComboBoxBase::OnSize(nType, cx, cy);
 }
 
 int CAutoComboBox::AddUniqueItems(const CStringArray& aItems)
