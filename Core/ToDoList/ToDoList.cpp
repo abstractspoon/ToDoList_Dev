@@ -1764,7 +1764,7 @@ void CToDoListApp::OnHelpCheckForUpdates()
 TDL_WEBUPDATE_CHECK CToDoListApp::CheckForUpdates(BOOL bManual)
 {
 //  FOR DEBUGGING
- 	return TDLWUC_WANTUPDATE;
+// 	return TDLWUC_WANTUPDATE;
 
 	CPreferences prefs;
 
