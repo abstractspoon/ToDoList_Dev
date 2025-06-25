@@ -1278,11 +1278,9 @@ int CToDoCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) co
 
 void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 {
-	// update the combos before copying over the current defaults
+	// Copy to the attribute editor and then update our copy for the tree view
 	m_ctrlAttributes.SetDefaultAutoListData(tld);
 	m_ctrlAttributes.GetAutoListData(TDCA_ALL, m_tldAll);
-
-//	m_tldDefault.Copy(tld, TDCA_ALL);
 }
 
 void CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly)

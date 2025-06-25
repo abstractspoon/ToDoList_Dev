@@ -504,7 +504,7 @@ protected:
 	CTDCTaskListDropTarget m_treeDropTarget;
 	CWndPromptManager m_mgrPrompts;
 	COleDateTime m_dtLastTaskMod;
-	TDCAUTOLISTDATA /*m_tldDefault,*/ m_tldAll;
+	TDCAUTOLISTDATA m_tldAll;
 	int m_nPercentIncrement;
 	TODOITEM m_tdiDefault;
 	TDC_RECURFROMOPTION m_nDefRecurFrom;
