@@ -1273,8 +1273,8 @@ BOOL CToDoCtrl::SetSelectedTaskMetaData(const CString& sKey, const CString& sMet
 
 int CToDoCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
 {
-	int nNumItems = m_ctrlAttributes.GetAutoListData(nAttribID, tld);
-	ASSERT(tld.Matches(m_tldAll, nAttribID));
+	int nNumItems = m_ctrlAttributes.GetAutoListData(nAttribID, tld); // source of truth
+	ASSERT(tld.Matches(m_tldAll, nAttribID)); // debug check
 
 	return nNumItems;
 }
