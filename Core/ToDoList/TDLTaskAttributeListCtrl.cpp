@@ -1305,9 +1305,9 @@ void CTDLTaskAttributeListCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tl
 	m_tldDefault.Copy(tldDefault, TDCA_ALL);
 }
 
-void CTDLTaskAttributeListCtrl::GetDefaultAutoListData(TDCAUTOLISTDATA& tldDefault) const
+int CTDLTaskAttributeListCtrl::GetDefaultAutoListData(TDCAUTOLISTDATA& tldDefault) const
 { 
-	tldDefault.Copy(m_tldDefault, TDCA_ALL);
+	return tldDefault.Copy(m_tldDefault, TDCA_ALL);
 }
 
 void CTDLTaskAttributeListCtrl::SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld)
@@ -1316,9 +1316,9 @@ void CTDLTaskAttributeListCtrl::SetAutoListData(TDC_ATTRIBUTE nAttribID, const T
 	m_tldAll.AppendUnique(m_tldDefault, nAttribID);
 }
 
-void CTDLTaskAttributeListCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
+int CTDLTaskAttributeListCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
 {
-	tld.Copy(m_tldAll, nAttribID);
+	return tld.Copy(m_tldAll, nAttribID);
 }
 
 void CTDLTaskAttributeListCtrl::SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly)

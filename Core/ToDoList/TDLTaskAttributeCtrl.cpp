@@ -446,6 +446,7 @@ CONST_FWD_FUNC_RET_1ARG(BOOL, GetTimeSpent, TDCTIMEPERIOD&)
 CONST_FWD_FUNC_RET_1ARG(int, GetDependencies, CTDCDependencyArray&)
 CONST_FWD_FUNC_RET_1ARG(int, GetFileLinks, CStringArray&)
 CONST_FWD_FUNC_RET_1ARG(BOOL, GetCost, TDCCOST&)
+CONST_FWD_FUNC_RET_1ARG(int, GetDefaultAutoListData, TDCAUTOLISTDATA&)
 
 // -----------------------------------------------------------------------
 
@@ -462,20 +463,11 @@ CONST_FWD_FUNC_RET_2ARG(int, GetAllocTo, CStringArray&, CStringArray&)
 CONST_FWD_FUNC_RET_2ARG(int, GetCategories, CStringArray&, CStringArray&)
 CONST_FWD_FUNC_RET_2ARG(int, GetTags, CStringArray&, CStringArray&)
 CONST_FWD_FUNC_RET_2ARG(int, GetCustomAttributeAutoListData, const CString&, CStringArray&)
+CONST_FWD_FUNC_RET_2ARG(int, GetAutoListData, TDC_ATTRIBUTE, TDCAUTOLISTDATA&)
 
 // -----------------------------------------------------------------------
 
 // Others having unique patterns
-void CTDLTaskAttributeCtrl::GetDefaultAutoListData(TDCAUTOLISTDATA& arg) const 
-{ 
-	m_lcAttributes.GetDefaultAutoListData(arg); 
-}
-
-void CTDLTaskAttributeCtrl::GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const
-{
-	m_lcAttributes.GetAutoListData(nAttribID, tld);
-}
-
 BOOL CTDLTaskAttributeCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 {
 	return m_lcAttributes.SetSelectedTaskIDs(aTaskIDs);
