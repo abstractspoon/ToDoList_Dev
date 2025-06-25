@@ -86,7 +86,11 @@ const int CUSTOMTIMEATTRIBOFFSET = (TDCA_LAST_ATTRIBUTE + 1);
 const int COMBO_DROPHEIGHT	= GraphicsMisc::ScaleByDPIFactor(200);
 const int ICON_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
+const int MIN_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(100);
+
 const int MIN_COL_WIDTH		= (4 * EE_BTNWIDTH_DEFAULT);
+const int MAX_EDIT_WIDTH	= (2 * MIN_EDIT_WIDTH);
+const int MAX_TIP_LINELEN	= MAX_EDIT_WIDTH;
 
 const int VALUE_VARIES = 1;
 const int TIMEPERIOD_DECPLACES = 6; // Preserve full(ish) precision
@@ -254,6 +258,7 @@ int CTDLTaskAttributeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	VERIFY(m_spinPercent.Create(WS_CHILD | UDS_SETBUDDYINT | UDS_ARROWKEYS| UDS_ALIGNRIGHT, CRect(0, 0, 0, 0), this, IDC_PERCENT_SPIN));
 
+	// Misc initialisation
 	CLocalizer::EnableTranslation(m_cbTextAndNumbers, FALSE);
 	CLocalizer::EnableTranslation(m_cbPriority, FALSE);
 	CLocalizer::EnableTranslation(m_cbRisk, FALSE);
@@ -848,6 +853,8 @@ void CTDLTaskAttributeListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 	if (rSplitBar.PtInRect(point) && ::DragDetect(*this, point))
 	{
+		OnCancelEdit();
+
 		m_bSplitting = TRUE;
 		SetCapture();
 
@@ -902,18 +909,25 @@ void CTDLTaskAttributeListCtrl::OnCaptureChanged(CWnd* pWnd)
 
 BOOL CTDLTaskAttributeListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
 {
+	// Check for mouse over a child editing control
+	CPoint point(::GetMessagePos());
+
+	if (IsEditing() && (::WindowFromPoint(point) != *this))
+		return FALSE;
+
+	// Check for mouse over splitter
 	CRect rSplitBar;
 	GetSplitterRect(rSplitBar);
 
-	CPoint ptClient(::GetMessagePos());
-	ScreenToClient(&ptClient);
+	ScreenToClient(&point);
 
-	if (rSplitBar.PtInRect(ptClient))
+	if (rSplitBar.PtInRect(point))
 		return GraphicsMisc::SetAfxCursor(AFX_IDC_HSPLITBAR);
 
+	// Check for read-only or locked fields
 	if (m_aSelectedTaskIDs.GetSize())
 	{
-		LVHITTESTINFO lvHit = { { ptClient.x, ptClient.y }, 0 };
+		LVHITTESTINFO lvHit = { { point.x, point.y }, 0 };
 
 		int nRow = SubItemHitTest(&lvHit);
 		int nCol = lvHit.iSubItem;
@@ -2657,8 +2671,14 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
 	m_editBox.ClearMask();
 
+	BOOL bCheckWantMultilineEdit = FALSE;
+
 	switch (nAttribID)
 	{
+	case TDCA_TASKNAME:
+		bCheckWantMultilineEdit = TRUE;
+		break;
+
 	case TDCA_ALLOCBY:	PrepareSingleSelCombo(nRow, m_tldDefault.aAllocBy, m_tldAll.aAllocBy, m_cbTextAndNumbers);	break;
 	case TDCA_STATUS: 	PrepareSingleSelCombo(nRow, m_tldDefault.aStatus, m_tldAll.aStatus, m_cbTextAndNumbers);	break;
 	case TDCA_VERSION: 	PrepareSingleSelCombo(nRow, m_tldDefault.aVersion, m_tldAll.aVersion, m_cbTextAndNumbers);	break;
@@ -2702,7 +2722,6 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	case TDCA_LOCK: 
 	case TDCA_COLOR:
 	case TDCA_RECURRENCE:
-	case TDCA_TASKNAME:
 	case TDCA_EXTERNALID: 
 		break; // Nothing to do
 
@@ -2827,6 +2846,9 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 					break;
 
 				case TDCCA_STRING:
+					bCheckWantMultilineEdit = TRUE;
+					break;
+
 				case TDCCA_ICON:
 				case TDCCA_BOOL:
 					break; // Handled by CInputListCtrl
@@ -2853,6 +2875,24 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			PrepareTimeOfDayCombo(nRow);
 		}
 		break;
+	}
+
+	if (&ctrl == &m_editBox)
+	{
+		BOOL bMultiline = FALSE;
+
+		if (bCheckWantMultilineEdit)
+		{
+			CRect rClient;
+			GetClientRect(rClient);
+
+			int nMaxWidth = rClient.Width();
+			int nTextWidth = GraphicsMisc::GetTextWidth(GetItemText(nRow, nCol), *this);
+
+			bMultiline = (nTextWidth >= min(nMaxWidth, MAX_EDIT_WIDTH));
+		}
+
+		VERIFY(CInputListCtrl::CheckRecreateEditControl(bMultiline));
 	}
 }
 
@@ -3040,6 +3080,73 @@ CWnd* CTDLTaskAttributeListCtrl::GetEditControl(int nRow, BOOL bBtnClick)
 	return NULL;
 }
 
+void CTDLTaskAttributeListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
+{
+	ASSERT(nCol == VALUE_COL);
+
+	CInputListCtrl::GetCellEditRect(nRow, nCol, rCell);
+
+	// Ensure a big-enough edit field for 'free-text'
+	BOOL bCheckTextWidth = FALSE;
+
+	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
+	switch (nAttribID)
+	{
+	case TDCA_TASKNAME:
+		bCheckTextWidth = TRUE;
+		break;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(m_aCustomAttribDefs, nAttribID, pDef, break);
+
+			bCheckTextWidth = (!pDef->IsList() && (pDef->GetDataType() == TDCCA_STRING));
+		}
+		break;
+	}
+
+	if (bCheckTextWidth)
+	{
+		// Prevent child edit extending beyond visible client 
+		// rect else those parts will not be visible
+		CRect rScreen, rClient;
+
+		GraphicsMisc::GetAvailableScreenSpace(*this, rScreen);
+		ScreenToClient(rScreen);
+
+		GetClientRect(rClient);
+		rClient.IntersectRect(rClient, rScreen);
+
+		// Progressively enlarge the edit box until the maximum is reached
+		int nMaxWidth = rClient.Width();
+		int nCellWidth = rCell.Width();
+
+		CRect rEdit(rCell);
+		rEdit.right = (rEdit.left + max(nCellWidth, min(nMaxWidth, MIN_EDIT_WIDTH)));
+
+		CString sValue = GetItemText(nRow, VALUE_COL);
+		int nTextWidth = GraphicsMisc::GetTextWidth(sValue, *this);
+
+		if (nTextWidth >= rEdit.Width())
+		{
+			rEdit.right = (rEdit.left + max(nCellWidth, min(nMaxWidth, MAX_EDIT_WIDTH)));
+
+			if (nTextWidth > MAX_EDIT_WIDTH)
+			{
+				// Make the height not a row-multiple so it's clearly 
+				// distinguishable from the attributes behind
+				rEdit.bottom += ((GetItemHeight() * 5) / 2);
+			}
+		}
+
+		// Fit to visible client rect
+		GraphicsMisc::FitRect(rEdit, rClient);
+		rCell = rEdit;
+	}
+}
+
 void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 {
 	ASSERT(CanEditCell(nRow, nCol));
@@ -3052,7 +3159,7 @@ void CTDLTaskAttributeListCtrl::EditCell(int nRow, int nCol, BOOL bBtnClick)
 	{
 		if (pCtrl == CInputListCtrl::GetEditControl())
 		{
-			PrepareControl(m_editBox, nRow, nCol);
+			PrepareControl(*pCtrl, nRow, nCol);
 			CInputListCtrl::EditCell(nRow, nCol, bBtnClick);
 		}
 		else if (pCtrl == &m_eTimePeriod)
@@ -3524,10 +3631,15 @@ void CTDLTaskAttributeListCtrl::OnComboCloseUp(UINT nCtrlID)
 			return;
 
 		// Else if this is the core File Link field and the user
-		// clicked on one of the button, perform the required action
-		// before hiding the combo
+		// clicked on one of the buttons (except for the drop button),
+		// perform the required action before hiding the combo
 		if ((pCombo == &m_cbMultiFileLink) && CDialogHelper::IsMouseDownInWindow(*pCombo))
-			EditCell(GetRow(TDCA_FILELINK), VALUE_COL, TRUE);
+		{
+			int nRow = GetRow(TDCA_FILELINK);
+
+			if (HitTestButtonID(nRow) != ID_BTN_DEFAULT)
+				EditCell(nRow, VALUE_COL, TRUE);
+		}
 	}
 
 	// All else
@@ -4124,6 +4236,16 @@ int CTDLTaskAttributeListCtrl::GetDateRow(TDC_ATTRIBUTE nTimeAttribID) const
 
 int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
+	// Check for mouse over a child editing control
+	if (IsEditing())
+	{
+		CPoint ptScreen(point);
+		ClientToScreen(&ptScreen);
+
+		if (::WindowFromPoint(ptScreen) != *this)
+			return 0;
+	}
+
 	LVHITTESTINFO lvHit = { { point.x, point.y }, 0 };
 
 	// Get around constness
@@ -4138,11 +4260,13 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	
 	// Button tooltips
 	TDC_ATTRIBUTE nAttribID = GetAttributeID(nRow);
-	CRect rBtn;
+	int nToolID = MAKELONG(nRow, nCol);
+	CRect rBounds;
 	
-	if (GetButtonRect(nRow, nCol, rBtn) && rBtn.PtInRect(point))
+	if (GetButtonRect(nRow, nCol, rBounds) && rBounds.PtInRect(point))
 	{
-		int nBtnID = HitTestButtonID(nRow, rBtn);
+		int nBtnID = HitTestButtonID(nRow, rBounds);
+		nToolID += nBtnID;
 
 		switch (nBtnID)
 		{
@@ -4219,134 +4343,181 @@ int CTDLTaskAttributeListCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			}
 			break;
 		}
-
-		if (!sTooltip.IsEmpty())
-			return CToolTipCtrlEx::SetToolInfo(*pTI, *this, sTooltip, MAKELONG(nRow, nCol) + nBtnID);
 	}
-	
-	// Value tooltips
-	switch (nCol)
+	else // Label/Value tooltips
 	{
-	case LABEL_COL:
-		if (IsCustomTime(nAttribID))
-			sTooltip.LoadString(IDS_ATTRIBTIP_TIMEOFDAY);
-		break;
+		GetCellRect(nRow, nCol, rBounds);
 
-	case VALUE_COL:
-		if (!RowValueVaries(nRow))
+		switch (nCol)
 		{
-			switch (nAttribID)
+		case LABEL_COL:
+			if (IsCustomTime(nAttribID))
+				sTooltip.LoadString(IDS_ATTRIBTIP_TIMEOFDAY);
+			break;
+
+		case VALUE_COL:
+			if (!RowValueVaries(nRow))
 			{
-			case TDCA_ALLOCTO:
-			case TDCA_CATEGORY:
-			case TDCA_TAGS:
-			case TDCA_FILELINK:
+				BOOL bCheckTextNeedsTip = FALSE;
+
+				switch (nAttribID)
 				{
-					CStringArray aValues;
+				case TDCA_TASKNAME:
+					bCheckTextNeedsTip = TRUE;
+					break;
 
-					if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
-						sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
-				}
-				break;
-
-			case TDCA_COLOR:
-				{
-					COLORREF color = _ttoi(GetItemText(nRow, nCol));
-
-					if (!color || (color == CLR_NONE))
-						sTooltip.LoadString(IDS_ATTRIBTIP_DEFCOLOR);
-				}
-				break;
-
-			case TDCA_STARTDATE:
-				if (!m_data.HasStyle(TDCS_READONLY) && 
-					m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && 
-					m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs) &&
-					m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs))
-				{
-					sTooltip.LoadString(IDS_ATTRIBTIP_DEPENDENTDATE);
-				}
-				break;
-
-			case TDCA_DONETIME:
-			case TDCA_DUETIME:
-			case TDCA_STARTTIME:
-				{
-					int nDateRow = (nRow - 1);
-					ASSERT(GetDateRow(nAttribID) == nDateRow);
-
-					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
-						sTooltip.LoadString(IDS_ATTRIBTIP_NODATESET);
-				}
-				break;
-
-			case TDCA_RECURRENCE:
-				if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, FALSE)) // exclude 'good as done'
-					sTooltip.LoadString(IDS_ATTRIBTIP_COMPLETEDTASK);
-				break;
-
-			case TDCA_REMINDER:
-				if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, TRUE)) // include 'good as done'
-					sTooltip.LoadString(IDS_ATTRIBTIP_COMPLETEDTASK);
-				break;
-
-			case TDCA_DEPENDENCY:
-				{
-					CTDCDependencyArray aDepends;
-					
-					if (aDepends.Parse(GetItemText(nRow, nCol)) > 1)
-						sTooltip = m_formatter.GetDependencies(aDepends, TOOLTIP_DELIM);
-				}
-				break;
-
-			case TDCA_PERCENT:
-				if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE) ||
-					(m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) &&
-					 m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs)))
-				{
-					sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
-				}
-				break;
-
-			default:
-				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-				{
-					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-					GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, NULL);
-
-					if (pDef->IsCalculation())
-					{
-						sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
-					}
-					else if (pDef->IsMultiList() && pDef->IsDataType(TDCCA_STRING))
+				case TDCA_ALLOCTO:
+				case TDCA_CATEGORY:
+				case TDCA_TAGS:
+				case TDCA_FILELINK:
 					{
 						CStringArray aValues;
 
 						if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
 							sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
+						else
+							bCheckTextNeedsTip = (nAttribID == TDCA_FILELINK);
+					}
+					break;
+
+				case TDCA_COLOR:
+					{
+						COLORREF color = _ttoi(GetItemText(nRow, nCol));
+
+						if (!color || (color == CLR_NONE))
+							sTooltip.LoadString(IDS_ATTRIBTIP_DEFCOLOR);
+					}
+					break;
+
+				case TDCA_STARTDATE:
+					if (!m_data.HasStyle(TDCS_READONLY) && 
+						m_data.HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && 
+						m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs) &&
+						m_multitasker.AllTasksHaveDependencies(m_aSelectedTaskIDs))
+					{
+						sTooltip.LoadString(IDS_ATTRIBTIP_DEPENDENTDATE);
+					}
+					break;
+
+				case TDCA_DONETIME:
+				case TDCA_DUETIME:
+				case TDCA_STARTTIME:
+					{
+						int nDateRow = (nRow - 1); // Always
+						ASSERT(GetDateRow(nAttribID) == nDateRow);
+
+						if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
+							sTooltip.LoadString(IDS_ATTRIBTIP_NODATESET);
+					}
+					break;
+
+				case TDCA_RECURRENCE:
+					if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, FALSE)) // exclude 'good as done'
+						sTooltip.LoadString(IDS_ATTRIBTIP_COMPLETEDTASK);
+					break;
+
+				case TDCA_REMINDER:
+					if (m_multitasker.AllTasksAreDone(m_aSelectedTaskIDs, TRUE)) // include 'good as done'
+						sTooltip.LoadString(IDS_ATTRIBTIP_COMPLETEDTASK);
+					break;
+
+				case TDCA_DEPENDENCY:
+					{
+						CTDCDependencyArray aDepends;
+					
+						if (aDepends.Parse(GetItemText(nRow, nCol)) > 1)
+							sTooltip = m_formatter.GetDependencies(aDepends, TOOLTIP_DELIM);
+					}
+					break;
+
+				case TDCA_PERCENT:
+					if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE) ||
+						(m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) &&
+						 m_multitasker.AnyTaskIsParent(m_aSelectedTaskIDs)))
+					{
+						sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
+					}
+					break;
+
+				default:
+					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+					{
+						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+						GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, NULL);
+
+						if (pDef->IsCalculation())
+						{
+							sTooltip.LoadString(IDS_ATTRIBTIP_CALCULATEDVALUE);
+						}
+						else if (pDef->IsDataType(TDCCA_STRING))
+						{
+							if (pDef->IsMultiList())
+							{
+								CStringArray aValues;
+
+								if (SplitValueArray(GetItemText(nRow, nCol), aValues) > 1)
+									sTooltip = Misc::FormatArray(aValues, TOOLTIP_DELIM);
+							}
+							else
+							{
+								bCheckTextNeedsTip = !pDef->IsList();
+							}
+						}
+					}
+					else if (IsCustomTime(nAttribID))
+					{
+						int nDateRow = (nRow - 1);
+						ASSERT(GetDateRow(nAttribID) == nDateRow);
+
+						if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
+							sTooltip.LoadString(IDS_ATTRIBTIP_NODATESET);
+					}
+					break;
+				}
+
+				if (sTooltip.IsEmpty())
+				{
+					if (!CanEditCell(nRow, nCol) && m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
+					{
+						sTooltip.LoadString(IDS_STATUSREADONLY);
+					}
+					else if (bCheckTextNeedsTip)
+					{
+						CString sText = GetItemText(nRow, nCol);
+						int nTextWidth = GraphicsMisc::GetTextWidth(sText, *this);
+
+						if (nTextWidth >= GetColumnWidth(VALUE_COL))
+						{
+							if (nTextWidth <= MAX_TIP_LINELEN)
+							{
+								sTooltip = sText;
+							}
+							else
+							{
+								CStringArray aLines;
+
+								int nMaxCharLineLen = (int)(MAX_TIP_LINELEN / GraphicsMisc::GetAverageCharWidth(*this));
+								int nNumLines = Misc::SplitLines(sText, aLines, nMaxCharLineLen);
+
+								sTooltip = Misc::FormatArray(aLines, TOOLTIP_DELIM);
+							}
+						}
 					}
 				}
-				else if (IsCustomTime(nAttribID))
-				{
-					int nDateRow = (nRow - 1);
-					ASSERT(GetDateRow(nAttribID) == nDateRow);
-
-					if (CanEditCell(nDateRow, nCol) && !RowValueVaries(nDateRow) && GetItemText(nDateRow, nCol).IsEmpty())
-						sTooltip.LoadString(IDS_ATTRIBTIP_NODATESET);
-				}
-				break;
 			}
-
-			if (sTooltip.IsEmpty() && !CanEditCell(nRow, nCol) && m_multitasker.AnyTaskIsUnlocked(m_aSelectedTaskIDs))
-				sTooltip.LoadString(IDS_STATUSREADONLY);
+			break;
 		}
-		break;
 	}
 
-	if (!sTooltip.IsEmpty())
-		return CToolTipCtrlEx::SetToolInfo(*pTI, *this, sTooltip, MAKELONG(nRow, nCol));
+	if (sTooltip.IsEmpty())
+		return -1;
 
-	return -1;  // not found
+	return CToolTipCtrlEx::SetToolInfo(*pTI,
+									   *this,
+									   sTooltip,
+									   nToolID,
+									   rBounds,
+									   TTF_TRANSPARENT | TTF_NOTBUTTON | TTF_EXCLUDEBOUNDS);
 }
 
 void CTDLTaskAttributeListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)

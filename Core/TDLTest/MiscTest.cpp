@@ -20,6 +20,7 @@ const CString DEFSEP = (Misc::GetListSeparator() + ' ');
 const int DEFSEPLEN = DEFSEP.GetLength();
 
 const LPCTSTR NULLSTRING = NULL;
+const CString EMPTYSTRING;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -49,6 +50,7 @@ TESTRESULT CMiscTest::Run()
 	TestAtof();
 	TestIsNumber();
 	TestRemoveDuplicates();
+	TestSplitLines();
 
 	return GetTotals();
 }
@@ -770,6 +772,100 @@ void CMiscTest::TestAppendItems()
 		ExpectEQ(aFrom.GetSize(), 1);
 
 		ExpectEQ(aTo[0], _T("abc"));
+	}
+}
+
+void CMiscTest::TestSplitLines()
+{
+	CTDCScopedTest test(*this, _T("Misc::SplitLines"));
+
+	const CString PARA_1 = _T("ToDoList can be navigated equally easily using the keyboard or the mouse and uses standard Windows keyboard and mouse actions for navigating.");
+	const CString PARA_2 = _T("In addition to this,	ToDoList keeps track of your navigation history so that you can easily track backwards and forwards in a similar way to browsing the web.");
+	const CString PARA_3 = _T("ToDoList also supports multiple selection of tasks for editing, moving, deleting, exporting and printing.");
+	const CString PARA_4 = _T("1. Local files/folders\n2. Network files\\folders\n3. Internet addresses(www.)\n4. Email addresses(mailto://)");
+
+	// No maximum line length
+	{
+		{
+			const CString sText = (PARA_1 + '\n' + PARA_2 + '\n' + PARA_3);
+			CStringArray aLines;
+
+			ExpectEQ(Misc::SplitLines(sText, aLines), 3);
+			ExpectEQ(aLines[0], PARA_1);
+			ExpectEQ(aLines[1], PARA_2);
+			ExpectEQ(aLines[2], PARA_3);
+		}
+
+		{
+			const CString sText = (PARA_1 + PARA_2 + PARA_3);
+			CStringArray aLines;
+
+			ExpectEQ(Misc::SplitLines(sText, aLines), 1);
+			ExpectEQ(aLines[0], sText);
+		}
+
+		{
+			const CString sText = (PARA_1 + _T("\n\n\n") + PARA_2 + _T("\n\n") + PARA_3);
+			CStringArray aLines;
+
+			ExpectEQ(Misc::SplitLines(sText, aLines), 6);
+			ExpectEQ(aLines[0], PARA_1);
+			ExpectEQ(aLines[1], EMPTYSTRING);
+			ExpectEQ(aLines[2], EMPTYSTRING);
+			ExpectEQ(aLines[3], PARA_2);
+			ExpectEQ(aLines[4], EMPTYSTRING);
+			ExpectEQ(aLines[5], PARA_3);
+		}
+	}
+
+	// With maximum line length
+	{
+		{
+			CStringArray aLines;
+			const int MAXLINELEN = 50;
+
+			ExpectEQ(Misc::SplitLines(PARA_1, aLines, MAXLINELEN), 3);
+			ExpectEQ(aLines[0], _T("ToDoList can be navigated equally easily using the "));
+			ExpectEQ(aLines[1], _T("keyboard or the mouse and uses standard Windows "));
+			ExpectEQ(aLines[2], _T("keyboard and mouse actions for navigating."));
+
+			int nTotalLen = 0;
+
+			for (int nLine = 0; nLine < aLines.GetSize(); nLine++)
+			{
+				// The line length can include the trailing delimiter
+				ExpectTrue(aLines[nLine].GetLength() <= (MAXLINELEN + 1));
+				nTotalLen += (aLines[nLine].GetLength());
+			}
+
+			ExpectEQ(nTotalLen, PARA_1.GetLength());
+		}
+
+		{
+			CStringArray aLines;
+			const int MAXLINELEN = 20;
+
+			ExpectEQ(Misc::SplitLines(PARA_4, aLines, MAXLINELEN), 8);
+			ExpectEQ(aLines[0], _T("1. Local files/"));
+			ExpectEQ(aLines[1], _T("folders"));
+			ExpectEQ(aLines[2], _T("2. Network files\\"));
+			ExpectEQ(aLines[3], _T("folders"));
+			ExpectEQ(aLines[4], _T("3. Internet "));
+			ExpectEQ(aLines[5], _T("addresses(www.)"));
+			ExpectEQ(aLines[6], _T("4. Email "));
+			ExpectEQ(aLines[7], _T("addresses(mailto://)"));
+
+			int nTotalLen = 0;
+
+			for (int nLine = 0; nLine < aLines.GetSize(); nLine++)
+			{
+				// The line length can include the trailing delimiter
+				ExpectTrue(aLines[nLine].GetLength() <= (MAXLINELEN + 1));
+				nTotalLen += (aLines[nLine].GetLength());
+			}
+
+			ExpectEQ(nTotalLen, PARA_4.GetLength() - 3); // embedded newlines not included
+		}
 	}
 }
 

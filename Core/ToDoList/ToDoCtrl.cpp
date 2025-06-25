@@ -3492,8 +3492,8 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 	int nMinLen = GraphicsMisc::ScaleByDPIFactor(200);
 	rPos.right = max(rPos.right, rPos.left + nMinLen);
 
-	// create edit if nec.
-	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_TASKLABELEDIT, WS_POPUP | WS_BORDER))
+	// create edit on request
+	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_TASKLABELEDIT, (WS_POPUP | WS_BORDER | ES_AUTOHSCROLL)))
 		return FALSE;
 
 	// start
@@ -7005,11 +7005,9 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 	// Verify that we have been saved
 	if (!HasFilePath())
 	{
-		CMessageBox::Show(AfxGetMainWnd(),
-						  CEnString(IDS_TITLE_TIMETRACKING), 
-						  _T(""),
-						  CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
-						  (MB_OK | MB_ICONEXCLAMATION));
+		CMessageBox::AfxShow(CEnString(IDS_TITLE_TIMETRACKING), 
+							 CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
+							 (MB_OK | MB_ICONEXCLAMATION));
 		return FALSE;
 	}
 

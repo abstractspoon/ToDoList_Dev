@@ -21,7 +21,8 @@ const TCHAR TAB = '\t';
 
 const UINT WM_RESELECTTASKID = (CB_MSGMAX + 1);
 
-const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int ICON_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
+const int MAX_DROPWIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -350,6 +351,11 @@ void CTDLTaskComboBox::SelectNextFind(BOOL bForward)
 int CTDLTaskComboBox::GetExtraListboxWidth() const
 {
 	return (CTabbedComboBox::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CTDLTaskComboBox::GetMaxDropWidth() const 
+{ 
+	return MAX_DROPWIDTH; 
 }
 
 int CTDLTaskComboBox::CalcMinItemHeight(BOOL bList) const

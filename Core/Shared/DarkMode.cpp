@@ -374,20 +374,6 @@ BOOL IsParentPreferencePage(HWND hWnd)
 	return CWinClasses::IsKindOf(::GetParent(hWnd), RUNTIME_CLASS(CPreferencesPageBase));
 }
 
-COLORREF GetParentBkgndColor(HWND hWnd)
-{
-	if (IsParentPreferencePage(hWnd))
-	{
-		HWND hwndParent = ::GetParent(hWnd);
-		CPreferencesPageBase* pParent = (CPreferencesPageBase*)CWnd::FromHandle(hwndParent);
-
-		return pParent->GetBackgroundColor();
-	}
-
-	// else
-	return DM_3DFACE;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 static HWND s_hwndCurrentComboBox			= NULL;
@@ -399,6 +385,8 @@ static HWND s_hwndCurrentManagedBtnStatic	= NULL;
 static HWND s_hwndCurrentExplorerTreeOrList = NULL;
 static HWND s_hwndCurrent					= NULL;
 static HWND s_hwndCurrentExclusion			= NULL;
+
+static CSet<HWND> s_mapExplorerThemedWnds;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -414,7 +402,24 @@ void CDarkMode::PrepareForIEPrintOrPreview()
 
 //////////////////////////////////////////////////////////////////////
 
-static CSet<HWND> s_mapExplorerThemedWnds;
+static CMap<COLORREF, COLORREF, HBRUSH, HBRUSH> s_mapBrushes;
+
+DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
+{
+	if (bColor)
+		return color;
+
+	// else
+	HBRUSH hbr = NULL;
+
+	if (!s_mapBrushes.Lookup(color, hbr) || !hbr)
+	{
+		hbr = ::CreateSolidBrush(color);
+		s_mapBrushes.SetAt(color, hbr);
+	}
+
+	return (DWORD)hbr;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -528,6 +533,39 @@ private:
 
 class CDarkModeComboBox : public CDarkModeCtrlBase
 {
+public:
+	CDarkModeComboBox() : m_bOwnerDraw(FALSE) 
+	{
+	}
+
+	BOOL HookWindow(HWND hWnd, CSubclasser* pSubclasser)
+	{
+		if (!CDarkModeCtrlBase::HookWindow(hWnd, pSubclasser))
+			return FALSE;
+
+		if (hWnd)
+		{
+			DWORD dwStyle = GetStyle();
+			ASSERT((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST);
+
+			m_bOwnerDraw = (Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) ||
+							Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE));
+		}
+
+		return TRUE;
+	}
+
+	static void GetEffectiveClientRect(HWND hwnd, CRect& rClient)
+	{
+		::GetClientRect(hwnd, rClient);
+
+		rClient.right -= GetSystemMetrics(SM_CXVSCROLL);
+		rClient.DeflateRect(2, 2);
+	}
+
+protected:
+	BOOL m_bOwnerDraw;
+
 protected:
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
@@ -537,7 +575,23 @@ protected:
 			if (s_hwndCurrentComboBox == NULL)
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hRealWnd);
-				return Default();
+				
+				LRESULT lr = Default();
+
+				// Disabled owner-draw combos get a COLOR_WINDOW border
+				// around the client region which I've not been able to 
+				// handle by the usual methods so we draw over it instead
+				if (m_bOwnerDraw && !IsWindowEnabled())
+				{
+					CClientDC dc(GetCWnd());
+
+					CRect rClient;
+					GetEffectiveClientRect(hRealWnd, rClient);
+
+					::FrameRect(dc, rClient, (HBRUSH)GetColorOrBrush(DM_3DFACE, FALSE));
+				}
+
+				return lr;
 			}
 			break;
 		}
@@ -701,7 +755,7 @@ protected:
 			if (s_hwndCurrentEdit == NULL)
 			{
 				CAutoFlagT<HWND> af(s_hwndCurrentEdit, hRealWnd);
-				CWnd* pEdit = CWnd::FromHandle(hRealWnd);
+				CWnd* pEdit = GetCWnd();
 
 				if (pEdit->IsKindOf(RUNTIME_CLASS(CPopupEditCtrl)))
 				{
@@ -709,9 +763,10 @@ protected:
 
 					// Give the control a highlighted border
 					CRect rBorder;
-					GetClientRect(rBorder);
+					GetWindowRect(rBorder);
+					ScreenToWindow(rBorder);
 
-					CClientDC dc(pEdit);
+					CWindowDC dc(pEdit);
 					GraphicsMisc::DrawRect(&dc, rBorder, CLR_NONE, DM_HOTLIGHT);
 
 					return lr;
@@ -1068,27 +1123,6 @@ BOOL WantDarkMode(HWND hwnd = NULL)
 
 //////////////////////////////////////////////////////////////////////
 
-static CMap<COLORREF, COLORREF, HBRUSH, HBRUSH> s_mapBrushes;
-
-DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
-{
-	if (bColor) 
-		return color; 
-	
-	// else
-	HBRUSH hbr = NULL;
-	
-	if (!s_mapBrushes.Lookup(color, hbr) || !hbr)
-	{
-		hbr = ::CreateSolidBrush(color); 
-		s_mapBrushes.SetAt(color, hbr);
-	}
-	
-	return (DWORD)hbr; 
-}
-
-//////////////////////////////////////////////////////////////////////
-
 DWORD TrueGetSysColorOrBrush(int nColor, BOOL bColor)
 {
 	if (bColor)
@@ -1204,16 +1238,19 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLORLISTBOX:
 		if (WantDarkMode(hWnd))
 		{
+			HDC hdc = (HDC)wp;
+			HWND hwndChild = (HWND)lp;
+
 			COLORREF crText = DM_WINDOWTEXT, crBack = DM_WINDOW;
 
-			if (!IsWindowEnabled((HWND)lp))
+			if (!IsWindowEnabled(hwndChild))
 			{
 				crText = DM_DISABLEDEDITTEXT;
 				crBack = DM_3DFACE;
 			}
 
-			::SetTextColor((HDC)wp, crText);
-			::SetBkMode((HDC)wp, TRANSPARENT);
+			::SetTextColor(hdc, crText);
+			::SetBkMode(hdc, TRANSPARENT);
 
 			lr = GetColorOrBrush(crBack, FALSE);
 			return TRUE;
@@ -1223,9 +1260,11 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 	case WM_CTLCOLOREDIT:
 		if (WantDarkMode(hWnd))
 		{
-			::SetTextColor((HDC)wp, DM_WINDOWTEXT);
-			::SetBkColor((HDC)wp, DM_WINDOW);
-			::SetBkMode((HDC)wp, OPAQUE);
+			HDC hdc = (HDC)wp;
+
+			::SetTextColor(hdc, DM_WINDOWTEXT);
+			::SetBkColor(hdc, DM_WINDOW);
+			::SetBkMode(hdc, OPAQUE);
 		
 			lr = GetColorOrBrush(DM_WINDOW, FALSE);
 			return TRUE;
@@ -1236,33 +1275,36 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
  	case WM_CTLCOLORSTATIC:
 		if (WantDarkMode(hWnd))
 		{
+			HDC hdc = (HDC)wp;
 			HWND hwndChild = (HWND)lp;
 
 			if (CWinClasses::IsEditControl(hwndChild))
 			{
-				::SetTextColor((HDC)wp, DM_DISABLEDEDITTEXT);
-				::SetBkColor((HDC)wp, DM_3DFACE);
-				::SetBkMode((HDC)wp, OPAQUE);
+				::SetTextColor(hdc, DM_DISABLEDEDITTEXT);
+				::SetBkColor(hdc, DM_3DFACE);
+				::SetBkMode(hdc, OPAQUE);
 		
 				lr = GetColorOrBrush(DM_3DFACE, FALSE);
 			}
 			else // static text, checkboxes and radiobuttons
 			{
-				::SetTextColor((HDC)wp, CDarkModeStaticText::GetTextColor(hwndChild));
+				::SetTextColor(hdc, CDarkModeStaticText::GetTextColor(hwndChild));
 
-				// There's a very strange occurrence that if we return
-				// the existing cached DM_WINDOW brush here then it 
-				// somehow fails to get used and instead the DM_3DFACE
-				// brush gets used even though it's not the returned 
-				// brush. Through trial and error I determined that
-				// modifying the color to be unique and hence return a
-				// unique brush is sufficient to 'fix' the issue.
 				COLORREF crBack = DM_3DFACE;
 
 				if (IsParentPreferencePage(hwndChild))
+				{
+					// There's a very strange occurrence that if we return
+					// the existing cached DM_WINDOW brush here then it 
+					// somehow fails to get used and instead the DM_3DFACE
+					// brush gets used even though it's not the returned 
+					// brush. Through trial and error I determined that
+					// modifying the colour to be unique and hence return a
+					// unique brush is sufficient to 'fix' the issue.
 					crBack = (DM_WINDOW + 1);
+				}
 
-				::SetBkMode((HDC)wp, TRANSPARENT);
+				::SetBkMode(hdc, TRANSPARENT);
 
 				lr = GetColorOrBrush(crBack, FALSE);
 			}
@@ -1319,26 +1361,12 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				::SendMessage(hWnd, TVM_SETTEXTCOLOR, 0, (LPARAM)DM_WINDOWTEXT);
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOBOX) || 
+					 CWinClasses::IsClass(sClass, WC_COMBOBOXEX) ||
 					 CWinClasses::IsWinFormsControl(sClass, WC_COMBOBOX))
 			{
-				DWORD dwStyle = ::GetWindowLong(hWnd, GWL_STYLE);
-
-				if ((dwStyle & CBS_TYPEMASK) == CBS_DROPDOWNLIST)
-				{
-					if (!Misc::HasFlag(dwStyle, CBS_OWNERDRAWFIXED) &&
-						!Misc::HasFlag(dwStyle, CBS_OWNERDRAWVARIABLE))
-					{
-						// To make read-only combos consistent with others
-						HookWindow(hWnd, new CDarkModeComboBox());
-					}
-					break;
-				}
-			}
-			else if (CWinClasses::IsClass(sClass, WC_COMBOBOXEX))
-			{
+				// Make read-only combos consistent with others
 				if (CWinClasses::GetStyleType(hWnd, CBS_TYPEMASK) == CBS_DROPDOWNLIST)
 				{
-					// To make read-only combos consistent with others
 					HookWindow(hWnd, new CDarkModeComboBox());
 				}
 			}
@@ -1447,11 +1475,11 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOLBOX))
 			{
-				// We only get here with simple combos (CBS_SIMPLE)
-				ASSERT(CWinClasses::GetStyleType(::GetParent(hWnd), CBS_TYPEMASK) == CBS_SIMPLE);
-
-				CAutoFlagT<HWND> af(s_hwndCurrentSimpleComboListBox, hWnd);
-				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+				if (CWinClasses::GetStyleType(::GetParent(hWnd), CBS_TYPEMASK) == CBS_SIMPLE)
+				{
+					CAutoFlagT<HWND> af(s_hwndCurrentSimpleComboListBox, hWnd);
+					return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+				}
 			}
 			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || 
 					 CWinClasses::IsWinFormsControl(sClass, WC_DATETIMEPICK))
@@ -1607,7 +1635,7 @@ HRESULT STDAPICALLTYPE MyGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
 					case ETS_CUEBANNER:
 						if (iPropId == TMT_TEXTCOLOR)
 						{
-							*pColor = GetColorOrBrush(COLOR_WINDOWTEXT, TRUE);
+							*pColor = GetSysColorOrBrush(COLOR_WINDOWTEXT, TRUE);
 							return S_OK;
 						}
 						break;
@@ -1715,10 +1743,7 @@ HRESULT STDAPICALLTYPE MyDrawThemeBackground(HTHEME hTheme, HDC hdc, int iPartId
 					if (hr == S_OK)
 					{
 						CRect rBkgnd;
-						GetClientRect(s_hwndCurrentComboBox, rBkgnd);
-
-						rBkgnd.right -= GetSystemMetrics(SM_CXVSCROLL);
-						rBkgnd.DeflateRect(2, 2);
+						CDarkModeComboBox::GetEffectiveClientRect(s_hwndCurrentComboBox, rBkgnd);
 
 						COLORREF crBkgnd = DM_WINDOW;
 

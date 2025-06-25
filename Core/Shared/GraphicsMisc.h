@@ -183,6 +183,7 @@ namespace GraphicsMisc
 	int GetTabbedTextWidth(CDC* pDC, const CString& sText, int nTabWidth);
 	int GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...);
 	float GetAverageCharWidth(CDC* pDC, CFont* pFont = NULL);
+	float GetAverageCharWidth(HWND hWndRef);
 	int GetAverageStringWidth(const CString& sText, CDC* pDC, CFont* pFont = NULL);
 	int GetAverageMaxStringWidth(const CString& sText, CDC* pDC, CFont* pFont = NULL);
 	
@@ -260,6 +261,10 @@ namespace GraphicsMisc
 	BOOL DwmSetWindowAttributeEx(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize);
 	BOOL DwmGetWindowAttributeEx(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize);
 	BOOL DwmIsCompositionEnabled();
+
+	BOOL FitRect(CRect& rect, const CRect& rOther);
+	BOOL FitRectToWindow(CRect& rect, HWND hWnd, BOOL bScreen = FALSE);
+	BOOL FitRectToScreen(CRect& rect, LPPOINT pPtRef = NULL, UINT nFallback = MONITOR_DEFAULTTONULL);
 
 	BOOL GetAvailableScreenSpace(const CPoint& point, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);
 	BOOL GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);

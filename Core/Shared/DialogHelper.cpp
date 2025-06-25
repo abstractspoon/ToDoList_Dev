@@ -13,6 +13,7 @@
 #include "enstring.h"
 #include "AcceleratorString.h"
 #include "OSVersion.h"
+#include "OwnerdrawComboBoxBase.h"
 
 #include <afxpriv.h>
 #include <afxtempl.h>
@@ -884,12 +885,17 @@ UINT CDialogHelper::MessageBoxEx(const CWnd* pWnd, LPCTSTR szText, UINT nIDCapti
 	return ::MessageBox(*pWnd, szText, sCaption, nType);
 }
 
-int CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth, int nExtra)
+void CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth)
 {
-   int nWidth = CalcMaxTextWidth(combo, 0, TRUE, pDCRef, nTabWidth);
-   combo.SetDroppedWidth(nWidth + nExtra);
-
-   return nWidth;
+	if (combo.IsKindOf(RUNTIME_CLASS(COwnerdrawComboBoxBase)))
+	{
+		((COwnerdrawComboBoxBase&)combo).RefreshDropWidth();
+	}
+	else
+	{
+	   int nWidth = CalcMaxTextWidth(combo, 0, TRUE, pDCRef, nTabWidth);
+	   combo.SetDroppedWidth(nWidth);
+	}
 }
 
 int CDialogHelper::CalcMaxTextWidth(CComboBox& combo, int nMinWidth, BOOL bDropped, CDC* pDCRef, int nTabWidth)

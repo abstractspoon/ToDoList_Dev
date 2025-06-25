@@ -140,7 +140,7 @@ static CEnString TDL_FILEFILTER;
 /////////////////////////////////////////////////////////////////////////////
 
 const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
-const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print\\Print"), _T("html"));
+const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print\\Print"), _T("html"), FALSE); // IE is very fussy about embedded paths
 const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("png"));
 
 /////////////////////////////////////////////////////////////////////////////
@@ -11591,15 +11591,24 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
     if (m_bClosing)
         return; 
 
-	// Reload tasklists as required
-	if (bActive)
+	// Essential house-keeping
+	if (!bActive)
+	{
+		// Finish up whatever the user was doing
+		GetToDoCtrl().Flush();
+	}
+	else
+	{
+		// Reload tasklists as required
 		CheckReloadToDoCtrls(-1, TRUE);
+	}
 
 	// Don't do any further processing if the Reminder window or Time tracker
 	// is active because the two windows get into a fight for activation!
 	if (m_dlgReminders.IsForegroundWindow() || m_dlgTimeTracker.IsForegroundWindow())
 		return;
 
+	// More house-keeping
 	if (!bActive)
 	{
 		// save tasklists if required
