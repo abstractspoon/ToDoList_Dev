@@ -27,10 +27,10 @@ REM ML - Make Lowercase
 REM NM - No Message
 
 ECHO Zipping %REPO%\Core\ToDoList_Core.sln
-%PATHPZIP% %REPO%\Core\ToDoList_Core.sln /ZP %REPO%\..\ToDoList_Prev\9.1\ToDoList_src_Core.9.1._.zip /ML /NM
+%PATHPZIP% %REPO%\Core\ToDoList_Core.sln /ZP %REPO%\..\ToDoList_Prev\9.2\ToDoList_src_Core.9.2._.zip /ML /NM
 
 ECHO Zipping %REPO%\Plugins\ToDoList_Plugins.sln
-%PATHPZIP% %REPO%\Plugins\ToDoList_Plugins.sln /ZP %REPO%\..\ToDoList_Prev\9.1\ToDoList_src_Plugins.9.1._.zip /ML /NM
+%PATHPZIP% %REPO%\Plugins\ToDoList_Plugins.sln /ZP %REPO%\..\ToDoList_Prev\9.2\ToDoList_src_Plugins.9.2._.zip /ML /NM
 
 ECHO:
 ECHO [42m Zipping Code SUCCEEDED[0m
