@@ -116,6 +116,8 @@ FINDSTR /C:"Unable to load file:" %OUTPUT_FILE%
 IF %errorlevel%==0 (
 ECHO [41m Versioning FAILED[0m
 ECHO:
+REM Open the log
+%OUTPUT_FILE%
 PAUSE
 EXIT
 )
@@ -155,6 +157,8 @@ FINDSTR /C:"The system cannot find the file specified." %OUTPUT_FILE%
 IF %errorlevel%==0 (
 ECHO [41m Symbols FAILED[0m
 ECHO:
+REM Open the log
+%OUTPUT_FILE%
 PAUSE
 EXIT
 )
@@ -247,6 +251,8 @@ FINDSTR /C:"The system cannot find the file specified." %OUTPUT_FILE% > NUL
 IF %errorlevel%==0 (
 ECHO [41m Zipping Binaries FAILED[0m
 ECHO:
+REM Open the log
+%OUTPUT_FILE%
 PAUSE
 EXIT
 )
@@ -260,10 +266,10 @@ ECHO Copy todolist_exe_.zip to %REPO%\..\ToDoList_Downloads\Latest\
 COPY %OUTZIP% %REPO%\..\ToDoList_Downloads\Latest\
 ECHO:
    
-REM - And then move it to ToDoList_Prev\9.1
-MKDIR %REPO%\..\ToDoList_Prev\9.1 2> NUL
-ECHO Rename todolist_exe_.zip to %REPO%\..\ToDoList_Prev\9.1\ToDoList_exe.9.1._.zip
-MOVE %OUTZIP% %REPO%\..\ToDoList_Prev\9.1\ToDoList_exe.9.1._.zip
+REM - And then move it to ToDoList_Prev\9.2
+MKDIR %REPO%\..\ToDoList_Prev\9.2 2> NUL
+ECHO Rename todolist_exe_.zip to %REPO%\..\ToDoList_Prev\9.2\ToDoList_exe.9.2._.zip
+MOVE %OUTZIP% %REPO%\..\ToDoList_Prev\9.2\ToDoList_exe.9.2._.zip
 ECHO:
    
 POPD
