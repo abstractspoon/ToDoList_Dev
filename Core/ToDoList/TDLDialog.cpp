@@ -11,6 +11,8 @@
 
 #include "..\Interfaces\Preferences.h"
 
+#include <afxpriv.h> // WM_KICKIDLE
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
@@ -56,7 +58,7 @@ BEGIN_MESSAGE_MAP(CTDLDialog, CDialog)
 	ON_WM_GETMINMAXINFO()
 	ON_WM_DESTROY()
 	ON_WM_SHOWWINDOW()
-	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetAppIcon)
+	ON_MESSAGE(WM_KICKIDLE, OnKickIdle)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 END_MESSAGE_MAP()
 
@@ -210,3 +212,9 @@ int CTDLDialog::DoModal(HICON hIcon)
 
 	return CDialog::DoModal();
 }
+
+LRESULT CTDLDialog::OnKickIdle(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	return DoIdleProcessing();
+}
+

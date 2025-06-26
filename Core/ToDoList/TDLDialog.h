@@ -40,6 +40,7 @@ protected:
 	virtual BOOL OnInitDialog();
 
 	virtual void OnRepositionControls(int /*dx*/, int /*dy*/) {}
+	virtual BOOL DoIdleProcessing() { return FALSE; }
 
 // Implementation
 protected:
@@ -52,6 +53,7 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnKickIdle(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
