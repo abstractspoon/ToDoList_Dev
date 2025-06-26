@@ -4304,19 +4304,10 @@ void CToDoCtrl::LoadGlobals(const CTaskFile& tasks, BOOL bMerge)
 	tasks.GetAutoListData(tld);
 
 	if (bMerge)
-	{
-		if (!m_tldAll.AppendUnique(tld, TDCA_ALL))
-			return;
-	}
-	else
-	{
-		if (m_tldAll.Matches(tld, TDCA_ALL))
-			return;
+		tld.AppendUnique(m_tldAll, TDCA_ALL);
 
-		m_tldAll.Copy(tld, TDCA_ALL);
-	}
-
-	m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
+	m_ctrlAttributes.SetAutoListData(TDCA_ALL, tld); // single source of truth
+	m_ctrlAttributes.GetAutoListData(TDCA_ALL, m_tldAll); // update our copy
 }
 
 void CToDoCtrl::OnCustomAttributesChanged()
