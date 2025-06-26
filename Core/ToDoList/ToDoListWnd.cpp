@@ -221,7 +221,14 @@ void CToDoListWnd::IDLETASKS::UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCA
 	else
 		m_bUpdateTimeTrackAllTasks |= (bAllTasks != FALSE);
 
-	m_mapTimeTrackAttrib.Append(mapAttrib);
+	if (mapAttrib.Has(TDCA_ALL))
+	{
+		m_mapTimeTrackAttrib.Set(TDCA_ALL);
+	}
+	else if (!m_mapTimeTrackAttrib.Has(TDCA_ALL))
+	{
+		m_mapTimeTrackAttrib.Append(mapAttrib);
+	}
 }
 
 BOOL CToDoListWnd::IDLETASKS::Process()
@@ -11595,7 +11602,8 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 	if (!bActive)
 	{
 		// Finish up whatever the user was doing
-		GetToDoCtrl().Flush();
+		if (GetTDCCount())
+			GetToDoCtrl().Flush();
 	}
 	else
 	{

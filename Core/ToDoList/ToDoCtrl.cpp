@@ -9912,6 +9912,8 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 		else if (elm.nOp == TDCUEO_DELETE)
 		{
 			// find tree item and delete it
+			CAutoFlag af(m_bDeletingTasks, TRUE);
+
 			// note: DeleteTask on the Parent will already have disposed of the children
 			// so we can expect hti to be NULL on occasion. ie don't ASSERT it
 			HTREEITEM hti = m_taskTree.GetItem(elm.dwTaskID);
