@@ -51,7 +51,7 @@ protected:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
-	afx_msg LRESULT OnGetAppIcon(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
