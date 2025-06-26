@@ -11602,7 +11602,8 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 	if (!bActive)
 	{
 		// Finish up whatever the user was doing
-		GetToDoCtrl().Flush();
+		if (GetTDCCount())
+			GetToDoCtrl().Flush();
 	}
 	else
 	{
