@@ -5531,7 +5531,7 @@ BOOL CToDoCtrl::DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, 
 					PrepareTasksForPaste(tasks, TDCR_YES, TRUE);
 
 				// then add them with impunity!
-				PasteTasksToTree(tasks, htiDropTarget, htiDropAfter, TDCR_NO, TRUE);
+				VERIFY(PasteTasksToTree(tasks, htiDropTarget, htiDropAfter, TDCR_NO, TRUE));
 
 				// if the parent was marked as done and this task is not
 				// then mark the parent as incomplete too
@@ -6602,30 +6602,14 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 		PrepareTasksForPaste(tasks, nResetID, TRUE);
 	}
 		
-	// Merge in any custom attributes we don't already have
-	CTDCCustomAttribDefinitionArray aOrgAttribDefs, aPasteAttribDefs;
-	aOrgAttribDefs.Copy(m_aCustomAttribDefs);
-	
-	BOOL bCustomAttribDefsChanged = (tasks.GetCustomAttributeDefs(aPasteAttribDefs) &&
-									m_aCustomAttribDefs.Append(aPasteAttribDefs));
 	DWORD dwDestTaskID = GetTaskID(htiDest);
 	
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_PASTE);
-	{
-		HOLD_REDRAW(*this, m_taskTree);
+	HOLD_REDRAW(*this, m_taskTree);
 			
-		// no need to re-check IDs as we've already done it
-		if (!PasteTasksToTree(tasks, htiDest, htiDestAfter, TDCR_NO, TRUE))
-		{
-			// Revert custom attribute changes
-			if (bCustomAttribDefsChanged)
-				m_aCustomAttribDefs.Copy(aOrgAttribDefs);
-			
-			return FALSE;
-		}
-	}
+	// no need to re-check IDs as we've already done it
+	VERIFY(PasteTasksToTree(tasks, htiDest, htiDestAfter, TDCR_NO, TRUE));
 
-	OnCustomAttributesChanged();
 	FixupParentCompletion(dwDestTaskID);
 	
 	return TRUE;
@@ -7840,6 +7824,12 @@ BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask
 
 BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll)
 {
+	if (tasks.GetTaskCount() == 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	if (!CanEditSelectedTask(TDCA_PASTE))
 		return FALSE;
 
@@ -7859,11 +7849,14 @@ BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL 
 
 		// and always assign new IDs
 		PrepareTasksForPaste(copy, TDCR_YES, FALSE);
-		return PasteTasksToTree(copy, htiParent, htiAfter, TDCR_NO, bSelectAll);
+		VERIFY(PasteTasksToTree(copy, htiParent, htiAfter, TDCR_NO, bSelectAll));
+	}
+	else
+	{
+		VERIFY(PasteTasksToTree(tasks, htiParent, htiAfter, TDCR_NO, bSelectAll));
 	}
 
-	// else
-	return PasteTasksToTree(tasks, htiParent, htiAfter, TDCR_NO, bSelectAll);
+	return TRUE;
 }
 
 BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
