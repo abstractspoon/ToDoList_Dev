@@ -7838,11 +7838,13 @@ BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL 
 	if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
 		return FALSE;
 
-	// add the tasks
+	// Note: Custom attributes and gloabsl are handled in PasteTasksToTree()
+
+	// Add the tasks
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_ADD);
 	HOLD_REDRAW(*this, m_taskTree);
 
-	// Fix up dependencies if not inserting into new tasklist
+	// Fix up dependencies if NOT inserting into new tasklist
 	if (GetTaskCount())
 	{
 		CTaskFile copy(tasks);
