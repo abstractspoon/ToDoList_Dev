@@ -2572,6 +2572,35 @@ BOOL CTDLTaskTreeCtrl::GetInsertLocation(TDC_MOVETASK nDirection, HTREEITEM& hti
 	return (htiDestAfter != NULL);
 }
 
+BOOL CTDLTaskTreeCtrl::GetInsertLocation(TDC_PASTE nWhere, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const
+{
+	HTREEITEM htiSel = GetTreeSelectedItem();
+	htiDest = htiDestAfter = NULL;
+
+	switch (nWhere)
+	{
+	case TDCP_ONSELTASK:
+		htiDest = htiSel;
+		htiDestAfter = TVI_FIRST;
+		break;
+		
+	case TDCP_BELOWSELTASK:
+		htiDestAfter = htiSel;
+		
+		if (!htiDestAfter)
+			htiDestAfter = TVI_LAST;
+		else
+			htiDest = GetParentItem(htiDestAfter);
+		break;
+		
+	case TDCP_ATBOTTOM:
+		htiDestAfter = TVI_LAST;
+		break;
+	}
+
+	return (htiDestAfter != NULL);
+}
+
 BOOL CTDLTaskTreeCtrl::GetInsertLocation(TDC_INSERTWHERE nWhere, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const
 {
 	HTREEITEM htiSel = GetSelectedItem();

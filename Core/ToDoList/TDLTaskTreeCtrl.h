@@ -105,6 +105,7 @@ public:
 	BOOL TaskHasReferences(DWORD dwTaskID) const;
 	BOOL HasReferenceTasks() const { return (m_mapReferenceTaskIDs.GetCount() > 0); }
 
+	BOOL GetInsertLocation(TDC_PASTE nWhere, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const;
 	BOOL GetInsertLocation(TDC_INSERTWHERE nWhere, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const;
 	BOOL GetInsertLocation(TDC_MOVETASK nDirection, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const;
 	BOOL GetInsertLocation(TDC_MOVETASK nDirection, DWORD& dwDest, DWORD& dwDestAfter) const;

@@ -2998,20 +2998,20 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 	
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
-	if (m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
+	if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
 	{
-		HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditLabel, dwDependency);
-		ASSERT(htiNew);
-
-		DWORD dwTaskID = GetTaskID(htiNew);
-		ASSERT(dwTaskID == (m_dwNextUniqueID - 1));
-
-		return (htiNew != NULL);
+		ASSERT(0);
+		return FALSE;
 	}
 
 	// else
-	ASSERT(0);
-	return FALSE;
+	HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditLabel, dwDependency);
+	ASSERT(htiNew);
+
+	DWORD dwTaskID = GetTaskID(htiNew);
+	ASSERT(dwTaskID == (m_dwNextUniqueID - 1));
+
+	return (htiNew != NULL);
 }
 
 BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
@@ -3040,7 +3040,7 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 				break; // handled below
 
 			case 1:
-				VERIFY (m_taskTree.GetInsertLocation(nInsertWhere, htiParent, htiAfter));
+				VERIFY(m_taskTree.GetInsertLocation(nInsertWhere, htiParent, htiAfter));
 				break;
 
 			default:
@@ -6550,25 +6550,10 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	// Figure out where to paste to
 	HTREEITEM htiDest = NULL, htiDestAfter = NULL;
 	
-	switch (nWhere)
+	if (!m_taskTree.GetInsertLocation(nWhere, htiDest, htiDestAfter))
 	{
-	case TDCP_ONSELTASK:
-		htiDest = m_taskTree.GetTreeSelectedItem();
-		htiDestAfter = TVI_FIRST;
-		break;
-		
-	case TDCP_BELOWSELTASK:
-		htiDestAfter = m_taskTree.GetTreeSelectedItem();
-		
-		if (!htiDestAfter)
-			htiDestAfter = TVI_LAST;
-		else
-			htiDest = m_taskTree.GetParentItem(htiDestAfter);
-		break;
-		
-	case TDCP_ATBOTTOM:
-		htiDestAfter = TVI_LAST;
-		break;
+		ASSERT(0);
+		return FALSE;
 	}
 	
 	if (bAsRef)
@@ -7836,7 +7821,10 @@ BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL 
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
 	if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// Note: Custom attributes and gloabsl are handled in PasteTasksToTree()
 
