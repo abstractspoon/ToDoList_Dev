@@ -765,9 +765,9 @@ protected:
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	BOOL CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;
 
-	void LoadGlobals(const CTaskFile& tasks);
+	void LoadGlobals(const CTaskFile& tasks, BOOL bMerge = FALSE);
 	void SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGETTASKS()) const;
-	void LoadCustomAttributeDefinitions(const CTaskFile& tasks);
+	void LoadCustomAttributeDefinitions(const CTaskFile& tasks, BOOL bMerge = FALSE);
 
 	BOOL IsClipboardEmpty(BOOL bCheckID = FALSE) const;
 	CString GetClipboardID() const;

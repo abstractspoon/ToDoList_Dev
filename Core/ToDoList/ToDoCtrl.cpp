@@ -3985,6 +3985,7 @@ void CToDoCtrl::SetCompletionStatus(const CString& sStatus)
 			Misc::RemoveItem(m_sCompletionStatus, tldDefault.aStatus);
 
 		m_ctrlAttributes.SetDefaultAutoListData(tldDefault);
+		m_ctrlAttributes.GetAutoListData(TDCA_ALL, m_tldAll);
 	}
 }
 
@@ -4251,12 +4252,6 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 	m_sourceControl.PrepareTasksForSave(tasks);
 }
 
-void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
-{
-	tasks.GetAutoListData(m_tldAll);
-	m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
-}
-
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	if (filter.mapAttribs.HasOnly(TDCA_ALL) ||
@@ -4282,12 +4277,46 @@ void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTAS
 	}
 }
 
-void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
+void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks, BOOL bMerge)
 {
-	tasks.GetCustomAttributeDefs(m_aCustomAttribDefs);
+	CTDCCustomAttribDefinitionArray aAttribDefs;
+	tasks.GetCustomAttributeDefs(aAttribDefs);
 
-	// Add Fields and columns to view
+	if (bMerge)
+	{
+		if (!m_aCustomAttribDefs.Append(aAttribDefs))
+			return;
+	}
+	else
+	{
+		if (Misc::MatchAllT(m_aCustomAttribDefs, aAttribDefs, TRUE))
+			return;
+
+		m_aCustomAttribDefs.Copy(aAttribDefs);
+	}
+
 	OnCustomAttributesChanged();
+}
+
+void CToDoCtrl::LoadGlobals(const CTaskFile& tasks, BOOL bMerge)
+{
+	TDCAUTOLISTDATA tld;
+	tasks.GetAutoListData(tld);
+
+	if (bMerge)
+	{
+		if (!m_tldAll.AppendUnique(tld, TDCA_ALL))
+			return;
+	}
+	else
+	{
+		if (m_tldAll.Matches(tld, TDCA_ALL))
+			return;
+
+		m_tldAll.Copy(tld, TDCA_ALL);
+	}
+
+	m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 }
 
 void CToDoCtrl::OnCustomAttributesChanged()
@@ -6632,6 +6661,10 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent
 	
 	if (!hTask)
 		return FALSE;
+
+	// merge in any new custom attribute definitions and globals
+	LoadCustomAttributeDefinitions(tasks, TRUE);
+	LoadGlobals(tasks, TRUE);
 	
 	// cache and clear current selection
 	DWORD dwSelID = GetTaskID(TSH().GetFirstItem());
@@ -6664,7 +6697,11 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent
 	{
 		SelectItem(m_taskTree.GetChildItem());
 	}
-	
+
+	// We may have acquired extra globals from the tasks
+	// themselves so we need to update again
+	m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
+
 	SetModified(TDCA_PASTE);
 	UpdateControls();
 	
@@ -7811,16 +7848,6 @@ BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL 
 	if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
 		return FALSE;
 
-	// merge in any new custom attribute definitions
-	CTDCCustomAttribDefinitionArray aAttribDefs;
-	
-	if (tasks.GetCustomAttributeDefs(aAttribDefs))
-	{
-		if (m_aCustomAttribDefs.Append(aAttribDefs))
-			OnCustomAttributesChanged();
-			//RebuildCustomAttributeUI();
-	}
-
 	// add the tasks
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_ADD);
 	HOLD_REDRAW(*this, m_taskTree);
@@ -7849,6 +7876,10 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 	if (!hTask)
 		return FALSE;
 
+	// Merge in any additional custom attributes definitions and globals
+	LoadCustomAttributeDefinitions(tasks, TRUE);
+	LoadGlobals(tasks, TRUE);
+
 	// cache and clear current selection
 	DWORD dwSelID = GetTaskID(TSH().GetFirstItem());
 
@@ -7869,14 +7900,9 @@ BOOL CToDoCtrl::MergeTasks(const CTaskFile& tasks, BOOL bMergeByID)
 		hTask = tasks.GetNextTask(hTask);
 	}
 
-	// Merge in any additional custom attributes definitions
-	CTDCCustomAttribDefinitionArray aImportedDefs;
-				
-	if (tasks.GetCustomAttributeDefs(aImportedDefs))
-	{
-		if (m_aCustomAttribDefs.Append(aImportedDefs))
-			OnCustomAttributesChanged();
-	}
+	// We may have acquired extra globals from the tasks
+	// themselves so we need to update again
+	m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
 
 	SetModified(TDCA_PASTE, aTaskIDs);
 	return TRUE;
