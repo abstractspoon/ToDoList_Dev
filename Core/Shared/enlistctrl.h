@@ -107,7 +107,6 @@ public:
 	virtual int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
 	virtual int GetCurSel() const;
 	virtual void Sort();
-	virtual int GetItemIndent(int nItem) const;
 	
 	// column methods
 	int GetColumnCount() const;
@@ -142,23 +141,25 @@ protected:
 // Attributes
 protected:
 	CEnHeaderCtrl m_header;
+	CToolTipCtrl m_ttCtrl;
+
+	int m_nCurView;
+	int m_nItemDropHilite;
+	int m_nSortColumn;
+
+	NMHDR m_nmhdr; // for notification
+	CPoint m_ptPopupPos;
 
 	BOOL m_bVertGrid, m_bHorzGrid;
-	int m_nCurView;
-	NMHDR m_nmhdr; // for notification
 	BOOL m_bLastColStretchy;
 	BOOL m_bFirstColStretchy;
 	BOOL m_bTooltipsEnabled;
-	CToolTipCtrl m_ttCtrl;
 	BOOL m_bReadOnly;
-	int m_nItemDropHilite;
 	BOOL m_bDropHiliteItemSelected;
 	BOOL m_bContextPopupEnabled;
 	BOOL m_bDrawCheckboxes;
-	CPoint m_ptPopupPos;
 	BOOL m_bUserSelChange;
 	BOOL m_bSortingEnabled;
-	int m_nSortColumn;
 	BOOL m_bSortAscending;
 	BOOL m_bInitColumns; // up to derived class to set: gets cleared in OnDestroy
 	BOOL m_bAlternateRowColoring;
@@ -180,7 +181,7 @@ private:
 	//{{AFX_VIRTUAL(CEnListCtrl)
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
-	afx_msg void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
+	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	virtual void PreSubclassWindow();
@@ -225,6 +226,7 @@ protected:
 	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, const CString& sText, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
 	virtual void DrawGroupHeader(CDC* pDC, CRect& rRow, const CString& sText, COLORREF crBack);
 	virtual UINT GetTextDrawFlags(int nCol, BOOL bDate = FALSE) const;
+	virtual int GetItemIndent(int nItem) const;
 
 	void NotifySelChange();
 	void DeleteAllColumnData();

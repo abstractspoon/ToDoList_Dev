@@ -42,8 +42,10 @@ public:
 	CInputListCtrl();
 	virtual ~CInputListCtrl();
 
-	void AutoAdd(BOOL bRows, BOOL bCols);
 	void SetAutoRowPrompt(const CString& sPrompt);
+	void AllowDuplicates(BOOL bAllow, BOOL bNotify = FALSE);
+
+	void AutoAdd(BOOL bRows, BOOL bCols);
 	BOOL CanEditSelectedCell() const;
 	void EditSelectedCell();
 	BOOL SetCellText(int nRow, int nCol, const CString& sText);
@@ -54,7 +56,6 @@ public:
 	int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection
 	int GetCurSel() const;
 	int GetLastEdit(int* pRow = NULL, int* pCol = NULL);
-	void AllowDuplicates(BOOL bAllow, BOOL bNotify = FALSE);
 	int AddRow(const CString& sRowText, int nImage = -1);
 	int AddCol(const CString& sColText, int nWidth = -1, IL_COLUMNTYPE nColType = ILCT_TEXT);
 	void SetView(int nView);
@@ -65,7 +66,6 @@ public:
 
 	virtual BOOL CanDeleteSelectedCell() const;
 	virtual BOOL DeleteSelectedCell();
-	virtual int GetItemIndent(int /*nItem*/) const { return 0; }
 
 	// column methods
 	void EnableColumnEditing(int nCol, BOOL bEnable);
@@ -85,28 +85,29 @@ protected:
 	};
 
 protected:
+	CPopupEditCtrl m_editBox;
+
 	int m_nItemLastSelected;
 	int m_nColLastSelected;
 	int m_nCurCol;
 	int m_nEditItem;
 	int m_nEditCol;
-	CPopupEditCtrl m_editBox;
-	BOOL m_bAutoAddRows;
-	BOOL m_bAutoAddCols;
 	int m_nAutoColWidth;
+	int m_nLastEditRow, m_nLastEditCol, m_nLastEditResult;
+
+	CPoint m_ptPopupPos;
 	CString m_sAutoRowPrompt;
 	CString m_sAutoColPrompt;
-	int m_nLastEditRow, m_nLastEditCol, m_nLastEditResult;
+
+	BOOL m_bAutoAddRows;
+	BOOL m_bAutoAddCols;
 	BOOL m_bAllowDuplication;
 	BOOL m_bNotifyDuplicates;
-	CPoint m_ptPopupPos;
 
 private:
 	CHotTracker m_hotTrack;
 
 protected:
-	virtual void OnEndEdit(UINT uIDCtrl, int* pResult);
-	virtual void OnCancelEdit();
 	virtual void PreSubclassWindow();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
@@ -145,6 +146,9 @@ protected:
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void InitState();
 	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);
+	virtual int GetItemIndent(int /*nItem*/) const { return 0; }
+	virtual void OnEndEdit(UINT uIDCtrl, int* pResult);
+	virtual void OnCancelEdit();
 
 	virtual void DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
 	virtual void DrawCell(CDC* pDC, int nItem, int nCol, const CRect& rCell, const CString& sText, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused);
