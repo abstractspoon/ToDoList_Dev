@@ -460,36 +460,33 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	nItem = GetFocusedItem();
 	m_nItemLastSelected = nItem;
 	
-	// if its the right or left cursor keys then update column position
-	if (nChar == VK_LEFT && nCol > 0)
+	switch (nChar)
 	{
-		nCol--;
-		
-		// scroll cell into view
-		ScrollCellIntoView(nItem, nCol);
-	}
-	else if (nChar == VK_RIGHT && nCol < GetColumnCount() - 1)
-	{
-		nCol++;
-		
-		// scroll cell into view
-		ScrollCellIntoView(nItem, nCol);
-	}
-	else if (nChar == VK_DELETE && CanDeleteSelectedCell())
-	{
-		// if the delete key is pressed and we're in col0 or row0 
-		// then delete corresponding row or column
-		// unless its the prompt row or column 
-		DeleteSelectedCell();
-	}
-	else if ((nChar == VK_F2 || nChar == VK_SPACE || nChar == VK_RETURN) && CanEditSelectedCell())
-	{
-		// if its the space bar then edit the current cell
-		EditCell(nItem, nCol, FALSE);
+	case VK_LEFT:
+		if (nCol > 0)
+			ScrollCellIntoView(nItem, --nCol);
+		break;
+
+	case VK_RIGHT:
+		if (nCol < GetColumnCount() - 1)
+			ScrollCellIntoView(nItem, ++nCol);
+		break;
+
+	case VK_DELETE:
+		if (CanDeleteSelectedCell())
+			DeleteSelectedCell();
+		break;
+
+	case VK_F2:
+	case VK_SPACE:
+	case VK_RETURN:
+		if (CanEditSelectedCell())
+			EditCell(nItem, nCol, FALSE);
+		break;
 	}
 
-	// update the list selection if its changed
-	SetCurSel(nItem, nCol, TRUE); // notifies parent
+	// update list selection notify parent
+	SetCurSel(nItem, nCol, TRUE);
 }
 
 void CInputListCtrl::DrawItemBackground(CDC* /*pDC*/, int /*nItem*/, const CRect& /*rItem*/, COLORREF /*crBack*/, 
