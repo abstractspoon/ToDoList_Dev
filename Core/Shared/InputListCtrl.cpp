@@ -117,6 +117,11 @@ void CInputListCtrl::AllowDuplicates(BOOL bAllow, BOOL bNotify)
 	m_bNotifyDuplicates = bNotify;
 }
 
+void CInputListCtrl::EnableSingleClickEditing(BOOL bEnable)
+{
+	m_bSingleClickEditing = bEnable;
+}
+
 void CInputListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point) 
 {
 	// find out which column the user clicked on

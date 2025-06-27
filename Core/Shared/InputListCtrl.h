@@ -44,6 +44,7 @@ public:
 
 	void SetAutoRowPrompt(const CString& sPrompt);
 	void AllowDuplicates(BOOL bAllow, BOOL bNotify = FALSE);
+	void EnableSingleClickEditing(BOOL bEnable = TRUE);
 
 	void AutoAdd(BOOL bRows, BOOL bCols);
 	BOOL CanEditSelectedCell() const;
@@ -106,6 +107,7 @@ protected:
 
 private:
 	CHotTracker m_hotTrack;
+	BOOL m_bSingleClickEditing;
 
 protected:
 	virtual void PreSubclassWindow();
