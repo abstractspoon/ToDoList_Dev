@@ -374,7 +374,7 @@ void CTDLTaskAttributeCtrl::OnUpdatePasteAttributeValue(CCmdUI* pCmdUI)
 
 void CTDLTaskAttributeCtrl::OnUpdateClearAttributeValue(CCmdUI* pCmdUI)
 {
-	if (m_lcAttributes.CanEditSelectedAttribute())
+	if (m_lcAttributes.CanEditSelectedCell())
 	{
 		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
 		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
