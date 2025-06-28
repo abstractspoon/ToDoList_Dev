@@ -87,6 +87,8 @@ BOOL CWorkloadPreferencesPage::OnInitDialog()
 	}
 
 	AddGroupLine(IDC_ALLOCATIONGROUP);
+	AddGroupLine(IDC_GRAPHINGGROUP);
+
 	EnableDisableControls();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
