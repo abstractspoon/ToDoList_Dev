@@ -912,14 +912,8 @@ void CInputListCtrl::OnKillFocus(CWnd* pNewWnd)
 	if (pNewWnd == this)
 		return;
 
-	// if we're not editing then clear the current selection
-	if (!IsEditing())
-	{
-	}
-	else
-	{
+	if (IsEditing())
 		HideAllControls(pNewWnd);
-	}
 
 	CRect rItem;
 	GetItemRect(GetCurSel(), rItem, LVIR_BOUNDS);
@@ -1043,14 +1037,14 @@ void CInputListCtrl::SetCurSel(int nRow, int nCol, BOOL bNotifyParent)
 	if (IsCellSelected(nRow, nCol))
 		return;
 
-	CRect rItem;
-	int nSel = GetCurSel();
-	RedrawItems(nSel, nSel);
+	// Redraw current selection
+	RedrawItems(GetCurSel(), m_nCurCol);
 
 	m_nCurCol = nCol;
 	CEnListCtrl::SetCurSel(nRow, bNotifyParent == TRUE);
 
-	RedrawItems(nRow, nRow);
+	// Redraw new selection
+	RedrawItems(GetCurSel(), m_nCurCol);
 }
 
 int CInputListCtrl::GetLastEdit(int* pRow, int* pCol)
