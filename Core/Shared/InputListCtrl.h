@@ -44,7 +44,8 @@ public:
 
 	void SetAutoRowPrompt(const CString& sPrompt);
 	void AllowDuplicates(BOOL bAllow, BOOL bNotify = FALSE);
-	void EnableSingleClickEditing(BOOL bEnable = TRUE);
+	void SetSingleClickEditing(BOOL bEnable = TRUE);
+	BOOL HasSingleClickEditing() const { return m_bSingleClickEditing; }
 
 	void AutoAdd(BOOL bRows, BOOL bCols);
 	BOOL CanEditSelectedCell() const;

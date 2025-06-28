@@ -535,6 +535,7 @@ void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) co
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
 	prefs.WriteProfileInt(szKey, _T("AttribSortAscending"), m_bSortAscending);
 	prefs.WriteProfileInt(szKey, _T("AttribGrouped"), m_bGrouped);
+	prefs.WriteProfileInt(szKey, _T("SingleClickEditing"), HasSingleClickEditing());
 
 	m_aAttribState.Save(prefs, szKey);
 }
@@ -544,6 +545,8 @@ void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szK
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
 	m_bGrouped = (SupportsGrouping() && prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE));
+
+	SetSingleClickEditing(prefs.GetProfileInt(szKey, _T("SingleClickEditing"), FALSE));
 
 	m_aAttribState.Load(prefs, szKey);
 
