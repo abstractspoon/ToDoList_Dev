@@ -149,17 +149,14 @@ BEGIN
     CONTROL         "Prefer 'Time Spent' to 'Duration' for calculating allocations",
                     IDC_USETIMESPENTFORDURATION,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,100,333,10
-    CONTROL         "Auto-calculate missing allocations",
-                    IDC_AUTOCALCALLOCATIONS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,115,333,10
     CONTROL         "Recalculate allocations when the 'Time Estimate' or 'Duration' changes",
                     IDC_RECALCALLOCATIONS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,130,333,10
+                    WS_TABSTOP,7,115,333,10
     CONTROL         "Adjust allocations equally",IDC_RECALCEQUALLY,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,19,145,321,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,19,130,321,10
     CONTROL         "Adjust allocations in proportion to their existing values",
                     IDC_RECALCPROPORTIONALLY,"Button",BS_AUTORADIOBUTTON,19,
-                    158,321,10
+                    143,321,10
     CONTROL         "Include tasks without dates in calculations for 'Current Period' ",
                     IDC_INCLUDEDATELESSTASKSINPERIOD,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,174,333,10
@@ -180,6 +177,9 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,277,97,10
     PUSHBUTTON      "Set...",IDC_SETOVERLAPCOLOR,149,276,52,13,BS_RIGHT
     LTEXT           "Graphing",IDC_GRAPHINGGROUP,7,190,333,8
+    CONTROL         "Auto-calculate missing allocations",
+                    IDC_AUTOCALCALLOCATIONS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,160,333,10
 END
 
 IDD_EDITALLOCATIONS_DIALOG DIALOG DISCARDABLE  0, 0, 270, 163
