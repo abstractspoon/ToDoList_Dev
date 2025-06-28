@@ -1039,7 +1039,7 @@ void CInputListCtrl::SetCurSel(int nRow, int nCol, BOOL bNotifyParent)
 	if (nRow < 0 || nRow >= GetItemCount() || nCol < 0 || nCol >= GetColumnCount())
 		return;
 
-	// don't update if nothing's changed
+	// don't update if nothing has changed
 	if (IsCellSelected(nRow, nCol))
 		return;
 
