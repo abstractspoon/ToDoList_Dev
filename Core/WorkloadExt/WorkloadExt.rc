@@ -133,7 +133,7 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 297
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 347, 326
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -143,40 +143,43 @@ BEGIN
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | 
                     WS_TABSTOP
     LTEXT           "Allocations",IDC_ALLOCATIONGROUP,7,70,333,8
-    CONTROL         "Use 'Time Estimate' in preference to 'Duration' when calculating allocations",
-                    IDC_USETIMESTIMATEFORDURATION,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Prefer 'Time Estimate' to 'Duration' for calculating allocations",
+                    IDC_USETIMEESTIMATEFORDURATION,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,85,333,10
+    CONTROL         "Prefer 'Time Spent' to 'Duration' for calculating allocations",
+                    IDC_USETIMESPENTFORDURATION,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,100,333,10
     CONTROL         "Auto-calculate missing allocations",
                     IDC_AUTOCALCALLOCATIONS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,100,333,10
+                    WS_TABSTOP,7,115,333,10
     CONTROL         "Recalculate allocations when the 'Time Estimate' or 'Duration' changes",
                     IDC_RECALCALLOCATIONS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,115,333,10
+                    WS_TABSTOP,7,130,333,10
     CONTROL         "Adjust allocations equally",IDC_RECALCEQUALLY,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,19,130,321,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,19,145,321,10
     CONTROL         "Adjust allocations in proportion to their existing values",
                     IDC_RECALCPROPORTIONALLY,"Button",BS_AUTORADIOBUTTON,19,
-                    143,321,10
+                    158,321,10
     CONTROL         "Include tasks without dates in calculations for 'Current Period' ",
                     IDC_INCLUDEDATELESSTASKSINPERIOD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,159,333,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,174,333,10
     CONTROL         "&Enable 'Overload' display",IDC_ENABLEOVERLOAD,"Button",
-                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,200,333,10
-    COMBOBOX        IDC_OVERLOADFROMPERCENT,18,214,31,143,CBS_DROPDOWNLIST | 
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,205,333,10
+    COMBOBOX        IDC_OVERLOADFROMPERCENT,18,219,31,143,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "% - 100%",IDC_STATIC,51,214,34,12,SS_CENTERIMAGE
-    PUSHBUTTON      "Set...",IDC_SETOVERLOADCOLOR,149,214,52,13,BS_RIGHT
+    LTEXT           "% - 100%",IDC_STATIC,51,219,34,12,SS_CENTERIMAGE
+    PUSHBUTTON      "Set...",IDC_SETOVERLOADCOLOR,149,219,52,13,BS_RIGHT
     CONTROL         "&Enable 'Underload' display",IDC_ENABLEUNDERLOAD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,235,333,10
-    LTEXT           "0% - ",IDC_STATIC,19,250,19,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_UNDERLOADTOPERCENT,37,250,31,143,CBS_DROPDOWNLIST | 
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,240,333,10
+    LTEXT           "0% - ",IDC_STATIC,19,255,19,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_UNDERLOADTOPERCENT,37,255,31,143,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "%",IDC_STATIC,71,250,8,12,SS_CENTERIMAGE
-    PUSHBUTTON      "Set...",IDC_SETUNDERLOADCOLOR,149,250,52,13,BS_RIGHT
+    LTEXT           "%",IDC_STATIC,71,255,8,12,SS_CENTERIMAGE
+    PUSHBUTTON      "Set...",IDC_SETUNDERLOADCOLOR,149,255,52,13,BS_RIGHT
     CONTROL         "'Overlapping' tasks colour",IDC_ENABLEOVERLAPCOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,272,97,10
-    PUSHBUTTON      "Set...",IDC_SETOVERLAPCOLOR,149,271,52,13,BS_RIGHT
-    LTEXT           "Graphing",IDC_GRAPHINGGROUP,7,185,333,8
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,277,97,10
+    PUSHBUTTON      "Set...",IDC_SETOVERLAPCOLOR,149,276,52,13,BS_RIGHT
+    LTEXT           "Graphing",IDC_GRAPHINGGROUP,7,190,333,8
 END
 
 IDD_EDITALLOCATIONS_DIALOG DIALOG DISCARDABLE  0, 0, 270, 163
@@ -216,7 +219,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 340
         TOPMARGIN, 7
-        BOTTOMMARGIN, 290
+        BOTTOMMARGIN, 319
     END
 
     IDD_EDITALLOCATIONS_DIALOG, DIALOG

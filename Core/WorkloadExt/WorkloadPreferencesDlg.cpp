@@ -39,7 +39,8 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CWorkloadPreferencesPage)
-	DDX_Check(pDX, IDC_USETIMESTIMATEFORDURATION, m_bPreferTimeEstimateInCalcs);
+	DDX_Check(pDX, IDC_USETIMEESTIMATEFORDURATION, m_bPreferTimeEstimateInCalcs);
+	DDX_Check(pDX, IDC_USETIMESPENTFORDURATION, m_bPreferTimeSpentInCalcs);
 	DDX_Check(pDX, IDC_AUTOCALCALLOCATIONS, m_bAutoCalcAllocations);
 	DDX_Check(pDX, IDC_ENABLEOVERLOAD, m_bEnableOverload);
 	DDX_Check(pDX, IDC_ENABLEUNDERLOAD, m_bEnableUnderload);
@@ -68,6 +69,8 @@ BEGIN_MESSAGE_MAP(CWorkloadPreferencesPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_ENABLEUNDERLOAD, OnEnableUnderload)
 	ON_BN_CLICKED(IDC_RECALCALLOCATIONS, OnSetRecalcAllocations)
 	ON_BN_CLICKED(IDC_ENABLEOVERLAPCOLOR, OnEnableOverlapColor)
+	ON_BN_CLICKED(IDC_USETIMEESTIMATEFORDURATION, OnPreferTimeEstimateForCalcs)
+	ON_BN_CLICKED(IDC_USETIMESPENTFORDURATION, OnPreferTimeSpentForCalcs)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -118,6 +121,28 @@ void CWorkloadPreferencesPage::OnSetRecalcAllocations()
 	}
 
 	EnableDisableControls();
+}
+
+void CWorkloadPreferencesPage::OnPreferTimeEstimateForCalcs()
+{
+	UpdateData();
+
+	if (m_bPreferTimeEstimateInCalcs && m_bPreferTimeSpentInCalcs)
+	{
+		m_bPreferTimeSpentInCalcs = FALSE;
+		UpdateDataEx(this, IDC_USETIMESPENTFORDURATION, m_bPreferTimeSpentInCalcs, FALSE);
+	}
+}
+
+void CWorkloadPreferencesPage::OnPreferTimeSpentForCalcs()
+{
+	UpdateData();
+
+	if (m_bPreferTimeSpentInCalcs && m_bPreferTimeEstimateInCalcs)
+	{
+		m_bPreferTimeEstimateInCalcs = FALSE;
+		UpdateDataEx(this, IDC_USETIMEESTIMATEFORDURATION, m_bPreferTimeEstimateInCalcs, FALSE);
+	}
 }
 
 void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const

@@ -29,6 +29,7 @@ public:
 	COLORREF GetOverlapColor() const { return (m_bEnableOverlapColor ? m_crOverlap : CLR_NONE); }
 
 	BOOL GetPreferTimeEstimateForCalcs() const { return m_bPreferTimeEstimateInCalcs; }
+	BOOL GetPreferTimeSpentForCalcs() const { return m_bPreferTimeSpentInCalcs; }
 	BOOL GetAutoCalculateMissingAllocations() const { return m_bAutoCalcAllocations || m_bRecalcAllocations; }
 	BOOL GetRecalculateAllocations() const { return m_bRecalcAllocations; }
 	BOOL GetRecalculateAllocationsProportionally() const { return m_bRecalcProportionally; }
@@ -41,6 +42,7 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CWorkloadPreferencesPage)
 	BOOL	m_bPreferTimeEstimateInCalcs;
+	BOOL	m_bPreferTimeSpentInCalcs;
 	BOOL	m_bAutoCalcAllocations;
 	BOOL	m_bEnableOverload;
 	BOOL	m_bEnableUnderload;
@@ -77,6 +79,8 @@ protected:
 	afx_msg void OnSetRecalcAllocations();
 	afx_msg void OnEnableOverlapColor();
 	//}}AFX_MSG
+	afx_msg void OnPreferTimeEstimateForCalcs();
+	afx_msg void OnPreferTimeSpentForCalcs();
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -100,6 +104,7 @@ public:
 
 	BOOL GetAutoCalculateMissingAllocations() const { return m_page.GetAutoCalculateMissingAllocations(); }
 	BOOL GetPreferTimeEstimateForCalcs() const { return m_page.GetPreferTimeEstimateForCalcs(); }
+	BOOL GetPreferTimeSpentForCalcs() const { return m_page.GetPreferTimeSpentForCalcs(); }
 	BOOL GetRecalculateAllocations() const { return m_page.GetRecalculateAllocations(); }
 	BOOL GetRecalculateAllocationsProportionally() const { return m_page.GetRecalculateAllocationsProportionally(); }
 	BOOL GetIncludeDatelessTasksInPeriod() const { return m_page.GetIncludeDatelessTasksInPeriod(); }
