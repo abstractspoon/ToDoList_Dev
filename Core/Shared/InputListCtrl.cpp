@@ -184,28 +184,34 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 	if (bWasEditing && IsCellSelected(nItem, nCol))
 		return;
 	
-	// if this is the second click or the user clicked on the column button
-	// then edit else update clicked pos unless we did not have the focus
 	if (nItem != -1)
 	{
+		// If we are single-click editing OR a button was clicked
+		// we can edit immediately regardless if the item was already selected
 		CRect rBtn;
+		BOOL bBtnClick = (GetButtonRect(nItem, nCol, rBtn) && rBtn.PtInRect(point));
 
-		if (CanEditCell(nItem, nCol) && GetButtonRect(nItem, nCol, rBtn) && rBtn.PtInRect(point))
+		if (CanEditCell(nItem, nCol) && (m_bSingleClickEditing || bBtnClick))
 		{
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
 
-			// Draw button pressed (unpressing handled in OnLButtonUp)
-			InvalidateRect(rBtn);
-			UpdateWindow();
+			if (bBtnClick)
+			{
+				// Draw button pressed (unpressing handled in OnLButtonUp)
+				InvalidateRect(rBtn);
+				UpdateWindow();
+			}
 
-			EditCell(nItem, nCol, TRUE);
+			EditCell(nItem, nCol, bBtnClick);
 		}
+		// else if we already had the focus and the user clicked 
+		// on the selected item then we can also edit
 		else if (CanEditSelectedCell() && bHadFocus && (nItem == nSelItem) && (nCol == nSelCol))
 		{
 			EditCell(nItem, nCol, FALSE);
 		}
-		else
+		else // we just scroll the clicked item into view
 		{
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
