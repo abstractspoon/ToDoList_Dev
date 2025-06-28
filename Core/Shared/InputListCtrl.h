@@ -88,8 +88,6 @@ protected:
 protected:
 	CPopupEditCtrl m_editBox;
 
-// 	int m_nItemLastSelected;
-// 	int m_nColLastSelected;
 	int m_nCurCol;
 	int m_nEditItem;
 	int m_nEditCol;

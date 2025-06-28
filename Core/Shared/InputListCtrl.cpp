@@ -82,8 +82,6 @@ END_MESSAGE_MAP()
 
 void CInputListCtrl::InitState()
 {
-// 	m_nItemLastSelected = -1;
-// 	m_nColLastSelected = -1;
 	m_nEditItem = -1;
 	m_nEditCol = -1;
 	m_bAutoAddRows = FALSE;
@@ -209,9 +207,6 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 		}
 		else
 		{
-// 			m_nItemLastSelected = nItem;
-// 			m_nColLastSelected = nCol;
-
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
 
@@ -463,7 +458,6 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CEnListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 	
 	nItem = GetFocusedItem();
-// 	m_nItemLastSelected = nItem;
 	
 	switch (nChar)
 	{
@@ -921,8 +915,6 @@ void CInputListCtrl::OnKillFocus(CWnd* pNewWnd)
 	// if we're not editing then clear the current selection
 	if (!IsEditing())
 	{
-// 		m_nItemLastSelected = -1;
-// 		m_nColLastSelected = -1;
 	}
 	else
 	{
@@ -1058,8 +1050,6 @@ void CInputListCtrl::SetCurSel(int nRow, int nCol, BOOL bNotifyParent)
 	m_nCurCol = nCol;
 	CEnListCtrl::SetCurSel(nRow, bNotifyParent == TRUE);
 
-// 	m_nColLastSelected = nCol;
-// 	m_nItemLastSelected = nRow;
 	RedrawItems(nRow, nRow);
 }
 
