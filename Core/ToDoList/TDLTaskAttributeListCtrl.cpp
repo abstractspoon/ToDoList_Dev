@@ -1006,11 +1006,6 @@ CString CTDLTaskAttributeListCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttribID) co
 	return GetItemText(nRow, LABEL_COL);
 }
 
-// BOOL CTDLTaskAttributeListCtrl::CanEditSelectedAttribute() const
-// {
-// 	return CanEditCell(GetCurSel(), VALUE_COL);
-// }
-
 void CTDLTaskAttributeListCtrl::SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd)
 {
 	int nSel = GetCurSel();
