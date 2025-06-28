@@ -456,6 +456,11 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_COL_TITLE           "Title"
+    IDS_RECALCALLOCATIONSDURATION 
+                            "Recalculate allocations when the 'Duration' changes"
+    IDS_ATTRIB_TIMESPENT    "Time Spent"
+    IDS_RECALCALLOCATIONSPREFERRED 
+                            "Recalculate allocations when the '%s' or 'Duration' changes"
 END
 
 #endif    // English (Australia) resources

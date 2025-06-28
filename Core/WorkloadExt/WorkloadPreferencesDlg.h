@@ -85,6 +85,7 @@ protected:
 
 protected:
 	void EnableDisableControls();
+	void UpdateRecalcAllocationsLabel();
 };
 
 /////////////////////////////////////////////////////////////////////////////

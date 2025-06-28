@@ -92,6 +92,7 @@ BOOL CWorkloadPreferencesPage::OnInitDialog()
 	AddGroupLine(IDC_ALLOCATIONGROUP);
 	AddGroupLine(IDC_GRAPHINGGROUP);
 
+	UpdateRecalcAllocationsLabel();
 	EnableDisableControls();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -130,8 +131,10 @@ void CWorkloadPreferencesPage::OnPreferTimeEstimateForCalcs()
 	if (m_bPreferTimeEstimateInCalcs && m_bPreferTimeSpentInCalcs)
 	{
 		m_bPreferTimeSpentInCalcs = FALSE;
-		UpdateDataEx(this, IDC_USETIMESPENTFORDURATION, m_bPreferTimeSpentInCalcs, FALSE);
+		UpdateData(FALSE);
 	}
+
+	UpdateRecalcAllocationsLabel();
 }
 
 void CWorkloadPreferencesPage::OnPreferTimeSpentForCalcs()
@@ -141,8 +144,31 @@ void CWorkloadPreferencesPage::OnPreferTimeSpentForCalcs()
 	if (m_bPreferTimeSpentInCalcs && m_bPreferTimeEstimateInCalcs)
 	{
 		m_bPreferTimeEstimateInCalcs = FALSE;
-		UpdateDataEx(this, IDC_USETIMEESTIMATEFORDURATION, m_bPreferTimeEstimateInCalcs, FALSE);
+		UpdateData(FALSE);
 	}
+
+	UpdateRecalcAllocationsLabel();
+}
+
+void CWorkloadPreferencesPage::UpdateRecalcAllocationsLabel()
+{
+	CString sLabel;
+	
+	if (m_bPreferTimeEstimateInCalcs)
+	{
+		sLabel = CEnString(IDS_RECALCALLOCATIONSPREFERRED, CEnString(IDS_ATTRIB_TIMEEST));
+	}
+	else if (m_bPreferTimeSpentInCalcs)
+	{
+		sLabel = CEnString(IDS_RECALCALLOCATIONSPREFERRED, CEnString(IDS_ATTRIB_TIMESPENT));
+	}
+	else
+	{
+		sLabel = CEnString(IDS_RECALCALLOCATIONSDURATION);
+	}
+
+	GetDlgItem(IDC_RECALCALLOCATIONS)->SetWindowText(sLabel);
+	CDialogHelper::ResizeStaticTextToFit(this, IDC_RECALCALLOCATIONS);
 }
 
 void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const

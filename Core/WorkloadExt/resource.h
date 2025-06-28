@@ -83,6 +83,9 @@
 #define IDS_COL_WEEKDAYS                57694
 #define IDS_UNALLOCATEDTO               57695
 #define IDS_COL_TITLE                   57696
+#define IDS_RECALCALLOCATIONSDURATION   57697
+#define IDS_ATTRIB_TIMESPENT            57698
+#define IDS_RECALCALLOCATIONSPREFERRED  57699
 
 // Next default values for new objects
 // 
