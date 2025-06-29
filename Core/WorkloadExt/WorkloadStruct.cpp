@@ -25,9 +25,6 @@ CStringArray UNALLOCATEDARRAY;
 
 CMapDayAllocations::CMapDayAllocations() : bAutoCalculated(FALSE)
 {
-	// Once only initialisation
-	if (UNALLOCATEDARRAY.GetSize() == 0)
-		UNALLOCATEDARRAY.Add(UNALLOCATED);
 }
 
 CMapDayAllocations::~CMapDayAllocations() 
@@ -574,16 +571,33 @@ void WORKLOADITEM::UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL b
 	}
 	else if (!bAutoCalculatedOnly || mapAllocatedDays.IsAutoCalculated())
 	{
-		double dDuration = (bPreferTimeEstimate ? dTimeEst : dtRange.GetWeekdayCount());
+		double dDuration = GetAllocationDuration(bPreferTimeEstimate);
+		const CStringArray& aNames = GetAllocationNames();
 
-		if (dDuration == 0.0)
-			dDuration = (bPreferTimeEstimate ? dtRange.GetWeekdayCount() : dTimeEst);
-
-		if (aAllocTo.GetSize())
-			mapAllocatedDays.Recalculate(aAllocTo, dDuration, bProportionally);
-		else
-			mapAllocatedDays.Recalculate(UNALLOCATEDARRAY, dDuration, bProportionally);
+		mapAllocatedDays.Recalculate(aNames, dDuration, bProportionally);
 	}
+}
+
+const CStringArray& WORKLOADITEM::GetAllocationNames() const
+{
+	if (aAllocTo.GetSize())
+		return aAllocTo;
+
+	// else
+	if (UNALLOCATEDARRAY.GetSize() == 0)
+		UNALLOCATEDARRAY.Add(UNALLOCATED);
+
+	return UNALLOCATEDARRAY;
+}
+
+double WORKLOADITEM::GetAllocationDuration(BOOL bPreferTimeEstimate) const
+{
+	double dDuration = (bPreferTimeEstimate ? dTimeEst : dtRange.GetWeekdayCount());
+
+	if (dDuration == 0.0)
+		dDuration = (bPreferTimeEstimate ? dtRange.GetWeekdayCount() : dTimeEst);
+
+	return dDuration;
 }
 
 BOOL WORKLOADITEM::HasStartDate() const

@@ -84,7 +84,7 @@ public:
 	void ClearOverlaps();
 	
 	BOOL IsAutoCalculated() const { return (bAutoCalculated || !GetCount()); }
-	void Recalculate(const CStringArray& aAllocTo, double dTotal, BOOL bProportionally);
+	void Recalculate(const CStringArray& aNames, double dTotal, BOOL bProportionally);
 
 	BOOL Decode(const CString& sAllocations);
 	CString Encode() const;
@@ -169,6 +169,10 @@ struct WORKLOADITEM
 	bool bParent; // 'bool' to match ITaskList
 	BOOL bLocked, bHasIcon;
 	BOOL bGoodAsDone, bSomeSubtaskDone;
+
+protected:
+	const CStringArray& GetAllocationNames() const;
+	double GetAllocationDuration(BOOL bPreferTimeEstimate) const;
 
 };
 
