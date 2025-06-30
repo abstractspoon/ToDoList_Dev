@@ -2322,7 +2322,7 @@ COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 
 		date = dtGreg;
 	}
-	ASSERT(WantRTLDates() || GetDateInMonths(date) == nNumMonths);
+	ASSERT(GetDateInMonths(date) == nNumMonths);
 
 	return date;
 }
