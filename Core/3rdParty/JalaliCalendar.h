@@ -1,5 +1,7 @@
 #pragma once
 
+// Original code by Ali Tavakol, CodeProject, Sep 24, 2007
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef LANG_PERSIAN
@@ -11,15 +13,17 @@
 class CJalaliCalendar
 {
 public:
-	// This function retrieves the current local Jalali date.
-	// Be sure that the system date is correct.
-	static void GetJalaliDate(int *Year, int *Month, int *Day, int *DayOfWeek = NULL);
+	static void GetCurrentDate(int *JYear, int *JMonth, int *JDay, int *JDayOfWeek = NULL);
+
+	static CString GetDayOfWeekName(int JDayOfWeek);
+	static CString GetMonthName(int JMonth);
 	
 	static void GregorianToJalali(const COleDateTime& dtGregorian, COleDateTime& dtJalali, int *JDayOfWeek = NULL);
 	static void JalaliToGregorian(const COleDateTime& dtJalali, COleDateTime& dtGregorian, int *GDayOfWeek = NULL);
 
 	static void GregorianToJalali(int GYear, int GMonth, int GDay, int *JYear, int *JMonth, int *JDay, int *JDayOfWeek = NULL);
 	static void JalaliToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay, int *GDayOfWeek = NULL);
+
 
 	static void GetJalaliDayOfWeek(int JYear, int JMonth, int JDay, int *DayOfWeek);
 	static void GetGregorianDayOfWeek(int GYear, int GMonth, int GDay, int *DayOfWeek);
