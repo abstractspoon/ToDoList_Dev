@@ -1,4 +1,6 @@
-﻿#include "StdAfx.h"
+﻿// Original code (c) Ali Tavakol, CodeProject, Sep 24, 2007
+
+#include "StdAfx.h"
 #include "JalaliCalendar.h"
 
 ////////////////////////////////////////////////////////////////////
