@@ -9,6 +9,10 @@
 #include "DateUtil.h"
 #include "RangeSliderCtrl.h"
 
+#include <Shared/DateHelper.h>
+
+#include <3rdParty/JalaliCalendar.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System::Windows::Forms;
@@ -398,21 +402,22 @@ String^ MonthRangeSliderCtrl::FormatRange()
 	if (!GetSelectedRange(from, to) && !GetMinMax(from, to))
 		return String::Empty;
 
-	to = to.AddMonths(-1);
+	String^ format = "MMM yyyy";
 
-	if (DateUtil::DateInMonths(from) == (DateUtil::DateInMonths(to)))
+	if (DateUtil::WantRTLDates())
 	{
-		return String::Format("{0} {1}",
-							  DateUtil::GetMonthName(from.Month, true),
-							  from.Year);
+		int nMonthTo = DateUtil::DateInMonths(to);
+		to = DateUtil::DateFromMonths(--nMonthTo);
+	}
+	else
+	{
+		to = to.AddMonths(-1);
 	}
 
-	// else
-	return String::Format("{0} {1} - {2} {3}",
-						  DateUtil::GetMonthName(from.Month, true),
-						  from.Year,
-						  DateUtil::GetMonthName(to.Month, true),
-						  to.Year);
+	if (to == from)
+		return DateUtil::FormatDateOnly(from, format);
+
+	return DateUtil::FormatDateOnlyRange(from, to, format);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

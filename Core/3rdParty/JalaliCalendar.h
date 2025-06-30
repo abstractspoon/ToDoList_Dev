@@ -11,9 +11,11 @@
 class CJalaliCalendar
 {
 public:
+	static BOOL IsActive();
+
 	// This function retrieves the current local Jalali date.
 	// Be sure that the system date is correct.
-	static void GetJalaliDate(int *Year, int *Month, int *Day, int *DayOfWeek = NULL);
+	static void GetCurrentJalaliDate(int *Year, int *Month, int *Day, int *DayOfWeek = NULL);
 	
 	static void GregorianToJalali(const COleDateTime& dtGregorian, COleDateTime& dtJalali, int *JDayOfWeek = NULL);
 	static void JalaliToGregorian(const COleDateTime& dtJalali, COleDateTime& dtGregorian, int *GDayOfWeek = NULL);
