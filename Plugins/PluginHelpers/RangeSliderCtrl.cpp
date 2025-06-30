@@ -400,19 +400,7 @@ String^ MonthRangeSliderCtrl::FormatRange()
 
 	to = to.AddMonths(-1);
 
-	if (DateUtil::DateInMonths(from) == (DateUtil::DateInMonths(to)))
-	{
-		return String::Format("{0} {1}",
-							  DateUtil::GetMonthName(from.Month, true),
-							  from.Year);
-	}
-
-	// else
-	return String::Format("{0} {1} - {2} {3}",
-						  DateUtil::GetMonthName(from.Month, true),
-						  from.Year,
-						  DateUtil::GetMonthName(to.Month, true),
-						  to.Year);
+	return DateUtil::FormatDateOnlyRange(from, to, "MMM yyyy");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
