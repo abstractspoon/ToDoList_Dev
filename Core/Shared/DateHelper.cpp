@@ -2312,7 +2312,15 @@ COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 	int nMonth = ((nNumMonths % 12) + 1);
 
 	COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
-	ASSERT(GetDateInMonths(date) == nNumMonths);
+
+	if (WantRTLDates())
+	{
+		COleDateTime dtGreg;
+		CJalaliCalendar::JalaliToGregorian(date, dtGreg);
+
+		date = dtGreg;
+	}
+	ASSERT(WantRTLDates() || GetDateInMonths(date) == nNumMonths);
 
 	return date;
 }
@@ -2320,6 +2328,14 @@ COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 int CDateHelper::GetDateInMonths(const COleDateTime& date)
 {
 	ASSERT(IsDateSet(date));
+
+	if (WantRTLDates())
+	{
+		COleDateTime dtJalali;
+		CJalaliCalendar::GregorianToJalali(date, dtJalali);
+
+		return GetDateInMonths(dtJalali.GetMonth(), dtJalali.GetYear());
+	}
 
 	return GetDateInMonths(date.GetMonth(), date.GetYear());
 }
