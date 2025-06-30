@@ -423,6 +423,24 @@ CString COleDateTimeRange::Format(DWORD dwFlags, LPCTSTR szDelim) const
 	return sRange;
 }
 
+CString COleDateTimeRange::FormatDateOnly(LPCTSTR szFormat, LPCTSTR szDelim) const
+{
+	CString sRange;
+
+	if (IsValid())
+	{
+		CString sStart = CDateHelper::FormatDateOnly(m_dtStart, szFormat);
+		CString sEnd = CDateHelper::FormatDateOnly(m_dtEnd, szFormat);
+
+		if (Misc::IsEmpty(szDelim))
+			szDelim = _T(" ");
+
+		sRange = (sStart + szDelim + sEnd);
+	}
+
+	return sRange;
+}
+
 double COleDateTimeRange::CalcProportion(const COleDateTime& date) const
 {
 	if (!IsValid())

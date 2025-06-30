@@ -897,22 +897,10 @@ void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange
 
 	if (dtActiveRange.IsValid())
 	{
-		COleDateTime dtStart = dtActiveRange.GetStart();
-
 		if (m_sliderDateRange.GetRangeWidth() == 1.0)
-		{
-			sRange.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
-		}
+			sRange = CDateHelper::FormatDateOnly(dtActiveRange.GetStart(), _T("MMM yyyy"));
 		else
-		{
-			COleDateTime dtEnd = dtActiveRange.GetEnd();
-			CString sStart, sEnd;
-
-			sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
-			sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
-
-			sRange.Format(_T("%s - %s"), sStart, sEnd);
-		}
+			sRange = dtActiveRange.FormatDateOnly(_T("MMM yyyy"));
 	}
 	
 	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
