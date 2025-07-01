@@ -79,6 +79,171 @@ void CJalaliCalendar::JalaliToGregorian(const COleDateTime& dtJalali, COleDateTi
 	dtGregorian = stGregorian;
 }
 
+void CJalaliCalendar::GetCurrentDate(int *JYear, int *JMonth, int *JDay, int *JDayOfWeek)
+{
+	SYSTEMTIME st;
+
+	GetLocalTime(&st);
+	GregorianToJalali(st.wYear, st.wMonth, st.wDay, JYear, JMonth, JDay, JDayOfWeek);
+}
+
+CString CJalaliCalendar::GetMonthName(int JMonth)
+{
+	switch (JMonth)
+	{
+	case 1:  return MONTHNAME_1;  // Farvardin
+	case 2:  return MONTHNAME_2;  // Ordibehesht
+	case 3:  return MONTHNAME_3;  // Khordad
+	case 4:  return MONTHNAME_4;  // Tir
+	case 5:  return MONTHNAME_5;  // Mordad
+	case 6:  return MONTHNAME_6;  // Shahrivar
+	case 7:  return MONTHNAME_7;  // Mehr
+	case 8:  return MONTHNAME_8;  // Aban
+	case 9:  return MONTHNAME_9;  // Azar
+	case 10: return MONTHNAME_10; // Dey
+	case 11: return MONTHNAME_11; // Bahman
+	case 12: return MONTHNAME_12; // Esfand
+	}
+
+	// all else
+	return "";
+}
+
+CString CJalaliCalendar::GetDayOfWeekName(int JDayOfWeek)
+{
+	switch (JDayOfWeek)
+	{
+	case 1:  return DOWNAME_1; // sanbe
+	case 2:  return DOWNAME_2; // yeksanbe
+	case 3:  return DOWNAME_3; // dosanbe
+	case 4:  return DOWNAME_4; // sesanbe
+	case 5:  return DOWNAME_5; // čaharsanbe
+	case 6:  return DOWNAME_6; // panjsanbe
+	case 7:  return DOWNAME_7; // Jom-e
+	}
+
+	// all else
+	return "";
+}
+
+void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JYear, int *JMonth, int *JDay, int *JDayOfWeek)
+{
+	/**
+	*
+	* @Name : ConvertCalendar.c
+	* @Version : 1.0
+	* @Programmer : Max
+	* @Date : 2019-03-31
+	* @Released under : https://github.com/BaseMax/ConvertCalendar/blob/master/LICENSE
+	* @Repository : https://github.com/BaseMax/ConvertCalendar
+	*
+	**/
+
+	const int MONTHOFFSET[12] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+	const int iMonth = (GMonth - 1);
+
+	if (GYear <= 1600)
+	{
+		GYear -= 621;
+		*JYear = 0;
+	}
+	else
+	{
+		GYear -= 1600;
+		*JYear = 979;
+	}
+
+	int temp = ((GYear > 2) ? (GYear + 1) : GYear);
+	int days = (((int)((temp + 3) / 4)) +
+				(365 * GYear) -
+				((int)((temp + 99) / 100)) -
+				80 +
+				MONTHOFFSET[iMonth] +
+				((int)((temp + 399) / 400)) +
+				GDay);
+
+	*JYear += 33 * ((int)(days / 12053));
+	days %= 12053;
+
+	*JYear += 4 * ((int)(days / 1461));
+	days %= 1461;
+
+	if (days > 365)
+	{
+		*JYear += (int)((days - 1) / 365);
+		days = (days - 1) % 365;
+	}
+
+	*JMonth = ((days < 186) ? 1 + (int)(days / 31) : 7 + (int)((days - 186) / 30));
+	*JDay = (1 + ((days < 186) ? (days % 31) : ((days - 186) % 30)));
+}
+
+void CJalaliCalendar::JalaliToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay, int *GDayOfWeek)
+{
+	/**
+	*
+	* @Name : ConvertCalendar.c
+	* @Version : 1.0
+	* @Programmer : Max
+	* @Date : 2019-03-31
+	* @Released under : https://github.com/BaseMax/ConvertCalendar/blob/master/LICENSE
+	* @Repository : https://github.com/BaseMax/ConvertCalendar
+	*
+	**/
+
+	if (JYear <= 979)
+	{
+		*GYear = 621;
+	}
+	else
+	{
+		JYear -= 979;
+		*GYear = 1600;
+	}
+
+	int temp = (((int)(JYear / 33)) * 8) + ((int)(((JYear % 33) + 3) / 4)) + (365 * JYear) + 78 + JDay + ((JMonth < 7) ? (JMonth - 1) * 31 : ((JMonth - 7) * 30) + 186);
+
+	*GYear += 400 * ((int)(temp / 146097));
+	temp %= 146097;
+
+	if (temp > 36524)
+	{
+		*GYear += 100 * ((int)(--temp / 36524));
+		temp %= 36524;
+
+		if (temp >= 365)
+			temp++;
+	}
+
+	*GYear += 4 * ((int)(temp / 1461));
+	temp %= 1461;
+
+	if (temp > 365)
+	{
+		*GYear += (int)((temp - 1) / 365);
+		temp = (temp - 1) % 365;
+	}
+
+	*GDay = temp + 1; // 1 -> 31
+
+	bool leapYear = ((*GYear % 4 == 0 && *GYear % 100 != 0) || (*GYear % 400 == 0));
+	int DAYSINMONTH[12] = { 31, (leapYear ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+	for (int index = 0; index < 12; index++)
+	{
+		*GMonth = (index + 1); // 1 -> 12
+
+		if (*GDay <= DAYSINMONTH[index])
+			break;
+
+		*GDay -= DAYSINMONTH[index];
+	}
+}
+
+/*
+// These original functions were found to occasionally 
+// convert consecutive days to the same date
+
 void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JYear, int *JMonth, int *JDay, int *JDayOfWeek)
 {
 	int TotalDays;
@@ -168,53 +333,6 @@ void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JY
 	}
 
 	(*JMonth)++;
-}
-
-void CJalaliCalendar::GetCurrentDate(int *JYear, int *JMonth, int *JDay, int *JDayOfWeek)
-{
-	SYSTEMTIME st;
-
-	GetLocalTime(&st);
-	GregorianToJalali(st.wYear, st.wMonth, st.wDay, JYear, JMonth, JDay, JDayOfWeek);
-}
-
-CString CJalaliCalendar::GetMonthName(int JMonth)
-{
-	switch (JMonth)
-	{
-	case 1:  return MONTHNAME_1;  // Farvardin
-	case 2:  return MONTHNAME_2;  // Ordibehesht
-	case 3:  return MONTHNAME_3;  // Khordad
-	case 4:  return MONTHNAME_4;  // Tir
-	case 5:  return MONTHNAME_5;  // Mordad
-	case 6:  return MONTHNAME_6;  // Shahrivar
-	case 7:  return MONTHNAME_7;  // Mehr
-	case 8:  return MONTHNAME_8;  // Aban
-	case 9:  return MONTHNAME_9;  // Azar
-	case 10: return MONTHNAME_10; // Dey
-	case 11: return MONTHNAME_11; // Bahman
-	case 12: return MONTHNAME_12; // Esfand
-	}
-
-	// all else
-	return "";
-}
-
-CString CJalaliCalendar::GetDayOfWeekName(int JDayOfWeek)
-{
-	switch (JDayOfWeek)
-	{
-	case 1:  return DOWNAME_1; // sanbe
-	case 2:  return DOWNAME_2; // yeksanbe
-	case 3:  return DOWNAME_3; // dosanbe
-	case 4:  return DOWNAME_4; // sesanbe
-	case 5:  return DOWNAME_5; // čaharsanbe
-	case 6:  return DOWNAME_6; // panjsanbe
-	case 7:  return DOWNAME_7; // Jom-e
-	}
-
-	// all else
-	return "";
 }
 
 void CJalaliCalendar::JalaliToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay, int *GDayOfWeek)
@@ -311,6 +429,7 @@ void CJalaliCalendar::JalaliToGregorian(int JYear, int JMonth, int JDay, int *GY
 		(*GDay) -= 31;
 	}
 }
+*/
 
 void CJalaliCalendar::GetJalaliDayOfWeek(int JYear, int JMonth, int JDay, int *DayOfWeek)
 {
