@@ -1,5 +1,36 @@
+// Original code (c) Ali Tavakol, CodeProject, Sep 24, 2007
+
 #include "StdAfx.h"
 #include "JalaliCalendar.h"
+
+////////////////////////////////////////////////////////////////////
+
+// Day of week names in Persian script
+TCHAR DOWNAME_1[] = { 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0009, 0x0 };								// sanbe
+TCHAR DOWNAME_2[] = { 0x06CC, 0x06A9, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };				// yeksanbe
+TCHAR DOWNAME_3[] = { 0x062F, 0x0648, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };				// dosanbe
+TCHAR DOWNAME_4[] = { 0x0633, 0x0647, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };				// sesanbe
+TCHAR DOWNAME_5[] = { 0x0686, 0x0647, 0x0627, 0x0631, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 }; // čaharsanbe
+TCHAR DOWNAME_6[] = { 0x067E, 0x0646, 0x062C, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };		// panjsanbe
+TCHAR DOWNAME_7[] = { 0x062C, 0x0645, 0x0639, 0x0647, 0x0009, 0x0009, 0x0 };								// Jom-e
+
+////////////////////////////////////////////////////////////////////
+
+// Month names in Persian script
+TCHAR MONTHNAME_1[] =  { 0x0641, 0x0631, 0x0648, 0x0631, 0x062F, 0x06CC, 0x0646, 0x0  };		// Farvardin
+TCHAR MONTHNAME_2[] =  { 0x0627, 0x0631, 0x062F, 0x06CC, 0x0628, 0x0647, 0x0634, 0x062A, 0x0 }; // Ordibehesht
+TCHAR MONTHNAME_3[] =  { 0x062E, 0x0631, 0x062F, 0x0627, 0x062F, 0x0 };							// Khordad
+TCHAR MONTHNAME_4[] =  { 0x062A, 0x06CC, 0x0631, 0x0 };											// Tir
+TCHAR MONTHNAME_5[] =  { 0x0645, 0x0631, 0x062F, 0x0627, 0x062F, 0x0};							// Mordad
+TCHAR MONTHNAME_6[] =  { 0x0634, 0x0647, 0x0631, 0x06CC, 0x0648, 0x0631, 0x0};					// Shahrivar
+TCHAR MONTHNAME_7[] =  { 0x0645, 0x0647, 0x0631, 0x0};											// Mehr
+TCHAR MONTHNAME_8[] =  { 0x0622, 0x0628, 0x0627, 0x0646, 0x0};									// Aban
+TCHAR MONTHNAME_9[] =  { 0x0622, 0x0630, 0x0631, 0x0};											// Azar
+TCHAR MONTHNAME_10[] = { 0x062F, 0x06CC, 0x0};													// Dey
+TCHAR MONTHNAME_11[] = { 0x0628, 0x0647, 0x0645, 0x0646, 0x0};									// Bahman
+TCHAR MONTHNAME_12[] = { 0x0627, 0x0633, 0x0641, 0x0646, 0x062F, 0x0};							// Esfand
+
+////////////////////////////////////////////////////////////////////
 
 BOOL CJalaliCalendar::IsActive()
 {
@@ -139,12 +170,51 @@ void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JY
 	(*JMonth)++;
 }
 
-void CJalaliCalendar::GetCurrentJalaliDate(int *Year, int *Month, int *Day, int *DayOfWeek)
+void CJalaliCalendar::GetCurrentDate(int *JYear, int *JMonth, int *JDay, int *JDayOfWeek)
 {
 	SYSTEMTIME st;
 
 	GetLocalTime(&st);
-	GregorianToJalali(st.wYear, st.wMonth, st.wDay, Year, Month, Day, DayOfWeek);
+	GregorianToJalali(st.wYear, st.wMonth, st.wDay, JYear, JMonth, JDay, JDayOfWeek);
+}
+
+CString CJalaliCalendar::GetMonthName(int JMonth)
+{
+	switch (JMonth)
+	{
+	case 1:  return MONTHNAME_1;  // Farvardin
+	case 2:  return MONTHNAME_2;  // Ordibehesht
+	case 3:  return MONTHNAME_3;  // Khordad
+	case 4:  return MONTHNAME_4;  // Tir
+	case 5:  return MONTHNAME_5;  // Mordad
+	case 6:  return MONTHNAME_6;  // Shahrivar
+	case 7:  return MONTHNAME_7;  // Mehr
+	case 8:  return MONTHNAME_8;  // Aban
+	case 9:  return MONTHNAME_9;  // Azar
+	case 10: return MONTHNAME_10; // Dey
+	case 11: return MONTHNAME_11; // Bahman
+	case 12: return MONTHNAME_12; // Esfand
+	}
+
+	// all else
+	return "";
+}
+
+CString CJalaliCalendar::GetDayOfWeekName(int JDayOfWeek)
+{
+	switch (JDayOfWeek)
+	{
+	case 1:  return DOWNAME_1; // sanbe
+	case 2:  return DOWNAME_2; // yeksanbe
+	case 3:  return DOWNAME_3; // dosanbe
+	case 4:  return DOWNAME_4; // sesanbe
+	case 5:  return DOWNAME_5; // čaharsanbe
+	case 6:  return DOWNAME_6; // panjsanbe
+	case 7:  return DOWNAME_7; // Jom-e
+	}
+
+	// all else
+	return "";
 }
 
 void CJalaliCalendar::JalaliToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay, int *GDayOfWeek)

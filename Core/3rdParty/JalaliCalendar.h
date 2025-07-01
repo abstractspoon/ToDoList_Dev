@@ -1,3 +1,5 @@
+// Original code (c) Ali Tavakol, CodeProject, Sep 24, 2007
+
 #pragma once
 
 //////////////////////////////////////////////////////////////////////
@@ -13,16 +15,17 @@ class CJalaliCalendar
 public:
 	static BOOL IsActive();
 
-	// This function retrieves the current local Jalali date.
-	// Be sure that the system date is correct.
-	static void GetCurrentJalaliDate(int *Year, int *Month, int *Day, int *DayOfWeek = NULL);
+	static CString GetDayOfWeekName(int JDayOfWeek); // 1 = Saturday
+	static CString GetMonthName(int JMonth);
+
+	static void GetCurrentDate(int *JYear, int *JMonth, int *JDay, int *JDayOfWeek = NULL);
 	
 	static void GregorianToJalali(const COleDateTime& dtGregorian, COleDateTime& dtJalali, int *JDayOfWeek = NULL);
 	static void JalaliToGregorian(const COleDateTime& dtJalali, COleDateTime& dtGregorian, int *GDayOfWeek = NULL);
 
 	static void GregorianToJalali(int GYear, int GMonth, int GDay, int *JYear, int *JMonth, int *JDay, int *JDayOfWeek = NULL);
 	static void JalaliToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay, int *GDayOfWeek = NULL);
-
+	
 	static void GetJalaliDayOfWeek(int JYear, int JMonth, int JDay, int *DayOfWeek);
 	static void GetGregorianDayOfWeek(int GYear, int GMonth, int GDay, int *DayOfWeek);
 
