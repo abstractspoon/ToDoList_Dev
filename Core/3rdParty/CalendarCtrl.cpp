@@ -430,7 +430,7 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 					if (CJalaliCalendar::IsActive())
 					{
 						int JYear, JMonth, JDay;
-						CJalaliCalendar::GregorianToJalali(pCell->date, &JYear, &JMonth, &JDay);
+						CJalaliCalendar::FromGregorian(pCell->date, &JYear, &JMonth, &JDay);
 
 						if (JDay == 1)
 							bShowMonth = TRUE;

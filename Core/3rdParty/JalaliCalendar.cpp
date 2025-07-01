@@ -1,4 +1,5 @@
 // Original code (c) Ali Tavakol, CodeProject, Sep 24, 2007
+// largely replaced with online code
 
 #include "StdAfx.h"
 #include "JalaliCalendar.h"
@@ -47,44 +48,35 @@ BOOL CJalaliCalendar::IsActive()
 	return FALSE;
 }
 
-void CJalaliCalendar::GregorianToJalali(const COleDateTime& dtGregorian, COleDateTime& dtJalali, int *JDayOfWeek)
+int CJalaliCalendar::GetDaysInMonth(int JYear, int JMonth)
 {
-	SYSTEMTIME stGregorian = { 0 };
-	dtGregorian.GetAsSystemTime(stGregorian);
+	switch (JMonth)
+	{
+	case 1:  return 31; // Farvardin
+	case 2:  return 31; // Ordibehesht
+	case 3:  return 31; // Khordad
+	case 4:  return 31; // Tir
+	case 5:  return 31; // Mordad
+	case 6:  return 31; // Shahrivar
+	case 7:  return 30; // Mehr
+	case 8:  return 30; // Aban
+	case 9:  return 30; // Azar
+	case 10: return 30; // Dey
+	case 11: return 30; // Bahman
 
-	int JYear, JMonth, JDay;
-	GregorianToJalali((int)stGregorian.wYear, (int)stGregorian.wMonth, (int)stGregorian.wDay, &JYear, &JMonth, &JDay, JDayOfWeek);
+	case 12: return (IsLeapYear(JYear) ? 30 : 29); // Esfand
+	}
 
-	SYSTEMTIME stJalali = stGregorian;
-	stJalali.wYear = (WORD)JYear;
-	stJalali.wMonth = (WORD)JMonth;
-	stJalali.wDay = (WORD)JDay;
-
-	dtJalali = stJalali;
+	// all else
+	return 0;
 }
 
-void CJalaliCalendar::JalaliToGregorian(const COleDateTime& dtJalali, COleDateTime& dtGregorian, int *GDayOfWeek)
+BOOL CJalaliCalendar::IsLeapYear(int JYear)
 {
-	SYSTEMTIME stJalali = { 0 };
-	dtJalali.GetAsSystemTime(stJalali);
+	// One of a number of ways apparently
+	// From https://github.com/MenoData/Time4J/issues/631
 
-	int GYear, GMonth, GDay;
-	JalaliToGregorian((int)stJalali.wYear, (int)stJalali.wMonth, (int)stJalali.wDay, &GYear, &GMonth, &GDay, GDayOfWeek);
-
-	SYSTEMTIME stGregorian = stJalali;
-	stGregorian.wYear = (WORD)GYear;
-	stGregorian.wMonth = (WORD)GMonth;
-	stGregorian.wDay = (WORD)GDay;
-
-	dtGregorian = stGregorian;
-}
-
-void CJalaliCalendar::GetCurrentDate(int *JYear, int *JMonth, int *JDay, int *JDayOfWeek)
-{
-	SYSTEMTIME st;
-
-	GetLocalTime(&st);
-	GregorianToJalali(st.wYear, st.wMonth, st.wDay, JYear, JMonth, JDay, JDayOfWeek);
+	return (((((((JYear - ((JYear > 0) ? 474 : 473)) % 2820) + 474) + 38) * 682) % 2816) < 682);
 }
 
 CString CJalaliCalendar::GetMonthName(int JMonth)
@@ -126,7 +118,31 @@ CString CJalaliCalendar::GetDayOfWeekName(int JDayOfWeek)
 	return "";
 }
 
-void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JYear, int *JMonth, int *JDay, int *JDayOfWeek)
+void CJalaliCalendar::FromGregorian(const COleDateTime& dtGregorian, int *JYear, int *JMonth, int *JDay)
+{
+	SYSTEMTIME stGregorian = { 0 };
+	dtGregorian.GetAsSystemTime(stGregorian);
+
+	FromGregorian((int)stGregorian.wYear, (int)stGregorian.wMonth, (int)stGregorian.wDay, JYear, JMonth, JDay);
+}
+
+void CJalaliCalendar::ToGregorian(int JYear, int JMonth, int JDay, COleDateTime& dtGregorian)
+{
+	int GYear, GMonth, GDay;
+	ToGregorian(JYear, JMonth, JDay, &GYear, &GMonth, &GDay);
+
+	dtGregorian.SetDate(GYear, GMonth, GDay);
+}
+
+void CJalaliCalendar::GetCurrentDate(int *JYear, int *JMonth, int *JDay)
+{
+	SYSTEMTIME st;
+
+	GetLocalTime(&st);
+	FromGregorian(st.wYear, st.wMonth, st.wDay, JYear, JMonth, JDay);
+}
+
+void CJalaliCalendar::FromGregorian(int GYear, int GMonth, int GDay, int *JYear, int *JMonth, int *JDay)
 {
 	/**
 	*
@@ -139,7 +155,8 @@ void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JY
 	*
 	**/
 
-	const int MONTHOFFSET[12] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+	const int GMONTHOFFSETS[12] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+
 	const int iMonth = (GMonth - 1);
 
 	if (GYear <= 1600)
@@ -158,7 +175,7 @@ void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JY
 				(365 * GYear) -
 				((int)((temp + 99) / 100)) -
 				80 +
-				MONTHOFFSET[iMonth] +
+				GMONTHOFFSETS[iMonth] +
 				((int)((temp + 399) / 400)) +
 				GDay);
 
@@ -178,7 +195,7 @@ void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JY
 	*JDay = (1 + ((days < 186) ? (days % 31) : ((days - 186) % 30)));
 }
 
-void CJalaliCalendar::JalaliToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay, int *GDayOfWeek)
+void CJalaliCalendar::ToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay)
 {
 	/**
 	*
@@ -431,307 +448,3 @@ void CJalaliCalendar::JalaliToGregorian(int JYear, int JMonth, int JDay, int *GY
 }
 */
 
-void CJalaliCalendar::GetJalaliDayOfWeek(int JYear, int JMonth, int JDay, int *DayOfWeek)
-{
-	int TotalDays;
-
-	TotalDays = GetJalaliOffset(JYear, JMonth, JDay);
-
-	if(DayOfWeek)
-		*DayOfWeek = (TotalDays) % 7;
-}
-
-void CJalaliCalendar::GetGregorianDayOfWeek(int GYear, int GMonth, int GDay, int *DayOfWeek)
-{
-	int TotalDays;
-
-	TotalDays = GetGregorianOffset(GYear, GMonth, GDay);
-
-	if(DayOfWeek)
-		*DayOfWeek = (TotalDays + 5) % 7;
-}
-
-int CJalaliCalendar::GetGregorianOffset(int GYear, int GMonth, int GDay)
-{
-	int TotalDays;
-	int i, j;
-
-	i = GYear / 4;
-	if(i * 4 == GYear)
-		i--;
-	TotalDays = i * 1461;
-	i *= 4;
-
-	if(GYear > i + 1)
-	{
-		i++;
-		TotalDays += 365;
-	}
-	if(GYear > i + 1)
-	{
-		i++;
-		TotalDays += 365;
-	}
-	if(GYear > i + 1)
-		TotalDays += 365;
-
-	i = (GYear - 2000) / 100 - (GYear - 2000) / 400;
-	TotalDays -= i;
-
-	switch(GMonth)
-	{
-	case 1:
-		i = 0;
-		break;
-	case 2:
-	case 3:
-		i = 1;
-		break;
-	case 4:
-	case 5:
-		i = 2;
-		break;
-	case 6:
-	case 7:
-		i = 3;
-		break;
-	case 8:
-		i = 4;
-		break;
-	case 9:
-	case 10:
-		i = 5;
-		break;
-	case 11:
-	case 12:
-		i = 6;
-	}
-
-	switch(GMonth)
-	{
-	case 1:
-	case 2:
-	case 3:
-	case 4:
-		j = 0;
-		break;
-	case 5:
-	case 6:
-		j = 1;
-		break;
-	case 7:
-	case 8:
-	case 9:
-		j = 2;
-		break;
-	case 10:
-	case 11:
-		j = 3;
-		break;
-	case 12:
-		j = 4;
-	}
-
-	TotalDays += GDay + i * 31 + j * 30;
-
-	if(GMonth > 2)
-		if(GYear % 4)
-			TotalDays += 28;
-		else
-			TotalDays += 29;
-
-	// Date should be greater than 1337/1/1
-//	ASSERT(TotalDays > (726926 - (7 * 1461 + 4 * 365 + 366)));
-	TotalDays -= (726926 - (7 * 1461 + 4 * 365 + 366));
-
-	return TotalDays;
-}
-
-int CJalaliCalendar::GetJalaliOffset(int JYear, int JMonth, int JDay)
-{
-	int TotalDays;
-	int i, j;
-	
-	// Date should be greater than 1337/1/1
-//	ASSERT(JYear > 1337);
-	TotalDays = 726926 - (7 * 1461 + 4 * 365 + 366);
-
-	i = (JYear - 1337) / 33;
-	TotalDays += (7 * 1461 + 4 * 365 + 366) * i;
-
-	i = i * 33 + 1336;
-
-	if(JYear > i + 1)
-	{
-		i++;
-		TotalDays += 366;
-	}
-	if(JYear > i + 1)
-	{
-		i++;
-		TotalDays += 365;
-	}
-	if(JYear > i + 1)
-	{
-		i++;
-		TotalDays += 365;
-	}
-	if(JYear > i + 1)
-	{
-		i++;
-		TotalDays += 365;
-	}
-	if(JYear > i + 1)
-	{
-		i++;
-		TotalDays += 365;
-	}
-
-	while(JYear > i + 1)
-	{
-		if(JYear > i + 1)
-		{
-			i++;
-			TotalDays += 366;
-		}
-		if(JYear > i + 1)
-		{
-			i++;
-			TotalDays += 365;
-		}
-		if(JYear > i + 1)
-		{
-			i++;
-			TotalDays += 365;
-		}
-		if(JYear > i + 1)
-		{
-			i++;
-			TotalDays += 365;
-		}
-	}
-
-	i = min(JMonth - 1, 6);
-	j = max(JMonth - 7, 0);
-	TotalDays += JDay + i * 31 + j * 30;
-
-	return TotalDays;
-}
-
-int CJalaliCalendar::GetGregorianDayDifference(int GYear1, int GMonth1, int GDay1, int GYear2, int GMonth2, int GDay2)
-{
-	int Offset1, Offset2;
-
-	Offset1 = GetGregorianOffset(GYear1, GMonth1, GDay1);
-	Offset2 = GetGregorianOffset(GYear2, GMonth2, GDay2);
-
-	return Offset2 - Offset1;
-}
-
-int CJalaliCalendar::GetJalaliDayDifference(int GYear1, int GMonth1, int GDay1, int GYear2, int GMonth2, int GDay2)
-{
-	int Offset1, Offset2;
-
-	Offset1 = GetJalaliOffset(GYear1, GMonth1, GDay1);
-	Offset2 = GetJalaliOffset(GYear2, GMonth2, GDay2);
-
-	return Offset2 - Offset1;
-}
-
-void CJalaliCalendar::GetJalaliDateWithOffset(int JYear, int JMonth, int JDay, int Offset, int *Year, int *Month, int *Day, int *DayOfWeek)
-{
-	int TotalDays;
-
-	TotalDays = GetJalaliOffset(JYear, JMonth, JDay) + Offset - 726926 + (7 * 1461 + 4 * 365 + 366);
-
-	if(DayOfWeek)
-		*DayOfWeek = (TotalDays + 5) % 7;
-
-	*Year = TotalDays / (7 * 1461 + 4 * 365 + 366);
-	if((*Year) * (7 * 1461 + 4 * 365 + 366) == TotalDays)
-		(*Year)--;
-	*Day = TotalDays - (*Year) * (7 * 1461 + 4 * 365 + 366);
-	(*Year) *= 33;
-
-	(*Year) += 1337;
-
-	if((*Day) > 366)
-	{
-		(*Year)++;
-		(*Day) -= 366;
-	}
-	if((*Day) > 365)
-	{
-		(*Year)++;
-		(*Day) -= 365;
-	}
-	if((*Day) > 365)
-	{
-		(*Year)++;
-		(*Day) -= 365;
-	}
-	if((*Day) > 365)
-	{
-		(*Year)++;
-		(*Day) -= 365;
-	}
-	if((*Day) > 365)
-	{
-		(*Year)++;
-		(*Day) -= 365;
-	}
-
-	while((*Day) > 366)
-	{
-		(*Year)++;
-		(*Day) -= 366;
-
-		if((*Day) > 365)
-		{
-			(*Year)++;
-			(*Day) -= 365;
-		}
-		if((*Day) > 365)
-		{
-			(*Year)++;
-			(*Day) -= 365;
-		}
-		if((*Day) > 365)
-		{
-			(*Year)++;
-			(*Day) -= 365;
-		}
-	}
-
-	if((*Day) < 187)
-	{
-		(*Month) = (*Day) / 31;
-		(*Day) -= (*Month) * 31;
-		if(!(*Day))
-		{
-			(*Month)--;
-			(*Day) = 31;
-		}
-	}
-	else
-	{
-		(*Day) -= 186;
-		(*Month) = (*Day) / 30;
-		(*Day) -= (*Month) * 30;
-		if(!(*Day))
-		{
-			(*Month)--;
-			(*Day) = 30;
-		}
-		(*Month) += 6;
-	}
-
-	(*Month)++;
-}
-
-void CJalaliCalendar::GetGregorianDateWithOffset(int GYear, int GMonth, int GDay, int Offset, int *Year, int *Month, int *Day, int *DayOfWeek /*, TCHAR *DayName , TCHAR *MonthName */)
-{
-	GregorianToJalali(GYear, GMonth, GDay, &GYear, &GMonth, &GDay);
-	GetJalaliDateWithOffset(GYear, GMonth, GDay, Offset, &GYear, &GMonth, &GDay);
-	JalaliToGregorian(GYear, GMonth, GDay, Year, Month, Day, DayOfWeek/*, DayName, MonthName*/);
-}

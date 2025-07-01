@@ -832,11 +832,11 @@ BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAnd
 		return FALSE;
 	}
 
-	// Handle Persian/Jalali dates
+	// Treat a negative date as Persian/Jalali
 	if ((date.m_dt < 0.0) && 
 		(Misc::GetPrimaryLanguage() == LANG_PERSIAN))
 	{
-		CJalaliCalendar::JalaliToGregorian(COleDateTime(date), date);
+		CJalaliCalendar::ToGregorian(date.GetYear(), date.GetMonth(), date.GetDay(), date);
 	}
 
 	return TRUE;
@@ -1435,7 +1435,7 @@ BOOL CDateHelper::IsDayOfMonth(const COleDateTime& date, int nDay)
 	if (WantRTLDates())
 	{
 		int JYear, JMonth, JDay;
-		CJalaliCalendar::GregorianToJalali(date, &JYear, &JMonth, &JDay);
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
 
 		return (JDay == nDay);
 	}
@@ -2319,18 +2319,19 @@ COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 	int nYear = (nNumMonths / 12);
 	int nMonth = ((nNumMonths % 12) + 1);
 
-	COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
+	COleDateTime dtGreg;
 
 	if (WantRTLDates())
 	{
-		COleDateTime dtGreg;
-		CJalaliCalendar::JalaliToGregorian(date, dtGreg);
-
-		date = dtGreg;
+		CJalaliCalendar::ToGregorian(nYear, nMonth, 1, dtGreg);
+		ASSERT(GetDateInMonths(dtGreg) == nNumMonths);
 	}
-	ASSERT(GetDateInMonths(date) == nNumMonths);
+	else
+	{
+		dtGreg.SetDate(nYear, nMonth, 1);
+	}
 
-	return date;
+	return dtGreg;
 }
 
 int CDateHelper::GetDateInMonths(const COleDateTime& date)
@@ -2339,12 +2340,13 @@ int CDateHelper::GetDateInMonths(const COleDateTime& date)
 
 	if (WantRTLDates())
 	{
-		COleDateTime dtJalali;
-		CJalaliCalendar::GregorianToJalali(date, dtJalali);
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
 
-		return GetDateInMonths(dtJalali.GetMonth(), dtJalali.GetYear());
+		return GetDateInMonths(JMonth, JYear);
 	}
 
+	// else
 	return GetDateInMonths(date.GetMonth(), date.GetYear());
 }
 

@@ -90,6 +90,9 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+//
+// NOTE: To avoid confusion it is assumed that every COleDateTime is Gregorian
+// ans will be converted internally to and from Jalali as required
 
 class CDateHelper  
 {
