@@ -8,6 +8,7 @@
 #include "BurndownEnum.h"
 
 #include "..\shared\misc.h"
+#include "..\shared\localizer.h"
 #include "..\shared\themed.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
@@ -34,6 +35,8 @@ static char THIS_FILE[] = __FILE__;
 const UINT WM_REBUILDGRAPH = (WM_APP+1);
 
 const BURNDOWN_GRAPH DEF_GRAPH = BCG_TIMESERIES_INCOMPLETETASKS;
+
+const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -156,15 +159,13 @@ BOOL CBurndownWnd::OnInitDialog()
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
 
-	// Initialise graph
-	CRect rFrame;
-	m_stFrame.GetWindowRect(rFrame);
-	ScreenToClient(rFrame);
-	rFrame.DeflateRect(1, 1);
-
 	VERIFY(m_chart.SubclassDlgItem(IDC_GRAPH, this));
 	VERIFY(m_cbGraphs.Initialise(m_mapGraphs));
 	VERIFY(m_wndPrompts.SetComboPrompt(m_cbOptions, IDS_NONE));
+
+	// Date range text needs to be big enough for all eventualities
+	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
+	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -660,19 +661,21 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 	
 	if (m_stFrame.GetSafeHwnd())
 	{
-		CRect rFrame;
-		m_stFrame.GetWindowRect(rFrame);
-		
-		ScreenToClient(rFrame);
-		rFrame.right = cx;
-		rFrame.bottom = cy;
-
-		m_stFrame.MoveWindow(rFrame);
+		CRect rFrame = CDialogHelper::GetChildRect(&m_stFrame);
+		rFrame = CDialogHelper::ResizeChild(&m_stFrame, (cx - rFrame.right), (cy - rFrame.bottom));
 
 		rFrame.DeflateRect(1, 1);
 		m_chart.MoveWindow(rFrame);
 
 		// selected task dates takes available space
+		if (CLocalizer::IsInitialized())
+		{
+			int nOffset = CDialogHelper::ResizeStaticTextToFit(this, IDC_ACTIVEDATERANGE_LABEL);
+
+			if (nOffset)
+				CDialogHelper::OffsetCtrl(this, IDC_ACTIVEDATERANGE_TEXT, nOffset, 0);
+		}
+
 		ResizeSlider(cx);
 
 		CAutoFlag af(m_bUpdatingSlider, TRUE);
@@ -897,13 +900,18 @@ void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange
 
 	if (dtActiveRange.IsValid())
 	{
+		CString sFormat(_T("MMM yyyy"));
+
+		if (CDateHelper::WantRTLDates())
+			sFormat.MakeReverse();
+
 		if (m_sliderDateRange.GetRangeWidth() == 1.0)
-			sRange = CDateHelper::FormatDateOnly(dtActiveRange.GetStart(), _T("MMM yyyy"));
+			sRange = CDateHelper::FormatDateOnly(dtActiveRange.GetStart(), sFormat);
 		else
-			sRange = dtActiveRange.FormatDateOnly(_T("MMM yyyy"));
+			sRange = dtActiveRange.FormatDateOnly(sFormat);
 	}
 	
-	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
+	SetDlgItemText(IDC_ACTIVEDATERANGE_TEXT, sRange);
 }
 
 void CBurndownWnd::OnSelChangeOption()
