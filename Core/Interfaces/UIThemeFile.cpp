@@ -20,7 +20,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-static CUIThemeFile UNSET_THEME;
+const CUIThemeFile UNSET_THEME;
 
 const COLORREF DEF_TODAY_COLOR = RGB(255, 145, 0);
 

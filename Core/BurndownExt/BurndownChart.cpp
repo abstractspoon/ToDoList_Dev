@@ -400,9 +400,9 @@ BOOL CBurndownChart::XScaleHasRTLDates() const
 { 
 	switch (m_pGraph->GetType())
 	{
-	case BCT_TIMESERIES:
-	case BCT_MINMAX:
-		return CDateHelper::WantRTLDates();
+// 	case BCT_TIMESERIES:
+// 	case BCT_MINMAX:
+// 		return CDateHelper::WantRTLDates();
 	}
 
 	return FALSE; 
@@ -412,8 +412,8 @@ BOOL CBurndownChart::YScaleHasRTLDates() const
 { 
 	switch (m_pGraph->GetGraph())
 	{
-	case BCG_MINMAX_DUEDONEDATES:
-		return CDateHelper::WantRTLDates();
+// 	case BCG_MINMAX_DUEDONEDATES:
+// 		return CDateHelper::WantRTLDates();
 	}
 
 	return FALSE; 

@@ -600,21 +600,21 @@ BOOL IsThemeActiveEx()
 
 #define PACKVERSION(major,minor) MAKELONG(minor,major)
 
+static DWORD s_dwWinVers = 0;	// check win version only once (will not change during application)
+
 DWORD GetWinVersion()
 {
-	static DWORD c_dwWinVers = 0;	// check win version only once (will not change during application)
-
-	if (!c_dwWinVers)
+	if (!s_dwWinVers)
 	{
 		OSVERSIONINFO osvi;	
 		ZeroMemory(&osvi, sizeof(OSVERSIONINFO));	// Initialize the OSVERSIONINFO structure.
 
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 		GetVersionEx(&osvi);
-		c_dwWinVers = PACKVERSION(osvi.dwMajorVersion, osvi.dwMinorVersion);
+		s_dwWinVers = PACKVERSION(osvi.dwMajorVersion, osvi.dwMinorVersion);
 	}
 
-	return c_dwWinVers;
+	return s_dwWinVers;
 }
 
 BOOL IsWinXP() 
