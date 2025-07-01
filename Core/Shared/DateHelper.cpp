@@ -1445,11 +1445,34 @@ BOOL CDateHelper::IsDayOfMonth(const COleDateTime& date, int nDay)
 
 COleDateTime CDateHelper::GetStartOfMonth(const COleDateTime& date)
 {
+	if (WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
+
+		COleDateTime dtGreg;
+		CJalaliCalendar::ToGregorian(JYear, JMonth, 1, dtGreg);
+
+		return dtGreg;
+	}
+
+	// else
 	return COleDateTime(date.GetYear(), date.GetMonth(), 1, 0, 0, 0);
 }
 
 COleDateTime CDateHelper::GetEndOfMonth(const COleDateTime& date)
 {
+	if (WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
+
+		COleDateTime dtGreg;
+		CJalaliCalendar::ToGregorian(JYear, JMonth, CJalaliCalendar::GetDaysInMonth(JYear, JMonth), dtGreg);
+
+		return dtGreg;
+	}
+
 	COleDateTime dtEnd = GetStartOfMonth(date);
 
 	return (dtEnd.m_dt + GetDaysInMonth(date) - 1);
