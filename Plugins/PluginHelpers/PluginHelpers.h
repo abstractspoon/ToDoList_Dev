@@ -49,6 +49,7 @@ namespace Abstractspoon
 										bool matchWhole, bool matchCase, String^% result);
 
 				static bool Find(String^ source, String^ findText, bool matchWhole, bool matchCase);
+				static String^ Reverse(String^ source);
 			};
 
 			// ----------------------------------------------------------------------------

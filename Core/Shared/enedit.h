@@ -151,8 +151,10 @@ protected:
 	int GetButtonWidthByIndex(int nBtn) const;
 	CRect GetButtonsRect() const;
 	int GetButtonsWidth() const;
+	HBRUSH PrepareColors(CDC* pDC) const;
 	BOOL InsertButton(int nPos, UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, 
 						LPCTSTR szFont, BOOL bSymbolFont);
+
 	void RedrawButtonByIndex(int nBtn);
 	void ForceRedraw();
 	void FreeButtonResources();

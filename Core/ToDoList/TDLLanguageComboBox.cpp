@@ -237,7 +237,7 @@ CString CTDLLanguageComboBox::GetSelectedLanguageFile(LPCTSTR szLanguage, LPCTST
 
 LANGID CTDLLanguageComboBox::GetSelectedPrimaryLanguageID() const
 {
-	return (LANGID)CDialogHelper::GetSelectedItemDataT(*this);
+	return (LANGID)CDialogHelper::GetSelectedItemData(*this);
 }
 
 CString CTDLLanguageComboBox::GetSelectedLanguageFile(BOOL bRelative) const

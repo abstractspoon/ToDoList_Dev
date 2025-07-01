@@ -76,6 +76,7 @@ public:
 	BOOL Expand(int nAmount, DH_UNITS nUnits);
 
 	CString Format(DWORD dwFlags = 0, LPCTSTR szDelim = _T(" - ")) const;
+	CString FormatDateOnly(LPCTSTR szFormat, LPCTSTR szDelim = _T(" - ")) const;
 	double CalcProportion(const COleDateTime& date) const; // returns 0.0-1.0
 
 	// returns 'end of day' if bInclusive is TRUE and date has no time

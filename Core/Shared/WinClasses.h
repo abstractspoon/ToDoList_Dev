@@ -42,23 +42,39 @@ enum WCLS_COMMONDIALOG
 
 //////////////////////////////////////////////////////////////////////
 
+// Pseudo-classes returned from IsClassEx functions only
+const LPCTSTR WC_MFCDIALOGBAR     = L"MfcDialogBar";
+const LPCTSTR WC_MFCVIEW          = L"MfcView";
+const LPCTSTR WC_MFCMDICHILD      = L"MfcFrameMDIChild";
+const LPCTSTR WC_MFCMDIFRAME      = L"MfcFrameMDI";
+const LPCTSTR WC_MFCSPLITTER      = L"MfcSplitter";
+const LPCTSTR WC_MFCFRAME         = L"MfcFrame";
+const LPCTSTR WC_MFCMINIDOCKFRAME = L"MfcFrameMiniDock";
+const LPCTSTR WC_MFCMINIFRAME     = L"MfcFrameMini";
+const LPCTSTR WC_MFCWND           = L"MfcWnd";
+
+//////////////////////////////////////////////////////////////////////
+
 class CWinClasses  
 {
 public:
 	static CString GetClass(HWND hWnd);
-	static CString GetClassEx(HWND hWnd); // will also determine the base type of mfc (Afx) classes
 	static BOOL IsControlClass(HWND hWnd);
 	static BOOL IsControlClass(LPCTSTR szClass);
 	static BOOL IsClass(HWND hWnd, LPCTSTR szClass);
-	static BOOL IsClassEx(HWND hWnd, LPCTSTR szClass);
 	static BOOL IsClass(LPCTSTR szClass, LPCTSTR szWndClass);
+
+	static BOOL HasParentClass(HWND hWnd, LPCTSTR szClass, BOOL bRecursive = FALSE);
+
+	static CString GetClassEx(HWND hWnd);
+	static BOOL IsClassEx(HWND hWnd, LPCTSTR szClass);
 	static BOOL IsClassEx(LPCTSTR szClass, LPCTSTR szWndClass);
 
-	static BOOL IsDialog(HWND hWnd);
-	static BOOL IsPropertyPage(HWND hWnd);
-	static BOOL IsCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType = WCD_ANY);
+	static BOOL IsMFCPropertyPage(HWND hWnd);
+	static BOOL IsMFCCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType = WCD_ANY);
 	static BOOL IsKindOf(HWND hWnd, const CRuntimeClass* pClass);
 
+	static BOOL IsDialog(HWND hWnd);
 	static BOOL IsEditControl(HWND hWnd, BOOL bOrRichEdit = TRUE);
 	static BOOL IsRichEditControl(HWND hWnd);
 	static BOOL IsComboBox(HWND hWnd);

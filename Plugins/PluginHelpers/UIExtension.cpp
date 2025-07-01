@@ -1018,23 +1018,22 @@ Drawing::Color UIExtension::SelectionRect::GetTextColor(Style style, Drawing::Co
 
 Windows::Forms::Cursor^ UIExtension::AppCursor(UIExtension::AppCursorType cursorType)
 {
-	String^ cursorName = nullptr;
+	LPCWSTR szCursor = NULL;
 
 	switch (cursorType)
 	{
 	case UIExtension::AppCursorType::LockedTask:
-		cursorName = gcnew String("locked");
+		szCursor = L"locked";
 		break;
 
 	case UIExtension::AppCursorType::NoDrag:
-		cursorName = gcnew String("nodrag");
+		szCursor = L"nodrag";
 		break;
 	}
 
-	if (cursorName != nullptr)
+	if (szCursor != NULL)
 	{
-		String^ subFolder = gcnew String("Resources\\Cursors");
-		HCURSOR hCursor = GraphicsMisc::LoadAppCursor(MS(cursorName), MS(subFolder));
+		HCURSOR hCursor = GraphicsMisc::LoadAppCursor(szCursor, L"Resources\\Cursors");
 		
 		if (hCursor != NULL)
 	 		return gcnew Cursor(static_cast<IntPtr>(hCursor));
@@ -1074,7 +1073,7 @@ Windows::Forms::Cursor^ UIExtension::OleDragCursor(OleDragCursorType cursorType)
 
 Windows::Forms::Cursor^ UIExtension::HandCursor()
 {
-	static HCURSOR hCursor = ::LoadCursor(NULL, IDC_HAND);
+	HCURSOR hCursor = ::LoadCursor(NULL, IDC_HAND);
 
 	return gcnew Cursor(static_cast<IntPtr>(hCursor));
 }

@@ -91,6 +91,7 @@ public:
 	BOOL SetTooltipCtrlText(CString sText);
 	BOOL SetMinItemHeight(int nHeight);
 	int GetMinItemHeight() const { return m_nMinItemHeight; }
+	int GetItemHeight() const { return m_nItemHeight; }
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL IsReadOnly() const { return m_bReadOnly; }
 	BOOL SelectDropTarget(int nItem);
@@ -163,6 +164,7 @@ protected:
 	BOOL m_bAlternateRowColoring;
 	BOOL m_bAllowOffItemClickDeslection;
 	BOOL m_bSortEmptyBelow;
+	BOOL m_bResizingCols;
 
 private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 

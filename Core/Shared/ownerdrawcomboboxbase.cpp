@@ -18,6 +18,10 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+static HFONT s_hFontHeadings = NULL;
+
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef CB_GETMINVISIBLE
 #	define CBM_FIRST         0x1700
 #	define CB_GETMINVISIBLE  (CBM_FIRST + 2)
@@ -52,6 +56,7 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
 	ON_WM_PAINT()
+	ON_WM_SIZE()
 
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
@@ -151,7 +156,7 @@ void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwI
 	crBack = GetSysColor(bDisabled ? COLOR_3DFACE : (bItemSelected ? COLOR_HIGHLIGHT : COLOR_WINDOW));
 	crText = GetSysColor(bItemDisabled ? COLOR_GRAYTEXT : (bItemSelected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
 
-	// Special case
+	// Special case to match Windows
 	if (IsType(CBS_SIMPLE) && bDisabled)
 		crBack = GetSysColor(COLOR_WINDOW);
 
@@ -220,18 +225,16 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		// We share a single font across the entire app
 		// and if ever the font changes for a given window
 		// we just recreate the font
-		static HFONT hFontHeadings = NULL;
-
 		HFONT hFont = GraphicsMisc::GetFont(lpDrawItemStruct->hwndItem);
 
-		if (hFont && !GraphicsMisc::IsSameFontNameAndSize(hFont, hFontHeadings))
+		if (hFont && !GraphicsMisc::IsSameFontNameAndSize(hFont, s_hFontHeadings))
 		{
-			GraphicsMisc::VerifyDeleteObject(hFontHeadings);
+			GraphicsMisc::VerifyDeleteObject(s_hFontHeadings);
 
-			hFontHeadings = GraphicsMisc::CreateFont(hFont, GMFS_BOLD);
-			ASSERT(hFontHeadings);
+			s_hFontHeadings = GraphicsMisc::CreateFont(hFont, GMFS_BOLD);
+			ASSERT(s_hFontHeadings);
 		}
-		dc.SelectObject(hFontHeadings);
+		dc.SelectObject(s_hFontHeadings);
 
 		// Note: No need to manually de-select the font from the dc
 		// because this will be handled by the call to RestoreDC below
@@ -362,30 +365,32 @@ void COwnerdrawComboBoxBase::RefreshDropWidth()
 
 void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 {
-	int nWidth = 0;
-	
 	if (bRecalc)
+		m_nMaxTextWidth = CDialogHelper::CalcMaxTextWidth(*this, 0, TRUE);
+
+	int nDefaultWidth = CDialogHelper::GetChildWidth(this);
+	int nReqWidth = 0;
+
+	if (m_nMaxTextWidth > 0)
 	{
-		m_nMaxTextWidth = nWidth = CDialogHelper::CalcMaxTextWidth(*this, 0, TRUE);
-	}
-	else if (m_nMaxTextWidth > 0)
-	{
-		nWidth = m_nMaxTextWidth;
-	}
-	else
-	{
-		CRect rWindow;
-		GetWindowRect(rWindow);
-		
-		nWidth = rWindow.Width();
-	}
+		// Derived classes can request extra space for drawing
+		nReqWidth = (m_nMaxTextWidth + GetExtraListboxWidth());
 	
-	int nMaxWidth = GetMaxDropWidth();
+		// And can set a maximum width
+		int nMaxWidth = GetMaxDropWidth();
 	
-	if (nMaxWidth > 0)
-		nWidth = min(nWidth, nMaxWidth);
-	
-	SetDroppedWidth(nWidth + GetExtraListboxWidth());
+		if (nMaxWidth > 0)
+			nReqWidth = min(nReqWidth, nMaxWidth);
+	}
+
+	SetDroppedWidth(max(nDefaultWidth, nReqWidth));
+}
+
+void COwnerdrawComboBoxBase::OnSize(UINT nType, int cx, int cy)
+{
+	CComboBox::OnSize(nType, cx, cy);
+
+	RefreshDropWidth(FALSE);
 }
 
 BOOL COwnerdrawComboBoxBase::IsType(UINT nComboType) const

@@ -64,6 +64,24 @@ namespace TDC
 		return TDC_INSERTATBOTTOM;
 	}
 
+	static FTC_VIEW MapViewIDToTaskView(int nCmdID)
+	{
+		switch (nCmdID)
+		{
+		case ID_ACTIVATEVIEW_TASKTREE: 
+			return FTCV_TASKTREE;
+		
+		case ID_ACTIVATEVIEW_LISTVIEW: 
+			return FTCV_TASKLIST;
+		}
+
+		if ((nCmdID >= ID_ACTIVATEVIEW_UIEXTENSION1) && (nCmdID <= ID_ACTIVATEVIEW_UIEXTENSION16))
+			return (FTC_VIEW)(FTCV_UIEXTENSION1 + (nCmdID - ID_ACTIVATEVIEW_UIEXTENSION1));
+
+		ASSERT(0);
+		return FTCV_UNSET;
+	}
+
 	static UINT MapNewTaskPosToCmdID(PUIP_NEWTASKPOS nPos, BOOL bSubtask)
 	{
 		if (!bSubtask) // task
@@ -274,6 +292,7 @@ namespace TDC
 		case TDCC_CREATEDBY:		return TDCA_CREATEDBY;
 		case TDCC_CREATIONDATE:		return TDCA_CREATIONDATE;
 		case TDCC_DEPENDENCY:		return TDCA_DEPENDENCY;
+		case TDCC_DONE:				return TDCA_DONEDATE;
 		case TDCC_DONEDATE:			return TDCA_DONEDATE;
 		case TDCC_DONETIME:			return TDCA_DONETIME;
 		case TDCC_DUEDATE:			return TDCA_DUEDATE;

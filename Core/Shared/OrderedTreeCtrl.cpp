@@ -21,6 +21,9 @@ static char THIS_FILE[] = __FILE__;
 const int MINGUTTER = 16;
 
 static CMap<int, int&, UINT, UINT&> g_mapWidths;
+static CMap<DWORD, DWORD, CString, LPCTSTR> g_mapParentPos;
+
+/////////////////////////////////////////////////////////////////////////////
 
 COrderedTreeCtrl::COrderedTreeCtrl(DWORD dwGutterStyles) : 
 
@@ -523,12 +526,10 @@ CString COrderedTreeCtrl::FormatPosition(DWORD dwItem, DWORD dwParentItem, int n
 {
 	// extract the parent pos
 	CString sPos, sParentPos; 
-	static CMap<DWORD, DWORD, CString, LPCTSTR> mapParentPos;
-	
 	HTREEITEM hti = (HTREEITEM)dwItem;
 
 	if (dwParentItem)
-		VERIFY(mapParentPos.Lookup(dwParentItem, sParentPos));
+		VERIFY(g_mapParentPos.Lookup(dwParentItem, sParentPos));
 	
 	BOOL bHasChildren = ItemHasChildren(hti);
 	
@@ -546,7 +547,7 @@ CString COrderedTreeCtrl::FormatPosition(DWORD dwItem, DWORD dwParentItem, int n
 	
 	// add to map for our children
 	if (bHasChildren)
-		mapParentPos[dwItem] = sPos;
+		g_mapParentPos[dwItem] = sPos;
 	
 	// modify for actual output
 	if (bHasChildren && (TCH().IsItemExpanded(hti) == FALSE))

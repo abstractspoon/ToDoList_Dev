@@ -6,6 +6,8 @@
 #include "tdlwebupdater.h"
 #include "tdlwebupdateprogressdlg.h"
 
+#include "..\todolist\tdcswitch.h"
+
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\EnCommandLineInfo.h"
@@ -15,8 +17,7 @@
 #include "..\shared\rtlInputmgr.h"
 #include "..\shared\OSVersion.h"
 #include "..\shared\DarkMode.h"
-
-#include "..\todolist\tdcswitch.h"
+#include "..\shared\MessageBox.h"
 
 #include "..\3rdparty\base64coder.h"
 
@@ -183,10 +184,6 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 	// error handling
 	switch (nRes)
 	{
-	case TDLWUR_CANCELLED:
-		AfxMessageBox(CEnString(IDS_WEBUPDATE_CANCEL), MB_ICONINFORMATION);
-		break;
-		
 	case TDLWUR_SUCCESS:
 		{
 			// Enable/Delete the XP-specific manifest
@@ -209,6 +206,10 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 		}
 		break;
 		
+	case TDLWUR_CANCELLED:
+		AfxMessageBox(CEnString(IDS_WEBUPDATE_CANCEL), MB_ICONINFORMATION);
+		break;
+
 	case TDLWUR_ERR_APPFOLDER:
 	case TDLWUR_ERR_CREATEPROGRESSDLG:
 	case TDLWUR_ERR_DELETEBACKUPFOLDER:
@@ -239,3 +240,7 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 	}
 }
 
+int CTDLUpdateApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/)
+{
+	return CMessageBox::AfxShow(lpszPrompt, nType);
+}

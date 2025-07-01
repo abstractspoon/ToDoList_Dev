@@ -78,6 +78,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	virtual void OnRepositionControls(int dx, int dy);
+	virtual BOOL DoIdleProcessing();
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLTasklistImportDlg)

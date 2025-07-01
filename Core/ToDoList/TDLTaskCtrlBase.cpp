@@ -4598,89 +4598,47 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	DWORD dwTaskID = GetColumnItemTaskID(nItem);
 	ASSERT(dwTaskID);
 
-	BOOL bNoModifiers = Misc::ModKeysArePressed(0);
-	BOOL bSingleSelection = (GetSelectedCount() == 1);
-	BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nItem);
-	BOOL bReadOnly = IsReadOnly();
-	BOOL bLocked = m_calculator.IsTaskLocked(dwTaskID);
+	BOOL bEditableTask = (!IsReadOnly() && !m_calculator.IsTaskLocked(dwTaskID));
 
-	// Edit operations
-	if (!bReadOnly)
+	switch (nColID)
 	{
-		switch (nColID)
+		// Edit operations
+	case TDCC_DONE:
+	case TDCC_FLAG:
+	case TDCC_ICON:
+	case TDCC_RECURRENCE:
+	case TDCC_LOCK:
+	case TDCC_REMINDER:
+		return m_multitasker.CanEditTask(dwTaskID, TDC::MapColumnToAttribute(nColID));
+
+		// Edit operation
+	case TDCC_TRACKTIME:
 		{
-		case TDCC_DONE:
-		case TDCC_FLAG:
-		case TDCC_ICON:
-			return !bLocked;
-
-		case TDCC_RECURRENCE:
-			return (!bLocked && !m_data.IsTaskDone(dwTaskID));
-
-		case TDCC_LOCK:
-			// Prevent editing of subtasks inheriting parent lock state
-			if (HasStyle(TDCS_SUBTASKSINHERITLOCK))
-				return !m_calculator.IsTaskLocked(m_data.GetTaskParentID(dwTaskID));
-
-			// else
-			return TRUE;
-			
-		case TDCC_TRACKTIME:
 			// check tasklist is editable, task is trackable and 
 			// neither the ctrl not shift keys are pressed (ie => multiple selection)
 			// and either the task is not selected or it's only singly selected
-			return (bNoModifiers && 
-					!bLocked &&
-					m_calculator.IsTaskTimeTrackable(dwTaskID) &&
-					(!bTaskSelected || bSingleSelection));
+			BOOL bNoModifiers = Misc::ModKeysArePressed(0);
+			BOOL bSingleSelection = (GetSelectedCount() == 1);
+			BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nItem);
 
-		default: // try custom columns
-			if (!bLocked && TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
-			{
-				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
-
-				switch (pDef->GetDataType())
-				{
-				case TDCCA_BOOL:
-					return TRUE;
-
-				case TDCCA_ICON:
-					switch (pDef->GetListType())
-					{
-					case TDCCA_FIXEDLIST:
-					case TDCCA_NOTALIST:
-						return TRUE;
-					}
-					break;
-
-				default: // Allow item cycling for fixed lists
-					if (pDef->GetListType() == TDCCA_FIXEDLIST)
-						return TRUE;
-					break;
-				}
-			}
-			break;
+			return (bNoModifiers &&
+					bEditableTask &&
+					(!bTaskSelected || bSingleSelection) &&
+					m_calculator.IsTaskTimeTrackable(dwTaskID));
 		}
-	}
 
-	// Non-edit operations
-	switch (nColID)
-	{
-	case TDCC_REMINDER:
-		return !m_calculator.IsTaskDone(dwTaskID);
-
+		// Non-edit operation
 	case TDCC_FILELINK:
 		if (pCursor)
 			return (HitTestFileLinkColumn(*pCursor) != -1);
-		
-		// else
-		return m_data.TaskHasFileLink(dwTaskID);
-			
+		else
+			return m_data.TaskHasFileLink(dwTaskID);
+
+		// Non-edit operation
 	case TDCC_DEPENDENCY:
 		return m_data.TaskHasDependencies(dwTaskID);
-			
-	default: // try custom columns
+
+	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
@@ -4688,17 +4646,38 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 
 			switch (pDef->GetDataType())
 			{
+				// Edit operation
+			case TDCCA_BOOL:
+				return bEditableTask;
+
+				// Edit operation
+			case TDCCA_ICON:
+				switch (pDef->GetListType())
+				{
+				case TDCCA_FIXEDLIST:
+				case TDCCA_NOTALIST:
+					return bEditableTask;
+				}
+				break;
+
+				// Non-edit operation
 			case TDCCA_FILELINK:
 				{
 					TDCCADATA data;
 					return m_data.GetTaskCustomAttributeData(dwTaskID, pDef->sUniqueID, data);
 				}
 				break;
+
+			default: // Allow item cycling for fixed lists
+				if (pDef->GetListType() == TDCCA_FIXEDLIST)
+					return bEditableTask;
+				break;
 			}
 		}
 		break;
 	}
 
+	// All else
 	return FALSE;
 }
 

@@ -34,7 +34,7 @@ int CMSWordHelper::s_nRefCount = 0;
 static COleVariant varNull(_T("")), varZero((short)0), varOne((short)1);
 static COleVariant varFalse((short)FALSE), varTrue((short)TRUE);
 
-static LPCTSTR DISABLED_REGKEY(_T("Software\\Microsoft\\Office\\%d.0\\Word\\Resiliency\\DisabledItems"));
+const LPCTSTR DISABLED_REGKEY(_T("Software\\Microsoft\\Office\\%d.0\\Word\\Resiliency\\DisabledItems"));
 
 //////////////////////////////////////////////////////////////////////
 

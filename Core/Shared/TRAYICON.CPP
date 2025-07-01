@@ -148,17 +148,17 @@ void CTrayIcon::OnDestroy()
 	ShowTrayIcon(FALSE);
 }
 
+static BOOL s_bInNotify = FALSE;
+
 LRESULT CTrayIcon::OnTrayIconNotify(WPARAM wParam, LPARAM lParam)
 {
 	UNREFERENCED_PARAMETER(wParam);
 
 	// prevent reentrancy
-	static BOOL bInNotify = FALSE;
-
-	if (bInNotify || !GetParent()->IsWindowEnabled())
+	if (s_bInNotify || !GetParent()->IsWindowEnabled())
 		return 0L;
 
-	CAutoFlag af(bInNotify, TRUE);
+	CAutoFlag af(s_bInNotify, TRUE);
 	BOOL bNotify = TRUE;
 
 	GetCursorPos(&m_nm.ptAction);

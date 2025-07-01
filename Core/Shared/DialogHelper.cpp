@@ -13,6 +13,7 @@
 #include "enstring.h"
 #include "AcceleratorString.h"
 #include "OSVersion.h"
+#include "OwnerdrawComboBoxBase.h"
 
 #include <afxpriv.h>
 #include <afxtempl.h>
@@ -36,6 +37,7 @@ const CString DELIMS(_T(".,;:-?"));
 const int FLOATBUFLEN = 400;
 
 const int CLASSICTHEMETEXTFUDGE = GraphicsMisc::ScaleByDPIFactor(2);
+const BOOL WANTROUNDCORNERS = (COSVersion() < OSV_WIN8);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -883,12 +885,17 @@ UINT CDialogHelper::MessageBoxEx(const CWnd* pWnd, LPCTSTR szText, UINT nIDCapti
 	return ::MessageBox(*pWnd, szText, sCaption, nType);
 }
 
-int CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth, int nExtra)
+void CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth)
 {
-   int nWidth = CalcMaxTextWidth(combo, 0, TRUE, pDCRef, nTabWidth);
-   combo.SetDroppedWidth(nWidth + nExtra);
-
-   return nWidth;
+	if (combo.IsKindOf(RUNTIME_CLASS(COwnerdrawComboBoxBase)))
+	{
+		((COwnerdrawComboBoxBase&)combo).RefreshDropWidth();
+	}
+	else
+	{
+	   int nWidth = CalcMaxTextWidth(combo, 0, TRUE, pDCRef, nTabWidth);
+	   combo.SetDroppedWidth(nWidth);
+	}
 }
 
 int CDialogHelper::CalcMaxTextWidth(CComboBox& combo, int nMinWidth, BOOL bDropped, CDC* pDCRef, int nTabWidth)
@@ -1109,7 +1116,7 @@ int CDialogHelper::GetSelectedItemAsValue(const CComboBox& combo)
 	return _ttoi(Misc::TrimAlpha(sValue));
 }
 
-DWORD CDialogHelper::GetSelectedItemDataT(const CComboBox& combo)
+DWORD CDialogHelper::GetSelectedItemData(const CComboBox& combo)
 {
 	int nSel = combo.GetCurSel();
 
@@ -2071,9 +2078,8 @@ void CDialogHelper::ExcludeChild(const CWnd* pChild, CDC* pDC)
 	if (pChild->IsWindowVisible() && !(dwExStyle & WS_EX_TRANSPARENT))
 	{
 		CRect rClip = GetChildRect(pChild);
-		static BOOL bRoundCorners = (COSVersion() < OSV_WIN8);
 
-		if (bRoundCorners)
+		if (WANTROUNDCORNERS)
 		{
 			rClip.DeflateRect(1, 0);
 			pDC->ExcludeClipRect(rClip);
@@ -2126,6 +2132,46 @@ HWND CDialogHelper::GetParentOwner(HWND hWnd)
 		return NULL;
 
 	return pParent->GetSafeHwnd();
+}
+
+HWND CDialogHelper::GetParentDialog(HWND hWnd, DWORD dwReqStyles)
+{
+	HWND hwndParent = hWnd;
+
+	while (hwndParent)
+	{
+		if (CWinClasses::IsDialog(hwndParent))
+		{
+			if (!dwReqStyles || HasStyle(hwndParent, dwReqStyles))
+				break;
+		}
+	
+		hwndParent = ::GetParent(hwndParent);
+	}
+
+	return hwndParent;
+}
+
+BOOL CDialogHelper::IsDialog(HWND hWnd, const DLGCTRL ctrls[], int nNumCtrls)
+{
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+
+	for (int nCtrl = 0; nCtrl < nNumCtrls; nCtrl++)
+	{
+		HWND hwndCtrl = ::GetDlgItem(hWnd, ctrls[nCtrl].nCtrlID);
+
+		if (!hwndCtrl)
+			return FALSE;
+
+		if (!CWinClasses::IsClass(hwndCtrl, ctrls[nCtrl].szClass))
+			return FALSE;
+
+		if (ctrls[nCtrl].nReqStyles && !HasStyle(hwndCtrl, ctrls[nCtrl].nReqStyles))
+			return FALSE;
+	}
+
+	return TRUE;
 }
 
 BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonClient)

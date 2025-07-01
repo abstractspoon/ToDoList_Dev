@@ -219,10 +219,10 @@ namespace FileMisc
 	CString& RemoveExtension(CString& sFilePath);
 	void EnsureSameExtension(LPCTSTR szFromFile, CString& sToFile);
 	
-	CString GetTempFolder();
-	CString GetTempFilePath(LPCTSTR szPrefix = NULL, UINT uUnique = 0);
-	CString GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt);
-	BOOL IsTempFilePath(LPCTSTR szFilename);
+	CString GetTempFolder(BOOL bLong = TRUE);
+	CString GetTempFilePath(LPCTSTR szPrefix = NULL, UINT uUnique = 0, BOOL bLong = TRUE);
+	CString GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt, BOOL bLong = TRUE);
+	BOOL IsTempFilePath(LPCTSTR szFilePath);
 
 	BOOL CanReadFile(LPCTSTR szPathname, BOOL bDenyWrite = FALSE);
 	BOOL LoadFile(LPCTSTR szPathname, CString& sText, BOOL bDenyWrite = FALSE, UINT nAnsiCodePage = CP_ACP);

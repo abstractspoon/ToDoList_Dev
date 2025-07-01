@@ -1264,48 +1264,11 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 
 int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/) 
 {
-	HWND hwndMain = NULL;
-
 	// make sure app window is visible
-	if (m_pMainWnd)
-	{
-		hwndMain = *m_pMainWnd;
-
-		if (::GetForegroundWindow() != hwndMain)
-			m_pMainWnd->SendMessage(WM_TDL_SHOWWINDOW, 0, 0);
-	}
-	else
-	{
-		hwndMain = ::GetDesktopWindow();
-	}
+	if (m_pMainWnd && (::GetForegroundWindow() != *m_pMainWnd))
+		m_pMainWnd->SendMessage(WM_TDL_SHOWWINDOW, 0, 0);
 	
-	CString sTitle(AfxGetAppName()), sInstruction, sText(lpszPrompt);
-	CStringArray aPrompt;
-	
-	int nNumInputs = Misc::Split(lpszPrompt, aPrompt, '|');
-	
-	switch (nNumInputs)
-	{
-	case 0:
-		ASSERT(0);
-		break;
-		
-	case 1:
-		// do nothing
-		break;
-		
-	case 2:
-		sInstruction = aPrompt[0];
-		sText = aPrompt[1];
-		break;
-		
-	case 3:
-		sTitle = aPrompt[0];
-		sInstruction = aPrompt[1];
-		sText = aPrompt[2];
-	}
-	
-	return CMessageBox::Show(hwndMain, sTitle, sInstruction, sText, nType);
+	return CMessageBox::AfxShow(lpszPrompt, nType);
 }
 
 void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs)
@@ -1331,11 +1294,13 @@ void CToDoListApp::OnToolsToggleDarkMode()
 	// Prompt to restart the app
 	CPreferences prefs;
 
+	BOOL bDarkMode = CTDCDarkMode::IsEnabled();
+
 	switch (CMessageBox::AfxShow(IDS_RESTARTTOCHANGEDARKMODE, MB_YESNOCANCEL))
 	{
 	case IDYES:
 		{
-			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CTDCDarkMode::IsEnabled());
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
 			
 			// Restart
 			HWND hwndMain = *AfxGetMainWnd();
@@ -1356,7 +1321,7 @@ void CToDoListApp::OnToolsToggleDarkMode()
 		break;
 
 	case IDNO:
-		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CTDCDarkMode::IsEnabled());
+		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
 		break;
 
 	case IDCANCEL:
@@ -1558,6 +1523,11 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		params.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
 	
+	// Check dark mode before closing the main window
+	// because it turns off dark mode as its last action
+	if (CTDCDarkMode::IsEnabled())
+		params.SetOption(SWITCH_DARKMODE);
+	
 #ifdef _DEBUG // ----------------------------------------------------
 	if (bTestDownload)
 		params.SetOption(SWITCH_TESTDOWNLOAD);
@@ -1590,9 +1560,6 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 			CLocalizer::Release();
 		}
 	}
-
-	if (CTDCDarkMode::IsEnabled())
-		params.SetOption(SWITCH_DARKMODE);
 
 	if (CRTLInputMgr::IsEnabled())
 		params.SetOption(SWITCH_RTL);

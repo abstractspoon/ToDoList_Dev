@@ -292,6 +292,11 @@ void CTDLTasklistImportDlg::OnOK()
 		m_taskTree.GetSelectedTasks(m_tasksSelected, m_bImportSubtasks);
 }
 
+BOOL CTDLTasklistImportDlg::DoIdleProcessing()
+{
+	return m_taskTree.DoIdleProcessing();
+}
+
 IIMPORTEXPORT_RESULT CTDLTasklistImportDlg::GetSelectedTasks(ITaskList* pTasks)
 {
 	if (pTasks == NULL)

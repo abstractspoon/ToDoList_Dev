@@ -16,6 +16,7 @@ class CDarkMode
 {
 public:
 	static void Enable(BOOL bEnable = TRUE);
+	static void PrepareForIEPrintOrPreview();
 
 	static BOOL IsSupported();
 	static BOOL IsEnabled()

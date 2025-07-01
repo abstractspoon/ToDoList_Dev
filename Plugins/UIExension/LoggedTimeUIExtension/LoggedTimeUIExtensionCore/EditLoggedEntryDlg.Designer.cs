@@ -42,7 +42,7 @@
 			// 
 			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label5.Location = new System.Drawing.Point(-38, 299);
+			this.label5.Location = new System.Drawing.Point(-38, 288);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(390, 2);
 			this.label5.TabIndex = 16;
@@ -51,7 +51,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(260, 309);
+			this.Cancel.Location = new System.Drawing.Point(260, 298);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 15;
@@ -62,7 +62,7 @@
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(179, 309);
+			this.OK.Location = new System.Drawing.Point(179, 298);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 14;
@@ -82,7 +82,7 @@
 			// 
 			// m_Attributes
 			// 
-			this.m_Attributes.Location = new System.Drawing.Point(7, 71);
+			this.m_Attributes.Location = new System.Drawing.Point(7, 60);
 			this.m_Attributes.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.m_Attributes.Name = "m_Attributes";
 			this.m_Attributes.ReadOnlyTask = false;
@@ -92,16 +92,18 @@
 			// m_TaskTitle
 			// 
 			this.m_TaskTitle.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.m_TaskTitle.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TaskTitle.Location = new System.Drawing.Point(107, 12);
 			this.m_TaskTitle.Name = "m_TaskTitle";
-			this.m_TaskTitle.Size = new System.Drawing.Size(229, 30);
+			this.m_TaskTitle.Size = new System.Drawing.Size(229, 13);
 			this.m_TaskTitle.TabIndex = 19;
 			// 
 			// m_TaskId
 			// 
 			this.m_TaskId.AutoSize = true;
 			this.m_TaskId.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.m_TaskId.Location = new System.Drawing.Point(107, 50);
+			this.m_TaskId.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.m_TaskId.Location = new System.Drawing.Point(107, 39);
 			this.m_TaskId.Name = "m_TaskId";
 			this.m_TaskId.Size = new System.Drawing.Size(0, 13);
 			this.m_TaskId.TabIndex = 21;
@@ -110,7 +112,8 @@
 			// 
 			this.label3.AutoSize = true;
 			this.label3.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.label3.Location = new System.Drawing.Point(7, 50);
+			this.label3.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.label3.Location = new System.Drawing.Point(7, 39);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(43, 13);
 			this.label3.TabIndex = 20;
@@ -122,7 +125,7 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
-			this.ClientSize = new System.Drawing.Size(345, 341);
+			this.ClientSize = new System.Drawing.Size(345, 330);
 			this.Controls.Add(this.m_TaskId);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.m_TaskTitle);

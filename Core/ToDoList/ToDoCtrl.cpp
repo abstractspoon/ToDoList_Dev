@@ -23,6 +23,7 @@
 #include "TDCTaskCompletion.h"
 #include "tdccontentmgr.h"
 #include "TDLRecurringTaskEdit.h"
+#include "ToDoCtrlDataUtils.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -257,6 +258,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_attribCopier(m_data, mgrContent),
 	m_exporter(m_data, m_taskTree, mgrContent),
 	m_matcher(m_data, m_reminders, mgrContent),
+	m_multitasker(m_data, mgrContent),
 
 	m_ctrlComments(TRUE,
 				   TRUE,
@@ -1023,7 +1025,7 @@ void CToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	if (!bShow)
 		m_ctrlComments.SetFocus();
 
-	m_taskTree.Show(bShow);
+	m_taskTree.ShowWindow(bShow ? SW_SHOW : SW_HIDE);
 	m_taskTree.EnableWindow(bShow);
 }
 
@@ -2989,9 +2991,14 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 	
 	Flush();
 
+	// CToDoListWnd already handles empty tasklists
+	// so this should be unnecessary.
+	// Commenting out to see what happens...
+/*
 	// handle special case when tasklist is empty
 	if (GetTaskCount() == 0)
 		nWhere = TDC_INSERTATBOTTOM;
+*/
 	
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
@@ -3492,8 +3499,8 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 	int nMinLen = GraphicsMisc::ScaleByDPIFactor(200);
 	rPos.right = max(rPos.right, rPos.left + nMinLen);
 
-	// create edit if nec.
-	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_TASKLABELEDIT, WS_POPUP | WS_BORDER))
+	// create edit on request
+	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_TASKLABELEDIT, (WS_POPUP | WS_BORDER | ES_AUTOHSCROLL)))
 		return FALSE;
 
 	// start
@@ -7007,11 +7014,9 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 	// Verify that we have been saved
 	if (!HasFilePath())
 	{
-		CMessageBox::Show(AfxGetMainWnd(),
-						  CEnString(IDS_TITLE_TIMETRACKING), 
-						  _T(""),
-						  CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
-						  (MB_OK | MB_ICONEXCLAMATION));
+		CMessageBox::AfxShow(CEnString(IDS_TITLE_TIMETRACKING), 
+							 CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
+							 (MB_OK | MB_ICONEXCLAMATION));
 		return FALSE;
 	}
 
@@ -9894,6 +9899,8 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 		else if (elm.nOp == TDCUEO_DELETE)
 		{
 			// find tree item and delete it
+			CAutoFlag af(m_bDeletingTasks, TRUE);
+
 			// note: DeleteTask on the Parent will already have disposed of the children
 			// so we can expect hti to be NULL on occasion. ie don't ASSERT it
 			HTREEITEM hti = m_taskTree.GetItem(elm.dwTaskID);
@@ -10222,122 +10229,18 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 	if (dwTaskID)
 		return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, nAttribID));
 
-	// else look for first editable task
-	POSITION pos = TSH().GetFirstItemPos();
+	// else
+	CDWordArray aTaskIDs;
+	m_taskTree.GetSelectedTaskIDs(aTaskIDs, TRUE);
 
-	while (pos)
-	{
-		if (CanEditTask(TSH().GetNextItemData(pos), nAttribID))
-			return TRUE;
-	}
-
-	return FALSE;
+	return m_multitasker.CanEditAnyTask(aTaskIDs, nAttribID);
 }
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {
-	if (IsReadOnly())
-		return FALSE;
-
-	BOOL bEditableTask = (dwTaskID && !m_calculator.IsTaskLocked(dwTaskID));
-
+	// These do not depend on a specific task
 	switch (nAttribID)
 	{
-	case TDCA_NONE:
-		return FALSE;
-
-	case TDCA_PERCENT:
-		if (!bEditableTask)
-		{
-			return FALSE;
-		}
-		else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			return FALSE;
-		}
-		else if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_data.IsTaskParent(dwTaskID))
-		{
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_ALL:		
-	case TDCA_ALLOCBY:		
-	case TDCA_ALLOCTO:		
-	case TDCA_ANYTEXTATTRIBUTE:		
-	case TDCA_CATEGORY:		
-	case TDCA_COLOR:		
-	case TDCA_COMMENTS:		
-	case TDCA_COST:			
-	case TDCA_CREATEDBY:	
-	case TDCA_CREATIONDATE:	
-	case TDCA_DEPENDENCY:	
-	case TDCA_DONEDATE:		
-	case TDCA_DONETIME:		
-	case TDCA_DUEDATE:		
-	case TDCA_DUETIME:		
-	case TDCA_EXTERNALID:	
-	case TDCA_FILELINK:		
-	case TDCA_FLAG:			
-	case TDCA_ICON:		
-	case TDCA_METADATA:
-	case TDCA_OFFSETTASK:
-	case TDCA_PRIORITY:		
-	case TDCA_RISK:			
-	case TDCA_STATUS:		
-	case TDCA_TAGS:			
-	case TDCA_TASKNAME:		
-	case TDCA_TASKNAMEORCOMMENTS:		
-	case TDCA_VERSION:		
-		return bEditableTask;
-
-	case TDCA_RECURRENCE:	
-		return (bEditableTask && !SelectedTasksAreAllDone(FALSE)); // exclude 'good as done'
-
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
-		if (!bEditableTask)
-		{
-			return FALSE;
-		}
-		else if (!HasStyle(TDCS_ALLOWPARENTTIMETRACKING) && m_data.IsTaskParent(dwTaskID))
-		{
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_STARTDATE:
-	case TDCA_STARTTIME:
-		if (!bEditableTask)
-		{
-			return FALSE;
-		}
-		else if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && m_data.TaskHasDependencies(dwTaskID))
-		{
-			// Ignore tasks with dependencies where their dates 
-			// are automatically calculated
-			return FALSE;
-		}
-		else if ((nAttribID == TDCA_STARTTIME) && !m_data.TaskHasDate(dwTaskID, TDCD_START))
-		{
-			// Ignore tasks without a start date set
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_DELETE:
-		if (!bEditableTask && !m_data.IsTaskReference(dwTaskID))
-		{
-			// Can't delete locked tasks unless they are references
-			return FALSE;
-		}
-		else if (m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
-		{
-			// Can't delete subtasks if immediate parent is locked
-			return FALSE;
-		}
-		return TRUE;
-
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
 	case TDCA_UNDO:
@@ -10346,17 +10249,37 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_ENCRYPT:
 	case TDCA_PROJECTNAME:
 		return TRUE;
+	}
 
-	case TDCA_LOCK:
-		return TRUE;
+	// Task specific editing
+	BOOL bCanEdit = m_multitasker.CanEditTask(dwTaskID, nAttribID);
+
+	if (bCanEdit != -1)
+		return bCanEdit; // Handled by multi-tasker
+
+	if (m_data.HasStyle(TDCS_READONLY))
+		return FALSE;
+
+	switch (nAttribID)
+	{
+	case TDCA_DELETE:
+		// Can only delete tasks if their immediate parent is UNLOCKED
+		if (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
+		{
+			// AND the task is UNLOCKED 
+			if (!m_calculator.IsTaskLocked(dwTaskID))
+				return TRUE;
+
+			// OR the task is a REFERENCE to the locked task
+			return m_data.IsTaskReference(dwTaskID);
+		}
+		break;
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-			return bEditableTask;
+		ASSERT(0); // Unexpectedly unhandled
 		break;
 	}
 
-	// all else
 	return FALSE;
 }
 

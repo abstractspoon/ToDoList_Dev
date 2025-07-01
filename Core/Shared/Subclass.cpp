@@ -37,6 +37,7 @@ public:
 
 static CSubclassWndMap theHookMap;
 static CMapPtrToPtr theSafeMap;
+static MSG curMsg;
 
 ISubclassCallback* CSubclassWnd::s_pCallback = NULL;
 
@@ -172,8 +173,6 @@ LRESULT CSubclassWnd::Default()
 
 const MSG* CSubclassWnd::GetCurrentMessage()
 {
-	static MSG curMsg;
-	
 	curMsg = AfxGetThreadState()->m_lastSentMsg;
 	return &curMsg;
 }

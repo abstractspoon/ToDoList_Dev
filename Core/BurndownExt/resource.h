@@ -26,6 +26,7 @@
 #define IDC_PPHOST                      16019
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_ACTIVEDATERANGE_LABEL       16028
+#define IDC_ACTIVEDATERANGE_TEXT        16029
 #define IDC_ACTIVEDATERANGE             16034
 #define IDD_BURNDOWN_DLG                17000
 #define IDD_STATISTICS_DLG              17000

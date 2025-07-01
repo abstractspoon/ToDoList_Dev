@@ -2373,6 +2373,7 @@ void CTabbedToDoCtrl::ReposTaskCtrl(const CRect& rTasks)
 void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 {
 	FTC_VIEW nView = GetTaskView();
+	int nShow = (bShow ? SW_SHOW : SW_HIDE);
 
 	switch (nView)
 	{
@@ -2382,7 +2383,10 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 		break;
 
 	case FTCV_TASKLIST:
-		m_taskList.ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+		m_taskList.ShowWindow(nShow);
+		m_taskList.EnableWindow(bShow);
+
+		ShowListViewSpecificCtrls(bShow);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -2401,6 +2405,16 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd);
+
+			if (pExtWnd)
+			{
+				::ShowWindow(pExtWnd->GetHwnd(), nShow);
+				::EnableWindow(pExtWnd->GetHwnd(), bShow);
+			}
+		}
 		break;
 
 	default:
@@ -2408,7 +2422,7 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	}
 
 	// handle tab control
-	m_tabViews.ShowWindow(bShow && HasStyle(TDCS_SHOWTREELISTBAR) ? SW_SHOW : SW_HIDE);
+	m_tabViews.ShowWindow((bShow && HasStyle(TDCS_SHOWTREELISTBAR)) ? SW_SHOW : SW_HIDE);
 }
 
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
@@ -6212,28 +6226,6 @@ void CTabbedToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 		break;
 
 	case FTCV_TASKLIST:
-		// Basically a copy of CToDoCtrl's handling of FTCV_TASKTREE
-		if (!m_taskList.HasFocus())
-		{
-			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
-			{
-				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
-				SetMaximizeState(TDCMS_MAXTASKLIST);
-			}
-			else
-			{
-				// See CToDoCtrl::SetFocus(TDCSF_TASKVIEW) for why we need this
-				if (m_layout.IsVisible(TDCSF_COMMENTS))
-					m_ctrlComments.SetFocus();
-
-				m_taskList.SetFocus();
-			}
-
-			// ensure the selected tree item is visible
-			m_taskList.EnsureSelectionVisible(TRUE);
-		}
-		break;
-
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
 	case FTCV_UIEXTENSION3:
@@ -6250,7 +6242,29 @@ void CTabbedToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		ExtensionDoAppCommand(nView, IUI_SETFOCUS);
+		// Basically a copy of CToDoCtrl's handling of FTCV_TASKTREE
+		if (!HasFocus(TDCSF_TASKVIEW))
+		{
+			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
+			{
+				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
+				SetMaximizeState(TDCMS_MAXTASKLIST);
+			}
+			else
+			{
+				// See CToDoCtrl::SetFocus(TDCSF_TASKVIEW) for why we need this
+				if (m_layout.IsVisible(TDCSF_COMMENTS))
+					m_ctrlComments.SetFocus();
+
+				if (InListView())
+					m_taskList.SetFocus();
+				else
+					ExtensionDoAppCommand(nView, IUI_SETFOCUS);
+			}
+
+			// ensure the selected item is visible
+			ScrollToSelectedTask();
+		}
 		break;
 
 	default:

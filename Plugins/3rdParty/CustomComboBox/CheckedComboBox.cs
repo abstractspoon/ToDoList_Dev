@@ -215,10 +215,22 @@ namespace CustomComboBox
 
 		private void OnDrawComboItem(object sender, DrawItemEventArgs e)
 		{
+			if (Enabled)
+			{
+				e.DrawBackground();
+				e.DrawFocusRectangle();
+			}
+			else
+			{
+				Brush backBrush = new SolidBrush(SystemColors.Control);
+				e.Graphics.FillRectangle(backBrush, e.Bounds);
+				backBrush.Dispose();
+			}
+
 			if (e.Index == -1)
 			{
 				String text = FormatItems(", ");
-				Color color = SystemColors.WindowText;
+				Color color = (Enabled ? SystemColors.WindowText : SystemColors.ControlDarkDark);
 
 				if (text == "")
 				{

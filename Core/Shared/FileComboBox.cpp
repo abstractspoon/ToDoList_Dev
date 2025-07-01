@@ -50,7 +50,8 @@ void CFileComboBox::CMultiFileEdit::HandleBrowseForFile(CEnFileDialog& dlg)
 
 // CFileComboBox //////////////////////////////////////////////////////////
 
-const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int ICON_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
+const int MAX_DROPWIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -448,6 +449,11 @@ void CFileComboBox::HandleReturnKey()
 int CFileComboBox::GetExtraListboxWidth() const
 {
 	return (CAutoComboBox::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CFileComboBox::GetMaxDropWidth() const
+{
+	return MAX_DROPWIDTH;
 }
 
 int CFileComboBox::CalcMinItemHeight(BOOL bList) const

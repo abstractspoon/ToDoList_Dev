@@ -118,7 +118,7 @@ namespace HTMLReportExporter
 			html.RenderBeginTag(HtmlTextWriterTag.Style);
 
  			html.WriteLine(m_BodyFontStyle);
-
+			html.WriteLine("body { color:Black;background-color:White; }");
 			html.WriteLine("body { line-height: normal; margin: 0; }");
 
 			if (m_Template.HasBackImage)

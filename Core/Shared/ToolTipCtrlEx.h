@@ -15,6 +15,11 @@ const UINT WM_TTC_TOOLHITTEST = ::RegisterWindowMessage(_T("WM_TTC_TOOLHITTEST")
 
 /////////////////////////////////////////////////////////////////////////////
 
+// Ensures the tip does not overlap TOOLINFO::rect
+#define TTF_EXCLUDEBOUNDS 0x2000
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CToolTipCtrlEx : public CToolTipCtrl, protected CSubclasser
 {
 	DECLARE_DYNAMIC(CToolTipCtrlEx)
@@ -25,7 +30,7 @@ public:
 
 	void RelayEvent(LPMSG lpMsg);
 	void FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage = FALSE);
-	BOOL AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const;
+	BOOL AdjustRect(LPRECT lprc, BOOL bLarger) const;
 	void Activate(BOOL bActivate);
 	void EnableMultilineTips() { SetMaxTipWidth(SHRT_MAX); }
 	void EnableTracking(BOOL bTracking = TRUE, int nXOffset = 0, int nYOffset = 0);
@@ -55,13 +60,14 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg int OnCreate(LPCREATESTRUCT pCreateStruct);
+	afx_msg BOOL OnNotifyShow(NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
-	CPoint FitTooltipRectToScreen(const CRect& rTooltip) const;
+	BOOL FitTooltipToScreen(CRect& rTooltip) const;
 
 	static void InitToolInfo(TOOLINFO& ti, BOOL bInitSize);
 	static int DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti, BOOL bSendHitTestMessage);

@@ -543,7 +543,7 @@ BOOL CTDLTimeTrackerDlg::SelectTaskList(const CToDoCtrl* pTDC)
 
 const CToDoCtrl* CTDLTimeTrackerDlg::GetSelectedTasklist() const
 {
-	return (const CToDoCtrl*)GetSelectedItemDataT(m_cbTasklists);
+	return (const CToDoCtrl*)GetSelectedItemData(m_cbTasklists);
 }
 
 BOOL CTDLTimeTrackerDlg::IsSelectedTasklist(const CToDoCtrl* pTDC) const

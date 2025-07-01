@@ -291,6 +291,8 @@ void CTDLCsvImportExportDlg::OnChangeCsvdelimiter()
 		
 		if (BuildImportColumnMapping(aMapping))
 			m_lcColumnSetup.SetColumnMapping(aMapping);
+
+		EnableDisableOK();
 	}
 }
 

@@ -47,7 +47,7 @@ enum TDL_WEBUPDATE_RESULT
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDLWebUpdater  
+class CTDLWebUpdater : public IBindStatusCallback
 {
 public:
 	CTDLWebUpdater(const CPoint& ptPos, BOOL bPreRelease);
@@ -76,6 +76,30 @@ protected:
 	BOOL CheckUpdateCancelled();
 	TDL_WEBUPDATE_RESULT LogError(const CString& sAppFolder) const;
 	void RestoreBackup(TDL_WEBUPDATE_PROGRESS nCancelled);
+
+	BOOL OnUnzipProgress(int nPercent);
+
+	static bool UnzipCallback(int nPercent, DWORD dwUserData);
+
+protected:
+	// IBindStatusCallback progress
+	STDMETHOD(OnProgress)(ULONG ulProgress,
+						  ULONG ulProgressMax,
+						  ULONG ulStatusCode,
+						  LPCWSTR szStatusText);
+
+	// Minimum implementation
+	STDMETHOD(QueryInterface)(REFIID, void **) { return E_NOINTERFACE; }
+	STDMETHOD_(ULONG, AddRef)() { return 1; }
+	STDMETHOD_(ULONG, Release)() { return 1; }
+	STDMETHOD(OnStartBinding)(DWORD, IBinding *) { return E_NOTIMPL; }
+	STDMETHOD(GetPriority)(LONG *) { return E_NOTIMPL; }
+	STDMETHOD(OnLowResource)(DWORD) { return E_NOTIMPL; }
+	STDMETHOD(OnStopBinding)(HRESULT, LPCWSTR) { return E_NOTIMPL; }
+	STDMETHOD(GetBindInfo)(DWORD *, BINDINFO *) { return E_NOTIMPL; }
+	STDMETHOD(OnDataAvailable)(DWORD, DWORD, FORMATETC *, STGMEDIUM *) { return E_NOTIMPL; }
+	STDMETHOD(OnObjectAvailable)(REFIID, IUnknown *) { return E_NOTIMPL; }
+
 };
 
 #endif // !defined(AFX_TDLWEBUPDATER_H__B88C8F13_1903_43B9_A9CC_BAF526C661E9__INCLUDED_)

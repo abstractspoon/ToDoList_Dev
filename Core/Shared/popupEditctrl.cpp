@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "popupEditctrl.h"
 #include "MouseWheelMgr.h"
+#include "Misc.h"
 
 #include <afxpriv.h>
 
@@ -50,14 +51,9 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CPopupEditCtrl message handlers
 
-BOOL CPopupEditCtrl::Create(CWnd* pParentWnd, UINT nID, DWORD dwFlags) 
+BOOL CPopupEditCtrl::Create(CWnd* pParentWnd, UINT nID, DWORD dwStyle) 
 {
-	DWORD dwStyle = dwFlags | ES_WANTRETURN | ES_AUTOHSCROLL;
-
-	if (!(dwFlags & WS_POPUP))
-		dwStyle |= WS_CHILD;
-	else
-		dwStyle &= ~WS_CHILD;
+	Misc::SetFlag(dwStyle, WS_CHILD, !Misc::HasFlag(dwStyle, WS_POPUP));
 
 	m_nID = nID;
 	m_pParent = pParentWnd;
@@ -158,8 +154,12 @@ LRESULT CPopupEditCtrl::OnPECShow(WPARAM wp, LPARAM /*lp*/)
 
 	if (wp && !ShowSpinBuddy(TRUE))
 	{
-		// Prevent underlying window moving during edit
-		CDisableMouseWheel::Initialize();
+		// Prevent any window scrolling except ourselves 
+		// if we have a vertical scrollbar
+		if (GetStyle() & WS_VSCROLL)
+			CDisableMouseWheel::Initialize(*this);
+		else
+			CDisableMouseWheel::Initialize();
 	}
 	
 	// enable and show

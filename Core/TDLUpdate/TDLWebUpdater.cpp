@@ -338,9 +338,11 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 		}
 	}
 
-	if (!WebMisc::DownloadFile(m_sDownloadUri, m_sDownloadFile, &m_dlgProgress))
+	if (!WebMisc::DownloadFile(m_sDownloadUri, m_sDownloadFile, this))
 	{
-		m_nResUpdate = TDLWUR_ERR_DOWNLOADZIP;
+		if (!CheckUpdateCancelled())
+			m_nResUpdate = TDLWUR_ERR_DOWNLOADZIP;
+
 		return FALSE;
 	}
 
@@ -356,7 +358,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 	// scope so unzipper releases any file handles
 	try
 	{
-		CUnzipper unzip;
+		CUnzipper unzip(NULL, UnzipCallback, (DWORD)this);
 		
 		FileMisc::LogText(_T("The unzip component was successfully initialised."));
 
@@ -383,7 +385,9 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 		// check we can do the unzip
 		if (!unzip.UnzipTo(m_sUnzipFolder))
 		{
-			m_nResUpdate = TDLWUR_ERR_UNZIP;
+			if (!CheckUpdateCancelled())
+				m_nResUpdate = TDLWUR_ERR_UNZIP;
+
 			return FALSE;
 		}
 	}
@@ -409,8 +413,10 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 	
 	// backup existing installation binaries and prefs
 	m_dlgProgress.SetProgressStatus(TDLWP_BACKUP);
+
+	DWORD dwBaseFlags = (FMDF_HIDDENREADONLY | FMDF_PROCESSMSGLOOP);
 	
-	if (!FileMisc::CopyFolder(m_sAppFolder, m_sBackupFolder, _T("*.exe;*.dll;*.ini"), FMDF_HIDDENREADONLY))
+	if (!FileMisc::CopyFolder(m_sAppFolder, m_sBackupFolder, _T("*.exe;*.dll;*.ini"), dwBaseFlags))
 	{
 		m_nResUpdate = TDLWUR_ERR_DOBACKUP;
 		return FALSE;
@@ -427,7 +433,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 	m_dlgProgress.SetProgressStatus(TDLWP_COPY);
 
 	// binaries (overwrite)
-	if (!FileMisc::CopyFolder(m_sUnzipFolder, m_sAppFolder, NULL, (FMDF_HIDDENREADONLY | FMDF_OVERWRITE)))
+	if (!FileMisc::CopyFolder(m_sUnzipFolder, m_sAppFolder, NULL, (dwBaseFlags | FMDF_OVERWRITE)))
 	{
 		m_nResUpdate = TDLWUR_ERR_DOUPDATE;
 		return FALSE;
@@ -437,7 +443,7 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestart
 	CString sSrcResources = (FileMisc::TerminatePath(m_sUnzipFolder) + _T("Resources"));
 	CString sDestResources = (FileMisc::TerminatePath(m_sAppFolder) + _T("Resources"));
 
-	if (!FileMisc::CopyFolder(sSrcResources, sDestResources, NULL, (FMDF_SUBFOLDERS | FMDF_HIDDENREADONLY | FMDF_NEWER)))
+	if (!FileMisc::CopyFolder(sSrcResources, sDestResources, NULL, (dwBaseFlags | FMDF_SUBFOLDERS | FMDF_NEWER)))
 	{
 		m_nResUpdate = TDLWUR_ERR_DOUPDATE;
 		return FALSE;
@@ -546,4 +552,168 @@ void CTDLWebUpdater::RestoreBackup(TDL_WEBUPDATE_PROGRESS nCancelled)
 	{
 		m_nResUpdate = TDLWUR_ERR_RUNRESTORE;
 	}
+}
+
+bool CTDLWebUpdater::UnzipCallback(int nPercent, DWORD dwUserData)
+{
+	if (dwUserData)
+	{
+		CTDLWebUpdater* pThis = (CTDLWebUpdater*)dwUserData;
+		return (pThis->OnUnzipProgress(nPercent) != FALSE);
+	}
+
+	ASSERT(0);
+	return false;
+}
+
+BOOL CTDLWebUpdater::OnUnzipProgress(int nPercent)
+{
+	if (m_dlgProgress.GetSafeHwnd() && (m_dlgProgress.GetProgressStatus() == TDLWP_UNZIP))
+	{
+		m_dlgProgress.SetProgressStatus(TDLWP_UNZIP, nPercent);
+		return !m_dlgProgress.IsCancelled();
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// IBindStatusCallback
+
+// IUnknown
+/*
+STDMETHODIMP CTDLWebUpdater::QueryInterface(REFIID riid, void **ppvObject)
+{
+	TRACE(_T("IUnknown::QueryInterface\n"));
+
+	*ppvObject = NULL;
+
+	// IUnknown
+	if (::IsEqualIID(riid, __uuidof(IUnknown)))
+	{
+		TRACE(_T("IUnknown::QueryInterface(IUnknown)\n"));
+
+		*ppvObject = this;
+	}
+	// IBindStatusCallback
+	else if (::IsEqualIID(riid, __uuidof(IBindStatusCallback)))
+	{
+		TRACE(_T("IUnknown::QueryInterface(IBindStatusCallback)\n"));
+
+		*ppvObject = static_cast<IBindStatusCallback *>(this);
+	}
+
+	if (*ppvObject)
+	{
+		(*reinterpret_cast<LPUNKNOWN *>(ppvObject))->AddRef();
+
+		return S_OK;
+	}
+
+	return E_NOINTERFACE;
+}
+
+STDMETHODIMP_(ULONG) CTDLWebUpdater::AddRef()
+{
+	TRACE(_T("IUnknown::AddRef\n"));
+
+	return ++m_ulObjRefCount;
+}
+
+STDMETHODIMP_(ULONG) CTDLWebUpdater::Release()
+{
+	TRACE(_T("IUnknown::Release\n"));
+
+	return --m_ulObjRefCount;
+}
+*/
+
+STDMETHODIMP CTDLWebUpdater::OnProgress(ULONG ulProgress,
+										ULONG ulProgressMax,
+										ULONG ulStatusCode,
+										LPCWSTR /*szStatusText*/)
+{
+#ifdef _DEBUG
+/*
+#ifndef BINDSTATUS_ACCEPTRANGES
+#	define BINDSTATUS_ACCEPTRANGES (BINDSTATUS_LOADINGMIMEHANDLER + 8)
+#endif
+
+	enum
+	{
+		UF_BINDSTATUS_FIRST = BINDSTATUS_FINDINGRESOURCE,
+		UF_BINDSTATUS_LAST = BINDSTATUS_ACCEPTRANGES
+	};
+
+	static const LPCTSTR plpszStatus[] =
+	{
+		_T("BINDSTATUS_FINDINGRESOURCE"),  // 1
+		_T("BINDSTATUS_CONNECTING"),
+		_T("BINDSTATUS_REDIRECTING"),
+		_T("BINDSTATUS_BEGINDOWNLOADDATA"),
+		_T("BINDSTATUS_DOWNLOADINGDATA"),
+		_T("BINDSTATUS_ENDDOWNLOADDATA"),
+		_T("BINDSTATUS_BEGINDOWNLOADCOMPONENTS"),
+		_T("BINDSTATUS_INSTALLINGCOMPONENTS"),
+		_T("BINDSTATUS_ENDDOWNLOADCOMPONENTS"),
+		_T("BINDSTATUS_USINGCACHEDCOPY"),
+		_T("BINDSTATUS_SENDINGREQUEST"),
+		_T("BINDSTATUS_CLASSIDAVAILABLE"),
+		_T("BINDSTATUS_MIMETYPEAVAILABLE"),
+		_T("BINDSTATUS_CACHEFILENAMEAVAILABLE"),
+		_T("BINDSTATUS_BEGINSYNCOPERATION"),
+		_T("BINDSTATUS_ENDSYNCOPERATION"),
+		_T("BINDSTATUS_BEGINUPLOADDATA"),
+		_T("BINDSTATUS_UPLOADINGDATA"),
+		_T("BINDSTATUS_ENDUPLOADINGDATA"),
+		_T("BINDSTATUS_PROTOCOLCLASSID"),
+		_T("BINDSTATUS_ENCODING"),
+		_T("BINDSTATUS_VERFIEDMIMETYPEAVAILABLE"),
+		_T("BINDSTATUS_CLASSINSTALLLOCATION"),
+		_T("BINDSTATUS_DECODING"),
+		_T("BINDSTATUS_LOADINGMIMEHANDLER"),
+		_T("BINDSTATUS_CONTENTDISPOSITIONATTACH"),
+		_T("BINDSTATUS_FILTERREPORTMIMETYPE"),
+		_T("BINDSTATUS_CLSIDCANINSTANTIATE"),
+		_T("BINDSTATUS_IUNKNOWNAVAILABLE"),
+		_T("BINDSTATUS_DIRECTBIND"),
+		_T("BINDSTATUS_RAWMIMETYPE"),
+		_T("BINDSTATUS_PROXYDETECTING"),
+		_T("BINDSTATUS_ACCEPTRANGES"),
+		_T("???")  // unknown
+	};
+
+	TRACE(_T("IBindStatusCallback::OnProgress\n"));
+	TRACE(_T("ulProgress: %lu, ulProgressMax: %lu\n"), ulProgress, ulProgressMax);
+	TRACE(_T("ulStatusCode: %lu "), ulStatusCode);
+
+	if (ulStatusCode < UF_BINDSTATUS_FIRST ||
+		ulStatusCode > UF_BINDSTATUS_LAST)
+	{
+		ulStatusCode = UF_BINDSTATUS_LAST + 1;
+	}
+
+	TRACE(_T("(%s), szStatusText: %ls\n"), plpszStatus[ulStatusCode - UF_BINDSTATUS_FIRST], szStatusText);
+*/
+#endif
+
+	if (m_dlgProgress.GetSafeHwnd()	&& (m_dlgProgress.GetProgressStatus() == TDLWP_DOWNLOAD))
+	{
+		switch (ulStatusCode)
+		{
+		case BINDSTATUS_BEGINDOWNLOADDATA:
+		case BINDSTATUS_DOWNLOADINGDATA:
+		case BINDSTATUS_ENDDOWNLOADDATA:
+			{
+				m_dlgProgress.SetProgressStatus(TDLWP_DOWNLOAD, (int)MulDiv(ulProgress, 100, ulProgressMax));
+
+				if (m_dlgProgress.IsCancelled())
+					return E_ABORT;
+			}
+			break;
+		}
+	}
+
+	return S_OK;
 }

@@ -30,7 +30,7 @@ public:
 	void EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttribID);
 	void DisableHeatMap();
 
-	void SetOptions(DWORD dwOptions);
+	void SetOptions(DWORD dwOptions, LPCTSTR szHideParentTag = NULL);
 	void SetBorderColor(COLORREF crBorder);
 	void SetUITheme(const UITHEME& theme);
 
@@ -46,6 +46,7 @@ protected:
 	
 	TDC_ATTRIBUTE m_nHeatMapAttribute;
 	DWORD m_dwOptions;
+	CString m_sHideParentTag;
 	COLORREF m_crBorder, m_crWeekend, m_crToday, m_crSelected;
 
 	// Generated message map functions

@@ -937,7 +937,7 @@ namespace unvell.ReoGrid.Views
 				style = cell.InnerStyle;
 			}
 
-			if (style.BackColor.A > 0)
+			if (!(style.BackColor.IsTransparent && style.FillPatternColor.IsTransparent))
 			{
 				var startPos = new CellPosition(row, col);
 
@@ -955,14 +955,10 @@ namespace unvell.ReoGrid.Views
 				{
 					var g = dc.Graphics;
 
-					if (style.FillPatternColor.A > 0)
-					{
-						g.FillRectangle(style.FillPatternStyle, style.FillPatternColor, style.BackColor, rect);
-					}
-					else
-					{
+					if (style.FillPatternColor.IsTransparent)
 						g.FillRectangle(rect, style.BackColor);
-					}
+					else
+						g.FillRectangle(style.FillPatternStyle, style.FillPatternColor, style.BackColor, rect);
 				}
 			}
 		}

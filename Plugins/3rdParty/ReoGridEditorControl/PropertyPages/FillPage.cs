@@ -32,7 +32,7 @@ namespace unvell.ReoGrid.PropertyPages
 		{
 			InitializeComponent();
 
-			patternColorComboBox.SolidColor = Color.Black;
+			patternColorComboBox.SolidColor = SystemColors.WindowText;
 			patternStyleComboBox.CloseOnClick = true;
 
 			labSample.Paint += new PaintEventHandler(labSample_Paint);
@@ -44,19 +44,23 @@ namespace unvell.ReoGrid.PropertyPages
 
 		void labSample_Paint(object sender, PaintEventArgs e)
 		{
-			if (!patternStyleComboBox.HasPatternStyle)
+			bool hasPattern = (!patternColorComboBox.SolidColor.IsEmpty &&
+								patternStyleComboBox.HasPatternStyle);
+
+			if (hasPattern)
+			{
+				using (HatchBrush hb = new HatchBrush(patternStyleComboBox.PatternStyle,
+														patternColorComboBox.SolidColor,
+														colorPanel.SolidColor))
+				{
+					e.Graphics.FillRectangle(hb, labSample.ClientRectangle);
+				}
+			}
+			else if (!colorPanel.SolidColor.IsEmpty)
 			{
 				using (Brush b = new SolidBrush(colorPanel.SolidColor))
 				{
 					e.Graphics.FillRectangle(b, labSample.ClientRectangle);
-				}
-			}
-			else
-			{
-				using (HatchBrush hb = new HatchBrush(patternStyleComboBox.PatternStyle,
-					patternColorComboBox.SolidColor, colorPanel.SolidColor))
-				{
-					e.Graphics.FillRectangle(hb, labSample.ClientRectangle);
 				}
 			}
 		}
@@ -87,6 +91,11 @@ namespace unvell.ReoGrid.PropertyPages
 				patternStyleComboBox.PatternStyle = (HatchStyle)style.FillPatternStyle;
 				patternStyleComboBox.HasPatternStyle = true;
 			}
+			else
+			{
+				patternColorComboBox.SolidColor = Color.Empty;
+				patternStyleComboBox.HasPatternStyle = false;
+			}
 
 			backupPatternColor = patternColorComboBox.SolidColor;
 			backupPatternStyle = patternStyleComboBox.PatternStyle;
@@ -108,14 +117,6 @@ namespace unvell.ReoGrid.PropertyPages
 				style.Flag |= PlainStyleFlag.FillPattern;
 				style.FillPatternColor = patternStyleComboBox.HasPatternStyle ? patternColorComboBox.SolidColor : Color.Empty;
 				style.FillPatternStyle = (unvell.ReoGrid.Graphics.HatchStyles)patternStyleComboBox.PatternStyle;
-
-				// pattern style need a back color
-				// when pattern style setted but back color is not setted, set the backcolor to white
-				if (patternStyleComboBox.HasPatternStyle && colorPanel.SolidColor.IsEmpty)
-				{
-					style.BackColor = new Graphics.SolidColor(1, 255, 255, 255);
-					style.Flag |= PlainStyleFlag.BackColor;
-				}
 
 				return new SetRangeStyleAction(grid.CurrentWorksheet.SelectionRange, style);
 			}

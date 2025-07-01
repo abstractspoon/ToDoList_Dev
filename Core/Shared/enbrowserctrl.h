@@ -51,7 +51,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	// event sink notification handlers
-//	afx_msg void OnNavigateComplete2(LPDISPATCH pDisp, VARIANT FAR* URL);
 	afx_msg void OnDocumentComplete(LPDISPATCH pDisp, VARIANT FAR* URL);
 	DECLARE_EVENTSINK_MAP()
 

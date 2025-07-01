@@ -40,6 +40,8 @@ struct TIMEUNIT
 	UINT nMenuID;
 };
 
+// -----------------------------------------------------------------
+
 enum
 {
 	ID_MINS = 0x8000,
@@ -51,6 +53,9 @@ enum
 	ID_YEARS,
 };
 
+// -----------------------------------------------------------------
+
+// These will have their labels filled in later
 static TIMEUNIT TIMEUNITS[] = 
 {
 	{ THU_MINS,		_T(""),	TIME_MIN_ABBREV,	ID_MINS },
@@ -61,8 +66,11 @@ static TIMEUNIT TIMEUNITS[] =
 	{ THU_MONTHS,	_T(""), TIME_MONTH_ABBREV,	ID_MONTHS },
 	{ THU_YEARS,	_T(""),	TIME_YEAR_ABBREV,	ID_YEARS },
 };
+const int NUM_UNITS = sizeof(TIMEUNITS) / sizeof(TIMEUNIT);
 
-static LPCTSTR UNITLABELS[] = 
+// -----------------------------------------------------------------
+
+const LPCTSTR UNITLABELS[] = 
 {
 	TIME_MINS,	
 	TIME_HOURS,	
@@ -73,7 +81,7 @@ static LPCTSTR UNITLABELS[] =
 	TIME_YEARS	
 };
 
-const int NUM_UNITS = sizeof(TIMEUNITS) / sizeof (TIMEUNIT);
+// -----------------------------------------------------------------
 
 const TIMEUNIT& GetTimeUnit(TH_UNITS nUnits)
 {

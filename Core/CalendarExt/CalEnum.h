@@ -41,7 +41,11 @@ enum // options
 													TCCO_DISPLAYDONE | 
 													TCCO_DISPLAYACTIVETODAY |
 													TCCO_DISPLAYCALCSTART | 
-													TCCO_DISPLAYCALCDUE)
+													TCCO_DISPLAYCALCDUE),
+
+	TCCO_DATEFORMATOPTIONS						= (TCCO_SHOWISODATES |
+												   TCCO_SHOWDATEINEVERYCELL |
+												   TCCO_SHOWWEEKNUMINCELLDATE)
 };
 
 /////////////////////////////////////////////////////////////////////////////

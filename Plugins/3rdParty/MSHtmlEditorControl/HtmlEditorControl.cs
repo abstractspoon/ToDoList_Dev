@@ -92,71 +92,71 @@ namespace MSDN.Html.Editor
         private const byte DEFAULT_BORDER_SIZE = 2;
 
         // define the tags being used by the application
-        private const string BODY_TAG = "BODY";
-        private const string SCRIPT_TAG = "SCRIPT";
-        private const string STYLE_TAG = "STYLE";
-        private const string ANCHOR_TAG = "A";
-        private const string FONT_TAG = "FONT";
-        private const string BOLD_TAG = "STRONG";
-        private const string UNDERLINE_TAG = "U";
-        private const string ITALIC_TAG = "EM";
-        private const string STRIKE_TAG = "STRIKE";
-        private const string SUBSCRIPT_TAG = "SUB";
-        private const string SUPERSCRIPT_TAG = "SUP";
-        private const string HEAD_TAG = "HEAD";
-        private const string IMAGE_TAG = "IMG";
-        private const string TABLE_TAG = "TABLE";
-        private const string TABLE_ROW_TAG = "TR";
-        private const string TABLE_CELL_TAG = "TD";
-        private const string TABLE_HEAD_TAG = "TH";
-        private const string SPAN_TAG = "SPAN";
-        private const string OPEN_TAG = "<";
-        private const string CLOSE_TAG = ">";
-        private const string SELECT_TYPE_TEXT = "text";
-        private const string SELECT_TYPE_CONTROL = "control";
-        private const string SELECT_TYPE_NONE = "none";
+        protected const string BODY_TAG = "BODY";
+        protected const string SCRIPT_TAG = "SCRIPT";
+        protected const string STYLE_TAG = "STYLE";
+        protected const string ANCHOR_TAG = "A";
+        protected const string FONT_TAG = "FONT";
+        protected const string BOLD_TAG = "STRONG";
+        protected const string UNDERLINE_TAG = "U";
+        protected const string ITALIC_TAG = "EM";
+        protected const string STRIKE_TAG = "STRIKE";
+        protected const string SUBSCRIPT_TAG = "SUB";
+        protected const string SUPERSCRIPT_TAG = "SUP";
+        protected const string HEAD_TAG = "HEAD";
+        protected const string IMAGE_TAG = "IMG";
+        protected const string TABLE_TAG = "TABLE";
+        protected const string TABLE_ROW_TAG = "TR";
+        protected const string TABLE_CELL_TAG = "TD";
+        protected const string TABLE_HEAD_TAG = "TH";
+        protected const string SPAN_TAG = "SPAN";
+        protected const string OPEN_TAG = "<";
+        protected const string CLOSE_TAG = ">";
+        protected const string SELECT_TYPE_TEXT = "text";
+        protected const string SELECT_TYPE_CONTROL = "control";
+        protected const string SELECT_TYPE_NONE = "none";
 
         // define commands for mshtml execution execution
-        private const string HTML_COMMAND_OVERWRITE = "OverWrite";
-        private const string HTML_COMMAND_BOLD = "Bold";
-        private const string HTML_COMMAND_UNDERLINE = "Underline";
-        private const string HTML_COMMAND_ITALIC = "Italic";
-        private const string HTML_COMMAND_SUBSCRIPT = "Subscript";
-        private const string HTML_COMMAND_SUPERSCRIPT = "Superscript";
-        private const string HTML_COMMAND_STRIKE_THROUGH = "StrikeThrough";
-        private const string HTML_COMMAND_FONT_NAME = "FontName";
-        private const string HTML_COMMAND_FONT_SIZE = "FontSize";
-        private const string HTML_COMMAND_FORE_COLOR = "ForeColor";
-        private const string HTML_COMMAND_INSERT_FORMAT_BLOCK = "FormatBlock";
-        private const string HTML_COMMAND_REMOVE_FORMAT = "RemoveFormat";
-        private const string HTML_COMMAND_JUSTIFY_LEFT = "JustifyLeft";
-        private const string HTML_COMMAND_JUSTIFY_CENTER = "JustifyCenter";
-        private const string HTML_COMMAND_JUSTIFY_RIGHT = "JustifyRight";
-        private const string HTML_COMMAND_INDENT = "Indent";
-        private const string HTML_COMMAND_OUTDENT = "Outdent";
-        private const string HTML_COMMAND_INSERT_LINE = "InsertHorizontalRule";
-        private const string HTML_COMMAND_INSERT_LISTUNORDERED = "InsertUnorderedList";
-        private const string HTML_COMMAND_INSERT_LISTORDERED = "InsertOrderedList";
-        private const string HTML_COMMAND_INSERT_IMAGE = "InsertImage";
-        private const string HTML_COMMAND_INSERT_LINK = "CreateLink";
-        private const string HTML_COMMAND_REMOVE_LINK = "Unlink";
-        private const string HTML_COMMAND_TEXT_CUT = "Cut";
-        private const string HTML_COMMAND_TEXT_COPY = "Copy";
-        private const string HTML_COMMAND_TEXT_PASTE = "Paste";
-        private const string HTML_COMMAND_TEXT_DELETE = "Delete";
-        private const string HTML_COMMAND_TEXT_UNDO = "Undo";
-        private const string HTML_COMMAND_TEXT_REDO= "Redo";
-        private const string HTML_COMMAND_TEXT_SELECT_ALL = "SelectAll";
-        private const string HTML_COMMAND_TEXT_UNSELECT = "Unselect";
-        private const string HTML_COMMAND_TEXT_PRINT = "Print";
-        private const string HTML_FORMATTED_PRE = "Formatted";
-        private const string HTML_FORMATTED_NORMAL = "Normal";
-        private const string HTML_FORMATTED_HEADING = "Heading";
-        private const string HTML_FORMATTED_HEADING1 = "Heading 1";
-        private const string HTML_FORMATTED_HEADING2 = "Heading 2";
-        private const string HTML_FORMATTED_HEADING3 = "Heading 3";
-        private const string HTML_FORMATTED_HEADING4 = "Heading 4";
-        private const string HTML_FORMATTED_HEADING5 = "Heading 5";
+        protected const string HTML_COMMAND_OVERWRITE = "OverWrite";
+        protected const string HTML_COMMAND_BOLD = "Bold";
+        protected const string HTML_COMMAND_UNDERLINE = "Underline";
+        protected const string HTML_COMMAND_ITALIC = "Italic";
+        protected const string HTML_COMMAND_SUBSCRIPT = "Subscript";
+        protected const string HTML_COMMAND_SUPERSCRIPT = "Superscript";
+        protected const string HTML_COMMAND_STRIKE_THROUGH = "StrikeThrough";
+        protected const string HTML_COMMAND_FONT_NAME = "FontName";
+        protected const string HTML_COMMAND_FONT_SIZE = "FontSize";
+        protected const string HTML_COMMAND_FORE_COLOR = "ForeColor";
+        protected const string HTML_COMMAND_INSERT_FORMAT_BLOCK = "FormatBlock";
+        protected const string HTML_COMMAND_REMOVE_FORMAT = "RemoveFormat";
+        protected const string HTML_COMMAND_JUSTIFY_LEFT = "JustifyLeft";
+        protected const string HTML_COMMAND_JUSTIFY_CENTER = "JustifyCenter";
+        protected const string HTML_COMMAND_JUSTIFY_RIGHT = "JustifyRight";
+        protected const string HTML_COMMAND_INDENT = "Indent";
+        protected const string HTML_COMMAND_OUTDENT = "Outdent";
+        protected const string HTML_COMMAND_INSERT_LINE = "InsertHorizontalRule";
+        protected const string HTML_COMMAND_INSERT_LISTUNORDERED = "InsertUnorderedList";
+        protected const string HTML_COMMAND_INSERT_LISTORDERED = "InsertOrderedList";
+        protected const string HTML_COMMAND_INSERT_IMAGE = "InsertImage";
+        protected const string HTML_COMMAND_INSERT_LINK = "CreateLink";
+        protected const string HTML_COMMAND_REMOVE_LINK = "Unlink";
+        protected const string HTML_COMMAND_TEXT_CUT = "Cut";
+        protected const string HTML_COMMAND_TEXT_COPY = "Copy";
+        protected const string HTML_COMMAND_TEXT_PASTE = "Paste";
+        protected const string HTML_COMMAND_TEXT_DELETE = "Delete";
+        protected const string HTML_COMMAND_TEXT_UNDO = "Undo";
+        protected const string HTML_COMMAND_TEXT_REDO= "Redo";
+        protected const string HTML_COMMAND_TEXT_SELECT_ALL = "SelectAll";
+        protected const string HTML_COMMAND_TEXT_UNSELECT = "Unselect";
+        protected const string HTML_COMMAND_TEXT_PRINT = "Print";
+        protected const string HTML_FORMATTED_PRE = "Formatted";
+        protected const string HTML_FORMATTED_NORMAL = "Normal";
+        protected const string HTML_FORMATTED_HEADING = "Heading";
+        protected const string HTML_FORMATTED_HEADING1 = "Heading 1";
+        protected const string HTML_FORMATTED_HEADING2 = "Heading 2";
+        protected const string HTML_FORMATTED_HEADING3 = "Heading 3";
+        protected const string HTML_FORMATTED_HEADING4 = "Heading 4";
+        protected const string HTML_FORMATTED_HEADING5 = "Heading 5";
 
         // internal command constants
         private const string INTERNAL_COMMAND_TEXTCUT = "TextCut";
@@ -4046,7 +4046,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Executes the queryCommandState on the selected range (given the range)
         /// </summary>
-        private bool ExecuteCommandQuery(mshtmlTextRange range, string command)
+        protected virtual bool ExecuteCommandQuery(mshtmlTextRange range, string command)
         {
             try
             {
@@ -4069,7 +4069,7 @@ namespace MSDN.Html.Editor
                 throw new HtmlEditorException("Unknown MSHTML Error.", command, ex);
             }
 
-            // all elsee
+            // all else
             return false;
 
         } // ExecuteCommandQuery
@@ -4089,7 +4089,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Executes the execCommand on the selected range (given the range)
         /// </summary>
-        private bool ExecuteCommandRange(mshtmlTextRange range, string command, object data)
+        protected virtual bool ExecuteCommandRange(mshtmlTextRange range, string command, object data)
         {
             try
             {
@@ -4151,7 +4151,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Executes the execCommand on the document with a system prompt
         /// </summary>
-        private bool ExecuteCommandDocument(string command, bool prompt)
+        protected virtual bool ExecuteCommandDocument(string command, bool prompt)
         {
             try
             {
@@ -4217,7 +4217,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Determines the value of the command
         /// </summary>
-        private object QueryCommandRange(mshtmlTextRange range, string command)
+        protected object QueryCommandRange(mshtmlTextRange range, string command)
         {
             object retValue = null;
             if (range != null)

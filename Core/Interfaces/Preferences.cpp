@@ -73,9 +73,9 @@ INISECTION::INISECTION(const INISECTION& other) : sSection(other.sSection)
 
 //////////////////////////////////////////////////////////////////////
 
-static CString ENDL = _T("\r\n");
-static CString NULLSTR;
-static LPCTSTR BACKUPFOLDER = _T("ini.Backup");
+const CString ENDL = _T("\r\n");
+const CString NULLSTR;
+const LPCTSTR BACKUPFOLDER = _T("ini.Backup");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -990,12 +990,13 @@ bool CPreferences::CIPreferencesImpl::WriteProfileInt(LPCWSTR lpszSection, LPCWS
 	return (m_prefs.WriteProfileInt(lpszSection, lpszEntry, nValue) != FALSE);
 }
 
+static CString STRING_VAL;
+
 LPCWSTR CPreferences::CIPreferencesImpl::GetProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszDefault) const
 {
-	static CString sValue;
-	sValue = m_prefs.GetProfileString(lpszSection, lpszEntry, lpszDefault);
+	STRING_VAL = m_prefs.GetProfileString(lpszSection, lpszEntry, lpszDefault);
 
-	return sValue;
+	return STRING_VAL;
 }
 
 bool CPreferences::CIPreferencesImpl::WriteProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszValue)

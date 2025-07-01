@@ -227,6 +227,7 @@ protected:
 	virtual void OnCancelEdit();
 	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rBtn) const;
 	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
+	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell) const;
 
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;

@@ -1022,55 +1022,43 @@ void CWorkloadCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPos)
 	}
 }
 
-void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
+void CWorkloadCtrl::SetOptions(DWORD dwOptions)
 {
-	if (dwOption)
+	DWORD dwPrev = m_dwOptions;
+	m_dwOptions = dwOptions;
+
+	// specific handling
+	if (m_dwOptions != dwPrev)
 	{
-		DWORD dwPrev = m_dwOptions;
-
-		if (bSet)
-			m_dwOptions |= dwOption;
-		else
-			m_dwOptions &= ~dwOption;
-
-		// specific handling
-		if (m_dwOptions != dwPrev)
+		if (Misc::FlagHasChanged(WLCF_STRIKETHRUDONETASKS, dwPrev, dwOptions))
 		{
-			switch (dwOption)
-			{
-			case WLCF_STRIKETHRUDONETASKS:
-				m_tree.Fonts().Clear();
-				CWnd::Invalidate(FALSE);
-				break;
-
-			case WLCF_SHOWMIXEDCOMPLETIONSTATE:
-				CWnd::Invalidate(FALSE);
-				break;
-
-			case WLCF_SHOWSPLITTERBAR:
-				CTreeListCtrl::SetSplitBarWidth(bSet ? 10 : 0);
-				break;
-
-			case WLCF_DISPLAYISODATES:
-				CWnd::Invalidate(FALSE);
-				break;
-
-			case WLCF_PREFERTIMEESTFORCALCS:
-			case WLCF_CALCMISSINGALLOCATIONS:
-			case WLCF_RECALCALLOCATIONS:
-			case WLCF_RECALCPROPORTIONALLY:
-				RefreshCalculatedAllocations();
-				break;
-
-			case WLCF_ALLOWPARENTALLOCATIONS:
-			case WLCF_INCLUDEDATELESSTASKSINPERIOD:
-				RecalcAllocationTotals();
-				break;
-			}
-
-			if (IsSyncing())
-				RedrawList();
+			m_tree.Fonts().Clear();
+			CWnd::Invalidate(FALSE);
 		}
+
+		if (Misc::FlagHasChanged(WLCF_SHOWMIXEDCOMPLETIONSTATE, dwPrev, dwOptions) ||
+			Misc::FlagHasChanged(WLCF_DISPLAYISODATES, dwPrev, dwOptions))
+		{
+			CWnd::Invalidate(FALSE);
+		}
+
+		if (Misc::FlagHasChanged(WLCF_SHOWSPLITTERBAR, dwPrev, dwOptions))
+		{
+			CTreeListCtrl::SetSplitBarWidth(Misc::HasFlag(dwOptions, WLCF_SHOWSPLITTERBAR) ? 10 : 0);
+		}
+
+		if (Misc::FlagHasChanged(WLCF_ALLOCATION_OPTIONS, dwPrev, dwOptions))
+		{
+			RefreshCalculatedAllocations();
+		}
+
+		if (Misc::FlagHasChanged(WLCF_TOTALS_OPTIONS, dwPrev, dwOptions))
+		{
+			RecalcAllocationTotals();
+		}
+
+		if (IsSyncing())
+			RedrawList();
 	}
 }
 

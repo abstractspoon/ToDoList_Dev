@@ -143,6 +143,7 @@
 			// m_ShowWorkingHoursOnly
 			// 
 			this.m_ShowWorkingHoursOnly.AutoSize = true;
+			this.m_ShowWorkingHoursOnly.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ShowWorkingHoursOnly.Location = new System.Drawing.Point(13, 109);
 			this.m_ShowWorkingHoursOnly.Name = "m_ShowWorkingHoursOnly";
 			this.m_ShowWorkingHoursOnly.Size = new System.Drawing.Size(138, 17);
@@ -153,6 +154,7 @@
 			// m_TreatOverdueTasksAsDueToday
 			// 
 			this.m_TreatOverdueTasksAsDueToday.AutoSize = true;
+			this.m_TreatOverdueTasksAsDueToday.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TreatOverdueTasksAsDueToday.Location = new System.Drawing.Point(13, 132);
 			this.m_TreatOverdueTasksAsDueToday.Name = "m_TreatOverdueTasksAsDueToday";
 			this.m_TreatOverdueTasksAsDueToday.Size = new System.Drawing.Size(222, 17);

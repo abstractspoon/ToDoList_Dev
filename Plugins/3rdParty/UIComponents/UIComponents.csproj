@@ -57,6 +57,7 @@
     <Compile Include="NumberBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="OwnerdrawComboBoxBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpinButtonRenderer.cs" />
     <Compile Include="YearComboBox.cs">

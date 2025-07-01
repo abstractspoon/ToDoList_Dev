@@ -33,6 +33,11 @@ public:
 protected:
 	static CString s_sAppName;
 	static BOOL s_bDisableSimpleErrorMessages;
+
+protected:
+	static int SplitMessage(LPCTSTR szMessage, CString& sTitle, CString& sInstruction, CString& sText, TCHAR cDelim = '|');
+	static CString GetAppName();
+	static HWND GetMainWindow();
 };
 
 #endif // !defined(AFX_MESSAGEBOX_H__8543A453_171B_11D4_AE08_0000E8425C3E__INCLUDED_)

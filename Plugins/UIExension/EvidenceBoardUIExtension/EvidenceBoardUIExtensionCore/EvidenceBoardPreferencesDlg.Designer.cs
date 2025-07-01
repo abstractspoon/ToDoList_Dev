@@ -91,7 +91,7 @@
 			this.m_ParentLinkColor.Size = new System.Drawing.Size(75, 23);
 			this.m_ParentLinkColor.TabIndex = 1;
 			this.m_ParentLinkColor.Text = "Set...";
-			this.m_ParentLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_ParentLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_ParentLinkColor.UseVisualStyleBackColor = true;
 			// 
 			// m_DependsLinkColor
@@ -103,7 +103,7 @@
 			this.m_DependsLinkColor.Size = new System.Drawing.Size(75, 23);
 			this.m_DependsLinkColor.TabIndex = 1;
 			this.m_DependsLinkColor.Text = "Set...";
-			this.m_DependsLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_DependsLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_DependsLinkColor.UseVisualStyleBackColor = true;
 			// 
 			// groupBox1

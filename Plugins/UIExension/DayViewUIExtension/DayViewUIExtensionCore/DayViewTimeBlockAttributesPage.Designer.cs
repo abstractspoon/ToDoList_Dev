@@ -177,6 +177,7 @@
 			// m_DateCheckBox
 			// 
 			this.m_DateCheckBox.AutoSize = true;
+			this.m_DateCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_DateCheckBox.Location = new System.Drawing.Point(7, 5);
 			this.m_DateCheckBox.Name = "m_DateCheckBox";
 			this.m_DateCheckBox.Size = new System.Drawing.Size(79, 17);

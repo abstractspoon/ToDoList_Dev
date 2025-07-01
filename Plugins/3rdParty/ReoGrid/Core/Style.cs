@@ -1443,14 +1443,12 @@ namespace unvell.ReoGrid
 		public SolidColor BackColor { get; set; }
 
 		/// <summary>
-		/// Get or set backgrond pattern color.
-		/// When set pattern color or pattern style, the background color should also be set.
+		/// Get or set background pattern color. Requires FillPatternStyle.
 		/// </summary>
 		public SolidColor FillPatternColor { get; set; }
 
 		/// <summary>
-		/// Get or set background pattern style.
-		/// When set pattern color or pattern style, the background color should also be set.
+		/// Get or set background pattern style.. Requires FillPatternColor.
 		/// </summary>
 		public HatchStyles FillPatternStyle { get; set; }
 

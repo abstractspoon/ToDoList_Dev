@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "EnHeaderCtrl.h"
 #include "themed.h"
+#include "osversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -22,6 +23,10 @@ enum // item flags
 	EHCF_SORTMASK	= (EHCF_SORTUP | EHCS_DOWN),
 	EHCF_NODRAG		= 0x0020,
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+static CThemed s_thSortArrow;
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnHeaderCtrl
@@ -495,19 +500,20 @@ BOOL CEnHeaderCtrl::DrawItemSortArrow(CDC* pDC, int nItem, BOOL bUp) const
 	if (!GetItemRect(nItem, rItem))
 		return FALSE;
 
-	static CThemed th(this, _T("Header"));
-	
-	if (th.AreControlsThemed())
+	if ((COSVersion() >= OSV_VISTA) && CThemed::AreControlsThemed())
 	{
+		if (!s_thSortArrow.IsValid())
+			s_thSortArrow.Open(this, _T("Header"));
+		
 		CSize size;
-		th.GetSize(HP_HEADERSORTARROW, 1, size);
+		s_thSortArrow.GetSize(HP_HEADERSORTARROW, 1, size);
 		
 		CRect rArrow(rItem.TopLeft(), size);
-
+		
 		rArrow.OffsetRect((rItem.Width() - size.cx - 1) / 2, 0);
 		rArrow.bottom = rArrow.top + 8;
 		
-		return th.DrawBackground(pDC, HP_HEADERSORTARROW, (bUp ? HSAS_SORTEDUP : HSAS_SORTEDDOWN), rArrow);
+		return s_thSortArrow.DrawBackground(pDC, HP_HEADERSORTARROW, (bUp ? HSAS_SORTEDUP : HSAS_SORTEDDOWN), rArrow);
 	}
 	
 	// else

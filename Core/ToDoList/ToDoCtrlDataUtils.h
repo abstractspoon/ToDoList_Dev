@@ -444,12 +444,14 @@ public:
 	BOOL AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const;
 	BOOL AnyTaskIsDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone) const;
 
-	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone) const;
-	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
 	BOOL AllTasksAreParents(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const;
+
+	// Returns TRUE, FALSE, and -1 if attribute not handled
+	int CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
+	int CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID) const;
 
 protected:
 	CTDCTaskFormatter m_formatter;

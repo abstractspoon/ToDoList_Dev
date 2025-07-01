@@ -97,7 +97,7 @@ int CTDLTimeTrackerTaskComboBox::Update(const TRACKTASKLIST* pTTL, const CDWordA
 
 	// Update 'All Tasks'
 	CMapTaskIndex mapCBItems;
-	VERIFY(BuildItemMap(mapCBItems)); // excludes recently tracked
+	VERIFY(BuildItemMap(mapCBItems) || !GetCount()); // excludes recently tracked
 
 	int nNumUpdated = Update(pTTL, aModTaskIDs, mapTTItems, mapCBItems);
 	

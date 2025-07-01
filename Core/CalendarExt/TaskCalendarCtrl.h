@@ -65,10 +65,9 @@ public:
 	TCC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
 	void SetDefaultSnapMode(TCC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
 
-	void SetOptions(DWORD dwOption);
+	void SetOptions(DWORD dwOption, LPCTSTR szHideParentTag = NULL);
 	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
-	void SetHideParentTasks(BOOL bHide, const CString& sTag);
 
 	void SetAlternateWeekColor(COLORREF crAltWeek);
 	void SetGridLineColor(COLORREF crGrid);
@@ -246,7 +245,7 @@ protected:
 
 	// helpers
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
-	static BOOL HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew);
+	static BOOL HasOptionChanged(int nOption, DWORD dwOldOptions, DWORD dwNewOptions);
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 	static BOOL IsExtensionItem(const TASKCALITEM* pTCI);
 	static BOOL IsFutureOccurrence(const TASKCALITEM* pTCI);

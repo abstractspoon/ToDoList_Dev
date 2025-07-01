@@ -139,7 +139,7 @@ namespace Misc
 	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrimResults = TRUE);
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrimResults = TRUE);
 	
-	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLength = -1);
+	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLengthInChars = -1);
 	CString SplitLeft(const CString& sText, TCHAR cDelim, BOOL bTrimResult = TRUE);
 	CString SplitLeft(const CString& sText, LPCTSTR szDelim, BOOL bTrimResult = TRUE);
 	CString Left(const CString& sText, int nLength, BOOL bNearestWord);

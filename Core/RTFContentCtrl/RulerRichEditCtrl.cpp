@@ -55,6 +55,9 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\encolordialog.h"
+#include "..\shared\DarkMode.h"
+
+#include "..\3rdparty\XNamedColors.h"
 
 #include <afxpriv.h>
 
@@ -1082,7 +1085,6 @@ void CRulerRichEditCtrl::DoFont()
 		height = cf.yHeight;
 		height = -(int) ((double) height * twip +.5);
 		lf.lfHeight = height;
-
 	}
 
 	// Effects
@@ -1105,20 +1107,19 @@ void CRulerRichEditCtrl::DoFont()
 
 	// Show font dialog
 	CFontDialog	dlg(&lf);
-
-	// color
-	dlg.m_cf.rgbColors = cf.crTextColor;
+	PrepareDlgTextColor(dlg.m_cf.rgbColors, cf);
 
 	if (dlg.DoModal() == IDOK)
 	{
+		cf.dwMask = cf.dwEffects = 0;
+		PrepareTextCharFormat(cf, dlg.GetColor());
+
 		// Apply new font
 		cf.yHeight = dlg.GetSize() * 2;
 		lstrcpy(cf.szFaceName, dlg.GetFaceName());
 
-		cf.dwMask = CFM_FACE | CFM_SIZE | CFM_COLOR | CFM_BOLD | 
-					CFM_ITALIC | CFM_UNDERLINE | CFM_STRIKEOUT;
-		cf.dwEffects = 0;
-		cf.crTextColor = dlg.GetColor();
+		cf.dwMask |= CFM_FACE | CFM_SIZE | CFM_BOLD | 
+					 CFM_ITALIC | CFM_UNDERLINE | CFM_STRIKEOUT;
 
 		if (dlg.IsBold())
 			cf.dwEffects |= CFE_BOLD;
@@ -1133,18 +1134,14 @@ void CRulerRichEditCtrl::DoFont()
 			cf.dwEffects |= CFE_STRIKEOUT;
 
 		m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
-/*
-		m_toolbar.SetFontColor(cf.crTextColor, TRUE);
-*/
 	}
 
 	m_rtf.SetFocus();
-
 }
 
 void CRulerRichEditCtrl::SetCurrentFontName(const CString& font)
 {
-	CharFormat	cf(CFM_FACE);
+	CharFormat cf(CFM_FACE);
 	lstrcpy(cf.szFaceName, font);
 
 	m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
@@ -1152,7 +1149,7 @@ void CRulerRichEditCtrl::SetCurrentFontName(const CString& font)
 
 void CRulerRichEditCtrl::SetCurrentFontSize(int size)
 {
-	CharFormat	cf(CFM_SIZE);
+	CharFormat cf(CFM_SIZE);
 	cf.yHeight = size * 20;
 
 	m_rtf.SetSelectionCharFormat(cf);
@@ -1160,26 +1157,65 @@ void CRulerRichEditCtrl::SetCurrentFontSize(int size)
 
 void CRulerRichEditCtrl::SetCurrentFontColor(COLORREF color, BOOL bForeground)
 {
-	CharFormat	cf(bForeground ? CFM_COLOR : CFM_BACKCOLOR);
+	CharFormat cf;
 
 	if (bForeground)
-	{
-		if (color == CLR_DEFAULT)
-			cf.dwEffects = CFE_AUTOCOLOR;
-		else
-			cf.crTextColor = color;
-	}
-	else // background
-	{
-		if (color == CLR_DEFAULT)
-			cf.dwEffects = CFE_AUTOBACKCOLOR;
-		else
-			cf.crBackColor = color;
-	}
+		PrepareTextCharFormat(cf, color);
+	else
+		PrepareBkgndCharFormat(cf, color);
 
 	m_rtf.SetSelectionCharFormat(cf);
 }
 
+void CRulerRichEditCtrl::PrepareDlgTextColor(COLORREF& crText, const CharFormat& cf)
+{
+	if ((cf.dwMask & CFM_COLOR) && !(cf.dwEffects & CFE_AUTOCOLOR))
+		crText = cf.crTextColor;
+	else
+		crText = (CDarkMode::IsEnabled() ? colorWhite : colorBlack);
+}
+
+void CRulerRichEditCtrl::PrepareTextCharFormat(CharFormat& cf, COLORREF color)
+{
+	// Intercept setting black/white text colours in Non/Dark Mode,
+	// and instead replace such colours with CFE_AUTOBACKCOLOR
+	BOOL bDarkMode = CDarkMode::IsEnabled();
+	BOOL bIsWhite = (color == colorWhite), bIsBlack = (color == colorBlack);
+
+	if ((color == CLR_DEFAULT) || (bDarkMode && bIsWhite) || (!bDarkMode && bIsBlack))
+	{
+		cf.dwEffects = CFE_AUTOCOLOR;
+	}
+	else
+	{
+		cf.dwEffects &= ~CFE_AUTOCOLOR;
+		cf.crTextColor = color;
+	}
+
+	cf.dwMask |= CFM_COLOR;
+}
+
+void CRulerRichEditCtrl::PrepareBkgndCharFormat(CharFormat& cf, COLORREF color)
+{
+	// Intercept setting white/black background colours in Non/Dark Mode,
+	// and instead replace such colours with CFE_AUTOBACKCOLOR
+	BOOL bDarkMode = CDarkMode::IsEnabled();
+	BOOL bIsWhite = (color == colorWhite), bIsBlack = (color == colorBlack);
+
+	if ((color == CLR_DEFAULT) || (bDarkMode && bIsBlack) || (!bDarkMode && bIsWhite))
+	{
+		cf.dwEffects = CFE_AUTOBACKCOLOR;
+	}	
+	else
+	{
+		cf.dwEffects &= ~CFE_AUTOBACKCOLOR;
+		cf.crBackColor = color;
+	}
+
+	cf.dwMask |= CFM_BACKCOLOR;
+}
+
+// This functionality seems to be obsolete
 void CRulerRichEditCtrl::DoColor()
 {
 	// Get the current color
@@ -1197,9 +1233,7 @@ void CRulerRichEditCtrl::DoColor()
 	if (dlg.DoModal() == IDOK)
 	{
 		// Apply new color
-		cf.dwMask = CFM_COLOR;
-		cf.dwEffects = 0;
-		cf.crTextColor = dlg.GetColor();
+		PrepareTextCharFormat(cf, dlg.GetColor());
 
 		m_rtf.SetSelectionCharFormat(cf);
 	}

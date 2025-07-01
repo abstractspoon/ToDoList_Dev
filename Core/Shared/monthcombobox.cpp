@@ -73,7 +73,7 @@ void CMonthComboBox::InitCombo()
 
 int CMonthComboBox::GetSelectedMonth() const
 {
-	return CDialogHelper::GetSelectedItemDataT(*this);
+	return CDialogHelper::GetSelectedItemData(*this);
 }
 
 int CMonthComboBox::SetSelectedMonth(int nMonth)

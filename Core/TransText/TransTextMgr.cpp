@@ -177,7 +177,7 @@ BOOL CTransTextMgr::WantTranslation(HWND hWnd, UINT nMsg) const
 			{
 				return FALSE;
 			}
-			else if (CWinClasses::IsCommonDialog(hWnd))
+			else if (CWinClasses::IsMFCCommonDialog(hWnd))
 			{
 				return FALSE;
 			}
@@ -413,7 +413,7 @@ BOOL CTransTextMgr::WantHookWnd(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) cons
 			if (CWinClasses::IsDialog(hWnd))
 			{
 				// Don't translate common dialogs for now
-				return !CWinClasses::IsCommonDialog(hWnd);
+				return !CWinClasses::IsMFCCommonDialog(hWnd);
 			}
 			else if (TransText::IsPopup(hWnd))
 			{

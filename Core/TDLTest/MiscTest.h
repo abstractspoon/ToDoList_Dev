@@ -29,6 +29,7 @@ protected:
 	void TestRemoveDuplicates();
 	void TestRemoveItems();
 	void TestAppendItems();
+	void TestSplitLines();
 
 	void TestRegionalSettingsRetrievalPerformance();
 

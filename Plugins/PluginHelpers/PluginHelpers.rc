@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "WinResrc.h"
+#include "winres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -17,7 +17,6 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
-#pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -32,7 +31,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""WinResrc.h""\r\n"
+    "#include ""winres.h""\r\n"
     "\0"
 END
 
@@ -43,16 +42,6 @@ BEGIN
 END
 
 #endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_HTML                ICON                    "..\\HTMLContentControlCore\\Resources\\html.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -80,9 +69,9 @@ BEGIN
             VALUE "CompanyName", "AbstractSpoon Software"
             VALUE "FileDescription", "ToDoList"
             VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "HTMLContentControlBridge.dll"
+            VALUE "InternalName", "PluginHelpers.dll"
             VALUE "LegalCopyright", "Copyright (C) 2025"
-            VALUE "OriginalFilename", "HTMLContentControlBridge.dll"
+            VALUE "OriginalFilename", "PluginHelpers.dll"
             VALUE "ProductName", "ToDoList"
             VALUE "ProductVersion", "1.0.0.1"
         END

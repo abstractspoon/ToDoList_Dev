@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+using UIComponents;
+
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
@@ -12,7 +14,7 @@ namespace WordCloudUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
 
-	class ColorSchemeComboBox : ComboBox
+	class ColorSchemeComboBox : OwnerdrawComboBoxBase
 	{
 		protected class ColorScheme
 		{
@@ -65,12 +67,11 @@ namespace WordCloudUIExtension
 			public List<Color> m_Colors { private set; get; }
 		}
 
-		public ColorSchemeComboBox()
+		public ColorSchemeComboBox() : base(true) // fixed
 		{
 			Initialise();
 
 			this.DropDownStyle = ComboBoxStyle.DropDownList;
-			this.DrawMode = DrawMode.OwnerDrawFixed;
 			this.MaxDropDownItems = 20;
 			this.DropDownHeight = 200;
 			this.ForeColor = Color.White;
@@ -126,9 +127,6 @@ namespace WordCloudUIExtension
 		protected override void OnDrawItem(DrawItemEventArgs e)
 		{
 			base.OnDrawItem(e);
-			
-			e.DrawBackground();
-			e.DrawFocusRectangle();
 
 			if (e.Index > -1)
 			{

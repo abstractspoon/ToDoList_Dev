@@ -36,6 +36,16 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+const CString EMPTY_STR;
+CString FALLBACK_STR;
+
+const CString DELIMS(_T("()-\\/{}[]:;,. ?\"'\n\r\t"));
+const CString BACKWARD_DELIMS(_T(")-\\/}]:;,. ?\"'\r\t"));
+
+const GUID NULLGUID = { 0 };
+
+/////////////////////////////////////////////////////////////////////
+
 CTempLocale::CTempLocale(const CString& sLocale) : m_nCategory(-1)
 {
 	Initialise(LC_ALL, sLocale);
@@ -184,7 +194,7 @@ BOOL Misc::CopyTexttoClipboard(const CString& sText, HWND hwnd, UINT nFormat, BO
 CString Misc::GetClipboardText(UINT nFormat)
 {
 	if (!::OpenClipboard(NULL)) 
-		return _T(""); 
+		return EMPTY_STR;
 
 	CString sText;
 
@@ -256,7 +266,7 @@ CString Misc::NewGuid(GUID* pGuid)
 	}
 
 	// else
-	return _T("");
+	return EMPTY_STR;
 }
 
 BOOL Misc::IsGuid(LPCTSTR szGuid)
@@ -299,8 +309,6 @@ BOOL Misc::GuidToString(const GUID& guid, CString& sGuid)
 
 BOOL Misc::GuidIsNull(const GUID& guid)
 {
-	static GUID NULLGUID = { 0 };
-	
 	return SameGuids(guid, NULLGUID);
 }
 
@@ -392,7 +400,7 @@ CString Misc::FormatArray(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncE
 
 	switch (nCount)
 	{
-	case 0: return _T("");
+	case 0: return EMPTY_STR;
 	case 1:	return aValues[0];
 	}
 
@@ -715,7 +723,6 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 		if (bWholeWord)
 		{
 			// Test prior and next chars for delimiters
-			static const CString DELIMS("()-\\/{}[]:;,. ?\"'\n\r\t");
 			TCHAR cPrevChar = ' ', cNextChar = ' ';
 
 			// prev
@@ -886,10 +893,7 @@ CString Misc::Last(const CStringArray& aText)
 	if (nSize > 0)
 		return aText[nSize - 1];
 
-	static CString sEmpty;
-	sEmpty.Empty();
-	
-	return sEmpty;
+	return EMPTY_STR;
 }
 
 CString& Misc::Last(CStringArray& aText)
@@ -899,10 +903,8 @@ CString& Misc::Last(CStringArray& aText)
 	if (nSize > 0)
 		return aText[nSize - 1];
 
-	static CString sEmpty;
-	sEmpty.Empty();
-
-	return sEmpty;
+	FALLBACK_STR.Empty();
+	return FALLBACK_STR;
 }
 
 int Misc::LastIndex(const CString& sText)
@@ -1151,46 +1153,46 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 	return aValues.GetSize();
 }
 
-int Misc::SplitLines(const CString& sText, CStringArray& aLines, int nMaxLineLength)
+int Misc::SplitLines(const CString& sText, CStringArray& aLines, int nMaxLineLengthInChars)
 {
 	int nNumLines = Split(sText, aLines, '\n', TRUE, TRUE);
+	const int MAXCHARS = nMaxLineLengthInChars;
 
-	if ((nNumLines == 0) || (nMaxLineLength <= 0) && (nMaxLineLength != -1))
+	if ((nNumLines == 0) || (MAXCHARS <= 0) && (MAXCHARS != -1))
 	{
 		ASSERT(0);
 		return 0;
 	}
 
-	if (nMaxLineLength != -1)
+	if (MAXCHARS != -1)
 	{
 		// Extra over processing
 		int nLine = nNumLines;
 
-		while (nLine--)
+		while (nLine--) // Reverse order so we can add sub-lines as we go
 		{
-			CString& sLine = aLines[nLine];
+			CString sLine = aLines[nLine];
 
-			if (sLine.GetLength() > nMaxLineLength)
+			if (sLine.GetLength() > MAXCHARS)
 			{
-				CStringArray aSubLines;
+				int nSubline = nLine;
 
 				do
 				{
 					// Find nearest word-break
-					CString sSubLine = Left(sLine, nMaxLineLength, TRUE);
+					CString sSubLine = Left(sLine, MAXCHARS, TRUE);
+					ASSERT(sSubLine.GetLength() <= (MAXCHARS + 1));
 
-					aSubLines.Add(sSubLine);
+					aLines.InsertAt(nSubline++, sSubLine);
 					sLine = sLine.Mid(sSubLine.GetLength());
 				}
-				while (sLine.GetLength() > nMaxLineLength);
+				while (sLine.GetLength() > MAXCHARS);
 				
-				// Add whatever's left over
-				if (!sLine.IsEmpty())
-					aSubLines.Add(sLine);
-
-				// Replace the existing string with the sub strings
-				aLines.RemoveAt(nLine);
-				aLines.InsertAt(nLine, &aSubLines);
+				// Whatever is left over is the last line
+				if (sLine.IsEmpty())
+					aLines.RemoveAt(nSubline);
+				else
+					aLines[nSubline] = sLine;
 			}
 		}
 	}
@@ -1202,9 +1204,7 @@ CString Misc::Left(const CString& sText, int nLength, BOOL bNearestWord)
 {
 	if (bNearestWord && (nLength < sText.GetLength()))
 	{
-		// Look forwards and backwards for word break
-		static CString BACKWARD_DELIMS(_T(")-\\/}]:;,. ?\"'\r\t")); // opening braces
-
+		// Look backwards for word break
 		int nFindPrev = FindNextOneOf(BACKWARD_DELIMS, sText, FALSE, nLength);
 
 		// Only accept the delimiter position if it falls
@@ -1412,13 +1412,11 @@ const CString& Misc::GetItem(const CStringArray& aValues, int nItem)
 {
 	ASSERT(nItem >= 0 && nItem < aValues.GetSize());
 
-	if (nItem < 0 || nItem >= aValues.GetSize())
-	{
-		static CString sDummy;
-		return sDummy;
-	}
+	if ((nItem >= 0) && (nItem < aValues.GetSize()))
+		return aValues.GetData()[nItem];
 
-	return aValues.GetData()[nItem];
+	FALLBACK_STR.Empty();
+	return FALLBACK_STR;
 }
 
 int Misc::RemoveEmptyItems(CStringArray& aFrom)
@@ -1615,8 +1613,8 @@ CString Misc::GetTimeFormat(BOOL bIncSeconds, BOOL bISO)
 	{
 		CString sTemp(sFormat);
 
-		if (!sTemp.Replace(GetTimeSeparator() + _T("ss"), _T("")))
-			sTemp.Replace(GetTimeSeparator() + _T("s"), _T(""));
+		if (!sTemp.Replace(GetTimeSeparator() + _T("ss"), EMPTY_STR))
+			sTemp.Replace(GetTimeSeparator() + _T("s"), EMPTY_STR);
 
 		return sTemp;
 	}
@@ -2444,7 +2442,7 @@ CString Misc::GetKeyName(WORD wVirtKeyCode, BOOL bExtended)
 	}
 
 	// else
-	return _T("");
+	return EMPTY_STR;
 }
 
 BOOL Misc::IsKeyPressed(DWORD dwVirtKey) 

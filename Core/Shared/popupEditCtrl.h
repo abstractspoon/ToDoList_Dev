@@ -31,6 +31,9 @@ class CPopupEditCtrl : public CEnEdit
 // Construction
 public:
 	CPopupEditCtrl(PEC_CLEANUP nCleanup = PEC_AUTOHIDE);
+	virtual ~CPopupEditCtrl();
+
+	virtual BOOL Create(CWnd* pParentWnd, UINT nID, DWORD dwStyle = WS_CHILD);
 
 	void Reset() { m_bEditEnded = FALSE; }
 	void Show(CRect rPos = CRect(0, 0, 0, 0), BOOL bDisableMouseWheel = TRUE); // screen or client depending on original creation mode
@@ -47,21 +50,6 @@ protected:
 	CSpinButtonCtrl* m_pSpinBuddy;
 	PEC_CLEANUP m_nCleanUp;
 
-// Operations
-public:
-	virtual BOOL Create(CWnd* pParentWnd, UINT nID, DWORD dwFlags = WS_CHILD);
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CPopupEditCtrl)
-	public:
-	protected:
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CPopupEditCtrl();
-
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CPopupEditCtrl)
@@ -76,6 +64,7 @@ protected:
 	afx_msg LRESULT OnFloatStatus(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
+protected:
 	void EndEdit(BOOL bCancel, BOOL bIntentional);
 	void Hide();
 	BOOL ShowSpinBuddy(BOOL bShow);

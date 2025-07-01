@@ -101,6 +101,7 @@
 			// m_ShowWorkingHoursOnly
 			// 
 			this.m_ShowWorkingHoursOnly.AutoSize = true;
+			this.m_ShowWorkingHoursOnly.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_ShowWorkingHoursOnly.Location = new System.Drawing.Point(13, 66);
 			this.m_ShowWorkingHoursOnly.Name = "m_ShowWorkingHoursOnly";
 			this.m_ShowWorkingHoursOnly.Size = new System.Drawing.Size(138, 17);

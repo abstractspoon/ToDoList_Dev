@@ -28,7 +28,7 @@ static char THIS_FILE[] = __FILE__;
 
 COleDateTime NullDate()
 {
-	static COleDateTime null;
+	COleDateTime null;
 
 	null.m_dt = 0;
 	null.m_status = COleDateTime::null;
@@ -639,7 +639,7 @@ void CCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const 
 				pDC->SelectObject(&dotPen);
 				
 				// Draw a little arrow
-				static int t[2][7] = {5,5,8,8,8,5,5,4,3,2,1,2,3,4};
+				int t[2][7] = {5,5,8,8,8,5,5,4,3,2,1,2,3,4};
 				int n = 0;
 				
 				for(int r=7; r>0; r--)

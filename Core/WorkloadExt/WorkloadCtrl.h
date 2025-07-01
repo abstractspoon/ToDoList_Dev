@@ -67,7 +67,8 @@ public:
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }
 	CString GetSortByAllocTo() const { return m_sSortByAllocTo; }
 
-	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
+	void SetOptions(DWORD dwOptions);
+	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
 	BOOL SetBackgroundColors(COLORREF crBkgnd, COLORREF crText);

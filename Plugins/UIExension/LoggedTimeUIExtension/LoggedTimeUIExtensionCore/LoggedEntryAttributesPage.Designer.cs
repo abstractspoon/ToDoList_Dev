@@ -76,6 +76,7 @@
 			// 
 			this.label2.AutoSize = true;
 			this.label2.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.label2.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label2.Location = new System.Drawing.Point(0, 3);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(60, 13);
@@ -86,6 +87,7 @@
 			// 
 			this.label3.AutoSize = true;
 			this.label3.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.label3.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label3.Location = new System.Drawing.Point(0, 57);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(31, 13);
@@ -96,6 +98,7 @@
 			// 
 			this.label4.AutoSize = true;
 			this.label4.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.label4.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label4.Location = new System.Drawing.Point(0, 87);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(25, 13);
@@ -106,6 +109,7 @@
 			// 
 			this.label5.AutoSize = true;
 			this.label5.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.label5.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label5.Location = new System.Drawing.Point(0, 113);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(52, 13);
@@ -134,6 +138,7 @@
 			// 
 			this.label6.AutoSize = true;
 			this.label6.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.label6.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label6.Location = new System.Drawing.Point(215, 3);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(34, 13);
@@ -144,6 +149,7 @@
 			// 
 			this.m_AddToTimeSpentCheckBox.AutoSize = true;
 			this.m_AddToTimeSpentCheckBox.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+			this.m_AddToTimeSpentCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_AddToTimeSpentCheckBox.Location = new System.Drawing.Point(102, 28);
 			this.m_AddToTimeSpentCheckBox.Name = "m_AddToTimeSpentCheckBox";
 			this.m_AddToTimeSpentCheckBox.Size = new System.Drawing.Size(186, 17);
@@ -154,6 +160,7 @@
 			// m_FillColorCheckBox
 			// 
 			this.m_FillColorCheckBox.AutoSize = true;
+			this.m_FillColorCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_FillColorCheckBox.Location = new System.Drawing.Point(0, 201);
 			this.m_FillColorCheckBox.Name = "m_FillColorCheckBox";
 			this.m_FillColorCheckBox.Size = new System.Drawing.Size(71, 17);
@@ -170,7 +177,7 @@
 			this.m_FillColorButton.Size = new System.Drawing.Size(75, 23);
 			this.m_FillColorButton.TabIndex = 43;
 			this.m_FillColorButton.Text = "Set...";
-			this.m_FillColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_FillColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_FillColorButton.UseVisualStyleBackColor = true;
 			// 
 			// LoggedEntryAttributesPage

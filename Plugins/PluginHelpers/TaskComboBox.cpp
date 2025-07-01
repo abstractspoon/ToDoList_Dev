@@ -18,9 +18,9 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 TaskComboBox::TaskComboBox()
 	:
+	OwnerdrawComboBoxBase(true), // fixed
 	m_NoneTask(nullptr)
 {
-	DrawMode = Windows::Forms::DrawMode::OwnerDrawFixed;
 }
 
 void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition,
@@ -76,6 +76,8 @@ void TaskComboBox::OnMeasureItem(MeasureItemEventArgs^ e)
 
 void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 {
+	OwnerdrawComboBoxBase::OnDrawItem(e);
+
 	if (e->Index < 0)
 		return;
 
@@ -83,8 +85,6 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 
 	if (taskItem != nullptr)
 	{
-		e->DrawBackground();
-
 		auto rect = e->Bounds;
 
 		if (taskItem != m_NoneTask)
@@ -108,7 +108,7 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 			}
 		}
 
-		auto brush = gcnew SolidBrush(e->ForeColor);
+		auto brush = TextBrush(e);
 
 		e->Graphics->DrawString(taskItem->Title, Font, brush, rect);
 		e->DrawFocusRectangle();
