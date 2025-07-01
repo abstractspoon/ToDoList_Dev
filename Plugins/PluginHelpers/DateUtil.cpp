@@ -322,6 +322,11 @@ String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime
 	return gcnew String(COleDateTimeRange(dateFrom.ToOADate(), dateTo.ToOADate()).Format(dwFlags));
 }
 
+String^ DateUtil::FormatDateOnly(DateTime date, String^ format)
+{
+	return gcnew String(CDateHelper::FormatDateOnly(date.ToOADate(), MS(format)));
+}
+
 String^ DateUtil::FormatDateOnlyRange(DateTime dateFrom, DateTime dateTo, String^ format)
 {
 	return gcnew String(COleDateTimeRange(dateFrom.ToOADate(), dateTo.ToOADate()).FormatDateOnly(MS(format), L" - "));

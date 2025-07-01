@@ -1,6 +1,21 @@
 #include "StdAfx.h"
 #include "JalaliCalendar.h"
 
+BOOL CJalaliCalendar::IsActive()
+{
+	LCID lcid = ::GetThreadLocale();
+	LANGID lid = LANGIDFROMLCID(lcid);
+
+	switch (PRIMARYLANGID(lid))
+	{
+	case LANG_ARABIC:
+	case LANG_PERSIAN:
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 void CJalaliCalendar::GregorianToJalali(const COleDateTime& dtGregorian, COleDateTime& dtJalali, int *JDayOfWeek)
 {
 	SYSTEMTIME stGregorian = { 0 };
@@ -124,7 +139,7 @@ void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JY
 	(*JMonth)++;
 }
 
-void CJalaliCalendar::GetJalaliDate(int *Year, int *Month, int *Day, int *DayOfWeek)
+void CJalaliCalendar::GetCurrentJalaliDate(int *Year, int *Month, int *Day, int *DayOfWeek)
 {
 	SYSTEMTIME st;
 
