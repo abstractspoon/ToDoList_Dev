@@ -13,10 +13,12 @@
 class CJalaliCalendar
 {
 public:
-	static void GetCurrentDate(int *JYear, int *JMonth, int *JDay, int *JDayOfWeek = NULL);
+	static BOOL IsActive();
 
 	static CString GetDayOfWeekName(int JDayOfWeek); // 1 = Saturday
 	static CString GetMonthName(int JMonth);
+
+	static void GetCurrentDate(int *JYear, int *JMonth, int *JDay, int *JDayOfWeek = NULL);
 	
 	static void GregorianToJalali(const COleDateTime& dtGregorian, COleDateTime& dtJalali, int *JDayOfWeek = NULL);
 	static void JalaliToGregorian(const COleDateTime& dtJalali, COleDateTime& dtGregorian, int *GDayOfWeek = NULL);

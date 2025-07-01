@@ -80,6 +80,17 @@ bool StringUtil::Find(String^ source, String^ findText, bool matchWhole, bool ma
 	return (-1 != Misc::Find(sSearchFor, sSearchIn, (BOOL)matchCase, (BOOL)matchWhole));
 }
 
+String^ StringUtil::Reverse(String^ source)
+{
+	if ((source == nullptr) || (source->Length < 2))
+		return source;
+
+	auto cArray = source->ToCharArray();
+	Array::Reverse(cArray);
+
+	return gcnew String(cArray);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Log::LogText(String^ text)

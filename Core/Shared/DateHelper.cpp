@@ -1645,14 +1645,7 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 
 BOOL CDateHelper::WantRTLDates()
 {
-	switch (Misc::GetPrimaryLanguage())
-	{
-	case LANG_ARABIC:
-	case LANG_PERSIAN:
-		return TRUE;
-	}
-
-	return FALSE;
+	return CJalaliCalendar::IsActive();
 }
 
 BOOL CDateHelper::FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow)

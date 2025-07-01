@@ -32,6 +32,21 @@ TCHAR MONTHNAME_12[] = { 0x0627, 0x0633, 0x0641, 0x0646, 0x062F, 0x0};							// 
 
 ////////////////////////////////////////////////////////////////////
 
+BOOL CJalaliCalendar::IsActive()
+{
+	LCID lcid = ::GetThreadLocale();
+	LANGID lid = LANGIDFROMLCID(lcid);
+
+	switch (PRIMARYLANGID(lid))
+	{
+	case LANG_ARABIC:
+	case LANG_PERSIAN:
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 void CJalaliCalendar::GregorianToJalali(const COleDateTime& dtGregorian, COleDateTime& dtJalali, int *JDayOfWeek)
 {
 	SYSTEMTIME stGregorian = { 0 };
