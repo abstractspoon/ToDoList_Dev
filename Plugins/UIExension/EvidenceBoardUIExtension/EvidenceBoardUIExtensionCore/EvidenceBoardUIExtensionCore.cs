@@ -422,12 +422,12 @@ namespace EvidenceBoardUIExtension
 			// Date slider combo and label
 			// Note: The date part has to be a separate label
 			// so that RTL rendering will work properly
-			m_ActiveDateRangeLabel = CreateLabel("Visible Date Range", m_Toolbar);
-			m_ActiveDateRange = CreateLabel("", m_ActiveDateRangeLabel);
+			m_ActiveDateRangeLabel = CreateLabel("Visible Date Range:", m_Toolbar);
+			this.Controls.Add(m_ActiveDateRangeLabel);
 
+			m_ActiveDateRange = CreateLabel("", m_ActiveDateRangeLabel);
 			Win32.SetRTLReading(m_ActiveDateRange.Handle, DateUtil.WantRTLDates());
 
-			this.Controls.Add(m_ActiveDateRangeLabel);
 			this.Controls.Add(m_ActiveDateRange);
 
 			m_DateSlider = new MonthRangeSliderCtrl();
@@ -489,8 +489,8 @@ namespace EvidenceBoardUIExtension
 			var label = new Label();
 
 			label.Font = m_ControlsFont;
-			label.Text = m_Trans.Translate(text, Translator.Type.Label);
 			label.AutoSize = true;
+			label.Text = m_Trans.Translate(text, Translator.Type.Label);
 			label.ForeColor = SystemColors.WindowText;
 
 			if (prevControl != null)
