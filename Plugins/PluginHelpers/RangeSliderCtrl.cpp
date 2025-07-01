@@ -408,6 +408,8 @@ String^ MonthRangeSliderCtrl::FormatRange()
 	{
 		int nMonthTo = DateUtil::DateInMonths(to);
 		to = DateUtil::DateFromMonths(--nMonthTo);
+
+		format = StringUtil::Reverse(format);
 	}
 	else
 	{
