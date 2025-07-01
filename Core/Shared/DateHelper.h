@@ -207,6 +207,8 @@ public:
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
 	static int GetDayCount(DWORD dwDays);
 
+	static BOOL IsDayOfMonth(const COleDateTime& date, int nDay); // 1 <= nDay <= 31
+
 	static COleDateTime GetStartOfWeek(const COleDateTime& date);
 	static COleDateTime GetEndOfWeek(const COleDateTime& date);
 	static COleDateTime GetStartOfMonth(const COleDateTime& date);

@@ -1430,6 +1430,19 @@ COleDateTime CDateHelper::GetEndOfWeek(const COleDateTime& date)
 	return dtEnd;
 }
 
+BOOL CDateHelper::IsDayOfMonth(const COleDateTime& date, int nDay)
+{
+	if (WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::GregorianToJalali(date, &JYear, &JMonth, &JDay);
+
+		return (JDay == nDay);
+	}
+
+	return (date.GetDay() == nDay);
+}
+
 COleDateTime CDateHelper::GetStartOfMonth(const COleDateTime& date)
 {
 	return COleDateTime(date.GetYear(), date.GetMonth(), 1, 0, 0, 0);

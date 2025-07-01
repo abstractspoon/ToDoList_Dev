@@ -945,7 +945,7 @@ void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, con
 	CRect rDate(rHeader);
 	rDate.DeflateRect(HEADER_PADDING, 3);
 
-	if (pCell->date.GetDay() == 1)
+	if (CDateHelper::IsDayOfMonth(pCell->date, 1))
 	{
 		// Draw the first of any month in bold
 		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));
