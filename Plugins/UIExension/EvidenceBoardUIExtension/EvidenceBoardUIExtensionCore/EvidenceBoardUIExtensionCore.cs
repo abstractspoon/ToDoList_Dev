@@ -41,7 +41,8 @@ namespace EvidenceBoardUIExtension
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 
-		private Label m_DateSliderLabel;
+		private Label m_ActiveDateRange;
+		private Label m_ActiveDateRangeLabel;
 		private MonthRangeSliderCtrl m_DateSlider;
 
 		// ----------------------------------------------------------------------------
@@ -269,11 +270,11 @@ namespace EvidenceBoardUIExtension
 				m_Control.Options = m_OptionsCombo.LoadPreferences(prefs, key);
 				m_Control.VisibleLinkTypes = m_LinkVisibilityCombo.LoadPreferences(prefs, key);
 
-				m_DateSlider.Visible = m_DateSliderLabel.Visible = m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider);
-
 				// Preferences
 				m_PrefsDlg.LoadPreferences(prefs, key);
+
 				UpdateEvidenceBoardPreferences();
+				ShowDateSlider(m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider));
 			}
 
 			// App preferences
@@ -419,17 +420,32 @@ namespace EvidenceBoardUIExtension
 			m_Toolbar.Location = ToolbarLocation;
 
 			// Date slider combo and label
-			m_DateSliderLabel = CreateLabel("Visible Date Range", m_Toolbar);
-			this.Controls.Add(m_DateSliderLabel);
+			// Note: The date part has to be a separate label
+			// so that RTL rendering will work properly
+			m_ActiveDateRangeLabel = CreateLabel("Visible Date Range", m_Toolbar);
+			m_ActiveDateRange = CreateLabel("", m_ActiveDateRangeLabel);
+
+			Win32.SetRTLReading(m_ActiveDateRange.Handle, DateUtil.WantRTLDates());
+
+			this.Controls.Add(m_ActiveDateRangeLabel);
+			this.Controls.Add(m_ActiveDateRange);
 
 			m_DateSlider = new MonthRangeSliderCtrl();
 			m_DateSlider.Height = MonthRangeSliderCtrl.GetRequiredHeight();
 
-			InitialiseCtrl(m_DateSlider, m_DateSliderLabel, 250);
+			InitialiseCtrl(m_DateSlider, m_ActiveDateRangeLabel, 250);
 
 			this.Controls.Add(m_DateSlider);
 
 			m_DateSlider.ChangeEvent += new EventHandler(OnDateSliderChange);
+		}
+
+		void ShowDateSlider(bool show)
+		{
+			m_DateSlider.Visible = m_ActiveDateRange.Visible = m_ActiveDateRangeLabel.Visible = show;
+
+			if (!show)
+				m_DateSlider.ClearSelectedRange();
 		}
 
 		protected void OnDateSliderChange(object sender, EventArgs e)
@@ -441,7 +457,7 @@ namespace EvidenceBoardUIExtension
 			else
 				m_Control.ClearSelectedDateRange();
 
-			m_DateSliderLabel.Text = string.Format("{0} ({1})", m_Trans.Translate("Visible Date Range", Translator.Type.Label), m_DateSlider.FormatRange());
+			m_ActiveDateRange.Text = m_DateSlider.FormatRange();
 		}
 
 		private int ControlTop
@@ -509,15 +525,7 @@ namespace EvidenceBoardUIExtension
 			{
 				m_Control.Options = m_OptionsCombo.SelectedOptions;
 
-				if (m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider))
-				{
-					m_DateSlider.Visible = m_DateSliderLabel.Visible = true;
-				}
-				else
-				{
-					m_DateSlider.Visible = m_DateSliderLabel.Visible = false;
-					m_Control.ClearSelectedDateRange();
-				}
+				ShowDateSlider(m_Control.Options.HasFlag(EvidenceBoardOption.ShowDateSlider));
 			}
 		}
 
