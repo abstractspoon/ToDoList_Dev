@@ -1655,7 +1655,7 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 {
 	CString sDate;
 
-	if (IsDateSet(date))
+	if (!Misc::IsEmpty(szFormat) && IsDateSet(date))
 	{
 		SYSTEMTIME st;
 
@@ -1664,7 +1664,7 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 			// RTL dates
 			CString sFormat;
 
-			if (WantRTLDates())
+			if ((szFormat[1] != 0) && WantRTLDates()) // longer than 1 character
 			{
 				sFormat = szFormat;
 				Misc::Reverse(sFormat);
