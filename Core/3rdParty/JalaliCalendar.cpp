@@ -71,6 +71,11 @@ int CJalaliCalendar::GetDaysInMonth(int JYear, int JMonth)
 	return 0;
 }
 
+BOOL CJalaliCalendar::IsEndOfMonth(int JYear, int JMonth, int JDay)
+{
+	return (GetDaysInMonth(JYear, JMonth) == JDay);
+}
+
 BOOL CJalaliCalendar::IsLeapYear(int JYear)
 {
 	// One of a number of ways apparently

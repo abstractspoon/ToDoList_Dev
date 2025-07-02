@@ -18,6 +18,7 @@ public:
 	static CString GetDayOfWeekName(int JDayOfWeek);
 	static CString GetMonthName(int JMonth);
 	
+	static BOOL IsEndOfMonth(int JYear, int JMonth, int JDay);
 	static int GetDaysInMonth(int JYear, int JMonth);
 	static BOOL IsLeapYear(int JYear);
 

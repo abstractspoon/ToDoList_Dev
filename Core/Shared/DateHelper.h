@@ -91,8 +91,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 //
-// NOTE: To avoid confusion it is assumed that every COleDateTime is Gregorian
-// and will be converted internally to and from Jalali as required
+// NOTE: To avoid confusion it is assumed that every COleDateTime and
+// SYSTEMTIME represents a Gregorian date, which will be converted 
+// internally to and from Jalali as required
 
 class CDateHelper  
 {

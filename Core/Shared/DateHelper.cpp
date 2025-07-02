@@ -2385,27 +2385,53 @@ int CDateHelper::CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTi
 
 void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy, BOOL bPreserveEndOfMonth)
 {
-	// convert month/year to int
-	int nMonth = st.wMonth;
-	int nYear = st.wYear;
+	int GDay = st.wDay;
+	int GMonth = st.wMonth;
+	int GYear = st.wYear;
 
-	IncrementMonth(nMonth, nYear, nBy);
-
-	// Validate day and preserve 'end-of month'
-	int nDayInMonth = GetDaysInMonth(nMonth, nYear);
-
-	if (bPreserveEndOfMonth && IsEndOfMonth(st))
+	if (WantRTLDates())
 	{
-		st.wDay = (WORD)nDayInMonth;
+		int JDay, JMonth, JYear;
+		CJalaliCalendar::FromGregorian(GYear, GMonth, GDay, &JYear, &JMonth, &JDay);
+
+		BOOL bWasEndOfMonth = CJalaliCalendar::IsEndOfMonth(JYear, JMonth, JDay);
+		IncrementMonth(JMonth, JYear, nBy);
+
+		int JDaysInMonth = CJalaliCalendar::GetDaysInMonth(JYear, JMonth);
+
+		if (bPreserveEndOfMonth && bWasEndOfMonth)
+		{
+			JDay = JDaysInMonth;
+		}
+		else
+		{
+			JDay = max(JDay, 1);
+			JDay = min(JDay, JDaysInMonth);
+		}
+
+		CJalaliCalendar::ToGregorian(JYear, JMonth, JDay, &GYear, &GMonth, &GDay);
 	}
 	else
 	{
-		st.wDay = max(st.wDay, 1);
-		st.wDay = min(st.wDay, nDayInMonth);
+		IncrementMonth(GMonth, GYear, nBy);
+
+		// Validate day and preserve 'end-of month'
+		int GDaysInMonth = GetDaysInMonth(GMonth, GYear);
+
+		if (bPreserveEndOfMonth && IsEndOfMonth(st))
+		{
+			GDay = GDaysInMonth;
+		}
+		else
+		{
+			GDay = max(GDay, 1);
+			GDay = min(GDay, GDaysInMonth);
+		}
 	}
 
-	st.wMonth = (WORD)nMonth;
-	st.wYear = (WORD)nYear;
+	st.wDay = (WORD)GDay;
+	st.wMonth = (WORD)GMonth;
+	st.wYear = (WORD)GYear;
 }
 
 void CDateHelper::IncrementMonth(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)
