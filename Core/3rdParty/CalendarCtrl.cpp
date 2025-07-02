@@ -13,6 +13,7 @@
 
 #include "stdafx.h"
 #include "CalendarCtrl.h"
+#include "JalaliCalendar.h"
 
 #include <math.h>
 
@@ -422,7 +423,23 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 					rCell.bottom = rc.bottom;
 
 				// test for showing month
-				BOOL bShowMonth = ((pCell->date.GetDay() == 1) || (i==0 && u==0));
+				BOOL bShowMonth = !(i || u);
+
+				if (!bShowMonth)
+				{
+					if (CJalaliCalendar::IsActive())
+					{
+						int JYear, JMonth, JDay;
+						CJalaliCalendar::FromGregorian(pCell->date, &JYear, &JMonth, &JDay);
+
+						if (JDay == 1)
+							bShowMonth = TRUE;
+					}
+					else
+					{
+						bShowMonth = (pCell->date.GetDay() == 1);
+					}
+				}
 
 				// test for today
 				COleDateTime today(time(NULL));

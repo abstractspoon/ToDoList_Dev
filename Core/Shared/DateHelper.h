@@ -90,6 +90,9 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+//
+// NOTE: To avoid confusion it is assumed that every COleDateTime is Gregorian
+// and will be converted internally to and from Jalali as required
 
 class CDateHelper  
 {
@@ -206,6 +209,8 @@ public:
 	static COleDateTime GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays);
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
 	static int GetDayCount(DWORD dwDays);
+
+	static BOOL IsDayOfMonth(const COleDateTime& date, int nDay); // 1 <= nDay <= 31
 
 	static COleDateTime GetStartOfWeek(const COleDateTime& date);
 	static COleDateTime GetEndOfWeek(const COleDateTime& date);

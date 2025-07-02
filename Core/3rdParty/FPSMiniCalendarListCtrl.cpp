@@ -42,10 +42,10 @@ CFPSMiniCalendarListCtrl::CFPSMiniCalendarListCtrl()
 {
 	SetCalendar(NULL);
 	SetItemsPerPage(7);
-	SetMiddleMonthYear(COleDateTime::GetCurrentTime().GetMonth(), COleDateTime::GetCurrentTime().GetYear());
+	SetMiddleMonthYear(COleDateTime::GetCurrentTime());
 
-	m_iSelMonth = COleDateTime::GetCurrentTime().GetMonth();
-	m_iSelYear = COleDateTime::GetCurrentTime().GetYear();
+	m_iSelMonth = m_iMiddleMonth;
+	m_iSelYear = m_iMiddleYear;
 
 	m_iUpFactor = 0;
 	m_iDownFactor = 0;
@@ -219,18 +219,14 @@ void CFPSMiniCalendarListCtrl::ForwardMessage(const MSG *pMSG)
 	}
 }
 
-void CFPSMiniCalendarListCtrl::SetMiddleMonthYear(int iMonth, int iYear)
+void CFPSMiniCalendarListCtrl::SetMiddleMonthYear(const COleDateTime& date)
 {
-	ASSERT(iYear >= 100);
-	ASSERT(iYear <= 9999);
-	ASSERT(iMonth >= 1);
-	ASSERT(iMonth <= 12);
+	CFPSMiniCalendarCtrl::DateToMonthYear(date, m_iMiddleMonth, m_iMiddleYear);
+}
 
-	if (iMonth >= 1 && iMonth <= 12)
-		m_iMiddleMonth = iMonth;
-
-	if (iYear >= 100 && iYear <= 9999)
-		m_iMiddleYear = iYear;
+COleDateTime CFPSMiniCalendarListCtrl::GetSelMonthAndYear() const
+{
+	return CFPSMiniCalendarCtrl::DateFromMonthYear(m_iSelMonth, m_iSelYear);
 }
 
 void CFPSMiniCalendarListCtrl::SetItemsPerPage(int iValue)

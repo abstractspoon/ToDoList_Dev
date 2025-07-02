@@ -909,14 +909,12 @@ CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMo
 {
 	ASSERT(m_sCellDateFormat);
 
-	BOOL bISODates = HasOption(TCCO_SHOWISODATES);
+	CString sDate;
 
-	CString sFormat(m_sCellDateFormat);
-
-	if (!bShowMonth)
-		sFormat = (bISODates ? _T("dd") : _T("d"));
-
-	CString sDate = CDateHelper::FormatDateOnly(date, sFormat);
+	if (bShowMonth)
+		sDate = CDateHelper::FormatDateOnly(date, m_sCellDateFormat);
+	else
+		sDate = CDateHelper::FormatDateOnly(date, (HasOption(TCCO_SHOWISODATES) ? _T("dd") : _T("d")));
 
 	// Show the week number on the first of the week -> First column
 	sWeekNum.Empty();
@@ -945,7 +943,7 @@ void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, con
 	CRect rDate(rHeader);
 	rDate.DeflateRect(HEADER_PADDING, 3);
 
-	if (pCell->date.GetDay() == 1)
+	if (CDateHelper::IsDayOfMonth(pCell->date, 1))
 	{
 		// Draw the first of any month in bold
 		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));

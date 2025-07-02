@@ -27,6 +27,7 @@
 #include "memdc.h"
 #include "FPSMiniCalendarCtrl.h"
 #include "FPSMiniCalendarListCtrl.h"
+#include "JalaliCalendar.h"
 
 #include <locale.h>
 
@@ -40,7 +41,7 @@ static char THIS_FILE[] = __FILE__;
 #define FMC_HEADER_TIMER_INTERVAL		30
 #define FMC_MINICALENDAR_HEIGHT			133
 
-const UINT DEFTEXTFLAGS = (DT_VCENTER | DT_CENTER | DT_SINGLELINE/* | DT_RTLREADING*/);
+const UINT DEFTEXTFLAGS = (DT_VCENTER | DT_CENTER | DT_SINGLELINE);
 const int WEEKNUMBERPADDING = 8;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -179,7 +180,7 @@ CFPSMiniCalendarCtrl::CFPSMiniCalendarCtrl()
 	// set default startup options
 	SetDefaultFont(FMC_DEFAULT_FONT);
 	SetDefaultMinFontSize(FMC_DEFAULT_MIN_FONT_SIZE);
-	SetCurrentMonthAndYear(COleDateTime::GetCurrentTime().GetMonth(), COleDateTime::GetCurrentTime().GetYear());
+	SetCurrentMonthAndYear(COleDateTime::GetCurrentTime());
 	SetBackColor(::GetSysColor(COLOR_WINDOW));
 	SetHighlightToday(TRUE, 0);
 	SetShowTodayButton(FALSE);
@@ -290,27 +291,50 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CFPSMiniCalendarCtrl message handlers
-void CFPSMiniCalendarCtrl::SetCurrentMonthAndYear(int iMonth, int iYear)
+
+void CFPSMiniCalendarCtrl::SetCurrentMonthAndYear(const COleDateTime& date)
 {
-	// From MSDN: The COleDateTime class handles dates from 1 January 100 to 31 December 9999.
-	ASSERT(iYear >= 100);
-	ASSERT(iYear <= 9999);
-	ASSERT(iMonth >= 1);
-	ASSERT(iMonth <= 12);
-
-	if (iMonth >= 1 && iMonth <= 12)
-		m_iCurrentMonth = iMonth;
-
-	if (iYear >= 100 && iYear <= 9999)
-		m_iCurrentYear = iYear;
+	DateToMonthYear(date, m_iCurrentMonth, m_iCurrentYear);
 
 	if (GetSafeHwnd())
 		Invalidate(FALSE);
 }
 
-void CFPSMiniCalendarCtrl::SetCurrentMonthAndYear(const COleDateTime& date)
+void CFPSMiniCalendarCtrl::DateToDayMonthYear(const COleDateTime& date, int& iDay, int& iMonth, int& iYear)
 {
-	SetCurrentMonthAndYear(date.GetMonth(), date.GetYear());
+	if (CJalaliCalendar::IsActive())
+	{
+		CJalaliCalendar::FromGregorian(date, &iYear, &iMonth, &iDay);
+	}
+	else
+	{
+		iDay = date.GetDay();
+		iMonth = date.GetMonth();
+		iYear = date.GetYear();
+	}
+}
+
+void CFPSMiniCalendarCtrl::DateToMonthYear(const COleDateTime& date, int& iMonth, int& iYear)
+{
+	int nUnused;
+	DateToDayMonthYear(date, nUnused, iMonth, iYear);
+}
+
+COleDateTime CFPSMiniCalendarCtrl::DateFromMonthYear(int iMonth, int iYear)
+{
+	COleDateTime date;
+
+	if (CJalaliCalendar::IsActive())
+		CJalaliCalendar::ToGregorian(iYear, iMonth, 1, date);
+	else
+		date.SetDate(iYear, iMonth, 1);
+
+	return date;
+}
+
+COleDateTime CFPSMiniCalendarCtrl::GetCurrentMonthAndYear() const 
+{ 
+	return DateFromMonthYear(m_iCurrentMonth, m_iCurrentYear);
 }
 
 void CFPSMiniCalendarCtrl::SetFontInfo(FMC_FONT_TYPE nFont, LPCTSTR lpszFont, int iSize, BOOL bBold, BOOL bItalic, BOOL bUnderline, BOOL bSymbol, COLORREF crText, COLORREF crBkgnd)
@@ -839,26 +863,22 @@ int CFPSMiniCalendarCtrl::DrawDaysOfWeek(CDC &dc, int iY, int iLeftX, int, int)
 // draw days of month
 int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, int iMonthCol, int iMonth, int iYear)
 {
-	CRect ClientRect;
 	int iReturn = 0;
 	int iStartY = iY;
 	int iStartX = 0;
 	int iEndX = 0;
-//	int iX = 0;
-	COleDateTime dtStart;
+
 	COleDateTime dt;
 	int iDayCounter = 0;
 
 	if (!m_bFontsCreated)
 		CreateFontObjects();
 
-	dtStart.SetDate(iYear, iMonth, 1);
+	const COleDateTime dtStart(DateFromMonthYear(iMonth, iYear));
 
 	dt = dtStart;
 	while (dt.GetDayOfWeek() != m_iFirstDayOfWeek)
 		dt -= 1;
-
-	GetClientRect(ClientRect);
 
 	// calculate starting X position
 	iStartX = ((iLeftX + (m_szMonthSize.cx / 2))) - (((m_iIndividualDayWidth*7) + 30) / 2);
@@ -879,16 +899,22 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 
 		for (int iDayOfWeek = 1; iDayOfWeek <= 7; iDayOfWeek++)
 		{
-			if (dt.GetMonth() == dtStart.GetMonth() ||
-				(dt > dtStart && m_bShowNonMonthDays) ||
-				(dt < dtStart && m_bShowNonMonthDays))
+			int nCurDay, nCurMonth, nCurYear;
+			DateToDayMonthYear(dt, nCurDay, nCurMonth, nCurYear);
+
+			BOOL bActiveMonth = (nCurMonth == iMonth);
+
+			if (bActiveMonth ||
+				(dt > dtStart && m_bShowNonMonthDays) || // Next month
+				(dt < dtStart && m_bShowNonMonthDays))   // Previous month
 			{
 				BOOL bSelected = IsDateSelected(dt);
 				BOOL bSpecial = IsSpecialDate(dt);
-				BOOL bActiveMonth = (dt.GetMonth() == iMonth);
 
 				CRect rCell(iX, iY, iX + m_iIndividualDayWidth+5, iY + m_iDaysHeight+2);
+
 				DrawCellBkgnd(dc, rCell, dt, bSelected, bSpecial, bActiveMonth);
+				SetHotSpot(iMonthRow, iMonthCol, iDayCounter, dt, rCell);
 
 				if (bSpecial && bActiveMonth)
 					pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_SPECIALDAYS].m_pFont);
@@ -897,9 +923,14 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 
 				COLORREF cTextColor = GetCellTextColor(dt, bSelected, bSpecial, bActiveMonth);
 				dc.SetTextColor(cTextColor);
-				dc.DrawText(CStr(dt.GetDay()), rCell, DEFTEXTFLAGS);
 
-				SetHotSpot(iMonthRow, iMonthCol, iDayCounter, dt, rCell);
+				int nDrawFlags = DEFTEXTFLAGS;
+
+				if (CJalaliCalendar::IsActive())
+					nDrawFlags |= DT_RTLREADING;
+
+				dc.DrawText(CStr(nCurDay), rCell, nDrawFlags);
+
 			}
 
 			dt += 1;
@@ -1212,7 +1243,7 @@ void CFPSMiniCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 			m_iHeaderTimerID = SetTimer(FMC_HEADER_TIMER_ID, FMC_HEADER_TIMER_INTERVAL, NULL);
 
-			m_pHeaderList->SetMiddleMonthYear(iMonth, iYear);
+			m_pHeaderList->SetMiddleMonthYear(DateFromMonthYear(iMonth, iYear));
 			m_pHeaderList->SetCalendar(this);
 			m_pHeaderList->CreateEx(0, 
 								szWndCls, 
@@ -1317,8 +1348,8 @@ void CFPSMiniCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		{
 			COleDateTime dtPrev(GetCurrentMonthAndYear());
 
-			int iSelMonth = m_pHeaderList->GetSelMonth();
-			int iSelYear = m_pHeaderList->GetSelYear();
+			int iSelMonth, iSelYear;
+			DateToMonthYear(m_pHeaderList->GetSelMonthAndYear(), iSelMonth, iSelYear);
 
 			int iCell = (((m_pHeaderCell->m_iRow-1) * m_iCols) + m_pHeaderCell->m_iCol)-1;
 
@@ -1332,7 +1363,7 @@ void CFPSMiniCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 				}
 			}
 
-			SetCurrentMonthAndYear(iSelMonth, iSelYear);
+			SetCurrentMonthAndYear(DateFromMonthYear(iSelMonth, iSelYear));
 
 			int nDirection = ((GetCurrentMonthAndYear() < dtPrev) ? SB_LEFT : SB_RIGHT);
 			FireNotifyHScroll(nDirection);
@@ -1901,13 +1932,16 @@ void CFPSMiniCalendarCtrl::SetMonthName(int iMonth, LPCTSTR lpszName)
 
 CString CFPSMiniCalendarCtrl::GetMonthName(int iMonth) 
 {
-	ASSERT(iMonth > 0); 
-	ASSERT(iMonth <= 12); 
-	
-	if (iMonth > 0 && iMonth <= 12)
-		return m_arMonthNames[iMonth-1];
-	else
+	if (iMonth <= 0 || iMonth > 12)
+	{
+		ASSERT(0);
 		return "";
+	}
+
+	if (CJalaliCalendar::IsActive())
+		return CJalaliCalendar::GetMonthName(iMonth);
+
+	return m_arMonthNames[iMonth - 1];
 }
 
 void CFPSMiniCalendarCtrl::SetDayOfWeekName(int iDayOfWeek, LPCTSTR lpszName) 
@@ -1999,11 +2033,12 @@ void CFPSMiniCalendarCtrl::SetDate(COleDateTime dt)
 		m_dtSelEnd.SetDate(dt.GetYear(), dt.GetMonth(), dt.GetDay());
 
 		// make sure the appropriate month and year are visible
-		int nMonth = dt.GetMonth(), nYear = dt.GetYear();
+		int nMonth, nYear;
+		DateToMonthYear(dt, nMonth, nYear);
 
 		if ((nMonth < m_iCurrentMonth) || (nMonth >= (m_iCurrentMonth + m_iRows)) || (nYear != m_iCurrentYear))
 		{
-			SetCurrentMonthAndYear(nMonth, nYear);
+			SetCurrentMonthAndYear(dt);
 		}
 	}
 	else
