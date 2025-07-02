@@ -199,6 +199,9 @@ BOOL COleDateTimeRange::Contains(const COleDateTimeRange& dtOther) const
 	if (!IsValid() || !dtOther.IsValid())
 		return FALSE;
 
+	if (dtOther == *this)
+		return TRUE;
+
 	return (Contains(dtOther.GetStart()) && Contains(dtOther.GetEndInclusive()));
 }
 

@@ -715,6 +715,8 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 		m_data.GetDataExtents(m_dtDataRange);
 
 	// Only restore previous range if it's wholly contained within the data
+	const COleDateTimeRange dtDataRange(CDateHelper::GetStartOfMonth(m_dtDataRange.GetStart()),
+										CDateHelper::GetEndOfMonth(m_dtDataRange.GetEnd()));
 	COleDateTimeRange dtActiveRange;
 
 	if (m_dtDataRange.IsValid())
@@ -725,17 +727,11 @@ void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheck
 		}
 		else if (!GetSliderDateRange(dtActiveRange))
 		{
-			COleDateTime dtDataStart = CDateHelper::GetStartOfMonth(m_dtDataRange.GetStart());
-			COleDateTime dtDataEnd = CDateHelper::GetEndOfMonth(m_dtDataRange.GetEnd());
-		
-			dtActiveRange.Set(dtDataStart, dtDataEnd);
+			dtActiveRange = dtDataRange;
 		}
 		
-		if (dtActiveRange.IsValid())
-		{
-			if (!m_dtDataRange.Contains(dtActiveRange))
-				dtActiveRange = m_dtDataRange;
-		}
+		if (dtActiveRange.IsValid() && !dtDataRange.Contains(dtActiveRange))
+			dtActiveRange = dtDataRange;
 	}
 	m_dtPrevActiveRange.Reset(); // always
 
