@@ -89,7 +89,7 @@ CSize CMiniCalendarCtrl::ComputeSize()
 
 int CMiniCalendarCtrl::ComputeWeekNumberWidth()
 {
-	if (m_bShowWeekNumbers && (m_nWeekNumberWidth == 0))
+	if (!CDateHelper::WantRTLDates() && m_bShowWeekNumbers && (m_nWeekNumberWidth == 0))
 	{
 		if (!m_bFontsCreated)
 			CreateFontObjects();
@@ -146,10 +146,10 @@ int CMiniCalendarCtrl::DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol,
 
 		// Draw divider between week numbers and days
 		dc.FillSolidRect(iLeftX + nWeekWidth + WEEKNUMBERPADDING, iY, 1, (6 * (2 + m_iDaysHeight)), GetSysColor(COLOR_3DDKSHADOW));
-	}
 
-	// Base class
-	iLeftX += (nWeekWidth / 2);
+		// Base class
+		iLeftX += (nWeekWidth / 2);
+	}
 
 	return CFPSMiniCalendarCtrl::DrawDays(dc, iY, iLeftX, iRow, iCol, iMonth, iYear);
 }
