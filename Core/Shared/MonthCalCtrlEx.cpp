@@ -210,6 +210,9 @@ void CMonthCalCtrlEx::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct
 
 void CMonthCalCtrlEx::PreSubclassWindow()
 {
+	// We only support Gregorian calendars
+	ASSERT(!CDateHelper::WantRTLDates());
+
 	m_bWeekNumbers = Misc::HasFlag(GetStyle(), MCS_WEEKNUMBERS);
 	m_rWeekNumbers.SetRect(0, 0, 0, 0);
 
