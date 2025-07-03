@@ -235,6 +235,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_imageIcons(FALSE),
 	m_mgrContent(mgrContent),
 	m_nHeaderContextMenuItem(-1),
+	m_fAveCharWidth(5), // non-zero default
 	m_idleTasks(*this)
 {
 	// build one time column map
@@ -329,13 +330,7 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return FALSE;
 
 	m_hdrColumns.EnableToolTips();
-	
-	// set header font and calc char width
-	CFont* pFont = m_hdrColumns.GetFont();
-	m_hdrTasks.SetFont(pFont);
-
-	CClientDC dc(&m_hdrTasks);
-	m_fAveHeaderCharWidth = GraphicsMisc::GetAverageCharWidth(&dc, pFont);
+	m_hdrTasks.SetFont(m_hdrColumns.GetFont());
 
 	// Add some padding to the right of the checkbox for tree/list
 	// so that the checkboxes, icons and labels have consistent positioning
@@ -363,9 +358,12 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 LRESULT CTDLTaskCtrlBase::OnSetFont(WPARAM wp, LPARAM lp)
 {
-	m_dateTimeWidths.ResetWidths();
+	LRESULT lr = CWnd::Default();
 
-	return CWnd::Default();
+	m_dateTimeWidths.ResetWidths();
+	m_fAveCharWidth = GraphicsMisc::GetAverageCharWidth(Tasks(), (HFONT)wp);
+
+	return lr;
 }
 
 int CTDLTaskCtrlBase::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
@@ -560,7 +558,7 @@ void CTDLTaskCtrlBase::UpdateSelectedTaskPath()
 		CRect rHeader;
 		::GetClientRect(m_hdrTasks, rHeader);
 
-		int nColWidthInChars = (int)(rHeader.Width() / m_fAveHeaderCharWidth);
+		int nColWidthInChars = (int)(rHeader.Width() / m_fAveCharWidth);
 		CString sPath = m_formatter.GetTaskPath(GetSelectedTaskID(), nColWidthInChars);
 
 		if (!sPath.IsEmpty())
@@ -1771,6 +1769,7 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 
 		m_dateTimeWidths.ResetWidths();
 		RecalcUntrackedColumnWidths();
+		m_fAveCharWidth = GraphicsMisc::GetAverageCharWidth(Tasks(), hFont);
 	}
 	
 	return bChange;
@@ -2347,13 +2346,50 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 
 	if (HasStyle(TDCS_SHOWCOMMENTSINLIST))
 	{
-		int nDrawLength = -1; // all 
+		CString sComments(pTDI->sComments); // shared reference
+
+		int nDrawLength = sComments.GetLength(); // All
+		BOOL bNeedReplace = FALSE;
 
 		if (HasStyle(TDCS_SHOWFIRSTCOMMENTLINEINLIST))
-			nDrawLength = pTDI->sComments.FindOneOf(_T("\n\r"));
+		{
+			nDrawLength = sComments.FindOneOf(_T("\n\r"));
+			bNeedReplace = (sComments.Find('\t') < nDrawLength);
+		}
+		else
+		{
+			int nFind = pTDI->sComments.FindOneOf(_T("\n\r\t"));
 
-		if (nDrawLength != 0)
-			DrawColumnText(pDC, pTDI->sComments, rComments, DT_LEFT, crText, TRUE, nDrawLength); // Ellipsis
+			if (nFind > 0)
+			{
+				// Calculate the max length of comments we are likely to show
+				int nMaxDraw = ((int)(rComments.Width() / m_fAveCharWidth) * 2);
+				
+				nDrawLength = min(nDrawLength, nMaxDraw);
+				bNeedReplace = (nFind < nDrawLength);
+			}
+		}
+
+		if (bNeedReplace)
+		{
+			LPTSTR szComments = sComments.GetBuffer(nDrawLength);
+
+			for (int nChar = 0; nChar < nDrawLength; nChar++)
+			{
+				switch (szComments[nChar])
+				{
+				case '\r':
+				case '\n':
+				case '\t':
+					szComments[nChar] = ' ';
+					break;
+				}
+			}
+
+			sComments.ReleaseBuffer(nDrawLength);
+		}
+
+		DrawColumnText(pDC, sComments, rComments, DT_LEFT, crText, TRUE, nDrawLength);
 	}
 	else
 	{

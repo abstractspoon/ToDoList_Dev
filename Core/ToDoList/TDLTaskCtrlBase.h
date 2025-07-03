@@ -257,7 +257,7 @@ protected:
 	TDC_COLUMN m_nSortColID;
 	TDC_SORTDIR m_nSortDir;
 	TDSORT m_sort;
-	float m_fAveHeaderCharWidth;
+	float m_fAveCharWidth;
 	CString m_sTasklistFolder;
 	TDCDATETIMEWIDTHS m_dateTimeWidths;
 	int m_nHeaderContextMenuItem;
