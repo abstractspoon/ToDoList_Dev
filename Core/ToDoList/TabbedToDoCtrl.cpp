@@ -7001,42 +7001,7 @@ void CTabbedToDoCtrl::UpdateSelectedTaskPath()
 		return;
 
 	CToDoCtrl::UpdateSelectedTaskPath();
-
-	// extra processing
-	FTC_VIEW nView = GetTaskView();
-
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		// handled above
-		break;
-
-	case FTCV_TASKLIST:
-		m_taskList.UpdateSelectedTaskPath();
-		break;
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		break;
-
-	default:
-		ASSERT(0);
-	}
+	m_taskList.UpdateSelectedTaskPath();
 }
 
 void CTabbedToDoCtrl::SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree) const

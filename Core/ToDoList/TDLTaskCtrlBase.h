@@ -52,12 +52,15 @@ private:
 	{
 		IDLETASKS(CTDLTaskCtrlBase& tcb);
 		
+		void UpdateSelectedTaskPath() { m_bUpdateSelectedTaskPath = TRUE; }
 		void RecalcColumnWidths(const CTDCColumnIDMap& aColIDs);
 		void Resort(const TDSORT& sort);
 		BOOL Process();
 
 	protected:
 		CTDLTaskCtrlBase& m_tcb;
+
+		BOOL m_bUpdateSelectedTaskPath;
 		CTDCColumnIDMap m_mapRecalcWidthColIDs;
 		TDSORT m_tdsResort;
 
@@ -103,9 +106,10 @@ public:
 	void RedrawTasks(BOOL bErase = TRUE) const;
 	void RedrawColumns(BOOL bErase = TRUE) const;
 	void RedrawColumn(TDC_COLUMN nColID) const;
-	void RecalcUntrackedColumnWidths();
-	void RecalcAllColumnWidths();
-	void UpdateSelectedTaskPath();
+
+	void RecalcUntrackedColumnWidths(); // Idle task
+	void RecalcAllColumnWidths(); // Idle task
+	void UpdateSelectedTaskPath(); // Idle task
 	
  	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
 	inline BOOL HasSelection() const { return GetSelectedCount(); }
@@ -163,6 +167,7 @@ public:
 	void InvalidateAll(BOOL bErase = FALSE, BOOL bUpdate = FALSE);
 	void UpdateAll() { CTreeListSyncer::UpdateAll(); }
 	void SetWindowPrompt(LPCTSTR szPrompt) { m_sTasksWndPrompt = szPrompt; }
+	void DoUpdateSelectedTaskPath();
 
 	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1, BOOL bSelected = FALSE) const;
 	BOOL GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF& crText, 

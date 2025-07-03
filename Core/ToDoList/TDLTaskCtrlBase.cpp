@@ -139,7 +139,8 @@ CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb)
 
 CTDLTaskCtrlBase::IDLETASKS::IDLETASKS(CTDLTaskCtrlBase& tcb)
 	:
-	m_tcb(tcb)
+	m_tcb(tcb),
+	m_bUpdateSelectedTaskPath(FALSE)
 {
 }
 
@@ -155,7 +156,12 @@ void CTDLTaskCtrlBase::IDLETASKS::Resort(const TDSORT& sort)
 
 BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 {
-	if (!m_mapRecalcWidthColIDs.IsEmpty())
+	if (m_bUpdateSelectedTaskPath)
+	{
+		m_tcb.DoUpdateSelectedTaskPath();
+		m_bUpdateSelectedTaskPath = FALSE;
+	}
+	else if (!m_mapRecalcWidthColIDs.IsEmpty())
 	{
 		CScopedLogTimer log(_T("IDLETASKS::Process(RecalcColumnWidths)"));
 
@@ -183,7 +189,8 @@ BOOL CTDLTaskCtrlBase::IDLETASKS::Process()
 
 BOOL CTDLTaskCtrlBase::IDLETASKS::HasTasks() const
 {
-	return (!m_mapRecalcWidthColIDs.IsEmpty() ||
+	return (m_bUpdateSelectedTaskPath ||
+			!m_mapRecalcWidthColIDs.IsEmpty() ||
 			m_tdsResort.IsSorting());
 }
 
@@ -550,6 +557,12 @@ CString CTDLTaskCtrlBase::GetTaskCustomColumnTooltip(const TODOITEM* pTDI, TDC_C
 
 void CTDLTaskCtrlBase::UpdateSelectedTaskPath()
 {
+	m_idleTasks.UpdateSelectedTaskPath();
+}
+
+// internal
+void CTDLTaskCtrlBase::DoUpdateSelectedTaskPath()
+{
 	CEnString sHeader(IDS_TDC_COLUMN_TASK);
 	
 	// add the item path to the header
@@ -629,6 +642,8 @@ void CTDLTaskCtrlBase::OnSize(UINT nType, int cx, int cy)
 
 		if (m_bAutoFitSplitter)
 			AdjustSplitterToFitAttributeColumns();
+
+		UpdateSelectedTaskPath(); // idle task
 	}
 }
 
@@ -795,7 +810,7 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 			break;
 
 		case TDCS_SHOWPATHINHEADER:
-			UpdateSelectedTaskPath();
+			UpdateSelectedTaskPath(); // idle task
 			break;
 
 		case TDCS_HIDEPANESPLITBAR:
@@ -1768,8 +1783,10 @@ BOOL CTDLTaskCtrlBase::SetFont(HFONT hFont)
 		::SendMessage(Tasks(), WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		m_dateTimeWidths.ResetWidths();
-		RecalcUntrackedColumnWidths();
 		m_fAveCharWidth = GraphicsMisc::GetAverageCharWidth(Tasks(), hFont);
+
+		RecalcUntrackedColumnWidths(); // idle task
+		UpdateSelectedTaskPath(); // idle task
 	}
 	
 	return bChange;
@@ -1963,6 +1980,7 @@ void CTDLTaskCtrlBase::OnNotifySplitterChange(int /*nSplitPos*/)
 		m_bAutoFitSplitter = FALSE;
 
 	InvalidateAll(TRUE);
+	UpdateSelectedTaskPath(); // idle task
 }
 
 void CTDLTaskCtrlBase::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar)
@@ -4876,7 +4894,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 						AccumulateRecalcColumn(attribDef.GetColumnID(), aColIDs);
 				}
 
-				UpdateSelectedTaskPath();
+				UpdateSelectedTaskPath(); // idle task
 			}
 			break;
 

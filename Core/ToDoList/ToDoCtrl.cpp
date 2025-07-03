@@ -196,20 +196,13 @@ BOOL CToDoCtrl::IDLETASKS::Process()
 
 		m_mapRefreshAttribIDs.RemoveAll();
 	}
-	else if (m_bUpdateSelectedTaskPath)
-	{
-		m_tdc.UpdateSelectedTaskPath();
-
-		m_bUpdateSelectedTaskPath = FALSE;
-	}
 
 	return HasTasks();
 }
 
 BOOL CToDoCtrl::IDLETASKS::HasTasks() const
 {
-	return (m_bUpdateSelectedTaskPath ||
-			!m_mapRefreshAttribIDs.IsEmpty());
+	return !m_mapRefreshAttribIDs.IsEmpty();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -822,9 +815,9 @@ void CToDoCtrl::Resize(int cx, int cy)
 		}
 
 		m_layout.Resize(cx, cy);
-
 		ShowHideControls();
-		m_idleTasks.UpdateSelectedTaskPath();
+
+		UpdateSelectedTaskPath();
 	}
 }
 
@@ -963,7 +956,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments)
 	m_ctrlAttributes.SetSelectedTaskIDs(aSelTaskIDs);
 
 	// and task header
-	m_idleTasks.UpdateSelectedTaskPath();
+	UpdateSelectedTaskPath();
 	
 	// Do the control enabling before updating the comments
 	// to prevent unwanted intermediate comments states
@@ -7307,7 +7300,7 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 		if (!m_taskTree.SelectItem(hti))
 			UpdateControls(); // disable controls
 
-		m_idleTasks.UpdateSelectedTaskPath();
+		UpdateSelectedTaskPath();
 		NotifyParentSelectionChange();
 	}
 }
