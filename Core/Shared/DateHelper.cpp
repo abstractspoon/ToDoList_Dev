@@ -199,6 +199,9 @@ BOOL COleDateTimeRange::Contains(const COleDateTimeRange& dtOther) const
 	if (!IsValid() || !dtOther.IsValid())
 		return FALSE;
 
+	if (dtOther == *this)
+		return TRUE;
+
 	return (Contains(dtOther.GetStart()) && Contains(dtOther.GetEndInclusive()));
 }
 
@@ -417,6 +420,24 @@ CString COleDateTimeRange::Format(DWORD dwFlags, LPCTSTR szDelim) const
 		if (Misc::IsEmpty(szDelim))
 			szDelim = _T(" ");
 	
+		sRange = (sStart + szDelim + sEnd);
+	}
+
+	return sRange;
+}
+
+CString COleDateTimeRange::FormatDateOnly(LPCTSTR szFormat, LPCTSTR szDelim) const
+{
+	CString sRange;
+
+	if (IsValid())
+	{
+		CString sStart = CDateHelper::FormatDateOnly(m_dtStart, szFormat);
+		CString sEnd = CDateHelper::FormatDateOnly(m_dtEnd, szFormat);
+
+		if (Misc::IsEmpty(szDelim))
+			szDelim = _T(" ");
+
 		sRange = (sStart + szDelim + sEnd);
 	}
 
@@ -814,11 +835,11 @@ BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAnd
 		return FALSE;
 	}
 
-	// Handle Persian/Jalali dates
+	// Treat a negative date as Persian/Jalali
 	if ((date.m_dt < 0.0) && 
 		(Misc::GetPrimaryLanguage() == LANG_PERSIAN))
 	{
-		CJalaliCalendar::JalaliToGregorian(COleDateTime(date), date);
+		CJalaliCalendar::ToGregorian(date.GetYear(), date.GetMonth(), date.GetDay(), date);
 	}
 
 	return TRUE;
@@ -1412,13 +1433,49 @@ COleDateTime CDateHelper::GetEndOfWeek(const COleDateTime& date)
 	return dtEnd;
 }
 
+BOOL CDateHelper::IsDayOfMonth(const COleDateTime& date, int nDay)
+{
+	if (WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
+
+		return (JDay == nDay);
+	}
+
+	return (date.GetDay() == nDay);
+}
+
 COleDateTime CDateHelper::GetStartOfMonth(const COleDateTime& date)
 {
+	if (WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
+
+		COleDateTime dtGreg;
+		CJalaliCalendar::ToGregorian(JYear, JMonth, 1, dtGreg);
+
+		return dtGreg;
+	}
+
+	// else
 	return COleDateTime(date.GetYear(), date.GetMonth(), 1, 0, 0, 0);
 }
 
 COleDateTime CDateHelper::GetEndOfMonth(const COleDateTime& date)
 {
+	if (WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
+
+		COleDateTime dtGreg;
+		CJalaliCalendar::ToGregorian(JYear, JMonth, CJalaliCalendar::GetDaysInMonth(JYear, JMonth), dtGreg);
+
+		return dtGreg;
+	}
+
 	COleDateTime dtEnd = GetStartOfMonth(date);
 
 	return (dtEnd.m_dt + GetDaysInMonth(date) - 1);
@@ -1601,7 +1658,7 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 {
 	CString sDate;
 
-	if (IsDateSet(date))
+	if (!Misc::IsEmpty(szFormat) && IsDateSet(date))
 	{
 		SYSTEMTIME st;
 
@@ -1610,7 +1667,7 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 			// RTL dates
 			CString sFormat;
 
-			if (WantRTLDates())
+			if ((szFormat[1] != 0) && WantRTLDates()) // longer than 1 character
 			{
 				sFormat = szFormat;
 				Misc::Reverse(sFormat);
@@ -1627,14 +1684,7 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 
 BOOL CDateHelper::WantRTLDates()
 {
-	switch (Misc::GetPrimaryLanguage())
-	{
-	case LANG_ARABIC:
-	case LANG_PERSIAN:
-		return TRUE;
-	}
-
-	return FALSE;
+	return CJalaliCalendar::IsActive();
 }
 
 BOOL CDateHelper::FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow)
@@ -1644,26 +1694,28 @@ BOOL CDateHelper::FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTim
 
 CString CDateHelper::GetDayOfWeekName(OLE_DAYOFWEEK nWeekday, BOOL bShort)
 {
-	LCTYPE lct = bShort ? LOCALE_SABBREVDAYNAME1 : LOCALE_SDAYNAME1;
 	CString sWeekday;
 
 	// data check
-	if (nWeekday < 1 || nWeekday > 7)
-		return "";
-
-	switch (nWeekday)
+	if ((nWeekday >= 1) && (nWeekday <= 7))
 	{
-	case DHO_SUNDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME7 : LOCALE_SDAYNAME7); break;
-	case DHO_MONDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME1 : LOCALE_SDAYNAME1); break;
-	case DHO_TUESDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME2 : LOCALE_SDAYNAME2); break;
-	case DHO_WEDNESDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME3 : LOCALE_SDAYNAME3); break;
-	case DHO_THURSDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME4 : LOCALE_SDAYNAME4); break;
-	case DHO_FRIDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME5 : LOCALE_SDAYNAME5); break;
-	case DHO_SATURDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME6 : LOCALE_SDAYNAME6); break;
+		LCTYPE lct = 0;
+
+		switch (nWeekday)
+		{
+		case DHO_SUNDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME7 : LOCALE_SDAYNAME7); break;
+		case DHO_MONDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME1 : LOCALE_SDAYNAME1); break;
+		case DHO_TUESDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME2 : LOCALE_SDAYNAME2); break;
+		case DHO_WEDNESDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME3 : LOCALE_SDAYNAME3); break;
+		case DHO_THURSDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME4 : LOCALE_SDAYNAME4); break;
+		case DHO_FRIDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME5 : LOCALE_SDAYNAME5); break;
+		case DHO_SATURDAY:	lct = (bShort ? LOCALE_SABBREVDAYNAME6 : LOCALE_SDAYNAME6); break;
+		}
+		ASSERT(lct);
+
+		GetLocaleInfo(LOCALE_USER_DEFAULT, lct, sWeekday.GetBuffer(30), 29);
+		sWeekday.ReleaseBuffer();
 	}
-	
-	GetLocaleInfo(LOCALE_USER_DEFAULT, lct, sWeekday.GetBuffer(30),	29);
-	sWeekday.ReleaseBuffer();
 
 	return sWeekday;
 }
@@ -2293,16 +2345,34 @@ COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 	int nYear = (nNumMonths / 12);
 	int nMonth = ((nNumMonths % 12) + 1);
 
-	COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
-	ASSERT(GetDateInMonths(date) == nNumMonths);
+	COleDateTime dtGreg;
 
-	return date;
+	if (WantRTLDates())
+	{
+		CJalaliCalendar::ToGregorian(nYear, nMonth, 1, dtGreg);
+		ASSERT(GetDateInMonths(dtGreg) == nNumMonths);
+	}
+	else
+	{
+		dtGreg.SetDate(nYear, nMonth, 1);
+	}
+
+	return dtGreg;
 }
 
 int CDateHelper::GetDateInMonths(const COleDateTime& date)
 {
 	ASSERT(IsDateSet(date));
 
+	if (WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
+
+		return GetDateInMonths(JMonth, JYear);
+	}
+
+	// else
 	return GetDateInMonths(date.GetMonth(), date.GetYear());
 }
 
@@ -2318,27 +2388,53 @@ int CDateHelper::CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTi
 
 void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy, BOOL bPreserveEndOfMonth)
 {
-	// convert month/year to int
-	int nMonth = st.wMonth;
-	int nYear = st.wYear;
+	int GDay = st.wDay;
+	int GMonth = st.wMonth;
+	int GYear = st.wYear;
 
-	IncrementMonth(nMonth, nYear, nBy);
-
-	// Validate day and preserve 'end-of month'
-	int nDayInMonth = GetDaysInMonth(nMonth, nYear);
-
-	if (bPreserveEndOfMonth && IsEndOfMonth(st))
+	if (WantRTLDates())
 	{
-		st.wDay = (WORD)nDayInMonth;
+		int JDay, JMonth, JYear;
+		CJalaliCalendar::FromGregorian(GYear, GMonth, GDay, &JYear, &JMonth, &JDay);
+
+		BOOL bWasEndOfMonth = CJalaliCalendar::IsEndOfMonth(JYear, JMonth, JDay);
+		IncrementMonth(JMonth, JYear, nBy);
+
+		int JDaysInMonth = CJalaliCalendar::GetDaysInMonth(JYear, JMonth);
+
+		if (bPreserveEndOfMonth && bWasEndOfMonth)
+		{
+			JDay = JDaysInMonth;
+		}
+		else
+		{
+			JDay = max(JDay, 1);
+			JDay = min(JDay, JDaysInMonth);
+		}
+
+		CJalaliCalendar::ToGregorian(JYear, JMonth, JDay, &GYear, &GMonth, &GDay);
 	}
 	else
 	{
-		st.wDay = max(st.wDay, 1);
-		st.wDay = min(st.wDay, nDayInMonth);
+		IncrementMonth(GMonth, GYear, nBy);
+
+		// Validate day and preserve 'end-of month'
+		int GDaysInMonth = GetDaysInMonth(GMonth, GYear);
+
+		if (bPreserveEndOfMonth && IsEndOfMonth(st))
+		{
+			GDay = GDaysInMonth;
+		}
+		else
+		{
+			GDay = max(GDay, 1);
+			GDay = min(GDay, GDaysInMonth);
+		}
 	}
 
-	st.wMonth = (WORD)nMonth;
-	st.wYear = (WORD)nYear;
+	st.wDay = (WORD)GDay;
+	st.wMonth = (WORD)GMonth;
+	st.wYear = (WORD)GYear;
 }
 
 void CDateHelper::IncrementMonth(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)

@@ -58,7 +58,7 @@ BOOL CTDLFileEncodingComboBox::SetSelectedEncoding(SFE_FORMAT nFormat)
 
 SFE_FORMAT CTDLFileEncodingComboBox::GetSelectedEncoding() const
 {
-	return (SFE_FORMAT)CDialogHelper::GetSelectedItemDataT(*this);
+	return (SFE_FORMAT)CDialogHelper::GetSelectedItemData(*this);
 }
 
 void CTDLFileEncodingComboBox::BuildCombo()

@@ -140,7 +140,7 @@ static CEnString TDL_FILEFILTER;
 /////////////////////////////////////////////////////////////////////////////
 
 const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
-const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print\\Print"), _T("html"));
+const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print\\Print"), _T("html"), FALSE); // IE is very fussy about embedded paths
 const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("png"));
 
 /////////////////////////////////////////////////////////////////////////////
@@ -221,7 +221,14 @@ void CToDoListWnd::IDLETASKS::UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCA
 	else
 		m_bUpdateTimeTrackAllTasks |= (bAllTasks != FALSE);
 
-	m_mapTimeTrackAttrib.Append(mapAttrib);
+	if (mapAttrib.Has(TDCA_ALL))
+	{
+		m_mapTimeTrackAttrib.Set(TDCA_ALL);
+	}
+	else if (!m_mapTimeTrackAttrib.Has(TDCA_ALL))
+	{
+		m_mapTimeTrackAttrib.Append(mapAttrib);
+	}
 }
 
 BOOL CToDoListWnd::IDLETASKS::Process()
@@ -809,10 +816,11 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEFILTER, OnUpdateViewTogglefilter)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKEXPANDED, OnUpdateViewExpandTasks)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKSANDCOMMENTS, AlwaysEnabled)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETREEANDLIST, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETREEANDLIST, OnUpdateViewToggleTreeandList)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_UNMAXTASKLISTANDCOMMENTS, OnUpdateUnmaximizeTasklistAndComments)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
 
+	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, OnUpdateActivateTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, OnUpdateFileSaveToUserStorage)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK, ID_NEWSUBTASK, OnUpdateNewTask)
@@ -3275,6 +3283,7 @@ BOOL CToDoListWnd::CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertW
 	{
 		// This location always works
 		nInsertWhere = TDC::MapInsertIDToInsertWhere(ID_NEWTASK_ATTOP);
+		ASSERT(tdc.CanCreateNewTask(nInsertWhere));
 	}
 
 	if (!tdc.CreateNewTask(sTitle, nInsertWhere, bEdit, dwDependency))
@@ -9839,12 +9848,13 @@ BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependen
 	if (tdc.CanCreateNewTask(nInsertWhere))
 		return TRUE;
 
-	// Special case: Map to the default position
 	if ((tdc.GetTaskCount() == 0) && !bDependent)
 	{
-		UINT nNewTaskID = GetNewTaskCmdID();
+		// Special case: Always allow if the default 
+		// command ID maps to the same location
+		UINT nNewTaskCmdID = GetNewTaskCmdID();
 		
-		if (TDC::MapInsertIDToInsertWhere(nNewTaskID) == nInsertWhere)
+		if (TDC::MapInsertIDToInsertWhere(nNewTaskCmdID) == nInsertWhere)
 			return TRUE;
 	}
 
@@ -11588,15 +11598,25 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
     if (m_bClosing)
         return; 
 
-	// Reload tasklists as required
-	if (bActive)
+	// Essential house-keeping
+	if (!bActive)
+	{
+		// Finish up whatever the user was doing
+		if (GetTDCCount())
+			GetToDoCtrl().Flush();
+	}
+	else
+	{
+		// Reload tasklists as required
 		CheckReloadToDoCtrls(-1, TRUE);
+	}
 
 	// Don't do any further processing if the Reminder window or Time tracker
 	// is active because the two windows get into a fight for activation!
 	if (m_dlgReminders.IsForegroundWindow() || m_dlgTimeTracker.IsForegroundWindow())
 		return;
 
+	// More house-keeping
 	if (!bActive)
 	{
 		// save tasklists if required
@@ -13140,6 +13160,8 @@ void CToDoListWnd::OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo)
 
 void CToDoListWnd::OnViewCycleTaskViews() 
 {
+	CLockUpdates lu(*this);
+
 	GetToDoCtrl().SetNextTaskView();
 
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
@@ -13148,19 +13170,22 @@ void CToDoListWnd::OnViewCycleTaskViews()
 
 void CToDoListWnd::OnViewToggleTreeandList() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	switch (tdc.GetTaskView())
+	switch (GetToDoCtrl().GetTaskView())
 	{
 	case FTCV_TASKTREE:
-		tdc.SetTaskView(FTCV_TASKLIST);
+		OnActivateTaskView(ID_ACTIVATEVIEW_LISTVIEW);
 		break;
 
 	case FTCV_TASKLIST:
 	default:
-		tdc.SetTaskView(FTCV_TASKTREE);
+		OnActivateTaskView(ID_ACTIVATEVIEW_TASKTREE);
 		break;
 	}
+}
+
+void CToDoListWnd::OnUpdateViewToggleTreeandList(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().IsListViewTabShowing());
 }
 
 void CToDoListWnd::OnViewToggletasksandcomments() 
@@ -13990,23 +14015,28 @@ void CToDoListWnd::OnViewShowRemindersWindow()
 	m_dlgReminders.ShowWindow();
 }
 
+void CToDoListWnd::OnUpdateActivateTaskView(CCmdUI* pCmdUI)
+{
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		pCmdUI->Enable(TRUE);
+	else
+		pCmdUI->Enable(TDC::MapViewIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
+}
+
 void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 {
-	switch (nCmdID)
-	{
-	case ID_ACTIVATEVIEW_TASKTREE:
-		GetToDoCtrl().SetTaskView(FTCV_TASKTREE);
-		break;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	case ID_ACTIVATEVIEW_LISTVIEW:
-		GetToDoCtrl().SetTaskView(FTCV_TASKLIST);
-		break;
+	FTC_VIEW nOldView = tdc.GetTaskView();
+	FTC_VIEW nNewView = TDC::MapViewIDToTaskView(nCmdID);
 
-	default:
-		ASSERT ((nCmdID >= ID_ACTIVATEVIEW_UIEXTENSION1) && (nCmdID <= ID_ACTIVATEVIEW_UIEXTENSION16));
-		GetToDoCtrl().SetTaskView((FTC_VIEW)(FTCV_UIEXTENSION1 + (nCmdID - ID_ACTIVATEVIEW_UIEXTENSION1)));
-		break;
-	}
+	CLockUpdates lu(*this);
+
+	if (nNewView != nOldView)
+		tdc.SetTaskView(nNewView);
+
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		OnMaximizeTasklist();
 }
 
 LRESULT CToDoListWnd::OnModifyKeyboardShortcuts(WPARAM /*wp*/, LPARAM /*lp*/)

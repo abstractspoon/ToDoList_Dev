@@ -50,16 +50,15 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTaskMiniCalendarCtrl message handlers
 
-void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions)
+void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions, LPCTSTR szHideParentTag)
 {
-	if (m_dwOptions != dwOptions)
+	if ((m_dwOptions != dwOptions) || (Misc::HasFlag(m_dwOptions, TCCO_HIDEPARENTTASKS) && (m_sHideParentTag != szHideParentTag)))
 	{
 		m_dwOptions = dwOptions;
+		m_sHideParentTag = szHideParentTag;
 
 		if (dwOptions & TCCO_DATEDISPLAYOPTIONS)
-		{
 			RecalcSpecialDates();
-		}
 	
 		RecalcHeatMap();
 	}
@@ -106,20 +105,21 @@ void CTaskMiniCalendarCtrl::RecalcSpecialDates()
 	{
 		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
 
-		if (HasOption(TCCO_DISPLAYDONE) || !pTCI->IsDone(TRUE))
-		{
-			if (pTCI->IsStartDateSet())
-				m_setSpecialDates.Add(CDateHelper::GetDateOnly(pTCI->GetAnyStartDate()).m_dt);
+		if (CTaskCalItemMap::WantHideTask(pTCI, m_dwOptions, m_sHideParentTag))
+			continue;
 
-			if (pTCI->IsEndDateSet())
-				m_setSpecialDates.Add(CDateHelper::GetDateOnly(pTCI->GetAnyEndDate()).m_dt);
-		}
+		// else
+		if (pTCI->IsStartDateSet())
+			m_setSpecialDates.Add(CDateHelper::GetDateOnly(pTCI->GetAnyStartDate()).m_dt);
+
+		if (pTCI->IsEndDateSet())
+			m_setSpecialDates.Add(CDateHelper::GetDateOnly(pTCI->GetAnyEndDate()).m_dt);
 	}
 }
 
 void CTaskMiniCalendarCtrl::RecalcHeatMap()
 {
-	if (m_mapHeatMap.Recalculate(m_mapData, m_nHeatMapAttribute, m_dwOptions))
+	if (m_mapHeatMap.Recalculate(m_mapData, m_nHeatMapAttribute, m_dwOptions, m_sHideParentTag))
 		Invalidate();
 }
 

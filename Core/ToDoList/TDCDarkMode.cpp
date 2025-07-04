@@ -41,13 +41,13 @@ struct NUMERICPREF
 	int nDefault[2];
 };
 
-NUMERICPREF NUMERICPREFS[] =
+const NUMERICPREF NUMERICPREFS[] =
 {
 	{ _T("PriorityColorOption"),			PRIORITYOPT_GRADIENT,	PRIORITYOPT_GRADIENT },
 	{ _T("TextColorOption"),				TEXTOPT_DEFAULT,		TEXTOPT_DEFAULT},
 	{ _T("ColorAttribute"),					TDCA_CATEGORY,			TDCA_CATEGORY},
 
-	{ _T("ColorTaskBackground"),			FALSE,					TRUE },
+	{ _T("ColorTaskBackground"),			FALSE,					TRUE }, // The only difference by default
 	{ _T("ColorPriority"),					TRUE,					TRUE },
 	{ _T("SpecifyGridColor"),				TRUE,					TRUE },
 	{ _T("SpecifyDoneColor"),				TRUE,					TRUE },
@@ -72,7 +72,7 @@ struct COLORPREF
 	COLORREF crDefault[2];
 };
 
-COLORPREF COLORPREFS[] = 
+const COLORPREF COLORPREFS[] = 
 {
 	{ _T("Gridlines"),			DEF_GRIDLINECOLOR,			DM_3DFACE },
 	{ _T("TaskDone"),			DEF_TASKDONECOLOR,			DM_WINDOW },
@@ -92,7 +92,7 @@ const int NUM_COLORS = (sizeof(COLORPREFS) / sizeof(COLORPREFS[0]));
 
 // -------------------------------------------------------
 
-LPCTSTR ARRAYPREFS[] =
+const LPCTSTR ARRAYPREFS[] =
 {
 	{ _T("PriorityColors") },
 	{ _T("PriorityScheme") },
@@ -110,7 +110,8 @@ void CTDCDarkMode::Initialize(CPreferences& prefs)
 
 	BOOL bDarkMode = prefs.GetProfileInt(PREFSSECTION, ISDARKMODE, FALSE);
 
-	// Cannot use this method for de-initialisation
+	// Cannot use this method for turning off dark-mode
+	// Have to use Release()
 	if (IsEnabled() && !bDarkMode)
 	{
 		ASSERT(0);
@@ -129,8 +130,10 @@ void CTDCDarkMode::Release()
 {
 	// Only save colours if we're:
 	//
-	// 1. Already in Dark Mode OR
-	// 2. We will be in Dark Mode next time OR
+	// 1. Currently in Dark Mode 
+	// OR
+	// 2. We will be in Dark Mode next time 
+	// OR
 	// 3. We've been in DarkMode at some point in the past
 	//
 	// This reduces the processing for people who will never use Dark Mode

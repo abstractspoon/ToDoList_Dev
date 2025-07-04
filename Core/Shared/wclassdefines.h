@@ -29,6 +29,7 @@
 #define WC_DATETIMEPICK		L"SysDateTimePick32"
 #define WC_DIALOGBOX		L"#32770"
 #define WC_DIRECTUIHWND		L"DirectUIHWND"
+#define WC_DIRECTUIVIEWWND	L"DUIViewWndClassName"
 
 #ifndef WC_EDIT
 #	define WC_EDIT			L"Edit"
@@ -45,6 +46,7 @@
 #define WC_MDICLIENT		L"MDIClient"
 #define WC_MENU				L"#32768"
 #define WC_MONTHCAL			L"SysMonthCal32"
+#define WC_MONTHCALDROPDOWN L"dropdown"
 #define WC_PROGRESS			L"msctls_progress32"
 #define WC_REBAR			L"ReBarWindow32"
 #define WC_RICHEDIT			L"Richedit"
@@ -58,6 +60,7 @@
 #define WC_SHDOCOBJVW		L"Shell DocObject View"
 #define WC_SHELLDLLDEFVIEW	L"SHELLDLL_DefView"
 #define WC_SHELLEMBEDDING	L"Shell Embedding"
+#define WC_SHELLFOLDERVIEW	L"SHBrowseForFolder ShellNameSpace Control"
 #define WC_SLIDER			L"msctls_trackbar32"
 #define WC_SPIN				L"msctls_updown32"
 

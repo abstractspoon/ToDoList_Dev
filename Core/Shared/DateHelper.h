@@ -76,6 +76,7 @@ public:
 	BOOL Expand(int nAmount, DH_UNITS nUnits);
 
 	CString Format(DWORD dwFlags = 0, LPCTSTR szDelim = _T(" - ")) const;
+	CString FormatDateOnly(LPCTSTR szFormat, LPCTSTR szDelim = _T(" - ")) const;
 	double CalcProportion(const COleDateTime& date) const; // returns 0.0-1.0
 
 	// returns 'end of day' if bInclusive is TRUE and date has no time
@@ -89,6 +90,10 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+//
+// NOTE: To avoid confusion it is assumed that every COleDateTime and
+// SYSTEMTIME represents a Gregorian date, which will be converted 
+// internally to and from Jalali as required
 
 class CDateHelper  
 {
@@ -205,6 +210,8 @@ public:
 	static COleDateTime GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays);
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
 	static int GetDayCount(DWORD dwDays);
+
+	static BOOL IsDayOfMonth(const COleDateTime& date, int nDay); // 1 <= nDay <= 31
 
 	static COleDateTime GetStartOfWeek(const COleDateTime& date);
 	static COleDateTime GetEndOfWeek(const COleDateTime& date);

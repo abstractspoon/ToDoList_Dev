@@ -19,6 +19,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\CtrlTextHighlighter.h"
 #include "..\shared\FileIcons.h"
+#include "..\shared\OSVersion.h"
 
 #include "..\Interfaces\TasklistStorageMgr.h"
 
@@ -30,7 +31,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const COLORREF HILITE_COLOUR = RGB(255, 255, 64); // yellow
+const COLORREF HILITE_BACKCOLOUR = RGB(255, 255, 64); // yellow
+const COLORREF HILITE_TEXTCOLOUR = GraphicsMisc::GetBestTextColor(HILITE_BACKCOLOUR);
 
 /////////////////////////////////////////////////////////////////////////////
 // Private class for tracking mouse middle-button clicking
@@ -420,7 +422,7 @@ BOOL CPreferencesDlg::AddPageToTree(CPreferencesPageBase* pPage, UINT nIDPath, U
 					break;
 			}
 
-			if (!pPage->HighlightUIText(m_aSearchTerms, HILITE_COLOUR) && (nPath == -1))
+			if (!pPage->HighlightUIText(m_aSearchTerms, HILITE_BACKCOLOUR) && (nPath == -1))
 				return FALSE;
 		}
 		else
@@ -864,7 +866,7 @@ void CPreferencesDlg::UpdatePageTitleTextColors()
 	if (CCtrlTextHighlighter::TextContainsOneOf(m_sPageTitle, m_aSearchTerms))
 	{
 		crText = 0;
-		crBack = HILITE_COLOUR;
+		crBack = HILITE_BACKCOLOUR;
 	}
 
 	m_stPageTitle.SetTextColors(crText, crBack);
@@ -1054,24 +1056,50 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		break;
 
 	case CDDS_ITEMPREPAINT:
-		if (m_aSearchTerms.GetSize())
-		{
-			CString sPage = m_tcPages.GetItemText(hti);
-
-			if (CCtrlTextHighlighter::TextContainsOneOf(sPage, m_aSearchTerms))
-			{
-				pTVCD->clrTextBk = HILITE_COLOUR;
-				pTVCD->clrText = GraphicsMisc::GetBestTextColor(HILITE_COLOUR);
-
-				*pResult = CDRF_NEWFONT;
-				break;
-			}
-		}
-		// All else
 		if (m_tcPages.GetSelectedItem() == hti)
 		{
 			pTVCD->clrText = GraphicsMisc::GetExplorerItemSelectionTextColor(CLR_NONE, GMIS_SELECTED, GMIB_THEMECLASSIC);
 			*pResult = CDRF_NEWFONT;
+
+			if (!CThemed::AreControlsThemed() || (COSVersion() < OSV_VISTA))
+			{
+				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
+				BOOL bFocused = (GetFocus() == &m_tcPages);
+				GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+
+				GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcPages, nState, pTVCD->nmcd.rc, GMIB_THEMECLASSIC);
+
+				pTVCD->clrTextBk = GraphicsMisc::GetExplorerItemSelectionBackColor(nState, GMIB_THEMECLASSIC);
+			}
+		}
+		
+		if (m_aSearchTerms.GetSize())
+		{
+			*pResult |= CDRF_NOTIFYPOSTPAINT;
+		}
+		break;
+
+	case CDDS_ITEMPOSTPAINT:
+		{
+			ASSERT(m_aSearchTerms.GetSize());
+
+			CString sPage = m_tcPages.GetItemText(hti);
+
+			if (CCtrlTextHighlighter::TextContainsOneOf(sPage, m_aSearchTerms))
+			{
+				CRect rText;
+				m_tcPages.GetItemRect(hti, rText, TRUE);
+
+				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
+				
+				pDC->SetTextColor(HILITE_TEXTCOLOUR);
+				pDC->SetBkColor(HILITE_BACKCOLOUR);
+				pDC->SetBkMode(OPAQUE);
+				pDC->DrawText(sPage, rText, (DT_CENTER | DT_VCENTER | DT_SINGLELINE));
+
+				*pResult = CDRF_SKIPDEFAULT;
+				break;
+			}
 		}
 		break;
 	}

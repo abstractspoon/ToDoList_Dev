@@ -55,14 +55,11 @@ private:
 		IDLETASKS(CToDoCtrl& tdc);
 
 		void RefreshAttributeValues(const CTDCAttributeMap& aAttribIDs = TDCA_ALL);
-		void UpdateSelectedTaskPath() { m_bUpdateSelectedTaskPath = TRUE; }
 		BOOL Process();
 
 	protected:
 		CToDoCtrl& m_tdc;
-
 		CTDCAttributeMap m_mapRefreshAttribIDs;
-		BOOL m_bUpdateSelectedTaskPath;
 
 	protected:
 		BOOL HasTasks() const;

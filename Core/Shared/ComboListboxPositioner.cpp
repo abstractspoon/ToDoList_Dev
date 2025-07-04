@@ -31,8 +31,9 @@ CComboListboxPositioner::~CComboListboxPositioner()
 
 BOOL CComboListboxPositioner::Initialize()
 {
-	// We handle our own class name checks for efficiency
-	return Instance().InitHooks(HM_CALLWNDPROCRET/*, WC_COMBOLBOX*/);
+	// We don't pass WC_COMBOLBOX here because it's more
+	// efficient to check the class in OnCallWndRetProc
+	return Instance().InitHooks(HM_CALLWNDPROCRET);
 }
 
 void CComboListboxPositioner::Release()
@@ -66,24 +67,12 @@ BOOL CComboListboxPositioner::OnCallWndRetProc(const MSG& msg, LRESULT lr)
 
 void CComboListboxPositioner::FixupListBoxPosition(HWND hwndListbox, const WINDOWPOS& wpos)
 {
-	CRect rMonitor, rNewPos(CPoint(wpos.x, wpos.y), CSize(wpos.cx, wpos.cy));
-	GraphicsMisc::GetAvailableScreenSpace(rNewPos, rMonitor);
+ 	CRect rNewPos(CPoint(wpos.x, wpos.y), CSize(wpos.cx, wpos.cy));
+	CPoint ptCursor(::GetMessagePos());
 
-	// Make sure at least some part of the listbox is visible
-	if (CRect().IntersectRect(rNewPos, rMonitor))
+	// We only fixup the X position because Windows handles the Y pos
+	if (GraphicsMisc::FitRectToScreen(rNewPos, &ptCursor) && (rNewPos.left != wpos.x))
 	{
-		if (rNewPos.right > rMonitor.right)
-		{
-			rNewPos.left = rMonitor.right - rNewPos.Width();
-			rNewPos.right = rMonitor.right;
-		}
-		else if (rNewPos.left < rMonitor.left)
-		{
-			rNewPos.right = rMonitor.left + rNewPos.Width();
-			rNewPos.left = rMonitor.left;
-		}
-
-		if (rNewPos.left != wpos.x)
-			::MoveWindow(hwndListbox, rNewPos.left, rNewPos.top, rNewPos.Width(), rNewPos.Height(), TRUE);
+		::MoveWindow(hwndListbox, rNewPos.left, wpos.y, wpos.cx, wpos.cy, TRUE);
 	}
 }

@@ -184,18 +184,19 @@ void GraphicsMisc::DrawGradient(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORR
 	TRIVERTEX vert[2];
 	GRADIENT_RECT gRect;
 
-	vert[0] .x      = pRect->left;
-	vert[0] .y      = pRect->top;
-	vert[0] .Red    = MAKEWORD(0, GetRValue(crFrom));
-	vert[0] .Green  = MAKEWORD(0, GetGValue(crFrom));
-	vert[0] .Blue   = MAKEWORD(0, GetBValue(crFrom));
-	vert[0] .Alpha  = 0x0000;
-	vert[1] .x      = pRect->right;
-	vert[1] .y      = pRect->bottom; 
-	vert[1] .Red    = MAKEWORD(0, GetRValue(crTo));
-	vert[1] .Green  = MAKEWORD(0, GetGValue(crTo));
-	vert[1] .Blue   = MAKEWORD(0, GetBValue(crTo));
-	vert[1] .Alpha  = 0x0000;
+	vert[0].x      = pRect->left;
+	vert[0].y      = pRect->top;
+	vert[0].Red    = MAKEWORD(0, GetRValue(crFrom));
+	vert[0].Green  = MAKEWORD(0, GetGValue(crFrom));
+	vert[0].Blue   = MAKEWORD(0, GetBValue(crFrom));
+	vert[0].Alpha  = 0x0000;
+	vert[1].x      = pRect->right;
+	vert[1].y      = pRect->bottom; 
+	vert[1].Red    = MAKEWORD(0, GetRValue(crTo));
+	vert[1].Green  = MAKEWORD(0, GetGValue(crTo));
+	vert[1].Blue   = MAKEWORD(0, GetBValue(crTo));
+	vert[1].Alpha  = 0x0000;
+
 	gRect.UpperLeft  = 0;
 	gRect.LowerRight = 1;
 
@@ -819,6 +820,17 @@ int GraphicsMisc::GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
 	return pDC->GetTextExtent(sText).cx;
 }
 
+float GraphicsMisc::GetAverageCharWidth(HWND hWndRef, HFONT hFont)
+{
+	CClientDC dc(CWnd::FromHandle(hWndRef));
+	HFONT hOldFont = PrepareDCFont(&dc, hWndRef, hFont);
+
+	float fAveWidth = GetAverageCharWidth(&dc);
+	dc.SelectObject(hOldFont);
+
+	return fAveWidth;
+}
+
 float GraphicsMisc::GetAverageCharWidth(CDC* pDC, CFont* pFont)
 {
 	ASSERT(pDC);
@@ -956,6 +968,12 @@ void GraphicsMisc::CalculateBoxColors(COLORREF crBase, BOOL bEnabled, COLORREF& 
 
 COLORREF GraphicsMisc::Blend(COLORREF color1, COLORREF color2, double dAmount)
 {
+	if ((dAmount < 0) || (dAmount > 1.0))
+	{
+		ASSERT(0);
+		return CLR_NONE;
+	}
+
 	if (color1 == CLR_NONE || color2 == CLR_NONE)
 		return CLR_NONE;
 
@@ -967,9 +985,9 @@ COLORREF GraphicsMisc::Blend(COLORREF color1, COLORREF color2, double dAmount)
 	int green2 = GetGValue(color2);
 	int blue2 = GetBValue(color2);
 	
-	int redBlend = (int)((red1 + red2) * dAmount);
-	int greenBlend = (int)((green1 + green2) * dAmount);
-	int blueBlend = (int)((blue1 + blue2) * dAmount);
+	int redBlend = (int)((red1 * dAmount) + (red2 * (1.0 - dAmount)));
+	int greenBlend = (int)((green1 * dAmount) + (green2 * (1.0 - dAmount)));
+	int blueBlend = (int)((blue1 * dAmount) + (blue2 * (1.0 - dAmount)));
 
 	return RGB(redBlend, greenBlend, blueBlend);
 }
@@ -1685,7 +1703,7 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
-				crBorder = CLASSICTHEME_SEL_BORDERCOLOR;
+				crBorder = CLASSICTHEME_SELNOFOCUS_BORDERCOLOR;
 				crFill = (bTransparent ? CLASSICTHEME_SEL_BORDERCOLOR : CLASSICTHEME_SELNOFOCUS_BKCOLOR);
 				break;
 			
@@ -1818,6 +1836,59 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionBorderColor(GM_ITEMSTATE nState, 
 	}
 
 	return GetSysColor(COLOR_WINDOW);
+}
+
+BOOL GraphicsMisc::FitRect(CRect& rect, const CRect& rOther)
+{
+	int nXOffset = 0, nYOffset = 0;
+
+	if (rect.left < rOther.left)
+	{
+		nXOffset = (rOther.left - rect.left);
+	}
+	else if (rect.right > rOther.right)
+	{
+		nXOffset = (rOther.right - rect.right);
+	}
+
+	if (rect.top < rOther.top)
+	{
+		nYOffset = (rOther.top - rect.top);
+	}
+	else if (rect.bottom > rOther.bottom)
+	{
+		nYOffset = (rOther.bottom - rect.bottom);
+	}
+
+	if (!nXOffset && !nYOffset)
+		return FALSE;
+
+	rect.OffsetRect(nXOffset, nYOffset);
+	return TRUE;
+}
+
+BOOL GraphicsMisc::FitRectToWindow(CRect& rect, HWND hWnd, BOOL bScreen)
+{
+	CRect rWnd;
+
+	if (bScreen)
+		::GetWindowRect(hWnd, rWnd);
+	else
+		::GetClientRect(hWnd, rWnd);
+
+	return FitRect(rect, rWnd);
+}
+
+BOOL GraphicsMisc::FitRectToScreen(CRect& rect, LPPOINT pPtRef, UINT nFallback)
+{
+	CRect rScreen;
+
+	if (pPtRef)
+		GetAvailableScreenSpace(*pPtRef, rScreen, nFallback);
+	else
+		GetAvailableScreenSpace(rect, rScreen, nFallback);
+
+	return FitRect(rect, rScreen);
 }
 
 BOOL GraphicsMisc::GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen, UINT nFallback)

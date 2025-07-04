@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "Graphicsmisc.h"
 #include "themed.h"
+#include "DateHelper.h"
 
 #include <math.h>
 
@@ -309,7 +310,8 @@ BOOL CDateTimeCtrlEx::OnDropDown(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = 0;
 
-	if (m_monthCal.GetSafeHwnd() == NULL)
+	// We only hook Gregorian calendars
+	if ((m_monthCal.GetSafeHwnd() == NULL) && !CDateHelper::WantRTLDates())
 	{
 		HWND hMonthCal = (HWND)SendMessage(DTM_GETMONTHCAL);
 		ASSERT(hMonthCal);

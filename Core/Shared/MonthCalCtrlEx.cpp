@@ -17,7 +17,11 @@ const UINT WM_REDRAWWEEKNUMBERS = (WM_USER+1);
 /////////////////////////////////////////////////////////////////////////////////////
 // CMonthCalCtrlEx
 
-// IMPLEMENT_DYNAMIC(CMonthCalCtrlEx, CMonthCalCtrl)
+#if _MSC_VER <= 1200
+IMPLEMENT_DYNAMIC(CMonthCalCtrl, CWnd)
+#endif
+
+IMPLEMENT_DYNAMIC(CMonthCalCtrlEx, CMonthCalCtrl)
 
 CMonthCalCtrlEx::CMonthCalCtrlEx() 
 	: 
@@ -197,7 +201,7 @@ void CMonthCalCtrlEx::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct
 	// Force redraw of week numbers if they become visible
 	if ((nStyleType == GWL_STYLE) && !m_bWeekNumbers && IsMonthView())
 	{
-		m_bWeekNumbers = ((lpStyleStruct->styleNew && MCS_WEEKNUMBERS) != 0);
+		m_bWeekNumbers = Misc::HasFlag(lpStyleStruct->styleNew, MCS_WEEKNUMBERS);
 
 		if (m_bWeekNumbers)
 			InvalidateRect(GetWeekNumbersRect());
@@ -206,7 +210,10 @@ void CMonthCalCtrlEx::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct
 
 void CMonthCalCtrlEx::PreSubclassWindow()
 {
-	m_bWeekNumbers = ((GetStyle() && MCS_WEEKNUMBERS) != 0);
+	// We only support Gregorian calendars
+	ASSERT(!CDateHelper::WantRTLDates());
+
+	m_bWeekNumbers = Misc::HasFlag(GetStyle(), MCS_WEEKNUMBERS);
 	m_rWeekNumbers.SetRect(0, 0, 0, 0);
 
 	CMonthCalCtrl::PreSubclassWindow();

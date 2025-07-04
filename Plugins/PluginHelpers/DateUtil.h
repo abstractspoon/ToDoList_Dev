@@ -85,6 +85,9 @@ namespace Abstractspoon
 				static String^ GetMonthName(int nMonth, bool shortName);
 				static String^ FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime, bool bISO);
 
+				static String^ FormatDateOnly(DateTime date, String^ format);
+				static String^ FormatDateOnlyRange(DateTime dateFrom, DateTime dateTo, String^ format); // delim = " - "
+
 				static int DateInMonths(DateTime date);
 				static DateTime DateFromMonths(int nMonths);
 

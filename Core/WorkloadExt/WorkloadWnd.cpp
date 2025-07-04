@@ -257,13 +257,17 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	// application preferences
 	InitWorkingWeek(pPrefs);
 
-	m_ctrlWorkload.SetOption(WLCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
-	m_ctrlWorkload.SetOption(WLCF_TREATSUBCOMPLETEDASDONE, pPrefs->GetProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), FALSE));
-	m_ctrlWorkload.SetOption(WLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
-	m_ctrlWorkload.SetOption(WLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
-	m_ctrlWorkload.SetOption(WLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
-	m_ctrlWorkload.SetOption(WLCF_ALLOWPARENTALLOCATIONS, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowParentTimeTracking"), TRUE));
-	m_ctrlWorkload.SetOption(WLCF_SHOWMIXEDCOMPLETIONSTATE, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowMixedCompletionState"), TRUE));
+	DWORD dwOptions = 0;
+
+	Misc::SetFlag(dwOptions, WLCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
+	Misc::SetFlag(dwOptions, WLCF_TREATSUBCOMPLETEDASDONE, pPrefs->GetProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), FALSE));
+	Misc::SetFlag(dwOptions, WLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
+	Misc::SetFlag(dwOptions, WLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
+	Misc::SetFlag(dwOptions, WLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
+	Misc::SetFlag(dwOptions, WLCF_ALLOWPARENTALLOCATIONS, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowParentTimeTracking"), TRUE));
+	Misc::SetFlag(dwOptions, WLCF_SHOWMIXEDCOMPLETIONSTATE, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowMixedCompletionState"), TRUE));
+
+	m_ctrlWorkload.SetOptions(dwOptions);
 
 	m_ctrlWorkload.EnableTreeCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 	m_ctrlWorkload.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
@@ -824,11 +828,15 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 
 	m_ctrlWorkload.SetOverlapColor(m_dlgPrefs.GetOverlapColor());
 
-	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGALLOCATIONS, m_dlgPrefs.GetAutoCalculateMissingAllocations());
-	m_ctrlWorkload.SetOption(WLCF_PREFERTIMEESTFORCALCS, m_dlgPrefs.GetPreferTimeEstimateForCalcs());
-	m_ctrlWorkload.SetOption(WLCF_RECALCALLOCATIONS, m_dlgPrefs.GetRecalculateAllocations());
-	m_ctrlWorkload.SetOption(WLCF_RECALCPROPORTIONALLY, m_dlgPrefs.GetRecalculateAllocationsProportionally());
-	m_ctrlWorkload.SetOption(WLCF_INCLUDEDATELESSTASKSINPERIOD, m_dlgPrefs.GetIncludeDatelessTasksInPeriod());
+	DWORD dwOptions = m_ctrlWorkload.GetOptions(); // Preserve app options
+
+	Misc::SetFlag(dwOptions, WLCF_CALCMISSINGALLOCATIONS, m_dlgPrefs.GetAutoCalculateMissingAllocations());
+	Misc::SetFlag(dwOptions, WLCF_PREFERTIMEESTFORCALCS, m_dlgPrefs.GetPreferTimeEstimateForCalcs());
+	Misc::SetFlag(dwOptions, WLCF_RECALCALLOCATIONS, m_dlgPrefs.GetRecalculateAllocations());
+	Misc::SetFlag(dwOptions, WLCF_RECALCPROPORTIONALLY, m_dlgPrefs.GetRecalculateAllocationsProportionally());
+	Misc::SetFlag(dwOptions, WLCF_INCLUDEDATELESSTASKSINPERIOD, m_dlgPrefs.GetIncludeDatelessTasksInPeriod());
+
+	m_ctrlWorkload.SetOptions(dwOptions);
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 

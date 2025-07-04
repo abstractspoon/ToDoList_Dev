@@ -144,29 +144,33 @@ int CTaskCalendarCtrl::GetDefaultTaskHeight()
 	return DEF_TASK_HEIGHT;
 }
 
-BOOL CTaskCalendarCtrl::HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew)
+BOOL CTaskCalendarCtrl::HasOptionChanged(int nOption, DWORD dwOldOptions, DWORD dwNewOptions)
 {
-	return ((dwOld & TCCO_DATEDISPLAYOPTIONS) == (dwNew & TCCO_DATEDISPLAYOPTIONS));
+	return ((dwOldOptions & nOption) != (dwNewOptions & nOption));
 }
 
-void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
+void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
 {
-	// Now handled by 'SetHideParentTasks'
-	dwNewOptions &= ~TCCO_HIDEPARENTTASKS;
+	BOOL bHideParentChange = (HasOptionChanged(TCCO_HIDEPARENTTASKS, m_dwOptions, dwNewOptions) ||
+							  (HasOption(TCCO_HIDEPARENTTASKS) && (m_sHideParentTag != szHideParentTag)));
 
-	DWORD dwCurOptions = (m_dwOptions & ~TCCO_HIDEPARENTTASKS);
+	BOOL bOtherOptionsChange = HasOptionChanged(~TCCO_HIDEPARENTTASKS, m_dwOptions, dwNewOptions);
+	BOOL bDateDisplayChange = HasOptionChanged(TCCO_DATEDISPLAYOPTIONS, m_dwOptions, dwNewOptions);
+	BOOL bDateFormatChange = HasOptionChanged(TCCO_DATEFORMATOPTIONS, m_dwOptions, dwNewOptions);
 
-	if (dwCurOptions != dwNewOptions)
+	if (!bHideParentChange && !bOtherOptionsChange)
+		return;
+
+	m_dwOptions = dwNewOptions;
+	m_sHideParentTag = szHideParentTag;
+
+	// Scroll to task if the date visibility options have changed
+	BOOL bScrollToTask = bDateDisplayChange;
+
+	if (bOtherOptionsChange)
 	{
-		DWORD dwPrev = m_dwOptions;
-		m_dwOptions = dwNewOptions | (dwPrev & TCCO_HIDEPARENTTASKS); // preserve parent status
-
-		RecalcCellHeaderDateFormats();
-		RecalcTaskDates();
-		RebuildCellTasks();
-
-		BOOL bScrollToTask = !HasSameDateDisplayOptions(m_dwOptions, dwPrev);
-		FixupSelection(bScrollToTask);
+		if (bDateFormatChange)
+			RecalcCellHeaderDateFormats();
 
 		EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
 
@@ -180,34 +184,13 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 			m_timerMidnight.Disable();
 		}
 	}
-}
 
-void CTaskCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
-{
-	BOOL bIsHidden = HasOption(TCCO_HIDEPARENTTASKS);
-	BOOL bChange = (Misc::StatesDiffer(bHide, bIsHidden) || 
-					(bHide && (m_sHideParentTag != sTag)));
-
-	if (bChange)
-	{
-		if (bHide)
-		{
-			m_dwOptions |= TCCO_HIDEPARENTTASKS;
-			m_sHideParentTag = sTag;
-		}
-		else
-		{
-			m_dwOptions &= ~TCCO_HIDEPARENTTASKS;
-			m_sHideParentTag.Empty();
-		}
-
-		RecalcTaskDates();
-		RebuildCellTasks();
-
-		// Scroll to task if hidden parent is being reshown
-		BOOL bScrollToTask = (!bHide && m_mapData.IsParentTask(GetSelectedTaskID()));
-		FixupSelection(bScrollToTask);
-	}
+	// Alternatively scroll to task parent visibility has changed and selected task is a parent
+	bScrollToTask |= (bHideParentChange && m_mapData.IsParentTask(GetSelectedTaskID()));
+	
+	RecalcTaskDates();
+	RebuildCellTasks();
+	FixupSelection(bScrollToTask);
 }
 
 void CTaskCalendarCtrl::RecalcTaskDates()
@@ -926,14 +909,12 @@ CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMo
 {
 	ASSERT(m_sCellDateFormat);
 
-	BOOL bISODates = HasOption(TCCO_SHOWISODATES);
+	CString sDate;
 
-	CString sFormat(m_sCellDateFormat);
-
-	if (!bShowMonth)
-		sFormat = (bISODates ? _T("dd") : _T("d"));
-
-	CString sDate = CDateHelper::FormatDateOnly(date, sFormat);
+	if (bShowMonth)
+		sDate = CDateHelper::FormatDateOnly(date, m_sCellDateFormat);
+	else
+		sDate = CDateHelper::FormatDateOnly(date, (HasOption(TCCO_SHOWISODATES) ? _T("dd") : _T("d")));
 
 	// Show the week number on the first of the week -> First column
 	sWeekNum.Empty();
@@ -962,7 +943,7 @@ void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, con
 	CRect rDate(rHeader);
 	rDate.DeflateRect(HEADER_PADDING, 3);
 
-	if (pCell->date.GetDay() == 1)
+	if (CDateHelper::IsDayOfMonth(pCell->date, 1))
 	{
 		// Draw the first of any month in bold
 		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));
@@ -2463,16 +2444,7 @@ BOOL CTaskCalendarCtrl::IsHiddenTask(const TASKCALITEM* pTCI, BOOL bCheckValid) 
 	if (bCheckValid && !pTCI->IsValid())
 		return TRUE;
 
-	if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
-	{
-		if (m_sHideParentTag.IsEmpty() || pTCI->HasTag(m_sHideParentTag))
-			return TRUE;
-	}
-
-	if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
-		return TRUE;
-
-	return FALSE;
+	return CTaskCalItemMap::WantHideTask(pTCI, m_dwOptions, m_sHideParentTag);
 }
 
 BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const

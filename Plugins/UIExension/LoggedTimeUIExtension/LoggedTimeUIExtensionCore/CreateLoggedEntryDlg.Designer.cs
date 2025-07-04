@@ -83,6 +83,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
+			this.label1.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.label1.Location = new System.Drawing.Point(7, 39);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(45, 13);
@@ -92,6 +93,7 @@
 			// m_TaskId
 			// 
 			this.m_TaskId.AutoSize = true;
+			this.m_TaskId.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TaskId.Location = new System.Drawing.Point(107, 39);
 			this.m_TaskId.Name = "m_TaskId";
 			this.m_TaskId.Size = new System.Drawing.Size(35, 13);

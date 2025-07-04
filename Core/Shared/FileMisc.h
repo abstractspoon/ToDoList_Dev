@@ -219,10 +219,10 @@ namespace FileMisc
 	CString& RemoveExtension(CString& sFilePath);
 	void EnsureSameExtension(LPCTSTR szFromFile, CString& sToFile);
 	
-	CString GetTempFolder();
-	CString GetTempFilePath(LPCTSTR szPrefix = NULL, UINT uUnique = 0);
-	CString GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt);
-	BOOL IsTempFilePath(LPCTSTR szFilename);
+	CString GetTempFolder(BOOL bLong = TRUE);
+	CString GetTempFilePath(LPCTSTR szPrefix = NULL, UINT uUnique = 0, BOOL bLong = TRUE);
+	CString GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt, BOOL bLong = TRUE);
+	BOOL IsTempFilePath(LPCTSTR szFilePath);
 
 	BOOL CanReadFile(LPCTSTR szPathname, BOOL bDenyWrite = FALSE);
 	BOOL LoadFile(LPCTSTR szPathname, CString& sText, BOOL bDenyWrite = FALSE, UINT nAnsiCodePage = CP_ACP);
@@ -245,8 +245,8 @@ namespace FileMisc
 	BOOL GetModuleVersion(HMODULE hMod, CDWordArray& aVersionParts);
 	BOOL GetModuleVersion(LPCTSTR szModulePath, CDWordArray& aVersionParts);
 	CString GetWindowModuleFilePath(HWND hWnd);
-	BOOL IsNativeModule(HMODULE hMod = NULL); // returns TRUE, FALSE, -1
-	BOOL IsNativeModule(LPCTSTR szModulePath); // returns TRUE, FALSE, -1
+	BOOL IsNativeModule(HMODULE hMod = NULL); // returns TRUE, FALSE, -1 if not a exe/dll
+	BOOL IsNativeModule(LPCTSTR szModulePath); // returns TRUE, FALSE, -1 if not a exe/dll
 
 	CString GetAppFilePath();
 	CString GetAppFolder(LPCTSTR szSubFolder = NULL);

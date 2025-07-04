@@ -131,7 +131,6 @@ protected:
 	CRect GetIconScreenRect() const; 
 	void DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon);
 	CString GetBrowseTitle(BOOL bFolder) const;
-	HBRUSH GetBackgroundBrush(CDC* pDC) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

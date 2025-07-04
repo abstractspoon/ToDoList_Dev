@@ -228,13 +228,12 @@ void CFileEdit::OnPaint()
 		else
 		{
 			// fill bkgnd
-			::FillRect(dc, rClient, GetBackgroundBrush(&dc));
+			::FillRect(dc, rClient, PrepareColors(&dc));
 
 			// file path
 			rClient.DeflateRect(4, 1, 1, 1);
 
 			dc.SetBkMode(TRANSPARENT);
-			dc.SetTextColor(::GetSysColor(IsWindowEnabled() ? COLOR_WINDOWTEXT : COLOR_GRAYTEXT));
 			dc.DrawText(sText, rClient, DT_PATH_ELLIPSIS);
 
 			m_bTipNeeded = TRUE;
@@ -280,26 +279,11 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	CRect rBkgnd(rIcon);
 	rBkgnd.InflateRect(1, 1);
 
-	::FillRect(*pDC, rBkgnd, GetBackgroundBrush(pDC));
+	::FillRect(*pDC, rBkgnd, PrepareColors(pDC));
 	DrawFileIcon(pDC, sFilePath, rIcon);
 
 	if (bReleaseDC)
 		GetParent()->ReleaseDC(pDC);
-}
-
-HBRUSH CFileEdit::GetBackgroundBrush(CDC* pDC) const
-{
-	UINT nMsgID = WM_CTLCOLOREDIT;
-
-	if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
-		nMsgID = WM_CTLCOLORSTATIC;
-
-	HBRUSH hBkgnd = (HBRUSH)::SendMessage(::GetParent(GetSafeHwnd()), nMsgID, (WPARAM)pDC->GetSafeHdc(), (LPARAM)(HWND)GetSafeHwnd());
-
-	if (!hBkgnd)
-		hBkgnd = ::GetSysColorBrush(COLOR_WINDOW);
-
-	return hBkgnd;
 }
 
 void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon)

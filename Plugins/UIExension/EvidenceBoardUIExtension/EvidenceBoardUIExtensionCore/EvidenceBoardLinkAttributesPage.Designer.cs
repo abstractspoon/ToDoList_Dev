@@ -123,7 +123,7 @@
 			this.m_ColorButton.Size = new System.Drawing.Size(75, 23);
 			this.m_ColorButton.TabIndex = 8;
 			this.m_ColorButton.Text = "Set...";
-			this.m_ColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_ColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_ColorButton.UseVisualStyleBackColor = true;
 			// 
 			// m_ColorCheckBox

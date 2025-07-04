@@ -196,20 +196,13 @@ BOOL CToDoCtrl::IDLETASKS::Process()
 
 		m_mapRefreshAttribIDs.RemoveAll();
 	}
-	else if (m_bUpdateSelectedTaskPath)
-	{
-		m_tdc.UpdateSelectedTaskPath();
-
-		m_bUpdateSelectedTaskPath = FALSE;
-	}
 
 	return HasTasks();
 }
 
 BOOL CToDoCtrl::IDLETASKS::HasTasks() const
 {
-	return (m_bUpdateSelectedTaskPath ||
-			!m_mapRefreshAttribIDs.IsEmpty());
+	return !m_mapRefreshAttribIDs.IsEmpty();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -822,9 +815,9 @@ void CToDoCtrl::Resize(int cx, int cy)
 		}
 
 		m_layout.Resize(cx, cy);
-
 		ShowHideControls();
-		m_idleTasks.UpdateSelectedTaskPath();
+
+		UpdateSelectedTaskPath();
 	}
 }
 
@@ -963,7 +956,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments)
 	m_ctrlAttributes.SetSelectedTaskIDs(aSelTaskIDs);
 
 	// and task header
-	m_idleTasks.UpdateSelectedTaskPath();
+	UpdateSelectedTaskPath();
 	
 	// Do the control enabling before updating the comments
 	// to prevent unwanted intermediate comments states
@@ -1025,7 +1018,7 @@ void CToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	if (!bShow)
 		m_ctrlComments.SetFocus();
 
-	m_taskTree.Show(bShow);
+	m_taskTree.ShowWindow(bShow ? SW_SHOW : SW_HIDE);
 	m_taskTree.EnableWindow(bShow);
 }
 
@@ -2991,9 +2984,14 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 	
 	Flush();
 
+	// CToDoListWnd already handles empty tasklists
+	// so this should be unnecessary.
+	// Commenting out to see what happens...
+/*
 	// handle special case when tasklist is empty
 	if (GetTaskCount() == 0)
 		nWhere = TDC_INSERTATBOTTOM;
+*/
 	
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
@@ -3494,8 +3492,8 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 	int nMinLen = GraphicsMisc::ScaleByDPIFactor(200);
 	rPos.right = max(rPos.right, rPos.left + nMinLen);
 
-	// create edit if nec.
-	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_TASKLABELEDIT, WS_POPUP | WS_BORDER))
+	// create edit on request
+	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_TASKLABELEDIT, (WS_POPUP | WS_BORDER | ES_AUTOHSCROLL)))
 		return FALSE;
 
 	// start
@@ -7009,11 +7007,9 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 	// Verify that we have been saved
 	if (!HasFilePath())
 	{
-		CMessageBox::Show(AfxGetMainWnd(),
-						  CEnString(IDS_TITLE_TIMETRACKING), 
-						  _T(""),
-						  CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
-						  (MB_OK | MB_ICONEXCLAMATION));
+		CMessageBox::AfxShow(CEnString(IDS_TITLE_TIMETRACKING), 
+							 CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
+							 (MB_OK | MB_ICONEXCLAMATION));
 		return FALSE;
 	}
 
@@ -7304,7 +7300,7 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 		if (!m_taskTree.SelectItem(hti))
 			UpdateControls(); // disable controls
 
-		m_idleTasks.UpdateSelectedTaskPath();
+		UpdateSelectedTaskPath();
 		NotifyParentSelectionChange();
 	}
 }
@@ -9896,6 +9892,8 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 		else if (elm.nOp == TDCUEO_DELETE)
 		{
 			// find tree item and delete it
+			CAutoFlag af(m_bDeletingTasks, TRUE);
+
 			// note: DeleteTask on the Parent will already have disposed of the children
 			// so we can expect hti to be NULL on occasion. ie don't ASSERT it
 			HTREEITEM hti = m_taskTree.GetItem(elm.dwTaskID);
@@ -10233,28 +10231,9 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {
-	BOOL bCanEdit = m_multitasker.CanEditTask(dwTaskID, nAttribID);
-
-	if (bCanEdit != -1) // Unhandled by multi-tasker
-		return bCanEdit;
-
-	if (m_data.HasStyle(TDCS_READONLY))
-		return FALSE;
-
-	BOOL bEditableTask = !m_calculator.IsTaskLocked(dwTaskID);
-
+	// These do not depend on a specific task
 	switch (nAttribID)
 	{
-	case TDCA_DELETE:
-		// Can only delete tasks if:
-		// 1. Their immediate parent is UNLOCKED
-		// AND
-		// 2. task is UNLOCKED 
-		// OR 
-		// 3. task is a reference to a locked task
-		return (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)) &&
-				(bEditableTask || m_data.IsTaskReference(dwTaskID)));
-
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
 	case TDCA_UNDO:
@@ -10263,6 +10242,31 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_ENCRYPT:
 	case TDCA_PROJECTNAME:
 		return TRUE;
+	}
+
+	// Task specific editing
+	BOOL bCanEdit = m_multitasker.CanEditTask(dwTaskID, nAttribID);
+
+	if (bCanEdit != -1)
+		return bCanEdit; // Handled by multi-tasker
+
+	if (m_data.HasStyle(TDCS_READONLY))
+		return FALSE;
+
+	switch (nAttribID)
+	{
+	case TDCA_DELETE:
+		// Can only delete tasks if their immediate parent is UNLOCKED
+		if (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
+		{
+			// AND the task is UNLOCKED 
+			if (!m_calculator.IsTaskLocked(dwTaskID))
+				return TRUE;
+
+			// OR the task is a REFERENCE to the locked task
+			return m_data.IsTaskReference(dwTaskID);
+		}
+		break;
 
 	default:
 		ASSERT(0); // Unexpectedly unhandled

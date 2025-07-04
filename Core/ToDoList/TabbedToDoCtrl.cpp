@@ -119,6 +119,7 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt,
 	m_bTreeNeedResort(FALSE),
 	m_bUpdatingExtensions(FALSE),
 	m_bRecreatingRecurringTasks(FALSE),
+	m_bLoadingTasks(FALSE),
 	m_nExtModifyingAttrib(TDCA_NONE),
 	m_nListViewGroupBy(TDCC_NONE),
 	m_dwListOptions(0),
@@ -2373,6 +2374,7 @@ void CTabbedToDoCtrl::ReposTaskCtrl(const CRect& rTasks)
 void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 {
 	FTC_VIEW nView = GetTaskView();
+	int nShow = (bShow ? SW_SHOW : SW_HIDE);
 
 	switch (nView)
 	{
@@ -2382,7 +2384,10 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 		break;
 
 	case FTCV_TASKLIST:
-		m_taskList.ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+		m_taskList.ShowWindow(nShow);
+		m_taskList.EnableWindow(bShow);
+
+		ShowListViewSpecificCtrls(bShow);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -2401,6 +2406,16 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd);
+
+			if (pExtWnd)
+			{
+				::ShowWindow(pExtWnd->GetHwnd(), nShow);
+				::EnableWindow(pExtWnd->GetHwnd(), bShow);
+			}
+		}
 		break;
 
 	default:
@@ -2408,7 +2423,7 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	}
 
 	// handle tab control
-	m_tabViews.ShowWindow(bShow && HasStyle(TDCS_SHOWTREELISTBAR) ? SW_SHOW : SW_HIDE);
+	m_tabViews.ShowWindow((bShow && HasStyle(TDCS_SHOWTREELISTBAR)) ? SW_SHOW : SW_HIDE);
 }
 
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
@@ -6212,28 +6227,6 @@ void CTabbedToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 		break;
 
 	case FTCV_TASKLIST:
-		// Basically a copy of CToDoCtrl's handling of FTCV_TASKTREE
-		if (!m_taskList.HasFocus())
-		{
-			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
-			{
-				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
-				SetMaximizeState(TDCMS_MAXTASKLIST);
-			}
-			else
-			{
-				// See CToDoCtrl::SetFocus(TDCSF_TASKVIEW) for why we need this
-				if (m_layout.IsVisible(TDCSF_COMMENTS))
-					m_ctrlComments.SetFocus();
-
-				m_taskList.SetFocus();
-			}
-
-			// ensure the selected tree item is visible
-			m_taskList.EnsureSelectionVisible(TRUE);
-		}
-		break;
-
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
 	case FTCV_UIEXTENSION3:
@@ -6250,7 +6243,29 @@ void CTabbedToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		ExtensionDoAppCommand(nView, IUI_SETFOCUS);
+		// Basically a copy of CToDoCtrl's handling of FTCV_TASKTREE
+		if (!HasFocus(TDCSF_TASKVIEW))
+		{
+			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
+			{
+				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
+				SetMaximizeState(TDCMS_MAXTASKLIST);
+			}
+			else
+			{
+				// See CToDoCtrl::SetFocus(TDCSF_TASKVIEW) for why we need this
+				if (m_layout.IsVisible(TDCSF_COMMENTS))
+					m_ctrlComments.SetFocus();
+
+				if (InListView())
+					m_taskList.SetFocus();
+				else
+					ExtensionDoAppCommand(nView, IUI_SETFOCUS);
+			}
+
+			// ensure the selected item is visible
+			ScrollToSelectedTask();
+		}
 		break;
 
 	default:
@@ -6986,42 +7001,7 @@ void CTabbedToDoCtrl::UpdateSelectedTaskPath()
 		return;
 
 	CToDoCtrl::UpdateSelectedTaskPath();
-
-	// extra processing
-	FTC_VIEW nView = GetTaskView();
-
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		// handled above
-		break;
-
-	case FTCV_TASKLIST:
-		m_taskList.UpdateSelectedTaskPath();
-		break;
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		break;
-
-	default:
-		ASSERT(0);
-	}
+	m_taskList.UpdateSelectedTaskPath();
 }
 
 void CTabbedToDoCtrl::SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree) const

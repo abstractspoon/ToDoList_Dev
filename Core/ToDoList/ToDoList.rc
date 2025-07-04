@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,0,998,3
+ FILEVERSION 9,0,998,6
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "9, 0, 998, 3\0"
+            VALUE "FileVersion", "9, 0, 998, 6\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-25\0"
             VALUE "LegalTrademarks", "\0"
@@ -643,7 +643,7 @@ BEGIN
                     WS_TABSTOP,363,10,25,17
 END
 
-IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 562
+IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 587
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -4368,6 +4368,12 @@ BEGIN
         RIGHTMARGIN, 394
         TOPMARGIN, 10
         BOTTOMMARGIN, 675
+    END
+
+    IDD_PREFUITASKLIST_PAGE, DIALOG
+    BEGIN
+        RIGHTMARGIN, 393
+        BOTTOMMARGIN, 562
     END
 
     IDD_PREFUITASKLISTCOLORS_PAGE, DIALOG

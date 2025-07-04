@@ -87,9 +87,14 @@ IIMPORTEXPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskLi
 	CStringArray aLines;
 	FileMisc::LoadFile(szSrcFilePath, aLines);
 
-	// remove header line
+	// Remove leading blank lines
+	while (aLines[0].IsEmpty())
+		aLines.RemoveAt(0);
+
+	// Remove header line
 	aLines.RemoveAt(0);
 
+	// Do the import
 	AddCustomAttributeDefinitions(pTasks);
 
 	BOOL bSomeFailed = FALSE;
@@ -452,9 +457,13 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 		
 		// arrays
 // ---------------------------------------------------------------
-#define SETTASKATTRIBARRAY(fn) \
-	{ CStringArray aItems; if (Misc::Split(sValue, aItems, '+')) \
-	for (int nItem = 0; nItem < aItems.GetSize(); nItem++) pTasks->fn(hTask, aItems[nItem]); }
+#define SETTASKATTRIBARRAY(fn)                         \
+{ CStringArray aItems;                                 \
+if (sValue.Find('+') >= 0)                             \
+	Misc::Split(sValue, aItems, '+');                  \
+else Misc::Split(sValue, aItems);                      \
+for (int nItem = 0; nItem < aItems.GetSize(); nItem++) \
+		pTasks->fn(hTask, aItems[nItem]); }
 // ---------------------------------------------------------------
 
 	case TDCA_CATEGORY: 

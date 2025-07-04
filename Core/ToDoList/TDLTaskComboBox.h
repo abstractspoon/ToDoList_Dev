@@ -63,6 +63,7 @@ protected:
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 	virtual int GetExtraListboxWidth() const;
+	virtual int GetMaxDropWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual BOOL IsSelectableItem(int nItem) const;
 
