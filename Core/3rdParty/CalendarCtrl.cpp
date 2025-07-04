@@ -143,57 +143,56 @@ void CCalendarCtrl::GotoToday(bool bSelect)
 
 void CCalendarCtrl::Goto(const COleDateTime& dtDate, bool bSelect)
 {
-		m_DateCurrent = WholeDays(dtDate);	
-		
-		if (m_nFirstWeekDay<1 || m_nFirstWeekDay>7)
-			m_nFirstWeekDay = 1;
+	m_DateCurrent = WholeDays(dtDate);
 
-		COleDateTime dtIte = m_DateCurrent;
-		int narr[7];
+	if (m_nFirstWeekDay < 1 || m_nFirstWeekDay>7)
+		m_nFirstWeekDay = 1;
 
-		for (int d=0; d<7; d++)	
-			narr[((m_nFirstWeekDay-1)+d)%7] = d;
+	COleDateTime dtIte = m_DateCurrent;
+	int narr[7];
 
-		int nCellStart = narr[dtIte.GetDayOfWeek()-1], i;
+	for (int d = 0; d < 7; d++)
+		narr[((m_nFirstWeekDay - 1) + d) % 7] = d;
 
-		for(i=0; i<nCellStart; i++)	
-			dtIte -= COleDateTimeSpan(1,0,0,0);
+	int nCellStart = narr[dtIte.GetDayOfWeek() - 1], i;
 
-		for(i=0; i<CALENDAR_MAX_ROWS ; i++)
+	for (i = 0; i < nCellStart; i++)
+		dtIte -= COleDateTimeSpan(1, 0, 0, 0);
+
+	for (i = 0; i < CALENDAR_MAX_ROWS; i++)
+	{
+		for (int u = 0; u < CALENDAR_NUM_COLUMNS; u++)
 		{
-			for(int u=0; u<CALENDAR_NUM_COLUMNS; u++)
-			{
-				// Init the cell
-				m_dayCells[i][u].date = dtIte;
-				m_dayCells[i][u].bPartial = false;
-				m_dayCells[i][u].bMark = false;
-				m_dayCells[i][u].csaLines.RemoveAll();
+			// Init the cell
+			m_dayCells[i][u].date = dtIte;
+			m_dayCells[i][u].bPartial = false;
+			m_dayCells[i][u].bMark = false;
+			m_dayCells[i][u].csaLines.RemoveAll();
 
-				if (m_pfnDataCallback)
-					m_pfnDataCallback(this, m_dayCells[i][u].date);
+			if (m_pfnDataCallback)
+				m_pfnDataCallback(this, m_dayCells[i][u].date);
 
-				dtIte += COleDateTimeSpan(1,0,0,0);
-			}
+			dtIte += COleDateTimeSpan(1, 0, 0, 0);
 		}
+	}
 
-		if (bSelect)
-		{
-			m_SingleSelection.RemoveAll();
+	if (bSelect)
+	{
+		m_SingleSelection.RemoveAll();
 
-			m_SelectionRange[2] = 0;
-			m_SelectionRange[1] = m_DateCurrent;
-			m_SelectionRange[0] = m_SelectionRange[1];
+		m_SelectionRange[2] = 0;
+		m_SelectionRange[1] = m_DateCurrent;
+		m_SelectionRange[0] = m_SelectionRange[1];
 
-			// Scrolling pos
-			COleDateTime today = WholeDays(COleDateTime::GetCurrentTime());
-			m_nVscrollPos = (m_nVscrollMax/2) + (m_DateCurrent-today).GetDays()/7;
+		// Scrolling pos
+		COleDateTime today = WholeDays(COleDateTime::GetCurrentTime());
+		m_nVscrollPos = (m_nVscrollMax / 2) + (m_DateCurrent - today).GetDays() / 7;
 
-			SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
-			NotifyParentClick();
-		}
+		SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
+		NotifyParentClick();
+	}
 
-		OnVisibleDateRangeChanged(); // for derived classes
-
+	OnVisibleDateRangeChanged(); // for derived classes
 	Invalidate(true);
 }
 
