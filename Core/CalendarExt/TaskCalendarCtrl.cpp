@@ -1489,11 +1489,11 @@ void CTaskCalendarCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 		return;
 	}
 
-	int nCurPos = GetScrollPos(SB_VERT);
+	COleDateTime dtCurPos = GetMinDate();
 	
 	CCalendarCtrlEx::OnVScroll(nSBCode, nPos, pScrollBar);
 	
-	if (GetScrollPos(SB_VERT) != nCurPos)
+	if (GetMinDate() != dtCurPos)
 	{
 		// Notify Parent
 		GetParent()->SendMessage(WM_VSCROLL, nPos, (LPARAM)GetSafeHwnd());
