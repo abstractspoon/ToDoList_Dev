@@ -3882,6 +3882,9 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	if (m_datePicker.IsWindowVisible())
+		HideControl(m_datePicker);
+
 	HandleDateEditCompletion();
 }
 
