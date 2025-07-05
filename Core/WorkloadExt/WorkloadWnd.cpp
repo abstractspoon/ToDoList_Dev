@@ -1138,7 +1138,7 @@ void CWorkloadWnd::OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnMovePeriodEndForwardOneMonth() 
 {
-	if (m_dtPeriod.OffsetEnd(1, DHU_MONTHS))
+	if (m_dtPeriod.OffsetEnd(1, DHU_MONTHS, TRUE))
 	{
 		UpdatePeriod();
 		UpdateRangeSlider();
@@ -1152,7 +1152,7 @@ void CWorkloadWnd::OnUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnMovePeriodEndBackOneMonth() 
 {
-	if (m_dtPeriod.OffsetEnd(-1, DHU_MONTHS))
+	if (m_dtPeriod.OffsetEnd(-1, DHU_MONTHS, TRUE))
 	{
 		UpdatePeriod();
 		UpdateRangeSlider();
@@ -1168,7 +1168,7 @@ void CWorkloadWnd::OnUpdateMovePeriodEndBackOneMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnMovePeriodForwardOneMonth() 
 {
-	m_dtPeriod.Offset(1, DHU_MONTHS);
+	m_dtPeriod.Offset(1, DHU_MONTHS, TRUE);
 
 	UpdatePeriod();
 	UpdateRangeSlider();
