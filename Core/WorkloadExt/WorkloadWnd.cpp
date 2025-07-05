@@ -44,6 +44,8 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 /////////////////////////////////////////////////////////////////////////////
 
 const int PADDING = 3;
+const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
+
 const UINT IDC_WORKLOADCTRL = 1001;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -695,7 +697,11 @@ BOOL CWorkloadWnd::OnInitDialog()
 		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
-		
+
+	// Date range text needs to be big enough for all eventualities
+	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
+	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
+
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
 	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
 
@@ -710,10 +716,17 @@ void CWorkloadWnd::Resize(int cx, int cy)
 	if (m_ctrlWorkload.GetSafeHwnd())
 	{
 		CRect rWorkload = CDialogHelper::GetChildRect(&m_ctrlWorkload);
-		rWorkload.right = cx;
-		rWorkload.bottom = cy;
+		CDialogHelper::ResizeChild(&m_ctrlWorkload, (cx - rWorkload.right), (cy - rWorkload.bottom));
 
-		m_ctrlWorkload.MoveWindow(rWorkload);
+		// selected task dates takes available space
+		if (CLocalizer::IsInitialized())
+		{
+			int nOffset = CDialogHelper::ResizeStaticTextToFit(this, IDC_ACTIVEDATERANGE_LABEL);
+
+			if (nOffset)
+				CDialogHelper::OffsetCtrl(this, IDC_ACTIVEDATERANGE_TEXT, nOffset, 0);
+		}
+
 		ResizeSlider(cx);
 	}
 }
@@ -756,6 +769,7 @@ BOOL CWorkloadWnd::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeChild(&m_sliderDateRange, pDC);
 
 	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())
@@ -1037,8 +1051,13 @@ void CWorkloadWnd::UpdatePeriod()
 		m_sPeriodDuration.Empty();
 
 	m_toolbar.RefreshButtonStates(FALSE);
-	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, m_dtPeriod.Format()));
 
+	CString sFormat(_T("MMM yyyy"));
+
+	if (CDateHelper::WantRTLDates())
+		sFormat.MakeReverse();
+
+	SetDlgItemText(IDC_ACTIVEDATERANGE_TEXT, m_dtPeriod.FormatDateOnly(sFormat));
 	UpdateData(FALSE);
 }
 
