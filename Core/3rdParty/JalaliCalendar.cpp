@@ -1,8 +1,12 @@
-// Original code (c) Ali Tavakol, CodeProject, Sep 24, 2007
-// largely replaced with online code
 
 #include "StdAfx.h"
 #include "JalaliCalendar.h"
+
+//////////////////////////////////////////////////////////////////////
+
+#ifndef LANG_PERSIAN
+#	define LANG_PERSIAN 0x29
+#endif
 
 ////////////////////////////////////////////////////////////////////
 
@@ -30,6 +34,146 @@ TCHAR MONTHNAME_9[] =  { 0x0622, 0x0630, 0x0631, 0x0};											// Azar
 TCHAR MONTHNAME_10[] = { 0x062F, 0x06CC, 0x0};													// Dey
 TCHAR MONTHNAME_11[] = { 0x0628, 0x0647, 0x0645, 0x0646, 0x0};									// Bahman
 TCHAR MONTHNAME_12[] = { 0x0627, 0x0633, 0x0641, 0x0646, 0x062F, 0x0};							// Esfand
+
+////////////////////////////////////////////////////////////////////
+// https://github.com/RayanFar/mysql-jalali-date-converter-plugin/blob/master/gregorian_to_jalali.c
+
+typedef struct { int year, month, day; } date_struct;
+
+static int jalali_month_days(int m)
+{
+	return (m <= 6) ? 31 : ((m <= 11) ? 30 : 29);
+}
+
+static int gregorian_month_days(int y, int m)
+{
+	static const int md[] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+	if (m == 2)
+	{
+		if ((y % 400 == 0) || ((y % 4 == 0) && (y % 100 != 0)))
+			return 29;
+	}
+	if (m >= 1 && m <= 12)
+		return md[m - 1];
+	return 0;
+}
+
+static date_struct gregorian_to_jalali_core(int gy, int gm, int gd)
+{
+	date_struct res;
+	int gy2 = gy - 1600;
+	int gm2 = gm - 1;
+	int gd2 = gd - 1;
+
+	long g_day_no = 365L * gy2 + (gy2 + 3) / 4 - (gy2 + 99) / 100 + (gy2 + 399) / 400;
+	{
+		for (int i = 0; i < gm2; ++i)
+			g_day_no += gregorian_month_days(gy, i + 1);
+	}
+	g_day_no += gd2;
+
+	long j_day_no = g_day_no - 79;
+	long j_np = j_day_no / 12053;
+	j_day_no %= 12053;
+
+	long jy = 979 + 33 * j_np + 4 * (j_day_no / 1461);
+	j_day_no %= 1461;
+
+	if (j_day_no >= 366)
+	{
+		jy += (j_day_no - 1) / 365;
+		j_day_no = (j_day_no - 1) % 365;
+	}
+
+	int jm = 0;
+	int jd = 0;
+	{
+		for (int i = 1; i <= 12; ++i)
+		{
+			int dim = jalali_month_days(i);
+
+			if ((j_day_no < dim) || ((i == 12) && (j_day_no == dim)))
+			{
+				jm = i;
+				jd = j_day_no + 1;
+				break;
+			}
+			j_day_no -= dim;
+		}
+	}
+
+	res.year = (int)jy;
+	res.month = jm;
+	res.day = jd;
+	return res;
+}
+
+static date_struct jalali_to_gregorian_core(int jy, int jm, int jd)
+{
+	date_struct res;
+	int jy2 = jy - 979;
+	int jm2 = jm - 1;
+	int jd2 = jd - 1;
+
+	long j_day_no = 365L * jy2 + (jy2 / 33) * 8 + ((jy2 % 33 + 3) / 4);
+	{
+		for (int i = 0; i < jm2; ++i)
+			j_day_no += jalali_month_days(i + 1);
+	}
+	j_day_no += jd2;
+
+	long g_day_no = j_day_no + 79;
+	long gy = 1600 + 400 * (g_day_no / 146097);
+	g_day_no %= 146097;
+
+	int leap = 1;
+	if (g_day_no >= 36525)
+	{
+		g_day_no--;
+		gy += 100 * (g_day_no / 36524);
+		g_day_no %= 36524;
+		if (g_day_no >= 365)
+			g_day_no++;
+		else
+			leap = 0;
+	}
+
+	gy += 4 * (g_day_no / 1461);
+	g_day_no %= 1461;
+
+	if (g_day_no >= 366)
+	{
+		leap = 0;
+		g_day_no--;
+		gy += g_day_no / 365;
+		g_day_no %= 365;
+	}
+
+	int gm = 0;
+	int gd = 0;
+	{
+		for (int i = 1; i <= 12; ++i)
+		{
+			int dim = gregorian_month_days((int)gy, i);
+			if (i == 2 && !leap)
+				dim = 28;
+			else if (i == 2 && leap)
+				dim = 29;
+			if (g_day_no < dim)
+			{
+				gm = i;
+				gd = g_day_no + 1;
+				break;
+			}
+			g_day_no -= dim;
+		}
+	}
+
+	res.year = (int)gy;
+	res.month = gm;
+	res.day = gd;
+	return res;
+}
 
 ////////////////////////////////////////////////////////////////////
 
@@ -78,10 +222,27 @@ BOOL CJalaliCalendar::IsEndOfMonth(int JYear, int JMonth, int JDay)
 
 BOOL CJalaliCalendar::IsLeapYear(int JYear)
 {
-	// One of a number of ways apparently
-	// From https://github.com/MenoData/Time4J/issues/631
+	COleDateTime dt29_12;
+	ToGregorian(JYear, 12, 29, dt29_12);
 
-	return (((((((JYear - ((JYear > 0) ? 474 : 473)) % 2820) + 474) + 38) * 682) % 2816) < 682);
+	int JCheckYear, JCheckMonth, JCheckDay;
+	FromGregorian((dt29_12.m_dt + 1), &JCheckYear, &JCheckMonth, &JCheckDay);
+	
+	BOOL bLeapYear = (JCheckYear == JYear);
+
+	if (bLeapYear)
+	{
+		ASSERT(JCheckMonth == 12);
+		ASSERT(JCheckDay == 30);
+	}
+	else
+	{
+		ASSERT(JCheckYear == JYear + 1);
+		ASSERT(JCheckMonth == 1);
+		ASSERT(JCheckDay == 1);
+	}
+
+	return bLeapYear;
 }
 
 CString CJalaliCalendar::GetMonthName(int JMonth)
@@ -149,307 +310,37 @@ void CJalaliCalendar::GetCurrentDate(int *JYear, int *JMonth, int *JDay)
 
 void CJalaliCalendar::FromGregorian(int GYear, int GMonth, int GDay, int *JYear, int *JMonth, int *JDay)
 {
-	/**
-	*
-	* @Name : ConvertCalendar.c
-	* @Version : 1.0
-	* @Programmer : Max
-	* @Date : 2019-03-31
-	* @Released under : https://github.com/BaseMax/ConvertCalendar/blob/master/LICENSE
-	* @Repository : https://github.com/BaseMax/ConvertCalendar
-	*
-	**/
+	date_struct dtJalali = gregorian_to_jalali_core(GYear, GMonth, GDay);
 
-	const int GMONTHOFFSETS[12] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+	*JYear = dtJalali.year;
+	*JMonth = dtJalali.month;
+	*JDay = dtJalali.day;
 
-	const int iMonth = (GMonth - 1);
+#ifdef _DEBUG
+	// Consistency check
+	date_struct dtGregCheck = jalali_to_gregorian_core(*JYear, *JMonth, *JDay);
 
-	if (GYear <= 1600)
-	{
-		GYear -= 621;
-		*JYear = 0;
-	}
-	else
-	{
-		GYear -= 1600;
-		*JYear = 979;
-	}
-
-	int temp = ((GYear > 2) ? (GYear + 1) : GYear);
-	int days = (((int)((temp + 3) / 4)) +
-				(365 * GYear) -
-				((int)((temp + 99) / 100)) -
-				80 +
-				GMONTHOFFSETS[iMonth] +
-				((int)((temp + 399) / 400)) +
-				GDay);
-
-	*JYear += 33 * ((int)(days / 12053));
-	days %= 12053;
-
-	*JYear += 4 * ((int)(days / 1461));
-	days %= 1461;
-
-	if (days > 365)
-	{
-		*JYear += (int)((days - 1) / 365);
-		days = (days - 1) % 365;
-	}
-
-	*JMonth = ((days < 186) ? 1 + (int)(days / 31) : 7 + (int)((days - 186) / 30));
-	*JDay = (1 + ((days < 186) ? (days % 31) : ((days - 186) % 30)));
+	ASSERT(dtGregCheck.year == GYear);
+	ASSERT(dtGregCheck.month == GMonth);
+	ASSERT(dtGregCheck.day == GDay);
+#endif
 }
 
 void CJalaliCalendar::ToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay)
 {
-	/**
-	*
-	* @Name : ConvertCalendar.c
-	* @Version : 1.0
-	* @Programmer : Max
-	* @Date : 2019-03-31
-	* @Released under : https://github.com/BaseMax/ConvertCalendar/blob/master/LICENSE
-	* @Repository : https://github.com/BaseMax/ConvertCalendar
-	*
-	**/
+	date_struct dtGreg = jalali_to_gregorian_core(JYear, JMonth, JDay);
 
-	if (JYear <= 979)
-	{
-		*GYear = 621;
-	}
-	else
-	{
-		JYear -= 979;
-		*GYear = 1600;
-	}
+	*GYear = dtGreg.year;
+	*GMonth = dtGreg.month;
+	*GDay = dtGreg.day;
 
-	int temp = (((int)(JYear / 33)) * 8) + ((int)(((JYear % 33) + 3) / 4)) + (365 * JYear) + 78 + JDay + ((JMonth < 7) ? (JMonth - 1) * 31 : ((JMonth - 7) * 30) + 186);
+#ifdef _DEBUG
+	// Consistency check
+	date_struct dtJalaliCheck = gregorian_to_jalali_core(*GYear, *GMonth, *GDay);
 
-	*GYear += 400 * ((int)(temp / 146097));
-	temp %= 146097;
-
-	if (temp > 36524)
-	{
-		*GYear += 100 * ((int)(--temp / 36524));
-		temp %= 36524;
-
-		if (temp >= 365)
-			temp++;
-	}
-
-	*GYear += 4 * ((int)(temp / 1461));
-	temp %= 1461;
-
-	if (temp > 365)
-	{
-		*GYear += (int)((temp - 1) / 365);
-		temp = (temp - 1) % 365;
-	}
-
-	*GDay = temp + 1; // 1 -> 31
-
-	bool leapYear = ((*GYear % 4 == 0 && *GYear % 100 != 0) || (*GYear % 400 == 0));
-	int DAYSINMONTH[12] = { 31, (leapYear ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-
-	for (int index = 0; index < 12; index++)
-	{
-		*GMonth = (index + 1); // 1 -> 12
-
-		if (*GDay <= DAYSINMONTH[index])
-			break;
-
-		*GDay -= DAYSINMONTH[index];
-	}
+	ASSERT(dtJalaliCheck.year == JYear);
+	ASSERT(dtJalaliCheck.month == JMonth);
+	ASSERT(dtJalaliCheck.day == JDay);
+#endif
 }
-
-/*
-// These original functions were found to occasionally 
-// convert consecutive days to the same date
-
-void CJalaliCalendar::GregorianToJalali(int GYear, int GMonth, int GDay, int *JYear, int *JMonth, int *JDay, int *JDayOfWeek)
-{
-	int TotalDays;
-
-	TotalDays = GetGregorianOffset(GYear, GMonth, GDay);
-	
-	if(JDayOfWeek)
-		*JDayOfWeek = (TotalDays + 5) % 7;
-
-	*JYear = TotalDays / (7 * 1461 + 4 * 365 + 366);
-	if((*JYear) * (7 * 1461 + 4 * 365 + 366) == TotalDays)
-		(*JYear)--;
-	*JDay = TotalDays - (*JYear) * (7 * 1461 + 4 * 365 + 366);
-	(*JYear) *= 33;
-
-	(*JYear) += 1337;
-
-	if((*JDay) > 366)
-	{
-		(*JYear)++;
-		(*JDay) -= 366;
-	}
-	if((*JDay) > 365)
-	{
-		(*JYear)++;
-		(*JDay) -= 365;
-	}
-	if((*JDay) > 365)
-	{
-		(*JYear)++;
-		(*JDay) -= 365;
-	}
-	if((*JDay) > 365)
-	{
-		(*JYear)++;
-		(*JDay) -= 365;
-	}
-	if((*JDay) > 365)
-	{
-		(*JYear)++;
-		(*JDay) -= 365;
-	}
-
-	while((*JDay) > 366)
-	{
-		(*JYear)++;
-		(*JDay) -= 366;
-
-		if((*JDay) > 365)
-		{
-			(*JYear)++;
-			(*JDay) -= 365;
-		}
-		if((*JDay) > 365)
-		{
-			(*JYear)++;
-			(*JDay) -= 365;
-		}
-		if((*JDay) > 365)
-		{
-			(*JYear)++;
-			(*JDay) -= 365;
-		}
-	}
-
-	if((*JDay) < 187)
-	{
-		(*JMonth) = (*JDay) / 31;
-		(*JDay) -= (*JMonth) * 31;
-		if(!(*JDay))
-		{
-			(*JMonth)--;
-			(*JDay) = 31;
-		}
-	}
-	else
-	{
-		(*JDay) -= 186;
-		(*JMonth) = (*JDay) / 30;
-		(*JDay) -= (*JMonth) * 30;
-		if(!(*JDay))
-		{
-			(*JMonth)--;
-			(*JDay) = 30;
-		}
-		(*JMonth) += 6;
-	}
-
-	(*JMonth)++;
-}
-
-void CJalaliCalendar::JalaliToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay, int *GDayOfWeek)
-{
-	int TotalDays;
-
-	TotalDays = GetJalaliOffset(JYear, JMonth, JDay);
-
-	if(GDayOfWeek)
-		*GDayOfWeek = (TotalDays) % 7;
-
-	*GYear = TotalDays / 1461;
-	if((*GYear) * 1461 == TotalDays)
-		(*GYear)--;
-	*GDay = TotalDays - (*GYear) * 1461;
-	(*GYear) *= 4;
-
-	(*GYear)++;
-	if((*GDay) > 365)
-	{
-		(*GYear)++;
-		(*GDay) -= 365;
-	}
-	if((*GDay) > 365)
-	{
-		(*GYear)++;
-		(*GDay) -= 365;
-	}
-	if((*GDay) > 365)
-	{
-		(*GYear)++;
-		(*GDay) -= 365;
-	}
-
-	*GMonth = 1;
-	if((*GDay) > 31)
-	{
-		(*GMonth)++;
-		(*GDay) -= 31;
-		if((*GDay) > (((*GYear) % 4)? 28 : 29))
-		{
-			(*GMonth)++;
-			(*GDay) -= (((*GYear) % 4)? 28 : 29);
-		}
-	}
-	if((*GDay) > 31)
-	{
-		(*GMonth)++;
-		(*GDay) -= 31;
-		if((*GDay) > 30)
-		{
-			(*GMonth)++;
-			(*GDay) -= 30;
-		}
-	}
-	if((*GDay) > 31)
-	{
-		(*GMonth)++;
-		(*GDay) -= 31;
-		if((*GDay) > 30)
-		{
-			(*GMonth)++;
-			(*GDay) -= 30;
-		}
-	}
-	if((*GDay) > 31)
-	{
-		(*GMonth)++;
-		(*GDay) -= 31;
-	}
-	if((*GDay) > 31)
-	{
-		(*GMonth)++;
-		(*GDay) -= 31;
-		if((*GDay) > 30)
-		{
-			(*GMonth)++;
-			(*GDay) -= 30;
-		}
-	}
-	if((*GDay) > 31)
-	{
-		(*GMonth)++;
-		(*GDay) -= 31;
-		if((*GDay) > 30)
-		{
-			(*GMonth)++;
-			(*GDay) -= 30;
-		}
-	}
-	if((*GDay) > 31)
-	{
-		(*GMonth)++;
-		(*GDay) -= 31;
-	}
-}
-*/
 
