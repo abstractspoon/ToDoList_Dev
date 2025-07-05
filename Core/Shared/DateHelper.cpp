@@ -465,6 +465,11 @@ BOOL COleDateTimeRange::IsSameDay() const
 	return CDateHelper::IsSameDay(m_dtStart, GetEndInclusive());
 }
 
+BOOL COleDateTimeRange::IsSameMonth() const
+{
+	return CDateHelper::IsSameMonth(m_dtStart, GetEndInclusive());
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CDateHelper::CDateHelper() : m_week()

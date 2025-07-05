@@ -60,6 +60,7 @@ public:
 	BOOL HasStart() const;
 	BOOL HasEnd() const;
 	BOOL IsSameDay() const;
+	BOOL IsSameMonth() const;
 
 	COleDateTime GetStart() const;
 	COleDateTime GetEnd() const;

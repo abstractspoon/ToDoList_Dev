@@ -1052,12 +1052,7 @@ void CWorkloadWnd::UpdatePeriod()
 
 	m_toolbar.RefreshButtonStates(FALSE);
 
-	CString sFormat(_T("MMM yyyy"));
-
-	if (CDateHelper::WantRTLDates())
-		sFormat.MakeReverse();
-
-	SetDlgItemText(IDC_ACTIVEDATERANGE_TEXT, m_dtPeriod.FormatDateOnly(sFormat));
+	SetDlgItemText(IDC_ACTIVEDATERANGE_TEXT, m_ctrlWorkload.FormatCurrentPeriod());
 	UpdateData(FALSE);
 }
 
