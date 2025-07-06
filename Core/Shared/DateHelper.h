@@ -269,6 +269,7 @@ protected:
 	static BOOL DecodeOffsetEx(LPCTSTR szDate, int& nAmount, DH_UNITS& nUnits, DH_UNITS nDefUnits, BOOL bMustHaveSign);
 	static COleDateTime GetNearestDayPart(const COleDateTime& date, int nNumParts, BOOL bEnd);
 	static int GetStartOfEpochYear(const COleDateTime& date, int nEpochLength, BOOL bZeroBased);
+	static COleDateTime GetNearestMonth(const COleDateTime& date, int nInterval, BOOL bEnd);
 };
 
 #endif // !defined(AFX_DATEHELPER_H__2A4E63F6_A106_4295_BCBA_06D03CD67AE7__INCLUDED_)
