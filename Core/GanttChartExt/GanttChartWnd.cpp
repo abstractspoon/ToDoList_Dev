@@ -39,8 +39,10 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int PADDING = 3;
 const UINT IDC_GANTTCTRL = 1001;
+
+const int PADDING = 3;
+const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttChartWnd
@@ -778,6 +780,10 @@ BOOL CGanttChartWnd::OnInitDialog()
 	m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
 	m_cbSnapModes.Rebuild(m_ctrlGantt.GetMonthDisplay(), m_ctrlGantt.GetDefaultSnapMode());
 
+	// Date range text needs to be big enough for all eventualities
+	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
+	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
+
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
 
@@ -793,6 +799,16 @@ void CGanttChartWnd::Resize(int cx, int cy)
 		rGantt.top = CDlgUnits(this).ToPixelsY(28);
 
 		m_ctrlGantt.MoveWindow(rGantt);
+
+		// selected task dates takes available space
+		if (CLocalizer::IsInitialized())
+		{
+			int nOffset = CDialogHelper::ResizeStaticTextToFit(this, IDC_ACTIVEDATERANGE_LABEL);
+
+			if (nOffset)
+				CDialogHelper::OffsetCtrl(this, IDC_ACTIVEDATERANGE_TEXT, nOffset, 0);
+		}
+
 		ResizeSlider(cx);
 	}
 }
@@ -1157,8 +1173,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 void CGanttChartWnd::UpdateActiveRangeLabel()
 {
 	CString sRange = m_sliderDateRange.FormatRange();
-
-	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
+	SetDlgItemText(IDC_ACTIVEDATERANGE_TEXT, sRange);
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM /*wp*/, LPARAM /*lp*/)

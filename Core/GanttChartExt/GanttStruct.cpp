@@ -753,21 +753,21 @@ GANTTDATERANGE::GANTTDATERANGE(const COleDateTimeRange& dtOther)
 
 CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL /*bISODates*/, TCHAR cDelim) const
 {
-	COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
+	CString sRange;
 
-	CString sRange, sStart;
-	sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
-
-	if (CDateHelper::GetDateInMonths(dtStart) == CDateHelper::GetDateInMonths(dtEnd))
+	if (IsValid())
 	{
-		sRange = sStart;
-	}
-	else
-	{
-		CString sEnd;
-		sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
+		CString sFormat(_T("MMM yyyy"));
 
-		sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
+		if (CDateHelper::WantRTLDates())
+			sFormat.MakeReverse();
+
+		COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
+
+		if (CDateHelper::IsSameMonth(dtStart, dtEnd))
+			sRange = CDateHelper::FormatDateOnly(dtStart, sFormat);
+		else
+			sRange = COleDateTimeRange(dtStart, dtEnd).FormatDateOnly(sFormat);
 	}
 
 	return sRange;
