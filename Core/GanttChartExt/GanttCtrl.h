@@ -334,10 +334,7 @@ protected:
 	static int CALLBACK MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	
-	static BOOL CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
-							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
-	static BOOL CalcDateRect(const CRect& rMonth, int nDaysInMonth, 
-							const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
+	static BOOL CalcDateRect(const CRect& rMonth, const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
 	static CString GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);

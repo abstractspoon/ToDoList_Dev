@@ -73,6 +73,8 @@ namespace GanttStatic
 	COleDateTime GetRangeEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
 
 	BOOL GetMaxDateRange(GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
+	int GetDaysInMonth(int nMonth, int nYear);
+	CString GetMonthName(int nMonth, BOOL bShort);
 }
 
 /////////////////////////////////////////////////////////////////////////////

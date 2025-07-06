@@ -5,6 +5,8 @@
 #include "stdafx.h"
 #include "ganttstatic.h"
 
+#include "..\3rdParty\JalaliCalendar.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 int GanttStatic::FindDisplay(GTLC_MONTH_DISPLAY nDisplay)
@@ -192,16 +194,30 @@ int GanttStatic::GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay)
 
 BOOL GanttStatic::GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd)
 {
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-	ASSERT(nDaysInMonth);
+	int nNumMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
 
-	if (nDaysInMonth == 0)
-		return FALSE;
-
-	dtStart.SetDate(nYear, nMonth, 1);
-	dtEnd.m_dt = dtStart.m_dt + nDaysInMonth;
+	dtStart = CDateHelper::GetDateFromMonths(nNumMonths);
+	dtEnd = CDateHelper::GetEndOfMonth(dtStart);
 
 	return TRUE;
+}
+
+int GanttStatic::GetDaysInMonth(int nMonth, int nYear)
+{
+	if (CDateHelper::WantRTLDates())
+		return CJalaliCalendar::GetDaysInMonth(nYear, nMonth);
+
+	// else
+	return CDateHelper::GetDaysInMonth(nMonth, nYear);
+}
+
+CString GanttStatic::GetMonthName(int nMonth, BOOL bShort)
+{
+	if (CDateHelper::WantRTLDates())
+		return CJalaliCalendar::GetMonthName(nMonth);
+
+	// else
+	return CDateHelper::GetMonthName(nMonth, bShort);
 }
 
 int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
@@ -212,20 +228,24 @@ int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONT
 	switch (nDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
+		// 1 column = 25 years
 		nNumCols = (nNumMonths / (25 * 12));
 		break;
 
 	case GTLC_DISPLAY_DECADES:
+		// 1 column = 10 years
 		nNumCols = (nNumMonths / (10 * 12));
 		break;
 
 	case GTLC_DISPLAY_YEARS:
+		// 1 column = 1 year / 12 months
 		nNumCols = (nNumMonths / 12);
 		break;
 
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
+		// 1 column = 3 months
 		nNumCols = (nNumMonths / 3);
 		break;
 
@@ -239,6 +259,7 @@ int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONT
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
 	case GTLC_DISPLAY_HOURS:
+		// 1 column = 1 month
 		nNumCols = nNumMonths;
 		break;
 

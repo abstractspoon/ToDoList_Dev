@@ -1180,7 +1180,7 @@ void CGanttCtrl::SetOption(DWORD dwOption, BOOL bSet)
 
 CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
 {
-	if (nMonth == 0)
+	if (nMonth == 0 || nYear == 0)
 		return _T("");
 
 	BOOL bZeroBasedDecades = HasOption(GTLCF_DECADESAREZEROBASED);
@@ -1191,25 +1191,11 @@ CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int 
 	switch (nDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
-		{
-			COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
-
-			int nStartYear = CDateHelper::GetStartOfQuarterCentury(date, bZeroBasedDecades).GetYear();
-			int nEndYear = (nStartYear + 24);
-
-			sDate.Format(_T("%d-%d"), nStartYear, nEndYear);
-		}
+		sDate.Format(_T("%d-%d"), nYear, nYear + 24);
 		break;
 
 	case GTLC_DISPLAY_DECADES:
-		{
-			COleDateTime date(nYear, nMonth, 1, 0, 0, 0);
-
-			int nStartYear = CDateHelper::GetStartOfDecade(date, bZeroBasedDecades).GetYear();
-			int nEndYear = (nStartYear + 9);
-
-			sDate.Format(_T("%d-%d"), nStartYear, nEndYear);
-		}
+		sDate.Format(_T("%d-%d"), nYear, nYear + 9);
 		break;
 
 	case GTLC_DISPLAY_YEARS:
@@ -1222,42 +1208,43 @@ CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int 
 
 	case GTLC_DISPLAY_QUARTERS_MID:
 		sDate.Format(_T("%s-%s %d"), 
-			CDateHelper::GetMonthName(nMonth, TRUE),
-			CDateHelper::GetMonthName(nMonth+2, TRUE), 
+			GanttStatic::GetMonthName(nMonth, TRUE),
+			GanttStatic::GetMonthName(nMonth+2, TRUE), 
 			nYear);
 		break;
 
 	case GTLC_DISPLAY_QUARTERS_LONG:
 		sDate.Format(_T("%s-%s %d"), 
-			CDateHelper::GetMonthName(nMonth, FALSE),
-			CDateHelper::GetMonthName(nMonth+2, FALSE), 
+			GanttStatic::GetMonthName(nMonth, FALSE),
+			GanttStatic::GetMonthName(nMonth+2, FALSE), 
 			nYear);
 		break;
 
 	case GTLC_DISPLAY_MONTHS_SHORT:
-		sDate = CDateHelper::FormatDate(COleDateTime(nYear, nMonth, 1, 0, 0, 0), 
-			(DHFD_NODAY | DHFD_NOCENTURY | (bISODates ? DHFD_ISO : 0)));
+		sDate.Format(_T("%d/%d"), nMonth, nYear);
+// 		sDate = CDateHelper::FormatDate(COleDateTime(nYear, nMonth, 1, 0, 0, 0), 
+// 			(DHFD_NODAY | DHFD_NOCENTURY | (bISODates ? DHFD_ISO : 0)));
 		break;
 
 	case GTLC_DISPLAY_MONTHS_MID:
-		sDate.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, TRUE), nYear);
+		sDate.Format(_T("%s %d"), GanttStatic::GetMonthName(nMonth, TRUE), nYear);
 		break;
 
 	case GTLC_DISPLAY_MONTHS_LONG:
-		sDate.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, FALSE), nYear);
+		sDate.Format(_T("%s %d"), GanttStatic::GetMonthName(nMonth, FALSE), nYear);
 		break;
 
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
-		sDate.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_WEEKS));
+		sDate.Format(_T("%s %d (%s)"), GanttStatic::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_WEEKS));
 		break;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
 	case GTLC_DISPLAY_HOURS:
-		sDate.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
+		sDate.Format(_T("%s %d (%s)"), GanttStatic::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
 		break;
 
 	default:
@@ -1315,8 +1302,8 @@ BOOL CGanttCtrl::GetListColumnDate(int nCol, int& nMonth, int& nYear) const
 	{
 		DWORD dwData = m_listHeader.GetItemData(nCol);
 
-		nMonth = LOWORD(dwData);
-		nYear = HIWORD(dwData);
+		nMonth = (int)(dwData % 12) + 1;
+		nYear = (int)(dwData / 12);
 	}
 
 	return (nMonth >= 1 && nMonth <= 12);
@@ -1329,7 +1316,7 @@ BOOL CGanttCtrl::GetListColumnDate(int nCol, COleDateTime& date, BOOL bEndOfMont
 	if (!GetListColumnDate(nCol, nMonth, nYear))
 		return FALSE;
 
-	date.SetDate(nYear, nMonth, 1);
+	date = CDateHelper::GetDateFromMonths(CDateHelper::GetDateInMonths(nMonth, nYear));
 
 	if (bEndOfMonth)
 		date = CDateHelper::GetEndOfMonth(date);
@@ -2805,7 +2792,7 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 											BOOL bRollup, BOOL& bDrawToday)
 {
 	// draw vertical week dividers
-	int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
+	int nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
 	double dMonthWidth = rMonth.Width();
 
 	int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
@@ -2862,10 +2849,10 @@ BOOL CGanttCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& r
 	return TRUE;
 }
 
-void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
-											int nMonth, int nYear, const GANTTITEM& gi, 
-											BOOL bSelected, BOOL bRollup, 
-											BOOL& bDrawToday, BOOL bDrawHours)
+void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
+								  int nMonth, int nYear, const GANTTITEM& gi,
+								  BOOL bSelected, BOOL bRollup,
+								  BOOL& bDrawToday, BOOL bDrawHours)
 {
 	// draw vertical day dividers
 	if (!bRollup)
@@ -2873,7 +2860,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 		CRect rDay(rMonth);
 		COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
 
-		int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
+		int nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
 		double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 		for (int nDay = 1; nDay <= nNumDays; nDay++)
@@ -3291,7 +3278,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, FALSE);
 
 			// draw week elements
-			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
+			int nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
 			double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 			// first week starts at 'First DOW of month'
@@ -3328,7 +3315,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 					// Note: width of next month may be different to this month
 					if (m_listHeader.GetItemRect(nCol+1, rMonth))
 					{
-						nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
+						nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
 						dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 						rWeek.right += (int)(nDay * dDayWidth);
@@ -3375,7 +3362,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, TRUE);
 
 			// draw day elements
-			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
+			int nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
 			double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 			rDay.right = rDay.left;
@@ -3591,26 +3578,13 @@ void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, BOOL bSelected, COLORREF
 	}
 }
 
-BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
-							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate)
-{
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-
-	if (nDaysInMonth == 0)
-		return FALSE;
-	
-	COleDateTime dtMonthStart(nYear, nMonth, 1, 0, 0, 0);
-	COleDateTime dtMonthEnd = (dtMonthStart.m_dt + nDaysInMonth);
-
-	return CalcDateRect(rMonth, nDaysInMonth, dtMonthStart, dtMonthEnd, dtFrom, dtTo, rDate);
-}
-
-BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth, 
-							const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
+BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate)
 {
 	if ((dtFrom > dtTo) || (dtTo < dtMonthStart) || (dtFrom > dtMonthEnd))
 		return FALSE;
+
+	int nDaysInMonth = (int)(dtMonthEnd - dtMonthStart);
 
 	double dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
 	rDate = rMonth;
@@ -3621,6 +3595,7 @@ BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 	if (dtTo < dtMonthEnd)
 		rDate.right = (rMonth.left + (int)((dtTo.m_dt - dtMonthStart.m_dt) * dDayWidth));
 
+//	return ((rDate.right > 0) && (rDate.Width() > 0));
 	return (rDate.right > 0);
 }
 
@@ -3807,11 +3782,6 @@ BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY
 
 void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, BOOL bSelected)
 {
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-
-	if (nDaysInMonth == 0)
-		return;
-
 	COleDateTime dtMonthStart, dtMonthEnd;
 
 	if (!GetMonthDates(nMonth, nYear, dtMonthStart, dtMonthEnd))
@@ -3837,7 +3807,7 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 	// check for visibility
 	CRect rBar(rMonth);
 
-	if (!CalcDateRect(rMonth, nDaysInMonth, dtMonthStart, dtMonthEnd, dtStart, dtDue, rBar))
+	if (!CalcDateRect(rMonth, /*nDaysInMonth,*/ dtMonthStart, dtMonthEnd, dtStart, dtDue, rBar))
 		return;
 
 	COLORREF crBorder = RGB(0, 0, 0), crFill = CLR_NONE;
@@ -4006,11 +3976,6 @@ void CGanttCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nY
 	if (!gi.HasDoneDate(HasOption(GTLCF_CALCPARENTDATES)) || gi.IsMilestone(m_sMilestoneTag))
 		return;
 
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-
-	if (nDaysInMonth == 0)
-		return;
-
 	COleDateTime dtMonthStart, dtMonthEnd;
 
 	if (!GetMonthDates(nMonth, nYear, dtMonthStart, dtMonthEnd))
@@ -4021,7 +3986,7 @@ void CGanttCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nY
 
 	CRect rDone(rMonth);
 
-	if (!CalcDateRect(rMonth, nDaysInMonth, dtMonthStart, dtMonthEnd, gi.dtDone, gi.dtDone, rDone))
+	if (!CalcDateRect(rMonth, dtMonthStart, dtMonthEnd, gi.dtDone, gi.dtDone, rDone))
 		return;
 	
 	// draw done date
@@ -4158,11 +4123,6 @@ BOOL CGanttCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear,
 	if (m_crToday == CLR_NONE)
 		return TRUE; // so we don't keep trying to draw it
 
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-
-	if (nDaysInMonth == 0)
-		return FALSE;
-
 	COleDateTime dtMonthStart, dtMonthEnd;
 
 	if (!GetMonthDates(nMonth, nYear, dtMonthStart, dtMonthEnd))
@@ -4177,7 +4137,7 @@ BOOL CGanttCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear,
 
 	CRect rToday;
 
-	if (!CalcDateRect(rMonth, nDaysInMonth, dtMonthStart, dtMonthEnd, dtToday, dtToday.m_dt + 1.0, rToday))
+	if (!CalcDateRect(rMonth, dtMonthStart, dtMonthEnd, dtToday, dtToday.m_dt + 1.0, rToday))
 		return FALSE;
 
 	// don't overdraw selection
@@ -4580,16 +4540,21 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 	int nTotalReqdWidth = 0;
 
 	COleDateTime dtStart = GetStartDate(m_nMonthDisplay);
-	int nYear = dtStart.GetYear(), nMonth = dtStart.GetMonth();
+
+	int nNumMonths = CDateHelper::GetDateInMonths(dtStart);
+	//int nYear = (nStartMonths / 12)/*dtStart.GetYear()*/, nMonth = (nStartMonths % 12)/*dtStart.GetMonth()*/;
 	
 	int nCol = 1;
 
 	do
 	{
+		int nMonth, nYear;
+		CDateHelper::GetDateFromMonths(nNumMonths, nMonth, nYear);
+
 		if (nMonth && nYear)
 		{
 			CString sTitle = FormatListColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
-			DWORD dwData = MAKELONG(nMonth, nYear);
+			//DWORD dwData = MAKELONG(nMonth, nYear);
 
 			int nColWidth = nWidth;
 			BOOL bTracked = FALSE;
@@ -4602,7 +4567,7 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 					nColWidth = m_aPrevColWidths[nCol];
 			}
 
-			m_listHeader.SetItem(nCol, nColWidth, sTitle, dwData);
+			m_listHeader.SetItem(nCol, nColWidth, sTitle, nNumMonths);
 			m_listHeader.SetItemTracked(nCol, bTracked);
 			m_listHeader.EnableItemTracking(nCol, TRUE);
 
@@ -4613,27 +4578,21 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 		switch (m_nMonthDisplay)
 		{
 		case GTLC_DISPLAY_QUARTERCENTURIES:
-			nYear += 25;
+			nNumMonths += (25 * 12);
 			break;
 
 		case GTLC_DISPLAY_DECADES:
-			nYear += 10;
+			nNumMonths += (10 * 12);
 			break;
 			
 		case GTLC_DISPLAY_YEARS:
-			nYear += 1;
+			nNumMonths += 12;
 			break;
 			
 		case GTLC_DISPLAY_QUARTERS_SHORT:
 		case GTLC_DISPLAY_QUARTERS_MID:
 		case GTLC_DISPLAY_QUARTERS_LONG:
-			nMonth += 3;
-
-			if (nMonth > 12)
-			{
-				nMonth = 1;
-				nYear += 1;
-			}
+			nNumMonths += 3;
 			break;
 			
 		case GTLC_DISPLAY_MONTHS_SHORT:
@@ -4646,20 +4605,14 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 		case GTLC_DISPLAY_DAYS_MID:
 		case GTLC_DISPLAY_DAYS_LONG:
 		case GTLC_DISPLAY_HOURS:
-			nMonth += 1;
-
-			if (nMonth > 12)
-			{
-				nMonth = 1;
-				nYear += 1;
-			}
+			nNumMonths += 1;
 			break;
 			
 		default:
 			ASSERT(0);
 			break;
 		}
-		ASSERT(CDateHelper::IsValidDayInMonth(1, nMonth, nYear));
+//		ASSERT(CDateHelper::IsValidDayInMonth(1, nNumMonths, nYear));
 	}
 	while (++nCol < nNumReqColumns);
 
@@ -4787,7 +4740,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 		{
 		case GTLC_DISPLAY_QUARTERCENTURIES:
 			{
-				CString sText = FormatListColumnHeaderText(GTLC_DISPLAY_YEARS, 1, 2013);
+				CString sText = FormatListColumnHeaderText(GTLC_DISPLAY_YEARS, 1, 2025);
 				
 				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 12;
@@ -4807,7 +4760,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 			
 		case GTLC_DISPLAY_QUARTERS_SHORT:
 			{
-				CString sText = FormatListColumnHeaderText(nDisplay, 1, 2013);
+				CString sText = FormatListColumnHeaderText(nDisplay, 1, 2025);
 				
 				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
@@ -4821,7 +4774,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth += 3)
 				{
-					CString sText = FormatListColumnHeaderText(nDisplay, nMonth, 2013);
+					CString sText = FormatListColumnHeaderText(nDisplay, 1, 2025);
 					
 					int nWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nWidth, nMinTextWidth);
@@ -4839,7 +4792,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth++)
 				{
-					CString sText = FormatListColumnHeaderText(nDisplay, nMonth, 2013);
+					CString sText = FormatListColumnHeaderText(nDisplay, 1, 2025);
 					
 					int nTextWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nTextWidth, nMinTextWidth);
@@ -5129,6 +5082,7 @@ BOOL CGanttCtrl::GetVisibleDateRange(GANTTDATERANGE& dtRange) const
 	return dtRange.IsValid();
 }
 
+// TODO /////////////////////////////////////////////
 BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
 {
 	CRect rMonth(rColumn);
@@ -5162,7 +5116,7 @@ BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDispla
 		break;
 	}
 
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
+	int nDaysInMonth = GanttStatic::GetDaysInMonth(nMonth, nYear);
 	int nNumMins = MulDiv((nScrollPos - rMonth.left), (60 * 24 * nDaysInMonth), rMonth.Width());
 
 	int nDay = (1 + (nNumMins / MINS_IN_DAY));
@@ -5177,6 +5131,7 @@ BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDispla
 	return CDateHelper::IsDateSet(date);
 }
 
+// TODO /////////////////////////////////////////////
 BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const
 {
 	// find the column containing this scroll pos
@@ -5196,6 +5151,7 @@ BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const
 	return GetDateFromScrollPos(nScrollPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
 }
 
+// TODO /////////////////////////////////////////////
 BOOL CGanttCtrl::GetDrawPosFromDate(const COleDateTime& date, int& nPos) const
 {
 	if (!GetScrollPosFromDate(date, nPos))
@@ -5205,6 +5161,7 @@ BOOL CGanttCtrl::GetDrawPosFromDate(const COleDateTime& date, int& nPos) const
 	return TRUE;
 }
 
+// TODO /////////////////////////////////////////////
 BOOL CGanttCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
 {
 	// figure out which column contains 'date'
@@ -5264,7 +5221,7 @@ BOOL CGanttCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
 			default: 
 				{
 					// Column == Month
-					nDaysInCol = CDateHelper::GetDaysInMonth(nMonth, nYear);
+					nDaysInCol = GanttStatic::GetDaysInMonth(nMonth, nYear);
 					dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
 				}
 				break;
