@@ -3807,7 +3807,7 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 	// check for visibility
 	CRect rBar(rMonth);
 
-	if (!CalcDateRect(rMonth, /*nDaysInMonth,*/ dtMonthStart, dtMonthEnd, dtStart, dtDue, rBar))
+	if (!CalcDateRect(rMonth, dtMonthStart, dtMonthEnd, dtStart, dtDue, rBar))
 		return;
 
 	COLORREF crBorder = RGB(0, 0, 0), crFill = CLR_NONE;
@@ -5126,7 +5126,7 @@ BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDispla
 	ASSERT(nDay >= 1 && nDay <= nDaysInMonth);
 	ASSERT(nHour >= 0 && nHour < 24);
 
-	date.SetDateTime(nYear, nMonth, nDay, nHour, nMin, 0);
+	date = GanttStatic::ToDate(nYear, nMonth, nDay, nHour, nMin);
 
 	return CDateHelper::IsDateSet(date);
 }
@@ -5173,9 +5173,8 @@ BOOL CGanttCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
 
 		if (GetListColumnRect(nCol, rColumn, FALSE))
 		{
-			int nDay = date.GetDay();
-			int nMonth = date.GetMonth();
-			int nYear = date.GetYear();
+			int nDay, nMonth, nYear;
+			GanttStatic::FromDate(date, nYear, nMonth, nDay);
 
 			double dDayInCol = 0;
 			int nDaysInCol = 0;
@@ -5245,7 +5244,7 @@ BOOL CGanttCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
 
 int CGanttCtrl::FindColumn(int nMonth, int nYear) const
 {	
-	int nMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
+	int nNumMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
 	int nNumReqColumns = GetRequiredListColumnCount();
 
 	for (int i = 1; i <= nNumReqColumns; i++)
@@ -5255,19 +5254,19 @@ int CGanttCtrl::FindColumn(int nMonth, int nYear) const
 
 		int nColMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
 
-		if (nMonths >= nColMonths)
+		if (nNumMonths >= nColMonths)
 		{
 			if (i == nNumReqColumns) // last column
 			{
 				int nColEndMonths = (nColMonths + GetNumMonthsPerColumn(m_nMonthDisplay) - 1);
 
-				return ((nMonths <= nColEndMonths) ? i : -1);
+				return ((nNumMonths <= nColEndMonths) ? i : -1);
 			}
 			else // get date for next column
 			{
 				VERIFY (GetListColumnDate(i+1, nMonth, nYear));
 				
-				if (nMonths < CDateHelper::GetDateInMonths(nMonth, nYear))
+				if (nNumMonths < CDateHelper::GetDateInMonths(nMonth, nYear))
 				{
 					return i;
 				}
@@ -5281,7 +5280,45 @@ int CGanttCtrl::FindColumn(int nMonth, int nYear) const
 
 int CGanttCtrl::FindColumn(const COleDateTime& date) const
 {
-	return FindColumn(date.GetMonth(), date.GetYear());
+	int nNumMonths = CDateHelper::GetDateInMonths(date);
+
+	int nMonth, nYear;
+	CDateHelper::GetDateFromMonths(nNumMonths, nMonth, nYear);
+
+// 	int nNumMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
+	int nNumReqColumns = GetRequiredListColumnCount();
+
+	for (int i = 1; i <= nNumReqColumns; i++)
+	{
+		// get date for current column
+		VERIFY(GetListColumnDate(i, nMonth, nYear));
+
+		int nColMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
+
+		if (nNumMonths >= nColMonths)
+		{
+			if (i == nNumReqColumns) // last column
+			{
+				int nColEndMonths = (nColMonths + GetNumMonthsPerColumn(m_nMonthDisplay) - 1);
+
+				return ((nNumMonths <= nColEndMonths) ? i : -1);
+			}
+			else // get date for next column
+			{
+				VERIFY(GetListColumnDate(i + 1, nMonth, nYear));
+
+				if (nNumMonths < CDateHelper::GetDateInMonths(nMonth, nYear))
+				{
+					return i;
+				}
+			}
+		}
+	}
+
+	// not found
+	return -1;
+
+	//return FindColumn(date.GetMonth(), date.GetYear());
 }
 
 int CGanttCtrl::FindColumn(int nScrollPos) const

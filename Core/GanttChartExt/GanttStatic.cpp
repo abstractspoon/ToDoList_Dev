@@ -220,6 +220,34 @@ CString GanttStatic::GetMonthName(int nMonth, BOOL bShort)
 	return CDateHelper::GetMonthName(nMonth, bShort);
 }
 
+COleDateTime GanttStatic::ToDate(int nYear, int nMonth, int nDay, int nHour, int nMinute)
+{
+	COleDateTime date;
+
+	if (CDateHelper::WantRTLDates())
+		CJalaliCalendar::ToGregorian(nYear, nMonth, nDay, date);
+	else
+		date.SetDate(nYear, nMonth, nDay);
+
+	date += COleDateTimeSpan(0, nHour, nMinute, 0);
+
+	return date;
+}
+
+void GanttStatic::FromDate(const COleDateTime& date, int& nYear, int& nMonth, int& nDay)
+{
+	if (CDateHelper::WantRTLDates())
+	{
+		CJalaliCalendar::FromGregorian(date, &nYear, &nMonth, &nDay);
+	}
+	else
+	{
+		nDay = date.GetDay();
+		nMonth = date.GetMonth();
+		nYear = date.GetYear();
+	}
+}
+
 int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	int nNumMonths = dtRange.GetNumMonths(nDisplay, bZeroBasedDecades);
