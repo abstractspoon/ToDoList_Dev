@@ -2109,7 +2109,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 						CPoint pt(::GetMessagePos());
 						m_list.ScreenToClient(&pt);
 
-						GetDateFromScrollPos((pt.x + m_list.GetScrollPos(SB_HORZ)), dtScroll);
+						GetDateFromScrolledPos((pt.x + m_list.GetScrollPos(SB_HORZ)), dtScroll);
 					}
 					else // centre on the task beneath the mouse
 					{
@@ -4388,7 +4388,7 @@ BOOL CGanttCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
 	CWnd::GetClientRect(rClient);
 
 	COleDateTime dtPos;
-	BOOL bRestorePos = GetDateFromScrollPos((m_list.GetScrollPos(SB_HORZ) + (rClient.Width() / 2)), dtPos);
+	BOOL bRestorePos = GetDateFromScrolledPos((m_list.GetScrollPos(SB_HORZ) + (rClient.Width() / 2)), dtPos);
 
 	// always cancel any ongoing operation
 	CancelOperation();
@@ -4422,7 +4422,7 @@ BOOL CGanttCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
 	{
 		int nScrollPos;
 		
-		if (GetScrollPosFromDate(dtPos, nScrollPos))
+		if (GetScrolledPosFromDate(dtPos, nScrollPos))
 		{
 			// Date was at the centre of the view
 			nScrollPos -= (rClient.Width() / 2);
@@ -4666,7 +4666,7 @@ void CGanttCtrl::UpdateListColumns(int nWidth)
 	int nScrollPos = m_list.GetScrollPos(SB_HORZ);
 
 	COleDateTime dtPos;
-	BOOL bRestorePos = GetDateFromScrollPos(nScrollPos, dtPos);
+	BOOL bRestorePos = GetDateFromScrolledPos(nScrollPos, dtPos);
 
 	if (nWidth == -1)
 		nWidth = GetColumnWidth();
@@ -5036,8 +5036,8 @@ void CGanttCtrl::ScrollTo(const COleDateTime& date)
 
 	int nStartPos, nEndPos;
 	
-	if (GetScrollPosFromDate(dateOnly, nStartPos) &&
-		GetScrollPosFromDate(dateOnly.m_dt + 1.0, nEndPos))
+	if (GetScrolledPosFromDate(dateOnly, nStartPos) &&
+		GetScrolledPosFromDate(dateOnly.m_dt + 1.0, nEndPos))
 	{
 		// if it is already visible no need to scroll
 		int nListStart = m_list.GetScrollPos(SB_HORZ);
@@ -5072,8 +5072,8 @@ BOOL CGanttCtrl::GetVisibleDateRange(GANTTDATERANGE& dtRange) const
 
 		COleDateTime dtStart, dtEnd;
 
-		if (GetDateFromScrollPos(rList.left, dtStart) &&
-			GetDateFromScrollPos(rList.right - 1, dtEnd))
+		if (GetDateFromScrolledPos(rList.left, dtStart) &&
+			GetDateFromScrolledPos(rList.right - 1, dtEnd))
 		{
 			dtRange.Set(COleDateTimeRange(dtStart, dtEnd, FALSE));
 		}
@@ -5083,7 +5083,7 @@ BOOL CGanttCtrl::GetVisibleDateRange(GANTTDATERANGE& dtRange) const
 }
 
 // TODO /////////////////////////////////////////////
-BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
+BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
 {
 	CRect rMonth(rColumn);
 
@@ -5100,7 +5100,7 @@ BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDispla
 			double dMonthWidth = GetMonthWidth(nDisplay, rMonth.Width());
 
 			// calc month as offset to start of column
-			int nPxOffset = (nScrollPos - rMonth.left);
+			int nPxOffset = (nPos - rMonth.left);
 			int nMonthOffset = (int)(nPxOffset / dMonthWidth);
 
 			// clip rect to this month
@@ -5117,7 +5117,7 @@ BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDispla
 	}
 
 	int nDaysInMonth = GanttStatic::GetDaysInMonth(nMonth, nYear);
-	int nNumMins = MulDiv((nScrollPos - rMonth.left), (60 * 24 * nDaysInMonth), rMonth.Width());
+	int nNumMins = MulDiv((nPos - rMonth.left), (60 * 24 * nDaysInMonth), rMonth.Width());
 
 	int nDay = (1 + (nNumMins / MINS_IN_DAY));
 	int nHour = ((nNumMins % MINS_IN_DAY) / MINS_IN_HOUR);
@@ -5132,10 +5132,10 @@ BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDispla
 }
 
 // TODO /////////////////////////////////////////////
-BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const
+BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, COleDateTime& date) const
 {
 	// find the column containing this scroll pos
-	int nCol = FindColumn(nScrollPos);
+	int nCol = FindColumn(nPos);
 
 	if (nCol == -1)
 		return FALSE;
@@ -5143,18 +5143,18 @@ BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const
 	// else
 	CRect rColumn;
 	VERIFY(GetListColumnRect(nCol, rColumn, FALSE));
-	ASSERT(nScrollPos >= rColumn.left && nScrollPos < rColumn.right);
+	ASSERT(nPos >= rColumn.left && nPos < rColumn.right);
 
 	int nYear, nMonth;
 	VERIFY(GetListColumnDate(nCol, nMonth, nYear));
 
-	return GetDateFromScrollPos(nScrollPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
+	return GetDateFromScrolledPos(nPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
 }
 
 // TODO /////////////////////////////////////////////
 BOOL CGanttCtrl::GetDrawPosFromDate(const COleDateTime& date, int& nPos) const
 {
-	if (!GetScrollPosFromDate(date, nPos))
+	if (!GetScrolledPosFromDate(date, nPos))
 		return FALSE;
 	
 	nPos -= m_list.GetScrollPos(SB_HORZ);
@@ -5162,7 +5162,7 @@ BOOL CGanttCtrl::GetDrawPosFromDate(const COleDateTime& date, int& nPos) const
 }
 
 // TODO /////////////////////////////////////////////
-BOOL CGanttCtrl::GetScrollPosFromDate(const COleDateTime& date, int& nPos) const
+BOOL CGanttCtrl::GetScrolledPosFromDate(const COleDateTime& date, int& nPos) const
 {
 	// figure out which column contains 'date'
 	int nCol = FindColumn(date);
@@ -5891,7 +5891,7 @@ BOOL CGanttCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) co
 	// convert pos to date
 	int nScrollPos = (m_list.GetScrollPos(SB_HORZ) + ptCursor.x);
 
-	if (GetDateFromScrollPos(nScrollPos, date))
+	if (GetDateFromScrolledPos(nScrollPos, date))
 		return TRUE;
 
 	// Fallback for dragging
@@ -5915,7 +5915,7 @@ BOOL CGanttCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) co
 		int nNumMonthsPerCol = GetNumMonthsPerColumn(m_nMonthDisplay);
 		CDateHelper::IncrementMonth(nMonth, nYear, (nDir * nNumMonthsPerCol));
 
-		return GetDateFromScrollPos(nScrollPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
+		return GetDateFromScrolledPos(nScrollPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
 	}
 
 	// else
@@ -6273,8 +6273,8 @@ BOOL CGanttCtrl::SaveToImage(CBitmap& bmImage)
 		CDateHelper::IncrementMonth(dtTo, 1);
 
 	int nFrom, nTo;
-	VERIFY(GetScrollPosFromDate(dtFrom, nFrom));
-	VERIFY(GetScrollPosFromDate(dtTo, nTo));
+	VERIFY(GetScrolledPosFromDate(dtFrom, nFrom));
+	VERIFY(GetScrolledPosFromDate(dtTo, nTo));
 
 	if (nTo == nFrom)
 		nTo = -1;

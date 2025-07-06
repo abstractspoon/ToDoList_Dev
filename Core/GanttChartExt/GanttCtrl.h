@@ -247,9 +247,6 @@ protected:
 	int FindColumn(int nScrollPos) const;
 	int FindColumn(int nMonth, int nYear) const;
 	int FindColumn(const COleDateTime& date) const;
-	BOOL GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const;
-	BOOL GetScrollPosFromDate(const COleDateTime& date, int& nPos) const;
-	BOOL GetDrawPosFromDate(const COleDateTime& date, int& nPos) const;
 	void ScrollTo(const COleDateTime& date);
 	void InitItemHeights();
 	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const;
@@ -265,6 +262,10 @@ protected:
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
 	BOOL GetVisibleDateRange(GANTTDATERANGE& dtRange) const;
 	GTLC_SNAPMODE GetSnapMode() const;
+
+	BOOL GetDateFromScrolledPos(int nPos, COleDateTime& date) const;
+	BOOL GetScrolledPosFromDate(const COleDateTime& date, int& nPos) const;
+	BOOL GetDrawPosFromDate(const COleDateTime& date, int& nPos) const;
 
 	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
 	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
@@ -341,7 +342,7 @@ protected:
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
 	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
-	static BOOL GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
+	static BOOL GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
 	static BOOL IsVerticalDivider(VERT_DIV nType);
 	static BOOL IsDragging(GTLC_DRAG nDrag);
 	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
