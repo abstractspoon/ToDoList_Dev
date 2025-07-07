@@ -94,7 +94,7 @@ BOOL CGanttDateRangeSlider::GetMaxRange(GANTTDATERANGE& dtRange) const
 	return GanttStatic::GetMaxDateRange(dtRange, m_nMonthDisplay, m_bZeroBasedDecades);
 }
 
-CString CGanttDateRangeSlider::FormatRange(TCHAR cDelim) const
+CString CGanttDateRangeSlider::FormatRange() const
 {
 	GANTTDATERANGE dtRange;
 
@@ -104,7 +104,7 @@ CString CGanttDateRangeSlider::FormatRange(TCHAR cDelim) const
 	dtRange.SetStart(dtRange.GetStart(m_nMonthDisplay, m_bZeroBasedDecades));
 	dtRange.SetEnd(dtRange.GetEnd(m_nMonthDisplay, m_bZeroBasedDecades));
 
-	return dtRange.Format(GTLC_DISPLAY_MONTHS_MID, m_bZeroBasedDecades, FALSE, cDelim);
+	return dtRange.Format(GTLC_DISPLAY_MONTHS_MID, m_bZeroBasedDecades);
 }
 
 BOOL CGanttDateRangeSlider::HasSelectedRange() const

@@ -751,7 +751,7 @@ GANTTDATERANGE::GANTTDATERANGE(const COleDateTimeRange& dtOther)
 		Set(dtOther);
 }
 
-CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL /*bISODates*/, TCHAR cDelim) const
+CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
 {
 	CString sRange;
 
