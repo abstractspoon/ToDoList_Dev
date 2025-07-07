@@ -18,11 +18,11 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-const int MAX_YEAR = 2100;
-#else
-const int MAX_YEAR = 2200;
-#endif
+// #ifdef _DEBUG
+// const int MAX_YEAR = 2100;
+// #else
+// const int MAX_YEAR = 2200;
+// #endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -803,9 +803,11 @@ int GANTTDATERANGE::GetStartYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDec
 int GANTTDATERANGE::GetEndYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
 {
 	int nYear = GetEnd(nDisplay, bZeroBasedDecades).GetYear();
-
+	return nYear;
+/*
 	// for now, do not let end year exceed MAX_YEAR
-	return min(nYear, MAX_YEAR);
+	min(nYear, MAX_YEAR);
+*/
 }
 
 int GANTTDATERANGE::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
