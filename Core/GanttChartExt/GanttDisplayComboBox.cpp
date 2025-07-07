@@ -5,6 +5,7 @@
 #include "GanttDisplayComboBox.h"
 #include "GanttCtrl.h"
 #include "GanttStatic.h"
+#include "GanttUtils.h"
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\DateHelper.h"
@@ -62,7 +63,7 @@ GTLC_MONTH_DISPLAY CGanttDisplayComboBox::GetSelectedDisplayRaw() const
 
 BOOL CGanttDisplayComboBox::IsEnabledDisplay(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return (GanttStatic::CompareDisplays(nDisplay, m_nMinEnabledDisplay) <= 0);
+	return (GanttUtils::CompareDisplays(nDisplay, m_nMinEnabledDisplay) <= 0);
 }
 
 void CGanttDisplayComboBox::UpdateDisplayOptions(const CGanttCtrl& ctrl)

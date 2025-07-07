@@ -3,9 +3,11 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "resource.h"
 #include "GanttCtrl.h"
 #include "GanttMsg.h"
 #include "GanttStatic.h"
+#include "GanttUtils.h"
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\DateHelper.h"
@@ -33,7 +35,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace GanttStatic;
+using namespace GanttUtils;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1048,7 +1050,7 @@ BOOL CGanttCtrl::GetMaxDateRange(GANTTDATERANGE& dtRange) const
 {
 	dtRange = m_dtDataRange;
 
-	return GanttStatic::GetMaxDateRange(dtRange, m_nMonthDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
+	return GanttUtils::GetMaxDateRange(dtRange, m_nMonthDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
 }
 
 const GANTTDATERANGE& CGanttCtrl::ActiveDateRange() const
@@ -2727,7 +2729,7 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 											BOOL bRollup, BOOL& bDrawToday)
 {
 	// draw vertical week dividers
-	int nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
+	int nNumDays = GetDaysInMonth(nMonth, nYear);
 	double dMonthWidth = rMonth.Width();
 
 	int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
@@ -2795,7 +2797,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 		CRect rDay(rMonth);
 		COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
 
-		int nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
+		int nNumDays = GetDaysInMonth(nMonth, nYear);
 		double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 		for (int nDay = 1; nDay <= nNumDays; nDay++)
@@ -3252,7 +3254,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, FALSE);
 
 			// draw week elements
-			int nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
+			int nNumDays = GetDaysInMonth(nMonth, nYear);
 			double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 			// first week starts at 'First DOW of month'
@@ -3289,7 +3291,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 					// Note: width of next month may be different to this month
 					if (m_listHeader.GetItemRect(nCol+1, rMonth))
 					{
-						nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
+						nNumDays = GetDaysInMonth(nMonth, nYear);
 						dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 						rWeek.right += (int)(nDay * dDayWidth);
@@ -3336,7 +3338,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, TRUE);
 
 			// draw day elements
-			int nNumDays = GanttStatic::GetDaysInMonth(nMonth, nYear);
+			int nNumDays = GetDaysInMonth(nMonth, nYear);
 			double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 			rDay.right = rDay.left;
@@ -4543,7 +4545,7 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 
 		if (nMonth && nYear)
 		{
-			CString sTitle = GanttStatic::FormatHeaderText(m_nMonthDisplay, nMonth, nYear);
+			CString sTitle = FormatHeaderText(m_nMonthDisplay, nMonth, nYear);
 
 			int nColWidth = nWidth;
 			BOOL bTracked = FALSE;
@@ -4726,7 +4728,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 		{
 		case GTLC_DISPLAY_QUARTERCENTURIES:
 			{
-				CString sText = GanttStatic::FormatHeaderText(GTLC_DISPLAY_YEARS, 1, 2025);
+				CString sText = FormatHeaderText(GTLC_DISPLAY_YEARS, 1, 2025);
 				
 				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 12;
@@ -4746,7 +4748,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 			
 		case GTLC_DISPLAY_QUARTERS_SHORT:
 			{
-				CString sText = GanttStatic::FormatHeaderText(nDisplay, 1, 2025);
+				CString sText = FormatHeaderText(nDisplay, 1, 2025);
 				
 				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
@@ -4760,7 +4762,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth += 3)
 				{
-					CString sText = GanttStatic::FormatHeaderText(nDisplay, 1, 2025);
+					CString sText = FormatHeaderText(nDisplay, 1, 2025);
 					
 					int nWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nWidth, nMinTextWidth);
@@ -4778,7 +4780,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth++)
 				{
-					CString sText = GanttStatic::FormatHeaderText(nDisplay, 1, 2025);
+					CString sText = FormatHeaderText(nDisplay, 1, 2025);
 					
 					int nTextWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nTextWidth, nMinTextWidth);
@@ -5120,7 +5122,7 @@ BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, i
 		break;
 	}
 
-	int nDaysInMonth = GanttStatic::GetDaysInMonth(nMonth, nYear);
+	int nDaysInMonth = GetDaysInMonth(nMonth, nYear);
 	int nNumMins = MulDiv((nPos - rMonth.left), (60 * 24 * nDaysInMonth), rMonth.Width());
 
 	int nDay = (1 + (nNumMins / MINS_IN_DAY));
@@ -5130,7 +5132,7 @@ BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, i
 	ASSERT(nDay >= 1 && nDay <= nDaysInMonth);
 	ASSERT(nHour >= 0 && nHour < 24);
 
-	date = GanttStatic::ToDate(nYear, nMonth, nDay, nHour, nMin);
+	date = ToDate(nYear, nMonth, nDay, nHour, nMin);
 
 	return CDateHelper::IsDateSet(date);
 }
@@ -5157,7 +5159,7 @@ BOOL CGanttCtrl::GetScrolledPosFromDate(const COleDateTime& date, int& nPos) con
 		if (GetListColumnRect(nCol, rColumn, FALSE))
 		{
 			int nDay, nMonth, nYear;
-			GanttStatic::FromDate(date, nYear, nMonth, nDay);
+			FromDate(date, nYear, nMonth, nDay);
 
 			double dDayInCol = 0;
 			int nDaysInCol = 0;
@@ -5203,7 +5205,7 @@ BOOL CGanttCtrl::GetScrolledPosFromDate(const COleDateTime& date, int& nPos) con
 			default: 
 				{
 					// Column == Month
-					nDaysInCol = GanttStatic::GetDaysInMonth(nMonth, nYear);
+					nDaysInCol = GetDaysInMonth(nMonth, nYear);
 					dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
 				}
 				break;

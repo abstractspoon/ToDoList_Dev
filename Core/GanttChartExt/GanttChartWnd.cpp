@@ -2,9 +2,10 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "GanttChartExt.h"
 #include "GanttChartWnd.h"
-#include "GanttStatic.h"
+#include "GanttUtils.h"
 #include "GanttMsg.h"
 
 #include "..\shared\themed.h"
@@ -941,7 +942,7 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 				// We only need to fixup the active selection if the primary 
 				// display group is changing else the column count is unchanged 
 				// so the previous selection is okay by default
-				if (!GanttStatic::IsSameDisplayGroup(nPrevDisplay, nDisplay))
+				if (!GanttUtils::IsSameDisplayGroup(nPrevDisplay, nDisplay))
 				{
 					GANTTDATERANGE dtMaxRange;
 
@@ -1030,7 +1031,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 		// We only need to fixup the active selection if the primary 
 		// display group is changing else the column count is unchanged 
 		// so the previous selection is okay by default
-		if (!GanttStatic::IsSameDisplayGroup(nPrevDisplay, nDisplay))
+		if (!GanttUtils::IsSameDisplayGroup(nPrevDisplay, nDisplay))
 		{
 			GANTTDATERANGE dtMaxRange;
 

@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "GanttStruct.h"
-#include "GanttStatic.h"
+#include "GanttUtils.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\shared\graphicsMisc.h"
@@ -832,7 +832,7 @@ COleDateTime GANTTDATERANGE::GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBas
 	if (CDateHelper::IsDateSet(m_dtStart))
 		dtTemp = m_dtStart;
 
-	return GanttStatic::GetRangeStart(dtTemp, nDisplay, bZeroBasedDecades);
+	return GanttUtils::GetRangeStart(dtTemp, nDisplay, bZeroBasedDecades);
 }
 
 COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
@@ -844,7 +844,7 @@ COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBased
 	if (CDateHelper::IsDateSet(m_dtEnd))
 		dtTemp = m_dtEnd;
 
-	return GanttStatic::GetRangeEnd(dtTemp, nDisplay, bZeroBasedDecades);
+	return GanttUtils::GetRangeEnd(dtTemp, nDisplay, bZeroBasedDecades);
 }
 
 BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi) const
@@ -968,22 +968,22 @@ void GANTTDATERANGE::Set(const COleDateTimeRange& dtOther, GTLC_MONTH_DISPLAY nD
 {
 	ASSERT(!dtOther.m_bInclusive); // always
 	
-	SetStart(GanttStatic::GetRangeStart(dtOther.GetStart(), nDisplay, bZeroBasedDecades));
-	SetEnd(GanttStatic::GetRangeEnd(dtOther.GetEnd(), nDisplay, bZeroBasedDecades));
+	SetStart(GanttUtils::GetRangeStart(dtOther.GetStart(), nDisplay, bZeroBasedDecades));
+	SetEnd(GanttUtils::GetRangeEnd(dtOther.GetEnd(), nDisplay, bZeroBasedDecades));
 }
 
 void GANTTDATERANGE::SetStart(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	ASSERT(!m_bInclusive); // always
 
-	SetStart(GanttStatic::GetRangeStart(date, nDisplay, bZeroBasedDecades));
+	SetStart(GanttUtils::GetRangeStart(date, nDisplay, bZeroBasedDecades));
 }
 
 void GANTTDATERANGE::SetEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	ASSERT(!m_bInclusive); // always
 
-	SetEnd(GanttStatic::GetRangeEnd(date, nDisplay, bZeroBasedDecades));
+	SetEnd(GanttUtils::GetRangeEnd(date, nDisplay, bZeroBasedDecades));
 }
 
 void GANTTDATERANGE::ClearStart()
