@@ -3799,10 +3799,10 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 	if (!GetTaskStartEndDates(gi, dtStart, dtDue))
 		return;
 
-	// Move due date to beginning of day as necessary
+	// Move due date to beginning of next day as necessary
 	// to avoid rounding errors
 	if (CDateHelper::IsEndOfDay(dtDue, FALSE))
-		dtDue = CDateHelper::GetStartOfDay(dtDue);
+		dtDue = CDateHelper::GetStartOfNextDay(dtDue);
 
 	// check for visibility
 	CRect rBar(rMonth);
