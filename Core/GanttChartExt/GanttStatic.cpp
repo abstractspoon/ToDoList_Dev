@@ -197,7 +197,7 @@ BOOL GanttStatic::GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, CO
 	int nNumMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
 
 	dtStart = CDateHelper::GetDateFromMonths(nNumMonths);
-	dtEnd = CDateHelper::GetEndOfMonth(dtStart);
+	dtEnd = CDateHelper::GetDateFromMonths(nNumMonths + 1);
 
 	return TRUE;
 }
