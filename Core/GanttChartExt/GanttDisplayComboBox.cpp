@@ -7,6 +7,7 @@
 #include "GanttStatic.h"
 
 #include "..\Shared\DialogHelper.h"
+#include "..\Shared\DateHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -101,6 +102,23 @@ void CGanttDisplayComboBox::UpdateDisplayOptions(const CGanttCtrl& ctrl)
 		else
 		{
 			aItems[nItem] += aExamples[nItem];
+		}
+	}
+
+	// Finally add the items to the combo, less those that
+	// are not supported by RTL dates because there is no short month name
+	for (nItem = 0; nItem < NUM_DISPLAYMODES; nItem++)
+	{
+		const GTCDISPLAYMODE& mode = DISPLAYMODES[nItem];
+
+		if (CDateHelper::WantRTLDates())
+		{
+			switch (mode.nDisplay)
+			{
+			case GTLC_DISPLAY_QUARTERS_MID:
+			case GTLC_DISPLAY_MONTHS_MID:
+				continue;
+			}
 		}
 
 		CDialogHelper::AddStringT(*this, aItems[nItem], mode.nDisplay);
