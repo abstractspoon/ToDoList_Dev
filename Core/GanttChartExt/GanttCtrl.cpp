@@ -3799,10 +3799,10 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 	if (!GetTaskStartEndDates(gi, dtStart, dtDue))
 		return;
 
-	// Move due date to beginning of next day as necessary
+	// Move due date to beginning of day as necessary
 	// to avoid rounding errors
 	if (CDateHelper::IsEndOfDay(dtDue, FALSE))
-		dtDue = CDateHelper::GetStartOfNextDay(dtDue);
+		dtDue = CDateHelper::GetStartOfDay(dtDue);
 
 	// check for visibility
 	CRect rBar(rMonth);
@@ -5082,7 +5082,25 @@ BOOL CGanttCtrl::GetVisibleDateRange(GANTTDATERANGE& dtRange) const
 	return dtRange.IsValid();
 }
 
-// TODO /////////////////////////////////////////////
+BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, COleDateTime& date) const
+{
+	// find the column containing this scroll pos
+	int nCol = FindColumn(nPos);
+
+	if (nCol == -1)
+		return FALSE;
+
+	// else
+	CRect rColumn;
+	VERIFY(GetListColumnRect(nCol, rColumn, FALSE));
+	ASSERT(nPos >= rColumn.left && nPos < rColumn.right);
+
+	int nYear, nMonth;
+	VERIFY(GetListColumnDate(nCol, nMonth, nYear));
+
+	return GetDateFromScrolledPos(nPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
+}
+
 BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
 {
 	CRect rMonth(rColumn);
@@ -5100,16 +5118,16 @@ BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, i
 			double dMonthWidth = GetMonthWidth(nDisplay, rMonth.Width());
 
 			// calc month as offset to start of column
-			int nPxOffset = (nPos - rMonth.left);
-			int nMonthOffset = (int)(nPxOffset / dMonthWidth);
+			int nPosOffset = (nPos - rMonth.left);
+			int nMonthOffset = (int)(nPosOffset / dMonthWidth);
 
 			// clip rect to this month
-			rMonth.left += nPxOffset;
-			rMonth.right = (rMonth.left + (int)dMonthWidth);
+			rMonth.left += (int)(nMonthOffset * dMonthWidth);
+			rMonth.right = (int)(rMonth.left + dMonthWidth);
 
 			nMonth += nMonthOffset;
 
-			// Months here are one-based
+			// Months are one-based
 			nYear += ((nMonth - 1) / 12);
 			nMonth = (((nMonth - 1) % 12) + 1);
 		}
@@ -5131,27 +5149,6 @@ BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, i
 	return CDateHelper::IsDateSet(date);
 }
 
-// TODO /////////////////////////////////////////////
-BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, COleDateTime& date) const
-{
-	// find the column containing this scroll pos
-	int nCol = FindColumn(nPos);
-
-	if (nCol == -1)
-		return FALSE;
-
-	// else
-	CRect rColumn;
-	VERIFY(GetListColumnRect(nCol, rColumn, FALSE));
-	ASSERT(nPos >= rColumn.left && nPos < rColumn.right);
-
-	int nYear, nMonth;
-	VERIFY(GetListColumnDate(nCol, nMonth, nYear));
-
-	return GetDateFromScrolledPos(nPos, m_nMonthDisplay, nMonth, nYear, rColumn, date);
-}
-
-// TODO /////////////////////////////////////////////
 BOOL CGanttCtrl::GetDrawPosFromDate(const COleDateTime& date, int& nPos) const
 {
 	if (!GetScrolledPosFromDate(date, nPos))
@@ -5285,7 +5282,6 @@ int CGanttCtrl::FindColumn(const COleDateTime& date) const
 	int nMonth, nYear;
 	CDateHelper::GetDateFromMonths(nNumMonths, nMonth, nYear);
 
-// 	int nNumMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
 	int nNumReqColumns = GetRequiredListColumnCount();
 
 	for (int i = 1; i <= nNumReqColumns; i++)
@@ -5317,8 +5313,6 @@ int CGanttCtrl::FindColumn(const COleDateTime& date) const
 
 	// not found
 	return -1;
-
-	//return FindColumn(date.GetMonth(), date.GetYear());
 }
 
 int CGanttCtrl::FindColumn(int nScrollPos) const
