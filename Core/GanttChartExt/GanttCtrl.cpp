@@ -1183,9 +1183,6 @@ CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int 
 	if (nMonth == 0 || nYear == 0)
 		return _T("");
 
-	BOOL bZeroBasedDecades = HasOption(GTLCF_DECADESAREZEROBASED);
-	BOOL bISODates = HasOption(GTLCF_DISPLAYISODATES);
-
 	CString sDate;
 
 	switch (nDisplay)
@@ -1221,9 +1218,25 @@ CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int 
 		break;
 
 	case GTLC_DISPLAY_MONTHS_SHORT:
-		sDate.Format(_T("%d/%d"), nMonth, nYear);
-// 		sDate = CDateHelper::FormatDate(COleDateTime(nYear, nMonth, 1, 0, 0, 0), 
-// 			(DHFD_NODAY | DHFD_NOCENTURY | (bISODates ? DHFD_ISO : 0)));
+		{
+			COleDateTime date = GanttStatic::ToDate(nYear, nMonth, 1, 0, 0);
+
+			if (CDateHelper::WantRTLDates())
+			{
+				sDate = CDateHelper::FormatDate(date);
+				Misc::Reverse(sDate);
+
+				CString sRest;
+				Misc::Split(sDate, sRest, Misc::GetDateSeparator());
+
+				sDate = sRest;
+				Misc::Reverse(sDate);
+			}
+			else
+			{
+				sDate = CDateHelper::FormatDate(date, (DHFD_NODAY | DHFD_NOCENTURY));
+			}
+		}
 		break;
 
 	case GTLC_DISPLAY_MONTHS_MID:
@@ -1539,13 +1552,25 @@ LRESULT CGanttCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		{
 		case CDDS_PREPAINT:
 			// only need handle drawing for double row height
+			// and/or some RTL date formats
 			if (m_listHeader.GetRowCount() > 1)
+			{
 				return CDRF_NOTIFYITEMDRAW;
+			}
+			else if (CDateHelper::WantRTLDates())
+			{
+				switch (m_nMonthDisplay)
+				{
+				case GTLC_DISPLAY_YEARS:
+				case GTLC_DISPLAY_QUARTERS_SHORT:
+				case GTLC_DISPLAY_MONTHS_SHORT:
+					return CDRF_NOTIFYITEMDRAW;
+				}
+			}
 			break;
 							
 		case CDDS_ITEMPREPAINT:
-			// only need handle drawing for double row height
-			if (m_listHeader.GetRowCount() > 1)
+			ASSERT((m_listHeader.GetRowCount() > 1) || CDateHelper::WantRTLDates());
 			{
 				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
 				int nItem = (int)pNMCD->dwItemSpec;
@@ -3223,15 +3248,51 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 	switch (m_nMonthDisplay)
 	{
-	case GTLC_DISPLAY_YEARS:
-	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
-	case GTLC_DISPLAY_MONTHS_SHORT:
 	case GTLC_DISPLAY_MONTHS_MID:
 	case GTLC_DISPLAY_MONTHS_LONG:
 		// should never get here
-		ASSERT(0);
+ 		ASSERT(0);
+		break;
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+		ASSERT(CDateHelper::WantRTLDates());
+		{
+			// The only way to render the year is to render it separately to the 'Q' part
+
+			// 1. Draw background with no text
+			DrawListHeaderRect(pDC, rItem, _T(""), pThemed, FALSE);
+
+			// 2. Required rectangle for text
+			CString sText = m_listHeader.GetItemText(nCol);
+
+			CRect rText(rItem);
+			rText.right = rText.left + pDC->GetTextExtent(sText).cx;
+
+			GraphicsMisc::CentreRect(rText, rItem);
+
+			// 3. Split Text
+			CString sQuarter = m_listHeader.GetItemText(nCol), sYear;
+			Misc::Split(sQuarter, sYear, ' ');
+
+			// 4. Draw sQuarter left-aligned
+			pDC->SetBkMode(TRANSPARENT);
+			pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
+
+			UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_LEFT | DT_RTLREADING);
+			pDC->DrawText(sQuarter, &rText, nFlags);
+
+			// 5. Draw sYear right-aligned
+			nFlags |= (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_RIGHT | DT_RTLREADING);
+			pDC->DrawText(sYear, &rText, nFlags);
+		}
+		break;
+
+	case GTLC_DISPLAY_YEARS:
+	case GTLC_DISPLAY_MONTHS_SHORT:
+		ASSERT(CDateHelper::WantRTLDates());
+		DrawListHeaderRect(pDC, rItem, m_listHeader.GetItemText(nCol), pThemed, FALSE);
 		break;
 
 	case GTLC_DISPLAY_QUARTERCENTURIES:
@@ -3261,7 +3322,10 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 				// check if we need to draw
 				if (rYear.right >= rClip.left)
-					DrawListHeaderRect(pDC, rYear, Misc::Format(nYear + i), pThemed, FALSE);
+				{
+					COleDateTime dtYear(nYear + i, 1, 1, 0, 0, 0);
+					DrawListHeaderRect(pDC, rYear, CDateHelper::FormatDateOnly(dtYear, _T("yyyy")), pThemed, FALSE);
+				}
 			}
 		}
 		break;
