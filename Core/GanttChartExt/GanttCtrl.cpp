@@ -1178,96 +1178,6 @@ void CGanttCtrl::SetOption(DWORD dwOption, BOOL bSet)
 	}
 }
 
-CString CGanttCtrl::FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const
-{
-	if (nMonth == 0 || nYear == 0)
-		return _T("");
-
-	CString sDate;
-
-	switch (nDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		sDate.Format(_T("%d-%d"), nYear, nYear + 24);
-		break;
-
-	case GTLC_DISPLAY_DECADES:
-		sDate.Format(_T("%d-%d"), nYear, nYear + 9);
-		break;
-
-	case GTLC_DISPLAY_YEARS:
-		sDate.Format(_T("%d"), nYear);
-		break;
-
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-		sDate.Format(_T("Q%d %d"), (1 + ((nMonth-1) / 3)), nYear);
-		break;
-
-	case GTLC_DISPLAY_QUARTERS_MID:
-		sDate.Format(_T("%s-%s %d"), 
-			GanttStatic::GetMonthName(nMonth, TRUE),
-			GanttStatic::GetMonthName(nMonth+2, TRUE), 
-			nYear);
-		break;
-
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		sDate.Format(_T("%s-%s %d"), 
-			GanttStatic::GetMonthName(nMonth, FALSE),
-			GanttStatic::GetMonthName(nMonth+2, FALSE), 
-			nYear);
-		break;
-
-	case GTLC_DISPLAY_MONTHS_SHORT:
-		{
-			COleDateTime date = GanttStatic::ToDate(nYear, nMonth, 1, 0, 0);
-
-			if (CDateHelper::WantRTLDates())
-			{
-				sDate = CDateHelper::FormatDate(date);
-				Misc::Reverse(sDate);
-
-				CString sRest;
-				Misc::Split(sDate, sRest, Misc::GetDateSeparator());
-
-				sDate = sRest;
-				Misc::Reverse(sDate);
-			}
-			else
-			{
-				sDate = CDateHelper::FormatDate(date, (DHFD_NODAY | DHFD_NOCENTURY));
-			}
-		}
-		break;
-
-	case GTLC_DISPLAY_MONTHS_MID:
-		sDate.Format(_T("%s %d"), GanttStatic::GetMonthName(nMonth, TRUE), nYear);
-		break;
-
-	case GTLC_DISPLAY_MONTHS_LONG:
-		sDate.Format(_T("%s %d"), GanttStatic::GetMonthName(nMonth, FALSE), nYear);
-		break;
-
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-		sDate.Format(_T("%s %d (%s)"), GanttStatic::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_WEEKS));
-		break;
-
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-	case GTLC_DISPLAY_HOURS:
-		sDate.Format(_T("%s %d (%s)"), GanttStatic::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
-		break;
-
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	return sDate;
-}
-
 double CGanttCtrl::GetMonthWidth(int nColWidth) const
 {
 	return GetMonthWidth(m_nMonthDisplay, nColWidth);
@@ -4633,8 +4543,7 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 
 		if (nMonth && nYear)
 		{
-			CString sTitle = FormatListColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
-			//DWORD dwData = MAKELONG(nMonth, nYear);
+			CString sTitle = GanttStatic::FormatHeaderText(m_nMonthDisplay, nMonth, nYear);
 
 			int nColWidth = nWidth;
 			BOOL bTracked = FALSE;
@@ -4692,11 +4601,8 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 			ASSERT(0);
 			break;
 		}
-//		ASSERT(CDateHelper::IsValidDayInMonth(1, nNumMonths, nYear));
 	}
 	while (++nCol < nNumReqColumns);
-
-//	TRACE(_T("CGanttTreeListCtrl2(Total Column Widths = %d)\n"), nTotalReqdWidth);
 
 	// for the rest, clear the text and item data and prevent tracking
 	int nNumCols = m_listHeader.GetItemCount();
@@ -4820,7 +4726,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 		{
 		case GTLC_DISPLAY_QUARTERCENTURIES:
 			{
-				CString sText = FormatListColumnHeaderText(GTLC_DISPLAY_YEARS, 1, 2025);
+				CString sText = GanttStatic::FormatHeaderText(GTLC_DISPLAY_YEARS, 1, 2025);
 				
 				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 12;
@@ -4840,7 +4746,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 			
 		case GTLC_DISPLAY_QUARTERS_SHORT:
 			{
-				CString sText = FormatListColumnHeaderText(nDisplay, 1, 2025);
+				CString sText = GanttStatic::FormatHeaderText(nDisplay, 1, 2025);
 				
 				int nMinTextWidth = dcClient.GetTextExtent(sText).cx;
 				nMinMonthWidth = (nMinTextWidth + COLUMN_PADDING) / 3;
@@ -4854,7 +4760,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth += 3)
 				{
-					CString sText = FormatListColumnHeaderText(nDisplay, 1, 2025);
+					CString sText = GanttStatic::FormatHeaderText(nDisplay, 1, 2025);
 					
 					int nWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nWidth, nMinTextWidth);
@@ -4872,7 +4778,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 				
 				for (int nMonth = 1; nMonth <= 12; nMonth++)
 				{
-					CString sText = FormatListColumnHeaderText(nDisplay, 1, 2025);
+					CString sText = GanttStatic::FormatHeaderText(nDisplay, 1, 2025);
 					
 					int nTextWidth = dcClient.GetTextExtent(sText).cx;
 					nMinTextWidth = max(nTextWidth, nMinTextWidth);

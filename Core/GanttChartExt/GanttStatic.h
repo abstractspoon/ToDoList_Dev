@@ -78,6 +78,8 @@ namespace GanttStatic
 
 	COleDateTime ToDate(int nYear, int nMonth, int nDay, int nHour, int nMinute);
 	void FromDate(const COleDateTime& date, int& nYear, int& nMonth, int& nDay);
+
+	CString FormatHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear);
 }
 
 /////////////////////////////////////////////////////////////////////////////
