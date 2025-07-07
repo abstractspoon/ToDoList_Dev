@@ -1464,9 +1464,10 @@ LRESULT CGanttCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		{
 		case CDDS_PREPAINT:
 			// only need handle drawing for double row height
-			// and/or some RTL date formats
+			// and some RTL date formats requiring DT_RTLREADING
 			if (m_listHeader.GetRowCount() > 1)
 			{
+				// This covers the RTL dates too
 				return CDRF_NOTIFYITEMDRAW;
 			}
 			else if (CDateHelper::WantRTLDates())
