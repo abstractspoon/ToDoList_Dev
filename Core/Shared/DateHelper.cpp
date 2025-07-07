@@ -1486,7 +1486,7 @@ COleDateTime CDateHelper::GetEndOfYear(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetStartOfDecade(const COleDateTime& date, BOOL bZeroBased)
 {
-	return GetStartOfEpoch(date, bZeroBased);
+	return GetStartOfEpoch(date, 10, bZeroBased);
 }
 
 COleDateTime CDateHelper::GetEndOfDecade(const COleDateTime& date, BOOL bZeroBased)
@@ -1501,9 +1501,7 @@ COleDateTime CDateHelper::GetStartOfQuarterCentury(const COleDateTime& date, BOO
 
 COleDateTime CDateHelper::GetEndOfQuarterCentury(const COleDateTime& date, BOOL bZeroBased)
 {
-	int nYear = GetStartOfQuarterCentury(date, bZeroBased).GetYear();
-	
-	return COleDateTime((nYear + 24), 12, 31, 0, 0, 0);
+	return GetEndOfEpoch(date, 25, bZeroBased);
 }
 
 COleDateTime CDateHelper::GetStartOfEpoch(const COleDateTime& date, int nEpochLen, BOOL bZeroBased)
