@@ -1817,7 +1817,7 @@ BOOL CDateHelper::IsSameWeek(const COleDateTime& date1, const COleDateTime& date
 	if (!IsSameMonth(date1, date2))
 		return FALSE;
 
-	return (GetWeekofYear(date1) == GetWeekofYear(date2));
+	return (GetWeekOfYear(date1) == GetWeekOfYear(date2));
 }
 
 BOOL CDateHelper::IsThisWeek(const COleDateTime& date)
@@ -2029,7 +2029,7 @@ COleDateTime CDateHelper::CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, i
 	return COleDateTime(nYear, nMonth, nDay, 0, 0, 0);
 }
 
-int CDateHelper::GetWeekofYear(const COleDateTime& date)
+int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 {
 	int nWeek = 0;
 	int nDayOfYear = date.GetDayOfYear();
@@ -2050,14 +2050,14 @@ int CDateHelper::GetWeekofYear(const COleDateTime& date)
 		{
 		case 0:
 			// Could be week 52 or 53 of the previous year
-			nWeek = (GetWeekofYear(date.m_dt - 7) + 1);
+			nWeek = (GetWeekOfYear(date.m_dt - 7) + 1); // RECURSIVE CALL
 			ASSERT((nWeek == 52) || (nWeek == 53));
 			break;
 
 		case 53:
 			// Since week 53 could be week 1 of the next year
 			// we check the week number a week later
-			if (GetWeekofYear(date.m_dt + 7) == 2)
+			if (GetWeekOfYear(date.m_dt + 7) == 2) // RECURSIVE CALL
 				nWeek = 1;
 			break;
 		}
@@ -2073,7 +2073,7 @@ int CDateHelper::GetWeekofYear(const COleDateTime& date)
 		{
 			// Since week 53 could be week 1 of the next year
 			// we check the week number a week later
-			if (GetWeekofYear(date.m_dt + 7) == 2)
+			if (GetWeekOfYear(date.m_dt + 7) == 2) // RECURSIVE CALL
 				nWeek = 1;
 		}
 	}
@@ -2263,13 +2263,13 @@ COleDateTime CDateHelper::GetNearestWeek(const COleDateTime& date, BOOL bEnd)
 	COleDateTime dtWeek = GetDateOnly(date);
 
 	// work forward until the week changes
-	int nWeek = GetWeekofYear(date);
+	int nWeek = GetWeekOfYear(date);
 
 	do
 	{
 		dtWeek.m_dt += 1.0;
 	}
-	while (GetWeekofYear(dtWeek) == nWeek);
+	while (GetWeekOfYear(dtWeek) == nWeek);
 
 	// if the number of days added >= 4 then subtract a week
 	CTwentyFourSevenWeek week;

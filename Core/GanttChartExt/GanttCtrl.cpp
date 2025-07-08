@@ -3288,7 +3288,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				// check if we need to draw
 				if (rWeek.right >= rClip.left)
 				{
-					int nWeek = CDateHelper::GetWeekofYear(dtWeek);
+					int nWeek = CDateHelper::GetWeekOfYear(dtWeek);
 					DrawListHeaderRect(pDC, rWeek, Misc::Format(nWeek), pThemed, FALSE);
 				}
 

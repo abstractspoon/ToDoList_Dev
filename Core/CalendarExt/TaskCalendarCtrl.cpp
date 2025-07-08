@@ -748,7 +748,7 @@ void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 
 void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday)
 {
-	if (HasColor(m_crAltWeek) && (CDateHelper::GetWeekofYear(pCell->date) % 2))
+	if (HasColor(m_crAltWeek) && (CDateHelper::GetWeekOfYear(pCell->date) % 2))
 	{
 		CRect rWeek(rCell);
 
@@ -924,7 +924,7 @@ CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMo
 		int nUnused = -1, nCol = -1;
 		
 		if (CCalendarCtrl::GetGridCell(date, nUnused, nCol) && (nCol == 0))
-			sWeekNum = Misc::Format(m_sCellDateWeekNumFormat, CDateHelper::GetWeekofYear(date));
+			sWeekNum = Misc::Format(m_sCellDateWeekNumFormat, CDateHelper::GetWeekOfYear(date));
 	}
 
 	return sDate;

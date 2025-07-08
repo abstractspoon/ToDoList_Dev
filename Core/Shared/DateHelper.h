@@ -157,7 +157,7 @@ public:
 	static int GetDaysInMonth(int nMonth, int nYear); 
 	static int GetDaysInMonth(const COleDateTime& date); 
 	static int GetDaysInMonth(const SYSTEMTIME& st);
-	static int GetWeekofYear(const COleDateTime& date);
+	static int GetWeekOfYear(const COleDateTime& date);
 	static COleDateTime GetEndOfPreviousDay(const COleDateTime& date);
 	static COleDateTime GetEndOfDay(const COleDateTime& date);
 	static COleDateTime GetStartOfNextDay(const COleDateTime& date);
