@@ -17,7 +17,7 @@ public:
 	static void GetCurrentDate(int *JYear, int *JMonth, int *JDay);
 	
 	static void FromGregorian(const COleDateTime& dtGregorian, int *JYear, int *JMonth, int *JDay);
-	static void ToGregorian(int JYear, int JMonth, int JDay, COleDateTime& dtGregorian);
+	static COleDateTime ToGregorian(int JYear, int JMonth, int JDay);
 
 	static void FromGregorian(int GYear, int GMonth, int GDay, int *JYear, int *JMonth, int *JDay);
 	static void ToGregorian(int JYear, int JMonth, int JDay, int *GYear, int *GMonth, int *GDay);

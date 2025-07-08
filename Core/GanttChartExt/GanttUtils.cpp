@@ -229,7 +229,7 @@ COleDateTime GanttUtils::ToDate(int nYear, int nMonth, int nDay, int nHour, int 
 	COleDateTime date;
 
 	if (CDateHelper::WantRTLDates())
-		CJalaliCalendar::ToGregorian(nYear, nMonth, nDay, date);
+		date = CJalaliCalendar::ToGregorian(nYear, nMonth, nDay);
 	else
 		date.SetDate(nYear, nMonth, nDay);
 

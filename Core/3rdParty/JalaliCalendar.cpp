@@ -222,8 +222,7 @@ BOOL CJalaliCalendar::IsEndOfMonth(int JYear, int JMonth, int JDay)
 
 BOOL CJalaliCalendar::IsLeapYear(int JYear)
 {
-	COleDateTime dt29_12;
-	ToGregorian(JYear, 12, 29, dt29_12);
+	COleDateTime dt29_12 = ToGregorian(JYear, 12, 29);
 
 	int JCheckYear, JCheckMonth, JCheckDay;
 	FromGregorian((dt29_12.m_dt + 1), &JCheckYear, &JCheckMonth, &JCheckDay);
@@ -292,12 +291,12 @@ void CJalaliCalendar::FromGregorian(const COleDateTime& dtGregorian, int *JYear,
 	FromGregorian((int)stGregorian.wYear, (int)stGregorian.wMonth, (int)stGregorian.wDay, JYear, JMonth, JDay);
 }
 
-void CJalaliCalendar::ToGregorian(int JYear, int JMonth, int JDay, COleDateTime& dtGregorian)
+COleDateTime CJalaliCalendar::ToGregorian(int JYear, int JMonth, int JDay)
 {
 	int GYear, GMonth, GDay;
 	ToGregorian(JYear, JMonth, JDay, &GYear, &GMonth, &GDay);
 
-	dtGregorian.SetDate(GYear, GMonth, GDay);
+	return COleDateTime(GYear, GMonth, GDay, 0, 0, 0);
 }
 
 void CJalaliCalendar::GetCurrentDate(int *JYear, int *JMonth, int *JDay)

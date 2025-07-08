@@ -322,14 +322,11 @@ void CFPSMiniCalendarCtrl::DateToMonthYear(const COleDateTime& date, int& iMonth
 
 COleDateTime CFPSMiniCalendarCtrl::DateFromMonthYear(int iMonth, int iYear)
 {
-	COleDateTime date;
-
 	if (CJalaliCalendar::IsActive())
-		CJalaliCalendar::ToGregorian(iYear, iMonth, 1, date);
-	else
-		date.SetDate(iYear, iMonth, 1);
+		return CJalaliCalendar::ToGregorian(iYear, iMonth, 1);
 
-	return date;
+	// else
+	return COleDateTime(iYear, iMonth, 1, 0, 0, 0);
 }
 
 COleDateTime CFPSMiniCalendarCtrl::GetCurrentMonthAndYear() const 
