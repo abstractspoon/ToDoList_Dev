@@ -50,7 +50,7 @@ MKDIR %REPO%\Core\ToDoList\Unicode_Release 2> NUL
 DEL %OUTPUT_FILE% 2> NUL
 
 IF EXIST %OUTPUT_FILE% (
-ECHO [41m FAILED to delete Core_Build_Output.txt[0m
+ECHO [41m FAILED to delete Core_Build_Output.txt[0m
 ECHO:
 PAUSE
 EXIT
@@ -97,7 +97,7 @@ SET OUTPUT_FILE=%REPO%\Core\TDLTest\Unicode_Release\Test_Output.txt
 DEL %OUTPUT_FILE% 2> NUL
 
 IF EXIST %OUTPUT_FILE% (
-ECHO [41m FAILED to delete Test_Output.txt[0m
+ECHO [41m FAILED to delete Test_Output.txt[0m
 ECHO:
 PAUSE
 EXIT
@@ -155,7 +155,7 @@ MKDIR %REPO%\Plugins\Release 2> NUL
 DEL %OUTPUT_FILE% 2> NUL
 
 IF EXIST %OUTPUT_FILE% (
-ECHO [41m FAILED to delete Plugins_Build_Output.txt[0m
+ECHO [41m FAILED to delete Plugins_Build_Output.txt[0m
 ECHO:
 PAUSE
 EXIT
