@@ -3032,33 +3032,6 @@ void CGanttCtrl::DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, con
 	}
 }
 
-/*
-BOOL CGanttCtrl::DrawListItemColumn(CDC* pDC, int nItem, int nCol, const GANTTITEM& gi, 
-											BOOL bSelected, BOOL bRollup)
-{
-	if (nCol == 0)
-		return TRUE;
-
-	if (m_listHeader.GetItemWidth(nCol) == 0)
-		return TRUE;
-
-	// see if we can avoid drawing this sub-item at all
-	CRect rColumn;
-	m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
-
-	CRect rClip;
-	pDC->GetClipBox(rClip);
-
-	if (rColumn.right < rClip.left)
-		return TRUE;
-	
-	if (rColumn.left > rClip.right)
-		return FALSE; // we can stop
-
-	return DrawListItemColumnRect(pDC, nCol, rColumn, gi, bSelected, bRollup);
-}
-*/
-
 BOOL CGanttCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn, const GANTTITEM& gi, 
 												BOOL bSelected, BOOL bRollup)
 {
@@ -4530,8 +4503,6 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 	COleDateTime dtStart = GetStartDate(m_nMonthDisplay);
 
 	int nNumMonths = CDateHelper::GetDateInMonths(dtStart);
-	//int nYear = (nStartMonths / 12)/*dtStart.GetYear()*/, nMonth = (nStartMonths % 12)/*dtStart.GetMonth()*/;
-	
 	int nCol = 1;
 
 	do
