@@ -1050,6 +1050,7 @@ BOOL CGanttCtrl::GetMaxDateRange(GANTTDATERANGE& dtRange) const
 {
 	dtRange = m_dtDataRange;
 
+	// This scoping is for disambiguation
 	return GanttUtils::GetMaxDateRange(dtRange, m_nMonthDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
 }
 
@@ -3243,8 +3244,10 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				DrawListHeaderRect(pDC, rWeek, _T(""), pThemed, FALSE);
 			}
 
-			// calc number of first week
-			COleDateTime dtWeek(nYear, nMonth, nDay, 0, 0, 0);
+			// Note: It might seem like we could just calculate the week 
+			// number once and then just increment it every 7 days but 
+			// that doesn't always work when transitioning to a new year
+			COleDateTime dtWeek(ToDate(nYear, nMonth, nDay, 0, 0));
 			BOOL bDone = FALSE;
 
 			while (!bDone)
