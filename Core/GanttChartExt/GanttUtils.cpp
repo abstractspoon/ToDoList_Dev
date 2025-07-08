@@ -431,22 +431,7 @@ CString GanttUtils::FormatHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, in
 	case GTLC_DISPLAY_MONTHS_SHORT:
 		{
 			COleDateTime date = GanttUtils::ToDate(nYear, nMonth, 1, 0, 0);
-
-			if (CDateHelper::WantRTLDates())
-			{
-				sDate = CDateHelper::FormatDate(date);
-				Misc::Reverse(sDate);
-
-				CString sRest;
-				Misc::Split(sDate, sRest, Misc::GetDateSeparator());
-
-				sDate = sRest;
-				Misc::Reverse(sDate);
-			}
-			else
-			{
-				sDate = CDateHelper::FormatDate(date, (DHFD_NODAY | DHFD_NOCENTURY));
-			}
+			sDate = CDateHelper::FormatDate(date, (DHFD_NODAY | DHFD_NOCENTURY));
 		}
 		break;
 
