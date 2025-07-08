@@ -2993,8 +2993,8 @@ void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rI
 	rText.left = nTextPos;
 	rText.top += 2;
 
-	COLORREF crFill, crBorder;
-	GetGanttBarColors(gi, bSelected, crBorder, crFill);
+	COLORREF crText, crUnused;
+	GetGanttBarColors(gi, bSelected, crText, crUnused);
 
 	HGDIOBJ hFontOld = NULL;
 
@@ -3002,7 +3002,7 @@ void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rI
 		hFontOld = pDC->SelectObject(m_tree.Fonts().GetHFont(FALSE, FALSE, FALSE, TRUE));
 	
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->SetTextColor(crBorder);
+	pDC->SetTextColor(crText);
 	pDC->DrawText(sTrailing, rText, (DT_LEFT | DT_NOPREFIX));
 
 	pDC->SelectObject(hFontOld);
@@ -3509,14 +3509,9 @@ void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, BOOL bSelected, COLORREF
 			if (bSelected)
 			{
 				if (Misc::IsHighContrastActive())
-				{
 					crDefBorder = GetSysColor(COLOR_HIGHLIGHTTEXT);
-				}
 				else
-				{
 					crDefBorder = GraphicsMisc::GetExplorerItemSelectionTextColor(crDefBorder, GMIS_SELECTED, GMIB_THEMECLASSIC);
-					crDefFill = CLR_NONE;
-				}
 			}
 		}
 	}
