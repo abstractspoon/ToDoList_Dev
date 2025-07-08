@@ -49,6 +49,13 @@ EXIT
 MKDIR %REPO%\Core\ToDoList\Unicode_Release 2> NUL
 DEL %OUTPUT_FILE% 2> NUL
 
+IF EXIST %OUTPUT_FILE% (
+ECHO [41m FAILED to delete Core_Build_Output.txt[0m
+ECHO:
+PAUSE
+EXIT
+)
+
 cd %REPO%\Core
 %MSDEV% ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" /OUT %OUTPUT_FILE% 
 ECHO:
@@ -89,6 +96,13 @@ SET OUTPUT_FILE=%REPO%\Core\TDLTest\Unicode_Release\Test_Output.txt
 
 DEL %OUTPUT_FILE% 2> NUL
 
+IF EXIST %OUTPUT_FILE% (
+ECHO [41m FAILED to delete Test_Output.txt[0m
+ECHO:
+PAUSE
+EXIT
+)
+
 %TDLTEST% > %OUTPUT_FILE%
 
 REM - Check for test errors
@@ -124,7 +138,7 @@ ECHO:
 
 SET MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 SET SOLUTION=%REPO%\Plugins\ToDoList_Plugins.sln
-SET OUTPUT_FILE=%REPO%\Plugins\Release\Build_Output.txt
+SET OUTPUT_FILE=%REPO%\Plugins\Release\Plugins_Build_Output.txt
 
 ECHO MSBUILD  = %MSBUILD%
 ECHO SOLUTION = %SOLUTION%
@@ -139,6 +153,13 @@ EXIT
 
 MKDIR %REPO%\Plugins\Release 2> NUL
 DEL %OUTPUT_FILE% 2> NUL
+
+IF EXIST %OUTPUT_FILE% (
+ECHO [41m FAILED to delete Plugins_Build_Output.txt[0m
+ECHO:
+PAUSE
+EXIT
+)
 
 %MSBUILD% %SOLUTION% /t:Build /p:Configuration=Release /m /v:normal > %OUTPUT_FILE%
 
