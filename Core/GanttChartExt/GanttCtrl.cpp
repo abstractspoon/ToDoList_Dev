@@ -2656,9 +2656,9 @@ BOOL CGanttCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bTe
 	return TRUE;
 }
 
-void CGanttCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem, 
-											int nYear, int nNumYears, const GANTTITEM& gi,
-											BOOL bSelected, BOOL bRollup, BOOL& bDrawToday)
+void CGanttCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem,
+								   int nYear, int nNumYears, const GANTTITEM& gi,
+								   BOOL bSelected, BOOL bRollup, BOOL& bDrawToday)
 {
 	double dYearWidth = (rItem.Width() / (double)nNumYears);
 	CRect rYear(rItem);
@@ -2677,17 +2677,17 @@ void CGanttCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem,
 	}
 }
 
-void CGanttCtrl::DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
-											const GANTTITEM& gi, BOOL bSelected, 
-											BOOL bRollup, BOOL& bDrawToday)
+void CGanttCtrl::DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear,
+								  const GANTTITEM& gi, BOOL bSelected,
+								  BOOL bRollup, BOOL& bDrawToday)
 {
 	DrawListItemMonths(pDC, rYear, 1, 12, nYear, gi, bSelected, bRollup, bDrawToday);
 }
 
-void CGanttCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem, 
-											int nMonth, int nNumMonths, int nYear, 
-											const GANTTITEM& gi, BOOL bSelected, 
-											BOOL bRollup, BOOL& bDrawToday)
+void CGanttCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem,
+									int nMonth, int nNumMonths, int nYear,
+									const GANTTITEM& gi, BOOL bSelected,
+									BOOL bRollup, BOOL& bDrawToday)
 {
 	double dMonthWidth = (rItem.Width() / (double)nNumMonths);
 	CRect rMonth(rItem);
@@ -2706,10 +2706,10 @@ void CGanttCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem,
 	}
 }
 
-void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth, 
-											int nMonth, int nYear, 
-											const GANTTITEM& gi, BOOL bSelected, 
-											BOOL bRollup, BOOL& bDrawToday)
+void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
+								   int nMonth, int nYear,
+								   const GANTTITEM& gi, BOOL bSelected,
+								   BOOL bRollup, BOOL& bDrawToday)
 {
 	if (!bRollup)
 	{
@@ -2724,10 +2724,10 @@ void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 	DrawGanttDone(pDC, rMonth, nMonth, nYear, gi, bSelected);
 }
 
-void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth, 
-											int nMonth, int nYear, 
-											const GANTTITEM& gi, BOOL bSelected, 
-											BOOL bRollup, BOOL& bDrawToday)
+void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
+								   int nMonth, int nYear,
+								   const GANTTITEM& gi, BOOL bSelected,
+								   BOOL bRollup, BOOL& bDrawToday)
 {
 	// draw vertical week dividers
 	int nNumDays = GetDaysInMonth(nMonth, nYear);
