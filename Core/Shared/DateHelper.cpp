@@ -2155,49 +2155,25 @@ COleDateTime CDateHelper::GetStartOfDay(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased)
 {
-	COleDateTime dtNearest;
-
-	int nYear = (date.GetYear() - (bZeroBased ? 0 : 1));
-	int nMonth = date.GetMonth();
-
-	if (((nYear % 25) > 5) || (((nYear % 25) == 5) && (nMonth > 6)))
-	{
-		// beginning of next decade
-		dtNearest = (GetEndOfQuarterCentury(date).m_dt + 1.0);
-	}
-	else
-	{
-		// beginning of this year
-		dtNearest = GetStartOfQuarterCentury(date);
-	}
-
-	ASSERT(IsDateSet(dtNearest));
-
-	// handle end - last second of day before
-	if (bEnd)
-		dtNearest = GetEndOfPreviousDay(dtNearest);
-
-	return dtNearest;
+	return GetNearestEpoch(date, 25, bEnd, bZeroBased);
 }
 
 COleDateTime CDateHelper::GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased)
 {
+	return GetNearestEpoch(date, 10, bEnd, bZeroBased);
+}
+
+COleDateTime CDateHelper::GetNearestEpoch(const COleDateTime& date, int nEpochLen, BOOL bEnd, BOOL bZeroBased)
+{
+	COleDateTime dtThisEpoch = GetStartOfEpoch(date, nEpochLen, bZeroBased);
+	COleDateTime dtNextEpoch = (GetEndOfEpoch(date, nEpochLen, bZeroBased).m_dt + 1.0);
+
 	COleDateTime dtNearest;
 
-	int nYear = (date.GetYear() - (bZeroBased ? 0 : 1));
-
-	if ((nYear % 10) > 5)
-	{
-		// beginning of next decade
-		dtNearest = (GetEndOfDecade(date).m_dt + 1.0);
-	}
+	if ((date - dtThisEpoch) < (dtNextEpoch - date))
+		dtNearest = dtThisEpoch;
 	else
-	{
-		// beginning of this year
-		dtNearest = GetStartOfDecade(date);
-	}
-
-	ASSERT(IsDateSet(dtNearest));
+		dtNearest = dtNextEpoch;
 
 	// handle end - last second of day before
 	if (bEnd)

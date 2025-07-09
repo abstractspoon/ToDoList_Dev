@@ -234,6 +234,7 @@ public:
 	static COleDateTime GetDate(time64_t date);
 	static COleDateTime GetDate(double date, COleDateTime::DateTimeStatus status);
 
+	static COleDateTime GetNearestEpoch(const COleDateTime& date, int nEpochLen, BOOL bEnd, BOOL bZeroBased = TRUE);
 	static COleDateTime GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased = TRUE);
 	static COleDateTime GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased = TRUE);
 	static COleDateTime GetNearestYear(const COleDateTime& date, BOOL bEnd);
