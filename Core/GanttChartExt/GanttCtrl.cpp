@@ -3553,9 +3553,10 @@ BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, const COleDateTime& dtMonthSt
 	if (dtTo <= dtMonthStart)
 		return FALSE;
 
-	// If the 'from' date is greater than the month end then
+	// 'Month End' is actually the start of the next month so
+	// if the 'from' date is greater than or equal to that then
 	// the bar belongs to the next month
-	if (dtFrom > dtMonthEnd)
+	if (dtFrom >= dtMonthEnd)
 		return FALSE;
 
 	int nDaysInMonth = (int)(dtMonthEnd - dtMonthStart);
