@@ -1988,7 +1988,7 @@ int CDateHelper::CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int 
 	int nDay = 1;
 	COleDateTime date(nYear, nMonth, nDay, 0, 0, 0);
 
-	// get it's day of week
+	// get its day of week
 	OLE_DAYOFWEEK nWeekDay = GetDayOfWeek(date);
 
 	// move forwards until we hit the requested day of week

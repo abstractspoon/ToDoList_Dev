@@ -224,6 +224,20 @@ int GanttUtils::GetWeekOfYear(const COleDateTime& date)
 	return CDateHelper::GetWeekOfYear(date);
 }
 
+int GanttUtils::GetYear(const COleDateTime& date)
+{
+	if (CDateHelper::WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
+
+		return JYear;
+	}
+
+	// else
+	return date.GetYear();
+}
+
 CString GanttUtils::GetMonthName(int nMonth, BOOL bShort)
 {
 	if (CDateHelper::WantRTLDates())

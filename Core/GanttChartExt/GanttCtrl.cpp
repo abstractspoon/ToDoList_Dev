@@ -5151,19 +5151,14 @@ BOOL CGanttCtrl::GetScrolledPosFromDate(const COleDateTime& date, int& nPos) con
 			switch (m_nMonthDisplay)
 			{
 			case GTLC_DISPLAY_QUARTERCENTURIES:
-				{
-					// Column == 25 years
-					nDaysInCol = (int)(DAYS_IN_YEAR * 25);
-					int nStartYear = CDateHelper::GetStartOfQuarterCentury(date, HasOption(GTLCF_DECADESAREZEROBASED)).GetYear();
-					dDayInCol = (int)(((nYear - nStartYear) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
-				}
-				break;
-
 			case GTLC_DISPLAY_DECADES:
 				{
-					// Column == 10 years
-					nDaysInCol = (int)(DAYS_IN_YEAR * 10);
-					int nStartYear = CDateHelper::GetStartOfDecade(date, HasOption(GTLCF_DECADESAREZEROBASED)).GetYear();
+					int nEpochLen = ((m_nMonthDisplay == GTLC_DISPLAY_DECADES) ? 10 : 25);
+					nDaysInCol = (int)(DAYS_IN_YEAR * nEpochLen);
+
+					COleDateTime dtEpochStart = CDateHelper::GetStartOfEpoch(date, nEpochLen, HasOption(GTLCF_DECADESAREZEROBASED));
+					int nStartYear = GetYear(dtEpochStart);
+
 					dDayInCol = (int)(((nYear - nStartYear) * DAYS_IN_YEAR) + ((nMonth - 1) * DAYS_IN_MONTH) + nDay);
 				}
 				break;
