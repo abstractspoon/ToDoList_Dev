@@ -11,13 +11,22 @@
 ////////////////////////////////////////////////////////////////////
 
 // Day of week names in Persian script
-TCHAR DOWNAME_1[] = { 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0009, 0x0 };								// sanbe
-TCHAR DOWNAME_2[] = { 0x06CC, 0x06A9, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };				// yeksanbe
-TCHAR DOWNAME_3[] = { 0x062F, 0x0648, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };				// dosanbe
-TCHAR DOWNAME_4[] = { 0x0633, 0x0647, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };				// sesanbe
-TCHAR DOWNAME_5[] = { 0x0686, 0x0647, 0x0627, 0x0631, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 }; // čaharsanbe
-TCHAR DOWNAME_6[] = { 0x067E, 0x0646, 0x062C, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };		// panjsanbe
-TCHAR DOWNAME_7[] = { 0x062C, 0x0645, 0x0639, 0x0647, 0x0009, 0x0009, 0x0 };								// Jom-e
+TCHAR DOWNAME_LONG_1[] = { 0x06CC, 0x06A9, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };					// yeksanbe,	sunday
+TCHAR DOWNAME_LONG_2[] = { 0x062F, 0x0648, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };					// dosanbe,		monday
+TCHAR DOWNAME_LONG_3[] = { 0x0633, 0x0647, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };					// sesanbe,		tuesday
+TCHAR DOWNAME_LONG_4[] = { 0x0686, 0x0647, 0x0627, 0x0631, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };	// čaharsanbe,	wednesday
+TCHAR DOWNAME_LONG_5[] = { 0x067E, 0x0646, 0x062C, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };			// panjsanbe,	thursday
+TCHAR DOWNAME_LONG_6[] = { 0x062C, 0x0645, 0x0639, 0x0647, 0x0009, 0x0009, 0x0 };									// Jom-e,		friday
+TCHAR DOWNAME_LONG_7[] = { 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0009, 0x0 };									// sanbe,		saturday
+
+// Day of week names in Persian script
+TCHAR DOWNAME_SHORT_1[] = { 0x06CC, 0x06A9, 0x0 };					// yeksanbe,	sunday
+TCHAR DOWNAME_SHORT_2[] = { 0x062F, 0x0648, 0x0 };					// dosanbe,		monday
+TCHAR DOWNAME_SHORT_3[] = { 0x0633, 0x0647, 0x0 };					// sesanbe,		tuesday
+TCHAR DOWNAME_SHORT_4[] = { 0x0686, 0x0647, 0x0627, 0x0631, 0x0 };	// čaharsanbe,	wednesday
+TCHAR DOWNAME_SHORT_5[] = { 0x067E, 0x0646, 0x062C, 0x0 };			// panjsanbe,	thursday
+TCHAR DOWNAME_SHORT_6[] = { 0x062C, 0x0645, 0x0639, 0x0647, 0x0 };	// Jom-e,		friday
+TCHAR DOWNAME_SHORT_7[] = { 0x0634, 0x0646, 0x0628, 0x0647, 0x0 };	// sanbe,		saturday
 
 ////////////////////////////////////////////////////////////////////
 
@@ -266,17 +275,17 @@ CString CJalaliCalendar::GetMonthName(int JMonth)
 	return "";
 }
 
-CString CJalaliCalendar::GetDayOfWeekName(int JDayOfWeek)
+CString CJalaliCalendar::GetDayOfWeekName(int JDayOfWeek, BOOL bShort)
 {
 	switch (JDayOfWeek)
 	{
-	case 1:  return DOWNAME_1; // sanbe
-	case 2:  return DOWNAME_2; // yeksanbe
-	case 3:  return DOWNAME_3; // dosanbe
-	case 4:  return DOWNAME_4; // sesanbe
-	case 5:  return DOWNAME_5; // čaharsanbe
-	case 6:  return DOWNAME_6; // panjsanbe
-	case 7:  return DOWNAME_7; // Jom-e
+	case 1:  return (bShort ? DOWNAME_SHORT_1: DOWNAME_LONG_1); // sanbe
+	case 2:  return (bShort ? DOWNAME_SHORT_2: DOWNAME_LONG_2); // yeksanbe
+	case 3:  return (bShort ? DOWNAME_SHORT_3: DOWNAME_LONG_3); // dosanbe
+	case 4:  return (bShort ? DOWNAME_SHORT_4: DOWNAME_LONG_4); // sesanbe
+	case 5:  return (bShort ? DOWNAME_SHORT_5: DOWNAME_LONG_5); // čaharsanbe
+	case 6:  return (bShort ? DOWNAME_SHORT_6: DOWNAME_LONG_6); // panjsanbe
+	case 7:  return (bShort ? DOWNAME_SHORT_7: DOWNAME_LONG_7); // Jom-e
 	}
 
 	// all else

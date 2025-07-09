@@ -7,7 +7,7 @@ class CJalaliCalendar
 public:
 	static BOOL IsActive();
 
-	static CString GetDayOfWeekName(int JDayOfWeek);
+	static CString GetDayOfWeekName(int JDayOfWeek, BOOL bShort = FALSE);
 	static CString GetMonthName(int JMonth);
 	
 	static BOOL IsEndOfMonth(int JYear, int JMonth, int JDay);
