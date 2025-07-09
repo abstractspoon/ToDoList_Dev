@@ -6114,10 +6114,10 @@ COleDateTime CGanttCtrl::GetNearestDate(const COleDateTime& dtDrag) const
 	switch (GetSnapMode())
 	{
 	case GTLCSM_NEARESTQUARTERCENTURY:
-		return CDateHelper::GetNearestQuarterCentury(dtDrag, bDraggingEnd);
+		return CDateHelper::GetNearestQuarterCentury(dtDrag, bDraggingEnd, HasOption(GTLCF_DECADESAREZEROBASED));
 		
 	case GTLCSM_NEARESTDECADE:
-		return CDateHelper::GetNearestDecade(dtDrag, bDraggingEnd);
+		return CDateHelper::GetNearestDecade(dtDrag, bDraggingEnd, HasOption(GTLCF_DECADESAREZEROBASED));
 
 	case GTLCSM_NEARESTYEAR:
 		return CDateHelper::GetNearestYear(dtDrag, bDraggingEnd);
