@@ -253,6 +253,46 @@ BOOL CJalaliCalendar::IsLeapYear(int JYear)
 	return bLeapYear;
 }
 
+int CJalaliCalendar::GetDayOfYear(int JYear, int JMonth, int JDay)
+{
+	int nDayOfYear = 0;
+
+	for (int nTemp = 1; nTemp < JMonth; nTemp++)
+		nDayOfYear += GetDaysInMonth(JYear, nTemp);
+
+	return (nDayOfYear + JDay);
+}
+
+int CJalaliCalendar::GetWeekOfYear(int JYear, int JMonth, int JDay)
+{
+	// Use the US method
+	// Note: We assume that the DOW for the first day
+	// of the year is the same FOR NOW
+	COleDateTime dtGreg = ToGregorian(JYear, 1, 1);
+	int nStartDOW = dtGreg.GetDayOfWeek();
+
+	int nDayOfYear = GetDayOfYear(JYear, JMonth, JDay);
+	int nWeek = (((nDayOfYear + nStartDOW - 1) / 7) + 1);
+
+	if (nWeek == 53)
+	{
+		// Since week 53 could be week 1 of the next year
+		// we check the week number a week later
+		if (GetWeekOfYear(JYear, JMonth, JDay + 7) == 2) // RECURSIVE CALL
+			nWeek = 1;
+	}
+
+	return nWeek;
+}
+
+int CJalaliCalendar::GetWeekOfYear(const COleDateTime& dtGregorian)
+{
+	int JYear, JMonth, JDay;
+	FromGregorian(dtGregorian, &JYear, &JMonth, &JDay);
+
+	return GetWeekOfYear(JYear, JMonth, JDay);
+}
+
 CString CJalaliCalendar::GetMonthName(int JMonth)
 {
 	switch (JMonth)

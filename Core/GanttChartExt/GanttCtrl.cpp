@@ -2730,34 +2730,36 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 								   const GANTTITEM& gi, BOOL bSelected,
 								   BOOL bRollup, BOOL& bDrawToday)
 {
-	// draw vertical week dividers
-	int nNumDays = GetDaysInMonth(nMonth, nYear);
-	double dMonthWidth = rMonth.Width();
-
-	int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
-	CRect rDay(rMonth);
-
-	COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
-
-	for (int nDay = 1; nDay <= nNumDays; nDay++)
+	// draw weekends and vertical week dividers if not a rollup
+	if (!bRollup)
 	{
-		rDay.left = rMonth.left + (int)(((nDay - 1) * dMonthWidth) / nNumDays);
-		rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nNumDays);
+		int nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+		double dMonthWidth = rMonth.Width();
 
-		// draw weekend/divider if visible
-		if ((rDay.right > 0) && !bRollup)
+		int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
+		CRect rDay(rMonth);
+
+		COleDateTime dtDay(ToDate(nYear, nMonth, 1, 0, 0));
+
+		for (int nDay = 1; nDay <= nDaysInMonth; nDay++)
 		{
-			DrawWeekend(pDC, dtDay, rDay);
+			rDay.left = rMonth.left + (int)(((nDay - 1) * dMonthWidth) / nDaysInMonth);
+			rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nDaysInMonth);
 
-			if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
+			if (rDay.right > 0)
 			{
-				rDay.right = rDay.left; // draw at start of day
-				DrawListItemVertDivider(pDC, rDay, DIV_LIGHT, bSelected);
-			}
-		}
+				DrawWeekend(pDC, dtDay, rDay);
 
-		// next day
-		dtDay += 1;
+				if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
+				{
+					rDay.right = rDay.left; // draw at start of day
+					DrawListItemVertDivider(pDC, rDay, DIV_LIGHT, bSelected);
+				}
+			}
+
+			// next day
+			dtDay += 1;
+		}
 	}
 
 	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bDrawToday);
@@ -2797,7 +2799,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 	if (!bRollup)
 	{
 		CRect rDay(rMonth);
-		COleDateTime dtDay = COleDateTime(nYear, nMonth, 1, 0, 0, 0);
+		COleDateTime dtDay(ToDate(nYear, nMonth, 1, 0, 0));
 
 		int nNumDays = GetDaysInMonth(nMonth, nYear);
 		double dDayWidth = (rMonth.Width() / (double)nNumDays);
@@ -3210,7 +3212,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				// check if we need to draw
 				if (rYear.right >= rClip.left)
 				{
-					COleDateTime dtYear(nYear + i, 1, 1, 0, 0, 0);
+					COleDateTime dtYear(ToDate((nYear + i), 1, 1, 0, 0));
 					DrawListHeaderRect(pDC, rYear, CDateHelper::FormatDateOnly(dtYear, _T("yyyy")), pThemed, FALSE);
 				}
 			}
@@ -3228,48 +3230,59 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			rMonth.bottom = rWeek.top;
 			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, FALSE);
 
-			// draw week elements
-			int nNumDays = GetDaysInMonth(nMonth, nYear);
-			double dDayWidth = (rMonth.Width() / (double)nNumDays);
+			// draw vertical week dividers
+			int nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
 
-			// first week starts at 'First DOW of month'
-			OLE_DAYOFWEEK nFirstDOW = CDateHelper::GetFirstDayOfWeek();
-			int nDay = CDateHelper::CalcDayOfMonth(nFirstDOW, 1, nMonth, nYear);
+			// Get start of first full week
+			int nDay = 1;
+
+			while (ToDate(nYear, nMonth, nDay, 0, 0).GetDayOfWeek() != nFirstDOW)
+				nDay++;
 
 			// If this is column 1 (column 0 is hidden) then we might need
 			// to draw part of the preceding week
+			COleDateTime dtWeek(ToDate(nYear, nMonth, nDay, 0, 0));
+			double dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
+
 			if ((nCol == 1) && (nDay != -1))
 			{
 				rWeek.right = (rWeek.left + (int)((nDay - 1) * dDayWidth));
-				DrawListHeaderRect(pDC, rWeek, _T(""), pThemed, FALSE);
+
+				// Only draw the week number if it's '1' and we've enough space
+				CString sWeek;
+
+				if ((rWeek.Width() > 6) && (GetWeekOfYear(dtWeek) == 2))
+					sWeek = _T("1");
+
+				DrawListHeaderRect(pDC, rWeek, sWeek, pThemed, FALSE);
 			}
 
 			// Note: It might seem like we could just calculate the week 
 			// number once and then just increment it every 7 days but 
 			// that doesn't always work when transitioning to a new year
-			COleDateTime dtWeek(ToDate(nYear, nMonth, nDay, 0, 0));
 			BOOL bDone = FALSE;
 
 			while (!bDone)
 			{
-				rWeek.left = rMonth.left + (int)((nDay - 1) * dDayWidth);
+				rWeek.left = (int)(rMonth.left + ((nDay - 1) * dDayWidth));
 
 				// if this week bridges into next month this needs special handling
-				if ((nDay + 6) > nNumDays)
+				if ((nDay + 6) > nDaysInMonth)
 				{
 					// rest of this month
 					rWeek.right = rMonth.right;
-					
+
 					// plus some of next month
-					nDay += (6 - nNumDays);
+					nDay += (6 - nDaysInMonth);
 
 					CDateHelper::IncrementMonth(nMonth, nYear);
-					
+
 					// Note: width of next month may be different to this month
-					if (m_listHeader.GetItemRect(nCol+1, rMonth))
+					if (m_listHeader.GetItemRect(nCol + 1, rMonth))
 					{
-						nNumDays = GetDaysInMonth(nMonth, nYear);
-						dDayWidth = (rMonth.Width() / (double)nNumDays);
+						nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+						dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
 
 						rWeek.right += (int)(nDay * dDayWidth);
 					}
@@ -3288,7 +3301,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				// check if we need to draw
 				if (rWeek.right >= rClip.left)
 				{
-					int nWeek = CDateHelper::GetWeekOfYear(dtWeek);
+					int nWeek = GetWeekOfYear(dtWeek);
 					DrawListHeaderRect(pDC, rWeek, Misc::Format(nWeek), pThemed, FALSE);
 				}
 
@@ -3297,7 +3310,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				dtWeek.m_dt += 7;
 
 				// are we done?
-				bDone = (bDone || nDay > nNumDays);
+				bDone |= (nDay > nDaysInMonth);
 			}
 		}
 		break;
@@ -3333,7 +3346,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				if (rDay.right >= rClip.left)
 				{
 					CString sHeader;
-					COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
+					COleDateTime dtDay(ToDate(nYear, nMonth, nDay, 0, 0));
 
 					if (m_nMonthDisplay == GTLC_DISPLAY_HOURS)
 					{

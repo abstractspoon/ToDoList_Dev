@@ -178,7 +178,7 @@ BOOL CGanttDateRangeSlider::SetSelectedRange(const GANTTDATERANGE& dtRange)
 
 	if (!dtRange.IsValid() || !dtMax.Contains(dtRange))
 	{
-		ASSERT(0);
+		ASSERT(dtMax.IntersectWith(dtRange));
 		return FALSE;
 	}
 

@@ -13,6 +13,9 @@ public:
 	static BOOL IsEndOfMonth(int JYear, int JMonth, int JDay);
 	static int GetDaysInMonth(int JYear, int JMonth);
 	static BOOL IsLeapYear(int JYear);
+	static int GetDayOfYear(int JYear, int JMonth, int JDay);
+	static int GetWeekOfYear(int JYear, int JMonth, int JDay);
+	static int GetWeekOfYear(const COleDateTime& dtGregorian);
 
 	static void GetCurrentDate(int *JYear, int *JMonth, int *JDay);
 	

@@ -37,6 +37,7 @@ namespace GanttUtils
 
 	BOOL GetMaxDateRange(GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades);
 	int GetDaysInMonth(int nMonth, int nYear);
+	int GetWeekOfYear(const COleDateTime& date);
 	CString GetMonthName(int nMonth, BOOL bShort);
 
 	COleDateTime ToDate(int nYear, int nMonth, int nDay, int nHour, int nMinute);

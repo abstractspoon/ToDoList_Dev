@@ -215,6 +215,15 @@ int GanttUtils::GetDaysInMonth(int nMonth, int nYear)
 	return CDateHelper::GetDaysInMonth(nMonth, nYear);
 }
 
+int GanttUtils::GetWeekOfYear(const COleDateTime& date)
+{
+	if (CDateHelper::WantRTLDates())
+		return CJalaliCalendar::GetWeekOfYear(date);
+
+	// else
+	return CDateHelper::GetWeekOfYear(date);
+}
+
 CString GanttUtils::GetMonthName(int nMonth, BOOL bShort)
 {
 	if (CDateHelper::WantRTLDates())
@@ -416,44 +425,44 @@ CString GanttUtils::FormatHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, in
 
 	case GTLC_DISPLAY_QUARTERS_MID:
 		sDate.Format(_T("%s-%s %d"),
-					 GanttUtils::GetMonthName(nMonth, TRUE),
-					 GanttUtils::GetMonthName(nMonth + 2, TRUE),
+					 GetMonthName(nMonth, TRUE),
+					 GetMonthName(nMonth + 2, TRUE),
 					 nYear);
 		break;
 
 	case GTLC_DISPLAY_QUARTERS_LONG:
 		sDate.Format(_T("%s-%s %d"),
-					 GanttUtils::GetMonthName(nMonth, FALSE),
-					 GanttUtils::GetMonthName(nMonth + 2, FALSE),
+					 GetMonthName(nMonth, FALSE),
+					 GetMonthName(nMonth + 2, FALSE),
 					 nYear);
 		break;
 
 	case GTLC_DISPLAY_MONTHS_SHORT:
 		{
-			COleDateTime date = GanttUtils::ToDate(nYear, nMonth, 1, 0, 0);
+			COleDateTime date(ToDate(nYear, nMonth, 1, 0, 0));
 			sDate = CDateHelper::FormatDate(date, (DHFD_NODAY | DHFD_NOCENTURY));
 		}
 		break;
 
 	case GTLC_DISPLAY_MONTHS_MID:
-		sDate.Format(_T("%s %d"), GanttUtils::GetMonthName(nMonth, TRUE), nYear);
+		sDate.Format(_T("%s %d"), GetMonthName(nMonth, TRUE), nYear);
 		break;
 
 	case GTLC_DISPLAY_MONTHS_LONG:
-		sDate.Format(_T("%s %d"), GanttUtils::GetMonthName(nMonth, FALSE), nYear);
+		sDate.Format(_T("%s %d"), GetMonthName(nMonth, FALSE), nYear);
 		break;
 
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
-		sDate.Format(_T("%s %d (%s)"), GanttUtils::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_WEEKS));
+		sDate.Format(_T("%s %d (%s)"), GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_WEEKS));
 		break;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
 	case GTLC_DISPLAY_HOURS:
-		sDate.Format(_T("%s %d (%s)"), GanttUtils::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
+		sDate.Format(_T("%s %d (%s)"), GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
 		break;
 
 	default:
