@@ -5825,25 +5825,44 @@ BOOL CGanttCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) 
 	if (!GetDateFromPoint(ptDrag, dtDrag))
 		return FALSE;
 
-	// if dragging the whole task, we calculate dtDrag as the 
-	// original start date plus the difference between the 
-	// current drag pos and the initial drag pos
-	if (m_nDragging == GTLCD_WHOLE)
-	{
-		COleDateTime dtOrg;
-		GetDateFromPoint(m_ptDragStart, dtOrg);
-		
-		COleDateTime dtPreStart, dtNotUsed;
-		VERIFY(GetTaskStartEndDates(m_giPreDrag, dtPreStart, dtNotUsed));
+	COleDateTime dtPreStart, dtPreEnd;
+	VERIFY(GetTaskStartEndDates(m_giPreDrag, dtPreStart, dtPreEnd));
 
-		double dOffset = (dtDrag.m_dt - dtOrg.m_dt);
-		dtDrag = (dtPreStart.m_dt + dOffset);
+	switch (m_nDragging)
+	{
+	case GTLCD_WHOLE:
+		{
+			// if dragging the whole task, we calculate dtDrag as the 
+			// original start date plus the difference between the 
+			// current drag pos and the initial drag pos
+			COleDateTime dtOrg;
+			GetDateFromPoint(m_ptDragStart, dtOrg);
+		
+			double dOffset = (dtDrag.m_dt - dtOrg.m_dt);
+			dtDrag = (dtPreStart.m_dt + dOffset);
+		}
+		break;
+
+	case GTLCD_START:
+		// Clip the date to the start of the task being dragged
+		if (dtDrag > dtPreEnd)
+		{
+			dtDrag = dtPreStart;
+			return TRUE;
+		}
+		break;
+
+	case GTLCD_END:
+		// Clip the date to the end of the task being dragged
+		if (dtDrag < dtPreStart)
+		{
+			dtDrag = dtPreEnd;
+			return TRUE;
+		}
+		break;
 	}
 	
-	// adjust date depending on modifier keys 
 	dtDrag = GetNearestDate(dtDrag);
-	
-	// else
 	return TRUE;
 }
 
