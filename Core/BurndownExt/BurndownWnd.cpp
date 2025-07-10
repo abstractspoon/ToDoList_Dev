@@ -625,6 +625,7 @@ BOOL CBurndownWnd::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeCtrl(this, IDC_DISPLAY_LABEL, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_OPTIONS_LABEL, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())

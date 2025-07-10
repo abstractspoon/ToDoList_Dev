@@ -352,7 +352,7 @@ int COleDateTimeRange::GetWeekdayCount() const
 	return CDateHelper().CalcDaysFromTo(m_dtStart, m_dtEnd, m_bInclusive);
 }
 
-BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
+BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth)
 {
 	if (!IsValid())
 		return FALSE;
@@ -361,7 +361,7 @@ BOOL COleDateTimeRange::Offset(int nAmount, DH_UNITS nUnits)
 	CDateHelper dh;
 
 	if (!dh.OffsetDate(m_dtStart, nAmount, nUnits) ||
-		!dh.OffsetDate(m_dtEnd, nAmount, nUnits))
+		!dh.OffsetDate(m_dtEnd, nAmount, nUnits, bPreserveEndOfMonth))
 	{
 		*this = prevRange;
 		return FALSE;
@@ -392,14 +392,14 @@ BOOL COleDateTimeRange::OffsetStart(int nAmount, DH_UNITS nUnits)
 	return TRUE;
 }
 
-BOOL COleDateTimeRange::OffsetEnd(int nAmount, DH_UNITS nUnits)
+BOOL COleDateTimeRange::OffsetEnd(int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth)
 {
 	if (!IsValid())
 		return FALSE;
 
 	COleDateTimeRange prevRange = *this;
 
-	if (!CDateHelper().OffsetDate(m_dtEnd, nAmount, nUnits) || !IsValid())
+	if (!CDateHelper().OffsetDate(m_dtEnd, nAmount, nUnits, bPreserveEndOfMonth) || !IsValid())
 	{
 		*this = prevRange;
 		return FALSE;
@@ -463,6 +463,11 @@ double COleDateTimeRange::CalcProportion(const COleDateTime& date) const
 BOOL COleDateTimeRange::IsSameDay() const
 {
 	return CDateHelper::IsSameDay(m_dtStart, GetEndInclusive());
+}
+
+BOOL COleDateTimeRange::IsSameMonth() const
+{
+	return CDateHelper::IsSameMonth(m_dtStart, GetEndInclusive());
 }
 
 //////////////////////////////////////////////////////////////////////

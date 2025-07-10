@@ -60,6 +60,7 @@ public:
 	BOOL HasStart() const;
 	BOOL HasEnd() const;
 	BOOL IsSameDay() const;
+	BOOL IsSameMonth() const;
 
 	COleDateTime GetStart() const;
 	COleDateTime GetEnd() const;
@@ -70,9 +71,9 @@ public:
 	int GetDayCount() const;
 	int GetWeekdayCount() const;
 
-	BOOL Offset(int nAmount, DH_UNITS nUnits);
+	BOOL Offset(int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth = FALSE);
 	BOOL OffsetStart(int nAmount, DH_UNITS nUnits);
-	BOOL OffsetEnd(int nAmount, DH_UNITS nUnits);
+	BOOL OffsetEnd(int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth = FALSE);
 	BOOL Expand(int nAmount, DH_UNITS nUnits);
 
 	CString Format(DWORD dwFlags = 0, LPCTSTR szDelim = _T(" - ")) const;
