@@ -836,11 +836,8 @@ BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAnd
 	}
 
 	// Treat a negative date as Persian/Jalali
-	if ((date.m_dt < 0.0) && 
-		(Misc::GetPrimaryLanguage() == LANG_PERSIAN))
-	{
-		CJalaliCalendar::ToGregorian(date.GetYear(), date.GetMonth(), date.GetDay(), date);
-	}
+	if ((date.m_dt < 0.0) && WantRTLDates())
+		date = CJalaliCalendar::ToGregorian(date.GetYear(), date.GetMonth(), date.GetDay());
 
 	return TRUE;
 }
@@ -992,96 +989,69 @@ BOOL CDateHelper::DecodeLocalShortDate(const CString& sDate, COleDateTime& date)
 
 double CDateHelper::GetDate(DH_DATE nDate)
 {
-	COleDateTime date;
+	COleDateTime date = COleDateTime::GetCurrentTime();
 
 	switch (nDate)
 	{
 	case DHD_NOW:
-		return COleDateTime::GetCurrentTime(); // no truncation
+		return date; // as-is ie. no time truncation
 
 	// All the rest have 'time of day' removed
 	case DHD_TODAY:
-		date = COleDateTime::GetCurrentTime();
+		date = GetDateOnly(date);
 		break;
 
 	case DHD_YESTERDAY:
-		return (GetDate(DHD_TODAY) - 1.0);
+		date = (GetDate(DHD_TODAY) - 1.0); // RECURSIVE CALL
+		break;
 		
 	case DHD_TOMORROW:
-		return (GetDate(DHD_TODAY) + 1.0);
+		date = (GetDate(DHD_TODAY) + 1.0); // RECURSIVE CALL
+		break;
 
 	case DHD_BEGINTHISWEEK:
-		return (GetDate(DHD_ENDTHISWEEK) - 6);
+		date = GetStartOfWeek(date);
+		break;
 
 	case DHD_ENDTHISWEEK:
-		{
-			// we must get the locale info to find out when this 
-			// user's week starts
-			date = COleDateTime::GetCurrentTime();
-			
-			// increment the date until we hit the last day of the week
-			// note: we could have kept checking date.GetDayOfWeek but
-			// it's a lot of calculation that's just not necessary
-			OLE_DAYOFWEEK nLastDOW = GetLastDayOfWeek();
-			OLE_DAYOFWEEK nDOW = GetDayOfWeek(date);
-			
-			while (nDOW != nLastDOW) 
-			{
-				date += 1;
-				nDOW = GetNextDayOfWeek(nDOW);
-			}
-		}
+		date = (GetDate(DHD_BEGINTHISWEEK) + 7); // RECURSIVE CALL
 		break;
 
 	case DHD_ENDNEXTWEEK:
-		return (GetDate(DHD_ENDTHISWEEK) + 7.0);
+		date = (GetDate(DHD_ENDTHISWEEK) + 7.0); // RECURSIVE CALL
+		break;
 
 	case DHD_BEGINTHISMONTH:
-		date = COleDateTime::GetCurrentTime();
-		return COleDateTime(date.GetYear(), date.GetMonth(), 1, 0, 0, 0);
+		date = GetStartOfMonth(date);
+		break;
 
 	case DHD_ENDTHISMONTH:
-		{
-			date = COleDateTime::GetCurrentTime();
-			int nThisMonth = date.GetMonth();
-
-			while (date.GetMonth() == nThisMonth)
-				date += 10; // much quicker than doing it one day at a time
-
-			date -= date.GetDay(); // because we went into next month
-		}
+		date = GetEndOfMonth(date);
 		break;
 
 	case DHD_ENDNEXTMONTH:
-		{
-			date = GetDate(DHD_ENDTHISMONTH) + 1; // first day of next month
-			int nNextMonth = date.GetMonth();
-
-			while (date.GetMonth() == nNextMonth)
-				date += 20; // much quicker than doing it one day at a time
-
-			date -= date.GetDay(); // because we went into next month + 1
-		}
+		date = GetEndOfMonth(GetDate(DHD_ENDTHISMONTH) + 1.0); // RECURSIVE CALL
 		break;
 
 	case DHD_BEGINTHISYEAR:
-		date = COleDateTime::GetCurrentTime();
-		return COleDateTime(date.GetYear(), 1, 1, 0, 0, 0);
+		date = GetStartOfYear(date);
+		break;
 
 	case DHD_ENDTHISYEAR:
-		date = COleDateTime::GetCurrentTime(); // for current year
-		return COleDateTime(date.GetYear(), 12, 31, 0, 0, 0);
+		date = GetEndOfYear(date);
+		break;
 
 	case DHD_ENDNEXTYEAR:
-		date = COleDateTime::GetCurrentTime(); // for current year
-		return COleDateTime(date.GetYear() + 1, 12, 31, 0, 0, 0);
+		date = GetEndOfYear(GetDate(DHD_ENDNEXTYEAR) + 1.0); // RECURSIVE CALL
+		break;
 
 	default:
 		ASSERT (0);
 		return 0;
 	}
 
-	return GetDateOnly(date);
+	ASSERT(!DateHasTime(date));
+	return date;
 }
 
 COleDateTime CDateHelper::GetDate(const COleDateTime& date, BOOL bNoTimeIsEndOfDay)
@@ -1309,7 +1279,7 @@ BOOL CDateHelper::ValidateDay(COleDateTime& date, DWORD dwAvailDays)
 	
 	// build a 2 week weekday array so we don't have to deal with 
 	// wrapping around
-	UINT nWeekdays[14] = 
+	const UINT nWeekdays[14] = 
 	{
 		(dwAvailDays & DHW_SUNDAY),
 		(dwAvailDays & DHW_MONDAY),
@@ -1453,10 +1423,7 @@ COleDateTime CDateHelper::GetStartOfMonth(const COleDateTime& date)
 		int JYear, JMonth, JDay;
 		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
 
-		COleDateTime dtGreg;
-		CJalaliCalendar::ToGregorian(JYear, JMonth, 1, dtGreg);
-
-		return dtGreg;
+		return CJalaliCalendar::ToGregorian(JYear, JMonth, 1);
 	}
 
 	// else
@@ -1470,80 +1437,87 @@ COleDateTime CDateHelper::GetEndOfMonth(const COleDateTime& date)
 		int JYear, JMonth, JDay;
 		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
 
-		COleDateTime dtGreg;
-		CJalaliCalendar::ToGregorian(JYear, JMonth, CJalaliCalendar::GetDaysInMonth(JYear, JMonth), dtGreg);
-
-		return dtGreg;
+		int nDaysInMonth = CJalaliCalendar::GetDaysInMonth(JYear, JMonth);
+		return CJalaliCalendar::ToGregorian(JYear, JMonth, nDaysInMonth);
 	}
 
-	COleDateTime dtEnd = GetStartOfMonth(date);
-
-	return (dtEnd.m_dt + GetDaysInMonth(date) - 1);
+	return (GetStartOfMonth(date).m_dt + GetDaysInMonth(date) - 1);
 }
 
 COleDateTime CDateHelper::GetStartOfQuarter(const COleDateTime& date)
 {
-	int nQuarter = ((date.GetMonth() - 1) / 3);
-	int nMonth = (1 + (nQuarter * 3));
-
-	return COleDateTime(date.GetYear(), nMonth, 1, 0, 0, 0);
+	int nStartInMonths = ((GetDateInMonths(date) / 3) * 3);
+	
+	return GetDateFromMonths(nStartInMonths);
 }
 
 COleDateTime CDateHelper::GetEndOfQuarter(const COleDateTime& date)
 {
-	COleDateTime dtEnd = GetStartOfQuarter(date);
+	int nStartInMonths = ((GetDateInMonths(date) / 3) * 3);
+	int nStartNextInMonths = (nStartInMonths + 3);
 
-	VERIFY(CDateHelper().OffsetDate(dtEnd, 3, DHU_MONTHS));
-
-	return (dtEnd.m_dt - 1.0);
+	return (GetDateFromMonths(nStartNextInMonths).m_dt - 1.0); // day before next quarter
 }
 
 COleDateTime CDateHelper::GetStartOfYear(const COleDateTime& date)
 {
-	return COleDateTime(date.GetYear(), 1, 1, 0, 0, 0);
+	int nStartInMonths = ((GetDateInMonths(date) / 12) * 12);
+
+	return GetDateFromMonths(nStartInMonths);
 }
 
 COleDateTime CDateHelper::GetEndOfYear(const COleDateTime& date)
 {
-	return COleDateTime(date.GetYear(), 12, 31, 0, 0, 0);
+	int nStartInMonths = ((GetDateInMonths(date) / 12) * 12);
+	int nStartNextInMonths = (nStartInMonths + 12);
+
+	return (GetDateFromMonths(nStartNextInMonths).m_dt - 1.0); // day before next year
 }
 
 COleDateTime CDateHelper::GetStartOfDecade(const COleDateTime& date, BOOL bZeroBased)
 {
-	int nYear = date.GetYear();
-
-	if (bZeroBased)
-		nYear = ((nYear / 10) * 10);
-	else
-		nYear = ((((nYear - 1) / 10) * 10) + 1);
-
-	return COleDateTime(nYear, 1, 1, 0, 0, 0);
+	return GetStartOfEpoch(date, 10, bZeroBased);
 }
 
 COleDateTime CDateHelper::GetEndOfDecade(const COleDateTime& date, BOOL bZeroBased)
 {
-	int nYear = GetStartOfDecade(date, bZeroBased).GetYear();
-	
-	return COleDateTime((nYear + 9), 12, 31, 0, 0, 0);
+	return GetEndOfEpoch(date, 10, bZeroBased);
 }
 
 COleDateTime CDateHelper::GetStartOfQuarterCentury(const COleDateTime& date, BOOL bZeroBased)
 {
-	int nYear = date.GetYear();
-	
-	if (bZeroBased)
-		nYear = ((nYear / 25) * 25);
-	else
-		nYear = ((((nYear - 1) / 25) * 25) + 1);
-	
-	return COleDateTime(nYear, 1, 1, 0, 0, 0);
+	return GetStartOfEpoch(date, 25, bZeroBased);
 }
 
 COleDateTime CDateHelper::GetEndOfQuarterCentury(const COleDateTime& date, BOOL bZeroBased)
 {
-	int nYear = GetStartOfQuarterCentury(date, bZeroBased).GetYear();
-	
-	return COleDateTime((nYear + 24), 12, 31, 0, 0, 0);
+	return GetEndOfEpoch(date, 25, bZeroBased);
+}
+
+COleDateTime CDateHelper::GetStartOfEpoch(const COleDateTime& date, int nEpochLen, BOOL bZeroBased)
+{
+	int nStartEpochYear = GetStartOfEpochYear(date, nEpochLen, bZeroBased);
+
+	return GetDateFromMonths(nStartEpochYear * 12);
+}
+
+COleDateTime CDateHelper::GetEndOfEpoch(const COleDateTime& date, int nEpochLen, BOOL bZeroBased)
+{
+	int nStartEpochYear = GetStartOfEpochYear(date, nEpochLen, bZeroBased);
+	int nStartNextEpochYear = (nStartEpochYear + nEpochLen);
+
+	return (GetDateFromMonths(nStartNextEpochYear * 12).m_dt - 1.0); // day before next epoch
+}
+
+int CDateHelper::GetStartOfEpochYear(const COleDateTime& date, int nEpochLength, BOOL bZeroBased)
+{
+	int nYear = (GetDateInMonths(date) / 12);
+
+	if (bZeroBased)
+		return ((nYear / nEpochLength) * nEpochLength);
+
+	// else
+	return ((((nYear - 1) / nEpochLength) * nEpochLength) + 1);
 }
 
 CString CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, TCHAR cDateTimeSep)
@@ -1836,7 +1810,7 @@ BOOL CDateHelper::IsSameWeek(const COleDateTime& date1, const COleDateTime& date
 	if (!IsSameMonth(date1, date2))
 		return FALSE;
 
-	return (GetWeekofYear(date1) == GetWeekofYear(date2));
+	return (GetWeekOfYear(date1) == GetWeekOfYear(date2));
 }
 
 BOOL CDateHelper::IsThisWeek(const COleDateTime& date)
@@ -2014,7 +1988,7 @@ int CDateHelper::CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int 
 	int nDay = 1;
 	COleDateTime date(nYear, nMonth, nDay, 0, 0, 0);
 
-	// get it's day of week
+	// get its day of week
 	OLE_DAYOFWEEK nWeekDay = GetDayOfWeek(date);
 
 	// move forwards until we hit the requested day of week
@@ -2048,7 +2022,7 @@ COleDateTime CDateHelper::CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, i
 	return COleDateTime(nYear, nMonth, nDay, 0, 0, 0);
 }
 
-int CDateHelper::GetWeekofYear(const COleDateTime& date)
+int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 {
 	int nWeek = 0;
 	int nDayOfYear = date.GetDayOfYear();
@@ -2069,14 +2043,14 @@ int CDateHelper::GetWeekofYear(const COleDateTime& date)
 		{
 		case 0:
 			// Could be week 52 or 53 of the previous year
-			nWeek = (GetWeekofYear(date.m_dt - 7) + 1);
+			nWeek = (GetWeekOfYear(date.m_dt - 7) + 1); // RECURSIVE CALL
 			ASSERT((nWeek == 52) || (nWeek == 53));
 			break;
 
 		case 53:
 			// Since week 53 could be week 1 of the next year
 			// we check the week number a week later
-			if (GetWeekofYear(date.m_dt + 7) == 2)
+			if (GetWeekOfYear(date.m_dt + 7) == 2) // RECURSIVE CALL
 				nWeek = 1;
 			break;
 		}
@@ -2092,7 +2066,7 @@ int CDateHelper::GetWeekofYear(const COleDateTime& date)
 		{
 			// Since week 53 could be week 1 of the next year
 			// we check the week number a week later
-			if (GetWeekofYear(date.m_dt + 7) == 2)
+			if (GetWeekOfYear(date.m_dt + 7) == 2) // RECURSIVE CALL
 				nWeek = 1;
 		}
 	}
@@ -2179,78 +2153,27 @@ COleDateTime CDateHelper::GetStartOfDay(const COleDateTime& date)
 	return GetDateOnly(date);
 }
 
-COleDateTime CDateHelper::GetNearestYear(const COleDateTime& date, BOOL bEnd)
-{
-	COleDateTime dtNearest;
-
-	int nYear  = date.GetYear();
-	int nMonth = date.GetMonth();
-
-	if (nMonth > 6)
-	{
-		// beginning of next year
-		dtNearest.SetDate(nYear+1, 1, 1);
-	}
-	else
-	{
-		// beginning of this year
-		dtNearest.SetDate(nYear, 1, 1);
-	}
-
-	ASSERT(IsDateSet(dtNearest));
-
-	// handle end - last second of day before
-	if (bEnd)
-		dtNearest = GetEndOfPreviousDay(dtNearest);
-
-	return dtNearest;
-}
-
 COleDateTime CDateHelper::GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased)
 {
-	COleDateTime dtNearest;
-
-	int nYear = (date.GetYear() - (bZeroBased ? 0 : 1));
-	int nMonth = date.GetMonth();
-
-	if (((nYear % 25) > 5) || (((nYear % 25) == 5) && (nMonth > 6)))
-	{
-		// beginning of next decade
-		dtNearest = (GetEndOfQuarterCentury(date).m_dt + 1.0);
-	}
-	else
-	{
-		// beginning of this year
-		dtNearest = GetStartOfQuarterCentury(date);
-	}
-
-	ASSERT(IsDateSet(dtNearest));
-
-	// handle end - last second of day before
-	if (bEnd)
-		dtNearest = GetEndOfPreviousDay(dtNearest);
-
-	return dtNearest;
+	return GetNearestEpoch(date, 25, bEnd, bZeroBased);
 }
 
 COleDateTime CDateHelper::GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased)
 {
+	return GetNearestEpoch(date, 10, bEnd, bZeroBased);
+}
+
+COleDateTime CDateHelper::GetNearestEpoch(const COleDateTime& date, int nEpochLen, BOOL bEnd, BOOL bZeroBased)
+{
+	COleDateTime dtThisEpoch = GetStartOfEpoch(date, nEpochLen, bZeroBased);
+	COleDateTime dtNextEpoch = (GetEndOfEpoch(date, nEpochLen, bZeroBased).m_dt + 1.0);
+
 	COleDateTime dtNearest;
 
-	int nYear = (date.GetYear() - (bZeroBased ? 0 : 1));
-
-	if ((nYear % 10) > 5)
-	{
-		// beginning of next decade
-		dtNearest = (GetEndOfDecade(date).m_dt + 1.0);
-	}
+	if ((date - dtThisEpoch) < (dtNextEpoch - date))
+		dtNearest = dtThisEpoch;
 	else
-	{
-		// beginning of this year
-		dtNearest = GetStartOfDecade(date);
-	}
-
-	ASSERT(IsDateSet(dtNearest));
+		dtNearest = dtNextEpoch;
 
 	// handle end - last second of day before
 	if (bEnd)
@@ -2259,78 +2182,77 @@ COleDateTime CDateHelper::GetNearestDecade(const COleDateTime& date, BOOL bEnd, 
 	return dtNearest;
 }
 
+COleDateTime CDateHelper::GetNearestYear(const COleDateTime& date, BOOL bEnd)
+{
+	return GetNearestMonth(date, 12, bEnd);
+}
+
 COleDateTime CDateHelper::GetNearestHalfYear(const COleDateTime& date, BOOL bEnd)
 {
-	COleDateTime dtHalfYear;
-
-	int nYear  = date.GetYear();
-	int nMonth = date.GetMonth();
-
-	if (nMonth > 9)
-	{
-		// beginning of next year
-		dtHalfYear.SetDate(nYear+1, 1, 1);
-
-	}
-	else if (nMonth > 3)
-	{
-		// beginning of july
-		dtHalfYear.SetDate(nYear, 7, 1);
-	}
-	else
-	{
-		// beginning of this year
-		dtHalfYear.SetDate(nYear, 1, 1);
-	}
-
-	ASSERT(IsDateSet(dtHalfYear));
-
-	// handle end - last second of day before
-	if (bEnd)
-		dtHalfYear = GetEndOfPreviousDay(dtHalfYear);
-
-	return dtHalfYear;
+	return GetNearestMonth(date, 6, bEnd);
 }
 
 COleDateTime CDateHelper::GetNearestQuarter(const COleDateTime& date, BOOL bEnd)
 {
-	COleDateTime dtQuarter;
+	return GetNearestMonth(date, 3, bEnd);
+}
 
-	int nYear  = date.GetYear();
+COleDateTime CDateHelper::GetNearestMonth(const COleDateTime& date, BOOL bEnd)
+{
+	return GetNearestMonth(date, 1, bEnd);
+}
 
-	if (date > COleDateTime(nYear, 11, 15, 0, 0, 0))
-	{
-		// beginning of next year
-		dtQuarter.SetDate(nYear+1, 1, 1);
-	}
-	else if (date > COleDateTime(nYear, 8, 15, 0, 0, 0))
-	{
-		// beginning of october
-		dtQuarter.SetDate(nYear, 10, 1);
-	}
-	else if (date > COleDateTime(nYear, 5, 15, 0, 0, 0))
-	{
-		// beginning of july
-		dtQuarter.SetDate(nYear, 7, 1);
-	}
-	else if (date > COleDateTime(nYear, 2, 14, 0, 0, 0))
-	{
-		// beginning of april
-		dtQuarter.SetDate(nYear, 4, 1);
-	}
+COleDateTime CDateHelper::GetNearestMonth(const COleDateTime& date, int nInterval, BOOL bEnd)
+{
+	ASSERT(nInterval > 0);
+
+	int nNumMonths = GetDateInMonths(date);
+
+	if (nInterval > 1)
+		nNumMonths = ((nNumMonths / nInterval) * nInterval);
+
+	COleDateTime dtMonth = GetDateFromMonths(nNumMonths);
+	COleDateTime dtNextMonth = GetDateFromMonths(nNumMonths + nInterval);;
+
+	COleDateTime dtNearestMonth;
+
+	if ((date - dtMonth) < (dtNextMonth - date))
+		dtNearestMonth = dtMonth;
 	else
-	{
-		// beginning of this year
-		dtQuarter.SetDate(nYear, 1, 1);
-	}
+		dtNearestMonth = dtNextMonth;
 
-	ASSERT(IsDateSet(dtQuarter));
+	if (bEnd)
+		dtNearestMonth = GetEndOfPreviousDay(dtNearestMonth);
+
+	return dtNearestMonth;
+}
+
+COleDateTime CDateHelper::GetNearestWeek(const COleDateTime& date, BOOL bEnd)
+{
+	COleDateTime dtWeek = GetDateOnly(date);
+
+	// work forward until the week changes
+	int nWeek = GetWeekOfYear(date);
+
+	do
+	{
+		dtWeek.m_dt += 1.0;
+	}
+	while (GetWeekOfYear(dtWeek) == nWeek);
+
+	// if the number of days added >= 4 then subtract a week
+	CTwentyFourSevenWeek week;
+
+	if (CDateHelper(week).CalcDaysFromTo(date, dtWeek, TRUE) >= 4)
+	{
+		dtWeek.m_dt -= 7.0;
+	}
 
 	// handle end - last second of day before
 	if (bEnd)
-		dtQuarter = GetEndOfPreviousDay(dtQuarter);
+		dtWeek = GetEndOfPreviousDay(dtWeek);
 
-	return dtQuarter;
+	return dtWeek;
 }
 
 int CDateHelper::GetDateInMonths(int nMonth, int nYear)
@@ -2340,24 +2262,22 @@ int CDateHelper::GetDateInMonths(int nMonth, int nYear)
 	return ((nYear * 12) + (nMonth - 1));
 }
 
+void CDateHelper::GetDateFromMonths(int nNumMonths, int& nMonth, int& nYear)
+{
+	nYear = (nNumMonths / 12);
+	nMonth = ((nNumMonths % 12) + 1);
+}
+
 COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 {
-	int nYear = (nNumMonths / 12);
-	int nMonth = ((nNumMonths % 12) + 1);
-
-	COleDateTime dtGreg;
+	int nMonth, nYear;
+	GetDateFromMonths(nNumMonths, nMonth, nYear);
 
 	if (WantRTLDates())
-	{
-		CJalaliCalendar::ToGregorian(nYear, nMonth, 1, dtGreg);
-		ASSERT(GetDateInMonths(dtGreg) == nNumMonths);
-	}
-	else
-	{
-		dtGreg.SetDate(nYear, nMonth, 1);
-	}
+		return CJalaliCalendar::ToGregorian(nYear, nMonth, 1);
 
-	return dtGreg;
+	// else
+	return COleDateTime(nYear, nMonth, 1, 0, 0, 0);
 }
 
 int CDateHelper::GetDateInMonths(const COleDateTime& date)
@@ -2394,6 +2314,10 @@ void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy, BOOL bPreserveEndOfMon
 
 	if (WantRTLDates())
 	{
+		// The Jalali conversion code expects a fully validated date
+		int nDaysInMonth = GetDaysInMonth(st);
+		GDay = min(GDay, nDaysInMonth);
+		
 		int JDay, JMonth, JYear;
 		CJalaliCalendar::FromGregorian(GYear, GMonth, GDay, &JYear, &JMonth, &JDay);
 
@@ -2488,57 +2412,5 @@ void CDateHelper::GetNextMonth(int& nMonth, int& nYear, BOOL bNext)
 			nMonth--;
 		}
 	}
-}
-
-COleDateTime CDateHelper::GetNearestMonth(const COleDateTime& date, BOOL bEnd)
-{
-	COleDateTime dtMonth;
-
-	int nYear  = date.GetYear();
-	int nMonth = date.GetMonth();
-	int nDay   = date.GetDay();
-
-	if (nDay > 15)
-	{
-		// start of next month
-		GetNextMonth(nMonth, nYear);
-	}
-	// else start of this month
-
-	dtMonth.SetDate(nYear, nMonth, 1);
-
-	// handle end - last second of day before
-	if (bEnd)
-		dtMonth = GetEndOfPreviousDay(dtMonth);
-
-	return dtMonth;
-}
-
-COleDateTime CDateHelper::GetNearestWeek(const COleDateTime& date, BOOL bEnd)
-{
-	COleDateTime dtWeek = GetDateOnly(date);
-
-	// work forward until the week changes
-	int nWeek = GetWeekofYear(date);
-
-	do 
-	{
-		dtWeek.m_dt += 1.0;
-	}
-	while (GetWeekofYear(dtWeek) == nWeek);
-
-	// if the number of days added >= 4 then subtract a week
-	CTwentyFourSevenWeek week;
-
-	if (CDateHelper(week).CalcDaysFromTo(date, dtWeek, TRUE) >= 4)
-	{
-		dtWeek.m_dt -= 7.0;
-	}
-
-	// handle end - last second of day before
-	if (bEnd)
-		dtWeek = GetEndOfPreviousDay(dtWeek);
-
-	return dtWeek;
 }
 

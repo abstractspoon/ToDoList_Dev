@@ -3,11 +3,17 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "ganttutils.h"
 #include "ganttstatic.h"
+
+#include "..\shared\Misc.h"
+#include "..\shared\EnString.h"
+
+#include "..\3rdParty\JalaliCalendar.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-int GanttStatic::FindDisplay(GTLC_MONTH_DISPLAY nDisplay)
+int GanttUtils::FindDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
 	int nMode = NUM_DISPLAYMODES;
 	
@@ -20,7 +26,7 @@ int GanttStatic::FindDisplay(GTLC_MONTH_DISPLAY nDisplay)
 	return -1;
 }
 
-GTLC_MONTH_DISPLAY GanttStatic::GetPreviousDisplay(GTLC_MONTH_DISPLAY nDisplay)
+GTLC_MONTH_DISPLAY GanttUtils::GetPreviousDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
 	int nMode = FindDisplay(nDisplay);
 
@@ -37,7 +43,7 @@ GTLC_MONTH_DISPLAY GanttStatic::GetPreviousDisplay(GTLC_MONTH_DISPLAY nDisplay)
 	return DISPLAYMODES[nMode - 1].nDisplay;
 }
 
-GTLC_MONTH_DISPLAY GanttStatic::GetNextDisplay(GTLC_MONTH_DISPLAY nDisplay)
+GTLC_MONTH_DISPLAY GanttUtils::GetNextDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
 	int nMode = FindDisplay(nDisplay);
 
@@ -54,27 +60,27 @@ GTLC_MONTH_DISPLAY GanttStatic::GetNextDisplay(GTLC_MONTH_DISPLAY nDisplay)
 	return DISPLAYMODES[nMode + 1].nDisplay;
 }
 
-GTLC_MONTH_DISPLAY GanttStatic::GetLastDisplay()
+GTLC_MONTH_DISPLAY GanttUtils::GetLastDisplay()
 {
 	return DISPLAYMODES[NUM_DISPLAYMODES - 1].nDisplay;
 }
 
-GTLC_MONTH_DISPLAY GanttStatic::GetFirstDisplay()
+GTLC_MONTH_DISPLAY GanttUtils::GetFirstDisplay()
 {
 	return DISPLAYMODES[0].nDisplay;
 }
 
-int GanttStatic::CompareDisplays(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2)
+int GanttUtils::CompareDisplays(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2)
 {
 	return (FindDisplay(nDisplay1) - FindDisplay(nDisplay2));
 }
 
-BOOL GanttStatic::IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay)
+BOOL GanttUtils::IsValidDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
 	return (FindDisplay(nDisplay) != -1);
 }
 
-BOOL GanttStatic::IsSameDisplayGroup(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2)
+BOOL GanttUtils::IsSameDisplayGroup(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DISPLAY nDisplay2)
 {
 	switch (nDisplay1)
 	{
@@ -125,7 +131,7 @@ BOOL GanttStatic::IsSameDisplayGroup(GTLC_MONTH_DISPLAY nDisplay1, GTLC_MONTH_DI
 
 /////////////////////////////////////////////////////////////////////////////
 
-GTLC_DRAG GanttStatic::MapHitTestToDrag(GTLC_HITTEST nHit)
+GTLC_DRAG GanttUtils::MapHitTestToDrag(GTLC_HITTEST nHit)
 {
 	switch (nHit)
 	{
@@ -138,7 +144,7 @@ GTLC_DRAG GanttStatic::MapHitTestToDrag(GTLC_HITTEST nHit)
 	return GTLCD_NONE;
 }
 
-GTLC_HITTEST GanttStatic::MapDragToHitTest(GTLC_DRAG nDrag)
+GTLC_HITTEST GanttUtils::MapDragToHitTest(GTLC_DRAG nDrag)
 {
 	switch (nDrag)
 	{
@@ -154,7 +160,7 @@ GTLC_HITTEST GanttStatic::MapDragToHitTest(GTLC_DRAG nDrag)
 
 /////////////////////////////////////////////////////////////////////////////
 
-int GanttStatic::GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay)
+int GanttUtils::GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay)
 {
 	switch (nDisplay)
 	{
@@ -190,21 +196,86 @@ int GanttStatic::GetNumMonthsPerColumn(GTLC_MONTH_DISPLAY nDisplay)
 	return 1;
 }
 
-BOOL GanttStatic::GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd)
+BOOL GanttUtils::GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COleDateTime& dtEnd)
 {
-	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
-	ASSERT(nDaysInMonth);
+	int nNumMonths = CDateHelper::GetDateInMonths(nMonth, nYear);
 
-	if (nDaysInMonth == 0)
-		return FALSE;
-
-	dtStart.SetDate(nYear, nMonth, 1);
-	dtEnd.m_dt = dtStart.m_dt + nDaysInMonth;
+	dtStart = CDateHelper::GetDateFromMonths(nNumMonths);
+	dtEnd = CDateHelper::GetDateFromMonths(nNumMonths + 1);
 
 	return TRUE;
 }
 
-int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+int GanttUtils::GetDaysInMonth(int nMonth, int nYear)
+{
+	if (CDateHelper::WantRTLDates())
+		return CJalaliCalendar::GetDaysInMonth(nYear, nMonth);
+
+	// else
+	return CDateHelper::GetDaysInMonth(nMonth, nYear);
+}
+
+int GanttUtils::GetWeekOfYear(const COleDateTime& date)
+{
+	if (CDateHelper::WantRTLDates())
+		return CJalaliCalendar::GetWeekOfYear(date);
+
+	// else
+	return CDateHelper::GetWeekOfYear(date);
+}
+
+int GanttUtils::GetYear(const COleDateTime& date)
+{
+	if (CDateHelper::WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
+
+		return JYear;
+	}
+
+	// else
+	return date.GetYear();
+}
+
+CString GanttUtils::GetMonthName(int nMonth, BOOL bShort)
+{
+	if (CDateHelper::WantRTLDates())
+		return CJalaliCalendar::GetMonthName(nMonth);
+
+	// else
+	return CDateHelper::GetMonthName(nMonth, bShort);
+}
+
+COleDateTime GanttUtils::ToDate(int nYear, int nMonth, int nDay, int nHour, int nMinute)
+{
+	COleDateTime date;
+
+	if (CDateHelper::WantRTLDates())
+		date = CJalaliCalendar::ToGregorian(nYear, nMonth, nDay);
+	else
+		date.SetDate(nYear, nMonth, nDay);
+
+	date += COleDateTimeSpan(0, nHour, nMinute, 0);
+
+	return date;
+}
+
+void GanttUtils::FromDate(const COleDateTime& date, int& nYear, int& nMonth, int& nDay)
+{
+	if (CDateHelper::WantRTLDates())
+	{
+		CJalaliCalendar::FromGregorian(date, &nYear, &nMonth, &nDay);
+	}
+	else
+	{
+		nDay = date.GetDay();
+		nMonth = date.GetMonth();
+		nYear = date.GetYear();
+	}
+}
+
+int GanttUtils::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	int nNumMonths = dtRange.GetNumMonths(nDisplay, bZeroBasedDecades);
 	int nNumCols = 0;
@@ -212,20 +283,24 @@ int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONT
 	switch (nDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
+		// 1 column = 25 years
 		nNumCols = (nNumMonths / (25 * 12));
 		break;
 
 	case GTLC_DISPLAY_DECADES:
+		// 1 column = 10 years
 		nNumCols = (nNumMonths / (10 * 12));
 		break;
 
 	case GTLC_DISPLAY_YEARS:
+		// 1 column = 1 year / 12 months
 		nNumCols = (nNumMonths / 12);
 		break;
 
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
+		// 1 column = 3 months
 		nNumCols = (nNumMonths / 3);
 		break;
 
@@ -239,6 +314,7 @@ int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONT
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
 	case GTLC_DISPLAY_HOURS:
+		// 1 column = 1 month
 		nNumCols = nNumMonths;
 		break;
 
@@ -250,7 +326,7 @@ int GanttStatic::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONT
 	return nNumCols;
 }
 
-COleDateTime GanttStatic::GetRangeStart(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+COleDateTime GanttUtils::GetRangeStart(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	switch (nDisplay)
 	{
@@ -285,7 +361,7 @@ COleDateTime GanttStatic::GetRangeStart(const COleDateTime& date, GTLC_MONTH_DIS
 	return date;
 }
 
-COleDateTime GanttStatic::GetRangeEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+COleDateTime GanttUtils::GetRangeEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	switch (nDisplay)
 	{
@@ -320,7 +396,7 @@ COleDateTime GanttStatic::GetRangeEnd(const COleDateTime& date, GTLC_MONTH_DISPL
 	return date;
 }
 
-BOOL GanttStatic::GetMaxDateRange(GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
+BOOL GanttUtils::GetMaxDateRange(GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	int nNumCols = GetRequiredColumnCount(dtRange, nDisplay, bZeroBasedDecades) + 1;
 	int nMonthsPerCol = GetNumMonthsPerColumn(nDisplay);
@@ -335,3 +411,79 @@ BOOL GanttStatic::GetMaxDateRange(GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nD
 
 	return dtRange.IsValid();
 }
+
+CString GanttUtils::FormatHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear)
+{
+	if (nMonth == 0 || nYear == 0)
+		return _T("");
+
+	CString sDate;
+
+	switch (nDisplay)
+	{
+	case GTLC_DISPLAY_QUARTERCENTURIES:
+		sDate.Format(_T("%d-%d"), nYear, nYear + 24);
+		break;
+
+	case GTLC_DISPLAY_DECADES:
+		sDate.Format(_T("%d-%d"), nYear, nYear + 9);
+		break;
+
+	case GTLC_DISPLAY_YEARS:
+		sDate.Format(_T("%d"), nYear);
+		break;
+
+	case GTLC_DISPLAY_QUARTERS_SHORT:
+		sDate.Format(_T("Q%d %d"), (1 + ((nMonth - 1) / 3)), nYear);
+		break;
+
+	case GTLC_DISPLAY_QUARTERS_MID:
+		sDate.Format(_T("%s-%s %d"),
+					 GetMonthName(nMonth, TRUE),
+					 GetMonthName(nMonth + 2, TRUE),
+					 nYear);
+		break;
+
+	case GTLC_DISPLAY_QUARTERS_LONG:
+		sDate.Format(_T("%s-%s %d"),
+					 GetMonthName(nMonth, FALSE),
+					 GetMonthName(nMonth + 2, FALSE),
+					 nYear);
+		break;
+
+	case GTLC_DISPLAY_MONTHS_SHORT:
+		{
+			COleDateTime date(ToDate(nYear, nMonth, 1, 0, 0));
+			sDate = CDateHelper::FormatDate(date, (DHFD_NODAY | DHFD_NOCENTURY));
+		}
+		break;
+
+	case GTLC_DISPLAY_MONTHS_MID:
+		sDate.Format(_T("%s %d"), GetMonthName(nMonth, TRUE), nYear);
+		break;
+
+	case GTLC_DISPLAY_MONTHS_LONG:
+		sDate.Format(_T("%s %d"), GetMonthName(nMonth, FALSE), nYear);
+		break;
+
+	case GTLC_DISPLAY_WEEKS_SHORT:
+	case GTLC_DISPLAY_WEEKS_MID:
+	case GTLC_DISPLAY_WEEKS_LONG:
+		sDate.Format(_T("%s %d (%s)"), GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_WEEKS));
+		break;
+
+	case GTLC_DISPLAY_DAYS_SHORT:
+	case GTLC_DISPLAY_DAYS_MID:
+	case GTLC_DISPLAY_DAYS_LONG:
+	case GTLC_DISPLAY_HOURS:
+		sDate.Format(_T("%s %d (%s)"), GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	return sDate;
+}
+

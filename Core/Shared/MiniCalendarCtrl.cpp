@@ -133,7 +133,7 @@ int CMiniCalendarCtrl::DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol,
 		for (int nRow = 1; nRow <= 6; nRow++)
 		{
 			// Draw week number
-			int nWeek = CDateHelper::GetWeekofYear(dtStart);
+			int nWeek = CDateHelper::GetWeekOfYear(dtStart);
 			CRect rect((iLeftX + WEEKNUMBERPADDING), iRowY, (iLeftX + nWeekWidth), iRowY+m_iDaysHeight);
 
 			dc.SelectObject(m_FontInfo[FMC_FONT_DAYS].m_pFont);

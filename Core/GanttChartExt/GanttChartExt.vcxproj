@@ -190,7 +190,7 @@ copy unicode_debug\GanttChartExt.dll ..\todolist\unicode_debug /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="GanttSnapComboBox.cpp" />
-    <ClCompile Include="GanttStatic.cpp" />
+    <ClCompile Include="GanttUtils.cpp" />
     <ClCompile Include="GanttStruct.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -233,6 +233,7 @@ copy unicode_debug\GanttChartExt.dll ..\todolist\unicode_debug /y
     <ClInclude Include="GanttStatic.h" />
     <ClInclude Include="GanttStruct.h" />
     <ClInclude Include="GanttCtrl.h" />
+    <ClInclude Include="GanttUtils.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>

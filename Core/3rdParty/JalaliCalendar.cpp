@@ -11,13 +11,22 @@
 ////////////////////////////////////////////////////////////////////
 
 // Day of week names in Persian script
-TCHAR DOWNAME_1[] = { 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0009, 0x0 };								// sanbe
-TCHAR DOWNAME_2[] = { 0x06CC, 0x06A9, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };				// yeksanbe
-TCHAR DOWNAME_3[] = { 0x062F, 0x0648, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };				// dosanbe
-TCHAR DOWNAME_4[] = { 0x0633, 0x0647, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };				// sesanbe
-TCHAR DOWNAME_5[] = { 0x0686, 0x0647, 0x0627, 0x0631, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 }; // čaharsanbe
-TCHAR DOWNAME_6[] = { 0x067E, 0x0646, 0x062C, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };		// panjsanbe
-TCHAR DOWNAME_7[] = { 0x062C, 0x0645, 0x0639, 0x0647, 0x0009, 0x0009, 0x0 };								// Jom-e
+TCHAR DOWNAME_LONG_1[] = { 0x06CC, 0x06A9, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };					// yeksanbe,	sunday
+TCHAR DOWNAME_LONG_2[] = { 0x062F, 0x0648, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };					// dosanbe,		monday
+TCHAR DOWNAME_LONG_3[] = { 0x0633, 0x0647, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };					// sesanbe,		tuesday
+TCHAR DOWNAME_LONG_4[] = { 0x0686, 0x0647, 0x0627, 0x0631, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };	// čaharsanbe,	wednesday
+TCHAR DOWNAME_LONG_5[] = { 0x067E, 0x0646, 0x062C, 0x200C, 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0 };			// panjsanbe,	thursday
+TCHAR DOWNAME_LONG_6[] = { 0x062C, 0x0645, 0x0639, 0x0647, 0x0009, 0x0009, 0x0 };									// Jom-e,		friday
+TCHAR DOWNAME_LONG_7[] = { 0x0634, 0x0646, 0x0628, 0x0647, 0x0009, 0x0009, 0x0 };									// sanbe,		saturday
+
+// Day of week names in Persian script
+TCHAR DOWNAME_SHORT_1[] = { 0x06CC, 0x06A9, 0x0 };					// yeksanbe,	sunday
+TCHAR DOWNAME_SHORT_2[] = { 0x062F, 0x0648, 0x0 };					// dosanbe,		monday
+TCHAR DOWNAME_SHORT_3[] = { 0x0633, 0x0647, 0x0 };					// sesanbe,		tuesday
+TCHAR DOWNAME_SHORT_4[] = { 0x0686, 0x0647, 0x0627, 0x0631, 0x0 };	// čaharsanbe,	wednesday
+TCHAR DOWNAME_SHORT_5[] = { 0x067E, 0x0646, 0x062C, 0x0 };			// panjsanbe,	thursday
+TCHAR DOWNAME_SHORT_6[] = { 0x062C, 0x0645, 0x0639, 0x0647, 0x0 };	// Jom-e,		friday
+TCHAR DOWNAME_SHORT_7[] = { 0x0634, 0x0646, 0x0628, 0x0647, 0x0 };	// sanbe,		saturday
 
 ////////////////////////////////////////////////////////////////////
 
@@ -222,8 +231,7 @@ BOOL CJalaliCalendar::IsEndOfMonth(int JYear, int JMonth, int JDay)
 
 BOOL CJalaliCalendar::IsLeapYear(int JYear)
 {
-	COleDateTime dt29_12;
-	ToGregorian(JYear, 12, 29, dt29_12);
+	COleDateTime dt29_12 = ToGregorian(JYear, 12, 29);
 
 	int JCheckYear, JCheckMonth, JCheckDay;
 	FromGregorian((dt29_12.m_dt + 1), &JCheckYear, &JCheckMonth, &JCheckDay);
@@ -243,6 +251,46 @@ BOOL CJalaliCalendar::IsLeapYear(int JYear)
 	}
 
 	return bLeapYear;
+}
+
+int CJalaliCalendar::GetDayOfYear(int JYear, int JMonth, int JDay)
+{
+	int nDayOfYear = 0;
+
+	for (int nTemp = 1; nTemp < JMonth; nTemp++)
+		nDayOfYear += GetDaysInMonth(JYear, nTemp);
+
+	return (nDayOfYear + JDay);
+}
+
+int CJalaliCalendar::GetWeekOfYear(int JYear, int JMonth, int JDay)
+{
+	// Use the US method
+	// Note: We assume that the DOW for the first day
+	// of the year is the same FOR NOW
+	COleDateTime dtGreg = ToGregorian(JYear, 1, 1);
+	int nStartDOW = dtGreg.GetDayOfWeek();
+
+	int nDayOfYear = GetDayOfYear(JYear, JMonth, JDay);
+	int nWeek = (((nDayOfYear + nStartDOW - 1) / 7) + 1);
+
+	if (nWeek == 53)
+	{
+		// Since week 53 could be week 1 of the next year
+		// we check the week number a week later
+		if (GetWeekOfYear(JYear, JMonth, JDay + 7) == 2) // RECURSIVE CALL
+			nWeek = 1;
+	}
+
+	return nWeek;
+}
+
+int CJalaliCalendar::GetWeekOfYear(const COleDateTime& dtGregorian)
+{
+	int JYear, JMonth, JDay;
+	FromGregorian(dtGregorian, &JYear, &JMonth, &JDay);
+
+	return GetWeekOfYear(JYear, JMonth, JDay);
 }
 
 CString CJalaliCalendar::GetMonthName(int JMonth)
@@ -267,17 +315,17 @@ CString CJalaliCalendar::GetMonthName(int JMonth)
 	return "";
 }
 
-CString CJalaliCalendar::GetDayOfWeekName(int JDayOfWeek)
+CString CJalaliCalendar::GetDayOfWeekName(int JDayOfWeek, BOOL bShort)
 {
 	switch (JDayOfWeek)
 	{
-	case 1:  return DOWNAME_1; // sanbe
-	case 2:  return DOWNAME_2; // yeksanbe
-	case 3:  return DOWNAME_3; // dosanbe
-	case 4:  return DOWNAME_4; // sesanbe
-	case 5:  return DOWNAME_5; // čaharsanbe
-	case 6:  return DOWNAME_6; // panjsanbe
-	case 7:  return DOWNAME_7; // Jom-e
+	case 1:  return (bShort ? DOWNAME_SHORT_1: DOWNAME_LONG_1); // sanbe
+	case 2:  return (bShort ? DOWNAME_SHORT_2: DOWNAME_LONG_2); // yeksanbe
+	case 3:  return (bShort ? DOWNAME_SHORT_3: DOWNAME_LONG_3); // dosanbe
+	case 4:  return (bShort ? DOWNAME_SHORT_4: DOWNAME_LONG_4); // sesanbe
+	case 5:  return (bShort ? DOWNAME_SHORT_5: DOWNAME_LONG_5); // čaharsanbe
+	case 6:  return (bShort ? DOWNAME_SHORT_6: DOWNAME_LONG_6); // panjsanbe
+	case 7:  return (bShort ? DOWNAME_SHORT_7: DOWNAME_LONG_7); // Jom-e
 	}
 
 	// all else
@@ -292,12 +340,12 @@ void CJalaliCalendar::FromGregorian(const COleDateTime& dtGregorian, int *JYear,
 	FromGregorian((int)stGregorian.wYear, (int)stGregorian.wMonth, (int)stGregorian.wDay, JYear, JMonth, JDay);
 }
 
-void CJalaliCalendar::ToGregorian(int JYear, int JMonth, int JDay, COleDateTime& dtGregorian)
+COleDateTime CJalaliCalendar::ToGregorian(int JYear, int JMonth, int JDay)
 {
 	int GYear, GMonth, GDay;
 	ToGregorian(JYear, JMonth, JDay, &GYear, &GMonth, &GDay);
 
-	dtGregorian.SetDate(GYear, GMonth, GDay);
+	return COleDateTime(GYear, GMonth, GDay, 0, 0, 0);
 }
 
 void CJalaliCalendar::GetCurrentDate(int *JYear, int *JMonth, int *JDay)

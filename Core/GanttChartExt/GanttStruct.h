@@ -30,7 +30,7 @@ struct GANTTDATERANGE : protected COleDateTimeRange
 	void Reset();
 	BOOL IsValid() const;
 
-	CString Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL bISODates, TCHAR cDelim = '-') const;
+	CString Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const;
 
 	void Add(const GANTTITEM& gi);
 	void Add(const COleDateTime& dtStart, const COleDateTime& dtEnd);

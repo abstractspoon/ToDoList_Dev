@@ -141,11 +141,11 @@ SOURCE=.\GanttSnapComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\GanttStatic.cpp
+SOURCE=.\GanttStruct.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\GanttStruct.cpp
+SOURCE=.\GanttUtils.cpp
 # End Source File
 # Begin Source File
 
@@ -203,6 +203,10 @@ SOURCE=.\GanttStatic.h
 # Begin Source File
 
 SOURCE=.\GanttStruct.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GanttUtils.h
 # End Source File
 # Begin Source File
 
