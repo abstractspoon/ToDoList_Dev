@@ -153,6 +153,7 @@ void CMonthCalCtrlEx::OnSize(UINT nType, int cx, int cy)
 void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 {
 	ASSERT(m_bWeekNumbers);
+	ASSERT(!CDateHelper::WantRTLDates());
 
 	if (m_bWeekNumbers)
 	{

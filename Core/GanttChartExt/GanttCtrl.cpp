@@ -3252,7 +3252,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				// Only draw the week number if it's '1' and we've enough space
 				CString sWeek;
 
-				if ((rWeek.Width() > 6) && (GetWeekOfYear(dtWeek) == 2))
+				if ((rWeek.Width() > 6) && (CDateHelper::GetWeekOfYear(dtWeek) == 2))
 					sWeek = _T("1");
 
 				DrawListHeaderRect(pDC, rWeek, sWeek, pThemed, FALSE);
@@ -3301,7 +3301,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				// check if we need to draw
 				if (rWeek.right >= rClip.left)
 				{
-					int nWeek = GetWeekOfYear(dtWeek);
+					int nWeek = CDateHelper::GetWeekOfYear(dtWeek);
 					DrawListHeaderRect(pDC, rWeek, Misc::Format(nWeek), pThemed, FALSE);
 				}
 

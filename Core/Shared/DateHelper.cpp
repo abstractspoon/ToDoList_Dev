@@ -2029,6 +2029,10 @@ COleDateTime CDateHelper::CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, i
 
 int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 {
+	if (WantRTLDates())
+		return CJalaliCalendar::GetWeekOfYear(date);
+
+	// else
 	int nWeek = 0;
 	int nDayOfYear = date.GetDayOfYear();
 
