@@ -215,15 +215,6 @@ int GanttUtils::GetDaysInMonth(int nMonth, int nYear)
 	return CDateHelper::GetDaysInMonth(nMonth, nYear);
 }
 
-int GanttUtils::GetWeekOfYear(const COleDateTime& date)
-{
-	if (CDateHelper::WantRTLDates())
-		return CJalaliCalendar::GetWeekOfYear(date);
-
-	// else
-	return CDateHelper::GetWeekOfYear(date);
-}
-
 int GanttUtils::GetYear(const COleDateTime& date)
 {
 	if (CDateHelper::WantRTLDates())

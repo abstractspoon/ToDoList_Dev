@@ -310,8 +310,8 @@ BOOL CDateTimeCtrlEx::OnDropDown(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = 0;
 
-	// We only hook Gregorian calendars
-	if ((m_monthCal.GetSafeHwnd() == NULL) && !CDateHelper::WantRTLDates())
+	// We only need hook ISO calendars to fix the week numbers
+	if ((m_monthCal.GetSafeHwnd() == NULL) && CDateHelper::WantISOWeekOfYear())
 	{
 		HWND hMonthCal = (HWND)SendMessage(DTM_GETMONTHCAL);
 		ASSERT(hMonthCal);

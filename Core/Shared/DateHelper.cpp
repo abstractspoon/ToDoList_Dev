@@ -2027,13 +2027,26 @@ COleDateTime CDateHelper::CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, i
 	return COleDateTime(nYear, nMonth, nDay, 0, 0, 0);
 }
 
+BOOL CDateHelper::WantISOWeekOfYear()
+{
+	// Jalali uses US week number algorithm
+	if (WantRTLDates())
+		return FALSE;
+	
+	// ISO weeks can only begin on Mondays 
+	return (GetFirstDayOfWeek() == DHO_MONDAY);
+}
+
 int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 {
+	if (WantRTLDates())
+		return CJalaliCalendar::GetWeekOfYear(date);
+
+	// else
 	int nWeek = 0;
 	int nDayOfYear = date.GetDayOfYear();
 
-	// ISO weeks can only begin on Mondays 
-	if (GetFirstDayOfWeek() == DHO_MONDAY)
+	if (WantISOWeekOfYear())
 	{
 		// http://en.wikipedia.org/wiki/ISO_week_date#Calculating_the_week_number_of_a_given_date
 		//
@@ -2067,12 +2080,20 @@ int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 
 		nWeek = (((nDayOfYear + nJan1DOW - 1) / 7) + 1);
 
-		if (nWeek == 53)
+		switch (nWeek)
 		{
-			// Since week 53 could be week 1 of the next year
-			// we check the week number a week later
-			if (GetWeekOfYear(date.m_dt + 7) == 2) // RECURSIVE CALL
-				nWeek = 1;
+		case 53:
+			{
+				// Since week 53 could be week 1 of the next year
+				// we check the week number a week later
+				if (GetWeekOfYear(date.m_dt + 7) == 2) // RECURSIVE CALL
+					nWeek = 1;
+			}
+			break;
+
+		case 54:
+			nWeek = 1;
+			break;
 		}
 	}
 	ASSERT((nWeek >= 1) && (nWeek <= 53));

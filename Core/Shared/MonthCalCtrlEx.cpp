@@ -153,6 +153,7 @@ void CMonthCalCtrlEx::OnSize(UINT nType, int cx, int cy)
 void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 {
 	ASSERT(m_bWeekNumbers);
+	ASSERT(!CDateHelper::WantRTLDates());
 
 	if (m_bWeekNumbers)
 	{
@@ -164,9 +165,6 @@ void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 		if (!CRect().IntersectRect(rWeekNumbers, rClip))
 			return;
 
-		HFONT hFont = (HFONT)SendMessage(WM_GETFONT);
-		HGDIOBJ hOldFont = pDC->SelectObject(hFont);
-
 		COleDateTime dtStart, dtEnd;
 		GetMonthRange(dtStart, dtEnd, GMR_DAYSTATE);
 
@@ -174,6 +172,7 @@ void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 		pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
 		int nDayHeight = (rWeekNumbers.Height() / 6);
+		HGDIOBJ hOldFont = pDC->SelectObject(::GetStockObject(DEFAULT_GUI_FONT));
 
 		CRect rWeek(rWeekNumbers);
 		rWeek.bottom = (rWeek.top + nDayHeight); // first row

@@ -3,9 +3,10 @@
 
 #include "stdafx.h"
 #include "MiniCalendarCtrl.h"
-
 #include "datehelper.h"
 #include "misc.h"
+
+#include "..\3rdParty\JalaliCalendar.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -89,7 +90,7 @@ CSize CMiniCalendarCtrl::ComputeSize()
 
 int CMiniCalendarCtrl::ComputeWeekNumberWidth()
 {
-	if (!CDateHelper::WantRTLDates() && m_bShowWeekNumbers && (m_nWeekNumberWidth == 0))
+	if (m_bShowWeekNumbers && (m_nWeekNumberWidth == 0))
 	{
 		if (!m_bFontsCreated)
 			CreateFontObjects();
@@ -123,8 +124,8 @@ int CMiniCalendarCtrl::DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol,
 
 	if (nWeekWidth)
 	{
-		COleDateTime dtStart(iYear, iMonth, 1, 0, 0, 0), dt(dtStart);
-
+		COleDateTime dtStart = DateFromMonthYear(iMonth, iYear);
+	
 		while (dtStart.GetDayOfWeek() != m_iFirstDayOfWeek)
 			dtStart -= 1;
 
