@@ -257,7 +257,7 @@ List<DayOfWeek>^ WorkingWeek::WeekDays()
 
 int DateUtil::WeekOfYear(DateTime date)
 {
-	return CDateHelper::GetWeekofYear(date.ToOADate());
+	return CDateHelper::GetWeekOfYear(date.ToOADate());
 }
 
 int DateUtil::GetMaxDayOfWeekNameWidth(Graphics^ graphics, Font^ font, bool shortName)
