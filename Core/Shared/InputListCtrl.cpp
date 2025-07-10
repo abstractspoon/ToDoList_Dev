@@ -82,8 +82,6 @@ END_MESSAGE_MAP()
 
 void CInputListCtrl::InitState()
 {
-	m_nItemLastSelected = -1;
-	m_nColLastSelected = -1;
 	m_nEditItem = -1;
 	m_nEditCol = -1;
 	m_bAutoAddRows = FALSE;
@@ -115,6 +113,11 @@ void CInputListCtrl::AllowDuplicates(BOOL bAllow, BOOL bNotify)
 { 
 	m_bAllowDuplication = bAllow; 
 	m_bNotifyDuplicates = bNotify;
+}
+
+void CInputListCtrl::SetSingleClickEditing(BOOL bEnable)
+{
+	m_bSingleClickEditing = bEnable;
 }
 
 void CInputListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point) 
@@ -181,32 +184,35 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 	if (bWasEditing && IsCellSelected(nItem, nCol))
 		return;
 	
-	// if this is the second click or the user clicked on the column button
-	// then edit else update clicked pos unless we did not have the focus
 	if (nItem != -1)
 	{
+		// If we are single-click editing OR a button was clicked
+		// we can edit immediately regardless if the item was already selected
 		CRect rBtn;
+		BOOL bBtnClick = (GetButtonRect(nItem, nCol, rBtn) && rBtn.PtInRect(point));
 
-		if (CanEditCell(nItem, nCol) && GetButtonRect(nItem, nCol, rBtn) && rBtn.PtInRect(point))
+		if (CanEditCell(nItem, nCol) && (m_bSingleClickEditing || bBtnClick))
 		{
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
 
-			// Draw button pressed (unpressing handled in OnLButtonUp)
-			InvalidateRect(rBtn);
-			UpdateWindow();
+			if (bBtnClick)
+			{
+				// Draw button pressed (unpressing handled in OnLButtonUp)
+				InvalidateRect(rBtn);
+				UpdateWindow();
+			}
 
-			EditCell(nItem, nCol, TRUE);
+			EditCell(nItem, nCol, bBtnClick);
 		}
+		// else if we already had the focus and the user clicked 
+		// on the selected item then we can also edit
 		else if (CanEditSelectedCell() && bHadFocus && (nItem == nSelItem) && (nCol == nSelCol))
 		{
 			EditCell(nItem, nCol, FALSE);
 		}
-		else
+		else // we just scroll the clicked item into view
 		{
-			m_nItemLastSelected = nItem;
-			m_nColLastSelected = nCol;
-
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
 
@@ -458,38 +464,34 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CEnListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 	
 	nItem = GetFocusedItem();
-	m_nItemLastSelected = nItem;
 	
-	// if its the right or left cursor keys then update column position
-	if (nChar == VK_LEFT && nCol > 0)
+	switch (nChar)
 	{
-		nCol--;
-		
-		// scroll cell into view
-		ScrollCellIntoView(nItem, nCol);
-	}
-	else if (nChar == VK_RIGHT && nCol < GetColumnCount() - 1)
-	{
-		nCol++;
-		
-		// scroll cell into view
-		ScrollCellIntoView(nItem, nCol);
-	}
-	else if (nChar == VK_DELETE && CanDeleteSelectedCell())
-	{
-		// if the delete key is pressed and we're in col0 or row0 
-		// then delete corresponding row or column
-		// unless its the prompt row or column 
-		DeleteSelectedCell();
-	}
-	else if ((nChar == VK_F2 || nChar == VK_SPACE || nChar == VK_RETURN) && CanEditSelectedCell())
-	{
-		// if its the space bar then edit the current cell
-		EditCell(nItem, nCol, FALSE);
+	case VK_LEFT:
+		if (nCol > 0)
+			ScrollCellIntoView(nItem, --nCol);
+		break;
+
+	case VK_RIGHT:
+		if (nCol < GetColumnCount() - 1)
+			ScrollCellIntoView(nItem, ++nCol);
+		break;
+
+	case VK_DELETE:
+		if (CanDeleteSelectedCell())
+			DeleteSelectedCell();
+		break;
+
+	case VK_F2:
+	case VK_SPACE:
+	case VK_RETURN:
+		if (CanEditSelectedCell())
+			EditCell(nItem, nCol, FALSE);
+		break;
 	}
 
-	// update the list selection if its changed
-	SetCurSel(nItem, nCol, TRUE); // notifies parent
+	// update list selection notify parent
+	SetCurSel(nItem, nCol, TRUE);
 }
 
 void CInputListCtrl::DrawItemBackground(CDC* /*pDC*/, int /*nItem*/, const CRect& /*rItem*/, COLORREF /*crBack*/, 
@@ -916,16 +918,8 @@ void CInputListCtrl::OnKillFocus(CWnd* pNewWnd)
 	if (pNewWnd == this)
 		return;
 
-	// if we're not editing then clear the current selection
-	if (!IsEditing())
-	{
-		m_nItemLastSelected = -1;
-		m_nColLastSelected = -1;
-	}
-	else
-	{
+	if (IsEditing())
 		HideAllControls(pNewWnd);
-	}
 
 	CRect rItem;
 	GetItemRect(GetCurSel(), rItem, LVIR_BOUNDS);
@@ -1045,20 +1039,18 @@ void CInputListCtrl::SetCurSel(int nRow, int nCol, BOOL bNotifyParent)
 	if (nRow < 0 || nRow >= GetItemCount() || nCol < 0 || nCol >= GetColumnCount())
 		return;
 
-	// don't update if nothing's changed
+	// don't update if nothing has changed
 	if (IsCellSelected(nRow, nCol))
 		return;
 
-	CRect rItem;
-	int nSel = GetCurSel();
-	RedrawItems(nSel, nSel);
+	// Redraw current selection
+	RedrawItems(GetCurSel(), m_nCurCol);
 
 	m_nCurCol = nCol;
 	CEnListCtrl::SetCurSel(nRow, bNotifyParent == TRUE);
 
-	m_nColLastSelected = nCol;
-	m_nItemLastSelected = nRow;
-	RedrawItems(nRow, nRow);
+	// Redraw new selection
+	RedrawItems(GetCurSel(), m_nCurCol);
 }
 
 int CInputListCtrl::GetLastEdit(int* pRow, int* pCol)
