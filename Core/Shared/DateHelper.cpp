@@ -2027,6 +2027,16 @@ COleDateTime CDateHelper::CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, i
 	return COleDateTime(nYear, nMonth, nDay, 0, 0, 0);
 }
 
+BOOL CDateHelper::WantISOWeekOfYear()
+{
+	// Jalali uses US week number algorithm
+	if (WantRTLDates())
+		return FALSE;
+	
+	// ISO weeks can only begin on Mondays 
+	return (GetFirstDayOfWeek() == DHO_MONDAY);
+}
+
 int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 {
 	if (WantRTLDates())
@@ -2036,8 +2046,7 @@ int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 	int nWeek = 0;
 	int nDayOfYear = date.GetDayOfYear();
 
-	// ISO weeks can only begin on Mondays 
-	if (GetFirstDayOfWeek() == DHO_MONDAY)
+	if (WantISOWeekOfYear())
 	{
 		// http://en.wikipedia.org/wiki/ISO_week_date#Calculating_the_week_number_of_a_given_date
 		//
