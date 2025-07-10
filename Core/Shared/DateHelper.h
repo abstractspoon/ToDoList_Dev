@@ -94,7 +94,7 @@ public:
 //
 // NOTE: To avoid confusion it is assumed that every COleDateTime and
 // SYSTEMTIME represents a Gregorian date, which will be converted 
-// internally to and from Jalali as required
+// internally to and from Jalali as required, UNLESS NOTED OTHERWISE
 
 class CDateHelper  
 {
@@ -150,14 +150,14 @@ public:
 	static BOOL DecodeOffset(LPCTSTR szDate, int& nAmount, DH_UNITS& nUnits, BOOL bMustHaveSign = TRUE);
 	static BOOL IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign = TRUE);
 
-	static OLE_DAYOFWEEK GetDayOfWeek(const COleDateTime& date);
-	static OLE_DAYOFWEEK GetDayOfWeek(const SYSTEMTIME& date);
+	static OLE_DAYOFWEEK GetDayOfWeek(const COleDateTime& date); // GREGORIAN ONLY
+	static OLE_DAYOFWEEK GetDayOfWeek(const SYSTEMTIME& date); // GREGORIAN ONLY
 	static OLE_DAYOFWEEK GetFirstDayOfWeek();
 	static OLE_DAYOFWEEK GetLastDayOfWeek();
 	static OLE_DAYOFWEEK GetNextDayOfWeek(OLE_DAYOFWEEK nDOW);
-	static int GetDaysInMonth(int nMonth, int nYear); 
-	static int GetDaysInMonth(const COleDateTime& date); 
-	static int GetDaysInMonth(const SYSTEMTIME& st);
+	static int GetDaysInMonth(int nMonth, int nYear); // GREGORIAN ONLY
+	static int GetDaysInMonth(const COleDateTime& date); // GREGORIAN ONLY
+	static int GetDaysInMonth(const SYSTEMTIME& st); // GREGORIAN ONLY
 	static int GetWeekOfYear(const COleDateTime& date);
 	static COleDateTime GetEndOfPreviousDay(const COleDateTime& date);
 	static COleDateTime GetEndOfDay(const COleDateTime& date);
@@ -176,9 +176,10 @@ public:
 	static COleDateTime GetDateFromMonths(int nNumMonths);
 	static void GetDateFromMonths(int nNumMonths, int& nMonth, int& nYear);
 
-	static COleDateTime CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
-	static int CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
+	static COleDateTime CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear); // GREGORIAN ONLY
+	static int CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear); // GREGORIAN ONLY
 
+	// GREGORIAN ONLY
 	static CString GetDayOfWeekName(OLE_DAYOFWEEK nDOW, BOOL bShort = FALSE); // 1-7, sun-sat
 	static CString GetMonthName(int nMonth, BOOL bShort = FALSE); // 1-12, jan-nov
 	static void GetDayOfWeekNames(BOOL bShort, CStringArray& aNames); // sun-sat
@@ -188,8 +189,8 @@ public:
 	static int GetMaxMonthNameWidth(CDC* pDC, BOOL bShort = FALSE);
 	static CSize GetMaxMonthNameExtent(CDC* pDC, BOOL bShort = FALSE);
 
-	static BOOL IsLeapYear(const COleDateTime& date = COleDateTime::GetCurrentTime());
-	static BOOL IsLeapYear(int nYear);
+	static BOOL IsLeapYear(const COleDateTime& date = COleDateTime::GetCurrentTime()); // GREGORIAN ONLY
+	static BOOL IsLeapYear(int nYear); // GREGORIAN ONLY
 	static BOOL IsToday(const COleDateTime& date);
 	static BOOL IsEndOfDay(const COleDateTime& date, BOOL bNoTimeIsEndOfDay);
 	static BOOL IsSameDay(const COleDateTime& date1, const COleDateTime& date2);
