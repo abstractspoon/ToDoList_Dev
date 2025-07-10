@@ -2071,12 +2071,20 @@ int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 
 		nWeek = (((nDayOfYear + nJan1DOW - 1) / 7) + 1);
 
-		if (nWeek == 53)
+		switch (nWeek)
 		{
-			// Since week 53 could be week 1 of the next year
-			// we check the week number a week later
-			if (GetWeekOfYear(date.m_dt + 7) == 2) // RECURSIVE CALL
-				nWeek = 1;
+		case 53:
+			{
+				// Since week 53 could be week 1 of the next year
+				// we check the week number a week later
+				if (GetWeekOfYear(date.m_dt + 7) == 2) // RECURSIVE CALL
+					nWeek = 1;
+			}
+			break;
+
+		case 54:
+			nWeek = 1;
+			break;
 		}
 	}
 	ASSERT((nWeek >= 1) && (nWeek <= 53));
