@@ -499,10 +499,15 @@ int CWorkloadCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	return aAllocTo.GetSize();
 }
 
-double CWorkloadCtrl::GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+double CWorkloadCtrl::GetTaskTime(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bTimeEst)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
-	double dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nUnits, false); // uncalculated
+	double dTime = 0.0;
+	
+	if (bTimeEst)
+		dTime = pTasks->GetTaskTimeEstimate(hTask, nUnits, false); // uncalculated
+	else
+		dTime = pTasks->GetTaskTimeSpent(hTask, nUnits, false); // uncalculated
 
 	TH_UNITS nTHUnits = THU_NULL;
 
@@ -516,14 +521,14 @@ double CWorkloadCtrl::GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM
 
 	case TDCU_DAYS:
 	case TDCU_WEEKDAYS:
-		return dTimeEst;
+		return dTime;
 
 	default:
 		ASSERT(0);
 		return 0.0;
 	}
 
-	return CTimeHelper().Convert(dTimeEst, nTHUnits, THU_WEEKDAYS);
+	return CTimeHelper().Convert(dTime, nTHUnits, THU_WEEKDAYS);
 }
 
 BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttribID)
@@ -542,6 +547,7 @@ BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttribID)
 	case TDCA_SUBTASKDONE:
 	case TDCA_TASKNAME:
 	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
 		return TRUE;
 	}
 	
@@ -701,9 +707,16 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 
 		if (pTasks->IsAttributeAvailable(TDCA_TIMEESTIMATE))
 		{
-			pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
+			pWI->dTimeEst = GetTaskTime(pTasks, hTask, TRUE);
 
-			bAllocationChange = TRUE;
+			bAllocationChange = HasOption(WLCF_PREFERTIMEESTFORCALCS);
+		}
+
+		if (pTasks->IsAttributeAvailable(TDCA_TIMESPENT))
+		{
+			pWI->dTimeSpent = GetTaskTime(pTasks, hTask, FALSE);
+
+			bAllocationChange = HasOption(WLCF_PREFERTIMESPENTFORCALCS);
 		}
 	
 		if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
@@ -763,6 +776,7 @@ void CWorkloadCtrl::UpdateAllocationCalculations(WORKLOADITEM& wi) const
 	
 	wi.UpdateAllocationCalculations(!HasOption(WLCF_RECALCALLOCATIONS),
 									  HasOption(WLCF_PREFERTIMEESTFORCALCS),
+									  HasOption(WLCF_PREFERTIMESPENTFORCALCS),
 									  HasOption(WLCF_RECALCPROPORTIONALLY),
 									  HasOption(WLCF_ALLOWPARENTALLOCATIONS));
 }
@@ -966,7 +980,8 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
 			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
 
-		pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
+		pWI->dTimeEst = GetTaskTime(pTasks, hTask, TRUE);
+		pWI->dTimeSpent = GetTaskTime(pTasks, hTask, FALSE);
 
 		// This wants to be last so that time estimate and date range are up to date
 		pWI->mapAllocatedDays.Decode(pTasks->GetTaskMetaData(hTask, WORKLOAD_TYPEID));
@@ -1042,6 +1057,8 @@ void CWorkloadCtrl::IncrementItemPositions(HTREEITEM htiParent, int nFromPos)
 
 void CWorkloadCtrl::SetOptions(DWORD dwOptions)
 {
+	ASSERT(!Misc::HasFlag(dwOptions, WLCF_PREFERTIMEESTFORCALCS | WLCF_PREFERTIMESPENTFORCALCS));
+
 	DWORD dwPrev = m_dwOptions;
 	m_dwOptions = dwOptions;
 

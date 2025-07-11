@@ -565,7 +565,8 @@ BOOL WORKLOADITEM::HasColor() const
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
-void WORKLOADITEM::UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, 
+void WORKLOADITEM::UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, 
+												BOOL bPreferTimeEstimate, BOOL bPreferTimeSpent, 
 												BOOL bProportionally, BOOL bAllowParentAllocations)
 {
 	if (bParent && !bAllowParentAllocations)
@@ -574,10 +575,13 @@ void WORKLOADITEM::UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL b
 	}
 	else if (!bAutoCalculatedOnly || mapAllocatedDays.IsAutoCalculated())
 	{
-		double dDuration = (bPreferTimeEstimate ? dTimeEst : dtRange.GetWeekdayCount());
+		double dDuration = 0.0;
+		
+		if (bPreferTimeEstimate || bPreferTimeSpent)
+			dDuration = (bPreferTimeEstimate ? dTimeEst : dTimeSpent);
 
 		if (dDuration == 0.0)
-			dDuration = (bPreferTimeEstimate ? dtRange.GetWeekdayCount() : dTimeEst);
+			dDuration = dtRange.GetWeekdayCount();
 
 		if (aAllocTo.GetSize())
 			mapAllocatedDays.Recalculate(aAllocTo, dDuration, bProportionally);

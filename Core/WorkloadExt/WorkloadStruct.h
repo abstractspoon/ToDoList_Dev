@@ -124,7 +124,11 @@ struct WORKLOADITEM
 
 	BOOL IsDone(BOOL bIncGoodAs) const;
 
-	void UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL bPreferTimeEstimate, BOOL bProportionally, BOOL bAllowParentAllocations);
+	void UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, 
+									  BOOL bPreferTimeEstimate, 
+									  BOOL bPreferTimeSpent, 
+									  BOOL bProportionally, 
+									  BOOL bAllowParentAllocations);
 	void ClearAllocations();
 
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
@@ -140,7 +144,7 @@ struct WORKLOADITEM
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
 	int nPercent;
 	int nPosition;
-	double dTimeEst; // weekdays
+	double dTimeEst, dTimeSpent; // weekdays
 	CMapDayAllocations mapAllocatedDays;
 	
 	BOOL bDone;

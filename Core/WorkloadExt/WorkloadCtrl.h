@@ -208,7 +208,7 @@ protected:
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	
 	static int GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CStringArray& aAllocTo);
-	static double GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	static double GetTaskTime(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bTimeEst);
 	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
 	static CString FormatTimeSpan(double dDays, int nDecimals);
 
