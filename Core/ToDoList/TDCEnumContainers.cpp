@@ -64,6 +64,10 @@ BOOL CTDCAttributeMap::Add(TDC_ATTRIBUTE nAttribID)
 	return TRUE;
 }
 
+BOOL CTDCAttributeMap::HasAttribOrAll(TDC_ATTRIBUTE nAttribID) const
+{
+	return (Has(nAttribID) || Has(TDCA_ALL));
+}
 
 int CTDCAttributeMap::Append(const CTDCAttributeMap& other)
 {

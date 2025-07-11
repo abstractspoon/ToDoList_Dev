@@ -1317,7 +1317,7 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
 
 	// Special cases
-	if (mapAttrib.Has(TDCA_NEWTASK) || mapAttrib.Has(TDCA_ALL))
+	if (mapAttrib.HasAttribOrAll(TDCA_NEWTASK))
 	{
 		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK) || mapAttrib.HasOnly(TDCA_ALL));
 
@@ -4094,11 +4094,9 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 		// Include parents if this is an undo 
 		// OR there is a colour change
 		// OR a calculated attribute change
-		BOOL bUndo = mapAttribIDs.Has(TDCA_ALL);
-		ASSERT(!bUndo || mapAttribIDs.HasOnly(TDCA_ALL));
+ 		ASSERT(!mapAttribIDs.Has(TDCA_ALL) || mapAttribIDs.HasOnly(TDCA_ALL));
 
-		if (bUndo || 
-			mapAttribIDs.Has(TDCA_COLOR) || 
+		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) || 
 			ModAffectsAggregatedAttributes(mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_ALLPARENTS;
@@ -4106,7 +4104,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// DONT include subtasks UNLESS the completion date
 		// has changed OR this is an inherited attribute
-		if (!mapAttribIDs.Has(TDCA_DONEDATE) && 
+		if (!mapAttribIDs.HasAttribOrAll(TDCA_DONEDATE) && 
 			!WantUpdateInheritedAttibutes(mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_NOTSUBTASKS;
@@ -4114,16 +4112,14 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// Include references to selected tasks if a 
 		// 'Reference-specific' colour is not set
-		if (mapAttribIDs.Has(TDCA_COLOR) && 
+		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) && 
 			!m_taskTree.HasReferenceTaskColor())
 		{
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
 		}
 	
-		if (bUndo || mapAttribIDs.Has(TDCA_DEPENDENCY))
-		{
+		if (mapAttribIDs.HasAttribOrAll(TDCA_DEPENDENCY))
 			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
-		}
 	}
 
 	// Get the tasks for the update
