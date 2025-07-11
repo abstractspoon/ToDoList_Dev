@@ -214,6 +214,7 @@ void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 
 	m_bAutoCalcAllocations = pPrefs->GetProfileInt(szKey, _T("AutoCalcAllocations"), TRUE);
 	m_bPreferTimeEstimateInCalcs = pPrefs->GetProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), TRUE);
+	m_bPreferTimeSpentInCalcs = pPrefs->GetProfileInt(szKey, _T("PreferTimeSpentInCalcs"), FALSE);
 	m_bRecalcAllocations = pPrefs->GetProfileInt(szKey, _T("RecalcAllocations"), TRUE);
 	m_bRecalcProportionally = pPrefs->GetProfileInt(szKey, _T("RecalcProportionally"), TRUE);
 	m_bIncludeDatelessTasksInPeriod = pPrefs->GetProfileInt(szKey, _T("IncludeDatelessTasksInPeriod"), TRUE);

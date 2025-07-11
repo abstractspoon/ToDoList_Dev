@@ -988,8 +988,13 @@ BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
 {
 	if (m_bReadOnly || !m_ctrlWorkload.GetSafeHwnd())
 		return FALSE;
+
+	DWORD dwSelTaskID = m_ctrlWorkload.GetSelectedTaskID();
+
+	if (!dwSelTaskID)
+		return FALSE;
 	
-	if (dwTaskID && (dwTaskID != m_ctrlWorkload.GetSelectedTaskID()))
+	if (dwTaskID && (dwTaskID != dwSelTaskID))
 	{
 		ASSERT(0);
 		return FALSE;
