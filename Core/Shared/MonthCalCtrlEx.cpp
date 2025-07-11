@@ -153,6 +153,7 @@ void CMonthCalCtrlEx::OnSize(UINT nType, int cx, int cy)
 void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 {
 	ASSERT(m_bWeekNumbers);
+	ASSERT(!CDateHelper::WantRTLDates());
 
 	if (m_bWeekNumbers)
 	{
@@ -164,9 +165,6 @@ void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 		if (!CRect().IntersectRect(rWeekNumbers, rClip))
 			return;
 
-		HFONT hFont = (HFONT)SendMessage(WM_GETFONT);
-		HGDIOBJ hOldFont = pDC->SelectObject(hFont);
-
 		COleDateTime dtStart, dtEnd;
 		GetMonthRange(dtStart, dtEnd, GMR_DAYSTATE);
 
@@ -174,6 +172,7 @@ void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 		pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
 		int nDayHeight = (rWeekNumbers.Height() / 6);
+		HGDIOBJ hOldFont = pDC->SelectObject(::GetStockObject(DEFAULT_GUI_FONT));
 
 		CRect rWeek(rWeekNumbers);
 		rWeek.bottom = (rWeek.top + nDayHeight); // first row
@@ -182,7 +181,7 @@ void CMonthCalCtrlEx::DrawWeekNumbers(CDC* pDC)
 
 		for (int nWeek = 0; nWeek < 6; nWeek++)
 		{
-			int nWeekNum = CDateHelper::GetWeekofYear(dtWeek);
+			int nWeekNum = CDateHelper::GetWeekOfYear(dtWeek);
 			pDC->DrawText(Misc::Format(nWeekNum), rWeek, (DT_BOTTOM | DT_CENTER));
 
 			// next row
@@ -210,6 +209,9 @@ void CMonthCalCtrlEx::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct
 
 void CMonthCalCtrlEx::PreSubclassWindow()
 {
+	// We only support Gregorian calendars
+	ASSERT(!CDateHelper::WantRTLDates());
+
 	m_bWeekNumbers = Misc::HasFlag(GetStyle(), MCS_WEEKNUMBERS);
 	m_rWeekNumbers.SetRect(0, 0, 0, 0);
 

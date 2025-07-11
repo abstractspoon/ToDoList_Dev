@@ -7001,9 +7001,11 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 	TDC_ATTRIBUTEGROUP nFromGroup = GetAttributeGroup(nFromAttribID);
 	TDC_ATTRIBUTEGROUP nToGroup = GetAttributeGroup(nToAttribID);
 
+	// Convert 'from' data to 'text' for text targets
 	CStringArray aValues;
+	BOOL bTextGroup = (nToGroup == TDCAG_SINGLETEXT) || (nToGroup == TDCAG_MULTITEXT);
 
-	if ((nToGroup == TDCAG_SINGLETEXT) || (nToGroup == TDCAG_MULTITEXT))
+	if (bTextGroup)
 	{
 		switch (nFromGroup)
 		{
@@ -7101,7 +7103,7 @@ BOOL CTDCTaskAttributeCopier::CopyAttributeValue(const TODOITEM& tdiFrom, TDC_AT
 			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 			GET_CUSTDEF_ALT(CustomAttribDefs(), nToAttribID, pDef, FALSE);
 
-			if (nFromGroup == TDCAG_DATETIME)
+			if ((nFromGroup == TDCAG_DATETIME) && !bTextGroup)
 			{
 				TDCCADATA dataTo;
 				tdiTo.GetCustomAttributeValue(pDef->sUniqueID, dataTo);

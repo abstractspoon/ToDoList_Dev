@@ -535,6 +535,7 @@ void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) co
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
 	prefs.WriteProfileInt(szKey, _T("AttribSortAscending"), m_bSortAscending);
 	prefs.WriteProfileInt(szKey, _T("AttribGrouped"), m_bGrouped);
+	prefs.WriteProfileInt(szKey, _T("SingleClickEditing"), HasSingleClickEditing());
 
 	m_aAttribState.Save(prefs, szKey);
 }
@@ -544,6 +545,8 @@ void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szK
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
 	m_bGrouped = (SupportsGrouping() && prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE));
+
+	SetSingleClickEditing(prefs.GetProfileInt(szKey, _T("SingleClickEditing"), FALSE));
 
 	m_aAttribState.Load(prefs, szKey);
 
@@ -1004,11 +1007,6 @@ CString CTDLTaskAttributeListCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttribID) co
 
 	// else
 	return GetItemText(nRow, LABEL_COL);
-}
-
-BOOL CTDLTaskAttributeListCtrl::CanEditSelectedAttribute() const
-{
-	return CanEditCell(GetCurSel(), VALUE_COL);
 }
 
 void CTDLTaskAttributeListCtrl::SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd)
@@ -3882,6 +3880,9 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	if (m_datePicker.IsWindowVisible())
+		HideControl(m_datePicker);
+
 	HandleDateEditCompletion();
 }
 

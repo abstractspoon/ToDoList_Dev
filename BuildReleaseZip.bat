@@ -113,6 +113,10 @@ FOR %%f IN (%FILELIST%) DO (
 REM Check for errors
 FINDSTR /C:"Unable to load file:" %OUTPUT_FILE%
    
+IF %errorlevel%==1 (
+FINDSTR /C:"Fatal error:" %OUTPUT_FILE%
+)
+
 IF %errorlevel%==0 (
 ECHO [41m Versioning FAILED[0m
 ECHO:

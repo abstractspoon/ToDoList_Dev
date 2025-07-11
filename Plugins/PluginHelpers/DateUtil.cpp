@@ -5,6 +5,7 @@
 #include "DateUtil.h"
 #include "Preferences.h"
 #include "Win32.h"
+#include "PluginHelpers.h"
 
 #include <Shared\DateHelper.h>
 #include <Shared\Misc.h>
@@ -256,7 +257,7 @@ List<DayOfWeek>^ WorkingWeek::WeekDays()
 
 int DateUtil::WeekOfYear(DateTime date)
 {
-	return CDateHelper::GetWeekofYear(date.ToOADate());
+	return CDateHelper::GetWeekOfYear(date.ToOADate());
 }
 
 int DateUtil::GetMaxDayOfWeekNameWidth(Graphics^ graphics, Font^ font, bool shortName)
@@ -300,15 +301,12 @@ String^ DateUtil::GetMonthName(int nMonth, bool shortName)
 
 int DateUtil::DateInMonths(DateTime date)
 {
-	return ((date.Year * 12) + (date.Month - 1)); // zero-based months
+	return CDateHelper::GetDateInMonths(date.ToOADate());
 }
 
 DateTime DateUtil::DateFromMonths(int nMonths)
 {
-	int nYear = (nMonths / 12);
-	int nMonth = (nMonths % 12) + 1;// one-based months
-
-	return DateTime(nYear, nMonth, 1);
+	return DateTime::FromOADate(CDateHelper::GetDateFromMonths(nMonths));
 }
 
 String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime, bool bISO)
@@ -322,6 +320,16 @@ String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime
 		dwFlags |= DHFD_ISO;
 
 	return gcnew String(COleDateTimeRange(dateFrom.ToOADate(), dateTo.ToOADate()).Format(dwFlags));
+}
+
+String^ DateUtil::FormatDateOnly(DateTime date, String^ format)
+{
+	return gcnew String(CDateHelper::FormatDateOnly(date.ToOADate(), MS(format)));
+}
+
+String^ DateUtil::FormatDateOnlyRange(DateTime dateFrom, DateTime dateTo, String^ format)
+{
+	return gcnew String(COleDateTimeRange(dateFrom.ToOADate(), dateTo.ToOADate()).FormatDateOnly(MS(format), L" - "));
 }
 
 TimeSpan DateUtil::TimeOnly(DateTime date)

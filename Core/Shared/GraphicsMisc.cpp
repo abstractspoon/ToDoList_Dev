@@ -820,10 +820,10 @@ int GraphicsMisc::GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
 	return pDC->GetTextExtent(sText).cx;
 }
 
-float GraphicsMisc::GetAverageCharWidth(HWND hWndRef)
+float GraphicsMisc::GetAverageCharWidth(HWND hWndRef, HFONT hFont)
 {
 	CClientDC dc(CWnd::FromHandle(hWndRef));
-	HFONT hOldFont = PrepareDCFont(&dc, hWndRef);
+	HFONT hOldFont = PrepareDCFont(&dc, hWndRef, hFont);
 
 	float fAveWidth = GetAverageCharWidth(&dc);
 	dc.SelectObject(hOldFont);

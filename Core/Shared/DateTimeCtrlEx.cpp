@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "Graphicsmisc.h"
 #include "themed.h"
+#include "DateHelper.h"
 
 #include <math.h>
 
@@ -309,7 +310,8 @@ BOOL CDateTimeCtrlEx::OnDropDown(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = 0;
 
-	if (m_monthCal.GetSafeHwnd() == NULL)
+	// We only need hook ISO calendars to fix the week numbers
+	if ((m_monthCal.GetSafeHwnd() == NULL) && CDateHelper::WantISOWeekOfYear())
 	{
 		HWND hMonthCal = (HWND)SendMessage(DTM_GETMONTHCAL);
 		ASSERT(hMonthCal);

@@ -702,10 +702,7 @@ void CCalendarWnd::ResizeControls(int cx, int cy)
 
 	// calendar frame
 	CRect rFrame = CDialogHelper::GetCtrlRect(this, IDC_CALENDAR_FRAME);
-
-	rFrame.right = cx;
-	rFrame.bottom = cy;
-	GetDlgItem(IDC_CALENDAR_FRAME)->MoveWindow(rFrame);
+	rFrame = CDialogHelper::ResizeCtrl(this, IDC_CALENDAR_FRAME, (cx - rFrame.right), (cy - rFrame.bottom));
 
 	// mini-cal
 	rFrame.DeflateRect(1, 1);
@@ -733,8 +730,7 @@ void CCalendarWnd::SyncMiniCalendar(BOOL bScroll)
 	}
 	else
 	{
-		time_t tSel =  m_BigCalendar.GetFirstSelectedItem();
-		COleDateTime dtSel(tSel);
+		COleDateTime dtSel =  m_BigCalendar.GetFirstSelectedItem();
 		
 		m_MiniCalendar.SetDateSel(dtSel, dtSel);
 		m_MiniCalendar.SetCurrentMonthAndYear(dtSel);

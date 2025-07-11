@@ -227,7 +227,6 @@ protected:
 	void UpdateListColumns(int nWidth = -1);
 	void RecalcListColumnWidths(int nFromWidth, int nToWidth);
 	void UpdateListColumnsWidthAndText(int nWidth = -1);
-	CString FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const;
 
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 	HFONT GetTreeItemFont(HTREEITEM hti, const GANTTITEM& gi, GTLC_COLUMN nColID);
@@ -247,9 +246,6 @@ protected:
 	int FindColumn(int nScrollPos) const;
 	int FindColumn(int nMonth, int nYear) const;
 	int FindColumn(const COleDateTime& date) const;
-	BOOL GetDateFromScrollPos(int nScrollPos, COleDateTime& date) const;
-	BOOL GetScrollPosFromDate(const COleDateTime& date, int& nPos) const;
-	BOOL GetDrawPosFromDate(const COleDateTime& date, int& nPos) const;
 	void ScrollTo(const COleDateTime& date);
 	void InitItemHeights();
 	int GetStartYear(GTLC_MONTH_DISPLAY nDisplay) const;
@@ -265,6 +261,10 @@ protected:
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
 	BOOL GetVisibleDateRange(GANTTDATERANGE& dtRange) const;
 	GTLC_SNAPMODE GetSnapMode() const;
+
+	BOOL GetDateFromScrolledPos(int nPos, COleDateTime& date) const;
+	BOOL GetScrolledPosFromDate(const COleDateTime& date, int& nPos) const;
+	BOOL GetDrawPosFromDate(const COleDateTime& date, int& nPos) const;
 
 	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
 	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
@@ -334,17 +334,14 @@ protected:
 	static int CALLBACK MultiSortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	
-	static BOOL CalcDateRect(const CRect& rMonth, int nMonth, int nYear, 
-							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
-	static BOOL CalcDateRect(const CRect& rMonth, int nDaysInMonth, 
-							const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
+	static BOOL CalcDateRect(const CRect& rMonth, const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
 	static CString GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
 	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
-	static BOOL GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
+	static BOOL GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
 	static BOOL IsVerticalDivider(VERT_DIV nType);
 	static BOOL IsDragging(GTLC_DRAG nDrag);
 	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);

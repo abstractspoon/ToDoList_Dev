@@ -55,6 +55,7 @@ public:
 
 	BOOL SetCurrentPeriod(const COleDateTimeRange& dtPeriod);
 	const COleDateTimeRange& GetDataDateRange() const { return m_dtDataRange; }
+	CString FormatCurrentPeriod() const;
 
 	BOOL CanMoveSelectedTask(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);

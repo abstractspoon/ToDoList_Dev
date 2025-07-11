@@ -188,11 +188,8 @@ public:
 	void SetFirstDayOfWeek(int iDayOfWeek);
 	int GetFirstDayOfWeek() const;
 
-	void SetCurrentMonthAndYear(int iMonth, int iYear);
-	int GetCurrentMonth() const {return m_iCurrentMonth;}
-	int GetCurrentYear() const {return m_iCurrentYear;}
 	void SetCurrentMonthAndYear(const COleDateTime& date);
-	COleDateTime GetCurrentMonthAndYear() const { return COleDateTime(m_iCurrentYear, m_iCurrentMonth, 1, 0, 0, 0); }
+	COleDateTime GetCurrentMonthAndYear() const;
 
 	void SetMultiSelect(BOOL bValue) {m_bMultiSel = bValue;}
 	BOOL IsMultiSelect() {return m_bMultiSel;}
@@ -231,10 +228,16 @@ public:
 	void SetFontInfo(FMC_FONT_TYPE nFont, const CFPSMiniCalendarCtrlFontInfo& font);
 	void GetFontInfo(FMC_FONT_TYPE nFont, CFPSMiniCalendarCtrlFontInfo& font) const;
 
+	// These functions convert to and from Gregorian/Jalali
+	// depending on CJalaliCalendar::IsActive
+	static void DateToDayMonthYear(const COleDateTime& date, int& iDay, int& iMonth, int& iYear); 
+	static void DateToMonthYear(const COleDateTime& date, int& iMonth, int& iYear);
+	static COleDateTime DateFromMonthYear(int iMonth, int iYear);
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CFPSMiniCalendarCtrl)
-	public:
+public:
 	BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_VIRTUAL
 
@@ -266,8 +269,9 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-	int								m_iCurrentMonth;
-	int								m_iCurrentYear;
+	int								m_iCurrentMonth; // Gregorian or Jalali depending on CJalaliCalendar::IsActive
+	int								m_iCurrentYear;  // Gregorian or Jalali depending on CJalaliCalendar::IsActive
+
 	CFPSMiniCalendarCtrlFontInfo	m_FontInfo[FMC_NUM_FONTS];
 	COLORREF						m_cBackColor;
 	BOOL							m_bHighlightToday;
@@ -315,7 +319,6 @@ protected:
 	void ClearHotSpots();
 	int DrawTodayButton(CDC& dc, int iY);
 	BOOL IsToday(const COleDateTime& dt) const;
-	CString CStr(long lValue);
 	void CreateFontObjects();
 
 	virtual void Draw(CDC& dc, const CRect& rDraw);
@@ -333,6 +336,8 @@ protected:
 	void FireNotifyClick();
 	void FireNotifyHScroll(int nDirection);
 	void FireTodayButton();
+
+	static CString CStr(long lValue);
 
 	virtual BOOL IsSpecialDate(const COleDateTime& dt) const;
 	virtual COLORREF GetCellBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const;

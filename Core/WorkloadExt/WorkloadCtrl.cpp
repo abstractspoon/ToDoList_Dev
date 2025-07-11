@@ -181,13 +181,31 @@ void CWorkloadCtrl::UpdateTotalsDateRangeLabel()
 {
 	if (m_lcTotalsLabels.GetSafeHwnd())
 	{
-		CString sLabel;
+		CString sPeriod;
+		sPeriod.Format(CEnString(IDS_TOTALSDATERANGE), FormatCurrentPeriod());
 
-		if (m_dtPeriod.IsValid())
-			sLabel.Format(CEnString(IDS_TOTALSDATERANGE), m_dtPeriod.Format());
-
-		m_lcTotalsLabels.SetItemText(ID_TOTALCOLUMNHEADER, 0, sLabel);
+		m_lcTotalsLabels.SetItemText(ID_TOTALCOLUMNHEADER, 0, sPeriod);
 	}
+}
+
+CString CWorkloadCtrl::FormatCurrentPeriod() const
+{
+	CString sPeriod;
+
+	if (m_dtPeriod.IsValid())
+	{
+		CString sFormat(_T("MMM yyyy"));
+
+		if (CDateHelper::WantRTLDates())
+			sFormat.MakeReverse();
+
+		if (m_dtPeriod.IsSameMonth())
+			sPeriod = CDateHelper::FormatDateOnly(m_dtPeriod.GetStart(), sFormat);
+		else
+			sPeriod = m_dtPeriod.FormatDateOnly(sFormat);
+	}
+
+	return sPeriod;
 }
 
 int CWorkloadCtrl::CalcSplitPosToFitListColumns(int nTotalWidth) const

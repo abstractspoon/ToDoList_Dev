@@ -245,8 +245,8 @@ namespace FileMisc
 	BOOL GetModuleVersion(HMODULE hMod, CDWordArray& aVersionParts);
 	BOOL GetModuleVersion(LPCTSTR szModulePath, CDWordArray& aVersionParts);
 	CString GetWindowModuleFilePath(HWND hWnd);
-	BOOL IsNativeModule(HMODULE hMod = NULL); // returns TRUE, FALSE, -1
-	BOOL IsNativeModule(LPCTSTR szModulePath); // returns TRUE, FALSE, -1
+	BOOL IsNativeModule(HMODULE hMod = NULL); // returns TRUE, FALSE, -1 if not a exe/dll
+	BOOL IsNativeModule(LPCTSTR szModulePath); // returns TRUE, FALSE, -1 if not a exe/dll
 
 	CString GetAppFilePath();
 	CString GetAppFolder(LPCTSTR szSubFolder = NULL);
