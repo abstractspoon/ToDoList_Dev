@@ -702,6 +702,9 @@ BOOL CWorkloadWnd::OnInitDialog()
 	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
 	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
 
+	if (CDateHelper::WantRTLDates())
+		GetDlgItem(IDC_ACTIVEDATERANGE_TEXT)->ModifyStyleEx(0, WS_EX_RTLREADING);
+
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
 	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
 

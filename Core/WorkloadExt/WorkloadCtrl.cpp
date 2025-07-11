@@ -188,26 +188,6 @@ void CWorkloadCtrl::UpdateTotalsDateRangeLabel()
 	}
 }
 
-CString CWorkloadCtrl::FormatCurrentPeriod() const
-{
-	CString sPeriod;
-
-	if (m_dtPeriod.IsValid())
-	{
-		CString sFormat(_T("MMM yyyy"));
-
-		if (CDateHelper::WantRTLDates())
-			sFormat.MakeReverse();
-
-		if (m_dtPeriod.IsSameMonth())
-			sPeriod = CDateHelper::FormatDateOnly(m_dtPeriod.GetStart(), sFormat);
-		else
-			sPeriod = m_dtPeriod.FormatDateOnly(sFormat);
-	}
-
-	return sPeriod;
-}
-
 int CWorkloadCtrl::CalcSplitPosToFitListColumns(int nTotalWidth) const
 {
 	// Adjust for bar chart
