@@ -853,6 +853,7 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 	Misc::SetFlag(dwOptions, WLCF_RECALCALLOCATIONS, m_dlgPrefs.GetRecalculateAllocations());
 	Misc::SetFlag(dwOptions, WLCF_RECALCPROPORTIONALLY, m_dlgPrefs.GetRecalculateAllocationsProportionally());
 	Misc::SetFlag(dwOptions, WLCF_INCLUDEDATELESSTASKSINPERIOD, m_dlgPrefs.GetIncludeDatelessTasksInPeriod());
+	Misc::SetFlag(dwOptions, WLCF_INCLUDEDONETASKSINCALCS, m_dlgPrefs.GetIncludeCompletedTasksInCalcs());
 
 	m_ctrlWorkload.SetOptions(dwOptions);
 }

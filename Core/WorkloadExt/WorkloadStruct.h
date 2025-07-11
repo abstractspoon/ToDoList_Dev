@@ -203,8 +203,9 @@ public:
 	void CalculateTotals(const COleDateTimeRange& dtPeriod,
 						 CMapAllocationTotals& mapTotalDays,
 						 CMapAllocationTotals& mapTotalTasks,
-						 BOOL bAllowParentAllocations,
-						 BOOL bIncludeTasksWithoutDates) const;
+						 BOOL bIncludeParentTasks,
+						 BOOL bIncludeTasksWithoutDates,
+						 BOOL bIncludeCompletedTasks) const;
 
 	void RecalculateOverlaps();
 	BOOL CalcDateRange(COleDateTimeRange& dtRange) const;

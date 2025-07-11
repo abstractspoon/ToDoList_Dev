@@ -643,8 +643,9 @@ void CWorkloadItemMap::RemoveAll()
 void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 									   CMapAllocationTotals& mapTotalDays, 
 									   CMapAllocationTotals& mapTotalTasks, 
-									   BOOL bAllowParentAllocations,
-									   BOOL bIncludeTasksWithoutDates) const
+									   BOOL bIncludeParentTasks,
+									   BOOL bIncludeTasksWithoutDates,
+									   BOOL bIncludeCompletedTasks) const
 {
 	mapTotalDays.RemoveAll();
 	mapTotalTasks.RemoveAll();
@@ -660,10 +661,10 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		ASSERT(pWI);
 
 		// Weed out unwanted tasks
-		if (pWI->bParent && !bAllowParentAllocations)
+		if (!bIncludeParentTasks && pWI->bParent)
 			continue;
 
-		if (pWI->IsDone(TRUE))
+		if (!bIncludeCompletedTasks && pWI->IsDone(TRUE))
 			continue;
 
 		// Determine what proportion of this task's days fall within the specified period

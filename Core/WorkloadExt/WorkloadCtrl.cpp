@@ -448,7 +448,8 @@ void CWorkloadCtrl::RecalcAllocationTotals()
 						   m_mapTotalDays, 
 						   m_mapTotalTasks, 
 						   HasOption(WLCF_ALLOWPARENTALLOCATIONS),
-						   HasOption(WLCF_INCLUDEDATELESSTASKSINPERIOD));
+						   HasOption(WLCF_INCLUDEDATELESSTASKSINPERIOD),
+						   HasOption(WLCF_INCLUDEDONETASKSINCALCS));
 
 	// Individual loading
 	m_mapPercentLoad.RemoveAll();

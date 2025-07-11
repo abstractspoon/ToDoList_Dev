@@ -158,29 +158,32 @@ BEGIN
     CONTROL         "Adjust allocations in proportion to their existing values",
                     IDC_RECALCPROPORTIONALLY,"Button",BS_AUTORADIOBUTTON,19,
                     143,321,10
-    CONTROL         "Include tasks without dates in calculations for 'Current Period' ",
-                    IDC_INCLUDEDATELESSTASKSINPERIOD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,174,333,10
-    CONTROL         "&Enable 'Overload' display",IDC_ENABLEOVERLOAD,"Button",
-                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,205,333,10
-    COMBOBOX        IDC_OVERLOADFROMPERCENT,18,219,31,143,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "% - 100%",IDC_STATIC,51,219,34,12,SS_CENTERIMAGE
-    PUSHBUTTON      "Set...",IDC_SETOVERLOADCOLOR,149,219,52,13,BS_RIGHT
-    CONTROL         "&Enable 'Underload' display",IDC_ENABLEUNDERLOAD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,240,333,10
-    LTEXT           "0% - ",IDC_STATIC,19,255,19,12,SS_CENTERIMAGE
-    COMBOBOX        IDC_UNDERLOADTOPERCENT,37,255,31,143,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "%",IDC_STATIC,71,255,8,12,SS_CENTERIMAGE
-    PUSHBUTTON      "Set...",IDC_SETUNDERLOADCOLOR,149,255,52,13,BS_RIGHT
-    CONTROL         "'Overlapping' tasks colour",IDC_ENABLEOVERLAPCOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,277,97,10
-    PUSHBUTTON      "Set...",IDC_SETOVERLAPCOLOR,149,276,52,13,BS_RIGHT
-    LTEXT           "Graphing",IDC_GRAPHINGGROUP,7,190,333,8
     CONTROL         "Auto-calculate missing allocations",
                     IDC_AUTOCALCALLOCATIONS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,160,333,10
+    CONTROL         "Include completed tasks in calculations",
+                    IDC_INCLUDEDONETASKSINCALCS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,175,333,10
+    CONTROL         "Include tasks without dates in calculations for 'Current Period' ",
+                    IDC_INCLUDEDATELESSTASKSINPERIOD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,190,333,10
+    LTEXT           "Graphing",IDC_GRAPHINGGROUP,7,206,333,8
+    CONTROL         "&Enable 'Overload' display",IDC_ENABLEOVERLOAD,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,221,333,10
+    COMBOBOX        IDC_OVERLOADFROMPERCENT,18,235,31,143,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "% - 100%",IDC_STATIC,51,235,34,12,SS_CENTERIMAGE
+    PUSHBUTTON      "Set...",IDC_SETOVERLOADCOLOR,149,235,52,13,BS_RIGHT
+    CONTROL         "&Enable 'Underload' display",IDC_ENABLEUNDERLOAD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,256,333,10
+    LTEXT           "0% - ",IDC_STATIC,19,271,19,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_UNDERLOADTOPERCENT,37,271,31,143,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "%",IDC_STATIC,71,271,8,12,SS_CENTERIMAGE
+    PUSHBUTTON      "Set...",IDC_SETUNDERLOADCOLOR,149,271,52,13,BS_RIGHT
+    CONTROL         "'Overlapping' tasks colour",IDC_ENABLEOVERLAPCOLOR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,293,97,10
+    PUSHBUTTON      "Set...",IDC_SETOVERLAPCOLOR,149,292,52,13,BS_RIGHT
 END
 
 IDD_EDITALLOCATIONS_DIALOG DIALOG DISCARDABLE  0, 0, 270, 163
@@ -220,7 +223,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 340
         TOPMARGIN, 7
-        BOTTOMMARGIN, 295
+        BOTTOMMARGIN, 310
     END
 
     IDD_EDITALLOCATIONS_DIALOG, DIALOG

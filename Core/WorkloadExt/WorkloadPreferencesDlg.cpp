@@ -49,6 +49,7 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_ENABLEOVERLAPCOLOR, m_bEnableOverlapColor);
 	DDX_Check(pDX, IDC_INCLUDEDATELESSTASKSINPERIOD, m_bIncludeDatelessTasksInPeriod);
 	//}}AFX_DATA_MAP
+	DDX_Check(pDX, IDC_INCLUDEDONETASKSINCALCS, m_bIncludeDoneTasksInCalcs);
 	DDX_Control(pDX, IDC_COLUMNVISIBILITY, m_lbColumnVisibility);
 	DDX_Control(pDX, IDC_SETOVERLOADCOLOR, m_btnOverloadColor);
 	DDX_Control(pDX, IDC_SETUNDERLOADCOLOR, m_btnUnderloadColor);
@@ -186,9 +187,11 @@ void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 	pPrefs->WriteProfileInt(szKey, _T("AutoCalcAllocations"), m_bAutoCalcAllocations);
 	pPrefs->WriteProfileInt(szKey, _T("PreferTimeEstimateInCalcs"), m_bPreferTimeEstimateInCalcs);
+	pPrefs->WriteProfileInt(szKey, _T("PreferTimeSpentInCalcs"), m_bPreferTimeSpentInCalcs);
 	pPrefs->WriteProfileInt(szKey, _T("RecalcAllocations"), m_bRecalcAllocations);
 	pPrefs->WriteProfileInt(szKey, _T("RecalcProportionally"), m_bRecalcProportionally);
 	pPrefs->WriteProfileInt(szKey, _T("IncludeDatelessTasksInPeriod"), m_bIncludeDatelessTasksInPeriod);
+	pPrefs->WriteProfileInt(szKey, _T("IncludeCompletedTasksInCalcs"), m_bIncludeDoneTasksInCalcs);
 	pPrefs->WriteProfileInt(szKey, _T("EnableOverload"), m_bEnableOverload);
 	pPrefs->WriteProfileInt(szKey, _T("EnableUnderload"), m_bEnableUnderload);
 	pPrefs->WriteProfileInt(szKey, _T("OverloadPercentFrom"), m_nOverloadFromPercent);
@@ -218,6 +221,7 @@ void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bRecalcAllocations = pPrefs->GetProfileInt(szKey, _T("RecalcAllocations"), TRUE);
 	m_bRecalcProportionally = pPrefs->GetProfileInt(szKey, _T("RecalcProportionally"), TRUE);
 	m_bIncludeDatelessTasksInPeriod = pPrefs->GetProfileInt(szKey, _T("IncludeDatelessTasksInPeriod"), TRUE);
+	m_bIncludeDoneTasksInCalcs = pPrefs->GetProfileInt(szKey, _T("IncludeCompletedTasksInCalcs"), FALSE);
 	m_bEnableOverload = pPrefs->GetProfileInt(szKey, _T("EnableOverload"), TRUE);
 	m_bEnableUnderload = pPrefs->GetProfileInt(szKey, _T("EnableUnderload"), TRUE);
 	m_nOverloadFromPercent = pPrefs->GetProfileInt(szKey, _T("OverloadPercentFrom"), 80);
