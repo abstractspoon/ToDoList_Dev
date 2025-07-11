@@ -663,8 +663,8 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		if (pWI->bParent && !bAllowParentAllocations)
 			continue;
 
-// 		if (pWI->IsDone(TRUE))
-// 			continue;
+		if (pWI->IsDone(TRUE))
+			continue;
 
 		// Determine what proportion of this task's days fall within the specified period
 		COleDateTimeRange dtTaskRange;
