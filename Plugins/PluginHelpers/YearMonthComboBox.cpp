@@ -51,6 +51,8 @@ void MonthComboBox::SelectedMonth::set(int month)
 YearComboBox::YearComboBox() : m_ListBoxHandled(false)
 {
 	SelectedYear = DateUtil::GetYear(DateTime::Now);
+
+	Win32::SetRTLReading(Handle, DateUtil::WantRTLDates());
 }
 
 void YearComboBox::WndProc(Message% m)
@@ -65,8 +67,7 @@ void YearComboBox::WndProc(Message% m)
 			// Clear first to prevent re-entrancy
 			m_ListBoxHandled = true;
 
-			if (CDateHelper::WantRTLDates())
-				Win32::SetRTLReading(m.LParam, true);
+			Win32::SetRTLReading(m.LParam, DateUtil::WantRTLDates());
 		}
 		break;
 	}
@@ -81,9 +82,6 @@ void YearComboBox::BuildCombo()
  		DateTime date = DateUtil::ToDate(year, 1, 1);
 		Items->Add(DateUtil::FormatDateOnly(date, "yyyy"));
 	}
-
-	if (CDateHelper::WantRTLDates())
-		Win32::SetRTLReading(Handle, true);
 }
 
 int YearComboBox::SelectedYear::get()
