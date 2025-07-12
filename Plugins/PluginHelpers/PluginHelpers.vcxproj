@@ -155,7 +155,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="UrlParser.h" />
     <ClInclude Include="WeekLabel.h" />
     <ClInclude Include="Win32.h" />
-    <ClInclude Include="YearComboBoxEx.h" />
+    <ClInclude Include="YearMonthComboBox.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ColorUtil.cpp" />
@@ -191,7 +191,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="UrlParser.cpp" />
     <ClCompile Include="WeekLabel.cpp" />
     <ClCompile Include="Win32.cpp" />
-    <ClCompile Include="YearComboBoxEx.cpp" />
+    <ClCompile Include="YearMonthComboBox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Office.Interop.Outlook">

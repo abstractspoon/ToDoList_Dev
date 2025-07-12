@@ -10,6 +10,8 @@
 #include <Shared\DateHelper.h>
 #include <Shared\Misc.h>
 
+#include <3rdParty\JalaliCalendar.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
@@ -307,6 +309,48 @@ int DateUtil::DateInMonths(DateTime date)
 DateTime DateUtil::DateFromMonths(int nMonths)
 {
 	return DateTime::FromOADate(CDateHelper::GetDateFromMonths(nMonths));
+}
+
+int DateUtil::GetDay(DateTime date)
+{
+	if (CDateHelper::WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date.ToOADate(), &JYear, &JMonth, &JDay);
+
+		return JDay;
+	}
+
+	// else
+	return date.Day;
+}
+
+int DateUtil::GetMonth(DateTime date)
+{
+	if (CDateHelper::WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date.ToOADate(), &JYear, &JMonth, &JDay);
+
+		return JMonth;
+	}
+
+	// else
+	return date.Month;
+}
+
+int DateUtil::GetYear(DateTime date)
+{
+	if (CDateHelper::WantRTLDates())
+	{
+		int JYear, JMonth, JDay;
+		CJalaliCalendar::FromGregorian(date.ToOADate(), &JYear, &JMonth, &JDay);
+
+		return JYear;
+	}
+
+	// else
+	return date.Year;
 }
 
 String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime, bool bISO)
