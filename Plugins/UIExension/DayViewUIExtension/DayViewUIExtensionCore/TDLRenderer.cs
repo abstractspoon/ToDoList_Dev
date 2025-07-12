@@ -529,7 +529,7 @@ namespace DayViewUIExtension
 			g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
 			// Use bold font for first-day-of-month
-			Font font = ((date.Day == 1) ? BoldFont : BaseFont);
+			Font font = ((DateUtil.GetDay(date) == 1) ? BoldFont : BaseFont);
 
 			Rectangle rText = rect;
 			rText.X += HeaderPadding;
