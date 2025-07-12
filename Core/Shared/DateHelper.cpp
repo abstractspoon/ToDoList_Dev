@@ -1880,12 +1880,16 @@ BOOL CDateHelper::IsLeapYear(int nYear)
 
 CString CDateHelper::GetMonthName(int nMonth, BOOL bShort)
 {
+	// data check
+	if ((nMonth < 1) || (nMonth > 12))
+		return "";
+
+	if (WantRTLDates())
+		return CJalaliCalendar::GetMonthName(nMonth);
+
+	// else
 	LCTYPE lct = LOCALE_SABBREVMONTHNAME1;
 	CString sMonth;
-
-	// data check
-	if (nMonth < 1 || nMonth> 12)
-		return "";
 
 	switch (nMonth)
 	{
