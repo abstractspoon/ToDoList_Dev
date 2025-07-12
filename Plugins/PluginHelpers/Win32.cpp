@@ -145,17 +145,7 @@ bool Win32::SetRTLReading(IntPtr hWnd, bool rtl)
 			RemoveStyle(hWnd, WS_EX_RIGHT, true);
 
 			if (CWinClasses::IsClass(GetHwnd(hWnd), WC_COMBOLBOX))
-			{
 				DoFrameChangeEx(hWnd, true);
-// 				// Force a resize/redraw of the listbox
-// 				::SetWindowPos(Win32::GetHwnd(m.LParam),
-// 							   NULL,
-// 							   0,
-// 							   0,
-// 							   (Width + 1),
-// 							   0,
-// 							   SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-			}
 		}
 		else
 		{
