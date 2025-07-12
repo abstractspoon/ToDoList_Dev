@@ -878,7 +878,7 @@ namespace DayViewUIExtension
             m_MonthCombo.Location = new Point(DPIScaling.Scale(0), ComboTop);
             m_MonthCombo.Size = DPIScaling.Scale(new Size(100, 16));
 			
-			m_MonthCombo.SelectedMonth = DateTime.Now.Month;
+			m_MonthCombo.SelectedMonth = DateUtil.GetMonth(DateTime.Now);
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
 			
 			Controls.Add(m_MonthCombo);
@@ -889,7 +889,7 @@ namespace DayViewUIExtension
             m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);
             m_YearCombo.Size = DPIScaling.Scale(new Size(100, 16));
 
-			m_YearCombo.SelectedYear = DateTime.Now.Year;
+			m_YearCombo.SelectedYear = DateUtil.GetYear(DateTime.Now);
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
 
 //			Win32.SetRTLReading(m_YearCombo.Handle, DateUtil.WantRTLDates());
@@ -1047,8 +1047,11 @@ namespace DayViewUIExtension
 			{
 				m_SettingMonthYear = true;
 
-				m_MonthCombo.SelectedMonth = args.StartDate.Month;
-				m_YearCombo.SelectedYear = args.StartDate.Year;
+				int year = 0, month = 0, unused = 0;
+				DateUtil.FromDate(args.StartDate, ref year, ref month, ref unused);
+
+				m_MonthCombo.SelectedMonth = month;
+				m_YearCombo.SelectedYear = year;
 
 				UpdatedSelectedTaskDatesPosition();
 
@@ -1062,7 +1065,7 @@ namespace DayViewUIExtension
 			{
 				m_SettingDayViewStartDate = true;
 
-				m_DayView.StartDate = new DateTime(m_YearCombo.SelectedYear, m_MonthCombo.SelectedMonth, 1);
+				m_DayView.StartDate = DateUtil.ToDate(m_YearCombo.SelectedYear, m_MonthCombo.SelectedMonth, 1);
 				m_WeekLabel.StartDate = m_DayView.StartDate;
 
 				UpdatedSelectedTaskDatesPosition();

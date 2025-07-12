@@ -311,46 +311,56 @@ DateTime DateUtil::DateFromMonths(int nMonths)
 	return DateTime::FromOADate(CDateHelper::GetDateFromMonths(nMonths));
 }
 
-int DateUtil::GetDay(DateTime date)
+void DateUtil::FromDate(DateTime date, int% year, int% month, int% day)
 {
 	if (CDateHelper::WantRTLDates())
 	{
-		int JYear, JMonth, JDay;
-		CJalaliCalendar::FromGregorian(date.ToOADate(), &JYear, &JMonth, &JDay);
+		int GYear, GMonth, GDay;
+		CJalaliCalendar::FromGregorian(date.ToOADate(), &GYear, &GMonth, &GDay);
 
-		return JDay;
+		year = GYear;
+		month = GMonth;
+		day = GDay;
 	}
+	else
+	{
+		year = date.Year;
+		month = date.Month;
+		day = date.Day;
+	}
+}
+
+DateTime DateUtil::ToDate(int year, int month, int day)
+{
+	if (CDateHelper::WantRTLDates())
+		return DateTime::FromOADate(CJalaliCalendar::ToGregorian(year, month, day));
 
 	// else
-	return date.Day;
+	return DateTime(year, month, day);
+}
+
+int DateUtil::GetDay(DateTime date)
+{
+	int year, month, day;
+	FromDate(date, year, month, day);
+
+	return day;
 }
 
 int DateUtil::GetMonth(DateTime date)
 {
-	if (CDateHelper::WantRTLDates())
-	{
-		int JYear, JMonth, JDay;
-		CJalaliCalendar::FromGregorian(date.ToOADate(), &JYear, &JMonth, &JDay);
+	int year, month, day;
+	FromDate(date, year, month, day);
 
-		return JMonth;
-	}
-
-	// else
-	return date.Month;
+	return month;
 }
 
 int DateUtil::GetYear(DateTime date)
 {
-	if (CDateHelper::WantRTLDates())
-	{
-		int JYear, JMonth, JDay;
-		CJalaliCalendar::FromGregorian(date.ToOADate(), &JYear, &JMonth, &JDay);
+	int year, month, day;
+	FromDate(date, year, month, day);
 
-		return JYear;
-	}
-
-	// else
-	return date.Year;
+	return year;
 }
 
 String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime, bool bISO)
