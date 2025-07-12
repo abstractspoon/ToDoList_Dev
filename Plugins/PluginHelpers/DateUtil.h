@@ -78,7 +78,7 @@ namespace Abstractspoon
 			public ref class DateUtil
 			{
 			public:
-				// All DateTime arguments are assumed to be Gregorian
+				// All DateTime arguments MUST represent Gregorian dates
 				static int WeekOfYear(DateTime date);
 				static int GetMaxDayOfWeekNameWidth(Drawing::Graphics^ graphics, Drawing::Font^ font, bool shortName);
 				static int GetMaxMonthNameWidth(Drawing::Graphics^ graphics, Drawing::Font^ font, bool shortName);

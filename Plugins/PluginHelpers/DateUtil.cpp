@@ -298,7 +298,11 @@ int DateUtil::GetMaxMonthNameWidth(Graphics^ graphics, Font^ font, bool shortNam
 
 String^ DateUtil::GetMonthName(int nMonth, bool shortName)
 {
-	return gcnew String(CDateHelper::GetMonthName(nMonth, (shortName ? TRUE : FALSE)));
+	CString sMonth = (CJalaliCalendar::IsActive() ? 
+					  CJalaliCalendar::GetMonthName(nMonth) :
+					  CDateHelper::GetMonthName(nMonth, (shortName ? TRUE : FALSE)));
+
+	return gcnew String(sMonth);
 }
 
 int DateUtil::DateInMonths(DateTime date)
@@ -313,7 +317,7 @@ DateTime DateUtil::DateFromMonths(int nMonths)
 
 void DateUtil::FromDate(DateTime date, int% year, int% month, int% day)
 {
-	if (CDateHelper::WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 	{
 		int GYear, GMonth, GDay;
 		CJalaliCalendar::FromGregorian(date.ToOADate(), &GYear, &GMonth, &GDay);
@@ -332,7 +336,7 @@ void DateUtil::FromDate(DateTime date, int% year, int% month, int% day)
 
 DateTime DateUtil::ToDate(int year, int month, int day)
 {
-	if (CDateHelper::WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 		return DateTime::FromOADate(CJalaliCalendar::ToGregorian(year, month, day));
 
 	// else
