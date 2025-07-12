@@ -61,8 +61,9 @@ namespace DayViewUIExtension
 			m_DefaultTimeBlockEditMask = (TimeBlockSeriesAttributes.EditMask.Dates | TimeBlockSeriesAttributes.EditMask.Times);
 
 			InitializeComponent();
+			UpdateMonthYearCombos(DateTime.Now);
 		}
-		
+
 		public bool SelectTask(UInt32 dwTaskID)
 		{
             if (m_DayView.SelectedTaskId == dwTaskID)
@@ -70,14 +71,9 @@ namespace DayViewUIExtension
 
 			bool selected = m_DayView.SelectTask(dwTaskID);
 
-			m_SettingMonthYear = true;
-
 			m_WeekLabel.StartDate = m_DayView.StartDate;
-			m_MonthCombo.SelectedMonth = m_DayView.StartDate.Month;
-			m_YearCombo.SelectedYear = m_DayView.StartDate.Year;
 
-			m_SettingMonthYear = false;
-
+			UpdateMonthYearCombos(m_DayView.StartDate);
 			UpdatedSelectedTaskDatesText();
 
 			return selected;
@@ -877,10 +873,8 @@ namespace DayViewUIExtension
 			m_MonthCombo.Font = m_ControlsFont;
             m_MonthCombo.Location = new Point(DPIScaling.Scale(0), ComboTop);
             m_MonthCombo.Size = DPIScaling.Scale(new Size(100, 16));
-			
-			m_MonthCombo.SelectedMonth = DateUtil.GetMonth(DateTime.Now);
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
-			
+
 			Controls.Add(m_MonthCombo);
 
 			m_YearCombo = new YearComboBox();
@@ -888,12 +882,8 @@ namespace DayViewUIExtension
 			m_YearCombo.Font = m_ControlsFont;
             m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);
             m_YearCombo.Size = DPIScaling.Scale(new Size(100, 16));
-
-			m_YearCombo.SelectedYear = DateUtil.GetYear(DateTime.Now);
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
 
-//			Win32.SetRTLReading(m_YearCombo.Handle, DateUtil.WantRTLDates());
-					
 			Controls.Add(m_YearCombo);
 		}
 
@@ -1039,24 +1029,28 @@ namespace DayViewUIExtension
 			m_SelectedTaskDates.Height = m_SelectedTaskDatesLabel.Height;
 		}
 
-		private void OnDayViewWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
+		private void UpdateMonthYearCombos(DateTime date)
 		{
-			m_WeekLabel.StartDate = args.StartDate;
-
 			if (!m_SettingDayViewStartDate)
 			{
 				m_SettingMonthYear = true;
 
 				int year = 0, month = 0, unused = 0;
-				DateUtil.FromDate(args.StartDate, ref year, ref month, ref unused);
+				DateUtil.FromDate(date, ref year, ref month, ref unused);
 
 				m_MonthCombo.SelectedMonth = month;
 				m_YearCombo.SelectedYear = year;
 
-				UpdatedSelectedTaskDatesPosition();
-
 				m_SettingMonthYear = false;
 			}
+		}
+
+		private void OnDayViewWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
+		{
+			m_WeekLabel.StartDate = args.StartDate;
+
+			UpdateMonthYearCombos(args.StartDate);
+			UpdatedSelectedTaskDatesPosition();
 		}
 
 		private void OnMonthYearSelChanged(object sender, EventArgs args)

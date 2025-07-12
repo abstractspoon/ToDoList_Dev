@@ -78,7 +78,8 @@ void YearComboBox::BuildCombo()
 
 	for (int year = m_MinYear; year <= m_MaxYear; year++)
 	{
-		Items->Add(DateTime(year, 1, 1).ToString("yyyy", Globalization::CultureInfo::CurrentCulture));
+ 		DateTime date = DateUtil::ToDate(year, 1, 1);
+		Items->Add(DateUtil::FormatDateOnly(date, "yyyy"));
 	}
 
 	if (CDateHelper::WantRTLDates())
