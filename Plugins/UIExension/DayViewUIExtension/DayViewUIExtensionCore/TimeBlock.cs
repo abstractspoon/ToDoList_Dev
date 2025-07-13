@@ -518,7 +518,7 @@ namespace DayViewUIExtension
 			do
 			{
 				if (!existingBlocks.Contains(date) && days.Contains(date.DayOfWeek))
-					AddTimeBlock(date, m_Attributes.FromTime, m_Attributes.ToTime);
+					updated |= AddTimeBlock(date, m_Attributes.FromTime, m_Attributes.ToTime);
 
 				date = date.AddDays(1);
 			}
