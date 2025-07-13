@@ -718,7 +718,10 @@ namespace DayViewUIExtension
 
 					m_DefaultTimeBlockEditMask = dlg.EditMask;
 
-					if (!m_DayView.EditSelectedTimeBlockSeries(dlg.Attributes, dlg.EditMask))
+					var attribs = dlg.Attributes;
+					attribs.SynchroniseDates(block.RealTask);
+
+					if (!m_DayView.EditSelectedTimeBlockSeries(attribs, dlg.EditMask))
 						return false;
 
 					return true;
@@ -792,9 +795,10 @@ namespace DayViewUIExtension
 			if (res != DialogResult.OK)
 				return false;
 
-			m_DefaultNewTimeBlockAttributes = dlg.Attributes;
+			m_DefaultNewTimeBlockAttributes = attribs = dlg.Attributes;
+			attribs.SynchroniseDates(m_DayView.GetAppointment(dlg.SelectedTaskId));
 
-			return m_DayView.CreateNewTaskBlockSeries(dlg.SelectedTaskId, dlg.Attributes);
+			return m_DayView.CreateNewTaskBlockSeries(dlg.SelectedTaskId, attribs);
 		}
 
 		private void OnDuplicateTimeBlock(object sender, EventArgs e)
