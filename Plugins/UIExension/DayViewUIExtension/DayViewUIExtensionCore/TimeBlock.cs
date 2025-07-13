@@ -323,6 +323,21 @@ namespace DayViewUIExtension
 			}
 		}
 
+		public bool SynchroniseDates(Calendar.Appointment appt)
+		{
+			if (appt == null)
+				return false;
+
+			if (!SyncToTaskDates)
+				return false;
+
+			if (Dates == appt.Dates)
+				return false;
+
+			Dates = appt.Dates;
+			return true;
+		}
+
 		public Calendar.AppointmentDates Dates
 		{
 			get { return new Calendar.AppointmentDates(FromDate.Date, ToDate.Date); }
@@ -503,13 +518,11 @@ namespace DayViewUIExtension
 			do
 			{
 				if (!existingBlocks.Contains(date) && days.Contains(date.DayOfWeek))
-					AddTimeBlock(date, m_Attributes.FromTime, m_Attributes.ToTime);
+					updated |= AddTimeBlock(date, m_Attributes.FromTime, m_Attributes.ToTime);
 
 				date = date.AddDays(1);
 			}
-			while (date != dates.End);
-
-
+			while (date <= dates.End);
 
 			return updated;
 		}

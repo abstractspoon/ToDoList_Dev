@@ -108,10 +108,10 @@
     <ClInclude Include="DateRangeLink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="YearComboBoxEx.h">
+    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="YearMonthComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -206,7 +206,7 @@
     <ClCompile Include="DateRangeLink.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="YearComboBoxEx.cpp">
+    <ClCompile Include="YearMonthComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

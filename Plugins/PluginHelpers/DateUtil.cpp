@@ -10,6 +10,8 @@
 #include <Shared\DateHelper.h>
 #include <Shared\Misc.h>
 
+#include <3rdParty\JalaliCalendar.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
@@ -296,7 +298,11 @@ int DateUtil::GetMaxMonthNameWidth(Graphics^ graphics, Font^ font, bool shortNam
 
 String^ DateUtil::GetMonthName(int nMonth, bool shortName)
 {
-	return gcnew String(CDateHelper::GetMonthName(nMonth, (shortName ? TRUE : FALSE)));
+	CString sMonth = (CJalaliCalendar::IsActive() ? 
+					  CJalaliCalendar::GetMonthName(nMonth) :
+					  CDateHelper::GetMonthName(nMonth, (shortName ? TRUE : FALSE)));
+
+	return gcnew String(sMonth);
 }
 
 int DateUtil::DateInMonths(DateTime date)
@@ -307,6 +313,58 @@ int DateUtil::DateInMonths(DateTime date)
 DateTime DateUtil::DateFromMonths(int nMonths)
 {
 	return DateTime::FromOADate(CDateHelper::GetDateFromMonths(nMonths));
+}
+
+void DateUtil::FromDate(DateTime date, int% year, int% month, int% day)
+{
+	if (CJalaliCalendar::IsActive())
+	{
+		int GYear, GMonth, GDay;
+		CJalaliCalendar::FromGregorian(date.ToOADate(), &GYear, &GMonth, &GDay);
+
+		year = GYear;
+		month = GMonth;
+		day = GDay;
+	}
+	else
+	{
+		year = date.Year;
+		month = date.Month;
+		day = date.Day;
+	}
+}
+
+DateTime DateUtil::ToDate(int year, int month, int day)
+{
+	if (CJalaliCalendar::IsActive())
+		return DateTime::FromOADate(CJalaliCalendar::ToGregorian(year, month, day));
+
+	// else
+	return DateTime(year, month, day);
+}
+
+int DateUtil::GetDay(DateTime date)
+{
+	int year, month, day;
+	FromDate(date, year, month, day);
+
+	return day;
+}
+
+int DateUtil::GetMonth(DateTime date)
+{
+	int year, month, day;
+	FromDate(date, year, month, day);
+
+	return month;
+}
+
+int DateUtil::GetYear(DateTime date)
+{
+	int year, month, day;
+	FromDate(date, year, month, day);
+
+	return year;
 }
 
 String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime, bool bISO)

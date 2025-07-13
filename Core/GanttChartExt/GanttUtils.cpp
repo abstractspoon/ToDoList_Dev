@@ -208,7 +208,7 @@ BOOL GanttUtils::GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COl
 
 int GanttUtils::GetDaysInMonth(int nMonth, int nYear)
 {
-	if (CDateHelper::WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 		return CJalaliCalendar::GetDaysInMonth(nYear, nMonth);
 
 	// else
@@ -217,7 +217,7 @@ int GanttUtils::GetDaysInMonth(int nMonth, int nYear)
 
 int GanttUtils::GetYear(const COleDateTime& date)
 {
-	if (CDateHelper::WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 	{
 		int JYear, JMonth, JDay;
 		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
@@ -231,7 +231,7 @@ int GanttUtils::GetYear(const COleDateTime& date)
 
 CString GanttUtils::GetMonthName(int nMonth, BOOL bShort)
 {
-	if (CDateHelper::WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 		return CJalaliCalendar::GetMonthName(nMonth);
 
 	// else
@@ -242,7 +242,7 @@ COleDateTime GanttUtils::ToDate(int nYear, int nMonth, int nDay, int nHour, int 
 {
 	COleDateTime date;
 
-	if (CDateHelper::WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 		date = CJalaliCalendar::ToGregorian(nYear, nMonth, nDay);
 	else
 		date.SetDate(nYear, nMonth, nDay);
@@ -254,7 +254,7 @@ COleDateTime GanttUtils::ToDate(int nYear, int nMonth, int nDay, int nHour, int 
 
 void GanttUtils::FromDate(const COleDateTime& date, int& nYear, int& nMonth, int& nDay)
 {
-	if (CDateHelper::WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 	{
 		CJalaliCalendar::FromGregorian(date, &nYear, &nMonth, &nDay);
 	}

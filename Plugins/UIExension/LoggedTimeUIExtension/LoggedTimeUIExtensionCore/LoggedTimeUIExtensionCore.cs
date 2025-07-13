@@ -35,7 +35,7 @@ namespace LoggedTimeUIExtension
 
 		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
-		private YearComboBoxEx m_YearCombo;
+		private YearComboBox m_YearCombo;
         private LoggedTimePreferencesDlg m_PrefsDlg;
 
         private IIControls.ToolStripEx m_Toolbar;
@@ -725,7 +725,7 @@ namespace LoggedTimeUIExtension
 			
 			Controls.Add(m_MonthCombo);
 
-			m_YearCombo = new YearComboBoxEx();
+			m_YearCombo = new YearComboBox();
 
 			m_YearCombo.Font = m_ControlsFont;
             m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);
