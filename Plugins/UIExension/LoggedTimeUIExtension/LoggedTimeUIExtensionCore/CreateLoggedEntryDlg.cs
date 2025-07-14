@@ -33,12 +33,10 @@ namespace LoggedTimeUIExtension
 			m_TaskItems = taskItems;
 
 			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false);
-
-			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, attrib.TaskId, TaskItem.None);
-			m_TaskCombo.SelectedIndex = 0;
+			m_TaskCombo.Initialise(taskItems, taskIcons, attrib.TaskId, TaskItem.None);
 
 			m_TaskCombo.SelectedIndexChanged += OnSelectedTaskChange;
-			OnSelectedTaskChange(this, null);
+			m_TaskCombo.SelectedIndex = 0;
 		}
 
 		protected void OnSelectedTaskChange(object sender, EventArgs e)

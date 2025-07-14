@@ -91,6 +91,11 @@ String^ StringUtil::Reverse(String^ source)
 	return gcnew String(cArray);
 }
 
+int StringUtil::NaturalCompare(String^ str1, String^ str2)
+{
+	return Misc::NaturalCompare(MS(str1), MS(str2));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Log::LogText(String^ text)
