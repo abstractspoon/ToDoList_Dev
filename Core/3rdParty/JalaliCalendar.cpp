@@ -294,14 +294,6 @@ int CJalaliCalendar::GetWeekOfYear(int JYear, int JMonth, int JDay)
 	return nWeek;
 }
 
-int CJalaliCalendar::GetWeekOfYear(const COleDateTime& dtGregorian)
-{
-	int JYear, JMonth, JDay;
-	FromGregorian(dtGregorian, &JYear, &JMonth, &JDay);
-
-	return GetWeekOfYear(JYear, JMonth, JDay);
-}
-
 CString CJalaliCalendar::GetMonthName(int JMonth)
 {
 	switch (JMonth)
