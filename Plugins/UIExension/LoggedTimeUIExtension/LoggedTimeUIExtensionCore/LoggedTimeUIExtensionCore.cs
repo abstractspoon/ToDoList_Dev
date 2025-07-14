@@ -168,6 +168,7 @@ namespace LoggedTimeUIExtension
 			m_ToolbarRenderer.SetUITheme(theme);
 
 			m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			m_WeekLabel.BackColor = BackColor;
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -719,10 +720,8 @@ namespace LoggedTimeUIExtension
 			m_MonthCombo.Font = m_ControlsFont;
             m_MonthCombo.Location = new Point(DPIScaling.Scale(0), ComboTop);
             m_MonthCombo.Size = DPIScaling.Scale(new Size(100, 16));
-			
-			m_MonthCombo.SelectedMonth = DateTime.Now.Month;
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
-			
+
 			Controls.Add(m_MonthCombo);
 
 			m_YearCombo = new YearComboBox();
@@ -730,10 +729,8 @@ namespace LoggedTimeUIExtension
 			m_YearCombo.Font = m_ControlsFont;
             m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);
             m_YearCombo.Size = DPIScaling.Scale(new Size(100, 16));
-
-			m_YearCombo.SelectedYear = DateTime.Now.Year;
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
-			
+
 			Controls.Add(m_YearCombo);
 		}
 
@@ -791,19 +788,27 @@ namespace LoggedTimeUIExtension
 			UpdateToolbarButtonStates();
 		}
 
-		private void OnTimeLogWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
+		private void UpdateMonthYearCombos(DateTime date)
 		{
-			m_WeekLabel.StartDate = args.StartDate;
-
 			if (!m_SettingTimeLogStartDate)
 			{
 				m_SettingMonthYear = true;
 
-				m_MonthCombo.SelectedMonth = args.StartDate.Month;
-				m_YearCombo.SelectedYear = args.StartDate.Year;
+				int year = 0, month = 0, unused = 0;
+				DateUtil.FromDate(date, ref year, ref month, ref unused);
+
+				m_MonthCombo.SelectedMonth = month;
+				m_YearCombo.SelectedYear = year;
 
 				m_SettingMonthYear = false;
 			}
+		}
+
+		private void OnTimeLogWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
+		{
+			m_WeekLabel.StartDate = args.StartDate;
+
+			UpdateMonthYearCombos(args.StartDate);
 		}
 
 		private void OnMonthYearSelChanged(object sender, EventArgs args)
