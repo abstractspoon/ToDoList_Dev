@@ -289,9 +289,6 @@ void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& da
 	ASSERT(m_utils.GetWantPerformanceTests());
 
 	// Mocks ----------------------------------------
-	CTreeCtrl tree;
-	const CTreeCtrlHelper tch(tree);
-
 	const CTDCImageList ilIcons;
 	const TDCAUTOLISTDATA tld;
 	const CTDCColumnIDMap mapVisibleCols;
