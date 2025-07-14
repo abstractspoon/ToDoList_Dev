@@ -841,7 +841,7 @@ BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAnd
 	}
 
 	// Treat a negative date as Persian/Jalali
-	if ((date.m_dt < 0.0) && WantRTLDates())
+	if ((date.m_dt < 0.0) && CJalaliCalendar::IsActive())
 		date = CJalaliCalendar::ToGregorian(date.GetYear(), date.GetMonth(), date.GetDay());
 
 	return TRUE;
@@ -1410,7 +1410,7 @@ COleDateTime CDateHelper::GetEndOfWeek(const COleDateTime& date)
 
 BOOL CDateHelper::IsDayOfMonth(const COleDateTime& date, int nDay)
 {
-	if (WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 	{
 		int JYear, JMonth, JDay;
 		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
@@ -1423,7 +1423,7 @@ BOOL CDateHelper::IsDayOfMonth(const COleDateTime& date, int nDay)
 
 COleDateTime CDateHelper::GetStartOfMonth(const COleDateTime& date)
 {
-	if (WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 	{
 		int JYear, JMonth, JDay;
 		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
@@ -1437,7 +1437,7 @@ COleDateTime CDateHelper::GetStartOfMonth(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetEndOfMonth(const COleDateTime& date)
 {
-	if (WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 	{
 		int JYear, JMonth, JDay;
 		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
@@ -1646,7 +1646,7 @@ CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 			// RTL dates
 			CString sFormat;
 
-			if ((szFormat[1] != 0) && WantRTLDates()) // longer than 1 character
+			if ((szFormat[1] != 0) && CJalaliCalendar::IsActive()) // longer than 1 character
 			{
 				sFormat = szFormat;
 				Misc::Reverse(sFormat);
@@ -2030,7 +2030,7 @@ COleDateTime CDateHelper::CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, i
 BOOL CDateHelper::WantISOWeekOfYear()
 {
 	// Jalali uses US week number algorithm
-	if (WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 		return FALSE;
 	
 	// ISO weeks can only begin on Mondays 
@@ -2299,7 +2299,7 @@ COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 	int nMonth, nYear;
 	GetDateFromMonths(nNumMonths, nMonth, nYear);
 
-	if (WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 		return CJalaliCalendar::ToGregorian(nYear, nMonth, 1);
 
 	// else
@@ -2310,7 +2310,7 @@ int CDateHelper::GetDateInMonths(const COleDateTime& date)
 {
 	ASSERT(IsDateSet(date));
 
-	if (WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 	{
 		int JYear, JMonth, JDay;
 		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
@@ -2338,7 +2338,7 @@ void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy, BOOL bPreserveEndOfMon
 	int GMonth = st.wMonth;
 	int GYear = st.wYear;
 
-	if (WantRTLDates())
+	if (CJalaliCalendar::IsActive())
 	{
 		// The Jalali conversion code expects a fully validated date
 		int nDaysInMonth = GetDaysInMonth(st);
