@@ -275,6 +275,10 @@ protected:
 	static COleDateTime GetNearestMonth(const COleDateTime& date, int nInterval, BOOL bEnd);
 	static BOOL IsLeapYear(const COleDateTime& date = COleDateTime::GetCurrentTime());
 	static BOOL IsLeapYear(int nYear);
+
+	static int GetGregorianDaysInMonth(int nMonth, int nYear);
+	static BOOL IsGregorianLeapYear(int nYear);
+
 };
 
 #endif // !defined(AFX_DATEHELPER_H__2A4E63F6_A106_4295_BCBA_06D03CD67AE7__INCLUDED_)

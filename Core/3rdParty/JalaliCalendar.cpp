@@ -280,7 +280,10 @@ int CJalaliCalendar::GetWeekOfYear(int JYear, int JMonth, int JDay)
 		{
 			// Since week 53 could be week 1 of the next year
 			// we check the week number a week later
-			if (GetWeekOfYear(dtGreg.m_dt + 7) == 2) // RECURSIVE CALL
+			dtGreg += 7.0;
+			FromGregorian(dtGreg, &JYear, &JMonth, &JDay);
+
+			if (GetWeekOfYear(JYear, JMonth, JDay) == 2) // RECURSIVE CALL
 				nWeek = 1;
 		}
 		break;

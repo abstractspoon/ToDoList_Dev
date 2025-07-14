@@ -1755,7 +1755,7 @@ void CDateHelper::GetDayOfWeekNames(BOOL bShort, CStringArray& aNames)
 int CDateHelper::GetDaysInMonth(const COleDateTime& date)
 {
 	int nYear, nMonth;
-	CDateHelper::GetDateFromMonths(CDateHelper::GetDateInMonths(date), nMonth, nYear);
+	GetDateFromMonths(GetDateInMonths(date), nMonth, nYear);
 
 	return GetDaysInMonth(nMonth, nYear);
 }
@@ -1778,10 +1778,15 @@ int CDateHelper::GetDaysInMonth(int nMonth, int nYear)
 		return CJalaliCalendar::GetDaysInMonth(nYear, nMonth);
 
 	// else
-	switch (nMonth)
+	return GetGregorianDaysInMonth(nMonth, nYear);
+}
+
+int CDateHelper::GetGregorianDaysInMonth(int GMonth, int GYear)
+{
+	switch (GMonth)
 	{
 	case 1:  return 31; // jan
-	case 2:	 return (IsLeapYear(nYear) ? 29 : 28); // feb
+	case 2:	 return (IsGregorianLeapYear(GYear) ? 29 : 28); // feb
 	case 3:  return 31; // mar
 	case 4:  return 30; // apr
 	case 5:  return 31; // may
@@ -1873,7 +1878,14 @@ BOOL CDateHelper::IsLeapYear(int nYear)
 		return CJalaliCalendar::IsLeapYear(nYear);
 
 	// else
-	return ((nYear % 4 == 0) && ((nYear % 100 != 0) || (nYear % 400 == 0)));
+	return IsGregorianLeapYear(nYear);
+}
+
+BOOL CDateHelper::IsGregorianLeapYear(int GYear)
+{
+	ASSERT(GYear);
+
+	return ((GYear % 4 == 0) && ((GYear % 100 != 0) || (GYear % 400 == 0)));
 }
 
 BOOL CDateHelper::IsEndOfDay(const COleDateTime& date, BOOL bNoTimeIsEndOfDay)
@@ -1895,6 +1907,9 @@ BOOL CDateHelper::IsEndOfDay(const COleDateTime& date, BOOL bNoTimeIsEndOfDay)
 
 CString CDateHelper::GetMonthName(int nMonth, BOOL bShort)
 {
+	if (CJalaliCalendar::IsActive())
+		return CJalaliCalendar::GetMonthName(nMonth); // no short version
+
 	// data check
 	if ((nMonth < 1) || (nMonth > 12))
 		return "";
@@ -2366,7 +2381,7 @@ void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy, BOOL bPreserveEndOfMon
 	if (CJalaliCalendar::IsActive())
 	{
 		// The Jalali conversion code expects a fully validated date
-		int nDaysInMonth = GetDaysInMonth(st);
+		int nDaysInMonth = GetGregorianDaysInMonth(GMonth, GYear);
 		GDay = min(GDay, nDaysInMonth);
 		
 		int JDay, JMonth, JYear;
