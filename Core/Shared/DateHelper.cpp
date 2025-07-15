@@ -2024,7 +2024,7 @@ int CDateHelper::CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int 
 	COleDateTime date;
 
 	if (CJalaliCalendar::IsActive())
-		CJalaliCalendar::ToGregorian(nYear, nMonth, nDay);
+		date = CJalaliCalendar::ToGregorian(nYear, nMonth, nDay);
 	else
 		date.SetDate(nYear, nMonth, nDay);
 
@@ -2059,6 +2059,29 @@ COleDateTime CDateHelper::CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, i
 	if (nDay == -1)
 		return COleDateTime((time_t)-1);
 
+	return ToDate(nDay, nMonth, nYear);
+}
+
+void CDateHelper::FromDate(const COleDateTime& date, int& nDay, int& nMonth, int& nYear)
+{
+	if (CJalaliCalendar::IsActive())
+	{
+		CJalaliCalendar::FromGregorian(date, &nYear, &nMonth, &nDay);
+	}
+	else
+	{
+		nDay = date.GetDay();
+		nMonth = date.GetMonth();
+		nYear = date.GetYear();
+	}
+}
+
+COleDateTime CDateHelper::ToDate(int nDay, int nMonth, int nYear)
+{
+	if (CJalaliCalendar::IsActive())
+		return CJalaliCalendar::ToGregorian(nYear, nMonth, nDay);
+
+	// else
 	return COleDateTime(nYear, nMonth, nDay, 0, 0, 0);
 }
 

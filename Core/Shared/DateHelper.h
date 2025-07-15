@@ -180,6 +180,8 @@ public:
 
 	static COleDateTime CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
 	static int CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
+	static void FromDate(const COleDateTime& date, int& nDay, int& nMonth, int& nYear);
+	static COleDateTime ToDate(int nDay, int nMonth, int nYear);
 
 	// GREGORIAN ONLY
 	static CString GetDayOfWeekName(OLE_DAYOFWEEK nDOW, BOOL bShort = FALSE); // 1-7, sun-sat
