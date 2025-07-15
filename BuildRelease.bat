@@ -190,6 +190,7 @@ ECHO [42m Build SUCCEEDED[0m
 ECHO:
 
 ECHO [106m[30m Allow caller to cancel building Zip[0m
+ECHO [106m[30m Remember to close any instances of ToDoList before proceeding[0m
 ECHO:
 PAUSE
 
