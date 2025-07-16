@@ -289,9 +289,6 @@ void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& da
 	ASSERT(m_utils.GetWantPerformanceTests());
 
 	// Mocks ----------------------------------------
-	CTreeCtrl tree;
-	const CTreeCtrlHelper tch(tree);
-
 	const CTDCImageList ilIcons;
 	const TDCAUTOLISTDATA tld;
 	const CTDCColumnIDMap mapVisibleCols;
@@ -358,7 +355,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 	int NUM_PRIMES = (sizeof(PRIMES) / sizeof(PRIMES[0])), i;
 
 	//  nRegularity								dwSpecific1				dwSpecific2
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 
 	//	TDIR_DAY_EVERY_NDAYS					every 'n' days			--- (0)
 	for (i = 0; i < NUM_PRIMES; i++)
@@ -366,18 +363,18 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		TestAdjustNewRecurringTasksDates(TDIR_DAY_EVERY_NDAYS, PRIMES[i], 0, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_DAY_EVERY_WEEKDAY					--- (0)					--- (0)
 	TestAdjustNewRecurringTasksDates(TDIR_DAY_EVERY_WEEKDAY, 0, 0, nRecalcFrom);
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_DAY_EVERY_NWEEKDAYS				every 'n' days			--- (0)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
 		TestAdjustNewRecurringTasksDates(TDIR_DAY_EVERY_NWEEKDAYS, PRIMES[i], 0, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_WEEK_SPECIFIC_DOWS_NWEEKS			every 'n' weeks			weekdays (DHW_...)
 	DWORD DOWS[] =
 	{
@@ -399,14 +396,14 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		}
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_WEEK_EVERY_NWEEKS					every 'n' weeks			--- (0)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
 		TestAdjustNewRecurringTasksDates(TDIR_WEEK_EVERY_NWEEKS, PRIMES[i], 0, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_MONTH_EVERY_NMONTHS				every 'n' months		preserve weekday (BOOL)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -419,7 +416,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		TestAdjustNewRecurringTasksDates(TDIR_MONTH_EVERY_NMONTHS, PRIMES[i], TRUE, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_MONTH_SPECIFIC_DAY_NMONTHS			every 'n' months		day of month (1-31)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -429,7 +426,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		}
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS		first(0), last(!0)		every 'n' months
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -442,7 +439,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		TestAdjustNewRecurringTasksDates(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS, TRUE, PRIMES[i], nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_MONTH_SPECIFIC_DOW_NMONTHS			LOWORD = which (1-5)	every 'n' months
 	//                                          HIWORD = DOW   (1-7)		
 	for (i = 0; i < NUM_PRIMES; i++)
@@ -456,7 +453,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		}
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_YEAR_SPECIFIC_DAY_MONTHS			month (1-12)			day of month (1-31)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -466,7 +463,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		}
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_YEAR_EVERY_NYEARS					every 'n' years			preserve weekday (BOOL)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -479,7 +476,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		TestAdjustNewRecurringTasksDates(TDIR_YEAR_EVERY_NYEARS, PRIMES[i], TRUE, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//  TDIR_YEAR_SPECIFIC_DOW_MONTHS			LOWORD = which (1-5)	specific month (1-12)
 	//                                          HIWORD = DOW   (1-7)		
 	for (DWORD dwMonth = 1; dwMonth < 12; dwMonth++)
