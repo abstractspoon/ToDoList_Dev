@@ -206,64 +206,12 @@ BOOL GanttUtils::GetMonthDates(int nMonth, int nYear, COleDateTime& dtStart, COl
 	return TRUE;
 }
 
-int GanttUtils::GetDaysInMonth(int nMonth, int nYear)
-{
-	if (CDateHelper::WantRTLDates())
-		return CJalaliCalendar::GetDaysInMonth(nYear, nMonth);
-
-	// else
-	return CDateHelper::GetDaysInMonth(nMonth, nYear);
-}
-
 int GanttUtils::GetYear(const COleDateTime& date)
 {
-	if (CDateHelper::WantRTLDates())
-	{
-		int JYear, JMonth, JDay;
-		CJalaliCalendar::FromGregorian(date, &JYear, &JMonth, &JDay);
+	int nDay, nMonth, nYear;
+	CDateHelper::FromDate(date, nDay, nMonth, nYear);
 
-		return JYear;
-	}
-
-	// else
-	return date.GetYear();
-}
-
-CString GanttUtils::GetMonthName(int nMonth, BOOL bShort)
-{
-	if (CDateHelper::WantRTLDates())
-		return CJalaliCalendar::GetMonthName(nMonth);
-
-	// else
-	return CDateHelper::GetMonthName(nMonth, bShort);
-}
-
-COleDateTime GanttUtils::ToDate(int nYear, int nMonth, int nDay, int nHour, int nMinute)
-{
-	COleDateTime date;
-
-	if (CDateHelper::WantRTLDates())
-		date = CJalaliCalendar::ToGregorian(nYear, nMonth, nDay);
-	else
-		date.SetDate(nYear, nMonth, nDay);
-
-	date += COleDateTimeSpan(0, nHour, nMinute, 0);
-
-	return date;
-}
-
-void GanttUtils::FromDate(const COleDateTime& date, int& nYear, int& nMonth, int& nDay)
-{
-	if (CDateHelper::WantRTLDates())
-	{
-		CJalaliCalendar::FromGregorian(date, &nYear, &nMonth, &nDay);
-	}
-	else
-	{
-		nDay = date.GetDay();
-		nMonth = date.GetMonth();
-		nYear = date.GetYear();
-	}
+	return nYear;
 }
 
 int GanttUtils::GetRequiredColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
@@ -430,44 +378,44 @@ CString GanttUtils::FormatHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, in
 
 	case GTLC_DISPLAY_QUARTERS_MID:
 		sDate.Format(_T("%s-%s %d"),
-					 GetMonthName(nMonth, TRUE),
-					 GetMonthName(nMonth + 2, TRUE),
+					 CDateHelper::GetMonthName(nMonth, TRUE),
+					 CDateHelper::GetMonthName(nMonth + 2, TRUE),
 					 nYear);
 		break;
 
 	case GTLC_DISPLAY_QUARTERS_LONG:
 		sDate.Format(_T("%s-%s %d"),
-					 GetMonthName(nMonth, FALSE),
-					 GetMonthName(nMonth + 2, FALSE),
+					 CDateHelper::GetMonthName(nMonth, FALSE),
+					 CDateHelper::GetMonthName(nMonth + 2, FALSE),
 					 nYear);
 		break;
 
 	case GTLC_DISPLAY_MONTHS_SHORT:
 		{
-			COleDateTime date(ToDate(nYear, nMonth, 1, 0, 0));
+			COleDateTime date(CDateHelper::ToDate(1, nMonth, nYear));
 			sDate = CDateHelper::FormatDate(date, (DHFD_NODAY | DHFD_NOCENTURY));
 		}
 		break;
 
 	case GTLC_DISPLAY_MONTHS_MID:
-		sDate.Format(_T("%s %d"), GetMonthName(nMonth, TRUE), nYear);
+		sDate.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, TRUE), nYear);
 		break;
 
 	case GTLC_DISPLAY_MONTHS_LONG:
-		sDate.Format(_T("%s %d"), GetMonthName(nMonth, FALSE), nYear);
+		sDate.Format(_T("%s %d"), CDateHelper::GetMonthName(nMonth, FALSE), nYear);
 		break;
 
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
-		sDate.Format(_T("%s %d (%s)"), GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_WEEKS));
+		sDate.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_WEEKS));
 		break;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
 	case GTLC_DISPLAY_HOURS:
-		sDate.Format(_T("%s %d (%s)"), GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
+		sDate.Format(_T("%s %d (%s)"), CDateHelper::GetMonthName(nMonth, FALSE), nYear, CEnString(IDS_GANTT_DAYS));
 		break;
 
 	default:

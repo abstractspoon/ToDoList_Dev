@@ -187,7 +187,7 @@ namespace DayViewUIExtension
 		{
 			get
 			{
-				return (!IsParent && TreatOverdueTasksAsDueToday && (base.EndDate.Date < DateTime.Now.Date));
+				return (TreatOverdueTasksAsDueToday && !IsParent && !IsDoneOrGoodAsDone && (base.EndDate.Date < DateTime.Now.Date));
 			}
 		}
 

@@ -103,7 +103,7 @@ protected:
 	DWORD m_dwSpecific2;
 
 protected:
-	BOOL ValidateDay(SYSTEMTIME& st) const;
+	void ValidateDay(int& nDay, int nMonth, int nYear) const;
 
 	static BOOL IsValidRegularity(RECURRENCE_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 	static BOOL IsValidSpecificMonths(DWORD dwMonths);

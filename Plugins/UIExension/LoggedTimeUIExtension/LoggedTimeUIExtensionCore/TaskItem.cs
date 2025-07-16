@@ -175,6 +175,7 @@ namespace LoggedTimeUIExtension
 			TaskTextColor = task.GetTextDrawingColor();
 			Locked = task.IsLocked(true);
 			IsParent = task.IsParent();
+			Position = task.GetPositionString();
 
 			if (newTask)
 			{

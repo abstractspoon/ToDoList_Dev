@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "WeekLabel.h"
 #include "DateUtil.h"
+#include "Win32.h"
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -21,8 +22,8 @@ WeekLabel::WeekLabel(Translator^ trans)
 	:
 	m_Trans(trans),
 	m_NumDays(1)
-
 {
+	Win32::SetRTLReading(Handle, DateUtil::WantRTLDates());
 }
 
 int WeekLabel::NumDays::get()
@@ -42,36 +43,39 @@ void WeekLabel::NumDays::set(int value)
 void WeekLabel::StartDate::set(DateTime value)
 {
 	m_StartDate = value;
-	DateTime endDate = m_StartDate.AddDays(m_NumDays).AddSeconds(-1);
+	DateTime endDate = m_StartDate.AddDays(m_NumDays - 1);
 
-	if (endDate.Year == m_StartDate.Year)
+	int startYear, endYear, startMonth, endMonth, unused;
+	DateUtil::FromDate(m_StartDate, startYear, startMonth, unused);
+	DateUtil::FromDate(endDate, endYear, endMonth, unused);
+
+	String^ MonthYearFormat = (DateUtil::WantRTLDates() ? "yyyy MMM" : "MMM yyyy");
+
+	if (endYear == startYear)
 	{
-		if (endDate.Month == m_StartDate.Month)
+		if (endMonth == startMonth)
 		{
-			Text = m_StartDate.ToString("MMM yyyy ");
+			Text = DateUtil::FormatDateOnly(m_StartDate, MonthYearFormat);
 		}
 		else
 		{
 			Text = String::Format("{0} - {1} ",
-								 m_StartDate.ToString("MMM"),
-								 endDate.ToString("MMM yyyy"));
+								 DateUtil::GetMonthName(startMonth, true),
+								 DateUtil::FormatDateOnly(endDate, MonthYearFormat));
 		}
 	}
 	else
 	{
-		Text = String::Format("{0} - {1} ",
-							 m_StartDate.ToString("MMM yyyy"),
-							 endDate.ToString("MMM yyyy"),
-							 m_StartDate.Year);
+		Text = DateUtil::FormatDateOnlyRange(m_StartDate, endDate, MonthYearFormat);
 	}
 
 	int startWeek = DateUtil::WeekOfYear(m_StartDate);
-	int numWeeks = (NumDays / 7);
+	int endWeek = DateUtil::WeekOfYear(endDate);
 
-	if (numWeeks <= 1)
+	if (endWeek == startWeek)
 		Text = (Text + String::Format(m_Trans->Translate("(Week {0})", Translator::Type::Label), startWeek));
 	else
-		Text = (Text + String::Format(m_Trans->Translate("(Weeks {0}-{1})", Translator::Type::Label), startWeek, (startWeek + numWeeks - 1)));
+		Text = (Text + String::Format(m_Trans->Translate("(Weeks {0}-{1})", Translator::Type::Label), startWeek, endWeek));
 
 	Invalidate();
 }
