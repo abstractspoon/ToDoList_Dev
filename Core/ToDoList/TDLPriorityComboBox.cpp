@@ -98,7 +98,7 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 	{
 		switch (nSel)
 		{
-		case 0:		return FM_NOPRIORITY;
+		case 0:		return FM_ANYPRIORITY;
 		default:	return (nSel - 1);
 		}
 	}
@@ -106,7 +106,7 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 	// Only 'None'
 	switch (nSel)
 	{
-	case 0:		return FM_ANYPRIORITY;
+	case 0:		return FM_NOPRIORITY;
 	default:	return (nSel - 1);
 	}
 }
