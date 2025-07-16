@@ -3921,7 +3921,31 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 	}
 	else // all else
 	{
+		// If this is an UNDO then our base class will have pre-selected
+		// the previously selected tasks (ie. aModTaskIDs) BUT if our current
+		// view does not don't support/ multi-selection, say, then the 
+		// current selection will no longer match aModTaskIDs, so our first job
+		// if to ensure that it does so that the correct tasks get updated.
+
+		// Get existing selection
+		CDWordArray aSelTaskIDs;
+		m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+		// Does it match the modified tasks
+		BOOL bFixupSelection = !Misc::MatchAll(aModTaskIDs, aSelTaskIDs);
+
+		if (bFixupSelection)
+		{
+			ASSERT(mapAttribIDs.HasOnly(TDCA_ALL) && aModTaskIDs.GetSize()); // heuristic for UNDO
+			m_taskTree.SelectTasks(aModTaskIDs);
+		}
+
+		// Do the update
 		UpdateExtensionViewsSelection(mapAttribIDs);
+
+		// restore the previous selection
+		if (bFixupSelection)
+			m_taskTree.SelectTasks(aSelTaskIDs);
 	}
 }
 
