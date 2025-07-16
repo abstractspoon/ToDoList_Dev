@@ -2025,6 +2025,17 @@ COleDateTime CDateHelper::MakeDate(const COleDateTime& dtDateOnly, const COleDat
 	return (dDateOnly + dTimeOnly);
 }
 
+COleDateTime CDateHelper::MakeDate(const COleDateTime& dtDateOnly, int nHour, int nMin, int nSec)
+{
+	double dDateOnly = GetDateOnly(dtDateOnly);
+	double dTimeOnly = COleDateTimeSpan(0, nHour, nMin, nSec).m_span;
+
+	if (dDateOnly < 0.0)
+		return (dDateOnly - dTimeOnly);
+
+	return (dDateOnly + dTimeOnly);
+}
+
 int CDateHelper::CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear)
 {
 	// data check
@@ -2035,19 +2046,13 @@ int CDateHelper::CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int 
 	if ((nMonth < 1) || (nMonth > 12) || (nDOW < 1) || (nDOW > 7) || (nWhich < 1) || (nWhich > 5))
 		return -1;
 
-	// start with first day of month
+	// start with first day of month and move it
+	// forwards until we hit the requested day of week
 	int nDay = 1;
-	COleDateTime date;
 
-	if (CJalaliCalendar::IsActive())
-		date = CJalaliCalendar::ToGregorian(nYear, nMonth, nDay);
-	else
-		date.SetDate(nYear, nMonth, nDay);
-
-	// get its day of week
+	COleDateTime date(ToDate(nDay, nMonth, nYear));
 	OLE_DAYOFWEEK nWeekDay = GetDayOfWeek(date);
 
-	// move forwards until we hit the requested day of week
 	while (nWeekDay != nDOW)
 	{
 		nDay++;

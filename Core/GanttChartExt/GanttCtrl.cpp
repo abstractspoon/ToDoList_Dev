@@ -2733,13 +2733,13 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 	// draw weekends and vertical week dividers if not a rollup
 	if (!bRollup)
 	{
-		int nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+		int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 		double dMonthWidth = rMonth.Width();
 
 		int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
 		CRect rDay(rMonth);
 
-		COleDateTime dtDay(ToDate(nYear, nMonth, 1, 0, 0));
+		COleDateTime dtDay(CDateHelper::ToDate(1, nMonth, nYear));
 
 		for (int nDay = 1; nDay <= nDaysInMonth; nDay++)
 		{
@@ -2799,9 +2799,9 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 	if (!bRollup)
 	{
 		CRect rDay(rMonth);
-		COleDateTime dtDay(ToDate(nYear, nMonth, 1, 0, 0));
+		COleDateTime dtDay(CDateHelper::ToDate(1, nMonth, nYear));
 
-		int nNumDays = GetDaysInMonth(nMonth, nYear);
+		int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 		double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 		for (int nDay = 1; nDay <= nNumDays; nDay++)
@@ -3212,7 +3212,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				// check if we need to draw
 				if (rYear.right >= rClip.left)
 				{
-					COleDateTime dtYear(ToDate((nYear + i), 1, 1, 0, 0));
+					COleDateTime dtYear(CDateHelper::ToDate(1, 1, (nYear + i)));
 					DrawListHeaderRect(pDC, rYear, CDateHelper::FormatDateOnly(dtYear, _T("yyyy")), pThemed, FALSE);
 				}
 			}
@@ -3231,18 +3231,18 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, FALSE);
 
 			// draw vertical week dividers
-			int nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+			int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
 
 			// Get start of first full week
 			int nDay = 1;
 
-			while (ToDate(nYear, nMonth, nDay, 0, 0).GetDayOfWeek() != nFirstDOW)
+			while (CDateHelper::ToDate(nDay, nMonth, nYear).GetDayOfWeek() != nFirstDOW)
 				nDay++;
 
 			// If this is column 1 (column 0 is hidden) then we might need
 			// to draw part of the preceding week
-			COleDateTime dtWeek(ToDate(nYear, nMonth, nDay, 0, 0));
+			COleDateTime dtWeek(CDateHelper::ToDate(nDay, nMonth, nYear));
 			double dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
 
 			if ((nCol == 1) && (nDay != -1))
@@ -3281,7 +3281,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 					// Note: width of next month may be different to this month
 					if (m_listHeader.GetItemRect(nCol + 1, rMonth))
 					{
-						nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+						nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 						dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
 
 						rWeek.right += (int)(nDay * dDayWidth);
@@ -3328,7 +3328,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, TRUE);
 
 			// draw day elements
-			int nNumDays = GetDaysInMonth(nMonth, nYear);
+			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 			double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 			rDay.right = rDay.left;
@@ -3346,7 +3346,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				if (rDay.right >= rClip.left)
 				{
 					CString sHeader;
-					COleDateTime dtDay(ToDate(nYear, nMonth, nDay, 0, 0));
+					COleDateTime dtDay(CDateHelper::ToDate(nDay, nMonth, nYear));
 
 					if (m_nMonthDisplay == GTLC_DISPLAY_HOURS)
 					{
@@ -5106,7 +5106,7 @@ BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, i
 		break;
 	}
 
-	int nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 	int nNumMins = MulDiv((nPos - rMonth.left), (60 * 24 * nDaysInMonth), rMonth.Width());
 
 	int nDay = (1 + (nNumMins / MINS_IN_DAY));
@@ -5116,7 +5116,7 @@ BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, i
 	ASSERT(nDay >= 1 && nDay <= nDaysInMonth);
 	ASSERT(nHour >= 0 && nHour < 24);
 
-	date = ToDate(nYear, nMonth, nDay, nHour, nMin);
+	date = CDateHelper::MakeDate(CDateHelper::ToDate(nDay, nMonth, nYear), nHour, nMin);
 
 	return CDateHelper::IsDateSet(date);
 }
@@ -5143,7 +5143,7 @@ BOOL CGanttCtrl::GetScrolledPosFromDate(const COleDateTime& date, int& nPos) con
 		if (GetListColumnRect(nCol, rColumn, FALSE))
 		{
 			int nDay, nMonth, nYear;
-			FromDate(date, nYear, nMonth, nDay);
+			CDateHelper::FromDate(date, nDay, nMonth, nYear);
 
 			double dDayInCol = 0;
 			int nDaysInCol = 0;
@@ -5184,7 +5184,7 @@ BOOL CGanttCtrl::GetScrolledPosFromDate(const COleDateTime& date, int& nPos) con
 			default: 
 				{
 					// Column == Month
-					nDaysInCol = GetDaysInMonth(nMonth, nYear);
+					nDaysInCol = CDateHelper::GetDaysInMonth(nMonth, nYear);
 					dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
 				}
 				break;

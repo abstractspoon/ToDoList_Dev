@@ -205,6 +205,7 @@ public:
 
 	static void SplitDate(const COleDateTime& date, double& dDateOnly, double& dTimeOnly);
 	static COleDateTime MakeDate(const COleDateTime& dtDateOnly, const COleDateTime& dtTimeOnly);
+	static COleDateTime MakeDate(const COleDateTime& dtDateOnly, int nHour, int nMin, int nSec = 0);
 
 	static BOOL DateHasTime(const COleDateTime& date);
 	static COleDateTime GetTimeOnly(const COleDateTime& date);
