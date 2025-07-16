@@ -647,15 +647,17 @@ double CDateHelper::CalcDuration(const COleDateTime& dtFrom, const COleDateTime&
 
 BOOL CDateHelper::IsValidDayInMonth(int nDay, int nMonth, int nYear)
 {
-	return (nMonth >= 1 && nMonth <= 12) &&
-		(nDay >= 1 && nDay <= GetDaysInMonth(nMonth, nYear));
+	return (nMonth >= 1) && 
+			(nMonth <= 12) &&
+			(nDay >= 1) && 
+			(nDay <= GetDaysInMonth(nMonth, nYear));
 }
 
 BOOL CDateHelper::IsValidDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth)
 {
 	return (nWhich >= 1 && nWhich <= 5) &&
-		(nDOW >= 1 && nDOW <= 7) &&
-		(nMonth >= 1 && nMonth <= 12);
+			(nDOW >= 1 && nDOW <= 7) &&
+			(nMonth >= 1 && nMonth <= 12);
 }
 
 BOOL CDateHelper::DecodeDate(const CString& sDate, double& date, BOOL bAndTime)
@@ -1674,6 +1676,15 @@ BOOL CDateHelper::FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTim
 
 CString CDateHelper::GetDayOfWeekName(OLE_DAYOFWEEK nWeekday, BOOL bShort)
 {
+	if (CJalaliCalendar::IsActive())
+		return CJalaliCalendar::GetDayOfWeekName(nWeekday, bShort);
+
+	// else
+	return GetGregorianDayOfWeekName(nWeekday, bShort);
+}
+
+CString CDateHelper::GetGregorianDayOfWeekName(OLE_DAYOFWEEK nWeekday, BOOL bShort)
+{
 	CString sWeekday;
 
 	// data check
@@ -1910,7 +1921,12 @@ CString CDateHelper::GetMonthName(int nMonth, BOOL bShort)
 	if (CJalaliCalendar::IsActive())
 		return CJalaliCalendar::GetMonthName(nMonth); // no short version
 
-	// data check
+	// else
+	return GetGregorianMonthName(nMonth, bShort);
+}
+
+CString CDateHelper::GetGregorianMonthName(int nMonth, BOOL bShort)
+{
 	if ((nMonth < 1) || (nMonth > 12))
 		return "";
 
@@ -2106,6 +2122,11 @@ int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 	}
 
 	// else
+	return GetGregorianWeekOfYear(date);
+}
+
+int CDateHelper::GetGregorianWeekOfYear(const COleDateTime& date)
+{
 	int nWeek = 0;
 	int nDayOfYear = date.GetDayOfYear();
 

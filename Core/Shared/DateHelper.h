@@ -280,6 +280,9 @@ protected:
 
 	static int GetGregorianDaysInMonth(int nMonth, int nYear);
 	static BOOL IsGregorianLeapYear(int nYear);
+	static CString GetGregorianDayOfWeekName(OLE_DAYOFWEEK nDOW, BOOL bShort);
+	static CString GetGregorianMonthName(int nMonth, BOOL bShort);
+	static int GetGregorianWeekOfYear(const COleDateTime& date);
 
 };
 
