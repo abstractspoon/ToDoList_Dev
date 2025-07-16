@@ -613,7 +613,7 @@ BOOL CTDCTaskTimeLogAnalysis::BreakdownDateAnalysis(CMapIDToTimeAndPeriodArray& 
 				{
 					// first item
 					pPeriodMap = pDayMap;
-					ASSERT(pDayMap->dtPeriod.GetMonth() == dtPeriod.GetMonth());
+					ASSERT(CDateHelper::IsSameMonth(pDayMap->dtPeriod, dtPeriod));
 				}
 				else if (IsSamePeriod(pDayMap->dtPeriod, dtPeriod, nBreakdown))
 				{
@@ -874,12 +874,7 @@ CString CTDCTaskTimeLogAnalysis::FormatPeriod(double dDay, TDCTTL_BREAKDOWN nBre
 		
 	case TTLB_BYWEEK:
 		{
-			// have to get the start of the week
-
-			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
-			int nDOW = date.GetDayOfWeek();
-
-			COleDateTime dtStart = (date.m_dt - (nDOW - nFirstDOW));
+			COleDateTime dtStart(CDateHelper::GetStartOfWeek(date));
 			COleDateTime dtEnd = (dtStart.m_dt + 6);
 
 			sPeriod.Format(_T("%s - %s"), dtStart.Format(VAR_DATEVALUEONLY), dtEnd.Format(VAR_DATEVALUEONLY));
@@ -888,11 +883,8 @@ CString CTDCTaskTimeLogAnalysis::FormatPeriod(double dDay, TDCTTL_BREAKDOWN nBre
 		
 	case TTLB_BYMONTH:
 		{
-			// have to get start of this month
-			int nYear = date.GetYear(), nMonth = date.GetMonth();
-
-			COleDateTime dtStart(nYear, nMonth, 1, 0, 0, 0);
-			COleDateTime dtEnd(nYear, nMonth, CDateHelper::GetDaysInMonth(nMonth, nYear), 0, 0, 0);
+			COleDateTime dtStart(CDateHelper::GetStartOfMonth(date));
+			COleDateTime dtEnd(CDateHelper::GetEndOfMonth(date));
 
 			sPeriod.Format(_T("%s - %s"), dtStart.Format(VAR_DATEVALUEONLY), dtEnd.Format(VAR_DATEVALUEONLY));
 		}
@@ -956,11 +948,10 @@ BOOL CTDCTaskTimeLogAnalysis::IsSamePeriod(const COleDateTime& date1, const COle
 		return (date1 == date2);
 
 	case TTLB_BYWEEK:
-		return (CDateHelper::GetWeekOfYear(date1) == CDateHelper::GetWeekOfYear(date2));
+		return CDateHelper::IsSameWeek(date1, date2);
 
 	case TTLB_BYMONTH:
-		return ((date1.GetMonth() == date2.GetMonth()) &&
-				(date1.GetYear()  == date2.GetYear()));
+		return CDateHelper::IsSameMonth(date1, date2);
 	}
 
 	ASSERT(0);
