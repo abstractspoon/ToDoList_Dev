@@ -48,6 +48,10 @@ TESTRESULT CDateHelperTest::Run()
 
 void CDateHelperTest::TestDecodeDate()
 {
+	CTDCScopedTest test(*this, _T("CDateHelper::DecodeDate"));
+
+	const double DATE_TOL = COleDateTimeSpan(0, 0, 0, 1).m_span;
+
 	// CDateHelper::FormatDate(DHFD_TIME)
 	{
 		COleDateTime dtNow = COleDateTime::GetCurrentTime();
@@ -55,7 +59,7 @@ void CDateHelperTest::TestDecodeDate()
 
 		COleDateTime dtCheck;
 		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
-		ExpectEQ(dtCheck, dtNow);
+		ExpectEQ(dtCheck, dtNow, DATE_TOL);
 
 		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
 		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
@@ -81,7 +85,7 @@ void CDateHelperTest::TestDecodeDate()
 
 		COleDateTime dtCheck;
 		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
-		ExpectEQ(dtCheck, dtNow);
+		ExpectEQ(dtCheck, dtNow, DATE_TOL);
 
 		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
 		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);

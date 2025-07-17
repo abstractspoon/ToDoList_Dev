@@ -844,7 +844,12 @@ BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAnd
 
 	// Treat a negative date as Persian/Jalali
 	if ((date.m_dt < 0.0) && CJalaliCalendar::IsActive())
+	{
+		COleDateTime dtTimeOnly = GetTimeOnly(date);
+
 		date = CJalaliCalendar::ToGregorian(date.GetYear(), date.GetMonth(), date.GetDay());
+		date = MakeDate(date, dtTimeOnly);
+	}
 
 	return TRUE;
 }

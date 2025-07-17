@@ -1317,7 +1317,7 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
 
 	// Special cases
-	if (mapAttrib.Has(TDCA_NEWTASK) || mapAttrib.Has(TDCA_ALL))
+	if (mapAttrib.HasAttribOrAll(TDCA_NEWTASK))
 	{
 		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK) || mapAttrib.HasOnly(TDCA_ALL));
 
@@ -3919,6 +3919,31 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 	{
 		// do nothing
 	}
+	else if (mapAttribIDs.HasOnly(TDCA_ALL))
+	{
+		// If this is an UNDO then our base class will have pre-selected
+		// the previously selected tasks (ie. aModTaskIDs) BUT if our current
+		// view does not don't support/ multi-selection, say, then the 
+		// current selection will no longer match aModTaskIDs, so our first job
+		// if to ensure that it does so that the correct tasks get updated.
+
+		// Get the current selection
+		CDWordArray aSelTaskIDs;
+		m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+		// Does it match the modified tasks
+		BOOL bFixupSelection = !Misc::MatchAll(aModTaskIDs, aSelTaskIDs);
+
+		if (bFixupSelection)
+			m_taskTree.SelectTasks(aModTaskIDs);
+
+		// Do the update
+		UpdateExtensionViewsSelection(mapAttribIDs);
+
+		// restore the previous selection if required
+		if (bFixupSelection)
+			m_taskTree.SelectTasks(aSelTaskIDs);
+	}
 	else // all else
 	{
 		UpdateExtensionViewsSelection(mapAttribIDs);
@@ -4094,11 +4119,9 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 		// Include parents if this is an undo 
 		// OR there is a colour change
 		// OR a calculated attribute change
-		BOOL bUndo = mapAttribIDs.Has(TDCA_ALL);
-		ASSERT(!bUndo || mapAttribIDs.HasOnly(TDCA_ALL));
+ 		ASSERT(!mapAttribIDs.Has(TDCA_ALL) || mapAttribIDs.HasOnly(TDCA_ALL));
 
-		if (bUndo || 
-			mapAttribIDs.Has(TDCA_COLOR) || 
+		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) || 
 			ModAffectsAggregatedAttributes(mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_ALLPARENTS;
@@ -4106,7 +4129,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// DONT include subtasks UNLESS the completion date
 		// has changed OR this is an inherited attribute
-		if (!mapAttribIDs.Has(TDCA_DONEDATE) && 
+		if (!mapAttribIDs.HasAttribOrAll(TDCA_DONEDATE) && 
 			!WantUpdateInheritedAttibutes(mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_NOTSUBTASKS;
@@ -4114,16 +4137,14 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// Include references to selected tasks if a 
 		// 'Reference-specific' colour is not set
-		if (mapAttribIDs.Has(TDCA_COLOR) && 
+		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) && 
 			!m_taskTree.HasReferenceTaskColor())
 		{
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
 		}
 	
-		if (bUndo || mapAttribIDs.Has(TDCA_DEPENDENCY))
-		{
+		if (mapAttribIDs.HasAttribOrAll(TDCA_DEPENDENCY))
 			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
-		}
 	}
 
 	// Get the tasks for the update

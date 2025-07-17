@@ -314,9 +314,7 @@ BOOL CTDLAttributeComboBox::AttributeIsTimePeriod(TDC_ATTRIBUTE nAttribID) const
 
 BOOL CTDLAttributeComboBox::WantAttribute(TDC_ATTRIBUTE nAttribID) const
 {
-	return (m_mapWantedAttrib.IsEmpty() ||
-			m_mapWantedAttrib.Has(TDCA_ALL) ||
-			m_mapWantedAttrib.Has(nAttribID));
+	return (m_mapWantedAttrib.IsEmpty() || m_mapWantedAttrib.HasAttribOrAll(nAttribID));
 }
 
 BOOL CTDLAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE nAttribID) const
