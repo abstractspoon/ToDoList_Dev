@@ -221,7 +221,18 @@ SET FILELIST=%FILELIST%;XmlDiffView.exe
 SET FILELIST=%FILELIST%;ZstdNet.dll
 
 FOR %%f IN (%FILELIST%) DO ( 
+ECHO Adding '%%f' to zip >> %OUTPUT_FILE%
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\%%f >> %OUTPUT_FILE%
+
+REM - Check for locking errors
+IF %errorlevel% NEQ 0 (
+ECHO [41m Zipping Binaries FAILED[0m
+ECHO:
+REM Open the log
+%OUTPUT_FILE%
+PAUSE
+EXIT
+)
 )
 
 REM REquired MS components for C# plugins
