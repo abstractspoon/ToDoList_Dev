@@ -316,8 +316,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 
 BOOL CTDLStatusBar::WantUpdateAttribute(TDC_ATTRIBUTE nAttribID, const CTDCAttributeMap& mapAttrib)
 {
-	return (mapAttrib.Has(nAttribID) ||
-			mapAttrib.Has(TDCA_ALL) ||
+	return (mapAttrib.HasAttribOrAll(nAttribID) ||
 			mapAttrib.Has(TDCA_PASTE) ||
 			mapAttrib.Has(TDCA_POSITION_DIFFERENTPARENT));
 }
