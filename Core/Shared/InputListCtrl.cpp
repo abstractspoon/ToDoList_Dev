@@ -215,12 +215,10 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 		{
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
-
-			// scroll cell into view
-			ScrollCellIntoView(nItem, nCol);
 		}
 
 		m_nCurCol = nCol;
+		ScrollCellIntoView(nItem, nCol);
 	}
 	else
 	{
