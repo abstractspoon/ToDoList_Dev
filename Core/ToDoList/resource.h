@@ -911,6 +911,7 @@
 #define ID_NEWTASK_BEFORESELECTEDTASK   32800
 #define ID_NEWSUBTASK_ATTOP             32801
 #define ID_NEWSUBTASK_ATBOTTOM          32802
+#define ID_NEWSUBTASK_INTASK            32803
 #define ID_EDIT_TASKTEXT                32806
 #define ID_EDIT_TOGGLETASKDONE          32807
 #define ID_EDIT_TASKCOLOR               32808

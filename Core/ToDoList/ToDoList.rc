@@ -3112,6 +3112,7 @@ BEGIN
         MENUITEM "New &Subtask at Top of Selected Task", ID_NEWSUBTASK_ATTOP
         MENUITEM "New S&ubtask at Bottom of Selected Task", 
                                                 ID_NEWSUBTASK_ATBOTTOM
+        MENUITEM "New Subtask in Task...",      ID_NEWSUBTASK_INTASK
         MENUITEM SEPARATOR
         MENUITEM "S&plit Selected Task into Two (2) Equal Subtasks", 
                                                 ID_SPLITTASKINTO_TWO
