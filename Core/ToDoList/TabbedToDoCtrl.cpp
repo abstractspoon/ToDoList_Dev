@@ -4014,15 +4014,16 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 	ASSERT(HasAnyExtensionViews());
 
 	ASSERT(mapAttribIDs.HasOnly(TDCA_DELETE) ||
-			mapAttribIDs.HasOnly(TDCA_UNDO) ||
-			mapAttribIDs.HasOnly(TDCA_PASTE) ||
-			mapAttribIDs.HasOnly(TDCA_MERGE) ||
-			mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
-			mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
-			mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
-			mapAttribIDs.HasOnly(TDCA_POSITION) ||
-			mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
-			mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
+		   mapAttribIDs.HasOnly(TDCA_UNDO) ||
+		   mapAttribIDs.HasOnly(TDCA_PASTE) ||
+		   mapAttribIDs.HasOnly(TDCA_NEWTASK) ||
+		   mapAttribIDs.HasOnly(TDCA_MERGE) ||
+		   mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
+		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
+		   mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
 
 	FTC_VIEW nView = GetTaskView();
 

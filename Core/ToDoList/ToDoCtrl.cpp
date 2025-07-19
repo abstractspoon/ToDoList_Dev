@@ -10222,11 +10222,17 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 	if (dwTaskID)
 		return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, nAttribID));
 
-	// else
+	// else look for any editable task
 	CDWordArray aTaskIDs;
 	m_taskTree.GetSelectedTaskIDs(aTaskIDs, TRUE);
 
-	return m_multitasker.CanEditAnyTask(aTaskIDs, nAttribID);
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (CanEditTask(aTaskIDs[nID], nAttribID))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
