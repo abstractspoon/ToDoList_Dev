@@ -6087,7 +6087,7 @@ BEGIN
     ID_TOOLS_TOGGLEDARKMODE "\nToggle Dark Mode"
     ID_ATTRIBCTRL_MOVEATTRIBUP "\nMove Attribute Up"
     ID_ATTRIBCTRL_MOVEATTRIBDOWN "\nMove Attribute Down"
-    ID_ATTRIBCTRL_RESETMOVES "\nReset Attribute Order"
+    ID_ATTRIBCTRL_RESETMOVES "\nReset Attribute Moves"
     ID_ATTRIBCTRL_SETLABELCOLOR "\nSet Label Background Colour"
 END
 
