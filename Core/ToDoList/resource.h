@@ -148,6 +148,7 @@
 #define IDB_ATTRIBCTRL_TOOLBAR          331
 #define IDI_TIMETRACK_GOTO              332
 #define IDI_REMINDER                    333
+#define IDD_BROWSEFORTASK_DIALOG        337
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -875,6 +876,7 @@
 #define IDC_NUMPRORITYRISKLEVELS        1587
 #define IDC_SETNUMPRIORITYRISKLEVELS    1588
 #define IDC_SOUNDFILE                   1589
+#define IDC_TASKCOMBO                   1591
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -2579,9 +2581,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        337
+#define _APS_NEXT_RESOURCE_VALUE        338
 #define _APS_NEXT_COMMAND_VALUE         34786
-#define _APS_NEXT_CONTROL_VALUE         1591
+#define _APS_NEXT_CONTROL_VALUE         1592
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
