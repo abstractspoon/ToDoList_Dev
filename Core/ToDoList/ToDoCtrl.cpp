@@ -2989,7 +2989,7 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 
 	if (nWhere == TDC_INSERTINTASK)
 	{
-		TDCGETTASKS filter(TDCGT_NOTDONE);
+		TDCGETTASKS filter;
 
 		filter.mapAttribs.Add(TDCA_TASKNAME);
 		filter.mapAttribs.Add(TDCA_ICON);
