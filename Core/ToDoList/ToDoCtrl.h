@@ -188,7 +188,6 @@ public:
 
 	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel = TRUE, DWORD dwDependency = 0);
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
-	BOOL CanCreateNewTask(TDC_INSERTWHERE nWhere, const CString& sText) const;
 
 	void SetSubtaskDragDropPos(BOOL bTop = TRUE) { m_bDragDropSubtasksAtTop = bTop; }
 	BOOL SplitSelectedTask(int nNumSubtasks = 2);

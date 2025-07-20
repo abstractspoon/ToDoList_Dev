@@ -2979,8 +2979,16 @@ BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 
 BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel, DWORD dwDependency)
 {
-	if (!CanCreateNewTask(nWhere, sText))
+	if (!CanCreateNewTask(nWhere) || sText.IsEmpty())
 		return FALSE;
+
+	// Are we an archive and should we warn user if we are
+	if (m_bArchive && 
+		HasStyle(TDCS_WARNADDDELETEARCHIVE) && 
+		(IDNO == CMessageBox::AfxShow(IDS_TDC_CONFIRMADD_TITLE, IDS_TDC_WARNADDTOARCHIVE, MB_YESNO | MB_ICONQUESTION)))
+	{
+		return FALSE;
+	}
 	
 	Flush();
 
@@ -3060,23 +3068,6 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	}
 
 	return FALSE;
-}
-
-BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nWhere, const CString& sText) const
-{
-	if (!CanCreateNewTask(nWhere) || sText.IsEmpty())
-		return FALSE;
-
-	// are we an archive and should we warn user if we are
-	if (m_bArchive && HasStyle(TDCS_WARNADDDELETEARCHIVE))
-	{
-		if (CMessageBox::AfxShow(IDS_TDC_CONFIRMADD_TITLE, IDS_TDC_WARNADDTOARCHIVE, MB_YESNO | MB_ICONQUESTION) != IDYES) 
-		{
-			return FALSE;
-		}
-	}
-
-	return TRUE;
 }
 
 TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
