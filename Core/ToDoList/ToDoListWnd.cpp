@@ -221,13 +221,12 @@ void CToDoListWnd::IDLETASKS::UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCA
 	else
 		m_bUpdateTimeTrackAllTasks |= (bAllTasks != FALSE);
 
-	if (mapAttrib.Has(TDCA_ALL))
+	if (!mapAttrib.MatchAll(m_mapTimeTrackAttrib))
 	{
-		m_mapTimeTrackAttrib.Set(TDCA_ALL);
-	}
-	else if (!m_mapTimeTrackAttrib.Has(TDCA_ALL))
-	{
-		m_mapTimeTrackAttrib.Append(mapAttrib);
+		if (mapAttrib.Has(TDCA_ALL) || !m_mapTimeTrackAttrib.IsEmpty())
+			m_mapTimeTrackAttrib.Set(TDCA_ALL);
+		else
+			m_mapTimeTrackAttrib.Append(mapAttrib);
 	}
 }
 
