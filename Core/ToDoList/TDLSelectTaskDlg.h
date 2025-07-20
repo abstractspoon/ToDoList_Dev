@@ -8,6 +8,14 @@
 //
 
 #include "TDLDialog.h"
+#include "TDLTaskComboBox.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTaskFile;
+class CTDCImageList;
+
+typedef void* HTASKITEM;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLBrowseForTaskDlg dialog
@@ -16,31 +24,37 @@ class CTDLSelectTaskDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLSelectTaskDlg(CWnd* pParent = NULL);   // standard constructor
+	CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, CWnd* pParent = NULL);
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLBrowseForTaskDlg)
-	CComboBox	m_cbTasks;
+	CTDLTaskComboBox m_cbTasks;
 	CString	m_sSelectedTask;
 	//}}AFX_DATA
 
+	const CTaskFile& m_tasks;
+	const CTDCImageList& m_ilTasks;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLBrowseForTaskDlg)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLBrowseForTaskDlg)
 		// NOTE: the ClassWizard will add member functions here
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	void PopulateTaskCombo(HTASKITEM hTask, int nLevel);
+
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -17,6 +17,7 @@
 #include "tdlreuserecurringtaskdlg.h"
 #include "tdlimportoutlookobjectsdlg.h"
 #include "tdladdloggedtimedlg.h"
+#include "TDLSelectTaskDlg.h"
 #include "tdcoutlookimporthelper.h"
 #include "ToDoCtrlDataDefines.h"
 #include "TDCDialogHelper.h"
@@ -2984,31 +2985,38 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 	
 	Flush();
 
-	// CToDoListWnd already handles empty tasklists
-	// so this should be unnecessary.
-	// Commenting out to see what happens...
-/*
-	// handle special case when tasklist is empty
-	if (GetTaskCount() == 0)
-		nWhere = TDC_INSERTATBOTTOM;
-*/
-	
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
-	if (m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
+	if (nWhere == TDC_INSERTINTASK)
 	{
-		HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditLabel, dwDependency);
-		ASSERT(htiNew);
+		TDCGETTASKS filter(TDCGT_NOTDONE);
 
-		DWORD dwTaskID = GetTaskID(htiNew);
-		ASSERT(dwTaskID == (m_dwNextUniqueID - 1));
+		filter.mapAttribs.Add(TDCA_TASKNAME);
+		filter.mapAttribs.Add(TDCA_ICON);
 
-		return (htiNew != NULL);
+		CTaskFile tasks;
+		GetTasks(tasks, filter);
+
+		CTDLSelectTaskDlg dialog(tasks, m_ilTaskIcons);
+
+		if (dialog.DoModal() != IDOK)
+			return FALSE;
+
+		// TODO
+	}
+	else if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
+	{
+		ASSERT(0);
+		return FALSE;
 	}
 
-	// else
-	ASSERT(0);
-	return FALSE;
+	HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditLabel, dwDependency);
+	ASSERT(htiNew);
+
+	DWORD dwTaskID = GetTaskID(htiNew);
+	ASSERT(dwTaskID == (m_dwNextUniqueID - 1));
+
+	return (htiNew != NULL);
 }
 
 BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
@@ -3021,6 +3029,9 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	case TDC_INSERTATTOP:
 	case TDC_INSERTATBOTTOM:
 		return TRUE;
+
+	case TDC_INSERTINTASK:
+		return GetTaskCount();
 
 	case TDC_INSERTATTOPOFSELTASKPARENT:
 	case TDC_INSERTATBOTTOMOFSELTASKPARENT:
