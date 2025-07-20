@@ -2227,10 +2227,10 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,221,246,50,14
 END
 
-IDD_BROWSEFORTASK_DIALOG DIALOG DISCARDABLE  0, 0, 307, 175
+IDD_SELECTTASK_DIALOG DIALOG DISCARDABLE  0, 0, 307, 175
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Browse for Task"
-FONT 8, "MS Sans Serif"
+CAPTION "Select Task"
+FONT 8, "Tahoma"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,193,154,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,250,154,50,14
@@ -3124,7 +3124,7 @@ BEGIN
         MENUITEM "New &Subtask at Top of Selected Task", ID_NEWSUBTASK_ATTOP
         MENUITEM "New S&ubtask at Bottom of Selected Task", 
                                                 ID_NEWSUBTASK_ATBOTTOM
-        MENUITEM "New Subtask on Task...",      ID_NEWSUBTASK_ONTASK
+        MENUITEM "New Subtask in Task...",      ID_NEWSUBTASK_INTASK
         MENUITEM SEPARATOR
         MENUITEM "S&plit Selected Task into Two (2) Equal Subtasks", 
                                                 ID_SPLITTASKINTO_TWO
@@ -3902,6 +3902,8 @@ BEGIN
         BEGIN
             MENUITEM "At &Top of Task",             ID_NEWSUBTASK_ATTOP
             MENUITEM "At &Bottom of Task",          ID_NEWSUBTASK_ATBOTTOM
+            MENUITEM SEPARATOR
+            MENUITEM "In Task...",                  ID_NEWSUBTASK_INTASK
         END
         MENUITEM SEPARATOR
         MENUITEM "New &Dependent Task Below Selected Task", 
@@ -4073,6 +4075,7 @@ BEGIN
             MENUITEM "At T&op",                     ID_NEWTASK_ATTOP
             MENUITEM "At Botto&m",                  ID_NEWTASK_ATBOTTOM
         END
+        MENUITEM "New Subtask in Task...",      ID_NEWSUBTASK_INTASK
     END
     POPUP "TabCtrl"
     BEGIN
@@ -4687,7 +4690,7 @@ BEGIN
         BOTTOMMARGIN, 260
     END
 
-    IDD_BROWSEFORTASK_DIALOG, DIALOG
+    IDD_SELECTTASK_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 300
