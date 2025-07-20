@@ -381,10 +381,6 @@ SOURCE=..\ToDoList\TDLBrowserDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDLBrowseTaskDlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TDLCleanupIniPreferencesDlg.cpp
 # End Source File
 # Begin Source File
@@ -570,6 +566,10 @@ SOURCE=..\ToDoList\TDLReuseRecurringTaskDlg.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLRiskComboBox.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLSelectTaskDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -1057,10 +1057,6 @@ SOURCE=..\ToDoList\TDLBrowserDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDLBrowseTaskDlg.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TDLCleanupIniPreferencesDlg.h
 # End Source File
 # Begin Source File
@@ -1246,6 +1242,10 @@ SOURCE=..\ToDoList\TDLReuseRecurringTaskDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLRiskComboBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLSelectTaskDlg.h
 # End Source File
 # Begin Source File
 

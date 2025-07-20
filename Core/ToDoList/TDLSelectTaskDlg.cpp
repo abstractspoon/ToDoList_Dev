@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "TDLBrowseTaskDlg.h"
+#include "TDLSelectTaskDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -15,7 +15,7 @@ static char THIS_FILE[] = __FILE__;
 // CTDLBrowseForTaskDlg dialog
 
 
-CTDLBrowseTaskDlg::CTDLBrowseTaskDlg(CWnd* pParent /*=NULL*/)
+CTDLSelectTaskDlg::CTDLSelectTaskDlg(CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_BROWSEFORTASK_DIALOG, _T(""), pParent)
 {
@@ -25,7 +25,7 @@ CTDLBrowseTaskDlg::CTDLBrowseTaskDlg(CWnd* pParent /*=NULL*/)
 }
 
 
-void CTDLBrowseTaskDlg::DoDataExchange(CDataExchange* pDX)
+void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 
@@ -36,7 +36,7 @@ void CTDLBrowseTaskDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLBrowseTaskDlg, CTDLDialog)
+BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLBrowseForTaskDlg)
 		// NOTE: the ClassWizard will add message map macros here
 	//}}AFX_MSG_MAP

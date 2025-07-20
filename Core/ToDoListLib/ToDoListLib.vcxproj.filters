@@ -497,7 +497,7 @@
     <ClCompile Include="..\ToDoList\TDCAnonymizeTaskTimeLog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLBrowseTaskDlg.cpp">
+    <ClCompile Include="..\ToDoList\TDLSelectTaskDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1009,7 +1009,7 @@
     <ClInclude Include="..\ToDoList\TDCAnonymizeTaskTimeLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ToDoList\TDLBrowseTaskDlg.h">
+    <ClInclude Include="..\ToDoList\TDLSelectTaskDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

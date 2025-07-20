@@ -151,6 +151,7 @@ enum TDC_INSERTWHERE
 	TDC_INSERTBEFORESELTASK,
 	TDC_INSERTATTOPOFSELTASK, // subtask
 	TDC_INSERTATBOTTOMOFSELTASK, // subtask
+	TDC_INSERTONTASK, // subtask
 };
 
 /////////////////////////////////////////////////////////////////////////////

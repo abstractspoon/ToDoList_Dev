@@ -1,5 +1,5 @@
-#if !defined(AFX_TDLBROWSETASKDLG_H__135C804F_9469_4B97_AAE1_F05C79DE41DF__INCLUDED_)
-#define AFX_TDLBROWSETASKDLG_H__135C804F_9469_4B97_AAE1_F05C79DE41DF__INCLUDED_
+#if !defined(AFX_TDLSELECTTASKDLG_H__135C804F_9469_4B97_AAE1_F05C79DE41DF__INCLUDED_)
+#define AFX_TDLSELECTTASKDLG_H__135C804F_9469_4B97_AAE1_F05C79DE41DF__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -12,11 +12,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // CTDLBrowseForTaskDlg dialog
 
-class CTDLBrowseTaskDlg : public CTDLDialog
+class CTDLSelectTaskDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLBrowseTaskDlg(CWnd* pParent = NULL);   // standard constructor
+	CTDLSelectTaskDlg(CWnd* pParent = NULL);   // standard constructor
 
 protected:
 // Dialog Data
@@ -46,4 +46,4 @@ protected:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_TDLBROWSETASKDLG_H__135C804F_9469_4B97_AAE1_F05C79DE41DF__INCLUDED_)
+#endif // !defined(AFX_TDLSELECTTASKDLG_H__135C804F_9469_4B97_AAE1_F05C79DE41DF__INCLUDED_)
