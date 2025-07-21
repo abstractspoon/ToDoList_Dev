@@ -1716,19 +1716,23 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const
+BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID/*, DWORD dwTaskID*/) const
 {
-	return CToDoCtrl::CanEditSelectedTask(nAttribID, dwTaskID);
+	return CToDoCtrl::CanEditSelectedTask(nAttribID/*, dwTaskID*/);
 }
 
 BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
 {
 	dwTaskID = mod.dwSelectedTaskID;
 
-	if (!CanEditSelectedTask(mod.nAttributeID, dwTaskID))
+	if (dwTaskID == 0)
+		return CanEditSelectedTask(mod.nAttributeID);
+
+//	if (!CanEditSelectedTask(mod.nAttributeID, dwTaskID))
+	if (!m_taskTree.IsTaskSelected(dwTaskID) || !CanEditTask(dwTaskID, mod.nAttributeID))
 		return FALSE;
 
-	if (dwTaskID && (GetSelectedTaskCount() == 1))
+	if (GetSelectedTaskCount() == 1)
 	{
 		ASSERT(GetSelectedTaskID() == dwTaskID);
 		dwTaskID = 0; // same as 'selected'

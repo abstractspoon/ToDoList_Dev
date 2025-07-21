@@ -2992,15 +2992,6 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 	
 	Flush();
 
-	// CToDoListWnd already handles empty tasklists
-	// so this should be unnecessary.
-	// Commenting out to see what happens...
-/*
-	// handle special case when tasklist is empty
-	if (GetTaskCount() == 0)
-		nWhere = TDC_INSERTATBOTTOM;
-*/
-	
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
 	if (m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
@@ -3082,13 +3073,10 @@ TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, 
 									BOOL bEditLabel, DWORD dwDependency)
 {
+	ASSERT(CanEditSelectedTask(TDCA_NEWTASK));
+	ASSERT(!sText.IsEmpty());
+
 	m_dwLastAddedID = 0;
-	
-	if (!CanEditSelectedTask(TDCA_NEWTASK))
-		return NULL;
-	
-	if (sText.IsEmpty())
-		return NULL;
 	
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_ADD);
 
@@ -6676,22 +6664,27 @@ void CToDoCtrl::OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult)
 LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 {
 	TDC_COLUMN nColID = (TDC_COLUMN)wParam;
+	ASSERT(nColID != TDCC_NONE);
+
 	DWORD dwTaskID = lParam;
+	ASSERT(dwTaskID);
+
+	BOOL bSelTask = m_taskTree.IsTaskSelected(dwTaskID);
 
 	switch (nColID)
 	{
 	case TDCC_CLIENT:
-		ASSERT(CanEditSelectedTask(TDCA_TASKNAME, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_TASKNAME));
 		EditSelectedTaskTitle();
 		break;
 		
 	case TDCC_DONE:
-		ASSERT(CanEditSelectedTask(TDCA_DONEDATE, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_DONEDATE));
 		SetSelectedTaskCompletion(m_data.IsTaskDone(dwTaskID) ? TDCTC_UNDONE : TDCTC_DONE);
 		break;
 		
 	case TDCC_TRACKTIME:
-		ASSERT(CanEditSelectedTask(TDCA_TIMESPENT, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_TIMESPENT));
 		{
 			HTREEITEM hti = m_taskTree.GetTreeSelectedItem();
 
@@ -6704,17 +6697,17 @@ LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case TDCC_FLAG:
-		ASSERT(CanEditSelectedTask(TDCA_FLAG, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_FLAG));
 		SetSelectedTaskFlag(!m_data.IsTaskFlagged(dwTaskID));
 		break;
 		
 	case TDCC_LOCK:
-		ASSERT(CanEditSelectedTask(TDCA_LOCK, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_LOCK));
 		SetSelectedTaskLock(!m_data.IsTaskLocked(dwTaskID));
 		break;
 
 	case TDCC_ICON:
-		ASSERT(CanEditSelectedTask(TDCA_ICON, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_ICON));
 
 		// Cancel any drag started by clicking on the tree item icon
 		m_treeDragDrop.CancelDrag();
@@ -7755,12 +7748,21 @@ int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncC
 
 BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttribs, DWORD dwFlags)
 {
-	if (!CanEditSelectedTask(mapAttribs))
-		return FALSE;
+	// Must be able to merge all specified attributes
+	POSITION pos = mapAttribs.GetStartPosition();
+
+	while (pos)
+	{
+		if (!CanEditSelectedTask(mapAttribs.GetNext(pos)))
+			return FALSE;
+	}
+	
+// 	if (!CanEditSelectedTask(mapAttribs))
+// 		return FALSE;
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	POSITION pos = TSH().GetFirstItemPos();
+	/*POSITION*/ pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
 
 	while (pos)
@@ -8279,7 +8281,7 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 				return CanEditSelectedTask(TDCA_FILELINK);
 
 			// else 
-			return CanEditSelectedTask(TDCA_NEWTASK);
+			return CanEditSelectedTask(TDCA_NEWTASK/*, pData->dwTaskID*/);
 		}
 
 		if (pData->HasText())
@@ -10186,6 +10188,30 @@ CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMax
 	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep, nMaxTasks); 
 }
 
+BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const
+{
+	CDWordArray aTaskIDs;
+	
+	// Special case: Nothing selected
+	if (!m_taskTree.GetSelectedTaskIDs(aTaskIDs, TRUE))
+		return CanEditTask(0, nAttribID);
+	
+	// Look for first editable task
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		if (CanEditTask(aTaskIDs[nID], nAttribID))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+/*
+BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const 
+{ 
+	return CanEditSelectedTask(nAttribID, 0); 
+}
+
 BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const
 {
 	if (mapAttribs.IsEmpty())
@@ -10223,6 +10249,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) con
 
 	return FALSE;
 }
+*/
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {
