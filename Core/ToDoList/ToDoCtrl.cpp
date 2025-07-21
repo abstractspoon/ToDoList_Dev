@@ -10073,17 +10073,11 @@ BOOL CToDoCtrl::CanClearSelectedTaskFocusedAttribute() const
 {
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 
-	if (!CanEditSelectedTask(nAttribID))
-		return FALSE;
-
 	return CanClearSelectedTaskAttribute(nAttribID);
 }
 
 BOOL CToDoCtrl::ClearSelectedTaskFocusedAttribute()
 {
-	if (!CanClearSelectedTaskFocusedAttribute())
-		return FALSE;
-
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 
 	return ClearSelectedTaskAttribute(nAttribID);
@@ -10096,11 +10090,12 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const
 
 	switch (nAttribID)
 	{
-	case TDCA_LOCK:		return TRUE;
-	case TDCA_TASKNAME:	return FALSE;
+	case TDCA_LOCK:			
+		return TRUE;
 
+	case TDCA_TASKNAME:
 	case TDCA_PROJECTNAME:
-		ASSERT(0);
+	case TDCA_COMMENTS:		
 		return FALSE;
 	}
 
@@ -10113,6 +10108,9 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const
 
 BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 {
+	if (!CanClearSelectedTaskAttribute(nAttribID))
+		return FALSE;
+
 	switch (nAttribID)
 	{
 	case TDCA_DONEDATE:		return SetSelectedTaskDate(TDCD_DONE, 0.0);
