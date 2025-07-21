@@ -1730,7 +1730,7 @@ BOOL CTabbedToDoCtrl::CanEditSelectedExtensionTask(const IUITASKMOD& mod, DWORD&
 {
 	dwTaskID = mod.dwSelectedTaskID;
 
-	if (GetSelectedTaskCount() == 1)
+	if (dwTaskID && (GetSelectedTaskCount() == 1))
 	{
 		ASSERT(GetSelectedTaskID() == dwTaskID);
 		dwTaskID = 0; // same as 'selected'
