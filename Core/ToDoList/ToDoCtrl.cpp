@@ -2979,8 +2979,11 @@ BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 
 BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel, DWORD dwDependency)
 {
-	if (!CanCreateNewTask(nWhere) || sText.IsEmpty())
+	if (sText.IsEmpty() || !CanCreateNewTask(nWhere))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// Are we an archive and should we warn user if we are
 	if (m_bArchive && 
@@ -3073,6 +3076,7 @@ TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, 
 									BOOL bEditLabel, DWORD dwDependency)
 {
+	ASSERT((htiParent == TVI_ROOT) || CanEditTask(GetTaskID(htiParent), TDCA_NEWTASK));
 	ASSERT(CanEditSelectedTask(TDCA_NEWTASK));
 	ASSERT(!sText.IsEmpty());
 
