@@ -1720,19 +1720,17 @@ BOOL CTabbedToDoCtrl::CanEditSelectedExtensionTask(const IUITASKMOD& mod, DWORD&
 {
 	dwTaskID = mod.dwSelectedTaskID;
 
-	if (dwTaskID == 0)
-		return CanEditSelectedTask(mod.nAttributeID);
-
-	if (!m_taskTree.IsTaskSelected(dwTaskID) || !CanEditTask(dwTaskID, mod.nAttributeID))
-		return FALSE;
-
 	if (GetSelectedTaskCount() == 1)
 	{
 		ASSERT(GetSelectedTaskID() == dwTaskID);
 		dwTaskID = 0; // same as 'selected'
 	}
 
-	return TRUE;
+	if (dwTaskID == 0)
+		return CanEditSelectedTask(mod.nAttributeID);
+
+	// else
+	return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, mod.nAttributeID));
 }
 
 BOOL CTabbedToDoCtrl::SplitSelectedTask(int nNumSubtasks)
