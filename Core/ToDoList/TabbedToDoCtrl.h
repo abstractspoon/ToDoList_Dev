@@ -68,7 +68,6 @@ public:
 	BOOL HasSelection() const { return GetSelectedTaskCount(); }
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect); 
-	BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
 	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 
