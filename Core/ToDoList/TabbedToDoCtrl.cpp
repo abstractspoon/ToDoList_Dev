@@ -1716,11 +1716,6 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	return TRUE;
 }
 
-// BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID/*, DWORD dwTaskID*/) const
-// {
-// 	return CToDoCtrl::CanEditSelectedTask(nAttribID/*, dwTaskID*/);
-// }
-
 BOOL CTabbedToDoCtrl::CanEditSelectedExtensionTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
 {
 	dwTaskID = mod.dwSelectedTaskID;
@@ -1728,7 +1723,6 @@ BOOL CTabbedToDoCtrl::CanEditSelectedExtensionTask(const IUITASKMOD& mod, DWORD&
 	if (dwTaskID == 0)
 		return CanEditSelectedTask(mod.nAttributeID);
 
-//	if (!CanEditSelectedTask(mod.nAttributeID, dwTaskID))
 	if (!m_taskTree.IsTaskSelected(dwTaskID) || !CanEditTask(dwTaskID, mod.nAttributeID))
 		return FALSE;
 

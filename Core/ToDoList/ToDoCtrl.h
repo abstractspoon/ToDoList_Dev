@@ -747,9 +747,6 @@ protected:
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const { return m_taskTree.SelectedTaskHasDate(nDate); }
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_ctrlAttributes.GetCustomAttributeData(sAttribID, data, bFormatted); }
 
-//	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const;
-//	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const;
-
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const;
 	BOOL ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID);

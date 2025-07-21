@@ -7757,13 +7757,11 @@ BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask
 			return FALSE;
 	}
 	
-// 	if (!CanEditSelectedTask(mapAttribs))
-// 		return FALSE;
-
+	// Do the paste
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	/*POSITION*/ pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
+	pos = TSH().GetFirstItemPos();
 
 	while (pos)
 	{
@@ -7808,7 +7806,6 @@ BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL 
 	{
 		if (m_aCustomAttribDefs.Append(aAttribDefs))
 			OnCustomAttributesChanged();
-			//RebuildCustomAttributeUI();
 	}
 
 	// add the tasks
@@ -10205,51 +10202,6 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const
 
 	return FALSE;
 }
-
-/*
-BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const 
-{ 
-	return CanEditSelectedTask(nAttribID, 0); 
-}
-
-BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const
-{
-	if (mapAttribs.IsEmpty())
-		return FALSE;
-
-	POSITION pos = mapAttribs.GetStartPosition();
-
-	while (pos)
-	{
-		if (!CanEditSelectedTask(mapAttribs.GetNext(pos), 0))
-			return FALSE;
-	}
-
-	return TRUE;
-}
-
-BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const 
-{ 
-	if (m_taskTree.GetItemCount())
-		return CanEditTask(0, nAttribID);
-
-	// else
-	if (dwTaskID)
-		return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, nAttribID));
-
-	// else look for any editable task
-	CDWordArray aTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aTaskIDs, TRUE);
-
-	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
-	{
-		if (CanEditTask(aTaskIDs[nID], nAttribID))
-			return TRUE;
-	}
-
-	return FALSE;
-}
-*/
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {

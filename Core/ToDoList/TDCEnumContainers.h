@@ -118,8 +118,6 @@ public:
 	TDC_ATTRIBUTE GetFirst() const;
 	BOOL HasAttribOrAll(TDC_ATTRIBUTE nAttribID) const;
 
-//	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttribID);
-
 protected:
 	TDC_ATTRIBUTE GetDefaultValue() { return TDCA_NONE; }
 
