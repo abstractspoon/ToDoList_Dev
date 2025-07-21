@@ -1712,6 +1712,7 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 
 	if (GetUpdateControlsItem() == NULL)
 	{
+		// Disable task editing
 		switch (nAttribID)
 		{
 		case TDCA_DELETE:
