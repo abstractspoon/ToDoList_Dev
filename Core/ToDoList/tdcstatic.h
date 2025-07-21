@@ -256,24 +256,6 @@ namespace TDC
 		return GetAttributeLabel(nAttribID);
 	}
 
-// 	static BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID)
-// 	{
-// 		switch (nAttribID)
-// 		{
-// 		case TDCA_CREATIONDATE:	
-// 		case TDCA_LASTMODDATE:	
-// 		case TDCA_STARTDATE:	
-// 		case TDCA_STARTTIME:	
-// 		case TDCA_DUEDATE:		
-// 		case TDCA_DUETIME:		
-// 		case TDCA_DONEDATE:		
-// 		case TDCA_DONETIME:		
-// 			return TRUE;
-// 		}
-// 
-// 		return FALSE;
-// 	}
-
 	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	{
 		switch (nAttribID)
