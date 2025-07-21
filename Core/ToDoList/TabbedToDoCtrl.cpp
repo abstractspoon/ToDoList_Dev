@@ -1711,7 +1711,16 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		return FALSE;
 
 	if (GetUpdateControlsItem() == NULL)
-		return !(TDC::IsTaskAttribute(nAttribID) || (nAttribID == TDCA_DELETE));
+	{
+		switch (nAttribID)
+		{
+		case TDCA_DELETE:
+			return FALSE;
+
+		default:
+			return !TDC::IsTaskAttribute(nAttribID);
+		}
+	}
 
 	return TRUE;
 }
