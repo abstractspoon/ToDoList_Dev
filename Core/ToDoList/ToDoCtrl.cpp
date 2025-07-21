@@ -7115,7 +7115,7 @@ BOOL CToDoCtrl::DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDial
 	{
 		// if we are readonly, we need to prevent
 		// the dialog showing 'Add time to time spent'
-		BOOL bShowAddToTimeSpent = (CanEditSelectedTask(TDCA_TIMESPENT) && !bTracked);
+		BOOL bShowAddToTimeSpent = (!bTracked && CanEditSelectedTask(TDCA_TIMESPENT));
 
 		CTDLAddLoggedTimeDlg dialog(dwTaskID, bShowAddToTimeSpent, HasStyle(TDCS_SHOWDATESINISO), dHours, this);
 
