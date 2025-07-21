@@ -256,22 +256,77 @@ namespace TDC
 		return GetAttributeLabel(nAttribID);
 	}
 
-	static BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID)
+// 	static BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID)
+// 	{
+// 		switch (nAttribID)
+// 		{
+// 		case TDCA_CREATIONDATE:	
+// 		case TDCA_LASTMODDATE:	
+// 		case TDCA_STARTDATE:	
+// 		case TDCA_STARTTIME:	
+// 		case TDCA_DUEDATE:		
+// 		case TDCA_DUETIME:		
+// 		case TDCA_DONEDATE:		
+// 		case TDCA_DONETIME:		
+// 			return TRUE;
+// 		}
+// 
+// 		return FALSE;
+// 	}
+
+	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	{
 		switch (nAttribID)
 		{
-		case TDCA_CREATIONDATE:	
-		case TDCA_LASTMODDATE:	
-		case TDCA_STARTDATE:	
-		case TDCA_STARTTIME:	
-		case TDCA_DUEDATE:		
-		case TDCA_DUETIME:		
-		case TDCA_DONEDATE:		
-		case TDCA_DONETIME:		
+		case TDCA_ALLOCBY:
+		case TDCA_ALLOCTO:
+		case TDCA_CATEGORY:
+		case TDCA_COLOR:
+		case TDCA_COMMENTS:
+		case TDCA_COMMENTSSIZE:
+		case TDCA_COMMENTSFORMAT:
+		case TDCA_COST:
+		case TDCA_CREATEDBY:
+		case TDCA_CREATIONDATE:
+		case TDCA_DEPENDENCY:
+		case TDCA_DONEDATE:
+		case TDCA_DONETIME:
+		case TDCA_DUEDATE:
+		case TDCA_DUETIME:
+		case TDCA_EXTERNALID:
+		case TDCA_FILELINK:
+		case TDCA_FLAG:
+		case TDCA_HTMLCOMMENTS:
+		case TDCA_ICON:
+		case TDCA_ID:
+		case TDCA_LOCK:
+		case TDCA_LASTMODDATE:
+		case TDCA_LASTMODBY:
+		case TDCA_METADATA:
+		case TDCA_PARENTID:
+		case TDCA_PATH:
+		case TDCA_PERCENT:
+		case TDCA_POSITION:
+		case TDCA_PRIORITY:
+		case TDCA_RECURRENCE:
+		case TDCA_REMINDER:
+		case TDCA_RISK:
+		case TDCA_STARTDATE:
+		case TDCA_STARTTIME:
+		case TDCA_STATUS:
+		case TDCA_SUBTASKDONE:
+		case TDCA_TAGS:
+		case TDCA_TASKNAME:
+		case TDCA_TASKNAMEORCOMMENTS:
+		case TDCA_TIMEESTIMATE:
+		case TDCA_TIMEREMAINING:
+		case TDCA_TIMESPENT:
+		case TDCA_VERSION:
 			return TRUE;
 		}
 
-		return FALSE;
+		// all else
+		return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
 	}
 
 	static BOOL IsValidNumPriorityRiskLevels(int nNumLevels)

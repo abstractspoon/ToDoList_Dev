@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "TDCEnumContainers.h"
 #include "TDCCustomAttributeDef.h"
+#include "TDCStatic.h"
 
 #include "..\shared\Misc.h"
 
@@ -106,20 +107,20 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttribID) const
 		break;
 
 	case TDCA_HTMLCOMMENTS:
-		bCanAdd = (HasOnly(TDCA_ALL) || IsTaskAttribute(nAttribID));
+		bCanAdd = (HasOnly(TDCA_ALL) || TDC::IsTaskAttribute(nAttribID));
 		break;
 
 	case TDCA_TODAY:
 	case TDCA_REMINDER:
 		// Can only add if we already contain a task attribute
-		bCanAdd = IsTaskAttribute(GetNext(pos));
+		bCanAdd = TDC::IsTaskAttribute(GetNext(pos));
 		break;
 
 	default:
-		if (IsTaskAttribute(nAttribID))
+		if (TDC::IsTaskAttribute(nAttribID))
 		{
 			// Can only add if we already contain a task attribute
-			bCanAdd = IsTaskAttribute(GetNext(pos));
+			bCanAdd = TDC::IsTaskAttribute(GetNext(pos));
 		}
 		else
 		{
@@ -135,6 +136,7 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttribID) const
 	return bCanAdd;
 }
 
+/*
 BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttribID)
 {
 	switch (nAttribID)
@@ -190,6 +192,7 @@ BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
 }
 
+*/
 TDC_ATTRIBUTE CTDCAttributeMap::GetFirst() const
 {
 	if (GetCount())
