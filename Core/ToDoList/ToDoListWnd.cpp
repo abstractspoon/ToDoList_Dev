@@ -5966,7 +5966,7 @@ void CToDoListWnd::OnEditCut()
 
 void CToDoListWnd::OnUpdateEditCut(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_DELETE));	
+	OnUpdateDeletetask(pCmdUI);	
 }
 
 void CToDoListWnd::OnEditPasteSub() 

@@ -3077,7 +3077,6 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 									BOOL bEditLabel, DWORD dwDependency)
 {
 	ASSERT((htiParent == TVI_ROOT) || CanEditTask(GetTaskID(htiParent), TDCA_NEWTASK));
-	ASSERT(CanEditSelectedTask(TDCA_NEWTASK));
 	ASSERT(!sText.IsEmpty());
 
 	m_dwLastAddedID = 0;
@@ -8268,8 +8267,14 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 	{
 		if (pData->HasFiles())
 		{
-			if (pData->dwTaskID && !pData->bImportTasks)
-				return CanEditSelectedTask(TDCA_FILELINK);
+			if (pData->dwTaskID)
+			{
+				if (m_data.IsTaskLocked(pData->dwTaskID))
+					return FALSE;
+
+				if (!pData->bImportTasks)
+					return CanEditTask(pData->dwTaskID, TDCA_FILELINK);
+			}
 
 			// Check with parent
 			TDCDROPIMPORT data(pData->dwTaskID, *pData->pFilePaths);
@@ -8278,11 +8283,17 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 
 		if (pData->pOutlookSelection || CMSOutlookHelper::IsOutlookObject(pData->pObject))
 		{
-			if (pData->dwTaskID && !pData->bImportTasks)
-				return CanEditSelectedTask(TDCA_FILELINK);
+			if (pData->dwTaskID)
+			{
+				if (m_data.IsTaskLocked(pData->dwTaskID))
+					return FALSE;
+
+				if (!pData->bImportTasks)
+					return CanEditTask(pData->dwTaskID, TDCA_FILELINK);
+			}
 
 			// else 
-			return CanEditSelectedTask(TDCA_NEWTASK/*, pData->dwTaskID*/);
+			return CanEditSelectedTask(TDCA_NEWTASK);
 		}
 
 		if (pData->HasText())
