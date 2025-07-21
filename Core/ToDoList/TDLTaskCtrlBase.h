@@ -143,11 +143,11 @@ public:
  	COLORREF GetSelectedTaskColor() const; // -1 or no item selected
  	CString GetSelectedTaskIcon() const;
 	DWORD GetSelectedTaskParentID() const;
-	BOOL CanSplitSelectedTask() const;
 
 	BOOL SelectionHasDependencies() const;
 	BOOL SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const;
 	BOOL SelectionHasSameParent() const;
+	BOOL SelectionHasReferences() const;
 	BOOL SelectionHasNonReferences() const;
 	BOOL SelectionHasDependents() const;
 	BOOL SelectionHasRecurring() const;
@@ -486,7 +486,6 @@ protected:
 
 	// internal version
 	COLORREF GetTaskCommentsTextColor(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, COLORREF crBack) const;
-	BOOL SelectionHasReferences() const;
 
 	static const TDCCOLUMN* GetColumn(TDC_COLUMN nColID);
 	static BOOL InvalidateSelection(CListCtrl& lc, BOOL bUpdate = FALSE);

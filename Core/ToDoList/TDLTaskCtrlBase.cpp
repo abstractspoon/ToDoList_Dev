@@ -5888,25 +5888,6 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 	return sPath;
 }
 
-BOOL CTDLTaskCtrlBase::CanSplitSelectedTask() const
-{
-	if (IsReadOnly())
-		return FALSE;
-	
-	if (SelectionHasReferences())
-		return FALSE;
-	
-	int nSelCount = GetSelectedCount();
-	
-	if (nSelCount == 1)
-	{
-		if (SelectionHasDone(FALSE) || SelectionHasSubtasks())
-			return FALSE;
-	}
-	
-	return (nSelCount > 0);
-}
-
 BOOL CTDLTaskCtrlBase::PreTranslateMessage(MSG* pMsg)
 {
 	m_tooltipColumns.FilterToolTipMessage(pMsg);

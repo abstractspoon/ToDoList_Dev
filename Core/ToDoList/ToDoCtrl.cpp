@@ -3168,7 +3168,22 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 BOOL CToDoCtrl::CanSplitSelectedTask() const 
 { 
-	return (CanEditSelectedTask(TDCA_POSITION) && m_taskTree.CanSplitSelectedTask()); 
+	if (!CanEditSelectedTask(TDCA_NEWTASK))
+		return FALSE; 
+
+	switch (m_taskTree.GetSelectedCount())
+	{
+	case 0:
+		return FALSE;
+
+	case 1:
+		return (!m_taskTree.SelectionHasDone(FALSE) && 
+				!m_taskTree.SelectionHasSubtasks() &&
+				!m_taskTree.SelectionHasReferences());
+	}
+
+	// For the rest we filter during the actual splitting
+	return TRUE;
 }
 
 BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
@@ -3193,10 +3208,13 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 		
 		DWORD dwTaskID = GetTaskID(hti);
 
+		if (m_calculator.IsTaskLocked(dwTaskID))
+			continue;
+
 		const TODOITEM* pTDI = GetTask(dwTaskID);
 		ASSERT(pTDI);
 		
-		if (!pTDI || pTDI->IsDone())
+		if (!pTDI || pTDI->IsDone() || pTDI->IsReference())
 			continue;
 		
 		// Calculate how to apportion time to subtasks
