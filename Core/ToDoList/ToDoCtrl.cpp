@@ -10220,14 +10220,20 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {
+	if (IsReadOnly())
+		return FALSE;
+
 	// These do not depend on a specific task
 	switch (nAttribID)
 	{
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
+		if (dwTaskID == 0)
+			return TRUE;
+		break;
+
 	case TDCA_UNDO:
 	case TDCA_CUSTOMATTRIB_DEFS:
-	case TDCA_POSITION:
 	case TDCA_ENCRYPT:
 	case TDCA_PROJECTNAME:
 		return TRUE;
@@ -10239,11 +10245,12 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	if (bCanEdit != -1)
 		return bCanEdit; // Handled by multi-tasker
 
-	if (m_data.HasStyle(TDCS_READONLY))
-		return FALSE;
-
 	switch (nAttribID)
 	{
+	case TDCA_NEWTASK:
+	case TDCA_PASTE:
+		return !m_calculator.IsTaskLocked(dwTaskID);
+
 	case TDCA_DELETE:
 		// Can only delete tasks if their immediate parent is UNLOCKED
 		if (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
