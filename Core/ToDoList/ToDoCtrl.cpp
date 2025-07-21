@@ -6690,6 +6690,8 @@ LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 	DWORD dwTaskID = lParam;
 	ASSERT(dwTaskID);
 
+	// Note: We only assert that the entry conditions are met
+	// because this should all have been dealt with by the caller
 	BOOL bSelTask = m_taskTree.IsTaskSelected(dwTaskID);
 
 	switch (nColID)
