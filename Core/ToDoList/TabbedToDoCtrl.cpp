@@ -1716,12 +1716,12 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID/*, DWORD dwTaskID*/) const
-{
-	return CToDoCtrl::CanEditSelectedTask(nAttribID/*, dwTaskID*/);
-}
+// BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID/*, DWORD dwTaskID*/) const
+// {
+// 	return CToDoCtrl::CanEditSelectedTask(nAttribID/*, dwTaskID*/);
+// }
 
-BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
+BOOL CTabbedToDoCtrl::CanEditSelectedExtensionTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
 {
 	dwTaskID = mod.dwSelectedTaskID;
 
@@ -1757,7 +1757,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
 
-	if (!CanEditSelectedTask(mod, dwTaskID))
+	if (!CanEditSelectedExtensionTask(mod, dwTaskID))
 	{
 		ASSERT(0);
 		return 0;
