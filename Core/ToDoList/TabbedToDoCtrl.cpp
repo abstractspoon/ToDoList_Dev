@@ -1660,10 +1660,6 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lPar
 	}
 
 	DWORD dwTaskID = wParam;
-
-	if (m_calculator.IsTaskLocked(dwTaskID))
-		return FALSE;
-
 	IUINEXTTASKOCCURRENCES* pOccurrences = (IUINEXTTASKOCCURRENCES*)lParam;
 
 	// Get the range for which we want the future occurrences
