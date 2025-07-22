@@ -187,12 +187,10 @@ TDC_COLUMN CTaskClipboard::GetColumnTasks(CTaskFile& tasks)
 
 HTASKITEM CTaskClipboard::GetAttributeTask(CTaskFile& task)
 {
-	CTaskFile tasks;
-
-	if (!GetTasks(DEF_CLIPID, tasks) || (tasks.GetTaskCount() != 1))
+	if (!GetTasks(DEF_CLIPID, task) || (task.GetTaskCount() != 1))
 		return NULL;
 
-	return tasks.GetFirstTask();
+	return task.GetFirstTask();
 }
 
 void CTaskClipboard::RemoveTaskReferences(CTaskFile& tasks, HTASKITEM hTask, BOOL bAndSiblings, CDWordSet& mapSelTaskIDs)
