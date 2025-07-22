@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "..\shared\tabbedcombobox.h"
+#include "..\shared\subclass.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -20,7 +21,7 @@ typedef void* HTASKITEM;
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDLTaskComboBox : public CTabbedComboBox
+class CTDLTaskComboBox : public CTabbedComboBox, private CSubclasser
 {
 public:
 	CTDLTaskComboBox();
@@ -38,7 +39,11 @@ public:
 protected:
 	const CTDCImageList* m_pIlTasks;
 
+	CSubclassWnd m_scSimpleList; // CBS_SIMPLE only
 	BOOL m_bEnableParents, m_bShowParentsAsFolders;
+
+private:
+	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -48,6 +53,7 @@ protected:
 	afx_msg void OnEditChange();
 	afx_msg void OnDropDown();
 	afx_msg LRESULT OnReselectTaskID(WPARAM wp, LPARAM lp);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // for subclassing
 
 	DECLARE_MESSAGE_MAP()
 

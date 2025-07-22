@@ -40,6 +40,7 @@ CTDLTaskComboBox::CTDLTaskComboBox()
 BEGIN_MESSAGE_MAP(CTDLTaskComboBox, CTabbedComboBox)
 	//{{AFX_MSG_MAP(CTDLTaskComboBox)
 	//}}AFX_MSG_MAP
+	ON_WM_CTLCOLOR()
 	ON_CONTROL_REFLECT(CBN_EDITCHANGE, OnEditChange)
 	ON_CONTROL_REFLECT(CBN_DROPDOWN, OnDropDown)
 	ON_MESSAGE(WM_RESELECTTASKID, OnReselectTaskID)
@@ -380,6 +381,7 @@ void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 	if (hTask)
 	{
 		int nImage = (m_pIlTasks ? m_pIlTasks->GetImageIndex(tasks.GetTaskIcon(hTask)) : -1);
+
 		InsertTask(GetCount(),
 				   tasks.GetTaskTitle(hTask),
 				   tasks.GetTaskID(hTask),
@@ -396,4 +398,28 @@ void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 		Populate(tasks, hSubtask, nLevel); // RECURSIVE CALL
 		hSubtask = tasks.GetNextTask(hSubtask);
 	}
+}
+
+HBRUSH CTDLTaskComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CTabbedComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// hook CBS_SIMPLE list box to eliminate flicker
+	if ((nCtlColor == CTLCOLOR_LISTBOX) && IsType(CBS_SIMPLE) && !m_scSimpleList.IsValid())
+	{
+		m_scSimpleList.HookWindow(*pWnd, this);
+	}
+
+	return hbr;
+}
+
+LRESULT CTDLTaskComboBox::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+	case WM_ERASEBKGND: return TRUE;
+	case WM_NCPAINT:	return 0L;
+	}
+
+	return CSubclasser::ScDefault(m_scSimpleList);
 }
