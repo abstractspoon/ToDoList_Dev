@@ -7771,34 +7771,43 @@ int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncC
 
 BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttribs, DWORD dwFlags)
 {
-	// Must be able to merge all specified attributes
-	POSITION pos = mapAttribs.GetStartPosition();
-
-	while (pos)
-	{
-		if (!CanEditSelectedTask(mapAttribs.GetNext(pos)))
-			return FALSE;
-	}
-	
-	// Do the paste
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
 	CDWordArray aModTaskIDs;
-	pos = TSH().GetFirstItemPos();
+	POSITION posSel = TSH().GetFirstItemPos();
 
-	while (pos)
+	while (posSel)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		const TODOITEM* pTDI = GetTask(dwTaskID);
+		DWORD dwTaskID = TSH().GetNextItemData(posSel);
 
-		if (pTDI)
+		if (m_calculator.IsTaskLocked(dwTaskID))
+			continue;
+
+		// For each task, build a set of editable attributes only
+		CTDCAttributeMap mapTaskAttribs;
+		POSITION posAttrib = mapAttribs.GetStartPosition();
+
+		while (posAttrib)
 		{
-			TODOITEM tdiCopy = *pTDI;
+			TDC_ATTRIBUTE nAttribID = mapAttribs.GetNext(posAttrib);
 
-			if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapAttribs, m_aCustomAttribDefs, dwFlags))
+			if (CanEditTask(dwTaskID, nAttribID))
+				mapTaskAttribs.Add(nAttribID);
+		}
+
+		if (!mapTaskAttribs.IsEmpty())
+		{
+			const TODOITEM* pTDI = GetTask(dwTaskID);
+
+			if (pTDI)
 			{
-				if (m_data.SetTaskAttributes(dwTaskID, tdiCopy) == SET_CHANGE)
-					aModTaskIDs.Add(dwTaskID);
+				TODOITEM tdiCopy = *pTDI;
+
+				if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapTaskAttribs, m_aCustomAttribDefs, dwFlags))
+				{
+					if (m_data.SetTaskAttributes(dwTaskID, tdiCopy) == SET_CHANGE)
+						aModTaskIDs.Add(dwTaskID);
+				}
 			}
 		}
 	}

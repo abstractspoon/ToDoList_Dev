@@ -6008,7 +6008,8 @@ void CToDoListWnd::OnEditPasteAttributes()
 
 void CToDoListWnd::OnUpdateEditPasteAttributes(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(CTaskClipboard::HasAttributeTask());
+	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_PASTE) && 
+				   CTaskClipboard::HasAttributeTask());
 }
 
 void CToDoListWnd::OnEditPasteAfter() 
