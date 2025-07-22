@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "TDCEnumContainers.h"
 #include "TDCCustomAttributeDef.h"
+#include "TDCStatic.h"
 
 #include "..\shared\Misc.h"
 
@@ -106,20 +107,20 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttribID) const
 		break;
 
 	case TDCA_HTMLCOMMENTS:
-		bCanAdd = (HasOnly(TDCA_ALL) || IsTaskAttribute(nAttribID));
+		bCanAdd = (HasOnly(TDCA_ALL) || TDC::IsTaskAttribute(nAttribID));
 		break;
 
 	case TDCA_TODAY:
 	case TDCA_REMINDER:
 		// Can only add if we already contain a task attribute
-		bCanAdd = IsTaskAttribute(GetNext(pos));
+		bCanAdd = TDC::IsTaskAttribute(GetNext(pos));
 		break;
 
 	default:
-		if (IsTaskAttribute(nAttribID))
+		if (TDC::IsTaskAttribute(nAttribID))
 		{
 			// Can only add if we already contain a task attribute
-			bCanAdd = IsTaskAttribute(GetNext(pos));
+			bCanAdd = TDC::IsTaskAttribute(GetNext(pos));
 		}
 		else
 		{
@@ -133,61 +134,6 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttribID) const
 	
 	ASSERT(bCanAdd);
 	return bCanAdd;
-}
-
-BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttribID)
-{
-	switch (nAttribID)
-	{
-	case TDCA_ALLOCBY:
-	case TDCA_ALLOCTO:
-	case TDCA_CATEGORY:
-	case TDCA_COLOR:
-	case TDCA_COMMENTS:
-	case TDCA_COMMENTSSIZE:
-	case TDCA_COMMENTSFORMAT:
-	case TDCA_COST:
-	case TDCA_CREATEDBY:
-	case TDCA_CREATIONDATE:
-	case TDCA_DEPENDENCY:
-	case TDCA_DONEDATE:
-	case TDCA_DONETIME:
-	case TDCA_DUEDATE:
-	case TDCA_DUETIME:
-	case TDCA_EXTERNALID:
-	case TDCA_FILELINK:
-	case TDCA_FLAG:
-	case TDCA_HTMLCOMMENTS:
-	case TDCA_ICON:
-	case TDCA_ID:
-	case TDCA_LOCK:
-	case TDCA_LASTMODDATE:
-	case TDCA_LASTMODBY:
-	case TDCA_METADATA:
-	case TDCA_PARENTID:
-	case TDCA_PATH:
-	case TDCA_PERCENT:
-	case TDCA_POSITION:
-	case TDCA_PRIORITY:
-	case TDCA_RECURRENCE:
-	case TDCA_REMINDER:
-	case TDCA_RISK:
-	case TDCA_STARTDATE:
-	case TDCA_STARTTIME:
-	case TDCA_STATUS:
-	case TDCA_SUBTASKDONE:
-	case TDCA_TAGS:
-	case TDCA_TASKNAME:
-	case TDCA_TASKNAMEORCOMMENTS:
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMEREMAINING:
-	case TDCA_TIMESPENT:
-	case TDCA_VERSION:
-		return TRUE;
-	}
-
-	// all else
-	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
 }
 
 TDC_ATTRIBUTE CTDCAttributeMap::GetFirst() const

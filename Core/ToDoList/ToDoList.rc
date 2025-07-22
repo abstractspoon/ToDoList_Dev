@@ -2193,38 +2193,37 @@ BEGIN
     DEFPUSHBUTTON   "&Dismiss",IDC_DISMISS,281,176,50,14
 END
 
-IDD_PASTETASKATTRIB_DIALOG DIALOG DISCARDABLE  0, 0, 278, 267
+IDD_PASTETASKATTRIB_DIALOG DIALOG DISCARDABLE  0, 0, 278, 250
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Paste Task Attributes"
 FONT 8, "Tahoma"
 BEGIN
-    GROUPBOX        "Attribute Selection",IDC_STATIC,7,7,264,191
-    CONTROL         "All",IDC_SELECTALL,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,15,23,23,10
+    GROUPBOX        "Attribute Selection",IDC_STATIC,7,7,264,174
+    CONTROL         "All attributes, including:",IDC_SELECTALL,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,15,23,91,10
     CONTROL         "Specific",IDC_SELECTSPECIFIC,"Button",
-                    BS_AUTORADIOBUTTON,15,105,41,10
-    LTEXT           "Including",IDC_STATIC,27,37,32,8
+                    BS_AUTORADIOBUTTON,15,90,40,10
     CONTROL         "Task Title",IDC_INCLUDETITLE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,37,50,46,10
+                    WS_TABSTOP,27,36,46,10
     CONTROL         "Comments",IDC_INCLUDECOMMENTS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,37,63,49,10
+                    WS_TABSTOP,27,49,49,10
     CONTROL         "Custom attributes",IDC_INCLUDECUSTOMATTRIB,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,37,76,70,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,27,62,70,10
     CONTROL         "Dates",IDC_INCLUDEDATES,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,37,89,35,10
-    LISTBOX         IDC_SPECIFICATTRIBS,27,118,234,69,LBS_SORT | 
+                    WS_TABSTOP,27,75,35,10
+    LISTBOX         IDC_SPECIFICATTRIBS,27,103,234,69,LBS_SORT | 
                     LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
                     LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_HSCROLL | 
                     WS_TABSTOP
     CONTROL         "Only overwrite empty destination values",
                     IDC_ONLYOVERWRITEMPTY,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,204,140,10
+                    WS_TABSTOP,7,187,140,10
     CONTROL         "Only overwrite with non-empty source values",
                     IDC_ONLYOVERWRITEWITHNONEMPTY,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,219,156,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,236,264,1
-    DEFPUSHBUTTON   "OK",IDOK,165,246,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,221,246,50,14
+                    WS_TABSTOP,7,202,156,10
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,219,264,1
+    DEFPUSHBUTTON   "OK",IDOK,165,229,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,221,229,50,14
 END
 
 
@@ -4671,7 +4670,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 271
         TOPMARGIN, 7
-        BOTTOMMARGIN, 260
+        BOTTOMMARGIN, 243
     END
 END
 #endif    // APSTUDIO_INVOKED

@@ -6151,6 +6151,7 @@ int CTDCMultiTasker::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_FILELINK:
 	case TDCA_FLAG:
 	case TDCA_ICON:
+	case TDCA_METADATA:
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
 	case TDCA_STATUS:
