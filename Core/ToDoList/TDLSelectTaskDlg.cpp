@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLSelectTaskDlg.h"
-#include "TDCImageList.h"
 #include "TaskFile.h"
 
 #ifdef _DEBUG
@@ -14,8 +13,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLBrowseForTaskDlg dialog
-
+// CTDLSelectTaskDlg dialog
 
 CTDLSelectTaskDlg::CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, CWnd* pParent /*=NULL*/)
 	: 
@@ -24,55 +22,32 @@ CTDLSelectTaskDlg::CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList
 	m_ilTasks(ilTasks)
 {
 	m_sSelectedTask = _T("");
-	m_cbTasks.SetImageList(ilTasks);
 }
 
 void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CTDLBrowseForTaskDlg)
+	//{{AFX_DATA_MAP(CTDLSelectTaskDlg)
 	DDX_Control(pDX, IDC_TASKCOMBO, m_cbTasks);
 	DDX_CBString(pDX, IDC_TASKCOMBO, m_sSelectedTask);
 	//}}AFX_DATA_MAP
 }
 
 BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLBrowseForTaskDlg)
+	//{{AFX_MSG_MAP(CTDLSelectTaskDlg)
 		// NOTE: the ClassWizard will add message map macros here
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLBrowseForTaskDlg message handlers
+// CTDLSelectTaskDlg message handlers
 
 BOOL CTDLSelectTaskDlg::OnInitDialog()
 {
 	BOOL bRet = CTDLDialog::OnInitDialog();
 
-	PopulateTaskCombo(NULL, 0);
-
+	m_cbTasks.Populate(m_tasks, m_ilTasks);
 
 	return bRet;
-}
-
-void CTDLSelectTaskDlg::PopulateTaskCombo(HTASKITEM hTask, int nLevel)
-{
-	if (hTask)
-	{
-		m_cbTasks.AddTask(m_tasks.GetTaskTitle(hTask),
-						  m_tasks.GetTaskID(hTask),
-						  m_tasks.IsTaskParent(hTask),
-						  nLevel++,
-						  m_ilTasks.GetImageIndex(m_tasks.GetTaskIcon(hTask)),
-						  m_tasks.IsTaskReference(hTask));
-	}
-
-	HTASKITEM hSubtask = m_tasks.GetFirstTask(hTask);
-
-	while (hSubtask)
-	{
-		PopulateTaskCombo(hSubtask, nLevel); // RECURSIVE CALL
-		hSubtask = m_tasks.GetNextTask(hSubtask);
-	}
 }

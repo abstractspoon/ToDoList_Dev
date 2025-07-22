@@ -49,6 +49,7 @@ void CTDLTimeTrackerTaskComboBox::ResetContent()
 	CTDLTaskComboBox::ResetContent();
 
 	m_pTDC = NULL;
+	m_pIlTasks = NULL;
 }
 
 int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL)
@@ -69,7 +70,7 @@ int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL)
 	CHoldRedraw hr(*this);
 
 	m_pTDC = pTTL->pTDC;
-	SetImageList(m_pTDC->GetTaskIconImageList());
+	m_pIlTasks = &m_pTDC->GetTaskIconImageList();
 
 	int nNumTasks = pTTL->aTasks.GetSize();
 
@@ -78,7 +79,7 @@ int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL)
 		const TRACKITEM& ti = Misc::GetItemT<TRACKITEM>(pTTL->aTasks, nTask);
 		int nImage = m_pTDC->GetTaskIconImageList().GetImageIndex(ti.sImage);
 
-		AddTask(ti.sTask, ti.dwTaskID, ti.bParent, ti.nLevel, nImage);
+		InsertTask(nTask, ti.sTask, ti.dwTaskID, ti.bParent, ti.nLevel, nImage);
 	}
 
 	UpdateRecentlyTrackedTasks(pTTL, dwSelID);

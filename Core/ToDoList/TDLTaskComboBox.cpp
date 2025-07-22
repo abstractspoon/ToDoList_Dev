@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "TDLTaskComboBox.h"
+#include "TaskFile.h"
+#include "TDCImageList.h"
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\Misc.h"
@@ -26,9 +28,10 @@ const int MAX_DROPWIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 //////////////////////////////////////////////////////////////////////
 
-CTDLTaskComboBox::CTDLTaskComboBox() 
-	: 
+CTDLTaskComboBox::CTDLTaskComboBox()
+	:
 	CTabbedComboBox(ICON_SIZE + 2),
+	m_pIlTasks(NULL),
 	m_bShowParentsAsFolders(FALSE),
 	m_bEnableParents(TRUE)
 {
@@ -65,11 +68,6 @@ CString CTDLTaskComboBox::GetSelectedTaskName() const
 int CTDLTaskComboBox::GetSelectedTaskImage() const
 {
 	return GetItemImage(GetCurSel());
-}
-
-BOOL CTDLTaskComboBox::AddTask(const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference)
-{
-	return InsertTask(GetCount(), sTask, dwTaskID, bParent, nIndent, nImage, bReference);
 }
 
 BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference)
@@ -171,7 +169,7 @@ BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
 
 int CTDLTaskComboBox::GetItemImage(int nItem) const
 {
-	if (!m_hilTasks)
+	if (!m_pIlTasks || !m_pIlTasks->GetSafeHandle())
 		return -1;
 
 	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
@@ -202,7 +200,6 @@ BOOL CTDLTaskComboBox::IsItemReference(int nItem) const
 void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 									DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
-
 	if (IsHeadingItem(nItem))
 	{
 		CTabbedComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
@@ -250,8 +247,8 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 	CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sText, bList, crText);
 
-	if (nImage != -1)
-		ImageList_Draw(m_hilTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+	if (m_pIlTasks && (nImage != -1))
+		ImageList_Draw(*m_pIlTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
 
 	if (bReference)
 		GraphicsMisc::DrawShortcutOverlay(&dc, rIcon);
@@ -366,4 +363,37 @@ int CTDLTaskComboBox::CalcMinItemHeight(BOOL bList) const
 		nMinHeight = max(nMinHeight, (ICON_SIZE + 2));
 
 	return nMinHeight;
+}
+
+int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks)
+{
+	m_pIlTasks = &ilTasks;
+
+	ResetContent();
+	Populate(tasks, NULL, 0);
+
+	return GetCount();
+}
+
+void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLevel)
+{
+	if (hTask)
+	{
+		int nImage = (m_pIlTasks ? m_pIlTasks->GetImageIndex(tasks.GetTaskIcon(hTask)) : -1);
+		InsertTask(GetCount(),
+				   tasks.GetTaskTitle(hTask),
+				   tasks.GetTaskID(hTask),
+				   tasks.IsTaskParent(hTask),
+				   nLevel++,
+				   nImage,
+				   tasks.IsTaskReference(hTask));
+	}
+
+	HTASKITEM hSubtask = tasks.GetFirstTask(hTask);
+
+	while (hSubtask)
+	{
+		Populate(tasks, hSubtask, nLevel); // RECURSIVE CALL
+		hSubtask = tasks.GetNextTask(hSubtask);
+	}
 }

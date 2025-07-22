@@ -18,7 +18,7 @@ class CTDCImageList;
 typedef void* HTASKITEM;
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLBrowseForTaskDlg dialog
+// CTDLSelectTaskDlg dialog
 
 class CTDLSelectTaskDlg : public CTDLDialog
 {
@@ -28,7 +28,7 @@ public:
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CTDLBrowseForTaskDlg)
+	//{{AFX_DATA(CTDLSelectTaskDlg)
 	CTDLTaskComboBox m_cbTasks;
 	CString	m_sSelectedTask;
 	//}}AFX_DATA
@@ -38,7 +38,7 @@ protected:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLBrowseForTaskDlg)
+	//{{AFX_VIRTUAL(CTDLSelectTaskDlg)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
@@ -47,13 +47,12 @@ protected:
 // Implementation
 protected:
 	// Generated message map functions
-	//{{AFX_MSG(CTDLBrowseForTaskDlg)
+	//{{AFX_MSG(CTDLSelectTaskDlg)
 		// NOTE: the ClassWizard will add member functions here
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void PopulateTaskCombo(HTASKITEM hTask, int nLevel);
 
 };
 

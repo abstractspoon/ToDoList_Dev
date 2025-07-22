@@ -13,6 +13,13 @@
 
 //////////////////////////////////////////////////////////////////////
 
+class CTaskFile;
+class CTDCImageList;
+
+typedef void* HTASKITEM;
+
+//////////////////////////////////////////////////////////////////////
+
 class CTDLTaskComboBox : public CTabbedComboBox
 {
 public:
@@ -21,20 +28,16 @@ public:
 	DWORD GetSelectedTaskID() const;
 	CString GetSelectedTaskName() const;
 	int GetSelectedTaskImage() const;
-	
-	BOOL AddTask(const CString& sTask, DWORD dwTaskID, int nIndent, BOOL bParent, int nImage, BOOL bReference = FALSE);
-	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference = FALSE);
+
+	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks);
 
 	BOOL SetSelectedTaskID(DWORD dwTaskID);
-	void SetImageList(HIMAGELIST hil) { m_hilTasks = hil; }
 	void EnableParentTasks(BOOL bEnable = TRUE) { m_bEnableParents = bEnable; }
 	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_bShowParentsAsFolders = bAsFolders; }
-	
-	int GetItemImage(int nItem) const;
-	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
 
 protected:
-	HIMAGELIST m_hilTasks;
+	const CTDCImageList* m_pIlTasks;
+
 	BOOL m_bEnableParents, m_bShowParentsAsFolders;
 
 protected:
@@ -70,6 +73,11 @@ protected:
 	int GetItemIndent(int nItem) const;
 	void SelectNextFind(BOOL bForward);
 	BOOL IsItemReference(int nItem) const;
+
+	void Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLevel);
+	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference = FALSE);
+	int GetItemImage(int nItem) const;
+	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
 };
 
 #endif // AFX_TDLTASKCOMBOBOX_H__4EE655E3_F4B1_44EA_8AAA_39DD459AD8A8__INCLUDED_
