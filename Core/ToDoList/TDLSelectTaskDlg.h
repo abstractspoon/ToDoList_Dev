@@ -47,7 +47,6 @@ protected:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	virtual void OnOK();
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -56,10 +55,11 @@ protected:
 	//{{AFX_MSG(CTDLSelectTaskDlg)
 		// NOTE: the ClassWizard will add member functions here
 	//}}AFX_MSG
+	afx_msg void OnSelChangeTask();
 	DECLARE_MESSAGE_MAP()
 
 protected:
-
+	void EnableDisableOK();
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -21,7 +21,6 @@ CTDLSelectTaskDlg::CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList
 	m_tasks(tasks),
 	m_ilTasks(ilTasks)
 {
-	m_sSelectedTask = _T("");
 }
 
 void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
@@ -32,12 +31,17 @@ void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TASKCOMBO, m_cbTasks);
 	DDX_CBString(pDX, IDC_TASKCOMBO, m_sSelectedTask);
 	//}}AFX_DATA_MAP
+
+	if (pDX->m_bSaveAndValidate)
+		m_dwSelTaskID = m_cbTasks.GetSelectedTaskID();
 }
 
 BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLSelectTaskDlg)
 		// NOTE: the ClassWizard will add message map macros here
 	//}}AFX_MSG_MAP
+	ON_CBN_SELCHANGE(IDC_TASKCOMBO, OnSelChangeTask)
+	ON_CBN_EDITUPDATE(IDC_TASKCOMBO, OnSelChangeTask)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -45,17 +49,23 @@ END_MESSAGE_MAP()
 
 BOOL CTDLSelectTaskDlg::OnInitDialog()
 {
-	BOOL bRet = CTDLDialog::OnInitDialog();
+	CTDLDialog::OnInitDialog();
 
 	m_cbTasks.Populate(m_tasks, m_ilTasks);
 	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
 
-	return bRet;
+	OnSelChangeTask();
+
+	return TRUE;
 }
 
-void CTDLSelectTaskDlg::OnOK()
+void CTDLSelectTaskDlg::OnSelChangeTask()
 {
-	m_dwSelTaskID = m_cbTasks.GetSelectedTaskID();
+	UpdateData();
+	EnableDisableOK();
+}
 
-	CTDLDialog::OnOK();
+void CTDLSelectTaskDlg::EnableDisableOK()
+{
+	GetDlgItem(IDOK)->EnableWindow(m_dwSelTaskID && !m_sSelectedTask.IsEmpty());
 }
