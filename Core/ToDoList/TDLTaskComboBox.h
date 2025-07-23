@@ -71,6 +71,8 @@ protected:
 	virtual ODCB_ITEMDATA* NewExtItemData() const { return new TCB_ITEMDATA(); }
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+	virtual void FillListItemBkgnd(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+								   DWORD dwItemData, COLORREF crBack);
 	virtual int GetExtraListboxWidth() const;
 	virtual int GetMaxDropWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;

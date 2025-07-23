@@ -183,6 +183,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 
 	int nDC = dc.SaveDC(), nItem = (int)lpDrawItemStruct->itemID;
+	BOOL bListItem = !(lpDrawItemStruct->itemState & ODS_COMBOBOXEDIT);
 
 	// Fixup item data because Windows will have passed us the 'raw' item data
 	DWORD dwItemData = (m_bHasExtItemData ? GetItemData(nItem) : lpDrawItemStruct->itemData);
@@ -191,14 +192,14 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	COLORREF crText, crBack;
 	GetItemColors(nItem, lpDrawItemStruct->itemState, dwItemData, crText, crBack);
 
-	CRect rItem(lpDrawItemStruct->rcItem);
-	dc.FillSolidRect(rItem, crBack);
+	if (bListItem)
+		FillListItemBkgnd(dc, lpDrawItemStruct->rcItem, nItem, lpDrawItemStruct->itemState, dwItemData, crBack);
 
 	// draw the item
+	CRect rItem(lpDrawItemStruct->rcItem);
 	rItem.DeflateRect(2, 1);
 
 	// Indent items below their heading
-	BOOL bListItem = !(lpDrawItemStruct->itemState & ODS_COMBOBOXEDIT);
 	BOOL bHeading = (bListItem && IsHeadingItem(nItem));
 
 	if (bListItem && m_nNumHeadings && !bHeading)
@@ -253,6 +254,11 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 
 	dc.Detach();
+}
+
+void COwnerdrawComboBoxBase::FillListItemBkgnd(CDC& dc, const CRect& rect, int /*nItem*/, UINT /*nItemState*/, DWORD /*dwItemData*/, COLORREF crBack)
+{
+	dc.FillSolidRect(rect, crBack);
 }
 
 BOOL COwnerdrawComboBoxBase::WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const

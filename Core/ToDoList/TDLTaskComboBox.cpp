@@ -418,8 +418,22 @@ LRESULT CTDLTaskComboBox::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	switch (msg)
 	{
 	case WM_ERASEBKGND: return TRUE;
-	case WM_NCPAINT:	return 0L;
 	}
 
 	return CSubclasser::ScDefault(m_scSimpleList);
+}
+
+void CTDLTaskComboBox::FillListItemBkgnd(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+										DWORD dwItemData, COLORREF crBack)
+{
+	// Because we're eating WM_ERASEBKGND we may need to fill 
+	// any 'dead' zone below the last item
+	CRect rBack(rect);
+
+	if ((GetStyle() & CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
+	{
+		rBack.bottom += rBack.Height();
+	}
+
+	CTabbedComboBox::FillListItemBkgnd(dc, rBack, nItem, nItemState, dwItemData, crBack);
 }
