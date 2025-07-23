@@ -376,9 +376,42 @@ int CTDLTaskComboBox::CalcMinItemHeight(BOOL bList) const
 
 int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks)
 {
+	return Populate(tasks, ilTasks, CDWordArray());
+}
+
+int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, const CDWordArray& aRecentSel)
+{
 	m_pIlTasks = &ilTasks;
 
 	ResetContent();
+
+	if (aRecentSel.GetSize())
+	{
+		int nPos = 0;
+		SetHeadingItem(InsertString(nPos++, _T("Recently Selected")));
+
+		for (int nSel = 0; nSel < aRecentSel.GetSize(); nSel++)
+		{
+			HTASKITEM hTask = tasks.FindTask(aRecentSel[nSel]);
+			ASSERT(hTask);
+
+			if (hTask)
+			{
+				int nImage = (m_pIlTasks ? m_pIlTasks->GetImageIndex(tasks.GetTaskIcon(hTask)) : -1);
+
+				InsertTask(nPos++,
+						   tasks.GetTaskTitle(hTask),
+						   tasks.GetTaskID(hTask),
+						   tasks.IsTaskParent(hTask),
+						   0,
+						   nImage,
+						   tasks.IsTaskReference(hTask));
+			}
+		}
+		
+		SetHeadingItem(InsertString(nPos, _T("All Tasks")));
+	}
+
 	Populate(tasks, NULL, 0);
 
 	return GetCount();

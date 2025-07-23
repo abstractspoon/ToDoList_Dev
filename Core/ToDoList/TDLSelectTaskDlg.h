@@ -24,11 +24,12 @@ class CTDLSelectTaskDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, CWnd* pParent = NULL);
+	CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, LPCTSTR szPrefsKey = NULL, CWnd* pParent = NULL);
 
 	DWORD GetSelectedTaskID() { return m_dwSelTaskID; }
 	void SetSelectedTaskID(DWORD dwTaskID) { m_dwSelTaskID = dwTaskID; }
 
+	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_cbTasks.SetShowParentTasksAsFolders(bAsFolders); }
 	int DoModal(HICON hIcon = NULL, UINT nTitleStrID = 0); // Caller owns icon
 
 protected:
@@ -42,6 +43,7 @@ protected:
 
 	DWORD m_dwSelTaskID;
 	UINT m_nTitleStrID;
+	CDWordArray m_aRecentTaskIDs;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

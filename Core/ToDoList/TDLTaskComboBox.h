@@ -32,6 +32,7 @@ public:
 	BOOL SetSelectedTaskID(DWORD dwTaskID);
 
 	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks);
+	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, const CDWordArray& aRecentSel);
 
 	void EnableParentTasks(BOOL bEnable = TRUE) { m_bEnableParents = bEnable; }
 	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_bShowParentsAsFolders = bAsFolders; }
@@ -86,6 +87,8 @@ protected:
 	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference = FALSE);
 	int GetItemImage(int nItem) const;
 	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
+
+	static CString FormatFullPath(const CTaskFile& tasks, HTASKITEM hTask);
 };
 
 #endif // AFX_TDLTASKCOMBOBOX_H__4EE655E3_F4B1_44EA_8AAA_39DD459AD8A8__INCLUDED_

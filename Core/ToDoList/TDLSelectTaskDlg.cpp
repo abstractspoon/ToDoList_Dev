@@ -15,12 +15,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSelectTaskDlg dialog
 
-CTDLSelectTaskDlg::CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, CWnd* pParent /*=NULL*/)
+CTDLSelectTaskDlg::CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, LPCTSTR szPrefsKey, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_BROWSEFORTASK_DIALOG, _T(""), pParent),
+	CTDLDialog(IDD_BROWSEFORTASK_DIALOG, szPrefsKey, pParent),
 	m_tasks(tasks),
 	m_ilTasks(ilTasks)
 {
+	if (!m_sPrefsKey.IsEmpty())
+		CPreferences().GetProfileArray(m_sPrefsKey, m_aRecentTaskIDs);
 }
 
 void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
@@ -48,7 +50,18 @@ int CTDLSelectTaskDlg::DoModal(HICON hIcon, UINT nTitleStrID)
 {
 	m_nTitleStrID = nTitleStrID;
 
-	return CTDLDialog::DoModal(hIcon);
+	int nRet = CTDLDialog::DoModal(hIcon);
+
+	if (nRet == IDOK)
+	{
+		// Move/Add selected task to head of recent
+		m_aRecentTaskIDs.InsertAt(0, m_dwSelTaskID);
+		Misc::RemoveDuplicates(m_aRecentTaskIDs);
+
+		CPreferences().WriteProfileArray(m_sPrefsKey, m_aRecentTaskIDs);
+	}
+
+	return nRet;
 }
 
 BOOL CTDLSelectTaskDlg::OnInitDialog()
@@ -58,7 +71,8 @@ BOOL CTDLSelectTaskDlg::OnInitDialog()
 	if (m_nTitleStrID)
 		SetWindowText(CEnString(m_nTitleStrID));
 
-	m_cbTasks.Populate(m_tasks, m_ilTasks);
+	// Add tasks to combo
+	m_cbTasks.Populate(m_tasks, m_ilTasks, m_aRecentTaskIDs);
 	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
 
 	OnSelChangeTask();
