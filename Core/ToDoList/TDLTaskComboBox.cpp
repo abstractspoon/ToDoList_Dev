@@ -428,12 +428,13 @@ void CTDLTaskComboBox::FillListItemBkgnd(CDC& dc, const CRect& rect, int nItem, 
 {
 	// Because we're eating WM_ERASEBKGND we may need to fill 
 	// any 'dead' zone below the last item
-	CRect rBack(rect);
-
 	if ((GetStyle() & CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
 	{
-		rBack.bottom += rBack.Height();
+		CRect rDead(rect);
+		rDead.OffsetRect(0, rect.Height());
+
+		::FillRect(dc, rDead, ::GetSysColorBrush(COLOR_WINDOW));
 	}
 
-	CTabbedComboBox::FillListItemBkgnd(dc, rBack, nItem, nItemState, dwItemData, crBack);
+	CTabbedComboBox::FillListItemBkgnd(dc, rect, nItem, nItemState, dwItemData, crBack);
 }
