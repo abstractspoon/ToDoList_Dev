@@ -9863,9 +9863,9 @@ void CToDoListWnd::OnNewSubtaskInTask()
 	CTDLSelectTaskDlg dialog(tasks, tdc.GetTaskIconImageList());
 	dialog.SetSelectedTaskID(tdc.GetSelectedTaskID());
 
-	UINT nCmdID = GetNewSubtaskCmdID(); // For dialog icon and position
+	UINT nCmdID = GetNewSubtaskCmdID(); // For dialog icon and subtask location
 
-	if (dialog.DoModal(CMDICON(nCmdID)) != IDOK)
+	if (dialog.DoModal(CMDICON(nCmdID), IDS_SELECTSUBTASKPARENT_TITLE) != IDOK)
 		return;
 
 	// Select the chosen task

@@ -29,6 +29,8 @@ public:
 	DWORD GetSelectedTaskID() { return m_dwSelTaskID; }
 	void SetSelectedTaskID(DWORD dwTaskID) { m_dwSelTaskID = dwTaskID; }
 
+	int DoModal(HICON hIcon = NULL, UINT nTitleStrID = 0); // Caller owns icon
+
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLSelectTaskDlg)
@@ -40,6 +42,7 @@ protected:
 	const CTDCImageList& m_ilTasks;
 
 	DWORD m_dwSelTaskID;
+	UINT m_nTitleStrID;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -2577,6 +2577,7 @@
 #define IDS_DEFAULTATTRIBUTES           51676
 #define IDS_ATTRIBTIP_DISMISS           51677
 #define IDS_ATTRIBTIP_CALCULATEDVALUE   51678
+#define IDS_SELECTSUBTASKPARENT_TITLE   51679
 
 // Next default values for new objects
 // 

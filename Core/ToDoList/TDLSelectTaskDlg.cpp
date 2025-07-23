@@ -47,9 +47,19 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSelectTaskDlg message handlers
 
+int CTDLSelectTaskDlg::DoModal(HICON hIcon, UINT nTitleStrID)
+{
+	m_nTitleStrID = nTitleStrID;
+
+	return CTDLDialog::DoModal(hIcon);
+}
+
 BOOL CTDLSelectTaskDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
+
+	if (m_nTitleStrID)
+		SetWindowText(CEnString(m_nTitleStrID));
 
 	m_cbTasks.Populate(m_tasks, m_ilTasks);
 	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
