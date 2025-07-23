@@ -5187,14 +5187,6 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 		if (pTDI->aDependencies.GetSize() && filter.WantAttribute(TDCA_DEPENDENCY))
 			tasks.SetTaskDependencies(hTask, pTDI->aDependencies);
 
-		if (filter.WantAttribute(TDCA_PATH))
-		{
-			CString sPath = m_formatter.GetTaskPath(pTDS);
-
-			if (!sPath.IsEmpty())
-				tasks.SetTaskPath(hTask, sPath);
-		}
-
 		if (filter.WantAttribute(TDCA_PRIORITY))
 		{
 			tasks.SetTaskPriority(hTask, pTDI->nPriority);

@@ -218,7 +218,6 @@ public:
 	BOOL SetTaskCalcCost(HTASKITEM hTask, double dCost);
 	BOOL SetTaskSubtaskCompletion(HTASKITEM hTask, const CString& sSubtaskDone);
 	BOOL SetTaskGoodAsDone(HTASKITEM hTask, BOOL bHasIncomplete);
-	BOOL SetTaskPath(HTASKITEM hTask, const CString& sPath);
 	BOOL SetTaskFlag(HTASKITEM hTask, BOOL bFlag, BOOL bCalc);
 	BOOL SetTaskLock(HTASKITEM hTask, BOOL bLock, BOOL bCalc);
 
