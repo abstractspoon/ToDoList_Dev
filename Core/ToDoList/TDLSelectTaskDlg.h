@@ -26,6 +26,9 @@ class CTDLSelectTaskDlg : public CTDLDialog
 public:
 	CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, CWnd* pParent = NULL);
 
+	DWORD GetSelectedTaskID() { return m_dwSelTaskID; }
+	void SetSelectedTaskID(DWORD dwTaskID) { m_dwSelTaskID = dwTaskID; }
+
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLSelectTaskDlg)
@@ -36,12 +39,15 @@ protected:
 	const CTaskFile& m_tasks;
 	const CTDCImageList& m_ilTasks;
 
+	DWORD m_dwSelTaskID;
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLSelectTaskDlg)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
+	virtual void OnOK();
 	//}}AFX_VIRTUAL
 
 // Implementation

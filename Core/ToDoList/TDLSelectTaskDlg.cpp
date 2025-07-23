@@ -48,6 +48,14 @@ BOOL CTDLSelectTaskDlg::OnInitDialog()
 	BOOL bRet = CTDLDialog::OnInitDialog();
 
 	m_cbTasks.Populate(m_tasks, m_ilTasks);
+	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
 
 	return bRet;
+}
+
+void CTDLSelectTaskDlg::OnOK()
+{
+	m_dwSelTaskID = m_cbTasks.GetSelectedTaskID();
+
+	CTDLDialog::OnOK();
 }

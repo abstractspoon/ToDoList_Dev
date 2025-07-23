@@ -29,10 +29,10 @@ public:
 	DWORD GetSelectedTaskID() const;
 	CString GetSelectedTaskName() const;
 	int GetSelectedTaskImage() const;
+	BOOL SetSelectedTaskID(DWORD dwTaskID);
 
 	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks);
 
-	BOOL SetSelectedTaskID(DWORD dwTaskID);
 	void EnableParentTasks(BOOL bEnable = TRUE) { m_bEnableParents = bEnable; }
 	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_bShowParentsAsFolders = bAsFolders; }
 

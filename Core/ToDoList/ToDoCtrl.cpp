@@ -3000,7 +3000,7 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 
 	if (nWhere == TDC_INSERTINTASK)
 	{
-		TDCGETTASKS filter;
+		TDCGETTASKS filter(TDCGT_ALL, TDCGTF_UNLOCKED);
 
 		filter.mapAttribs.Add(TDCA_TASKNAME);
 		filter.mapAttribs.Add(TDCA_ICON);
@@ -3008,12 +3008,14 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 		CTaskFile tasks;
 		GetTasks(tasks, filter);
 
-		CTDLSelectTaskDlg dialog(tasks, m_ilTaskIcons);
+		CTDLSelectTaskDlg dialog(tasks, m_ilTaskIcons, FALSE); // exclude locked tasks
+		dialog.SetSelectedTaskID(GetSelectedTaskID());
 
 		if (dialog.DoModal() != IDOK)
 			return FALSE;
 
-		// TODO
+		htiParent = m_taskTree.GetItem(dialog.GetSelectedTaskID());
+		ASSERT(htiParent);
 	}
 	else if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
 	{
@@ -8063,48 +8065,53 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 			}
 			else
 			{
-				BOOL bDone = pTDI->IsDone();
-				BOOL bGoodAsDone = (bDone ? TRUE : m_calculator.IsTaskDone(dwTaskID));
-			
-				switch (filter.nFilter)
+				BOOL bLocked = m_calculator.IsTaskLocked(dwTaskID);
+
+				if (!bLocked || !filter.HasFlag(TDCGTF_UNLOCKED))
 				{
-				case TDCGT_DUE:
-				case TDCGT_DUETOMORROW:
-				case TDCGT_DUETHISWEEK:
-				case TDCGT_DUENEXTWEEK:
-				case TDCGT_DUETHISMONTH:
-				case TDCGT_DUENEXTMONTH:
-					// remember to check for 'Auto-Due-Today' tasks
-					if (!bGoodAsDone)
+					BOOL bDone = pTDI->IsDone();
+					BOOL bGoodAsDone = (bDone ? TRUE : m_calculator.IsTaskDone(dwTaskID));
+
+					switch (filter.nFilter)
 					{
-						if (pTDI->HasDue())
+					case TDCGT_DUE:
+					case TDCGT_DUETOMORROW:
+					case TDCGT_DUETHISWEEK:
+					case TDCGT_DUENEXTWEEK:
+					case TDCGT_DUETHISMONTH:
+					case TDCGT_DUENEXTMONTH:
+						// remember to check for 'Auto-Due-Today' tasks
+						if (!bGoodAsDone)
 						{
-							bMatch = pTDI->IsDue(filter.dateDueBy);
-						}
-						else if (HasStyle(TDCS_NODUEDATEISDUETODAYORSTART))
-						{
-							COleDateTime dtDue(CDateHelper::GetDate(DHD_TODAY));
+							if (pTDI->HasDue())
+							{
+								bMatch = pTDI->IsDue(filter.dateDueBy);
+							}
+							else if (HasStyle(TDCS_NODUEDATEISDUETODAYORSTART))
+							{
+								COleDateTime dtDue(CDateHelper::GetDate(DHD_TODAY));
 
-							if (CDateHelper::Max(dtDue, pTDI->dateStart))
-								bMatch = (dtDue <= filter.dateDueBy);
+								if (CDateHelper::Max(dtDue, pTDI->dateStart))
+									bMatch = (dtDue <= filter.dateDueBy);
+							}
 						}
+						break;
+
+					case TDCGT_DONE:
+						bMatch |= (bGoodAsDone || bDone);
+						break;
+
+					case TDCGT_NOTDONE:
+						bMatch |= !bGoodAsDone; // 'good as' includes 'done'
+
+						// check 'flagged' flag
+						if (!bMatch && filter.HasFlag(TDCGTF_KEEPFLAGGED) && pTDI->bFlagged)
+							bMatch = TRUE;
+						break;
+
+					default:
+						bMatch = FALSE;
 					}
-					break;
-
-				case TDCGT_DONE:
-					bMatch |= (bGoodAsDone || bDone);
-					break;
-
-				case TDCGT_NOTDONE:
-					bMatch |= !bGoodAsDone; // 'good as' includes 'done'
-
-					// check 'flagged' flag
-					if (!bMatch && filter.HasFlag(TDCGTF_KEEPFLAGGED) && pTDI->bFlagged)
-						bMatch = TRUE;
-					break;
-
-				default:
-					bMatch = FALSE;
 				}
 			}
 

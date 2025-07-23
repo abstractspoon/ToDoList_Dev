@@ -428,7 +428,7 @@ void CTDLTimeTrackerDlg::UpdateAllTasks(const CToDoCtrl* pTDC)
 
 void CTDLTimeTrackerDlg::DoUpdateAllTasks(const TRACKTASKLIST* pTTL)
 {
-	TDCGETTASKS filter(TDCGT_NOTDONE);
+	TDCGETTASKS filter(TDCGT_NOTDONE, TDCGTF_UNLOCKED);
 
 	filter.mapAttribs.Add(TDCA_TASKNAME);
 	filter.mapAttribs.Add(TDCA_ICON);

@@ -411,7 +411,27 @@ enum TDC_GETTASKS
 	TDCGT_DONE,
 	TDCGT_NOTDONE,
 };
+
+enum // CToDoCtrl::GetTasks()
+{
+	TDCGTF_PARENTTITLECOMMENTSONLY	= 0x0001,
+	TDCGTF_KEEPFLAGGED				= 0x0002,
+	TDCGTF_TRANSFORM				= 0x0004,
+	TDCGTF_UNLOCKED					= 0x0008,
+};
  
+/////////////////////////////////////////////////////////////////////////////
+
+enum // CToDoCtrl::GetSelectedTasks()
+{
+	TDCGSTF_IMMEDIATEPARENT			= 0x0100,
+	TDCGSTF_ALLPARENTS				= 0x0200,
+	TDCGSTF_NOTSUBTASKS				= 0x0400,
+	TDCGSTF_RESOLVEREFERENCES		= 0x0800,
+	TDCGSTF_APPENDREFERENCES		= 0x1000 | TDCGSTF_RESOLVEREFERENCES,
+	TDCGSTF_LOCALDEPENDENTS			= 0x2000,
+};
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum TDC_RESETIDS
@@ -447,25 +467,6 @@ enum TDC_MOVEMETHOD
 	TDCM_NONDRAG,
 	TDCM_LEFTDRAG,
 	TDCM_RIGHTDRAG,
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
-enum // CToDoCtrl::GetTasks()
-{
-	TDCGTF_PARENTTITLECOMMENTSONLY	= 0x0001,
-	TDCGTF_KEEPFLAGGED				= 0x0002,
-	TDCGTF_TRANSFORM				= 0x0004,
-};
-
-enum // CToDoCtrl::GetSelectedTasks()
-{
-	TDCGSTF_IMMEDIATEPARENT			= 0x0100,
-	TDCGSTF_ALLPARENTS				= 0x0200,
-	TDCGSTF_NOTSUBTASKS				= 0x0400,
-	TDCGSTF_RESOLVEREFERENCES		= 0x0800,
-	TDCGSTF_APPENDREFERENCES		= 0x1000 | TDCGSTF_RESOLVEREFERENCES,
-	TDCGSTF_LOCALDEPENDENTS			= 0x2000,
 };
  
 /////////////////////////////////////////////////////////////////////////////
