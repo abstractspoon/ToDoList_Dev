@@ -50,7 +50,15 @@ END_MESSAGE_MAP()
 
 DWORD CTDLTaskComboBox::GetSelectedTaskID() const
 {
-	return CDialogHelper::GetSelectedItemData(*this);
+	int nSel = GetCurSel();
+	
+	if (nSel == CB_ERR)
+		return 0;
+
+	if (CDialogHelper::ComboHasEdit(*this) && CDialogHelper::GetEditText(*this).IsEmpty())
+		return 0;
+
+	return GetItemData(nSel);
 }
 
 BOOL CTDLTaskComboBox::SetSelectedTaskID(DWORD dwTaskID)

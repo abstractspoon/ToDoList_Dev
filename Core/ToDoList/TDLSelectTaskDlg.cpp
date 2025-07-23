@@ -29,11 +29,8 @@ void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
 
 	//{{AFX_DATA_MAP(CTDLSelectTaskDlg)
 	DDX_Control(pDX, IDC_TASKCOMBO, m_cbTasks);
-	DDX_CBString(pDX, IDC_TASKCOMBO, m_sSelectedTask);
 	//}}AFX_DATA_MAP
 
-	if (pDX->m_bSaveAndValidate)
-		m_dwSelTaskID = m_cbTasks.GetSelectedTaskID();
 }
 
 BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
@@ -65,17 +62,16 @@ BOOL CTDLSelectTaskDlg::OnInitDialog()
 	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
 
 	OnSelChangeTask();
-
 	return TRUE;
 }
 
 void CTDLSelectTaskDlg::OnSelChangeTask()
 {
-	UpdateData();
+	m_dwSelTaskID = m_cbTasks.GetSelectedTaskID();
 	EnableDisableOK();
 }
 
 void CTDLSelectTaskDlg::EnableDisableOK()
 {
-	GetDlgItem(IDOK)->EnableWindow(m_dwSelTaskID && !m_sSelectedTask.IsEmpty());
+	GetDlgItem(IDOK)->EnableWindow(m_dwSelTaskID);
 }

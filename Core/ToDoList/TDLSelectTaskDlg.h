@@ -35,7 +35,6 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLSelectTaskDlg)
 	CTDLTaskComboBox m_cbTasks;
-	CString	m_sSelectedTask;
 	//}}AFX_DATA
 
 	const CTaskFile& m_tasks;
