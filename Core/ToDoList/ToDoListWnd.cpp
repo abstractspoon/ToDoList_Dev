@@ -34,6 +34,7 @@
 #include "tdlOffsetDatesDlg.h"
 #include "TDLPasteTaskAttributesDlg.h"
 #include "tdlprintdialog.h"
+#include "TDLSelectTaskDlg.h"
 #include "tdlsetreminderdlg.h"
 #include "tdlshowreminderdlg.h"
 #include "TDLTasklistSaveAsDlg.h"
@@ -483,6 +484,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENCIES, OnMoveSelectTaskDependencies)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENTS, OnMoveSelectTaskDependents)
 	ON_COMMAND(ID_NEW, OnNewTasklist)
+	ON_COMMAND(ID_NEWSUBTASK_INTASK, OnNewSubtaskInTask)
 	ON_COMMAND(ID_NEXTTASK, OnGotoNexttask)
 	ON_COMMAND(ID_NEXTTOPLEVELTASK, OnNexttopleveltask)
 	ON_COMMAND(ID_OPEN_RELOAD, OnReload)
@@ -575,7 +577,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, OnFileOpenFromUserStorage)
 	ON_COMMAND_RANGE(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, OnFileSaveToUserStorage)
 	ON_COMMAND_RANGE(ID_NEWTASK, ID_NEWSUBTASK, OnNewTask)
-	ON_COMMAND_RANGE(ID_NEWTASK_ATTOP, ID_NEWSUBTASK_INTASK, OnNewTask)
+	ON_COMMAND_RANGE(ID_NEWTASK_ATTOP, ID_NEWTASK_ATBOTTOM, OnNewTask)
 	ON_COMMAND_RANGE(ID_NEWTASK_ATTOPSELECTED, ID_NEWTASK_ATBOTTOMSELECTED, OnNewTask)
 	ON_COMMAND_RANGE(ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK, ID_NEWTASK_DEPENDENTBEFORESELECTEDTASK, OnNewTask)
 	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetStartDueDates)
@@ -742,6 +744,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
 	ON_UPDATE_COMMAND_UI(ID_NEW, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_NEWSUBTASK_INTASK, OnUpdateNewSubtaskInTask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTASK, OnUpdateGotoNexttask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTOPLEVELTASK, OnUpdateNexttopleveltask)
 	ON_UPDATE_COMMAND_UI(ID_OPEN_RELOAD, OnUpdateReload)
@@ -823,7 +826,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, OnUpdateFileSaveToUserStorage)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK, ID_NEWSUBTASK, OnUpdateNewTask)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOP, ID_NEWSUBTASK_INTASK, OnUpdateNewTask)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOP, ID_NEWTASK_ATBOTTOM, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOPSELECTED, ID_NEWTASK_ATBOTTOMSELECTED, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK, ID_NEWTASK_DEPENDENTBEFORESELECTEDTASK, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
@@ -9784,7 +9787,6 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 	case ID_NEWTASK_ATBOTTOMSELECTED:
 	case ID_NEWSUBTASK_ATTOP:
 	case ID_NEWSUBTASK_ATBOTTOM:
-	case ID_NEWSUBTASK_INTASK:
 		break;
 
 	case ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK:
@@ -9792,6 +9794,7 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 		dwDependencyID = GetToDoCtrl().GetSelectedTaskID();
 		break;
 
+	case ID_NEWSUBTASK_INTASK: // Handled by OnNewSubtaskInTask
 	default:
 		ASSERT(0);
 		return;
@@ -9799,7 +9802,7 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
 
-	VERIFY (CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE, dwDependencyID) || (nInsert == TDC_INSERTINTASK));
+	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE, dwDependencyID));
 }
 
 void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI) 
@@ -9825,7 +9828,6 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 	case ID_NEWTASK_ATBOTTOMSELECTED:
 	case ID_NEWSUBTASK_ATTOP:
 	case ID_NEWSUBTASK_ATBOTTOM:
-	case ID_NEWSUBTASK_INTASK:
 		break;
 
 	case ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK:
@@ -9833,6 +9835,7 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 		bDependent = TRUE;
 		break;
 
+	case ID_NEWSUBTASK_INTASK: // Handled by OnUpdateNewSubtaskInTask
 	default:
 		ASSERT(0);
 		return;
@@ -9841,6 +9844,42 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
 
 	pCmdUI->Enable(CanCreateNewTask(nInsert, bDependent));
+}
+
+void CToDoListWnd::OnNewSubtaskInTask()
+{
+	// Get all editable tasks 
+	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_UNLOCKED);
+
+	filter.mapAttribs.Add(TDCA_TASKNAME);
+	filter.mapAttribs.Add(TDCA_ICON);
+
+	CTaskFile tasks;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	tdc.GetTasks(tasks, filter);
+
+	// Prepare the dialog
+	CTDLSelectTaskDlg dialog(tasks, tdc.GetTaskIconImageList());
+	dialog.SetSelectedTaskID(tdc.GetSelectedTaskID());
+
+	UINT nCmdID = GetNewSubtaskCmdID(); // For dialog icon and position
+
+	if (dialog.DoModal(CMDICON(nCmdID)) != IDOK)
+		return;
+
+	// Select the chosen task
+	VERIFY(tdc.SelectTask(dialog.GetSelectedTaskID(), FALSE));
+
+	// Create the task
+	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
+
+	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE));
+}
+
+void CToDoListWnd::OnUpdateNewSubtaskInTask(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }
 
 BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent) const

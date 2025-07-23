@@ -334,6 +334,7 @@ protected:
 	afx_msg void OnMovetaskup();
 	afx_msg void OnNeedTooltipText(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNewTask(UINT nCmdID);
+	afx_msg void OnNewSubtaskInTask();
 	afx_msg void OnNewTasklist();
 	afx_msg void OnNexttopleveltask();
 	afx_msg void OnPreferences();
@@ -508,6 +509,7 @@ protected:
 	afx_msg void OnUpdateMovetaskleft(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateMovetaskright(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateMovetaskup(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateNewSubtaskInTask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateNewTask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateNexttopleveltask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdatePrevtopleveltask(CCmdUI* pCmdUI);

@@ -2998,26 +2998,7 @@ BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL
 
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
-	if (nWhere == TDC_INSERTINTASK)
-	{
-		TDCGETTASKS filter(TDCGT_ALL, TDCGTF_UNLOCKED);
-
-		filter.mapAttribs.Add(TDCA_TASKNAME);
-		filter.mapAttribs.Add(TDCA_ICON);
-
-		CTaskFile tasks;
-		GetTasks(tasks, filter);
-
-		CTDLSelectTaskDlg dialog(tasks, m_ilTaskIcons, FALSE); // exclude locked tasks
-		dialog.SetSelectedTaskID(GetSelectedTaskID());
-
-		if (dialog.DoModal() != IDOK)
-			return FALSE;
-
-		htiParent = m_taskTree.GetItem(dialog.GetSelectedTaskID());
-		ASSERT(htiParent);
-	}
-	else if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
+	if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -3039,9 +3020,6 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	case TDC_INSERTATTOP:
 	case TDC_INSERTATBOTTOM:
 		return !IsReadOnly();
-
-	case TDC_INSERTINTASK:
-		return GetTaskCount();
 
 	case TDC_INSERTATTOPOFSELTASKPARENT:
 	case TDC_INSERTATBOTTOMOFSELTASKPARENT:
