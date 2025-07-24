@@ -60,6 +60,12 @@ DWORD CTDLTaskComboBox::GetSelectedTaskID() const
 
 BOOL CTDLTaskComboBox::SetSelectedTaskID(DWORD dwTaskID)
 {
+	if (dwTaskID == 0)
+	{
+		SetCurSel(CB_ERR);
+		return FALSE;
+	}
+
 	return (CDialogHelper::SelectItemByDataT(*this, dwTaskID) != CB_ERR);
 }
 
