@@ -19,31 +19,28 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const TCHAR TAB = '\t';
-
-const UINT WM_RESELECTTASKID = (CB_MSGMAX + 1);
-
-const int ICON_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
 const int MAX_DROPWIDTH = GraphicsMisc::ScaleByDPIFactor(400);
+const int ICON_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
+
+const int ICON_INDENT	= (ICON_SIZE + 2);
+const int LEVEL_INDENT	= ICON_INDENT;
+const int REF_INDENT	= ((ICON_INDENT / 2) + 1);
 
 //////////////////////////////////////////////////////////////////////
 
 CTDLTaskComboBox::CTDLTaskComboBox()
 	:
-	CTabbedComboBox(ICON_SIZE + 2),
 	m_pIlTasks(NULL),
 	m_bShowParentsAsFolders(FALSE),
 	m_bEnableParents(TRUE)
 {
 }
 
-BEGIN_MESSAGE_MAP(CTDLTaskComboBox, CTabbedComboBox)
+BEGIN_MESSAGE_MAP(CTDLTaskComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTDLTaskComboBox)
 	//}}AFX_MSG_MAP
 	ON_WM_CTLCOLOR()
 	ON_CONTROL_REFLECT(CBN_EDITCHANGE, OnEditChange)
-	ON_CONTROL_REFLECT(CBN_DROPDOWN, OnDropDown)
-	ON_MESSAGE(WM_RESELECTTASKID, OnReselectTaskID)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -79,23 +76,23 @@ int CTDLTaskComboBox::GetSelectedTaskImage() const
 	return GetItemImage(GetCurSel());
 }
 
-BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference)
+BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nLevel, int nImage, BOOL bReference)
 {
-	int nTask = CDialogHelper::InsertStringT(*this, nPos, (CString(TAB, nIndent) + sTask), dwTaskID);
+	int nTask = CDialogHelper::InsertStringT(*this, nPos, sTask, dwTaskID);
 
 	if (nTask == CB_ERR)
 		return FALSE;
 	else
 		ASSERT(nTask == nPos);
 
-	if ((nIndent > 0) || (nImage != -1) || bParent)
+	if ((nLevel > 0) || (nImage != -1) || bParent)
 	{
 		TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetAddExtItemData(nTask);
 		ASSERT(pItemData);
 
 		if (pItemData)
 		{
-			pItemData->nIndent = nIndent;
+			pItemData->nLevel = nLevel;
 			pItemData->nImage = nImage;
 			pItemData->bParent = bParent;
 			pItemData->bReference = bReference;
@@ -128,7 +125,7 @@ BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
 							sName, 
 							pItemData->dwItemData, 
 							pItemData->bParent, 
-							pItemData->nIndent, 
+							pItemData->nLevel, 
 							nImage,
 							pItemData->bReference))
 			{
@@ -192,18 +189,18 @@ int CTDLTaskComboBox::GetItemImage(int nItem) const
 	return pItemData->nImage;
 }
 
-int CTDLTaskComboBox::GetItemIndent(int nItem) const
+int CTDLTaskComboBox::GetItemLevel(int nItem) const
 {
 	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
 
-	return pItemData ? pItemData->nIndent : 0;
+	return (pItemData ? pItemData->nLevel : 0);
 }
 
 BOOL CTDLTaskComboBox::IsItemReference(int nItem) const
 {
 	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
 
-	return pItemData ? pItemData->bReference : FALSE;
+	return (pItemData ? pItemData->bReference : FALSE);
 }
 
 void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
@@ -211,13 +208,12 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 {
 	if (IsHeadingItem(nItem))
 	{
-		CTabbedComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
+		COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 		return;
 	}
 
 	// else
-	CRect rText(rect), rIcon(rect);
-	CString sText(sItem);
+	CRect rText(rect);
 
 	int nImage = GetItemImage(nItem);
 	BOOL bReference = IsItemReference(nItem);
@@ -226,46 +222,42 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	{
 		// ALWAYS indent the text to make room for the image, unless we have
 		// headings in which case the base class will do that for us
+		rText.left += (GetItemLevel(nItem) * LEVEL_INDENT);
+
 		if (m_nNumHeadings == 0)
-			rText.left += ICON_SIZE + 2;
-
-		// Draw the actual image
-		if (nImage != -1)
-		{
-			rIcon.left += ((ICON_SIZE + 2) * GetItemIndent(nItem));
-
-			if (m_nNumHeadings)
-				rIcon.left -= (ICON_SIZE + 2);
-		}
+			rText.left += ICON_INDENT;
 	}
-	else
+	else if (nImage != -1)
 	{
-		sText.TrimLeft(TAB);
-
-		if (nImage != -1)
-		{
-			rText.left += (ICON_SIZE + 2);
-		}
-		else if (bReference)
-		{
-			rText.left += ((ICON_SIZE / 2) + 2);
-		}
-
-		rIcon.top--;
+		rText.left += ICON_INDENT;
+	}
+	else if (bReference)
+	{
+		rText.left += REF_INDENT;
 	}
 
-	CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sText, bList, crText);
+	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 
-	if (m_pIlTasks && (nImage != -1))
-		ImageList_Draw(*m_pIlTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+	// Draw icon and/or shortcut overlay
+	if ((nImage != -1) || bReference)
+	{
+		CRect rImage(rText);
+		rImage.OffsetRect(-ICON_INDENT, 0);
 
-	if (bReference)
-		GraphicsMisc::DrawShortcutOverlay(&dc, rIcon);
+		if (!bList)
+			rImage.top++;
+
+		if (nImage != -1)
+			m_pIlTasks->Draw(&dc, nImage, rImage.TopLeft());
+
+		if (bReference)
+			GraphicsMisc::DrawShortcutOverlay(&dc, rImage);
+	}
 }
 
 BOOL CTDLTaskComboBox::IsSelectableItem(int nItem) const
 {
-	if (!CTabbedComboBox::IsSelectableItem(nItem))
+	if (!COwnerdrawComboBoxBase::IsSelectableItem(nItem))
 		return FALSE;
 
 	if (!m_bEnableParents)
@@ -283,43 +275,6 @@ void CTDLTaskComboBox::OnEditChange()
 	SelectNextFind(TRUE);
 }
 
-void CTDLTaskComboBox::OnDropDown()
-{
-	if (CDialogHelper::ComboHasEdit(*this))
-	{
-		// Trim leading tabs
-		CString sText;
-		GetWindowText(sText);
-
-		if (!sText.IsEmpty() && (Misc::First(sText) == TAB))
-		{
-			// Modifying the window text will cause the selection 
-			// to be cleared/changed after this function has returned, 
-			// so we'll need to post ourselves a message to fix things up
-			DWORD dwSelTaskID = GetSelectedTaskID();
-			sText.TrimLeft(TAB);
-
-			SetWindowText(sText);
-			PostMessage(WM_RESELECTTASKID, 0, dwSelTaskID);
-		}
-	}
-}
-
-LRESULT CTDLTaskComboBox::OnReselectTaskID(WPARAM /*wp*/, LPARAM lp)
-{
-	ASSERT(lp);
-	ASSERT(CDialogHelper::ComboHasEdit(*this));
-	ASSERT(GetDroppedState());
-
-	if (SetSelectedTaskID(lp))
-	{
-		SetWindowText(GetSelectedTaskName());
-		SetEditSel(0, -1); // select all
-	}
-
-	return 0L;
-}
-
 BOOL CTDLTaskComboBox::PreTranslateMessage(MSG* pMsg)
 {
 	if (CDialogHelper::ComboHasEdit(*this) && GetDroppedState())
@@ -333,7 +288,7 @@ BOOL CTDLTaskComboBox::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 
-	return CTabbedComboBox::PreTranslateMessage(pMsg);
+	return COwnerdrawComboBoxBase::PreTranslateMessage(pMsg);
 }
 
 void CTDLTaskComboBox::SelectNextFind(BOOL bForward)
@@ -356,7 +311,7 @@ void CTDLTaskComboBox::SelectNextFind(BOOL bForward)
 
 int CTDLTaskComboBox::GetExtraListboxWidth() const
 {
-	return (CTabbedComboBox::GetExtraListboxWidth() + ICON_SIZE + 2);
+	return (COwnerdrawComboBoxBase::GetExtraListboxWidth() + ICON_INDENT);
 }
 
 int CTDLTaskComboBox::GetMaxDropWidth() const 
@@ -366,7 +321,7 @@ int CTDLTaskComboBox::GetMaxDropWidth() const
 
 int CTDLTaskComboBox::CalcMinItemHeight(BOOL bList) const
 {
-	int nMinHeight = CTabbedComboBox::CalcMinItemHeight(bList);
+	int nMinHeight = COwnerdrawComboBoxBase::CalcMinItemHeight(bList);
 
 	if (bList)
 		nMinHeight = max(nMinHeight, (ICON_SIZE + 2));
@@ -443,7 +398,7 @@ void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 
 HBRUSH CTDLTaskComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-	HBRUSH hbr = CTabbedComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
+	HBRUSH hbr = COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
 
 	// hook CBS_SIMPLE list box to eliminate flicker
 	if ((nCtlColor == CTLCOLOR_LISTBOX) && IsType(CBS_SIMPLE) && !m_scSimpleList.IsValid())
@@ -477,5 +432,5 @@ void CTDLTaskComboBox::FillListItemBkgnd(CDC& dc, const CRect& rect, int nItem, 
 		::FillRect(dc, rDead, ::GetSysColorBrush(COLOR_WINDOW));
 	}
 
-	CTabbedComboBox::FillListItemBkgnd(dc, rect, nItem, nItemState, dwItemData, crBack);
+	COwnerdrawComboBoxBase::FillListItemBkgnd(dc, rect, nItem, nItemState, dwItemData, crBack);
 }

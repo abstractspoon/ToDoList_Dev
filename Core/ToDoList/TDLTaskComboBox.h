@@ -21,7 +21,7 @@ typedef void* HTASKITEM;
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDLTaskComboBox : public CTabbedComboBox, private CSubclasser
+class CTDLTaskComboBox : public COwnerdrawComboBoxBase, private CSubclasser
 {
 public:
 	CTDLTaskComboBox();
@@ -52,8 +52,6 @@ protected:
 protected:
 	// Generated message map functions
 	afx_msg void OnEditChange();
-	afx_msg void OnDropDown();
-	afx_msg LRESULT OnReselectTaskID(WPARAM wp, LPARAM lp);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // for subclassing
 
 	DECLARE_MESSAGE_MAP()
@@ -61,10 +59,10 @@ protected:
 protected:
 	struct TCB_ITEMDATA : public ODCB_ITEMDATA
 	{
-		TCB_ITEMDATA() : nIndent(0), nImage(-1), bParent(FALSE), bReference(FALSE) {}
+		TCB_ITEMDATA() : nLevel(0), nImage(-1), bParent(FALSE), bReference(FALSE) {}
 
 		int nImage;
-		int nIndent;
+		int nLevel;
 		BOOL bParent;
 		BOOL bReference;
 	};
@@ -79,16 +77,14 @@ protected:
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual BOOL IsSelectableItem(int nItem) const;
 
-	int GetItemIndent(int nItem) const;
+	int GetItemLevel(int nItem) const;
 	void SelectNextFind(BOOL bForward);
 	BOOL IsItemReference(int nItem) const;
 
 	void Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLevel);
-	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference = FALSE);
+	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nLevel, int nImage, BOOL bReference = FALSE);
 	int GetItemImage(int nItem) const;
 	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
-
-	static CString FormatFullPath(const CTaskFile& tasks, HTASKITEM hTask);
 };
 
 #endif // AFX_TDLTASKCOMBOBOX_H__4EE655E3_F4B1_44EA_8AAA_39DD459AD8A8__INCLUDED_
