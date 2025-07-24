@@ -4333,6 +4333,11 @@ BOOL CTaskFile::SetTaskIsParent(HTASKITEM hTask)
 	return SetTaskUChar(hTask, TDL_TASKISPARENT, 1);
 }
 
+BOOL CTaskFile::SetTaskPath(HTASKITEM hTask, const CString& sPath)
+{
+	return SetTaskString(hTask, TDL_TASKPATH, sPath);
+}
+
 BOOL CTaskFile::GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, CString& sValue) const
 {
 	const CXmlItem* pXITask = NULL;
