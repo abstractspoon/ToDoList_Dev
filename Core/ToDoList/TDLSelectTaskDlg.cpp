@@ -17,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLSelectTaskDlg::CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, LPCTSTR szPrefsKey, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_BROWSEFORTASK_DIALOG, szPrefsKey, pParent),
+	CTDLDialog(IDD_SELECTTASK_DIALOG, szPrefsKey, pParent),
 	m_tasks(tasks),
 	m_ilTasks(ilTasks)
 {
