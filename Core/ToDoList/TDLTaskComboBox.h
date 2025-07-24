@@ -9,8 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "..\shared\tabbedcombobox.h"
-#include "..\shared\subclass.h"
+#include "..\shared\OwnerdrawComboBoxBase.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -21,7 +20,7 @@ typedef void* HTASKITEM;
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDLTaskComboBox : public COwnerdrawComboBoxBase, private CSubclasser
+class CTDLTaskComboBox : public COwnerdrawComboBoxBase
 {
 public:
 	CTDLTaskComboBox();
@@ -39,12 +38,7 @@ public:
 
 protected:
 	const CTDCImageList* m_pIlTasks;
-
-	CSubclassWnd m_scSimpleList; // CBS_SIMPLE only
 	BOOL m_bEnableParents, m_bShowParentsAsFolders;
-
-private:
-	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -52,8 +46,7 @@ protected:
 protected:
 	// Generated message map functions
 	afx_msg void OnEditChange();
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // for subclassing
-
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	DECLARE_MESSAGE_MAP()
 
 protected:

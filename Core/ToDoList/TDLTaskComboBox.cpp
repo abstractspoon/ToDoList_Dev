@@ -404,33 +404,19 @@ void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 
 HBRUSH CTDLTaskComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-	HBRUSH hbr = COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
+	// Eliminate flicker in CBS_SIMPLE list boxes
+	if ((nCtlColor == CTLCOLOR_LISTBOX) && IsType(CBS_SIMPLE))
+		return NULL;
 
-	// hook CBS_SIMPLE list box to eliminate flicker
-	if ((nCtlColor == CTLCOLOR_LISTBOX) && IsType(CBS_SIMPLE) && !m_scSimpleList.IsValid())
-	{
-		m_scSimpleList.HookWindow(*pWnd, this);
-	}
-
-	return hbr;
-}
-
-LRESULT CTDLTaskComboBox::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	switch (msg)
-	{
-	case WM_ERASEBKGND: 
-		return TRUE;
-	}
-
-	return CSubclasser::ScDefault(m_scSimpleList);
+	// else
+	return COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
 }
 
 void CTDLTaskComboBox::FillListItemBkgnd(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 										DWORD dwItemData, COLORREF crBack)
 {
-	// Because we're eating WM_ERASEBKGND we may need to fill 
-	// any 'dead' zone below the last item
+	// Because we're not providing a background brush so as to eliminate 
+	// flicker we may need to fill any 'dead' zone below the last item
 	if ((GetStyle() & CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
 	{
 		CRect rDead(rect);
