@@ -60,6 +60,7 @@ protected:
 		// NOTE: the ClassWizard will add member functions here
 	//}}AFX_MSG
 	afx_msg void OnSelChangeTask();
+	afx_msg void OnDoubleClickTask();
 	DECLARE_MESSAGE_MAP()
 
 protected:

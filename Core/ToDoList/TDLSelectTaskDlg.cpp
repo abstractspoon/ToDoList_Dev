@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
 	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_TASKCOMBO, OnSelChangeTask)
 	ON_CBN_EDITUPDATE(IDC_TASKCOMBO, OnSelChangeTask)
+	ON_CBN_DBLCLK(IDC_TASKCOMBO, OnDoubleClickTask)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -88,4 +89,10 @@ void CTDLSelectTaskDlg::OnSelChangeTask()
 void CTDLSelectTaskDlg::EnableDisableOK()
 {
 	GetDlgItem(IDOK)->EnableWindow(m_dwSelTaskID);
+}
+
+void CTDLSelectTaskDlg::OnDoubleClickTask()
+{
+	if (m_dwSelTaskID != 0)
+		EndDialog(IDOK);
 }

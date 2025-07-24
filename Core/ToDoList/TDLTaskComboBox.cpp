@@ -413,7 +413,8 @@ LRESULT CTDLTaskComboBox::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 {
 	switch (msg)
 	{
-	case WM_ERASEBKGND: return TRUE;
+	case WM_ERASEBKGND: 
+		return TRUE;
 	}
 
 	return CSubclasser::ScDefault(m_scSimpleList);
