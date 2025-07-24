@@ -148,7 +148,6 @@
 #define IDB_ATTRIBCTRL_TOOLBAR          331
 #define IDI_TIMETRACK_GOTO              332
 #define IDI_REMINDER                    333
-#define IDD_BROWSEFORTASK_DIALOG        337
 #define IDD_SELECTTASK_DIALOG           337
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
