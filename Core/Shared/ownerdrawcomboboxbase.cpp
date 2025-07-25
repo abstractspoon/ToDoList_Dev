@@ -481,10 +481,17 @@ int COwnerdrawComboBoxBase::GetMinVisible() const
 
 BOOL COwnerdrawComboBoxBase::OnSelEndOK()
 {
-	// Prevent focus moving to a container item
+	// Prevent focus moving to a container/disabled item
 	int nSel = GetCurSel();
 
-	if (ValidateSelection(nSel, TRUE))
+	// We don't receive WM_KEYDOWN for simple combos, so
+	// we need to decide if we are validating up or down
+	BOOL bValidateDown = TRUE;
+
+	if (IsType(CBS_SIMPLE))
+		bValidateDown = ((nSel == 0) || !(Misc::IsKeyPressed(VK_UP) || Misc::IsKeyPressed(VK_PRIOR)));
+
+	if (ValidateSelection(nSel, bValidateDown))
 		SetCurSel(nSel);
 
 	return FALSE;// continue routing
