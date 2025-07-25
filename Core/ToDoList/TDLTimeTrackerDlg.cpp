@@ -56,6 +56,7 @@ CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
 void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+
 	DDX_Control(pDX, IDC_TASKLISTS, m_cbTasklists);
 	DDX_Control(pDX, IDC_TASKS, m_cbTasks);
 	DDX_Control(pDX, IDC_STARTSTOP, m_btnStart);

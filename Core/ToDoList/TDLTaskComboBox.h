@@ -25,7 +25,7 @@ class CTDLTaskComboBox : public COwnerdrawComboBoxBase
 public:
 	CTDLTaskComboBox();
 
-	DWORD GetSelectedTaskID() const;
+	DWORD GetSelectedTaskID(BOOL bTrueTask) const;
 	CString GetSelectedTaskName() const;
 	int GetSelectedTaskImage() const;
 	BOOL SetSelectedTaskID(DWORD dwTaskID);
@@ -52,12 +52,12 @@ protected:
 protected:
 	struct TCB_ITEMDATA : public ODCB_ITEMDATA
 	{
-		TCB_ITEMDATA() : nLevel(0), nImage(-1), bParent(FALSE), bReference(FALSE) {}
+		TCB_ITEMDATA() : nDepth(0), nImage(-1), bParent(FALSE), dwRefTaskID(FALSE) {}
 
 		int nImage;
-		int nLevel;
+		int nDepth;
 		BOOL bParent;
-		BOOL bReference;
+		DWORD dwRefTaskID;
 	};
 
 	virtual ODCB_ITEMDATA* NewExtItemData() const { return new TCB_ITEMDATA(); }
@@ -70,12 +70,12 @@ protected:
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual BOOL IsSelectableItem(int nItem) const;
 
-	int GetItemLevel(int nItem) const;
+	int GetItemDepth(int nItem) const;
 	void SelectNextFind(BOOL bForward);
-	BOOL IsItemReference(int nItem) const;
+	DWORD GetItemRefTaskID(int nItem) const;
 
-	void Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLevel);
-	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nLevel, int nImage, BOOL bReference = FALSE);
+	void Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDepth);
+	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nDepth, int nImage, DWORD dwRefTaskID = 0);
 	int GetItemImage(int nItem) const;
 	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
 };

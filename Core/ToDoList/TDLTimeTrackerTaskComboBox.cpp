@@ -63,8 +63,17 @@ int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL)
 	}
 
 	BOOL bTasklistChange = (pTTL->pTDC != m_pTDC);
-	DWORD dwSelID = (pTTL->IsTracking() ? pTTL->GetTrackedTaskID() : (bTasklistChange ? 0 : GetSelectedTaskID()));
-
+	DWORD dwSelTaskID = 0;
+	
+	if (pTTL->IsTracking())
+	{
+		dwSelTaskID = pTTL->GetTrackedTaskID();
+	}
+	else if (!bTasklistChange)
+	{
+		dwSelTaskID = GetSelectedTaskID(FALSE);
+	}
+		
 	ResetContent();
 
 	CHoldRedraw hr(*this);
@@ -82,7 +91,7 @@ int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL)
 		InsertTask(nTask, ti.sTask, ti.dwTaskID, ti.bParent, ti.nLevel, nImage);
 	}
 
-	UpdateRecentlyTrackedTasks(pTTL, dwSelID);
+	UpdateRecentlyTrackedTasks(pTTL, dwSelTaskID);
 
 	CDialogHelper::RefreshMaxDropWidth(*this);
 
@@ -137,7 +146,9 @@ int CTDLTimeTrackerTaskComboBox::Update(const TRACKTASKLIST* pTTL, const CDWordA
 
 void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST* pTTL)
 {
-	UpdateRecentlyTrackedTasks(pTTL, (pTTL->IsTracking() ? pTTL->GetTrackedTaskID() : GetSelectedTaskID()));
+	DWORD dwSelTaskID = (pTTL->IsTracking() ? pTTL->GetTrackedTaskID() : GetSelectedTaskID(FALSE));
+
+	UpdateRecentlyTrackedTasks(pTTL, dwSelTaskID);
 }
 
 void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST* pTTL, DWORD dwSelTaskID)
@@ -259,16 +270,6 @@ int CTDLTimeTrackerTaskComboBox::BuildRecentlyTrackedItemMap(CMapTaskIndex& mapI
 	return mapItems.GetCount();
 }
 
-DWORD CTDLTimeTrackerTaskComboBox::GetSelectedTaskID() const
-{
-	int nSel = GetCurSel();
-
-	if (IsHeadingItem(nSel))
-		return 0;
-
-	return GetItemData(nSel);
-}
-
 BOOL CTDLTimeTrackerTaskComboBox::SelectTask(DWORD dwTaskID)
 {
 	int nItem = CDialogHelper::FindItemByDataT(*this, dwTaskID);
@@ -290,9 +291,4 @@ BOOL CTDLTimeTrackerTaskComboBox::SelectTask(const TRACKTASKLIST* pTTL)
 		dwTaskID = pTTL->pTDC->GetSelectedTaskID();
 
 	return SelectTask(dwTaskID);
-}
-
-BOOL CTDLTimeTrackerTaskComboBox::IsSelectedTask(DWORD dwTaskID) const
-{
-	return (dwTaskID && (GetSelectedTaskID() == dwTaskID));
 }

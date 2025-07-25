@@ -45,7 +45,7 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 
-DWORD CTDLTaskComboBox::GetSelectedTaskID() const
+DWORD CTDLTaskComboBox::GetSelectedTaskID(BOOL bTrueTask) const
 {
 	int nSel = GetCurSel();
 	
@@ -55,6 +55,15 @@ DWORD CTDLTaskComboBox::GetSelectedTaskID() const
 	if (CDialogHelper::ComboHasEdit(*this) && CDialogHelper::GetEditText(*this).IsEmpty())
 		return 0;
 
+	if (bTrueTask)
+	{
+		DWORD dwRefTaskID = GetItemRefTaskID(nSel);
+
+		if (dwRefTaskID)
+			return dwRefTaskID;
+	}
+
+	// else
 	return GetItemData(nSel);
 }
 
@@ -82,7 +91,7 @@ int CTDLTaskComboBox::GetSelectedTaskImage() const
 	return GetItemImage(GetCurSel());
 }
 
-BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nLevel, int nImage, BOOL bReference)
+BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nDepth, int nImage, DWORD dwRefTaskID)
 {
 	int nTask = CDialogHelper::InsertStringT(*this, nPos, sTask, dwTaskID);
 
@@ -91,17 +100,17 @@ BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID
 	else
 		ASSERT(nTask == nPos);
 
-	if ((nLevel > 0) || (nImage != -1) || bParent)
+	if ((nDepth > 0) || (nImage != -1) || bParent)
 	{
 		TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetAddExtItemData(nTask);
 		ASSERT(pItemData);
 
 		if (pItemData)
 		{
-			pItemData->nLevel = nLevel;
+			pItemData->nDepth = nDepth;
 			pItemData->nImage = nImage;
 			pItemData->bParent = bParent;
-			pItemData->bReference = bReference;
+			pItemData->dwRefTaskID = dwRefTaskID;
 		}
 	}
 
@@ -131,9 +140,9 @@ BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
 							sName, 
 							pItemData->dwItemData, 
 							pItemData->bParent, 
-							pItemData->nLevel, 
+							pItemData->nDepth, 
 							nImage,
-							pItemData->bReference))
+							pItemData->dwRefTaskID))
 			{
 				return FALSE;
 			}
@@ -195,18 +204,18 @@ int CTDLTaskComboBox::GetItemImage(int nItem) const
 	return pItemData->nImage;
 }
 
-int CTDLTaskComboBox::GetItemLevel(int nItem) const
+int CTDLTaskComboBox::GetItemDepth(int nItem) const
 {
 	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
 
-	return (pItemData ? pItemData->nLevel : 0);
+	return (pItemData ? pItemData->nDepth : 0);
 }
 
-BOOL CTDLTaskComboBox::IsItemReference(int nItem) const
+DWORD CTDLTaskComboBox::GetItemRefTaskID(int nItem) const
 {
 	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
 
-	return (pItemData ? pItemData->bReference : FALSE);
+	return (pItemData ? pItemData->dwRefTaskID : FALSE);
 }
 
 void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
@@ -222,13 +231,13 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	CRect rText(rect);
 
 	int nImage = GetItemImage(nItem);
-	BOOL bReference = IsItemReference(nItem);
+	BOOL bReference = (0 != GetItemRefTaskID(nItem));
 
 	if (bList)
 	{
 		// ALWAYS indent the text to make room for the image, unless we have
 		// headings in which case the base class will do that for us
-		rText.left += (GetItemLevel(nItem) * LEVEL_INDENT);
+		rText.left += (GetItemDepth(nItem) * LEVEL_INDENT);
 
 		if (m_nNumHeadings == 0)
 			rText.left += ICON_INDENT;
@@ -366,7 +375,7 @@ int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTa
 						   tasks.IsTaskParent(hTask),
 						   0,
 						   nImage,
-						   tasks.IsTaskReference(hTask));
+						   tasks.GetTaskReferenceID(hTask));
 			}
 		}
 		
@@ -378,7 +387,7 @@ int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTa
 	return GetCount();
 }
 
-void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLevel)
+void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDepth)
 {
 	if (hTask)
 	{
@@ -388,16 +397,16 @@ void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 				   tasks.GetTaskTitle(hTask),
 				   tasks.GetTaskID(hTask),
 				   tasks.IsTaskParent(hTask),
-				   nLevel++,
+				   nDepth++,
 				   nImage,
-				   tasks.IsTaskReference(hTask));
+				   tasks.GetTaskReferenceID(hTask));
 	}
 
 	HTASKITEM hSubtask = tasks.GetFirstTask(hTask);
 
 	while (hSubtask)
 	{
-		Populate(tasks, hSubtask, nLevel); // RECURSIVE CALL
+		Populate(tasks, hSubtask, nDepth); // RECURSIVE CALL
 		hSubtask = tasks.GetNextTask(hSubtask);
 	}
 }
