@@ -86,7 +86,7 @@ BOOL CTDLSelectTaskDlg::OnInitDialog()
 
 void CTDLSelectTaskDlg::OnSelChangeTask()
 {
-	m_dwSelTaskID = m_cbTasks.GetSelectedTaskID(TRUE);
+	m_dwSelTaskID = m_cbTasks.GetSelectedTaskID();
 	EnableDisableOK();
 }
 

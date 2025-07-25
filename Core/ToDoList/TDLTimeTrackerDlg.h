@@ -59,7 +59,7 @@ public:
 
 	BOOL SelectTaskList(const CToDoCtrl* pTDC);
 	const CToDoCtrl* GetSelectedTasklist() const;
-	DWORD GetSelectedTaskID() const { return m_cbTasks.GetSelectedTaskID(TRUE); }
+	DWORD GetSelectedTaskID() const { return m_cbTasks.GetSelectedTaskID(); }
 	BOOL IsAlwaysOnTop() const { return m_bAlwaysOnTop; }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
 		

@@ -25,10 +25,11 @@ class CTDLTaskComboBox : public COwnerdrawComboBoxBase
 public:
 	CTDLTaskComboBox();
 
-	DWORD GetSelectedTaskID(BOOL bTrueTask) const;
+	DWORD GetSelectedTaskID(BOOL bTrueTask = TRUE) const;
+	BOOL SetSelectedTaskID(DWORD dwTaskID);
+
 	CString GetSelectedTaskName() const;
 	int GetSelectedTaskImage() const;
-	BOOL SetSelectedTaskID(DWORD dwTaskID);
 
 	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks);
 	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, const CDWordArray& aRecentSel);

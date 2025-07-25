@@ -442,7 +442,7 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 		SetItemText(nRow, DEPEND_COL, sTask);
 	}
 
-	SetItemData(nRow, m_cbTasks.GetSelectedTaskID(TRUE));
+	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
 	SetItemImage(nRow, m_cbTasks.GetSelectedTaskImage());
 	SetFocus();
 }

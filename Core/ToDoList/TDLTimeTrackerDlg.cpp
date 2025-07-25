@@ -950,7 +950,6 @@ BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 		GetClientRect(rClient);
 		
 		pDC->FillSolidRect(rClient, GetBkgndColor());
-		
 		return TRUE;
 	}
 
