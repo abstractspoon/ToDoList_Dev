@@ -35,12 +35,10 @@ class CAutoComboBox : public COwnerdrawComboBoxBase, private CSubclasser
 {
 	DECLARE_DYNAMIC(CAutoComboBox)
 
-		// Construction
 public:
 	CAutoComboBox(DWORD dwFlags = 0);
 	virtual ~CAutoComboBox();
 	
-	// Operations
 public:
     virtual int AddString(LPCTSTR szItem) { return AddUniqueItem(szItem); }
     virtual int InsertString(int nIndex, LPCTSTR szItem) { return InsertUniqueItem(nIndex, szItem); }
@@ -122,7 +120,7 @@ private:
 protected:
 	//{{AFX_MSG(CAutoComboBox)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // for subclassing
 	//}}AFX_MSG
 	afx_msg BOOL OnSelEndCancel();
 	afx_msg BOOL OnSelEndOK();

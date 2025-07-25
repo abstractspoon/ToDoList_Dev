@@ -9,32 +9,36 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "..\shared\tabbedcombobox.h"
+#include "..\shared\OwnerdrawComboBoxBase.h"
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDLTaskComboBox : public CTabbedComboBox
+class CTaskFile;
+class CTDCImageList;
+
+typedef void* HTASKITEM;
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDLTaskComboBox : public COwnerdrawComboBoxBase
 {
 public:
 	CTDLTaskComboBox();
 
-	DWORD GetSelectedTaskID() const;
+	DWORD GetSelectedTaskID(BOOL bTrueTask = TRUE) const;
+	BOOL SetSelectedTaskID(DWORD dwTaskID);
+
 	CString GetSelectedTaskName() const;
 	int GetSelectedTaskImage() const;
-	
-	BOOL AddTask(const CString& sTask, DWORD dwTaskID, int nIndent, BOOL bParent, int nImage, BOOL bReference = FALSE);
-	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage, BOOL bReference = FALSE);
 
-	BOOL SetSelectedTaskID(DWORD dwTaskID);
-	void SetImageList(HIMAGELIST hil) { m_hilTasks = hil; }
+	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks);
+	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, const CDWordArray& aRecentSel);
+
 	void EnableParentTasks(BOOL bEnable = TRUE) { m_bEnableParents = bEnable; }
 	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_bShowParentsAsFolders = bAsFolders; }
-	
-	int GetItemImage(int nItem) const;
-	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
 
 protected:
-	HIMAGELIST m_hilTasks;
+	const CTDCImageList* m_pIlTasks;
 	BOOL m_bEnableParents, m_bShowParentsAsFolders;
 
 protected:
@@ -43,33 +47,38 @@ protected:
 protected:
 	// Generated message map functions
 	afx_msg void OnEditChange();
-	afx_msg void OnDropDown();
-	afx_msg LRESULT OnReselectTaskID(WPARAM wp, LPARAM lp);
-
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	struct TCB_ITEMDATA : public ODCB_ITEMDATA
 	{
-		TCB_ITEMDATA() : nIndent(0), nImage(-1), bParent(FALSE), bReference(FALSE) {}
+		TCB_ITEMDATA() : nDepth(0), nImage(-1), bParent(FALSE), dwRefTaskID(FALSE) {}
 
 		int nImage;
-		int nIndent;
+		int nDepth;
 		BOOL bParent;
-		BOOL bReference;
+		DWORD dwRefTaskID;
 	};
 
 	virtual ODCB_ITEMDATA* NewExtItemData() const { return new TCB_ITEMDATA(); }
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+	virtual void FillListItemBkgnd(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+								   DWORD dwItemData, COLORREF crBack);
 	virtual int GetExtraListboxWidth() const;
 	virtual int GetMaxDropWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual BOOL IsSelectableItem(int nItem) const;
 
-	int GetItemIndent(int nItem) const;
+	int GetItemDepth(int nItem) const;
 	void SelectNextFind(BOOL bForward);
-	BOOL IsItemReference(int nItem) const;
+	DWORD GetItemRefTaskID(int nItem) const;
+
+	void Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDepth);
+	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nDepth, int nImage, DWORD dwRefTaskID = 0);
+	int GetItemImage(int nItem) const;
+	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
 };
 
 #endif // AFX_TDLTASKCOMBOBOX_H__4EE655E3_F4B1_44EA_8AAA_39DD459AD8A8__INCLUDED_

@@ -569,6 +569,10 @@ SOURCE=..\ToDoList\TDLRiskComboBox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLSelectTaskDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLSendTasksDlg.cpp
 # End Source File
 # Begin Source File
@@ -1238,6 +1242,10 @@ SOURCE=..\ToDoList\TDLReuseRecurringTaskDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLRiskComboBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLSelectTaskDlg.h
 # End Source File
 # Begin Source File
 

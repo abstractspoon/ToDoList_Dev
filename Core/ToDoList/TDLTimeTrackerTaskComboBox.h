@@ -20,9 +20,6 @@ public:
 	CTDLTimeTrackerTaskComboBox();
 	virtual ~CTDLTimeTrackerTaskComboBox();
 
-	DWORD GetSelectedTaskID() const;
-	BOOL IsSelectedTask(DWORD dwTaskID) const;
-
 	void ResetContent();
 	int Rebuild(const TRACKTASKLIST* pTTL);
 	int Update(const TRACKTASKLIST* pTTL, const CDWordArray& aModTaskIDs);

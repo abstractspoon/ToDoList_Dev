@@ -2226,6 +2226,18 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,221,229,50,14
 END
 
+IDD_SELECTTASK_DIALOG DIALOG DISCARDABLE  0, 0, 307, 175
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Task"
+FONT 8, "Tahoma"
+BEGIN
+    COMBOBOX        IDC_TASKCOMBO,7,7,293,144,CBS_SIMPLE | 
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | 
+                    CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,193,154,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,250,154,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3111,6 +3123,7 @@ BEGIN
         MENUITEM "New &Subtask at Top of Selected Task", ID_NEWSUBTASK_ATTOP
         MENUITEM "New S&ubtask at Bottom of Selected Task", 
                                                 ID_NEWSUBTASK_ATBOTTOM
+        MENUITEM "New Subtask in Task...",      ID_NEWSUBTASK_INTASK
         MENUITEM SEPARATOR
         MENUITEM "S&plit Selected Task into Two (2) Equal Subtasks", 
                                                 ID_SPLITTASKINTO_TWO
@@ -3888,6 +3901,8 @@ BEGIN
         BEGIN
             MENUITEM "At &Top of Task",             ID_NEWSUBTASK_ATTOP
             MENUITEM "At &Bottom of Task",          ID_NEWSUBTASK_ATBOTTOM
+            MENUITEM SEPARATOR
+            MENUITEM "In Task...",                  ID_NEWSUBTASK_INTASK
         END
         MENUITEM SEPARATOR
         MENUITEM "New &Dependent Task Below Selected Task", 
@@ -4059,6 +4074,7 @@ BEGIN
             MENUITEM "At T&op",                     ID_NEWTASK_ATTOP
             MENUITEM "At Botto&m",                  ID_NEWTASK_ATBOTTOM
         END
+        MENUITEM "New Subtask in Task...",      ID_NEWSUBTASK_INTASK
     END
     POPUP "TabCtrl"
     BEGIN
@@ -4671,6 +4687,14 @@ BEGIN
         RIGHTMARGIN, 271
         TOPMARGIN, 7
         BOTTOMMARGIN, 243
+    END
+
+    IDD_SELECTTASK_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 300
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 168
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -6079,6 +6103,7 @@ BEGIN
     IDS_DEFAULTATTRIBUTES   "Default Attributes"
     IDS_ATTRIBTIP_DISMISS   "Dismiss"
     IDS_ATTRIBTIP_CALCULATEDVALUE "Calculated value"
+    IDS_SELECTSUBTASKPARENT_TITLE "Select Subtask Parent"
 END
 
 STRINGTABLE DISCARDABLE 

@@ -185,6 +185,7 @@
     <ClCompile Include="..\ToDoList\TDLAttribListBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLAttributeComboBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLBrowserDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLSelectTaskDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLCleanupIniPreferencesDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLCmdlineOptionsDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLColumnAttribVisibilityListCtrl.cpp" />
@@ -354,6 +355,7 @@
     <ClInclude Include="..\ToDoList\TDLAttribListBox.h" />
     <ClInclude Include="..\ToDoList\TDLAttributeComboBox.h" />
     <ClInclude Include="..\ToDoList\TDLBrowserDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLSelectTaskDlg.h" />
     <ClInclude Include="..\ToDoList\TDLCleanupIniPreferencesDlg.h" />
     <ClInclude Include="..\ToDoList\TDLCmdlineOptionsDlg.h" />
     <ClInclude Include="..\ToDoList\TDLColumnAttribVisibilityListCtrl.h" />

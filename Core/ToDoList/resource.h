@@ -148,6 +148,7 @@
 #define IDB_ATTRIBCTRL_TOOLBAR          331
 #define IDI_TIMETRACK_GOTO              332
 #define IDI_REMINDER                    333
+#define IDD_SELECTTASK_DIALOG           337
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -875,6 +876,7 @@
 #define IDC_NUMPRORITYRISKLEVELS        1587
 #define IDC_SETNUMPRIORITYRISKLEVELS    1588
 #define IDC_SOUNDFILE                   1589
+#define IDC_TASKCOMBO                   1591
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -911,6 +913,7 @@
 #define ID_NEWTASK_BEFORESELECTEDTASK   32800
 #define ID_NEWSUBTASK_ATTOP             32801
 #define ID_NEWSUBTASK_ATBOTTOM          32802
+#define ID_NEWSUBTASK_INTASK            32803
 #define ID_EDIT_TASKTEXT                32806
 #define ID_EDIT_TOGGLETASKDONE          32807
 #define ID_EDIT_TASKCOLOR               32808
@@ -2573,14 +2576,15 @@
 #define IDS_DEFAULTATTRIBUTES           51676
 #define IDS_ATTRIBTIP_DISMISS           51677
 #define IDS_ATTRIBTIP_CALCULATEDVALUE   51678
+#define IDS_SELECTSUBTASKPARENT_TITLE   51679
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        337
+#define _APS_NEXT_RESOURCE_VALUE        338
 #define _APS_NEXT_COMMAND_VALUE         34786
-#define _APS_NEXT_CONTROL_VALUE         1591
+#define _APS_NEXT_CONTROL_VALUE         1592
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

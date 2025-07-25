@@ -34,6 +34,7 @@
 #include "tdlOffsetDatesDlg.h"
 #include "TDLPasteTaskAttributesDlg.h"
 #include "tdlprintdialog.h"
+#include "TDLSelectTaskDlg.h"
 #include "tdlsetreminderdlg.h"
 #include "tdlshowreminderdlg.h"
 #include "TDLTasklistSaveAsDlg.h"
@@ -483,6 +484,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENCIES, OnMoveSelectTaskDependencies)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENTS, OnMoveSelectTaskDependents)
 	ON_COMMAND(ID_NEW, OnNewTasklist)
+	ON_COMMAND(ID_NEWSUBTASK_INTASK, OnNewSubtaskInTask)
 	ON_COMMAND(ID_NEXTTASK, OnGotoNexttask)
 	ON_COMMAND(ID_NEXTTOPLEVELTASK, OnNexttopleveltask)
 	ON_COMMAND(ID_OPEN_RELOAD, OnReload)
@@ -742,6 +744,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
 	ON_UPDATE_COMMAND_UI(ID_NEW, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_NEWSUBTASK_INTASK, OnUpdateNewSubtaskInTask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTASK, OnUpdateGotoNexttask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTOPLEVELTASK, OnUpdateNexttopleveltask)
 	ON_UPDATE_COMMAND_UI(ID_OPEN_RELOAD, OnUpdateReload)
@@ -9791,6 +9794,7 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 		dwDependencyID = GetToDoCtrl().GetSelectedTaskID();
 		break;
 
+	case ID_NEWSUBTASK_INTASK: // Handled by OnNewSubtaskInTask
 	default:
 		ASSERT(0);
 		return;
@@ -9798,7 +9802,7 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
 
-	VERIFY (CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE, dwDependencyID));
+	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE, dwDependencyID));
 }
 
 void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI) 
@@ -9831,6 +9835,7 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 		bDependent = TRUE;
 		break;
 
+	case ID_NEWSUBTASK_INTASK: // Handled by OnUpdateNewSubtaskInTask
 	default:
 		ASSERT(0);
 		return;
@@ -9839,6 +9844,44 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
 
 	pCmdUI->Enable(CanCreateNewTask(nInsert, bDependent));
+}
+
+void CToDoListWnd::OnNewSubtaskInTask()
+{
+	// Get all editable tasks 
+	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_NOTLOCKED);
+
+	filter.mapAttribs.Add(TDCA_TASKNAME);
+	filter.mapAttribs.Add(TDCA_ICON);
+
+	CTaskFile tasks;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	tdc.GetTasks(tasks, filter);
+
+	// Prepare the dialog
+	CTDLSelectTaskDlg dialog(tasks, tdc.GetTaskIconImageList(), _T("NewSubtaskInTask"));
+
+	dialog.SetShowParentTasksAsFolders(Prefs().GetShowParentsAsFolders());
+	dialog.SetSelectedTaskID(tdc.GetSelectedTaskID());
+
+	UINT nCmdID = GetNewSubtaskCmdID(); // For dialog icon and subtask location
+
+	if (dialog.DoModal(CMDICON(nCmdID), IDS_SELECTSUBTASKPARENT_TITLE) != IDOK)
+		return;
+
+	// Select the chosen task
+	VERIFY(tdc.SelectTask(dialog.GetSelectedTaskID(), FALSE));
+
+	// Create the task
+	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
+
+	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE));
+}
+
+void CToDoListWnd::OnUpdateNewSubtaskInTask(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }
 
 BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent) const

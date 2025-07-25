@@ -86,11 +86,15 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	BOOL HandleCursorKey(UINT nChar);
+
 protected:
 	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 								COLORREF& crText, COLORREF& crBack) const;	
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
+	virtual void FillListItemBkgnd(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+									DWORD dwItemData, COLORREF crBack);
 	virtual UINT GetDrawEllipsis() const { return DT_END_ELLIPSIS; }
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const { return 0; }
