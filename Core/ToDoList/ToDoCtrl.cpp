@@ -8044,7 +8044,7 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 			{
 				BOOL bLocked = m_calculator.IsTaskLocked(dwTaskID);
 
-				if (!bLocked || !filter.HasFlag(TDCGTF_UNLOCKED))
+				if (!bLocked || !filter.HasFlag(TDCGTF_NOTLOCKED))
 				{
 					BOOL bDone = pTDI->IsDone();
 					BOOL bGoodAsDone = (bDone ? TRUE : m_calculator.IsTaskDone(dwTaskID));

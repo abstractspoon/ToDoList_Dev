@@ -9849,7 +9849,7 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 void CToDoListWnd::OnNewSubtaskInTask()
 {
 	// Get all editable tasks 
-	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_UNLOCKED);
+	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_NOTLOCKED);
 
 	filter.mapAttribs.Add(TDCA_TASKNAME);
 	filter.mapAttribs.Add(TDCA_ICON);

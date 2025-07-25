@@ -416,7 +416,7 @@ enum // CToDoCtrl::GetTasks()
 	TDCGTF_PARENTTITLECOMMENTSONLY	= 0x0001,
 	TDCGTF_KEEPFLAGGED				= 0x0002,
 	TDCGTF_TRANSFORM				= 0x0004,
-	TDCGTF_UNLOCKED					= 0x0008,
+	TDCGTF_NOTLOCKED				= 0x0008,
 };
  
 /////////////////////////////////////////////////////////////////////////////
