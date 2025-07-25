@@ -490,7 +490,7 @@ BOOL COwnerdrawComboBoxBase::OnSelEndOK()
 	return FALSE;// continue routing
 }
 
-void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+BOOL COwnerdrawComboBoxBase::HandleCursorKey(UINT nChar)
 {
 	// Step over container and disabled items
 	int nCurSel = GetCurSel(), nNewSel = CB_ERR;
@@ -527,10 +527,7 @@ void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	}
 
 	if ((nNewSel == CB_ERR) || IsSelectableItem(nNewSel))
-	{
-		CComboBox::OnKeyDown(nChar, nRepCnt, nFlags);
-		return;
-	}
+		return FALSE;
 
 	if (nNewSel > nCurSel)
 	{
@@ -544,13 +541,24 @@ void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			ValidateSelection(nNewSel, TRUE); // move back one place
 	}
 
-	if (nNewSel != nCurSel)
-	{
-		SetCurSel(nNewSel);
+	if (nNewSel == nCurSel)
+		return FALSE;
 
-		int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
-		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
-	}
+	// else
+	SetCurSel(nNewSel);
+
+	int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
+
+	return TRUE;
+}
+
+void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (HandleCursorKey(nChar))
+		return;
+
+	CComboBox::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 BOOL COwnerdrawComboBoxBase::ValidateSelection(int& nSel, BOOL bForward) const

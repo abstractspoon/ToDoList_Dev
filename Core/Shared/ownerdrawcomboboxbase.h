@@ -86,6 +86,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	BOOL HandleCursorKey(UINT nChar);
+
 protected:
 	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 								COLORREF& crText, COLORREF& crBack) const;	
