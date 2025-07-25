@@ -55,9 +55,13 @@ int CTDLSelectTaskDlg::DoModal(HICON hIcon, UINT nTitleStrID)
 
 	if (nRet == IDOK)
 	{
-		// Move/Add selected task to head of recent
+		// Move/Add selected task to head of recent tasks
+		Misc::RemoveItemT(m_dwSelTaskID, m_aRecentTaskIDs);
 		m_aRecentTaskIDs.InsertAt(0, m_dwSelTaskID);
-		Misc::RemoveDuplicates(m_aRecentTaskIDs);
+
+		// And limit to last 10 items
+		while (m_aRecentTaskIDs.GetSize() > 10)
+			Misc::RemoveLastT(m_aRecentTaskIDs);
 
 		CPreferences().WriteProfileArray(m_sPrefsKey, m_aRecentTaskIDs);
 	}
