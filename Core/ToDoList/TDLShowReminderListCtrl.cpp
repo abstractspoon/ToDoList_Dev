@@ -109,7 +109,7 @@ BOOL CTDLShowReminderListCtrl::Initialise()
 	InsertColumn(WHEN_COL, CEnString(IDS_REMINDER_WHENCOL), LVCFMT_LEFT, (int)aWidths[3]);
 
 	RecalcColumnWidths();
-	SetTooltipCtrlText(CEnString(IDS_REMINDER_DBLCLK_TIP));
+	SetTooltipText(CEnString(IDS_REMINDER_DBLCLK_TIP), TTS_ALWAYSTIP);
 
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);

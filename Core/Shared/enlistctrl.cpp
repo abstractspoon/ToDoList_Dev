@@ -942,28 +942,21 @@ void CEnListCtrl::EnableHeaderTracking(BOOL bAllow)
 	m_header.EnableTracking(bAllow);
 }
 
-void CEnListCtrl::EnableTooltipCtrl(BOOL bEnable)
-{
-	ASSERT (m_hWnd);
-
-	if (m_ttCtrl.m_hWnd == NULL)
-		m_ttCtrl.Create(this);
-	
-	m_bTooltipsEnabled = bEnable;
-	m_ttCtrl.Activate(bEnable);
-}
-
-BOOL CEnListCtrl::SetTooltipCtrlText(CString sText)
+BOOL CEnListCtrl::SetTooltipText(CString sText, DWORD dwTipFlags)
 {
 	ASSERT (m_hWnd);
 
 	if (sText.IsEmpty())
+	{
+		m_ttCtrl.DestroyToolTipCtrl();
 		return FALSE;
+	}
 
 	if (m_ttCtrl.m_hWnd == NULL)
-		m_ttCtrl.Create(this);
+		m_ttCtrl.Create(this, dwTipFlags);
 	
 	m_ttCtrl.AddTool(this, sText);
+	m_ttCtrl.Activate(TRUE);
 
 	return TRUE;
 }
@@ -1387,7 +1380,7 @@ int CEnListCtrl::FindItemFromLabel(CString sLabel, BOOL bExact, int nFromIndex) 
 
 BOOL CEnListCtrl::PreTranslateMessage(MSG* pMsg) 
 {
-	if (::IsWindow(m_ttCtrl.m_hWnd) && pMsg->hwnd == m_hWnd && m_bTooltipsEnabled)
+	if (::IsWindow(m_ttCtrl.m_hWnd) && (pMsg->hwnd == m_hWnd))
 	{
 		switch (pMsg->message)
 		{

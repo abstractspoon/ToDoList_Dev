@@ -26,13 +26,14 @@ namespace LoggedTimeUIExtension
 									UIExtension.TaskIcon taskIcons, 
 									WorkingWeek workWeek,
 									bool isoDateTimes,
-									LogEntry attrib)
+									LogEntry attrib,
+									Translator trans)
 			:
 			this()
 		{
 			m_TaskItems = taskItems;
 
-			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false);
+			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false, trans);
 			m_TaskCombo.Initialise(taskItems, taskIcons, attrib.TaskId, TaskItem.None);
 
 			m_TaskCombo.SelectedIndexChanged += OnSelectedTaskChange;

@@ -366,7 +366,7 @@ namespace LoggedTimeUIExtension
 			item.Enabled = ((m_TimeLog.CanAddNewLogEntry || !m_TimeLog.HasTasklistPath) && (appt == null));
 			item.Click += (s, a) => { OnCreateLogEntry(sender, e); };
 
-			item = AddMenuItem(menu, "Modify Log Entry", (Keys.Control | Keys.F2), 7);
+			item = AddMenuItem(menu, "Edit Log Entry", (Keys.Control | Keys.F2), 7);
 			item.Enabled = m_TimeLog.CanModifySelectedLogEntry;
 			item.Click += (s, a) => { OnEditLogEntry(sender, e); };
 
@@ -594,7 +594,8 @@ namespace LoggedTimeUIExtension
 												m_TimeLog.TaskIcons, 
 												m_WorkWeek, 
 												m_TimeLog.DisplayDatesInISO, 
-												attrib);
+												attrib,
+												m_Trans);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 			m_Trans.Translate(dlg);
@@ -643,7 +644,8 @@ namespace LoggedTimeUIExtension
 			var dlg = new EditLoggedEntryDlg(entry, 
 											 m_WorkWeek,
 											 m_TimeLog.DisplayDatesInISO,
-											 (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked));
+											 (m_TimeLog.ReadOnly || (taskItem == null) || taskItem.Locked),
+											 m_Trans);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
 			m_Trans.Translate(dlg);
