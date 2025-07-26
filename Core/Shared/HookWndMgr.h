@@ -235,7 +235,6 @@ protected:
 			return FALSE;
 		
 		CSubclassWnd* pHookWnd = GetHookWnd(hWnd);
-		//CWnd* pWnd = CWnd::FromHandle(hWnd);
 		
 		if (pHookWnd)
 		{
