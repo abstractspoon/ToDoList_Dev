@@ -403,7 +403,7 @@ bool CWorkloadWnd::GetLabelEditRect(LPRECT pEdit)
 	if (m_ctrlWorkload.GetLabelEditRect(pEdit))
 	{
 		// convert to screen coords
-		m_ctrlWorkload.CWnd::ClientToScreen(pEdit);
+		m_ctrlWorkload.ClientToScreen(pEdit);
 		return true;
 	}
 

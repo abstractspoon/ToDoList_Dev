@@ -454,7 +454,7 @@ int CTreeListCtrl::CalcSplitPosToFitListColumns(int nAvailWidth) const
 void CTreeListCtrl::AdjustSplitterToFitListColumns()
 {
 	CRect rClient;
-	CWnd::GetClientRect(rClient);
+	GetClientRect(rClient);
 
 	int nNewSplitPos = CalcSplitPosToFitListColumns(rClient.Width());
 	nNewSplitPos = max(MIN_SPLIT_POS, nNewSplitPos);
@@ -516,14 +516,14 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 
 	if (!bWasSelected)
 	{
-		NMTREEVIEW nmtv = { *this, (UINT)CWnd::GetDlgCtrlID(), TVN_SELCHANGED, 0 };
+		NMTREEVIEW nmtv = { *this, GetDlgCtrlID(), TVN_SELCHANGED, 0 };
 
 		nmtv.itemNew.hItem = hti;
 		nmtv.itemNew.lParam = GetItemData(hti);
 		nmtv.action = TVC_BYMOUSE;
 
 		nmtv.ptDrag = CPoint(GetMessagePos());
-		CWnd::ScreenToClient(&nmtv.ptDrag);
+		ScreenToClient(&nmtv.ptDrag);
 
 		OnTreeSelectionChange(&nmtv);
 	}
@@ -531,7 +531,7 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 	// If the item is still not visible because of the horizontal
 	// hold and this was a mouse selection then we post a message to
 	// ensure that whatever called this has already finished
-	if ((CWnd::GetCurrentMessage()->message == WM_LBUTTONDOWN) && !TCH().IsItemVisible(hti))
+	if ((GetCurrentMessage()->message == WM_LBUTTONDOWN) && !TCH().IsItemVisible(hti))
 		m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
 	
 	return TRUE;
@@ -621,7 +621,7 @@ void CTreeListCtrl::Resize(int cx, int cy)
 	if (!cx || !cy)
 	{
 		CRect rClient;
-		CWnd::GetClientRect(rClient);
+		GetClientRect(rClient);
 
 		cx = rClient.Width();
 		cy = rClient.Height();
@@ -814,7 +814,7 @@ BOOL CTreeListCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
 void CTreeListCtrl::OnTreeHeaderRightClick(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	// pass on to parent
-	CWnd::GetParent()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), (LPARAM)::GetMessagePos());
+	GetParent()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), (LPARAM)::GetMessagePos());
 }
 
 void CTreeListCtrl::OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -841,17 +841,17 @@ LRESULT CTreeListCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM lp)
 	if (!OnDragBeginItem(move, pDDI->bLeftDrag))
 		return FALSE;
 	
-	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
+	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
 LRESULT CTreeListCtrl::OnTreePreDragMove(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
+	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
 LRESULT CTreeListCtrl::OnTreeDragOver(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	UINT nCursor = m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
+	UINT nCursor = m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 
 	if (nCursor != DD_DROPEFFECT_NONE)
 	{
@@ -869,7 +869,7 @@ LRESULT CTreeListCtrl::OnTreeDragOver(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CTreeListCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	if (m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage()))
+	if (m_treeDragDrop.ProcessMessage(GetCurrentMessage()))
 	{
 		TLCITEMMOVE move = { GetSelectedItem(), 0 };
 		
@@ -879,7 +879,7 @@ LRESULT CTreeListCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
 			if (!OnDragDropItem(move))
 			{
 				// Notify parent of move
-				return CWnd::GetParent()->SendMessage(WM_TLC_MOVEITEM, CWnd::GetDlgCtrlID(), (LPARAM)&move);
+				return GetParent()->SendMessage(WM_TLC_MOVEITEM, GetDlgCtrlID(), (LPARAM)&move);
 			}
 		}
 	}
@@ -889,7 +889,7 @@ LRESULT CTreeListCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CTreeListCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
+	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
 void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
@@ -907,7 +907,7 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	if (pNMTV->action == TVC_BYKEYBOARD)
 		return;
 
-	CWnd::GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
+	GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
 }
 
 LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -1136,7 +1136,7 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			case VK_DOWN:
 			case VK_PRIOR:
 			case VK_NEXT:
-				CWnd::GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)GetSelectedItem());
+				GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID(), (LPARAM)GetSelectedItem());
 				break;
 
 			default:
@@ -1149,7 +1149,7 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 					tvkd.wVKey = LOWORD(wp);
 					tvkd.flags = lp;
 
-					lr = CWnd::SendMessage(WM_NOTIFY, ::GetDlgCtrlID(hRealWnd), (LPARAM)&tvkd);
+					lr = CWnd::SendMessage(WM_NOTIFY, tvkd.hdr.idFrom, (LPARAM)&tvkd);
 				}
 				break;
 			}
@@ -1243,7 +1243,7 @@ BOOL CTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 	{
 		// Derived class gets first refusal
 		if (!OnTreeCheckChange(hti))
-			CWnd::GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)hti);
+			GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, GetDlgCtrlID(), (LPARAM)hti);
 		
 		return TRUE; // eat
 	}
@@ -1343,7 +1343,7 @@ BOOL CTreeListCtrl::GetLabelEditRect(LPRECT pEdit) const
 
 		// convert from tree to 'our' coords
 		m_tree.ClientToScreen(pEdit);
-		CWnd::ScreenToClient(pEdit);
+		ScreenToClient(pEdit);
 
 		return true;
 	}
@@ -1564,7 +1564,7 @@ BOOL CTreeListCtrl::HandleEraseBkgnd(CDC* pDC)
 	CTreeListSyncer::HandleEraseBkgnd(pDC);
 
  	CRect rClient;
- 	CWnd::GetClientRect(rClient);
+ 	GetClientRect(rClient);
  	
  	pDC->FillSolidRect(rClient, m_crBkgnd);
 	return TRUE;
