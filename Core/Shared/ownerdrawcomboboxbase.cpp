@@ -190,11 +190,20 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	COLORREF crText, crBack;
 	GetItemColors(nItem, lpDrawItemStruct->itemState, dwItemData, crText, crBack);
 
-	if (bListItem)
-		FillListItemBkgnd(dc, lpDrawItemStruct->rcItem, nItem, lpDrawItemStruct->itemState, dwItemData, crBack);
+	CRect rItem(lpDrawItemStruct->rcItem);
+	dc.FillSolidRect(rItem, crBack);
+
+	// Because we're not handling WM_ERASEBKGND so as to eliminate 
+	// flicker we may need to fill any 'dead' zone below the last item
+	if (IsType(CBS_SIMPLE) && (GetStyle() & CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
+	{
+		CRect rDead(rItem);
+		rDead.OffsetRect(0, rDead.Height());
+
+		::FillRect(dc, rDead, ::GetSysColorBrush(COLOR_WINDOW));
+	}
 
 	// draw the item
-	CRect rItem(lpDrawItemStruct->rcItem);
 	rItem.DeflateRect(2, 1);
 
 	// Indent items below their heading
@@ -252,11 +261,6 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 
 	dc.Detach();
-}
-
-void COwnerdrawComboBoxBase::FillListItemBkgnd(CDC& dc, const CRect& rect, int /*nItem*/, UINT /*nItemState*/, DWORD /*dwItemData*/, COLORREF crBack)
-{
-	dc.FillSolidRect(rect, crBack);
 }
 
 BOOL COwnerdrawComboBoxBase::WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const
@@ -405,6 +409,11 @@ LRESULT COwnerdrawComboBoxBase::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg)
 	{
+	case WM_ERASEBKGND:
+		// prevent flicker
+		if (IsType(CBS_SIMPLE))
+			return TRUE;
+		break;
 	}
 
 	return CSubclasser::ScWindowProc(m_scList, msg, wp, lp);
@@ -421,7 +430,7 @@ LRESULT COwnerdrawComboBoxBase::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 
 HBRUSH COwnerdrawComboBoxBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-	HBRUSH hbr = COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
+	HBRUSH hbr = CComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
 
 	// hook list box before base class subclasses it
 	switch (nCtlColor)
