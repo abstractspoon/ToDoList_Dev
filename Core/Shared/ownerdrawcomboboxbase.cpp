@@ -409,6 +409,12 @@ LRESULT COwnerdrawComboBoxBase::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg)
 	{
+	case WM_KEYDOWN:
+		// Avoid headings and disabled items
+		if (IsType(CBS_SIMPLE) && HandleCursorKey(wp))
+			return 0L;
+		break;
+
 	case WM_ERASEBKGND:
 		// prevent flicker
 		if (IsType(CBS_SIMPLE))
@@ -421,9 +427,9 @@ LRESULT COwnerdrawComboBoxBase::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 
 LRESULT COwnerdrawComboBoxBase::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (msg)
-	{
-	}
+// 	switch (msg)
+// 	{
+// 	}
 
 	return CSubclasser::ScWindowProc(m_scEdit, msg, wp, lp);
 }
@@ -541,14 +547,7 @@ BOOL COwnerdrawComboBoxBase::OnSelEndOK()
 	// Prevent focus moving to a container/disabled item
 	int nSel = GetCurSel();
 
-	// We don't receive WM_KEYDOWN for simple combos, so
-	// we need to decide if we are validating up or down
-	BOOL bValidateDown = TRUE;
-
-	if (IsType(CBS_SIMPLE))
-		bValidateDown = ((nSel == 0) || !(Misc::IsKeyPressed(VK_UP) || Misc::IsKeyPressed(VK_PRIOR)));
-
-	if (ValidateSelection(nSel, bValidateDown))
+	if (ValidateSelection(nSel, TRUE))
 		SetCurSel(nSel);
 
 	return FALSE;// continue routing
@@ -605,14 +604,13 @@ BOOL COwnerdrawComboBoxBase::HandleCursorKey(UINT nChar)
 			ValidateSelection(nNewSel, TRUE); // move back one place
 	}
 
-	if (nNewSel == nCurSel)
-		return FALSE;
+	if (nNewSel != nCurSel)
+	{
+		SetCurSel(nNewSel);
 
-	// else
-	SetCurSel(nNewSel);
-
-	int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
+		int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
+		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
+	}
 
 	return TRUE;
 }
