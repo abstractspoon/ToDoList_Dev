@@ -110,7 +110,6 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	inline DWORD GetDataType() const { return (dwAttribType & TDCCA_DATAMASK); }
 	inline DWORD GetListType() const { return (dwAttribType & TDCCA_LISTMASK); }
-	inline BOOL HasFeature(DWORD dwFeature) const { return SupportsFeature(dwFeature) && (dwFeatures & dwFeature); }
 
 	inline BOOL IsDataType(DWORD dwDataType) const { return (GetDataType() == dwDataType); }
 	inline BOOL IsList() const { return (GetListType() != TDCCA_NOTALIST); }
@@ -124,6 +123,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	BOOL GetListIconName(const CString& sImage, CString& sName) const;
 
 	BOOL SupportsFeature(DWORD dwFeature) const;
+	BOOL HasFeature(DWORD dwFeature) const;
 	BOOL IsAggregated() const;
 	BOOL ValidateData(TDCCADATA& data) const;
 

@@ -3377,7 +3377,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 	}
 
-	if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_ACCUMULATE))
+	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE) ||
 			   attribDef.IsDataType(TDCCA_CALCULATION));
@@ -3398,7 +3398,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			}
 		}
 	}
-	else if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_MAXIMIZE))
+	else if (attribDef.HasFeature(TDCCAF_MAXIMIZE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_MAXIMIZE) ||
 			   attribDef.IsDataType(TDCCA_CALCULATION));
@@ -3424,7 +3424,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (dCalcValue <= -DBL_MAX)
 			dCalcValue = DBL_NULL;
 	}
-	else if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_MINIMIZE))
+	else if (attribDef.HasFeature(TDCCAF_MINIMIZE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_MINIMIZE) ||
 			   attribDef.IsDataType(TDCCA_CALCULATION));
@@ -3449,6 +3449,11 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 		if (dCalcValue >= DBL_MAX)
 			dCalcValue = DBL_NULL;
+	}
+	else if (!attribDef.HasFeature(TDCCAF_SHOWTIME))
+	{
+		attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
+		dCalcValue = (int)dCalcValue;
 	}
 	else
 	{
