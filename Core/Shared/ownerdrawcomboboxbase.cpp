@@ -47,9 +47,6 @@ COwnerdrawComboBoxBase::~COwnerdrawComboBoxBase()
 IMPLEMENT_DYNAMIC(COwnerdrawComboBoxBase, CComboBox)
 
 BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
-	//{{AFX_MSG_MAP(COwnerdrawComboBoxBase)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
@@ -57,6 +54,7 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	ON_WM_DESTROY()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
+	ON_WM_CTLCOLOR()
 
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
@@ -390,6 +388,56 @@ void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 	}
 
 	SetDroppedWidth(max(nDefaultWidth, nReqWidth));
+}
+
+LRESULT COwnerdrawComboBoxBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	if (m_scEdit.GetHwnd() == hRealWnd)
+		return OnEditboxMessage(msg, wp, lp);
+
+	// else
+	ASSERT(m_scList.GetHwnd() == hRealWnd);
+
+	return OnListboxMessage(msg, wp, lp);
+}
+
+LRESULT COwnerdrawComboBoxBase::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+	}
+
+	return CSubclasser::ScWindowProc(m_scList, msg, wp, lp);
+}
+
+LRESULT COwnerdrawComboBoxBase::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+	}
+
+	return CSubclasser::ScWindowProc(m_scEdit, msg, wp, lp);
+}
+
+HBRUSH COwnerdrawComboBoxBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// hook list box before base class subclasses it
+	switch (nCtlColor)
+	{
+	case CTLCOLOR_LISTBOX:
+		if (!m_scList.IsValid())
+			m_scList.HookWindow(*pWnd, this);
+		break;
+
+	case CTLCOLOR_EDIT:
+		if (!m_scEdit.IsValid())
+			m_scEdit.HookWindow(*pWnd, this);
+		break;
+	}
+
+	return hbr;
 }
 
 void COwnerdrawComboBoxBase::OnSize(UINT nType, int cx, int cy)

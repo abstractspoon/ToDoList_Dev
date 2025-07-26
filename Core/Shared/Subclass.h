@@ -127,6 +127,8 @@ protected:
 	LRESULT Default(); // call this at the end of handler fns if you are happy with the defaults
 };
 
+////////////////////////////////////////////////////////////////////
+
 class CSubclasser
 {
 	friend class CSubclassWndMap;

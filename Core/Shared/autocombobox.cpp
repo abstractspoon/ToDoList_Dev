@@ -44,11 +44,10 @@ CAutoComboBox::~CAutoComboBox()
 IMPLEMENT_DYNAMIC(CAutoComboBox, COwnerdrawComboBoxBase)
 
 BEGIN_MESSAGE_MAP(CAutoComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CAutoComboBox)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
-	//}}AFX_MSG_MAP
 	ON_WM_KEYDOWN()
+
 	ON_CONTROL_REFLECT_EX(CBN_SELENDCANCEL, OnSelEndCancel)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
@@ -479,17 +478,6 @@ int CAutoComboBox::GetItems(CStringArray& aItems) const
     return aItems.GetSize();
 }
 
-LRESULT CAutoComboBox::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	if (m_scEdit.GetHwnd() == hRealWnd)
-		return OnEditboxMessage(msg, wp, lp);
-
-	// else
-	ASSERT(m_scList.GetHwnd() == hRealWnd);
-
-	return OnListboxMessage(msg, wp, lp);
-}
-
 BOOL CAutoComboBox::DoDeleteListItem(const CPoint& ptClient)
 {
 	ASSERT(GetDroppedState());
@@ -545,11 +533,11 @@ LRESULT CAutoComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 				if ((nHit != LB_ERR) && (nHit != nSel))
 				{
 					RedrawListItem(nHit);
-					CDialogHelper::TrackMouseLeave(m_scList.GetHwnd());
+					CDialogHelper::TrackMouseLeave(GetListbox());
 				}
 				else
 				{
-					CDialogHelper::TrackMouseLeave(m_scList.GetHwnd(), FALSE);
+					CDialogHelper::TrackMouseLeave(GetListbox(), FALSE);
 				}
 			}
 		}
@@ -569,12 +557,12 @@ LRESULT CAutoComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 					RedrawListItem(nPrev);
 			}
 
-			CDialogHelper::TrackMouseLeave(m_scList.GetHwnd(), FALSE);
+			CDialogHelper::TrackMouseLeave(GetListbox(), FALSE);
 		}
 		break;
 	}
 	
-	return CSubclasser::ScDefault(m_scList);
+	return COwnerdrawComboBoxBase::OnListboxMessage(msg, wp, lp);
 }
 
 void CAutoComboBox::RedrawListItem(int nItem) const
@@ -584,8 +572,8 @@ void CAutoComboBox::RedrawListItem(int nItem) const
 
 	TRACE(_T("CAutoComboBox::OnListboxMessage(hot = %d)\n"), m_nHotSimpleListItem);
 
-	::InvalidateRect(m_scList.GetHwnd(), rItem, FALSE);
-	::UpdateWindow(m_scList.GetHwnd());
+	::InvalidateRect(GetListbox(), rItem, FALSE);
+	::UpdateWindow(GetListbox());
 }
 
 LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
@@ -664,7 +652,7 @@ LRESULT CAutoComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		break;
 	}
 
-	return CSubclasser::ScDefault(m_scEdit);
+	return COwnerdrawComboBoxBase::OnEditboxMessage(msg, wp, lp);
 }
 
 void CAutoComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
@@ -815,20 +803,8 @@ HBRUSH CAutoComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
 	
-	// hook list box before base class subclasses it
-	if ((nCtlColor == CTLCOLOR_LISTBOX) && !m_scList.IsValid())
-	{
-		m_scList.HookWindow(*pWnd, this);
-	}
-	// and hook edit box
-	else if ((nCtlColor == CTLCOLOR_EDIT) && !m_scEdit.IsValid())
-	{
-		m_scEdit.HookWindow(*pWnd, this);
-
-		// mask
-		if (m_eMask.IsMasked())
-			m_eMask.SubclassWindow(*pWnd);
-	}
+	if ((nCtlColor == CTLCOLOR_EDIT) && !m_eMask.GetSafeHwnd())
+		m_eMask.SubclassWindow(*pWnd);
 	
 	return hbr;
 }
