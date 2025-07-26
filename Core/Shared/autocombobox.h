@@ -67,21 +67,6 @@ public:
 	void ModifyFlags(DWORD dwRemove, DWORD dwAdd);
 	CString GetItemText(int nItem) const;
 
-	operator HWND() const { return GetSafeHwnd(); }
-
-	// resolve ambiguities between CWnd and CSubclassWnd
-	inline CWnd* GetParent() const { return COwnerdrawComboBoxBase::GetParent(); }
-	inline DWORD GetExStyle() const { return COwnerdrawComboBoxBase::GetExStyle(); }
-	inline DWORD GetStyle() const { return COwnerdrawComboBoxBase::GetStyle(); }
-
-	inline void GetClientRect(LPRECT pRect) const { COwnerdrawComboBoxBase::GetClientRect(pRect); }
-	inline void GetWindowRect(LPRECT pRect) const { COwnerdrawComboBoxBase::GetWindowRect(pRect); }
-	inline void Invalidate(BOOL bErase = TRUE) { COwnerdrawComboBoxBase::Invalidate(bErase); }
-	inline BOOL IsWindowEnabled() const { return COwnerdrawComboBoxBase::IsWindowEnabled(); }
-	inline BOOL IsWindowVisible() const { return COwnerdrawComboBoxBase::IsWindowVisible(); }
-	inline UINT GetDlgCtrlID() const { return COwnerdrawComboBoxBase::GetDlgCtrlID(); }
-	inline void SetRedraw(BOOL bRedraw = TRUE) { COwnerdrawComboBoxBase::SetRedraw(bRedraw); }
-
 	void DDX(CDataExchange* pDX, CString& value);
 
 protected:

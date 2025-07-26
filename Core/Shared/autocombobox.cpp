@@ -776,7 +776,6 @@ void CAutoComboBox::ParentACNotify(UINT nMsgNotify, int nIndex, LPCTSTR szItem)
 	if ((nIndex >= 0) && (!szItem || szItem[0]))
 	{
 		CAutoFlag af(m_bNotifyingParent, TRUE);
-		
 		GetParent()->SendMessage(nMsgNotify, MAKEWPARAM(GetDlgCtrlID(), nIndex), (LPARAM)szItem);
 	}
 }
@@ -788,9 +787,7 @@ void CAutoComboBox::ParentCBNotify(UINT nIDNotify)
 	if (pParent)
 	{
 		CAutoFlag af(m_bNotifyingParent, TRUE);
-		
-		UINT nID = GetDlgCtrlID();
-		pParent->SendMessage(WM_COMMAND, MAKEWPARAM(nID, nIDNotify), (LPARAM)m_hWnd);
+		pParent->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nIDNotify), (LPARAM)m_hWnd);
 	}
 }
 
