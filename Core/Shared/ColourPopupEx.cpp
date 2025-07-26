@@ -98,7 +98,7 @@ LRESULT CColourPopupEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			if (m_WindowRect.PtInRect(ptMsg))
 			{
 				ScreenToClient(&ptMsg);
-				return ::SendMessage(hRealWnd, msg, wp, MAKELPARAM(ptMsg.x, ptMsg.y));
+				return SendMessage(msg, wp, MAKELPARAM(ptMsg.x, ptMsg.y));
 			}
 
 			EndSelection(CPN_SELENDCANCEL);
@@ -114,7 +114,7 @@ LRESULT CColourPopupEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			if (m_WindowRect.PtInRect(ptMsg))
 			{
 				ScreenToClient(&ptMsg);
-				return ::SendMessage(hRealWnd, msg, wp, MAKELPARAM(ptMsg.x, ptMsg.y));
+				return SendMessage(msg, wp, MAKELPARAM(ptMsg.x, ptMsg.y));
 			}
 		}
 		break;
