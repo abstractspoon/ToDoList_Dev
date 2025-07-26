@@ -18,7 +18,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // CEnEdit window
 
-
 const int EE_BTNWIDTH_DEFAULT	= ::GetSystemMetrics(SM_CXHTHUMB);
 const int EE_BTNWIDTH_ICON		= (GraphicsMisc::ScaleByDPIFactor(16 + 2));
 const int EE_BTNWIDTH_CALCULATE = -1;

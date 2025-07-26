@@ -8,7 +8,7 @@
 //
 
 #include "ownerdrawcomboboxbase.h"
-#include "maskedit.h"
+#include "enedit.h"
 #include "misc.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ public:
 
 protected:
 	DWORD m_dwFlags;
-	CMaskEdit m_eMask;
+	CEnEdit m_edit;
 	CFont m_fontClose;
 
 	BOOL m_bEditChange;

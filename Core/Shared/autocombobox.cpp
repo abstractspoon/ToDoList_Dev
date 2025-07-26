@@ -796,15 +796,15 @@ BOOL CAutoComboBox::AllowDelete() const
 
 void CAutoComboBox::SetEditMask(LPCTSTR szMask, DWORD dwMaskFlags)
 {
-	m_eMask.SetMask(szMask, dwMaskFlags);
+	m_edit.SetMask(szMask, dwMaskFlags);
 }
 
 HBRUSH CAutoComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
 	HBRUSH hbr = COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
 	
-	if ((nCtlColor == CTLCOLOR_EDIT) && !m_eMask.GetSafeHwnd())
-		m_eMask.SubclassWindow(*pWnd);
+	if ((nCtlColor == CTLCOLOR_EDIT) && !m_edit.GetSafeHwnd())
+		m_edit.SubclassWindow(*pWnd);
 	
 	return hbr;
 }

@@ -6,6 +6,7 @@
 #include "TDLQuickFindComboBox.h"
 
 #include "..\shared\EnString.h"
+#include "..\shared\TooltipCtrlEx.h"
 
 // CTDLQuickFindComboBox ///////////////////////////////////////////////
 
@@ -36,10 +37,8 @@ HBRUSH CTDLQuickFindComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CAutoComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if ((nCtlColor == CTLCOLOR_EDIT) && (m_edit.GetSafeHwnd() == NULL))
+	if ((nCtlColor == CTLCOLOR_EDIT) && !Misc::HasFlag(m_nFlags, WF_TOOLTIPS))
 	{
-		VERIFY(m_edit.SubclassDlgItem(1001, this));
-
 		// CEnEdit disables its tooltips when embedded in a combobox
 		// simply because they don't seem to work
 		// So we have to handle it ourselves
@@ -59,21 +58,19 @@ void CTDLQuickFindComboBox::OnDestroy()
 
 int CTDLQuickFindComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	ASSERT(m_edit.GetSafeHwnd());
+ 	ASSERT(m_edit.GetSafeHwnd());
 
 	ClientToScreen(&point);
-	m_edit.ScreenToClient(&point);
 
-	int nTool = m_edit.OnToolHitTest(point, pTI);
-
-	if (nTool != -1)
+	for (int nID = TDLQFB_PREV; nID <= TDLQFB_NEXT; nID++)
 	{
-		pTI->hwnd = m_hWnd;
+		CRect rBtn = m_edit.GetButtonRect(nID);
 
-		m_edit.ClientToScreen(&pTI->rect);
-		ScreenToClient(&pTI->rect);
-
-		return nTool;
+		if (rBtn.PtInRect(point))
+		{
+			ScreenToClient(rBtn);
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, m_edit.GetButtonTip(nID), nID, rBtn);
+		}
 	}
 
 	// else
@@ -82,7 +79,7 @@ int CTDLQuickFindComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 LRESULT CTDLQuickFindComboBox::OnEEBtnClick(WPARAM wp, LPARAM lp)
 {
-	// Forward to parent
+	// Forward to app
 	if (wp == 1001)
 	{
 		switch (lp)

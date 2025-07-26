@@ -27,16 +27,6 @@ public:
 	void ClearEdit() { m_bEditChange = FALSE; }
 
 protected:
-	class CTDLQuickFindEdit : public CEnEdit
-	{
-	public:
-		int OnToolHitTest(CPoint point, TOOLINFO* pTI) const
-		{
-			return CEnEdit::OnToolHitTest(point, pTI);
-		}
-	};
-
-	CTDLQuickFindEdit m_edit;
 	CIcon m_iconNext, m_iconPrev;
 
 protected:
