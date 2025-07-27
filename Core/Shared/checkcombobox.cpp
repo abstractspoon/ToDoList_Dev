@@ -726,13 +726,13 @@ void CCheckComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	case VK_RETURN:
 		// We only need to handle this when there's no edit box
-		if (!m_scEdit.GetHwnd() && GetDroppedState())
+		if (!GetEdit() && GetDroppedState())
 			ShowDropDown(FALSE);
 		break;
 
 	case VK_ESCAPE:
 		// We only need to handle this when there's no edit box
-		if (!m_scEdit.GetHwnd() && GetDroppedState())
+		if (!GetEdit() && GetDroppedState())
 			m_bEditChange = FALSE;
 		break;
 	}
