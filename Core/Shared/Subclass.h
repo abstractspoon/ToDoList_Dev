@@ -63,7 +63,7 @@ public:
 	inline CWnd* GetCWnd() const { return CWnd::FromHandle(m_hWndHooked); }
 
 	inline UINT GetDlgCtrlID() const { return ::GetDlgCtrlID(m_hWndHooked); }
-	void SetRedraw(BOOL bRedraw = TRUE) { ::SendMessage(m_hWndHooked, WM_SETREDRAW, bRedraw, 0); }
+	inline void SetRedraw(BOOL bRedraw = TRUE) { ::SendMessage(m_hWndHooked, WM_SETREDRAW, bRedraw, 0); }
 	inline DWORD GetExStyle() const { return ::GetWindowLong(m_hWndHooked, GWL_EXSTYLE); }
 	inline DWORD GetStyle() const { return ::GetWindowLong(m_hWndHooked, GWL_STYLE); }
 	inline BOOL SetExStyle(DWORD dwExStyle) const { return ::SetWindowLong(m_hWndHooked, GWL_EXSTYLE, dwExStyle); }
