@@ -95,6 +95,8 @@ protected:
 	virtual LRESULT OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 
+	virtual void OnSubclassChild(HWND hwndChild) { ASSERT(::IsWindow(hwndChild)); } // for derived classes
+
 	BOOL HandleCursorKey(UINT nChar);
 
 protected:
@@ -103,7 +105,7 @@ protected:
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 
-	virtual UINT GetDrawEllipsis() const { return DT_END_ELLIPSIS; }
+	virtual UINT GetEllipsisStyle() const { return DT_END_ELLIPSIS; }
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const { return 0; }
 	virtual int CalcMinItemHeight(BOOL bList) const;

@@ -291,7 +291,7 @@ void COwnerdrawComboBoxBase::DrawItemText(CDC& dc, const CRect& rect, int /*nIte
 		if (crText != CLR_NONE)
 			dc.SetTextColor(crText);
 
-		UINT nFlags = (DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_NOCLIP | GetDrawEllipsis());
+		UINT nFlags = (DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_NOCLIP | GetEllipsisStyle());
 		dc.DrawText(sItem, (LPRECT)(LPCRECT)rect, nFlags);
 	}
 }
@@ -396,11 +396,11 @@ void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 
 LRESULT COwnerdrawComboBoxBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	if (m_scEdit.GetHwnd() == hRealWnd)
+	if (GetEdit() == hRealWnd)
 		return OnEditboxMessage(msg, wp, lp);
 
 	// else
-	ASSERT(m_scList.GetHwnd() == hRealWnd);
+	ASSERT(GetListbox() == hRealWnd);
 
 	return OnListboxMessage(msg, wp, lp);
 }
@@ -443,12 +443,18 @@ HBRUSH COwnerdrawComboBoxBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	{
 	case CTLCOLOR_LISTBOX:
 		if (!m_scList.IsValid())
-			m_scList.HookWindow(*pWnd, this);
+		{
+			VERIFY(m_scList.HookWindow(*pWnd, this));
+			OnSubclassChild(*pWnd); // for derived classes
+		}
 		break;
 
 	case CTLCOLOR_EDIT:
 		if (!m_scEdit.IsValid())
-			m_scEdit.HookWindow(*pWnd, this);
+		{
+			VERIFY(m_scEdit.HookWindow(*pWnd, this));
+			OnSubclassChild(*pWnd); // for derived classes
+		}
 		break;
 	}
 

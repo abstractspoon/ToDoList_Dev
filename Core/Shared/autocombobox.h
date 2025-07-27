@@ -8,14 +8,13 @@
 //
 
 #include "ownerdrawcomboboxbase.h"
-#include "enedit.h"
+#include "maskedit.h"
 #include "misc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_ACBN_ITEMADDED = ::RegisterWindowMessage(_T("WM_ACBN_ITEMADDED"));
 const UINT WM_ACBN_ITEMDELETED = ::RegisterWindowMessage(_T("WM_ACBN_ITEMDELETED"));
-
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -36,6 +35,8 @@ class CAutoComboBox : public COwnerdrawComboBoxBase
 
 public:
 	CAutoComboBox(DWORD dwFlags = 0);
+	CAutoComboBox(CMaskEdit& edit, DWORD dwFlags = 0);
+
 	virtual ~CAutoComboBox();
 	
 public:
@@ -70,7 +71,6 @@ public:
 
 protected:
 	DWORD m_dwFlags;
-	CEnEdit m_edit;
 	CFont m_fontClose;
 
 	BOOL m_bEditChange;
@@ -88,11 +88,16 @@ protected:
 
 	// for deletion
 	int m_nDeleteItem;
+
+private:
+	CMaskEdit m_maskEdit;
+
+protected:
+	CMaskEdit& m_edit; // Allows derived classes to pass in their own edit
 	
 protected:
 	// Generated message map functions
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // for subclassing
 	afx_msg BOOL OnSelEndCancel();
 	afx_msg BOOL OnSelEndOK();
 	afx_msg BOOL OnSelChange();
@@ -119,8 +124,10 @@ protected:
 	virtual CString GetSelectedItemText() const;
 	virtual BOOL DeleteLBItem(int nItem);
 	virtual int UpdateEditAutoComplete(const CString& sText, int nCaretPos);
+	virtual void OnSubclassChild(HWND hwndChild);
 
 protected:
+	void Initialise(DWORD dwFlags);
 	BOOL GetListDeleteButtonRect(const CRect& rItem, CRect& rBtn) const;
 	BOOL DoDeleteListItem(const CPoint& ptList);
 	int HitTestListDeleteBtn(const CPoint& ptList) const;

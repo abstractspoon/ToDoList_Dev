@@ -25,16 +25,14 @@ const int SIZE_CLOSEBTN = (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::Wa
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox
 
-CAutoComboBox::CAutoComboBox(DWORD dwFlags) 
-	: 
-	m_dwFlags(dwFlags), 
-	m_bNotifyingParent(FALSE), 
-	m_bEditChange(FALSE), 
-	m_nDeleteItem(LB_ERR),
-	m_bSkipAutoComplete(FALSE),
-	m_nHotSimpleListItem(LB_ERR),
-	m_nAutoCompleteMatch(LB_ERR)
+CAutoComboBox::CAutoComboBox(DWORD dwFlags) : m_edit(m_maskEdit)
 {
+	Initialise(dwFlags);
+}
+
+CAutoComboBox::CAutoComboBox(CMaskEdit& edit, DWORD dwFlags) : m_edit(edit)
+{
+	Initialise(dwFlags);
 }
 
 CAutoComboBox::~CAutoComboBox()
@@ -45,7 +43,6 @@ IMPLEMENT_DYNAMIC(CAutoComboBox, COwnerdrawComboBoxBase)
 
 BEGIN_MESSAGE_MAP(CAutoComboBox, COwnerdrawComboBoxBase)
 	ON_WM_SIZE()
-	ON_WM_CTLCOLOR()
 	ON_WM_KEYDOWN()
 
 	ON_CONTROL_REFLECT_EX(CBN_SELENDCANCEL, OnSelEndCancel)
@@ -60,6 +57,17 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox message handlers
 
+void CAutoComboBox::Initialise(DWORD dwFlags)
+{
+	m_dwFlags = dwFlags;
+	m_bNotifyingParent = FALSE;
+	m_bEditChange = FALSE;
+	m_nDeleteItem = LB_ERR;
+	m_bSkipAutoComplete =FALSE;
+	m_nHotSimpleListItem = LB_ERR;
+	m_nAutoCompleteMatch = LB_ERR;
+}
+
 void CAutoComboBox::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 {
 	Misc::ModifyFlags(m_dwFlags, dwRemove, dwAdd);
@@ -68,7 +76,6 @@ void CAutoComboBox::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 int CAutoComboBox::SetStrings(const CStringArray& aItems) 
 { 
 	CHoldRedraw hr(*this);
-
 	ResetContent(); 
 
 	return AddUniqueItems(aItems); 
@@ -414,15 +421,15 @@ void CAutoComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 
 void CAutoComboBox::OnSize(UINT nType, int cx, int cy) 
 {
-	CWnd* pEdit = GetDlgItem(1001);
-
 	// if the edit control does not have the focus then hide the selection
-	if (pEdit && pEdit != GetFocus())
+	HWND hwndEdit = GetEdit();
+
+	if (hwndEdit && (hwndEdit != ::GetFocus()))
 	{
-		CHoldRedraw hr(*pEdit);
+		CHoldRedraw hr(hwndEdit);
 		COwnerdrawComboBoxBase::OnSize(nType, cx, cy);
 	
-		pEdit->SendMessage(EM_SETSEL, (UINT)-1, 0);
+		m_scEdit.SendMessage(EM_SETSEL, (UINT)-1, 0);
 		return;
 	}
 
@@ -516,7 +523,7 @@ LRESULT CAutoComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		break;
 
 	case WM_MOUSEMOVE:
-		if (IsType(CBS_SIMPLE))
+		if (IsType(CBS_SIMPLE) && AllowDelete())
 		{
 			int nHit = HitTestList(lp);
 
@@ -544,7 +551,7 @@ LRESULT CAutoComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 		break;
 
 	case WM_MOUSELEAVE:
-		if (IsType(CBS_SIMPLE))
+		if (IsType(CBS_SIMPLE) && AllowDelete())
 		{
 			int nSel = m_scList.SendMessage(LB_GETCURSEL);
 
@@ -567,6 +574,9 @@ LRESULT CAutoComboBox::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 
 void CAutoComboBox::RedrawListItem(int nItem) const
 {
+	ASSERT(IsType(CBS_SIMPLE));
+	ASSERT(AllowDelete());
+
 	CRect rItem;
 	m_scList.SendMessage(LB_GETITEMRECT, nItem, (LPARAM)(LPRECT)&rItem);
 
@@ -799,14 +809,15 @@ void CAutoComboBox::SetEditMask(LPCTSTR szMask, DWORD dwMaskFlags)
 	m_edit.SetMask(szMask, dwMaskFlags);
 }
 
-HBRUSH CAutoComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
+void CAutoComboBox::OnSubclassChild(HWND hwndChild)
 {
-	HBRUSH hbr = COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
-	
-	if ((nCtlColor == CTLCOLOR_EDIT) && !m_edit.GetSafeHwnd())
-		m_edit.SubclassWindow(*pWnd);
-	
-	return hbr;
+	COwnerdrawComboBoxBase::OnSubclassChild(hwndChild);
+
+	if (GetEdit() == hwndChild)
+	{
+		ASSERT(m_edit.GetSafeHwnd() == NULL);
+		VERIFY(m_edit.SubclassWindow(hwndChild));
+	}
 }
 
 BOOL CAutoComboBox::DeleteLBItem(int nItem)
