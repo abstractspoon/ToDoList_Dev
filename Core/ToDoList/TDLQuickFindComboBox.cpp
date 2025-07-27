@@ -36,8 +36,7 @@ int CTDLQuickFindComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	ASSERT(m_quickEdit.GetSafeHwnd());
 
-	ClientToScreen(&point);
-	m_quickEdit.ScreenToClient(&point);
+	::MapWindowPoints(m_hWnd, m_quickEdit, &point, 1);
 
 	int nTool = m_quickEdit.OnToolHitTest(point, pTI);
 

@@ -140,8 +140,7 @@ int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	ASSERT (m_fileEdit.GetSafeHwnd());
 
-	ClientToScreen(&point);
-	m_fileEdit.ScreenToClient(&point);
+	::MapWindowPoints(m_hWnd, m_fileEdit, &point, 1);
 
 	int nTool = m_fileEdit.OnToolHitTest(point, pTI);
 
