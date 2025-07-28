@@ -39,7 +39,6 @@ CTDLTaskComboBox::CTDLTaskComboBox()
 BEGIN_MESSAGE_MAP(CTDLTaskComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTDLTaskComboBox)
 	//}}AFX_MSG_MAP
-// 	ON_WM_CTLCOLOR()
 	ON_CONTROL_REFLECT(CBN_EDITCHANGE, OnEditChange)
 END_MESSAGE_MAP()
 
