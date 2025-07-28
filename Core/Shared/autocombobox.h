@@ -78,7 +78,8 @@ protected:
 	BOOL m_bNotifyingParent;
 	BOOL m_bSkipAutoComplete;
 
-	int m_nHotSimpleListItem;
+	int m_nHotSimpleListItem; // Hot-tracking CBS_SIMPLE
+	int m_nDeleteItem;
 
 	// It seems that both the edit and listbox cannot
 	// have visible selection at the same time so we
@@ -87,13 +88,10 @@ protected:
 
 	mutable BOOL m_bDrawing;
 
-	// for deletion
-	int m_nDeleteItem;
-
 private:
 	CMaskEdit m_maskEdit; // The default edit
-	CMaskEdit* m_pEdit; // Actual edit - default or from derived class
-	
+	CMaskEdit* m_pEdit;   // Actual edit - default or from derived class
+
 protected:
 	// Generated message map functions
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -126,7 +124,6 @@ protected:
 	virtual void OnSubclassChild(HWND hwndChild);
 
 protected:
-	void Initialise(CMaskEdit* pEdit, DWORD dwFlags);
 	BOOL GetListDeleteButtonRect(const CRect& rItem, CRect& rBtn) const;
 	BOOL DoDeleteListItem(const CPoint& ptList);
 	int HitTestListDeleteBtn(const CPoint& ptList) const;

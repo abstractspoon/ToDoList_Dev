@@ -25,14 +25,31 @@ const int SIZE_CLOSEBTN = (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::Wa
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox
 
-CAutoComboBox::CAutoComboBox(DWORD dwFlags) : m_pEdit(NULL)
+CAutoComboBox::CAutoComboBox(DWORD dwFlags) 
+	: 
+	m_pEdit(&m_maskEdit),
+	m_dwFlags(dwFlags), 
+	m_bNotifyingParent(FALSE), 
+	m_bEditChange(FALSE), 
+	m_nDeleteItem(LB_ERR),
+	m_bSkipAutoComplete(FALSE),
+	m_nHotSimpleListItem(LB_ERR),
+	m_nAutoCompleteMatch(LB_ERR)
 {
-	Initialise(&m_maskEdit, dwFlags);
 }
 
-CAutoComboBox::CAutoComboBox(CMaskEdit* pEdit, DWORD dwFlags) : m_pEdit(NULL)
+CAutoComboBox::CAutoComboBox(CMaskEdit* pEdit, DWORD dwFlags) 
+	: 
+	m_pEdit(pEdit), 
+	m_dwFlags(dwFlags),
+	m_bNotifyingParent(FALSE),
+	m_bEditChange(FALSE),
+	m_nDeleteItem(LB_ERR),
+	m_bSkipAutoComplete(FALSE),
+	m_nHotSimpleListItem(LB_ERR),
+	m_nAutoCompleteMatch(LB_ERR)
 {
-	Initialise(pEdit, dwFlags);
+	ASSERT(m_pEdit);
 }
 
 CAutoComboBox::~CAutoComboBox()
@@ -56,21 +73,6 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox message handlers
-
-void CAutoComboBox::Initialise(CMaskEdit* pEdit, DWORD dwFlags)
-{
-	ASSERT(pEdit);
-
-	m_pEdit = pEdit;
-	m_dwFlags = dwFlags;
-
-	m_bNotifyingParent = FALSE;
-	m_bEditChange = FALSE;
-	m_nDeleteItem = LB_ERR;
-	m_bSkipAutoComplete =FALSE;
-	m_nHotSimpleListItem = LB_ERR;
-	m_nAutoCompleteMatch = LB_ERR;
-}
 
 void CAutoComboBox::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 {
