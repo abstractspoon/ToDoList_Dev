@@ -23,10 +23,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox
 
-CTimeComboBox::CTimeComboBox(DWORD dwStyles) 
-	: 
-	m_dwStyle(dwStyles), 
-	m_hwndListBox(NULL)
+CTimeComboBox::CTimeComboBox(DWORD dwStyles) : m_dwStyle(dwStyles) 
 {
 }
 
@@ -35,10 +32,7 @@ CTimeComboBox::~CTimeComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CTimeComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CTimeComboBox)
 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
-	ON_WM_CTLCOLOR()
 	ON_WM_CAPTURECHANGED()
 END_MESSAGE_MAP()
 
@@ -47,7 +41,7 @@ END_MESSAGE_MAP()
 
 void CTimeComboBox::PreSubclassWindow() 
 {
-	VERIFY(Initialize());
+	BuildCombo();
 
 	COwnerdrawComboBoxBase::PreSubclassWindow();
 }
@@ -57,22 +51,8 @@ int CTimeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
-	VERIFY(Initialize());
-	
-	return 0;
-}
-
-BOOL CTimeComboBox::Initialize()
-{
 	BuildCombo();
-	
-	// hook the edit ctrl so we can convert '.' and ',' to ':'
-	CWnd* pEdit = GetDlgItem(1001);
-
-	if (pEdit)
-		return m_scEdit.HookWindow(*pEdit, this);
-
-	return TRUE;
+	return 0;
 }
 
 void CTimeComboBox::BuildCombo(BOOL bReset)
@@ -245,24 +225,23 @@ BOOL CTimeComboBox::Set24HourTime(double dTime)
 	return TRUE;
 }
 
-LRESULT CTimeComboBox::ScWindowProc(HWND hRealWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CTimeComboBox::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (message)
+	switch (msg)
 	{
 	case WM_CHAR:
 		// Convert comma and period to time separator
-		if ((wParam == ',') || (wParam == '.'))
+		if ((wp == ',') || (wp == '.'))
 		{
 			CString sSep = Misc::GetTimeSeparator();
 
 			if (!sSep.IsEmpty())
-				return CSubclasser::ScWindowProc(m_scEdit, message, sSep[0], lParam);
+				wp = sSep[0];
 		}
 		break;
 	}
 
-	// else
-	return CSubclasser::ScDefault(m_scEdit);
+	return COwnerdrawComboBoxBase::OnEditboxMessage(msg, wp, lp);
 }
 
 void CTimeComboBox::OnCaptureChanged(CWnd* pWnd)
@@ -274,24 +253,8 @@ void CTimeComboBox::OnCaptureChanged(CWnd* pWnd)
 	ScrollListBox();
 }
 
-HBRUSH CTimeComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	if (nCtlColor == CTLCOLOR_LISTBOX)
-		m_hwndListBox = *pWnd;
-
-	return COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
-}
-
 void CTimeComboBox::ScrollListBox()
 {
-	if (!GetDroppedState())
-	{
-		ASSERT(m_hwndListBox == NULL);
-		return;
-	}
-
-	ASSERT(m_hwndListBox);
-
 	// Scroll to beginning of working day unless the
 	// current time is earlier than that
 	const int STARTOFWORKDAY = 7;
@@ -300,7 +263,7 @@ void CTimeComboBox::ScrollListBox()
 
 	if ((dCurTime == 0.0) || (dCurTime > STARTOFWORKDAY))
 	{
-		int nCurScrollPos = ::GetScrollPos(m_hwndListBox, SB_VERT);
+		int nCurScrollPos = ::GetScrollPos(GetListbox(), SB_VERT);
 		int nMinScrollPos = STARTOFWORKDAY; 
 
 		if (m_dwStyle & TCB_HALFHOURS)
@@ -308,12 +271,10 @@ void CTimeComboBox::ScrollListBox()
 
 		if (nMinScrollPos > nCurScrollPos)
 		{
-			CHoldRedraw hr(m_hwndListBox);
-			::SendMessage(m_hwndListBox, WM_VSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nMinScrollPos), 0);
+			CHoldRedraw hr(GetListbox());
+			m_scList.SendMessage(WM_VSCROLL, MAKEWPARAM(SB_THUMBPOSITION, nMinScrollPos), 0);
 		}
 	}
-	
-	m_hwndListBox = NULL; // always
 }
 
 void CTimeComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 

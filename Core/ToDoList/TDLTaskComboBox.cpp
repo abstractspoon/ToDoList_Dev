@@ -39,7 +39,6 @@ CTDLTaskComboBox::CTDLTaskComboBox()
 BEGIN_MESSAGE_MAP(CTDLTaskComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTDLTaskComboBox)
 	//}}AFX_MSG_MAP
-	ON_WM_CTLCOLOR()
 	ON_CONTROL_REFLECT(CBN_EDITCHANGE, OnEditChange)
 END_MESSAGE_MAP()
 
@@ -409,30 +408,4 @@ void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDe
 		Populate(tasks, hSubtask, nDepth); // RECURSIVE CALL
 		hSubtask = tasks.GetNextTask(hSubtask);
 	}
-}
-
-HBRUSH CTDLTaskComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	// Eliminate flicker in CBS_SIMPLE list boxes
-	if ((nCtlColor == CTLCOLOR_LISTBOX) && IsType(CBS_SIMPLE))
-		return NULL;
-
-	// else
-	return COwnerdrawComboBoxBase::OnCtlColor(pDC, pWnd, nCtlColor);
-}
-
-void CTDLTaskComboBox::FillListItemBkgnd(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-										DWORD dwItemData, COLORREF crBack)
-{
-	// Because we're not providing a background brush so as to eliminate 
-	// flicker we may need to fill any 'dead' zone below the last item
-	if ((GetStyle() & CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
-	{
-		CRect rDead(rect);
-		rDead.OffsetRect(0, rect.Height());
-
-		::FillRect(dc, rDead, ::GetSysColorBrush(COLOR_WINDOW));
-	}
-
-	COwnerdrawComboBoxBase::FillListItemBkgnd(dc, rect, nItem, nItemState, dwItemData, crBack);
 }

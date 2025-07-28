@@ -6,7 +6,6 @@
 #endif // _MSC_VER > 1000
 // timecombobox.h : header file
 //
-#include "Subclass.h"
 #include "OwnerdrawComboBoxBase.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -22,11 +21,12 @@ enum
 /////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox window
 
-class CTimeComboBox : public COwnerdrawComboBoxBase, public CSubclasser
+class CTimeComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
 	CTimeComboBox(DWORD dwStyles = 0);
+	virtual ~CTimeComboBox();
 	
 	double GetOleTime() const;
 	BOOL SetOleTime(double dTime); // 0-1 suitable for COleDateTime, -1 for 'no time'
@@ -41,37 +41,23 @@ public:
 	
 protected:
 	DWORD m_dwStyle;
-	CSubclassWnd m_scEdit;
-	HWND m_hwndListBox;
 	
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTimeComboBox)
 protected:
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 
-// Implementation
-public:
-	virtual ~CTimeComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTimeComboBox)
+	// Generated message map functions
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	DECLARE_MESSAGE_MAP()
 
-	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 								COLORREF& crText, COLORREF& crBack) const;	
 
 protected:
 	void BuildCombo(BOOL bReset = FALSE);
-	BOOL Initialize();
 	void ScrollListBox();
 	CString GetCurrentTime() const;
 	double Get24HourTime(int nItem) const; // -1 for 'no time'

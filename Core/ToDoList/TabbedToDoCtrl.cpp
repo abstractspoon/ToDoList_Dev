@@ -3498,6 +3498,11 @@ BOOL CTabbedToDoCtrl::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
 	return FALSE;
 }
 
+BOOL CTabbedToDoCtrl::HasListOption(DWORD dwOption) const 
+{ 
+	return Misc::HasFlag(m_dwListOptions, dwOption); 
+}
+
 void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, const void* pContext)
 {
 	GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = FALSE;

@@ -47,9 +47,6 @@ COwnerdrawComboBoxBase::~COwnerdrawComboBoxBase()
 IMPLEMENT_DYNAMIC(COwnerdrawComboBoxBase, CComboBox)
 
 BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
-	//{{AFX_MSG_MAP(COwnerdrawComboBoxBase)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
@@ -57,6 +54,7 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	ON_WM_DESTROY()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
+	ON_WM_CTLCOLOR()
 
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
@@ -192,11 +190,20 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	COLORREF crText, crBack;
 	GetItemColors(nItem, lpDrawItemStruct->itemState, dwItemData, crText, crBack);
 
-	if (bListItem)
-		FillListItemBkgnd(dc, lpDrawItemStruct->rcItem, nItem, lpDrawItemStruct->itemState, dwItemData, crBack);
+	CRect rItem(lpDrawItemStruct->rcItem);
+	dc.FillSolidRect(rItem, crBack);
+
+	// Because we're not handling WM_ERASEBKGND so as to eliminate 
+	// flicker we may need to fill any 'dead' zone below the last item
+	if (IsType(CBS_SIMPLE) && (GetStyle() & CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
+	{
+		CRect rDead(rItem);
+		rDead.OffsetRect(0, rDead.Height());
+
+		::FillRect(dc, rDead, ::GetSysColorBrush(COLOR_WINDOW));
+	}
 
 	// draw the item
-	CRect rItem(lpDrawItemStruct->rcItem);
 	rItem.DeflateRect(2, 1);
 
 	// Indent items below their heading
@@ -256,11 +263,6 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	dc.Detach();
 }
 
-void COwnerdrawComboBoxBase::FillListItemBkgnd(CDC& dc, const CRect& rect, int /*nItem*/, UINT /*nItemState*/, DWORD /*dwItemData*/, COLORREF crBack)
-{
-	dc.FillSolidRect(rect, crBack);
-}
-
 BOOL COwnerdrawComboBoxBase::WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const
 {
 	if (!IsSelectableItem((int)lpDrawItemStruct->itemID))
@@ -289,7 +291,7 @@ void COwnerdrawComboBoxBase::DrawItemText(CDC& dc, const CRect& rect, int /*nIte
 		if (crText != CLR_NONE)
 			dc.SetTextColor(crText);
 
-		UINT nFlags = (DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_NOCLIP | GetDrawEllipsis());
+		UINT nFlags = (DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_NOCLIP | GetEllipsisStyle());
 		dc.DrawText(sItem, (LPRECT)(LPCRECT)rect, nFlags);
 	}
 }
@@ -392,6 +394,73 @@ void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 	SetDroppedWidth(max(nDefaultWidth, nReqWidth));
 }
 
+LRESULT COwnerdrawComboBoxBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	if (GetEdit() == hRealWnd)
+		return OnEditboxMessage(msg, wp, lp);
+
+	// else
+	ASSERT(GetListbox() == hRealWnd);
+
+	return OnListboxMessage(msg, wp, lp);
+}
+
+LRESULT COwnerdrawComboBoxBase::OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+	case WM_KEYDOWN:
+		// Avoid headings and disabled items
+		if (IsType(CBS_SIMPLE) && HandleCursorKey(wp))
+			return 0L;
+		break;
+
+	case WM_ERASEBKGND:
+		// prevent flicker
+		if (IsType(CBS_SIMPLE))
+			return TRUE;
+		break;
+	}
+
+	return CSubclasser::ScWindowProc(m_scList, msg, wp, lp);
+}
+
+LRESULT COwnerdrawComboBoxBase::OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp)
+{
+// 	switch (msg)
+// 	{
+// 	}
+
+	return CSubclasser::ScWindowProc(m_scEdit, msg, wp, lp);
+}
+
+HBRUSH COwnerdrawComboBoxBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// hook list box before base class subclasses it
+	switch (nCtlColor)
+	{
+	case CTLCOLOR_LISTBOX:
+		if (!m_scList.IsValid())
+		{
+			VERIFY(m_scList.HookWindow(*pWnd, this));
+			OnSubclassChild(*pWnd); // for derived classes
+		}
+		break;
+
+	case CTLCOLOR_EDIT:
+		if (!m_scEdit.IsValid())
+		{
+			VERIFY(m_scEdit.HookWindow(*pWnd, this));
+			OnSubclassChild(*pWnd); // for derived classes
+		}
+		break;
+	}
+
+	return hbr;
+}
+
 void COwnerdrawComboBoxBase::OnSize(UINT nType, int cx, int cy)
 {
 	CComboBox::OnSize(nType, cx, cy);
@@ -484,14 +553,7 @@ BOOL COwnerdrawComboBoxBase::OnSelEndOK()
 	// Prevent focus moving to a container/disabled item
 	int nSel = GetCurSel();
 
-	// We don't receive WM_KEYDOWN for simple combos, so
-	// we need to decide if we are validating up or down
-	BOOL bValidateDown = TRUE;
-
-	if (IsType(CBS_SIMPLE))
-		bValidateDown = ((nSel == 0) || !(Misc::IsKeyPressed(VK_UP) || Misc::IsKeyPressed(VK_PRIOR)));
-
-	if (ValidateSelection(nSel, bValidateDown))
+	if (ValidateSelection(nSel, TRUE))
 		SetCurSel(nSel);
 
 	return FALSE;// continue routing
@@ -548,14 +610,13 @@ BOOL COwnerdrawComboBoxBase::HandleCursorKey(UINT nChar)
 			ValidateSelection(nNewSel, TRUE); // move back one place
 	}
 
-	if (nNewSel == nCurSel)
-		return FALSE;
+	if (nNewSel != nCurSel)
+	{
+		SetCurSel(nNewSel);
 
-	// else
-	SetCurSel(nNewSel);
-
-	int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
+		int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
+		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
+	}
 
 	return TRUE;
 }

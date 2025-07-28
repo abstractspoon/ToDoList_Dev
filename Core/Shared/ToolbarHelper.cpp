@@ -420,7 +420,7 @@ LRESULT CToolbarHelper::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	{
 	case WM_MOUSEMOVE:
 	case WM_MOUSELEAVE:
-		m_tt.RelayEvent(const_cast<MSG*>(CSubclassWnd::GetCurrentMessage()));
+		m_tt.RelayEvent(const_cast<MSG*>(GetCurrentMessage()));
 		break;
 
 	case WM_SIZE:

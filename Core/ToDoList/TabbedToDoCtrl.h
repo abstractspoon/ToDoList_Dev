@@ -14,9 +14,6 @@
 #include "tdlviewTabcontrol.h"
 #include "tdltasklistctrloptionscombobox.h"
 
-#include "..\shared\misc.h"
-#include "..\shared\subclass.h"
-
 #include "..\Interfaces\UIExtensionMgr.h"
 
 #include <afxtempl.h>
@@ -278,7 +275,7 @@ protected:
 	void BuildListGroupByCombo();
 	void BuildListOptionsCombo();
 	void ResortList(BOOL bAllowToggle = FALSE);
-	BOOL HasListOption(DWORD dwOption) const { return Misc::HasFlag(m_dwListOptions, dwOption); }
+	BOOL HasListOption(DWORD dwOption) const;
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree(BOOL bEnsureSelection);

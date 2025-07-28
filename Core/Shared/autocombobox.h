@@ -7,16 +7,14 @@
 // autocombobox.h : header file
 //
 
-#include "Subclass.h"
+#include "ownerdrawcomboboxbase.h"
 #include "maskedit.h"
 #include "misc.h"
-#include "ownerdrawcomboboxbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_ACBN_ITEMADDED = ::RegisterWindowMessage(_T("WM_ACBN_ITEMADDED"));
 const UINT WM_ACBN_ITEMDELETED = ::RegisterWindowMessage(_T("WM_ACBN_ITEMDELETED"));
-
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -31,7 +29,7 @@ enum
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox window
 
-class CAutoComboBox : public COwnerdrawComboBoxBase, private CSubclasser
+class CAutoComboBox : public COwnerdrawComboBoxBase
 {
 	DECLARE_DYNAMIC(CAutoComboBox)
 
@@ -39,6 +37,9 @@ public:
 	CAutoComboBox(DWORD dwFlags = 0);
 	virtual ~CAutoComboBox();
 	
+protected:
+	CAutoComboBox(CMaskEdit* pEdit, DWORD dwFlags = 0); // Derived classes only
+
 public:
     virtual int AddString(LPCTSTR szItem) { return AddUniqueItem(szItem); }
     virtual int InsertString(int nIndex, LPCTSTR szItem) { return InsertUniqueItem(nIndex, szItem); }
@@ -67,36 +68,18 @@ public:
 	void ModifyFlags(DWORD dwRemove, DWORD dwAdd);
 	CString GetItemText(int nItem) const;
 
-	operator HWND() const { return GetSafeHwnd(); }
-
-	// resolve ambiguities between CWnd and CSubclassWnd
-	inline CWnd* GetParent() const { return COwnerdrawComboBoxBase::GetParent(); }
-	inline DWORD GetExStyle() const { return COwnerdrawComboBoxBase::GetExStyle(); }
-	inline DWORD GetStyle() const { return COwnerdrawComboBoxBase::GetStyle(); }
-
-	inline void GetClientRect(LPRECT pRect) const { COwnerdrawComboBoxBase::GetClientRect(pRect); }
-	inline void GetWindowRect(LPRECT pRect) const { COwnerdrawComboBoxBase::GetWindowRect(pRect); }
-	inline void Invalidate(BOOL bErase = TRUE) { COwnerdrawComboBoxBase::Invalidate(bErase); }
-	inline BOOL IsWindowEnabled() const { return COwnerdrawComboBoxBase::IsWindowEnabled(); }
-	inline BOOL IsWindowVisible() const { return COwnerdrawComboBoxBase::IsWindowVisible(); }
-	inline UINT GetDlgCtrlID() const { return COwnerdrawComboBoxBase::GetDlgCtrlID(); }
-	inline void SetRedraw(BOOL bRedraw = TRUE) { COwnerdrawComboBoxBase::SetRedraw(bRedraw); }
-
 	void DDX(CDataExchange* pDX, CString& value);
 
 protected:
 	DWORD m_dwFlags;
-	CMaskEdit m_eMask;
 	CFont m_fontClose;
-
-	CSubclassWnd m_scEdit;
-	CSubclassWnd m_scList;
 
 	BOOL m_bEditChange;
 	BOOL m_bNotifyingParent;
 	BOOL m_bSkipAutoComplete;
 
-	int m_nHotSimpleListItem;
+	int m_nHotSimpleListItem; // Hot-tracking CBS_SIMPLE
+	int m_nDeleteItem;
 
 	// It seems that both the edit and listbox cannot
 	// have visible selection at the same time so we
@@ -105,23 +88,13 @@ protected:
 
 	mutable BOOL m_bDrawing;
 
-	// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CAutoComboBox)
-	//}}AFX_VIRTUAL
-	
 private:
-	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
+	CMaskEdit m_maskEdit; // The default edit
+	CMaskEdit* m_pEdit;   // Actual edit - default or from derived class
 
-	// for deletion
-	int m_nDeleteItem;
-	
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CAutoComboBox)
+	// Generated message map functions
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // for subclassing
-	//}}AFX_MSG
 	afx_msg BOOL OnSelEndCancel();
 	afx_msg BOOL OnSelEndOK();
 	afx_msg BOOL OnSelChange();
@@ -132,18 +105,25 @@ protected:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	DECLARE_MESSAGE_MAP()
 
+protected:
 	// pseudo handlers
 	virtual LRESULT OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 		
-protected:
 	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
 							   COLORREF& crText, COLORREF& crBack) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+
 	virtual int GetExtraListboxWidth() const;
 	virtual DWORD GetNewItemData() const { return 0; }
+	virtual void HandleReturnKey();
+	virtual CString GetSelectedItemText() const;
+	virtual BOOL DeleteLBItem(int nItem);
+	virtual int UpdateEditAutoComplete(const CString& sText, int nCaretPos);
+	virtual void OnSubclassChild(HWND hwndChild);
 
+protected:
 	BOOL GetListDeleteButtonRect(const CRect& rItem, CRect& rBtn) const;
 	BOOL DoDeleteListItem(const CPoint& ptList);
 	int HitTestListDeleteBtn(const CPoint& ptList) const;
@@ -157,17 +137,8 @@ protected:
 	int AddUniqueItem(const CString& sItem, BOOL bAddToStart);
 	CString GetEditText() const;
 
-	inline HWND GetEdit() const { return m_scEdit.GetHwnd(); }
-	inline HWND GetListbox() const { return m_scList.GetHwnd(); }
-
 	void ParentCBNotify(UINT nIDNotify);
 	void ParentACNotify(UINT nMsgNotify, int nIndex, LPCTSTR szItem);
-
-	virtual void HandleReturnKey();
-	virtual CString GetSelectedItemText() const;
-	virtual BOOL DeleteLBItem(int nItem);
-	virtual int UpdateEditAutoComplete(const CString& sText, int nCaretPos);
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

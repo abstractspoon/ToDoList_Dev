@@ -1353,7 +1353,7 @@ HIMAGELIST CGanttCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 	if (m_tree.GetImageList(TVSIL_NORMAL) == NULL)
 		return NULL;
 
-	return (HIMAGELIST)CWnd::GetParent()->SendMessage(WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
+	return (HIMAGELIST)GetParent()->SendMessage(WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }
 
 GM_ITEMSTATE CGanttCtrl::GetItemState(int nItem) const
@@ -1553,7 +1553,7 @@ void CGanttCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL 
 	m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		CWnd::GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nColumnID);
+		GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nColumnID);
 }
 
 void CGanttCtrl::Sort(const GANTTSORTCOLUMNS& multi)
@@ -1589,7 +1589,7 @@ void CGanttCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		return;
 
 	// notify app to edit
-	CWnd::GetParent()->SendMessage(WM_GTLC_EDITTASKTITLE, 0, GetTaskID(hti));
+	GetParent()->SendMessage(WM_GTLC_EDITTASKTITLE, 0, GetTaskID(hti));
 }
 
 void CGanttCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -1694,7 +1694,7 @@ BOOL CGanttCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 
 	// If copying a task, app will send us a full update 
 	// so we do not need to perform the move ourselves
-	if (CWnd::GetParent()->SendMessage(WM_GTLC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)
+	if (GetParent()->SendMessage(WM_GTLC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)
 	{
 		VERIFY(MoveItem(move));
 	}
@@ -2073,7 +2073,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 						}
 					
 						// notify parent
-						CWnd::GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
+						GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
 					}
 				}
 			}
@@ -2161,7 +2161,7 @@ BOOL CGanttCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 
 		if (nFlags & TVHT_ONITEMICON)
-			CWnd::GetParent()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
+			GetParent()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
 		
 		return TRUE; // eat
 	}
@@ -2178,7 +2178,7 @@ BOOL CGanttCtrl::OnTreeCheckChange(HTREEITEM hti)
 	DWORD dwTaskID = GetTaskID(hti);
 	BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
 
-	CWnd::GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
+	GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
 
 	return TRUE; // always
 }
@@ -4280,7 +4280,7 @@ void CGanttCtrl::ValidateMonthDisplay()
 	if (m_nMonthDisplay != nDisplay)
 	{
 		VERIFY(SetMonthDisplay(nDisplay));
-		CWnd::GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
+		GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
 	}
 }
 
@@ -4363,7 +4363,7 @@ BOOL CGanttCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
 
 	// cache the scroll-pos at the centre of the view so we can restore it
 	CRect rClient;
-	CWnd::GetClientRect(rClient);
+	GetClientRect(rClient);
 
 	COleDateTime dtPos;
 	BOOL bRestorePos = GetDateFromScrolledPos((m_list.GetScrollPos(SB_HORZ) + (rClient.Width() / 2)), dtPos);
@@ -5371,7 +5371,7 @@ BOOL CGanttCtrl::GetListItemRect(int nItem, CRect& rItem) const
 	{
 		// Extend to end of client rect
 		CRect rClient;
-		CWnd::GetClientRect(rClient);
+		GetClientRect(rClient);
 
 		rItem.right = max(rItem.right, rClient.right);
 		return TRUE;
@@ -5436,7 +5436,7 @@ DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTES
 		ASSERT(m_dtActiveRange.IsValid() && !m_dtActiveRange.Contains(*pGI));
 
 		CRect rClient;
-		CWnd::GetClientRect(rClient);
+		GetClientRect(rClient);
 
 		nTo = (rClient.Width() + 1000);
 	}
@@ -5689,7 +5689,7 @@ void CGanttCtrl::NotifyParentDragChange()
 	ASSERT(!m_bReadOnly);
 	ASSERT(GetSelectedTaskID());
 
-	CWnd::GetParent()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
+	GetParent()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
 }
 
 BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
@@ -5698,7 +5698,7 @@ BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
 	ASSERT(GetSelectedTaskID());
 
 	if (IsDragging(nDrag))
-		return CWnd::GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
+		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
 
 	// else
 	return 0L;

@@ -240,24 +240,6 @@ LRESULT CALLBACK CSubclassWnd::HookWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARA
 	return lr;
 }
 
-BOOL CSubclassWnd::PostMessage(UINT message, WPARAM wParam, LPARAM lParam) const
-{
-	if (IsValid())
-		return ::PostMessage(m_hWndHooked, message, wParam, lParam);
-
-	// else
-	return FALSE;
-}
-
-BOOL CSubclassWnd::SendMessage(UINT message, WPARAM wParam, LPARAM lParam) const
-{
-	if (IsValid())
-		return ::SendMessage(m_hWndHooked, message, wParam, lParam);
-
-	// else
-	return FALSE;
-}
-
 BOOL CSubclassWnd::IsValid(const CSubclassWnd* pScWnd)
 {
 	void* pResult;

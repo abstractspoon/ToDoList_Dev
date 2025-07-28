@@ -6,6 +6,9 @@
 #endif // _MSC_VER > 1000
 // ownerdrawcomboboxbase.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
+
+#include "Subclass.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -22,7 +25,7 @@ struct ODCB_ITEMDATA
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase window
 
-class COwnerdrawComboBoxBase : public CComboBox
+class COwnerdrawComboBoxBase : public CComboBox, private CSubclasser
 {
 	DECLARE_DYNAMIC(COwnerdrawComboBoxBase)
 
@@ -55,21 +58,22 @@ protected:
 	int m_nItemIndentBelowHeadings;
 	BOOL m_bHasExtItemData;
 
+protected:
+	CSubclassWnd m_scEdit;
+	CSubclassWnd m_scList;
+
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(COwnerdrawComboBoxBase)
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual void PreSubclassWindow();
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	//}}AFX_VIRTUAL
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct); 
 
-	// Generated message map functions
+private:
+	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
+
 protected:
-	//{{AFX_MSG(COwnerdrawComboBoxBase)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
+	// Generated message map functions
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg LRESULT OnSetFont(WPARAM , LPARAM);
 	afx_msg BOOL OnSelEndOK();
@@ -77,6 +81,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // for subclassing
 
 	// These are for extending the item data
 	afx_msg LRESULT OnCBGetItemData(WPARAM wParam, LPARAM lParam);
@@ -86,6 +91,12 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	// pseudo handlers
+	virtual LRESULT OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp);
+	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
+
+	virtual void OnSubclassChild(HWND hwndChild) { ASSERT(::IsWindow(hwndChild)); } // for derived classes
+
 	BOOL HandleCursorKey(UINT nChar);
 
 protected:
@@ -93,13 +104,15 @@ protected:
 								COLORREF& crText, COLORREF& crBack) const;	
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-	virtual void FillListItemBkgnd(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-									DWORD dwItemData, COLORREF crBack);
-	virtual UINT GetDrawEllipsis() const { return DT_END_ELLIPSIS; }
+
+	virtual UINT GetEllipsisStyle() const { return DT_END_ELLIPSIS; }
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const { return 0; }
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual BOOL IsSelectableItem(int nItem) const;
+
+	inline HWND GetEdit() const { return m_scEdit.GetHwnd(); }
+	inline HWND GetListbox() const { return m_scList.GetHwnd(); }
 
 	void InitItemHeight();
 	BOOL IsType(UINT nComboType) const;
