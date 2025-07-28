@@ -186,8 +186,8 @@ public:
 	inline void GetClientRect(LPRECT pRect) const { CWnd::GetClientRect(pRect); }
 	inline void Invalidate(BOOL bErase = TRUE) { CWnd::Invalidate(bErase); }
 	inline void SetRedraw(BOOL bRedraw = TRUE) { CWnd::SetRedraw(bRedraw); }
-	inline void ClientToScreen(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
-	inline void ClientToScreen(LPPOINT pPoint) const { CWnd::ScreenToClient(pPoint); }
+	inline void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
+	inline void ClientToScreen(LPPOINT pPoint) const { CWnd::ClientToScreen(pPoint); }
 	inline void ScreenToClient(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
 	inline void ScreenToClient(LPPOINT pPoint) const { CWnd::ScreenToClient(pPoint); }
 
