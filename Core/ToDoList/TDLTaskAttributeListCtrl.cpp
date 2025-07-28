@@ -1407,14 +1407,12 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribI
 CString CTDLTaskAttributeListCtrl::FormatDate(const COleDateTime& date, BOOL bAndTime) const
 {
 	DWORD dwFlags = 0;
-	
-	if (m_data.HasStyle(TDCS_SHOWDATESINISO))
-		dwFlags |= DHFD_ISO;
-	
-	if (bAndTime)
-		dwFlags |= DHFD_TIME | DHFD_NOSEC;
 
-	return CDateHelper::FormatDate(date,  dwFlags);
+	Misc::SetFlag(dwFlags, DHFD_DOW, m_data.HasStyle(TDCS_SHOWWEEKDAYINDATES));
+	Misc::SetFlag(dwFlags, DHFD_ISO, m_data.HasStyle(TDCS_SHOWDATESINISO));
+	Misc::SetFlag(dwFlags, DHFD_TIME | DHFD_NOSEC, bAndTime);
+
+	return CDateHelper::FormatDate(date, dwFlags);
 }
 
 CString CTDLTaskAttributeListCtrl::FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const
