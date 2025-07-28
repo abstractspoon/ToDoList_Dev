@@ -35,10 +35,11 @@ class CAutoComboBox : public COwnerdrawComboBoxBase
 
 public:
 	CAutoComboBox(DWORD dwFlags = 0);
-	CAutoComboBox(CMaskEdit& edit, DWORD dwFlags = 0);
-
 	virtual ~CAutoComboBox();
 	
+protected:
+	CAutoComboBox(CMaskEdit* pEdit, DWORD dwFlags = 0); // Derived classes only
+
 public:
     virtual int AddString(LPCTSTR szItem) { return AddUniqueItem(szItem); }
     virtual int InsertString(int nIndex, LPCTSTR szItem) { return InsertUniqueItem(nIndex, szItem); }
@@ -90,10 +91,8 @@ protected:
 	int m_nDeleteItem;
 
 private:
-	CMaskEdit m_maskEdit;
-
-protected:
-	CMaskEdit& m_edit; // Allows derived classes to pass in their own edit
+	CMaskEdit m_maskEdit; // The default edit
+	CMaskEdit* m_pEdit; // Actual edit - default or from derived class
 	
 protected:
 	// Generated message map functions
@@ -127,7 +126,7 @@ protected:
 	virtual void OnSubclassChild(HWND hwndChild);
 
 protected:
-	void Initialise(DWORD dwFlags);
+	void Initialise(CMaskEdit* pEdit, DWORD dwFlags);
 	BOOL GetListDeleteButtonRect(const CRect& rItem, CRect& rBtn) const;
 	BOOL DoDeleteListItem(const CPoint& ptList);
 	int HitTestListDeleteBtn(const CPoint& ptList) const;

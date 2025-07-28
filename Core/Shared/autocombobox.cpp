@@ -25,14 +25,14 @@ const int SIZE_CLOSEBTN = (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::Wa
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox
 
-CAutoComboBox::CAutoComboBox(DWORD dwFlags) : m_edit(m_maskEdit)
+CAutoComboBox::CAutoComboBox(DWORD dwFlags) : m_pEdit(NULL)
 {
-	Initialise(dwFlags);
+	Initialise(&m_maskEdit, dwFlags);
 }
 
-CAutoComboBox::CAutoComboBox(CMaskEdit& edit, DWORD dwFlags) : m_edit(edit)
+CAutoComboBox::CAutoComboBox(CMaskEdit* pEdit, DWORD dwFlags) : m_pEdit(NULL)
 {
-	Initialise(dwFlags);
+	Initialise(pEdit, dwFlags);
 }
 
 CAutoComboBox::~CAutoComboBox()
@@ -57,9 +57,13 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CAutoComboBox message handlers
 
-void CAutoComboBox::Initialise(DWORD dwFlags)
+void CAutoComboBox::Initialise(CMaskEdit* pEdit, DWORD dwFlags)
 {
+	ASSERT(pEdit);
+
+	m_pEdit = pEdit;
 	m_dwFlags = dwFlags;
+
 	m_bNotifyingParent = FALSE;
 	m_bEditChange = FALSE;
 	m_nDeleteItem = LB_ERR;
@@ -806,17 +810,20 @@ BOOL CAutoComboBox::AllowDelete() const
 
 void CAutoComboBox::SetEditMask(LPCTSTR szMask, DWORD dwMaskFlags)
 {
-	m_edit.SetMask(szMask, dwMaskFlags);
+	ASSERT(m_pEdit);
+
+	if (m_pEdit)
+		m_pEdit->SetMask(szMask, dwMaskFlags);
 }
 
 void CAutoComboBox::OnSubclassChild(HWND hwndChild)
 {
 	COwnerdrawComboBoxBase::OnSubclassChild(hwndChild);
 
-	if (GetEdit() == hwndChild)
+	if ((GetEdit() == hwndChild) && m_pEdit)
 	{
-		ASSERT(m_edit.GetSafeHwnd() == NULL);
-		VERIFY(m_edit.SubclassWindow(hwndChild));
+		ASSERT(m_pEdit->GetSafeHwnd() == NULL);
+		VERIFY(m_pEdit->SubclassWindow(hwndChild));
 	}
 }
 

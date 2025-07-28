@@ -57,7 +57,7 @@ const int MAX_DROPWIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 CFileComboBox::CFileComboBox(int nEditStyle) 
 	: 
-	CAutoComboBox(m_fileEdit, ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
+	CAutoComboBox(&m_fileEdit, ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
 	m_fileEdit(nEditStyle),
 	m_fileIcons(FALSE), // small icons
 	m_bReadOnly(FALSE)

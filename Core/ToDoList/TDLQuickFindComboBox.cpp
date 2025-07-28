@@ -13,7 +13,7 @@ IMPLEMENT_DYNAMIC(CTDLQuickFindComboBox, CAutoComboBox)
 
 CTDLQuickFindComboBox::CTDLQuickFindComboBox(DWORD dwFlags) 
 	: 
-	CAutoComboBox(m_quickEdit, dwFlags)
+	CAutoComboBox(&m_quickEdit, dwFlags)
 {
 	m_iconPrev.Load(IDI_QUICKFIND_PREV);
 	m_iconNext.Load(IDI_QUICKFIND_NEXT);
