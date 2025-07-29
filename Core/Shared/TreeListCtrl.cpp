@@ -1341,10 +1341,8 @@ BOOL CTreeListCtrl::GetLabelEditRect(LPRECT pEdit) const
 
 		pEdit->right = (pEdit->left + nWidth);
 
-		// convert from tree to 'our' coords
-		m_tree.ClientToScreen(pEdit);
-		ScreenToClient(pEdit);
-
+		// Convert to 'our' coord space
+ 		m_tree.MapWindowPoints((CWnd*)this, pEdit);
 		return true;
 	}
 	

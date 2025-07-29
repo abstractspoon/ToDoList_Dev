@@ -1564,15 +1564,11 @@ BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle, BOOL bAllowMultiple)
 
 BOOL CToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 {
-	if (m_taskTree.GetSelectionBoundingRect(rSelection))
-	{
-		m_taskTree.ClientToScreen(rSelection);
-		ScreenToClient(rSelection);
+	if (!m_taskTree.GetSelectionBoundingRect(rSelection))
+		return FALSE;
 
-		return TRUE;
-	}
-
-	return FALSE;
+	m_taskTree.MapWindowPoints((CWnd*)this, rSelection);
+	return TRUE;
 }
 
 COleDateTime CToDoCtrl::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const

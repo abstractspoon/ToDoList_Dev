@@ -5246,14 +5246,16 @@ void CTDLTaskCtrlBase::RedrawColumn(TDC_COLUMN nColID) const
 		m_hdrColumns.GetItemRect(nCol, rCol);
 
 		// Adjust header rect for list scrollpos
-		m_hdrColumns.ClientToScreen(rCol);
-		m_lcColumns.ScreenToClient(rCol);
-		
-		rCol.top = rClient.top;
-		rCol.bottom = rClient.bottom;
-		
-		::InvalidateRect(m_lcColumns, rCol, TRUE);
-		::UpdateWindow(m_lcColumns);
+		m_hdrColumns.MapWindowPoints((CWnd*)&m_lcColumns, rCol);
+
+		if ((rCol.right > 0) && (rCol.left < rClient.right))
+		{
+			rCol.top = rClient.top;
+			rCol.bottom = rClient.bottom;
+
+			::InvalidateRect(m_lcColumns, rCol, TRUE);
+			::UpdateWindow(m_lcColumns);
+		}
 	}
 }
 

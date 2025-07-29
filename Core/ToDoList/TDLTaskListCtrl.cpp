@@ -1740,10 +1740,11 @@ BOOL CTDLTaskListCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 		rSelection |= rItem;
 	}
 	
-	m_lcTasks.ClientToScreen(rSelection);
-	ScreenToClient(rSelection);
-	
-	return !rSelection.IsRectEmpty();
+	if (rSelection.IsRectEmpty())
+		return FALSE;
+
+	m_lcTasks.MapWindowPoints((CWnd*)this, rSelection);
+	return TRUE;	
 }
 
 BOOL CTDLTaskListCtrl::GetLabelEditRect(CRect& rLabel) const

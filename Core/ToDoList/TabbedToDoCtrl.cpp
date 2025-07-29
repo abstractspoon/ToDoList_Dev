@@ -2563,10 +2563,7 @@ BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 
 	case FTCV_TASKLIST:
 		if (m_taskList.GetSelectionBoundingRect(rSelection))
-		{
-			m_taskList.ClientToScreen(rSelection);
-			ScreenToClient(rSelection);
-		}
+			m_taskList.MapWindowPoints((CWnd*)this, rSelection);
 		break;
 
 	case FTCV_UIEXTENSION1:

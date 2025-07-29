@@ -586,15 +586,11 @@ void CTDLTaskTreeCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem
 
 BOOL CTDLTaskTreeCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 {
-	if (TSH().GetBoundingRect(rSelection))
-	{
-		m_tcTasks.ClientToScreen(rSelection);
-		ScreenToClient(rSelection);
-		
-		return TRUE;
-	}
-	
-	return FALSE;
+	if (!TSH().GetBoundingRect(rSelection))
+		return FALSE;
+
+	m_tcTasks.MapWindowPoints((CWnd*)this, rSelection);
+	return TRUE;
 }
 
 BOOL CTDLTaskTreeCtrl::IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const
