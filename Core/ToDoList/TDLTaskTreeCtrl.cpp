@@ -608,10 +608,10 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetTreeItemState(HTREEITEM hti) const
 	if (!m_bSavingToImage)
 	{
 		if (m_tcTasks.GetItemState(hti, TVIS_DROPHILITED) & TVIS_DROPHILITED)
-		{
 			return GMIS_DROPHILITED;
-		}
-		else if (IsItemSelected(hti))
+
+		// else
+		if (IsItemSelected(hti))
 		{
 			DWORD dwTaskID = GetTaskID(hti);
 		
@@ -623,6 +623,7 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetTreeItemState(HTREEITEM hti) const
 		}
 	}
 	
+	// all else
 	return GMIS_NONE;
 }
 
@@ -634,7 +635,7 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetColumnItemState(int nItem) const
 void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 {
 	// only called when the focus is actually on the columns
-	// ie. not when Syncing Column Selection)
+	// ie. not when Syncing Column Selection
 	
 	// sync only the item that has changed 
 	HTREEITEM hti = (HTREEITEM)m_lcColumns.GetItemData(pNMLV->iItem);

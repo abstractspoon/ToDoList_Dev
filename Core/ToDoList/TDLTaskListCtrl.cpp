@@ -1630,22 +1630,20 @@ BOOL CTDLTaskListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	if ((pWnd == &m_lcTasks) && !IsReadOnly() && !IsColumnShowing(TDCC_ICON))
 	{
-		UINT nHitFlags = 0;
 		CPoint ptClient(::GetMessagePos());
 		m_lcTasks.ScreenToClient(&ptClient);
 
+		UINT nHitFlags = 0;
 		int nHit = m_lcTasks.HitTest(ptClient, &nHitFlags);
 	
 		if (nHit != -1)
 		{
 			if (m_calculator.IsTaskLocked(GetTaskID(nHit)))
-			{
 				return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
-			}
-			else if (HasHitTestFlag(nHitFlags, LVHT_ONITEMICON))
-			{
+
+			// else
+			if (HasHitTestFlag(nHitFlags, LVHT_ONITEMICON))
 				return GraphicsMisc::SetHandCursor();
-			}
 		}
 	}
 	
