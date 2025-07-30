@@ -1455,7 +1455,7 @@ FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Time Spent",IDC_STATIC,7,10,63,8
     EDITTEXT        IDC_LOGGEDTIME,73,7,74,13,ES_AUTOHSCROLL
-    CONTROL         "Also add time to task's 'Time Spent'",
+    CONTROL         "Also add time to task 'Time Spent'",
                     IDC_ADDTIMETOTIMESPENT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,73,24,152,10
     LTEXT           "&When",IDC_STATIC,7,42,64,8
