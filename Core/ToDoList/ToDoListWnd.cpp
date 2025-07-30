@@ -9860,7 +9860,9 @@ void CToDoListWnd::OnNewSubtaskInTask()
 	tdc.GetTasks(tasks, filter);
 
 	// Prepare the dialog
-	CTDLSelectTaskDlg dialog(tasks, tdc.GetTaskIconImageList(), _T("NewSubtaskInTask"));
+	CTDLSelectTaskDlg dialog(tasks, 
+							 tdc.GetTaskIconImageList(), 
+							 tdc.GetPreferencesKey(_T("NewSubtaskInTask")));
 
 	dialog.SetShowParentTasksAsFolders(Prefs().GetShowParentsAsFolders());
 	dialog.SetSelectedTaskID(tdc.GetSelectedTaskID());
