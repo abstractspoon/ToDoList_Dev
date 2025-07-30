@@ -343,28 +343,29 @@ int CTDLTaskComboBox::CalcMinItemHeight(BOOL bList) const
 	return nMinHeight;
 }
 
-int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks)
+int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bIncDoneTasks)
 {
-	return Populate(tasks, ilTasks, CDWordArray());
+	return Populate(tasks, ilTasks, CDWordArray(), bIncDoneTasks);
 }
 
-int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, const CDWordArray& aRecentSel)
+int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, const CDWordArray& aRecentSel, BOOL bIncDoneTasks)
 {
 	m_pIlTasks = &ilTasks;
 
+	CWaitCursor cursor;
 	ResetContent();
 
+	// Recent tasks first
 	if (aRecentSel.GetSize())
 	{
 		int nPos = 0;
-		SetHeadingItem(InsertString(nPos++, _T("Recently Selected")));
 
 		for (int nSel = 0; nSel < aRecentSel.GetSize(); nSel++)
 		{
 			HTASKITEM hTask = tasks.FindTask(aRecentSel[nSel]);
 			ASSERT(hTask);
 
-			if (hTask)
+			if (hTask && (bIncDoneTasks || !tasks.IsTaskGoodAsDone(hTask)))
 			{
 				int nImage = (m_pIlTasks ? m_pIlTasks->GetImageIndex(tasks.GetTaskIcon(hTask)) : -1);
 
@@ -377,19 +378,29 @@ int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTa
 						   tasks.GetTaskReferenceID(hTask));
 			}
 		}
-		
-		SetHeadingItem(InsertString(nPos, _T("All Tasks")));
+
+		if (nPos != 0)
+		{
+			SetHeadingItem(InsertString(0, _T("Recently Selected")));
+			nPos++;
+			
+			SetHeadingItem(InsertString(nPos, _T("All Tasks")));
+		}
 	}
 
-	Populate(tasks, NULL, 0);
+	// Then 'all' tasks
+	Populate(tasks, NULL, 0, bIncDoneTasks);
 
 	return GetCount();
 }
 
-void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDepth)
+void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDepth, BOOL bIncDoneTasks)
 {
 	if (hTask)
 	{
+		if (!bIncDoneTasks && tasks.IsTaskGoodAsDone(hTask))
+			return;
+
 		int nImage = (m_pIlTasks ? m_pIlTasks->GetImageIndex(tasks.GetTaskIcon(hTask)) : -1);
 
 		InsertTask(GetCount(),
@@ -405,7 +416,7 @@ void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDe
 
 	while (hSubtask)
 	{
-		Populate(tasks, hSubtask, nDepth); // RECURSIVE CALL
+		Populate(tasks, hSubtask, nDepth, bIncDoneTasks); // RECURSIVE CALL
 		hSubtask = tasks.GetNextTask(hSubtask);
 	}
 }

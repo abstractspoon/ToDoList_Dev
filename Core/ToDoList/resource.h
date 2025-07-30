@@ -877,6 +877,7 @@
 #define IDC_SETNUMPRIORITYRISKLEVELS    1588
 #define IDC_SOUNDFILE                   1589
 #define IDC_TASKCOMBO                   1591
+#define IDC_SHOWDONETASKS               1592
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -2584,7 +2585,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        338
 #define _APS_NEXT_COMMAND_VALUE         34786
-#define _APS_NEXT_CONTROL_VALUE         1592
+#define _APS_NEXT_CONTROL_VALUE         1593
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

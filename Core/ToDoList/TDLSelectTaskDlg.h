@@ -37,6 +37,7 @@ protected:
 	//{{AFX_DATA(CTDLSelectTaskDlg)
 	CTDLTaskComboBox m_cbTasks;
 	//}}AFX_DATA
+	BOOL m_bShowDoneTasks;
 
 	const CTaskFile& m_tasks;
 	const CTDCImageList& m_ilTasks;
@@ -61,6 +62,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnSelChangeTask();
 	afx_msg void OnDoubleClickTask();
+	afx_msg void OnShowDoneTasks();
 	DECLARE_MESSAGE_MAP()
 
 protected:

@@ -22,7 +22,12 @@ CTDLSelectTaskDlg::CTDLSelectTaskDlg(const CTaskFile& tasks, const CTDCImageList
 	m_ilTasks(ilTasks)
 {
 	if (!m_sPrefsKey.IsEmpty())
-		CPreferences().GetProfileArray(m_sPrefsKey, m_aRecentTaskIDs);
+	{
+		CPreferences prefs;
+		
+		prefs.GetProfileArray(m_sPrefsKey, m_aRecentTaskIDs);
+		m_bShowDoneTasks = prefs.GetProfileInt(m_sPrefsKey, _T("ShowDoneTasks"), FALSE);
+	}
 }
 
 void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
@@ -32,6 +37,7 @@ void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CTDLSelectTaskDlg)
 	DDX_Control(pDX, IDC_TASKCOMBO, m_cbTasks);
 	//}}AFX_DATA_MAP
+	DDX_Check(pDX, IDC_SHOWDONETASKS, m_bShowDoneTasks);
 
 }
 
@@ -42,6 +48,7 @@ BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
 	ON_CBN_SELCHANGE(IDC_TASKCOMBO, OnSelChangeTask)
 	ON_CBN_EDITUPDATE(IDC_TASKCOMBO, OnSelChangeTask)
 	ON_CBN_DBLCLK(IDC_TASKCOMBO, OnDoubleClickTask)
+	ON_BN_CLICKED(IDC_SHOWDONETASKS, OnShowDoneTasks)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -63,7 +70,11 @@ int CTDLSelectTaskDlg::DoModal(HICON hIcon, UINT nTitleStrID)
 		while (m_aRecentTaskIDs.GetSize() > 10)
 			Misc::RemoveLastT(m_aRecentTaskIDs);
 
-		CPreferences().WriteProfileArray(m_sPrefsKey, m_aRecentTaskIDs);
+		// Save state
+		CPreferences prefs;
+
+		prefs.WriteProfileArray(m_sPrefsKey, m_aRecentTaskIDs);
+		prefs.WriteProfileInt(m_sPrefsKey, _T("ShowDoneTasks"), m_bShowDoneTasks);
 	}
 
 	return nRet;
@@ -77,10 +88,11 @@ BOOL CTDLSelectTaskDlg::OnInitDialog()
 		SetWindowText(CEnString(m_nTitleStrID));
 
 	// Add tasks to combo
-	m_cbTasks.Populate(m_tasks, m_ilTasks, m_aRecentTaskIDs);
+	m_cbTasks.Populate(m_tasks, m_ilTasks, m_aRecentTaskIDs, m_bShowDoneTasks);
 	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
 
 	OnSelChangeTask();
+
 	return TRUE;
 }
 
@@ -99,4 +111,12 @@ void CTDLSelectTaskDlg::OnDoubleClickTask()
 {
 	if (m_dwSelTaskID != 0)
 		EndDialog(IDOK);
+}
+
+void CTDLSelectTaskDlg::OnShowDoneTasks()
+{
+	UpdateData();
+
+	m_cbTasks.Populate(m_tasks, m_ilTasks, m_bShowDoneTasks);
+	m_cbTasks.SetSelectedTaskID(m_dwSelTaskID);
 }

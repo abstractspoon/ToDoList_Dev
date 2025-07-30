@@ -31,8 +31,8 @@ public:
 	CString GetSelectedTaskName() const;
 	int GetSelectedTaskImage() const;
 
-	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks);
-	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, const CDWordArray& aRecentSel);
+	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bIncDoneTasks = TRUE);
+	int Populate(const CTaskFile& tasks, const CTDCImageList& ilTasks, const CDWordArray& aRecentSel, BOOL bIncDoneTasks = TRUE);
 
 	void EnableParentTasks(BOOL bEnable = TRUE) { m_bEnableParents = bEnable; }
 	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_bShowParentsAsFolders = bAsFolders; }
@@ -40,6 +40,7 @@ public:
 protected:
 	const CTDCImageList* m_pIlTasks;
 	BOOL m_bEnableParents, m_bShowParentsAsFolders;
+	BOOL m_bShowDoneTasks;
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -72,7 +73,7 @@ protected:
 	void SelectNextFind(BOOL bForward);
 	DWORD GetItemRefTaskID(int nItem) const;
 
-	void Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDepth);
+	void Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDepth, BOOL bIncDoneTasks);
 	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nDepth, int nImage, DWORD dwRefTaskID = 0);
 	int GetItemImage(int nItem) const;
 	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
