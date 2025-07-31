@@ -182,7 +182,7 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 		rImage.OffsetRect(-ICON_INDENT, 0);
 
 		if (!bList)
-			rImage.top++;
+			rImage.top--;
 
 		if (nImage != -1)
 			m_pIlTasks->Draw(&dc, nImage, rImage.TopLeft());
