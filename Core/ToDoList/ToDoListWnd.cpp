@@ -34,7 +34,6 @@
 #include "tdlOffsetDatesDlg.h"
 #include "TDLPasteTaskAttributesDlg.h"
 #include "tdlprintdialog.h"
-#include "TDLSelectTaskDlg.h"
 #include "tdlsetreminderdlg.h"
 #include "tdlshowreminderdlg.h"
 #include "TDLTasklistSaveAsDlg.h"
@@ -9848,44 +9847,14 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnNewSubtaskInTask()
 {
-	// Get all editable tasks 
-	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_NOTLOCKED);
-
-	filter.mapAttribs.Add(TDCA_TASKNAME);
-	filter.mapAttribs.Add(TDCA_ICON);
-
-	CTaskFile tasks;
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	tdc.GetTasks(tasks, filter);
-
-	// Prepare the dialog
-	CTDLSelectTaskDlg dialog(tasks, 
-							 tdc.GetTaskIconImageList(), 
-							 tdc.GetPreferencesKey(_T("NewSubtaskInTask")));
-
-	dialog.SetStrikethroughCompletedTasks(tdc.HasStyle(TDCS_STRIKETHOUGHDONETASKS));
-	dialog.SetShowParentTasksAsFolders(tdc.HasStyle(TDCS_SHOWPARENTSASFOLDERS));
-	dialog.SetSelectedTaskID(tdc.GetSelectedTaskID());
-	dialog.SetCompletedTaskColor(Prefs().GetDoneTaskColor());
-
-	UINT nCmdID = GetNewSubtaskCmdID(); // For dialog icon and subtask location
-
-	if (dialog.DoModal(CMDICON(nCmdID), IDS_SELECTSUBTASKPARENT_TITLE) != IDOK)
-		return;
-
-	// Select the chosen task
-	VERIFY(tdc.SelectTask(dialog.GetSelectedTaskID(), FALSE));
-
-	// Create the task
-	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
-
-	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE));
+	BOOL bTop = (GetNewSubtaskCmdID() == ID_NEWSUBTASK_ATTOP);
+	
+	GetToDoCtrl().CreateNewSubtaskInTask(CEnString(IDS_TASK), bTop);
 }
 
 void CToDoListWnd::OnUpdateNewSubtaskInTask(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
+	pCmdUI->Enable(GetToDoCtrl().CanCreateNewSubtaskInTask());
 }
 
 BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent) const

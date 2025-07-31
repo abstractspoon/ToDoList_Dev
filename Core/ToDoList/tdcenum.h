@@ -143,14 +143,14 @@ enum TDC_LABELRECT
 
 enum TDC_INSERTWHERE
 {
-	TDC_INSERTATTOP,
-	TDC_INSERTATBOTTOM,
-	TDC_INSERTATTOPOFSELTASKPARENT,
-	TDC_INSERTATBOTTOMOFSELTASKPARENT,
-	TDC_INSERTAFTERSELTASK,
-	TDC_INSERTBEFORESELTASK,
-	TDC_INSERTATTOPOFSELTASK, // subtask
-	TDC_INSERTATBOTTOMOFSELTASK, // subtask
+	TDC_INSERTATTOP,					// top-level task
+	TDC_INSERTATBOTTOM,					// top-level task
+	TDC_INSERTATTOPOFSELTASKPARENT,		// sibling of selected task
+	TDC_INSERTATBOTTOMOFSELTASKPARENT,	// sibling of selected task
+	TDC_INSERTAFTERSELTASK,				// sibling of selected task
+	TDC_INSERTBEFORESELTASK,			// sibling of selected task
+	TDC_INSERTATTOPOFSELTASK,			// subtask of selected task
+	TDC_INSERTATBOTTOMOFSELTASK,		// subtask of selected task
 };
 
 /////////////////////////////////////////////////////////////////////////////

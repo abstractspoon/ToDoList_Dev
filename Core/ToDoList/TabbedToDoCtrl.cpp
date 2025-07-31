@@ -3515,6 +3515,11 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 	if (!GetAllTaskIDs(aTaskIDs, bWantParents, bWantCollapsed))
 	{
 		m_taskList.DeleteAll(); 
+
+		VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
+		ASSERT(pLVData);
+
+		pLVData->bHasSelectedTask = FALSE;
 		return;
 	}
 
