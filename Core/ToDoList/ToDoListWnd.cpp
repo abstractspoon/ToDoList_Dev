@@ -9867,6 +9867,7 @@ void CToDoListWnd::OnNewSubtaskInTask()
 	dialog.SetStrikethroughCompletedTasks(tdc.HasStyle(TDCS_STRIKETHOUGHDONETASKS));
 	dialog.SetShowParentTasksAsFolders(tdc.HasStyle(TDCS_SHOWPARENTSASFOLDERS));
 	dialog.SetSelectedTaskID(tdc.GetSelectedTaskID());
+	dialog.SetCompletedTaskColor(Prefs().GetDoneTaskColor());
 
 	UINT nCmdID = GetNewSubtaskCmdID(); // For dialog icon and subtask location
 

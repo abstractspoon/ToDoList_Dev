@@ -38,6 +38,7 @@ public:
 	void EnableParentTasks(BOOL bEnable = TRUE) { m_bEnableParents = bEnable; }
 	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_bShowParentsAsFolders = bAsFolders; }
 	void SetStrikethroughCompletedTasks(BOOL bStrikeThru = TRUE) { m_bStrikeThruDone = bStrikeThru; }
+	void SetCompletedTaskColor(COLORREF crDone) { m_crDone = crDone; }
 
 protected:
 	const CTDCImageList* m_pIlTasks;
@@ -46,6 +47,7 @@ protected:
 	BOOL m_bEnableParents, m_bShowParentsAsFolders;
 	BOOL m_bShowDoneTasks;
 	BOOL m_bStrikeThruDone;
+	COLORREF m_crDone;
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -70,19 +72,17 @@ protected:
 			: 
 			nDepth(0), 
 			nImage(-1), 
-			crText(CLR_NONE),
-			dwAttribs(0),
-			dwRefTaskID(0)
+			dwRefTaskID(0),
+			dwAttribs(0)
 		{
 		}
 
 		BOOL HasAttrib(DWORD dwAttrib) const { return ((dwAttribs & dwAttrib) == dwAttrib); }
 
-		int nDepth;
 		int nImage;
-		COLORREF crText;
-		DWORD dwAttribs;
+		int nDepth;
 		DWORD dwRefTaskID;
+		DWORD dwAttribs;
 	};
 
 	virtual ODCB_ITEMDATA* NewExtItemData() const { return new TCB_ITEMDATA(); }
@@ -104,8 +104,7 @@ protected:
 
 	void Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDepth, BOOL bIncDoneTasks);
 	BOOL InsertTask(int nPos, const CTaskFile& tasks, HTASKITEM hTask, int nDepth, BOOL bIncDoneTasks);
-	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, int nDepth, int nImage, 
-					COLORREF crText = CLR_NONE, DWORD dwAttribs = 0, DWORD dwRefTaskID = 0);
+	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, int nDepth, int nImage, DWORD dwAttribs = 0, DWORD dwRefTaskID = 0);
 	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
 };
 
