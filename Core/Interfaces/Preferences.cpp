@@ -22,6 +22,11 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+const LPCTSTR REALQUOTE = _T("\"");
+const LPCTSTR SAFEQUOTE = _T("{QUOTES}");
+
+//////////////////////////////////////////////////////////////////////
+
 INIENTRY::INIENTRY(LPCTSTR szName, LPCTSTR szValue, BOOL bQuote) 
 	: sName(szName), sValue(szValue), bQuoted(bQuote) 
 {
@@ -57,6 +62,22 @@ BOOL INIENTRY::operator==(const INIENTRY& ie) const
 	return ((sName == ie.sName) && 
 			(sValue == ie.sValue) && 
 			(bQuoted == ie.bQuoted));
+}
+
+CString INIENTRY::SafeQuote(const CString& sValue)
+{
+	CString sSafe(sValue);
+	sSafe.Replace(REALQUOTE, SAFEQUOTE);
+
+	return sSafe;
+}
+
+CString INIENTRY::UnSafeQuote(const CString& sValue)
+{
+	CString sUnsafe(sValue);
+	sUnsafe.Replace(SAFEQUOTE, REALQUOTE);
+
+	return sUnsafe;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
