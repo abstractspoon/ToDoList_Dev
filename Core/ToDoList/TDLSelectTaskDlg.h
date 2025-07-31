@@ -31,7 +31,6 @@ public:
 
 	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_cbTasks.SetShowParentTasksAsFolders(bAsFolders); }
 	void SetStrikethroughCompletedTasks(BOOL bStrikeThru = TRUE) { m_cbTasks.SetStrikethroughCompletedTasks(bStrikeThru); }
-	void SetCompletedTaskColor(COLORREF crDone) { m_cbTasks.SetCompletedTaskColor(crDone); }
 
 	int DoModal(HICON hIcon = NULL, UINT nTitleStrID = 0); // Caller owns icon
 

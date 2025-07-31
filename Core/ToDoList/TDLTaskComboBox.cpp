@@ -33,8 +33,7 @@ CTDLTaskComboBox::CTDLTaskComboBox()
 	m_pIlTasks(NULL),
 	m_bShowParentsAsFolders(FALSE),
 	m_bEnableParents(TRUE),
-	m_bStrikeThruDone(TRUE),
-	m_crDone(RGB(128, 128, 128))
+	m_bStrikeThruDone(TRUE)
 {
 }
 
@@ -199,8 +198,13 @@ void CTDLTaskComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemDat
 {
 	COwnerdrawComboBoxBase::GetItemColors(nItem, nItemState, dwItemData, crText, crBack);
 
-	if (!(nItemState & ODS_SELECTED) && ItemHasAttrib(nItem, TCBA_GOODASDONE))
-		crText = m_crDone;
+	if (!(nItemState & (ODS_SELECTED | ODS_DISABLED)))
+	{
+		const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
+
+		if (pItemData && (pItemData->crText != CLR_NONE))
+			crText = pItemData->crText;
+	}
 }
 
 BOOL CTDLTaskComboBox::IsSelectableItem(int nItem) const
@@ -359,22 +363,23 @@ BOOL CTDLTaskComboBox::InsertTask(int nPos, const CTaskFile& tasks, HTASKITEM hT
 					  tasks.GetTaskID(hTask),
 					  nDepth,
 					  nImage,
+					  tasks.GetTaskTextColor(hTask),
 					  dwAttribs,
 					  tasks.GetTaskReferenceID(hTask));
 }
 
 
 BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, int nDepth,
-								  int nImage, DWORD dwAttribs, DWORD dwRefTaskID)
+								  int nImage, COLORREF crText, DWORD dwAttribs, DWORD dwRefTaskID)
 {
 	int nTask = CDialogHelper::InsertStringT(*this, nPos, sTask, dwTaskID);
 
 	if (nTask == CB_ERR)
 		return FALSE;
-	else
-		ASSERT(nTask == nPos);
 
-	if ((nDepth > 0) || (nImage != -1) || dwAttribs)
+	ASSERT(nTask == nPos);
+
+	if ((nDepth > 0) || (nImage != -1) || (crText != CLR_NONE) || dwAttribs)
 	{
 		TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetAddExtItemData(nTask);
 		ASSERT(pItemData);
@@ -383,6 +388,7 @@ BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID
 		{
 			pItemData->nDepth = nDepth;
 			pItemData->nImage = nImage;
+			pItemData->crText = crText;
 			pItemData->dwAttribs = dwAttribs;
 			pItemData->dwRefTaskID = dwRefTaskID;
 		}
@@ -415,6 +421,7 @@ BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
 							pItemData->dwItemData,
 							pItemData->nDepth,
 							nImage,
+							pItemData->crText,
 							pItemData->dwAttribs,
 							pItemData->dwRefTaskID))
 			{
@@ -437,7 +444,6 @@ BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
 		if (!InsertTask(nItem,
 						sName,
 						GetItemData(nItem),
-						FALSE,
 						0,
 						nImage))
 		{
