@@ -32,7 +32,9 @@ CTDLTaskComboBox::CTDLTaskComboBox()
 	:
 	m_pIlTasks(NULL),
 	m_bShowParentsAsFolders(FALSE),
-	m_bEnableParents(TRUE)
+	m_bEnableParents(TRUE),
+	m_bStrikeThruDone(TRUE),
+	m_crDone(RGB(128, 128, 128))
 {
 }
 
@@ -56,7 +58,7 @@ DWORD CTDLTaskComboBox::GetSelectedTaskID(BOOL bTrueTask) const
 
 	if (bTrueTask)
 	{
-		DWORD dwRefTaskID = GetItemRefTaskID(nSel);
+		DWORD dwRefTaskID = GetItemRefID(nSel);
 
 		if (dwRefTaskID)
 			return dwRefTaskID;
@@ -89,104 +91,6 @@ int CTDLTaskComboBox::GetSelectedTaskImage() const
 {
 	return GetItemImage(GetCurSel());
 }
-
-BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nDepth, int nImage, DWORD dwRefTaskID)
-{
-	int nTask = CDialogHelper::InsertStringT(*this, nPos, sTask, dwTaskID);
-
-	if (nTask == CB_ERR)
-		return FALSE;
-	else
-		ASSERT(nTask == nPos);
-
-	if ((nDepth > 0) || (nImage != -1) || bParent)
-	{
-		TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetAddExtItemData(nTask);
-		ASSERT(pItemData);
-
-		if (pItemData)
-		{
-			pItemData->nDepth = nDepth;
-			pItemData->nImage = nImage;
-			pItemData->bParent = bParent;
-			pItemData->dwRefTaskID = dwRefTaskID;
-		}
-	}
-
-	return TRUE;
-}
-
-BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
-{
-	if (!IsValidIndex(nItem))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	CString sCurName = CDialogHelper::GetItem(*this, nItem);
-	sCurName.TrimLeft();
-
-	BOOL bNameChange = (sName != sCurName);
-
-	TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
-
-	if (pItemData)
-	{
-		if (bNameChange)
-		{
-			if (!InsertTask(nItem, 
-							sName, 
-							pItemData->dwItemData, 
-							pItemData->bParent, 
-							pItemData->nDepth, 
-							nImage,
-							pItemData->dwRefTaskID))
-			{
-				return FALSE;
-			}
-
-			DeleteString(nItem + 1);
-		}
-		else if (nImage != pItemData->nImage)
-		{
-			pItemData->nImage = nImage;
-		}
-		else
-		{
-			return FALSE;
-		}
-	}
-	else if (bNameChange)
-	{
-		if (!InsertTask(nItem,
-						sName,
-						GetItemData(nItem),
-						FALSE,
-						0,
-						nImage))
-		{
-			return FALSE;
-		}
-
-		DeleteString(nItem + 1);
-	}
-	else if (nImage != -1)
-	{
-		TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetAddExtItemData(nItem);
-		ASSERT(pItemData);
-
-		if (pItemData)
-			pItemData->nImage = nImage;
-	}
-	else
-	{
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
 int CTDLTaskComboBox::GetItemImage(int nItem) const
 {
 	if (!m_pIlTasks || !m_pIlTasks->GetSafeHandle())
@@ -197,7 +101,7 @@ int CTDLTaskComboBox::GetItemImage(int nItem) const
 	if (!pItemData)
 		return -1;
 
-	if ((pItemData->nImage == -1) && pItemData->bParent && m_bShowParentsAsFolders)
+	if ((pItemData->nImage == -1) && pItemData->HasAttrib(TCBA_PARENT) && m_bShowParentsAsFolders)
 		return 0;
 
 	return pItemData->nImage;
@@ -210,11 +114,18 @@ int CTDLTaskComboBox::GetItemDepth(int nItem) const
 	return (pItemData ? pItemData->nDepth : 0);
 }
 
-DWORD CTDLTaskComboBox::GetItemRefTaskID(int nItem) const
+DWORD CTDLTaskComboBox::GetItemRefID(int nItem) const
 {
 	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
 
 	return (pItemData ? pItemData->dwRefTaskID : FALSE);
+}
+
+BOOL CTDLTaskComboBox::ItemHasAttrib(int nItem, DWORD dwAttrib) const
+{
+	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
+
+	return (pItemData ? pItemData->HasAttrib(dwAttrib) : FALSE);
 }
 
 void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
@@ -230,13 +141,24 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	CRect rText(rect);
 
 	int nImage = GetItemImage(nItem);
-	BOOL bReference = (0 != GetItemRefTaskID(nItem));
+	DWORD dwRefID = GetItemRefID(nItem);
+	CFont* pOldFont = NULL;
 
 	if (bList)
 	{
+		BOOL bBold = ItemHasAttrib(nItem, TCBA_TOPLEVEL);
+		BOOL bStrikeThru = (m_bStrikeThruDone && ItemHasAttrib(nItem, TCBA_DONE));
+
+		if (bBold || bStrikeThru)
+		{
+			if (m_fonts.GetHwnd() || m_fonts.Initialise(*this))
+				pOldFont = dc.SelectObject(m_fonts.GetFont(bBold, FALSE, FALSE, bStrikeThru));
+		}
+
 		// ALWAYS indent the text to make room for the image, unless we have
 		// headings in which case the base class will do that for us
-		rText.left += (GetItemDepth(nItem) * LEVEL_INDENT);
+		int nDepth = GetItemDepth(nItem);
+		rText.left += (nDepth * LEVEL_INDENT);
 
 		if (m_nNumHeadings == 0)
 			rText.left += ICON_INDENT;
@@ -245,7 +167,7 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	{
 		rText.left += ICON_INDENT;
 	}
-	else if (bReference)
+	else if (dwRefID)
 	{
 		rText.left += REF_INDENT;
 	}
@@ -253,7 +175,7 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 
 	// Draw icon and/or shortcut overlay
-	if ((nImage != -1) || bReference)
+	if ((nImage != -1) || dwRefID)
 	{
 		CRect rImage(rText);
 		rImage.OffsetRect(-ICON_INDENT, 0);
@@ -264,9 +186,21 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 		if (nImage != -1)
 			m_pIlTasks->Draw(&dc, nImage, rImage.TopLeft());
 
-		if (bReference)
+		if (dwRefID)
 			GraphicsMisc::DrawShortcutOverlay(&dc, rImage);
 	}
+
+	if (bList && pOldFont)
+		dc.SelectObject(pOldFont);
+}
+
+void CTDLTaskComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
+									 COLORREF& crText, COLORREF& crBack) const
+{
+	COwnerdrawComboBoxBase::GetItemColors(nItem, nItemState, dwItemData, crText, crBack);
+
+	if (!(nItemState & ODS_SELECTED) && ItemHasAttrib(nItem, TCBA_GOODASDONE))
+		crText = m_crDone;
 }
 
 BOOL CTDLTaskComboBox::IsSelectableItem(int nItem) const
@@ -274,14 +208,7 @@ BOOL CTDLTaskComboBox::IsSelectableItem(int nItem) const
 	if (!COwnerdrawComboBoxBase::IsSelectableItem(nItem))
 		return FALSE;
 
-	if (!m_bEnableParents)
-	{
-		const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
-		return (!pItemData || !pItemData->bParent);
-	}
-
-	// else
-	return TRUE;
+	return (m_bEnableParents || !ItemHasAttrib(nItem, TCBA_PARENT));
 }
 
 void CTDLTaskComboBox::OnEditChange()
@@ -363,20 +290,9 @@ int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTa
 		for (int nSel = 0; nSel < aRecentSel.GetSize(); nSel++)
 		{
 			HTASKITEM hTask = tasks.FindTask(aRecentSel[nSel]);
-			ASSERT(hTask);
 
-			if (hTask && (bIncDoneTasks || !tasks.IsTaskGoodAsDone(hTask)))
-			{
-				int nImage = (m_pIlTasks ? m_pIlTasks->GetImageIndex(tasks.GetTaskIcon(hTask)) : -1);
-
-				InsertTask(nPos++,
-						   tasks.GetTaskTitle(hTask),
-						   tasks.GetTaskID(hTask),
-						   tasks.IsTaskParent(hTask),
-						   0,
-						   nImage,
-						   tasks.GetTaskReferenceID(hTask));
-			}
+			if (hTask && InsertTask(nPos, tasks, hTask, 0, bIncDoneTasks))
+				nPos++;
 		}
 
 		if (nPos != 0)
@@ -396,22 +312,14 @@ int CTDLTaskComboBox::Populate(const CTaskFile& tasks, const CTDCImageList& ilTa
 
 void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDepth, BOOL bIncDoneTasks)
 {
-	if (hTask)
+	// The task itself
+	if (hTask && !InsertTask(-1, tasks, hTask, nDepth++, bIncDoneTasks))
 	{
-		if (!bIncDoneTasks && tasks.IsTaskGoodAsDone(hTask))
-			return;
-
-		int nImage = (m_pIlTasks ? m_pIlTasks->GetImageIndex(tasks.GetTaskIcon(hTask)) : -1);
-
-		InsertTask(GetCount(),
-				   tasks.GetTaskTitle(hTask),
-				   tasks.GetTaskID(hTask),
-				   tasks.IsTaskParent(hTask),
-				   nDepth++,
-				   nImage,
-				   tasks.GetTaskReferenceID(hTask));
+		ASSERT(!bIncDoneTasks);
+		return;
 	}
-
+		
+	// subtasks
 	HTASKITEM hSubtask = tasks.GetFirstTask(hTask);
 
 	while (hSubtask)
@@ -420,3 +328,137 @@ void CTDLTaskComboBox::Populate(const CTaskFile& tasks, HTASKITEM hTask, int nDe
 		hSubtask = tasks.GetNextTask(hSubtask);
 	}
 }
+
+BOOL CTDLTaskComboBox::InsertTask(int nPos, const CTaskFile& tasks, HTASKITEM hTask, int nDepth, BOOL bIncDoneTasks)
+{
+	if (!hTask)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (nPos == -1)
+		nPos = GetCount();
+
+	DWORD dwAttribs = 0;
+	BOOL bDone = tasks.IsTaskDone(hTask);
+
+	Misc::SetFlag(dwAttribs, TCBA_DONE, bDone);
+	Misc::SetFlag(dwAttribs, TCBA_GOODASDONE, (bDone || tasks.IsTaskGoodAsDone(hTask)));
+
+	if (!bIncDoneTasks && dwAttribs)
+		return FALSE;
+
+	Misc::SetFlag(dwAttribs, TCBA_PARENT, tasks.IsTaskParent(hTask));
+	Misc::SetFlag(dwAttribs, TCBA_TOPLEVEL, (tasks.GetTaskParentID(hTask) == 0));
+
+	int nImage = (m_pIlTasks ? m_pIlTasks->GetImageIndex(tasks.GetTaskIcon(hTask)) : -1);
+
+	return InsertTask(nPos,
+					  tasks.GetTaskTitle(hTask),
+					  tasks.GetTaskID(hTask),
+					  nDepth,
+					  nImage,
+					  dwAttribs,
+					  tasks.GetTaskReferenceID(hTask));
+}
+
+
+BOOL CTDLTaskComboBox::InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, int nDepth,
+								  int nImage, DWORD dwAttribs, DWORD dwRefTaskID)
+{
+	int nTask = CDialogHelper::InsertStringT(*this, nPos, sTask, dwTaskID);
+
+	if (nTask == CB_ERR)
+		return FALSE;
+	else
+		ASSERT(nTask == nPos);
+
+	if ((nDepth > 0) || (nImage != -1) || dwAttribs)
+	{
+		TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetAddExtItemData(nTask);
+		ASSERT(pItemData);
+
+		if (pItemData)
+		{
+			pItemData->nDepth = nDepth;
+			pItemData->nImage = nImage;
+			pItemData->dwAttribs = dwAttribs;
+			pItemData->dwRefTaskID = dwRefTaskID;
+		}
+	}
+
+	return TRUE;
+}
+
+BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
+{
+	if (!IsValidIndex(nItem))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	CString sCurName = CDialogHelper::GetItem(*this, nItem);
+	sCurName.TrimLeft();
+
+	BOOL bNameChange = (sName != sCurName);
+
+	TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
+
+	if (pItemData)
+	{
+		if (bNameChange)
+		{
+			if (!InsertTask(nItem,
+							sName,
+							pItemData->dwItemData,
+							pItemData->nDepth,
+							nImage,
+							pItemData->dwAttribs,
+							pItemData->dwRefTaskID))
+			{
+				return FALSE;
+			}
+
+			DeleteString(nItem + 1);
+		}
+		else if (nImage != pItemData->nImage)
+		{
+			pItemData->nImage = nImage;
+		}
+		else
+		{
+			return FALSE;
+		}
+	}
+	else if (bNameChange)
+	{
+		if (!InsertTask(nItem,
+						sName,
+						GetItemData(nItem),
+						FALSE,
+						0,
+						nImage))
+		{
+			return FALSE;
+		}
+
+		DeleteString(nItem + 1);
+	}
+	else if (nImage != -1)
+	{
+		TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetAddExtItemData(nItem);
+		ASSERT(pItemData);
+
+		if (pItemData)
+			pItemData->nImage = nImage;
+	}
+	else
+	{
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
