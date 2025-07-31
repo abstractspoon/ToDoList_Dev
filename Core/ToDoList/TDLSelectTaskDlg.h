@@ -30,36 +30,27 @@ public:
 	void SetSelectedTaskID(DWORD dwTaskID) { m_dwSelTaskID = dwTaskID; }
 
 	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_cbTasks.SetShowParentTasksAsFolders(bAsFolders); }
+	void SetStrikethroughCompletedTasks(BOOL bStrikeThru = TRUE) { m_cbTasks.SetStrikethroughCompletedTasks(bStrikeThru); }
+
 	int DoModal(HICON hIcon = NULL, UINT nTitleStrID = 0); // Caller owns icon
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLSelectTaskDlg)
 	CTDLTaskComboBox m_cbTasks;
-	//}}AFX_DATA
-	BOOL m_bShowDoneTasks;
+	CDWordArray m_aRecentTaskIDs;
 
 	const CTaskFile& m_tasks;
 	const CTDCImageList& m_ilTasks;
 
 	DWORD m_dwSelTaskID;
 	UINT m_nTitleStrID;
-	CDWordArray m_aRecentTaskIDs;
+	BOOL m_bShowDoneTasks;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLSelectTaskDlg)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 
-// Implementation
 protected:
 	// Generated message map functions
-	//{{AFX_MSG(CTDLSelectTaskDlg)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
 	afx_msg void OnSelChangeTask();
 	afx_msg void OnDoubleClickTask();
 	afx_msg void OnShowDoneTasks();

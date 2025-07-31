@@ -34,17 +34,11 @@ void CTDLSelectTaskDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CTDLSelectTaskDlg)
 	DDX_Control(pDX, IDC_TASKCOMBO, m_cbTasks);
-	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_SHOWDONETASKS, m_bShowDoneTasks);
-
 }
 
 BEGIN_MESSAGE_MAP(CTDLSelectTaskDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLSelectTaskDlg)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_TASKCOMBO, OnSelChangeTask)
 	ON_CBN_EDITUPDATE(IDC_TASKCOMBO, OnSelChangeTask)
 	ON_CBN_DBLCLK(IDC_TASKCOMBO, OnDoubleClickTask)
