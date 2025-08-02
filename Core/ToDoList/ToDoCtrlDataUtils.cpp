@@ -3364,6 +3364,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 	double dCalcValue = DBL_NULL, dSubtaskVal;
 	TDCCADATA data;
+	BOOL bIsDate = FALSE;
 
 	if (attribDef.IsDataType(TDCCA_CALCULATION))
 	{
@@ -3371,10 +3372,12 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			return FALSE;
 
 		data.Set(dCalcValue);
+		bIsDate = (CustomAttribDefs().GetCalculationResultDataType(attribDef.Calculation()) == TDCCA_DATE);
 	}
 	else
 	{
 		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+		bIsDate = attribDef.IsDataType(TDCCA_DATE);
 	}
 
 	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
@@ -3450,7 +3453,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (dCalcValue >= DBL_MAX)
 			dCalcValue = DBL_NULL;
 	}
-	else if (!attribDef.HasFeature(TDCCAF_SHOWTIME))
+	else if (bIsDate && !attribDef.HasFeature(TDCCAF_SHOWTIME))
 	{
 		attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
 		dCalcValue = (int)dCalcValue;
