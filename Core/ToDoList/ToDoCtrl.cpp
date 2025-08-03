@@ -10339,6 +10339,10 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		}
 		break;
 
+	case TDCA_OFFSETTASK:
+		return (CanEditTask(dwTaskID, TDCA_STARTDATE) &&  // RECURSIVE CALL
+				CanEditTask(dwTaskID, TDCA_DUEDATE));     // RECURSIVE CALL
+
 	default:
 		ASSERT(0); // Unexpectedly unhandled
 		break;
