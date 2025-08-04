@@ -7,16 +7,20 @@
 // TDLLanguageComboBox.h : header file
 //
 
+#include "..\shared\OwnerdrawComboBoxBase.h"
 #include "..\shared\EnImageList.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLLanguageComboBox window
 
-class CTDLLanguageComboBox : public CComboBoxEx
+class CTDLLanguageComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
 	CTDLLanguageComboBox(LPCTSTR szFilter = _T("*.csv"));
+	virtual ~CTDLLanguageComboBox();
+
+	void Populate();
 
 	void SelectLanguageFile(LPCTSTR szFile);
 	CString GetSelectedLanguageFile(BOOL bRelative = FALSE) const;
@@ -29,39 +33,40 @@ public:
 	static BOOL HasLanguages();
 	
 protected:
-	mutable CString m_sSelLanguage;
 	CString m_sFilter;
 	CEnImageList m_il;
 
+	int m_nLangCountryColWidth;
+
+	mutable CString m_sSelLanguage;
+
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLLanguageComboBox)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLLanguageComboBox();
-
 	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLLanguageComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnDestroy();
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void BuildLanguageList();
-	int AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID nLangID, COLORREF crBack = CLR_NONE);
+	struct LCB_ITEMDATA : public ODCB_ITEMDATA
+	{
+		CString sCompletion;
+	};
+
+	virtual ODCB_ITEMDATA* NewExtItemData() const { return new LCB_ITEMDATA(); }
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+	virtual int CalcMinItemHeight(BOOL bList) const;
+
+protected:
+	BOOL AddDefaultLanguage();
+	int AddString(LPCTSTR szLanguage, LANGID nLangID, const CString& sCompletion, HBITMAP hbmFlag, COLORREF crBack = CLR_NONE);
 	int SelectLanguage(LPCTSTR szLanguage);
+	void InitialiseMinDropWidth(CDC* pDC);
 
 	static CString GetSelectedLanguageFile(LPCTSTR szLanguage, LPCTSTR szExt = _T("csv"), BOOL bRelative = FALSE);
 	static CString GetTranslationFolder();
 	static LANGID GetLanguageID(const CString& sTransFile);
+	static CString GetPercentTranslated(const CString& sTransFile);
+	static void GetLanguageAndCountry(const CString& sItem, CString& sLanguage, CString& sCountry);
 };
 
 /////////////////////////////////////////////////////////////////////////////
