@@ -6021,7 +6021,7 @@ BEGIN
     IDS_FIND_INCLUDING      "I&ncluding"
     IDS_FIND_ACTIVETASKLIST "The active tasklist"
     IDS_FIND_ALLTASKLISTS   "All tasklists"
-    IDS_CONFIRMSAVEAS       "%s already exists.\nDo you want to replace it?"
+    IDS_CONFIRMSAVEAS       "'%s' already exists.\nDo you want to replace it?"
     IDS_CONFIRMSAVEAS_TITLE "Confirm Save As"
     IDS_PRINT_TASKVIEW      "Image of active task view (%s)"
     IDS_TASKCOMPLETION      "Task Completion"
