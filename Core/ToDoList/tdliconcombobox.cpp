@@ -196,14 +196,6 @@ int CTDLIconComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) c
 	return DecodeImageTags(aTemp1, aChecked);
 }
 
-BOOL CTDLIconComboBox::SetChecked(const CStringArray& aItems)
-{
-	CStringArray aEncodedItems;
-	EncodeImageTags(aItems, aEncodedItems, FALSE);
-
-	return CEnCheckComboBox::SetChecked(aEncodedItems);
-}
-
 BOOL CTDLIconComboBox::SetChecked(const CStringArray& aChecked, const CStringArray& aMixed)
 {
 	CStringArray aEncodedChecked, aEncodedMixed;
@@ -220,14 +212,6 @@ int CTDLIconComboBox::SetStrings(const CStringArray& aItems)
 	EncodeImageTags(aItems, aEncodedItems, TRUE);
 
 	return CEnCheckComboBox::SetStrings(aEncodedItems);
-}
-
-int CTDLIconComboBox::GetItems(CStringArray& aItems) const
-{
-	CStringArray aTemp;
-	CEnCheckComboBox::GetItems(aTemp);
-
-	return DecodeImageTags(aTemp, aItems);
 }
 
 int CTDLIconComboBox::EncodeImageTags(const CStringArray& aImages, CStringArray& aEncodedTags, BOOL bAdding) const

@@ -26,13 +26,12 @@ public:
 	int SelectImage(const CString& sImage);
 	CString GetSelectedImage() const;
 
-	int SetStrings(const CStringArray& aItems);
-	int GetItems(CStringArray& aItems) const; 
-
 	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
-	int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
-	BOOL SetChecked(const CStringArray& aItems);
-	BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
+	BOOL SetChecked(const CStringArray& aItems) { return CEnCheckComboBox::SetChecked(aItems); }
+
+	virtual int SetStrings(const CStringArray& aItems);
+	virtual int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
+	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 
 // Attributes
 protected:
