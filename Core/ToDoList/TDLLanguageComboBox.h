@@ -20,14 +20,12 @@ public:
 	CTDLLanguageComboBox(LPCTSTR szFilter = _T("*.csv"));
 	virtual ~CTDLLanguageComboBox();
 
-	void Populate();
-
 	void SelectLanguageFile(LPCTSTR szFile);
+	int SelectUserLanguage();
+
 	CString GetSelectedLanguageFile(BOOL bRelative = FALSE) const;
 	LANGID GetSelectedPrimaryLanguageID() const;
 	BOOL IsDefaultLanguageSelected() const;
-
-	int SelectUserLanguage();
 
 	static CString GetDefaultLanguage();
 	static BOOL HasLanguages();
@@ -43,7 +41,11 @@ protected:
 protected:
 	// Generated message map functions
 	afx_msg void OnDestroy();
+	afx_msg LRESULT OnPopulate(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	virtual void PreSubclassWindow();
 
 protected:
 	struct LCB_ITEMDATA : public ODCB_ITEMDATA
@@ -60,7 +62,8 @@ protected:
 	BOOL AddDefaultLanguage();
 	int AddString(LPCTSTR szLanguage, LANGID nLangID, const CString& sCompletion, HBITMAP hbmFlag, COLORREF crBack = CLR_NONE);
 	int SelectLanguage(LPCTSTR szLanguage);
-	void InitialiseMinDropWidth(CDC* pDC);
+	void InitialiseDropWidth();
+	void Populate();
 
 	static CString GetSelectedLanguageFile(LPCTSTR szLanguage, LPCTSTR szExt = _T("csv"), BOOL bRelative = FALSE);
 	static CString GetTranslationFolder();

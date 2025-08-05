@@ -172,7 +172,6 @@ void CPreferencesGenPage::OnFirstShow()
 		}
 	}
 
-	m_cbLanguages.Populate();
 	EnableDisableLanguageOptions();
 
 	// Show/Enable 'Edit' button only if the initial language is set

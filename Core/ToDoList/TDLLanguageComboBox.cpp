@@ -33,6 +33,10 @@ const int COL_SPACING	= GraphicsMisc::ScaleByDPIFactor(10);
 
 /////////////////////////////////////////////////////////////////////////////
 
+const UINT CB_POPULATE = (WM_USER+4);
+
+/////////////////////////////////////////////////////////////////////////////
+
 CString CTDLLanguageComboBox::GetDefaultLanguage()
 {
 	return DEFAULT_LANG;
@@ -56,6 +60,7 @@ CTDLLanguageComboBox::~CTDLLanguageComboBox()
 
 BEGIN_MESSAGE_MAP(CTDLLanguageComboBox, COwnerdrawComboBoxBase)
 	ON_WM_DESTROY()
+	ON_MESSAGE(CB_POPULATE, OnPopulate)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -66,9 +71,28 @@ CString CTDLLanguageComboBox::GetTranslationFolder()
 	return FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
 }
 
+void CTDLLanguageComboBox::PreSubclassWindow()
+{
+	COwnerdrawComboBoxBase::PreSubclassWindow();
+
+	PostMessage(CB_POPULATE);
+}
+
+LRESULT CTDLLanguageComboBox::OnPopulate(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	if (GetCount() == 0)
+	{
+		Populate();
+		InitialiseDropWidth();
+	}
+
+	return 0L;
+}
+
 void CTDLLanguageComboBox::Populate()
 {
 	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
 
 	if (GetCount())
 		return; // already done
@@ -111,6 +135,7 @@ void CTDLLanguageComboBox::Populate()
 	m_il.ScaleByDPIFactor();
 
 	SelectLanguage(m_sSelLanguage);
+	return;
 }
 
 BOOL CTDLLanguageComboBox::AddDefaultLanguage()
@@ -353,12 +378,15 @@ int CTDLLanguageComboBox::CalcMinItemHeight(BOOL bList) const
 	return nMinHeight;
 }
 
-void CTDLLanguageComboBox::InitialiseMinDropWidth(CDC* pDC)
+void CTDLLanguageComboBox::InitialiseDropWidth()
 {
 	if (m_nLangCountryColWidth == 0)
 	{
+		CClientDC dc(this);
+		HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, *this);
+
 		// Completion column always defined by heading text
-		int nDoneColWidth = MulDiv(pDC->GetTextExtent(CEnString(IDS_LANGCOMBO_COMPLETION)).cx, 3, 2);
+		int nDoneColWidth = MulDiv(dc.GetTextExtent(CEnString(IDS_LANGCOMBO_COMPLETION)).cx, 3, 2);
 		int nMaxLangColWidth = 0, nMaxCountryColWidth = 0;
 		int nIndex = GetCount();
 
@@ -368,7 +396,7 @@ void CTDLLanguageComboBox::InitialiseMinDropWidth(CDC* pDC)
 			GetLanguageAndCountry(CDialogHelper::GetItem(*this, nIndex), sLanguage, sCountry);
 
 			// Language
-			int nWidth = pDC->GetTextExtent(sLanguage).cx;
+			int nWidth = dc.GetTextExtent(sLanguage).cx;
 
 			if (nIndex == 0) // heading
 				nWidth = MulDiv(nWidth, 3, 2); // ~ bold
@@ -376,13 +404,14 @@ void CTDLLanguageComboBox::InitialiseMinDropWidth(CDC* pDC)
 			nMaxLangColWidth = max(nWidth, nMaxLangColWidth);
 
 			// Country
-			nWidth = pDC->GetTextExtent(sCountry).cx;
+			nWidth = dc.GetTextExtent(sCountry).cx;
 
 			if (nIndex == 0) // heading
 				nWidth = MulDiv(nWidth, 3, 2); // ~ bold
 
 			nMaxCountryColWidth = max(nWidth, nMaxCountryColWidth);
 		}
+		dc.SelectObject(hOldFont);
 
 		m_nLangCountryColWidth = max(nMaxLangColWidth, nMaxCountryColWidth);
 
@@ -431,10 +460,6 @@ void CTDLLanguageComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	}
 	else // edit
 	{
-		// The edit will always be drawn before the list 
-		// so now's a good time to initialise the min drop width
-		InitialiseMinDropWidth(&dc);
-
 		COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 	}
 }

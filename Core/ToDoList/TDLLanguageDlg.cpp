@@ -54,7 +54,6 @@ BOOL CTDLLanguageDlg::OnInitDialog()
 	SetIcon(IDR_MAINFRAME);
 
 	// Initialise language to user's UI language
-	m_cbLanguages.Populate();
 	m_cbLanguages.SelectUserLanguage();
 	m_cbLanguages.SetFocus();
 	
