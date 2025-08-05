@@ -21,6 +21,7 @@ class CTDLIconComboBox : public CEnCheckComboBox
 // Construction
 public:
 	CTDLIconComboBox(const CTDCImageList& ilImages, BOOL bMultiSel = FALSE, BOOL bFilter = FALSE);
+	virtual ~CTDLIconComboBox();
 
 	int SelectImage(const CString& sImage);
 	CString GetSelectedImage() const;
@@ -38,7 +39,7 @@ protected:
 	const CTDCImageList& m_ilImages;
 
 // Operations
-public:
+// public:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -46,8 +47,7 @@ public:
 	//}}AFX_VIRTUAL
 
 // Implementation
-public:
-	virtual ~CTDLIconComboBox();
+// public:
 
 	// Generated message map functions
 protected:

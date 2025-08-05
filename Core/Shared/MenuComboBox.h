@@ -17,6 +17,7 @@ class CMenuComboBox : public CTabbedComboBox
 // Construction
 public:
 	CMenuComboBox();
+	virtual ~CMenuComboBox();
 
 // Operations
 public:
@@ -32,8 +33,7 @@ public:
 	//}}AFX_VIRTUAL
 
 // Implementation
-public:
-	virtual ~CMenuComboBox();
+// public:
 
 	// Generated message map functions
 protected:

@@ -33,11 +33,7 @@ CBurndownGraphComboBox::~CBurndownGraphComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CBurndownGraphComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CBurndownGraphComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

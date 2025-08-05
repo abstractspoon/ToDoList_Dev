@@ -42,12 +42,12 @@ public:
 protected:
 	DWORD m_dwStyle;
 	
-protected:
-	virtual void PreSubclassWindow();
+// protected:
+// 	virtual void PreSubclassWindow();
 
 protected:
 	// Generated message map functions
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 
 	DECLARE_MESSAGE_MAP()
@@ -55,9 +55,9 @@ protected:
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 								COLORREF& crText, COLORREF& crBack) const;	
+	virtual void OnPopulate();
 
 protected:
-	void BuildCombo(BOOL bReset = FALSE);
 	void ScrollListBox();
 	CString GetCurrentTime() const;
 	double Get24HourTime(int nItem) const; // -1 for 'no time'

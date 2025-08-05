@@ -39,13 +39,13 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLImportExportComboBox)
 protected:
-	virtual void PreSubclassWindow();
+//	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTDLImportExportComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+//	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -54,8 +54,8 @@ protected:
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
+	virtual void OnPopulate();
 
-	void BuildCombo();
 	CString GetImpExpMenuText(int nImpExp) const;
 	CString GetImpExpFileExtension(int nImpExp, BOOL bWithDot) const;
 	HICON GetImpExpIcon(int nImpExp) const;

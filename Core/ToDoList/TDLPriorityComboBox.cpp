@@ -36,32 +36,34 @@ CTDLPriorityComboBox::~CTDLPriorityComboBox()
 
 BEGIN_MESSAGE_MAP(CTDLPriorityComboBox, CColorComboBox)
 	//{{AFX_MSG_MAP(CTDLPriorityComboBox)
-	ON_WM_CREATE()
+// 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPriorityComboBox message handlers
 
-int CTDLPriorityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CColorComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildCombo();
-	
-	return 0;
-}
-
-void CTDLPriorityComboBox::PreSubclassWindow() 
-{
-	CColorComboBox::PreSubclassWindow();
-	
-	BuildCombo();
-}
+// int CTDLPriorityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+// {
+// 	if (CColorComboBox::OnCreate(lpCreateStruct) == -1)
+// 		return -1;
+// 	
+// 	BuildCombo();
+// 	
+// 	return 0;
+// }
+// 
+// void CTDLPriorityComboBox::PreSubclassWindow() 
+// {
+// 	CColorComboBox::PreSubclassWindow();
+// 	
+// 	BuildCombo();
+// }
 
 int CTDLPriorityComboBox::IncrementPriority(int nAmount)
 {
+	ASSERT(GetCount());
+
 	int nPrevPriority = GetCurSel();
 	int nPriority = nPrevPriority + nAmount;
 	nPriority = max(0, min(nPriority, m_nNumLevels));	
@@ -113,6 +115,8 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 
 void CTDLPriorityComboBox::SetSelectedPriority(int nPriority) // -2 -> 10
 {
+	OnPopulate();
+
 	int nSel = CB_ERR;
 
 	switch (nPriority)
@@ -156,6 +160,8 @@ BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 
 		if (GetSafeHwnd())
 		{
+			OnPopulate();
+
 			// Update the colours in-place
 			int nNumItems = GetCount();
 
@@ -167,16 +173,16 @@ BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 	return TRUE;
 }
 
-void CTDLPriorityComboBox::BuildCombo()
+void CTDLPriorityComboBox::OnPopulate()
 {
-	ASSERT(GetSafeHwnd());
-	CHoldRedraw hr(*this);
+// 	ASSERT(GetSafeHwnd());
+// 	CHoldRedraw hr(*this);
 
 	// Remove sorting else 10 will get sorted after 1
 	ModifyStyle(CBS_SORT, 0);
 	
-	int nSel = GetCurSel(); // so we can restore it
-	ResetContent();
+// 	int nSel = GetCurSel(); // so we can restore it
+// 	ResetContent();
 	
 	BOOL bHasColors = m_aColors.GetSize();
 
@@ -200,7 +206,7 @@ void CTDLPriorityComboBox::BuildCombo()
 		AddColor(color, sPriority);
 	}
 	
-	SetCurSel(nSel);
+// 	SetCurSel(nSel);
 }
 
 void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
@@ -243,7 +249,13 @@ void CTDLPriorityComboBox::SetNumLevels(int nNumLevels)
 		m_nNumLevels = nNumLevels;
 
 		if (GetSafeHwnd())
-			BuildCombo();
+		{
+			int nSel = GetCurSel(); // save
+
+			ResetContent();
+			OnPopulate();
+			SetCurSel(nSel); // restore
+		}
 	}
 }
 

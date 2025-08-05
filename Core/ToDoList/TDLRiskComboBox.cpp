@@ -37,29 +37,29 @@ CTDLRiskComboBox::~CTDLRiskComboBox()
 
 BEGIN_MESSAGE_MAP(CTDLRiskComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTDLRiskComboBox)
-	ON_WM_CREATE()
+// 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRiskComboBox message handlers
 
-int CTDLRiskComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildCombo();
-	
-	return 0;
-}
-
-void CTDLRiskComboBox::PreSubclassWindow() 
-{
-	COwnerdrawComboBoxBase::PreSubclassWindow();
-
- 	BuildCombo();
-}
+// int CTDLRiskComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+// {
+// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
+// 		return -1;
+// 	
+// 	OnPopulate();
+// 	
+// 	return 0;
+// }
+// 
+// void CTDLRiskComboBox::PreSubclassWindow() 
+// {
+// 	COwnerdrawComboBoxBase::PreSubclassWindow();
+// 
+//  	OnPopulate();
+// }
 
 int CTDLRiskComboBox::GetSelectedRisk() const
 {
@@ -102,6 +102,8 @@ int CTDLRiskComboBox::GetSelectedRisk() const
 
 void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 {
+	OnPopulate();
+
 	int nSel = CB_ERR;
 
 	switch (nRisk)
@@ -134,13 +136,14 @@ void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 	SetCurSel(nSel);
 }
 
-void CTDLRiskComboBox::BuildCombo()
+void CTDLRiskComboBox::OnPopulate()
 {
 	ASSERT(GetSafeHwnd());
-	CHoldRedraw hr(*this);
-	
-	int nSel = GetCurSel(); // so we can restore it
-	ResetContent();
+
+	if (GetCount() == 0)
+		return;
+
+//	CHoldRedraw hr(*this);
 	
 	// first items are 'Any' and 'None'
 	if (m_bIncludeAny)
@@ -157,8 +160,6 @@ void CTDLRiskComboBox::BuildCombo()
 		sRisk.Format(_T("%d (%s)"), nLevel, CEnString(aStrResIDs[nLevel]));
 		AddString(sRisk);
 	}
-	
-	SetCurSel(nSel);
 }
 
 void CTDLRiskComboBox::DDX(CDataExchange* pDX, int& nRisk)
@@ -191,7 +192,13 @@ void CTDLRiskComboBox::SetNumLevels(int nNumLevels)
 		m_nNumLevels = nNumLevels;
 
 		if (GetSafeHwnd())
-			BuildCombo();
+		{
+			int nSel = GetCurSel(); // save
+
+			ResetContent();
+			OnPopulate();
+			SetCurSel(nSel); // restore
+		}
 	}
 }
 

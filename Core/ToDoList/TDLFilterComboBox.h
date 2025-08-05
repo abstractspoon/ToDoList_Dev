@@ -40,19 +40,20 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLFilterComboBox)
-protected:
-	virtual void PreSubclassWindow();
+// protected:
+// 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 
 	// Generated message map functions
-protected:
+// protected:
 	//{{AFX_MSG(CTDLFilterComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void FillCombo();
+	virtual void OnPopulate();
+
 	void RebuildCombo(LPCTSTR szAdvancedSel = NULL);
 	int AddDefaultFilterItem(int nItem);
 	int GetDefaultFilterCount() const;

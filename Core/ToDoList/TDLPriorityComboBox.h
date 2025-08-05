@@ -33,7 +33,7 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLPriorityComboBox)
-	virtual void PreSubclassWindow();
+// 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 
 protected:
@@ -44,15 +44,14 @@ protected:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTDLPriorityComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
-   void BuildCombo();
-
-   virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
+	virtual void OnPopulate();
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
 							 DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 };
 

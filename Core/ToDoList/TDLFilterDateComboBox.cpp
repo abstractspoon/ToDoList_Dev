@@ -35,7 +35,7 @@ CTDLFilterDateComboBox::~CTDLFilterDateComboBox()
 
 BEGIN_MESSAGE_MAP(CTDLFilterDateComboBox, CTabbedComboBox)
 	//{{AFX_MSG_MAP(CTDLFilterDateComboBox)
-	ON_WM_CREATE()
+// 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnReflectSelChange)
 END_MESSAGE_MAP()
@@ -43,22 +43,22 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterDateComboBox message handlers
 
-void CTDLFilterDateComboBox::PreSubclassWindow() 
-{
-	CTabbedComboBox::PreSubclassWindow();
-
-	FillCombo();
-}
-
-int CTDLFilterDateComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CTabbedComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	FillCombo();
-	
-	return 0;
-}
+// void CTDLFilterDateComboBox::PreSubclassWindow() 
+// {
+// 	CTabbedComboBox::PreSubclassWindow();
+// 
+// 	FillCombo();
+// }
+// 
+// int CTDLFilterDateComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+// {
+// 	if (CTabbedComboBox::OnCreate(lpCreateStruct) == -1)
+// 		return -1;
+// 	
+// 	FillCombo();
+// 	
+// 	return 0;
+// }
 
 void CTDLFilterDateComboBox::SetNextNDays(int nDays)
 {
@@ -72,7 +72,7 @@ void CTDLFilterDateComboBox::SetNextNDays(int nDays)
 		FILTER_DATE nSelFilter = GetSelectedFilter();
 
 		ResetContent();
-		FillCombo();
+		OnPopulate();
 
 		SelectFilter(nSelFilter);
 	}
@@ -85,7 +85,7 @@ BOOL CTDLFilterDateComboBox::OnReflectSelChange()
 	return m_bRebuildingCombo;
 }
 
-void CTDLFilterDateComboBox::FillCombo()
+void CTDLFilterDateComboBox::OnPopulate()
 {
 	ASSERT(GetSafeHwnd());
 
@@ -141,6 +141,8 @@ FILTER_DATE CTDLFilterDateComboBox::GetSelectedFilter() const
 
 BOOL CTDLFilterDateComboBox::SelectFilter(FILTER_DATE nFilter)
 {
+	OnPopulate();
+
 	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, (DWORD)nFilter));
 }
 

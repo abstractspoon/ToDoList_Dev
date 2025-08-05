@@ -31,7 +31,7 @@ CColorBrewerComboBox::~CColorBrewerComboBox()
 
 BEGIN_MESSAGE_MAP(CColorBrewerComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CContentTypeComboBox)
-	ON_WM_CREATE()
+// 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -100,24 +100,24 @@ BOOL CColorBrewerComboBox::Initialize(const CColorBrewerPaletteArray& aPalettes)
 	return TRUE;
 }
 
-int CColorBrewerComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	if (m_aPalettes.GetSize())
-		FillCombo();
-	
-	return 0;
-}
-
-void CColorBrewerComboBox::PreSubclassWindow() 
-{
-	if (m_aPalettes.GetSize())
-		FillCombo();
-
-	COwnerdrawComboBoxBase::PreSubclassWindow();
-}
+// int CColorBrewerComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+// {
+// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
+// 		return -1;
+// 
+// 	if (m_aPalettes.GetSize())
+// 		OnPopulate();
+// 	
+// 	return 0;
+// }
+// 
+// void CColorBrewerComboBox::PreSubclassWindow() 
+// {
+// 	if (m_aPalettes.GetSize())
+// 		OnPopulate();
+// 
+// 	COwnerdrawComboBoxBase::PreSubclassWindow();
+// }
 
 void CColorBrewerComboBox::RebuildCombo()
 {
@@ -126,17 +126,17 @@ void CColorBrewerComboBox::RebuildCombo()
 		int nSel = GetCurSel();
 
 		ResetContent();
-		FillCombo();
+		OnPopulate();
 
 		SetCurSel(nSel);
 	}
 }
 
-void CColorBrewerComboBox::FillCombo()
+void CColorBrewerComboBox::OnPopulate()
 {
 	ASSERT(GetSafeHwnd());
 
-	if (COwnerdrawComboBoxBase::GetCount())
+	if (GetCount())
 		return;
 
 	if (!m_sNone.IsEmpty())

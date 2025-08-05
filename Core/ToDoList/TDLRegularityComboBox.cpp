@@ -30,7 +30,7 @@ CTDLRegularityComboBox::~CTDLRegularityComboBox()
 
 BEGIN_MESSAGE_MAP(CTDLRegularityComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTDLRegularityComboBox)
-	ON_WM_CREATE()
+//	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -50,7 +50,17 @@ TDC_REGULARITY CTDLRegularityComboBox::GetSelectedRegularity() const
 
 int CTDLRegularityComboBox::SetSelectedRegularity(TDC_REGULARITY nRegularity)
 {
+	OnPopulate();
+
 	return CDialogHelper::SelectItemByDataT(*this, nRegularity);
+}
+
+void CTDLRegularityComboBox::DDX(CDataExchange* pDX, TDC_REGULARITY& value)
+{
+	if (pDX->m_bSaveAndValidate)
+		value = GetSelectedRegularity();
+	else
+		SetSelectedRegularity(value);
 }
 
 CString CTDLRegularityComboBox::GetRegularity(TDC_REGULARITY nRegularity)
@@ -58,25 +68,28 @@ CString CTDLRegularityComboBox::GetRegularity(TDC_REGULARITY nRegularity)
 	return TDCRECURRENCE::GetRegularityText(nRegularity, TRUE);
 }
 
-void CTDLRegularityComboBox::PreSubclassWindow() 
-{
-	COwnerdrawComboBoxBase::PreSubclassWindow();
+// void CTDLRegularityComboBox::PreSubclassWindow() 
+// {
+// 	COwnerdrawComboBoxBase::PreSubclassWindow();
+// 
+// 	OnPopulate();
+// }
+// 
+// int CTDLRegularityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+// {
+// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
+// 		return -1;
+// 	
+// 	OnPopulate();
+// 	
+// 	return 0;
+// }
 
-	BuildCombo();
-}
-
-int CTDLRegularityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+void CTDLRegularityComboBox::OnPopulate()
 {
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildCombo();
-	
-	return 0;
-}
+	if (GetCount())
+		return;
 
-void CTDLRegularityComboBox::BuildCombo()
-{
 	if (m_bIncludeAny)
 		CDialogHelper::AddStringT(*this, CEnString(IDS_TDC_ANY), TDIR_NONE);
 

@@ -118,7 +118,16 @@ int CTDLTimeTrackerTaskComboBox::Update(const TRACKTASKLIST* pTTL, const CDWordA
 int CTDLTimeTrackerTaskComboBox::Update(const TRACKTASKLIST* pTTL, const CDWordArray& aModTaskIDs,
 										const CMapTaskIndex& mapTTItems, const CMapTaskIndex& mapCBItems)
 {
-	ASSERT(m_pIlTasks == &pTTL->pTDC->GetTaskIconImageList());
+	if (GetCount() == 0)
+	{
+		ASSERT(mapCBItems.IsEmpty());
+		return 0;
+	}
+
+	if (!m_pIlTasks)
+		m_pIlTasks = &pTTL->pTDC->GetTaskIconImageList();
+	else
+		ASSERT(m_pIlTasks == &pTTL->pTDC->GetTaskIconImageList());
 
 	int nNumUpdated = 0, nID = aModTaskIDs.GetSize();
 

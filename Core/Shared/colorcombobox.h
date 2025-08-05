@@ -26,6 +26,7 @@ class CColorComboBox : public CAutoComboBox
 // Construction
 public:
 	CColorComboBox(BOOL dwFlags = FALSE, DWORD dwAutoComboFlags = 0);
+	virtual ~CColorComboBox();
 
 // Operations
 public:
@@ -45,8 +46,7 @@ protected:
 	//}}AFX_VIRTUAL
 
 // Implementation
-public:
-	virtual ~CColorComboBox();
+// public:
 
 	// Generated message map functions
 protected:

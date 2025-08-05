@@ -38,23 +38,22 @@ protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CContentTypeComboBox)
 protected:
-	virtual void PreSubclassWindow();
+// 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CContentTypeComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
 
+	virtual void OnPopulate();
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-
-	void FillCombo();
 };
 
 /////////////////////////////////////////////////////////////////////////////

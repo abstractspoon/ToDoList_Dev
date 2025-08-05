@@ -40,7 +40,7 @@ CImportExportComboBox::~CImportExportComboBox()
 
 BEGIN_MESSAGE_MAP(CImportExportComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CTDLImportExportComboBox)
-	ON_WM_CREATE()
+// 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -68,62 +68,66 @@ void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts
 	if (GetSafeHwnd())
 	{
 		ResetContent();
-		BuildCombo();
+		OnPopulate();
 	}
 }
 
-void CImportExportComboBox::PreSubclassWindow() 
-{
-	BuildCombo();
-	
-	COwnerdrawComboBoxBase::PreSubclassWindow();
-}
-
-int CImportExportComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildCombo();
-	
-	return 0;
-}
+// void CImportExportComboBox::PreSubclassWindow() 
+// {
+// 	OnPopulate();
+// 	
+// 	COwnerdrawComboBoxBase::PreSubclassWindow();
+// }
+// 
+// int CImportExportComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+// {
+// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
+// 		return -1;
+// 	
+// 	OnPopulate();
+// 	
+// 	return 0;
+// }
 
 void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
-	int nImpExp = (int)dwItemData;
-
-	// draw icon
-	CPoint ptDraw(rect.TopLeft());
-	
-	if (!bList)
-		ptDraw.y--;
-	
-	HICON hIcon = GetImpExpIcon(nImpExp);
-	int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
-	
-	if (hIcon)
-	{
-		::DrawIconEx(dc, ptDraw.x, ptDraw.y, hIcon, nImageSize, nImageSize, 0, NULL, DI_NORMAL);
-	}
-	else // fallback on file handler icon
-	{
-		CString sFileExt = GetImpExpFileExtension(nImpExp, TRUE);
-		int nImage = -1;
-		
-		if (!sFileExt.IsEmpty())
-			CFileIcons::Draw(&dc, sFileExt, ptDraw);
-	}
-
-	// draw text
 	CRect rText(rect);
-	rText.left += (nImageSize + 4); // for icon always
+
+	if (nItem != -1)
+	{
+		int nImpExp = (int)dwItemData;
+
+		// draw icon
+		CPoint ptDraw(rect.TopLeft());
+
+		if (!bList)
+			ptDraw.y--;
+
+		HICON hIcon = GetImpExpIcon(nImpExp);
+		int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
+
+		if (hIcon)
+		{
+			::DrawIconEx(dc, ptDraw.x, ptDraw.y, hIcon, nImageSize, nImageSize, 0, NULL, DI_NORMAL);
+		}
+		else // fallback on file handler icon
+		{
+			CString sFileExt = GetImpExpFileExtension(nImpExp, TRUE);
+			int nImage = -1;
+
+			if (!sFileExt.IsEmpty())
+				CFileIcons::Draw(&dc, sFileExt, ptDraw);
+		}
+
+		// draw text
+		rText.left += (nImageSize + 4); // for icon always
+	}
 
 	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
-void CImportExportComboBox::BuildCombo()
+void CImportExportComboBox::OnPopulate()
 {
 	// once only
 	if (GetCount())
@@ -198,6 +202,8 @@ CString CImportExportComboBox::GetSelectedTypeID() const
 
 int CImportExportComboBox::SetSelectedTypeID(LPCTSTR szTypeID)
 {
+	OnPopulate();
+
 	return SetCurSel(FindItem(szTypeID));
 }
 

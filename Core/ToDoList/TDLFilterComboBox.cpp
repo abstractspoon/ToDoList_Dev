@@ -40,29 +40,29 @@ CTDLFilterComboBox::~CTDLFilterComboBox()
 
 BEGIN_MESSAGE_MAP(CTDLFilterComboBox, CTabbedComboBox)
 	//{{AFX_MSG_MAP(CTDLFilterComboBox)
-	ON_WM_CREATE()
+// 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterComboBox message handlers
 
-void CTDLFilterComboBox::PreSubclassWindow() 
-{
-	CTabbedComboBox::PreSubclassWindow();
-
-	FillCombo();
-}
-
-int CTDLFilterComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CTabbedComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	FillCombo();
-	
-	return 0;
-}
+// void CTDLFilterComboBox::PreSubclassWindow() 
+// {
+// 	CTabbedComboBox::PreSubclassWindow();
+// 
+// 	FillCombo();
+// }
+// 
+// int CTDLFilterComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+// {
+// 	if (CTabbedComboBox::OnCreate(lpCreateStruct) == -1)
+// 		return -1;
+// 	
+// 	FillCombo();
+// 	
+// 	return 0;
+// }
 
 int CTDLFilterComboBox::AddDefaultFilterItem(int nItem)
 {
@@ -83,7 +83,7 @@ int CTDLFilterComboBox::AddDefaultFilterItem(int nItem)
 	return CDialogHelper::AddStringT(*this, sItem, nFilter);
 }
 
-void CTDLFilterComboBox::FillCombo()
+void CTDLFilterComboBox::OnPopulate()
 {
 	ASSERT(GetSafeHwnd());
 	
@@ -139,7 +139,7 @@ void CTDLFilterComboBox::RebuildCombo(LPCTSTR szAdvancedSel)
 		FILTER_SHOW nSelFilter = GetSelectedFilter(sAdvFilter);
 		
 		ResetContent();
-		FillCombo();
+		OnPopulate();
 		
 		// restore selection
 		if (!SelectFilter(nSelFilter, (szAdvancedSel ? szAdvancedSel : sAdvFilter)))

@@ -18,6 +18,7 @@ class CTDLFilterDateComboBox : public CTabbedComboBox
 // Construction
 public:
 	CTDLFilterDateComboBox(int nNextNDays = 7);
+	virtual ~CTDLFilterDateComboBox();
 
 // Operations
 public:
@@ -32,25 +33,24 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLFilterDateComboBox)
-	protected:
-	virtual void PreSubclassWindow();
+// 	protected:
+// 	virtual void PreSubclassWindow();
 	//}}AFX_VIRTUAL
 
 // Implementation
-public:
-	virtual ~CTDLFilterDateComboBox();
+// public:
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTDLFilterDateComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 	afx_msg BOOL OnReflectSelChange();
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void FillCombo();
+	virtual void OnPopulate();
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 		DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 
