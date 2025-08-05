@@ -2578,6 +2578,8 @@
 #define IDS_ATTRIBTIP_DISMISS           51677
 #define IDS_ATTRIBTIP_CALCULATEDVALUE   51678
 #define IDS_SELECTSUBTASKPARENT_TITLE   51679
+#define IDS_LANGCOMBO_COMPLETION        51680
+#define IDS_LANGCOMBO_LANGCOUNTRY       51681
 
 // Next default values for new objects
 // 
@@ -2585,7 +2587,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        338
 #define _APS_NEXT_COMMAND_VALUE         34786
-#define _APS_NEXT_CONTROL_VALUE         1593
+#define _APS_NEXT_CONTROL_VALUE         1595
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
