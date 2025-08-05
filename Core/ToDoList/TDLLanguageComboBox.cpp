@@ -33,10 +33,6 @@ const int COL_SPACING	= GraphicsMisc::ScaleByDPIFactor(10);
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT CB_POPULATE = (WM_USER+4);
-
-/////////////////////////////////////////////////////////////////////////////
-
 CString CTDLLanguageComboBox::GetDefaultLanguage()
 {
 	return DEFAULT_LANG;
@@ -60,7 +56,7 @@ CTDLLanguageComboBox::~CTDLLanguageComboBox()
 
 BEGIN_MESSAGE_MAP(CTDLLanguageComboBox, COwnerdrawComboBoxBase)
 	ON_WM_DESTROY()
-	ON_MESSAGE(CB_POPULATE, OnPopulate)
+	ON_CONTROL_REFLECT_EX(CBN_DROPDOWN, OnDropDown)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -71,25 +67,14 @@ CString CTDLLanguageComboBox::GetTranslationFolder()
 	return FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
 }
 
-void CTDLLanguageComboBox::PreSubclassWindow()
+BOOL CTDLLanguageComboBox::OnDropDown()
 {
-	COwnerdrawComboBoxBase::PreSubclassWindow();
+	InitialiseDropWidth();
 
-	PostMessage(CB_POPULATE);
+	return FALSE; // continue routing
 }
 
-LRESULT CTDLLanguageComboBox::OnPopulate(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	if (GetCount() == 0)
-	{
-		Populate();
-		InitialiseDropWidth();
-	}
-
-	return 0L;
-}
-
-void CTDLLanguageComboBox::Populate()
+void CTDLLanguageComboBox::OnPopulate()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
@@ -135,7 +120,6 @@ void CTDLLanguageComboBox::Populate()
 	m_il.ScaleByDPIFactor();
 
 	SelectLanguage(m_sSelLanguage);
-	return;
 }
 
 BOOL CTDLLanguageComboBox::AddDefaultLanguage()

@@ -74,14 +74,17 @@ private:
 
 protected:
 	// Generated message map functions
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg LRESULT OnSetFont(WPARAM , LPARAM);
+// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg BOOL OnSelEndOK();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // for subclassing
+
+private:
+	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnPopulate(WPARAM wp, LPARAM lp);
 
 	// These are for extending the item data
 	afx_msg LRESULT OnCBGetItemData(WPARAM wParam, LPARAM lParam);
@@ -96,6 +99,7 @@ protected:
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 
 	virtual void OnSubclassChild(HWND hwndChild) { ASSERT(::IsWindow(hwndChild)); } // for derived classes
+	virtual void OnPopulate() { } // for derived classes
 
 	BOOL HandleCursorKey(UINT nChar);
 

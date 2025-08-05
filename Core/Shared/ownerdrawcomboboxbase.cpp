@@ -27,6 +27,8 @@ static HFONT s_hFontHeadings = NULL;
 #	define CB_GETMINVISIBLE  (CBM_FIRST + 2)
 #endif
 
+#define CB_POPULATE (WM_USER + 4)
+
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase
 
@@ -47,8 +49,7 @@ COwnerdrawComboBoxBase::~COwnerdrawComboBoxBase()
 IMPLEMENT_DYNAMIC(COwnerdrawComboBoxBase, CComboBox)
 
 BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
-	ON_WM_CREATE()
-	ON_MESSAGE(WM_SETFONT, OnSetFont)
+//	ON_WM_CREATE()
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
@@ -56,6 +57,8 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_MESSAGE(CB_POPULATE, OnPopulate)
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
 	ON_MESSAGE(CB_DELETESTRING, OnCBDeleteString)
@@ -348,6 +351,8 @@ void COwnerdrawComboBoxBase::PreSubclassWindow()
 	InitItemHeight();
 
 	CComboBox::PreSubclassWindow();
+
+	PostMessage(CB_POPULATE);
 }
 
 void COwnerdrawComboBoxBase::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
@@ -357,14 +362,14 @@ void COwnerdrawComboBoxBase::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct
 	lpMeasureItemStruct->itemHeight = max(lpMeasureItemStruct->itemHeight, nMinHeight); 
 }
 
-int COwnerdrawComboBoxBase::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	InitItemHeight();
-	return 0;
-}
+// int COwnerdrawComboBoxBase::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+// {
+// 	if (CComboBox::OnCreate(lpCreateStruct) == -1)
+// 		return -1;
+// 
+// 	InitItemHeight();
+// 	return 0;
+// }
 
 void COwnerdrawComboBoxBase::RefreshDropWidth()
 {
@@ -647,6 +652,14 @@ BOOL COwnerdrawComboBoxBase::ValidateSelection(int& nSel, BOOL bForward) const
 	}
 
 	return TRUE;
+}
+
+LRESULT COwnerdrawComboBoxBase::OnPopulate(WPARAM wp, LPARAM lp)
+{
+	if (GetCount() == 0)
+		OnPopulate(); // for derived classes
+
+	return 0L;
 }
 
 LRESULT COwnerdrawComboBoxBase::OnCBSetItemData(WPARAM wParam, LPARAM lParam)
