@@ -1504,7 +1504,7 @@ FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Select your preferred display language",IDC_STATIC,7,7,
                     174,10
-    COMBOBOX        IDC_LANGUAGES,7,20,175,30,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_LANGUAGES,7,20,174,30,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
     DEFPUSHBUTTON   "OK",IDOK,77,41,50,14
@@ -6123,6 +6123,12 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_ATTRIBCTRL_CLEARLABELCOLOR "\nClear Label Background Colour"
     ID_ATTRIBCTRL_SINGLECLICKEDIT "\nSingle-click Editing"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_LANGCOMBO_COMPLETION "Completion"
+    IDS_LANGCOMBO_LANGCOUNTRY "Language (Country)"
 END
 
 #endif    // English (Australia) resources

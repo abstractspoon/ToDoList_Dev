@@ -81,7 +81,7 @@ void CTDLLanguageComboBox::Populate()
 	int nNumFiles = FileMisc::FindFiles(sFolder, aFiles, FALSE, m_sFilter);
 	int bDefaultAdded = FALSE;
 
-	int nHeading = AddString(_T("Language (Country)"), 0x00, _T("Completion"), NULL);
+	int nHeading = AddString(CEnString(IDS_LANGCOMBO_LANGCOUNTRY), 0x00, CEnString(IDS_LANGCOMBO_COMPLETION), NULL);
 	SetHeadingItem(nHeading);
 	
 	for (int nFile = 0; nFile < nNumFiles; nFile++)
@@ -358,7 +358,7 @@ void CTDLLanguageComboBox::InitialiseMinDropWidth(CDC* pDC)
 	if (m_nLangCountryColWidth == 0)
 	{
 		// Completion column always defined by heading text
-		int nDoneColWidth = MulDiv(pDC->GetTextExtent(_T("Completion")).cx, 3, 2);
+		int nDoneColWidth = MulDiv(pDC->GetTextExtent(CEnString(IDS_LANGCOMBO_COMPLETION)).cx, 3, 2);
 		int nMaxLangColWidth = 0, nMaxCountryColWidth = 0;
 		int nIndex = GetCount();
 
