@@ -2620,9 +2620,8 @@ void CTDLTaskAttributeListCtrl::RebuildCombo(CEnCheckComboBox& combo, const CStr
 	
 	aAllValues.Copy(aDefValues);
 	aAllValues.Append(aUserValues);
-	Misc::RemoveDuplicates(aAllValues);
 
-	CDialogHelper::SetComboBoxItems(combo, aAllValues);
+	combo.SetStrings(aAllValues);
 }
 
 void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
