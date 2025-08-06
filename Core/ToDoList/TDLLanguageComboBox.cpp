@@ -411,6 +411,12 @@ void CTDLLanguageComboBox::InitialiseDropWidth()
 void CTDLLanguageComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 									  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
+	if (nItem == -1)
+	{
+		COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
+		return;
+	}
+
 	LCB_ITEMDATA* pItemData = (LCB_ITEMDATA*)GetExtItemData(nItem);
 	ASSERT(pItemData);
 
