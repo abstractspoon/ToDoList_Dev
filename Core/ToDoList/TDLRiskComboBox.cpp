@@ -49,7 +49,7 @@ END_MESSAGE_MAP()
 // 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
 // 		return -1;
 // 	
-// 	OnPopulate();
+// 	BuildCombo();
 // 	
 // 	return 0;
 // }
@@ -58,7 +58,7 @@ END_MESSAGE_MAP()
 // {
 // 	COwnerdrawComboBoxBase::PreSubclassWindow();
 // 
-//  	OnPopulate();
+//  	BuildCombo();
 // }
 
 int CTDLRiskComboBox::GetSelectedRisk() const
@@ -102,7 +102,7 @@ int CTDLRiskComboBox::GetSelectedRisk() const
 
 void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 {
-	OnPopulate();
+	CheckBuildCombo();
 
 	int nSel = CB_ERR;
 
@@ -136,7 +136,7 @@ void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 	SetCurSel(nSel);
 }
 
-void CTDLRiskComboBox::OnPopulate()
+void CTDLRiskComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 
@@ -194,9 +194,8 @@ void CTDLRiskComboBox::SetNumLevels(int nNumLevels)
 		if (GetSafeHwnd())
 		{
 			int nSel = GetCurSel(); // save
+			RebuildCombo();
 
-			ResetContent();
-			OnPopulate();
 			SetCurSel(nSel); // restore
 		}
 	}

@@ -52,7 +52,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual void OnPopulate();
+	virtual void BuildCombo();
 
 	void RebuildCombo(LPCTSTR szAdvancedSel = NULL);
 	int AddDefaultFilterItem(int nItem);

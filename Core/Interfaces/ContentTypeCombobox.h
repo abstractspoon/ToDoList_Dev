@@ -49,7 +49,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-	virtual void OnPopulate();
+	virtual void BuildCombo();
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,

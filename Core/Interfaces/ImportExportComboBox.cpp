@@ -65,16 +65,12 @@ void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts
 		m_aFileExt.RemoveAll();
 	}
 
-	if (GetSafeHwnd())
-	{
-		ResetContent();
-		OnPopulate();
-	}
+	RebuildCombo();
 }
 
 // void CImportExportComboBox::PreSubclassWindow() 
 // {
-// 	OnPopulate();
+// 	BuildCombo();
 // 	
 // 	COwnerdrawComboBoxBase::PreSubclassWindow();
 // }
@@ -84,7 +80,7 @@ void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts
 // 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
 // 		return -1;
 // 	
-// 	OnPopulate();
+// 	BuildCombo();
 // 	
 // 	return 0;
 // }
@@ -105,11 +101,10 @@ void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, 
 			ptDraw.y--;
 
 		HICON hIcon = GetImpExpIcon(nImpExp);
-		int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
 
 		if (hIcon)
 		{
-			::DrawIconEx(dc, ptDraw.x, ptDraw.y, hIcon, nImageSize, nImageSize, 0, NULL, DI_NORMAL);
+			::DrawIconEx(dc, ptDraw.x, ptDraw.y, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
 		}
 		else // fallback on file handler icon
 		{
@@ -121,17 +116,16 @@ void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, 
 		}
 
 		// draw text
-		rText.left += (nImageSize + 4); // for icon always
+		rText.left += (ICON_SIZE + 4); // for icon always
 	}
 
 	COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 }
 
-void CImportExportComboBox::OnPopulate()
+void CImportExportComboBox::BuildCombo()
 {
-	// once only
-	if (GetCount())
-		return; 
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
 
 	int nNumImpExp = (m_bImporting ? m_mgrImpExp.GetNumImporters() : m_mgrImpExp.GetNumExporters());
 
@@ -202,7 +196,7 @@ CString CImportExportComboBox::GetSelectedTypeID() const
 
 int CImportExportComboBox::SetSelectedTypeID(LPCTSTR szTypeID)
 {
-	OnPopulate();
+	CheckBuildCombo();
 
 	return SetCurSel(FindItem(szTypeID));
 }

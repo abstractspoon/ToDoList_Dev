@@ -58,7 +58,7 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	ON_WM_CTLCOLOR()
 
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-	ON_MESSAGE(CB_POPULATE, OnPopulate)
+	ON_MESSAGE(CB_POPULATE, BuildCombo)
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
 	ON_MESSAGE(CB_DELETESTRING, OnCBDeleteString)
@@ -654,12 +654,27 @@ BOOL COwnerdrawComboBoxBase::ValidateSelection(int& nSel, BOOL bForward) const
 	return TRUE;
 }
 
-LRESULT COwnerdrawComboBoxBase::OnPopulate(WPARAM wp, LPARAM lp)
+LRESULT COwnerdrawComboBoxBase::BuildCombo(WPARAM wp, LPARAM lp)
 {
-	if (GetCount() == 0)
-		OnPopulate(); // for derived classes
-
+	CheckBuildCombo();
 	return 0L;
+}
+
+void COwnerdrawComboBoxBase::CheckBuildCombo()
+{
+	if (!GetSafeHwnd() || GetCount())
+		return;
+	
+	BuildCombo(); // for derived classes
+}
+
+void COwnerdrawComboBoxBase::RebuildCombo()
+{
+	if (!GetSafeHwnd())
+		return;
+
+	ResetContent();
+	BuildCombo(); // for derived classes
 }
 
 LRESULT COwnerdrawComboBoxBase::OnCBSetItemData(WPARAM wParam, LPARAM lParam)

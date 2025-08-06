@@ -14,11 +14,11 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-void DDX_Month(CDataExchange* pDX, CMonthComboBox& combo, int& nMonth)
-{
-	CDialogHelper::DDX_CBData(pDX, combo, nMonth, 1);
-}
+// 
+// void DDX_Month(CDataExchange* pDX, CMonthComboBox& combo, int& nMonth)
+// {
+// 	CDialogHelper::DDX_CBData(pDX, combo, nMonth, 1);
+// }
 
 /////////////////////////////////////////////////////////////////////////////
 // CMonthComboBox
@@ -34,7 +34,7 @@ CMonthComboBox::~CMonthComboBox()
 
 BEGIN_MESSAGE_MAP(CMonthComboBox, CComboBox)
 	//{{AFX_MSG_MAP(CMonthComboBox)
-	ON_WM_CREATE()
+// 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -43,28 +43,29 @@ END_MESSAGE_MAP()
 
 void CMonthComboBox::PreSubclassWindow() 
 {
-	InitCombo();
+	BuildCombo();
 	
 	CComboBox::PreSubclassWindow();
 }
 
-int CMonthComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	InitCombo();
-	
-	return 0;
-}
+// int CMonthComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+// {
+// 	if (CComboBox::OnCreate(lpCreateStruct) == -1)
+// 		return -1;
+// 	
+// 	BuildCombo();
+// 	
+// 	return 0;
+// }
 
-void CMonthComboBox::InitCombo()
+void CMonthComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
 
 	CLocalizer::EnableTranslation(*this, FALSE);
 
-	ResetContent();
+// 	ResetContent();
 	ModifyStyle(CBS_SORT, 0); // Unsorted
 
 	for (int nMonth = 1; nMonth <= 12; nMonth++)
@@ -79,4 +80,9 @@ int CMonthComboBox::GetSelectedMonth() const
 int CMonthComboBox::SetSelectedMonth(int nMonth)
 {
 	return CDialogHelper::SelectItemByDataT(*this, nMonth);
+}
+
+void CMonthComboBox::DDX(CDataExchange* pDX, int& nMonth)
+{
+	CDialogHelper::DDX_CBData(pDX, *this, nMonth, 1);
 }

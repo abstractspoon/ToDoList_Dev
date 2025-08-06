@@ -55,10 +55,12 @@ END_MESSAGE_MAP()
 // 	return 0;
 // }
 
-void CTimeComboBox::OnPopulate()
+void CTimeComboBox::BuildCombo()
 {
-	if (GetCount())
-		return;
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
+	// 	if (GetCount())
+// 		return;
 
 	for (int nHour = 0; nHour < 24; nHour++)
 	{
@@ -111,7 +113,7 @@ double CTimeComboBox::GetOleTime() const
 
 BOOL CTimeComboBox::SetOleTime(double dTime)
 {
-	OnPopulate();
+	CheckBuildCombo();
 
 	// truncate to extract the time only component if it has one
 	dTime = fabs(dTime - (int)dTime);
@@ -142,9 +144,7 @@ void CTimeComboBox::SetISOFormat(BOOL bISO)
 		if (GetSafeHwnd())
 		{
 			double date = GetOleTime();
-
-			ResetContent();
-			OnPopulate();
+			RebuildCombo();
 
 			SetOleTime(date);
 		}
@@ -201,7 +201,7 @@ double CTimeComboBox::Get24HourTime(int nItem) const
 
 BOOL CTimeComboBox::Set24HourTime(double dTime)
 {
-	OnPopulate();
+	CheckBuildCombo();
 
 	if (dTime < 0)
 	{

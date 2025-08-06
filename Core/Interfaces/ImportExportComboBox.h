@@ -54,7 +54,7 @@ protected:
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
-	virtual void OnPopulate();
+	virtual void BuildCombo();
 
 	CString GetImpExpMenuText(int nImpExp) const;
 	CString GetImpExpFileExtension(int nImpExp, BOOL bWithDot) const;

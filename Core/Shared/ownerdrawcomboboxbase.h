@@ -84,7 +84,7 @@ protected:
 
 private:
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnPopulate(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT BuildCombo(WPARAM wp, LPARAM lp);
 
 	// These are for extending the item data
 	afx_msg LRESULT OnCBGetItemData(WPARAM wParam, LPARAM lParam);
@@ -99,7 +99,6 @@ private:
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 
 	virtual void OnSubclassChild(HWND hwndChild) { ASSERT(::IsWindow(hwndChild)); } // for derived classes
-	virtual void OnPopulate() { } // for derived classes
 
 	BOOL HandleCursorKey(UINT nChar);
 
@@ -114,6 +113,12 @@ protected:
 	virtual int GetExtraListboxWidth() const { return 0; }
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual BOOL IsSelectableItem(int nItem) const;
+
+	// for derived classes
+	virtual void BuildCombo() { }
+
+	void CheckBuildCombo();
+	void RebuildCombo();
 
 	inline HWND GetEdit() const { return m_scEdit.GetHwnd(); }
 	inline HWND GetListbox() const { return m_scList.GetHwnd(); }

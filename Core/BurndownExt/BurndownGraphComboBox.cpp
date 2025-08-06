@@ -41,19 +41,16 @@ END_MESSAGE_MAP()
 
 BOOL CBurndownGraphComboBox::Initialise(const CGraphsMap& mapGraphs)
 {
-	// Once only
-	if (GetCount())
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
+// 	// Once only
+// 	if (GetCount())
+// 	{
+// 		ASSERT(0);
+// 		return FALSE;
+// 	}
 
-	// We build the combo in a specific order
-	if (GetStyle() & CBS_SORT)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	ModifyStyle(CBS_SORT, 0); // Unsorted
 
 	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
 	{

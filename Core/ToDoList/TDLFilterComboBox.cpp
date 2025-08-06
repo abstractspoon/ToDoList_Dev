@@ -83,12 +83,10 @@ int CTDLFilterComboBox::AddDefaultFilterItem(int nItem)
 	return CDialogHelper::AddStringT(*this, sItem, nFilter);
 }
 
-void CTDLFilterComboBox::OnPopulate()
+void CTDLFilterComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
-	
-	if (GetCount())
-		return; // already called
+	ASSERT(GetCount() == 0);
 
 	if (m_bShowDefaultFilters)
 	{
@@ -138,9 +136,8 @@ void CTDLFilterComboBox::RebuildCombo(LPCTSTR szAdvancedSel)
 		CString sAdvFilter;
 		FILTER_SHOW nSelFilter = GetSelectedFilter(sAdvFilter);
 		
-		ResetContent();
-		OnPopulate();
-		
+		CTabbedComboBox::RebuildCombo();
+
 		// restore selection
 		if (!SelectFilter(nSelFilter, (szAdvancedSel ? szAdvancedSel : sAdvFilter)))
 		{

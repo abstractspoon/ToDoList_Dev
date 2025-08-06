@@ -45,9 +45,7 @@ void CTDLAttributeComboBox::SetCustomAttributes(const CTDCCustomAttribDefinition
 	if (!Misc::MatchAllT(aAttribDefs, m_aAttribDefs, FALSE))
 	{
 		m_aAttribDefs.Copy(aAttribDefs);
-
-		if (GetSafeHwnd())
-			BuildCombo();
+		RebuildCombo();
 	}
 }
 
@@ -56,12 +54,14 @@ void CTDLAttributeComboBox::SetAttributeFilter(const CTDCAttributeMap& mapAttrib
 	if (!m_mapWantedAttrib.MatchAll(mapAttrib))
 	{
 		m_mapWantedAttrib.Copy(mapAttrib);
-		BuildCombo();
+		RebuildCombo();
 	}
 }
 
 BOOL CTDLAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, BOOL bRelative)
 {
+	CheckBuildCombo();
+
 	DWORD dwItemData = EncodeItemData(nAttribID, bRelative);
 
 	return (CDialogHelper::SelectItemByDataT(*this, dwItemData) != CB_ERR);
@@ -201,6 +201,9 @@ void CTDLAttributeComboBox::AddItem(const CString& sItem, TDC_ATTRIBUTE nAttribI
 
 void CTDLAttributeComboBox::BuildCombo()
 {
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
+
 	TDC_ATTRIBUTE nSelAttrib = GetSelectedAttribute();
 
 	CArray<SORTITEM, SORTITEM&> aItems, aCustomItems;

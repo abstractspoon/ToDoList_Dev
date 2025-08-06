@@ -18,6 +18,7 @@ class CTDLCustomAttribFeatureComboBox : public CCheckComboBox
 // Construction
 public:
 	CTDLCustomAttribFeatureComboBox();
+	virtual ~CTDLCustomAttribFeatureComboBox();
 
 	BOOL SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 	BOOL SetAttributeDefinition(DWORD dwDataType, DWORD dwListType, DWORD dwSelectedFeatures);
@@ -25,7 +26,7 @@ public:
 
 	static CString FormatFeatureList(DWORD dwFeatures);
 
-protected:
+// protected:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -33,8 +34,7 @@ protected:
 	//}}AFX_VIRTUAL
 
 // Implementation
-public:
-	virtual ~CTDLCustomAttribFeatureComboBox();
+// public:
 
 	// Generated message map functions
 protected:

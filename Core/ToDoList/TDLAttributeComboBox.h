@@ -51,15 +51,16 @@ protected:
 	CTDCAttributeMap m_mapWantedAttrib;
 	DWORD m_dwOptions;
 
+protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void BuildCombo();
 	DWORD EncodeItemData(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate = FALSE) const;
 	void DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttribID, BOOL& bRelativeDate) const;
 	BOOL AttributeIsDate(TDC_ATTRIBUTE nAttribID) const;
 	BOOL AttributeIsTimePeriod(TDC_ATTRIBUTE nAttribID) const;
 
+	virtual void BuildCombo();
 	virtual BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);

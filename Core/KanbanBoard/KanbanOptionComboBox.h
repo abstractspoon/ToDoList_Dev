@@ -31,7 +31,7 @@ protected:
 	DWORD m_dwOptions;
 
 // Operations
-public:
+// public:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CFilterOptionComboBox)

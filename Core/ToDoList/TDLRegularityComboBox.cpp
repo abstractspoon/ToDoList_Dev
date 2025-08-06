@@ -50,7 +50,7 @@ TDC_REGULARITY CTDLRegularityComboBox::GetSelectedRegularity() const
 
 int CTDLRegularityComboBox::SetSelectedRegularity(TDC_REGULARITY nRegularity)
 {
-	OnPopulate();
+	CheckBuildCombo();
 
 	return CDialogHelper::SelectItemByDataT(*this, nRegularity);
 }
@@ -72,7 +72,7 @@ CString CTDLRegularityComboBox::GetRegularity(TDC_REGULARITY nRegularity)
 // {
 // 	COwnerdrawComboBoxBase::PreSubclassWindow();
 // 
-// 	OnPopulate();
+// 	BuildCombo();
 // }
 // 
 // int CTDLRegularityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -80,15 +80,17 @@ CString CTDLRegularityComboBox::GetRegularity(TDC_REGULARITY nRegularity)
 // 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
 // 		return -1;
 // 	
-// 	OnPopulate();
+// 	BuildCombo();
 // 	
 // 	return 0;
 // }
 
-void CTDLRegularityComboBox::OnPopulate()
+void CTDLRegularityComboBox::BuildCombo()
 {
-	if (GetCount())
-		return;
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
+// 	if (GetCount())
+// 		return;
 
 	if (m_bIncludeAny)
 		CDialogHelper::AddStringT(*this, CEnString(IDS_TDC_ANY), TDIR_NONE);

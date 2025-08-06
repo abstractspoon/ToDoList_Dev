@@ -246,20 +246,18 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	// Initialise the previously visible tabs
 	SetVisibleTaskViews(s_aDefTaskViews);
 
-	// Build the list-specific comboboxes
+	// Prepare the list-specific comboboxes
 	BuildListGroupByCombo();
-	BuildListOptionsCombo();
+	InitListOptionsCombo();
 
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::BuildListOptionsCombo()
+void CTabbedToDoCtrl::InitListOptionsCombo()
 {
 	// once only
 	if (!m_cbListOptions.GetCount())
 	{
-		m_cbListOptions.BuildCombo();
-
 		m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(CPreferences(), GetPreferencesKey());
 		m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
 

@@ -34,7 +34,7 @@ protected:
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CTDLFileEncodingComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+//	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

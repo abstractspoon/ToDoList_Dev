@@ -252,6 +252,8 @@ int CCheckComboBox::SelectString(int nStartAfter, LPCTSTR lpszString)
 
 int CCheckComboBox::SetCheckByItemData(DWORD dwItemData, CCB_CHECKSTATE nCheck)
 {
+	CheckBuildCombo();
+
 	int nIndex = CDialogHelper::FindItemByDataT(*this, dwItemData);
 
 	return SetCheck(nIndex, nCheck, TRUE);
@@ -859,6 +861,8 @@ int CCheckComboBox::UpdateEditAutoComplete(const CString& sText, int nCaretPos)
 int CCheckComboBox::SetCheckedByItemData(DWORD dwFlags)
 {
 	ASSERT(GetSafeHwnd());
+
+	CheckBuildCombo();
 
 	int nNumChecked = 0;
 

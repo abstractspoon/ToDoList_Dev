@@ -115,7 +115,7 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 
 void CTDLPriorityComboBox::SetSelectedPriority(int nPriority) // -2 -> 10
 {
-	OnPopulate();
+	CheckBuildCombo();
 
 	int nSel = CB_ERR;
 
@@ -160,7 +160,7 @@ BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 
 		if (GetSafeHwnd())
 		{
-			OnPopulate();
+			CheckBuildCombo();
 
 			// Update the colours in-place
 			int nNumItems = GetCount();
@@ -173,13 +173,12 @@ BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 	return TRUE;
 }
 
-void CTDLPriorityComboBox::OnPopulate()
+void CTDLPriorityComboBox::BuildCombo()
 {
 // 	ASSERT(GetSafeHwnd());
 // 	CHoldRedraw hr(*this);
 
-	// Remove sorting else 10 will get sorted after 1
-	ModifyStyle(CBS_SORT, 0);
+	ModifyStyle(CBS_SORT, 0); // Unsorted
 	
 // 	int nSel = GetCurSel(); // so we can restore it
 // 	ResetContent();
@@ -251,9 +250,8 @@ void CTDLPriorityComboBox::SetNumLevels(int nNumLevels)
 		if (GetSafeHwnd())
 		{
 			int nSel = GetCurSel(); // save
+			RebuildCombo();
 
-			ResetContent();
-			OnPopulate();
 			SetCurSel(nSel); // restore
 		}
 	}

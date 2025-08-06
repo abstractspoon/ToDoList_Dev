@@ -21,10 +21,7 @@ class CTDLFilterOptionComboBox : public CCheckComboBox
 // Construction
 public:
 	CTDLFilterOptionComboBox();
-
-// Attributes
-protected:
-	DWORD m_dwOptions;
+	virtual ~CTDLFilterOptionComboBox();
 
 // Operations
 public:
@@ -34,14 +31,17 @@ public:
 	DWORD GetSelectedOptions() const;
 	void SetSelectedOptions(DWORD dwOptions);
 
+// Attributes
+protected:
+	DWORD m_dwOptions;
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CFilterOptionComboBox)
 	//}}AFX_VIRTUAL
 
 // Implementation
-public:
-	virtual ~CTDLFilterOptionComboBox();
+// public:
 
 	// Generated message map functions
 protected:

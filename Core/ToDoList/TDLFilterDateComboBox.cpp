@@ -70,9 +70,7 @@ void CTDLFilterDateComboBox::SetNextNDays(int nDays)
 		CAutoFlag af(m_bRebuildingCombo, TRUE);
 		
 		FILTER_DATE nSelFilter = GetSelectedFilter();
-
-		ResetContent();
-		OnPopulate();
+		RebuildCombo();
 
 		SelectFilter(nSelFilter);
 	}
@@ -85,12 +83,13 @@ BOOL CTDLFilterDateComboBox::OnReflectSelChange()
 	return m_bRebuildingCombo;
 }
 
-void CTDLFilterDateComboBox::OnPopulate()
+void CTDLFilterDateComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
 
-	if (GetCount())
-		return; // already called
+// 	if (GetCount())
+// 		return; // already called
 
 	CLocalizer::EnableTranslation(*this, FALSE);
 
@@ -141,7 +140,7 @@ FILTER_DATE CTDLFilterDateComboBox::GetSelectedFilter() const
 
 BOOL CTDLFilterDateComboBox::SelectFilter(FILTER_DATE nFilter)
 {
-	OnPopulate();
+	CheckBuildCombo();
 
 	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, (DWORD)nFilter));
 }

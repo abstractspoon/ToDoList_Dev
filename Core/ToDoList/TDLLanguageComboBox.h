@@ -50,12 +50,11 @@ protected:
 		CString sCompletion;
 	};
 
+	virtual void BuildCombo();
 	virtual ODCB_ITEMDATA* NewExtItemData() const { return new LCB_ITEMDATA(); }
+	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
-	virtual int CalcMinItemHeight(BOOL bList) const;
-	virtual void OnPopulate();
-
 protected:
 	BOOL AddDefaultLanguage();
 	int AddString(LPCTSTR szLanguage, LANGID nLangID, const CString& sCompletion, HBITMAP hbmFlag, COLORREF crBack = CLR_NONE);

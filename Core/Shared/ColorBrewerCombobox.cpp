@@ -106,7 +106,7 @@ BOOL CColorBrewerComboBox::Initialize(const CColorBrewerPaletteArray& aPalettes)
 // 		return -1;
 // 
 // 	if (m_aPalettes.GetSize())
-// 		OnPopulate();
+// 		BuildCombo();
 // 	
 // 	return 0;
 // }
@@ -114,7 +114,7 @@ BOOL CColorBrewerComboBox::Initialize(const CColorBrewerPaletteArray& aPalettes)
 // void CColorBrewerComboBox::PreSubclassWindow() 
 // {
 // 	if (m_aPalettes.GetSize())
-// 		OnPopulate();
+// 		BuildCombo();
 // 
 // 	COwnerdrawComboBoxBase::PreSubclassWindow();
 // }
@@ -124,17 +124,16 @@ void CColorBrewerComboBox::RebuildCombo()
 	if (GetSafeHwnd())
 	{
 		int nSel = GetCurSel();
-
-		ResetContent();
-		OnPopulate();
+		RebuildCombo();
 
 		SetCurSel(nSel);
 	}
 }
 
-void CColorBrewerComboBox::OnPopulate()
+void CColorBrewerComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
 
 	if (GetCount())
 		return;

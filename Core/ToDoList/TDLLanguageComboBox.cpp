@@ -74,13 +74,13 @@ BOOL CTDLLanguageComboBox::OnDropDown()
 	return FALSE; // continue routing
 }
 
-void CTDLLanguageComboBox::OnPopulate()
+void CTDLLanguageComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
 
-	if (GetCount())
-		return; // already done
+// 	if (GetCount())
+// 		return; // already done
 
 	// build the language list from csv files in the Resources\Translations folder
 	// These will come out sorted by default

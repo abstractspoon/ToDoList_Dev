@@ -50,12 +50,12 @@ END_MESSAGE_MAP()
 // 	if (!m_pContentMgr)
 // 		return -1;
 // 	
-// 	OnPopulate();
+// 	BuildCombo();
 // 	
 // 	return 0;
 // }
 
-void CContentTypeComboBox::OnPopulate()
+void CContentTypeComboBox::BuildCombo()
 {
 	if (COwnerdrawComboBoxBase::GetCount())
 		return;
@@ -77,7 +77,7 @@ void CContentTypeComboBox::OnPopulate()
 // void CContentTypeComboBox::PreSubclassWindow() 
 // {
 // 	if (m_pContentMgr)
-// 		OnPopulate();
+// 		BuildCombo();
 // 	
 // 	COwnerdrawComboBoxBase::PreSubclassWindow();
 // }
