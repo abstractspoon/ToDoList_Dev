@@ -79,20 +79,10 @@ void CMonthCheckComboBox::BuildCombo()
 
 DWORD CMonthCheckComboBox::GetSelectedMonths() const
 {
-	return CDialogHelper::GetSelectedItemData(*this);
+	return GetCheckedItemData();
 }
 
 int CMonthCheckComboBox::SetSelectedMonths(DWORD dwMonths)
 {
-	CheckBuildCombo();
-
-	return CDialogHelper::SelectItemByDataT(*this, dwMonths);
-}
-
-void CMonthCheckComboBox::DDX(CDataExchange* pDX, DWORD& value)
-{
-	if (pDX->m_bSaveAndValidate)
-		value = GetSelectedMonths();
-	else
-		SetSelectedMonths(value);
+	return SetCheckedByItemData(dwMonths);
 }

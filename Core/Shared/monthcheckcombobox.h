@@ -28,8 +28,6 @@ public:
 	DWORD GetSelectedMonths() const;
 	int SetSelectedMonths(DWORD dwMonths);
 
-	void DDX(CDataExchange* pDX, DWORD& value);
-
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMonthCheckComboBox)

@@ -21,12 +21,6 @@ enum CCB_CHECKSTATE
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-class CCheckComboBox;
-
-void DDX_CheckItemData(CDataExchange* pDX, CCheckComboBox& combo, DWORD& dwItems);
-
-/////////////////////////////////////////////////////////////////////////////
 // CCheckComboBox window
 
 class CCheckComboBox : public CAutoComboBox
@@ -60,6 +54,8 @@ public:
 
 	virtual int AddUniqueItem(const CString& sItem); // returns index or CB_ERR
     virtual int SelectString(int nStartAfter, LPCTSTR lpszString);
+
+	void DDX(CDataExchange* pDX, DWORD& itemsData);
 
 protected:
 	CString m_sText;

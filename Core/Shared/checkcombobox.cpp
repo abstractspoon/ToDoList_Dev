@@ -18,16 +18,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-void DDX_CheckItemData(CDataExchange* pDX, CCheckComboBox& combo, DWORD& dwItems)
-{
-	if (pDX->m_bSaveAndValidate)
-		dwItems = combo.GetCheckedItemData();
-	else
-		combo.SetCheckedByItemData(dwItems);
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // CCheckComboBox
 
 const int CCheckComboBox::CHECKBOX_SIZE = GraphicsMisc::ScaleByDPIFactor(13);
@@ -257,6 +247,14 @@ int CCheckComboBox::SetCheckByItemData(DWORD dwItemData, CCB_CHECKSTATE nCheck)
 	int nIndex = CDialogHelper::FindItemByDataT(*this, dwItemData);
 
 	return SetCheck(nIndex, nCheck, TRUE);
+}
+
+void CCheckComboBox::DDX(CDataExchange* pDX, DWORD& dwItemsData)
+{
+	if (pDX->m_bSaveAndValidate)
+		dwItemsData = GetCheckedItemData();
+	else
+		SetCheckedByItemData(dwItemsData);
 }
 
 int CCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck)
