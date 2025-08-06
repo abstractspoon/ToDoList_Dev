@@ -18,7 +18,6 @@ class CTDLIconComboBox : public CEnCheckComboBox
 {
 	DECLARE_DYNAMIC(CTDLIconComboBox);
 
-// Construction
 public:
 	CTDLIconComboBox(const CTDCImageList& ilImages, BOOL bMultiSel = FALSE, BOOL bFilter = FALSE);
 	virtual ~CTDLIconComboBox();
@@ -33,27 +32,10 @@ public:
 	virtual int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 
-// Attributes
 protected:
 	const CTDCImageList& m_ilImages;
 
-// Operations
-// public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLIconComboBox)
-	//}}AFX_VIRTUAL
-
-// Implementation
-// public:
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLIconComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

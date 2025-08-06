@@ -45,32 +45,13 @@ protected:
 	CColorBrewerPaletteArray m_aPalettes;
 	CString m_sNone;
 
-// Operations
-// public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CContentTypeComboBox)
-// 	protected:
-// 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-// public:
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CContentTypeComboBox)
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
+	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 	virtual void BuildCombo();
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-
-	void RebuildCombo();
 };
 
 /////////////////////////////////////////////////////////////////////////////

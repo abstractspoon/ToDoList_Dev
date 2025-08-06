@@ -17,33 +17,23 @@ class CDayOfWeekCheckListBox : public CCheckListBoxEx
 // Construction
 public:
 	CDayOfWeekCheckListBox();
+	virtual ~CDayOfWeekCheckListBox();
 
 	DWORD GetChecked() const;
 	DWORD GetChecked(int& nNumChecked) const;
 	void SetChecked(DWORD dwChecked);
 
-// Attributes
 protected:
 	mutable DWORD m_dwChecked;
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CWeekdayCheckListBox)
-	//}}AFX_VIRTUAL
 	virtual void PreSubclassWindow();
 
-// Implementation
-public:
-	virtual ~CDayOfWeekCheckListBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CWeekdayCheckListBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
+	// Generated message map functions
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	LRESULT OnInitListbox(WPARAM wp, LPARAM lp);
+
 	DECLARE_MESSAGE_MAP()
 
 };

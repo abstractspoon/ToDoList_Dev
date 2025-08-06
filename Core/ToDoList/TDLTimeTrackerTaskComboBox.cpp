@@ -27,7 +27,6 @@ CTDLTimeTrackerTaskComboBox::~CTDLTimeTrackerTaskComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLTimeTrackerTaskComboBox, CTDLTaskComboBox)
 END_MESSAGE_MAP()
 

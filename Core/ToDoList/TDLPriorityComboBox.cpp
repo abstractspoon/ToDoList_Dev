@@ -35,30 +35,10 @@ CTDLPriorityComboBox::~CTDLPriorityComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CTDLPriorityComboBox, CColorComboBox)
-	//{{AFX_MSG_MAP(CTDLPriorityComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPriorityComboBox message handlers
-
-// int CTDLPriorityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CColorComboBox::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	
-// 	return 0;
-// }
-// 
-// void CTDLPriorityComboBox::PreSubclassWindow() 
-// {
-// 	CColorComboBox::PreSubclassWindow();
-// 	
-// 	BuildCombo();
-// }
 
 int CTDLPriorityComboBox::IncrementPriority(int nAmount)
 {
@@ -175,13 +155,10 @@ BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 
 void CTDLPriorityComboBox::BuildCombo()
 {
-// 	ASSERT(GetSafeHwnd());
-// 	CHoldRedraw hr(*this);
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
 
 	ModifyStyle(CBS_SORT, 0); // Unsorted
-	
-// 	int nSel = GetCurSel(); // so we can restore it
-// 	ResetContent();
 	
 	BOOL bHasColors = m_aColors.GetSize();
 
@@ -204,8 +181,6 @@ void CTDLPriorityComboBox::BuildCombo()
 		sPriority.Format(_T("%d (%s)"), nPriority, CEnString(aStrResIDs[nLevel]));
 		AddColor(color, sPriority);
 	}
-	
-// 	SetCurSel(nSel);
 }
 
 void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 

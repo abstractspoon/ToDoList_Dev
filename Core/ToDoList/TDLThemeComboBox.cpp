@@ -32,30 +32,10 @@ CTDLThemeComboBox::~CTDLThemeComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLThemeComboBox, CColorComboBox)
-	//{{AFX_MSG_MAP(CTDLThemeComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLThemeComboBox message handlers
-
-// int CTDLThemeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CColorComboBox::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	
-// 	return 0;
-// }
-// 
-// void CTDLThemeComboBox::PreSubclassWindow() 
-// {
-// 	CColorComboBox::PreSubclassWindow();
-// 	
-// 	BuildCombo();
-// }
 
 CString CTDLThemeComboBox::GetThemePath() const
 {

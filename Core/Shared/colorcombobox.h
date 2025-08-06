@@ -28,8 +28,6 @@ public:
 	CColorComboBox(BOOL dwFlags = FALSE, DWORD dwAutoComboFlags = 0);
 	virtual ~CColorComboBox();
 
-// Operations
-public:
 	int AddColor(COLORREF color, LPCTSTR szDescription = NULL);
 	int InsertColor(int nIndex, COLORREF color, LPCTSTR szDescription = NULL);
 
@@ -40,25 +38,13 @@ public:
 protected:
 	DWORD m_dwFlags;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CColorComboBox)
-	//}}AFX_VIRTUAL
-
-// Implementation
-// public:
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CColorComboBox)
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	virtual DWORD GetNewItemData() const { return CLR_NONE; }
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-	virtual DWORD GetNewItemData() const { return CLR_NONE; }
 
 };
 

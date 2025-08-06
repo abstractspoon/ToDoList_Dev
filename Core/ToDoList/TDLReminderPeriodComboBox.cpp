@@ -77,43 +77,16 @@ CTDLReminderPeriodComboBox::~CTDLReminderPeriodComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLReminderPeriodComboBox, COwnerdrawComboBoxBase)
-// 	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
+/////////////////////////////////////////////////////////////////////////////
 // CTDLReminderleadinComboBox message handlers
-
-// void CTDLReminderPeriodComboBox::PreSubclassWindow()
-// {
-// 	COwnerdrawComboBoxBase::PreSubclassWindow();
-// 
-// 	// Remove CBS_SORT
-// 	ModifyStyle(CBS_SORT, 0, 0);
-// 	BuildCombo();
-// }
-// 
-// int CTDLReminderPeriodComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
-// {
-// 	// Remove CBS_SORT
-// 	lpCreateStruct->style &= ~CBS_SORT;
-// 
-// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 
-// 	// else
-// 	BuildCombo();
-// 	return 0;
-// }
 
 void CTDLReminderPeriodComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
-
-// 	// once only
-// 	if (GetCount())
-// 		return;
 
 	ModifyStyle(CBS_SORT, 0); // Unsorted
 

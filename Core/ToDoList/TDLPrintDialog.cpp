@@ -140,8 +140,6 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle,
 	m_sTitle(szTitle),
 	m_nPrevActiveTab(0)
 {
-	//{{AFX_DATA_INIT(CTDLPrintDialog)
-	//}}AFX_DATA_INIT
 	CPreferences prefs;
 
 	m_nPrevActiveTab = prefs.GetProfileInt(m_sPrefsKey, _T("PrevActiveTab"), 0);
@@ -156,16 +154,12 @@ void CTDLPrintDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CTDLPrintDialog)
-	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_PRINTTITLE, m_sTitle);
 	DDX_Check(pDX, IDC_PRINTDATE, m_bDate);
 	DDX_Control(pDX, IDC_PRINTTITLE, m_cbTitle);
 }
 
 BEGIN_MESSAGE_MAP(CTDLPrintDialog, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLPrintDialog)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -226,9 +220,6 @@ CTDLPrintStylePage::CTDLPrintStylePage(LPCTSTR szStylesheet,
 	m_eStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
 	m_nSimpleStyle(TDLPDS_WRAP)
 {
-	//{{AFX_DATA_INIT(CTDLPrintStylePage)
-		// NOTE: the ClassWizard will add member initialization here
-	//}}AFX_DATA_INIT
 	CPreferences prefs;
 
 	m_sOtherExporterTypeID = prefs.GetProfileString(m_sPrefsKey, _T("OtherExporter"));
@@ -244,13 +235,12 @@ CTDLPrintStylePage::~CTDLPrintStylePage()
 void CTDLPrintStylePage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLPrintStylePage)
+
 	DDX_Control(pDX, IDC_SIMPLE_ICON, m_stSimpleIcon);
 	DDX_Control(pDX, IDC_SIMPLEPAGE_OPTIONS, m_cbSimpleOptions);
 	DDX_Control(pDX, IDC_OTHEREXPORTERS, m_cbOtherExporters);
-	//}}AFX_DATA_MAP
-
 	DDX_Control(pDX, IDC_STYLESHEET, m_eStylesheet);
+
 	DDX_Text(pDX, IDC_STYLESHEET, m_sStylesheet);
 	DDX_Radio(pDX, IDC_STYLE_STYLESHEET, m_nStyleOption);
 	DDX_Control(pDX, IDC_IMAGE_ICON, m_stImageIcon);
@@ -530,9 +520,6 @@ CTDLPrintTaskSelectionPage::CTDLPrintTaskSelectionPage(const CTDCCustomAttribDef
 	CPropertyPage(CTDLPrintTaskSelectionPage::IDD),
 	m_dlgTaskSel(aAttribDefs, szRegKey, bEnableSubtaskSelection)
 {
-	//{{AFX_DATA_INIT(CTDLPrintTaskSelectionPage)
-		// NOTE: the ClassWizard will add member initialization here
-	//}}AFX_DATA_INIT
 }
 
 CTDLPrintTaskSelectionPage::~CTDLPrintTaskSelectionPage()
@@ -542,16 +529,10 @@ CTDLPrintTaskSelectionPage::~CTDLPrintTaskSelectionPage()
 void CTDLPrintTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLPrintTaskSelectionPage)
-		// NOTE: the ClassWizard will add DDX and DDV calls here
-	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLPrintTaskSelectionPage, CPropertyPage)
-	//{{AFX_MSG_MAP(CTDLPrintTaskSelectionPage)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

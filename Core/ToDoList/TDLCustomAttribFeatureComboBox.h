@@ -26,20 +26,7 @@ public:
 
 	static CString FormatFeatureList(DWORD dwFeatures);
 
-// protected:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLCustomAttribFeatureComboBox)
-	//}}AFX_VIRTUAL
-
-// Implementation
-// public:
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLCustomAttribFeatureComboBox)
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:

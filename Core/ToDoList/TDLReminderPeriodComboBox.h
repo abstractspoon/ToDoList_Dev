@@ -1,7 +1,10 @@
 #pragma once
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "..\Shared\ownerdrawcomboboxbase.h"
 
+/////////////////////////////////////////////////////////////////////////////
 // CTDLReminderleadinComboBox
 
 enum 
@@ -10,7 +13,11 @@ enum
 	TDLRPC_SHOWNONE	= 0x02,
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 const UINT TDLRPC_NOREMINDER = (UINT)-1; // for SetSelectedLeadin
+
+/////////////////////////////////////////////////////////////////////////////
 
 class CTDLReminderPeriodComboBox : public COwnerdrawComboBoxBase
 {
@@ -29,10 +36,7 @@ protected:
 	DWORD m_dwShow;
 
 protected:
-// 	void PreSubclassWindow();
-
-protected:
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 protected:

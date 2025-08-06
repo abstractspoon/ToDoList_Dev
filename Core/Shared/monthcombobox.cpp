@@ -14,13 +14,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// 
-// void DDX_Month(CDataExchange* pDX, CMonthComboBox& combo, int& nMonth)
-// {
-// 	CDialogHelper::DDX_CBData(pDX, combo, nMonth, 1);
-// }
-
-/////////////////////////////////////////////////////////////////////////////
 // CMonthComboBox
 
 CMonthComboBox::CMonthComboBox()
@@ -33,9 +26,6 @@ CMonthComboBox::~CMonthComboBox()
 
 
 BEGIN_MESSAGE_MAP(CMonthComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CMonthComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -48,16 +38,6 @@ void CMonthComboBox::PreSubclassWindow()
 	CComboBox::PreSubclassWindow();
 }
 
-// int CMonthComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CComboBox::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	
-// 	return 0;
-// }
-
 void CMonthComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
@@ -65,7 +45,6 @@ void CMonthComboBox::BuildCombo()
 
 	CLocalizer::EnableTranslation(*this, FALSE);
 
-// 	ResetContent();
 	ModifyStyle(CBS_SORT, 0); // Unsorted
 
 	for (int nMonth = 1; nMonth <= 12; nMonth++)

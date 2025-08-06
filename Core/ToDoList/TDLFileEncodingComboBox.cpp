@@ -26,9 +26,6 @@ CTDLFileEncodingComboBox::~CTDLFileEncodingComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLFileEncodingComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CTDLFileEncodingComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -40,16 +37,6 @@ void CTDLFileEncodingComboBox::PreSubclassWindow()
 	
 	CComboBox::PreSubclassWindow();
 }
-
-// int CTDLFileEncodingComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CComboBox::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	
-// 	return 0;
-// }
 
 BOOL CTDLFileEncodingComboBox::SetSelectedEncoding(SFE_FORMAT nFormat)
 {

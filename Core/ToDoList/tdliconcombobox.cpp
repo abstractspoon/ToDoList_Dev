@@ -37,9 +37,6 @@ CTDLIconComboBox::~CTDLIconComboBox()
 IMPLEMENT_DYNAMIC(CTDLIconComboBox, CEnCheckComboBox)
 
 BEGIN_MESSAGE_MAP(CTDLIconComboBox, CEnCheckComboBox)
-	//{{AFX_MSG_MAP(CTDLIconComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

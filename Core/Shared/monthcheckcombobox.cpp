@@ -14,13 +14,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-// void DDX_Months(CDataExchange* pDX, CMonthCheckComboBox& combo, DWORD& dwMonths)
-// {
-// 	DDX_CheckItemData(pDX, combo, dwMonths);
-// }
-
-/////////////////////////////////////////////////////////////////////////////
 // CMonthCheckComboBox
 
 CMonthCheckComboBox::CMonthCheckComboBox()
@@ -32,38 +25,15 @@ CMonthCheckComboBox::~CMonthCheckComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CMonthCheckComboBox, CCheckComboBox)
-	//{{AFX_MSG_MAP(CMonthCheckComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CMonthCheckComboBox message handlers
 
-// void CMonthCheckComboBox::PreSubclassWindow() 
-// {
-// 	BuildCombo();
-// 	
-// 	CCheckComboBox::PreSubclassWindow();
-// }
-// 
-// int CMonthCheckComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CCheckComboBox::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	
-// 	return 0;
-// }
-
 void CMonthCheckComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
-
-// 	if (GetCount())
-// 		return;
 
 	CLocalizer::EnableTranslation(*this, FALSE);
 

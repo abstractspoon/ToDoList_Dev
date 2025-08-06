@@ -42,20 +42,14 @@ public:
 protected:
 	DWORD m_dwStyle;
 	
-// protected:
-// 	virtual void PreSubclassWindow();
-
 protected:
-	// Generated message map functions
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
-
 	DECLARE_MESSAGE_MAP()
 
+	virtual void BuildCombo();
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 								COLORREF& crText, COLORREF& crBack) const;	
-	virtual void BuildCombo();
 
 protected:
 	void ScrollListBox();

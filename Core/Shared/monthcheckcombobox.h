@@ -10,12 +10,6 @@
 #include "checkcombobox.h"
 
 /////////////////////////////////////////////////////////////////////////////
-
-// class CMonthCheckComboBox;
-
-// void DDX_Months(CDataExchange* pDX, CMonthCheckComboBox& combo, DWORD& dwMonths);
-
-/////////////////////////////////////////////////////////////////////////////
 // CMonthCheckComboBox window
 
 class CMonthCheckComboBox : public CCheckComboBox
@@ -28,22 +22,8 @@ public:
 	DWORD GetSelectedMonths() const;
 	int SetSelectedMonths(DWORD dwMonths);
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CMonthCheckComboBox)
-// protected:
-// 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-// public:
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CMonthCheckComboBox)
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
+	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 	virtual void BuildCombo();

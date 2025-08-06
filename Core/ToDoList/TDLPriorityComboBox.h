@@ -30,23 +30,12 @@ public:
 	void DDX(CDataExchange* pDX, int& nPriority);
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLPriorityComboBox)
-// 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-protected:
 	CDWordArray m_aColors;
 	BOOL m_bIncludeAny, m_bIncludeNone;
 	int m_nNumLevels;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLPriorityComboBox)
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
+	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 protected:

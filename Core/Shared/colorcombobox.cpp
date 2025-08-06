@@ -17,7 +17,8 @@ static char THIS_FILE[] = __FILE__;
 // CColorComboBox
 
 CColorComboBox::CColorComboBox(BOOL dwFlags, DWORD dwAutoComboFlags) 
-	: CAutoComboBox(dwAutoComboFlags), m_dwFlags(dwFlags)
+	: 
+	CAutoComboBox(dwAutoComboFlags), m_dwFlags(dwFlags)
 {
 }
 
@@ -27,9 +28,6 @@ CColorComboBox::~CColorComboBox()
 
 
 BEGIN_MESSAGE_MAP(CColorComboBox, CAutoComboBox)
-	//{{AFX_MSG_MAP(CColorComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

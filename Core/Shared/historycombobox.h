@@ -17,9 +17,8 @@ class CHistoryComboBox : public CComboBox
 // Construction
 public:
 	CHistoryComboBox();
+	virtual ~CHistoryComboBox();
 
-// Operations
-public:
 	void Load(const IPreferences* pPrefs, LPCTSTR szKey);
 	void Save(IPreferences* pPrefs, LPCTSTR szKey) const;
 
@@ -27,22 +26,9 @@ protected:
 	CStringArray m_aHistory;
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CHistoryComboBox)
-	protected:
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 
-// Implementation
-public:
-	virtual ~CHistoryComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CHistoryComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:

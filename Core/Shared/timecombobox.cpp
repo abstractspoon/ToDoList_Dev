@@ -32,35 +32,16 @@ CTimeComboBox::~CTimeComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CTimeComboBox, COwnerdrawComboBoxBase)
-// 	ON_WM_CREATE()
 	ON_WM_CAPTURECHANGED()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox message handlers
 
-// void CTimeComboBox::PreSubclassWindow() 
-// {
-// 	BuildCombo();
-// 
-// 	COwnerdrawComboBoxBase::PreSubclassWindow();
-// }
-// 
-// int CTimeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	return 0;
-// }
-
 void CTimeComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
-	// 	if (GetCount())
-// 		return;
 
 	for (int nHour = 0; nHour < 24; nHour++)
 	{

@@ -43,12 +43,6 @@ BOOL CBurndownGraphComboBox::Initialise(const CGraphsMap& mapGraphs)
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
-// 	// Once only
-// 	if (GetCount())
-// 	{
-// 		ASSERT(0);
-// 		return FALSE;
-// 	}
 
 	ModifyStyle(CBS_SORT, 0); // Unsorted
 

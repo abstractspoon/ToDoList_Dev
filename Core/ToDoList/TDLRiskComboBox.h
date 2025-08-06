@@ -28,22 +28,10 @@ public:
 	void DDX(CDataExchange* pDX, int& nRisk);
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLRiskComboBox)
-// 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-protected:
 	BOOL m_bIncludeAny, m_bIncludeNone;
 	int m_nNumLevels;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLRiskComboBox)
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

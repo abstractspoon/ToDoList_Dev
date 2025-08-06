@@ -27,9 +27,6 @@ CGanttSnapComboBox::~CGanttSnapComboBox()
 
 
 BEGIN_MESSAGE_MAP(CGanttSnapComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CGanttSnapComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

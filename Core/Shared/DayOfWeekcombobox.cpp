@@ -26,9 +26,6 @@ CDayOfWeekComboBox::~CDayOfWeekComboBox()
 
 
 BEGIN_MESSAGE_MAP(CDayOfWeekComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CWeekdayComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -40,16 +37,6 @@ void CDayOfWeekComboBox::PreSubclassWindow()
 	
 	CComboBox::PreSubclassWindow();
 }
-
-// int CDayOfWeekComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CComboBox::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	InitCombo();
-// 	
-// 	return 0;
-// }
 
 void CDayOfWeekComboBox::BuildCombo()
 {

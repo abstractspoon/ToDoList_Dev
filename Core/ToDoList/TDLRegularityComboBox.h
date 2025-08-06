@@ -32,19 +32,7 @@ protected:
 	BOOL m_bIncludeAny;
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLRegularityComboBox)
-// 	protected:
-// 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
 	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLRegularityComboBox)
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

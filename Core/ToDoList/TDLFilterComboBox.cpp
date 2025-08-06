@@ -39,30 +39,10 @@ CTDLFilterComboBox::~CTDLFilterComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLFilterComboBox, CTabbedComboBox)
-	//{{AFX_MSG_MAP(CTDLFilterComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterComboBox message handlers
-
-// void CTDLFilterComboBox::PreSubclassWindow() 
-// {
-// 	CTabbedComboBox::PreSubclassWindow();
-// 
-// 	FillCombo();
-// }
-// 
-// int CTDLFilterComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CTabbedComboBox::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	FillCombo();
-// 	
-// 	return 0;
-// }
 
 int CTDLFilterComboBox::AddDefaultFilterItem(int nItem)
 {
@@ -223,9 +203,7 @@ BOOL CTDLFilterComboBox::SelectFilter(FILTER_SHOW nFilter, LPCTSTR szAdvFilter)
 void CTDLFilterComboBox::SetAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel)
 {
 	m_aAdvancedFilterNames.Copy(aFilters);
-
-	if (GetSafeHwnd())
-		RebuildCombo(szAdvancedSel);
+	RebuildCombo(szAdvancedSel);
 }
 
 const CStringArray& CTDLFilterComboBox::AdvancedFilterNames() const
@@ -239,9 +217,7 @@ void CTDLFilterComboBox::ShowDefaultFilters(BOOL bShow)
 		return;
 
 	m_bShowDefaultFilters = bShow;
-
-	if (GetSafeHwnd())
-		RebuildCombo();
+	RebuildCombo();
 }
 
 int CTDLFilterComboBox::GetDefaultFilterCount() const

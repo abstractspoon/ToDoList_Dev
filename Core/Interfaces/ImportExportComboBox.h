@@ -35,18 +35,7 @@ protected:
 	BOOL m_bImporting, m_bFileBasedOnly;
 	CStringArray m_aFileExt;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLImportExportComboBox)
 protected:
-//	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLImportExportComboBox)
-//	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:

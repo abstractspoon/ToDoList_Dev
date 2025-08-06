@@ -34,26 +34,10 @@ CContentTypeComboBox::~CContentTypeComboBox()
 
 
 BEGIN_MESSAGE_MAP(CContentTypeComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CContentTypeComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox message handlers
-
-// int CContentTypeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 
-// 	if (!m_pContentMgr)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	
-// 	return 0;
-// }
 
 void CContentTypeComboBox::BuildCombo()
 {
@@ -73,14 +57,6 @@ void CContentTypeComboBox::BuildCombo()
 
 	SetCurSel(0);
 }
-
-// void CContentTypeComboBox::PreSubclassWindow() 
-// {
-// 	if (m_pContentMgr)
-// 		BuildCombo();
-// 	
-// 	COwnerdrawComboBoxBase::PreSubclassWindow();
-// }
 
 int CContentTypeComboBox::GetSelectedFormat(CONTENTFORMAT& cf) const
 {

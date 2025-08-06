@@ -24,23 +24,7 @@ public:
 
 	void DDX(CDataExchange* pDX, CString& value);
 
-// protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLThemeComboBox)
-// 	protected:
-// 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-// public:
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLThemeComboBox)
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

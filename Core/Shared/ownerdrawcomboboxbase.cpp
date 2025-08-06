@@ -49,7 +49,6 @@ COwnerdrawComboBoxBase::~COwnerdrawComboBoxBase()
 IMPLEMENT_DYNAMIC(COwnerdrawComboBoxBase, CComboBox)
 
 BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
-//	ON_WM_CREATE()
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
@@ -361,15 +360,6 @@ void COwnerdrawComboBoxBase::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct
 
 	lpMeasureItemStruct->itemHeight = max(lpMeasureItemStruct->itemHeight, nMinHeight); 
 }
-
-// int COwnerdrawComboBoxBase::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CComboBox::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 
-// 	InitItemHeight();
-// 	return 0;
-// }
 
 void COwnerdrawComboBoxBase::RefreshDropWidth()
 {

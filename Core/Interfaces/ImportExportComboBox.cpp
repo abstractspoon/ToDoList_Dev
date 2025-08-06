@@ -39,9 +39,6 @@ CImportExportComboBox::~CImportExportComboBox()
 
 
 BEGIN_MESSAGE_MAP(CImportExportComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CTDLImportExportComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -67,23 +64,6 @@ void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts
 
 	RebuildCombo();
 }
-
-// void CImportExportComboBox::PreSubclassWindow() 
-// {
-// 	BuildCombo();
-// 	
-// 	COwnerdrawComboBoxBase::PreSubclassWindow();
-// }
-// 
-// int CImportExportComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	
-// 	return 0;
-// }
 
 void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)

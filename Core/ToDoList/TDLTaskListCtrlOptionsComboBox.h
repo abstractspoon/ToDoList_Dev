@@ -32,19 +32,6 @@ protected:
 	DWORD m_dwRemovedOptions;
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLTaskListOptionsComboBox)
-	//}}AFX_VIRTUAL
-// 	virtual void PreSubclassWindow();
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLTaskListOptionsComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

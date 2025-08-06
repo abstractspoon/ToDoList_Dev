@@ -33,9 +33,6 @@ CMenuComboBox::~CMenuComboBox()
 
 
 BEGIN_MESSAGE_MAP(CMenuComboBox, CTabbedComboBox)
-	//{{AFX_MSG_MAP(CMenuComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

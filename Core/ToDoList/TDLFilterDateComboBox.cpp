@@ -34,31 +34,11 @@ CTDLFilterDateComboBox::~CTDLFilterDateComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLFilterDateComboBox, CTabbedComboBox)
-	//{{AFX_MSG_MAP(CTDLFilterDateComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnReflectSelChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterDateComboBox message handlers
-
-// void CTDLFilterDateComboBox::PreSubclassWindow() 
-// {
-// 	CTabbedComboBox::PreSubclassWindow();
-// 
-// 	FillCombo();
-// }
-// 
-// int CTDLFilterDateComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (CTabbedComboBox::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	FillCombo();
-// 	
-// 	return 0;
-// }
 
 void CTDLFilterDateComboBox::SetNextNDays(int nDays)
 {
@@ -87,9 +67,6 @@ void CTDLFilterDateComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
-
-// 	if (GetCount())
-// 		return; // already called
 
 	CLocalizer::EnableTranslation(*this, FALSE);
 

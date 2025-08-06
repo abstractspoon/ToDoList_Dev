@@ -27,12 +27,7 @@ public:
 protected:
 	TDC_ATTRIBUTE m_nExcludeAttribID;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CKanbanAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

@@ -34,19 +34,7 @@ protected:
 	const CContentMgr* m_pContentMgr;
 	CIcon m_iconNull;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CContentTypeComboBox)
 protected:
-// 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CContentTypeComboBox)
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 	virtual void BuildCombo();

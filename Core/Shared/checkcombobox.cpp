@@ -39,9 +39,7 @@ CCheckComboBox::~CCheckComboBox()
 IMPLEMENT_DYNAMIC(CCheckComboBox, CAutoComboBox)
 
 BEGIN_MESSAGE_MAP(CCheckComboBox, CAutoComboBox)
-	//{{AFX_MSG_MAP(CCheckComboBox)
 	ON_WM_KEYDOWN()
-	//}}AFX_MSG_MAP
 	ON_WM_DESTROY()
 	ON_WM_CHAR()
 	ON_CONTROL_REFLECT_EX(CBN_EDITCHANGE, OnEditchange)

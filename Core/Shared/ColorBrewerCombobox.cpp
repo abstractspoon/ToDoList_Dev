@@ -100,43 +100,10 @@ BOOL CColorBrewerComboBox::Initialize(const CColorBrewerPaletteArray& aPalettes)
 	return TRUE;
 }
 
-// int CColorBrewerComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 
-// 	if (m_aPalettes.GetSize())
-// 		BuildCombo();
-// 	
-// 	return 0;
-// }
-// 
-// void CColorBrewerComboBox::PreSubclassWindow() 
-// {
-// 	if (m_aPalettes.GetSize())
-// 		BuildCombo();
-// 
-// 	COwnerdrawComboBoxBase::PreSubclassWindow();
-// }
-
-void CColorBrewerComboBox::RebuildCombo()
-{
-	if (GetSafeHwnd())
-	{
-		int nSel = GetCurSel();
-		RebuildCombo();
-
-		SetCurSel(nSel);
-	}
-}
-
 void CColorBrewerComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
-
-	if (GetCount())
-		return;
 
 	if (!m_sNone.IsEmpty())
 	{

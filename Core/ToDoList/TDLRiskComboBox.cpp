@@ -36,30 +36,10 @@ CTDLRiskComboBox::~CTDLRiskComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLRiskComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CTDLRiskComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRiskComboBox message handlers
-
-// int CTDLRiskComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	
-// 	return 0;
-// }
-// 
-// void CTDLRiskComboBox::PreSubclassWindow() 
-// {
-// 	COwnerdrawComboBoxBase::PreSubclassWindow();
-// 
-//  	BuildCombo();
-// }
 
 int CTDLRiskComboBox::GetSelectedRisk() const
 {
@@ -143,8 +123,6 @@ void CTDLRiskComboBox::BuildCombo()
 	if (GetCount() == 0)
 		return;
 
-//	CHoldRedraw hr(*this);
-	
 	// first items are 'Any' and 'None'
 	if (m_bIncludeAny)
 		AddString(CEnString(IDS_TDC_ANY));

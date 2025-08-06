@@ -29,9 +29,6 @@ CTDLRegularityComboBox::~CTDLRegularityComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLRegularityComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CTDLRegularityComboBox)
-//	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -68,29 +65,10 @@ CString CTDLRegularityComboBox::GetRegularity(TDC_REGULARITY nRegularity)
 	return TDCRECURRENCE::GetRegularityText(nRegularity, TRUE);
 }
 
-// void CTDLRegularityComboBox::PreSubclassWindow() 
-// {
-// 	COwnerdrawComboBoxBase::PreSubclassWindow();
-// 
-// 	BuildCombo();
-// }
-// 
-// int CTDLRegularityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-// {
-// 	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-// 		return -1;
-// 	
-// 	BuildCombo();
-// 	
-// 	return 0;
-// }
-
 void CTDLRegularityComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
-// 	if (GetCount())
-// 		return;
 
 	if (m_bIncludeAny)
 		CDialogHelper::AddStringT(*this, CEnString(IDS_TDC_ANY), TDIR_NONE);

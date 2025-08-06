@@ -67,16 +67,9 @@ protected:
 
 	const static int CHECKBOX_SIZE;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCheckComboBox)
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CCheckComboBox)
+	// Generated message map functions
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	//}}AFX_MSG
 	afx_msg void OnDestroy();
 	afx_msg BOOL OnEditchange();
 	afx_msg BOOL OnDropdown();

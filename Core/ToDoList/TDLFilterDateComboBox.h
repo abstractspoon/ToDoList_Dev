@@ -8,6 +8,7 @@
 //
 
 #include "tdcenum.h"
+
 #include "..\shared\tabbedcombobox.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -30,21 +31,8 @@ protected:
 	int m_nNextNDays;
 	BOOL m_bRebuildingCombo;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFilterDateComboBox)
-// 	protected:
-// 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-// public:
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLFilterDateComboBox)
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
+	// Generated message map functions
 	afx_msg BOOL OnReflectSelChange();
 
 	DECLARE_MESSAGE_MAP()
@@ -52,7 +40,7 @@ protected:
 protected:
 	virtual void BuildCombo();
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-		DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 
 };
 

@@ -32,9 +32,6 @@ CTDLAttributeComboBox::~CTDLAttributeComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLAttributeComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CTDLTaskAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

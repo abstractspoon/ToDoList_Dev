@@ -23,8 +23,6 @@ public:
 	CTDLFilterOptionComboBox();
 	virtual ~CTDLFilterOptionComboBox();
 
-// Operations
-public:
 	void Initialize(const TDCFILTER& filter, const CTDCAttributeMap& mapVisibleFilters, BOOL bMultiSelection);
 	void Initialize(DWORD dwFlags, DWORD dwOptions = 0);
 
@@ -35,20 +33,7 @@ public:
 protected:
 	DWORD m_dwOptions;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CFilterOptionComboBox)
-	//}}AFX_VIRTUAL
-
-// Implementation
-// public:
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CFilterOptionComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 	void OnCheckChange(int nIndex);

@@ -53,7 +53,6 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:
-	// Generated message map functions
 	afx_msg void OnEditChange();
 	DECLARE_MESSAGE_MAP()
 

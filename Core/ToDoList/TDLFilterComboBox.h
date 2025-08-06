@@ -37,18 +37,8 @@ protected:
 	BOOL m_bShowDefaultFilters;
 	CStringArray m_aAdvancedFilterNames;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFilterComboBox)
-// protected:
-// 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
+protected:
 	// Generated message map functions
-// protected:
-	//{{AFX_MSG(CTDLFilterComboBox)
-// 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
