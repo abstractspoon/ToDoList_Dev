@@ -16,7 +16,6 @@
 
 class CTDLRegularityComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTDLRegularityComboBox(BOOL bIncludeAny);
 	virtual ~CTDLRegularityComboBox();
@@ -32,7 +31,6 @@ protected:
 	BOOL m_bIncludeAny;
 
 protected:
-	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 protected:

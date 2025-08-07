@@ -1,4 +1,4 @@
-// contenttypecombobox.cpp : implementation file
+// CColorBrewerComboBox.cpp : implementation file
 //
 
 #include "stdafx.h"
@@ -14,7 +14,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CContentTypeComboBox
+// CColorBrewerComboBox
 
 CColorBrewerComboBox::CColorBrewerComboBox(DWORD dwBrewerFlags, UINT nIDNoneString) 
 	: 
@@ -28,11 +28,7 @@ CColorBrewerComboBox::~CColorBrewerComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CColorBrewerComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CContentTypeComboBox)
-// 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

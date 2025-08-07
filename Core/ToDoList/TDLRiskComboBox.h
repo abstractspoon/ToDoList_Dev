@@ -14,7 +14,6 @@
 
 class CTDLRiskComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTDLRiskComboBox(BOOL bIncludeAny, BOOL bIncludeNone = TRUE);
 	virtual ~CTDLRiskComboBox();

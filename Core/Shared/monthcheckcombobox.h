@@ -4,7 +4,7 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// monthcombobox.h : header file
+// CMonthCheckComboBox.h : header file
 //
 
 #include "checkcombobox.h"
@@ -14,7 +14,6 @@
 
 class CMonthCheckComboBox : public CCheckComboBox
 {
-// Construction
 public:
 	CMonthCheckComboBox();
 	virtual ~CMonthCheckComboBox();
@@ -23,7 +22,6 @@ public:
 	int SetSelectedMonths(DWORD dwMonths);
 
 protected:
-	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 	virtual void BuildCombo();

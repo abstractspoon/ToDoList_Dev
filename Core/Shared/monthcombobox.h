@@ -26,7 +26,6 @@ protected:
 	virtual void PreSubclassWindow();
 
 protected:
-	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 	void BuildCombo();

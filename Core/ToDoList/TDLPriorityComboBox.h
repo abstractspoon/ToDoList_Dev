@@ -14,7 +14,6 @@
 
 class CTDLPriorityComboBox : public CColorComboBox
 {
-// Construction
 public:
 	CTDLPriorityComboBox(BOOL bIncludeAny, BOOL bIncludeNone = TRUE);
 	virtual ~CTDLPriorityComboBox();
@@ -35,7 +34,6 @@ protected:
 	int m_nNumLevels;
 
 protected:
-	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 protected:

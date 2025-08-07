@@ -426,8 +426,9 @@ void CTDLLanguageComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 
 		GraphicsMisc::CentreRect(rIcon, rText, FALSE, TRUE);
 		VERIFY(m_il.Draw(&dc, nItem, rIcon.TopLeft(), ILD_TRANSPARENT));
+		
+		rText.left += FLAG_SIZE + 5;
 	}
-	rText.left += FLAG_SIZE + 5;
 
 	if (bList)
 	{
@@ -437,6 +438,9 @@ void CTDLLanguageComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 		// Draw language
 		COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sLanguage, bList, crText);
 		rText.left += m_nLangCountryColWidth + COL_SPACING;
+		
+		if (pItemData->bHeading)
+			rText.left += FLAG_SIZE + 5;
 
 		// Draw country
 		COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sCountry, bList, crText);

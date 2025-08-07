@@ -4,7 +4,7 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// TDLFilterComboBox.h : header file
+// CTDLFilterDateComboBox.h : header file
 //
 
 #include "tdcenum.h"
@@ -16,12 +16,10 @@
 
 class CTDLFilterDateComboBox : public CTabbedComboBox
 {
-// Construction
 public:
 	CTDLFilterDateComboBox(int nNextNDays = 7);
 	virtual ~CTDLFilterDateComboBox();
 
-// Operations
 public:
 	FILTER_DATE GetSelectedFilter() const;
 	BOOL SelectFilter(FILTER_DATE nFilter);
@@ -32,9 +30,7 @@ protected:
 	BOOL m_bRebuildingCombo;
 
 protected:
-	// Generated message map functions
 	afx_msg BOOL OnReflectSelChange();
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

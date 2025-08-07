@@ -189,11 +189,9 @@ void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	if (nItem == -1)
 		return;
 
-	// Draw <any> or <none> in window prompt color
-	if (!(nItemState & ODS_SELECTED) && !bList && (nItem == 0))
-	{
+	// Draw <any> in window prompt color
+	if (!(nItemState & ODS_SELECTED) && !bList && m_bIncludeAny && (nItem == 0))
 		crText = CWndPrompt::GetTextColor();
-	}
 	
 	// Don't indent 'non-color' items
 	if ((dwItemData == CLR_NONE) && !Misc::HasFlag(m_dwFlags, CCBS_DRAWNOCOLOR))

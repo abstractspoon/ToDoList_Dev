@@ -23,7 +23,6 @@ enum
 
 class CTimeComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTimeComboBox(DWORD dwStyles = 0);
 	virtual ~CTimeComboBox();

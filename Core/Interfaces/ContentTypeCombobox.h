@@ -18,7 +18,6 @@ class CONTENTFORMAT;
 
 class CContentTypeComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CContentTypeComboBox(const CContentMgr* pContentMgr, UINT nNullIconID);
 	virtual ~CContentTypeComboBox();
@@ -29,7 +28,6 @@ public:
 	int GetCount() const;
 	BOOL IsInitialized() const { return (m_pContentMgr != NULL); }
 
-// Attributes
 protected:
 	const CContentMgr* m_pContentMgr;
 	CIcon m_iconNull;

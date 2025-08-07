@@ -119,9 +119,7 @@ void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 void CTDLRiskComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
-
-	if (GetCount() == 0)
-		return;
+	ASSERT(GetCount() == 0);
 
 	// first items are 'Any' and 'None'
 	if (m_bIncludeAny)
@@ -151,11 +149,9 @@ void CTDLRiskComboBox::DDX(CDataExchange* pDX, int& nRisk)
 void CTDLRiskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 	DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
-	// Draw <any> or <none> in window prompt color
-	if (!(nItemState & ODS_SELECTED) && !bList && (nItem == 0))
-	{
+	// Draw <any> in window prompt color
+	if (!(nItemState & ODS_SELECTED) && !bList && m_bIncludeAny && (nItem == 0))
 		crText = CWndPrompt::GetTextColor();
-	}
 
 	// all else
 	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);

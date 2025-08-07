@@ -101,6 +101,8 @@ int CColorComboBox::InsertColor(int nIndex, COLORREF color, LPCTSTR szDescriptio
 
 COLORREF CColorComboBox::SetColor(int nIndex, COLORREF color)
 {
+	CheckBuildCombo();
+
 	ASSERT (GetStyle() & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE));
 	ASSERT (nIndex >= 0 && nIndex < GetCount());
 
@@ -115,6 +117,8 @@ COLORREF CColorComboBox::SetColor(int nIndex, COLORREF color)
 
 COLORREF CColorComboBox::SetColor(LPCTSTR szDescription, COLORREF color)
 {
+	CheckBuildCombo();
+
 	int nFind = FindStringExact(0, szDescription);
 	ASSERT(nFind != CB_ERR);
 

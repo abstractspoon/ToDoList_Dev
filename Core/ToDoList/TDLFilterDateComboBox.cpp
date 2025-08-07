@@ -1,4 +1,4 @@
-// TDLFilterComboBox.cpp : implementation file
+// CTDLFilterDateComboBox.cpp : implementation file
 //
 
 #include "stdafx.h"

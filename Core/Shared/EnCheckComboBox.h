@@ -17,7 +17,6 @@ class CEnCheckComboBox : public CCheckComboBox
 {
 	DECLARE_DYNAMIC(CEnCheckComboBox);
 
-	// Construction
 public:
 	CEnCheckComboBox(BOOL bMulti = TRUE, UINT nIDNoneString = 0, UINT nIDAnyString = 0);
 	virtual ~CEnCheckComboBox();
@@ -41,7 +40,6 @@ protected:
 	CEnString m_sNone, m_sAny;
 	
 protected:
-	// Generated message map functions
 	afx_msg void OnLBSelChange();
 	afx_msg BOOL OnSelEndOK();
 	afx_msg LRESULT OnGetTextLen(WPARAM wParam, LPARAM lParam);
