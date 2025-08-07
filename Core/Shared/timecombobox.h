@@ -23,7 +23,6 @@ enum
 
 class CTimeComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTimeComboBox(DWORD dwStyles = 0);
 	virtual ~CTimeComboBox();
@@ -43,21 +42,15 @@ protected:
 	DWORD m_dwStyle;
 	
 protected:
-	virtual void PreSubclassWindow();
-
-protected:
-	// Generated message map functions
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
-
 	DECLARE_MESSAGE_MAP()
 
+	virtual void BuildCombo();
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 								COLORREF& crText, COLORREF& crBack) const;	
 
 protected:
-	void BuildCombo(BOOL bReset = FALSE);
 	void ScrollListBox();
 	CString GetCurrentTime() const;
 	double Get24HourTime(int nItem) const; // -1 for 'no time'

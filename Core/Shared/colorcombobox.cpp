@@ -17,7 +17,8 @@ static char THIS_FILE[] = __FILE__;
 // CColorComboBox
 
 CColorComboBox::CColorComboBox(BOOL dwFlags, DWORD dwAutoComboFlags) 
-	: CAutoComboBox(dwAutoComboFlags), m_dwFlags(dwFlags)
+	: 
+	CAutoComboBox(dwAutoComboFlags), m_dwFlags(dwFlags)
 {
 }
 
@@ -27,9 +28,6 @@ CColorComboBox::~CColorComboBox()
 
 
 BEGIN_MESSAGE_MAP(CColorComboBox, CAutoComboBox)
-	//{{AFX_MSG_MAP(CColorComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -103,6 +101,8 @@ int CColorComboBox::InsertColor(int nIndex, COLORREF color, LPCTSTR szDescriptio
 
 COLORREF CColorComboBox::SetColor(int nIndex, COLORREF color)
 {
+	CheckBuildCombo();
+
 	ASSERT (GetStyle() & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE));
 	ASSERT (nIndex >= 0 && nIndex < GetCount());
 
@@ -117,6 +117,8 @@ COLORREF CColorComboBox::SetColor(int nIndex, COLORREF color)
 
 COLORREF CColorComboBox::SetColor(LPCTSTR szDescription, COLORREF color)
 {
+	CheckBuildCombo();
+
 	int nFind = FindStringExact(0, szDescription);
 	ASSERT(nFind != CB_ERR);
 

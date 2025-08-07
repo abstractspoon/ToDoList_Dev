@@ -32,40 +32,17 @@ CTimeComboBox::~CTimeComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CTimeComboBox, COwnerdrawComboBoxBase)
-	ON_WM_CREATE()
 	ON_WM_CAPTURECHANGED()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox message handlers
 
-void CTimeComboBox::PreSubclassWindow() 
+void CTimeComboBox::BuildCombo()
 {
-	BuildCombo();
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
 
-	COwnerdrawComboBoxBase::PreSubclassWindow();
-}
-
-int CTimeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildCombo();
-	return 0;
-}
-
-void CTimeComboBox::BuildCombo(BOOL bReset)
-{
-	CLocalizer::EnableTranslation(*this, FALSE);
-	
-	ASSERT(bReset || GetCount() == 0);
-	
-	if (!bReset && GetCount())
-		return;
-	
-	ResetContent();
-	
 	for (int nHour = 0; nHour < 24; nHour++)
 	{
 		CString sTime;
@@ -81,6 +58,8 @@ void CTimeComboBox::BuildCombo(BOOL bReset)
 			AddString(sTime);
 		}
 	}
+
+	CLocalizer::EnableTranslation(*this, FALSE);
 }
 
 void CTimeComboBox::DDX(CDataExchange* pDX, double& dHours)
@@ -115,6 +94,8 @@ double CTimeComboBox::GetOleTime() const
 
 BOOL CTimeComboBox::SetOleTime(double dTime)
 {
+	CheckBuildCombo();
+
 	// truncate to extract the time only component if it has one
 	dTime = fabs(dTime - (int)dTime);
 
@@ -144,8 +125,8 @@ void CTimeComboBox::SetISOFormat(BOOL bISO)
 		if (GetSafeHwnd())
 		{
 			double date = GetOleTime();
+			RebuildCombo();
 
-			BuildCombo(TRUE);
 			SetOleTime(date);
 		}
 	}
@@ -201,6 +182,8 @@ double CTimeComboBox::Get24HourTime(int nItem) const
 
 BOOL CTimeComboBox::Set24HourTime(double dTime)
 {
+	CheckBuildCombo();
+
 	if (dTime < 0)
 	{
 		SetCurSel(0);

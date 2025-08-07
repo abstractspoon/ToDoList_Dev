@@ -4,49 +4,27 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// monthcombobox.h : header file
+// CMonthCheckComboBox.h : header file
 //
 
 #include "checkcombobox.h"
-
-/////////////////////////////////////////////////////////////////////////////
-
-class CMonthCheckComboBox;
-
-void DDX_Months(CDataExchange* pDX, CMonthCheckComboBox& combo, DWORD& dwMonths);
 
 /////////////////////////////////////////////////////////////////////////////
 // CMonthCheckComboBox window
 
 class CMonthCheckComboBox : public CCheckComboBox
 {
-// Construction
 public:
 	CMonthCheckComboBox();
+	virtual ~CMonthCheckComboBox();
 
 	DWORD GetSelectedMonths() const;
 	int SetSelectedMonths(DWORD dwMonths);
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CMonthCheckComboBox)
 protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CMonthCheckComboBox();
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CMonthCheckComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
-	void InitCombo();
+	virtual void BuildCombo();
 };
 
 /////////////////////////////////////////////////////////////////////////////

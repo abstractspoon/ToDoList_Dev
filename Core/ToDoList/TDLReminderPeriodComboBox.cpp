@@ -77,59 +77,35 @@ CTDLReminderPeriodComboBox::~CTDLReminderPeriodComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLReminderPeriodComboBox, COwnerdrawComboBoxBase)
-	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
+/////////////////////////////////////////////////////////////////////////////
 // CTDLReminderleadinComboBox message handlers
-
-void CTDLReminderPeriodComboBox::PreSubclassWindow()
-{
-	COwnerdrawComboBoxBase::PreSubclassWindow();
-
-	// Remove CBS_SORT
-	ModifyStyle(CBS_SORT, 0, 0);
-	BuildCombo();
-}
-
-int CTDLReminderPeriodComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-	// Remove CBS_SORT
-	lpCreateStruct->style &= ~CBS_SORT;
-
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	// else
-	BuildCombo();
-	return 0;
-}
 
 void CTDLReminderPeriodComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
+	ASSERT(!HasStyle(CBS_SORT));
 
-	// once only
-	if (GetCount() == 0)
+	for (int nData = 0; nData < NUM_DATA; nData++)
 	{
-		for (int nData = 0; nData < NUM_DATA; nData++)
-		{
-			if (!(m_dwShow & TDLRPC_SHOWNONE) && (data[nData].nItemData == TDLRPC_NOREMINDER))
-				continue;
+		if (!(m_dwShow & TDLRPC_SHOWNONE) && (data[nData].nItemData == TDLRPC_NOREMINDER))
+			continue;
 
-			if (!(m_dwShow & TDLRPC_SHOWZERO) && (data[nData].nItemData == 0))
-				continue;
-			
-			VERIFY(CDialogHelper::AddStringT(*this, 
-											data[nData].szItemText, 
-											data[nData].nItemData) != CB_ERR);
-		}
+		if (!(m_dwShow & TDLRPC_SHOWZERO) && (data[nData].nItemData == 0))
+			continue;
+
+		VERIFY(CDialogHelper::AddStringT(*this,
+										 data[nData].szItemText,
+										 data[nData].nItemData) != CB_ERR);
 	}
 }
 
 BOOL CTDLReminderPeriodComboBox::SetSelectedPeriod(UINT nMinutes)
 {
+	CheckBuildCombo();
 	ValidateLeadin(nMinutes);
 
 	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, nMinutes));

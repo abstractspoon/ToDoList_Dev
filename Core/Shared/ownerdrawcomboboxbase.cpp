@@ -27,6 +27,8 @@ static HFONT s_hFontHeadings = NULL;
 #	define CB_GETMINVISIBLE  (CBM_FIRST + 2)
 #endif
 
+#define CB_POPULATE (WM_USER + 4)
+
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase
 
@@ -47,8 +49,6 @@ COwnerdrawComboBoxBase::~COwnerdrawComboBoxBase()
 IMPLEMENT_DYNAMIC(COwnerdrawComboBoxBase, CComboBox)
 
 BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
-	ON_WM_CREATE()
-	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_WM_KEYDOWN()
 	ON_WM_DESTROY()
@@ -56,6 +56,8 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_MESSAGE(CB_POPULATE, BuildCombo)
 	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
 	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
 	ON_MESSAGE(CB_DELETESTRING, OnCBDeleteString)
@@ -81,6 +83,8 @@ int COwnerdrawComboBoxBase::SetDisabledItem(int nItem, BOOL bDisabled)
 
 int COwnerdrawComboBoxBase::SetHeadingItem(int nItem, BOOL bHeading)
 {
+	ASSERT(!HasStyle(CBS_SORT));
+
 	ODCB_ITEMDATA* pItemData = GetAddExtItemData(nItem);
 
 	if (pItemData == NULL)
@@ -195,7 +199,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	// Because we're not handling WM_ERASEBKGND so as to eliminate 
 	// flicker we may need to fill any 'dead' zone below the last item
-	if (IsType(CBS_SIMPLE) && (GetStyle() & CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
+	if (IsType(CBS_SIMPLE) && HasStyle(CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
 	{
 		CRect rDead(rItem);
 		rDead.OffsetRect(0, rDead.Height());
@@ -219,7 +223,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (nItem != CB_ERR) // Any item selected?
 	{
 		// draw text
-		if (GetStyle() & CBS_HASSTRINGS)
+		if (HasStyle(CBS_HASSTRINGS))
 			GetLBText(nItem, sText);
 	}
 	else
@@ -343,11 +347,13 @@ int COwnerdrawComboBoxBase::CalcMinItemHeight(BOOL bList) const
 
 void COwnerdrawComboBoxBase::PreSubclassWindow() 
 {
-	ASSERT(GetStyle() & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE));
+	ASSERT(HasStyle(CBS_OWNERDRAWFIXED) || HasStyle(CBS_OWNERDRAWVARIABLE));
 
 	InitItemHeight();
 
 	CComboBox::PreSubclassWindow();
+
+	PostMessage(CB_POPULATE);
 }
 
 void COwnerdrawComboBoxBase::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
@@ -355,15 +361,6 @@ void COwnerdrawComboBoxBase::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct
 	UINT nMinHeight = CalcMinItemHeight(TRUE);
 
 	lpMeasureItemStruct->itemHeight = max(lpMeasureItemStruct->itemHeight, nMinHeight); 
-}
-
-int COwnerdrawComboBoxBase::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	InitItemHeight();
-	return 0;
 }
 
 void COwnerdrawComboBoxBase::RefreshDropWidth()
@@ -471,6 +468,11 @@ void COwnerdrawComboBoxBase::OnSize(UINT nType, int cx, int cy)
 BOOL COwnerdrawComboBoxBase::IsType(UINT nComboType) const
 {
 	return ((GetStyle() & 0xf) == nComboType);
+}
+
+BOOL COwnerdrawComboBoxBase::HasStyle(UINT nStyle) const 
+{ 
+	return ((GetStyle() & nStyle) == nStyle); 
 }
 
 int COwnerdrawComboBoxBase::FindStringExact(int nIndexStart, LPCTSTR lpszFind) const
@@ -647,6 +649,29 @@ BOOL COwnerdrawComboBoxBase::ValidateSelection(int& nSel, BOOL bForward) const
 	}
 
 	return TRUE;
+}
+
+LRESULT COwnerdrawComboBoxBase::BuildCombo(WPARAM wp, LPARAM lp)
+{
+	CheckBuildCombo();
+	return 0L;
+}
+
+void COwnerdrawComboBoxBase::CheckBuildCombo()
+{
+	if (!GetSafeHwnd() || GetCount())
+		return;
+	
+	BuildCombo(); // for derived classes
+}
+
+void COwnerdrawComboBoxBase::RebuildCombo()
+{
+	if (!GetSafeHwnd())
+		return;
+
+	ResetContent();
+	BuildCombo(); // for derived classes
 }
 
 LRESULT COwnerdrawComboBoxBase::OnCBSetItemData(WPARAM wParam, LPARAM lParam)

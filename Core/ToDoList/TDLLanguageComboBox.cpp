@@ -33,10 +33,6 @@ const int COL_SPACING	= GraphicsMisc::ScaleByDPIFactor(10);
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT CB_POPULATE = (WM_USER+4);
-
-/////////////////////////////////////////////////////////////////////////////
-
 CString CTDLLanguageComboBox::GetDefaultLanguage()
 {
 	return DEFAULT_LANG;
@@ -60,7 +56,7 @@ CTDLLanguageComboBox::~CTDLLanguageComboBox()
 
 BEGIN_MESSAGE_MAP(CTDLLanguageComboBox, COwnerdrawComboBoxBase)
 	ON_WM_DESTROY()
-	ON_MESSAGE(CB_POPULATE, OnPopulate)
+	ON_CONTROL_REFLECT_EX(CBN_DROPDOWN, OnDropDown)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -71,31 +67,17 @@ CString CTDLLanguageComboBox::GetTranslationFolder()
 	return FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
 }
 
-void CTDLLanguageComboBox::PreSubclassWindow()
+BOOL CTDLLanguageComboBox::OnDropDown()
 {
-	COwnerdrawComboBoxBase::PreSubclassWindow();
+	InitialiseDropWidth();
 
-	PostMessage(CB_POPULATE);
+	return FALSE; // continue routing
 }
 
-LRESULT CTDLLanguageComboBox::OnPopulate(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	if (GetCount() == 0)
-	{
-		Populate();
-		InitialiseDropWidth();
-	}
-
-	return 0L;
-}
-
-void CTDLLanguageComboBox::Populate()
+void CTDLLanguageComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
-
-	if (GetCount())
-		return; // already done
 
 	// build the language list from csv files in the Resources\Translations folder
 	// These will come out sorted by default
@@ -135,7 +117,6 @@ void CTDLLanguageComboBox::Populate()
 	m_il.ScaleByDPIFactor();
 
 	SelectLanguage(m_sSelLanguage);
-	return;
 }
 
 BOOL CTDLLanguageComboBox::AddDefaultLanguage()
@@ -427,6 +408,12 @@ void CTDLLanguageComboBox::InitialiseDropWidth()
 void CTDLLanguageComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 									  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
+	if (nItem == -1)
+	{
+		COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
+		return;
+	}
+
 	LCB_ITEMDATA* pItemData = (LCB_ITEMDATA*)GetExtItemData(nItem);
 	ASSERT(pItemData);
 
@@ -439,8 +426,9 @@ void CTDLLanguageComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 
 		GraphicsMisc::CentreRect(rIcon, rText, FALSE, TRUE);
 		VERIFY(m_il.Draw(&dc, nItem, rIcon.TopLeft(), ILD_TRANSPARENT));
+		
+		rText.left += FLAG_SIZE + 5;
 	}
-	rText.left += FLAG_SIZE + 5;
 
 	if (bList)
 	{
@@ -450,6 +438,9 @@ void CTDLLanguageComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 		// Draw language
 		COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sLanguage, bList, crText);
 		rText.left += m_nLangCountryColWidth + COL_SPACING;
+		
+		if (pItemData->bHeading)
+			rText.left += FLAG_SIZE + 5;
 
 		// Draw country
 		COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sCountry, bList, crText);

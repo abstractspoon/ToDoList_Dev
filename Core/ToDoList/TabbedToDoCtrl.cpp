@@ -160,7 +160,8 @@ void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LISTVIEWOPTIONS, m_cbListOptions);
 
 	DDX_CBData(pDX, m_cbListGroupBy, m_nListViewGroupBy, TDCC_NONE);
-	DDX_CheckItemData(pDX, m_cbListOptions, m_dwListOptions);
+
+	m_cbListOptions.DDX(pDX, m_dwListOptions);
 }
 
 BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
@@ -246,20 +247,18 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	// Initialise the previously visible tabs
 	SetVisibleTaskViews(s_aDefTaskViews);
 
-	// Build the list-specific comboboxes
+	// Prepare the list-specific comboboxes
 	BuildListGroupByCombo();
-	BuildListOptionsCombo();
+	InitListOptionsCombo();
 
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::BuildListOptionsCombo()
+void CTabbedToDoCtrl::InitListOptionsCombo()
 {
 	// once only
 	if (!m_cbListOptions.GetCount())
 	{
-		m_cbListOptions.BuildCombo();
-
 		m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(CPreferences(), GetPreferencesKey());
 		m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
 

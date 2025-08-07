@@ -30,9 +30,6 @@ CTDLFilterOptionComboBox::~CTDLFilterOptionComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLFilterOptionComboBox, CCheckComboBox)
-	//{{AFX_MSG_MAP(CFilterOptionComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

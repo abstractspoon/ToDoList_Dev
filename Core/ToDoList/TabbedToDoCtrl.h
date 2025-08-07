@@ -273,7 +273,7 @@ protected:
 	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 	void BuildListGroupByCombo();
-	void BuildListOptionsCombo();
+	void InitListOptionsCombo();
 	void ResortList(BOOL bAllowToggle = FALSE);
 	BOOL HasListOption(DWORD dwOption) const;
 

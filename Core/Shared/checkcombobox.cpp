@@ -18,16 +18,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-void DDX_CheckItemData(CDataExchange* pDX, CCheckComboBox& combo, DWORD& dwItems)
-{
-	if (pDX->m_bSaveAndValidate)
-		dwItems = combo.GetCheckedItemData();
-	else
-		combo.SetCheckedByItemData(dwItems);
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // CCheckComboBox
 
 const int CCheckComboBox::CHECKBOX_SIZE = GraphicsMisc::ScaleByDPIFactor(13);
@@ -49,9 +39,7 @@ CCheckComboBox::~CCheckComboBox()
 IMPLEMENT_DYNAMIC(CCheckComboBox, CAutoComboBox)
 
 BEGIN_MESSAGE_MAP(CCheckComboBox, CAutoComboBox)
-	//{{AFX_MSG_MAP(CCheckComboBox)
 	ON_WM_KEYDOWN()
-	//}}AFX_MSG_MAP
 	ON_WM_DESTROY()
 	ON_WM_CHAR()
 	ON_CONTROL_REFLECT_EX(CBN_EDITCHANGE, OnEditchange)
@@ -252,9 +240,19 @@ int CCheckComboBox::SelectString(int nStartAfter, LPCTSTR lpszString)
 
 int CCheckComboBox::SetCheckByItemData(DWORD dwItemData, CCB_CHECKSTATE nCheck)
 {
+	CheckBuildCombo();
+
 	int nIndex = CDialogHelper::FindItemByDataT(*this, dwItemData);
 
 	return SetCheck(nIndex, nCheck, TRUE);
+}
+
+void CCheckComboBox::DDX(CDataExchange* pDX, DWORD& dwItemsData)
+{
+	if (pDX->m_bSaveAndValidate)
+		dwItemsData = GetCheckedItemData();
+	else
+		SetCheckedByItemData(dwItemsData);
 }
 
 int CCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck)
@@ -859,6 +857,8 @@ int CCheckComboBox::UpdateEditAutoComplete(const CString& sText, int nCaretPos)
 int CCheckComboBox::SetCheckedByItemData(DWORD dwFlags)
 {
 	ASSERT(GetSafeHwnd());
+
+	CheckBuildCombo();
 
 	int nNumChecked = 0;
 

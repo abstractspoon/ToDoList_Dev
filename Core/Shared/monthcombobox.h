@@ -8,43 +8,26 @@
 //
 
 /////////////////////////////////////////////////////////////////////////////
-
-class CMonthComboBox;
-
-void DDX_Month(CDataExchange* pDX, CMonthComboBox& combo, int& nMonth);
-
-/////////////////////////////////////////////////////////////////////////////
 // CMonthComboBox window
 
 class CMonthComboBox : public CComboBox
 {
-// Construction
 public:
 	CMonthComboBox();
+	virtual ~CMonthComboBox();
 
 	int GetSelectedMonth() const;
 	int SetSelectedMonth(int nMonth);
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CMonthComboBox)
+	void DDX(CDataExchange* pDX, int& nMonth);
+
 protected:
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 
-// Implementation
-public:
-	virtual ~CMonthComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CMonthComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
-	void InitCombo();
+	void BuildCombo();
 };
 
 /////////////////////////////////////////////////////////////////////////////

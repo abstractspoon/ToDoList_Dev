@@ -14,9 +14,9 @@
 
 class CTDLThemeComboBox : public CColorComboBox
 {
-// Construction
 public:
 	CTDLThemeComboBox();
+	virtual ~CTDLThemeComboBox();
 
 	CString GetThemePath() const;
 	BOOL SetThemePath(LPCTSTR szThemePath);
@@ -24,27 +24,10 @@ public:
 	void DDX(CDataExchange* pDX, CString& value);
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLThemeComboBox)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLThemeComboBox();
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLThemeComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
-   void BuildCombo();
+   virtual void BuildCombo();
 
    static CString ExtractThemeName(LPCTSTR szThemePath);
    static CString FormatThemePath(LPCTSTR szThemeName);

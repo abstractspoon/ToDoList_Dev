@@ -1,4 +1,4 @@
-// TDLFilterComboBox.cpp : implementation file
+// CTDLFilterDateComboBox.cpp : implementation file
 //
 
 #include "stdafx.h"
@@ -34,31 +34,11 @@ CTDLFilterDateComboBox::~CTDLFilterDateComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLFilterDateComboBox, CTabbedComboBox)
-	//{{AFX_MSG_MAP(CTDLFilterDateComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnReflectSelChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterDateComboBox message handlers
-
-void CTDLFilterDateComboBox::PreSubclassWindow() 
-{
-	CTabbedComboBox::PreSubclassWindow();
-
-	FillCombo();
-}
-
-int CTDLFilterDateComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CTabbedComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	FillCombo();
-	
-	return 0;
-}
 
 void CTDLFilterDateComboBox::SetNextNDays(int nDays)
 {
@@ -70,9 +50,7 @@ void CTDLFilterDateComboBox::SetNextNDays(int nDays)
 		CAutoFlag af(m_bRebuildingCombo, TRUE);
 		
 		FILTER_DATE nSelFilter = GetSelectedFilter();
-
-		ResetContent();
-		FillCombo();
+		RebuildCombo();
 
 		SelectFilter(nSelFilter);
 	}
@@ -85,12 +63,10 @@ BOOL CTDLFilterDateComboBox::OnReflectSelChange()
 	return m_bRebuildingCombo;
 }
 
-void CTDLFilterDateComboBox::FillCombo()
+void CTDLFilterDateComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
-
-	if (GetCount())
-		return; // already called
+	ASSERT(GetCount() == 0);
 
 	CLocalizer::EnableTranslation(*this, FALSE);
 
@@ -141,6 +117,8 @@ FILTER_DATE CTDLFilterDateComboBox::GetSelectedFilter() const
 
 BOOL CTDLFilterDateComboBox::SelectFilter(FILTER_DATE nFilter)
 {
+	CheckBuildCombo();
+
 	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, (DWORD)nFilter));
 }
 

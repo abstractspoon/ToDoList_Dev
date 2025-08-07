@@ -55,7 +55,7 @@ void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SNOOZEUNTILDATE, m_dtcSnoozeDate);
 	DDX_Control(pDX, IDC_SNOOZEUNTILTIME, m_cbSnoozeTime);
 
-	ASSERT(m_cbSnoozeFor.GetCount());
+//	ASSERT(m_cbSnoozeFor.GetCount());
 
 	if (pDX->m_bSaveAndValidate)
 	{

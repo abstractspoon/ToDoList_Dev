@@ -24,8 +24,6 @@ CTabbedComboBox::~CTabbedComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTabbedComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CTabbedComboBox)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

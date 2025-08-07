@@ -26,9 +26,6 @@ CHistoryComboBox::~CHistoryComboBox()
 
 
 BEGIN_MESSAGE_MAP(CHistoryComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CHistoryComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -94,14 +91,4 @@ void CHistoryComboBox::PreSubclassWindow()
 	BuildCombo();
 	
 	CComboBox::PreSubclassWindow();
-}
-
-int CHistoryComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildCombo();
-	
-	return 0;
 }

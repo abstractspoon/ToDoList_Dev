@@ -297,11 +297,12 @@ int CAutoComboBox::InsertUniqueItem(int nIndex, const CString& sNewItem)
 				DWORD dwItemData = GetItemData(nFind);
 				
 				DeleteString(nFind); // remove original
-
-				if (GetStyle() & CBS_SORT)
-					nIndex = COwnerdrawComboBoxBase::AddString(sItem); // re-insert
+ 
+				// re-insert
+				if (HasStyle(CBS_SORT))
+					nIndex = COwnerdrawComboBoxBase::AddString(sItem);
 				else
-					nIndex = COwnerdrawComboBoxBase::InsertString(nIndex, sItem); // re-insert
+					nIndex = COwnerdrawComboBoxBase::InsertString(nIndex, sItem);
 
 				if (nIndex != CB_ERR)
 				{
@@ -318,10 +319,11 @@ int CAutoComboBox::InsertUniqueItem(int nIndex, const CString& sNewItem)
 		}
 		else
 		{
-			if (GetStyle() & CBS_SORT)
-				nIndex = COwnerdrawComboBoxBase::AddString(sItem); // re-insert
+			// re-insert
+			if (HasStyle(CBS_SORT))
+				nIndex = COwnerdrawComboBoxBase::AddString(sItem);
 			else
-				nIndex = COwnerdrawComboBoxBase::InsertString(nIndex, sItem); // re-insert
+				nIndex = COwnerdrawComboBoxBase::InsertString(nIndex, sItem);
 			
 			if (nIndex != CB_ERR)
 			{

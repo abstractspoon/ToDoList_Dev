@@ -15,7 +15,6 @@
 
 class CTDLLanguageComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTDLLanguageComboBox(LPCTSTR szFilter = _T("*.csv"));
 	virtual ~CTDLLanguageComboBox();
@@ -39,13 +38,9 @@ protected:
 	mutable CString m_sSelLanguage;
 
 protected:
-	// Generated message map functions
 	afx_msg void OnDestroy();
-	afx_msg LRESULT OnPopulate(WPARAM wp, LPARAM lp);
+	afx_msg BOOL OnDropDown();
 	DECLARE_MESSAGE_MAP()
-
-protected:
-	virtual void PreSubclassWindow();
 
 protected:
 	struct LCB_ITEMDATA : public ODCB_ITEMDATA
@@ -53,17 +48,16 @@ protected:
 		CString sCompletion;
 	};
 
+	virtual void BuildCombo();
 	virtual ODCB_ITEMDATA* NewExtItemData() const { return new LCB_ITEMDATA(); }
+	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
-	virtual int CalcMinItemHeight(BOOL bList) const;
-
 protected:
 	BOOL AddDefaultLanguage();
 	int AddString(LPCTSTR szLanguage, LANGID nLangID, const CString& sCompletion, HBITMAP hbmFlag, COLORREF crBack = CLR_NONE);
 	int SelectLanguage(LPCTSTR szLanguage);
 	void InitialiseDropWidth();
-	void Populate();
 
 	static CString GetSelectedLanguageFile(LPCTSTR szLanguage, LPCTSTR szExt = _T("csv"), BOOL bRelative = FALSE);
 	static CString GetTranslationFolder();

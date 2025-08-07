@@ -29,9 +29,6 @@ CGanttDisplayComboBox::~CGanttDisplayComboBox()
 
 
 BEGIN_MESSAGE_MAP(CGanttDisplayComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CGanttDisplayComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 END_MESSAGE_MAP()

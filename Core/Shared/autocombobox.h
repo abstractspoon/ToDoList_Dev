@@ -93,7 +93,6 @@ private:
 	CMaskEdit* m_pEdit;   // Actual edit - default or from derived class
 
 protected:
-	// Generated message map functions
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnSelEndCancel();
 	afx_msg BOOL OnSelEndOK();

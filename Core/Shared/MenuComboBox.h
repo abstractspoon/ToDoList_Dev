@@ -14,33 +14,17 @@
 
 class CMenuComboBox : public CTabbedComboBox
 {
-// Construction
 public:
 	CMenuComboBox();
+	virtual ~CMenuComboBox();
 
-// Operations
-public:
 	BOOL Initialise(UINT nMenuID, UINT nSeparatorResID = 0);
 	BOOL Initialise(const CMenu& menu, UINT nSeparatorResID = 0);
 
 	CString GetMenuItemText(UINT nMenuID, BOOL bFullPath) const;
 	CString GetItemText(int nItem, BOOL bFullPath) const;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CMenuComboBox)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CMenuComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CMenuComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

@@ -29,7 +29,6 @@ class COwnerdrawComboBoxBase : public CComboBox, private CSubclasser
 {
 	DECLARE_DYNAMIC(COwnerdrawComboBoxBase)
 
-// Construction
 public:
 	COwnerdrawComboBoxBase(int nDefMinVisible = 30, int nItemIndentBelowHeadings = 16);
 	virtual ~COwnerdrawComboBoxBase();
@@ -50,7 +49,6 @@ public:
 	BOOL IsHeadingItem(int nItem) const;
 	BOOL IsDisabledItem(int nItem) const;
 
-// Attributes
 protected:
 	int m_nMaxTextWidth;
 	int m_nDefMinVisible;
@@ -62,7 +60,6 @@ protected:
 	CSubclassWnd m_scEdit;
 	CSubclassWnd m_scList;
 
-// Overrides
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual void PreSubclassWindow();
@@ -73,15 +70,16 @@ private:
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
-	// Generated message map functions
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg LRESULT OnSetFont(WPARAM , LPARAM);
 	afx_msg BOOL OnSelEndOK();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor); // for subclassing
+
+private:
+	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT BuildCombo(WPARAM wp, LPARAM lp);
 
 	// These are for extending the item data
 	afx_msg LRESULT OnCBGetItemData(WPARAM wParam, LPARAM lParam);
@@ -111,11 +109,18 @@ protected:
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual BOOL IsSelectableItem(int nItem) const;
 
+	// for derived classes
+	virtual void BuildCombo() { }
+
+	void CheckBuildCombo();
+	void RebuildCombo();
+
 	inline HWND GetEdit() const { return m_scEdit.GetHwnd(); }
 	inline HWND GetListbox() const { return m_scList.GetHwnd(); }
 
 	void InitItemHeight();
 	BOOL IsType(UINT nComboType) const;
+	BOOL HasStyle(UINT nStyle) const;
 	void RefreshDropWidth(BOOL bRecalc);
 	int GetMinVisible() const;
 

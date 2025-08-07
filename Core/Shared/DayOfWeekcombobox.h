@@ -12,36 +12,18 @@
 
 class CDayOfWeekComboBox : public CComboBox
 {
-// Construction
 public:
 	CDayOfWeekComboBox();
-
-// Attributes
-public:
-
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CWeekdayComboBox)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
 	virtual ~CDayOfWeekComboBox();
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CWeekdayComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
+	virtual void PreSubclassWindow();
 
+protected:
 	DECLARE_MESSAGE_MAP()
 
-	void InitCombo();
+protected:
+	void BuildCombo();
 };
 
 /////////////////////////////////////////////////////////////////////////////

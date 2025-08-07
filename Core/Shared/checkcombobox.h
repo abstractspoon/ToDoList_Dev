@@ -21,19 +21,12 @@ enum CCB_CHECKSTATE
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-class CCheckComboBox;
-
-void DDX_CheckItemData(CDataExchange* pDX, CCheckComboBox& combo, DWORD& dwItems);
-
-/////////////////////////////////////////////////////////////////////////////
 // CCheckComboBox window
 
 class CCheckComboBox : public CAutoComboBox
 {
 	DECLARE_DYNAMIC(CCheckComboBox);
 
-// Construction
 public:
 	CCheckComboBox(DWORD dwFlags = 0);
 	virtual ~CCheckComboBox();
@@ -61,6 +54,8 @@ public:
 	virtual int AddUniqueItem(const CString& sItem); // returns index or CB_ERR
     virtual int SelectString(int nStartAfter, LPCTSTR lpszString);
 
+	void DDX(CDataExchange* pDX, DWORD& itemsData);
+
 protected:
 	CString m_sText;
 	BOOL m_bTextFits;
@@ -71,16 +66,8 @@ protected:
 
 	const static int CHECKBOX_SIZE;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCheckComboBox)
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CCheckComboBox)
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	//}}AFX_MSG
 	afx_msg void OnDestroy();
 	afx_msg BOOL OnEditchange();
 	afx_msg BOOL OnDropdown();

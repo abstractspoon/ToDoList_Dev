@@ -14,13 +14,10 @@
 
 class CTDLFindTaskAttributeComboBox : public CTDLAttributeComboBox
 {
-// Construction
 public:
 	CTDLFindTaskAttributeComboBox();
 	virtual ~CTDLFindTaskAttributeComboBox();
 
-// Operations
-public:
 	BOOL SelectAttribute(const SEARCHPARAM& sp);
 	BOOL GetSelectedAttribute(SEARCHPARAM& sp) const;
 	BOOL SelectedAttributeIsDate() const;
@@ -28,7 +25,6 @@ public:
 	CString GetAttributeName(const SEARCHPARAM& sp) const;
 
 protected:
-
 	DECLARE_MESSAGE_MAP()
 
 	virtual BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;

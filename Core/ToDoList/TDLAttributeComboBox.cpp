@@ -32,9 +32,6 @@ CTDLAttributeComboBox::~CTDLAttributeComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLAttributeComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CTDLTaskAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -45,9 +42,7 @@ void CTDLAttributeComboBox::SetCustomAttributes(const CTDCCustomAttribDefinition
 	if (!Misc::MatchAllT(aAttribDefs, m_aAttribDefs, FALSE))
 	{
 		m_aAttribDefs.Copy(aAttribDefs);
-
-		if (GetSafeHwnd())
-			BuildCombo();
+		RebuildCombo();
 	}
 }
 
@@ -56,12 +51,14 @@ void CTDLAttributeComboBox::SetAttributeFilter(const CTDCAttributeMap& mapAttrib
 	if (!m_mapWantedAttrib.MatchAll(mapAttrib))
 	{
 		m_mapWantedAttrib.Copy(mapAttrib);
-		BuildCombo();
+		RebuildCombo();
 	}
 }
 
 BOOL CTDLAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, BOOL bRelative)
 {
+	CheckBuildCombo();
+
 	DWORD dwItemData = EncodeItemData(nAttribID, bRelative);
 
 	return (CDialogHelper::SelectItemByDataT(*this, dwItemData) != CB_ERR);
@@ -201,6 +198,9 @@ void CTDLAttributeComboBox::AddItem(const CString& sItem, TDC_ATTRIBUTE nAttribI
 
 void CTDLAttributeComboBox::BuildCombo()
 {
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
+
 	TDC_ATTRIBUTE nSelAttrib = GetSelectedAttribute();
 
 	CArray<SORTITEM, SORTITEM&> aItems, aCustomItems;
@@ -233,9 +233,9 @@ void CTDLAttributeComboBox::BuildCombo()
 
 	if (Misc::HasFlag(m_dwOptions, TDLACB_GROUPCUSTOMATTRIBS) && aCustomItems.GetSize())
 	{
-		ASSERT(!Misc::HasFlag(GetStyle(), CBS_SORT));
-		ASSERT(Misc::HasFlag(GetStyle(), CBS_OWNERDRAWFIXED));
-		ASSERT(Misc::HasFlag(GetStyle(), CBS_HASSTRINGS));
+		ASSERT(!HasStyle(CBS_SORT));
+		ASSERT(HasStyle(CBS_OWNERDRAWFIXED));
+		ASSERT(HasStyle(CBS_HASSTRINGS));
 
 		int nItem = AddString(CEnString(IDS_TDLBC_CUSTOMATTRIBS));
 		SetHeadingItem(nItem);

@@ -15,7 +15,6 @@
 
 class CTDLTimeTrackerTaskComboBox : public CTDLTaskComboBox
 {
-// Construction
 public:
 	CTDLTimeTrackerTaskComboBox();
 	virtual ~CTDLTimeTrackerTaskComboBox();
@@ -33,7 +32,6 @@ public:
 protected:
 	const CToDoCtrl* m_pTDC;
 
-	// Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
 
