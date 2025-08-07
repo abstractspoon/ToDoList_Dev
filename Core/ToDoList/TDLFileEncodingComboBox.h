@@ -14,13 +14,10 @@
 
 class CTDLFileEncodingComboBox : public CComboBox
 {
-// Construction
 public:
 	CTDLFileEncodingComboBox();
 	virtual ~CTDLFileEncodingComboBox();
 
-// Operations
-public:
 	BOOL SetSelectedEncoding(SFE_FORMAT nFormat);
 	SFE_FORMAT GetSelectedEncoding() const;
 

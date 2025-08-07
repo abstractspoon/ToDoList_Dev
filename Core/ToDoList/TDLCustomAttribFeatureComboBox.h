@@ -15,7 +15,6 @@
 
 class CTDLCustomAttribFeatureComboBox : public CCheckComboBox
 {
-// Construction
 public:
 	CTDLCustomAttribFeatureComboBox();
 	virtual ~CTDLCustomAttribFeatureComboBox();

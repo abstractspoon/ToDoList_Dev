@@ -14,7 +14,6 @@
 
 class CTDLThemeComboBox : public CColorComboBox
 {
-// Construction
 public:
 	CTDLThemeComboBox();
 	virtual ~CTDLThemeComboBox();

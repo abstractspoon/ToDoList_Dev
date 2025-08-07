@@ -14,7 +14,6 @@
 
 class CKanbanOptionComboBox : public CCheckComboBox
 {
-// Construction
 public:
 	CKanbanOptionComboBox();
 	virtual ~CKanbanOptionComboBox();
@@ -26,13 +25,13 @@ public:
 
 	DWORD GetOptionMask() const;
 
-// Attributes
 protected:
 	DWORD m_dwOptions;
 
 protected:
 	DECLARE_MESSAGE_MAP()
 
+protected:
 	void OnCheckChange(int nIndex);
 
 };

@@ -14,36 +14,19 @@
 
 class CTabbedComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTabbedComboBox(int nTabStops = 0);
+	virtual ~CTabbedComboBox();
 
-// Attributes
 protected:
 	const int TABSTOPS;
 
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTabbedComboBox)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTabbedComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTabbedComboBox)
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

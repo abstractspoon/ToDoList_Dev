@@ -17,7 +17,6 @@
 
 class CKanbanAttributeComboBox : public CComboBox
 {
-// Construction
 public:
 	CKanbanAttributeComboBox(BOOL bShowNone);
 	virtual ~CKanbanAttributeComboBox();

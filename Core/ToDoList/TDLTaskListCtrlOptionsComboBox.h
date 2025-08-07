@@ -18,7 +18,6 @@ class IPreferences;
 
 class CTDLTaskListCtrlOptionsComboBox : public CCheckComboBox
 {
-// Construction
 public:
 	CTDLTaskListCtrlOptionsComboBox();
 	virtual ~CTDLTaskListCtrlOptionsComboBox();

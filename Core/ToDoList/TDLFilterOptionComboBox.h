@@ -18,7 +18,6 @@
 
 class CTDLFilterOptionComboBox : public CCheckComboBox
 {
-// Construction
 public:
 	CTDLFilterOptionComboBox();
 	virtual ~CTDLFilterOptionComboBox();
@@ -29,7 +28,6 @@ public:
 	DWORD GetSelectedOptions() const;
 	void SetSelectedOptions(DWORD dwOptions);
 
-// Attributes
 protected:
 	DWORD m_dwOptions;
 

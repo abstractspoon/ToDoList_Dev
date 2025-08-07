@@ -20,7 +20,6 @@ class CBurndownChart;
 
 class CBurndownGraphComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CBurndownGraphComboBox();
 	virtual ~CBurndownGraphComboBox();

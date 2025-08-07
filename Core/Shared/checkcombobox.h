@@ -27,7 +27,6 @@ class CCheckComboBox : public CAutoComboBox
 {
 	DECLARE_DYNAMIC(CCheckComboBox);
 
-// Construction
 public:
 	CCheckComboBox(DWORD dwFlags = 0);
 	virtual ~CCheckComboBox();
@@ -68,7 +67,6 @@ protected:
 	const static int CHECKBOX_SIZE;
 
 protected:
-	// Generated message map functions
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnDestroy();
 	afx_msg BOOL OnEditchange();

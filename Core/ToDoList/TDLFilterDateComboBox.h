@@ -20,7 +20,6 @@ public:
 	CTDLFilterDateComboBox(int nNextNDays = 7);
 	virtual ~CTDLFilterDateComboBox();
 
-public:
 	FILTER_DATE GetSelectedFilter() const;
 	BOOL SelectFilter(FILTER_DATE nFilter);
 	void SetNextNDays(int nDays);

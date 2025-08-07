@@ -16,7 +16,6 @@
 
 class CImportExportComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly, LPCTSTR szFileExts = NULL);
 	virtual ~CImportExportComboBox();

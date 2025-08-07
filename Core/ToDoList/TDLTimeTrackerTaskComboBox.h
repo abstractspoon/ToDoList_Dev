@@ -15,7 +15,6 @@
 
 class CTDLTimeTrackerTaskComboBox : public CTDLTaskComboBox
 {
-// Construction
 public:
 	CTDLTimeTrackerTaskComboBox();
 	virtual ~CTDLTimeTrackerTaskComboBox();

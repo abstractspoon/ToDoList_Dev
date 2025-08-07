@@ -25,13 +25,10 @@ enum // options
 
 class CTDLAttributeComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTDLAttributeComboBox(DWORD dwOptions = 0);
 	virtual ~CTDLAttributeComboBox();
 
-// Operations
-public:
 	void SetAttributeFilter(const CTDCAttributeMap& mapAttrib);
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, BOOL bRelative = FALSE);
@@ -45,7 +42,6 @@ public:
 	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttribID);
 	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttribID, CString& sCustAttribID);
 
-	// Attributes
 protected:
 	CTDCCustomAttribDefinitionArray m_aAttribDefs;
 	CTDCAttributeMap m_mapWantedAttrib;

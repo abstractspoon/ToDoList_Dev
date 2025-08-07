@@ -14,7 +14,6 @@ class IPreferences;
 
 class CHistoryComboBox : public CComboBox
 {
-// Construction
 public:
 	CHistoryComboBox();
 	virtual ~CHistoryComboBox();

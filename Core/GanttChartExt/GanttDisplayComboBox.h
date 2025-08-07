@@ -20,7 +20,6 @@ class CGanttCtrl;
 
 class CGanttDisplayComboBox : public CTabbedComboBox
 {
-// Construction
 public:
 	CGanttDisplayComboBox();
 	virtual ~CGanttDisplayComboBox();

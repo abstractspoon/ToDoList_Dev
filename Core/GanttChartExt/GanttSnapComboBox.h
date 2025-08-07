@@ -18,7 +18,6 @@ class CGanttCtrl;
 
 class CGanttSnapComboBox : public CComboBox
 {
-// Construction
 public:
 	CGanttSnapComboBox();
 	virtual ~CGanttSnapComboBox();
@@ -29,7 +28,6 @@ public:
 	GTLC_SNAPMODE GetSelectedMode() const;
 
 protected:
-	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 };
 

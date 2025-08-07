@@ -15,7 +15,6 @@
 
 class CTDLLanguageComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTDLLanguageComboBox(LPCTSTR szFilter = _T("*.csv"));
 	virtual ~CTDLLanguageComboBox();
@@ -39,7 +38,6 @@ protected:
 	mutable CString m_sSelLanguage;
 
 protected:
-	// Generated message map functions
 	afx_msg void OnDestroy();
 	afx_msg BOOL OnDropDown();
 	DECLARE_MESSAGE_MAP()

@@ -12,7 +12,6 @@
 
 class CMonthComboBox : public CComboBox
 {
-// Construction
 public:
 	CMonthComboBox();
 	virtual ~CMonthComboBox();

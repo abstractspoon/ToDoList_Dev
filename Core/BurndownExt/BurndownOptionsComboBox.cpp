@@ -69,9 +69,6 @@ CBurndownOptionsComboBox::~CBurndownOptionsComboBox()
 
 
 BEGIN_MESSAGE_MAP(CBurndownOptionsComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CCBurndownOptionsComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

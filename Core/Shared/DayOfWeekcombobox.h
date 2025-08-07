@@ -12,7 +12,6 @@
 
 class CDayOfWeekComboBox : public CComboBox
 {
-// Construction
 public:
 	CDayOfWeekComboBox();
 	virtual ~CDayOfWeekComboBox();
@@ -21,9 +20,9 @@ protected:
 	virtual void PreSubclassWindow();
 
 protected:
-	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
+protected:
 	void BuildCombo();
 };
 

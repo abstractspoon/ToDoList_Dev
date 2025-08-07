@@ -15,13 +15,10 @@
 
 class CTDLFilterComboBox : public CTabbedComboBox
 {
-// Construction
 public:
 	CTDLFilterComboBox();
 	virtual ~CTDLFilterComboBox();
 
-// Attributes
-public:
 	FILTER_SHOW GetSelectedFilter() const;
 	FILTER_SHOW GetSelectedFilter(CString& sAdvFilter) const;
 	BOOL SelectFilter(FILTER_SHOW nShow, LPCTSTR szAdvFilter = NULL);
@@ -32,13 +29,11 @@ public:
 
 	void ShowDefaultFilters(BOOL bShow);
 
-// Operations
 protected:
 	BOOL m_bShowDefaultFilters;
 	CStringArray m_aAdvancedFilterNames;
 
 protected:
-	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 protected:

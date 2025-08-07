@@ -23,7 +23,6 @@ enum
 
 class CColorComboBox : public CAutoComboBox
 {
-// Construction
 public:
 	CColorComboBox(BOOL dwFlags = FALSE, DWORD dwAutoComboFlags = 0);
 	virtual ~CColorComboBox();
@@ -34,7 +33,6 @@ public:
 	COLORREF SetColor(int nIndex, COLORREF color);
 	COLORREF SetColor(LPCTSTR szDescription, COLORREF color);
 
-// Attributes
 protected:
 	DWORD m_dwFlags;
 

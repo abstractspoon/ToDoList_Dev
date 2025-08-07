@@ -36,7 +36,6 @@ protected:
 	DWORD m_dwShow;
 
 protected:
-	// Generated message map functions
 	DECLARE_MESSAGE_MAP()
 
 protected:
