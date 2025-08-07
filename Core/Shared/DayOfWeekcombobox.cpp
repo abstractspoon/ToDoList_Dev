@@ -42,10 +42,9 @@ void CDayOfWeekComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
+	ASSERT(!(GetStyle() & CBS_SORT));
 
 	CLocalizer::EnableTranslation(*this, FALSE);
-
-	ModifyStyle(CBS_SORT, 0); // Unsorted
 
 	for (int nDay = 0; nDay < 7; nDay++)
 	{

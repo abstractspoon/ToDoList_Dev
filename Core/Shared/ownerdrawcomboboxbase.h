@@ -29,7 +29,6 @@ class COwnerdrawComboBoxBase : public CComboBox, private CSubclasser
 {
 	DECLARE_DYNAMIC(COwnerdrawComboBoxBase)
 
-// Construction
 public:
 	COwnerdrawComboBoxBase(int nDefMinVisible = 30, int nItemIndentBelowHeadings = 16);
 	virtual ~COwnerdrawComboBoxBase();
@@ -50,7 +49,6 @@ public:
 	BOOL IsHeadingItem(int nItem) const;
 	BOOL IsDisabledItem(int nItem) const;
 
-// Attributes
 protected:
 	int m_nMaxTextWidth;
 	int m_nDefMinVisible;
@@ -62,7 +60,6 @@ protected:
 	CSubclassWnd m_scEdit;
 	CSubclassWnd m_scList;
 
-// Overrides
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual void PreSubclassWindow();
@@ -73,7 +70,6 @@ private:
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
-	// Generated message map functions
 	afx_msg BOOL OnSelEndOK();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnDestroy();
@@ -124,6 +120,7 @@ protected:
 
 	void InitItemHeight();
 	BOOL IsType(UINT nComboType) const;
+	BOOL HasStyle(UINT nStyle) const;
 	void RefreshDropWidth(BOOL bRecalc);
 	int GetMinVisible() const;
 

@@ -42,10 +42,9 @@ void CMonthComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
+	ASSERT(!(GetStyle() & CBS_SORT));
 
 	CLocalizer::EnableTranslation(*this, FALSE);
-
-	ModifyStyle(CBS_SORT, 0); // Unsorted
 
 	for (int nMonth = 1; nMonth <= 12; nMonth++)
 		CDialogHelper::AddStringT(*this, CDateHelper::GetMonthName(nMonth, FALSE), nMonth);

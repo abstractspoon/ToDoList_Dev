@@ -43,7 +43,7 @@ void CTDLTimeTrackerTaskComboBox::ResetContent()
 
 int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL)
 {
-	ASSERT((GetStyle() & CBS_SORT) == 0);
+	ASSERT(!HasStyle(CBS_SORT));
 
 	if (!pTTL)
 	{

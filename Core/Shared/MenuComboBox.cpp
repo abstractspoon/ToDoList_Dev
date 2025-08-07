@@ -53,11 +53,8 @@ BOOL CMenuComboBox::Initialise(UINT nMenuID, UINT nSeparatorResID)
 
 BOOL CMenuComboBox::Initialise(const CMenu& menu, UINT nSeparatorResID)
 {
-	if (!GetSafeHwnd() || (GetStyle() & CBS_SORT))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	ASSERT(GetSafeHwnd());
+	ASSERT(!HasStyle(CBS_SORT));
 
 	ResetContent();
 

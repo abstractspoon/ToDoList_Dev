@@ -233,9 +233,9 @@ void CTDLAttributeComboBox::BuildCombo()
 
 	if (Misc::HasFlag(m_dwOptions, TDLACB_GROUPCUSTOMATTRIBS) && aCustomItems.GetSize())
 	{
-		ASSERT(!Misc::HasFlag(GetStyle(), CBS_SORT));
-		ASSERT(Misc::HasFlag(GetStyle(), CBS_OWNERDRAWFIXED));
-		ASSERT(Misc::HasFlag(GetStyle(), CBS_HASSTRINGS));
+		ASSERT(!HasStyle(CBS_SORT));
+		ASSERT(HasStyle(CBS_OWNERDRAWFIXED));
+		ASSERT(HasStyle(CBS_HASSTRINGS));
 
 		int nItem = AddString(CEnString(IDS_TDLBC_CUSTOMATTRIBS));
 		SetHeadingItem(nItem);

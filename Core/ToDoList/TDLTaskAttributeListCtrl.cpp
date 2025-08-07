@@ -2582,7 +2582,7 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 
 	if (Misc::StatesDiffer(bIsReadOnly, bWantReadOnly))
 	{
-		// Update the combo sort style for when it's recreated
+		// Update the combo sort style FOR WHEN IT'S RECREATED
 		combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
 
 		if (!CDialogHelper::SetAutoComboReadOnly(combo, TRUE, bWantReadOnly, COMBO_DROPHEIGHT))

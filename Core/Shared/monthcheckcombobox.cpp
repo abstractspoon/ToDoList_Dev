@@ -34,10 +34,9 @@ void CMonthCheckComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
+	ASSERT(!HasStyle(CBS_SORT));
 
 	CLocalizer::EnableTranslation(*this, FALSE);
-
-	ModifyStyle(CBS_SORT, 0); // Unsorted
 
 	for (int nMonth = 1; nMonth <= 12; nMonth++)
 	{

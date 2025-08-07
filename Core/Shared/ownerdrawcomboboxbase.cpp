@@ -83,6 +83,8 @@ int COwnerdrawComboBoxBase::SetDisabledItem(int nItem, BOOL bDisabled)
 
 int COwnerdrawComboBoxBase::SetHeadingItem(int nItem, BOOL bHeading)
 {
+	ASSERT(!HasStyle(CBS_SORT));
+
 	ODCB_ITEMDATA* pItemData = GetAddExtItemData(nItem);
 
 	if (pItemData == NULL)
@@ -197,7 +199,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	// Because we're not handling WM_ERASEBKGND so as to eliminate 
 	// flicker we may need to fill any 'dead' zone below the last item
-	if (IsType(CBS_SIMPLE) && (GetStyle() & CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
+	if (IsType(CBS_SIMPLE) && HasStyle(CBS_NOINTEGRALHEIGHT) && (nItem == (GetCount() - 1)))
 	{
 		CRect rDead(rItem);
 		rDead.OffsetRect(0, rDead.Height());
@@ -221,7 +223,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (nItem != CB_ERR) // Any item selected?
 	{
 		// draw text
-		if (GetStyle() & CBS_HASSTRINGS)
+		if (HasStyle(CBS_HASSTRINGS))
 			GetLBText(nItem, sText);
 	}
 	else
@@ -345,7 +347,7 @@ int COwnerdrawComboBoxBase::CalcMinItemHeight(BOOL bList) const
 
 void COwnerdrawComboBoxBase::PreSubclassWindow() 
 {
-	ASSERT(GetStyle() & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE));
+	ASSERT(HasStyle(CBS_OWNERDRAWFIXED) || HasStyle(CBS_OWNERDRAWVARIABLE));
 
 	InitItemHeight();
 
@@ -466,6 +468,11 @@ void COwnerdrawComboBoxBase::OnSize(UINT nType, int cx, int cy)
 BOOL COwnerdrawComboBoxBase::IsType(UINT nComboType) const
 {
 	return ((GetStyle() & 0xf) == nComboType);
+}
+
+BOOL COwnerdrawComboBoxBase::HasStyle(UINT nStyle) const 
+{ 
+	return ((GetStyle() & nStyle) == nStyle); 
 }
 
 int COwnerdrawComboBoxBase::FindStringExact(int nIndexStart, LPCTSTR lpszFind) const

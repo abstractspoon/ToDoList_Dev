@@ -157,9 +157,8 @@ void CTDLPriorityComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
+	ASSERT(!HasStyle(CBS_SORT));
 
-	ModifyStyle(CBS_SORT, 0); // Unsorted
-	
 	BOOL bHasColors = m_aColors.GetSize();
 
 	// first item are 'Any' and  'None' which never have a colour

@@ -87,8 +87,7 @@ void CTDLReminderPeriodComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
-
-	ModifyStyle(CBS_SORT, 0); // Unsorted
+	ASSERT(!HasStyle(CBS_SORT));
 
 	for (int nData = 0; nData < NUM_DATA; nData++)
 	{

@@ -44,8 +44,6 @@ BOOL CBurndownGraphComboBox::Initialise(const CGraphsMap& mapGraphs)
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
 
-	ModifyStyle(CBS_SORT, 0); // Unsorted
-
 	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
 	{
 		const GRAPHTYPE& gt = GRAPHTYPES[nType];
