@@ -598,7 +598,6 @@ namespace LoggedTimeUIExtension
 												m_Trans);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
-			m_Trans.Translate(dlg);
 
 			m_TimeLog.ForceShowSelection = true;
 
@@ -648,7 +647,6 @@ namespace LoggedTimeUIExtension
 											 m_Trans);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
-			m_Trans.Translate(dlg);
 
 			m_TimeLog.ForceShowSelection = true;
 

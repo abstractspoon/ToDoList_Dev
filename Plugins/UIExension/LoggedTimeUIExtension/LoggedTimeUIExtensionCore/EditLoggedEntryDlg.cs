@@ -34,7 +34,7 @@ namespace LoggedTimeUIExtension
 
 			if (entry.TaskId == 0)
 			{
-				m_TaskTitle.Text = m_TaskId.Text = "<none>";
+				m_TaskTitle.Text = m_TaskId.Text = trans.Translate("<none>", Translator.Type.Text);
 			}
 			else
 			{
@@ -43,6 +43,8 @@ namespace LoggedTimeUIExtension
 			}
 
 			m_Attributes.Initialise(entry, workWeek, isoDateTimes, readonlyTask, true, trans);
+
+			trans.Translate(this);
 		}
 
 		public Calendar.AppointmentDates Dates
