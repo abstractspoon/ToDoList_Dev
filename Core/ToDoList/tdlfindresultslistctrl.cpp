@@ -49,10 +49,12 @@ int FTDRESULT::HasIcon() const
 
 void FTDRESULT::DrawIcon(CDC* pDC, const CRect& rText) const
 {
-	int nImage = pTDC->GetTaskIconIndex(dwTaskID);
-
-	if (nImage != -1)
-		pTDC->GetTaskIconImageList().DrawVerticallyCentred(pDC, nImage, rText);
+	GraphicsMisc::DrawCentred(pDC,
+							  pTDC->GetTaskIconImageList(),
+							  pTDC->GetTaskIconIndex(dwTaskID),
+							  rText,
+							  FALSE,
+							  TRUE); // vertically centred
 
 	if (IsReference())
 		GraphicsMisc::DrawShortcutOverlay(pDC, rText);

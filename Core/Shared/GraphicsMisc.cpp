@@ -1473,6 +1473,44 @@ void GraphicsMisc::AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags)
 	::OffsetRect(pRect, (ptOtherRef.x - ptRef.x), (ptOtherRef.y - ptRef.y));
 }
 
+BOOL GraphicsMisc::DrawCentred(CDC* pDC, HIMAGELIST hIl, int nImage, LPCRECT prcImage, BOOL bCentreHorz, BOOL bCentreVert, UINT nStyle)
+{
+	ASSERT(bCentreHorz || bCentreVert);
+
+	if (nImage == -1)
+		return FALSE;
+
+	CRect rImage(prcImage);
+
+	CSize sizeIcon;
+	CEnImageList::GetImageSize(hIl, sizeIcon);
+
+	rImage.right = (rImage.left + sizeIcon.cx);
+	rImage.bottom = (rImage.top + sizeIcon.cy);
+
+	GraphicsMisc::CentreRect(&rImage, prcImage, bCentreHorz, bCentreVert);
+
+	return ImageList_Draw(hIl, nImage, *pDC, rImage.left, rImage.top, nStyle);
+}
+
+BOOL GraphicsMisc::DrawCentred(CDC* pDC, HICON hIcon, LPCRECT prcIcon, BOOL bCentreHorz, BOOL bCentreVert)
+{
+	ASSERT(bCentreHorz || bCentreVert);
+
+	if (!hIcon)
+		return FALSE;
+
+	CRect rIcon(prcIcon);
+	CSize sizeIcon = GetIconSize(hIcon);
+
+	rIcon.right = (rIcon.left + sizeIcon.cx);
+	rIcon.bottom = (rIcon.top + sizeIcon.cy);
+
+	GraphicsMisc::CentreRect(&rIcon, prcIcon, bCentreHorz, bCentreVert);
+
+	::DrawIconEx(*pDC, rIcon.left, rIcon.top, hIcon, sizeIcon.cx, sizeIcon.cy, 0, NULL, DI_NORMAL);
+}
+
 COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags)
 {
 	if (nState != GMIS_NONE)

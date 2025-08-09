@@ -564,11 +564,13 @@ void CTDLTaskTreeCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
 void CTDLTaskTreeCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
 {
 	DWORD dwTaskID = m_dragTree.GetItemData(hti);
-	int nImage = GetTaskIconIndex(dwTaskID);
 
-	if (nImage != -1)
-		m_ilTaskIcons.Draw(&dc, nImage, rItem.TopLeft());
-
+	GraphicsMisc::DrawCentred(&dc, 
+							  m_ilTaskIcons,
+							  GetTaskIconIndex(dwTaskID),
+							  rItem,
+							  FALSE, 
+							  TRUE);
 	CRect rText(rItem);
 	rText.OffsetRect(ICON_SIZE, 0);
 

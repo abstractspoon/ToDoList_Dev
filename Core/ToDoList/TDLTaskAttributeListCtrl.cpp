@@ -2265,14 +2265,13 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, CRect& 
 	if (sIcon.IsEmpty())
 		return FALSE;
 
-	CPoint ptIcon(GetIconPos(rIcon));
 	BOOL bDrawn = FALSE;
 
 	if (bIconIsFile)
 	{
 		bDrawn = CFileEdit::DrawFileIcon(pDC,
 										 sIcon,
-										 ptIcon,
+										 GetIconPos(rIcon),
 										 m_iconCache,
 										 this,
 										 m_sCurrentFolder,
@@ -2280,7 +2279,12 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, CRect& 
 	}
 	else
 	{
-		bDrawn = m_ilIcons.Draw(pDC, sIcon, ptIcon, ILD_TRANSPARENT);
+		bDrawn = GraphicsMisc::DrawCentred(pDC, 
+										   m_ilIcons, 
+										   m_ilIcons.GetImageIndex(sIcon), 
+										   rIcon,
+										   FALSE,
+										   TRUE);
 	}
 
 	if (bDrawn)
