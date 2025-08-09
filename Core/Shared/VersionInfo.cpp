@@ -100,7 +100,7 @@ CString CVersionInfo::ReformatVersionString(LPCTSTR pszFileVersion,
 	// File Version
 	//
 	CString strFileVersion = pszFileVersion;
-	strFileVersion.Replace(_T(" "), _T(""));	//remove spaces
+	strFileVersion.Remove(' ');
 
 	TCHAR* pszFileVersionLocal = new TCHAR[strFileVersion.GetLength()+1];
 	lstrcpy(pszFileVersionLocal, strFileVersion);

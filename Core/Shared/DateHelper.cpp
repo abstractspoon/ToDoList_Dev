@@ -1602,7 +1602,7 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 
 		if (dwFlags & DHFD_NOYEAR)
 		{
-			sFormat.Replace(_T("y"), _T(""));
+			sFormat.Remove('y');
 		}
 		else if (dwFlags & DHFD_NOCENTURY)
 		{
@@ -1611,7 +1611,7 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 
 		if (dwFlags & DHFD_NODAY)
 		{
-			sFormat.Replace(_T("d"), _T(""));
+			sFormat.Remove('d');
 		}
 		
 		// Handle doubled-up and/or trailing date separators

@@ -34,6 +34,8 @@ INIENTRY::INIENTRY(LPCTSTR szName, LPCTSTR szValue, BOOL bQuote)
 
 CString INIENTRY::Format() const
 {
+	ASSERT(sValue.Find('\"') == -1);
+
 	CString sEntry;
 
 	if (bQuoted)
@@ -52,7 +54,8 @@ BOOL INIENTRY::Parse(const CString& sEntry)
 		return FALSE;
 
 	// remove quotes
-	bQuoted = sValue.Replace(_T("\""), _T(""));
+	bQuoted = sValue.Remove('\"');
+	ASSERT((bQuoted == 0) || (bQuoted == 2));
 
 	return !sName.IsEmpty();
 }

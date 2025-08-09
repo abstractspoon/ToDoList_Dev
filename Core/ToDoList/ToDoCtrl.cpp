@@ -8285,7 +8285,7 @@ CString CToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 			sText.LoadString(IDS_TDC_FIELD_PROJECT);
 		}
 
-		sText.Replace(_T("&"), _T(""));
+		sText.Remove('&');
 	}
 
 	return sText;
