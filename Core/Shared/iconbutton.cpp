@@ -60,15 +60,9 @@ void CIconButton::SetIcon(HICON hIcon, BOOL bCleanup)
 void CIconButton::CalcExtraSpace(const CRect& rClient, CRect& rExtra) const
 {
 	if (GetWindowTextLength() == 0)
-	{
-		rExtra.SetRect(0, 0, m_nSize, m_nSize);
-
-		GraphicsMisc::CentreRect(rExtra, rClient, TRUE, TRUE);
-	}
+		rExtra = GraphicsMisc::CalcCentredRect(m_nSize, rClient, TRUE, TRUE);
 	else
-	{
 		CCustomButton::CalcExtraSpace(rClient, rExtra);
-	}
 }
 
 BOOL CIconButton::PreTranslateMessage(MSG* pMsg)

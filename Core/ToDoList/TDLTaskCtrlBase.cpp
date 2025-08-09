@@ -3057,10 +3057,7 @@ void CTDLTaskCtrlBase::DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITE
 				int nImageSize = m_ilTaskIcons.GetImageSize();
 
 				if (rColumn.Width() >= nImageSize)
-				{
-					//CPoint pt(CalcColumnIconTopLeft(rColumn, nImageSize));
-					GraphicsMisc::DrawCentred(pDC, m_ilTaskIcons, nIcon, rColumn, FALSE, TRUE);
-				}
+					GraphicsMisc::DrawCentred(pDC, m_ilTaskIcons, nIcon, rColumn, TRUE, TRUE);
 			}
 		}
 		break;

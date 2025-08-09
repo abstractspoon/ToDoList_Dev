@@ -1426,13 +1426,8 @@ BOOL CTreeListCtrl::GetTreeIconRect(HTREEITEM hti, CRect& rIcon) const
 
 BOOL CTreeListCtrl::GetTreeIconRect(const CRect& rLabel, CRect& rIcon)
 {
-	rIcon = rLabel;
-
-	rIcon.right = (rIcon.left + IMAGE_SIZE);
-	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
-
+	rIcon = GraphicsMisc::CalcCentredRect(IMAGE_SIZE, rLabel, FALSE, TRUE);
 	rIcon.OffsetRect(-(IMAGE_SIZE + 2), 0);
-	GraphicsMisc::CentreRect(rIcon, rLabel, FALSE, TRUE);
 
 	return !rIcon.IsRectEmpty();
 }
