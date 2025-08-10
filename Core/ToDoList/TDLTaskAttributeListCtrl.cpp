@@ -2618,14 +2618,18 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 
 void CTDLTaskAttributeListCtrl::RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel)
 {
+	combo.ResetContent();
 	combo.EnableMultiSelection(bMultiSel);
 
-	CStringArray aAllValues;
-	
-	aAllValues.Copy(aDefValues);
-	aAllValues.Append(aUserValues);
+	if (aDefValues.GetSize() || aUserValues.GetSize())
+	{
+		CStringArray aAllValues;
 
-	combo.SetStrings(aAllValues);
+		aAllValues.Copy(aDefValues);
+		aAllValues.Append(aUserValues);
+
+		combo.SetStrings(aAllValues);
+	}
 }
 
 void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
