@@ -2876,7 +2876,7 @@ void CTDLTaskCtrlBase::DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITE
 	case TDCC_PERCENT:
 		if (!sTaskColText.IsEmpty())
 		{
-			CRect rPercent;
+			CRect rPercent(rColumn);
 			rPercent.DeflateRect(2, 1, 3, 2);
 
 			// draw default text first
