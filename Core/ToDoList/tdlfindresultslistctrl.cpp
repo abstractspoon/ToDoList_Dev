@@ -79,6 +79,10 @@ struct NMLVSCROLL
 
 /////////////////////////////////////////////////////////////////////////////
 
+const int ICON_PADDING = GraphicsMisc::ScaleByDPIFactor(3);
+
+/////////////////////////////////////////////////////////////////////////////
+
 enum
 {
 	COL_TASKTITLE,
@@ -144,7 +148,7 @@ void CTDLFindResultsListCtrl::RecalcTextOffset()
 int CTDLFindResultsListCtrl::GetTextOffset(const FTDRESULT* pRes) const
 {
 	if (pRes && (pRes->HasIcon() || pRes->IsReference()))
-		return (pRes->pTDC->GetTaskIconImageList().GetImageWidth() + 2);
+		return (pRes->pTDC->GetTaskIconImageList().GetImageWidth() + ICON_PADDING);
 
 	// else
 	return NULL;
@@ -387,7 +391,10 @@ void CTDLFindResultsListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const 
 void CTDLFindResultsListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
 {
 	if (m_nTextOffset == 0)
+	{
 		CEnListCtrl::DrawItemBackground(pDC, nItem, rItem, crBack, bSelected, bDropHighlighted, bFocused);
+		return;
+	}
 
 	CRect rText(rItem);
 	rText.left += m_nTextOffset;
