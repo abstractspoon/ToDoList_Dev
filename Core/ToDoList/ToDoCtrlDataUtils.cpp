@@ -6210,6 +6210,9 @@ int CTDCMultiTasker::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 			return m_data.TaskHasDate(dwTaskID, TDCD_DONEDATE);
 		break;
 
+	case TDCA_OFFSETTASK:
+		return (CanEditTask(dwTaskID, TDCA_STARTDATE) && CanEditTask(dwTaskID, TDCA_DUEDATE)); // RECURSIVE CALLS
+
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
 		if (bEditable)
