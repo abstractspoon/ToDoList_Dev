@@ -37,7 +37,7 @@ CInputListCtrl::CColumnData2::CColumnData2()
 	: 
 	CColumnData(), 
 	bEditEnabled(TRUE), 
-	nType(ILCT_TEXT) 
+	nType(ILCT_TEXT)
 {
 }
 
@@ -93,6 +93,7 @@ void CInputListCtrl::InitState()
 	m_bNotifyDuplicates = FALSE;
 	m_nCurCol = -1;
 	m_nLastEditCol = m_nLastEditRow = -1;
+	m_bSingleClickEditing = FALSE;
 
 	// Hot tracker might have been initialised in PreSubclassWindow
 	if (GetSafeHwnd() && CThemed::AreControlsThemed() && !m_hotTrack.IsInitialized())
