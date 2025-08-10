@@ -24,10 +24,7 @@ CIconButton::~CIconButton()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CIconButton, CCustomButton)
-	//{{AFX_MSG_MAP(CIconButton)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -54,12 +51,4 @@ void CIconButton::CalcExtraSpace(const CRect& rClient, CRect& rExtra) const
 		rExtra = GraphicsMisc::CalcCentredRect(m_nSize, rClient, TRUE, TRUE);
 	else
 		CCustomButton::CalcExtraSpace(rClient, rExtra);
-}
-
-BOOL CIconButton::PreTranslateMessage(MSG* pMsg)
-{
-	if (m_tooltip.GetSafeHwnd())
-		m_tooltip.RelayEvent(pMsg);
-
-	return CCustomButton::PreTranslateMessage(pMsg);
 }

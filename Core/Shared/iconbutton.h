@@ -16,9 +16,9 @@
 
 class CIconButton : public CCustomButton
 {
-// Construction
 public:
 	CIconButton(int nSize = 16);
+	virtual ~CIconButton();
 
 	void SetIcon(HICON hIcon, BOOL bCleanup = TRUE);
 
@@ -30,21 +30,7 @@ protected:
 	virtual void DoExtraPaint(CDC* pDC, const CRect& rExtra);
 	virtual void CalcExtraSpace(const CRect& rClient, CRect& rExtra) const;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CIconButton)
-	//}}AFX_VIRTUAL
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-
-// Implementation
-public:
-	virtual ~CIconButton();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CIconButton)
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 };
 
