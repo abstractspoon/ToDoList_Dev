@@ -9,6 +9,7 @@
 
 #include "custombutton.h"
 #include "enimagelist.h"
+#include "icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CIconButton window
@@ -22,7 +23,7 @@ public:
 	void SetIcon(HICON hIcon, BOOL bCleanup = TRUE);
 
 protected:
-	HICON m_hIcon;
+	CIcon m_icon;
 	int m_nSize;
 
 protected:

@@ -16,14 +16,12 @@ static char THIS_FILE[] = __FILE__;
 
 CIconButton::CIconButton(int nSize) 
 	: 
-	m_nSize(GraphicsMisc::ScaleByDPIFactor(nSize)), 
-	m_hIcon(NULL)
+	m_nSize(GraphicsMisc::ScaleByDPIFactor(nSize)) 
 {
 }
 
 CIconButton::~CIconButton()
 {
-	::DestroyIcon(m_hIcon);
 }
 
 
@@ -37,21 +35,14 @@ END_MESSAGE_MAP()
 
 void CIconButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 {
-	if (m_hIcon)
-		::DrawIconEx(*pDC, rExtra.left, rExtra.top, m_hIcon, m_nSize, m_nSize, 0, NULL, DI_NORMAL);
+	if (m_icon.IsValid())
+		::DrawIconEx(*pDC, rExtra.left, rExtra.top, m_icon, m_nSize, m_nSize, 0, NULL, DI_NORMAL);
 }
 
 void CIconButton::SetIcon(HICON hIcon, BOOL bCleanup)
 { 
-	::DestroyIcon(m_hIcon);
-
-	if (hIcon)
-	{
-		if (bCleanup)
-			m_hIcon = hIcon;
-		else
-			m_hIcon = ::CopyIcon(hIcon);
-	}
+	m_icon.Destroy();
+	m_icon.Attach(hIcon, bCleanup);
 	
 	if (GetSafeHwnd())
 		Invalidate();
