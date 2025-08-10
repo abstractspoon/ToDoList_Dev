@@ -110,10 +110,12 @@ void TDCREMINDER::DrawIcon(CDC* pDC, const CRect& rText) const
 
 	if (pTDC)
 	{
-		int nImage = pTDC->GetTaskIconIndex(dwTaskID);
-
-		if (nImage != -1)
-			pTDC->GetTaskIconImageList().DrawVerticallyCentred(pDC, nImage, rText);
+		GraphicsMisc::DrawCentred(pDC, 
+								  pTDC->GetTaskIconImageList(), 
+								  pTDC->GetTaskIconIndex(dwTaskID),
+								  rText, 
+								  FALSE, 
+								  TRUE); // vertically centred
 	}
 }
 

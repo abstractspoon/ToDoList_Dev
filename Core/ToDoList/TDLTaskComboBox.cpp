@@ -179,11 +179,7 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 		CRect rImage(rText);
 		rImage.OffsetRect(-ICON_INDENT, 0);
 
-		if (!bList)
-			rImage.top--;
-
-		if (nImage != -1)
-			m_pIlTasks->Draw(&dc, nImage, rImage.TopLeft());
+		GraphicsMisc::DrawCentred(&dc, *m_pIlTasks, nImage, rImage, FALSE, TRUE);
 
 		if (dwRefID)
 			GraphicsMisc::DrawShortcutOverlay(&dc, rImage);

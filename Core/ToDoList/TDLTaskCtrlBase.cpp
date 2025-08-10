@@ -3057,10 +3057,7 @@ void CTDLTaskCtrlBase::DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITE
 				int nImageSize = m_ilTaskIcons.GetImageSize();
 
 				if (rColumn.Width() >= nImageSize)
-				{
-					CPoint pt(CalcColumnIconTopLeft(rColumn, nImageSize));
-					m_ilTaskIcons.Draw(pDC, nIcon, pt);
-				}
+					GraphicsMisc::DrawCentred(pDC, m_ilTaskIcons, nIcon, rColumn, TRUE, TRUE);
 			}
 		}
 		break;
@@ -3305,10 +3302,16 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 
 				if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(aImages[nImg], sImage, sDummy))
 				{
-					m_ilTaskIcons.Draw(pDC, sImage, rCol.TopLeft());
-					rCol.left += (COL_ICON_SIZE + COL_ICON_SPACING);
-
-					bOverrun = ((rCol.left + COL_ICON_SIZE) > rCol.right);
+					if (GraphicsMisc::DrawCentred(pDC, 
+												  m_ilTaskIcons,
+												  m_ilTaskIcons.GetImageIndex(sImage),
+												  rCol,
+												  FALSE,
+												  TRUE))
+					{
+						rCol.left += (COL_ICON_SIZE + COL_ICON_SPACING);
+						bOverrun = ((rCol.left + COL_ICON_SIZE) > rCol.right);
+					}
 				}
 			}
 			

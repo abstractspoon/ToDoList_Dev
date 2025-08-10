@@ -421,12 +421,7 @@ void CTDLLanguageComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	
 	if (!pItemData->bHeading)
 	{
-		CRect rIcon(rect);
-		rIcon.bottom = (rIcon.top + FLAG_SIZE);
-
-		GraphicsMisc::CentreRect(rIcon, rText, FALSE, TRUE);
-		VERIFY(m_il.Draw(&dc, nItem, rIcon.TopLeft(), ILD_TRANSPARENT));
-		
+		VERIFY(GraphicsMisc::DrawCentred(&dc, m_il, nItem, rect, FALSE, TRUE));
 		rText.left += FLAG_SIZE + 5;
 	}
 

@@ -46,10 +46,6 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 									DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
 	CRect rImage(rect);
-	rImage.bottom = (rImage.top + m_ilImages.GetImageSize());
-
-	GraphicsMisc::CentreRect(rImage, rect, FALSE, TRUE);
-
 	CStringArray aImages;
 	int nNumImage = 0;
 	
@@ -91,12 +87,13 @@ void CTDLIconComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 			if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(aImages[nImg], sImage, sName))
 			{
-				// draw image
-				if (m_ilImages.GetSafeHandle() && !sImage.IsEmpty())
-				{
-					CPoint pt = rImage.TopLeft();
-
-					m_ilImages.Draw(&dc, sImage, pt, ILD_TRANSPARENT);
+				if (GraphicsMisc::DrawCentred(&dc, 
+											  m_ilImages, 
+											  m_ilImages.GetImageIndex(sImage),
+											  rImage, 
+											  FALSE, 
+											  TRUE)) // vertically centred
+ 				{
 					rImage.left += (ICON_SIZE + 2);
 				}
 

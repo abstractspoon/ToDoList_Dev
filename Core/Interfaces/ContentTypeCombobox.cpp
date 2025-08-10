@@ -101,17 +101,11 @@ void CContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	
 		if (nContent != -1)
 		{
-			CRect rImage(rect);
-			rImage.bottom = (rImage.top + ICON_SIZE);
-
-			GraphicsMisc::CentreRect(rImage, rect, FALSE, TRUE);
-			
-			HICON hIcon = m_pContentMgr->GetContentIcon(nContent);
-
-			if (hIcon == NULL)
-				hIcon = m_iconNull;
-
-			::DrawIconEx(dc, rImage.left, rImage.top, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
+			GraphicsMisc::DrawCentred(&dc,
+									  m_pContentMgr->GetContentIcon(nContent),
+									  rect,
+									  FALSE,
+									  TRUE); // vertically centred
 		}
 	}
 

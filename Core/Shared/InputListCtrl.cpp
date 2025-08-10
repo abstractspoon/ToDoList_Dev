@@ -657,12 +657,7 @@ void CInputListCtrl::DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DW
 {
 	DrawBlankButton(pDC, rBtn, dwState);
 
-	const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
-
-	CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
-	GraphicsMisc::CentreRect(rIcon, rBtn);
-
-	::DrawIconEx(*pDC, rIcon.left, rIcon.top, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
+	GraphicsMisc::DrawCentred(pDC, hIcon, rBtn);
 }
 
 void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const

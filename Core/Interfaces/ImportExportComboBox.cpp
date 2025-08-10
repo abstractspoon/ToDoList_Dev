@@ -75,24 +75,20 @@ void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, 
 		int nImpExp = (int)dwItemData;
 
 		// draw icon
-		CPoint ptDraw(rect.TopLeft());
-
-		if (!bList)
-			ptDraw.y--;
-
-		HICON hIcon = GetImpExpIcon(nImpExp);
-
-		if (hIcon)
+		if (!GraphicsMisc::DrawCentred(&dc, 
+									   GetImpExpIcon(nImpExp),
+									   rect,
+									   FALSE,
+									   TRUE))
 		{
-			::DrawIconEx(dc, ptDraw.x, ptDraw.y, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
-		}
-		else // fallback on file handler icon
-		{
+			// fallback on file handler icon
 			CString sFileExt = GetImpExpFileExtension(nImpExp, TRUE);
-			int nImage = -1;
 
 			if (!sFileExt.IsEmpty())
-				CFileIcons::Draw(&dc, sFileExt, ptDraw);
+			{
+				CRect rIcon = GraphicsMisc::CalcCentredRect(ICON_SIZE, rect, FALSE, TRUE);
+				CFileIcons::Draw(&dc, sFileExt, rIcon.TopLeft());
+			}
 		}
 
 		// draw text
