@@ -274,12 +274,9 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	}
 
 	CRect rIcon = GetIconScreenRect();
-	rIcon.OffsetRect(-rRef.TopLeft());
+	rIcon.OffsetRect(-rRef.TopLeft()); // window coordinates
 
-	CRect rBkgnd(rIcon);
-	rBkgnd.InflateRect(1, 1);
-
-	::FillRect(*pDC, rBkgnd, PrepareColors(pDC));
+	::FillRect(*pDC, rIcon, PrepareColors(pDC));
 	DrawFileIcon(pDC, sFilePath, rIcon);
 
 	if (bReleaseDC)

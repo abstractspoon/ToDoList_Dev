@@ -377,6 +377,7 @@ BOOL IsParentPreferencePage(HWND hWnd)
 //////////////////////////////////////////////////////////////////////
 
 static HWND s_hwndCurrentComboBox			= NULL;
+static HWND s_hwndCurrentHotKeyCtrl			= NULL;
 static HWND s_hwndCurrentSimpleComboListBox	= NULL;
 static HWND s_hwndCurrentEdit				= NULL;
 static HWND s_hwndCurrentDateTime			= NULL;
@@ -1174,7 +1175,8 @@ DWORD GetSysColorOrBrush(int nColor, BOOL bColor)
 		if (s_hwndCurrentComboBox || 
 			s_hwndCurrentDateTime || 
 			s_hwndCurrentEdit || 
-			s_hwndCurrentSimpleComboListBox)
+			s_hwndCurrentSimpleComboListBox ||
+			s_hwndCurrentHotKeyCtrl)
 		{
 			crCustom = DM_DISABLEDEDITTEXT;
 		}
@@ -1456,6 +1458,10 @@ HBRUSH WINAPI MyGetSysColorBrush(int nColor)
 
 LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp)
 {
+#define CWP_SCOPEDHWND(var)     \
+CAutoFlagT<HWND> af(var, hWnd); \
+return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp)
+
 	switch (nMsg)
 	{
 	case WM_PAINT:
@@ -1469,28 +1475,28 @@ LRESULT WINAPI MyCallWindowProc(WNDPROC lpPrevWndFunc, HWND hWnd, UINT nMsg, WPA
 			{
 				if (!IsHooked(hWnd) && !s_hwndCurrentComboBox)
 				{
-					CAutoFlagT<HWND> af(s_hwndCurrentComboBox, hWnd);
-					return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+					CWP_SCOPEDHWND(s_hwndCurrentComboBox);
 				}
 			}
 			else if (CWinClasses::IsClass(sClass, WC_COMBOLBOX))
 			{
 				if (CWinClasses::GetStyleType(::GetParent(hWnd), CBS_TYPEMASK) == CBS_SIMPLE)
 				{
-					CAutoFlagT<HWND> af(s_hwndCurrentSimpleComboListBox, hWnd);
-					return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+					CWP_SCOPEDHWND(s_hwndCurrentSimpleComboListBox);
 				}
 			}
 			else if (CWinClasses::IsClass(sClass, WC_DATETIMEPICK) || 
 					 CWinClasses::IsWinFormsControl(sClass, WC_DATETIMEPICK))
 			{
-				CAutoFlagT<HWND> af(s_hwndCurrentDateTime, hWnd);
-				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+				CWP_SCOPEDHWND(s_hwndCurrentDateTime);
+			}
+			else if (CWinClasses::IsClass(sClass, WC_HOTKEY))
+			{
+				CWP_SCOPEDHWND(s_hwndCurrentHotKeyCtrl);
 			}
 			else if (s_mapExplorerThemedWnds.Has(hWnd))
 			{
-				CAutoFlagT<HWND> af(s_hwndCurrentExplorerTreeOrList, hWnd);
-				return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
+				CWP_SCOPEDHWND(s_hwndCurrentExplorerTreeOrList);
 			}
 			
 			return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
