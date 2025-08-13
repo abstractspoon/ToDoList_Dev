@@ -1624,7 +1624,12 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 	}
 
 	sDate = FormatDateOnly(date, sFormat);
-	ASSERT(!sDate.IsEmpty());
+	
+	if (sDate.IsEmpty())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	// Day of week
 	if (dwFlags & DHFD_DOW)
