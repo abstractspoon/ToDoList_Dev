@@ -143,7 +143,6 @@
     <ClCompile Include="..\ToDoList\TDCRecurrenceHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCReminder.cpp" />
     <ClCompile Include="..\ToDoList\TDCSort.cpp" />
-    <ClCompile Include="..\ToDoList\TDCSourceControl_v2.cpp" />
     <ClCompile Include="..\ToDoList\TDCStruct.cpp" />
     <ClCompile Include="..\ToDoList\TDCTaskListDropTarget.cpp" />
     <ClCompile Include="..\ToDoList\TaskListExporterBase.cpp" />
@@ -316,7 +315,6 @@
     <ClInclude Include="..\ToDoList\TDCRecurrenceHelper.h" />
     <ClInclude Include="..\ToDoList\TDCReminder.h" />
     <ClInclude Include="..\ToDoList\TDCSort.h" />
-    <ClInclude Include="..\ToDoList\TDCSourceControl_v2.h" />
     <ClInclude Include="..\ToDoList\TDCStatic.h" />
     <ClInclude Include="..\ToDoList\TDCStringRes.h" />
     <ClInclude Include="..\ToDoList\TDCStruct.h" />

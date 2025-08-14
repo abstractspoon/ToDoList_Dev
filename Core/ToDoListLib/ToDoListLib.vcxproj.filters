@@ -491,9 +491,6 @@
     <ClCompile Include="..\ToDoList\TDCSort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDCSourceControl_v2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDCStruct.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1004,9 +1001,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCSort.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\TDCSourceControl_v2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCStatic.h">
