@@ -116,15 +116,12 @@
     <ClInclude Include="ConvertRTFToHTML.h" />
     <ClInclude Include="ConvertRTFToHTMLDlg.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConvertRTFToHTML.cpp" />
     <ClCompile Include="ConvertRTFToHTMLDlg.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="StdAfx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ConvertRTFToHTML.rc" />
