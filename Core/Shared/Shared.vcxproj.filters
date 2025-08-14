@@ -4,37 +4,10 @@
     <ClCompile Include="AboutDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="autocombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseTabCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BinaryData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="browserdlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="checkcombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="checklistboxex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Clipboard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="colorbutton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="colorcombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="custombutton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DatabaseEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DateHelper.cpp">
@@ -43,19 +16,10 @@
     <ClCompile Include="DateTimeCtrlEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="deferWndMove.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="delayredraw.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DialogHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DlgUnits.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="driveinfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EditShortcutMgr.cpp">
@@ -67,28 +31,13 @@
     <ClCompile Include="EnBitmapEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="enbrowserctrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="EnCheckComboBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="encolordialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EnCommandLineInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="enedit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="enfiledialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="EnHeaderCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="enlistctrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="EnMenu.cpp">
@@ -97,19 +46,10 @@
     <ClCompile Include="EnRecentFileList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="enstatic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="EnString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="entoolbar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="FileComboBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fileedit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FileMisc.cpp">
@@ -127,28 +67,16 @@
     <ClCompile Include="FontCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="framewndcontainer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GraphicsMisc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GroupLine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="historycombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HoldRedraw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="hotkeyctrlex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HotTracker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="iconbutton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IconCache.cpp">
@@ -160,22 +88,10 @@
     <ClCompile Include="InputListCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LightBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Localizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MASKEDIT.CPP">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="menubutton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MenuIconMgr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="monthcombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MouseWheelMgr.cpp">
@@ -184,43 +100,13 @@
     <ClCompile Include="MSWordHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MultiSelTreeCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NcGutter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="odbcfieldcombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OdbcFields.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="odbctablecombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OdbcTables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="odbcvaluecombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OrderedTreeCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OSVersion.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ownerdrawcomboboxbase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="passworddialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="popupEditctrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="popupListboxctrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PreferencesBase.cpp">
@@ -235,9 +121,6 @@
     <ClCompile Include="RCCtrlParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RecordsetEx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Regkey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -245,9 +128,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RemoteFileDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="richeditbasectrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RichEditHelper.cpp">
@@ -289,22 +169,10 @@
     <ClCompile Include="Subclass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="symbolbutton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tabbedcombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TabbedPropertyPageHost.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tabctrlex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Themed.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="timecombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TimeEdit.cpp">
@@ -314,9 +182,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ToolbarHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TRAYICON.CPP">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TreeCtrlHelper.cpp">
@@ -334,22 +199,13 @@
     <ClCompile Include="Unzipper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="urlricheditctrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VersionInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="webbrowserctrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WebMisc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WinClasses.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="winhelpbutton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WndMisc.cpp">
@@ -359,9 +215,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XmlFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="xmlfileex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Zipper.cpp">
@@ -481,15 +334,6 @@
     <ClCompile Include="MidnightTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InterSpy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ISMsgManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="monthcheckcombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DarkMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -497,6 +341,129 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RTLInputMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AutoComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BrowserDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckListBoxEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferWndMove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DelayRedraw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DriveInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnBrowserCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnColorDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnFileDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnStatic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnToolBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FontComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HistoryComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HotKeyCtrlEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IconButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MonthCheckComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MonthComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OwnerdrawComboBoxBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PasswordDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupEditCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PopupListBoxCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RichEditBaseCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SymbolButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TabbedComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TabCtrlEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UrlRichEditCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WebBrowserCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinHelpButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlFileEx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MaskEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TrayIcon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -507,40 +474,13 @@
     <ClInclude Include="FontCache.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="autocombobox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AutoFlag.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseTabCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BinaryData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="browserdlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="checkcombobox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="checklistboxex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Clipboard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="colorbutton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="colorcombobox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="custombutton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DatabaseEx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DateHelper.h">
@@ -549,19 +489,10 @@
     <ClInclude Include="DateTimeCtrlEx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="deferWndMove.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="delayredraw.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DialogHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DlgUnits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="driveinfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EditShortcutMgr.h">
@@ -573,28 +504,13 @@
     <ClInclude Include="EnBitmapEx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="enbrowserctrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EnCheckComboBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="encolordialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EnCommandLineInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="enedit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="enfiledialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EnHeaderCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="enlistctrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EnMenu.h">
@@ -603,22 +519,10 @@
     <ClInclude Include="EnRecentFileList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="enstatic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EnString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="entoolbar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FileComboBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fileedit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FILEMISC.H">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FileRegister.h">
@@ -630,9 +534,6 @@
     <ClInclude Include="FolderDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="framewndcontainer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RichEditHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -640,9 +541,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GroupLine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="historycombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HoldRedraw.h">
@@ -654,16 +552,10 @@
     <ClInclude Include="HookWndMgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hotkeyctrlex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HotTracker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HtmlCharMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="iconbutton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IconCache.h">
@@ -675,19 +567,7 @@
     <ClInclude Include="InputListCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LightBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Localizer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mapex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MASKEDIT.H">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="menubutton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MenuIconMgr.h">
@@ -696,52 +576,19 @@
     <ClInclude Include="Misc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="monthcombobox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MouseWheelMgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MSWordHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MultiSelTreeCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NcGutter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="odbcfieldcombobox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OdbcFields.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="odbctablecombobox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OdbcTables.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="odbcvaluecombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OrderedTreeCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OSVersion.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ownerdrawcomboboxbase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="passworddialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="popupEditCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="popupListboxctrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PreferencesBase.h">
@@ -754,9 +601,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RCCtrlParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RecordsetEx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Regkey.h">
@@ -804,31 +648,13 @@
     <ClInclude Include="StickiesWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stringres.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Subclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="symbolbutton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SysColors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tabbedcombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TabbedPropertyPageHost.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tabctrlex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Themed.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="timecombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TimeEdit.h">
@@ -838,9 +664,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ToolbarHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TRAYICON.H">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Zipper.h">
@@ -861,16 +684,7 @@
     <ClInclude Include="Unzipper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="urlricheditctrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="VersionInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="wclassdefines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="webbrowserctrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WebMisc.h">
@@ -880,9 +694,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WinHelpButton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="winstyles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WndMisc.h">
@@ -895,9 +706,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="XmlFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="xmlfileex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MSOutlookHelper.h">
@@ -1014,25 +822,10 @@
     <ClInclude Include="FileIcons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="richeditbasectrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CtrlTextHighlighter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MidnightTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InterSpy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ISMsgHandlers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ISMsgManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="monthcheckcombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DarkMode.h">
@@ -1042,6 +835,141 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RTLInputMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BrowserDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckListBoxEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferWndMove.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DelayRedraw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DriveInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnBrowserCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnColorDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnFileDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnStatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnToolBar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileMisc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FontComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HistoryComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HotKeyCtrlEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IconButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MapEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MaskEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MonthCheckComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OrderedEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OwnerdrawComboBoxBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PasswordDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupEditCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopupListBoxCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RichEditBaseCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StringRes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SymbolButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TabbedComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TabCtrlEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TrayIcon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UrlRichEditCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WClassDefines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WebBrowserCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlFileEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MonthComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinStyles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
