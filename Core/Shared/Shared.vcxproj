@@ -117,59 +117,30 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="AcceleratorString.cpp" />
-    <ClCompile Include="autocombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="BaseTabCtrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="AutoComboBox.cpp" />
     <ClCompile Include="BinaryData.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="browserdlg.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="BrowserDlg.cpp" />
     <ClCompile Include="CalendarCtrlEx.cpp" />
-    <ClCompile Include="checkcombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="checklistboxex.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="CheckComboBox.cpp" />
+    <ClCompile Include="CheckListBoxEx.cpp" />
     <ClCompile Include="Clipboard.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="ColorBrewer.cpp" />
     <ClCompile Include="ColorBrewerCombobox.cpp" />
-    <ClCompile Include="colorbutton.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="colorcombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="ColorButton.cpp" />
+    <ClCompile Include="ColorComboBox.cpp" />
     <ClCompile Include="ColourPickerEx.cpp" />
     <ClCompile Include="ColourPopupEx.cpp" />
     <ClCompile Include="ComboListboxPositioner.cpp" />
     <ClCompile Include="CopyWndContents.cpp" />
     <ClCompile Include="CtrlTextHighlighter.cpp" />
-    <ClCompile Include="custombutton.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="CustomButton.cpp" />
     <ClCompile Include="DarkMode.cpp" />
-    <ClCompile Include="DatabaseEx.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="DateHelper.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -180,14 +151,8 @@
     </ClCompile>
     <ClCompile Include="DayOfWeekchecklistbox.cpp" />
     <ClCompile Include="DayOfWeekcombobox.cpp" />
-    <ClCompile Include="deferWndMove.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="delayredraw.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="DeferWndMove.cpp" />
+    <ClCompile Include="DelayRedraw.cpp" />
     <ClCompile Include="DialogHelper.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -196,10 +161,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="driveinfo.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="DriveInfo.cpp" />
     <ClCompile Include="EditShortcutMgr.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -212,39 +174,24 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="enbrowserctrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="EnBrowserCtrl.cpp" />
     <ClCompile Include="EnCheckComboBox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="encolordialog.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="EnColorDialog.cpp" />
     <ClCompile Include="EnCommandLineInfo.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="enedit.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="enfiledialog.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="EnEdit.cpp" />
+    <ClCompile Include="EnFileDialog.cpp" />
     <ClCompile Include="EnHeaderCtrl.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="EnImageList.cpp" />
-    <ClCompile Include="enlistctrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="EnListCtrl.cpp" />
     <ClCompile Include="EnMenu.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -253,26 +200,17 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="enstatic.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="EnStatic.cpp" />
     <ClCompile Include="EnString.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="entoolbar.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="EnToolBar.cpp" />
     <ClCompile Include="FileComboBox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="fileedit.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="FileEdit.cpp" />
     <ClCompile Include="FileIcons.cpp" />
     <ClCompile Include="FileMisc.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -295,10 +233,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="framewndcontainer.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="FontComboBox.cpp" />
     <ClCompile Include="GraphicsMisc.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -307,28 +242,19 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="historycombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="HistoryComboBox.cpp" />
     <ClCompile Include="HMXChartEx.cpp" />
     <ClCompile Include="HoldRedraw.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="hotkeyctrlex.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="HotKeyCtrlEx.cpp" />
     <ClCompile Include="HotTracker.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="Icon.cpp" />
-    <ClCompile Include="iconbutton.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="IconButton.cpp" />
     <ClCompile Include="IconCache.cpp" />
     <ClCompile Include="ImageProcessors.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -338,24 +264,12 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="InterSpy.cpp" />
-    <ClCompile Include="ISMsgManager.cpp" />
-    <ClCompile Include="LightBox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="Localizer.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="MASKEDIT.CPP">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="menubutton.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="MaskEdit.cpp" />
+    <ClCompile Include="MenuButton.cpp" />
     <ClCompile Include="MenuComboBox.cpp" />
     <ClCompile Include="MenuIconMgr.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -370,11 +284,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="MonthCalCtrlEx.cpp" />
-    <ClCompile Include="monthcheckcombobox.cpp" />
-    <ClCompile Include="monthcombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="MonthCheckComboBox.cpp" />
+    <ClCompile Include="MonthComboBox.cpp" />
     <ClCompile Include="MouseWheelMgr.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -385,31 +296,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="MultiSelTreeCtrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="NcGutter.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="odbcfieldcombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="OdbcFields.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="odbctablecombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="OdbcTables.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="odbcvaluecombobox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -422,22 +309,10 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="ownerdrawcomboboxbase.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="passworddialog.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="popupEditctrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="popupListboxctrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="OwnerdrawComboBoxBase.cpp" />
+    <ClCompile Include="PasswordDialog.cpp" />
+    <ClCompile Include="PopupEditCtrl.cpp" />
+    <ClCompile Include="PopupListBoxCtrl.cpp" />
     <ClCompile Include="PreferencesBase.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -455,10 +330,6 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="RecordsetEx.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="Recurrence.cpp" />
     <ClCompile Include="Regkey.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -472,10 +343,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="richeditbasectrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="RichEditBaseCtrl.cpp" />
     <ClCompile Include="RichEditHelper.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -524,6 +392,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="StdAfx.cpp" />
     <ClCompile Include="StickiesAPI.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -537,30 +406,18 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="symbolbutton.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="tabbedcombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="SymbolButton.cpp" />
+    <ClCompile Include="TabbedComboBox.cpp" />
     <ClCompile Include="TabbedPropertyPageHost.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="tabctrlex.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="TabCtrlEx.cpp" />
     <ClCompile Include="Themed.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="timecombobox.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="TimeComboBox.cpp" />
     <ClCompile Include="TimeEdit.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -574,10 +431,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="ToolTipCtrlEx.cpp" />
-    <ClCompile Include="TRAYICON.CPP">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="TrayIcon.cpp" />
     <ClCompile Include="TreeCtrlHelper.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -600,18 +454,12 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="UrlParser.cpp" />
-    <ClCompile Include="urlricheditctrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="UrlRichEditCtrl.cpp" />
     <ClCompile Include="VersionInfo.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="webbrowserctrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="WebBrowserCtrl.cpp" />
     <ClCompile Include="WebMisc.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -621,11 +469,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="WindowIcons.cpp" />
-    <ClCompile Include="winhelpbutton.cpp" />
-    <ClCompile Include="WndMisc.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="WinHelpButton.cpp" />
     <ClCompile Include="WndPrompt.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -635,10 +479,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="xmlfileex.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="XmlFileEx.cpp" />
     <ClCompile Include="XslFile.cpp" />
     <ClCompile Include="Zipper.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -648,87 +489,81 @@
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
     <ClInclude Include="AcceleratorString.h" />
-    <ClInclude Include="autocombobox.h" />
+    <ClInclude Include="AutoComboBox.h" />
     <ClInclude Include="AutoFlag.h" />
-    <ClInclude Include="BaseTabCtrl.h" />
     <ClInclude Include="BinaryData.h" />
-    <ClInclude Include="browserdlg.h" />
+    <ClInclude Include="BrowserDlg.h" />
     <ClInclude Include="CalendarCtrlEx.h" />
-    <ClInclude Include="checkcombobox.h" />
-    <ClInclude Include="checklistboxex.h" />
+    <ClInclude Include="CheckComboBox.h" />
+    <ClInclude Include="CheckListBoxEx.h" />
     <ClInclude Include="Clipboard.h" />
     <ClInclude Include="ColorBrewer.h" />
     <ClInclude Include="ColorBrewerCombobox.h" />
-    <ClInclude Include="colorbutton.h" />
-    <ClInclude Include="colorcombobox.h" />
+    <ClInclude Include="ColorButton.h" />
+    <ClInclude Include="ColorComboBox.h" />
     <ClInclude Include="ColourPickerEx.h" />
     <ClInclude Include="ColourPopupEx.h" />
     <ClInclude Include="ComboListboxPositioner.h" />
     <ClInclude Include="CopyWndContents.h" />
     <ClInclude Include="CtrlTextHighlighter.h" />
-    <ClInclude Include="custombutton.h" />
+    <ClInclude Include="CustomButton.h" />
     <ClInclude Include="DarkMode.h" />
-    <ClInclude Include="DatabaseEx.h" />
     <ClInclude Include="DateHelper.h" />
     <ClInclude Include="DateHelperEnums.h" />
     <ClInclude Include="DateTimeCtrlEx.h" />
     <ClInclude Include="DayOfWeekchecklistbox.h" />
     <ClInclude Include="DayOfWeekcombobox.h" />
-    <ClInclude Include="deferWndMove.h" />
-    <ClInclude Include="delayredraw.h" />
+    <ClInclude Include="DeferWndMove.h" />
+    <ClInclude Include="DelayRedraw.h" />
     <ClInclude Include="DialogHelper.h" />
     <ClInclude Include="DlgUnits.h" />
-    <ClInclude Include="driveinfo.h" />
+    <ClInclude Include="DriveInfo.h" />
     <ClInclude Include="EditShortcutMgr.h" />
     <ClInclude Include="EnBitmap.h" />
     <ClInclude Include="EnBitmapEx.h" />
-    <ClInclude Include="enbrowserctrl.h" />
+    <ClInclude Include="EnBrowserCtrl.h" />
     <ClInclude Include="EnCheckComboBox.h" />
-    <ClInclude Include="encolordialog.h" />
+    <ClInclude Include="EnColorDialog.h" />
     <ClInclude Include="EnCommandLineInfo.h" />
-    <ClInclude Include="enedit.h" />
-    <ClInclude Include="enfiledialog.h" />
+    <ClInclude Include="EnEdit.h" />
+    <ClInclude Include="EnFileDialog.h" />
     <ClInclude Include="EnHeaderCtrl.h" />
     <ClInclude Include="EnImageList.h" />
-    <ClInclude Include="enlistctrl.h" />
+    <ClInclude Include="EnListCtrl.h" />
     <ClInclude Include="EnMenu.h" />
     <ClInclude Include="EnRecentFileList.h" />
-    <ClInclude Include="enstatic.h" />
+    <ClInclude Include="EnStatic.h" />
     <ClInclude Include="EnString.h" />
-    <ClInclude Include="entoolbar.h" />
+    <ClInclude Include="EnToolBar.h" />
     <ClInclude Include="FileComboBox.h" />
-    <ClInclude Include="fileedit.h" />
+    <ClInclude Include="FileEdit.h" />
     <ClInclude Include="FileIcons.h" />
-    <ClInclude Include="FILEMISC.H" />
+    <ClInclude Include="FileMisc.h" />
     <ClInclude Include="FileRegister.h" />
     <ClInclude Include="FindReplace.h" />
     <ClInclude Include="FocusWatcher.h" />
     <ClInclude Include="FolderDialog.h" />
     <ClInclude Include="FontCache.h" />
-    <ClInclude Include="framewndcontainer.h" />
+    <ClInclude Include="FontComboBox.h" />
     <ClInclude Include="GraphicsMisc.h" />
     <ClInclude Include="GroupLine.h" />
-    <ClInclude Include="historycombobox.h" />
+    <ClInclude Include="HistoryComboBox.h" />
     <ClInclude Include="HMXChartEx.h" />
     <ClInclude Include="HoldRedraw.h" />
     <ClInclude Include="HookMgr.h" />
     <ClInclude Include="HookWndMgr.h" />
-    <ClInclude Include="hotkeyctrlex.h" />
+    <ClInclude Include="HotKeyCtrlEx.h" />
     <ClInclude Include="HotTracker.h" />
     <ClInclude Include="HtmlCharMap.h" />
     <ClInclude Include="Icon.h" />
-    <ClInclude Include="iconbutton.h" />
+    <ClInclude Include="IconButton.h" />
     <ClInclude Include="IconCache.h" />
     <ClInclude Include="ImageProcessors.h" />
     <ClInclude Include="InputListCtrl.h" />
-    <ClInclude Include="InterSpy.h" />
-    <ClInclude Include="ISMsgHandlers.h" />
-    <ClInclude Include="ISMsgManager.h" />
-    <ClInclude Include="LightBox.h" />
     <ClInclude Include="Localizer.h" />
-    <ClInclude Include="mapex.h" />
-    <ClInclude Include="MASKEDIT.H" />
-    <ClInclude Include="menubutton.h" />
+    <ClInclude Include="MapEx.h" />
+    <ClInclude Include="MaskEdit.h" />
+    <ClInclude Include="MenuButton.h" />
     <ClInclude Include="MenuComboBox.h" />
     <ClInclude Include="MenuIconMgr.h" />
     <ClInclude Include="MessageBox.h" />
@@ -737,38 +572,32 @@
     <ClInclude Include="MiniCalendarListCtrl.h" />
     <ClInclude Include="Misc.h" />
     <ClInclude Include="MonthCalCtrlEx.h" />
-    <ClInclude Include="monthcheckcombobox.h" />
-    <ClInclude Include="monthcombobox.h" />
+    <ClInclude Include="MonthCheckComboBox.h" />
+    <ClInclude Include="MonthComboBox.h" />
     <ClInclude Include="MouseWheelMgr.h" />
     <ClInclude Include="MSOutlookHelper.h" />
     <ClInclude Include="MSOutlookHelperEnum.h" />
     <ClInclude Include="MSProjectHelper.h" />
     <ClInclude Include="MSWordHelper.h" />
-    <ClInclude Include="MultiSelTreeCtrl.h" />
     <ClInclude Include="NcGutter.h" />
-    <ClInclude Include="odbcfieldcombobox.h" />
-    <ClInclude Include="OdbcFields.h" />
-    <ClInclude Include="odbctablecombobox.h" />
-    <ClInclude Include="OdbcTables.h" />
-    <ClInclude Include="odbcvaluecombobox.h" />
     <ClInclude Include="OleDropTargetEx.h" />
+    <ClInclude Include="OrderedEdit.h" />
     <ClInclude Include="OrderedTreeCtrl.h" />
     <ClInclude Include="OSVersion.h" />
-    <ClInclude Include="ownerdrawcomboboxbase.h" />
-    <ClInclude Include="passworddialog.h" />
-    <ClInclude Include="popupEditCtrl.h" />
-    <ClInclude Include="popupListboxctrl.h" />
+    <ClInclude Include="OwnerdrawComboBoxBase.h" />
+    <ClInclude Include="PasswordDialog.h" />
+    <ClInclude Include="PopupEditCtrl.h" />
+    <ClInclude Include="PopupListBoxCtrl.h" />
     <ClInclude Include="PreferencesBase.h" />
     <ClInclude Include="ProgressDlg.h" />
     <ClInclude Include="PropertyPageHost.h" />
     <ClInclude Include="RangeSliderCtrl.h" />
     <ClInclude Include="RCCtrlParser.h" />
-    <ClInclude Include="RecordsetEx.h" />
     <ClInclude Include="Recurrence.h" />
     <ClInclude Include="Regkey.h" />
     <ClInclude Include="RemoteFile.h" />
     <ClInclude Include="RemoteFileDialog.h" />
-    <ClInclude Include="richeditbasectrl.h" />
+    <ClInclude Include="RichEditBaseCtrl.h" />
     <ClInclude Include="RichEditHelper.h" />
     <ClInclude Include="RichEditNcBorder.h" />
     <ClInclude Include="Rtf2HtmlConverter.h" />
@@ -788,21 +617,20 @@
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="StickiesAPI.h" />
     <ClInclude Include="StickiesWnd.h" />
-    <ClInclude Include="stringres.h" />
+    <ClInclude Include="StringRes.h" />
     <ClInclude Include="StylesheetParamConfigDlg.h" />
     <ClInclude Include="Subclass.h" />
-    <ClInclude Include="symbolbutton.h" />
-    <ClInclude Include="SysColors.h" />
-    <ClInclude Include="tabbedcombobox.h" />
+    <ClInclude Include="SymbolButton.h" />
+    <ClInclude Include="TabbedComboBox.h" />
     <ClInclude Include="TabbedPropertyPageHost.h" />
-    <ClInclude Include="tabctrlex.h" />
+    <ClInclude Include="TabCtrlEx.h" />
     <ClInclude Include="Themed.h" />
-    <ClInclude Include="timecombobox.h" />
+    <ClInclude Include="TimeComboBox.h" />
     <ClInclude Include="TimeEdit.h" />
     <ClInclude Include="TimeHelper.h" />
     <ClInclude Include="ToolbarHelper.h" />
     <ClInclude Include="ToolTipCtrlEx.h" />
-    <ClInclude Include="TRAYICON.H" />
+    <ClInclude Include="TrayIcon.h" />
     <ClInclude Include="TreeCtrlHelper.h" />
     <ClInclude Include="TreeDragDropHelper.h" />
     <ClInclude Include="TreeListCtrl.h" />
@@ -810,21 +638,20 @@
     <ClInclude Include="TreeSelectionHelper.h" />
     <ClInclude Include="Unzipper.h" />
     <ClInclude Include="UrlParser.h" />
-    <ClInclude Include="urlricheditctrl.h" />
+    <ClInclude Include="UrlRichEditCtrl.h" />
     <ClInclude Include="VersionInfo.h" />
-    <ClInclude Include="wclassdefines.h" />
-    <ClInclude Include="webbrowserctrl.h" />
+    <ClInclude Include="WClassDefines.h" />
+    <ClInclude Include="WebBrowserCtrl.h" />
     <ClInclude Include="WebMisc.h" />
     <ClInclude Include="WinClasses.h" />
     <ClInclude Include="WindowIcons.h" />
     <ClInclude Include="WinHelpButton.h" />
-    <ClInclude Include="winstyles.h" />
-    <ClInclude Include="WndMisc.h" />
+    <ClInclude Include="WinStyles.h" />
     <ClInclude Include="WndPrompt.h" />
     <ClInclude Include="WorkingWeek.h" />
     <ClInclude Include="XmlCharMap.h" />
     <ClInclude Include="XmlFile.h" />
-    <ClInclude Include="xmlfileex.h" />
+    <ClInclude Include="XmlFileEx.h" />
     <ClInclude Include="XslFile.h" />
     <ClInclude Include="Zipper.h" />
   </ItemGroup>

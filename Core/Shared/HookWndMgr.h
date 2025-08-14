@@ -1,4 +1,4 @@
-// SkinCtrlMgr.h: interface for the CHookWndMgr class.
+// HookWndMgr.h: interface for the CHookWndMgr class.
 //
 //////////////////////////////////////////////////////////////////////
 
