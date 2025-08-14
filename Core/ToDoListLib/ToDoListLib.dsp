@@ -317,10 +317,6 @@ SOURCE=..\ToDoList\TDCSourceControl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDCSourceControl_v2.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TDCStartupOptions.cpp
 # End Source File
 # Begin Source File
@@ -998,10 +994,6 @@ SOURCE=..\ToDoList\TDCSort.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCSourceControl.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCSourceControl_v2.h
 # End Source File
 # Begin Source File
 
