@@ -40,7 +40,7 @@
 #include "tdlToolsUserInputDlg.h"
 #include "tdltransformdialog.h"
 #include "tdlwelcomewizard.h"
-#include "tdstringres.h"
+#include "tdcstringres.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\AcceleratorString.h"

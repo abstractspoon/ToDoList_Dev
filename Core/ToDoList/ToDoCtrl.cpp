@@ -7,7 +7,7 @@
 #include "taskclipboard.h"
 #include "tdcmsg.h"
 #include "tdcmapping.h"
-#include "tdstringres.h"
+#include "tdcstringres.h"
 #include "resource.h"
 #include "TDCtasktimelog.h"
 #include "todoitem.h"
