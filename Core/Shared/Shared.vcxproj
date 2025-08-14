@@ -470,10 +470,6 @@
     </ClCompile>
     <ClCompile Include="WindowIcons.cpp" />
     <ClCompile Include="WinHelpButton.cpp" />
-    <ClCompile Include="WndMisc.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
     <ClCompile Include="WndPrompt.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -651,7 +647,6 @@
     <ClInclude Include="WindowIcons.h" />
     <ClInclude Include="WinHelpButton.h" />
     <ClInclude Include="WinStyles.h" />
-    <ClInclude Include="WndMisc.h" />
     <ClInclude Include="WndPrompt.h" />
     <ClInclude Include="WorkingWeek.h" />
     <ClInclude Include="XmlCharMap.h" />

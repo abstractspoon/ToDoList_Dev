@@ -208,9 +208,6 @@
     <ClCompile Include="WinClasses.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WndMisc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="WndPrompt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -694,9 +691,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WinHelpButton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WndMisc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WndPrompt.h">
