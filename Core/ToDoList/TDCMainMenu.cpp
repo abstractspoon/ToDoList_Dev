@@ -901,7 +901,8 @@ void CTDCMainMenu::PrepareUserStorageMenu(CMenu* pMenu, const CTDLTasklistStorag
 
 		for (int nStore = 0; nStore < nNumStorage; nStore++)
 		{
-			CString sMenuItem, sText = mgrStorage.GetStorageMenuText(nStore);
+			CString sMenuItem;
+			CEnString sText(mgrStorage.GetStorageMenuText(nStore));
 
 			if (nStore < 9)
 				sMenuItem.Format(_T("&%d %s"), nStore + 1, sText);

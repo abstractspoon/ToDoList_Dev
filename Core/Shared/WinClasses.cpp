@@ -366,7 +366,7 @@ BOOL CWinClasses::IsMFCCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 				IsMFCCommonDialog(hWnd, WCD_COLOR) ||
 				IsMFCCommonDialog(hWnd, WCD_FINDREPLACE) ||
 				IsMFCCommonDialog(hWnd, WCD_OPENSAVE) ||
-				IsMFCCommonDialog(hWnd, WCD_BROWSEFOLDER);
+				IsMFCCommonDialog(hWnd, WCD_BROWSEFOLDER); // RECURSIVE CALLS
 	}
 
 	// all else
@@ -388,6 +388,9 @@ BOOL CWinClasses::IsMFCCommonDialog(HWND hWnd, WCLS_COMMONDIALOG nType)
 
 	switch (nType)
 	{
+	case WCD_OPENSAVE:
+		return pDlg->IsKindOf(RUNTIME_CLASS(CFileDialog));
+
 	case WCD_PRINT:
 		return pDlg->IsKindOf(RUNTIME_CLASS(CPrintDialog));
 

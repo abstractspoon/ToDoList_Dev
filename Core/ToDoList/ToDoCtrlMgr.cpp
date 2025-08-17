@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "ToDoCtrlMgr.h"
-#include "tdstringres.h"
+#include "tdcstringres.h"
 #include "TDCTasktimelog.h"
 #include "TDCContentMgr.h"
 

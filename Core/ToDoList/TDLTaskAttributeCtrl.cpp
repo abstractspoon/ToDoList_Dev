@@ -346,7 +346,7 @@ void CTDLTaskAttributeCtrl::OnUpdateCopyAttributeValue(CCmdUI* pCmdUI)
 		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
 		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
 
-		CString sMenuText;
+		CEnString sMenuText;
 		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
 
 		pCmdUI->SetText(sMenuText);
@@ -368,7 +368,7 @@ void CTDLTaskAttributeCtrl::OnUpdatePasteAttributeValue(CCmdUI* pCmdUI)
 		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
 		CString sFromAttrib = m_lcAttributes.GetAttributeLabel(nFromAttribID);
 
-		CString sMenuText;
+		CEnString sMenuText;
 		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
 
 		pCmdUI->SetText(sMenuText);
@@ -387,11 +387,11 @@ void CTDLTaskAttributeCtrl::OnUpdateClearAttributeValue(CCmdUI* pCmdUI)
 		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
 		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
 
-		CString sMenuText;
+		CEnString sMenuText;
 		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
 
 		pCmdUI->SetText(sMenuText);
-		pCmdUI->Enable(TRUE);
+		pCmdUI->Enable(m_lcAttributes.GetSelectedAttributeID() != TDCA_TASKNAME);
 	}
 	else
 	{

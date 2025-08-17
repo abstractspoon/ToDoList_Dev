@@ -246,8 +246,8 @@ BEGIN
     IDS_DISPLAY_INCOMPLETE  "Incomplete Tasks"
     IDS_DISPLAY_REMAINING   "Days Remaining"
     IDS_TOOLTIP_INCOMPLETE  "%s\n%d Tasks"
-    IDS_TOOLTIP_REMAINING   "%s\n%.2f Estimated\n%.2f Actual"
-    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%.2f Estimated\n%.2f Spent"
+    IDS_TOOLTIP_REMAINING   "%s\n%d Estimated\n%d Actual"
+    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%0.2f Estimated\n%0.2f Spent"
     IDS_TOOLTIP_ATTRIBFREQUENCY "%s\n%d Tasks"
 END
 

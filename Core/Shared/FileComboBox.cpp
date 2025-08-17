@@ -57,7 +57,7 @@ const int MAX_DROPWIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 CFileComboBox::CFileComboBox(int nEditStyle) 
 	: 
-	CAutoComboBox(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
+	CAutoComboBox(&m_fileEdit, ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
 	m_fileEdit(nEditStyle),
 	m_fileIcons(FALSE), // small icons
 	m_bReadOnly(FALSE)
@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(CFileComboBox, CAutoComboBox)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditGetFileIcon)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileEditGetFileTooltip)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
+
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
 	ON_WM_CTLCOLOR()
 	ON_WM_PAINT()
@@ -135,33 +136,18 @@ void CFileComboBox::OnPaint()
 	DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);
 }
 
-HBRUSH CFileComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	HBRUSH hbr = CAutoComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
-
-	if ((nCtlColor == CTLCOLOR_EDIT) && (m_fileEdit.GetSafeHwnd() == NULL))
-	{
-		VERIFY (InitFileEdit());
-	}
-
-	return hbr;
-}
-
 int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	ASSERT (m_fileEdit.GetSafeHwnd());
 
-	ClientToScreen(&point);
-	m_fileEdit.ScreenToClient(&point);
+	::MapWindowPoints(m_hWnd, m_fileEdit, &point, 1);
 
 	int nTool = m_fileEdit.OnToolHitTest(point, pTI);
 
 	if (nTool != -1)
 	{
 		pTI->hwnd = m_hWnd;
-
-		m_fileEdit.ClientToScreen(&pTI->rect);
-		ScreenToClient(&pTI->rect);
+		::MapWindowPoints(m_fileEdit, m_hWnd, (LPPOINT)&pTI->rect, 2);
 
 		return nTool;
 	}
@@ -170,42 +156,30 @@ int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CAutoComboBox::OnToolHitTest(point, pTI);
 }
 
-BOOL CFileComboBox::InitFileEdit()
+void CFileComboBox::OnSubclassChild(HWND hwndChild)
 {
-	if (!m_fileEdit.GetSafeHwnd())
-	{
-		if (!m_fileEdit.SubclassDlgItem(1001, this))
-			return FALSE;
+	CAutoComboBox::OnSubclassChild(hwndChild);
 
+	if (m_fileEdit.GetSafeHwnd() == hwndChild)
+	{
 		m_fileEdit.SendMessage(EM_SETREADONLY, m_bReadOnly);
 
-		// CFileEdit disables its tooltips when embedded in a combobox
+		// CEnEdit disables its tooltips when embedded in a combobox
 		// simply because they don't seem to work
-		ASSERT(!m_fileEdit.m_tooltip.GetSafeHwnd());
-
 		// So we have to handle it ourselves
 		EnableToolTips(TRUE);
 	}
-
-	return TRUE;
 }
 
 BOOL CFileComboBox::DoBrowse() 
 { 
-	if (!InitFileEdit())
-		return FALSE;
-
-	// If necessary, initialise base class hook by faking a WM_CTLCOLOR message
-	if (!m_scEdit.GetHwnd())
+	// Make sure we're all initialised
+	if (!m_fileEdit.GetSafeHwnd())
 	{
 		CClientDC dc(this);
-		SendMessage(WM_CTLCOLOREDIT, (WPARAM)dc.GetSafeHdc(), (LPARAM)m_fileEdit.GetSafeHwnd());
+		SendMessage(WM_CTLCOLOREDIT, (WPARAM)dc.GetSafeHdc(), (LPARAM)::GetDlgItem(*this, 1001));
 
-		if (!m_scEdit.GetHwnd())
-		{
-			ASSERT(0);
-			return FALSE;
-		}
+		ASSERT(m_fileEdit.GetSafeHwnd());
 	}
 
 	return m_fileEdit.DoBrowse(GetFirstFile()); 

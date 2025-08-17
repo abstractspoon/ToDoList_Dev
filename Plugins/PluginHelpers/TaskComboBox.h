@@ -21,10 +21,11 @@ namespace Abstractspoon
 			public interface class ITask
 			{
 			public:
-				virtual property UInt32 Id		{ UInt32 get(); }
-				virtual property String^ Title	{ String^ get(); }
-				virtual property int Depth		{ int get(); }
-				virtual property bool HasIcon	{ bool get(); }
+				virtual property UInt32 Id			{ UInt32 get(); }
+				virtual property String^ Title		{ String^ get(); }
+				virtual property String^ Position	{ String^ get(); }
+				virtual property int Depth			{ int get(); }
+				virtual property bool HasIcon		{ bool get(); }
 			};
 
 			public ref class TaskComboBox : UIComponents::OwnerdrawComboBoxBase
@@ -32,13 +33,14 @@ namespace Abstractspoon
 			public:
 				TaskComboBox();
 
-				void Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition, 
+				void Initialise(IEnumerable<ITask^>^ taskItems, 
 								UIExtension::TaskIcon^ taskIcons, 
 								UInt32 selTaskId);
 
-				void Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition,
+				void Initialise(IEnumerable<ITask^>^ taskItems,
 								UIExtension::TaskIcon^ taskIcons,
-								UInt32 selTaskId, ITask^ noneTask);
+								UInt32 selTaskId, 
+								ITask^ noneTask);
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
 				property String^ SelectedTaskTitle { String^ get(); }

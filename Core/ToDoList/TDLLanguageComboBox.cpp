@@ -10,6 +10,7 @@
 #include "..\Shared\localizer.h"
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\misc.h"
+#include "..\Shared\graphicsmisc.h"
 
 #include "..\3rdParty\XNamedColors.h"
 
@@ -23,6 +24,15 @@ static char THIS_FILE[] = __FILE__;
 
 const CString DEFAULT_LANG(_T("English (UK)"));
 
+static const CString NEED_TRANSLATION	= _T("NEED_TRANSLATION");
+static const CString PRIMARY_LANGID		= _T("PRIMARY_LANGID");
+static const CString TRANSLATED			= _T("TRANSLATED");
+
+const int FLAG_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
+const int COL_SPACING	= GraphicsMisc::ScaleByDPIFactor(10);
+
+/////////////////////////////////////////////////////////////////////////////
+
 CString CTDLLanguageComboBox::GetDefaultLanguage()
 {
 	return DEFAULT_LANG;
@@ -31,7 +41,12 @@ CString CTDLLanguageComboBox::GetDefaultLanguage()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLLanguageComboBox
 
-CTDLLanguageComboBox::CTDLLanguageComboBox(LPCTSTR szFilter) : m_sSelLanguage(DEFAULT_LANG), m_sFilter(szFilter)
+CTDLLanguageComboBox::CTDLLanguageComboBox(LPCTSTR szFilter) 
+	: 
+	COwnerdrawComboBoxBase(30, 0),
+	m_sSelLanguage(DEFAULT_LANG), 
+	m_sFilter(szFilter),
+	m_nLangCountryColWidth(0)
 {
 }
 
@@ -39,45 +54,30 @@ CTDLLanguageComboBox::~CTDLLanguageComboBox()
 {
 }
 
-
-BEGIN_MESSAGE_MAP(CTDLLanguageComboBox, CComboBoxEx)
-	//{{AFX_MSG_MAP(CTDLLanguageComboBox)
-	ON_WM_CREATE()
+BEGIN_MESSAGE_MAP(CTDLLanguageComboBox, COwnerdrawComboBoxBase)
 	ON_WM_DESTROY()
-	//}}AFX_MSG_MAP
+	ON_CONTROL_REFLECT_EX(CBN_DROPDOWN, OnDropDown)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLLanguageComboBox message handlers
-
-void CTDLLanguageComboBox::PreSubclassWindow() 
-{
-	CComboBoxEx::PreSubclassWindow();
-
-	CLocalizer::EnableTranslation(*this, FALSE);
-	BuildLanguageList();
-}
-
-int CTDLLanguageComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CComboBoxEx::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	CLocalizer::EnableTranslation(*this, FALSE);
-	BuildLanguageList();
-	
-	return 0;
-}
 
 CString CTDLLanguageComboBox::GetTranslationFolder()
 {
 	return FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
 }
 
-void CTDLLanguageComboBox::BuildLanguageList()
+BOOL CTDLLanguageComboBox::OnDropDown()
 {
-	if (GetCount())
-		return; // already done
+	InitialiseDropWidth();
+
+	return FALSE; // continue routing
+}
+
+void CTDLLanguageComboBox::BuildCombo()
+{
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
 
 	// build the language list from csv files in the Resources\Translations folder
 	// These will come out sorted by default
@@ -86,46 +86,45 @@ void CTDLLanguageComboBox::BuildLanguageList()
 
 	int nNumFiles = FileMisc::FindFiles(sFolder, aFiles, FALSE, m_sFilter);
 	int bDefaultAdded = FALSE;
+
+	int nHeading = AddString(CEnString(IDS_LANGCOMBO_LANGCOUNTRY), 0x00, CEnString(IDS_LANGCOMBO_COMPLETION), NULL);
+	SetHeadingItem(nHeading);
 	
 	for (int nFile = 0; nFile < nNumFiles; nFile++)
 	{
-		CString sFileName;
-		FileMisc::SplitPath(aFiles[nFile], NULL, NULL, &sFileName, NULL);
+		CString sFilePath(aFiles[nFile]), sFileName;
+		FileMisc::SplitPath(sFilePath, NULL, NULL, &sFileName, NULL);
 
-		// Because CComboBoxEx does not support sorting, we need
+		// Because COwnerdrawComboBoxBase does not support sorting, we need
 		// to dynamically determine the default language position
 		if (!bDefaultAdded && (DEFAULT_LANG.CompareNoCase(sFileName) < 0))
-		{
-			CBitmap bm;
-			bm.LoadBitmap(IDB_UK_FLAG);
-
-			AddString(DEFAULT_LANG, (HBITMAP)bm.Detach(), LANG_ENGLISH, colorMagenta);
-
-			bDefaultAdded = TRUE;
-		}
+			bDefaultAdded = AddDefaultLanguage();
 
 		// load icon file
-		CString sIconPath(aFiles[nFile]);
+		CString sIconPath(sFilePath);
 		FileMisc::ReplaceExtension(sIconPath, _T("png"));
 
 		HBITMAP hbmFlag = CEnBitmap::LoadImageFile(sIconPath);
+		LANGID nLangID = GetLanguageID(sFilePath);
+		CString sPercent = GetPercentTranslated(sFilePath);
 
-		LANGID nLangID = GetLanguageID(aFiles[nFile]);
-		AddString(sFileName, hbmFlag, nLangID);
+		AddString(sFileName, nLangID, sPercent, hbmFlag);
 	}
 
 	if (!bDefaultAdded)
-	{
-		CBitmap bm;
-		bm.LoadBitmap(IDB_UK_FLAG);
-
-		AddString(DEFAULT_LANG, (HBITMAP)bm.Detach(), LANG_ENGLISH, colorMagenta);
-	}
+		AddDefaultLanguage();
 
 	m_il.ScaleByDPIFactor();
-	SetImageList(&m_il);
 
 	SelectLanguage(m_sSelLanguage);
+}
+
+BOOL CTDLLanguageComboBox::AddDefaultLanguage()
+{
+	CBitmap bm;
+	bm.LoadBitmap(IDB_UK_FLAG);
+
+	return (CB_ERR != AddString(DEFAULT_LANG, LANG_ENGLISH, _T("100%"), (HBITMAP)bm.Detach(), colorMagenta));
 }
 
 LANGID CTDLLanguageComboBox::GetLanguageID(const CString& sTransFile)
@@ -141,7 +140,7 @@ LANGID CTDLLanguageComboBox::GetLanguageID(const CString& sTransFile)
 	// 2nd line is language ID
 	CString sLangID;
 
-	if (!Misc::Split(aHeader[1], sLangID, ' ') || (aHeader[1] != _T("PRIMARY_LANGID")))
+	if (!Misc::Split(aHeader[1], sLangID, ' ') || (aHeader[1] != PRIMARY_LANGID))
 	{
 		ASSERT(0);
 		return LANG_NEUTRAL;
@@ -150,22 +149,42 @@ LANGID CTDLLanguageComboBox::GetLanguageID(const CString& sTransFile)
 	return (LANGID)PRIMARYLANGID(_ttoi(sLangID));
 }
 
-int CTDLLanguageComboBox::AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID nLangID, COLORREF crBack)
+CString CTDLLanguageComboBox::GetPercentTranslated(const CString& sTransFile)
 {
-	// create and associate the image list first time around
-	if (m_il.GetSafeHandle() == NULL)
+	CString sPercent;
+	CStringArray aHeader;
+
+	if (FileMisc::LoadFile(sTransFile, aHeader, 4) == 4)
 	{
-		m_il.Create(16, 16, ILC_COLOR32 | ILC_MASK, 1, 1);
-		SetImageList(&m_il);
+		// If 4th line is NEED_TRANSLATION it's followed by the current UNTRANSLATED percent
+		Misc::Split(aHeader[3], sPercent, ' ');
+	
+		if (aHeader[3] != NEED_TRANSLATION)
+		{
+			ASSERT(aHeader[3] == TRANSLATED);
+			sPercent = _T("100%"); // all translated
+		}
+		else if (!sPercent.IsEmpty())
+		{
+			ASSERT(Misc::IsNumber(sPercent));
+			sPercent.Format(_T("%d%%"), (100 - _ttoi(sPercent)));
+		}
+	}
+	else
+	{
+		ASSERT(0);
 	}
 
-	COMBOBOXEXITEM cbe;
+	return sPercent;
+}
 
-	cbe.mask = CBEIF_IMAGE | CBEIF_SELECTEDIMAGE | CBEIF_TEXT | CBEIF_LPARAM;
-	cbe.iItem = GetCount();
-	cbe.pszText = (LPTSTR)szLanguage;
-	cbe.lParam = nLangID;
-	cbe.iImage = cbe.iSelectedImage = GetCount();
+int CTDLLanguageComboBox::AddString(LPCTSTR szLanguage, LANGID nLangID, const CString& sCompletion, HBITMAP hbmFlag, COLORREF crBack)
+{
+	int nItem = COwnerdrawComboBoxBase::AddString(szLanguage);
+
+	// create the image list first time around
+	if (m_il.GetSafeHandle() == NULL)
+		m_il.Create(16, 16, ILC_COLOR32 | ILC_MASK, 1, 1);
 
 	if (hbmFlag == NULL)
 	{
@@ -178,9 +197,18 @@ int CTDLLanguageComboBox::AddString(LPCTSTR szLanguage, HBITMAP hbmFlag, LANGID 
 
 	CBitmap tmp;
 	tmp.Attach(hbmFlag); // will auto cleanup
-	m_il.Add(&tmp, crBack);
+	VERIFY(m_il.Add(&tmp, crBack) == nItem);
 
-	return InsertItem(&cbe);
+	LCB_ITEMDATA* pItemData = (LCB_ITEMDATA*)GetAddExtItemData(nItem);
+	ASSERT(pItemData);
+
+	if (pItemData)
+	{
+		pItemData->dwItemData = nLangID;
+		pItemData->sCompletion = sCompletion;
+	}
+
+	return nItem;
 }
 
 void CTDLLanguageComboBox::SelectLanguageFile(LPCTSTR szFile)
@@ -213,9 +241,11 @@ void CTDLLanguageComboBox::OnDestroy()
 	if (nSel == -1)
 		m_sSelLanguage = DEFAULT_LANG;
 	else
-		GetLBText(nSel, m_sSelLanguage);
+		m_sSelLanguage = CDialogHelper::GetItem(*this, nSel);
 
-	CComboBoxEx::OnDestroy();
+	m_nLangCountryColWidth = 0;
+
+	COwnerdrawComboBoxBase::OnDestroy();
 }
 
 CString CTDLLanguageComboBox::GetSelectedLanguageFile(LPCTSTR szLanguage, LPCTSTR szExt, BOOL bRelative) // static
@@ -244,18 +274,28 @@ CString CTDLLanguageComboBox::GetSelectedLanguageFile(BOOL bRelative) const
 {
 	CString sLanguageFile(GetDefaultLanguage());
 
-	if (GetSafeHwnd())
+	if (GetSafeHwnd() && GetCount())
 	{
 		int nSel = GetCurSel();
 
 		if (nSel == -1)
 			m_sSelLanguage = DEFAULT_LANG;
 		else
-			GetLBText(nSel, m_sSelLanguage);
+			m_sSelLanguage = CDialogHelper::GetItem(*this, nSel);
 	}
 
 	LPCTSTR szExt = (m_sFilter.Find(_T(".csv")) != -1) ? _T("csv") : _T("txt");
 	return GetSelectedLanguageFile(m_sSelLanguage, szExt, bRelative);
+}
+
+void CTDLLanguageComboBox::GetLanguageAndCountry(const CString& sItem, CString& sLanguage, CString& sCountry)
+{
+	sLanguage = sItem;
+
+	Misc::Split(sLanguage, sCountry, '(');
+	sCountry.TrimRight(')');
+
+	ASSERT(!sLanguage.IsEmpty() && (!sCountry.IsEmpty() || (sLanguage == _T("YourLanguage"))));
 }
 
 BOOL CTDLLanguageComboBox::IsDefaultLanguageSelected() const
@@ -269,10 +309,7 @@ int CTDLLanguageComboBox::SelectLanguage(LPCTSTR szLanguage)
 
 	while (nIndex--)
 	{
-		CString sLanguage;
-		GetLBText(nIndex, sLanguage);
-
-		if (sLanguage.CompareNoCase(szLanguage) == 0)
+		if (Misc::Find(szLanguage, CDialogHelper::GetItem(*this, nIndex)) == 0)
 		{
 			SetCurSel(nIndex);
 			return nIndex;
@@ -310,4 +347,105 @@ BOOL CTDLLanguageComboBox::SelectUserLanguage()
 BOOL CTDLLanguageComboBox::HasLanguages()
 {
 	return FileMisc::FolderContainsFiles(GetTranslationFolder(), FALSE, _T("*.csv"));
+}
+
+int CTDLLanguageComboBox::CalcMinItemHeight(BOOL bList) const
+{
+	int nMinHeight = COwnerdrawComboBoxBase::CalcMinItemHeight(bList);
+
+	if (bList)
+		nMinHeight = max(nMinHeight, (FLAG_SIZE + 2));
+
+	return nMinHeight;
+}
+
+void CTDLLanguageComboBox::InitialiseDropWidth()
+{
+	if (m_nLangCountryColWidth == 0)
+	{
+		CClientDC dc(this);
+		HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, *this);
+
+		// Completion column always defined by heading text
+		int nDoneColWidth = MulDiv(dc.GetTextExtent(CEnString(IDS_LANGCOMBO_COMPLETION)).cx, 3, 2);
+		int nMaxLangColWidth = 0, nMaxCountryColWidth = 0;
+		int nIndex = GetCount();
+
+		while (nIndex--)
+		{
+			CString sLanguage, sCountry;
+			GetLanguageAndCountry(CDialogHelper::GetItem(*this, nIndex), sLanguage, sCountry);
+
+			// Language
+			int nWidth = dc.GetTextExtent(sLanguage).cx;
+
+			if (nIndex == 0) // heading
+				nWidth = MulDiv(nWidth, 3, 2); // ~ bold
+
+			nMaxLangColWidth = max(nWidth, nMaxLangColWidth);
+
+			// Country
+			nWidth = dc.GetTextExtent(sCountry).cx;
+
+			if (nIndex == 0) // heading
+				nWidth = MulDiv(nWidth, 3, 2); // ~ bold
+
+			nMaxCountryColWidth = max(nWidth, nMaxCountryColWidth);
+		}
+		dc.SelectObject(hOldFont);
+
+		m_nLangCountryColWidth = max(nMaxLangColWidth, nMaxCountryColWidth);
+
+		int nReqWidth = ((2 * m_nLangCountryColWidth) +
+						 nDoneColWidth +
+						 (FLAG_SIZE + 5) +
+						 (2 * COL_SPACING));
+
+		SetDroppedWidth(nReqWidth);
+	}
+}
+
+void CTDLLanguageComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+									  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
+{
+	if (nItem == -1)
+	{
+		COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
+		return;
+	}
+
+	LCB_ITEMDATA* pItemData = (LCB_ITEMDATA*)GetExtItemData(nItem);
+	ASSERT(pItemData);
+
+	CRect rText(rect);
+	
+	if (!pItemData->bHeading)
+	{
+		VERIFY(GraphicsMisc::DrawCentred(&dc, m_il, nItem, rect, FALSE, TRUE));
+		rText.left += FLAG_SIZE + 5;
+	}
+
+	if (bList)
+	{
+		CString sLanguage, sCountry;
+		GetLanguageAndCountry(sItem, sLanguage, sCountry);
+
+		// Draw language
+		COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sLanguage, bList, crText);
+		rText.left += m_nLangCountryColWidth + COL_SPACING;
+		
+		if (pItemData->bHeading)
+			rText.left += FLAG_SIZE + 5;
+
+		// Draw country
+		COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sCountry, bList, crText);
+		rText.left += m_nLangCountryColWidth + COL_SPACING;
+
+		// Draw % completion
+		COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, pItemData->sCompletion, bList, crText);
+	}
+	else // edit
+	{
+		COwnerdrawComboBoxBase::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
+	}
 }

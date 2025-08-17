@@ -40,7 +40,7 @@
 #include "tdlToolsUserInputDlg.h"
 #include "tdltransformdialog.h"
 #include "tdlwelcomewizard.h"
-#include "tdstringres.h"
+#include "tdcstringres.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\AcceleratorString.h"
@@ -221,13 +221,12 @@ void CToDoListWnd::IDLETASKS::UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCA
 	else
 		m_bUpdateTimeTrackAllTasks |= (bAllTasks != FALSE);
 
-	if (mapAttrib.Has(TDCA_ALL))
+	if (!mapAttrib.MatchAll(m_mapTimeTrackAttrib))
 	{
-		m_mapTimeTrackAttrib.Set(TDCA_ALL);
-	}
-	else if (!m_mapTimeTrackAttrib.Has(TDCA_ALL))
-	{
-		m_mapTimeTrackAttrib.Append(mapAttrib);
+		if (mapAttrib.Has(TDCA_ALL) || !m_mapTimeTrackAttrib.IsEmpty())
+			m_mapTimeTrackAttrib.Set(TDCA_ALL);
+		else
+			m_mapTimeTrackAttrib.Append(mapAttrib);
 	}
 }
 
@@ -484,6 +483,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENCIES, OnMoveSelectTaskDependencies)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENTS, OnMoveSelectTaskDependents)
 	ON_COMMAND(ID_NEW, OnNewTasklist)
+	ON_COMMAND(ID_NEWSUBTASK_INTASK, OnNewSubtaskInTask)
 	ON_COMMAND(ID_NEXTTASK, OnGotoNexttask)
 	ON_COMMAND(ID_NEXTTOPLEVELTASK, OnNexttopleveltask)
 	ON_COMMAND(ID_OPEN_RELOAD, OnReload)
@@ -743,6 +743,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
 	ON_UPDATE_COMMAND_UI(ID_NEW, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_NEWSUBTASK_INTASK, OnUpdateNewSubtaskInTask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTASK, OnUpdateGotoNexttask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTOPLEVELTASK, OnUpdateNexttopleveltask)
 	ON_UPDATE_COMMAND_UI(ID_OPEN_RELOAD, OnUpdateReload)
@@ -5967,7 +5968,7 @@ void CToDoListWnd::OnEditCut()
 
 void CToDoListWnd::OnUpdateEditCut(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_DELETE));	
+	OnUpdateDeletetask(pCmdUI);	
 }
 
 void CToDoListWnd::OnEditPasteSub() 
@@ -6009,7 +6010,8 @@ void CToDoListWnd::OnEditPasteAttributes()
 
 void CToDoListWnd::OnUpdateEditPasteAttributes(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(CTaskClipboard::HasAttributeTask());
+	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_PASTE) && 
+				   CTaskClipboard::HasAttributeTask());
 }
 
 void CToDoListWnd::OnEditPasteAfter() 
@@ -9791,6 +9793,7 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 		dwDependencyID = GetToDoCtrl().GetSelectedTaskID();
 		break;
 
+	case ID_NEWSUBTASK_INTASK: // Handled by OnNewSubtaskInTask
 	default:
 		ASSERT(0);
 		return;
@@ -9798,7 +9801,7 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
 
-	VERIFY (CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE, dwDependencyID));
+	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE, dwDependencyID));
 }
 
 void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI) 
@@ -9831,6 +9834,7 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 		bDependent = TRUE;
 		break;
 
+	case ID_NEWSUBTASK_INTASK: // Handled by OnUpdateNewSubtaskInTask
 	default:
 		ASSERT(0);
 		return;
@@ -9839,6 +9843,18 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
 
 	pCmdUI->Enable(CanCreateNewTask(nInsert, bDependent));
+}
+
+void CToDoListWnd::OnNewSubtaskInTask()
+{
+	BOOL bTop = (GetNewSubtaskCmdID() == ID_NEWSUBTASK_ATTOP);
+	
+	GetToDoCtrl().CreateNewSubtaskInTask(CEnString(IDS_TASK), bTop);
+}
+
+void CToDoListWnd::OnUpdateNewSubtaskInTask(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().CanCreateNewSubtaskInTask());
 }
 
 BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent) const

@@ -365,7 +365,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		
 	case IUI_NEW:
 	case IUI_EDIT:
-		CWnd::SetRedraw(FALSE);
+		SetRedraw(FALSE);
 			
 		// update the task(s)
 		if (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE))
@@ -417,7 +417,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	case IUI_NEW:
 	case IUI_EDIT:
 	case IUI_DELETE:
-		CWnd::SetRedraw(TRUE);
+		SetRedraw(TRUE);
 		InvalidateAll();
 		break;
 
@@ -1049,13 +1049,13 @@ void CWorkloadCtrl::SetOptions(DWORD dwOptions)
 		if (Misc::FlagHasChanged(WLCF_STRIKETHRUDONETASKS, dwPrev, dwOptions))
 		{
 			m_tree.Fonts().Clear();
-			CWnd::Invalidate(FALSE);
+			Invalidate(FALSE);
 		}
 
 		if (Misc::FlagHasChanged(WLCF_SHOWMIXEDCOMPLETIONSTATE, dwPrev, dwOptions) ||
 			Misc::FlagHasChanged(WLCF_DISPLAYISODATES, dwPrev, dwOptions))
 		{
-			CWnd::Invalidate(FALSE);
+			Invalidate(FALSE);
 		}
 
 		if (Misc::FlagHasChanged(WLCF_SHOWSPLITTERBAR, dwPrev, dwOptions))
@@ -1145,7 +1145,7 @@ void CWorkloadCtrl::OnResize(int cx, int cy)
 void CWorkloadCtrl::ResyncTotalsPositions()
 {
 	CRect rClient;
-	CWnd::GetClientRect(rClient);
+	GetClientRect(rClient);
 
 	CRect rTreeTotals = CDialogHelper::GetChildRect(&m_tree);
 	CRect rColumnTotals = CDialogHelper::GetChildRect(&m_list);
@@ -1297,7 +1297,7 @@ HIMAGELIST CWorkloadCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 	if (m_tree.GetImageList(TVSIL_NORMAL) == NULL)
 		return NULL;
 
-	return (HIMAGELIST)CWnd::GetParent()->SendMessage(WM_WLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
+	return (HIMAGELIST)GetParent()->SendMessage(WM_WLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }
 
 GM_ITEMSTATE CWorkloadCtrl::GetItemState(int nItem) const
@@ -1618,7 +1618,7 @@ void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, B
 		m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		CWnd::GetParent()->PostMessage(WM_WLCN_SORTCHANGE, m_sort.single.bAscending, m_sort.single.nColumnID);
+		GetParent()->PostMessage(WM_WLCN_SORTCHANGE, m_sort.single.bAscending, m_sort.single.nColumnID);
 }
 
 void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS& multi)
@@ -1653,7 +1653,7 @@ void CWorkloadCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		return;
 
 	// notify app to edit
-	CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKTITLE, 0, GetTaskID(hti));
+	GetParent()->SendMessage(WM_WLC_EDITTASKTITLE, 0, GetTaskID(hti));
 }
 
 void CWorkloadCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -1712,7 +1712,7 @@ BOOL CWorkloadCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 
 		if (nFlags & TVHT_ONITEMICON)
-			CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
+			GetParent()->SendMessage(WM_WLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
 
 		return TRUE; // eat
 	}
@@ -1823,7 +1823,7 @@ BOOL CWorkloadCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 			
 	// If copying a task, app will send us a full update 
 	// so we do not need to perform the move ourselves
-	if (CWnd::GetParent()->SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)
+	if (GetParent()->SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)
 	{
 		VERIFY(MoveItem(move));
 	}
@@ -1930,7 +1930,7 @@ BOOL CWorkloadCtrl::OnMouseWheel(UINT /*nFlags*/, short zDelta, CPoint pt)
 		// We have to handle mouse wheel over the totals because we have disabled it
 		if (HasHScrollBar(m_list))
 		{
-			CWnd::ScreenToClient(&pt);
+			ScreenToClient(&pt);
 
 			if (ChildWindowFromPoint(pt) == &m_lcColumnTotals)
 			{
@@ -1990,7 +1990,7 @@ BOOL CWorkloadCtrl::OnTreeCheckChange(HTREEITEM hti)
 		DWORD dwTaskID = GetTaskID(hti);
 		BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
 	
-		CWnd::GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
+		GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
 	}
 
 	return TRUE; // always
@@ -2009,7 +2009,7 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
 
 	CString sAllocTo(m_aAllocTo[nCol - 1]); // Account for hidden first column
 
-	return CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKALLOCATIONS, (WPARAM)(LPCTSTR)sAllocTo, GetTaskID(nHit));
+	return GetParent()->SendMessage(WM_WLC_EDITTASKALLOCATIONS, (WPARAM)(LPCTSTR)sAllocTo, GetTaskID(nHit));
 }
 
 void CWorkloadCtrl::SetOverlapColor(COLORREF crOverlap)

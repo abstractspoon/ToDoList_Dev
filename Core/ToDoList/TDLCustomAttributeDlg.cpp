@@ -1021,6 +1021,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 
 	// disable localization because we do it ourselves by using CEnString
 	CLocalizer::EnableTranslation(m_cbDataType, FALSE);
+	CLocalizer::EnableTranslation(m_cbFeatures, FALSE);
 	CLocalizer::EnableTranslation(ListView_GetHeader(m_lcAttributes), FALSE);
 
 	VERIFY(m_pageList.Create(this));

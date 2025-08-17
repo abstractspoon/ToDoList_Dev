@@ -15,13 +15,10 @@
 
 class CTDLFilterComboBox : public CTabbedComboBox
 {
-// Construction
 public:
 	CTDLFilterComboBox();
 	virtual ~CTDLFilterComboBox();
 
-// Attributes
-public:
 	FILTER_SHOW GetSelectedFilter() const;
 	FILTER_SHOW GetSelectedFilter(CString& sAdvFilter) const;
 	BOOL SelectFilter(FILTER_SHOW nShow, LPCTSTR szAdvFilter = NULL);
@@ -32,27 +29,16 @@ public:
 
 	void ShowDefaultFilters(BOOL bShow);
 
-// Operations
 protected:
 	BOOL m_bShowDefaultFilters;
 	CStringArray m_aAdvancedFilterNames;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFilterComboBox)
 protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLFilterComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void FillCombo();
+	virtual void BuildCombo();
+
 	void RebuildCombo(LPCTSTR szAdvancedSel = NULL);
 	int AddDefaultFilterItem(int nItem);
 	int GetDefaultFilterCount() const;

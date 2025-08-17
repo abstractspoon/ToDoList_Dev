@@ -16,14 +16,22 @@ namespace LoggedTimeUIExtension
 		private double m_OrgTimeSpent = 0.0;
 		private bool m_EditMode = false;
 		private bool m_ReadOnlyTask = false;
+		private Translator m_Trans = null;
 
 		public LoggedEntryAttributesPage()
 		{
 			InitializeComponent();
 		}
 
-		public void Initialise(LogEntry entry, WorkingWeek workWeek, bool isoDateTimes, bool readonlyTask, bool editMode)
+		public void Initialise(LogEntry entry, 
+								WorkingWeek workWeek, 
+								bool isoDateTimes, 
+								bool readonlyTask, 
+								bool editMode, 
+								Translator trans)
 		{
+			m_Trans = trans;
+
 			TimeComboBox.SetWorkingWeek(workWeek);
 			SetDates(workWeek, entry);
 
@@ -68,7 +76,10 @@ namespace LoggedTimeUIExtension
 		private void OnTimeSpentChanged(object sender, EventArgs e)
 		{
 			if (m_EditMode && m_AddToTimeSpentCheckBox.Enabled)
-				m_AddToTimeSpentCheckBox.Text = string.Format("Also modify task 'Time Spent' by {0:0.###} hours", (TimeSpent - m_OrgTimeSpent));
+			{
+				string format = m_Trans.Translate("Also modify task 'Time Spent' by {0:0.###} hours", Translator.Type.CheckBox);
+				m_AddToTimeSpentCheckBox.Text = string.Format(format, (TimeSpent - m_OrgTimeSpent));
+			}
 		}
 
 		public Calendar.AppointmentDates Dates

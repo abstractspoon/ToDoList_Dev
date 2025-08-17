@@ -56,6 +56,7 @@ CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
 void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+
 	DDX_Control(pDX, IDC_TASKLISTS, m_cbTasklists);
 	DDX_Control(pDX, IDC_TASKS, m_cbTasks);
 	DDX_Control(pDX, IDC_STARTSTOP, m_btnStart);
@@ -428,7 +429,7 @@ void CTDLTimeTrackerDlg::UpdateAllTasks(const CToDoCtrl* pTDC)
 
 void CTDLTimeTrackerDlg::DoUpdateAllTasks(const TRACKTASKLIST* pTTL)
 {
-	TDCGETTASKS filter(TDCGT_NOTDONE);
+	TDCGETTASKS filter(TDCGT_NOTDONE, TDCGTF_NOTLOCKED);
 
 	filter.mapAttribs.Add(TDCA_TASKNAME);
 	filter.mapAttribs.Add(TDCA_ICON);
@@ -949,7 +950,6 @@ BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 		GetClientRect(rClient);
 		
 		pDC->FillSolidRect(rClient, GetBkgndColor());
-		
 		return TRUE;
 	}
 

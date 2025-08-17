@@ -332,57 +332,80 @@ void CTDLAnalyseLoggedTimeDlg::OnSelchangeOutputFormat()
 
 BOOL CTDLAnalyseLoggedTimeDlg::GetDateRange(COleDateTime& dtFrom, COleDateTime& dtTo) const
 {
-	COleDateTime dtNow = CDateHelper::GetDate(DHD_TODAY);
-
 	CDateHelper::ClearDate(dtFrom);
 	CDateHelper::ClearDate(dtTo);
 
 	switch (m_nTimePeriod)
 	{
 	case TTLP_FROMTO:
-		dtFrom = CDateHelper::GetDateOnly(m_dtFrom);
-		dtTo = (CDateHelper::GetDateOnly(m_dtTo).m_dt + 1.0);
+		{
+			dtFrom = CDateHelper::GetDateOnly(m_dtFrom);
+			dtTo = (CDateHelper::GetDateOnly(m_dtTo).m_dt + 1.0);
+		}
 		break;
 
 	case TTLP_YESTERDAY:
-		dtFrom = (dtNow.m_dt - 1.0);
-		dtTo = dtNow;
+		{
+			dtFrom = CDateHelper::GetDate(DHD_YESTERDAY);
+			dtTo = CDateHelper::GetDate(DHD_TODAY);
+		}
 		break;
 
 	case TTLP_TODAY:
-		dtFrom = dtNow;
-		dtTo = (dtNow.m_dt + 1.0);
+		{
+			dtFrom = CDateHelper::GetDate(DHD_TODAY);
+			dtTo = CDateHelper::GetDate(DHD_TOMORROW);
+		}
 		break;
 
 	case TTLP_LASTWEEK:
-		dtTo = CDateHelper::GetDate(DHD_BEGINTHISWEEK);
-		dtFrom = (dtTo.m_dt - 7.0);
+		{
+			dtTo = CDateHelper::GetDate(DHD_BEGINTHISWEEK);
+			dtFrom = (dtTo.m_dt - 7.0);
+		}
 		break;
 
 	case TTLP_THISWEEK:
-		dtFrom = CDateHelper::GetDate(DHD_BEGINTHISWEEK);
-		dtTo = (dtFrom.m_dt + 7.0);
+		{
+			dtFrom = CDateHelper::GetDate(DHD_BEGINTHISWEEK);
+			dtTo = (dtFrom.m_dt + 7.0);
+		}
 		break;
 
 	case TTLP_LASTMONTH:
-		CDateHelper::IncrementMonth(dtNow, -1);
-		dtFrom.SetDate(dtNow.GetYear(), dtNow.GetMonth(), 1);
-		dtTo = (CDateHelper::GetEndOfMonth(dtNow).m_dt + 1.0);
+		{
+			dtTo = CDateHelper::GetDate(DHD_BEGINTHISMONTH);
+
+			dtFrom = dtTo;
+			CDateHelper::IncrementMonth(dtFrom, -1);
+		}
 		break;
 
 	case TTLP_THISMONTH:
-		dtFrom.SetDate(dtNow.GetYear(), dtNow.GetMonth(), 1);
-		dtTo = (CDateHelper::GetEndOfMonth(dtNow).m_dt + 1.0);
+		{
+			dtFrom = CDateHelper::GetDate(DHD_BEGINTHISMONTH);
+
+			dtTo = dtFrom;
+			CDateHelper::IncrementMonth(dtTo, 1);
+		}
 		break;
 
 	case TTLP_LASTYEAR:
-		dtFrom.SetDate(dtNow.GetYear() - 1, 1, 1);
-		dtTo = CDateHelper::GetStartOfYear(dtNow);
+		{
+			dtTo = CDateHelper::GetDate(DHD_BEGINTHISYEAR);
+
+			dtFrom = dtTo;
+			CDateHelper::IncrementYear(dtFrom, -1);
+		}
 		break;
 
 	case TTLP_THISYEAR:
-		dtFrom.SetDate(dtNow.GetYear(), 1, 1);
-		dtTo = (CDateHelper::GetEndOfYear(dtNow).m_dt + 1.0);
+		{
+			dtFrom = CDateHelper::GetDate(DHD_BEGINTHISYEAR);
+
+			dtTo = dtFrom;
+			CDateHelper::IncrementYear(dtTo, 1);
+		}
 		break;
 
 	default:

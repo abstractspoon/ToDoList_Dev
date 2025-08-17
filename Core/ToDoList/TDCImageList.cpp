@@ -193,28 +193,6 @@ CString CTDCImageList::GetImageName(int nIndex) const
 	return sName;
 }
 
-BOOL CTDCImageList::Draw(CDC* pDC, const CString& sImageName, POINT pt, UINT nStyle) const
-{
-	return Draw(pDC, GetImageIndex(sImageName), pt, nStyle);
-}
-
-BOOL CTDCImageList::Draw(CDC* pDC, int nImage, POINT pt, UINT nStyle) const
-{
-	CTDCImageList* pThis = const_cast<CTDCImageList*>(this);
-
-	return pThis->CImageList::Draw(pDC, nImage, pt, nStyle);
-}
-
-BOOL CTDCImageList::DrawVerticallyCentred(CDC* pDC, int nImage, LPCRECT pRect, UINT nStyle) const
-{
-	CRect rIcon(pRect);
-	rIcon.bottom = (rIcon.top + GetImageHeight());
-
-	GraphicsMisc::CentreRect(&rIcon, pRect, FALSE, TRUE);
-	
-	return Draw(pDC, nImage, rIcon.TopLeft(), nStyle);
-}
-
 BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORREF crTransparent, 
 							 CTDCImageList* pImages, int& nNextNameIndex)
 {

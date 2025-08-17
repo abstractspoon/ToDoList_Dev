@@ -69,9 +69,6 @@ CBurndownOptionsComboBox::~CBurndownOptionsComboBox()
 
 
 BEGIN_MESSAGE_MAP(CBurndownOptionsComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CCBurndownOptionsComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -90,13 +87,6 @@ BOOL CBurndownOptionsComboBox::SetActiveGraphType(BURNDOWN_GRAPHTYPE nType)
 	}
 
 	m_nGraphType = nType;
-
-	// We build the combo in a specific order
-	if (!GetSafeHwnd() || (GetStyle() & CBS_SORT))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
 
 	// Build our own sorted array because we have leading numbers
 	CArray<SORTITEM, SORTITEM&> aOptions;

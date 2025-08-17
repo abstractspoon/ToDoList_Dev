@@ -464,7 +464,7 @@ bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
 	if (m_ctrlGantt.GetLabelEditRect(pEdit))
 	{
 		// convert to screen coords
-		m_ctrlGantt.CWnd::ClientToScreen(pEdit);
+		m_ctrlGantt.ClientToScreen(pEdit);
 		return true;
 	}
 

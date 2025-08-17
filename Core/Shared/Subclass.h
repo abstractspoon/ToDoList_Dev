@@ -63,13 +63,15 @@ public:
 	inline CWnd* GetCWnd() const { return CWnd::FromHandle(m_hWndHooked); }
 
 	inline UINT GetDlgCtrlID() const { return ::GetDlgCtrlID(m_hWndHooked); }
-	void SetRedraw(BOOL bRedraw = TRUE) { ::SendMessage(m_hWndHooked, WM_SETREDRAW, bRedraw, 0); }
+	inline void SetRedraw(BOOL bRedraw = TRUE) { ::SendMessage(m_hWndHooked, WM_SETREDRAW, bRedraw, 0); }
 	inline DWORD GetExStyle() const { return ::GetWindowLong(m_hWndHooked, GWL_EXSTYLE); }
 	inline DWORD GetStyle() const { return ::GetWindowLong(m_hWndHooked, GWL_STYLE); }
 	inline BOOL SetExStyle(DWORD dwExStyle) const { return ::SetWindowLong(m_hWndHooked, GWL_EXSTYLE, dwExStyle); }
 	inline BOOL SetStyle(DWORD dwStyle) const { return ::SetWindowLong(m_hWndHooked, GWL_STYLE, dwStyle); }
 	inline BOOL HasExStyle(DWORD dwExStyle) const { return (GetExStyle() & dwExStyle) == dwExStyle; }
 	inline BOOL HasStyle(DWORD dwStyle) const { return (GetStyle() & dwStyle) == dwStyle; }
+	inline BOOL PostMessage(UINT msg, WPARAM wp = 0, LPARAM lp = 0) const { return ::PostMessage(m_hWndHooked, msg, wp, lp); }
+	inline BOOL SendMessage(UINT msg, WPARAM wp = 0, LPARAM lp = 0) const { return ::SendMessage(m_hWndHooked, msg, wp, lp); }
 
 	inline HWND GetParent() const { return ::GetParent(m_hWndHooked); }
 	inline void GetClientRect(LPRECT pRect) const { ::GetClientRect(m_hWndHooked, pRect); }
@@ -87,9 +89,6 @@ public:
 	void ScreenToClient(LPPOINT pPoint) const;
 	void ClientToScreen(LPPOINT pPoint) const;
 	void ScreenToWindow(LPPOINT pPoint) const;
-
-	virtual BOOL PostMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) const;
-	virtual BOOL SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) const;
 
 	static void SetCallback(ISubclassCallback* pCallback) { s_pCallback = pCallback; }
 	static const MSG* GetCurrentMessage();
@@ -126,6 +125,8 @@ protected:
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT Default(); // call this at the end of handler fns if you are happy with the defaults
 };
+
+////////////////////////////////////////////////////////////////////
 
 class CSubclasser
 {

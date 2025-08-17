@@ -7,7 +7,7 @@
 #include "taskclipboard.h"
 #include "tdcmsg.h"
 #include "tdcmapping.h"
-#include "tdstringres.h"
+#include "tdcstringres.h"
 #include "resource.h"
 #include "TDCtasktimelog.h"
 #include "todoitem.h"
@@ -24,6 +24,7 @@
 #include "tdccontentmgr.h"
 #include "TDLRecurringTaskEdit.h"
 #include "ToDoCtrlDataUtils.h"
+#include "TDLSelectTaskDlg.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -1564,15 +1565,11 @@ BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle, BOOL bAllowMultiple)
 
 BOOL CToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 {
-	if (m_taskTree.GetSelectionBoundingRect(rSelection))
-	{
-		m_taskTree.ClientToScreen(rSelection);
-		ScreenToClient(rSelection);
+	if (!m_taskTree.GetSelectionBoundingRect(rSelection))
+		return FALSE;
 
-		return TRUE;
-	}
-
-	return FALSE;
+	m_taskTree.MapWindowPoints((CWnd*)this, rSelection);
+	return TRUE;
 }
 
 COleDateTime CToDoCtrl::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const
@@ -2979,48 +2976,46 @@ BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 
 BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel, DWORD dwDependency)
 {
-	if (!CanCreateNewTask(nWhere, sText))
+	if (sText.IsEmpty() || !CanCreateNewTask(nWhere))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	// Are we an archive and should we warn user if we are
+	if (m_bArchive && 
+		HasStyle(TDCS_WARNADDDELETEARCHIVE) && 
+		(IDNO == CMessageBox::AfxShow(IDS_TDC_CONFIRMADD_TITLE, IDS_TDC_WARNADDTOARCHIVE, MB_YESNO | MB_ICONQUESTION)))
+	{
+		return FALSE;
+	}
 	
 	Flush();
 
-	// CToDoListWnd already handles empty tasklists
-	// so this should be unnecessary.
-	// Commenting out to see what happens...
-/*
-	// handle special case when tasklist is empty
-	if (GetTaskCount() == 0)
-		nWhere = TDC_INSERTATBOTTOM;
-*/
-	
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
-	if (m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
+	if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
 	{
-		HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditLabel, dwDependency);
-		ASSERT(htiNew);
-
-		DWORD dwTaskID = GetTaskID(htiNew);
-		ASSERT(dwTaskID == (m_dwNextUniqueID - 1));
-
-		return (htiNew != NULL);
+		ASSERT(0);
+		return FALSE;
 	}
 
-	// else
-	ASSERT(0);
-	return FALSE;
+	HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditLabel, dwDependency);
+	ASSERT(htiNew);
+
+	DWORD dwTaskID = GetTaskID(htiNew);
+	ASSERT(dwTaskID == (m_dwNextUniqueID - 1));
+
+	return (htiNew != NULL);
 }
 
 BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 {
-	if (!CanEditSelectedTask(TDCA_NEWTASK))
-		return FALSE;
-
 	switch (nInsertWhere)
 	{
 	case TDC_INSERTATTOP:
 	case TDC_INSERTATBOTTOM:
-		return TRUE;
+		return !IsReadOnly();
 
 	case TDC_INSERTATTOPOFSELTASKPARENT:
 	case TDC_INSERTATBOTTOMOFSELTASKPARENT:
@@ -3028,6 +3023,7 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	case TDC_INSERTBEFORESELTASK:
 	case TDC_INSERTATTOPOFSELTASK: 
 	case TDC_INSERTATBOTTOMOFSELTASK:
+		if (CanEditSelectedTask(TDCA_NEWTASK))
 		{
 			HTREEITEM htiParent = NULL, htiAfter = NULL;
 
@@ -3037,7 +3033,7 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 				break; // handled below
 
 			case 1:
-				VERIFY (m_taskTree.GetInsertLocation(nInsertWhere, htiParent, htiAfter));
+				VERIFY(m_taskTree.GetInsertLocation(nInsertWhere, htiParent, htiAfter));
 				break;
 
 			default:
@@ -3055,30 +3051,61 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 			return !m_data.IsTaskReference(GetTaskID(htiParent));
 		}
 		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 
-	ASSERT(0);
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nWhere, const CString& sText) const
+BOOL CToDoCtrl::CreateNewSubtaskInTask(const CString& sText, BOOL bTop)
 {
-	if (!CanCreateNewTask(nWhere))
-		return FALSE;
-	
-	if (sText.IsEmpty())
+	// Get all editable tasks 
+	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_NOTLOCKED);
+
+	filter.mapAttribs.Add(TDCA_TASKNAME);
+	filter.mapAttribs.Add(TDCA_ICON);
+
+	CTaskFile tasks;
+	GetTasks(tasks, filter);
+
+	// Prepare the dialog
+	CTDLSelectTaskDlg dialog(tasks,
+							 GetTaskIconImageList(),
+							 GetPreferencesKey(_T("NewSubtaskInTask")));
+
+	dialog.SetStrikethroughCompletedTasks(HasStyle(TDCS_STRIKETHOUGHDONETASKS));
+	dialog.SetShowParentTasksAsFolders(HasStyle(TDCS_SHOWPARENTSASFOLDERS));
+	dialog.SetSelectedTaskID(GetSelectedTaskID());
+	dialog.SetCompletedTaskColor(m_taskTree.GetCompletedTaskColor());
+
+	if (dialog.DoModal(NULL, IDS_SELECTSUBTASKPARENT_TITLE) != IDOK)
 		return FALSE;
 
-	// are we an archive and should we warn user if we are
-	if (m_bArchive && HasStyle(TDCS_WARNADDDELETEARCHIVE))
+	// Select the chosen task
+	if (!SelectTask(dialog.GetSelectedTaskID(), FALSE))
 	{
-		if (CMessageBox::AfxShow(IDS_TDC_CONFIRMADD_TITLE, IDS_TDC_WARNADDTOARCHIVE, MB_YESNO | MB_ICONQUESTION) != IDYES) 
-		{
-			return FALSE;
-		}
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Create the task
+	TDC_INSERTWHERE nInsert = (bTop ? TDC_INSERTATTOPOFSELTASK : TDC_INSERTATBOTTOMOFSELTASK);
+
+	if (!CreateNewTask(sText, nInsert, TRUE))
+	{
+		ASSERT(0);
+		return FALSE;
 	}
 
 	return TRUE;
+}
+
+BOOL CToDoCtrl::CanCreateNewSubtaskInTask() const
+{
+	return m_taskTree.GetItemCount();
 }
 
 TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
@@ -3093,13 +3120,10 @@ TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, 
 									BOOL bEditLabel, DWORD dwDependency)
 {
+	ASSERT((htiParent == TVI_ROOT) || CanEditTask(GetTaskID(htiParent), TDCA_NEWTASK));
+	ASSERT(!sText.IsEmpty());
+
 	m_dwLastAddedID = 0;
-	
-	if (!CanEditSelectedTask(TDCA_NEWTASK))
-		return NULL;
-	
-	if (sText.IsEmpty())
-		return NULL;
 	
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_ADD);
 
@@ -3188,7 +3212,22 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 BOOL CToDoCtrl::CanSplitSelectedTask() const 
 { 
-	return (CanEditSelectedTask(TDCA_POSITION) && m_taskTree.CanSplitSelectedTask()); 
+	if (!CanEditSelectedTask(TDCA_NEWTASK))
+		return FALSE; 
+
+	switch (m_taskTree.GetSelectedCount())
+	{
+	case 0:
+		return FALSE;
+
+	case 1:
+		return (!m_taskTree.SelectionHasDone(FALSE) && 
+				!m_taskTree.SelectionHasSubtasks() &&
+				!m_taskTree.SelectionHasReferences());
+	}
+
+	// For the rest we filter during the actual splitting
+	return TRUE;
 }
 
 BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
@@ -3213,10 +3252,13 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 		
 		DWORD dwTaskID = GetTaskID(hti);
 
+		if (m_calculator.IsTaskLocked(dwTaskID))
+			continue;
+
 		const TODOITEM* pTDI = GetTask(dwTaskID);
 		ASSERT(pTDI);
 		
-		if (!pTDI || pTDI->IsDone())
+		if (!pTDI || pTDI->IsDone() || pTDI->IsReference())
 			continue;
 		
 		// Calculate how to apportion time to subtasks
@@ -6687,22 +6729,29 @@ void CToDoCtrl::OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult)
 LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 {
 	TDC_COLUMN nColID = (TDC_COLUMN)wParam;
+	ASSERT(nColID != TDCC_NONE);
+
 	DWORD dwTaskID = lParam;
+	ASSERT(dwTaskID);
+
+	// Note: We only assert that the entry conditions are met
+	// because this should all have been dealt with by the caller
+	BOOL bSelTask = m_taskTree.IsTaskSelected(dwTaskID);
 
 	switch (nColID)
 	{
 	case TDCC_CLIENT:
-		ASSERT(CanEditSelectedTask(TDCA_TASKNAME, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_TASKNAME));
 		EditSelectedTaskTitle();
 		break;
 		
 	case TDCC_DONE:
-		ASSERT(CanEditSelectedTask(TDCA_DONEDATE, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_DONEDATE));
 		SetSelectedTaskCompletion(m_data.IsTaskDone(dwTaskID) ? TDCTC_UNDONE : TDCTC_DONE);
 		break;
 		
 	case TDCC_TRACKTIME:
-		ASSERT(CanEditSelectedTask(TDCA_TIMESPENT, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_TIMESPENT));
 		{
 			HTREEITEM hti = m_taskTree.GetTreeSelectedItem();
 
@@ -6715,17 +6764,17 @@ LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case TDCC_FLAG:
-		ASSERT(CanEditSelectedTask(TDCA_FLAG, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_FLAG));
 		SetSelectedTaskFlag(!m_data.IsTaskFlagged(dwTaskID));
 		break;
 		
 	case TDCC_LOCK:
-		ASSERT(CanEditSelectedTask(TDCA_LOCK, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_LOCK));
 		SetSelectedTaskLock(!m_data.IsTaskLocked(dwTaskID));
 		break;
 
 	case TDCC_ICON:
-		ASSERT(CanEditSelectedTask(TDCA_ICON, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_ICON));
 
 		// Cancel any drag started by clicking on the tree item icon
 		m_treeDragDrop.CancelDrag();
@@ -7112,7 +7161,7 @@ BOOL CToDoCtrl::DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDial
 	{
 		// if we are readonly, we need to prevent
 		// the dialog showing 'Add time to time spent'
-		BOOL bShowAddToTimeSpent = (CanEditSelectedTask(TDCA_TIMESPENT) && !bTracked);
+		BOOL bShowAddToTimeSpent = (!bTracked && CanEditSelectedTask(TDCA_TIMESPENT));
 
 		CTDLAddLoggedTimeDlg dialog(dwTaskID, bShowAddToTimeSpent, HasStyle(TDCS_SHOWDATESINISO), dHours, this);
 
@@ -7766,27 +7815,43 @@ int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncC
 
 BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttribs, DWORD dwFlags)
 {
-	if (!CanEditSelectedTask(mapAttribs))
-		return FALSE;
-
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
+	POSITION posSel = TSH().GetFirstItemPos();
 
-	while (pos)
+	while (posSel)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		const TODOITEM* pTDI = GetTask(dwTaskID);
+		DWORD dwTaskID = TSH().GetNextItemData(posSel);
 
-		if (pTDI)
+		if (m_calculator.IsTaskLocked(dwTaskID))
+			continue;
+
+		// For each task, build a set of editable attributes only
+		CTDCAttributeMap mapTaskAttribs;
+		POSITION posAttrib = mapAttribs.GetStartPosition();
+
+		while (posAttrib)
 		{
-			TODOITEM tdiCopy = *pTDI;
+			TDC_ATTRIBUTE nAttribID = mapAttribs.GetNext(posAttrib);
 
-			if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapAttribs, m_aCustomAttribDefs, dwFlags))
+			if (CanEditTask(dwTaskID, nAttribID))
+				mapTaskAttribs.Add(nAttribID);
+		}
+
+		if (!mapTaskAttribs.IsEmpty())
+		{
+			const TODOITEM* pTDI = GetTask(dwTaskID);
+
+			if (pTDI)
 			{
-				if (m_data.SetTaskAttributes(dwTaskID, tdiCopy) == SET_CHANGE)
-					aModTaskIDs.Add(dwTaskID);
+				TODOITEM tdiCopy = *pTDI;
+
+				if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapTaskAttribs, m_aCustomAttribDefs, dwFlags))
+				{
+					if (m_data.SetTaskAttributes(dwTaskID, tdiCopy) == SET_CHANGE)
+						aModTaskIDs.Add(dwTaskID);
+				}
 			}
 		}
 	}
@@ -7817,7 +7882,6 @@ BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL 
 	{
 		if (m_aCustomAttribDefs.Append(aAttribDefs))
 			OnCustomAttributesChanged();
-			//RebuildCustomAttributeUI();
 	}
 
 	// add the tasks
@@ -8017,7 +8081,11 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 
 		if (!bMatch) //  no children matched -> 'Check ourselves'
 		{
-			if (filter.nFilter == TDCGT_ALL)
+			if (filter.HasFlag(TDCGTF_NOTLOCKED) && m_calculator.IsTaskLocked(dwTaskID))
+			{
+				// no match
+			}
+			else if (filter.nFilter == TDCGT_ALL)
 			{
 				bMatch = TRUE; // always
 			}
@@ -8025,7 +8093,7 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 			{
 				BOOL bDone = pTDI->IsDone();
 				BOOL bGoodAsDone = (bDone ? TRUE : m_calculator.IsTaskDone(dwTaskID));
-			
+
 				switch (filter.nFilter)
 				{
 				case TDCGT_DUE:
@@ -8217,7 +8285,7 @@ CString CToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 			sText.LoadString(IDS_TDC_FIELD_PROJECT);
 		}
 
-		sText.Replace(_T("&"), _T(""));
+		sText.Remove('&');
 	}
 
 	return sText;
@@ -8276,8 +8344,14 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 	{
 		if (pData->HasFiles())
 		{
-			if (pData->dwTaskID && !pData->bImportTasks)
-				return CanEditSelectedTask(TDCA_FILELINK);
+			if (pData->dwTaskID)
+			{
+				if (m_data.IsTaskLocked(pData->dwTaskID))
+					return FALSE;
+
+				if (!pData->bImportTasks)
+					return CanEditTask(pData->dwTaskID, TDCA_FILELINK);
+			}
 
 			// Check with parent
 			TDCDROPIMPORT data(pData->dwTaskID, *pData->pFilePaths);
@@ -8286,8 +8360,14 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 
 		if (pData->pOutlookSelection || CMSOutlookHelper::IsOutlookObject(pData->pObject))
 		{
-			if (pData->dwTaskID && !pData->bImportTasks)
-				return CanEditSelectedTask(TDCA_FILELINK);
+			if (pData->dwTaskID)
+			{
+				if (m_data.IsTaskLocked(pData->dwTaskID))
+					return FALSE;
+
+				if (!pData->bImportTasks)
+					return CanEditTask(pData->dwTaskID, TDCA_FILELINK);
+			}
 
 			// else 
 			return CanEditSelectedTask(TDCA_NEWTASK);
@@ -10052,17 +10132,11 @@ BOOL CToDoCtrl::CanClearSelectedTaskFocusedAttribute() const
 {
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 
-	if (!CanEditSelectedTask(nAttribID))
-		return FALSE;
-
 	return CanClearSelectedTaskAttribute(nAttribID);
 }
 
 BOOL CToDoCtrl::ClearSelectedTaskFocusedAttribute()
 {
-	if (!CanClearSelectedTaskFocusedAttribute())
-		return FALSE;
-
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 
 	return ClearSelectedTaskAttribute(nAttribID);
@@ -10075,11 +10149,12 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const
 
 	switch (nAttribID)
 	{
-	case TDCA_LOCK:		return TRUE;
-	case TDCA_TASKNAME:	return FALSE;
+	case TDCA_LOCK:			
+		return TRUE;
 
+	case TDCA_TASKNAME:
 	case TDCA_PROJECTNAME:
-		ASSERT(0);
+	case TDCA_COMMENTS:		
 		return FALSE;
 	}
 
@@ -10092,6 +10167,9 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const
 
 BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 {
+	if (!CanClearSelectedTaskAttribute(nAttribID))
+		return FALSE;
+
 	switch (nAttribID)
 	{
 	case TDCA_DONEDATE:		return SetSelectedTaskDate(TDCD_DONE, 0.0);
@@ -10197,48 +10275,40 @@ CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMax
 	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep, nMaxTasks); 
 }
 
-BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const
+BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const
 {
-	if (mapAttribs.IsEmpty())
-		return FALSE;
-
-	POSITION pos = mapAttribs.GetStartPosition();
-
-	while (pos)
+	CDWordArray aTaskIDs;
+	
+	// Special case: Nothing selected
+	if (!GetSelectedTaskIDs(aTaskIDs, TRUE))
+		return CanEditTask(0, nAttribID);
+	
+	// Look for first editable task
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 	{
-		if (!CanEditSelectedTask(mapAttribs.GetNext(pos), 0))
-			return FALSE;
+		if (CanEditTask(aTaskIDs[nID], nAttribID))
+			return TRUE;
 	}
 
-	return TRUE;
-}
-
-BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const 
-{ 
-	if (!GetTaskCount())
-		return CanEditTask(0, nAttribID);
-
-	// else
-	if (dwTaskID)
-		return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, nAttribID));
-
-	// else
-	CDWordArray aTaskIDs;
-	m_taskTree.GetSelectedTaskIDs(aTaskIDs, TRUE);
-
-	return m_multitasker.CanEditAnyTask(aTaskIDs, nAttribID);
+	return FALSE;
 }
 
 BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 {
+	if (IsReadOnly())
+		return FALSE;
+
 	// These do not depend on a specific task
 	switch (nAttribID)
 	{
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
+		if (dwTaskID == 0)
+			return TRUE;
+		break;
+
 	case TDCA_UNDO:
 	case TDCA_CUSTOMATTRIB_DEFS:
-	case TDCA_POSITION:
 	case TDCA_ENCRYPT:
 	case TDCA_PROJECTNAME:
 		return TRUE;
@@ -10250,11 +10320,12 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	if (bCanEdit != -1)
 		return bCanEdit; // Handled by multi-tasker
 
-	if (m_data.HasStyle(TDCS_READONLY))
-		return FALSE;
-
 	switch (nAttribID)
 	{
+	case TDCA_NEWTASK:
+	case TDCA_PASTE:
+		return !m_calculator.IsTaskLocked(dwTaskID);
+
 	case TDCA_DELETE:
 		// Can only delete tasks if their immediate parent is UNLOCKED
 		if (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
@@ -10267,6 +10338,10 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 			return m_data.IsTaskReference(dwTaskID);
 		}
 		break;
+
+	case TDCA_OFFSETTASK:
+		return (CanEditTask(dwTaskID, TDCA_STARTDATE) &&  // RECURSIVE CALL
+				CanEditTask(dwTaskID, TDCA_DUEDATE));     // RECURSIVE CALL
 
 	default:
 		ASSERT(0); // Unexpectedly unhandled

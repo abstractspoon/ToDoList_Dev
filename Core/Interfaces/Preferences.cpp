@@ -22,6 +22,11 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+const LPCTSTR REALQUOTE = _T("\"");
+const LPCTSTR SAFEQUOTE = _T("{QUOTES}");
+
+//////////////////////////////////////////////////////////////////////
+
 INIENTRY::INIENTRY(LPCTSTR szName, LPCTSTR szValue, BOOL bQuote) 
 	: sName(szName), sValue(szValue), bQuoted(bQuote) 
 {
@@ -29,6 +34,8 @@ INIENTRY::INIENTRY(LPCTSTR szName, LPCTSTR szValue, BOOL bQuote)
 
 CString INIENTRY::Format() const
 {
+	ASSERT(sValue.Find('\"') == -1);
+
 	CString sEntry;
 
 	if (bQuoted)
@@ -47,7 +54,8 @@ BOOL INIENTRY::Parse(const CString& sEntry)
 		return FALSE;
 
 	// remove quotes
-	bQuoted = sValue.Replace(_T("\""), _T(""));
+	bQuoted = sValue.Remove('\"');
+	ASSERT((bQuoted == 0) || (bQuoted == 2));
 
 	return !sName.IsEmpty();
 }
@@ -57,6 +65,22 @@ BOOL INIENTRY::operator==(const INIENTRY& ie) const
 	return ((sName == ie.sName) && 
 			(sValue == ie.sValue) && 
 			(bQuoted == ie.bQuoted));
+}
+
+CString INIENTRY::SafeQuote(const CString& sValue)
+{
+	CString sSafe(sValue);
+	sSafe.Replace(REALQUOTE, SAFEQUOTE);
+
+	return sSafe;
+}
+
+CString INIENTRY::UnSafeQuote(const CString& sValue)
+{
+	CString sUnsafe(sValue);
+	sUnsafe.Replace(SAFEQUOTE, REALQUOTE);
+
+	return sUnsafe;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

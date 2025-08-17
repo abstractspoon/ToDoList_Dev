@@ -33,7 +33,6 @@ File :			RuleRichEdit.cpp
 #include "..\shared\misc.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\filemisc.h"
-#include "..\shared\subclass.h"
 #include "..\shared\HookMgr.h"
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\clipboard.h"

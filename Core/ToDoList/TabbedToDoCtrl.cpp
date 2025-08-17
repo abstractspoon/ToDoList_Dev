@@ -160,7 +160,8 @@ void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LISTVIEWOPTIONS, m_cbListOptions);
 
 	DDX_CBData(pDX, m_cbListGroupBy, m_nListViewGroupBy, TDCC_NONE);
-	DDX_CheckItemData(pDX, m_cbListOptions, m_dwListOptions);
+
+	m_cbListOptions.DDX(pDX, m_dwListOptions);
 }
 
 BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
@@ -246,20 +247,18 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	// Initialise the previously visible tabs
 	SetVisibleTaskViews(s_aDefTaskViews);
 
-	// Build the list-specific comboboxes
+	// Prepare the list-specific comboboxes
 	BuildListGroupByCombo();
-	BuildListOptionsCombo();
+	InitListOptionsCombo();
 
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::BuildListOptionsCombo()
+void CTabbedToDoCtrl::InitListOptionsCombo()
 {
 	// once only
 	if (!m_cbListOptions.GetCount())
 	{
-		m_cbListOptions.BuildCombo();
-
 		m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(CPreferences(), GetPreferencesKey());
 		m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
 
@@ -1317,7 +1316,7 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
 
 	// Special cases
-	if (mapAttrib.Has(TDCA_NEWTASK) || mapAttrib.Has(TDCA_ALL))
+	if (mapAttrib.HasAttribOrAll(TDCA_NEWTASK))
 	{
 		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK) || mapAttrib.HasOnly(TDCA_ALL));
 
@@ -1660,10 +1659,6 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lPar
 	}
 
 	DWORD dwTaskID = wParam;
-
-	if (m_calculator.IsTaskLocked(dwTaskID))
-		return FALSE;
-
 	IUINEXTTASKOCCURRENCES* pOccurrences = (IUINEXTTASKOCCURRENCES*)lParam;
 
 	// Get the range for which we want the future occurrences
@@ -1711,22 +1706,24 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		return FALSE;
 
 	if (GetUpdateControlsItem() == NULL)
-		return !(CTDCAttributeMap::IsTaskAttribute(nAttribID) || (nAttribID == TDCA_DELETE));
+	{
+		// Disable task editing
+		switch (nAttribID)
+		{
+		case TDCA_DELETE:
+			return FALSE;
+
+		default:
+			return !TDC::IsTaskAttribute(nAttribID);
+		}
+	}
 
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const
-{
-	return CToDoCtrl::CanEditSelectedTask(nAttribID, dwTaskID);
-}
-
-BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
+BOOL CTabbedToDoCtrl::CanEditSelectedExtensionTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
 {
 	dwTaskID = mod.dwSelectedTaskID;
-
-	if (!CanEditSelectedTask(mod.nAttributeID, dwTaskID))
-		return FALSE;
 
 	if (dwTaskID && (GetSelectedTaskCount() == 1))
 	{
@@ -1734,7 +1731,11 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 		dwTaskID = 0; // same as 'selected'
 	}
 
-	return TRUE;
+	if (dwTaskID == 0)
+		return CanEditSelectedTask(mod.nAttributeID);
+
+	// else
+	return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, mod.nAttributeID));
 }
 
 BOOL CTabbedToDoCtrl::SplitSelectedTask(int nNumSubtasks)
@@ -1753,7 +1754,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
 
-	if (!CanEditSelectedTask(mod, dwTaskID))
+	if (!CanEditSelectedExtensionTask(mod, dwTaskID))
 	{
 		ASSERT(0);
 		return 0;
@@ -2561,10 +2562,7 @@ BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 
 	case FTCV_TASKLIST:
 		if (m_taskList.GetSelectionBoundingRect(rSelection))
-		{
-			m_taskList.ClientToScreen(rSelection);
-			ScreenToClient(rSelection);
-		}
+			m_taskList.MapWindowPoints((CWnd*)this, rSelection);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -2737,6 +2735,11 @@ int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedT
 
 	// else
 	return CToDoCtrl::GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes, bOrdered);
+}
+
+int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
+{
+	return GetTasks(tasks, GetTaskView(), filter);
 }
 
 int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
@@ -3491,6 +3494,11 @@ BOOL CTabbedToDoCtrl::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
 	return FALSE;
 }
 
+BOOL CTabbedToDoCtrl::HasListOption(DWORD dwOption) const 
+{ 
+	return Misc::HasFlag(m_dwListOptions, dwOption); 
+}
+
 void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, const void* pContext)
 {
 	GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = FALSE;
@@ -3506,6 +3514,11 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 	if (!GetAllTaskIDs(aTaskIDs, bWantParents, bWantCollapsed))
 	{
 		m_taskList.DeleteAll(); 
+
+		VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
+		ASSERT(pLVData);
+
+		pLVData->bHasSelectedTask = FALSE;
 		return;
 	}
 
@@ -3919,6 +3932,31 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 	{
 		// do nothing
 	}
+	else if (mapAttribIDs.HasOnly(TDCA_ALL))
+	{
+		// If this is an UNDO then our base class will have pre-selected
+		// the previously selected tasks (ie. aModTaskIDs) BUT if our current
+		// view does not don't support/ multi-selection, say, then the 
+		// current selection will no longer match aModTaskIDs, so our first job
+		// if to ensure that it does so that the correct tasks get updated.
+
+		// Get the current selection
+		CDWordArray aSelTaskIDs;
+		m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+		// Does it match the modified tasks
+		BOOL bFixupSelection = !Misc::MatchAll(aModTaskIDs, aSelTaskIDs);
+
+		if (bFixupSelection)
+			m_taskTree.SelectTasks(aModTaskIDs);
+
+		// Do the update
+		UpdateExtensionViewsSelection(mapAttribIDs);
+
+		// restore the previous selection if required
+		if (bFixupSelection)
+			m_taskTree.SelectTasks(aSelTaskIDs);
+	}
 	else // all else
 	{
 		UpdateExtensionViewsSelection(mapAttribIDs);
@@ -3989,15 +4027,16 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 	ASSERT(HasAnyExtensionViews());
 
 	ASSERT(mapAttribIDs.HasOnly(TDCA_DELETE) ||
-			mapAttribIDs.HasOnly(TDCA_UNDO) ||
-			mapAttribIDs.HasOnly(TDCA_PASTE) ||
-			mapAttribIDs.HasOnly(TDCA_MERGE) ||
-			mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
-			mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
-			mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
-			mapAttribIDs.HasOnly(TDCA_POSITION) ||
-			mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
-			mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
+		   mapAttribIDs.HasOnly(TDCA_UNDO) ||
+		   mapAttribIDs.HasOnly(TDCA_PASTE) ||
+		   mapAttribIDs.HasOnly(TDCA_NEWTASK) ||
+		   mapAttribIDs.HasOnly(TDCA_MERGE) ||
+		   mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
+		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
+		   mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
 
 	FTC_VIEW nView = GetTaskView();
 
@@ -4094,11 +4133,9 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 		// Include parents if this is an undo 
 		// OR there is a colour change
 		// OR a calculated attribute change
-		BOOL bUndo = mapAttribIDs.Has(TDCA_ALL);
-		ASSERT(!bUndo || mapAttribIDs.HasOnly(TDCA_ALL));
+ 		ASSERT(!mapAttribIDs.Has(TDCA_ALL) || mapAttribIDs.HasOnly(TDCA_ALL));
 
-		if (bUndo || 
-			mapAttribIDs.Has(TDCA_COLOR) || 
+		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) || 
 			ModAffectsAggregatedAttributes(mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_ALLPARENTS;
@@ -4106,8 +4143,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// DONT include subtasks UNLESS the completion date
 		// has changed OR this is an inherited attribute
-		if (!bUndo &&
-			!mapAttribIDs.Has(TDCA_DONEDATE) && 
+		if (!mapAttribIDs.HasAttribOrAll(TDCA_DONEDATE) && 
 			!WantUpdateInheritedAttibutes(mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_NOTSUBTASKS;
@@ -4115,16 +4151,14 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// Include references to selected tasks if a 
 		// 'Reference-specific' colour is not set
-		if (mapAttribIDs.Has(TDCA_COLOR) && 
+		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) && 
 			!m_taskTree.HasReferenceTaskColor())
 		{
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
 		}
 	
-		if (bUndo || mapAttribIDs.Has(TDCA_DEPENDENCY))
-		{
+		if (mapAttribIDs.HasAttribOrAll(TDCA_DEPENDENCY))
 			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
-		}
 	}
 
 	// Get the tasks for the update

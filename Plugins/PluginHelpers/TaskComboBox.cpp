@@ -10,9 +10,22 @@
 
 using namespace System::Diagnostics;
 using namespace System::Drawing;
+using namespace System::Linq;
+using namespace System::Collections::Generic;
 using namespace System::Windows::Forms;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+public ref class TaskPosComparer : public IComparer<ITask^>
+{
+public:
+	virtual int Compare(ITask^ task1, ITask^ task2)
+	{
+		return StringUtil::NaturalCompare(task1->Position, task2->Position);
+	}
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -21,21 +34,22 @@ TaskComboBox::TaskComboBox()
 	OwnerdrawComboBoxBase(true), // fixed
 	m_NoneTask(nullptr)
 {
+	Sorted = false; // we control the order
 }
 
-void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition,
-							  UIExtension::TaskIcon^ taskIcons, UInt32 selTaskId)
+void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
+							  UIExtension::TaskIcon^ taskIcons, 
+							  UInt32 selTaskId)
 {
-	Initialise(taskItemsSortedByPosition, taskIcons, selTaskId, nullptr);
+	Initialise(taskItems, taskIcons, selTaskId, nullptr);
 }
 
-void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition, 
-							  UIExtension::TaskIcon^ taskIcons, UInt32 selTaskId, ITask^ noneTask)
+void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems, 
+							  UIExtension::TaskIcon^ taskIcons, 
+							  UInt32 selTaskId, 
+							  ITask^ noneTask)
 {
 	m_TaskIcons = taskIcons;
-
-	// Populate combo
-	Sorted = false;
 
 	if (noneTask != nullptr)
 	{
@@ -43,7 +57,10 @@ void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItemsSortedByPosition,
 		m_NoneTask = noneTask;
 	}
 
-	for each(auto task in taskItemsSortedByPosition)
+	auto sortedTasks = Enumerable::ToList(taskItems);
+	sortedTasks->Sort(gcnew TaskPosComparer());
+
+	for each(auto task in sortedTasks)
 	{
 		Items->Add(task);
 

@@ -3364,6 +3364,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 	double dCalcValue = DBL_NULL, dSubtaskVal;
 	TDCCADATA data;
+	BOOL bIsDate = FALSE;
 
 	if (attribDef.IsDataType(TDCCA_CALCULATION))
 	{
@@ -3371,13 +3372,15 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			return FALSE;
 
 		data.Set(dCalcValue);
+		bIsDate = (CustomAttribDefs().GetCalculationResultDataType(attribDef.Calculation()) == TDCCA_DATE);
 	}
 	else
 	{
 		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+		bIsDate = attribDef.IsDataType(TDCCA_DATE);
 	}
 
-	if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_ACCUMULATE))
+	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE) ||
 			   attribDef.IsDataType(TDCCA_CALCULATION));
@@ -3398,7 +3401,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 			}
 		}
 	}
-	else if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_MAXIMIZE))
+	else if (attribDef.HasFeature(TDCCAF_MAXIMIZE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_MAXIMIZE) ||
 			   attribDef.IsDataType(TDCCA_CALCULATION));
@@ -3424,7 +3427,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 		if (dCalcValue <= -DBL_MAX)
 			dCalcValue = DBL_NULL;
 	}
-	else if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_MINIMIZE))
+	else if (attribDef.HasFeature(TDCCAF_MINIMIZE))
 	{
 		ASSERT(attribDef.SupportsFeature(TDCCAF_MINIMIZE) ||
 			   attribDef.IsDataType(TDCCA_CALCULATION));
@@ -3449,6 +3452,11 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 
 		if (dCalcValue >= DBL_MAX)
 			dCalcValue = DBL_NULL;
+	}
+	else if (bIsDate && !attribDef.HasFeature(TDCCAF_SHOWTIME))
+	{
+		attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
+		dCalcValue = (int)dCalcValue;
 	}
 	else
 	{
@@ -6151,6 +6159,7 @@ int CTDCMultiTasker::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	case TDCA_FILELINK:
 	case TDCA_FLAG:
 	case TDCA_ICON:
+	case TDCA_METADATA:
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
 	case TDCA_STATUS:
@@ -6200,6 +6209,9 @@ int CTDCMultiTasker::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		if (bEditable)
 			return m_data.TaskHasDate(dwTaskID, TDCD_DONEDATE);
 		break;
+
+	case TDCA_OFFSETTASK:
+		return (CanEditTask(dwTaskID, TDCA_STARTDATE) && CanEditTask(dwTaskID, TDCA_DUEDATE)); // RECURSIVE CALLS
 
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:

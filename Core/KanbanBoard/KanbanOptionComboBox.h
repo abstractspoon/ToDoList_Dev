@@ -14,7 +14,6 @@
 
 class CKanbanOptionComboBox : public CCheckComboBox
 {
-// Construction
 public:
 	CKanbanOptionComboBox();
 	virtual ~CKanbanOptionComboBox();
@@ -26,25 +25,13 @@ public:
 
 	DWORD GetOptionMask() const;
 
-// Attributes
 protected:
 	DWORD m_dwOptions;
 
-// Operations
-public:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CFilterOptionComboBox)
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CFilterOptionComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
+protected:
 	void OnCheckChange(int nIndex);
 
 };

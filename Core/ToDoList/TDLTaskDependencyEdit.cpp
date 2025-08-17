@@ -452,7 +452,7 @@ void CTDLTaskDependencyListCtrl::PrepareTaskCombo(int nRow)
 	// Populate once only
 	if (m_cbTasks.GetCount() == 0)
 	{
-		PopulateTaskCombo(NULL, 0);
+		m_cbTasks.Populate(m_tasks, m_ilTasks);
 		CDialogHelper::RefreshMaxDropWidth(m_cbTasks);
 	}
 
@@ -485,29 +485,7 @@ void CTDLTaskDependencyListCtrl::PrepareTaskCombo(int nRow)
 		}
 	}
 
-	m_cbTasks.SetImageList(m_ilTasks);
 	m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
-}
-
-void CTDLTaskDependencyListCtrl::PopulateTaskCombo(HTASKITEM hTask, int nLevel)
-{
-	if (hTask)
-	{
-		m_cbTasks.AddTask(m_tasks.GetTaskTitle(hTask),
-						  m_tasks.GetTaskID(hTask),
-						  m_tasks.IsTaskParent(hTask),
-						  nLevel++,
-						  m_ilTasks.GetImageIndex(m_tasks.GetTaskIcon(hTask)),
-						  m_tasks.IsTaskReference(hTask));
-	}
-
-	HTASKITEM hSubtask = m_tasks.GetFirstTask(hTask);
-
-	while (hSubtask)
-	{
-		PopulateTaskCombo(hSubtask, nLevel); // RECURSIVE CALL
-		hSubtask = m_tasks.GetNextTask(hSubtask);
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

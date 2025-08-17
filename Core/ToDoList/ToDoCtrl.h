@@ -188,7 +188,8 @@ public:
 
 	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel = TRUE, DWORD dwDependency = 0);
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
-	BOOL CanCreateNewTask(TDC_INSERTWHERE nWhere, const CString& sText) const;
+	BOOL CreateNewSubtaskInTask(const CString& sText, BOOL bTop); // 'Edit label' is implied
+	BOOL CanCreateNewSubtaskInTask() const;
 
 	void SetSubtaskDragDropPos(BOOL bTop = TRUE) { m_bDragDropSubtasksAtTop = bTop; }
 	BOOL SplitSelectedTask(int nNumSubtasks = 2);
@@ -405,7 +406,7 @@ public:
 	BOOL SelectTasksInHistory(BOOL bForward);
 	void SelectAll(BOOL bVisibleOnly = TRUE);
 	BOOL CanSelectAll() const { return (GetTaskCount() > 0); }
-	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const { return CanEditSelectedTask(nAttribID, 0); }
+	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const;
 
 	BOOL SetTreeFont(HFONT hFont); // setter responsible for deleting
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting
@@ -747,9 +748,6 @@ protected:
 	BOOL GetSelectedTaskTimePeriod(TDC_ATTRIBUTE nAttribID, TDCTIMEPERIOD& tp) const;
 	BOOL SelectedTaskHasDate(TDC_DATE nDate) const { return m_taskTree.SelectedTaskHasDate(nDate); }
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_ctrlAttributes.GetCustomAttributeData(sAttribID, data, bFormatted); }
-
-	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const;
-	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs) const;
 
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const;

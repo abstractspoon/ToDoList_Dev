@@ -33,9 +33,6 @@ CMenuComboBox::~CMenuComboBox()
 
 
 BEGIN_MESSAGE_MAP(CMenuComboBox, CTabbedComboBox)
-	//{{AFX_MSG_MAP(CMenuComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -56,11 +53,8 @@ BOOL CMenuComboBox::Initialise(UINT nMenuID, UINT nSeparatorResID)
 
 BOOL CMenuComboBox::Initialise(const CMenu& menu, UINT nSeparatorResID)
 {
-	if (!GetSafeHwnd() || (GetStyle() & CBS_SORT))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	ASSERT(GetSafeHwnd());
+	ASSERT(!HasStyle(CBS_SORT));
 
 	ResetContent();
 

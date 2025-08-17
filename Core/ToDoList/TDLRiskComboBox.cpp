@@ -36,30 +36,10 @@ CTDLRiskComboBox::~CTDLRiskComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLRiskComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CTDLRiskComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRiskComboBox message handlers
-
-int CTDLRiskComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildCombo();
-	
-	return 0;
-}
-
-void CTDLRiskComboBox::PreSubclassWindow() 
-{
-	COwnerdrawComboBoxBase::PreSubclassWindow();
-
- 	BuildCombo();
-}
 
 int CTDLRiskComboBox::GetSelectedRisk() const
 {
@@ -87,7 +67,7 @@ int CTDLRiskComboBox::GetSelectedRisk() const
 	{
 		switch (nSel)
 		{
-		case 0:		return FM_NOPRIORITY;
+		case 0:		return FM_ANYPRIORITY;
 		default:	return (nSel - 1);
 		}
 	}
@@ -95,13 +75,15 @@ int CTDLRiskComboBox::GetSelectedRisk() const
 	// Only 'None'
 	switch (nSel)
 	{
-	case 0:		return FM_ANYPRIORITY;
+	case 0:		return FM_NOPRIORITY;
 	default:	return (nSel - 1);
 	}
 }
 
 void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 {
+	CheckBuildCombo();
+
 	int nSel = CB_ERR;
 
 	switch (nRisk)
@@ -137,11 +119,8 @@ void CTDLRiskComboBox::SetSelectedRisk(int nRisk) // -2 -> m_nNumLevels
 void CTDLRiskComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
-	CHoldRedraw hr(*this);
-	
-	int nSel = GetCurSel(); // so we can restore it
-	ResetContent();
-	
+	ASSERT(GetCount() == 0);
+
 	// first items are 'Any' and 'None'
 	if (m_bIncludeAny)
 		AddString(CEnString(IDS_TDC_ANY));
@@ -157,8 +136,6 @@ void CTDLRiskComboBox::BuildCombo()
 		sRisk.Format(_T("%d (%s)"), nLevel, CEnString(aStrResIDs[nLevel]));
 		AddString(sRisk);
 	}
-	
-	SetCurSel(nSel);
 }
 
 void CTDLRiskComboBox::DDX(CDataExchange* pDX, int& nRisk)
@@ -172,11 +149,9 @@ void CTDLRiskComboBox::DDX(CDataExchange* pDX, int& nRisk)
 void CTDLRiskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 	DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
-	// Draw <any> or <none> in window prompt color
-	if (!(nItemState & ODS_SELECTED) && !bList && (nItem == 0))
-	{
+	// Draw <any> in window prompt color
+	if (!(nItemState & ODS_SELECTED) && !bList && m_bIncludeAny && (nItem == 0))
 		crText = CWndPrompt::GetTextColor();
-	}
 
 	// all else
 	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
@@ -191,7 +166,12 @@ void CTDLRiskComboBox::SetNumLevels(int nNumLevels)
 		m_nNumLevels = nNumLevels;
 
 		if (GetSafeHwnd())
-			BuildCombo();
+		{
+			int nSel = GetCurSel(); // save
+			RebuildCombo();
+
+			SetCurSel(nSel); // restore
+		}
 	}
 }
 

@@ -420,7 +420,7 @@ LRESULT CToolbarHelper::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	{
 	case WM_MOUSEMOVE:
 	case WM_MOUSELEAVE:
-		m_tt.RelayEvent(const_cast<MSG*>(CSubclassWnd::GetCurrentMessage()));
+		m_tt.RelayEvent(const_cast<MSG*>(GetCurrentMessage()));
 		break;
 
 	case WM_SIZE:
@@ -596,7 +596,7 @@ CString CToolbarHelper::GetResourceTip(UINT nID)
 		if (nStartTip != -1) 
 			sTip = sTip.Right(sTip.GetLength() - nStartTip - 1);
 		else
-			sTip.Replace(_T("."), _T("")); // strip '...' if present
+			sTip.TrimRight('.'); // strip '...' if present
 
 		Misc::Trim(sTip);
 	}

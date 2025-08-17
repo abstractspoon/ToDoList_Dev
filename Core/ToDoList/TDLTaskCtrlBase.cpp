@@ -2876,7 +2876,7 @@ void CTDLTaskCtrlBase::DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITE
 	case TDCC_PERCENT:
 		if (!sTaskColText.IsEmpty())
 		{
-			CRect rPercent;
+			CRect rPercent(rColumn);
 			rPercent.DeflateRect(2, 1, 3, 2);
 
 			// draw default text first
@@ -3057,10 +3057,7 @@ void CTDLTaskCtrlBase::DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITE
 				int nImageSize = m_ilTaskIcons.GetImageSize();
 
 				if (rColumn.Width() >= nImageSize)
-				{
-					CPoint pt(CalcColumnIconTopLeft(rColumn, nImageSize));
-					m_ilTaskIcons.Draw(pDC, nIcon, pt);
-				}
+					GraphicsMisc::DrawCentred(pDC, m_ilTaskIcons, nIcon, rColumn, TRUE, TRUE);
 			}
 		}
 		break;
@@ -3305,10 +3302,16 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 
 				if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(aImages[nImg], sImage, sDummy))
 				{
-					m_ilTaskIcons.Draw(pDC, sImage, rCol.TopLeft());
-					rCol.left += (COL_ICON_SIZE + COL_ICON_SPACING);
-
-					bOverrun = ((rCol.left + COL_ICON_SIZE) > rCol.right);
+					if (GraphicsMisc::DrawCentred(pDC, 
+												  m_ilTaskIcons,
+												  m_ilTaskIcons.GetImageIndex(sImage),
+												  rCol,
+												  FALSE,
+												  TRUE))
+					{
+						rCol.left += (COL_ICON_SIZE + COL_ICON_SPACING);
+						bOverrun = ((rCol.left + COL_ICON_SIZE) > rCol.right);
+					}
 				}
 			}
 			
@@ -5246,14 +5249,16 @@ void CTDLTaskCtrlBase::RedrawColumn(TDC_COLUMN nColID) const
 		m_hdrColumns.GetItemRect(nCol, rCol);
 
 		// Adjust header rect for list scrollpos
-		m_hdrColumns.ClientToScreen(rCol);
-		m_lcColumns.ScreenToClient(rCol);
-		
-		rCol.top = rClient.top;
-		rCol.bottom = rClient.bottom;
-		
-		::InvalidateRect(m_lcColumns, rCol, TRUE);
-		::UpdateWindow(m_lcColumns);
+		m_hdrColumns.MapWindowPoints((CWnd*)&m_lcColumns, rCol);
+
+		if ((rCol.right > 0) && (rCol.left < rClient.right))
+		{
+			rCol.top = rClient.top;
+			rCol.bottom = rClient.bottom;
+
+			::InvalidateRect(m_lcColumns, rCol, TRUE);
+			::UpdateWindow(m_lcColumns);
+		}
 	}
 }
 
@@ -5886,25 +5891,6 @@ CString CTDLTaskCtrlBase::GetSelectedTaskPath(BOOL bIncludeTaskName, int nMaxLen
 	}
 
 	return sPath;
-}
-
-BOOL CTDLTaskCtrlBase::CanSplitSelectedTask() const
-{
-	if (IsReadOnly())
-		return FALSE;
-	
-	if (SelectionHasReferences())
-		return FALSE;
-	
-	int nSelCount = GetSelectedCount();
-	
-	if (nSelCount == 1)
-	{
-		if (SelectionHasDone(FALSE) || SelectionHasSubtasks())
-			return FALSE;
-	}
-	
-	return (nSelCount > 0);
 }
 
 BOOL CTDLTaskCtrlBase::PreTranslateMessage(MSG* pMsg)

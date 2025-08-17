@@ -70,6 +70,7 @@ protected:
 	afx_msg void OnFileNewTranslation();
 	afx_msg void OnFileOpenTranslation();
 	afx_msg void OnFileSaveTranslation();
+	afx_msg void OnFileCloseTranslation();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnEndlabeleditDictionary(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnFileExit();

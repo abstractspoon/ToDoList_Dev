@@ -1353,7 +1353,7 @@ HIMAGELIST CGanttCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 	if (m_tree.GetImageList(TVSIL_NORMAL) == NULL)
 		return NULL;
 
-	return (HIMAGELIST)CWnd::GetParent()->SendMessage(WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
+	return (HIMAGELIST)GetParent()->SendMessage(WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }
 
 GM_ITEMSTATE CGanttCtrl::GetItemState(int nItem) const
@@ -1553,7 +1553,7 @@ void CGanttCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL 
 	m_treeHeader.Invalidate(FALSE);
 
 	if (bNotifyParent)
-		CWnd::GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nColumnID);
+		GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nColumnID);
 }
 
 void CGanttCtrl::Sort(const GANTTSORTCOLUMNS& multi)
@@ -1589,7 +1589,7 @@ void CGanttCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		return;
 
 	// notify app to edit
-	CWnd::GetParent()->SendMessage(WM_GTLC_EDITTASKTITLE, 0, GetTaskID(hti));
+	GetParent()->SendMessage(WM_GTLC_EDITTASKTITLE, 0, GetTaskID(hti));
 }
 
 void CGanttCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -1694,7 +1694,7 @@ BOOL CGanttCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 
 	// If copying a task, app will send us a full update 
 	// so we do not need to perform the move ourselves
-	if (CWnd::GetParent()->SendMessage(WM_GTLC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)
+	if (GetParent()->SendMessage(WM_GTLC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)
 	{
 		VERIFY(MoveItem(move));
 	}
@@ -2073,7 +2073,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 						}
 					
 						// notify parent
-						CWnd::GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
+						GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
 					}
 				}
 			}
@@ -2161,7 +2161,7 @@ BOOL CGanttCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 
 		if (nFlags & TVHT_ONITEMICON)
-			CWnd::GetParent()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
+			GetParent()->SendMessage(WM_GTLC_EDITTASKICON, (WPARAM)m_tree.GetSafeHwnd());
 		
 		return TRUE; // eat
 	}
@@ -2178,7 +2178,7 @@ BOOL CGanttCtrl::OnTreeCheckChange(HTREEITEM hti)
 	DWORD dwTaskID = GetTaskID(hti);
 	BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
 
-	CWnd::GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
+	GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
 
 	return TRUE; // always
 }
@@ -2733,13 +2733,13 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 	// draw weekends and vertical week dividers if not a rollup
 	if (!bRollup)
 	{
-		int nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+		int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 		double dMonthWidth = rMonth.Width();
 
 		int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
 		CRect rDay(rMonth);
 
-		COleDateTime dtDay(ToDate(nYear, nMonth, 1, 0, 0));
+		COleDateTime dtDay(CDateHelper::ToDate(1, nMonth, nYear));
 
 		for (int nDay = 1; nDay <= nDaysInMonth; nDay++)
 		{
@@ -2799,9 +2799,9 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 	if (!bRollup)
 	{
 		CRect rDay(rMonth);
-		COleDateTime dtDay(ToDate(nYear, nMonth, 1, 0, 0));
+		COleDateTime dtDay(CDateHelper::ToDate(1, nMonth, nYear));
 
-		int nNumDays = GetDaysInMonth(nMonth, nYear);
+		int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 		double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 		for (int nDay = 1; nDay <= nNumDays; nDay++)
@@ -3212,7 +3212,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				// check if we need to draw
 				if (rYear.right >= rClip.left)
 				{
-					COleDateTime dtYear(ToDate((nYear + i), 1, 1, 0, 0));
+					COleDateTime dtYear(CDateHelper::ToDate(1, 1, (nYear + i)));
 					DrawListHeaderRect(pDC, rYear, CDateHelper::FormatDateOnly(dtYear, _T("yyyy")), pThemed, FALSE);
 				}
 			}
@@ -3231,18 +3231,18 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, FALSE);
 
 			// draw vertical week dividers
-			int nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+			int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
 
 			// Get start of first full week
 			int nDay = 1;
 
-			while (ToDate(nYear, nMonth, nDay, 0, 0).GetDayOfWeek() != nFirstDOW)
+			while (CDateHelper::ToDate(nDay, nMonth, nYear).GetDayOfWeek() != nFirstDOW)
 				nDay++;
 
 			// If this is column 1 (column 0 is hidden) then we might need
 			// to draw part of the preceding week
-			COleDateTime dtWeek(ToDate(nYear, nMonth, nDay, 0, 0));
+			COleDateTime dtWeek(CDateHelper::ToDate(nDay, nMonth, nYear));
 			double dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
 
 			if ((nCol == 1) && (nDay != -1))
@@ -3281,7 +3281,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 					// Note: width of next month may be different to this month
 					if (m_listHeader.GetItemRect(nCol + 1, rMonth))
 					{
-						nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+						nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 						dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
 
 						rWeek.right += (int)(nDay * dDayWidth);
@@ -3328,7 +3328,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, TRUE);
 
 			// draw day elements
-			int nNumDays = GetDaysInMonth(nMonth, nYear);
+			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 			double dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 			rDay.right = rDay.left;
@@ -3346,7 +3346,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				if (rDay.right >= rClip.left)
 				{
 					CString sHeader;
-					COleDateTime dtDay(ToDate(nYear, nMonth, nDay, 0, 0));
+					COleDateTime dtDay(CDateHelper::ToDate(nDay, nMonth, nYear));
 
 					if (m_nMonthDisplay == GTLC_DISPLAY_HOURS)
 					{
@@ -4280,7 +4280,7 @@ void CGanttCtrl::ValidateMonthDisplay()
 	if (m_nMonthDisplay != nDisplay)
 	{
 		VERIFY(SetMonthDisplay(nDisplay));
-		CWnd::GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
+		GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
 	}
 }
 
@@ -4363,7 +4363,7 @@ BOOL CGanttCtrl::ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth)
 
 	// cache the scroll-pos at the centre of the view so we can restore it
 	CRect rClient;
-	CWnd::GetClientRect(rClient);
+	GetClientRect(rClient);
 
 	COleDateTime dtPos;
 	BOOL bRestorePos = GetDateFromScrolledPos((m_list.GetScrollPos(SB_HORZ) + (rClient.Width() / 2)), dtPos);
@@ -5106,7 +5106,7 @@ BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, i
 		break;
 	}
 
-	int nDaysInMonth = GetDaysInMonth(nMonth, nYear);
+	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 	int nNumMins = MulDiv((nPos - rMonth.left), (60 * 24 * nDaysInMonth), rMonth.Width());
 
 	int nDay = (1 + (nNumMins / MINS_IN_DAY));
@@ -5116,7 +5116,7 @@ BOOL CGanttCtrl::GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, i
 	ASSERT(nDay >= 1 && nDay <= nDaysInMonth);
 	ASSERT(nHour >= 0 && nHour < 24);
 
-	date = ToDate(nYear, nMonth, nDay, nHour, nMin);
+	date = CDateHelper::MakeDate(CDateHelper::ToDate(nDay, nMonth, nYear), nHour, nMin);
 
 	return CDateHelper::IsDateSet(date);
 }
@@ -5143,7 +5143,7 @@ BOOL CGanttCtrl::GetScrolledPosFromDate(const COleDateTime& date, int& nPos) con
 		if (GetListColumnRect(nCol, rColumn, FALSE))
 		{
 			int nDay, nMonth, nYear;
-			FromDate(date, nYear, nMonth, nDay);
+			CDateHelper::FromDate(date, nDay, nMonth, nYear);
 
 			double dDayInCol = 0;
 			int nDaysInCol = 0;
@@ -5184,7 +5184,7 @@ BOOL CGanttCtrl::GetScrolledPosFromDate(const COleDateTime& date, int& nPos) con
 			default: 
 				{
 					// Column == Month
-					nDaysInCol = GetDaysInMonth(nMonth, nYear);
+					nDaysInCol = CDateHelper::GetDaysInMonth(nMonth, nYear);
 					dDayInCol = ((nDay - 1) + CDateHelper::GetTimeOnly(date));
 				}
 				break;
@@ -5371,7 +5371,7 @@ BOOL CGanttCtrl::GetListItemRect(int nItem, CRect& rItem) const
 	{
 		// Extend to end of client rect
 		CRect rClient;
-		CWnd::GetClientRect(rClient);
+		GetClientRect(rClient);
 
 		rItem.right = max(rItem.right, rClient.right);
 		return TRUE;
@@ -5436,7 +5436,7 @@ DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTES
 		ASSERT(m_dtActiveRange.IsValid() && !m_dtActiveRange.Contains(*pGI));
 
 		CRect rClient;
-		CWnd::GetClientRect(rClient);
+		GetClientRect(rClient);
 
 		nTo = (rClient.Width() + 1000);
 	}
@@ -5689,7 +5689,7 @@ void CGanttCtrl::NotifyParentDragChange()
 	ASSERT(!m_bReadOnly);
 	ASSERT(GetSelectedTaskID());
 
-	CWnd::GetParent()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
+	GetParent()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
 }
 
 BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
@@ -5698,7 +5698,7 @@ BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
 	ASSERT(GetSelectedTaskID());
 
 	if (IsDragging(nDrag))
-		return CWnd::GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
+		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
 
 	// else
 	return 0L;

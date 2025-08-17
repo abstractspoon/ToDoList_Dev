@@ -133,7 +133,6 @@ public:
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
 	void SetFocus();
-	void Invalidate(BOOL bErase = TRUE) { CWnd::Invalidate(bErase); }
 
 	void EnableTreeCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable = TRUE) { m_tree.EnableCheckboxes(nUnthemedBitmapID, bEnable); }
 	void EnableTreeImagePlaceholder(BOOL bEnable = TRUE) { m_tree.EnableImagePlaceholder(bEnable); }
@@ -179,6 +178,20 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider = CLR_NONE);
 
 	void Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort);
+
+	// Disambiguate common functions replicated by CSubclassWnd
+	inline CWnd* GetParent() const { return CWnd::GetParent(); }
+	inline UINT GetDlgCtrlID() const { return CWnd::GetDlgCtrlID(); }
+
+	inline void GetClientRect(LPRECT pRect) const { CWnd::GetClientRect(pRect); }
+	inline void Invalidate(BOOL bErase = TRUE) { CWnd::Invalidate(bErase); }
+	inline void SetRedraw(BOOL bRedraw = TRUE) { CWnd::SetRedraw(bRedraw); }
+	inline void ClientToScreen(LPRECT pRect) const { CWnd::ClientToScreen(pRect); }
+	inline void ClientToScreen(LPPOINT pPoint) const { CWnd::ClientToScreen(pPoint); }
+	inline void ScreenToClient(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
+	inline void ScreenToClient(LPPOINT pPoint) const { CWnd::ScreenToClient(pPoint); }
+
+	static inline const MSG* GetCurrentMessage() { return CWnd::GetCurrentMessage(); }
 
 protected:
 	CTreeListTreeCtrl m_tree;

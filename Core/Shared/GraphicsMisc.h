@@ -238,9 +238,16 @@ namespace GraphicsMisc
 
 	BOOL FillItemRect(CDC* pDC, CRect& rItem, COLORREF color, HWND hwnd); // will update rItem
 	BOOL FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND hwnd);
-	BOOL CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
+	
+	void CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
+	CRect CalcCentredRect(int nSize, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
+	CRect CalcCentredRect(int cx, int cy, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
+
 	CPoint CentrePoint(LPCRECT prcRect);
 	void AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags); // DT_LEFT, etc
+
+	BOOL DrawCentred(CDC* pDC, HIMAGELIST hIl, int nImage, LPCRECT prcImage, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE, UINT nStyle = ILD_TRANSPARENT);
+	BOOL DrawCentred(CDC* pDC, HICON hIcon, LPCRECT prcIcon, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
 
 	BOOL DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags, LPCRECT prClip = NULL); 
 	COLORREF GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags);

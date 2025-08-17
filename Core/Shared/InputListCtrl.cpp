@@ -37,7 +37,7 @@ CInputListCtrl::CColumnData2::CColumnData2()
 	: 
 	CColumnData(), 
 	bEditEnabled(TRUE), 
-	nType(ILCT_TEXT) 
+	nType(ILCT_TEXT)
 {
 }
 
@@ -93,6 +93,7 @@ void CInputListCtrl::InitState()
 	m_bNotifyDuplicates = FALSE;
 	m_nCurCol = -1;
 	m_nLastEditCol = m_nLastEditRow = -1;
+	m_bSingleClickEditing = FALSE;
 
 	// Hot tracker might have been initialised in PreSubclassWindow
 	if (GetSafeHwnd() && CThemed::AreControlsThemed() && !m_hotTrack.IsInitialized())
@@ -215,12 +216,10 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 		{
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
-
-			// scroll cell into view
-			ScrollCellIntoView(nItem, nCol);
 		}
 
 		m_nCurCol = nCol;
+		ScrollCellIntoView(nItem, nCol);
 	}
 	else
 	{
@@ -658,12 +657,7 @@ void CInputListCtrl::DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DW
 {
 	DrawBlankButton(pDC, rBtn, dwState);
 
-	const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
-
-	CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
-	GraphicsMisc::CentreRect(rIcon, rBtn);
-
-	::DrawIconEx(*pDC, rIcon.left, rIcon.top, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
+	GraphicsMisc::DrawCentred(pDC, hIcon, rBtn);
 }
 
 void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const

@@ -687,6 +687,7 @@ namespace DayViewUIExtension
 				return false;
 
 			SelectedAppointment = null;
+			Invalidate();
 
 			return SelectTask(taskId);
 		}

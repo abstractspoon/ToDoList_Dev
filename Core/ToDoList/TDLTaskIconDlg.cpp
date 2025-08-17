@@ -240,7 +240,7 @@ void CTDLTaskIconDlg::BuildListCtrl()
 		{
 			ASSERT(!m_bMultiSel);
 
-			int nIndex = m_lcIcons.InsertItem(nNumImages, _T("<none>"), -1);
+			int nIndex = m_lcIcons.InsertItem(nNumImages, CEnString(IDS_TDC_NONE), -1);
 			m_lcIcons.SetItemData(nIndex, (DWORD)-1);
 		}
 	}

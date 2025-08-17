@@ -33,11 +33,8 @@ protected:
 protected:
 	BOOL ConvertRtfToHtmlWithMSWord(LPCTSTR szRtfFile, LPCTSTR szCharSet, CString& sHtml, LPCTSTR szUniqueDir);
 	BOOL ConvertRtfToHtmlWithIntenso(LPCTSTR szRtfFile, LPCTSTR szCharSet, CString& sHtml, LPCTSTR szUniqueDir);
-	BOOL ConvertRtfToHtmlWithSautin(LPCTSTR szRtfFile, LPCTSTR szCharSet, CString& sHtml, LPCTSTR szUniqueDir);
 
 	BOOL ConvertHtmlToRtfWithMSWord(LPCTSTR szHtmlFile, LPCTSTR szCharSet, CString& sRtf, LPCTSTR szUniqueDir);
-	BOOL ConvertHtmlToRtfWithSautin(LPCTSTR szHtmlFile, LPCTSTR szCharSet, CString& sRtf, LPCTSTR szUniqueDir);
-	BOOL ConvertHtmlToRtfWithViskoe(LPCTSTR szHtmlFile, LPCTSTR szCharSet, CString& sRtf, LPCTSTR szUniqueDir);
 
 	void CleanupTemporaryImages();
 	static BOOL ProcessMSWordHtml(const CString& sUniqueDir, CString& sHtml);

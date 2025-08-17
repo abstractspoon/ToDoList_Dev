@@ -225,17 +225,12 @@ void CTDLToolbarButtonListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 			return;
 
 		// Don't use sText because it might have been truncated
-		int nImage = m_ilImages.GetImageIndex(GetItemText(nRow, nCol));
-				
-		if (nImage != -1)
-		{
-			CRect rImage(rText);
-			rImage.bottom = (rImage.top + m_ilImages.GetImageSize());
-
-			GraphicsMisc::CentreRect(rImage, rText);
-
-			m_ilImages.Draw(pDC, nImage, rImage.TopLeft());
-		}
+		GraphicsMisc::DrawCentred(pDC, 
+								  m_ilImages, 
+								  m_ilImages.GetImageIndex(GetItemText(nRow, nCol)), 
+								  rText,
+								  FALSE,
+								  TRUE);
 	}
 	else
 	{

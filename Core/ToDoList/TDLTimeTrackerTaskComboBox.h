@@ -15,13 +15,9 @@
 
 class CTDLTimeTrackerTaskComboBox : public CTDLTaskComboBox
 {
-// Construction
 public:
 	CTDLTimeTrackerTaskComboBox();
 	virtual ~CTDLTimeTrackerTaskComboBox();
-
-	DWORD GetSelectedTaskID() const;
-	BOOL IsSelectedTask(DWORD dwTaskID) const;
 
 	void ResetContent();
 	int Rebuild(const TRACKTASKLIST* pTTL);
@@ -36,17 +32,7 @@ public:
 protected:
 	const CToDoCtrl* m_pTDC;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLTimeTrackerTaskComboBox)
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLTimeTrackerTaskComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
