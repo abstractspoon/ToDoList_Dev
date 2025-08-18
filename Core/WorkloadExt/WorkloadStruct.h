@@ -21,7 +21,7 @@ class COleDateTimeRange;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR ALLOCTO_TOTALID = _T("_TOTAL_");
+const LPCTSTR ALLOCTO_TOTALID = _T("_TOTAL_"); 
 
 /////////////////////////////////////////////////////////////////////////////
 // Represents a number of days and whether these overlap with any other allocation
