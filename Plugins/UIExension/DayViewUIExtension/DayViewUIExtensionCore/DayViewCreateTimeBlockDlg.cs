@@ -27,7 +27,7 @@ namespace DayViewUIExtension
 			:
 			this()
 		{
-			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, taskId);
+			m_TaskCombo.Initialise(taskItems, taskIcons, taskId);
 			m_Attributes.Initialise(workWeek, isoDateTimes, attribs, false);
 		}
 

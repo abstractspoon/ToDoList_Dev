@@ -108,8 +108,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_DateTimeCtrl(pDX, IDC_USERSTARTDATE, m_filter.dtUserStart);
 	DDX_DateTimeCtrl(pDX, IDC_USERDUEDATE, m_filter.dtUserDue);
 
-	CDialogHelper::DDX_CBData(pDX, m_cbRecurrence, m_filter.nRecurrence, TDIR_NONE);
-
+	m_cbRecurrence.DDX(pDX, m_filter.nRecurrence);
 	m_cbPriorityFilter.DDX(pDX, m_filter.nPriority);
 	m_cbRiskFilter.DDX(pDX, m_filter.nRisk);
 

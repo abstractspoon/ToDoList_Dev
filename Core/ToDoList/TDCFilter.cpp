@@ -630,11 +630,10 @@ void CTDCFilter::SaveAdvancedFilter(CPreferences& prefs, const CString& sKey, co
 
 void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCFILTER& filter)
 {
+	filter.sTitle = INIENTRY::UnSafeQuote(prefs.GetProfileString(sKey, _T("Title")));
 	filter.nShow = prefs.GetProfileEnum(sKey, _T("Show"), FS_ALL);
 	filter.nStartBy = prefs.GetProfileEnum(sKey, _T("Start"), FD_ANY);
 	filter.nDueBy = prefs.GetProfileEnum(sKey, _T("Due"), FD_ANY);
-
-	filter.sTitle = prefs.GetProfileString(sKey, _T("Title"));
 	filter.nTitleOption = prefs.GetProfileEnum(sKey, _T("TitleOption"), FT_FILTERONTITLEONLY);
 	filter.nPriority = prefs.GetProfileInt(sKey, _T("Priority"), FM_ANYPRIORITY);
 	filter.nRisk = prefs.GetProfileInt(sKey, _T("Risk"), FM_ANYRISK);
@@ -700,7 +699,7 @@ DWORD CTDCFilter::LoadFlags(const CPreferences& prefs, const CString& sKey)
 
 void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCFILTER& filter)
 {
-	prefs.WriteProfileString(sKey, _T("Title"), filter.sTitle);
+	prefs.WriteProfileString(sKey, _T("Title"), INIENTRY::SafeQuote(filter.sTitle));
 
 	prefs.WriteProfileInt(sKey, _T("TitleOption"), filter.nTitleOption);
 	prefs.WriteProfileInt(sKey, _T("Show"), filter.nShow);

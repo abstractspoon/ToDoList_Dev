@@ -138,24 +138,25 @@ END
 IDD_STATISTICS_DLG DIALOGEX 0, 0, 477, 281
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,120,8
     COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
-    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,253,12,49,13
-    CONTROL         "",IDC_GRAPH,"Button",BS_OWNERDRAW | WS_TABSTOP,8,38,298,
-                    234
-    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,310,2,167,
-                    8
-    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,309,
-                    12,112,13
     LTEXT           "Option",IDC_OPTIONS_LABEL,126,2,120,8
     COMBOBOX        IDC_OPTIONS,126,13,121,118,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
+    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,253,12,49,13
+    LTEXT           "Acti&ve Date Range:",IDC_ACTIVEDATERANGE_LABEL,310,2,65,
+                    8
+    LTEXT           "from-to",IDC_ACTIVEDATERANGE_TEXT,381,2,96,8
+    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,309,
+                    12,112,13
+    CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
+    CONTROL         "",IDC_GRAPH,"Button",BS_OWNERDRAW | WS_TABSTOP,8,38,298,
+                    234
 END
 
 IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 358, 200
@@ -245,8 +246,8 @@ BEGIN
     IDS_DISPLAY_INCOMPLETE  "Incomplete Tasks"
     IDS_DISPLAY_REMAINING   "Days Remaining"
     IDS_TOOLTIP_INCOMPLETE  "%s\n%d Tasks"
-    IDS_TOOLTIP_REMAINING   "%s\n%.2f Estimated\n%.2f Actual"
-    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%.2f Estimated\n%.2f Spent"
+    IDS_TOOLTIP_REMAINING   "%s\n%d Estimated\n%d Actual"
+    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%0.2f Estimated\n%0.2f Spent"
     IDS_TOOLTIP_ATTRIBFREQUENCY "%s\n%d Tasks"
 END
 

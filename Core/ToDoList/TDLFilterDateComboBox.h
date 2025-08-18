@@ -4,10 +4,11 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// TDLFilterComboBox.h : header file
+// CTDLFilterDateComboBox.h : header file
 //
 
 #include "tdcenum.h"
+
 #include "..\shared\tabbedcombobox.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -15,12 +16,10 @@
 
 class CTDLFilterDateComboBox : public CTabbedComboBox
 {
-// Construction
 public:
 	CTDLFilterDateComboBox(int nNextNDays = 7);
+	virtual ~CTDLFilterDateComboBox();
 
-// Operations
-public:
 	FILTER_DATE GetSelectedFilter() const;
 	BOOL SelectFilter(FILTER_DATE nFilter);
 	void SetNextNDays(int nDays);
@@ -29,30 +28,14 @@ protected:
 	int m_nNextNDays;
 	BOOL m_bRebuildingCombo;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFilterDateComboBox)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLFilterDateComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLFilterDateComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	afx_msg BOOL OnReflectSelChange();
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void FillCombo();
+	virtual void BuildCombo();
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-		DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 
 };
 

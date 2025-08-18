@@ -126,7 +126,7 @@ protected:
 	BOOL InitializeToolbar();
 	BOOL GetToolFromList(int nTool, TDCUSERTOOL& tool) const;
 	int AddToolToList(const TDCUSERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
-	void RebuildToolsFromList(BOOL bSafeQuotes = FALSE);
+	void RebuildToolsFromList();
 	
 	CString MapCmdIDToPlaceholder(UINT nCmdID) const;
 	CString GetNewUserVariableName(LPCTSTR szVarType) const;

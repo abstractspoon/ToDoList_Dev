@@ -283,9 +283,8 @@ void CLocalizer::ForceTranslateAllUIElements(UINT nIDFirstStr, UINT nIDLastStr)
 				
 				if (nStartTip != -1) 
 					sTip = sTip.Right(sTip.GetLength() - nStartTip - 1);
-				
-				else // strip '...' if present
-					sTip.Replace(_T("."), _T(""));
+				else
+					sTip.TrimRight('.'); // strip '...' if present
 				
 				sTip.TrimLeft();
 				sTip.TrimRight();

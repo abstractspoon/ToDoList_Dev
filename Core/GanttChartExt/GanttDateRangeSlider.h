@@ -34,7 +34,7 @@ public:
 	BOOL SetSelectedRange(const GANTTDATERANGE& dtRange);
 	void ClearSelectedRange();
 
-	CString FormatRange(TCHAR cDelim = '-') const;
+	CString FormatRange() const;
 
 protected:
 	GTLC_MONTH_DISPLAY m_nMonthDisplay;

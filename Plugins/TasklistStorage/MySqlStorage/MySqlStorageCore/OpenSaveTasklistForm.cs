@@ -61,7 +61,7 @@ namespace MySqlStorage
 			};
 
 			Win32.EnableExplorerTheming(m_Tasklists.Handle);
-			Win32.SetEditCue(m_Filter.Handle, "<optional>");
+			Win32.SetEditCue(m_Filter.Handle, m_Trans.Translate("<optional>", Translator.Type.Text));
 		}
 
 		public TasklistInfo TasklistInfo

@@ -19,6 +19,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Text.RegularExpressions;
 
 using unvell.ReoGrid.CellTypes;
 using unvell.ReoGrid.Editor.LangRes;
@@ -45,12 +46,26 @@ namespace unvell.ReoGrid.Editor
 
 			InitializeComponent();
 
-			this.cmbCellBody.Items.Add("(null)");
+			this.cmbCellBody.Items.Add(new CellBodyItem
+			{
+				Name = "(null)",
+				Type = null
+			});
 
 			foreach (var cellType in CellTypesManager.CellTypes)
 			{
 				var name = cellType.Key;
-				if (name.EndsWith("Cell")) name = name.Substring(0, name.Length - 4);
+
+				if (name.EndsWith("Cell"))
+					name = name.Substring(0, name.Length - 4);
+
+				// Make 'nice' by inserting spaces at upper case letters
+				var r = new Regex(@"
+                (?<=[A-Z])(?=[A-Z][a-z]) |
+                 (?<=[^A-Z])(?=[A-Z]) |
+                 (?<=[A-Za-z])(?=[^A-Za-z])", RegexOptions.IgnorePatternWhitespace);
+
+				name = r.Replace(name, " ");
 
 				cmbCellBody.Items.Add(new CellBodyItem
 				{
@@ -87,7 +102,9 @@ namespace unvell.ReoGrid.Editor
 			{
 				for (int i = 0; i < this.cmbCellBody.Items.Count; i++)
 				{
-					if (this.DefaultCellBody == (Type)this.cmbCellBody.Items[i])
+					var cmbItem = (this.cmbCellBody.Items[i] as CellBodyItem);
+
+					if (this.DefaultCellBody == cmbItem.Type)
 					{
 						this.cmbCellBody.SelectedIndex = i;
 						break;

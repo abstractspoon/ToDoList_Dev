@@ -24,7 +24,6 @@ static const CString TEXTIN				= _T("TEXTIN");
 static const CString ALTERNATIVE		= _T("ALTERNATIVE");
 static const CString CLASSID			= _T("CLASSID");
 static const CString TRANSLATED			= _T("TRANSLATED");
-static const CString DICTVER			= _T("VERSION");
 static const CString NEED_TRANSLATION	= _T("NEED_TRANSLATION");
 static const CString ITEM				= _T("ITEM");
 static const CString CSVCOLUMN_HEADER	= _T("English Text\tTranslated Text\tItem Type");
@@ -1050,7 +1049,9 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 	// put NEED_TRANSLATION first
 	if (aNeedTranslation.GetSize() > 0)
 	{
-		aLines.Add(NEED_TRANSLATION);
+		int nPercent = ((aNeedTranslation.GetSize() * 100) / (aNeedTranslation.GetSize() + aTranslated.GetSize()));
+
+		aLines.Add(Misc::Format(_T("%s %d"), NEED_TRANSLATION, nPercent));
 		aLines.Append(aNeedTranslation);
 	}
 

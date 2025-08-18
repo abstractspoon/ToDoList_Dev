@@ -20,8 +20,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR REALQUOTE = _T("\"");
-const LPCTSTR SAFEQUOTE = _T("{QUOTES}");
 const LPCTSTR NULLSTRING = NULL;
 
 //////////////////////////////////////////////////////////////////////
@@ -47,7 +45,7 @@ BOOL CTDCSearchParamHelper::LoadRule(const CPreferences& prefs, const CString& s
 		switch (nAttribType)
 		{
 		case FT_STRING:
-			sValue.Replace(SAFEQUOTE, REALQUOTE);
+			sValue = INIENTRY::UnSafeQuote(sValue);
 			break;
 			
 		case FT_DATERELATIVE:
@@ -96,14 +94,7 @@ BOOL CTDCSearchParamHelper::SaveRule(CPreferences& prefs, const CString& sRule, 
 	prefs.WriteProfileInt(sRule, _T("Operator"), rule.GetOperator());
 	prefs.WriteProfileInt(sRule, _T("And"), rule.GetAnd());
 	prefs.WriteProfileInt(sRule, _T("Flags"), rule.GetFlags());
-
-	// Handle user-quoted strings
-	CString sValue = rule.ValueAsString();
-
-	if (rule.TypeIs(FT_STRING) && !sValue.IsEmpty() && Misc::IsQuoted(sValue))
-		sValue.Replace(REALQUOTE, SAFEQUOTE);
-
-	prefs.WriteProfileString(sRule, _T("Value"), sValue);
+	prefs.WriteProfileString(sRule, _T("Value"), INIENTRY::SafeQuote(rule.ValueAsString()));
 
 	return TRUE;
 }

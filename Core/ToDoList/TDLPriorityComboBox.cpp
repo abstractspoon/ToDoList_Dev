@@ -35,33 +35,15 @@ CTDLPriorityComboBox::~CTDLPriorityComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CTDLPriorityComboBox, CColorComboBox)
-	//{{AFX_MSG_MAP(CTDLPriorityComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPriorityComboBox message handlers
 
-int CTDLPriorityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CColorComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildCombo();
-	
-	return 0;
-}
-
-void CTDLPriorityComboBox::PreSubclassWindow() 
-{
-	CColorComboBox::PreSubclassWindow();
-	
-	BuildCombo();
-}
-
 int CTDLPriorityComboBox::IncrementPriority(int nAmount)
 {
+	ASSERT(GetCount());
+
 	int nPrevPriority = GetCurSel();
 	int nPriority = nPrevPriority + nAmount;
 	nPriority = max(0, min(nPriority, m_nNumLevels));	
@@ -98,7 +80,7 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 	{
 		switch (nSel)
 		{
-		case 0:		return FM_NOPRIORITY;
+		case 0:		return FM_ANYPRIORITY;
 		default:	return (nSel - 1);
 		}
 	}
@@ -106,13 +88,15 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 	// Only 'None'
 	switch (nSel)
 	{
-	case 0:		return FM_ANYPRIORITY;
+	case 0:		return FM_NOPRIORITY;
 	default:	return (nSel - 1);
 	}
 }
 
 void CTDLPriorityComboBox::SetSelectedPriority(int nPriority) // -2 -> 10
 {
+	CheckBuildCombo();
+
 	int nSel = CB_ERR;
 
 	switch (nPriority)
@@ -156,6 +140,8 @@ BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 
 		if (GetSafeHwnd())
 		{
+			CheckBuildCombo();
+
 			// Update the colours in-place
 			int nNumItems = GetCount();
 
@@ -170,14 +156,9 @@ BOOL CTDLPriorityComboBox::SetColors(const CDWordArray& aColors)
 void CTDLPriorityComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
-	CHoldRedraw hr(*this);
+	ASSERT(GetCount() == 0);
+	ASSERT(!HasStyle(CBS_SORT));
 
-	// Remove sorting else 10 will get sorted after 1
-	ModifyStyle(CBS_SORT, 0);
-	
-	int nSel = GetCurSel(); // so we can restore it
-	ResetContent();
-	
 	BOOL bHasColors = m_aColors.GetSize();
 
 	// first item are 'Any' and  'None' which never have a colour
@@ -199,8 +180,6 @@ void CTDLPriorityComboBox::BuildCombo()
 		sPriority.Format(_T("%d (%s)"), nPriority, CEnString(aStrResIDs[nLevel]));
 		AddColor(color, sPriority);
 	}
-	
-	SetCurSel(nSel);
 }
 
 void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
@@ -209,11 +188,9 @@ void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	if (nItem == -1)
 		return;
 
-	// Draw <any> or <none> in window prompt color
-	if (!(nItemState & ODS_SELECTED) && !bList && (nItem == 0))
-	{
+	// Draw <any> in window prompt color
+	if (!(nItemState & ODS_SELECTED) && !bList && m_bIncludeAny && (nItem == 0))
 		crText = CWndPrompt::GetTextColor();
-	}
 	
 	// Don't indent 'non-color' items
 	if ((dwItemData == CLR_NONE) && !Misc::HasFlag(m_dwFlags, CCBS_DRAWNOCOLOR))
@@ -243,7 +220,12 @@ void CTDLPriorityComboBox::SetNumLevels(int nNumLevels)
 		m_nNumLevels = nNumLevels;
 
 		if (GetSafeHwnd())
-			BuildCombo();
+		{
+			int nSel = GetCurSel(); // save
+			RebuildCombo();
+
+			SetCurSel(nSel); // restore
+		}
 	}
 }
 

@@ -14,6 +14,7 @@ namespace LoggedTimeUIExtension
 	public partial class CreateLoggedEntryDlg : Form
 	{
 		IEnumerable<TaskItem> m_TaskItems;
+		Translator m_Trans;
 
 		// -----------------------------------
 
@@ -26,19 +27,21 @@ namespace LoggedTimeUIExtension
 									UIExtension.TaskIcon taskIcons, 
 									WorkingWeek workWeek,
 									bool isoDateTimes,
-									LogEntry attrib)
+									LogEntry attrib,
+									Translator trans)
 			:
 			this()
 		{
 			m_TaskItems = taskItems;
+			m_Trans = trans;
 
-			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false);
-
-			m_TaskCombo.Initialise(taskItems.OrderBy(x => x.Position), taskIcons, attrib.TaskId, TaskItem.None);
-			m_TaskCombo.SelectedIndex = 0;
+			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false, trans);
+			m_TaskCombo.Initialise(taskItems, taskIcons, attrib.TaskId, TaskItem.None(trans.Translate("<none>", Translator.Type.ComboBox)));
 
 			m_TaskCombo.SelectedIndexChanged += OnSelectedTaskChange;
-			OnSelectedTaskChange(this, null);
+			m_TaskCombo.SelectedIndex = 0;
+
+			trans.Translate(this);
 		}
 
 		protected void OnSelectedTaskChange(object sender, EventArgs e)
@@ -47,7 +50,7 @@ namespace LoggedTimeUIExtension
 
 			if (taskId == 0)
 			{
-				m_TaskId.Text = "<none>";
+				m_TaskId.Text = m_Trans.Translate("<none>", Translator.Type.Text);
 				m_Attributes.ReadOnlyTask = true;
 			}
 			else

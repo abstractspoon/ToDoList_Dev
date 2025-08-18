@@ -43,33 +43,28 @@ class CFPSMiniCalendarListCtrl : public CWnd
 // Construction
 public:
 	CFPSMiniCalendarListCtrl();
-
-// Attributes
-public:
+	virtual ~CFPSMiniCalendarListCtrl();
 
 // Operations
 public:
-	int GetSelMonth() const {return m_iSelMonth;}
-	int GetSelYear() const {return m_iSelYear;}
+	COleDateTime GetSelMonthAndYear() const;
 
 	void SetCalendar(CFPSMiniCalendarCtrl* pWnd);
-	void SetMiddleMonthYear(int iMonth, int iYear);
+	void SetMiddleMonthYear(const COleDateTime& date);
 	void SetItemsPerPage(int iValue);
 
 	void SetFontInfo(const CFPSMiniCalendarCtrlFontInfo& font);
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CFPSMiniCalendarListCtrl)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
 	void ScrollDown(int iCount = 1);
 	void ScrollUp(int iCount = 1);
 	void AutoConfigure();
 	void ForwardMessage(const MSG* pMSG);
-	virtual ~CFPSMiniCalendarListCtrl();
+
+// Overrides
+protected:
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CFPSMiniCalendarListCtrl)
+	//}}AFX_VIRTUAL
 
 	// Generated message map functions
 protected:
@@ -82,12 +77,12 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-	int			m_iMiddleMonth;
-	int			m_iMiddleYear;
+	int			m_iMiddleMonth; // Gregorian or Jalali depending on CJalaliCalendar::IsActive
+	int			m_iMiddleYear;  // Gregorian or Jalali depending on CJalaliCalendar::IsActive
 	int			m_iItemsPerPage;
 
-	int			m_iSelMonth;
-	int			m_iSelYear;
+	int			m_iSelMonth; // Gregorian or Jalali depending on CJalaliCalendar::IsActive
+	int			m_iSelYear;  // Gregorian or Jalali depending on CJalaliCalendar::IsActive
 
 	CFPSMiniCalendarCtrlFontInfo	m_FontInfo;
 	CFPSMiniCalendarCtrl*			m_pwndCalendar;

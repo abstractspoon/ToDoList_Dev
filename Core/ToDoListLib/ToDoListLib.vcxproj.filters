@@ -143,9 +143,6 @@
     <ClCompile Include="..\ToDoList\TDCRecurrence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\tdcreminder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDCSearchParamHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -245,12 +242,6 @@
     <ClCompile Include="..\ToDoList\TDLFilterOptionComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\tdlfindresultslistctrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\tdlfindtaskattributecombobox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDLFindTaskExpressionListCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -258,9 +249,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\ToDoList\TDLGoToTaskDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\tdliconcombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.cpp">
@@ -431,9 +419,6 @@
     <ClCompile Include="..\ToDoList\TDLTaskListCtrlOptionsComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\tdcsort.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDLAttributeComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -482,9 +467,6 @@
     <ClCompile Include="..\ToDoList\TDLTaskAttributeCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\tdcstruct.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDCMenuIconMgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -495,6 +477,33 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\ToDoList\TDCAnonymizeTaskTimeLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLSelectTaskDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCReminder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCSort.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCStruct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLFindResultsListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLFindTaskAttributeComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLIconComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\ToDoList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -595,16 +604,10 @@
     <ClInclude Include="..\ToDoList\TDCAnonymizeTasklist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ToDoList\tdccustomattribdata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\ToDoList\TDCCustomAttributeDef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCDialogHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\tdcenum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCEnumContainers.h">
@@ -625,13 +628,7 @@
     <ClInclude Include="..\ToDoList\TDCMainMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ToDoList\tdcmapping.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\ToDoList\TDCMergeTasklist.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\tdcmsg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCOutlookImportHelper.h">
@@ -640,31 +637,16 @@
     <ClInclude Include="..\ToDoList\TDCRecurrence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ToDoList\tdcreminder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\ToDoList\TDCSearchParamHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCSimpleTextContent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ToDoList\tdcsort.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\ToDoList\TDCSourceControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCStartupOptions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\tdcstatic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\tdcstruct.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\tdcswitch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCTaskTimeLog.h">
@@ -754,12 +736,6 @@
     <ClInclude Include="..\ToDoList\TDLFilterOptionComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ToDoList\tdlfindresultslistctrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\tdlfindtaskattributecombobox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\ToDoList\TDLFindTaskExpressionListCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -767,9 +743,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLGoToTaskDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\tdliconcombobox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.h">
@@ -898,9 +871,6 @@
     <ClInclude Include="..\ToDoList\TDLWelcomeWizard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\ToDoList\tdstringres.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\ToDoList\ToDoCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1004,6 +974,57 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCAnonymizeTaskTimeLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLSelectTaskDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCCustomAttribData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCEnum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCMapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCMsg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCReminder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCSort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCStatic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCStringRes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCSwitch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLFindResultsListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLFindTaskAttributeComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLIconComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\ToDoList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

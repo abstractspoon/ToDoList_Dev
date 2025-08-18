@@ -748,7 +748,7 @@ void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 
 void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday)
 {
-	if (HasColor(m_crAltWeek) && (CDateHelper::GetWeekofYear(pCell->date) % 2))
+	if (HasColor(m_crAltWeek) && (CDateHelper::GetWeekOfYear(pCell->date) % 2))
 	{
 		CRect rWeek(rCell);
 
@@ -909,14 +909,12 @@ CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMo
 {
 	ASSERT(m_sCellDateFormat);
 
-	BOOL bISODates = HasOption(TCCO_SHOWISODATES);
+	CString sDate;
 
-	CString sFormat(m_sCellDateFormat);
-
-	if (!bShowMonth)
-		sFormat = (bISODates ? _T("dd") : _T("d"));
-
-	CString sDate = CDateHelper::FormatDateOnly(date, sFormat);
+	if (bShowMonth)
+		sDate = CDateHelper::FormatDateOnly(date, m_sCellDateFormat);
+	else
+		sDate = CDateHelper::FormatDateOnly(date, (HasOption(TCCO_SHOWISODATES) ? _T("dd") : _T("d")));
 
 	// Show the week number on the first of the week -> First column
 	sWeekNum.Empty();
@@ -926,7 +924,7 @@ CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMo
 		int nUnused = -1, nCol = -1;
 		
 		if (CCalendarCtrl::GetGridCell(date, nUnused, nCol) && (nCol == 0))
-			sWeekNum = Misc::Format(m_sCellDateWeekNumFormat, CDateHelper::GetWeekofYear(date));
+			sWeekNum = Misc::Format(m_sCellDateWeekNumFormat, CDateHelper::GetWeekOfYear(date));
 	}
 
 	return sDate;
@@ -945,7 +943,7 @@ void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, con
 	CRect rDate(rHeader);
 	rDate.DeflateRect(HEADER_PADDING, 3);
 
-	if (pCell->date.GetDay() == 1)
+	if (CDateHelper::IsDayOfMonth(pCell->date, 1))
 	{
 		// Draw the first of any month in bold
 		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));
@@ -1491,11 +1489,11 @@ void CTaskCalendarCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 		return;
 	}
 
-	int nCurPos = GetScrollPos(SB_VERT);
+	COleDateTime dtCurPos = GetMinDate();
 	
 	CCalendarCtrlEx::OnVScroll(nSBCode, nPos, pScrollBar);
 	
-	if (GetScrollPos(SB_VERT) != nCurPos)
+	if (GetMinDate() != dtCurPos)
 	{
 		// Notify Parent
 		GetParent()->SendMessage(WM_VSCROLL, nPos, (LPARAM)GetSafeHwnd());

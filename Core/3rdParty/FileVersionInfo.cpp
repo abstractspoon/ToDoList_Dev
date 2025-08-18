@@ -139,8 +139,8 @@ BOOL CFileVersionInfo::Create(LPCTSTR lpszFileName)
 		if (VerQueryValue(lpData, (LPTSTR)(LPCTSTR)(strSubBlock+_T("FileVersion")), &lpInfo, &unInfoLen))
 		{
 			m_strFileVersion = (LPCTSTR)lpInfo;
-			m_strFileVersion.Replace(_T(" "), _T("")); // remove spaces
-			m_strFileVersion.Replace(_T(","), _T(".")); // replace commas with periods
+			m_strFileVersion.Remove(' ');
+			m_strFileVersion.Replace(',', '.'); // replace commas with periods
 		}
 
 		if (VerQueryValue(lpData, (LPTSTR)(LPCTSTR)(strSubBlock+_T("InternalName")), &lpInfo, &unInfoLen))
@@ -158,8 +158,8 @@ BOOL CFileVersionInfo::Create(LPCTSTR lpszFileName)
 		if (VerQueryValue(lpData, (LPTSTR)(LPCTSTR)(strSubBlock+_T("ProductVersion")), &lpInfo, &unInfoLen))
 		{
 			m_strProductVersion = (LPCTSTR)lpInfo;
-			m_strProductVersion.Replace(_T(" "), _T("")); // remove spaces
-			m_strProductVersion.Replace(_T(","), _T(".")); // replace commas with periods
+			m_strProductVersion.Remove(' ');
+			m_strProductVersion.Replace(',', '.'); // replace commas with periods
 		}
 
 		if (VerQueryValue(lpData, (LPTSTR)(LPCTSTR)(strSubBlock+_T("Comments")), &lpInfo, &unInfoLen))

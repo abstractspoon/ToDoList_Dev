@@ -15,7 +15,6 @@
 
 class CKanbanGroupByComboBox : public CKanbanAttributeComboBox
 {
-// Construction
 public:
 	CKanbanGroupByComboBox();
 	virtual ~CKanbanGroupByComboBox();
@@ -23,16 +22,10 @@ public:
 	void ShowFixedColumns(TDC_ATTRIBUTE /*nAttribID*/) { m_nFixedColumnsAttribID = TDCA_NONE; } // never
 	void ExcludeAttribute(TDC_ATTRIBUTE nAttribID);
 
-// Attributes
 protected:
 	TDC_ATTRIBUTE m_nExcludeAttribID;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CKanbanAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

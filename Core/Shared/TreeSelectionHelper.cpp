@@ -420,9 +420,7 @@ BOOL CTreeSelectionHelper::GetBoundingRect(CRect& rSelection) const
 	POSITION pos = GetFirstItemPos();
 
 	if (pos)
-	{
 		VERIFY(m_tree.GetItemRect(GetNextItem(pos), rSelection, TRUE));
-	}
 
 	// rest of items
 	while (pos)
@@ -433,7 +431,7 @@ BOOL CTreeSelectionHelper::GetBoundingRect(CRect& rSelection) const
 		rSelection |= rItem;
 	}
 
-	return (!rSelection.IsRectEmpty());
+	return !rSelection.IsRectEmpty();
 }
 
 BOOL CTreeSelectionHelper::ItemsAreAllParents() const

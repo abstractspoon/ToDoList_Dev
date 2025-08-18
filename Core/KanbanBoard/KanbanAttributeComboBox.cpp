@@ -32,9 +32,6 @@ CKanbanAttributeComboBox::~CKanbanAttributeComboBox()
 
 
 BEGIN_MESSAGE_MAP(CKanbanAttributeComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CKanbanAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

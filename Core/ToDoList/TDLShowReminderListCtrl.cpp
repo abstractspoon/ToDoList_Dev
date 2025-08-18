@@ -34,6 +34,10 @@ static char THIS_FILE[] = __FILE__;
 #define LVS_EX_DOUBLEBUFFER 0x00010000
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
+const int ICON_PADDING = GraphicsMisc::ScaleByDPIFactor(3);
+
 ///////////////////////////////////////////////////////////////////////////
 
 enum
@@ -109,7 +113,7 @@ BOOL CTDLShowReminderListCtrl::Initialise()
 	InsertColumn(WHEN_COL, CEnString(IDS_REMINDER_WHENCOL), LVCFMT_LEFT, (int)aWidths[3]);
 
 	RecalcColumnWidths();
-	SetTooltipCtrlText(CEnString(IDS_REMINDER_DBLCLK_TIP));
+	SetTooltipText(CEnString(IDS_REMINDER_DBLCLK_TIP), TTS_ALWAYSTIP);
 
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(*this, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
@@ -501,7 +505,10 @@ void CTDLShowReminderListCtrl::DrawCellText(CDC* pDC, int nItem, int nCol, const
 void CTDLShowReminderListCtrl::DrawItemBackground(CDC* pDC, int nItem, const CRect& rItem, COLORREF crBack, BOOL bSelected, BOOL bDropHighlighted, BOOL bFocused)
 {
 	if (m_nTextOffset == 0)
+	{
 		CEnListCtrl::DrawItemBackground(pDC, nItem, rItem, crBack, bSelected, bDropHighlighted, bFocused);
+		return;
+	}
 
 	CRect rText(rItem);
 	rText.left += m_nTextOffset;
@@ -526,7 +533,7 @@ void CTDLShowReminderListCtrl::RecalcTextOffset()
 int CTDLShowReminderListCtrl::GetTextOffset(const TDCREMINDER& rem) const
 {
 	if (rem.HasIcon())
-		return (rem.pTDC->GetTaskIconImageList().GetImageWidth() + 2);
+		return (rem.pTDC->GetTaskIconImageList().GetImageWidth() + ICON_PADDING);
 
 	// else
 	return 0;

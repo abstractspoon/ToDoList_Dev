@@ -17,7 +17,6 @@
 
 class CKanbanAttributeComboBox : public CComboBox
 {
-// Construction
 public:
 	CKanbanAttributeComboBox(BOOL bShowNone);
 	virtual ~CKanbanAttributeComboBox();
@@ -31,26 +30,16 @@ public:
 
 	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value, CString& sCustomAttribID);
 
-// Attributes
 protected:
 	BOOL m_bShowNone;
 	TDC_ATTRIBUTE m_nFixedColumnsAttribID;
 
 	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CKanbanAttributeComboBox)
 protected:
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CKanbanAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

@@ -30,31 +30,10 @@ CTDLTaskListCtrlOptionsComboBox::~CTDLTaskListCtrlOptionsComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CTDLTaskListCtrlOptionsComboBox, CCheckComboBox)
-	//{{AFX_MSG_MAP(CTDLTaskListOptionsComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
-	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskListOptionsComboBox message handlers
-
-int CTDLTaskListCtrlOptionsComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-	if (CCheckComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	//BuildCombo();
-
-	return 0;
-}
-
-void CTDLTaskListCtrlOptionsComboBox::PreSubclassWindow()
-{
-	CCheckComboBox::PreSubclassWindow();
-
-	//BuildCombo();
-}
 
 void CTDLTaskListCtrlOptionsComboBox::BuildCombo()
 {
@@ -84,12 +63,7 @@ void CTDLTaskListCtrlOptionsComboBox::RemoveOptions(DWORD dwOptions)
 	if (dwOptions != m_dwRemovedOptions)
 	{
 		m_dwRemovedOptions = dwOptions;
-		
-		if (GetSafeHwnd())
-		{
-			ResetContent();
-			BuildCombo();
-		}
+		RebuildCombo();
 	}
 }
 

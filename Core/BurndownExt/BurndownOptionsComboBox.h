@@ -14,7 +14,6 @@
 
 class CBurndownOptionsComboBox : public CComboBox
 {
-// Construction
 public:
 	CBurndownOptionsComboBox();
 	virtual ~CBurndownOptionsComboBox();
@@ -27,9 +26,6 @@ protected:
 	BURNDOWN_GRAPHTYPE m_nGraphType;
 
 protected:
-	//{{AFX_MSG(CBurndownOptionsComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:

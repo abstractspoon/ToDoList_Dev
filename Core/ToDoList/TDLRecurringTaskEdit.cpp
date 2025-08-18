@@ -928,8 +928,8 @@ void CTDLRecurringTaskYearlyOptionPage::DoDataExchange(CDataExchange* pDX)
 	CDialogHelper::DDX_Text(pDX, IDC_RECREATEYEARS, m_nEveryNumYears);
 	CDialogHelper::DDX_Text(pDX, IDC_EVERYMONTHDAY, m_nEveryDayOfMonth);
 
-	DDX_Months(pDX, m_cbSpecificMonthList, m_dwSpecificMonths);
-	DDX_Months(pDX, m_cbEveryMonthList, m_dwEveryMonths);
+	m_cbSpecificMonthList.DDX(pDX, m_dwSpecificMonths);
+	m_cbEveryMonthList.DDX(pDX, m_dwEveryMonths);
 }
 
 BEGIN_MESSAGE_MAP(CTDLRecurringTaskYearlyOptionPage, CCmdNotifyPropertyPage)

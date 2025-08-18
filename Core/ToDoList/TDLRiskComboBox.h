@@ -14,7 +14,6 @@
 
 class CTDLRiskComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTDLRiskComboBox(BOOL bIncludeAny, BOOL bIncludeNone = TRUE);
 	virtual ~CTDLRiskComboBox();
@@ -28,27 +27,14 @@ public:
 	void DDX(CDataExchange* pDX, int& nRisk);
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLRiskComboBox)
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-protected:
 	BOOL m_bIncludeAny, m_bIncludeNone;
 	int m_nNumLevels;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLRiskComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
-   void BuildCombo();
-
+   virtual void BuildCombo();
    virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 	   DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 };

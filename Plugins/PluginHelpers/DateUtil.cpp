@@ -5,9 +5,12 @@
 #include "DateUtil.h"
 #include "Preferences.h"
 #include "Win32.h"
+#include "PluginHelpers.h"
 
 #include <Shared\DateHelper.h>
 #include <Shared\Misc.h>
+
+#include <3rdParty\JalaliCalendar.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -256,7 +259,7 @@ List<DayOfWeek>^ WorkingWeek::WeekDays()
 
 int DateUtil::WeekOfYear(DateTime date)
 {
-	return CDateHelper::GetWeekofYear(date.ToOADate());
+	return CDateHelper::GetWeekOfYear(date.ToOADate());
 }
 
 int DateUtil::GetMaxDayOfWeekNameWidth(Graphics^ graphics, Font^ font, bool shortName)
@@ -295,20 +298,73 @@ int DateUtil::GetMaxMonthNameWidth(Graphics^ graphics, Font^ font, bool shortNam
 
 String^ DateUtil::GetMonthName(int nMonth, bool shortName)
 {
-	return gcnew String(CDateHelper::GetMonthName(nMonth, (shortName ? TRUE : FALSE)));
+	CString sMonth = (CJalaliCalendar::IsActive() ? 
+					  CJalaliCalendar::GetMonthName(nMonth) :
+					  CDateHelper::GetMonthName(nMonth, (shortName ? TRUE : FALSE)));
+
+	return gcnew String(sMonth);
 }
 
 int DateUtil::DateInMonths(DateTime date)
 {
-	return ((date.Year * 12) + (date.Month - 1)); // zero-based months
+	return CDateHelper::GetDateInMonths(date.ToOADate());
 }
 
 DateTime DateUtil::DateFromMonths(int nMonths)
 {
-	int nYear = (nMonths / 12);
-	int nMonth = (nMonths % 12) + 1;// one-based months
+	return DateTime::FromOADate(CDateHelper::GetDateFromMonths(nMonths));
+}
 
-	return DateTime(nYear, nMonth, 1);
+void DateUtil::FromDate(DateTime date, int% year, int% month, int% day)
+{
+	if (CJalaliCalendar::IsActive())
+	{
+		int GYear, GMonth, GDay;
+		CJalaliCalendar::FromGregorian(date.ToOADate(), &GYear, &GMonth, &GDay);
+
+		year = GYear;
+		month = GMonth;
+		day = GDay;
+	}
+	else
+	{
+		year = date.Year;
+		month = date.Month;
+		day = date.Day;
+	}
+}
+
+DateTime DateUtil::ToDate(int year, int month, int day)
+{
+	if (CJalaliCalendar::IsActive())
+		return DateTime::FromOADate(CJalaliCalendar::ToGregorian(year, month, day));
+
+	// else
+	return DateTime(year, month, day);
+}
+
+int DateUtil::GetDay(DateTime date)
+{
+	int year, month, day;
+	FromDate(date, year, month, day);
+
+	return day;
+}
+
+int DateUtil::GetMonth(DateTime date)
+{
+	int year, month, day;
+	FromDate(date, year, month, day);
+
+	return month;
+}
+
+int DateUtil::GetYear(DateTime date)
+{
+	int year, month, day;
+	FromDate(date, year, month, day);
+
+	return year;
 }
 
 String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime, bool bISO)
@@ -322,6 +378,16 @@ String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime
 		dwFlags |= DHFD_ISO;
 
 	return gcnew String(COleDateTimeRange(dateFrom.ToOADate(), dateTo.ToOADate()).Format(dwFlags));
+}
+
+String^ DateUtil::FormatDateOnly(DateTime date, String^ format)
+{
+	return gcnew String(CDateHelper::FormatDateOnly(date.ToOADate(), MS(format)));
+}
+
+String^ DateUtil::FormatDateOnlyRange(DateTime dateFrom, DateTime dateTo, String^ format)
+{
+	return gcnew String(COleDateTimeRange(dateFrom.ToOADate(), dateTo.ToOADate()).FormatDateOnly(MS(format), L" - "));
 }
 
 TimeSpan DateUtil::TimeOnly(DateTime date)

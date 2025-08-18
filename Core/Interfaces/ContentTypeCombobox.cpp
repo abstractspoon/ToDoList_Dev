@@ -34,28 +34,12 @@ CContentTypeComboBox::~CContentTypeComboBox()
 
 
 BEGIN_MESSAGE_MAP(CContentTypeComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CContentTypeComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CContentTypeComboBox message handlers
 
-int CContentTypeComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	if (!m_pContentMgr)
-		return -1;
-	
-	FillCombo();
-	
-	return 0;
-}
-
-void CContentTypeComboBox::FillCombo()
+void CContentTypeComboBox::BuildCombo()
 {
 	if (COwnerdrawComboBoxBase::GetCount())
 		return;
@@ -72,14 +56,6 @@ void CContentTypeComboBox::FillCombo()
 	}
 
 	SetCurSel(0);
-}
-
-void CContentTypeComboBox::PreSubclassWindow() 
-{
-	if (m_pContentMgr)
-		FillCombo();
-	
-	COwnerdrawComboBoxBase::PreSubclassWindow();
 }
 
 int CContentTypeComboBox::GetSelectedFormat(CONTENTFORMAT& cf) const
@@ -125,17 +101,11 @@ void CContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	
 		if (nContent != -1)
 		{
-			CRect rImage(rect);
-			rImage.bottom = (rImage.top + ICON_SIZE);
-
-			GraphicsMisc::CentreRect(rImage, rect, FALSE, TRUE);
-			
-			HICON hIcon = m_pContentMgr->GetContentIcon(nContent);
-
-			if (hIcon == NULL)
-				hIcon = m_iconNull;
-
-			::DrawIconEx(dc, rImage.left, rImage.top, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
+			GraphicsMisc::DrawCentred(&dc,
+									  m_pContentMgr->GetContentIcon(nContent),
+									  rect,
+									  FALSE,
+									  TRUE); // vertically centred
 		}
 	}
 

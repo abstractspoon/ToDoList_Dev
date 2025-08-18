@@ -124,6 +124,7 @@ protected:
 	afx_msg void OnItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 
+	afx_msg void OnToggleSingleClickEditing();
 	afx_msg void OnToggleGrouping();
 	afx_msg void OnToggleSorting();
 	afx_msg void OnMoveAttributeUp();

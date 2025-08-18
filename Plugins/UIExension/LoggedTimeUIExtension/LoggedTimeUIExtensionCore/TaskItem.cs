@@ -146,9 +146,9 @@ namespace LoggedTimeUIExtension
 			get { return !TaskTextColor.IsEmpty; }
 		}
 
-		static public TaskItem None
+		static public TaskItem None(string title)
 		{
-			get { return new TaskItem() { Title = "<none>", Id = 0 }; }
+			return new TaskItem() { Title = title, Id = 0 };
 		}
 
 		public string Title { get; private set; }
@@ -175,6 +175,7 @@ namespace LoggedTimeUIExtension
 			TaskTextColor = task.GetTextDrawingColor();
 			Locked = task.IsLocked(true);
 			IsParent = task.IsParent();
+			Position = task.GetPositionString();
 
 			if (newTask)
 			{

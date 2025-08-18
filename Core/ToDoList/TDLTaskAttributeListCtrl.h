@@ -74,7 +74,6 @@ public:
 	TDC_ATTRIBUTE GetSelectedAttributeID() const;
 	CString GetSelectedAttributeLabel() const;
 	CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const;
-	BOOL CanEditSelectedAttribute() const;
 	void RefreshSelectedTasksValues();
 	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);

@@ -2146,6 +2146,7 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 	{
 		// remove unwanted translations
 		FileMisc::DeleteFile(sTranslationsFolder + _T("\\Brazilian Portuguese (PT-BR).csv"), TRUE);
+		FileMisc::DeleteFile(sTranslationsFolder + _T("\\Non-specific RTL Language.csv"), TRUE);
 	}
 }
 

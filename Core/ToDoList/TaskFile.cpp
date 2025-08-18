@@ -1910,7 +1910,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 		GETATTRIB(TDCA_FILELINK,		TDL_TASKFILELINKPATH,	GetTaskFileLinks(hSrcTask, tdiDest.aFileLinks));
 
 		// Comments are trickier
-		if (mapAttribs.Has(TDCA_ALL) || mapAttribs.Has(TDCA_COMMENTS))
+		if (mapAttribs.HasAttribOrAll(TDCA_COMMENTS))
 		{
 			if (Misc::HasFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES) && 
 				!TaskHasAttribute(hSrcTask, TDL_TASKCOMMENTS) &&
@@ -2032,7 +2032,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 BOOL CTaskFile::WantGetTaskAttribute(HTASKITEM hSrcTask, LPCTSTR szSrcAttrib, TODOITEM& tdiDest, TDC_ATTRIBUTE nDestAttrib, 
 									 const CTDCAttributeMap& mapAttribs, DWORD dwFlags) const
 {
-	if (!mapAttribs.Has(TDCA_ALL) && !mapAttribs.Has(nDestAttrib))
+	if (!mapAttribs.HasAttribOrAll(nDestAttrib))
 		return FALSE;
 
 	BOOL bHasSrc = TaskHasAttribute(hSrcTask, szSrcAttrib);

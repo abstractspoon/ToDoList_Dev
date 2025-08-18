@@ -652,6 +652,11 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 	return AttributeSupportsFeature(GetDataType(), GetListType(), dwFeature);
 }
 
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::HasFeature(DWORD dwFeature) const
+{
+	return (SupportsFeature(dwFeature) && Misc::HasFlag(dwFeatures, dwFeature));
+}
+
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DWORD dwListType, DWORD dwFeature)
 {
 	switch (dwFeature)

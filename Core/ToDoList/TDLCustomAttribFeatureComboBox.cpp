@@ -51,8 +51,6 @@ CTDLCustomAttribFeatureComboBox::~CTDLCustomAttribFeatureComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CTDLCustomAttribFeatureComboBox, CCheckComboBox)
-	//{{AFX_MSG_MAP(CTDLCustomAttribFeatureComboBox)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

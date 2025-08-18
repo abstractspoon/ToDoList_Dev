@@ -32,13 +32,10 @@ CEnCheckComboBox::~CEnCheckComboBox()
 IMPLEMENT_DYNAMIC(CEnCheckComboBox, CCheckComboBox)
 
 BEGIN_MESSAGE_MAP(CEnCheckComboBox, CCheckComboBox)
-	//{{AFX_MSG_MAP(CEnCheckComboBox)
-	//}}AFX_MSG_MAP
 	ON_CONTROL(LBN_SELCHANGE, 1000, OnLBSelChange)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_MESSAGE(WM_GETTEXTLENGTH, OnGetTextLen)
 	ON_WM_KEYDOWN()
-
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

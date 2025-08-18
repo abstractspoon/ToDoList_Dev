@@ -364,7 +364,7 @@ BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, cons
 		return FALSE;
 	}
 	
-	BOOL bAllAttribModified = (mapAttrib.Has(TDCA_UNDO) || mapAttrib.Has(TDCA_ALL));
+	BOOL bAllAttribModified = mapAttrib.HasAttribOrAll(TDCA_UNDO);
 	BOOL bUpdated = FALSE;
 
 	if (bAllAttribModified || mapAttrib.Has(TDCA_DELETE))

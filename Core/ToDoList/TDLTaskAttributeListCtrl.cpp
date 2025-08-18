@@ -535,6 +535,7 @@ void CTDLTaskAttributeListCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) co
 	prefs.WriteProfileDouble(szKey, _T("AttribColProportion"), m_fAttribColProportion);
 	prefs.WriteProfileInt(szKey, _T("AttribSortAscending"), m_bSortAscending);
 	prefs.WriteProfileInt(szKey, _T("AttribGrouped"), m_bGrouped);
+	prefs.WriteProfileInt(szKey, _T("SingleClickEditing"), HasSingleClickEditing());
 
 	m_aAttribState.Save(prefs, szKey);
 }
@@ -544,6 +545,8 @@ void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szK
 	m_fAttribColProportion = (float)prefs.GetProfileDouble(szKey, _T("AttribColProportion"), 0.5);
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
 	m_bGrouped = (SupportsGrouping() && prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE));
+
+	SetSingleClickEditing(prefs.GetProfileInt(szKey, _T("SingleClickEditing"), FALSE));
 
 	m_aAttribState.Load(prefs, szKey);
 
@@ -1006,11 +1009,6 @@ CString CTDLTaskAttributeListCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttribID) co
 	return GetItemText(nRow, LABEL_COL);
 }
 
-BOOL CTDLTaskAttributeListCtrl::CanEditSelectedAttribute() const
-{
-	return CanEditCell(GetCurSel(), VALUE_COL);
-}
-
 void CTDLTaskAttributeListCtrl::SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd)
 {
 	int nSel = GetCurSel();
@@ -1409,14 +1407,12 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribI
 CString CTDLTaskAttributeListCtrl::FormatDate(const COleDateTime& date, BOOL bAndTime) const
 {
 	DWORD dwFlags = 0;
-	
-	if (m_data.HasStyle(TDCS_SHOWDATESINISO))
-		dwFlags |= DHFD_ISO;
-	
-	if (bAndTime)
-		dwFlags |= DHFD_TIME | DHFD_NOSEC;
 
-	return CDateHelper::FormatDate(date,  dwFlags);
+	Misc::SetFlag(dwFlags, DHFD_DOW, m_data.HasStyle(TDCS_SHOWWEEKDAYINDATES));
+	Misc::SetFlag(dwFlags, DHFD_ISO, m_data.HasStyle(TDCS_SHOWDATESINISO));
+	Misc::SetFlag(dwFlags, DHFD_TIME | DHFD_NOSEC, bAndTime);
+
+	return CDateHelper::FormatDate(date, dwFlags);
 }
 
 CString CTDLTaskAttributeListCtrl::FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const
@@ -2269,14 +2265,13 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, CRect& 
 	if (sIcon.IsEmpty())
 		return FALSE;
 
-	CPoint ptIcon(GetIconPos(rIcon));
 	BOOL bDrawn = FALSE;
 
 	if (bIconIsFile)
 	{
 		bDrawn = CFileEdit::DrawFileIcon(pDC,
 										 sIcon,
-										 ptIcon,
+										 GetIconPos(rIcon),
 										 m_iconCache,
 										 this,
 										 m_sCurrentFolder,
@@ -2284,7 +2279,12 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, CRect& 
 	}
 	else
 	{
-		bDrawn = m_ilIcons.Draw(pDC, sIcon, ptIcon, ILD_TRANSPARENT);
+		bDrawn = GraphicsMisc::DrawCentred(pDC, 
+										   m_ilIcons, 
+										   m_ilIcons.GetImageIndex(sIcon), 
+										   rIcon,
+										   FALSE,
+										   TRUE);
 	}
 
 	if (bDrawn)
@@ -2586,7 +2586,7 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 
 	if (Misc::StatesDiffer(bIsReadOnly, bWantReadOnly))
 	{
-		// Update the combo sort style for when it's recreated
+		// Update the combo sort style FOR WHEN IT'S RECREATED
 		combo.ModifyStyle(bWantSort ? 0 : CBS_SORT, bWantSort ? CBS_SORT : 0);
 
 		if (!CDialogHelper::SetAutoComboReadOnly(combo, TRUE, bWantReadOnly, COMBO_DROPHEIGHT))
@@ -2618,15 +2618,18 @@ BOOL CTDLTaskAttributeListCtrl::CheckRecreateCombo(int nRow, CEnCheckComboBox& c
 
 void CTDLTaskAttributeListCtrl::RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel)
 {
+	combo.ResetContent();
 	combo.EnableMultiSelection(bMultiSel);
 
-	CStringArray aAllValues;
-	
-	aAllValues.Copy(aDefValues);
-	aAllValues.Append(aUserValues);
-	Misc::RemoveDuplicates(aAllValues);
+	if (aDefValues.GetSize() || aUserValues.GetSize())
+	{
+		CStringArray aAllValues;
 
-	CDialogHelper::SetComboBoxItems(combo, aAllValues);
+		aAllValues.Copy(aDefValues);
+		aAllValues.Append(aUserValues);
+
+		combo.SetStrings(aAllValues);
+	}
 }
 
 void CTDLTaskAttributeListCtrl::PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort)
@@ -3882,6 +3885,9 @@ void CTDLTaskAttributeListCtrl::OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLTaskAttributeListCtrl::OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult)
 {
+	if (m_datePicker.IsWindowVisible())
+		HideControl(m_datePicker);
+
 	HandleDateEditCompletion();
 }
 

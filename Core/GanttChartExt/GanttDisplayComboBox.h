@@ -20,7 +20,6 @@ class CGanttCtrl;
 
 class CGanttDisplayComboBox : public CTabbedComboBox
 {
-// Construction
 public:
 	CGanttDisplayComboBox();
 	virtual ~CGanttDisplayComboBox();
@@ -33,19 +32,9 @@ public:
 protected:
 	GTLC_MONTH_DISPLAY m_nMinEnabledDisplay;    
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CGanttDisplayComboBox)
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CGanttDisplayComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
 	afx_msg BOOL OnSelChange();
 	afx_msg BOOL OnSelEndOK();
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

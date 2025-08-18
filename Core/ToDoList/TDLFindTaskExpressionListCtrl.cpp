@@ -1614,18 +1614,20 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 				rIcon.DeflateRect(0, ((rText.Height() - IMAGE_SIZE) / 2));
 
 				// Don't use sText because it might have been truncated
-				CString sIcons = GetItemText(nRow, nCol);
-				CStringArray aIcons;
+				CString sIcons(GetItemText(nRow, nCol));
 
+				CStringArray aIcons;
 				int nNumIcons = Misc::Split(sIcons, aIcons);
 
 				for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 				{
-					int nIconIdx = m_ilIcons.GetImageIndex(aIcons[nIcon]);
-
-					if (nIconIdx != -1)
+					if (GraphicsMisc::DrawCentred(pDC, 
+												  m_ilIcons,
+												  m_ilIcons.GetImageIndex(aIcons[nIcon]),
+												  rIcon,
+												  FALSE,
+												  TRUE)) // vertically centred
 					{
-						m_ilIcons.Draw(pDC, nIconIdx, rIcon.TopLeft(), ILD_TRANSPARENT);
 						rIcon.left += (IMAGE_SIZE + 2);
 					}
 				}

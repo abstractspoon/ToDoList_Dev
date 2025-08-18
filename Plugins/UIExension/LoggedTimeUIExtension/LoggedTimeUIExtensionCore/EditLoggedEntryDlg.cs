@@ -25,7 +25,8 @@ namespace LoggedTimeUIExtension
 		public EditLoggedEntryDlg(LogEntry entry, 
 								  WorkingWeek workWeek, 
 								  bool isoDateTimes,
-								  bool readonlyTask)
+								  bool readonlyTask, 
+								  Translator trans)
 			:
 			this()
 		{
@@ -33,7 +34,7 @@ namespace LoggedTimeUIExtension
 
 			if (entry.TaskId == 0)
 			{
-				m_TaskTitle.Text = m_TaskId.Text = "<none>";
+				m_TaskTitle.Text = m_TaskId.Text = trans.Translate("<none>", Translator.Type.Text);
 			}
 			else
 			{
@@ -41,7 +42,9 @@ namespace LoggedTimeUIExtension
 				m_TaskId.Text = entry.TaskId.ToString();
 			}
 
-			m_Attributes.Initialise(entry, workWeek, isoDateTimes, readonlyTask, true);
+			m_Attributes.Initialise(entry, workWeek, isoDateTimes, readonlyTask, true, trans);
+
+			trans.Translate(this);
 		}
 
 		public Calendar.AppointmentDates Dates

@@ -2091,7 +2091,10 @@ TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 		data.AsArray(aNewItems);
 	}
 		
-	if (!Misc::MatchAll(aOldItems, aNewItems))
+	// Only plain text fields are checked case-sensitively
+	BOOL bCaseSensitive = (pDef->IsDataType(TDCCA_STRING) && !pDef->IsList());
+
+	if (!Misc::MatchAll(aOldItems, aNewItems, FALSE, bCaseSensitive))
 	{
 		// save undo data
 		SaveEditUndo(dwTaskID, pTDI, TDCA_CUSTOMATTRIB);

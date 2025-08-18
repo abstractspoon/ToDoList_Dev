@@ -59,10 +59,7 @@ public:
 	BOOL GetOtherExporterTypeID(CString& sExporterID) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLPrintStylePage)
 	enum { IDD = IDD_PRINT_STYLE_PAGE };
-	//}}AFX_DATA
 
 	CTDLHtmlStyleStatic m_stSimpleIcon;
 	CTDLHtmlStyleComboBox m_cbSimpleOptions;
@@ -80,21 +77,13 @@ protected:
 
 	const CTDCImportExportMgr& m_mgrImpExp;
 
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CTDLPrintStylePage)
 protected:
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLPrintStylePage)
 	afx_msg void OnSelchangeSimplePageOption();
-	//}}AFX_MSG
 	afx_msg void OnChangeStylesheet();
 	afx_msg void OnChangeStyle();
 	afx_msg void OnConfigureStylesheet();
@@ -124,31 +113,18 @@ public:
 	void SetOutputStyle(TDLPD_STYLE nStyle);
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLPrintTaskSelectionPage)
 	enum { IDD = IDD_PRINT_TASKSEL_PAGE };
-		// NOTE: the ClassWizard will add data members here
-	//}}AFX_DATA
+
 	CTaskSelectionDlg m_dlgTaskSel;
 	TDLPD_STYLE	m_nExportStyle;
 
-// Overrides
 protected:
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLPrintTaskSelectionPage)
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 
-	// Generated message map functions
-	//{{AFX_MSG(CTDLPrintTaskSelectionPage)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-
-// Implementation
 protected:
+	DECLARE_MESSAGE_MAP()
 };
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPrintDialog dialog
@@ -176,10 +152,8 @@ public:
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLPrintDialog)
 	enum { IDD = IDD_PRINT_DIALOG };
-	//}}AFX_DATA
+
 	CString	m_sTitle;
 	BOOL	m_bDate;
 	BOOL	m_bPrintPreview;
@@ -190,24 +164,13 @@ protected:
 	CTDLPrintTaskSelectionPage m_pageTaskSel;
 	CTabbedPropertyPageHost m_ppHost;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLPrintDialog)
 protected:
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 
-// Implementation
 protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(CTDLPrintDialog)
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
-protected:
 };
 
 //{{AFX_INSERT_LOCATION}}

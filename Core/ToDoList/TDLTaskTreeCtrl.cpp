@@ -564,11 +564,13 @@ void CTDLTaskTreeCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
 void CTDLTaskTreeCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
 {
 	DWORD dwTaskID = m_dragTree.GetItemData(hti);
-	int nImage = GetTaskIconIndex(dwTaskID);
 
-	if (nImage != -1)
-		m_ilTaskIcons.Draw(&dc, nImage, rItem.TopLeft());
-
+	GraphicsMisc::DrawCentred(&dc, 
+							  m_ilTaskIcons,
+							  GetTaskIconIndex(dwTaskID),
+							  rItem,
+							  FALSE, 
+							  TRUE);
 	CRect rText(rItem);
 	rText.OffsetRect(ICON_SIZE, 0);
 
@@ -586,15 +588,11 @@ void CTDLTaskTreeCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem
 
 BOOL CTDLTaskTreeCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 {
-	if (TSH().GetBoundingRect(rSelection))
-	{
-		m_tcTasks.ClientToScreen(rSelection);
-		ScreenToClient(rSelection);
-		
-		return TRUE;
-	}
-	
-	return FALSE;
+	if (!TSH().GetBoundingRect(rSelection))
+		return FALSE;
+
+	m_tcTasks.MapWindowPoints((CWnd*)this, rSelection);
+	return TRUE;
 }
 
 BOOL CTDLTaskTreeCtrl::IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const
@@ -612,10 +610,10 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetTreeItemState(HTREEITEM hti) const
 	if (!m_bSavingToImage)
 	{
 		if (m_tcTasks.GetItemState(hti, TVIS_DROPHILITED) & TVIS_DROPHILITED)
-		{
 			return GMIS_DROPHILITED;
-		}
-		else if (IsItemSelected(hti))
+
+		// else
+		if (IsItemSelected(hti))
 		{
 			DWORD dwTaskID = GetTaskID(hti);
 		
@@ -627,6 +625,7 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetTreeItemState(HTREEITEM hti) const
 		}
 	}
 	
+	// all else
 	return GMIS_NONE;
 }
 
@@ -638,7 +637,7 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetColumnItemState(int nItem) const
 void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 {
 	// only called when the focus is actually on the columns
-	// ie. not when Syncing Column Selection)
+	// ie. not when Syncing Column Selection
 	
 	// sync only the item that has changed 
 	HTREEITEM hti = (HTREEITEM)m_lcColumns.GetItemData(pNMLV->iItem);

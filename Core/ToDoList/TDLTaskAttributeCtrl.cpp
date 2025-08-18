@@ -52,6 +52,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_WM_SETFOCUS()
 	ON_WM_CONTEXTMENU()
 
+	ON_COMMAND(ID_ATTRIBCTRL_SINGLECLICKEDIT, OnToggleSingleClickEditing)
 	ON_COMMAND(ID_ATTRIBCTRL_TOGGLEGROUP, OnToggleGrouping)
 	ON_COMMAND(ID_ATTRIBCTRL_TOGGLESORT, OnToggleSorting)
 	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBUP, OnMoveAttributeUp)
@@ -190,6 +191,12 @@ void CTDLTaskAttributeCtrl::OnToggleGrouping()
 	UpdateToolbarButtons();
 }
 
+void CTDLTaskAttributeCtrl::OnToggleSingleClickEditing()
+{
+	m_lcAttributes.SetSingleClickEditing(!m_lcAttributes.HasSingleClickEditing());
+	UpdateToolbarButtons();
+}
+
 void CTDLTaskAttributeCtrl::OnToggleSorting()
 {
 	m_lcAttributes.ToggleSortDirection();
@@ -217,6 +224,7 @@ void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 {
 	CToolBarCtrl& tb = m_toolbar.GetToolBarCtrl();
 	
+	tb.PressButton(ID_ATTRIBCTRL_SINGLECLICKEDIT, m_lcAttributes.HasSingleClickEditing());
 	tb.PressButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.IsGrouped());
 
 	tb.EnableButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.SupportsGrouping());
@@ -338,7 +346,7 @@ void CTDLTaskAttributeCtrl::OnUpdateCopyAttributeValue(CCmdUI* pCmdUI)
 		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
 		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
 
-		CString sMenuText;
+		CEnString sMenuText;
 		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
 
 		pCmdUI->SetText(sMenuText);
@@ -360,7 +368,7 @@ void CTDLTaskAttributeCtrl::OnUpdatePasteAttributeValue(CCmdUI* pCmdUI)
 		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
 		CString sFromAttrib = m_lcAttributes.GetAttributeLabel(nFromAttribID);
 
-		CString sMenuText;
+		CEnString sMenuText;
 		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
 
 		pCmdUI->SetText(sMenuText);
@@ -374,16 +382,16 @@ void CTDLTaskAttributeCtrl::OnUpdatePasteAttributeValue(CCmdUI* pCmdUI)
 
 void CTDLTaskAttributeCtrl::OnUpdateClearAttributeValue(CCmdUI* pCmdUI)
 {
-	if (m_lcAttributes.CanEditSelectedAttribute())
+	if (m_lcAttributes.CanEditSelectedCell())
 	{
 		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
 		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
 
-		CString sMenuText;
+		CEnString sMenuText;
 		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
 
 		pCmdUI->SetText(sMenuText);
-		pCmdUI->Enable(TRUE);
+		pCmdUI->Enable(m_lcAttributes.GetSelectedAttributeID() != TDCA_TASKNAME);
 	}
 	else
 	{

@@ -32,9 +32,6 @@ CKanbanGroupByComboBox::~CKanbanGroupByComboBox()
 
 
 BEGIN_MESSAGE_MAP(CKanbanGroupByComboBox, CKanbanAttributeComboBox)
-	//{{AFX_MSG_MAP(CKanbanGroupByComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

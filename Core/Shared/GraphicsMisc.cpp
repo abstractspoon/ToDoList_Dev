@@ -820,10 +820,10 @@ int GraphicsMisc::GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
 	return pDC->GetTextExtent(sText).cx;
 }
 
-float GraphicsMisc::GetAverageCharWidth(HWND hWndRef)
+float GraphicsMisc::GetAverageCharWidth(HWND hWndRef, HFONT hFont)
 {
 	CClientDC dc(CWnd::FromHandle(hWndRef));
-	HFONT hOldFont = PrepareDCFont(&dc, hWndRef);
+	HFONT hOldFont = PrepareDCFont(&dc, hWndRef, hFont);
 
 	float fAveWidth = GetAverageCharWidth(&dc);
 	dc.SelectObject(hOldFont);
@@ -1408,30 +1408,42 @@ BOOL GraphicsMisc::FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND 
 
 CPoint GraphicsMisc::CentrePoint(LPCRECT prcRect)
 {
-	return CPoint(((prcRect->left + prcRect->right) / 2), ((prcRect->top + prcRect->bottom) / 2));
+	return CPoint(((prcRect->left + prcRect->right) / 2), 
+				  ((prcRect->top + prcRect->bottom) / 2));
 }
 
-BOOL GraphicsMisc::CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz, BOOL bCentreVert)
+void GraphicsMisc::CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz, BOOL bCentreVert)
 {
-	if (!bCentreHorz && !bCentreVert)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	ASSERT(bCentreHorz || bCentreVert);
 
 	if (bCentreHorz)
 	{
-		int nOffset = (CentrePoint(prcOther).x - CentrePoint(pRect).x);
-		::OffsetRect(pRect, nOffset, 0);
+		int nXOffset = ((prcOther->left + prcOther->right) - (pRect->left + pRect->right)) / 2;
+		::OffsetRect(pRect, nXOffset, 0);
 	}
 		
 	if (bCentreVert)
 	{
-		int nOffset = (CentrePoint(prcOther).y - CentrePoint(pRect).y);
-		::OffsetRect(pRect, 0, nOffset);
+		int nYOffset = ((prcOther->top + prcOther->bottom) - (pRect->top + pRect->bottom)) / 2;
+		::OffsetRect(pRect, 0, nYOffset);
 	}
+}
 
-	return TRUE;
+CRect GraphicsMisc::CalcCentredRect(int nSize, LPCRECT prcOther, BOOL bCentreHorz, BOOL bCentreVert)
+{
+	return CalcCentredRect(nSize, nSize, prcOther, bCentreHorz, bCentreVert);
+}
+
+CRect GraphicsMisc::CalcCentredRect(int cx, int cy, LPCRECT prcOther, BOOL bCentreHorz, BOOL bCentreVert)
+{
+	CRect rect(prcOther);
+
+	rect.right = (rect.left + cx);
+	rect.bottom = (rect.top + cy);
+
+	CentreRect(rect, prcOther, bCentreHorz, bCentreVert);
+
+	return rect;
 }
 
 void GraphicsMisc::AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags)
@@ -1471,6 +1483,34 @@ void GraphicsMisc::AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags)
 
 	CPoint ptRef = CentrePoint(pRect);
 	::OffsetRect(pRect, (ptOtherRef.x - ptRef.x), (ptOtherRef.y - ptRef.y));
+}
+
+BOOL GraphicsMisc::DrawCentred(CDC* pDC, HIMAGELIST hIl, int nImage, LPCRECT prcImage, BOOL bCentreHorz, BOOL bCentreVert, UINT nStyle)
+{
+	ASSERT(bCentreHorz || bCentreVert);
+
+	if (nImage == -1)
+		return FALSE;
+
+	int cxIcon, cyIcon;
+	VERIFY(CEnImageList::GetImageSize(hIl, cxIcon, cyIcon));
+
+	CRect rImage = CalcCentredRect(cxIcon, cyIcon, prcImage, bCentreHorz, bCentreVert);
+
+	return ImageList_Draw(hIl, nImage, *pDC, rImage.left, rImage.top, nStyle);
+}
+
+BOOL GraphicsMisc::DrawCentred(CDC* pDC, HICON hIcon, LPCRECT prcIcon, BOOL bCentreHorz, BOOL bCentreVert)
+{
+	ASSERT(bCentreHorz || bCentreVert);
+
+	if (!hIcon)
+		return FALSE;
+
+	CSize sizeIcon = GetIconSize(hIcon);
+	CRect rIcon = CalcCentredRect(sizeIcon.cx, sizeIcon.cy, prcIcon, bCentreHorz, bCentreVert);
+
+	return ::DrawIconEx(*pDC, rIcon.left, rIcon.top, hIcon, sizeIcon.cx, sizeIcon.cy, 0, NULL, DI_NORMAL);
 }
 
 COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags)
