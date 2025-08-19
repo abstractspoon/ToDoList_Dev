@@ -40,6 +40,8 @@ struct TIMEUNIT
 	UINT nMenuID;
 };
 
+// -----------------------------------------------------------------
+
 enum
 {
 	ID_MINS = 0x8000,
@@ -51,6 +53,9 @@ enum
 	ID_YEARS,
 };
 
+// -----------------------------------------------------------------
+
+// These will have their labels filled in later
 static TIMEUNIT TIMEUNITS[] = 
 {
 	{ THU_MINS,		_T(""),	TIME_MIN_ABBREV,	ID_MINS },
@@ -61,8 +66,11 @@ static TIMEUNIT TIMEUNITS[] =
 	{ THU_MONTHS,	_T(""), TIME_MONTH_ABBREV,	ID_MONTHS },
 	{ THU_YEARS,	_T(""),	TIME_YEAR_ABBREV,	ID_YEARS },
 };
+const int NUM_UNITS = sizeof(TIMEUNITS) / sizeof(TIMEUNIT);
 
-static LPCTSTR UNITLABELS[] = 
+// -----------------------------------------------------------------
+
+const LPCTSTR UNITLABELS[] = 
 {
 	TIME_MINS,	
 	TIME_HOURS,	
@@ -73,7 +81,7 @@ static LPCTSTR UNITLABELS[] =
 	TIME_YEARS	
 };
 
-const int NUM_UNITS = sizeof(TIMEUNITS) / sizeof (TIMEUNIT);
+// -----------------------------------------------------------------
 
 const TIMEUNIT& GetTimeUnit(TH_UNITS nUnits)
 {
@@ -92,7 +100,10 @@ const TIMEUNIT& GetTimeUnit(TH_UNITS nUnits)
 // Construction/Destruction
 /////////////////////////////////////////////////////////////////////////////////////
 
-CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) : m_nUnits(nUnits), m_nMaxDecPlaces(nMaxDecPlaces)
+CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) 
+	: 
+	m_nUnits(nUnits), 
+	m_nMaxDecPlaces(nMaxDecPlaces)
 {
 	// init static units
 	for (int nUnit = 0; nUnit < NUM_UNITS; nUnit++)
@@ -105,7 +116,7 @@ CTimeEdit::CTimeEdit(TH_UNITS nUnits, int nMaxDecPlaces) : m_nUnits(nUnits), m_n
 
 	SetMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
 
-	AddButton(TEBTN_UNITS, _T(""), _T(""), CALC_BTNWIDTH);
+	AddButton(TEBTN_UNITS, _T(""), _T(""), EE_BTNWIDTH_CALCULATE);
 	SetDropMenuButton(TEBTN_UNITS);
 
 	UpdateButtonText(nUnits);
@@ -201,7 +212,11 @@ void CTimeEdit::OnShowWindow(BOOL bShow, UINT nStatus)
 	if (bShow)
 	{
 		UpdateButtonText(m_nUnits);
-		SetTime(Convert());
+
+		if (m_nUnits == THU_NULL)
+			SetWindowText(NULL);
+		else
+			SetTime(GetTime());
 	}
 }
 
@@ -224,7 +239,7 @@ void CTimeEdit::UpdateButtonText(TH_UNITS nUnits)
 	}
 }
 
-double CTimeEdit::Convert() const
+double CTimeEdit::GetTime() const
 {
 	CString sTime;
 	GetWindowText(sTime);
@@ -241,7 +256,7 @@ void CTimeEdit::SetTime(double dTime)
 
 void CTimeEdit::SetTime(double dTime, TH_UNITS nUnits)
 {
-	if (dTime != Convert())
+	if (dTime != GetTime())
 		SetTime(dTime);
 
 	SetUnits(nUnits);
@@ -256,13 +271,23 @@ void CTimeEdit::SetUnits(TH_UNITS nUnits)
 	}
 }
 
+BOOL CTimeEdit::HasValidTime() const
+{
+	if (!IsValidUnits(m_nUnits))
+		return FALSE;
+
+	CString sTime;
+	GetWindowText(sTime);
+
+	return !sTime.IsEmpty();
+}
+
 void CTimeEdit::SetMaxDecimalPlaces(int nMaxDecPlaces)
 {
 	if (m_nMaxDecPlaces != nMaxDecPlaces)
 	{
 		m_nMaxDecPlaces = nMaxDecPlaces;
-
-		SetTime(Convert());
+		SetTime(GetTime());
 	}
 }
 
@@ -311,6 +336,11 @@ UINT CTimeEdit::MapUnitsToMenuID() const
 	return 0;
 }
 
+void CTimeEdit::ShowUnitsPopupMenu() 
+{ 
+	OnBtnClick(TEBTN_UNITS);
+}
+
 void CTimeEdit::OnBtnClick(UINT nID)
 {
 	if (nID != TEBTN_UNITS)
@@ -338,24 +368,24 @@ void CTimeEdit::OnBtnClick(UINT nID)
 	}
 }
 
-double CTimeEdit::Convert(TH_UNITS nUnits) const
+double CTimeEdit::ConvertTime(TH_UNITS nUnits) const
 {
-	return CTimeHelper().Convert(Convert(), m_nUnits, nUnits);
+	return CTimeHelper().Convert(GetTime(), m_nUnits, nUnits);
 }
 
 CString CTimeEdit::FormatTime(BOOL bUnits) const
 {
-	return CTimeHelper().FormatTime(Convert(), (bUnits ? m_nUnits : THU_NULL), m_nMaxDecPlaces);
+	return CTimeHelper::FormatTime(GetTime(), (bUnits ? m_nUnits : THU_NULL), m_nMaxDecPlaces);
 }
 
 CString CTimeEdit::FormatTimeHMS() const
 {
-	return CTimeHelper().FormatTimeHMS(Convert(), GetUnits(), TRUE); 
+	return CTimeHelper().FormatTimeHMS(GetTime(), GetUnits(), TRUE);
 }
 
 void CTimeEdit::OnSetReadOnly(BOOL bReadOnly)
 {
-	EnableButton(1, !bReadOnly && IsWindowEnabled());
+	EnableButton(TEBTN_UNITS, !bReadOnly);
 }
 
 void CTimeEdit::SetUnits(TH_UNITS nUnits, LPCTSTR szLongUnits, LPCTSTR szAbbrevUnits)

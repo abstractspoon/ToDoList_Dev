@@ -44,10 +44,13 @@ struct UZ_FileInfo
 	bool bFolder;
 };
 
+// Returns false to cancel
+typedef bool (*PFNUNZIPPROGRESS)(int nPercent, DWORD dwUserData);
+
 class CUnzipper  
 {
 public:
-	CUnzipper(LPCTSTR szFilePath = NULL);
+	CUnzipper(LPCTSTR szFilePath = NULL, PFNUNZIPPROGRESS pCBProgress = NULL, DWORD dwCBUserData = 0);
 	virtual ~CUnzipper();
 	
 	// simple interface
@@ -73,15 +76,25 @@ public:
 	bool GetFileInfo(UZ_FileInfo& info);
 	bool UnzipFile(LPCTSTR szFolder = NULL, bool bIgnoreFilePath = FALSE);
 
-	// helpers
-	bool GotoFile(LPCTSTR szFileName, bool bIgnoreFilePath = TRUE);
+	// Random access
 	bool GotoFile(int nFile);
+
+	// This will fail if a progress callback has been set up
+	// because it's not possible to determine the current file index
+	bool GotoFile(LPCTSTR szFileName, bool bIgnoreFilePath = TRUE);
 	
 protected:
 	void* m_uzFile;
 	TCHAR m_szOutputFolder[MAX_PATH + 1];
 
+	// Progress related 
+	PFNUNZIPPROGRESS m_pCBProgress;
+	DWORD m_dwCBUserData;
+	int m_nFileCount, m_nCurFile;
+
 protected:
+	bool CheckUpdateProgress();
+
 	static bool CreateFolder(LPCTSTR szFolder);
 	static bool CreateFilePath(LPCTSTR szFilePath); // truncates from the last '\'
 	static bool SetFileModTime(LPCTSTR szFilePath, DWORD dwDosDate);

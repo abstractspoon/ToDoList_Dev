@@ -65,14 +65,14 @@ namespace EvidenceBoardUIExtension
 
 		public void Translate(Translator trans)
 		{
-			None = trans.Translate(None);
+			None = trans.Translate(None, Translator.Type.ComboBox);
 
 			foreach (var item in Items)
 			{
 				var link = (item as EvidenceBoardLinkVisibilityItem);
 
 				if (link.Type != EvidenceBoardLinkType.User)
-					link.Label = trans.Translate(link.Label);
+					link.Label = trans.Translate(link.Label, Translator.Type.ComboBox);
 			}
 		}
 
@@ -99,7 +99,7 @@ namespace EvidenceBoardUIExtension
 					var link = (Items[iItem] as EvidenceBoardLinkVisibilityItem);
 
 					if (link.Type == EvidenceBoardLinkType.User)
-						Items.Remove(iItem);
+						Items.RemoveAt(iItem);
 				}
 
 				// Re-add
@@ -116,15 +116,15 @@ namespace EvidenceBoardUIExtension
 				for (int index = 0; index < Items.Count; index++)
 				{
 					var item = (EvidenceBoardLinkVisibilityItem)Items[index];
-					var itemVis = prevVisibility.Find(x => ((x.Type == item.Type) && (x.Name == item.Name)));
-
-					ListBox.SetItemChecked(index, ((itemVis == null) ? true : itemVis.Visible));
+					ListBox.SetItemChecked(index, IsTypeVisible(prevVisibility, item.Type, item.Name));
 				}
 
-				m_UserTypes.Clear();
+				m_PrevLinkVisibility = null;
 
 				if (value != null)
 					m_UserTypes = new HashSet<string>(value);
+				else
+					m_UserTypes.Clear();
 			}
 		}
 

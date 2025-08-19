@@ -18,7 +18,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CDateHelperTest::CDateHelperTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CDateHelperTest::CDateHelperTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CDateHelperTest"), utils)
 {
 
 }
@@ -32,20 +34,80 @@ TESTRESULT CDateHelperTest::Run()
 {
 	ClearTotals();
 
-	Test64BitDates();
+	TestDecodeDate();
 	TestDecodeRelativeDate();
 	TestTruncateSeconds();
 	TestGetDateOnly();
 	TestGetTimeOnly();
 	TestMakeDate();
 	TestCompare();
-	
+	Test64BitDates();
+
 	return GetTotals();
+}
+
+void CDateHelperTest::TestDecodeDate()
+{
+	CTDCScopedTest test(*this, _T("CDateHelper::DecodeDate"));
+
+	const double DATE_TOL = COleDateTimeSpan(0, 0, 0, 1).m_span;
+
+	// CDateHelper::FormatDate(DHFD_TIME)
+	{
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CString sNow = CDateHelper::FormatDate(dtNow, DHFD_TIME);
+
+		COleDateTime dtCheck;
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
+		ExpectEQ(dtCheck, dtNow, DATE_TOL);
+
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+	}
+
+	// CDateHelper::FormatDate() - no time
+	{
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CString sNow = CDateHelper::FormatDate(dtNow);
+
+		COleDateTime dtCheck;
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+	}
+
+	// CDateHelper::FormatDate(DHFD_ISO | DHFD_TIME)
+	{
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CString sNow = CDateHelper::FormatDate(dtNow, DHFD_ISO | DHFD_TIME);
+
+		COleDateTime dtCheck;
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
+		ExpectEQ(dtCheck, dtNow, DATE_TOL);
+
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+	}
+
+	// CDateHelper::FormatDate(DHFD_ISO) - no time
+	{
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CString sNow = CDateHelper::FormatDate(dtNow, DHFD_ISO);
+
+		COleDateTime dtCheck;
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, TRUE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+
+		ExpectTrue(CDateHelper::DecodeDate(sNow, dtCheck, FALSE));
+		ExpectEQ(dtCheck.m_dt, (double)(int)dtNow.m_dt);
+	}
 }
 
 void CDateHelperTest::TestDecodeRelativeDate()
 {
-	BeginTest(_T("CDateHelperTest::DecodeRelativeDate"));
+	CTDCScopedTest test(*this, _T("CDateHelper::DecodeRelativeDate"));
 	
 	const double TODAY(CDateHelper::GetDate(DHD_TODAY));
 	const double ENDTHISWEEK(CDateHelper::GetDate(DHD_ENDTHISWEEK));
@@ -121,15 +183,11 @@ void CDateHelperTest::TestDecodeRelativeDate()
 		ExpectTrue(dh.OffsetDate(dtExpect, -4, DHU_YEARS));
 		ExpectEQ(date, dtExpect);
 	}
-	
-	// -----------------------------------------------------------------------
-	
-	EndTest();
 }
 
 void CDateHelperTest::TestTruncateSeconds()
 {
-	BeginTest(_T("CDateHelperTest::TruncateSeconds"));
+	CTDCScopedTest test(*this, _T("CDateHelper::TruncateSeconds"));
 	
 	const COleDateTime dtPositive(45678.123456);
 	const COleDateTime dtNegative(-45678.123456);
@@ -146,44 +204,32 @@ void CDateHelperTest::TestTruncateSeconds()
 
 	ExpectTrue(dtPositive.GetSecond() > 0);
 	ExpectTrue(dtPositiveNoSeconds.GetSecond() == 0);
-	
-	// -----------------------------------------------------------------------
-	
-	EndTest();
 }
 
 void CDateHelperTest::TestGetDateOnly()
 {
-	BeginTest(_T("CDateHelperTest::GetDateOnly"));
+	CTDCScopedTest test(*this, _T("CDateHelper::GetDateOnly"));
 
 	ExpectEQ(CDateHelper::GetDateOnly(44000.125).m_dt, 44000.0);
 	ExpectEQ(CDateHelper::GetDateOnly(44000.0).m_dt, 44000.0);
 	ExpectEQ(CDateHelper::GetDateOnly(-44000.125).m_dt, -44000.0);
 	ExpectEQ(CDateHelper::GetDateOnly(-44000.0).m_dt, -44000.0);
-
-	// -----------------------------------------------------------------------
-	
-	EndTest();
 }
 
 void CDateHelperTest::TestGetTimeOnly()
 {
-	BeginTest(_T("CDateHelperTest::GetTimeOnly"));
+	CTDCScopedTest test(*this, _T("CDateHelper::GetTimeOnly"));
 
 	// Note: time component is always positive
 	ExpectEQ(CDateHelper::GetTimeOnly(44000.125).m_dt, 0.125);
 	ExpectEQ(CDateHelper::GetTimeOnly(44000.0).m_dt, 0.0);
 	ExpectEQ(CDateHelper::GetTimeOnly(-44000.125).m_dt, 0.125);
 	ExpectEQ(CDateHelper::GetTimeOnly(-44000.0).m_dt, 0.0);
-
-	// -----------------------------------------------------------------------
-	
-	EndTest();
 }
 
 void CDateHelperTest::TestMakeDate()
 {
-	BeginTest(_T("CDateHelperTest::MakeDate"));
+	CTDCScopedTest test(*this, _T("CDateHelper::MakeDate"));
 
 	{
 		COleDateTime dt1(44000.125), dt2(34000.375);
@@ -205,15 +251,11 @@ void CDateHelperTest::TestMakeDate()
 		ExpectEQ(CDateHelper::MakeDate(dt1, dt2).m_dt, -44000.375);
 		ExpectEQ(CDateHelper::MakeDate(dt2, dt1).m_dt, -34000.125);
 	}
-
-	// -----------------------------------------------------------------------
-	
-	EndTest();
 }
 
 void CDateHelperTest::TestCompare()
 {
-	BeginTest(_T("CDateHelperTest::Compare"));
+	CTDCScopedTest test(*this, _T("CDateHelper::Compare"));
 
 	{
 		COleDateTime dt1(44000.125), dt2(44000.25);
@@ -253,15 +295,11 @@ void CDateHelperTest::TestCompare()
 
 		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_COMPARETIME | DHC_COMPARESECONDS) == 0);
 	}
-
-	// -----------------------------------------------------------------------
-	
-	EndTest();
 }
 
 void CDateHelperTest::Test64BitDates()
 {
-	BeginTest(_T("CDateHelperTest::64BitDates"));
+	CTDCScopedTest test(*this, _T("CDateHelper::64BitDates"));
 
 	COleDateTime dtNow = COleDateTime::GetCurrentTime();
 
@@ -270,6 +308,4 @@ void CDateHelperTest::Test64BitDates()
 
 	COleDateTime dtNowCheck = CDateHelper::GetDate(tNow);
 	ExpectEQ(dtNow, dtNowCheck);
-
-	EndTest();
 }

@@ -44,6 +44,8 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 /////////////////////////////////////////////////////////////////////////////
 
 const int PADDING = 3;
+const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
+
 const UINT IDC_WORKLOADCTRL = 1001;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -257,16 +259,24 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	// application preferences
 	InitWorkingWeek(pPrefs);
 
-	m_ctrlWorkload.SetOption(WLCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
-	m_ctrlWorkload.SetOption(WLCF_TREATSUBCOMPLETEDASDONE, pPrefs->GetProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), FALSE));
-	m_ctrlWorkload.SetOption(WLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
-	m_ctrlWorkload.SetOption(WLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
-	m_ctrlWorkload.SetOption(WLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
-	m_ctrlWorkload.SetOption(WLCF_ALLOWPARENTALLOCATIONS, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowParentTimeTracking"), TRUE));
+	DWORD dwOptions = 0;
+
+	Misc::SetFlag(dwOptions, WLCF_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
+	Misc::SetFlag(dwOptions, WLCF_TREATSUBCOMPLETEDASDONE, pPrefs->GetProfileInt(_T("Preferences"), _T("TreatSubCompletedAsDone"), FALSE));
+	Misc::SetFlag(dwOptions, WLCF_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
+	Misc::SetFlag(dwOptions, WLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
+	Misc::SetFlag(dwOptions, WLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
+	Misc::SetFlag(dwOptions, WLCF_ALLOWPARENTALLOCATIONS, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowParentTimeTracking"), TRUE));
+	Misc::SetFlag(dwOptions, WLCF_SHOWMIXEDCOMPLETIONSTATE, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowMixedCompletionState"), TRUE));
+
+	m_ctrlWorkload.SetOptions(dwOptions);
 
 	m_ctrlWorkload.EnableTreeCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 	m_ctrlWorkload.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
 	m_ctrlWorkload.EnableColumnHeaderSorting(pPrefs->GetProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), TRUE));
+
+	m_dtcPeriodStart.SetISOFormat(m_ctrlWorkload.HasOption(WLCF_DISPLAYISODATES));
+	m_dtcPeriodEnd.SetISOFormat(m_ctrlWorkload.HasOption(WLCF_DISPLAYISODATES));
 
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
@@ -393,7 +403,7 @@ bool CWorkloadWnd::GetLabelEditRect(LPRECT pEdit)
 	if (m_ctrlWorkload.GetLabelEditRect(pEdit))
 	{
 		// convert to screen coords
-		m_ctrlWorkload.CWnd::ClientToScreen(pEdit);
+		m_ctrlWorkload.ClientToScreen(pEdit);
 		return true;
 	}
 
@@ -423,7 +433,7 @@ DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 	return m_ctrlWorkload.HitTestTask(ptScreen, (nReason == IUI_INFOTIP));
 }
 
-bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -494,13 +504,13 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			WORKLOADSORTCOLUMNS sort;
 
-			sort.cols[0].nBy = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttrib1);
+			sort.cols[0].nColumnID = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttributeID1);
 			sort.cols[0].bAscending = (pData->sort.bAscending1 ? TRUE : FALSE);
 
-			sort.cols[1].nBy = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttrib2);
+			sort.cols[1].nColumnID = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttributeID2);
 			sort.cols[1].bAscending = (pData->sort.bAscending2 ? TRUE : FALSE);
 
-			sort.cols[2].nBy = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttrib3);
+			sort.cols[2].nColumnID = m_ctrlWorkload.MapAttributeToColumn(pData->sort.nAttributeID3);
 			sort.cols[2].bAscending = (pData->sort.bAscending3 ? TRUE : FALSE);
 			
 			m_ctrlWorkload.Sort(sort);
@@ -687,7 +697,11 @@ BOOL CWorkloadWnd::OnInitDialog()
 		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
-		
+
+	// Date range text needs to be big enough for all eventualities
+	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
+	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
+
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
 	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
 
@@ -702,10 +716,17 @@ void CWorkloadWnd::Resize(int cx, int cy)
 	if (m_ctrlWorkload.GetSafeHwnd())
 	{
 		CRect rWorkload = CDialogHelper::GetChildRect(&m_ctrlWorkload);
-		rWorkload.right = cx;
-		rWorkload.bottom = cy;
+		CDialogHelper::ResizeChild(&m_ctrlWorkload, (cx - rWorkload.right), (cy - rWorkload.bottom));
 
-		m_ctrlWorkload.MoveWindow(rWorkload);
+		// selected task dates takes available space
+		if (CLocalizer::IsInitialized())
+		{
+			int nOffset = CDialogHelper::ResizeStaticTextToFit(this, IDC_ACTIVEDATERANGE_LABEL);
+
+			if (nOffset)
+				CDialogHelper::OffsetCtrl(this, IDC_ACTIVEDATERANGE_TEXT, nOffset, 0);
+		}
+
 		ResizeSlider(cx);
 	}
 }
@@ -748,6 +769,7 @@ BOOL CWorkloadWnd::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeChild(&m_sliderDateRange, pDC);
 
 	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_LABEL, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())
@@ -820,11 +842,15 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 
 	m_ctrlWorkload.SetOverlapColor(m_dlgPrefs.GetOverlapColor());
 
-	m_ctrlWorkload.SetOption(WLCF_CALCMISSINGALLOCATIONS, m_dlgPrefs.GetAutoCalculateMissingAllocations());
-	m_ctrlWorkload.SetOption(WLCF_PREFERTIMEESTFORCALCS, m_dlgPrefs.GetPreferTimeEstimateForCalcs());
-	m_ctrlWorkload.SetOption(WLCF_RECALCALLOCATIONS, m_dlgPrefs.GetRecalculateAllocations());
-	m_ctrlWorkload.SetOption(WLCF_RECALCPROPORTIONALLY, m_dlgPrefs.GetRecalculateAllocationsProportionally());
-	m_ctrlWorkload.SetOption(WLCF_INCLUDEDATELESSTASKSINPERIOD, m_dlgPrefs.GetIncludeDatelessTasksInPeriod());
+	DWORD dwOptions = m_ctrlWorkload.GetOptions(); // Preserve app options
+
+	Misc::SetFlag(dwOptions, WLCF_CALCMISSINGALLOCATIONS, m_dlgPrefs.GetAutoCalculateMissingAllocations());
+	Misc::SetFlag(dwOptions, WLCF_PREFERTIMEESTFORCALCS, m_dlgPrefs.GetPreferTimeEstimateForCalcs());
+	Misc::SetFlag(dwOptions, WLCF_RECALCALLOCATIONS, m_dlgPrefs.GetRecalculateAllocations());
+	Misc::SetFlag(dwOptions, WLCF_RECALCPROPORTIONALLY, m_dlgPrefs.GetRecalculateAllocationsProportionally());
+	Misc::SetFlag(dwOptions, WLCF_INCLUDEDATELESSTASKSINPERIOD, m_dlgPrefs.GetIncludeDatelessTasksInPeriod());
+
+	m_ctrlWorkload.SetOptions(dwOptions);
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 
@@ -1025,8 +1051,8 @@ void CWorkloadWnd::UpdatePeriod()
 		m_sPeriodDuration.Empty();
 
 	m_toolbar.RefreshButtonStates(FALSE);
-	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, m_dtPeriod.Format()));
 
+	SetDlgItemText(IDC_ACTIVEDATERANGE_TEXT, m_ctrlWorkload.FormatCurrentPeriod());
 	UpdateData(FALSE);
 }
 
@@ -1112,7 +1138,7 @@ void CWorkloadWnd::OnUpdateResetPeriodToThisMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnMovePeriodEndForwardOneMonth() 
 {
-	if (m_dtPeriod.OffsetEnd(1, DHU_MONTHS))
+	if (m_dtPeriod.OffsetEnd(1, DHU_MONTHS, TRUE))
 	{
 		UpdatePeriod();
 		UpdateRangeSlider();
@@ -1126,7 +1152,7 @@ void CWorkloadWnd::OnUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnMovePeriodEndBackOneMonth() 
 {
-	if (m_dtPeriod.OffsetEnd(-1, DHU_MONTHS))
+	if (m_dtPeriod.OffsetEnd(-1, DHU_MONTHS, TRUE))
 	{
 		UpdatePeriod();
 		UpdateRangeSlider();
@@ -1142,7 +1168,7 @@ void CWorkloadWnd::OnUpdateMovePeriodEndBackOneMonth(CCmdUI* pCmdUI)
 
 void CWorkloadWnd::OnMovePeriodForwardOneMonth() 
 {
-	m_dtPeriod.Offset(1, DHU_MONTHS);
+	m_dtPeriod.Offset(1, DHU_MONTHS, TRUE);
 
 	UpdatePeriod();
 	UpdateRangeSlider();

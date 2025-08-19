@@ -20,10 +20,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesFilePage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesFilePage, CPreferencesPageBase)
-
-CPreferencesFilePage::CPreferencesFilePage() : CPreferencesPageBase(CPreferencesFilePage::IDD),
-		m_eDueTaskStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
+CPreferencesFilePage::CPreferencesFilePage() 
+	: 
+	CPreferencesPageBase(IDD_PREFFILE_PAGE),
+	m_eDueTaskStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {
 //	m_psp.dwFlags &= ~PSP_HASHELP;
 
@@ -180,7 +180,6 @@ void CPreferencesFilePage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 	m_bWarnAddDeleteArchive = pPrefs->GetProfileInt(szKey, _T("WarnAddDeleteArchive"), TRUE);
 	m_bDontRemoveFlagged = pPrefs->GetProfileInt(szKey, _T("DontRemoveFlagged"), FALSE);
 	m_bExpandTasks = pPrefs->GetProfileInt(szKey, _T("ExpandTasks"), FALSE);
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 
 	// init the stylesheet folder to point to the resource folder and make path relative
 	CString sFolder = FileMisc::GetAppResourceFolder() + "\\Stylesheets";
@@ -196,7 +195,6 @@ void CPreferencesFilePage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 
 void CPreferencesFilePage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("NotifyDue"), m_bNotifyDueOnLoad);
 	pPrefs->WriteProfileInt(szKey, _T("NotifyDueOnSwitch"), m_bNotifyDueOnSwitch);
 	pPrefs->WriteProfileInt(szKey, _T("AutoArchive"), m_bAutoArchive);
@@ -216,8 +214,6 @@ void CPreferencesFilePage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) 
 	pPrefs->WriteProfileInt(szKey, _T("WarnAddDeleteArchive"), m_bWarnAddDeleteArchive);
 	pPrefs->WriteProfileInt(szKey, _T("DontRemoveFlagged"), m_bDontRemoveFlagged);
 	pPrefs->WriteProfileInt(szKey, _T("ExpandTasks"), m_bExpandTasks);
-
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 CString CPreferencesFilePage::GetDueTaskStylesheet() const 

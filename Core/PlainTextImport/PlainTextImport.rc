@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -13,15 +13,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
-#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -44,15 +41,13 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "PlainTextImport DLL\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "PlainTextImport\0"
-            VALUE "LegalCopyright", "Copyright (C) 2006\0"
-            VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "PlainTextImport.DLL\0"
-            VALUE "ProductName", "PlainTextImport Dynamic Link Library\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "FileDescription", "PlainTextImport DLL"
+            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "InternalName", "PlainTextImport"
+            VALUE "LegalCopyright", "Copyright (C) 2006"
+            VALUE "OriginalFilename", "PlainTextImport.DLL"
+            VALUE "ProductName", "PlainTextImport Dynamic Link Library"
+            VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
     BLOCK "VarFileInfo"
@@ -61,9 +56,7 @@ BEGIN
     END
 END
 
-#endif    // !_MAC
-
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -71,10 +64,8 @@ END
 // English (Australia) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -82,18 +73,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -120,7 +111,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_OPTIONSDIALOG, DIALOG
     BEGIN
@@ -159,21 +150,29 @@ END
 // Dialog
 //
 
-IDD_OPTIONSDIALOG DIALOG DISCARDABLE  0, 0, 217, 78
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_OPTIONSDIALOG DIALOGEX 0, 0, 217, 78
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Options"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,104,57,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,160,57,50,14
-    COMBOBOX        IDC_TABWIDTHS,136,28,74,83,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_GROUP | WS_TABSTOP
-    LTEXT           "Subtasks are delimited at each level using:",
-                    IDC_CBLABEL,7,27,122,17
+    COMBOBOX        IDC_TABWIDTHS,136,26,74,83,CBS_DROPDOWNLIST | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "Indent subtasks at each level with",IDC_CBLABEL,7,27,122,17
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,49,203,1
-    CONTROL         "First Line represents the project title",
-                    IDC_PROJECTINCLUDED,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,7,203,10
+    CONTROL         "First Line represents the project title",IDC_PROJECTINCLUDED,
+                    "Button",BS_AUTOCHECKBOX | BS_TOP | WS_TABSTOP,7,7,203,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_OPTIONSDIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
 END
 
 
@@ -182,10 +181,10 @@ END
 // String Table
 //
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
-    IDS_IMPORTLABEL         "Subtasks are indented at each level with:"
-    IDS_EXPORTLABEL         "Indent subtasks at each level with:"
+    IDS_IMPORTLABEL         "Subtasks are indented at each level with"
+    IDS_EXPORTLABEL         "Indent subtasks at each level with"
     IDS_IMPORTTITLE         "Import Tasks from Outline"
     IDS_EXPORTTITLE         "Export Tasks to Outline"
     IDS_IMPORTPROJECTLABEL  "Import the first line as the project name"

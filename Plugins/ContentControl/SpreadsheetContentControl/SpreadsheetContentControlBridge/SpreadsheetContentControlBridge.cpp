@@ -37,9 +37,7 @@ const LPCWSTR SPREADSHEET_NAME = L"Spreadsheet";
 
 CSpreadsheetContentBridge::CSpreadsheetContentBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
-   HMODULE hMod = LoadLibrary(L"SpreadsheetContentControlBridge.dll"); // us
-
-   m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_SPREADSHEET), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+   m_hIcon = Win32::LoadHIcon(L"SpreadsheetContentControlBridge.dll", IDI_SPREADSHEET, 16, true);
 }
 
 CSpreadsheetContentBridge::~CSpreadsheetContentBridge()

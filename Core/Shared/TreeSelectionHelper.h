@@ -178,7 +178,7 @@ protected:
 	struct SORTITEM
 	{
 		HTREEITEM hti;
-		int nPos;
+		int nVPos;
 	};
 
 	typedef CArray<SORTITEM, SORTITEM&> CSortArray;

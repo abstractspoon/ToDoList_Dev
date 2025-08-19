@@ -104,7 +104,12 @@ namespace MindMapUIExtension
             return false;
         }
 
-        public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
+		public bool DoIdleProcessing()
+		{
+			return m_MindMap.DoIdleProcessing();
+		}
+
+		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
         {
 			Rectangle labelRect = m_MindMap.GetSelectedItemLabelRect();
 
@@ -180,14 +185,10 @@ namespace MindMapUIExtension
 				m_OptionsCombo.SelectedOptions = m_MindMap.Options;
 			}
 
-			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
-			m_MindMap.TaskColorIsBackground = taskColorIsBkgnd;
-
-			bool showParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
-			m_MindMap.ShowParentsAsFolders = showParentsAsFolders;
-
-            bool showDoneCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
-            m_MindMap.ShowCompletionCheckboxes = showDoneCheckboxes;
+			m_MindMap.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
+			m_MindMap.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
+            m_MindMap.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
+            m_MindMap.ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
 			
 			m_MindMap.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
         }
@@ -296,12 +297,12 @@ namespace MindMapUIExtension
 			this.Controls.Add(m_OptionsCombo);
 		}
 
-		Label CreateLabel(string untranslatedText, Control prevControl)
+		Label CreateLabel(string text, Control prevControl)
 		{
 			var label = new Label();
 
 			label.Font = m_ControlsFont;
-			label.Text = m_Trans.Translate(untranslatedText);
+			label.Text = text;
 			label.AutoSize = true;
 			label.ForeColor = SystemColors.WindowText;
 
@@ -309,6 +310,8 @@ namespace MindMapUIExtension
 				label.Location = new Point((prevControl.Bounds.Right + 20), 8);
 			else
 				label.Location = new Point(-2, 8);
+
+			m_Trans.Translate(label);
 
 			return label;
 		}

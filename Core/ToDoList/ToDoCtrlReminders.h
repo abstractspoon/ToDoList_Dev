@@ -33,12 +33,9 @@ public:
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath, BOOL bAutoStart);
 	void EnableReducedFlashing(BOOL bEnable) { m_bReduceFlashing = bEnable; }
 
-	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
-	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
-
-	void AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
+	int AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC);
-	void SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);
+	BOOL SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);
 	BOOL ClearReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC);
 	BOOL TransferReminder(DWORD dwTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC);
 	BOOL GetReminder(int nRem, TDCREMINDER& rem) const;
@@ -49,7 +46,9 @@ public:
 	BOOL UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib);
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 	void CheckReminders();
-	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday, BOOL bPreserveWeekday);
+	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday);
+	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
+	BOOL UpdateRecurringTaskReminders(DWORD dwOldTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC);
 
 // Attributes
 protected:
@@ -61,55 +60,44 @@ protected:
 	CStickiesWnd m_stickies;
 	CRichEditBaseCtrl m_rtfFormatter; // For 'Stickies'
 
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CToDoCtrlReminders)
-	//}}AFX_VIRTUAL
-
 // Implementation
 public:
 	virtual ~CToDoCtrlReminders();
 
 	virtual void DoSnoozeReminder(const TDCREMINDER& rem);
+	virtual void DoModifyReminder(const TDCREMINDER& rem);
 	virtual void DoDismissReminder(const TDCREMINDER& rem);
 	virtual void DoGotoTask(const TDCREMINDER& rem);
 	virtual void DoCompleteTask(const TDCREMINDER& rem);
 	virtual void HideWindow();
+	virtual BOOL CanModifyReminders() const;
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CToDoCtrlReminders)
-	afx_msg void OnTimer(UINT nIDEvent);
 	//}}AFX_MSG
+	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void SaveAndRemoveReminders(const CFilteredToDoCtrl* pTDC);
-	void LoadReminders(const CFilteredToDoCtrl* pTDC);
-	void StartTimer();
-	BOOL ShowReminder(const TDCREMINDER& rem);
-	BOOL DeleteReminder(int nRem);
-	BOOL DismissReminder(int nRem);
 	void NotifyReminder(const TDCREMINDER& rem, UINT nMsg);
 	void ActivateNotificationWindow();
 	void DoCheckReminders();
-
-	enum 
-	{
-		TCR_REMOVEDELETED	= 0x01,
-		TCR_REMOVEDONE		= 0x02,
-	};
-
-	BOOL InitialiseRTFFormatter();
-	BOOL BuildStickiesRTFContent(const TDCREMINDER& rem, CString& sContent);
+	void StartTimer();
+	int LoadReminders(const CFilteredToDoCtrl* pTDC);
 	int RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	int RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
+	BOOL ShowReminder(const TDCREMINDER& rem);
+	BOOL DeleteReminder(int nRem);
+	BOOL DismissReminder(int nRem);
+	BOOL InitialiseRTFFormatter();
+	BOOL BuildStickiesRTFContent(const TDCREMINDER& rem, CString& sContent);
+	BOOL NonRecurringReminderHasRecurringParent(const TDCREMINDER& rem, DWORD dwParentID, const CFilteredToDoCtrl* pTDC) const;
+	BOOL IsRecurringReminder(const TDCREMINDER& rem, BOOL bIncludeParent = TRUE) const;
 
-	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday, BOOL bPreserveWeekday);
+	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday);
 };
 
 /////////////////////////////////////////////////////////////////////////////

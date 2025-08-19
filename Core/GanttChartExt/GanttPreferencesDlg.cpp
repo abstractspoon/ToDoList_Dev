@@ -111,8 +111,8 @@ BOOL CGanttPreferencesPage::OnInitDialog()
 	{
 		const GANTTCOLUMN& colVis = GANTTTREECOLUMNS[nCol];
 		
-		int nItem = CDialogHelper::AddString(m_lbColumnVisibility, colVis.nIDAttribName, colVis.nColID);
-		m_lbColumnVisibility.SetCheck(nItem, m_aColumnVis[colVis.nColID]);
+		int nItem = CDialogHelper::AddStringT(m_lbColumnVisibility, colVis.nIDAttribName, colVis.nColumnID);
+		m_lbColumnVisibility.SetCheck(nItem, m_aColumnVis[colVis.nColumnID]);
 	}
 
 	GetDlgItem(IDC_MILESTONETAG)->EnableWindow(m_bUseTagForMilestone);
@@ -173,7 +173,7 @@ void CGanttPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		GTLC_COLUMN nColID = GANTTTREECOLUMNS[nCol].nColID;
+		GTLC_COLUMN nColID = GANTTTREECOLUMNS[nCol].nColumnID;
 		CString sCol(Misc::MakeKey(_T("Column%d"), nColID));
 
 		pPrefs->WriteProfileInt(sColVis, sCol, m_aColumnVis[nColID]);
@@ -205,7 +205,7 @@ void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		GTLC_COLUMN nColID = GANTTTREECOLUMNS[nCol].nColID;
+		GTLC_COLUMN nColID = GANTTTREECOLUMNS[nCol].nColumnID;
 		CString sCol(Misc::MakeKey(_T("Column%d"), nColID));
 
 		m_aColumnVis[nColID] = pPrefs->GetProfileInt(sColVis, sCol, GANTTTREECOLUMNS[nCol].bDefaultVis);
@@ -216,7 +216,7 @@ void CGanttPreferencesPage::OnOK()
 {
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		GTLC_COLUMN nColID = GANTTTREECOLUMNS[nCol].nColID;
+		GTLC_COLUMN nColID = GANTTTREECOLUMNS[nCol].nColumnID;
 		m_aColumnVis[nColID] = m_lbColumnVisibility.GetCheckByData(nColID);
 	}
 

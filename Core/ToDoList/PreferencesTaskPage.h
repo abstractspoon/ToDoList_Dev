@@ -23,8 +23,6 @@ class CWorkingWeek;
 
 class CPreferencesTaskPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesTaskPage)
-
 // Construction
 public:
 	CPreferencesTaskPage();
@@ -50,7 +48,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesTaskPage)
-	enum { IDD = IDD_PREFTASK_PAGE };
 	CTimeComboBox	m_cbEndOfLunch;
 	CTimeComboBox	m_cbStartOfLunch;
 	CTimeComboBox	m_cbStartOfWorkday;
@@ -91,6 +88,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnFirstShow();
 	virtual void OnOK();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 // Implementation
 protected:
@@ -100,8 +98,7 @@ protected:
 	afx_msg void OnChangeWeekends();
 	afx_msg void OnNotifyTimeTracking();
 	afx_msg void OnHasLunchBreak();
-	afx_msg void OnEditChangeHoursInDay();
-	afx_msg void OnComboChangeHoursInDay();
+	afx_msg void OnSelChangeHoursInDay();
 	afx_msg void OnKillFocusHoursInDay();
 	//}}AFX_MSG
 	afx_msg LRESULT OnEnableDisableCtrls(WPARAM wp, LPARAM lp);

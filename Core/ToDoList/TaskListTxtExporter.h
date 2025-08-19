@@ -46,12 +46,13 @@ protected:
 	// base-class overrides
 	virtual CString ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth) const;
 
-	virtual CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue) const;
-	virtual CString FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const;
+	virtual CString FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel, const CString& sValue) const;
+	virtual CString FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const;
+	virtual CString FormatTitle(const IMultiTaskList* pTasks) const;
+	virtual CString FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const;
 
 	virtual bool InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 	virtual CString GetSpaceForNotes() const { return TEXTNOTES; }
-	virtual CString FormatTitle(const ITASKLISTBASE* pTasks) const;
 };
 
 #endif // !defined(AFX_TASKLISTTXTEXPORTER_H__CF68988D_FBBD_431D_BB56_464E8737D993__INCLUDED_)

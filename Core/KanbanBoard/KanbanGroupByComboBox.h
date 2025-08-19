@@ -15,30 +15,21 @@
 
 class CKanbanGroupByComboBox : public CKanbanAttributeComboBox
 {
-// Construction
 public:
 	CKanbanGroupByComboBox();
 	virtual ~CKanbanGroupByComboBox();
 
-	void ShowFixedColumns(BOOL /*bShow*/) { m_bShowFixedColumns = FALSE; } // never
-	void ExcludeAttribute(TDC_ATTRIBUTE nAttrib);
+	void ShowFixedColumns(TDC_ATTRIBUTE /*nAttribID*/) { m_nFixedColumnsAttribID = TDCA_NONE; } // never
+	void ExcludeAttribute(TDC_ATTRIBUTE nAttribID);
 
-// Attributes
 protected:
 	TDC_ATTRIBUTE m_nExcludeAttribID;
-	//CString m_sExcludeCustomAttribID;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CKanbanAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual void BuildCombo();
-	virtual TDC_ATTRIBUTE GetFallbackAttribute() const { return TDCA_NONE; }
 };
 
 /////////////////////////////////////////////////////////////////////////////

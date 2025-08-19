@@ -38,17 +38,17 @@ public:
 protected:
 	struct ATTRIBVIS
 	{
-		ATTRIBVIS() : nTDCAttrib(TDCA_NONE), bVisible(FALSE) {}
-		ATTRIBVIS(UINT nIDName, TDC_ATTRIBUTE tdcAttrib, BOOL bVis) 
+		ATTRIBVIS() : nAttributeID(TDCA_NONE), bVisible(FALSE) {}
+		ATTRIBVIS(UINT nIDName, TDC_ATTRIBUTE nAttribID, BOOL bVis) 
 		{ 
 			sName.LoadString(nIDName); 
-			nTDCAttrib = tdcAttrib;
+			nAttributeID = nAttribID;
 			bVisible = bVis; 
 		}
 
 		CEnString sName;
 		CString sCustAttribID;
-		TDC_ATTRIBUTE nTDCAttrib;
+		TDC_ATTRIBUTE nAttributeID;
 		BOOL bVisible;
 	};
 	CArray<ATTRIBVIS, ATTRIBVIS&> m_aAttribs;
@@ -76,7 +76,7 @@ protected:
 	afx_msg LRESULT OnInitListBox(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
-	int FindAttribute(TDC_ATTRIBUTE nAttrib) const;
+	int FindAttribute(TDC_ATTRIBUTE nAttribID) const;
 	int GetAttributes(CTDCAttributeMap& mapAttrib, BOOL bSelected, BOOL bIncCustAttrib) const;
 
 };

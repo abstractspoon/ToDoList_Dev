@@ -10,6 +10,11 @@
 #include "TDLColumnListBox.h"
 
 #include "..\shared\preferencesbase.h"
+#include "..\shared\TabbedComboBox.h"
+
+/////////////////////////////////////////////////////////////////////////////
+
+const UINT WM_PUITCP_NUMPRORITYRISKLEVELS = ::RegisterWindowMessage(_T("WM_PUITCP_NUMPRORITYRISKLEVELS"));
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUITasklistPage dialog
@@ -48,19 +53,24 @@ public:
 	BOOL GetHidePaneSplitBar() const { return m_bHidePaneSplitBar; }
 	BOOL GetShowRemindersAsDateAndTime() const { return m_bShowRemindersAsDateAndTime; }
 	BOOL GetShowFileLinkThumbnails() const { return m_bShowFileLinkThumbnails; }
-//	BOOL Get() const { return m_b; }
+	BOOL GetHidePriorityNumber() const { return m_bHidePriorityNumber; }
+	BOOL GetShowMixedCompletionState() const { return m_bShowMixedCompletionState; }
+	int GetNumPriorityRiskLevels() const { return (m_bSetNumPriorityRiskLevels ? m_nNumPriorityRiskLevels : 11); }
+	//	BOOL Get() const { return m_b; }
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesUITasklistPage)
-	enum { IDD = IDD_PREFUITASKLIST_PAGE };
 	//}}AFX_DATA
 	CComboBox	m_cbPercentIncrement;
+	CTabbedComboBox m_cbPriorityRiskLevels;
+
 	BOOL	m_bShowRemindersAsDateAndTime;
 	BOOL	m_bUseISOForDates;
 	BOOL	m_bShowWeekdayInDates;
 	BOOL	m_bShowParentsAsFolders;
 	BOOL	m_bDisplayFirstCommentLine;
+	BOOL	m_bHidePriorityNumber;
 	int		m_nMaxInfoTipCommentsLength;
 	BOOL	m_bLimitInfoTipCommentsLength;
 	BOOL	m_bAutoFocusTasklist;
@@ -86,6 +96,9 @@ protected:
 	BOOL	m_bAllowCheckboxAgainstTreeItem;
 	BOOL	m_bHidePaneSplitBar;
 	BOOL	m_bShowFileLinkThumbnails;
+	BOOL	m_bShowMixedCompletionState;
+	BOOL	m_bSetNumPriorityRiskLevels;
+	int		m_nNumPriorityRiskLevels;
 
 // Overrides
 	// ClassWizard generate virtual function overrides
@@ -107,6 +120,8 @@ protected:
 	afx_msg void OnLimitcolwidths();
 	afx_msg void OnShowparentsasfolders();
 	afx_msg void OnAppendTextToDateTimePaste();
+	afx_msg void OnSetNumPriorityRiskLevels();
+	afx_msg void OnSelChangeNumPriorityRiskLevels();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

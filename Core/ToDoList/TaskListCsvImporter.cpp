@@ -3,15 +3,17 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "TaskListCsvImporter.h"
 #include "resource.h"
+#include "TaskListCsvImporter.h"
 #include "tdlrecurringtaskedit.h"
 #include "TDLCsvImportExportDlg.h"
+#include "tdcmapping.h"
 
 #include "..\shared\timehelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\DateHelper.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\TasklistSchemaDef.h"
@@ -44,10 +46,10 @@ bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTas
 {
 	// Build custom attribute mapping
 	CMapStringToString mapCustAttrib;
-	int nAttrib = pTasks->GetCustomAttributeCount();
+	int nAtt = pTasks->GetCustomAttributeCount();
 
-	while (nAttrib--)
-		mapCustAttrib[pTasks->GetCustomAttributeID(nAttrib)] = pTasks->GetCustomAttributeLabel(nAttrib);
+	while (nAtt--)
+		mapCustAttrib[pTasks->GetCustomAttributeID(nAtt)] = pTasks->GetCustomAttributeLabel(nAtt);
 
 	// Show mapping dialog
 	CTDLCsvImportExportDlg dialog(szSrcFilePath, mapCustAttrib, pPrefs, szKey);
@@ -85,9 +87,14 @@ IIMPORTEXPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskLi
 	CStringArray aLines;
 	FileMisc::LoadFile(szSrcFilePath, aLines);
 
-	// remove header line
+	// Remove leading blank lines
+	while (aLines[0].IsEmpty())
+		aLines.RemoveAt(0);
+
+	// Remove header line
 	aLines.RemoveAt(0);
 
+	// Do the import
 	AddCustomAttributeDefinitions(pTasks);
 
 	BOOL bSomeFailed = FALSE;
@@ -236,7 +243,7 @@ BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& 
 	if (col.sColumnName.IsEmpty())
 		return FALSE;
 
-	switch (col.nTDCAttrib)
+	switch (col.nAttributeID)
 	{
 	case TDCA_NEW_CUSTOMATTRIBUTE:
 	case TDCA_NEW_CUSTOMATTRIBUTE_LIST:
@@ -260,7 +267,7 @@ BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& 
 			}
 			else // create custom ID
 			{
-				ASSERT(col.nTDCAttrib != TDCA_EXISTING_CUSTOMATTRIBUTE);
+				ASSERT(col.nAttributeID != TDCA_EXISTING_CUSTOMATTRIBUTE);
 
 				sCustID.Format(_T("_%s_ID_"), col.sColumnName);
 				sCustID.Replace(' ', '_');
@@ -277,16 +284,16 @@ BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& 
 
 void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) const
 {
-	int nAttrib = m_aColumnMapping.GetSize();
+	int nAtt = m_aColumnMapping.GetSize();
 	
-	while (nAttrib--)
+	while (nAtt--)
 	{
-		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAttrib];
+		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAtt];
 		CString sCustID, sCustLabel;
 
 		if (GetCustomAttribIDAndLabel(col, sCustID, sCustLabel))
 		{
-			switch (col.nTDCAttrib)
+			switch (col.nAttributeID)
 			{
 			case TDCA_NEW_CUSTOMATTRIBUTE:
 				pTasks->AddCustomAttribute(sCustID, sCustLabel, NULL, false);
@@ -305,18 +312,18 @@ void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) 
 
 void CTaskListCsvImporter::AddCustomAttributesToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringArray& aValues) const
 {
-	int nAttrib = min(aValues.GetSize(), m_aColumnMapping.GetSize());
+	int nAtt = min(aValues.GetSize(), m_aColumnMapping.GetSize());
 	
-	while (nAttrib--)
+	while (nAtt--)
 	{
-		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAttrib];
+		const TDCATTRIBUTEMAPPING& col = m_aColumnMapping[nAtt];
 		CString sCustID, sDummy;
 		
 		if (GetCustomAttribIDAndLabel(col, sCustID, sDummy))
 		{
 			// The CSV exporter formats multiple items with '+'
 			// so we need to decode this and recode with '\n'
-			const CString& sValue = GetValue(aValues, nAttrib);
+			const CString& sValue = GetValue(aValues, nAtt);
 
 			if (sValue.Find('+') != -1)
 			{
@@ -336,9 +343,9 @@ void CTaskListCsvImporter::AddCustomAttributesToTask(ITASKLISTBASE* pTasks, HTAS
 }
 
 
-void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, const CStringArray& aColValues) const
+void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, const CStringArray& aColValues) const
 {
-	int nCol = m_aColumnMapping.FindMappedAttribute(nAttrib);
+	int nCol = m_aColumnMapping.FindMappedAttribute(nAttribID);
 	
 	if ((nCol == -1) || (nCol >= aColValues.GetSize()))
 		return;
@@ -346,7 +353,7 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 	const CString& sValue = Misc::GetItem(aColValues, nCol);
 	time64_t t64 = 0;
 	
-	switch(nAttrib)
+	switch(nAttribID)
 	{
 	case TDCA_CREATEDBY: 
 		pTasks->SetTaskCreatedBy(hTask, sValue);
@@ -450,9 +457,13 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 		
 		// arrays
 // ---------------------------------------------------------------
-#define SETTASKATTRIBARRAY(fn) \
-	{ CStringArray aItems; if (Misc::Split(sValue, aItems, '+')) \
-	for (int nItem = 0; nItem < aItems.GetSize(); nItem++) pTasks->fn(hTask, aItems[nItem]); }
+#define SETTASKATTRIBARRAY(fn)                         \
+{ CStringArray aItems;                                 \
+if (sValue.Find('+') >= 0)                             \
+	Misc::Split(sValue, aItems, '+');                  \
+else Misc::Split(sValue, aItems);                      \
+for (int nItem = 0; nItem < aItems.GetSize(); nItem++) \
+		pTasks->fn(hTask, aItems[nItem]); }
 // ---------------------------------------------------------------
 
 	case TDCA_CATEGORY: 

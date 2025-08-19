@@ -7,6 +7,7 @@
 
 #include "..\Shared\misc.h"
 #include "..\Shared\graphicsmisc.h"
+#include "..\Shared\enstring.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -59,7 +60,7 @@ void CEditAllocationsListCtrl::InitState()
 
 	CreateControl(m_cbAllocTo, IDC_ALLOCTO_COMBO);
 
-	AddCol(CEnString(IDS_ATTRIB_ALLOCTO), GraphicsMisc::ScaleByDPIFactor(200));
+	AddCol(CEnString(IDS_ATTRIB_ALLOCTO), GraphicsMisc::ScaleByDPIFactor(200), ILCT_COMBO);
 	AddCol(CEnString(IDS_COL_WEEKDAYS), GraphicsMisc::ScaleByDPIFactor(75));
 
 	SetEditMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);

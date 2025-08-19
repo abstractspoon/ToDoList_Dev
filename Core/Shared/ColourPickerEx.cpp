@@ -59,7 +59,7 @@ void CColourPickerEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (m_bActive) 
 		state |= ODS_SELECTED;
 
-	CThemed::DrawFrameControl(this, pDC, &m_ArrowRect, DFC_SCROLL, DFCS_SCROLLDOWN  | 
+	CThemed::DrawFrameControl(this, pDC, &m_ArrowRect, DFC_COMBO, 
 							((state & ODS_SELECTED) ? DFCS_PUSHED : 0) |
 							((state & ODS_DISABLED) ? DFCS_INACTIVE : 0));
 

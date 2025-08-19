@@ -11,13 +11,15 @@
 
 //////////////////////////////////////////////////////////////////////
 
+#include "tdcenum.h"
+
 #include "..\Shared\EnMenu.h"
+
 #include "..\Interfaces\UITheme.h"
 
 //////////////////////////////////////////////////////////////////////
 
 class CRecentFileList;
-
 class CToDoCtrlMgr;
 class CFilteredToDoCtrl;
 class CPreferencesDlg;
@@ -36,8 +38,6 @@ public:
 
 	BOOL LoadMenu();
 	BOOL LoadMenu(const CPreferencesDlg& prefs);
-	void UpdateBackgroundColor();
-	void SetUITheme(const UITHEME& theme);
 
 	BOOL HandleInitMenuPopup(CMenu* pPopupMenu, 
 							 const CFilteredToDoCtrl& tdc, 
@@ -51,14 +51,6 @@ public:
 	BOOL HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const;
 	BOOL HandlePostTranslateMenu(HMENU hMenu) const;
 
-	void PrepareTaskContextMenu(CMenu* pMenu, 
-								const CFilteredToDoCtrl& tdc, 
-								const CPreferencesDlg& prefs) const;
-
-	void PrepareTabCtrlContextMenu(CMenu* pMenu, 
-									const CFilteredToDoCtrl& tdc, 
-									const CPreferencesDlg& prefs) const;
-	
 	CString GetDynamicItemTooltip(UINT nMenuID,
 								  const CRecentFileList& mru,
 								  const CToDoCtrlMgr& mgrToDoCtrl,
@@ -66,6 +58,22 @@ public:
 								  const CTDLFilterBar& filterBar,
 								  const CTDLTasklistStorageMgr& mgrStorage,
 								  const CUIExtensionMgr& mgrUIExt) const;
+
+	static void PrepareTaskContextMenu(CMenu* pMenu,
+									   const CFilteredToDoCtrl& tdc,
+									   const CPreferencesDlg& prefs);
+
+	static void PrepareTabCtrlContextMenu(CMenu* pMenu,
+										  const CFilteredToDoCtrl& tdc,
+										  const CPreferencesDlg& prefs);
+
+	static BOOL GetFilterToActivate(UINT nMenuID,
+									const CTDLFilterBar& filterBar,
+									const CPreferencesDlg& prefs,
+									FILTER_SHOW& nFilter,
+									CString& sAdvFilter);
+
+	static UINT GetSelectedFilterMenuID(const CTDLFilterBar& filterBar);
 
 	static BOOL IsDynamicItem(UINT nMenuID);
 
@@ -81,7 +89,7 @@ protected:
 	static void PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);
 	static void PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, CMenuIconMgr& mgrMenuIcons);
 
-	static void PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar);
+	static void PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar, const CPreferencesDlg& prefs);
 	static void PrepareUserStorageMenu(CMenu* pMenu, const CTDLTasklistStorageMgr& mgrStorage, CMenuIconMgr& mgrMenuIcons);
 	static void PrepareTaskViewVisibilityMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt);
 	static void PrepareTaskViewActivationMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt);

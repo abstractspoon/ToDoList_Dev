@@ -18,7 +18,6 @@ class CONTENTFORMAT;
 
 class CContentTypeComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CContentTypeComboBox(const CContentMgr* pContentMgr, UINT nNullIconID);
 	virtual ~CContentTypeComboBox();
@@ -29,32 +28,18 @@ public:
 	int GetCount() const;
 	BOOL IsInitialized() const { return (m_pContentMgr != NULL); }
 
-// Attributes
 protected:
 	const CContentMgr* m_pContentMgr;
 	CIcon m_iconNull;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CContentTypeComboBox)
 protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CContentTypeComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
+	virtual void BuildCombo();
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-
-	void FillCombo();
 };
 
 /////////////////////////////////////////////////////////////////////////////

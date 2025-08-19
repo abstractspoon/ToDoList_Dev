@@ -45,7 +45,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\PDFExporter.ico">
+    <Image Include="..\PDFExporterCore\Resources\PDFExporter.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

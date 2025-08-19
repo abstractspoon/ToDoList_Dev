@@ -116,7 +116,7 @@ BOOL CStylesheetParamConfigDlg::OnInitDialog()
 	}
 
 	m_lcParams.ShowGrid(TRUE, TRUE);
-	m_lcParams.DisableColumnEditing(0, TRUE);
+	m_lcParams.EnableColumnEditing(0, FALSE);
 	m_lcParams.SetSortColumn(0);
 	m_lcParams.SetFocus();
 

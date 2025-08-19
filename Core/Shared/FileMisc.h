@@ -111,10 +111,22 @@ public:
 					const CString& sExt = _T(".bak"));
 	BOOL RestoreBackup();
 
+	CString GetBackupFilePath() const { return m_sBackup; }
+	CString GetBackupFolderPath() const;
+
 	static CString BuildBackupPath(const CString& sFile, 
 									DWORD dwFlags = 0, 
 									const CString& sFolder = _T(""), 
 									const CString& sExt = _T(".bak"));
+
+	static int CullBackups(const CString& sPattern, 
+						   DWORD dwFlags = 0, 
+						   int nNumToKeep = 10);
+
+	static int CullBackups(const CString& sPattern, 
+						   DWORD dwFlags, 
+						   int nNumToKeep, 
+						   int& nNumFound);
 
 protected:
 	CString m_sFile, m_sBackup;
@@ -124,6 +136,9 @@ protected:
 						 DWORD dwFlags,
 						 const CString& sFolder,
 						 const CString& sExt);
+
+	static int FileDateSortProc(const void* pV1, const void* pV2);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,22 +204,25 @@ namespace FileMisc
 
 	BOOL Find(LPCTSTR szSearchSpec);
 	BOOL FindFirst(LPCTSTR szSearchSpec, CString& sPath);
-	int FindFiles(const CString& sFolder, CStringArray& aFiles, BOOL bCheckSubFolders = TRUE, LPCTSTR szPattern = _T("*.*"));
 	BOOL FolderContainsFiles(LPCTSTR szFolder, BOOL bCheckSubFolders = TRUE, LPCTSTR szFilter = _T("*.*"));
+	int FindFiles(const CString& sFolder, CStringArray& aFilePaths, BOOL bCheckSubFolders = TRUE, LPCTSTR szPattern = _T("*.*"));
+	void SortFilePathsByLastModified(CStringArray& aFilePaths, BOOL bOldestFirst);
 
 	CString& ValidateFileName(CString& sFilename, LPCTSTR szReplace = _T(""));
 	CString& ValidateFilePath(CString& sFilepath, LPCTSTR szReplace = _T(""));
 
+	BOOL HasExtension(LPCTSTR szFilePath);
 	BOOL HasExtension(LPCTSTR szFilePath, LPCTSTR szExt);
 	CString GetExtension(LPCTSTR szFilePath, BOOL bWithDot = TRUE);
 	CString FormatExtension(LPCTSTR szExt, BOOL bWithDot = TRUE);
 	CString& ReplaceExtension(CString& sFilePath, LPCTSTR szExt);
 	CString& RemoveExtension(CString& sFilePath);
+	void EnsureSameExtension(LPCTSTR szFromFile, CString& sToFile);
 	
-	CString GetTempFolder();
-	CString GetTempFilePath(LPCTSTR szPrefix = NULL, UINT uUnique = 0);
-	CString GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt);
-	BOOL IsTempFilePath(LPCTSTR szFilename);
+	CString GetTempFolder(BOOL bLong = TRUE);
+	CString GetTempFilePath(LPCTSTR szPrefix = NULL, UINT uUnique = 0, BOOL bLong = TRUE);
+	CString GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt, BOOL bLong = TRUE);
+	BOOL IsTempFilePath(LPCTSTR szFilePath);
 
 	BOOL CanReadFile(LPCTSTR szPathname, BOOL bDenyWrite = FALSE);
 	BOOL LoadFile(LPCTSTR szPathname, CString& sText, BOOL bDenyWrite = FALSE, UINT nAnsiCodePage = CP_ACP);
@@ -227,8 +245,8 @@ namespace FileMisc
 	BOOL GetModuleVersion(HMODULE hMod, CDWordArray& aVersionParts);
 	BOOL GetModuleVersion(LPCTSTR szModulePath, CDWordArray& aVersionParts);
 	CString GetWindowModuleFilePath(HWND hWnd);
-	BOOL IsNativeModule(HMODULE hMod = NULL); // returns TRUE, FALSE, -1
-	BOOL IsNativeModule(LPCTSTR szModulePath); // returns TRUE, FALSE, -1
+	BOOL IsNativeModule(HMODULE hMod = NULL); // returns TRUE, FALSE, -1 if not a exe/dll
+	BOOL IsNativeModule(LPCTSTR szModulePath); // returns TRUE, FALSE, -1 if not a exe/dll
 
 	CString GetAppFilePath();
 	CString GetAppFolder(LPCTSTR szSubFolder = NULL);
@@ -279,7 +297,7 @@ namespace FileMisc
 	BOOL AddToFileName(CString& sFilePath, LPCTSTR szExtra, BOOL bSuffix = TRUE);
 	BOOL AddToFileName(CString& sFilePath, int nSuffix);
 	
-	BOOL IsSamePath(const CString& sPath1, const CString& sPath2);
+	BOOL IsSamePath(const CString& sPath1, const CString& sPath2, BOOL bFileNameOnly = FALSE);
 	int CompareContents(const CString& sPath1, const CString& sPath2);
 
 	CString GetFolderFromFilePath(LPCTSTR szFilePath);

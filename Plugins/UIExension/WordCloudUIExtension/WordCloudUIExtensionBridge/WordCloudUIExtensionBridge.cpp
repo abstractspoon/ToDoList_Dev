@@ -38,9 +38,7 @@ const LPCWSTR WORDCLOUD_NAME = L"Word Cloud";
 
 CWordCloudUIExtensionBridge::CWordCloudUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	HMODULE hMod = LoadLibrary(L"WordCloudUIExtensionBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_DAYVIEW), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"WordCloudUIExtensionBridge.dll", IDI_DAYVIEW, 16, true);
 }
 
 void CWordCloudUIExtensionBridge::Release()
@@ -139,7 +137,7 @@ LPCWSTR CWordCloudUIExtensionBridgeWindow::GetTypeID() const
 	return WORDCLOUD_GUID;
 }
 
-bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -161,9 +159,9 @@ void CWordCloudUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CWordCloudUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CWordCloudUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CWordCloudUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
@@ -182,6 +180,11 @@ bool CWordCloudUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 		pMsg->time, 
 		pMsg->pt.x,
 		pMsg->pt.y);
+}
+
+bool CWordCloudUIExtensionBridgeWindow::DoIdleProcessing()
+{
+	return m_wnd->DoIdleProcessing();
 }
 
 bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)

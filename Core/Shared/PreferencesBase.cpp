@@ -200,7 +200,7 @@ HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if ((nCtlColor == CTLCOLOR_STATIC) && (m_brBack != NULL))
+	if ((nCtlColor == CTLCOLOR_STATIC) && (m_brBack != NULL) && !CWinClasses::IsEditControl(*pWnd))
 	{
 		hbr = m_brBack;
 		pDC->SetBkMode(TRANSPARENT);
@@ -409,7 +409,6 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 	if (m_nDlgIconID)
 	{
 		m_icon.Load(m_nDlgIconID);
-
 		SendMessage(WM_SETICON, ICON_SMALL, (LPARAM)(HICON)m_icon);
 	}
 

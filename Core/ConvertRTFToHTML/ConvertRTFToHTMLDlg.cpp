@@ -33,12 +33,13 @@ static const LPCTSTR RTF_TYPEID = L"849CF988-79FE-418A-A40D-01FE3AFCAB2C";
 
 
 CConvertRTFToHTMLDlg::CConvertRTFToHTMLDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(IDD_CONVERTRTFTOHTML_DIALOG, pParent)
-	, m_eInputTasklist(FES_COMBOSTYLEBTN, FILTER_TASKLISTS)
-	, m_eOutputTasklist(FES_COMBOSTYLEBTN | FES_SAVEAS, FILTER_TASKLISTS)
-	, m_sCurrentTask(_T(""))
-	, m_bUseMSWordForConversion(FALSE)
-	, m_bOpenConvertedTasklist(FALSE)
+	: 
+	CDialog(IDD_CONVERTRTFTOHTML_DIALOG, pParent), 
+	m_eInputTasklist(0, FILTER_TASKLISTS), 
+	m_eOutputTasklist(FES_SAVEAS, FILTER_TASKLISTS), 
+	m_sCurrentTask(_T("")), 
+	m_bUseMSWordForConversion(FALSE), 
+	m_bOpenConvertedTasklist(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
@@ -363,9 +364,7 @@ BOOL CConvertRTFToHTMLDlg::FixupLinks(const CString& sTextComments, CString& sHt
 		{
 			// remove duplicates because CString::Replace will
 			// replace duplicates
-			CStringSet mapUrls;
-			mapUrls.CopyFrom(aLinks);
-
+			CStringSet mapUrls(aLinks);
 			POSITION pos = mapUrls.GetStartPosition();
 
 			while (pos)

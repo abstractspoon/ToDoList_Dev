@@ -51,7 +51,6 @@ class CTDLTaskListCtrl : public CTDLTaskCtrlBase
 public:
 	CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data,
-					 const CToDoCtrlFind& find,
 					 const CTDCStyleMap& styles,
 					 const TDCAUTOLISTDATA& tld,
 					 const CTDCColumnIDMap& mapVisibleCols,
@@ -76,7 +75,7 @@ public:
 	DWORD GetTaskID(int nItem) const;
 	DWORD GetSelectedTaskID() const;
 	DWORD GetTrueTaskID(int nItem) const;
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const; // ordered by design
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID) const;
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
@@ -93,12 +92,13 @@ public:
 	BOOL SelectItem(int nItem);
 	BOOL IsItemSelected(int nItem) const;
 	BOOL SelectAll();
+	void DeselectAll();
 	BOOL InvalidateSelection(BOOL bUpdate = FALSE);
 	BOOL InvalidateItem(int nItem, BOOL bUpdate = FALSE);
 	DWORD GetFocusedListTaskID() const;
 	int GetFocusedListItem() const;
 	int FindTaskItem(DWORD dwTaskID) const;
-	int InsertItem(DWORD dwTaskID, int nPos = -1);
+	int InsertTaskItem(DWORD dwTaskID, int nPos = -1);
 	DWORD GetNextSelectedTaskID(POSITION& pos) const;
 
 	BOOL GetLabelEditRect(CRect& rLabel) const;
@@ -107,10 +107,11 @@ public:
 	void RemoveDeletedItems();
 	void SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 
-	BOOL SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending = -1);
+	BOOL SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending = -1, BOOL bSortNoneGroupBelow = -1);
 	BOOL CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) const;
 	UINT GetGroupCount() const;
-	void SetSortGroupsAscending(BOOL bAscending = TRUE);
+	BOOL SetSortGroupsAscending(BOOL bAscending = TRUE);
+	BOOL SetSortNoneGroupBelow(BOOL bBelow = TRUE);
 	BOOL TaskHasGroupValue(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderItem(int nItem) const;
@@ -125,6 +126,7 @@ protected:
 	CListCtrl m_lcTasks;
 	TDC_COLUMN m_nGroupBy;
 	BOOL m_bSortGroupsAscending;
+	BOOL m_bSortNoneGroupBelow;
 	BOOL m_bDeletingGroupHeaders;
 	COLORREF m_crGroupHeaderBkgnd;
 
@@ -151,7 +153,7 @@ protected:
 	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	
- 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+ 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths);
 	LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);
 
 	void OnListSelectionChange(NMLISTVIEW* pNMLV);
@@ -167,7 +169,6 @@ protected:
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	HWND Tasks() const { return m_lcTasks; }
 	GM_ITEMSTATE GetColumnItemState(int nItem) const;
-	void DeselectAll();
 	DWORD GetHelpID() const;
 	BOOL DoSaveToImage(CBitmap& bmImage, COLORREF crDivider);
 	LPCTSTR GetDebugName() const { return _T("ListView"); }
@@ -197,6 +198,7 @@ protected:
 	CString GetGroupByColumnName() const;
 	BOOL IsGrouped() const { return (m_nGroupBy != TDCC_NONE); }
 	int CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& mapOldHeaders, CIntArray& aOldHeaderItems) const;
+	BOOL HasNoneGroup() const;
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 

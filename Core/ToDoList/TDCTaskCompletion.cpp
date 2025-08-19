@@ -5,6 +5,8 @@
 #include "tdccustomattribdata.h"
 #include "ToDoCtrlData.h"
 
+#include "..\shared\DateHelper.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 TDCTASKCOMPLETION::TDCTASKCOMPLETION()

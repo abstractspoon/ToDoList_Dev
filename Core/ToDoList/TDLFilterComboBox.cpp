@@ -19,10 +19,18 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const int ITEM_HEADING = -100;
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLFilterComboBox
 
-CTDLFilterComboBox::CTDLFilterComboBox() : CTabbedComboBox(20), m_bShowDefaultFilters(TRUE)
+CTDLFilterComboBox::CTDLFilterComboBox() 
+	: 
+	CTabbedComboBox(20), 
+	m_bShowDefaultFilters(TRUE)
 {
+	SetItemIndentBelowHeadings(0);
 }
 
 CTDLFilterComboBox::~CTDLFilterComboBox()
@@ -31,30 +39,10 @@ CTDLFilterComboBox::~CTDLFilterComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLFilterComboBox, CTabbedComboBox)
-	//{{AFX_MSG_MAP(CTDLFilterComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterComboBox message handlers
-
-void CTDLFilterComboBox::PreSubclassWindow() 
-{
-	CTabbedComboBox::PreSubclassWindow();
-
-	FillCombo();
-}
-
-int CTDLFilterComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CTabbedComboBox::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	FillCombo();
-	
-	return 0;
-}
 
 int CTDLFilterComboBox::AddDefaultFilterItem(int nItem)
 {
@@ -72,20 +60,22 @@ int CTDLFilterComboBox::AddDefaultFilterItem(int nItem)
 
 	UINT nFilter = SHOW_FILTERS[nItem][1];
 	
-	return CDialogHelper::AddString(*this, sItem, nFilter);
+	return CDialogHelper::AddStringT(*this, sItem, nFilter);
 }
 
-void CTDLFilterComboBox::FillCombo()
+void CTDLFilterComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
-	
-	if (GetCount())
-		return; // already called
+	ASSERT(GetCount() == 0);
 
-	CLocalizer::EnableTranslation(*this, FALSE);
-	
 	if (m_bShowDefaultFilters)
 	{
+		if (m_aAdvancedFilterNames.GetSize())
+		{
+			int nHeading = CDialogHelper::AddStringT(*this, CEnString(IDS_FILTERPLACEHOLDER), ITEM_HEADING);
+			SetHeadingItem(nHeading);
+		}
+
 		for (int nItem = 0; nItem < NUM_SHOWFILTER; nItem++)
 			AddDefaultFilterItem(nItem);
 	}
@@ -95,119 +85,130 @@ void CTDLFilterComboBox::FillCombo()
 	}
 	
 	// Advanced filters
-	for (int nItem = 0; nItem < m_aAdvancedFilterNames.GetSize(); nItem++)
+	if (m_aAdvancedFilterNames.GetSize())
 	{
-		CString sFilter = FormatAdvancedFilterDisplayString(nItem, m_aAdvancedFilterNames[nItem]);	
-		CDialogHelper::AddString(*this, sFilter, (DWORD)FS_ADVANCED);
+		if (m_bShowDefaultFilters)
+		{
+			int nHeading = CDialogHelper::AddStringT(*this, CEnString(IDS_ADVANCEDFILTERPLACEHOLDER), ITEM_HEADING);
+			SetHeadingItem(nHeading);
+		}
+
+		for (int nItem = 0; nItem < m_aAdvancedFilterNames.GetSize(); nItem++)
+		{
+			CString sFilter = FormatAdvancedFilterDisplayString(nItem, m_aAdvancedFilterNames[nItem]);
+			CDialogHelper::AddStringT(*this, sFilter, (DWORD)FS_ADVANCED);
+		}
 	}
 
 	// resize to fit widest item
 	CDialogHelper::RefreshMaxDropWidth(*this, NULL, TABSTOPS);
+
+	CLocalizer::EnableTranslation(*this, FALSE);
 }
 
-void CTDLFilterComboBox::RefillCombo(LPCTSTR szAdvancedSel)
+void CTDLFilterComboBox::RebuildCombo(LPCTSTR szAdvancedSel)
 {
 	if (GetSafeHwnd())
 	{
 		CHoldRedraw hr(*this);
 		
 		// save selection
-		CString sAdvanced;
-		FILTER_SHOW nSelFilter = GetSelectedFilter(sAdvanced);
+		CString sAdvFilter;
+		FILTER_SHOW nSelFilter = GetSelectedFilter(sAdvFilter);
 		
-		ResetContent();
-		FillCombo();
-		
+		CTabbedComboBox::RebuildCombo();
+
 		// restore selection
-		RestoreSelection(nSelFilter, (szAdvancedSel ? szAdvancedSel : sAdvanced));
+		if (!SelectFilter(nSelFilter, (szAdvancedSel ? szAdvancedSel : sAdvFilter)))
+		{
+			SelectFilter(FS_ALL);
+
+			// notify parent of selection change
+			GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELENDOK), (LPARAM)GetSafeHwnd());
+		}
 	}
 }
 
 FILTER_SHOW CTDLFilterComboBox::GetSelectedFilter() const
 {
-	return CDialogHelper::GetSelectedItemData(*this, FS_ALL);
+	return CDialogHelper::GetSelectedItemDataT(*this, FS_ALL);
 }
 
-FILTER_SHOW CTDLFilterComboBox::GetSelectedFilter(CString& sAdvanced) const
+FILTER_SHOW CTDLFilterComboBox::GetSelectedFilter(CString& sAdvFilter) const
 {
 	FILTER_SHOW nSelFilter = GetSelectedFilter();
 
 	if (nSelFilter == FS_ADVANCED)
 	{
 		CString sDisplay = CDialogHelper::GetSelectedItem(*this);
-		VERIFY(ExtractAdvancedFilterName(sDisplay, sAdvanced));
+		VERIFY(ExtractAdvancedFilterName(sDisplay, sAdvFilter));
 	}
 	else
 	{
-		sAdvanced.Empty();
+		sAdvFilter.Empty();
 	}
 
 	return nSelFilter;
 }
 
-BOOL CTDLFilterComboBox::HasAdvancedFilter(const CString& sAdvanced) const
+BOOL CTDLFilterComboBox::HasAdvancedFilter(const CString& sAdvFilter) const
 {
-	return (Misc::Find(sAdvanced, m_aAdvancedFilterNames, FALSE, TRUE) != -1);
+	return (Misc::Find(sAdvFilter, m_aAdvancedFilterNames, FALSE, TRUE) != -1);
 }
 
-BOOL CTDLFilterComboBox::SelectFilter(FILTER_SHOW nFilter)
+BOOL CTDLFilterComboBox::SelectFilter(FILTER_SHOW nFilter, LPCTSTR szAdvFilter)
 {
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, (DWORD)nFilter));
-}
+	ASSERT((nFilter != FS_ADVANCED) || !Misc::IsEmpty(szAdvFilter));
 
-BOOL CTDLFilterComboBox::SelectAdvancedFilter(const CString& sAdvFilter)
-{
-	for (int nItem = 0; nItem < GetCount(); nItem++)
+	if (nFilter != FS_ADVANCED)
 	{
-		if (FS_ADVANCED == GetItemData(nItem))
-		{
-			CString sFilter;
-			GetLBText(nItem, sFilter);
+		// This can fail if the default filters have been omitted
+		// so we don't want to change the selection in such cases
+		int nItem = CDialogHelper::FindItemByDataT(*this, (DWORD)nFilter);
 
-			// exact test
-			if (sFilter == sAdvFilter)
-			{
-				SetCurSel(nItem);
-				return TRUE;
-			}
-			// partial test
-			else if (sFilter.Find(sAdvFilter) != -1)
-			{
-				// then full test
-				int nFilter = nItem - (m_bShowDefaultFilters ? NUM_SHOWFILTER : 0);
-				CString sFull = FormatAdvancedFilterDisplayString(nFilter, sAdvFilter);	
+		if (nItem == CB_ERR)
+			return FALSE;
 
-				if (sFilter == sFull)
-				{
-					SetCurSel(nItem);
-					return TRUE;
-				}
-			}
-		}
+		SetCurSel(nItem);
+		return TRUE;
 	}
 
-	return FALSE;
+	// else lookup advanced filter by name
+	int nAdvFilter = Misc::Find(szAdvFilter, m_aAdvancedFilterNames, TRUE, TRUE);
+
+	if (nAdvFilter == -1)
+		return FALSE;
+
+#ifdef _DEBUG
+	if (m_nNumHeadings == 0)
+	{
+		ASSERT(!m_bShowDefaultFilters || !m_aAdvancedFilterNames.GetSize());
+	}
+	else
+	{
+		ASSERT(GetDefaultFilterCount() == NUM_SHOWFILTER);
+		ASSERT(m_nNumHeadings == 2);
+		ASSERT(m_bShowDefaultFilters);
+		ASSERT(m_aAdvancedFilterNames.GetSize());
+	}
+#endif
+
+	int nIndex = (GetDefaultFilterCount() + nAdvFilter + m_nNumHeadings);
+
+	ASSERT(GetItemData(nIndex) == FS_ADVANCED);
+
+	return (SetCurSel(nIndex) != CB_ERR);
 }
 
-void CTDLFilterComboBox::AddAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel)
+void CTDLFilterComboBox::SetAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel)
 {
 	m_aAdvancedFilterNames.Copy(aFilters);
-
-	if (GetSafeHwnd())
-		RefillCombo(szAdvancedSel);
+	RebuildCombo(szAdvancedSel);
 }
 
-const CStringArray& CTDLFilterComboBox::GetAdvancedFilterNames() const
+const CStringArray& CTDLFilterComboBox::AdvancedFilterNames() const
 {
 	return m_aAdvancedFilterNames;
-}
-
-void CTDLFilterComboBox::RemoveAdvancedFilters()
-{
-	m_aAdvancedFilterNames.RemoveAll();
-
-	if (GetSafeHwnd())
-		RefillCombo();
 }
 
 void CTDLFilterComboBox::ShowDefaultFilters(BOOL bShow)
@@ -216,46 +217,25 @@ void CTDLFilterComboBox::ShowDefaultFilters(BOOL bShow)
 		return;
 
 	m_bShowDefaultFilters = bShow;
-
-	if (GetSafeHwnd())
-		RefillCombo();
+	RebuildCombo();
 }
 
-void CTDLFilterComboBox::RestoreSelection(FILTER_SHOW nFilter, LPCTSTR szAdvanced)
+int CTDLFilterComboBox::GetDefaultFilterCount() const
 {
-	if (nFilter == FS_ADVANCED)
-	{
-		if (SelectAdvancedFilter(szAdvanced))
-			return;
-	}
-	else if (SelectFilter(nFilter))
-	{
-		return;
-	}
-
-	// else
-	SetCurSel(0);
-
-	// notify parent of selection change
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+	return (m_bShowDefaultFilters ? NUM_SHOWFILTER : 1);
 }
 
-CString CTDLFilterComboBox::FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter, BOOL bIncAdvancedLabel)
+CString CTDLFilterComboBox::FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter)
 {
 	// if it starts with a tab then it's already done
 	if (!sFilter.IsEmpty() && sFilter[0] == '\t')
 		return sFilter;
 
-	CEnString sAdvanced(IDS_ADVANCEDFILTER);
 	CString sDisplay, sNumeral(Misc::Format(nFilter));	
 
 	if (sFilter.IsEmpty())
 	{
-		sDisplay.Format(_T("%s)\t%s"), sNumeral, sAdvanced);
-	}
-	else if (bIncAdvancedLabel)
-	{
-		sDisplay.Format(_T("%s)\t%s (%s)"), sNumeral, sFilter, sAdvanced);
+		sDisplay.Format(_T("%s)\t%s"), sNumeral, CEnString(IDS_UNNAMEDFILTER));
 	}
 	else // filter only
 	{
@@ -271,54 +251,12 @@ BOOL CTDLFilterComboBox::ExtractAdvancedFilterName(const CString& sDisplay, CStr
 	int nTab = sDisplay.Find('\t');
 
 	if (nTab == -1)
-	{
 		sFilter = sDisplay;
-		return TRUE;
-	}
+	else
+		sFilter = sDisplay.Mid(nTab + 1);
 
-	sFilter.Empty();
-
-	// check for Advanced filter string
-	CEnString sAdvanced(IDS_ADVANCEDFILTER);
-	int nEnd = sDisplay.Find(sAdvanced);
-	
-	if (nEnd == -1)
-		return FALSE;
-
-	nEnd = sDisplay.Left(nEnd).ReverseFind('(');
-
-	if (nEnd == -1)
-		return FALSE;
-
-	// else
-	sFilter = sDisplay.Mid(nTab + 1, nEnd - nTab - 1);
 	Misc::Trim(sFilter);
 
 	return !sFilter.IsEmpty();
 }
 
-void CTDLFilterComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-										DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
-{
-	CString sText(sItem);
-
-	// if it's a Advanced filter and the non-list item
-	// remove the (Find Tasks Filter) bit
-	if ((FS_ADVANCED == dwItemData) && !bList)
-	{
-		CString sFilter;
-
-		if (ExtractAdvancedFilterName(sItem, sFilter))
-		{
-			int nFilter = nItem;
-		
-			if (m_bShowDefaultFilters)
-				nFilter -= NUM_SHOWFILTER;
-
-			sText = FormatAdvancedFilterDisplayString(nFilter, sFilter, FALSE);
-		}
-	}
-
-	// default drawing
-	CTabbedComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sText, bList, crText);
-}

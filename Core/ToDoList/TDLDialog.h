@@ -19,6 +19,8 @@ class CTDLDialog : public CDialog, protected CDialogHelper
 {
 	DECLARE_DYNAMIC(CTDLDialog)
 
+	int DoModal(HICON hIcon = NULL); // Caller owns icon
+
 // Construction
 protected:
 	CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey = NULL, CWnd* pParent = NULL);   // standard constructor
@@ -27,7 +29,8 @@ protected:
 	CWinHelpButton m_btnHelp;
 	CSizeGrip m_sbGrip;
 
-	static CIcon s_iconTDL;
+	CIcon m_iconDlg;
+	static CIcon s_iconApp;
 
 	CSize m_sizeOrg, m_sizePrev;
 	CString m_sPrefsKey;
@@ -37,6 +40,7 @@ protected:
 	virtual BOOL OnInitDialog();
 
 	virtual void OnRepositionControls(int /*dx*/, int /*dy*/) {}
+	virtual BOOL DoIdleProcessing() { return FALSE; }
 
 // Implementation
 protected:
@@ -49,10 +53,12 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnKickIdle(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	BOOL IsResizable() const;
+	BOOL SetIcon(UINT nIconID);
 };
 
 //{{AFX_INSERT_LOCATION}}

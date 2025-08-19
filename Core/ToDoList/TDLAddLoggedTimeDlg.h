@@ -28,13 +28,12 @@ class CTDLAddLoggedTimeDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, double dHours = 0.0, CWnd* pParent = NULL);   // standard constructor
-
-	int DoModal(BOOL bShowAddTimeToTimeSpent);
+	CTDLAddLoggedTimeDlg(DWORD dwTaskID, BOOL bEnableAddTimeToTimeSpent,
+						 BOOL bISODates, double dHours, CWnd* pParent = NULL);
 
 	double GetLoggedHours() const; // in hours
 	COleDateTime GetWhen() const;
-	BOOL GetAddToTimeSpent() const { return (m_bShowAddTimeToTimeSpent && m_bAddTimeToTimeSpent); }
+	BOOL GetAddToTimeSpent() const { return (m_bEnableAddTimeToTimeSpent && m_bAddTimeToTimeSpent); }
 	CString GetComment() const { return m_sComment; }
 	BOOL IsTracked() const { return m_bTracked; }
 
@@ -45,28 +44,25 @@ protected:
 	CTimeComboBox	m_cbTimeWhen;
 	TDCTIMEPERIOD	m_loggedTime;
 	DWORD	m_dwTaskID;
-	CString	m_sTaskTitle;
 	BOOL	m_bAddTimeToTimeSpent;
 	CString	m_sComment;
 	//}}AFX_DATA
-	CDateTimeCtrlEx	m_dateWhen;
+	CDateTimeCtrlEx m_dtcWhen;
 	CTimeEdit m_eLoggedTime;
 	COleDateTime m_dtWhen;
-	BOOL m_bShowAddTimeToTimeSpent;
-	CEnStatic m_stTaskTitle;
+	BOOL m_bEnableAddTimeToTimeSpent;
 	BOOL m_bTracked;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLAddLoggedTimeDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void OnOK();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLAddLoggedTimeDlg)
 	virtual BOOL OnInitDialog();

@@ -197,6 +197,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Open Translation...",        ID_FILE_OPEN_TRANSLATION
         MENUITEM "&Save Translation",           ID_FILE_SAVE_TRANSLATION
+        MENUITEM "&Close Translation",          ID_FILE_CLOSE_TRANSLATION
         MENUITEM SEPARATOR
         MENUITEM "&Exit",                       ID_FILE_CLOSE
     END

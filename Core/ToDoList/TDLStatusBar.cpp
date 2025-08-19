@@ -1,8 +1,9 @@
 #include "stdafx.h"
+#include "resource.h"
 #include "TDLStatusBar.h"
 #include "ToDoItem.h"
-#include "resource.h"
 #include "FilteredToDoCtrl.h"
+#include "tdcmapping.h"
 
 #include "..\shared\Localizer.h"
 #include "..\shared\Misc.h"
@@ -81,19 +82,16 @@ int CTDLStatusBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// prevent translation because we handle it manually
 	CLocalizer::EnableTranslation(*this, FALSE);
 
-	for (int nPane = 0; nPane < SB_PANECOUNT; nPane++)
-		VERIFY(CString().LoadString(SB_PANES[nPane].nID));
-
 	if (!SetPanes(SB_PANES, SB_PANECOUNT))
 		return -1;
 
-	// Translate tooltips
-	if (CLocalizer::IsInitialized())
-	{
-		int nPane = SB_PANECOUNT;
+	// Initialise pane text and tooltips
+	int nPane = SB_PANECOUNT;
 
-		while (nPane--)
-			SetPaneTooltip(SB_PANES[nPane].nID, CEnString((UINT)SB_PANES[nPane].lpszTip));
+	while (nPane--)
+	{
+		SetPaneText(nPane, CEnString(SB_PANES[nPane].nID, _T("")));
+		SetPaneTooltip(nPane, CEnString((UINT)SB_PANES[nPane].lpszTip));
 	}
 
 	return 0;
@@ -202,7 +200,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 				sTextValue = CEnString(ID_SB_MULTISELTASK, nSelCount);
 
 				const int MAXTIPLEN = 255; // CToolInfo
-				int nMaxTasks = max(nSelCount, 10), nNumTasks = nMaxTasks;
+				int nMaxTasks = min(nSelCount, 10), nNumTasks = nMaxTasks;
 
 				CString sFmtMore;
 
@@ -318,8 +316,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 
 BOOL CTDLStatusBar::WantUpdateAttribute(TDC_ATTRIBUTE nAttribID, const CTDCAttributeMap& mapAttrib)
 {
-	return (mapAttrib.Has(nAttribID) ||
-			mapAttrib.Has(TDCA_ALL) ||
+	return (mapAttrib.HasAttribOrAll(nAttribID) ||
 			mapAttrib.Has(TDCA_PASTE) ||
 			mapAttrib.Has(TDCA_POSITION_DIFFERENTPARENT));
 }
@@ -337,10 +334,10 @@ CString CTDLStatusBar::FormatTime(double dAmount, TDC_UNITS nUnits, BOOL bHMS)
 	TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(nUnits);
 
 	if (bHMS)
-		return CTimeHelper().FormatTimeHMS(dAmount, nTHUnits);
+		return CTimeHelper().FormatTimeHMS(dAmount, nTHUnits, (HMS_DECIMALPLACES | HMS_PRESERVEUNITS));
 
 	// else
-	return CTimeHelper().FormatTime(dAmount, nTHUnits, 2);
+	return CTimeHelper::FormatTime(dAmount, nTHUnits, 2);
 }
 
 void CTDLStatusBar::SetPaneTextAndTooltip(UINT nIDPane, UINT nIDTextFormat, const CString& sTextValue, UINT nIDTipFormat, LPCTSTR szTipValue)

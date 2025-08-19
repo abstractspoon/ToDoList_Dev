@@ -18,7 +18,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CWorkingWeekTest::CWorkingWeekTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CWorkingWeekTest::CWorkingWeekTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CWorkingWeekTest"), utils)
 {
 
 }
@@ -40,7 +42,7 @@ TESTRESULT CWorkingWeekTest::Run()
 
 void CWorkingWeekTest::TestAddDuration()
 {
-	BeginTest(_T("CWorkingWeekTest::AddDuration"));
+	CTDCScopedTest test(*this, _T("CWorkingWeek::AddDurationInMinutes/Hours/Days/Weeks"));
 
 	// -----------------------------------------------------------------------
 
@@ -109,27 +111,22 @@ void CWorkingWeekTest::TestAddDuration()
 		ExpectEQ(week.AddDurationInWeeks(date, 2).m_dt, -43987.75);  // end of 14th day
 		ExpectEQ(week.AddDurationInWeeks(date, -2).m_dt, -44014.375);// start of 14th previous day
 	}
-
-	// -----------------------------------------------------------------------
-
-	EndTest();
 }
 
 void CWorkingWeekTest::TestCalculateDuration()
 {
-	BeginTest(_T("CWorkingWeekTest::CalculateDuration"));
+	CTDCScopedTest test(*this, _T("CWorkingWeek::CalculateDuration"));
 
 	// -----------------------------------------------------------------------
 
-
-	// -----------------------------------------------------------------------
-
-	EndTest();
+	// TODO
 }
 
 //////////////////////////////////////////////////////////////////////
 
-CWorkingDayTest::CWorkingDayTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CWorkingDayTest::CWorkingDayTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CWorkingDayTest"), utils)
 {
 
 }
@@ -150,7 +147,7 @@ TESTRESULT CWorkingDayTest::Run()
 
 void CWorkingDayTest::TestAddDurationInHours()
 {
-	BeginTest(_T("CWorkingDayTest::AddDurationInHours"));
+	CTDCScopedTest test(*this, _T("CWorkingDay::AddDurationInHours"));
 
 	// -----------------------------------------------------------------------
 
@@ -281,9 +278,5 @@ void CWorkingDayTest::TestAddDurationInHours()
 		ExpectEQ(date.m_dt, -44003.625);
 		ExpectEQ(dHours, 0.0);
 	}
-
-	// -----------------------------------------------------------------------
-
-	EndTest();
 }
 

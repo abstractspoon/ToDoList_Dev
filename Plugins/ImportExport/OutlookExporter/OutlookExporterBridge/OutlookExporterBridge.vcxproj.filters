@@ -45,7 +45,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\outlook_16.ico">
+    <None Include="..\OutlookExporterCore\Resources\outlook_16.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

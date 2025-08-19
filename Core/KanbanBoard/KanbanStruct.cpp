@@ -20,38 +20,45 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-CString KBUtils::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
+CString KBUtils::FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sValue, KBC_ATTRIBLABELS nLabelVis,
 										const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
-	return GetAttributeLabel(nAttrib, nLabelVis, aCustAttribDefs) + sValue;
+	CString sLabel = GetAttributeLabel(nAttribID, nLabelVis, aCustAttribDefs);
+	
+	if (!sLabel.IsEmpty())
+		return (sLabel + _T(": ") + sValue);
+	
+	return sValue;
 }
 
-CString KBUtils::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis,
-										 const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+CString KBUtils::FormatDate(const COleDateTime& date, BOOL bISODates)
+{
+	if (!CDateHelper::IsDateSet(date))
+		return _T("");
+
+	if (bISODates)
+		return CDateHelper::FormatDate(date, DHFD_ISO);
+
+	return CDateHelper::FormatDate(date);
+}
+
+CString KBUtils::GetAttributeLabel(TDC_ATTRIBUTE nAttribID, KBC_ATTRIBLABELS nLabelVis,
+								   const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	if (nLabelVis == KBCAL_NONE)
 		return _T("");
 
-	CString sLabel;
+	if (IsCustomAttribute(nAttribID))
+		return aCustAttribDefs.GetDefinitionLabel(nAttribID);
 
-	if (IsCustomAttribute(nAttrib))
-	{
-		sLabel = aCustAttribDefs.GetDefinitionLabel(nAttrib) + _T(": ");
-	}
-	else
-	{
-		UINT nFormatID = GetDisplayFormat(nAttrib, (nLabelVis == KBCAL_LONG));
-
-		if (nFormatID != 0)
-			sLabel = CEnString(nFormatID) + _T(": ");
-	}
-
-	return sLabel;
+	// else
+	UINT nFormatID = GetDisplayFormat(nAttribID, (nLabelVis == KBCAL_LONG));
+	return CEnString(nFormatID);
 }
 
-UINT KBUtils::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
+UINT KBUtils::GetDisplayFormat(TDC_ATTRIBUTE nAttribID, BOOL bLong)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCBY:			return (bLong ? IDS_DISPLAY_ALLOCBY : IDS_DISPLAY_ALLOCBY_SHORT);
 	case TDCA_ALLOCTO:			return (bLong ? IDS_DISPLAY_ALLOCTO : IDS_DISPLAY_ALLOCTO_SHORT);
@@ -83,16 +90,16 @@ UINT KBUtils::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
 	case TDCA_LOCK:				return 0;
 
 	default:
-		ASSERT(IsCustomAttribute(nAttrib));
+		ASSERT(IsCustomAttribute(nAttribID));
 		break;
 	}
 
 	return 0;
 }
 
-CString KBUtils::GetAttributeID(TDC_ATTRIBUTE nAttrib)
+CString KBUtils::GetAttributeID(TDC_ATTRIBUTE nAttribID)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:	return _T("ALLOCTO");
 	case TDCA_ALLOCBY:	return _T("ALLOCBY");
@@ -108,12 +115,18 @@ CString KBUtils::GetAttributeID(TDC_ATTRIBUTE nAttrib)
 	return _T("");
 }
 
-CString KBUtils::GetAttributeID(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribs)
+CString KBUtils::GetAttributeID(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribs)
 {
-	if (IsCustomAttribute(nAttrib))
-		return aCustAttribs.GetDefinitionID(nAttrib);
+	if (IsCustomAttribute(nAttribID))
+		return aCustAttribs.GetDefinitionID(nAttribID);
 
-	return GetAttributeID(nAttrib);
+	return GetAttributeID(nAttribID);
+}
+
+BOOL KBUtils::IsPriorityOrRisk(const CString& sAttribID)
+{
+	return ((sAttribID == KBUtils::GetAttributeID(TDCA_PRIORITY)) ||
+			(sAttribID == KBUtils::GetAttributeID(TDCA_RISK)));
 }
 
 BOOL KBUtils::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
@@ -121,9 +134,35 @@ BOOL KBUtils::IsCustomAttribute(TDC_ATTRIBUTE nAttribID)
 	return ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST));
 }
 
-BOOL KBUtils::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib)
+BOOL KBUtils::IsDateAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribs)
 {
-	switch (nAttrib)
+	switch (nAttribID)
+	{
+	case TDCA_DONEDATE:		
+	case TDCA_DUEDATE:		
+	case TDCA_STARTDATE:	
+	case TDCA_CREATIONDATE:	
+	case TDCA_LASTMODDATE:	
+		return TRUE;
+
+	default:
+		if (IsCustomAttribute(nAttribID))
+		{
+			int nCust = aCustAttribs.FindDefinition(aCustAttribs.GetDefinitionID(nAttribID));
+			ASSERT(nCust != -1);
+
+			if (nCust != -1)
+				return aCustAttribs[nCust].bDate;
+		}
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL KBUtils::IsTrackableAttribute(TDC_ATTRIBUTE nAttribID)
+{
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCTO:
 	case TDCA_ALLOCBY:
@@ -139,21 +178,21 @@ BOOL KBUtils::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib)
 	return FALSE;
 }
 
-BOOL KBUtils::IsTrackableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+BOOL KBUtils::IsTrackableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
-	if (IsTrackableAttribute(nAttrib))
+	if (IsTrackableAttribute(nAttribID))
 		return TRUE;
 
 	// else
-	return (IsCustomAttribute(nAttrib) ? aCustAttribDefs.HasDefinition(nAttrib) : FALSE);
+	return (IsCustomAttribute(nAttribID) ? aCustAttribDefs.HasDefinition(nAttribID) : FALSE);
 }
 
-BOOL KBUtils::IsGroupableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
+BOOL KBUtils::IsGroupableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
-	if (IsTrackableAttribute(nAttrib, aCustAttribDefs))
+	if (IsTrackableAttribute(nAttribID, aCustAttribDefs))
 		return TRUE;
 
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_RECURRENCE:
 	case TDCA_NONE:
@@ -163,14 +202,17 @@ BOOL KBUtils::IsGroupableAttribute(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAtt
 	return FALSE;
 }
 
-BOOL KBUtils::IsSortableAttribute(TDC_ATTRIBUTE nAttrib)
+BOOL KBUtils::IsSortableAttribute(TDC_ATTRIBUTE nAttribID)
 {
-	return !IsCustomAttribute(nAttrib);
+	return !IsCustomAttribute(nAttribID);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-KANBANCUSTOMATTRIBDEF::KANBANCUSTOMATTRIBDEF() : bMultiValue(FALSE) 
+KANBANCUSTOMATTRIBDEF::KANBANCUSTOMATTRIBDEF() 
+	: 
+	bMultiValue(FALSE), 
+	bDate(FALSE) 
 {
 }
 
@@ -178,10 +220,11 @@ BOOL KANBANCUSTOMATTRIBDEF::operator==(const KANBANCUSTOMATTRIBDEF& kca) const
 {
 	return ((sAttribID == kca.sAttribID) &&
 			(sAttribName == kca.sAttribName) &&
-			(bMultiValue == kca.bMultiValue));
+			(bMultiValue == kca.bMultiValue) &&
+			(bDate == kca.bDate));
 }
 
-int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal)
+int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal, BOOL bDate)
 {
 	ASSERT(!sAttribID.IsEmpty());
 
@@ -194,6 +237,7 @@ int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribI
 		def.sAttribID = sAttribID;
 		def.sAttribName = sAttribName;
 		def.bMultiValue = bMultiVal;
+		def.bDate = bDate;
 
 		nFind = Add(def);
 	}
@@ -203,6 +247,9 @@ int CKanbanCustomAttributeDefinitionArray::AddDefinition(const CString& sAttribI
 
 		def.sAttribName = sAttribName;
 		def.bMultiValue = bMultiVal;
+
+		// Assume attribute type cannot change
+		ASSERT(def.bDate == bDate);
 	}
 
 	return nFind;
@@ -237,33 +284,33 @@ BOOL CKanbanCustomAttributeDefinitionArray::HasDefinition(const CString& sAttrib
 	return (FindDefinition(sAttribID) != -1);
 }
 
-BOOL CKanbanCustomAttributeDefinitionArray::HasDefinition(TDC_ATTRIBUTE nAttrib) const
+BOOL CKanbanCustomAttributeDefinitionArray::HasDefinition(TDC_ATTRIBUTE nAttribID) const
 {
-	return (FindDefinition(nAttrib) != -1);
+	return (FindDefinition(nAttribID) != -1);
 }
 
-CString CKanbanCustomAttributeDefinitionArray::GetDefinitionID(TDC_ATTRIBUTE nAttrib) const
+CString CKanbanCustomAttributeDefinitionArray::GetDefinitionID(TDC_ATTRIBUTE nAttribID) const
 {
-	int nCust = FindDefinition(nAttrib);
+	int nCust = FindDefinition(nAttribID);
 
 	return ((nCust != -1) ? GetAt(nCust).sAttribID : _T(""));
 }
 
-CString CKanbanCustomAttributeDefinitionArray::GetDefinitionLabel(TDC_ATTRIBUTE nAttrib) const
+CString CKanbanCustomAttributeDefinitionArray::GetDefinitionLabel(TDC_ATTRIBUTE nAttribID) const
 {
-	int nCust = FindDefinition(nAttrib);
+	int nCust = FindDefinition(nAttribID);
 
 	return ((nCust != -1) ? GetAt(nCust).sAttribName : _T(""));
 }
 
-int CKanbanCustomAttributeDefinitionArray::FindDefinition(TDC_ATTRIBUTE nAttrib) const
+int CKanbanCustomAttributeDefinitionArray::FindDefinition(TDC_ATTRIBUTE nAttribID) const
 {
-	if (KBUtils::IsCustomAttribute(nAttrib))
+	if (KBUtils::IsCustomAttribute(nAttribID))
 	{
-		int nCust = (nAttrib - TDCA_CUSTOMATTRIB_FIRST);
+		int nAtt = (nAttribID - TDCA_CUSTOMATTRIB_FIRST);
 
-		if ((nCust >= 0) && (nCust < GetSize()))
-			return nCust;
+		if ((nAtt >= 0) && (nAtt < GetSize()))
+			return nAtt;
 	}
 
 	return -1;
@@ -410,9 +457,9 @@ void KANBANITEM::SetTrackedAttributeValues(TDC_ATTRIBUTE nAttribID, const CStrin
 	SetTrackedAttributeValues(KBUtils::GetAttributeID(nAttribID), aValues);
 }
 
-void KANBANITEM::SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues)
+void KANBANITEM::SetTrackedAttributeValues(const CString& sAttribID, const CStringArray& aValues)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
@@ -420,14 +467,14 @@ void KANBANITEM::SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray&
 
 	// else
 	if (aValues.GetSize() == 0)
-		mapAttribValues.RemoveKey(szAttrib);
+		mapAttribValues.RemoveKey(sAttribID);
 	else
-		mapAttribValues.Set(szAttrib, aValues);
+		mapAttribValues.Set(sAttribID, aValues, TRUE);
 }
 
-void KANBANITEM::SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
+void KANBANITEM::SetTrackedAttributeValue(const CString& sAttribID, LPCTSTR szValue)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
@@ -435,38 +482,38 @@ void KANBANITEM::SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
 
 	// else
 	if (Misc::IsEmpty(szValue))
-		mapAttribValues.RemoveKey(szAttrib);
+		mapAttribValues.RemoveKey(sAttribID);
 	else
-		mapAttribValues.Set(szAttrib, szValue);
+		mapAttribValues.Set(sAttribID, szValue);
 }
 
-void KANBANITEM::AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
+void KANBANITEM::AddTrackedAttributeValue(const CString& sAttribID, LPCTSTR szValue)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
 	}
 
 	if (!Misc::IsEmpty(szValue))
-		mapAttribValues.Add(szAttrib, szValue);
+		mapAttribValues.Add(sAttribID, szValue);
 }
 
-void KANBANITEM::RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue)
+void KANBANITEM::RemoveTrackedAttributeValue(const CString& sAttribID, LPCTSTR szValue)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
 	}
 
 	if (!Misc::IsEmpty(szValue))
-		mapAttribValues.Remove(szAttrib, szValue, TRUE);
+		mapAttribValues.Remove(sAttribID, szValue, TRUE);
 }
 
-void KANBANITEM::RemoveTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues)
+void KANBANITEM::RemoveTrackedAttributeValues(const CString& sAttribID, const CStringArray& aValues)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
@@ -475,18 +522,18 @@ void KANBANITEM::RemoveTrackedAttributeValues(LPCTSTR szAttrib, const CStringArr
 	int nVal = aValues.GetSize();
 
 	while (nVal--)
-		mapAttribValues.Remove(szAttrib, aValues[nVal], TRUE);
+		mapAttribValues.Remove(sAttribID, aValues[nVal], TRUE);
 }
 
-void KANBANITEM::RemoveAllTrackedAttributeValues(LPCTSTR szAttrib)
+void KANBANITEM::RemoveAllTrackedAttributeValues(const CString& sAttribID)
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 	{
 		ASSERT(0);
 		return;
 	}
 
-	mapAttribValues.RemoveKey(szAttrib);
+	mapAttribValues.RemoveKey(sAttribID);
 }
 
 void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, LPCTSTR szValue)
@@ -505,13 +552,13 @@ void KANBANITEM::SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, int nValue)
 	SetTrackedAttributeValue(nAttribID, sValue);
 }
 
-CString KANBANITEM::GetTrackedAttributeValue(LPCTSTR szAttrib) const
+CString KANBANITEM::GetTrackedAttributeValue(const CString& sAttribID) const
 {
 	CString sValue;
 
-	if (!Misc::IsEmpty(szAttrib))
+	if (!sAttribID.IsEmpty())
 	{
-		const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+		const CStringArray* pArray = mapAttribValues.GetMapping(sAttribID);
 
 		if (pArray)
 			sValue = Misc::FormatArray(*pArray);
@@ -520,11 +567,11 @@ CString KANBANITEM::GetTrackedAttributeValue(LPCTSTR szAttrib) const
 	return sValue;
 }
 
-int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CStringArray& aValues) const
+int KANBANITEM::GetTrackedAttributeValues(const CString& sAttribID, DWORD dwOptions, CStringArray& aValues) const
 {
 	aValues.RemoveAll();
 
-	if ((_tcscmp(szAttrib, _T("PRIORITY")) == 0) || (_tcscmp(szAttrib, _T("RISK")) == 0))
+	if (KBUtils::IsPriorityOrRisk(sAttribID))
 	{
 		if ((dwOptions & KBCF_DONEHAVELOWESTPRIORITYRISK) && IsDone(TRUE))
 		{
@@ -538,7 +585,7 @@ int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CSt
 
 	if (aValues.GetSize() == 0)
 	{
-		const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+		const CStringArray* pArray = mapAttribValues.GetMapping(sAttribID);
 
 		if (pArray)
 			aValues.Copy(*pArray);
@@ -547,12 +594,12 @@ int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CSt
 	return aValues.GetSize();
 }
 
-BOOL KANBANITEM::HasTrackedAttributeValues(LPCTSTR szAttrib) const
+BOOL KANBANITEM::HasTrackedAttributeValues(const CString& sAttribID) const
 {
-	if (Misc::IsEmpty(szAttrib))
+	if (sAttribID.IsEmpty())
 		return FALSE;
 
-	const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+	const CStringArray* pArray = mapAttribValues.GetMapping(sAttribID);
 
 	return (pArray && pArray->GetSize());
 }
@@ -561,7 +608,7 @@ BOOL KANBANITEM::MatchesAttribute(const IUISELECTTASK& select) const
 {
 	ASSERT(!Misc::IsEmpty(select.szWords));
 
-	CString sAttrib = GetAttributeDisplayValue(select.nAttrib);
+	CString sAttrib = GetAttributeDisplayValue(select.nAttributeID);
 
 	if (sAttrib.IsEmpty())
 		return FALSE;
@@ -570,18 +617,18 @@ BOOL KANBANITEM::MatchesAttribute(const IUISELECTTASK& select) const
 	return (Misc::Find(select.szWords, sAttrib, select.bCaseSensitive, select.bWholeWord) != -1);
 }
 
-CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs) const
+CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs, BOOL bISODates) const
 {
-	if (KBUtils::IsCustomAttribute(nAttrib))
-		return GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttrib, aCustAttribDefs));
+	if (KBUtils::IsCustomAttribute(nAttribID))
+		return GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttribID, aCustAttribDefs));
 
 	// else
-	return GetAttributeDisplayValue(nAttrib);
+	return GetAttributeDisplayValue(nAttribID, bISODates);
 }
 
-CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
+CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, BOOL bISODates) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:
 		return sTitle;
@@ -594,39 +641,22 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TAGS:		
 	case TDCA_PRIORITY:	
 	case TDCA_RISK:			
-		return GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttrib));
+		return GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttribID));
 		
-	case TDCA_DONEDATE:		
-		if (CDateHelper::IsDateSet(dtDone))
-			return dtDone.Format(VAR_DATEVALUEONLY);
-		break;
-
-	case TDCA_DUEDATE:		
-		if (CDateHelper::IsDateSet(dtDue))
-			return dtDue.Format(VAR_DATEVALUEONLY);
-		break;
-
-	case TDCA_STARTDATE:		
-		if (CDateHelper::IsDateSet(dtStart))
-			return dtStart.Format(VAR_DATEVALUEONLY);
-		break;
-
-	case TDCA_CREATIONDATE:	
-		if (CDateHelper::IsDateSet(dtCreate))
-			return dtCreate.Format(VAR_DATEVALUEONLY);
-		break;
-
-	case TDCA_LASTMODDATE:		
-		if (CDateHelper::IsDateSet(dtLastMod))
-			return dtLastMod.Format(VAR_DATEVALUEONLY);
-		break;
+	case TDCA_DONEDATE:			return KBUtils::FormatDate(dtDone, bISODates);
+	case TDCA_DUEDATE:			return KBUtils::FormatDate(dtDue, bISODates);
+	case TDCA_STARTDATE:		return KBUtils::FormatDate(dtStart, bISODates);
+	case TDCA_CREATIONDATE:		return KBUtils::FormatDate(dtCreate, bISODates);
+	case TDCA_LASTMODDATE:		return KBUtils::FormatDate(dtLastMod, bISODates);
 
 	case TDCA_ID:				return Misc::Format(dwTaskID);
 	case TDCA_PERCENT:			return Misc::Format(nPercent, _T("%"));
+	case TDCA_COST:				return Misc::Format(dCost, 2);
+
 	case TDCA_CREATEDBY:		return sCreatedBy;
 	case TDCA_EXTERNALID:		return sExternalID;
-	case TDCA_COST:				return Misc::Format(dCost, 2);
 	case TDCA_RECURRENCE:		return sRecurrence;
+
 	case TDCA_TIMEESTIMATE:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
 	case TDCA_TIMEREMAINING:	return CTimeHelper().FormatTime(dTimeRemaining, MapUnitsToTHUnits(nTimeRemainingUnits), 2);
 	case TDCA_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
@@ -643,9 +673,9 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	return _T("");
 }
 
-BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
+BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:
 	case TDCA_ID:
@@ -659,7 +689,7 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TAGS:		
 	case TDCA_PRIORITY:	
 	case TDCA_RISK:			
-		return HasTrackedAttributeValues(KBUtils::GetAttributeID(nAttrib));
+		return HasTrackedAttributeValues(KBUtils::GetAttributeID(nAttribID));
 		
 	case TDCA_DONEDATE:			return CDateHelper::IsDateSet(dtDone);
 	case TDCA_DUEDATE:			return CDateHelper::IsDateSet(dtDue);
@@ -687,10 +717,10 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	return FALSE;
 }
 
-BOOL KANBANITEM::AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) const
+BOOL KANBANITEM::AttributeValuesMatch(const CString& sAttribID, const KANBANITEM& ki) const
 {
-	const CStringArray* pThisArray = mapAttribValues.GetMapping(szAttrib);
-	const CStringArray* pOtherArray = ki.mapAttribValues.GetMapping(szAttrib);
+	const CStringArray* pThisArray = mapAttribValues.GetMapping(sAttribID);
+	const CStringArray* pOtherArray = ki.mapAttribValues.GetMapping(sAttribID);
 
 	int nThisCount = (pThisArray ? pThisArray->GetSize() : 0);
 	int nOtherCount = (pOtherArray ? pOtherArray->GetSize() : 0);
@@ -705,9 +735,9 @@ BOOL KANBANITEM::AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) co
 	return TRUE;
 }
 
-BOOL KANBANITEM::AttributeValuesMatch(LPCTSTR szAttrib, const CStringArray& aValues) const
+BOOL KANBANITEM::AttributeValuesMatch(const CString& sAttribID, const CStringArray& aValues) const
 {
-	const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+	const CStringArray* pArray = mapAttribValues.GetMapping(sAttribID);
 
 	int nThisCount = (pArray ? pArray->GetSize() : 0);
 	int nOtherCount = aValues.GetSize();
@@ -818,9 +848,9 @@ BOOL KANBANITEM::HasDueOrDonePriorityOrRisk(DWORD dwOptions) const
 	return FALSE;
 }
 
-int KANBANITEM::GetPriorityOrRisk(TDC_ATTRIBUTE nAttrib, DWORD dwOptions) const
+int KANBANITEM::GetPriorityOrRisk(TDC_ATTRIBUTE nAttribID, DWORD dwOptions) const
 {
-	ASSERT((nAttrib == TDCA_PRIORITY) || (nAttrib == TDCA_RISK));
+	ASSERT((nAttribID == TDCA_PRIORITY) || (nAttribID == TDCA_RISK));
 
 	if ((dwOptions & KBCF_DONEHAVELOWESTPRIORITYRISK) && IsDone(TRUE))
 		return -1;
@@ -828,7 +858,7 @@ int KANBANITEM::GetPriorityOrRisk(TDC_ATTRIBUTE nAttrib, DWORD dwOptions) const
 	if ((dwOptions & KBCF_DUEHAVEHIGHESTPRIORITYRISK) && IsDue())
 		return 11;
 
-	CString sValue(GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttrib)));
+	CString sValue(GetTrackedAttributeValue(KBUtils::GetAttributeID(nAttribID)));
 
 	return (sValue.IsEmpty() ? -2 : _ttoi(sValue));
 }
@@ -1037,9 +1067,9 @@ void CKanbanItemMap::ClearPinnedItems()
 	}
 }
 
-int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, DWORD dwOptions, CKanbanItemArrayMap& map) const
+int CKanbanItemMap::BuildTempItemMaps(const CString& sAttribID, DWORD dwOptions, int nNumPriorityRiskLevels, CKanbanItemArrayMap& map) const
 {
-	ASSERT(!Misc::IsEmpty(szAttribID));
+	ASSERT(!sAttribID.IsEmpty());
 
 	map.RemoveAll();
 
@@ -1054,19 +1084,38 @@ int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, DWORD dwOptions, CKanb
 		ASSERT(pKI);
 
 		CStringArray aAttribValues;
-		int nVal = pKI->GetTrackedAttributeValues(szAttribID, dwOptions, aAttribValues);
+		int nNumVal = pKI->GetTrackedAttributeValues(sAttribID, dwOptions, aAttribValues);
 
-		if (nVal == 0)
+		if (nNumVal == 0)
 		{
 			AddItemToMap(pKI, _T(""), map);
 		}
 		else
 		{
+			int nVal = nNumVal;
+
 			while (nVal--)
 			{
 				const CString& sValue = aAttribValues[nVal];
 				AddItemToMap(pKI, sValue, map);
 			}
+		}
+	}
+
+	// If the tracked attribute is Priority or Risk
+	// Move all tasks with values above m_nNumPriorityRiskLevels
+	// to the bucket with the value (m_nNumPriorityRiskLevels - 1)
+	if ((nNumPriorityRiskLevels < 11) && KBUtils::IsPriorityOrRisk(sAttribID))
+	{
+		CString sLastColValue = Misc::Format(nNumPriorityRiskLevels - 1);
+
+		for (int nLevel = nNumPriorityRiskLevels; nLevel < 11; nLevel++)
+		{
+			CString sColValue = Misc::Format(nLevel);
+			const CKanbanItemArray* pKIArr = map.GetMapping(sColValue);
+
+			if (pKIArr && pKIArr->GetSize())
+				map.GetAddMapping(sLastColValue)->Append(*pKIArr);
 		}
 	}
 
@@ -1087,18 +1136,18 @@ void CKanbanItemMap::AddItemToMap(const KANBANITEM* pKI, const CString& sValue, 
 }
 
 #ifdef _DEBUG
-void CKanbanItemMap::TraceSummary(LPCTSTR szAttribID, DWORD dwOptions) const
+void CKanbanItemMap::TraceSummary(const CString& sAttribID, DWORD dwOptions) const
 {
 	CKanbanItemArrayMap map;
 
-	if (BuildTempItemMaps(szAttribID, dwOptions, map) == 0)
+	if (BuildTempItemMaps(sAttribID, dwOptions, 11, map) == 0)
 	{
-		TRACE(_T("'%s' contains no unique values\n"), szAttribID);
+		TRACE(_T("'%s' contains no unique values\n"), sAttribID);
 		return;
 	}
 
 	// else
-	TRACE(_T("'%s' contains the following unique values:\n"), szAttribID);
+	TRACE(_T("'%s' contains the following unique values:\n"), sAttribID);
 
 	POSITION pos = map.GetStartPosition();
 
@@ -1183,8 +1232,7 @@ void CKanbanItemArrayMap::RemoveAll()
 KANBANCOLUMN::KANBANCOLUMN() 
 	: 
  	nMaxTaskCount(0), 
-	crBackground(CLR_NONE), 
-	crExcess(255) 
+	crBackground(CLR_NONE) 
 {
 
 }
@@ -1201,7 +1249,6 @@ KANBANCOLUMN& KANBANCOLUMN::operator=(const KANBANCOLUMN& kc)
 	aAttribValues.Copy(kc.aAttribValues);
  	nMaxTaskCount = kc.nMaxTaskCount;
 	crBackground = kc.crBackground;
-	crExcess = kc.crExcess;
 
 	return *this;
 }
@@ -1225,8 +1272,7 @@ BOOL KANBANCOLUMN::Matches(const KANBANCOLUMN& kc, BOOL bIncDisplayAttribs) cons
 	if (bMatches && bIncDisplayAttribs)
 	{
 		bMatches = ((crBackground == kc.crBackground) &&
-					(nMaxTaskCount == kc.nMaxTaskCount) &&
-					(crExcess == kc.crExcess));
+					(nMaxTaskCount == kc.nMaxTaskCount));
 	}
 
 	return bMatches;

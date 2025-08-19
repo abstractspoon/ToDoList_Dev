@@ -29,7 +29,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDLTaskCtrlBaseTest::CTDLTaskCtrlBaseTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CTDLTaskCtrlBaseTest::CTDLTaskCtrlBaseTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CTDLTaskCtrlBaseTest"), utils)
 {
 	// Calculation styles
 	m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
@@ -85,23 +87,21 @@ TESTRESULT CTDLTaskCtrlBaseTest::Run()
 
 void CTDLTaskCtrlBaseTest::TestColumnRecalculationPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CTDLTaskCtrlBaseTest::ColumnRecalculationPerformance\n"));
 		return;
 	}
 
-	BeginTest(_T("CTDLTaskCtrlBaseTest::ColumnRecalculationPerformance"));
+	CTDCScopedTest test(*this, _T("CTDLTaskCtrlBaseTest::ColumnRecalculationPerformance"));
 	
 	TestTreeColumnRecalculationPerformance();
 	TestListColumnRecalculationPerformance();
-
-	EndTest();
 }
 
 void CTDLTaskCtrlBaseTest::TestTreeColumnRecalculationPerformance()
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	CTaskFile tasks;
 	CTaskFileTest(m_utils).PopulateHierarchy(tasks, 4);
@@ -128,7 +128,7 @@ void CTDLTaskCtrlBaseTest::TestTreeColumnRecalculationPerformance()
 
 void CTDLTaskCtrlBaseTest::TestListColumnRecalculationPerformance()
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	CTaskFile tasks;
 	CTaskFileTest(m_utils).PopulateFlatList(tasks, 10000);
@@ -179,7 +179,7 @@ void CTDLTaskCtrlBaseTest::PopulateLongestMap(const CToDoCtrlData& data, CTDCLon
 		mapLongest.CheckUpdateValue(TDCC_RECURRENCE, pTDI->trRecurrence.GetRegularityText(FALSE));
 
 		// Attributes dependent on subtask values
-		mapLongest.UpdateValue(TDCC_PATH, formatter.GetTaskPath(pTDI, pTDS));
+		mapLongest.UpdateValue(TDCC_PATH, formatter.GetTaskPath(pTDS));
 		mapLongest.UpdateValue(TDCC_POSITION, formatter.GetTaskPosition(pTDS));
 		mapLongest.UpdateValue(TDCC_SUBTASKDONE, formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
 		mapLongest.UpdateValue(TDCC_COST, formatter.GetTaskCost(pTDI, pTDS));

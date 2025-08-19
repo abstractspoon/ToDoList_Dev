@@ -73,6 +73,11 @@ void CFontCache::Release()
 	Clear();
 }
 
+BOOL CFontCache::IsSameFontNameAndSize(HFONT hFont) const
+{
+	return GraphicsMisc::IsSameFontNameAndSize(GetBaseFont(), hFont);
+}
+
 CFont* CFontCache::GetFont(BOOL bBold, BOOL bItalic, BOOL bUnderline, BOOL bStrikeThru)
 {
 	HFONT hFont = GetHFont(bBold, bItalic, bUnderline, bStrikeThru);
@@ -141,14 +146,12 @@ HFONT CFontCache::GetBaseFont() const
 void CFontCache::Clear()
 {
 	POSITION pos = m_mapFonts.GetStartPosition();
+	DWORD dwUnused = 0;
+	HFONT hFont = NULL;
 	
 	while (pos)
 	{
-		DWORD dwDummy = 0;
-		HFONT hFont = NULL;
-		
-		m_mapFonts.GetNextAssoc(pos, dwDummy, hFont);
-		
+		m_mapFonts.GetNextAssoc(pos, dwUnused, hFont);
 		GraphicsMisc::VerifyDeleteObject(hFont);
 	}
 	

@@ -77,6 +77,10 @@
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
       <Name>ToolStripEx</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\UIComponents\UIComponents.csproj">
+      <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
+      <Name>UIComponents</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
       <Name>PluginHelpers</Name>
@@ -98,10 +102,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="toolbar_std.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="WordCloud.ico" />
+    <Content Include="Resources\toolbar_std.bmp" />
+    <Content Include="Resources\WordCloud.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -125,7 +125,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ResourceCompile Include="DayViewUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\dayview.ico" />
+    <None Include="..\DayViewUIExtensionCore\Resources\dayview.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DayViewUIExtensionCore\DayViewUIExtensionCore.csproj">

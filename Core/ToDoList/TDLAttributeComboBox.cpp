@@ -9,6 +9,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
+#include "..\shared\misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,9 +20,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeComboBox
 
-CTDLAttributeComboBox::CTDLAttributeComboBox(BOOL bIncRelativeDates)
+CTDLAttributeComboBox::CTDLAttributeComboBox(DWORD dwOptions)
 	:
-	m_bIncRelativeDates(bIncRelativeDates)
+	m_dwOptions(dwOptions)
 {
 }
 
@@ -30,10 +31,7 @@ CTDLAttributeComboBox::~CTDLAttributeComboBox()
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLAttributeComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CTDLTaskAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
+BEGIN_MESSAGE_MAP(CTDLAttributeComboBox, COwnerdrawComboBoxBase)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -41,10 +39,11 @@ END_MESSAGE_MAP()
 
 void CTDLAttributeComboBox::SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
-	m_aAttribDefs.Copy(aAttribDefs);
-
-	if (GetSafeHwnd())
-		BuildCombo();
+	if (!Misc::MatchAllT(aAttribDefs, m_aAttribDefs, FALSE))
+	{
+		m_aAttribDefs.Copy(aAttribDefs);
+		RebuildCombo();
+	}
 }
 
 void CTDLAttributeComboBox::SetAttributeFilter(const CTDCAttributeMap& mapAttrib)
@@ -52,28 +51,30 @@ void CTDLAttributeComboBox::SetAttributeFilter(const CTDCAttributeMap& mapAttrib
 	if (!m_mapWantedAttrib.MatchAll(mapAttrib))
 	{
 		m_mapWantedAttrib.Copy(mapAttrib);
-		BuildCombo();
+		RebuildCombo();
 	}
 }
 
-BOOL CTDLAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, BOOL bRelative)
+BOOL CTDLAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, BOOL bRelative)
 {
-	DWORD dwItemData = EncodeItemData(nAttrib, bRelative);
+	CheckBuildCombo();
 
-	return (CDialogHelper::SelectItemByData(*this, dwItemData) != CB_ERR);
+	DWORD dwItemData = EncodeItemData(nAttribID, bRelative);
+
+	return (CDialogHelper::SelectItemByDataT(*this, dwItemData) != CB_ERR);
 }
 
 BOOL CTDLAttributeComboBox::SetSelectedAttribute(const CString& sCustAttribID, BOOL bRelative)
 {
-	TDC_ATTRIBUTE nAttrib = m_aAttribDefs.GetAttributeID(sCustAttribID);
+	TDC_ATTRIBUTE nAttribID = m_aAttribDefs.GetAttributeID(sCustAttribID);
 
-	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	return SetSelectedAttribute(nAttrib, bRelative);
+	return SetSelectedAttribute(nAttribID, bRelative);
 }
 
 TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute() const
@@ -84,11 +85,11 @@ TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute() const
 
 TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute(CString& sCustAttribID) const
 {
-	TDC_ATTRIBUTE nAttrib = GetSelectedAttribute();
+	TDC_ATTRIBUTE nAttribID = GetSelectedAttribute();
 
-	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
-		sCustAttribID = m_aAttribDefs.GetAttributeTypeID(nAttrib);
+		sCustAttribID = m_aAttribDefs.GetAttributeTypeID(nAttribID);
 		ASSERT(!sCustAttribID.IsEmpty());
 	}
 	else
@@ -96,43 +97,43 @@ TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute(CString& sCustAttribID
 		sCustAttribID.Empty();
 	}
 
-	return nAttrib;
+	return nAttribID;
 }
 
 TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute(BOOL& bRelative) const
 {
 	int nSel = GetCurSel();
 
-	TDC_ATTRIBUTE nAttrib = TDCA_NONE;
+	TDC_ATTRIBUTE nAttribID = TDCA_NONE;
 	bRelative = FALSE;
 
 	if (nSel != CB_ERR)
 	{
 		DWORD dwItemData = GetItemData(nSel);
-		DecodeItemData(dwItemData, nAttrib, bRelative);
+		DecodeItemData(dwItemData, nAttribID, bRelative);
 	}
 
-	return nAttrib;
+	return nAttribID;
 }
 
-void CTDLAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttrib)
+void CTDLAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttribID)
 {
 	if (pDX->m_bSaveAndValidate)
-		nAttrib = GetSelectedAttribute();
+		nAttribID = GetSelectedAttribute();
 	else
-		SetSelectedAttribute(nAttrib);
+		SetSelectedAttribute(nAttribID);
 }
 
-void CTDLAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttrib, CString& sCustAttribID)
+void CTDLAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttribID, CString& sCustAttribID)
 {
 	if (pDX->m_bSaveAndValidate)
 	{
-		nAttrib = GetSelectedAttribute(sCustAttribID);
+		nAttribID = GetSelectedAttribute(sCustAttribID);
 	}
 	else
 	{
 		if (sCustAttribID.IsEmpty())
-			SetSelectedAttribute(nAttrib);
+			SetSelectedAttribute(nAttribID);
 		else
 			SetSelectedAttribute(sCustAttribID);
 	}
@@ -147,70 +148,111 @@ CString CTDLAttributeComboBox::GetSelectedAttributeText() const
 		GetLBText(nSel, sItem);
 
 	return sItem;
+}
 
+void CTDLAttributeComboBox::CheckAddItem(TDC_ATTRIBUTE nAttribID, UINT nStrResID, CSortItemArray& aItems)
+{
+	if (!nStrResID || !WantAttribute(nAttribID))
+		return;
+
+	AddItem(CEnString(nStrResID), nAttribID, aItems);
+}
+
+void CTDLAttributeComboBox::CheckAddItem(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSortItemArray& aItems)
+{
+	if (!WantAttribute(attribDef.GetAttributeID()))
+		return;
+
+	CString sItem;
+
+	if (m_dwOptions & TDLACB_GROUPCUSTOMATTRIBS)
+		sItem = attribDef.sLabel; // No need to suffix
+	else
+		sItem = CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+
+	AddItem(sItem, attribDef.GetAttributeID(), aItems);
+}
+
+void CTDLAttributeComboBox::AddItem(const CString& sItem, TDC_ATTRIBUTE nAttribID, CSortItemArray& aItems)
+{
+	SORTITEM si;
+
+	si.sItem = sItem;
+	si.nAttribID = nAttribID;
+	si.bRelativeDate = FALSE;
+
+	aItems.Add(si);
+
+	if (Misc::HasFlag(m_dwOptions, TDLACB_INCRELATIVEDATES) && AttributeIsDate(nAttribID))
+	{
+		si.bRelativeDate = TRUE;
+
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && !Misc::HasFlag(m_dwOptions, TDLACB_GROUPCUSTOMATTRIBS))
+			si.sItem = CEnString(IDS_CUSTOMRELDATECOLUMN, si.sItem);
+		else 
+			si.sItem += (' ' + CEnString(IDS_TDLBC_RELATIVESUFFIX));
+
+		aItems.Add(si);
+	}
 }
 
 void CTDLAttributeComboBox::BuildCombo()
 {
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
+
 	TDC_ATTRIBUTE nSelAttrib = GetSelectedAttribute();
-	ResetContent();
 
-	CLocalizer::EnableTranslation(*this, FALSE);
+	CArray<SORTITEM, SORTITEM&> aItems, aCustomItems;
+	SORTITEM si;
 
-	int nAtt;
-	for (nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
+	// Built-in attributes
+	CheckAddItem(TDCA_REMINDER, IDS_TDLBC_REMINDER, aItems);
+
+	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 	{
-		const TDCATTRIBUTE& ap = ATTRIBUTES[nAtt];
-
-		if (ap.nAttribResID && WantAttribute(ap.nAttribID))
-		{
-			CEnString sAttrib(ap.nAttribResID);
-			DWORD dwItemData = EncodeItemData(ap.nAttribID);
-
-			CDialogHelper::AddString(*this, sAttrib, dwItemData); 
-
-			// relative dates
-			if (m_bIncRelativeDates && AttributeIsDate(ap.nAttribID))
-			{
-				// then add relative version too
-				dwItemData = EncodeItemData(ap.nAttribID, TRUE);
-
-				sAttrib += ' ';
-				sAttrib += CEnString(IDS_TDLBC_RELATIVESUFFIX);
-
-				CDialogHelper::AddString(*this, sAttrib, dwItemData); 
-			}
-		}
+		const TDCATTRIBUTE& ap = TASKATTRIBUTES[nAtt];
+		CheckAddItem(ap.nAttributeID, ap.nLabelResID, aItems);
 	}
 
 	// custom attributes
-	for (nAtt = 0; nAtt < m_aAttribDefs.GetSize(); nAtt++)
+	for (int nCust = 0; nCust < m_aAttribDefs.GetSize(); nCust++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAtt];
-
-		if (WantAttribute(attribDef.GetAttributeID()))
-		{
-			CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			TDC_ATTRIBUTE attrib = attribDef.GetAttributeID();
-
-			DWORD dwItemData = EncodeItemData(attrib);
-			CDialogHelper::AddString(*this, sAttrib, dwItemData);
-
-			// is it a date
-			if (m_bIncRelativeDates && AttributeIsDate(attrib))
-			{
-				// then add relative version too
-				dwItemData = EncodeItemData(attrib, TRUE);
-				sAttrib.Format(IDS_CUSTOMRELDATECOLUMN, attribDef.sLabel);
-
-				CDialogHelper::AddString(*this, sAttrib, dwItemData);
-			}
-		}
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nCust];
+		CheckAddItem(attribDef, aCustomItems);
 	}
 
-	// Misc others
-	if (WantAttribute(TDCA_REMINDER))
-		CDialogHelper::AddString(*this, IDS_TDLBC_REMINDER, EncodeItemData(TDCA_REMINDER));
+	// Rebuild combo
+	CLocalizer::EnableTranslation(*this, FALSE);
+
+	ResetContent();
+
+	// Today is always first regardless
+	if (WantAttribute(TDCA_TODAY))
+		CDialogHelper::AddStringT(*this, CEnString(IDS_TODAY), EncodeItemData(TDCA_TODAY));
+
+	if (Misc::HasFlag(m_dwOptions, TDLACB_GROUPCUSTOMATTRIBS) && aCustomItems.GetSize())
+	{
+		ASSERT(!HasStyle(CBS_SORT));
+		ASSERT(HasStyle(CBS_OWNERDRAWFIXED));
+		ASSERT(HasStyle(CBS_HASSTRINGS));
+
+		int nItem = AddString(CEnString(IDS_TDLBC_CUSTOMATTRIBS));
+		SetHeadingItem(nItem);
+
+		Misc::SortArrayT<SORTITEM>(aCustomItems, SortProc);
+		AddItemsToCombo(aCustomItems);
+
+		nItem = AddString(CEnString(IDS_DEFAULTATTRIBUTES));
+		SetHeadingItem(nItem);
+	}
+	else
+	{
+		aItems.Append(aCustomItems);
+	}
+
+	Misc::SortArrayT<SORTITEM>(aItems, SortProc);
+	AddItemsToCombo(aItems);
 
 	// restore selection
 	SetSelectedAttribute(nSelAttrib);
@@ -219,13 +261,37 @@ void CTDLAttributeComboBox::BuildCombo()
 	CDialogHelper::RefreshMaxDropWidth(*this);
 }
 
-DWORD CTDLAttributeComboBox::EncodeItemData(TDC_ATTRIBUTE nAttrib, BOOL bRelative) const
+void CTDLAttributeComboBox::AddItemsToCombo(const CSortItemArray& aItems)
+{
+	for (int nItem = 0; nItem < aItems.GetSize(); nItem++)
+	{
+		const SORTITEM& si = aItems[nItem];
+
+		CDialogHelper::AddStringT(*this, si.sItem, EncodeItemData(si.nAttribID, si.bRelativeDate));
+	}
+}
+
+int CTDLAttributeComboBox::SortProc(const void* v1, const void* v2)
+{
+	const SORTITEM* pSI1 = (SORTITEM*)v1;
+	const SORTITEM* pSI2 = (SORTITEM*)v2;
+
+	if (pSI1->nAttribID == TDCA_TODAY)
+		return -1;
+
+	if (pSI2->nAttribID == TDCA_TODAY)
+		return 1;
+
+	return Misc::NaturalCompare(pSI1->sItem, pSI2->sItem);
+}
+
+DWORD CTDLAttributeComboBox::EncodeItemData(TDC_ATTRIBUTE nAttribID, BOOL bRelative) const
 {
 	// sanity check
-	if (!AttributeIsDate(nAttrib))
+	if (!AttributeIsDate(nAttribID))
 		bRelative = FALSE;
 
-	return MAKELONG(nAttrib, bRelative);
+	return MAKELONG(nAttribID, bRelative);
 }
 
 BOOL CTDLAttributeComboBox::AttributeIsTimePeriod(TDC_ATTRIBUTE nAttribID) const
@@ -246,9 +312,9 @@ BOOL CTDLAttributeComboBox::AttributeIsTimePeriod(TDC_ATTRIBUTE nAttribID) const
 	return FALSE;
 }
 
-BOOL CTDLAttributeComboBox::WantAttribute(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDLAttributeComboBox::WantAttribute(TDC_ATTRIBUTE nAttribID) const
 {
-	return (m_mapWantedAttrib.IsEmpty() || m_mapWantedAttrib.Has(nAttrib));
+	return (m_mapWantedAttrib.IsEmpty() || m_mapWantedAttrib.HasAttribOrAll(nAttribID));
 }
 
 BOOL CTDLAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE nAttribID) const
@@ -272,11 +338,27 @@ BOOL CTDLAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE nAttribID) const
 	return FALSE;
 }
 
-void CTDLAttributeComboBox::DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttrib, BOOL& bRelative) const
+void CTDLAttributeComboBox::DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttribID, BOOL& bRelative) const
 {
-	nAttrib = (TDC_ATTRIBUTE)LOWORD(dwItemData);
+	nAttribID = (TDC_ATTRIBUTE)LOWORD(dwItemData);
 	bRelative = (BOOL)HIWORD(dwItemData);
 
 	// sanity check
-	ASSERT (!bRelative || AttributeIsDate(nAttrib));
+	ASSERT (!bRelative || AttributeIsDate(nAttribID));
+}
+
+void CTDLAttributeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+						  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
+{
+	CRect rItem(rect);
+
+	// Don't indent <today> when grouped
+	if (bList && 
+		(dwItemData == TDCA_TODAY) && 
+		Misc::HasFlag(m_dwOptions, TDLACB_GROUPCUSTOMATTRIBS))
+	{
+		rItem.left = 0;
+	}
+
+	COwnerdrawComboBoxBase::DrawItemText(dc, rItem, nItem, nItemState, dwItemData, sItem, bList, crText);
 }

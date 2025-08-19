@@ -161,6 +161,10 @@ SOURCE=..\ToDoList\PreferencesUIVisibilityPage.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\StdAfx.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TabbedToDoCtrl.cpp
 # End Source File
 # Begin Source File
@@ -178,10 +182,6 @@ SOURCE=..\ToDoList\TaskListCsvExporter.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TaskListCsvImporter.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TaskListDropTarget.cpp
 # End Source File
 # Begin Source File
 
@@ -217,6 +217,10 @@ SOURCE=..\ToDoList\TDCAnonymizeTasklist.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCAnonymizeTaskTimeLog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCContentMgr.cpp
 # End Source File
 # Begin Source File
@@ -229,7 +233,11 @@ SOURCE=..\ToDoList\TDCCustomAttributeDef.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDCCustomAttributeUIHelper.cpp
+SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCDarkMode.cpp
 # End Source File
 # Begin Source File
 
@@ -265,6 +273,10 @@ SOURCE=..\ToDoList\TDCMainMenu.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCMenuIconMgr.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCMergeTasklist.cpp
 # End Source File
 # Begin Source File
@@ -277,7 +289,11 @@ SOURCE=..\ToDoList\TDCRecurrence.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcreminder.cpp
+SOURCE=..\ToDoList\TDCRecurrenceHelper.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCReminder.cpp
 # End Source File
 # Begin Source File
 
@@ -293,7 +309,7 @@ SOURCE=..\ToDoList\TDCSimpleTextContent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcsort.cpp
+SOURCE=..\ToDoList\TDCSort.cpp
 # End Source File
 # Begin Source File
 
@@ -305,7 +321,15 @@ SOURCE=..\ToDoList\TDCStartupOptions.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCStruct.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCTaskCompletion.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCTaskListDropTarget.cpp
 # End Source File
 # Begin Source File
 
@@ -437,11 +461,11 @@ SOURCE=..\ToDoList\TDLFilterOptionComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdlfindresultslistctrl.cpp
+SOURCE=..\ToDoList\TDLFindResultsListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdlfindtaskattributecombobox.cpp
+SOURCE=..\ToDoList\TDLFindTaskAttributeComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -457,7 +481,7 @@ SOURCE=..\ToDoList\TDLGoToTaskDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdliconcombobox.cpp
+SOURCE=..\ToDoList\TDLIconComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -549,6 +573,10 @@ SOURCE=..\ToDoList\TDLRiskComboBox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLSelectTaskDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLSendTasksDlg.cpp
 # End Source File
 # Begin Source File
@@ -561,6 +589,10 @@ SOURCE=..\ToDoList\TDLShowReminderDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLShowReminderListCtrl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLSimpleTextContentCtrl.cpp
 # End Source File
 # Begin Source File
@@ -570,6 +602,14 @@ SOURCE=..\ToDoList\TDLStatusBar.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskAttributeCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskAttributeListCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -677,6 +717,10 @@ SOURCE=..\ToDoList\ToDoCtrlFind.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\ToDoCtrlLayout.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\ToDoCtrlMgr.cpp
 # End Source File
 # Begin Source File
@@ -690,6 +734,10 @@ SOURCE=..\ToDoList\ToDoCtrlUndo.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\ToDoitem.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\ToDoList.cpp
 # End Source File
 # Begin Source File
 
@@ -777,6 +825,14 @@ SOURCE=..\ToDoList\PreferencesUIVisibilityPage.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\StdAfx.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TabbedToDoCtrl.h
 # End Source File
 # Begin Source File
@@ -794,10 +850,6 @@ SOURCE=..\ToDoList\TaskListCsvExporter.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TaskListCsvImporter.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TaskListDropTarget.h
 # End Source File
 # Begin Source File
 
@@ -833,11 +885,15 @@ SOURCE=..\ToDoList\TDCAnonymizeTasklist.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCAnonymizeTaskTimeLog.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCContentMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdccustomattribdata.h
+SOURCE=..\ToDoList\TDCCustomAttribData.h
 # End Source File
 # Begin Source File
 
@@ -845,7 +901,11 @@ SOURCE=..\ToDoList\TDCCustomAttributeDef.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDCCustomAttributeUIHelper.h
+SOURCE=..\ToDoList\TDCCustomFilterAttributeUIHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCDarkMode.h
 # End Source File
 # Begin Source File
 
@@ -853,7 +913,7 @@ SOURCE=..\ToDoList\TDCDialogHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcenum.h
+SOURCE=..\ToDoList\TDCEnum.h
 # End Source File
 # Begin Source File
 
@@ -885,7 +945,11 @@ SOURCE=..\ToDoList\TDCMainMenu.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcmapping.h
+SOURCE=..\ToDoList\TDCMapping.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCMenuIconMgr.h
 # End Source File
 # Begin Source File
 
@@ -893,7 +957,7 @@ SOURCE=..\ToDoList\TDCMergeTasklist.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcmsg.h
+SOURCE=..\ToDoList\TDCMsg.h
 # End Source File
 # Begin Source File
 
@@ -905,7 +969,11 @@ SOURCE=..\ToDoList\TDCRecurrence.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcreminder.h
+SOURCE=..\ToDoList\TDCRecurrenceHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCReminder.h
 # End Source File
 # Begin Source File
 
@@ -921,7 +989,7 @@ SOURCE=..\ToDoList\TDCSimpleTextContent.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcsort.h
+SOURCE=..\ToDoList\TDCSort.h
 # End Source File
 # Begin Source File
 
@@ -933,19 +1001,27 @@ SOURCE=..\ToDoList\TDCStartupOptions.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcstatic.h
+SOURCE=..\ToDoList\TDCStatic.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcstruct.h
+SOURCE=..\ToDoList\TDCStringRes.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdcswitch.h
+SOURCE=..\ToDoList\TDCStruct.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCSwitch.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCTaskCompletion.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCTaskListDropTarget.h
 # End Source File
 # Begin Source File
 
@@ -1077,11 +1153,11 @@ SOURCE=..\ToDoList\TDLFilterOptionComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdlfindresultslistctrl.h
+SOURCE=..\ToDoList\TDLFindResultsListCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdlfindtaskattributecombobox.h
+SOURCE=..\ToDoList\TDLFindTaskAttributeComboBox.h
 # End Source File
 # Begin Source File
 
@@ -1097,7 +1173,7 @@ SOURCE=..\ToDoList\TDLGoToTaskDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdliconcombobox.h
+SOURCE=..\ToDoList\TDLIconComboBox.h
 # End Source File
 # Begin Source File
 
@@ -1189,6 +1265,10 @@ SOURCE=..\ToDoList\TDLRiskComboBox.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLSelectTaskDlg.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLSendTasksDlg.h
 # End Source File
 # Begin Source File
@@ -1201,6 +1281,10 @@ SOURCE=..\ToDoList\TDLShowReminderDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLShowReminderListCtrl.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLSimpleTextContentCtrl.h
 # End Source File
 # Begin Source File
@@ -1210,6 +1294,14 @@ SOURCE=..\ToDoList\TDLStatusBar.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskAttributeCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskAttributeListCtrl.h
 # End Source File
 # Begin Source File
 
@@ -1301,10 +1393,6 @@ SOURCE=..\ToDoList\TDLWelcomeWizard.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\tdstringres.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\ToDoCtrl.h
 # End Source File
 # Begin Source File
@@ -1325,6 +1413,10 @@ SOURCE=..\ToDoList\ToDoCtrlFind.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\ToDoCtrlLayout.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\ToDoCtrlMgr.h
 # End Source File
 # Begin Source File
@@ -1338,6 +1430,10 @@ SOURCE=..\ToDoList\ToDoCtrlUndo.h
 # Begin Source File
 
 SOURCE=..\ToDoList\ToDoitem.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\ToDoList.h
 # End Source File
 # Begin Source File
 

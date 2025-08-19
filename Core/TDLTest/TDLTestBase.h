@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "..\shared\EnCommandlineInfo.h"
+#include "..\shared\Misc.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -22,7 +23,8 @@ public:
 	CTestUtils(const CTestUtils& utils);
 	
 	BOOL Initialise(const CString& sOutputDir, const CString& sControlDir);
-	BOOL HasCommandlineFlag(TCHAR cFlag) const;
+	
+	BOOL GetWantPerformanceTests() const { return HasCommandlineFlag(_T("p")); }
 	
 	CString GetOutputFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const;
 	CString GetControlFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const;
@@ -38,6 +40,8 @@ public:
 	
 	int Compare(const CString& s1, const CString& s2, BOOL bCaseSensitive = TRUE) const;
 	int Compare(LPCTSTR sz1, LPCTSTR sz2, BOOL bCaseSensitive = TRUE) const;
+
+	BOOL HasCommandlineFlag(LPCTSTR szFlag) const;
 
 protected:
 	CString m_sOutputDir;
@@ -82,7 +86,7 @@ struct TESTRESULT
 		return ((nNumError != other.nNumError) || (nNumSuccess != other.nNumSuccess));
 	}
 
-	void ReportResults() const
+	void ReportResults(LPCTSTR szTest, BOOL bAssertErrors) const
 	{
 		if (!GetTotal())
 		{
@@ -90,11 +94,18 @@ struct TESTRESULT
 		}
 		else
 		{
+			ASSERT(!Misc::IsEmpty(szTest));
+
 			if (nNumError)
-				_tprintf(_T("\n  %2d/%2d tests FAILED\n"), nNumError, GetTotal());
+			{
+				_tprintf(_T("\n  %2d/%2d of '%s' tests FAILED\n"), nNumError, GetTotal(), szTest);
+
+				if (bAssertErrors && ::IsDebuggerPresent())
+					ASSERT(0);
+			}
 
 			if (nNumSuccess)
-				_tprintf(_T("\n  %2d/%2d tests SUCCEEDED\n"), nNumSuccess, GetTotal());
+				_tprintf(_T("\n  %2d/%2d of '%s' tests SUCCEEDED\n"), nNumSuccess, GetTotal(), szTest);
 		}
 	}
 
@@ -104,9 +115,24 @@ struct TESTRESULT
 
 //////////////////////////////////////////////////////////////////////
 
+class CTDLTestBase;
+
+class CTDCScopedTest
+{
+public:
+	CTDCScopedTest(CTDLTestBase& base, LPCTSTR szTest);
+	~CTDCScopedTest();
+
+protected:
+	CTDLTestBase& m_base;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class CTDLTestBase
 {
 	friend class CTDLTestSelfTest;
+	friend class CTDCScopedTest;
 
 public:
 	virtual ~CTDLTestBase();
@@ -116,10 +142,13 @@ public:
 	static BOOL SelfTest();
 	
 protected:
-	CTDLTestBase(const CTestUtils& utils);
+	CTDLTestBase(LPCTSTR szName, const CTestUtils& utils);
 
 	BOOL BeginTest(LPCTSTR szTest);
 	BOOL EndTest();
+
+	BOOL BeginSubTest(LPCTSTR szSubTest);
+	BOOL EndSubTest();
 
 	BOOL ExpectTrue(bool b) const;
 	BOOL ExpectTrue(BOOL b) const;
@@ -198,7 +227,7 @@ private:
 	TESTRESULT m_resTotal;
 
 	mutable UINT m_nCurTest;
-	CString m_sCurrentTest;
+	CString m_sName, m_sCurTest, m_sCurSubTest;
 
 private:
 	CTDLTestBase();
@@ -222,7 +251,7 @@ private:
 	template <class T> 
 	BOOL ExpectCompareT(T t1, LPCTSTR szFmt1, T t2, LPCTSTR szFmt2, TEST_OP nOp) const
 	{
-		return HandleCompareResult(t1, szFmt1, t2, szFmt2, nOp, m_utils.CompareT(t1, t2));
+		return HandleCompareResultT(t1, szFmt1, t2, szFmt2, nOp, m_utils.CompareT(t1, t2));
 	}
 
 	// specifically for float and double
@@ -236,11 +265,11 @@ private:
 		else
 			sTrail = _T("No tolerance");
 
-		return HandleCompareResult(t1, szFmt1, t2, szFmt2, nOp, m_utils.Compare(t1, t2, tol), sTrail);
+		return HandleCompareResultT(t1, szFmt1, t2, szFmt2, nOp, m_utils.Compare(t1, t2, tol), sTrail);
 	}
 
 	template <class T> 
-	BOOL HandleCompareResult(T t1, LPCTSTR szFmt1, T t2, LPCTSTR szFmt2, TEST_OP nOp, int nCmp, LPCTSTR szTrail = _T("")) const
+	BOOL HandleCompareResultT(T t1, LPCTSTR szFmt1, T t2, LPCTSTR szFmt2, TEST_OP nOp, int nCmp, LPCTSTR szTrail = _T("")) const
 	{
 		m_nCurTest++;
 		BOOL bSuccess = FALSE;
@@ -285,7 +314,11 @@ private:
 			ASSERT(!sOp.IsEmpty());
 
 			CString sOutput;
-			sOutput.Format(_T("  Test [%2d] failed:    Expected \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
+
+			if (m_sCurSubTest.IsEmpty())
+				sOutput.Format(_T("  Test [%2d] failed:    Expected \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
+			else
+				sOutput.Format(_T("  Test [%s] failed:    Expected \"%s\" %s \"%s\""), m_sCurSubTest, szFmt1, sOp, szFmt2);
 
 			if (!Misc::IsEmpty(szTrail))
 			{

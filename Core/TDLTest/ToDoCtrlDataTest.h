@@ -30,7 +30,7 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 protected:
-	void BeginTest(LPCTSTR szFunction, BOOL bWithAttributes);
+	void BeginPerformanceTest(LPCTSTR szFunction, BOOL bWithAttributes);
 
 	void TestHierarchyDataModelPerformance();
 	void TestFlatListDataModelPerformance();
@@ -40,6 +40,12 @@ protected:
 	void TestDataModelExporterPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
 	void TestDataModelGetTaskPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
 	void TestDataModelGetTaskPositionPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
+
+	void TestAdjustNewRecurringTasksDates();
+	void TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRecalcFrom);
+	void TestAdjustNewRecurringTasksDates(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom);
+
+	static CString GetRegularityText(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom);
 
 };
 

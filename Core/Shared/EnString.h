@@ -9,7 +9,14 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-enum { ES_END, ES_WORD, ES_PATH, ES_START };
+enum 
+{ 
+	ES_NONE = -1, 
+	ES_END, 
+	ES_WORD, 
+	ES_PATH, 
+	ES_START 
+};
 
 class ITransText;
 

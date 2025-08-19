@@ -8,6 +8,7 @@
 //
 
 #include "tdcenum.h"
+#include "tdcsort.h"
 #include "tdcstruct.h"
 #include "tdldialog.h"
 
@@ -62,7 +63,7 @@ protected:
 
 protected:
 	void BuildCombos();
-	BOOL IsColumnVisible(TDC_COLUMN col) const;
+	BOOL IsColumnVisible(TDC_COLUMN nColID) const;
 	void EnableControls();
 
 };

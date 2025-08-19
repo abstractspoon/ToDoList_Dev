@@ -124,7 +124,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ResourceCompile Include="EvidenceBoardUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\EvidenceBoard.ico" />
+    <Image Include="..\EvidenceBoardUIExtensionCore\Resources\EvidenceBoard.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EvidenceBoardUIExtensionCore\EvidenceBoardUIExtensionCore.csproj">

@@ -12,6 +12,8 @@
 	#error include 'stdafx.h' before including this file for PCH
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "tdcenum.h"
 
 #include "..\shared\Localizer.h"
@@ -43,6 +45,7 @@ protected:
 	virtual void WinHelp(DWORD dwData, UINT nCmd = HELP_CONTEXT);
 	virtual int DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt = 0);
 	virtual int ExitInstance();
+	virtual BOOL OnIdle(LONG lCount);
 	//}}AFX_VIRTUAL
 
 protected:
@@ -54,11 +57,22 @@ protected:
 
 	//{{AFX_MSG(CToDoListApp)
 	//}}AFX_MSG
+	afx_msg void OnExportPrefs();
 	afx_msg void OnHelpForum();
 	afx_msg void OnHelpLicense();
 	afx_msg void OnHelpCommandline();
 	afx_msg void OnHelpDonate();
 	afx_msg void OnHelpUninstall();
+	afx_msg void OnHelpCheckForUpdates();
+	afx_msg void OnHelpRecordBugReport();
+	afx_msg void OnHelpWiki();
+	afx_msg void OnImportPrefs();
+	afx_msg void OnToolsToggleDarkMode();
+
+	afx_msg void OnUpdateImportPrefs(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateExportPrefs(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateToolsToggleDarkMode(CCmdUI* pCmdUI);
+
 #ifdef _DEBUG
 	afx_msg void OnDebugTaskDialogInfo();
 	afx_msg void OnDebugShowUpdateDlg();
@@ -71,13 +85,6 @@ protected:
 	afx_msg void OnDebugShowEmbeddedUrl();
 	afx_msg void OnDebugFormatGetLastError();
 #endif
-	afx_msg void OnHelpCheckForUpdates();
-	afx_msg void OnHelpRecordBugReport();
-	afx_msg void OnHelpWiki();
-	afx_msg void OnImportPrefs();
-	afx_msg void OnUpdateImportPrefs(CCmdUI* pCmdUI);
-	afx_msg void OnExportPrefs();
-	afx_msg void OnUpdateExportPrefs(CCmdUI* pCmdUI);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -86,6 +93,7 @@ protected:
 	BOOL InitPreferences(CEnCommandLineInfo& cmdInfo);
 	BOOL SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting);
 	BOOL InitTranslation(BOOL bFirstTime, BOOL bQuiet);
+	void InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs);
 	void UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer);
 	void ParseCommandLine(CEnCommandLineInfo& cmdInfo);
 	void RunUninstaller() const;

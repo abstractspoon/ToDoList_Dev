@@ -48,7 +48,7 @@ protected:
 	COLORREF GetNormalColor() const;
 	COLORREF GetValueColor(double dValue) const;
 
-	bool DrawGrid(CDC& dc);
+	BOOL DrawGrid(CDC& dc);
 	BOOL HasOverload() const;
 	BOOL HasUnderload() const;
 

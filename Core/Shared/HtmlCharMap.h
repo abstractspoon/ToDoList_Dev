@@ -178,20 +178,7 @@ public:
 
         for (int nChar = 0; nChar < sText.GetLength(); nChar++)
 		{
-			TCHAR c = sText[nChar];
-
-#ifndef _UNICODE
-			// don't translate multibyte chars
-			if (IsDBCSLeadByte(c))
-			{
-				// add 2 chars to result because they're really
-				// a single unicode char
-				sResult += sText.Mid(nChar, 2);
-				nChar++; // bump pos
-			}
-			else
-#endif
-				Translate(c, sResult);
+			Translate(sText[nChar], sResult);
 		}
 
         sText = sResult;

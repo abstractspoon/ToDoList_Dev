@@ -14,9 +14,12 @@
 #include "TDCCustomAttributeCalculationTest.h"
 #include "TDCDependencyTest.h"
 #include "TDCRecurrenceTest.h"
+#include "TDCTaskCalculatorTest.h"
+#include "TDCTaskTimeLogTest.h"
 #include "TDLTaskCtrlBaseTest.h"
 #include "TimeHelperTest.h"
 #include "ToDoCtrlDataTest.h"
+#include "ToDoCtrlMgrTest.h"
 #include "ToDoCtrlTaskLinkTest.h"
 #include "WorkingWeekTest.h"
 #include "XmlFileTest.h"
@@ -74,30 +77,40 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 	return 0;
 }
 
+#define DOTEST(test) test(utils).Run()
+
 void DoTests(const CTestUtils& utils)
 {
 	TESTRESULT res;
 
 	// Keep sorted for easy scanning
-	res += CDateHelperTest(utils).Run();
-	res += CFileMiscTest(utils).Run();
-	res += CImportExportMgrTest(utils).Run();
-	res += CMiscTest(utils).Run();
-	res += CPreferencesTest(utils).Run();
-	res += CRemapMenuIDsTest(utils).Run();
-	res += CTaskFileTest(utils).Run();
-	res += CTDCCUSTOMATTRIBUTECALCULATIONTest(utils).Run();
-	res += CTDCDEPENDENCYTest(utils).Run();
-	res += CTDCRECURRENCETest(utils).Run();
-	res += CTDLTaskCtrlBaseTest(utils).Run();
-	res += CTimeHelperTest(utils).Run();
-	res += CToDoCtrlDataTest(utils).Run();
-	res += CToDoCtrlTaskLinkTest(utils).Run();
-	res += CWorkingDayTest(utils).Run();
-	res += CWorkingWeekTest(utils).Run();
- 	res += CXmlFileTest(utils).Run();
+	res += DOTEST(CDateHelperTest);
+	res += DOTEST(CFileMiscTest);
+	res += DOTEST(CImportExportMgrTest);
+	res += DOTEST(CMiscTest);
+	res += DOTEST(CPreferencesTest);
+	res += DOTEST(CRemapMenuIDsTest);
+	res += DOTEST(CTaskFileTest);
+	res += DOTEST(CTDCCUSTOMATTRIBUTECALCULATIONTest);
+	res += DOTEST(CTDCDEPENDENCYTest);
+	res += DOTEST(CTDCRECURRENCETest);
+	res += DOTEST(CTDCTaskCalculatorTest);
+	res += DOTEST(CTDCTaskTimeLogTest);
+	res += DOTEST(CTDLTaskCtrlBaseTest);
+	res += DOTEST(CTimeHelperTest);
+	res += DOTEST(CToDoCtrlDataTest);
+	res += DOTEST(CToDoCtrlMgrTest);
+	res += DOTEST(CToDoCtrlTaskLinkTest);
+	res += DOTEST(CWorkingDayTest);
+	res += DOTEST(CWorkingWeekTest);
+	res += DOTEST(CXmlFileTest);
 
 	// More...
 
-	res.ReportResults();
+	res.ReportResults(_T("All"), FALSE);
+
+	// When we are NOT DEBUGGING we just assert once at the end
+	// else we assert in the actual test that failed
+	if (!::IsDebuggerPresent())
+		ASSERT(res.nNumError == 0);
 }

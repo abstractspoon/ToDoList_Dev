@@ -301,7 +301,7 @@ namespace HTMLContentControl
 					case WM_KEYDOWN:
 					case WM_SYSKEYDOWN:
 					{
-						Keys keyPress = CommandHandling.GetMenuShortcutFromVirtualKey(wParam);
+						Keys keyPress = CommandHandling.GetKeyboardShortcutFromVirtualKey(wParam);
 
 						if (keyPress == Keys.Return)
 						{
@@ -478,7 +478,7 @@ namespace HTMLContentControl
 					else
 						tooltip = tooltip + "\n";
 
-					tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link");
+					tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link", Translator.Type.ToolTip);
 				}
 
 				if (!tooltip.Equals(element.GetAttribute("title")))

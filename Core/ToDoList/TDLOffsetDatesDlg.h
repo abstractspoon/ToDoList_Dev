@@ -11,6 +11,7 @@
 #include "TDLDialog.h"
 
 #include "..\shared\dialoghelper.h"
+#include "..\shared\CheckListBoxEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg dialog
@@ -29,32 +30,33 @@ class CTDLOffsetDatesDlg : public CTDLDialog
 public:
 	CTDLOffsetDatesDlg(CWnd* pParent = NULL);   // standard constructor
 
-	DWORD GetOffsetWhat() const;
+	DWORD GetOffsetWhat() const { return m_dwOffsetWhat; }
 	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
+	BOOL GetOffsetSubtaskReferences() const { return (m_bOffsetSubtasks && m_bOffsetSubtaskRefs); }
 	BOOL GetOffsetFromToday() const { return m_bOffsetFromToday; }
-	BOOL GetPreserveWeekdays() const;
+	BOOL GetPreserveEndOfMonth() const;
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(COffsetDatesDlg)
 	enum { IDD = IDD_OFFSETDATES_DIALOG };
-	BOOL	m_bOffsetStartDate;
-	BOOL	m_bOffsetDueDate;
-	BOOL	m_bOffsetDoneDate;
-	BOOL	m_bOffsetReminder;
+
 	int		m_bForward;
 	int		m_nOffsetBy;
 	int		m_nOffsetByUnits;
 	BOOL	m_bOffsetSubtasks;
+	BOOL	m_bOffsetSubtaskRefs;
 	BOOL	m_bOffsetFromToday;
 	//}}AFX_DATA
-	BOOL	m_bPreserveWeekdays;
+	BOOL	m_bPreserveEndOfMonth;
+	CCheckListBoxEx m_lbOffsetWhat;
+	DWORD m_dwOffsetWhat;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(COffsetDatesDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnOK();
@@ -65,7 +67,9 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(COffsetDatesDlg)
 	afx_msg void OnSelchangeUnits();
+	afx_msg void OnClickOffsetSubtasks();
 	//}}AFX_MSG
+	afx_msg void OnClickWhatList();
 	DECLARE_MESSAGE_MAP()
 };
 

@@ -36,9 +36,7 @@ const LPCWSTR PDFEXPORTER_NAME = L"PDF Tree View";
 // see ExporterBridge.h for the class definition
 CPDFExporterBridge::CPDFExporterBridge() : m_pTT(nullptr), m_hIcon(NULL)
 {
-	HMODULE hMod = LoadLibrary(L"PDFExporterBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_PDF), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"PDFExporterBridge.dll", IDI_PDF, 16, true);
 }
 
 void CPDFExporterBridge::Release()
@@ -100,6 +98,19 @@ IIMPORTEXPORT_RESULT CPDFExporterBridge::Export(const ITaskList* pSrcTaskFile, L
 
 IIMPORTEXPORT_RESULT CPDFExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
-	// TODO
+	// call into out sibling C# module to do the actual work
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<MultiTaskList^> srcTasks = gcnew MultiTaskList(pSrcTaskFile);
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<String^> typeID = gcnew String(PDFEXPORTER_GUID);
+
+	msclr::auto_gcroot<PDFExporterCore^> expCore = gcnew PDFExporterCore(typeID.get(), trans.get());
+
+	// do the export
+	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
+
+	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
+		return IIER_SUCCESS;
+
 	return IIER_OTHER;
 }

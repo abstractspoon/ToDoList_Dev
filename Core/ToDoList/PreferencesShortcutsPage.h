@@ -4,8 +4,10 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
+
 // PrefererencesShortcutsPage.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
 
 #include "..\shared\shortcutManager.h"
 #include "..\shared\orderedtreectrl.h"
@@ -15,22 +17,25 @@
 #include "..\shared\FontCache.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CMenuIconMgr;
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesShortcutsPage dialog
 
 class CPreferencesShortcutsPage : public CPreferencesPageBase 
 {
 // Construction
 public:
-	CPreferencesShortcutsPage(CShortcutManager* pMgr);
+	CPreferencesShortcutsPage(const CMenuIconMgr& mgrIcons, CShortcutManager* pMgrShortcuts);
 	~CPreferencesShortcutsPage();
 
-	UINT GetShortcutCmdID(DWORD dwShortcut) const { return m_pShortcutMgr->GetCommandID(dwShortcut); }
+	UINT GetShortcutCmdID(DWORD dwShortcut) const { return m_pMgrShortcuts->GetCommandID(dwShortcut); }
 	BOOL RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs);
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesShortcutsPage)
-	enum { IDD = IDD_PREFSHORTCUTS_PAGE };
 	CHotKeyCtrlEx	m_hkCur;
 	COrderedTreeCtrl	m_tcCommands;
 	CHotKeyCtrlEx	m_hkNew;
@@ -40,7 +45,9 @@ protected:
 
 	CFontCache m_fonts;
 
-	CShortcutManager* m_pShortcutMgr;
+	const CMenuIconMgr& m_mgrMenuIcons;
+	CShortcutManager* m_pMgrShortcuts;
+
 	CMap<UINT, UINT, DWORD, DWORD&> m_mapID2Shortcut;
 	CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&> m_mapShortcut2HTI;
 

@@ -73,8 +73,8 @@ public:
 
 	BOOL IsItemSelected(HTREEITEM hti, BOOL bSingly = FALSE) const;
 	BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const;
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes, BOOL bOrdered = FALSE) const;
 	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreSelection(const TDCSELECTIONCACHE& cache);
 	BOOL RestorePreviousSelection(BOOL bRedraw);
@@ -84,7 +84,6 @@ public:
 	BOOL SelectTasksInHistory(BOOL bForward);
 	int GetSelectedTasksInHistory(BOOL bForward, CDWordArray& aTaskIDs) const;
 	BOOL CanSelectTasksInHistory(BOOL bForward) const;
-	BOOL SelectionHasLocked(BOOL bCheckChildren, BOOL bTreatRefsAsUnlocked = FALSE) const;
 	int GetSelectedTaskLocalDependents(BOOL bImmediateOnly, CHTIList& lstDependents) const;
 	int GetReferencesToSelectedTask(CHTIList& listRefs) const;
 
@@ -93,7 +92,7 @@ public:
 	double CalcSelectedTaskCost() const;
 
 	BOOL SelectItem(HTREEITEM hti);
-	BOOL SelectAll();
+	BOOL SelectAll(BOOL bVisibleOnly = TRUE);
 	BOOL InvalidateItem(HTREEITEM hti, BOOL bUpdate = FALSE);
 	BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate = FALSE);
 	BOOL InvalidateSelection(BOOL bUpdate = FALSE);
@@ -238,7 +237,6 @@ protected:
 	void BeginLabelEditTimer();
 	void EndLabelEditTimer();
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
-	BOOL TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);
 	BOOL ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const;
 	int GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend) const;

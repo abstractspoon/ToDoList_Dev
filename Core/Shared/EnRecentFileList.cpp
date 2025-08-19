@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "EnRecentFileList.h"
 #include "FileMisc.h"
+#include "Misc.h"
 
 #include "..\Interfaces\IPreferences.h"
 
@@ -32,6 +33,21 @@ CEnRecentFileList::CEnRecentFileList(UINT nStart, LPCTSTR lpszSection,
 CEnRecentFileList::~CEnRecentFileList()
 {
 
+}
+
+BOOL CEnRecentFileList::Remove(LPCTSTR szFile)
+{
+	for (int nIndex = 0; nIndex < m_nSize; nIndex++)
+	{
+		if (m_arrNames[nIndex].CompareNoCase(szFile) == 0)
+		{
+			Remove(nIndex);
+			return TRUE;
+		}
+	}
+
+	// not found
+	return FALSE;
 }
 
 void CEnRecentFileList::UpdateMenu(CCmdUI* pCmdUI)

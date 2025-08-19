@@ -168,18 +168,22 @@ IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
 IDD_CALENDAR_DIALOG DIALOGEX 0, 0, 536, 271
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Selected Task Date Range: 01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
-                    IDC_SELECTEDTASKDATES,236,16,293,8,SS_CENTERIMAGE
     LTEXT           "Dis&play",IDC_STATIC,0,2,79,8
     COMBOBOX        IDC_NUMWEEKS,0,13,79,200,CBS_DROPDOWNLIST | WS_TABSTOP
-    CONTROL         "",IDC_CALENDAR_FRAME,"Static",SS_GRAYFRAME,0,28,529,236
+    LTEXT           "&Snap Mode",IDC_STATIC,87,2,79,8
     COMBOBOX        IDC_SNAPMODES,87,13,79,161,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Snap Mode",IDC_STATIC,87,2,79,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,172,12,62,17
+                    WS_VISIBLE,172,12,55,17
+    CONTROL         "Selected Task Date Range",IDC_SELECTEDTASKDATESLABEL,
+                    "Static",SS_LEFTNOWORDWRAP | SS_NOTIFY | SS_CENTERIMAGE | 
+                    WS_GROUP,234,16,88,8
+    LTEXT           "01/01/2001 10:12 AM - 01/01/2001 11:12 PM",
+                    IDC_SELECTEDTASKDATES,327,16,147,8,SS_NOTIFY | 
+                    SS_CENTERIMAGE
+    CONTROL         "",IDC_CALENDAR_FRAME,"Static",SS_GRAYFRAME,0,28,529,236
 END
 
 IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 373, 223
@@ -198,7 +202,7 @@ FONT 8, "Tahoma"
 BEGIN
     CONTROL         "&Hide parent tasks",IDC_HIDEPARENTTASKS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,7,334,10
-    CONTROL         "&Having the following tag:",IDC_HIDEPARENTTASKSBYTAG,
+    CONTROL         "&Having the following tag",IDC_HIDEPARENTTASKSBYTAG,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,22,324,10
     EDITTEXT        IDC_HIDEPARENTTAG,29,35,146,13,ES_AUTOHSCROLL
     CONTROL         "&Show vertical mini calendar-bar",IDC_SHOWMINICALENDAR,
@@ -231,7 +235,7 @@ BEGIN
     CONTROL         "Incl&uding 'Calculated Due' dates",IDC_SHOWCALCDUEDATES,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,30,201,311,10
     CONTROL         "Display task 'Completion' dates",IDC_SHOWDONEDATES,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,216,316,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,216,328,10
     CONTROL         "Treat overdue tasks as being due 'Today'",
                     IDC_SHOWOVERDUEASDUETODAY,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,231,334,10
@@ -240,7 +244,7 @@ BEGIN
     CONTROL         "Show the 'Week Number' on the first day of the week",
                     IDC_SHOWWEEKNUMINCELL,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,260,334,10
-    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,276,
+    GROUPBOX        "Calculate missing 'Start' dates as",IDC_STATIC,7,276,
                     334,62
     CONTROL         "The task's 'Creation' date",IDC_USECREATIONFORSTART,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,290,316,10

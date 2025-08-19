@@ -16,29 +16,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define GET_GRAPH(e) pGraph = m_mapGraphs.GetGraph(e); if (pGraph == NULL) return
-#define GET_GRAPH_RET(e, ret) pGraph = m_mapGraphs.GetGraph(e); if (pGraph == NULL) return ret
+#define CHECK_GRAPH() ASSERT(m_pGraph); if (!m_pGraph) return
+#define CHECK_GRAPH_RET(ret) ASSERT(m_pGraph); if (!m_pGraph) return ret
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct SORTITEM
-{
-	BURNDOWN_GRAPH nGraph;
-	CString sLabel;
-};
-
-static int SortProc(const void* pV1, const void* pV2)
-{
-	const SORTITEM* pSI1 = (const SORTITEM*)pV1;
-	const SORTITEM* pSI2 = (const SORTITEM*)pV2;
-
-	return Misc::NaturalCompare(pSI1->sLabel, pSI2->sLabel);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-// Fixed number of Y ticks
-const int NUM_Y_TICKS = 10;
+const int DEFAULT_NUMYTICKS = 10;
 
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
@@ -46,10 +29,12 @@ const int NUM_Y_TICKS = 10;
 CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	: 
 	m_data(data),
-	m_nActiveGraph(BCT_TIMESERIES_INCOMPLETETASKS),
+	m_pGraph(NULL),
 	m_calculator(data)
 {
 	EnableFixedLabelFontSize(); // don't scale down as available size decreases
+
+	m_dRoundY = 0.0; // we do our own rounding
 }
 
 CBurndownChart::~CBurndownChart()
@@ -63,229 +48,67 @@ BEGIN_MESSAGE_MAP(CBurndownChart, CHMXChartEx)
 END_MESSAGE_MAP()
 
 ////////////////////////////////////////////////////////////////////////////////
-// CBurndownChart message handlers
 
-CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPH nGraph) const
+BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph, BOOL bRebuild)
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(nGraph, _T(""));
-
-	return pGraph->GetTitle();
-}
-
-BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
-{
-	if (!IsValidGraph(nGraph))
+	if (!pGraph)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	if (nGraph != m_nActiveGraph)
+	if (pGraph != m_pGraph)
 	{
-		m_nActiveGraph = nGraph;
-		RebuildGraph(m_dtExtents);
+		m_pGraph = pGraph;
 
-		return TRUE;
+		if (bRebuild && m_dtExtents.IsValid())
+			RebuildGraph(m_dtExtents);
 	}
-
-	return FALSE;
-}
-
-int CBurndownChart::BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const
-{
-	CArray<SORTITEM, SORTITEM&> aSort;
-	SORTITEM st;
-
-	int nItem;
-
-	for (nItem = 0; nItem < BCT_NUMGRAPHS; nItem++)
-	{
-		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)nItem;
-		ASSERT(IsValidGraph(nGraph));
-
-		if (m_mapGraphs.HasGraph(nGraph) && (GetGraphType(nGraph) == nType))
-		{
-			st.nGraph = (BURNDOWN_GRAPH)nItem;
-			st.sLabel = GetGraphTitle(st.nGraph);
-
-			aSort.Add(st);
-		}
-	}
-
-	Misc::SortArrayT<SORTITEM>(aSort, SortProc);
-
-	nItem = aSort.GetSize();
-	aGraphs.SetSize(nItem);
-
-	while (nItem--)
-		aGraphs[nItem] = aSort[nItem].nGraph;
-	
-	return aGraphs.GetSize();
-}
-
-BOOL CBurndownChart::SetActiveGraphColors(const CColorArray& aColors)
-{
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, FALSE);
-
-	if (!pGraph->SetColors(aColors))
-		return FALSE;
-
-	pGraph->UpdateDatasetColors(m_datasets);
-	Invalidate();
 
 	return TRUE;
 }
 
-BURNDOWN_GRAPHOPTION CBurndownChart::GetActiveGraphOption() const
+void CBurndownChart::OnColorsChanged()
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, BGO_INVALID);
+	CHECK_GRAPH();
 
-	return pGraph->GetOption();
+	m_pGraph->UpdateDatasetColors(m_datasets);
+	Invalidate();
 }
 
-int CBurndownChart::GetActiveGraphColors(CColorArray& aColors) const
+void CBurndownChart::OnOptionChanged(BURNDOWN_GRAPHOPTION nOption)
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, 0);
+	CHECK_GRAPH();
 
-	aColors.Copy(pGraph->GetColors());
-	return aColors.GetSize();
-}
-
-void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
-{
-	POSITION pos = m_mapGraphs.GetStartPosition();
-
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
-
-		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
-		CString sColors = pPrefs->GetProfileString(szKey, sGraphKey);
-
-		if (!sColors.IsEmpty()) // first time will fail
-		{
-			CColorArray aColors;
-			Misc::Split(sColors, aColors, '|');
-
-			// Only allow the same number of colours as the graph's default palette
-			if (aColors.GetSize() == pGraph->GetColors().GetSize())
-				pGraph->SetColors(aColors);
-		}
-
-		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-		BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, GetDefaultOption(nGraph));
-
-		if (nOption != BGO_INVALID)
-			pGraph->SetOption(nOption);
-	}
-}
-
-void CBurndownChart::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
-{
-	POSITION pos = m_mapGraphs.GetStartPosition();
-
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
-
-		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
-		pPrefs->WriteProfileString(szKey, sGraphKey, Misc::FormatArray(pGraph->GetColors(), '|'));
-
-		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-		pPrefs->WriteProfileInt(szKey, sGraphKey, pGraph->GetOption());
-	}
-}
-
-void CBurndownChart::SetGraphColors(const CGraphColorMap& mapColors)
-{
-	POSITION pos = mapColors.GetStartPosition();
-
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CColorArray aColors;
-		
-		mapColors.GetNextAssoc(pos, nGraph, aColors);
-		ASSERT(aColors.GetSize());
-
-		if (aColors.GetSize())
-		{
-			CGraphBase* pGraph = m_mapGraphs.GetGraph(nGraph);
-			ASSERT(pGraph);
-
-			if (pGraph)
-			{
-				pGraph->SetColors(aColors);
-
-				// Refresh active graph
-				if (nGraph == m_nActiveGraph)
-				{
-					pGraph->UpdateDatasetColors(m_datasets);
-					Invalidate();
-				}
-			}
-		}
-	}
-}
-
-int CBurndownChart::GetGraphColors(CGraphColorMap& mapColors) const
-{
-	mapColors.RemoveAll();
-	POSITION pos = m_mapGraphs.GetStartPosition();
-
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
-
-		CColorArray aColors;
-		aColors.Copy(pGraph->GetColors());
-
-		mapColors[nGraph] = aColors;
-	}
-
-	return mapColors.GetCount();
-}
-
-BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
-{
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, FALSE);
-
-	if (!pGraph->IsValidOption(nOption))
-		return FALSE;
-
-	if (!pGraph->HasOption(nOption) && pGraph->SetOption(nOption, m_calculator, m_datasets))
+	if (m_pGraph->OnOptionChanged(nOption, m_datasets))
 	{
 		RefreshRenderFlags(FALSE);
 		Invalidate();
 	}
-
-	return TRUE;
 }
 
-void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
+void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty, BOOL bRebuild)
 {
-	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) &&
-		(GetGraphType(m_nActiveGraph) == BCT_FREQUENCY))
+	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) && bRebuild &&	m_dtExtents.IsValid())
 	{
-		RebuildGraph(m_dtExtents);
+		CHECK_GRAPH();
+
+		if (m_pGraph->HasType(BCT_FREQUENCY))
+			RebuildGraph(m_dtExtents);
 	}
+}
+
+void CBurndownChart::OnDisplayISODatesChanged()
+{
+	RebuildXScale();
 }
 
 BOOL CBurndownChart::HighlightDataPoint(int nIndex)
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, FALSE);
-
-	if (pGraph->HasOption(BGO_FREQUENCY_PIE) || 
-		pGraph->HasOption(BGO_FREQUENCY_DONUT))
+	CHECK_GRAPH_RET(FALSE);
+	
+	if (m_pGraph->HasOption(BGO_FREQUENCY_PIE) || 
+		m_pGraph->HasOption(BGO_FREQUENCY_DONUT))
 	{ 
 		// we handle it ourselves for now
 		// TODO
@@ -324,13 +147,12 @@ void CBurndownChart::RebuildXScale()
 {
 	ClearXScaleLabels();
 
-	if (!m_data.IsEmpty())
+	if (!m_data.IsEmpty() && m_calculator.HasValidDateRange())
 	{
-		CGraphBase* pGraph = NULL;
-		GET_GRAPH(m_nActiveGraph);
+		CHECK_GRAPH();
 
 		int nLabelStep = 1;
-		pGraph->RebuildXScale(m_calculator, m_rectData.Width(), m_strarrScaleXLabel, nLabelStep);
+		m_pGraph->RebuildXScale(m_calculator, m_rectData.Width(), m_strarrScaleXLabel, nLabelStep);
 
 		SetXLabelStep(nLabelStep);
 	}
@@ -345,60 +167,162 @@ void CBurndownChart::OnSize(UINT nType, int cx, int cy)
 
 BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, FALSE);
-
-	if (!m_dtExtents.Set(dtExtents))
+	if (!dtExtents.IsValid() || !m_dtExtents.Set(dtExtents))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 	
+	CHECK_GRAPH_RET(FALSE);
+
 	m_calculator.SetDateRange(m_dtExtents);
 
 	CWaitCursor cursor;
 	CHoldRedraw hr(*this);
 	
-	ClearData();
+	ResetDatasets();
 	RefreshRenderFlags(FALSE);
 
-	// Which one gets drawn is controlled by the render flags
-	SetXText(pGraph->GetTitle());
-	SetYText(pGraph->GetTitle());
+	SetXText(m_pGraph->GetTitle());
+	SetYText(m_pGraph->GetTitle());
 
 	{
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
-
-		pGraph->BuildGraph(m_calculator, m_datasets);
+		m_pGraph->BuildGraph(m_calculator, m_datasets);
 	}
 
+	RecalcNumYTicks();
 	RebuildXScale();
 	CalcDatas();
 
 	return TRUE;
 }
 
+CString CBurndownChart::GetYTickText(int nTick, double dValue) const
+{
+	// This is a virtual function which can get legitimately called
+	// by CHMXChart before m_pGraph is set so we don't assert
+	if (m_pGraph)
+	{
+		switch (m_pGraph->GetGraph())
+		{
+		case BCG_MINMAX_DUEDONEDATES:
+			return m_pGraph->FormatDate(dValue);
+		}
+	}
+
+	// All else
+	return CHMXChartEx::GetYTickText(nTick, dValue);
+}
+
+int CBurndownChart::GetNumYSubTicks(double dInterval) const
+{
+	CHECK_GRAPH_RET(1);
+
+	int nNumSub = CHMXChartEx::GetNumYSubTicks(dInterval);
+
+	switch (m_pGraph->GetGraph())
+	{
+	case BCG_MINMAX_DUEDONEDATES:
+		// Don't allow less than a day
+		if ((dInterval / nNumSub) < 1.0)
+			nNumSub = (int)dInterval;
+		break;
+	}
+
+	return nNumSub;
+}
+
+void CBurndownChart::RecalcNumYTicks()
+{
+	double dUnused1, dUnused2;
+	int nNumYTicks;
+
+	if (CalcMinMax(dUnused1, dUnused2, nNumYTicks))
+		SetNumYTicks(nNumYTicks);
+}
+
+BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL /*bDataOnly*/) const
+{
+	int nUnused;
+
+	return CalcMinMax(dMin, dMax, nUnused);
+}
+
+BOOL CBurndownChart::CalcMinMax(double& dMin, double& dMax, int& nNumYTicks) const
+{
+	if (m_data.GetSize() == 0)
+		return FALSE;
+
+	CHECK_GRAPH_RET(FALSE);
+
+	if (!m_pGraph->GetDataMinMax(dMin, dMax) || (dMin > dMax))
+		return FALSE;
+
+	nNumYTicks = DEFAULT_NUMYTICKS;
+
+	if ((dMin < 0.0) && (dMax == 0.0))
+	{
+		dMin = -HMXUtils::CalcMaxYAxisValue(-dMin, nNumYTicks);
+	}
+	else if ((dMin == 0.0) && (dMax > 0.0))
+	{
+		dMax = HMXUtils::CalcMaxYAxisValue(dMax, nNumYTicks);
+	}
+	else if ((dMin < 0.0) && (dMax > 0.0))
+	{
+		// Whichever is the greater of 'abs(min) and max', use that
+		// to calculate our overall scale and then calculate the
+		// 'other' end of the scale from that
+		int nOtherTicks = 0;
+
+		if (dMax > -dMin)
+		{
+			dMax = HMXUtils::CalcMaxYAxisValue(dMax, nNumYTicks);
+
+			double dTick = (dMax / nNumYTicks);
+
+			nOtherTicks = (int)((-dMin / dTick) + 1);
+			dMin = (-nOtherTicks * dTick);
+		}
+		else // -dMin > dMax
+		{
+			dMin = -HMXUtils::CalcMaxYAxisValue(-dMin, nNumYTicks);
+
+			double dTick = (-dMin / DEFAULT_NUMYTICKS); // +ve
+
+			nOtherTicks = (int)((dMax / dTick) + 1);
+			dMax = (nOtherTicks * dTick);
+		}
+
+		nNumYTicks += nOtherTicks;
+	}
+	else // trickier
+	{
+		double dDiff = max(1.0, (dMax - dMin));
+		dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, nNumYTicks);
+	}
+
+	return TRUE;
+}
+
 void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH(m_nActiveGraph);
+	CHECK_GRAPH();
 
 	DWORD dwFlags = ModifyRenderFlags(HMX_RENDER_TITLE, 0, FALSE); // Never draw title
 
-	switch (pGraph->GetOption())
+	if (m_pGraph->HasAxes())
 	{
-	case BGO_FREQUENCY_PIE:
-	case BGO_FREQUENCY_DONUT:
-		// Remove then add
-		dwFlags &= ~ (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
-		dwFlags |= HMX_RENDER_XAXISTITLE;
-		break;
-
-	default:
 		// Add then remove
 		dwFlags |= (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
 		dwFlags &= ~HMX_RENDER_XAXISTITLE;
-		break;
+	}
+	else
+	{
+		// Remove then add
+		dwFlags &= ~ (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
+		dwFlags |= HMX_RENDER_XAXISTITLE;
 	}
 
 	SetRenderFlags(dwFlags, bRedraw);
@@ -407,9 +331,9 @@ void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
 void CBurndownChart::PreSubclassWindow()
 {
 	SetBkGnd(GetSysColor(COLOR_WINDOW));
-	SetXLabelsAreTicks(true);
+	SetXLabelsAreTicks(TRUE);
 	SetXLabelAngle(45);
-	SetNumYTicks(NUM_Y_TICKS);
+	SetNumYTicks(DEFAULT_NUMYTICKS);
 
 	VERIFY(InitTooltip(TRUE));
 }
@@ -418,18 +342,9 @@ CString CBurndownChart::GetTooltip(int nHit) const
 {
 	ASSERT(nHit != -1);
 
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, _T(""));
+	CHECK_GRAPH_RET(_T(""));
 
-	return pGraph->GetTooltip(m_calculator, m_datasets, nHit);
-}
-
-int CBurndownChart::HitTest(const CPoint& ptClient) const
-{
-	if (!m_dtExtents.IsValid())
-		return -1;
-
-	return CHMXChartEx::HitTest(ptClient);
+	return m_pGraph->GetTooltip(m_calculator, m_datasets, nHit);
 }
 
 void CBurndownChart::SetTodayColour(COLORREF color)
@@ -447,11 +362,10 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 {
 	CHMXChartEx::DoPaint(dc, bPaintBkgnd);
 
-	if ((m_rectData.Height() > 0) && (m_crToday != CLR_NONE) && (GetGraphType(m_nActiveGraph) == BCT_TIMESERIES))
-	{
-		CGraphBase* pGraph = NULL;
-		GET_GRAPH(m_nActiveGraph);
+	CHECK_GRAPH();
 
+	if ((m_rectData.Height() > 0) && (m_crToday != CLR_NONE) && m_pGraph->HasType(BCT_TIMESERIES))
+	{
 		// Find the data point corresponding to today
 		COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
 		int nPos = m_calculator.HitTest(dtToday);
@@ -466,17 +380,41 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	}
 }
 
-bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
+BOOL CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
 	{
 		ASSERT(0);
-		return false;
+		return FALSE;
 	}
 
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, false);
+	CHECK_GRAPH_RET(FALSE);
 
-	return CHMXChartEx::DrawDataset(dc, m_datasets[nDatasetIndex], pGraph->GetColors(), alpha);
+	if (m_pGraph->HasType(BCT_MINMAX))
+		return CHMXChartEx::DrawMinMaxChart(dc, m_datasets[nDatasetIndex], m_datasets[nDatasetIndex + 1], alpha);
+
+	return CHMXChartEx::DrawDataset(dc, m_datasets[nDatasetIndex], m_pGraph->GetColors(), alpha);
 }
 
+BOOL CBurndownChart::XScaleHasRTLDates() const 
+{ 
+	switch (m_pGraph->GetType())
+	{
+	case BCT_TIMESERIES:
+	case BCT_MINMAX:
+		return CDateHelper::WantRTLDates();
+	}
+
+	return FALSE; 
+}
+
+BOOL CBurndownChart::YScaleHasRTLDates() const 
+{ 
+	switch (m_pGraph->GetGraph())
+	{
+	case BCG_MINMAX_DUEDONEDATES:
+		return CDateHelper::WantRTLDates();
+	}
+
+	return FALSE; 
+}

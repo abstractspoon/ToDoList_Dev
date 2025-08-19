@@ -70,6 +70,7 @@
     <EmbeddedResource Include="MDContentControlCore.resx">
       <DependentUpon>MDContentControlCore.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\3rdParty\CommandHandling\CommandHandling.csproj">
@@ -88,6 +89,9 @@
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
       <Name>PluginHelpers</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\markdown.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

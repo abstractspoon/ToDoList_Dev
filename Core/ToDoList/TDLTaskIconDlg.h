@@ -25,27 +25,35 @@ class CTDLTaskIconDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem = TRUE, CWnd* pParent = NULL);   // standard constructor
-	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, CWnd* pParent = NULL);   // standard constructor
+	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem = TRUE, int nNumImages = -1, CWnd* pParent = NULL);
+	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, int nNumImages = -1, CWnd* pParent = NULL);
 
 	CString GetIconName() const; 
 	int GetIconNames(CStringArray& aSelNames) const; 
 
-	CString GetUserIconName(const CString& sImage) const;
+	int DoModal(HICON hIcon = NULL);
+	int DoModal(UINT nTitleStrID);
+
+	static CString GetUserIconName(const CString& sImage);
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLTaskIconDlg)
 	enum { IDD = IDD_TASKICON_DIALOG };
-	CListCtrl	m_lcIcons;
 	//}}AFX_DATA
+
+	CListCtrl	m_lcIcons;
 	const CTDCImageList& m_ilIcons;
-	CString m_sIconName;
-	CMapStringToString m_mapRenamedItems;
+
+	int m_nNumImages; 
 	BOOL m_bMultiSel;
 	BOOL m_bWantNone;
 	BOOL m_bAllowReload;
+
+	CString m_sTitle;
+	CString m_sIconName;
 	CStringArray m_aIconNames;
+	CMapStringToString m_mapRenamedItems;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

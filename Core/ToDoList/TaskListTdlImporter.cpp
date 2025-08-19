@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "resource.h"
 #include "TaskListTdlImporter.h"
 #include "TDLTasklistImportDlg.h"
 #include "Taskfile.h"

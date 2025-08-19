@@ -50,9 +50,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\icon1.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\BurndownExt.rc2">
       <Filter>Resource Files</Filter>
     </None>
@@ -63,6 +60,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\help_button.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\burndown.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

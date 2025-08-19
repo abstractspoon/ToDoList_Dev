@@ -7,6 +7,7 @@
 #include "tdlrecurringtaskedit.h"
 
 #include "..\shared\enstring.h"
+#include "..\shared\Misc.h"
 
 #include "..\3rdparty\stdiofileex.h"
 
@@ -75,13 +76,13 @@ bool CTaskListTxtExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 	return true;
 }
 
-CString CTaskListTxtExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue) const 
+CString CTaskListTxtExporter::FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel, const CString& sValue) const 
 {
 	CString sFmtAttrib;
 
 	if (!sValue.IsEmpty())
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_POSITION:
 		case TDCA_TASKNAME:
@@ -99,13 +100,13 @@ CString CTaskListTxtExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStri
 }
 
 CString CTaskListTxtExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, 
-											  TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const
+											  TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const
 {
 	// base processing
-	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttrib, sAttribLabel);
+	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttribID, sAttribLabel);
 
 	// extra processing
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_COMMENTS:
 	case TDCA_FILELINK:
@@ -142,21 +143,19 @@ CString CTaskListTxtExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM 
 	return sTask;
 }
 
-CString CTaskListTxtExporter::FormatTitle(const ITASKLISTBASE* pTasks) const
+CString CTaskListTxtExporter::FormatTitle(const IMultiTaskList* pTasks) const
 {
-	CString sTitle = pTasks->GetReportTitle();
-	CString sDate = pTasks->GetReportDate();
-	CString sHeader;
+	CString sTitle = CTaskListExporterBase::FormatTitle(pTasks);
+	CString sUnderline = CString('=', sTitle.GetLength());
+	
+	return (sTitle + '\n' + sUnderline + _T("\n\n"));
+}
 
-	if (!sTitle.IsEmpty())
-	{
-		sHeader.Format(_T("%s\n%s\n"), sTitle, sDate);
-	}
-	else if (!sDate.IsEmpty())
-	{
-		sHeader.Format(_T("%s\n"), sDate);
-	}
+CString CTaskListTxtExporter::FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const
+{
+	CString sTitle = CTaskListExporterBase::FormatTitle(pTasks, bWantDate);
+	CString sUnderline = CString('-', sTitle.GetLength());
 
-	return sHeader;
+	return (sTitle + '\n' + sUnderline + '\n');
 }
 

@@ -36,9 +36,7 @@ const LPCWSTR MARKDEEPEXPORTER_NAME = L"Markdeep";
 // see ExporterBridge.h for the class definition
 CMarkdeepExporterBridge::CMarkdeepExporterBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
-	HMODULE hMod = LoadLibrary(L"MarkdeepExporterBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MARKDEEP), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"MarkdeepExporterBridge.dll", IDI_MARKDEEP, 16, true);
 }
 
 void CMarkdeepExporterBridge::Release()
@@ -64,7 +62,7 @@ LPCWSTR CMarkdeepExporterBridge::GetMenuText() const
 
 LPCWSTR CMarkdeepExporterBridge::GetFileFilter() const
 {
-	return L"md.html";
+	return _T("Markdeep Files (*.md.html)|*.md.html||");
 }
 
 LPCWSTR CMarkdeepExporterBridge::GetFileExtension() const
@@ -81,14 +79,6 @@ LPCWSTR CMarkdeepExporterBridge::GetTypeID() const
 
 IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
-   const ITaskList14* pTasks14 = GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14);
-
-   if (pTasks14 == nullptr)
-   {
-      MessageBox(NULL, L"You need a minimum ToDoList version of 7.0 to use this plugin", L"Version Not Supported", MB_OK);
-      return IIER_BADINTERFACE;
-   }
-
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
@@ -108,6 +98,19 @@ IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const ITaskList* pSrcTaskFi
 
 IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
-	// TODO
+	// call into out sibling C# module to do the actual work
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<MultiTaskList^> srcTasks = gcnew MultiTaskList(pSrcTaskFile);
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<String^> typeID = gcnew String(MARKDEEPEXPORTER_GUID);
+
+	msclr::auto_gcroot<MarkdeepExporterCore^> expCore = gcnew MarkdeepExporterCore(typeID.get(), trans.get());
+
+	// do the export
+	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
+
+	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
+		return IIER_SUCCESS;
+
 	return IIER_OTHER;
 }

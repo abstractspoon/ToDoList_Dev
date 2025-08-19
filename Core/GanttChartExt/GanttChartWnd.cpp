@@ -2,9 +2,10 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "GanttChartExt.h"
 #include "GanttChartWnd.h"
-#include "GanttStatic.h"
+#include "GanttUtils.h"
 #include "GanttMsg.h"
 
 #include "..\shared\themed.h"
@@ -39,14 +40,10 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef LVS_EX_DOUBLEBUFFER
-#define LVS_EX_DOUBLEBUFFER 0x00010000
-#endif
-
-/////////////////////////////////////////////////////////////////////////////
+const UINT IDC_GANTTCTRL = 1001;
 
 const int PADDING = 3;
-const UINT IDC_GANTTCTRL = 1001;
+const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 /////////////////////////////////////////////////////////////////////////////
 // CGanttChartWnd
@@ -292,6 +289,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 	m_ctrlGantt.SetOption(GTLCF_DISABLEDEPENDENTDRAGGING, pPrefs->GetProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), TRUE));
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 	m_ctrlGantt.SetOption(GTLCF_SHOWSPLITTERBAR, (pPrefs->GetProfileInt(_T("Preferences"), _T("HidePaneSplitBar"), TRUE) == FALSE));
+	m_ctrlGantt.SetOption(GTLCF_SHOWMIXEDCOMPLETIONSTATE, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowMixedCompletionState"), TRUE));
 
 	m_ctrlGantt.EnableTreeCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 	m_ctrlGantt.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
@@ -409,21 +407,25 @@ void CGanttChartWnd::SetUITheme(const UITHEME* pTheme)
 	
 	GraphicsMisc::VerifyDeleteObject(m_brBack);
 	
-	if (CThemed::IsAppThemed() && pTheme)
+	if (pTheme)
 	{
 		m_theme = *pTheme;
-		m_brBack.CreateSolidBrush(m_theme.crAppBackLight);
-
-		// intentionally set background colours to be same as ours
-		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
-		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-
-		// Rescale images because background colour has changed
-		if (GraphicsMisc::WantDPIScaling())
-			m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
-
 		m_ctrlGantt.SetUITheme(m_theme);
-		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
+
+		if (CThemed::IsAppThemed())
+		{
+			m_brBack.CreateSolidBrush(m_theme.crAppBackLight);
+
+			// intentionally set toolbar background colours to be same as ours
+			m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
+			m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+			// Rescale images because background colour has changed
+			if (GraphicsMisc::WantDPIScaling())
+				m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
+
+			m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
+		}
 	}
 }
 
@@ -462,7 +464,7 @@ bool CGanttChartWnd::GetLabelEditRect(LPRECT pEdit)
 	if (m_ctrlGantt.GetLabelEditRect(pEdit))
 	{
 		// convert to screen coords
-		m_ctrlGantt.CWnd::ClientToScreen(pEdit);
+		m_ctrlGantt.ClientToScreen(pEdit);
 		return true;
 	}
 
@@ -492,7 +494,7 @@ DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) con
 	return m_ctrlGantt.HitTestTask(ptScreen, (nReason == IUI_INFOTIP));
 }
 
-bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -589,13 +591,13 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			GANTTSORTCOLUMNS sort;
 
-			sort.cols[0].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttrib1);
+			sort.cols[0].nColumnID = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID1);
 			sort.cols[0].bAscending = (pData->sort.bAscending1 ? TRUE : FALSE);
 
-			sort.cols[1].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttrib2);
+			sort.cols[1].nColumnID = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID2);
 			sort.cols[1].bAscending = (pData->sort.bAscending2 ? TRUE : FALSE);
 
-			sort.cols[2].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttrib3);
+			sort.cols[2].nColumnID = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttributeID3);
 			sort.cols[2].bAscending = (pData->sort.bAscending3 ? TRUE : FALSE);
 			
 			m_ctrlGantt.Sort(sort);
@@ -779,6 +781,10 @@ BOOL CGanttChartWnd::OnInitDialog()
 	m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
 	m_cbSnapModes.Rebuild(m_ctrlGantt.GetMonthDisplay(), m_ctrlGantt.GetDefaultSnapMode());
 
+	// Date range text needs to be big enough for all eventualities
+	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
+	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
+
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
 
@@ -794,6 +800,16 @@ void CGanttChartWnd::Resize(int cx, int cy)
 		rGantt.top = CDlgUnits(this).ToPixelsY(28);
 
 		m_ctrlGantt.MoveWindow(rGantt);
+
+		// selected task dates takes available space
+		if (CLocalizer::IsInitialized())
+		{
+			int nOffset = CDialogHelper::ResizeStaticTextToFit(this, IDC_ACTIVEDATERANGE_LABEL);
+
+			if (nOffset)
+				CDialogHelper::OffsetCtrl(this, IDC_ACTIVEDATERANGE_TEXT, nOffset, 0);
+		}
+
 		ResizeSlider(cx);
 	}
 }
@@ -926,7 +942,7 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 				// We only need to fixup the active selection if the primary 
 				// display group is changing else the column count is unchanged 
 				// so the previous selection is okay by default
-				if (!GanttStatic::IsSameDisplayGroup(nPrevDisplay, nDisplay))
+				if (!GanttUtils::IsSameDisplayGroup(nPrevDisplay, nDisplay))
 				{
 					GANTTDATERANGE dtMaxRange;
 
@@ -1015,7 +1031,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 		// We only need to fixup the active selection if the primary 
 		// display group is changing else the column count is unchanged 
 		// so the previous selection is okay by default
-		if (!GanttStatic::IsSameDisplayGroup(nPrevDisplay, nDisplay))
+		if (!GanttUtils::IsSameDisplayGroup(nPrevDisplay, nDisplay))
 		{
 			GANTTDATERANGE dtMaxRange;
 
@@ -1041,9 +1057,9 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 LRESULT CGanttChartWnd::OnGanttNotifySortChange(WPARAM wp, LPARAM lp)
 {
 	// notify app
-	TDC_ATTRIBUTE nAttrib = CGanttCtrl::MapColumnToAttribute((GTLC_COLUMN)lp);
+	TDC_ATTRIBUTE nAttribID = CGanttCtrl::MapColumnToAttribute((GTLC_COLUMN)lp);
 
-	GetParent()->SendMessage(WM_IUI_SORTCHANGE, wp, nAttrib);
+	GetParent()->SendMessage(WM_IUI_SORTCHANGE, wp, nAttribID);
 
 	return 0L;
 }
@@ -1108,14 +1124,14 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 		case GTLCD_START:
 			if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
 			{
-				mod[0].nAttrib = TDCA_STARTDATE;
+				mod[0].nAttributeID = TDCA_STARTDATE;
 			}
 			break;
 			
 		case GTLCD_END:
 			if (CDateHelper::GetTimeT64(dtDue, mod[0].tValue))
 			{
-				mod[0].nAttrib = TDCA_DUEDATE;
+				mod[0].nAttributeID = TDCA_DUEDATE;
 			}
 			break;
 			
@@ -1132,15 +1148,15 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 				if (bStartSet && bDueSet)
 				{
 					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
-						mod[0].nAttrib = TDCA_OFFSETTASK;
+						mod[0].nAttributeID = TDCA_OFFSETTASK;
 				}
 				else
 				{
 					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue) &&
 						CDateHelper::GetTimeT64(dtDue, mod[1].tValue))
 					{
-						mod[0].nAttrib = TDCA_STARTDATE;
-						mod[1].nAttrib = TDCA_DUEDATE;
+						mod[0].nAttributeID = TDCA_STARTDATE;
+						mod[1].nAttributeID = TDCA_DUEDATE;
 						nNumMod = 2;
 					}
 				}
@@ -1148,7 +1164,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 			break;
 		}
 		
-		if (mod[0].nAttrib != TDCA_NONE)
+		if (mod[0].nAttributeID != TDCA_NONE)
 			return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumMod, (LPARAM)&mod[0]);
 	}
 
@@ -1158,8 +1174,7 @@ LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 void CGanttChartWnd::UpdateActiveRangeLabel()
 {
 	CString sRange = m_sliderDateRange.FormatRange();
-
-	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
+	SetDlgItemText(IDC_ACTIVEDATERANGE_TEXT, sRange);
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM /*wp*/, LPARAM /*lp*/)

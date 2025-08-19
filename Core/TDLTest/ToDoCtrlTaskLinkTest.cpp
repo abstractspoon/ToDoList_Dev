@@ -31,7 +31,7 @@ TDCCOLEDITFILTERVISIBILITY visDefault;
 
 CToDoCtrlTaskLinkTest::CToDoCtrlTaskLinkTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(utils),
+	CTDLTestBase(_T("CToDoCtrlTaskLinkTest"), utils),
 	m_tdc(mgrContent, mgrShortcuts, cfDefault, visDefault)
 {
 
@@ -55,7 +55,7 @@ TESTRESULT CToDoCtrlTaskLinkTest::Run()
 
 void CToDoCtrlTaskLinkTest::TestFormatTaskLink()
 {
-	BeginTest(_T("CToDoCtrl::FormatTaskLink"));
+	CTDCScopedTest test(*this, _T("CToDoCtrl::FormatTaskLink"));
 
 	//  ---------------------------------------
 
@@ -78,15 +78,11 @@ void CToDoCtrlTaskLinkTest::TestFormatTaskLink()
 	// These assert so we only run them in release
 	ExpectEQ(m_tdc.FormatTaskLink(10, TRUE), _T("")); // Must have been saved for 'full' task link
 #endif
-
-	//  ---------------------------------------
-
-	EndTest();
 }
 
 void CToDoCtrlTaskLinkTest::TestFormatTaskDependency()
 {
-	BeginTest(_T("CToDoCtrl::FormatTaskDependency"));
+	CTDCScopedTest test(*this, _T("CToDoCtrl::FormatTaskDependency"));
 
 	//  ---------------------------------------
 
@@ -108,15 +104,11 @@ void CToDoCtrlTaskLinkTest::TestFormatTaskDependency()
 #ifndef _DEBUG
 	ExpectEQ(m_tdc.FormatTaskDependency(10, TRUE), _T("")); // Must have been saved for 'full' task link
 #endif
-
-	//  ---------------------------------------
-
-	EndTest();
 }
 
 void CToDoCtrlTaskLinkTest::TestParseTaskLink()
 {
-	BeginTest(_T("CToDoCtrl::ParseTaskLink"));
+	CTDCScopedTest test(*this, _T("CToDoCtrl::ParseTaskLink"));
 
 	//  ---------------------------------------
 
@@ -258,8 +250,4 @@ void CToDoCtrlTaskLinkTest::TestParseTaskLink()
 	ExpectTrue(m_tdc.ParseTaskLink(_T("A Tasklist.tdl?"), FALSE, dwTaskID, sFilePath));
 	ExpectEQ(dwTaskID, 0UL);
 	ExpectEQ(sFilePath, _T("C:\\Users\\Daniel Godson\\AppData\\Local\\A Tasklist.tdl"));
-
-	//  ---------------------------------------
-
-	EndTest();
 }

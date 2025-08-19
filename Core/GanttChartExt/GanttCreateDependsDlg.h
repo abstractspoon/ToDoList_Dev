@@ -9,6 +9,8 @@
 
 #include "GanttStruct.h"
 
+#include "..\shared\icon.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CGanttCreateDependsDlg dialog
 
@@ -62,6 +64,7 @@ protected:
 	CString	m_sCurStage;
 	DWORD m_dwFromTaskID, m_dwCurToTaskID, m_dwNewToTaskID;
 	GCDD_MODE m_nMode;
+	CIcon m_icon;
 
 	enum GCDD_STAGE
 	{
@@ -76,7 +79,7 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CGanttCreateDependsDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnOK() {}

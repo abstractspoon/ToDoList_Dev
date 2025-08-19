@@ -70,15 +70,14 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 	// build column combo because that is static
 	CLocalizer::EnableTranslation(m_cbAttributes, FALSE);
 
-	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 	{
-		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];
+		const TDCATTRIBUTE& att = TASKATTRIBUTES[nAtt];
 
 		// ignore certain attributes
-		switch (att.nAttribID)
+		switch (att.nAttributeID)
 		{
 		case TDCA_COLOR:
-		case TDCA_PROJECTNAME:
 		case TDCA_RECURRENCE:
 		case TDCA_POSITION:
 		case TDCA_TASKNAMEORCOMMENTS:
@@ -90,11 +89,11 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		case TDCA_NONE:
 			// Allow mapping to 'none' when importing
 			if (m_bImporting)
-				CDialogHelper::AddString(m_cbAttributes, _T(""), att.nAttribID);
+				CDialogHelper::AddStringT(m_cbAttributes, _T(""), att.nAttributeID);
 			break;
 
 		default:
-			CDialogHelper::AddString(m_cbAttributes, CEnString(att.nAttribResID), att.nAttribID);
+			CDialogHelper::AddStringT(m_cbAttributes, CEnString(att.nLabelResID), att.nAttributeID);
 			break;
 		}
 	}
@@ -102,8 +101,8 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 	// add custom attribute placeholder if importing
 	if (m_bImporting)
 	{
-		CDialogHelper::AddString(m_cbAttributes, CEnString(IDS_CSV_CUSTOMATTRIB), TDCA_NEW_CUSTOMATTRIBUTE);
-		CDialogHelper::AddString(m_cbAttributes, CEnString(IDS_CSV_CUSTOMLISTATTRIB), TDCA_NEW_CUSTOMATTRIBUTE_LIST);
+		CDialogHelper::AddStringT(m_cbAttributes, CEnString(IDS_CSV_CUSTOMATTRIB), TDCA_NEW_CUSTOMATTRIBUTE);
+		CDialogHelper::AddStringT(m_cbAttributes, CEnString(IDS_CSV_CUSTOMLISTATTRIB), TDCA_NEW_CUSTOMATTRIBUTE_LIST);
 	}
 
 	m_header.EnableTracking(FALSE);
@@ -114,8 +113,8 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		InsertColumn(IMPORT_COLUMNID, CEnString(IDS_CSV_MAPSTOATTRIBUTE));
 
 		SetColumnType(IMPORT_COLUMNNAME, ILCT_TEXT);
-		DisableColumnEditing(IMPORT_COLUMNNAME, TRUE);
-		SetColumnType(IMPORT_COLUMNID, ILCT_DROPLIST);
+		EnableColumnEditing(IMPORT_COLUMNNAME, FALSE);
+		SetColumnType(IMPORT_COLUMNID, ILCT_COMBO);
 	}
 	else // export
 	{
@@ -123,7 +122,7 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		InsertColumn(EXPORT_COLUMNNAME, CEnString(IDS_CSV_MAPSTOCOLUMNNAME));
 
 		SetColumnType(EXPORT_COLUMNID, ILCT_TEXT);
-		DisableColumnEditing(EXPORT_COLUMNID, TRUE);
+		EnableColumnEditing(EXPORT_COLUMNID, FALSE);
 		SetColumnType(EXPORT_COLUMNNAME, ILCT_TEXT);
 	}
 
@@ -156,14 +155,14 @@ void CTDLImportExportAttributeMappingListCtrl::BuildListCtrl()
 
 		if (!col.sColumnName.IsEmpty())
 		{
-			CString sAttribName(GetAttributeName(col.nTDCAttrib));
+			CString sAttribName(GetAttributeName(col.nAttributeID));
 			CString sFrom(m_bImporting ? col.sColumnName : sAttribName);
 			CString sTo(m_bImporting ? sAttribName : col.sColumnName);
 
 			int nItem = AddRow(sFrom);
 
 			SetItemText(nItem, IMPORT_COLUMNID, sTo);
-			SetItemData(nItem, col.nTDCAttrib);
+			SetItemData(nItem, col.nAttributeID);
 		}
 	}
 
@@ -178,7 +177,7 @@ CString CTDLImportExportAttributeMappingListCtrl::GetAttributeName(TDC_ATTRIBUTE
 	if (nAtt == TDCA_EXISTING_CUSTOMATTRIBUTE)
 		return CEnString(IDS_CSV_EXISTCUSTOMATTRIB);
 	
-	return TDC::GetAttributeName(nAtt);
+	return TDC::GetAttributeLabel(nAtt);
 }
 
 int CTDLImportExportAttributeMappingListCtrl::FindRow(TDC_ATTRIBUTE nAtt, int nIgnoreRow) const
@@ -223,7 +222,7 @@ void CTDLImportExportAttributeMappingListCtrl::EditCell(int nItem, int nCol, BOO
 		(!m_bImporting && nCol == EXPORT_COLUMNID))
 	{
 		PrepareEdit(nItem, nCol);
-		ShowControl(m_cbAttributes, nItem, nCol); 
+		ShowControl(m_cbAttributes, nItem, nCol, bBtnClick);
 	}
 	else
 	{
@@ -241,8 +240,8 @@ void CTDLImportExportAttributeMappingListCtrl::PrepareEdit(int nRow, int nCol)
 {
 	if (m_bImporting && nCol == IMPORT_COLUMNID)
 	{
-		TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)GetItemData(nRow);
-		CString sAttrib = GetAttributeName(nAttrib);
+		TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)GetItemData(nRow);
+		CString sAttrib = GetAttributeName(nAttribID);
 
 		int nFind = m_cbAttributes.FindStringExact(0, sAttrib);
 
@@ -279,7 +278,7 @@ BOOL CTDLImportExportAttributeMappingListCtrl::DeleteSelectedCell()
 
 		if (m_bImporting)
 		{
-			attrib.nTDCAttrib = TDCA_NONE;
+			attrib.nAttributeID = TDCA_NONE;
 			SetItemData(nRow, (DWORD)TDCA_NONE);
 		}
 		else // exporting
@@ -312,7 +311,7 @@ void CTDLImportExportAttributeMappingListCtrl::OnAttribEditOK()
 	{
 		CString sSel;
 
-		TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)m_cbAttributes.GetItemData(nSel);
+		TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)m_cbAttributes.GetItemData(nSel);
 		m_cbAttributes.GetLBText(nSel, sSel);
 
 		int nRow = GetCurSel();
@@ -320,21 +319,21 @@ void CTDLImportExportAttributeMappingListCtrl::OnAttribEditOK()
 
 		// check that this column ID is not already in use
 		if (m_bOneToOneMapping && 
-			(nAttrib != TDCA_CUSTOMATTRIB_FIRST) && 
-			(nAttrib != TDCA_CUSTOMATTRIB_LAST) &&
-			(nAttrib != TDCA_NONE))
+			(nAttribID != TDCA_CUSTOMATTRIB_FIRST) && 
+			(nAttribID != TDCA_CUSTOMATTRIB_LAST) &&
+			(nAttribID != TDCA_NONE))
 		{
-			int nExist = FindRow(nAttrib, nRow);
+			int nExist = FindRow(nAttribID, nRow);
 
 			if (nExist != -1)
 			{
 				// update mapping
-				TDC_ATTRIBUTE nExistAttrib = (TDC_ATTRIBUTE)GetItemData(nExist);
+				TDC_ATTRIBUTE nExistAttribID = (TDC_ATTRIBUTE)GetItemData(nExist);
 
-				int nExistMap = m_aMapping.Find(nExistAttrib);
+				int nExistMap = m_aMapping.Find(nExistAttribID);
 				ASSERT(nExistMap != -1);
 
-				m_aMapping[nExistMap].nTDCAttrib = TDCA_NONE;
+				m_aMapping[nExistMap].nAttributeID = TDCA_NONE;
 
 				// clear field
 				SetItemText(nExist, IMPORT_COLUMNID, _T(""));
@@ -344,7 +343,7 @@ void CTDLImportExportAttributeMappingListCtrl::OnAttribEditOK()
 
 		// update list
 		SetItemText(nRow, IMPORT_COLUMNID, sSel);
-		SetItemData(nRow, nAttrib);
+		SetItemData(nRow, nAttribID);
 
 		// update mapping
 		CString sMap = GetItemText(nRow, IMPORT_COLUMNNAME);
@@ -352,7 +351,7 @@ void CTDLImportExportAttributeMappingListCtrl::OnAttribEditOK()
 		int nMap = m_aMapping.Find(sMap);
 		ASSERT(nMap != -1);
 
-		m_aMapping[nMap].nTDCAttrib = nAttrib;
+		m_aMapping[nMap].nAttributeID = nAttribID;
 
 		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), TDCN_IMPORTMAPPINGCHANGE), (LPARAM)GetSafeHwnd());
 	}
@@ -364,7 +363,7 @@ void CTDLImportExportAttributeMappingListCtrl::TraceMapping() const
 	{
 		const TDCATTRIBUTEMAPPING& col = m_aMapping[nAtt];
 
-		TRACE (_T("'%s' maps to '%d'\n"), col.sColumnName, col.nTDCAttrib);
+		TRACE (_T("'%s' maps to '%d'\n"), col.sColumnName, col.nAttributeID);
 	}
 }
 
@@ -400,9 +399,9 @@ void CTDLImportExportAttributeMappingListCtrl::OnNameEditOK(NMHDR* /*pNMHDR*/, L
 	SetItemText(nRow, EXPORT_COLUMNNAME, sSel);
 
 	// update mapping
-	TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)GetItemData(nRow);
+	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)GetItemData(nRow);
 
-	int nMap = m_aMapping.Find(nAttrib);
+	int nMap = m_aMapping.Find(nAttribID);
 	ASSERT(nMap != -1);
 	
 	m_aMapping[nMap].sColumnName = sSel;

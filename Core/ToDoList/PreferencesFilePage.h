@@ -26,8 +26,6 @@ enum
 
 class CPreferencesFilePage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesFilePage)
-
 // Construction
 public:
 	CPreferencesFilePage();
@@ -54,7 +52,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesFilePage)
-	enum { IDD = IDD_PREFFILE_PAGE };
 	CFileEdit	m_eDueTaskStylesheet;
 	CComboBox	m_cbFontSize;
 	BOOL	m_bDisplayDueTasksInHtml;

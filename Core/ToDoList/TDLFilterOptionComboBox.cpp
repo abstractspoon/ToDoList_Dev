@@ -30,9 +30,6 @@ CTDLFilterOptionComboBox::~CTDLFilterOptionComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLFilterOptionComboBox, CCheckComboBox)
-	//{{AFX_MSG_MAP(CFilterOptionComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -51,7 +48,7 @@ void CTDLFilterOptionComboBox::Initialize(DWORD dwFlags, DWORD dwOptions)
 		UINT nFlag = FILTER_OPTIONS[nItem][1];
 
 		if (Misc::HasFlag(dwFlags, nFlag))
-			CDialogHelper::AddString(*this, FILTER_OPTIONS[nItem][0], nFlag);
+			CDialogHelper::AddStringT(*this, FILTER_OPTIONS[nItem][0], nFlag);
 	}
 
 	SetCheckedByItemData(dwOptions);
@@ -118,6 +115,7 @@ void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter, const CTDCAtt
 			break;
 
 		case FO_SHOWALLSUB:
+		case FO_HIDEUNDONEDEPENDS:
 			bAddFlag = TRUE;
 			break;
 
@@ -144,7 +142,7 @@ void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter, const CTDCAtt
 		}	
 
 		if (bAddFlag)
-			CDialogHelper::AddString(*this, FILTER_OPTIONS[nItem][0], nFlag);
+			CDialogHelper::AddStringT(*this, FILTER_OPTIONS[nItem][0], nFlag);
 		else
 			dwFlags &= ~nFlag;
 	}

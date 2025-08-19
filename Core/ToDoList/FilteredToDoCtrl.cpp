@@ -37,10 +37,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef LVS_EX_DOUBLEBUFFER
-#define LVS_EX_DOUBLEBUFFER 0x00010000
-#endif
-
 #ifndef LVS_EX_LABELTIP
 #define LVS_EX_LABELTIP     0x00004000
 #endif
@@ -84,7 +80,6 @@ BEGIN_MESSAGE_MAP(CFilteredToDoCtrl, CTabbedToDoCtrl)
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
-	ON_CBN_EDITCHANGE(IDC_DUETIME, OnEditChangeDueTime)
 	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 END_MESSAGE_MAP()
 
@@ -108,8 +103,8 @@ BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTaskLink)
 	{
 		// Shift the focus away from the comments because toggling
 		// the filter may cause the comments to become disabled
-		if (m_ctrlComments.HasFocus())
-			SetFocusToTasks();
+		if (HasFocus(TDCSF_COMMENTS))
+			SetFocus(TDCSF_TASKVIEW);
 	
 		ToggleFilter(); // show all tasks
 		
@@ -255,24 +250,6 @@ void CFilteredToDoCtrl::OnDestroy()
 	CTabbedToDoCtrl::OnDestroy();
 }
 
-void CFilteredToDoCtrl::OnEditChangeDueTime()
-{
-	// need some special hackery to prevent a re-filter in the middle
-	// of the user manually typing into the time field
-	CDWordArray aSelTaskIDs;
-	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
-
-	BOOL bNeedFullTaskUpdate = ModNeedsRefilter(TDCA_DUEDATE, aSelTaskIDs);
-	
-	if (bNeedFullTaskUpdate)
-		m_styles[TDCS_REFILTERONMODIFY] = FALSE;
-	
-	CTabbedToDoCtrl::OnSelChangeDueTime();
-	
-	if (bNeedFullTaskUpdate)
-		m_styles[TDCS_REFILTERONMODIFY] = TRUE;
-}
-
 BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 {
 	// NOTE: we are overriding this function else
@@ -312,18 +289,16 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 	// extra processing to identify the originally selected tasks
 	// in case the user wants to paste as references
 	// Note: references can always be pasted 'as references'
-	CDWordArray aSelTasks;
-	TSH().GetItemData(aSelTasks);
+	CDWordArray aSelTaskIDs;
+	TSH().GetItemData(aSelTaskIDs);
 
-	tasks.SetSelectedTaskIDs(aSelTasks);
-	
 	// and their titles (including child dupes)
 	CStringArray aTitles;
 	
 	VERIFY(TSH().CopySelection(selection, FALSE, TRUE));
 	VERIFY(TSH().GetItemTitles(selection, aTitles));
 	
-	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), Misc::FormatArray(aTitles, '\n'));
+	return CTaskClipboard::SetTasks(tasks, GetClipboardID(), aSelTaskIDs, Misc::FormatArray(aTitles, '\n'));
 }
 
 BOOL CFilteredToDoCtrl::ArchiveDoneTasks(TDC_ARCHIVE nFlags, BOOL bRemoveFlagged)
@@ -662,12 +637,16 @@ int CFilteredToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BO
 
 BOOL CFilteredToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const
 {
-	BOOL bWantAdd = CTabbedToDoCtrl::WantAddTreeTaskToList(dwTaskID, pContext);
+	if (!CTabbedToDoCtrl::WantAddTreeTaskToList(dwTaskID, pContext))
+		return FALSE;
 
-	if ((pContext == NULL) || !bWantAdd)
-		return bWantAdd;
-
-	// Hide non-matching parents
+	if (pContext == NULL)
+	{
+		// Assume the tree is our source of truth
+		return (m_taskTree.GetItem(dwTaskID) != NULL);
+	}
+	
+	// else hide parent tasks non-matching the filter
 	const TODOSTRUCTURE* pTDS = NULL;
 	const TODOITEM* pTDI = NULL;
 
@@ -679,10 +658,10 @@ BOOL CFilteredToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pConte
 		const SEARCHPARAMS* pFilter = static_cast<const SEARCHPARAMS*>(pContext);
 		SEARCHRESULT unused;
 
-		bWantAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), unused);
+		return m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), unused);
 	}
 
-	return bWantAdd;
+	return TRUE;
 }
 
 HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
@@ -825,6 +804,11 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 					bWantTask = !sWhatMatched.IsEmpty();
 					break;
 
+				case FOP_DEPENDS_COMPLETE:
+					ASSERT(rule.AttributeIs(TDCA_DEPENDENCY));
+					bWantTask = TRUE;
+					break;
+
 				default:
 					ASSERT(0);
 					bWantTask = TRUE;
@@ -902,16 +886,7 @@ void CFilteredToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 
 BOOL CFilteredToDoCtrl::CreateNewTask(LPCTSTR szText, TDC_INSERTWHERE nWhere, BOOL bEditText, DWORD dwDependency)
 {
-	if (CTabbedToDoCtrl::CreateNewTask(szText, nWhere, bEditText, dwDependency))
-	{
-// 		SetViewNeedsTaskUpdate(FTCV_TASKLIST, !InListView());
-// 		SetExtensionsNeedTaskUpdate(TRUE, GetTaskView());
-
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
+	return CTabbedToDoCtrl::CreateNewTask(szText, nWhere, bEditText, dwDependency);
 }
 
 BOOL CFilteredToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
@@ -933,8 +908,8 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 		bListRefiltered = InListView();
 	}
 
-	// This may cause either the list or one of the extensions to be rebuilt
-	// we set flags and ignore it
+	// Calling our base class may cause either the list or one of 
+	// the extensions to be rebuilt which we want to avoid
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
@@ -960,7 +935,7 @@ void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	CTabbedToDoCtrl::EndTimeTracking(bAllowConfirm, bNotify);
 	
 	// do we need to refilter?
-	if (bWasTimeTracking && m_filter.HasAdvancedFilter() && m_filter.HasAdvancedFilterAttribute(TDCA_TIMESPENT))
+	if (bWasTimeTracking && m_filter.HasFilterAttribute(TDCA_TIMESPENT, m_aCustomAttribDefs))
 	{
 		RefreshFilter(FALSE);
 	}
@@ -982,10 +957,10 @@ BOOL CFilteredToDoCtrl::ModsNeedRefilter(const CTDCAttributeMap& mapAttribIDs, c
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs) const
+BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs) const
 {
 	// sanity checks
-	if ((nAttrib == TDCA_NONE) || !HasStyle(TDCS_REFILTERONMODIFY))
+	if ((nAttribID == TDCA_NONE) || !HasStyle(TDCS_REFILTERONMODIFY))
 		return FALSE;
 
 	if (!m_filter.HasAnyFilter())
@@ -993,12 +968,12 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArra
 
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
-	BOOL bNeedRefilter = m_filter.ModNeedsRefilter(nAttrib, m_aCustomAttribDefs);
+	BOOL bNeedRefilter = m_filter.ModNeedsRefilter(nAttribID, m_aCustomAttribDefs);
 
 	if (!bNeedRefilter)
 	{
 		// 'Other' attributes
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_NEWTASK: // handled in CreateNewTask
 		case TDCA_DELETE:
@@ -1015,41 +990,52 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArra
 		}
 	}
 	else if (aModTaskIDs.GetSize() == 1)
-	{
+	{ 
+		// Task edit on single task
 		DWORD dwModTaskID = aModTaskIDs[0];
 
-		// VERY SPECIAL CASE
-		// The task being time tracked has been filtered out
-		// in which case we don't need to check if it matches
-		if (m_timeTracking.IsTrackingTask(dwModTaskID))
+		// Optimisations
+		switch (nAttribID)
 		{
-			if (m_taskTree.GetItem(dwModTaskID) == NULL)
-			{
-				ASSERT(HasTask(dwModTaskID));
-				ASSERT(nAttrib == TDCA_TIMESPENT);
-
+		case TDCA_TIMESPENT:
+			// DON'T refilter if time tracking
+			if (m_timeTracking.IsTrackingTask(dwModTaskID))
 				return FALSE;
-			}
-			// else fall thru
-		}
+			break;
 
-		// Finally, if this was a simple task edit we can just test to 
-		// see if the modified task still matches the filter.
-		SEARCHPARAMS params;
+		case TDCA_COMMENTS:
+			// ONLY refilter on committed changes
+			if (m_nCommentsState != CToDoCtrl::CS_CHANGED)
+				return FALSE;
+			break;
+		}
+		
+		// Test if the modified task still matches the filter.
+		SEARCHPARAMS query;
 		SEARCHRESULT result;
 
-		m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
-
-		BOOL bMatchesFilter = m_matcher.TaskMatches(dwModTaskID, params, FALSE, result);
-		BOOL bTreeHasItem = (m_taskTree.GetItem(dwModTaskID) != NULL);
-
-		bNeedRefilter = ((bMatchesFilter && !bTreeHasItem) || (!bMatchesFilter && bTreeHasItem));
+		m_filter.BuildFilterQuery(query, m_aCustomAttribDefs);
 		
-		// extra handling for 'Find Tasks' filters 
-		if (bNeedRefilter && HasAdvancedFilter())
+		BOOL bWantShowItem = m_matcher.TaskMatches(dwModTaskID, query, FALSE, result);
+		BOOL bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwModTaskID);
+
+		bNeedRefilter = Misc::StatesDiffer(bWantShowItem, bTreeHasItem);
+
+		// Special case: Modified task is a dependency of a hidden task
+		if (!bNeedRefilter && (nAttribID == TDCA_DONEDATE) && m_filter.HasCompletedDependencyFilter())
 		{
-			// don't refilter on Time Spent if time tracking
-			bNeedRefilter = !(nAttrib == TDCA_TIMESPENT && IsActivelyTimeTracking());
+			CDWordArray aDependentIDs;
+			int nID = m_data.GetTaskLocalDependents(dwModTaskID, aDependentIDs, FALSE);
+
+			while (nID-- && !bNeedRefilter)
+			{
+				DWORD dwDependID = aDependentIDs[nID];
+
+				bWantShowItem = m_matcher.TaskMatches(dwDependID, query, FALSE, result);
+				bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwDependID);
+
+				bNeedRefilter = Misc::StatesDiffer(bWantShowItem, bTreeHasItem);
+			}
 		}
 	}
 
@@ -1078,12 +1064,6 @@ BOOL CFilteredToDoCtrl::StyleChangesNeedRefilter(const CTDCStyleMap& styles) con
 		case TDCS_USEEARLIESTSTARTDATE:
 		case TDCS_USELATESTSTARTDATE:
 			mapAttribAffected.Add(TDCA_STARTDATE);
-			break;
-
-		case TDCS_CALCREMAININGTIMEBYDUEDATE:
-		case TDCS_CALCREMAININGTIMEBYSPENT:
-		case TDCS_CALCREMAININGTIMEBYPERCENT:
-			// Not supported
 			break;
 
 		case TDCS_DUEHAVEHIGHESTPRIORITY:
@@ -1132,10 +1112,6 @@ BOOL CFilteredToDoCtrl::StyleChangesNeedRefilter(const CTDCStyleMap& styles) con
 		case TDCS_AUTOCALCPERCENTDONE:
 			mapAttribAffected.Add(TDCA_PERCENT);
 			break;
-
-		case TDCS_HIDESTARTDUEFORDONETASKS:
-			//mapAttribAffected.Add(TDCA_);
-			break;
 		}
 	}
 	
@@ -1154,19 +1130,8 @@ LRESULT CFilteredToDoCtrl::OnMidnight(WPARAM wParam, LPARAM lParam)
 	// don't re-filter delay-loaded tasklists
 	if (!IsDelayLoaded())
 	{
-		BOOL bRefilter = FALSE;
-		TDCFILTER filter;
-
-		if (m_filter.GetFilter(filter) == FS_ADVANCED)
-		{
-			bRefilter = (m_filter.HasAdvancedFilterAttribute(TDCA_STARTDATE) ||
-						 m_filter.HasAdvancedFilterAttribute(TDCA_DUEDATE));
-		}
-		else
-		{
-			bRefilter = (((filter.nStartBy != FD_NONE) && (filter.nStartBy != FD_ANY)) ||
-						((filter.nDueBy != FD_NONE) && (filter.nDueBy != FD_ANY)));
-		}
+		BOOL bRefilter = (m_filter.HasFilterAttribute(TDCA_STARTDATE, m_aCustomAttribDefs) ||
+ 						 m_filter.HasFilterAttribute(TDCA_DUEDATE, m_aCustomAttribDefs));
 
 		if (bRefilter)
 			RefreshFilter(FALSE);
@@ -1209,28 +1174,28 @@ void CFilteredToDoCtrl::OnTimerNow()
 	
 	// So first thing we do is find reasons not to:
 	
-	// We are hidden
+	// 1. We are hidden
 	if (!IsWindowVisible())
 	{
 		TRACE(_T("CFilteredToDoCtrl::OnTimerNow eaten (Window not visible)\n"));
 		return;
 	}
 	
-	// We're already displaying all tasks
+	// 2. We're already displaying all tasks
 	if (m_taskTree.GetItemCount() == m_data.GetTaskCount())
 	{
 		TRACE(_T("CFilteredToDoCtrl::OnTimerNow eaten (All tasks showing)\n"));
 		return;
 	}
 	
-	// App is minimized or hidden
+	// 3. App is minimized or hidden
 	if (AfxGetMainWnd()->IsIconic() || !AfxGetMainWnd()->IsWindowVisible())
 	{
 		TRACE(_T("CFilteredToDoCtrl::OnTimerNow eaten (App not visible)\n"));
 		return;
 	}
 	
-	// App is not the foreground window
+	// 4. App is not the foreground window
 	if (GetForegroundWindow() != AfxGetMainWnd())
 	{
 		TRACE(_T("CFilteredToDoCtrl::OnTimerNow eaten (App not active)\n"));
@@ -1248,47 +1213,7 @@ void CFilteredToDoCtrl::OnTimerNow()
 	ASSERT(pTDS);
 	
 	if (FindNewNowFilterTasks(pTDS, params, m_taskTree.TreeItemMap()))
-	{
 		RefreshFilter(FALSE);
-
-		/*TDC_ATTRIBUTE nNowAttrib;
-
-		if (m_filter.HasNowFilter(nNowAttrib))
-		{
-			BOOL bRefilter = FALSE;
-		
-			switch (nNowAttrib)
-			{
-			case TDCA_DUEDATE:
-				bRefilter = (AfxMessageBox(CEnString(IDS_DUEBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
-				break;
-
-			case TDCA_STARTDATE:
-				bRefilter = (AfxMessageBox(CEnString(IDS_STARTBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
-				break;
-
-			default:
-				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nNowAttrib))
-				{
-					// TODO
-					//bRefilter = (AfxMessageBox(CEnString(IDS_CUSTOMBYNOW_CONFIRMREFILTER), MB_YESNO | MB_ICONQUESTION) == IDYES);
-				}
-				else
-				{
-					ASSERT(0);
-				}
-			}
-		
-			if (bRefilter)
-			{
-				RefreshFilter(FALSE);
-			}
-			else // make the timer 10 minutes so we don't re-prompt them too soon
-			{
-				SetTimer(TIMER_NOWFILTER, TEN_MINUTES, NULL);
-			}
-		}*/
-	}
 }
 
 BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& params, const CHTIMap& htiMap) const
@@ -1449,6 +1374,10 @@ DWORD CFilteredToDoCtrl::MergeNewTaskIntoDataModel(const CTaskFile& tasks, HTASK
 
 DWORD CFilteredToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate)
 {
+	// The original task must be in the tree view so that the
+	// new task can be placed after it. It it's been filtered 
+	// out we need to toggle the filter to make it appear, then 
+	// add the new task, then restore the filter
 	DWORD dwTaskID = task.GetTaskID(task.GetFirstTask());
 	BOOL bToggleFilter = (HasAnyFilter() && (m_taskTree.GetItem(dwTaskID) == NULL));
 

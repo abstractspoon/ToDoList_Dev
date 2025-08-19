@@ -98,6 +98,7 @@ namespace Abstractspoon
 				bool InsertTextContent(String^ text, bool bInsertAtEnd);
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
+				bool DoIdleProcessing();
 
 				bool Undo();
 				bool Redo();

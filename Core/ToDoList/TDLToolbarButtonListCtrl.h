@@ -7,7 +7,7 @@
 // TDLToolbarButtonListCtrl.h : header file
 //
 
-#include "TDLCustomToolbar.h"
+#include "TDLCustomToolbar.h" // for CToolbarButtonArray
 
 #include "..\Shared\MenuComboBox.h"
 #include "..\Shared\InputListCtrl.h"
@@ -19,11 +19,12 @@ class CTDLToolbarButtonListCtrl : public CInputListCtrl
 {
 // Construction
 public:
-	CTDLToolbarButtonListCtrl();
+	CTDLToolbarButtonListCtrl(const CTDCImageList& ilIcons);
+	virtual ~CTDLToolbarButtonListCtrl();
 
 	BOOL HasButtons() const;
-	int GetButtons(CToolbarButtonArray& aButtons) const;
-	void SetButtons(const CToolbarButtonArray& aButtons);
+	int GetButtons(CTDCToolbarButtonArray& aButtons) const;
+	void SetButtons(const CTDCToolbarButtonArray& aButtons);
 	UINT GetLastButtonID() const;
 
 	BOOL CanMoveSelectedButtonUp() const;
@@ -36,23 +37,17 @@ public:
 	BOOL DeleteSelectedButton();
 	BOOL DuplicateSelectedButton();
 
-// Operations
-public:
-
 // Attributes
 protected:
 	CMenuComboBox m_cbMenuItems;
-	CToolbarButtonArray m_aButtons;
-	CTDCImageList m_ilImages;
+	CTDCToolbarButtonArray m_aButtons;
+
+	const CTDCImageList& m_ilImages;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLToolbarButtonListCtrl)
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLToolbarButtonListCtrl();
 
 	// Generated message map functions
 protected:

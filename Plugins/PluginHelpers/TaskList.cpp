@@ -23,6 +23,37 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+MultiTaskList::MultiTaskList(const IMultiTaskList* pMultiTaskList)
+	:
+	m_pMultiTaskList(pMultiTaskList)
+{
+}
+
+String^ MultiTaskList::GetReportTitle()
+{
+	return gcnew String(m_pMultiTaskList->GetReportTitle());
+}
+
+String^ MultiTaskList::GetReportDate()
+{
+	return gcnew String(m_pMultiTaskList->GetReportDate());
+}
+
+List<TaskList^>^ MultiTaskList::GetTaskLists()
+{
+	auto tasklists = gcnew List<TaskList^>();
+
+	for (int nTasklist = 0; nTasklist < m_pMultiTaskList->GetTaskListCount(); nTasklist++)
+	{
+		auto tasklist = gcnew TaskList(m_pMultiTaskList->GetTaskList(nTasklist));
+		tasklists->Add(tasklist);
+	}
+
+	return tasklists;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 TaskList::TaskList(ITaskList* pTaskList) 
 	: 
 	m_pTaskList(GetITLInterface<ITASKLISTBASE>(pTaskList, IID_TASKLISTBASE)), 

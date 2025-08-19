@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "PreferencesToolPage.h"
 #include "tdcenum.h"
+#include "TDLTaskIconDlg.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
@@ -15,6 +16,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\themed.h"
 #include "..\shared\fileicons.h"
+#include "..\shared\enlistctrl.h"
 
 #include "..\3rdparty\ini.h"
 #include "..\3rdparty\XNamedColors.h"
@@ -37,11 +39,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-static LPCTSTR REALQUOTE = _T("\"");
-static LPCTSTR SAFEQUOTE = _T("{QUOTES}");
-
-/////////////////////////////////////////////////////////////////////////////
-
 enum 
 {
 	COL_NAME,
@@ -51,24 +48,23 @@ enum
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesToolPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesToolPage, CPreferencesPageBase)
+const int BTN_SELECTICON = 101;
+
+/////////////////////////////////////////////////////////////////////////////
+// CPreferencesToolPage property page
 
 CPreferencesToolPage::CPreferencesToolPage(int nMaxNumTools)
 	: 
-	CPreferencesPageBase(CPreferencesToolPage::IDD),
-	m_eToolPath(FES_COMBOSTYLEBTN | FES_ALLOWURL),
-	m_eIconPath(FES_COMBOSTYLEBTN | FES_DISPLAYIMAGETHUMBNAILS),
+	CPreferencesPageBase(IDD_PREFTOOLS_PAGE),
+	m_eToolPath(FES_ALLOWURL),
+	m_eIconPath(FES_DISPLAYIMAGETHUMBNAILS),
 	m_nMaxNumTools(nMaxNumTools),
-	m_btnArgMenu(IDR_MISC, MM_TOOLARGS, MBS_DOWN)
+	m_btnArgMenu(IDR_MISC, MM_TOOLARGS, MBS_DOWN),
+	m_bRunMinimized(FALSE),
+	m_nNumDefaultIcons(-1)
 {
-	//{{AFX_DATA_INIT(CPreferencesToolPage)
-	m_sToolPath = _T("");
-	m_sCommandLine = _T("");
-	m_bRunMinimized = FALSE;
-	m_sIconPath = _T("");
-	//}}AFX_DATA_INIT
+	m_eIconPath.InsertButton(0, BTN_SELECTICON, CIcon(IDI_ICON_SELECT), CEnString(IDS_CAD_BROWSEIMAGES));
 }
 
 CPreferencesToolPage::~CPreferencesToolPage()
@@ -122,6 +118,7 @@ BEGIN_MESSAGE_MAP(CPreferencesToolPage, CPreferencesPageBase)
 	ON_EN_CHANGE(IDC_ICONPATH, OnChangeIconPath)
 	ON_BN_CLICKED(IDC_IMPORT, OnImportTools)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
+	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnSelectIcon)
 
 	ON_COMMAND_RANGE(ID_TOOLARG_CUSTOMATTRIB1, ID_TOOLARG_CUSTOMATTRIB16, OnInsertCustomAttribute)
 	ON_COMMAND_RANGE(ID_TOOLARG_USERVAR1, ID_TOOLARG_USERVAR10, OnInsertUserVariable)
@@ -151,7 +148,8 @@ void CPreferencesToolPage::OnFirstShow()
 
 	VERIFY(InitializeToolbar());
 
-	m_lcTools.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)CFileIcons::GetImageList());
+	m_nNumDefaultIcons = m_ilTools.LoadDefaultImages(TRUE);
+	m_lcTools.SetImageList(&m_ilTools, LVSIL_SMALL);
 
 	m_eToolPath.SetCurrentFolder(FileMisc::GetAppFolder());
 	m_eIconPath.SetCurrentFolder(FileMisc::GetAppFolder());
@@ -172,11 +170,10 @@ void CPreferencesToolPage::OnFirstShow()
 	// add tools we loaded from the registry
 	for (int nTool = 0; nTool < m_aTools.GetSize(); nTool++)
 	{
-		const USERTOOL& tool = m_aTools[nTool];
-		VERIFY(AddListTool(tool) != -1);
-
+		const TDCUSERTOOL& tool = m_aTools[nTool];
+		VERIFY(AddToolToList(tool) != -1);
 	}
-	RebuildListCtrlImages();
+	RebuildListImages();
 
 	m_lcTools.SetItemState(0, LVIS_SELECTED, LVIS_SELECTED);
 	OnItemchangedToollist(NULL, NULL);
@@ -187,7 +184,21 @@ void CPreferencesToolPage::OnFirstShow()
 	m_toolbar.RefreshButtonStates(FALSE);
 }
 
-int CPreferencesToolPage::AddListTool(const USERTOOL& tool, int nPos, BOOL bRebuildImages)
+void CPreferencesToolPage::OnOK()
+{
+	CPreferencesPageBase::OnOK();
+
+#ifdef _DEBUG
+	// Check we kept things properly synchronised
+	CTDCUserToolArray aTools;
+	aTools.Copy(m_aTools);
+#endif
+
+	RebuildToolsFromList();
+	ASSERT(Misc::MatchAllT(aTools, m_aTools, TRUE));
+}
+
+int CPreferencesToolPage::AddToolToList(const TDCUSERTOOL& tool, int nPos, BOOL bRebuildImages)
 {
 	// special case
 	if (nPos == -1)
@@ -211,42 +222,30 @@ int CPreferencesToolPage::AddListTool(const USERTOOL& tool, int nPos, BOOL bRebu
 	m_lcTools.SetItemData(nIndex, tool.bRunMinimized);
 
 	if (bRebuildImages)
-		RebuildListCtrlImages();
+		RebuildListImages();
 	
 	return nIndex;
 }
 
 void CPreferencesToolPage::OnNewExternalTool() 
 {
-	if (AddNewTool(TRUE) == -1)
-	{
-		ASSERT(0);
+	if (AddNewTool(FALSE) == -1)
 		return;
-	}
 
 	CPreferencesPageBase::OnControlChange();
 }
 
 void CPreferencesToolPage::OnNewTDLTool()
 {
-	int nTool = AddNewTool(FALSE);
-
-	if (nTool == -1)
-	{
+	if (AddNewTool(TRUE) == -1)
 		ASSERT(0);
-		return;
-	}
 
-	m_lcTools.SetItemText(nTool, COL_PATH, _T("todolist.exe"));
-	m_lcTools.SetItemText(nTool, COL_ARGS, MapCmdIDToPlaceholder(ID_TOOLARG_PATHNAME));
-	m_lcTools.EditLabel(nTool);
-
-	RebuildListCtrlImages();
+	RebuildListImages();
 
 	CPreferencesPageBase::OnControlChange();
 }
 
-int CPreferencesToolPage::AddNewTool(BOOL bEditLabel)
+int CPreferencesToolPage::AddNewTool(BOOL bTDLTool)
 {
 	if (m_lcTools.GetItemCount() >= m_nMaxNumTools)
 	{
@@ -254,15 +253,26 @@ int CPreferencesToolPage::AddNewTool(BOOL bEditLabel)
 		return -1;
 	}
 
-	int nIndex = m_lcTools.InsertItem(m_lcTools.GetItemCount(), CEnString(IDS_PTP_NEWTOOL), -1);
+	TDCUSERTOOL tool;
+	tool.sToolName = CEnString(IDS_PTP_NEWTOOL);
 
+	if (bTDLTool)
+	{
+		tool.sToolPath = _T("todolist.exe");
+		tool.sCmdline = MapCmdIDToPlaceholder(ID_TOOLARG_PATHNAME);
+	}
+
+	int nIndex = m_lcTools.InsertItem(m_lcTools.GetItemCount(), tool.sToolName, -1);
+	VERIFY(m_aTools.Add(tool) == nIndex);
+
+	m_lcTools.SetItemText(nIndex, COL_PATH, tool.sToolPath);
+	m_lcTools.SetItemText(nIndex, COL_ARGS, tool.sCmdline);
 	m_lcTools.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
+
 	m_lcTools.SetFocus();
+	m_lcTools.EditLabel(nIndex);
 
-	if (bEditLabel)
-		m_lcTools.EditLabel(nIndex);
-
-	m_toolbar.RefreshButtonStates(TRUE);
+	m_toolbar.RefreshButtonStates();
 
 	return nIndex;
 }
@@ -283,6 +293,7 @@ void CPreferencesToolPage::OnDeleteTool()
 
 	if (nSel != -1)
 	{
+		m_aTools.RemoveAt(nSel);
 		m_lcTools.DeleteItem(nSel);
 
 		// Select next previous item
@@ -332,16 +343,16 @@ void CPreferencesToolPage::OnCopyTool()
 	
 	if (nSel != -1)
 	{
-		USERTOOL tool;
-		VERIFY(GetListTool(nSel, tool));
-		
-		int nCopy = AddListTool(tool, (nSel + 1), TRUE);
+		TDCUSERTOOL tool = m_aTools[nSel];
+		m_aTools.InsertAt(nSel + 1, tool);
+
+		int nCopy = AddToolToList(tool, (nSel + 1), TRUE);
 		SetCurSel(nCopy);
 		
 		m_lcTools.SetFocus();
 		m_lcTools.EditLabel(nCopy);
 		
-		m_toolbar.RefreshButtonStates(TRUE);
+		m_toolbar.RefreshButtonStates();
 		
 		CPreferencesPageBase::OnControlChange();
 	}
@@ -358,14 +369,18 @@ void CPreferencesToolPage::OnMoveToolUp()
 	
 	if (nSel > 0)
 	{
-		USERTOOL tool;
-		VERIFY(GetListTool(nSel, tool));
+		TDCUSERTOOL tool = m_aTools[nSel]; // copy
+
+		m_aTools.RemoveAt(nSel);
+		m_aTools.InsertAt(nSel - 1, tool);
 
 		m_lcTools.DeleteItem(nSel);
-		nSel = AddListTool(tool, (nSel - 1), TRUE);
-		SetCurSel(nSel);
+		nSel = AddToolToList(tool, (nSel - 1), TRUE);
 
+		SetCurSel(nSel);
 		m_lcTools.SetFocus();
+
+		RebuildToolsFromList();
 
 		CPreferencesPageBase::OnControlChange();
 	}
@@ -382,15 +397,17 @@ void CPreferencesToolPage::OnMoveToolDown()
 	
 	if ((nSel >= 0) && (nSel < (m_lcTools.GetItemCount() - 1)))
 	{
-		USERTOOL tool;
-		VERIFY(GetListTool(nSel, tool));
-		
+		TDCUSERTOOL tool = m_aTools[nSel]; // copy
+
+		m_aTools.RemoveAt(nSel);
+		m_aTools.InsertAt(nSel + 1, tool);
+
 		m_lcTools.DeleteItem(nSel);
-		nSel = AddListTool(tool, (nSel + 1), TRUE);
+		nSel = AddToolToList(tool, (nSel + 1), TRUE);
 		SetCurSel(nSel);
 
 		m_lcTools.SetFocus();
-		
+
 		CPreferencesPageBase::OnControlChange();
 	}
 }
@@ -413,8 +430,9 @@ void CPreferencesToolPage::OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResul
 		if (nSel >= 0)
 		{
 			m_lcTools.SetItemText(nSel, COL_NAME, pDispInfo->item.pszText);
+			m_aTools[nSel].sToolName = pDispInfo->item.pszText;
 
-			GetDlgItem(IDC_TOOLPATH)->SetFocus();
+			m_eToolPath.SetFocus();
 		}
 	}
 	
@@ -423,9 +441,11 @@ void CPreferencesToolPage::OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResul
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesToolPage::OnItemchangedToollist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
+void CPreferencesToolPage::OnItemchangedToollist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	EnableControls();
+	if (pNMHDR && !CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+		return;
+
 	int nSel = GetCurSel();
 
 	if (nSel >= 0)
@@ -444,6 +464,8 @@ void CPreferencesToolPage::OnItemchangedToollist(NMHDR* /*pNMHDR*/, LRESULT* /*p
 	}
 
 	UpdateData(FALSE);
+	EnableControls();
+
 	m_toolbar.RefreshButtonStates(FALSE);
 }
 
@@ -492,50 +514,25 @@ void CPreferencesToolPage::OnChangeToolpath()
 	UpdateData();
 
 	m_lcTools.SetItemText(nSel, COL_PATH, m_sToolPath);
+	m_aTools[nSel].sToolPath = m_sToolPath;
 
-	RebuildListCtrlImages();
+	RebuildListImages();
 
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesToolPage::RebuildListCtrlImages()
+void CPreferencesToolPage::RebuildListImages()
 {
 	int nTool = m_lcTools.GetItemCount();
 
 	while (nTool--)
 	{
 		LVITEM lvi = { 0 };
-		
+
 		lvi.mask = LVIF_IMAGE;
 		lvi.iItem = nTool;
-		lvi.iImage = -1;
-		
-		CString sIconPath = m_lcTools.GetItemText(nTool, COL_ICON);
+		lvi.iImage = CTDCToolsHelper::AddToolToImageList(m_aTools[nTool], m_ilTools);
 
-		if (sIconPath.IsEmpty())
-		{
-			CString sToolPath = m_lcTools.GetItemText(nTool, COL_PATH);
-			CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE);
-
-			lvi.iImage = CFileIcons::GetIndex(sToolPath);	
-		}
-		else
-		{
-			FileMisc::MakeFullPath(sIconPath, FileMisc::GetAppFolder());
-
-			HICON hIcon = CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, 16, 16);
-
-			if (hIcon)
-			{
-				lvi.iImage = ImageList_AddIcon(CFileIcons::GetImageList(), hIcon);
-				::DestroyIcon(hIcon);
-			}
-			else
-			{
-				lvi.iImage = CFileIcons::GetIndex(sIconPath);
-			}
-		}
-		
 		m_lcTools.SetItem(&lvi);
 	}
 }
@@ -553,52 +550,44 @@ void CPreferencesToolPage::OnChangeIconPath()
 	UpdateData();
 
 	m_lcTools.SetItemText(nSel, 3, m_sIconPath);
+	m_aTools[nSel].sIconPath = m_sIconPath;
 
-	RebuildListCtrlImages();
+	RebuildListImages();
 
 	CPreferencesPageBase::OnControlChange();
 }
 
-int CPreferencesToolPage::GetUserTools(CUserToolArray& aTools) const
+int CPreferencesToolPage::GetUserTools(CTDCUserToolArray& aTools) const
 {
 	aTools.Copy(m_aTools);
 
 	return aTools.GetSize();
 }
 
-BOOL CPreferencesToolPage::GetUserTool(int nTool, USERTOOL& tool) const
+BOOL CPreferencesToolPage::GetUserTool(int nTool, TDCUSERTOOL& tool) const
 {
-	if (nTool >= 0 && nTool < m_aTools.GetSize())
-	{
-		tool = m_aTools[nTool];
-		return TRUE;
-	}
+	if ((nTool < 0) || (nTool >= m_aTools.GetSize()))
+		return FALSE;
 
-	return FALSE;
+	tool = m_aTools[nTool];
+	return TRUE;
 }
 
-void CPreferencesToolPage::OnOK() 
+void CPreferencesToolPage::RebuildToolsFromList()
 {
-	CPreferencesPageBase::OnOK();
-	
-	// save tools to m_aTools
 	m_aTools.RemoveAll();
 	int nToolCount = m_lcTools.GetItemCount();
 
 	for (int nTool = 0; nTool < nToolCount; nTool++)
 	{
-		USERTOOL ut;
-		VERIFY(GetListTool(nTool, ut));
+		TDCUSERTOOL tool;
+		VERIFY(GetToolFromList(nTool, tool));
 
-		// GetPrivateProfileString strips a leading/trailing quote pairs if 
-		// it finds them so we replace quotes with safe quotes
-		ut.sCmdline.Replace(REALQUOTE, SAFEQUOTE);
-		
-		m_aTools.Add(ut);
+		m_aTools.Add(tool);
 	}
 }
 
-BOOL CPreferencesToolPage::GetListTool(int nTool, USERTOOL& ut) const
+BOOL CPreferencesToolPage::GetToolFromList(int nTool, TDCUSERTOOL& tool) const
 {
 	if ((nTool < 0) || (nTool >= m_lcTools.GetItemCount()))
 	{
@@ -606,11 +595,11 @@ BOOL CPreferencesToolPage::GetListTool(int nTool, USERTOOL& ut) const
 		return FALSE;
 	}
 
-	ut.sToolName = m_lcTools.GetItemText(nTool, COL_NAME);
-	ut.sToolPath = m_lcTools.GetItemText(nTool, COL_PATH);
-	ut.sCmdline = m_lcTools.GetItemText(nTool, COL_ARGS);
-	ut.sIconPath = m_lcTools.GetItemText(nTool, COL_ICON);
-	ut.bRunMinimized = m_lcTools.GetItemData(nTool);
+	tool.sToolName = m_lcTools.GetItemText(nTool, COL_NAME);
+	tool.sToolPath = m_lcTools.GetItemText(nTool, COL_PATH);
+	tool.sCmdline = m_lcTools.GetItemText(nTool, COL_ARGS);
+	tool.sIconPath = m_lcTools.GetItemText(nTool, COL_ICON);
+	tool.bRunMinimized = m_lcTools.GetItemData(nTool);
 
 	return TRUE;
 }
@@ -647,7 +636,7 @@ void CPreferencesToolPage::OnChangeCmdline()
 		UpdateData();
 
 		m_lcTools.SetItemText(nSel, COL_ARGS, m_sCommandLine);
-		m_eCmdLine.SetFocus();
+		m_aTools[nSel].sCmdline = m_sCommandLine;
 
 		CPreferencesPageBase::OnControlChange();
 	}
@@ -699,13 +688,13 @@ void CPreferencesToolPage::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL 
 
 		int nNumAttrib = m_aCustomAttribDefs.GetSize(), nAdded = 0;
 		
-		for (int nAttrib = 0; ((nAttrib < nNumAttrib) && (nAdded < 16)); nAttrib++)
+		for (int nAtt = 0; ((nAtt < nNumAttrib) && (nAdded < 16)); nAtt++)
 		{
-			if (m_aCustomAttribDefs[nAttrib].bEnabled)
+			if (m_aCustomAttribDefs[nAtt].bEnabled)
 			{
-				CEnMenu::SetMenuString(*pPopupMenu, nAdded, m_aCustomAttribDefs[nAttrib].sLabel, MF_BYPOSITION);
+				CEnMenu::SetMenuString(*pPopupMenu, nAdded, m_aCustomAttribDefs[nAtt].sLabel, MF_BYPOSITION);
 
-				m_aMenuCustomAttribIDs.Add(Misc::ToLower(m_aCustomAttribDefs[nAttrib].sUniqueID));
+				m_aMenuCustomAttribIDs.Add(Misc::ToLower(m_aCustomAttribDefs[nAtt].sUniqueID));
 				nAdded++;
 			}
 		}
@@ -738,16 +727,16 @@ void CPreferencesToolPage::OnInsertUserVariable(UINT nCmdID)
 
 void CPreferencesToolPage::OnInsertCustomAttribute(UINT nCmdID)
 {
-	int nAttrib = (nCmdID - ID_TOOLARG_CUSTOMATTRIB1);
+	int nAtt = (nCmdID - ID_TOOLARG_CUSTOMATTRIB1);
 
-	if (nAttrib >= m_aMenuCustomAttribIDs.GetSize())
+	if (nAtt >= m_aMenuCustomAttribIDs.GetSize())
 	{
 		ASSERT(0);
 		return;
 	}
 
 	CString sPlaceholder;
-	sPlaceholder.Format(_T("$(seltcustom, %s)"), m_aMenuCustomAttribIDs[nAttrib]);
+	sPlaceholder.Format(_T("$(seltcustom, %s)"), m_aMenuCustomAttribIDs[nAtt]);
 
 	m_eCmdLine.ReplaceSel(sPlaceholder, TRUE);
 }
@@ -796,9 +785,40 @@ void CPreferencesToolPage::OnRunminimized()
 		UpdateData();
 
 		m_lcTools.SetItemData(nSel, m_bRunMinimized);
+		m_aTools[nSel].bRunMinimized = m_bRunMinimized;
 
 		CPreferencesPageBase::OnControlChange();
 	}
+}
+
+LRESULT CPreferencesToolPage::OnSelectIcon(WPARAM wParam, LPARAM lParam)
+{
+	int nSel = GetCurSel();
+
+	if ((nSel >= 0) && (lParam == BTN_SELECTICON))
+	{
+		// We pass in the number of default icons so that any others
+		// added due to the tool or icon path are not shown to the user
+		CTDLTaskIconDlg dialog(m_ilTools, m_aTools[nSel].sIconPath, FALSE, m_nNumDefaultIcons);
+		
+		if (dialog.DoModal(IDS_TOOLSICONDLG_TITLE) == IDOK)
+		{
+			CString sNewIcon = dialog.GetIconName();
+
+			if (sNewIcon != m_sIconPath)
+			{
+				m_lcTools.SetItemText(nSel, COL_ICON, sNewIcon);
+				m_aTools[nSel].sIconPath = sNewIcon;
+
+				RebuildListImages();
+
+				m_sIconPath = sNewIcon;
+				UpdateData(FALSE);
+			}
+		}
+	}
+
+	return 0L;
 }
 
 LRESULT CPreferencesToolPage::OnGetFileIcon(WPARAM wParam, LPARAM lParam)
@@ -807,14 +827,32 @@ LRESULT CPreferencesToolPage::OnGetFileIcon(WPARAM wParam, LPARAM lParam)
 	{
 	case IDC_TOOLPATH:
 		{
-			CString sToolPath((LPCTSTR)lParam);
-			
-			if (CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, TRUE))
+			CString sFilePath((LPCTSTR)lParam);
+			int nIcon = m_ilTools.GetImageIndex(sFilePath);
+
+			if (nIcon != -1)
 			{
-				// This is the application icon
-				static CIcon icon(IDR_MAINFRAME_STD, 16);
+				static CIcon icon;
+
+				icon.SetIcon(m_ilTools.ExtractIcon(nIcon));
 				return (LRESULT)(HICON)icon;
 			}
+		}
+		break;
+
+	case IDC_ICONPATH:
+		{
+			CString sFilePath((LPCTSTR)lParam);
+			int nIcon = m_ilTools.GetImageIndex(sFilePath);
+
+			static CIcon icon;
+
+			if (nIcon != -1)
+				icon.SetIcon(m_ilTools.ExtractIcon(nIcon));
+			else
+				icon.Load(IDI_NULL); // else CFileEdit will show a folder icon
+
+			return (LRESULT)(HICON)icon;
 		}
 		break;
 	}
@@ -827,12 +865,7 @@ void CPreferencesToolPage::OnTestTool()
 	int nTool = GetCurSel();
 	
 	if (nTool != -1)
-	{
-		USERTOOL ut;
-		VERIFY(GetListTool(nTool, ut));
-		
-		GetParent()->SendMessage(WM_PTP_TESTTOOL, 0, (LPARAM)&ut);
-	}
+		GetParent()->SendMessage(WM_PTP_TESTTOOL, 0, (LPARAM)&(m_aTools[nTool]));
 }
 
 CString CPreferencesToolPage::MapCmdIDToPlaceholder(UINT nCmdID) const
@@ -959,21 +992,17 @@ void CPreferencesToolPage::OnImportTools()
 				for (int nTool = 0; nTool < nNumTools; nTool++)
 				{
 					CString sKey = Misc::MakeKey(_T("Tools\\Tool%d"), nTool + 1);
-					USERTOOL ut;
+					TDCUSERTOOL tool;
 
-					ut.sToolName = ini.GetString(sKey, _T("Name"));
-					ut.sToolPath = ini.GetString(sKey, _T("Path"));
-					ut.sIconPath = ini.GetString(sKey, _T("IconPath"));
-					ut.bRunMinimized = ini.GetBool(sKey, _T("RunMinimized"), FALSE);
-					ut.sCmdline = ini.GetString(sKey, _T("Cmdline"));
-
-					// replace safe quotes with real quotes
-					ut.sCmdline.Replace(SAFEQUOTE, REALQUOTE);
+					tool.sToolName = ini.GetString(sKey, _T("Name"));
+					tool.sToolPath = ini.GetString(sKey, _T("Path"));
+					tool.sIconPath = ini.GetString(sKey, _T("IconPath"));
+					tool.bRunMinimized = ini.GetBool(sKey, _T("RunMinimized"), FALSE);
+					tool.sCmdline = INIENTRY::UnSafeQuote(ini.GetString(sKey, _T("Cmdline")));
 
 					// add tool to list
-					VERIFY(AddListTool(ut) != -1);
+					VERIFY(AddToolToList(tool) != -1);
 				}
-
 				bContinue = FALSE;
 
 				CPreferencesPageBase::OnControlChange();
@@ -986,25 +1015,21 @@ void CPreferencesToolPage::OnImportTools()
 
 void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load tools
 	int nToolCount = pPrefs->GetProfileInt(_T("Tools"), _T("ToolCount"), 0);
 	nToolCount = min(nToolCount, m_nMaxNumTools);
 
 	for (int nTool = 1; nTool <= nToolCount; nTool++)
 	{
 		CString sKey = Misc::MakeKey(_T("Tools\\Tool%d"), nTool);
+		TDCUSERTOOL tool;
 
-		USERTOOL ut;
-		ut.sToolName = pPrefs->GetProfileString(sKey, _T("Name"), _T(""));
-		ut.sToolPath = pPrefs->GetProfileString(sKey, _T("Path"), _T(""));
-		ut.sCmdline = pPrefs->GetProfileString(sKey, _T("CmdLine"), _T("")); 
-		ut.bRunMinimized = pPrefs->GetProfileInt(sKey, _T("RunMinimized"), FALSE);
-		ut.sIconPath = pPrefs->GetProfileString(sKey, _T("IconPath"), _T(""));
-		
-		// replace safe quotes with real quotes
-		ut.sCmdline.Replace(SAFEQUOTE, REALQUOTE);
+		tool.sToolName = pPrefs->GetProfileString(sKey, _T("Name"));
+		tool.sToolPath = pPrefs->GetProfileString(sKey, _T("Path"));
+		tool.bRunMinimized = pPrefs->GetProfileInt(sKey, _T("RunMinimized"), FALSE);
+		tool.sIconPath = pPrefs->GetProfileString(sKey, _T("IconPath"));
+		tool.sCmdline = INIENTRY::UnSafeQuote(pPrefs->GetProfileString(sKey, _T("CmdLine")));
 
-		m_aTools.Add(ut);
+		m_aTools.Add(tool);
 	}
 
 	m_bDisplayUDTsInToolbar = pPrefs->GetProfileInt(szKey, _T("DisplayUDTsInToolbar"), TRUE);
@@ -1012,24 +1037,18 @@ void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 
 void CPreferencesToolPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save tools to registry and m_aTools
 	int nToolCount = m_aTools.GetSize();
 
 	for (int nTool = 0; nTool < nToolCount; nTool++)
 	{
-		USERTOOL ut = m_aTools[nTool];
-
         CString sKey = Misc::MakeKey(_T("Tools\\Tool%d"), nTool + 1);
-		
-		pPrefs->WriteProfileString(sKey, _T("Name"), ut.sToolName);
-		pPrefs->WriteProfileString(sKey, _T("Path"), ut.sToolPath);
-		pPrefs->WriteProfileString(sKey, _T("IconPath"), ut.sIconPath);
-		pPrefs->WriteProfileInt(sKey, _T("RunMinimized"), ut.bRunMinimized);
-		
-		// GetPrivateProfileString strips a leading/trailing quote pairs if 
-		// it finds them so we replace quotes with safe quotes
-		ut.sCmdline.Replace(REALQUOTE, SAFEQUOTE);
-		pPrefs->WriteProfileString(sKey, _T("Cmdline"), ut.sCmdline);
+		const TDCUSERTOOL& tool = m_aTools[nTool];
+
+		pPrefs->WriteProfileString(sKey, _T("Name"), tool.sToolName);
+		pPrefs->WriteProfileString(sKey, _T("Path"), tool.sToolPath);
+		pPrefs->WriteProfileString(sKey, _T("IconPath"), tool.sIconPath);
+		pPrefs->WriteProfileInt(sKey, _T("RunMinimized"), tool.bRunMinimized);
+		pPrefs->WriteProfileString(sKey, _T("Cmdline"), INIENTRY::SafeQuote(tool.sCmdline));
 	}
 
 	pPrefs->WriteProfileInt(_T("Tools"), _T("ToolCount"), nToolCount);

@@ -6,8 +6,11 @@
 #endif // _MSC_VER > 1000
 // EditAllocationsDlg.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
 
 #include "EditAllocationsListCtrl.h"
+
+#include "..\shared\Icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CEditAllocationsDlg dialog
@@ -28,20 +31,20 @@ protected:
 	CString	m_sTaskTitle;
 	//}}AFX_DATA
 	CString	m_sAllocTo;
+	CIcon m_icon;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CEditAllocationsDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CEditAllocationsDlg)
-	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -5,13 +5,16 @@ using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Resources;
 using System.IO;
 using System.Net;
 using System.Threading;
 using System.Diagnostics;
 
+using unvell.Common;
 using unvell.ReoGrid;
+using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Editor;
 using unvell.ReoGrid.CellTypes;
@@ -35,6 +38,7 @@ namespace SpreadsheetContentControl
 		private Translator m_Trans;
 
 		private Byte[] m_PrevContent;
+		private bool m_HandlingColorChanges = false;
 
 		// --------------------------------------------
 
@@ -65,6 +69,8 @@ namespace SpreadsheetContentControl
 		public TDLGridEditorControl(Font font, Translator trans)
 		{
 			m_toolbarRenderer = new UIThemeToolbarRenderer();
+			m_toolbarRenderer.SetUITheme(new UITheme());
+
 			m_ControlsFont = font;
 			m_Trans = trans;
 
@@ -100,6 +106,12 @@ namespace SpreadsheetContentControl
 				e.Worksheet.CellMouseLeave -= new EventHandler<CellMouseEventArgs>(OnCellMouseLeave);
 				e.Worksheet.CellMouseMove -= new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
 			};
+
+			// For handling Dark Mode text colour changes
+			GridControl.BeforeActionPerform += new EventHandler<WorkbookActionEventArgs>(OnBeforeActionPerformed);
+			GridControl.ActionPerformed += new EventHandler<WorkbookActionEventArgs>(OnAfterActionPerformed);
+
+			this.SizeChanged += (s, e) => Invalidate(true);
 
 			AllowDrop = true;
 		}
@@ -210,35 +222,36 @@ namespace SpreadsheetContentControl
 
 		private void TranslateUI()
 		{
-			m_Trans.Translate(MenuBar.Items);
-			m_Trans.Translate(ToolBar.Items);
-			m_Trans.Translate(FontBar.Items);
-			m_Trans.Translate(RowContextMenu.Items);
-			m_Trans.Translate(CellContextMenu.Items);
-			m_Trans.Translate(HeaderContextMenu.Items);
-			m_Trans.Translate(ColumnContextMenu.Items);
+			m_Trans.Translate(MenuBar.Items, true);
+			m_Trans.Translate(ToolBar.Items, false);
+			m_Trans.Translate(FontBar.Items, false);
+			m_Trans.Translate(RowContextMenu.Items, true);
+			m_Trans.Translate(CellContextMenu.Items, true);
+			m_Trans.Translate(HeaderContextMenu.Items, true);
+			m_Trans.Translate(ColumnContextMenu.Items, true);
 
-			LanguageResource.Menu_InsertSheet = m_Trans.Translate(LanguageResource.Menu_InsertSheet);
-			LanguageResource.Menu_DeleteSheet = m_Trans.Translate(LanguageResource.Menu_DeleteSheet);
-			LanguageResource.Menu_RenameSheet = m_Trans.Translate(LanguageResource.Menu_RenameSheet);
+			LanguageResource.Menu_InsertSheet = m_Trans.Translate(LanguageResource.Menu_InsertSheet, Translator.Type.Menu);
+			LanguageResource.Menu_DeleteSheet = m_Trans.Translate(LanguageResource.Menu_DeleteSheet, Translator.Type.Menu);
+			LanguageResource.Menu_RenameSheet = m_Trans.Translate(LanguageResource.Menu_RenameSheet, Translator.Type.Menu);
 
-			LanguageResource.Filter_SortAtoZ = m_Trans.Translate(LanguageResource.Filter_SortAtoZ);
-			LanguageResource.Filter_SortZtoA = m_Trans.Translate(LanguageResource.Filter_SortZtoA);
-			LanguageResource.Filter_SelectAll = m_Trans.Translate(LanguageResource.Filter_SelectAll);
-			LanguageResource.Filter_Blanks = m_Trans.Translate(LanguageResource.Filter_Blanks);
-			LanguageResource.Button_OK = m_Trans.Translate(LanguageResource.Button_OK);
-			LanguageResource.Button_Cancel = m_Trans.Translate(LanguageResource.Button_Cancel);
+			LanguageResource.Filter_SortAtoZ = m_Trans.Translate(LanguageResource.Filter_SortAtoZ, Translator.Type.ListBox);
+			LanguageResource.Filter_SortZtoA = m_Trans.Translate(LanguageResource.Filter_SortZtoA, Translator.Type.ListBox);
+			LanguageResource.Filter_SelectAll = m_Trans.Translate(LanguageResource.Filter_SelectAll, Translator.Type.ListBox);
+			LanguageResource.Filter_Blanks = m_Trans.Translate(LanguageResource.Filter_Blanks, Translator.Type.ListBox);
 
-			LanguageResource.Sheet = m_Trans.Translate(LanguageResource.Sheet);
-			LanguageResource.None = m_Trans.Translate(LanguageResource.None);
-			LanguageResource.Text = m_Trans.Translate(LanguageResource.Text);
+			LanguageResource.Button_OK = m_Trans.Translate(LanguageResource.Button_OK, Translator.Type.Button);
+			LanguageResource.Button_Cancel = m_Trans.Translate(LanguageResource.Button_Cancel, Translator.Type.Button);
 
-			LanguageResource.CellDataFormat_General = m_Trans.Translate(LanguageResource.CellDataFormat_General);
-			LanguageResource.CellDataFormat_Number = m_Trans.Translate(LanguageResource.CellDataFormat_Number);
-			LanguageResource.CellDataFormat_DateTime = m_Trans.Translate(LanguageResource.CellDataFormat_DateTime);
-			LanguageResource.CellDataFormat_Percent = m_Trans.Translate(LanguageResource.CellDataFormat_Percent);
-			LanguageResource.CellDataFormat_Currency = m_Trans.Translate(LanguageResource.CellDataFormat_Currency);
-			LanguageResource.CellDataFormat_Text = m_Trans.Translate(LanguageResource.CellDataFormat_Text);
+			LanguageResource.Sheet = m_Trans.Translate(LanguageResource.Sheet, Translator.Type.Tab);
+			LanguageResource.None = m_Trans.Translate(LanguageResource.None, Translator.Type.Text);
+			LanguageResource.Text = m_Trans.Translate(LanguageResource.Text, Translator.Type.Text);
+
+			LanguageResource.CellDataFormat_General = m_Trans.Translate(LanguageResource.CellDataFormat_General, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_Number = m_Trans.Translate(LanguageResource.CellDataFormat_Number, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_DateTime = m_Trans.Translate(LanguageResource.CellDataFormat_DateTime, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_Percent = m_Trans.Translate(LanguageResource.CellDataFormat_Percent, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_Currency = m_Trans.Translate(LanguageResource.CellDataFormat_Currency, Translator.Type.ListBox);
+			LanguageResource.CellDataFormat_Text = m_Trans.Translate(LanguageResource.CellDataFormat_Text, Translator.Type.ListBox);
 
 		}
 
@@ -473,6 +486,19 @@ namespace SpreadsheetContentControl
 			return numChanges;
 		}
 
+		public void SavePreferences(Preferences prefs, String key)
+		{
+			prefs.WriteProfileInt(key, "FormulaHeight", this.FormulaBar.Height);
+		}
+
+		public void LoadPreferences(Preferences prefs, String key)
+		{
+			int nHeight = prefs.GetProfileInt(key, "FormulaHeight", -1);
+
+			if (nHeight > 0)
+				this.FormulaBar.Height = nHeight;
+		}
+
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
 		{
 			const int WM_KEYDOWN = 0x0100;
@@ -686,6 +712,120 @@ namespace SpreadsheetContentControl
 
 		}
 
+		private List<WorksheetReusableAction> PrepareStyleActions(IAction action)
+		{
+			List<WorksheetReusableAction> actions = null;
+
+			if (action is WorksheetReusableActionGroup)
+			{
+				actions = (action as WorksheetReusableActionGroup).Actions;
+
+				if (actions.Find(x => (x is SetRangeStyleAction)) == null)
+					actions = null;
+			}
+			else if (action is SetRangeStyleAction)
+			{
+				actions = new List<WorksheetReusableAction>() { (action as WorksheetReusableAction) };
+			}
+
+			return actions;
+		}
+
+		private void OnBeforeActionPerformed(object sender, WorkbookActionEventArgs e)
+		{
+			// Prevent re-entrancy
+			if (m_HandlingColorChanges)
+				return;
+
+			var actions = PrepareStyleActions(e.Action);
+
+			if (actions != null)
+			{
+				// Intercept setting white/black back/pattern colours in Non/Dark Mode, 
+				// and replace the relevant colour with Color.Empty
+				bool darkMode = UITheme.IsDarkMode();
+
+				foreach (var action in actions)
+				{
+					if (action is SetRangeStyleAction)
+					{
+						var styleAction = (action as SetRangeStyleAction);
+
+						if (styleAction.Style.Flag.HasFlag(PlainStyleFlag.BackColor))
+						{
+							if ((darkMode && (styleAction.Style.BackColor == Color.Black)) ||
+								(!darkMode && (styleAction.Style.BackColor == Color.White)))
+							{
+								styleAction.Style.BackColor = new unvell.ReoGrid.Graphics.SolidColor(Color.Empty);
+							}
+						}
+
+						if (styleAction.Style.Flag.HasFlag(PlainStyleFlag.FillPatternColor))
+						{
+							if ((darkMode && (styleAction.Style.FillPatternColor == Color.White)) ||
+								(!darkMode && (styleAction.Style.FillPatternColor == Color.Black)))
+							{
+								styleAction.Style.FillPatternColor = new unvell.ReoGrid.Graphics.SolidColor(Color.Empty);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		private void OnAfterActionPerformed(object sender, WorkbookActionEventArgs e)
+		{
+			// Prevent re-entrancy
+			if (m_HandlingColorChanges)
+				return;
+
+			var actions = PrepareStyleActions(e.Action);
+
+			if (actions != null)
+			{
+				// Intercept setting white/black text colours for in Non/Dark Mode, 
+				// and replace instead with removing the appropriate colour definition
+				bool darkMode = UITheme.IsDarkMode();
+
+				var redoGroup = new WorksheetReusableActionGroup(actions[0].Range);
+				var removeAction = new RemoveRangeStyleAction(redoGroup.Range, PlainStyleFlag.None);
+
+				foreach (var action in actions)
+				{
+					if (action is SetRangeStyleAction)
+					{
+						var styleAction = (action as SetRangeStyleAction);
+
+						if (styleAction.Style.Flag.HasFlag(PlainStyleFlag.TextColor))
+						{
+							if ((darkMode && (styleAction.Style.TextColor == Color.White)) ||
+								(!darkMode && (styleAction.Style.TextColor == Color.Black)))
+							{
+								removeAction.Flag |= PlainStyleFlag.TextColor;
+								styleAction.Style.Flag &= ~PlainStyleFlag.TextColor;
+							}
+						}
+					}
+
+					redoGroup.Actions.Add(action);
+					// We wait until the end for adding the 'remove' action
+				}
+
+				if (removeAction.Flag != PlainStyleFlag.None)
+				{
+					m_HandlingColorChanges = true;
+
+					// Undo the entire action
+					Undo();
+
+					redoGroup.Actions.Add(removeAction);
+					GridControl.DoAction(redoGroup);
+
+					m_HandlingColorChanges = false;
+				}
+			}
+		}
+
 		private void OnAfterPaste(object sender, RangeEventArgs e)
 		{
 			for (int row = e.Range.Row; row <= e.Range.EndRow; row++)
@@ -873,7 +1013,7 @@ namespace SpreadsheetContentControl
 				else
 					tooltip = tooltip + "\n";
 
-				tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link");
+				tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link", Translator.Type.ToolTip);
 
 				GridControl.ShowTooltip(tooltip);
 			}
@@ -957,7 +1097,9 @@ namespace SpreadsheetContentControl
             ToolBar.BackColor = backColor;
 			FontBar.BackColor = backColor;
 			StatusBar.BackColor = backColor;
+
 			FormulaBar.BackColor = backColor;
+			FormulaBar.SplitterBackColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarDark);
 
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalStart, backColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadNormalEnd, backColor);
@@ -975,6 +1117,17 @@ namespace SpreadsheetContentControl
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadFullSelectedNotFocused, gridColor);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.GridText, SystemColors.WindowText);
 			GridControl.ControlStyle.SetColor(ControlAppearanceColors.GridBackground, SystemColors.Window);
+
+			// ReoGrid already does a reasonable 'Classic Theme' so we just need
+			// to handle the unfocused colours on a regular theme
+			if (VisualStyleRenderer.IsSupported)
+			{
+				var fillColor = GridControl.ControlStyle[ControlAppearanceColors.SelectionFill];
+				GridControl.ControlStyle.SetColor(ControlAppearanceColors.SelectionNotFocusedFill, new unvell.ReoGrid.Graphics.SolidColor(40, fillColor));
+
+				var borderColor = GridControl.ControlStyle[ControlAppearanceColors.SelectionBorder];
+				GridControl.ControlStyle.SetColor(ControlAppearanceColors.SelectionNotFocusedBorder, new unvell.ReoGrid.Graphics.SolidColor(80, borderColor));
+			}
 
 			// Focused colours
 			backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.Selected);
@@ -1100,7 +1253,7 @@ namespace SpreadsheetContentControl
 			if (dialog is FileDialog)
 			{
 				var fileDlg = (dialog as FileDialog);
-				fileDlg.Filter = m_Trans.Translate(fileDlg.Filter);
+				fileDlg.Filter = m_Trans.Translate(fileDlg.Filter, Translator.Type.FileFilter);
 			}
 			else // all others
 			{

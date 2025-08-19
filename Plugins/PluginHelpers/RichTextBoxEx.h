@@ -23,6 +23,9 @@ namespace Abstractspoon
 				bool SelectionContainsPos(Drawing::Point ptClient);
 				bool SelectionContainsMessagePos();
 
+				void Indent();
+				void Outdent();
+
 				virtual LabelTipInfo^ ToolHitTest(Drawing::Point ptScreen);
 				virtual Windows::Forms::Control^ GetOwner() { return this; }
 

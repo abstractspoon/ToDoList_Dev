@@ -45,7 +45,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Spreadsheet.ico">
+    <Image Include="..\SpreadsheetContentControlCore\Resources\Spreadsheet.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

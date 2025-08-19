@@ -16,7 +16,6 @@
 
 class CTDLRegularityComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CTDLRegularityComboBox(BOOL bIncludeAny);
 	virtual ~CTDLRegularityComboBox();
@@ -24,32 +23,20 @@ public:
 	TDC_REGULARITY GetSelectedRegularity() const;
 	int SetSelectedRegularity(TDC_REGULARITY nRegularity);
 
+	void DDX(CDataExchange* pDX, TDC_REGULARITY& value);
+
 	static CString GetRegularity(TDC_REGULARITY nRegularity);
 
 protected:
 	BOOL m_bIncludeAny;
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLRegularityComboBox)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLRegularityComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void BuildCombo();
-
-	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-					  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+	virtual void BuildCombo();
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 };
 
 /////////////////////////////////////////////////////////////////////////////

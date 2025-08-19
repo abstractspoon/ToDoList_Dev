@@ -182,7 +182,7 @@
 			// toolStripNewReport
 			// 
 			this.toolStripNewReport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripNewReport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripNewReport.Image")));
+			this.toolStripNewReport.Image = Properties.Resources.ToolbarFileNew;
 			this.toolStripNewReport.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripNewReport.Name = "toolStripNewReport";
 			this.toolStripNewReport.Size = new System.Drawing.Size(23, 22);
@@ -192,7 +192,7 @@
 			// toolStripOpenReport
 			// 
 			this.toolStripOpenReport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripOpenReport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripOpenReport.Image")));
+			this.toolStripOpenReport.Image = Properties.Resources.ToolbarFileOpen;
 			this.toolStripOpenReport.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripOpenReport.Name = "toolStripOpenReport";
 			this.toolStripOpenReport.Size = new System.Drawing.Size(23, 22);
@@ -202,7 +202,7 @@
 			// toolStripSaveReport
 			// 
 			this.toolStripSaveReport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripSaveReport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSaveReport.Image")));
+			this.toolStripSaveReport.Image = Properties.Resources.ToolbarFileSave;
 			this.toolStripSaveReport.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripSaveReport.Name = "toolStripSaveReport";
 			this.toolStripSaveReport.Size = new System.Drawing.Size(23, 22);
@@ -212,7 +212,7 @@
 			// toolStripSaveAsReport
 			// 
 			this.toolStripSaveAsReport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripSaveAsReport.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSaveAsReport.Image")));
+			this.toolStripSaveAsReport.Image = Properties.Resources.ToolbarFileSaveAs;
 			this.toolStripSaveAsReport.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripSaveAsReport.Name = "toolStripSaveAsReport";
 			this.toolStripSaveAsReport.Size = new System.Drawing.Size(23, 22);
@@ -228,7 +228,7 @@
 			// toolStripInsertImage
 			// 
 			this.toolStripInsertImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripInsertImage.Image = global::HTMLReportExporter.Properties.Resources.ToolbarImage;
+			this.toolStripInsertImage.Image = Properties.Resources.ToolbarImage;
 			this.toolStripInsertImage.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripInsertImage.Name = "toolStripInsertImage";
 			this.toolStripInsertImage.Size = new System.Drawing.Size(23, 22);
@@ -239,7 +239,7 @@
 			// toolStripClearImage
 			// 
 			this.toolStripClearImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripClearImage.Image = global::HTMLReportExporter.Properties.Resources.ToolbarImageClear;
+			this.toolStripClearImage.Image = Properties.Resources.ToolbarImageClear;
 			this.toolStripClearImage.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripClearImage.Name = "toolStripClearImage";
 			this.toolStripClearImage.Size = new System.Drawing.Size(23, 22);
@@ -255,7 +255,7 @@
 			// toolStripBackColor
 			// 
 			this.toolStripBackColor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripBackColor.Image = global::HTMLReportExporter.Properties.Resources.ToolbarBackColor;
+			this.toolStripBackColor.Image = Properties.Resources.ToolbarBackColor;
 			this.toolStripBackColor.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripBackColor.Name = "toolStripBackColor";
 			this.toolStripBackColor.Size = new System.Drawing.Size(23, 22);
@@ -266,7 +266,7 @@
 			// toolStripBackColorClear
 			// 
 			this.toolStripBackColorClear.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripBackColorClear.Image = global::HTMLReportExporter.Properties.Resources.ToolbarBackColorClear;
+			this.toolStripBackColorClear.Image = Properties.Resources.ToolbarBackColorClear;
 			this.toolStripBackColorClear.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripBackColorClear.Name = "toolStripBackColorClear";
 			this.toolStripBackColorClear.Size = new System.Drawing.Size(23, 22);
@@ -282,7 +282,7 @@
 			// toolStripHelp
 			// 
 			this.toolStripHelp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.toolStripHelp.Image = global::HTMLReportExporter.Properties.Resources.ToolbarHelp;
+			this.toolStripHelp.Image = Properties.Resources.ToolbarHelp;
 			this.toolStripHelp.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.toolStripHelp.Name = "toolStripHelp";
 			this.toolStripHelp.Size = new System.Drawing.Size(23, 22);
@@ -683,7 +683,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(884, 511);
 			this.Controls.Add(this.Content);
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = Properties.Resources.HTMLReporter;
 			this.MinimizeBox = false;
 			this.MinimumSize = new System.Drawing.Size(900, 550);
 			this.Name = "HtmlReportTemplateForm";

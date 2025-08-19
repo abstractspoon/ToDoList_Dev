@@ -124,7 +124,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Spreadsheet.ico" />
+    <Image Include="..\SpreadsheetContentControlCore\Resources\Spreadsheet.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

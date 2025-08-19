@@ -30,13 +30,15 @@ class CBurndownPreferencesPage : public CPreferencesPageBase
 {
 // Construction
 public:
-	CBurndownPreferencesPage(const CBurndownChart& chart, CWnd* pParent = NULL);
+	CBurndownPreferencesPage(const CGraphsMap& mapGraphs, CWnd* pParent = NULL);
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	const CGraphColorMap& GetGraphColors() const { return m_lcGraphColors.GetGraphColors(); }
 	BOOL GetShowEmptyFrequencyValues() const { return m_bShowEmptyFrequencyValues; }
+
+	void SetActiveGraph(BURNDOWN_GRAPH nGraph) { m_nActiveGraph = nGraph; }
 
 protected:
 // Dialog Data
@@ -47,7 +49,8 @@ protected:
 	CBurndownGraphColorListCtrl	m_lcGraphColors;
 	CColourButton m_btnTodayColor;
 
-	const CBurndownChart& m_chart;
+	const CGraphsMap& m_mapGraphs;
+	BURNDOWN_GRAPH m_nActiveGraph;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -76,13 +79,15 @@ class CBurndownPreferencesDlg : public CPreferencesDlgBase
 {
 // Construction
 public:
-	CBurndownPreferencesDlg(const CBurndownChart& chart, CWnd* pParent);
+	CBurndownPreferencesDlg(const CGraphsMap& mapGraphs, CWnd* pParent);
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
 	const CGraphColorMap& GetGraphColors() const { return m_page.GetGraphColors(); }
 	BOOL GetShowEmptyFrequencyValues() const { return m_page.GetShowEmptyFrequencyValues(); }
+
+	int DoModal(BURNDOWN_GRAPH nActiveGraph);
 
 protected:
 // Dialog Data

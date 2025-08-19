@@ -134,7 +134,7 @@ STYLE DS_CENTER | WS_CHILD | WS_VISIBLE | WS_CAPTION
 CAPTION "ToDoList Web Update (c) AbstractSpoon"
 FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "&Progress:",IDC_STATIC,0,0,275,8
+    LTEXT           "&Progress",IDC_STATIC,0,0,275,8
     CONTROL         "List1",IDC_PROGRESS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | 
                     WS_DISABLED | WS_BORDER | WS_TABSTOP,0,12,275,94

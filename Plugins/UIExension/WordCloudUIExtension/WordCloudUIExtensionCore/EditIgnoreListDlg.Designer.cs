@@ -28,7 +28,6 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EditIgnoreListDlg));
 			this.IgnoredWords = new System.Windows.Forms.TextBox();
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
@@ -37,16 +36,16 @@
 			// IgnoredWords
 			// 
 			this.IgnoredWords.HideSelection = false;
-			this.IgnoredWords.Location = new System.Drawing.Point(12, 12);
+			this.IgnoredWords.Location = new System.Drawing.Point(10, 10);
 			this.IgnoredWords.Multiline = true;
 			this.IgnoredWords.Name = "IgnoredWords";
-			this.IgnoredWords.Size = new System.Drawing.Size(260, 208);
+			this.IgnoredWords.Size = new System.Drawing.Size(263, 210);
 			this.IgnoredWords.TabIndex = 0;
 			// 
 			// OK
 			// 
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.OK.Location = new System.Drawing.Point(116, 226);
+			this.OK.Location = new System.Drawing.Point(116, 229);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
 			this.OK.TabIndex = 1;
@@ -56,7 +55,7 @@
 			// Cancel
 			// 
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(197, 226);
+			this.Cancel.Location = new System.Drawing.Point(198, 229);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 1;
@@ -73,7 +72,7 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.IgnoredWords);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = global::WordCloudUIExtension.Properties.Resources.WordCloud;
 			this.Name = "EditIgnoreListDlg";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

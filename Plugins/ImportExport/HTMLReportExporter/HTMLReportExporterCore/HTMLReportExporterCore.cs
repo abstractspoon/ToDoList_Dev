@@ -26,29 +26,85 @@ namespace HTMLReportExporter
 			m_Trans = trans;
 		}
 
-		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, bool printing, Preferences prefs, string sKey)
+		protected bool InitConsts(TaskList tasks, 
+								  string reportTitle, 
+								  string reportDate, 
+								  string destFilePath, 
+								  bool silent, 
+								  bool printing, 
+								  Preferences prefs, 
+								  string sKey)
 		{
-			// Display a dialog to get the report parameters
-			// or to return the last saved template
-			using (var dialog = new HtmlReportTemplateForm(m_TypeId, m_Trans, tasks, printing, prefs, sKey))
+			if (silent)
 			{
-				if (!silent && (dialog.ShowDialog() != DialogResult.OK))
-					return false;
+				var lastTemplate = prefs.GetProfileString(sKey, "LastOpenTemplate", "");
 
-				m_Template = dialog.ReportTemplate;
+				m_Template = new HtmlReportTemplate(lastTemplate);
+			}
+			else
+			{
+				using (var dialog = new HtmlReportTemplateForm(m_TypeId, 
+															   m_Trans, 
+															   tasks, 
+															   reportTitle, 
+															   reportDate, 
+															   printing, 
+															   prefs, 
+															   sKey))
+				{
+					if (!silent && (dialog.ShowDialog() != DialogResult.OK))
+						return false;
+
+					m_Template = dialog.ReportTemplate;
+				}
 			}
 
 			return m_Template.HasContents();
 		}
 
-		public bool Export(TaskList tasks, string destFilePath, bool silent, bool printing, Preferences prefs, string sKey)
+		public bool Export(TaskList srcTasks, string sDestFilePath, bool silent, bool printing, Preferences prefs, string sKey)
 		{
-			if (!InitConsts(tasks, destFilePath, silent, printing, prefs, sKey))
+			var tasklists = new List<TaskList>() { srcTasks };
+
+			return ExportTasklists(tasklists, 
+								   srcTasks.GetReportTitle(), 
+								   srcTasks.GetReportDate(), 
+								   sDestFilePath, 
+								   silent, 
+								   printing, 
+								   prefs, 
+								   sKey);
+		}
+
+		public bool Export(MultiTaskList srcTasks, string sDestFilePath, bool silent, bool printing, Preferences prefs, string sKey)
+		{
+			var tasklists = srcTasks.GetTaskLists();
+
+			return ExportTasklists(tasklists, 
+								   srcTasks.GetReportTitle(), 
+								   srcTasks.GetReportDate(), 
+								   sDestFilePath, 
+								   silent, 
+								   printing, 
+								   prefs, 
+								   sKey);
+		}
+
+		public bool ExportTasklists(IList<TaskList> tasklists, 
+									string reportTitle, 
+									string reportDate, 
+									string destFilePath,
+									bool silent, 
+									bool printing, 
+									Preferences prefs, 
+									string sKey)
+		{
+			if (!InitConsts(tasklists[0], reportTitle, reportDate, destFilePath, silent, printing, prefs, sKey))
 				return false;
 
-			var report = new HtmlReportBuilder(m_Trans, tasks, prefs, m_Template, false, printing);
+			var report = new HtmlReportBuilder(m_Trans, prefs, m_Template, reportTitle, reportDate, false, printing);
 
-			return report.BuildReport(destFilePath);
+			return report.BuildReport(tasklists, destFilePath);
 		}
 	}
 }

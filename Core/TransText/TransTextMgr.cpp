@@ -177,7 +177,7 @@ BOOL CTransTextMgr::WantTranslation(HWND hWnd, UINT nMsg) const
 			{
 				return FALSE;
 			}
-			else if (CWinClasses::IsCommonDialog(hWnd))
+			else if (CWinClasses::IsMFCCommonDialog(hWnd))
 			{
 				return FALSE;
 			}
@@ -303,6 +303,7 @@ BOOL CTransTextMgr::HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM /*wp*/, LP
 
 	if (pNMHDR->code == TTN_NEEDTEXTA)
 	{
+		// CString implicitly handles ANSI to unicode conversions
 		strTipText = pTTTA->szText;
 
 		if (strTipText.IsEmpty())
@@ -337,26 +338,9 @@ BOOL CTransTextMgr::HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM /*wp*/, LP
 	// copy back to TOOLTIPTEXT
 	const int MAX_TIP_LEN = ((sizeof(pTTTW->szText) / sizeof(pTTTW->szText[0])) - 1);
 
-#ifndef _UNICODE
-	if (pNMHDR->code == TTN_NEEDTEXTW)
-	{
-#if _MSC_VER >= 1400
-		strncpy_s(pTTTA->szText, MAX_TIP_LEN, strTipText, MAX_TIP_LEN);
-#else
-		strncpy(pTTTA->szText, strTipText, MAX_TIP_LEN);
-#endif
-		pTTTA->lpszText = (LPSTR)(LPCSTR)strTipText;
-	}
-	else // TTN_NEEDTEXTW
-	{
-		Misc::EncodeAsUnicode(strTipText);
-
-		lstrcpyn(pTTTW->szText, (LPCWSTR)(LPCSTR)strTipText, MAX_TIP_LEN);
-		pTTTW->lpszText = (LPWSTR)(LPCWSTR)(LPCSTR)strTipText;
-	}
-#else
 	if (pNMHDR->code == TTN_NEEDTEXTA)
 	{
+		// Convert back from unicode
 		Misc::EncodeAsMultiByte(strTipText);
 
 #if _MSC_VER >= 1400
@@ -371,7 +355,6 @@ BOOL CTransTextMgr::HandleTootipNeedText(HWND hWnd, UINT nMsg, WPARAM /*wp*/, LP
 		lstrcpyn(pTTTW->szText, strTipText, MAX_TIP_LEN);
 		pTTTW->lpszText = (LPWSTR)(LPCWSTR)strTipText;
 	}
-#endif
 	
 	return TRUE; // handled
 }
@@ -430,18 +413,16 @@ BOOL CTransTextMgr::WantHookWnd(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp) cons
 			if (CWinClasses::IsDialog(hWnd))
 			{
 				// Don't translate common dialogs for now
-				return !CWinClasses::IsCommonDialog(hWnd);
+				return !CWinClasses::IsMFCCommonDialog(hWnd);
 			}
 			else if (TransText::IsPopup(hWnd))
 			{
 				return TRUE; 
 			}
 		}
-
-		// else 
-		return FALSE;
 	}
 
+	// All else
 	return FALSE;
 }
 

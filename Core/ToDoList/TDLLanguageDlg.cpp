@@ -51,8 +51,7 @@ BOOL CTDLLanguageDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 	
-	m_icon.Load(IDR_MAINFRAME);
-	SetIcon(m_icon, FALSE);
+	SetIcon(IDR_MAINFRAME);
 
 	// Initialise language to user's UI language
 	m_cbLanguages.SelectUserLanguage();

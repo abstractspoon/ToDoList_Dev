@@ -33,7 +33,6 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 static const CString NULLSTRING;
-static const LPCTSTR METADATA_SELECTED = _T("__selected__");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -372,21 +371,35 @@ BOOL CTaskFile::LoadEx(IXmlParse* pCallback)
 	return bResult;
 }
 
-void CTaskFile::CleanUp(HTASKITEM hTask)
+BOOL CTaskFile::CleanUp(HTASKITEM hTask)
 {
-	// Tasks should have no 'value' just attributes
-	// but MSXML does something that I do not yet understand
+	BOOL bCleaned = FALSE;
+
 	if (hTask != NULL)
-		TaskFromHandle(hTask)->ClearValue();
-	
+	{
+		// Remove obsolete selection attribute
+		bCleaned |= (ClearTaskMetaData(hTask, _T("__selected__")) ? TRUE : FALSE);
+
+		// Tasks should have no 'value' just attributes
+		// but MSXML does something that I do not yet understand
+		bCleaned |= TaskFromHandle(hTask)->ClearValue();
+	}
+
 	// process children
 	HTASKITEM hChild = GetFirstTask(hTask);
 	
 	while (hChild)
 	{
-		CleanUp(hChild);
-		hChild = GetNextTask(hChild);
+		bCleaned |= CleanUp(hChild); // RECURSIVE CALL
+		hChild = GetNextTask(hChild); 
 	}
+
+	// PERMANENT LOGGING /////////////////////////////////
+	if ((hTask == NULL) && bCleaned)
+		FileMisc::LogTextRaw(_T("CTaskFile::CleanUp(TRUE)"));
+	//////////////////////////////////////////////////////
+
+	return bCleaned;
 }
 
 BOOL CTaskFile::SaveEx()
@@ -451,6 +464,7 @@ void CTaskFile::Reset()
 	ClearHandleMap();
 
 	m_dwNextUniqueID = 1;
+	m_mapReadableAttrib.RemoveAll();
 }
 
 BOOL CTaskFile::CopyTaskFrom(const ITaskList* pSrcTasks, HTASKITEM hSrcTask, HTASKITEM hDestParent, 
@@ -919,104 +933,6 @@ int CTaskFile::GetMetaData(CMapStringToString& mapMetaData) const
 	return GetMetaData(Root(), mapMetaData);
 }
 
-int CTaskFile::SetSelectedTaskIDs(const CDWordArray& aSelTaskIDs, BOOL bSelect)
-{
-	int nSel = aSelTaskIDs.GetSize(), nNumModified = 0;
-
-	while (nSel--)
-	{
-		if (SelectTask(aSelTaskIDs[nSel], bSelect))
-			nNumModified++;
-	}
-
-	return nNumModified;
-}
-
-BOOL CTaskFile::SelectTask(DWORD dwTaskID, BOOL bSelect)
-{
-	ASSERT(dwTaskID);
-
-	return SelectTask(FindTask(dwTaskID), bSelect);
-}
-
-BOOL CTaskFile::SelectTask(HTASKITEM hTask, BOOL bSelect)
-{
-	if (!hTask)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	return (SetTaskMetaData(hTask, METADATA_SELECTED, (bSelect ? _T("1") : NULL)) ? TRUE : FALSE);
-}
-
-BOOL CTaskFile::IsTaskSelected(DWORD dwTaskID) const
-{
-	ASSERT(dwTaskID);
-
-	return IsTaskSelected(FindTask(dwTaskID));
-}
-
-BOOL CTaskFile::IsTaskSelected(HTASKITEM hTask) const
-{
-	if (!hTask)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	LPCTSTR szSelected = GetTaskMetaData(hTask, METADATA_SELECTED);
-
-	return (szSelected && (szSelected[0] == '1'));
-}
-
-int CTaskFile::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
-{
-	aTaskIDs.RemoveAll();
-
-	return GetSelectedTaskIDs(GetFirstTask(), aTaskIDs);
-}
-
-int CTaskFile::GetSelectedTaskIDs(HTASKITEM hTask, CDWordArray& aTaskIDs) const
-{
-	if (hTask)
-	{
-		if (IsTaskSelected(hTask))
-			aTaskIDs.Add(GetTaskID(hTask));
-
-		// siblings
-		GetSelectedTaskIDs(GetNextTask(hTask), aTaskIDs);
-
-		// children
-		GetSelectedTaskIDs(GetFirstTask(hTask), aTaskIDs);
-	}
-
-	return aTaskIDs.GetSize();
-}
-
-void CTaskFile::RemoveNonSelectedTasks()
-{
-	RemoveNonSelectedTasks(GetFirstTask());
-}
-
-void CTaskFile::RemoveNonSelectedTasks(HTASKITEM hTask)
-{
-	if (hTask)
-	{
-		// siblings first ie. before we might delete it
-		RemoveNonSelectedTasks(GetNextTask(hTask));
-
-		if (!IsTaskSelected(hTask))
-		{
-			DeleteTask(hTask); // will delete children
-			return;
-		}
-
-		// check children
-		RemoveNonSelectedTasks(GetFirstTask(hTask));
-	}
-}
-
 BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)
 {
 	// delete old visibility settings
@@ -1046,8 +962,8 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = mapEdit.GetNext(pos);
-			pXIVis->AddItem(TDL_ATTRIBVISEDIT, nAttrib, XIT_ELEMENT);
+			TDC_ATTRIBUTE nAttribID = mapEdit.GetNext(pos);
+			pXIVis->AddItem(TDL_ATTRIBVISEDIT, nAttribID, XIT_ELEMENT);
 		}
 	}
 
@@ -1110,8 +1026,8 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITFILTERVISIBILITY& vis)
 
 		while (pos)
 		{
-			TDC_ATTRIBUTE nAttrib = mapFilter.GetNext(pos);
-			pXIVis->AddItem(TDL_ATTRIBVISFILTER, nAttrib, XIT_ELEMENT);
+			TDC_ATTRIBUTE nAttribID = mapFilter.GetNext(pos);
+			pXIVis->AddItem(TDL_ATTRIBVISFILTER, nAttribID, XIT_ELEMENT);
 		}
 	}
 
@@ -1154,9 +1070,9 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 
 	int nNumAttrib = aAttribs.GetSize();
 
-	for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
+	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribs.GetData()[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribs.GetData()[nAtt];
 
 		ASSERT(!attribDef.sUniqueID.IsEmpty());
 		ASSERT(!attribDef.sLabel.IsEmpty() || !attribDef.sColumnTitle.IsEmpty());
@@ -1167,7 +1083,7 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBLABEL, attribDef.sLabel);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCOLTITLE, attribDef.sColumnTitle);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (int)attribDef.GetAttributeType());
-		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCOLALIGN, (int)attribDef.nHorzAlignment);
+		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCOLALIGN, (int)attribDef.nTextAlignment);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBFEATURES, (int)attribDef.dwFeatures);
 		pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBENABLED, (int)attribDef.bEnabled);
 		
@@ -1190,8 +1106,8 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 			}
 			else
 			{
-				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opFirst.nAttribID));
-				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCFIRSTOPERAND, calc.opFirst.nAttribID);
+				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opFirst.nAttributeID));
+				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCFIRSTOPERAND, calc.opFirst.nAttributeID);
 			}
 
 			pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCOPERATOR, calc.nOperator);
@@ -1200,10 +1116,10 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 			{
 				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDATTRIB, calc.opSecond.sCustAttribID);
 			}
-			else if (calc.opSecond.nAttribID != TDCA_NONE)
+			else if (calc.opSecond.nAttributeID != TDCA_NONE)
 			{
-				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opSecond.nAttribID));
-				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDATTRIB, calc.opSecond.nAttribID);
+				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opSecond.nAttributeID));
+				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDATTRIB, calc.opSecond.nAttributeID);
 			}
 			else
 			{
@@ -1238,7 +1154,7 @@ int CTaskFile::GetCustomAttributeDefs(const ITaskList* pTasks, CTDCCustomAttribD
 			attribDef.sUniqueID = pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBID);
 			attribDef.sLabel = pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBLABEL);
 			attribDef.sColumnTitle = pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBCOLTITLE);
-			attribDef.nHorzAlignment = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBCOLALIGN));
+			attribDef.nTextAlignment = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBCOLALIGN));
 			attribDef.bEnabled = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBENABLED));
 			attribDef.dwFeatures = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBFEATURES));
 
@@ -1297,7 +1213,7 @@ int CTaskFile::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttribs)
 		attribDef.sUniqueID = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBID);
 		attribDef.sLabel = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBLABEL);
 		attribDef.sColumnTitle = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBCOLTITLE);
-		attribDef.nHorzAlignment = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBCOLALIGN);
+		attribDef.nTextAlignment = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBCOLALIGN);
 		attribDef.bEnabled = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBENABLED);
 		attribDef.dwFeatures = pXIAttribDef->GetItemValueI(TDL_CUSTOMATTRIBFEATURES);
 
@@ -1321,11 +1237,11 @@ int CTaskFile::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttribs)
 
 			if (Misc::IsNumber(sFirstOp))
 			{
-				calc.opFirst.nAttribID = (TDC_ATTRIBUTE)_ttoi(sFirstOp);
+				calc.opFirst.nAttributeID = (TDC_ATTRIBUTE)_ttoi(sFirstOp);
 			}
 			else if (!sFirstOp.IsEmpty())
 			{
-				calc.opFirst.nAttribID = TDCA_CUSTOMATTRIB;
+				calc.opFirst.nAttributeID = TDCA_CUSTOMATTRIB;
 				calc.opFirst.sCustAttribID = sFirstOp;
 			}
 
@@ -1336,19 +1252,19 @@ int CTaskFile::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttribs)
 
 			if (Misc::IsNumber(sSecondOpAttrib))
 			{
-				calc.opSecond.nAttribID = (TDC_ATTRIBUTE)_ttoi(sSecondOpAttrib);
+				calc.opSecond.nAttributeID = (TDC_ATTRIBUTE)_ttoi(sSecondOpAttrib);
 			}
 			else if (!sSecondOpAttrib.IsEmpty())
 			{
 				ASSERT(sSecondOpValue.IsEmpty());
 
-				calc.opSecond.nAttribID = TDCA_CUSTOMATTRIB;
+				calc.opSecond.nAttributeID = TDCA_CUSTOMATTRIB;
 				calc.opSecond.sCustAttribID = sSecondOpAttrib;
 				calc.dSecondOperandValue = 0.0;
 			}
 			else
 			{
-				calc.opSecond.nAttribID = TDCA_NONE;
+				calc.opSecond.nAttributeID = TDCA_NONE;
 				calc.opSecond.sCustAttribID.Empty();
 				calc.dSecondOperandValue = _ttof(sSecondOpValue); // defaults to 0.0
 			}
@@ -1434,6 +1350,11 @@ LPCTSTR CTaskFile::GetCustomAttributeID(int nIndex) const
 unsigned long CTaskFile::GetCustomAttributeType(int nIndex) const
 {
 	return _ttol(GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBTYPE));
+}
+
+unsigned long CTaskFile::GetCustomAttributeFeatures(int nIndex) const
+{
+	return _ttol(GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBFEATURES));
 }
 
 LPCTSTR CTaskFile::GetCustomAttributeListData(int nIndex) const
@@ -1734,17 +1655,54 @@ BOOL CTaskFile::SetReportDetails(LPCTSTR szTitle, const COleDateTime& date)
 void CTaskFile::SetAvailableAttributes(const CTDCAttributeMap& mapAttrib)
 {
 	m_mapReadableAttrib.Copy(mapAttrib);
+
+	POSITION pos = mapAttrib.GetStartPosition();
+
+	while (pos)
+		AddItem(TDL_AVAILABLEATTRIB, (int)mapAttrib.GetNext(pos), XIT_ELEMENT);
 }
 
-bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const
+void CTaskFile::LoadAvailableAttributes() const
 {
-	if (!m_mapReadableAttrib.GetCount() || m_mapReadableAttrib.Has(TDCA_ALL))
-		return (nAttrib != TDCA_NONE);
+	if (!m_mapReadableAttrib.GetCount())
+	{
+		const CXmlItem* pXIAttrib = GetItem(TDL_AVAILABLEATTRIB);
+
+		if (!pXIAttrib)
+		{
+			m_mapReadableAttrib.Add(TDCA_ALL);
+		}
+		else
+		{
+			while (pXIAttrib)
+			{
+				m_mapReadableAttrib.Add((TDC_ATTRIBUTE)pXIAttrib->GetValueI());
+				pXIAttrib = pXIAttrib->GetSibling();
+			}
+		}
+	}
+}
+
+bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const
+{
+	LoadAvailableAttributes();
+
+	ASSERT(m_mapReadableAttrib.GetCount());
+
+	if (m_mapReadableAttrib.Has(TDCA_ALL))
+		return (nAttribID != TDCA_NONE);
 
 	if (m_mapReadableAttrib.Has(TDCA_NONE))
-		return (nAttrib == TDCA_NONE);
+		return (nAttribID == TDCA_NONE);
 
-	return (m_mapReadableAttrib.Has(nAttrib) != FALSE);
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) ||
+		 (nAttribID == TDCA_CUSTOMATTRIB_DEFS))
+	{
+		if (m_mapReadableAttrib.Has(TDCA_CUSTOMATTRIB_ALL))
+			return true;
+	}
+
+	return (m_mapReadableAttrib.Has(nAttribID) != FALSE);
 }
 
 bool CTaskFile::SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate)
@@ -1884,18 +1842,28 @@ BOOL CTaskFile::SetTaskAttributes(HTASKITEM hTask, const TODOITEM& tdi)
 	return TRUE;
 }
 
-BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi) const
+// External
+BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bCalc) const
 {
-	return MergeTaskAttributes(hTask, tdi, TDLMTA_OVERWRITEALL);
+	return MergeTaskAttributes(hTask, tdi, TDCA_ALL, m_aCustomAttribDefs, TDLMTA_OVERWRITEALL, (bCalc != FALSE));
 }
 
+// External
 BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, DWORD dwFlags) const
 {
-	return MergeTaskAttributes(hTask, tdi, TDCA_ALL, CTDCCustomAttribDefinitionArray(), dwFlags);
+	return MergeTaskAttributes(hTask, tdi, TDCA_ALL, m_aCustomAttribDefs, dwFlags, false);
 }
 
+// External
 BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const CTDCAttributeMap& mapAttribs, 
 									const CTDCCustomAttribDefinitionArray& aCustAttribs, DWORD dwFlags) const
+{
+	return MergeTaskAttributes(hSrcTask, tdiDest, mapAttribs, aCustAttribs, dwFlags, false);
+}
+
+// Internal
+BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const CTDCAttributeMap& mapAttribs, 
+									const CTDCCustomAttribDefinitionArray& aCustAttribs, DWORD dwFlags, bool bCalc) const
 {
 	ASSERT(m_mapReadableAttrib.GetCount() == 0);
 
@@ -1908,41 +1876,41 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 #define GETATTRIB(a, s, expr) if (WANTATTRIB(a, s)) expr
 
 		// Call GetTaskString wherever possible to avoid string copying
-		GETATTRIB(TDCA_TASKNAME,	TDL_TASKTITLE,			tdiDest.sTitle = GetTaskString(hSrcTask, TDL_TASKTITLE));
-		GETATTRIB(TDCA_ALLOCBY,		TDL_TASKALLOCBY,		tdiDest.sAllocBy = GetTaskString(hSrcTask, TDL_TASKALLOCBY));
-		GETATTRIB(TDCA_STATUS,		TDL_TASKSTATUS,			tdiDest.sStatus = GetTaskString(hSrcTask, TDL_TASKSTATUS));
-		GETATTRIB(TDCA_CREATEDBY,	TDL_TASKCREATEDBY,		tdiDest.sCreatedBy = GetTaskString(hSrcTask, TDL_TASKCREATEDBY));
-		GETATTRIB(TDCA_EXTERNALID,	TDL_TASKEXTERNALID,		tdiDest.sExternalID = GetTaskString(hSrcTask, TDL_TASKEXTERNALID));
-		GETATTRIB(TDCA_VERSION,		TDL_TASKVERSION,		tdiDest.sVersion = GetTaskString(hSrcTask, TDL_TASKVERSION));
-		GETATTRIB(TDCA_ICON,		TDL_TASKICON,			tdiDest.sIcon = GetTaskString(hSrcTask, TDL_TASKICON));
-		GETATTRIB(TDCA_LASTMODBY,	TDL_TASKLASTMODBY,		tdiDest.sLastModifiedBy = GetTaskString(hSrcTask, TDL_TASKLASTMODBY));
+		GETATTRIB(TDCA_TASKNAME,		TDL_TASKTITLE,			tdiDest.sTitle = GetTaskString(hSrcTask, TDL_TASKTITLE));
+		GETATTRIB(TDCA_ALLOCBY,			TDL_TASKALLOCBY,		tdiDest.sAllocBy = GetTaskString(hSrcTask, TDL_TASKALLOCBY));
+		GETATTRIB(TDCA_STATUS,			TDL_TASKSTATUS,			tdiDest.sStatus = GetTaskString(hSrcTask, TDL_TASKSTATUS));
+		GETATTRIB(TDCA_CREATEDBY,		TDL_TASKCREATEDBY,		tdiDest.sCreatedBy = GetTaskString(hSrcTask, TDL_TASKCREATEDBY));
+		GETATTRIB(TDCA_EXTERNALID,		TDL_TASKEXTERNALID,		tdiDest.sExternalID = GetTaskString(hSrcTask, TDL_TASKEXTERNALID));
+		GETATTRIB(TDCA_VERSION,			TDL_TASKVERSION,		tdiDest.sVersion = GetTaskString(hSrcTask, TDL_TASKVERSION));
+		GETATTRIB(TDCA_ICON,			TDL_TASKICON,			tdiDest.sIcon = GetTaskString(hSrcTask, TDL_TASKICON));
+		GETATTRIB(TDCA_LASTMODBY,		TDL_TASKLASTMODBY,		tdiDest.sLastModifiedBy = GetTaskString(hSrcTask, TDL_TASKLASTMODBY));
 
-		GETATTRIB(TDCA_FLAG,		TDL_TASKFLAG,			tdiDest.bFlagged = IsTaskFlagged(hSrcTask, false));
-		GETATTRIB(TDCA_LOCK,		TDL_TASKLOCK,			tdiDest.bLocked = IsTaskLocked(hSrcTask, false));
+		GETATTRIB(TDCA_FLAG,			TDL_TASKFLAG,			tdiDest.bFlagged = IsTaskFlagged(hSrcTask, bCalc));
+		GETATTRIB(TDCA_LOCK,			TDL_TASKLOCK,			tdiDest.bLocked = IsTaskLocked(hSrcTask, bCalc));
 
-		GETATTRIB(TDCA_COLOR,		TDL_TASKCOLOR,			tdiDest.color = (COLORREF)GetTaskColor(hSrcTask));
-		GETATTRIB(TDCA_PERCENT,		TDL_TASKPERCENTDONE,	tdiDest.nPercentDone = (int)GetTaskPercentDone(hSrcTask, false));
-		GETATTRIB(TDCA_TIMEESTIMATE, TDL_TASKTIMEESTIMATE,	tdiDest.timeEstimate.dAmount = GetTaskTimeEstimate(hSrcTask, tdiDest.timeEstimate.nUnits, false));
-		GETATTRIB(TDCA_TIMESPENT,	TDL_TASKTIMESPENT,		tdiDest.timeSpent.dAmount = GetTaskTimeSpent(hSrcTask, tdiDest.timeSpent.nUnits, false));
-		GETATTRIB(TDCA_PRIORITY,	TDL_TASKPRIORITY,		tdiDest.nPriority = (int)GetTaskPriority(hSrcTask, false));
-		GETATTRIB(TDCA_RISK,		TDL_TASKRISK,			tdiDest.nRisk = GetTaskRisk(hSrcTask, false));
-		GETATTRIB(TDCA_COST,		TDL_TASKCOST,			tdiDest.cost.Parse(GetTaskString(hSrcTask, TDL_TASKCOST)));
+		GETATTRIB(TDCA_COLOR,			TDL_TASKCOLOR,			tdiDest.color = (COLORREF)GetTaskColor(hSrcTask));
+		GETATTRIB(TDCA_PERCENT,			TDL_TASKPERCENTDONE,	tdiDest.nPercentDone = (int)GetTaskPercentDone(hSrcTask, bCalc));
+		GETATTRIB(TDCA_TIMEESTIMATE,	TDL_TASKTIMEESTIMATE,	tdiDest.timeEstimate.dAmount = GetTaskTimeEstimate(hSrcTask, tdiDest.timeEstimate.nUnits, bCalc));
+		GETATTRIB(TDCA_TIMESPENT,		TDL_TASKTIMESPENT,		tdiDest.timeSpent.dAmount = GetTaskTimeSpent(hSrcTask, tdiDest.timeSpent.nUnits, bCalc));
+		GETATTRIB(TDCA_PRIORITY,		TDL_TASKPRIORITY,		tdiDest.nPriority = (int)GetTaskPriority(hSrcTask, bCalc));
+		GETATTRIB(TDCA_RISK,			TDL_TASKRISK,			tdiDest.nRisk = GetTaskRisk(hSrcTask, bCalc));
+		GETATTRIB(TDCA_COST,			TDL_TASKCOST,			tdiDest.cost.Parse(GetTaskString(hSrcTask, (bCalc ? TDL_TASKCALCCOST : TDL_TASKCOST))));
 
-		GETATTRIB(TDCA_DUEDATE,		TDL_TASKDUEDATE,		tdiDest.dateDue = GetTaskDueDateOle(hSrcTask));
-		GETATTRIB(TDCA_STARTDATE,	TDL_TASKSTARTDATE,		tdiDest.dateStart = GetTaskStartDateOle(hSrcTask));
-		GETATTRIB(TDCA_DONEDATE,	TDL_TASKDONEDATE,		tdiDest.dateDone = GetTaskDoneDateOle(hSrcTask));
-		GETATTRIB(TDCA_CREATIONDATE, TDL_TASKCREATIONDATE,	tdiDest.dateCreated = GetTaskCreationDateOle(hSrcTask));
-		GETATTRIB(TDCA_LASTMODDATE, TDL_TASKLASTMOD,		tdiDest.dateLastMod = GetTaskLastModifiedOle(hSrcTask));
+		GETATTRIB(TDCA_DUEDATE,			TDL_TASKDUEDATE,		tdiDest.dateDue = GetTaskDueDateOle(hSrcTask, bCalc));
+		GETATTRIB(TDCA_STARTDATE,		TDL_TASKSTARTDATE,		tdiDest.dateStart = GetTaskStartDateOle(hSrcTask, bCalc));
+		GETATTRIB(TDCA_DONEDATE,		TDL_TASKDONEDATE,		tdiDest.dateDone = GetTaskDoneDateOle(hSrcTask));
+		GETATTRIB(TDCA_CREATIONDATE,	TDL_TASKCREATIONDATE,	tdiDest.dateCreated = GetTaskCreationDateOle(hSrcTask));
+		GETATTRIB(TDCA_LASTMODDATE,		TDL_TASKLASTMOD,		tdiDest.dateLastMod = GetTaskLastModifiedOle(hSrcTask));
 
-		GETATTRIB(TDCA_CATEGORY,	TDL_TASKCATEGORY,		GetTaskCategories(hSrcTask, tdiDest.aCategories));
-		GETATTRIB(TDCA_TAGS,		TDL_TASKTAG,			GetTaskTags(hSrcTask, tdiDest.aTags));
-		GETATTRIB(TDCA_ALLOCTO,		TDL_TASKALLOCTO,		GetTaskAllocatedTo(hSrcTask, tdiDest.aAllocTo));
-		GETATTRIB(TDCA_RECURRENCE,	TDL_TASKRECURRENCE,		GetTaskRecurrence(hSrcTask, tdiDest.trRecurrence));
-		GETATTRIB(TDCA_DEPENDENCY,	TDL_TASKDEPENDENCY,		GetTaskDependencies(hSrcTask, tdiDest.aDependencies));
-		GETATTRIB(TDCA_FILELINK,	TDL_TASKFILELINKPATH,	GetTaskFileLinks(hSrcTask, tdiDest.aFileLinks));
+		GETATTRIB(TDCA_CATEGORY,		TDL_TASKCATEGORY,		GetTaskCategories(hSrcTask, tdiDest.aCategories));
+		GETATTRIB(TDCA_TAGS,			TDL_TASKTAG,			GetTaskTags(hSrcTask, tdiDest.aTags));
+		GETATTRIB(TDCA_ALLOCTO,			TDL_TASKALLOCTO,		GetTaskAllocatedTo(hSrcTask, tdiDest.aAllocTo));
+		GETATTRIB(TDCA_RECURRENCE,		TDL_TASKRECURRENCE,		GetTaskRecurrence(hSrcTask, tdiDest.trRecurrence));
+		GETATTRIB(TDCA_DEPENDENCY,		TDL_TASKDEPENDENCY,		GetTaskDependencies(hSrcTask, tdiDest.aDependencies));
+		GETATTRIB(TDCA_FILELINK,		TDL_TASKFILELINKPATH,	GetTaskFileLinks(hSrcTask, tdiDest.aFileLinks));
 
 		// Comments are trickier
-		if (mapAttribs.Has(TDCA_ALL) || mapAttribs.Has(TDCA_COMMENTS))
+		if (mapAttribs.HasAttribOrAll(TDCA_COMMENTS))
 		{
 			if (Misc::HasFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES) && 
 				!TaskHasAttribute(hSrcTask, TDL_TASKCOMMENTS) &&
@@ -2007,7 +1975,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 		if (mapAttribs.Has(TDCA_ALL))
 		{
 			CTDCCustomAttributeDataMap mapSrcData;
-			GetTaskCustomAttributeData(hSrcTask, mapSrcData);
+			GetTaskCustomAttributeData(hSrcTask, mapSrcData, bCalc);
 
 			if (dwFlags == TDLMTA_OVERWRITEALL)
 			{
@@ -2032,7 +2000,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 		else if (aCustAttribs.GetSize())
 		{
 			CTDCCustomAttributeDataMap mapSrcData;
-			GetTaskCustomAttributeData(hSrcTask, mapSrcData);
+			GetTaskCustomAttributeData(hSrcTask, mapSrcData, bCalc);
 
 			int nCust = aCustAttribs.GetSize();
 
@@ -2064,7 +2032,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 BOOL CTaskFile::WantGetTaskAttribute(HTASKITEM hSrcTask, LPCTSTR szSrcAttrib, TODOITEM& tdiDest, TDC_ATTRIBUTE nDestAttrib, 
 									 const CTDCAttributeMap& mapAttribs, DWORD dwFlags) const
 {
-	if (!mapAttribs.Has(TDCA_ALL) && !mapAttribs.Has(nDestAttrib))
+	if (!mapAttribs.HasAttribOrAll(nDestAttrib))
 		return FALSE;
 
 	BOOL bHasSrc = TaskHasAttribute(hSrcTask, szSrcAttrib);
@@ -2204,21 +2172,12 @@ BOOL CTaskFile::GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CSt
 
 	Base64Coder b64;
 
-#ifdef _UNICODE
-
-	// if text is unicode then we need to convert it back to multibyte
+	// Convert unicode back to multibyte
 	// to read the binary stream as unsigned chars
 	int nLen = sTemp.GetLength();
 	unsigned char* pBinary = (unsigned char*)Misc::WideToMultiByte((LPCTSTR)sTemp, nLen);
 	b64.Decode(pBinary, nLen);
 	delete [] pBinary;
-
-#else
-
-	b64.Decode(sTemp);
-
-#endif
-
 
 	unsigned long nLenContent;
 	PBYTE pContent = b64.DecodedMessage(nLenContent);
@@ -2287,7 +2246,7 @@ int CTaskFile::GetTaskMetaData(HTASKITEM hTask, CMapStringToString& mapMetaData)
 	return GetMetaData(pXITask, mapMetaData);
 }
 
-int CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData) const
+int CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDataMap& mapData, BOOL bCalc) const
 {
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, 0);
@@ -2299,7 +2258,13 @@ int CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, CTDCCustomAttributeDa
 	while (pXICustData)
 	{
 		CString sTypeID = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBID);
-		CString sData = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBVALUE);
+		CString sData;
+		
+		if (bCalc)
+			sData = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBCALCVALUE);
+
+		if (sData.IsEmpty())
+			sData = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBVALUE);
 
 		if (!sTypeID.IsEmpty() && !sData.IsEmpty())
 		{
@@ -2363,12 +2328,13 @@ BOOL CTaskFile::SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCu
 	}
 	ASSERT(pXICustData);
 
+	// Note: overwrite any existing value
 	LPCTSTR szTag = (bCalc ? TDL_TASKCUSTOMATTRIBCALCVALUE : TDL_TASKCUSTOMATTRIBVALUE);
-	pXICustData->AddItem(szTag, data.AsString());
+	pXICustData->GetAddItem(szTag, XIT_ATTRIB)->SetValue(data.AsString());
 
 	// add human readable format
 	szTag = (bCalc ? TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING : TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
-	pXICustData->AddItem(szTag, m_aCustomAttribDefs.FormatData(data, sCustAttribID, m_bISODates));
+	pXICustData->GetAddItem(szTag, XIT_ATTRIB)->SetValue(m_aCustomAttribDefs.FormatData(data, sCustAttribID, m_bISODates));
 
 	return TRUE;
 }
@@ -2736,25 +2702,24 @@ LPCTSTR CTaskFile::GetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, boo
 	
 		if (pXICustData)
 		{
-			LPCTSTR szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING);
+			// NOTE: It's very important to respect empty values if the XML item
+			// exists because numeric types have the option to hide zero values
 
-			if (Misc::IsEmpty(szValue))
+			// Try for calculation display value first
+			const CXmlItem* pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBCALCDISPLAYSTRING);
+
+			if (!pXIVal)
 			{
-				szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
+				// else try for regular display value
+				pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBDISPLAYSTRING);
 
-				if (Misc::IsEmpty(szValue))
-				{
-					const CXmlItem* pXICustData = GetTaskCustomAttribute(hTask, szID);
-
-					if (pXICustData)
-					{
-						szValue = pXICustData->GetItemValue(TDL_TASKCUSTOMATTRIBCALCVALUE);
-					}
-				}
+				// else try for regular calculation value
+				if (!pXIVal)
+					pXIVal = pXICustData->GetItem(TDL_TASKCUSTOMATTRIBCALCVALUE);
 			}
 
-			if (!Misc::IsEmpty(szValue))
-				return szValue;
+			if (pXIVal)
+				return pXIVal->GetValue();
 		}
 	}
 
@@ -3331,13 +3296,19 @@ COleDateTime CTaskFile::GetTaskDoneDateOle(HTASKITEM hTask) const
 	return GetTaskDateOle(hTask, TDL_TASKDONEDATE, TRUE);
 }
 
-COleDateTime CTaskFile::GetTaskDueDateOle(HTASKITEM hTask) const
+COleDateTime CTaskFile::GetTaskDueDateOle(HTASKITEM hTask, BOOL bCalc) const
 {
+	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCDUEDATE))
+		return GetTaskDateOle(hTask, TDL_TASKCALCDUEDATE, TRUE);
+
 	return GetTaskDateOle(hTask, TDL_TASKDUEDATE, TRUE);
 }
 
-COleDateTime CTaskFile::GetTaskStartDateOle(HTASKITEM hTask) const
+COleDateTime CTaskFile::GetTaskStartDateOle(HTASKITEM hTask, BOOL bCalc) const
 {
+	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCSTARTDATE))
+		return GetTaskDateOle(hTask, TDL_TASKCALCSTARTDATE, TRUE);
+
 	return GetTaskDateOle(hTask, TDL_TASKSTARTDATE, TRUE);
 }
 
@@ -3352,11 +3323,7 @@ COleDateTime CTaskFile::GetEarliestTaskStartDate(HTASKITEM hTask) const
 
 	if (hTask)
 	{
-		//CDateHelper::Min(dtEarliest, GetTaskCreationDateOle(hTask));
 		CDateHelper::Min(dtEarliest, GetTaskStartDateOle(hTask));
-		//CDateHelper::Min(dtEarliest, GetTaskDueDateOle(hTask));
-		//CDateHelper::Min(dtEarliest, GetTaskDoneDateOle(hTask));
-		//CDateHelper::Min(dtEarliest, GetTaskLastModifiedOle(hTask));
 
 		// First child
 		CDateHelper::Min(dtEarliest, GetEarliestTaskStartDate(GetFirstTask(hTask)));
@@ -3518,12 +3485,12 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, LPCTSTR szAttrib) const
 	return false;
 }
 
-bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const
+bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay) const
 {
-	if (!IsAttributeAvailable(nAttrib))
+	if (!IsAttributeAvailable(nAttribID))
 		return false;
 
-	LPCTSTR szAttrib = GetAttribTag(nAttrib, bCalc, bDisplay);
+	LPCTSTR szAttrib = GetAttribTag(nAttribID, bCalc, bDisplay);
 
 	if (Misc::IsEmpty(szAttrib))
 		return false;
@@ -3535,15 +3502,15 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bC
 		return true;
 
 	// Fallback in special case
-	if ((nAttrib == TDCA_PARENTID) && IsAttributeAvailable(TDCA_ID))
+	if ((nAttribID == TDCA_PARENTID) && IsAttributeAvailable(TDCA_ID))
 		return (GetTaskParent(hTask) != NULL);
 
 	return false;
 }
 
-LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay)
+LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay)
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_ALLOCBY:		return TDL_TASKALLOCBY;
 	case TDCA_ALLOCTO:		return TDL_TASKALLOCTO;
@@ -3577,14 +3544,15 @@ LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay
 	case TDCA_RISK:			return (bCalc ? TDL_TASKHIGHESTRISK : TDL_TASKRISK);
 	case TDCA_TIMEESTIMATE:	return (bCalc ? TDL_TASKCALCTIMEESTIMATE : TDL_TASKTIMEESTIMATE);
 	case TDCA_TIMESPENT:	return (bCalc ? TDL_TASKCALCTIMESPENT : TDL_TASKTIMESPENT);
+	case TDCA_TIMEREMAINING:return (bCalc ? TDL_TASKCALCTIMEREMAINING : TDL_TASKCALCTIMEREMAINING);
 
 	case TDCA_CREATIONDATE:	return (bDisplay ? TDL_TASKCREATIONDATESTRING : TDL_TASKCREATIONDATE);
 	case TDCA_DONEDATE:		return (bDisplay ? TDL_TASKDONEDATESTRING : TDL_TASKDONEDATE);
 	case TDCA_LASTMODDATE:	return (bDisplay ? TDL_TASKLASTMODSTRING : TDL_TASKLASTMOD);
 	case TDCA_POSITION:		return (bDisplay ? TDL_TASKPOSSTRING : TDL_TASKPOSITION);
 
-	case TDCA_DUEDATE:		return (bCalc ? (bDisplay ? TDL_TASKCALCDUEDATESTRING : TDL_TASKDUEDATESTRING) : (bDisplay ? TDL_TASKDUEDATESTRING : TDL_TASKDUEDATE));
-	case TDCA_STARTDATE:	return (bCalc ? (bDisplay ? TDL_TASKCALCSTARTDATESTRING : TDL_TASKSTARTDATESTRING) : (bDisplay ? TDL_TASKSTARTDATESTRING : TDL_TASKSTARTDATE));
+	case TDCA_DUEDATE:		return (bDisplay ? (bCalc ? TDL_TASKCALCDUEDATESTRING : TDL_TASKDUEDATESTRING) : (bCalc ? TDL_TASKCALCDUEDATE : TDL_TASKDUEDATE));
+	case TDCA_STARTDATE:	return (bDisplay ? (bCalc ? TDL_TASKCALCSTARTDATESTRING : TDL_TASKSTARTDATESTRING) : (bCalc ? TDL_TASKCALCSTARTDATE : TDL_TASKSTARTDATE));
 	}
 	
 	// all else
@@ -3592,27 +3560,35 @@ LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay
 	return NULLSTRING;
 }
 
-LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const
+LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc, bool bDisplay) const
 {
-	if (!IsAttributeAvailable(nAttrib))
+	if (!IsAttributeAvailable(nAttribID))
 		return NULLSTRING;
 
-	if (!TaskHasAttribute(hTask, nAttrib, bCalc, bDisplay))
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
-		if (bCalc && TaskHasAttribute(hTask, nAttrib, !bCalc, bDisplay))
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_CUSTDEF_RET(m_aCustomAttribDefs, nAttribID, pDef, NULLSTRING);
+
+		return GetTaskCustomAttributeData(hTask, pDef->sUniqueID, bDisplay);
+	}
+
+	if (!TaskHasAttribute(hTask, nAttribID, bCalc, bDisplay))
+	{
+		if (bCalc && TaskHasAttribute(hTask, nAttribID, !bCalc, bDisplay))
 			bCalc = false;
 		else
 			return NULLSTRING;
 	}
 
-	LPCTSTR szAttrib = GetAttribTag(nAttrib, bCalc, bDisplay);
+	LPCTSTR szAttrib = GetAttribTag(nAttribID, bCalc, bDisplay);
 
 	if (bDisplay)
 	{
 		// Customisations
 		static CString DISPLAYSTRING;
 
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_ALLOCTO:
 		case TDCA_CATEGORY:
@@ -3628,7 +3604,7 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 		case TDCA_TIMESPENT:
 			{
 				TDCTIMEPERIOD time;
-				time.dAmount = (nAttrib == TDCA_TIMEESTIMATE) ?
+				time.dAmount = (nAttribID == TDCA_TIMEESTIMATE) ?
 								GetTaskTimeEstimate(hTask, time.nUnits, bCalc) :
 								GetTaskTimeSpent(hTask, time.nUnits, bCalc);
 
@@ -3845,10 +3821,8 @@ bool CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, LPCTST
 			pXICustDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (int)temp.GetAttributeType());
 		}
 
-		if (Misc::AddUniqueItems(aData, temp.aDefaultListData))
-		{
+		if (Misc::AppendItems(aData, temp.aDefaultListData, TRUE))
 			pXICustDef->SetItemValue(TDL_CUSTOMATTRIBLISTDATA, temp.EncodeListData());
-		}
 	}
 
 	return true;

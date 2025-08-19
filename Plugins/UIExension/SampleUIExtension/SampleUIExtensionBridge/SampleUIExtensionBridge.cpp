@@ -133,7 +133,7 @@ LPCWSTR CSampleUIExtensionBridgeWindow::GetTypeID() const
 	return SAMPLE_GUID;
 }
 
-bool CSampleUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CSampleUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -155,9 +155,9 @@ void CSampleUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UP
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CSampleUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CSampleUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CSampleUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
@@ -176,6 +176,11 @@ bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->time, 
 										pMsg->pt.x,
 										pMsg->pt.y);
+}
+
+bool CSampleUIExtensionBridgeWindow::DoIdleProcessing()
+{
+	return m_wnd->DoIdleProcessing();
 }
 
 bool CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND /*nCmd*/, IUIAPPCOMMANDDATA* /*pData*/)

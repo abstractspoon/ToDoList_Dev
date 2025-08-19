@@ -14,7 +14,6 @@
 #include "..\shared\enstring.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\themed.h"
-#include "..\shared\icon.h"
 #include "..\shared\GraphicsMisc.h"
 
 #include "..\Interfaces\IPreferences.h"
@@ -57,19 +56,17 @@ int NUM_ICONS = (sizeof(ICONS) / sizeof(ICONS[0]));
 
 CTDLImportOutlookDlg::CTDLImportOutlookDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(IDD_IMPORT_OUTLOOK_DIALOG, pParent), 
+	CTDLDialog(IDD_IMPORT_OUTLOOK_DIALOG, _T("ImportOutlook"), pParent),
 	m_pDestTaskFile(NULL), 
 	m_pOutlook(NULL),
 	m_pFolder(NULL)
 {
-	//{{AFX_DATA_INIT(COutlookImportDlg)
-	m_sCurFolder = _T("");
-	//}}AFX_DATA_INIT
+	m_iconDlg.SetIcon(CMSOutlookHelper::GetOutlookIcon());
 }
 
 void CTDLImportOutlookDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COutlookImportDlg)
 	DDX_Check(pDX, IDC_REMOVEOUTLOOKTASKS, m_bRemoveOutlookTasks);
 	DDX_Text(pDX, IDC_CURFOLDER, m_sCurFolder);
@@ -79,7 +76,7 @@ void CTDLImportOutlookDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLImportOutlookDlg, CDialog)
+BEGIN_MESSAGE_MAP(CTDLImportOutlookDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(COutlookImportDlg)
 	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_CHOOSEFOLDER, OnChoosefolder)
@@ -120,9 +117,9 @@ IIMPORTEXPORT_RESULT CTDLImportOutlookDlg::ImportTasks(ITaskList* pDestTaskFile,
 
 BOOL CTDLImportOutlookDlg::OnInitDialog() 
 {
-	CDialog::OnInitDialog();
+	CTDLDialog::OnInitDialog();
 	CLocalizer::EnableTranslation(m_tcTasks, FALSE);
-	
+
 	ASSERT(m_pOutlook == NULL);
 	m_pOutlook = new _Application;
 
@@ -148,7 +145,7 @@ BOOL CTDLImportOutlookDlg::OnInitDialog()
 	}
 
 	CThemed::SetWindowTheme(&m_tcTasks, _T("Explorer"));
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -302,7 +299,7 @@ void CTDLImportOutlookDlg::AddFolderItemsToTree(MAPIFolder* pFolder, HTREEITEM h
 
 void CTDLImportOutlookDlg::OnOK()
 {
-	CDialog::OnOK();
+	CTDLDialog::OnOK();
 
 	ASSERT(m_pOutlook && m_pDestTaskFile);
 
@@ -406,7 +403,7 @@ BOOL CTDLImportOutlookDlg::DeleteItemFromFolder(_Item& obj, MAPIFolder* pFolder)
 
 void CTDLImportOutlookDlg::OnDestroy() 
 {
-	CDialog::OnDestroy();
+	CTDLDialog::OnDestroy();
 	
 	delete m_pOutlook;
 	delete m_pFolder;

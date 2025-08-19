@@ -62,31 +62,25 @@
     <Compile Include="DayViewEditTimeBlockSeriesDlg.Designer.cs">
       <DependentUpon>DayViewEditTimeBlockSeriesDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewMonthComboBox.cs" />
-    <Compile Include="DayViewTaskComboBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="DayViewTimeBlockAttributesPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="DayViewTimeBlockAttributesPage.Designer.cs">
       <DependentUpon>DayViewTimeBlockAttributesPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="DayViewWeekLabel.cs" />
-    <Compile Include="DayViewYearComboBox.cs" />
     <Compile Include="DayViewPreferencesDlg.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="DayViewPreferencesDlg.Designer.cs">
       <DependentUpon>DayViewPreferencesDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="DayViewUIExtensionCore.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="DayViewUIExtensionCore.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TaskExtensionItems.cs" />
     <Compile Include="TaskItem.cs" />
     <Compile Include="TDLDayView.cs" />
@@ -99,6 +93,7 @@
   <ItemGroup>
     <EmbeddedResource Include="DayViewCreateTimeBlockDlg.resx">
       <DependentUpon>DayViewCreateTimeBlockDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="DayViewEditTimeBlockSeriesDlg.resx">
       <DependentUpon>DayViewEditTimeBlockSeriesDlg.cs</DependentUpon>
@@ -112,6 +107,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -123,9 +119,9 @@
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
       <Name>ToolStripEx</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\ImageHelper\ImageHelper.csproj">
-      <Project>{819992e3-fc33-4fcd-8aa5-5bc8329b2c20}</Project>
-      <Name>ImageHelper</Name>
+    <ProjectReference Include="..\..\..\3rdParty\UIComponents\UIComponents.csproj">
+      <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
+      <Name>UIComponents</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}</Project>
@@ -140,7 +136,7 @@
     <EmbeddedResource Include="toolbar_std.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="dayview.ico" />
+    <EmbeddedResource Include="Resources\dayview.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

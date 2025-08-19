@@ -420,9 +420,7 @@ BOOL CTreeSelectionHelper::GetBoundingRect(CRect& rSelection) const
 	POSITION pos = GetFirstItemPos();
 
 	if (pos)
-	{
 		VERIFY(m_tree.GetItemRect(GetNextItem(pos), rSelection, TRUE));
-	}
 
 	// rest of items
 	while (pos)
@@ -433,7 +431,7 @@ BOOL CTreeSelectionHelper::GetBoundingRect(CRect& rSelection) const
 		rSelection |= rItem;
 	}
 
-	return (!rSelection.IsRectEmpty());
+	return !rSelection.IsRectEmpty();
 }
 
 BOOL CTreeSelectionHelper::ItemsAreAllParents() const
@@ -543,7 +541,7 @@ int CTreeSelectionHelper::BuildSortArray(const CHTIList& selection, CSortArray& 
 		SORTITEM& si = aItems[nItem++];
 
 		si.hti = selection.GetNext(pos);
-		si.nPos = m_tch.GetItemTop(si.hti);
+		si.nVPos = m_tch.GetItemTop(si.hti);
 	}
 
 	return aItems.GetSize();
@@ -554,7 +552,7 @@ int CTreeSelectionHelper::SortProc(const void* item1, const void* item2)
 	const SORTITEM* pItem1 = (const SORTITEM*)item1;
 	const SORTITEM* pItem2 = (const SORTITEM*)item2;
 
-	return (pItem1->nPos - pItem2->nPos);
+	return (pItem1->nVPos - pItem2->nVPos);
 }
 
 void CTreeSelectionHelper::RemoveChildDuplicates() 
@@ -646,7 +644,7 @@ BOOL CTreeSelectionHelper::ContainsAllItems() const
 
 BOOL CTreeSelectionHelper::HasNextSelection() const
 {
-	return (m_nCurSelection < m_aHistory.GetSize() - 1);
+	return (m_nCurSelection < Misc::LastIndexT(m_aHistory));
 }
 
 int CTreeSelectionHelper::GetNextSelectionIDs(CDWordArray& aIDs) const
@@ -899,14 +897,15 @@ BOOL CTreeSelectionHelper::FixupTreeSelection()
 
 int CTreeSelectionHelper::GetItemTitles(const CHTIList& selection, CStringArray& aTitles) const
 {
-	aTitles.RemoveAll();
+	aTitles.SetSize(selection.GetCount());
 
 	POSITION pos = selection.GetHeadPosition();
+	int nItem = 0;
 
 	while (pos)
 	{
 		HTREEITEM hti = selection.GetNext(pos);
-		aTitles.Add(m_tree.GetItemText(hti));
+		aTitles[nItem++] = m_tree.GetItemText(hti);
 	}
 
 	return aTitles.GetSize();
@@ -914,14 +913,15 @@ int CTreeSelectionHelper::GetItemTitles(const CHTIList& selection, CStringArray&
 
 int CTreeSelectionHelper::GetItemData(const CHTIList& selection, CDWordArray& aData) const
 {
-	aData.RemoveAll();
+	aData.SetSize(selection.GetCount());
 
 	POSITION pos = selection.GetHeadPosition();
+	int nItem = 0;
 
 	while (pos)
 	{
 		HTREEITEM hti = selection.GetNext(pos);
-		aData.Add(m_tree.GetItemData(hti));
+		aData[nItem++] = m_tree.GetItemData(hti);
 	}
 
 	return aData.GetSize();

@@ -36,6 +36,7 @@ static LPCTSTR COMMENTS_DONECOLOR = _T("#808080");
 static LPCTSTR DOCTYPE = _T("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n\n");
 static LPCTSTR TAB = _T("&nbsp;&nbsp;&nbsp;&nbsp;");
 static LPCTSTR SPACE = _T("&nbsp;");
+static LPCTSTR CHARSET = _T("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-16\">\n");
 
 CTaskListHtmlExporter::CTaskListHtmlExporter() 
 	: 
@@ -63,6 +64,7 @@ IIMPORTEXPORT_RESULT CTaskListHtmlExporter::ExportOutput(LPCTSTR szDestFilePath,
 	sHtmlOutput += _T("<style type=\"text/css\">\n");
 	sHtmlOutput += _T("@media print { thead {display: table-header-group;} }\n");
 	sHtmlOutput += _T("table { border-collapse: collapse; }\n");
+	sHtmlOutput += _T("body { color:Black;background-color:White; } \n");
 	sHtmlOutput += _T("</style>\n");
 	sHtmlOutput += _T("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n");
 	sHtmlOutput += CHARSET;
@@ -127,16 +129,6 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 		INDENT = TAB;
 	}
 	
-	// charset
-#ifdef _UNICODE
-	CString sCS = "UTF-16"; 
-#else
-	CString sCS = pTasks->GetHtmlCharSet();
-#endif
-	
-	if (!sCS.IsEmpty())
-		CHARSET.Format(_T("<meta http-equiv=\"content-type\" content=\"text/html; charset=%s\">\n"), sCS);
-
 	if (WantAttribute(TDCA_COMMENTS))
 	{
 		COMMENTSPERCENTWIDTH = 30; // minimum
@@ -188,34 +180,31 @@ IIMPORTEXPORT_RESULT CTaskListHtmlExporter::Export(const IMultiTaskList* pSrcTas
 	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, dwFlags, pPrefs, szKey);
 }
 
-CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks) const
+CString CTaskListHtmlExporter::FormatTitle(const IMultiTaskList* pTasks) const
 {
-	CString sTitleBlock;
-			
-	// title and date
-	CString sTitle = pTasks->GetReportTitle();
-	CString sDate = pTasks->GetReportDate();
-			
-	if (!sTitle.IsEmpty())
-	{
-		CString sProjTitle;
-		sProjTitle.Format(_T("<h2>%s</h2>%s"), sTitle, sDate);
-		
-		sTitleBlock += DEFAULTFONT;
-		sTitleBlock += sProjTitle;
-	}
-	else if (!sDate.IsEmpty())
+	CString sTitleBlock, sTitleText = CTaskListExporterBase::FormatTitle(pTasks);
+
+	if (!sTitleText.IsEmpty())
 	{
 		sTitleBlock += DEFAULTFONT;
-		sTitleBlock += sDate;
+		sTitleBlock += Misc::Format(_T("<h1>%s</h1><p></p>"), sTitleText);
 	}
 
-	sTitleBlock += _T("<p/>");
-	
-	if (IsTableStyle())
+	return sTitleBlock;
+}
+
+CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const
+{
+	CString sTitleBlock, sTitleText = CTaskListExporterBase::FormatTitle(pTasks, bWantDate);
+
+	if (!sTitleText.IsEmpty())
 	{
-		sTitleBlock += _T("<table border=\"1\">\n");
+		sTitleBlock += DEFAULTFONT;
+		sTitleBlock += Misc::Format(_T("<h2>%s</h2><p></p>"), sTitleText);
 	}
+
+	if (IsTableStyle())
+		sTitleBlock += _T("<table border=\"1\">\n");
 
 	return sTitleBlock;
 }
@@ -232,13 +221,13 @@ CString CTaskListHtmlExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
 	return sHeader;
 }
 
-CString CTaskListHtmlExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const
+CString CTaskListHtmlExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const
 {
 	CString sItem;
 
 	if (IsTableStyle())
 	{
-		if (nAttrib == TDCA_COMMENTS)
+		if (nAttribID == TDCA_COMMENTS)
 			sItem.Format(_T("<th width=\"%d%%\">%s</th>"), COMMENTSPERCENTWIDTH, sAttribLabel);
 		else
 			sItem.Format(_T("<th>%s</th>"), sAttribLabel);
@@ -319,13 +308,13 @@ CString CTaskListHtmlExporter::ExportSubtasks(const ITASKLISTBASE* pTasks, HTASK
 }
 
 // virtual override
-CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue) const
+CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel, const CString& sValue) const
 {
-	return FormatAttribute(nAttrib, sAttribLabel, sValue, TRUE);
+	return FormatAttribute(nAttribID, sAttribLabel, sValue, TRUE);
 }
 
 // non-virtual helper
-CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue, BOOL bEncodeVal) const
+CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel, const CString& sValue, BOOL bEncodeVal) const
 {
 	CString sFmtAttrib;
 	CString sAttribVal(sValue);
@@ -336,7 +325,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 	// Must process empty values in table format
 	if (IsTableStyle() || !sAttribVal.IsEmpty())
 	{
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_POSITION:
 			sFmtAttrib.Format(_T("%s%s"), sAttribVal, SPACE);
@@ -359,7 +348,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 		default:
 			if (IsWrappedStyle())
 			{
-				if (nAttrib == TDCA_COMMENTS)
+				if (nAttribID == TDCA_COMMENTS)
 				{
 					sFmtAttrib = ENDL + sAttribVal;
 				}
@@ -378,13 +367,13 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 				else
 					sFmtAttrib.Format(_T("%s: %s"), sAttribLabel, sAttribVal);
 
-				if (nAttrib != TDCA_COMMENTS)
+				if (nAttribID != TDCA_COMMENTS)
 					sFmtAttrib += _T("<br>");
 			}
 			else // Wrapped
 			{
 				// special case: custom attrib
-				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 					sFmtAttrib = FormatTableCell(sAttribVal);
 				else
 					sFmtAttrib = sAttribVal;
@@ -396,10 +385,10 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 }
 
 CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, 
-											   TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const
+											   TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const
 {
 	// base processing
-	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttrib, sAttribLabel);
+	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttribID, sAttribLabel);
 
 	// extra processing
 	CString sTextColor = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKTEXTWEBCOLOR);
@@ -408,7 +397,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	BOOL bStrikeThru = (STRIKETHRUDONE && pTasks->IsTaskDone(hTask));
 	BOOL bBlockQuote = FALSE;
 	
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_POSITION:
 		if (IsTableStyle())
@@ -457,7 +446,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 				CString sPriorityCol = pTasks->GetTaskPriorityWebColor(hTask);
 				sPriority.Format(_T("<font color='%s'>%d</font>"), sPriorityCol, nPriority);
 
-				sItem = FormatAttribute(nAttrib, sAttribLabel, sPriority, FALSE); // FALSE = Don't encode
+				sItem = FormatAttribute(nAttribID, sAttribLabel, sPriority, FALSE); // FALSE = Don't encode
 			}
 		}
 		break;
@@ -501,7 +490,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 				sFileLinks += sFileLink;
 			} 
 
-			sItem = FormatAttribute(nAttrib, sAttribLabel, sFileLinks, FALSE); // FALSE = Don't encode
+			sItem = FormatAttribute(nAttribID, sAttribLabel, sFileLinks, FALSE); // FALSE = Don't encode
 		}
 		break;
 		
@@ -529,7 +518,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 				sDepends += sDepend;
 			} 
 
-			sItem = FormatAttribute(nAttrib, sAttribLabel, sDepends, FALSE); // FALSE = Don't encode
+			sItem = FormatAttribute(nAttribID, sAttribLabel, sDepends, FALSE); // FALSE = Don't encode
 		}
 		break;
 		
@@ -596,7 +585,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	}
 
 	// we've already handled custom attrib above
-	if (IsTableStyle() && !TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	if (IsTableStyle() && !TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
 		if (sItem.IsEmpty())
 			sItem = SPACE;

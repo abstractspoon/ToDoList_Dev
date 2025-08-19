@@ -22,8 +22,6 @@ enum RELOAD_OPTION
 
 class CPreferencesMultiUserPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesMultiUserPage)
-
 // Construction
 public:
 	CPreferencesMultiUserPage();
@@ -42,7 +40,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesMultiUserPage)
-	enum { IDD = IDD_PREFMULTIUSER_PAGE };
 	CComboBox	m_cbNoEditTime;
 	BOOL	m_bCheckinNoChange;
 	BOOL	m_bUse3rdPartySourceControl;

@@ -5,15 +5,23 @@
 #include "Win32.h"
 #include "CommCtrl.h"
 #include "PluginHelpers.h"
+#include "DPIScaling.h"
 
 #include <Shared\MessageBox.h>
 #include <Shared\GraphicsMisc.h>
+#include <Shared\Themed.h>
+#include <Shared\WinClasses.h>
+#include <Shared\wclassdefines.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Windows::Forms;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+static int s_nDPI = 0;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -62,11 +70,24 @@ void Win32::AddBorder(IntPtr hWnd)
 		DoFrameChange(hWnd);
 }
 
-void Win32::DoFrameChange(IntPtr hWnd)
+void Win32::DoFrameChangeEx(IntPtr hWnd, bool bIncrementWidth)
 {
-	SetWindowPos(GetHwnd(hWnd), NULL, 0, 0, 0, 0,
-			SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
-			SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+	HWND hwnd = GetHwnd(hWnd);
+	int nWidth = 0;
+
+	DWORD dwFlags = (SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | 
+					 SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+
+	if (bIncrementWidth)
+	{
+		CRect rWnd;
+		::GetWindowRect(hwnd, rWnd);
+
+		nWidth = (rWnd.Width() + 1);
+		dwFlags &= ~SWP_NOSIZE;
+	}
+
+	SetWindowPos(GetHwnd(hWnd), NULL, 0, 0, nWidth, 0, dwFlags);
 }
 
 bool Win32::HasStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
@@ -107,6 +128,68 @@ bool Win32::AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle)
 	return HasStyle(hWnd, nStyle, bExStyle);
 }
 
+bool Win32::SetRTLReading(IntPtr hWnd, bool rtl)
+{
+	if (!::IsWindow(GetHwnd(hWnd)))
+		return false;
+
+	Control^ ctrl = Control::FromHandle(hWnd);
+
+	if (ctrl == nullptr)
+	{
+		// Unwrapped HWND
+		if (rtl)
+		{
+			AddStyle(hWnd, WS_EX_RTLREADING, true);
+			RemoveStyle(hWnd, WS_EX_LEFTSCROLLBAR, true);
+			RemoveStyle(hWnd, WS_EX_RIGHT, true);
+
+			if (CWinClasses::IsClass(GetHwnd(hWnd), WC_COMBOLBOX))
+				DoFrameChangeEx(hWnd, true);
+		}
+		else
+		{
+			RemoveStyle(hWnd, WS_EX_RTLREADING, true);
+		}
+	}
+	else if (rtl)
+	{
+		auto handler = gcnew EventHandler(&RTLChangeEventReceiver::Handler);
+
+		ctrl->RightToLeftChanged += handler;
+		ctrl->RightToLeft = RightToLeft::Yes;
+		ctrl->RightToLeftChanged -= handler;
+	}
+	else
+	{
+		ctrl->RightToLeft = RightToLeft::No;
+	}
+	
+	return true;
+}
+
+void Win32::RTLChangeEventReceiver::Handler(Object^ sender, EventArgs^ e)
+{
+	if (ISTYPE(sender, Control))
+	{
+		// For consistency with core app
+		Win32::RemoveStyle(ASTYPE(sender, Control)->Handle, WS_EX_LEFTSCROLLBAR, true);
+		Win32::RemoveStyle(ASTYPE(sender, Control)->Handle, WS_EX_RIGHT, true);
+	}
+}
+
+bool Win32::SyncRTLReadingWithParent(IntPtr hWnd)
+{
+	HWND hwndParent = ::GetParent(GetHwnd(hWnd));
+
+	return SetRTLReading(hWnd, HasRTLReading(IntPtr(hWnd)));
+}
+
+bool Win32::HasRTLReading(IntPtr hWnd)
+{
+	return HasStyle(hWnd, WS_EX_RTLREADING, true);
+}
+
 int Win32::GetVScrollPos(IntPtr hWnd)
 {
 	return ::GetScrollPos(GetHwnd(hWnd), SB_VERT);
@@ -119,16 +202,14 @@ int Win32::GetHScrollPos(IntPtr hWnd)
 
 int Win32::GetSystemDPI()
 {
-	static int nDPI = 0;
-
-	if (nDPI == 0)
+	if (s_nDPI == 0)
 	{
 		HDC	hdc = ::GetDC(NULL);
-		nDPI = GetDeviceCaps(hdc, LOGPIXELSX);
+		s_nDPI = GetDeviceCaps(hdc, LOGPIXELSX);
 		::ReleaseDC(NULL, hdc);
 	}
 
-	return nDPI;
+	return s_nDPI;
 }
 
 String^ Win32::GetFaceName(HFONT hFont)
@@ -237,6 +318,32 @@ int Win32::GetWmNotifyCode(IntPtr lParam)
 void Win32::SetArrowCursor()
 {
 	GraphicsMisc::SetStandardCursor(IDC_ARROW);
+}
+
+HICON Win32::LoadHIcon(LPCWSTR szDllPath, UINT nIDIcon, int nSize, bool bScaleByDPI)
+{
+	HMODULE hMod = LoadLibrary(szDllPath);
+
+	if (bScaleByDPI)
+		nSize = DPIScaling::Scale(nSize);
+
+	HICON hIcon = (HICON)::LoadImage(hMod,
+									 MAKEINTRESOURCE(nIDIcon),
+									 IMAGE_ICON,
+									 nSize,
+									 nSize,
+									 LR_LOADMAP3DCOLORS);
+
+	FreeLibrary(hMod);
+
+	return hIcon;
+}
+
+void Win32::EnableExplorerTheming(IntPtr hWnd)
+{
+	CWnd* pWnd = CWnd::FromHandle(GetHwnd(hWnd));
+
+	CThemed::SetWindowTheme(pWnd, _T("Explorer"));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

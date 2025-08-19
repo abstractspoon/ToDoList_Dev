@@ -473,6 +473,7 @@ void CRTFContentControl::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_BULLET,			'L',		HOTKEYF_CONTROL | HOTKEYF_SHIFT); 
 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPYASHTML,		'C',		HOTKEYF_CONTROL | HOTKEYF_ALT); 
+	m_mgrShortcuts.AddShortcut(ID_EDIT_HORZRULE,		'L',		HOTKEYF_CONTROL | HOTKEYF_ALT); 
 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_GROWFONT,		0xBE,		HOTKEYF_CONTROL | HOTKEYF_EXT); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_SHRINKFONT,		0xBC,		HOTKEYF_CONTROL | HOTKEYF_EXT); 
@@ -695,7 +696,7 @@ bool CRTFContentControl::ProcessMessage(MSG* pMsg)
 
 						Misc::Split(sAllocTo, aListData, '\n');
 						Misc::Split(sAllocBy, aTemp, '\n');
-						Misc::AddUniqueItems(aTemp, aListData);
+						Misc::AppendItems(aTemp, aListData, TRUE);
 
 						if (aListData.GetSize())
 						{
@@ -930,21 +931,19 @@ void CRTFContentControl::OnUpdateEditOpenCopyUrl(CCmdUI* pCmdUI)
 {
 	if (pCmdUI->m_pMenu)
 	{
-		CEnString sUrl = m_rtf.GetContextUrl();
+		CEnString sUrl = m_rtf.GetContextUrl(TRUE);
 		pCmdUI->Enable(!sUrl.IsEmpty());
 		
-		if (!sUrl.IsEmpty() && pCmdUI->m_pMenu)
+		if (!sUrl.IsEmpty())
 		{
-			CString sText, sMenu;
-			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
-			
-			sUrl = CUrlParser::GetUrlAsFile(sUrl);
-
 			// restrict url length to 250 pixels
 			CClientDC dc(this);
 			sUrl.FormatDC(&dc, 250, ES_PATH);
 			
-			sText.Format(_T("%s: %s"), sMenu, sUrl);
+			CString sText, sMenu;
+			pCmdUI->m_pMenu->GetMenuString(pCmdUI->m_nID, sMenu, MF_BYCOMMAND);
+			
+			sText.Format(_T("%s: %s"), CEnString(sMenu), sUrl);
 			pCmdUI->SetText(sText);
 		}
 	}

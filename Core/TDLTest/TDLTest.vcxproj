@@ -154,6 +154,8 @@ copy unicode_release\TDLTest.exe ..\todolist\unicode_release /y
       <Command>mkdir ..\ToDoList
 mkdir ..\ToDoList\unicode_debug
 copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
+
+unicode_debug\TDLTest.exe
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -180,6 +182,8 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClCompile Include="TDCCUSTOMATTRIBUTECALCULATIONTest.cpp" />
     <ClCompile Include="TDCDEPENDENCYTest.cpp" />
     <ClCompile Include="TDCRECURRENCETest.cpp" />
+    <ClCompile Include="TDCTaskCalculatorTest.cpp" />
+    <ClCompile Include="TDCTaskTimeLogTest.cpp" />
     <ClCompile Include="TDLTaskCtrlBaseTest.cpp" />
     <ClCompile Include="TDLTest.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -194,6 +198,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ToDoCtrlMgrTest.cpp" />
     <ClCompile Include="ToDoCtrlTaskLinkTest.cpp" />
     <ClCompile Include="WorkingWeekTest.cpp" />
     <ClCompile Include="XmlFileTest.cpp" />
@@ -218,11 +223,14 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClInclude Include="TDCCUSTOMATTRIBUTECALCULATIONTest.h" />
     <ClInclude Include="TDCDEPENDENCYTest.h" />
     <ClInclude Include="TDCRECURRENCETest.h" />
+    <ClInclude Include="TDCTaskCalculatorTest.h" />
+    <ClInclude Include="TDCTaskTimeLogTest.h" />
     <ClInclude Include="TDLTaskCtrlBaseTest.h" />
     <ClInclude Include="TDLTest.h" />
     <ClInclude Include="TDLTestBase.h" />
     <ClInclude Include="TimeHelperTest.h" />
     <ClInclude Include="ToDoCtrlDataTest.h" />
+    <ClInclude Include="ToDoCtrlMgrTest.h" />
     <ClInclude Include="ToDoCtrlTaskLinkTest.h" />
     <ClInclude Include="WorkingWeekTest.h" />
     <ClInclude Include="XmlFileTest.h" />
@@ -240,6 +248,9 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ProjectReference Include="..\ToDoListLib\ToDoListLib.vcxproj">
       <Project>{940be78e-1486-7f9b-02b3-6f0113741a6a}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\ToDoList\RES\app_std.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

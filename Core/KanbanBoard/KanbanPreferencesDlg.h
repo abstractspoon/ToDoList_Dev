@@ -17,6 +17,7 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\checklistboxex.h"
+#include "..\Shared\colorbutton.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\iuiextension.h"
@@ -36,16 +37,19 @@ class CKanbanPreferencesPage : public CPreferencesPageBase
 public:
 	CKanbanPreferencesPage(CWnd* pParent = NULL);   // standard constructor
 
-	BOOL HasFixedColumns() const { return (m_aFixedColumnDefs.GetSize() ? TRUE : FALSE); }
+	BOOL HasFixedColumns() const;
 	int GetFixedColumnDefinitions(CKanbanColumnArray& aColumnDefs) const;
+	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
+
 	BOOL GetSortSubtasksBelowParents() const { return m_bSortSubtaskBelowParent; }
 	BOOL GetAlwaysShowBacklog() const { return m_bAlwaysShowBacklog; }
 	BOOL GetShowTaskColorAsBar() const { return m_bShowTaskColorAsBar; }
 	BOOL GetColorBarByPriority() const { return m_bColorBarByPriority; }
 	BOOL GetIndentSubtasks() const { return m_bSortSubtaskBelowParent && m_bIndentSubtasks; }
 	BOOL GetHideEmptyAttributes() const { return m_bHideEmptyAttributeValues; }
-	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
+	BOOL GetAltKeyOverridesMaxCount() const { return m_bAltKeyOverridesMaxCount; }
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const;
+	COLORREF GetFullColumnColor() const { return (m_bSpecifyFullColor ? m_crFullColumn : CLR_NONE); }
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
@@ -61,15 +65,20 @@ protected:
 	CKanbanFixedColumnListCtrl	m_lcFixedColumnDefs;
 	CGroupLineManager m_mgrGroupLines;
 	CCheckListBoxEx	m_lbDisplayAttrib;
+	CColourButton m_btFullColor;
 
-	BOOL	m_bShowTaskColorAsBar;
-	BOOL	m_bHideEmptyAttributeValues;
-	BOOL	m_bSortSubtaskBelowParent;
-	BOOL	m_bColorBarByPriority;
-	BOOL	m_bIndentSubtasks;
-	BOOL	m_bAlwaysShowBacklog;
+	BOOL m_bShowTaskColorAsBar;
+	BOOL m_bHideEmptyAttributeValues;
+	BOOL m_bSortSubtaskBelowParent;
+	BOOL m_bColorBarByPriority;
+	BOOL m_bIndentSubtasks;
+	BOOL m_bAlwaysShowBacklog;
+	BOOL m_bSpecifyFullColor;
+	BOOL m_bAltKeyOverridesMaxCount;
+
 	CString	m_sFixedCustomAttribID;
 	TDC_ATTRIBUTE m_nFixedAttrib;
+	COLORREF m_crFullColumn;
 
 	CKanbanColumnArray m_aFixedColumnDefs;
 	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
@@ -79,10 +88,10 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CKanbanPreferencesPage)
-	protected:
+	//}}AFX_VIRTUAL
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 	virtual void OnOK();
 
 // Implementation
@@ -90,12 +99,12 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CKanbanPreferencesPage)
+	afx_msg void OnSpecifyFullColor();
+	afx_msg void OnSetFullColor();
 	afx_msg void OnChangeColumnType();
 	afx_msg void OnSelchangeAttribute();
 	afx_msg void OnMoveFixedColDown();
-	afx_msg void OnUpdateFixedMoveColDown(CCmdUI* pCmdUI);
 	afx_msg void OnMoveFixedColUp();
-	afx_msg void OnUpdateMoveFixedColUp(CCmdUI* pCmdUI);
 	afx_msg void OnItemchangedColumndefs(NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	afx_msg void OnShowColorAsBar();
@@ -129,13 +138,15 @@ public:
 	BOOL GetColorBarByPriority() const { return m_page.GetColorBarByPriority(); }
 	BOOL GetIndentSubtasks() const { return m_page.GetIndentSubtasks(); }
 	BOOL GetHideEmptyAttributes() const { return m_page.GetHideEmptyAttributes(); }
+	BOOL GetAltKeyOverridesMaxCount() const { return m_page.GetAltKeyOverridesMaxCount(); }
 	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const { return m_page.GetFixedAttributeToTrack(sCustomID); }
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib, TDC_ATTRIBUTE nExclude) const;
+	COLORREF GetFullColumnColor() const { return m_page.GetFullColumnColor(); }
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
-	void SetCustomAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs);
+	void SetCustomAttributeDefs(const CKanbanCustomAttributeDefinitionArray& aCustomAttribDefs);
 	void SetAttributeValues(const CKanbanAttributeValueMap& mapValues);
 
 protected:

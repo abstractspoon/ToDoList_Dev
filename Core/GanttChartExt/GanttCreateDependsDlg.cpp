@@ -9,6 +9,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
+#include "..\shared\HookMgr.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,8 +18,53 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CGanttCreateDependsDlg dialog
+// Private class
 
+class CDependsDlgHookMgr : protected CHookMgr<CDependsDlgHookMgr>
+{
+	friend class CHookMgr<CDependsDlgHookMgr>;
+
+public:
+	static BOOL Initialise(IGanttDependencyEditor* pCallback)
+	{
+		if (!pCallback)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		if (!Instance().InitHooks(HM_KEYBOARD))
+			return FALSE;
+
+		Instance().m_pCallback = pCallback;
+		return TRUE;
+	}
+
+	static void Release()
+	{
+		GetInstance().ReleaseHooks();
+		GetInstance().m_pCallback = NULL;
+	}
+
+protected:
+	IGanttDependencyEditor* m_pCallback;
+
+protected:
+	CDependsDlgHookMgr() : m_pCallback(NULL) {}
+
+	static CDependsDlgHookMgr& Instance() { return CHookMgr<CDependsDlgHookMgr>::GetInstance(); }
+
+	BOOL OnKeyboard(UINT uVirtKey, UINT /*uFlags*/)
+	{
+		if (uVirtKey == VK_ESCAPE)
+			m_pCallback->Cancel();
+
+		return FALSE;
+	}
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// CGanttCreateDependsDlg dialog
 
 CGanttCreateDependsDlg::CGanttCreateDependsDlg(CWnd* pParent /*=NULL*/)
 	: 
@@ -26,7 +72,8 @@ CGanttCreateDependsDlg::CGanttCreateDependsDlg(CWnd* pParent /*=NULL*/)
 	m_dwFromTaskID(0),
 	m_dwNewToTaskID(0),
 	m_nStage(GCDDS_PICKINGCANCELLED),
-	m_nMode(GCDDM_NONE)
+	m_nMode(GCDDM_NONE),
+	m_icon(IDR_GANTTCHART)
 {
 	//{{AFX_DATA_INIT(CGanttCreateDependsDlg)
 	m_sCurStage = _T("");
@@ -89,7 +136,8 @@ BOOL CGanttCreateDependsDlg::Create(GCDD_MODE nMode, CWnd* pOwner)
 
 void CGanttCreateDependsDlg::OnDestroy() 
 {
-	// if called from outside we treat as a cancel
+	CDependsDlgHookMgr::Release();
+
 	if (!IsPickingCompleted())
 		Cancel(FALSE);
 
@@ -322,7 +370,10 @@ BOOL CGanttCreateDependsDlg::OnInitDialog()
 	}
 
 	SetWindowText(sTitle);
+	SetIcon(m_icon, FALSE);
 	UpdatePrompt();
+
+	CDependsDlgHookMgr::Initialise(this);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

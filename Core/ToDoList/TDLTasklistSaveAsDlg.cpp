@@ -28,7 +28,7 @@ CTDLTasklistSaveAsDlg::CTDLTasklistSaveAsDlg(LPCTSTR szFilePath,
 	m_sOrgFilePath(szFilePath),
 	m_sNewFilePath(szFilePath),
 	m_sProjectName(szProjectName),
-	m_eFilePath(FES_COMBOSTYLEBTN | FES_SAVEAS | FES_NOPROMPTOVERWRITE)
+	m_eFilePath(FES_SAVEAS | FES_NOPROMPTOVERWRITE)
 {
 	//{{AFX_DATA_INIT(CTDLTasklistSaveAsDlg)
 	//}}AFX_DATA_INIT

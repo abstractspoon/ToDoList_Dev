@@ -16,7 +16,8 @@
 
 enum RMERR
 {
-	RMERR_SUCCESS,
+	RMERR_CHANGESERVER = -1,
+	RMERR_SUCCESS = 0,
 	RMERR_UNKNOWN,
 	RMERR_SERVERDETAILS,
 	RMERR_REMOTEPATH,
@@ -37,7 +38,7 @@ enum RMERR
 
 enum // options
 {
-	RMO_ALLOWDIALOG			= 0x00000001,
+	RMO_PROMPTFORFILE		= 0x00000001,
 	RMO_USETEMPFILE			= 0x00000002, // only valid for download
 	RMO_KEEPEXTENSION		= 0x00000004, // only valid if RMO_USETEMPFILE is specified
 	RMO_LOWERCASEPATHS		= 0x00000008,
@@ -55,8 +56,8 @@ enum // options
 	RMO_KEEPFILENAME		= 0x00008000, // only valid if RMO_USETEMPFILE is specified
 //	RMO_ = 0x0001,
 
-	RMO_DEFGETFILE			= RMO_ALLOWDIALOG | RMO_CREATEDOWNLOADDIR | RMO_CONFIRMOVERWRITE | RMO_MULTISELECT,
-	RMO_DEFSETFILE			= RMO_ALLOWDIALOG | RMO_LOWERCASEPATHS | RMO_DELETEFAILURES | RMO_CONFIRMOVERWRITE,
+	RMO_DEFGETFILE			= (RMO_PROMPTFORFILE | RMO_CREATEDOWNLOADDIR | RMO_CONFIRMOVERWRITE | RMO_MULTISELECT),
+	RMO_DEFSETFILE			= (RMO_PROMPTFORFILE | RMO_LOWERCASEPATHS | RMO_DELETEFAILURES | RMO_CONFIRMOVERWRITE),
 };
 
 // note: if you don't need the browse capabilities then you can #define NO_DIALOGS 
@@ -94,6 +95,7 @@ public:
 	void SetServer(LPCTSTR szServer) { m_sServer = szServer; }
 	void SetUsername(LPCTSTR szUsername) { m_sUsername = szUsername; }
 	void SetPassword(LPCTSTR szPassword) { m_sPassword = szPassword; }
+	void SetIcon(HICON hIcon) { m_hIcon = hIcon; }
 
 	static void SplitPath(LPCTSTR szFullRemotePath, CString& sServer, CString& sFile);
 
@@ -105,13 +107,15 @@ protected:
 	DWORD m_dwInternetErr;
 	CWnd* m_pParent;
 	CEnString m_sLastError;
+	HICON m_hIcon;
 	
 	IPreferences* m_pPrefs;
 	CString m_sPrefKey;
 	
 protected:
 	BOOL RestartSession();
-	BOOL EstablishConnection(RMERR& nRes, DWORD dwOptions);
+	BOOL EstablishConnection(DWORD dwOptions, BOOL bPrompt, RMERR& nRes);
+	BOOL IsConnectionDefined(BOOL bAnonLogin) const;
 	BOOL DoServerDlg(DWORD dwOptions, BOOL& bAnonLogin); // returns TRUE for IDOK else FALSE (cancel)
 
 	void CloseConnection();
@@ -124,23 +128,25 @@ protected:
 	RMERR SaveErrorMsg(RMERR nErr, LPCTSTR szRemotePath = NULL, LPCTSTR szLocalPath = NULL); // returns nErr to allow chaining
 	DWORD GetRemoteFileSize(LPCTSTR szRemotePath);
 
-	RMERR GetRemotePaths(CFRArray& aRemoteFiles, const CStringArray& aLocalFiles, 
-						DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir = NULL, LPCTSTR szLocalRoot = NULL); // for upload
-	RMERR GetRemotePaths(CFRArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemoteDir = NULL); // for download
+	RMERR GetRemoteDownloadPaths(CFileResultArray& aRemoteFiles, DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemotePath = NULL);
+	RMERR GetLocalDownloadPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFileResultArray& aRemoteFiles, 
+						DWORD dwOptions, LPCTSTR szLocalPath = NULL);
 
-	RMERR GetLocalPaths(CStringArray& aLocalFiles, BOOL& bTemp, const CFRArray& aRemoteFiles, 
-						DWORD dwOptions, LPCTSTR szLocalDir = NULL); // for download
-	RMERR GetLocalPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPCTSTR szLocalDir = NULL); // for upload
+	RMERR GetRemoteUploadPaths(CFileResultArray& aRemoteFiles, const CStringArray& aLocalFiles, 
+						DWORD dwOptions, LPCTSTR szFilter, LPCTSTR szRemotePath = NULL, LPCTSTR szLocalRoot = NULL);
+	RMERR GetLocalUploadPaths(CStringArray& aLocalFiles, DWORD dwOptions, LPCTSTR szLocalPath = NULL);
 
+	void InitialiseRemoteDirAndFileName(LPCTSTR szRemotePath, LPCTSTR szLastFolderKey, CString& sDir, CString& sFilename) const;
 	CString GetTempPath(const CString& sRemotePath, DWORD dwOptions = 0);
 	BOOL RemoteFileExists(LPCTSTR szRemotePath);
 
 	BOOL SetProxy(const CString& sProxy, UINT nPort);
 
 	static BOOL ValidateLocalFolder(CString& sFolder, BOOL bAllowCreation);
-	static BOOL RemotePathIsFolder(const CString& sFolder);
+	static BOOL RemotePathIsFolder(LPCTSTR szPath);
 	static void DoProgress(CProgressDlg* pDlg, DWORD dwBytesRead, DWORD dwFileSize, BOOL bUpload);
 	static CString MakeRemotePath(const CString& sLocalPath, const CString& sRemoteDir, LPCTSTR szLocalRoot);
+	static CString ValidateRemotePath(LPCTSTR szRemotePath);
 };
 
 #endif // !defined(AFX_REMOTEFILE_H__04648C98_565F_41B2_A1F7_E10E00800691__INCLUDED_)

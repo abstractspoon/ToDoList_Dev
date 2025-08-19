@@ -136,6 +136,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data,
 	m_dwOptions(0),
 	m_crItemShadow(CLR_NONE),
 	m_crGroupHeaderBkgnd(CLR_NONE),
+	m_crFullBkgnd(255),
 	m_bReadOnly(FALSE),
 	m_tch(*this)
 {
@@ -163,6 +164,7 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_SETFOCUS()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_CHAR()
+	ON_WM_HSCROLL()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(TVM_HITTEST, OnHitTest)
@@ -274,6 +276,12 @@ BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	return CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);
 }
 
+void CKanbanColumnCtrl::OnHScroll(UINT nSBCode, UINT /*nPos*/, CScrollBar* /*pScrollBar*/)
+{
+	// Forward to parent because it must be coming from a mouse-wheel
+	GetParent()->SendMessage(WM_HSCROLL, nSBCode, (LPARAM)GetSafeHwnd());
+}
+
 void CKanbanColumnCtrl::SetDropTarget(BOOL bTarget)
 {
 	if (bTarget != m_bDropTarget)
@@ -289,12 +297,30 @@ LRESULT CKanbanColumnCtrl::OnThemeChanged(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
+BOOL CKanbanColumnCtrl::IsFull() const 
+{ 
+	if (GetMaxCount() > 0)
+		return (GetCount() >= GetMaxCount()); 
+
+	// else
+	return FALSE;
+}
+
 void CKanbanColumnCtrl::RefreshBkgndColor()
 {
+	if (!GetSafeHwnd())
+		return;
+
 	COLORREF crBack = GetSysColor(COLOR_WINDOW);
 
-	if (m_columnDef.crBackground != CLR_NONE)
+	if ((m_crFullBkgnd != CLR_NONE) && IsFull())
+	{
+		crBack = m_crFullBkgnd;
+	}
+	else if (m_columnDef.crBackground != CLR_NONE)
+	{
 		crBack = m_columnDef.crBackground;
+	}
 
 	if (m_bDropTarget)
 	{
@@ -334,16 +360,25 @@ void CKanbanColumnCtrl::RecalcItemShadowColor()
 	m_crItemShadow = RGB(btShadow, btShadow, btShadow);
 }
 
-void CKanbanColumnCtrl::SetExcessColor(COLORREF /*color*/)
+void CKanbanColumnCtrl::SetFullColor(COLORREF color)
 {
-	// TODO
-	ASSERT(0);
+	if (color == GetSysColor(COLOR_WINDOW))
+		color = CLR_NONE;
+
+	if (m_crFullBkgnd != color)
+	{
+		m_crFullBkgnd = color;
+		RefreshBkgndColor();
+	}
 }
 
-void CKanbanColumnCtrl::SetMaximumTaskCount(int /*nMaxTasks*/)
+void CKanbanColumnCtrl::SetMaximumTaskCount(int nMaxTasks)
 {
-	// TODO
-	ASSERT(0);
+	if (m_columnDef.nMaxTaskCount != nMaxTasks)
+	{
+		m_columnDef.nMaxTaskCount = nMaxTasks;
+		RefreshBkgndColor();
+	}
 }
 
 void CKanbanColumnCtrl::OnDisplayAttributeChanged()
@@ -440,17 +475,30 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 
 		if (GetSafeHwnd())
 		{
+			if (Misc::FlagHasChanged(KBCF_SHOWTASKCOLORASBAR, dwPrevOptions, m_dwOptions) ||
+				Misc::FlagHasChanged(KBCF_COLORBARBYPRIORITY, dwPrevOptions, m_dwOptions) ||
+				Misc::FlagHasChanged(KBCF_SHOWMIXEDCOMPLETIONSTATE, dwPrevOptions, m_dwOptions))
+			{
+ 				Invalidate(FALSE);
+			}
+
 			if (Misc::FlagHasChanged(KBCF_HIDEEMPTYATTRIBUTES, dwPrevOptions, m_dwOptions))
+			{
 				RefreshItemLineHeights();
-			else
-				Invalidate(FALSE);
+			}
 
 			if (IsGrouping())
 			{
 				if (Misc::FlagHasChanged(KBCF_SORTGROUPSASCENDING, dwPrevOptions, m_dwOptions))
+				{
 					DoSort();
-				else
-					Invalidate(FALSE);
+				}
+				else if (Misc::FlagHasChanged(KBCF_SORTNONEGROUPBELOW, dwPrevOptions, m_dwOptions))
+				{
+					// 'sort <none> below' has no effect without 'sort ascending'
+					if (HasOption(KBCF_SORTGROUPSASCENDING))
+						DoSort();
+				}
 			}
 
 			if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && !m_tooltip.GetSafeHwnd())
@@ -490,6 +538,7 @@ int CKanbanColumnCtrl::CalcItemTitleTextHeight() const
 
 HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki)
 {
+	BOOL bWasFull = IsFull();
 	HTREEITEM hti = FindItem(ki.dwTaskID);
 
 	if (hti)
@@ -513,6 +562,9 @@ HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki)
 	{
 		m_mapHTItems.AddItem(*this, hti);
 		RefreshItemLineHeights(hti);
+
+		if (!bWasFull && IsFull())
+			RefreshBkgndColor();
 	}
 
 	return hti;
@@ -724,9 +776,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 	}
 
 	// Prefix the text by the column name
-	CString sLabel(KBUtils::GetAttributeLabel(m_nGroupBy, KBCAL_LONG, m_aCustAttribDefs));
-	
-	return (sLabel + sGroupBy);
+	return KBUtils::FormatAttribute(m_nGroupBy, sGroupBy, KBCAL_LONG, m_aCustAttribDefs);
 }
 
 void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
@@ -802,18 +852,18 @@ void CKanbanColumnCtrl::DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRe
 		pDC->SelectObject(pOldFont);
 }
 
-BOOL CKanbanColumnCtrl::WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const
+BOOL CKanbanColumnCtrl::WantDisplayAttribute(TDC_ATTRIBUTE nAttribID, const KANBANITEM* pKI) const
 {
-	ASSERT(Misc::FindT(nAttrib, m_aDisplayAttrib) != -1);
+	ASSERT(Misc::FindT(nAttribID, m_aDisplayAttrib) != -1);
 
-	if (HasOption(KBCF_HIDEEMPTYATTRIBUTES) && !pKI->HasAttributeDisplayValue(nAttrib))
+	if (HasOption(KBCF_HIDEEMPTYATTRIBUTES) && !pKI->HasAttributeDisplayValue(nAttribID))
 		return FALSE;
 
 	// If this attribute matches the tracked attribute then we are
 	// necessarily part of a fixed-column setup, and we need to do 
 	// some extra checks to see if we really do want to display it
-	if (KBUtils::IsTrackableAttribute(nAttrib) &&
-		(KBUtils::GetAttributeID(nAttrib) == GetAttributeID()) &&
+	if (KBUtils::IsTrackableAttribute(nAttribID) &&
+		(KBUtils::GetAttributeID(nAttribID) == GetAttributeID()) &&
 		(m_columnDef.aAttribValues.GetSize() == 1))
 	{
 		return FALSE;
@@ -838,14 +888,15 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 	rAttrib.DeflateRect(TEXT_BORDER);
 
 	int nFlags = (DT_LEFT | DT_BOTTOM | DT_END_ELLIPSIS | DT_NOPREFIX);
+	BOOL bISODates = HasOption(KBCF_SHOWISODATES);
 
 	for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 	{
-		TDC_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
+		TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
 
-		if (WantDisplayAttribute(nAttrib, pKI))
+		if (WantDisplayAttribute(nAttribID, pKI))
 		{
-			switch (nAttrib)
+			switch (nAttribID)
 			{
 			case TDCA_PARENT:
 				DrawItemParents(pDC, pKI, rAttrib, crText);
@@ -860,7 +911,10 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 				break; // handled elsewhere
 
 			default:
-				DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags, crText);
+				{
+					CString sValue = pKI->GetAttributeDisplayValue(nAttribID, bISODates);
+					DrawAttribute(pDC, rAttrib, nAttribID, sValue, nFlags, crText);
+				}
 				break;
 			}
 		}
@@ -875,7 +929,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = KBUtils::GetAttributeLabel(TDCA_PARENT, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KBUtils::FormatAttribute(TDCA_PARENT, _T(""), nLabelVis, m_aCustAttribDefs);
 
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(crText);
@@ -958,7 +1012,7 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = KBUtils::GetAttributeLabel(TDCA_FILELINK, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KBUtils::FormatAttribute(TDCA_FILELINK, _T(""), nLabelVis, m_aCustAttribDefs);
 
 	if (!sLabel.IsEmpty())
 	{
@@ -1154,7 +1208,7 @@ void CKanbanColumnCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect&
 		{
 			iImage = KLCC_CHECKED;
 		}
-		else if (pKI->bSomeSubtaskDone)
+		else if (pKI->bSomeSubtaskDone && HasOption(KBCF_SHOWMIXEDCOMPLETIONSTATE))
 		{
 			iImage = KLCC_MIXED;
 		}
@@ -1324,17 +1378,44 @@ BOOL CKanbanColumnCtrl::GetItemTooltipRect(HTREEITEM hti, CRect& rTip) const
 	return TRUE;
 }
 
-void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
+void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttribID, const CString& sValue, int nFlags, COLORREF crText) const
 {
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sAttrib = KBUtils::FormatAttribute(nAttrib, sValue, nLabelVis, m_aCustAttribDefs);
+
+	// Common code
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(crText);
+
+	// Special handling for RTL dates - avoid where possible
+	if (!sValue.IsEmpty() && KBUtils::IsDateAttribute(nAttribID, m_aCustAttribDefs) && CDateHelper::WantRTLDates())
+	{
+		// Draw date separately from label
+		CRect rAttrib(rLine);
+		CString sLabel = KBUtils::GetAttributeLabel(nAttribID, nLabelVis, m_aCustAttribDefs);
+
+		if (!sLabel.IsEmpty())
+		{
+			sLabel += _T(": "); // to match KBUtils::FormatAttribute
+
+			pDC->DrawText(sLabel, rAttrib, (nFlags | DT_CALCRECT));
+			pDC->DrawText(sLabel, rLine, nFlags);
+
+			rAttrib.left = rAttrib.right;
+			rAttrib.right = rLine.right;
+		}
+
+		pDC->DrawText(sValue, rAttrib, (nFlags | DT_RTLREADING));
+		rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
+
+		return;
+	}
+
+	// all else
+	CString sAttrib = KBUtils::FormatAttribute(nAttribID, sValue, nLabelVis, m_aCustAttribDefs);
 
 	if (!sAttrib.IsEmpty())
 	{
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(crText);
 		pDC->DrawText(sAttrib, rLine, nFlags);
-
 		rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
 	}
 }
@@ -1696,20 +1777,25 @@ HTREEITEM CKanbanColumnCtrl::FindItem(const IUISELECTTASK& select, BOOL bNext, H
 	return NULL; // no match
 }
 
-BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
+BOOL CKanbanColumnCtrl::RemoveTask(DWORD dwTaskID)
 {
+	BOOL bWasFull = IsFull();
 	HTREEITEM hti = FindItem(dwTaskID);
 
 	if (hti && CTreeCtrl::DeleteItem(hti))
 	{
 		VERIFY(m_mapHTItems.RemoveKey(dwTaskID));
+
+		if (bWasFull && !IsFull())
+			RefreshBkgndColor();
+
 		return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CKanbanColumnCtrl::DeleteAll()
+BOOL CKanbanColumnCtrl::RemoveAll()
 {
 	m_mapHTItems.RemoveAll();
 	m_aSelTaskIDs.RemoveAll();
@@ -1744,14 +1830,14 @@ int CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 	return nNumDeleted;
 }
 
-BOOL CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttrib)
+BOOL CKanbanColumnCtrl::GroupBy(TDC_ATTRIBUTE nAttribID)
 {
-	if (!KBUtils::IsGroupableAttribute(nAttrib, m_aCustAttribDefs))
+	if (!KBUtils::IsGroupableAttribute(nAttribID, m_aCustAttribDefs))
 		return FALSE;
 
-	if (nAttrib != m_nGroupBy)
+	if (nAttribID != m_nGroupBy)
 	{
-		m_nGroupBy = nAttrib;
+		m_nGroupBy = nAttribID;
 
 		CStringSet aGroups;
 		GetGroupValues(aGroups);
@@ -1984,15 +2070,24 @@ int CKanbanColumnCtrl::CompareGrouping(LPARAM lParam1, LPARAM lParam2) const
 
 	int nCompare = Misc::NaturalCompare(sItem1, sItem2);
 
-	if (!(bIsGroupHeader1 && bIsGroupHeader2))
+	if (nCompare == 0) // Same Group
 	{
-		if (nCompare == 0) // Same Group
-		{
-			if (bIsGroupHeader1)
-				return SORT_1ABOVE2;
+		if (bIsGroupHeader1)
+			return SORT_1ABOVE2;
 
-			if (bIsGroupHeader2)
+		if (bIsGroupHeader2)
+			return SORT_2ABOVE1;
+	}
+	else // different groups
+	{
+		// 'sort <none> below' has no effect without 'sort ascending'
+		if (HasOption(KBCF_SORTGROUPSASCENDING) && HasOption(KBCF_SORTNONEGROUPBELOW))
+		{
+			if (sItem1.IsEmpty())
 				return SORT_2ABOVE1;
+
+			if (sItem2.IsEmpty())
+				return SORT_1ABOVE2;
 		}
 	}
 
@@ -2368,7 +2463,7 @@ BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
 				CDWordArray aNewTaskIDs;
 				tsh.GetItemData(aNewTaskIDs);
 
-				Misc::AddUniqueItems(aNewTaskIDs, m_aSelTaskIDs);
+				Misc::AppendItems(aNewTaskIDs, m_aSelTaskIDs, TRUE);
 			}
 			else
 			{
@@ -2633,7 +2728,7 @@ CString CKanbanColumnCtrl::HitTestFileLink(HTREEITEM hti, CPoint point) const
 			{
 				if (m_nAttribLabelVisibility != KBCAL_NONE)
 				{
-					CString sLabel = KBUtils::GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility, m_aCustAttribDefs);
+					CString sLabel = KBUtils::FormatAttribute(TDCA_FILELINK, _T(""), m_nAttribLabelVisibility, m_aCustAttribDefs);
 
 					if (!sLabel.IsEmpty())
 						rLinks.left += GraphicsMisc::GetTextWidth(sLabel, *this, m_fonts.GetHFont());
@@ -2758,9 +2853,9 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
-				TDC_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
+				TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
 
-				switch (nAttrib)
+				switch (nAttribID)
 				{
 				case TDCA_FLAG: 
 				case TDCA_LOCK:
@@ -2777,8 +2872,8 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 
 				default: // Rest
 					{
-						CString sValue = pKI->GetAttributeDisplayValue(nAttrib, m_aCustAttribDefs);
-						CString sAttrib = KBUtils::FormatAttribute(nAttrib, sValue, KBCAL_LONG, m_aCustAttribDefs);
+						CString sValue = pKI->GetAttributeDisplayValue(nAttribID, m_aCustAttribDefs);
+						CString sAttrib = KBUtils::FormatAttribute(nAttribID, sValue, KBCAL_LONG, m_aCustAttribDefs);
 
 						int nAttribWidth = (nItemIndent + GraphicsMisc::GetTextWidth(&dc, sAttrib));
 						nMaxAttribWidth = max(nMaxAttribWidth, nAttribWidth);
@@ -2908,10 +3003,7 @@ BOOL CKanbanColumnCtrl::InitTooltip()
 		if (!m_tooltip.Create(this))
 			return FALSE;
 
-		m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-		m_tooltip.SetDelayTime(TTDT_INITIAL, 50);
-		m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
-		m_tooltip.SetMaxTipWidth((UINT)(WORD)-1);
+		m_tooltip.EnableMultilineTips();
 
 		HWND hwndTooltips = (HWND)SendMessage(LVM_GETTOOLTIPS);
 		::SendMessage(hwndTooltips, TTM_ACTIVATE, FALSE, 0);
@@ -2994,9 +3086,24 @@ BOOL CKanbanColumnCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanC
 	if (pSrcCol->AttributeValuesMatch(*pDestCol))
 		return FALSE;
 
-	// Can't copy FROM the backlog
+	// Can't COPY from the backlog
 	if (pSrcCol->IsBacklog() && Misc::ModKeysArePressed(MKS_CTRL))
 		return FALSE;
+
+	// Can't exceed max count unless ALT key is pressed
+	if (!pDestCol->HasOption(KBCF_ALTKEYOVERRIDESMAXCOUNT) || !Misc::IsKeyPressed(VK_MENU))
+	{
+		int nDestMaxCount = pDestCol->GetMaxCount();
+
+		if (nDestMaxCount > 0)
+		{
+			int nDestCount = pDestCol->GetCount();
+			int nSrcCount = pSrcCol->GetSelectedCount();
+
+			if ((nDestCount + nSrcCount) > nDestMaxCount)
+				return FALSE;
+		}
+	}
 
 	return TRUE;
 }

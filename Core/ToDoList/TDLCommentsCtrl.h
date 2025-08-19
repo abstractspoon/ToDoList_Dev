@@ -62,6 +62,7 @@ public:
 	BOOL Redo() { return m_ctrlComments.Redo(); }
 
 	BOOL ProcessMessage(MSG* pMsg) { return m_ctrlComments.ProcessMessage(pMsg); }
+	BOOL DoIdleProcessing() { return m_ctrlComments.DoIdleProcessing(); }
 	BOOL HasFocus() const { return m_ctrlComments.HasFocus(); }
 	void UpdateAppPreferences();
 

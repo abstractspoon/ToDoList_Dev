@@ -9,7 +9,7 @@
 #include "..\shared\regkey.h"
 #include "..\shared\enstring.h"
 #include "..\shared\EnCommandLineInfo.h"
-#include "..\shared\rtlstylemgr.h"
+#include "..\shared\rtlinputmgr.h"
 
 #include "..\todolist\tdcswitch.h"
 
@@ -54,7 +54,7 @@ BOOL CTDLUninstallApp::InitInstance()
 	{
 		// RTL support
 		if (cmdInfo.HasOption(SWITCH_RTL))
-			CRTLStyleMgr::Initialize();
+			CRTLInputMgr::Initialize();
 		
 		FileMisc::LogText(_T("CTDLUninstallApp::InitInstance(Has TDLAPPID"));
 
@@ -81,7 +81,7 @@ BOOL CTDLUninstallApp::InitInstance()
 				params.SetOption(SWITCH_APPID, TDLAPPID);
 				params.SetOption(SWITCH_APPFOLDER, FileMisc::GetAppFolder());
 
-				if (CRTLStyleMgr::IsRTL())
+				if (CRTLInputMgr::IsEnabled())
 					params.SetOption(SWITCH_RTL);
 
 				if (FileMisc::Run(NULL, sTempPath, params.GetCommandLine()) < SE_ERR_SUCCESS)

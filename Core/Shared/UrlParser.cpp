@@ -14,6 +14,20 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+const LPCTSTR BASEDELIMS[] =
+{
+	_T(" "),
+	_T("\n"),
+	_T("\r"),
+	_T("\t"),
+	_T(", "),
+	_T(". "),
+	_T("<"),
+};
+const int NUM_DEMIM = sizeof(BASEDELIMS) / sizeof(LPCTSTR);
+
+/////////////////////////////////////////////////////////////////////////////
 // CUrlRichEditCtrl
 
 CUrlParser::CUrlParser()
@@ -34,9 +48,11 @@ CUrlParser::CUrlParser()
 	AddProtocol(_T("winword:"), FALSE);
 	AddProtocol(_T("thunderlink://"), FALSE);
 	AddProtocol(_T("wiki:"), FALSE);
+	AddProtocol(_T("obsidian://"), FALSE);
+	AddProtocol(_T("zotero://"), FALSE);
 
-	// Note: The correct file URI protocol has an extra trailing slash
-	// but we use the incorrect one to pick up badly formatted URIs
+	// Note: The correct file URI protocol has 3 forward slashes
+	// but we use the 2-slash version to pick up badly formatted URIs
 	m_nFileProtocol = AddProtocol(_T("file:///"), FALSE);
 	m_nFileProtocol2 = AddProtocol(_T("file://"), FALSE);
 }
@@ -167,18 +183,6 @@ BOOL CUrlParser::IsBaseDelim(LPCTSTR szText)
 {
 	if (Misc::IsEmpty(szText))
 		return TRUE; // end of string
-
-	static LPCTSTR BASEDELIMS[] = 
-	{ 
-		_T(" "), 
-		_T("\n"),
-		_T("\r"),
-		_T("\t"),
-		_T(", "),
-		_T(". "),
-		_T("<"),
-	};
-	const int NUM_DEMIM = sizeof(BASEDELIMS) / sizeof(LPCTSTR);
 
 	for (int nDelim = 0; nDelim < NUM_DEMIM; nDelim++)
 	{

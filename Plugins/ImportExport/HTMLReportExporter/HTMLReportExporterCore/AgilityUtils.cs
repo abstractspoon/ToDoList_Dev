@@ -29,7 +29,7 @@ namespace HTMLReportExporter
 
 				while (child != null)
 				{
-					var find = FindElement(child, name, recursive);
+					var find = FindElement(child, name, contents, recursive);
 
 					if (find != null)
 						return find;

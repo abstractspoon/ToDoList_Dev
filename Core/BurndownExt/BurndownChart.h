@@ -5,12 +5,11 @@
 #include "BurndownGraphs.h"
 
 #include "..\Shared\HMXChartEx.h"
+#include "..\shared\datehelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 class CGraphBase;
-
-class IPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
@@ -25,30 +24,18 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
-	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
-	BOOL SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption);
-	BOOL SetActiveGraphColors(const CColorArray& aColors);
-	void SetShowEmptyFrequencyValues(BOOL bShowEmpty);
+	BOOL SetActiveGraph(const CGraphBase* pGraph, BOOL bRebuild = TRUE);
+	void SetShowEmptyFrequencyValues(BOOL bShowEmpty, BOOL bRebuild = TRUE);
 
-	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
-	BURNDOWN_GRAPHOPTION GetActiveGraphOption() const;
-	int GetActiveGraphColors(CColorArray& aColors) const;
-	
-	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
-	int BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const;
-
-	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
-	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
-
-	void SetGraphColors(const CGraphColorMap& mapColors);
-	int GetGraphColors(CGraphColorMap& mapColors) const;
+	void OnColorsChanged();
+	void OnOptionChanged(BURNDOWN_GRAPHOPTION nOption);
+	void OnDisplayISODatesChanged();
 
 protected:
 	const CStatsItemArray& m_data;
-	CGraphsMap m_mapGraphs;
-	CStatsItemCalculator m_calculator;
 
-	BURNDOWN_GRAPH m_nActiveGraph;
+	CStatsItemCalculator m_calculator;
+	const CGraphBase* m_pGraph;
 	COleDateTimeRange m_dtExtents;
 	COLORREF m_crToday;
 
@@ -60,15 +47,21 @@ protected:
 
 protected:
 	void RebuildXScale();
+	void RecalcNumYTicks();
 	void RefreshRenderFlags(BOOL bRedraw = TRUE);
+	BOOL CalcMinMax(double& dMin, double& dMax, int& nNumYTicks) const;
 
-	// virtual overrides
-	CString GetTooltip(int nHit) const;
-	int HitTest(const CPoint& ptClient) const;
-	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
+	// CHMXChart overrides
+	virtual CString GetTooltip(int nHit) const;
+	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
+	virtual BOOL GetMinMax(double& dMin, double& dMax, BOOL bDataOnly) const;
+	virtual CString GetYTickText(int nTick, double dValue) const;
+	virtual BOOL DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);
+	virtual BOOL XScaleHasRTLDates() const;
+	virtual BOOL YScaleHasRTLDates() const;
 
-	BOOL HighlightDataPoint(int nIndex);
-	bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);
-
+	// CHMXChartEx overrides
+	virtual int GetNumYSubTicks(double dInterval) const;
+	virtual BOOL HighlightDataPoint(int nIndex);
 };
 

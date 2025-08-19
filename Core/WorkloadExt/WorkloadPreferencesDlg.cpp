@@ -82,8 +82,8 @@ BOOL CWorkloadPreferencesPage::OnInitDialog()
 	{
 		const WORKLOADCOLUMN& colVis = WORKLOADTREECOLUMNS[nCol];
 		
-		int nItem = CDialogHelper::AddString(m_lbColumnVisibility, colVis.nIDAttribName, colVis.nColID);
-		m_lbColumnVisibility.SetCheck(nItem, m_aColumnVis[colVis.nColID]);
+		int nItem = CDialogHelper::AddStringT(m_lbColumnVisibility, colVis.nIDAttribName, colVis.nColumnID);
+		m_lbColumnVisibility.SetCheck(nItem, m_aColumnVis[colVis.nColumnID]);
 	}
 
 	AddGroupLine(IDC_ALLOCATIONGROUP);
@@ -125,7 +125,7 @@ void CWorkloadPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		WLC_COLUMNID nColID = WORKLOADTREECOLUMNS[nCol].nColID;
+		WLC_COLUMNID nColID = WORKLOADTREECOLUMNS[nCol].nColumnID;
 		CString sCol(Misc::MakeKey(_T("Column%d"), nColID));
 
 		pPrefs->WriteProfileInt(sColVis, sCol, m_aColumnVis[nColID]);
@@ -153,7 +153,7 @@ void CWorkloadPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		WLC_COLUMNID nColID = WORKLOADTREECOLUMNS[nCol].nColID;
+		WLC_COLUMNID nColID = WORKLOADTREECOLUMNS[nCol].nColumnID;
 		CString sCol(Misc::MakeKey(_T("Column%d"), nColID));
 
 		m_aColumnVis[nColID] = pPrefs->GetProfileInt(sColVis, sCol, WORKLOADTREECOLUMNS[nCol].bDefaultVis);
@@ -178,7 +178,7 @@ void CWorkloadPreferencesPage::OnOK()
 {
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)
 	{
-		WLC_COLUMNID nColID = WORKLOADTREECOLUMNS[nCol].nColID;
+		WLC_COLUMNID nColID = WORKLOADTREECOLUMNS[nCol].nColumnID;
 		m_aColumnVis[nColID] = m_lbColumnVisibility.GetCheckByData(nColID);
 	}
 

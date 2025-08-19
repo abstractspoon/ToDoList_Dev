@@ -64,7 +64,8 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	m_sizeDocked(0, 0), 
 	m_sizeDockedMax(0, 0),
 	m_rUndocked(0, 0, 0, 0),
-	m_lcFindSetup(mgrContent)
+	m_lcFindSetup(mgrContent),
+	m_hResultsFont(NULL)
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
@@ -73,7 +74,7 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	AddRCControl(_T("PUSHBUTTON"), _T(""), CEnString(IDS_FIND_APPLYASFILTER), 0, 0, 0, 176, 65, 14, IDC_APPLYASFILTER);
 	AddRCControl(_T("PUSHBUTTON"), _T(""), CEnString(IDS_FIND_SELECTALL), 0, 0, 72, 176, 50, 14, IDC_SELECTALL);
 	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_RESULTS), 0, 0, 133, 179, 240, 8, IDC_RESULTSLABEL);
-	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_REPORT | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 191, 370, 94, IDC_RESULTS);
+	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_REPORT | LVS_SHAREIMAGELISTS | LVS_OWNERDRAWFIXED | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 191, 370, 94, IDC_RESULTS);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0, 85, 3, 71, 121, IDC_SEARCHLIST);
 	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_SEARCH), 0, 0, 0, 22, 120, 8, IDC_SEARCHLABEL);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 0, 0, 31, 120, 125, IDC_TASKLISTOPTIONS);
@@ -174,6 +175,9 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 	m_icon.Load(IDI_FIND_DIALOG_STD);
 	SetIcon(m_icon, FALSE);
 
+	if (m_hResultsFont)
+		SetResultsFont(m_hResultsFont);
+
 	m_mgrPrompts.SetComboEditPrompt(m_cbSearches, IDS_FT_SAVESEARCHPROMPT);
 
 	// always add a default search
@@ -197,12 +201,12 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 void CTDLFindTasksDlg::BuildOptionCombos()
 {
-	CDialogHelper::AddString(m_cbTasklists, IDS_FIND_ACTIVETASKLIST, FALSE);
-	CDialogHelper::AddString(m_cbTasklists, IDS_FIND_ALLTASKLISTS, TRUE);
+	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ACTIVETASKLIST, FALSE);
+	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ALLTASKLISTS, TRUE);
 	
-	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEDONE, FI_COMPLETED);
-	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEPARENTS, FI_PARENT);
-	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEFILTEREDOUT, FI_FILTEREDOUT);
+	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEDONE, FI_COMPLETED);
+	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEPARENTS, FI_PARENT);
+	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEFILTEREDOUT, FI_FILTEREDOUT);
 
 	CLocalizer::EnableTranslation(m_cbInclude, FALSE);
 
@@ -213,7 +217,7 @@ BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 {
 	if (m_cbInclude.GetSafeHwnd())
 	{
-		int nItem = FindItemByData(m_cbInclude, nOption);
+		int nItem = FindItemByDataT(m_cbInclude, nOption);
 		
 		if (nItem != CB_ERR)
 			return m_cbInclude.GetCheck(nItem);
@@ -224,10 +228,18 @@ BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 
 void CTDLFindTasksDlg::CheckIncludeOption(FIND_INCLUDE nOption, BOOL bCheck)
 {
-	int nItem = FindItemByData(m_cbInclude, nOption);
+	int nItem = FindItemByDataT(m_cbInclude, nOption);
 
 	if (nItem != CB_ERR)
 		m_cbInclude.SetCheck(nItem, (bCheck ? CCBC_CHECKED : CCBC_UNCHECKED));
+}
+
+void CTDLFindTasksDlg::SetResultsFont(HFONT hFont) 
+{ 
+	m_hResultsFont = hFont;
+
+	if (m_lcResults.GetSafeHwnd())
+		m_lcResults.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); 
 }
 
 void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
@@ -362,15 +374,11 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 {
 	BOOL bWasDocked = IsDocked();
 	BOOL bIsDocked = IsDocked(nPos);
-	CFont* pOldResultsFont = NULL;
 
 	if (GetSafeHwnd())
 	{
 		if (nPos == m_nDockPos)
 			return TRUE;
-
-		// else
-		pOldResultsFont = m_lcResults.GetFont();
 
 		DestroyWindow();
 	}
@@ -419,9 +427,6 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 
 	if (!CRuntimeDlg::Create(CEnString(IDS_FIND_TASKS), dwStyle, dwExStyle, rect, AfxGetMainWnd(), IDC_STATIC))
 		return FALSE;
-
-	if (pOldResultsFont)
-		m_lcResults.SetFont(pOldResultsFont);
 
 	return TRUE;
 }
@@ -615,6 +620,21 @@ void CTDLFindTasksDlg::SetActiveTasklist(const CString& sTasklist, BOOL bWantDef
 	m_lcFindSetup.SetActiveTasklist(sTasklist, bWantDefaultIcons);
 }
 
+void CTDLFindTasksDlg::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	m_lcFindSetup.SetNumPriorityRiskLevels(nNumLevels);
+}
+
+void CTDLFindTasksDlg::SetGroupHeaderBackColor(COLORREF crBack)
+{
+	m_lcResults.SetGroupHeaderBackColor(crBack);
+}
+
+void CTDLFindTasksDlg::SetStrikeThroughCompletedTasks(BOOL bStrikeThru)
+{
+	m_lcResults.SetStrikeThroughCompletedTasks(bStrikeThru);
+}
+
 void CTDLFindTasksDlg::AddResults(const CFilteredToDoCtrl* pTDC, const CResultArray& aResults, BOOL bShowValueOnly, LPCTSTR szHeaderText)
 {
 	if (!GetSafeHwnd())
@@ -715,6 +735,7 @@ BOOL CTDLFindTasksDlg::SetSearchIncludesCompletedTasks(LPCTSTR szName, BOOL bInc
 
 int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, TDCADVANCEDFILTER& filter) const
 {
+	// Note - Can't call method below because it's not const
 	if (GetSearchParams(szName, filter.params))
 	{
 		filter.sName = szName;
@@ -1361,12 +1382,13 @@ int CTDLFindTasksDlg::GetSelectedItem()
 	return m_nCurSel;
 }
 
-void CTDLFindTasksDlg::OnItemchangedRulelist(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CTDLFindTasksDlg::OnItemchangedRulelist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-//	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-
-	if (m_toolbar.GetSafeHwnd())
-		m_toolbar.RefreshButtonStates();
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+	{
+		if (m_toolbar.GetSafeHwnd())
+			m_toolbar.RefreshButtonStates();
+	}
 
 	// enable 'set as filter' provided there is something to set
 	EnableApplyAsFilterButton();
@@ -1973,7 +1995,7 @@ BOOL CTDLFindTasksDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	if (GetSplitterRect().PtInRect(ptCursor))
 	{ 
 		UINT nIDCursor = ((m_nDockPos == DMP_BELOW) ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR);
-		::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
+		GraphicsMisc::SetAfxCursor(nIDCursor);
 
 		return TRUE;
 	}

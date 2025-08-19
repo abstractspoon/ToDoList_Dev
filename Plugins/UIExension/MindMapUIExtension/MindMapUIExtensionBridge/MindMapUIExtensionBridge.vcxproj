@@ -124,7 +124,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ResourceCompile Include="MindMapUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\MindMap.ico" />
+    <None Include="..\MindMapUIExtensionCore\Resources\MindMap.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MindMapUIExtensionCore\MindMapUIExtensionCore.csproj">

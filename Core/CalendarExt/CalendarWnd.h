@@ -15,7 +15,7 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 
-#include "..\3rdParty\XHTMLStatic.h"
+#include "..\3rdParty\StatLink.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -63,6 +63,7 @@ public:
 
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
+	bool DoIdleProcessing() { return false; }
 
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
@@ -76,7 +77,7 @@ protected:
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CComboBox m_cbSnapModes;
-	CXHTMLStatic m_stSelectedTaskDates;
+	CStaticLink m_stSelectedTaskDates;
 
 	CBrush m_brBack;
 	UITHEME m_theme;
@@ -124,6 +125,7 @@ protected:
 	afx_msg LRESULT OnBigCalendarNotifyVisibleWeekChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarPrefsHelp(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarGetTaskIcon(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnBigCalendarEditTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarGetTaskFutureDates(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 

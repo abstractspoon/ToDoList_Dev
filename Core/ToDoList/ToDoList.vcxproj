@@ -115,9 +115,6 @@
 mkdir ..\..\Plugins\debug
 copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y
 copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
-
-unicode_debug\TDLTest.exe
-
 </Command>
     </PostBuildEvent>
     <BuildLog>
@@ -228,11 +225,9 @@ unicode_release\TDLTest.exe
     <None Include="res\column_header.bmp" />
     <None Include="res\custattrib_toolbar.bmp" />
     <None Include="res\custattrib_toolbar_std.bmp" />
-    <None Include="res\custom_attrib_icons.ico" />
     <None Include="res\datetime_toolbar.bmp" />
     <None Include="res\datetime_toolbar_std.bmp" />
     <None Include="res\depend_link.ico" />
-    <None Include="res\English.gif" />
     <None Include="res\fileedit_browse.ico" />
     <None Include="res\fileedit_go.ico" />
     <None Include="res\find_dialog_std.ico" />
@@ -261,7 +256,6 @@ unicode_release\TDLTest.exe
     <None Include="res\udtprefs_toolbar_std.bmp" />
     <None Include="res\update_filter.ico" />
     <None Include="RES\XPcheckboxes.bmp" />
-    <None Include="res\YourLanguage.GIF" />
     <None Include="Unicode_Debug\Itenso.Rtf.Converter.Html.dll" />
     <None Include="Unicode_Debug\Itenso.Rtf.Interpreter.dll" />
     <None Include="Unicode_Debug\Itenso.Rtf.Parser.dll" />
@@ -295,11 +289,20 @@ unicode_release\TDLTest.exe
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\quickfind_next.ico" />
+    <Image Include="res\quickfind_prev.ico" />
+    <Image Include="res\reminder.ico" />
+    <Image Include="res\select_icon.ico" />
     <Image Include="res\reset.ico" />
     <Image Include="res\style_image.bmp" />
     <Image Include="res\style_para.bmp" />
     <Image Include="res\style_table.bmp" />
     <Image Include="res\style_wrap.bmp" />
+    <Image Include="res\taskattrib_toolbar.bmp" />
+    <Image Include="res\taskattrib_toolbar_std.bmp" />
+    <Image Include="res\timetrack_goto.ico" />
+    <Image Include="res\uk_flag.bmp" />
+    <Image Include="res\yourlang_flag.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

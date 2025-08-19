@@ -25,7 +25,8 @@ CCreateFileLinkDlg::CCreateFileLinkDlg(LPCTSTR szRefFile, RE_PASTE nLinkOption, 
 	m_sRefFile(szRefFile), 
 	m_nLinkOption(nLinkOption), 
 	m_bMakeDefault(bDefault),
-	m_bReduceImageColors(bReduceColors)
+	m_bReduceImageColors(bReduceColors),
+	m_icon(IDR_RTFCOMMENTS)
 {
 	//{{AFX_DATA_INIT(CCreateFileLinkDlg)
 	//}}AFX_DATA_INIT
@@ -93,6 +94,8 @@ BOOL CCreateFileLinkDlg::OnInitDialog()
 		// then set it
 		SetDlgItemText(IDC_FILEURL, sText);
 	}
+
+	SetIcon(m_icon, FALSE);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

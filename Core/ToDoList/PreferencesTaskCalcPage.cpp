@@ -18,10 +18,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskCalcPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesTaskCalcPage, CPreferencesPageBase)
-
-CPreferencesTaskCalcPage::CPreferencesTaskCalcPage() : 
-   CPreferencesPageBase(CPreferencesTaskCalcPage::IDD)
+CPreferencesTaskCalcPage::CPreferencesTaskCalcPage() 
+	: 
+	CPreferencesPageBase(IDD_PREFTASKCALC_PAGE)
 {
 	//{{AFX_DATA_INIT(CPreferencesTaskCalcPage)
 	//}}AFX_DATA_INIT
@@ -49,7 +48,7 @@ void CPreferencesTaskCalcPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_NODUEDATEDUETODAY, m_bNoDueDateDueTodayOrStart);
 	DDX_Check(pDX, IDC_SETSTATUSONDONE, m_bSetCompletionStatus);
 	DDX_Check(pDX, IDC_SYNCCOMPLETIONTOSTATUS, m_bSyncCompletionToStatus);
-	DDX_Check(pDX, IDC_PRESERVEWEEKDAYS, m_bPreserveWeekdays);
+	DDX_Check(pDX, IDC_INCLUDEREFSINCALC, m_bIncludeReferencesInCalcs);
 	DDX_Text(pDX, IDC_DONESTATUS, m_sCompletionStatus);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_SUBTASKSINHERITLOCK, m_bSubtasksInheritLockStatus);
@@ -142,7 +141,6 @@ void CPreferencesTaskCalcPage::OnAutocalcpercentdone()
 
 void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_bTreatSubCompletedAsDone = pPrefs->GetProfileInt(szKey, _T("TreatSubCompletedAsDone"), TRUE);
 	m_bAveragePercentSubCompletion = pPrefs->GetProfileInt(szKey, _T("AveragePercentSubCompletion"), TRUE);
 	m_bIncludeDoneInAverageCalc = pPrefs->GetProfileInt(szKey, _T("IncludeDoneInAverageCalc"), TRUE);
@@ -165,7 +163,7 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bSubtasksInheritLockStatus = pPrefs->GetProfileInt(szKey, _T("SubtasksInheritLockStatus"), FALSE);
 	m_bTaskInheritsSubtaskFlags = pPrefs->GetProfileInt(szKey, _T("TaskInheritsSubtaskFlags"), FALSE);
 	m_bUseLatestLastModifiedDate = pPrefs->GetProfileInt(szKey, _T("UseLatestLastModifiedDate"), FALSE);
-	m_bPreserveWeekdays = pPrefs->GetProfileInt(szKey, _T("PreserveWeekdays"), TRUE);
+	m_bIncludeReferencesInCalcs = pPrefs->GetProfileInt(szKey, _T("IncludeReferencesInCalcs"), FALSE);
 
 	// backwards compatibility
 	if (m_nCalcDueDate == PTCP_NOCALCDUEDATE)
@@ -180,13 +178,10 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 
 	m_recentModTime.dAmount = pPrefs->GetProfileDouble(szKey, _T("RecentModTime"), 1.0);
 	m_recentModTime.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("RecentModTimeUnits"), THU_HOURS), FALSE);
-
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
 void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("TreatSubCompletedAsDone"), m_bTreatSubCompletedAsDone);
 	pPrefs->WriteProfileInt(szKey, _T("AveragePercentSubCompletion"), m_bAveragePercentSubCompletion);
 	pPrefs->WriteProfileInt(szKey, _T("IncludeDoneInAverageCalc"), m_bIncludeDoneInAverageCalc);
@@ -208,7 +203,7 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("SubtasksInheritLockStatus"), m_bSubtasksInheritLockStatus);
 	pPrefs->WriteProfileInt(szKey, _T("TaskInheritsSubtaskFlags"), m_bTaskInheritsSubtaskFlags);
 	pPrefs->WriteProfileInt(szKey, _T("UseLatestLastModifiedDate"), m_bUseLatestLastModifiedDate);
-	pPrefs->WriteProfileInt(szKey, _T("PreserveWeekdays"), m_bPreserveWeekdays);
+	pPrefs->WriteProfileInt(szKey, _T("IncludeReferencesInCalcs"), m_bIncludeReferencesInCalcs);
 
 	pPrefs->WriteProfileDouble(szKey, _T("RecentModTime"), m_recentModTime.dAmount);
 	pPrefs->WriteProfileInt(szKey, _T("RecentModTimeUnits"), m_recentModTime.GetTHUnits());
@@ -217,8 +212,6 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 	// cleanup old entry	
 	pPrefs->DeleteProfileEntry(szKey, _T("UseEarliestDueDate"));
-
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 COleDateTimeSpan CPreferencesTaskCalcPage::GetRecentlyModifiedPeriod() const

@@ -21,7 +21,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCRECURRENCETest::CTDCRECURRENCETest(const CTestUtils& utils) : CTDLTestBase(utils)
+CTDCRECURRENCETest::CTDCRECURRENCETest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CTDCRECURRENCETest"), utils)
 {
 
 }
@@ -43,7 +45,7 @@ TESTRESULT CTDCRECURRENCETest::Run()
 
 void CTDCRECURRENCETest::TestSetRegularity()
 {
-	BeginTest(_T("CTDCRECURRENCETest::SetRegularity"));
+	CTDCScopedTest test(*this, _T("CTDCRECURRENCE::SetRegularity"));
 	
 	//  nRegularity										dwSpecific1				dwSpecific2
 	
@@ -102,9 +104,9 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	ExpectFalse(tr.SetRegularity(TDIR_WEEK_EVERY_NWEEKS, 0, 0));  // 'n' weeks == 0
 		
 	//	TDIR_MONTH_EVERY_NMONTHS ---------------------------------------
-	ExpectTrue(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 5, 0));
+	ExpectTrue(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 5, FALSE)); // Don't preserve weekdays
+	ExpectTrue(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 5, TRUE));  // Preserve weekdays
 
-	ExpectFalse(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 5, 3));  // dwSpecific2 != 0
 	ExpectFalse(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, -5, 0)); // 'n' Months < 0
 	ExpectFalse(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS, 0, 0));  // 'n' Months == 0
 
@@ -152,8 +154,9 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DAY_MONTHS, 5, 0)); // 'Day' < 1
 
 	//	TDIR_YEAR_EVERY_NYEARS ---------------------------------------
-	ExpectTrue(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 5, 0));
-	ExpectFalse(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 5, 3));  // dwSpecific2 != 0
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 5, FALSE)); // Don't preserve weekdays
+	ExpectTrue(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 5, TRUE));  // Preserve weekdays
+
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, -5, 0)); // 'n' years < 0
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 0, 0));  // 'n' years == 0
 
@@ -171,21 +174,17 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 0), 5)); // 'DOW' < 1 
 	ExpectFalse(tr.SetRegularity(TDIR_YEAR_SPECIFIC_DOW_MONTHS, MAKELONG(1, 8), 5)); // 'DOW' > 7
-		
-	//  ---------------------------------------
-
-	EndTest();
 }
 
 void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CTDCRECURRENCETest::CalcNextOccurrencesPerformance\n"));
 		return;
 	}
 
-	BeginTest(_T("CTDCRECURRENCETest::CalcNextOccurrencesPerformance"));
+	CTDCScopedTest test(*this, _T("CTDCRECURRENCETest::CalcNextOccurrencesPerformance"));
 
 	const TDCRECURRENCE RECURRENCES[] = 
 	{
@@ -248,7 +247,7 @@ void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 		DWORD dwTickStart = GetTickCount();
 		const TDCRECURRENCE& tr = RECURRENCES[nRecur];
 
-		int nNumRecur = tr.CalcNextOccurences(date, range, aRecurrences);
+		int nNumRecur = tr.CalcNextOccurrences(date, range, aRecurrences);
 
 		DWORD dwDuration = (GetTickCount() - dwTickStart);
 
@@ -262,8 +261,6 @@ void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 			_tprintf(_T("Recurrence (%s) took %ld ms to calculate %d recurrences for the range: %s\n"), (LPCTSTR)FormatRecurrenceRegularity(tr), dwDuration, nNumRecur, (LPCTSTR)range.Format());
 		}
 	}
-
-	EndTest();
 }
 
 CString CTDCRECURRENCETest::FormatRecurrenceRegularity(const TDCRECURRENCE& tr)

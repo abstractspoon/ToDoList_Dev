@@ -30,7 +30,7 @@ struct GANTTDATERANGE : protected COleDateTimeRange
 	void Reset();
 	BOOL IsValid() const;
 
-	CString Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL bISODates, TCHAR cDelim = '-') const;
+	CString Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const;
 
 	void Add(const GANTTITEM& gi);
 	void Add(const COleDateTime& dtStart, const COleDateTime& dtEnd);
@@ -207,7 +207,7 @@ struct GANTTSORTCOLUMN
 	BOOL operator==(const GANTTSORTCOLUMN& other) const;
 	BOOL operator!=(const GANTTSORTCOLUMN& other) const;
 
-	GTLC_COLUMN nBy;
+	GTLC_COLUMN nColumnID;
 	BOOL bAscending;
 };
 
@@ -282,7 +282,7 @@ struct GTCDISPLAYMODE
 
 struct GANTTCOLUMN
 {
-	GTLC_COLUMN nColID;
+	GTLC_COLUMN nColumnID;
 	UINT nIDAttribName;
 	UINT nIDColName;
 	int nColAlign;

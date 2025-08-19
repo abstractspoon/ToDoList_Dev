@@ -29,14 +29,12 @@ const UINT WM_PTP_ENABLEDISABLE = (WM_APP + 1);
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesTaskPage, CPreferencesPageBase)
-
 CPreferencesTaskPage::CPreferencesTaskPage() 
 	: 
-	CPreferencesPageBase(CPreferencesTaskPage::IDD),
+	CPreferencesPageBase(IDD_PREFTASK_PAGE),
 	m_cbStartOfWorkday(TCB_HALFHOURS),
-	m_cbStartOfLunch(TCB_HALFHOURS | TCB_HOURSINDAY),
-	m_cbEndOfLunch(TCB_HALFHOURS | TCB_HOURSINDAY)
+	m_cbStartOfLunch(TCB_HALFHOURS),
+	m_cbEndOfLunch(TCB_HALFHOURS)
 {
 	//{{AFX_DATA_INIT(CPreferencesTaskPage)
 	//}}AFX_DATA_INIT
@@ -91,15 +89,12 @@ void CPreferencesTaskPage::DoDataExchange(CDataExchange* pDX)
 	}
 }
 
-
 BEGIN_MESSAGE_MAP(CPreferencesTaskPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesTaskPage)
 	ON_BN_CLICKED(IDC_LOGTIME, OnLogtime)
 	ON_BN_CLICKED(IDC_NOTIFYTIMETRACKING, OnNotifyTimeTracking)
 	ON_BN_CLICKED(IDC_HASLUNCHBREAK, OnHasLunchBreak)
-	ON_CBN_EDITUPDATE(IDC_HOURSINONEDAY, OnEditChangeHoursInDay)
-	ON_CBN_EDITCHANGE(IDC_HOURSINONEDAY, OnEditChangeHoursInDay)
-	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnComboChangeHoursInDay)
+	ON_CBN_SELENDOK(IDC_HOURSINONEDAY, OnSelChangeHoursInDay)
 	ON_CBN_KILLFOCUS(IDC_HOURSINONEDAY, OnKillFocusHoursInDay)
 	//}}AFX_MSG_MAP
 	ON_CONTROL(CLBN_CHKCHANGE, IDC_WEEKENDS, OnChangeWeekends)
@@ -115,6 +110,27 @@ BOOL CPreferencesTaskPage::OnInitDialog()
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+BOOL CPreferencesTaskPage::PreTranslateMessage(MSG* pMsg)
+{
+	switch (pMsg->message)
+	{
+	case WM_KEYDOWN:
+		switch (pMsg->wParam)
+		{
+		case VK_RETURN:
+			if (CDialogHelper::IsChildOrSame(::GetDlgItem(*this, IDC_HOURSINONEDAY), ::GetFocus()))
+			{
+				OnKillFocusHoursInDay();
+				return TRUE;
+			}
+			break;
+		}
+		break;
+	}
+
+	return CPreferencesPageBase::PreTranslateMessage(pMsg);
 }
 
 void CPreferencesTaskPage::OnFirstShow()
@@ -215,7 +231,6 @@ void CPreferencesTaskPage::OnChangeWeekends()
 
 void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_bLogTime = pPrefs->GetProfileInt(szKey, _T("LogTime"), TRUE);
 	m_bLogTasksSeparately = pPrefs->GetProfileInt(szKey, _T("LogTasksSeparately"), FALSE);
 	m_bExclusiveTimeTracking = pPrefs->GetProfileInt(szKey, _T("ExclusiveTimeTracking"), TRUE);
@@ -258,13 +273,10 @@ void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 	m_dwWeekends = pPrefs->GetProfileInt(szKey, _T("Weekends"), dwDefWeekend);
 
 	CheckSetWorkingWeek();
-
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
 void CPreferencesTaskPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("TrackNonSelectedTasks"), m_bTrackNonSelectedTasks);
 	pPrefs->WriteProfileInt(szKey, _T("TrackNonActiveTasklists"), m_bTrackNonActiveTasklists);
 	pPrefs->WriteProfileInt(szKey, _T("TrackOnScreenSaver"), m_bTrackOnScreenSaver);
@@ -288,8 +300,6 @@ void CPreferencesTaskPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) 
 
 	pPrefs->WriteProfileString(szKey, _T("HoursInDay"), Misc::Format(GetHoursInDay(), 2));
 	pPrefs->WriteProfileString(_T("Reminders"), _T("SoundFile"), m_sTrackReminderSoundFile.IsEmpty() ? NO_SOUND : m_sTrackReminderSoundFile);
-
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 void CPreferencesTaskPage::OnNotifyTimeTracking() 
@@ -309,18 +319,10 @@ void CPreferencesTaskPage::OnHasLunchBreak()
 	GetDlgItem(IDC_ENDOFLUNCH)->EnableWindow(m_bHasLunchBreak);
 }
 
-void CPreferencesTaskPage::OnEditChangeHoursInDay() 
+void CPreferencesTaskPage::OnSelChangeHoursInDay()
 {
-	UpdateData();
-	ValidateWorkingWeek();
-
-	PostMessage(WM_PTP_ENABLEDISABLE);
-}
-
-void CPreferencesTaskPage::OnComboChangeHoursInDay()
-{
-	// We have to get the text via the combo's selected index
-	// because the text is not updated until after the notification
+	// UpdateData won't here because the combo text is 
+	// not updated until after this notification
 	CComboBox* pCombo = (CComboBox*)GetDlgItem(IDC_HOURSINONEDAY);
 	ASSERT(pCombo);
 
@@ -332,16 +334,10 @@ void CPreferencesTaskPage::OnComboChangeHoursInDay()
 
 void CPreferencesTaskPage::OnKillFocusHoursInDay()
 {
-	CString sHours = Misc::Format(GetHoursInDay(), 2);
-	Misc::TrimTrailingDecimalZeros(sHours);
+	UpdateData();
+	ValidateWorkingWeek();
 
-	if (sHours != m_sHoursInDay)
-	{
-		m_sHoursInDay = sHours;
-
-		UpdateDataEx(this, IDC_HOURSINONEDAY, m_sHoursInDay, FALSE);
-		EnableDisableControls();
-	}
+	PostMessage(WM_PTP_ENABLEDISABLE);
 }
 
 LRESULT CPreferencesTaskPage::OnEnableDisableCtrls(WPARAM /*wp*/, LPARAM /*lp*/)

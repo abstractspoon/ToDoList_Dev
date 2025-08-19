@@ -33,9 +33,9 @@ const int TDC_MAXPRIORITYORISK = 10;
 
 struct TDCTIMEPERIOD
 {
-	// Note: Different units
 	TDCTIMEPERIOD(double dAmount = 0.0, TDC_UNITS nUnits = TDCU_HOURS);
-	TDCTIMEPERIOD(double dAmount, TH_UNITS nUnits);
+	TDCTIMEPERIOD(double dAmount, TH_UNITS nUnits);	// Note different units type
+	TDCTIMEPERIOD(LPCTSTR szPeriod);
 	
 	TDCTIMEPERIOD& operator=(const TDCTIMEPERIOD& other);
 
@@ -43,6 +43,7 @@ struct TDCTIMEPERIOD
 	BOOL operator!=(const TDCTIMEPERIOD& other) const;
 
 	CString Format(int nDecPlaces) const;
+	BOOL Parse(LPCTSTR szPeriod);
 	TH_UNITS GetTHUnits() const;
 
 	double GetTime(TH_UNITS nUnits) const;
@@ -136,19 +137,21 @@ public:
 	BOOL HasDependency(const TDCDEPENDENCY& depend) const;
 
 	int Format(CStringArray& aDepends, const CString& sFolder = _T("")) const;
-	CString Format(LPCTSTR szSep = NULL, const CString& sFolder = _T("")) const;
+	CString Format(TCHAR cSep = 0, const CString& sFolder = _T("")) const;
 	
+	int Parse(LPCTSTR szDepends, LPCTSTR szSep = NULL);
 	BOOL MatchAll(const CTDCDependencyArray& other, BOOL bIncludeAttributes = TRUE) const;
 
 	// Mfc42 versions return value not reference
-	const TDCDEPENDENCY& GetAt(int nIndex) const;
-	TDCDEPENDENCY& GetAt(int nIndex);
 	const TDCDEPENDENCY& operator[](int nIndex) const;
 	TDCDEPENDENCY& operator[](int nIndex);
 
 private:
 	int FindLocalDependency(DWORD dwDependID) const;
 	int FindDependency(const TDCDEPENDENCY& depend) const;
+
+	const TDCDEPENDENCY& GetAt(int nIndex) const;
+	TDCDEPENDENCY& GetAt(int nIndex);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,8 +205,9 @@ public:
 	CString GetTag(int nTag) const;
 	CString GetFileLink(int nFile) const;
 
-	BOOL GetNextOccurence(COleDateTime& dtNext, BOOL& bDue);
-	int CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const;
+	BOOL GetNextOccurrence(COleDateTime& dtNext, BOOL& bDue);
+	BOOL CalcNextOccurrence(COleDateTimeRange& dtOccur) const;
+	int CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const;
 	BOOL IsRecurring() const;
 	BOOL CanRecur() const;
 	BOOL RecurrenceMatches(const TODOITEM& tdi, BOOL bIncludeRemainingOccurrences) const;
@@ -296,6 +300,7 @@ protected:
 private:
 	static COleDateTime GetDefaultStartDueDate(const COleDateTime& dtCreation, const COleDateTime& dtStartDue);
 	
+private:
 	static COleDateTimeSpan dtsRecentModPeriod;
 	static CString sModifierName;
 };

@@ -87,6 +87,9 @@ class IMultiTaskList : public IUnknown
 public:
 	virtual int GetTaskListCount() const = 0;
 	virtual const ITaskList* GetTaskList(int nTaskList = 0) const = 0;
+
+	virtual LPCWSTR GetReportTitle() const = 0;
+	virtual LPCWSTR GetReportDate() const = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -420,10 +423,10 @@ public:
 	virtual LPCWSTR GetFileName(bool bFullPath) const = 0;
 
 	virtual bool IsTaskRecurring(HTASKITEM hTask) const = 0;
-	virtual bool IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const = 0;
-	virtual bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc = false, bool bDisplay = false) const = 0;
+	virtual bool IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const = 0;
+	virtual bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc = false, bool bDisplay = false) const = 0;
 
-	virtual LPCWSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc = false, bool bDisplay = false) const = 0;
+	virtual LPCWSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttribID, bool bCalc = false, bool bDisplay = false) const = 0;
 	
 	virtual bool SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate) = 0;
 	virtual double GetTaskCost(HTASKITEM hTask, bool bCalc, bool& bIsRate) const = 0;
@@ -439,6 +442,7 @@ public:
 
 	virtual double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const = 0;
 
+	virtual unsigned long GetCustomAttributeFeatures(int nIndex) const = 0;
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

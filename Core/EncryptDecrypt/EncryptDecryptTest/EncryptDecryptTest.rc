@@ -34,7 +34,7 @@ FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,208,84,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,263,84,50,14
-    LTEXT           "File to Encrypt:",IDC_STATIC,7,9,48,8
+    LTEXT           "File to Encrypt",IDC_STATIC,7,9,48,8
     EDITTEXT        IDC_FILEPATH,61,7,228,14,ES_AUTOHSCROLL
     PUSHBUTTON      "...",IDC_BROWSE,293,7,20,14
     PUSHBUTTON      "Encrypt",IDC_ENCRYPT,7,32,50,14

@@ -1,150 +1,290 @@
 ECHO OFF
+ECHO:
 
-pushd %~dp0
+REM - WE USE FULL PATHS THROUGHOUT - NO 'CD' WITH RELATIVE PATHS
+
+PUSHD %~dp0
+
+ECHO:
+ECHO Versioning Binaries
+ECHO ===================
+ECHO:
+
 SET REPO=%CD%
-ECHO REPO=%REPO%
-
 SET RESREPO=%REPO%\..\ToDoList_Resources
-ECHO RESREPO=%RESREPO%
-
-REM 7-Zip Location
-SET PATH7ZIP="C:\Program Files (x86)\7-Zip\7z.exe"
-
-IF NOT EXIST %PATH7ZIP% SET PATH7ZIP="C:\Program Files\7-Zip\7z.exe"
-ECHO PATH7ZIP=%PATH7ZIP%
-
-IF NOT EXIST %PATH7ZIP% exit
-
 SET OUTDIR=%REPO%\Core\ToDoList\Unicode_Release
+SET PATHVEREDIT=D:\tools\rcedit-x64.exe
+SET VERFILE=%OUTDIR%\ver.txt
 
 REM - Extract version from core app
-%REPO%\Core\ToDoList\Unicode_Release\ToDoList.exe -ver
-SET /P TDLVER=< .\ver.txt
-ECHO TDLVER=%TDLVER%
-DEL .\ver.txt
+DEL %VERFILE% 2> NUL
+%OUTDIR%\ToDoList.exe -ver %VERFILE%
+
+IF NOT EXIST %VERFILE% (
+ECHO [41m Unable to locate ver.txt!![0m
+ECHO:
+PAUSE
+EXIT
+)
+
+SET /P TDLVER=< %VERFILE%
+
+ECHO REPO        = %REPO%
+ECHO OUTDIR      = %OUTDIR%
+ECHO RESREPO     = %RESREPO%
+ECHO PATHVEREDIT = %PATHVEREDIT%
+ECHO TDLVER      = %TDLVER%
+ECHO:
+
+IF NOT EXIST %PATHVEREDIT% (
+ECHO [41m Unable to locate rcedit-x64.exe!!
+ECHO:
+PAUSE
+EXIT
+)
+
+DEL %OUTDIR%\ver.txt 2> NUL
 
 REM - Update all TDL components with version from core app
 REM - Excludes all dlls we DON'T own the copyright to
-SET PATHVEREDIT="D:\tools\rcedit-x64.exe"
-ECHO PATHVEREDIT=%PATHVEREDIT%
-
 REM - ToDoList.exe is added so we can also use this list for zipping
-SET TDLFILELIST=ToDoList.exe
-SET TDLFILELIST=%TDLFILELIST%;TDLUpdate.exe
-SET TDLFILELIST=%TDLFILELIST%;TDLUninstall.exe
-SET TDLFILELIST=%TDLFILELIST%;TDLTransEdit.exe
-SET TDLFILELIST=%TDLFILELIST%;ConvertRTFToHTML.exe
+SET FILELIST=ToDoList.exe
+SET FILELIST=%FILELIST%;TDLUpdate.exe
+SET FILELIST=%FILELIST%;TDLUninstall.exe
+SET FILELIST=%FILELIST%;TDLTransEdit.exe
+SET FILELIST=%FILELIST%;ConvertRTFToHTML.exe
 
-SET TDLFILELIST=%TDLFILELIST%;BurndownExt.dll
-SET TDLFILELIST=%TDLFILELIST%;CalendarExt.dll
-SET TDLFILELIST=%TDLFILELIST%;EncryptDecrypt.dll
-SET TDLFILELIST=%TDLFILELIST%;FMindImportExport.dll
-SET TDLFILELIST=%TDLFILELIST%;FtpStorage.dll
-SET TDLFILELIST=%TDLFILELIST%;GPExport.dll
-SET TDLFILELIST=%TDLFILELIST%;GanttChartExt.dll
-SET TDLFILELIST=%TDLFILELIST%;iCalImportExport.dll
-SET TDLFILELIST=%TDLFILELIST%;KanbanBoard.dll
-SET TDLFILELIST=%TDLFILELIST%;MLOImport.dll
-SET TDLFILELIST=%TDLFILELIST%;MySpellCheck.dll
-SET TDLFILELIST=%TDLFILELIST%;PlainTextImport.dll
-SET TDLFILELIST=%TDLFILELIST%;RTFContentCtrl.dll
-SET TDLFILELIST=%TDLFILELIST%;TransText.dll
-SET TDLFILELIST=%TDLFILELIST%;WorkloadExt.dll
+SET FILELIST=%FILELIST%;BurndownExt.dll
+SET FILELIST=%FILELIST%;CalendarExt.dll
+SET FILELIST=%FILELIST%;EncryptDecrypt.dll
+SET FILELIST=%FILELIST%;FMindImportExport.dll
+SET FILELIST=%FILELIST%;FtpStorage.dll
+SET FILELIST=%FILELIST%;GPExport.dll
+SET FILELIST=%FILELIST%;GanttChartExt.dll
+SET FILELIST=%FILELIST%;iCalImportExport.dll
+SET FILELIST=%FILELIST%;KanbanBoard.dll
+SET FILELIST=%FILELIST%;MLOImport.dll
+SET FILELIST=%FILELIST%;MySpellCheck.dll
+SET FILELIST=%FILELIST%;PlainTextImport.dll
+SET FILELIST=%FILELIST%;RTFContentCtrl.dll
+SET FILELIST=%FILELIST%;TransText.dll
+SET FILELIST=%FILELIST%;WorkloadExt.dll
 
-SET TDLFILELIST=%TDLFILELIST%;CommandHandling.dll
-SET TDLFILELIST=%TDLFILELIST%;RichEditExtensions.dll
-SET TDLFILELIST=%TDLFILELIST%;ImageHelper.dll
-SET TDLFILELIST=%TDLFILELIST%;ScrollHelper.dll
-SET TDLFILELIST=%TDLFILELIST%;TreeViewHelper.dll
-SET TDLFILELIST=%TDLFILELIST%;WebBrowserEx.dll
+SET FILELIST=%FILELIST%;CommandHandling.dll
+SET FILELIST=%FILELIST%;RichEditExtensions.dll
+SET FILELIST=%FILELIST%;ImageHelper.dll
+SET FILELIST=%FILELIST%;ScrollHelper.dll
+SET FILELIST=%FILELIST%;TreeViewHelper.dll
+SET FILELIST=%FILELIST%;WebBrowserEx.dll
 
-SET TDLFILELIST=%TDLFILELIST%;DayViewUIExtensionBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;DayViewUIExtensionCore.dll
-SET TDLFILELIST=%TDLFILELIST%;EvidenceBoardUIExtensionBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;EvidenceBoardUIExtensionCore.dll
-SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlCore.dll
-SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterCore.dll
-SET TDLFILELIST=%TDLFILELIST%;MDContentControlBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;MDContentControlCore.dll
-SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionCore.dll
-SET TDLFILELIST=%TDLFILELIST%;PDFExporterBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;PDFExporterCore.dll
-SET TDLFILELIST=%TDLFILELIST%;PluginHelpers.dll
-SET TDLFILELIST=%TDLFILELIST%;SpreadsheetContentControlBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;SpreadsheetContentControlCore.dll
-SET TDLFILELIST=%TDLFILELIST%;WordCloudUIExtensionBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;WordCloudUIExtensionCore.dll
+SET FILELIST=%FILELIST%;DayViewUIExtensionBridge.dll
+SET FILELIST=%FILELIST%;DayViewUIExtensionCore.dll
+SET FILELIST=%FILELIST%;EvidenceBoardUIExtensionBridge.dll
+SET FILELIST=%FILELIST%;EvidenceBoardUIExtensionCore.dll
+SET FILELIST=%FILELIST%;HTMLContentControlBridge.dll
+SET FILELIST=%FILELIST%;HTMLContentControlCore.dll
+SET FILELIST=%FILELIST%;HTMLReportExporterBridge.dll
+SET FILELIST=%FILELIST%;HTMLReportExporterCore.dll
+SET FILELIST=%FILELIST%;JSONExporterBridge.dll
+SET FILELIST=%FILELIST%;JSONExporterCore.dll
+SET FILELIST=%FILELIST%;LoggedTimeUIExtensionBridge.dll
+SET FILELIST=%FILELIST%;LoggedTimeUIExtensionCore.dll
+SET FILELIST=%FILELIST%;MDContentControlBridge.dll
+SET FILELIST=%FILELIST%;MDContentControlCore.dll
+SET FILELIST=%FILELIST%;MindMapUIExtensionBridge.dll
+SET FILELIST=%FILELIST%;MindMapUIExtensionCore.dll
+SET FILELIST=%FILELIST%;MySQLStorageBridge.dll
+SET FILELIST=%FILELIST%;MySQLStorageCore.dll
+SET FILELIST=%FILELIST%;PDFExporterBridge.dll
+SET FILELIST=%FILELIST%;PDFExporterCore.dll
+SET FILELIST=%FILELIST%;PluginHelpers.dll
+SET FILELIST=%FILELIST%;SpreadsheetContentControlBridge.dll
+SET FILELIST=%FILELIST%;SpreadsheetContentControlCore.dll
+SET FILELIST=%FILELIST%;WordCloudUIExtensionBridge.dll
+SET FILELIST=%FILELIST%;WordCloudUIExtensionCore.dll
 
-FOR %%f IN (%TDLFILELIST%) DO ( 
-   ECHO Updating version in %OUTDIR%\%%f
-   %PATHVEREDIT% %OUTDIR%\%%f --set-file-version "%TDLVER%"
+SET OUTPUT_FILE=%OUTDIR%\Versioning_Output.txt
+DEL %OUTPUT_FILE% 2> NUL
+
+FOR %%f IN (%FILELIST%) DO ( 
+%PATHVEREDIT% %OUTDIR%\%%f --set-file-version "%TDLVER%" 2>> %OUTPUT_FILE%
 )
+
+REM Check for errors
+FINDSTR /C:"Unable to load file:" %OUTPUT_FILE%
+   
+IF %errorlevel%==1 (
+FINDSTR /C:"Fatal error:" %OUTPUT_FILE%
+)
+
+IF %errorlevel%==0 (
+ECHO [41m Versioning FAILED[0m
+ECHO:
+REM Open the log
+%OUTPUT_FILE%
+PAUSE
+EXIT
+)
+ 
+REM SUCCESS! 
+ECHO [42m Versioning SUCCEEDED[0m
 
 REM Save symbols to their own zip file
-MKDIR %REPO%\..\ToDoList_Symbols
-SET OUTZIP=%REPO%\..\ToDoList_Symbols\%TDLVER%.zip
+ECHO:
+ECHO Zipping symbols
+ECHO ===============
+ECHO:
 
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\*.pdb
+SET PATH7ZIP="C:\Program Files (x86)\7-Zip\7z.exe"
+IF NOT EXIST %PATH7ZIP% SET PATH7ZIP="C:\Program Files\7-Zip\7z.exe"
 
-REM - Zip up app and resources
-SET OUTZIP=%OUTDIR%\todolist_exe_.zip
+ECHO PATH7ZIP = %PATH7ZIP%
+ECHO:
 
-ECHO OUTDIR=%OUTDIR%
-ECHO OUTZIP=%OUTZIP%
-
-DEL %OUTZIP%
-
-REM - Core app and dlls we own the copyright to
-FOR %%f IN (%TDLFILELIST%) DO ( 
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\%%f
+IF NOT EXIST %PATH7ZIP% (
+ECHO [41m Unable to locate 7z.exe!![0m
+ECHO:
+PAUSE
+EXIT
 )
 
-REM - All other components which we don't own
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\BouncyCastle.Crypto.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Calendar.DayView.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\CustomComboBox.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\LinkLabelEx.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Markdig.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\RadialTree.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\UIComponents.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGrid.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGridEditorControl.dll
+SET OUTPUT_FILE=%OUTDIR%\Symbols_Output.txt
+
+MKDIR %REPO%\..\ToDoList_Symbols 2> NUL
+SET OUTZIP=%REPO%\..\ToDoList_Symbols\%TDLVER%.zip
+
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\*.pdb > %OUTPUT_FILE%
+
+REM Check for errors
+FINDSTR /C:"The system cannot find the file specified." %OUTPUT_FILE%
+   
+IF %errorlevel%==0 (
+ECHO [41m Symbols FAILED[0m
+ECHO:
+REM Open the log
+%OUTPUT_FILE%
+PAUSE
+EXIT
+)
+ 
+REM SUCCESS! 
+ECHO [42m Symbols SUCCEEDED[0m
+
+REM - Zip up app and resources
+ECHO:
+ECHO Zipping Binaries
+ECHO ================
+ECHO:
+
+SET OUTZIP=%OUTDIR%\todolist_exe_.zip
+SET OUTPUT_FILE=%OUTDIR%\Zip_Output.txt
+
+ECHO OUTZIP = %OUTZIP%
+ECHO OUTDIR = %OUTDIR%
+ECHO:
+
+DEL %OUTPUT_FILE% 2> NUL
+DEL %OUTZIP% 2> NUL
+
+REM - Add all other components which we don't own
+SET FILELIST=%FILELIST%;BouncyCastle.Crypto.dll
+SET FILELIST=%FILELIST%;Calendar.DayView.dll
+SET FILELIST=%FILELIST%;CustomComboBox.dll
+SET FILELIST=%FILELIST%;Gma.CodeCloud.Controls.dll
+SET FILELIST=%FILELIST%;Google.Protobuf.dll
+SET FILELIST=%FILELIST%;HtmlAgilityPack.dll
+SET FILELIST=%FILELIST%;Itenso.Rtf.Converter.Html.dll
+SET FILELIST=%FILELIST%;Itenso.Rtf.Interpreter.dll
+SET FILELIST=%FILELIST%;Itenso.Rtf.Parser.dll
+SET FILELIST=%FILELIST%;Itenso.Solutions.Community.Rtf2Html.dll
+SET FILELIST=%FILELIST%;Itenso.Sys.dll
+SET FILELIST=%FILELIST%;iTextSharp.dll
+SET FILELIST=%FILELIST%;LinkLabelEx.dll
+SET FILELIST=%FILELIST%;K4os.Compression.LZ4.dll
+SET FILELIST=%FILELIST%;K4os.Compression.LZ4.Streams.dll
+SET FILELIST=%FILELIST%;K4os.Hash.xxHash.dll
+SET FILELIST=%FILELIST%;Markdig.dll
+SET FILELIST=%FILELIST%;Microsoft.VisualStudio.OLE.Interop.dll
+SET FILELIST=%FILELIST%;MSDN.HtmlEditorControl.dll
+SET FILELIST=%FILELIST%;MySql.Data.dll
+SET FILELIST=%FILELIST%;Newtonsoft.Json.dll
+SET FILELIST=%FILELIST%;RadialTree.dll
+SET FILELIST=%FILELIST%;Rtf2HtmlBridge.dll
+SET FILELIST=%FILELIST%;ToolStripToolTip.dll
+SET FILELIST=%FILELIST%;UIComponents.dll
+SET FILELIST=%FILELIST%;Ubiety.Dns.Core.dll
+SET FILELIST=%FILELIST%;unvell.ReoGrid.dll
+SET FILELIST=%FILELIST%;unvell.ReoGridEditorControl.dll
+SET FILELIST=%FILELIST%;XmlDiffPatch.dll
+SET FILELIST=%FILELIST%;XmlDiffPatch.View.dll
+SET FILELIST=%FILELIST%;XmlDiffView.exe
+SET FILELIST=%FILELIST%;ZstdNet.dll
+
+FOR %%f IN (%FILELIST%) DO ( 
+ECHO Adding '%%f' to zip >> %OUTPUT_FILE%
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\%%f >> %OUTPUT_FILE%
+
+REM - Check for locking errors
+IF %errorlevel% NEQ 0 (
+ECHO [41m Zipping Binaries FAILED[0m
+ECHO:
+REM Open the log
+%OUTPUT_FILE%
+PAUSE
+EXIT
+)
+)
+
+REM REquired MS components for C# plugins
+%PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\MFC140U.dll >> %OUTPUT_FILE%
+%PATH7ZIP% a %OUTZIP% C:\Windows\SysWOW64\VCRUNTIME140.dll >> %OUTPUT_FILE%
 
 REM - Manifest for XP only (Updater will delete for other OSes)
-%PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest
+%PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest >> %OUTPUT_FILE%
+
+REM - Delete and recreate Resources folder
+RMDIR %OUTDIR%\Resources /Q /S > NUL
+MKDIR %OUTDIR%\Resources 2> NUL
 
 REM - Copy latest Resources
-del %OUTDIR%\Resources\ /Q /S
-del %OUTDIR%\Resources\Translations\backup\ /Q
-xcopy %RESREPO%\*.* %OUTDIR%\Resources\ /Y /D /E /EXCLUDE:%REPO%\BuildReleaseZip_Exclude.txt
+XCOPY %RESREPO%\*.* %OUTDIR%\Resources\ /Y /D /E /EXCLUDE:%REPO%\BuildReleaseZip_Exclude.txt > NUL
 
 REM - Zip install instructions to root
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Windows.txt
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Linux.txt
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Windows.txt >> %OUTPUT_FILE%
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\Install.Linux.txt >> %OUTPUT_FILE%
 
 REM - And remove from resources to avoid duplication
-del %OUTDIR%\Resources\Install.Windows.txt
-del %OUTDIR%\Resources\Install.Linux.txt
+DEL %OUTDIR%\Resources\Install.Windows.txt > NUL
+DEL %OUTDIR%\Resources\Install.Linux.txt > NUL
 
 REM - Zip Resources
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\ -x!.git*
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\ -x!.git* >> %OUTPUT_FILE%
+
+REM Check for errors
+FINDSTR /C:"The system cannot find the file specified." %OUTPUT_FILE% > NUL
+   
+IF %errorlevel%==0 (
+ECHO [41m Zipping Binaries FAILED[0m
+ECHO:
+REM Open the log
+%OUTPUT_FILE%
+PAUSE
+EXIT
+)
+ 
+REM SUCCESS! 
+ECHO [42m Zipping Binaries SUCCEEDED[0m
+ECHO:
 
 REM - Copy the zip file to the download folder
-copy %OUTZIP% %REPO%\..\ToDoList_Downloads\Latest\
-
-REM - And then move it to ToDoList_Prev\9.0
-MKDIR %REPO%\..\ToDoList_Prev\9.0
-move %OUTZIP% %REPO%\..\ToDoList_Prev\9.0\ToDoList_exe.9.0._.zip
-
-popd
+ECHO Copy todolist_exe_.zip to %REPO%\..\ToDoList_Downloads\Latest\
+COPY %OUTZIP% %REPO%\..\ToDoList_Downloads\Latest\
+ECHO:
+   
+REM - And then move it to ToDoList_Prev\9.2
+MKDIR %REPO%\..\ToDoList_Prev\9.2 2> NUL
+ECHO Rename todolist_exe_.zip to %REPO%\..\ToDoList_Prev\9.2\ToDoList_exe.9.2._.zip
+MOVE %OUTZIP% %REPO%\..\ToDoList_Prev\9.2\ToDoList_exe.9.2._.zip
+ECHO:
+   
+POPD

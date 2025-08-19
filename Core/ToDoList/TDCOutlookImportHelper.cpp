@@ -9,7 +9,7 @@
 #include "taskfile.h"
 #include "TDCOutlookImportHelper.h"
 #include "TDLImportOutlookObjectsDlg.h"
-#include "TaskListDropTarget.h"
+#include "TDCTaskListDropTarget.h"
 
 #include "..\shared\Misc.h"
 #include "..\shared\datehelper.h"
@@ -137,18 +137,18 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 	if (CMSOutlookHelper::GetItemData(*pItem, mapData, bWantConfidential) == 0)
 		return NULL;
 
-	for (int nAttrib = 0; nAttrib < aMapping.GetSize(); nAttrib++)
+	for (int nAtt = 0; nAtt < aMapping.GetSize(); nAtt++)
 	{
-		const TDCATTRIBUTEMAPPING& attrib = aMapping[nAttrib];
+		const TDCATTRIBUTEMAPPING& attrib = aMapping[nAtt];
 
 		OUTLOOK_FIELDTYPE oaType = (OUTLOOK_FIELDTYPE)attrib.dwItemData;
 		CString sData;
 		CStringArray aData;
 		
-		if (attrib.nTDCAttrib == TDCA_NONE || !mapData.Lookup(oaType, sData) || sData.IsEmpty())
+		if (attrib.nAttributeID == TDCA_NONE || !mapData.Lookup(oaType, sData) || sData.IsEmpty())
 			continue;
 		
-		switch(attrib.nTDCAttrib)
+		switch(attrib.nAttributeID)
 		{
 		case TDCA_TASKNAME:
 			if (!tdi.sTitle.IsEmpty())

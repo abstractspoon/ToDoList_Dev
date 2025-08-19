@@ -1,4 +1,4 @@
-// contenttypecombobox.cpp : implementation file
+// CColorBrewerComboBox.cpp : implementation file
 //
 
 #include "stdafx.h"
@@ -14,7 +14,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CContentTypeComboBox
+// CColorBrewerComboBox
 
 CColorBrewerComboBox::CColorBrewerComboBox(DWORD dwBrewerFlags, UINT nIDNoneString) 
 	: 
@@ -28,11 +28,7 @@ CColorBrewerComboBox::~CColorBrewerComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CColorBrewerComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CContentTypeComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -100,44 +96,10 @@ BOOL CColorBrewerComboBox::Initialize(const CColorBrewerPaletteArray& aPalettes)
 	return TRUE;
 }
 
-int CColorBrewerComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	if (m_aPalettes.GetSize())
-		FillCombo();
-	
-	return 0;
-}
-
-void CColorBrewerComboBox::PreSubclassWindow() 
-{
-	if (m_aPalettes.GetSize())
-		FillCombo();
-
-	COwnerdrawComboBoxBase::PreSubclassWindow();
-}
-
-void CColorBrewerComboBox::RebuildCombo()
-{
-	if (GetSafeHwnd())
-	{
-		int nSel = GetCurSel();
-
-		ResetContent();
-		FillCombo();
-
-		SetCurSel(nSel);
-	}
-}
-
-void CColorBrewerComboBox::FillCombo()
+void CColorBrewerComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
-
-	if (COwnerdrawComboBoxBase::GetCount())
-		return;
+	ASSERT(GetCount() == 0);
 
 	if (!m_sNone.IsEmpty())
 	{
@@ -177,7 +139,7 @@ int CColorBrewerComboBox::GetSelectedPalette() const
 
 int CColorBrewerComboBox::SetSelectedPalette(int nPal)
 {
-	return CDialogHelper::SelectItemByData(*this, (nPal + 1));
+	return CDialogHelper::SelectItemByDataT(*this, (nPal + 1));
 }
 
 int CColorBrewerComboBox::GetSelectedPalette(CDWordArray& aColors) const

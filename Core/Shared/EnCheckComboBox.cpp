@@ -32,13 +32,10 @@ CEnCheckComboBox::~CEnCheckComboBox()
 IMPLEMENT_DYNAMIC(CEnCheckComboBox, CCheckComboBox)
 
 BEGIN_MESSAGE_MAP(CEnCheckComboBox, CCheckComboBox)
-	//{{AFX_MSG_MAP(CEnCheckComboBox)
-	//}}AFX_MSG_MAP
 	ON_CONTROL(LBN_SELCHANGE, 1000, OnLBSelChange)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 	ON_MESSAGE(WM_GETTEXTLENGTH, OnGetTextLen)
 	ON_WM_KEYDOWN()
-
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -131,6 +128,15 @@ int CEnCheckComboBox::SetStrings(const CStringArray& aItems)
 	return nRes;
 }
 
+int CEnCheckComboBox::SelectString(int nStartAfter, LPCTSTR lpszString)
+{
+	if (m_bMultiSel)
+		return CCheckComboBox::SelectString(nStartAfter, lpszString);
+	
+	// else
+	return CAutoComboBox::SelectString(nStartAfter, lpszString);
+}
+
 void CEnCheckComboBox::FixupEmptyStringsAtStart()
 {
 	CHoldRedraw hr(*this);
@@ -141,7 +147,7 @@ void CEnCheckComboBox::FixupEmptyStringsAtStart()
 	int nEmpty = CalcNumRequiredEmptyStrings();
 
 	while (nEmpty--)
-		int nItem = CComboBox::InsertString(0, _T("")); // bypass checks for uniqueness
+		CComboBox::InsertString(0, _T("")); // bypass checks for uniqueness
 }
 
 int CEnCheckComboBox::CalcNumRequiredEmptyStrings() const
@@ -279,17 +285,22 @@ int CEnCheckComboBox::GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck) co
 	return aItems.GetSize();
 }
 
-void CEnCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) const
+int CEnCheckComboBox::GetChecked(CStringArray& aChecked, CStringArray& aMixed) const
 {
-	CCheckComboBox::GetChecked(aChecked, CCBC_CHECKED);
-	CCheckComboBox::GetChecked(aMixed, CCBC_MIXED);
+	// Call base class directly to avoid 'our' handling of 'Any'
+	int nNumItems = (CCheckComboBox::GetChecked(aChecked, CCBC_CHECKED) + 
+					 CCheckComboBox::GetChecked(aMixed, CCBC_MIXED));
 
-	// Remove 'Any'
+	// Then remove 'Any'
 	if (m_bMultiSel && IsItemAnyChecked())
 	{
 		ASSERT(aChecked.GetSize());
+
 		aChecked.RemoveAt(0);
+		nNumItems--;
 	}
+
+	return nNumItems;
 }
 
 #ifdef _DEBUG
@@ -418,8 +429,6 @@ BOOL CEnCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArr
 		// Caller can call 'ClearMultiSelectionHistory' as required afterwards.
 		if ((nAny != CB_ERR) && !aChecked.GetSize() && aCurChecked.GetSize())
 		{
-			ASSERT(!bAnyIsChecked);
-
 			if (CCheckComboBox::SetCheck(nAny, CCBC_CHECKED, FALSE) == CB_ERR)
 				return FALSE;
 

@@ -62,7 +62,7 @@ public:
 	void AddDurationInHours(COleDateTime& date, double& dHours) const;
 
 	double CalcDurationInHours(double fromHour, double toHour) const;
-	double GetLengthInHours(bool bIncludingLunch = false) const;
+	double GetLengthInHours(BOOL bIncludingLunch = FALSE) const;
 	double GetLunchLengthInHours() const;
 
 	BOOL Contains(const COleDateTime& date) const;

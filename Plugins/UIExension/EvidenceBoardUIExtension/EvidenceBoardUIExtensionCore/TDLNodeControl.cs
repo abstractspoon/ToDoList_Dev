@@ -13,6 +13,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 using IIControls;
 using ImageHelper;
+using UIComponents;
 
 using BaseNode = RadialTree.TreeNode<uint>;
 
@@ -103,6 +104,8 @@ namespace EvidenceBoardUIExtension
 		protected int DefaultPinRadius { get { return DPIScaling.Scale(3); } }
 		protected int LinkOffset { get { return DPIScaling.Scale(6); } }
 
+		protected const int BorderAndPadding = 2;
+
 		// -------------------------------------------------------------------------
 
 		// From Parent
@@ -166,7 +169,7 @@ namespace EvidenceBoardUIExtension
 			m_TaskItems = null;
 			m_DependencyColor = Color.CornflowerBlue;
 
-			int nodeHeight = (int)Math.Max((2 * BaseFontHeight), (BaseFontHeight + UIExtension.TaskIcon.IconSize)) + (3 * LabelPadding);
+			int nodeHeight = (int)(2 * Math.Max(BaseFontHeight, UIExtension.TaskIcon.IconSize)) + (3 * BorderAndPadding);
 			int nodeWidth  = (4 * nodeHeight);
 
 			base.NodeSize = DPIScaling.UnScale(new Size(nodeWidth, nodeHeight));
@@ -1708,7 +1711,7 @@ namespace EvidenceBoardUIExtension
 				graphics.DrawImage(taskItem.ActiveImage, imageRect);
 
 				// Image spin button
-				DrawTaskImageSpinButtons(graphics, taskItem, imageRect);
+				DrawTaskImageNavigationButtons(graphics, taskItem, imageRect);
 			}
 
 
@@ -1750,8 +1753,7 @@ namespace EvidenceBoardUIExtension
 		private Rectangle CalcImageExpansionButtonRect(Rectangle labelRect)
 		{
 			var rect = CalcIconRect(labelRect);
-			rect.Y += rect.Height;
-			rect.Height--;
+			rect.Y += rect.Height + BorderAndPadding;
 
 			return rect;
 		}
@@ -1764,14 +1766,14 @@ namespace EvidenceBoardUIExtension
 			if (!taskItem.HasImage)
 				return;
 
-			var iconRect = CalcImageExpansionButtonRect(nodeRect);
+			var btnRect = CalcImageExpansionButtonRect(nodeRect);
 
 			var mousePos = PointToClient(MousePosition);
-			ScrollButton btn = (taskItem.IsImageCollapsed ? ScrollButton.Down : ScrollButton.Up);
+			var btn = (taskItem.IsImageCollapsed ? SpinButton.Down : SpinButton.Up);
 
 			if (!IsZoomed)
 			{
-				DrawTaskImageScrollButton(graphics, iconRect, btn, mousePos, true);
+				DrawSpinButton(graphics, btnRect, btn, mousePos, true);
 			}
 			else
 			{
@@ -1786,14 +1788,14 @@ namespace EvidenceBoardUIExtension
 						var tempRect = new Rectangle(0, 0, imageSize, imageSize);
 						gTemp.Clear(backColor);
 
-						DrawTaskImageScrollButton(gTemp, tempRect, btn, mousePos, true);
-						ImageUtils.DrawZoomedImage(tempImage, graphics, iconRect, nodeRect);
+						DrawSpinButton(gTemp, tempRect, btn, mousePos, true);
+						ImageUtils.DrawZoomedImage(tempImage, graphics, btnRect, nodeRect);
 					}
 				}
 			}
 		}
 
-		private Rectangle CalcImageSpinButtonRect(Rectangle imageRect)
+		private Rectangle CalcImageNavigationButtonsRect(Rectangle imageRect)
 		{
 			imageRect.Inflate(1, 1);
 
@@ -1803,9 +1805,9 @@ namespace EvidenceBoardUIExtension
 			return rect;
 		}
 
-		private Rectangle CalcImageSpinButtonRect(Rectangle imageRect, bool forward)
+		private Rectangle CalcImageNavigationButtonRect(Rectangle imageRect, bool forward)
 		{
-			var rect = CalcImageSpinButtonRect(imageRect);
+			var rect = CalcImageNavigationButtonsRect(imageRect);
 			rect.Width /= 2;
 
 			if (forward)
@@ -1814,7 +1816,7 @@ namespace EvidenceBoardUIExtension
 			return rect;
 		}
 
-		void DrawTaskImageSpinButtons(Graphics graphics, TaskItem taskItem, Rectangle imageRect)
+		void DrawTaskImageNavigationButtons(Graphics graphics, TaskItem taskItem, Rectangle imageRect)
 		{
 			Debug.Assert(taskItem.IsImageExpanded);
 
@@ -1822,14 +1824,14 @@ namespace EvidenceBoardUIExtension
 				return;
 
 			var mousePos = PointToClient(MousePosition);
-			var spinRect = CalcImageSpinButtonRect(imageRect);
+			var spinRect = CalcImageNavigationButtonsRect(imageRect);
 
 			bool backEnabled = taskItem.CanSelectNextImage(false);
 			bool forwardEnabled = taskItem.CanSelectNextImage(true);
 
 			if (!IsZoomed)
 			{
-				DrawTaskImageSpinButtons(graphics, spinRect, mousePos, backEnabled, forwardEnabled);
+				DrawTaskImageNavigationButtons(graphics, spinRect, mousePos, backEnabled, forwardEnabled);
 			}
 			else
 			{
@@ -1843,83 +1845,32 @@ namespace EvidenceBoardUIExtension
 					{
 						var tempRect = new Rectangle(0, 0, spinRect.Width, spinRect.Height);
 
-						DrawTaskImageSpinButtons(gTemp, tempRect, mousePos, backEnabled, forwardEnabled);
+						DrawTaskImageNavigationButtons(gTemp, tempRect, mousePos, backEnabled, forwardEnabled);
 						ImageUtils.DrawZoomedImage(tempImage, graphics, spinRect, imageRect);
 					}
 				}
 			}
 		}
 
-		static void DrawTaskImageSpinButtons(Graphics graphics, Rectangle spinRect, Point mousePos, bool backEnabled, bool forwardEnabled)
+		static void DrawTaskImageNavigationButtons(Graphics graphics, Rectangle spinRect, Point mousePos, bool backEnabled, bool forwardEnabled)
 		{
 			var backRect = spinRect;
 			backRect.Width /= 2;
 
-			DrawTaskImageScrollButton(graphics, backRect, ScrollButton.Left, mousePos, backEnabled);
+			DrawSpinButton(graphics, backRect, SpinButton.Left, mousePos, backEnabled);
 
 			var forwardRect = backRect;
 			forwardRect.X = forwardRect.Right;
 
-			DrawTaskImageScrollButton(graphics, forwardRect, ScrollButton.Right, mousePos, forwardEnabled);
+			DrawSpinButton(graphics, forwardRect, SpinButton.Right, mousePos, forwardEnabled);
 		}
 
-		static void DrawTaskImageScrollButton(Graphics graphics, Rectangle rect, ScrollButton btn, Point mousePos, bool enabled)
+		static void DrawSpinButton(Graphics graphics, Rectangle rect, SpinButton btn, Point mousePos, bool enabled)
 		{
 			bool pressed = (MouseButtons.HasFlag(MouseButtons.Left) && rect.Contains(mousePos));
+			var state = (!enabled ? SpinState.Disabled : (pressed ? SpinState.Pressed : SpinState.Normal));
 
-			if (VisualStyleRenderer.IsSupported)
-			{
-				// Map to visual styles
-				ScrollBarArrowButtonState vsBtn;
-
-				switch (btn)
-				{
-				case ScrollButton.Down:
-					if (pressed)
-						vsBtn = ScrollBarArrowButtonState.DownPressed;
-					else
-						vsBtn = ScrollBarArrowButtonState.DownNormal;
-					break;
-
-				case ScrollButton.Up:
-					if (pressed)
-						vsBtn = ScrollBarArrowButtonState.UpPressed;
-					else
-						vsBtn = ScrollBarArrowButtonState.UpNormal;
-					break;
-
-				case ScrollButton.Left:
-					if (!enabled)
-						vsBtn = ScrollBarArrowButtonState.LeftDisabled;
-					else if (pressed)
-						vsBtn = ScrollBarArrowButtonState.LeftPressed;
-					else
-						vsBtn = ScrollBarArrowButtonState.LeftNormal;
-					break;
-
-				case ScrollButton.Right:
-					if (!enabled)
-						vsBtn = ScrollBarArrowButtonState.RightDisabled;
-					else if (pressed)
-						vsBtn = ScrollBarArrowButtonState.RightPressed;
-					else
-						vsBtn = ScrollBarArrowButtonState.RightNormal;
-					break;
-
-				default:
-					return;
-				}
-				ScrollBarRenderer.DrawArrowButton(graphics, rect, vsBtn);
-
-				// Try to match core app with a border
-				graphics.DrawRectangle(Pens.LightGray, rect);
-			}
-			else
-			{
-				ButtonState state = (!enabled ? ButtonState.Inactive : (pressed ? ButtonState.Pushed : ButtonState.Normal));
-
-				ControlPaint.DrawScrollButton(graphics, rect, btn, state);
-			}
+			SpinButtonRenderer.Draw(graphics, rect, btn, state);
 		}
 
 		protected override void DrawSelectionBox(Graphics graphics, Rectangle rect)
@@ -1965,10 +1916,10 @@ namespace EvidenceBoardUIExtension
 			return (task.HasIcon || (m_ShowParentAsFolder && task.IsParent));
 		}
 
-        private Rectangle CalcIconRect(Rectangle labelRect)
+        private Rectangle CalcIconRect(Rectangle nodeRect)
 		{
-            Point topLeft = labelRect.Location;
-			topLeft.Offset(2, 2); // border and padding
+            Point topLeft = nodeRect.Location;
+			topLeft.Offset(BorderAndPadding, BorderAndPadding);
 
 			int width = (int)(UIExtension.TaskIcon.IconSize * ZoomFactor);
 			int height = width;
@@ -2149,7 +2100,7 @@ namespace EvidenceBoardUIExtension
 				if ((taskItem != null) && taskItem.CanSelectNextImage(forwardBtn))
 				{
 					// Redraw the spin control
-					Invalidate(CalcImageSpinButtonRect(CalcImageRect(taskItem, GetNodeClientRect(node), false)));
+					Invalidate(CalcImageNavigationButtonsRect(CalcImageRect(taskItem, GetNodeClientRect(node), false)));
 					Update();
 
 					SelectNode(taskItem.TaskId, true, false);
@@ -2223,7 +2174,7 @@ namespace EvidenceBoardUIExtension
 				taskItem = GetTaskItem(hit);
 				var imageRect = CalcImageRect(taskItem, GetNodeClientRect(hit), false);
 
-				if ((taskItem.ImageCount < 2) || !CalcImageSpinButtonRect(imageRect).Contains(e.Location))
+				if ((taskItem.ImageCount < 2) || !CalcImageNavigationButtonsRect(imageRect).Contains(e.Location))
 				{
 					if (imageRect.Contains(e.Location))
 					{
@@ -2395,13 +2346,13 @@ namespace EvidenceBoardUIExtension
 
 			var imageRect = CalcImageRect(taskItem, GetNodeClientRect(node), false);
 
-			if (CalcImageSpinButtonRect(imageRect, true).Contains(ptClient)) // forward button
+			if (CalcImageNavigationButtonRect(imageRect, true).Contains(ptClient)) // forward button
 			{
 				forward = true;
 				return taskItem;
 			}
 
-			if (CalcImageSpinButtonRect(imageRect, false).Contains(ptClient)) // back button
+			if (CalcImageNavigationButtonRect(imageRect, false).Contains(ptClient)) // back button
 			{
 				forward = false;
 				return taskItem;
@@ -2799,6 +2750,8 @@ namespace EvidenceBoardUIExtension
 			return this;
 		}
 
+		const uint NoTip = 0xffffffff;
+
 		enum TipId
 		{
 			TaskTitle,
@@ -2833,8 +2786,12 @@ namespace EvidenceBoardUIExtension
 
 			if (Rectangle.Inflate(GetCreateLinkPinRect(node), 1, 1).Contains(clientPos))
 			{
-				tip.Text = m_Trans.Translate("Create New Link");
+				tip.Text = m_Trans.Translate("New Connection", Translator.Type.ToolTip);
 				tip.Id = TooltipId(taskItem, TipId.CreateLinkPin);
+			}
+			else if (CalcExpansionButtonRect(nodeRect).Contains(clientPos))
+			{
+				tip.Id = NoTip;
 			}
 			else if (taskItem.HasImage)
 			{
@@ -2845,27 +2802,27 @@ namespace EvidenceBoardUIExtension
 
 				if (tip.Rect.Contains(clientPos))
 				{
-					tip.Text = m_Trans.Translate("Toggle Image Visibility");
+					tip.Text = m_Trans.Translate("Toggle Image Visibility", Translator.Type.ToolTip);
 					tip.Id = TooltipId(taskItem, TipId.ExpansionBtn);
 				}
 				else if (taskItem.ImageCount > 1)
 				{
 					// Image spin buttons
 					// Forward button
-					tip.Rect = CalcImageSpinButtonRect(imageRect, true);
+					tip.Rect = CalcImageNavigationButtonRect(imageRect, true);
 
 					if (tip.Rect.Contains(clientPos))
 					{
-						tip.Text = m_Trans.Translate("Next Image");
+						tip.Text = m_Trans.Translate("Next Image", Translator.Type.ToolTip);
 						tip.Id = TooltipId(taskItem, TipId.SpinForwardBtn);
 					}
 					else // Back button
 					{
-						tip.Rect = CalcImageSpinButtonRect(imageRect, false);
+						tip.Rect = CalcImageNavigationButtonRect(imageRect, false);
 
 						if (tip.Rect.Contains(clientPos))
 						{
-							tip.Text = m_Trans.Translate("Previous Image");
+							tip.Text = m_Trans.Translate("Previous Image", Translator.Type.ToolTip);
 							tip.Id = TooltipId(taskItem, TipId.SpinBackBtn);
 						}
 					}
@@ -2874,13 +2831,16 @@ namespace EvidenceBoardUIExtension
 
 			if (tip.Id != 0)
 			{
-				// These are really tooltips not label tips so offset them
-				clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
+				if (tip.Id != NoTip)
+				{
+					// These are really tooltips not label tips so offset them
+					clientPos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
 
-				tip.Rect.Location = clientPos;
-				tip.InitialDelay = 500;
-				tip.MultiLine = false;
-				tip.Font = Font;
+					tip.Rect.Location = clientPos;
+					tip.InitialDelay = 500;
+					tip.MultiLine = false;
+					tip.Font = Font;
+				}
 			}
 			else // check for title tip
 			{

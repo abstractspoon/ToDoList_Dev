@@ -17,8 +17,6 @@
 
 class CPreferencesExportPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesExportPage)
-
 // Construction
 public:
 	CPreferencesExportPage();
@@ -36,7 +34,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesExportPage)
-	enum { IDD = IDD_PREFEXPORT_PAGE };
 	CMaskEdit	m_eLineSpaces;
 	CComboBox	m_cbFontSize;
 	BOOL	m_bExportParentTitleCommentsOnly;

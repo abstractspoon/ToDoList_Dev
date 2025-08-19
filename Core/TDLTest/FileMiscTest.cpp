@@ -19,7 +19,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFileMiscTest::CFileMiscTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CFileMiscTest::CFileMiscTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CFileMiscTest"), utils)
 {
 
 }
@@ -35,13 +37,14 @@ TESTRESULT CFileMiscTest::Run()
 	TestGetVirtualStorePath();
 	TestGetExtension();
 	TestSplitPath();
+	TestFileBackupCullBackups();
 
 	return GetTotals();
 }
 
 void CFileMiscTest::TestGetVirtualStorePath()
 {
-	BeginTest(_T("FileMisc::GetVirtualStorePath"));
+	CTDCScopedTest test(*this, _T("FileMisc::GetVirtualStorePath"));
 
 	LPCTSTR szTestPath1 = _T("C:\\Program Files\\Abstractspoon\\ToDoList\\ToDoList.ini"); // 64-bit app
 	LPCTSTR szTestPath2 = _T("C:\\Program Files (x86)\\Abstractspoon\\ToDoList\\ToDoList.ini"); // 32-bit app
@@ -87,13 +90,11 @@ void CFileMiscTest::TestGetVirtualStorePath()
 	ExpectEmpty(sVirtualPath3);
 	ExpectFalse(FileMisc::GetVirtualStorePath(szTestPath4, sVirtualPath4));
 	ExpectEmpty(sVirtualPath4);
-	
-	EndTest();
 }
 
 void CFileMiscTest::TestGetExtension()
 {
-	BeginTest(_T("FileMisc::GetExtension"));
+	CTDCScopedTest test(*this, _T("FileMisc::GetExtension"));
 
 	CString FILEPATHS[] = 
 	{
@@ -127,13 +128,11 @@ void CFileMiscTest::TestGetExtension()
 		ExpectEQ(_T(".ext2"), FileMisc::GetExtension(sPath, TRUE));
 		ExpectEQ(_T("ext2"), FileMisc::GetExtension(sPath, FALSE));
 	}
-
-	EndTest();
 }
 
 void CFileMiscTest::TestSplitPath()
 {
-	BeginTest(_T("FileMisc::SplitPath"));
+	CTDCScopedTest test(*this, _T("FileMisc::SplitPath"));
 
 	CString sDrive, sFolder, sFileName, sExt;
 
@@ -244,6 +243,145 @@ void CFileMiscTest::TestSplitPath()
 		ExpectEQ(_T("File.ext1"), sFileName);
 		ExpectEQ(_T(".ext2"), sExt);
 	}
-	
-	EndTest();
+}
+
+void CFileMiscTest::TestFileBackupCullBackups()
+{
+	CTDCScopedTest test(*this, _T("CFileBackup::CullBackups"));
+
+	int nNumFound = 0;
+
+	// Keep NO backups
+	// Recreate backups each time
+	{
+		const int NUMTOKEEP = 0;
+
+		{
+			CreateBackupFiles();
+
+			ExpectEQ(11, CFileBackup::CullBackups(_T("backup\\*.*"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+			ExpectEQ(11, nNumFound);
+		}
+
+		{
+			CreateBackupFiles();
+
+			ExpectEQ(0, CFileBackup::CullBackups(_T("backup\\*.bob"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+			ExpectEQ(0, nNumFound);
+		}
+
+		{
+			CreateBackupFiles();
+
+			ExpectEQ(11, CFileBackup::CullBackups(_T("backup\\*.csv"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+			ExpectEQ(11, nNumFound);
+		}
+
+		{
+			CreateBackupFiles();
+
+			ExpectEQ(3, CFileBackup::CullBackups(_T("backup\\FileToBackup.9_0_0_0*.csv"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+			ExpectEQ(3, nNumFound);
+		}
+
+		{
+			CreateBackupFiles();
+
+			ExpectEQ(8, CFileBackup::CullBackups(_T("backup\\*_0_0_0.*.csv"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+			ExpectEQ(8, nNumFound);
+		}
+	}
+
+	// Keep 2 backups
+	{ 
+		const int NUMTOKEEP = 2;
+
+		// Recreate backups each time
+		{
+			{
+				CreateBackupFiles();
+
+				ExpectEQ(9, CFileBackup::CullBackups(_T("backup\\*.*"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+				ExpectEQ(11, nNumFound);
+			}
+
+			{
+				CreateBackupFiles();
+
+				ExpectEQ(0, CFileBackup::CullBackups(_T("backup\\*.bob"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+				ExpectEQ(0, nNumFound);
+			}
+
+			{
+				CreateBackupFiles();
+
+				ExpectEQ(9, CFileBackup::CullBackups(_T("backup\\*.csv"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+				ExpectEQ(11, nNumFound);
+			}
+
+			{
+				CreateBackupFiles();
+
+				ExpectEQ(1, CFileBackup::CullBackups(_T("backup\\FileToBackup.9_0_0_0*.csv"), FBS_DATESTAMP, 2, nNumFound));
+				ExpectEQ(3, nNumFound);
+			}
+
+			{
+				CreateBackupFiles();
+
+				ExpectEQ(6, CFileBackup::CullBackups(_T("backup\\*_0_0_0.*.csv"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+				ExpectEQ(8, nNumFound);
+			}
+		}
+
+		// DON'T recreate backups each time
+		{
+			CreateBackupFiles();
+
+			{
+				ExpectEQ(1, CFileBackup::CullBackups(_T("backup\\FileToBackup.9_0_0_0*.csv"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+				ExpectEQ(3, nNumFound);
+			}
+
+			{
+				ExpectEQ(5, CFileBackup::CullBackups(_T("backup\\*_0_0_0.*.csv"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+				ExpectEQ(7, nNumFound);
+			}
+
+			{
+				ExpectEQ(0, CFileBackup::CullBackups(_T("backup\\*.2025-02-05.csv"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+				ExpectEQ(1, nNumFound);
+			}
+
+			{
+				ExpectEQ(3, CFileBackup::CullBackups(_T("backup\\*.*"), FBS_DATESTAMP, NUMTOKEEP, nNumFound));
+				ExpectEQ(5, nNumFound);
+			}
+		}
+	}
+}
+
+void CFileMiscTest::CreateBackupFiles()
+{
+	FileMisc::DeleteFolder(_T("backup"));
+	ExpectTrue(FileMisc::CreateFolder(_T("backup")));
+
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.9_0_0_0.2025-02-07.csv"), "a"));
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.9_0_0_0.2025-02-06.csv"), "a"));
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.9_0_0_0.2025-02-05.csv"), "a"));
+
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.8_0_0_0.2025-02-07.csv"), "a"));
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.8_0_0_0.2025-02-06.csv"), "a"));
+
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.7_0_1_0.2025-02-05.csv"), "a"));
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.7_0_1_0.2025-02-04.csv"), "a"));
+
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.6_0_5_0.2025-02-03.csv"), "a"));
+
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.5_0_0_0.2025-02-05.csv"), "a"));
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.5_0_0_0.2025-02-04.csv"), "a"));
+	ExpectTrue(FileMisc::SaveFile(_T("backup\\FileToBackup.5_0_0_0.2025-02-03.csv"), "a"));
+
+	CStringArray aBackups;
+	ExpectEQ(11, FileMisc::FindFiles(_T("backup"), aBackups, FALSE, _T("*.csv")));
 }

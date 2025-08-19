@@ -7,6 +7,8 @@
 // OutlookImportDlg.h : header file
 //
 
+#include "TDLDialog.h"
+
 #include "..\Shared\wndprompt.h"
 #include "..\Shared\enimagelist.h"
 
@@ -15,7 +17,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-// predecs
 namespace OutlookAPI
 {
 	class _Application;
@@ -32,7 +33,7 @@ typedef void* HTASKITEM;
 /////////////////////////////////////////////////////////////////////////////
 // COutlookImportDlg dialog
 
-class CTDLImportOutlookDlg : public CDialog
+class CTDLImportOutlookDlg : public CTDLDialog
 {
 // Construction
 public:
@@ -64,8 +65,6 @@ public:
 
 // Implementation
 protected:
-	int DoModal() { return CDialog::DoModal(); }
-
 	// Generated message map functions
 	//{{AFX_MSG(COutlookImportDlg)
 	virtual BOOL OnInitDialog();

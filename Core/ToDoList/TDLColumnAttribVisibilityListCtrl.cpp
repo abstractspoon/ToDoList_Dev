@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include "tdcmapping.h"
 #include "TDLColumnAttribVisibilityListCtrl.h"
 
 #include "..\shared\GraphicsMisc.h"
@@ -28,7 +29,7 @@ enum
 struct TDCCOLATTRIBITEM
 {
 	UINT nIDName;
-	TDC_COLUMN nCol;
+	TDC_COLUMN nColumnID;
 };
 
 const TDCCOLATTRIBITEM ERRITEM = { 0, TDCC_NONE };
@@ -82,13 +83,13 @@ TDCCOLATTRIBITEM ITEMS[] =
 };
 const int NUM_ITEMS = (sizeof(ITEMS) / sizeof(TDCCOLATTRIBITEM));
 
-const TDCCOLATTRIBITEM& GetColAttrib(TDC_COLUMN nCol)
+const TDCCOLATTRIBITEM& GetColAttrib(TDC_COLUMN nColID)
 {
 	int nItem = NUM_ITEMS;
 
 	while (nItem--)
 	{
-		if (ITEMS[nItem].nCol == nCol)
+		if (ITEMS[nItem].nColumnID == nColID)
 			return ITEMS[nItem];
 	}
 
@@ -140,11 +141,12 @@ void CTDLColumnAttribVisibilityListCtrl::BuildListCtrl()
 		const TDCCOLATTRIBITEM& caItem = ITEMS[nItem];
 
 		int nIndex = InsertRow(CEnString(caItem.nIDName), nItem);
-		SetItemData(nIndex, caItem.nCol);
+		SetItemData(nIndex, caItem.nColumnID);
 	}
 
 	ASSERT(GetItemCount() == NUM_ITEMS);
 
+	GetHeader()->EnableTracking(FALSE);
 	UpdateVisibility();
 }
 
@@ -163,18 +165,18 @@ void CTDLColumnAttribVisibilityListCtrl::UpdateVisibility()
 	while (nItem--)
 	{
 		TDC_COLUMN nColumn = GetItemColumn(nItem);
-		TDC_ATTRIBUTE nAttrib = GetItemAttrib(nItem);
+		TDC_ATTRIBUTE nAttribID = GetItemAttrib(nItem);
 		
 		// set column visibility
 		BOOL bVisible = m_vis.IsColumnVisible(nColumn);
 		SetCellText(nItem, COL_COLUMNVIS, (bVisible ? _T("+") : _T("")));
 
 		// set edit visibility
-		bVisible = m_vis.IsEditFieldVisible(nAttrib);
+		bVisible = m_vis.IsEditFieldVisible(nAttribID);
 		SetCellText(nItem, COL_EDITVIS, (bVisible ? _T("+") : _T("")));
 
 		// set filter visibility
-		bVisible = m_vis.IsFilterFieldVisible(nAttrib);
+		bVisible = m_vis.IsFilterFieldVisible(nAttribID);
 		SetCellText(nItem, COL_FILTERVIS, (bVisible ? _T("+") : _T("")));
 	}
 
@@ -227,7 +229,7 @@ void CTDLColumnAttribVisibilityListCtrl::EditCell(int nItem, int nCol, BOOL bBtn
 
 	// update our data to match
 	TDC_COLUMN nColumn = GetItemColumn(nItem);
-	TDC_ATTRIBUTE nAttrib = GetItemAttrib(nItem);
+	TDC_ATTRIBUTE nAttribID = GetItemAttrib(nItem);
 	BOOL bVisible = !GetItemText(nItem, nCol).IsEmpty();
 	
 	switch (nCol)
@@ -240,18 +242,18 @@ void CTDLColumnAttribVisibilityListCtrl::EditCell(int nItem, int nCol, BOOL bBtn
 		break;
 		
 	case COL_EDITVIS:
-		ASSERT(nAttrib != TDCA_NONE);
+		ASSERT(nAttribID != TDCA_NONE);
 		ASSERT(m_vis.GetShowFields() == TDLSA_ANY);
 
-		m_vis.SetEditFieldVisible(nAttrib, bVisible);
+		m_vis.SetEditFieldVisible(nAttribID, bVisible);
 		UpdateVisibility();
 		break;
 		
 	case COL_FILTERVIS:
-		ASSERT(nAttrib != TDCA_NONE);
+		ASSERT(nAttribID != TDCA_NONE);
 		ASSERT(m_vis.GetShowFields() == TDLSA_ANY);
 		
-		m_vis.SetFilterFieldVisible(nAttrib, bVisible);
+		m_vis.SetFilterFieldVisible(nAttribID, bVisible);
 		UpdateVisibility();
 		break;
 	}

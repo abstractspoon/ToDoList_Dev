@@ -11,7 +11,6 @@
 #include "rtfpreferencesdlg.h"
 
 #include "..\shared\toolbarhelper.h"
-#include "..\shared\subclass.h"
 #include "..\shared\menuiconmgr.h"
 #include "..\shared\ShortcutManager.h"
 
@@ -42,6 +41,7 @@ public:
 	void Release();
 	LPCTSTR GetTypeID() const { return RTF_TYPEID; }
 	bool ProcessMessage(MSG* pMsg);
+	bool DoIdleProcessing() { return false; }
 	void FilterToolTipMessage(MSG* pMsg);
 	ISpellCheck* GetSpellCheckInterface() { return &m_reSpellCheck; }
 	bool Undo();

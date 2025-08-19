@@ -36,9 +36,7 @@ const LPCWSTR OUTLOOKEXPORTER_NAME = L"Microsoft Outlook";
 // see ExporterBridge.h for the class definition
 COutlookExporterBridge::COutlookExporterBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	HMODULE hMod = LoadLibrary(L"OutlookExporterBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_OUTLOOK), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"OutlookExporterBridge.dll", IDI_OUTLOOK, 16, true);
 }
 
 void COutlookExporterBridge::Release()

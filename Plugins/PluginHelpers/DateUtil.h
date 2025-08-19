@@ -78,14 +78,26 @@ namespace Abstractspoon
 			public ref class DateUtil
 			{
 			public:
+				// All DateTime arguments MUST represent Gregorian dates
 				static int WeekOfYear(DateTime date);
 				static int GetMaxDayOfWeekNameWidth(Drawing::Graphics^ graphics, Drawing::Font^ font, bool shortName);
 				static int GetMaxMonthNameWidth(Drawing::Graphics^ graphics, Drawing::Font^ font, bool shortName);
 
 				static String^ GetMonthName(int nMonth, bool shortName);
+				static String^ FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime, bool bISO);
+
+				static String^ FormatDateOnly(DateTime date, String^ format);
+				static String^ FormatDateOnlyRange(DateTime dateFrom, DateTime dateTo, String^ format); // delim = " - "
 
 				static int DateInMonths(DateTime date);
 				static DateTime DateFromMonths(int nMonths);
+
+				static int GetDay(DateTime date);
+				static int GetMonth(DateTime date);
+				static int GetYear(DateTime date);
+
+				static void FromDate(DateTime date, int% year, int% month, int% day);
+				static DateTime ToDate(int year, int month, int day);
 
 				static TimeSpan TimeOnly(DateTime date);
 
@@ -95,6 +107,9 @@ namespace Abstractspoon
 				
 				static Collections::Generic::List<DayOfWeek>^ AllDaysOfWeek();
 				static bool IsAllDaysOfWeek(Collections::Generic::List<DayOfWeek>^ days);
+
+				static void SetShortDateFormat(Windows::Forms::DateTimePicker^ ctrl, bool isoFormat);
+				static bool WantRTLDates();
 			};
 		}
 	}

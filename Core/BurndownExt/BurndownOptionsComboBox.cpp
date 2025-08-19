@@ -26,7 +26,7 @@ struct COMBOOPTION
 
 static const COMBOOPTION COMBOOPTIONS[] =
 {
-	{ IDS_TREND_NONE,			BGO_TREND_NONE },
+	{ IDS_NONE,					BGO_TREND_NONE },
 	{ IDS_TREND_BESTFIT,		BGO_TREND_BESTFIT },
 	{ IDS_TREND_7DAYAVERAGE,	BGO_TREND_7DAYAVERAGE },
 	{ IDS_TREND_30DAYAVERAGE,	BGO_TREND_30DAYAVERAGE },
@@ -69,18 +69,13 @@ CBurndownOptionsComboBox::~CBurndownOptionsComboBox()
 
 
 BEGIN_MESSAGE_MAP(CBurndownOptionsComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CCBurndownOptionsComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CCBurndownOptionsComboBox message handlers
 
-BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
+BOOL CBurndownOptionsComboBox::SetActiveGraphType(BURNDOWN_GRAPHTYPE nType)
 {
-	BURNDOWN_GRAPHTYPE nType = GetGraphType(nGraph);
-
 	if (nType == BCT_UNKNOWNTYPE)
 	{
 		ASSERT(0);
@@ -91,12 +86,7 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 		return TRUE;
 	}
 
-	// We build the combo in a specific order
-	if (!GetSafeHwnd() || (GetStyle() & CBS_SORT))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	m_nGraphType = nType;
 
 	// Build our own sorted array because we have leading numbers
 	CArray<SORTITEM, SORTITEM&> aOptions;
@@ -124,29 +114,35 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	for (nItem = 0; nItem < aOptions.GetSize(); nItem++)
 	{
 		const SORTITEM& st = aOptions[nItem];
-		CDialogHelper::AddString(*this, st.sLabel, st.nOption);
+		CDialogHelper::AddStringT(*this, st.sLabel, st.nOption);
 	}
 
 	CDialogHelper::RefreshMaxDropWidth(*this);
 	CLocalizer::EnableTranslation(GetSafeHwnd(), FALSE);
 
-	m_nGraphType = nType;
-
 	// restore selection
-	if (!IsValidOption(nSelOpt, nGraph))
-		nSelOpt = GetDefaultOption(m_nGraphType);
+	if (!IsValidOption(nSelOpt, nType))
+		nSelOpt = GetDefaultOption(nType);
 
 	SetSelectedOption(nSelOpt);
 
 	return TRUE;
 }
 
+void CBurndownOptionsComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPHOPTION& nOption)
+{
+	if (pDX->m_bSaveAndValidate)
+		nOption = GetSelectedOption();
+	else
+		SetSelectedOption(nOption);
+}
+
 BURNDOWN_GRAPHOPTION CBurndownOptionsComboBox::GetSelectedOption() const
 {
-	return (BURNDOWN_GRAPHOPTION)CDialogHelper::GetSelectedItemData(*this, BCT_UNKNOWNTYPE);
+	return CDialogHelper::GetSelectedItemDataT(*this, BGO_INVALID);
 }
 
 BOOL CBurndownOptionsComboBox::SetSelectedOption(BURNDOWN_GRAPHOPTION nOption)
 {
-	return (CDialogHelper::SelectItemByData(*this, nOption) != CB_ERR);
+	return (CDialogHelper::SelectItemByDataT(*this, nOption) != CB_ERR);
 }

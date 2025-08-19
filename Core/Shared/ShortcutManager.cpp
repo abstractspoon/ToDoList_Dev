@@ -479,7 +479,7 @@ int CShortcutManager::BuildMapping(const CMenu* pMenu, LPCTSTR szParentName,
 	}
 	
 	// add a space between sections unless already added
-	if (aMapping.GetSize() && !aMapping[aMapping.GetSize() - 1].IsEmpty())
+	if (aMapping.GetSize() && !aMapping[Misc::LastIndexT(aMapping)].IsEmpty())
 		aMapping.Add("");
 
 	return aMapping.GetSize();

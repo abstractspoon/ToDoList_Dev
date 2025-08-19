@@ -420,7 +420,7 @@ LRESULT CToolbarHelper::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	{
 	case WM_MOUSEMOVE:
 	case WM_MOUSELEAVE:
-		m_tt.RelayEvent(const_cast<MSG*>(CSubclassWnd::GetCurrentMessage()));
+		m_tt.RelayEvent(const_cast<MSG*>(GetCurrentMessage()));
 		break;
 
 	case WM_SIZE:
@@ -459,12 +459,14 @@ void CToolbarHelper::InitTooltips()
 	// set up tools for each of the toolbar buttons
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
-		if (m_pToolbar->GetItemID(nBtn) != ID_SEPARATOR)
+		UINT nCmdID = m_pToolbar->GetItemID(nBtn);
+
+		if (nCmdID != ID_SEPARATOR)
 		{
 			CRect rBtn;
 			m_pToolbar->GetItemRect(nBtn, rBtn);
 
-			m_tt.AddTool(m_pToolbar, LPSTR_TEXTCALLBACK, rBtn, m_pToolbar->GetItemID(nBtn));
+			m_tt.AddTool(m_pToolbar, LPSTR_TEXTCALLBACK, rBtn, nCmdID);
 		}
 	}
 }
@@ -594,7 +596,7 @@ CString CToolbarHelper::GetResourceTip(UINT nID)
 		if (nStartTip != -1) 
 			sTip = sTip.Right(sTip.GetLength() - nStartTip - 1);
 		else
-			sTip.Replace(_T("."), _T("")); // strip '...' if present
+			sTip.TrimRight('.'); // strip '...' if present
 
 		Misc::Trim(sTip);
 	}

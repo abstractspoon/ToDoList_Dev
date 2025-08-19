@@ -114,7 +114,7 @@ namespace unvell.ReoGrid
 		/// <summary>
 		/// Event raised when grid loaded from file.
 		/// </summary>
-		public event EventHandler<FileLoadedEventArgs> FileLoaded;
+		//public event EventHandler<FileLoadedEventArgs> FileLoaded;
 
 		#endregion // Load
 
@@ -752,13 +752,12 @@ namespace unvell.ReoGrid
 					formula = xmlCell.formula.val;
 					cellValue = xmlCell.data;
 				}
-				else if (xmlCell.data != null && xmlCell.data.StartsWith("="))
+				else if (xmlCell.data != null)
 				{
-					formula = xmlCell.data.Substring(1);
-				}
-				else
-				{
-					cellValue = xmlCell.data;
+					if (xmlCell.data.StartsWith("="))
+						formula = xmlCell.data.Substring(1);
+					else
+						cellValue = xmlCell.data.Replace("\n", "\r\n");
 				}
 #else
 				cellValue = xmlCell.data;

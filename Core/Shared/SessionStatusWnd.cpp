@@ -148,11 +148,11 @@ BOOL CSessionStatusWnd::RegisterForSessionNotification(HWND hwnd)
 	typedef BOOL (WINAPI *PFNWTSREGISTERSESSIONNOTIFICATION)(HWND, DWORD);
 
 	// load dll once only
-	static HMODULE hDll = LoadLibrary(_T("Wtsapi32.dll"));
+	HMODULE hDll = LoadLibrary(_T("Wtsapi32.dll"));
 
 	if (hDll)
 	{
-		static PFNWTSREGISTERSESSIONNOTIFICATION fnRegister = 
+		PFNWTSREGISTERSESSIONNOTIFICATION fnRegister = 
 			(PFNWTSREGISTERSESSIONNOTIFICATION)GetProcAddress(hDll, "WTSRegisterSessionNotification");
 
 		if (fnRegister)
@@ -168,11 +168,11 @@ BOOL CSessionStatusWnd::UnregisterForSessionNotification(HWND hwnd)
 	typedef BOOL (WINAPI *PFNWTSUNREGISTERSESSIONNOTIFICATION)(HWND);
 
 	// load dll once only
-	static HMODULE hDll = LoadLibrary(_T("Wtsapi32.dll"));
+	HMODULE hDll = LoadLibrary(_T("Wtsapi32.dll"));
 
 	if (hDll)
 	{
-		static PFNWTSUNREGISTERSESSIONNOTIFICATION fnUnregister = 
+		PFNWTSUNREGISTERSESSIONNOTIFICATION fnUnregister = 
 			(PFNWTSUNREGISTERSESSIONNOTIFICATION)GetProcAddress(hDll, "WTSUnRegisterSessionNotification");
 
 		if (fnUnregister)
@@ -192,7 +192,7 @@ void CSessionStatusWnd::OnTimer(UINT_PTR nIDEvent)
 			BOOL bWasActive = m_bScreenSaver;
 			BOOL bIsActive = Misc::IsScreenSaverActive();
 
-			if (Misc::StateChanged(bWasActive, bIsActive))
+			if (Misc::StatesDiffer(bWasActive, bIsActive))
 			{
 				m_bScreenSaver = bIsActive;
 				Notify(SESSIONSTATUS_SCREENSAVER, bIsActive);
@@ -205,7 +205,7 @@ void CSessionStatusWnd::OnTimer(UINT_PTR nIDEvent)
 			BOOL bWasLocked = m_bLocked;
 			BOOL bIsLocked = Misc::IsWorkStationLocked();
 
-			if (Misc::StateChanged(bWasLocked, bIsLocked))
+			if (Misc::StatesDiffer(bWasLocked, bIsLocked))
 			{
 				m_bLocked = bIsLocked;
 				Notify(SESSIONSTATUS_LOCK, bIsLocked);

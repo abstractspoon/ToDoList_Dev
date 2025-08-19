@@ -45,7 +45,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\MindMap.ico">
+    <None Include="..\MindMapUIExtensionCore\Resources\MindMap.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

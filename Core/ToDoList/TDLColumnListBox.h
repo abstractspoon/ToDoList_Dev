@@ -27,7 +27,7 @@ public:
 	void SetAllColumnsVisible(BOOL bVisible = TRUE);
 	int GetAllColumns(CTDCColumnIDArray& aColumns) const;
 
-	void SetColumnVisible(TDC_COLUMN nCol, BOOL bVisible = TRUE);
+	void SetColumnVisible(TDC_COLUMN nColID, BOOL bVisible = TRUE);
 	void SetVisibleColumns(const CTDCColumnIDArray& aColumns);
 	int GetVisibleColumns(CTDCColumnIDArray& aColumns) const;
 
@@ -35,16 +35,16 @@ public:
 protected:
 	struct COLUMNVIS
 	{
-		COLUMNVIS() : nTDCCol(TDCC_NONE), bVisible(FALSE) {}
-		COLUMNVIS(UINT nIDName, TDC_COLUMN tdcCol, BOOL bVis) 
+		COLUMNVIS() : nColumnID(TDCC_NONE), bVisible(FALSE) {}
+		COLUMNVIS(UINT nIDName, TDC_COLUMN nColID, BOOL bVis) 
 		{ 
 			sName.LoadString(nIDName); 
-			nTDCCol = tdcCol;
+			nColumnID = nColID;
 			bVisible = bVis; 
 		}
 
 		CString sName;
-		TDC_COLUMN nTDCCol;
+		TDC_COLUMN nColumnID;
 		BOOL bVisible;
 	};
 	CArray<COLUMNVIS, COLUMNVIS&> m_aColumns;
@@ -72,7 +72,7 @@ protected:
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor); // relected
 	DECLARE_MESSAGE_MAP()
 
-	int FindColumn(TDC_COLUMN nCol) const;
+	int FindColumn(TDC_COLUMN nColID) const;
 
 };
 

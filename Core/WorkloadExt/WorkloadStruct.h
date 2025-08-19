@@ -24,6 +24,8 @@ class COleDateTimeRange;
 const LPCTSTR ALLOCTO_TOTALID = _T("_TOTAL_");
 
 /////////////////////////////////////////////////////////////////////////////
+// Represents a number of days and whether these overlap with any other allocation
+// Only used by CMapDayAllocations
 
 struct WORKLOADALLOCATION
 {
@@ -58,6 +60,8 @@ struct WORKLOADALLOCATION
 };
 
 /////////////////////////////////////////////////////////////////////////////
+// Represents a set of allocated days mapped to unique persons
+// Only used by WORKLOADITEM
 
 class CMapDayAllocations : protected CMap<CString, LPCTSTR, WORKLOADALLOCATION, WORKLOADALLOCATION&> 
 {
@@ -102,33 +106,7 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-class CMapAllocationTotals : protected CMap<CString, LPCTSTR, double, double&> 
-{
-public:
-	CMapAllocationTotals(BOOL bReturnAverageForTotal = FALSE);
-	virtual ~CMapAllocationTotals();
-
-	double Get(const CString& sAllocTo) const;
-	CString Format(const CString& sAllocTo, int nDecimals) const;
-
-	double GetTotal() const;
-	CString FormatTotal(int nDecimals) const;
-
-	BOOL Set(const CString& sAllocTo, double dValue);
-	BOOL Add(const CString& sAllocTo, double dValue);
-	void Increment(const CString& sAllocTo);
-
-	void RemoveAll();
-
-protected:
-	BOOL m_bReturnAverageForTotal;
-
-protected:
-	static CString Format(double dValue, int nDecimals);
-};
-
-/////////////////////////////////////////////////////////////////////////////
+// Represents a Task
 
 struct WORKLOADITEM 
 { 
@@ -173,6 +151,35 @@ struct WORKLOADITEM
 };
 
 /////////////////////////////////////////////////////////////////////////////
+// Represents the total allocated days (or tasks) mapped to unique persons
+
+class CMapAllocationTotals : protected CMap<CString, LPCTSTR, double, double&> 
+{
+public:
+	CMapAllocationTotals(BOOL bReturnAverageForTotal = FALSE);
+	virtual ~CMapAllocationTotals();
+
+	double Get(const CString& sAllocTo) const;
+	CString Format(const CString& sAllocTo, int nDecimals) const;
+
+	double GetTotal() const;
+	CString FormatTotal(int nDecimals) const;
+
+	BOOL Set(const CString& sAllocTo, double dValue);
+	BOOL Add(const CString& sAllocTo, double dValue);
+	void Increment(const CString& sAllocTo);
+
+	void RemoveAll();
+
+protected:
+	BOOL m_bReturnAverageForTotal;
+
+protected:
+	static CString Format(double dValue, int nDecimals);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// Represents the entire collection of items loaded from the ITasklist
 
 class CWorkloadItemMap : public CMap<DWORD, DWORD, WORKLOADITEM*, WORKLOADITEM*&>
 {
@@ -218,7 +225,7 @@ struct WORKLOADSORTCOLUMN
 	BOOL operator==(const WORKLOADSORTCOLUMN& col) const;
 	BOOL operator!=(const WORKLOADSORTCOLUMN& col) const;
 
-	WLC_COLUMNID nBy;
+	WLC_COLUMNID nColumnID;
 	CString sAllocTo;
 	BOOL bAscending;
 };
@@ -259,7 +266,7 @@ struct WORKLOADSORT
 
 struct WORKLOADCOLUMN
 {
-	WLC_COLUMNID nColID;
+	WLC_COLUMNID nColumnID;
 	UINT nIDAttribName;
 	UINT nIDColName;
 	int nColAlign;

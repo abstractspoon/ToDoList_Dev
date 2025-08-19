@@ -6,6 +6,9 @@
 #endif // _MSC_VER > 1000
 // InsertTableDlg.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
+
+#include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CInsertTableDlg dialog
@@ -20,20 +23,15 @@ public:
 	int GetNumColumns() const { return m_nNumCols; }
 	int GetColumnWidth() const { return m_nColWidth; }
 
-	//void GetPadding(CRect& rPadding) const;
-
 protected:
 // Dialog Data
 	//{{AFX_DATA(CInsertTableDlg)
 	enum { IDD = IDD_INSERTTABLE_DIALOG };
-	CComboBox	m_cbColWidth;
-	CComboBox	m_cbCols;
-	CComboBox	m_cbRows;
+	CComboBox m_cbColWidth;
+	CComboBox m_cbCols;
+	CComboBox m_cbRows;
+	CIcon m_icon;
 	//}}AFX_DATA
-// 	int		m_nPadLeft;
-// 	int		m_nPadTop;
-// 	int		m_nPadRight;
-// 	int		m_nPadBottom;
 	int		m_nNumRows;
 	int		m_nNumCols;
 	int		m_nColWidth;
@@ -41,16 +39,15 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CInsertTableDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CInsertTableDlg)
-	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

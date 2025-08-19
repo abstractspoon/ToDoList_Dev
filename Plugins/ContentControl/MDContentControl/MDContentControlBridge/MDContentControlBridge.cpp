@@ -37,9 +37,7 @@ const LPCWSTR MARKDOWN_NAME = L"Markdown";
 
 CMDContentBridge::CMDContentBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
-   HMODULE hMod = LoadLibrary(L"MDContentControlBridge.dll"); // us
-
-   m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MARKDOWN), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+   m_hIcon = Win32::LoadHIcon(L"MDContentControlBridge.dll", IDI_MARKDOWN, 16, true);
 }
 
 CMDContentBridge::~CMDContentBridge()

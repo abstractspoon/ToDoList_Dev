@@ -28,13 +28,12 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DayViewCreateTimeBlockDlg));
 			this.m_TaskLabel = new System.Windows.Forms.Label();
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
-			this.m_Attributes = new DayViewUIExtension.DayViewTimeBlockAttributesPage();
-			this.m_TaskCombo = new DayViewUIExtension.DayViewTaskComboBox();
+			this.m_Attributes = new DayViewTimeBlockAttributesPage();
+			this.m_TaskCombo = new Abstractspoon.Tdl.PluginHelpers.TaskComboBox();
 			this.SuspendLayout();
 			// 
 			// m_TaskLabel
@@ -51,6 +50,7 @@
 			// 
 			this.OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.OK.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.OK.Enabled = false;
 			this.OK.Location = new System.Drawing.Point(208, 228);
 			this.OK.Name = "OK";
 			this.OK.Size = new System.Drawing.Size(75, 23);
@@ -62,7 +62,7 @@
 			// 
 			this.Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.Cancel.Location = new System.Drawing.Point(289, 228);
+			this.Cancel.Location = new System.Drawing.Point(291, 228);
 			this.Cancel.Name = "Cancel";
 			this.Cancel.Size = new System.Drawing.Size(75, 23);
 			this.Cancel.TabIndex = 10;
@@ -74,7 +74,7 @@
 			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label5.Location = new System.Drawing.Point(-2, 216);
+			this.label5.Location = new System.Drawing.Point(-2, 218);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(386, 2);
 			this.label5.TabIndex = 11;
@@ -92,6 +92,7 @@
 			this.m_TaskCombo.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
 			this.m_TaskCombo.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
 			this.m_TaskCombo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.m_TaskCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_TaskCombo.FormattingEnabled = true;
 			this.m_TaskCombo.Location = new System.Drawing.Point(132, 9);
 			this.m_TaskCombo.Name = "m_TaskCombo";
@@ -112,12 +113,12 @@
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.m_TaskLabel);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = global::DayViewUIExtension.Properties.Resources.dayview;
 			this.Name = "DayViewCreateTimeBlockDlg";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Create Time Block";
+			this.Text = "New Time Block";
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -129,7 +130,7 @@
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Label label5;
-		private DayViewTaskComboBox m_TaskCombo;
+		private Abstractspoon.Tdl.PluginHelpers.TaskComboBox m_TaskCombo;
 		private DayViewTimeBlockAttributesPage m_Attributes;
 	}
 }

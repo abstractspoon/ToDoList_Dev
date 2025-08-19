@@ -19,6 +19,7 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\RangeSliderCtrl.h"
+#include "..\Shared\WndPrompt.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\ITaskList.h"
@@ -64,21 +65,21 @@ public:
 
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
+	bool DoIdleProcessing() { return false; }
 
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CBurndownWnd)
-	enum { IDD = IDD_STATISTICS_DLG };
-	//}}AFX_DATA
 	CIcon m_icon;
 	CBrush m_brBack;
 	UITHEME m_theme;
 
 	CStatsItemArray m_data;
-	COleDateTimeRange m_dtDataRange, m_dtPrevActiveRange;
+	CGraphsMap m_mapGraphs;
+	CCustomAttributeDefinitionArray m_aCustomAttribDefs;
+	CGraphAttributes m_graphAttrib;
 
 	CStatic	m_stFrame;
 	CBurndownChart m_chart;
@@ -88,38 +89,38 @@ protected:
 	CBurndownGraphComboBox m_cbGraphs;
 	CBurndownOptionsComboBox m_cbOptions;
 	CBurndownPreferencesDlg m_dlgPrefs;
-	
+	CWndPromptManager m_wndPrompts;
+
+	BURNDOWN_GRAPH m_nActiveGraph;
+	BURNDOWN_GRAPHOPTION m_nSelOption;
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
 	BOOL m_bVisible;
-	BURNDOWN_GRAPH m_nGraph;
+	COleDateTimeRange m_dtDataRange;
+	
+	COleDateTimeRange m_dtPrevActiveRange;
+	CString m_sPrevCustomGraph;
+
 
 protected:
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CBurndownWnd)
-	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
 	virtual void OnCancel() {}
 	virtual void OnOK() {}
 
 // Implementation
 protected:
-
 	// Generated message map functions
-	//{{AFX_MSG(CBurndownWnd)
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	//}}AFX_MSG
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
-	afx_msg void OnSelchangeDisplay();
+	afx_msg void OnSelChangeGraph();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnNcDestroy();
-	afx_msg void OnOptionChanged();
+	afx_msg void OnSelChangeOption();
 	afx_msg void OnPreferences();
 
 	afx_msg LRESULT OnRebuildGraph(WPARAM wp, LPARAM lp);
@@ -130,6 +131,7 @@ protected:
 	void UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist);
+	BOOL UpdateCustomAttributeDefinitions(const ITASKLISTBASE* pTasks);
 
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
 	void UpdateRangeSlider(const COleDateTimeRange& dtActiveRange);
@@ -137,7 +139,7 @@ protected:
 	void UpdateRangeSliderStep();
 	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
 	void ResizeSlider(int nParentWidth = -1);
-
+	void SetActiveGraph(BURNDOWN_GRAPH nGraph, BOOL bRebuild);
 };
 
 //{{AFX_INSERT_LOCATION}}

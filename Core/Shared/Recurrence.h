@@ -84,7 +84,7 @@ struct CRecurrence
 	BOOL FitDayToScheme(COleDateTime& dtRecur) const;
 	
 	BOOL CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dtNext) const;
-	int CalcNextOccurences(const COleDateTime& dtPrev, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const;
+	int CalcNextOccurrences(const COleDateTime& dtPrev, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const;
 
 	BOOL SetRegularity(RECURRENCE_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 	RECURRENCE_REGULARITY GetRegularity(DWORD& dwSpecific1, DWORD& dwSpecific2) const;
@@ -94,6 +94,7 @@ struct CRecurrence
 	BOOL SetOccurrenceCount(int nNumOccur, int nRemainingOccur);
 	int GetOccurrenceCount() const;	
 	int GetRemainingOccurrenceCount() const;
+	BOOL DecrementRemainingOccurrenceCount();
 
 protected:
 	int m_nNumOccur, m_nRemainingOccur;
@@ -102,7 +103,7 @@ protected:
 	DWORD m_dwSpecific2;
 
 protected:
-	BOOL ValidateDay(SYSTEMTIME& st) const;
+	void ValidateDay(int& nDay, int nMonth, int nYear) const;
 
 	static BOOL IsValidRegularity(RECURRENCE_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 	static BOOL IsValidSpecificMonths(DWORD dwMonths);

@@ -61,6 +61,7 @@ public:
 
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
+	bool DoIdleProcessing() { return false; }
 
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
@@ -83,7 +84,7 @@ protected:
 	CBrush m_brBack;
 	UITHEME m_theme;
 	CString	m_sTrackedCustomAttribID, m_sGroupByCustomAttribID;
-	TDC_ATTRIBUTE m_nTrackedAttrib, m_nGroupByAttrib;
+	TDC_ATTRIBUTE m_nTrackedAttribID, m_nGroupByAttribID;
 	CDWordArray m_aSelTaskIDs;
 	CWndPromptManager m_mgrPrompts;
 

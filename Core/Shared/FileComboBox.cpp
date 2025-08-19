@@ -8,6 +8,7 @@
 #include "enbitmap.h"
 #include "enfiledialog.h"
 #include "DialogHelper.h"
+#include "webmisc.h"
 
 // CFileComboBox::CMultiFileEdit //////////////////////////////////////////////////////////
 
@@ -49,15 +50,16 @@ void CFileComboBox::CMultiFileEdit::HandleBrowseForFile(CEnFileDialog& dlg)
 
 // CFileComboBox //////////////////////////////////////////////////////////
 
-const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int ICON_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
+const int MAX_DROPWIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 ///////////////////////////////////////////////////////////////////////////
 
 CFileComboBox::CFileComboBox(int nEditStyle) 
 	: 
-	CAutoComboBox(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
+	CAutoComboBox(&m_fileEdit, ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
 	m_fileEdit(nEditStyle),
-	m_imageIcons(FALSE), // small icons
+	m_fileIcons(FALSE), // small icons
 	m_bReadOnly(FALSE)
 {
 
@@ -74,6 +76,7 @@ BEGIN_MESSAGE_MAP(CFileComboBox, CAutoComboBox)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditGetFileIcon)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileEditGetFileTooltip)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
+
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
 	ON_WM_CTLCOLOR()
 	ON_WM_PAINT()
@@ -93,64 +96,58 @@ BOOL CFileComboBox::PreCreateWindow(CREATESTRUCT& cs)
 
 void CFileComboBox::OnPaint()
 {
-	// If the edit field has an image and its icon rect 
-	// is less than the height of the image, then we draw 
+	// If the edit field has an image and the icon rect 
+	// is less than the height of the edit field, then we draw 
 	// the extra bit that MIGHT have been clipped out
 	CPaintDC dc(this);
 
-	if (m_fileEdit.GetSafeHwnd() && m_fileEdit.GetWindowTextLength())
+	if (m_fileEdit.GetSafeHwnd())
 	{
-		CRect rIcon = m_fileEdit.GetIconScreenRect();
-
-		if (rIcon.Height() < m_imageIcons.GetIconSize())
+		if (m_fileEdit.GetWindowTextLength())
 		{
-			ScreenToClient(rIcon);
+			CRect rIcon = m_fileEdit.GetIconScreenRect(), rEdit;
+			m_fileEdit.GetWindowRect(rEdit);
 
-			// Because CFileEdit messes with its non-client rect
-			// we can end up with a negative rectangle during startup
-			if (rIcon.left >= 0)
+			if (rIcon.Height() > rEdit.Height())
 			{
-				CString sIcon;
-				m_fileEdit.GetWindowText(sIcon);
-				m_fileEdit.DrawFileIcon(&dc, sIcon, rIcon);
+				ScreenToClient(rIcon);
+
+				// Because CFileEdit messes with its non-client rect
+				// we can end up with a negative rectangle during startup
+				if (rIcon.left >= 0)
+				{
+					CString sIcon;
+					m_fileEdit.GetWindowText(sIcon);
+					m_fileEdit.DrawFileIcon(&dc, sIcon, rIcon);
+				}
 			}
 		}
-	}
 
-	CRect rEdit = CDialogHelper::GetCtrlRect(this, 1001);
-	dc.ExcludeClipRect(rEdit);
+		// Also clip out the edit field and its buttons
+		CRect rEdit = CDialogHelper::GetChildRect(&m_fileEdit);
+		dc.ExcludeClipRect(rEdit);
+
+		CRect rButtons = m_fileEdit.GetButtonsRect();
+		ScreenToClient(rButtons);
+		dc.ExcludeClipRect(rButtons);
+	}
 
 	// default painting
 	DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);
-}
-
-HBRUSH CFileComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	HBRUSH hbr = CAutoComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
-
-	if ((nCtlColor == CTLCOLOR_EDIT) && (m_fileEdit.GetSafeHwnd() == NULL))
-	{
-		VERIFY (InitFileEdit());
-	}
-
-	return hbr;
 }
 
 int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	ASSERT (m_fileEdit.GetSafeHwnd());
 
-	ClientToScreen(&point);
-	m_fileEdit.ScreenToClient(&point);
+	::MapWindowPoints(m_hWnd, m_fileEdit, &point, 1);
 
 	int nTool = m_fileEdit.OnToolHitTest(point, pTI);
 
 	if (nTool != -1)
 	{
 		pTI->hwnd = m_hWnd;
-
-		m_fileEdit.ClientToScreen(&pTI->rect);
-		ScreenToClient(&pTI->rect);
+		::MapWindowPoints(m_fileEdit, m_hWnd, (LPPOINT)&pTI->rect, 2);
 
 		return nTool;
 	}
@@ -159,24 +156,46 @@ int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CAutoComboBox::OnToolHitTest(point, pTI);
 }
 
-BOOL CFileComboBox::InitFileEdit()
+void CFileComboBox::OnSubclassChild(HWND hwndChild)
 {
-	if (!m_fileEdit.GetSafeHwnd())
-	{
-		if (!m_fileEdit.SubclassDlgItem(1001, this))
-			return FALSE;
+	CAutoComboBox::OnSubclassChild(hwndChild);
 
+	if (m_fileEdit.GetSafeHwnd() == hwndChild)
+	{
 		m_fileEdit.SendMessage(EM_SETREADONLY, m_bReadOnly);
 
-		// CFileEdit disables its tooltips when embedded in a combobox
+		// CEnEdit disables its tooltips when embedded in a combobox
 		// simply because they don't seem to work
-		ASSERT(!m_fileEdit.m_tooltip.GetSafeHwnd());
-
 		// So we have to handle it ourselves
 		EnableToolTips(TRUE);
 	}
+}
 
-	return TRUE;
+BOOL CFileComboBox::DoBrowse() 
+{ 
+	// Make sure we're all initialised
+	if (!m_fileEdit.GetSafeHwnd())
+	{
+		CClientDC dc(this);
+		SendMessage(WM_CTLCOLOREDIT, (WPARAM)dc.GetSafeHdc(), (LPARAM)::GetDlgItem(*this, 1001));
+
+		ASSERT(m_fileEdit.GetSafeHwnd());
+	}
+
+	return m_fileEdit.DoBrowse(GetFirstFile()); 
+}
+
+void CFileComboBox::EnableEditStyle(int nStyle, BOOL bEnable) 
+{ 
+	m_fileEdit.EnableStyle(nStyle, bEnable); 
+
+	if (nStyle & FES_DISPLAYIMAGETHUMBNAILS)
+		m_fileIcons.Clear();
+}
+
+CString CFileComboBox::GetFirstFile() const
+{
+	return CDialogHelper::GetItem(*this, 0);
 }
 
 LRESULT CFileComboBox::OnFileEditBrowseChange(WPARAM wp, LPARAM lp)
@@ -194,7 +213,6 @@ LRESULT CFileComboBox::OnFileEditBrowseChange(WPARAM wp, LPARAM lp)
 	}
 
 	HandleReturnKey();
-
 	return 0L;
 }
 
@@ -287,24 +305,15 @@ void CFileComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 
 	if (bList && !sItem.IsEmpty())
 	{
-		BOOL bDrawn = FALSE;
+		CFileEdit::DrawFileIcon(&dc,
+								sItem,
+								rect.TopLeft(),
+								m_fileIcons,
+								this,
+								m_fileEdit.GetCurrentFolder(),
+								m_fileEdit.HasStyle(FES_DISPLAYIMAGETHUMBNAILS));
 
-		if (m_fileEdit.HasStyle(FES_DISPLAYIMAGETHUMBNAILS) && CEnBitmap::IsSupportedImageFile(sItem))
-		{
-			CString sFullPath(sItem);
-			FileMisc::MakeFullPath(sFullPath, m_fileEdit.GetCurrentFolder());
-			
-			if (m_imageIcons.HasIcon(sFullPath) || m_imageIcons.Add(sFullPath, sFullPath))
-			{
-				bDrawn = m_imageIcons.Draw(&dc, sFullPath, rect.TopLeft());
-			}
-		}
-
-		// Fallback/default
-		if (!bDrawn)
-			m_fileEdit.DrawFileIcon(&dc, sItem, rText);
-
-		rText.left += m_imageIcons.GetIconSize() + 2;
+		rText.left += m_fileIcons.GetIconSize() + 2;
 	}
 
 	CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
@@ -335,8 +344,8 @@ BOOL CFileComboBox::DeleteLBItem(int nItem)
 		}
 
 		// delete any image associated with this item
-		if (m_imageIcons.HasIcon(sFilename))
-			m_imageIcons.Remove(sFilename);
+		if (m_fileIcons.HasIcon(sFilename))
+			m_fileIcons.Remove(sFilename);
 
 		return TRUE;
 	}
@@ -414,6 +423,11 @@ void CFileComboBox::HandleReturnKey()
 int CFileComboBox::GetExtraListboxWidth() const
 {
 	return (CAutoComboBox::GetExtraListboxWidth() + ICON_SIZE + 2);
+}
+
+int CFileComboBox::GetMaxDropWidth() const
+{
+	return MAX_DROPWIDTH;
 }
 
 int CFileComboBox::CalcMinItemHeight(BOOL bList) const

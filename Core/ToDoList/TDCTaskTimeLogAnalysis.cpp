@@ -35,17 +35,8 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-static LPCTSTR TAB = _T("\t");
-
-static LPCTSTR HEADERFMT_PERIOD_GROUPBY = _T("%s\t%s\t%s\t%s\t%s\t%s\n");
-static LPCTSTR HEADERFMT_PERIOD_NOGROUPBY = _T("%s\t%s\t%s\t%s\t%s\n");
-static LPCTSTR HEADERFMT_NOPERIOD_GROUPBY = _T("%s\t%s\t%s\t%s\t%s\n");
-static LPCTSTR HEADERFMT_NOPERIOD_NOGROUPBY = _T("%s\t%s\t%s\t%s\n");
-
-static LPCTSTR ROWFMT_PERIOD_GROUPBY = _T("%s\t%s\t%lu\t%s\t%0.3f\t%s\n");
-static LPCTSTR ROWFMT_PERIOD_NOGROUPBY = _T("%s\t%lu\t%s\t%0.3f\t%s\n");
-static LPCTSTR ROWFMT_NOPERIOD_GROUPBY = _T("%s\t%lu\t%s\t%0.3f\t%s\n");
-static LPCTSTR ROWFMT_NOPERIOD_NOGROUPBY = _T("%lu\t%s\t%0.3f\t%s\n");
+static LPCTSTR TAB  = _T("\t");
+static LPCTSTR ENDL = _T("\n");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -196,6 +187,8 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom,
 											 TDCTTL_FORMAT nFormat,
 											 LPCTSTR szOutputFile)
 {
+	CWaitCursor cursor;
+
 	if (!BuildLogItemArray())
 		return FALSE;
 
@@ -272,17 +265,17 @@ int CTDCTaskTimeLogAnalysis::BuildLogItemArray()
 	// iterate the list of files building a master list of log items
 	for (int nFile = 0; nFile < nNumLogFiles; nFile++)
 	{
-		CString sDelim;
+		CString sHeaderDelim;
 		
-		if (CTDCTaskTimeLog::LoadLogItems(aLogFiles[nFile], m_aLogItems, TRUE, sDelim))
+		if (CTDCTaskTimeLog::LoadLogFile(aLogFiles[nFile], m_aLogItems, TRUE, sHeaderDelim))
 		{
-			if (m_sCsvDelim.IsEmpty())
-			{
-				ASSERT(!sDelim.IsEmpty());
-				m_sCsvDelim = sDelim;
-			}
+			if (m_sCsvDelim.IsEmpty() && !sHeaderDelim.IsEmpty())
+				m_sCsvDelim = sHeaderDelim;
 		}
 	}
+
+	if (m_sCsvDelim.IsEmpty())
+		m_sCsvDelim = Misc::GetListSeparator();
 
 	// Build reverse lookup
 	int nNumItems = m_aLogItems.GetSize(), nItem = nNumItems;
@@ -472,7 +465,7 @@ BOOL CTDCTaskTimeLogAnalysis::OutputAnalysis(const CMapIDToTime& mapIDs,
 						sLastGroupBy = sGroupBy;
 
 						if (nItem > 0)
-							file.WriteString(_T("\n"));
+							file.WriteString(ENDL);
 					}
 
 					// write to file
@@ -543,12 +536,13 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseByDate(const COleDateTime& dtFrom,
 											CMapIDToTimeAndPeriodArray& aPeriods) const
 {
 	// sanity check
-	ASSERT(m_aLogItems.GetSize());
-
 	int nNumItems = m_aLogItems.GetSize();
 
 	if (nNumItems == 0)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// Build a map of days since this is our 
 	// smallest unit of breakdown
@@ -619,7 +613,7 @@ BOOL CTDCTaskTimeLogAnalysis::BreakdownDateAnalysis(CMapIDToTimeAndPeriodArray& 
 				{
 					// first item
 					pPeriodMap = pDayMap;
-					ASSERT(pDayMap->dtPeriod.GetMonth() == dtPeriod.GetMonth());
+					ASSERT(CDateHelper::IsSameMonth(pDayMap->dtPeriod, dtPeriod));
 				}
 				else if (IsSamePeriod(pDayMap->dtPeriod, dtPeriod, nBreakdown))
 				{
@@ -647,48 +641,16 @@ CString CTDCTaskTimeLogAnalysis::BuildCsvHeader(BOOL bBreakdownByPeriod) const
 	CString sHeader;
 
 	if (bBreakdownByPeriod)
-	{
-		if (WantGroupBy())
-		{
-			sHeader.Format(HEADERFMT_PERIOD_GROUPBY,
-						   CEnString(IDS_LOG_PERIOD),
-						   GetGroupByHeader(),
-						   CEnString(IDS_LOG_TASKID),
-						   CEnString(IDS_LOG_TASKTITLE),
-						   CEnString(IDS_LOG_TIMESPENT),
-						   CEnString(IDS_LOG_PATH));
-		}
-		else
-		{
-			sHeader.Format(HEADERFMT_PERIOD_NOGROUPBY,
-						   CEnString(IDS_LOG_PERIOD),
-						   CEnString(IDS_LOG_TASKID),
-						   CEnString(IDS_LOG_TASKTITLE),
-						   CEnString(IDS_LOG_TIMESPENT),
-						   CEnString(IDS_LOG_PATH));
-		}
-	}
-	else // by task
-	{
-		if (WantGroupBy())
-		{
-			sHeader.Format(HEADERFMT_NOPERIOD_GROUPBY,
-						   GetGroupByHeader(),
-						   CEnString(IDS_LOG_TASKID),
-						   CEnString(IDS_LOG_TASKTITLE),
-						   CEnString(IDS_LOG_TIMESPENT),
-						   CEnString(IDS_LOG_PATH));
-		}
-		else
-		{
-			sHeader.Format(HEADERFMT_NOPERIOD_NOGROUPBY,
-						   CEnString(IDS_LOG_TASKID),
-						   CEnString(IDS_LOG_TASKTITLE),
-						   CEnString(IDS_LOG_TIMESPENT),
-						   CEnString(IDS_LOG_PATH));
-		}
-	}
-	sHeader.Replace(TAB, m_sCsvDelim);
+		sHeader += (CEnString(IDS_LOG_PERIOD) + m_sCsvDelim);
+
+	if (WantGroupBy())
+		sHeader += (GetGroupByHeader() + m_sCsvDelim);
+
+	// Common columns
+	sHeader += (CEnString(IDS_LOG_TASKID) + m_sCsvDelim);
+	sHeader += (CEnString(IDS_LOG_TASKTITLE) + m_sCsvDelim);
+	sHeader += (CEnString(IDS_LOG_TIMESPENT) + m_sCsvDelim);
+	sHeader += (CEnString(IDS_LOG_PATH) + ENDL);
 
 	return sHeader;
 }
@@ -699,20 +661,16 @@ CString CTDCTaskTimeLogAnalysis::FormatCsvRow(DWORD dwTaskID, const CString& sTa
 	CString sRow;
 	
 	if (!sPeriod.IsEmpty())
-	{
-		if (WantGroupBy())
-			sRow.Format(ROWFMT_PERIOD_GROUPBY, sPeriod, sGroupBy, dwTaskID, sTaskTitle, dTime, sPath);
-		else
-			sRow.Format(ROWFMT_PERIOD_NOGROUPBY, sPeriod, dwTaskID, sTaskTitle, dTime, sPath);
-	}
-	else
-	{
-		if (WantGroupBy())
-			sRow.Format(ROWFMT_NOPERIOD_GROUPBY, sGroupBy, dwTaskID, sTaskTitle, dTime, sPath);
-		else
-			sRow.Format(ROWFMT_NOPERIOD_NOGROUPBY, dwTaskID, sTaskTitle, dTime, sPath);
-	}
-	sRow.Replace(TAB, m_sCsvDelim);
+		sRow += (sPeriod + m_sCsvDelim);
+
+	if (!sGroupBy.IsEmpty())
+		sRow += (sGroupBy + m_sCsvDelim);
+
+	// Common columns
+	sRow += (Misc::Format(dwTaskID) + m_sCsvDelim);
+	sRow += (sTaskTitle + m_sCsvDelim);
+	sRow += (Misc::Format(dTime, 3) + m_sCsvDelim);
+	sRow += (sPath + ENDL);
 
 	return sRow;
 }
@@ -916,12 +874,7 @@ CString CTDCTaskTimeLogAnalysis::FormatPeriod(double dDay, TDCTTL_BREAKDOWN nBre
 		
 	case TTLB_BYWEEK:
 		{
-			// have to get the start of the week
-
-			int nFirstDOW = CDateHelper::GetFirstDayOfWeek();
-			int nDOW = date.GetDayOfWeek();
-
-			COleDateTime dtStart = (date.m_dt - (nDOW - nFirstDOW));
+			COleDateTime dtStart(CDateHelper::GetStartOfWeek(date));
 			COleDateTime dtEnd = (dtStart.m_dt + 6);
 
 			sPeriod.Format(_T("%s - %s"), dtStart.Format(VAR_DATEVALUEONLY), dtEnd.Format(VAR_DATEVALUEONLY));
@@ -930,11 +883,8 @@ CString CTDCTaskTimeLogAnalysis::FormatPeriod(double dDay, TDCTTL_BREAKDOWN nBre
 		
 	case TTLB_BYMONTH:
 		{
-			// have to get start of this month
-			int nYear = date.GetYear(), nMonth = date.GetMonth();
-
-			COleDateTime dtStart(nYear, nMonth, 1, 0, 0, 0);
-			COleDateTime dtEnd(nYear, nMonth, CDateHelper::GetDaysInMonth(nMonth, nYear), 0, 0, 0);
+			COleDateTime dtStart(CDateHelper::GetStartOfMonth(date));
+			COleDateTime dtEnd(CDateHelper::GetEndOfMonth(date));
 
 			sPeriod.Format(_T("%s - %s"), dtStart.Format(VAR_DATEVALUEONLY), dtEnd.Format(VAR_DATEVALUEONLY));
 		}
@@ -998,11 +948,10 @@ BOOL CTDCTaskTimeLogAnalysis::IsSamePeriod(const COleDateTime& date1, const COle
 		return (date1 == date2);
 
 	case TTLB_BYWEEK:
-		return (CDateHelper::GetWeekofYear(date1) == CDateHelper::GetWeekofYear(date2));
+		return CDateHelper::IsSameWeek(date1, date2);
 
 	case TTLB_BYMONTH:
-		return ((date1.GetMonth() == date2.GetMonth()) &&
-				(date1.GetYear()  == date2.GetYear()));
+		return CDateHelper::IsSameMonth(date1, date2);
 	}
 
 	ASSERT(0);

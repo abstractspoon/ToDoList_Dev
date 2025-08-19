@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4B4C2975-69B4-4EBC-8802-CAAE2DB37B96}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LoggedTimeUIExtension</RootNamespace>
+    <AssemblyName>LoggedTimeUIExtensionCore</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="TaskItem.cs" />
+    <Compile Include="CreateLoggedEntryDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateLoggedEntryDlg.Designer.cs">
+      <DependentUpon>CreateLoggedEntryDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EditLoggedEntryDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EditLoggedEntryDlg.Designer.cs">
+      <DependentUpon>EditLoggedEntryDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LogEntry.cs" />
+    <Compile Include="LoggedTimeRenderer.cs" />
+    <Compile Include="LoggedEntryAttributesPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LoggedEntryAttributesPage.Designer.cs">
+      <DependentUpon>LoggedEntryAttributesPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LoggedTimeView.cs" />
+    <Compile Include="LoggedTimePreferencesDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoggedTimePreferencesDlg.Designer.cs">
+      <DependentUpon>LoggedTimePreferencesDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LoggedTimeUIExtensionCore.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CreateLoggedEntryDlg.resx">
+      <DependentUpon>CreateLoggedEntryDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditLoggedEntryDlg.resx">
+      <DependentUpon>EditLoggedEntryDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoggedTimePreferencesDlg.resx">
+      <DependentUpon>LoggedTimePreferencesDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoggedEntryAttributesPage.resx">
+      <DependentUpon>LoggedEntryAttributesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\LinkLabelEx\LinkLabelEx.csproj">
+      <Project>{6b24236c-6b0c-4ba4-9778-6d8a9388b419}</Project>
+      <Name>LinkLabelEx</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\ToolStripEx\ToolStripEx.csproj">
+      <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
+      <Name>ToolStripEx</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\UIComponents\UIComponents.csproj">
+      <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
+      <Name>UIComponents</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
+      <Project>{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}</Project>
+      <Name>PluginHelpers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\DayView\DayView.csproj">
+      <Project>{D17A4D6A-4CAA-4470-8A19-F42463C021FD}</Project>
+      <Name>DayView</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\DayViewUIExtension\DayViewUIExtensionCore\DayViewUIExtensionCore.csproj">
+      <Project>{92fefdb8-3f95-4404-a620-8003b51c5a53}</Project>
+      <Name>DayViewUIExtensionCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="toolbar_std.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\LoggedTime.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
+
+mkdir "$(SolutionDir)..\Core\ToDoList"
+mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
+copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

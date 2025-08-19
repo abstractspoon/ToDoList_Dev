@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
+using UIComponents;
+
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
@@ -31,15 +33,16 @@ namespace DayViewUIExtension
 		private bool m_SettingDayViewStartDate = false;
 		private bool m_AllowModifyTimeEstimate = false;
 
-		private DayViewWeekLabel m_WeekLabel;
-		private DayViewMonthComboBox m_MonthCombo;
-		private DayViewYearComboBox m_YearCombo;
+		private WeekLabel m_WeekLabel;
+		private MonthComboBox m_MonthCombo;
+		private YearComboBox m_YearCombo;
         private DayViewPreferencesDlg m_PrefsDlg;
+		private DateRangeLink m_SelectedTaskDates;
+		private Label m_SelectedTaskDatesLabel;
 
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_ToolbarRenderer;
-		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
 
 		private TimeBlockSeriesAttributes m_DefaultNewTimeBlockAttributes;
@@ -58,8 +61,9 @@ namespace DayViewUIExtension
 			m_DefaultTimeBlockEditMask = (TimeBlockSeriesAttributes.EditMask.Dates | TimeBlockSeriesAttributes.EditMask.Times);
 
 			InitializeComponent();
+			UpdateMonthYearCombos(DateTime.Now);
 		}
-		
+
 		public bool SelectTask(UInt32 dwTaskID)
 		{
             if (m_DayView.SelectedTaskId == dwTaskID)
@@ -67,14 +71,9 @@ namespace DayViewUIExtension
 
 			bool selected = m_DayView.SelectTask(dwTaskID);
 
-			m_SettingMonthYear = true;
-
 			m_WeekLabel.StartDate = m_DayView.StartDate;
-			m_MonthCombo.SelectedMonth = m_DayView.StartDate.Month;
-			m_YearCombo.SelectedYear = m_DayView.StartDate.Year;
 
-			m_SettingMonthYear = false;
-
+			UpdateMonthYearCombos(m_DayView.StartDate);
 			UpdatedSelectedTaskDatesText();
 
 			return selected;
@@ -170,6 +169,11 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+		public bool DoIdleProcessing()
+		{
+			return false;
+		}
+
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
             Rectangle rect = new Rectangle();
@@ -212,7 +216,11 @@ namespace DayViewUIExtension
 			m_ToolbarRenderer.SetUITheme(theme);
 
 			m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			m_WeekLabel.BackColor = BackColor;
+
 			m_SelectedTaskDatesLabel.ForeColor = m_WeekLabel.ForeColor;
+			m_SelectedTaskDatesLabel.BackColor = BackColor;
+			m_SelectedTaskDates.BackColor = BackColor;
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -243,6 +251,9 @@ namespace DayViewUIExtension
 			m_DayView.DependencyDatesAreCalculated = prefs.GetProfileBool("Preferences", "AutoAdjustDependents", false);
             m_DayView.StrikeThruDoneTasks = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_DayView.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+			m_DayView.DisplayDatesInISO = prefs.GetProfileBool("Preferences", "DisplayDatesInISO", false);
+
+			m_SelectedTaskDates.SetISOFormat(m_DayView.DisplayDatesInISO);
 
 			m_AllowModifyTimeEstimate = !prefs.GetProfileBool("Preferences", "SyncTimeEstAndDates", false);
 
@@ -256,7 +267,11 @@ namespace DayViewUIExtension
 
             m_DayView.GridlineColor = ((gridColor == -1) ? DefGridColor : DrawingColor.ToColor((UInt32)gridColor));
             
-            if (!appOnly)
+            if (appOnly)
+			{
+				UpdateWorkingHourDisplay(); // else called in UpdateDayViewPreferences
+			}
+			else
             {
 				// private settings
 				m_DefaultTimeBlockEditMask = prefs.GetProfileEnum(key, "DefaultTimeBlockEditMask", m_DefaultTimeBlockEditMask);
@@ -279,10 +294,6 @@ namespace DayViewUIExtension
 				UpdateDayViewPreferences();
 				SetDaysShowing(prefs.GetProfileInt(key, "DaysShowing", 7));
             }
-			else
-			{
-				UpdateWorkingHourDisplay();
-			}
  		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
@@ -345,7 +356,7 @@ namespace DayViewUIExtension
 			CreateMonthYearCombos();
 			CreateToolbar();
 			CreateWeekLabel();
-			CreateSelectedTaskDatesLabel();
+			CreateSelectedTaskDates();
 
 			// Day view always comes last
 			CreateDayView();
@@ -384,7 +395,7 @@ namespace DayViewUIExtension
 
 		ToolStripMenuItem AddMenuItem(ContextMenuStrip menu, string text, Keys keys, int imageIndex)
 		{
-			var item = new ToolStripMenuItem(m_Trans.Translate(text));
+			var item = new ToolStripMenuItem(text);
 			item.ShortcutKeys = keys;
 			item.ShowShortcutKeys = (keys != Keys.None);
 
@@ -404,7 +415,7 @@ namespace DayViewUIExtension
 
 			var menu = new ContextMenuStrip();
 
-			if (appt is CustomTaskDateAttribute)
+			if (appt is TaskCustomDateAttribute)
 			{
 				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
 				item.Click += (s, a) => { m_DayView.DeleteSelectedCustomDate();	};
@@ -436,7 +447,9 @@ namespace DayViewUIExtension
 			if (menu.Items.Count > 0)
 			{
 				menu.Items.Add(new ToolStripSeparator());
-				menu.Items.Add(m_Trans.Translate("Cancel"));
+				menu.Items.Add("Cancel");
+
+				m_Trans.Translate(menu.Items, true);
 
 				menu.Renderer = m_ToolbarRenderer;
 				menu.Show(m_DayView, e.Location);
@@ -447,7 +460,7 @@ namespace DayViewUIExtension
 
 		private void CreateWeekLabel()
 		{
-			m_WeekLabel = new DayViewWeekLabel(m_Trans);
+			m_WeekLabel = new WeekLabel(m_Trans);
 
 			m_WeekLabel.Font = new Font(FontName, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);
@@ -458,25 +471,33 @@ namespace DayViewUIExtension
 			Controls.Add(m_WeekLabel);
 		}
 
-		private void CreateSelectedTaskDatesLabel()
+		private void CreateSelectedTaskDates()
 		{
-			m_SelectedTaskDatesLabel = new LinkLabelEx.LinkLabelEx();
+			// label
+			m_SelectedTaskDatesLabel = new Label()
+			{
+				Text = m_Trans.Translate("Selected Task Date Range", Translator.Type.Label),
+				Font = m_ControlsFont,
+				BackColor = BackColor,
+				AutoSize = true
+			};
 
-			m_SelectedTaskDatesLabel.Font = m_ControlsFont;
-			m_SelectedTaskDatesLabel.Location = new Point(m_Toolbar.Right, m_Toolbar.Top);
-			m_SelectedTaskDatesLabel.Height = m_Toolbar.Height;
-			m_SelectedTaskDatesLabel.Width = 1024;
-			m_SelectedTaskDatesLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-			m_SelectedTaskDatesLabel.AutoSize = false;
-			m_SelectedTaskDatesLabel.ActiveLinkColor = m_SelectedTaskDatesLabel.LinkColor;
-			m_SelectedTaskDatesLabel.VisitedLinkColor = m_SelectedTaskDatesLabel.LinkColor;
+			// Date range
+			m_SelectedTaskDates = new DateRangeLink()
+			{
+				Font = m_ControlsFont,
+				Width = 300,
+				BackColor = BackColor,
+				AutoSize = false
+			};
 
-			m_SelectedTaskDatesLabel.LinkClicked += new LinkLabelLinkClickedEventHandler(OnClickSelectedTaskDatesLink);
-			
+			m_SelectedTaskDates.ClickEvent += new EventHandler(OnClickSelectedTaskDatesLink);
+
 			Controls.Add(m_SelectedTaskDatesLabel);
+			Controls.Add(m_SelectedTaskDates);
 		}
 
-		protected void OnClickSelectedTaskDatesLink(object sender, LinkLabelLinkClickedEventArgs e)
+		protected void OnClickSelectedTaskDatesLink(object sender, EventArgs e)
 		{
 			m_DayView.EnsureSelectionVisible(false);
 			m_DayView.Focus();
@@ -509,11 +530,11 @@ namespace DayViewUIExtension
 			var btn1 = new ToolStripButton();
 			btn1.ImageIndex = 0;
 			btn1.Click += new EventHandler(OnGoToToday);
-			btn1.ToolTipText = m_Trans.Translate("Go To Today");
+			btn1.ToolTipText = "Go To Today";
 			m_Toolbar.Items.Add(btn1);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
-			string format = m_Trans.Translate("{0} Day View");
+			string format = m_Trans.Translate("{0} Day View", Translator.Type.ToolTip);
 
 			var btn2 = new ToolStripButton();
 			btn2.Name = "Show1DayView";
@@ -556,21 +577,21 @@ namespace DayViewUIExtension
 			btn7.Name = "NewTimeBlock";
 			btn7.ImageIndex = 6;
 			btn7.Click += new EventHandler(OnNewTimeBlock);
-			btn7.ToolTipText = m_Trans.Translate("New Time Block");
+			btn7.ToolTipText = "New Time Block";
 			m_Toolbar.Items.Add(btn7);
 
 			var btn8 = new ToolStripButton();
 			btn8.Name = "DeleteTimeBlock";
 			btn8.ImageIndex = 7;
 			btn8.Click += new EventHandler(OnDeleteTimeBlock);
-			btn8.ToolTipText = m_Trans.Translate("Delete Time Block");
+			btn8.ToolTipText = "Delete Time Block";
 			m_Toolbar.Items.Add(btn8);
 
 			var btn9 = new ToolStripButton();
 			btn9.Name = "DuplicateTimeBlock";
 			btn9.ImageIndex = 8;
 			btn9.Click += new EventHandler(OnDuplicateTimeBlock);
-			btn9.ToolTipText = m_Trans.Translate("Duplicate Time Block");
+			btn9.ToolTipText = "Duplicate Time Block";
 			m_Toolbar.Items.Add(btn9);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -579,14 +600,14 @@ namespace DayViewUIExtension
 			btn10.Name = "EditTimeBlockSeries";
 			btn10.ImageIndex = 9;
 			btn10.Click += new EventHandler(OnEditTimeBlockSeries);
-			btn10.ToolTipText = m_Trans.Translate("Edit Time Block Series");
+			btn10.ToolTipText = "Edit Time Block Series";
 			m_Toolbar.Items.Add(btn10);
 
 			var btn11 = new ToolStripButton();
 			btn11.Name = "DeleteTimeBlockSeries";
 			btn11.ImageIndex = 10;
 			btn11.Click += new EventHandler(OnDeleteTimeBlockSeries);
-			btn11.ToolTipText = m_Trans.Translate("Delete Time Block Series");
+			btn11.ToolTipText = "Delete Time Block Series";
 			m_Toolbar.Items.Add(btn11);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -594,7 +615,7 @@ namespace DayViewUIExtension
 			var btn12 = new ToolStripButton();
 			btn12.ImageIndex = 11;
 			btn12.Click += new EventHandler(OnPreferences);
-			btn12.ToolTipText = m_Trans.Translate("Preferences");
+			btn12.ToolTipText = "Preferences";
 			m_Toolbar.Items.Add(btn12);
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
@@ -602,12 +623,13 @@ namespace DayViewUIExtension
 			var btn13 = new ToolStripButton();
 			btn13.ImageIndex = 12;
 			btn13.Click += new EventHandler(OnHelp);
-			btn13.ToolTipText = m_Trans.Translate("Online Help");
+			btn13.ToolTipText = "Online Help";
 			m_Toolbar.Items.Add(btn13);
 
 			Toolbars.FixupButtonSizes(m_Toolbar);
 
 			Controls.Add(m_Toolbar);
+			m_Trans.Translate(m_Toolbar.Items, false);
 		}
 
 		private void OnGoToToday(object sender, EventArgs e)
@@ -650,7 +672,7 @@ namespace DayViewUIExtension
 			m_DayView.DaysShowing = numDays;
             m_WeekLabel.NumDays = numDays;
 
-			string format = m_Trans.Translate("Next/Previous {0} days");
+			string format = m_Trans.Translate("Next/Previous {0} days", Translator.Type.ToolTip);
 			m_DayView.HScrollTooltipText = String.Format(format, m_DayView.HScrollStep);
 
 			UpdateToolbarButtonStates();
@@ -683,7 +705,11 @@ namespace DayViewUIExtension
 
 				if (series != null)
 				{
-					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, m_WorkWeek, series.Attributes, m_DefaultTimeBlockEditMask);
+					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, 
+																m_WorkWeek, 
+																m_DayView.DisplayDatesInISO,
+																series.Attributes, 
+																m_DefaultTimeBlockEditMask);
 					FormsUtil.SetFont(dlg, m_ControlsFont);
 					m_Trans.Translate(dlg);
 
@@ -692,7 +718,10 @@ namespace DayViewUIExtension
 
 					m_DefaultTimeBlockEditMask = dlg.EditMask;
 
-					if (!m_DayView.EditSelectedTimeBlockSeries(dlg.Attributes, dlg.EditMask))
+					var attribs = dlg.Attributes;
+					attribs.SynchroniseDates(block.RealTask);
+
+					if (!m_DayView.EditSelectedTimeBlockSeries(attribs, dlg.EditMask))
 						return false;
 
 					return true;
@@ -750,6 +779,7 @@ namespace DayViewUIExtension
 			var dlg = new DayViewCreateTimeBlockDlg(m_DayView.TaskItems, 
 													new UIExtension.TaskIcon(m_HwndParent),
 													m_WorkWeek,
+													m_DayView.DisplayDatesInISO,
 													m_DayView.SelectedTaskId,
 													attribs);
 
@@ -765,9 +795,10 @@ namespace DayViewUIExtension
 			if (res != DialogResult.OK)
 				return false;
 
-			m_DefaultNewTimeBlockAttributes = dlg.Attributes;
+			m_DefaultNewTimeBlockAttributes = attribs = dlg.Attributes;
+			attribs.SynchroniseDates(m_DayView.GetAppointment(dlg.SelectedTaskId));
 
-			return m_DayView.CreateNewTaskBlockSeries(dlg.SelectedTaskId, dlg.Attributes);
+			return m_DayView.CreateNewTaskBlockSeries(dlg.SelectedTaskId, attribs);
 		}
 
 		private void OnDuplicateTimeBlock(object sender, EventArgs e)
@@ -812,6 +843,8 @@ namespace DayViewUIExtension
             m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
             m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
 			m_DayView.ShowFutureOccurrences = m_PrefsDlg.ShowFutureOccurrences;
+			m_DayView.ShowWorkingHoursOnly = m_PrefsDlg.ShowWorkingHoursOnly;
+			m_DayView.TreatOverdueTasksAsDueToday = m_PrefsDlg.TreatOverdueTasksAsDueToday;
 
 			m_DayView.SlotsPerHour = (60 / m_PrefsDlg.SlotMinutes);
 			m_DayView.MinSlotHeight = DPIScaling.Scale(m_PrefsDlg.MinSlotHeight);
@@ -839,26 +872,22 @@ namespace DayViewUIExtension
 
 		private void CreateMonthYearCombos()
 		{
-			m_MonthCombo = new DayViewMonthComboBox();
+			m_MonthCombo = new MonthComboBox();
 
 			m_MonthCombo.Font = m_ControlsFont;
             m_MonthCombo.Location = new Point(DPIScaling.Scale(0), ComboTop);
             m_MonthCombo.Size = DPIScaling.Scale(new Size(100, 16));
-			
-			m_MonthCombo.SelectedMonth = DateTime.Now.Month;
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
-			
+
 			Controls.Add(m_MonthCombo);
 
-			m_YearCombo = new DayViewYearComboBox();
+			m_YearCombo = new YearComboBox();
 
 			m_YearCombo.Font = m_ControlsFont;
             m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);
             m_YearCombo.Size = DPIScaling.Scale(new Size(100, 16));
-
-			m_YearCombo.SelectedYear = DateTime.Now.Year;
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
-			
+
 			Controls.Add(m_YearCombo);
 		}
 
@@ -976,40 +1005,56 @@ namespace DayViewUIExtension
 
 			if (m_DayView.GetSelectedTaskDates(out from, out to))
 			{
-				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range"));
-
-				String toDate = to.ToString((from.DayOfYear == to.DayOfYear) ? "t" : "g");
-				String dateRange = String.Format("{0} - {1}", from.ToString("g"), toDate);
-
-				m_SelectedTaskDatesLabel.Text = (label + dateRange);
-				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
+				m_SelectedTaskDates.SetRange(from, to);
+				m_SelectedTaskDatesLabel.Visible = true;
 			}
 			else
 			{
-				m_SelectedTaskDatesLabel.Text = String.Empty;
+				m_SelectedTaskDates.ClearRange();
+				m_SelectedTaskDatesLabel.Visible = false;
 			}
 		}
 
 		private void UpdatedSelectedTaskDatesPosition()
 		{
-			m_SelectedTaskDatesLabel.Location = new Point(m_WeekLabel.Right + 10, m_YearCombo.Bottom - m_SelectedTaskDatesLabel.Height);
+			// Align with the base of the combo text to match core app
+			Point pt = new Point(m_WeekLabel.Right + 10, 0);
+
+			pt.Y = (m_YearCombo.Top + m_YearCombo.Bottom + m_YearCombo.ItemHeight) / 2;
+			pt.Y -= m_SelectedTaskDatesLabel.Height;
+
+			// Label part
+			m_SelectedTaskDatesLabel.Location = pt;
+
+			// Link part
+			pt.X = (m_SelectedTaskDatesLabel.Right + 10);
+
+			m_SelectedTaskDates.Location = pt;
+			m_SelectedTaskDates.Height = m_SelectedTaskDatesLabel.Height;
+		}
+
+		private void UpdateMonthYearCombos(DateTime date)
+		{
+			if (!m_SettingDayViewStartDate)
+			{
+				m_SettingMonthYear = true;
+
+				int year = 0, month = 0, unused = 0;
+				DateUtil.FromDate(date, ref year, ref month, ref unused);
+
+				m_MonthCombo.SelectedMonth = month;
+				m_YearCombo.SelectedYear = year;
+
+				m_SettingMonthYear = false;
+			}
 		}
 
 		private void OnDayViewWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
 		{
 			m_WeekLabel.StartDate = args.StartDate;
 
-			if (!m_SettingDayViewStartDate)
-			{
-				m_SettingMonthYear = true;
-
-				m_MonthCombo.SelectedMonth = args.StartDate.Month;
-				m_YearCombo.SelectedYear = args.StartDate.Year;
-
-				UpdatedSelectedTaskDatesPosition();
-
-				m_SettingMonthYear = false;
-			}
+			UpdateMonthYearCombos(args.StartDate);
+			UpdatedSelectedTaskDatesPosition();
 		}
 
 		private void OnMonthYearSelChanged(object sender, EventArgs args)
@@ -1018,7 +1063,7 @@ namespace DayViewUIExtension
 			{
 				m_SettingDayViewStartDate = true;
 
-				m_DayView.StartDate = new DateTime(m_YearCombo.SelectedYear, m_MonthCombo.SelectedMonth, 1);
+				m_DayView.StartDate = DateUtil.ToDate(m_YearCombo.SelectedYear, m_MonthCombo.SelectedMonth, 1);
 				m_WeekLabel.StartDate = m_DayView.StartDate;
 
 				UpdatedSelectedTaskDatesPosition();
@@ -1176,7 +1221,7 @@ namespace DayViewUIExtension
             get
             {
                 if (m_MonthCombo != null)
-                    return m_MonthCombo.Bounds.Bottom + DPIScaling.Scale(4);
+                    return m_MonthCombo.Bounds.Bottom + DPIScaling.Scale(3);
 
                 // else
                 return 0;

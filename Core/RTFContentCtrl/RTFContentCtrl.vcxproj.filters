@@ -103,16 +103,13 @@
     <None Include="res\RTFContentCtrl.rc2">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="toolbar2.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\icon1.ico">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\help_button.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\toolbar.bmp">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -123,5 +120,10 @@
     <Library Include="..\3rdParty\Zlib\zlibstatD.lib">
       <Filter>Libs</Filter>
     </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

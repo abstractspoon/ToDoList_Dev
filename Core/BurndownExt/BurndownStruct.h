@@ -7,11 +7,15 @@
 
 #include "BurndownEnum.h"
 
-#include "..\shared\datehelper.h"
-
 #include "..\Interfaces\ITasklist.h"
 
 #include <afxtempl.h>
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CGraphsMap;
+class COleDateTimeRange;
+class IPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -20,21 +24,69 @@
 class CColorArray : public CDWordArray
 {
 public:
+	CColorArray() {}
+	
 	CColorArray& operator=(const CColorArray& other);
+	BOOL operator==(const CColorArray& other) const;
 
 	int Set(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);
+	BOOL SetAt(int nIndex, COLORREF color);
+
+	COLORREF GetAt(int nIndex) const;
 	BOOL Has(COLORREF color) const;
 };
 
-class CGraphColorMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CColorArray, CColorArray&>
+/////////////////////////////////////////////////////////////////////////////
+
+class CGraphColorMap : public CMap<CString, LPCTSTR, CColorArray, CColorArray&>
 {
 public:
-	void Copy(const CGraphColorMap& other);
+	BOOL Set(const CGraphColorMap& other);
 
-	int GetColorCount(BURNDOWN_GRAPH nGraph) const;
-	
-	COLORREF GetColor(BURNDOWN_GRAPH nGraph, int nIndex) const;
-	BOOL SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color);
+	int GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const;
+	BOOL SetColors(BURNDOWN_GRAPH nGraph, const CColorArray& aColors);
+
+	int GetColors(const CString& sCustAttribID, CColorArray& aColors) const;
+	BOOL SetColors(const CString& sCustAttribID, const CColorArray& aColors);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct GRAPHATTRIBUTES
+{
+	GRAPHATTRIBUTES() : nOption(BGO_INVALID) {}
+
+	BURNDOWN_GRAPHOPTION nOption;
+	CColorArray aColors;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+typedef CMap<CString, LPCTSTR, BURNDOWN_GRAPHOPTION, BURNDOWN_GRAPHOPTION&> CGraphOptionsMap;
+
+class CGraphAttributes
+{
+public:
+	BOOL Initialise(const CGraphsMap& mapGraphs);
+	BOOL Update(const CGraphsMap& mapGraphs);
+
+	BOOL IsEmpty() const { return (m_mapColors.GetCount() == 0); }
+	BOOL SetColors(const CGraphColorMap& mapColors);
+
+	int GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const;
+	BURNDOWN_GRAPHOPTION GetOption(BURNDOWN_GRAPH nGraph) const;
+	BOOL SetOption(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption);
+
+	int GetColors(const CString& sCustAttribID, CColorArray& aColors) const;
+	BURNDOWN_GRAPHOPTION GetOption(const CString& sCustAttribID) const;
+	BOOL SetOption(const CString& sCustAttribID, BURNDOWN_GRAPHOPTION nOption);
+
+	void Save(IPreferences* pPrefs, LPCTSTR szKey) const;
+	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey);
+
+protected:
+	CGraphColorMap m_mapColors;
+	CGraphOptionsMap m_mapOptions;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -63,13 +115,45 @@ struct GRAPHOPTION
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct CUSTOMATTRIBDEF
+{
+	CUSTOMATTRIBDEF();
+
+	BOOL operator==(const CUSTOMATTRIBDEF& other) const;
+	BOOL operator!=(const CUSTOMATTRIBDEF& other) const;
+
+	CString sUniqueID;
+	CString sLabel;
+	CString sListData;
+
+	BURNDOWN_GRAPH nGraph;
+	BURNDOWN_GRAPHTYPE nType;
+};
+
+// ------------------------------------------------------
+
+class CCustomAttributeDefinitionArray : public CArray<CUSTOMATTRIBDEF, CUSTOMATTRIBDEF&>
+{
+public:
+	int Find(const CString& sID) const;
+	int Find(BURNDOWN_GRAPH nGraph) const;
+
+	BOOL Update(const ITASKLISTBASE* pTasks);
+
+protected:
+	BURNDOWN_GRAPH GetFirstUnusedGraph() const;
+
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct STATSITEM 
 { 
 	STATSITEM(DWORD dwTaskID = 0);
 	virtual ~STATSITEM();
 
-	void Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
-	void Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	void Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef);
+	void Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef);
 
 	BOOL HasStart() const;
 	BOOL HasDue() const;
@@ -90,17 +174,21 @@ struct STATSITEM
 	CStringArray aAllocatedTo;
 	CStringArray aTags;
 
+	CString sTitle;
 	CString sStatus;
 	CString sAllocatedBy;
 	CString sPriority;
 	CString sRisk;
 	CString sVersion;
 
+	CMapStringToString mapCustomAttrib; // Maps unique ID to value
+
 protected:
 	void ValidateStartDate();
 
 	static void MinMax(const COleDateTime& date, COleDateTimeRange& dtExtents);
 
+	static void GetCustomAttributeValues(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef, CMapStringToString& mapValues);
 	static double GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate);
 	static COleDateTime GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static COleDateTime GetDueDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask);

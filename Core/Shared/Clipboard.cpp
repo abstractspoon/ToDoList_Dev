@@ -12,6 +12,12 @@
 #include <AFXOLE.H>
 
 //////////////////////////////////////////////////////////////////////
+
+const CString STARTHTML = _T("StartHTML:");
+const CString ENDHTML = _T("EndHTML:");
+const CString SRCURL = _T("SourceURL:");
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -221,10 +227,6 @@ CString& CClipboard::PackageHTMLFragment(CString& sContent, const CString& sSour
 
 CString& CClipboard::UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl)
 {
-	static CString STARTHTML = _T("StartHTML:");
-	static CString ENDHTML = _T("EndHTML:");
-	static CString SRCURL = _T("SourceURL:");
-
 	// check that it is packaged
 	int nStart = sContent.Find(STARTHTML);
 	
@@ -400,11 +402,10 @@ BOOL CClipboard::GetHTMLSourceLink(CString& sLink, BOOL bIgnoreAboutBlank) const
 	// Chrome and Firefox use CF_HTML encoded as multibyte
 	else if (GetText(sLink, CBF_HTML))
 	{
-#ifdef _UNICODE
 		// convert to unicode for unpackaging because
 		// CF_HTML is saved to the clipboard as UTF8
 		Misc::EncodeAsUnicode(sLink, CP_UTF8);
-#endif
+
 		CString sUrl;
 		UnpackageHTMLFragment(sLink, sUrl);
 

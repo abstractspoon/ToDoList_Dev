@@ -13,14 +13,19 @@ class CFileComboBox : public CAutoComboBox
 	DECLARE_DYNAMIC(CFileComboBox)
 		
 public:
-	CFileComboBox(int nEditStyle = FES_COMBOSTYLEBTN);
+	CFileComboBox(int nEditStyle = 0);
 	virtual ~CFileComboBox();
 
-	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE) { m_fileEdit.EnableStyle(nStyle, bEnable); }
+	void EnableEditStyle(int nStyle, BOOL bEnable = TRUE);
 	void SetCurrentFolder(LPCTSTR szFolder) { m_fileEdit.SetCurrentFolder(szFolder); }
 	CString GetCurrentFolder() const { return m_fileEdit.GetCurrentFolder(); }
+	CString GetFirstFile() const;
 
 	void SetReadOnly(BOOL bReadOnly = TRUE);
+	void SetDefaultButton(UINT nID) { m_fileEdit.SetDefaultButton(nID); }
+	void EnableButtonPadding(BOOL bEnable = TRUE) { m_fileEdit.EnableButtonPadding(bEnable); }
+
+	BOOL DoBrowse();
 
 	int GetFileList(CStringArray& aFiles);
 	int SetFileList(const CStringArray& aFiles);
@@ -41,20 +46,20 @@ protected:
 	
 protected:
 	CMultiFileEdit m_fileEdit;
-	CIconCache m_imageIcons;
+	CIconCache m_fileIcons;
 	BOOL m_bReadOnly;
 
 protected:
-	BOOL PreCreateWindow(CREATESTRUCT& cs);
-	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 protected:
 	afx_msg LRESULT OnFileEditBrowseChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditGetFileIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditGetFileTooltip(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wp, LPARAM lp);
+
 	afx_msg BOOL OnSelChange();
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnPaint();
 	DECLARE_MESSAGE_MAP()
 
@@ -63,16 +68,15 @@ protected:
 	LRESULT OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
-	BOOL InitFileEdit();
-	BOOL DeleteLBItem(int nItem);
-
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
-	virtual int GetMaxDropWidth() const { return 400; }
-	virtual UINT GetDrawEllipsis() const { return DT_PATH_ELLIPSIS; }
+	virtual int GetMaxDropWidth() const;
+	virtual UINT GetEllipsisStyle() const { return DT_PATH_ELLIPSIS; }
 	virtual void HandleReturnKey();
+	virtual BOOL DeleteLBItem(int nItem);
+	virtual void OnSubclassChild(HWND hwndChild);
 
 };
 

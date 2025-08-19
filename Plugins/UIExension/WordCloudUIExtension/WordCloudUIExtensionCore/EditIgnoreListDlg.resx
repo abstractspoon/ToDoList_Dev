@@ -117,29 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAA
-        AAD/AAACAAAAAP9fNyD+MAqT/i8Iq/40EE4AAAAAAAAAABuND1MolhdMN6YpNx6PEbAhkROhO60rLwAA
-        AAAAfwACAAAAAP6LXAv+Lwrg/i0H+f4vCbX+OBLRz38/EAAAAAAYhgibEIEC/xuNDdwhkROQFocJwBaH
-        CP85pikxAAAAAAAAAAD+OxZF/ysF//5HIE4AAAAA/nNFFqlxHAkAAAAAFYUHjxmJC/pSw0MiAAAAAAAA
-        AAAYiQrXGIoLsQAAAAAAAAAA/jEJU/8sBv/+UywuAAAAAAAAAAAA/wABAAAAABOFBpsnmBjEAAAAAAB/
-        AAoAAAAALJsdgxmJC+YAAAAAAAAAAP9MLCj/Kwb//i8Jh/+ffwj+RB1OuXMuCwAAAAAVhQabJpgZxwAA
-        AAAAbQAHAAAAACubHXsbiw3q////BP8AAAIAAAAA+TUUhvwsCv/9Mw///DUSzWaZsgoAAAAAFYYGmBqM
-        DNoAAAAAAAAAAAAAAAAdjg+jFocJ1gAAAAAAAP8CAAAAAAAAAAD+iAAc/lAAOQAAAAAAAAAAAAAAABeH
-        Co0NfgD/HIwNqT2pLiEikhRJFYUH/yiYGn8AAAAAAAAAACEh/kUWFP2tAw7+ngAc/jUqMv9gKiv3kW86
-        /icRigCQIJEU1COUFogZig7sE4UG9yGUEqXU/9QGAAAAACYm/i4HB/7+AAD//wgH/PoTEfvvBQT+/wQG
-        /P8uGv5oFJMAiSiYHs4AAAAAf/8AClnlMxQAAAAAAAAAAAAAAAAcHP5rAAD//wsL/t////8GcXH+EggI
-        /t8AAfz/LBb+XBKSAIgmlR3QAAAAAAwHj2cEAojXBAWC4ggKh8gLC40tLy/+QQYG//8DA///FBT/Zjo6
-        /iMHB/7TAQL8/yoT/loWkgCUKZ8WyyMIxDkEBYH/BweEhQoKhDAJCYlxEBCQLgAAAAAjI/5tCAj+6QcH
-        //8JCf//AAD++wID/v8iG/5nPM4AKkrXIzoFAYuHAgKA/woKiF8GBodRCgqKSBkZmR4AAP8B////Bv//
-        /wJra/4aKSn/RAIC/uMBAf//Hh78awAAAAAAAAAABweEjAEBgP8KCoiqCgqIqAICgf8GBoSYAAAAAAsL
-        /skHB/7JDg7+jwkJ/roAAP//BQX//yMj/jkAAAAAAAAAABgYmEgFBYT/CgqJShgYlyoDA4L/CQmJagAA
-        AAAPD/6YCgr+8QgI/v0JCf73Dg7+0hwc/mMAAAAAAAD/AQAAAAEAAAAADg6MewYGhugHB4fsDAyMoFVV
-        1AYAAAAAAAAAAP///wRPT/8QZmb/DwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABMTMwKLS20EQAA
-        AAAAAAAA5+cAAMMDAADfOQAA3zkAAM89AADDOQAA/xsAAM0DAACBPwAAmTEAAJknAADBzwAA+cAAAIHt
-        AACD8QAA//8AAA==
-</value>
-  </data>
 </root>

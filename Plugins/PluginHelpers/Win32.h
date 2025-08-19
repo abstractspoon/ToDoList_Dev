@@ -33,6 +33,10 @@ namespace Abstractspoon
 				static bool RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 				static bool AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 
+				static bool SetRTLReading(IntPtr hWnd, bool rtl);
+				static bool SyncRTLReadingWithParent(IntPtr hWnd);
+				static bool HasRTLReading(IntPtr hWnd);
+
 				static int GetHScrollPos(IntPtr hWnd);
 				static int GetVScrollPos(IntPtr hWnd);
 
@@ -47,17 +51,26 @@ namespace Abstractspoon
 				static bool SetEditMargins(IntPtr hWnd, int nAllMargins);
 				static bool SetEditMargins(IntPtr hWnd, int nLeft, int nTop, int nRight, int nBottom);
 
-				static void ActivateApp(IntPtr hWnd);
-				static int GetSystemDPI();
-
 				static int SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
 				static int PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
 
+				// Misc
+				static void ActivateApp(IntPtr hWnd);
+				static int GetSystemDPI();
 				static int GetWmNotifyCode(IntPtr lParam);
 				static void SetArrowCursor();
+				static HICON LoadHIcon(LPCWSTR szDllPath, UINT nIDIcon, int nSize, bool bScaleByDPI);
+				static void EnableExplorerTheming(IntPtr hWnd);
 
 			protected:
-				static void DoFrameChange(IntPtr hWnd);
+				static void DoFrameChange(IntPtr hWnd) { DoFrameChangeEx(hWnd, false); }
+				static void DoFrameChangeEx(IntPtr hWnd, bool bIncrementWidth);
+
+				ref class RTLChangeEventReceiver
+				{
+				public:
+					static void Handler(Object^ sender, EventArgs^ e);
+				};
 			};
 
 			public ref class DlgUnits

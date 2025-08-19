@@ -7,6 +7,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.IO;
+using System.Text;
 using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
@@ -30,6 +31,13 @@ namespace MDContentControl
 		bool m_RestoreInputFocusAfterUpdate = false;
 		bool m_SettingTextOrFont = false;
 
+		string m_TempFile = Path.GetTempFileName();
+
+		// -----------------------------------------------------------------
+
+		const int WS_EX_RTLREADING = 0x00002000;
+		const int WS_EX_LEFTSCROLLBAR = 0x00004000;
+
 		// -----------------------------------------------------------------
 
 		public MDContentControlForm()
@@ -46,6 +54,7 @@ namespace MDContentControl
 			contextMenuStrip1.ImageScalingSize = new Size(imageSize, imageSize);
 			contextMenuStrip1.Renderer = new UIThemeToolbarRenderer();
 
+			Win32.SyncRTLReadingWithParent(InputTextCtrl.Handle);
 			Win32.SetEditMargins(InputTextCtrl.Handle, DPIScaling.Scale(4));
 			Win32.RemoveClientEdge(InputTextCtrl.Handle);
 			Win32.AddBorder(InputTextCtrl.Handle);
@@ -139,7 +148,7 @@ namespace MDContentControl
 			return writer.ToString();
 		}
 
-		protected ContextMenuStrip ContextMenu { get { return contextMenuStrip1; } }
+		protected new ContextMenuStrip ContextMenu { get { return contextMenuStrip1; } }
 
 		public string OutputHtml
 		{
@@ -241,9 +250,14 @@ namespace MDContentControl
 			m_RestoreInputFocusAfterUpdate = restoreInputFocus;
 
 			if (PreviewBrowser.Document != null)
-				PreviewBrowser.DocumentText = OutputHtmlAsPage;
+			{
+ 				File.WriteAllText(m_TempFile, OutputHtmlAsPage, Encoding.UTF8);
+ 				PreviewBrowser.Navigate(m_TempFile);
+			}
 			else
+			{
 				Debug.Assert(false);
+			}
 		}
 
 		private void HtmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
@@ -266,11 +280,32 @@ namespace MDContentControl
 			}
 		}
 
+		private void HtmlPreview_Navigating(object sender, WebBrowserNavigatingEventArgs e)
+		{
+			var path = new Uri(e.Url.ToString()).LocalPath;
+
+			if (string.Compare(path, m_TempFile, true) != 0)
+			{
+				// Open everything other than m_TempFile externally
+				e.Cancel = true;
+				Process.Start(e.Url.ToString());
+			}
+
+		}
+
 		private void textBox1_TextChanged(object sender, EventArgs e)
 		{
 			// We don't restore the focus to the input control
 			// if the origin of the text change was external
 			UpdateOutput(!m_SettingTextOrFont);
+		}
+
+		protected override void OnHandleDestroyed(EventArgs e)
+		{
+			base.OnHandleDestroyed(e);
+
+			// Delete the temp file so we don't leave user data lying around
+			File.Delete(m_TempFile);
 		}
 
 		protected override void OnPaintBackground(PaintEventArgs e)
@@ -401,10 +436,30 @@ namespace MDContentControl
 
 		public bool ProcessMenuShortcut(UInt32 keypress)
 		{
-			// Return false for deleting to allow default handling
-			if (CommandHandling.GetMenuShortcutFromVirtualKey(keypress) == Keys.Delete)
-				return false;
+			const int WM_KEYDOWN = 0x0100;
 
+			switch (CommandHandling.GetKeyboardShortcutFromVirtualKey(keypress))
+			{
+			case Keys.Delete:
+				return false; // default handling
+
+			case Keys.Tab:
+				InputTextCtrl.Indent();
+				return true; // handled
+
+			case (Keys.Shift | Keys.Tab):
+				InputTextCtrl.Outdent();
+				return true; // handled
+
+			case (Keys.Control | Keys.Left):
+			case (Keys.Control | Keys.Right):
+			case (Keys.Shift | Keys.Left):
+			case (Keys.Shift | Keys.Right):
+				Win32.SendMessage(InputTextCtrl.Handle, WM_KEYDOWN, (UIntPtr)keypress, IntPtr.Zero);
+				return true; // handled
+			}
+
+			// All else
 			return CommandHandling.ProcessMenuShortcut(keypress, contextMenuStrip1.Items);
 		}
 

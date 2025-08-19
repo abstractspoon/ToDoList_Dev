@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Web.UI;
 
 using MSDN.Html.Editor;
+using UIComponents;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -29,9 +30,9 @@ namespace HTMLReportExporter
 
 		public void Initialise(Translator trans)
 		{
-			Items.Add(new Item(trans.Translate("Auto-generate header row"),  TaskTemplate.Layout.TableHeaderRowType.AutoGenerate));
-			Items.Add(new Item(trans.Translate("First row is header row"),   TaskTemplate.Layout.TableHeaderRowType.FirstRow));
-			Items.Add(new Item(trans.Translate("No header row is required"), TaskTemplate.Layout.TableHeaderRowType.NotRequired));
+			Items.Add(new Item(trans.Translate("Auto-generate header row", Translator.Type.ComboBox),  TaskTemplate.Layout.TableHeaderRowType.AutoGenerate));
+			Items.Add(new Item(trans.Translate("First row is header row", Translator.Type.ComboBox),   TaskTemplate.Layout.TableHeaderRowType.FirstRow));
+			Items.Add(new Item(trans.Translate("No header row is required", Translator.Type.ComboBox), TaskTemplate.Layout.TableHeaderRowType.NotRequired));
 
 			SelectedIndex = 0;
 		}
@@ -91,8 +92,8 @@ namespace HTMLReportExporter
 		{
 			base.SetTranslator(trans);
 
-			m_Trans.Translate(ContextMenu.Items);
-			m_Trans.Translate(m_ToolStripAttributeMenu.DropDownItems);
+			m_Trans.Translate(ContextMenu.Items, true);
+			m_Trans.Translate(m_ToolStripAttributeMenu.DropDownItems, true);
 
 			Toolbars.Sort(m_ToolStripAttributeMenu.DropDownItems);
 
@@ -316,7 +317,10 @@ namespace HTMLReportExporter
 				// the user to insert a space first and then try again
 				if (placeHolderToLeft && placeHolderToRight)
 				{
-					MessageBox.Show(m_Trans.Translate("Please insert at least one space between the existing placeholders and then try again."), m_Trans.Translate("Report Builder"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+					MessageBox.Show(m_Trans.Translate("Please insert at least one space between the existing placeholders and then try again.", Translator.Type.Text), 
+									m_Trans.Translate("Report Builder", Translator.Type.Dialog), 
+									MessageBoxButtons.OK, 
+									MessageBoxIcon.Information);
 					Focus();
 
 					return;
@@ -464,8 +468,13 @@ namespace HTMLReportExporter
 		{
 			switch (placeHolderText)
 			{
-				case "reportTitle": tooltip = m_Trans.Translate("Report Title"); return true;
-				case "reportDate": tooltip = m_Trans.Translate("Report Date"); return true;
+			case "reportTitle":
+				tooltip = m_Trans.Translate("Report Title", Translator.Type.ToolTip);
+				return true;
+
+			case "reportDate":
+				tooltip = m_Trans.Translate("Report Date", Translator.Type.ToolTip);
+				return true;
 			}
 
 			return base.GetPlaceholderTooltip(placeHolderText, out tooltip);
@@ -512,19 +521,18 @@ namespace HTMLReportExporter
 
 		private void OnBackColorClick(object sender, EventArgs e)
 		{
-			using (ColorDialog colorDialog = new ColorDialog())
+			using (var dlg = new ColorDialogEx())
 			{
-				colorDialog.FullOpen = true;
-				colorDialog.AnyColor = true;
-				colorDialog.SolidColorOnly = true;
-				colorDialog.AllowFullOpen = true;
-				colorDialog.Color = (HasBackColor ? BackColor : Color.White);
-				//colorDialog.CustomColors = _customColors;
+				dlg.FullOpen = true;
+				dlg.AnyColor = true;
+				dlg.SolidColorOnly = true;
+				dlg.AllowFullOpen = true;
+				dlg.Color = (HasBackColor ? BackColor : Color.White);
 
-				if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				if (dlg.ShowDialog() == DialogResult.OK)
 				{
 					//_customColors = colorDialog.CustomColors;
-					BackColor = colorDialog.Color;
+					BackColor = dlg.Color;
 				}
 			}
 		}
@@ -578,8 +586,13 @@ namespace HTMLReportExporter
 		{
 			switch (placeHolderText)
 			{
-				case "reportTitle": tooltip = m_Trans.Translate("Report Title"); return true;
-				case "reportDate": tooltip = m_Trans.Translate("Report Date"); return true;
+			case "reportTitle":
+				tooltip = m_Trans.Translate("Report Title", Translator.Type.ToolTip);
+				return true;
+
+			case "reportDate":
+				tooltip = m_Trans.Translate("Report Date", Translator.Type.ToolTip);
+				return true;
 			}
 
 			return base.GetPlaceholderTooltip(placeHolderText, out tooltip);
@@ -646,39 +659,39 @@ namespace HTMLReportExporter
 
 			string levelLabel;
 
-			if (GetLevelLabel(level, out levelLabel))
+			if (GetLevelLabel(level, Translator.Type.ToolTip, out levelLabel))
 				tooltip = String.Format("{0}\n{1}", tooltip, levelLabel);
 
 			return true;
 		}
 
-		string GetLevelLabel(int level)
+		string GetLevelLabel(int level, Translator.Type type)
 		{
 			string label;
-			GetLevelLabel(level, out label);
+			GetLevelLabel(level, type, out label);
 
 			return label;
 		}
 		
-		bool GetLevelLabel(int level, out string label)
+		bool GetLevelLabel(int level, Translator.Type type, out string label)
 		{
 			label = String.Empty;
 
 			switch (level)
 			{
-				case 0:		label = m_Trans.Translate("'Leaf' tasks");			break;
-				case 1:		label = m_Trans.Translate("Top-level tasks");		break;
-				case 2:		label = m_Trans.Translate("1st subtask level");		break;
-				case 3:		label = m_Trans.Translate("2nd subtask level");		break;
-				case 4:		label = m_Trans.Translate("3rd subtask level");		break;
-				case 5:		label = m_Trans.Translate("4th subtask level");		break;
-				case 6:		label = m_Trans.Translate("5th subtask level");		break;
-				case 7:		label = m_Trans.Translate("6th subtask level");		break;
-				case 8:		label = m_Trans.Translate("7th subtask level");		break;
-				case 9:		label = m_Trans.Translate("8th subtask level");		break;
-				case 10:	label = m_Trans.Translate("9th subtask level");		break;
+				case 0:		label = m_Trans.Translate("'Leaf' tasks",		type);	break;
+				case 1:		label = m_Trans.Translate("Top-level tasks",	type);	break;
+				case 2:		label = m_Trans.Translate("1st subtask level",	type);	break;
+				case 3:		label = m_Trans.Translate("2nd subtask level",	type);	break;
+				case 4:		label = m_Trans.Translate("3rd subtask level",	type);	break;
+				case 5:		label = m_Trans.Translate("4th subtask level",	type);	break;
+				case 6:		label = m_Trans.Translate("5th subtask level",	type);	break;
+				case 7:		label = m_Trans.Translate("6th subtask level",	type);	break;
+				case 8:		label = m_Trans.Translate("7th subtask level",	type);	break;
+				case 9:		label = m_Trans.Translate("8th subtask level",	type);	break;
+				case 10:	label = m_Trans.Translate("9th subtask level",	type);	break;
 
-				case -1:	label = m_Trans.Translate("Unspecified Levels");	break;
+				case -1:	label = m_Trans.Translate("Unspecified Levels", type);	break;
 			}
 
 			return !String.IsNullOrEmpty(label);
@@ -690,7 +703,7 @@ namespace HTMLReportExporter
 			{
 				if (basePlaceholder.Equals(attrib.BasePlaceholder))
 				{
-					label = m_Trans.Translate(attrib.Label);
+					label = m_Trans.Translate(attrib.Label, Translator.Type.ToolTip);
 					return true;
 				}
 			}
@@ -706,17 +719,17 @@ namespace HTMLReportExporter
 			// additional 'level' menu
 			m_ToolStripAttributeLevelMenu = new ToolStripDropDownButton() { ForeColor = SystemColors.WindowText }; 
 
-			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(1)) { Name = "1" });
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(1, Translator.Type.Menu)) { Name = "1" });
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
 
 			for (int level = 2; level <= 9; level++)
-				m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(level))	{ Name = level.ToString() });
+				m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(level, Translator.Type.Menu))	{ Name = level.ToString() });
 
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
-			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(0))	{ Name = "0" });
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(0, Translator.Type.Menu))	{ Name = "0" });
 
 			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripSeparator());
-			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(-1)) { Name = "-1" });
+			m_ToolStripAttributeLevelMenu.DropDownItems.Add(new ToolStripMenuItem(GetLevelLabel(-1, Translator.Type.Menu)) { Name = "-1" });
 			
 			m_ToolStripAttributeLevelMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
 			m_ToolStripAttributeLevelMenu.Text = "Task Depth";
@@ -734,7 +747,7 @@ namespace HTMLReportExporter
 		{
 			base.SetTranslator(trans);
 
-			m_Trans.Translate(m_ToolStripAttributeLevelMenu.DropDownItems);
+			m_Trans.Translate(m_ToolStripAttributeLevelMenu.DropDownItems, true);
 		}
 
 		protected void OnAttributeLevelMenuClick(object sender, EventArgs args)
@@ -809,7 +822,7 @@ namespace HTMLReportExporter
 				{
 					var menuItem = new ToolStripMenuItem();
 
-					menuItem.Text = String.Format(m_Trans.Translate("{0} (Custom)"), attrib.Value);
+					menuItem.Text = String.Format(m_Trans.Translate("{0} (Custom)", Translator.Type.Menu), attrib.Value);
 					menuItem.Name = attrib.Key.ToLower();
 					menuItem.Click += new System.EventHandler(base.OnAttributeMenuClick);
 

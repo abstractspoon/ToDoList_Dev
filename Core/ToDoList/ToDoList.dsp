@@ -58,7 +58,7 @@ LINK32=link.exe
 # ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /pdbtype:sept
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Debug	copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y	copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y	unicode_debug\TDLTest.exe
+PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Debug	copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y	copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "ToDoList - Win32 Unicode Release"
@@ -92,7 +92,7 @@ LINK32=link.exe
 # SUBTRACT LINK32 /pdb:none /map /nodefaultlib
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Release	copy unicode_release\ToDoList.exe ..\..\Plugins\release /y	unicode_release\TDLTest.exe
+PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Release	copy unicode_release\ToDoList.exe ..\..\Plugins\release /y
 # End Special Build Tool
 
 !ENDIF 
@@ -195,10 +195,6 @@ SOURCE=.\res\custattrib_toolbar_std.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\custom_attrib_icons.ico
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\datetime_toolbar.bmp
 # End Source File
 # Begin Source File
@@ -267,11 +263,19 @@ SOURCE=.\res\quickfind_prev.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\reminder.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\reset.ico
 # End Source File
 # Begin Source File
 
 SOURCE=.\res\search_prefs.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\select_icon.ico
 # End Source File
 # Begin Source File
 
@@ -328,6 +332,10 @@ SOURCE=.\res\timetrac.bmp
 # Begin Source File
 
 SOURCE=.\res\timetrack_btns.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\timetrack_goto.ico
 # End Source File
 # Begin Source File
 

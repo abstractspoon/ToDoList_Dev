@@ -19,8 +19,6 @@ class CTDCImportExportMgr;
 
 class CPreferencesFile2Page : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesFile2Page)
-
 // Construction
 public:
 	CPreferencesFile2Page(const CTDCImportExportMgr* pExportMgr = NULL);
@@ -48,7 +46,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesFile2Page)
-	enum { IDD = IDD_PREFFILE2_PAGE };
 	CComboBox	m_cbKeepBackups;
 	CFileEdit	m_eBackupLocation;
 	BOOL	m_bBackupOnSave;

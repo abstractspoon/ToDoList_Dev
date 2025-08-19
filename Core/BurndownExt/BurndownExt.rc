@@ -69,7 +69,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_STATISTICS          ICON    DISCARDABLE     "res\\icon1.ico"
+IDR_STATISTICS          ICON    DISCARDABLE     "res\\burndown.ico"
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -144,18 +144,19 @@ BEGIN
     COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
-    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,253,12,49,13
-    CONTROL         "",IDC_GRAPH,"Button",BS_OWNERDRAW | WS_TABSTOP,8,38,298,
-                    234
-    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,310,2,167,
-                    8
-    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,309,
-                    12,112,13
     LTEXT           "Option",IDC_OPTIONS_LABEL,126,2,120,8
     COMBOBOX        IDC_OPTIONS,126,13,121,118,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
+    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,253,12,49,13
+    LTEXT           "Acti&ve Date Range:",IDC_ACTIVEDATERANGE_LABEL,310,2,65,
+                    8
+    LTEXT           "from-to",IDC_ACTIVEDATERANGE_TEXT,381,2,96,8
+    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,309,
+                    12,112,13
+    CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
+    CONTROL         "",IDC_GRAPH,"Button",BS_OWNERDRAW | WS_TABSTOP,8,38,298,
+                    234
 END
 
 IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 358, 200
@@ -165,8 +166,7 @@ BEGIN
     LTEXT           "&Graph colours",IDC_COLORSLABEL,7,23,344,8
     CONTROL         "List1",IDC_GRAPHCOLORS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
-                    LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | 
-                    WS_TABSTOP,7,36,344,157
+                    LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,7,36,344,157
     CONTROL         "Include 'empty' values in Frequency Distribution graphs",
                     IDC_SHOWEMPTYINFREQUENCYCHARTS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,6,344,10
@@ -247,7 +247,7 @@ BEGIN
     IDS_DISPLAY_REMAINING   "Days Remaining"
     IDS_TOOLTIP_INCOMPLETE  "%s\n%d Tasks"
     IDS_TOOLTIP_REMAINING   "%s\n%d Estimated\n%d Actual"
-    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%d Estimated\n%d Spent"
+    IDS_TOOLTIP_ESTIMATEDSPENT "%s\n%0.2f Estimated\n%0.2f Spent"
     IDS_TOOLTIP_ATTRIBFREQUENCY "%s\n%d Tasks"
 END
 
@@ -265,7 +265,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TREND_NONE          "<none>"
+    IDS_NONE                "<none>"
     IDS_FREQUENCYDIST       "Frequency Distributions"
     IDS_TIMESERIES          "Time Series"
     IDS_FREQUENCY_CATEGORY  "Category Frequency"
@@ -286,6 +286,14 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_BURNDOWN_PREF        "\nGraphs Preferences"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_MINMAX              "Min Max"
+    IDS_DISPLAY_DUEDONEDATES "Due/Completion Dates"
+    IDS_TOOLTIP_DUEDONEDATES "%s\nDue %s\nCompleted %s"
+    IDS_CUSTOMATTRIB_GRAPH  "%s (Custom)"
 END
 
 #endif    // English (Australia) resources

@@ -43,7 +43,6 @@ enum
 	HMX_RENDER_ALL			= 0xffff
 };
 
-
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart window
 
@@ -52,6 +51,7 @@ class CHMXChart : public CWnd
 // Construction
 public:
 	CHMXChart();
+	virtual ~CHMXChart();
 
 // Attributes
 public:
@@ -59,110 +59,97 @@ public:
 	void SetRenderFlags(DWORD dwFlags, BOOL bRedraw = TRUE);
 	DWORD ModifyRenderFlags(DWORD dwRemove, DWORD dwAdd, BOOL bRedraw = TRUE);
 	BOOL HasRenderFlag(DWORD dwFlag) const { return ((m_dwRenderFlags & dwFlag) == dwFlag); }
+	CSize GetDataArea() const { return m_rectData.Size(); }
+	BOOL HasData() const { return m_datasets[0].HasData(); }
 
-// Operations
 public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CHMXChart)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-
 	// export chart
-	virtual bool		CopyToFile( CString sFile );
-	virtual bool		CopyToFile();
-	virtual bool		CopyToClipboard();
+	virtual BOOL		CopyToFile( CString sFile );
+	virtual BOOL		CopyToFile();
+	virtual BOOL		CopyToClipboard();
 
 	// X labels scale functions
-	virtual bool		SetXLabelStep( int nStep );
+	virtual BOOL		SetXLabelStep( int nStep );
 	virtual int			GetXLabelStep() const;
-	void				SetXLabelsAreTicks(bool bTicks = TRUE);
+	void				SetXLabelsAreTicks(BOOL bTicks = TRUE);
 	void				SetXLabelAngle(int nDegrees);
 
-	virtual bool		SetXScaleLabel( int nIndex, CString str );
-	virtual bool		GetXScaleLabel( int nIndex, CString& str ) const;
+	virtual BOOL		SetXScaleLabel( int nIndex, CString str );
+	virtual BOOL		GetXScaleLabel( int nIndex, CString& str ) const;
 	void				ClearXScaleLabels();
 
 	// X text
-	virtual bool		SetXText( CString sText );
+	virtual BOOL		SetXText( CString sText );
 	virtual CString		GetXText() const;
 
 	// Y text
-	virtual bool		SetYText( CString sText );
+	virtual BOOL		SetYText( CString sText );
 	virtual CString		GetYText() const;
 
 	// useful Y functions
-	virtual bool		SetRoundY( double nRound );
+	virtual BOOL		SetRoundY( double dRound );
 	virtual double		GetRoundY() const;
 
-	virtual bool		SetNumYTicks( int nTicks );
+	virtual BOOL		SetNumYTicks( int nTicks );
 	virtual int			GetNumYTicks() const;
 
 	// main title functions
-	virtual	bool		SetTitle( CString strTitle );
+	virtual	BOOL		SetTitle( CString strTitle );
 	virtual	CString		GetTitle() const;
 
 	// background functions
-	virtual bool		SetBkGnd( COLORREF clr );
+	virtual BOOL		SetBkGnd( COLORREF clr );
 	virtual COLORREF	GetBkGnd() const;
 
-	virtual bool		SetGridColor(COLORREF clr);
+	virtual BOOL		SetGridColor(COLORREF clr);
 	virtual COLORREF	GetGridColor() const;
 
 	// dataset functions
-	virtual bool		SetDatasetLineColor( int nDatasetIndex, COLORREF clr );
-	virtual bool		GetDatasetLineColor( int nDatasetIndex, COLORREF& clr ) const;
-	virtual bool		SetDatasetFillColor( int nDatasetIndex, COLORREF clr );
-	virtual bool		GetDatasetFillColor( int nDatasetIndex, COLORREF& clr ) const;
+	virtual BOOL		SetDatasetLineColor( int nDatasetIndex, COLORREF clr );
+	virtual BOOL		GetDatasetLineColor( int nDatasetIndex, COLORREF& clr ) const;
+	virtual BOOL		SetDatasetFillColor( int nDatasetIndex, COLORREF clr );
+	virtual BOOL		GetDatasetFillColor( int nDatasetIndex, COLORREF& clr ) const;
 
-	virtual bool		SetDatasetSizeFactor( int nDatasetIndex, int nSize );
-	virtual bool		GetDatasetLineThickness( int nDatasetIndex, int& nSize ) const;
+	virtual BOOL		SetDatasetSizeFactor( int nDatasetIndex, int nSize );
+	virtual BOOL		GetDatasetLineThickness( int nDatasetIndex, int& nSize ) const;
 
-	virtual bool		SetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE nStyle );
-	virtual bool		GetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE& nStyle ) const;
+	virtual BOOL		SetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE nStyle );
+	virtual BOOL		GetDatasetStyle( int nDatasetIndex, HMX_DATASET_STYLE& nStyle ) const;
 
-	virtual bool		SetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER nMarker );
-	virtual bool		GetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER& nMarker ) const;
+	virtual BOOL		SetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER nMarker );
+	virtual BOOL		GetDatasetMarker( int nDatasetIndex, HMX_DATASET_MARKER& nMarker ) const;
 	
-	virtual bool		AddData( int nDatasetIndex, double nData );
-	virtual bool		SetData( int nDatasetIndex, int nIndex, double nData );
-	virtual bool 		GetData( int nDatasetIndex, int nIndex, double& nData ) const;
+	virtual BOOL		AddData( int nDatasetIndex, double dData );
+	virtual BOOL		SetData( int nDatasetIndex, int nIndex, double dData );
+	virtual BOOL 		GetData( int nDatasetIndex, int nIndex, double& dData ) const;
 
-	virtual bool		ResetDataset(int nDatasetIndex);
+	virtual BOOL		ResetDataset(int nDatasetIndex);
 	virtual void		ResetDatasets();
-	virtual bool		ClearData( int nDatasetIndex);
+	virtual BOOL		ClearData( int nDatasetIndex);
 	virtual void		ClearData();
-	CSize				GetDataArea() const { return m_rectData.Size(); }
-	bool				HasData() const { return m_datasets[0].HasData(); }
 
-	virtual bool		SetDatasetMin(int nDatasetIndex, double dMin);
-	virtual bool		SetDatasetMax(int nDatasetIndex, double dMax);
-	virtual bool		GetMinMax(double& nMin, double& nMax, bool bDataOnly) const;	// get min & max
+	virtual BOOL		SetDatasetMin(int nDatasetIndex, double dMin);
+	virtual BOOL		SetDatasetMax(int nDatasetIndex, double dMax);
+	virtual BOOL		GetMinMax(double& dMin, double& dnMax, BOOL bDataOnly) const;
 
 	// useful global functions
-	virtual bool		CalcDatas();
-	virtual bool		Redraw();
-																							// the clipboard
-
-	virtual ~CHMXChart();
+	virtual BOOL		CalcDatas();
+	virtual BOOL		Redraw();
 
 	// Generated message map functions
 protected:
 	
-	virtual bool PaintBkGnd(CDC &dc);						
-	virtual bool DrawTitle( CDC &dc );						
-	virtual bool DrawGrid( CDC& dc);						
-	virtual bool DrawAxes(CDC &dc);							
-	virtual bool DrawHorzGridLines( CDC &dc);					
-	virtual bool DrawVertGridLines( CDC &dc);					
-	virtual bool DrawBaseline( CDC& dc );					
-	virtual bool DrawXScale( CDC& dc);						
-	virtual bool DrawYScale( CDC& dc);						
-	virtual bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity = 255);	
-	virtual bool DrawDatasets(CDC &dc);						
+	virtual BOOL PaintBkGnd(CDC &dc);						
+	virtual BOOL DrawTitle( CDC &dc );						
+	virtual BOOL DrawGrid( CDC& dc);						
+	virtual BOOL DrawAxes(CDC &dc);							
+	virtual BOOL DrawHorzGridLines( CDC &dc);					
+	virtual BOOL DrawVertGridLines( CDC &dc);					
+	virtual BOOL DrawBaseline( CDC& dc );					
+	virtual BOOL DrawXScale( CDC& dc);						
+	virtual BOOL DrawYScale( CDC& dc);						
+	virtual BOOL DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity = 255);	
+	virtual BOOL DrawDatasets(CDC &dc);						
 	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 
 	virtual COLORREF GetLineColor(int nDatasetIndex, double dValue) const;
@@ -173,18 +160,29 @@ protected:
 	virtual int CalcYScaleFontSize(BOOL bTitle) const;
 	virtual int CalcTitleFontSize() const;
 
+	virtual BOOL XScaleHasRTLDates() const { return FALSE; }
+	virtual BOOL YScaleHasRTLDates() const { return FALSE; }
+
 	CStringArray	m_strarrScaleXLabel;					// x labels
+
 	int				m_nXLabelStep;							// x label step
-	double			m_nRoundY;								// y scale rounding
 	int				m_nNumYTicks;							// y ticks
 	int				m_nXMax;								// max x value
-	double			m_nYMax;								// max y value
-	double			m_nYMin;								// min y value
-	CHMXDataset		m_datasets[HMX_MAX_DATASET];			// datasets
 	int				m_nCountDataset;						// dataset counter
+	int				m_nXLabelDegrees;
+	int				m_nFontPixelSize;						// -1 -> dynamic sizing
+
+	double			m_dRoundY;								// y scale rounding
+	double			m_dYMax;								// max y value
+	double			m_dYMin;								// min y value
+
+	CHMXDataset		m_datasets[HMX_MAX_DATASET];			// datasets
+
 	CString			m_strTitle;								// main title
 	CString			m_strYText;								// Y text
 	CString			m_strXText;								// X text
+	CString			m_strFont;
+
 	CRect			m_rectUsable;							// usable area
 	CRect			m_rectData;								// data area
 	CRect			m_rectGraph;							// graph area
@@ -192,14 +190,12 @@ protected:
 	CRect			m_rectYAxis;							// y axis area
 	CRect			m_rectTitle;							// main title area
 	CRect			m_rectArea;								// entire control area
+
 	COLORREF		m_clrBkGnd;								// background color
 	COLORREF		m_clrGrid;	
-	bool			m_bXLabelsAreTicks;
-	int				m_nXLabelDegrees;
-	DWORD			m_dwRenderFlags;
 
-	CString			m_strFont;
-	int				m_nFontPixelSize;						// -1 -> dynamic sizing
+	BOOL			m_bXLabelsAreTicks;
+	DWORD			m_dwRenderFlags;
 
 	CPen			m_penGrid;
 
@@ -213,16 +209,20 @@ protected:
 
 protected:
 	int GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&>& points, BOOL bArea) const;
-	BOOL GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int nSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const;
+	BOOL GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, float fSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const;
 	int CalcAxisSize(const CRect& rAvail, CDC& dc) const;
 	BOOL CreateXAxisFont(BOOL bTitle, CFont& font) const;
 	BOOL CreateYAxisFont(BOOL bTitle, CFont& font) const;
+	BOOL GetMinMax(double& dMin, double& dMax, BOOL bDataOnly, double dIgnoreVal) const;
+	UINT GetXScaleDrawFlags() const;
+	UINT GetYScaleDrawFlags() const;
 
-	bool DrawDataset(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltItemColors, BYTE fillOpacity = 255);
-	bool DrawLineGraph(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltMarkerColors, BYTE fillOpacity = 255);
-	bool DrawAreaGraph(CDC &dc, const CHMXDataset& dataset, BYTE fillOpacity = 255);
-	bool DrawBarChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltBarColors, BYTE fillOpacity = 255);
-	bool DrawPieChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltPieColors, BYTE fillOpacity = 255);
+	BOOL DrawDataset(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltItemColors, BYTE fillOpacity = 255);
+	BOOL DrawLineGraph(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltMarkerColors, BYTE fillOpacity = 255);
+	BOOL DrawAreaGraph(CDC &dc, const CHMXDataset& dataset, BYTE fillOpacity = 255);
+	BOOL DrawBarChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltBarColors, BYTE fillOpacity = 255);
+	BOOL DrawPieChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltPieColors, BYTE fillOpacity = 255);
+	BOOL DrawMinMaxChart(CDC& dc, const CHMXDataset& dsMin, const CHMXDataset& dsMax, BYTE fillOpacity = 255);
 
 	struct PIESEGMENT
 	{
@@ -238,13 +238,15 @@ protected:
 		return ((nDatasetIndex >= 0) && (nDatasetIndex < HMX_MAX_DATASET));
 	}
 
-	BOOL GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double nBarWidth = -1) const;
-	BOOL GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double nBarWidth = -1) const;
+	float CalcRelativeYValue(double dDataValue) const;
+	BOOL GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double dBarWidth = -1) const;
+	BOOL GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double dBarWidth = -1) const;
 
 	static BOOL CreateDefaultItemDrawingTools(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 	static BOOL CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 	static float NormaliseAngle(float fDegrees);
-	
+	static float ScaleByDPIFactor(int nValue);
+
 	DECLARE_HANDLE(HDIB);
 
 	HANDLE DDBToDIB( CBitmap& bitmap, DWORD dwCompression, CPalette* pPal );	

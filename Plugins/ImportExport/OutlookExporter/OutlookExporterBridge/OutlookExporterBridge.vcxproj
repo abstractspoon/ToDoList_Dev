@@ -115,7 +115,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\outlook_16.ico" />
+    <None Include="..\OutlookExporterCore\Resources\outlook_16.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OutlookExporterCore\OutlookExporterCore.csproj">

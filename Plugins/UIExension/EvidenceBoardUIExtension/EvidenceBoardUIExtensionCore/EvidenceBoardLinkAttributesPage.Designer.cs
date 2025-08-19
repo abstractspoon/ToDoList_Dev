@@ -71,7 +71,7 @@
             "5"});
 			this.m_ThicknessCombo.Location = new System.Drawing.Point(111, 31);
 			this.m_ThicknessCombo.Name = "m_ThicknessCombo";
-			this.m_ThicknessCombo.Size = new System.Drawing.Size(172, 21);
+			this.m_ThicknessCombo.Size = new System.Drawing.Size(173, 21);
 			this.m_ThicknessCombo.TabIndex = 14;
 			// 
 			// m_ArrowsLabel
@@ -123,7 +123,7 @@
 			this.m_ColorButton.Size = new System.Drawing.Size(75, 23);
 			this.m_ColorButton.TabIndex = 8;
 			this.m_ColorButton.Text = "Set...";
-			this.m_ColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_ColorButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_ColorButton.UseVisualStyleBackColor = true;
 			// 
 			// m_ColorCheckBox

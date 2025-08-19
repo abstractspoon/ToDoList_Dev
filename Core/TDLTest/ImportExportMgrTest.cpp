@@ -16,7 +16,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CImportExportMgrTest::CImportExportMgrTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CImportExportMgrTest::CImportExportMgrTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CImportExportMgrTest"), utils)
 {
 
 }

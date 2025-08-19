@@ -95,6 +95,8 @@
       </DataExecutionPrevention>
       <ImportLibrary>.\Unicode_Release/KanbanBoard.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>..\3rdParty\Detours\lib.x86\detours.lib;legacy_stdio_definitions.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -203,8 +205,6 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\column_toolbar.bmp" />
-    <None Include="res\column_toolbar_std.bmp" />
     <None Include="res\help_button.ico" />
     <None Include="res\KanbanBoard.rc2" />
     <None Include="res\toolbar.bmp" />

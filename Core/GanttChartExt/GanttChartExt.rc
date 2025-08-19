@@ -70,7 +70,7 @@ END
 IDD_GANTTTREE_DIALOG DIALOGEX 0, 0, 594, 274
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
     COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
@@ -79,14 +79,15 @@ BEGIN
     COMBOBOX        IDC_SNAPMODES,159,13,79,161,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Snap Mode",IDC_SNAPMODES_LABEL,159,2,79,8
-    LTEXT           "&Visible Date Range",IDC_ACTIVEDATERANGE_LABEL,354,3,
-                    233,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,243,12,106,13
     CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,353,
                     12,112,13
     CONTROL         "",IDC_GANTTCHART_FRAME,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,0,32,587,235
+    LTEXT           "Acti&ve Date Range:",IDC_ACTIVEDATERANGE_LABEL,354,2,65,
+                    8
+    LTEXT           "from-to",IDC_ACTIVEDATERANGE_TEXT,425,2,96,8
 END
 
 
@@ -174,7 +175,7 @@ BEGIN
     CONTROL         "&Auto-scroll to task when selecting",
                     IDC_AUTOSCROLLSELECTION,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,67,333,10
-    CONTROL         "&Treat tasks with the following tag as 'Milestones':",
+    CONTROL         "&Treat tasks with the following tag as 'Milestones'",
                     IDC_USETAGFORMILESTONE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,82,333,10
     EDITTEXT        IDC_MILESTONETAG,18,94,211,13,ES_AUTOHSCROLL
@@ -212,10 +213,9 @@ BEGIN
                     WS_TABSTOP,7,338,333,10
 END
 
-IDD_CREATEDEPENDS_DIALOG DIALOGEX 0, 0, 186, 113
+IDD_CREATEDEPENDS_DIALOG DIALOG DISCARDABLE  0, 0, 186, 113
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_TOOLWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,67,92,50,14
     GROUPBOX        "Steps",IDC_STATIC,7,7,172,79

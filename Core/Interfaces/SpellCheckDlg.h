@@ -72,6 +72,7 @@ public:
 
 	// for overiding the default text for translating
 	static void SetItemText(UINT nIDItem, UINT nIDText);
+	static void SetIcon(HICON hIcon) { s_hIconDlg = hIcon; }
 
 protected:
 // Dialog Data
@@ -98,6 +99,7 @@ protected:
 	mutable CPoint m_ptTopLeft;
 
 	static CMap<UINT, UINT, CString, CString&> s_mapText;
+	static HICON s_hIconDlg;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

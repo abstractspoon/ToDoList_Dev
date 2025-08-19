@@ -91,7 +91,7 @@
 			this.m_ParentLinkColor.Size = new System.Drawing.Size(75, 23);
 			this.m_ParentLinkColor.TabIndex = 1;
 			this.m_ParentLinkColor.Text = "Set...";
-			this.m_ParentLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_ParentLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_ParentLinkColor.UseVisualStyleBackColor = true;
 			// 
 			// m_DependsLinkColor
@@ -103,7 +103,7 @@
 			this.m_DependsLinkColor.Size = new System.Drawing.Size(75, 23);
 			this.m_DependsLinkColor.TabIndex = 1;
 			this.m_DependsLinkColor.Text = "Set...";
-			this.m_DependsLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			this.m_DependsLinkColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.m_DependsLinkColor.UseVisualStyleBackColor = true;
 			// 
 			// groupBox1
@@ -126,7 +126,7 @@
 			this.m_DefaultAttribs.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.m_DefaultAttribs.MultipleLinkEditing = false;
 			this.m_DefaultAttribs.Name = "m_DefaultAttribs";
-			this.m_DefaultAttribs.Size = new System.Drawing.Size(287, 125);
+			this.m_DefaultAttribs.Size = new System.Drawing.Size(287, 131);
 			this.m_DefaultAttribs.TabIndex = 0;
 			// 
 			// BtnCancel
@@ -162,7 +162,7 @@
 			this.Controls.Add(this.BtnCancel);
 			this.Controls.Add(this.panel1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = Properties.Resources.EvidenceBoard;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "EvidenceBoardPreferencesDlg";

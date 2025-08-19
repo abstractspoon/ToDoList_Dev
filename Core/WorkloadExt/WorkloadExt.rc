@@ -67,25 +67,26 @@ END
 // Dialog
 //
 
-IDD_WORKLOAD_DIALOG DIALOGEX 0, 0, 594, 316
+IDD_WORKLOAD_DIALOG DIALOGEX 0, 0, 501, 316
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Current Period: ",IDC_PERIODDURATION,0,2,300,8
-    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,164,12,185,13
-    CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,0,28,587,281
     CONTROL         "DateTimePicker1",IDC_PERIODBEGIN,"SysDateTimePick32",
                     WS_TABSTOP,0,13,73,13
+    CTEXT           "-",IDC_STATIC,75,16,8,8
     CONTROL         "DateTimePicker1",IDC_PERIODENDINCLUSIVE,
                     "SysDateTimePick32",WS_TABSTOP,86,13,73,13
-    CTEXT           "-",IDC_STATIC,75,16,8,8
-    LTEXT           "Acti&ve Date Range",IDC_ACTIVEDATERANGE_LABEL,354,3,233,
+    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,164,12,185,13
+    LTEXT           "Acti&ve Date Range:",IDC_ACTIVEDATERANGE_LABEL,354,2,65,
                     8
+    LTEXT           "from-to",IDC_ACTIVEDATERANGE_TEXT,425,2,69,8
     CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,353,
                     12,112,13
+    CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,0,28,493,281
 END
 
 
@@ -99,7 +100,7 @@ GUIDELINES DESIGNINFO MOVEABLE PURE
 BEGIN
     IDD_WORKLOAD_DIALOG, DIALOG
     BEGIN
-        RIGHTMARGIN, 587
+        RIGHTMARGIN, 494
         BOTTOMMARGIN, 309
     END
 END
@@ -190,7 +191,7 @@ BEGIN
     CONTROL         "List1",IDC_ALLOCATIONS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,32,256,103
-    LTEXT           "&Allocations:",IDC_STATIC,7,20,256,8
+    LTEXT           "&Allocations",IDC_STATIC,7,20,256,8
 END
 
 
@@ -419,7 +420,7 @@ BEGIN
     IDS_ATTRIB_ALLOCTO      "Allocated To"
     IDS_ATTRIB_PERCENTDONE  "Percent Complete"
     IDS_ATTRIB_TASKID       "Task ID"
-    IDS_NEW_ALLOCATION      "<New Allocation>"
+    IDS_NEW_ALLOCATION      "<new allocation>"
     IDS_COL_TOTAL           "Total"
     IDS_TOTALSDATERANGE     "Current Period: %s"
     IDS_PERIODDURATION      "Current Period: %d weekdays"

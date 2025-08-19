@@ -45,9 +45,7 @@ public:
 	BOOL IsValid() const { return (s_pOutlook != NULL); }
 
 	static BOOL IsOutlookInstalled();
-// 	static BOOL IsUrlHandlerInstalled();
-// 	static BOOL InstallUrlHandler();
-// 	static BOOL QueryInstallUrlHandler(UINT nIDQuery, UINT nMBOptions = MB_YESNO, int nMBSuccess = IDYES);
+	static HICON GetOutlookIcon(); // Caller frees
 	static BOOL HandleUrl(HWND hWnd, LPCTSTR szURL);
 
 	static BOOL IsOutlookObject(LPDATAOBJECT lpObject);
@@ -87,6 +85,7 @@ protected:
 
 protected:
 	static CString MapDate(DATE date);
+	static CString GetExePath();
 	static BOOL EscapeText(CString& sText);
 	static BOOL CanEscapeText(const CString& sText);
 

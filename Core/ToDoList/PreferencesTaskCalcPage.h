@@ -38,8 +38,6 @@ enum PTCP_CALCSTARTDATE
 
 class CPreferencesTaskCalcPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesTaskCalcPage)
-
 // Construction
 public:
 	CPreferencesTaskCalcPage();
@@ -53,6 +51,7 @@ public:
 	BOOL GetUseHighestRisk() const { return m_bUseHighestPriority; } // Note: this uses same flag as priority
 	BOOL GetSyncTimeEstimatesAndDates() const { return m_bSyncTimeEstAndDates; }
 	BOOL GetIncludeDoneInPriorityRiskCalc() const { return m_bIncludeDoneInPriorityRiskCalc; }
+	BOOL GetIncludeReferencesInCalcs() const { return m_bIncludeReferencesInCalcs; }
 	BOOL GetWeightPercentCompletionByNumSubtasks() const { return m_bWeightPercentCompletionByNumSubtasks; }
 	BOOL GetAutoCalcPercentDone() const { return m_bAutoCalcPercentDone; }
 	BOOL GetAutoAdjustDependentsDates() const { return m_bAutoAdjustDependents; }
@@ -65,7 +64,6 @@ public:
 	BOOL GetSubtasksInheritLockStatus() const { return m_bSubtasksInheritLockStatus; }
 	BOOL GetTaskInheritsSubtaskFlags() const { return m_bTaskInheritsSubtaskFlags; }
 	BOOL GetUseLatestLastModifiedDate() const { return m_bUseLatestLastModifiedDate; }
-	BOOL GetPreserveWeekdays() const { return m_bPreserveWeekdays; }
 
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const;
 
@@ -78,7 +76,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesTaskCalcPage)
-	enum { IDD = IDD_PREFTASKCALC_PAGE };
 	BOOL	m_bTreatSubCompletedAsDone;
 	BOOL	m_bUseHighestPriority;
 	BOOL	m_bSyncTimeEstAndDates;
@@ -88,6 +85,7 @@ protected:
 	BOOL	m_bWeightPercentCompletionByNumSubtasks;
 	BOOL	m_bDueTasksHaveHighestPriority;
 	BOOL	m_bDoneTasksHaveLowestPriority;
+	BOOL	m_bIncludeReferencesInCalcs;
 	BOOL	m_bNoDueDateDueTodayOrStart;
 	BOOL	m_bSetCompletionStatus;
 	BOOL	m_bSyncCompletionToStatus;
@@ -106,7 +104,6 @@ protected:
 	BOOL	m_bSubtasksInheritLockStatus;
 	BOOL	m_bTaskInheritsSubtaskFlags;
 	BOOL	m_bUseLatestLastModifiedDate;
-	BOOL	m_bPreserveWeekdays;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

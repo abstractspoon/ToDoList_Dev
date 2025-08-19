@@ -31,7 +31,7 @@ struct TDCRECURRENCE : public CRecurrence
 	//	TDIR_WEEK_EVERY_NWEEKS							every 'n' weeks			--- (0)
 
 	//	TDIR_MONTHLY (TDIR_MONTH_SPECIFIC_DAY_NMONTHS)				
-	//	TDIR_MONTH_EVERY_NMONTHS						every 'n' months		preserve weekday (BOOL)
+	//	TDIR_MONTH_EVERY_NMONTHS						every 'n' months		--- (0)
 	//	TDIR_MONTH_SPECIFIC_DAY_NMONTHS					every 'n' months		day of month (1-31)
 	//	TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS				first(0), last(!0)		every 'n' months
 	//	TDIR_MONTH_SPECIFIC_DOW_NMONTHS					LOWORD = which (1-5)	every 'n' months
@@ -39,7 +39,7 @@ struct TDCRECURRENCE : public CRecurrence
 
 	//	TDIR_YEARLY	(TDIR_YEAR_SPECIFIC_DAY_MONTH)				
 	//	TDIR_YEAR_SPECIFIC_DAY_MONTH					month (1-12)			day of month (1-31)
-	//	TDIR_YEAR_EVERY_NYEARS							every 'n' years			preserve weekday (BOOL)
+	//	TDIR_YEAR_EVERY_NYEARS							every 'n' years			--- (0)
 	//  TDIR_YEAR_SPECIFIC_DOW_MONTH					LOWORD = which (1-5)	specific month (1-12)
 	//													HIWORD = DOW (1-7)		
 
@@ -56,10 +56,6 @@ struct TDCRECURRENCE : public CRecurrence
 	TDC_REGULARITY GetRegularity(DWORD& dwSpecific1, DWORD& dwSpecific2) const;
 	TDC_REGULARITY GetRegularity() const;
 	
-	BOOL GetSimpleOffsetAmount(int& nAmount, TDC_UNITS& nUnits) const;
-	BOOL GetWantPreserveWeekday() const;
-	TDC_UNITS GetRegularityUnits() const;
-
 	CString GetRegularityText(BOOL bIncOnce = TRUE) const;
 	static CString GetRegularityText(TDC_REGULARITY nRegularity, BOOL bIncOnce);
 

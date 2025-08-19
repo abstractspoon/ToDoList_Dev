@@ -27,7 +27,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-typedef HRESULT (CALLBACK FAR * LPFN_CALENDAR_DATA_CALLBACK)(CWnd*,time_t);
+typedef HRESULT (CALLBACK FAR * LPFN_CALENDAR_DATA_CALLBACK)(CWnd*,const COleDateTime&);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -75,8 +75,8 @@ public:
 	void EnableMultiSelection(BOOL bEnable) { m_bEnableMultiSel = bEnable; }
 	BOOL IsMultiSelectionEnabled() const { return m_bEnableMultiSel; }
 
-	int GetSelectedItems(CDWordArray& dwaSelection) const;
-	time_t GetFirstSelectedItem() const;
+	int GetSelectedItems(CArray<COleDateTime, COleDateTime>& aSelection) const;
+	double GetFirstSelectedItem() const;
 
 	COleDateTime GetMinDate() const;
 	COleDateTime GetMaxDate() const;
@@ -130,12 +130,10 @@ protected:
 	int HitTestGridRow(const CPoint& point) const;
 
 	COLORREF GetFadedThemeColour(int percent) const;
-	int GetDayOfWeek(int nColumn) const;
+	int GetDayOfWeek(int nCol) const;
 	COleDateTime GetMinDate(int nRow) const;
 	COleDateTime GetMaxDate(int nRow) const;
 
-	// helper func
-	static time_t DateToSeconds(const COleDateTime& date);
 	static COleDateTime WholeDays(const COleDateTime& date) { return (double)(int)date.m_dt; }
 
 	//{{AFX_MSG(CCalendarCtrl)
@@ -158,12 +156,8 @@ protected:
 	CFont			m_DefaultFont;
 	CCalendarCell	m_dayCells[CALENDAR_MAX_ROWS][CALENDAR_NUM_COLUMNS];
 	int				m_nMaxSel;
-	COleDateTime	m_BoundUp;
-	COleDateTime	m_BoundDown;
 	COleDateTime	m_DateCurrent;
 	BOOL			m_bSelectionStarted;
-	time_t			m_SelectionRange[3];
-	CMap<time_t, time_t, bool, bool> m_SingleSelection;
 	int				m_nFirstWeekDay; // 1 = sunday	
 	bool			m_bMonthIsOdd;
 	int				m_nVscrollPos;
@@ -173,6 +167,9 @@ protected:
 	COLORREF		m_crTheme, m_crGrid;
 	int				m_nHeaderHeight, m_nDayHeaderHeight;
 	BOOL			m_bDrawGridOverCells;
+
+	double			m_SelectionRange[3];
+	CMap<COleDateTime, COleDateTime, bool, bool> m_SingleSelection;
 
 	LPFN_CALENDAR_DATA_CALLBACK	m_pfnDataCallback;
 };

@@ -24,6 +24,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 using unvell.Common;
 using unvell.ReoGrid.Events;
@@ -37,22 +38,44 @@ namespace unvell.ReoGrid.Editor
 	{
 		public bool FocusToGridAfterInputValue { get; set; }
 
+		private int MinHeight = -1;
+		private bool dragging = false;
+		private int lastYDrag;
+
+		public Color SplitterBackColor
+		{
+			set { this.splitterDown.BackColor = value; }
+		}
+
 		public FormulaBarControl()
 		{
 			InitializeComponent();
+
+			MinHeight = (addressField.Height + (this.Height - txtFormula.Height));
+			SplitterBackColor = Color.Empty;
 
 			txtFormula.KeyDown += txtFormula_KeyDown;
 			txtFormula.GotFocus += txtFormula_GotFocus;
 			txtFormula.LostFocus += txtFormula_LostFocus;
 
+			txtFormula.TextChanged += (s, e) =>
+			{
+				if (txtFormula.Text.Contains('\n'))
+					txtFormula.ScrollBars = ScrollBars.Vertical;
+				else
+					txtFormula.ScrollBars = ScrollBars.None;
+			};
+
 			panel1.Paint += (s, e) =>
 			{
-				e.Graphics.DrawLine(SystemPens.ControlLight, panel1.Width - 1, 0, panel1.Width - 1, panel1.Height);
+				if (!VisualStyleRenderer.IsSupported)
+					e.Graphics.DrawLine(SystemPens.ControlLight, panel1.Width - 1, 0, panel1.Width - 1, panel1.Height);
 			};
 
 			panel2.Paint += (s, e) =>
 			{
-				e.Graphics.DrawLine(SystemPens.ControlLight, 0, 0, 0, this.panel2.Bottom);
+				if (!VisualStyleRenderer.IsSupported)
+					e.Graphics.DrawLine(SystemPens.ControlLight, 0, 0, 0, this.panel2.Bottom);
 			};
 
 			panel1.Resize += (s, e) =>
@@ -62,14 +85,13 @@ namespace unvell.ReoGrid.Editor
 					pictureBox1.Width, panel1.ClientRectangle.Height);
 			};
 
-			this.splitterUp.BackColor = SystemColors.ControlLight;
-
 			this.splitterDown.Paint += (s, e) =>
 			{
-				var g = e.Graphics;
-
-				g.DrawLine(SystemPens.Control, 0, 0, splitterDown.Right, 0);
-				g.DrawLine(SystemPens.ControlDark, 0, splitterDown.Height - 1, splitterDown.Right, splitterDown.Height - 1);
+				if (!VisualStyleRenderer.IsSupported)
+				{
+					e.Graphics.DrawLine(SystemPens.Control, 0, 0, splitterDown.Right, 0);
+					e.Graphics.DrawLine(SystemPens.ControlDark, 0, splitterDown.Height - 1, splitterDown.Right, splitterDown.Height - 1);
+				}
 			};
 
 			this.splitterDown.MouseDown += (s, e) =>
@@ -77,26 +99,35 @@ namespace unvell.ReoGrid.Editor
 				if (e.Button == System.Windows.Forms.MouseButtons.Left)
 				{
 					this.dragging = true;
+					this.lastYDrag = this.PointToClient(Cursor.Position).Y;
 				}
 			};
 
-			const int fixedHeight = 26;
-
 			this.splitterDown.MouseMove += (s, e) =>
+			{
+				if (this.dragging)
 				{
-					if (this.dragging)
+					int yDrag = this.PointToClient(Cursor.Position).Y;
+					int height = this.Height + (yDrag - lastYDrag);
+
+					if (height > 300)
 					{
-						int height = this.PointToClient(Cursor.Position).Y;
-
-						var r = height % fixedHeight;
-						height += (r < (fixedHeight / 2) ? -r : (fixedHeight - r));
-
-						if (height >= fixedHeight && height <= 300)
-						{
-							this.Height = height;
-						}
+						height = 300;
+						lastYDrag = height + splitterDown.Height / 2;
 					}
-				};
+					else if (height < MinHeight)
+					{
+						height = MinHeight;
+						lastYDrag = height + splitterDown.Height / 2;
+					}
+					else
+					{
+						lastYDrag = yDrag;
+					}
+
+					this.Height = height;
+				}
+			};
 
 			this.splitterDown.MouseUp += (s, e) =>
 			{
@@ -105,10 +136,11 @@ namespace unvell.ReoGrid.Editor
 
 			this.leftPanel.Paint += (s, e) =>
 			{
-				var g = e.Graphics;
-
-				g.DrawLine(SystemPens.ControlLight, 0, panel1.Height, this.leftPanel.Right, panel1.Height);
-				g.DrawLine(SystemPens.ControlLight, this.leftPanel.Right - 1, panel1.Height, this.leftPanel.Right - 1, this.leftPanel.Bottom);
+				if (!VisualStyleRenderer.IsSupported)
+				{
+					e.Graphics.DrawLine(SystemPens.ControlLight, 0, panel1.Height, this.leftPanel.Right, panel1.Height);
+					e.Graphics.DrawLine(SystemPens.ControlLight, this.leftPanel.Right - 1, panel1.Height, this.leftPanel.Right - 1, this.leftPanel.Bottom);
+				}
 			};
 
 			ToolStripEx.RemapSysColors(this.pictureBox1.Image as Bitmap);
@@ -182,8 +214,6 @@ namespace unvell.ReoGrid.Editor
 			}
 		}
 
-		private bool dragging = false;
-
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
@@ -205,20 +235,23 @@ namespace unvell.ReoGrid.Editor
 
 		void txtFormula_KeyDown(object sender, KeyEventArgs e)
 		{
-		if (e.KeyCode == Keys.Enter)
+			if (e.KeyCode == Keys.Enter)
 			{
-				if (ApplyNewFormula())
+				if (e.Control)
 				{
-					this.worksheet.MoveSelectionForward();
+					txtFormula.SelectedText = "\r\n";
 				}
-				
+				else
+				{
+					if (ApplyNewFormula())
+						this.worksheet.MoveSelectionForward();
+
+					if (FocusToGridAfterInputValue)
+						grid.Focus();
+				}
+
 				e.Handled = true;
 				e.SuppressKeyPress = true;
-
-				if (FocusToGridAfterInputValue)
-				{
-					grid.Focus();
-				}
 			}
 		}
 

@@ -7,7 +7,7 @@
 // BurndownGraphComboBox.h : header file
 //
 
-#include "BurndownEnum.h"
+#include "BurndownGraphs.h"
 
 #include "..\Shared\ownerdrawcomboboxbase.h"
 
@@ -20,28 +20,16 @@ class CBurndownChart;
 
 class CBurndownGraphComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CBurndownGraphComboBox();
 	virtual ~CBurndownGraphComboBox();
 
-	BOOL Initialise(const CBurndownChart& chart);
+	BOOL Initialise(const CGraphsMap& mapGraphs);
+
 	void DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph);
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CBurndownGraphComboBox)
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CBurndownGraphComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

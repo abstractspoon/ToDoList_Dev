@@ -37,7 +37,7 @@ namespace MSDN.Html.Editor
             this.listTargets.SelectedIndex = 0;
 
 			BrowseTitle = "Select File";
-			BrowseFilter = "All Files (*.*)|*.*||";
+			BrowseFilter = "All Files (*.*)|*.*";
 
         } //EnterHrefForm
 

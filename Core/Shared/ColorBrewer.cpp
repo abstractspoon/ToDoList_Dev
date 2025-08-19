@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "ColorBrewer.h"
 #include "GraphicsMisc.h"
+#include "Misc.h"
 
 #include "..\3rdParty\ColorDef.h"
 
@@ -522,10 +523,10 @@ BOOL CColorBrewer::SampleColors(COLORBREWER_PALETTETYPE nTypeFrom, const COLORBR
 				return TRUE;
 			}
 
-			if (((temp.GetSize() - 1) % nNumColors) != 0)
+			if ((Misc::LastIndexT(temp) % nNumColors) != 0)
 				return FALSE;
 
-			int nNumIntervals = ((temp.GetSize() - 1) / nNumColors);
+			int nNumIntervals = (Misc::LastIndexT(temp) / nNumColors);
 
 			for (int nCol = 0; nCol < temp.GetSize(); nCol += nNumIntervals)
 				aTo.Add(temp[nCol]);

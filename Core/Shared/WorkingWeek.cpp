@@ -353,9 +353,9 @@ COleDateTime CWorkingDay::GetDateAtTimeInHours(const COleDateTime& date, double 
 	return CDateHelper::MakeDate(date, (dHourOfDay / 24));
 }
 
-double CWorkingDay::GetLengthInHours(bool includingLunch) const
+double CWorkingDay::GetLengthInHours(BOOL bIncludingLunch) const
 {
-	if (includingLunch)
+	if (bIncludingLunch)
 		return (m_dWorkingLengthInHours + GetLunchLengthInHours());
 
 	// else

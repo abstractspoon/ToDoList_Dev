@@ -161,6 +161,10 @@ SOURCE=.\Ini.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\JalaliCalendar.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\LockableHeaderCtrl.cpp
 # End Source File
 # Begin Source File
@@ -210,6 +214,10 @@ SOURCE=.\sha2.cpp
 # Begin Source File
 
 SOURCE=.\ShellIcons.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\SimpleSplitter.cpp
 # End Source File
 # Begin Source File
 
@@ -345,6 +353,10 @@ SOURCE=.\Zlib\IOWIN32.H
 # End Source File
 # Begin Source File
 
+SOURCE=.\JalaliCalendar.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\LimitSingleInstance.h
 # End Source File
 # Begin Source File
@@ -414,6 +426,10 @@ SOURCE=.\sha2.h
 # Begin Source File
 
 SOURCE=.\ShellIcons.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\SimpleSplitter.h
 # End Source File
 # Begin Source File
 

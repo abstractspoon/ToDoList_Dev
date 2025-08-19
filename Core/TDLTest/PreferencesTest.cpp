@@ -21,7 +21,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CPreferencesTest::CPreferencesTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CPreferencesTest::CPreferencesTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CPreferencesTest"), utils)
 {
 
 }
@@ -43,13 +45,13 @@ TESTRESULT CPreferencesTest::Run()
 
 void CPreferencesTest::TestSectionPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CPreferencesTest::SectionPerformance\n"));
 		return;
 	}
 
-	BeginTest(_T("CPreferencesTest::SectionPerformance"));
+	CTDCScopedTest test(*this, _T("CPreferencesTest::SectionPerformance"));
 
 	CString sIniPath = FileMisc::GetTempFilePath(_T("Test"), _T(".ini"));
 
@@ -106,21 +108,21 @@ void CPreferencesTest::TestSectionPerformance()
 		_tprintf(_T("Reading %d sections x %d entries took %ld ms\n"), nNumSection, nNumEntry, dwDuration / 10);
 	}
 
-	// Clear preferences to prevent save
+#ifndef _DEBUG
+	// Reset preferences to prevent a save affecting timing
 	CPreferences::Release();
-	
-	EndTest();
+#endif
 }
 
 void CPreferencesTest::TestArrayPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CPreferencesTest::TestArrayPerformance\n"));
 		return;
 	}
 
-	BeginTest(_T("CPreferencesTest::TestArrayPerformance"));
+	CTDCScopedTest test(*this, _T("CPreferencesTest::TestArrayPerformance"));
 
 	// Separate items
 	{
@@ -261,8 +263,6 @@ void CPreferencesTest::TestArrayPerformance()
 			nTestSize *= 10;
 		}
 	}
-	
-	EndTest();
 }
 
 void CPreferencesTest::InitArray(CDWordArray& aItems, int nSize)

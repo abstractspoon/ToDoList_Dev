@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "PreferencesUITasklistColorsPage.h"
+#include "tdcstatic.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
@@ -20,50 +21,46 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesUITasklistColorsPage property page
-
-// default colors
-const COLORREF PRIORITYLOWCOLOR		= RGB(30, 225, 0);
-const COLORREF PRIORITYHIGHCOLOR	= RGB(255, 0, 0);
-const COLORREF CBMASKCOLOR			= RGB(255, 0, 0);
-const COLORREF ALTERNATELINECOLOR	= RGB(235, 235, 255);
-const COLORREF GRIDLINECOLOR		= RGB(192, 192, 192);
-const COLORREF TASKDONECOLOR		= RGB(128, 128, 128);
-const COLORREF TASKDUECOLOR			= RGB(255, 0, 0);
-const COLORREF TASKDUETODAYCOLOR	= RGB(255, 128, 0);
-const COLORREF TASKSTARTCOLOR		= RGB(0, 255, 0);
-const COLORREF FILTEREDCOLOR		= RGB(200, 200, 200);
-const COLORREF FLAGGEDCOLOR			= RGB(128, 64, 0);
-const COLORREF REFERENCECOLOR		= RGB(128, 0, 64);
-const COLORREF GROUPHEADERBKCOLOR	= RGB(63, 118, 179);
 
 const int DEFFONTSIZE = 8;
 const TDC_ATTRIBUTE DEFCOLORATTRIB = TDCA_CATEGORY;
 
-enum
+const COLORREF DEF_LIGHTGRAY = RGB(240, 240, 240);
+
+/////////////////////////////////////////////////////////////////////////////
+
+const COLORREF DEF_PRIORITYCOLOR[] =
 {
-	COLORPRIORITYBY_INDIVIDUAL,
-	COLORPRIORITYBY_GRADIENT,
-	COLORPRIORITYBY_SCHEME,
+	RGB(30, 225, 0),
+	RGB(30, 225, 0),
+	RGB(30, 225, 0),
+	RGB(30, 225, 0),
+	RGB(0, 0, 255),
+	RGB(0, 0, 255),
+	RGB(0, 0, 255),
+	RGB(255, 0, 0),
+	RGB(255, 0, 0),
+	RGB(255, 0, 0),
+	RGB(255, 0, 0)
 };
+const int NUM_DEFPRIORITY = (sizeof(DEF_PRIORITYCOLOR) / sizeof(DEF_PRIORITYCOLOR[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUITasklistColorsPage property page
 
-//IMPLEMENT_DYNCREATE(CPreferencesUITasklistColorsPage, CPreferencesPageBase)
-
 CPreferencesUITasklistColorsPage::CPreferencesUITasklistColorsPage() 
 	: 
-	CPreferencesPageBase(CPreferencesUITasklistColorsPage::IDD),
-	m_nTextColorOption(COLOROPT_DEFAULT), 
+	CPreferencesPageBase(IDD_PREFUITASKLISTCOLORS_PAGE),
+	m_nPriorityColorOption(PRIORITYOPT_GRADIENT),
+	m_nTextColorOption(TEXTOPT_DEFAULT), 
 	m_cbAttributes(CCBS_DRAWNOCOLOR, ACBS_ALLOWDELETE), 
-	m_nColorAttribute(DEFCOLORATTRIB)
+	m_nColorAttribute(DEFCOLORATTRIB),
+	m_cbPriorityColors(FALSE, FALSE),
+	m_nNumPriorityRiskLevels(NUM_DEFPRIORITY)
 {
 	//{{AFX_DATA_INIT(CPreferencesUITasklistColorsPage)
 	//}}AFX_DATA_INIT
-	// priority colors
 	m_nSelPriorityColor = 0; 
-	m_nPriorityColorOption = COLORPRIORITYBY_GRADIENT;
 }
 
 CPreferencesUITasklistColorsPage::~CPreferencesUITasklistColorsPage()
@@ -78,7 +75,6 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ATTRIBUTETOCOLORBY, m_cbColorByAttribute);
 	DDX_Check(pDX, IDC_COLORTASKBKGND, m_bColorTaskBackground);
 	DDX_Check(pDX, IDC_USEHLSGRADIENT, m_bHLSColorGradient);
-	DDX_Check(pDX, IDC_HIDEPRIORITYNUMBER, m_bHidePriorityNumber);
 	DDX_Check(pDX, IDC_ALTERNATELINECOLOR, m_bSpecifyAlternateLineColor);
 	DDX_Check(pDX, IDC_SPECIFYGROUPHEADERBKCOLOR, m_bSpecifyGroupHeaderBkgndColor);
 	//}}AFX_DATA_MAP
@@ -89,7 +85,7 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SETATTRIBUTECOLOR, m_btAttribColor);
 	DDX_Control(pDX, IDC_SETGROUPHEADERBKCOLOR, m_btGroupHeaderBkgndColor);
 	DDX_Control(pDX, IDC_ATTRIBUTECOLORS, m_cbAttributes);
-	DDX_Radio(pDX, IDC_COLORTEXTBYATTRIBUTE, m_nTextColorOption);
+	DDX_Radio(pDX, IDC_COLORTEXTBYATTRIBUTE, (int&)m_nTextColorOption);
 	DDX_Check(pDX, IDC_DUETASKCOLOR, m_bSpecifyDueColor);
 	DDX_Check(pDX, IDC_DUETODAYTASKCOLOR, m_bSpecifyDueTodayColor);
 	DDX_Check(pDX, IDC_STARTTASKCOLOR, m_bSpecifyStartColor);
@@ -113,11 +109,11 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SETFLAGGEDCOLOR, m_btFlaggedColor);
 	DDX_Control(pDX, IDC_SETREFERENCECOLOR, m_btReferenceColor);
 	DDX_Control(pDX, IDC_SETALTLINECOLOR, m_btAltLineColor);
-	DDX_Control(pDX, IDC_SETPRIORITYCOLOR, m_btSetColor);
-	DDX_Control(pDX, IDC_LOWPRIORITYCOLOR, m_btLowColor);
-	DDX_Control(pDX, IDC_HIGHPRIORITYCOLOR, m_btHighColor);
+	DDX_Control(pDX, IDC_SETPRIORITYCOLOR, m_btPriorityColor);
+	DDX_Control(pDX, IDC_LOWPRIORITYCOLOR, m_btPriorityLowColor);
+	DDX_Control(pDX, IDC_HIGHPRIORITYCOLOR, m_btPriorityHighColor);
 	DDX_Check(pDX, IDC_COLORPRIORITY, m_bColorPriority);
-	DDX_Radio(pDX, IDC_INDIVIDUALPRIORITYCOLORS, m_nPriorityColorOption);
+	DDX_Radio(pDX, IDC_INDIVIDUALPRIORITYCOLORS, (int&)m_nPriorityColorOption);
 	DDX_CBIndex(pDX, IDC_PRIORITYCOLORS, m_nSelPriorityColor);
 	DDX_Control(pDX, IDC_PRIORITYCOLORS, m_cbPriorityColors);
 
@@ -128,9 +124,7 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	m_cbTreeFonts.DDX(pDX, m_sTreeFont);
 	m_cbCommentsFonts.DDX(pDX, m_sCommentsFont);
 	m_cbPriorityScheme.DDX(pDX, m_aPriorityScheme);
-
 }
-
 
 BEGIN_MESSAGE_MAP(CPreferencesUITasklistColorsPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesUITasklistColorsPage)
@@ -208,9 +202,9 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	GetDlgItem(IDC_INDIVIDUALPRIORITYCOLORS)->EnableWindow(m_bColorPriority);
 	GetDlgItem(IDC_SCHEMEPRIORITYCOLORS)->EnableWindow(m_bColorPriority);
 
-	GetDlgItem(IDC_PRIORITYCOLORS)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_INDIVIDUAL));
-	GetDlgItem(IDC_USEHLSGRADIENT)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_GRADIENT));
-	GetDlgItem(IDC_PRIORITYSCHEMES)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_SCHEME));
+	GetDlgItem(IDC_PRIORITYCOLORS)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_INDIVIDUAL));
+	GetDlgItem(IDC_USEHLSGRADIENT)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
+	GetDlgItem(IDC_PRIORITYSCHEMES)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_SCHEME));
 
 	GetDlgItem(IDC_TREEFONTSIZE)->EnableWindow(m_bSpecifyTreeFont);
 	GetDlgItem(IDC_TREEFONTSIZELABEL)->EnableWindow(m_bSpecifyTreeFont);
@@ -220,7 +214,7 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	GetDlgItem(IDC_FINDTASKSUSETREEFONT)->EnableWindow(m_bSpecifyTreeFont);
 	GetDlgItem(IDC_SPECIFYCOMMENTSFONT)->EnableWindow(!m_bCommentsUseTreeFont || !m_bSpecifyTreeFont);
 
-	BOOL bColorByAttrib = (m_nTextColorOption == COLOROPT_ATTRIB);
+	BOOL bColorByAttrib = (m_nTextColorOption == TEXTOPT_ATTRIB);
 	BOOL bHasAttrib = (m_nColorAttribute != TDCA_NONE);
 
 	GetDlgItem(IDC_ATTRIBUTETOCOLORBY)->EnableWindow(bColorByAttrib);
@@ -232,9 +226,9 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	GetDlgItem(IDC_COMMENTSFONTSIZELABEL)->EnableWindow(bEnableCommentsFont);
 	GetDlgItem(IDC_COMMENTSFONTLIST)->EnableWindow(bEnableCommentsFont);
 
-	m_btSetColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_INDIVIDUAL));
-	m_btLowColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_GRADIENT));
-	m_btHighColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_GRADIENT));
+	m_btPriorityColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_INDIVIDUAL));
+	m_btPriorityLowColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
+	m_btPriorityHighColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
 	m_btGridlineColor.EnableWindow(m_bSpecifyGridColor);
 	m_btDoneColor.EnableWindow(m_bSpecifyDoneColor);
 	m_btAltLineColor.EnableWindow(m_bSpecifyAlternateLineColor);
@@ -248,9 +242,9 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	m_btGroupHeaderBkgndColor.EnableWindow(m_bSpecifyGroupHeaderBkgndColor);
 
 	m_btGridlineColor.SetColor(m_crGridlines);
-	m_btLowColor.SetColor(m_crLow);
-	m_btHighColor.SetColor(m_crHigh);
-	m_btSetColor.SetColor(m_aPriorityColors[0]);
+	m_btPriorityLowColor.SetColor(m_crPriorityLow);
+	m_btPriorityHighColor.SetColor(m_crPriorityHigh);
+	m_btPriorityColor.SetColor(m_aPriorityColors[0]);
 	m_btDoneColor.SetColor(m_crDone);
 	m_btAltLineColor.SetColor(m_crAltLine);
 	m_btStartColor.SetColor(m_crStart);
@@ -262,15 +256,17 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	m_btGroupHeaderBkgndColor.SetColor(m_crGroupHeaderBkgnd);
 
 	// priority colors
-	for (int nPriority = 0; nPriority < m_aPriorityColors.GetSize(); nPriority++)
+	ASSERT(m_aPriorityColors.GetSize() >= m_nNumPriorityRiskLevels);
+
+	for (int nPriority = 0; nPriority < m_nNumPriorityRiskLevels; nPriority++)
 		m_cbPriorityColors.SetColor(nPriority, (COLORREF)m_aPriorityColors[nPriority]);
 
 	// Priority colors schemes
 	CColorBrewer brewer(CBF_SYNTHESIZE | CBF_TEXTSAFE);
 	CColorBrewerPaletteArray aPalettes;
 
-	brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, 11);
-	brewer.GetPalettes(CBPT_DIVERGING, aPalettes, 11, TRUE);
+	brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, m_nNumPriorityRiskLevels);
+	brewer.GetPalettes(CBPT_DIVERGING, aPalettes, m_nNumPriorityRiskLevels, TRUE);
 
 	m_cbPriorityScheme.Initialize(aPalettes);
 
@@ -278,13 +274,13 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 		m_cbPriorityScheme.SetCurSel(0);
 	
 	// attribute colors
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_CATEGORY),	TDCA_CATEGORY);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_STATUS),	TDCA_STATUS);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCTO),	TDCA_ALLOCTO);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCBY),	TDCA_ALLOCBY);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_VERSION),	TDCA_VERSION);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_EXTERNALID),TDCA_EXTERNALID);
-	AddString(m_cbColorByAttribute, CEnString(IDS_TDLBC_TAGS),		TDCA_TAGS);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_CATEGORY),		TDCA_CATEGORY);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_STATUS),		TDCA_STATUS);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCTO),		TDCA_ALLOCTO);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_ALLOCBY),		TDCA_ALLOCBY);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_VERSION),		TDCA_VERSION);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_EXTERNALID),	TDCA_EXTERNALID);
+	AddStringT(m_cbColorByAttribute, CEnString(IDS_TDLBC_TAGS),			TDCA_TAGS);
 
 	int nColor = m_aAttribColors.GetSize();
 	
@@ -306,14 +302,14 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 
 void CPreferencesUITasklistColorsPage::OnLowprioritycolor() 
 {
-	m_crLow = m_btLowColor.GetColor();
+	m_crPriorityLow = m_btPriorityLowColor.GetColor();
 
 	CPreferencesPageBase::OnControlChange();
 }
 
 void CPreferencesUITasklistColorsPage::OnHighprioritycolor() 
 {
-	m_crHigh = m_btHighColor.GetColor();
+	m_crPriorityHigh = m_btPriorityHighColor.GetColor();
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -322,8 +318,8 @@ void CPreferencesUITasklistColorsPage::OnSetprioritycolor()
 {
 	VERIFY(m_nSelPriorityColor >= 0);
 
-	m_aPriorityColors.SetAt(m_nSelPriorityColor, m_btSetColor.GetColor());
-	m_cbPriorityColors.SetColor(m_nSelPriorityColor, m_btSetColor.GetColor());
+	m_aPriorityColors.SetAt(m_nSelPriorityColor, m_btPriorityColor.GetColor());
+	m_cbPriorityColors.SetColor(m_nSelPriorityColor, m_btPriorityColor.GetColor());
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -332,13 +328,13 @@ void CPreferencesUITasklistColorsPage::OnChangePriorityColorOption()
 {
 	UpdateData();
 
-	GetDlgItem(IDC_PRIORITYCOLORS)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_INDIVIDUAL));
-	GetDlgItem(IDC_USEHLSGRADIENT)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_GRADIENT));
-	GetDlgItem(IDC_PRIORITYSCHEMES)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_SCHEME));
+	GetDlgItem(IDC_PRIORITYCOLORS)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_INDIVIDUAL));
+	GetDlgItem(IDC_USEHLSGRADIENT)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
+	GetDlgItem(IDC_PRIORITYSCHEMES)->EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_SCHEME));
 
-	m_btSetColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_INDIVIDUAL) && m_nSelPriorityColor >= 0);
-	m_btLowColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_GRADIENT));
-	m_btHighColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_GRADIENT));
+	m_btPriorityColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_INDIVIDUAL) && m_nSelPriorityColor >= 0);
+	m_btPriorityLowColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
+	m_btPriorityHighColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == PRIORITYOPT_GRADIENT));
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -355,9 +351,9 @@ void CPreferencesUITasklistColorsPage::OnColorPriority()
 
 	// if the text color option is COLOROPT_PRIORITY and 
 	// the user has turned off priority coloring then switch to default
-	if (!m_bColorPriority && (m_nTextColorOption == COLOROPT_PRIORITY))
+	if (!m_bColorPriority && (m_nTextColorOption == TEXTOPT_PRIORITY))
 	{
-		m_nTextColorOption = COLOROPT_DEFAULT;
+		m_nTextColorOption = TEXTOPT_DEFAULT;
 		UpdateData(FALSE);
 	}
 
@@ -372,22 +368,22 @@ int CPreferencesUITasklistColorsPage::GetPriorityColors(CDWordArray& aColors) co
 	{
 		switch (m_nPriorityColorOption)
 		{
-		case COLORPRIORITYBY_INDIVIDUAL:
+		case PRIORITYOPT_INDIVIDUAL:
 			aColors.Copy(m_aPriorityColors); 
 			break;
 
-		case COLORPRIORITYBY_GRADIENT:	
-			GraphicsMisc::CalculateColorGradient(m_crLow, m_crHigh, 11, aColors, !m_bHLSColorGradient);
+		case PRIORITYOPT_GRADIENT:	
+			GraphicsMisc::CalculateColorGradient(m_crPriorityLow, m_crPriorityHigh, m_nNumPriorityRiskLevels, aColors, !m_bHLSColorGradient);
 			break;
 
-		case COLORPRIORITYBY_SCHEME:
+		case PRIORITYOPT_SCHEME:
 			aColors.Copy(m_aPriorityScheme);
 			break;
 		}
 	}
-	else // grayscale
+	else // gray scale
 	{
-		GraphicsMisc::CalculateColorGradient(RGB(240, 240, 240), 0, 11, aColors, TRUE);
+		GraphicsMisc::CalculateColorGradient(DEF_LIGHTGRAY, 0, m_nNumPriorityRiskLevels, aColors, TRUE);
 	}
 	
 	return aColors.GetSize(); 
@@ -431,11 +427,11 @@ void CPreferencesUITasklistColorsPage::OnSelchangePrioritycolors()
 	
 	if (m_nSelPriorityColor >= 0)
 	{
-		m_btSetColor.SetColor(m_aPriorityColors[m_nSelPriorityColor]);
-		m_btSetColor.EnableWindow(TRUE);
+		m_btPriorityColor.SetColor(m_aPriorityColors[m_nSelPriorityColor]);
+		m_btPriorityColor.EnableWindow(TRUE);
 	}
 	else
-		m_btSetColor.EnableWindow(FALSE);
+		m_btPriorityColor.EnableWindow(FALSE);
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -680,7 +676,7 @@ void CPreferencesUITasklistColorsPage::OnChangeTextColorOption()
 
 	// if the text color option is COLOROPT_PRIORITY and 
 	// the user has got priority coloring turned off then switch it on
-	if (!m_bColorPriority && (m_nTextColorOption == COLOROPT_PRIORITY))
+	if (!m_bColorPriority && (m_nTextColorOption == TEXTOPT_PRIORITY))
 	{
 		m_bColorPriority = TRUE;
 		UpdateData(FALSE);
@@ -688,7 +684,7 @@ void CPreferencesUITasklistColorsPage::OnChangeTextColorOption()
 		OnColorPriority();
 	}
 
-	BOOL bColorByAttrib = (m_nTextColorOption == COLOROPT_ATTRIB);
+	BOOL bColorByAttrib = (m_nTextColorOption == TEXTOPT_ATTRIB);
 	BOOL bHasAttrib = (m_nColorAttribute != TDCA_NONE);
 
 	GetDlgItem(IDC_ATTRIBUTETOCOLORBY)->EnableWindow(bColorByAttrib);
@@ -747,7 +743,7 @@ void CPreferencesUITasklistColorsPage::OnEditAttribValue()
 {
 	UpdateData();
 
-	m_btAttribColor.EnableWindow(m_nTextColorOption == COLOROPT_ATTRIB && 
+	m_btAttribColor.EnableWindow(m_nTextColorOption == TEXTOPT_ATTRIB && 
 								!m_sSelAttribValue.IsEmpty());
 
 	CPreferencesPageBase::OnControlChange();
@@ -767,7 +763,7 @@ void CPreferencesUITasklistColorsPage::OnSelchangeAttribValue()
 	if (nColor >= 0)
 		m_btAttribColor.SetColor(m_aAttribColors[nColor].color);
 
-	m_btAttribColor.EnableWindow(m_nTextColorOption == COLOROPT_ATTRIB && 
+	m_btAttribColor.EnableWindow(m_nTextColorOption == TEXTOPT_ATTRIB && 
 								!m_sSelAttribValue.IsEmpty());
 }
 
@@ -921,9 +917,7 @@ void CPreferencesUITasklistColorsPage::OnSetduetodaytaskcolor()
 
 void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// prefs
 	m_bColorPriority = pPrefs->GetProfileInt(szKey, _T("ColorPriority"), TRUE);
-	m_nPriorityColorOption = pPrefs->GetProfileInt(szKey, _T("PriorityColorOption"), -1);
 	m_sTreeFont = pPrefs->GetProfileString(szKey, _T("TreeFont"), _T("Arial"));
 	m_nTreeFontSize = pPrefs->GetProfileInt(szKey, _T("FontSize"), DEFFONTSIZE);
 	m_bSpecifyTreeFont = pPrefs->GetProfileInt(szKey, _T("SpecifyTreeFont"), FALSE);
@@ -941,89 +935,109 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_bRemindersUseTreeFont = pPrefs->GetProfileInt(szKey, _T("RemindersUseTreeFont"), FALSE);
 	m_bFindTasksUseTreeFont = pPrefs->GetProfileInt(szKey, _T("FindTasksUseTreeFont"), FALSE);
 	m_bHLSColorGradient = pPrefs->GetProfileInt(szKey, _T("HLSColorGradient"), TRUE);
-	m_bHidePriorityNumber = pPrefs->GetProfileInt(szKey, _T("HidePriorityNumber"), FALSE);
 	m_bSpecifyAlternateLineColor = pPrefs->GetProfileInt(szKey, _T("AlternateLineColor"), TRUE);
 	m_bSpecifyFlaggedColor = pPrefs->GetProfileInt(szKey, _T("FlaggedColor"), FALSE);
 	m_bSpecifyReferenceColor = pPrefs->GetProfileInt(szKey, _T("ReferenceColor"), FALSE);
 	m_bSpecifyGroupHeaderBkgndColor = pPrefs->GetProfileInt(szKey, _T("SpecifyGroupHeaderBkgndColor"), FALSE);
 
-	CColourButton::LoadPreferences(pPrefs);
+	m_nPriorityColorOption = (PUITCP_PRIORITYCOLOROPTION)pPrefs->GetProfileInt(szKey, _T("PriorityColorOption"), m_nPriorityColorOption);
+	m_nTextColorOption = (PUITCP_TEXTCOLOROPTION)pPrefs->GetProfileInt(szKey, _T("TextColorOption"), m_nTextColorOption);
+	m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("ColorAttribute"), TDCA_CATEGORY);
 
 	// colors
 	CString sColorKey(szKey);
 	sColorKey += _T("\\Colors");
-	
-	m_aPriorityColors.RemoveAll();
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P0"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P1"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P2"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P3"), RGB(30, 225, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P4"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P5"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P6"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P7"), RGB(0, 0, 255)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P8"), RGB(255, 0, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P9"), RGB(255, 0, 0)));
-	m_aPriorityColors.Add(pPrefs->GetProfileInt(sColorKey, _T("P10"), RGB(255, 0, 0)));
 
-	m_aPriorityScheme.RemoveAll();
+	m_crGridlines = pPrefs->GetProfileInt(sColorKey, _T("Gridlines"), DEF_GRIDLINECOLOR);
+	m_crDone = pPrefs->GetProfileInt(sColorKey, _T("TaskDone"), DEF_TASKDONECOLOR);
+	m_crStart = pPrefs->GetProfileInt(sColorKey, _T("TaskStart"), DEF_TASKSTARTCOLOR);
+	m_crStartToday = pPrefs->GetProfileInt(sColorKey, _T("TaskStartToday"), DEF_TASKSTARTCOLOR);
+	m_crDue = pPrefs->GetProfileInt(sColorKey, _T("TaskDue"), DEF_TASKDUECOLOR);
+	m_crDueToday = pPrefs->GetProfileInt(sColorKey, _T("TaskDueToday"), DEF_TASKDUETODAYCOLOR);
+	m_crAltLine = pPrefs->GetProfileInt(sColorKey, _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
+	m_crFlagged = pPrefs->GetProfileInt(sColorKey, _T("Flagged"), DEF_FLAGGEDCOLOR);
+	m_crReference = pPrefs->GetProfileInt(sColorKey, _T("Reference"), DEF_REFERENCECOLOR);
+	m_crGroupHeaderBkgnd = pPrefs->GetProfileInt(sColorKey, _T("GroupHeaderBkgnd"), DEF_GROUPHEADERBKCOLOR);
 
-	if (pPrefs->GetProfileInt(sColorKey, _T("S0"), -1) != -1)
+	if (pPrefs->GetProfileInt(sColorKey, _T("Low"), CLR_NONE) == CLR_NONE)
 	{
-		for (int nColor = 0; nColor < 11; nColor++)
+		// Priority Range
+		m_crPriorityLow = pPrefs->GetProfileInt(sColorKey, _T("PriorityLow"), DEF_PRIORITYLOWCOLOR);
+		m_crPriorityHigh = pPrefs->GetProfileInt(sColorKey, _T("PriorityHigh"), DEF_PRIORITYHIGHCOLOR);
+
+		// Priority Individual colours
+		if (!Misc::Split(pPrefs->GetProfileString(sColorKey, _T("PriorityColors")), m_aPriorityColors, '|'))
+			GetDefaultPriorityColors(m_aPriorityColors);
+
+		// Priority Scheme
+		Misc::Split(pPrefs->GetProfileString(sColorKey, _T("PriorityScheme")), m_aPriorityScheme, '|');
+
+		// Attribute colours
+		CStringArray aAttribColors;
+		int nNumColors = Misc::Split(pPrefs->GetProfileString(sColorKey, _T("AttribColors")), aAttribColors, '|');
+
+		m_aAttribColors.SetSize(nNumColors);
+		CString sColor;
+
+		for (int nColor = 0; nColor < nNumColors; nColor++)
 		{
-			CString sKey = Misc::MakeKey(_T("S%d"), nColor);
-			m_aPriorityScheme.Add(pPrefs->GetProfileInt(sColorKey, sKey));
+			ATTRIBCOLOR& at = m_aAttribColors[nColor];
+
+			at.sAttrib = aAttribColors[nColor];
+			at.color = (Misc::Split(at.sAttrib, sColor, ':') ? _ttoi(sColor) : CLR_NONE);
+		}
+	}
+	else // Backwards compatibility
+	{
+		// Priority Range
+		m_crPriorityLow = pPrefs->GetProfileInt(sColorKey, _T("Low"), DEF_PRIORITYLOWCOLOR);
+		m_crPriorityHigh = pPrefs->GetProfileInt(sColorKey, _T("High"), DEF_PRIORITYHIGHCOLOR);
+
+		// Priority Individual colours
+		int nColor;
+		m_aPriorityColors.SetSize(NUM_DEFPRIORITY);
+
+		for (nColor = 0; nColor < NUM_DEFPRIORITY; nColor++)
+		{
+			CString sKey = Misc::MakeKey(_T("P%d"), nColor);
+			m_aPriorityColors[nColor] = pPrefs->GetProfileInt(sColorKey, sKey, DEF_PRIORITYCOLOR[nColor]);
+		}
+
+		// Priority Scheme
+		m_aPriorityScheme.SetSize(NUM_DEFPRIORITY);
+
+		if (pPrefs->GetProfileInt(sColorKey, _T("S0"), CLR_NONE) != CLR_NONE)
+		{
+			for (int nColor = 0; nColor < NUM_DEFPRIORITY; nColor++)
+			{
+				CString sKey = Misc::MakeKey(_T("S%d"), nColor);
+				m_aPriorityScheme.Add(pPrefs->GetProfileInt(sColorKey, sKey, CLR_NONE));
+			}
+		}
+
+		// Attribute colours
+		m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(_T("Preferences\\AttribColors"), _T("Attribute"), TDCA_CATEGORY);
+
+		CString sKey = Misc::MakeKey(_T("AttribColors"), NULL, szKey), sAttrib(_T("Attrib"));
+		int nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), 0);
+
+		for (nColor = 0; nColor < nNumColor; nColor++)
+		{
+			CString sColorKey = Misc::MakeKey(_T("\\P%d"), nColor, sKey);
+
+			ATTRIBCOLOR ac;
+			ac.color = pPrefs->GetProfileInt(sColorKey, _T("Color"), CLR_NONE);
+			ac.sAttrib = pPrefs->GetProfileString(sColorKey, sAttrib);
+
+			if (!ac.sAttrib.IsEmpty())
+			{
+				m_aAttribColors.Add(ac);
+			}
 		}
 	}
 
-	m_crLow = pPrefs->GetProfileInt(sColorKey, _T("Low"), PRIORITYLOWCOLOR);
-	m_crHigh = pPrefs->GetProfileInt(sColorKey, _T("High"), PRIORITYHIGHCOLOR);
-	m_crGridlines = pPrefs->GetProfileInt(sColorKey, _T("Gridlines"), GRIDLINECOLOR);
-	m_crDone = pPrefs->GetProfileInt(sColorKey, _T("TaskDone"), TASKDONECOLOR);
-	m_crStart = pPrefs->GetProfileInt(sColorKey, _T("TaskStart"), TASKSTARTCOLOR);
-	m_crStartToday = pPrefs->GetProfileInt(sColorKey, _T("TaskStartToday"), TASKSTARTCOLOR);
-	m_crDue = pPrefs->GetProfileInt(sColorKey, _T("TaskDue"), TASKDUECOLOR);
-	m_crDueToday = pPrefs->GetProfileInt(sColorKey, _T("TaskDueToday"), TASKDUETODAYCOLOR);
-	m_crAltLine = pPrefs->GetProfileInt(sColorKey, _T("AlternateLines"), ALTERNATELINECOLOR);
-	m_crFlagged = pPrefs->GetProfileInt(sColorKey, _T("Flagged"), FLAGGEDCOLOR);
-	m_crReference = pPrefs->GetProfileInt(sColorKey, _T("Reference"), REFERENCECOLOR);
-	m_crGroupHeaderBkgnd = pPrefs->GetProfileInt(sColorKey, _T("GroupHeaderBkgnd"), GROUPHEADERBKCOLOR);
-
-	// bkwds compatibility
-	if (pPrefs->GetProfileInt(szKey, _T("ColorByPriority"), FALSE))
-		m_nTextColorOption = COLOROPT_PRIORITY;
-
-	// bkwds compatibility
-	if (m_nPriorityColorOption == -1)
-	{
-		if (pPrefs->GetProfileInt(szKey, _T("IndividualPriorityColors"), FALSE))
-			m_nPriorityColorOption = COLORPRIORITYBY_INDIVIDUAL;
-		else
-			m_nPriorityColorOption = COLORPRIORITYBY_GRADIENT;
-	}
-	
-	m_nTextColorOption = pPrefs->GetProfileInt(szKey, _T("TextColorOption"), m_nTextColorOption);
-
-	// attribute colors
-	m_nColorAttribute = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(_T("Preferences\\AttribColors"), _T("Attribute"), TDCA_CATEGORY);
-
-	CString sKey = Misc::MakeKey(_T("AttribColors"), NULL, szKey), sAttrib(_T("Attrib"));
-	int nNumColor = pPrefs->GetProfileInt(sKey, _T("Count"), -1);
-
-	for (int nColor = 0; nColor < nNumColor; nColor++)
-	{
-		CString sColorKey = Misc::MakeKey(_T("\\P%d"), nColor, sKey);
-
-		ATTRIBCOLOR ac;
-		ac.color = pPrefs->GetProfileInt(sColorKey, _T("Color"), 0);
-		ac.sAttrib = pPrefs->GetProfileString(sColorKey, sAttrib);
-
-		if (!ac.sAttrib.IsEmpty())
-		{
-			m_aAttribColors.Add(ac);
-		}
-	}
+	// Restore customised colour dialog colours
+	CColourButton::LoadPreferences(pPrefs);
 }
 
 void CPreferencesUITasklistColorsPage::AddDefaultListItemsToAttributeColors()
@@ -1046,9 +1060,9 @@ void CPreferencesUITasklistColorsPage::AddDefaultListItemsToAttributeColors()
 
 	int nNumAttrib = pDefAttribs->GetSize();
 
-	for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
+	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 	{
-		const CString& sDef = pDefAttribs->GetAt(nAttrib);
+		const CString& sDef = pDefAttribs->GetAt(nAtt);
 		
 		if (sDef.IsEmpty())
 			continue;
@@ -1071,46 +1085,6 @@ void CPreferencesUITasklistColorsPage::AddDefaultListItemsToAttributeColors()
 
 void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
-	CString sColorKey(szKey);
-	sColorKey += _T("\\Colors");
-	
-	// priority colors
-	pPrefs->WriteProfileInt(sColorKey, _T("Low"), m_crLow);
-	pPrefs->WriteProfileInt(sColorKey, _T("High"), m_crHigh);
-
-	int nColor = m_aPriorityColors.GetSize();
-
-	while (nColor--)
-	{
-		CString sKey = Misc::MakeKey(_T("P%d"), nColor);
-		pPrefs->WriteProfileInt(sColorKey, sKey, m_aPriorityColors[nColor]);
-	}
-
-	nColor = m_aPriorityScheme.GetSize();
-
-	while (nColor--)
-	{
-		CString sKey = Misc::MakeKey(_T("S%d"), nColor);
-		pPrefs->WriteProfileInt(sColorKey, sKey, m_aPriorityScheme[nColor]);
-	}
-
-	// attrib colors
-	int nNumColor = m_aAttribColors.GetSize();
-
-	pPrefs->WriteProfileInt(_T("Preferences\\AttribColors"), _T("Attribute"), m_nColorAttribute);
-	pPrefs->WriteProfileInt(_T("Preferences\\AttribColors"), _T("Count"), nNumColor);
-
-	for (nColor = 0; nColor < nNumColor; nColor++)
-	{
-		CString sKey = Misc::MakeKey(_T("Preferences\\AttribColors\\P%d"), nColor);
-
-		const ATTRIBCOLOR& ac = m_aAttribColors[nColor];
-		pPrefs->WriteProfileInt(sKey, _T("Color"), ac.color);
-		pPrefs->WriteProfileString(sKey, _T("Attrib"), ac.sAttrib);
-	}
-
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("TextColorOption"), m_nTextColorOption);
 	pPrefs->WriteProfileInt(szKey, _T("ColorPriority"), m_bColorPriority);
 	pPrefs->WriteProfileInt(szKey, _T("PriorityColorOption"), m_nPriorityColorOption);
@@ -1131,14 +1105,20 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(szKey, _T("RemindersUseTreeFont"), m_bRemindersUseTreeFont);
 	pPrefs->WriteProfileInt(szKey, _T("FindTasksUseTreeFont"), m_bFindTasksUseTreeFont);
 	pPrefs->WriteProfileInt(szKey, _T("HLSColorGradient"), m_bHLSColorGradient);
-	pPrefs->WriteProfileInt(szKey, _T("HidePriorityNumber"), m_bHidePriorityNumber);
 	pPrefs->WriteProfileInt(szKey, _T("AlternateLineColor"), m_bSpecifyAlternateLineColor);
 	pPrefs->WriteProfileInt(szKey, _T("FlaggedColor"), m_bSpecifyFlaggedColor);
 	pPrefs->WriteProfileInt(szKey, _T("ReferenceColor"), m_bSpecifyReferenceColor);
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyGroupHeaderBkgndColor"), m_bSpecifyGroupHeaderBkgndColor);
+	pPrefs->WriteProfileInt(szKey, _T("ColorAttribute"), m_nColorAttribute);
 
-	CColourButton::SavePreferences(pPrefs);
+	// Colors
+	CString sColorKey(szKey);
+	sColorKey += _T("\\Colors");
 
+	// Remove old entries
+	pPrefs->DeleteProfileSection(sColorKey, true);
+	pPrefs->DeleteProfileSection(_T("Preferences\\AttribColors"), true);
+	
 	pPrefs->WriteProfileInt(sColorKey, _T("Gridlines"), m_crGridlines);
 	pPrefs->WriteProfileInt(sColorKey, _T("TaskDone"), m_crDone);
 	pPrefs->WriteProfileInt(sColorKey, _T("TaskStart"), m_crStart);
@@ -1149,6 +1129,27 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(sColorKey, _T("Flagged"), m_crFlagged);
 	pPrefs->WriteProfileInt(sColorKey, _T("Reference"), m_crReference);
 	pPrefs->WriteProfileInt(sColorKey, _T("GroupHeaderBkgnd"), m_crGroupHeaderBkgnd);
+
+	// priority colors
+	pPrefs->WriteProfileInt(sColorKey, _T("PriorityLow"), m_crPriorityLow);
+	pPrefs->WriteProfileInt(sColorKey, _T("PriorityHigh"), m_crPriorityHigh);
+
+	pPrefs->WriteProfileString(sColorKey, _T("PriorityColors"), Misc::FormatArray(m_aPriorityColors, '|'));
+	pPrefs->WriteProfileString(sColorKey, _T("PriorityScheme"), Misc::FormatArray(m_aPriorityScheme, '|'));
+
+	// attrib colors
+	CString sAttribColors;
+	int nNumColor = m_aAttribColors.GetSize();
+
+	for (int nColor = 0; nColor < nNumColor; nColor++)
+	{
+		const ATTRIBCOLOR& ac = m_aAttribColors[nColor];
+		sAttribColors += Misc::Format(_T("%s:%ld|"), ac.sAttrib, ac.color);
+	}
+	pPrefs->WriteProfileString(sColorKey, _T("AttribColors"), sAttribColors);
+
+	// Save customised colour dialog colours
+	CColourButton::SavePreferences(pPrefs);
 }
 
 void CPreferencesUITasklistColorsPage::OnPopulateattriblist() 
@@ -1161,7 +1162,32 @@ void CPreferencesUITasklistColorsPage::SetDefaultListData(const TDCAUTOLISTDATA&
 	m_defaultListData.Copy(defaultListData, TDCA_ALL);
 }
 
+void CPreferencesUITasklistColorsPage::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
+
+	m_nNumPriorityRiskLevels = nNumLevels;
+	m_cbPriorityColors.SetNumLevels(nNumLevels);
+
+	CColorBrewer brewer(CBF_SYNTHESIZE | CBF_TEXTSAFE);
+	CColorBrewerPaletteArray aPalettes;
+
+	brewer.GetPalettes(CBPT_SEQUENTIAL, aPalettes, nNumLevels);
+	brewer.GetPalettes(CBPT_DIVERGING, aPalettes, nNumLevels, TRUE);
+
+	m_cbPriorityScheme.Initialize(aPalettes);
+
+}
+
 void CPreferencesUITasklistColorsPage::OnSelchangeAttributetocolorby() 
 {
 	UpdateData(TRUE);
+}
+
+void CPreferencesUITasklistColorsPage::GetDefaultPriorityColors(CDWordArray& aColors)
+{
+	aColors.SetSize(NUM_DEFPRIORITY);
+
+	for (int nColor = 0; nColor < NUM_DEFPRIORITY; nColor++)
+		aColors[nColor] = DEF_PRIORITYCOLOR[nColor];
 }

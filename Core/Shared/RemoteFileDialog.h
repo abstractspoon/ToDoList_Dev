@@ -10,6 +10,7 @@
 #include "fileedit.h"
 #include "runtimedlg.h"
 #include "sizegrip.h"
+#include "entoolbar.h"
 
 #include <afxinet.h>
 #include <afxtempl.h>
@@ -29,6 +30,11 @@ enum // flags
 
 /////////////////////////////////////////////////////////////////////////////
 
+// Return from DoModal
+const int IDCHANGESERVER = 10; // IDTRYAGAIN
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct FILERESULT
 {
 	FILERESULT(LPCTSTR szFilePath = NULL, DWORD size = 0);
@@ -37,7 +43,7 @@ struct FILERESULT
 	CString sFilePath; // relative to root
 	DWORD dwSize;
 };
-typedef CArray<FILERESULT, FILERESULT&> CFRArray;
+typedef CArray<FILERESULT, FILERESULT&> CFileResultArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -49,7 +55,12 @@ class CRemoteFileDialog : public CRuntimeDlg
 {
 // Construction
 public:
-	CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServer, LPCTSTR szFilters = NULL, LPCTSTR szInitialFolder = NULL);   // standard constructor
+	CRemoteFileDialog(CFtpConnection* pConnection, 
+					  LPCTSTR szServer, 
+					  LPCTSTR szFilters = NULL, 
+					  LPCTSTR szInitialFolder = NULL, 
+					  HICON hIcon = NULL);
+
 	virtual ~CRemoteFileDialog();
 
 	int DoModal(IPreferences* pPrefs, LPCTSTR szKey, DWORD dwOptions = RFD_DOWNLOAD | RFD_FILEMUSTEXIST | RFD_MULTISELECT, LPCTSTR szFilename = NULL);
@@ -59,7 +70,7 @@ public:
 	CString GetFirstPath();
 
 	int GetPathCount() { return m_aFiles.GetSize(); }
-	void GetPaths(CFRArray& aFiles) { aFiles.Copy(m_aFiles); }
+	void GetPaths(CFileResultArray& aFiles) { aFiles.Copy(m_aFiles); }
 
 protected:
 // Dialog Data
@@ -75,11 +86,12 @@ protected:
 	CFileEdit	m_eFilename;
 	CFtpConnection* m_pConnection;
 	DWORD m_dwFileSize; // selected file
-	CToolBar m_toolbar;
-	CFRArray m_aFiles;
+	CEnToolBar m_toolbar;
+	CFileResultArray m_aFiles;
 	DWORD m_dwOptions;
 	BOOL m_bFilling;
 	CSizeGrip m_sbGrip;
+	HICON m_hIcon;
 	
 	IPreferences* m_pPrefs;
 	CString m_sPrefKey;
@@ -137,6 +149,7 @@ protected:
 	afx_msg void OnToolbarDropDown(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnViewMenu();
 	afx_msg void OnUpOneLevel();
+	afx_msg void OnChangeServer();
 	afx_msg void OnChangeView(UINT nCmdID);
 	afx_msg BOOL OnToolbarNeedText(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
@@ -154,6 +167,7 @@ protected:
 	BOOL FolderSelect() { return (m_dwOptions & RFD_UPLOAD) && (m_dwOptions & RFD_FOLDERSELECT); }
 	void UpdateOKButton(BOOL bRefreshResults = TRUE);
 	void UpdateFileResults();
+	void SaveWindowPos();
 
 	static CString FormatSize(DWORD dwSize);
 	static CString FormatDate(double dDate);

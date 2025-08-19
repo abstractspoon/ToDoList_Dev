@@ -32,13 +32,22 @@ namespace DayViewUIExtension
 			InitializeComponent();
 		}
 
-		public void Initialise(WorkingWeek workWeek, TimeBlockSeriesAttributes attribs, bool editMode, 
+		public void Initialise(WorkingWeek workWeek,
+								bool isoDateTimes,
+								TimeBlockSeriesAttributes attribs, 
+								bool editMode, 
 								TimeBlockSeriesAttributes.EditMask mask = TimeBlockSeriesAttributes.EditMask.None)
 		{
 			TimeComboBox.SetWorkingWeek(workWeek);
 
 			m_DowListBox.SetSelectedDays(workWeek.WeekDays()); // default
 			m_EditMode = editMode;
+
+			m_FromTimeCombo.SetISOFormat(isoDateTimes);
+			m_ToTimeCombo.SetISOFormat(isoDateTimes);
+
+			DateUtil.SetShortDateFormat(m_FromDateCtrl, isoDateTimes);
+			DateUtil.SetShortDateFormat(m_ToDateCtrl, isoDateTimes);
 
 			if (attribs != null)
 			{
@@ -106,20 +115,27 @@ namespace DayViewUIExtension
 
 		public void SetDates(Calendar.AppointmentDates dates)
 		{
-			if (dates.Start.Date == DateTime.MinValue)
-				m_FromDateCtrl.Value = DateTime.Now.Date;
-			else
-				m_FromDateCtrl.Value = dates.Start.Date;
-
-			if (dates.Start.Date == DateTime.MinValue)
+			if (dates.Start.Date == DateTime.MinValue) // invalid
 			{
+				m_FromDateCtrl.Value = DateTime.Now.Date;
+
 				m_ToDateCtrl.Value = DateTime.Now.Date;
 				m_ToDateCtrl.Checked = false;
 			}
-			else
+			else // valid start date
 			{
-				m_ToDateCtrl.Value = dates.End.Date;
-				m_ToDateCtrl.Checked = (dates.End.Date > dates.Start.Date);
+				m_FromDateCtrl.Value = dates.Start.Date;
+
+				if (dates.End.Date == DateTime.MinValue) // invalid
+				{
+					m_ToDateCtrl.Value = dates.Start.Date;
+					m_ToDateCtrl.Checked = false;
+				}
+				else
+				{ 
+					m_ToDateCtrl.Value = dates.End.Date;
+					m_ToDateCtrl.Checked = (dates.End.Date > dates.Start.Date);
+				}
 			}
 		}
 

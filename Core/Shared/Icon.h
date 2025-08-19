@@ -4,14 +4,12 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// fileedit.h : header file
-//
 
 class CIcon
 {
 public:
 	CIcon();
-	CIcon(HICON hIcon);
+	CIcon(HICON hIcon, BOOL bOwned = TRUE);
 	CIcon(UINT nIDIcon, int nSize = 16, BOOL bScaleByDPI = TRUE);
 	virtual ~CIcon();
 
@@ -19,16 +17,21 @@ public:
 	void Destroy();
 
 	BOOL IsValid() const;
-	BOOL SetIcon(HICON hIcon, BOOL bDeletePrev = TRUE);
+	BOOL SetIcon(HICON hIcon, BOOL bOwned = TRUE);
 
-	BOOL Attach(HICON hIcon);
+	BOOL Attach(HICON hIcon, BOOL bOwned = TRUE);
 	HICON Detach();
+
+	BOOL Draw(CDC* pDC, const CPoint& ptTopLeft) const;
+	CSize GetSize() const { return m_size; }
 
 	operator HICON() const { return m_hIcon; }
 	operator HICON() { return m_hIcon; }
 
 protected:
 	HICON m_hIcon;
+	CSize m_size;
+	BOOL m_bOwned;
 };
 
 

@@ -46,12 +46,15 @@ public:
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
+	void SetNumPriorityRiskLevels(int nNumLevels);
+	void SetPriorityColors(const CDWordArray& aColors);
+	void SetISODateFormat(BOOL bIso);
 
 	BOOL AddRule();
 	BOOL DeleteSelectedRule();
 	BOOL CanDeleteSelectedRule() const { return CanDeleteSelectedCell(); }
 	BOOL HasRules() const { return m_aSearchParams.GetSize(); }
-	BOOL HasRule(TDC_ATTRIBUTE nAttrib) const;
+	BOOL HasRule(TDC_ATTRIBUTE nAttribID) const;
 
 	void MoveSelectedRuleUp();
 	BOOL CanMoveSelectedRuleUp() const;
@@ -68,30 +71,27 @@ protected:
 	CComboBox						m_cbAndOr;
 	CTDLRegularityComboBox			m_cbRecurrence;
 	CDateTimeCtrlEx					m_dtcDate;
-	CTimeEdit						m_eTime;
+	CTimeEdit						m_eTimePeriod;
 	CCheckComboBox					m_cbListValues;
 	CTDLPriorityComboBox			m_cbPriority;
 	CTDLRiskComboBox				m_cbRisk;
 	CTDLIconComboBox				m_cbCustomIcons;
 
 	CSearchParamArray				m_aSearchParams;
-	CTDCCustomAttribDefinitionArray m_aAttribDefs;
+	CTDCCustomAttribDefinitionArray m_aCustAttribDefs;
 	TDCAUTOLISTDATA					m_tldListContents;
 	CTDCImageList					m_ilIcons;
+	BOOL							m_bIsoDateFormat;
 
 	const CContentMgr&				m_mgrContent;
-// Overrides
+
 protected:
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFindTaskExpressionListCtrl)
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CTDLFindTaskExpressionListCtrl)
-	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -111,7 +111,6 @@ protected:
 	afx_msg void OnRecurrenceEditOK();
 	afx_msg void OnCustomIconEditChange();
 	afx_msg void OnValueEditOK(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg BOOL OnSelItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTimeChange();
@@ -127,6 +126,7 @@ protected:
 	virtual void OnCancelEdit();
 	virtual void InitState();
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
+	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);
 
 	void PrepareEdit(int nRow, int nCol);
 	void PrepareControl(CWnd& ctrl, int nRow, int nCol);
@@ -138,7 +138,6 @@ protected:
 	void UpdateValueColumnText(int nRow);
 	void AddOperatorToCombo(FIND_OPERATOR op);
 	void RefreshAndOrColumnText();
-	void HideAllControls(const CWnd* pWndIgnore = NULL);
 
 	static CString GetOpName(FIND_OPERATOR op);
 };

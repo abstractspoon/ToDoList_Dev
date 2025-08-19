@@ -6,8 +6,10 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using System.Diagnostics;
 using System.Web.UI;
+using System.Collections.Generic;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using UIComponents;
 
 namespace HTMLReportExporter
 {
@@ -36,10 +38,15 @@ namespace HTMLReportExporter
         private HtmlReportTemplate m_Template = null;
 		private HtmlReportTemplate m_PrevTemplate = null;
 		private Timer m_ChangeTimer = null;
-		private String m_TemplateFilePath = "";
+
+		private String m_TemplateFilePath = string.Empty;
+		private String m_ReportTitle = string.Empty;
+		private String m_ReportDate = string.Empty;
+
 		private bool m_FirstPreview = true;
 		private bool m_EditedSinceLastSave = false;
 		private bool m_Printing = false;
+
 		private HtmlReportUtils.CustomAttributes m_CustomAttributes = null;
 
 		private String PreviewPageName
@@ -59,7 +66,14 @@ namespace HTMLReportExporter
 
 		// --------------------------------------------------------------
 
-		public HtmlReportTemplateForm(String typeId, Translator trans, TaskList tasks, bool printing, Preferences prefs, String key)
+		public HtmlReportTemplateForm(String typeId, 
+									  Translator trans, 
+									  TaskList tasks,
+							 		  string reportTitle,
+									  string reportDate,
+									  bool printing, 
+									  Preferences prefs, 
+									  String key)
 		{
 			m_TypeId = typeId;
 			m_Trans = trans;
@@ -67,10 +81,12 @@ namespace HTMLReportExporter
 			m_Prefs = prefs;
 			m_PrefsKey = key;
 			m_Printing = printing;
+			m_ReportTitle = reportTitle;
+			m_ReportDate = reportDate;
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
-			m_CustomAttributes = new HtmlReportUtils.CustomAttributes();
+			m_CustomAttributes = HtmlReportUtils.GetCustomAttributes(tasks);
 			m_EditedSinceLastSave = false;
 
             m_ChangeTimer = new Timer();
@@ -80,12 +96,6 @@ namespace HTMLReportExporter
 			InitializeComponent();
             InitialiseFontAndColors();
 			DoHighDPIFixups();
-
-			// Build list custom attribute IDs for later use
-			var custAttrib = tasks.GetCustomAttributes();
-
-			foreach (var attrib in custAttrib)
-				m_CustomAttributes.Add(attrib.Id.ToLower(), attrib.Label);
 
 			var prevSize = LoadPreferences();
 
@@ -236,7 +246,7 @@ namespace HTMLReportExporter
 			this.footerEnabledCheckbox.CheckedChanged += new EventHandler(OnFooterEnableChanged);
 
 			// IE version
-			this.labelPreview.Text = String.Format("{0} (Internet Explorer {1})", m_Trans.Translate("Preview"), this.browserPreview.Version.Major);
+			this.labelPreview.Text = String.Format("{0} (Internet Explorer {1})", m_Trans.Translate("Preview", Translator.Type.Label), this.browserPreview.Version.Major);
 
 			m_Trans.Translate(this);
 
@@ -286,7 +296,7 @@ namespace HTMLReportExporter
 				var tbHotColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarHot);
 
 				// Windows doesn't report the actual tab control back colour
-				if (!theme.IsDarkMode())
+				if (!UITheme.IsDarkMode())
 				{
 					tbBackColor = SystemColors.Window;
 					tbHotColor = SystemColors.Control;
@@ -371,7 +381,6 @@ namespace HTMLReportExporter
                 UpdateCaption();
                 UpdateControls();
             }
-
         }
 
         private void UpdateToolbar()
@@ -469,10 +478,10 @@ namespace HTMLReportExporter
 					break;
 
 				case PageType.Tasks:
+					// Only update if the header row combo is NOT dropped down
+					// else it's inconsistent with the rest of the updates
 					if (!this.tableHeaderRowCombobox.DroppedDown)
 					{
-						// Only update if the header row combo is NOT dropped down
-						// else it's inconsistent with the rest of the updates
 						m_Template.Task.Text = this.htmlReportTasksControl.InnerHtml ?? "";
 						m_Template.Task.Enabled = true; // always
 						m_Template.Task.TableHeaderRow = this.tableHeaderRowCombobox.SelectedOption;
@@ -585,9 +594,10 @@ namespace HTMLReportExporter
 
 		private bool BuildPreviewPage()
 		{
-			var report = new HtmlReportBuilder(m_Trans, m_Tasklist, m_Prefs, m_Template, true, m_Printing);
+			var tasklists = new List<TaskList>() { m_Tasklist };
+			var report = new HtmlReportBuilder(m_Trans, m_Prefs, m_Template, m_ReportTitle, m_ReportDate , true, m_Printing);
 
-			return report.BuildReport(PreviewPageName);
+			return report.BuildReport(tasklists, PreviewPageName);
 		}
 
 		private void RefreshPreview()
@@ -614,7 +624,7 @@ namespace HTMLReportExporter
 			var dlg = new OpenFileDialog
 			{
 				//InitialDirectory = LastBrowsedFolder,
-				Title = m_Trans.Translate("Open Report Template"),
+				Title = m_Trans.Translate("Open Report Template", Translator.Type.Dialog),
 
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
@@ -644,19 +654,19 @@ namespace HTMLReportExporter
 
 		private void UpdateCaption()
 		{
-			String title = m_Trans.Translate("Report Builder"), fileName = "";
+			String title = m_Trans.Translate("Report Builder", Translator.Type.Dialog), fileName = "";
 
 			if (!String.IsNullOrEmpty(m_TemplateFilePath))
 				fileName = Path.GetFileName(m_TemplateFilePath);
 			else
-				fileName = m_Trans.Translate("untitled");
+				fileName = m_Trans.Translate("untitled", Translator.Type.Text);
 
 			this.Text = String.Format("{0} - {1}", fileName, title);
 		}
 
 		private String FileFilter
 		{
-			get { return String.Format("{0} (*.rbt)|*.rbt;", m_Trans.Translate("Report Templates")); }
+			get { return m_Trans.Translate("Report Templates (*.rbt)|*.rbt;", Translator.Type.FileFilter); }
 		}
 
 		private void OnSaveReportTemplate(object sender, EventArgs e)
@@ -686,7 +696,7 @@ namespace HTMLReportExporter
 			var dlg = new SaveFileDialog
 			{
 				//InitialDirectory = LastBrowsedFolder,
-				Title = m_Trans.Translate("Save Report Template"),
+				Title = m_Trans.Translate("Save Report Template", Translator.Type.Dialog),
 
 				AutoUpgradeEnabled = true,
 				CheckPathExists = true,
@@ -734,8 +744,8 @@ namespace HTMLReportExporter
 
 			m_Trans.Translate(dialog, dialog.Tooltip);
 
-			dialog.BrowseTitle = m_Trans.Translate(dialog.BrowseTitle);
-			dialog.BrowseFilter = m_Trans.Translate(dialog.BrowseFilter);
+			dialog.BrowseTitle = m_Trans.Translate(dialog.BrowseTitle, Translator.Type.Dialog);
+			dialog.BrowseFilter = m_Trans.Translate(dialog.BrowseFilter, Translator.Type.Dialog);
 
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
@@ -755,19 +765,19 @@ namespace HTMLReportExporter
 
 		private void OnSetBackgroundColor(object sender, EventArgs e)
 		{
-			using (ColorDialog colorDialog = new ColorDialog())
+			using (var dlg = new ColorDialogEx())
 			{
-				colorDialog.FullOpen = true;
-				colorDialog.AnyColor = true;
-				colorDialog.SolidColorOnly = true;
-				colorDialog.AllowFullOpen = true;
-				colorDialog.Color = (m_Template.HasBackColor ? m_Template.BackColor : Color.White);
+				dlg.FullOpen = true;
+				dlg.AnyColor = true;
+				dlg.SolidColorOnly = true;
+				dlg.AllowFullOpen = true;
+				dlg.Color = (m_Template.HasBackColor ? m_Template.BackColor : Color.White);
 				//colorDialog.CustomColors = _customColors;
 
-				if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				if (dlg.ShowDialog() == DialogResult.OK)
 				{
 					//_customColors = colorDialog.CustomColors;
-					m_Template.BackColor = colorDialog.Color;
+					m_Template.BackColor = dlg.Color;
 					UpdateControls();
 				}
 			}

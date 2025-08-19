@@ -11,6 +11,7 @@
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
 #include <shared\Rtf2HtmlConverter.h>
+#include <shared\DarkMode.h>
 
 #include <3rdParty\ClipboardBackup.h>
 
@@ -18,10 +19,12 @@
 
 using namespace System::Drawing;
 using namespace System::Windows::Forms;
+using namespace System::Collections::Generic;
 
 using namespace MSDN::Html::Editor;
-using namespace Abstractspoon::Tdl::PluginHelpers;
 using namespace Command::Handling;
+
+using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -109,8 +112,8 @@ void HtmlEditorControlEx::Translate()
 		// Prepare pre-translation of enum comboboxes 
 		m_Trans->AddPreTranslation(gcnew String("Center"), gcnew String("Centre"));
 
-		m_Trans->Translate(ToolBar->Items);
-		m_Trans->Translate(ContextMenu->Items);
+		m_Trans->Translate(ToolBar->Items, false);
+		m_Trans->Translate(ContextMenu->Items, true);
 	}
 }
 
@@ -168,20 +171,20 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 	
 		m_Trans->Translate(urlDialog, urlDialog->Tooltip);
 
-		urlDialog->BrowseTitle = m_Trans->Translate(urlDialog->BrowseTitle);
-		urlDialog->BrowseFilter = m_Trans->Translate(urlDialog->BrowseFilter);
+		urlDialog->BrowseTitle = m_Trans->Translate(urlDialog->BrowseTitle, Translator::Type::Dialog);
+		urlDialog->BrowseFilter = m_Trans->Translate(urlDialog->BrowseFilter, Translator::Type::FileFilter);
 	}
 	else if (ISTYPE(dialog, EnterImageForm))
 	{
 		auto imageDialog = ASTYPE(dialog, EnterImageForm);
 
 		imageDialog->LastBrowsedFolder = LastBrowsedImageFolder;
-		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional")), false);
+		FormsUtil::SetEditCue(dialog, gcnew String("hrefText"), m_Trans->Translate(gcnew String("Optional"), Translator::Type::Text), false);
 
 		m_Trans->Translate(imageDialog, imageDialog->Tooltip);
 
-		imageDialog->BrowseTitle = m_Trans->Translate(imageDialog->BrowseTitle);
-		imageDialog->BrowseFilter = m_Trans->Translate(imageDialog->BrowseFilter);
+		imageDialog->BrowseTitle = m_Trans->Translate(imageDialog->BrowseTitle, Translator::Type::Dialog);
+		imageDialog->BrowseFilter = m_Trans->Translate(imageDialog->BrowseFilter, Translator::Type::FileFilter);
 	}
 	else if (ISTYPE(dialog, EditHtmlForm))
 	{
@@ -351,7 +354,7 @@ void HtmlEditorControlEx::TextPaste()
 		if (sSourceUrl.IsEmpty() && !CClipboard().GetHTMLSourceLink(sSourceUrl))
 			return;
 
-		SelectedHtml = String::Format(L"<a href=\"{0}\">{1}</a>", gcnew String(sSourceUrl), m_Trans->Translate(L"Source"));
+		SelectedHtml = String::Format(L"<a href=\"{0}\">{1}</a>", gcnew String(sSourceUrl), m_Trans->Translate(L"Source", Translator::Type::Text));
 	}
 }
 
@@ -376,4 +379,70 @@ bool HtmlEditorControlEx::InitialiseClipboardSupport()
 	}
 
 	return (s_ClipboardEnabled != -1);
+}
+
+bool HtmlEditorControlEx::ExecuteCommandRange(MSHTML::IHTMLTxtRange^ range, String^ command, Object^ data)
+{
+	if (command->Equals(HtmlEditorControl::HTML_COMMAND_FORE_COLOR))
+	{
+		Color color = Color::FromName(ASTYPE(data, String));
+
+		if (OnSetForeColor(range, color))
+			return true;
+	}
+
+	return HtmlEditorControl::ExecuteCommandRange(range, command, data);
+}
+
+bool HtmlEditorControlEx::OnSetForeColor(MSHTML::IHTMLTxtRange^ range, Drawing::Color color)
+{
+	// Intercept setting white text in Dark Mode, and black text in non Dark Mode, 
+	// and instead remove any colour definition by removing all attributes and 
+	// then adding back everything that was there before except for the colour
+	bool darkMode = (CDarkMode::IsEnabled() != FALSE);
+	bool isWhite = (color == Color::White), isBlack = (color == Color::Black);
+
+	if ((darkMode && isWhite) || (!darkMode && isBlack))
+	{
+		cli::array<String^>^ AttribCmds =
+		{
+			HTML_COMMAND_BOLD,
+			HTML_COMMAND_UNDERLINE,
+			HTML_COMMAND_ITALIC,
+			HTML_COMMAND_SUBSCRIPT,
+			HTML_COMMAND_SUPERSCRIPT,
+			HTML_COMMAND_STRIKE_THROUGH,
+			HTML_COMMAND_FONT_NAME,
+			HTML_COMMAND_FONT_SIZE,
+		};
+
+		cli::array<Object^>^ AttribVals = gcnew cli::array<Object ^>(AttribCmds->Length);
+
+		for (int attrib = 0; attrib < AttribCmds->Length; attrib++)
+		{
+			AttribVals[attrib] = QueryCommandRange(range, AttribCmds[attrib]);
+		}
+
+		if (HtmlEditorControl::ExecuteCommandRange(range, HtmlEditorControl::HTML_COMMAND_REMOVE_FORMAT, nullptr))
+		{
+			// restore all the other removed attributes
+			for (int attrib = 0; attrib < AttribCmds->Length; attrib++)
+			{
+				// Only re-apply boolean attributes if they are true
+				if (ISTYPE(AttribVals[attrib], bool))
+				{
+					bool^ val = ASTYPE(AttribVals[attrib], bool);
+
+					if (!(*val))
+						continue;
+				}
+
+				ExecuteCommandRange(range, AttribCmds[attrib], AttribVals[attrib]);
+			}
+
+			return true;
+		}
+	}
+
+	return false; // not handled
 }

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "filemisc.h"
+#include "webmisc.h"
 #include "fileregister.h"
 #include "misc.h"
 #include "driveinfo.h"
@@ -37,12 +38,11 @@ static CString s_sLogAppDataKey;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-static LPCTSTR ENDL = _T("\r\n");
-static CString EMPTYSTRING;
+const LPCTSTR ENDL = _T("\r\n");
+const CString EMPTYSTRING;
+const LPCTSTR ALLFILESMASK = _T("*.*");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-static LPCTSTR ALLFILESMASK = _T("*.*");
 
 static BOOL IsAllFileMask(LPCTSTR szFileMask)
 {
@@ -171,6 +171,11 @@ BOOL CFileBackup::RestoreBackup()
 	return FileMisc::CopyFile(m_sBackup, m_sFile, TRUE);
 }
 
+CString CFileBackup::GetBackupFolderPath() const 
+{ 
+	return FileMisc::GetFolderFromFilePath(m_sBackup); 
+}
+
 CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
 {
 	CString sBackup(sFile);
@@ -216,6 +221,8 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 	if (Misc::HasFlag(dwFlags, FBS_APPVERSION))
 	{
 		CString sVersion = FileMisc::GetAppVersion('_');
+		ASSERT(!sVersion.IsEmpty());
+
 		sFExt = ('.' + sVersion + sFExt);
 	}
 
@@ -236,7 +243,7 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 		sBackupExt = '.' + sBackupExt;
 	}
 
-	FileMisc::ReplaceExtension(sBackup, (sBackupExt + sFExt));
+	FileMisc::ReplaceExtension(sBackup, (sFExt + sBackupExt));
 
 	// Make sure we're not overwriting an existing backup
 	if (!Misc::HasFlag(dwFlags, FBS_OVERWRITE) && FileMisc::FileExists(sBackup))
@@ -254,6 +261,47 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 	}
 
 	return sBackup;
+}
+
+int CFileBackup::CullBackups(const CString& sPattern, DWORD dwFlags, int nNumToKeep)
+{
+	int nUnused;
+	return CullBackups(sPattern, dwFlags, nNumToKeep, nUnused);
+}
+
+int CFileBackup::CullBackups(const CString& sPattern, DWORD dwFlags, int nNumToKeep, int& nNumFound)
+{
+	CString sFolder = FileMisc::GetFolderFromFilePath(sPattern);
+	CString sFilePattern = FileMisc::GetFileNameFromPath(sPattern);
+
+	ASSERT(sFilePattern.FindOneOf(_T("*?")) != -1);
+
+	CStringArray aFiles;
+	nNumFound = FileMisc::FindFiles(sFolder, aFiles, FALSE, sFilePattern);
+
+	if (!nNumFound)
+		return 0;
+
+	if (dwFlags & FBS_DATESTAMP)
+		Misc::SortArray(aFiles);
+	else
+		Misc::SortArray(aFiles, FileDateSortProc);
+
+	while (aFiles.GetSize() > nNumToKeep)
+	{
+		FileMisc::DeleteFile(aFiles[0]);
+		aFiles.RemoveAt(0);
+	}
+
+	return (nNumFound - aFiles.GetSize());
+}
+
+int CFileBackup::FileDateSortProc(const void* v1, const void* v2)
+{
+	const CString* pFile1 = (CString*)v1;
+	const CString* pFile2 = (CString*)v2;
+
+	return (int)(FileMisc::GetFileLastModified(*pFile2) - FileMisc::GetFileLastModified(*pFile1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -443,8 +491,10 @@ BOOL FileMisc::FindFirst(LPCTSTR szSearchSpec, CString& sPath)
 	return FALSE;
 }
 
-int FileMisc::FindFiles(const CString& sFolder, CStringArray& aFiles, BOOL bCheckSubFolders, LPCTSTR szPattern)
+int FileMisc::FindFiles(const CString& sFolder, CStringArray& aFilePaths, BOOL bCheckSubFolders, LPCTSTR szPattern)
 {
+	aFilePaths.RemoveAll();
+
 	CFileFind ff;
 	CString sSearchSpec;
 
@@ -463,17 +513,52 @@ int FileMisc::FindFiles(const CString& sFolder, CStringArray& aFiles, BOOL bChec
 			if (ff.IsDirectory())
 			{
 				if (bCheckSubFolders)
-					FindFiles(sPath, aFiles, TRUE, szPattern);
+					FindFiles(sPath, aFilePaths, TRUE, szPattern);
 			}
 			else
 			{
-				aFiles.Add(sPath);
+				aFilePaths.Add(sPath);
 			}
 		}
 	}
 
-	return aFiles.GetSize();
+	return aFilePaths.GetSize();
 }
+
+//////////////////////////////////////////////////////////////
+
+// private string compare functions
+int LastModifiedAscendingSortProc(const void* v1, const void* v2)
+{
+	const CString* pFile1 = (CString*)v1;
+	const CString* pFile2 = (CString*)v2;
+
+	time64_t tMod1 = FileMisc::GetFileLastModified(*pFile1);
+	time64_t tMod2 = FileMisc::GetFileLastModified(*pFile2);
+
+	if (tMod1 > tMod2)
+		return 1;
+
+	if (tMod1 < tMod2)
+		return -1;
+
+	return 0;
+}
+
+int LastModifiedDescendingSortProc(const void* v1, const void* v2)
+{
+	return -LastModifiedAscendingSortProc(v1, v2);
+}
+
+void FileMisc::SortFilePathsByLastModified(CStringArray& aFilePaths, BOOL bOldestFirst)
+{
+	if (bOldestFirst)
+		Misc::SortArray(aFilePaths, LastModifiedAscendingSortProc);
+	else
+		Misc::SortArray(aFilePaths, LastModifiedDescendingSortProc);
+}
+
+//////////////////////////////////////////////////////////////
 
 int FileMisc::GetDropFilePaths(HDROP hDrop, CStringArray& aFiles)
 {
@@ -861,7 +946,12 @@ BOOL FileMisc::CreateFolderFromFilePath(LPCTSTR szFilePath)
 {
 	ASSERT(!Misc::IsEmpty(szFilePath));
 
-	return CreateFolder(GetFolderFromFilePath(szFilePath));
+	CString sFolder(GetFolderFromFilePath(szFilePath));
+
+	if (sFolder.IsEmpty())
+		return TRUE; // cwd always exists
+
+	return CreateFolder(sFolder);
 }
 
 BOOL FileMisc::PathHasWildcard(LPCTSTR szFilePath)
@@ -1437,7 +1527,9 @@ BOOL FileMisc::AppendLineToFile(LPCTSTR szPathname, const CString& sLine, SFE_FO
 		file.WriteString(sLine);
 
 		// add trailing new line as necessary
-		if (sLine.Find(ENDL) != (sLine.GetLength() - 2))
+		int nLen = sLine.GetLength();
+
+		if (sLine.Find(ENDL, (nLen - 2)) != (nLen - 2))
 			file.WriteString(ENDL);
 
 		file.Flush();
@@ -1525,48 +1617,42 @@ BOOL FileMisc::LoadFile(LPCTSTR szPathname, CString& sText, BOOL bDenyWrite, UIN
 
 BOOL FileMisc::IsTempFilePath(LPCTSTR szFilename)
 {
-	CString sFilename(szFilename);
-	sFilename.MakeLower();
+	if (Misc::Find(GetTempFolder(), szFilename) == 0)
+		return TRUE;
 
-	CString sTempFolder = GetTempFolder();
-	sTempFolder.MakeLower();
-
-	return (sFilename.Find(sTempFolder) == 0);
+	// else try short version
+	return (Misc::Find(GetTempFolder(FALSE), szFilename) == 0);
 }
 
-CString FileMisc::GetTempFolder()
+CString FileMisc::GetTempFolder(BOOL bLong)
 {
 	TCHAR szTempPath[MAX_PATH+1] = { 0 };
 	
-	if (::GetTempPath(MAX_PATH, szTempPath))
-		return CString(szTempPath);
+	if (!::GetTempPath(MAX_PATH, szTempPath))
+		return _T("C:\\Temp");
 
 	// else
-	return _T("C:\\Temp");
+	return (bLong ? GetLongPathName(szTempPath) : szTempPath);
 }
 
-CString FileMisc::GetTempFilePath(LPCTSTR szPrefix, UINT uUnique)
+CString FileMisc::GetTempFilePath(LPCTSTR szPrefix, UINT uUnique, BOOL bLong)
 {
-	TCHAR szTempFile[MAX_PATH+1] = { 0 }, szTempPath[MAX_PATH+1] = { 0 };
+	CString sTempPath = GetTempFolder(bLong);
+	TCHAR szTempFile[MAX_PATH+1] = { 0 };
 	
-	if (::GetTempPath(MAX_PATH, szTempPath))
-	{
-		if (::GetTempFileName(szTempPath, szPrefix, uUnique, szTempFile))
-			return szTempFile;
-	}
+	if (::GetTempFileName(sTempPath, szPrefix, uUnique, szTempFile) && bLong)
+		return GetLongPathName(szTempFile);
 
-	return "";
+	// else
+	return szTempFile;
 }
 
-CString FileMisc::GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt)
+CString FileMisc::GetTempFilePath(LPCTSTR szFilename, LPCTSTR szExt, BOOL bLong)
 {
 	CString sTempFile;
-	TCHAR szTempPath[MAX_PATH+1] = { 0 };
-	
-	if (::GetTempPath(MAX_PATH, szTempPath))
-		MakePath(sTempFile, NULL, szTempPath, szFilename, szExt);
+	MakePath(sTempFile, NULL, GetTempFolder(bLong), szFilename, szExt);
 
-	return sTempFile;
+	return (bLong ? GetLongPathName(sTempFile) : sTempFile);
 }
 
 BOOL FileMisc::SelectFileInExplorer(LPCTSTR szFilePath)
@@ -2044,7 +2130,7 @@ int FileMisc::GetAppModuleHandles(CDWordArray& aHandles, BOOL bSorted)
 	HMODULE hMods[1024] = { 0 };
     DWORD cbNeeded = 0;
 
-	static HMODULE hPsapi = LoadLibrary(_T("psapi.dll"));
+	HMODULE hPsapi = LoadLibrary(_T("psapi.dll"));
 
 	if (hPsapi)
 	{
@@ -2073,7 +2159,7 @@ int FileMisc::GetAppModuleHandles(CDWordArray& aHandles, BOOL bSorted)
 CString FileMisc::GetProcessFilePath(HANDLE hProcess)
 {
 	CString sPath;
-	static HMODULE hPsapi = LoadLibrary(_T("psapi.dll"));
+	HMODULE hPsapi = LoadLibrary(_T("psapi.dll"));
 
 	if (hPsapi)
 	{
@@ -2087,10 +2173,7 @@ CString FileMisc::GetProcessFilePath(HANDLE hProcess)
 			sPath.ReleaseBuffer();
 
 			if (!dwRes)
-			{
 				dwRes = GetLastError();
-				int breakpoint = 0;
-			}
 		}
 	}
 
@@ -2127,14 +2210,16 @@ BOOL FileMisc::IsAdminProcess(HANDLE hProcess)
 		typedef BOOL (WINAPI *PFNISUSERANADMIN)(void);
 		
 		// load shell32.dll once only
-		static HMODULE hShell32 = LoadLibrary(_T("shell32.dll"));
+		HMODULE hShell32 = LoadLibrary(_T("shell32.dll"));
 		
 		if (hShell32)
 		{
-			static PFNISUSERANADMIN fnIsUserAdmin = (PFNISUSERANADMIN)GetProcAddress(hShell32, "IsUserAnAdmin");
+			PFNISUSERANADMIN fnIsUserAdmin = (PFNISUSERANADMIN)GetProcAddress(hShell32, "IsUserAnAdmin");
 			
 			if (fnIsUserAdmin)
 				bAdmin = fnIsUserAdmin();
+
+			FreeLibrary(hShell32);
 		}
 	}
 
@@ -2238,7 +2323,7 @@ BOOL FileMisc::GetPrevAppVersion(CDWordArray& aVersionParts, DWORD nMaxVer2, DWO
 	int nPart = aVersionParts.GetSize();
 	ASSERT(nPart == 4);
 
-	UINT nMaxVers[4] = { 0, nMaxVer2, nMaxVer3, nMaxVer4 };
+	const UINT MAXVERS[4] = { 0, nMaxVer2, nMaxVer3, nMaxVer4 };
 
 	while (nPart--)
 	{
@@ -2248,7 +2333,7 @@ BOOL FileMisc::GetPrevAppVersion(CDWordArray& aVersionParts, DWORD nMaxVer2, DWO
 			return TRUE;
 		}
 
-		aVersionParts[nPart] = nMaxVers[nPart];
+		aVersionParts[nPart] = MAXVERS[nPart];
 	}
 
 	// all else
@@ -2338,6 +2423,11 @@ BOOL FileMisc::ExtractResource(LPCTSTR szModulePath, UINT nID, LPCTSTR szType, c
 	return ExtractResource(nID, szType, sTempFilePath, hModule);
 }
 
+BOOL FileMisc::HasExtension(LPCTSTR szFilePath)
+{
+	return !GetExtension(szFilePath, FALSE).IsEmpty();
+}
+
 BOOL FileMisc::HasExtension(LPCTSTR szFilePath, LPCTSTR szExt)
 {
 	if (Misc::IsEmpty(szExt) || Misc::IsEmpty(szFilePath))
@@ -2374,6 +2464,14 @@ CString FileMisc::FormatExtension(LPCTSTR szExt, BOOL bWithDot)
 	}
 
 	return sExt;
+}
+
+void FileMisc::EnsureSameExtension(LPCTSTR szFromFile, CString& sToFile)
+{
+	CString sExt = GetExtension(szFromFile, FALSE);
+
+	if (!HasExtension(sToFile, sExt))
+		ReplaceExtension(sToFile, sExt);
 }
 
 void FileMisc::SplitPath(LPCTSTR szPath, CString* pDrive, CString* pDir, CString* pFName, CString* pExt)
@@ -2437,7 +2535,7 @@ CString FileMisc::PathConcat(LPCTSTR szPath, LPCTSTR szDirOrFName)
 CString FileMisc::GetFullPath(const CString& sFilePath, const CString& sRelativeToFolder)
 {
 	// Check for URLs and already full paths
-	if (sFilePath.Find(':') != -1)
+	if ((sFilePath.Find(':') != -1) || WebMisc::IsURL(sFilePath))
 		return sFilePath;
 
 	CString sFullPath;
@@ -2497,8 +2595,12 @@ CString& FileMisc::MakeRelativePath(CString& sFilePath, const CString& sRelative
 	return sFilePath;
 }
 
-BOOL FileMisc::IsSamePath(const CString& sPath1, const CString& sPath2)
+BOOL FileMisc::IsSamePath(const CString& sPath1, const CString& sPath2, BOOL bFileNameOnly)
 {
+	if (bFileNameOnly)
+		return (GetFileNameFromPath(sPath1).CompareNoCase(GetFileNameFromPath(sPath2)) == 0);
+
+	// else
 	CString sFullPath1 = GetFullPath(sPath1);
 	CString sFullPath2 = GetFullPath(sPath2);
 
@@ -2705,22 +2807,16 @@ BOOL FileMisc::CreateShortCut(LPCTSTR szTargetFile, LPCTSTR szShortcut,
 
 			if (!Misc::IsEmpty(szTargetArgs))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szTargetArgs, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szTargetArgs);
-#endif
+
 				if (FAILED(pShellLink->SetArguments(wsz)))
 					break;
 			}
 
 			if (!Misc::IsEmpty(szDescription))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szDescription, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szDescription);
-#endif
+
 				if (FAILED(pShellLink->SetDescription(wsz)))
 					break;
 			}
@@ -2733,22 +2829,16 @@ BOOL FileMisc::CreateShortCut(LPCTSTR szTargetFile, LPCTSTR szShortcut,
 
 			if (!Misc::IsEmpty(szCurDir))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szCurDir, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szCurDir);
-#endif
+
 				if (FAILED(pShellLink->SetWorkingDirectory(wsz)))
 					break;
 			}
 
 			if (!Misc::IsEmpty(szIconFile) && (iIconIndex >= 0))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szIconFile, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szIconFile);
-#endif
+
 				if (FAILED(pShellLink->SetIconLocation(wsz, iIconIndex)))
 					break;
 			}
@@ -2759,11 +2849,7 @@ BOOL FileMisc::CreateShortCut(LPCTSTR szTargetFile, LPCTSTR szShortcut,
 
 			if (SUCCEEDED(hr))
 			{
-#ifndef _UNICODE
-				MultiByteToWideChar(CP_ACP, 0, szShortcut, -1, wsz, MAX_PATH);
-#else
 				lstrcpy(wsz, szShortcut);
-#endif
 
 				hr = pPersistFile->Save(wsz, TRUE);
 				pPersistFile->Release();
@@ -2838,35 +2924,12 @@ BOOL FileMisc::ResolveShortcut(LPCTSTR szShortcut, CString& sTargetPath)
 
 CString FileMisc::GetLongPathName(LPCTSTR szShortPath)
 {
-// 	CString sLongPath(szShortPath);
-// 
-// 	// must link dynamically to kernel32 else problem with win95/NT4
-// 	static HMODULE hLib = LoadLibrary(_T("kernel32.dll"));
-// 
-// 	if (hLib)
-// 	{
-// 		typedef DWORD (WINAPI *FNGETLONGPATHNAME)(LPCTSTR, LPTSTR, DWORD);
-// 
-// #ifdef _UNICODE
-// 		FNGETLONGPATHNAME pFN = (FNGETLONGPATHNAME)GetProcAddress(hLib, "GetLongPathNameW");
-// #else
-// 		FNGETLONGPATHNAME pFN = (FNGETLONGPATHNAME)GetProcAddress(hLib, "GetLongPathNameA");
-// #endif
-// 		if (pFN)
-// 		{
-// 			TCHAR szLongPath[MAX_PATH+1] = { 0 };
-// 			pFN(szShortPath, szLongPath, MAX_PATH);
-// 
-// 			sLongPath = szLongPath;
-// 		}
-// 	}
-// 
-// 	return sLongPath;
-
 	TCHAR szLongPath[MAX_PATH+1] = { 0 };
-	::GetLongPathName(szShortPath, szLongPath, MAX_PATH);
+	
+	if (::GetLongPathName(szShortPath, szLongPath, MAX_PATH))
+		return szLongPath;
 
-	return szLongPath;
+	return szShortPath;
 }
 
 int FileMisc::GetDropFilePaths(COleDataObject* pObject, CStringArray& aFiles)

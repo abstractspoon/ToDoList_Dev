@@ -19,8 +19,8 @@ public:
 	CLockableHeaderCtrl() { }
 	virtual ~CLockableHeaderCtrl() { }
 
-	void LockColumn(int nColumn, BOOL bLock = TRUE);
-	BOOL IsColumnLocked(int nColumn);
+	void LockColumn(int nCol, BOOL bLock = TRUE);
+	BOOL IsColumnLocked(int nCol);
 
 protected:
 	CMap<int, int, int, int&> m_mapLocked; // columns are locked

@@ -210,12 +210,8 @@ BOOL CRuntimeDlg::OnInitDialog()
 			SetIcon(m_hISmall ? m_hISmall : m_hILarge, FALSE);
 		}
 	}
-
-	// set font to parent's if poss
-	SetFont(CDialogHelper::GetFont(pParent), FALSE);
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 BOOL CRuntimeDlg::Create(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, const CRect& rect, CWnd* pParentWnd, UINT nID)
@@ -228,9 +224,9 @@ BOOL CRuntimeDlg::Create(LPCTSTR szCaption, DWORD dwStyle, DWORD dwExStyle, cons
 	dwStyle &= ~WS_VISIBLE;
 	
 	// Handle DS_SETFONT
-	if (pParentWnd && (dwStyle & DS_SETFONT))
+	if (dwStyle & DS_SETFONT)
 	{
-		HFONT hFont = GraphicsMisc::GetFont(*pParentWnd, FALSE);
+		HFONT hFont = CDialogHelper::GetFont(pParentWnd);
 
 		if (hFont)
 		{
@@ -578,10 +574,14 @@ HWND CRuntimeDlg::CreateControl(LPCTSTR szClass, LPCTSTR szCaption, DWORD dwStyl
 				::SendMessage(hwnd, STM_SETIMAGE, IMAGE_ICON, (LPARAM)hIcon);
 		}
 		else if (!sCaption.IsEmpty())
+		{
 			::SendMessage(hwnd, WM_SETTEXT, 0, (LPARAM)(LPCTSTR)sCaption);
+		}
 	}
 	else
+	{
 		TRACE(_T("CreateWindowEx(%s) failed. GetLastError returned %08X\n"), szClass, GetLastError());
+	}
 	
 	return hwnd;
 }
@@ -803,11 +803,6 @@ int CRuntimeDlg::CalcLinesRequired(const CString& sText, int nWidthDLU)
 	nLines += (nSegLenDLU / nWidthDLU) + ((nSegLenDLU % nWidthDLU) ? 1 : 0);
 
 	return nLines;
-}
-
-void CRuntimeDlg::ShowCtrls(UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bShow)
-{
-	CDialogHelper::ShowCtrls(this, nCtrlIDFrom, nCtrlIDTo, bShow);
 }
 
 CString CRuntimeDlg::GetControlClassName(CWnd* pWnd)

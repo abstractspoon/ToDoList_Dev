@@ -3,7 +3,10 @@
 
 #include "stdafx.h"
 #include "ToDoCtrlData.h"
+#include "ToDoCtrlDataUtils.h"
 #include "TDCTimeTracking.h"
+
+#include "..\shared\TreeSelectionHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -58,7 +61,7 @@ BOOL CTDCTimeTracking::PauseTracking(BOOL bPause)
 
 BOOL CTDCTimeTracking::CanTrackTask(DWORD dwTaskID) const
 {
-	return ((dwTaskID != 0) && m_data.IsTaskTimeTrackable(dwTaskID));
+	return CTDCTaskCalculator(m_data).IsTaskTimeTrackable(dwTaskID);
 }
 
 BOOL CTDCTimeTracking::CanTrackSelectedTask() const

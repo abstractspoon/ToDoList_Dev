@@ -293,8 +293,6 @@ namespace HTMLReportExporter
 			public String EndHtml { get; private set; }
 
 			private HtmlReportUtils.CustomAttributes CustomAttributes;
-
-			private const String ColorPlaceholder = "$(textColor)";
 			
 			// ------------------------------------------------------
 
@@ -486,7 +484,7 @@ namespace HTMLReportExporter
 				}
 
 				if (taskElm != null)
-					taskElm.Attributes.Add("style", String.Format("color:{0}", ColorPlaceholder));
+					taskElm.Attributes.Add("style", String.Format("color:{0}", HtmlReportUtils.TaskColorPlaceholder));
 
 				// else
 				return GetTaskHtml(container);
@@ -565,41 +563,7 @@ namespace HTMLReportExporter
 
 			public String FormatRow(Task task, int depth)
 			{
-				var row = TaskHtml;
-
-				if (!String.IsNullOrWhiteSpace(row))
-				{
-					// Default attributes
-					foreach (var attrib in TaskAttribute.Attributes)
-					{
-						var attribVal = task.GetAttributeValue(attrib.Id, true, true);
-
-						// Special case
-						if ((attrib.Id == Task.Attribute.HtmlComments) && String.IsNullOrWhiteSpace(attribVal))
-						{
-							attribVal = task.GetComments().Trim().Replace("\n", "<br>");
-						}
-
-						row = ReplacePlaceholder(row, attribVal, attrib.BasePlaceholder, depth, !task.IsParent());
-					}
-
-					// Custom attributes
-					foreach (var attrib in CustomAttributes)
-					{
-						var attribVal = task.GetCustomAttributeValue(attrib.Key, true);
-						
-						row = ReplacePlaceholder(row, attribVal, attrib.Key, depth, !task.IsParent());
-					}
-
-					row = row.Replace(ColorPlaceholder, task.GetTextForeWebColor());
-				}
-
-				return row;
-			}
-
-			static String ReplacePlaceholder(String row, String attribVal, String defaultPlaceholderText, int depth, bool isLeafTask)
-			{
-				return HtmlReportUtils.ReplaceTaskAttributePlaceholder(row, attribVal, defaultPlaceholderText, depth, isLeafTask);
+				return HtmlReportUtils.ReplaceTaskAttributePlaceholders(TaskHtml, CustomAttributes, task, depth, !task.IsParent());
 			}
 		}
 
@@ -679,9 +643,10 @@ namespace HTMLReportExporter
 
 		// ---------------------------------------------
 
-		public HtmlReportTemplate()
+		public HtmlReportTemplate(string filePath = null)
 		{
-			Clear();
+			if (!Load(filePath))
+				Clear();
 		}
 
 		public void Clear()
@@ -783,7 +748,7 @@ namespace HTMLReportExporter
 
 		public bool Load(String pathName)
 		{
-			if (!File.Exists(pathName))
+			if (string.IsNullOrEmpty(pathName) || !File.Exists(pathName))
 				return false;
 
 			// else

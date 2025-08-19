@@ -276,6 +276,8 @@ namespace unvell.ReoGrid
 				TabStop = false,
 			});
 
+			this.bottomPanel.SizeChanged += (s, e) => { bottomPanel.Height = SystemInformation.HorizontalScrollBarHeight; };
+
 			Controls.Add(bottomPanel);
 
 			#endregion // Bottom Panel

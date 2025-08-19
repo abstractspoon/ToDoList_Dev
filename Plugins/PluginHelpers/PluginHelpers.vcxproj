@@ -64,8 +64,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Shared.lib;3rdParty.lib;Interfaces.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)3rdParty\Unicode_Debug;$(SolutionDir)Shared\Unicode_Debug;$(SolutionDir)Interfaces\Unicode_Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Shared.lib;3rdParty.lib;Interfaces.lib;ToDoListLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)3rdParty\Unicode_Debug;$(SolutionDir)Shared\Unicode_Debug;$(SolutionDir)Interfaces\Unicode_Debug;$(SolutionDir)ToDoListLib\Unicode_Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4248 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
@@ -103,8 +103,8 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;comctl32.lib;3rdParty.lib;Shared.lib;Interfaces.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Interfaces\Unicode_Release;$(SolutionDir)3rdParty\Unicode_Release;$(SolutionDir)Shared\Unicode_Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;comctl32.lib;3rdParty.lib;Shared.lib;Interfaces.lib;ToDoListLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Interfaces\Unicode_Release;$(SolutionDir)3rdParty\Unicode_Release;$(SolutionDir)Shared\Unicode_Release;$(SolutionDir)ToDoListLib\Unicode_Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
@@ -125,6 +125,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
   <ItemGroup>
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="Compression.h" />
+    <ClInclude Include="DateRangeLink.h" />
     <ClInclude Include="DateUtil.h" />
     <ClInclude Include="DaysOfWeekCheckListBox.h" />
     <ClInclude Include="DPIScaling.h" />
@@ -136,12 +137,15 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="PluginHelpers.h" />
     <ClInclude Include="GeometryUtil.h" />
     <ClInclude Include="RangeSliderCtrl.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="RichTextBoxEx.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ContentControl.h" />
     <ClInclude Include="Preferences.h" />
+    <ClInclude Include="TaskComboBox.h" />
     <ClInclude Include="TaskList.h" />
+    <ClInclude Include="TaskTimeLog.h" />
     <ClInclude Include="TimeComboBox.h" />
     <ClInclude Include="Toolbars.h" />
     <ClInclude Include="Translator.h" />
@@ -149,11 +153,14 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="UIExtension.h" />
     <ClInclude Include="UITheme.h" />
     <ClInclude Include="UrlParser.h" />
+    <ClInclude Include="WeekLabel.h" />
     <ClInclude Include="Win32.h" />
+    <ClInclude Include="YearMonthComboBox.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="Compression.cpp" />
+    <ClCompile Include="DateRangeLink.cpp" />
     <ClCompile Include="DateUtil.cpp" />
     <ClCompile Include="DaysOfWeekCheckListBox.cpp" />
     <ClCompile Include="DPIScaling.cpp" />
@@ -172,7 +179,9 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     </ClCompile>
     <ClCompile Include="ContentControl.cpp" />
     <ClCompile Include="Preferences.cpp" />
+    <ClCompile Include="TaskComboBox.cpp" />
     <ClCompile Include="TaskList.cpp" />
+    <ClCompile Include="TaskTimeLog.cpp" />
     <ClCompile Include="TimeComboBox.cpp" />
     <ClCompile Include="Toolbars.cpp" />
     <ClCompile Include="Translator.cpp" />
@@ -180,11 +189,13 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClCompile Include="UIExtension.cpp" />
     <ClCompile Include="UITheme.cpp" />
     <ClCompile Include="UrlParser.cpp" />
+    <ClCompile Include="WeekLabel.cpp" />
     <ClCompile Include="Win32.cpp" />
+    <ClCompile Include="YearMonthComboBox.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Office.Interop.Outlook, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Microsoft Visual Studio 10.0\Visual Studio Tools for Office\PIA\Office12\Microsoft.Office.Interop.Outlook.dll</HintPath>
+    <Reference Include="Microsoft.Office.Interop.Outlook">
+      <HintPath>..\3rdParty\Microsoft\Microsoft.Office.Interop.Outlook.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="PresentationCore" />
@@ -205,6 +216,9 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ProjectReference Include="..\..\Core\Shared\Shared.vcxproj">
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\Core\ToDoListLib\ToDoListLib.vcxproj">
+      <Project>{940be78e-1486-7f9b-02b3-6f0113741a6a}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\3rdParty\CommandHandling\CommandHandling.csproj">
       <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
     </ProjectReference>
@@ -214,6 +228,12 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ProjectReference Include="..\3rdParty\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\3rdParty\UIComponents\UIComponents.csproj">
+      <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PluginHelpers.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

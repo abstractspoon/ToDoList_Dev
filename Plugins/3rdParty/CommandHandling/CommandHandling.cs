@@ -62,7 +62,7 @@ namespace Command.Handling
 			return false;
 		}
 
-		public static Keys GetMenuShortcutFromVirtualKey(UInt32 virtualKeyCode)
+		public static Keys GetKeyboardShortcutFromVirtualKey(UInt32 virtualKeyCode)
 		{
 			Keys keyPress = (Keys)virtualKeyCode;
 
@@ -87,7 +87,7 @@ namespace Command.Handling
 
 		public static bool HasMenuShortcut(UInt32 virtualKeyCode, ToolStripItemCollection items)
 		{
-			Keys keyPress = GetMenuShortcutFromVirtualKey(virtualKeyCode);
+			Keys keyPress = GetKeyboardShortcutFromVirtualKey(virtualKeyCode);
 
 			if (keyPress == Keys.None)
 				return false;
@@ -97,7 +97,7 @@ namespace Command.Handling
 
 		public static bool ProcessMenuShortcut(UInt32 virtualKeyCode, ToolStripItemCollection items)
 		{
-			Keys keyPress = GetMenuShortcutFromVirtualKey(virtualKeyCode);
+			Keys keyPress = GetKeyboardShortcutFromVirtualKey(virtualKeyCode);
 
 			if (keyPress == Keys.None)
 				return false;

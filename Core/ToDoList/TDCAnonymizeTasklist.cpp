@@ -263,7 +263,7 @@ void CTDCAnonymizeTasklist::AnonymizeCustomAttributeData(const CTDCCustomAttribu
 		}
 
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_ALT(m_aAttribDefs, sRndID, pDef, continue);
+		GET_CUSTDEF_ALT(m_aAttribDefs, sRndID, pDef, continue);
 
 		// Anonymise list content
 		if (pDef->IsDataType(TDCCA_STRING) || pDef->IsDataType(TDCCA_FILELINK))

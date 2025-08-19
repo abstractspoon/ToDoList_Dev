@@ -20,6 +20,7 @@ public:
 	TESTRESULT Run();
 
 protected:
+	void TestDecodeDate();
 	void TestDecodeRelativeDate();
 	void TestTruncateSeconds();
 	void TestGetDateOnly();

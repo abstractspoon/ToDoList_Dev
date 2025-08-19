@@ -18,8 +18,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUITasklistPage property page
 
-CPreferencesUITasklistPage::CPreferencesUITasklistPage() : 
-	CPreferencesPageBase(CPreferencesUITasklistPage::IDD)
+CPreferencesUITasklistPage::CPreferencesUITasklistPage() 
+	: 
+	CPreferencesPageBase(IDD_PREFUITASKLIST_PAGE),
+	m_cbPriorityRiskLevels(-1)
 {
 	//{{AFX_DATA_INIT(CPreferencesUITasklistPage)
 	//}}AFX_DATA_INIT
@@ -34,7 +36,6 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 { 
 	CPreferencesPageBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CPreferencesUITasklistPage)
-	DDX_Control(pDX, IDC_PERCENTINCREMENT, m_cbPercentIncrement);
 	DDX_Check(pDX, IDC_USEISODATEFORMAT, m_bUseISOForDates);
 	DDX_Check(pDX, IDC_SHOWWEEKDAYINDATES, m_bShowWeekdayInDates);
 	DDX_Check(pDX, IDC_SHOWPARENTSASFOLDERS, m_bShowParentsAsFolders);
@@ -65,10 +66,16 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_ALLOWTREEITEMCHECKBOX, m_bAllowCheckboxAgainstTreeItem);
 	DDX_Check(pDX, IDC_HIDEPANESPLITBAR, m_bHidePaneSplitBar);
 	DDX_Check(pDX, IDC_FILELINKTHUMBNAILS, m_bShowFileLinkThumbnails);
+	DDX_Check(pDX, IDC_HIDEPRIORITYNUMBER, m_bHidePriorityNumber);
+	DDX_Check(pDX, IDC_SHOWMIXEDDONECHECKBOX, m_bShowMixedCompletionState);
+	DDX_Check(pDX, IDC_SETNUMPRIORITYRISKLEVELS, m_bSetNumPriorityRiskLevels);
+
+	DDX_Control(pDX, IDC_PERCENTINCREMENT, m_cbPercentIncrement);
+	DDX_Control(pDX, IDC_NUMPRORITYRISKLEVELS, m_cbPriorityRiskLevels);
 
 	CDialogHelper::DDX_CBValue(pDX, m_cbPercentIncrement, m_nPercentIncrement, 5);
+	CDialogHelper::DDX_CBValue(pDX, m_cbPriorityRiskLevels, m_nNumPriorityRiskLevels, 5);
 }
-
 
 BEGIN_MESSAGE_MAP(CPreferencesUITasklistPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesUITasklistPage)
@@ -78,6 +85,8 @@ BEGIN_MESSAGE_MAP(CPreferencesUITasklistPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_LIMITCOLWIDTHS, OnLimitcolwidths)
 	ON_BN_CLICKED(IDC_SHOWPARENTSASFOLDERS, OnShowparentsasfolders)
 	ON_BN_CLICKED(IDC_APPENDTEXTTODATETIMEPASTE, OnAppendTextToDateTimePaste)
+	ON_BN_CLICKED(IDC_SETNUMPRIORITYRISKLEVELS, OnSetNumPriorityRiskLevels)
+	ON_CBN_SELCHANGE(IDC_SETNUMPRIORITYRISKLEVELS, OnSelChangeNumPriorityRiskLevels)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -97,6 +106,7 @@ void CPreferencesUITasklistPage::OnFirstShow()
 	CPreferencesPageBase::OnFirstShow();
 
 	AddGroupLine(IDC_DATETIMEGROUP);
+	AddGroupLine(IDC_DONEGROUP);
 	AddGroupLine(IDC_OTHERGROUP);
 
 	GetDlgItem(IDC_DISPLAYFIRSTCOMMENTLINE)->EnableWindow(m_bShowComments);
@@ -104,6 +114,7 @@ void CPreferencesUITasklistPage::OnFirstShow()
 	GetDlgItem(IDC_INFOTIPCOMMENTSMAX)->EnableWindow(m_bShowInfoTips && m_bLimitInfoTipCommentsLength);
 	GetDlgItem(IDC_COLWIDTHS)->EnableWindow(m_bLimitColumnWidths);
 	GetDlgItem(IDC_DATETIMETRAILTEXT)->EnableWindow(m_bAppendTextToDateTimePaste);
+	GetDlgItem(IDC_NUMPRORITYRISKLEVELS)->EnableWindow(m_bSetNumPriorityRiskLevels);
 }
 
 int CPreferencesUITasklistPage::GetMaxInfoTipCommentsLength() const
@@ -175,15 +186,18 @@ void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs, LPC
 	m_bAppendTextToDateTimePaste = pPrefs->GetProfileInt(szKey, _T("AppendTextToDateTimePaste"), FALSE);
 	m_sDateTimeTrailText = pPrefs->GetProfileString(szKey, _T("DateTimeTrail"));
 	m_bAllowCheckboxAgainstTreeItem = pPrefs->GetProfileInt(szKey, _T("AllowCheckboxAgainstTreeItem"), TRUE);
-	m_bHidePaneSplitBar = pPrefs->GetProfileInt(szKey, _T("HidePaneSplitBar"), FALSE);
+	m_bHidePaneSplitBar = pPrefs->GetProfileInt(szKey, _T("HidePaneSplitBar"), TRUE);
 	m_bShowRemindersAsDateAndTime = pPrefs->GetProfileInt(szKey, _T("ShowRemindersAsDateAndTime"), FALSE);
 	m_bShowFileLinkThumbnails = pPrefs->GetProfileInt(szKey, _T("ShowFileLinkThumbnails"), FALSE);
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
+	m_bHidePriorityNumber = pPrefs->GetProfileInt(szKey, _T("HidePriorityNumber"), FALSE);
+	m_bShowMixedCompletionState = pPrefs->GetProfileInt(szKey, _T("ShowMixedCompletionState"), TRUE);
+
+	m_nNumPriorityRiskLevels = pPrefs->GetProfileInt(szKey, _T("NumPriorityRiskLevels"), 11);
+	m_bSetNumPriorityRiskLevels = (m_nNumPriorityRiskLevels < 11);
 }
 
 void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("ShowInfoTips"), m_bShowInfoTips);
 	pPrefs->WriteProfileInt(szKey, _T("ShowComments"), m_bShowComments);
 	pPrefs->WriteProfileInt(szKey, _T("DisplayFirstCommentLine"), m_bDisplayFirstCommentLine);
@@ -214,7 +228,9 @@ void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR s
 	pPrefs->WriteProfileInt(szKey, _T("HidePaneSplitBar"), m_bHidePaneSplitBar);
 	pPrefs->WriteProfileInt(szKey, _T("ShowRemindersAsDateAndTime"), m_bShowRemindersAsDateAndTime);
 	pPrefs->WriteProfileInt(szKey, _T("ShowFileLinkThumbnails"), m_bShowFileLinkThumbnails);
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
+	pPrefs->WriteProfileInt(szKey, _T("HidePriorityNumber"), m_bHidePriorityNumber);
+	pPrefs->WriteProfileInt(szKey, _T("ShowMixedCompletionState"), m_bShowMixedCompletionState);
+	pPrefs->WriteProfileInt(szKey, _T("NumPriorityRiskLevels"), (m_bSetNumPriorityRiskLevels ? m_nNumPriorityRiskLevels : 11));
 }
 
 void CPreferencesUITasklistPage::OnLimitcolwidths() 
@@ -238,4 +254,19 @@ void CPreferencesUITasklistPage::OnAppendTextToDateTimePaste()
 	UpdateData();
 
 	GetDlgItem(IDC_DATETIMETRAILTEXT)->EnableWindow(m_bAppendTextToDateTimePaste);
+}
+
+void CPreferencesUITasklistPage::OnSetNumPriorityRiskLevels()
+{
+	UpdateData();
+
+	GetDlgItem(IDC_NUMPRORITYRISKLEVELS)->EnableWindow(m_bSetNumPriorityRiskLevels);
+	GetParent()->SendMessage(WM_PUITCP_NUMPRORITYRISKLEVELS);
+}
+
+void CPreferencesUITasklistPage::OnSelChangeNumPriorityRiskLevels()
+{
+	UpdateData();
+
+	GetParent()->SendMessage(WM_PUITCP_NUMPRORITYRISKLEVELS);
 }

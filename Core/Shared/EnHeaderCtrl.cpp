@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "EnHeaderCtrl.h"
 #include "themed.h"
+#include "osversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,6 +25,10 @@ enum // item flags
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+static CThemed s_thSortArrow;
+
+/////////////////////////////////////////////////////////////////////////////
 // CEnHeaderCtrl
 
 CEnHeaderCtrl::CEnHeaderCtrl() : m_nRowCount(1), m_bEnableTracking(TRUE)
@@ -42,7 +47,7 @@ BEGIN_MESSAGE_MAP(CEnHeaderCtrl, CHeaderCtrl)
 	//}}AFX_MSG_MAP
 	ON_WM_LBUTTONDBLCLK()
 	ON_NOTIFY_REFLECT(HDN_BEGINTRACK, OnBeginTrackHeader)
-	ON_NOTIFY_REFLECT(HDN_ENDTRACK, OnEndTrackHeader)
+	ON_NOTIFY_REFLECT_EX(HDN_ENDTRACK, OnEndTrackHeader)
 	ON_NOTIFY_REFLECT(HDN_BEGINDRAG, OnBeginDragHeader)
 	ON_NOTIFY_REFLECT_EX(HDN_ENDDRAG, OnEndDragHeader)
 	ON_MESSAGE(HDM_LAYOUT, OnLayout)
@@ -157,13 +162,16 @@ LRESULT CEnHeaderCtrl::OnDeleteItem(WPARAM wp, LPARAM lp)
 	return lResult;
 }
 
-void CEnHeaderCtrl::OnEndTrackHeader(NMHDR* pNMHDR, LRESULT* pResult) 
+BOOL CEnHeaderCtrl::OnEndTrackHeader(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	LPNMHEADER pNMH = (LPNMHEADER)pNMHDR;
 
 	// mark item as having been tracked
 	if (IsItemTrackable(pNMH->iItem))
 		ModifyItemFlags(pNMH->iItem, EHCF_TRACKED, TRUE);
+
+	// Allow parent to be notified too
+	return FALSE;
 }
 
 void CEnHeaderCtrl::OnBeginTrackHeader(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -492,19 +500,20 @@ BOOL CEnHeaderCtrl::DrawItemSortArrow(CDC* pDC, int nItem, BOOL bUp) const
 	if (!GetItemRect(nItem, rItem))
 		return FALSE;
 
-	static CThemed th(this, _T("Header"));
-	
-	if (th.AreControlsThemed())
+	if ((COSVersion() >= OSV_VISTA) && CThemed::AreControlsThemed())
 	{
+		if (!s_thSortArrow.IsValid())
+			s_thSortArrow.Open(this, _T("Header"));
+		
 		CSize size;
-		th.GetSize(HP_HEADERSORTARROW, 1, size);
+		s_thSortArrow.GetSize(HP_HEADERSORTARROW, 1, size);
 		
 		CRect rArrow(rItem.TopLeft(), size);
-
+		
 		rArrow.OffsetRect((rItem.Width() - size.cx - 1) / 2, 0);
 		rArrow.bottom = rArrow.top + 8;
 		
-		return th.DrawBackground(pDC, HP_HEADERSORTARROW, (bUp ? HSAS_SORTEDUP : HSAS_SORTEDDOWN), rArrow);
+		return s_thSortArrow.DrawBackground(pDC, HP_HEADERSORTARROW, (bUp ? HSAS_SORTEDUP : HSAS_SORTEDDOWN), rArrow);
 	}
 	
 	// else

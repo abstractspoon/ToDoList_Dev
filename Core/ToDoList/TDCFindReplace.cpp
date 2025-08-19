@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "TDCFindReplace.h"
 #include "ToDoCtrl.h"
 #include "ToDoCtrlDataDefines.h"
@@ -19,7 +20,7 @@ static char THIS_FILE[] = __FILE__;
 CTDCFindReplace::CTDCFindReplace(const CToDoCtrl& tdc) 
 	: 
 	m_tdc(tdc), 
-	m_nAttribute(TDCA_NONE),
+	m_nAttributeID(TDCA_NONE),
 	m_bReplacing(FALSE)
 {
 }
@@ -28,12 +29,12 @@ CTDCFindReplace::~CTDCFindReplace()
 {
 }
 
-BOOL CTDCFindReplace::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDCFindReplace::CanDoFindReplace(TDC_ATTRIBUTE nAttribID) const
 {
 	if (m_tdc.GetTaskCount() == 0)
 		return FALSE;
 
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:
 	case TDCA_COMMENTS:
@@ -45,30 +46,30 @@ BOOL CTDCFindReplace::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
 }
 
 
-BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCFindReplace::DoFindReplace(TDC_ATTRIBUTE nAttribID)
 {
 	// Sanity check
-	if (!CanDoFindReplace(nAttrib))
+	if (!CanDoFindReplace(nAttribID))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	return Initialise(nAttrib);
+	return Initialise(nAttribID);
 }
 
-BOOL CTDCFindReplace::Initialise(TDC_ATTRIBUTE nAttrib)
+BOOL CTDCFindReplace::Initialise(TDC_ATTRIBUTE nAttribID)
 {
-	if (nAttrib != m_nAttribute)
+	if (nAttribID != m_nAttributeID)
 	{
 		DestroyDialog();
 		strFind.Empty();
 	}
 
-	BOOL bFindOnly = !m_tdc.CanEditSelectedTask(nAttrib);
+	BOOL bFindOnly = !m_tdc.CanEditSelectedTask(nAttribID);
 	CEnString sTitle;
 	
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:
 		sTitle.LoadString(bFindOnly ? IDS_FINDINTASKTITLES : IDS_REPLACEINTASKTITLES);
@@ -89,7 +90,7 @@ BOOL CTDCFindReplace::Initialise(TDC_ATTRIBUTE nAttrib)
 		return FALSE;
 	}
 
-	m_nAttribute = nAttrib;
+	m_nAttributeID = nAttribID;
 
 	if (!strFind.IsEmpty())
 	{
@@ -161,7 +162,7 @@ BOOL CTDCFindReplace::SelectNextTask(TDC_SELECTNEXTTASK nSelectWhat) const
 void CTDCFindReplace::OnReplaceSel(const CString& sFind, const CString& sReplace, 
 									BOOL bNext, BOOL bCase, BOOL bWord)
 {
-	ASSERT(m_tdc.CanEditSelectedTask(m_nAttribute));
+	ASSERT(m_tdc.CanEditSelectedTask(m_nAttributeID));
 
 	CAutoFlag af(m_bReplacing, TRUE);
 
@@ -176,7 +177,7 @@ void CTDCFindReplace::OnReplaceSel(const CString& sFind, const CString& sReplace
 
 void CTDCFindReplace::OnReplaceAll(const CString& sFind, const CString& sReplace, BOOL bCase, BOOL bWord)
 {
-	ASSERT(m_tdc.CanEditSelectedTask(m_nAttribute));
+	ASSERT(m_tdc.CanEditSelectedTask(m_nAttributeID));
 
 	CAutoFlag af(m_bReplacing, TRUE);
 

@@ -12,6 +12,7 @@
 #include "tdcenum.h"
 
 #include "..\Shared\fileedit.h"
+#include "..\Shared\DateTimeCtrlEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLAnalyseLoggedTimeDlg dialog
@@ -20,7 +21,9 @@ class CTDLAnalyseLoggedTimeDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, CWnd* pParent = NULL);   // standard constructor
+	CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, 
+							 const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, 
+							 BOOL bISODates, CWnd* pParent = NULL); 
 
 	TDCTTL_BREAKDOWN GetBreakdown() const { return m_nBreakdown; }
 	TDCTTL_FORMAT GetOutputFormat() const { return m_nOutputFormat; }
@@ -42,8 +45,8 @@ protected:
 	BOOL m_bAutoDisplayReport;
 
 	BOOL m_bGroupBy;
-	COleDateTime m_dtFrom;
-	COleDateTime m_dtTo;
+	COleDateTime m_dtFrom, m_dtTo;
+	CDateTimeCtrlEx m_dtcFrom, m_dtcTo;
 	CString	m_sOutputFilePath;
 
 	CFileEdit m_eOutputFile;

@@ -5,7 +5,6 @@
 #include "resource.h"
 #include "TDLFilterDlg.h"
 #include "tdcstatic.h"
-#include "TDCCustomAttributeUIHelper.h"
 
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
@@ -23,13 +22,15 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterDlg dialog
 
-
-CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter, 
-							BOOL bMultiSelFilters, 
-							const CStringArray& aAdvFilterNames,
-							const CFilteredToDoCtrl& tdc, 
-							const CDWordArray& aPriorityColors,
-							CWnd* pParent /*=NULL*/)
+CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
+							 BOOL bMultiSelFilters,
+							 BOOL bShowDefaultFilters,
+							 const CStringArray& aAdvFilterNames,
+							 const CFilteredToDoCtrl& tdc,
+							 const CDWordArray& aPriorityColors,
+							 int nNumPriorityRiskLevels,
+							 BOOL bISODateFormat,
+							 CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLFilterDlg::IDD, _T("Filtering"), pParent), 
 	m_cbCategoryFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
@@ -41,8 +42,8 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	m_cbPriorityFilter(TRUE),
 	m_cbRiskFilter(TRUE),
 	m_cbRecurrence(TRUE),
-	m_eStartNextNDays(TRUE, _T("-0123456789")),
-	m_eDueNextNDays(TRUE, _T("-0123456789")),
+	m_eStartNextNDays(_T("-0123456789")),
+	m_eDueNextNDays(_T("-0123456789")),
 	m_nTitleFilter(nTitleFilter)
 {
 	// main filter
@@ -67,11 +68,16 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	}
 
 	// auto-droplists
-	tdc.GetAutoListData(m_tldListData, TDCA_ALL);
+	tdc.GetAutoListData(TDCA_ALL, m_tldListData);
 
+	m_cbShowFilter.ShowDefaultFilters(bShowDefaultFilters);
+	m_cbPriorityFilter.SetNumLevels(nNumPriorityRiskLevels);
 	m_cbPriorityFilter.SetColors(aPriorityColors);
-}
+	m_cbRiskFilter.SetNumLevels(nNumPriorityRiskLevels);
 
+	m_dtcUserDue.SetISOFormat(bISODateFormat);
+	m_dtcUserStart.SetISOFormat(bISODateFormat);
+}
 
 void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -86,7 +92,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ALLOCBYFILTERCOMBO, m_cbAllocByFilter);
 	DDX_Control(pDX, IDC_VERSIONFILTERCOMBO, m_cbVersionFilter);
 	DDX_Control(pDX, IDC_TAGFILTERCOMBO, m_cbTagFilter);
-	DDX_Control(pDX, IDC_FILTERCOMBO, m_cbTaskFilter);
+	DDX_Control(pDX, IDC_SHOWFILTERCOMBO, m_cbShowFilter);
 	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_STARTNEXTNDAYS, m_eStartNextNDays);
 	DDX_Control(pDX, IDC_DUENEXTNDAYS, m_eDueNextNDays);
@@ -102,8 +108,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_DateTimeCtrl(pDX, IDC_USERSTARTDATE, m_filter.dtUserStart);
 	DDX_DateTimeCtrl(pDX, IDC_USERDUEDATE, m_filter.dtUserDue);
 
-	CDialogHelper::DDX_CBData(pDX, m_cbRecurrence, m_filter.nRecurrence, TDIR_NONE);
-
+	m_cbRecurrence.DDX(pDX, m_filter.nRecurrence);
 	m_cbPriorityFilter.DDX(pDX, m_filter.nPriority);
 	m_cbRiskFilter.DDX(pDX, m_filter.nRisk);
 
@@ -111,7 +116,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	if (pDX->m_bSaveAndValidate)
 	{
 		// filter
-		m_filter.nShow = m_cbTaskFilter.GetSelectedFilter(m_sAdvancedFilter);
+		m_filter.nShow = m_cbShowFilter.GetSelectedFilter(m_sAdvancedFilter);
 		m_filter.nStartBy = m_cbStartFilter.GetSelectedFilter();
 		m_filter.nDueBy = m_cbDueFilter.GetSelectedFilter();
 
@@ -132,11 +137,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	else
 	{
 		// filter
-		if (m_filter.IsAdvanced())
-			m_cbTaskFilter.SelectAdvancedFilter(m_sAdvancedFilter);
-		else
-			m_cbTaskFilter.SelectFilter(m_filter.nShow);
-
+		m_cbShowFilter.SelectFilter(m_filter.nShow, m_sAdvancedFilter);
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbDueFilter.SelectFilter(m_filter.nDueBy);
 
@@ -165,7 +166,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLFilterDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLFilterDlg)
 	ON_BN_CLICKED(IDC_CLEARFILTER, OnClearfilter)
-	ON_CBN_SELCHANGE(IDC_FILTERCOMBO, OnSelchangeFiltercombo)
+	ON_CBN_SELCHANGE(IDC_SHOWFILTERCOMBO, OnSelchangeFiltercombo)
 	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_DUEFILTERCOMBO, OnSelchangeDatecombo)
 	ON_CBN_SELCHANGE(IDC_STARTFILTERCOMBO, OnSelchangeDatecombo)
@@ -229,7 +230,7 @@ BOOL CTDLFilterDlg::OnInitDialog()
 	SetDlgItemText(IDC_TITLEFILTERLABEL, m_filter.GetTitleFilterLabel());
 
 	// custom filters
-	m_cbTaskFilter.AddAdvancedFilters(m_aAdvancedFilterNames, m_sAdvancedFilter);
+	m_cbShowFilter.SetAdvancedFilters(m_aAdvancedFilterNames, m_sAdvancedFilter);
 
 	m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
 	m_cbDueFilter.SetNextNDays(m_filter.nDueNextNDays);
@@ -335,6 +336,10 @@ BOOL CTDLFilterDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 
 	switch (nCtrlID)
 	{
+	case IDC_SHOWFILTERCOMBO:
+		Misc::Split(CDialogHelper::GetSelectedItem(m_cbShowFilter), sTooltip, '\t');
+		break;
+
 	case IDC_CATEGORYFILTERCOMBO:
 		sTooltip = m_cbCategoryFilter.GetTooltip();
 		break;
@@ -364,11 +369,7 @@ BOOL CTDLFilterDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 		break;
 
 	default:
-		if (!CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID))
-			return FALSE;
-
-		sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(this, nCtrlID);
-		break;
+		return FALSE;
 	}
 
 	if (!sTooltip.IsEmpty())

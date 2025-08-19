@@ -941,19 +941,19 @@ int CWorkloadItemMap::CompareItems(const void* pV1, const void* pV2)
 
 //////////////////////////////////////////////////////////////////////
 
-WORKLOADSORTCOLUMN::WORKLOADSORTCOLUMN() : nBy(WLCC_NONE), bAscending(-1)
+WORKLOADSORTCOLUMN::WORKLOADSORTCOLUMN() : nColumnID(WLCC_NONE), bAscending(-1)
 {
 
 }
 
 BOOL WORKLOADSORTCOLUMN::Matches(WLC_COLUMNID nSortBy, BOOL bSortAscending) const
 {
-	return ((nBy == nSortBy) && (bAscending == bSortAscending));
+	return ((nColumnID == nSortBy) && (bAscending == bSortAscending));
 }
 
 BOOL WORKLOADSORTCOLUMN::operator==(const WORKLOADSORTCOLUMN& other) const
 {
-	return Matches(other.nBy, other.bAscending);
+	return Matches(other.nColumnID, other.bAscending);
 }
 
 BOOL WORKLOADSORTCOLUMN::operator!=(const WORKLOADSORTCOLUMN& other) const
@@ -966,8 +966,8 @@ BOOL WORKLOADSORTCOLUMN::Set(WLC_COLUMNID nSortBy, BOOL bAllowToggle, BOOL bSort
 	if (!bAllowToggle && Matches(nSortBy, bSortAscending))
 		return FALSE;
 
-	WLC_COLUMNID nOldSort = nBy;
-	nBy = nSortBy;
+	WLC_COLUMNID nOldSort = nColumnID;
+	nColumnID = nSortBy;
 
 	if (nSortBy != WLCC_NONE)
 	{
@@ -1049,10 +1049,10 @@ WORKLOADSORT::WORKLOADSORT() : bMultiSort(FALSE)
 BOOL WORKLOADSORT::IsSorting() const
 {
 	if (!bMultiSort)
-		return (single.nBy != WLCC_NONE);
+		return (single.nColumnID != WLCC_NONE);
 
 	// else
-	return (multi.cols[0].nBy != WLCC_NONE);
+	return (multi.cols[0].nColumnID != WLCC_NONE);
 }
 
 BOOL WORKLOADSORT::IsSortingBy(WLC_COLUMNID nColID) const
@@ -1065,7 +1065,7 @@ BOOL WORKLOADSORT::IsSortingBy(WLC_COLUMNID nColID) const
 
 BOOL WORKLOADSORT::IsSingleSortingBy(WLC_COLUMNID nColID) const
 {
-	return (!bMultiSort && (single.nBy == nColID));
+	return (!bMultiSort && (single.nColumnID == nColID));
 }
 
 BOOL WORKLOADSORT::IsMultiSortingBy(WLC_COLUMNID nColID) const
@@ -1074,7 +1074,7 @@ BOOL WORKLOADSORT::IsMultiSortingBy(WLC_COLUMNID nColID) const
 	{
 		for (int nCol = 0; nCol < 3; nCol++)
 		{
-			if (multi.cols[nCol].nBy == nColID)
+			if (multi.cols[nCol].nColumnID == nColID)
 				return TRUE;
 		}
 	}

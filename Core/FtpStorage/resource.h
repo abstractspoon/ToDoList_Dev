@@ -5,6 +5,8 @@
 #define IDS_TDLFILEFILTER               102
 #define IDR_FTPSTORAGE                  13001
 #define IDS_SD_TITLE                    57345
+#define IDS_DOWNLOADERROR_TITLE         57346
+#define IDS_UPLOADERROR_TITLE           57347
 
 // Next default values for new objects
 // 

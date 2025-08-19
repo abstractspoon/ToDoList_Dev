@@ -8,6 +8,7 @@
 #include "tdlwelcomewizard.h"
 #include "tdcenum.h"
 #include "tdcmsg.h"
+#include "tdcswitch.h"
 #include "tdlprefmigrationdlg.h"
 #include "tdllanguagedlg.h"
 #include "TDLCmdlineOptionsDlg.h"
@@ -16,10 +17,12 @@
 #include "tdcstartupoptions.h"
 #include "tdcanonymizetasklist.h"
 #include "TDLDebugFormatGetLastErrorDlg.h"
+#include "TDCDarkMode.h"
 
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\driveinfo.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\datehelper.h"
 #include "..\shared\enfiledialog.h"
 #include "..\shared\regkey.h"
 #include "..\shared\enstring.h"
@@ -28,12 +31,11 @@
 #include "..\shared\localizer.h"
 #include "..\shared\fileregister.h"
 #include "..\shared\osversion.h"
-#include "..\shared\rtlstylemgr.h"
+#include "..\shared\rtlInputmgr.h"
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
-#include "..\shared\DarkMode.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -78,7 +80,7 @@ LPCTSTR APPDATAINI			= _T("Abstractspoon\\ToDoList\\ToDoList.ini");
 LPCTSTR WIKI_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id="); 
 LPCTSTR FORUM_URL			= _T("https://www.abstractspoon.com/phpBB/"); 
 LPCTSTR LICENSE_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software"); 
-LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=donations%2eabstractspoon%2etodolist%40gmail%2ecom&item_name=ToDoList%20Software"); 
+LPCTSTR DONATE_URL			= _T("https://www.paypal.com/donate/?hosted_button_id=Z3KT3PNZZGHX2"); 
 
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CToDoListApp object
@@ -103,6 +105,7 @@ CToDoListApp::~CToDoListApp()
 BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	//{{AFX_MSG_MAP(CToDoListApp)
 	//}}AFX_MSG_MAP
+	ON_COMMAND(ID_TOOLS_EXPORTPREFS, OnExportPrefs)
 	ON_COMMAND(ID_HELP_FORUM, OnHelpForum)
 	ON_COMMAND(ID_HELP_LICENSE, OnHelpLicense)
 	ON_COMMAND(ID_HELP_COMMANDLINE, OnHelpCommandline)
@@ -110,6 +113,13 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_HELP_UNINSTALL, OnHelpUninstall)
 	ON_COMMAND(ID_HELP_RECORDBUGREPORT, OnHelpRecordBugReport)
 	ON_COMMAND(ID_HELP_WIKI, OnHelpWiki)
+	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
+	ON_COMMAND(ID_TOOLS_IMPORTPREFS, OnImportPrefs)
+	ON_COMMAND(ID_TOOLS_TOGGLEDARKMODE, OnToolsToggleDarkMode)
+
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORTPREFS, OnUpdateExportPrefs)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORTPREFS, OnUpdateImportPrefs)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_TOGGLEDARKMODE, OnUpdateToolsToggleDarkMode)
 
 #ifdef _DEBUG
 	ON_COMMAND(ID_DEBUG_TASKDIALOG_INFO, OnDebugTaskDialogInfo)
@@ -123,12 +133,6 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_DEBUG_SHOWEMBEDDEDURL, OnDebugShowEmbeddedUrl)
 	ON_COMMAND(ID_DEBUG_FORMATGETLASTERROR, OnDebugFormatGetLastError)
 #endif
-
-	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
-	ON_COMMAND(ID_TOOLS_IMPORTPREFS, OnImportPrefs)
-	ON_COMMAND(ID_TOOLS_EXPORTPREFS, OnExportPrefs)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORTPREFS, OnUpdateImportPrefs)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORTPREFS, OnUpdateExportPrefs)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -221,9 +225,6 @@ BOOL CToDoListApp::InitInstance()
 
 	if (HandleSimpleQueries(cmdInfo))
 		return FALSE; // quit
-
-	if (cmdInfo.HasOption(SWITCH_DARKMODE))
-		CDarkMode::Enable();
 
 	// If this is a restart, wait until the previous instance has closed
 	if (cmdInfo.HasOption(SWITCH_RESTART))
@@ -980,7 +981,11 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		// Save language choice 
 		FileMisc::MakeRelativePath(m_sLanguageFile, FileMisc::GetAppFolder(), FALSE);
 		prefs.WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_sLanguageFile);
+
+		// Dark Mode
+		InitDarkMode(cmdInfo, prefs);
 		
+		// Multi-instance. Don't overwrite existing value
 		if (bSetMultiInstance)
 			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);
 
@@ -1100,7 +1105,10 @@ BOOL CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 		while (nTry--)
 		{
 			if (CPreferences::Initialise(szPrefs, TRUE))
+			{
+				CPreferences::CullIniBackups();
 				return TRUE;
+			}
 
 			FileMisc::LogText(_T("Existing ini file is not readable (%d)"), (10 - nTry));
 			Sleep(100);
@@ -1256,48 +1264,75 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 
 int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/) 
 {
-	HWND hwndMain = NULL;
-
 	// make sure app window is visible
-	if (m_pMainWnd)
-	{
-		hwndMain = *m_pMainWnd;
+	if (m_pMainWnd && (::GetForegroundWindow() != *m_pMainWnd))
+		m_pMainWnd->SendMessage(WM_TDL_SHOWWINDOW, 0, 0);
+	
+	return CMessageBox::AfxShow(lpszPrompt, nType);
+}
 
-		if (::GetForegroundWindow() != hwndMain)
-			m_pMainWnd->SendMessage(WM_TDL_SHOWWINDOW, 0, 0);
-	}
-	else
+void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs)
+{
+	ASSERT(!CTDCDarkMode::IsEnabled());
+
+	if (CTDCDarkMode::IsSupported())
 	{
-		hwndMain = ::GetDesktopWindow();
+		BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
+
+		if (bDarkMode == -1) // First time fallback
+		{
+			bDarkMode = cmdInfo.HasOption(SWITCH_DARKMODE);
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
+		}
+
+		CTDCDarkMode::Initialize(prefs);
 	}
-	
-	CString sTitle(AfxGetAppName()), sInstruction, sText(lpszPrompt);
-	CStringArray aPrompt;
-	
-	int nNumInputs = Misc::Split(lpszPrompt, aPrompt, '|');
-	
-	switch (nNumInputs)
+}
+
+void CToDoListApp::OnToolsToggleDarkMode()
+{
+	// Prompt to restart the app
+	CPreferences prefs;
+
+	BOOL bDarkMode = CTDCDarkMode::IsEnabled();
+
+	switch (CMessageBox::AfxShow(IDS_RESTARTTOCHANGEDARKMODE, MB_YESNOCANCEL))
 	{
-	case 0:
-		ASSERT(0);
+	case IDYES:
+		{
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
+			
+			// Restart
+			HWND hwndMain = *AfxGetMainWnd();
+			::SendMessage(hwndMain, WM_CLOSE, 0, 1);
+
+			if (::IsWindow(hwndMain))
+			{
+				// user cancelled the restart
+			}
+			else
+			{
+				if (FileMisc::Run(NULL, FileMisc::GetModuleFilePath(), m_lpCmdLine) < SE_ERR_SUCCESS)
+				{
+					//int breakpoint = 0;
+				}
+			}
+		}
 		break;
-		
-	case 1:
-		// do nothing
+
+	case IDNO:
+		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
 		break;
-		
-	case 2:
-		sInstruction = aPrompt[0];
-		sText = aPrompt[1];
-		break;
-		
-	case 3:
-		sTitle = aPrompt[0];
-		sInstruction = aPrompt[1];
-		sText = aPrompt[2];
+
+	case IDCANCEL:
+		return;
 	}
-	
-	return CMessageBox::Show(hwndMain, sTitle, sInstruction, sText, nType);
+}
+
+void CToDoListApp::OnUpdateToolsToggleDarkMode(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(CTDCDarkMode::IsSupported());
+	pCmdUI->SetCheck(CTDCDarkMode::IsEnabled());
 }
 
 void CToDoListApp::OnImportPrefs() 
@@ -1311,12 +1346,12 @@ void CToDoListApp::OnImportPrefs()
 	{
 		CPreferences prefs;
 
-		CFileOpenDialog dialog(IDS_IMPORTPREFS_TITLE, 
-			_T("ini"), 
-			sIniPath, 
-			EOFN_DEFAULTOPEN, 
-			CEnString(IDS_INIFILEFILTER));
-		
+		CFileOpenDialog dialog(IDS_IMPORTPREFS_TITLE,
+							   _T("ini"),
+							   sIniPath,
+							   EOFN_DEFAULTOPEN,
+							   CEnString(IDS_INIFILEFILTER));
+
 		if (dialog.DoModal(prefs) != IDOK)
 			return;
 
@@ -1483,10 +1518,15 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	{
 		CRect rWindow;
 		m_pMainWnd->GetWindowRect(rWindow);
-		CPoint ptPos = rWindow.CenterPoint();
 
+		CPoint ptPos = rWindow.CenterPoint();
 		params.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
+	
+	// Check dark mode before closing the main window
+	// because it turns off dark mode as its last action
+	if (CTDCDarkMode::IsEnabled())
+		params.SetOption(SWITCH_DARKMODE);
 	
 #ifdef _DEBUG // ----------------------------------------------------
 	if (bTestDownload)
@@ -1521,10 +1561,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		}
 	}
 
-	if (CDarkMode::IsEnabled())
-		params.SetOption(SWITCH_DARKMODE);
-
-	if (CRTLStyleMgr::IsRTL())
+	if (CRTLInputMgr::IsEnabled())
 		params.SetOption(SWITCH_RTL);
 
 	if (bPreRelease)
@@ -1796,7 +1833,7 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 	cmdInfo.SetOption(SWITCH_APPID, TDLAPPID);
 	cmdInfo.SetOption(SWITCH_SHOWUI);
 
-	if (CDarkMode::IsEnabled())
+	if (CTDCDarkMode::IsEnabled())
 		cmdInfo.SetOption(SWITCH_DARKMODE);
 
 	// Pass the centroid of the main wnd so that the
@@ -1805,8 +1842,8 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 	{
 		CRect rWindow;
 		m_pMainWnd->GetWindowRect(rWindow);
-		CPoint ptPos = rWindow.CenterPoint();
 
+		CPoint ptPos = rWindow.CenterPoint();
 		cmdInfo.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
 
@@ -2034,7 +2071,8 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 	CScopedLogTimer log(_T("CleanupAppFolder"));
 
 	CString sAppFolder = FileMisc::GetAppFolder();
-	CString sTasklists = FileMisc::GetAppResourceFolder(_T("Resources\\TaskLists"));
+	CString sTasklistsFolder = FileMisc::GetAppResourceFolder(_T("Resources\\TaskLists"));
+	CString sTranslationsFolder = FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("7.0")) < 0)
 	{
@@ -2061,9 +2099,9 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		FileMisc::DeleteFolderContents(sTranslations, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY, _T("*.gif"));
 
 		// Wrongly installed resource files
-		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.txt")), 395, TRUE);
-		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.csv")), 10602, TRUE);
-		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.xml")), 177520, TRUE);
+		FileMisc::DeleteFileBySize((sTasklistsFolder + _T("\\Introduction.txt")), 395, TRUE);
+		FileMisc::DeleteFileBySize((sTasklistsFolder + _T("\\Introduction.csv")), 10602, TRUE);
+		FileMisc::DeleteFileBySize((sTasklistsFolder + _T("\\Introduction.xml")), 177520, TRUE);
 	}
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("7.2.11")) < 0)
@@ -2075,11 +2113,11 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		CString sExamples = FileMisc::GetAppResourceFolder(_T("Resources\\Examples"));
 		FileMisc::CreateFolder(sExamples);
 
-		FileMisc::MoveFile(sTasklists + _T("\\Introduction.tdl"), sExamples + _T("\\Introduction.tdl"), TRUE, TRUE);
-		FileMisc::MoveFile(sTasklists + _T("\\ToDoListDocumentation.tdl"), sExamples + _T("\\ToDoListDocumentation.tdl"), TRUE, TRUE);
+		FileMisc::MoveFile(sTasklistsFolder + _T("\\Introduction.tdl"), sExamples + _T("\\Introduction.tdl"), TRUE, TRUE);
+		FileMisc::MoveFile(sTasklistsFolder + _T("\\ToDoListDocumentation.tdl"), sExamples + _T("\\ToDoListDocumentation.tdl"), TRUE, TRUE);
 
 		// Intentionally use raw API call so it will fail if any files remain in the folder
-		RemoveDirectory(sTasklists);
+		::RemoveDirectory(sTasklistsFolder);
 
 		// Rename/move install instructions
 		CString sResources = FileMisc::GetAppResourceFolder();
@@ -2089,7 +2127,7 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		FileMisc::DeleteFileBySize(sReadmes + _T("\\Readme.Linux.txt"), 3260, TRUE);
 
 		// Intentionally use raw API call so it will fail if any files remain in the folder
-		RemoveDirectory(sReadmes);
+		::RemoveDirectory(sReadmes);
 	}
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("8.1")) < 0)
@@ -2102,6 +2140,13 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 	{
 		// remove old components
 		FileMisc::DeleteFile(sAppFolder + _T("\\MarkdownSharp.dll"), TRUE);
+	}
+
+	if (FileMisc::CompareVersions(szPrevVer, _T("9.1")) < 0)
+	{
+		// remove unwanted translations
+		FileMisc::DeleteFile(sTranslationsFolder + _T("\\Brazilian Portuguese (PT-BR).csv"), TRUE);
+		FileMisc::DeleteFile(sTranslationsFolder + _T("\\Non-specific RTL Language.csv"), TRUE);
 	}
 }
 
@@ -2142,4 +2187,15 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 			}
 		}
 	}
+}
+
+BOOL CToDoListApp::OnIdle(LONG lCount)
+{
+	if (m_pMainWnd)
+	{
+		if (((CToDoListWnd*)m_pMainWnd)->DoIdleProcessing())
+			return TRUE;
+	}
+	
+	return CWinApp::OnIdle(lCount);
 }

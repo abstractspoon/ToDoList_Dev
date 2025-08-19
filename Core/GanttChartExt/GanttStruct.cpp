@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "GanttStruct.h"
-#include "GanttStatic.h"
+#include "GanttUtils.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\shared\graphicsMisc.h"
@@ -18,11 +18,11 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-const int MAX_YEAR = 2100;
-#else
-const int MAX_YEAR = 2200;
-#endif
+// #ifdef _DEBUG
+// const int MAX_YEAR = 2100;
+// #else
+// const int MAX_YEAR = 2200;
+// #endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -751,23 +751,23 @@ GANTTDATERANGE::GANTTDATERANGE(const COleDateTimeRange& dtOther)
 		Set(dtOther);
 }
 
-CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades, BOOL /*bISODates*/, TCHAR cDelim) const
+CString GANTTDATERANGE::Format(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
 {
-	COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
+	CString sRange;
 
-	CString sRange, sStart;
-	sStart.Format(_T("%s %d"), CDateHelper::GetMonthName(dtStart.GetMonth(), TRUE), dtStart.GetYear());
-
-	if (CDateHelper::GetDateInMonths(dtStart) == CDateHelper::GetDateInMonths(dtEnd))
+	if (IsValid())
 	{
-		sRange = sStart;
-	}
-	else
-	{
-		CString sEnd;
-		sEnd.Format(_T("%s %d"), CDateHelper::GetMonthName(dtEnd.GetMonth(), TRUE), dtEnd.GetYear());
+		CString sFormat(_T("MMM yyyy"));
 
-		sRange.Format(_T("%s %c %s"), sStart, cDelim, sEnd);
+		if (CDateHelper::WantRTLDates())
+			sFormat.MakeReverse();
+
+		COleDateTime dtStart(GetStart(nDisplay, bZeroBasedDecades)), dtEnd(GetEnd(nDisplay, bZeroBasedDecades));
+
+		if (CDateHelper::IsSameMonth(dtStart, dtEnd))
+			sRange = CDateHelper::FormatDateOnly(dtStart, sFormat);
+		else
+			sRange = COleDateTimeRange(dtStart, dtEnd).FormatDateOnly(sFormat);
 	}
 
 	return sRange;
@@ -803,9 +803,11 @@ int GANTTDATERANGE::GetStartYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDec
 int GANTTDATERANGE::GetEndYear(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
 {
 	int nYear = GetEnd(nDisplay, bZeroBasedDecades).GetYear();
-
+	return nYear;
+/*
 	// for now, do not let end year exceed MAX_YEAR
-	return min(nYear, MAX_YEAR);
+	min(nYear, MAX_YEAR);
+*/
 }
 
 int GANTTDATERANGE::GetNumMonths(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
@@ -830,7 +832,7 @@ COleDateTime GANTTDATERANGE::GetStart(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBas
 	if (CDateHelper::IsDateSet(m_dtStart))
 		dtTemp = m_dtStart;
 
-	return GanttStatic::GetRangeStart(dtTemp, nDisplay, bZeroBasedDecades);
+	return GanttUtils::GetRangeStart(dtTemp, nDisplay, bZeroBasedDecades);
 }
 
 COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades) const
@@ -842,7 +844,7 @@ COleDateTime GANTTDATERANGE::GetEnd(GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBased
 	if (CDateHelper::IsDateSet(m_dtEnd))
 		dtTemp = m_dtEnd;
 
-	return GanttStatic::GetRangeEnd(dtTemp, nDisplay, bZeroBasedDecades);
+	return GanttUtils::GetRangeEnd(dtTemp, nDisplay, bZeroBasedDecades);
 }
 
 BOOL GANTTDATERANGE::Contains(const GANTTITEM& gi) const
@@ -908,7 +910,7 @@ BOOL GANTTDATERANGE::operator==(const COleDateTimeRange& dtOther) const
 {
 	// return false if one or other is not valid,
 	// but allow both being unset
-	if (Misc::StateChanged(IsValid(), dtOther.IsValid()))
+	if (Misc::StatesDiffer(IsValid(), dtOther.IsValid()))
 		return FALSE;
 
 	ASSERT(!m_bInclusive && !dtOther.m_bInclusive); // always
@@ -966,22 +968,22 @@ void GANTTDATERANGE::Set(const COleDateTimeRange& dtOther, GTLC_MONTH_DISPLAY nD
 {
 	ASSERT(!dtOther.m_bInclusive); // always
 	
-	SetStart(GanttStatic::GetRangeStart(dtOther.GetStart(), nDisplay, bZeroBasedDecades));
-	SetEnd(GanttStatic::GetRangeEnd(dtOther.GetEnd(), nDisplay, bZeroBasedDecades));
+	SetStart(GanttUtils::GetRangeStart(dtOther.GetStart(), nDisplay, bZeroBasedDecades));
+	SetEnd(GanttUtils::GetRangeEnd(dtOther.GetEnd(), nDisplay, bZeroBasedDecades));
 }
 
 void GANTTDATERANGE::SetStart(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	ASSERT(!m_bInclusive); // always
 
-	SetStart(GanttStatic::GetRangeStart(date, nDisplay, bZeroBasedDecades));
+	SetStart(GanttUtils::GetRangeStart(date, nDisplay, bZeroBasedDecades));
 }
 
 void GANTTDATERANGE::SetEnd(const COleDateTime& date, GTLC_MONTH_DISPLAY nDisplay, BOOL bZeroBasedDecades)
 {
 	ASSERT(!m_bInclusive); // always
 
-	SetEnd(GanttStatic::GetRangeEnd(date, nDisplay, bZeroBasedDecades));
+	SetEnd(GanttUtils::GetRangeEnd(date, nDisplay, bZeroBasedDecades));
 }
 
 void GANTTDATERANGE::ClearStart()
@@ -1035,19 +1037,19 @@ BOOL GANTTDATERANGE::HasEnd() const
 
 //////////////////////////////////////////////////////////////////////
 
-GANTTSORTCOLUMN::GANTTSORTCOLUMN() : nBy(GTLCC_NONE), bAscending(-1)
+GANTTSORTCOLUMN::GANTTSORTCOLUMN() : nColumnID(GTLCC_NONE), bAscending(-1)
 {
 
 }
 
 BOOL GANTTSORTCOLUMN::Matches(GTLC_COLUMN nSortBy, BOOL bSortAscending) const
 {
-	return ((nBy == nSortBy) && (bAscending == bSortAscending));
+	return ((nColumnID == nSortBy) && (bAscending == bSortAscending));
 }
 
 BOOL GANTTSORTCOLUMN::operator==(const GANTTSORTCOLUMN& other) const
 {
-	return Matches(other.nBy, other.bAscending);
+	return Matches(other.nColumnID, other.bAscending);
 }
 
 BOOL GANTTSORTCOLUMN::operator!=(const GANTTSORTCOLUMN& other) const
@@ -1060,8 +1062,8 @@ BOOL GANTTSORTCOLUMN::Set(GTLC_COLUMN nSortBy, BOOL bAllowToggle, BOOL bSortAsce
 	if (!bAllowToggle && Matches(nSortBy, bSortAscending))
 		return FALSE;
 
-	GTLC_COLUMN nOldSort = nBy;
-	nBy = nSortBy;
+	GTLC_COLUMN nOldSort = nColumnID;
+	nColumnID = nSortBy;
 
 	if (nSortBy != GTLCC_NONE)
 	{
@@ -1143,10 +1145,10 @@ GANTTSORT::GANTTSORT() : bMultiSort(FALSE)
 BOOL GANTTSORT::IsSorting() const
 {
 	if (!bMultiSort)
-		return (single.nBy != GTLCC_NONE);
+		return (single.nColumnID != GTLCC_NONE);
 
 	// else
-	return (multi.cols[0].nBy != GTLCC_NONE);
+	return (multi.cols[0].nColumnID != GTLCC_NONE);
 }
 
 BOOL GANTTSORT::IsSortingBy(GTLC_COLUMN nColID) const
@@ -1159,7 +1161,7 @@ BOOL GANTTSORT::IsSortingBy(GTLC_COLUMN nColID) const
 
 BOOL GANTTSORT::IsSingleSortingBy(GTLC_COLUMN nColID) const
 {
-	return (!bMultiSort && (single.nBy == nColID));
+	return (!bMultiSort && (single.nColumnID == nColID));
 }
 
 BOOL GANTTSORT::IsMultiSortingBy(GTLC_COLUMN nColID) const
@@ -1168,7 +1170,7 @@ BOOL GANTTSORT::IsMultiSortingBy(GTLC_COLUMN nColID) const
 	{
 		for (int nCol = 0; nCol < 3; nCol++)
 		{
-			if (multi.cols[nCol].nBy == nColID)
+			if (multi.cols[nCol].nColumnID == nColID)
 				return TRUE;
 		}
 	}

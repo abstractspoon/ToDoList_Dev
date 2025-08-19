@@ -32,7 +32,13 @@ static char THIS_FILE[]=__FILE__;
 
 const UINT BUFFERSIZE = 2048;
 
-CUnzipper::CUnzipper(LPCTSTR szFilePath) : m_uzFile(0)
+CUnzipper::CUnzipper(LPCTSTR szFilePath, PFNUNZIPPROGRESS pCallback, DWORD dwUserData) 
+	: 
+	m_uzFile(0),
+	m_pCBProgress(pCallback),
+	m_dwCBUserData(dwUserData),
+	m_nFileCount(-1),
+	m_nCurFile(0)
 {
 	OpenZip(szFilePath);
 }
@@ -57,7 +63,7 @@ bool CUnzipper::CloseZip()
 bool CUnzipper::Unzip(bool bIgnoreFilePath)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
 
 	return UnzipTo(m_szOutputFolder, bIgnoreFilePath);
 }
@@ -65,26 +71,26 @@ bool CUnzipper::Unzip(bool bIgnoreFilePath)
 bool CUnzipper::UnzipTo(LPCTSTR szFolder, bool bIgnoreFilePath)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
 
 	if (!szFolder || !CreateFolder(szFolder))
-		return FALSE;
+		return false;
 
 	if (GetFileCount() == 0)
-		return FALSE;
+		return false;
 
 	if (!GotoFirstFile())
-		return FALSE;
+		return false;
 
 	// else
 	do
 	{
 		if (!UnzipFile(szFolder, bIgnoreFilePath))
-			return FALSE;
+			return false;
 	}
 	while (GotoNextFile());
 	
-	return TRUE;
+	return true;
 }
 
 // static version
@@ -93,7 +99,7 @@ bool CUnzipper::Unzip(LPCTSTR szFileName, LPCTSTR szFolder, bool bIgnoreFilePath
 	CUnzipper unz;
 
 	if (!unz.OpenZip(szFileName))
-		return FALSE;
+		return false;
 
 	return unz.UnzipTo(szFolder, bIgnoreFilePath);
 }
@@ -112,17 +118,14 @@ bool CUnzipper::OpenZip(LPCTSTR szFilePath)
 	if (!GetFullPathName(szFilePath, MAX_PATH, szFullPath, NULL))
 		return false;
 
-	// convert unicode to ansi as required
-#ifdef _UNICODE
+	// Path names must be ANSI
 	char szAnsiPath[MAX_PATH] = { 0 };
-
 	::WideCharToMultiByte(CP_ACP, 0, szFullPath, lstrlen(szFullPath), szAnsiPath, MAX_PATH, NULL, NULL);
-	const char* pPath = szAnsiPath;
-#else
-	const char* pPath = szFullPath;
-#endif
-	
-	m_uzFile = unzOpen(pPath);
+
+	m_nFileCount = -1;
+	m_nCurFile = 0;
+
+	m_uzFile = unzOpen(szAnsiPath);
 	
 	if (m_uzFile)
 	{
@@ -140,7 +143,7 @@ bool CUnzipper::SetOutputFolder(LPCTSTR szFolder)
 	DWORD dwAttrib = GetFileAttributes(szFolder);
 
 	if (dwAttrib != 0xffffffff && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY))
-		return FALSE;
+		return false;
 
 	lstrcpy(m_szOutputFolder, szFolder);
 
@@ -152,23 +155,24 @@ int CUnzipper::GetFileCount()
 	if (!m_uzFile)
 		return 0;
 
-	unz_global_info info;
-
-	if (unzGetGlobalInfo(m_uzFile, &info) == UNZ_OK)
+	if (m_nFileCount == -1)
 	{
-		return (int)info.number_entry;
+		unz_global_info info;
+
+		if (unzGetGlobalInfo(m_uzFile, &info) == UNZ_OK)
+			m_nFileCount = (int)info.number_entry;
 	}
 
-	return 0;
+	return ((m_nFileCount == -1) ? 0 : m_nFileCount);
 }
 
 bool CUnzipper::GetFileInfo(int nFile, UZ_FileInfo& info)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
 
 	if (!GotoFile(nFile))
-		return FALSE;
+		return false;
 
 	return GetFileInfo(info);
 }
@@ -176,13 +180,13 @@ bool CUnzipper::GetFileInfo(int nFile, UZ_FileInfo& info)
 bool CUnzipper::UnzipFile(int nFile, LPCTSTR szFolder, bool bIgnoreFilePath)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
 
 	if (!szFolder)
 		szFolder = m_szOutputFolder;
 
 	if (!GotoFile(nFile))
-		return FALSE;
+		return false;
 
 	return UnzipFile(szFolder, bIgnoreFilePath);
 }
@@ -190,7 +194,9 @@ bool CUnzipper::UnzipFile(int nFile, LPCTSTR szFolder, bool bIgnoreFilePath)
 bool CUnzipper::GotoFirstFile(LPCTSTR szExt)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
+
+	m_nCurFile = 0;
 
 	if (!szExt || !lstrlen(szExt))
 		return (unzGoToFirstFile(m_uzFile) == UNZ_OK);
@@ -201,7 +207,7 @@ bool CUnzipper::GotoFirstFile(LPCTSTR szExt)
 		UZ_FileInfo info;
 
 		if (!GetFileInfo(info))
-			return FALSE;
+			return false;
 
 		// test extension
 		TCHAR szFExt[_MAX_EXT];
@@ -210,30 +216,38 @@ bool CUnzipper::GotoFirstFile(LPCTSTR szExt)
 		if (szFExt[0])
 		{
 			if (lstrcmpi(szExt, szFExt + 1) == 0)
-				return TRUE;
+				return true;
 		}
 
 		return GotoNextFile(szExt);
 	}
 
-	return FALSE;
+	return false;
 }
 
 bool CUnzipper::GotoNextFile(LPCTSTR szExt)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
 
 	if (!szExt || !lstrlen(szExt))
-		return (unzGoToNextFile(m_uzFile) == UNZ_OK);
+	{
+		if (unzGoToNextFile(m_uzFile) != UNZ_OK)
+			return false;
+
+		m_nCurFile++;
+		return true;
+	}
 
 	// else
 	UZ_FileInfo info;
 
 	while (unzGoToNextFile(m_uzFile) == UNZ_OK)
 	{
+		m_nCurFile++;
+
 		if (!GetFileInfo(info))
-			return FALSE;
+			return false;
 
 		// test extension
 		TCHAR szFExt[_MAX_EXT];
@@ -242,18 +256,18 @@ bool CUnzipper::GotoNextFile(LPCTSTR szExt)
 		if (szFExt[0])
 		{
 			if (lstrcmpi(szExt, szFExt + 1) == 0)
-				return TRUE;
+				return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 
 }
 
 bool CUnzipper::GetFileInfo(UZ_FileInfo& info)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
 
 	unz_file_info uzfi;
 
@@ -264,7 +278,7 @@ bool CUnzipper::GetFileInfo(UZ_FileInfo& info)
 	char szAnsiPath[MAX_PATH] = { 0 };
 
 	if (UNZ_OK != unzGetCurrentFileInfo(m_uzFile, &uzfi, szAnsiPath, MAX_PATH, NULL, 0, szAnsiComment, MAX_COMMENT))
-		return FALSE;
+		return false;
 
 	// copy across
 	info.dwVersion = uzfi.version;	
@@ -278,12 +292,8 @@ bool CUnzipper::GetFileInfo(UZ_FileInfo& info)
 	info.dwInternalAttrib = uzfi.internal_fa; 
 	info.dwExternalAttrib = uzfi.external_fa; 
 
-#if _UNICODE
 	::MultiByteToWideChar(CP_ACP, 0, szAnsiPath, strlen(szAnsiPath), info.szFileName, MAX_PATH);
 	::MultiByteToWideChar(CP_ACP, 0, szAnsiComment, strlen(szAnsiComment), info.szComment, MAX_COMMENT);
-#else
-	strcpy(info.szComment, szAnsiComment);
-#endif
 
 	// replace filename forward slashes with backslashes
 	int nLen = lstrlen(info.szFileName);
@@ -297,24 +307,24 @@ bool CUnzipper::GetFileInfo(UZ_FileInfo& info)
 	// is it a folder?
 	info.bFolder = ((info.dwExternalAttrib & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
 
-	return TRUE;
+	return true;
 }
 
 bool CUnzipper::UnzipFile(LPCTSTR szFolder, bool bIgnoreFilePath)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
 
 	if (!szFolder)
 		szFolder = m_szOutputFolder;
 
 	if (!CreateFolder(szFolder))
-		return FALSE;
+		return false;
 
 	UZ_FileInfo info;
 	GetFileInfo(info);
 
-	// if the item is a folder then create it and return 'TRUE'
+	// if the item is a folder then create it and return 'true'
 	if (info.bFolder)
 	{
 		TCHAR szFolderPath[MAX_PATH];
@@ -338,7 +348,7 @@ bool CUnzipper::UnzipFile(LPCTSTR szFolder, bool bIgnoreFilePath)
 
 	// open the input and output files
 	if (!CreateFilePath(szFilePath))
-		return FALSE;
+		return false;
 
 	HANDLE hOutputFile = ::CreateFile(szFilePath, 
 										GENERIC_WRITE,
@@ -349,10 +359,13 @@ bool CUnzipper::UnzipFile(LPCTSTR szFolder, bool bIgnoreFilePath)
 										NULL);
 
 	if (INVALID_HANDLE_VALUE == hOutputFile)
-		return FALSE;
+		return false;
 
 	if (unzOpenCurrentFile(m_uzFile) != UNZ_OK)
-		return FALSE;
+	{
+		CloseHandle(hOutputFile);
+		return false;
+	}
 
 	// read the file and output
 	int nRet = UNZ_OK;
@@ -384,60 +397,84 @@ bool CUnzipper::UnzipFile(LPCTSTR szFolder, bool bIgnoreFilePath)
 	{
 		SetFileModTime(szFilePath, info.dwDosDate);
 		SetFileAttributes(szFilePath, info.dwExternalAttrib);
+
+		if (!CheckUpdateProgress())
+			return false;
 	}
 
 	return (nRet == UNZ_OK);
 }
 
+bool CUnzipper::CheckUpdateProgress()
+{
+	if (m_pCBProgress)
+	{
+		int nNumFiles = GetFileCount();
+
+		int nPrevPercent = (((m_nCurFile - 1) * 100) / nNumFiles);
+		int nCurPercent = ((m_nCurFile * 100) / nNumFiles);
+
+		if (nCurPercent != nPrevPercent)
+			return m_pCBProgress(nCurPercent, m_dwCBUserData);
+	}
+
+	return true;
+}
+
 bool CUnzipper::GotoFile(int nFile)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
 
 	if (nFile < 0 || nFile >= GetFileCount())
-		return FALSE;
+		return false;
 
 	GotoFirstFile();
 
 	while (nFile--)
 	{
 		if (!GotoNextFile())
-			return FALSE;
+			return false;
 	}
+	ASSERT(m_nCurFile == nFile);
 
-	return TRUE;
+	return true;
 }
 
 bool CUnzipper::GotoFile(LPCTSTR szFileName, bool bIgnoreFilePath)
 {
 	if (!m_uzFile)
-		return FALSE;
+		return false;
+
+	if (m_pCBProgress)
+	{
+		// We disallow this method if a callback has been
+		// specified because there's no way to back-calculate
+		// the current file index 
+		ASSERT(0);
+		return false;
+	}
 
 	// try the simple approach
-#ifdef _UNICODE
 	char szAnsiPath[MAX_PATH] = { 0 };
-
 	::WideCharToMultiByte(CP_ACP, 0, szFileName, lstrlen(szFileName), szAnsiPath, MAX_PATH, NULL, NULL);
-	char* pPath = szAnsiPath;
-#else
-	char* pPath = szFileName;
-#endif
 
-	if (unzLocateFile(m_uzFile, pPath, 2) == UNZ_OK)
-		return TRUE;
-
+	if (unzLocateFile(m_uzFile, szAnsiPath, 2) == UNZ_OK)
+	{
+		return true;
+	}
 	else if (bIgnoreFilePath)
 	{ 
 		// brute force way
 		if (unzGoToFirstFile(m_uzFile) != UNZ_OK)
-			return FALSE;
+			return false;
 
 		UZ_FileInfo info;
 
 		do
 		{
 			if (!GetFileInfo(info))
-				return FALSE;
+				return false;
 
 			// test name
 			TCHAR szFName[_MAX_FNAME], szName[_MAX_FNAME], szExt[_MAX_EXT];
@@ -446,19 +483,19 @@ bool CUnzipper::GotoFile(LPCTSTR szFileName, bool bIgnoreFilePath)
 			zmakepath(szFName, NULL, NULL, szName, szExt);
 
 			if (lstrcmpi(szFileName, szFName) == 0)
-				return TRUE;
+				return true;
 		}
 		while (unzGoToNextFile(m_uzFile) == UNZ_OK);
 	}
 
 	// else
-	return FALSE;
+	return false;
 }
 
 bool CUnzipper::CreateFolder(LPCTSTR szFolder)
 {
 	if (!szFolder)
-		return FALSE;
+		return false;
 
 	// remove trailing whitespace and '\'
 	TCHAR szPath[MAX_PATH];
@@ -475,7 +512,7 @@ bool CUnzipper::CreateFolder(LPCTSTR szFolder)
 	szPath[nEnd + 1] = 0;
 
 	if (!lstrlen(szPath))
-		return FALSE;
+		return false;
 
 	DWORD dwAttrib = GetFileAttributes(szPath);
 
@@ -496,18 +533,18 @@ bool CUnzipper::CreateFolder(LPCTSTR szFolder)
 		if (!CreateFolder(szParent))
 		{
 			free(szParent);
-			return FALSE;
+			return false;
 		}
 		free(szParent);
 
 		if (!::CreateDirectory(szPath, NULL)) 
 		{
 			if (GetLastError() != ERROR_ALREADY_EXISTS) 
-				return FALSE;
+				return false;
 		}
 	}
 	
-	return TRUE;
+	return true;
 }
 
 bool CUnzipper::CreateFilePath(LPCTSTR szFilePath)
@@ -515,7 +552,7 @@ bool CUnzipper::CreateFilePath(LPCTSTR szFilePath)
 	TCHAR* szPath = _tcsdup(szFilePath);
 	TCHAR* p = _tcsrchr(szPath,'\\');
 
-	bool bRes = FALSE;
+	bool bRes = false;
 
 	if (p)
 	{
@@ -534,7 +571,7 @@ bool CUnzipper::SetFileModTime(LPCTSTR szFilePath, DWORD dwDosDate)
 	HANDLE hFile = CreateFile(szFilePath, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 
 	if (!hFile)
-		return FALSE;
+		return false;
 	
 	FILETIME ftm, ftLocal, ftCreate, ftLastAcc, ftLastWrite;
 

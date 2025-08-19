@@ -25,6 +25,10 @@ static char THIS_FILE[] = __FILE__;
 #	define BCM_SETSHIELD 0x0000160C
 #endif
 
+#ifndef LANG_PERSIAN
+#	define LANG_PERSIAN 0x29
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 
 const LPCTSTR DEFAULT_STICKIES_PATH = _T("C:\\Program Files (x86)\\Stickies\\stickies.exe");
@@ -32,13 +36,12 @@ const LPCTSTR DEFAULT_STICKIES_PATH = _T("C:\\Program Files (x86)\\Stickies\\sti
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesGenPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesGenPage, CPreferencesPageBase)
-
-CPreferencesGenPage::CPreferencesGenPage() : 
-   CPreferencesPageBase(CPreferencesGenPage::IDD), 
-   m_hkGlobal(TRUE), 
-   m_cbLanguages(_T("*.csv")),
-   m_eStickiesPath(FES_COMBOSTYLEBTN, CEnString(IDS_STICKIESEXEFILTER))
+CPreferencesGenPage::CPreferencesGenPage()
+	:
+	CPreferencesPageBase(IDD_PREFGEN_PAGE),
+	m_hkGlobal(TRUE),
+	m_cbLanguages(_T("*.csv")),
+	m_eStickiesPath(0, CEnString(IDS_STICKIESEXEFILTER))
 {
 	//{{AFX_DATA_INIT(CPreferencesGenPage)
 	//}}AFX_DATA_INIT
@@ -163,7 +166,7 @@ void CPreferencesGenPage::OnFirstShow()
 			sCtrlText.Format(_T("%s (%s)"), sCtrlText, CEnString(IDS_REQUIRESADMINTOMODIFY));
 			pCtrl->SetWindowText(sCtrlText);
 
-			ResizeButtonStaticTextToFit(this, pCtrl);
+			ResizeStaticTextToFit(this, pCtrl);
 
 			pCtrl->EnableWindow(FALSE);
 		}
@@ -216,7 +219,6 @@ void CPreferencesGenPage::OnClearMRU()
 
 void CPreferencesGenPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_bAlwaysOnTop = pPrefs->GetProfileInt(szKey, _T("AlwaysOnTop"), FALSE);
 	m_bUseSysTray = pPrefs->GetProfileInt(szKey, _T("UseSysTray"), FALSE);
 	m_bConfirmDelete = pPrefs->GetProfileInt(szKey, _T("ConfirmDelete"), FALSE);
@@ -249,13 +251,10 @@ void CPreferencesGenPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR sz
 
 	if (m_sStickiesPath.IsEmpty() && FileMisc::FileExists(DEFAULT_STICKIES_PATH))
 		m_sStickiesPath = DEFAULT_STICKIES_PATH;
-
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), TRUE);
 }
 
 void CPreferencesGenPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("AlwaysOnTop"), m_bAlwaysOnTop);
 	pPrefs->WriteProfileInt(szKey, _T("UseSysTray"), m_bUseSysTray);
 	pPrefs->WriteProfileInt(szKey, _T("ConfirmDelete"), m_bConfirmDelete);
@@ -283,8 +282,6 @@ void CPreferencesGenPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 
 	pPrefs->WriteProfileString(szKey, _T("LanguageFile"), m_cbLanguages.GetSelectedLanguageFile(TRUE)); // relative path
 	pPrefs->WriteProfileString(szKey, _T("PathToStickies"), m_sStickiesPath);
-
-	//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 void CPreferencesGenPage::OnSelchangeLanguage() 
@@ -299,6 +296,7 @@ void CPreferencesGenPage::OnSelchangeLanguage()
 	case LANG_HEBREW:
 	case LANG_ARABIC:
 	case LANG_URDU:
+	case LANG_PERSIAN:
 		bEnable = TRUE;
 		break;
 	}
@@ -320,6 +318,7 @@ void CPreferencesGenPage::EnableDisableLanguageOptions()
 	case LANG_HEBREW:
 	case LANG_ARABIC:
 	case LANG_URDU:
+	case LANG_PERSIAN:
 		bEnable = TRUE;
 		break;
 	}

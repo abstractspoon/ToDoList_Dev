@@ -69,6 +69,7 @@ namespace WordCloudUIExtension
 		private Boolean m_ShowParentAsFolder;
 		private Boolean m_TaskColorIsBkgnd;
 		private Boolean m_ShowCompletionCheckboxes;
+		private Boolean m_ShowMixedCompletionState;
 
 		public TaskMatchesListView(IntPtr hwndParent)
 		{
@@ -167,6 +168,19 @@ namespace WordCloudUIExtension
 			}
 		}
 
+		public bool ShowMixedCompletionState
+		{
+			get { return m_ShowMixedCompletionState; }
+			set
+			{
+				if (m_ShowMixedCompletionState != value)
+				{
+					m_ShowMixedCompletionState = value;
+					Invalidate();
+				}
+			}
+		}
+
 		public bool ShowLabelTips
 		{
 			set { m_LabelTip.Active = value; }
@@ -202,8 +216,8 @@ namespace WordCloudUIExtension
         {
 			if (this.Columns.Count == 0) // once only
 			{
-				this.Columns.Add(trans.Translate("Task Matches"));
-				this.Columns.Add(trans.Translate("ID"));
+				this.Columns.Add(trans.Translate("Task Matches", Translator.Type.Header));
+				this.Columns.Add(trans.Translate("ID", Translator.Type.Header));
 
 				Columns[1].Width = -2; // Header width
 
@@ -856,7 +870,7 @@ namespace WordCloudUIExtension
             if (taskItem.IsDone(false))
                 return CheckBoxState.CheckedNormal;
 
-            if (taskItem.HasSomeSubtasksDone)
+            if (taskItem.HasSomeSubtasksDone && ShowMixedCompletionState)
                 return CheckBoxState.MixedNormal;
 
             // else

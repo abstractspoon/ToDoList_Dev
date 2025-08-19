@@ -640,7 +640,6 @@ CTDLRecurringTaskMonthlyOptionPage::CTDLRecurringTaskMonthlyOptionPage(const TDC
 	m_nMonthlyOption = 0;
 	//}}AFX_DATA_INIT
 	m_bFirstLastWeekday = FALSE;
-	m_bPreserveWeekdays = TRUE;
 
 	// first set to default values
 	if (CDateHelper::IsDateSet(dtDefault))
@@ -659,7 +658,6 @@ CTDLRecurringTaskMonthlyOptionPage::CTDLRecurringTaskMonthlyOptionPage(const TDC
 	case TDIR_MONTH_EVERY_NMONTHS:
 		m_nMonthlyOption = 0;
 		m_nEveryNumMonths = dwSpecific1;
-		m_bPreserveWeekdays = dwSpecific2;
 		break;
 		
 	case TDIR_MONTH_SPECIFIC_DAY_NMONTHS: 
@@ -703,7 +701,6 @@ void CTDLRecurringTaskMonthlyOptionPage::DoDataExchange(CDataExchange* pDX)
 	DDX_CBIndex(pDX, IDC_THESPECIFICWEEK, m_nSpecificNumber);
 	DDX_CBIndex(pDX, IDC_THEWEEKDAY, m_nSpecificDayOfWeek);
 	DDX_Radio(pDX, IDC_RECREATE, m_nMonthlyOption);
-	DDX_Check(pDX, IDC_PRESERVEWEEKDAYS, m_bPreserveWeekdays);
 	CDialogHelper::DDX_Text(pDX, IDC_DAYMONTHDAY, m_nEveryDayOfMonth);
 	CDialogHelper::DDX_Text(pDX, IDC_DAYMONTHS, m_nEveryNumMonthsDay);
 	CDialogHelper::DDX_Text(pDX, IDC_THEMONTHS, m_nSpecificNumMonths);
@@ -758,7 +755,7 @@ void CTDLRecurringTaskMonthlyOptionPage::GetRecurrenceOptions(TDCRECURRENCE& tr)
 	case 0:
 		VERIFY(tr.SetRegularity(TDIR_MONTH_EVERY_NMONTHS,
 								m_nEveryNumMonths,
-								m_bPreserveWeekdays));
+								0));
 		break;
 
 	case 1:
@@ -791,7 +788,6 @@ void CTDLRecurringTaskMonthlyOptionPage::OnChangeMonthlyValues()
 	UpdateData();
 
 	GetDlgItem(IDC_RECREATEMONTHS)->EnableWindow(m_nMonthlyOption == 0);
-	GetDlgItem(IDC_PRESERVEWEEKDAYS)->EnableWindow(m_nMonthlyOption == 0);
  	GetDlgItem(IDC_DAYMONTHDAY)->EnableWindow(m_nMonthlyOption == 1);
  	GetDlgItem(IDC_DAYMONTHS)->EnableWindow(m_nMonthlyOption == 1);
  	GetDlgItem(IDC_THEMONTHS)->EnableWindow(m_nMonthlyOption == 2);
@@ -842,7 +838,7 @@ void CTDLRecurringTaskMonthlyOptionPage::FixupSpecificWeekCombo(int iWeekday, in
 		CStringArray aSpecificWeek;
 		
 		aSpecificWeek.Add(m_aSpecificWeek[0]);
-		aSpecificWeek.Add(m_aSpecificWeek[m_aSpecificWeek.GetSize() - 1]);
+		aSpecificWeek.Add(m_aSpecificWeek[Misc::LastIndexT(m_aSpecificWeek)]);
 		
 		CDialogHelper::SetComboBoxItems(m_cbSpecificWeek, aSpecificWeek);
 
@@ -871,7 +867,6 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 	m_nSpecificDayOfWeek = 0;
 	m_dwEveryMonths = 1;
 	//}}AFX_DATA_INIT
-	m_bPreserveWeekdays = TRUE;
 
 	// first set to default values
 	if (CDateHelper::IsDateSet(dtDefault))
@@ -891,7 +886,6 @@ CTDLRecurringTaskYearlyOptionPage::CTDLRecurringTaskYearlyOptionPage(const TDCRE
 	case TDIR_YEAR_EVERY_NYEARS:
 		m_nYearlyOption = 0;
 		m_nEveryNumYears = dwSpecific1;
-		m_bPreserveWeekdays = dwSpecific2;
 		break;
 		
 	case TDIR_YEAR_SPECIFIC_DAY_MONTHS:  
@@ -929,14 +923,13 @@ void CTDLRecurringTaskYearlyOptionPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_THEMONTH, m_cbSpecificMonthList);
 	DDX_Control(pDX, IDC_THEWEEKDAY, m_cbDaysOfWeek);
 	DDX_Control(pDX, IDC_EVERYMONTHLIST, m_cbEveryMonthList);
-	DDX_Check(pDX, IDC_PRESERVEWEEKDAYS, m_bPreserveWeekdays);
 	//}}AFX_DATA_MAP
 
 	CDialogHelper::DDX_Text(pDX, IDC_RECREATEYEARS, m_nEveryNumYears);
 	CDialogHelper::DDX_Text(pDX, IDC_EVERYMONTHDAY, m_nEveryDayOfMonth);
 
-	DDX_Months(pDX, m_cbSpecificMonthList, m_dwSpecificMonths);
-	DDX_Months(pDX, m_cbEveryMonthList, m_dwEveryMonths);
+	m_cbSpecificMonthList.DDX(pDX, m_dwSpecificMonths);
+	m_cbEveryMonthList.DDX(pDX, m_dwEveryMonths);
 }
 
 BEGIN_MESSAGE_MAP(CTDLRecurringTaskYearlyOptionPage, CCmdNotifyPropertyPage)
@@ -972,7 +965,7 @@ void CTDLRecurringTaskYearlyOptionPage::GetRecurrenceOptions(TDCRECURRENCE& tr) 
 	case 0:
 		tr.SetRegularity(TDIR_YEAR_EVERY_NYEARS, 
 						 m_nEveryNumYears, 
-						 m_bPreserveWeekdays);
+						 0);
 		break;
 		
 	case 1:  
@@ -998,7 +991,6 @@ void CTDLRecurringTaskYearlyOptionPage::OnChangeYearlyValues()
 	UpdateData();
 
 	GetDlgItem(IDC_RECREATEYEARS)->EnableWindow(m_nYearlyOption == 0);
-	GetDlgItem(IDC_PRESERVEWEEKDAYS)->EnableWindow(m_nYearlyOption == 0);
  	GetDlgItem(IDC_EVERYMONTHLIST)->EnableWindow(m_nYearlyOption == 1);
  	GetDlgItem(IDC_EVERYMONTHDAY)->EnableWindow(m_nYearlyOption == 1);
  	GetDlgItem(IDC_THESPECIFICWEEK)->EnableWindow(m_nYearlyOption == 2);

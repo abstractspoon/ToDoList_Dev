@@ -18,7 +18,8 @@ namespace Abstractspoon
 				static int CentreX(Drawing::Rectangle^ rect);
 				static int CentreY(Drawing::Rectangle^ rect);
 
-				static Drawing::Point Centre(Drawing::Rectangle^ rect);
+				static Drawing::Point CentrePoint(Drawing::Rectangle^ rect);
+				static Drawing::Rectangle CentredRect(Drawing::Point^ point, int size);
 
 				static Drawing::Point TopLeft(Drawing::Rectangle^ rect);
 				static Drawing::Point TopCentre(Drawing::Rectangle^ rect);

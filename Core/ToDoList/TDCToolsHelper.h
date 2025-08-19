@@ -17,9 +17,10 @@
 
 //////////////////////////////////////////////////////////////////////
 
-struct USERTOOL
+struct TDCUSERTOOL
 {
-	BOOL operator==(const USERTOOL& other) const;
+	TDCUSERTOOL();
+	BOOL operator==(const TDCUSERTOOL& other) const;
 
 	CString sToolName;
 	CString sToolPath;
@@ -51,11 +52,11 @@ struct USERTOOLARGS
 class CPreferencesDlg;
 class CEnToolBar;
 class CMenuIconMgr;
+class CTDCImageList;
 
 //////////////////////////////////////////////////////////////////////
 
-typedef CArray<USERTOOL, USERTOOL&> CUserToolArray;
-typedef CArray<int, int&> CToolIndexArray;
+typedef CArray<TDCUSERTOOL, TDCUSERTOOL&> CTDCUserToolArray;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -65,19 +66,18 @@ public:
 	CTDCToolsHelper(BOOL bTDLEnabled);
 	virtual ~CTDCToolsHelper();
 	
-	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
-	BOOL TestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
-	void AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped = TRUE);
-	void AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped = TRUE);
+	BOOL RunTool(const TDCUSERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+	BOOL TestTool(const TDCUSERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+	void AddToolsToToolbar(const CTDCUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped = TRUE);
+	void AddToolsToMenu(const CTDCUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped = TRUE);
 	int RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter);
 
-	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
+	BOOL PrepareCmdline(const TDCUSERTOOL& tool, const USERTOOLARGS& args, 
 						const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline);
 
-	static HICON GetToolIcon(const USERTOOL& tool);
-	static BOOL GetToolIcon(const USERTOOL& tool, CBitmap& bmp, COLORREF crBkgnd);
-	static CString GetToolPath(const USERTOOL& tool);
+	static CString GetToolPath(const TDCUSERTOOL& tool);
 	static BOOL IsToolCmdID(UINT nCmdID);
+	static int AddToolToImageList(const TDCUSERTOOL& tool, CTDCImageList& ilTools);
 
 protected:
 	BOOL m_bTDLEnabled;
@@ -86,19 +86,17 @@ protected:
    	LPCTSTR GetFileFilter();
 	LPCTSTR GetDefaultFileExt();
 	BOOL CheckToDoListVersionCompatibility(const CString& sToolPath) const;
-	BOOL RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bTest);
+	BOOL RunTestTool(const TDCUSERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bTest);
 
-	static BOOL GetToolPaths(const USERTOOL& tool, CString& sToolPath, CString& sIconPath);
+	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, CLA_TYPE nType, const CString& sValue, BOOL bWebTool);
+	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, const CString& sName, const CString& sValue, BOOL bWebTool);
 
-	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, CLA_TYPE nType, 
-									const CString& sValue, BOOL bWebTool);
-	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, const CString& sName, 
-									const CString& sValue, BOOL bWebTool);
 	static CString EscapeCharacters(const CString& sValue, BOOL bWebTool);
-
 	static int IndexArraySortProc(const void* pV1, const void* pV2);
-	static int BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped);
 	static BOOL GetToolButtonRange(const CEnToolBar& toolbar, int& nFirstBtn, int& nLastBtn);
+
+	typedef CArray<int, int&> CTDCToolIndexArray;
+	static int BuildToolIndexArray(const CTDCUserToolArray& aTools, CTDCToolIndexArray& aIndices, BOOL bGrouped);
 };
 
 #endif // !defined(AFX_TOOLSHELPER_H__6BAD432D_0189_46A9_95ED_EF869CFC6CE1__INCLUDED_)

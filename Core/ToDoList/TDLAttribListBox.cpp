@@ -31,8 +31,6 @@ CTDLAttributeListBox::CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_EXTERNALID,		TDCA_EXTERNALID,	FALSE)); 
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_FILELINK,		TDCA_FILELINK,		FALSE)); 
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_FLAG,			TDCA_FLAG,			FALSE)); 
-//	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_LOCK,			TDCA_LOCK,			FALSE)); 
-//	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_PATH,			TDCA_PATH,			FALSE)); 
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_PERCENT,			TDCA_PERCENT,		TRUE)); 
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_PRIORITY,		TDCA_PRIORITY,		TRUE)); 
 	m_aAttribs.Add(ATTRIBVIS(IDS_TDLBC_RECURRENCE,		TDCA_RECURRENCE,	FALSE)); 
@@ -66,7 +64,7 @@ CTDLAttributeListBox::CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray
 		if (attribDef.bEnabled)
 		{
 			vis.sName.Format(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			vis.nTDCAttrib = attribDef.GetAttributeID();
+			vis.nAttributeID = attribDef.GetAttributeID();
 			vis.sCustAttribID = attribDef.sUniqueID;
 			vis.bVisible = TRUE;
 
@@ -98,19 +96,19 @@ void CTDLAttributeListBox::PreSubclassWindow()
 	PostMessage(WM_INITLISTBOX);
 }
 
-int CTDLAttributeListBox::FindAttribute(TDC_ATTRIBUTE nAttrib) const
+int CTDLAttributeListBox::FindAttribute(TDC_ATTRIBUTE nAttribID) const
 {
 	int nIndex = m_aAttribs.GetSize();
 	
 	while (nIndex--)
 	{
-		int nLBAttrib = m_aAttribs[nIndex].nTDCAttrib;
+		int nLBAttrib = m_aAttribs[nIndex].nAttributeID;
 
-		if (nLBAttrib == nAttrib)
+		if (nLBAttrib == nAttribID)
 			return nIndex;
 
 		// parent ID piggy-backs on task ID
-		if ((nLBAttrib == TDCA_ID) && (nAttrib == TDCA_PARENTID))
+		if ((nLBAttrib == TDCA_ID) && (nAttribID == TDCA_PARENTID))
 			return nIndex;
 	}
 
@@ -147,7 +145,7 @@ LRESULT CTDLAttributeListBox::OnInitListBox(WPARAM /*wp*/, LPARAM /*lp*/)
 
 		int nPos = AddString(cs.sName); 
 		SetCheck(nPos, cs.bVisible ? 1 : 0);
-		SetItemData(nPos, (DWORD)cs.nTDCAttrib);
+		SetItemData(nPos, (DWORD)cs.nAttributeID);
 	}
 
 	CDialogHelper::RefreshMaxColumnWidth(*this);
@@ -157,25 +155,25 @@ LRESULT CTDLAttributeListBox::OnInitListBox(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CTDLAttributeListBox::SetSelectedAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs)
 {
-	int nAttrib = m_aAttribs.GetSize();
+	int nAtt = m_aAttribs.GetSize();
 	
-	while (nAttrib--)
+	while (nAtt--)
 	{
-		ATTRIBVIS& vis = m_aAttribs[nAttrib];
+		ATTRIBVIS& vis = m_aAttribs[nAtt];
 
 		if (vis.sCustAttribID.IsEmpty())
 		{
-			vis.bVisible = mapAttrib.Has(vis.nTDCAttrib);
+			vis.bVisible = mapAttrib.Has(vis.nAttributeID);
 		}
 		else
 		{
-			ASSERT (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(vis.nTDCAttrib));
+			ASSERT (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(vis.nAttributeID));
 
 			vis.bVisible = mapCustomAttribIDs.Has(vis.sCustAttribID);
 		}
 		
 		if (GetSafeHwnd())
-			SetCheck(nAttrib, vis.bVisible);
+			SetCheck(nAtt, vis.bVisible);
 	}
 }
 
@@ -194,15 +192,15 @@ int CTDLAttributeListBox::GetSelectedAttributes(CTDCAttributeMap& mapAttrib, CSt
 		{
 			if (vis.sCustAttribID.IsEmpty())
 			{
-				mapAttrib.Add(vis.nTDCAttrib);
+				mapAttrib.Add(vis.nAttributeID);
 
 				// parent ID
-				if (vis.nTDCAttrib == TDCA_ID)
+				if (vis.nAttributeID == TDCA_ID)
 					mapAttrib.Add(TDCA_PARENTID);
 			}
 			else
 			{
-				ASSERT (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(vis.nTDCAttrib));
+				ASSERT (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(vis.nAttributeID));
 
 				mapCustomAttribIDs.Add(vis.sCustAttribID);
 			}
@@ -235,10 +233,10 @@ int CTDLAttributeListBox::GetAttributes(CTDCAttributeMap& mapAttrib, BOOL bSelec
 		if (!bSelected || vis.bVisible)
 		{
 			if (vis.sCustAttribID.IsEmpty() || bIncCustAttrib)
-				mapAttrib.Add(vis.nTDCAttrib);
+				mapAttrib.Add(vis.nAttributeID);
 
 			// parent ID
-			if (vis.nTDCAttrib == TDCA_ID)
+			if (vis.nAttributeID == TDCA_ID)
 				mapAttrib.Add(TDCA_PARENTID);
 		}
 	}

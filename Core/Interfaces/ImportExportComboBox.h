@@ -16,7 +16,6 @@
 
 class CImportExportComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
 	CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly, LPCTSTR szFileExts = NULL);
 	virtual ~CImportExportComboBox();
@@ -35,18 +34,7 @@ protected:
 	BOOL m_bImporting, m_bFileBasedOnly;
 	CStringArray m_aFileExt;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLImportExportComboBox)
 protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLImportExportComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -54,8 +42,8 @@ protected:
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
+	virtual void BuildCombo();
 
-	void BuildCombo();
 	CString GetImpExpMenuText(int nImpExp) const;
 	CString GetImpExpFileExtension(int nImpExp, BOOL bWithDot) const;
 	HICON GetImpExpIcon(int nImpExp) const;

@@ -163,11 +163,12 @@ BOOL CTDCFilter::SetFilter(const TDCFILTER& filter)
 
 BOOL CTDCFilter::SetAdvancedFilter(const TDCADVANCEDFILTER& filter)
 {
-	// error checking
-	ASSERT(!filter.sName.IsEmpty() && filter.params.GetRuleCount());
-
+	// sanity check
 	if (filter.sName.IsEmpty() || !filter.params.GetRuleCount())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	m_advFilter = filter;
 	m_nState = TDCFS_ADVANCED;
@@ -223,106 +224,41 @@ BOOL CTDCFilter::HasSelectionFilter() const
 	return ((m_nState == TDCFS_FILTER) && (m_filter.nShow == FS_SELECTED));
 }
 
-BOOL CTDCFilter::HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDCFilter::HasCompletedDependencyFilter() const
 {
-	if (m_nState == TDCFS_ADVANCED)
-		return m_advFilter.params.HasAttribute(nAttrib);
-
-	// else
-	ASSERT(0);
-	return FALSE;
-}
-
-BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const
-{
-	switch (nAttrib)
+	switch (m_nState)
 	{
-	case TDCA_ALL:
-		return TRUE; // More detailed check done later
+	case TDCFS_FILTER:
+		return m_filter.HasFlag(FO_HIDEUNDONEDEPENDS);
 
-	case TDCA_TASKNAME:
-		return !m_filter.sTitle.IsEmpty();
+	case TDCFS_ADVANCED:
+		return m_advFilter.params.HasRule(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE);
 
-	case TDCA_PRIORITY:
-		return (m_filter.nPriority != FM_ANYPRIORITY);
-
-	case TDCA_FLAG:
-		return (m_filter.nShow == FS_FLAGGED);
-
-	case TDCA_LOCK:
-		return (m_filter.nShow == FS_LOCKED);
-
-	case TDCA_RISK:
-		return (m_filter.nRisk != FM_ANYRISK);
-
-	case TDCA_ALLOCBY:
-		return (m_filter.aAllocBy.GetSize() > 0);
-
-	case TDCA_STATUS:
-		return (m_filter.aStatus.GetSize() > 0);
-
-	case TDCA_VERSION:
-		return (m_filter.aVersions.GetSize() > 0);
-
-	case TDCA_CATEGORY:
-		return (m_filter.aCategories.GetSize() > 0);
-
-	case TDCA_TAGS:
-		return (m_filter.aTags.GetSize() > 0);
-
-	case TDCA_ALLOCTO:
-		return (m_filter.aAllocTo.GetSize() > 0);
-
-	case TDCA_PERCENT:
-		return ((m_filter.nShow == FS_DONE) || (m_filter.nShow == FS_NOTDONE));
-
-	case TDCA_DONEDATE:
-		// changing the DONE date requires refiltering if:
-		return
-			// 1. The user wants to hide completed tasks
-			(m_filter.HasFlag(FO_HIDEDONE) ||
-			 // 2. OR the user wants only completed tasks
-			(m_filter.nShow == FS_DONE) ||
-			// 3. OR the user wants only incomplete tasks
-			(m_filter.nShow == FS_NOTDONE) ||
-			// 4. OR a due date filter is active
-			(m_filter.nDueBy != FD_ANY) ||
-			// 5. OR a start date filter is active
-			(m_filter.nStartBy != FD_ANY) ||
-			// 6. OR the user is filtering on priority
-			(m_filter.nPriority > 0));
-
-	case TDCA_DUEDATE:
-		// changing the DUE date requires refiltering if:
-		return 
-			// 1. The user wants to hide overdue tasks
-			((m_filter.HasFlag(FO_HIDEOVERDUE) ||
-			// 2. OR the user is filtering on priority
-			(m_filter.nPriority > 0) ||
-			// 3. OR a due date filter is active
-			(m_filter.nDueBy != FD_ANY)) &&
-			// 4. AND the user doesn't want only completed tasks
-			(m_filter.nShow != FS_DONE));
-
-	case TDCA_STARTDATE:
-		// changing the START date requires refiltering if:
-		return 
-			// 1. A start date filter is active
-			((m_filter.nStartBy != FD_ANY) &&
-			// 2. AND the user doesn't want only completed tasks
-			(m_filter.nShow != FS_DONE));
-
-	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
-		{
-			CString sAttribID = aCustomAttribDefs.GetAttributeTypeID(nAttrib);
-
-			return m_filter.mapCustomAttrib.HasKey(sAttribID);
-		}
+	case TDCFS_NONE:
+	case TDCFS_FILTER_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
 		break;
 	}
 
-	// all else
+	return FALSE;
+}
+
+BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const
+{
+	switch (m_nState)
+	{
+	case TDCFS_FILTER:
+		return m_filter.HasAttribute(nAttribID, aCustomAttribDefs);
+
+	case TDCFS_ADVANCED:
+		return m_advFilter.params.HasAttribute(nAttribID);
+
+	case TDCFS_NONE:
+	case TDCFS_FILTER_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
+		break;
+	}
+
 	return FALSE;
 }
 
@@ -523,15 +459,19 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 	if (filter.nRecurrence != TDIR_NONE)
 		params.aRules.Add(SEARCHPARAM(TDCA_RECURRENCE, FOP_EQUALS, filter.nRecurrence));
 
-	// Custom Attributes
-	bWantCustomAttrib |= CTDCSearchParamHelper::AppendCustomAttributeFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules);
+	// Incomplete dependencies filter
+	if (filter.HasFlag(FO_HIDEUNDONEDEPENDS))
+		params.aRules.Add(SEARCHPARAM(TDCA_DEPENDENCY, FOP_DEPENDS_COMPLETE));
+
+	if (CTDCSearchParamHelper::AppendCustomAttributeFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules))
+		bWantCustomAttrib = TRUE;
+
+	if (bWantCustomAttrib)
+		params.aAttribDefs.Copy(aCustomAttribDefs);
 
 	// special case: no rules + ignore completed
 	if (params.bIgnoreDone && (params.aRules.GetSize() == 0))
 		params.aRules.Add(SEARCHPARAM(TDCA_DONEDATE, FOP_NOT_SET));
-
-	if (bWantCustomAttrib)
-		params.aAttribDefs.Copy(aCustomAttribDefs);
 }
 
 void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey) const
@@ -690,11 +630,10 @@ void CTDCFilter::SaveAdvancedFilter(CPreferences& prefs, const CString& sKey, co
 
 void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCFILTER& filter)
 {
+	filter.sTitle = INIENTRY::UnSafeQuote(prefs.GetProfileString(sKey, _T("Title")));
 	filter.nShow = prefs.GetProfileEnum(sKey, _T("Show"), FS_ALL);
 	filter.nStartBy = prefs.GetProfileEnum(sKey, _T("Start"), FD_ANY);
 	filter.nDueBy = prefs.GetProfileEnum(sKey, _T("Due"), FD_ANY);
-
-	filter.sTitle = prefs.GetProfileString(sKey, _T("Title"));
 	filter.nTitleOption = prefs.GetProfileEnum(sKey, _T("TitleOption"), FT_FILTERONTITLEONLY);
 	filter.nPriority = prefs.GetProfileInt(sKey, _T("Priority"), FM_ANYPRIORITY);
 	filter.nRisk = prefs.GetProfileInt(sKey, _T("Risk"), FM_ANYRISK);
@@ -760,7 +699,7 @@ DWORD CTDCFilter::LoadFlags(const CPreferences& prefs, const CString& sKey)
 
 void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCFILTER& filter)
 {
-	prefs.WriteProfileString(sKey, _T("Title"), filter.sTitle);
+	prefs.WriteProfileString(sKey, _T("Title"), INIENTRY::SafeQuote(filter.sTitle));
 
 	prefs.WriteProfileInt(sKey, _T("TitleOption"), filter.nTitleOption);
 	prefs.WriteProfileInt(sKey, _T("Show"), filter.nShow);
@@ -827,51 +766,14 @@ void CTDCFilter::SaveFlags(DWORD dwFlags, CPreferences& prefs, const CString& sK
 
 BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const 
 {
-	// we only need to refilter if the modified attribute
-	// actually affects the filter
-	if (m_nState == TDCFS_ADVANCED) // 'Find' filter
+	switch (m_nState)
 	{
-		if (HasAdvancedFilterAttribute(nModType))
-		{
-			// don't refilter on Time Estimate/Spent, Cost or Comments, or 
-			// similar custom attributes because the user typically hasn't 
-			// finished editing when this notification is first received
-			switch (nModType)
-			{
-			case TDCA_TIMESPENT:
-			case TDCA_TIMEESTIMATE:
-			case TDCA_COST:
-			case TDCA_COMMENTS:
-				return FALSE;
-
-			default:
-				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nModType))
-				{
-					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-					GET_DEF_RET(aCustomAttribDefs, nModType, pDef, FALSE);
-
-					if (!pDef->IsList())
-					{
-						switch (pDef->GetDataType())
-						{
-						case TDCCA_DOUBLE:
-						case TDCCA_INTEGER:
-						case TDCCA_STRING:
-							return FALSE;
-						}
-					}
-				}
-			}
-
-			// all else
-			return TRUE;
-		}
-	}
-	else if (m_nState == TDCFS_FILTER) // 'Filter Bar' filter
-	{
+	case TDCFS_FILTER:
+	case TDCFS_ADVANCED:
 		return HasFilterAttribute(nModType, aCustomAttribDefs);
 	}
 
+	// All else
 	return FALSE;
 }
 

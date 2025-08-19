@@ -12,30 +12,15 @@
 #include "tdldialog.h"
 #include "tdcreminder.h"
 #include "TDLReminderPeriodComboBox.h"
+#include "TDLShowReminderListCtrl.h"
 
 #include "..\Shared\DateTimeCtrlEx.h"
 #include "..\Shared\timecombobox.h"
-#include "..\Shared\Icon.h"
 #include "..\Shared\EnListCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 class CFilteredToDoCtrl;
-
-/////////////////////////////////////////////////////////////////////////////
-// CTDLShowReminderListCtrl
-
-class CTDLShowReminderListCtrl : public CEnListCtrl
-{
-public:
-	CTDLShowReminderListCtrl(const CTDCReminderMap& mapReminders);
-
-protected:
-	const CTDCReminderMap& m_mapReminders;
-
-protected:
-	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
-};
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLShowReminderDlg dialog
@@ -51,37 +36,26 @@ public:
 	BOOL Create(CWnd* pParent, BOOL bVisible = TRUE);
 	void SetRemindersFont(HFONT hFont);
 
-	BOOL AddListReminder(const TDCREMINDER& rem);
-	BOOL UpdateListReminder(const TDCREMINDER& rem);
-	void RemoveListReminder(const TDCREMINDER& rem);
-	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
-	void RemoveAllListReminders();
-	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
-
-	BOOL GetWantSnoozeUntil() const { return m_bSnoozeUntil; }
-	UINT GetSnoozeMinutes() const { return m_nSnoozeMins; }
-	double GetSnoozeDays() const;
-	COleDateTime GetSnoozeUntil() const;
+	void ShowWindow();
+	BOOL IsForegroundWindow() const;
+	void SetISODateTimeFormat(BOOL bIso);
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLShowReminderDlg)
-	enum { IDD = IDD_SHOWREMINDER_DIALOG };
 	//}}AFX_DATA
 	CString m_sSoundFile;
 	UINT m_nSnoozeMins;
 	int m_bSnoozeUntil;
-	DWORD m_dwNextReminderID;
-	BOOL m_bChangingReminders;
+	BOOL m_bModifyingList;
+	BOOL m_bModifyingReminder;
+	BOOL m_bISODateTimes;
 
 	CTDLReminderPeriodComboBox m_cbSnoozeFor;
 	CDateTimeCtrlEx m_dtcSnoozeDate;
 	CTimeComboBox m_cbSnoozeTime;
 	COleDateTime m_dtSnoozeUntil;
 	CTDLShowReminderListCtrl m_lcReminders;
-	CIcon m_icon;
-
-	CTDCReminderMap m_mapReminders;
 
 protected:
 // Overrides
@@ -97,15 +71,18 @@ protected:
 	virtual void DoSnoozeReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void DoGotoTask(const TDCREMINDER& /*rem*/) { ASSERT(0); }
+	virtual void DoModifyReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void DoCompleteTask(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void HideWindow();
 	virtual void OnRepositionControls(int dx, int dy);
+	virtual BOOL CanModifyReminders() const;
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CTDLShowReminderDlg)
 	afx_msg void OnSnooze();
+	afx_msg void OnModify();
 	afx_msg void OnDismiss();
 	afx_msg void OnGotoTask();
 	afx_msg void OnCompleteTask();
@@ -116,18 +93,26 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnDblClkReminders(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClose();
-	afx_msg void OnDestroy();
+	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	int FindListReminder(const TDCREMINDER& rem);
-	int GetSelectedReminder(TDCREMINDER& rem) const;
-	int GetSelectedReminders(CTDCReminderArray& aRem) const;
-	int GetListReminders(CTDCReminderArray& aRem) const;
-	void EnableControls();
+	BOOL AddListReminder(const TDCREMINDER& rem);
+	BOOL UpdateListReminder(const TDCREMINDER& rem);
+	BOOL RemoveListReminder(const TDCREMINDER& rem);
+	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
+
+	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
+
+	BOOL GetWantSnoozeUntil() const { return m_bSnoozeUntil; }
+	UINT GetSnoozeMinutes() const { return m_nSnoozeMins; }
+	double GetSnoozeDays() const;
+	COleDateTime GetSnoozeUntil() const;
+
+	void EnableDisableControls();
+	void EnableDisableModify();
 	void UpdateControls();
 	void UpdateTitleText();
-	void UpdateColumnWidths();
 	void SnoozeReminders(BOOL bAll);
 	void RestoreFocusToList(int nPrevSel);
 };

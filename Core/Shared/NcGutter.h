@@ -47,7 +47,7 @@ enum
 struct NCGDRAWITEM
 {
 	NCGDRAWITEM() { pDC = NULL; dwItem = dwParentItem = 0; nColID = 0; rItem = NULL; nLevel = 0; 
-					nItemPos = 0; rWindow = NULL; /*bSelected = FALSE;*/ nTextAlign = DT_LEFT; }
+					nItemPos = 0; rWindow = NULL; nTextAlign = DT_LEFT; }
 
 	CDC* pDC;
 	DWORD dwItem;
@@ -252,7 +252,7 @@ protected:
 	enum HCHDRPART { NONCLIENT, CLIENT }; // private
 
 	void NcDrawHeader(CDC* pDC, const CRect& rHeader, HCHDRPART nPart, const LPPOINT pCursor);
-	void NcDrawHeaderColumn(CDC* pDC, int nColumn, CRect rColumn, CThemed* pTheme, const LPPOINT pCursor);
+	void NcDrawHeaderColumn(CDC* pDC, int nCol, CRect rColumn, CThemed* pTheme, const LPPOINT pCursor);
 	void UpdateHeaderHotRects();
 	void UnpressAllColumnHeaders(int nExcludeCol = -1);
 	int RecalcGutterWidth();
@@ -262,7 +262,7 @@ protected:
 
 	static BOOL PrepareBitmap(CDC* pDC, CBitmap* pBitmap, const CRect& rect);
 	static BOOL BitmapNeedsRecreate(CDC* pDC, CBitmap* pBitmap, const CRect& rect);
-	CFont* PrepareFont(CDC* pDC, BOOL bHeader, HFONT hFont = NULL); // returns 'old' font
+	HFONT PrepareFont(CDC* pDC, BOOL bHeader, HFONT hFont = NULL); // returns 'old' font
 
 	enum GHR_WHAT { GHR_NONCLIENT, GHR_CLIENT, GHR_ALL }; // private
 

@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "TDLTasklistImportDlg.h"
 #include "tdcmsg.h"
+#include "tdcmapping.h"
 #include "preferencesdlg.h"
 #include "TDCToDoCtrlPreferenceHelper.h"
 
@@ -172,6 +173,8 @@ CTDLTasklistImportDlg::CTDLTasklistImportDlg(const CString& sFilePath, CWnd* pPa
 	//}}AFX_DATA_INIT
 	m_bResetCreationDate = TRUE;
 	m_sFilePath = sFilePath;
+
+	m_iconDlg.Load(IDR_MAINFRAME);
 }
 
 
@@ -220,7 +223,7 @@ BOOL CTDLTasklistImportDlg::OnInitDialog()
 
 BOOL CTDLTasklistImportDlg::OnEraseBkgnd(CDC* pDC)
 {
-	// Don't know why but exaanding all the tasks prior
+	// Don't know why but expanding all the tasks prior
 	// to the tree actually being visible causes it all
 	// sorts of rendering problems some of which are a
 	// consequence of my choices but which are hard to change.
@@ -228,8 +231,7 @@ BOOL CTDLTasklistImportDlg::OnEraseBkgnd(CDC* pDC)
 	{
 		m_bFirstShow = FALSE;
 
-		m_taskTree.ExpandAll();
-		m_taskTree.SelectAll();
+		m_taskTree.SelectAll(FALSE); // Include collapsed items
 		m_taskTree.SetFocus();
 	}
 	
@@ -288,6 +290,11 @@ void CTDLTasklistImportDlg::OnOK()
 
 	if (m_nLoadRes == TDCF_SUCCESS)
 		m_taskTree.GetSelectedTasks(m_tasksSelected, m_bImportSubtasks);
+}
+
+BOOL CTDLTasklistImportDlg::DoIdleProcessing()
+{
+	return m_taskTree.DoIdleProcessing();
 }
 
 IIMPORTEXPORT_RESULT CTDLTasklistImportDlg::GetSelectedTasks(ITaskList* pTasks)

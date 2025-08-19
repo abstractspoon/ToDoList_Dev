@@ -752,31 +752,7 @@ BOOL CXmlDocumentWrapper::IsVersion3orGreater()
 //------------------------//
 BSTR CXmlNodeWrapper::ConvertStringToBSTR(const CString& src)
 {
-#ifdef _UNICODE
-	BSTR wsOut = ::SysAllocStringLen((LPCWSTR)src, src.GetLength());
-#else
-	BSTR wsOut(NULL);
-	DWORD cwch = ::MultiByteToWideChar(CP_ACP, 0, (LPCSTR)src, -1, NULL, 0);//get size minus NULL terminator
-
-	if (cwch)
-	{
-		cwch--;
-		wsOut = ::SysAllocStringLen(NULL, cwch);
-		
-		if(wsOut)
-		{
-			if(!::MultiByteToWideChar(CP_ACP, 0, (LPCSTR)src, -1, wsOut, cwch))
-			{
-				if(ERROR_INSUFFICIENT_BUFFER == ::GetLastError())
-					return wsOut;
-				::SysFreeString(wsOut);//must clean up
-				wsOut = NULL;
-			}
-		}
-		
-	};
-#endif
-	return wsOut;
+	return ::SysAllocStringLen((LPCWSTR)src, src.GetLength());
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1092,9 +1068,9 @@ int CXmlNodeWrapper::GetAttributes(CStringArray& aNames, CStringArray& aValues)
 		{
 			int nNumAttrib = attribs->Getlength();
 
-			for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
+			for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
 			{
-				MSXML2::IXMLDOMAttributePtr attrib = attribs->Getitem(nAttrib);
+				MSXML2::IXMLDOMAttributePtr attrib = attribs->Getitem(nAtt);
 
 				if (attrib)
 				{

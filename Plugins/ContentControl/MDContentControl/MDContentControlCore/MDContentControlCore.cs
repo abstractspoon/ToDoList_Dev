@@ -41,10 +41,10 @@ namespace MDContentControl
 				if (!string.IsNullOrEmpty(tooltip))
 					tooltip = (tooltip + "\n");
 
-				e.tooltip = (tooltip + m_Trans.Translate("'CTRL + click' to follow link"));
+				e.tooltip = (tooltip + m_Trans.Translate("'CTRL + click' to follow link", Translator.Type.ToolTip));
 			};
 
-			m_Trans.Translate(ContextMenu.Items);
+			m_Trans.Translate(ContextMenu.Items, true);
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------
@@ -86,6 +86,11 @@ namespace MDContentControl
 
 			return false;
         }
+
+		public bool DoIdleProcessing()
+		{
+			return false;
+		}
 
 		public new bool Undo()
         {

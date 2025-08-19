@@ -6,7 +6,7 @@
 #include "TDLFilterBar.h"
 #include "tdcmsg.h"
 #include "filteredtodoctrl.h"
-#include "tdccustomattributeUIHelper.h"
+#include "tdccustomFilterattributeUIHelper.h"
 
 #include "..\shared\deferwndmove.h"
 #include "..\shared\dlgunits.h"
@@ -36,7 +36,7 @@ const int LABELHEIGHT	= 9;
 
 static CTRLITEM FILTERCTRLS[] = 
 {
-	CTRLITEM(IDC_FILTERCOMBO,			IDC_FILTERLABEL,			TDCA_NONE),
+	CTRLITEM(IDC_SHOWFILTERCOMBO,		IDC_FILTERLABEL,			TDCA_NONE),
 	CTRLITEM(IDC_TITLEFILTERTEXT,		IDC_TITLEFILTERLABEL,		TDCA_TASKNAME),
 	CTRLITEM(IDC_STARTFILTERCOMBO,		IDC_STARTFILTERLABEL,		TDCA_STARTDATE),
 	CTRLITEM(IDC_USERSTARTDATE,			0,							TDCA_STARTDATE),
@@ -76,8 +76,8 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	m_cbRiskFilter(TRUE),
 	m_cbRecurrence(TRUE),
 	m_crUIBack(CLR_NONE),
-	m_eStartNextNDays(TRUE, _T("-0123456789")),
-	m_eDueNextNDays(TRUE, _T("-0123456789")),
+	m_eStartNextNDays(_T("-0123456789")),
+	m_eDueNextNDays(_T("-0123456789")),
 	m_bMultiSelection(TRUE),
 	m_nTitleFilter(FT_FILTERONTITLEONLY)
 {
@@ -103,7 +103,7 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TAGFILTERCOMBO, m_cbTagFilter);
 	DDX_Control(pDX, IDC_VERSIONFILTERCOMBO, m_cbVersionFilter);
 	DDX_Control(pDX, IDC_OPTIONFILTERCOMBO, m_cbOptions);
-	DDX_Control(pDX, IDC_FILTERCOMBO, m_cbTaskFilter);
+	DDX_Control(pDX, IDC_SHOWFILTERCOMBO, m_cbShowFilter);
 	DDX_Control(pDX, IDC_STARTFILTERCOMBO, m_cbStartFilter);
 	DDX_Control(pDX, IDC_DUEFILTERCOMBO, m_cbDueFilter);
 	DDX_Control(pDX, IDC_ALLOCTOFILTERCOMBO, m_cbAllocToFilter);
@@ -125,8 +125,7 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	DDX_DateTimeCtrl(pDX, IDC_USERSTARTDATE, m_filter.dtUserStart);
 	DDX_DateTimeCtrl(pDX, IDC_USERDUEDATE, m_filter.dtUserDue);
 	
-	CDialogHelper::DDX_CBData(pDX, m_cbRecurrence, m_filter.nRecurrence, TDIR_NONE);
-
+	m_cbRecurrence.DDX(pDX, m_filter.nRecurrence);
 	m_cbPriorityFilter.DDX(pDX, m_filter.nPriority);
 	m_cbRiskFilter.DDX(pDX, m_filter.nRisk);
 
@@ -149,12 +148,8 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		// filter
-		if (m_filter.IsAdvanced())
-			m_cbTaskFilter.SelectAdvancedFilter(m_sAdvancedFilter);
-		else
-			m_cbTaskFilter.SelectFilter(m_filter.nShow);
-		
+		// filters
+		m_cbShowFilter.SelectFilter(m_filter.nShow, m_sAdvancedFilter);
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
 		m_cbDueFilter.SelectFilter(m_filter.nDueBy);
@@ -198,7 +193,7 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CBN_SELENDOK(IDC_RISKFILTERCOMBO, OnSelchangeFilterAttribute)
 	ON_CBN_SELENDOK(IDC_RECURFILTERCOMBO, OnSelchangeFilterAttribute)
 
-	ON_CBN_SELENDOK(IDC_FILTERCOMBO, OnSelchangeFilter) // separate handler
+	ON_CBN_SELENDOK(IDC_SHOWFILTERCOMBO, OnSelchangeFilter) // separate handler
 	ON_CBN_CLOSEUP(IDC_OPTIONFILTERCOMBO, OnCloseUpOptions)
 
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERDUEDATE, OnChangeDateFilter)
@@ -229,7 +224,7 @@ BOOL CTDLFilterBar::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 
 void CTDLFilterBar::OnDestroy()
 {
-	CTDCCustomAttributeUIHelper::CleanupControls(m_aCustomControls, this);
+	CTDCCustomFilterAttributeUIHelper::CleanupControls(m_aCustomControls, this);
 
 	CDialog::OnDestroy();
 }
@@ -263,30 +258,36 @@ void CTDLFilterBar::ClearCheckboxHistory()
 		m_cbTagFilter.CheckAll(CCBC_UNCHECKED);
 		m_cbVersionFilter.CheckAll(CCBC_UNCHECKED);
 
-		CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(m_aCustomControls, this);
+		CTDCCustomFilterAttributeUIHelper::ClearCheckboxHistory(m_aCustomControls, this);
 	}
+}
+
+void CTDLFilterBar::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	m_cbPriorityFilter.SetNumLevels(nNumLevels);
+	m_cbRiskFilter.SetNumLevels(nNumLevels);
 }
 
 void CTDLFilterBar::OnSelchangeFilter() 
 {
-	CString sAdvanced;
-	FILTER_SHOW nShow = m_cbTaskFilter.GetSelectedFilter(sAdvanced);
+	CString sAdvFilter;
+	FILTER_SHOW nShow = m_cbShowFilter.GetSelectedFilter(sAdvFilter);
 
 	// Refresh the labels if switching from custom to not, or vice versa
-	if (sAdvanced.IsEmpty() != m_sAdvancedFilter.IsEmpty())
+	if (sAdvFilter.IsEmpty() != m_sAdvancedFilter.IsEmpty())
 		Invalidate(FALSE);
 
 	// Only notify the parent if something actually changed
-	if ((nShow != m_filter.nShow) || ((nShow == FS_ADVANCED) && (sAdvanced != m_sAdvancedFilter)))
+	if ((nShow != m_filter.nShow) || ((nShow == FS_ADVANCED) && (sAdvFilter != m_sAdvancedFilter)))
 	{
 		m_filter.nShow = nShow;
-		m_sAdvancedFilter = sAdvanced;
+		m_sAdvancedFilter = sAdvFilter;
 
 		// Update the Options combo with the stored custom flags before notifying the parent
 		if (nShow == FS_ADVANCED)
 		{
 			DWORD dwCustomFlags = 0;
-			m_mapCustomFlags.Lookup(sAdvanced, dwCustomFlags);
+			m_mapCustomFlags.Lookup(sAdvFilter, dwCustomFlags);
 
 			m_cbOptions.SetSelectedOptions(dwCustomFlags);
 		}
@@ -412,7 +413,7 @@ void CTDLFilterBar::OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFil
 
 	UpdateData();
 
-	if (Misc::StateChanged(bWasShowingBuddy, bShowBuddy))
+	if (Misc::StatesDiffer(bWasShowingBuddy, bShowBuddy))
 		ReposControls();
 
 	NotifyParentFilterChange();
@@ -468,33 +469,26 @@ BOOL CTDLFilterBar::PreTranslateMessage(MSG* pMsg)
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
-BOOL CTDLFilterBar::SelectFilter(int nFilter)
+BOOL CTDLFilterBar::SelectFilter(FILTER_SHOW nShow, LPCTSTR szAdvFilter)
 {
-	if (nFilter < 0 || nFilter >= m_cbTaskFilter.GetCount())
+	if (!m_cbShowFilter.SelectFilter(nShow, szAdvFilter))
 		return FALSE;
 
-	m_cbTaskFilter.SetCurSel(nFilter);
-	OnSelchangeFilter();
-
-	return TRUE;
+ 	OnSelchangeFilter();
+ 	return TRUE;
 }
 
-int CTDLFilterBar::GetSelectedFilter() const
+FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sAdvFilter, DWORD& dwCustomFlags) const
 {
-	return m_cbTaskFilter.GetCurSel();
-}
-
-FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
-{
-	sCustom.Empty();
+	sAdvFilter.Empty();
 	dwCustomFlags = 0;
 
 	if (m_filter.IsAdvanced())
 	{
 		filter.Reset(FS_ADVANCED);
 
-		sCustom = m_sAdvancedFilter;
-		m_mapCustomFlags.Lookup(sCustom, dwCustomFlags);
+		sAdvFilter = m_sAdvancedFilter;
+		m_mapCustomFlags.Lookup(sAdvFilter, dwCustomFlags);
 	}
 	else
 	{
@@ -505,57 +499,52 @@ FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD&
 	return filter.nShow;
 }
 
-BOOL CTDLFilterBar::SetAdvancedFilterIncludesDoneTasks(const CString& sCustom, BOOL bIncDone)
+BOOL CTDLFilterBar::SetAdvancedFilterIncludesDoneTasks(const CString& sAdvFilter, BOOL bIncDone)
 {
-	if (!m_cbTaskFilter.HasAdvancedFilter(sCustom))
+	if (!m_cbShowFilter.HasAdvancedFilter(sAdvFilter))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
 	DWORD dwFlags = 0;
-	m_mapCustomFlags.Lookup(sCustom, dwFlags);
+	m_mapCustomFlags.Lookup(sAdvFilter, dwFlags);
 
 	Misc::SetFlag(dwFlags, FO_HIDEDONE, !bIncDone);
 
 	CString sActive;
 
-	if ((GetFilter(sActive) == FS_ADVANCED) && (sCustom == sActive))
+	if ((GetFilter(sActive) == FS_ADVANCED) && (sAdvFilter == sActive))
 		m_cbOptions.SetSelectedOptions(dwFlags);
 
-	m_mapCustomFlags[sCustom] = dwFlags;
+	m_mapCustomFlags[sAdvFilter] = dwFlags;
 
 	return TRUE;
 }
 
-FILTER_SHOW CTDLFilterBar::GetFilter(CString& sCustom) const
+FILTER_SHOW CTDLFilterBar::GetFilter(CString& sAdvFilter) const
 {
-	return m_cbTaskFilter.GetSelectedFilter(sCustom);
+	return m_cbShowFilter.GetSelectedFilter(sAdvFilter);
 }
 
 FILTER_SHOW CTDLFilterBar::GetFilter() const
 {
-	return m_cbTaskFilter.GetSelectedFilter();
+	return m_cbShowFilter.GetSelectedFilter();
 }
 
-void CTDLFilterBar::AddAdvancedFilters(const CStringArray& aFilters)
+void CTDLFilterBar::SetAdvancedFilters(const CStringArray& aFilters)
 {
-	m_cbTaskFilter.AddAdvancedFilters(aFilters); 
+	m_cbShowFilter.SetAdvancedFilters(aFilters); 
 }
 
-const CStringArray& CTDLFilterBar::GetAdvancedFilterNames() const
+const CStringArray& CTDLFilterBar::AdvancedFilterNames() const
 {
-	return m_cbTaskFilter.GetAdvancedFilterNames(); 
-}
-
-void CTDLFilterBar::RemoveAdvancedFilters()
-{
-	m_cbTaskFilter.RemoveAdvancedFilters(); 
+	return m_cbShowFilter.AdvancedFilterNames(); 
 }
 
 void CTDLFilterBar::ShowDefaultFilters(BOOL bShow)
 {
-	m_cbTaskFilter.ShowDefaultFilters(bShow); 
+	m_cbShowFilter.ShowDefaultFilters(bShow); 
 }
 
 void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
@@ -616,7 +605,7 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
 {
 	TDCAUTOLISTDATA tld;
-	tdc.GetAutoListData(tld, nAttribID);
+	tdc.GetAutoListData(nAttribID, tld);
 
 	BOOL bAllAttrib = (nAttribID == TDCA_ALL);
 
@@ -645,7 +634,7 @@ void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBU
 		while (nCtrl--)
 		{
 			const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
-			CTDCCustomAttributeUIHelper::UpdateControlAutoListData(this, ctrl, tdc.GetCustomAttributeDefs());
+			CTDCCustomFilterAttributeUIHelper::UpdateControlAutoListData(this, ctrl, tdc.GetCustomAttributeDefs());
 		}
 
 	}
@@ -657,7 +646,7 @@ void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBU
 		if (nCtrl != -1)
 		{
 			const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
-			CTDCCustomAttributeUIHelper::UpdateControlAutoListData(this, ctrl, tdc.GetCustomAttributeDefs());
+			CTDCCustomFilterAttributeUIHelper::UpdateControlAutoListData(this, ctrl, tdc.GetCustomAttributeDefs());
 		}
 	}
 }
@@ -682,11 +671,11 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRI
 		CTDCCustomAttribDefinitionArray aNewAttribDefs;
 		tdc.GetCustomAttributeDefs(aNewAttribDefs);
 
-		if (CTDCCustomAttributeUIHelper::NeedRebuildFilterControls(m_aCustomAttribDefs,
+		if (CTDCCustomFilterAttributeUIHelper::NeedRebuildControls(m_aCustomAttribDefs,
 																   aNewAttribDefs,
 																   m_aCustomControls))
 		{
-			CTDCCustomAttributeUIHelper::RebuildFilterControls(this,
+			CTDCCustomFilterAttributeUIHelper::RebuildControls(this,
 															   aNewAttribDefs,
 															   m_filter.mapCustomAttrib,
 															   tdc.GetTaskIconImageList(),
@@ -696,7 +685,7 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRI
 		}
 
 		// Update data
-		CTDCCustomAttributeUIHelper::UpdateControls(this, m_aCustomControls, aNewAttribDefs, m_filter.mapCustomAttrib);
+		CTDCCustomFilterAttributeUIHelper::UpdateControls(this, m_aCustomControls, aNewAttribDefs, m_filter.mapCustomAttrib);
 
 		m_aCustomAttribDefs.Copy(aNewAttribDefs);
 	}
@@ -706,7 +695,7 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRI
 
 		if (nCtrl != -1)
 		{
-			CTDCCustomAttributeUIHelper::UpdateControl(this, 
+			CTDCCustomFilterAttributeUIHelper::UpdateControl(this, 
 														m_aCustomControls[nCtrl],
 														tdc.GetCustomAttributeDefs(), 
 														m_filter.mapCustomAttrib);
@@ -787,6 +776,12 @@ BOOL CTDLFilterBar::WantShowFilter(TDC_ATTRIBUTE nType) const
 	return (!m_filter.IsAdvanced() && m_mapVisibility.Has(nType));
 }
 
+void CTDLFilterBar::SetISODateFormat(BOOL bIso)
+{
+	m_dtcUserDue.SetISOFormat(bIso);
+	m_dtcUserStart.SetISOFormat(bIso);
+}
+
 void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)
 {
 	if (bEnable != m_bMultiSelection)
@@ -802,7 +797,7 @@ void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)
 
 		RebuildOptionsCombo();
 
-		CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(m_aCustomControls, this, bEnable);
+		CTDCCustomFilterAttributeUIHelper::EnableMultiSelection(m_aCustomControls, this, bEnable);
 		
 		UpdateData(); // Pick up any changes
 	}
@@ -844,7 +839,7 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 		
 		// display this control only if the corresponding column
 		// is also showing
-		BOOL bWantCtrl = WantShowFilter(fc.nAttrib);
+		BOOL bWantCtrl = WantShowFilter(fc.nAttributeID);
 		
 		// special case: User Dates
 		switch (fc.nCtrlID)
@@ -928,7 +923,7 @@ int CTDLFilterBar::ReposControls(int nWidth, BOOL bCalcOnly)
 				bEnable &= (m_filter.nDueBy == FD_USER);
 				break;
 
-			case IDC_FILTERCOMBO: 
+			case IDC_SHOWFILTERCOMBO: 
 			case IDC_OPTIONFILTERCOMBO:
 				// always enabled
 				break;
@@ -1017,6 +1012,10 @@ BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 
 	switch (nCtrlID)
 	{
+	case IDC_SHOWFILTERCOMBO:
+		Misc::Split(CDialogHelper::GetSelectedItem(m_cbShowFilter), sTooltip, '\t');
+		break;
+
 	case IDC_CATEGORYFILTERCOMBO:
 		sTooltip = m_cbCategoryFilter.GetTooltip();
 		break;
@@ -1046,10 +1045,10 @@ BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 		break;
 
 	default:
-		if (!CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID))
+		if (!CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID))
 			return FALSE;
 
-		sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(this, nCtrlID);
+		sTooltip = CTDCCustomFilterAttributeUIHelper::GetControlTooltip(this, nCtrlID);
 		break;
 	}
 
@@ -1197,7 +1196,7 @@ HBRUSH CTDLFilterBar::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 void CTDLFilterBar::OnCustomAttributeSelchangeFilter(UINT nCtrlID)
 {
-	ASSERT(CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID));
+	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID));
 
 	int nCtrl = m_aCustomControls.Find(nCtrlID);
 
@@ -1235,13 +1234,13 @@ void CTDLFilterBar::OnCustomAttributeChangeDateFilter(UINT nCtrlID, NMHDR* /*pNM
 
 void CTDLFilterBar::OnCustomAttributeChangeFilter(CUSTOMATTRIBCTRLITEM& ctrl)
 {
-	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
-	ASSERT(CTDCCustomAttributeUIHelper::IsCustomFilterControl(ctrl.nCtrlID));
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttributeID));
+	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomControl(ctrl.nCtrlID));
 
 	TDCCADATA data, dataPrev;
 	m_filter.mapCustomAttrib.Lookup(ctrl.sAttribID, dataPrev);
 
-	TDCCAUI_UPDATERESULT nRes = CTDCCustomAttributeUIHelper::GetControlData(this, ctrl, m_aCustomAttribDefs, dataPrev, data);
+	TDCCAUI_UPDATERESULT nRes = CTDCCustomFilterAttributeUIHelper::GetControlData(this, ctrl, m_aCustomAttribDefs, dataPrev, data);
 
 	if (data.IsEmpty())
 		m_filter.mapCustomAttrib.RemoveKey(ctrl.sAttribID);
@@ -1257,15 +1256,15 @@ void CTDLFilterBar::OnCustomAttributeChangeFilter(CUSTOMATTRIBCTRLITEM& ctrl)
 
 void CTDLFilterBar::OnCustomAttributeSelcancelFilter(UINT nCtrlID)
 {
-	ASSERT(CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID));
+	ASSERT(CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID));
 
 	CUSTOMATTRIBCTRLITEM ctrl;
 
-	if (CTDCCustomAttributeUIHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
+	if (CTDCCustomFilterAttributeUIHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
 	{
 		// Restore previous state
-		CTDCCustomAttributeUIHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, m_filter.mapCustomAttrib);
-		CTDCCustomAttributeUIHelper::ClearFilterCheckboxHistory(ctrl, this);
+		CTDCCustomFilterAttributeUIHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, m_filter.mapCustomAttrib);
+		CTDCCustomFilterAttributeUIHelper::ClearCheckboxHistory(ctrl, this);
 	}
 	else
 	{

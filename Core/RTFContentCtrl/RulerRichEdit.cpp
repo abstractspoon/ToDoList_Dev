@@ -33,7 +33,6 @@ File :			RuleRichEdit.cpp
 #include "..\shared\misc.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\filemisc.h"
-#include "..\shared\subclass.h"
 #include "..\shared\HookMgr.h"
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\clipboard.h"
@@ -396,21 +395,17 @@ BOOL CRulerRichEdit::ProcessHtmlForPasting(CString& sHtml, CString& sSourceUrl)
 {
 	if (!sHtml.IsEmpty())
 	{
-#ifdef _UNICODE
 		// convert to unicode for unpackaging because
 		// CF_HTML is saved to the clipboard as UTF8
 		Misc::EncodeAsUnicode(sHtml, CP_UTF8);
-#endif
 		Misc::Trim(sHtml);
 
 		CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl);
 		
 		if (!sHtml.IsEmpty() && !WebMisc::IsAboutBlank(sSourceUrl))
 		{
-#ifdef _UNICODE
 			// convert back to UTF8 for translation
 			Misc::EncodeAsMultiByte(sHtml, CP_UTF8);
-#endif
 			return TRUE;
 		}
 	}
@@ -612,10 +607,9 @@ BOOL CRulerRichEdit::CopyRtfToClipboardAsHtml(const CString& sRTF, BOOL bAppend)
 	{
 		CClipboard::PackageHTMLFragment(sHtml);
 		
-#ifdef _UNICODE
 		// must be multibyte format for clipboard
 		Misc::EncodeAsMultiByte(sHtml, CP_UTF8);
-#endif
+
 		if (bAppend)
 		{
 			CClipboardBackup cb(*this);

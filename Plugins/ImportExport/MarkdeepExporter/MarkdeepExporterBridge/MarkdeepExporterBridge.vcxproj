@@ -120,7 +120,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\markdeep.ico" />
+    <Image Include="..\MarkdeepExporterCore\Resources\markdeep.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

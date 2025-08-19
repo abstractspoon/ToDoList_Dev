@@ -110,7 +110,7 @@
 			this.Controls.Add(this.divider);
 			this.Controls.Add(this.cancelBtn);
 			this.Controls.Add(this.okBtn);
-			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.Icon = Properties.Resources.EvidenceBoard;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "EvidenceBoardEditLinkDlg";

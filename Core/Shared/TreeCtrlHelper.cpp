@@ -200,7 +200,6 @@ int CTreeCtrlHelper::GetItemTop(HTREEITEM hti) const
 	if (m_tree.GetItemRect(hti, rItem, FALSE))
 		return rItem.top;
 
-	ASSERT(0);
 	return 0;
 }
 

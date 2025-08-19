@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 
 CKanbanGroupByComboBox::CKanbanGroupByComboBox() 
 	: 
-	CKanbanAttributeComboBox(),
+	CKanbanAttributeComboBox(TRUE), // include <none>
 	m_nExcludeAttribID(TDCA_NONE)
 {
 }
@@ -32,44 +32,43 @@ CKanbanGroupByComboBox::~CKanbanGroupByComboBox()
 
 
 BEGIN_MESSAGE_MAP(CKanbanGroupByComboBox, CKanbanAttributeComboBox)
-	//{{AFX_MSG_MAP(CKanbanGroupByComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanGroupByComboBox message handlers
 
-void CKanbanGroupByComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttrib)
+void CKanbanGroupByComboBox::ExcludeAttribute(TDC_ATTRIBUTE nAttribID)
 {
-	ASSERT(nAttrib != TDCA_FIXEDCOLUMNS);
-	ASSERT(!KBUtils::IsCustomAttribute(nAttrib) || m_aCustAttribDefs.GetSize());
+	ASSERT(nAttribID != TDCA_FIXEDCOLUMNS);
+	ASSERT(!KBUtils::IsCustomAttribute(nAttribID) || m_aCustAttribDefs.GetSize());
 
-	if (nAttrib == m_nExcludeAttribID)
+	if (nAttribID == m_nExcludeAttribID)
 		return;
 
-	m_nExcludeAttribID = nAttrib;
+	m_nExcludeAttribID = nAttribID;
 	BuildCombo();
 }
 
 void CKanbanGroupByComboBox::BuildCombo()
 {
 	// Override base class's selection restoration because
-	// our default is 'none'
+	// of our extra item
 	CString sSelCustID;
 	TDC_ATTRIBUTE nSelAttrib = GetSelectedAttribute(sSelCustID);
 
 	CKanbanAttributeComboBox::BuildCombo();
 
 	// Remove excluded attribute
-	int nExclude = CDialogHelper::FindItemByData(*this, m_nExcludeAttribID);
-	
-	if (nExclude != CB_ERR)
-		DeleteString(nExclude);
+	if (m_nExcludeAttribID != TDCA_NONE)
+	{
+		int nExclude = CDialogHelper::FindItemByDataT(*this, m_nExcludeAttribID);
+
+		if (nExclude != CB_ERR)
+			DeleteString(nExclude);
+	}
 
 	// Add extra items
-	CDialogHelper::AddString(*this, CEnString(IDS_NONE), TDCA_NONE);
-	CDialogHelper::AddString(*this, CEnString(IDS_DISPLAY_RECURRENCE), TDCA_RECURRENCE);
+	CDialogHelper::AddStringT(*this, CEnString(IDS_DISPLAY_RECURRENCE), TDCA_RECURRENCE);
 
 	// Restore selection
 	if (!SetSelectedAttribute(nSelAttrib, sSelCustID))

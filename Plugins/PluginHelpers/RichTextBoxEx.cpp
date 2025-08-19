@@ -22,6 +22,10 @@ using namespace IIControls;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+const int TabWidth = 48;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 CreateParams^ RichTextBoxEx::CreateParams::get()
 {
 	auto cp = RichTextBox::CreateParams::get();
@@ -220,4 +224,53 @@ LabelTipInfo^ RichTextBoxEx::ToolHitTest(Drawing::Point ptScreen)
 	}
 	
 	return nullptr;
+}
+
+void RichTextBoxEx::Indent()
+{
+	// Match behaviour of core app -> insert leading tab
+	// keeping what's selected still selected
+	if (String::IsNullOrEmpty(SelectedText) || (SelectedText->IndexOf('\n') == -1))
+	{
+		int selStart = SelectionStart;
+		int selLen = SelectionLength;
+
+		// Move selection to start of text
+		SelectionLength = 0;
+
+		// Insert a tab
+		SelectedText = "\t";
+
+		// Restore selection
+		SelectionStart = (selStart + 1);
+		SelectionLength = selLen;
+	}
+	else  // Paragraph indent
+	{
+		SelectionIndent += TabWidth;
+	}
+}
+
+void RichTextBoxEx::Outdent()
+{
+	if (String::IsNullOrEmpty(SelectedText) || (SelectedText->IndexOf('\n') == -1))
+	{
+		int selStart = SelectionStart;
+		int selLen = SelectionLength;
+
+		// Move selection back a character
+		SelectionStart--;
+		SelectionLength = 1;
+
+		// Remove a tab
+		if (SelectedText == "\t")
+			SelectedText = "";
+
+		// Restore selection
+		SelectionLength = selLen;
+	}
+	else  // Paragraph indent
+	{
+		SelectionIndent = Math::Max(0, (SelectionIndent - TabWidth));
+	}
 }

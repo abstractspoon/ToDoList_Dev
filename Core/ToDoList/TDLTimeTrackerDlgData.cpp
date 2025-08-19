@@ -17,7 +17,7 @@ TRACKITEM::TRACKITEM() : dwTaskID(0), bParent(FALSE), nLevel(0)
 
 BOOL TRACKITEM::operator==(const TRACKITEM& ti) const
 {
-	return (sTaskTitle == ti.sTaskTitle) && 
+	return (sTask == ti.sTask) && 
 			(dwTaskID == ti.dwTaskID) &&
 			(bParent == ti.bParent) &&
 			(nLevel == ti.nLevel) &&
@@ -105,7 +105,7 @@ int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLev
 
 		TRACKITEM ti;
 
-		ti.sTaskTitle = tasks.GetTaskTitle(hTask);
+		ti.sTask = tasks.GetTaskTitle(hTask);
 		ti.dwTaskID = dwTaskID;
 		ti.bParent = tasks.IsTaskParent(hTask);
 		ti.nLevel = nLevel;

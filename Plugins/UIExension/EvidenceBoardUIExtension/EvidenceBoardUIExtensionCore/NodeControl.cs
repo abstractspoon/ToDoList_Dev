@@ -42,10 +42,12 @@ namespace EvidenceBoardUIExtension
 	{
 		public int NodeSpacing = 5;
 
-		int m_PinRadius = 2;
 		const int GraphBorder = 50;
+		const int ExpansionBtnBorder = 2;
 
 		readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
+
+		int m_PinRadius = 2;
 
 		public int PinRadius
 		{
@@ -127,8 +129,8 @@ namespace EvidenceBoardUIExtension
 
 			m_InitialRadius = DefaultInitialRadius;
 			m_RadialIncrementOrSpacing = DefaultInitialRadius;
-			m_NodeSize = DefaulttNodeSize;
-			m_TextFont = new Font("Tahoma", 8.25f);
+			m_NodeSize = DefaultNodeSize;
+			m_TextFont = new Font("Tahoma", 8f);
 			m_BaseFontHeight = m_TextFont.Height;
 			m_SelectedNodes = new List<BaseNode>();
 			m_DragScroll = new DragScroller(this) { DragScrollMargin = (int)ScaleByDpi(20) };
@@ -500,10 +502,10 @@ namespace EvidenceBoardUIExtension
 
 		public float DefaultInitialRadius
 		{
-			get { return ((2 * DefaulttNodeSize.Width) + NodeSpacing); }
+			get { return ((2 * DefaultNodeSize.Width) + NodeSpacing); }
 		}
 
-		public Size DefaulttNodeSize
+		public Size DefaultNodeSize
 		{
 			get { return new Size(50, 25); }
 		}
@@ -830,7 +832,7 @@ namespace EvidenceBoardUIExtension
 
 		protected Rectangle CalcExpansionButtonRect(Rectangle nodeRect)
 		{
-			int border = 2;
+			int border = ExpansionBtnBorder;
 			int btnSize = TreeViewUtils.ExpansionButtonSize;
 
 			if (SavingToImage)
@@ -1295,7 +1297,10 @@ namespace EvidenceBoardUIExtension
 		{
 			foreach (var node in HitTestableNodes)
 			{
-				if (CalcExpansionButtonRect(GetNodeClientRect(node)).Contains(ptClient))
+				var btnRect = CalcExpansionButtonRect(GetNodeClientRect(node));
+				btnRect.Inflate(ExpansionBtnBorder, ExpansionBtnBorder);
+
+				if (btnRect.Contains(ptClient))
 					return node;
 			}
 
@@ -1966,18 +1971,30 @@ namespace EvidenceBoardUIExtension
 
 		private void ValidateSelectedNodeVisibility()
 		{
-			int numItems = m_SelectedNodes.Count, item = numItems;
+			int numSel = m_SelectedNodes.Count;
 
-			while (item-- > 0)
+			if (numSel > 0)
 			{
-				if (!m_SelectedNodes[item].AllParentsExpanded)
-					m_SelectedNodes.RemoveAt(item);
-			}
+				// cache the first selected item's parent
+				// in case every selected node ends up removed
+				var prevSel = m_SelectedNodes[0].FirstVisibleParent;
 
-			if (m_SelectedNodes.Count < numItems)
-			{
-				NotifySelectionChange();
-				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+				// Remove any selected item whose parents are not all expanded
+				int item = numSel;
+
+				while (item-- > 0)
+				{
+					if (!m_SelectedNodes[item].AllParentsExpanded)
+						m_SelectedNodes.RemoveAt(item);
+				}
+
+				if (m_SelectedNodes.Count < numSel)
+				{
+					if (m_SelectedNodes.Count == 0)
+						m_SelectedNodes.Add(prevSel);
+
+					NotifySelectionChange();
+				}
 			}
 		}
 

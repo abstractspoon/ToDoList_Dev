@@ -86,13 +86,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\ImageHelper\ImageHelper.csproj">
+      <Project>{819992e3-fc33-4fcd-8aa5-5bc8329b2c20}</Project>
+      <Name>ImageHelper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj">
       <Project>{5873de0f-6853-4c8e-91a4-7a6861069a9a}</Project>
       <Name>MSHTMLEditorControl</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\ImageHelper\ImageHelper.csproj">
-      <Project>{819992e3-fc33-4fcd-8aa5-5bc8329b2c20}</Project>
-      <Name>ImageHelper</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>

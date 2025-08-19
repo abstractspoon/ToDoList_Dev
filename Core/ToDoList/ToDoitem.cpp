@@ -6,6 +6,7 @@
 #include "ToDoitem.h"
 #include "tdcmapping.h"
 #include "tdcstatic.h"
+#include "tdcrecurrencehelper.h"
 
 #include "..\shared\DateHelper.h"
 #include "..\shared\misc.h"
@@ -23,15 +24,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-COleDateTimeSpan TODOITEM::dtsRecentModPeriod = (1.0 / 24); // one hour
-
-CString TODOITEM::sModifierName;
-
-const COleDateTime TODOITEM::dtUseCreationDateOnly    =	CDateHelper::GetDate(-1, COleDateTime::null);
-const COleDateTime TODOITEM::dtUseCreationDateAndTime =	CDateHelper::GetDate(-2, COleDateTime::null);
-
-//////////////////////////////////////////////////////////////////////
-
 const CString EMPTY_STR(_T(""));
 
 //////////////////////////////////////////////////////////////////////
@@ -43,6 +35,11 @@ TDCTIMEPERIOD::TDCTIMEPERIOD(double dTime, TDC_UNITS nTimeUnits) : dAmount(dTime
 TDCTIMEPERIOD::TDCTIMEPERIOD(double dTime, TH_UNITS nTimeUnits) : dAmount(dTime), nUnits(TDCU_HOURS)
 {
 	SetTHUnits(nTimeUnits, FALSE);
+}
+
+TDCTIMEPERIOD::TDCTIMEPERIOD(LPCTSTR szPeriod) : dAmount(0), nUnits(TDCU_HOURS)
+{
+	VERIFY(Parse(szPeriod));
 }
 
 BOOL TDCTIMEPERIOD::operator==(const TDCTIMEPERIOD& other) const
@@ -131,7 +128,7 @@ BOOL TDCTIMEPERIOD::AddTime(const TDCTIMEPERIOD& time)
 
 BOOL TDCTIMEPERIOD::SetTime(double dTime, TDC_UNITS nTimeUnits)
 {
-	if (!IsValidUnits(nTimeUnits) || (dTime < 0.0))
+	if (!IsValidUnits(nTimeUnits))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -145,7 +142,21 @@ BOOL TDCTIMEPERIOD::SetTime(double dTime, TDC_UNITS nTimeUnits)
 
 CString TDCTIMEPERIOD::Format(int nDecPlaces) const
 {
-	return CTimeHelper().FormatTime(dAmount, GetTHUnits(), nDecPlaces);
+	return CTimeHelper::FormatTime(dAmount, GetTHUnits(), nDecPlaces);
+}
+
+BOOL TDCTIMEPERIOD::Parse(LPCTSTR szPeriod)
+{
+	double dValue = 0.0;
+	TH_UNITS nTimeUnits = THU_NULL;
+
+	if (!CTimeHelper::DecodeOffset(szPeriod, dValue, nTimeUnits, FALSE))
+		return FALSE;
+
+	dAmount = dValue;
+	nUnits = TDC::MapTHUnitsToUnits(nTimeUnits);
+
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -495,14 +506,14 @@ int CTDCDependencyArray::FindDependency(const TDCDEPENDENCY& other) const
 	return -1;
 }
 
-CString CTDCDependencyArray::Format(LPCTSTR szSep, const CString& sFolder) const
+CString CTDCDependencyArray::Format(TCHAR cSep, const CString& sFolder) const
 {
 	CStringArray aDepends;
 
 	if (!Format(aDepends, sFolder))
 		return EMPTY_STR;
 		
-	return Misc::FormatArray(aDepends, szSep);
+	return Misc::FormatArray(aDepends, cSep);
 }
 
 int CTDCDependencyArray::Format(CStringArray& aDepends, const CString& sFolder) const
@@ -514,6 +525,24 @@ int CTDCDependencyArray::Format(CStringArray& aDepends, const CString& sFolder) 
 		aDepends[nDepend] = GetAt(nDepend).Format(sFolder);
 
 	return nNumDepends;
+}
+
+int CTDCDependencyArray::Parse(LPCTSTR szDepends, LPCTSTR szSep)
+{
+	RemoveAll();
+
+	CStringArray aDepends;
+	int nNumDepends = Misc::Split(szDepends, aDepends, szSep);
+
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+	{
+		TDCDEPENDENCY depend;
+
+		if (depend.Parse(aDepends[nDepend]))
+			Add(depend);
+	}
+
+	return GetSize();
 }
 
 BOOL CTDCDependencyArray::MatchAll(const CTDCDependencyArray& other, BOOL bIncludeAttributes) const
@@ -754,7 +783,17 @@ CString TDCTASKLINK::Format(DWORD dwTaskID, BOOL bURL, const CString& sFile)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
+COleDateTimeSpan TODOITEM::dtsRecentModPeriod = (1.0 / 24); // one hour
+
+CString TODOITEM::sModifierName;
+
+const COleDateTime TODOITEM::dtUseCreationDateOnly = CDateHelper::GetDate(-1, COleDateTime::null);
+const COleDateTime TODOITEM::dtUseCreationDateAndTime = CDateHelper::GetDate(-2, COleDateTime::null);
+
+// ---------------------------------------------------------
+
+TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) 
+	:
 	sTitle(szTitle), 
 	sComments(szComments),
 	color(0), 
@@ -1103,172 +1142,23 @@ BOOL TODOITEM::RecurrenceMatches(const TODOITEM& tdi, BOOL bIncludeRemainingOccu
 	return trRecurrence.Matches(tdi.trRecurrence, bIncludeRemainingOccurrences);
 }
 
-BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
+BOOL TODOITEM::GetNextOccurrence(COleDateTime& dtNext, BOOL& bDue)
 {
-	ASSERT(IsDone());
-
-	if (!trRecurrence.CanRecur() || !IsDone())
+	if (!CTDCRecurrenceHelper(*this).CalcNextOccurrence(dtNext, bDue))
 		return FALSE;
 
-	BOOL bHasDue = HasDue();
-	BOOL bHasStart = HasStart();
-
-	switch (trRecurrence.nRecalcFrom)
-	{
-	case TDIRO_STARTDATE:
-		if (bHasStart)
-		{
-			bDue = FALSE;
-			return trRecurrence.GetNextOccurence(dateStart, dtNext);
-		}
-		// fall thru
-
-	case TDIRO_DUEDATE:
-		if (bHasDue)
-		{
-			bDue = TRUE;
-			return trRecurrence.GetNextOccurence(dateDue, dtNext);
-		}
-		// fall thru
-
-	case TDIRO_DONEDATE:
-	default:
-		bDue = (bHasDue || !bHasStart);
-		break;
-	}
-
-	COleDateTime dtStartDue = (bDue ? dateDue : dateStart);
-	COleDateTime dtFrom = dateDone;
-
-	if (CDateHelper::IsSameDay(dateDone, dtStartDue) || (dateDone < dtStartDue))
-	{
-// 		// If the completion date comes on/before before the 
-// 		// start/due date it's possible that the next start/due 
-// 		// date can be on/before the previous start/due date,
-// 		// which seems an unlikely expectation for the user.
-// 		// So we check it first, and if it is on/before we use
-// 		// the start/due date as our reference date instead.
-// 		COleDateTime dtTemp;
-// 
-// 		if (!trRecurrence.GetNextOccurence(dtFrom, dtTemp))
-// 			return FALSE;
-// 
-// 		if (CDateHelper::IsSameDay(dtTemp, dtStartDue) || (dtTemp < dtStartDue))
-// 		{
-// 			dtFrom = dtStartDue;
-// 		}
-	}
-	else 
-	{
-		// completed date comes after start/due date
-		ASSERT(dateDone > dtStartDue);
-
-		// Special case:
-		//
-		// 1. Weekly occurrence
-		// 2. > 1 week interval
-		// 3. Completion date not in the same week as due date
-		DWORD dwNumWeeks, dwNotUsed;
-		TDC_REGULARITY nReg = trRecurrence.GetRegularity(dwNumWeeks, dwNotUsed);
-
-		if ((nReg == TDIR_WEEK_SPECIFIC_DOWS_NWEEKS) && 
-			(dwNumWeeks > 1) &&
-			!CDateHelper::IsSameWeek(dtStartDue, dateDone))
-		{
-			// Move the date to the end of the week to prevent 
-			// the base class implementation from selecting the
-			// next available day in the current week
-			dtFrom = CDateHelper::GetEndOfWeek(dateDone);
-		}
-	}
-	ASSERT(CDateHelper::IsDateSet(dtFrom));
-
-	if (!trRecurrence.GetNextOccurence(dtFrom, dtNext))
-		return FALSE;
-
-	// Restore the previous due/start time
-	if (bHasDue || bHasStart)
-		dtNext = CDateHelper::MakeDate(dtNext, dtStartDue);
-	else
-		dtNext = CDateHelper::GetDateOnly(dtNext); // End of day
-
+	VERIFY(trRecurrence.DecrementRemainingOccurrenceCount());
 	return TRUE;
 }
 
-int TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
+BOOL TODOITEM::CalcNextOccurrence(COleDateTimeRange& dtOccur) const
 {
-	ASSERT(!IsDone());
+	return CTDCRecurrenceHelper(*this).CalcNextOccurrence(dtOccur);
+}
 
-	if (!CanRecur())
-		return FALSE;
-
-	if (!HasStart() || !HasDue() || (dateDue < dateStart))
-		return 0;
-
-	// Expand range by task duration to ensure full coverage
-	COleDateTimeRange dtExtended(dtRange);
-	dtExtended.Expand((int)(dateDue.m_dt - dateStart.m_dt), DHU_DAYS);
-
-	BOOL bDueDate = (trRecurrence.nRecalcFrom != TDIRO_STARTDATE);
-	COleDateTime dtCur = (bDueDate ? dateDue : dateStart);
-
-	CArray<double, double&> aDates;
-	int nNumOccur = trRecurrence.CalcNextOccurences(dtCur, dtExtended, aDates);
-
-	if (!nNumOccur)
-		return 0;
-
-	CDateHelper dh;
-
-	aOccur.SetSize(nNumOccur);
-
-	for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
-	{
-		const double dOccur = aDates[nOccur];
-
-		// Ideally we stick to the same units configured in the recurrence setup
-		// so that, for instance, months having different numbers of days are
-		// offset correctly
-		DH_UNITS nUnits = TDC::MapUnitsToDHUnits(trRecurrence.GetRegularityUnits());
-		double dOffset = dh.CalcDuration(dtCur, dOccur, nUnits, FALSE); // not inclusive
-
-		int nOffset = 0;
-
-		if (dOffset == (int)dOffset)
-		{
-			nOffset = (int)dOffset;
-		}
-		else
-		{
-			nOffset = dh.CalcDaysFromTo(dtCur, dOccur, FALSE); // not inclusive
-			nUnits = DHU_DAYS;
-		}
-
-		COleDateTimeRange& dtOccur = aOccur[nOccur];
-
-		if (bDueDate)
-		{
-			COleDateTime dtNewStart(dateStart);
-			VERIFY(dh.OffsetDate(dtNewStart, nOffset, nUnits));
-
-			ASSERT((dtNewStart.m_dt <= dOccur) ||
-				(CDateHelper::IsSameDay(dOccur, dtNewStart) && !CDateHelper::DateHasTime(dOccur)));
-
-			dtOccur.Set(dtNewStart, dOccur);
-		}
-		else // start date
-		{
-			COleDateTime dtNewDue(dateDue);
-			VERIFY(dh.OffsetDate(dtNewDue, nOffset, nUnits, TRUE)); // Preserve end of month
-
-			ASSERT((dOccur <= dtNewDue.m_dt) ||
-				(CDateHelper::IsSameDay(dOccur, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
-
-			dtOccur.Set(dOccur, dtNewDue);
-		}
-	}
-
-	return nNumOccur;
+int TODOITEM::CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const
+{
+	return CTDCRecurrenceHelper(*this).CalcNextOccurrences(dtRange, aOccur);
 }
 
 BOOL TODOITEM::IsRecentlyModified() const
@@ -1298,16 +1188,19 @@ COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
 	switch (nDate)
 	{
 	case TDCD_CREATE:		return dateCreated;
+	case TDCD_LASTMOD:		return dateLastMod;
+
 	case TDCD_START:		return dateStart;
 	case TDCD_STARTDATE:	return CDateHelper::GetDateOnly(dateStart);
 	case TDCD_STARTTIME:	return CDateHelper::GetTimeOnly(dateStart);
+
 	case TDCD_DUE:			return dateDue;
 	case TDCD_DUEDATE:		return CDateHelper::GetDateOnly(dateDue);
 	case TDCD_DUETIME:		return CDateHelper::GetTimeOnly(dateDue);
+
 	case TDCD_DONE:			return dateDone;
 	case TDCD_DONEDATE:		return CDateHelper::GetDateOnly(dateDone);
 	case TDCD_DONETIME:		return CDateHelper::GetTimeOnly(dateDone);
-	case TDCD_LASTMOD:		return dateLastMod;
 	}
 	
 	// else
@@ -1346,7 +1239,7 @@ BOOL TODOITEM::HasCustomAttributeValue(const CString& sAttribID) const
 
 COleDateTimeSpan TODOITEM::GetRemainingTime(const COleDateTime& date)
 {
-	COleDateTimeSpan dtsRemaining = date - COleDateTime::GetCurrentTime();
+	COleDateTimeSpan dtsRemaining = (date - COleDateTime::GetCurrentTime());
 	
 	if (!HasTime(date))
 		dtsRemaining += 1; // midnight on the day
@@ -1463,6 +1356,10 @@ BOOL TODOITEM::GetAttributeValue(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
 	case TDCA_DEPENDENCY:
 	case TDCA_RECURRENCE:
 		ASSERT(0);
+		break;
+
+	default:
+		ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
 		break;
 	}
 

@@ -292,7 +292,7 @@ void TDCCADATA::Set(int nValue)
 
 void TDCCADATA::Set(const COleDateTime& dtValue) 
 { 
-	sData.Format(_T("%lf"), dtValue); 
+	Set(dtValue.m_dt); 
 }
 
 void TDCCADATA::Set(const CString& sValue) 

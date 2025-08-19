@@ -29,11 +29,9 @@ public:
 protected:
 	MySpell* m_pMySpell;
 
-#ifdef _UNICODE
 protected:
 	WCHAR* MultiByteToWide(const char* szFrom, int& nLength, UINT nCodepage = CP_ACP);
 	char* WideToMultiByte(const WCHAR* szFrom, int& nLength, UINT nCodePage = CP_ACP);
-#endif
 };
 
 #endif // !defined(AFX_SPELLCHECKER_H__74596014_29E0_4289_9BC7_28A7996FA37B__INCLUDED_)

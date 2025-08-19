@@ -64,13 +64,13 @@ namespace HTMLContentControl
 			var dialog = new OpenFileDialog
 			{
 				InitialDirectory = LastBrowsedImageFolder,
-				Title = m_Trans.Translate("Select Watermark Image"),
+				Title = m_Trans.Translate("Select Watermark Image", Translator.Type.Dialog),
 
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
 
-				Filter = ImageUtils.ImageFilter,
+				Filter = m_Trans.Translate(ImageUtils.ImageFilter, Translator.Type.FileFilter),
 				FilterIndex = 0,
 				RestoreDirectory = true,
 

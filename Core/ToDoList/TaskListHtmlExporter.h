@@ -44,8 +44,7 @@ public:
 
 protected:
 	// Pseudo-const variables
-	CString CHARSET, INDENT;
-	CString DEFAULTFONT, HTMLNOTES, TASKLISTLINK;
+	CString INDENT, DEFAULTFONT, HTMLNOTES, TASKLISTLINK;
 	BOOL STRIKETHRUDONE;
 	int EXPORTSTYLE;
 	int COMMENTSPERCENTWIDTH;
@@ -57,20 +56,21 @@ protected:
 	virtual CString ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth) const;
 	virtual CString ExportSubtasks(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth) const;
 
-	virtual CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue) const;
-	virtual CString FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const;
+	virtual CString FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel, const CString& sValue) const;
+	virtual CString FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const;
 
 	virtual bool InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 	virtual CString GetSpaceForNotes() const { return HTMLNOTES; }
 
-	virtual CString FormatTitle(const ITASKLISTBASE* pTasks) const;
-	virtual CString FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel) const;
+	virtual CString FormatTitle(const IMultiTaskList* pTasks) const;
+	virtual CString FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const;
+	virtual CString FormatHeaderItem(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const;
 	virtual CString FormatHeader(const ITASKLISTBASE* pTasks) const;
 
 	virtual BOOL WantExportCustomAttributeID() const { return FALSE; }
 
 	// non-virtual internal helper
-	CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue, BOOL bEncodeVal) const;
+	CString FormatAttribute(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel, const CString& sValue, BOOL bEncodeVal) const;
 
 	BOOL IsTableStyle() const		{ return (EXPORTSTYLE == TDCEF_HTMLTABLE); }
 	BOOL IsParagraphStyle() const	{ return (EXPORTSTYLE == TDCEF_HTMLPARA); }

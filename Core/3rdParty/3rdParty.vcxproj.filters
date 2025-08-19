@@ -121,6 +121,12 @@
     <ClCompile Include="RangeSlider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SimpleSplitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JalaliCalendar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base64Coder.h">
@@ -292,6 +298,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RangeSlider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleSplitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="COMUTIL.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JalaliCalendar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -634,7 +634,7 @@ COLORREF TASKCALITEM::GetFillColor(BOOL bColorIsBkgnd) const
 	return GetSysColor(COLOR_WINDOW);
 }
 
-COLORREF TASKCALITEM::GetBorderColor(BOOL bColorIsBkgnd) const
+COLORREF TASKCALITEM::GetBorderColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
@@ -642,7 +642,12 @@ COLORREF TASKCALITEM::GetBorderColor(BOOL bColorIsBkgnd) const
 			return GraphicsMisc::Darker(color, 0.4);
 
 		if (!Misc::IsHighContrastActive())
+		{
+			if (bSelected)
+				return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
+
 			return color;
+		}
 	}
 	
 	// else
@@ -689,6 +694,37 @@ TASKCALEXTENSIONITEM::TASKCALEXTENSIONITEM(const TASKCALITEM& tciOrg, DWORD dwEx
 	dwTaskID = dwExtID;
 }
 
+COLORREF TASKCALEXTENSIONITEM::GetFillColor(BOOL bTextIsBack) const
+{
+	COLORREF crFill = TASKCALITEM::GetFillColor(bTextIsBack);
+
+	if (HasColor() && bTextIsBack)
+	{
+		// Make it lighter to distinguish with 'real' task
+		crFill = GraphicsMisc::Lighter(crFill, 0.5);
+	}
+
+	return crFill;
+}
+
+COLORREF TASKCALEXTENSIONITEM::GetBorderColor(BOOL bSelected, BOOL bTextIsBack) const
+{
+	return TASKCALITEM::GetBorderColor(bSelected, bTextIsBack);
+}
+
+COLORREF TASKCALEXTENSIONITEM::GetTextColor(BOOL bSelected, BOOL bTextIsBack) const
+{
+	COLORREF crText = TASKCALITEM::GetTextColor(bSelected, bTextIsBack);
+
+	if (HasColor() && !bSelected && bTextIsBack)
+	{
+		// Make it lighter to distinguish with 'real' task
+		crText = GraphicsMisc::Lighter(crText, 0.5);
+	}
+
+	return crText;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 TASKCALFUTUREOCURRENCE::TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange)
@@ -699,21 +735,6 @@ TASKCALFUTUREOCURRENCE::TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD 
 
 	SetStartDate(dtRange.GetStart());
 	SetDueDate(dtRange.GetEndInclusive());
-}
-
-COLORREF TASKCALFUTUREOCURRENCE::GetFillColor(BOOL /*bTextIsBack*/) const
-{
-	return CLR_NONE;
-}
-
-COLORREF TASKCALFUTUREOCURRENCE::GetBorderColor(BOOL /*bTextIsBack*/) const
-{
-	return 0; // Black
-}
-
-COLORREF TASKCALFUTUREOCURRENCE::GetTextColor(BOOL /*bSelected*/, BOOL /*bTextIsBack*/) const
-{
-	return GetSysColor(COLOR_3DDKSHADOW);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -744,21 +765,6 @@ void TASKCALCUSTOMDATE::SetDate(const COleDateTime& date)
 	{
 		ASSERT(0);
 	}
-}
-
-COLORREF TASKCALCUSTOMDATE::GetFillColor(BOOL /*bTextIsBack*/) const
-{
-	return TASKCALEXTENSIONITEM::GetFillColor(FALSE);
-}
-
-COLORREF TASKCALCUSTOMDATE::GetBorderColor(BOOL /*bTextIsBack*/) const
-{
-	return TASKCALEXTENSIONITEM::GetBorderColor(FALSE);
-}
-
-COLORREF TASKCALCUSTOMDATE::GetTextColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
-{
-	return TASKCALEXTENSIONITEM::GetTextColor(bSelected, FALSE);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -841,6 +847,25 @@ BOOL CTaskCalItemMap::IsParentTask(DWORD dwTaskID) const
 	const TASKCALITEM* pTCI = GetTaskItem(dwTaskID);
 
 	return (pTCI ? pTCI->IsParent() : FALSE);
+}
+
+BOOL CTaskCalItemMap::WantHideTask(const TASKCALITEM* pTCI, DWORD dwOptions, LPCTSTR szHideParentTag)
+{
+	if (!pTCI)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	BOOL bHide = FALSE;
+
+	if (Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS) && pTCI->IsParent())
+		bHide = (Misc::IsEmpty(szHideParentTag) || pTCI->HasTag(szHideParentTag));
+
+	if (!bHide && Misc::HasFlag(dwOptions, !TCCO_DISPLAYDONE))
+		bHide = pTCI->IsDone(TRUE);
+
+	return bHide;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -951,6 +976,65 @@ int CTaskCalItemArray::FindItem(DWORD dwTaskID) const
 	return -1;
 }
 
+int CTaskCalItemArray::GetNextItem(DWORD dwTaskID, BOOL bForwards) const
+{
+	int nNext = FindItem(dwTaskID);
+
+	if (nNext != -1)
+		nNext =  Misc::NextIndexT(*this, nNext, bForwards);
+
+	return nNext;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+CSortedTaskCalItemArray::CSortedTaskCalItemArray(const CTaskCalItemMap& mapTasks)
+	:
+	m_mapTasks(mapTasks),
+	m_bNeedsResort(TRUE),
+	m_nSortBy(TDCA_NONE),
+	m_bSortAscending(TRUE)
+{
+}
+
+void CSortedTaskCalItemArray::SetNeedsRebuild()
+{
+	RemoveAll();
+	m_bNeedsResort = TRUE;
+}
+
+void CSortedTaskCalItemArray::SetNeedsResort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending)
+{
+	m_nSortBy = nSortBy;
+	m_bSortAscending = bSortAscending;
+	m_bNeedsResort = TRUE;
+}
+
+const CTaskCalItemArray& CSortedTaskCalItemArray::GetTasks()
+{
+	if (GetSize() == 0)
+	{
+		SetSize(m_mapTasks.GetCount());
+
+		POSITION pos = m_mapTasks.GetStartPosition();
+		int nTask = 0;
+
+		while (pos)
+		{
+			TASKCALITEM* pTCI = m_mapTasks.GetNextTask(pos);
+			SetAt(nTask++, pTCI);
+		}
+	}
+
+	if (m_bNeedsResort)
+	{
+		SortItems(m_nSortBy, m_bSortAscending);
+		m_bNeedsResort = FALSE;
+	}
+	
+	return *this;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 CHeatMap::CHeatMap(int nMinHeatCutoff) 
@@ -981,11 +1065,11 @@ BOOL CHeatMap::SetColorPalette(const CDWordArray& aColors)
 	return TRUE;
 }
 
-BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib, DWORD dwOptions)
+BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions, LPCTSTR szHideParentTask)
 {
 	m_mapHeat.RemoveAll();
 
-	if ((nAttrib == TDCA_NONE) || (mapData.GetCount() == 0))
+	if ((nAttribID == TDCA_NONE) || (mapData.GetCount() == 0))
 		return FALSE;
 
 	POSITION pos = mapData.GetStartPosition();
@@ -996,10 +1080,10 @@ BOOL CHeatMap::Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib
 	{
 		mapData.GetNextAssoc(pos, dwTaskID, pTCI);
 
-		if (pTCI->IsParent() && Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS))
+		if (CTaskCalItemMap::WantHideTask(pTCI, dwOptions, szHideParentTask))
 			continue;
 
-		switch (nAttrib)
+		switch (nAttribID)
 		{
 		case TDCA_DONEDATE:
 			if (pTCI->IsDone(FALSE))
@@ -1078,7 +1162,7 @@ COLORREF CHeatMap::GetColor(const COleDateTime& date) const
 		nHeat = min(nHeat, m_nMaxHeatCutoff);
 
 		int nColor = ((m_aColorPalette.GetSize() * nHeat) / m_nMaxHeatCutoff);
-		nColor = min(nColor, m_aColorPalette.GetSize() - 1);
+		nColor = min(nColor, Misc::LastIndexT(m_aColorPalette));
 
 		if (nColor >= 0)
 			return m_aColorPalette[nColor];

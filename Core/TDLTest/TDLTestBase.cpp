@@ -57,9 +57,9 @@ BOOL CTestUtils::Initialise(const CString& sOutputDir, const CString& sControlDi
 	return TRUE;
 }
 
-BOOL CTestUtils::HasCommandlineFlag(TCHAR cFlag) const
+BOOL CTestUtils::HasCommandlineFlag(LPCTSTR szFlag) const
 {
-	return m_cmdInfo.HasOption(cFlag);
+	return m_cmdInfo.HasOption(szFlag);
 }
 
 CString CTestUtils::GetOutputFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const
@@ -76,7 +76,6 @@ CString CTestUtils::GetFilePath(const CString& sRoot, const CString& sSubDir,
 								const CString& sFilename, const CString& sExt)
 {
 	ASSERT(FileMisc::IsPath(sRoot) && !sSubDir.IsEmpty() && !sFilename.IsEmpty() && !sExt.IsEmpty());
-	
 	
 	if (FileMisc::IsPath(sRoot) && !sSubDir.IsEmpty() && !sFilename.IsEmpty() && !sExt.IsEmpty())
 	{
@@ -116,6 +115,20 @@ int CTestUtils::Compare(LPCTSTR sz1, LPCTSTR sz2, BOOL bCaseSensitive) const
 }
 
 //////////////////////////////////////////////////////////////////////
+
+CTDCScopedTest::CTDCScopedTest(CTDLTestBase& base, LPCTSTR szTest)
+	:
+	m_base(base)
+{
+	m_base.BeginTest(szTest);
+}
+
+CTDCScopedTest::~CTDCScopedTest()
+{
+	m_base.EndTest();
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -126,7 +139,7 @@ public:
 
 	TESTRESULT Run()
 	{
-		BeginTest(_T("CTDLTestBase::SelfTest"));
+		CTDCScopedTest test(*this, _T("CTDLTestBase::SelfTest"));
 
 		// -------------------------------------------------
 		
@@ -284,19 +297,26 @@ public:
 static CEnCommandLineInfo cmdInfoEmpty;
 
 // private constructor for self test
-CTDLTestBase::CTDLTestBase() : m_utils(cmdInfoEmpty)
+CTDLTestBase::CTDLTestBase() 
+	: 
+	m_utils(cmdInfoEmpty),
+	m_nCurTest(0)
 {
 }
 
-CTDLTestBase::CTDLTestBase(const CTestUtils& utils) : m_utils(utils) 
+CTDLTestBase::CTDLTestBase(LPCTSTR szName, const CTestUtils& utils)
+	: 
+	m_sName(szName),
+	m_utils(utils),
+	m_nCurTest(0)
 {
-
+	ASSERT(!m_sName.IsEmpty());
 }
 
 CTDLTestBase::~CTDLTestBase()
 {
 	if (m_resTotal != m_resTest)
-		m_resTotal.ReportResults();
+		m_resTotal.ReportResults(m_sName, FALSE);
 }
 
 BOOL CTDLTestBase::BeginTest(LPCTSTR szTest) 
@@ -307,12 +327,13 @@ BOOL CTDLTestBase::BeginTest(LPCTSTR szTest)
 		return FALSE;
 	}
 
-	ASSERT(m_sCurrentTest.IsEmpty());
-
-	if (!m_sCurrentTest.IsEmpty())
+	if (!m_sCurTest.IsEmpty())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
-	m_sCurrentTest = szTest;
+	m_sCurTest = szTest;
 	m_resTest.Clear();
 	m_nCurTest = 0;
 
@@ -323,18 +344,49 @@ BOOL CTDLTestBase::BeginTest(LPCTSTR szTest)
 
 BOOL CTDLTestBase::EndTest()
 {
-	ASSERT(!m_sCurrentTest.IsEmpty());
-	
-	if (m_sCurrentTest.IsEmpty())
+	if (m_sCurTest.IsEmpty())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
-	m_resTest.ReportResults();
+	m_resTest.ReportResults(m_sCurTest, TRUE);
 	m_resTotal += m_resTest;
 	
-	_tprintf(_T("\nTest '%s' ended ----------\n"), (LPCTSTR)m_sCurrentTest);
+	_tprintf(_T("\nTest '%s' ended ----------\n"), (LPCTSTR)m_sCurTest);
 	
-	m_sCurrentTest.Empty();
+	m_sCurTest.Empty();
+	return TRUE;
+}
 
+BOOL CTDLTestBase::BeginSubTest(LPCTSTR szSubTest)
+{
+	if (Misc::IsEmpty(szSubTest))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Must be within a main test
+	if (m_sCurTest.IsEmpty())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_sCurSubTest = szSubTest;
+	return TRUE;
+}
+
+BOOL CTDLTestBase::EndSubTest()
+{
+	if (m_sCurSubTest.IsEmpty())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_sCurSubTest.Empty();
 	return TRUE;
 }
 
@@ -640,7 +692,7 @@ BOOL CTDLTestBase::ExpectCompare(LPCTSTR sz1, LPCTSTR szFmt1, LPCTSTR sz2, LPCTS
 {
 	LPCTSTR szTrail(bCaseSensitive ? _T("Case sensitive") : _T("Case insensitive"));
 
-	return HandleCompareResult(sz1, szFmt1, sz2, szFmt2, nOp, m_utils.Compare(sz1, sz2, bCaseSensitive), szTrail);
+	return HandleCompareResultT(sz1, szFmt1, sz2, szFmt2, nOp, m_utils.Compare(sz1, sz2, bCaseSensitive), szTrail);
 }
 
 BOOL CTDLTestBase::ExpectCompareFileContents(const CString& sFile, const CString& sControl, TEST_OP nOp) const
@@ -661,7 +713,7 @@ BOOL CTDLTestBase::ExpectCompareFileContents(const CString& sFile, const CString
 		return TRUE;
 	}
 
-	return HandleCompareResult(sFile, _T("%s"), sControl, _T("%s"), nOp, FileMisc::CompareContents(sFile, sControl), _T("File contents"));
+	return HandleCompareResultT(sFile, _T("%s"), sControl, _T("%s"), nOp, FileMisc::CompareContents(sFile, sControl), _T("File contents"));
 }
 
 BOOL CTDLTestBase::ExpectCompare(const CStringArray& a1, const CStringArray& a2, BOOL bOrderSensitive, BOOL bCaseSensitive, TEST_OP nOp) const
@@ -704,7 +756,7 @@ BOOL CTDLTestBase::ExpectCompare(const CStringArray& a1, const CStringArray& a2,
 		sTrail = _T("Order & Case insensitive");
 	}
 
-	return HandleCompareResult(Misc::FormatArray(a1), _T("%s"), Misc::FormatArray(a2), _T("%s"), nOp, nCmp, sTrail);
+	return HandleCompareResultT(Misc::FormatArray(a1), _T("%s"), Misc::FormatArray(a2), _T("%s"), nOp, nCmp, sTrail);
 }
 
 BOOL CTDLTestBase::ExpectCompare(const CDWordArray& a1, const CDWordArray& a2, BOOL bOrderSensitive, TEST_OP nOp) const
@@ -731,7 +783,7 @@ BOOL CTDLTestBase::ExpectCompare(const CDWordArray& a1, const CDWordArray& a2, B
 
 	LPCTSTR szTrail(bOrderSensitive ? _T("Order sensitive") :  _T("Order insensitive"));
 
-	return HandleCompareResult(Misc::FormatArray(a1), _T("%s"), Misc::FormatArray(a2), _T("%s"), nOp, nCmp, szTrail);
+	return HandleCompareResultT(Misc::FormatArray(a1), _T("%s"), Misc::FormatArray(a2), _T("%s"), nOp, nCmp, szTrail);
 }
 
 BOOL CTDLTestBase::SelfTest()

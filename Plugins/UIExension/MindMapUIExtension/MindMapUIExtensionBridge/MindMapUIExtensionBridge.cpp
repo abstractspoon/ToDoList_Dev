@@ -38,9 +38,7 @@ const LPCWSTR MINDMAP_NAME = L"Mind Map";
 
 CMindMapUIExtensionBridge::CMindMapUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	HMODULE hMod = LoadLibrary(L"MindMapUIExtensionBridge.dll"); // us
-
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MINDMAP), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = Win32::LoadHIcon(L"MindMapUIExtensionBridge.dll", IDI_MINDMAP, 16, true);
 }
 
 void CMindMapUIExtensionBridge::Release()
@@ -76,7 +74,7 @@ IUIExtensionWindow* CMindMapUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
-		pExtWnd->Release();
+		delete pExtWnd;
 		pExtWnd = NULL;
 	}
 
@@ -98,12 +96,6 @@ void CMindMapUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCW
 CMindMapUIExtensionBridgeWindow::CMindMapUIExtensionBridgeWindow(ITransText* pTT) : m_pTT(pTT)
 {
 
-}
-
-void CMindMapUIExtensionBridgeWindow::Release()
-{
-	::DestroyWindow(GetHwnd());
-	delete this;
 }
 
 BOOL CMindMapUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
@@ -144,7 +136,7 @@ LPCWSTR CMindMapUIExtensionBridgeWindow::GetTypeID() const
 	return MINDMAP_GUID;
 }
 
-bool CMindMapUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CMindMapUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -166,9 +158,9 @@ void CMindMapUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_U
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CMindMapUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CMindMapUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CMindMapUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
@@ -187,6 +179,11 @@ bool CMindMapUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->time, 
 										pMsg->pt.x,
 										pMsg->pt.y);
+}
+
+bool CMindMapUIExtensionBridgeWindow::DoIdleProcessing()
+{
+	return m_wnd->DoIdleProcessing();
 }
 
 bool CMindMapUIExtensionBridgeWindow::Map(IUI_APPCOMMAND nCmd, MindMapControl::ExpandNode% expand)

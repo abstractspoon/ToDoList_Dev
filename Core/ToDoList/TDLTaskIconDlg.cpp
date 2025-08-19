@@ -10,6 +10,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
+#include "..\shared\enlistctrl.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -29,29 +30,32 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR NO_ICON = _T("__NONE__");
+const LPCTSTR NO_ICON	= _T("__NONE__");
+const LPCTSTR PREFS_KEY = _T("TaskIcons");
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskIconDlg dialog
 
-CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem, CWnd* pParent /*=NULL*/)
+CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem, int nNumImages, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, _T("TaskIcons"), pParent), 
+	CTDLDialog(CTDLTaskIconDlg::IDD, PREFS_KEY, pParent),
 	m_ilIcons(ilIcons), 
 	m_sIconName(sSelName), 
 	m_bMultiSel(FALSE),
 	m_bWantNone(bWantNoneItem),
-	m_bAllowReload(pParent != NULL)
+	m_bAllowReload(pParent != NULL),
+	m_nNumImages(nNumImages)
 {
 }
 
-CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, CWnd* pParent /*=NULL*/)
+CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, int nNumImages, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, _T("TaskIcons"), pParent), 
+	CTDLDialog(CTDLTaskIconDlg::IDD, PREFS_KEY, pParent),
 	m_ilIcons(ilIcons), 
 	m_bMultiSel(TRUE),
 	m_bWantNone(FALSE),
-	m_bAllowReload(pParent != NULL)
+	m_bAllowReload(pParent != NULL),
+	m_nNumImages(nNumImages)
 {
 	if (aSelNames.GetSize())
 		m_sIconName = aSelNames[0];
@@ -88,6 +92,12 @@ END_MESSAGE_MAP()
 BOOL CTDLTaskIconDlg::OnInitDialog() 
 {
 	CTDLDialog::OnInitDialog();
+
+	if (!m_sTitle.IsEmpty())
+	{
+		ASSERT(!m_iconDlg.IsValid());
+		SetWindowText(m_sTitle);
+	}
 	
 	ListView_SetImageList(m_lcIcons, m_ilIcons, LVSIL_SMALL);
 	BuildListCtrl();
@@ -106,6 +116,18 @@ BOOL CTDLTaskIconDlg::OnInitDialog()
 
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+int CTDLTaskIconDlg::DoModal(HICON hIcon)
+{
+	return CTDLDialog::DoModal(hIcon);
+}
+
+int CTDLTaskIconDlg::DoModal(UINT nTitleStrID)
+{
+	VERIFY(m_sTitle.LoadString(nTitleStrID) && !m_sTitle.IsEmpty());
+
+	return CTDLDialog::DoModal();
 }
 
 CString CTDLTaskIconDlg::GetIconName() const 
@@ -141,19 +163,24 @@ int CTDLTaskIconDlg::GetIconNames(CStringArray& aSelNames) const
 				aSelNames.Add(NO_ICON);
 			}
 			else
+			{
 				aSelNames.Add(m_ilIcons.GetImageName(nImage));
+			}
 		}
 	}
-	else // just copy what we've got
+	else 
+	{
+		// just copy what we've got
 		aSelNames.Copy(m_aIconNames);
+	}
 
 	return aSelNames.GetSize();
 }
 
-CString CTDLTaskIconDlg::GetUserIconName(const CString& sImage) const
+CString CTDLTaskIconDlg::GetUserIconName(const CString& sImage)
 {
 	CPreferences prefs;
-	return prefs.GetProfileString(m_sPrefsKey, sImage);
+	return prefs.GetProfileString(PREFS_KEY, sImage);
 }
 
 void CTDLTaskIconDlg::EnableDisable()
@@ -177,19 +204,15 @@ void CTDLTaskIconDlg::BuildListCtrl()
 		m_lcIcons.DeleteAllItems();
 		m_lcIcons.ModifyStyle(m_bMultiSel ? LVS_SINGLESEL : 0, LVS_SORTASCENDING | (m_bMultiSel ? 0 : LVS_SINGLESEL));
 		
-		int nImage;
-		for (nImage = 0; nImage < m_ilIcons.GetImageCount(); nImage++)
+		int nNumImages = m_ilIcons.GetImageCount();
+
+		if (m_nNumImages > 0)
+			nNumImages = min(nNumImages, m_nNumImages);
+
+		for (int nImage = 0; nImage < nNumImages; nImage++)
 		{
-			CString sImage, sKey, sBaseName;
-
-			sBaseName = m_ilIcons.GetImageName(nImage);
-
-			// backwards compatibility
-			sKey.Format(_T("Icon%d"), nImage + 1);
-			sImage = prefs.GetProfileString(m_sPrefsKey, sKey);
-
-			if (sImage.IsEmpty())
-				sImage = prefs.GetProfileString(m_sPrefsKey, sBaseName, sBaseName);
+			CString sBaseName = m_ilIcons.GetImageName(nImage);
+			CString sImage = prefs.GetProfileString(m_sPrefsKey, sBaseName, sBaseName);
 
 			if (sImage != sBaseName)
 				m_mapRenamedItems[sBaseName] = sImage;
@@ -200,18 +223,15 @@ void CTDLTaskIconDlg::BuildListCtrl()
 			// look out for selected image
 			if (!m_bMultiSel)
 			{
-				if (!m_sIconName.IsEmpty() && m_sIconName == sBaseName)
+				if (!m_sIconName.IsEmpty() && (m_sIconName == sBaseName))
 					nSelImage = nImage;
 			}
-			else
+			else if (Misc::Contains(sBaseName, m_aIconNames, FALSE, TRUE))
 			{
-				if (Misc::Contains(sBaseName, m_aIconNames, FALSE, TRUE))
-				{
-					m_lcIcons.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
+				m_lcIcons.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
 
-					if (nSelImage == -1)
-						nSelImage = nImage;
-				}
+				if (nSelImage == -1)
+					nSelImage = nImage;
 			}
 		}
 
@@ -220,7 +240,7 @@ void CTDLTaskIconDlg::BuildListCtrl()
 		{
 			ASSERT(!m_bMultiSel);
 
-			int nIndex = m_lcIcons.InsertItem(nImage, _T("<none>"), -1);
+			int nIndex = m_lcIcons.InsertItem(nNumImages, CEnString(IDS_TDC_NONE), -1);
 			m_lcIcons.SetItemData(nIndex, (DWORD)-1);
 		}
 	}
@@ -267,12 +287,11 @@ void CTDLTaskIconDlg::OnDblclkIconlist(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLTaskIconDlg::OnItemchangedIconlist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	int nItem = -1;
 
-	if (!(pNMListView->uOldState & LVIS_SELECTED) &&
-		 (pNMListView->uNewState & LVIS_SELECTED))
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR, &nItem))
 	{
-		int nImage = m_lcIcons.GetItemData(pNMListView->iItem);
+		int nImage = m_lcIcons.GetItemData(nItem);
 
 		if (nImage == -1)
 			m_sIconName = NO_ICON;
@@ -281,9 +300,8 @@ void CTDLTaskIconDlg::OnItemchangedIconlist(NMHDR* pNMHDR, LRESULT* pResult)
 
 		// disable OK button if nothing selected
 		EnableDisable();
+		*pResult = 0;
 	}
-		
-	*pResult = 0;
 }
 
 void CTDLTaskIconDlg::OnBeginlabeleditIconlist(NMHDR* pNMHDR, LRESULT* pResult) 

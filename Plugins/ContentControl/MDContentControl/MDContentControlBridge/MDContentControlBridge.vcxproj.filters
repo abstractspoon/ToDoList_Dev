@@ -45,7 +45,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\markdown.ico">
+    <None Include="..\MDContentControlCore\Resources\markdown.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

@@ -146,7 +146,7 @@ namespace PDFExporter
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
-				Filter = m_Trans.Translate("True Type Fonts (*.ttf)|*.ttf"),
+				Filter = m_Trans.Translate("True Type Fonts (*.ttf)|*.ttf", Translator.Type.FileFilter),
 				FilterIndex = 0,
 			};
 
@@ -183,7 +183,7 @@ namespace PDFExporter
 				AutoUpgradeEnabled = true,
 				CheckFileExists = true,
 				CheckPathExists = true,
-				Filter = m_Trans.Translate(ImageUtils.ImageFilter),
+				Filter = m_Trans.Translate(ImageUtils.ImageFilter, Translator.Type.FileFilter),
 				FilterIndex = 0,
 			};
 

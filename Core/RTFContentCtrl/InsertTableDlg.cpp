@@ -16,15 +16,15 @@ static char THIS_FILE[] = __FILE__;
 
 
 CInsertTableDlg::CInsertTableDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CInsertTableDlg::IDD, pParent), m_nNumRows(4), m_nNumCols(4), m_nColWidth(3)
-
+	: 
+	CDialog(CInsertTableDlg::IDD, pParent), 
+	m_nNumRows(4), 
+	m_nNumCols(4), 
+	m_nColWidth(3),
+	m_icon(IDR_RTFCOMMENTS)
 {
 	//{{AFX_DATA_INIT(CInsertTableDlg)
 	//}}AFX_DATA_INIT
-// 	m_nPadLeft = 0;
-// 	m_nPadTop = 0;
-// 	m_nPadRight = 0;
-// 	m_nPadBottom = 0;
 }
 
 
@@ -36,10 +36,6 @@ void CInsertTableDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_NUMCOLS, m_cbCols);
 	DDX_Control(pDX, IDC_NUMROWS, m_cbRows);
 	//}}AFX_DATA_MAP
-// 	DDX_Text(pDX, IDC_PADLEFT, m_nPadLeft);
-// 	DDX_Text(pDX, IDC_PADTOP, m_nPadTop);
-// 	DDX_Text(pDX, IDC_PADRIGHT, m_nPadRight);
-// 	DDX_Text(pDX, IDC_PADBOTTOM, m_nPadBottom);
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -82,18 +78,8 @@ BOOL CInsertTableDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
-	// TODO: Add extra initialization here
+	SetIcon(m_icon, FALSE);
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
-
-/*
-void CInsertTableDlg::GetPadding(CRect& rPadding) const
-{
-	rPadding.left = m_nPadLeft;
-	rPadding.top = m_nPadTop;
-	rPadding.right = m_nPadRight;
-	rPadding.bottom = m_nPadBottom;
-}
-*/

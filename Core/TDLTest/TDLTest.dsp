@@ -78,8 +78,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /subsystem:console /debug /machine:I386 /OPT:REF
-# SUBTRACT LINK32 /pdb:none /map
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /subsystem:console /map /debug /machine:I386 /OPT:REF
+# SUBTRACT LINK32 /pdb:none
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\TDLTest.exe ..\todolist\unicode_release /y	copy unicode_release\TDLTest.pdb ..\todolist\unicode_release /y
@@ -142,6 +142,14 @@ SOURCE=.\TDCRECURRENCETest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCTaskCalculatorTest.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCTaskTimeLogTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTaskCtrlBaseTest.cpp
 # End Source File
 # Begin Source File
@@ -163,6 +171,10 @@ SOURCE=.\TimeHelperTest.cpp
 # Begin Source File
 
 SOURCE=.\ToDoCtrlDataTest.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ToDoCtrlMgrTest.cpp
 # End Source File
 # Begin Source File
 
@@ -230,6 +242,14 @@ SOURCE=.\TDCRECURRENCETest.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCTaskCalculatorTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCTaskTimeLogTest.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTaskCtrlBaseTest.h
 # End Source File
 # Begin Source File
@@ -247,6 +267,10 @@ SOURCE=.\TimeHelperTest.h
 # Begin Source File
 
 SOURCE=.\ToDoCtrlDataTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ToDoCtrlMgrTest.h
 # End Source File
 # Begin Source File
 

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "TransTextMgr.h"
+#include "TransTextUtils.h"
 
 #include <afxdllx.h>
 
@@ -58,7 +59,7 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 class CTransText : public ITransText
 {
 public:
-	CTransText(LPCTSTR szDictPath = NULL, ITT_TRANSLATEOPTION nOption = ITTTO_TRANSLATEONLY)
+	CTransText(LPCWSTR szDictPath = NULL, ITT_TRANSLATEOPTION nOption = ITTTO_TRANSLATEONLY)
 	{
 		Initialize(szDictPath, nOption);
 	}
@@ -68,7 +69,7 @@ public:
 	}
 
 	// interface implementation
-	bool Initialize(LPCTSTR szDictPath, ITT_TRANSLATEOPTION nOption)
+	bool Initialize(LPCWSTR szDictPath, ITT_TRANSLATEOPTION nOption)
 	{
 		Release();
 
@@ -90,12 +91,12 @@ public:
 		CTransTextMgr::Release();
 	}
 
-	LPCTSTR GetDictionaryFile() const
+	LPCWSTR GetDictionaryFile() const
 	{
 		return CTransTextMgr::GetDictionaryFile();
 	}
 
-	LPCTSTR GetDictionaryVersion() const
+	LPCWSTR GetDictionaryVersion() const
 	{
 		return CTransTextMgr::GetDictionaryVersion();
 	}
@@ -110,17 +111,22 @@ public:
 		return CTransTextMgr::GetTranslationOption();
 	}
 	
-	bool TranslateText(LPCTSTR szText, LPTSTR& szTranslated)
+	bool TranslateText(LPCWSTR szText, LPWSTR& szTranslated)
 	{
-		return TranslateText(szText, NULL, szTranslated);
+		return TranslateText(szText, NULL, NULL, szTranslated);
 	}
 
-	bool TranslateText(LPCTSTR szText, HWND hWndRef, LPTSTR& szTranslated)
+	bool TranslateText(LPCWSTR szText, LPCWSTR szClassName, LPWSTR& szTranslated)
+	{
+		return TranslateText(szText, NULL, szClassName, szTranslated);
+	}
+
+	bool TranslateText(LPCWSTR szText, HWND hWndRef, LPWSTR& szTranslated)
 	{
 		return TranslateText(szText, hWndRef, CWinClasses::GetClass(hWndRef), szTranslated);
 	}
 
-	void CTransText::FreeTextBuffer(LPTSTR& szTranslated)
+	void CTransText::FreeTextBuffer(LPWSTR& szTranslated)
 	{
 		delete [] szTranslated; 
 		szTranslated = NULL;
@@ -140,7 +146,7 @@ public:
 	{
 		CString sText(szText);
 
-		if (CTransTextMgr::TranslateText(sText, hWndRef, szClassID))
+		if (CTransTextMgr::TranslateText(sText, hWndRef, TransText::GetFriendlyClass(szClassID)))
 		{
 			szTranslated = new TCHAR[sText.GetLength() + 1];
 			lstrcpy(szTranslated, sText);
@@ -167,12 +173,12 @@ public:
 		CTransTextMgr::EnableTranslation(nMenuID, bEnable);
 	}
 
-	void IgnoreString(LPCTSTR szText)
+	void IgnoreString(LPCWSTR szText)
 	{
 		CTransTextMgr::IgnoreString(szText, TRUE);
 	}
 
-	bool CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
+	bool CleanupDictionary(LPCWSTR szMasterDictPath, LPCWSTR szDictPath)
 	{
 		return (CTransTextMgr::CleanupDictionary(szMasterDictPath, szDictPath) != FALSE);
 	}
@@ -185,7 +191,7 @@ public:
 
 };
 
-DLL_DECLSPEC ITransText* CreateTransTextInterface(LPCTSTR szDictPath, ITT_TRANSLATEOPTION nOption)
+DLL_DECLSPEC ITransText* CreateTransTextInterface(LPCWSTR szDictPath, ITT_TRANSLATEOPTION nOption)
 {
 	if ((nOption == ITTTO_TRANSLATEONLY) && Misc::IsEmpty(szDictPath))
 		return NULL;

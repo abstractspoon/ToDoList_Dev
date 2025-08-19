@@ -9,6 +9,7 @@
 
 #include "tdcstruct.h"
 #include "TDCToolsHelper.h"
+#include "TDCImageList.h"
 
 #include "..\shared\fileedit.h"
 #include "..\shared\preferencesbase.h"
@@ -23,23 +24,17 @@
 const UINT WM_PTP_TESTTOOL = ::RegisterWindowMessage(_T("WM_PTP_TESTTOOL"));
 
 /////////////////////////////////////////////////////////////////////////////
-
-class CTDCCustomAttribDefinitionArray;
-
-/////////////////////////////////////////////////////////////////////////////
 // CPreferencesToolPage dialog
 
 class CPreferencesToolPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesToolPage)
-
 // Construction
 public:
 	CPreferencesToolPage(int nMaxNumTools = 50);
 	~CPreferencesToolPage();
 
-	int GetUserTools(CUserToolArray& aTools) const; // returns the number of tools
-	BOOL GetUserTool(int nTool, USERTOOL& tool) const; 
+	int GetUserTools(CTDCUserToolArray& aTools) const; // returns the number of tools
+	BOOL GetUserTool(int nTool, TDCUSERTOOL& tool) const; 
 	BOOL GetDisplayUDTsInToolbar() const { return m_bDisplayUDTsInToolbar; }
 	void SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
@@ -47,24 +42,25 @@ protected:
 
 // Dialog Data
 	//{{AFX_DATA(CPreferencesToolPage)
-	enum { IDD = IDD_PREFTOOLS_PAGE };
 	//}}AFX_DATA
 	CMenuButton	m_btnArgMenu;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CEdit	m_eCmdLine;
-	CFileEdit	m_eToolPath;
-	CListCtrl	m_lcTools;
-	CFileEdit	m_eIconPath;
+	CEdit m_eCmdLine;
+	CFileEdit m_eToolPath;
+	CListCtrl m_lcTools;
+	CFileEdit m_eIconPath;
+	CTDCImageList m_ilTools;
 
 	int m_nMaxNumTools;
+	int m_nNumDefaultIcons;
 	BOOL m_bDisplayUDTsInToolbar;
 	CString	m_sToolPath;
 	CString	m_sCommandLine;
-	BOOL	m_bRunMinimized;
-	CString		m_sIconPath;
+	BOOL m_bRunMinimized;
+	CString m_sIconPath;
 	
-	CUserToolArray m_aTools;
+	CTDCUserToolArray m_aTools;
 	CStringArray m_aMenuCustomAttribIDs;
 	CStringArray m_aMenuUserVariableIDs;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
@@ -115,20 +111,22 @@ protected:
 	afx_msg void OnChangeIconPath();
 	afx_msg void OnImportTools();
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSelectIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
-	int AddNewTool(BOOL bEditLabel);
+	int AddNewTool(BOOL bTDLTool);
 	void EnableControls();
 	int GetCurSel() const;
 	BOOL SetCurSel(int nTool);
-	void RebuildListCtrlImages();
+	void RebuildListImages();
 	BOOL InitializeToolbar();
-	BOOL GetListTool(int nTool, USERTOOL& tool) const;
-	int AddListTool(const USERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	BOOL GetToolFromList(int nTool, TDCUSERTOOL& tool) const;
+	int AddToolToList(const TDCUSERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	void RebuildToolsFromList();
 	
 	CString MapCmdIDToPlaceholder(UINT nCmdID) const;
 	CString GetNewUserVariableName(LPCTSTR szVarType) const;

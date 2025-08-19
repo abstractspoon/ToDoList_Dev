@@ -8,6 +8,7 @@
 #include "ToDoCtrlDataDefines.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataUtils.h"
+#include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
@@ -31,7 +32,7 @@ CTDLInfoTipCtrl::CTDLInfoTipCtrl(const CToDoCtrlData& data,
 								 const CContentMgr& mgrContent)
 	:
 	m_data(data),
-	m_aCustAttribs(aCustAttribs),
+	m_aCustomAttribDefs(aCustAttribs),
 	m_formatter(data, mgrContent),
 	m_calculator(data)
 {
@@ -87,7 +88,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 
 	// Calculate offset to make item values line up
 	CClientDC dc(const_cast<CTDLInfoTipCtrl*>(this));
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, GetSafeHwnd());
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, GetSafeHwnd());
 
 	// 1. Normalise the labels by adding a tab 
 	// 2. Keep track of the widest label
@@ -109,7 +110,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		nMaxLabelWidth = max(nMaxLabelWidth, iti.nLabelWidth);
 
 		// omit various 'longer than normal' attributes from checks
-		switch (iti.nAttribID)
+		switch (iti.nAttributeID)
 		{
 		case TDCA_COMMENTS:
 		case TDCA_FILELINK:
@@ -118,6 +119,16 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 			break;
 
 		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(iti.nAttributeID))
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_CUSTDEF_ALT(m_aCustomAttribDefs, iti.nAttributeID, pDef, break);
+
+				if (pDef->IsDataType(TDCCA_STRING) && !pDef->IsList())
+					break;
+			}
+
+			// All else
 			nMaxValueLen = max(nMaxValueLen, iti.sValue.GetLength());
 			break;
 		}
@@ -154,7 +165,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 			const int MAX_LINELEN = max(75, (nMaxValueLen + 10));
 
 			// Note: Add the ellipsis at the end else it messes up the line splitting
-			BOOL bWantEllipsis = ((iti.nAttribID == TDCA_COMMENTS) && (iti.sValue.GetLength() < m_data.GetTaskCommentsLength(dwTaskID)));
+			BOOL bWantEllipsis = ((iti.nAttributeID == TDCA_COMMENTS) && (iti.sValue.GetLength() < m_data.GetTaskCommentsLength(dwTaskID)));
 
 			if (((iti.sValue.Find('\n') != -1) || (iti.sValue.GetLength() > MAX_LINELEN)))
 			{
@@ -193,7 +204,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		sTip += _T("\n");
 	}
 
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 
 	return sTip;
 }
@@ -245,15 +256,14 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	ADDINFOITEM(TDCA_COST, IDS_TDLBC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
 	ADDINFOITEM(TDCA_CREATEDBY, IDS_TDLBC_CREATEDBY, pTDI->sCreatedBy);
 	ADDINFOITEM(TDCA_CREATIONDATE, IDS_TDLBC_CREATEDATE, m_formatter.GetTaskCreationDate(pTDI));
-	ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, pTDI->aDependencies.Format());
 	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, m_formatter.GetTaskDoneDate(pTDI));
-	ADDINFOITEM(TDCA_FILELINK, IDS_TDLBC_FILELINK, Misc::FormatArray(pTDI->aFileLinks, '\n')); // separate lines
+	ADDINFOITEM(TDCA_FILELINK, IDS_TDLBC_FILELINK, m_formatter.GetTaskFileLinks(pTDI, '\n')); // separate lines
 	ADDINFOITEM(TDCA_FLAG, IDS_TDLBC_FLAG, CEnString(pTDI->bFlagged ? IDS_YES : 0));
 	ADDINFOITEM(TDCA_ID, IDS_TDLBC_ID, Misc::Format(dwTaskID));
 	ADDINFOITEM(TDCA_LASTMODBY, IDS_TDLBC_LASTMODBY, pTDI->sLastModifiedBy);
 	ADDINFOITEM(TDCA_LASTMODDATE, IDS_TDLBC_LASTMODDATE, m_formatter.GetTaskLastModDate(pTDI));
 	ADDINFOITEM(TDCA_LOCK, IDS_TDLBC_LOCK, CEnString(pTDI->bLocked ? IDS_YES : 0));
-	ADDINFOITEM(TDCA_PATH, IDS_TDC_COLUMN_PATH, m_formatter.GetTaskPath(pTDI, pTDS));
+	ADDINFOITEM(TDCA_PATH, IDS_TDC_COLUMN_PATH, m_formatter.GetTaskPath(pTDS));
 	ADDINFOITEM(TDCA_PERCENT, IDS_TDLBC_PERCENT, m_formatter.GetTaskPercentDone(pTDI, pTDS));
 	ADDINFOITEM(TDCA_POSITION, IDS_TDLBC_POS, m_formatter.GetTaskPosition(pTDS));
 	ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, m_formatter.GetTaskPriority(pTDI, pTDS, FALSE));
@@ -273,20 +283,26 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 		ADDINFOITEM(TDCA_DUEDATE, IDS_TDLBC_DUEDATE, m_formatter.GetTaskDueDate(pTDI, pTDS));
 	}
 
+	if (mapAttrib.Has(TDCA_REMINDER))
+	{
+		time_t tRem = GetOwner()->SendMessage(WM_TDCM_GETTASKREMINDER, (WPARAM)GetSafeHwnd(), dwTaskID);
+
+		if ((tRem != 0) && (tRem != -1))
+			ADDINFOITEM(TDCA_REMINDER, IDS_TDLBC_REMINDER, m_formatter.GetDateTime(tRem));
+	}
+
 	if (mapAttrib.Has(TDCA_DEPENDENCY))
 	{
-		CDWordArray aDependents;
-
-		if (m_data.GetTaskLocalDependents(dwTaskID, aDependents, FALSE))
-			ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, Misc::FormatArray(aDependents));
+		ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, m_formatter.GetTaskDependencies(pTDI, '\n')); // separate lines
+		ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, m_formatter.GetTaskDependents(dwTaskID, '\n')); // separate lines
 	}
 
 	// Custom attributes
-	int nCust = m_aCustAttribs.GetSize();
+	int nCust = m_aCustomAttribDefs.GetSize();
 
 	while (nCust--)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustAttribs[nCust];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nCust];
 
 		CString sValue = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, attribDef);
 		
@@ -306,17 +322,17 @@ int CTDLInfoTipCtrl::InfoTipSortProc(const void* pV1, const void* pV2)
 	const TDCINFOTIPITEM* pITI2 = (const TDCINFOTIPITEM*)pV2;
 
 	// Task title always sorts at top
-	if (pITI1->nAttribID == TDCA_TASKNAME)
+	if (pITI1->nAttributeID == TDCA_TASKNAME)
 		return -1;
 
-	if (pITI2->nAttribID == TDCA_TASKNAME)
+	if (pITI2->nAttributeID == TDCA_TASKNAME)
 		return 1;
 
 	// Comments always sort at bottom
-	if (pITI1->nAttribID == TDCA_COMMENTS)
+	if (pITI1->nAttributeID == TDCA_COMMENTS)
 		return 1;
 
-	if (pITI2->nAttribID == TDCA_COMMENTS)
+	if (pITI2->nAttributeID == TDCA_COMMENTS)
 		return -1;
 
 	// Rest sort by label

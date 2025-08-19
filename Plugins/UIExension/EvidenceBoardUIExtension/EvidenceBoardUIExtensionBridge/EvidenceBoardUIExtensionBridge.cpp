@@ -76,7 +76,7 @@ IUIExtensionWindow* CEvidenceBoardUIExtensionBridge::CreateExtWindow(UINT nCtrlI
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
-		pExtWnd->Release();
+		delete pExtWnd;
 		pExtWnd = NULL;
 	}
 
@@ -97,12 +97,6 @@ void CEvidenceBoardUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs
 
 CEvidenceBoardUIExtensionBridgeWindow::CEvidenceBoardUIExtensionBridgeWindow(ITransText* pTT) : m_pTT(pTT)
 {
-}
-
-void CEvidenceBoardUIExtensionBridgeWindow::Release()
-{
-	::DestroyWindow(GetHwnd());
-	delete this;
 }
 
 BOOL CEvidenceBoardUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
@@ -143,7 +137,7 @@ LPCWSTR CEvidenceBoardUIExtensionBridgeWindow::GetTypeID() const
 	return EVIDENCEBOARD_GUID;
 }
 
-bool CEvidenceBoardUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CEvidenceBoardUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -165,9 +159,9 @@ void CEvidenceBoardUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks,
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::MapUpdateType(nUpdate));
 }
 
-bool CEvidenceBoardUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CEvidenceBoardUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const
 {
-	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
+	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribID));
 }
 
 bool CEvidenceBoardUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
@@ -186,6 +180,11 @@ bool CEvidenceBoardUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->time, 
 										pMsg->pt.x,
 										pMsg->pt.y);
+}
+
+bool CEvidenceBoardUIExtensionBridgeWindow::DoIdleProcessing()
+{
+	return m_wnd->DoIdleProcessing();
 }
 
 bool CEvidenceBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)

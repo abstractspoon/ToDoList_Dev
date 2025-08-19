@@ -271,3 +271,5 @@ paket-files/
 *.resources
 *.user
 *.user
+*.aps
+*.csv

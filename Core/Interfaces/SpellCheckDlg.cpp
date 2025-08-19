@@ -24,11 +24,14 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CSpellCheckDlg dialog
+// statics
 
 CMap<UINT, UINT, CString, CString&> CSpellCheckDlg::s_mapText;
 
+HICON CSpellCheckDlg::s_hIconDlg = NULL;
+
 /////////////////////////////////////////////////////////////////////////////
+// CSpellCheckDlg dialog
 
 CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
 	m_pSpellChecker(NULL), 
@@ -37,7 +40,7 @@ CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
 	m_stURL(_T("http://wiki.services.openoffice.org/wiki/Dictionaries")),
 	m_bMadeChanges(FALSE),
 	m_ptTopLeft(-1, -1),
-	m_cbDictionaries(FES_RELATIVEPATHS | FES_COMBOSTYLEBTN)
+	m_cbDictionaries(FES_RELATIVEPATHS)
 {
 	AfxEnableControlContainer();
 	CRichEditHelper::InitRichEdit();
@@ -301,6 +304,8 @@ BOOL CSpellCheckDlg::FindNextMisspeltWord(CString& sWord, CHECKFROM nFrom)
 BOOL CSpellCheckDlg::OnInitDialog() 
 {
 	CRuntimeDlg::OnInitDialog();
+
+	CDialog::SetIcon(s_hIconDlg, FALSE);
 
 	// don't localize certain fields
 	CLocalizer::EnableTranslation(m_lbSuggestions, FALSE);

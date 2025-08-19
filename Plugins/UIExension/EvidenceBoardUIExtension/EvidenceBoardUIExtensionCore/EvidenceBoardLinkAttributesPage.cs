@@ -67,8 +67,8 @@ namespace EvidenceBoardUIExtension
 		{
 			trans.Translate(this);
 
-			FormsUtil.SetEditCue(m_TextBox, trans.Translate("<none>"));
-			FormsUtil.SetComboBoxCue(m_TypeCombo, trans.Translate("<none>"));
+			FormsUtil.SetEditCue(m_TextBox, trans.Translate("<none>", Translator.Type.Text));
+			FormsUtil.SetComboBoxCue(m_TypeCombo, trans.Translate("<none>", Translator.Type.Text));
 		}
 
 		public IEnumerable<string> UserLinkTypes

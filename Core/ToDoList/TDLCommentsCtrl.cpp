@@ -129,9 +129,6 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 
 			VERIFY(m_toolbar.LoadToolBar(IDR_COMMENTS_DATETIME_TOOLBAR, IDB_DATETIME_TOOLBAR_STD, colorMagenta));
 
-			// HACK TO GET TOOLTIPS TO WORK ON FIRST BUTTON
-			m_toolbar.InsertSeparator(0);
-
 			if (m_pMgrShortcuts)
 				m_tbHelper.Initialize(&m_toolbar, m_pMgrShortcuts);
 
@@ -229,7 +226,10 @@ void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
 		CRect rComments;
 		CalcCommentsCtrlRect(rComments, cx, cy);
 
-		m_ctrlComments.MoveWindow(rComments, TRUE);
+		m_ctrlComments.MoveWindow(rComments, FALSE);
+
+		// Make sure the area above the comments field is redrawn
+		Invalidate(TRUE);
 	}
 }
 

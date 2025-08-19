@@ -43,7 +43,7 @@ const DWORD ID_CHILD2 = 3;
 
 CTDCCUSTOMATTRIBUTECALCULATIONTest::CTDCCUSTOMATTRIBUTECALCULATIONTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(utils)
+	CTDLTestBase(_T("CTDCCUSTOMATTRIBUTECALCULATIONTest"), utils)
 {
 
 }
@@ -128,7 +128,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::InitCustomAttributes(CTDCCustomAttribDe
 
 void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 {
-	BeginTest(_T("TDCCUSTOMATTRIBUTECALCULATION"));
+	CTDCScopedTest test(*this, _T("TDCCUSTOMATTRIBUTECALCULATION"));
 
 	CTDCCustomAttribDefinitionArray aAttribDef;
 	InitCustomAttributes(aAttribDef);
@@ -282,13 +282,13 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 		// with the result of constructing it manually and then checking its validity
 		//
 		// Built-in attributes and Built-in attributes
-		for (int nAttrib1 = TDCA_FIRST_ATTRIBUTE; nAttrib1 <= TDCA_LAST_REALATTRIBUTE; nAttrib1++)
+		for (int nAtt1 = TDCA_FIRST_ATTRIBUTE; nAtt1 <= TDCA_LAST_REALATTRIBUTE; nAtt1++)
 		{
-			TDC_ATTRIBUTE nAttrib1ID = (TDC_ATTRIBUTE)nAttrib1;
+			TDC_ATTRIBUTE nAttrib1ID = (TDC_ATTRIBUTE)nAtt1;
 
-			for (int nAttrib2 = TDCA_FIRST_ATTRIBUTE; nAttrib2 <= TDCA_LAST_REALATTRIBUTE; nAttrib2++)
+			for (int nAtt2 = TDCA_FIRST_ATTRIBUTE; nAtt2 <= TDCA_LAST_REALATTRIBUTE; nAtt2++)
 			{
-				TDC_ATTRIBUTE nAttrib2ID = (TDC_ATTRIBUTE)nAttrib2;
+				TDC_ATTRIBUTE nAttrib2ID = (TDC_ATTRIBUTE)nAtt2;
 
 				TDCCUSTOMATTRIBUTECALCULATION calcSet;
 				bool bSetSuccess = (FALSE != calcSet.Set(nAttrib1ID, 
@@ -298,10 +298,10 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 														 NONE));
 
 				TDCCUSTOMATTRIBUTECALCULATION calcManual;
-				calcManual.opFirst.nAttribID			= nAttrib1ID;
+				calcManual.opFirst.nAttributeID			= nAttrib1ID;
 				calcManual.opFirst.sCustAttribID		= NONE;
 				calcManual.nOperator					= TDCCAC_ADD;
-				calcManual.opSecond.nAttribID			= nAttrib2ID;
+				calcManual.opSecond.nAttributeID		= nAttrib2ID;
 				calcManual.opSecond.sCustAttribID		= NONE;
 
 				bool bManualSuccess = (FALSE != calcManual.IsValid(FALSE));
@@ -326,9 +326,9 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 		// with the result of constructing it manually and then checking its validity
 		//
 		// Built-in attributes and custom attributes
-		for (int nAttrib2 = TDCA_FIRST_ATTRIBUTE; nAttrib2 <= TDCA_LAST_REALATTRIBUTE; nAttrib2++)
+		for (int nAtt2 = TDCA_FIRST_ATTRIBUTE; nAtt2 <= TDCA_LAST_REALATTRIBUTE; nAtt2++)
 		{
-			TDC_ATTRIBUTE nAttrib1ID = (TDC_ATTRIBUTE)nAttrib2;
+			TDC_ATTRIBUTE nAttrib1ID = (TDC_ATTRIBUTE)nAtt2;
 
 			for (int nDef = 0; nDef < aAttribDef.GetSize(); nDef++)
 			{
@@ -340,10 +340,10 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 														 aAttribDef[nDef].sUniqueID));
 
 				TDCCUSTOMATTRIBUTECALCULATION calcManual;
-				calcManual.opFirst.nAttribID			= nAttrib1ID;
+				calcManual.opFirst.nAttributeID			= nAttrib1ID;
 				calcManual.opFirst.sCustAttribID		= NONE;
 				calcManual.nOperator					= TDCCAC_SUBTRACT;
-				calcManual.opSecond.nAttribID			= TDCA_CUSTOMATTRIB;
+				calcManual.opSecond.nAttributeID		= TDCA_CUSTOMATTRIB;
 				calcManual.opSecond.sCustAttribID		= aAttribDef[nDef].sUniqueID;
 
 				bool bManualSuccess = (FALSE != calcManual.IsValid(FALSE));
@@ -381,10 +381,10 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 														 aAttribDef[nDef2].sUniqueID));
 
 				TDCCUSTOMATTRIBUTECALCULATION calcManual;
-				calcManual.opFirst.nAttribID			= TDCA_CUSTOMATTRIB;
+				calcManual.opFirst.nAttributeID			= TDCA_CUSTOMATTRIB;
 				calcManual.opFirst.sCustAttribID		= aAttribDef[nDef1].sUniqueID;
 				calcManual.nOperator					= TDCCAC_MULTIPLY;
-				calcManual.opSecond.nAttribID			= TDCA_CUSTOMATTRIB;
+				calcManual.opSecond.nAttributeID		= TDCA_CUSTOMATTRIB;
 				calcManual.opSecond.sCustAttribID		= aAttribDef[nDef2].sUniqueID;
 
 				bool bManualSuccess = (FALSE != calcManual.IsValid(FALSE));
@@ -410,9 +410,9 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 		// with the result of constructing it manually and then checking its validity
 		//
 		// Custom attributes and built-in attributes
-		for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_REALATTRIBUTE; nAttrib++)
+		for (int nAtt = TDCA_FIRST_ATTRIBUTE; nAtt <= TDCA_LAST_REALATTRIBUTE; nAtt++)
 		{
-			TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)nAttrib;
+			TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)nAtt;
 
 			for (int nDef = 0; nDef < aAttribDef.GetSize(); nDef++)
 			{
@@ -424,10 +424,10 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 														 NONE));
 
 				TDCCUSTOMATTRIBUTECALCULATION calcManual;
-				calcManual.opFirst.nAttribID			= TDCA_CUSTOMATTRIB;
+				calcManual.opFirst.nAttributeID			= TDCA_CUSTOMATTRIB;
 				calcManual.opFirst.sCustAttribID		= aAttribDef[nDef].sUniqueID;
 				calcManual.nOperator					= TDCCAC_SUBTRACT;
-				calcManual.opSecond.nAttribID			= nAttribID;
+				calcManual.opSecond.nAttributeID		= nAttribID;
 				calcManual.opSecond.sCustAttribID		= NONE;
 
 				bool bManualSuccess = (FALSE != calcManual.IsValid(FALSE));
@@ -447,12 +447,12 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 			}
 		}
 	}
-
-	EndTest();
 }
 
 void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONSimple()
 {
+	CTDCScopedTest test(*this, _T("TDCCUSTOMATTRIBUTECALCULATION (Simple)"));
+
 	CTDCCustomAttribDefinitionArray aAttribDefs;
 	InitCustomAttributes(aAttribDefs);
 
@@ -464,12 +464,12 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONSimple
 	CTDCTaskCalculator calc(data);
 
 	{
-		int nAttrib = aAttribDefs.Find(ID_PRORITYMULTRISK);
-		ExpectTrue(nAttrib != -1);
+		int nAtt = aAttribDefs.Find(ID_PRORITYMULTRISK);
+		ExpectTrue(nAtt != -1);
 
-		if (nAttrib != -1)
+		if (nAtt != -1)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAtt];
 			double dValue = 0.0;
 
 			data.SetTaskPriority(ID_PARENT, 3);
@@ -493,12 +493,12 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONSimple
 	}
 
 	{
-		int nAttrib = aAttribDefs.Find(ID_TIMEESTMINUSVALUE);
-		ExpectTrue(nAttrib != -1);
+		int nAtt = aAttribDefs.Find(ID_TIMEESTMINUSVALUE);
+		ExpectTrue(nAtt != -1);
 
-		if (nAttrib != -1)
+		if (nAtt != -1)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAtt];
 			double dValue = 0.0;
 
 			data.SetTaskTimeEstimate(ID_PARENT, TDCTIMEPERIOD(8, TDCU_DAYS));
@@ -517,12 +517,12 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONSimple
 	}
 
 	{
-		int nAttrib = aAttribDefs.Find(ID_DATEPLUSDOUBLE);
-		ExpectTrue(nAttrib != -1);
+		int nAtt = aAttribDefs.Find(ID_DATEPLUSDOUBLE);
+		ExpectTrue(nAtt != -1);
 
-		if (nAttrib != -1)
+		if (nAtt != -1)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAtt];
 			double dValue = 0.0;
 
 			data.SetTaskCustomAttributeData(ID_PARENT, ID_DATE, _T("41254.0"));

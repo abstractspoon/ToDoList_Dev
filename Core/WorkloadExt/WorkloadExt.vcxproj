@@ -152,6 +152,8 @@ copy unicode_release\WorkloadExt.dll ..\todolist\unicode_release /y</Command>
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Unicode_Release\WorkloadExt.dll</OutputFile>
       <ImportLibrary>.\Unicode_Release\WorkloadExt.lib</ImportLibrary>
+      <AdditionalDependencies>..\3rdParty\Detours\lib.x86\detours.lib;legacy_stdio_definitions.lib</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

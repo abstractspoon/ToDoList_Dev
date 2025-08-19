@@ -7,6 +7,10 @@
 // PreferencesDlg.h : header file
 //
 
+#include "TDCMenuIconMgr.h"
+#include "TDCImageList.h"
+#include "TDLCustomToolbar.h"
+
 #include "preferencesgenpage.h"
 #include "preferencestaskpage.h"
 #include "preferencestaskdefpage.h"
@@ -62,6 +66,10 @@ enum // RemapAdvancedFilterNames
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CTasklistStorageMgr;
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlg dialog
 
 class CPreferencesDlg : public CPreferencesDlgBase
@@ -72,7 +80,8 @@ public:
 					const CTDCContentMgr* pContentMgr = NULL, 
 					const CTDCImportExportMgr* pExportMgr = NULL, 
 					const CUIExtensionMgr* pMgrUIExt = NULL,
-					CWnd* pParent = NULL);   // standard constructor
+					const CTasklistStorageMgr* pMgrStorage = NULL,
+					CWnd* pParent = NULL);
 	virtual ~CPreferencesDlg();
 
 	void InitializePreferences(); // one time only
@@ -199,6 +208,7 @@ public:
 	BOOL GetDoneTasksHaveLowestRisk() const { return m_pageTaskCalc.GetDoneTasksHaveLowestRisk(); } 
 	BOOL GetSyncTimeEstimatesAndDates() const { return m_pageTaskCalc.GetSyncTimeEstimatesAndDates(); }
 	BOOL GetIncludeDoneInPriorityRiskCalc() const { return m_pageTaskCalc.GetIncludeDoneInPriorityRiskCalc(); }
+	BOOL GetIncludeReferencesInCalcs() const { return m_pageTaskCalc.GetIncludeReferencesInCalcs(); }
 	BOOL GetWeightPercentCompletionByNumSubtasks() const { return m_pageTaskCalc.GetWeightPercentCompletionByNumSubtasks(); }
 	BOOL GetAutoCalcPercentDone() const { return m_pageTaskCalc.GetAutoCalcPercentDone(); }
 	BOOL GetAutoAdjustDependentsDates() const { return m_pageTaskCalc.GetAutoAdjustDependentsDates(); }
@@ -208,7 +218,6 @@ public:
 	BOOL GetSubtasksInheritLockStatus() const { return m_pageTaskCalc.GetSubtasksInheritLockStatus(); }
 	BOOL GetTaskInheritsSubtaskFlags() const { return m_pageTaskCalc.GetTaskInheritsSubtaskFlags(); }
 	BOOL GetUseLatestLastModifiedDate() const { return m_pageTaskCalc.GetUseLatestLastModifiedDate(); }
-	BOOL GetPreserveWeekdays() const { return m_pageTaskCalc.GetPreserveWeekdays(); }
 	COleDateTimeSpan GetRecentlyModifiedPeriod() const { return m_pageTaskCalc.GetRecentlyModifiedPeriod(); }
 
 	PTCP_CALCTIMEREMAINING GetTimeRemainingCalculation() const { return m_pageTaskCalc.GetTimeRemainingCalculation(); }
@@ -219,7 +228,6 @@ public:
 	BOOL GetShowEditMenuAsColumns() const { return m_pageUI.GetShowEditMenuAsColumns(); }
 	BOOL GetShowSortMenuAsColumns() const { return m_pageUI.GetShowSortMenuAsColumns(); }
 	BOOL GetShowCommentsAlways() const { return m_pageUI.GetShowCommentsAlways(); }
-	BOOL GetAutoReposCtrls() const { return m_pageUI.GetAutoReposCtrls(); }
 	BOOL GetShareCommentsSize() const { return m_pageUI.GetShareCommentsSize(); }
 	BOOL GetAutoHideTabbar() const { return m_pageUI.GetAutoHideTabbar(); }
 	BOOL SetAutoHideTabbar(BOOL bAutoHide);
@@ -249,7 +257,7 @@ public:
 
 	// CPreferencesUICustomToolbarPage
 	BOOL HasCustomToolbar() const { return m_pageUICustomToolbar.HasToolbarButtons(); }
-	int GetCustomToolbarButtons(CToolbarButtonArray& aButtons) const { return m_pageUICustomToolbar.GetToolbarButtons(aButtons); }
+	int GetCustomToolbarButtons(CTDCToolbarButtonArray& aButtons) const { return m_pageUICustomToolbar.GetToolbarButtons(aButtons); }
 	UINT GetLastCustomToolbarButtonID() const { return m_pageUICustomToolbar.GetLastCustomToolbarButtonID(); }
 
 	// CPreferencesUIVisibilityPage
@@ -284,6 +292,9 @@ public:
 	BOOL GetHidePaneSplitBar() const { return m_pageUITasklist.GetHidePaneSplitBar(); }
 	BOOL GetShowRemindersAsDateAndTime() const { return m_pageUITasklist.GetShowRemindersAsDateAndTime(); }
 	BOOL GetShowFileLinkThumbnails() const { return m_pageUITasklist.GetShowFileLinkThumbnails(); }
+	COLORREF GetHidePriorityNumber() const { return m_pageUITasklist.GetHidePriorityNumber(); }
+	BOOL GetShowMixedCompletionState() const { return m_pageUITasklist.GetShowMixedCompletionState(); }
+	BOOL GetNumPriorityRiskLevels() const { return m_pageUITasklist.GetNumPriorityRiskLevels(); }
 
 	// CPreferencesUITasklistColorsPage
 	int GetTextColorOption() const { return m_pageUITasklistColors.GetTextColorOption(); }
@@ -304,14 +315,13 @@ public:
 	COLORREF GetDoneTaskColor() const { return m_pageUITasklistColors.GetDoneTaskColor(); }
 	COLORREF GetFlaggedTaskColor() const { return m_pageUITasklistColors.GetFlaggedTaskColor(); }
 	COLORREF GetReferenceTaskColor() const { return m_pageUITasklistColors.GetReferenceTaskColor(); }
-	COLORREF GetHidePriorityNumber() const { return m_pageUITasklistColors.GetHidePriorityNumber(); }
 	COLORREF GetAlternateLineColor() const { return m_pageUITasklistColors.GetAlternateLineColor(); }
 	COLORREF GetGroupHeaderBackgroundColor() const { return m_pageUITasklistColors.GetGroupHeaderBackgroundColor(); }
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const { return m_pageUITasklistColors.GetAttributeColors(colors); }
 
 	// CPreferencesToolPage
-	int GetUserTools(CUserToolArray& aTools) const { return m_pageTools.GetUserTools(aTools); }
-	BOOL GetUserTool(int nTool, USERTOOL& tool) const { return m_pageTools.GetUserTool(nTool, tool); } 
+	int GetUserTools(CTDCUserToolArray& aTools) const { return m_pageTools.GetUserTools(aTools); }
+	BOOL GetUserTool(int nTool, TDCUSERTOOL& tool) const { return m_pageTools.GetUserTool(nTool, tool); } 
 	BOOL GetDisplayUDTsInToolbar() const { return m_pageTools.GetDisplayUDTsInToolbar(); }
 
 //	BOOL Get() const { return m_b; }
@@ -319,7 +329,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CPreferencesDlg)
-	enum { IDD = IDD_PREFERENCES };
 	//}}AFX_DATA
 	CPreferencesGenPage m_pageGen;
 	CPreferencesFilePage m_pageFile;
@@ -343,6 +352,10 @@ protected:
 	CEnEdit m_eSearchText;
 	CIcon m_iconSearch, m_iconReset;
 	CWndPromptManager m_mgrPrompts;
+
+	CTDCMenuIconMgr m_mgrMenuIcons; // For m_pageShortcuts
+	CTDCImageList m_ilIcons; // For m_pageShortcuts, m_pageUICustomToolbar
+	const CTasklistStorageMgr* m_pMgrStorage; // For m_pageShortcuts
 
 	CStringArray m_aSearchTerms;
 	CString m_sPageTitle;
@@ -380,10 +393,14 @@ protected:
 	afx_msg LRESULT OnGenPageEditLangFile(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnControlChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnColorPageTextOption(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnNumPriorityRiskLevels(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnCopy(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
+
+	// Pseudo-handler
+	void OnShowPage(const CPreferencesPageBase* pPage);
 
 protected:
 	void AddPagesToTree(BOOL bDoSearch);

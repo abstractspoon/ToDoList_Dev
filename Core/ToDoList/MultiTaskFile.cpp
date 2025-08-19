@@ -6,6 +6,8 @@
 #include "MultiTaskFile.h"
 #include "TaskFile.h"
 
+#include "..\shared\DateHelper.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -16,9 +18,11 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CMultiTaskFile::CMultiTaskFile()
+CMultiTaskFile::CMultiTaskFile(LPCTSTR szReportTitle, const COleDateTime& dtReport)
+	:
+	m_sReportTitle(szReportTitle),
+	m_sReportDate(CDateHelper::FormatDate(dtReport))
 {
-
 }
 
 CMultiTaskFile::~CMultiTaskFile()

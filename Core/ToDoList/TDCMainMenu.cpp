@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "TDCMainMenu.h"
 #include "TDCStatic.h"
+#include "TDCMapping.h"
 #include "FilteredToDoCtrl.h"
 #include "ToDoCtrlMgr.h"
 #include "PreferencesDlg.h"
@@ -45,14 +46,6 @@ CTDCMainMenu::~CTDCMainMenu()
 {
 }
 
-void CTDCMainMenu::SetUITheme(const UITHEME& theme)
-{
-	m_theme = theme;
-
-	if (GetSafeHmenu())
-		UpdateBackgroundColor();
-}
-
 BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 {
 	CWnd* pMainWnd = AfxGetMainWnd();
@@ -87,8 +80,6 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 	}
 #endif
 
-	UpdateBackgroundColor();
-	
 	return TRUE;
 }
 
@@ -176,7 +167,7 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	}
 	else if (IsInRange(nMenuID, ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50))
 	{
-		USERTOOL tool;
+		TDCUSERTOOL tool;
 		int nTool = (nMenuID - ID_TOOLS_USERTOOL1);
 
 		if (prefs.GetUserTool(nTool, tool))
@@ -221,8 +212,8 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	{
 		int nFilter = (nMenuID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
 
-		if (nFilter < filterBar.GetAdvancedFilterNames().GetSize())
-			sTipText = filterBar.GetAdvancedFilterNames().GetAt(nFilter);
+		if (nFilter < filterBar.AdvancedFilterNames().GetSize())
+			sTipText = filterBar.AdvancedFilterNames().GetAt(nFilter);
 	}
 	else
 	{
@@ -232,6 +223,17 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	// Fallback
 	if (sTipText.IsEmpty())
 		sTipText = GetMenuString(nMenuID, MF_BYCOMMAND);
+
+	// Add parent menu name for context
+	HMENU hParentMenu = NULL;
+	
+	int nPos = FindMenuItem(*this, nMenuID, hParentMenu);
+	ASSERT(hParentMenu);
+
+	nPos = FindMenuItem(*this, hParentMenu, hParentMenu);
+	ASSERT(hParentMenu);
+
+	sTipText = (GetMenuString(hParentMenu, nPos, MF_BYPOSITION) + _T(" > ") + sTipText);
 
 	// removed embedded tabs
 	if (!sTipText.IsEmpty())
@@ -264,42 +266,6 @@ void CTDCMainMenu::LoadMenuCommon()
 		if (pSubMenu->GetMenuItemID(nPos) == 0)
 			pSubMenu->DeleteMenu(nPos, MF_BYPOSITION);
 	}
-}
-
-void CTDCMainMenu::UpdateBackgroundColor()
-{
-	// set the menu background colour
-	// Note: On XP and classic, the menu bar is not distinctive
-	// so we set the menu color a little darker than 3DFACE
-	if (!CThemed::IsAppThemed())
-	{
-		SetBackgroundColor(GraphicsMisc::Darker(GetSysColor(COLOR_3DFACE), 0.1));
-	}
-	else if (COSVersion() < OSV_VISTA)
-	{
-		if (m_theme.crMenuBack == m_theme.crAppBackLight)
-		{
-			if (m_theme.crAppBackDark != m_theme.crAppBackLight)
-			{
-				SetBackgroundColor(m_theme.crAppBackDark);
-			}
-			else
-			{
-				SetBackgroundColor(GraphicsMisc::Darker(m_theme.crAppBackLight, 0.1));
-			}
-		}
-		else
-		{
-			SetBackgroundColor(m_theme.crMenuBack);
-		}
-
-	}
-	else // Vista+ with themes
-	{
-		SetBackgroundColor(m_theme.crMenuBack);
-	}
-
-	AfxGetMainWnd()->DrawMenuBar();
 }
 
 // test for top-level menus
@@ -342,7 +308,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 			return TRUE;
 
 		case ID_VIEW_ACTIVATEFILTER1:
-			PrepareFiltersActivationMenu(pPopupMenu, filterBar);
+			PrepareFiltersActivationMenu(pPopupMenu, filterBar, prefs);
 			return TRUE;
 
 		case ID_ACTIVATEVIEW_TASKTREE:
@@ -360,7 +326,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 
 void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 										  const CFilteredToDoCtrl& tdc,
-										  const CPreferencesDlg& prefs) const
+										  const CPreferencesDlg& prefs)
 {
 	PrepareEditMenu(pMenu, tdc, prefs);
 
@@ -409,7 +375,7 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 
 void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
 											 const CFilteredToDoCtrl& tdc,
-											 const CPreferencesDlg& prefs) const
+											 const CPreferencesDlg& prefs)
 {
 	PrepareFileMenu(pMenu, prefs);
 	PrepareEditMenu(pMenu, tdc, prefs);
@@ -596,7 +562,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 		case ID_EDIT_TASKCOLOR:
 		case ID_EDIT_CLEARTASKCOLOR:
-			bDelete = !((prefs.GetTextColorOption() == COLOROPT_DEFAULT) ||
+			bDelete = !((prefs.GetTextColorOption() == TEXTOPT_DEFAULT) ||
 						tdc.IsEditFieldShowing(TDCA_COLOR));
 			break;
 
@@ -799,27 +765,24 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 	}
 }
 
-void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar)
+void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar, const CPreferencesDlg& prefs)
 {
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, CTDCFilter::GetDefaultFilterNames(), IDS_FILTERPLACEHOLDER);
-	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.GetAdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
+	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.AdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
 
-	// Restore selection
-	int nSelFilter = filterBar.GetSelectedFilter();
+	// Enable state
+	BOOL bWantDefFilters = prefs.GetShowDefaultFiltersInFilterBar();
 
-	if (filterBar.GetFilter() == FS_ADVANCED)
+	for (int nFilter = 0; nFilter < NUM_SHOWFILTER; nFilter++)
 	{
-		CString sFilter;
-		VERIFY((filterBar.GetFilter(sFilter) == FS_ADVANCED) && !sFilter.IsEmpty());
-
-		int nFilter = Misc::Find(sFilter, filterBar.GetAdvancedFilterNames(), FALSE, TRUE);
-		ASSERT(nFilter != -1);
-
-		nSelFilter = (NUM_SHOWFILTER + 1 + nFilter); // +1 for separator
+		BOOL bEnable = (bWantDefFilters || (nFilter == 0));
+		pMenu->EnableMenuItem(ID_VIEW_ACTIVATEFILTER1 + nFilter, (bEnable ? MF_ENABLED : MF_DISABLED));
 	}
 
-	if (nSelFilter != -1)
-		pMenu->CheckMenuRadioItem(0, pMenu->GetMenuItemCount(), nSelFilter, MF_BYPOSITION);
+	// Restore selection
+	UINT nSelMenuID = GetSelectedFilterMenuID(filterBar);
+
+	pMenu->CheckMenuRadioItem(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, nSelMenuID, MF_BYCOMMAND);
 }
 
 void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID)
@@ -856,6 +819,64 @@ void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const 
 	}
 }
 
+BOOL CTDCMainMenu::GetFilterToActivate(UINT nMenuID,
+									   const CTDLFilterBar& filterBar,
+									   const CPreferencesDlg& prefs,
+									   FILTER_SHOW& nShow,
+									   CString& sAdvFilter)
+{
+	if (IsInRange(nMenuID, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24))
+	{
+		int nFilter = (nMenuID - ID_VIEW_ACTIVATEFILTER1);
+
+		if ((nFilter >= 0) && (nFilter < NUM_SHOWFILTER))
+		{
+			nShow = (FILTER_SHOW)SHOW_FILTERS[nFilter][1];
+			sAdvFilter.Empty();
+
+			if (!prefs.GetShowDefaultFiltersInFilterBar())
+				return (nShow == FS_ALL);
+
+			// else
+			return TRUE;
+		}
+	}
+	else if (IsInRange(nMenuID, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24))
+	{
+		int nFilter = (nMenuID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
+
+		if ((nFilter >= 0) && (nFilter < filterBar.AdvancedFilterNames().GetSize()))
+		{
+			nShow = FS_ADVANCED;
+
+			sAdvFilter = filterBar.AdvancedFilterNames()[nFilter];
+			ASSERT(!sAdvFilter.IsEmpty());
+
+			return TRUE;
+		}
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
+UINT CTDCMainMenu::GetSelectedFilterMenuID(const CTDLFilterBar& filterBar)
+{
+	CString sAdvFilter;
+	FILTER_SHOW nShow = filterBar.GetFilter(sAdvFilter);
+
+	if (nShow == FS_ADVANCED)
+	{
+		int nFilter = Misc::Find(sAdvFilter, filterBar.AdvancedFilterNames(), FALSE, TRUE);
+		ASSERT(nFilter != -1);
+
+		return (ID_VIEW_ACTIVATEADVANCEDFILTER1 + nFilter);
+	}
+
+	// else
+	return (ID_VIEW_ACTIVATEFILTER1 + nShow - FS_ALL);
+}
+
 void CTDCMainMenu::PrepareUserStorageMenu(CMenu* pMenu, const CTDLTasklistStorageMgr& mgrStorage, CMenuIconMgr& mgrMenuIcons)
 {
 	ASSERT(pMenu);
@@ -880,7 +901,8 @@ void CTDCMainMenu::PrepareUserStorageMenu(CMenu* pMenu, const CTDLTasklistStorag
 
 		for (int nStore = 0; nStore < nNumStorage; nStore++)
 		{
-			CString sMenuItem, sText = mgrStorage.GetStorageMenuText(nStore);
+			CString sMenuItem;
+			CEnString sText(mgrStorage.GetStorageMenuText(nStore));
 
 			if (nStore < 9)
 				sMenuItem.Format(_T("&%d %s"), nStore + 1, sText);
@@ -909,8 +931,8 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 	if (!pMenu)
 		return;
 
-	CUserToolArray aTools;
+	CTDCUserToolArray aTools;
 	prefs.GetUserTools(aTools);
 
-	CTDCToolsHelper(FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons, TRUE/*prefs.GetWantToolsgrouping()*/);
+	CTDCToolsHelper(FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons);
 }

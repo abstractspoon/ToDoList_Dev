@@ -402,14 +402,14 @@ int CTDLToolsUserInputDlg::GetArgumentListData(const CMDLINEARG& arg, CStringArr
 	if (Misc::Split(sSwitch, sValue, ' ') && (sSwitch == SWITCH_TASKCUSTOMATTRIB))
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-		GET_DEF_RET(m_aCustAttribDefs, sValue, pDef, 0);
+		GET_CUSTDEF_RET(m_aCustAttribDefs, sValue, pDef, 0);
 
 		if (!pDef->IsList())
 			return 0;
 
 		// else
 		aItems.Copy(pDef->aAutoListData);
-		Misc::AddUniqueItems(pDef->aDefaultListData, aItems);
+		Misc::AppendItems(pDef->aDefaultListData, aItems, TRUE);
 	}
 	else // built-in attribute
 	{

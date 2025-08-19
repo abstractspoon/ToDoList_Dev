@@ -21,14 +21,16 @@ class CTDCMainMenu;
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct TOOLBARBUTTON
+struct TDCCUSTOMTOOLBARBUTTON
 {
-	TOOLBARBUTTON(UINT nID = 0, LPCTSTR szImage = NULL) 
-		: nMenuID(nID), sImageID(szImage) 
+	TDCCUSTOMTOOLBARBUTTON(UINT nID = 0, LPCTSTR szImage = NULL) 
+		: 
+		nMenuID(nID), 
+		sImageID(szImage) 
 	{
 	}
 
-	BOOL operator==(const TOOLBARBUTTON& tbOther) const
+	BOOL operator==(const TDCCUSTOMTOOLBARBUTTON& tbOther) const
 	{
 		return ((nMenuID == tbOther.nMenuID) &&
 				(sImageID == tbOther.sImageID));
@@ -43,7 +45,7 @@ struct TOOLBARBUTTON
 	CString sImageID;
 };
 
-typedef CArray<TOOLBARBUTTON, TOOLBARBUTTON&> CToolbarButtonArray;
+typedef CArray<TDCCUSTOMTOOLBARBUTTON, TDCCUSTOMTOOLBARBUTTON&> CTDCToolbarButtonArray;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomToolbar window
@@ -56,20 +58,20 @@ public:
 
 // Operations
 public:
-	BOOL InitialiseButtons(const CToolbarButtonArray& aButtons,
+	BOOL InitialiseButtons(const CTDCToolbarButtonArray& aButtons,
 						   const CTDCMainMenu& mainMenu,
 						   const CShortcutManager& mgrShortcuts);
 
-	BOOL AppendTools(const CUserToolArray& aTools, BOOL bGrouped = TRUE);
+	BOOL AppendTools(const CTDCUserToolArray& aTools, BOOL bGrouped = TRUE);
 	int RemoveTools();
 		
 	// Must have exact same arrangement of 
 	// buttons and separators as original initialisation
-	BOOL ModifyButtonAttributes(const CToolbarButtonArray& aButtons,
+	BOOL ModifyButtonAttributes(const CTDCToolbarButtonArray& aButtons,
 								const CTDCMainMenu& mainMenu);
 
 	static BOOL RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs,
-								 CToolbarButtonArray& aButtons);
+								 CTDCToolbarButtonArray& aButtons);
 
 protected:
 	CToolbarHelper m_tbHelper;

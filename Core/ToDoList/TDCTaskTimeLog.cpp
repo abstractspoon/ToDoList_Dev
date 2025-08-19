@@ -28,9 +28,11 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR HEADER_LINE = _T("TODOTIMELOG VERSION");
+const CString VERSION_LINE	= _T("TODOTIMELOG VERSION");
 
-static LPCTSTR TAB = _T("\t");
+static CString TAB			= _T("\t");
+static CString COMMA		= _T(",");
+static CString SEMICOLON	= _T(";");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,14 +49,16 @@ enum CSVFMT_LOG_VERSION
 struct LOG_VERSION_INFO
 {
 	CSVFMT_LOG_VERSION nVersion;
+	int nNumHeaderRows;
 	int nTimeField;
-	int nNumFields;
+	int nMinFields;
+	int nMaxFields;
 };
 
 const LOG_VERSION_INFO LOG_VERSIONS[] = 
 {
-	{ VER_0, 2, 6 },
-	{ VER_LATEST, 7, 11 },
+	{ VER_0,		1, 2, 6, 6 },
+	{ VER_LATEST,	2, 7, 8, 12 },
 };
 const int NUM_LOG_VERSIONS = sizeof(LOG_VERSIONS) / sizeof(LOG_VERSION_INFO);
 
@@ -62,109 +66,114 @@ const int NUM_LOG_VERSIONS = sizeof(LOG_VERSIONS) / sizeof(LOG_VERSION_INFO);
 
 TASKTIMELOGITEM::TASKTIMELOGITEM()
 {
-	Reset();
+	Clear(TRUE);
+}
+
+BOOL TASKTIMELOGITEM::operator==(const TASKTIMELOGITEM& other) const
+{
+	return ((other.dwTaskID == dwTaskID) &&
+			(other.sTaskTitle == sTaskTitle) &&
+			(other.sPerson == sPerson) &&
+			(other.dtFrom == dtFrom) &&
+			(other.dtTo == dtTo) &&
+			(other.dHours == dHours) &&
+			(other.sComment == sComment) &&
+			(other.sType == sType) &&
+			(other.sPath == sPath) &&
+			(other.crAltColor == crAltColor));
 }
 
 BOOL TASKTIMELOGITEM::IsValidToLog() const
 {
-	if (dwTaskID && !sTaskTitle.IsEmpty())
-	{
-		// must have a comment or valid time
-		return (!sComment.IsEmpty() || IsValidToAnalyse());
-	}
-
-	// else 
-	return FALSE;
+	// must have a comment or valid time
+	return (!sComment.IsEmpty() || IsValidToAnalyse());
 }
 
 BOOL TASKTIMELOGITEM::IsValidToAnalyse() const
 {
-	if (dwTaskID && !sTaskTitle.IsEmpty())
-	{
-		return ((dHours != 0) && CDateHelper::IsDateSet(dtFrom) && (dtTo >= dtFrom));
-	}
-
-	// else 
-	return FALSE;
+	return ((dHours != 0) && CDateHelper::IsDateSet(dtFrom) && (dtTo >= dtFrom));
 }
 
-void TASKTIMELOGITEM::Reset()
+void TASKTIMELOGITEM::Clear(BOOL bInitPerson)
 {
 	dwTaskID = 0;
 	dHours = 0.0;
-	bTracked = TRUE;
+	crAltColor = CLR_NONE;
 
 	CDateHelper::ClearDate(dtFrom);
 	CDateHelper::ClearDate(dtTo);
 
 	sTaskTitle.Empty();
 	sComment.Empty();
-	sPerson.Empty();
 	sPath.Empty();
+	sType = CEnString(IDS_LOG_TYPETRACKED);
+
+	if (bInitPerson)
+		sPerson = Misc::GetUserName();
+	else
+		sPerson.Empty();
 }
 
 CString TASKTIMELOGITEM::FormatRow(int nRowVer, const CString& sDelim) const
 {
-	ASSERT(IsValidToLog());
-
 	CString sItem, sRowFormat(GetRowFormat(nRowVer, sDelim));
 	
+	// Note: We format dates as ISO manually to avoid any localisation
+	// that might take place in CDateHelper::FormatDate
 	switch (nRowVer)
 	{
 	case VER_0:
-		sItem.Format(sRowFormat, 
-					Misc::Format(dwTaskID),
-					sTaskTitle,
-					Misc::Format(dHours, 3), 
-					Misc::GetUserName(),
-					CDateHelper::FormatDate(dtTo, DHFD_TIME), 
-					CDateHelper::FormatDate(dtFrom, DHFD_TIME));
+		sItem.Format(sRowFormat,
+					 Misc::Format(dwTaskID),
+					 EncodeValue(sTaskTitle, sDelim),
+					 EncodeValue(Misc::Format(dHours, 3), sDelim),
+					 EncodeValue(sPerson, sDelim),
+					 dtTo.Format(_T("%Y-%m-%d %H:%M")),		// ISO
+					 dtFrom.Format(_T("%Y-%m-%d %H:%M")));	// ISO
 		break;
 		
 	case VER_LATEST:
-		sItem.Format(sRowFormat, 
-					Misc::Format(dwTaskID), 
-					sTaskTitle,
-					Misc::GetUserName(),
-					CDateHelper::FormatDate(dtFrom, DHFD_ISO),
-					CTimeHelper::FormatClockTime(dtFrom, FALSE, TRUE), 
-					CDateHelper::FormatDate(dtTo, DHFD_ISO), 
-					CTimeHelper::FormatClockTime(dtTo, FALSE, TRUE),
-					Misc::Format(dHours, 3),
-					sComment,
-					CEnString(bTracked ? IDS_LOG_TYPETRACKED : IDS_LOG_TYPEADJUSTED),
-					sPath);		
+		sItem.Format(sRowFormat,
+					 Misc::Format(dwTaskID),
+					 EncodeValue(sTaskTitle, sDelim),
+					 EncodeValue(sPerson, sDelim),
+					 dtFrom.Format(_T("%Y-%m-%d")), // ISO
+					 dtFrom.Format(_T("%H:%M")),	// ISO
+					 dtTo.Format(_T("%Y-%m-%d")),	// ISO
+					 dtTo.Format(_T("%H:%M")),		// ISO
+					 EncodeValue(Misc::Format(dHours, 3), sDelim),
+					 EncodeValue(sComment, sDelim, TRUE),
+					 EncodeValue(sType, sDelim),
+					 EncodeValue(sPath, sDelim),
+					 ((crAltColor == CLR_NONE) ? _T("") : Misc::Format((int)crAltColor)));
 		break;
 		
 	default:
 		ASSERT(0);
 	}
 
-	// handle newline chars
-	sItem.Replace(_T("\r"), _T(""));
-	sItem.Replace('\n', '|');
-	
 	return sItem;
 }
-
-
 
 BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 {
 	// NOTE: order of elements as FormatItemRow above
 	CStringArray aFields;
-	int nNumFields = Misc::Split(sRow, aFields, sDelim, TRUE);
+	int nNumFields = Misc::Split(sRow, aFields, sDelim, TRUE, TRUE); // Allow Empty and Preserve Quotes
 	
 	if (!nNumFields)
 		return FALSE;
 	
+	Clear();
+
 	// try to determine row version dynamically
 	int nRowVer = GetRowVersion(nNumFields);
-	ASSERT (nRowVer != -1);
+
+	if (nRowVer == VER_NONE)
+		return FALSE;
 	
 	COleDateTime date;
-	Reset();
-	
+
 	switch (nRowVer)
 	{
 	case VER_0:
@@ -172,15 +181,19 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 		{
 			dwTaskID = _ttoi(aFields[0]);
 			sTaskTitle = aFields[1];
-			dHours = _ttof(aFields[2]);
+			dHours = Misc::Atof(aFields[2]);
 			sPerson = aFields[3];
 			
-			// NOTE: 'To' precedes 'From' because 'To' was added later
+			// NOTE: 'To' precedes 'From' because 'From' was added later
 			if (CDateHelper::DecodeDate(aFields[4], date, TRUE))
 				dtTo = date;
+			else
+				ASSERT(0);
 			
 			if (CDateHelper::DecodeDate(aFields[5], date, TRUE))
 				dtFrom = date;
+			else
+				ASSERT(0);
 		}
 		else
 		{
@@ -192,28 +205,40 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 		if (nNumFields >= 8)
 		{
 			dwTaskID = _ttoi(aFields[0]);
-			sTaskTitle = aFields[1];
-			sPerson = aFields[2];
+			sTaskTitle = DecodeValue(aFields[1], sDelim);
+			sPerson = DecodeValue(aFields[2], sDelim);
 			
-			if (CDateHelper::DecodeDate(aFields[3], date, TRUE))
+			if (CDateHelper::DecodeDate((aFields[3] + ' ' + aFields[4]), date, TRUE))
 				dtFrom = date;
+			else
+				ASSERT(0);
 			
-			if (CDateHelper::DecodeDate(aFields[5], date, TRUE))
+			if (CDateHelper::DecodeDate((aFields[5] + ' ' + aFields[6]), date, TRUE))
 				dtTo = date;
+			else
+				ASSERT(0);
 			
-			dHours = _ttof(aFields[7]);
+			dHours = Misc::Atof(DecodeValue(aFields[7], sDelim));
 			
-			// optional fields
+			// Extra fields
 			if (nNumFields > 8)
 			{
-				sComment = aFields[8];
-				
-				if (nNumFields > 9)
+				switch (nNumFields)
 				{
-					bTracked = _ttoi(aFields[9]);
-					
-					if (nNumFields > 10)
-						sPath = aFields[10];
+					// ADDITIONAL FIELDS ADDED HERE
+
+				case 12:
+					if (!aFields[11].IsEmpty())
+						crAltColor = _ttoi(aFields[11]);
+
+				case 11: sPath		= DecodeValue(aFields[10], sDelim);
+				case 10: sType		= DecodeValue(aFields[9], sDelim);
+				case 9:  sComment	= DecodeValue(aFields[8], sDelim, TRUE);
+					break;
+
+				default:
+					ASSERT(0);
+					break;
 				}
 			}
 		}
@@ -228,7 +253,45 @@ BOOL TASKTIMELOGITEM::ParseRow(const CString& sRow, const CString& sDelim)
 		break;
 	}
 	
-	return IsValidToAnalyse();
+	return TRUE;
+}
+
+CString TASKTIMELOGITEM::EncodeValue(const CString& sValue, const CString& sDelim, BOOL bEncodeNewLines)
+{
+	if (sValue.IsEmpty())
+		return sValue;
+
+	CString sEncoded(sValue);
+	
+	if (bEncodeNewLines)
+	{
+		sEncoded.Remove('\r');
+		sEncoded.Replace('\n', '|');
+	}
+
+	if (sEncoded.Find(sDelim) >= 0)
+		Misc::MakeQuoted(sEncoded);
+
+	return sEncoded;
+}
+
+CString TASKTIMELOGITEM::DecodeValue(const CString& sValue, const CString& sDelim, BOOL bDecodeNewLines)
+{
+	if (sValue.IsEmpty())
+		return sValue;
+
+	CString sDecoded(sValue);
+
+	if (sDecoded.Find(sDelim) >= 0)
+		Misc::MakeUnquoted(sDecoded);
+
+	if (bDecodeNewLines)
+	{
+		sDecoded.Replace('|', '\n');
+		sDecoded.Replace(_T("\n"), _T("\r\n"));
+	}
+
+	return sDecoded;
 }
 
 BOOL TASKTIMELOGITEM::GetRowVersion(int nNumFields)
@@ -238,7 +301,8 @@ BOOL TASKTIMELOGITEM::GetRowVersion(int nNumFields)
 	
 	while (nVer--)
 	{
-		if (LOG_VERSIONS[nVer].nNumFields == nNumFields)
+		if ((nNumFields >= LOG_VERSIONS[nVer].nMinFields) &&
+			(nNumFields <= LOG_VERSIONS[nVer].nMaxFields))
 		{
 			nRowVer = LOG_VERSIONS[nVer].nVersion;
 			ASSERT(nVer == nRowVer);
@@ -248,7 +312,7 @@ BOOL TASKTIMELOGITEM::GetRowVersion(int nNumFields)
 	}
 
 	// else
-	return VER_LATEST;
+	return VER_NONE;
 }
 
 CString TASKTIMELOGITEM::GetRowFormat(int nRowVer, const CString& sDelim)
@@ -264,7 +328,7 @@ CString TASKTIMELOGITEM::GetRowFormat(int nRowVer, const CString& sDelim)
 	// build row format from 
 	CString sRowFormat;
 	
-	for (int nField = 0; nField < vi.nNumFields; nField++)
+	for (int nField = 0; nField < vi.nMaxFields; nField++)
 	{
 		if (!sRowFormat.IsEmpty())
 			sRowFormat += sDelim;
@@ -275,7 +339,6 @@ CString TASKTIMELOGITEM::GetRowFormat(int nRowVer, const CString& sDelim)
 	return sRowFormat;
 }
 
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -285,7 +348,7 @@ CTDCTaskTimeLog::CTDCTaskTimeLog()
 	m_nFormat(SFEF_AUTODETECT),
 	m_nVersion(VER_NONE),
 	m_bLogExists(FALSE),
-	m_sDelim(Misc::GetListSeparator())
+	m_bUseTabDelim(FALSE)
 {
 }
 	
@@ -295,7 +358,7 @@ CTDCTaskTimeLog::CTDCTaskTimeLog(LPCTSTR szRefPath, SFE_FORMAT nFormat)
 	m_nFormat(nFormat),
 	m_nVersion(VER_NONE),
 	m_bLogExists(FALSE),
-	m_sDelim(Misc::GetListSeparator())
+	m_bUseTabDelim(FALSE)
 {
 }
 
@@ -315,7 +378,7 @@ BOOL CTDCTaskTimeLog::LogTime(DWORD dwTaskID, LPCTSTR szTaskTitle, LPCTSTR szTas
 	li.sComment = sComment;
 	li.sPath = szTaskPath;
 	li.sPerson = Misc::GetUserName();
-	li.bTracked = bTracked;
+	li.sType = CEnString(bTracked ? IDS_LOG_TYPETRACKED : IDS_LOG_TYPEADJUSTED);
 	li.dHours = dHours;
 	li.dtTo = dtWhen;
 	li.dtFrom = dtWhen;
@@ -331,30 +394,36 @@ BOOL CTDCTaskTimeLog::LogTime(const TASKTIMELOGITEM& li, BOOL bLogSeparately)
 	if (!li.IsValidToLog())
 		return FALSE;
 
+	// init state
 	CString sLogPath = GetLogPath(li.dwTaskID, bLogSeparately);
 
-	// init state
-	Initialise(sLogPath);
-	ASSERT(m_nVersion != VER_NONE);
-
-	// if the file doesn't exist then we insert the 
-	// column headings as the first line
-	if (!m_bLogExists)
+	if (Initialise(sLogPath))
 	{
-		CString sHeader;
-		sHeader.Format(_T("%s %d\n%s\n"), HEADER_LINE, m_nVersion, GetLatestColumnHeader());
+		ASSERT(m_nVersion != VER_NONE);
 
-		// if Excel is installed we use UTF16 else UTF8
-		SFE_FORMAT nFormat = SFEF_UTF8;
+		// if the file doesn't exist then we insert the 
+		// column headings as the first line
+		if (!m_bLogExists)
+		{
+			CString sHeader;
+			sHeader.Format(_T("%s %d\n%s\n"), VERSION_LINE, m_nVersion, GetLatestColumnHeader());
 
-		if (CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE))
-			nFormat = SFEF_UTF16;
+			VERIFY(FileMisc::CreateFolderFromFilePath(sLogPath));
+			VERIFY(m_bLogExists = FileMisc::SaveFile(sLogPath, sHeader, m_nFormat));
+		}
 
-		VERIFY(FileMisc::CreateFolderFromFilePath(sLogPath));
-		VERIFY(FileMisc::SaveFile(sLogPath, sHeader, nFormat));
+		int nTry = 10;
+
+		while (nTry--)
+		{
+			if (FileMisc::AppendLineToFile(sLogPath, li.FormatRow(m_nVersion, GetDelimiter()), SFEF_AUTODETECT))
+				return TRUE;
+
+			::Sleep(100);
+		}
 	}
 
-	return FileMisc::AppendLineToFile(sLogPath, li.FormatRow(m_nVersion, m_sDelim), SFEF_AUTODETECT);
+	return FALSE;
 }
 
 CString CTDCTaskTimeLog::GetLogPath() const
@@ -382,119 +451,267 @@ CString CTDCTaskTimeLog::GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const
 	return sLogPath;
 }
 
+CString CTDCTaskTimeLog::GetLogFileFilter(BOOL bLogSeparately) const
+{
+	CString sFilter;
+
+	// use ref filename as the basis for the log filename
+	if (!m_sRefPath.IsEmpty())
+	{
+		CString sDrive, sFolder, sFileName;
+		FileMisc::SplitPath(m_sRefPath, &sDrive, &sFolder, &sFileName);
+
+		if (bLogSeparately)
+			sFilter.Format(_T("%s%s%s\\*_Log.csv"), sDrive, sFolder, sFileName);
+		else
+			sFilter.Format(_T("%s%s%s_Log.csv"), sDrive, sFolder, sFileName);
+	}
+
+	return sFilter;
+}
+
 CString CTDCTaskTimeLog::GetLatestColumnHeader() const // always the latest version
 {
 	// sanity check
 	ASSERT(VER_LATEST == NUM_LOG_VERSIONS - 1);
 
-	CString sRowFormat = TASKTIMELOGITEM::GetRowFormat(VER_LATEST, m_sDelim);
+	CString sRowFormat = TASKTIMELOGITEM::GetRowFormat(VER_LATEST, GetDelimiter());
 	CString sColumnHeader;
 
 	sColumnHeader.Format(sRowFormat,
-						CEnString(IDS_LOG_TASKID),
-						CEnString(IDS_LOG_TASKTITLE),
-						CEnString(IDS_LOG_USERID),
-						CEnString(IDS_LOG_STARTDATE),
-						CEnString(IDS_LOG_STARTTIME),
-						CEnString(IDS_LOG_ENDDATE),
-						CEnString(IDS_LOG_ENDTIME),
-						CEnString(IDS_LOG_TIMESPENT),
-						CEnString(IDS_LOG_COMMENT),
-						CEnString(IDS_LOG_TYPE),
-						CEnString(IDS_LOG_PATH));
+						 CEnString(IDS_LOG_TASKID),
+						 CEnString(IDS_LOG_TASKTITLE),
+						 CEnString(IDS_LOG_USERID),
+						 CEnString(IDS_LOG_STARTDATE),
+						 CEnString(IDS_LOG_STARTTIME),
+						 CEnString(IDS_LOG_ENDDATE),
+						 CEnString(IDS_LOG_ENDTIME),
+						 CEnString(IDS_LOG_TIMESPENT),
+						 CEnString(IDS_LOG_COMMENT),
+						 CEnString(IDS_LOG_TYPE),
+						 CEnString(IDS_LOG_PATH),
+						 CEnString(IDS_LOG_ALTCOLOR));
 	
 	return sColumnHeader;
 }
 
 // public static helper
-int CTDCTaskTimeLog::LoadLogItems(const CString& sLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sDelim)
+BOOL CTDCTaskTimeLog::LoadLogFile(LPCTSTR szLogPath, CTaskTimeLogItemArray& aLogItems, BOOL bAppend, CString& sHeaderDelim)
 {
+	if (!FileMisc::FileExists(szLogPath))
+		return FALSE;
+
+	CStringArray aLines;
+
+	if (!FileMisc::LoadFile(szLogPath, aLines))
+		return FALSE;
+
 	CTDCTaskTimeLog log;
-	log.Initialise(sLogPath);
+	
+	if (!log.Initialise(aLines))
+		return FALSE;
 
-	sDelim = log.GetDelimiter();
+	int nNumLines = aLines.GetSize(), nItem = 0;
+	int nNumHeaderRows = log.GetNumHeaderRows();
 
-	if (FileMisc::FileExists(sLogPath))
+	// skip header and column titles lines
+	CTaskTimeLogItemArray aTempLogItems;
+	aTempLogItems.SetSize(nNumLines - nNumHeaderRows);
+
+	for (int nLine = nNumHeaderRows; nLine < nNumLines; nLine++)
 	{
-		CStringArray aLines;
-		int nNumLines = FileMisc::LoadFile(sLogPath, aLines);
+		const CString& sLine = Misc::GetItem(aLines, nLine);
+		CString sDelim = log.GetDelimiter(sLine);
 
-		if (nNumLines)
-		{
-			int nItem = 0;
-			CTaskTimeLogItemArray aTempLogItems;
+		TASKTIMELOGITEM& li = aTempLogItems[nItem];
 
-			// skip header and column titles lines
-			aTempLogItems.SetSize(nNumLines - 2);
-
-			for (int nLine = 2; nLine < nNumLines; nLine++)
-			{
-				const CString& sLine = Misc::GetItem(aLines, nLine);
-				TASKTIMELOGITEM& li = aTempLogItems[nItem];
-
-				if (li.ParseRow(sLine, sDelim))
-					nItem++;
-			}
-
-			if (nItem)
-			{
-				// Remove unused items
-				aTempLogItems.SetSize(nItem);
-
-				if (bAppend && aLogItems.GetSize())
-					aLogItems.Append(aTempLogItems);
-				else
-					aLogItems.Copy(aTempLogItems);
-			}
-		}
+		if (li.ParseRow(sLine, sDelim))
+			nItem++;
 	}
 
-	return aLogItems.GetSize();
+	// Remove unused items
+	aTempLogItems.SetSize(nItem);
+
+	if (bAppend)
+		aLogItems.Append(aTempLogItems);
+	else
+		aLogItems.Copy(aTempLogItems);
+
+	sHeaderDelim = log.m_sHeaderDelim;
+
+	return TRUE;
 }
 
-void CTDCTaskTimeLog::Initialise(const CString& sLogPath)
+BOOL CTDCTaskTimeLog::SaveLogFile(LPCTSTR szLogPath, const CTaskTimeLogItemArray& aLogItems, BOOL bPreserveVersion)
+{
+	// sanity check
+	if (aLogItems.GetSize() == 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Note: App is responsible for permanent backups
+	CTempFileBackup backup(szLogPath);
+	CTDCTaskTimeLog log;
+
+	// If we're not preserving the format we need to delete
+	// the existing log file to force adoption of the new 
+	// format in the following call to Initialise 
+	if (!bPreserveVersion)
+		VERIFY(!FileMisc::FileExists(szLogPath) || ::DeleteFile(szLogPath));
+
+	if (!log.Initialise(szLogPath))
+		return FALSE;
+
+	// Build the array of log lines
+	CString sDelim = log.GetDelimiter();
+	int nVersion = log.m_nVersion;
+	int nNumHeaderRows = log.GetNumHeaderRows();
+	SFE_FORMAT nFormat = log.m_nFormat;
+
+	CStringArray aLines;
+	int nNumItems = aLogItems.GetSize(), nLine = 0;
+	aLines.SetSize(nNumHeaderRows + nNumItems);
+
+	if (nVersion != VER_0)
+		aLines[nLine++].Format(_T("%s %d"), VERSION_LINE, nVersion);
+
+	aLines[nLine++] = log.m_sColumnHeader;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++, nLine++)
+		aLines[nLine] = aLogItems[nItem].FormatRow(nVersion, sDelim);
+
+	CString sFileContents = Misc::FormatArray(aLines, '\n') + '\n';
+
+	// Save the log file
+	if (!FileMisc::SaveFile(szLogPath, sFileContents, nFormat)) 
+	{
+		VERIFY(backup.RestoreBackup());
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CTDCTaskTimeLog::Initialise(const CString& sLogPath)
 {
 	// Once only
 	if (m_nVersion != VER_NONE)
-		return; 
+		return TRUE; 
 
-	m_bLogExists = FileMisc::FileExists(sLogPath);
+	CStringArray aLines;
 
-	if (!m_bLogExists) // new log file
+	if (FileMisc::FileExists(sLogPath) && 
+		(FileMisc::LoadFile(sLogPath, aLines, 2) == 0))
 	{
-		m_nVersion = VER_LATEST;
-	
-		// if Excel is installed we use a tab as delimiter
-		if (CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE))
-			m_sDelim = TAB;
+		m_nVersion = VER_NONE;
+		return FALSE;
 	}
-	else
-	{
-		// get version and delimiter from file
-		m_nVersion = VER_0;
-		
-		CStringArray aLines;
-		
-		if (FileMisc::LoadFile(sLogPath, aLines, 2))
-		{
-			CString sLine = aLines[0];
-			
-			// version
-			if (sLine.Find(HEADER_LINE) != -1)
-			{
-				int nSpace = sLine.ReverseFind(' ');
-				
-				if (nSpace != -1)
-				{
-					m_nVersion = _ttoi(((LPCTSTR)sLine) + nSpace + 1);
-					sLine = aLines[1];
-				}
-			}
 
-			// check for tab char in column header
-			if (sLine.Find(TAB) != -1)
-				m_sDelim = TAB;
-		}
-	}
+	return Initialise(aLines);
 }
 
+BOOL CTDCTaskTimeLog::Initialise(const CStringArray& aLines)
+{
+	// Once only
+	if (m_nVersion != VER_NONE)
+		return TRUE;
+
+	int nNumLines = aLines.GetSize();
+
+	m_bLogExists = (nNumLines > 0);
+	m_bUseTabDelim = CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE);
+	m_nFormat = (m_bUseTabDelim ? SFEF_UTF16 : SFEF_UTF8);
+
+	m_nVersion = VER_LATEST; // default
+	m_sHeaderDelim = GetDelimiter(); // default
+	m_sColumnHeader = GetLatestColumnHeader(); // default
+
+	if (m_bLogExists)
+	{
+		CString sLine = aLines[0];
+
+		// version
+		if (sLine.Find(VERSION_LINE) != -1)
+		{
+			CString sVer;
+			Misc::Split(sLine, sVer, VERSION_LINE);
+
+			m_nVersion = _ttoi(sVer);
+
+			if (nNumLines < 2)
+				sLine = GetLatestColumnHeader();
+			else
+				sLine = aLines[1];
+		}
+		else
+		{
+			m_nVersion = VER_0;
+		}
+
+		// Test for column header delimiter
+		m_sColumnHeader = sLine;
+		m_sHeaderDelim = TAB;
+
+		CStringArray aUnused;
+		int nNumFields = Misc::Split(m_sColumnHeader, aUnused, m_sHeaderDelim);
+
+		if (TASKTIMELOGITEM::GetRowVersion(nNumFields) != VER_NONE)
+		{
+			m_bUseTabDelim = TRUE;
+		}
+		else
+		{
+			m_bUseTabDelim = FALSE;
+
+			// Try some others
+			m_sHeaderDelim = COMMA;
+
+			nNumFields = Misc::Split(m_sColumnHeader, aUnused, m_sHeaderDelim);
+
+			if (TASKTIMELOGITEM::GetRowVersion(nNumFields) == VER_NONE)
+			{
+				m_sHeaderDelim = SEMICOLON;
+				nNumFields = Misc::Split(m_sColumnHeader, aUnused, m_sHeaderDelim);
+
+				if (TASKTIMELOGITEM::GetRowVersion(nNumFields) == VER_NONE)
+					m_sHeaderDelim.Empty(); // unknown
+			}
+		}
+	}
+
+	return TRUE;
+}
+
+CString CTDCTaskTimeLog::GetDelimiter(const CString& sLine) const
+{
+	if (!sLine.IsEmpty())
+	{
+		ASSERT(isdigit(sLine[0]));
+
+		int nLen = sLine.GetLength(), nPos = 0;
+
+		while (++nPos < nLen)
+		{
+			TCHAR nVal = sLine[nPos];
+
+			if (!isdigit(nVal))
+				return CString(nVal);
+		}
+	}
+
+	// else
+	return (m_bUseTabDelim ? TAB : Misc::GetListSeparator());
+}
+
+int CTDCTaskTimeLog::GetNumHeaderRows() const
+{
+	if ((m_nVersion < 0) || (m_nVersion >= NUM_LOG_VERSIONS))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	return LOG_VERSIONS[m_nVersion].nNumHeaderRows;
+}

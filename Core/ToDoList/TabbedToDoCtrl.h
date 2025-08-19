@@ -14,9 +14,6 @@
 #include "tdlviewTabcontrol.h"
 #include "tdltasklistctrloptionscombobox.h"
 
-#include "..\shared\misc.h"
-#include "..\shared\subclass.h"
-
 #include "..\Interfaces\UIExtensionMgr.h"
 
 #include <afxtempl.h>
@@ -32,7 +29,6 @@ struct VIEWDATA
 	BOOL WantAnyAttribute(const CTDCAttributeMap& other) const;
 
 	TDSORT sort;
-	CTaskListDropTarget dropTgt;
 	IUIExtension* pExtension;
 	CTDCAttributeMap mapWantedAttrib;
 
@@ -63,13 +59,13 @@ public:
 	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTaskLink);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs);
 
+	int GetTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int GetSelectedTaskCount() const;
 	BOOL ScrollToSelectedTask();
 	BOOL HasSelection() const { return GetSelectedTaskCount(); }
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect); 
-	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 
@@ -107,6 +103,12 @@ public:
 
 	virtual HTREEITEM GetUpdateControlsItem() const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
+	virtual CString GetControlDescription(const CWnd* pCtrl) const;
+	virtual void NotifyEndPreferencesUpdate();
+	virtual BOOL DoIdleProcessing();
+	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const;
+	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes, BOOL bOrdered = FALSE) const;
+	virtual void DeselectAll();
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
@@ -119,18 +121,14 @@ public:
 	BOOL CanGotoNextTask(TDC_GOTO nDirection) const;
 	BOOL GotoNextTopLevelTask(TDC_GOTO nDirection); 
 	BOOL CanGotoNextTopLevelTask(TDC_GOTO nDirection) const;
-	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttrib = TDCA_TASKNAME) const;
+	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttribID = TDCA_TASKNAME) const;
 	void SelectAll();
 	BOOL CanSelectAll() const;
-
 	BOOL CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const;
 	void ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand = TRUE);
-	
-	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
-	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 
-	void SetFocusToTasks();
-	BOOL TasksHaveFocus() const;
+	void SetFocus(TDC_SETFOCUSTO nLocation);
+	BOOL HasFocus(TDC_SETFOCUSTO nLocation) const;
 
 	BOOL SelectTasksInHistory(BOOL bForward);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
@@ -138,21 +136,17 @@ public:
 	void SetUITheme(const CUIThemeFile& theme);
 	void ResizeAttributeColumnsToFit();
 	BOOL CanResizeAttributeColumnsToFit() const;
-	void RedrawReminders();
+	void RefreshReminders();
 	void EndTimeTracking(BOOL bAllowConfirm) { CToDoCtrl::EndTimeTracking(bAllowConfirm); }
 	void BeginTimeTracking(DWORD dwTaskID) { CToDoCtrl::BeginTimeTracking(dwTaskID); }
 	void EndSelectedTaskEdit();
-
-	virtual CString GetControlDescription(const CWnd* pCtrl) const;
-	virtual void RebuildCustomAttributeUI();
-	virtual void NotifyEndPreferencesUpdate();
 
 	// override these so we can notify extensions of color changes
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetCompletedTaskColor(COLORREF color);
 	void SetFlaggedTaskColor(COLORREF color);
 	void SetReferenceTaskColor(COLORREF color);
-	void SetAttributeColors(TDC_ATTRIBUTE nAttrib, const CTDCColorMap& colors);
+	void SetAttributeColors(TDC_ATTRIBUTE nAttribID, const CTDCColorMap& colors);
 	void SetStartedTaskColors(COLORREF crStarted, COLORREF crStartedToday);
 	void SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
     void SetGridlineColor(COLORREF color);
@@ -162,7 +156,7 @@ public:
 protected:
 	CTDLTaskListCtrl m_taskList;
 	CTDLViewTabControl m_tabViews;
-	CTaskListDropTarget m_dtList;
+	CTDCTaskListDropTarget m_dtList;
 	CComboBox m_cbListGroupBy;
 	CTDLTaskListCtrlOptionsComboBox m_cbListOptions;
 
@@ -211,12 +205,14 @@ protected:
 
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnLabelEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRestoreLastTaskView(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnMidnight(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnSplitChange(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnUIExtSelectTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam);
@@ -239,16 +235,16 @@ protected:
 	const TDSORT& GetSort() const;
 
 	virtual void SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
-	virtual void ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos);
+	virtual void ReposTaskCtrl(const CRect& rTasks);
 	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bOn);
-	virtual void UpdateTasklistVisibility();
+	virtual void ShowTaskCtrl(BOOL bShow);
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
 	virtual DWORD GetNextNonSelectedTaskID() const;
-	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
+	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
-	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
+	virtual int GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom = 0, int nTo = -1) const;
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildTree = FALSE) const; 
@@ -256,27 +252,30 @@ protected:
 
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 	virtual void OnTaskIconsChanged();
-	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
+	virtual void OnCustomAttributesChanged();
+	virtual void OnFirstSave(const CTaskFile& tasks);
 
 	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE, const void* pContext = NULL);
-	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const;
+	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext = NULL) const;
 	virtual BOOL GetLabelEditRect(CRect& rScreen); // screen coords
+	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
+	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
 
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
-	int FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, int nStart, BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const;
+	int FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttribID, int nStart, BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const;
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void LoadState();
 	void SaveState();
-	BOOL ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttrib) const;
+	BOOL ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttribID) const;
 	BOOL ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
 	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 	void BuildListGroupByCombo();
-	void BuildListOptionsCombo();
+	void InitListOptionsCombo();
 	void ResortList(BOOL bAllowToggle = FALSE);
-	BOOL HasListOption(DWORD dwOption) const { return ((m_dwListOptions & dwOption) == dwOption); }
+	BOOL HasListOption(DWORD dwOption) const;
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree(BOOL bEnsureSelection);
@@ -317,12 +316,12 @@ protected:
 	IUIExtensionWindow* GetExtensionWnd(FTC_VIEW nView) const;
 	BOOL GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, VIEWDATA*& pData) const;
 	BOOL HasAnyExtensionViews() const;
-	BOOL AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttrib) const;
+	BOOL AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttribID) const;
 	BOOL AnyExtensionViewWantsChanges(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL GetExtensionViewsWantedChanges(const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const;
 	BOOL ExtensionViewWantsChanges(int nExt, const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL GetExtensionViewWantedChanges(int nExt, const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const;
-	BOOL ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) const;
+	BOOL ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttribID) const;
 	BOOL AllExtensionViewsNeedFullUpdate() const;
 	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);
 	void EndExtensionProgress();
@@ -342,13 +341,13 @@ protected:
 	void RefreshExtensionViewSort(FTC_VIEW nView);
 	BOOL ExtensionCanSortBy(FTC_VIEW nView, TDC_ATTRIBUTE nBy) const;
 	BOOL GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nDirection, DWORD& dwDestParentID, DWORD& dwDestPrevSiblingID) const;
-	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const;
+	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttribID) const;
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, DWORD dwFlags, CTaskFile& tasks) const;
+	BOOL CanEditSelectedExtensionTask(const IUITASKMOD& mod, DWORD& dwTaskID) const;
 	
 	int GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	int GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
-	BOOL CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const;
 	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
 
 	BOOL AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
@@ -362,6 +361,7 @@ protected:
 	static int PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData);
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);
+	static void PrepareAttributesForExtensionViewUpdate(CTDCAttributeMap& mapAttribIDs);
 
 };
 

@@ -37,7 +37,8 @@ enum THU_HMS
 	HMS_ALLOWZERO		= 0x01,
 	HMS_DECIMALPLACES	= 0x02,
 	HMS_WANTSECONDS		= 0x04,
-	HMS_FORMATSPACED	= 0x08
+	HMS_FORMATSPACED	= 0x08,
+	HMS_PRESERVEUNITS	= 0x10
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -50,8 +51,6 @@ public:
 	
 	double Convert(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const;
 	CString FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFlags = HMS_DECIMALPLACES) const;
-	CString FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces) const;
-	CString FormatTime(double dTime, int nDecPlaces) const;
 
 	int Compare(double dTime1, TH_UNITS nUnits1, double dTime2, TH_UNITS nUnits2) const;
 
@@ -65,7 +64,10 @@ public:
 	static BOOL DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits, BOOL bMustHaveSign = TRUE, TH_UNITS nDefaultUnits = THU_HOURS);
 	static TH_UNITS DecodeUnits(TCHAR cUnits, TH_UNITS nDefault = THU_HOURS);
 	static TH_UNITS DecodeUnits(LPCTSTR szValueWithUnits, TH_UNITS nDefault = THU_HOURS);
+	static BOOL IsValidUnits(TH_UNITS nUnits);
 
+	static CString FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces, TCHAR cSpacer = ' ');
+	static CString FormatTime(double dTime, int nDecPlaces, TCHAR cSpacer = ' ');
 	static CString FormatClockTime(const COleDateTime& dtTime, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
 	static CString FormatClockTime(int nHour, int nMin, int nSec = 0, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
 	static double DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds = FALSE); // returns 0-24
@@ -87,7 +89,6 @@ protected:
 								double dLeftOverMultiplier, BOOL bDecPlaces, TCHAR cDelim);
 	static CString FormatTimeHMS(int nTime, TH_UNITS nUnits);
 
-	static BOOL IsValidUnit(TH_UNITS nUnits);
 	static BOOL RemovePM(CString& sTime);
 	static BOOL RemoveAM(CString& sTime);
 };

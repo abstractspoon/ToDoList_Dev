@@ -33,6 +33,7 @@ enum // options
 	TCCO_SHOWDATEINEVERYCELL					= 0x00100000,
 	TCCO_SHOWWEEKNUMINCELLDATE					= 0x00200000,
 	TCCO_DISPLAYACTIVETODAY						= 0x00400000,
+	TCCO_SHOWISODATES							= 0x00800000,
 
 	TCCO_DATEDISPLAYOPTIONS						= (TCCO_DISPLAYCONTINUOUS | 
 													TCCO_DISPLAYSTART | 
@@ -40,7 +41,11 @@ enum // options
 													TCCO_DISPLAYDONE | 
 													TCCO_DISPLAYACTIVETODAY |
 													TCCO_DISPLAYCALCSTART | 
-													TCCO_DISPLAYCALCDUE)
+													TCCO_DISPLAYCALCDUE),
+
+	TCCO_DATEFORMATOPTIONS						= (TCCO_SHOWISODATES |
+												   TCCO_SHOWDATEINEVERYCELL |
+												   TCCO_SHOWWEEKNUMINCELLDATE)
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -51,6 +56,7 @@ enum TCC_HITTEST
 	TCCHT_BEGIN,
 	TCCHT_MIDDLE,
 	TCCHT_END,
+	TCCHT_ICON,
 };
 
 /////////////////////////////////////////////////////////////////////////////

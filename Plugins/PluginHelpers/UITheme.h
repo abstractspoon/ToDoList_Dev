@@ -65,9 +65,9 @@ namespace Abstractspoon
 
 				bool HasAppColor(AppColor color);
 				void RecalcToolbarHotColor();
-				bool IsDarkMode();
 
 				static void DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style);
+				static bool IsDarkMode();
 
 			private:
 				CUIThemeFile* m_pTheme;
@@ -94,11 +94,13 @@ namespace Abstractspoon
 				virtual void OnRenderOverflowButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderSplitButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e) override;
+				virtual void OnRenderToolStripBackground(Windows::Forms::ToolStripRenderEventArgs^ e) override;
 				virtual void OnRenderToolStripBorder(Windows::Forms::ToolStripRenderEventArgs^ e) override;
 				virtual void OnRenderItemText(Windows::Forms::ToolStripItemTextRenderEventArgs^ e) override;
 				virtual void OnRenderItemCheck(Windows::Forms::ToolStripItemImageRenderEventArgs^ e) override;
+				virtual void OnRenderItemImage(Windows::Forms::ToolStripItemImageRenderEventArgs^ e) override;
 
-				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow, bool isMenuBar) override;
+				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow/*, bool isMenuBar*/) override;
 				virtual Drawing::Pen^ GetSeperatorLightPen() override;
 				virtual Drawing::Pen^ GetSeperatorDarkPen() override;
 
@@ -111,11 +113,15 @@ namespace Abstractspoon
 
 				UITheme::RenderStyle m_Style;
 
+				static System::Windows::Forms::VisualStyles::VisualStyleRenderer^ s_vsRenderer = nullptr;
+
 				bool ValidColours();
 				bool RenderButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e);
 				void DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ arrowRect);
 				bool DrawButtonBackground(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect, Toolbars::ItemState state);
 
+				static bool DrawStyledMenu(Drawing::Graphics^ g, Drawing::Rectangle^ rect, int part, int state);
+				static bool IsStyled();
 			};
 
 		}

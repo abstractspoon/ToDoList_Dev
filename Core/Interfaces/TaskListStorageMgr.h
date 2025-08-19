@@ -23,6 +23,9 @@ struct TSM_TASKLISTINFO : ITS_TASKLISTINFO
 	void Reset();
 	BOOL HasInfo() const;
 
+	BOOL HasTasklistName() const;
+	void SetTasklistName(LPCTSTR szName);
+
 	BOOL HasLocalFilePath() const;
 	void SetLocalFilePath(LPCTSTR szFilePath);
 	void ClearLocalFilePath();
@@ -30,9 +33,12 @@ struct TSM_TASKLISTINFO : ITS_TASKLISTINFO
 	CString EncodeInfo(BOOL bIncPassword = TRUE) const;
 	BOOL DecodeInfo(const CString& sInfo, BOOL bIncPassword = TRUE);
 
+	static BOOL IsStorage(const CString& sInfo, BOOL bIncPassword = TRUE);
+
 	CString sStorageID;
 
 protected:
+	static BOOL DecodeInfo(const CString& sPart, LPTSTR szAttrib, int nMaxLen);
 	static CString Decode(const CString& sData);
 	static CString Encode(const CString& sData);
 };
@@ -51,8 +57,8 @@ public:
 	CString GetStorageTypeID(int nStorage) const;
 	HICON GetStorageIcon(int nStorage) const;
 	
-	BOOL RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, int nByStorage, IPreferences* pPrefs, BOOL bSilent = FALSE);
-	BOOL StoreTasklist(TSM_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, int nByStorage, IPreferences* pPrefs, BOOL bSilent = FALSE);
+	BOOL RetrieveTasklist(TSM_TASKLISTINFO* pFInfo, ITaskList* pDestTaskFile, int nByStorage, IPreferences* pPrefs, BOOL bPrompt);
+	BOOL StoreTasklist(TSM_TASKLISTINFO* pFInfo, const ITaskList* pSrcTaskFile, int nByStorage, IPreferences* pPrefs, BOOL bPrompt);
 
 	int FindStorage(LPCTSTR szTypeID) const;
 	

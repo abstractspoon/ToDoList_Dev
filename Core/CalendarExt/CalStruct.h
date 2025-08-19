@@ -94,7 +94,7 @@ public:
 	inline DWORD GetTaskID() const { return dwTaskID; }
 
 	virtual COLORREF GetFillColor(BOOL bTextIsBack) const;
-	virtual COLORREF GetBorderColor(BOOL bTextIsBack) const;
+	virtual COLORREF GetBorderColor(BOOL bSelected, BOOL bTextIsBack) const;
 	virtual COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 	BOOL HasColor() const;
 
@@ -158,6 +158,10 @@ struct TASKCALEXTENSIONITEM : public TASKCALITEM
 {
 	TASKCALEXTENSIONITEM(const TASKCALITEM& tciOrg, DWORD dwExtID);
 
+	COLORREF GetFillColor(BOOL bTextIsBack) const;
+	COLORREF GetBorderColor(BOOL bSelected, BOOL bTextIsBack) const;
+	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
+
 	const DWORD dwRealTaskID;
 };
 /////////////////////////////////////////////////////////////////////////////
@@ -165,10 +169,6 @@ struct TASKCALEXTENSIONITEM : public TASKCALITEM
 struct TASKCALFUTUREOCURRENCE : public TASKCALEXTENSIONITEM
 {
 	TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange);
-
-	COLORREF GetFillColor(BOOL bTextIsBack) const;
-	COLORREF GetBorderColor(BOOL bTextIsBack) const;
-	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -181,10 +181,6 @@ struct TASKCALCUSTOMDATE : public TASKCALEXTENSIONITEM
 	COleDateTime GetDate() const { return dates.GetAnyStart(); }
 
 	const CString sCustomAttribID;
-
-	COLORREF GetFillColor(BOOL bTextIsBack) const;
-	COLORREF GetBorderColor(BOOL bTextIsBack) const;
-	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -214,6 +210,8 @@ public:
 	DWORD GetNextTaskID(POSITION& pos) const;
 	BOOL HasTask(DWORD dwTaskID) const;
 	BOOL IsParentTask(DWORD dwTaskID) const;
+
+	static BOOL WantHideTask(const TASKCALITEM* pTCI, DWORD dwOptions, LPCTSTR szHideParentTag);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -231,10 +229,29 @@ class CTaskCalItemArray : public CArray<TASKCALITEM*, TASKCALITEM*&>
 public:
 	void SortItems(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending);
 	int FindItem(DWORD dwTaskID) const;
+	int GetNextItem(DWORD dwTaskID, BOOL bForwards = TRUE) const;
 
 protected:
 	static int CompareItems(const void* pV1, const void* pV2);
+};
 
+/////////////////////////////////////////////////////////////////////////////
+
+class CSortedTaskCalItemArray : protected CTaskCalItemArray
+{
+public:
+	CSortedTaskCalItemArray(const CTaskCalItemMap& mapTasks);
+
+	const CTaskCalItemArray& GetTasks();
+
+	void SetNeedsRebuild();
+	void SetNeedsResort(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending);
+
+protected:
+	const CTaskCalItemMap& m_mapTasks;
+
+	TDC_ATTRIBUTE m_nSortBy;
+	BOOL m_bNeedsResort, m_bSortAscending;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -252,7 +269,7 @@ public:
 	BOOL HasHeat() const { return m_mapHeat.GetCount(); }
 
 	BOOL SetColorPalette(const CDWordArray& aColors);
-	BOOL Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttrib, DWORD dwOptions);
+	BOOL Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions, LPCTSTR szHideParentTag);
 
 	int GetHeat(const COleDateTime& date) const;
 	COLORREF GetColor(const COleDateTime& date) const;

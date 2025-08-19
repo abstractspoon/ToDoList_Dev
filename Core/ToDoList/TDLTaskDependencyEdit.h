@@ -30,11 +30,12 @@ public:
 	CTDLTaskDependencyEdit();
 	virtual ~CTDLTaskDependencyEdit();
 
-	void GetDependencies(CTDCDependencyArray& aDepends) const;
+	int GetDependencies(CTDCDependencyArray& aDepends) const;
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	void SetDependenciesAreCircular(BOOL bCircular = TRUE, COLORREF crCircular = 255);
+	CString FormatDependencies(TCHAR cSep = NULL);
 	
-	BOOL DoEdit(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
+	BOOL DoEdit(const CDWordArray& aDependentTaskIDs, const CTaskFile& tasks, const CTDCImageList& ilTasks,
 				BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes);
 	void DDX(CDataExchange* pDX, CTDCDependencyArray& aValues);
 
@@ -71,14 +72,15 @@ protected:
 class CTDLTaskDependencyListCtrl : public CInputListCtrl
 {
 public:
-	CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
-							   BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes);
+	CTDLTaskDependencyListCtrl(const CDWordArray& aDependentTaskIDs, const CTaskFile& tasks, 
+							   const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes);
 
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 
 protected:
 	CTDLTaskComboBox m_cbTasks;
+	CDWordArray m_aDependentTaskIDs;
 	BOOL m_bShowParentTasksAsFolders, m_bShowLeadInTimes;
 
 	const CTaskFile& m_tasks;
@@ -102,7 +104,6 @@ protected:
 
 protected:
 	void PrepareTaskCombo(int nRow);
-	void PopulateTaskCombo(const CTaskFile& tasks, HTASKITEM hTask, int nLevel);
 };
 
 // ----------------------------------------------
@@ -111,9 +112,9 @@ class CTDLTaskDependencyEditDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTaskDependencyEditDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
-							  const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, 
-							  BOOL bShowLeadInTimes, CWnd* pParent = NULL);   // standard constructor
+	CTDLTaskDependencyEditDlg(const CDWordArray& aDependentTaskIDs, const CTaskFile& tasks, 
+							  const CTDCImageList& ilTasks, const CTDCDependencyArray& aDepends, 
+							  BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes, CWnd* pParent = NULL);
 
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 

@@ -31,7 +31,7 @@ public:
    void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const;
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey);
 
-   bool IUIExtension::SupportsTaskSelection(void) const { return true; }
+   bool SupportsTaskSelection() const { return true; }
 
 protected:
    HICON m_hIcon;
@@ -46,9 +46,7 @@ class CEvidenceBoardUIExtensionBridgeWindow : public IUIExtensionWindow
 public:
 	CEvidenceBoardUIExtensionBridgeWindow(ITransText* pTT);
 
-   void Release(); // releases the interface
-   BOOL Create(UINT nCtrlID, DWORD nStyle, 
-      long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
+   BOOL Create(UINT nCtrlID, DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
    HICON GetIcon() const;
    LPCWSTR GetMenuText() const; // caller must copy result only
@@ -59,11 +57,12 @@ public:
    bool SupportsTaskSelection() const { return false; }
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
-   bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const;
+   bool WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const;
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);
    void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
+   bool DoIdleProcessing();
 
    bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;

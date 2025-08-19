@@ -32,7 +32,7 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle,
 	CTDLDialog(IDD_TRANSFORM_DIALOG, _T("Transform"), pParent), 
 	m_dlgTaskSel(aAttribDefs, _T("Transform"), bEnableSubtaskSelection),
 	m_sTitle(szTitle), 
-	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
+	m_eStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {
 	//{{AFX_DATA_INIT(CTDLTransformDialog)
 	//}}AFX_DATA_INIT

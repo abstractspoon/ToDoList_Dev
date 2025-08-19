@@ -64,10 +64,10 @@ public:
 		}
 		else
 		{
-			if (CB_ERR == SelectItemByData(combo, (DWORD)value))
+			if (CB_ERR == SelectItemByDataT(combo, (DWORD)value))
 			{
 				value = fallbackValue;
-				VERIFY(SelectItemByData(combo, (DWORD)value) != CB_ERR);
+				VERIFY(SelectItemByDataT(combo, (DWORD)value) != CB_ERR);
 			}
 		}
 	}
@@ -82,6 +82,15 @@ public:
 	static CString GetCtrlText(const CWnd* pWnd, BOOL bStripAccelerator = TRUE);
 	static HWND GetWindowFromPoint(HWND hwndParent, POINT ptScreen);
 	static HWND GetParentOwner(HWND hWnd);
+	static HWND GetParentDialog(HWND hWnd, DWORD dwReqStyles = WS_POPUP | WS_CAPTION);
+
+	struct DLGCTRL
+	{
+		int nCtrlID;
+		LPCTSTR szClass;
+		UINT nReqStyles;
+	};
+	static BOOL IsDialog(HWND hWnd, const DLGCTRL ctrls[], int nNumCtrls);
 
 	static int GetCtrlsCount(const CWnd* pParent, LPCTSTR szClass = NULL);
 	static int GetCtrlIDs(const CWnd* pParent, CUIntArray& aCtrlIDs, LPCTSTR szClass = NULL);
@@ -110,10 +119,13 @@ public:
 	static void SetStyle(CWnd* pWnd, DWORD dwStyle, BOOL bSet = TRUE);
 	static BOOL HasStyle(HWND hWnd, DWORD dwStyle, BOOL bExStyle = FALSE);
 
-	// covers static text, radiobuttons, checkboxes
+	// covers radiobuttons and checkboxes
 	static void ResizeButtonStaticTextFieldsToFit(CWnd* pParent);
-	static void ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef = NULL);
-	static void ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef = NULL);
+
+	// covers static text, radiobuttons and checkboxes
+	// Returns the width difference
+	static int ResizeStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef = NULL);
+	static int ResizeStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef = NULL);
 
 	// CEdit and CRichEditCtrl
 	static BOOL SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen);
@@ -121,7 +133,7 @@ public:
 
 	// Comboboxes and Listboxes
 	template <class T, class S>
-	static int BuildItemDataMap(const S& ctrl, T& mapItems)
+	static int BuildItemDataMapT(const S& ctrl, T& mapItems)
 	{
 		mapItems.RemoveAll();
 		int nNumItem = ctrl.GetCount();
@@ -135,7 +147,7 @@ public:
 	}
 	
 	template <class T, class S>
-	static int FindItemByData(const S& ctrl, T itemData)
+	static int FindItemByDataT(const S& ctrl, T itemData)
 	{
 		int nNumItem = ctrl.GetCount();
 
@@ -149,16 +161,16 @@ public:
 	}
 
 	template <class T, class S>
-	static int SelectItemByData(S& ctrl, T itemData)
+	static int SelectItemByDataT(S& ctrl, T itemData)
 	{
-		int nItem = FindItemByData(ctrl, itemData);
+		int nItem = FindItemByDataT(ctrl, itemData);
 		ctrl.SetCurSel(nItem);
 
 		return nItem;
 	}
 
 	template <class T, class S>
-	static T GetSelectedItemData(const S& ctrl, T fallbackValue)
+	static T GetSelectedItemDataT(const S& ctrl, T fallbackValue)
 	{
 		int nSel = ctrl.GetCurSel();
 
@@ -170,7 +182,7 @@ public:
 	}
 
 	template <class T, class S>
-	static int AddString(S& ctrl, LPCTSTR szItem, T itemData)
+	static int AddStringT(S& ctrl, LPCTSTR szItem, T itemData)
 	{
 		int nIndex = ctrl.AddString(szItem);
 
@@ -181,13 +193,13 @@ public:
 	}
 
 	template <class T, class S>
-	static int AddString(S& ctrl, UINT nIDItem, T itemData)
+	static int AddStringT(S& ctrl, UINT nIDItem, T itemData)
 	{
-		return AddString(ctrl, CEnString(nIDItem), itemData);
+		return AddStringT(ctrl, CEnString(nIDItem), itemData);
 	}
 
 	template <class T, class S>
-	static int InsertString(S& ctrl, int nPos, LPCTSTR szItem, T itemData)
+	static int InsertStringT(S& ctrl, int nPos, LPCTSTR szItem, T itemData)
 	{
 		int nIndex = ctrl.InsertString(nPos, szItem);
 
@@ -198,17 +210,18 @@ public:
 	}
 
 	template <class T, class S>
-	static int InsertString(S& ctrl, int nPos, UINT nIDItem, T itemData)
+	static int InsertStringT(S& ctrl, int nPos, UINT nIDItem, T itemData)
 	{
-		return InsertString(ctrl, nPos, CEnString(nIDItem), itemData);
+		return InsertStringT(ctrl, nPos, CEnString(nIDItem), itemData);
 	}
 	
 	// comboboxes
 	static int SetComboBoxItems(CComboBox& combo, const CStringArray& aItems);
 	static int GetComboBoxItems(const CComboBox& combo, CStringArray& aItems);
-	static int RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef = NULL, int nTabWidth = -1, int nExtra = 0);
+	static void RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef = NULL, int nTabWidth = -1);
 	static int CalcMaxTextWidth(CComboBox& combo, int nMinWidth = 0, BOOL bDropped = FALSE, CDC* pDCRef = NULL, int nTabWidth = 0);
 	static int SelectItemByValue(CComboBox& combo, int nValue);
+	static int SelectItemExact(CComboBox& combo, LPCTSTR szItem);
 	static DWORD GetSelectedItemData(const CComboBox& combo);
 	static int GetSelectedItemAsValue(const CComboBox& combo);
 	static CString GetSelectedItem(const CComboBox& combo);
@@ -219,6 +232,7 @@ public:
 	static int FindItemByValue(const CComboBox& combo, int nValue);
 	static BOOL SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL bReadonly = TRUE, int nDropHeight = 200);
 	static void SetComboEditReadonly(CComboBox& combo, BOOL bReadonly = TRUE);
+	static BOOL IsComboEdit(HWND hWnd);
 	static BOOL ComboHasEdit(const CComboBox& combo);
 	static void MoveCombo(CComboBox& combo, const CRect& rNew, int nDropHeight = 200);
 
@@ -248,6 +262,7 @@ public:
 	static CRect GetCtrlRect(const CWnd* pParent, UINT nCtrlID);
 	static CRect GetChildRect(const CWnd* pChild);
 	static int GetChildHeight(const CWnd* pChild);
+	static int GetChildWidth(const CWnd* pChild);
 
 	static void SetCtrlState(const CWnd* pParent, UINT nCtrlID, RT_CTRLSTATE nState);
 	static void SetCtrlState(HWND hCtrl, RT_CTRLSTATE nState);
@@ -265,9 +280,12 @@ public:
 
 	static void EnableAllCtrls(const CWnd* pParent, BOOL bEnable = TRUE);
 	static void InvalidateAllCtrls(const CWnd* pParent, BOOL bErase = TRUE);
+	static void InvalidateCtrl(const CWnd* pParent, UINT nCtrlID, BOOL bErase = TRUE, BOOL bUpdate = FALSE);
+	static void InvalidateChild(const CWnd* pChild, BOOL bErase = TRUE, BOOL bUpdate = FALSE);
 
 	static BOOL TrackMouseLeave(HWND hWnd, BOOL bEnable = TRUE, BOOL bIncludeNonClient = TRUE);
-	
+	static BOOL IsMouseDownInWindow(HWND hWnd);
+
 	// helpers for updating only a single item
 	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate = TRUE);
 	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, short& value, BOOL bSaveAndValidate = TRUE);

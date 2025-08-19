@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "ToDoCtrlMgr.h"
-#include "tdstringres.h"
+#include "tdcstringres.h"
 #include "TDCTasktimelog.h"
 #include "TDCContentMgr.h"
 
@@ -128,8 +128,11 @@ BOOL CToDoCtrlMgr::TDCITEM::IsSelectable() const
 	return (!HasFilePath() || bLoaded || FileMisc::FileExists(pTDC->GetFilePath()));
 }
 
-BOOL CToDoCtrlMgr::TDCITEM::HasFilePath() const
+BOOL CToDoCtrlMgr::TDCITEM::HasFilePath(BOOL bIncStorage) const
 {
+	if (!bIncStorage && UsesStorage())
+		return FALSE;
+
 	return pTDC->HasFilePath();
 }
 
@@ -157,30 +160,56 @@ void CToDoCtrlMgr::TDCITEM::RefreshPathType()
 	}
 }
 
-void CToDoCtrlMgr::TDCITEM::ClearStorageDetails()
+BOOL CToDoCtrlMgr::TDCITEM::ClearStorageDetails(BOOL bIncFilePath)
 {
+	if (!UsesStorage())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	storageinfo.Reset();
+
+	if (bIncFilePath)
+	{
+		pTDC->SetFilePath(_T(""));
+		bLoaded = FALSE;
+	}
+
 	pTDC->SetAlternatePreferencesKey(_T(""));
+	return TRUE;
 }
 
-void CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
+BOOL CToDoCtrlMgr::TDCITEM::SetStorageDetails(const TSM_TASKLISTINFO& info)
 {
-	if (info.HasInfo())
-	{
-		storageinfo = info;
+	ASSERT(info.HasInfo());
 
-		// set filename and alternate pref name to be the display name
-		pTDC->SetFilePath(info.szDisplayName);
-		pTDC->SetAlternatePreferencesKey(info.szDisplayName);
+	if (!info.HasInfo())
+	{
+		ASSERT(0);
+		return FALSE;
 	}
-	else
-		ClearStorageDetails();
+
+	storageinfo = info;
+	bLoaded = TRUE;
+
+	// set filename and alternate pref name to be the display name
+	pTDC->SetFilePath(info.szDisplayPath);
+	pTDC->SetAlternatePreferencesKey(info.szDisplayPath);
+
+	return TRUE;
 }
 
 CString CToDoCtrlMgr::TDCITEM::GetFriendlyProjectName() const 
 { 
 	if (UsesStorage() && pTDC->GetProjectName().IsEmpty())
-		return storageinfo.szDisplayName;
+	{
+		if (storageinfo.HasTasklistName())
+			return storageinfo.szTasklistName;
+
+		// else
+		return storageinfo.szDisplayPath;
+	}
 
 	// else
 	return pTDC->GetFriendlyProjectName(nUntitledIndex); 
@@ -337,7 +366,7 @@ CString CToDoCtrlMgr::GetDisplayPath(int nIndex) const
 	TSM_TASKLISTINFO storageInfo;
 
 	if (GetStorageDetails(nIndex, storageInfo))
-		return storageInfo.szDisplayName;
+		return storageInfo.szDisplayPath;
 
 	// else
 	return GetFilePath(nIndex);
@@ -358,6 +387,8 @@ BOOL CToDoCtrlMgr::GetStorageDetails(int nIndex, TSM_TASKLISTINFO& info) const
 		return FALSE;
 
 	info = GetTDCItem(nIndex).storageinfo;
+	info.SetTasklistName(GetFriendlyProjectName(nIndex));
+
 	return TRUE;
 }
 
@@ -365,7 +396,8 @@ BOOL CToDoCtrlMgr::SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	GetTDCItem(nIndex).SetStorageDetails(info);
+	if (!GetTDCItem(nIndex).SetStorageDetails(info))
+		return FALSE;
 
 	// reset file timestamp info
 	RefreshFileLastModified(nIndex);
@@ -373,15 +405,11 @@ BOOL CToDoCtrlMgr::SetStorageDetails(int nIndex, const TSM_TASKLISTINFO& info)
 	return TRUE;
 }
 
-BOOL CToDoCtrlMgr::ClearStorageDetails(int nIndex)
+BOOL CToDoCtrlMgr::ClearStorageDetails(int nIndex, BOOL bIncFilePath)
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	if (!UsesStorage(nIndex))
-		return FALSE;
-
-	GetTDCItem(nIndex).ClearStorageDetails();
-	return TRUE;
+	return GetTDCItem(nIndex).ClearStorageDetails(bIncFilePath);
 }
 
 CString CToDoCtrlMgr::GetFriendlyProjectName(int nIndex) const
@@ -389,6 +417,16 @@ CString CToDoCtrlMgr::GetFriendlyProjectName(int nIndex) const
 	CHECKVALIDINDEXRET(nIndex, _T(""));
 
 	return GetTDCItem(nIndex).GetFriendlyProjectName();
+}
+
+CString CToDoCtrlMgr::FormatFriendlyProjectNames() const
+{
+	CStringArray aNames;
+
+	for (int nTDC = 0; nTDC < GetCount(); nTDC++)
+		aNames.Add(GetFriendlyProjectName(nTDC));
+
+	return Misc::FormatArray(aNames);
 }
 
 CString CToDoCtrlMgr::FormatProjectNameWithFileName(int nIndex) const
@@ -449,11 +487,11 @@ void CToDoCtrlMgr::ClearFilePath(int nIndex)
 	GetToDoCtrl(nIndex).ClearFilePath();
 }
 
-BOOL CToDoCtrlMgr::HasFilePath(int nIndex) const
+BOOL CToDoCtrlMgr::HasFilePath(int nIndex, BOOL bIncStorage) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	return GetTDCItem(nIndex).HasFilePath();
+	return GetTDCItem(nIndex).HasFilePath(bIncStorage);
 }
 
 TDCM_PATHTYPE CToDoCtrlMgr::GetFilePathType(int nIndex) const
@@ -871,6 +909,13 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 			else
 				prefs.WriteProfileInt(sKey, _T("TabColor"), tdci.crTab);
 		}
+
+		// cleanup temp storage file
+		if (tdci.UsesStorage() && FileMisc::FileExists(tdci.storageinfo.szLocalFileName))
+		{
+			ASSERT(FileMisc::IsTempFilePath(tdci.storageinfo.szLocalFileName));
+			FileMisc::DeleteFile(tdci.storageinfo.szLocalFileName, TRUE);
+		}
 	}
 	
 	m_aToDoCtrls.RemoveAt(nIndex);
@@ -1181,14 +1226,14 @@ void CToDoCtrlMgr::GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& 
 
 		if (nTDC == nActive)
 		{
-			tdc.GetAutoListData(tldActive, nAttribID);
+			tdc.GetAutoListData(nAttribID, tldActive);
 			tldAll.AppendUnique(tldActive, nAttribID);
 		}
 		else
 		{
 			TDCAUTOLISTDATA tld;
 
-			tdc.GetAutoListData(tld, nAttribID);
+			tdc.GetAutoListData(nAttribID, tld);
 			tldAll.AppendUnique(tld, nAttribID);
 		}
 	}
@@ -1247,6 +1292,10 @@ BOOL CToDoCtrlMgr::AddToSourceControl(int nIndex, BOOL bAdd)
 BOOL CToDoCtrlMgr::CanAddToSourceControl(int nIndex, BOOL bAdd) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
+
+	// Not supported by storage providers
+	if (UsesStorage(nIndex))
+		return FALSE;
 
 	return GetToDoCtrl(nIndex).CanAddToSourceControl(bAdd);
 }
@@ -1315,7 +1364,7 @@ COLORREF CToDoCtrlMgr::GetTabColor(int nIndex) const
 	if (!m_tabCtrl.IsSupportedFlag(TCE_TABCOLORS))
 	{
 		ASSERT(0);
-		return FALSE;
+		return CLR_NONE;
 	}
 	
 	CHECKVALIDINDEXRET(nIndex, CLR_NONE);
@@ -1421,13 +1470,13 @@ void CToDoCtrlMgr::SetAllNeedPreferenceUpdate(BOOL bNeed, int nExcept)
 	}
 }
 
-int CToDoCtrlMgr::FindToDoCtrl(LPCTSTR szFilePath) const
+int CToDoCtrlMgr::FindToDoCtrl(LPCTSTR szFilePath, BOOL bFileNameOnly) const
 {
 	int nCtrl = GetCount();
 	
 	while (nCtrl--)
 	{
-		if (GetFilePath(nCtrl).CompareNoCase(szFilePath) == 0)
+		if (FileMisc::IsSamePath(GetFilePath(nCtrl), szFilePath, bFileNameOnly))
 			return nCtrl;
 	}
 
@@ -1575,15 +1624,15 @@ BOOL CToDoCtrlMgr::DoBackup(int nIndex) const
 		return TRUE; // not yet saved
 
 	CString sBackupFolder(Prefs().GetBackupLocation(sTDLPath));
-	int nKeepBackups = Prefs().GetKeepBackupCount();
+	int nNumKeepBackups = Prefs().GetKeepBackupCount();
 
-	if (CreateBackup(sTDLPath, sBackupFolder, nKeepBackups))
+	if (CreateBackup(sTDLPath, sBackupFolder, nNumKeepBackups))
 	{
 		// Back up task time log files
 		FileMisc::TerminatePath(sBackupFolder);
 		sBackupFolder += FileMisc::GetFileNameFromPath(sTDLPath, FALSE);
 		
-		BackupLogFiles(sTDLPath, sBackupFolder, nKeepBackups);
+		BackupLogFiles(sTDLPath, sBackupFolder, nNumKeepBackups);
 
 		return TRUE;
 	}
@@ -1591,119 +1640,108 @@ BOOL CToDoCtrlMgr::DoBackup(int nIndex) const
 	return FALSE;
 }
 
-void CToDoCtrlMgr::BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nKeepBackups) const
+void CToDoCtrlMgr::BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nNumKeepBackups) const
 {
 	if (Prefs().GetLogTaskTimeSeparately())
 	{
 #define MAGIC_TASKID	    999999999
 #define MAGIC_TASKIDSTR _T("999999999")
 		
-		// get a file filter
-		CString sLogPath = CTDCTaskTimeLog(sTDLPath).GetLogPath(MAGIC_TASKID, TRUE);
-		sLogPath.Replace(MAGIC_TASKIDSTR, _T("*"));
-		
-		CString sDrive, sFolder, sFName, sExt;
-		
-		FileMisc::SplitPath(sLogPath, &sDrive, &sFolder, &sFName, &sExt);
-		FileMisc::MakePath(sLogPath, sDrive, sFolder);
-		
+		CString sLogPattern = CTDCTaskTimeLog(sTDLPath).GetLogPath(MAGIC_TASKID, TRUE);
+		sLogPattern.Replace(MAGIC_TASKIDSTR, _T("*"));
+
 		CStringArray aLogFiles;
-		int nFile = FileMisc::FindFiles(sFolder, aLogFiles, FALSE, sFName + sExt);
-		
+		int nFile = FileMisc::FindFiles(FileMisc::GetFolderFromFilePath(sLogPattern), 
+										aLogFiles, 
+										FALSE, 
+										FileMisc::GetFileNameFromPath(sLogPattern));
 		while (nFile--)
-			CreateBackup(aLogFiles[nFile], sBackupFolder, nKeepBackups);
+			CreateBackup(aLogFiles[nFile], sBackupFolder, nNumKeepBackups);
 	}
 	else // single log file
 	{
 		CString sLogPath = CTDCTaskTimeLog(sTDLPath).GetLogPath();
 		
-		CreateBackup(sLogPath, sBackupFolder, nKeepBackups);
+		CreateBackup(sLogPath, sBackupFolder, nNumKeepBackups);
 	}
 }
 
-BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFolder, int nKeepBackups)
+BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFolder, int nNumKeepBackups)
 {
 	// No need to create a backup of non-existent file
 	if (!FileMisc::FileExists(sPath))
 		return FALSE;
-
+	
 	// NOTE: We encode the app version in the backup name to ensure that
 	// in the event that an update contains a breaking bug which corrupts 
-	// tasklists we haven't already deleted 'good' backups of the previous 
+	// files we haven't already deleted 'good' backups of the previous 
 	// version before the bug is discovered.
-
-	// However, this means that we could accumulate 'nKeepBackups'
-	// for as many versions as this user has updated. ie. the number of 
-	// backups can grow indefinitely, so we also cull the number of the
-	// previous version's backups to a MINIMUM OF ONE.
-	if (nKeepBackups)
+	if (!CFileBackup().MakeBackup(sPath, FBS_APPVERSION | FBS_DATETIMESTAMP, sBackupFolder, _T("")))
 	{
-		CString sBackupPath = CFileBackup::BuildBackupPath(sPath, FBS_APPVERSION, sBackupFolder, _T(""));
-		CString sDrive, sFolder, sFName, sExt;
-		
-		FileMisc::SplitPath(sBackupPath, &sDrive, &sFolder, &sFName, &sExt);
-		FileMisc::MakePath(sBackupPath, sDrive, sFolder);
-		
-		CStringArray aFiles;
-		int nNumFiles = FileMisc::FindFiles(sBackupPath, aFiles, FALSE, sFName + _T("*") + sExt);
+		ASSERT(0);
+		return FALSE;
+	}
 
-		if (nNumFiles >= nKeepBackups)
-		{
-			Misc::SortArray(aFiles); // sorts oldest backups first
-			
-			// cull as required
-			while (aFiles.GetSize() >= nKeepBackups)
-			{
-				FileMisc::DeleteFile(aFiles[0], TRUE);
-				aFiles.RemoveAt(0);
-			}
-		}
-		else // cull previous version's backups except the last
-		{
-			nKeepBackups -= nNumFiles;
-			nNumFiles = 0;
+	if (nNumKeepBackups > 0)
+	{
+		// Cull backups of current version
+		CString sBackupPattern = CFileBackup::BuildBackupPath(sPath, FBS_APPVERSION, sBackupFolder, _T(""));
+		FileMisc::AddToFileName(sBackupPattern, _T("*"));
+
+		int nNumFoundFiles;
+		int nNumCulled = CFileBackup::CullBackups(sBackupPattern, FBS_DATETIMESTAMP, nNumKeepBackups, nNumFoundFiles);
+
+		ASSERT((nNumCulled == 0) || (nNumCulled == (nNumFoundFiles - nNumKeepBackups)));
+
+		// If anything got culled it means we've used up all
+		// of 'nNumKeepBackups' and we can therefore assume 
+		// that all previous versions have been culled.
+
+		// Otherwise we use the leftover amount to cull from 
+		// previous versions, but always leaving at least one 
+		// backup from each previous version
+		if (nNumCulled == 0)
+		{ 
+			ASSERT(nNumFoundFiles <= nNumKeepBackups);
 
 			// get current app version once only
 			CString sAppVer = FileMisc::GetAppVersion('_');
-			ASSERT(sFName.Find(sAppVer) != -1);
+			ASSERT(sBackupPattern.Find(sAppVer) != -1);
 
 			// find the first previous version having backups
 			CDWordArray aPrevVer;
 			
-			while (FileMisc::GetPrevAppVersion(aPrevVer, 10, 20) && !nNumFiles) 
+			while (FileMisc::GetPrevAppVersion(aPrevVer, 10, 20) && (nNumKeepBackups > 0)) 
 			{
-				// replace current app ver with previous ver in filename
 				CString sPrevVer = Misc::FormatArray(aPrevVer, '_');
-				sFName.Replace(sAppVer, sPrevVer);
+				sBackupPattern.Replace(sAppVer, sPrevVer);
 
-				nNumFiles = FileMisc::FindFiles(sBackupPath, aFiles, FALSE, sFName + _T("*") + sExt);
+				nNumKeepBackups = max(1, (nNumKeepBackups - nNumFoundFiles));
+				nNumFoundFiles = 0;
 
-				switch (nNumFiles)
+				nNumCulled = CFileBackup::CullBackups(sBackupPattern, FBS_DATETIMESTAMP, nNumKeepBackups, nNumFoundFiles);
+
+				switch (nNumFoundFiles)
 				{
 				case 0:
-					// keep going
-					sAppVer = sPrevVer;
+					ASSERT(nNumCulled == 0);
 					break;
 
 				case 1:
-					// always leave last backup of last version used
+					// We can assume that this version has been
+					// previously culled so we stop looking
+					ASSERT(nNumCulled == 0);
+					nNumKeepBackups = 0;
 					break;
 
 				default:
-					Misc::SortArray(aFiles); // see above
-					
-					// always leave last backup
-					while ((aFiles.GetSize() >= nKeepBackups) &&
-							(aFiles.GetSize() > 1))
-					{
-						FileMisc::DeleteFile(aFiles[0], TRUE);
-						aFiles.RemoveAt(0);
-					}
+					break;
 				}
+
+				sAppVer = sPrevVer; // Try next previous version
 			}
 		}
 	}
-	
-	CFileBackup backup;
-	return backup.MakeBackup(sPath, FBS_APPVERSION | FBS_DATETIMESTAMP, sBackupFolder, _T(""));
+
+	return TRUE;
 }

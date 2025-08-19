@@ -8,6 +8,7 @@
 #include "Mapex.h"
 #include "Themed.h"
 #include "OSVersion.h"
+#include "Misc.h"
 
 #include <math.h>
 
@@ -31,34 +32,6 @@ const int TOOLTIPOFFSET = GraphicsMisc::ScaleByDPIFactor(20);
 
 /////////////////////////////////////////////////////////////////////////////
 
-bool HMXUtils::GetMinMax(const CHMXDataset datasets[], int nNumSets, double& nMin, double& nMax, bool bDataOnly)
-{
-	bool first = true;
-
-	for (int i = 0; i < nNumSets; i++)
-	{
-		double dMinSet, dMaxSet;
-
-		if (datasets[i].GetMinMax(dMinSet, dMaxSet, bDataOnly))
-		{
-			if (first)
-			{
-				nMin = dMinSet;
-				nMax = dMaxSet;
-
-				first = false;
-			}
-			else
-			{
-				nMin = min(nMin, dMinSet);
-				nMax = min(nMax, dMaxSet);
-			}
-		}
-	}
-
-	return !first;
-}
-
 double HMXUtils::CalcMaxYAxisValue(double dDataMax, int nNumTicks)
 {
 	return (nNumTicks * CalcYAxisInterval(dDataMax, nNumTicks));
@@ -68,20 +41,25 @@ double HMXUtils::CalcYAxisInterval(double dDataMax, int nNumTicks)
 {
 	ASSERT(nNumTicks > 0);
 
-	const double INTERVALS[] = { 1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
-	const int NUM_INT = (sizeof(INTERVALS) / sizeof(INTERVALS[0]));
+	// Calculate the initial power of 10
+	int nPower = (int)log10(dDataMax / nNumTicks);
+	double dMultiplier = pow(10, nPower);
 
-	// Find the first tick increment that gives us a range
+	// Find the first interval that gives us a range
 	// greater than or equal to dDataMax
-	for (int nInc = 0; nInc < NUM_INT; nInc++)
+	const double INTERVAL[] = { 0.1, 0.2, 0.25, 0.5, 1.0, 2.0, 2.5, 5.0 };
+	const int NUM_INT = (sizeof(INTERVAL) / sizeof(INTERVAL[0]));
+
+	for (int nInt = 0; nInt < NUM_INT; nInt++)
 	{
-		double dMaxYAxis = (nNumTicks * INTERVALS[nInc]);
+		double dInterval = (INTERVAL[nInt] * dMultiplier);
+		double dMaxYAxis = (nNumTicks * dInterval);
 
 		if (dDataMax <= dMaxYAxis)
-			return INTERVALS[nInc];
+			return dInterval;
 	}
 
-	return 10000;
+	return pow(10, nPower + 1);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -120,30 +98,20 @@ BOOL CHMXChartEx::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 
 int CHMXChartEx::GetNumYSubTicks(double dInterval) const
 {
-	if (dInterval != (int)dInterval)
-	{
-		ASSERT(0);
-		return 1;
-	}
-	else if (dInterval == 1.0)
-	{
-		return 1;
-	}
-
 	const int SUB_TICKS[] = { 2, 4, 5 };
 	const int NUM_SUBTICKS = (sizeof(SUB_TICKS) / sizeof(SUB_TICKS[0]));
 
 	int nSubTick = NUM_SUBTICKS;
 	int nNumTicks = GetNumYTicks();
+	int nAvailHeight = m_rectData.Height();
 
 	while (nSubTick--)
 	{
-		double dSubInterval = (dInterval / SUB_TICKS[nSubTick]);
+		double dSubIntervalInPixels = (nAvailHeight / (nNumTicks * SUB_TICKS[nSubTick]));
 
-		if (dSubInterval == (int)dSubInterval)
+		// Must be an exact pixel height
+		if (dSubIntervalInPixels == (int)dSubIntervalInPixels)
 		{
-			double dSubIntervalInPixels = (m_rectData.Height() / (nNumTicks * SUB_TICKS[nSubTick]));
-
 			if (dSubIntervalInPixels >= MIN_SUBINTERVAL_HEIGHT)
 				return SUB_TICKS[nSubTick];
 		}
@@ -164,21 +132,25 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 		return FALSE;
 
 	// else
-	m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-	m_tooltip.SetDelayTime(TTDT_INITIAL, 0);
-	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 100000);
 	m_tooltip.SetDelayTime(TTDT_RESHOW, 0);
 	m_tooltip.EnableTracking(TRUE, 16, 16);
 
 	if (bMultiline)
-		m_tooltip.SetMaxTipWidth(SHRT_MAX); // for '\n' support
+		m_tooltip.EnableMultilineTips();
 
 	return TRUE;
 }
 
-bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
+BOOL CHMXChartEx::DrawHorzGridLines(CDC& dc)
 {
-	double dInterval = HMXUtils::CalcYAxisInterval(m_nYMax, 10);
+	double dMin, dMax;
+
+	if (!GetMinMax(dMin, dMax, FALSE))
+		return FALSE;
+
+	double dRange = (dMax - dMin);
+	double dInterval = HMXUtils::CalcYAxisInterval(dRange, 10);
+
 	int nNumSubTicks = GetNumYSubTicks(dInterval);
 
 	if (nNumSubTicks > 1)
@@ -187,16 +159,16 @@ bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 		CPen* pPenOld = dc.SelectObject(&penSubGrid);
 
 		int nTotalTicks = (GetNumYTicks() * nNumSubTicks);
-		double nY = ((m_nYMax - m_nYMin) / nTotalTicks);
+		double nY = (dRange / nTotalTicks);
 
 		for (int f = 0; f <= nTotalTicks; f++)
 		{
 			if (f % nNumSubTicks)
 			{
-				double nTemp = m_rectData.bottom - (nY*f) * m_rectData.Height() / (m_nYMax - m_nYMin);
+				int nVPos = Misc::Round(m_rectData.bottom - (((nY*f) * m_rectData.Height()) / dRange));
 
-				dc.MoveTo(m_rectData.left, (int)nTemp);
-				dc.LineTo(m_rectData.right, (int)nTemp);
+				dc.MoveTo(m_rectData.left, nVPos);
+				dc.LineTo(m_rectData.right, nVPos);
 			}
 		}
 
@@ -264,20 +236,26 @@ int CHMXChartEx::HitTest(const CPoint& ptClient, int nDataset) const
 			CRect rPie, rDonut;
 			VERIFY(CalcPieRects(rPie, rDonut) > 0);
 
+			// Quick exit
 			if (!rPie.PtInRect(ptClient))
-				return false;
-
-			// Calculate the distance from the pie centre to the cursor
-			CPoint ptDiff = (ptClient - rPie.CenterPoint());
-			double dist = sqrt((double)(ptDiff.x * ptDiff.x) + (ptDiff.y * ptDiff.y));
-
-			if (dist > (rPie.Width() / 2))
 				return -1;
 
-			if (nStyle == HMX_DATASET_STYLE_DONUT || nStyle == HMX_DATASET_STYLE_DONUTLINE)
+			// Distance from the pie centre to the cursor
+			CPoint ptDiff = (ptClient - rPie.CenterPoint());
+			
+			int nDistSquared = ((ptDiff.x * ptDiff.x) + (ptDiff.y * ptDiff.y));
+			int nOuterRadius = (rPie.Width() / 2);
+
+			if (nDistSquared > (nOuterRadius * nOuterRadius))
+				return -1; // outside the pie chart
+
+			if (nStyle == HMX_DATASET_STYLE_DONUT || 
+				nStyle == HMX_DATASET_STYLE_DONUTLINE)
 			{
-				if (dist < (rPie.Width() / 4))
-					return -1;
+				int nInnerRadius = (nOuterRadius / 2);
+
+				if (nDistSquared < (nInnerRadius * nInnerRadius))
+					return -1; // in the donut hole
 			}
 
 			// Determine which segment the cursor falls in
@@ -470,4 +448,3 @@ CString CHMXChartEx::GetYTickText(int nTick, double dValue) const
 	// else
 	return CHMXChart::GetYTickText(nTick, dValue);
 }
-

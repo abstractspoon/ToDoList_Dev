@@ -10,6 +10,8 @@
 
 #include <float.h>
 
+/////////////////////////////////////////////////////////////////////////////
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -50,15 +52,16 @@ BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
 
 BOOL CStatsItemCalculator::SetShowEmptyFrequencyValues(BOOL bShowEmpty) 
 { 
-	if ((m_bShowEmptyFrequencyValues && !bShowEmpty) ||
-		(!m_bShowEmptyFrequencyValues && bShowEmpty))
-	{
-		m_bShowEmptyFrequencyValues = bShowEmpty;
-		return TRUE;
-	}
+	if (!Misc::StatesDiffer(m_bShowEmptyFrequencyValues, bShowEmpty))
+		return FALSE;
 
-	// else
-	return FALSE;
+	m_bShowEmptyFrequencyValues = bShowEmpty;
+	return TRUE;
+}
+
+BOOL CStatsItemCalculator::HasValidDateRange() const
+{
+	return ((m_dStartExtents != 0.0) && (m_dEndExtents != 0.0) && (m_dStartExtents < m_dEndExtents));
 }
 
 int CStatsItemCalculator::GetTotalDays() const
@@ -74,6 +77,62 @@ int CStatsItemCalculator::GetTotalWeekdays() const
 	return m_nTotalWeekdays;
 }
 
+int CStatsItemCalculator::GetItemRange(int& nFrom, int& nTo) const
+{
+	nFrom = -1;
+	nTo = (m_data.GetSize() - 1);
+
+	int nNumItems = m_data.GetSize();
+
+#ifdef _DEBUG
+	CString sStart = CDateHelper::FormatDate(m_dStartExtents);
+	CString sEnd = CDateHelper::FormatDate(m_dEndExtents);
+#endif
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = m_data[nItem];
+		COleDateTime dtItem(pSI->dtStart);
+
+		if (!CDateHelper::IsDateSet(dtItem))
+			continue;
+
+#ifdef _DEBUG
+		CString sItem = CDateHelper::FormatDate(pSI->dtStart);
+#endif
+		// skip items until the start of the range
+		if (dtItem.m_dt > m_dStartExtents)
+		{
+			if (nFrom == -1)
+			{
+				nFrom = nItem;
+			}
+			else if (dtItem.m_dt > m_dEndExtents)
+			{
+				// Stop when we hit the end of the range
+				nTo = nItem - 1;
+				break;
+			}
+		}
+	}
+
+	if (nFrom == -1)
+		return 0;
+
+	return max(0, (nTo - nFrom + 1));
+}
+
+// ------------------------------------------------
+
+#define CHECK_START_WITHIN_RANGE(psi, d) \
+if (psi->dtStart.m_dt < m_dStartExtents) \
+continue;                                \
+if ((psi->dtStart.m_dt > d.m_dt)         \
+|| (psi->dtStart.m_dt > m_dEndExtents))  \
+break
+
+// ------------------------------------------------
+
 int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const
 {
 	nNextItemFrom = 0;
@@ -88,12 +147,7 @@ int CStatsItemCalculator::GetIncompleteTaskCount(const COleDateTime& date, int n
 	for (int nItem = nItemFrom; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
-
-		if (pSI->dtStart.m_dt < m_dStartExtents)
-			continue;
-
-		if ((pSI->dtStart.m_dt > date.m_dt) || (pSI->dtStart.m_dt > m_dEndExtents))
-			break;
+		CHECK_START_WITHIN_RANGE(pSI, date);
 
 		nNumStarted++;
 
@@ -122,13 +176,8 @@ BOOL CStatsItemCalculator::GetStartedEndedTasks(const COleDateTime& date, int &n
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
+		CHECK_START_WITHIN_RANGE(pSI, date);
 
-		if (pSI->dtStart.m_dt < m_dStartExtents)
-			continue;
-		
-		if ((pSI->dtStart.m_dt > date.m_dt) || (pSI->dtStart.m_dt > m_dEndExtents))
-			break;
-		
 		nNumStarted++;
 
 		if (pSI->IsDone() && (pSI->dtDone.m_dt < date.m_dt))
@@ -153,18 +202,69 @@ BOOL CStatsItemCalculator::GetDaysEstimatedSpent(const COleDateTime& date, doubl
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
+		CHECK_START_WITHIN_RANGE(pSI, date);
 
-		if (pSI->dtStart.m_dt < m_dStartExtents)
-			continue;
-		
-		if ((pSI->dtStart.m_dt > date.m_dt) || (pSI->dtStart.m_dt > m_dEndExtents))
-			break;
-		
-		dEstDays += GetAttribValue(*pSI, DAYS, ESTIMATE, date);
-		dSpentDays += GetAttribValue(*pSI, DAYS, SPENT, date);
+		dEstDays += GetAttribValue(*pSI, TS_DAYS, TS_ESTIMATE, date);
+		dSpentDays += GetAttribValue(*pSI, TS_DAYS, TS_SPENT, date);
 	}
 
 	return (nNumItems > 0);
+}
+
+BOOL CStatsItemCalculator::GetItemDaysEstimatedSpent(int nItem, double &dEstDays, double &dSpentDays) const
+{
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
+		return FALSE;
+
+	const STATSITEM* pSI = m_data[nItem];
+
+	dEstDays = GetAttribValue(*pSI, MM_DAYS, MM_ESTIMATE);
+	dSpentDays = GetAttribValue(*pSI, MM_DAYS, MM_SPENT);
+
+	return TRUE;
+}
+
+BOOL CStatsItemCalculator::GetItemDueDoneDates(int nItem, COleDateTime& dtDue, COleDateTime& dtDone) const
+{
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
+		return FALSE;
+
+	const STATSITEM* pSI = m_data[nItem];
+
+	dtDue = pSI->dtDue;
+	dtDone = pSI->dtDone;
+
+	return TRUE;
+}
+
+BOOL CStatsItemCalculator::GetItemEndDate(int nItem, COleDateTime& dtItem) const
+{
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
+		return FALSE;
+
+	return m_data[nItem]->GetEndDate(dtItem);
+}
+
+BOOL CStatsItemCalculator::GetItemStartDate(int nItem, COleDateTime& dtItem) const
+{
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
+		return FALSE;
+
+	const STATSITEM* pSI = m_data[nItem];
+
+	if (!pSI->HasStart())
+		return FALSE;
+
+	dtItem = pSI->dtStart;
+	return TRUE;
+}
+
+CString CStatsItemCalculator::GetItemTitle(int nItem) const
+{
+	if ((nItem < 0) || (nItem >= m_data.GetSize()))
+		return _T("");
+
+	return m_data[nItem]->sTitle;
 }
 
 BOOL CStatsItemCalculator::GetCostEstimatedSpent(const COleDateTime& date, double &dEstCost, double &dSpentCost) const
@@ -181,15 +281,10 @@ BOOL CStatsItemCalculator::GetCostEstimatedSpent(const COleDateTime& date, doubl
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
+		CHECK_START_WITHIN_RANGE(pSI, date);
 
-		if (pSI->dtStart.m_dt < m_dStartExtents)
-			continue;
-		
-		if ((pSI->dtStart.m_dt > date.m_dt) || (pSI->dtStart.m_dt > dtEndExtents))
-			break;
-		
-		dEstCost += GetAttribValue(*pSI, COST, ESTIMATE, date);
-		dSpentCost += GetAttribValue(*pSI, COST, SPENT, date);
+		dEstCost += GetAttribValue(*pSI, TS_COST, TS_ESTIMATE, date);
+		dSpentCost += GetAttribValue(*pSI, TS_COST, TS_SPENT, date);
 	}
 
 	return (nNumItems > 0);
@@ -244,49 +339,23 @@ double CStatsItemCalculator::GetIntersectionProportion(const STATSITEM& si, BOOL
 
 double CStatsItemCalculator::GetDaysEstimated() const
 {
-	return GetTotalAttribValue(DAYS, ESTIMATE);
-}
-
-double CStatsItemCalculator::GetDaysEstimated(const COleDateTime& date) const
-{
-	return GetTotalAttribValue(DAYS, ESTIMATE, date);
-}
-
-// ----------------------------------------------------
-
-double CStatsItemCalculator::GetDaysSpent() const
-{
-	return GetTotalAttribValue(DAYS, SPENT);
+	return GetTotalAttribValue(TS_DAYS, TS_ESTIMATE);
 }
 
 double CStatsItemCalculator::GetDaysSpent(const COleDateTime& date) const
 {
-	return GetTotalAttribValue(DAYS, SPENT, date);
+	return GetTotalAttribValue(TS_DAYS, TS_SPENT, date);
 }
 
 // ----------------------------------------------------
 
-double CStatsItemCalculator::GetCostEstimate() const
-{
-	return GetTotalAttribValue(COST, ESTIMATE);
-}
-
-double CStatsItemCalculator::GetCostEstimated(const COleDateTime& date) const
-{
-	return GetTotalAttribValue(COST, ESTIMATE, date);
-}
-
-// ----------------------------------------------------
-
-double CStatsItemCalculator::GetCostSpent() const
-{
-	return GetTotalAttribValue(COST, SPENT);
-}
-
-double CStatsItemCalculator::GetCostSpent(const COleDateTime& date) const
-{
-	return GetTotalAttribValue(COST, SPENT, date);
-}
+#define CHECK_END_WITHIN_RANGE(psi)    \
+COleDateTime dtItemEnd;                \
+if (!psi->GetEndDate(dtItemEnd) ||     \
+(dtItemEnd.m_dt < m_dStartExtents))    \
+continue;                              \
+if (psi->dtStart.m_dt > m_dEndExtents) \
+break
 
 // ----------------------------------------------------
 
@@ -298,12 +367,7 @@ double CStatsItemCalculator::GetTotalAttribValue(TIMESERIES_ATTRIB nAttrib, TIME
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
-
-		if (pSI->GetEndDate().m_dt < m_dStartExtents)
-			continue;
-
-		if (pSI->dtStart.m_dt > m_dEndExtents)
-			break;
+		CHECK_END_WITHIN_RANGE(pSI);
 
 		dTotal += GetAttribValue(*pSI, nAttrib, nType);
 	}
@@ -316,19 +380,44 @@ double CStatsItemCalculator::GetTotalAttribValue(TIMESERIES_ATTRIB nAttrib, TIME
 	double dTotal = 0;
 	int nNumItems = m_data.GetSize();
 
-	COleDateTime dtItemEnd;
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = m_data[nItem];
+		CHECK_END_WITHIN_RANGE(pSI);
+
+		dTotal += GetAttribValue(*pSI, nAttrib, nType, date);
+	}
+
+	return dTotal;
+}
+
+double CStatsItemCalculator::GetTotalAttribValue(const CString& sCustAttribID) const
+{
+	double dTotal = 0;
+	int nNumItems = m_data.GetSize();
 
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
+		CHECK_END_WITHIN_RANGE(pSI);
 
-		if (!pSI->GetEndDate(dtItemEnd) || (dtItemEnd.m_dt < m_dStartExtents))
-			continue;
+		dTotal += GetAttribValue(*pSI, sCustAttribID);
+	}
 
-		if (pSI->dtStart.m_dt > m_dEndExtents)
-			break;
+	return dTotal;
+}
 
-		dTotal += GetAttribValue(*pSI, nAttrib, nType, date);
+double CStatsItemCalculator::GetTotalAttribValue(const CString& sCustAttribID, const COleDateTime& date) const
+{
+	double dTotal = 0;
+	int nNumItems = m_data.GetSize();
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = m_data[nItem];
+		CHECK_END_WITHIN_RANGE(pSI);
+
+		dTotal += GetAttribValue(*pSI, sCustAttribID, date);
 	}
 
 	return dTotal;
@@ -340,15 +429,15 @@ double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, TIMESERIES_ATTR
 
 	switch (nAttrib)
 	{
-	case DAYS:
+	case TS_DAYS:
 		{
 			switch (nType)
 			{
-			case ESTIMATE:
+			case TS_ESTIMATE:
 				dValue = GetTimeInDays(si.dTimeEst, si.nTimeEstUnits);
 				break;
 
-			case SPENT:
+			case TS_SPENT:
 				dValue = GetTimeInDays(si.dTimeSpent, si.nTimeSpentUnits);
 				break;
 
@@ -360,15 +449,15 @@ double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, TIMESERIES_ATTR
 		break;
 
 
-	case COST:
+	case TS_COST:
 		{
 			switch (nType)
 			{
-			case ESTIMATE:
+			case TS_ESTIMATE:
 				dValue = (si.bCostIsRate ? (si.dTimeEst * si.dCost) : si.dCost);
 				break;
 
-			case SPENT:
+			case TS_SPENT:
 				dValue = (si.bCostIsRate ? (si.dTimeSpent * si.dCost) : si.dCost);
 				break;
 
@@ -393,9 +482,52 @@ double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, TIMESERIES_ATTR
 	return (dValue * dProportion);
 }
 
+double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, MINMAX_ATTRIB nAttrib, MINMAX_ATTRIBTYPE nType) const
+{
+	switch (nAttrib)
+	{
+	case MM_DAYS:
+		{
+			switch (nType)
+			{
+			case MM_ESTIMATE:	return GetTimeInDays(si.dTimeEst, si.nTimeEstUnits);
+			case MM_SPENT:		return GetTimeInDays(si.dTimeSpent, si.nTimeSpentUnits);
+
+			default:
+				ASSERT(0);
+				break;
+			}
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	return 0.0;
+}
+
 double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType, const COleDateTime& date) const
 {
 	double dValue = GetAttribValue(si, nAttrib, nType);
+
+	return CalcProportionOfValue(si, dValue, date);
+}
+
+double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, const CString& sCustAttribID) const
+{
+	CString sAttrib;
+
+	if (!si.mapCustomAttrib.Lookup(sCustAttribID, sAttrib) || sAttrib.IsEmpty())
+		return 0.0;
+
+	return Misc::Atof(sAttrib);
+}
+
+double CStatsItemCalculator::GetAttribValue(const STATSITEM& si, const CString& sCustAttribID, const COleDateTime& date) const
+{
+	double dValue = GetAttribValue(si, sCustAttribID);
 
 	return CalcProportionOfValue(si, dValue, date);
 }
@@ -468,11 +600,11 @@ TH_UNITS CStatsItemCalculator::MapUnitsToTHUnits(TDC_UNITS nUnits)
 
 int CStatsItemCalculator::HitTest(const COleDateTime& date) const
 {
-	if ((date.m_dt < GetStartDate()) || (date.m_dt >= GetEndDate()))
+	if ((date.m_dt < m_dStartExtents) || (date.m_dt >= m_dEndExtents))
 		return -1;
 
 	// else
-	return (int)(date.m_dt - GetStartDate());
+	return (int)(date.m_dt - m_dStartExtents);
 }
 
 int CStatsItemCalculator::GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
@@ -480,23 +612,48 @@ int CStatsItemCalculator::GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CS
 	mapFrequencies.RemoveAll();
 	int nNumItems = m_data.GetSize();
 
-	COleDateTime dtItemEnd;
-
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
 		const STATSITEM* pSI = m_data[nItem];
 
 		switch (nAttrib)
 		{
-		case CATEGORY:	AppendFrequencyAttribs(pSI->aCategory,		mapFrequencies); break;
-		case ALLOCTO:	AppendFrequencyAttribs(pSI->aAllocatedTo,	mapFrequencies); break;
-		case TAGS:		AppendFrequencyAttribs(pSI->aTags,			mapFrequencies); break;
+		case F_CATEGORY:	AppendFrequencyAttribs(pSI->aCategory,		mapFrequencies); break;
+		case F_ALLOCTO:		AppendFrequencyAttribs(pSI->aAllocatedTo,	mapFrequencies); break;
+		case F_TAGS:		AppendFrequencyAttribs(pSI->aTags,			mapFrequencies); break;
 
-		case STATUS:	AppendFrequencyAttrib(pSI->sStatus,			mapFrequencies); break;
-		case ALLOCBY:	AppendFrequencyAttrib(pSI->sAllocatedBy,	mapFrequencies); break;
-		case PRIORITY:	AppendFrequencyAttrib(pSI->sPriority,		mapFrequencies); break;
-		case RISK:		AppendFrequencyAttrib(pSI->sRisk,			mapFrequencies); break;
-		case VERSION:	AppendFrequencyAttrib(pSI->sVersion,		mapFrequencies); break;
+		case F_STATUS:		AppendFrequencyAttrib(pSI->sStatus,			mapFrequencies); break;
+		case F_ALLOCBY:		AppendFrequencyAttrib(pSI->sAllocatedBy,	mapFrequencies); break;
+		case F_PRIORITY:	AppendFrequencyAttrib(pSI->sPriority,		mapFrequencies); break;
+		case F_RISK:		AppendFrequencyAttrib(pSI->sRisk,			mapFrequencies); break;
+		case F_VERSION:		AppendFrequencyAttrib(pSI->sVersion,		mapFrequencies); break;
+		}
+	}
+
+	return mapFrequencies.GetCount();
+}
+
+int CStatsItemCalculator::GetAttribFrequencies(const CString& sCustAttribID, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
+{
+	mapFrequencies.RemoveAll();
+
+	int nNumItems = m_data.GetSize();
+	CString sAttrib;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const STATSITEM* pSI = m_data[nItem];
+
+		if (!pSI->mapCustomAttrib.Lookup(sCustAttribID, sAttrib) || sAttrib.IsEmpty())
+		{
+			AppendFrequencyAttrib(CString(), mapFrequencies);
+		}
+		else
+		{
+			CStringArray aAttrib;
+			Misc::Split(sAttrib, aAttrib);
+
+			AppendFrequencyAttribs(aAttrib, mapFrequencies);
 		}
 	}
 
@@ -511,23 +668,23 @@ void CStatsItemCalculator::AppendFrequencyAttrib(const CString& sAttrib, CMap<CS
 
 void CStatsItemCalculator::AppendFrequencyAttribs(const CStringArray& aAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
 {
-	int nAttrib = aAttrib.GetSize();
+	int nAtt = aAttrib.GetSize();
 
-	if (nAttrib == 0)
+	if (nAtt == 0)
 	{
 		AppendFrequencyAttrib(_T(""), mapFrequencies);
 	}
 	else
 	{
-		while (nAttrib--)
-			AppendFrequencyAttrib(aAttrib[nAttrib], mapFrequencies);
+		while (nAtt--)
+			AppendFrequencyAttrib(aAttrib[nAtt], mapFrequencies);
 	}
 }
 
 int CStatsItemCalculator::GetCategoryFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
 {
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
-	GetAttribFrequencies(CATEGORY, mapFrequencies);
+	GetAttribFrequencies(F_CATEGORY, mapFrequencies);
 
 	return AsSortedArray(mapFrequencies, aFrequencies);
 }
@@ -535,7 +692,7 @@ int CStatsItemCalculator::GetCategoryFrequencies(CArray<FREQUENCYITEM, FREQUENCY
 int CStatsItemCalculator::GetStatusFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
 {
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
-	GetAttribFrequencies(STATUS, mapFrequencies);
+	GetAttribFrequencies(F_STATUS, mapFrequencies);
 
 	return AsSortedArray(mapFrequencies, aFrequencies);
 }
@@ -543,7 +700,7 @@ int CStatsItemCalculator::GetStatusFrequencies(CArray<FREQUENCYITEM, FREQUENCYIT
 int CStatsItemCalculator::GetAllocatedToFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
 {
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
-	GetAttribFrequencies(ALLOCTO, mapFrequencies);
+	GetAttribFrequencies(F_ALLOCTO, mapFrequencies);
 
 	return AsSortedArray(mapFrequencies, aFrequencies);
 }
@@ -551,7 +708,7 @@ int CStatsItemCalculator::GetAllocatedToFrequencies(CArray<FREQUENCYITEM, FREQUE
 int CStatsItemCalculator::GetAllocatedByFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
 {
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
-	GetAttribFrequencies(ALLOCBY, mapFrequencies);
+	GetAttribFrequencies(F_ALLOCBY, mapFrequencies);
 
 	return AsSortedArray(mapFrequencies, aFrequencies);
 }
@@ -562,7 +719,7 @@ int CStatsItemCalculator::GetPriorityFrequencies(CArray<FREQUENCYITEM, FREQUENCY
 		return 0L;
 
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
-	GetAttribFrequencies(PRIORITY, mapFrequencies);
+	GetAttribFrequencies(F_PRIORITY, mapFrequencies);
 
 	// Fill in any missing values
 	for (int nVal = 0; nVal <= 10; nVal++)
@@ -577,7 +734,7 @@ int CStatsItemCalculator::GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM
 		return 0L;
 
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
-	GetAttribFrequencies(RISK, mapFrequencies);
+	GetAttribFrequencies(F_RISK, mapFrequencies);
 	
 	// Fill in any missing values
 	for (int nVal = 0; nVal <= 10; nVal++)
@@ -589,7 +746,7 @@ int CStatsItemCalculator::GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM
 int CStatsItemCalculator::GetTagFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
 {
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
-	GetAttribFrequencies(TAGS, mapFrequencies);
+	GetAttribFrequencies(F_TAGS, mapFrequencies);
 
 	return AsSortedArray(mapFrequencies, aFrequencies);
 }
@@ -597,7 +754,15 @@ int CStatsItemCalculator::GetTagFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&
 int CStatsItemCalculator::GetVersionFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
 {
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
-	GetAttribFrequencies(VERSION, mapFrequencies);
+	GetAttribFrequencies(F_VERSION, mapFrequencies);
+
+	return AsSortedArray(mapFrequencies, aFrequencies);
+}
+
+int CStatsItemCalculator::GetCustomAttributeFrequencies(const CString& sCustAttribID, CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
+{
+	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
+	GetAttribFrequencies(sCustAttribID, mapFrequencies);
 
 	return AsSortedArray(mapFrequencies, aFrequencies);
 }

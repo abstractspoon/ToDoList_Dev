@@ -9,6 +9,7 @@
 #include "TDLImportOutlookDlg.h"
 
 #include "..\shared\Localizer.h"
+#include "..\shared\MSOutlookHelper.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -22,7 +23,7 @@ static char THIS_FILE[]=__FILE__;
 
 CTaskListOutlookImporter::CTaskListOutlookImporter()
 {
-	m_icon.Load(IDI_OUTLOOK);
+	m_icon.SetIcon(CMSOutlookHelper::GetOutlookIcon());
 }
 
 CTaskListOutlookImporter::~CTaskListOutlookImporter()

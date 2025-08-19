@@ -109,7 +109,7 @@ public:
 	void SetValue(const CString& sValue);
 	void SetValue(int nValue);
 	void SetValue(double dValue);
-	void ClearValue();
+	BOOL ClearValue();
 
 	BOOL RemoveItem(CXmlItem* pXIChild); // does not remove siblings or delete item
 	BOOL DeleteItem(CXmlItem* pXIChild); // does not remove siblings

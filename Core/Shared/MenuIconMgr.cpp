@@ -119,7 +119,7 @@ int CMenuIconMgr::AddImages(const CToolBar& toolbar)
 	// iterate the non-separator items extracting their images 
 	// from the imagelist
 	const CToolBarCtrl& tbc = toolbar.GetToolBarCtrl();
-	int nBtnCount = tbc.GetButtonCount(), nImage = 0;
+	int nBtnCount = tbc.GetButtonCount(), nImagesAdded = 0;
 
 	CImageList* pIL = tbc.GetImageList();
 	CImageList* pILDis = (m_bVistaPlus ? NULL : tbc.GetDisabledImageList());
@@ -131,7 +131,7 @@ int CMenuIconMgr::AddImages(const CToolBar& toolbar)
 
 		toolbar.GetButtonInfo(nBtn, nCmdID, nStyle, iImage);
 
-		if (nCmdID != ID_SEPARATOR)
+		if ((nCmdID != ID_SEPARATOR) && !HasImageID(nCmdID))
 		{
 			ASSERT(iImage != -1);
 
@@ -139,10 +139,12 @@ int CMenuIconMgr::AddImages(const CToolBar& toolbar)
 
 			if (pILDis)
 				VERIFY(SetImage(nCmdID, pILDis->ExtractIcon(iImage), FALSE));
+
+			nImagesAdded++;
 		}
 	}
 	
-	return nImage;
+	return nImagesAdded;
 }
 
 int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, const CImageList& il, const CImageList* pILDisabled)
@@ -170,10 +172,15 @@ int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, const CImageList& il, con
 
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
-		VERIFY(SetImage(aCmdIDs[nBtn], ImageList_GetIcon(il, nBtn, ILD_TRANSPARENT), TRUE));
+		UINT nCmdID = aCmdIDs[nBtn];
 
-		if (pILDisabled)
-			VERIFY(SetImage(aCmdIDs[nBtn], ImageList_GetIcon(*pILDisabled, nBtn, ILD_TRANSPARENT), FALSE));
+		if (!HasImageID(nCmdID))
+		{
+			VERIFY(SetImage(nCmdID, ImageList_GetIcon(il, nBtn, ILD_TRANSPARENT), TRUE));
+
+			if (pILDisabled)
+				VERIFY(SetImage(nCmdID, ImageList_GetIcon(*pILDisabled, nBtn, ILD_TRANSPARENT), FALSE));
+		}
 	}
 	   
 	return nBtnCount;
@@ -351,6 +358,9 @@ HANDLE CMenuIconMgr::LoadItemImage(UINT nCmdID)
 
 BOOL CMenuIconMgr::AddImage(UINT nCmdID, HICON hIcon)
 {
+	if (HasImageID(nCmdID))
+		return FALSE;
+
 	// Resize the icon if it is not the right size
 	int nSize = GraphicsMisc::ScaleByDPIFactor(16);
 
@@ -370,17 +380,21 @@ BOOL CMenuIconMgr::AddImage(UINT nCmdID, HICON hIcon)
 	}
 
 	// Add normal icon
-	VERIFY(SetImage(nCmdID, hIcon, TRUE));
+	if (SetImage(nCmdID, hIcon, TRUE))
+		return FALSE;
 
 	// Add disabled icon
 	if (!m_bVistaPlus)
 		SetImage(nCmdID, CEnBitmapEx::CreateDisabledIcon(hIcon), FALSE);
 	
-	return FALSE;
+	return TRUE;
 }
 
 BOOL CMenuIconMgr::AddImage(UINT nCmdID, UINT nCmdIDToCopy)
 {
+	if (HasImageID(nCmdID))
+		return FALSE;
+
 	HICON hIcon = LoadItemIcon(nCmdIDToCopy, TRUE);
 
 	if (!hIcon)
@@ -406,6 +420,9 @@ BOOL CMenuIconMgr::AddImage(UINT nCmdID, UINT nCmdIDToCopy)
 
 BOOL CMenuIconMgr::AddImage(UINT nCmdID, const CImageList& il, int nImage)
 {
+	if (HasImageID(nCmdID))
+		return FALSE;
+
 	return SetImage(nCmdID, ImageList_GetIcon(il, nImage, ILD_TRANSPARENT));
 }
 

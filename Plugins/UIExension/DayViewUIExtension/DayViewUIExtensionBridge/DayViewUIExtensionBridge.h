@@ -57,11 +57,12 @@ public:
    bool SupportsTaskSelection() const { return true; }
 
    void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
-   bool WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const;
+   bool WantTaskUpdate(TDC_ATTRIBUTE nAttribID) const;
    bool PrepareNewTask(ITaskList* pTask) const;
 
    bool ProcessMessage(MSG* pMsg);
    void FilterToolTipMessage(MSG* pMsg) {/*.Net tooltips don't need this*/}
+   bool DoIdleProcessing();
 
    bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
    bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;

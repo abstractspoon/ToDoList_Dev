@@ -41,6 +41,8 @@ const LPCTSTR FILEPROTOCOLS[] =
 
 const int NUM_FILEPROTOCOLS = (sizeof(FILEPROTOCOLS) / sizeof(LPCTSTR));
 
+const CString INTERNETSETTINGS("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 BOOL WebMisc::IsOnline()
@@ -55,15 +57,13 @@ BOOL WebMisc::IsOnline()
 BOOL WebMisc::DeleteCacheEntry(LPCTSTR szURI)
 {
 	BOOL bSuccess = FALSE;
-
+	
 #if _MSC_VER >= 1400
 	bSuccess = DeleteUrlCacheEntry(szURI);
-#elif _UNICODE
+#else
 	LPSTR szAnsiPath = Misc::WideToMultiByte(szURI);
 	bSuccess = DeleteUrlCacheEntry(szAnsiPath);
 	delete [] szAnsiPath;
-#else
-	bSuccess = DeleteUrlCacheEntry(szURI);
 #endif
 
 	if (!bSuccess && (GetLastError() == ERROR_FILE_NOT_FOUND))
@@ -436,14 +436,20 @@ BOOL WebMisc::DownloadFile(LPCTSTR szDownloadUri, LPCTSTR szDownloadFile, IBindS
 {
 	HRESULT hr = ::URLDownloadToFile(NULL, szDownloadUri, szDownloadFile, 0, pCallback);
 
-	if (hr == S_OK)
+	switch (hr)
+	{
+	case S_OK:
 		return TRUE;
+		
+	case E_ABORT:
+		FileMisc::LogText(_T("WebMisc::DownloadFile(cancelled download of %s to %s)"), szDownloadUri, szDownloadFile);
+		break;
 
-	// else
-	FileMisc::LogText(_T("WebMisc::DownloadFile(failed to download %s to %s)"), szDownloadUri, szDownloadFile);
-
-	_com_error err(hr);
-	FileMisc::LogText(_T("\tURLDownloadToFile reported %s"), err.ErrorMessage());
+	default:
+		FileMisc::LogText(_T("WebMisc::DownloadFile(failed to download %s to %s)"), szDownloadUri, szDownloadFile);
+		FileMisc::LogText(_T("\tURLDownloadToFile reported %s"), _com_error(hr).ErrorMessage());
+		break;
+	}
 
 	return FALSE;
 }
@@ -456,4 +462,33 @@ BOOL WebMisc::DownloadPage(LPCTSTR szDownloadUri, CString& sPageContents, IBindS
 		return FALSE;
 
 	return FileMisc::LoadFile(sTempFile, sPageContents);
+}
+
+BOOL WebMisc::GetProxySettings(CString& sProxy, UINT& nPort)
+{
+	CRegKey2 reg;
+
+	if (reg.Open(HKEY_CURRENT_USER, INTERNETSETTINGS, TRUE) == ERROR_SUCCESS)
+	{
+		// is proxy enabled?
+		DWORD dwProxyEnabled = FALSE;
+
+		if ((reg.Read(_T("ProxyEnabled"), dwProxyEnabled) == ERROR_SUCCESS) && dwProxyEnabled)
+		{
+			if ((reg.Read(_T("ProxyServer"), sProxy) == ERROR_SUCCESS) && !sProxy.IsEmpty())
+			{
+				CString sPort;
+
+				if (Misc::Split(sProxy, sPort, ':'))
+					nPort = _ttoi(sPort);
+				else
+					nPort = 80;
+
+				return TRUE;
+			}
+		}
+	}
+
+	// all else 
+	return FALSE;
 }

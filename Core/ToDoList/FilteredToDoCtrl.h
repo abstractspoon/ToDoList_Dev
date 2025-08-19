@@ -36,7 +36,6 @@ public:
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect);
 	BOOL SelectTasksInHistory(BOOL bForward);
 
-	FILTER_SHOW GetFilter(CTDCFilter& filter) const { filter = m_filter; }
 	void RefreshFilter();
 	void ClearFilter();
 	void ToggleFilter();
@@ -94,7 +93,7 @@ protected:
 		//}}AFX_MSG
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg void OnEditChangeDueTime();
+	//afx_msg void OnEditChangeDueTime();
 	afx_msg LRESULT OnMidnight(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
@@ -104,7 +103,7 @@ protected:
 
 protected:
 	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs) const;
-	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs) const;
+	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs) const;
 	BOOL StyleChangesNeedRefilter(const CTDCStyleMap& styles) const;
 
 	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);

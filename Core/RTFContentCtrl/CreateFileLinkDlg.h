@@ -6,8 +6,10 @@
 #endif // _MSC_VER > 1000
 // CreateFileLinkDlg.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
 
 #include "..\shared\RichEditHelper.h"
+#include "..\shared\icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CCreateFileLinkDlg dialog
@@ -30,11 +32,12 @@ protected:
 	BOOL	m_bMakeDefault;
 	int		m_nLinkOption;
 	CString m_sRefFile;
+	CIcon m_icon;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CCreateFileLinkDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 

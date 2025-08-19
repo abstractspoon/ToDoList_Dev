@@ -5,8 +5,10 @@
 #include "StdAfx.h"
 #include "TDCSourceControl.h"
 #include "ToDoCtrl.h"
+#include "tdcmapping.h"
 
 #include "..\shared\FileMisc.h"
+#include "..\shared\ScopedTimer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,7 +31,7 @@ CTDCSourceControl::~CTDCSourceControl()
 {
 }
 
-void CTDCSourceControl::InitialiseState(const CTaskFile& tasks)
+void CTDCSourceControl::Initialise(const CTaskFile& tasks)
 {
 	m_bSourceControlled = tasks.IsSourceControlled();
 
@@ -101,6 +103,10 @@ BOOL CTDCSourceControl::CanCheckOut() const
 
 TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, BOOL bForce, LPCTSTR szTasklistPath)
 {
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CTDCSourceControl::CheckOut"));
+	///////////////////////////////////////////////////////////////////
+
 	if (!m_bSourceControlled)
 	{
 		// caller must think we're source controlled
@@ -250,7 +256,7 @@ TDC_FILE CTDCSourceControl::CheckIn(CTaskFile& tasks)
 	FILETIME ftMod = { 0 };
 	VERIFY(FileMisc::GetFileLastModified(sTaskfilePath, ftMod));
 
-	TDC_FILE nResult = m_tdc.SaveTaskfile(tasks, sTaskfilePath);
+	TDC_FILE nResult = CToDoCtrl::SaveTaskfile(tasks, sTaskfilePath);
 
 	if (nResult == TDCF_SUCCESS)
 	{
@@ -312,7 +318,7 @@ TDC_FILE CTDCSourceControl::AddToSourceControl(BOOL bAdd)
 
 			tasks.SetCheckedOutTo(GetSourceControlID()); // auto-checkout
 
-			TDC_FILE nResult = m_tdc.SaveTaskfile(tasks, sTaskfilePath);
+			TDC_FILE nResult = CToDoCtrl::SaveTaskfile(tasks, sTaskfilePath);
 
 			if (nResult != TDCF_SUCCESS)			
 			{
@@ -333,7 +339,7 @@ TDC_FILE CTDCSourceControl::AddToSourceControl(BOOL bAdd)
 
 			tasks.RemoveFromSourceControl();
 
-			TDC_FILE nResult = m_tdc.SaveTaskfile(tasks, sTaskfilePath);
+			TDC_FILE nResult = CToDoCtrl::SaveTaskfile(tasks, sTaskfilePath);
 
 			if (nResult != TDCF_SUCCESS)			
 			{

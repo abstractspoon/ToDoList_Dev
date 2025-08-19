@@ -13,6 +13,7 @@
 #include "enstring.h"
 #include "AcceleratorString.h"
 #include "OSVersion.h"
+#include "OwnerdrawComboBoxBase.h"
 
 #include <afxpriv.h>
 #include <afxtempl.h>
@@ -36,6 +37,7 @@ const CString DELIMS(_T(".,;:-?"));
 const int FLOATBUFLEN = 400;
 
 const int CLASSICTHEMETEXTFUDGE = GraphicsMisc::ScaleByDPIFactor(2);
+const BOOL WANTROUNDCORNERS = (COSVersion() < OSV_WIN8);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -199,7 +201,7 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 									int nDecimals, LPTSTR szBuffer, int nBufSize)
 {
 	// handle locale specific decimal separator
-	setlocale(LC_NUMERIC, "");
+	CTempLocale loc(LC_NUMERIC, "");
 
 	ASSERT(pData != NULL);
 	ASSERT((nDecimals == -1) || (nDecimals > 0));
@@ -215,8 +217,8 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 //			pDX->Fail();        // throws exception
 // *******************************************************************
 			
-			// try English locale
-			setlocale(LC_NUMERIC, "English");
+			// try 'C' locale
+			loc.ChangeLocale("C");
 			SimpleFloatParse(szBuffer, d);
 		}
 
@@ -244,9 +246,6 @@ void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double v
 		_stprintf(szBuffer, _T("%.*g"), nSizeGcvt, value);
 #endif
 	}
-
-	// restore decimal separator to '.'
-	setlocale(LC_NUMERIC, "English");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -645,23 +644,12 @@ void CDialogHelper::SetFont(CWnd* pWnd, HFONT hFont, BOOL bRedraw)
 
 HFONT CDialogHelper::GetFont(const CWnd* pWnd)
 {
-   if (pWnd)
-      return GetFont(pWnd->GetSafeHwnd());
-
-   return (HFONT)::GetStockObject(DEFAULT_GUI_FONT);
+	return GraphicsMisc::GetFont(pWnd ? pWnd->GetSafeHwnd() : NULL);
 }
  
 HFONT CDialogHelper::GetFont(HWND hWnd)
 {
-   if (hWnd)
-   {
-      HFONT hFont = (HFONT)::SendMessage(hWnd, WM_GETFONT, 0, 0);
-
-      if (hFont)
-         return hFont;
-   }
-
-   return (HFONT)::GetStockObject(DEFAULT_GUI_FONT);
+	return GraphicsMisc::GetFont(hWnd);
 }
 
 int CDialogHelper::SetComboBoxItems(CComboBox& combo, const CStringArray& aItems) 
@@ -712,7 +700,7 @@ BOOL CDialogHelper::SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL b
 	if (nDropHeight > 0)
 		rect.bottom += nDropHeight;
 
-	DWORD dwStyle = (combo.GetStyle() | (bVScroll ? WS_VSCROLL : 0));
+	DWORD dwStyle = (combo.GetStyle() | (bVScroll ? WS_VSCROLL : 0) | (bReadOnly ? CBS_AUTOHSCROLL : 0));
 	DWORD dwExStyle = combo.GetExStyle();
 	UINT nCtrlID = combo.GetDlgCtrlID();
 
@@ -743,6 +731,13 @@ BOOL CDialogHelper::SetAutoComboReadOnly(CComboBox& combo, BOOL bVScroll, BOOL b
 BOOL CDialogHelper::ComboHasEdit(const CComboBox& combo)
 {
 	return (NULL != combo.GetDlgItem(1001));
+}
+
+BOOL CDialogHelper::IsComboEdit(HWND hWnd)
+{
+	return ((::GetDlgCtrlID(hWnd) == 1001) &&
+			CWinClasses::IsEditControl(hWnd) &&
+			CWinClasses::IsComboBox(::GetParent(hWnd)));
 }
 
 void CDialogHelper::MoveCombo(CComboBox& combo, const CRect& rNew, int nDropHeight)
@@ -890,12 +885,17 @@ UINT CDialogHelper::MessageBoxEx(const CWnd* pWnd, LPCTSTR szText, UINT nIDCapti
 	return ::MessageBox(*pWnd, szText, sCaption, nType);
 }
 
-int CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth, int nExtra)
+void CDialogHelper::RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef, int nTabWidth)
 {
-   int nWidth = CalcMaxTextWidth(combo, 0, TRUE, pDCRef, nTabWidth);
-   combo.SetDroppedWidth(nWidth + nExtra);
-
-   return nWidth;
+	if (combo.IsKindOf(RUNTIME_CLASS(COwnerdrawComboBoxBase)))
+	{
+		((COwnerdrawComboBoxBase&)combo).RefreshDropWidth();
+	}
+	else
+	{
+	   int nWidth = CalcMaxTextWidth(combo, 0, TRUE, pDCRef, nTabWidth);
+	   combo.SetDroppedWidth(nWidth);
+	}
 }
 
 int CDialogHelper::CalcMaxTextWidth(CComboBox& combo, int nMinWidth, BOOL bDropped, CDC* pDCRef, int nTabWidth)
@@ -1077,6 +1077,16 @@ int CDialogHelper::FindItemByValue(const CComboBox& combo, int nValue)
 	sNum.Format(_T("%d"), nValue);
 
 	return combo.FindString(-1, sNum);
+}
+
+int CDialogHelper::SelectItemExact(CComboBox& combo, LPCTSTR szItem)
+{
+	int nSel = combo.FindStringExact(-1, szItem);
+
+	if (nSel != CB_ERR)
+		combo.SetCurSel(nSel);
+
+	return nSel;
 }
 
 CString CDialogHelper::GetSelectedItem(const CComboBox& combo)
@@ -1430,6 +1440,22 @@ int CDialogHelper::GetChildHeight(const CWnd* pChild)
 	return 0;
 }
 
+int CDialogHelper::GetChildWidth(const CWnd* pChild)
+{
+	ASSERT(pChild);
+
+	if (pChild)
+	{
+		CRect rChild;
+		pChild->GetWindowRect(rChild);
+
+		return rChild.Width();
+	}
+
+	// all else
+	return 0;
+}
+
 CRect CDialogHelper::GetChildRect(const CWnd* pChild) 
 { 
 	ASSERT(pChild && pChild->GetParent());
@@ -1765,11 +1791,21 @@ void CDialogHelper::InvalidateAllCtrls(const CWnd* pParent, BOOL bErase)
 	}
 }
 
+void CDialogHelper::InvalidateCtrl(const CWnd* pParent, UINT nCtrlID, BOOL bErase, BOOL bUpdate)
+{
+	InvalidateChild(pParent->GetDlgItem(nCtrlID), bErase, bUpdate);
+}
+
+void CDialogHelper::InvalidateChild(const CWnd* pChild, BOOL bErase, BOOL bUpdate)
+{
+	if (::InvalidateRect(*pChild, NULL, bErase) && bUpdate)
+		::UpdateWindow(*pChild);
+}
+
 void CDialogHelper::RemoveCtrlID(UINT nCtrlID, CUIntArray& aCtrlIDs)
 {
 	Misc::RemoveItemT(nCtrlID, aCtrlIDs);
 }
-
 
 void CDialogHelper::ShowCtrls(const CWnd* pParent, const CUIntArray& aCtrlIDs, BOOL bShow)
 {
@@ -1892,7 +1928,9 @@ void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
 		// resize children
 		while (pChild)
 		{
-			ResizeButtonStaticTextToFit(pParent, pChild, &dc);
+			if (CWinClasses::IsClass(*pChild, WC_BUTTON))
+				ResizeStaticTextToFit(pParent, pChild, &dc);
+
 			pChild = pChild->GetWindow(GW_HWNDNEXT);
 		}
 
@@ -1901,22 +1939,22 @@ void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
 	}
 }
 
-void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef)
+int CDialogHelper::ResizeStaticTextToFit(CWnd* pParent, UINT nCtrlID, CDC* pDCRef)
 {
-	ResizeButtonStaticTextToFit(pParent, pParent->GetDlgItem(nCtrlID), pDCRef);
+	return ResizeStaticTextToFit(pParent, pParent->GetDlgItem(nCtrlID), pDCRef);
 }
 
-void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef)
+int CDialogHelper::ResizeStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC* pDCRef)
 {
 	ASSERT(pParent && pParent->GetSafeHwnd() && pCtrl && pCtrl->GetSafeHwnd());
 
 	if (!pParent ||! pParent->GetSafeHwnd() || !pCtrl || !pCtrl->GetSafeHwnd())
-		return;
+		return 0;
 
 	if (!pCtrl->GetWindowTextLength())
-		return;
+		return 0;
 
-	BOOL bRightAligned = FALSE;
+	BOOL bRightAligned = FALSE, bStatic = FALSE;
 
 	if (CWinClasses::IsClass(*pCtrl, WC_BUTTON))
 	{
@@ -1933,19 +1971,26 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 			{
 				// must be single line
 				if (dwStyle & BS_MULTILINE)
-					return;
+					return 0;
 
 				bRightAligned = (dwStyle & BS_RIGHT);
 			}
 			break; // all good
 			
 		default:
-			return; // push button
+			return 0; // push button
 		}
 	}
-	else // not a button
+	else if (CWinClasses::IsClass(*pCtrl, WC_STATIC)) 
 	{
-		return;
+		DWORD dwStyle = pCtrl->GetStyle();
+
+		bRightAligned = (dwStyle & SS_RIGHT);
+		bStatic = TRUE;
+	}
+	else 
+	{
+		return 0;
 	}
 
 	// prepare DC
@@ -1963,6 +2008,8 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 	CRect rText;
 	pCtrl->GetWindowRect(rText);
 	pParent->ScreenToClient(rText);	
+
+	CRect rOrgText(rText);
 	
 	CString sText;
 	pCtrl->GetWindowText(sText);
@@ -1974,16 +2021,20 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 	// just add a smidgin
 	nExtent += CLASSICTHEMETEXTFUDGE;
 
-	// adjust the appropriate side of the control rect,
-	// adding the height of the rect to allow
-	// for the checkbox or radiobutton
+	// Adjust extent for the checkbox or radio-button
+	if (!bStatic)
+		nExtent += rText.Height();
+
 	if (bRightAligned)
-		rText.left = (rText.right - nExtent - rText.Height());
+		rText.left = (rText.right - nExtent);
 	else
-		rText.right = (rText.left + nExtent + rText.Height());
+		rText.right = (rText.left + nExtent);
 	
 	// resize window
-	pCtrl->MoveWindow(rText);
+	int nDiff = (rText.Width() - rOrgText.Width());
+
+	if (nDiff)
+		pCtrl->MoveWindow(rText);
 
 	// restore DC
 	if (!bCallerDC)
@@ -1991,6 +2042,8 @@ void CDialogHelper::ResizeButtonStaticTextToFit(CWnd* pParent, CWnd* pCtrl, CDC*
 		pDCRef->SelectObject(hOldFont);
 		pCtrl->ReleaseDC(pDCRef);
 	}
+
+	return nDiff;
 }
 
 void CDialogHelper::ExcludeCtrls(const CWnd* pParent, CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo)
@@ -2025,9 +2078,8 @@ void CDialogHelper::ExcludeChild(const CWnd* pChild, CDC* pDC)
 	if (pChild->IsWindowVisible() && !(dwExStyle & WS_EX_TRANSPARENT))
 	{
 		CRect rClip = GetChildRect(pChild);
-		static BOOL bRoundCorners = (COSVersion() < OSV_WIN8);
 
-		if (bRoundCorners)
+		if (WANTROUNDCORNERS)
 		{
 			rClip.DeflateRect(1, 0);
 			pDC->ExcludeClipRect(rClip);
@@ -2082,6 +2134,46 @@ HWND CDialogHelper::GetParentOwner(HWND hWnd)
 	return pParent->GetSafeHwnd();
 }
 
+HWND CDialogHelper::GetParentDialog(HWND hWnd, DWORD dwReqStyles)
+{
+	HWND hwndParent = hWnd;
+
+	while (hwndParent)
+	{
+		if (CWinClasses::IsDialog(hwndParent))
+		{
+			if (!dwReqStyles || HasStyle(hwndParent, dwReqStyles))
+				break;
+		}
+	
+		hwndParent = ::GetParent(hwndParent);
+	}
+
+	return hwndParent;
+}
+
+BOOL CDialogHelper::IsDialog(HWND hWnd, const DLGCTRL ctrls[], int nNumCtrls)
+{
+	if (!CWinClasses::IsDialog(hWnd))
+		return FALSE;
+
+	for (int nCtrl = 0; nCtrl < nNumCtrls; nCtrl++)
+	{
+		HWND hwndCtrl = ::GetDlgItem(hWnd, ctrls[nCtrl].nCtrlID);
+
+		if (!hwndCtrl)
+			return FALSE;
+
+		if (!CWinClasses::IsClass(hwndCtrl, ctrls[nCtrl].szClass))
+			return FALSE;
+
+		if (ctrls[nCtrl].nReqStyles && !HasStyle(hwndCtrl, ctrls[nCtrl].nReqStyles))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonClient)
 {
 	DWORD dwFlags = (TME_LEAVE | (bIncludeNonClient ? TME_NONCLIENT : 0));
@@ -2104,6 +2196,23 @@ BOOL CDialogHelper::TrackMouseLeave(HWND hWnd, BOOL bEnable, BOOL bIncludeNonCli
 	
 	TRACKMOUSEEVENT tme = { sizeof(tme), dwFlags, hWnd, 0 };
 	return _TrackMouseEvent(&tme);
+}
+
+BOOL CDialogHelper::IsMouseDownInWindow(HWND hWnd)
+{
+	ASSERT(hWnd);
+	ASSERT(::IsWindowVisible(hWnd));
+
+	if (!hWnd || !Misc::IsKeyPressed(VK_LBUTTON))
+		return FALSE;
+
+	CPoint ptMsg(::GetMessagePos());
+	::ScreenToClient(hWnd, &ptMsg);
+
+	CRect rWnd;
+	::GetClientRect(hWnd, rWnd);
+
+	return rWnd.PtInRect(ptMsg);
 }
 
 BOOL CDialogHelper::SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen)

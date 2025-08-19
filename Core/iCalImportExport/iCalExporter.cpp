@@ -49,38 +49,28 @@ void CiCalExporter::WriteHeader(CStdioFileEx& fileOut)
 
 IIMPORTEXPORT_RESULT CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (pTasks == NULL)
-	{
-		ASSERT(0);
-		return IIER_BADINTERFACE;
-	}
+	CITaskListArray aTasklists;
+	aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE));
 
-	if (!InitConsts(dwFlags, pPrefs, szKey))
-		return IIER_CANCELLED;
-
-	CStdioFileEx fileOut;
-	
-	if (!fileOut.Open(szDestFilePath, CFile::modeCreate | CFile::modeWrite, SFEF_UTF8WITHOUTBOM))
-		return IIER_BADFILE;
-
-	// header
-	WriteHeader(fileOut);
-		
-	// export first task only and the rest will follow
-	int nNumExported = ExportTask(pTasks, pTasks->GetFirstTask(), _T(""), fileOut, TRUE);
-
-	// footer
-	WriteString(fileOut, _T("END:VCALENDAR"));
-
-	if (nNumExported != pTasks->GetTaskCount())
-		return IIER_SOMEFAILED;
-		
-	return IIER_SUCCESS;
+	return ExportTasklists(aTasklists, szDestFilePath, dwFlags, pPrefs, szKey);
 }
 
 IIMPORTEXPORT_RESULT CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CITaskListArray aTasklists;
+
+	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
+		aTasklists.Add(GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE));
+
+	return ExportTasklists(aTasklists, szDestFilePath, dwFlags, pPrefs, szKey);
+}
+
+IIMPORTEXPORT_RESULT CiCalExporter::ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath,
+									 DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	if (!InitConsts(dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
@@ -95,19 +85,19 @@ IIMPORTEXPORT_RESULT CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, L
 
 	int nNumTasks = 0, nNumExported = 0;
 
-	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
+	for (int nTasklist = 0; nTasklist < aTasklists.GetSize(); nTasklist++)
 	{
-		const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
+		const ITASKLISTBASE* pTasks = aTasklists[nTasklist];
 
-		// export first task only and the rest will follow
 		if (pTasks == NULL)
 		{
 			ASSERT(0);
 			return IIER_BADINTERFACE;
 		}
 
-		nNumTasks += pTasks->GetTaskCount();
+		// export first task only and the rest will follow
 		nNumExported += ExportTask(pTasks, pTasks->GetFirstTask(), _T(""), fileOut, TRUE);
+		nNumTasks += pTasks->GetTaskCount();
 	}
 
 	// footer
@@ -121,8 +111,6 @@ IIMPORTEXPORT_RESULT CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, L
 
 bool CiCalExporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
 	NODUEDATEISTODAYORSTART = pPrefs->GetProfileInt(_T("Preferences"), _T("NoDueDateIsDueToday"), FALSE);
 
 	CString sKey(szKey);
@@ -355,7 +343,7 @@ CString CiCalExporter::FormatRecurrence(int nRegularity, DWORD dwSpecific1, DWOR
 		break;
 
 	case TDIR_DAY_EVERY_NWEEKDAYS: // TDIR_DAILY
-		sRecurrence.Format(_T("RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=%lu"));
+		sRecurrence.Format(_T("RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;INTERVAL=%lu"), dwSpecific1);
 		break;
 
 	case TDIR_DAY_EVERY_WEEKDAY:

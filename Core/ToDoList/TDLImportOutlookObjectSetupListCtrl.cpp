@@ -50,8 +50,8 @@ void CTDLImportOutlookObjectSetupListCtrl::OnAttribEditOK()
 	if (nSel == CB_ERR)
 		return;
 
-	TDC_ATTRIBUTE nAttrib = (TDC_ATTRIBUTE)m_cbAttributes.GetItemData(nSel);
-	BOOL bOneToOne = !((nAttrib != TDCA_COMMENTS) || (nAttrib != TDCA_TASKNAME));
+	TDC_ATTRIBUTE nAttribID = (TDC_ATTRIBUTE)m_cbAttributes.GetItemData(nSel);
+	BOOL bOneToOne = !((nAttribID != TDCA_COMMENTS) || (nAttribID != TDCA_TASKNAME));
 
 	CAutoFlag af(m_bOneToOneMapping, bOneToOne);
 

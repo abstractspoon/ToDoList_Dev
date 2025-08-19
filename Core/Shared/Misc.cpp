@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Misc.h"
+#include "mapex.h"
 
 #include <Lmcons.h>
 #include <math.h>
@@ -27,15 +28,71 @@ static char THIS_FILE[]=__FILE__;
 #	define RPC_CSTR LPSTR
 #endif
 
-#ifdef _UNICODE
-#	define RPC_TSTR RPC_WSTR
-#else
-#	define RPC_TSTR RPC_CSTR
-#endif
+#define RPC_TSTR RPC_WSTR
 
 //////////////////////////////////////////////////////////////////////
 
 #define DBL_QUOTE _T("\"")
+
+//////////////////////////////////////////////////////////////////////
+
+const CString EMPTY_STR;
+CString FALLBACK_STR;
+
+const CString DELIMS(_T("()-\\/{}[]:;,. ?\"'\n\r\t"));
+const CString BACKWARD_DELIMS(_T(")-\\/}]:;,. ?\"'\r\t"));
+
+const GUID NULLGUID = { 0 };
+
+/////////////////////////////////////////////////////////////////////
+
+CTempLocale::CTempLocale(const CString& sLocale) : m_nCategory(-1)
+{
+	Initialise(LC_ALL, sLocale);
+}
+
+CTempLocale::CTempLocale(int nCategory, const CString& sLocale) : m_nCategory(-1)
+{
+	Initialise(nCategory, sLocale);
+}
+
+CTempLocale::~CTempLocale()
+{
+	_tsetlocale(m_nCategory, m_sPrevLocale);
+}
+
+void CTempLocale::Initialise(int nCategory, const CString& sLocale)
+{
+	ASSERT(m_nCategory == -1);
+	ASSERT(m_sPrevLocale.IsEmpty());
+
+	m_nCategory = nCategory;
+	m_sPrevLocale = _tsetlocale(m_nCategory, NULL);
+
+#ifdef _DEBUG
+#	if _MSC_VER > 1200
+
+	// This test will fail under VC6 because of something in setlocale.
+	// Note: This will resolved in 9.1 because we will be using VS2015 
+	//for the release build
+	CString sNewLocale = _tsetlocale(m_nCategory, sLocale);
+	ASSERT(sLocale.IsEmpty() || (sNewLocale == sLocale));
+
+#	endif
+#else
+	_tsetlocale(m_nCategory, sLocale);
+#endif
+}
+
+void CTempLocale::ChangeLocale(const CString& sAltLocale)
+{
+	_tsetlocale(m_nCategory, sAltLocale);
+}
+
+CString CTempLocale::Current(int nCategory)
+{
+	return _tsetlocale(nCategory, NULL);
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -51,11 +108,11 @@ BOOL Misc::Is64BitWindows()
 	typedef BOOL (WINAPI *PFNISWOW64PROCESS)(HANDLE, PBOOL);
 	
 	// load dll once only
-	static HMODULE hKernel32 = LoadLibrary(_T("kernel32.dll"));
+	HMODULE hKernel32 = LoadLibrary(_T("kernel32.dll"));
 	
 	if (hKernel32)
 	{
-		static PFNISWOW64PROCESS fnIsWow64 = (PFNISWOW64PROCESS)GetProcAddress(hKernel32, "IsWow64Process");
+		PFNISWOW64PROCESS fnIsWow64 = (PFNISWOW64PROCESS)GetProcAddress(hKernel32, "IsWow64Process");
 		
 		if (fnIsWow64)
 		{
@@ -137,7 +194,7 @@ BOOL Misc::CopyTexttoClipboard(const CString& sText, HWND hwnd, UINT nFormat, BO
 CString Misc::GetClipboardText(UINT nFormat)
 {
 	if (!::OpenClipboard(NULL)) 
-		return _T(""); 
+		return EMPTY_STR;
 
 	CString sText;
 
@@ -209,7 +266,7 @@ CString Misc::NewGuid(GUID* pGuid)
 	}
 
 	// else
-	return _T("");
+	return EMPTY_STR;
 }
 
 BOOL Misc::IsGuid(LPCTSTR szGuid)
@@ -252,8 +309,6 @@ BOOL Misc::GuidToString(const GUID& guid, CString& sGuid)
 
 BOOL Misc::GuidIsNull(const GUID& guid)
 {
-	static GUID NULLGUID = { 0 };
-	
 	return SameGuids(guid, NULLGUID);
 }
 
@@ -345,7 +400,7 @@ CString Misc::FormatArray(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncE
 
 	switch (nCount)
 	{
-	case 0: return _T("");
+	case 0: return EMPTY_STR;
 	case 1:	return aValues[0];
 	}
 
@@ -668,7 +723,6 @@ int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSe
 		if (bWholeWord)
 		{
 			// Test prior and next chars for delimiters
-			static const CString DELIMS("()-\\/{}[]:;,. ?\"'\n\r\t");
 			TCHAR cPrevChar = ' ', cNextChar = ' ';
 
 			// prev
@@ -804,6 +858,11 @@ BOOL Misc::RemoveAt(CString& sText, int nPos)
 	return TRUE;
 }
 
+void Misc::Reverse(CString& sText)
+{
+	_tcsrev((LPTSTR)(LPCTSTR)sText);
+}
+
 BOOL Misc::IsEmpty(LPCTSTR szText) 
 { 
 	return ((!szText || !szText[0]) ? TRUE : FALSE); 
@@ -834,10 +893,7 @@ CString Misc::Last(const CStringArray& aText)
 	if (nSize > 0)
 		return aText[nSize - 1];
 
-	static CString sEmpty;
-	sEmpty.Empty();
-	
-	return sEmpty;
+	return EMPTY_STR;
 }
 
 CString& Misc::Last(CStringArray& aText)
@@ -847,10 +903,8 @@ CString& Misc::Last(CStringArray& aText)
 	if (nSize > 0)
 		return aText[nSize - 1];
 
-	static CString sEmpty;
-	sEmpty.Empty();
-
-	return sEmpty;
+	FALLBACK_STR.Empty();
+	return FALLBACK_STR;
 }
 
 int Misc::LastIndex(const CString& sText)
@@ -1099,46 +1153,46 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 	return aValues.GetSize();
 }
 
-int Misc::SplitLines(const CString& sText, CStringArray& aLines, int nMaxLineLength)
+int Misc::SplitLines(const CString& sText, CStringArray& aLines, int nMaxLineLengthInChars)
 {
 	int nNumLines = Split(sText, aLines, '\n', TRUE, TRUE);
+	const int MAXCHARS = nMaxLineLengthInChars;
 
-	if ((nNumLines == 0) || (nMaxLineLength <= 0) && (nMaxLineLength != -1))
+	if ((nNumLines == 0) || (MAXCHARS <= 0) && (MAXCHARS != -1))
 	{
 		ASSERT(0);
 		return 0;
 	}
 
-	if (nMaxLineLength != -1)
+	if (MAXCHARS != -1)
 	{
 		// Extra over processing
 		int nLine = nNumLines;
 
-		while (nLine--)
+		while (nLine--) // Reverse order so we can add sub-lines as we go
 		{
-			CString& sLine = aLines[nLine];
+			CString sLine = aLines[nLine];
 
-			if (sLine.GetLength() > nMaxLineLength)
+			if (sLine.GetLength() > MAXCHARS)
 			{
-				CStringArray aSubLines;
+				int nSubline = nLine;
 
 				do
 				{
 					// Find nearest word-break
-					CString sSubLine = Left(sLine, nMaxLineLength, TRUE);
+					CString sSubLine = Left(sLine, MAXCHARS, TRUE);
+					ASSERT(sSubLine.GetLength() <= (MAXCHARS + 1));
 
-					aSubLines.Add(sSubLine);
+					aLines.InsertAt(nSubline++, sSubLine);
 					sLine = sLine.Mid(sSubLine.GetLength());
 				}
-				while (sLine.GetLength() > nMaxLineLength);
+				while (sLine.GetLength() > MAXCHARS);
 				
-				// Add whatever's left over
-				if (!sLine.IsEmpty())
-					aSubLines.Add(sLine);
-
-				// Replace the existing string with the sub strings
-				aLines.RemoveAt(nLine);
-				aLines.InsertAt(nLine, &aSubLines);
+				// Whatever is left over is the last line
+				if (sLine.IsEmpty())
+					aLines.RemoveAt(nSubline);
+				else
+					aLines[nSubline] = sLine;
 			}
 		}
 	}
@@ -1150,9 +1204,7 @@ CString Misc::Left(const CString& sText, int nLength, BOOL bNearestWord)
 {
 	if (bNearestWord && (nLength < sText.GetLength()))
 	{
-		// Look forwards and backwards for word break
-		static CString BACKWARD_DELIMS(_T(")-\\/}]:;,. ?\"'\r\t")); // opening braces
-
+		// Look backwards for word break
 		int nFindPrev = FindNextOneOf(BACKWARD_DELIMS, sText, FALSE, nLength);
 
 		// Only accept the delimiter position if it falls
@@ -1360,19 +1412,16 @@ const CString& Misc::GetItem(const CStringArray& aValues, int nItem)
 {
 	ASSERT(nItem >= 0 && nItem < aValues.GetSize());
 
-	if (nItem < 0 || nItem >= aValues.GetSize())
-	{
-		static CString sDummy;
-		return sDummy;
-	}
+	if ((nItem >= 0) && (nItem < aValues.GetSize()))
+		return aValues.GetData()[nItem];
 
-	return aValues.GetData()[nItem];
+	FALLBACK_STR.Empty();
+	return FALLBACK_STR;
 }
 
 int Misc::RemoveEmptyItems(CStringArray& aFrom)
 {
-	int nRemoved = 0; // counter
-	int nItem = aFrom.GetSize();
+	int nOrgCount = aFrom.GetSize(), nItem = nOrgCount;
 
 	while (nItem--)
 	{
@@ -1380,29 +1429,69 @@ int Misc::RemoveEmptyItems(CStringArray& aFrom)
 		Trim(sItem);
 
 		if (sItem.IsEmpty())
-		{
 			aFrom.RemoveAt(nItem);
-			nRemoved++;
-		}
 	}
 
-	return nRemoved;
+	return (nOrgCount - aFrom.GetSize());
+}
+
+int Misc::RemoveDuplicates(CStringArray& aFrom, BOOL bCaseSensitive)
+{
+	CStringSet mapUniqueItems;
+	int nOrgCount = aFrom.GetSize(), nNumItems = nOrgCount;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		CString sItem = (bCaseSensitive ? aFrom[nItem] : ToUpper(aFrom[nItem]));
+
+		if (!mapUniqueItems.Has(sItem))
+		{
+			mapUniqueItems.Add(sItem);
+			continue;
+		}
+
+		// else
+		aFrom.RemoveAt(nItem);
+
+		nItem--;
+		nNumItems--;
+	}
+
+	return (nOrgCount - nNumItems);
 }
 
 int Misc::RemoveItems(const CStringArray& aValues, CStringArray& aFrom, BOOL bCaseSensitive)
 {
-	int nRemoved = 0; // counter
-	int nItem = aValues.GetSize();
+	if (aValues.GetSize() == 0)
+		return 0;
+
+	// Create a look up of the values to be removed
+	CStringSet mapValues;
+
+	if (bCaseSensitive)
+	{
+		mapValues.CopyFrom(aValues);
+	}
+	else
+	{
+		int nItem = aValues.GetSize();
+
+		while (nItem--)
+			mapValues.Add(ToUpper(aValues[nItem]));
+	}
+
+	// Traverse the existing array removing as we go
+	int nOrgCount = aFrom.GetSize(), nItem = nOrgCount;
 
 	while (nItem--)
 	{
-		const CString& sItem = GetItem(aValues, nItem);
+		CString sItem = (bCaseSensitive ? aFrom[nItem] : ToUpper(aFrom[nItem]));
 
-		if (RemoveItem(sItem, aFrom, bCaseSensitive))
-			nRemoved++;
+		if (mapValues.Has(sItem))
+			aFrom.RemoveAt(nItem);
 	}
 
-	return nRemoved;
+	return (nOrgCount - aFrom.GetSize());
 }
 
 BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
@@ -1416,34 +1505,51 @@ BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 	return TRUE;
 }
 
-int Misc::AddUniqueItems(const CStringArray& aValues, CStringArray& aTo, BOOL bCaseSensitive)
+int Misc::AppendItems(const CStringArray& aFrom, CStringArray& aTo, BOOL bRemoveDuplicates, BOOL bCaseSensitiveRemove)
 {
-	int nAdded = 0; // counter
-	int nSize = aValues.GetSize();
-	
-	for (int nItem = 0; nItem < nSize; nItem++)
-	{
-		const CString& sItem = GetItem(aValues, nItem);
+	int nOrgCount = aTo.GetSize();
 
-		if (AddUniqueItem(sItem, aTo, bCaseSensitive))
-			nAdded++;
-	}
+	aTo.Append(aFrom);
 
-	return nAdded;
+	if (bRemoveDuplicates)
+		RemoveDuplicates(aTo, bCaseSensitiveRemove);
+
+	return (aTo.GetSize() - nOrgCount);
 }
 
-int Misc::AddUniqueItems(const CDWordArray& aValues, CDWordArray& aTo)
+int Misc::AppendItems(const CDWordArray& aFrom, CDWordArray& aTo, BOOL bRemoveDuplicates)
 {
-	int nAdded = 0; // counter
-	int nSize = aValues.GetSize();
-	
-	for (int nItem = 0; nItem < nSize; nItem++)
+	int nOrgCount = aTo.GetSize();
+
+	aTo.Append(aFrom);
+
+	if (bRemoveDuplicates)
+		RemoveDuplicates(aTo);
+
+	return (aTo.GetSize() - nOrgCount);
+}
+
+int Misc::RemoveDuplicates(CDWordArray& aFrom)
+{
+	CDWordSet mapUniqueItems;
+	int nOrgCount = aFrom.GetSize(), nNumItems = nOrgCount;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		if (AddUniqueItemT(aValues[nItem], aTo))
-			nAdded++;
+		if (!mapUniqueItems.Has(aFrom[nItem]))
+		{
+			mapUniqueItems.Add(aFrom[nItem]);
+			continue;
+		}
+
+		// else
+		aFrom.RemoveAt(nItem);
+
+		nItem--;
+		nNumItems--;
 	}
 
-	return nAdded;
+	return (nOrgCount - nNumItems);
 }
 
 BOOL Misc::AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive)
@@ -1495,16 +1601,20 @@ CString Misc::GetPM()
 	return GetLocaleInfo(LOCALE_S2359, 10);
 }
 
-CString Misc::GetTimeFormat(BOOL bIncSeconds)
+CString Misc::GetTimeFormat(BOOL bIncSeconds, BOOL bISO)
 {
+	if (bISO)
+		return (bIncSeconds ? _T("HH:mm:ss") : _T("HH:mm"));
+	
+	// else
 	CString sFormat = GetLocaleInfo(LOCALE_STIMEFORMAT, 100);
 
 	if (!bIncSeconds)
 	{
 		CString sTemp(sFormat);
 
-		if (!sTemp.Replace(GetTimeSeparator() + _T("ss"), _T("")))
-			sTemp.Replace(GetTimeSeparator() + _T("s"), _T(""));
+		if (!sTemp.Replace(GetTimeSeparator() + _T("ss"), EMPTY_STR))
+			sTemp.Replace(GetTimeSeparator() + _T("s"), EMPTY_STR);
 
 		return sTemp;
 	}
@@ -1540,8 +1650,12 @@ CString Misc::GetDateSeparator()
 	return sSep;
 }
 
-CString Misc::GetShortDateFormat(BOOL bIncDOW)
+CString Misc::GetShortDateFormat(BOOL bIncDOW, BOOL bISO)
 {
+	if (bISO)
+		return _T("yyyy-MM-dd");
+
+	// else
 	CString sFormat = GetLocaleInfo(LOCALE_SSHORTDATE, 100);
 
 	if (bIncDOW)
@@ -1584,11 +1698,7 @@ BOOL Misc::IsMetricMeasurementSystem()
 CString& Misc::EncodeAsMultiByte(CString& sUnicode, UINT nCodePage)
 {
 	// calc number of unicode chars in string
-#ifdef _UNICODE
 	int nLen = sUnicode.GetLength();
-#else
-	int nLen = ((sUnicode.GetLength() + 1) / sizeof(WCHAR));
-#endif
 	
 	char* szMB = WideToMultiByte((LPCWSTR)(LPCTSTR)sUnicode, nLen, nCodePage);
 	// nLen is now the number of returned multibyte chars
@@ -1596,10 +1706,8 @@ CString& Misc::EncodeAsMultiByte(CString& sUnicode, UINT nCodePage)
 	// calc number of bytes required to hold multibyte chars
 	int nBytes = nLen;
 	
-#ifdef _UNICODE
 	// calc number of chars required to hold multibyte chars
 	nLen = ((nLen + 1) / sizeof(WCHAR));
-#endif
 	
 	LPTSTR szOutput = sUnicode.GetBuffer(nLen);
 	
@@ -1622,11 +1730,6 @@ CString& Misc::EncodeAsUnicode(CString& sMultibyte, UINT nCodePage)
 	
 	// calc number of bytes required to hold unicode chars
 	int nBytes = (nLen * sizeof(WCHAR));
-	
-	// calc number of chars needed to hold unicode chars
-#ifndef _UNICODE
-	nLen *= sizeof(WCHAR);
-#endif
 	
 	LPTSTR szOutput = sMultibyte.GetBuffer(nLen);
 	
@@ -1759,17 +1862,52 @@ int Misc::GetNextValue(int nValue, int nIncrement)
 
 BOOL Misc::IsNumber(const CString& sValue)
 {
-	if (sValue.IsEmpty())
+	int nLen = sValue.GetLength();
+
+	if (nLen == 0)
 		return FALSE;
 
-	static const CString DELIMS(_T("+-."));
+	// Can start with '+' or a '-'
+	int nPos = 0;
+	TCHAR chr = sValue[nPos];
 
-	for (int nChar = 0; nChar < sValue.GetLength(); nChar++)
+	if ((chr == '-') || (chr == '+'))
 	{
-		TCHAR chr = sValue[nChar];
-
-		if (!_istdigit(chr) && DELIMS.Find(chr) == -1)
+		if (nLen == 1)
 			return FALSE;
+
+		nPos++;
+	}
+
+	// Rest must be digits with a single optional decimal
+	TCHAR cDecSep = 0;
+	BOOL bHasDecimal = FALSE;
+
+	for (; nPos < nLen; nPos++)
+	{
+		chr = sValue[nPos];
+
+		if (_istdigit(chr))
+			continue;
+		
+		if (((chr == '.') || (chr == ',')) && !bHasDecimal)
+		{
+			bHasDecimal = TRUE;
+		}
+		else if (!bHasDecimal)
+		{
+			if (cDecSep == 0)
+				cDecSep = Misc::GetDecimalSeparator()[0];
+
+			if (chr != cDecSep)
+				return FALSE;
+
+			bHasDecimal = TRUE;
+		}
+		else
+		{
+			return FALSE;
+		}
 	}
 
 	return TRUE;
@@ -1791,9 +1929,9 @@ BOOL Misc::IsSymbol(const CString& sValue)
 	return TRUE;
 }
 
-BOOL Misc::StateChanged(BOOL b1, BOOL b2) 
+BOOL Misc::StatesDiffer(BOOL bState1, BOOL bState2) 
 { 
-	return ((b1 && !b2) || (!b1 && b2)); 
+	return ((bState1 && !bState2) || (!bState1 && bState2)); 
 }
 
 // From: http://www.geeksforgeeks.org/shuffle-a-given-array/
@@ -1852,27 +1990,39 @@ const CString& Misc::GetLongest(const CString& str1, const CString& str2, BOOL b
 
 double Misc::Atof(const CString& sValue)
 {
-	if (sValue.IsEmpty())
-		return 0.0;
+	double dValue = 0.0;
 
-	// needs special care to handle decimal point properly
-	// especially since we've no way of knowing how it is encoded.
-	// so we assume that if a period is present then it's encoded
-	// in 'english' else it's in native format
-	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL));
-	
-	if (sValue.Find('.') != -1)
-		setlocale(LC_NUMERIC, "English");
-	else
-		setlocale(LC_NUMERIC, "");
+	if (!sValue.IsEmpty())
+	{
+		// Always use the 'C' locale and convert decimal separators 
+		// to periods because that gives us much more control
+		CTempLocale loc(LC_NUMERIC, "C");
+		
+		if (sValue.Find('.') != -1)
+		{
+			// No changes required
+			dValue = _tcstod(sValue, NULL);
+		}
+		else
+		{
+			CString sTemp(sValue);
+			
+			// Check for comma as most likely next bet
+			if (sTemp.Replace(',', '.') == 0)
+			{
+				// else check for a custom decimal
+				// separator unless that's a comma too
+				TCHAR cDecSep = GetDecimalSeparator()[0];
+				
+				if (cDecSep != ',')
+					sTemp.Replace(cDecSep, '.');
+			}
+			
+			dValue = _tcstod(sTemp, NULL);
+		}
+	}
 
-	double dVal = _tcstod(sValue, NULL);
-
-	// restore locale
-	setlocale(LC_NUMERIC, szLocale);
-	free(szLocale);
-	
-	return dVal; 
+	return dValue;
 }
 
 BOOL Misc::ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason)
@@ -1880,28 +2030,14 @@ BOOL Misc::ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason)
 	typedef BOOL (WINAPI *PFNSHUTDOWNBLOCKREASONCREATE)(HWND, LPCWSTR);
 
 	// load user32.dll once only
-	static HMODULE hUser32 = LoadLibrary(_T("user32.dll"));
+	HMODULE hUser32 = LoadLibrary(_T("user32.dll"));
 
 	if (hUser32)
 	{
-		static PFNSHUTDOWNBLOCKREASONCREATE fnCreate = (PFNSHUTDOWNBLOCKREASONCREATE)GetProcAddress(hUser32, "ShutdownBlockReasonCreate");
+		PFNSHUTDOWNBLOCKREASONCREATE fnCreate = (PFNSHUTDOWNBLOCKREASONCREATE)GetProcAddress(hUser32, "ShutdownBlockReasonCreate");
 
 		if (fnCreate)
-		{
-#ifdef _UNICODE
-			LPCWSTR wszReason = szReason;
-#else
-			int nLength = lstrlen(szReason);
-			LPWSTR wszReason = MultiByteToWide(szReason, nLength);
-#endif
-
-			BOOL bRes = fnCreate(hWnd, wszReason);
-
-#ifndef _UNICODE
-			delete [] wszReason;
-#endif
-			return bRes;
-		}
+			return fnCreate(hWnd, szReason);
 	}
 
 	// must be < XP
@@ -1913,11 +2049,11 @@ BOOL Misc::ShutdownBlockReasonDestroy(HWND hWnd)
 	typedef BOOL (WINAPI *PFNSHUTDOWNBLOCKREASONDESTROY)(HWND);
 
 	// load user32.dll once only
-	static HMODULE hUser32 = LoadLibrary(_T("user32.dll"));
+	HMODULE hUser32 = LoadLibrary(_T("user32.dll"));
 
 	if (hUser32)
 	{
-		static PFNSHUTDOWNBLOCKREASONDESTROY fnDestroy = (PFNSHUTDOWNBLOCKREASONDESTROY)GetProcAddress(hUser32, "ShutdownBlockReasonDestroy");
+		PFNSHUTDOWNBLOCKREASONDESTROY fnDestroy = (PFNSHUTDOWNBLOCKREASONDESTROY)GetProcAddress(hUser32, "ShutdownBlockReasonDestroy");
 
 		if (fnDestroy)
 			return fnDestroy(hWnd);
@@ -1980,7 +2116,7 @@ LANGID Misc::GetUserDefaultUILanguage()
 {
 	typedef LANGID (WINAPI *FNGETUSERDEFAULTUILANGUAGE)(VOID);
 
-	static HMODULE hLib = LoadLibrary(_T("kernel32.dll"));
+	HMODULE hLib = LoadLibrary(_T("kernel32.dll"));
 	LANGID nLangID = 0;
 
 	if (hLib)
@@ -1998,7 +2134,7 @@ BOOL Misc::IsFullScreenAppActive()
 {
 	typedef HRESULT (*FNSHQUERYUSERNOTIFICATIONSTATE)(int*);
 
-	static HMODULE hLib = LoadLibrary(_T("Shell32.dll"));
+	HMODULE hLib = LoadLibrary(_T("Shell32.dll"));
 
 	if (hLib)
 	{
@@ -2025,6 +2161,14 @@ BOOL Misc::IsFullScreenAppActive()
 LANGID Misc::GetUserKeyboardLanguage()
 {
 	return LOWORD(::GetKeyboardLayout(0));
+}
+
+LANGID Misc::GetPrimaryLanguage()
+{
+	LCID lcid = ::GetThreadLocale();
+	LANGID lid = LANGIDFROMLCID(lcid);
+	
+	return PRIMARYLANGID(lid);
 }
 
 CString Misc::GetDefCharset()
@@ -2178,8 +2322,8 @@ int Misc::ParseSearchString(LPCTSTR szSearch, CStringArray& aWords)
 
 CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 {
-	char* szLocale = _strdup(setlocale(LC_NUMERIC, NULL)); // current locale
-	setlocale(LC_NUMERIC, ""); // local default
+	// Change locale to local default
+	CTempLocale(LC_NUMERIC, "");
 
 	CString sValue;
 
@@ -2198,10 +2342,6 @@ CString Misc::Format(double dVal, int nDecPlaces, LPCTSTR szTrail)
 		sValue.Format(_T("%.*f"), nDecPlaces, dVal); 
 		break;
 	}
-				
-	// restore locale
-	setlocale(LC_NUMERIC, szLocale);
-	free(szLocale);
 
 	return (sValue + szTrail);
 }
@@ -2235,12 +2375,10 @@ CString Misc::Format(LPCTSTR lpszFormat, ...)
 
 #define FORMAT_REGION_VALUE(FUNC)                             \
                                                               \
-char* szPrevLocale = _strdup(setlocale(LC_NUMERIC, NULL));    \
-setlocale(LC_NUMERIC, "");                                    \
+{ CTempLocale loc(LC_NUMERIC, "");                            \
 const UINT BUFSIZE = 100; TCHAR szValue[BUFSIZE + 1] = { 0 }; \
 FUNC(NULL, 0, sValue, NULL, szValue, BUFSIZE);                \
-sValue = szValue;                                             \
-setlocale(LC_NUMERIC, szPrevLocale); free(szPrevLocale);
+sValue = szValue; }
 
 // ----------------------------------------------------------------
 
@@ -2304,7 +2442,7 @@ CString Misc::GetKeyName(WORD wVirtKeyCode, BOOL bExtended)
 	}
 
 	// else
-	return _T("");
+	return EMPTY_STR;
 }
 
 BOOL Misc::IsKeyPressed(DWORD dwVirtKey) 
@@ -2476,16 +2614,14 @@ int Misc::NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBe
 			return (bEmpty1 ? 1 : -1);
 	}
 
-#ifdef _UNICODE
 	// initialize once only per session
-	static HMODULE hShlwapi = ::LoadLibrary(_T("Shlwapi.dll"));
+	HMODULE hShlwapi = ::LoadLibrary(_T("Shlwapi.dll"));
 	   
 	typedef int (WINAPI *PFNSTRCMPLOGICAL)(PCWSTR, PCWSTR);
-	static PFNSTRCMPLOGICAL pFn = (PFNSTRCMPLOGICAL)::GetProcAddress(hShlwapi, "StrCmpLogicalW");
+	PFNSTRCMPLOGICAL pFn = (PFNSTRCMPLOGICAL)::GetProcAddress(hShlwapi, "StrCmpLogicalW");
 	
 	if (pFn)
 		return pFn(szString1, szString2);
-#endif
 	
 	// all else
 	return _tcsicmp(szString1, szString2);

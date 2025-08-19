@@ -13,7 +13,7 @@
 
 enum TDC_ATTRIBUTE
 {
-	// NEVER CHANGE THE ORDER OF THIS LIST
+	// NEVER CHANGE THE ORDER OF THIS LIST OR REMOVE ITEMS
 	TDCA_NONE = -1,
 
 	TDCA_FIRST_ATTRIBUTE = 0,
@@ -69,14 +69,15 @@ enum TDC_ATTRIBUTE
 	// pseudo attributes for Find Tasks dialog
 	TDCA_TASKNAMEORCOMMENTS,
 	TDCA_ANYTEXTATTRIBUTE,
-	TDCA_DONEDATE_RELATIVE_DEP,		// deprecated
-	TDCA_DUEDATE_RELATIVE_DEP,		// deprecated
-	TDCA_STARTDATE_RELATIVE_DEP,	// deprecated
-	TDCA_CREATIONDATE_RELATIVE_DEP,	// deprecated
-	TDCA_LASTMOD_RELATIVE_DEP,		// deprecated
+
+	TDCA_DEPRECATED1,
+	TDCA_DEPRECATED2,
+	TDCA_DEPRECATED3,
+	TDCA_DEPRECATED4,
+	TDCA_DEPRECATED5,
 
 	// custom attributes
-	TDCA_CUSTOMATTRIBDEFS,
+	TDCA_CUSTOMATTRIB_DEFS,
 	TDCA_CUSTOMATTRIB,
 	TDCA_CUSTOMATTRIB_FIRST = TDCA_CUSTOMATTRIB,
 	TDCA_CUSTOMATTRIB_LAST = (TDCA_CUSTOMATTRIB_FIRST + 63),
@@ -86,7 +87,7 @@ enum TDC_ATTRIBUTE
 	TDCA_RECENTMODIFIED,
 
 	// pseudo attribute for printing
-	TDCA_NOTES_DEP,					// deprecated
+	TDCA_DEPRECATED6,
 
 	// pseudo attribute for Find Tasks dialog
 	TDCA_PATH,
@@ -108,8 +109,13 @@ enum TDC_ATTRIBUTE
 	// pseudo attribute for Find Tasks dialog
 	TDCA_REMINDER,
 
+	// pseudo attributes for Attribute Editor
 	TDCA_TIMEREMAINING, 
 	TDCA_COMMENTSFORMAT,
+
+	// pseudo attribute for Custom Attributes dialog
+	TDCA_TODAY,
+
 	// ADD NEW ATTRIBUTES HERE ONLY!
 	
 	// Hack to capture the value of the very last attribute
@@ -250,7 +256,7 @@ enum // custom attribute features
 	TDCCAF_DISPLAYASPERCENT		= 0x0100, // Numbers only
 	TDCCAF_EXCLUDEBLANKITEM		= 0x0200, // Non-multi lists only
 	TDCCAF_ONEDECIMAL			= 0x0400, // Decimals/Fractions only
-	TDCCAF_SHOWEDITFIELD		= 0x0800, // Checkboxes only
+	TDCCAF_DEPRECATED_1			= 0x0800, // DEPRECATED
 };
 
 //////////////////////////////////////////////////////////////////////

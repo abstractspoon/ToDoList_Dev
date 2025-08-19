@@ -28,20 +28,6 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace PDFExporter
 {
-    struct TaskAttribute
-    {
-        public TaskAttribute(Task.Attribute attrib, String name)
-        {
-            Attribute = attrib;
-            Name = name;
-        }
-
-        public Task.Attribute Attribute;
-        public String Name;
-    }
-
-	// ------------------------------------------------------------------
-
 	public class PDFBackgroundImage : IPdfPageEvent
 	{
 		private Image m_WatermarkImage = null;
@@ -80,13 +66,20 @@ namespace PDFExporter
 	[System.ComponentModel.DesignerCategory("")]
 	public class PDFExporterCore
 	{
-	
+		private class AttribItem
+		{
+			public string Label = "";
+			public Task.Attribute AttribId = Task.Attribute.Unknown;
+			public string CustAttribId = "";
+			public CustomAttributeDefinition.Attribute CustAttribType = CustomAttributeDefinition.Attribute.Unknown;
+		}
+
+		// --------------------------------------------------------------------------------------
+
 		private Translator m_Trans;
 		private String m_TypeId;
         private String m_TempFolder;
         private bool m_WantComments = false, m_WantPosition = false;
-
-		private System.Collections.Generic.List<TaskAttribute> m_AvailAttributes = null;
 
 		private FontMappings m_FontMappings;
 		private string m_BaseFontName;
@@ -164,15 +157,12 @@ namespace PDFExporter
 			else
 				m_WatermarkImagePath = "";
 
-			BuildAttributeList(tasks);
-
             return true;
 		}
 
-		private void BuildAttributeList(TaskList tasks)
+		private IList<AttribItem> GetAttributeList(TaskList tasks)
 		{
-			m_AvailAttributes = new List<TaskAttribute>();
-
+			var attribList = new List<AttribItem>();
 			var attribs = tasks.GetAvailableAttributes();
 
 			foreach (var attrib in attribs)
@@ -191,10 +181,6 @@ namespace PDFExporter
 					m_WantPosition = true;
 					break;
 
-				// case Task.Attribute.CustomAttribute:
-				// // TODO
-				// break;
-
 				case Task.Attribute.MetaData:
 					// Not a user attribute
 					break;
@@ -211,27 +197,134 @@ namespace PDFExporter
 					// handled separately
 					break;
 
+				case Task.Attribute.CustomAttribute:
+					if (tasks.IsAttributeAvailable(attrib))
+					{
+						var custAttribs = tasks.GetCustomAttributes();
+
+						foreach (var custAttrib in custAttribs)
+						{
+							attribList.Add(new AttribItem()
+							{
+								Label = custAttrib.Label,
+								AttribId = attrib,
+								CustAttribId = custAttrib.Id,
+								CustAttribType = custAttrib.AttributeType
+							});
+						}
+					}
+					break;
+
 				default:
-					m_AvailAttributes.Add(new TaskAttribute(attrib, m_Trans.Translate(TaskList.GetAttributeName(attrib))));
+					{
+						var attribName = TaskList.GetAttributeName(attrib);
+
+						if (!String.IsNullOrEmpty(attribName))
+						{
+							attribList.Add(new AttribItem()
+							{
+								Label = m_Trans.Translate(attribName, Translator.Type.Text),
+								AttribId = attrib
+							});
+						}
+					}
 					break;
 				}
 			}
 
-			m_AvailAttributes.Sort((a, b) => String.Compare(a.Name, b.Name));
+			attribList.Sort((a, b) => String.Compare(a.Label, b.Label));
+
+			return attribList;
 		}
 
-		public bool Export(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
+		public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
 		{
-			if (!InitConsts(tasks, destFilePath, silent, prefs, sKey))
+			var tasklists = new List<TaskList>() { srcTasks };
+
+			return ExportTasklists(tasklists, srcTasks.GetReportTitle(), srcTasks.GetReportDate(), sDestFilePath, bSilent, prefs, sKey);
+		}
+
+		public bool Export(MultiTaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
+		{
+			var tasklists = srcTasks.GetTaskLists();
+
+			return ExportTasklists(tasklists, srcTasks.GetReportTitle(), srcTasks.GetReportDate(), sDestFilePath, bSilent, prefs, sKey);
+		}
+
+		private bool ExportTasklists(IList<TaskList> srcTasks, 
+									 string reportTitle,
+									 string reportDate,
+									 string destFilePath, 
+									 bool silent, 
+									 Preferences prefs, 
+									 string sKey)
+		{
+			if (!InitConsts(srcTasks[0], destFilePath, silent, prefs, sKey))
 				return false;
 
 			try
 			{
-				var pdfContent = CreatePDFDocument(tasks);
-			
-				File.WriteAllBytes(destFilePath, pdfContent);
+				MemoryStream workStream = new MemoryStream();
+				Document pdfDoc = new Document(PageSize.A4);
+				PdfWriter pdfWriter = PdfWriter.GetInstance(pdfDoc, workStream);
+				pdfWriter.CloseStream = false;
+				pdfWriter.PageEvent = new PDFBackgroundImage(m_WatermarkImagePath);
+
+				pdfDoc.Open();
+
+				if (srcTasks.Count == 1)
+				{
+					var attribList = GetAttributeList(srcTasks[0]);
+
+					// Add top-level tasks directly to the document
+					Task task = srcTasks[0].GetFirstTask();
+
+					while (task.IsValid())
+					{
+						pdfDoc.Add(CreateSection(task, attribList, null));
+						task = task.GetNextTask();
+					}
+				}
+				else
+				{
+					string title = FormatTitle(reportTitle, reportDate, !string.IsNullOrEmpty(reportTitle));
+
+					if (string.IsNullOrEmpty(title))
+					{
+						// Add each tasklist directly to the document
+						foreach (var tasklist in srcTasks)
+						{
+							pdfDoc.Add(CreateSection(tasklist));
+						}
+					}
+					else // create a root element for the tasklists
+					{
+						Section root = new Chapter(CreateTitleElement(title, 1.75f), 0)
+						{
+							BookmarkTitle = title,
+							BookmarkOpen = true,
+							NumberDepth = 0 // don't show chapter number
+						};
+
+						// Create a separate section for each tasklist
+						foreach (var tasklist in srcTasks)
+						{
+							CreateSection(tasklist, root);
+						}
+
+						pdfDoc.Add(root);
+					}
+				}
+
+				pdfDoc.Close();
+
+				byte[] byteInfo = workStream.ToArray();
+				workStream.Write(byteInfo, 0, byteInfo.Length);
+				workStream.Position = 0;
+
+				File.WriteAllBytes(destFilePath, byteInfo);
 			}
-			catch (Exception e)
+			catch (Exception /*e*/)
 			{
 				return false;
 			}
@@ -239,35 +332,53 @@ namespace PDFExporter
 			return true;
 		}
 
-		private byte[] CreatePDFDocument(TaskList tasks)
+		static string FormatTitle(string reportTitle, string reportDate, bool wantDate)
 		{
-			MemoryStream workStream = new MemoryStream();
-			Document pdfDoc = new Document(PageSize.A4);
-			PdfWriter pdfWriter = PdfWriter.GetInstance(pdfDoc, workStream);
-			pdfWriter.CloseStream = false;
-			pdfWriter.PageEvent = new PDFBackgroundImage(m_WatermarkImagePath);
+			if (!wantDate || string.IsNullOrEmpty(reportDate))
+				return reportTitle;
 
-			pdfDoc.Open();
+			if (string.IsNullOrWhiteSpace(reportTitle))
+				return reportDate;
 
-            // Add top-level tasks
-            Task task = tasks.GetFirstTask();
-
-			while (task.IsValid())
-            {
-				pdfDoc.Add(CreateSection(task, null));
-				task = task.GetNextTask();
-            }
-
-			pdfDoc.Close();
-
-			byte[] byteInfo = workStream.ToArray();
-			workStream.Write(byteInfo, 0, byteInfo.Length);
-			workStream.Position = 0;
-
-			return byteInfo;
+			return string.Format("{0} ({1})", reportTitle, reportDate);
 		}
 
-		private Section CreateSection(Task task, Section parent)
+		private Section CreateSection(TaskList tasklist, Section parent = null)
+		{
+			Section section = null;
+			string title = FormatTitle(tasklist.GetReportTitle(), tasklist.GetReportDate(), (parent == null));
+
+			if (parent == null)
+			{
+				section = new Chapter(CreateTitleElement(title, 1.75f), 0)
+				{
+					BookmarkOpen = true,
+					NumberDepth = 0 // don't show chapter number
+				};
+			}
+			else
+			{
+				section = parent.AddSection(CreateTitleElement(title, 1.65f), 0);
+				section.TriggerNewPage = true;
+			}
+
+			section.BookmarkTitle = title;
+			section.Add(new Chunk(tasklist.GetFilePath()));
+
+			// Add tasks as nested Sections on new pages
+			var attribList = GetAttributeList(tasklist);
+			var task = tasklist.GetFirstTask();
+
+			while (task.IsValid())
+			{
+				CreateSection(task, attribList, section);
+				task = task.GetNextTask();
+			}
+
+			return section;
+		}
+
+		private Section CreateSection(Task task, IList<AttribItem> attribList, Section parent)
 		{
 			Section section = null;
 
@@ -281,23 +392,28 @@ namespace PDFExporter
 				section.TriggerNewPage = true;
 			}
 
-			section.NumberDepth = 0;
+			section.NumberDepth = 0; // don't show chapter number
 			section.BookmarkTitle = GetTitle(task);
 			section.BookmarkOpen = true;
 
 			// Create content
-			if (m_AvailAttributes.Count > 0)
+			if (attribList.Count > 0)
 			{
 				// Add spacer beneath title
 				section.Add(Chunk.NEWLINE);
 
-				foreach (var attrib in m_AvailAttributes)
+				foreach (var attrib in attribList)
 				{
-					var attribVal = task.GetAttributeValue(attrib.Attribute, true, true);
+					var attribVal = string.Empty;
+
+					if (attrib.AttribId == Task.Attribute.CustomAttribute)
+						attribVal = task.GetCustomAttributeValue(attrib.CustAttribId, true);
+					else
+						attribVal = task.GetAttributeValue(attrib.AttribId, true, true);
 
 					if (!string.IsNullOrWhiteSpace(attribVal))
 					{
-						string html = FormatTextInputAsHtml(String.Format("{0}: {1}\n", attrib.Name, attribVal));
+						string html = FormatTextInputAsHtml(String.Format("{0}: {1}\n", attrib.Label, attribVal));
 						AddContent(html, section);
 					}
 				}
@@ -332,7 +448,7 @@ namespace PDFExporter
 
 			while (subtask.IsValid())
 			{
-				CreateSection(subtask, section);
+				CreateSection(subtask, attribList, section); // RECURSIVE CALL
 				subtask = subtask.GetNextTask();
 			}
 
@@ -348,18 +464,23 @@ namespace PDFExporter
             return task.GetTitle();
 		}
 
-		private Paragraph CreateTitleElement(Task task)
+		private Paragraph CreateTitleElement(string title, float scale, System.Drawing.Color color)
 		{
-			var font = CreateFont(m_BaseFontName, (m_BaseFontSize * 1.5f), Font.BOLD | Font.UNDERLINE);
-			var color = task.GetTextDrawingColor();
-
-			if (!color.IsEmpty)
-				font.Color = new BaseColor(color);
-
-			var chunk = new Chunk(GetTitle(task), font);
+			var font = CreateFont(m_BaseFontName, (m_BaseFontSize * scale), Font.BOLD | Font.UNDERLINE);
+			var chunk = new Chunk(title, font);
 			chunk.setLineHeight(font.Size);
 
 			return new Paragraph(chunk);
+		}
+
+		private Paragraph CreateTitleElement(string title, float scale)
+		{
+			return CreateTitleElement(title, scale, System.Drawing.Color.Empty);
+		}
+
+		private Paragraph CreateTitleElement(Task task)
+		{
+			return CreateTitleElement(task.GetTitle(), 1.5f, task.GetTextDrawingColor());
 		}
 
 		private class MyHTMLWorker : HTMLWorker

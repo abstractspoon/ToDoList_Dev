@@ -33,7 +33,7 @@ const CString DELIMS(_T(".,;:-?"));
 
 //////////////////////////////////////////////////////////////////////
 
-typedef HRESULT (CALLBACK *PFNTASKDIALOGCALLBACK)(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, long/*LONG_PTR*/ lpRefData);
+typedef HRESULT (CALLBACK *PFNTASKDIALOGCALLBACK)(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, LONG/*LONG_PTR*/ lpRefData);
 
 struct TASKDIALOGBUTTON
 {
@@ -73,7 +73,7 @@ struct TASKDIALOGCONFIGEX
 	};
 	PCWSTR                         pszFooter;
 	PFNTASKDIALOGCALLBACK          pfCallback;
-	long/*LONG_PTR*/               lpCallbackData;
+	LONG/*LONG_PTR*/			   lpCallbackData;
 	UINT                           cxWidth;
 };
 
@@ -107,59 +107,104 @@ enum
 
 //////////////////////////////////////////////////////////////////////
 
-CString CMessageBox::s_sAppName;
+CString CMessageBox::s_sAppName = _T("");
 BOOL CMessageBox::s_bDisableSimpleErrorMessages = FALSE;
 
 //////////////////////////////////////////////////////////////////////
 
 void CMessageBox::SetAppName(const CString& sAppName)
 {
-	if (sAppName.IsEmpty())
-		s_sAppName = AfxGetAppName();
-	else
-		s_sAppName = sAppName;
+	s_sAppName = sAppName;
 }
+
+CString CMessageBox::GetAppName()
+{
+	if (s_sAppName.IsEmpty())
+		s_sAppName = AfxGetApp()->m_pszAppName;
+
+	return s_sAppName;
+}
+
+int CMessageBox::SplitMessage(LPCTSTR szMessage, CString& sTitle, CString& sInstruction, CString& sText, TCHAR cDelim)
+{
+	CStringArray aParts;
+	int nNumParts = Misc::Split(szMessage, aParts, cDelim);
+	
+	switch (nNumParts)
+	{
+	case 0:
+		ASSERT(0);
+		break;
+		
+	case 1:
+		sText = aParts[0];
+		break;
+		
+	case 2:
+		sInstruction = aParts[0];
+		sText = aParts[1];
+		break;
+		
+	case 3:
+		sTitle = aParts[0];
+		sInstruction = aParts[1];
+		sText = aParts[2];
+	}
+	
+	if (sTitle.IsEmpty())
+		sTitle = GetAppName();
+
+	return nNumParts;
+}
+
+HWND CMessageBox::GetMainWindow()
+{
+	CWnd* pParent = AfxGetMainWnd();
+	
+	if (pParent && !pParent->IsWindowEnabled())
+	{
+		pParent = pParent->GetLastActivePopup();
+		
+		if (pParent && !pParent->IsWindowEnabled())
+			pParent = NULL;
+	}
+
+	return (pParent ? pParent->GetSafeHwnd() : NULL);
+}
+
+// --------------------------------------
 
 int CMessageBox::AfxShow(const CString& sInstruction, const CString& sText, UINT nFlags)
 {
-	if (s_sAppName.IsEmpty())
-		s_sAppName = AfxGetAppName();
-
-	CWnd* pParent = AfxGetMainWnd();
-
-	if (!pParent || !pParent->IsWindowEnabled())
-	{
-		pParent = CWnd::GetForegroundWindow();
-	}
-
-	return Show(pParent, s_sAppName, sInstruction, sText, nFlags);
+	return Show(GetMainWindow(), GetAppName(), sInstruction, sText, nFlags);
 }
 
 int CMessageBox::AfxShow(UINT nInstructionID, const CString& sText, UINT nFlags)
 {
-	return AfxShow(CEnString(nInstructionID), sText, nFlags);
+	return AfxShow(CEnString(nInstructionID), sText, nFlags); // Calls prior function
 }
 
 int CMessageBox::AfxShow(UINT nInstructionID, UINT nTextID, UINT nFlags)
 {
-	return AfxShow(nInstructionID, CEnString(nTextID), nFlags);
+	return AfxShow(nInstructionID, CEnString(nTextID), nFlags); // Calls prior function
 }
+
+// --------------------------------------
 
 int CMessageBox::AfxShow(const CString& sMessage, UINT nFlags)
 {
-	CString sText, sInstruction(sMessage);
+	CString sTitle, sInstruction, sText;
+	SplitMessage(sMessage, sTitle, sInstruction, sText);
 
-	if (Misc::Split(sInstruction, sText, '|'))
-		return AfxShow(sInstruction, sText, nFlags);
-
-	// else
-	return AfxShow((LPCTSTR)NULL, sMessage, nFlags);
+	return Show(GetMainWindow(), sTitle, sInstruction, sText, nFlags);
 }
 
 int CMessageBox::AfxShow(UINT nTextID, UINT nFlags)
 {
-	return AfxShow(CEnString(nTextID), nFlags);
+	return AfxShow(CEnString(nTextID), nFlags); // Calls prior function
 }
+
+// --------------------------------------
 
 int CMessageBox::AfxShow(HWND hwndParent, const CString& sInstruction, const CString& sText, UINT nFlags)
 {
@@ -167,25 +212,23 @@ int CMessageBox::AfxShow(HWND hwndParent, const CString& sInstruction, const CSt
 		return AfxShow(sInstruction, sText, nFlags);
 
 	// else
-	return Show(hwndParent, s_sAppName, sInstruction, sText, nFlags);
+	return Show(hwndParent, GetAppName(), sInstruction, sText, nFlags);
 }
 
-int CMessageBox::AfxShow(const CWnd* pWnd, const CString& sInstruction, const CString& sText, UINT nFlags)
+int CMessageBox::AfxShow(const CWnd* pWndParent, const CString& sInstruction, const CString& sText, UINT nFlags)
 {
-	if (!pWnd)
-		return AfxShow(sInstruction, sText, nFlags);
+	HWND hwndParent = (pWndParent ? pWndParent->GetSafeHwnd() : NULL);
 
-	// else
-	return Show(pWnd, s_sAppName, sInstruction, sText, nFlags);
+	return AfxShow(hwndParent, sInstruction, sText, nFlags); // Calls prior function
 }
 
-int CMessageBox::Show(const CWnd* pWnd, const CString& sCaption, const CString& sInstruction, const CString& sText, UINT nFlags)
-{
-	if (pWnd)
-		return Show(*pWnd, sCaption, sInstruction, sText, nFlags);
+// --------------------------------------
 
-	// else
-	return Show((HWND)NULL, sCaption, sInstruction, sText, nFlags);
+int CMessageBox::Show(const CWnd* pWndParent, const CString& sCaption, const CString& sInstruction, const CString& sText, UINT nFlags)
+{
+	HWND hwndParent = (pWndParent ? pWndParent->GetSafeHwnd() : NULL);
+
+	return Show(hwndParent, sCaption, sInstruction, sText, nFlags);
 }
 
 int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& sInstruction, const CString& sText, UINT nFlags)
@@ -203,23 +246,16 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 	
 	if (hMod)
 	{
-		//PFNTASKDIALOG pFn = (PFNTASKDIALOG)::GetProcAddress(hMod, "TaskDialog");
 		PFNTASKDIALOGINDIRECT pFn = (PFNTASKDIALOGINDIRECT)::GetProcAddress(hMod, "TaskDialogIndirect");
 		
 		if (pFn)
 		{
 			// convert string to unicode as required
-#ifdef _UNICODE
 			LPCWSTR wszCaption = sCaption;
 			LPCWSTR wszInstruction = sInstruction;
 
 			// copy because we will modify
 			LPWSTR wszText = _tcsdup(sText);
-#else
-			LPWSTR wszCaption = Misc::MultiByteToWide(szCaption);
-			LPWSTR wszText = Misc::MultiByteToWide(szText);
-			LPWSTR wszInstruction = Misc::MultiByteToWide(szInstruction);
-#endif
 			
 			int nResult = 0;
 
@@ -309,17 +345,10 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 			if (hwndParent)
 				tdc.dwFlags = TDF_POSITION_RELATIVE_TO_WINDOW;
 
-//			HRESULT hr = pFn(hwndParent, NULL, wszCaption, wszInstruction, wszText, dwButtons, wszIcon, &nResult);
 			HRESULT hr = pFn(&tdc, &nResult, NULL, NULL);
 			
 			// clean up
-#ifdef _UNICODE
 			free(wszText);
-#else
-			delete [] wszText;
-			delete [] wszCaption;
-			delete [] wszInstruction;
-#endif
 			
 			return SUCCEEDED(hr) ? nResult : IDCANCEL;
 		}
@@ -335,7 +364,7 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 	}
 	else if (sCaption.IsEmpty())
 	{
-		sTitle = AfxGetAppName();
+		sTitle = AfxGetApp()->m_pszAppName;
 	}
 		
 	return ::MessageBox(hwndParent, sText, sTitle, nFlags);

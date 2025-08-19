@@ -11,6 +11,8 @@
 
 #include "..\Interfaces\Preferences.h"
 
+#include <afxpriv.h> // WM_KICKIDLE
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
@@ -22,7 +24,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLDialog dialog
 
-CIcon CTDLDialog::s_iconTDL;
+CIcon CTDLDialog::s_iconApp;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -56,6 +58,7 @@ BEGIN_MESSAGE_MAP(CTDLDialog, CDialog)
 	ON_WM_GETMINMAXINFO()
 	ON_WM_DESTROY()
 	ON_WM_SHOWWINDOW()
+	ON_MESSAGE(WM_KICKIDLE, OnKickIdle)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 END_MESSAGE_MAP()
 
@@ -95,6 +98,9 @@ BOOL CTDLDialog::OnInitDialog()
 			}
 		}
 	}
+
+	if (m_iconDlg.IsValid())
+		CDialog::SetIcon(m_iconDlg, FALSE); // Small icon
 	
 	return TRUE;
 }
@@ -179,11 +185,36 @@ LRESULT CTDLDialog::OnGetFileIcon(WPARAM /*wParam*/, LPARAM lParam)
 {
 	if (FileMisc::HasExtension((LPCTSTR)lParam, _T("tdl")))
 	{
-		if (!s_iconTDL.IsValid())
-			s_iconTDL.Load(IDR_MAINFRAME_STD);
+		if (!s_iconApp.IsValid())
+			s_iconApp.Load(IDR_MAINFRAME_STD);
 
-		return (LRESULT)(HICON)s_iconTDL;
+		return (LRESULT)(HICON)s_iconApp;
 	}
 
 	return 0L;
 }
+
+BOOL CTDLDialog::SetIcon(UINT nIconID)
+{
+	if (!m_iconDlg.Load(nIconID)) // owned
+		return FALSE;
+
+	if (GetSafeHwnd())
+		CDialog::SetIcon(m_iconDlg, FALSE); // Small icon
+
+	return TRUE;
+}
+
+int CTDLDialog::DoModal(HICON hIcon)
+{
+	if (hIcon)
+		m_iconDlg.SetIcon(hIcon, FALSE); // Not owned
+
+	return CDialog::DoModal();
+}
+
+LRESULT CTDLDialog::OnKickIdle(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	return DoIdleProcessing();
+}
+

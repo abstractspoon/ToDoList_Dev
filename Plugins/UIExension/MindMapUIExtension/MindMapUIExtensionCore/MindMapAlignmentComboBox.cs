@@ -32,9 +32,9 @@ namespace MindMapUIExtension
 
 		public MindMapAlignmentComboBox(Translator trans)
 		{
-			Items.Add(new MindMapAlignmentItem(trans.Translate("Left"), MindMapControl.RootAlignment.Left));
-			Items.Add(new MindMapAlignmentItem(trans.Translate("Right"), MindMapControl.RootAlignment.Right));
-			Items.Add(new MindMapAlignmentItem(trans.Translate("Centre"), MindMapControl.RootAlignment.Centre));
+			Items.Add(new MindMapAlignmentItem(trans.Translate("Left", Translator.Type.ComboBox), MindMapControl.RootAlignment.Left));
+			Items.Add(new MindMapAlignmentItem(trans.Translate("Right", Translator.Type.ComboBox), MindMapControl.RootAlignment.Right));
+			Items.Add(new MindMapAlignmentItem(trans.Translate("Centre", Translator.Type.ComboBox), MindMapControl.RootAlignment.Centre));
 		}
 
 		public MindMapControl.RootAlignment SelectedAlignment
