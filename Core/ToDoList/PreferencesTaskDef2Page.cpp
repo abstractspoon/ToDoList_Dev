@@ -205,6 +205,9 @@ int CPreferencesTaskDef2Page::GetListItems(TDC_ATTRIBUTE nList, CStringArray& aI
 	Misc::Split(sDef, aDef, ENDL);
 	Misc::AppendItems(aDef, aItems, TRUE);
 
+	if (!GetListIsReadonly(nList))
+		Misc::SortArray(aItems);
+
 	return aItems.GetSize();
 }
 
@@ -408,9 +411,7 @@ void CPreferencesTaskDef2Page::LoadPreferences(const IPreferences* pPrefs, LPCTS
 CString CPreferencesTaskDef2Page::LoadDefaultListItems(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	CStringArray aItems;
-
 	CPreferences::GetProfileArray(pPrefs, szKey, aItems);
-	Misc::SortArray(aItems);
 
 	return Misc::FormatArray(aItems, ENDL);
 }
