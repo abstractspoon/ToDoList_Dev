@@ -247,62 +247,6 @@ CString* CPreferencesTaskDef2Page::GetListText(TDC_ATTRIBUTE nList)
 	return pList;
 }
 
-BOOL CPreferencesTaskDef2Page::AddListItem(TDC_ATTRIBUTE nList, LPCTSTR szItem)
-{
-	UpdateData();
-
-	CString* pList = GetListText(nList);
-
-	if (pList)
-	{
-		// parse string into array
-		CStringArray aItems;
-
-		if (Misc::Split(*pList, aItems, ENDL))
-		{
-			// add to array
-			if (Misc::AddUniqueItem(szItem, aItems))
-			{
-				// update edit control
-				*pList = Misc::FormatArray(aItems, ENDL);
-				UpdateData(FALSE);
-
-				return TRUE;
-			}
-		}
-	}
-
-	return FALSE; // not unique
-}
-
-BOOL CPreferencesTaskDef2Page::DeleteListItem(TDC_ATTRIBUTE nList, LPCTSTR szItem)
-{
-	UpdateData();
-
-	CString* pList = GetListText(nList);
-
-	if (pList)
-	{
-		// parse string into array
-		CStringArray aItems;
-
-		if (Misc::Split(*pList, aItems, ENDL))
-		{
-			// delete from array
-			if (Misc::RemoveItem(szItem, aItems))
-			{
-				// update edit control
-				*pList = Misc::FormatArray(aItems, ENDL);
-				UpdateData(FALSE);
-
-				return TRUE;
-			}
-		}
-	}
-
-	return FALSE; // not found
-}
-
 void CPreferencesTaskDef2Page::OnAttribUseChange()
 {
 	UpdateData();

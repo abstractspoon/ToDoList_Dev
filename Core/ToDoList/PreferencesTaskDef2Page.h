@@ -39,8 +39,6 @@ public:
 	int GetInheritParentAttributes(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const;
 
 	int GetListItems(TDC_ATTRIBUTE nList, CStringArray& aItems) const;
-	BOOL AddListItem(TDC_ATTRIBUTE nList, LPCTSTR szItem);
-	BOOL DeleteListItem(TDC_ATTRIBUTE nList, LPCTSTR szItem);
 	BOOL GetListIsReadonly(TDC_ATTRIBUTE nList) const;
 
 protected:
