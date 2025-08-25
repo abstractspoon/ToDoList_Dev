@@ -453,8 +453,8 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 	CTDCSearchParamHelper::AppendArrayRule(filter.aVersions, TDCA_VERSION, params.aRules, filter.dwFlags, FO_ANYVERSION);
 	CTDCSearchParamHelper::AppendArrayRule(filter.aTags, TDCA_TAGS, params.aRules, filter.dwFlags, FO_ANYTAG);
 
-	CTDCSearchParamHelper::AppendPriorityRiskRule(filter.nPriority, TDCA_PRIORITY, params.aRules, FM_ANYPRIORITY, FM_NOPRIORITY);
-	CTDCSearchParamHelper::AppendPriorityRiskRule(filter.nRisk, TDCA_RISK, params.aRules, FM_ANYRISK, FM_NORISK);
+	CTDCSearchParamHelper::AppendPriorityOrRiskRule(filter.nPriority, TRUE, params.aRules);
+	CTDCSearchParamHelper::AppendPriorityOrRiskRule(filter.nRisk, FALSE, params.aRules);
 
 	if (filter.nRecurrence != TDIR_NONE)
 		params.aRules.Add(SEARCHPARAM(TDCA_RECURRENCE, FOP_EQUALS, filter.nRecurrence));
@@ -635,8 +635,8 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCF
 	filter.nStartBy = prefs.GetProfileEnum(sKey, _T("Start"), FD_ANY);
 	filter.nDueBy = prefs.GetProfileEnum(sKey, _T("Due"), FD_ANY);
 	filter.nTitleOption = prefs.GetProfileEnum(sKey, _T("TitleOption"), FT_FILTERONTITLEONLY);
-	filter.nPriority = prefs.GetProfileInt(sKey, _T("Priority"), FM_ANYPRIORITY);
-	filter.nRisk = prefs.GetProfileInt(sKey, _T("Risk"), FM_ANYRISK);
+	filter.nPriority = prefs.GetProfileInt(sKey, _T("Priority"), FM_ANYPRIORITYORRISK);
+	filter.nRisk = prefs.GetProfileInt(sKey, _T("Risk"), FM_ANYPRIORITYORRISK);
 	filter.nRecurrence = prefs.GetProfileEnum(sKey, _T("Recurrence"), TDIR_NONE);
 	filter.nStartNextNDays = prefs.GetProfileInt(sKey, _T("StartNextNDays"), 7);
 	filter.nDueNextNDays = prefs.GetProfileInt(sKey, _T("DueNextNDays"), 7);

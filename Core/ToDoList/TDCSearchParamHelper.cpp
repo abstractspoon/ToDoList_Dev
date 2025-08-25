@@ -494,18 +494,17 @@ void CTDCSearchParamHelper::AppendArrayRule(const CStringArray& aValues, TDC_ATT
 	}
 }
 
-void CTDCSearchParamHelper::AppendPriorityRiskRule(int nValue, TDC_ATTRIBUTE nAttribID, CSearchParamArray& aRules,
-													int nAnyValue, int nNoValue)
+void CTDCSearchParamHelper::AppendPriorityOrRiskRule(int nValue, BOOL bPriority, CSearchParamArray& aRules)
 {
-	ASSERT((nAttribID == TDCA_PRIORITY) || (nAttribID == TDCA_RISK));
+	TDC_ATTRIBUTE nAttribID = (bPriority ? TDCA_PRIORITY : TDCA_RISK);
 
-	if (nValue != nAnyValue)
+	if (nValue != FM_ANYPRIORITYORRISK)
 	{
-		if (nValue == nNoValue)
+		if (nValue == FM_NOPRIORITYORRISK)
 		{
 			aRules.Add(SEARCHPARAM(nAttribID, FOP_NOT_SET));
 		}
-		else if (nValue != nAnyValue)
+		else/* if (nValue != nAnyValue)*/
 		{
 			aRules.Add(SEARCHPARAM(nAttribID, FOP_GREATER_OR_EQUAL, nValue));
 		}

@@ -1418,13 +1418,10 @@ CString SEARCHPARAM::ValueAsString() const
 		switch (GetAttribute())
 		{
 		case TDCA_PRIORITY:
-			if (nValue == FM_NOPRIORITY)
+		case TDCA_RISK:
+			if (nValue == FM_NOPRIORITYORRISK)
 				return CEnString(IDS_TDC_NONE);
 			break;
-
-		case TDCA_RISK:
-			if (nValue == FM_NORISK)
-				return CEnString(IDS_TDC_NONE);
 		}
 		// else fall thru
 
@@ -1732,8 +1729,8 @@ TDCFILTER::TDCFILTER()
 	nShow(FS_ALL),
 	nStartBy(FD_ANY),
 	nDueBy(FD_ANY),
-	nPriority(FM_ANYPRIORITY),
-	nRisk(FM_ANYRISK),
+	nPriority(FM_ANYPRIORITYORRISK),
+	nRisk(FM_ANYPRIORITYORRISK),
 	dwFlags(FO_ATTRIBUTES),
 	nTitleOption(FT_FILTERONTITLEONLY),
 	nStartNextNDays(7),
@@ -1848,7 +1845,10 @@ BOOL TDCFILTER::HasAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefi
 		return !sTitle.IsEmpty();
 
 	case TDCA_PRIORITY:
-		return (nPriority != FM_ANYPRIORITY);
+		return (nPriority != FM_ANYPRIORITYORRISK);
+
+	case TDCA_RISK:
+		return (nRisk != FM_ANYPRIORITYORRISK);
 
 	case TDCA_FLAG:
 		return (nShow == FS_FLAGGED);
@@ -1858,9 +1858,6 @@ BOOL TDCFILTER::HasAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefi
 
 	case TDCA_DEPENDENCY:
 		return HasFlag(FO_HIDEUNDONEDEPENDS);
-
-	case TDCA_RISK:
-		return (nRisk != FM_ANYRISK);
 
 	case TDCA_ALLOCBY:
 		return (aAllocBy.GetSize() > 0);

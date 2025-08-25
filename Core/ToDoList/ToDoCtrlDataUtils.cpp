@@ -1271,11 +1271,11 @@ BOOL CTDCTaskMatcher::PriorityRiskValueMatches(int nValue, const SEARCHPARAM& ru
 	switch (rule.GetOperator())
 	{
 	case FOP_SET:
-		bMatch = (nValue != FM_NOPRIORITY); // FM_NORISK == FM_NOPRIORITY
+		bMatch = (nValue != FM_NOPRIORITYORRISK);
 		break;
 
 	case FOP_NOT_SET:
-		bMatch = (nValue == FM_NOPRIORITY); // FM_NORISK == FM_NOPRIORITY
+		bMatch = (nValue == FM_NOPRIORITYORRISK);
 		break;
 
 	default:
@@ -1283,7 +1283,7 @@ BOOL CTDCTaskMatcher::PriorityRiskValueMatches(int nValue, const SEARCHPARAM& ru
 		break;
 	}
 
-	if (bMatch && (nValue != FM_NOPRIORITY))
+	if (bMatch && (nValue != FM_NOPRIORITYORRISK))
 		sWhatMatched = Misc::Format(nValue);
 	else
 		sWhatMatched.Empty();
@@ -3136,7 +3136,7 @@ int CTDCTaskCalculator::GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) cons
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITY);
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITYORRISK);
 
 	return GetTaskPriority(pTDI, pTDS, bCheckOverdue);
 }
@@ -3152,10 +3152,10 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 	if (!pTDS || !pTDI)
 	{
 		ASSERT(0);
-		return FM_NOPRIORITY;
+		return FM_NOPRIORITYORRISK;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NOPRIORITY);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NOPRIORITYORRISK);
 
 	// Do as little work as possible
 	int nHighest = pTDI->nPriority;
@@ -3201,7 +3201,7 @@ int CTDCTaskCalculator::GetTaskRisk(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NORISK);
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITYORRISK);
 
 	return GetTaskRisk(pTDI, pTDS);
 }
@@ -3217,10 +3217,10 @@ int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 	if (!pTDS || !pTDI)
 	{
 		ASSERT(0);
-		return FM_NORISK;
+		return FM_NOPRIORITYORRISK;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NORISK);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NOPRIORITYORRISK);
 
 	// Do as little work as possible
 	int nHighest = pTDI->nRisk;
@@ -4235,7 +4235,7 @@ CString CTDCTaskFormatter::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUC
 	{
 		int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, bCheckOverdue);
 
-		if (nPriority != FM_NOPRIORITY)
+		if (nPriority != FM_NOPRIORITYORRISK)
 			return Misc::Format(nPriority);
 	}
 
@@ -4251,7 +4251,7 @@ CString CTDCTaskFormatter::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE
 	{
 		int nRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
 
-		if (nRisk != FM_NOPRIORITY)
+		if (nRisk != FM_NOPRIORITYORRISK)
 			return Misc::Format(nRisk);
 	}
 

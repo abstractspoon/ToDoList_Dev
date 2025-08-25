@@ -984,7 +984,7 @@ COLORREF CToDoCtrlData::GetTaskColor(DWORD dwTaskID) const
 int CToDoCtrlData::GetTaskPriority(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, FM_NOPRIORITY);
+	GET_TDI(dwTaskID, pTDI, FM_NOPRIORITYORRISK);
 	
 	return pTDI->nPriority;
 }
@@ -992,7 +992,7 @@ int CToDoCtrlData::GetTaskPriority(DWORD dwTaskID) const
 int CToDoCtrlData::GetTaskRisk(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, FM_NORISK);
+	GET_TDI(dwTaskID, pTDI, FM_NOPRIORITYORRISK);
 	
 	return pTDI->nRisk;
 }
@@ -1497,11 +1497,11 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttribI
 		break;
 		
 	case TDCA_PRIORITY:		
-		nRes = SetTaskPriority(dwTaskID, FM_NOPRIORITY);
+		nRes = SetTaskPriority(dwTaskID, FM_NOPRIORITYORRISK);
 		break;
 
 	case TDCA_RISK:			
-		nRes = SetTaskRisk(dwTaskID, FM_NORISK);
+		nRes = SetTaskRisk(dwTaskID, FM_NOPRIORITYORRISK);
 		break;
 		
 	case TDCA_ALLOCTO:		
@@ -1833,12 +1833,12 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 			break;
 
 		case TDCA_PRIORITY:
-			if (bIncludeBlank || pTDIParent->nPriority != FM_NOPRIORITY)
+			if (bIncludeBlank || pTDIParent->nPriority != FM_NOPRIORITYORRISK)
 				pTDIChild->nPriority = pTDIParent->nPriority;
 			break;
 
 		case TDCA_RISK:
-			if (bIncludeBlank || pTDIParent->nRisk != FM_NORISK)
+			if (bIncludeBlank || pTDIParent->nRisk != FM_NOPRIORITYORRISK)
 				pTDIChild->nRisk = pTDIParent->nRisk;
 			break;
 
@@ -2165,7 +2165,7 @@ BOOL CToDoCtrlData::CanEditPriorityRisk(int nValue, int nNoValue, BOOL bOffset)
 
 TDC_SET CToDoCtrlData::SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffset)
 {
-	if (!CanEditPriorityRisk(nPriority, FM_NOPRIORITY, bOffset))
+	if (!CanEditPriorityRisk(nPriority, FM_NOPRIORITYORRISK, bOffset))
 		return SET_FAILED;
 	
 	TODOITEM* pTDI = NULL;
@@ -2173,7 +2173,7 @@ TDC_SET CToDoCtrlData::SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffs
 
 	if (bOffset)
 	{
-		if (pTDI->nPriority == FM_NOPRIORITY)
+		if (pTDI->nPriority == FM_NOPRIORITYORRISK)
 			return SET_NOCHANGE;
 
 		// else
@@ -2186,7 +2186,7 @@ TDC_SET CToDoCtrlData::SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffs
 
 TDC_SET CToDoCtrlData::SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset)
 {
-	if (!CanEditPriorityRisk(nRisk, FM_NORISK, bOffset))
+	if (!CanEditPriorityRisk(nRisk, FM_NOPRIORITYORRISK, bOffset))
 		return SET_FAILED;
 	
 	TODOITEM* pTDI = NULL;
@@ -2194,7 +2194,7 @@ TDC_SET CToDoCtrlData::SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset)
 
 	if (bOffset)
 	{
-		if (pTDI->nRisk == FM_NORISK)
+		if (pTDI->nRisk == FM_NOPRIORITYORRISK)
 			return SET_NOCHANGE;
 
 		nRisk += pTDI->nRisk;

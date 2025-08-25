@@ -69,8 +69,8 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 	{
 		switch (nSel)
 		{
-		case 0:		return FM_ANYPRIORITY;
-		case 1:		return FM_NOPRIORITY;
+		case 0:		return FM_ANYPRIORITYORRISK;
+		case 1:		return FM_NOPRIORITYORRISK;
 		default:	return (nSel - 2);
 		}
 	}
@@ -80,7 +80,7 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 	{
 		switch (nSel)
 		{
-		case 0:		return FM_ANYPRIORITY;
+		case 0:		return FM_ANYPRIORITYORRISK;
 		default:	return (nSel - 1);
 		}
 	}
@@ -88,7 +88,7 @@ int CTDLPriorityComboBox::GetSelectedPriority() const
 	// Only 'None'
 	switch (nSel)
 	{
-	case 0:		return FM_NOPRIORITY;
+	case 0:		return FM_NOPRIORITYORRISK;
 	default:	return (nSel - 1);
 	}
 }
@@ -101,14 +101,14 @@ void CTDLPriorityComboBox::SetSelectedPriority(int nPriority) // -2 -> 10
 
 	switch (nPriority)
 	{
-	case FM_ANYPRIORITY:
+	case FM_ANYPRIORITYORRISK:
 		if (m_bIncludeAny)
 			nSel = 0;
 		else
 			ASSERT(0);
 		break;
 
-	case FM_NOPRIORITY:
+	case FM_NOPRIORITYORRISK:
 		if (m_bIncludeNone)
 			nSel = (m_bIncludeAny ? 1 : 0);
 		else
