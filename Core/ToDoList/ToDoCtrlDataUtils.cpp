@@ -3162,20 +3162,20 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 
 	if (HasStyle(TDCS_DONEHAVELOWESTPRIORITY) && IsTaskDone(pTDI, pTDS))
 	{
-		nHighest = min(nHighest, MIN_TDPRIORITYORRISK);
+		nHighest = min(nHighest, TDC_PRIORITYORRISK_MIN);
 	}
-	else if (nHighest < MAX_TDPRIORITYORRISK)
+	else if (nHighest < TDC_PRIORITYORRISK_MAX)
 	{
 		if (bCheckOverdue && HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && IsTaskOverDue(pTDI, pTDS))
 		{
-			nHighest = MAX_TDPRIORITYORRISK;
+			nHighest = TDC_PRIORITYORRISK_MAX;
 		}
 		else if (HasStyle(TDCS_USEHIGHESTPRIORITY))
 		{
 			// check children
 			int nSubtask = pTDS->GetSubTaskCount();
 
-			while (nSubtask-- && (nHighest < MAX_TDPRIORITYORRISK))
+			while (nSubtask-- && (nHighest < TDC_PRIORITYORRISK_MAX))
 			{
 				const TODOSTRUCTURE* pTDSChild = NULL;
 				const TODOITEM* pTDIChild = NULL;
@@ -3227,16 +3227,16 @@ int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 
 	if (HasStyle(TDCS_DONEHAVELOWESTRISK) && IsTaskDone(pTDI, pTDS))
 	{
-		nHighest = min(nHighest, MIN_TDPRIORITYORRISK);
+		nHighest = min(nHighest, TDC_PRIORITYORRISK_MIN);
 	}
-	else if (nHighest < MAX_TDPRIORITYORRISK)
+	else if (nHighest < TDC_PRIORITYORRISK_MAX)
 	{
 		if (HasStyle(TDCS_USEHIGHESTRISK))
 		{
 			// check children
 			int nSubtask = pTDS->GetSubTaskCount();
 
-			while (nSubtask-- && (nHighest < MAX_TDPRIORITYORRISK))
+			while (nSubtask-- && (nHighest < TDC_PRIORITYORRISK_MAX))
 			{
 				const TODOSTRUCTURE* pTDSChild = NULL;
 				const TODOITEM* pTDIChild = NULL;
