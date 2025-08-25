@@ -643,8 +643,8 @@ BOOL CTDLTaskListCtrl::TaskHasGroupValue(DWORD dwTaskID) const
 	case TDCC_ALLOCTO:		return pTDI->aAllocTo.GetSize();
 	case TDCC_TAGS:			return pTDI->aTags.GetSize();
 
-	case TDCC_PRIORITY:		return (m_calculator.GetTaskPriority(pTDI, m_data.LocateTask(dwTaskID), TRUE) != FM_NOPRIORITYORRISK);
-	case TDCC_RISK:			return (m_calculator.GetTaskRisk(pTDI, m_data.LocateTask(dwTaskID)) != FM_NOPRIORITYORRISK);
+	case TDCC_PRIORITY:		return (m_calculator.GetTaskPriority(pTDI, m_data.LocateTask(dwTaskID), TRUE) != TDC_PRIORITYORRISK_NONE);
+	case TDCC_RISK:			return (m_calculator.GetTaskRisk(pTDI, m_data.LocateTask(dwTaskID)) != TDC_PRIORITYORRISK_NONE);
 
 	case TDCC_ALLOCBY:		return !pTDI->sAllocBy.IsEmpty();
 	case TDCC_VERSION:		return !pTDI->sVersion.IsEmpty();

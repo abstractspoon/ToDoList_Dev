@@ -10180,8 +10180,8 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_DUETIME:		return SetSelectedTaskDate(TDCD_DUETIME, 0.0);
 	case TDCA_STARTTIME:	return SetSelectedTaskDate(TDCD_STARTTIME, 0.0);
 		
-	case TDCA_PRIORITY:		return SetSelectedTaskPriority(FM_NOPRIORITYORRISK);
-	case TDCA_RISK:			return SetSelectedTaskRisk(FM_NOPRIORITYORRISK);
+	case TDCA_PRIORITY:		return SetSelectedTaskPriority(TDC_PRIORITYORRISK_NONE);
+	case TDCA_RISK:			return SetSelectedTaskRisk(TDC_PRIORITYORRISK_NONE);
 		
 	case TDCA_ALLOCTO:		return SetSelectedTaskAllocTo(CStringArray());
 	case TDCA_CATEGORY:		return SetSelectedTaskCategories(CStringArray());

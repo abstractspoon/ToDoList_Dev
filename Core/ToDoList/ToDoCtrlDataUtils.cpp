@@ -1271,11 +1271,11 @@ BOOL CTDCTaskMatcher::PriorityRiskValueMatches(int nValue, const SEARCHPARAM& ru
 	switch (rule.GetOperator())
 	{
 	case FOP_SET:
-		bMatch = (nValue != FM_NOPRIORITYORRISK);
+		bMatch = (nValue != TDC_PRIORITYORRISK_NONE);
 		break;
 
 	case FOP_NOT_SET:
-		bMatch = (nValue == FM_NOPRIORITYORRISK);
+		bMatch = (nValue == TDC_PRIORITYORRISK_NONE);
 		break;
 
 	default:
@@ -1283,7 +1283,7 @@ BOOL CTDCTaskMatcher::PriorityRiskValueMatches(int nValue, const SEARCHPARAM& ru
 		break;
 	}
 
-	if (bMatch && (nValue != FM_NOPRIORITYORRISK))
+	if (bMatch && (nValue != TDC_PRIORITYORRISK_NONE))
 		sWhatMatched = Misc::Format(nValue);
 	else
 		sWhatMatched.Empty();
@@ -3136,7 +3136,7 @@ int CTDCTaskCalculator::GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) cons
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITYORRISK);
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, TDC_PRIORITYORRISK_NONE);
 
 	return GetTaskPriority(pTDI, pTDS, bCheckOverdue);
 }
@@ -3152,12 +3152,13 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 	if (!pTDS || !pTDI)
 	{
 		ASSERT(0);
-		return FM_NOPRIORITYORRISK;
+		return TDC_PRIORITYORRISK_NONE;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NOPRIORITYORRISK);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, TDC_PRIORITYORRISK_NONE);
 
 	// Do as little work as possible
+	// Note: we only return values in the range: TDC_PRIORITYORRISK_MIN -> TDC_PRIORITYORRISK_MAX
 	int nHighest = pTDI->nPriority;
 
 	if (HasStyle(TDCS_DONEHAVELOWESTPRIORITY) && IsTaskDone(pTDI, pTDS))
@@ -3201,7 +3202,7 @@ int CTDCTaskCalculator::GetTaskRisk(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITYORRISK);
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, TDC_PRIORITYORRISK_NONE);
 
 	return GetTaskRisk(pTDI, pTDS);
 }
@@ -3217,12 +3218,13 @@ int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 	if (!pTDS || !pTDI)
 	{
 		ASSERT(0);
-		return FM_NOPRIORITYORRISK;
+		return TDC_PRIORITYORRISK_NONE;
 	}
 
-	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, FM_NOPRIORITYORRISK);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, TDC_PRIORITYORRISK_NONE);
 
 	// Do as little work as possible
+	// Note: we only return values in the range: TDC_PRIORITYORRISK_MIN -> TDC_PRIORITYORRISK_MAX
 	int nHighest = pTDI->nRisk;
 
 	if (HasStyle(TDCS_DONEHAVELOWESTRISK) && IsTaskDone(pTDI, pTDS))
@@ -4235,7 +4237,7 @@ CString CTDCTaskFormatter::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUC
 	{
 		int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, bCheckOverdue);
 
-		if (nPriority != FM_NOPRIORITYORRISK)
+		if (nPriority != TDC_PRIORITYORRISK_NONE)
 			return Misc::Format(nPriority);
 	}
 
@@ -4251,7 +4253,7 @@ CString CTDCTaskFormatter::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE
 	{
 		int nRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
 
-		if (nRisk != FM_NOPRIORITYORRISK)
+		if (nRisk != TDC_PRIORITYORRISK_NONE)
 			return Misc::Format(nRisk);
 	}
 
