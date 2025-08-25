@@ -633,9 +633,6 @@ void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
 {
 	ASSERT(IsTestActive());
 
-	ExpectEQ(MAX_TDPRIORITY, MAX_TDRISK);
-	ExpectEQ(MIN_TDPRIORITY, MIN_TDRISK);
-
 	CTDCStyleMap aStyles;
 	CTDCCustomAttribDefinitionArray aCustAttrib;
 
@@ -648,8 +645,8 @@ void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
 	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
 	ExpectEQ(GET_PRIORITYRISK(), -2);
 	
-	for (int nValue = (MIN_TDPRIORITY - 10);
-			(nValue <= MAX_TDPRIORITY + 10); nValue++)
+	for (int nValue = (MIN_TDPRIORITYORRISK - 10);
+			(nValue <= MAX_TDPRIORITYORRISK + 10); nValue++)
 	{
 		int nCurValue = GET_PRIORITYRISK();
 		TDC_SET nSet = SET_PRIORITYRISK();
@@ -661,7 +658,7 @@ void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
 			ExpectEQ(nSet, SET_NOCHANGE); // it started off as this value
 			ExpectEQ(nNewValue, nValue);
 		}
-		else if ((nValue >= MIN_TDPRIORITY) && (nValue <= MAX_TDPRIORITY))
+		else if ((nValue >= MIN_TDPRIORITYORRISK) && (nValue <= MAX_TDPRIORITYORRISK))
 		{
 			ExpectEQ(nSet, SET_CHANGE);
 			ExpectEQ(GET_PRIORITYRISK(), nValue);
@@ -700,13 +697,13 @@ void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk(BOOL bPriority)
 		TDC_SET nSet = OFFSET_PRIORITYRISK();
 		int nNewValue = GET_PRIORITYRISK();
 
-		if (nAttempt < MIN_TDPRIORITY) // -1
+		if (nAttempt < MIN_TDPRIORITYORRISK) // -1
 		{
-			ExpectEQ(nNewValue, MIN_TDPRIORITY);
+			ExpectEQ(nNewValue, MIN_TDPRIORITYORRISK);
 		}
-		else if (nAttempt > MAX_TDPRIORITY) // > 10
+		else if (nAttempt > MAX_TDPRIORITYORRISK) // > 10
 		{
-			ExpectEQ(nNewValue, MAX_TDPRIORITY);
+			ExpectEQ(nNewValue, MAX_TDPRIORITYORRISK);
 		}
 		else
 		{
