@@ -25,9 +25,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-const int TDC_NOPRIORITYORISK = -2;
-const int TDC_MINPRIORITYORISK = 0;
-const int TDC_MAXPRIORITYORISK = 10;
+const int TDC_NOPRIORITYORRISK = -2;
+const int TDC_MINPRIORITYORRISK = 0;
+const int TDC_MAXPRIORITYORRISK = 10;
 
 ///////////////////////////////////////////////////////////////////////////////////
 

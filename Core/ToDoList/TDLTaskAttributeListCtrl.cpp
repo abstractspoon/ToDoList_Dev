@@ -2383,14 +2383,14 @@ int CTDLTaskAttributeListCtrl::GetPriority() const
 {
 	CString sValue = GetValueText(TDCA_PRIORITY);
 
-	return (sValue.IsEmpty() ? TDC_NOPRIORITYORISK : _ttoi(sValue));
+	return (sValue.IsEmpty() ? TDC_NOPRIORITYORRISK : _ttoi(sValue));
 }
 
 int CTDLTaskAttributeListCtrl::GetRisk() const
 {
 	CString sValue = GetValueText(TDCA_RISK);
 
-	return (sValue.IsEmpty() ? TDC_NOPRIORITYORISK : _ttoi(sValue));
+	return (sValue.IsEmpty() ? TDC_NOPRIORITYORRISK : _ttoi(sValue));
 }
 
 BOOL CTDLTaskAttributeListCtrl::GetCost(TDCCOST& cost) const

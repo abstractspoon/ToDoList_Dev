@@ -797,8 +797,8 @@ TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments)
 	sTitle(szTitle), 
 	sComments(szComments),
 	color(0), 
-	nPriority(TDC_NOPRIORITYORISK),
-	nRisk(TDC_NOPRIORITYORISK),
+	nPriority(TDC_NOPRIORITYORRISK),
+	nRisk(TDC_NOPRIORITYORRISK),
 	nPercentDone(0),
 	bFlagged(FALSE),
 	bLocked(FALSE),
@@ -1300,10 +1300,10 @@ void TODOITEM::SetMetaData(const CString& sKey, const CString& sData)
 
 BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
 {
-	if (nValue > TDC_MAXPRIORITYORISK)
+	if (nValue > TDC_MAXPRIORITYORRISK)
 		return FALSE;
 
-	if ((nValue < TDC_MINPRIORITYORISK) && (nValue != TDC_NOPRIORITYORISK))
+	if ((nValue < TDC_MINPRIORITYORRISK) && (nValue != TDC_NOPRIORITYORRISK))
 		return FALSE;
 
 	return TRUE;
@@ -1381,8 +1381,8 @@ BOOL TODOITEM::HasAttributeValue(TDC_ATTRIBUTE nAttribID) const
 	case TDCA_ICON:			return !sIcon.IsEmpty();			
 							 
 	case TDCA_COLOR:		return (color != 0);		
-	case TDCA_PRIORITY:		return (nPriority != TDC_NOPRIORITYORISK);		
-	case TDCA_RISK:			return (nRisk != TDC_NOPRIORITYORISK);			
+	case TDCA_PRIORITY:		return (nPriority != TDC_NOPRIORITYORRISK);		
+	case TDCA_RISK:			return (nRisk != TDC_NOPRIORITYORRISK);			
 	case TDCA_PERCENT:		return (nPercentDone > 0);	
 	case TDCA_FLAG:			return bFlagged;		
 	case TDCA_LOCK:			return bLocked;		
