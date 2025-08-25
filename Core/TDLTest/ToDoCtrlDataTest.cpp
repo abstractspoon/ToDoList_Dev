@@ -643,7 +643,7 @@ void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
 	TODOITEM* pTDI = data.NewTask(TODOITEM());
 
 	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
-	ExpectEQ(GET_PRIORITYRISK(), -2);
+	ExpectEQ(GET_PRIORITYRISK(), TDC_PRIORITYORRISK_NONE);
 	
 	for (int nValue = (TDC_PRIORITYORRISK_MIN - 10);
 			(nValue <= TDC_PRIORITYORRISK_MAX + 10); nValue++)
@@ -653,7 +653,7 @@ void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
 
 		int nNewValue = GET_PRIORITYRISK();
 
-		if (nValue == -2)
+		if (nValue == TDC_PRIORITYORRISK_NONE)
 		{
 			ExpectEQ(nSet, SET_NOCHANGE); // it started off as this value
 			ExpectEQ(nNewValue, nValue);

@@ -615,8 +615,9 @@ enum TDC_TASKCOMPLETION
 
 enum
 {
-	TDC_PRIORITYORRISK_MAX = 10,
-	TDC_PRIORITYORRISK_MIN = 0,
+	TDC_PRIORITYORRISK_MAX			= 10,
+	TDC_PRIORITYORRISK_MIN			= 0,
+	TDC_PRIORITYORRISK_NONE			= -2,
 };
  
 /////////////////////////////////////////////////////////////////////////////

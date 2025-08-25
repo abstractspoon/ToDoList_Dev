@@ -2942,7 +2942,7 @@ int CTaskFile::GetTaskPriority(HTASKITEM hTask, bool bHighest) const
 		return GetTaskInt(hTask, TDL_TASKPRIORITY);
 
 	// else
-	return TDC_NOPRIORITYORRISK;
+	return TDC_PRIORITYORRISK_NONE;
 }
 
 unsigned char CTaskFile::GetTaskPercentDone(HTASKITEM hTask, bool bCalc) const
@@ -3706,7 +3706,7 @@ int CTaskFile::GetTaskRisk(HTASKITEM hTask, bool bHighest) const
 		return GetTaskInt(hTask, TDL_TASKRISK);
 
 	// else
-	return TDC_NOPRIORITYORRISK;
+	return TDC_PRIORITYORRISK_NONE;
 }
 
 LPCTSTR CTaskFile::GetTaskExternalID(HTASKITEM hTask) const
@@ -3968,7 +3968,7 @@ bool CTaskFile::SetTaskColor(HTASKITEM hTask, unsigned long nColor)
 bool CTaskFile::SetTaskPriorityOrRisk(HTASKITEM hTask, const CString& sIntItem, int iVal)
 {
 	if (!TODOITEM::IsValidPriorityOrRisk(iVal))
-		iVal = (int)max(TDC_MINPRIORITYORRISK, min(TDC_MAXPRIORITYORRISK, iVal));
+		iVal = (int)max(TDC_PRIORITYORRISK_MIN, min(TDC_PRIORITYORRISK_MAX, iVal));
 
 	if (!SetTaskInt(hTask, sIntItem, iVal))
 		return false;
