@@ -93,7 +93,8 @@ CToDoCtrlData::CToDoCtrlData(const CTDCStyleMap& styles, const CTDCCustomAttribD
 	m_bUndoRedoing(FALSE),
 	m_bUpdateInheritAttrib(FALSE),
 	m_nDefTimeEstUnits(TDCU_DAYS),
-	m_nDefTimeSpentUnits(TDCU_DAYS)
+	m_nDefTimeSpentUnits(TDCU_DAYS),
+	m_nNumPriorityRiskLevels(TDC_PRIORITYORRISK_MAXLEVELS)
 {
 }
 
@@ -2178,7 +2179,9 @@ TDC_SET CToDoCtrlData::SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffs
 
 		// else
 		nPriority += pTDI->nPriority;
-		nPriority = max(0, min(10, nPriority));
+
+		const int nMaxLevel = (m_nNumPriorityRiskLevels - 1);
+		nPriority = max(TDC_PRIORITYORRISK_MIN, min(nPriority, nMaxLevel));
 	}
 	
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_PRIORITY, pTDI->nPriority, nPriority);
@@ -2198,7 +2201,9 @@ TDC_SET CToDoCtrlData::SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset)
 			return SET_NOCHANGE;
 
 		nRisk += pTDI->nRisk;
-		nRisk = max(0, min(10, nRisk));
+
+		const int nMaxLevel = (m_nNumPriorityRiskLevels - 1);
+		nRisk = max(TDC_PRIORITYORRISK_MIN, min(nRisk, nMaxLevel));
 	}
 
 	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_RISK, pTDI->nRisk, nRisk);

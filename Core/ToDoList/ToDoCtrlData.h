@@ -232,6 +232,7 @@ public:
 
 	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
 	
+	void SetNumPriorityRiskLevels(int nNumLevels) { m_nNumPriorityRiskLevels = nNumLevels; } // for offsetting
 	void SetDefaultCommentsFormat(const CString& format);
 	void SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits);
 	TDC_UNITS GetDefaultTimeEstimateUnits() const { return m_nDefTimeEstUnits; }
@@ -254,6 +255,7 @@ protected:
 
 	TDC_UNITS m_nDefTimeEstUnits, m_nDefTimeSpentUnits;
 	CTDCAttributeMap m_mapParentAttribs; // inheritable attribs
+	int m_nNumPriorityRiskLevels;
 
 	BOOL m_bUndoRedoing;
 	BOOL m_bUpdateInheritAttrib; // update as changes are made to parents

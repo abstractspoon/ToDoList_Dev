@@ -497,7 +497,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 
 void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom)
 {
-	BeginSubTest(GetRegularityText(nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom));
+	CTDCScopedSubTest subtest(*this, GetRegularityText(nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom));
 
 	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 	CUndoAction undo(data, TDCUAT_ADD, FALSE); // Otherwise CToDoCtrlData will assert
@@ -546,8 +546,6 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_REGULARITY nRegular
 		if (nRecalcFrom == TDIRO_DONEDATE)
 			data.SetTaskDate(dwTaskID, TDCD_DONE, dtNext);
 	}
-
-	EndSubTest();
 }
 
 CString CToDoCtrlDataTest::GetRegularityText(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom)
@@ -606,13 +604,21 @@ void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk()
 	{
 		CTDCScopedTest test(*this, _T("CToDoCtrlData::OffsetTaskPriority"));
 
-		TestOffsetTaskPriorityRisk(TRUE);
+		for (int nNumLevels = TDC_PRIORITYORRISK_MINLEVELS;
+				 nNumLevels <= TDC_PRIORITYORRISK_MAXLEVELS; nNumLevels++)
+		{
+			TestOffsetTaskPriorityRisk(TRUE, nNumLevels);
+		}
 	}
 
 	{
 		CTDCScopedTest test(*this, _T("CToDoCtrlData::OffsetTaskRisk"));
 
-		TestOffsetTaskPriorityRisk(FALSE);
+		for (int nNumLevels = TDC_PRIORITYORRISK_MINLEVELS;
+			 nNumLevels <= TDC_PRIORITYORRISK_MAXLEVELS; nNumLevels++)
+		{
+			TestOffsetTaskPriorityRisk(FALSE, nNumLevels);
+		}
 	}
 }
 
@@ -671,14 +677,16 @@ void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
 	}
 }
 
-void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk(BOOL bPriority)
+void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk(BOOL bPriority, int nNumLevels)
 {
-	ASSERT(IsTestActive());
+	CTDCScopedSubTest subtest(*this, Misc::Format(_T("Num Levels = %d"), nNumLevels));
 
 	CTDCStyleMap aStyles;
 	CTDCCustomAttribDefinitionArray aCustAttrib;
 
 	CToDoCtrlData data(aStyles, aCustAttrib);
+	data.SetNumPriorityRiskLevels(nNumLevels);
+
 	CUndoAction undo(data, TDCUAT_ADD, FALSE); // Otherwise CToDoCtrlData will assert
 
 	const DWORD dwTaskID = 1;
@@ -689,21 +697,24 @@ void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk(BOOL bPriority)
 
 	ExpectEQ(GET_PRIORITYRISK(), 5);
 
+	const int nMaxLevel = (nNumLevels - 1);
+
 	for (int nOffset = -10; nOffset <= 10; nOffset++)
 	{
 		int nCurValue = GET_PRIORITYRISK();
-		int nAttempt = (nCurValue + nOffset);
 
 		TDC_SET nSet = OFFSET_PRIORITYRISK();
 		int nNewValue = GET_PRIORITYRISK();
+
+		int nAttempt = (nCurValue + nOffset);
 
 		if (nAttempt < TDC_PRIORITYORRISK_MIN) // -1
 		{
 			ExpectEQ(nNewValue, TDC_PRIORITYORRISK_MIN);
 		}
-		else if (nAttempt > TDC_PRIORITYORRISK_MAX) // > 10
+		else if (nAttempt > nMaxLevel) // > 10
 		{
-			ExpectEQ(nNewValue, TDC_PRIORITYORRISK_MAX);
+			ExpectEQ(nNewValue, nMaxLevel);
 		}
 		else
 		{

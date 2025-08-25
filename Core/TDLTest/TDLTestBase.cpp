@@ -128,6 +128,22 @@ CTDCScopedTest::~CTDCScopedTest()
 	m_base.EndTest();
 }
 
+CTDCScopedSubTest::CTDCScopedSubTest(CTDLTestBase& base, LPCTSTR szTest)
+	:
+	m_base(base)
+{
+	if (m_base.IsTestActive())
+		m_base.BeginSubTest(szTest);
+	else
+		ASSERT(0);
+}
+
+CTDCScopedSubTest::~CTDCScopedSubTest()
+{
+	if (m_base.IsSubTestActive())
+		m_base.EndSubTest();
+}
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -368,7 +384,7 @@ BOOL CTDLTestBase::BeginSubTest(LPCTSTR szSubTest)
 	}
 
 	// Must be within a main test
-	if (m_sCurTest.IsEmpty())
+	if (!IsTestActive())
 	{
 		ASSERT(0);
 		return FALSE;

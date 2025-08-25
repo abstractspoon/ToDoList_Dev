@@ -49,7 +49,7 @@ protected:
 	void TestSetTaskPriorityRisk(BOOL bPriority);
 
 	void TestOffsetTaskPriorityRisk();
-	void TestOffsetTaskPriorityRisk(BOOL bPriority);
+	void TestOffsetTaskPriorityRisk(BOOL bPriority, int nNumLevels);
 
 	static CString GetRegularityText(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom);
 
