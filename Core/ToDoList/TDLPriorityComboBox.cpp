@@ -24,7 +24,7 @@ CTDLPriorityComboBox::CTDLPriorityComboBox(BOOL bIncludeAny, BOOL bIncludeNone)
 	: 
 	m_bIncludeAny(bIncludeAny),
 	m_bIncludeNone(bIncludeNone),
-	m_nNumLevels(11)
+	m_nNumLevels(TDC_PRIORITYORRISK_MAXLEVELS)
 {
 	// 'Any' and NOT 'None' is unexpected though it will still work
 	ASSERT(!bIncludeAny || bIncludeNone);
@@ -168,7 +168,7 @@ void CTDLPriorityComboBox::BuildCombo()
 	if (m_bIncludeNone)
 		AddColor(CLR_NONE, CEnString(IDS_TDC_NONE));
 
-	UINT aStrResIDs[11];
+	UINT aStrResIDs[TDC_PRIORITYORRISK_MAXLEVELS] = { 0 };
 	TDC::GetPriorityRiskLevelStringResourceIDs(m_nNumLevels, aStrResIDs);
 
 	for (int nLevel = 0; nLevel < m_nNumLevels; nLevel++)

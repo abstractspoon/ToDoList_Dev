@@ -173,7 +173,7 @@ protected:
 	
 	mutable CIconCache m_iconCache;
 
-	UINT m_aPriorityRiskStrResIDs[11];
+	UINT m_aPriorityRiskStrResIDs[TDC_PRIORITYORRISK_MAXLEVELS];
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)

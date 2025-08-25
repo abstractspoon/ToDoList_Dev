@@ -313,14 +313,15 @@ namespace TDC
 
 	static BOOL IsValidNumPriorityRiskLevels(int nNumLevels)
 	{
-		return ((nNumLevels >= 2) && (nNumLevels <= 11));
+		return ((nNumLevels >= TDC_PRIORITYORRISK_MINLEVELS) && 
+				(nNumLevels <= TDC_PRIORITYORRISK_MAXLEVELS));
 	}
 
-	static void GetPriorityRiskLevelStringResourceIDs(int nNumLevels, UINT aStrResIDs[11])
+	static void GetPriorityRiskLevelStringResourceIDs(int nNumLevels, UINT aStrResIDs[TDC_PRIORITYORRISK_MAXLEVELS])
 	{
 		ASSERT(IsValidNumPriorityRiskLevels(nNumLevels));
 
-		ZeroMemory(aStrResIDs, (sizeof(UINT) * 11));
+		ZeroMemory(aStrResIDs, (sizeof(UINT) * TDC_PRIORITYORRISK_MAXLEVELS));
 
 		switch (nNumLevels)
 		{

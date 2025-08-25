@@ -428,12 +428,12 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 				if (bIsDone && HasStyle(TDCS_DONEHAVELOWESTPRIORITY))
 				{
-					nPriority = -1;
+					nPriority = TDC_PRIORITYORRISK_DONETASKS;
 				}
 				else if (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY))
 				{
 					if (m_calculator.IsTaskOverDue(pTDI, pTDS) || (bCheckDueToday && m_calculator.IsTaskDueToday(pTDI, pTDS)))
-						nPriority = 11; 
+						nPriority = TDC_PRIORITYORRISK_OVERDUETASKS;
 				}
 
 				bMatch = PriorityRiskValueMatches(nPriority, rule, sWhatMatched);
@@ -1742,10 +1742,10 @@ int CTDCTaskComparer::CalcTaskPriority(BOOL bCheckDueToday, BOOL bDone, const TO
 		return -1;
 
 	if (bDueHaveHighestPriority && m_calculator.IsTaskOverDue(pTDI, pTDS))
-		return (pTDI->nPriority + 22); // 'overdue' sort higher than 'due today'
+		return (pTDI->nPriority + (TDC_PRIORITYORRISK_MAXLEVELS * 2)); // 'overdue' sort higher than 'due today'
 
 	if (bDueHaveHighestPriority && bCheckDueToday && m_calculator.IsTaskDueToday(pTDI, pTDS))
-		return (pTDI->nPriority + 11);
+		return (pTDI->nPriority + TDC_PRIORITYORRISK_MAXLEVELS);
 
 	if (bUseHighestPriority)
 		return m_calculator.GetTaskPriority(pTDI, pTDS, TRUE);

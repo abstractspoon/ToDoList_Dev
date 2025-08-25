@@ -192,8 +192,8 @@ void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs, LPC
 	m_bHidePriorityNumber = pPrefs->GetProfileInt(szKey, _T("HidePriorityNumber"), FALSE);
 	m_bShowMixedCompletionState = pPrefs->GetProfileInt(szKey, _T("ShowMixedCompletionState"), TRUE);
 
-	m_nNumPriorityRiskLevels = pPrefs->GetProfileInt(szKey, _T("NumPriorityRiskLevels"), 11);
-	m_bSetNumPriorityRiskLevels = (m_nNumPriorityRiskLevels < 11);
+	m_nNumPriorityRiskLevels = pPrefs->GetProfileInt(szKey, _T("NumPriorityRiskLevels"), TDC_PRIORITYORRISK_MAXLEVELS);
+	m_bSetNumPriorityRiskLevels = (m_nNumPriorityRiskLevels < TDC_PRIORITYORRISK_MAXLEVELS);
 }
 
 void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -230,7 +230,12 @@ void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR s
 	pPrefs->WriteProfileInt(szKey, _T("ShowFileLinkThumbnails"), m_bShowFileLinkThumbnails);
 	pPrefs->WriteProfileInt(szKey, _T("HidePriorityNumber"), m_bHidePriorityNumber);
 	pPrefs->WriteProfileInt(szKey, _T("ShowMixedCompletionState"), m_bShowMixedCompletionState);
-	pPrefs->WriteProfileInt(szKey, _T("NumPriorityRiskLevels"), (m_bSetNumPriorityRiskLevels ? m_nNumPriorityRiskLevels : 11));
+	pPrefs->WriteProfileInt(szKey, _T("NumPriorityRiskLevels"), GetNumPriorityRiskLevels());
+}
+
+int CPreferencesUITasklistPage::GetNumPriorityRiskLevels() const 
+{ 
+	return (m_bSetNumPriorityRiskLevels ? m_nNumPriorityRiskLevels : TDC_PRIORITYORRISK_MAXLEVELS); 
 }
 
 void CPreferencesUITasklistPage::OnLimitcolwidths() 

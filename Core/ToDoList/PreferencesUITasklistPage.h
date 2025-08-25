@@ -55,7 +55,7 @@ public:
 	BOOL GetShowFileLinkThumbnails() const { return m_bShowFileLinkThumbnails; }
 	BOOL GetHidePriorityNumber() const { return m_bHidePriorityNumber; }
 	BOOL GetShowMixedCompletionState() const { return m_bShowMixedCompletionState; }
-	int GetNumPriorityRiskLevels() const { return (m_bSetNumPriorityRiskLevels ? m_nNumPriorityRiskLevels : 11); }
+	int GetNumPriorityRiskLevels() const;
 	//	BOOL Get() const { return m_b; }
 
 protected:

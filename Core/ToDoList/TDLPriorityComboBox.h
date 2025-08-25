@@ -18,13 +18,13 @@ public:
 	CTDLPriorityComboBox(BOOL bIncludeAny, BOOL bIncludeNone = TRUE);
 	virtual ~CTDLPriorityComboBox();
 
-	BOOL SetColors(const CDWordArray& aColors); // 2 - 11
-	void SetNumLevels(int nLevels); // 2 - 11
+	BOOL SetColors(const CDWordArray& aColors);
+	void SetNumLevels(int nLevels);
 	int GetNumLevels() const { return m_nNumLevels; }
 
 	int IncrementPriority(int nAmount);
-	int GetSelectedPriority() const; // -2 -> Num Levels - 1
-	void SetSelectedPriority(int nPriority); // -2 -> Num Levels - 1
+	int GetSelectedPriority() const;
+	void SetSelectedPriority(int nPriority);
 
 	void DDX(CDataExchange* pDX, int& nPriority);
 

@@ -18,11 +18,11 @@ public:
 	CTDLRiskComboBox(BOOL bIncludeAny, BOOL bIncludeNone = TRUE);
 	virtual ~CTDLRiskComboBox();
 
-	void SetNumLevels(int nNumLevels); // 2 - 11
+	void SetNumLevels(int nNumLevels);
 	int GetNumLevels() const { return m_nNumLevels; }
 
-	int GetSelectedRisk() const; // -2 -> 10
-	void SetSelectedRisk(int nRisk); // -2 -> 10
+	int GetSelectedRisk() const;
+	void SetSelectedRisk(int nRisk);
 
 	void DDX(CDataExchange* pDX, int& nRisk);
 
@@ -36,7 +36,7 @@ protected:
 protected:
    virtual void BuildCombo();
    virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-	   DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+							DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 };
 
 /////////////////////////////////////////////////////////////////////////////
