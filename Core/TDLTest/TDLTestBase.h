@@ -144,6 +144,9 @@ public:
 protected:
 	CTDLTestBase(LPCTSTR szName, const CTestUtils& utils);
 
+	BOOL IsTestActive() const { return !m_sCurTest.IsEmpty(); }
+	BOOL IsSubTestActive() const { return !m_sCurSubTest.IsEmpty(); }
+
 	BOOL BeginTest(LPCTSTR szTest);
 	BOOL EndTest();
 

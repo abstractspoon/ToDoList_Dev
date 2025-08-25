@@ -45,6 +45,12 @@ protected:
 	void TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRecalcFrom);
 	void TestAdjustNewRecurringTasksDates(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom);
 
+	void TestSetTaskPriorityRisk();
+	void TestSetTaskPriorityRisk(BOOL bPriority);
+
+	void TestOffsetTaskPriorityRisk();
+	void TestOffsetTaskPriorityRisk(BOOL bPriority);
+
 	static CString GetRegularityText(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom);
 
 };

@@ -61,6 +61,8 @@ TESTRESULT CToDoCtrlDataTest::Run()
 {
 	ClearTotals();
 
+	TestSetTaskPriorityRisk();
+	TestOffsetTaskPriorityRisk();
 	TestAdjustNewRecurringTasksDates();
 
 	// Performance
@@ -349,6 +351,8 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates()
 	TestAdjustNewRecurringTasksDates(TDIRO_DONEDATE);
 }
 
+////////////////////////////////////////////////////////////////////////////
+
 void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRecalcFrom)
 {
 	DWORD PRIMES[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
@@ -496,7 +500,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_REGULARITY nRegular
 	BeginSubTest(GetRegularityText(nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom));
 
 	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
-	CUndoAction undo(data, TDCUAT_ADD, FALSE);
+	CUndoAction undo(data, TDCUAT_ADD, FALSE); // Otherwise CToDoCtrlData will assert
 
 	const DWORD dwTaskID = 1;
 	TODOITEM* pTDI = data.NewTask(TODOITEM());
@@ -578,4 +582,135 @@ CString CToDoCtrlDataTest::GetRegularityText(TDC_REGULARITY nRegularity, DWORD d
 	ASSERT(szRegularity);
 
 	return Misc::Format(_T("%s(%ld, %ld, %s)"), szRegularity, dwSpecific1, dwSpecific2, szFrom);
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+void CToDoCtrlDataTest::TestSetTaskPriorityRisk()
+{
+	{
+		CTDCScopedTest test(*this, _T("CToDoCtrlData::SetTaskPriority"));
+
+		TestSetTaskPriorityRisk(TRUE);
+	}
+
+	{
+		CTDCScopedTest test(*this, _T("CToDoCtrlData::SetTaskRisk"));
+
+		TestSetTaskPriorityRisk(FALSE);
+	}
+}
+
+void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk()
+{
+	{
+		CTDCScopedTest test(*this, _T("CToDoCtrlData::OffsetTaskPriority"));
+
+		TestOffsetTaskPriorityRisk(TRUE);
+	}
+
+	{
+		CTDCScopedTest test(*this, _T("CToDoCtrlData::OffsetTaskRisk"));
+
+		TestOffsetTaskPriorityRisk(FALSE);
+	}
+}
+
+// -----------------------------------------------
+
+#define GET_PRIORITYRISK() \
+	(bPriority ? data.GetTaskPriority(dwTaskID) : data.GetTaskRisk(dwTaskID))
+
+#define SET_PRIORITYRISK() \
+	(bPriority ? data.SetTaskPriority(dwTaskID, nValue, FALSE) : data.SetTaskRisk(dwTaskID, nValue, FALSE))
+
+#define OFFSET_PRIORITYRISK() \
+	(bPriority ? data.SetTaskPriority(dwTaskID, nOffset, TRUE) : data.SetTaskRisk(dwTaskID, nOffset, TRUE))
+
+// -----------------------------------------------
+
+void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
+{
+	ASSERT(IsTestActive());
+
+	ExpectEQ(MAX_TDPRIORITY, MAX_TDRISK);
+	ExpectEQ(MIN_TDPRIORITY, MIN_TDRISK);
+
+	CTDCStyleMap aStyles;
+	CTDCCustomAttribDefinitionArray aCustAttrib;
+
+	CToDoCtrlData data(aStyles, aCustAttrib);
+	CUndoAction undo(data, TDCUAT_ADD, FALSE); // Otherwise CToDoCtrlData will assert
+
+	const DWORD dwTaskID = 1;
+	TODOITEM* pTDI = data.NewTask(TODOITEM());
+
+	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
+	ExpectEQ(GET_PRIORITYRISK(), -2);
+	
+	for (int nValue = (MIN_TDPRIORITY - 10);
+			(nValue <= MAX_TDPRIORITY + 10); nValue++)
+	{
+		int nCurValue = GET_PRIORITYRISK();
+		TDC_SET nSet = SET_PRIORITYRISK();
+
+		int nNewValue = GET_PRIORITYRISK();
+
+		if (nValue == -2)
+		{
+			ExpectEQ(nSet, SET_NOCHANGE); // it started off as this value
+			ExpectEQ(nNewValue, nValue);
+		}
+		else if ((nValue >= MIN_TDPRIORITY) && (nValue <= MAX_TDPRIORITY))
+		{
+			ExpectEQ(nSet, SET_CHANGE);
+			ExpectEQ(GET_PRIORITYRISK(), nValue);
+		}
+		else
+		{
+			ExpectEQ(nSet, SET_FAILED);
+			ExpectEQ(GET_PRIORITYRISK(), nCurValue);
+		}
+	}
+}
+
+void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk(BOOL bPriority)
+{
+	ASSERT(IsTestActive());
+
+	CTDCStyleMap aStyles;
+	CTDCCustomAttribDefinitionArray aCustAttrib;
+
+	CToDoCtrlData data(aStyles, aCustAttrib);
+	CUndoAction undo(data, TDCUAT_ADD, FALSE); // Otherwise CToDoCtrlData will assert
+
+	const DWORD dwTaskID = 1;
+	TODOITEM* pTDI = data.NewTask(TODOITEM());
+
+	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
+	ExpectTrue(bPriority ? data.SetTaskPriority(dwTaskID, 5, FALSE) : data.SetTaskRisk(dwTaskID, 5, FALSE));
+
+	ExpectEQ(GET_PRIORITYRISK(), 5);
+
+	for (int nOffset = -10; nOffset <= 10; nOffset++)
+	{
+		int nCurValue = GET_PRIORITYRISK();
+		int nAttempt = (nCurValue + nOffset);
+
+		TDC_SET nSet = OFFSET_PRIORITYRISK();
+		int nNewValue = GET_PRIORITYRISK();
+
+		if (nAttempt < MIN_TDPRIORITY) // -1
+		{
+			ExpectEQ(nNewValue, MIN_TDPRIORITY);
+		}
+		else if (nAttempt > MAX_TDPRIORITY) // > 10
+		{
+			ExpectEQ(nNewValue, MAX_TDPRIORITY);
+		}
+		else
+		{
+			ExpectEQ(nNewValue, nAttempt);
+		}
+	}
 }
