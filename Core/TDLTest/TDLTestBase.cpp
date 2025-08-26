@@ -132,7 +132,7 @@ CTDCScopedSubTest::CTDCScopedSubTest(CTDLTestBase& base, LPCTSTR szTest)
 	:
 	m_base(base)
 {
-	if (m_base.IsTestActive())
+	if (m_base.IsTestActive() && !m_base.IsSubTestActive())
 		m_base.BeginSubTest(szTest);
 	else
 		ASSERT(0);

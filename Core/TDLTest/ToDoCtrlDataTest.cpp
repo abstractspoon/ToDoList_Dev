@@ -627,11 +627,11 @@ void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk()
 #define GET_PRIORITYRISK() \
 	(bPriority ? data.GetTaskPriority(dwTaskID) : data.GetTaskRisk(dwTaskID))
 
-#define SET_PRIORITYRISK() \
-	(bPriority ? data.SetTaskPriority(dwTaskID, nValue, FALSE) : data.SetTaskRisk(dwTaskID, nValue, FALSE))
+#define SET_PRIORITYRISK(value) \
+	(bPriority ? data.SetTaskPriority(dwTaskID, value, FALSE) : data.SetTaskRisk(dwTaskID, value, FALSE))
 
-#define OFFSET_PRIORITYRISK() \
-	(bPriority ? data.SetTaskPriority(dwTaskID, nOffset, TRUE) : data.SetTaskRisk(dwTaskID, nOffset, TRUE))
+#define OFFSET_PRIORITYRISK(offset) \
+	(bPriority ? data.SetTaskPriority(dwTaskID, offset, TRUE) : data.SetTaskRisk(dwTaskID, offset, TRUE))
 
 // -----------------------------------------------
 
@@ -649,13 +649,13 @@ void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
 	TODOITEM* pTDI = data.NewTask(TODOITEM());
 
 	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
-	ExpectEQ(GET_PRIORITYRISK(), TDC_PRIORITYORRISK_NONE);
+	ExpectEQ(GET_PRIORITYRISK(), TDC_PRIORITYORRISK_NONE); // default value
 	
 	for (int nValue = (TDC_PRIORITYORRISK_MIN - 10);
 			(nValue <= TDC_PRIORITYORRISK_MAX + 10); nValue++)
 	{
 		int nCurValue = GET_PRIORITYRISK();
-		TDC_SET nSet = SET_PRIORITYRISK();
+		TDC_SET nSet = SET_PRIORITYRISK(nValue);
 
 		int nNewValue = GET_PRIORITYRISK();
 
@@ -679,8 +679,6 @@ void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
 
 void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk(BOOL bPriority, int nNumLevels)
 {
-	CTDCScopedSubTest subtest(*this, Misc::Format(_T("Num Levels = %d"), nNumLevels));
-
 	CTDCStyleMap aStyles;
 	CTDCCustomAttribDefinitionArray aCustAttrib;
 
@@ -692,33 +690,108 @@ void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk(BOOL bPriority, int nNumLevel
 	const DWORD dwTaskID = 1;
 	TODOITEM* pTDI = data.NewTask(TODOITEM());
 
-	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
-	ExpectTrue(bPriority ? data.SetTaskPriority(dwTaskID, 5, FALSE) : data.SetTaskRisk(dwTaskID, 5, FALSE));
-
-	ExpectEQ(GET_PRIORITYRISK(), 5);
+	VERIFY(data.AddTask(dwTaskID, pTDI, 0, 0));
 
 	const int nMaxLevel = (nNumLevels - 1);
 
-	for (int nOffset = -10; nOffset <= 10; nOffset++)
+	// Offset < 0
 	{
-		int nCurValue = GET_PRIORITYRISK();
+		const int OFFSETS[] = { -1, -3, -5, -7 };
+		const int NUM_OFFSETS = (sizeof(OFFSETS), sizeof(OFFSETS[0]));
 
-		TDC_SET nSet = OFFSET_PRIORITYRISK();
-		int nNewValue = GET_PRIORITYRISK();
+		for (int i = 0; i < NUM_OFFSETS; i++)
+		{
+			const int nOffset = OFFSETS[i];
 
-		int nAttempt = (nCurValue + nOffset);
+			for (int nStart = TDC_PRIORITYORRISK_NONE; nStart <= TDC_PRIORITYORRISK_MAX; nStart++)
+			{
+				if (nStart == -1)
+					nStart = TDC_PRIORITYORRISK_MIN;
 
-		if (nAttempt < TDC_PRIORITYORRISK_MIN) // -1
-		{
-			ExpectEQ(nNewValue, TDC_PRIORITYORRISK_MIN);
-		}
-		else if (nAttempt > nMaxLevel) // > 10
-		{
-			ExpectEQ(nNewValue, nMaxLevel);
-		}
-		else
-		{
-			ExpectEQ(nNewValue, nAttempt);
+				CTDCScopedSubTest subtest(*this, Misc::Format(_T("Num Levels = %d, Offset = %d, Start = %d"), nNumLevels, nOffset, nStart));
+
+				SET_PRIORITYRISK(nStart);
+				ExpectEQ(GET_PRIORITYRISK(), nStart);
+
+				for (int k = 0; k < 10; k++)
+				{
+					int nCurValue = GET_PRIORITYRISK();
+					ASSERT(TODOITEM::IsValidPriorityOrRisk(nCurValue));
+
+					TDC_SET nSet = OFFSET_PRIORITYRISK(nOffset);
+					int nNewValue = GET_PRIORITYRISK();
+
+					int nAttempt = (nCurValue + nOffset);
+
+					if (nCurValue <= 0)
+					{
+						ExpectEQ(nNewValue, TDC_PRIORITYORRISK_NONE);
+					}
+					else if (nAttempt <= 0)
+					{
+						ExpectEQ(nNewValue, TDC_PRIORITYORRISK_MIN);
+					}
+					else if (nAttempt > nMaxLevel)
+					{
+						ExpectEQ(nNewValue, nMaxLevel);
+					}
+					else
+					{
+						ExpectEQ(nNewValue, nAttempt);
+					}
+				}
+			}
 		}
 	}
+
+	// Offset > 0
+	{
+		const int OFFSETS[] = { 1, 3, 5, 7 };
+		const int NUM_OFFSETS = (sizeof(OFFSETS), sizeof(OFFSETS[0]));
+
+		for (int i = 0; i < NUM_OFFSETS; i++)
+		{
+			const int nOffset = OFFSETS[i];
+
+			for (int nStart = TDC_PRIORITYORRISK_NONE; nStart <= TDC_PRIORITYORRISK_MAX; nStart++)
+			{
+				if (nStart == -1)
+					nStart = TDC_PRIORITYORRISK_MIN;
+
+				CTDCScopedSubTest subtest(*this, Misc::Format(_T("Num Levels = %d, Offset = %d, Start = %d"), nNumLevels, nOffset, nStart));
+
+				SET_PRIORITYRISK(nStart);
+				ExpectEQ(GET_PRIORITYRISK(), nStart);
+
+				for (int j = 0; j < 10; j++)
+				{
+					int nCurValue = GET_PRIORITYRISK();
+					ASSERT(TODOITEM::IsValidPriorityOrRisk(nCurValue));
+
+					TDC_SET nSet = OFFSET_PRIORITYRISK(nOffset);
+					int nNewValue = GET_PRIORITYRISK();
+
+					int nAttempt = (nCurValue + nOffset);
+
+					if (nCurValue == TDC_PRIORITYORRISK_NONE)
+					{
+						ExpectEQ(nNewValue, TDC_PRIORITYORRISK_MIN);
+					}
+					else if (nCurValue > nMaxLevel)
+					{
+						ExpectEQ(nNewValue, nCurValue);
+					}
+					else if (nAttempt > nMaxLevel)
+					{
+						ExpectEQ(nNewValue, nMaxLevel);
+					}
+					else
+					{
+						ExpectEQ(nNewValue, nAttempt);
+					}
+				}
+			}
+		}
+	}
+
 }
