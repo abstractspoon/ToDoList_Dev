@@ -482,9 +482,6 @@
     <ClCompile Include="..\ToDoList\TDLSelectTaskDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\StdAfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDCReminder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

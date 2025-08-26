@@ -305,10 +305,6 @@ SOURCE=.\FontCache.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\FontComboBox.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\GraphicsMisc.cpp
 # End Source File
 # Begin Source File
@@ -554,10 +550,6 @@ SOURCE=.\StatusBarACTEx.cpp
 # Begin Source File
 
 SOURCE=.\StatusBarProgress.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
@@ -930,10 +922,6 @@ SOURCE=.\FolderDialog.h
 # Begin Source File
 
 SOURCE=.\FontCache.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\FontComboBox.h
 # End Source File
 # Begin Source File
 

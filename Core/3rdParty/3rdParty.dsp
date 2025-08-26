@@ -233,10 +233,6 @@ SOURCE=.\StatusBarACT.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\StdAfx.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\StdioFileEx.cpp
 # End Source File
 # Begin Source File

@@ -161,10 +161,6 @@ SOURCE=..\ToDoList\PreferencesUIVisibilityPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\StdAfx.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TabbedToDoCtrl.cpp
 # End Source File
 # Begin Source File

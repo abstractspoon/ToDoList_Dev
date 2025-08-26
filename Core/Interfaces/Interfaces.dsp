@@ -125,10 +125,6 @@ SOURCE=.\SpellChecker.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\StdAfx.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TasklistStorageMgr.cpp
 # End Source File
 # Begin Source File

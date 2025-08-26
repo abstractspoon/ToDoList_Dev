@@ -169,20 +169,14 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
   <ItemGroup>
     <ClCompile Include="BurndownCalculator.cpp" />
     <ClCompile Include="BurndownChart.cpp" />
-    <ClCompile Include="BurndownExt.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="BurndownExt.cpp" />
     <ClCompile Include="BurndownGraphColorListCtrl.cpp" />
     <ClCompile Include="BurndownGraphComboBox.cpp" />
     <ClCompile Include="BurndownGraphs.cpp" />
     <ClCompile Include="BurndownPreferencesDlg.cpp" />
     <ClCompile Include="BurndownStruct.cpp" />
     <ClCompile Include="BurndownOptionsComboBox.cpp" />
-    <ClCompile Include="BurndownWnd.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="BurndownWnd.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
@@ -197,8 +191,6 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BurndownExt.rc">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>

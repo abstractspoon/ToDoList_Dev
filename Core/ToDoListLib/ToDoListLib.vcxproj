@@ -131,7 +131,6 @@
     <ClCompile Include="..\ToDoList\PreferencesUITasklistColorsPage.cpp" />
     <ClCompile Include="..\ToDoList\PreferencesUITasklistPage.cpp" />
     <ClCompile Include="..\ToDoList\PreferencesUIVisibilityPage.cpp" />
-    <ClCompile Include="..\ToDoList\StdAfx.cpp" />
     <ClCompile Include="..\ToDoList\TabbedToDoCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TaskClipboard.cpp" />
     <ClCompile Include="..\ToDoList\TaskFile.cpp" />

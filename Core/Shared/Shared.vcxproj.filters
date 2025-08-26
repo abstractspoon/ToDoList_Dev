@@ -394,9 +394,6 @@
     <ClCompile Include="FileEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FontComboBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HistoryComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -428,9 +425,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RichEditBaseCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SymbolButton.cpp">
@@ -882,9 +876,6 @@
     <ClInclude Include="FileMisc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FontComboBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HistoryComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -904,9 +895,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MonthCheckComboBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OrderedEdit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OwnerdrawComboBoxBase.h">
