@@ -93,7 +93,7 @@ private:
 	virtual LRESULT OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 
-	virtual void OnSubclassChild(HWND hwndChild) { ASSERT(::IsWindow(hwndChild)); } // for derived classes
+	virtual void OnSubclassChild(HWND /*hwndChild*/) {} // for derived classes
 
 	BOOL HandleCursorKey(UINT nChar);
 
