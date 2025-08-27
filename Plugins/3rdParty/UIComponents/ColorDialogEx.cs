@@ -63,8 +63,31 @@ namespace UIComponents
 		// -----------------------------------------------
 
 		IntPtr m_DlgHandle = IntPtr.Zero;
+		static int[] s_CustomColors = null;
 
 		// -----------------------------------------------
+
+		new public static int[] CustomColors
+		{
+			get { return s_CustomColors; }
+			set { s_CustomColors = value; }
+		}
+
+		public ColorDialogEx()
+		{
+			base.CustomColors = ColorDialogEx.CustomColors;
+		}
+
+		// -----------------------------------------------
+
+		protected override bool RunDialog(IntPtr hwndOwner)
+		{
+			if (!base.RunDialog(hwndOwner))
+				return false;
+
+			CustomColors = base.CustomColors;
+			return true;
+		}
 
 		protected override IntPtr HookProc(IntPtr hWnd, int msg, IntPtr wparam, IntPtr lparam)
 		{
@@ -129,6 +152,5 @@ namespace UIComponents
 
 			return true;
 		}
-
 	}
 }

@@ -287,7 +287,7 @@ namespace MSDN.Html.Editor
 		private Color _bodyBackColor;
         private Color _bodyForeColor;
         private HtmlFontProperty _bodyFont;
-        private int[] _customColors;
+//        private int[] _customColors;
         private string _imageDirectory;
         private string _htmlDirectory;
         private NavigateActionOption _navigateWindow;
@@ -3199,11 +3199,11 @@ namespace MSDN.Html.Editor
                 dlg.SolidColorOnly = true;
                 dlg.AllowFullOpen = true;
                 dlg.Color = GetFontColor();
-                dlg.CustomColors = _customColors;
+//                 dlg.CustomColors = _customColors;
 
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    _customColors = dlg.CustomColors;
+//                     _customColors = dlg.CustomColors;
                     FormatTextColor(dlg.Color);
                 }
             }

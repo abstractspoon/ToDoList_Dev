@@ -24,6 +24,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 using Command.Handling;
+using UIComponents;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -489,6 +490,11 @@ namespace SpreadsheetContentControl
 		public void SavePreferences(Preferences prefs, String key)
 		{
 			prefs.WriteProfileInt(key, "FormulaHeight", this.FormulaBar.Height);
+
+			var custColors = ColorDialogEx.CustomColors;
+
+			if (custColors != null)
+				prefs.WriteProfileString("ColorDialog", "CustomColors", string.Join("|", custColors));
 		}
 
 		public void LoadPreferences(Preferences prefs, String key)
@@ -497,6 +503,9 @@ namespace SpreadsheetContentControl
 
 			if (nHeight > 0)
 				this.FormulaBar.Height = nHeight;
+
+			var custColors = prefs.GetProfileString("ColorDialog", "CustomColors", "").Split('|');
+			ColorDialogEx.CustomColors = Array.ConvertAll(custColors, int.Parse);
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)

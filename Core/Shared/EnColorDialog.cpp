@@ -3,8 +3,11 @@
 
 #include "stdafx.h"
 #include "encolordialog.h"
+#include "Misc.h"
 
 #include "..\Interfaces\IPreferences.h"
+
+#include "..\3rdParty\XNamedColors.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -64,13 +67,26 @@ int CEnColorDialog::DoModal(IPreferences* pPrefs)
 void CEnColorDialog::LoadPreferences(const IPreferences* pPrefs)
 {
 	// restore previously saved custom colors
-	for (int nColor = 0; nColor < 16; nColor++)
-	{
-		CString sKey;
-		sKey.Format(_T("CustomColor%d"), nColor);
+	CString sColors = pPrefs->GetProfileString(_T("ColorDialog"), _T("CustomColors"));
 
-		COLORREF color = (COLORREF)pPrefs->GetProfileInt(_T("ColorDialog"), sKey, (int)RGB(255, 255, 255));
-		m_cc.lpCustColors[nColor] = color;
+	if (!sColors.IsEmpty())
+	{
+		CDWordArray aColors;
+		int nNumColors = Misc::Split(sColors, aColors, '|');
+
+		for (int col = 0; col < 16; col++)
+		{
+			if (col < nNumColors)
+				m_cc.lpCustColors[col] = ((col < nNumColors) ? aColors[col] : colorWhite);
+		}
+	}
+	else // Backwards compatibility
+	{
+		for (int col = 0; col < 16; col++)
+		{
+			CString sKey = Misc::MakeKey(_T("CustomColor%d"), col);
+			m_cc.lpCustColors[col] = (COLORREF)pPrefs->GetProfileInt(_T("ColorDialog"), sKey, colorWhite);
+		}
 	}
 }
 
@@ -79,14 +95,14 @@ void CEnColorDialog::SavePreferences(IPreferences* pPrefs) const
 	// save any custom colors
 	COLORREF* pColors = GetSavedCustomColors();
 
-	for (int nColor = 0; nColor < 16; nColor++)
-	{
-		CString sKey;
-		sKey.Format(_T("CustomColor%d"), nColor);
+	CDWordArray aColors;
+	aColors.SetSize(16);
 
-		int nColorVal = (int)pColors[nColor];
-		pPrefs->WriteProfileInt(_T("ColorDialog"), sKey, nColorVal);
-	}
+	for (int col = 0; col < 16; col++)
+		aColors[col] = pColors[col];
+
+	pPrefs->DeleteProfileSection(_T("ColorDialog"));
+	pPrefs->WriteProfileString(_T("ColorDialog"), _T("CustomColors"), Misc::FormatArray(aColors, '|'));
 }
 
 void CEnColorDialog::SetCurrentColor(COLORREF clr)
