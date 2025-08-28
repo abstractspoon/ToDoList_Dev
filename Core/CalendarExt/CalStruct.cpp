@@ -880,7 +880,7 @@ DWORD CTaskCalExtensionItemMap::GetRealTaskID(DWORD dwTaskID) const
 		return 0;
 	}
 
-	const TASKCALEXTENSIONITEM* pTCIExt = dynamic_cast<const TASKCALEXTENSIONITEM*>(pTCI);
+	const TASKCALEXTENSIONITEM* pTCIExt = ASEXTENSIONITEM(pTCI);
 
 	if (pTCIExt)
 		return pTCIExt->dwRealTaskID;

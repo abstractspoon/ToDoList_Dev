@@ -2736,17 +2736,17 @@ BOOL CTaskCalendarCtrl::IsCustomDate(DWORD dwTaskID) const
 
 BOOL CTaskCalendarCtrl::IsExtensionItem(const TASKCALITEM* pTCI)
 {
-	return (dynamic_cast<const TASKCALEXTENSIONITEM*>(pTCI) != NULL);
+	return (ASEXTENSIONITEM(pTCI) != NULL);
 }
 
 BOOL CTaskCalendarCtrl::IsFutureOccurrence(const TASKCALITEM* pTCI)
 {
-	return (dynamic_cast<const TASKCALFUTUREOCURRENCE*>(pTCI) != NULL);
+	return (ASFUTUREOCCURRENCE(pTCI) != NULL);
 }
 
 BOOL CTaskCalendarCtrl::IsCustomDate(const TASKCALITEM* pTCI)
 {
-	return (dynamic_cast<const TASKCALCUSTOMDATE*>(pTCI) != NULL);
+	return (ASCUSTOMDATE(pTCI) != NULL);
 }
 
 BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
@@ -3074,7 +3074,7 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 	}
 	else if (bExtItem)
 	{
-		const TASKCALCUSTOMDATE* pTCICust = dynamic_cast<const TASKCALCUSTOMDATE*>(pTCI);
+		const TASKCALCUSTOMDATE* pTCICust = ASCUSTOMDATE(pTCI);
 		ASSERT(pTCICust);
 
 		if (pTCICust)
@@ -3571,7 +3571,7 @@ BOOL CTaskCalendarCtrl::ClearSelectedCustomDate()
 
 	if (IsCustomDate(pTCI))
 	{
-		const TASKCALCUSTOMDATE* pTCIDate = dynamic_cast<TASKCALCUSTOMDATE*>(pTCI);
+		const TASKCALCUSTOMDATE* pTCIDate = ASCUSTOMDATE(pTCI);
 		ASSERT(pTCIDate);
 
 		pTCI = GetTaskCalItem(GetRealTaskID(m_dwSelectedTaskID));
@@ -3630,7 +3630,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			}
 			else if (IsCustomDate(pTCI))
 			{
-				const TASKCALCUSTOMDATE* pTCIDate = dynamic_cast<const TASKCALCUSTOMDATE*>(pTCI);
+				const TASKCALCUSTOMDATE* pTCIDate = ASCUSTOMDATE(pTCI);
 				ASSERT(pTCIDate);
 
 				CString sAttribLabel;

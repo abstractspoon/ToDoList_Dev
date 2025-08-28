@@ -164,12 +164,17 @@ struct TASKCALEXTENSIONITEM : public TASKCALITEM
 
 	const DWORD dwRealTaskID;
 };
+
+#define ASEXTENSIONITEM(tci) dynamic_cast<const TASKCALEXTENSIONITEM*>(tci)
+
 /////////////////////////////////////////////////////////////////////////////
 
 struct TASKCALFUTUREOCURRENCE : public TASKCALEXTENSIONITEM
 {
 	TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange);
 };
+
+#define ASFUTUREOCCURRENCE(tci) dynamic_cast<const TASKCALFUTUREOCURRENCE*>(tci)
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -182,6 +187,8 @@ struct TASKCALCUSTOMDATE : public TASKCALEXTENSIONITEM
 
 	const CString sCustomAttribID;
 };
+
+#define ASCUSTOMDATE(tci) dynamic_cast<const TASKCALCUSTOMDATE*>(tci)
 
 /////////////////////////////////////////////////////////////////////////////
 
