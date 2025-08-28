@@ -3,10 +3,10 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
 using Abstractspoon.Tdl.PluginHelpers;
 
-
-// PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
+using UIComponents;
 
 namespace SpreadsheetContentControl
 {
@@ -115,11 +115,20 @@ namespace SpreadsheetContentControl
 
         public void SavePreferences(Preferences prefs, String key)
         {
-            m_EditorControl.SavePreferences(prefs, key);
-        }
+			var custColors = ColorDialogEx.CustomColors;
 
-        public void LoadPreferences(Preferences prefs, String key, bool appOnly)
+			if (custColors != null)
+				prefs.WriteProfileString("ColorDialog", "CustomColors", string.Join("|", custColors));
+
+			m_EditorControl.SavePreferences(prefs, key);
+
+		}
+
+		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
+			var custColors = prefs.GetProfileString("ColorDialog", "CustomColors", "").Split('|');
+			ColorDialogEx.CustomColors = Array.ConvertAll(custColors, int.Parse);
+
 			if (!appOnly)
 				m_EditorControl.LoadPreferences(prefs, key);
 		}
