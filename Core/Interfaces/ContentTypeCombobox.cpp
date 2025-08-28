@@ -75,11 +75,13 @@ int CContentTypeComboBox::SetSelectedFormat(const CONTENTFORMAT& cf)
 {
 	int nContent = (m_pContentMgr ? m_pContentMgr->FindContent(cf) : -1);
 
-	if (nContent != -1)
-		return CDialogHelper::SelectItemByDataT(*this, nContent);
+	if (nContent == -1)
+		return SetCurSel(CB_ERR);
 
 	// else
-	return SetCurSel(CB_ERR);
+	CheckBuildCombo();
+
+	return CDialogHelper::SelectItemByDataT(*this, nContent);
 }
 
 int CContentTypeComboBox::GetCount() const
