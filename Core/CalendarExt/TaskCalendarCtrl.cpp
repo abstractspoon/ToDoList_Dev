@@ -305,6 +305,7 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	if (m_dwSelectedTaskID && (m_dwSelectedTaskID != dwRealSelTaskID))
 	{
 		const TASKCALCUSTOMDATE* pTCISel = ASCUSTOMDATE(GetTaskCalItem(m_dwSelectedTaskID));
+		ASSERT(pTCISel);
 
 		if (pTCISel)
 			sCustDateAttribID = pTCISel->sCustomAttribID;
