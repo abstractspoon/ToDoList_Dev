@@ -293,47 +293,44 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		return FALSE;
 	}
 
-	// Extension items will be rebuilt so make sure
-	// our selected task is a real task
-	m_dwSelectedTaskID = GetRealTaskID(m_dwSelectedTaskID);
-
 	// Make sure the selected task remains visible
 	// after any changes if it was visible to start with
 	BOOL bSelTaskWasVisible = IsTaskVisible(m_dwSelectedTaskID);
+
+	// Store enough information that we can restore the 
+	// selection to a custom date item if required
+	DWORD dwRealSelTaskID = GetRealTaskID(m_dwSelectedTaskID);
+	CString sCustDateAttribID;
+
+	if (m_dwSelectedTaskID && (m_dwSelectedTaskID != dwRealSelTaskID))
+	{
+		const TASKCALCUSTOMDATE* pTCISel = ASCUSTOMDATE(GetTaskCalItem(m_dwSelectedTaskID));
+
+		if (pTCISel)
+			sCustDateAttribID = pTCISel->sCustomAttribID;
+	}
+
 	BOOL bChange = UpdateCustomDateAttributes(pTasks);
 
 	switch (nUpdate)
 	{
 	case IUI_ALL:
-		{
-			DeleteData();
-			BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-
-			bChange = TRUE;
-		}
+		DeleteData();
+		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
+		bChange = TRUE;
 		break;
 
 	case IUI_NEW:
-		{
-			BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-
-			bChange = TRUE;
-		}
+		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
+		bChange = TRUE;
 		break;
 		
 	case IUI_EDIT:
-		{
-			bChange = UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
-
-			if (!bChange)
-				bChange = pTasks->IsAttributeAvailable(TDCA_RECURRENCE);
-		}
+		bChange = (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE) || pTasks->IsAttributeAvailable(TDCA_RECURRENCE));
 		break;
 		
 	case IUI_DELETE:
-		{
-			bChange |= RemoveDeletedTasks(pTasks);
-		}
+		bChange |= RemoveDeletedTasks(pTasks);
 		break;
 		
 	default:
@@ -342,8 +339,8 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	
 	if (bChange)
 	{
-		// clear selection if necessary
-		if (!HasTask(m_dwSelectedTaskID, FALSE))
+		// clear selection if the previously selected task no longer exists
+		if (!HasTask(dwRealSelTaskID, FALSE))
 		{
 			m_dwSelectedTaskID = 0;
 			bSelTaskWasVisible = FALSE;
@@ -351,6 +348,16 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 
 		RecalcDataRange();
 		RebuildCellTasks();
+
+		// Restore previous selection
+		if (m_dwSelectedTaskID)
+		{
+			if (!sCustDateAttribID.IsEmpty())
+				m_dwSelectedTaskID = m_mapExtensionItems.FindCustomDate(dwRealSelTaskID, sCustDateAttribID);
+
+			if (!m_dwSelectedTaskID)
+				m_dwSelectedTaskID = dwRealSelTaskID;
+		}
 
 		if (bSelTaskWasVisible && !IsTaskVisible(m_dwSelectedTaskID))
 			EnsureSelectionVisible();
@@ -368,6 +375,9 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 
 BOOL CTaskCalendarCtrl::UpdateCustomDateAttributes(const ITASKLISTBASE* pTasks)
 {
+	if (!pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
+		return FALSE;
+
 	CMapStringToString mapPrevAttrib;
 	Misc::Copy(m_mapCustomDateAttrib, mapPrevAttrib);
 

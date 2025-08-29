@@ -889,6 +889,27 @@ DWORD CTaskCalExtensionItemMap::GetRealTaskID(DWORD dwTaskID) const
 	return dwTaskID;
 }
 
+DWORD CTaskCalExtensionItemMap::FindCustomDate(DWORD dwRealTaskID, const CString& sCustAttribID) const
+{
+	POSITION pos = GetStartPosition();
+
+	DWORD dwTaskID = 0;
+	TASKCALITEM* pTCI = NULL;
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pTCI);
+
+		const TASKCALCUSTOMDATE* pTCIDate = ASCUSTOMDATE(pTCI);
+
+		if (pTCIDate && (pTCIDate->dwRealTaskID == dwRealTaskID) && (pTCIDate->sCustomAttribID == sCustAttribID))
+			return dwTaskID;
+	}
+
+	// else
+	return 0;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 // Used temporarily by CompareItems
