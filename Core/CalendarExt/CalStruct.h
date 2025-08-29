@@ -164,12 +164,19 @@ struct TASKCALEXTENSIONITEM : public TASKCALITEM
 
 	const DWORD dwRealTaskID;
 };
+
+#define ASEXTENSIONITEM(tci) dynamic_cast<const TASKCALEXTENSIONITEM*>(tci)
+#define ISEXTENSIONITEM(tci) (NULL != ASEXTENSIONITEM(tci))
+
 /////////////////////////////////////////////////////////////////////////////
 
 struct TASKCALFUTUREOCURRENCE : public TASKCALEXTENSIONITEM
 {
 	TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange);
 };
+
+#define ASFUTUREOCCURRENCE(tci) dynamic_cast<const TASKCALFUTUREOCURRENCE*>(tci)
+#define ISFUTUREOCCURRENCE(tci) (NULL != ASFUTUREOCCURRENCE(tci))
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -182,6 +189,9 @@ struct TASKCALCUSTOMDATE : public TASKCALEXTENSIONITEM
 
 	const CString sCustomAttribID;
 };
+
+#define ASCUSTOMDATE(tci) dynamic_cast<const TASKCALCUSTOMDATE*>(tci)
+#define ISCUSTOMDATE(tci) (NULL != ASCUSTOMDATE(tci))
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -220,6 +230,8 @@ class CTaskCalExtensionItemMap : public CTaskCalItemMap
 {
 public:
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
+
+	DWORD FindCustomDate(DWORD dwRealTaskID, const CString& sCustAttribID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

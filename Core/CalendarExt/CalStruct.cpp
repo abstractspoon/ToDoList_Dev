@@ -880,13 +880,34 @@ DWORD CTaskCalExtensionItemMap::GetRealTaskID(DWORD dwTaskID) const
 		return 0;
 	}
 
-	const TASKCALEXTENSIONITEM* pTCIExt = dynamic_cast<const TASKCALEXTENSIONITEM*>(pTCI);
+	const TASKCALEXTENSIONITEM* pTCIExt = ASEXTENSIONITEM(pTCI);
 
 	if (pTCIExt)
 		return pTCIExt->dwRealTaskID;
 
 	// else
 	return dwTaskID;
+}
+
+DWORD CTaskCalExtensionItemMap::FindCustomDate(DWORD dwRealTaskID, const CString& sCustAttribID) const
+{
+	POSITION pos = GetStartPosition();
+
+	DWORD dwTaskID = 0;
+	TASKCALITEM* pTCI = NULL;
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pTCI);
+
+		const TASKCALCUSTOMDATE* pTCIDate = ASCUSTOMDATE(pTCI);
+
+		if (pTCIDate && (pTCIDate->dwRealTaskID == dwRealTaskID) && (pTCIDate->sCustomAttribID == sCustAttribID))
+			return dwTaskID;
+	}
+
+	// else
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
