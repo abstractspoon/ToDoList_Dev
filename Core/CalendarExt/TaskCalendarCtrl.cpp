@@ -1029,7 +1029,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		// draw selection
 		GM_ITEMSTATE nState = GetTaskSelectedState(pTCI, bFocused);
 		BOOL bSelTask = (nState != GMIS_NONE);
-		BOOL bFutureTask = IsFutureOccurrence(pTCI);
+		BOOL bFutureTask = ISFUTUREOCCURRENCE(pTCI);
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
 
 		if (bSelTask)
@@ -1222,7 +1222,7 @@ GM_ITEMSTATE CTaskCalendarCtrl::GetTaskSelectedState(const TASKCALITEM* pTCI, BO
 	if (dwTaskID == m_dwSelectedTaskID)
 	{
 		// Can't be a future task because they are not directly selectable
-		ASSERT(!IsFutureOccurrence(pTCI));
+		ASSERT(!ISFUTUREOCCURRENCE(pTCI));
 
 		return (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 	}
@@ -1236,7 +1236,7 @@ GM_ITEMSTATE CTaskCalendarCtrl::GetTaskSelectedState(const TASKCALITEM* pTCI, BO
 		if (dwSelRealID == dwRealID)
 		{
 			// If this date's 'real' task is selected show the extension date as 'lightly' selected
-			if (IsExtensionItem(pTCI))
+			if (ISEXTENSIONITEM(pTCI))
 				return GMIS_DROPHILITED;
 
 			// If this is the real task for a selected custom date, show the real task as 'lightly' selected
@@ -1593,8 +1593,8 @@ int CTaskCalendarCtrl::RebuildCellTasks(BOOL bIncExtItems)
 		m_mapExtensionItems.RemoveAll();
 		DWORD dwNextExtID = (((m_dwMaximumTaskID / 1000) + 1) * 1000);
 
-		RebuildFutureOccurrences(dwNextExtID);
 		RebuildCustomDates(dwNextExtID);
+		RebuildFutureOccurrences(dwNextExtID);
 
 		// Check for disappearing selected 'custom date'
 		if (bSelItemIsCustomDate &&	!HasTask(m_dwSelectedTaskID, FALSE))
@@ -1890,7 +1890,7 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 				}
 			}
 
-			if (!IsExtensionItem(pTCI))
+			if (!ISEXTENSIONITEM(pTCI))
 			{
 				if (HasOption(TCCO_DISPLAYDONE) && pTCI->IsDone(FALSE))
 				{
@@ -2610,7 +2610,7 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNo
 
 	DWORD dwSelTaskID = GetSelectedTaskID(); // Can be 'real' or 'extension'
 
-	if (dwTaskID != dwSelTaskID)
+	if ((dwTaskID != GetRealTaskID(dwSelTaskID)))
 	{
 		m_dwSelectedTaskID = dwTaskID;
 
@@ -2733,7 +2733,7 @@ BOOL CTaskCalendarCtrl::IsFutureOccurrence(DWORD dwTaskID) const
 	if (!IsExtensionItem(dwTaskID))
 		return FALSE;
 
-	return IsFutureOccurrence(GetTaskCalItem(dwTaskID));
+	return ISFUTUREOCCURRENCE(GetTaskCalItem(dwTaskID));
 }
 
 BOOL CTaskCalendarCtrl::IsCustomDate(DWORD dwTaskID) const
@@ -2741,22 +2741,7 @@ BOOL CTaskCalendarCtrl::IsCustomDate(DWORD dwTaskID) const
 	if (!IsExtensionItem(dwTaskID))
 		return FALSE;
 
-	return IsCustomDate(GetTaskCalItem(dwTaskID));
-}
-
-BOOL CTaskCalendarCtrl::IsExtensionItem(const TASKCALITEM* pTCI)
-{
-	return (ASEXTENSIONITEM(pTCI) != NULL);
-}
-
-BOOL CTaskCalendarCtrl::IsFutureOccurrence(const TASKCALITEM* pTCI)
-{
-	return (ASFUTUREOCCURRENCE(pTCI) != NULL);
-}
-
-BOOL CTaskCalendarCtrl::IsCustomDate(const TASKCALITEM* pTCI)
-{
-	return (ASCUSTOMDATE(pTCI) != NULL);
+	return ISCUSTOMDATE(GetTaskCalItem(dwTaskID));
 }
 
 BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
@@ -2775,7 +2760,7 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	// when not drawing tasks continuously, it's possible
 	// for the act of selecting a task to change its
 	// position and thus its hit-test result
-	if ((dwTaskID != m_dwSelectedTaskID) && !IsCustomDate(pTCI))
+	if ((dwTaskID != m_dwSelectedTaskID) && !ISCUSTOMDATE(pTCI))
 		return FALSE;
 
 	if (nHit == TCCHT_BEGIN || nHit == TCCHT_END)
@@ -2927,9 +2912,9 @@ TCC_SNAPMODE CTaskCalendarCtrl::GetSnapMode() const
 	if (IsDragging())
 	{
 		TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
-		ASSERT(pTCI && !IsFutureOccurrence(pTCI));
+		ASSERT(pTCI && !ISFUTUREOCCURRENCE(pTCI));
 
-		if (IsCustomDate(pTCI))
+		if (ISCUSTOMDATE(pTCI))
 			return TCCSM_NEARESTDAY;
 		
 		// else active keys override
@@ -2960,7 +2945,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 		return FALSE;
 
 	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
-	ASSERT(pTCI && !IsFutureOccurrence(pTCI));
+	ASSERT(pTCI && !ISFUTUREOCCURRENCE(pTCI));
 
 	if (IsValidDrag(ptCursor))
 	{
@@ -3076,7 +3061,7 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
 	ASSERT(pTCI);
 
-	BOOL bExtItem = IsExtensionItem(pTCI);
+	BOOL bExtItem = ISEXTENSIONITEM(pTCI);
 
 	if (!rLimits.PtInRect(ptCursor) || !IsValidDrag(ptCursor))
 	{
@@ -3244,10 +3229,10 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 	if (pTCI->IsCalculatedParent())
 		return FALSE;
 
-	if (IsFutureOccurrence(pTCI))
+	if (ISFUTUREOCCURRENCE(pTCI))
 		return FALSE;
 
-	BOOL bCustomDate = IsCustomDate(pTCI);
+	BOOL bCustomDate = ISCUSTOMDATE(pTCI);
 	BOOL bHasDepends = (!bCustomDate && HasOption(TCCO_PREVENTDEPENDENTDRAGGING) && pTCI->bHasDepends);
 			
 	switch (nHit)
@@ -3434,7 +3419,7 @@ void CTaskCalendarCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
 	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
 	ASSERT(pTCI);
 
-	if (pTCI && IsCustomDate(pTCI))
+	if (pTCI && ISCUSTOMDATE(pTCI))
 	{
 		CMenu menu;
 
@@ -3579,7 +3564,7 @@ BOOL CTaskCalendarCtrl::ClearSelectedCustomDate()
 {
 	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
 
-	if (IsCustomDate(pTCI))
+	if (ISCUSTOMDATE(pTCI))
 	{
 		const TASKCALCUSTOMDATE* pTCIDate = ASCUSTOMDATE(pTCI);
 		ASSERT(pTCIDate);
@@ -3631,14 +3616,14 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 		CEnString sTooltip;
 
-		if (IsExtensionItem(pTCI))
+		if (ISEXTENSIONITEM(pTCI))
 		{
 			// NOTE: - Must match 'Week Planner' View in 'Plugins' project
-			if (IsFutureOccurrence(pTCI))
+			if (ISFUTUREOCCURRENCE(pTCI))
 			{
 				sTooltip.LoadString(IDS_FUTUREOCCURRENCE_TOOLTIP);
 			}
-			else if (IsCustomDate(pTCI))
+			else if (ISCUSTOMDATE(pTCI))
 			{
 				const TASKCALCUSTOMDATE* pTCIDate = ASCUSTOMDATE(pTCI);
 				ASSERT(pTCIDate);
