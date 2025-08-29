@@ -1594,8 +1594,8 @@ int CTaskCalendarCtrl::RebuildCellTasks(BOOL bIncExtItems)
 		m_mapExtensionItems.RemoveAll();
 		DWORD dwNextExtID = (((m_dwMaximumTaskID / 1000) + 1) * 1000);
 
-		RebuildCustomDates(dwNextExtID);
 		RebuildFutureOccurrences(dwNextExtID);
+		RebuildCustomDates(dwNextExtID);
 
 		// Check for disappearing selected 'custom date'
 		if (bSelItemIsCustomDate &&	!HasTask(m_dwSelectedTaskID, FALSE))
