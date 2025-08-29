@@ -293,23 +293,17 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		return FALSE;
 	}
 
-	// Make sure the selected task remains visible
-	// after any changes if it was visible to start with
-	BOOL bSelTaskWasVisible = IsTaskVisible(m_dwSelectedTaskID);
-
 	// Store enough information that we can restore the 
-	// selection to a custom date item if required
-	DWORD dwRealSelTaskID = GetRealTaskID(m_dwSelectedTaskID);
+	// current selection and visibility
+	BOOL bSelTaskWasVisible = IsTaskVisible(m_dwSelectedTaskID);
+	DWORD dwRealSelTaskID = 0;
 	CString sCustDateAttribID;
 
-	if (m_dwSelectedTaskID && (m_dwSelectedTaskID != dwRealSelTaskID))
-	{
-		const TASKCALCUSTOMDATE* pTCISel = ASCUSTOMDATE(GetTaskCalItem(m_dwSelectedTaskID));
-		ASSERT(pTCISel);
+	CacheSelection(dwRealSelTaskID, sCustDateAttribID);
 
-		if (pTCISel)
-			sCustDateAttribID = pTCISel->sCustomAttribID;
-	}
+	// Prevent any other code trying to dereference 
+	// the selected task ID during the update
+	m_dwSelectedTaskID = 0;
 
 	BOOL bChange = UpdateCustomDateAttributes(pTasks);
 
@@ -340,30 +334,9 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	
 	if (bChange)
 	{
-		// clear selection if the previously selected task no longer exists
-		if (!HasTask(dwRealSelTaskID, FALSE))
-		{
-			m_dwSelectedTaskID = 0;
-			bSelTaskWasVisible = FALSE;
-		}
-
 		RecalcDataRange();
 		RebuildCellTasks();
-
-		// Restore previous selection
-		if (m_dwSelectedTaskID)
-		{
-			if (!sCustDateAttribID.IsEmpty())
-				m_dwSelectedTaskID = m_mapExtensionItems.FindCustomDate(dwRealSelTaskID, sCustDateAttribID);
-
-			if (!m_dwSelectedTaskID)
-				m_dwSelectedTaskID = dwRealSelTaskID;
-		}
-
-		if (bSelTaskWasVisible && !IsTaskVisible(m_dwSelectedTaskID))
-			EnsureSelectionVisible();
-		else
-			Invalidate(FALSE);
+		RestoreSelection(dwRealSelTaskID, sCustDateAttribID, bSelTaskWasVisible);
 
 		if (nUpdate == IUI_EDIT)
 			m_aSortedTasks.SetNeedsResort(m_nSortBy, m_bSortAscending);
@@ -372,6 +345,43 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	}
 
 	return bChange;
+}
+
+void CTaskCalendarCtrl::CacheSelection(DWORD& dwRealTaskID, CString& sCustDateAttribID) const
+{
+	dwRealTaskID = 0;
+	sCustDateAttribID.Empty();
+
+	if (m_dwSelectedTaskID)
+	{
+		dwRealTaskID = GetRealTaskID(m_dwSelectedTaskID);
+
+		if (m_dwSelectedTaskID && (m_dwSelectedTaskID != dwRealTaskID))
+		{
+			const TASKCALCUSTOMDATE* pTCISel = ASCUSTOMDATE(GetTaskCalItem(m_dwSelectedTaskID));
+			ASSERT(pTCISel);
+
+			if (pTCISel)
+				sCustDateAttribID = pTCISel->sCustomAttribID;
+		}
+	}
+}
+
+void CTaskCalendarCtrl::RestoreSelection(DWORD dwRealTaskID, const CString& sCustDateAttribID, BOOL bEnsureVisible)
+{
+	if (dwRealTaskID)
+	{
+		if (!sCustDateAttribID.IsEmpty())
+			m_dwSelectedTaskID = m_mapExtensionItems.FindCustomDate(dwRealTaskID, sCustDateAttribID);
+
+		if (!m_dwSelectedTaskID)
+			m_dwSelectedTaskID = dwRealTaskID;
+
+		if (m_dwSelectedTaskID && (bEnsureVisible && !IsTaskVisible(m_dwSelectedTaskID)))
+			EnsureSelectionVisible();
+		else
+			Invalidate(FALSE);
+	}
 }
 
 BOOL CTaskCalendarCtrl::UpdateCustomDateAttributes(const ITASKLISTBASE* pTasks)
@@ -1588,21 +1598,17 @@ int CTaskCalendarCtrl::RebuildCellTasks(BOOL bIncExtItems)
 	// needed for building the cell tasks
 	if (bIncExtItems)
 	{
-		// Cache before clearing the map
-		BOOL bSelItemIsCustomDate = IsCustomDate(m_dwSelectedTaskID);
+		// Cache selection state
+		DWORD dwRealSelTaskID = 0;
+		CString sCustDateAttribID;
+		CacheSelection(dwRealSelTaskID, sCustDateAttribID);
 
 		m_mapExtensionItems.RemoveAll();
 		DWORD dwNextExtID = (((m_dwMaximumTaskID / 1000) + 1) * 1000);
 
-		RebuildCustomDates(dwNextExtID);
 		RebuildFutureOccurrences(dwNextExtID);
-
-		// Check for disappearing selected 'custom date'
-		if (bSelItemIsCustomDate &&	!HasTask(m_dwSelectedTaskID, FALSE))
-		{
-			m_dwSelectedTaskID = 0;
-			NotifyParentSelChange();
-		}
+		RebuildCustomDates(dwNextExtID);
+		RestoreSelection(dwRealSelTaskID, sCustDateAttribID, FALSE);
 	}
 	
 	// Now rebuild the cell tasks
@@ -1697,6 +1703,8 @@ void CTaskCalendarCtrl::RebuildCustomDates(DWORD& dwNextExtID)
 		if (IsHiddenTask(pTCI, FALSE))
 			continue;
 
+		// Note: we want ALL custom dates regardless of the visible date 
+		// range because otherwise we can't maintain custom date selection
 		POSITION posDate = pTCI->Dates().Custom().GetStartPosition();
 
 		while (posDate)
@@ -1705,14 +1713,12 @@ void CTaskCalendarCtrl::RebuildCustomDates(DWORD& dwNextExtID)
 			COleDateTime date;
 
 			pTCI->Dates().Custom().GetNextAssoc(posDate, sCustAttribID, date);
+			ASSERT(CDateHelper::IsDateSet(date));
 
-			if (HasOption(TCCO_TREATOVERDUEASDUETODAY) || (date.m_dt >= dStart) && (date.m_dt < dEnd))
-			{
-				TASKCALCUSTOMDATE* pTCIDate = new TASKCALCUSTOMDATE(*pTCI, dwNextExtID, sCustAttribID, date);
-				pTCIDate->RecalcDates(m_dwOptions);
+			TASKCALCUSTOMDATE* pTCIDate = new TASKCALCUSTOMDATE(*pTCI, dwNextExtID, sCustAttribID, date);
+			pTCIDate->RecalcDates(m_dwOptions);
 
-				m_mapExtensionItems[dwNextExtID++] = pTCIDate;
-			}
+			m_mapExtensionItems[dwNextExtID++] = pTCIDate;
 		}
 	}
 }
@@ -2598,6 +2604,12 @@ BOOL CTaskCalendarCtrl::SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND n
 // external version
 BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible)
 {
+	// If the currently selected item is a custom date having 
+	// the specified task as its 'real' task then do nothing
+	if (IsCustomDate(m_dwSelectedTaskID) && (GetRealTaskID(m_dwSelectedTaskID) == dwTaskID))
+		return TRUE;
+
+	// else
 	SelectTask(dwTaskID, bEnsureVisible, FALSE);
 
 	return (GetSelectedTaskID() != 0);
@@ -2611,11 +2623,11 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNo
 
 	DWORD dwSelTaskID = GetSelectedTaskID(); // Can be 'real' or 'extension'
 
-	if ((dwTaskID != GetRealTaskID(dwSelTaskID)))
+	if (dwTaskID != dwSelTaskID)
 	{
 		m_dwSelectedTaskID = dwTaskID;
 
-		if (bNotify && (dwTaskID != GetRealTaskID(dwSelTaskID)))
+		if (bNotify && (GetRealTaskID(dwTaskID) != GetRealTaskID(dwSelTaskID)))
 			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetRealTaskID(GetSelectedTaskID()));
 
 		if (bEnsureVisible)
