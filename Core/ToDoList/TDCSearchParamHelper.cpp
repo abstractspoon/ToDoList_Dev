@@ -439,7 +439,7 @@ BOOL CTDCSearchParamHelper::InitFilterDate(FILTER_DATE nDate, const COleDateTime
 		break;
 
 	case FD_NEXTNDAYS:
-		date = (CDateHelper::GetDate(DHD_TODAY) + nNextNDays - 1); // -1 because filter is FOP_ON_OR_BEFORE
+		date = (CDateHelper::GetDate(DHD_TODAY).m_dt + nNextNDays - 1); // -1 because filter is FOP_ON_OR_BEFORE
 		break;
 
 	case FD_NOW:
@@ -447,8 +447,6 @@ BOOL CTDCSearchParamHelper::InitFilterDate(FILTER_DATE nDate, const COleDateTime
 		break;
 
 	case FD_USER:
-		ASSERT(CDateHelper::IsDateSet(dateUser));
-
 		date = CDateHelper::GetDateOnly(dateUser);
 		break;
 

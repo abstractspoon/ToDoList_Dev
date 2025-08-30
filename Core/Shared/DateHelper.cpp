@@ -34,9 +34,7 @@ const double START_OF_DAY = ONE_SECOND;
 
 //////////////////////////////////////////////////////////////////////
 
-//#define NULLCHECK_RET(dt, ret) if (!IsDateSet(dt)) return ret;
-#define NULLCHECKA_RET(dt, ret) if (!CDateHelper::IsDateSet(dt)) { ASSERT(0); return ret; }
-#define NULLCHECK_RET(dt, ret) NULLCHECKA_RET(dt, ret)
+#define NULLCHECK_RET(dt, ret) if (!CDateHelper::IsDateSet(dt)) { ASSERT(0); return ret; }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -123,8 +121,8 @@ BOOL COleDateTimeRange::Set(const COleDateTimeRange& dtRange)
 
 BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
 {
-	NULLCHECKA_RET(dtStart, FALSE);
-	NULLCHECKA_RET(dtEnd, FALSE);
+	NULLCHECK_RET(dtStart, FALSE);
+	NULLCHECK_RET(dtEnd, FALSE);
 
 	if (GetEndInclusive(dtEnd, bInclusive) < dtStart)
 	{
@@ -488,8 +486,8 @@ CDateHelper::CDateHelper(const CWorkingWeek& week) : m_week(week)
 
 int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive) const
 {
-	NULLCHECKA_RET(dateFrom, 0);
-	NULLCHECKA_RET(dateTo, 0);
+	NULLCHECK_RET(dateFrom, 0);
+	NULLCHECK_RET(dateTo, 0);
 	
 	COleDateTime dFrom = GetDateOnly(dateFrom);
 	COleDateTime dTo = GetDateOnly(dateTo);
@@ -530,7 +528,7 @@ int CDateHelper::CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive) con
 BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth) const
 {
 	// sanity checks
-	NULLCHECKA_RET(date, FALSE);
+	NULLCHECK_RET(date, FALSE);
 
 	if (!IsValidUnit(nUnits) && (nUnits != DHU_NULL))
 	{
@@ -886,7 +884,7 @@ BOOL CDateHelper::GetTimeT(time64_t date, time_t& timeT)
 
 BOOL CDateHelper::GetTimeT64(const COleDateTime& date, time64_t& timeT)
 {
-//	NULLCHECKA_RET(date, FALSE)
+	NULLCHECK_RET(date, FALSE)
 
 	SYSTEMTIME st = { 0 };
 	
@@ -1001,7 +999,7 @@ BOOL CDateHelper::DecodeLocalShortDate(const CString& sDate, COleDateTime& date)
 	return FALSE;
 }
 
-double CDateHelper::GetDate(DH_DATE nDate)
+COleDateTime CDateHelper::GetDate(DH_DATE nDate)
 {
 	COleDateTime date = COleDateTime::GetCurrentTime();
 
@@ -1016,11 +1014,11 @@ double CDateHelper::GetDate(DH_DATE nDate)
 		break;
 
 	case DHD_YESTERDAY:
-		date = (GetDate(DHD_TODAY) - 1.0); // RECURSIVE CALL
+		date = (GetDate(DHD_TODAY).m_dt - 1.0); // RECURSIVE CALL
 		break;
 		
 	case DHD_TOMORROW:
-		date = (GetDate(DHD_TODAY) + 1.0); // RECURSIVE CALL
+		date = (GetDate(DHD_TODAY).m_dt + 1.0); // RECURSIVE CALL
 		break;
 
 	case DHD_BEGINTHISWEEK:
@@ -1028,11 +1026,11 @@ double CDateHelper::GetDate(DH_DATE nDate)
 		break;
 
 	case DHD_ENDTHISWEEK:
-		date = (GetDate(DHD_BEGINTHISWEEK) + 7); // RECURSIVE CALL
+		date = (GetDate(DHD_BEGINTHISWEEK).m_dt + 7.0); // RECURSIVE CALL
 		break;
 
 	case DHD_ENDNEXTWEEK:
-		date = (GetDate(DHD_ENDTHISWEEK) + 7.0); // RECURSIVE CALL
+		date = (GetDate(DHD_ENDTHISWEEK).m_dt + 7.0); // RECURSIVE CALL
 		break;
 
 	case DHD_BEGINTHISMONTH:
@@ -1044,7 +1042,7 @@ double CDateHelper::GetDate(DH_DATE nDate)
 		break;
 
 	case DHD_ENDNEXTMONTH:
-		date = GetEndOfMonth(GetDate(DHD_ENDTHISMONTH) + 1.0); // RECURSIVE CALL
+		date = GetEndOfMonth(GetDate(DHD_ENDTHISMONTH).m_dt + 1.0); // RECURSIVE CALL
 		break;
 
 	case DHD_BEGINTHISYEAR:
@@ -1056,12 +1054,12 @@ double CDateHelper::GetDate(DH_DATE nDate)
 		break;
 
 	case DHD_ENDNEXTYEAR:
-		date = GetEndOfYear(GetDate(DHD_ENDNEXTYEAR) + 1.0); // RECURSIVE CALL
+		date = GetEndOfYear(GetDate(DHD_ENDNEXTYEAR).m_dt + 1.0); // RECURSIVE CALL
 		break;
 
 	default:
 		ASSERT (0);
-		return 0;
+		return NullDate();
 	}
 
 	ASSERT(!DateHasTime(date));
@@ -1070,6 +1068,8 @@ double CDateHelper::GetDate(DH_DATE nDate)
 
 COleDateTime CDateHelper::GetDate(const COleDateTime& date, BOOL bNoTimeIsEndOfDay)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	if (!bNoTimeIsEndOfDay || DateHasTime(date))
 		return date;
 
@@ -1172,7 +1172,9 @@ int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, D
 
 BOOL CDateHelper::IsDateSet(const COleDateTime& date)
 {
-	return (date.m_status == COleDateTime::valid && date.m_dt != 0.0) ? TRUE : FALSE;
+	ASSERT((date.m_status == COleDateTime::valid) || (date.m_dt == 0.0));
+
+	return (date.m_status == COleDateTime::valid/* && date.m_dt != 0.0*/) ? TRUE : FALSE;
 }
 
 void CDateHelper::ClearDate(COleDateTime& date)
@@ -1183,8 +1185,8 @@ void CDateHelper::ClearDate(COleDateTime& date)
 
 COleDateTime CDateHelper::NullDate()
 {
-	COleDateTime null;
-	ClearDate(null);
+	static COleDateTime null;
+	null.m_status = COleDateTime::null;
 
 	return null;
 }
@@ -1277,6 +1279,8 @@ OLE_DAYOFWEEK CDateHelper::GetNextDayOfWeek(OLE_DAYOFWEEK nDOW)
 
 COleDateTime CDateHelper::GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	COleDateTime dtNext(date);
 	dtNext.m_dt += 1.0; // at least
 
@@ -1286,6 +1290,8 @@ COleDateTime CDateHelper::GetNextAvailableDay(const COleDateTime& date, DWORD dw
 
 BOOL CDateHelper::ValidateDay(COleDateTime& date, DWORD dwAvailDays)
 {
+	NULLCHECK_RET(date, FALSE)
+
 	ASSERT(dwAvailDays);
 
 	if (!dwAvailDays)
@@ -1395,11 +1401,15 @@ DH_MONTH CDateHelper::MapMonthIndexToDHMonth(int nMonth)
 
 COleDateTime CDateHelper::GetStartOfWeek(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	return (GetEndOfWeek(date).m_dt - 6);
 }
 
 COleDateTime CDateHelper::GetEndOfWeek(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	// increment the date until we hit the last day of the week
 	// note: we could have kept checking date.GetDayOfWeek but
 	// it's a lot of calculation that's just not necessary
@@ -1419,6 +1429,8 @@ COleDateTime CDateHelper::GetEndOfWeek(const COleDateTime& date)
 
 BOOL CDateHelper::IsDayOfMonth(const COleDateTime& date, int nDay)
 {
+	NULLCHECK_RET(date, FALSE)
+
 	if (CJalaliCalendar::IsActive())
 	{
 		int JYear, JMonth, JDay;
@@ -1432,6 +1444,8 @@ BOOL CDateHelper::IsDayOfMonth(const COleDateTime& date, int nDay)
 
 COleDateTime CDateHelper::GetStartOfMonth(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	if (CJalaliCalendar::IsActive())
 	{
 		int JYear, JMonth, JDay;
@@ -1563,7 +1577,7 @@ CString CDateHelper::FormatCurrentDate(DWORD dwFlags)
 
 BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow)
 {
-	NULLCHECKA_RET(date, FALSE)
+	NULLCHECK_RET(date, FALSE)
 
 	SYSTEMTIME st;
 
@@ -1649,6 +1663,8 @@ BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& s
 
 CString CDateHelper::FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat)
 {
+	NULLCHECK_RET(date, _T(""));
+
 	CString sDate;
 
 	if (!Misc::IsEmpty(szFormat) && IsDateSet(date))
@@ -1777,6 +1793,8 @@ void CDateHelper::GetDayOfWeekNames(BOOL bShort, CStringArray& aNames)
 
 int CDateHelper::GetDaysInMonth(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, FALSE)
+
 	int nYear, nMonth;
 	GetDateFromMonths(GetDateInMonths(date), nMonth, nYear);
 
@@ -1828,6 +1846,8 @@ int CDateHelper::GetGregorianDaysInMonth(int GMonth, int GYear)
 
 BOOL CDateHelper::IsToday(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, FALSE)
+
 	int nToday = (int)COleDateTime::GetCurrentTime().m_dt;
 
 	return ((int)date.m_dt == nToday);
@@ -1835,16 +1855,16 @@ BOOL CDateHelper::IsToday(const COleDateTime& date)
 
 BOOL CDateHelper::IsSameDay(const COleDateTime& date1, const COleDateTime& date2)
 {
-	NULLCHECKA_RET(date1, FALSE)
-	NULLCHECKA_RET(date2, FALSE)
+	NULLCHECK_RET(date1, FALSE)
+	NULLCHECK_RET(date2, FALSE)
 
 	return ((int)date1.m_dt == (int)date2.m_dt);
 }
 
 BOOL CDateHelper::IsSameWeek(const COleDateTime& date1, const COleDateTime& date2)
 {
-	NULLCHECKA_RET(date1, FALSE)
-	NULLCHECKA_RET(date2, FALSE)
+	NULLCHECK_RET(date1, FALSE)
+	NULLCHECK_RET(date2, FALSE)
 
 	if (!IsSameMonth(date1, date2))
 		return FALSE;
@@ -1879,7 +1899,7 @@ BOOL CDateHelper::IsSameYear(const COleDateTime& date1, const COleDateTime& date
 
 BOOL CDateHelper::IsLeapYear(const COleDateTime& date)
 {
-	NULLCHECKA_RET(date, FALSE)
+	NULLCHECK_RET(date, FALSE)
 
 	int nUnused, nYear;
 	GetDateFromMonths(GetDateInMonths(date), nUnused, nYear);
@@ -1907,7 +1927,7 @@ BOOL CDateHelper::IsGregorianLeapYear(int GYear)
 
 BOOL CDateHelper::IsEndOfDay(const COleDateTime& date, BOOL bNoTimeIsEndOfDay)
 {
-	NULLCHECKA_RET(date, FALSE)
+	NULLCHECK_RET(date, FALSE)
 
 	double dTime = GetTimeOnly(date).m_dt;
 
@@ -1967,23 +1987,22 @@ void CDateHelper::GetMonthNames(BOOL bShort, CStringArray& aMonths)
 
 COleDateTime CDateHelper::GetTimeOnly(const COleDateTime& date)
 {
-	if (IsDateSet(date))
+	NULLCHECK_RET(date, NullDate())
+
+	double dTime = (date.m_dt - GetDateOnly(date));
+
+	if (date.m_dt < 0.0)
 	{
-		double dTime = (date.m_dt - GetDateOnly(date));
-
-		if (date.m_dt < 0.0)
-		{
-			ASSERT((dTime <= 0.0) && (dTime > -1.0));
-			dTime = -dTime;
-		}
-
-		ASSERT((dTime >= 0) && (dTime < 1.0));
-
-		if (dTime >= START_OF_DAY)
-			return dTime;
+		ASSERT((dTime <= 0.0) && (dTime > -1.0));
+		dTime = -dTime;
 	}
 
-	return NullDate();
+	ASSERT((dTime >= 0) && (dTime < 1.0));
+
+	if (dTime >= START_OF_DAY)
+		return dTime;
+
+	return 0.0;
 }
 
 BOOL CDateHelper::DateHasTime(const COleDateTime& date)
@@ -1995,12 +2014,13 @@ COleDateTime CDateHelper::GetDateOnly(const COleDateTime& date)
 {
 	NULLCHECK_RET(date, NullDate())
 
-	// else
 	return (double)((int)date.m_dt);
 }
 
 COleDateTime CDateHelper::TruncateSeconds(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	double dTime = GetTimeOnly(date).m_dt;
 	ASSERT(dTime >= 0.0); // always positive
 
@@ -2095,8 +2115,10 @@ COleDateTime CDateHelper::CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, i
 	return ToDate(nDay, nMonth, nYear);
 }
 
-void CDateHelper::FromDate(const COleDateTime& date, int& nDay, int& nMonth, int& nYear)
+BOOL CDateHelper::FromDate(const COleDateTime& date, int& nDay, int& nMonth, int& nYear)
 {
+	NULLCHECK_RET(date, FALSE)
+
 	if (CJalaliCalendar::IsActive())
 	{
 		CJalaliCalendar::FromGregorian(date, &nYear, &nMonth, &nDay);
@@ -2107,6 +2129,8 @@ void CDateHelper::FromDate(const COleDateTime& date, int& nDay, int& nMonth, int
 		nMonth = date.GetMonth();
 		nYear = date.GetYear();
 	}
+
+	return TRUE;
 }
 
 COleDateTime CDateHelper::ToDate(int nDay, int nMonth, int nYear)
@@ -2130,6 +2154,8 @@ BOOL CDateHelper::WantISOWeekOfYear()
 
 int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, 0)
+
 	if (CJalaliCalendar::IsActive())
 	{
 		int JYear, JMonth, JDay;
@@ -2144,6 +2170,8 @@ int CDateHelper::GetWeekOfYear(const COleDateTime& date)
 
 int CDateHelper::GetGregorianWeekOfYear(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, 0)
+
 	int nWeek = 0;
 	int nDayOfYear = date.GetDayOfYear();
 
@@ -2260,24 +2288,28 @@ COleDateTime CDateHelper::GetNearestDayPart(const COleDateTime& date, int nNumPa
 
 COleDateTime CDateHelper::GetEndOfPreviousDay(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	return (GetEndOfDay(date).m_dt - 1.0);
 }
 
 COleDateTime CDateHelper::GetEndOfDay(const COleDateTime& date)
 {
-	NULLCHECKA_RET(date, NullDate())
+	NULLCHECK_RET(date, NullDate())
 
 	return MakeDate(date, END_OF_DAY);
 }
 
 COleDateTime CDateHelper::GetStartOfNextDay(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	return (GetStartOfDay(date).m_dt + 1.0);
 }
 
 COleDateTime CDateHelper::GetStartOfDay(const COleDateTime& date)
 {
-	NULLCHECKA_RET(date, NullDate())
+	NULLCHECK_RET(date, NullDate())
 
 	return GetDateOnly(date);
 }
@@ -2294,6 +2326,8 @@ COleDateTime CDateHelper::GetNearestDecade(const COleDateTime& date, BOOL bEnd, 
 
 COleDateTime CDateHelper::GetNearestEpoch(const COleDateTime& date, int nEpochLen, BOOL bEnd, BOOL bZeroBased)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	COleDateTime dtThisEpoch = GetStartOfEpoch(date, nEpochLen, bZeroBased);
 	COleDateTime dtNextEpoch = (GetEndOfEpoch(date, nEpochLen, bZeroBased).m_dt + 1.0);
 
@@ -2333,6 +2367,8 @@ COleDateTime CDateHelper::GetNearestMonth(const COleDateTime& date, BOOL bEnd)
 
 COleDateTime CDateHelper::GetNearestMonth(const COleDateTime& date, int nInterval, BOOL bEnd)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	ASSERT(nInterval > 0);
 
 	int nNumMonths = GetDateInMonths(date);
@@ -2358,6 +2394,8 @@ COleDateTime CDateHelper::GetNearestMonth(const COleDateTime& date, int nInterva
 
 COleDateTime CDateHelper::GetNearestWeek(const COleDateTime& date, BOOL bEnd)
 {
+	NULLCHECK_RET(date, NullDate())
+		
 	COleDateTime dtWeek = GetDateOnly(date);
 
 	// work forward until the week changes
@@ -2399,7 +2437,11 @@ void CDateHelper::GetDateFromMonths(int nNumMonths, int& nMonth, int& nYear)
 
 COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 {
-	ASSERT(nNumMonths);
+	if (!nNumMonths)
+	{
+		ASSERT(0);
+		return NullDate();
+	}
 
 	int nMonth, nYear;
 	GetDateFromMonths(nNumMonths, nMonth, nYear);
@@ -2413,7 +2455,7 @@ COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 
 int CDateHelper::GetDateInMonths(const COleDateTime& date)
 {
-	NULLCHECKA_RET(date, 0)
+	NULLCHECK_RET(date, 0)
 
 	if (CJalaliCalendar::IsActive())
 	{
@@ -2429,8 +2471,8 @@ int CDateHelper::GetDateInMonths(const COleDateTime& date)
 
 int CDateHelper::CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive)
 {
-	NULLCHECKA_RET(dateFrom, 0)
-	NULLCHECKA_RET(dateTo, 0)
+	NULLCHECK_RET(dateFrom, 0)
+	NULLCHECK_RET(dateTo, 0)
 	
 	if (dateFrom > dateTo)
 	{
@@ -2499,8 +2541,10 @@ void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy, BOOL bPreserveEndOfMon
 	st.wYear = (WORD)GYear;
 }
 
-void CDateHelper::IncrementMonth(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)
+BOOL CDateHelper::IncrementMonth(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)
 {
+	NULLCHECK_RET(date, FALSE)
+
 	SYSTEMTIME st = { 0 };
 	
 	if (date.GetAsSystemTime(st))
@@ -2508,11 +2552,13 @@ void CDateHelper::IncrementMonth(COleDateTime& date, int nBy, BOOL bPreserveEndO
 		IncrementMonth(st, nBy, bPreserveEndOfMonth);
 		date = COleDateTime(st);
 	}
+
+	return IsDateSet(date);
 }
 
-void CDateHelper::IncrementYear(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)
+BOOL CDateHelper::IncrementYear(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)
 {
-	IncrementMonth(date, (nBy * 12), bPreserveEndOfMonth);
+	return IncrementMonth(date, (nBy * 12), bPreserveEndOfMonth);
 }
 
 void CDateHelper::IncrementMonth(int& nMonth, int& nYear, int nBy)
