@@ -878,7 +878,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const CString& sComments, const CBinaryData& 
 BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM& rule, 
 									BOOL bIncludeTime, TDC_DATE nDate, CString& sWhatMatched) const
 {
-	double dTaskDate = dtTask.m_dt, dSearch = rule.ValueAsDate().m_dt;
+	COleDateTime dtTaskDate = dtTask, dtSearch = rule.ValueAsDate();
 	BOOL bMatch = FALSE;
 
 	// Special case: Rule is a relative date (except for 'Now')
@@ -889,8 +889,8 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 	if (!bIncludeTime)
 	{
 		// Truncate to start of day
-		dTaskDate = CDateHelper::GetDateOnly(dTaskDate);
-		dSearch = CDateHelper::GetDateOnly(dSearch);
+		dtTaskDate = CDateHelper::GetDateOnly(dtTaskDate);
+		dtSearch = CDateHelper::GetDateOnly(dtSearch);
 	}
 	else
 	{
@@ -908,7 +908,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 			case TDCD_DONE:
 			case TDCD_CUSTOM:
 				// Due/Done dates default to the end of the day
-				dTaskDate = CDateHelper::GetEndOfDay(dtTask);
+				dtTaskDate = CDateHelper::GetEndOfDay(dtTask);
 				break;
 
 			case TDCD_CREATE:
@@ -921,39 +921,41 @@ BOOL CTDCTaskMatcher::ValueMatches(const COleDateTime& dtTask, const SEARCHPARAM
 			}
 		}
 	}
+
+	BOOL bTaskDateSet = CDateHelper::IsDateSet(dtTaskDate);
 	
 	switch (rule.GetOperator())
 	{
 	case FOP_EQUALS:
-		bMatch = (dTaskDate != 0.0) && (dTaskDate == dSearch);
+		bMatch = (bTaskDateSet && (dtTaskDate == dtSearch));
 		break;
 		
 	case FOP_NOT_EQUALS:
-		bMatch = (dTaskDate != dSearch);
+		bMatch = (dtTaskDate != dtSearch);
 		break;
 		
 	case FOP_ON_OR_AFTER:
-		bMatch = (dTaskDate != 0.0) && (dTaskDate >= dSearch);
+		bMatch = (bTaskDateSet && (dtTaskDate >= dtSearch));
 		break;
 		
 	case FOP_AFTER:
-		bMatch = (dTaskDate != 0.0) && (dTaskDate > dSearch);
+		bMatch = (bTaskDateSet && (dtTaskDate > dtSearch));
 		break;
 		
 	case FOP_ON_OR_BEFORE:
-		bMatch = (dTaskDate != 0.0) && (dTaskDate <= dSearch);
+		bMatch = (bTaskDateSet && (dtTaskDate <= dtSearch));
 		break;
 		
 	case FOP_BEFORE:
-		bMatch = (dTaskDate != 0.0) && (dTaskDate < dSearch);
+		bMatch = (bTaskDateSet && (dtTaskDate < dtSearch));
 		break;
 		
 	case FOP_SET:
-		bMatch = (dTaskDate != 0.0);
+		bMatch = bTaskDateSet;
 		break;
 		
 	case FOP_NOT_SET:
-		bMatch = (dTaskDate == 0.0);
+		bMatch = !bTaskDateSet;
 		break;
 	}
 	

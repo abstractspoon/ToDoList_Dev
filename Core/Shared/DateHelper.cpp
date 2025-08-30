@@ -1174,7 +1174,7 @@ BOOL CDateHelper::IsDateSet(const COleDateTime& date)
 {
 	ASSERT((date.m_status == COleDateTime::valid) || (date.m_dt == 0.0));
 
-	return (date.m_status == COleDateTime::valid/* && date.m_dt != 0.0*/) ? TRUE : FALSE;
+	return (date.m_status == COleDateTime::valid) ? TRUE : FALSE;
 }
 
 void CDateHelper::ClearDate(COleDateTime& date)
