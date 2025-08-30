@@ -194,6 +194,7 @@ protected:
 	
 	BOOL ExpectEQ(float f1, float f2, float fTol = 1e-6) const;
 	BOOL ExpectEQ(double d1, double d2, double dTol = 1e-12) const;
+	BOOL ExpectEQ(const COleDateTime& dt1, const COleDateTime& dt2, double dTol = 1e-12) const;
 	
 	BOOL ExpectEQ(bool b1, bool b2) const;
 	
@@ -221,6 +222,7 @@ protected:
 	
 	BOOL ExpectNE(float f1, float f2, float fTol = 1e-6) const;
 	BOOL ExpectNE(double d1, double d2, double dTol = 1e-12) const;
+	BOOL ExpectNE(const COleDateTime& dt1, const COleDateTime& dt2, double dTol = 1e-12) const;
 	
 	BOOL ExpectNE(bool b1, bool b2) const;
 	

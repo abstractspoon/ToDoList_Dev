@@ -109,10 +109,10 @@ void CDateHelperTest::TestDecodeRelativeDate()
 {
 	CTDCScopedTest test(*this, _T("CDateHelper::DecodeRelativeDate"));
 	
-	const double TODAY(CDateHelper::GetDate(DHD_TODAY));
-	const double ENDTHISWEEK(CDateHelper::GetDate(DHD_ENDTHISWEEK));
-	const double ENDTHISMONTH(CDateHelper::GetDate(DHD_ENDTHISMONTH));
-	const double ENDTHISYEAR(CDateHelper::GetDate(DHD_ENDTHISYEAR));
+	const COleDateTime TODAY(CDateHelper::GetDate(DHD_TODAY));
+	const COleDateTime ENDTHISWEEK(CDateHelper::GetDate(DHD_ENDTHISWEEK));
+	const COleDateTime ENDTHISMONTH(CDateHelper::GetDate(DHD_ENDTHISMONTH));
+	const COleDateTime ENDTHISYEAR(CDateHelper::GetDate(DHD_ENDTHISYEAR));
 
 	const BOOL MUSTHAVESIGN = TRUE;
 	const BOOL DONTNEEDSIGN = FALSE;
@@ -133,7 +133,7 @@ void CDateHelperTest::TestDecodeRelativeDate()
 	ExpectFalse(dh.DecodeRelativeDate(_T("4"), date, MUSTHAVESIGN));
 	ExpectTrue(dh.DecodeRelativeDate(_T("+4"), date, MUSTHAVESIGN));
 	ExpectTrue(dh.DecodeRelativeDate(_T("4"), date, DONTNEEDSIGN));
-	ExpectEQ(date, (TODAY + 4));
+	ExpectEQ(date, COleDateTime(TODAY.m_dt + 4));
 	
 	// -----------------------------------------------------------------------
 
@@ -160,15 +160,15 @@ void CDateHelperTest::TestDecodeRelativeDate()
 	// -----------------------------------------------------------------------
 
 	ExpectTrue(dh.DecodeRelativeDate(_T("t+3"), date));
-	ExpectEQ(date, (TODAY + 3));
+	ExpectEQ(date, COleDateTime(TODAY.m_dt + 3));
 	
 	ExpectTrue(dh.DecodeRelativeDate(_T("T-21"), date));
-	ExpectEQ(date, (TODAY - 21));
+	ExpectEQ(date, COleDateTime(TODAY.m_dt - 21));
 	
 	// -----------------------------------------------------------------------
 
 	ExpectTrue(dh.DecodeRelativeDate(_T("W+11"), date));
-	ExpectEQ(date, (ENDTHISWEEK + (11 * 7)));
+	ExpectEQ(date, COleDateTime(ENDTHISWEEK.m_dt + (11 * 7)));
 
 	ExpectTrue(dh.DecodeRelativeDate(_T("M+7"), date));
 	{

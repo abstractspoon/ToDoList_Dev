@@ -2744,19 +2744,19 @@ BOOL CTDCTaskCalculator::IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pT
 		return FALSE;
 	}
 	
-	double dDue = GetTaskDueDate(pTDI, pTDS);
+	COleDateTime dtDue = GetTaskDueDate(pTDI, pTDS);
 	
-	if (dDue == 0.0)
+	if (!CDateHelper::IsDateSet(dtDue))
 		return FALSE;
 
 	if (bToday)
-		return CDateHelper::IsToday(dDue);
+		return CDateHelper::IsToday(dtDue);
 
 	// else
-	if (!CDateHelper::DateHasTime(dDue))
-		dDue = CDateHelper::GetEndOfDay(dDue);
+	if (!CDateHelper::DateHasTime(dtDue))
+		dtDue = CDateHelper::GetEndOfDay(dtDue);
 
-	return (dDue < COleDateTime::GetCurrentTime());
+	return (dtDue < COleDateTime::GetCurrentTime());
 }
 
 // ---------------------------------------------------------------------
@@ -2890,12 +2890,12 @@ BOOL CTDCTaskCalculator::HasLockedTasks(const TODOSTRUCTURE* pTDS, CDWordSet& ma
 
 // ---------------------------------------------------------------------
 
-double CTDCTaskCalculator::GetEarliestDueDate() const
+COleDateTime CTDCTaskCalculator::GetEarliestDueDate() const
 {
-	double dEarliest = DBL_MAX;
+	// traverse top level items
+	COleDateTime dtEarliest = CDateHelper::NullDate();
 	CDWordSet mapProcessedIDs;
 
-	// traverse top level items
 	for (int nSubtask = 0; nSubtask < m_data.m_struct.GetSubTaskCount(); nSubtask++)
 	{
 		const TODOSTRUCTURE* pTDSChild = NULL;
@@ -2903,33 +2903,33 @@ double CTDCTaskCalculator::GetEarliestDueDate() const
 
 		if (GET_SUBTASK(&m_data.m_struct, nSubtask, pTDIChild, pTDSChild))
 		{
-			double dTaskEarliest = GetStartDueDate(pTDIChild, pTDSChild, TRUE, TRUE, TRUE, mapProcessedIDs);
+			COleDateTime dtTaskEarliest = GetStartDueDate(pTDIChild, pTDSChild, TRUE, TRUE, TRUE, mapProcessedIDs);
 
-			if (dTaskEarliest > 0.0)
+			if (CDateHelper::IsDateSet(dtTaskEarliest))
 			{
-				if (!CDateHelper::DateHasTime(dTaskEarliest))
-					dTaskEarliest = CDateHelper::GetEndOfDay(dTaskEarliest);
+				if (!CDateHelper::DateHasTime(dtTaskEarliest))
+					dtTaskEarliest = CDateHelper::GetEndOfDay(dtTaskEarliest);
 
-				dEarliest = min(dTaskEarliest, dEarliest);
+				dtEarliest = GetEarliestDate(dtTaskEarliest, dtEarliest, TRUE);
 			}
 		}
 	}
 
-	return ((dEarliest == DBL_MAX) ? 0.0 : dEarliest);
+	return dtEarliest;
 }
 
 // ---------------------------------------------------------------------
 
-double CTDCTaskCalculator::GetTaskDueDate(DWORD dwTaskID) const
+COleDateTime CTDCTaskCalculator::GetTaskDueDate(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, CDateHelper::NullDate());
 
 	return GetTaskDueDate(pTDI, pTDS);
 }
 
-double CTDCTaskCalculator::GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+COleDateTime CTDCTaskCalculator::GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	if (HasStyle(TDCS_USEEARLIESTDUEDATE))
 		return GetStartDueDate(pTDI, pTDS, TRUE, TRUE, TRUE, CDWordSet());
@@ -2943,16 +2943,16 @@ double CTDCTaskCalculator::GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCT
 
 // ---------------------------------------------------------------------
 
-double CTDCTaskCalculator::GetTaskStartDate(DWORD dwTaskID) const
+COleDateTime CTDCTaskCalculator::GetTaskStartDate(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, CDateHelper::NullDate());
 
 	return GetTaskStartDate(pTDI, pTDS);
 }
 
-double CTDCTaskCalculator::GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+COleDateTime CTDCTaskCalculator::GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	if (HasStyle(TDCS_USEEARLIESTSTARTDATE))
 		return GetStartDueDate(pTDI, pTDS, TRUE, FALSE, TRUE, CDWordSet());
@@ -2966,20 +2966,20 @@ double CTDCTaskCalculator::GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRU
 
 // ---------------------------------------------------------------------
 
-double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
-										   BOOL bCheckChildren, BOOL bDue, BOOL bEarliest, CDWordSet& mapProcessedIDs) const
+COleDateTime CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,
+												BOOL bCheckChildren, BOOL bDue, BOOL bEarliest, CDWordSet& mapProcessedIDs) const
 {
 	// sanity check
 	if (!pTDS || !pTDI)
 	{
 		ASSERT(0);
-		return 0.0;
+		return CDateHelper::NullDate();
 	}
 
 	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
 
 	BOOL bDone = IsTaskDone(pTDI, pTDS, TDCCHECKCHILDREN);
-	double dBest = 0.0;
+	COleDateTime dtBest = CDateHelper::NullDate();
 
 	if (bDone)
 	{
@@ -2987,15 +2987,10 @@ double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUC
 	}
 	else
 	{
-		dBest = (bDue ? pTDI->dateDue.m_dt : pTDI->dateStart.m_dt);
+		dtBest = (bDue ? pTDI->dateDue : pTDI->dateStart);
 
 		if (bCheckChildren && pTDS->HasSubTasks())
 		{
-			// handle pTDI not having dates
-			// Note: we don't use DBL_MAX because then 'end of day' calcs overflow
-			if (dBest == 0.0)
-				dBest = (bEarliest ? INT_MAX : -INT_MAX);
-
 			// check children
 			for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 			{
@@ -3004,43 +2999,40 @@ double CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUC
 
 				if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 				{
-					double dChildDate = GetStartDueDate(pTDIChild, pTDSChild, TRUE, bDue, bEarliest, mapProcessedIDs); // RECURSIVE CALL
-					dBest = (bEarliest ? GetEarliestDate(dBest, dChildDate, bDue) : GetLatestDate(dBest, dChildDate, bDue));
+					COleDateTime dtChildDate = GetStartDueDate(pTDIChild, pTDSChild, TRUE, bDue, bEarliest, mapProcessedIDs); // RECURSIVE CALL
+					dtBest = (bEarliest ? GetEarliestDate(dtBest, dtChildDate, bDue) : GetLatestDate(dtBest, dtChildDate, bDue));
 				}
 			}
-
-			if (fabs(dBest) == INT_MAX) // no children had dates
-				dBest = 0;
 		}
 	}
 
 	if (bDue)
 	{
 		// finally if no date set then use today or start whichever is later
-		if ((dBest == 0) && !bDone && HasStyle(TDCS_NODUEDATEISDUETODAYORSTART))
+		if (!CDateHelper::IsDateSet(dtBest) && !bDone && HasStyle(TDCS_NODUEDATEISDUETODAYORSTART))
 		{
 			COleDateTime dtDue(CDateHelper::GetDate(DHD_TODAY));
 
 			if (CDateHelper::Max(dtDue, pTDI->dateStart))
-				dBest = dtDue.m_dt;
+				dtBest = dtDue;
 		}
 	}
 
-	return dBest;
+	return dtBest;
 }
 
 // ---------------------------------------------------------------------
 
-double CTDCTaskCalculator::GetTaskLastModifiedDate(DWORD dwTaskID) const
+COleDateTime CTDCTaskCalculator::GetTaskLastModifiedDate(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, 0);
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, CDateHelper::NullDate());
 
 	return GetTaskLastModifiedDate(pTDI, pTDS);
 }
 
-double CTDCTaskCalculator::GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+COleDateTime CTDCTaskCalculator::GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS, CDWordSet());
 
@@ -3088,7 +3080,7 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 
 	if (CDateHelper::IsDateSet(pTDI->dateLastMod) && HasStyle(TDCS_USELATESTLASTMODIFIED))
 	{
-		double dLatest = pTDI->dateLastMod;
+		COleDateTime dtLatest = pTDI->dateLastMod;
 
 		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
 		{
@@ -3098,12 +3090,12 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 			if (GET_SUBTASK(pTDS, nSubtask, pTDIChild, pTDSChild))
 			{
 				const TODOITEM* pLatestChild = GetLastModifiedTask(pTDIChild, pTDSChild, mapProcessedIDs); // RECURSIVE CALL
-				double dLatestChildDate = pLatestChild->dateLastMod.m_dt;
+				COleDateTime dtLatestChildDate = pLatestChild->dateLastMod;
 
-				if (GetLatestDate(dLatest, dLatestChildDate, FALSE) == dLatestChildDate)
+				if (GetLatestDate(dtLatest, dtLatestChildDate, FALSE) == dtLatestChildDate)
 				{
 					pLatest = pLatestChild;
-					dLatest = dLatestChildDate;
+					dtLatest = dtLatestChildDate;
 				}
 			}
 		}
@@ -3114,20 +3106,20 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 
 // ---------------------------------------------------------------------
 
-double CTDCTaskCalculator::GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay)
+COleDateTime CTDCTaskCalculator::GetLatestDate(COleDateTime dtDate1, COleDateTime dtDate2, BOOL bNoTimeIsEndOfDay)
 {
-	COleDateTime dtMax(dDate1);
-	CDateHelper::Max(dtMax, dDate2, bNoTimeIsEndOfDay);
+	COleDateTime dtMax(dtDate1);
+	CDateHelper::Max(dtMax, dtDate2, bNoTimeIsEndOfDay);
 
-	return dtMax.m_dt;
+	return dtMax;
 }
 
-double CTDCTaskCalculator::GetEarliestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay)
+COleDateTime CTDCTaskCalculator::GetEarliestDate(COleDateTime dtDate1, COleDateTime dtDate2, BOOL bNoTimeIsEndOfDay)
 {
-	COleDateTime dtMin(dDate1);
-	CDateHelper::Min(dtMin, dDate2, bNoTimeIsEndOfDay);
+	COleDateTime dtMin(dtDate1);
+	CDateHelper::Min(dtMin, dtDate2, bNoTimeIsEndOfDay);
 
-	return dtMin.m_dt;
+	return dtMin;
 }
 
 // ---------------------------------------------------------------------
