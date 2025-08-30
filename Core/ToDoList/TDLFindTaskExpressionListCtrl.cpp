@@ -1066,6 +1066,8 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 
 		if (m_cbAttributes.GetSelectedAttribute(ruleNew) && (rule != ruleNew))
 		{
+			BOOL bTypeChange = (rule.GetAttribType() != ruleNew.GetAttribType());
+
 			rule = ruleNew;
 
 			// update list text
@@ -1077,9 +1079,9 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 				SetItemText(nRow, OPERATOR_COL, _T(""));
 
 			// Clear the text value if the attribute type has changed
-			if (rule.GetAttribType() != ruleNew.GetAttribType())
+			if (bTypeChange)
 			{
-				rule.SetValue(_T(""));
+				rule.ClearValue();
 				UpdateValueColumnText(nRow);
 			}
 			
