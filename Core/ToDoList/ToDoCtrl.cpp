@@ -1725,7 +1725,6 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 	return SetSelectedTaskPriority((bUp ? 1 : -1), TRUE); // offset
 }
 
-// external version
 BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date)
 {
 	// special case

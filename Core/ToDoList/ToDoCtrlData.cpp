@@ -2259,8 +2259,6 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 	if (bDateIsSet && CDateHelper::IsEndOfDay(dtDate, FALSE))
 		dtDate = CDateHelper::GetDateOnly(dtDate);
 	
-	BOOL bWasDone = pTDI->IsDone();
-	
 	if (pTDI->GetDate(nDate) != dtDate)
 	{
 		// save undo data
@@ -2269,9 +2267,10 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 		switch (nDate)
 		{
 		case TDCD_CREATE:
-			pTDI->dateCreated = dtDate;	
-
-			bRecalcTimeEstimate = FALSE;
+			{
+				pTDI->dateCreated = dtDate;
+				bRecalcTimeEstimate = FALSE;
+			}
 			break;
 			
 		case TDCD_START:	
@@ -2279,25 +2278,37 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 			break;
 			
 		case TDCD_STARTDATE:		
-			// Add date to existing time component unless existing date is 0.0
-			if (!bDateIsSet || !pTDI->HasStart())
-				pTDI->dateStart = CDateHelper::GetDateOnly(dtDate);
-			else
-				pTDI->dateStart = CDateHelper::MakeDate(dtDate, pTDI->dateStart);	
-
-			// If the task does NOT have a due date but does have a time estimate
-			// then calculate an appropriate due date
-			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) && CalcMissingDueDateFromStart(pTDI))
 			{
-				nDate = TDCD_DUE; // to update dependencies
-				bRecalcTimeEstimate = FALSE;
+				// Add date to existing time component unless existing date is 0.0
+				if (!bDateIsSet)
+				{
+					CDateHelper::ClearDate(pTDI->dateStart);
+				}
+				else if (!pTDI->HasStart())
+				{
+					pTDI->dateStart = CDateHelper::GetDateOnly(dtDate);
+				}
+				else
+				{
+					pTDI->dateStart = CDateHelper::MakeDate(dtDate, pTDI->dateStart);
+				}
+
+				// If the task does NOT have a due date but does have a time estimate
+				// then calculate an appropriate due date
+				if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) && CalcMissingDueDateFromStart(pTDI))
+				{
+					nDate = TDCD_DUE; // to update dependencies
+					bRecalcTimeEstimate = FALSE;
+				}
 			}
 			break;
 			
 		case TDCD_STARTTIME:		
-			// add time to date component only if it exists
-			if (pTDI->HasStart())
-				pTDI->dateStart = CDateHelper::MakeDate(pTDI->dateStart, dtDate);		
+			{
+				// add time to date component only if it exists
+				if (pTDI->HasStart())
+					pTDI->dateStart = CDateHelper::MakeDate(pTDI->dateStart, dtDate);
+			}
 			break;
 			
 		case TDCD_DUE:		
@@ -2305,47 +2316,73 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 			break;
 			
 		case TDCD_DUEDATE:		
-			// add date to existing time component unless existing date is 0.0
-			if (!bDateIsSet || !pTDI->HasDue())
-				pTDI->dateDue = CDateHelper::GetDateOnly(dtDate);
-			else
-				pTDI->dateDue = CDateHelper::MakeDate(dtDate, pTDI->dateDue);		
-
-			// If the task does NOT have a start date but does have a time estimate
-			// then back-calculate an appropriate start date
-			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) &&	CalcMissingStartDateFromDue(pTDI))
 			{
-				bRecalcTimeEstimate = FALSE;
+				// add date to existing time component unless existing date is 0.0
+				if (!bDateIsSet)
+				{
+					CDateHelper::ClearDate(pTDI->dateDue);
+				}
+				else if (!pTDI->HasDue())
+				{
+					pTDI->dateDue = CDateHelper::GetDateOnly(dtDate);
+				}
+				else
+				{
+					pTDI->dateDue = CDateHelper::MakeDate(dtDate, pTDI->dateDue);
+				}
+
+				// If the task does NOT have a start date but does have a time estimate
+				// then back-calculate an appropriate start date
+				if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) && CalcMissingStartDateFromDue(pTDI))
+				{
+					bRecalcTimeEstimate = FALSE;
+				}
 			}
 			break;
 			
 		case TDCD_DUETIME:		
-			// add time to date component only if it exists
-			if (pTDI->HasDue())
-				pTDI->dateDue = CDateHelper::MakeDate(pTDI->dateDue, dtDate);		
+			{
+				// add time to date component only if it exists
+				if (pTDI->HasDue())
+					pTDI->dateDue = CDateHelper::MakeDate(pTDI->dateDue, dtDate);
+			}
 			break;
 			
 		case TDCD_DONE:		
-			pTDI->dateDone = dtDate;
-			bRecalcTimeEstimate = FALSE;
+			{
+				pTDI->dateDone = dtDate;
+				bRecalcTimeEstimate = FALSE;
+			}
 			break;
 			
 		case TDCD_DONEDATE:		
-			// add date to existing time component unless date is 0.0
-			if (!bDateIsSet || !bWasDone)
-				pTDI->dateDone = CDateHelper::GetDateOnly(dtDate);
-			else
-				pTDI->dateDone = CDateHelper::MakeDate(dtDate, pTDI->dateDone);
+			{
+				// add date to existing time component unless date is 0.0
+				if (!bDateIsSet)
+				{
+					CDateHelper::ClearDate(pTDI->dateDone);
+				}
+				else if (!pTDI->IsDone())
+				{
+					pTDI->dateDone = CDateHelper::GetDateOnly(dtDate);
+				}
+				else
+				{
+					pTDI->dateDone = CDateHelper::MakeDate(dtDate, pTDI->dateDone);
+				}
 
-			bRecalcTimeEstimate = FALSE;
+				bRecalcTimeEstimate = FALSE;
+			}
 			break;
 			
 		case TDCD_DONETIME:		
-			// add time to date component only if it exists
-			if (pTDI->IsDone())
-				pTDI->dateDone = CDateHelper::MakeDate(pTDI->dateDone, dtDate);		
-			
-			bRecalcTimeEstimate = FALSE;
+			{
+				// add time to date component only if it exists
+				if (pTDI->IsDone())
+					pTDI->dateDone = CDateHelper::MakeDate(pTDI->dateDone, dtDate);
+
+				bRecalcTimeEstimate = FALSE;
+			}
 			break;
 			
 		default:

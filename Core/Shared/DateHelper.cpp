@@ -34,6 +34,12 @@ const double START_OF_DAY = ONE_SECOND;
 
 //////////////////////////////////////////////////////////////////////
 
+//#define NULLCHECK_RET(dt, ret) if (!IsDateSet(dt)) return ret;
+#define NULLCHECKA_RET(dt, ret) if (!CDateHelper::IsDateSet(dt)) { ASSERT(0); return ret; }
+#define NULLCHECK_RET(dt, ret) NULLCHECKA_RET(dt, ret)
+
+//////////////////////////////////////////////////////////////////////
+
 COleDateTimeRange::COleDateTimeRange()
 {
 	Reset();
@@ -117,12 +123,10 @@ BOOL COleDateTimeRange::Set(const COleDateTimeRange& dtRange)
 
 BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
 {
-	if (!CDateHelper::IsDateSet(dtStart) || !CDateHelper::IsDateSet(dtEnd))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-	else if (GetEndInclusive(dtEnd, bInclusive) < dtStart)
+	NULLCHECKA_RET(dtStart, FALSE);
+	NULLCHECKA_RET(dtEnd, FALSE);
+
+	if (GetEndInclusive(dtEnd, bInclusive) < dtStart)
 	{
 		ASSERT(0);
 		return FALSE;
@@ -484,11 +488,8 @@ CDateHelper::CDateHelper(const CWorkingWeek& week) : m_week(week)
 
 int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive) const
 {
-	if (!IsDateSet(dateFrom) || !IsDateSet(dateTo))
-	{
-		ASSERT(0);
-		return 0;
-	}
+	NULLCHECKA_RET(dateFrom, 0);
+	NULLCHECKA_RET(dateTo, 0);
 	
 	COleDateTime dFrom = GetDateOnly(dateFrom);
 	COleDateTime dTo = GetDateOnly(dateTo);
@@ -529,7 +530,9 @@ int CDateHelper::CalcDaysFromTo(DH_DATE nFrom, DH_DATE nTo, BOOL bInclusive) con
 BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth) const
 {
 	// sanity checks
-	if (!IsDateSet(date) || (!IsValidUnit(nUnits) && (nUnits != DHU_NULL)))
+	NULLCHECKA_RET(date, FALSE);
+
+	if (!IsValidUnit(nUnits) && (nUnits != DHU_NULL))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -883,8 +886,7 @@ BOOL CDateHelper::GetTimeT(time64_t date, time_t& timeT)
 
 BOOL CDateHelper::GetTimeT64(const COleDateTime& date, time64_t& timeT)
 {
-	if (!IsDateSet(date))
-		return FALSE;
+//	NULLCHECKA_RET(date, FALSE)
 
 	SYSTEMTIME st = { 0 };
 	
@@ -1561,8 +1563,7 @@ CString CDateHelper::FormatCurrentDate(DWORD dwFlags)
 
 BOOL CDateHelper::FormatDate(const COleDateTime& date, DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow)
 {
-	if (!IsDateSet(date))
-		return FALSE;
+	NULLCHECKA_RET(date, FALSE)
 
 	SYSTEMTIME st;
 
@@ -1834,18 +1835,16 @@ BOOL CDateHelper::IsToday(const COleDateTime& date)
 
 BOOL CDateHelper::IsSameDay(const COleDateTime& date1, const COleDateTime& date2)
 {
-	if (!IsDateSet(date1) || !IsDateSet(date2))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	NULLCHECKA_RET(date1, FALSE)
+	NULLCHECKA_RET(date2, FALSE)
 
 	return ((int)date1.m_dt == (int)date2.m_dt);
 }
 
 BOOL CDateHelper::IsSameWeek(const COleDateTime& date1, const COleDateTime& date2)
 {
-	ASSERT(IsDateSet(date1) && IsDateSet(date2));
+	NULLCHECKA_RET(date1, FALSE)
+	NULLCHECKA_RET(date2, FALSE)
 
 	if (!IsSameMonth(date1, date2))
 		return FALSE;
@@ -1880,11 +1879,7 @@ BOOL CDateHelper::IsSameYear(const COleDateTime& date1, const COleDateTime& date
 
 BOOL CDateHelper::IsLeapYear(const COleDateTime& date)
 {
-	if (!IsDateSet(date))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	NULLCHECKA_RET(date, FALSE)
 
 	int nUnused, nYear;
 	GetDateFromMonths(GetDateInMonths(date), nUnused, nYear);
@@ -1912,11 +1907,7 @@ BOOL CDateHelper::IsGregorianLeapYear(int GYear)
 
 BOOL CDateHelper::IsEndOfDay(const COleDateTime& date, BOOL bNoTimeIsEndOfDay)
 {
-	if (!IsDateSet(date))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	NULLCHECKA_RET(date, FALSE)
 
 	double dTime = GetTimeOnly(date).m_dt;
 
@@ -1976,20 +1967,23 @@ void CDateHelper::GetMonthNames(BOOL bShort, CStringArray& aMonths)
 
 COleDateTime CDateHelper::GetTimeOnly(const COleDateTime& date)
 {
-	double dTime = (date.m_dt - GetDateOnly(date));
-	
-	if (date.m_dt < 0.0)
+	if (IsDateSet(date))
 	{
-		ASSERT((dTime <= 0.0) && (dTime > -1.0));
-		dTime = -dTime;
+		double dTime = (date.m_dt - GetDateOnly(date));
+
+		if (date.m_dt < 0.0)
+		{
+			ASSERT((dTime <= 0.0) && (dTime > -1.0));
+			dTime = -dTime;
+		}
+
+		ASSERT((dTime >= 0) && (dTime < 1.0));
+
+		if (dTime >= START_OF_DAY)
+			return dTime;
 	}
 
-	ASSERT((dTime >= 0) && (dTime < 1.0));
-
-	if (dTime < START_OF_DAY)
-		return 0.0;
-
-	return dTime;
+	return NullDate();
 }
 
 BOOL CDateHelper::DateHasTime(const COleDateTime& date)
@@ -1999,6 +1993,9 @@ BOOL CDateHelper::DateHasTime(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetDateOnly(const COleDateTime& date)
 {
+	NULLCHECK_RET(date, NullDate())
+
+	// else
 	return (double)((int)date.m_dt);
 }
 
@@ -2027,6 +2024,8 @@ void CDateHelper::SplitDate(const COleDateTime& date, double& dDateOnly, double&
 
 COleDateTime CDateHelper::MakeDate(const COleDateTime& dtDateOnly, const COleDateTime& dtTimeOnly)
 {
+	NULLCHECK_RET(dtDateOnly, NullDate())
+
 	double dDateOnly = GetDateOnly(dtDateOnly);
 	double dTimeOnly = GetTimeOnly(dtTimeOnly);
 
@@ -2038,6 +2037,8 @@ COleDateTime CDateHelper::MakeDate(const COleDateTime& dtDateOnly, const COleDat
 
 COleDateTime CDateHelper::MakeDate(const COleDateTime& dtDateOnly, int nHour, int nMin, int nSec)
 {
+	NULLCHECK_RET(dtDateOnly, NullDate())
+
 	double dDateOnly = GetDateOnly(dtDateOnly);
 	double dTimeOnly = COleDateTimeSpan(0, nHour, nMin, nSec).m_span;
 
@@ -2223,6 +2224,8 @@ COleDateTime CDateHelper::GetNearestHalfHour(const COleDateTime& date, BOOL bEnd
 
 COleDateTime CDateHelper::GetNearestDayPart(const COleDateTime& date, int nNumParts, BOOL bEnd)
 {
+	NULLCHECK_RET(date, NullDate())
+
 	COleDateTime dtDay = GetDateOnly(date);
 
 	double dPart = (1.0 / nNumParts);
@@ -2262,7 +2265,7 @@ COleDateTime CDateHelper::GetEndOfPreviousDay(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetEndOfDay(const COleDateTime& date)
 {
-	ASSERT(IsDateSet(date));
+	NULLCHECKA_RET(date, NullDate())
 
 	return MakeDate(date, END_OF_DAY);
 }
@@ -2274,7 +2277,7 @@ COleDateTime CDateHelper::GetStartOfNextDay(const COleDateTime& date)
 
 COleDateTime CDateHelper::GetStartOfDay(const COleDateTime& date)
 {
-	ASSERT(IsDateSet(date));
+	NULLCHECKA_RET(date, NullDate())
 
 	return GetDateOnly(date);
 }
@@ -2396,6 +2399,8 @@ void CDateHelper::GetDateFromMonths(int nNumMonths, int& nMonth, int& nYear)
 
 COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 {
+	ASSERT(nNumMonths);
+
 	int nMonth, nYear;
 	GetDateFromMonths(nNumMonths, nMonth, nYear);
 
@@ -2408,7 +2413,7 @@ COleDateTime CDateHelper::GetDateFromMonths(int nNumMonths)
 
 int CDateHelper::GetDateInMonths(const COleDateTime& date)
 {
-	ASSERT(IsDateSet(date));
+	NULLCHECKA_RET(date, 0)
 
 	if (CJalaliCalendar::IsActive())
 	{
@@ -2424,7 +2429,14 @@ int CDateHelper::GetDateInMonths(const COleDateTime& date)
 
 int CDateHelper::CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive)
 {
-	ASSERT(dateFrom <= dateTo);
+	NULLCHECKA_RET(dateFrom, 0)
+	NULLCHECKA_RET(dateTo, 0)
+	
+	if (dateFrom > dateTo)
+	{
+		ASSERT(0);
+		return 0;
+	}
 
 	int nNumMonthsFrom = GetDateInMonths(dateFrom);
 	int nNumMonthsTo = GetDateInMonths(dateTo);

@@ -1187,25 +1187,64 @@ COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
 {
 	switch (nDate)
 	{
-	case TDCD_CREATE:		return dateCreated;
-	case TDCD_LASTMOD:		return dateLastMod;
+	case TDCD_CREATE:		
+		return dateCreated;
 
-	case TDCD_START:		return dateStart;
-	case TDCD_STARTDATE:	return CDateHelper::GetDateOnly(dateStart);
-	case TDCD_STARTTIME:	return CDateHelper::GetTimeOnly(dateStart);
+	case TDCD_LASTMOD:		
+		return dateLastMod;
 
-	case TDCD_DUE:			return dateDue;
-	case TDCD_DUEDATE:		return CDateHelper::GetDateOnly(dateDue);
-	case TDCD_DUETIME:		return CDateHelper::GetTimeOnly(dateDue);
+		// --------------------------------
 
-	case TDCD_DONE:			return dateDone;
-	case TDCD_DONEDATE:		return CDateHelper::GetDateOnly(dateDone);
-	case TDCD_DONETIME:		return CDateHelper::GetTimeOnly(dateDone);
+	case TDCD_START:		
+		return dateStart;
+
+	case TDCD_STARTDATE:	
+		if (CDateHelper::IsDateSet(dateStart))
+			return CDateHelper::GetDateOnly(dateStart);
+		break;
+
+	case TDCD_STARTTIME:	
+		if (CDateHelper::IsDateSet(dateStart))
+			return CDateHelper::GetTimeOnly(dateStart);
+		break;
+
+		// --------------------------------
+
+	case TDCD_DUE:			
+		return dateDue;
+
+	case TDCD_DUEDATE:		
+		if (CDateHelper::IsDateSet(dateDue))
+			return CDateHelper::GetDateOnly(dateDue);
+		break;
+
+	case TDCD_DUETIME:
+		if (CDateHelper::IsDateSet(dateDue))
+			return CDateHelper::GetTimeOnly(dateDue);
+		break;
+
+		// --------------------------------
+
+	case TDCD_DONE:			
+		return dateDone;
+
+	case TDCD_DONEDATE:		
+		if (CDateHelper::IsDateSet(dateDone))
+			return CDateHelper::GetDateOnly(dateDone);
+		break;
+
+	case TDCD_DONETIME:
+		if (CDateHelper::IsDateSet(dateDone))
+			return CDateHelper::GetTimeOnly(dateDone);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 	
 	// else
-	ASSERT(0);
-	return 0.0;
+	return CDateHelper::NullDate();
 }
 
 BOOL TODOITEM::GetStartDueDates(COleDateTimeRange& dtRange) const
