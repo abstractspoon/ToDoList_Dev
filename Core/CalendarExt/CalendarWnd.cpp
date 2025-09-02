@@ -412,7 +412,7 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		return true;
 
 	case IUI_SETFOCUS:
-		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
+		return (CDialogHelper::IsChildOrSame(&m_BigCalendar, GetFocus()) == FALSE);
 
 	case IUI_SORT:
 		if (pData)

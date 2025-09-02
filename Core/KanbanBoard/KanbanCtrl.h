@@ -206,7 +206,6 @@ protected:
 	void FixupSelectedColumn();
 	void FixupColumnFocus();
 	BOOL DeleteColumn(int nCol);
-	BOOL HasFocus() const;
 	BOOL SelectClosestAdjacentItemToSelection(int nAdjacentCol);
 	int MapHeaderItemToColumn(int nItem) const;
 	int CalcMinRequiredColumnsWidth() const;
