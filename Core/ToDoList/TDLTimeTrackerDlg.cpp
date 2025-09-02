@@ -849,9 +849,7 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 				if (IsTrackingSelectedTasklistAndTask())
 					pDC->SetTextColor(255);
 				else
-					pDC->SetTextColor(COLOR_3DDKSHADOW);
-
-				//hbr = GetSysColorBrush(COLOR_3DHIGHLIGHT);
+					pDC->SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
 				break;
 
 			default:
