@@ -1289,6 +1289,11 @@ void CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bRe
 	m_ctrlAttributes.SetAutoListDataReadOnly(nListAttribID, bReadOnly);
 }
 
+BOOL CToDoCtrl::IsAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID) const
+{
+	return m_ctrlAttributes.IsAutoListDataReadOnly(nListAttribID);
+}
+
 BOOL CToDoCtrl::RenameTaskAttributeValues(TDC_ATTRIBUTE nListAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)
 {
 	return (m_data.RenameTasksAttributeValue(nListAttribID, sFrom, sTo, bCaseSensitive, bWholeWord) == SET_CHANGE);

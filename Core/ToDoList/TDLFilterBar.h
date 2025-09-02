@@ -158,6 +158,7 @@ protected:
 	void UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
 	void NotifyParentFilterChange();
 	void RebuildOptionsCombo();
+	void UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID, CEnCheckComboBox& combo, const CStringArray& aData);
 };
 
 //{{AFX_INSERT_LOCATION}}

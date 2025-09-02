@@ -602,6 +602,28 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 	}
 }
 
+void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID, CEnCheckComboBox& combo, const CStringArray& aData)
+{
+	BOOL bIsSorted = CDialogHelper::HasStyle(combo, CBS_SORT);
+	BOOL bWantSorted = !tdc.IsAutoListContentReadOnly(nAttribID);
+
+	if (Misc::StatesDiffer(bIsSorted, bWantSorted))
+	{
+		int nCtrlID = combo.GetDlgCtrlID();
+		CRect rCombo = GetChildRect(&combo);
+
+		DWORD dwStyle = combo.GetStyle();
+		Misc::SetFlag(dwStyle, CBS_SORT, bWantSorted);
+
+		combo.DestroyWindow();
+		VERIFY(combo.Create(dwStyle, rCombo, this, nCtrlID));
+
+		combo.SetFont(CWnd::GetFont());
+	}
+
+	combo.SetStrings(aData);
+}
+
 void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
 {
 	TDCAUTOLISTDATA tld;
@@ -609,23 +631,15 @@ void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBU
 
 	BOOL bAllAttrib = (nAttribID == TDCA_ALL);
 
-	if (bAllAttrib || (nAttribID == TDCA_ALLOCTO))
-		m_cbAllocToFilter.SetStrings(tld.aAllocTo);
+#define UPDATECOMBODATA(att, combo, data) \
+	if (bAllAttrib || (att == TDCA_ALLOCTO)) UpdateDropListData(tdc, att, combo, data);
 
-	if (bAllAttrib || (nAttribID == TDCA_ALLOCBY))
-		m_cbAllocByFilter.SetStrings(tld.aAllocBy);
-
-	if (bAllAttrib || (nAttribID == TDCA_CATEGORY))
-		m_cbCategoryFilter.SetStrings(tld.aCategory);
-
-	if (bAllAttrib || (nAttribID == TDCA_STATUS))
-		m_cbStatusFilter.SetStrings(tld.aStatus);
-
-	if (bAllAttrib || (nAttribID == TDCA_VERSION))
-		m_cbVersionFilter.SetStrings(tld.aVersion);
-
-	if (bAllAttrib || (nAttribID == TDCA_TAGS))
-		m_cbTagFilter.SetStrings(tld.aTags);
+	UPDATECOMBODATA(TDCA_ALLOCTO, m_cbAllocToFilter, tld.aAllocTo);
+	UPDATECOMBODATA(TDCA_ALLOCBY, m_cbAllocByFilter, tld.aAllocBy);
+	UPDATECOMBODATA(TDCA_CATEGORY, m_cbCategoryFilter, tld.aCategory);
+	UPDATECOMBODATA(TDCA_STATUS, m_cbStatusFilter, tld.aStatus);
+	UPDATECOMBODATA(TDCA_VERSION, m_cbVersionFilter, tld.aVersion);
+	UPDATECOMBODATA(TDCA_TAGS, m_cbTagFilter, tld.aTags);
 
 	if (bAllAttrib)
 	{

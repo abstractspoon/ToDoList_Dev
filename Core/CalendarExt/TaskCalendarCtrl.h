@@ -211,12 +211,15 @@ protected:
 	double CalcDateDragTolerance() const;
 	void GetAllowableDragLimits(CRect& rLimits) const;
 	double GetSnapIncrement() const;
-	void FixupSelection(BOOL bScrollToTask);
 	BOOL SelectGridCell(int nRow, int nCol);
 	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
-	BOOL ClearSelectedCustomDate();
+
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
+	void CacheSelection(DWORD& dwRealTaskID, CString& sCustDateAttribID) const;
+	void RestoreSelection(DWORD dwRealTaskID, const CString& sCustDateAttribID, BOOL bEnsureVisible);
+	BOOL ClearSelectedCustomDate();
+	void FixupSelection(BOOL bScrollToTask);
 
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL IsExtensionItem(DWORD dwTaskID) const;
