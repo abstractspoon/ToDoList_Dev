@@ -112,6 +112,8 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_WM_DESTROY()
 	ON_WM_SETFOCUS()
 	ON_WM_SIZE()
+	ON_WM_WINDOWPOSCHANGING()
+	ON_WM_WINDOWPOSCHANGED()
 
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
@@ -976,10 +978,33 @@ void CRichEditBaseCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CRichEditCtrl::OnSize(nType, cx, cy);
 
-	CRect rClient(0, 0, cx, cy);
-	rClient -= m_rMargins;
+// 	CRect rClient(0, 0, cx, cy);
+// 	rClient -= m_rMargins;
+// 
+// 	SetRect(rClient);
+}
 
-	SetRect(rClient);
+void CRichEditBaseCtrl::OnWindowPosChanging(WINDOWPOS* lpwndpos)
+{
+	if (!Misc::HasFlag(lpwndpos->flags, SWP_NOSIZE))
+	{
+		SetRect(CRect(0, 0, lpwndpos->cx, lpwndpos->cy));
+	}
+
+	CRichEditCtrl::OnWindowPosChanging(lpwndpos);
+}
+
+void CRichEditBaseCtrl::OnWindowPosChanged(WINDOWPOS* lpwndpos)
+{
+	if (!Misc::HasFlag(lpwndpos->flags, SWP_NOSIZE))
+	{
+		CRect rClient(0, 0, lpwndpos->cx, lpwndpos->cy);
+		rClient -= m_rMargins;
+
+		SetRect(rClient);
+	}
+
+	CRichEditCtrl::OnWindowPosChanged(lpwndpos);
 }
 
 DWORD CRichEditBaseCtrl::GetSelectionCharFormat(CHARFORMAT2 &cf) const

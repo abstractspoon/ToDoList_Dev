@@ -194,7 +194,7 @@ protected:
 
 	void UpdateToolbarButtons();
 	void UpdateToolbarColourButtons();
-	void UpdateEditRect();
+// 	void UpdateEditRect();
 
 	void LayoutControls(int width, int height);
 

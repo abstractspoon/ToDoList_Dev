@@ -292,7 +292,7 @@ void CRulerRichEditCtrl::SetRTF(const CString& rtf)
 		m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
 		m_rtf.SetSel(-1, 0);
 	}
-	UpdateEditRect();
+//	UpdateEditRect();
 
 	m_rtf.ParseAndFormatText(TRUE);
 }
@@ -322,22 +322,23 @@ void CRulerRichEditCtrl::SetSelectedWebLink(const CString& sWebLink)
 	}
 }
 
-void CRulerRichEditCtrl::UpdateEditRect()
-{
-	// Set up edit rect margins
-	CRect rc;
-	m_rtf.GetClientRect(rc);
-
-	rc.top = SCMARGIN;
-	rc.left = SCMARGIN * 2;
-	rc.right -= SCMARGIN * 2;
-
-	m_rtf.SetRect(rc);
-}
+// void CRulerRichEditCtrl::UpdateEditRect()
+// {
+// 	// Set up edit rect margins
+// 	CRect rc;
+// 	m_rtf.GetClientRect(rc);
+// 
+// 	rc.top = SCMARGIN;
+// 	rc.left = SCMARGIN * 2;
+// 	rc.right -= SCMARGIN * 2;
+// 
+// 	m_rtf.SetRect(rc);
+// }
 
 void CRulerRichEditCtrl::CreateMargins()
 {
-	UpdateEditRect();
+	m_rtf.SetMargins(CRect(SCMARGIN * 2, SCMARGIN, SCMARGIN * 2, 0));
+// 	UpdateEditRect();
 
 	// Get the diff between the window- and client 
 	// rect of the RTF-control. This gives the actual 
@@ -461,7 +462,7 @@ void CRulerRichEditCtrl::OnSize(UINT nType, int cx, int cy)
 	
 	if (m_rtf.m_hWnd)
 	{
-		UpdateEditRect();
+//		UpdateEditRect();
 		LayoutControls(cx, cy);
 	}
 }
