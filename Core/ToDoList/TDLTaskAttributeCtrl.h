@@ -45,6 +45,7 @@ public:
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
 	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
 	void SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly);
+	BOOL IsAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID) const;
 
 	TDC_ATTRIBUTE GetSelectedAttributeID() const;
 	CString GetSelectedAttributeLabel() const;

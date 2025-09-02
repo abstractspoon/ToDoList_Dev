@@ -259,23 +259,24 @@ BOOL IsHooked(HWND hWnd)
 	return s_mapScWnds.Lookup(hWnd, pUnused);
 }
 
-BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
+BOOL HookWindow(HWND hWnd, CSubclassWnd* pScWnd)
 {
 	ASSERT(hWnd);
+	ASSERT(pScWnd);
 
 	if (IsHooked(hWnd))
 	{
-		delete pWnd;
+		delete pScWnd;
 		return TRUE;
 	}
 
-	if (pWnd && pWnd->HookWindow(hWnd))
+	if (pScWnd && pScWnd->HookWindow(hWnd))
 	{
-		s_mapScWnds[hWnd] = pWnd;
+		s_mapScWnds[hWnd] = pScWnd;
 		return TRUE;
 	}
 
-	delete pWnd;
+	delete pScWnd;
 	return FALSE;
 }
 
@@ -422,6 +423,23 @@ DWORD GetColorOrBrush(COLORREF color, BOOL bColor)
 	return (DWORD)hbr;
 }
 
+BOOL HasBrush(HBRUSH hBrush)
+{
+	POSITION pos = s_mapBrushes.GetStartPosition();
+	HBRUSH hbr = NULL;
+	COLORREF color = CLR_NONE;
+
+	while (pos)
+	{
+		s_mapBrushes.GetNextAssoc(pos, color, hbr);
+
+		if (hBrush == hbr)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 class CDarkModeCtrlBase : public CSubclassWnd
@@ -541,6 +559,8 @@ public:
 
 	BOOL HookWindow(HWND hWnd, CSubclasser* pSubclasser)
 	{
+		ASSERT(pSubclasser == NULL);
+
 		if (!CDarkModeCtrlBase::HookWindow(hWnd, pSubclasser))
 			return FALSE;
 
@@ -739,9 +759,11 @@ protected:
 	BOOL m_bParentIsCombo;
 
 protected:
-	BOOL HookWindow(HWND hWnd, CSubclassWnd* pWnd)
+	BOOL HookWindow(HWND hWnd, CSubclasser* pSubclasser)
 	{
-		if (!CDarkModeCtrlBase::HookWindow(hWnd))
+		ASSERT(pSubclasser == NULL);
+
+		if (!CDarkModeCtrlBase::HookWindow(hWnd, pSubclasser))
 			return FALSE;
 
 		m_bParentIsCombo = CWinClasses::IsComboBox(::GetParent(hWnd));
@@ -1425,10 +1447,6 @@ BOOL WindowProcEx(HWND hWnd, UINT nMsg, WPARAM wp, LPARAM lp, LRESULT& lr)
 				}
 			}
 		}
-		else
-		{
-			UnhookWindow(hWnd);
-		}
 		break;
 
 	case WM_NCDESTROY:
@@ -1510,13 +1528,18 @@ return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp)
 		{
 			// Always do default first to allow CAutoComboBox hooking
 			// and dialog initialisation
-			LRESULT lrTrue = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp), lr = 0;
+			LRESULT lrTrue = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp), lr = lrTrue;
 
-			if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
-				return lr;
+			// Only do our own colour overriding if the returned brush 
+			// is NOT one of 'our' custom brushes, else we assume that 
+			// the returned brush can just be returned as-is
+			if (!HasBrush((HBRUSH)lrTrue))
+			{
+				if (!WindowProcEx(hWnd, nMsg, wp, lp, lr))
+					lr = lrTrue;
+			}
 
-			// else
-			return lrTrue;
+			return lr;
 		}
 		break;
 
