@@ -357,7 +357,9 @@ void CKanbanPreferencesPage::EnableDisableControls()
 	GetDlgItem(IDC_INDENTSUBTASKS)->EnableWindow(m_bSortSubtaskBelowParent);
 	GetDlgItem(IDC_COLORBARBYPRIORITY)->EnableWindow(m_bShowTaskColorAsBar);
 
-	m_lcFixedColumnDefs.EnableWindow(m_cbAttributes.GetSelectedAttribute() != TDCA_NONE);
+	BOOL bEnableColumnDefs = (m_cbAttributes.GetSelectedAttribute() != TDCA_NONE);
+	m_lcFixedColumnDefs.EnableWindow(bEnableColumnDefs);
+	m_lcFixedColumnDefs.SetBkColor(GetSysColor(bEnableColumnDefs ? COLOR_WINDOW : COLOR_3DFACE));
 
 	GetDlgItem(IDC_MOVECOL_DOWN)->EnableWindow(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(FALSE));
 	GetDlgItem(IDC_MOVECOL_UP)->EnableWindow(m_lcFixedColumnDefs.CanMoveSelectedColumnRow(TRUE));
