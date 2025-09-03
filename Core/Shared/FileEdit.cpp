@@ -569,7 +569,7 @@ CRect CFileEdit::GetIconScreenRect() const
 		rWindow.left += 2;
 	}
 
-	return GraphicsMisc::CalcCentredRect(IMAGE_SIZE, rWindow, FALSE, TRUE);
+	return GraphicsMisc::CalcCentredRect((IMAGE_SIZE + 1), rWindow, FALSE, TRUE);
 }
 
 #if _MSC_VER >= 1400
