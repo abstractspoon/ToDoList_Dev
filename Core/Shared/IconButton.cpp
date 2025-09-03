@@ -39,7 +39,9 @@ void CIconButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 void CIconButton::SetIcon(HICON hIcon, BOOL bCleanup)
 { 
 	m_icon.Destroy();
-	m_icon.Attach(hIcon, bCleanup);
+
+	if (hIcon)
+		m_icon.Attach(hIcon, bCleanup);
 	
 	if (GetSafeHwnd())
 		Invalidate();
