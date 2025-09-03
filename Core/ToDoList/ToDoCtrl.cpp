@@ -1876,7 +1876,9 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 
 		if (aDateModTaskIDs.GetSize())
 		{
-			mapAttribs.Add(TDC::MapDateToAttribute(nDate));
+			TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
+			m_taskTree.GetAttributesAffectedByMod(nAttribID, mapAttribs);
+
 			Misc::AppendItems(aDateModTaskIDs, aModTaskIDs, TRUE);
 		}
 	}
