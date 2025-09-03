@@ -15,6 +15,7 @@
 #include "icon.h"
 #include "msoutlookhelper.h"
 #include "FileIcons.h"
+#include "MessageBox.h"
 
 #include <shlwapi.h>
 
@@ -524,7 +525,7 @@ int CFileEdit::GotoFile(HWND hWnd, LPCTSTR szPath, LPCTSTR szFolder, BOOL bHandl
 			break;
 		}
 		
-		AfxMessageBox(sMessage, MB_OK);
+		CMessageBox::AfxShow(sMessage, MB_OK);
 	}
 
 	return nRes;

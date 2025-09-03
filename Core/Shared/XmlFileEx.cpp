@@ -8,7 +8,7 @@
 #include "enstring.h"
 #include "misc.h"
 #include "passworddialog.h"
-//#include "filemisc.h"
+#include "MessageBox.h"
 
 #include "..\Interfaces\iencryption.h"
 
@@ -242,7 +242,7 @@ BOOL CXmlFileEx::Decrypt(LPCWSTR szPassword)
 			{
 				CEnString sMessage(s_sDecryptFailed, GetFileName());
 
-				if (IDNO == AfxMessageBox(sMessage, MB_YESNO))
+				if (IDNO == CMessageBox::AfxShow(sMessage, MB_YESNO))
 				{
 					m_nFileError = XFL_CANCELLED;
 					return FALSE;

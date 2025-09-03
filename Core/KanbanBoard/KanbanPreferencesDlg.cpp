@@ -9,6 +9,7 @@
 
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
+#include "..\shared\Messagebox.h"
 
 #include "..\3rdparty\XNamedColors.h"
 
@@ -368,7 +369,7 @@ void CKanbanPreferencesPage::OnSelchangeAttribute()
 	UpdateData();
 
 	if ((m_lcFixedColumnDefs.GetItemCount() > 1) && 
-		(AfxMessageBox(CEnString(IDS_DELETEALLROWS), (MB_YESNO | MB_ICONQUESTION)) == IDYES))
+		(CMessageBox::AfxShow(IDS_DELETEALLROWS, (MB_YESNO | MB_ICONQUESTION)) == IDYES))
 	{
 		m_lcFixedColumnDefs.DeleteAllItems(FALSE);
 	}
