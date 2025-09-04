@@ -1521,25 +1521,40 @@ return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp)
 		}
 		break;
 
+	case WM_CTLCOLORBTN:
+	case WM_CTLCOLORDLG:
 	case WM_CTLCOLOREDIT:
 	case WM_CTLCOLORLISTBOX:
 	case WM_CTLCOLORSTATIC:
-	case WM_INITDIALOG:
 		{
-			// Always do default first to allow CAutoComboBox hooking
-			// and dialog initialisation
-			LRESULT lrTrue = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp), lr = lrTrue;
+			// Always do default first to allow custom hooking
+			LRESULT lrTrue = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp);
 
 			// Only do our own colour overriding if the returned brush 
 			// is NOT one of 'our' custom brushes, else we assume that 
 			// the returned brush can just be returned as-is
 			if (!HasBrush((HBRUSH)lrTrue))
 			{
-				if (!WindowProcEx(hWnd, nMsg, wp, lp, lr))
-					lr = lrTrue;
+				LRESULT lr = 0;
+
+				if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+					return lr;
 			}
 
-			return lr;
+			// all else
+			return lrTrue;
+		}
+		break;
+
+	case WM_INITDIALOG:
+		{
+			// Always do default first to allow dialog initialisation
+			LRESULT lrTrue = TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp), lr = 0;
+
+			if (WindowProcEx(hWnd, nMsg, wp, lp, lr))
+				return lr;
+
+			return lrTrue;
 		}
 		break;
 
