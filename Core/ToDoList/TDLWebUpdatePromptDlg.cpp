@@ -230,7 +230,7 @@ HBRUSH CTDLWebUpdatePromptPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	
 	if (pWnd->GetDlgCtrlID() == IDC_CHANGES)
 	{
-		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetBkColor(GetSysColor(COLOR_WINDOW));
 		hBr = GetSysColorBrush(COLOR_WINDOW);
 	}
 	
