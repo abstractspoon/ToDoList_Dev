@@ -64,7 +64,7 @@ namespace TDC
 		return TDC_INSERTATBOTTOM;
 	}
 
-	static FTC_VIEW MapViewIDToTaskView(int nCmdID)
+	static FTC_VIEW MapActivateIDToTaskView(int nCmdID)
 	{
 		switch (nCmdID)
 		{
@@ -73,16 +73,39 @@ namespace TDC
 		
 		case ID_ACTIVATEVIEW_LISTVIEW: 
 			return FTCV_TASKLIST;
+		
+		default:
+			if ((nCmdID >= ID_ACTIVATEVIEW_UIEXTENSION1) && (nCmdID <= ID_ACTIVATEVIEW_UIEXTENSION16))
+				return (FTC_VIEW)(FTCV_UIEXTENSION1 + (nCmdID - ID_ACTIVATEVIEW_UIEXTENSION1));
+			break;
 		}
-
-		if ((nCmdID >= ID_ACTIVATEVIEW_UIEXTENSION1) && (nCmdID <= ID_ACTIVATEVIEW_UIEXTENSION16))
-			return (FTC_VIEW)(FTCV_UIEXTENSION1 + (nCmdID - ID_ACTIVATEVIEW_UIEXTENSION1));
 
 		ASSERT(0);
 		return FTCV_UNSET;
 	}
 
-	static UINT MapNewTaskPosToCmdID(PUIP_NEWTASKPOS nPos, BOOL bSubtask)
+	static UINT MapTaskViewToActivateID(FTC_VIEW nView)
+	{
+		switch (nView)
+		{
+		case FTCV_UNSET:
+		case FTCV_TASKTREE:
+			return ID_ACTIVATEVIEW_TASKTREE;
+
+		case FTCV_TASKLIST:
+			return ID_ACTIVATEVIEW_LISTVIEW;
+
+		default:
+			if ((nView >= FTCV_UIEXTENSION1) && (nView <= FTCV_UIEXTENSION16))
+				return (ID_ACTIVATEVIEW_UIEXTENSION1 + (nView - FTCV_UIEXTENSION1));
+			break;
+		}
+
+		ASSERT(0);
+		return 0;
+	}
+
+	static UINT MapNewTaskPosToNewTaskID(PUIP_NEWTASKPOS nPos, BOOL bSubtask)
 	{
 		if (!bSubtask) // task
 		{
@@ -149,12 +172,11 @@ namespace TDC
 		case ID_SORTBY_TIMETRACKING:	return TDCC_TRACKTIME;
 		case ID_SORTBY_VERSION:			return TDCC_VERSION;
 		case ID_SORTBY_NONE:			return TDCC_NONE;
-		}
-		
-		// handle custom columns
-		if (nSortID >= ID_SORTBY_CUSTOMCOLUMN_FIRST && nSortID <= ID_SORTBY_CUSTOMCOLUMN_LAST)
-		{
-			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nSortID - ID_SORTBY_CUSTOMCOLUMN_FIRST));
+
+		default:
+			if (nSortID >= ID_SORTBY_CUSTOMCOLUMN_FIRST && nSortID <= ID_SORTBY_CUSTOMCOLUMN_LAST)
+				return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nSortID - ID_SORTBY_CUSTOMCOLUMN_FIRST));
+			break;
 		}
 		
 		// all else
@@ -205,12 +227,11 @@ namespace TDC
 		case TDCC_TIMESPENT:		return ID_SORTBY_TIMESPENT;
 		case TDCC_TRACKTIME:		return ID_SORTBY_TIMETRACKING;
 		case TDCC_VERSION:			return ID_SORTBY_VERSION;
-		}
-		
-		// handle custom columns
-		if (nColumn >= TDCC_CUSTOMCOLUMN_FIRST && nColumn < TDCC_CUSTOMCOLUMN_LAST)
-		{
-			return (ID_SORTBY_CUSTOMCOLUMN_FIRST + (nColumn - TDCC_CUSTOMCOLUMN_FIRST));
+
+		default:
+			if (nColumn >= TDCC_CUSTOMCOLUMN_FIRST && nColumn < TDCC_CUSTOMCOLUMN_LAST)
+				return (ID_SORTBY_CUSTOMCOLUMN_FIRST + (nColumn - TDCC_CUSTOMCOLUMN_FIRST));
+			break;
 		}
 		
 		// all else
@@ -265,12 +286,11 @@ namespace TDC
 		case TDCA_POSITION_SAMEPARENT:	
 		case TDCA_POSITION_DIFFERENTPARENT:
 		case TDCA_POSITION:			return TDCC_POSITION;
-		}
 		
-		// handle custom columns
-		if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST))
-		{
-			return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nAttribID - TDCA_CUSTOMATTRIB_FIRST));
+		default:
+			if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST))
+				return (TDC_COLUMN)(TDCC_CUSTOMCOLUMN_FIRST + (nAttribID - TDCA_CUSTOMATTRIB_FIRST));
+			break;
 		}
 		
 		// all else
@@ -323,12 +343,11 @@ namespace TDC
 		case TDCC_TIMEREMAINING:	return TDCA_TIMEREMAINING;
 		case TDCC_TIMESPENT:		return TDCA_TIMESPENT;
 		case TDCC_VERSION:			return TDCA_VERSION;
-		}
-		
-		// handle custom columns
-		if (nColumn >= TDCC_CUSTOMCOLUMN_FIRST && nColumn < TDCC_CUSTOMCOLUMN_LAST)
-		{
-			return (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB_FIRST + (nColumn - TDCC_CUSTOMCOLUMN_FIRST));
+
+		default:
+			if (nColumn >= TDCC_CUSTOMCOLUMN_FIRST && nColumn < TDCC_CUSTOMCOLUMN_LAST)
+				return (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB_FIRST + (nColumn - TDCC_CUSTOMCOLUMN_FIRST));
+			break;
 		}
 
 		// all else
@@ -581,9 +600,10 @@ namespace TDC
 		case TDCA_PROJECTNAME:
 			return IUI_EDIT;
 
-		default: // handle custom attrib
+		default:
 			if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID < TDCA_CUSTOMATTRIB_LAST))
 				return IUI_EDIT;
+			break;
 		}
 
 		ASSERT(0);
