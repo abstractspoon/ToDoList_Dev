@@ -140,7 +140,10 @@ namespace MDContentControl
 			}
 
 			var writer = new StringWriter();
-			var renderer = new HtmlRenderer(writer);
+			var renderer = new HtmlRenderer(writer)
+			{
+				UseNonAsciiNoEscape = true
+			};
 
 			pipeline.Setup(renderer);
 			renderer.Render(document);

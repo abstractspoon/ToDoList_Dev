@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using ImageHelper;
+using MSDN.Html.Editor;
+
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLContentControl
@@ -34,7 +36,7 @@ namespace HTMLContentControl
 		{
             string prefsKey = (key + "\\Preferences");
 
-            prefs.WriteProfileString(prefsKey, "WatermarkPath", watermarkImage.Text);
+            prefs.WriteProfileString(prefsKey, "WatermarkPath", WatermarkPath);
 			prefs.WriteProfileBool(prefsKey, "EnableWatermark", enableWatermark.Checked);
 		}
 
@@ -43,11 +45,25 @@ namespace HTMLContentControl
             string prefsKey = (key + "\\Preferences");
 
 			enableWatermark.Checked = prefs.GetProfileBool(prefsKey, "EnableWatermark", false);
-			watermarkImage.Text = prefs.GetProfileString(prefsKey, "WatermarkPath", "");
+			WatermarkPath = prefs.GetProfileString(prefsKey, "WatermarkPath", "");
 		}
 
-		public String WatermarkPath	{ get { return watermarkImage.Text; } }
-		public bool WatermarkEnabled { get { return enableWatermark.Checked; } }
+		public String WatermarkPath
+		{
+			get
+			{
+				return Utils.FilePathToUrl(watermarkImage.Text, true);
+			}
+			set
+			{
+				watermarkImage.Text = Utils.FilePathToUrl(value, true);
+			}
+		}
+
+		public bool WatermarkEnabled
+		{
+			get { return enableWatermark.Checked; }
+		}
 
 		public void SetWatermark(String path, bool enabled)
 		{
@@ -79,8 +95,7 @@ namespace HTMLContentControl
 
 			if (dialog.ShowDialog() == DialogResult.OK)
 			{
-				watermarkImage.Text = new System.Uri(dialog.FileName).AbsoluteUri;
-
+				WatermarkPath = dialog.FileName;
 				LastBrowsedImageFolder = System.IO.Path.GetDirectoryName(dialog.FileName);
 			}
 		}
