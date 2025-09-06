@@ -92,9 +92,11 @@ CRichEditBaseCtrl::CRichEditBaseCtrl(BOOL bAutoRTL)
 	: 
 	m_bEnableSelectOnFocus(FALSE),
 	m_bInOnFocus(FALSE), 
+	m_bHasTables(FALSE),
 	m_rMargins(DEFMARGINS),
 	m_bAutoRTL(bAutoRTL),
-	m_pPopupListOwner(NULL)
+	m_pPopupListOwner(NULL),
+	m_crBkgnd(CLR_DEFAULT)
 {
    m_callback.SetOwner(this);
 }
@@ -111,9 +113,7 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_SETFOCUS()
-	ON_WM_SIZE()
-	ON_WM_WINDOWPOSCHANGING()
-	ON_WM_WINDOWPOSCHANGED()
+	ON_WM_PAINT()
 
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
@@ -121,6 +121,7 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnDropListEndEdit)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnDropListCancelEdit)
 
+	ON_MESSAGE(EM_SETBKGNDCOLOR, OnEditSetBkgndColor)
 	ON_MESSAGE(EM_SETSEL, OnEditSetSelection)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
@@ -528,7 +529,11 @@ BOOL CRichEditBaseCtrl::InsertTable(int nRows, int nCols, int nColWidth, int nTe
 	sTable += RTF_TABLE_FOOTER;
 
 	// paste table
-	return SetTextEx(sTable);
+	if (!SetTextEx(sTable))
+		return FALSE;
+
+	m_bHasTables = TRUE;
+	return TRUE;
 }
 
 CRichEditBaseCtrl::CRichEditOleCallback::CRichEditOleCallback() : m_pOwner(NULL)
@@ -970,41 +975,76 @@ void CRichEditBaseCtrl::SetMargins(LPCRECT pMargins)
 	GetClientRect(rClient);
 
 	rClient -= m_rMargins;
-
 	SetRect(rClient);
 }
 
-void CRichEditBaseCtrl::OnSize(UINT nType, int cx, int cy)
+void CRichEditBaseCtrl::OnPaint()
 {
-	CRichEditCtrl::OnSize(nType, cx, cy);
+	CPaintDC dc(this);
 
-// 	CRect rClient(0, 0, cx, cy);
-// 	rClient -= m_rMargins;
-// 
-// 	SetRect(rClient);
-}
-
-void CRichEditBaseCtrl::OnWindowPosChanging(WINDOWPOS* lpwndpos)
-{
-	if (!Misc::HasFlag(lpwndpos->flags, SWP_NOSIZE))
+	// Nasty bug in Windows RichEdit (reproducible in WordPad.exe).
+	//
+	// Conditions:
+	//
+	// 1. Content contains tables
+	// 2. A top and/or bottom margin has been specified (via SetRect)
+	// 3. The table is partway vertically scrolled
+	// 4. The richedit is resized
+	//
+	// Consequence:
+	//
+	// The richedit overwrites the top and bottom margins with a
+	// portion of the content instead of rendering them with the 
+	// approporiate background colour. So we have to do it ourselves.
+	//
+	if (m_bHasTables && (m_rMargins.top > 0) || (m_rMargins.bottom > 0))
 	{
-		SetRect(CRect(0, 0, lpwndpos->cx, lpwndpos->cy));
+		// Fill and then clip out the top and bottom margins
+		CRect rClient;
+		GetClientRect(rClient);
+
+		COLORREF crBack = GetBkgndColor();
+
+		if (m_rMargins.top > 0)
+		{
+			CRect rClip(rClient);
+			rClip.bottom = m_rMargins.top;
+
+			dc.FillSolidRect(rClip, crBack);
+			dc.ExcludeClipRect(rClip);
+		}
+
+		if (m_rMargins.bottom > 0)
+		{
+			CRect rClip(rClient);
+			rClip.top = (rClip.bottom - m_rMargins.bottom);
+
+			dc.FillSolidRect(rClip, crBack);
+			dc.ExcludeClipRect(rClip);
+		}
 	}
 
-	CRichEditCtrl::OnWindowPosChanging(lpwndpos);
+	// do the default drawing
+	DefWindowProc(WM_PRINT, (WPARAM)dc.GetSafeHdc(), PRF_CLIENT);
 }
 
-void CRichEditBaseCtrl::OnWindowPosChanged(WINDOWPOS* lpwndpos)
+LRESULT CRichEditBaseCtrl::OnEditSetBkgndColor(WPARAM wParam, LPARAM lParam)
 {
-	if (!Misc::HasFlag(lpwndpos->flags, SWP_NOSIZE))
-	{
-		CRect rClient(0, 0, lpwndpos->cx, lpwndpos->cy);
-		rClient -= m_rMargins;
+	m_crBkgnd = (wParam ? CLR_DEFAULT : lParam);
 
-		SetRect(rClient);
-	}
+	return Default();
+}
 
-	CRichEditCtrl::OnWindowPosChanged(lpwndpos);
+COLORREF CRichEditBaseCtrl::GetBkgndColor() const
+{
+	if (m_crBkgnd != CLR_DEFAULT)
+		return m_crBkgnd;
+
+	// else
+	if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
+		return GetSysColor(COLOR_3DFACE);
+
+	return GetSysColor(COLOR_WINDOW);
 }
 
 DWORD CRichEditBaseCtrl::GetSelectionCharFormat(CHARFORMAT2 &cf) const
@@ -1331,6 +1371,7 @@ void CRichEditBaseCtrl::SetRTF(const CString& rtf)
 	TemporarilyDisableChangeNotifications();
 
 	CString sRTF = (rtf.IsEmpty() ? DEFAULTRTF : rtf);
+	m_bHasTables = sRTF.Find(RTF_TABLE_HEADER);
 	
 	STREAMINCOOKIE cookie(sRTF);
 	EDITSTREAM es = { (DWORD)&cookie, 0, StreamInCB };

@@ -206,24 +206,21 @@ protected:
 	BOOL m_bEnableSelectOnFocus;
 	BOOL m_bInOnFocus;
 	BOOL m_bAutoRTL;
+	BOOL m_bHasTables;
 
 	CRect m_rMargins;
 	FIND_STATE m_findState;
+	COLORREF m_crBkgnd;
 
 	CToolTipCtrlEx m_tooltip;
 	CPopupListBoxCtrl m_lbPopupList;
 	CWnd* m_pPopupListOwner;
 	
-	// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CRichEditBaseCtrl)
 protected:
 	virtual void PreSubclassWindow();
 	virtual int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	//}}AFX_VIRTUAL
 	
-	// Implementation
 protected:
 	class CRichEditOleCallback : public IRichEditOleCallback
 	{
@@ -263,7 +260,6 @@ protected:
 protected:
 	CRichEditOleCallback m_callback;
 	
-	// Generated message map functions
 protected:
 	virtual HRESULT GetNewStorage(LPSTORAGE* /*lplpstg*/) { return S_OK; }
 	virtual HRESULT GetInPlaceContext(LPOLEINPLACEFRAME FAR* /*lplpFrame*/,
@@ -286,17 +282,15 @@ protected:
 								BOOL bCase, BOOL bWord);
 	virtual void OnSelectPopupListItem(const CString& /*sSelItem*/) {}
 	virtual void Initialise();
-	
-	//{{AFX_MSG(CRichEditBaseCtrl)
-	//}}AFX_MSG
+
+protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnDestroy();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);
-	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
+	afx_msg void OnPaint();
 
+	afx_msg LRESULT OnEditSetBkgndColor(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSetText(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
@@ -308,6 +302,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 		
+protected:
 	void AdjustFindDialogPosition();
 	BOOL FindText(LPCTSTR lpszFind, BOOL bNext = TRUE, BOOL bCase = TRUE, BOOL bWord = TRUE, BOOL bWrap = TRUE);
 	void TextNotFound(LPCTSTR lpszFind);
@@ -318,6 +313,7 @@ protected:
 	BOOL IsFindDialog(HWND hwnd) const;
 	BOOL InsertSoftReturn();
 	void GetCharacterAtCaret(CHARRANGE& cr, BOOL bForwards) const;
+	COLORREF GetBkgndColor() const;
 
 	BOOL EnableLanguageOptions(DWORD dwOption, BOOL bEnable);
 	BOOL EnableEditStyles(DWORD dwStyles, BOOL bEnable);
