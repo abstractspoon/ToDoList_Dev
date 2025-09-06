@@ -290,6 +290,7 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnPaint();
 
+	afx_msg LRESULT OnPaste(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditSetBkgndColor(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSetText(WPARAM wParam, LPARAM lParam);
@@ -321,6 +322,7 @@ protected:
 	BOOL HasChangeNotifications() const;
 
 	static BOOL EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable);
+	static BOOL HasTables(const CString& sText);
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Stream callback functions

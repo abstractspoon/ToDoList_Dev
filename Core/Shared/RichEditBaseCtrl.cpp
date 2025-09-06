@@ -37,6 +37,7 @@ const UINT WM_REBC_REENABLECHANGENOTIFY = ::RegisterWindowMessage(_T("WM_REBC_RE
 
 const LPCSTR  DEFAULTRTF				= "{\\rtf1\\ansi\\deff0\\f0\\fs60}";
 const LPCTSTR RTF_TABLE_HEADER			= _T("{\\rtf1{\\pard{{\\trowd");
+const LPCTSTR RTF_TABLE_ROW				= _T("\\trowd");
 const LPCTSTR RTF_TEXT_INDENT			= _T("\\trgaph%d");
 const LPCTSTR RTF_COLUMN_WIDTH			= _T("\\cellx%d");
 const LPCTSTR RTF_CELL_BORDER_TOP		= _T("\\clbrdrt\\brdrdb\\brdrw1");
@@ -121,6 +122,7 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnDropListEndEdit)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnDropListCancelEdit)
 
+	ON_MESSAGE(WM_PASTE, OnPaste)
 	ON_MESSAGE(EM_SETBKGNDCOLOR, OnEditSetBkgndColor)
 	ON_MESSAGE(EM_SETSEL, OnEditSetSelection)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
@@ -249,6 +251,26 @@ BOOL CRichEditBaseCtrl::Redo()
 	return CTextDocument(GetSafeHwnd()).Redo();
 }
 
+LRESULT CRichEditBaseCtrl::OnPaste(WPARAM wParam, LPARAM lParam)
+{
+	LRESULT lr = Default();
+
+	if (!m_bHasTables && CClipboard::HasFormat(CBF_RTF))
+	{
+		CString sRTF = CClipboard().GetText(CBF_RTF);
+		Misc::EncodeAsUnicode(sRTF);
+
+		m_bHasTables = HasTables(sRTF);
+	}
+
+	return lr;
+}
+
+BOOL CRichEditBaseCtrl::HasTables(const CString& sText)
+{
+	return (sText.Find(RTF_TABLE_ROW) != -1);
+}
+
 BOOL CRichEditBaseCtrl::PasteSpecial(CLIPFORMAT nFormat)
 {
 	if ((nFormat == 0) || !CClipboard().HasFormat(nFormat))
@@ -346,6 +368,9 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 	// cleanup
 	if (szText != (LPCTSTR)sText)
 		delete [] szText;
+
+	if (bResult)
+		m_bHasTables = HasTables(sText);
 
 	return bResult;
 }
@@ -529,11 +554,7 @@ BOOL CRichEditBaseCtrl::InsertTable(int nRows, int nCols, int nColWidth, int nTe
 	sTable += RTF_TABLE_FOOTER;
 
 	// paste table
-	if (!SetTextEx(sTable))
-		return FALSE;
-
-	m_bHasTables = TRUE;
-	return TRUE;
+	return SetTextEx(sTable);
 }
 
 CRichEditBaseCtrl::CRichEditOleCallback::CRichEditOleCallback() : m_pOwner(NULL)
@@ -1371,7 +1392,7 @@ void CRichEditBaseCtrl::SetRTF(const CString& rtf)
 	TemporarilyDisableChangeNotifications();
 
 	CString sRTF = (rtf.IsEmpty() ? DEFAULTRTF : rtf);
-	m_bHasTables = sRTF.Find(RTF_TABLE_HEADER);
+	m_bHasTables = HasTables(sRTF);
 	
 	STREAMINCOOKIE cookie(sRTF);
 	EDITSTREAM es = { (DWORD)&cookie, 0, StreamInCB };
