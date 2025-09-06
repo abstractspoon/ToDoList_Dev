@@ -35,9 +35,12 @@ const UINT WM_REBC_REENABLECHANGENOTIFY = ::RegisterWindowMessage(_T("WM_REBC_RE
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCSTR  DEFAULTRTF				= "{\\rtf1\\ansi\\deff0\\f0\\fs60}";
+// Ansi strings
+const LPCSTR  DEFAULT_RTF				= "{\\rtf1\\ansi\\deff0\\f0\\fs60}";
+const LPCSTR  RTF_TABLE_ROW				= "\\trowd";
+
+// Unicode strings
 const LPCTSTR RTF_TABLE_HEADER			= _T("{\\rtf1{\\pard{{\\trowd");
-const LPCTSTR RTF_TABLE_ROW				= _T("\\trowd");
 const LPCTSTR RTF_TEXT_INDENT			= _T("\\trgaph%d");
 const LPCTSTR RTF_COLUMN_WIDTH			= _T("\\cellx%d");
 const LPCTSTR RTF_CELL_BORDER_TOP		= _T("\\clbrdrt\\brdrdb\\brdrw1");
@@ -258,17 +261,20 @@ LRESULT CRichEditBaseCtrl::OnPaste(WPARAM wParam, LPARAM lParam)
 	if (!m_bHasTables && CClipboard::HasFormat(CBF_RTF))
 	{
 		CString sRTF = CClipboard().GetText(CBF_RTF);
-		Misc::EncodeAsUnicode(sRTF);
 
-		m_bHasTables = HasTables(sRTF);
+		m_bHasTables = HasTables(sRTF, TRUE);
 	}
 
 	return lr;
 }
 
-BOOL CRichEditBaseCtrl::HasTables(const CString& sText)
+BOOL CRichEditBaseCtrl::HasTables(const CString& sRtf, BOOL bAnsiEncoded)
 {
-	return (sText.Find(RTF_TABLE_ROW) != -1);
+	if (bAnsiEncoded)
+		return (strstr((LPCSTR)(LPCTSTR)sRtf, RTF_TABLE_ROW) != NULL);
+
+	// else
+	return (sRtf.Find(CString(RTF_TABLE_ROW)) != -1);
 }
 
 BOOL CRichEditBaseCtrl::PasteSpecial(CLIPFORMAT nFormat)
@@ -369,8 +375,8 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 	if (szText != (LPCTSTR)sText)
 		delete [] szText;
 
-	if (bResult && !m_bHasTables)
-		m_bHasTables = HasTables(sText);
+ 	if (bResult && !m_bHasTables)
+ 		m_bHasTables = HasTables(sText, FALSE);
 
 	return bResult;
 }
@@ -1391,13 +1397,14 @@ void CRichEditBaseCtrl::SetRTF(const CString& rtf)
 	// that's where it came from
 	TemporarilyDisableChangeNotifications();
 
-	CString sRTF = (rtf.IsEmpty() ? DEFAULTRTF : rtf);
-	m_bHasTables = HasTables(sRTF);
+	CString sRTF = (rtf.IsEmpty() ? DEFAULT_RTF : rtf);
 	
 	STREAMINCOOKIE cookie(sRTF);
 	EDITSTREAM es = { (DWORD)&cookie, 0, StreamInCB };
 	
 	StreamIn(SF_RTF, es);
+
+	m_bHasTables = HasTables(sRTF, TRUE);
 }
 
 BOOL CRichEditBaseCtrl::EnableInlineSpellChecking(BOOL bEnable)

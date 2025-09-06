@@ -114,7 +114,7 @@ public:
 	BOOL Load(const CString& filename);
 	
 	BOOL GetRTF(CString& sRTF) const; // ansi encoded string 
-	void SetRTF(const CString& rtf);
+	void SetRTF(const CString& rtf); // ansi encoded string 
 
 	// Size of buffer must be >= GetRTFLength()
 	int GetRTF(unsigned char* pRTF, int nRTFLen) const; // ansi encoded string 
@@ -322,7 +322,7 @@ protected:
 	BOOL HasChangeNotifications() const;
 
 	static BOOL EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable);
-	static BOOL HasTables(const CString& sText);
+	static BOOL HasTables(const CString& sRtf, BOOL bAnsiEncoded);
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Stream callback functions
