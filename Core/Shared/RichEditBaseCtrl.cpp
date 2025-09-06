@@ -369,7 +369,7 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 	if (szText != (LPCTSTR)sText)
 		delete [] szText;
 
-	if (bResult)
+	if (bResult && !m_bHasTables)
 		m_bHasTables = HasTables(sText);
 
 	return bResult;
