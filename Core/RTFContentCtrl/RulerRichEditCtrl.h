@@ -194,8 +194,6 @@ protected:
 
 	void UpdateToolbarButtons();
 	void UpdateToolbarColourButtons();
-// 	void UpdateEditRect();
-
 	void LayoutControls(int width, int height);
 
 	static void PrepareTextCharFormat(CharFormat& cf, COLORREF color);
