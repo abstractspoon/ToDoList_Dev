@@ -17,12 +17,12 @@ class CRulerRichEditCtrl : public CWnd
 {
 
 public:
-// Construction/creation/destruction
 	CRulerRichEditCtrl(CRtfHtmlConverter& rtfHtml);
 	virtual ~CRulerRichEditCtrl();
+
 	virtual BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID, BOOL autohscroll = FALSE);
 
-// Attributes
+	// Attributes
 	void	SetMode(int mode);
 	int		GetMode() const;
 
@@ -51,7 +51,7 @@ public:
 	void SetDefaultFont(HFONT hFont);
 	
 protected:
-// Formatting
+	// Formatting
 	void DoFont();
 	void DoColor();
 	void DoBold();
@@ -76,18 +76,11 @@ protected:
 	void SetCurrentFontSize(int points);
 	void SetCurrentFontColor(COLORREF color, BOOL bForeground);
 
-	//void InsertHorizontalRule();
-
-// Overrides
-	//{{AFX_VIRTUAL(CRulerRichEditCtrl)
-	protected:
+protected:
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	//}}AFX_VIRTUAL
 
 protected:
-// Message handlers
-	//{{AFX_MSG(CRulerRichEditCtrl)
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
@@ -95,7 +88,6 @@ protected:
 	afx_msg LRESULT OnGetText (WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetTextLength (WPARAM wParam, LPARAM lParam);
 	afx_msg void OnEnable(BOOL bEnable);
-	//}}AFX_MSG
 	afx_msg void OnKillFocusToolbar(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnEnHScroll();
@@ -177,9 +169,6 @@ protected:
 	CRulerRichEdit	m_rtf;
 	CRRECToolBar	m_toolbar;
 	CRRECRuler		m_ruler;
-
-	// Handle to the RTF 2.0 dll
-//	HINSTANCE		m_richEditModule;
 
 	// Private helpers
 	void SetTabStops(LPLONG tabs, int size);
