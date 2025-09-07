@@ -10,6 +10,7 @@
 #include "enimagelist.h"
 #include "dlgunits.h"
 #include "osversion.h"
+#include "MessageBox.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1500,7 +1501,7 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 				if (m_bNotifyDuplicates)
 				{
 					sMessage.Format(_T("The item '%s' already exists in the list"), sText);
-					AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+					CMessageBox::AfxShow(sMessage, MB_OK | MB_ICONEXCLAMATION);
 					SetFocus();
 				}
 
@@ -1538,7 +1539,7 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 				if (m_bNotifyDuplicates)
 				{
 					sMessage.Format(_T("The item '%s' already exists in the list"), sText);
-					AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+					CMessageBox::AfxShow(sMessage, MB_OK | MB_ICONEXCLAMATION);
 					SetFocus();
 				}
 
@@ -1574,7 +1575,7 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 				if (m_bNotifyDuplicates)
 				{
 					sMessage.Format(_T("The item '%s' already exists in the list"), sText);
-					AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+					CMessageBox::AfxShow(sMessage, MB_OK | MB_ICONEXCLAMATION);
 					SetFocus();
 				}
 				

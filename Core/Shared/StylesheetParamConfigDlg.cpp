@@ -6,6 +6,7 @@
 #include "misc.h"
 #include "filemisc.h"
 #include "Graphicsmisc.h"
+#include "MessageBox.h"
 
 #include <shlwapi.h>
 
@@ -80,7 +81,7 @@ BOOL CStylesheetParamConfigDlg::OnInitDialog()
 
 	if (!stylesheet.GetGlobalParams(m_aParams))
 	{
-		AfxMessageBox(m_nIDNoParamsMsg);
+		CMessageBox::AfxShow(m_nIDNoParamsMsg);
 		EndDialog(IDCANCEL);
 		return FALSE;
 	}
@@ -173,7 +174,7 @@ BOOL CStylesheetParamConfigDlg::SaveChanges(LPCTSTR szStylesheetPath)
 
 	if (!stylesheet.GetGlobalParams(aOrgParams))
 	{
-		AfxMessageBox(m_nIDNoParamsMsg);
+		CMessageBox::AfxShow(m_nIDNoParamsMsg);
 		return FALSE;
 	}
 

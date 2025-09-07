@@ -862,7 +862,7 @@ BOOL CTaskCalItemMap::WantHideTask(const TASKCALITEM* pTCI, DWORD dwOptions, LPC
 	if (Misc::HasFlag(dwOptions, TCCO_HIDEPARENTTASKS) && pTCI->IsParent())
 		bHide = (Misc::IsEmpty(szHideParentTag) || pTCI->HasTag(szHideParentTag));
 
-	if (!bHide && Misc::HasFlag(dwOptions, !TCCO_DISPLAYDONE))
+	if (!bHide && !Misc::HasFlag(dwOptions, TCCO_DISPLAYDONE))
 		bHide = pTCI->IsDone(TRUE);
 
 	return bHide;

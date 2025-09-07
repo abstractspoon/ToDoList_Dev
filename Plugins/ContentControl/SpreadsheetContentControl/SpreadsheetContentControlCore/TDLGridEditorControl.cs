@@ -903,21 +903,19 @@ namespace SpreadsheetContentControl
 				{
 					Image image = null;
 
-/*
-					try
-					{
-						image = new Bitmap(newData);
-						GridControl.CurrentWorksheet.SetCellBody(row, col, new ImageCell(image, ImageCellViewMode.Clip));
-					}
-					catch (Exception / *e* /)
-					{
-						image = null;
-					}
-*/
+// 					try
+// 					{
+// 						image = new Bitmap(newData);
+// 						GridControl.CurrentWorksheet.SetCellBody(row, col, new ImageCell(image, ImageCellViewMode.Clip));
+// 					}
+// 					catch (Exception /*e*/)
+// 					{
+// 						image = null;
+// 					}
 
 					if (image == null)
 					{
-						var uri = new Uri(newData);
+						var uri = new Uri(newData, true);
 						GridControl.CurrentWorksheet.SetCellBody(row, col, new HyperlinkCell(uri.AbsoluteUri));
 					}
 

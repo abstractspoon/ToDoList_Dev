@@ -112,15 +112,9 @@ LRESULT CCtrlTextHighlighter::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 			ASSERT(pDC);
 
 			int nNumCtrl = m_aHighlightedCtrls.GetSize();
-			CRect rCtrl;
-
+			
 			for (int nCtrl = 0; nCtrl < nNumCtrl; nCtrl++)
-			{
-				if (GetHighlightRect(m_aHighlightedCtrls[nCtrl], rCtrl))
-				{
-					pDC->FillSolidRect(rCtrl, m_crHighlight);
-				}
-			}
+				HighlightCtrl(pDC, m_aHighlightedCtrls[nCtrl]);
 		}
 		break;
 
@@ -216,22 +210,21 @@ BOOL CCtrlTextHighlighter::TextContainsOneOf(const CStringArray& aUIText, const 
 	return FALSE;
 }
 
-BOOL CCtrlTextHighlighter::GetHighlightRect(HWND hwnd, CRect& rHighlight) const
+void CCtrlTextHighlighter::HighlightCtrl(CDC* pDC, HWND hwnd) const
 {
 	if (!IsHooked())
 	{
 		ASSERT(0);
-		return FALSE;
+		return;
 	}
 
 	if (!::IsWindowVisible(hwnd))
-		return FALSE;
+		return;
 
-	::GetWindowRect(hwnd, rHighlight);
-	ScreenToClient(rHighlight);
-
-	// Tweak the rect on a per-class basis
+	// Calculate padding on a per-class basis
 	int nPadding = 0;
+	BOOL bClipHwnd = FALSE;
+
 	CString sClass = CWinClasses::GetClass(hwnd);
 
 	if (CWinClasses::IsClass(sClass, WC_STATIC))
@@ -240,28 +233,33 @@ BOOL CCtrlTextHighlighter::GetHighlightRect(HWND hwnd, CRect& rHighlight) const
 	}
 	else if (CWinClasses::IsClass(sClass, WC_BUTTON))
 	{
-		DWORD dwStyle = ::GetWindowLong(hwnd, GWL_STYLE);
-		int nType = (dwStyle & 0xF);
-
-		switch (nType)
+		switch (CWinClasses::GetStyleType(hwnd, BS_TYPEMASK))
 		{
 			case BS_PUSHBUTTON:
 			case BS_DEFPUSHBUTTON:
 				nPadding = OTHER_PADDING;
+				bClipHwnd = TRUE;
 				break;
 
 			case BS_GROUPBOX:
-				return FALSE;
+				return;
 		}
 	}
 	else
 	{
 		nPadding = OTHER_PADDING;
+		bClipHwnd = TRUE;
 	}
 
+	CRect rHighlight;
+	::GetWindowRect(hwnd, rHighlight);
+	ScreenToClient(rHighlight);
+
+	if (bClipHwnd)
+		pDC->ExcludeClipRect(rHighlight);
+
 	rHighlight.InflateRect(nPadding, nPadding);
-	
-	return TRUE;
+	pDC->FillSolidRect(rHighlight, m_crHighlight);
 }
 
 int CCtrlTextHighlighter::FindMatchingCtrls(const CWnd* pWnd, const CStringArray& aSearch, CHWndArray& aMatching, const CWnd* pWndIgnore)

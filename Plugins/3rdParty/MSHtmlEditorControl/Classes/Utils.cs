@@ -1,7 +1,8 @@
 #region Using directives
 
 using System;
-using System.Drawing;
+using System.IO;
+using System.Text;
 using System.Globalization;
 
 #endregion
@@ -10,6 +11,28 @@ namespace MSDN.Html.Editor
 {
 	public class Utils
 	{
+
+		public static string EscapeSpaces(string text)
+		{
+			return text.Replace(" ", "%20");
+		}
+
+		public static string FilePathToUrl(string path, bool noEscapeNonAscii)
+		{
+			path = path.Trim().Trim('\"');
+
+			if (string.IsNullOrEmpty(path))
+				return string.Empty;
+
+			if (noEscapeNonAscii == false)
+				return Uri.EscapeUriString(path);
+
+			// else do it manually
+			// Note: Uri.Uri(string, bool) is deprecated but we have 
+			// to use it because Internet Explorer does not handle
+			// escaped non-ASCII characters well (eg. Cyrillic)
+			return EscapeSpaces(new Uri(path, true).AbsoluteUri);
+		}
 
 		/// <summary>
 		/// Method to perform a parse of a string into a byte number

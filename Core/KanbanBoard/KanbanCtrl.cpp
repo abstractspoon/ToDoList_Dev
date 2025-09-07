@@ -578,11 +578,6 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 	return false;
 }
 
-BOOL CKanbanCtrl::HasFocus() const
-{
-	return CDialogHelper::IsChildOrSame(GetSafeHwnd(), ::GetFocus());
-}
-
 void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	ASSERT(GetSafeHwnd());
@@ -2177,21 +2172,26 @@ void CKanbanCtrl::FixupColumnFocus()
 {
 	const CWnd* pFocus = GetFocus();
 
-	if (IsWindowVisible() && HasFocus() && m_pSelectedColumn && (pFocus != m_pSelectedColumn))
+	if (IsWindowVisible())
 	{
+		BOOL bHasFocus = CDialogHelper::IsChildOrSame(this, pFocus);
+
+		if (bHasFocus && m_pSelectedColumn && (pFocus != m_pSelectedColumn))
 		{
-			CAutoFlag af(m_bSettingColumnFocus, TRUE);
+			{
+				CAutoFlag af(m_bSettingColumnFocus, TRUE);
 
-			m_pSelectedColumn->SetFocus();
-			m_pSelectedColumn->Invalidate(FALSE);
-		}
+				m_pSelectedColumn->SetFocus();
+				m_pSelectedColumn->Invalidate(FALSE);
+			}
 
-		if (pFocus)
-		{
-			CKanbanColumnCtrl* pOtherCol = m_aColumns.Get(*pFocus);
+			if (pFocus)
+			{
+				CKanbanColumnCtrl* pOtherCol = m_aColumns.Get(*pFocus);
 
-			if (pOtherCol)
-				pOtherCol->ClearSelection();
+				if (pOtherCol)
+					pOtherCol->ClearSelection();
+			}
 		}
 	}
 }

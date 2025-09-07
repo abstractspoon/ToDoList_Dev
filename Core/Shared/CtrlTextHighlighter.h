@@ -46,7 +46,7 @@ protected:
 protected:
 	LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 
-	BOOL GetHighlightRect(HWND hwnd, CRect& rHighlight) const;
+	void HighlightCtrl(CDC* pDC, HWND hwnd) const;
 	
 	// This searches 'pWnd', its children, grand-children, etc
 	static int FindMatchingCtrls(const CWnd* pWnd, const CStringArray& aSearch, CHWndArray& aMatching, const CWnd* pWndIgnore = NULL);

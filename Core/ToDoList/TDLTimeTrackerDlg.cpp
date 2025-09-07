@@ -942,6 +942,17 @@ BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 	if (!m_tipCaption.GetSafeHwnd())
 		m_tipCaption.Create(this);
 
+	ExcludeChild(&m_toolbar, pDC);
+	ExcludeChild(&m_cbTasklists, pDC);
+	ExcludeChild(&m_cbTasks, pDC);
+	ExcludeChild(&m_btnStart, pDC);
+	ExcludeChild(&m_eElapsedTime, pDC);
+	ExcludeChild(&m_btnGoToTasklist, pDC);
+	ExcludeChild(&m_btnGoToTask, pDC);
+
+	ExcludeCtrl(this, IDC_QUICKFIND, pDC);
+	ExcludeCtrl(this, IDC_TASKTIME, pDC);
+
 	if (!Misc::IsHighContrastActive())
 	{
 		CRect rClient;

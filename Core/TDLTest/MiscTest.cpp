@@ -7,6 +7,7 @@
 #include "MiscTest.h"
 
 #include "..\shared\Misc.h"
+#include "..\shared\OSVersion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -359,13 +360,16 @@ void  CMiscTest::TestAtof()
 	
 	TestAtof("C");
 	TestAtof("en-GB");
-	TestAtof("en-BE");
 	TestAtof("fr-FR");
 	TestAtof("fr-BE");
 	TestAtof("zh-CN");
 	TestAtof("hu-HU");
 	TestAtof("ar-DZ");
 	TestAtof("fa-IR");
+
+	// This fails on windows 7 probably because the locale is not supported
+	if (COSVersion() >= OSV_WIN8)
+		TestAtof("en-BE");
 }
 
 void CMiscTest::TestAtof(const CString& sLocale)
@@ -375,9 +379,7 @@ void CMiscTest::TestAtof(const CString& sLocale)
 		CTempLocale loc(LC_ALL, sLocale);
 
 #if _MSC_VER > 1200
-		// This test will fail under VC6 because of something in setlocale.
-		// Note: This will resolved in 9.1 because we will be using VS2015 
-		//for the release build
+		// This test fails under VC6 because of something in setlocale.
 		ExpectEQ(CTempLocale::Current(), sLocale);
 #endif
 

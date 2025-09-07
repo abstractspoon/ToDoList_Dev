@@ -37,6 +37,7 @@ File :			RuleRichEdit.cpp
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\clipboard.h"
 #include "..\shared\Rtf2HtmlConverter.h"
+#include "..\shared\MessageBox.h"
 
 #include "..\3rdparty\clipboardbackup.h"
 
@@ -212,7 +213,7 @@ LRESULT CRulerRichEdit::OnDropFiles(WPARAM wp, LPARAM /*lp*/)
 	switch (nNumFiles)
 	{
 	case -1: // error
-		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
+		CMessageBox::AfxShow(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
 		break;
 
 	case 0:
@@ -421,7 +422,7 @@ BOOL CRulerRichEdit::PasteSimple()
 
 	if (nNumFiles == -1)
 	{
-		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
+		CMessageBox::AfxShow(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 	else if (nNumFiles == 0)
@@ -440,7 +441,7 @@ BOOL CRulerRichEdit::Paste()
 
 	if (nNumFiles == -1)
 	{
-		AfxMessageBox(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
+		CMessageBox::AfxShow(IDS_PASTE_ERROR, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 	else if (nNumFiles == 0)

@@ -9756,12 +9756,12 @@ void CToDoListWnd::OnSysCommand(UINT nID, LPARAM lParam)
 
 UINT CToDoListWnd::GetNewTaskCmdID() const
 {
-	return TDC::MapNewTaskPosToCmdID(Prefs().GetNewTaskPos(), FALSE);
+	return TDC::MapNewTaskPosToNewTaskID(Prefs().GetNewTaskPos(), FALSE);
 }
 
 UINT CToDoListWnd::GetNewSubtaskCmdID() const
 {
-	return TDC::MapNewTaskPosToCmdID(Prefs().GetNewSubtaskPos(), TRUE);
+	return TDC::MapNewTaskPosToNewTaskID(Prefs().GetNewSubtaskPos(), TRUE);
 }
 
 void CToDoListWnd::OnNewTask(UINT nCmdID) 
@@ -14036,7 +14036,7 @@ void CToDoListWnd::OnUpdateActivateTaskView(CCmdUI* pCmdUI)
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
 		pCmdUI->Enable(TRUE);
 	else
-		pCmdUI->Enable(TDC::MapViewIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
+		pCmdUI->Enable(TDC::MapActivateIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
 }
 
 void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
@@ -14044,7 +14044,7 @@ void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	FTC_VIEW nOldView = tdc.GetTaskView();
-	FTC_VIEW nNewView = TDC::MapViewIDToTaskView(nCmdID);
+	FTC_VIEW nNewView = TDC::MapActivateIDToTaskView(nCmdID);
 
 	CLockUpdates lu(*this);
 

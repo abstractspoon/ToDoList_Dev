@@ -326,16 +326,7 @@ namespace DayViewUIExtension
 
         public new Boolean Focused
         {
-            get
-            {
-                foreach (Control ctrl in Controls)
-                {
-                    if (ctrl.CanFocus && ctrl.Focused)
-                        return true;
-                }
-
-                return false;
-            }
+            get { return m_DayView.Focused; }
         }
 
 		// Internal ------------------------------------------------------------------------------
