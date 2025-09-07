@@ -127,20 +127,27 @@ CRulerRichEditCtrl::~CRulerRichEditCtrl()
 /////////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CRulerRichEditCtrl, CWnd)
-	//{{AFX_MSG_MAP(CRulerRichEditCtrl)
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
 	ON_WM_SETFOCUS()
+	ON_WM_ENABLE()
+	ON_WM_CREATE()
+
+	ON_EN_HSCROLL(RTF_CONTROL, OnEnHScroll)
+	ON_NOTIFY(NM_KILLFOCUS, TOOLBAR_CONTROL, OnKillFocusToolbar)
+	ON_NOTIFY(EN_SELCHANGE, RTF_CONTROL, OnEnSelChange)
+
+	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
 	ON_MESSAGE(WM_GETTEXT, OnGetText )
 	ON_MESSAGE(WM_GETTEXTLENGTH, OnGetTextLength)
-	ON_WM_ENABLE()
+
 	ON_REGISTERED_MESSAGE(urm_RULERACTION, OnTrackRuler)
 	ON_REGISTERED_MESSAGE(urm_GETSCROLLPOS, OnGetScrollPos)
 	ON_REGISTERED_MESSAGE(urm_SETCURRENTFONTNAME, OnSetCurrentFontName)
 	ON_REGISTERED_MESSAGE(urm_SETCURRENTFONTSIZE, OnSetCurrentFontSize)
 	ON_REGISTERED_MESSAGE(urm_SETCURRENTFONTCOLOR, OnSetCurrentFontColor)
-	//}}AFX_MSG_MAP
+
 	ON_COMMAND(ID_EDIT_BACKCOLOR, OnEditBackColor)
 	ON_COMMAND(ID_EDIT_BOLD, OnEditBold)
 	ON_COMMAND(ID_EDIT_BULLET, OnEditBulletList)
@@ -180,12 +187,6 @@ BEGIN_MESSAGE_MAP(CRulerRichEditCtrl, CWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_TEXTCOLOR, OnUpdateEditTextColor)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDERLINE, OnUpdateEditUnderline)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_WORDWRAP, OnUpdateEditWordwrap)
-
-	ON_WM_CREATE()
-	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
-	ON_NOTIFY(NM_KILLFOCUS, TOOLBAR_CONTROL, OnKillFocusToolbar)
-	ON_EN_HSCROLL(RTF_CONTROL, OnEnHScroll)
-	ON_NOTIFY(EN_SELCHANGE, RTF_CONTROL, OnEnSelChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -292,7 +293,6 @@ void CRulerRichEditCtrl::SetRTF(const CString& rtf)
 		m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
 		m_rtf.SetSel(-1, 0);
 	}
-	UpdateEditRect();
 
 	m_rtf.ParseAndFormatText(TRUE);
 }
@@ -322,22 +322,9 @@ void CRulerRichEditCtrl::SetSelectedWebLink(const CString& sWebLink)
 	}
 }
 
-void CRulerRichEditCtrl::UpdateEditRect()
-{
-	// Set up edit rect margins
-	CRect rc;
-	m_rtf.GetClientRect(rc);
-
-	rc.top = SCMARGIN;
-	rc.left = SCMARGIN * 2;
-	rc.right -= SCMARGIN * 2;
-
-	m_rtf.SetRect(rc);
-}
-
 void CRulerRichEditCtrl::CreateMargins()
 {
-	UpdateEditRect();
+	m_rtf.SetMargins(CRect(SCMARGIN * 2, SCMARGIN, SCMARGIN * 2, 0));
 
 	// Get the diff between the window- and client 
 	// rect of the RTF-control. This gives the actual 
@@ -460,10 +447,7 @@ void CRulerRichEditCtrl::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 	
 	if (m_rtf.m_hWnd)
-	{
-		UpdateEditRect();
 		LayoutControls(cx, cy);
-	}
 }
 
 void CRulerRichEditCtrl::OnSetFocus(CWnd* /*pOldWnd*/) 
