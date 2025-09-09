@@ -490,9 +490,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 	if (!pMenu)
 		return;
 
-	if (!prefs.GetShowEditMenuAsColumns())
-		return;
-
+	BOOL bVisibleColsEditsOnly = prefs.GetShowEditMenuAsColumns();
 	int nCountLastSep = 0;
 
 	for (int nItem = 0; nItem < (int)pMenu->GetMenuItemCount(); nItem++)
@@ -510,7 +508,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 				if (pPopup)
 				{
-					PrepareEditMenu(pPopup, tdc, prefs);
+					PrepareEditMenu(pPopup, tdc, prefs); // RECURSIVE CALL
 
 					// if the popup is now empty remove it too
 					bDelete = !pPopup->GetMenuItemCount();
@@ -527,15 +525,20 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 		case ID_EDIT_TASKCOLOR:
 		case ID_EDIT_CLEARTASKCOLOR:
+			if (prefs.GetTextColorOption() != TEXTOPT_DEFAULT)
 			{
-				bDelete = !((prefs.GetTextColorOption() == TEXTOPT_DEFAULT) ||
-							tdc.IsEditFieldShowing(TDCA_COLOR));
+				bDelete = TRUE;
+			}
+			else if (bVisibleColsEditsOnly && !tdc.IsEditFieldShowing(TDCA_COLOR))
+			{
+				bDelete = TRUE;
 			}
 			break;
 
 		case ID_EDIT_DECTASKPRIORITY:
 		case ID_EDIT_INCTASKPRIORITY:
 		case ID_EDIT_SETPRIORITYNONE:
+			if (bVisibleColsEditsOnly)
 			{
 				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY);
 			}
@@ -552,13 +555,37 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		case ID_EDIT_SETPRIORITY8:
 		case ID_EDIT_SETPRIORITY9:
 		case ID_EDIT_SETPRIORITY10:
+			if (bVisibleColsEditsOnly && !tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY))
 			{
-				bDelete = (!tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY) ||
-							((int)(nMenuID - ID_EDIT_SETPRIORITY0) >= prefs.GetNumPriorityRiskLevels()));
+				bDelete = TRUE;
+			}
+			else
+			{
+				int nPriority = (int)(nMenuID - ID_EDIT_SETPRIORITY0);
+				int nNumLevels = prefs.GetNumPriorityRiskLevels();
+
+				if (nPriority >= nNumLevels)
+				{
+					bDelete = TRUE;
+				}
+				else if ((nNumLevels < 11) && (nPriority == 0))
+				{
+					UINT aStrResIDs[11];
+					TDC::GetPriorityRiskLevelStringResourceIDs(nNumLevels, aStrResIDs);
+
+					for (int nLevel = 0; nLevel < nNumLevels; nLevel++)
+					{
+						CEnMenu::SetMenuString(*pMenu, 
+											   (nLevel + ID_EDIT_SETPRIORITY0),
+											   Misc::Format(_T("%d (%s)"), nLevel, CEnString(aStrResIDs[nLevel])),
+											   MF_BYCOMMAND);
+					}
+				}
 			}
 			break;
 
 		case ID_EDIT_OFFSETDATES:
+			if (bVisibleColsEditsOnly)
 			{
 				bDelete = !(tdc.IsColumnOrEditFieldShowing(TDCC_STARTDATE, TDCA_STARTDATE) ||
 							tdc.IsColumnOrEditFieldShowing(TDCC_DUEDATE, TDCA_DUEDATE) ||
@@ -567,6 +594,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 			break;
 
 		case ID_EDIT_CLOCK_TASK:
+			if (bVisibleColsEditsOnly)
 			{
 				bDelete = !(tdc.IsColumnShowing(TDCC_TRACKTIME) ||
 							tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT));
@@ -575,15 +603,16 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 		case ID_SHOWTIMELOGFILE:
 		case ID_ADDTIMETOLOGFILE:
+			if (bVisibleColsEditsOnly && prefs.GetLogTimeTracking())
 			{
-				bDelete = !((tdc.IsColumnShowing(TDCC_TRACKTIME) ||
-							 tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT)) &&
-							prefs.GetLogTimeTracking());
+				bDelete = !(tdc.IsColumnShowing(TDCC_TRACKTIME) ||
+							tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT));
 			}
 			break;
 
 		case ID_EDIT_DECTASKPERCENTDONE:
 		case ID_EDIT_INCTASKPERCENTDONE:
+			if (bVisibleColsEditsOnly)
 			{
 				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PERCENT, TDCA_PERCENT);
 			}
@@ -591,24 +620,28 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 		case ID_EDIT_OPENFILELINK1:
 		case ID_EDIT_SETFILELINK:
+			if (bVisibleColsEditsOnly)
 			{
 				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_FILELINK, TDCA_FILELINK);
 			}
 			break;
 
 		case ID_EDIT_FLAGTASK:
+			if (bVisibleColsEditsOnly)
 			{
 				bDelete = !tdc.IsColumnShowing(TDCC_FLAG);
 			}
 			break;
 
 		case ID_EDIT_RECURRENCE:
+			if (bVisibleColsEditsOnly)
 			{
 				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_RECURRENCE, TDCA_RECURRENCE);
 			}
 			break;
 
 		case ID_EDIT_GOTODEPENDENCY:
+			if (bVisibleColsEditsOnly)
 			{
 				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_DEPENDENCY, TDCA_DEPENDENCY);
 			}
@@ -617,6 +650,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		case ID_EDIT_LOCKTASK:
 		case ID_EDIT_SETTASKICON:
 		case ID_EDIT_CLEARTASKICON:
+			// Always visible
 			break;
 			
 		case ID_SEPARATOR:
