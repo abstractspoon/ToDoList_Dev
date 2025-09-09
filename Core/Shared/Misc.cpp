@@ -71,13 +71,9 @@ void CTempLocale::Initialise(int nCategory, const CString& sLocale)
 
 #ifdef _DEBUG
 #	if _MSC_VER > 1200
-
 	// This test will fail under VC6 because of something in setlocale.
-	// Note: This will resolved in 9.1 because we will be using VS2015 
-	//for the release build
 	CString sNewLocale = _tsetlocale(m_nCategory, sLocale);
 	ASSERT(sLocale.IsEmpty() || (sNewLocale == sLocale));
-
 #	endif
 #else
 	_tsetlocale(m_nCategory, sLocale);

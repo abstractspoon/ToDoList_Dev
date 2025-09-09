@@ -100,21 +100,16 @@ namespace MSDN.Html.Editor
 		/// </summary>
 		public string HrefLink
         {
-            get
-            {
-                return this.hrefLink.Text.Trim();
-            }
-            set
-            {
-                this.hrefLink.Text = value.Trim();
-            }
+			get
+			{
+				return Utils.FilePathToUrl(this.hrefLink.Text, true);
+			}
+			set
+			{
+				this.hrefLink.Text = Utils.FilePathToUrl(value, true);
+			}
 
-        } //HrefLink
-
-		private void hrefLink_TextChanged(object sender, EventArgs e)
-		{
-
-		}
+		} //HrefLink
 
 		public String LastBrowsedFolder { get; set; }
 
@@ -138,10 +133,7 @@ namespace MSDN.Html.Editor
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				// Format filePath as file URI
-				var uri = new System.Uri(dlg.FileName);
-				HrefLink = uri.AbsoluteUri;
-
+				HrefLink = dlg.FileName;
 				LastBrowsedFolder = System.IO.Path.GetDirectoryName(dlg.FileName);
 			}
 		}

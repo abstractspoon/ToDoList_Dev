@@ -14,6 +14,7 @@
 #include "..\Shared\localizer.h"
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\wclassdefines.h"
+#include "..\Shared\MessageBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -364,7 +365,7 @@ BOOL CSpellCheckDlg::OnInitDialog()
 	if (!IsSpellCheckDll(m_sEnginePath))
 	{
 		CString sMsg = GetItemText(DLG_SCD_SETUPMSG, _T("Before you can spell check for the first time you need \nto specify the location of the Spell Checker."));
-		bCancel = (IDCANCEL == AfxMessageBox(sMsg, MB_OKCANCEL));
+		bCancel = (IDCANCEL == CMessageBox::AfxShow(sMsg, MB_OKCANCEL));
 
 		while (!bCancel && !IsSpellCheckDll(m_sEnginePath))
 		{

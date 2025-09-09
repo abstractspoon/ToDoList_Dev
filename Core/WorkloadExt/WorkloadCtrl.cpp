@@ -1172,6 +1172,7 @@ COLORREF CWorkloadCtrl::GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BO
 	GET_WI_RET(dwItemData, pWI, CLR_NONE);
 
 	COLORREF crBack = CLR_NONE;
+	BOOL bColorIsBkgnd = HasOption(WLCF_TASKTEXTCOLORISBKGND);
 
 	if (pWI->dwOrgRefID)
 	{
@@ -1179,11 +1180,11 @@ COLORREF CWorkloadCtrl::GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BO
 		ASSERT(pWIRef);
 
 		if (pWIRef)
-			crBack = pWIRef->GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+			crBack = pWIRef->GetTextBkColor(bSelected, bColorIsBkgnd);
 	}
 	else
 	{
-		crBack = pWI->GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+		crBack = pWI->GetTextBkColor(bSelected, bColorIsBkgnd);
 	}
 
 	if (crBack == CLR_NONE)

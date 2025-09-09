@@ -125,7 +125,6 @@ namespace MSDN.Html.Editor
 			this.hrefLink.TabIndex = 1;
 			this.hrefLink.Text = "https://";
 			this.hrefLink.WordWrap = false;
-			this.hrefLink.TextChanged += new System.EventHandler(this.hrefLink_TextChanged);
 			// 
 			// labelTarget
 			// 

@@ -2139,12 +2139,12 @@ namespace MSDN.Html.Editor
 		{
 			if (Clipboard.ContainsText())
 			{
-				var text = Clipboard.GetText();
+				var text = Clipboard.GetText().Trim('\"');
 
 				if (EnterImageForm.IsImagePath(text))
 				{
 					if (File.Exists(text) || !IsValidHref(text))
-						text = new System.Uri(text).AbsoluteUri;
+						text = Utils.FilePathToUrl(text, true);
 
 					InsertImagePrompt(text);
 					return true;
@@ -2158,13 +2158,11 @@ namespace MSDN.Html.Editor
 
 				// see if it looks like a file path
 				// Unquote path in case it was produced by Windows Explorer
-				var path = text.Trim('"');
-
-				if (path.StartsWith("\\\\") || (path.IndexOf(":\\") == 1))
+				if (text.StartsWith("\\\\") || (text.IndexOf(":\\") == 1))
 				{
-					var fileUrl = new System.Uri(path).AbsoluteUri;
+					var fileUrl = Utils.FilePathToUrl(text, true);
 
-					InsertLinkPrompt(fileUrl, path);
+					InsertLinkPrompt(fileUrl, text);
 					return true;
 				}
 			}
@@ -2174,7 +2172,7 @@ namespace MSDN.Html.Editor
 				var fileUrl = "";
 
 				if (File.Exists(filePath) || !IsValidHref(filePath))
-					fileUrl = new System.Uri(filePath).AbsoluteUri;
+					fileUrl = Utils.FilePathToUrl(filePath, true);
 
 				if (EnterImageForm.IsImagePath(filePath))
 					InsertImagePrompt(fileUrl);

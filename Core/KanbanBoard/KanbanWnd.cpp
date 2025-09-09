@@ -780,7 +780,7 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* p
 		break;
 
 	case IUI_SETFOCUS:
-		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
+		return (CDialogHelper::IsChildOrSame(&m_ctrlKanban, GetFocus()) == FALSE);
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:

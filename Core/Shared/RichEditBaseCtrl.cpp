@@ -35,7 +35,11 @@ const UINT WM_REBC_REENABLECHANGENOTIFY = ::RegisterWindowMessage(_T("WM_REBC_RE
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCSTR  DEFAULTRTF				= "{\\rtf1\\ansi\\deff0\\f0\\fs60}";
+// Ansi strings
+const LPCSTR  DEFAULT_RTF				= "{\\rtf1\\ansi\\deff0\\f0\\fs60}";
+const LPCSTR  RTF_TABLE_ROW				= "\\trowd";
+
+// Unicode strings
 const LPCTSTR RTF_TABLE_HEADER			= _T("{\\rtf1{\\pard{{\\trowd");
 const LPCTSTR RTF_TEXT_INDENT			= _T("\\trgaph%d");
 const LPCTSTR RTF_COLUMN_WIDTH			= _T("\\cellx%d");
@@ -92,9 +96,11 @@ CRichEditBaseCtrl::CRichEditBaseCtrl(BOOL bAutoRTL)
 	: 
 	m_bEnableSelectOnFocus(FALSE),
 	m_bInOnFocus(FALSE), 
+	m_bHasTables(FALSE),
 	m_rMargins(DEFMARGINS),
 	m_bAutoRTL(bAutoRTL),
-	m_pPopupListOwner(NULL)
+	m_pPopupListOwner(NULL),
+	m_crBkgnd(CLR_DEFAULT)
 {
    m_callback.SetOwner(this);
 }
@@ -111,7 +117,7 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_SETFOCUS()
-	ON_WM_SIZE()
+	ON_WM_PAINT()
 
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
@@ -119,6 +125,8 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnDropListEndEdit)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnDropListCancelEdit)
 
+	ON_MESSAGE(WM_PASTE, OnPaste)
+	ON_MESSAGE(EM_SETBKGNDCOLOR, OnEditSetBkgndColor)
 	ON_MESSAGE(EM_SETSEL, OnEditSetSelection)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
@@ -246,6 +254,29 @@ BOOL CRichEditBaseCtrl::Redo()
 	return CTextDocument(GetSafeHwnd()).Redo();
 }
 
+LRESULT CRichEditBaseCtrl::OnPaste(WPARAM wParam, LPARAM lParam)
+{
+	LRESULT lr = Default();
+
+	if (!m_bHasTables && CClipboard::HasFormat(CBF_RTF))
+	{
+		CString sRTF = CClipboard().GetText(CBF_RTF);
+
+		m_bHasTables = HasTables(sRTF, TRUE);
+	}
+
+	return lr;
+}
+
+BOOL CRichEditBaseCtrl::HasTables(const CString& sRtf, BOOL bAnsiEncoded)
+{
+	if (bAnsiEncoded)
+		return (strstr((LPCSTR)(LPCTSTR)sRtf, RTF_TABLE_ROW) != NULL);
+
+	// else
+	return (sRtf.Find(CString(RTF_TABLE_ROW)) != -1);
+}
+
 BOOL CRichEditBaseCtrl::PasteSpecial(CLIPFORMAT nFormat)
 {
 	if ((nFormat == 0) || !CClipboard().HasFormat(nFormat))
@@ -343,6 +374,9 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 	// cleanup
 	if (szText != (LPCTSTR)sText)
 		delete [] szText;
+
+ 	if (bResult && !m_bHasTables)
+ 		m_bHasTables = HasTables(sText, FALSE);
 
 	return bResult;
 }
@@ -968,18 +1002,76 @@ void CRichEditBaseCtrl::SetMargins(LPCRECT pMargins)
 	GetClientRect(rClient);
 
 	rClient -= m_rMargins;
-
 	SetRect(rClient);
 }
 
-void CRichEditBaseCtrl::OnSize(UINT nType, int cx, int cy)
+void CRichEditBaseCtrl::OnPaint()
 {
-	CRichEditCtrl::OnSize(nType, cx, cy);
+	CPaintDC dc(this);
 
-	CRect rClient(0, 0, cx, cy);
-	rClient -= m_rMargins;
+	// Nasty bug in Windows RichEdit (reproducible in WordPad.exe).
+	//
+	// Conditions:
+	//
+	// 1. Content contains tables
+	// 2. A top and/or bottom margin has been specified (via SetRect)
+	// 3. The table is partway vertically scrolled
+	// 4. The richedit is resized
+	//
+	// Consequence:
+	//
+	// The richedit overwrites the top and bottom margins with a
+	// portion of the content instead of rendering them with the 
+	// approporiate background colour. So we have to do it ourselves.
+	//
+	if (m_bHasTables && (m_rMargins.top > 0) || (m_rMargins.bottom > 0))
+	{
+		// Fill and then clip out the top and bottom margins
+		CRect rClient;
+		GetClientRect(rClient);
 
-	SetRect(rClient);
+		COLORREF crBack = GetBkgndColor();
+
+		if (m_rMargins.top > 0)
+		{
+			CRect rClip(rClient);
+			rClip.bottom = m_rMargins.top;
+
+			dc.FillSolidRect(rClip, crBack);
+			dc.ExcludeClipRect(rClip);
+		}
+
+		if (m_rMargins.bottom > 0)
+		{
+			CRect rClip(rClient);
+			rClip.top = (rClip.bottom - m_rMargins.bottom);
+
+			dc.FillSolidRect(rClip, crBack);
+			dc.ExcludeClipRect(rClip);
+		}
+	}
+
+	// do the default drawing
+	DefWindowProc(WM_PRINT, (WPARAM)dc.GetSafeHdc(), PRF_CLIENT);
+}
+
+LRESULT CRichEditBaseCtrl::OnEditSetBkgndColor(WPARAM wParam, LPARAM lParam)
+{
+	m_crBkgnd = (wParam ? CLR_DEFAULT : lParam);
+
+	return Default();
+}
+
+COLORREF CRichEditBaseCtrl::GetBkgndColor() const
+{
+	if (m_crBkgnd != CLR_DEFAULT)
+		return m_crBkgnd;
+
+	// else
+	if (!IsWindowEnabled() || (GetStyle() & ES_READONLY))
+		return GetSysColor(COLOR_3DFACE);
+
+	return GetSysColor(COLOR_WINDOW);
 }
 
 DWORD CRichEditBaseCtrl::GetSelectionCharFormat(CHARFORMAT2 &cf) const
@@ -1305,12 +1397,14 @@ void CRichEditBaseCtrl::SetRTF(const CString& rtf)
 	// that's where it came from
 	TemporarilyDisableChangeNotifications();
 
-	CString sRTF = (rtf.IsEmpty() ? DEFAULTRTF : rtf);
+	CString sRTF = (rtf.IsEmpty() ? DEFAULT_RTF : rtf);
 	
 	STREAMINCOOKIE cookie(sRTF);
 	EDITSTREAM es = { (DWORD)&cookie, 0, StreamInCB };
 	
 	StreamIn(SF_RTF, es);
+
+	m_bHasTables = HasTables(sRTF, TRUE);
 }
 
 BOOL CRichEditBaseCtrl::EnableInlineSpellChecking(BOOL bEnable)

@@ -77,11 +77,11 @@ namespace MSDN.Html.Editor
 		{
 			get
 			{
-				return this.hrefLink.Text.Trim();
+				return Utils.FilePathToUrl(this.hrefLink.Text, true);
 			}
 			set
 			{
-				this.hrefLink.Text = value.Trim();
+				this.hrefLink.Text = Utils.FilePathToUrl(value, true);
 			}
 
 		} //ImageLink
@@ -158,7 +158,7 @@ namespace MSDN.Html.Editor
 				if (String.IsNullOrEmpty(extension))
 					return false;
 
-				string filter = String.Format("*{0};", extension);
+				string filter = String.Format("*{0};", extension.ToLower());
 
 				return ImageUtils.ImageFilter.Contains(filter);
 			}
@@ -188,10 +188,7 @@ namespace MSDN.Html.Editor
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				// Format filePath as file URI
-				var uri = new System.Uri(dlg.FileName);
-				ImageLink = uri.AbsoluteUri;
-
+				ImageLink = dlg.FileName;
 				LastBrowsedFolder = System.IO.Path.GetDirectoryName(dlg.FileName);
 			}
 		}

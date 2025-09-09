@@ -441,46 +441,9 @@ void CTDCMainMenu::PrepareTaskViewActivationMenu(CMenu* pMenu, const CFilteredTo
 	helper.AddExtensionsToMenu(pMenu, mgrUIExt, aTypeIDs);
 
 	// Active view
-	FTC_VIEW nView = tdc.GetTaskView();
-	int nMenuID = 0;
+	int nSelMenuID = TDC::MapTaskViewToActivateID(tdc.GetTaskView());
 
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		nMenuID = ID_ACTIVATEVIEW_TASKTREE;
-		break;
-
-	case FTCV_TASKLIST:
-		nMenuID = ID_ACTIVATEVIEW_LISTVIEW;
-		break;
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		nMenuID = (ID_ACTIVATEVIEW_UIEXTENSION1 + (nView - FTCV_UIEXTENSION1));
-		break;
-
-		// all else
-	default:
-		ASSERT(0);
-		return;
-	}
-
-	pMenu->CheckMenuRadioItem(0, ID_ACTIVATEVIEW_UIEXTENSION16, nMenuID, MF_BYCOMMAND);
+	pMenu->CheckMenuRadioItem(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, nSelMenuID, MF_BYCOMMAND);
 }
 
 BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu) const
@@ -557,18 +520,27 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 		case ID_EDIT_SETTASKLISTCOLOR:
 		case ID_EDIT_CLEARTASKLISTCOLOR:
-			bDelete = !CTabCtrlEx::IsSupportedFlag(TCE_TABCOLORS);
+			{
+				bDelete = !CTabCtrlEx::IsSupportedFlag(TCE_TABCOLORS);
+			}
 			break;
 
 		case ID_EDIT_TASKCOLOR:
 		case ID_EDIT_CLEARTASKCOLOR:
-			bDelete = !((prefs.GetTextColorOption() == TEXTOPT_DEFAULT) ||
-						tdc.IsEditFieldShowing(TDCA_COLOR));
+			{
+				bDelete = !((prefs.GetTextColorOption() == TEXTOPT_DEFAULT) ||
+							tdc.IsEditFieldShowing(TDCA_COLOR));
+			}
 			break;
 
 		case ID_EDIT_DECTASKPRIORITY:
 		case ID_EDIT_INCTASKPRIORITY:
 		case ID_EDIT_SETPRIORITYNONE:
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY);
+			}
+			break;
+
 		case ID_EDIT_SETPRIORITY0:
 		case ID_EDIT_SETPRIORITY1:
 		case ID_EDIT_SETPRIORITY2:
@@ -580,61 +552,79 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		case ID_EDIT_SETPRIORITY8:
 		case ID_EDIT_SETPRIORITY9:
 		case ID_EDIT_SETPRIORITY10:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY);
+			{
+				bDelete = (!tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY) ||
+							((int)(nMenuID - ID_EDIT_SETPRIORITY0) >= prefs.GetNumPriorityRiskLevels()));
+			}
 			break;
 
 		case ID_EDIT_OFFSETDATES:
-			bDelete = !(tdc.IsColumnOrEditFieldShowing(TDCC_STARTDATE, TDCA_STARTDATE) ||
-						tdc.IsColumnOrEditFieldShowing(TDCC_DUEDATE, TDCA_DUEDATE) ||
-						tdc.IsColumnOrEditFieldShowing(TDCC_DONEDATE, TDCA_DONEDATE));
+			{
+				bDelete = !(tdc.IsColumnOrEditFieldShowing(TDCC_STARTDATE, TDCA_STARTDATE) ||
+							tdc.IsColumnOrEditFieldShowing(TDCC_DUEDATE, TDCA_DUEDATE) ||
+							tdc.IsColumnOrEditFieldShowing(TDCC_DONEDATE, TDCA_DONEDATE));
+			}
 			break;
 
 		case ID_EDIT_CLOCK_TASK:
-			bDelete = !(tdc.IsColumnShowing(TDCC_TRACKTIME) ||
-						tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT));
+			{
+				bDelete = !(tdc.IsColumnShowing(TDCC_TRACKTIME) ||
+							tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT));
+			}
 			break;
 
 		case ID_SHOWTIMELOGFILE:
 		case ID_ADDTIMETOLOGFILE:
-			bDelete = !((tdc.IsColumnShowing(TDCC_TRACKTIME) ||
-						 tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT)) &&
-						prefs.GetLogTimeTracking());
+			{
+				bDelete = !((tdc.IsColumnShowing(TDCC_TRACKTIME) ||
+							 tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT)) &&
+							prefs.GetLogTimeTracking());
+			}
 			break;
 
 		case ID_EDIT_DECTASKPERCENTDONE:
 		case ID_EDIT_INCTASKPERCENTDONE:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PERCENT, TDCA_PERCENT);
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PERCENT, TDCA_PERCENT);
+			}
 			break;
 
 		case ID_EDIT_OPENFILELINK1:
 		case ID_EDIT_SETFILELINK:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_FILELINK, TDCA_FILELINK);
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_FILELINK, TDCA_FILELINK);
+			}
 			break;
 
 		case ID_EDIT_FLAGTASK:
-			bDelete = !tdc.IsColumnShowing(TDCC_FLAG);
-			break;
-
-		case ID_EDIT_LOCKTASK:
-			bDelete = FALSE;
+			{
+				bDelete = !tdc.IsColumnShowing(TDCC_FLAG);
+			}
 			break;
 
 		case ID_EDIT_RECURRENCE:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_RECURRENCE, TDCA_RECURRENCE);
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_RECURRENCE, TDCA_RECURRENCE);
+			}
 			break;
 
 		case ID_EDIT_GOTODEPENDENCY:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_DEPENDENCY, TDCA_DEPENDENCY);
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_DEPENDENCY, TDCA_DEPENDENCY);
+			}
 			break;
 
+		case ID_EDIT_LOCKTASK:
 		case ID_EDIT_SETTASKICON:
 		case ID_EDIT_CLEARTASKICON:
 			break;
 			
 		case ID_SEPARATOR:
-			bIsSeparator = TRUE;
-			bDelete = (nCountLastSep == 0);
-			nCountLastSep = 0;
+			{
+				bIsSeparator = TRUE;
+				bDelete = (nCountLastSep == 0);
+				nCountLastSep = 0;
+			}
 			break;
 
 		default:

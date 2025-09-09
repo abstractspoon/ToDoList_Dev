@@ -125,12 +125,12 @@ void CTDCMenuIconMgr::ClearImages()
 
 UINT CTDCMenuIconMgr::GetNewTaskCmdID(const CPreferencesDlg& prefs)
 {
-	return TDC::MapNewTaskPosToCmdID(prefs.GetNewTaskPos(), FALSE);
+	return TDC::MapNewTaskPosToNewTaskID(prefs.GetNewTaskPos(), FALSE);
 }
 
 UINT CTDCMenuIconMgr::GetNewSubtaskCmdID(const CPreferencesDlg& prefs)
 {
-	return TDC::MapNewTaskPosToCmdID(prefs.GetNewSubtaskPos(), TRUE);
+	return TDC::MapNewTaskPosToNewTaskID(prefs.GetNewSubtaskPos(), TRUE);
 }
 
 void CTDCMenuIconMgr::UpdateSourceControlStatus(BOOL bIsDisabled, BOOL bIsCheckedOut)
