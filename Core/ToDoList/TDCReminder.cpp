@@ -280,14 +280,11 @@ BOOL TDCREMINDER::GetReminderDate(COleDateTime& date, BOOL bIncludeSnooze) const
 	if (bRelative && GetRelativeToDate(date))
 		date -= dRelativeDaysLeadIn;
 	
-	if (CDateHelper::IsDateSet(date))
-	{
-		if (bIncludeSnooze)
-			date += dDaysSnooze;
+	NULLDATE_CHECKRET(date, FALSE);
 
-		return TRUE;
-	}
-	
-	return FALSE;
+	if (bIncludeSnooze)
+		date += dDaysSnooze;
+
+	return TRUE;
 }
 

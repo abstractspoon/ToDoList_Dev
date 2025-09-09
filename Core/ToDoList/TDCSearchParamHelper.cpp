@@ -452,11 +452,11 @@ BOOL CTDCSearchParamHelper::InitFilterDate(FILTER_DATE nDate, const COleDateTime
 
 	case FD_ANY:
 	case FD_NONE:
-		break;
+		return FALSE;
 
 	default:
 		ASSERT(0);
-		break;
+		return FALSE;
 	}
 
 	return CDateHelper::IsDateSet(date);

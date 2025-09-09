@@ -140,8 +140,7 @@ BOOL CRecurrence::GetNextOccurence(const COleDateTime& dtPrev, COleDateTime& dtN
 
 BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dtNext) const
 {
-	if (!CDateHelper::IsDateSet(dtPrev))
-		return FALSE;
+	NULLDATE_CHECKRET(dtPrev, FALSE);
 	
 	// This checks:
 	// 1. Have we got valid parameters
@@ -420,11 +419,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 	}
 #endif
 
-	if (!CDateHelper::IsDateSet(dtDateOnly))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	NULLDATE_CHECKRET(dtDateOnly, FALSE);
 
 	dtNext = CDateHelper::MakeDate(dtDateOnly, dtPrev);
 	return TRUE;
@@ -489,9 +484,8 @@ int CRecurrence::CalcNextOccurrences(const COleDateTime& dtPrev, const COleDateT
 
 BOOL CRecurrence::FitDayToScheme(COleDateTime& dtRecur) const
 {
-	if (!CDateHelper::IsDateSet(dtRecur))
-		return FALSE;
-	
+	NULLDATE_CHECKRET(dtRecur, FALSE);
+
 	switch (m_nRegularity)
 	{
 	case RECURS_DAY_EVERY_WEEKDAY:

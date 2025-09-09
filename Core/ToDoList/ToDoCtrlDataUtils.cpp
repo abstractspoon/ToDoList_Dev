@@ -2793,9 +2793,9 @@ BOOL CTDCTaskCalculator::HasOverdueTasks() const
 		return FALSE;
 
 	COleDateTime dtToday = CDateHelper::GetDate(DHD_NOW);
-	double dEarliest = GetEarliestDueDate();
+	COleDateTime dtEarliest = GetEarliestDueDate();
 
-	return ((dEarliest > 0.0) && (dEarliest < dtToday));
+	return (CDateHelper::IsDateSet(dtEarliest) && (dtEarliest < dtToday));
 }
 
 // ---------------------------------------------------------------------

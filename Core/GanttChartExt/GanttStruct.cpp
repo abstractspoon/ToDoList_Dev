@@ -472,7 +472,7 @@ BOOL GANTTITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, 
 				dtDue = CDateHelper::GetEndOfDay(dtDue);
 			}
 	
-			ASSERT(CDateHelper::IsDateSet(dtDue));
+			NULLDATE_CHECKRET(dtDue, FALSE);
 		}
 	
 		// do we need to calculate start date?
@@ -485,7 +485,7 @@ BOOL GANTTITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, 
 			// take the earlier of that and 'today'
 			CDateHelper::Min(dtStart, CDateHelper::GetDate(DHD_TODAY));
 	
-			ASSERT(CDateHelper::IsDateSet(dtStart));
+			NULLDATE_CHECKRET(dtStart, FALSE);
 		}
 	}
 

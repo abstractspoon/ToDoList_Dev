@@ -4100,7 +4100,10 @@ UINT CToDoCtrlData::UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDat
 
 COleDateTime CToDoCtrlData::AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits, BOOL bAllowUpdateStart)
 {
-	if (!CDateHelper::IsDateSet(dateStart) || (dDuration == 0.0) || (nUnits == TDCU_NULL))
+	// Sanity checks
+	NULLDATE_CHECKRET(dateStart, CDateHelper::NullDate());
+
+	if ((dDuration == 0.0) || (nUnits == TDCU_NULL))
 	{
 		ASSERT(0);
 		return dateStart;
@@ -4679,7 +4682,7 @@ TDC_SET CToDoCtrlData::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
 
 // Internal version
 TDC_SET CToDoCtrlData::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
-							   BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates, BOOL bIsSubtask)
+									BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates, BOOL bIsSubtask)
 {
 	ASSERT(bAndSubtasks || !bIsSubtask);
 	ASSERT(!CDateHelper::IsDateSet(date) || !bUpdateAllSubtaskDates);

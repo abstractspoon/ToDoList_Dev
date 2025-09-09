@@ -113,7 +113,7 @@ BOOL CTDCRecurrenceHelper::CalcNextOccurrence(COleDateTime& dtNext, BOOL& bDue) 
 			dtFrom = CDateHelper::GetEndOfWeek(m_tdi.dateDone);
 		}
 	}
-	ASSERT(CDateHelper::IsDateSet(dtFrom));
+	NULLDATE_CHECKRET(dtFrom, FALSE);
 
 	if (!m_tdi.trRecurrence.CalcNextOccurence(dtFrom, dtNext))
 		return FALSE;
@@ -317,12 +317,9 @@ BOOL CTDCRecurrenceHelper::GetFromDate(COleDateTime& dtFrom) const
 		dtFrom = CDateHelper::NullDate();
 		break;
 	}
+	NULLDATE_CHECKRET(dtFrom, FALSE);
 
-	if (CDateHelper::IsDateSet(dtFrom))
-		return TRUE;
-
-	ASSERT(0);
-	return FALSE;
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

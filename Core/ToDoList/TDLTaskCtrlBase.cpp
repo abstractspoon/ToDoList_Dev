@@ -3614,7 +3614,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 
 BOOL CTDLTaskCtrlBase::IsDateWithin7DaysOfToday(const COleDateTime& date, TDC_DATE nDate)
 {
-	ASSERT(CDateHelper::IsDateSet(date));
+	NULLDATE_CHECKRET(date, FALSE);
 
 	COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
 
