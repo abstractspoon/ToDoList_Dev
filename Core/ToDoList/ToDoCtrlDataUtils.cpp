@@ -3713,43 +3713,65 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 		return (dValue >= 0);
 
 	case TDCA_CREATIONDATE:
+		if (pTDI->HasCreation())
 		{
 			dValue = pTDI->dateCreated.m_dt;
+			return TRUE;
 		}
-		return (dValue != 0);
+		break;
 
 	case TDCA_DONEDATE:
+		if (pTDI->IsDone())
 		{
 			dValue = pTDI->dateDone.m_dt;
+			return TRUE;
 		}
-		return (dValue != 0);
+		break;
 
 	case TDCA_DUEDATE:
 		{
+			COleDateTime date = pTDI->dateDue;
+
 			if (bAggregated)
-				dValue = GetTaskDueDate(pTDI, pTDS);
-			else
-				dValue = pTDI->dateDue.m_dt;
+				date = GetTaskDueDate(pTDI, pTDS);
+
+			if (CDateHelper::IsDateSet(date))
+			{
+				dValue = date.m_dt;
+				return TRUE;
+			}
 		}
-		return (dValue != 0);
+		break;
 
 	case TDCA_LASTMODDATE:
 		{
+			COleDateTime date = pTDI->dateLastMod;
+
 			if (bAggregated)
-				dValue = GetTaskLastModifiedDate(pTDI, pTDS);
-			else
-				dValue = pTDI->dateLastMod.m_dt;
+				date = GetTaskLastModifiedDate(pTDI, pTDS);
+
+			if (CDateHelper::IsDateSet(date))
+			{
+				dValue = date.m_dt;
+				return TRUE;
+			}
 		}
-		return (dValue != 0);
+		break;
 
 	case TDCA_STARTDATE:
 		{
+			COleDateTime date = pTDI->dateStart;
+
 			if (bAggregated)
-				dValue = GetTaskStartDate(pTDI, pTDS);
-			else
-				dValue = pTDI->dateStart.m_dt;
+				date = GetTaskStartDate(pTDI, pTDS);
+
+			if (CDateHelper::IsDateSet(date))
+			{
+				dValue = date.m_dt;
+				return TRUE;
+			}
 		}
-		return (dValue != 0);
+		break;
 
 	case TDCA_TIMEESTIMATE:
 		{
