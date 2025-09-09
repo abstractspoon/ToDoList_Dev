@@ -3712,7 +3712,13 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		
 	case CDDS_ITEMPREPAINT:
 		{
-			// don't draw columns having min width
+			// don't draw columns having min width unless they
+			// are the current right-clicked item
+			int nCol = (int)pNMCD->dwItemSpec;
+
+			if (nCol == m_nHeaderContextMenuItem)
+				return CDRF_NOTIFYPOSTPAINT;
+
 			CRect rItem(pNMCD->rc);
 
 			if (rItem.Width() > MIN_COL_WIDTH)
@@ -3729,7 +3735,7 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 			int nCol = (int)pNMCD->dwItemSpec;
 			BOOL bContextItem = (nCol == m_nHeaderContextMenuItem);
 
-			// Custom rendering for context menu item
+			// Custom rendering for context menu item always
 			if (bContextItem)
 			{
 				if (CThemed::AreControlsThemed())
@@ -3745,7 +3751,7 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 
 			if (rItem.Width() > MIN_COL_WIDTH)
 			{
-				// draw sort direction
+				// Sort direction
 				TDC_COLUMN nColID = (TDC_COLUMN)pNMCD->lItemlParam;
 
 				if (nColID == m_nSortColID)
@@ -3754,43 +3760,48 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 					GetColumnHeaderCtrl(nColID).DrawItemSortArrow(pDC, nCol, bUp);
 				}
 
-				// Draw image
+				// Column icon
 				const TDCCOLUMN* pTDCC = GetColumn(nColID);
-				int nTextAlign = DT_LEFT;
 
-				if (pTDCC)
+				if (pTDCC && (pTDCC->iImage != -1))
 				{
-					nTextAlign = pTDCC->nTextAlignment;
+					CRect rImage(0, 0, COL_ICON_SIZE, COL_ICON_SIZE);
+					GraphicsMisc::CentreRect(rImage, rItem, TRUE, TRUE);
 
-					// handle symbol images
-					if (pTDCC->iImage != -1)
-					{
-						CRect rImage(0, 0, COL_ICON_SIZE, COL_ICON_SIZE);
-						GraphicsMisc::CentreRect(rImage, rItem, TRUE, TRUE);
-
- 						m_ilColSymbols.Draw(pDC, pTDCC->iImage, rImage.TopLeft(), ILD_TRANSPARENT);
-						return CDRF_SKIPDEFAULT;
-					}
-				}
-				else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
-				{
-					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-					GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, CDRF_DODEFAULT);
-
-					nTextAlign = pDef->nTextAlignment;
+ 					m_ilColSymbols.Draw(pDC, pTDCC->iImage, rImage.TopLeft(), ILD_TRANSPARENT);
+					return CDRF_SKIPDEFAULT;
 				}
 
-				// Handle text for RTL or context column headers
+				// In order to draw the currently right-clicked item background
+				// as selected we're also forced to draw its text
 				if (bContextItem)
 				{
+					// Figure out the correct alignment
+					int nTextAlign = DT_LEFT;
+					
+					if (pTDCC)
+					{
+						nTextAlign = pTDCC->nTextAlignment;
+					}
+					else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+					{
+						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+						GET_CUSTDEF_RET(m_aCustomAttribDefs, nColID, pDef, CDRF_DODEFAULT);
+
+						nTextAlign = pDef->nTextAlignment;
+					}
+
+					// Draw the text
 					CEnString sColumn(GetColumnHeaderCtrl(nColID).GetItemText(nCol));
 		
 					rItem.DeflateRect(3, 0);
 					sColumn.FormatDC(pDC, rItem.Width(), ES_END);
 
-					DrawColumnText(pDC, sColumn, rItem, nTextAlign, GetSysColor(COLOR_WINDOWTEXT));
+					DrawColumnText(pDC, sColumn, rItem, nTextAlign, GetSysColor(COLOR_BTNTEXT));
 					return CDRF_SKIPDEFAULT;
 				}
+
+				// else default drawing
 			}
 		}
 		break;
