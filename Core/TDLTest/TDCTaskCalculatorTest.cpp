@@ -100,11 +100,11 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data, BOO
 	{
 		InitialiseStyles(bIncludeRefs);
 
-		ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
-		ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-		ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-		ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
-		ExpectEQ(calc.GetTaskStartDate(5), 45004.0);
+		ExpectEQ(calc.GetTaskStartDate(1), COleDateTime(45000.0));
+		ExpectEQ(calc.GetTaskStartDate(2), COleDateTime(45001.0));
+		ExpectEQ(calc.GetTaskStartDate(3), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskStartDate(4), CDateHelper::NullDate()); // completed task
+		ExpectEQ(calc.GetTaskStartDate(5), COleDateTime(45004.0));
 	}
 
 	// Earliest (unaffected by reference task because its date is later)
@@ -112,11 +112,11 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data, BOO
 		InitialiseStyles(bIncludeRefs);
 		m_aStyles[TDCS_USEEARLIESTSTARTDATE] = TRUE;
 
-		ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
-		ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-		ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-		ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
-		ExpectEQ(calc.GetTaskStartDate(5), 45004.0);
+		ExpectEQ(calc.GetTaskStartDate(1), COleDateTime(45000.0));
+		ExpectEQ(calc.GetTaskStartDate(2), COleDateTime(45001.0));
+		ExpectEQ(calc.GetTaskStartDate(3), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskStartDate(4), CDateHelper::NullDate()); // completed task
+		ExpectEQ(calc.GetTaskStartDate(5), COleDateTime(45004.0));
 	}
 
 	// Latest
@@ -126,17 +126,17 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data, BOO
 
 		if (bIncludeRefs)
 		{
-			ExpectEQ(calc.GetTaskStartDate(1), 45004.0);
-			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-			ExpectEQ(calc.GetTaskStartDate(3), 45004.0);
-			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
+			ExpectEQ(calc.GetTaskStartDate(1), COleDateTime(45004.0));
+			ExpectEQ(calc.GetTaskStartDate(2), COleDateTime(45001.0));
+			ExpectEQ(calc.GetTaskStartDate(3), COleDateTime(45004.0));
+			ExpectEQ(calc.GetTaskStartDate(4), CDateHelper::NullDate()); // completed task
 		}
 		else
 		{
-			ExpectEQ(calc.GetTaskStartDate(1), 45002.0);
-			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-			ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
+			ExpectEQ(calc.GetTaskStartDate(1), COleDateTime(45002.0));
+			ExpectEQ(calc.GetTaskStartDate(2), COleDateTime(45001.0));
+			ExpectEQ(calc.GetTaskStartDate(3), COleDateTime(45002.0));
+			ExpectEQ(calc.GetTaskStartDate(4), CDateHelper::NullDate()); // completed task
 		}
 	}
 }
@@ -150,11 +150,11 @@ void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data, BOOL 
 	{
 		InitialiseStyles(bIncludeRefs);
 
-		ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
-		ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-		ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-		ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-		ExpectEQ(calc.GetTaskDueDate(5), 45005.0);
+		ExpectEQ(calc.GetTaskDueDate(1), COleDateTime(45001.0));
+		ExpectEQ(calc.GetTaskDueDate(2), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskDueDate(3), COleDateTime(45003.0));
+		ExpectEQ(calc.GetTaskDueDate(4), CDateHelper::NullDate()); // completed task
+		ExpectEQ(calc.GetTaskDueDate(5), COleDateTime(45005.0));
 	}
 
 	// Earliest (unaffected by reference tasks because its date is later)
@@ -162,11 +162,11 @@ void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data, BOOL 
 		InitialiseStyles(bIncludeRefs);
 		m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
 
-		ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
-		ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-		ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-		ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-		ExpectEQ(calc.GetTaskDueDate(5), 45005.0);
+		ExpectEQ(calc.GetTaskDueDate(1), COleDateTime(45001.0));
+		ExpectEQ(calc.GetTaskDueDate(2), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskDueDate(3), COleDateTime(45003.0));
+		ExpectEQ(calc.GetTaskDueDate(4), CDateHelper::NullDate()); // completed task
+		ExpectEQ(calc.GetTaskDueDate(5), COleDateTime(45005.0));
 	}
 
 	// Latest
@@ -176,19 +176,19 @@ void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data, BOOL 
 
 		if (bIncludeRefs)
 		{
-			ExpectEQ(calc.GetTaskDueDate(1), 45005.0);
-			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-			ExpectEQ(calc.GetTaskDueDate(3), 45005.0);
-			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-			ExpectEQ(calc.GetTaskDueDate(5), 45005.0);
+			ExpectEQ(calc.GetTaskDueDate(1), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskDueDate(2), COleDateTime(45002.0));
+			ExpectEQ(calc.GetTaskDueDate(3), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskDueDate(4), CDateHelper::NullDate()); // completed task
+			ExpectEQ(calc.GetTaskDueDate(5), COleDateTime(45005.0));
 		}
 		else
 		{
-			ExpectEQ(calc.GetTaskDueDate(1), 45003.0);
-			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-			ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-			ExpectEQ(calc.GetTaskDueDate(5), 45005.0);
+			ExpectEQ(calc.GetTaskDueDate(1), COleDateTime(45003.0));
+			ExpectEQ(calc.GetTaskDueDate(2), COleDateTime(45002.0));
+			ExpectEQ(calc.GetTaskDueDate(3), COleDateTime(45003.0));
+			ExpectEQ(calc.GetTaskDueDate(4), CDateHelper::NullDate()); // completed task
+			ExpectEQ(calc.GetTaskDueDate(5), COleDateTime(45005.0));
 		}
 	}
 }
@@ -202,11 +202,11 @@ void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlD
 	{
 		InitialiseStyles(bIncludeRefs);
 
-		ExpectEQ(calc.GetTaskLastModifiedDate(1), 45002.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(3), 45004.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(5), 45006.0);
+		ExpectEQ(calc.GetTaskLastModifiedDate(1), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskLastModifiedDate(2), COleDateTime(45003.0));
+		ExpectEQ(calc.GetTaskLastModifiedDate(3), COleDateTime(45004.0));
+		ExpectEQ(calc.GetTaskLastModifiedDate(4), COleDateTime(45005.0));
+		ExpectEQ(calc.GetTaskLastModifiedDate(5), COleDateTime(45006.0));
 
 		ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User1"));
 		ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
@@ -222,11 +222,11 @@ void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlD
 
 		if (bIncludeRefs)
 		{
-			ExpectEQ(calc.GetTaskLastModifiedDate(1), 45006.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(3), 45006.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(5), 45006.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(1), COleDateTime(45006.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(2), COleDateTime(45003.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(3), COleDateTime(45006.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(4), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(5), COleDateTime(45006.0));
 
 			ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User5"));
 			ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
@@ -236,11 +236,11 @@ void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlD
 		}
 		else
 		{
-			ExpectEQ(calc.GetTaskLastModifiedDate(1), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(3), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(5), 45006.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(1), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(2), COleDateTime(45003.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(3), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(4), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(5), COleDateTime(45006.0));
 
 			ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User4"));
 			ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));

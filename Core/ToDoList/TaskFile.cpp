@@ -3249,6 +3249,8 @@ bool CTaskFile::GetTaskCreationDate64(HTASKITEM hTask, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskCreationDateOle(hTask);
 
+	// Task should always have a creation date so we 
+	// let this assert to catch anything unexpected
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 
@@ -3258,6 +3260,9 @@ bool CTaskFile::GetTaskStartDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT)
 
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCSTARTDATE))
 		date = GetTaskDateOle(hTask, TDL_TASKCALCSTARTDATE, TRUE);
+
+	if (!CDateHelper::IsDateSet(date))
+		return false;
 	
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
@@ -3265,9 +3270,12 @@ bool CTaskFile::GetTaskStartDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT)
 bool CTaskFile::GetTaskDueDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskDueDateOle(hTask);
-	
+
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCDUEDATE))
 		date = GetTaskDateOle(hTask, TDL_TASKCALCDUEDATE, TRUE);
+
+	if (!CDateHelper::IsDateSet(date))
+		return false;
 
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
@@ -3276,6 +3284,9 @@ bool CTaskFile::GetTaskDoneDate64(HTASKITEM hTask, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskDoneDateOle(hTask);
 
+	if (!CDateHelper::IsDateSet(date))
+		return false;
+
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 
@@ -3283,6 +3294,8 @@ bool CTaskFile::GetTaskLastModified64(HTASKITEM hTask, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskLastModifiedOle(hTask);
 
+	// Task should always have a modification date so we 
+	// let this assert to catch anything unexpected
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 
@@ -4365,19 +4378,14 @@ time_t CTaskFile::GetTaskDate(HTASKITEM hTask, const CString& sDateItem, BOOL bI
 
 COleDateTime CTaskFile::GetTaskDateOle(HTASKITEM hTask, const CString& sDateItem, BOOL bIncTime) const
 {
-	COleDateTime date;
+	if (!TaskHasAttribute(hTask, sDateItem))
+		return CDateHelper::NullDate();
 
-	if (TaskHasAttribute(hTask, sDateItem))
-	{
-		date = GetTaskDouble(hTask, sDateItem);
+	// else
+	COleDateTime date = GetTaskDouble(hTask, sDateItem);
 
-		if (!bIncTime)
-			date = CDateHelper::GetDateOnly(date);
-	}
-	else
-	{
-		CDateHelper::ClearDate(date);
-	}
+	if (!bIncTime)
+		date = CDateHelper::GetDateOnly(date);
 
 	return date;
 }

@@ -55,7 +55,7 @@ public:
 	BOOL HasOverdueTasks() const;
 	BOOL HasDueTodayTasks() const;
 	BOOL HasLockedTasks() const;
-	double GetEarliestDueDate() const;
+	COleDateTime GetEarliestDueDate() const;
 
 	BOOL IsTaskRecentlyModified(DWORD dwTaskID) const;
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
@@ -67,9 +67,9 @@ public:
 	BOOL IsTaskOverDue(DWORD dwTaskID) const;
 	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
 
-	double GetTaskDueDate(DWORD dwTaskID) const;
-	double GetTaskStartDate(DWORD dwTaskID) const;
-	double GetTaskLastModifiedDate(DWORD dwTaskID) const;
+	COleDateTime GetTaskDueDate(DWORD dwTaskID) const;
+	COleDateTime GetTaskStartDate(DWORD dwTaskID) const;
+	COleDateTime GetTaskLastModifiedDate(DWORD dwTaskID) const;
 	double GetTaskCost(DWORD dwTaskID) const;
 	double GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
@@ -91,9 +91,9 @@ public:
 	BOOL IsTaskDueToday(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	BOOL IsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
-	double GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	COleDateTime GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	COleDateTime GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	COleDateTime GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
 	double GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
@@ -141,14 +141,14 @@ protected:
 	double GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, CDWordSet& mapProcessedIDs) const;
 	double GetAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 	double GetWeightedAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
-	double GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest, CDWordSet& mapProcessedIDs) const;
+	COleDateTime GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest, CDWordSet& mapProcessedIDs) const;
 	int GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue, CDWordSet& mapProcessedIDs) const;
 	int GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 	int GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone, CDWordSet& mapProcessedIDs) const;
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 
-	static double GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
-	static double GetEarliestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
+	static COleDateTime GetLatestDate(COleDateTime dtDate1, COleDateTime dtDate2, BOOL bNoTimeIsEndOfDay);
+	static COleDateTime GetEarliestDate(COleDateTime dtDate1, COleDateTime dtDate2, BOOL bNoTimeIsEndOfDay);
 };
 
 //////////////////////////////////////////////////////////////////////

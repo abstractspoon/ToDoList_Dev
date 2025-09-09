@@ -128,7 +128,7 @@ public:
 	static BOOL IsValidDayInMonth(int nDay, int nMonth, int nYear);
 	static BOOL IsValidDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth);
 
-	static double GetDate(DH_DATE nDate); // 12am
+	static COleDateTime GetDate(DH_DATE nDate); // 12am
 
 	static CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0, TCHAR cDateTimeSep = ' ');
 	static CString FormatCurrentDate(DWORD dwFlags = 0);
@@ -169,8 +169,8 @@ public:
 	static void GetNextMonth(int& nMonth, int& nYear, BOOL bNext = TRUE);
 	static void IncrementMonth(int& nMonth, int& nYear, int nBy = 1);
 	static void IncrementMonth(SYSTEMTIME& st, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
-	static void IncrementMonth(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
-	static void IncrementYear(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
+	static BOOL IncrementMonth(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
+	static BOOL IncrementYear(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
 	
 	static int CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive);
 	static int GetDateInMonths(int nMonth, int nYear);
@@ -180,7 +180,7 @@ public:
 
 	static COleDateTime CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
 	static int CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
-	static void FromDate(const COleDateTime& date, int& nDay, int& nMonth, int& nYear);
+	static BOOL FromDate(const COleDateTime& date, int& nDay, int& nMonth, int& nYear);
 	static COleDateTime ToDate(int nDay, int nMonth, int nYear);
 
 	// GREGORIAN ONLY

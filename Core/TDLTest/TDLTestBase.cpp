@@ -7,6 +7,7 @@
 
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\datehelper.h"
 
 #include <math.h>
 
@@ -616,6 +617,24 @@ BOOL CTDLTestBase::ExpectEQ(double d1, double d2, double dTol) const
 BOOL CTDLTestBase::ExpectNE(double d1, double d2, double dTol) const
 {
 	return ExpectCompareT(d1, _T("%lf"), d2, _T("%lf"), dTol, OP_NE);
+}
+
+// -------------------------------------------------------------------------------------------------------
+
+BOOL CTDLTestBase::ExpectEQ(const COleDateTime& dt1, const COleDateTime& dt2, double dTol) const
+{
+	if (Misc::StatesDiffer(CDateHelper::IsDateSet(dt1), CDateHelper::IsDateSet(dt2)))
+		return FALSE;
+
+	return ExpectEQ(dt1.m_dt, dt2.m_dt, dTol); // RECURSIVE CALL
+}
+
+BOOL CTDLTestBase::ExpectNE(const COleDateTime& dt1, const COleDateTime& dt2, double dTol) const
+{
+	if (Misc::StatesDiffer(CDateHelper::IsDateSet(dt1), CDateHelper::IsDateSet(dt2)))
+		return TRUE;
+
+	return ExpectNE(dt1.m_dt, dt2.m_dt, dTol);
 }
 
 // -------------------------------------------------------------------------------------------------------
