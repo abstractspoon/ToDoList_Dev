@@ -751,7 +751,10 @@ BOOL CDateHelper::DecodeRelativeDate(LPCTSTR szDate, COleDateTime& date, BOOL bM
 	Misc::Trim(sDate);
 
 	if (sDate.IsEmpty())
+	{
+		date = NullDate();
 		return FALSE;
+	}
 
 	// clear date so we know if it changed
 	ClearDate(date);
@@ -820,7 +823,10 @@ BOOL CDateHelper::IsValidRelativeDate(LPCTSTR szDate, BOOL bMustHaveSign)
 BOOL CDateHelper::DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime)
 {
 	if (sDate.IsEmpty())
+	{
+		date = NullDate();
 		return FALSE;
+	}
 
 	if (bAndTime && date.ParseDateTime(sDate))
 	{
