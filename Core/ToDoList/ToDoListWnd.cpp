@@ -615,7 +615,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_NOTIFY(TCN_SELCHANGING, IDC_TABCONTROL, OnTabCtrlSelchanging)
 	ON_NOTIFY(TTN_NEEDTEXT, 0, OnNeedTooltipText)
 
-	ON_REGISTERED_MESSAGE(WM_FBN_FILTERCHANGE, OnSelchangeFilter)
+	ON_REGISTERED_MESSAGE(WM_FBN_FILTERCHANGE, OnFilterChange)
 	ON_REGISTERED_MESSAGE(WM_FTD_ADDSEARCH, OnFindAddSearch)
 	ON_REGISTERED_MESSAGE(WM_FTD_APPLYASFILTER, OnFindApplyAsFilter)
 	ON_REGISTERED_MESSAGE(WM_FTD_CLOSE, OnFindDlgClose)
@@ -11961,34 +11961,34 @@ void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
 		pCmdUI->SetCheck((bCanToggle && tdc.HasAnyFilter()) ? 0 : 1);
 }
 
-LRESULT CToDoListWnd::OnSelchangeFilter(WPARAM wp, LPARAM lp) 
+LRESULT CToDoListWnd::OnFilterChange(WPARAM wp, LPARAM lp) 
 {
-	int nCtrlID = (int)wp;
-	HWND hWnd = (HWND)lp;
-
-	ASSERT((nCtrlID == m_filterBar.GetDlgCtrlID()) && (hWnd == m_filterBar));
+	ASSERT((wp == m_filterBar.GetDlgCtrlID()) && ((HWND)lp == m_filterBar));
 
 	TDCFILTER filter;
 	CString sCustom;
-	DWORD dwCustomFlags;
+	DWORD dwCustomFlags = 0;
 
 	m_filterBar.GetFilter(filter, sCustom, dwCustomFlags);
-
-	// Refresh filter controls if we've switched 
-	// from a custom to default filter or vice versa
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	BOOL bUpdateFilterCtrls = Misc::StatesDiffer(sCustom.IsEmpty(), !tdc.HasAdvancedFilter());
-
-	OnChangeFilter(filter, sCustom, dwCustomFlags, bUpdateFilterCtrls);
+	DoChangeFilter(filter, sCustom, dwCustomFlags);
 
 	return 0L;
 }
 
-void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bUpdateFilterCtrls)
+void CToDoListWnd::DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	FILTER_SHOW nOldFilter = tdc.GetFilter(), nNewFilter = filter.nShow;
 
-	if (!sCustom.IsEmpty())
+	ASSERT(((nNewFilter == FS_ADVANCED) && !sCustom.IsEmpty()) ||
+		   ((nNewFilter != FS_ADVANCED) && sCustom.IsEmpty()));
+
+	// Refresh filter controls if we're switching to/from a 
+	// 'custom' or 'selected' filter
+	BOOL bRefreshFilterCtrls = (Misc::StatesDiffer((nOldFilter == FS_ADVANCED), (nNewFilter == FS_ADVANCED)) ||
+								Misc::StatesDiffer((nOldFilter == FS_SELECTED), (nNewFilter == FS_SELECTED)));
+
+	if (nNewFilter == FS_ADVANCED)
 	{
 		// Synchronise 'Find Tasks' dialog flags
 		VERIFY(m_findFilterHelper.UpdateFindDlgAdvancedFilter(sCustom, dwCustomFlags));
@@ -12008,7 +12008,7 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 		tdc.ClearFilter();
 	}
 
-	if (bUpdateFilterCtrls)
+	if (bRefreshFilterCtrls)
 		RefreshFilterBarControls();
 	else
 		CheckResizeFilterBar();
@@ -12040,7 +12040,7 @@ void CToDoListWnd::OnViewFilter()
 		DWORD dwCustomFlags = 0;
 		
 		dialog.GetFilter(filter, sCustom, dwCustomFlags);
-		OnChangeFilter(filter, sCustom, dwCustomFlags, TRUE);
+		DoChangeFilter(filter, sCustom, dwCustomFlags);
 	}
 }
 
@@ -12057,7 +12057,7 @@ void CToDoListWnd::OnViewRefreshfilter()
 	// refresh the current one
 	TDCFILTER filter;
 	CString sCustom;
-	DWORD dwCustomFlags;
+	DWORD dwCustomFlags = 0;
 
 	m_filterBar.GetFilter(filter, sCustom, dwCustomFlags);
 	
@@ -12067,7 +12067,7 @@ void CToDoListWnd::OnViewRefreshfilter()
 	}
 	else
 	{
-		OnChangeFilter(filter, sCustom, dwCustomFlags, FALSE);
+		DoChangeFilter(filter, sCustom, dwCustomFlags);
 
 		if (Prefs().GetExpandTasksOnLoad())
 			tdc.ExpandTasks(TDCEC_ALL);

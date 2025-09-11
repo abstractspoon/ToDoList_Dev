@@ -48,6 +48,7 @@ public:
 	const CTDCAttributeMap& GetVisibleEditFields() const;
 	const CTDCAttributeMap& GetVisibleFilterFields() const;
 
+	FILTER_SHOW GetFilter() const;
 	FILTER_SHOW GetFilter(TDCFILTER& filter) const;
 	void SetFilter(const TDCFILTER& filter);
 	BOOL FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom = NULL, DWORD dwCustomFlags = 0) const;

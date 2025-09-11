@@ -376,6 +376,11 @@ int CFilteredToDoCtrl::GetFilteredTasks(CTaskFile& tasks, const TDCGETTASKS& fil
 	return GetTasks(tasks, GetTaskView(), filter);
 }
 
+FILTER_SHOW CFilteredToDoCtrl::GetFilter() const
+{
+	return m_filter.GetFilter();
+}
+
 FILTER_SHOW CFilteredToDoCtrl::GetFilter(TDCFILTER& filter) const
 {
 	return m_filter.GetFilter(filter);
@@ -705,7 +710,7 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 			}
 			else
 			{
-				bWantTask = Misc::HasT(pTDS->GetTaskID(), m_aSelectedTaskIDsForFiltering);
+				bWantTask = Misc::HasT(dwTaskID, m_aSelectedTaskIDsForFiltering);
 
 				// check parents
 				if (!bWantTask && pFilter->bWantAllSubtasks)

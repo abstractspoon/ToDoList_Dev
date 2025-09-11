@@ -592,6 +592,7 @@ protected:
 	afx_msg LRESULT OnDoInitialDueTaskNotify(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnExportThreadFinished(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnFilterChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFindAddSearch(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFindApplyAsFilter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFindDeleteSearch(WPARAM wp, LPARAM lp);
@@ -614,7 +615,6 @@ protected:
 	afx_msg LRESULT OnPreferencesTestTool(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnRefreshUDTsInToolbar(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnReminderCompleteTask(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnSelchangeFilter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSessionStatusChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTimeTrackerGoToTasklist(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTimeTrackerLoadDelayedTasklist(WPARAM wParam, LPARAM lParam);
@@ -658,7 +658,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 		
 	// Pseudo-handlers
-	void OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bUpdateFilterCtrls);
 	void OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWhere);
 	void OnEditSetReminder(int nTDC, DWORD dwTaskID);
 	void OnEditUndoRedo(BOOL bUndo);
@@ -851,6 +850,7 @@ protected:
 	void SetToDoCtrlFocus(TDC_SETFOCUSTO nLocation);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	void DoMoveTask(TDC_MOVETASK nDirection);
+	void DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags/*, BOOL bUpdateFilterCtrls = -1*/);
 
 	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);
 	TDCEXPORTTASKLIST* PrepareNewExportAfterSave(int nTDC, const CTaskFile& tasks);
