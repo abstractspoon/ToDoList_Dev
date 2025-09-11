@@ -114,7 +114,6 @@ CRichEditBaseCtrl::~CRichEditBaseCtrl()
 BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	//{{AFX_MSG_MAP(CRichEditBaseCtrl)
 	//}}AFX_MSG_MAP
-	ON_WM_CREATE()
 	ON_WM_DESTROY()
 	ON_WM_SETFOCUS()
 	ON_WM_PAINT()
@@ -140,18 +139,6 @@ BOOL CRichEditBaseCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd
 {
 	return (CRichEditHelper::CreateRichEdit50(*this, dwStyle, rect, pParentWnd, nID, dwExStyle, m_bAutoRTL) ||
 			CRichEditHelper::CreateRichEdit20(*this, dwStyle, rect, pParentWnd, nID, dwExStyle, m_bAutoRTL));
-}
-
-int CRichEditBaseCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CRichEditCtrl::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	ASSERT_VALID(this);
-	
-	Initialise();
-		
-	return 0;
 }
 
 void CRichEditBaseCtrl::OnSetFocus(CWnd* pOldWnd)
@@ -239,6 +226,8 @@ void CRichEditBaseCtrl::PreSubclassWindow()
 void CRichEditBaseCtrl::Initialise()
 {
 	SetOLECallback(&m_callback);
+	SetMargins(m_rMargins);
+
 	EnableInlineSpellChecking(TRUE);
 	EnableAutoFontChanging(FALSE);
 	EnableAutoUrlDetection();
@@ -998,10 +987,32 @@ void CRichEditBaseCtrl::SetMargins(LPCRECT pMargins)
 	else
 		m_rMargins = *pMargins;
 
+	// Make sure we're big enough for our margins
+	// else SetRect() will fail
 	CRect rClient;
 	GetClientRect(rClient);
 
-	rClient -= m_rMargins;
+	int nCxMargin = (m_rMargins.left + m_rMargins.right);
+	int nCyMargin = (m_rMargins.top + m_rMargins.bottom);
+
+	if ((nCxMargin > 0) || (nCyMargin > 0))
+	{
+		CRect rRequired(rClient);
+
+		if (rRequired.right <= nCxMargin)
+			rRequired.right = (nCxMargin + 2);
+
+		if (rRequired.bottom <= nCyMargin)
+			rRequired.bottom = (nCyMargin + 2);
+
+		if (rRequired != rClient)
+		{
+			MoveWindow(rRequired);
+			rClient = rRequired;
+		}
+
+		rClient -= m_rMargins;
+	}
 	SetRect(rClient);
 }
 
