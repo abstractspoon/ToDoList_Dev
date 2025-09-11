@@ -187,11 +187,10 @@ public:
 	static BOOL FromDate(const COleDateTime& date, int& nDay, int& nMonth, int& nYear);
 	static COleDateTime ToDate(int nDay, int nMonth, int nYear);
 
-	// GREGORIAN ONLY
 	static CString GetDayOfWeekName(OLE_DAYOFWEEK nDOW, BOOL bShort = FALSE); // 1-7, sun-sat
-	static CString GetMonthName(int nMonth, BOOL bShort = FALSE); // 1-12, jan-nov
+	static CString GetMonthName(int nMonth, BOOL bShort = FALSE); // 1-12
 	static void GetDayOfWeekNames(BOOL bShort, CStringArray& aNames); // sun-sat
-	static void GetMonthNames(BOOL bShort, CStringArray& aMonths); // jan-dec
+	static void GetMonthNames(BOOL bShort, CStringArray& aMonths); // 1-12
 	static int GetMaxDayOfWeekNameWidth(CDC* pDC, BOOL bShort = FALSE);
 	static CSize GetMaxDayOfWeekNameExtent(CDC* pDC, BOOL bShort = FALSE);
 	static int GetMaxMonthNameWidth(CDC* pDC, BOOL bShort = FALSE);
