@@ -773,21 +773,23 @@ void CTDLFilterBar::RebuildOptionsCombo()
 
 BOOL CTDLFilterBar::WantShowFilter(TDC_ATTRIBUTE nType) const
 {
+	BOOL bAdvancedOrSelected = ((m_filter.nShow == FS_SELECTED) || m_filter.IsAdvanced());
+
 	switch (nType)
 	{
 	case TDCA_NONE:
 		return TRUE;
 
 	case TDCA_TASKNAME:
-		return !m_filter.IsAdvanced();
+		return !bAdvancedOrSelected;
 
 	default:
 		if ((nType >= TDCA_CUSTOMATTRIB_FIRST) && (nType <= TDCA_CUSTOMATTRIB_LAST))
-			return !m_filter.IsAdvanced();
+			return !bAdvancedOrSelected;
 		break;
 	}
 
-	return (!m_filter.IsAdvanced() && m_mapVisibility.Has(nType));
+	return (!bAdvancedOrSelected && m_mapVisibility.Has(nType));
 }
 
 void CTDLFilterBar::SetISODateFormat(BOOL bIso)
