@@ -1770,9 +1770,9 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nA
 BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDS, 
 											  TDC_ATTRIBUTE nAttribID, BOOL bIncludeBlank)
 {
+	// Sanity checks
 	ASSERT(m_undo.IsActive());
 
-	// Exclude references
 	if (!pTDIParent || pTDIParent->dwTaskRefID || !pTDS)
 	{
 		ASSERT(0);
@@ -2946,8 +2946,24 @@ TDC_SET CToDoCtrlData::RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TD
 	return SET_NOCHANGE;
 }
 
+// External
 BOOL CToDoCtrlData::ResetRecurringSubtaskOccurrences(DWORD dwTaskID)
 {
+//	CDWordSet aProcessedIDs;
+	return ResetRecurringSubtaskOccurrences(dwTaskID, CDWordSet());
+}
+
+// Internal
+BOOL CToDoCtrlData::ResetRecurringSubtaskOccurrences(DWORD dwTaskID, CDWordSet& aProcessedIDs)
+{
+	// Don't process the same real task more than once
+	DWORD dwTrueTaskID = GetTrueTaskID(dwTaskID);
+
+	if (aProcessedIDs.Has(GetTrueTaskID(dwTrueTaskID)))
+		return TRUE;
+
+	aProcessedIDs.Add(dwTrueTaskID);
+
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDS(dwTaskID, pTDS, FALSE);
 	
@@ -2955,17 +2971,17 @@ BOOL CToDoCtrlData::ResetRecurringSubtaskOccurrences(DWORD dwTaskID)
 	{
 		DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
 
-		TODOITEM* pTDI = NULL;
-		GET_TDI(dwSubtaskID, pTDI, FALSE);
+		TODOITEM* pTDISubtask = NULL;
+		GET_TDI(dwSubtaskID, pTDISubtask, FALSE);
 
-		if (pTDI->IsRecurring())
+		if (pTDISubtask->IsRecurring())
 		{
-			int nNumOccur = pTDI->trRecurrence.GetOccurrenceCount();
-			pTDI->trRecurrence.SetOccurrenceCount(nNumOccur, nNumOccur);
+			int nNumOccur = pTDISubtask->trRecurrence.GetOccurrenceCount();
+			pTDISubtask->trRecurrence.SetOccurrenceCount(nNumOccur, nNumOccur);
 		}
 
 		// then its subtasks
-		ResetRecurringSubtaskOccurrences(dwSubtaskID);
+		ResetRecurringSubtaskOccurrences(dwSubtaskID, aProcessedIDs); // RECURSIVE CALL
 	}
 
 	return TRUE;
