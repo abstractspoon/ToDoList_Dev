@@ -152,7 +152,7 @@ LRESULT CPopupEditCtrl::OnPECShow(WPARAM wp, LPARAM /*lp*/)
 {
 	Reset();
 
-	if (wp && !ShowSpinBuddy(TRUE))
+	if (!ShowSpinBuddy(TRUE) && wp)
 	{
 		// Prevent any window scrolling except ourselves 
 		// if we have a vertical scrollbar
@@ -212,26 +212,14 @@ void CPopupEditCtrl::Hide()
 
 BOOL CPopupEditCtrl::ShowSpinBuddy(BOOL bShow)
 {
-	if (m_pSpinBuddy && m_pSpinBuddy->GetSafeHwnd())
-	{
-		if (bShow)
-		{
-			m_pSpinBuddy->SetBuddy(this);
-			m_pSpinBuddy->ShowWindow(SW_SHOW);
-			m_pSpinBuddy->EnableWindow(TRUE);
+	if (!m_pSpinBuddy || !m_pSpinBuddy->GetSafeHwnd())
+		return FALSE;
 
-			return TRUE;
-		}
-		else
-		{
-			m_pSpinBuddy->SetBuddy(NULL);
-			m_pSpinBuddy->ShowWindow(SW_HIDE);
-			m_pSpinBuddy->EnableWindow(FALSE);
-		}
-	}
+	m_pSpinBuddy->SetBuddy(bShow ? this : NULL);
+	m_pSpinBuddy->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+	m_pSpinBuddy->EnableWindow(bShow);
 
-	// else
-	return FALSE;
+	return TRUE;
 }
 
 void CPopupEditCtrl::EndEdit(BOOL bCancel, BOOL bIntentional)
