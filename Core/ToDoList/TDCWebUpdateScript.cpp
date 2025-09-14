@@ -17,8 +17,8 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR UPDATE_SCRIPT_URL		= _T("http://www.abstractspoon.com/todolist_update_new.txt");
-const LPCTSTR PRERELEASE_SCRIPT_URL	= _T("http://www.abstractspoon.com/todolist_pre_new.txt");
+const LPCTSTR UPDATE_SCRIPT_URL		= _T("https://www.abstractspoon.com/todolist_update_new.txt");
+const LPCTSTR PRERELEASE_SCRIPT_URL	= _T("https://www.abstractspoon.com/todolist_pre_new.txt");
 
 const LPCTSTR SCRIPT_HEADER_VAL		= _T("ToDoList AbstractSpoon");
 
