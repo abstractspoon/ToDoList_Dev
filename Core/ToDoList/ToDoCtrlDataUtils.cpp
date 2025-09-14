@@ -1831,10 +1831,22 @@ int CTDCTaskComparer::Compare(double dNum1, double dNum2)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-// if GetSubtask() returns a reference it means we should not include it in our calcs
+// if GetSubtask() returns a reference it means that TDCS_INCLUDEREFERENCESINCALCS is not
+// defined and therefore we should not include the subtask in our calcs
 #define GET_SUBTASK(ptds, n, tdi, tds) (GetSubtask(ptds, n, tdi, tds) && !tdi->IsReference())
 
-#define CHECKSET_ALREADY_PROCESSED(map, tds, ret) if (map.Has(tds->GetTaskID())) return ret; map.Add(tds->GetTaskID())
+BOOL CTDCTaskCalculator::CheckSetAlreadyProcessed(DWORD dwTaskID, CDWordSet& mapProcessedIDs)
+{
+	if (mapProcessedIDs.Has(dwTaskID))
+		return TRUE;
+
+	mapProcessedIDs.Add(dwTaskID);
+	return FALSE;
+}
+
+// We check the true task ID because it's allowable for there to be 
+// multiple references to the same task within the same hierarchy
+#define CHECKSET_ALREADY_PROCESSED(map, tds, ret) if (CheckSetAlreadyProcessed(m_data.GetTrueTaskID(tds->GetTaskID()), map)) return ret;
 
 // ---------------------------------------------------------------------
 
@@ -3289,7 +3301,20 @@ BOOL CTDCTaskCalculator::IsTaskDone(const TODOITEM* pTDI, const TODOSTRUCTURE* p
 	if (dwExtraCheck & TDCCHECKCHILDREN)
 	{
 		if (HasStyle(TDCS_TREATSUBCOMPLETEDASDONE) && pTDS->HasSubTasks())
-			return !m_data.TaskHasIncompleteSubtasks(pTDS, FALSE);
+		{
+			if (m_data.TaskHasIncompleteSubtasks(pTDS, FALSE))
+				return FALSE;
+
+			// There's a very rare case where a task contains nothing but
+			// references and references are being excluded from the mix
+			// In such a case we make our decision on the basis of whether
+			// or not the task actually had any completed subtasks
+			if (!HasStyle(TDCS_INCLUDEREFERENCESINCALCS))
+				return m_data.TaskHasCompletedSubtasks(pTDS);
+
+			// else we can reliably say the subtasks were all completed
+			return TRUE;
+		}
 	}
 
 	// else

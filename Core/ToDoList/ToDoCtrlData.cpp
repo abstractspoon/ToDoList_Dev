@@ -3726,9 +3726,18 @@ BOOL CToDoCtrlData::TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const
 	
 	while (nPos--)
 	{
-		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nPos);
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nPos); 
+		const TODOITEM* pTDIChild = GetTask(pTDSChild);
+
+		if (pTDIChild->IsReference())
+		{
+			if (HasStyle(TDCS_INCLUDEREFERENCESINCALCS))
+				pTDIChild = GetTrueTask(pTDSChild);
+			else
+				continue;
+		}
 		
-		if (IsTaskDone(pTDSChild->GetTaskID()))
+		if (pTDIChild->IsDone())
 			return TRUE;
 		
 		// Grandchildren

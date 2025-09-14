@@ -149,6 +149,7 @@ protected:
 
 	static COleDateTime GetLatestDate(COleDateTime dtDate1, COleDateTime dtDate2, BOOL bNoTimeIsEndOfDay);
 	static COleDateTime GetEarliestDate(COleDateTime dtDate1, COleDateTime dtDate2, BOOL bNoTimeIsEndOfDay);
+	static BOOL CheckSetAlreadyProcessed(DWORD dwTaskID, CDWordSet& mapProcessedIDs);
 };
 
 //////////////////////////////////////////////////////////////////////
