@@ -1018,9 +1018,8 @@ void CRichEditBaseCtrl::SetMargins(LPCRECT pMargins)
 
 void CRichEditBaseCtrl::OnPaint()
 {
-	CPaintDC dc(this);
-
 	// Nasty bug in Windows RichEdit (reproducible in WordPad.exe).
+	// BUT only on windows 10 and up
 	//
 	// Conditions:
 	//
@@ -1033,10 +1032,12 @@ void CRichEditBaseCtrl::OnPaint()
 	//
 	// The richedit overwrites the top and bottom margins with a
 	// portion of the content instead of rendering them with the 
-	// approporiate background colour. So we have to do it ourselves.
+	// appropriate background colour. So we have to do it ourselves.
 	//
-	if (m_bHasTables && (m_rMargins.top > 0) || (m_rMargins.bottom > 0))
+	if (m_bHasTables && (COSVersion() >= OSV_WIN10) && (m_rMargins.top > 0) || (m_rMargins.bottom > 0))
 	{
+		CPaintDC dc(this);
+
 		// Fill and then clip out the top and bottom margins
 		CRect rClient;
 		GetClientRect(rClient);
@@ -1060,10 +1061,14 @@ void CRichEditBaseCtrl::OnPaint()
 			dc.FillSolidRect(rClip, crBack);
 			dc.ExcludeClipRect(rClip);
 		}
-	}
 
-	// do the default drawing
-	DefWindowProc(WM_PRINT, (WPARAM)dc.GetSafeHdc(), PRF_CLIENT);
+		// do the default drawing
+		DefWindowProc(WM_PRINT, (WPARAM)dc.GetSafeHdc(), PRF_CLIENT);
+	}
+	else // all else
+	{
+		Default();
+	}
 }
 
 LRESULT CRichEditBaseCtrl::OnEditSetBkgndColor(WPARAM wParam, LPARAM lParam)
