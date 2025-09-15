@@ -43,23 +43,34 @@ void CComboListboxPositioner::Release()
 
 BOOL CComboListboxPositioner::OnCallWndRetProc(const MSG& msg, LRESULT lr)
 {   
-	if (!m_bMovingListBox)
+	// Prevent re-entrancy
+	if (m_bMovingListBox)
+		return FALSE;
+		
+	switch (msg.message)
 	{
-		ASSERT (m_hCallWndRetHook);
-
-		if (msg.message == WM_WINDOWPOSCHANGED)
+	case WM_WINDOWPOSCHANGED:
 		{
+			// Sequence our checks to do the least work necessary
 			const WINDOWPOS* pWPos = (const WINDOWPOS*)msg.lParam;
 
-			if (!Misc::HasFlag(pWPos->flags, (SWP_NOMOVE | SWP_NOSIZE)) && (pWPos->cx || pWPos->cy))
-			{
-				if (::ClassMatches(msg.hwnd, WC_COMBOLBOX))
-				{
-					CAutoFlag af(m_bMovingListBox, TRUE);
-					FixupListBoxPosition(msg.hwnd, *pWPos);
-				}
-			}
+			// We're only interested in visible move/size events where the size is non-zero
+			if (Misc::HasFlag(pWPos->flags, (SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW)) || (!pWPos->cx && !pWPos->cy))
+				return FALSE;
+
+			// Ensure that it's parented to the desktop
+			if (::GetParent(msg.hwnd) != ::GetDesktopWindow())
+				return FALSE;
+				
+			// And that it's a combo-listbox
+			if (!::ClassMatches(msg.hwnd, WC_COMBOLBOX))
+				return FALSE;
+				
+			// Do the fixup
+			CAutoFlag af(m_bMovingListBox, TRUE);
+			FixupListBoxPosition(msg.hwnd, *pWPos);
 		}
+		break;
 	}
 	
 	return FALSE; // continue routing
@@ -67,12 +78,10 @@ BOOL CComboListboxPositioner::OnCallWndRetProc(const MSG& msg, LRESULT lr)
 
 void CComboListboxPositioner::FixupListBoxPosition(HWND hwndListbox, const WINDOWPOS& wpos)
 {
- 	CRect rNewPos(CPoint(wpos.x, wpos.y), CSize(wpos.cx, wpos.cy));
-	CPoint ptCursor(::GetMessagePos());
+	CRect rMonitor, rNewPos(CPoint(wpos.x, wpos.y), CSize(wpos.cx, wpos.cy));
+	GraphicsMisc::GetAvailableScreenSpace(rNewPos, rMonitor);
 
-	// We only fixup the X position because Windows handles the Y pos
-	if (GraphicsMisc::FitRectToScreen(rNewPos, &ptCursor) && (rNewPos.left != wpos.x))
-	{
-		::MoveWindow(hwndListbox, rNewPos.left, wpos.y, wpos.cx, wpos.cy, TRUE);
-	}
+	// Make sure at least some part of the listbox is visible
+	if (CRect().IntersectRect(rNewPos, rMonitor) && GraphicsMisc::FitRect(rNewPos, rMonitor) && (rNewPos.left != wpos.x))
+		::MoveWindow(hwndListbox, rNewPos.left, rNewPos.top, rNewPos.Width(), rNewPos.Height(), TRUE);
 }
