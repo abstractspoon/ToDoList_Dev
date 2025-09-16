@@ -840,26 +840,27 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	{
 		if (nCtlColor == CTLCOLOR_STATIC)
 		{
-			pDC->SetBkMode(TRANSPARENT);
+			COLORREF crBack = GetBkgndColor();
 
 			switch (pWnd->GetDlgCtrlID())
 			{
 			case IDC_TASKTIME:
 			case IDC_ELAPSEDTIME:
 				if (IsTrackingSelectedTasklistAndTask())
-					pDC->SetTextColor(255);
+					pDC->SetTextColor((RGBX(crBack).Luminance() < 128) ? colorPink : colorRed);
 				else
 					pDC->SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
 				break;
 
 			default:
 				if (!m_brBack.GetSafeHandle())
-					m_brBack.CreateSolidBrush(GetBkgndColor());
+					m_brBack.CreateSolidBrush(crBack);
 
 				hbr = (HBRUSH)m_brBack.GetSafeHandle();
 				pDC->SetTextColor(m_theme.crAppText);
 				break;
 			}
+			pDC->SetBkMode(TRANSPARENT);
 		}
 	}
 
