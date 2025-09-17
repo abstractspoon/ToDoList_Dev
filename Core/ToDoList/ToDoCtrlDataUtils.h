@@ -263,11 +263,13 @@ class CTDCTaskMatcher : protected CTDCDataHelperBase
 public:
 	CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders, const CContentMgr& mgrContent);
 
-	int FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CResultArray& aResults) const;
+	int FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sValue, BOOL bCheckDueToday, CResultArray& aResults) const;
+	int FindTasks(const SEARCHPARAM& rule, BOOL bCheckDueToday, CResultArray& aResults) const;
 	int FindTasks(const SEARCHPARAMS& query, BOOL bCheckDueToday, CResultArray& aResults) const;
 	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, BOOL bCheckDueToday, CResultArray& aResults) const;
 
-	int FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const;
+	int FindTasks(TDC_ATTRIBUTE nAttribID, FIND_OPERATOR nOp, const CString& sValue, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const;
+	int FindTasks(const SEARCHPARAM& rule, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const;
 	int FindTasks(const SEARCHPARAMS& query, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const;
 	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const;
 

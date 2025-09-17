@@ -175,6 +175,7 @@ unicode_debug\TDLTest.exe
     <ClCompile Include="TDCDEPENDENCYTest.cpp" />
     <ClCompile Include="TDCRECURRENCETest.cpp" />
     <ClCompile Include="TDCTaskCalculatorTest.cpp" />
+    <ClCompile Include="TDCTaskMatcherTest.cpp" />
     <ClCompile Include="TDCTaskTimeLogTest.cpp" />
     <ClCompile Include="TDLTaskCtrlBaseTest.cpp" />
     <ClCompile Include="TDLTest.cpp" />
@@ -205,6 +206,7 @@ unicode_debug\TDLTest.exe
     <ClInclude Include="TDCDEPENDENCYTest.h" />
     <ClInclude Include="TDCRECURRENCETest.h" />
     <ClInclude Include="TDCTaskCalculatorTest.h" />
+    <ClInclude Include="TDCTaskMatcherTest.h" />
     <ClInclude Include="TDCTaskTimeLogTest.h" />
     <ClInclude Include="TDLTaskCtrlBaseTest.h" />
     <ClInclude Include="TDLTest.h" />

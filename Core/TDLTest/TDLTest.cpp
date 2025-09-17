@@ -17,6 +17,7 @@
 #include "TDCTaskCalculatorTest.h"
 #include "TDCTaskTimeLogTest.h"
 #include "TDLTaskCtrlBaseTest.h"
+#include "TDCTaskMatcherTest.h"
 #include "TimeHelperTest.h"
 #include "ToDoCtrlDataTest.h"
 #include "ToDoCtrlMgrTest.h"
@@ -96,6 +97,7 @@ void DoTests(const CTestUtils& utils)
 	res += DOTEST(CTDCRECURRENCETest);
 	res += DOTEST(CTDCTaskCalculatorTest);
 	res += DOTEST(CTDCTaskTimeLogTest);
+	res += DOTEST(CTDCTaskMatcherTest);
 	res += DOTEST(CTDLTaskCtrlBaseTest);
 	res += DOTEST(CTimeHelperTest);
 	res += DOTEST(CToDoCtrlDataTest);
