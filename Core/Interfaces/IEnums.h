@@ -116,6 +116,10 @@ enum TDC_ATTRIBUTE
 	// pseudo attribute for Custom Attributes dialog
 	TDCA_TODAY,
 
+	// pseudo attributes for Find Tasks dialog
+	TDCA_BEGINGROUP,
+	TDCA_ENDGROUP,
+
 	// ADD NEW ATTRIBUTES HERE ONLY!
 	
 	// Hack to capture the value of the very last attribute

@@ -609,26 +609,52 @@ void CTDLFindTaskExpressionListCtrl::CancelEdit()
 
 BOOL CTDLFindTaskExpressionListCtrl::CanEditCell(int nRow, int nCol) const
 {
-	if (nRow < m_aSearchParams.GetSize())
+	int nNumRules = m_aSearchParams.GetSize();
+
+	if (nRow < nNumRules)
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-		if (nCol == VALUE_COL)
+		// special cases
+		switch (nCol)
 		{
-			// special cases
-			switch (rule.GetAttribType())
+		case VALUE_COL:
 			{
-			case FT_BOOL:
-			case FT_DEPENDENCY:
-				return FALSE;
-			}
+				switch (rule.GetAttribType())
+				{
+				case FT_BOOL:
+				case FT_DEPENDENCY:
+				case FT_GROUP:
+					return FALSE;
+				}
 
-			switch (rule.GetOperator())
+				switch (rule.GetOperator())
+				{
+				case FOP_SET:
+				case FOP_NOT_SET:
+					return FALSE;
+				}
+			}
+			break;
+
+		case OPERATOR_COL:
+			if (rule.GetAttribType() == FT_GROUP)
+				return FALSE;
+			break;
+
+		case ANDOR_COL:
+			if (rule.GetAttribute() == TDCA_BEGINGROUP)
 			{
-			case FOP_SET:
-			case FOP_NOT_SET:
 				return FALSE;
 			}
+			else if (nRow < (nNumRules - 1))
+			{
+				// If the next rule is a <end group> then disable
+				// the and/or of 'this' rule
+				if (m_aSearchParams[nRow + 1].GetAttribute() == TDCA_ENDGROUP)
+					return FALSE;
+			}
+			break;
 		}
 	}
 
@@ -1293,35 +1319,39 @@ void CTDLFindTaskExpressionListCtrl::BuildListCtrl()
 
 		// value
 		UpdateValueColumnText(nItem);
-
-		// and/or (but not for last row)
-		if (nParam < GetRuleCount() - 1)
-		{
-			CEnString sAndOr(rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR);
-			SetItemText(nItem, ANDOR_COL, sAndOr);
-		}
 	}
-
+	
+	RefreshAndOrColumnText();
 	ValidateListData();
 	SetCurSel(0);
 }
 
 void CTDLFindTaskExpressionListCtrl::RefreshAndOrColumnText()
 {
-	for (int nParam = 0; nParam < GetRuleCount(); nParam++)
+	int nNumRules = m_aSearchParams.GetSize();
+
+	for (int nRule = 0; nRule < nNumRules; nRule++)
 	{
-		const SEARCHPARAM& rule = m_aSearchParams[nParam];
-		
-		// and/or (but not for last row)
-		if (nParam < GetRuleCount() - 1)
+		const SEARCHPARAM& rule = m_aSearchParams[nRule];
+
+		// Hide text for last rule
+		BOOL bShowEmpty = (nRule == (nNumRules - 1));
+
+		// And for the beginning of a group
+		if (!bShowEmpty)
 		{
-			CEnString sAndOr(rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR);
-			SetItemText(nParam, ANDOR_COL, sAndOr);
+			bShowEmpty = (rule.GetAttribute() == TDCA_BEGINGROUP);
+
+			// and the last rule of a group
+			if (!bShowEmpty)
+			{
+				if (nRule < nNumRules - 1)
+					bShowEmpty = (m_aSearchParams[nRule + 1].GetAttribute() == TDCA_ENDGROUP);
+			}
 		}
-		else
-		{
-			SetItemText(nParam, ANDOR_COL, _T(""));
-		}
+
+		CEnString sAndOr(bShowEmpty ? 0 : (rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR));
+		SetItemText(nRule, ANDOR_COL, sAndOr);
 	}
 }
 

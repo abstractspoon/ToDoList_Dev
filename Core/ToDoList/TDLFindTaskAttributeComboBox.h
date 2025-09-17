@@ -27,6 +27,7 @@ public:
 protected:
 	DECLARE_MESSAGE_MAP()
 
+	virtual void BuildCombo();
 	virtual BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
 };
 

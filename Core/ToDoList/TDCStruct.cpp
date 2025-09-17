@@ -1113,8 +1113,8 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType() const
 		nAttribType = GetAttribType(nAttributeID, bRelativeDate);
 
 	ASSERT((nAttribType != FT_NONE) ||
-		(nAttributeID == TDCA_NONE) ||
-		   (nAttributeID == TDCA_SELECTION));
+			(nAttributeID == TDCA_NONE) ||
+			(nAttributeID == TDCA_SELECTION));
 
 	return nAttribType;
 }
@@ -1191,6 +1191,10 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 	case TDCA_DUETIME:
 	case TDCA_LASTMODDATE:
 		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
+
+	case TDCA_BEGINGROUP:
+	case TDCA_ENDGROUP:
+		return FT_GROUP;
 	}
 
 	// custom attribute type must be set explicitly by caller
@@ -1352,6 +1356,10 @@ void SEARCHPARAM::SetValue(const CString& sVal)
 		nValue = _ttoi(sVal);
 		break;
 
+	case FT_GROUP:
+		ASSERT(sVal.IsEmpty());
+		break;
+
 	default:
 		ASSERT(0);
 		break;
@@ -1435,10 +1443,16 @@ CString SEARCHPARAM::ValueAsString() const
 	case FT_ICON:
 	case FT_DEPENDENCY:
 		return sValue;
+
+	case FT_GROUP:
+		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 
 	// all else
-	ASSERT(0);
 	return _T("");
 }
 
@@ -1646,7 +1660,12 @@ void SEARCHPARAMS::InitAttributeMap() const
 		int nRule = aRules.GetSize();
 
 		while (nRule--)
-			mapAttrib.Add(aRules[nRule].nAttributeID);
+		{
+			const SEARCHPARAM& rule = aRules[nRule];
+
+			if (rule.GetAttribType() != FT_GROUP)
+				mapAttrib.Add(rule.nAttributeID);
+		}
 	}
 }
 
