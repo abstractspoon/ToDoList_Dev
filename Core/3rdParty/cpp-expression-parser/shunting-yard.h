@@ -12,12 +12,14 @@
 
 enum tokType { NONE, OP, VAR, NUM };
 
-struct TokenBase {
+struct TokenBase 
+{
   tokType type;
   virtual ~TokenBase() {}
 };
 
-template<class T> class Token : public TokenBase {
+template<class T> class Token : public TokenBase 
+{
 public:
   Token (T t, tokType type) : val(t) { this->type=type; }
   T val;
@@ -25,36 +27,37 @@ public:
 
 typedef std::queue<TokenBase*> TokenQueue_t;
 
-class calculator {
-private:
-  static std::map<std::string, int> opPrecedence;
-  static std::map<std::string, int> buildOpPrecedence();
-
+class calculator 
+{
 public:
-  static double calculate(const char* expr,
-      std::map<std::string, double>* vars = 0);
+	calculator() {}
+	calculator(const char* expr,
+			   std::map<std::string, double>* vars = 0,
+			   std::map<std::string, int> opPrecedence = opPrecedence);
+	~calculator();
+
+	void compile(const char* expr,
+				 std::map<std::string, double>* vars = 0,
+				 std::map<std::string, int> opPrecedence = opPrecedence);
+	double eval(std::map<std::string, double>* vars = 0);
+	std::string str();
+
+	static double calculate(const char* expr,
+							std::map<std::string, double>* vars = 0);
+private:
+	TokenQueue_t RPN;
+
+	static std::map<std::string, int> opPrecedence;
+	static std::map<std::string, int> buildOpPrecedence();
 
 private:
-  static double calculate(TokenQueue_t RPN,
-      std::map<std::string, double>* vars = 0);
-  static void cleanRPN(TokenQueue_t& rpn);
-  static TokenQueue_t toRPN(const char* expr,
-      std::map<std::string, double>* vars,
-      std::map<std::string, int> opPrecedence=opPrecedence);
+	static double calculate(TokenQueue_t RPN,
+							std::map<std::string, double>* vars = 0);
+	static void cleanRPN(TokenQueue_t& rpn);
+	static TokenQueue_t toRPN(const char* expr,
+							  std::map<std::string, double>* vars,
+							  std::map<std::string, int> opPrecedence = opPrecedence);
 
-private:
-  TokenQueue_t RPN;
-public:
-  ~calculator();
-  calculator(){}
-  calculator(const char* expr,
-      std::map<std::string, double>* vars = 0,
-      std::map<std::string, int> opPrecedence=opPrecedence);
-  void compile(const char* expr,
-      std::map<std::string, double>* vars = 0,
-      std::map<std::string, int> opPrecedence=opPrecedence);
-  double eval(std::map<std::string, double>* vars = 0);
-  std::string str();
 };
 
 #endif // _SHUNTING_YARD_H
