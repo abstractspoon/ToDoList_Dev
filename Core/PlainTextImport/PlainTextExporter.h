@@ -38,9 +38,12 @@ protected:
 	BOOL WANTPROJECT;
 
 protected:
-	bool InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
-	void ExportTask(const ITaskList* pSrcTaskFile, HTASKITEM hTask, 
+	BOOL InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
+	BOOL ExportTasklist(const ITaskList* pSrcTaskFile, CStdioFile& fileOut, int nDepth);
+	void ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 					CStdioFile& fileOut, int nDepth, BOOL bAndSiblings);
+
+	static CString FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate, BOOL bWantDate = TRUE);
 };
 
 #endif // !defined(AFX_PLAINTEXTEXPORTER_H__69016DB3_5424_49DF_A877_962E83BC6E6B__INCLUDED_)

@@ -7,6 +7,9 @@
 #include "tdcstruct.h"
 
 #include "..\shared\Localizer.h"
+#include "..\shared\EnMenu.h"
+#include "..\shared\EnColorDialog.h"
+#include "..\shared\ToolbarHelper.h"
 
 #include "..\3rdparty\XNamedColors.h"
 
@@ -47,25 +50,43 @@ BEGIN_MESSAGE_MAP(CTDLTaskAttributeCtrl, CWnd)
 	ON_WM_SIZE()
 	ON_WM_CREATE()
 	ON_WM_SETFOCUS()
+	ON_WM_CONTEXTMENU()
 
-	ON_COMMAND(ID_GROUP_ATTRIBUTES, OnGroupAttributes)
-	ON_COMMAND(ID_TOGGLE_SORT, OnToggleSorting)
+	ON_COMMAND(ID_ATTRIBCTRL_SINGLECLICKEDIT, OnToggleSingleClickEditing)
+	ON_COMMAND(ID_ATTRIBCTRL_TOGGLEGROUP, OnToggleGrouping)
+	ON_COMMAND(ID_ATTRIBCTRL_TOGGLESORT, OnToggleSorting)
+	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBUP, OnMoveAttributeUp)
+	ON_COMMAND(ID_ATTRIBCTRL_MOVEATTRIBDOWN, OnMoveAttributeDown)
+	ON_COMMAND(ID_ATTRIBCTRL_RESETMOVES, OnResetAttributeMoves)
+	ON_COMMAND(ID_ATTRIBCTRL_SETLABELCOLOR, OnSetLabelBkgndColor)
+	ON_COMMAND(ID_ATTRIBCTRL_CLEARLABELCOLOR, OnClearLabelBkgndColor)
+	ON_COMMAND(ID_ATTRIBCTRL_COPYATTRIBVALUES, OnCopyAttributeValue)
+	ON_COMMAND(ID_ATTRIBCTRL_PASTEATTRIBVALUES, OnPasteAttributeValue)
+	ON_COMMAND(ID_ATTRIBCTRL_CLEARATTRIBVALUES, OnClearAttributeValue)
+
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_MOVEATTRIBUP, OnUpdateMoveAttributeUp)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_MOVEATTRIBDOWN, OnUpdateMoveAttributeDown)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_RESETMOVES, OnUpdateResetAttributeMoves)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_SETLABELCOLOR, OnUpdateSetLabelBkgndColor)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_CLEARLABELCOLOR, OnUpdateClearLabelBkgndColor)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_COPYATTRIBVALUES, OnUpdateCopyAttributeValue)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_PASTEATTRIBVALUES, OnUpdatePasteAttributeValue)
+	ON_UPDATE_COMMAND_UI(ID_ATTRIBCTRL_CLEARATTRIBVALUES, OnUpdateClearAttributeValue)
+
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_TASKATTRIBUTES, OnItemChanged)
 
 	// These we just forward to our parent
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnEditTaskAttribute)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnClearTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnEditTaskReminder)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKREMINDER, OnClearTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCN_ATTRIBUTEEDITED, OnAttributeEdited)
 	ON_REGISTERED_MESSAGE(WM_TDCN_AUTOITEMADDEDDELETED, OnAutoItemAddedOrDeleted)
-	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnClearTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnToggleTimeTracking)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnAddTimeToLogFile)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTDEPENDENCIES, OnSelectDependencies)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_DISPLAYLINK, OnDisplayLink)
-	ON_REGISTERED_MESSAGE(WM_TDCM_COPYTASKATTRIBUTE, OnCopyTaskAttribute)
-	ON_REGISTERED_MESSAGE(WM_TDCM_PASTETASKATTRIBUTE, OnPasteTaskAttribute)
-	ON_REGISTERED_MESSAGE(WM_TDCM_CANCOPYTASKATTRIBUTE, OnCanCopyTaskAttribute)
-	ON_REGISTERED_MESSAGE(WM_TDCM_CANPASTETASKATTRIBUTE, OnCanPasteTaskAttribute)
 
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 
@@ -78,20 +99,16 @@ END_MESSAGE_MAP()
 #define FWD_MSG(msg, name) LRESULT CTDLTaskAttributeCtrl::name(WPARAM wp, LPARAM lp) { return GetParent()->SendMessage(msg, wp, lp); }
 
 FWD_MSG(WM_TDCM_EDITTASKATTRIBUTE,		OnEditTaskAttribute)
+FWD_MSG(WM_TDCM_CLEARTASKATTRIBUTE,		OnClearTaskAttribute)
 FWD_MSG(WM_TDCM_EDITTASKREMINDER,		OnEditTaskReminder)
+FWD_MSG(WM_TDCM_CLEARTASKREMINDER,		OnClearTaskReminder)
 FWD_MSG(WM_TDCN_ATTRIBUTEEDITED,		OnAttributeEdited)
 FWD_MSG(WM_TDCN_AUTOITEMADDEDDELETED,	OnAutoItemAddedOrDeleted)
-FWD_MSG(WM_TDCM_CLEARTASKATTRIBUTE,		OnClearTaskAttribute)
 FWD_MSG(WM_TDCM_TOGGLETIMETRACKING,		OnToggleTimeTracking)
 FWD_MSG(WM_TDCM_ADDTIMETOLOGFILE,		OnAddTimeToLogFile)
 FWD_MSG(WM_TDCM_SELECTDEPENDENCIES,		OnSelectDependencies)
 FWD_MSG(WM_TDCM_GETLINKTOOLTIP,			OnGetLinkTooltip)
 FWD_MSG(WM_TDCM_DISPLAYLINK,			OnDisplayLink)
-FWD_MSG(WM_TDCM_COPYTASKATTRIBUTE,		OnCopyTaskAttribute)
-FWD_MSG(WM_TDCM_PASTETASKATTRIBUTE,		OnPasteTaskAttribute)
-FWD_MSG(WM_TDCM_CANCOPYTASKATTRIBUTE,	OnCanCopyTaskAttribute)
-FWD_MSG(WM_TDCM_CANPASTETASKATTRIBUTE,	OnCanPasteTaskAttribute)
-
 FWD_MSG(WM_FE_GETFILEICON,				OnGetFileIcon)
 
 /////////////////////////////////////////////////////////////////////////////
@@ -121,7 +138,10 @@ int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 		return -1;
 
 	// Create toolbar
-	if (!m_toolbar.Create(this) || !m_toolbar.LoadToolBar(IDR_TASK_ATTRIBUTE_TOOLBAR, IDB_TASKATTRIB_TOOLBAR, colorMagenta))
+	if (!m_toolbar.CreateEx(this, (TBSTYLE_FLAT | TBSTYLE_WRAPABLE), WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
+		return -1;
+		
+	if (!m_toolbar.LoadToolBar(IDR_ATTRIBCTRL_TOOLBAR, IDB_ATTRIBCTRL_TOOLBAR, colorMagenta))
 		return -1;
 
 	if (!m_tbHelper.Initialize(&m_toolbar))
@@ -130,6 +150,9 @@ int CTDLTaskAttributeCtrl::OnCreate(LPCREATESTRUCT pCreateStruct)
 	// Create List
 	if (!m_lcAttributes.Create(this, IDC_TASKATTRIBUTES))
 		return -1;
+
+	m_mgrMenuIcons.Initialize(this);
+	m_mgrMenuIcons.AddImages(m_toolbar);
 
 	return 0;
 }
@@ -162,15 +185,28 @@ void CTDLTaskAttributeCtrl::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 }
 
-void CTDLTaskAttributeCtrl::OnGroupAttributes()
+void CTDLTaskAttributeCtrl::OnToggleGrouping()
 {
 	m_lcAttributes.ToggleGrouping();
+	UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnToggleSingleClickEditing()
+{
+	m_lcAttributes.SetSingleClickEditing(!m_lcAttributes.HasSingleClickEditing());
 	UpdateToolbarButtons();
 }
 
 void CTDLTaskAttributeCtrl::OnToggleSorting()
 {
 	m_lcAttributes.ToggleSortDirection();
+	UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnItemChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
+{
+	if (m_lcAttributes.IsSelectionChange((NMLISTVIEW*)pNMHDR))
+		UpdateToolbarButtons();
 }
 
 void CTDLTaskAttributeCtrl::LoadState(const CPreferences& prefs, LPCTSTR szKey)
@@ -186,7 +222,181 @@ void CTDLTaskAttributeCtrl::SaveState(CPreferences& prefs, LPCTSTR szKey) const
 
 void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 {
-	m_toolbar.GetToolBarCtrl().PressButton(ID_GROUP_ATTRIBUTES, m_lcAttributes.IsGrouped());
+	CToolBarCtrl& tb = m_toolbar.GetToolBarCtrl();
+	
+	tb.PressButton(ID_ATTRIBCTRL_SINGLECLICKEDIT, m_lcAttributes.HasSingleClickEditing());
+	tb.PressButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.IsGrouped());
+
+	tb.EnableButton(ID_ATTRIBCTRL_TOGGLEGROUP, m_lcAttributes.SupportsGrouping());
+	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBUP, m_lcAttributes.CanMoveSelectedAttribute(TRUE));
+	tb.EnableButton(ID_ATTRIBCTRL_MOVEATTRIBDOWN, m_lcAttributes.CanMoveSelectedAttribute(FALSE));
+	tb.EnableButton(ID_ATTRIBCTRL_RESETMOVES, m_lcAttributes.CanResetAttributeMoves());
+	tb.EnableButton(ID_ATTRIBCTRL_SETLABELCOLOR, m_lcAttributes.CanSetSelectedAttributeLabelBackgroundColor());
+	tb.EnableButton(ID_ATTRIBCTRL_CLEARLABELCOLOR, m_lcAttributes.CanClearSelectedAttributeLabelBackgroundColor());
+}
+
+void CTDLTaskAttributeCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+{
+	int nRow, nCol;
+
+	if (!m_lcAttributes.GetCurSel(nRow, nCol))
+		return; // eat
+
+	if ((pos.x == -1) && (pos.y == -1))
+	{
+		CRect rCell;
+
+		if (nCol == 0)
+			m_lcAttributes.GetItemRect(nRow, rCell, LVIR_LABEL);
+		else
+			m_lcAttributes.GetSubItemRect(nRow, nCol, LVIR_BOUNDS, rCell);
+
+		m_lcAttributes.ClientToScreen(rCell);
+
+		pos.x = ((rCell.left + rCell.right) / 2);
+		pos.y = ((rCell.top + rCell.bottom) / 2);
+	}
+
+	CMenu menu;
+	VERIFY(menu.LoadMenu(IDR_MISC));
+
+	CMenu* pPopup = menu.GetSubMenu((nCol == 0) ? MM_ATTRIBUTECTRLLABEL : MM_ATTRIBUTECTRLVALUE);
+	CToolbarHelper::PrepareMenuItems(pPopup, this);
+
+	VERIFY(pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, pos.x, pos.y, this));
+}
+
+void CTDLTaskAttributeCtrl::OnMoveAttributeUp()
+{
+	if (m_lcAttributes.MoveSelectedAttribute(TRUE))
+		UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnMoveAttributeDown()
+{
+	if (m_lcAttributes.MoveSelectedAttribute(FALSE))
+		UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnResetAttributeMoves()
+{
+	if (m_lcAttributes.ResetAttributeMoves())
+		UpdateToolbarButtons();
+}
+
+void CTDLTaskAttributeCtrl::OnSetLabelBkgndColor()
+{
+	CEnColorDialog dialog(m_lcAttributes.GetSelectedAttributeLabelBackgroundColor());
+
+	if (dialog.DoModal(CPreferences()) == IDOK)
+		m_lcAttributes.SetSelectedAttributeLabelBackgroundColor(dialog.GetColor());
+}
+
+void CTDLTaskAttributeCtrl::OnClearLabelBkgndColor()
+{
+	m_lcAttributes.ClearSelectedAttributeLabelBackgroundColor();
+}
+
+void CTDLTaskAttributeCtrl::OnCopyAttributeValue()
+{
+	GetParent()->SendMessage(WM_TDCM_COPYTASKATTRIBUTE, m_lcAttributes.GetSelectedAttributeID());
+}
+
+void CTDLTaskAttributeCtrl::OnPasteAttributeValue()
+{
+	GetParent()->SendMessage(WM_TDCM_PASTETASKATTRIBUTE, m_lcAttributes.GetSelectedAttributeID());
+}
+
+void CTDLTaskAttributeCtrl::OnClearAttributeValue()
+{
+	GetParent()->SendMessage(WM_TDCM_CLEARTASKATTRIBUTE, m_lcAttributes.GetSelectedAttributeID());
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateMoveAttributeUp(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcAttributes.CanMoveSelectedAttribute(TRUE));
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateMoveAttributeDown(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcAttributes.CanMoveSelectedAttribute(FALSE));
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateResetAttributeMoves(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcAttributes.CanResetAttributeMoves());
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateSetLabelBkgndColor(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcAttributes.CanSetSelectedAttributeLabelBackgroundColor());
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateClearLabelBkgndColor(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcAttributes.CanClearSelectedAttributeLabelBackgroundColor());
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateCopyAttributeValue(CCmdUI* pCmdUI)
+{
+	TDC_ATTRIBUTE nAttribID = m_lcAttributes.GetSelectedAttributeID();
+
+	if (GetParent()->SendMessage(WM_TDCM_CANCOPYTASKATTRIBUTE, nAttribID))
+	{
+		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
+		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
+
+		CEnString sMenuText;
+		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_COPYATTRIBVALUES : IDS_ATTRIBCTRL_COPYATTRIBVALUE), sAttrib);
+
+		pCmdUI->SetText(sMenuText);
+		pCmdUI->Enable(TRUE);
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+}
+
+void CTDLTaskAttributeCtrl::OnUpdatePasteAttributeValue(CCmdUI* pCmdUI)
+{
+	TDC_ATTRIBUTE nAttribID = m_lcAttributes.GetSelectedAttributeID(), nFromAttribID = TDCA_NONE;
+
+	if (GetParent()->SendMessage(WM_TDCM_CANPASTETASKATTRIBUTE, nAttribID, (LPARAM)&nFromAttribID))
+	{
+		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
+		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
+		CString sFromAttrib = m_lcAttributes.GetAttributeLabel(nFromAttribID);
+
+		CEnString sMenuText;
+		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_PASTEATTRIBVALUES : IDS_ATTRIBCTRL_PASTEATTRIBVALUE), sFromAttrib, sAttrib);
+
+		pCmdUI->SetText(sMenuText);
+		pCmdUI->Enable(TRUE);
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+}
+
+void CTDLTaskAttributeCtrl::OnUpdateClearAttributeValue(CCmdUI* pCmdUI)
+{
+	if (m_lcAttributes.CanEditSelectedCell())
+	{
+		BOOL bMultiSel = m_lcAttributes.HasMultiSelection();
+		CString sAttrib = m_lcAttributes.GetSelectedAttributeLabel();
+
+		CEnString sMenuText;
+		sMenuText.Format((bMultiSel ? IDS_ATTRIBCTRL_CLEARATTRIBVALUES : IDS_ATTRIBCTRL_CLEARATTRIBVALUE), sAttrib);
+
+		pCmdUI->SetText(sMenuText);
+		pCmdUI->Enable(m_lcAttributes.GetSelectedAttributeID() != TDCA_TASKNAME);
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
 }
 
 // -----------------------------------------------------------------------
@@ -195,7 +405,6 @@ void CTDLTaskAttributeCtrl::UpdateToolbarButtons()
 #define FWD_FUNC_VOID_0ARG(name) void CTDLTaskAttributeCtrl::name() { m_lcAttributes.name(); }
 
 FWD_FUNC_VOID_0ARG(RefreshDateTimeFormatting)
-FWD_FUNC_VOID_0ARG(RefreshSelectedTasksValues)
 
 // -----------------------------------------------------------------------
 
@@ -229,6 +438,7 @@ FWD_FUNC_VOID_1ARG(SelectValue,	TDC_ATTRIBUTE)
 FWD_FUNC_VOID_1ARG(SetCurrentFolder, const CString&)
 FWD_FUNC_VOID_1ARG(SetCompletionStatus, const CString&)
 FWD_FUNC_VOID_1ARG(SetPriorityColors, const CDWordArray&)
+FWD_FUNC_VOID_1ARG(SetNumPriorityRiskLevels, int)
 FWD_FUNC_VOID_1ARG(SetPercentDoneIncrement,	int)
 FWD_FUNC_VOID_1ARG(SetTimeTrackTaskID, DWORD)
 FWD_FUNC_VOID_1ARG(SetDefaultAutoListData, const TDCAUTOLISTDATA&)
@@ -244,6 +454,7 @@ CONST_FWD_FUNC_RET_1ARG(BOOL, GetTimeSpent, TDCTIMEPERIOD&)
 CONST_FWD_FUNC_RET_1ARG(int, GetDependencies, CTDCDependencyArray&)
 CONST_FWD_FUNC_RET_1ARG(int, GetFileLinks, CStringArray&)
 CONST_FWD_FUNC_RET_1ARG(BOOL, GetCost, TDCCOST&)
+CONST_FWD_FUNC_RET_1ARG(BOOL, IsAutoListDataReadOnly, TDC_ATTRIBUTE)
 
 // -----------------------------------------------------------------------
 

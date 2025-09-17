@@ -182,6 +182,11 @@ bool CWordCloudUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 		pMsg->pt.y);
 }
 
+bool CWordCloudUIExtensionBridgeWindow::DoIdleProcessing()
+{
+	return m_wnd->DoIdleProcessing();
+}
+
 bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
 	switch (nCmd)

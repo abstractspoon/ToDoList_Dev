@@ -35,6 +35,11 @@ namespace MDContentControl
 
 		// -----------------------------------------------------------------
 
+		const int WS_EX_RTLREADING = 0x00002000;
+		const int WS_EX_LEFTSCROLLBAR = 0x00004000;
+
+		// -----------------------------------------------------------------
+
 		public MDContentControlForm()
 		{
 			InitializeComponent();
@@ -49,6 +54,7 @@ namespace MDContentControl
 			contextMenuStrip1.ImageScalingSize = new Size(imageSize, imageSize);
 			contextMenuStrip1.Renderer = new UIThemeToolbarRenderer();
 
+			Win32.SyncRTLReadingWithParent(InputTextCtrl.Handle);
 			Win32.SetEditMargins(InputTextCtrl.Handle, DPIScaling.Scale(4));
 			Win32.RemoveClientEdge(InputTextCtrl.Handle);
 			Win32.AddBorder(InputTextCtrl.Handle);
@@ -134,7 +140,10 @@ namespace MDContentControl
 			}
 
 			var writer = new StringWriter();
-			var renderer = new HtmlRenderer(writer);
+			var renderer = new HtmlRenderer(writer)
+			{
+				UseNonAsciiNoEscape = true
+			};
 
 			pipeline.Setup(renderer);
 			renderer.Render(document);
@@ -272,6 +281,19 @@ namespace MDContentControl
 				InputTextCtrl.Focus();
 				m_RestoreInputFocusAfterUpdate = false;
 			}
+		}
+
+		private void HtmlPreview_Navigating(object sender, WebBrowserNavigatingEventArgs e)
+		{
+			var path = new Uri(e.Url.ToString()).LocalPath;
+
+			if (string.Compare(path, m_TempFile, true) != 0)
+			{
+				// Open everything other than m_TempFile externally
+				e.Cancel = true;
+				Process.Start(e.Url.ToString());
+			}
+
 		}
 
 		private void textBox1_TextChanged(object sender, EventArgs e)

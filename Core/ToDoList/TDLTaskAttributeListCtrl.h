@@ -34,29 +34,6 @@ class CTDCImageList;
 
 class CTDLTaskAttributeListCtrl : public CInputListCtrl
 {
-	// Private helper
-	class CFileDropTarget : public COleDropTargetEx
-	{
-	public:
-		CFileDropTarget(CTDLTaskAttributeListCtrl* pAtributeList);
-		
-	protected:
-		CTDLTaskAttributeListCtrl* m_pAttributeList;
-		int m_nDropHighlightedRow;
-		
-	protected:
-		virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-		virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
-		virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
-		virtual void OnDragLeave(CWnd* pWnd);
-		virtual DROPEFFECT OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
-		
-		BOOL CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const;
-		BOOL CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const;
-	};
-	
-	friend class CFileDropTarget;
-
 // Construction -------------------------------------------------------------
 public:
 	CTDLTaskAttributeListCtrl(const CToDoCtrlData& data,
@@ -71,17 +48,33 @@ public:
 public:
 	BOOL Create(CWnd* pParent, UINT nID);
 	void ToggleSortDirection();
+	BOOL HasMultiSelection() const { return (m_aSelectedTaskIDs.GetSize() > 1); }
+	BOOL HasFocus() const;
+
 	void ToggleGrouping();
 	BOOL IsGrouped() const { return m_bGrouped; }
+	BOOL SupportsGrouping() const { return CListCtrlItemGrouping::IsSupported(); }
+
+	BOOL MoveSelectedAttribute(BOOL bUp);
+	BOOL CanMoveSelectedAttribute(BOOL bUp) const;
+	BOOL ResetAttributeMoves();
+	BOOL CanResetAttributeMoves() const;
+
+	COLORREF GetSelectedAttributeLabelBackgroundColor() const;
+	void ClearSelectedAttributeLabelBackgroundColor();
+	BOOL CanClearSelectedAttributeLabelBackgroundColor() const;
+	void SetSelectedAttributeLabelBackgroundColor(COLORREF crBkgnd);
+	BOOL CanSetSelectedAttributeLabelBackgroundColor() const;
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
 	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
 	void SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly);
+	BOOL IsAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID) const;
 
 	TDC_ATTRIBUTE GetSelectedAttributeID() const;
 	CString GetSelectedAttributeLabel() const;
-
+	CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const;
 	void RefreshSelectedTasksValues();
 	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
@@ -93,6 +86,7 @@ public:
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetPercentDoneIncrement(int nAmount);
 	void SetTimeTrackTaskID(DWORD dwTaskID);
+	void SetNumPriorityRiskLevels(int nNumLevels);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 	void SelectValue(TDC_ATTRIBUTE nAttribID);
@@ -137,6 +131,8 @@ public:
 	void OnCustomAttributesChange();
 	void OnAttributeVisibilityChange();
 
+	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
+
 protected:
 	const CToDoCtrlData& m_data;
 	const CTDCImageList& m_ilIcons;
@@ -158,6 +154,8 @@ protected:
 
 	BOOL m_bGrouped;
 	BOOL m_bSplitting;
+	BOOL m_bTaskIDChangeSinceLastEdit; 
+
 	float m_fAttribColProportion;
 	DWORD m_dwTimeTrackingTask;
 
@@ -173,9 +171,10 @@ protected:
 	CFileEdit m_eSingleFileLink;
 	CTDLIconComboBox m_cbCustomIcons;
 	CToolTipCtrlEx m_tooltip;
-	CFileDropTarget m_dropFiles;
 	
 	mutable CIconCache m_iconCache;
+
+	UINT m_aPriorityRiskStrResIDs[TDC_PRIORITYORRISK_MAXLEVELS];
 
 protected:
 	//{{AFX_MSG(CTDLTaskAttributeListCtrl)
@@ -184,24 +183,27 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
-
 	afx_msg void OnTextEditOK(NMHDR* pNMHDR, LRESULT* pResult);
+
 	afx_msg void OnDateCloseUp(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDateChange(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDateKillFocus(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg void OnDependsChange();
-	afx_msg void OnTimePeriodChange();
-	afx_msg void OnSingleFileLinkChange();
+	afx_msg void OnDependsKillFocus();
+	afx_msg void OnTimePeriodKillFocus();
+	afx_msg void OnSingleFileLinkKillFocus();
+	afx_msg void OnTimeOfDaySelEndOK();
 
 	afx_msg void OnComboKillFocus(UINT nCtrlID);
 	afx_msg void OnComboCloseUp(UINT nCtrlID);
-	afx_msg void OnComboEditChange(UINT nCtrlID);
+	afx_msg void OnComboSelChange(UINT nCtrlID);
 
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEnEditButtonClick(WPARAM wParam, LPARAM lParam);
@@ -224,6 +226,8 @@ protected:
 	virtual BOOL DeleteSelectedCell();
 	virtual void OnCancelEdit();
 	virtual BOOL GetButtonRect(int nRow, int nCol, CRect& rBtn) const;
+	virtual int CompareItems(DWORD dwItemData1, DWORD dwItemData2, int nSortColumn) const;
+	virtual void GetCellEditRect(int nRow, int nCol, CRect& rCell) const;
 
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
@@ -233,9 +237,9 @@ protected:
 
 protected:
 	CString GetValueText(TDC_ATTRIBUTE nAttribID) const;
+	COleDateTime GetDateTime(TDC_ATTRIBUTE nAttribID) const;
 	TDC_ATTRIBUTE GetAttributeID(int nRow, BOOL bResolveCustomTimeFields = FALSE) const;
-	TDC_ATTRIBUTE MapCustomDateToTime(TDC_ATTRIBUTE nDateAttribID) const;
-	TDC_ATTRIBUTE MapCustomTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
+	TDC_ATTRIBUTE MapTimeToDate(TDC_ATTRIBUTE nTimeAttribID) const;
 
 	void Populate();
 	int GetGroupAttributes(TDC_ATTRIBUTEGROUP nGroup, CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, LPCTSTR>& mapAttrib) const;
@@ -246,17 +250,22 @@ protected:
 	void HideAllControls(const CWnd* pWndIgnore = NULL);
 	CWnd* GetEditControl(int nRow, BOOL bBtnClick);
 	void RefreshSelectedTasksValue(int nRow);
-	void NotifyParentEdit(int nRow);
-	BOOL DrawIcon(CDC* pDC, const CString& sIcon, const CRect& rText, BOOL bIconIsFile);
+	void NotifyParentEdit(int nRow, LPARAM bUnitsChange = FALSE);
+	BOOL DrawIcon(CDC* pDC, const CString& sIcon, CRect& rIcon, BOOL bIconIsFile);
  	BOOL GetCellPrompt(int nRow, const CString& sText, CString& sPrompt) const;
 	void HandleTimePeriodEdit(int nRow, BOOL bBtnClick);
 	CString FormatDate(const COleDateTime& date, BOOL bAndTime) const;
 	CString FormatTime(const COleDateTime& date, BOOL bNotSetIsEmpty) const;
-	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo);
+	BOOL CheckRecreateCombo(int nRow, CEnCheckComboBox& combo, BOOL bWantSort);
 	BOOL RowValueVaries(int nRow) const;
 	void GetSplitterRect(CRect& rSplitBar) const;
 	void RecalcColumnWidths(int nAttribColWidth = -1, int cx = -1);
-	BOOL SetValueText(int nRow, const CString& sNewText);
+	BOOL SetValueText(int nRow, const CString& sNewText, LPARAM bUnitsChange = FALSE);
+	void HandleDateEditCompletion();
+	DWORD GetSingleSelectedTaskID() const;
+
+	BOOL GetAttributeToMoveBelow(TDC_ATTRIBUTE nAttribID, BOOL bUp, TDC_ATTRIBUTE& nBelowAttribID) const;
+	BOOL IsAttributeMoveLimited(TDC_ATTRIBUTE nAttribID, BOOL bUp) const;
 
 	int HitTestButtonID(int nRow) const;
 	int HitTestButtonID(int nRow, const CRect& rBtn) const;
@@ -266,8 +275,8 @@ protected:
 	HICON GetButtonIcon(TDC_ATTRIBUTE nAttribID, int nBtnID, DWORD dwState) const;
 	BOOL DrawIconButton(CDC* pDC, TDC_ATTRIBUTE nAttribID, int nBtnID, const CString& sText, DWORD dwBaseState, CRect& rBtn) const;
 
-	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
-	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo);
+	void PrepareMultiSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort = TRUE);
+	void PrepareSingleSelCombo(int nRow, const CStringArray& aDefValues, const CStringArray& aUserValues, CEnCheckComboBox& combo, BOOL bWantSort = TRUE);
 	void PrepareSingleFileEdit(int nRow, const CString& sValue);
 	void PrepareDatePicker(int nRow, TDC_ATTRIBUTE nFallbackDate);
 	void PrepareTimeOfDayCombo(int nRow);
@@ -276,11 +285,37 @@ protected:
 	static int ParseMultiSelValues(const CString& sValues, CStringArray& aMatched, CStringArray& aMixed);
 	static CString FormatMultiSelItems(const CStringArray& aMatched, const CStringArray& aMixed);
 	static CPoint GetIconPos(const CRect& rText);
-	static BOOL IsCustomTime(TDC_ATTRIBUTE nAttribID);
 	static int HitTestExtraButton(int nRow, const CRect& rBtn, const CPoint& ptMouse, int nNumExtraBtns);
 	static BOOL GetExtraButtonRect(const CRect& rBtn, int nExtraBtn, CRect& rExtraBtn);
+	static CString FormatValueArray(const CStringArray& aValues);
+	static int SplitValueArray(const CString& sValues, CStringArray& aValues);
+	static void RebuildCombo(CEnCheckComboBox& combo, const CStringArray& aDefValues, const CStringArray& aUserValues, BOOL bMultiSel);
 
 private:
+	// ---------------------------------------------------------------------
+
+	class CFileDropTarget : public COleDropTargetEx
+	{
+	public:
+		CFileDropTarget(CTDLTaskAttributeListCtrl* pAtributeList);
+		
+	protected:
+		CTDLTaskAttributeListCtrl* m_pAttributeList;
+		int m_nDropHighlightedRow;
+		
+	protected:
+		virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+		virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+		virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
+		virtual void OnDragLeave(CWnd* pWnd);
+		virtual DROPEFFECT OnDragScroll(CWnd* pWnd, DWORD dwKeyState, CPoint point);
+		
+		BOOL CanDropFiles(const CPoint& point, COleDataObject* pDataObject, int& nRow, CStringArray& aFiles) const;
+		BOOL CanDropFiles(TDC_ATTRIBUTE nAttribID, const CStringArray& aFiles) const;
+	};
+	
+	friend class CFileDropTarget;
+	
 	// ---------------------------------------------------------------------
 
 	struct GROUPITEM
@@ -291,6 +326,8 @@ private:
 		int nGroupID;
 		CRect rItem;
 	};
+	
+	// ---------------------------------------------------------------------
 
 	class CSortedGroupItemArray : CArray<GROUPITEM, GROUPITEM&>
 	{
@@ -311,8 +348,6 @@ private:
 		static int SortProc(const void* item1, const void* item2);
 	};
 
-	CSortedGroupItemArray m_aSortedGroupedItems;
-
 	// ---------------------------------------------------------------------
 
 	struct ATTRIBGROUP
@@ -320,6 +355,8 @@ private:
 		TDC_ATTRIBUTEGROUP nGroup;
 		CString sName;
 	};
+	
+	// ---------------------------------------------------------------------
 
 	class CSortedGroupedHeaderArray : public CArray<ATTRIBGROUP, ATTRIBGROUP&>
 	{
@@ -330,6 +367,74 @@ private:
 		static int AscendingSortProc(const void* item1, const void* item2);
 		static int DescendingSortProc(const void* item1, const void* item2);
 	};
+
+	// ---------------------------------------------------------------------
+
+	struct ATTRIBSTATE
+	{
+		ATTRIBSTATE(UINT nLabelResID = 0, TDC_ATTRIBUTE nAttribID = TDCA_NONE, TDC_ATTRIBUTEGROUP nGroup = TDCAG_NONE);
+		ATTRIBSTATE(const TDCATTRIBUTE& attrib);
+		ATTRIBSTATE(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
+
+		BOOL IsCustom() const;
+
+		CString sLabel;
+		TDC_ATTRIBUTE nAttribID;
+		CString sCustAttribID;
+		TDC_ATTRIBUTEGROUP nGroup;
+		int nPos;
+		COLORREF crLabelBkgnd;
+	};
+
+	// ---------------------------------------------------------------------
+
+	class CAttributeStates
+	{
+	public:
+		CAttributeStates(const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
+
+		BOOL MoveAttribute(TDC_ATTRIBUTE nAttribID, TDC_ATTRIBUTE nBelowAttribID);
+		BOOL ResetOrder();
+		BOOL CanResetOrder() const;
+
+		BOOL SetLabelBkgndColor(TDC_ATTRIBUTE nAttribID, COLORREF crBkgnd);
+		BOOL ClearLabelBkgndColor(TDC_ATTRIBUTE nAttribID);
+		COLORREF GetLabelBkgndColor(TDC_ATTRIBUTE nAttribID) const;
+
+		int CompareItems(TDC_ATTRIBUTE nAttribID1, TDC_ATTRIBUTE nAttribID2) const;
+		BOOL GetNextAttribute(TDC_ATTRIBUTE nAttribID, BOOL bUp, BOOL bSameGroup, TDC_ATTRIBUTE& nNextAttribID) const;
+
+		void Save(CPreferences& prefs, LPCTSTR szKey) const;
+		void Load(const CPreferences& prefs, LPCTSTR szKey);
+
+		void OnCustomAttributesChange();
+
+	protected:
+		const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
+
+		CArray<ATTRIBSTATE, ATTRIBSTATE&> m_aAttributeItems;
+		CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, int, int> m_mapPositions;
+
+		CString m_sDefaultOrder;
+
+	private:
+		void RebuildItemPositions();
+		void Populate();
+		int GetAttribPos(TDC_ATTRIBUTE nAttribID) const;
+
+		CString GetItemsState(BOOL bIncBkgndColors = TRUE) const;
+		void SetItemsState(const CString& sState, BOOL bIncBkgndColors = TRUE);
+
+		static int SortByNameProc(const void* item1, const void* item2);
+		static int SortByPosProc(const void* item1, const void* item2);
+	};
+
+	// ---------------------------------------------------------------------
+	
+	CFileDropTarget m_dropFiles;
+	CSortedGroupItemArray m_aSortedGroupedItems;
+	CAttributeStates m_aAttribState;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

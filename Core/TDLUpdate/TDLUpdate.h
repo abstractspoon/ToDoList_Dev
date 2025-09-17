@@ -25,21 +25,13 @@ public:
 	CTDLUpdateApp();
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLUpdateApp)
 	virtual BOOL InitInstance();
-	//}}AFX_VIRTUAL
+	virtual int DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt);
 
+protected:
 	static void DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, const CPoint& ptPos,
 						 BOOL bPreRelease, BOOL bRestartElevated);
 
-// Implementation
-
-	//{{AFX_MSG(CTDLUpdateApp)
-		// NOTE - the ClassWizard will add and remove member functions here.
-		//    DO NOT EDIT what you see in these blocks of generated code !
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
 

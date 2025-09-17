@@ -58,7 +58,7 @@ namespace DayViewUIExtension
 			Locked = item.Locked;
 
 			if (EndDate == EndDate.Date)
-				EndDate = EndDate.AddSeconds(-1);
+				EndDate = EndDate.AddSeconds(-1); // end of day before
 		}
 
 		public override bool IsLongAppt(DateTime start, DateTime end)
@@ -80,6 +80,25 @@ namespace DayViewUIExtension
 		{
 			RealTask.CustomDates[AttributeId] = DateTime.MinValue;
 		}
+
+		private bool TreatAsDueToday
+		{
+			get
+			{
+				return (m_RealItem.TreatOverdueTasksAsDueToday && (base.EndDate.Date < DateTime.Now.Date));
+			}
+		}
+
+		public override DateTime EndDate
+		{
+			get
+			{
+				return (TreatAsDueToday ? TaskItem.EndOfDay(DateTime.Now) : base.EndDate);
+			}
+			set	{ base.EndDate = value; }
+		}
+
+		public bool HasCalculatedEndDate { get {  return TreatAsDueToday; } }
 
 		public string AttributeId { get; private set; }
 		public DateTime OriginalDate { get; private set; }

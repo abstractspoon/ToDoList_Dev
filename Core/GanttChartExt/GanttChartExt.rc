@@ -70,7 +70,7 @@ END
 IDD_GANTTTREE_DIALOG DIALOGEX 0, 0, 594, 274
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Dis&play",IDC_DISPLAY_LABEL,0,2,151,8
     COMBOBOX        IDC_DISPLAY,0,13,152,118,CBS_DROPDOWNLIST | 
@@ -79,14 +79,15 @@ BEGIN
     COMBOBOX        IDC_SNAPMODES,159,13,79,161,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Snap Mode",IDC_SNAPMODES_LABEL,159,2,79,8
-    LTEXT           "&Visible Date Range",IDC_ACTIVEDATERANGE_LABEL,354,3,
-                    233,8
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,243,12,106,13
     CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,353,
                     12,112,13
     CONTROL         "",IDC_GANTTCHART_FRAME,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,0,32,587,235
+    LTEXT           "Acti&ve Date Range:",IDC_ACTIVEDATERANGE_LABEL,354,2,65,
+                    8
+    LTEXT           "from-to",IDC_ACTIVEDATERANGE_TEXT,425,2,96,8
 END
 
 

@@ -9,6 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <locale.h>
 #include <afxtempl.h>
 
 //////////////////////////////////////////////////////////////////////
@@ -32,16 +33,34 @@ enum
 
 //////////////////////////////////////////////////////////////////////
 
-#ifdef _UNICODE
 static const CLIPFORMAT CB_TEXTFORMAT =	CF_UNICODETEXT;
-#else
-static const CLIPFORMAT CB_TEXTFORMAT =	CF_TEXT;
-#endif
 
 //////////////////////////////////////////////////////////////////////
 
 #undef _ttof
 #define _ttof(str) Misc::Atof(str)
+
+//////////////////////////////////////////////////////////////////////
+
+class CTempLocale
+{
+public:
+	CTempLocale(const CString& sLocale); // LC_ALL
+	CTempLocale(int nCategory, const CString& sLocale);
+	virtual ~CTempLocale();
+
+	void ChangeLocale(const CString& sAltLocale);
+
+	static CString Current(int nCategory = LC_ALL);
+
+protected:
+	int m_nCategory;
+	CString m_sPrevLocale;
+
+protected:
+	void Initialise(int nCategory, const CString& sLocale);
+
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -80,8 +99,8 @@ namespace Misc
 	CString GetAM();
 	CString GetPM();
 	CString GetTimeSeparator();
-	CString GetTimeFormat(BOOL bIncSeconds = TRUE);
-	CString GetShortDateFormat(BOOL bIncDOW = FALSE);
+	CString GetTimeFormat(BOOL bIncSeconds = TRUE, BOOL bIso = FALSE);
+	CString GetShortDateFormat(BOOL bIncDOW = FALSE, BOOL bIso = FALSE);
 	BOOL ShortDateFormatHasMonthBeforeDay();
 	CString GetDateSeparator();
 	CString GetLocaleInfo(LCTYPE lcType, int nBufSize = 1024);
@@ -91,12 +110,15 @@ namespace Misc
 	BOOL MatchAll(const CDWordArray& array1, const CDWordArray& array2, BOOL bOrderSensitive = FALSE);
 	BOOL MatchAny(const CDWordArray& array1, const CDWordArray& array2);
 	
+	int AppendItems(const CStringArray& aFrom, CStringArray& aTo, BOOL bRemoveDuplicates = FALSE, BOOL bCaseSensitiveRemove = FALSE);
+	BOOL AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
 	int RemoveItems(const CStringArray& aItems, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	int RemoveEmptyItems(CStringArray& aFrom);
+	int RemoveDuplicates(CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	BOOL RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
-	int AddUniqueItems(const CStringArray& aItems, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
-	int AddUniqueItems(const CDWordArray& aItems, CDWordArray& aTo);
-	BOOL AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
+
+	int AppendItems(const CDWordArray& aFrom, CDWordArray& aTo, BOOL bRemoveDuplicates = FALSE);
+	int RemoveDuplicates(CDWordArray& aFrom);
 
 	CString GetLongestItem(const CStringArray& aValues);
 	int GetMaximumItemLength(const CStringArray& aValues);
@@ -117,7 +139,7 @@ namespace Misc
 	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrimResults = TRUE);
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrimResults = TRUE);
 	
-	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLength = -1);
+	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLengthInChars = -1);
 	CString SplitLeft(const CString& sText, TCHAR cDelim, BOOL bTrimResult = TRUE);
 	CString SplitLeft(const CString& sText, LPCTSTR szDelim, BOOL bTrimResult = TRUE);
 	CString Left(const CString& sText, int nLength, BOOL bNearestWord);
@@ -180,6 +202,7 @@ namespace Misc
 	BOOL HasEmpty(const CStringArray& aItems);
 	CString Last(const CStringArray& aText);
 	CString& Last(CStringArray& aText);
+	void Reverse(CString& sText);
 
 	int FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos = -1);
 	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE);
@@ -197,7 +220,7 @@ namespace Misc
 	int GetNextValue(int nValue, int nIncrement);
 	BOOL IsNumber(const CString& sValue);
 	BOOL IsSymbol(const CString& sValue);
-	BOOL StateChanged(BOOL b1, BOOL b2);
+	BOOL StatesDiffer(BOOL bState1, BOOL bState2);
 
 	// These use regional settings
 	CString FormatNumber(int nVal, LPCTSTR szTrail = NULL);
@@ -220,11 +243,13 @@ namespace Misc
 	BOOL IsScreenSaverActive();
 	BOOL IsScreenReaderActive(BOOL bCheckForMSNarrator = TRUE);
 	BOOL IsMSNarratorActive();
-	LANGID GetUserDefaultUILanguage();
-	LANGID GetUserKeyboardLanguage();
 	BOOL IsMetricMeasurementSystem();
 	BOOL IsHighContrastActive();
 	BOOL IsFullScreenAppActive();
+
+	LANGID GetUserDefaultUILanguage();
+	LANGID GetUserKeyboardLanguage();
+	LANGID GetPrimaryLanguage();
 
 	BOOL ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason);
 	BOOL ShutdownBlockReasonDestroy(HWND hWnd);
@@ -256,7 +281,7 @@ namespace Misc
 #endif
 }
 
-// Template helpers
+// Template helpers ///////////////////////////////////////////////////////
 namespace Misc  
 {
 	template <class T>
@@ -546,7 +571,7 @@ namespace Misc
 			{
 				map1.GetNextAssoc(pos, keySrc, valueSrc);
 				
-				if (!map2.Lookup(keySrc, valueDest) || (valueDest != valueSrc))
+				if (!map2.Lookup(keySrc, valueDest) || !(valueDest == valueSrc))
 					return FALSE;
 			}
 		}
@@ -570,7 +595,7 @@ namespace Misc
 			{
 				map1.GetNextAssoc(pos, sKeySrc, valueSrc);
 
-				if (!map2.Lookup(sKeySrc, valueDest) || (valueDest != valueSrc))
+				if (!map2.Lookup(sKeySrc, valueDest) || !(valueDest == valueSrc))
 					return FALSE;
 			}
 		}

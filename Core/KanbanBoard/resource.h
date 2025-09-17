@@ -85,6 +85,9 @@
 #define IDC_POPULATECOLUMNS             16048
 #define IDC_MOVECOL_UP                  16049
 #define IDC_MOVECOL_DOWN                16050
+#define IDC_SPECFIFYFULLCOLOUR          16051
+#define IDC_SETFULLCOLOR                16052
+#define IDC_ALTOVERRIDESMAXCOUNT        16053
 #define ID_KANBAN_GOTOTODAY             32774
 #define ID_KANBAN_PREFS                 32775
 #define ID_PREFS                        32775
@@ -175,6 +178,7 @@
 #define IDS_OPTIONS_SORTGROUPSASCENDING 57731
 #define IDS_OPTIONS_HIDENONEGROUP       57732
 #define IDS_OPTIONS_SORTNONEGROUPBELOW  57733
+#define IDS_COLUMNFULL                  57734
 
 // Next default values for new objects
 // 
@@ -182,7 +186,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        16015
 #define _APS_NEXT_COMMAND_VALUE         32784
-#define _APS_NEXT_CONTROL_VALUE         16051
+#define _APS_NEXT_CONTROL_VALUE         16054
 #define _APS_NEXT_SYMED_VALUE           16000
 #endif
 #endif

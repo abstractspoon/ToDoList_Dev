@@ -30,12 +30,14 @@ public:
 
 protected:
 	CGraphColorMap m_mapColors;
+	CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CString, CString&> m_mapCustAttribIDs;
 
 protected:
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
+	int GetRowColors(int nRow, CColorArray& aColors) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

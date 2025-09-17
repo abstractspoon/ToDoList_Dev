@@ -67,6 +67,10 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CGraphsMap& mapGraphs, BURNDO
 			// Set selection to the currently active graph
 			if (nActiveGraph == nGraph)
 				nSelRow = nRow;
+
+			// Cache custom attribute IDs for later lookups
+			if (IsCustomAttributeGraph(nGraph))
+				m_mapCustAttribIDs[nGraph] = mapGraphs.GetCustomAttributeID(nGraph);
 		}
 	}
 
@@ -75,8 +79,6 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CGraphsMap& mapGraphs, BURNDO
 
 	while (nColor--)
 		AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(50), ILCT_BROWSE);
-
-	RefreshItemHeight();
 
 	if (nSelRow != -1)
 	{
@@ -92,17 +94,49 @@ BOOL CBurndownGraphColorListCtrl::CanEditCell(int nRow, int nCol) const
 	if (!CInputListCtrl::CanEditCell(nRow, nCol))
 		return FALSE;
 
-	return (nCol <= m_mapColors.GetColorCount((BURNDOWN_GRAPH)GetItemData(nRow)));
+	CColorArray aUnused;
+	return (nCol <= GetRowColors(nRow, aUnused));
+}
+
+int CBurndownGraphColorListCtrl::GetRowColors(int nRow, CColorArray& aColors) const
+{
+	BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)GetItemData(nRow);
+
+	if (!IsCustomAttributeGraph(nGraph))
+		return m_mapColors.GetColors(nGraph, aColors);
+
+	// else
+	CString sCustAttribID;
+	VERIFY(m_mapCustAttribIDs.Lookup(nGraph, sCustAttribID));
+
+	return m_mapColors.GetColors(sCustAttribID, aColors);
 }
 
 void CBurndownGraphColorListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
 {
-	BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)GetItemData(nItem);
+	CColorArray aColors;
+	VERIFY(GetRowColors(nItem, aColors));
 
-	CEnColorDialog dialog(m_mapColors.GetColor(nGraph, (nCol - 1)));
+	CEnColorDialog dialog(aColors[nCol - 1]);
 
 	if (dialog.DoModal() == IDOK)
-		m_mapColors.SetColor(nGraph, (nCol - 1), dialog.GetColor());
+	{
+		aColors.SetAt((nCol - 1), dialog.GetColor());
+
+		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)GetItemData(nItem);
+
+		if (IsCustomAttributeGraph(nGraph))
+		{
+			CString sCustAttribID;
+			VERIFY(m_mapCustAttribIDs.Lookup(nGraph, sCustAttribID));
+
+			m_mapColors.SetColors(sCustAttribID, aColors);
+		}
+		else
+		{
+			m_mapColors.SetColors(nGraph, aColors);
+		}
+	}
 }
 
 void CBurndownGraphColorListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
@@ -111,12 +145,13 @@ void CBurndownGraphColorListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 {
 	if (nCol > 0)
 	{
-		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)GetItemData(nRow);
+		CColorArray aColors;
+		VERIFY(GetRowColors(nRow, aColors));
 
-		if (m_mapColors.GetColorCount(nGraph) < nCol)
+		if (nCol > aColors.GetSize()) // first column is graph title
 			return;
 
-		COLORREF color = m_mapColors.GetColor(nGraph, (nCol - 1));
+		COLORREF color = aColors[nCol - 1];
 		ASSERT(color != CLR_NONE);
 
 		CRect rColor(rText);

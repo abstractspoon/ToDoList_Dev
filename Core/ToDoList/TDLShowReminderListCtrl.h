@@ -44,9 +44,13 @@ public:
 
 	void DeleteAllItems();
 	BOOL RestoreFocusToList(int nPrevSel);
+	void SetISODateFormat(BOOL bISODates);
 
 protected:
-	BOOL m_bHasIcons;
+	int m_nTextOffset;
+	BOOL m_bModifyingReminders;
+	BOOL m_bISODates;
+
 	CString m_sPrefsKey;
 	DWORD m_dwNextReminderID;
 	CTDCReminderMap m_mapReminders;
@@ -64,9 +68,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void UpdateIconStatus();
+	void RecalcTextOffset();
+	int GetTextOffset(const TDCREMINDER& rem) const;
 	void RecalcColumnWidths();
-	void UpdateReminder(const TDCREMINDER& rem, int nItem);
+	void UpdateItemText(int nItem, const TDCREMINDER& rem);
+	void ReformatReminderDates();
 
 };
 

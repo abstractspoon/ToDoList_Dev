@@ -18,30 +18,16 @@ class CGanttCtrl;
 
 class CGanttSnapComboBox : public CComboBox
 {
-// Construction
 public:
 	CGanttSnapComboBox();
+	virtual ~CGanttSnapComboBox();
 
 	void Rebuild(GTLC_MONTH_DISPLAY nDisplay, GTLC_SNAPMODE nSnap);
 
 	BOOL SelectMode(GTLC_SNAPMODE nSnap);
 	GTLC_SNAPMODE GetSelectedMode() const;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CGanttSnapComboBox)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CGanttSnapComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CGanttSnapComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 };
 

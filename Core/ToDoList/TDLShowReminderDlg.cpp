@@ -10,6 +10,7 @@
 #include "..\Shared\DateHelper.h"
 #include "..\Shared\autoflag.h"
 #include "..\Shared\dlgunits.h"
+#include "..\Shared\holdredraw.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -54,7 +55,7 @@ void CTDLShowReminderDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SNOOZEUNTILDATE, m_dtcSnoozeDate);
 	DDX_Control(pDX, IDC_SNOOZEUNTILTIME, m_cbSnoozeTime);
 
-	ASSERT(m_cbSnoozeFor.GetCount());
+//	ASSERT(m_cbSnoozeFor.GetCount());
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -195,10 +196,12 @@ void CTDLShowReminderDlg::OnModify()
 {
 	TDCREMINDER rem;
 
-	if (CanModifyReminders() && m_lcReminders.GetSelectedReminder(rem) != -1)
+	if (CanModifyReminders())
 	{
+		if (m_lcReminders.GetSelectedReminder(rem) != -1)
 		{
 			CAutoFlag af(m_bModifyingReminder, TRUE);
+			CHoldRedraw hr(m_lcReminders);
 
 			EnableDisableModify();
 			DoModifyReminder(rem);
@@ -223,6 +226,7 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 		(!bAll && m_lcReminders.GetSelectedReminders(aRem)))
 	{
 		CAutoFlag af(m_bModifyingList, TRUE);
+		CHoldRedraw hr(m_lcReminders);
 
 		for (int nRem = 0; nRem < aRem.GetSize(); nRem++)
 			DoSnoozeReminder(aRem[nRem]);
@@ -295,6 +299,7 @@ void CTDLShowReminderDlg::OnDismiss()
 	{
 		int nPrevSel = m_lcReminders.GetLastSel();
 		{
+			CHoldRedraw hr(m_lcReminders);
 			CAutoFlag af(m_bModifyingList, TRUE);
 
 			for (int nRem = 0; nRem < aRem.GetSize(); nRem++)
@@ -384,6 +389,15 @@ BOOL CTDLShowReminderDlg::CanModifyReminders() const
 	return (!m_bModifyingReminder && (m_lcReminders.GetSelectedCount() == 1));
 }
 
+void CTDLShowReminderDlg::SetISODateTimeFormat(BOOL bIso) 
+{ 
+	m_bISODateTimes = bIso;
+
+	m_dtcSnoozeDate.SetISOFormat(bIso); 
+	m_lcReminders.SetISODateFormat(bIso);
+	m_cbSnoozeTime.SetISOFormat(bIso);
+}
+
 void CTDLShowReminderDlg::UpdateControls()
 {
 	TDCREMINDER rem;
@@ -402,12 +416,13 @@ void CTDLShowReminderDlg::UpdateControls()
 	EnableDisableControls();
 }
 
-void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	if (!m_bModifyingList)
+	if (!m_bModifyingList && CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+	{
 		UpdateControls();
-
-	*pResult = 0;
+		*pResult = 0;
+	}
 }
 
 void CTDLShowReminderDlg::OnDblClkReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult) 

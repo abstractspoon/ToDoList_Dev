@@ -11,11 +11,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "tdcrecurrence.h"
-
 #include <afxtempl.h>
 
 ///////////////////////////////////////////////////////////////////////////////////
+
+class COleDateTimeRange;
 
 struct TODOITEM;
 
@@ -40,8 +40,6 @@ protected:
 	int CalcNextOccurrences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const;
 	BOOL GetFromDate(COleDateTime& dtFrom) const;
 	int CalcDaysToNextOccurrence(const COleDateTime& dtTo) const;
-
-	BOOL CanRecur() const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////

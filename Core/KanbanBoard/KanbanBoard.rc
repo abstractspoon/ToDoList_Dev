@@ -154,9 +154,9 @@ BEGIN
                     WS_EX_TRANSPARENT
 END
 
-IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 390
+IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 425
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "S&ort subtasks below their respective parent task",
                     IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
@@ -183,7 +183,7 @@ BEGIN
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,278,243,94
     GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,233,
-                    330,147,0,WS_EX_TRANSPARENT
+                    330,179,0,WS_EX_TRANSPARENT
     GROUPBOX        "Display the following attributes for each task",
                     IDC_STATIC,7,69,330,124
     CONTROL         "&Hide empty attribute values",IDC_HIDEEMPTYATTRIBS,
@@ -191,6 +191,13 @@ BEGIN
     PUSHBUTTON      "Move &Up",IDC_MOVECOL_UP,268,278,59,14
     PUSHBUTTON      "Move &Down",IDC_MOVECOL_DOWN,268,297,59,14
     PUSHBUTTON      "&Populate",IDC_POPULATECOLUMNS,268,358,59,14
+    CONTROL         "Background colour for 'Full' columns",
+                    IDC_SPECFIFYFULLCOLOUR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,16,380,145,10
+    PUSHBUTTON      "S&et...   ",IDC_SETFULLCOLOR,207,379,52,13,BS_RIGHT
+    CONTROL         "'Alt' key overrides 'Max Count' when dragging tasks",
+                    IDC_ALTOVERRIDESMAXCOUNT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,16,395,321,10
 END
 
 
@@ -215,7 +222,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 337
         TOPMARGIN, 7
-        BOTTOMMARGIN, 383
+        BOTTOMMARGIN, 418
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -312,7 +319,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_ATTRIBVALUES        "Attribute Values"
-    IDS_MAXTASKCOUNT        "Maximum Tasks"
+    IDS_MAXTASKCOUNT        "Max Count"
     IDS_NEWCOLUMN           "<New Column>"
     IDS_CATEGORYATTRIB      "Category"
     IDS_ALLOCTOATTRIB       "Allocated To"
@@ -361,7 +368,7 @@ BEGIN
     IDS_DISPLAY_EXTERNALID  "External ID"
     IDS_DISPLAY_RECURRENCE  "Recurrence"
     IDS_DISPLAY_PARENT      "Parent"
-    IDS_FIXEDCOLUMNS        "- Fixed Columns -"
+    IDS_FIXEDCOLUMNS        "%s (Fixed Columns)"
     IDS_DELETEALLROWS       "Do you want to delete the existing column definitions?"
     IDS_BKGNDCOLOR          "Colour"
     IDS_DISPLAY_TASKID      "ID"
@@ -408,6 +415,7 @@ BEGIN
     IDS_OPTIONS_SORTGROUPSASCENDING "Sort groups ascending"
     IDS_OPTIONS_HIDENONEGROUP "Hide <none> group"
     IDS_OPTIONS_SORTNONEGROUPBELOW "Sort <none> group below other groups"
+    IDS_COLUMNFULL          "Full"
 END
 
 #endif    // English (Australia) resources

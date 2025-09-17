@@ -292,7 +292,7 @@ DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
 }
 
-LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
+LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
@@ -338,7 +338,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 		if (hwndList == m_lcColumns)
 		{
 			// columns handled by base class
-			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD);
+			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD, aColOrder, aColWidths);
 		}
 
 		switch (pLVCD->nmcd.dwDrawStage)
@@ -404,7 +404,7 @@ void CTDLTaskListCtrl::OnNotifySplitterChange(int nSplitPos)
 	}
 }
 
-int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
+int CTDLTaskListCtrl::InsertTaskItem(DWORD dwTaskID, int nPos)
 {
 	if (FindTaskItem(dwTaskID) != -1)
 	{
@@ -511,27 +511,27 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) co
 
 BOOL CTDLTaskListCtrl::SetSortGroupsAscending(BOOL bAscending)
 {
-	if (!Misc::StateChanged(m_bSortGroupsAscending, bAscending))
+	if (!Misc::StatesDiffer(m_bSortGroupsAscending, bAscending))
 		return FALSE;
 
 	m_bSortGroupsAscending = bAscending;
 
 	if ((GetGroupCount() > 1) && GetSafeHwnd())
-		Resort(FALSE);
+		Resort();
 
 	return TRUE;
 }
 
 BOOL CTDLTaskListCtrl::SetSortNoneGroupBelow(BOOL bBelow)
 {
-	if (!Misc::StateChanged(m_bSortNoneGroupBelow, bBelow))
+	if (!Misc::StatesDiffer(m_bSortNoneGroupBelow, bBelow))
 		return FALSE;
 
 	m_bSortNoneGroupBelow = bBelow;
 
 	// 'sort <none> below' has no effect without 'sort ascending'
 	if (m_bSortGroupsAscending && HasNoneGroup() && GetSafeHwnd())
-		Resort(FALSE);
+		Resort();
 
 	return TRUE;
 }
@@ -643,8 +643,8 @@ BOOL CTDLTaskListCtrl::TaskHasGroupValue(DWORD dwTaskID) const
 	case TDCC_ALLOCTO:		return pTDI->aAllocTo.GetSize();
 	case TDCC_TAGS:			return pTDI->aTags.GetSize();
 
-	case TDCC_PRIORITY:		return (m_calculator.GetTaskPriority(pTDI, m_data.LocateTask(dwTaskID), TRUE) != FM_NOPRIORITY);
-	case TDCC_RISK:			return (m_calculator.GetTaskRisk(pTDI, m_data.LocateTask(dwTaskID)) != FM_NORISK);
+	case TDCC_PRIORITY:		return (m_calculator.GetTaskPriority(pTDI, m_data.LocateTask(dwTaskID), TRUE) != TDC_PRIORITYORRISK_NONE);
+	case TDCC_RISK:			return (m_calculator.GetTaskRisk(pTDI, m_data.LocateTask(dwTaskID)) != TDC_PRIORITYORRISK_NONE);
 
 	case TDCC_ALLOCBY:		return !pTDI->sAllocBy.IsEmpty();
 	case TDCC_VERSION:		return !pTDI->sVersion.IsEmpty();
@@ -890,7 +890,7 @@ void CTDLTaskListCtrl::SetGroupHeaderBackgroundColor(COLORREF color)
 	{
 		m_crGroupHeaderBkgnd = color;
 
-		if (IsGrouped())
+		if (IsGrouped() && GetSafeHwnd())
 			CWnd::Invalidate();
 	}
 }
@@ -983,17 +983,11 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 					pLVDI->item.mask |= LVIF_STATE;
 					pLVDI->item.stateMask = LVIS_STATEIMAGEMASK | LVIS_SELECTED;
 
-					if (pTDI->IsDone())
+					switch (GetTaskCheckState(pTDI, pTDS))
 					{
-						pLVDI->item.state = LCHC_CHECKED;
-					}
-					else if (m_data.TaskHasCompletedSubtasks(pTDS))
-					{
-						pLVDI->item.state = LCHC_MIXED;
-					}
-					else 
-					{
-						pLVDI->item.state = LCHC_UNCHECKED;
+					case CTDLTaskCtrlBase::TTCBC_UNCHECKED:	pLVDI->item.state = LCHC_UNCHECKED; break;
+					case CTDLTaskCtrlBase::TTCBC_MIXED:		pLVDI->item.state = LCHC_MIXED;		break;
+					case CTDLTaskCtrlBase::TTCBC_CHECKED:	pLVDI->item.state = LCHC_CHECKED;	break;
 					}
 				}
 			}
@@ -1044,7 +1038,10 @@ void CTDLTaskListCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 	NMLISTVIEW nmlv = { 0 };
 	
 	nmlv.hdr.code = LVN_ITEMCHANGED;
+	nmlv.uChanged = LVIF_STATE;
 	nmlv.iItem = nmlv.iSubItem = -1;
+	nmlv.uOldState = 0;
+	nmlv.uNewState = LVIS_SELECTED;
 	
 	RepackageAndSendToParent(WM_NOTIFY, 0, (LPARAM)&nmlv);
 }
@@ -1489,7 +1486,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					// make sure the mouse is still over the item label because
 					// LVS_EX_FULLROWSELECT turned on the whole row
 					CClientDC dc(&m_lcTasks);
-					CFont* pOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
+					HFONT hOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
 					
 					CRect rLabel;
 					
@@ -1506,7 +1503,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					}
 					
 					// cleanup
-					dc.SelectObject(pOldFont);
+					dc.SelectObject(hOldFont);
 				}
 			}
 			
@@ -1633,22 +1630,20 @@ BOOL CTDLTaskListCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	if ((pWnd == &m_lcTasks) && !IsReadOnly() && !IsColumnShowing(TDCC_ICON))
 	{
-		UINT nHitFlags = 0;
 		CPoint ptClient(::GetMessagePos());
 		m_lcTasks.ScreenToClient(&ptClient);
 
+		UINT nHitFlags = 0;
 		int nHit = m_lcTasks.HitTest(ptClient, &nHitFlags);
 	
 		if (nHit != -1)
 		{
 			if (m_calculator.IsTaskLocked(GetTaskID(nHit)))
-			{
 				return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
-			}
-			else if (HasHitTestFlag(nHitFlags, LVHT_ONITEMICON))
-			{
+
+			// else
+			if (HasHitTestFlag(nHitFlags, LVHT_ONITEMICON))
 				return GraphicsMisc::SetHandCursor();
-			}
 		}
 	}
 	
@@ -1743,10 +1738,11 @@ BOOL CTDLTaskListCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 		rSelection |= rItem;
 	}
 	
-	m_lcTasks.ClientToScreen(rSelection);
-	ScreenToClient(rSelection);
-	
-	return !rSelection.IsRectEmpty();
+	if (rSelection.IsRectEmpty())
+		return FALSE;
+
+	m_lcTasks.MapWindowPoints((CWnd*)this, rSelection);
+	return TRUE;	
 }
 
 BOOL CTDLTaskListCtrl::GetLabelEditRect(CRect& rLabel) const

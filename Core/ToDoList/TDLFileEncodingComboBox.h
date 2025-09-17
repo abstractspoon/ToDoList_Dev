@@ -14,29 +14,17 @@
 
 class CTDLFileEncodingComboBox : public CComboBox
 {
-// Construction
 public:
 	CTDLFileEncodingComboBox();
 	virtual ~CTDLFileEncodingComboBox();
 
-// Operations
-public:
 	BOOL SetSelectedEncoding(SFE_FORMAT nFormat);
 	SFE_FORMAT GetSelectedEncoding() const;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFileEncodingComboBox)
 protected:
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLFileEncodingComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:

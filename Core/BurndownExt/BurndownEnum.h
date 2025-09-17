@@ -51,6 +51,9 @@ enum BURNDOWN_GRAPH
 
 	// --------------------------------------------------------
 
+	BCG_CUSTOMATTRIB_FIRST			= 1000,
+	BCG_CUSTOMATTRIB_LAST			= 1063,
+
 	// Always the last
 	BCT_NUMGRAPHS
 };

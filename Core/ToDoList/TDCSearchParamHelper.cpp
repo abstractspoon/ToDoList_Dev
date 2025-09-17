@@ -20,8 +20,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR REALQUOTE = _T("\"");
-const LPCTSTR SAFEQUOTE = _T("{QUOTES}");
 const LPCTSTR NULLSTRING = NULL;
 
 //////////////////////////////////////////////////////////////////////
@@ -47,7 +45,7 @@ BOOL CTDCSearchParamHelper::LoadRule(const CPreferences& prefs, const CString& s
 		switch (nAttribType)
 		{
 		case FT_STRING:
-			sValue.Replace(SAFEQUOTE, REALQUOTE);
+			sValue = INIENTRY::UnSafeQuote(sValue);
 			break;
 			
 		case FT_DATERELATIVE:
@@ -96,14 +94,7 @@ BOOL CTDCSearchParamHelper::SaveRule(CPreferences& prefs, const CString& sRule, 
 	prefs.WriteProfileInt(sRule, _T("Operator"), rule.GetOperator());
 	prefs.WriteProfileInt(sRule, _T("And"), rule.GetAnd());
 	prefs.WriteProfileInt(sRule, _T("Flags"), rule.GetFlags());
-
-	// Handle user-quoted strings
-	CString sValue = rule.ValueAsString();
-
-	if (rule.TypeIs(FT_STRING) && !sValue.IsEmpty() && Misc::IsQuoted(sValue))
-		sValue.Replace(REALQUOTE, SAFEQUOTE);
-
-	prefs.WriteProfileString(sRule, _T("Value"), sValue);
+	prefs.WriteProfileString(sRule, _T("Value"), INIENTRY::SafeQuote(rule.ValueAsString()));
 
 	return TRUE;
 }
@@ -213,8 +204,13 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttri
 		if (pDef->IsList() && !pDef->IsDataType(TDCCA_ICON))
 			return FT_STRING;
 
+		DWORD dwAttribType = pDef->GetDataType();
+
+		if (dwAttribType == TDCCA_CALCULATION)
+			dwAttribType = aAttribDefs.GetCalculationResultDataType(pDef->Calculation());
+
 		// else
-		switch (pDef->GetDataType())
+		switch (dwAttribType)
 		{
 		case TDCCA_STRING:		return FT_STRING;
 		case TDCCA_INTEGER:		return FT_INTEGER;
@@ -443,7 +439,7 @@ BOOL CTDCSearchParamHelper::InitFilterDate(FILTER_DATE nDate, const COleDateTime
 		break;
 
 	case FD_NEXTNDAYS:
-		date = (CDateHelper::GetDate(DHD_TODAY) + nNextNDays - 1); // -1 because filter is FOP_ON_OR_BEFORE
+		date = (CDateHelper::GetDate(DHD_TODAY).m_dt + nNextNDays - 1); // -1 because filter is FOP_ON_OR_BEFORE
 		break;
 
 	case FD_NOW:
@@ -451,18 +447,16 @@ BOOL CTDCSearchParamHelper::InitFilterDate(FILTER_DATE nDate, const COleDateTime
 		break;
 
 	case FD_USER:
-		ASSERT(CDateHelper::IsDateSet(dateUser));
-
 		date = CDateHelper::GetDateOnly(dateUser);
 		break;
 
 	case FD_ANY:
 	case FD_NONE:
-		break;
+		return FALSE;
 
 	default:
 		ASSERT(0);
-		break;
+		return FALSE;
 	}
 
 	return CDateHelper::IsDateSet(date);
@@ -498,18 +492,17 @@ void CTDCSearchParamHelper::AppendArrayRule(const CStringArray& aValues, TDC_ATT
 	}
 }
 
-void CTDCSearchParamHelper::AppendPriorityRiskRule(int nValue, TDC_ATTRIBUTE nAttribID, CSearchParamArray& aRules,
-													int nAnyValue, int nNoValue)
+void CTDCSearchParamHelper::AppendPriorityOrRiskRule(int nValue, BOOL bPriority, CSearchParamArray& aRules)
 {
-	ASSERT((nAttribID == TDCA_PRIORITY) || (nAttribID == TDCA_RISK));
+	TDC_ATTRIBUTE nAttribID = (bPriority ? TDCA_PRIORITY : TDCA_RISK);
 
-	if (nValue != nAnyValue)
+	if (nValue != FM_ANYPRIORITYORRISK)
 	{
-		if (nValue == nNoValue)
+		if (nValue == FM_NOPRIORITYORRISK)
 		{
 			aRules.Add(SEARCHPARAM(nAttribID, FOP_NOT_SET));
 		}
-		else if (nValue != nAnyValue)
+		else/* if (nValue != nAnyValue)*/
 		{
 			aRules.Add(SEARCHPARAM(nAttribID, FOP_GREATER_OR_EQUAL, nValue));
 		}

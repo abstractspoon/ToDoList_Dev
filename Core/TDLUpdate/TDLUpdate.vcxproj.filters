@@ -63,13 +63,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuildStep Include="res\tdlupdate.exe.manifest">
-      <Filter>Resource Files</Filter>
-    </CustomBuildStep>
-  </ItemGroup>
-  <ItemGroup>
     <Library Include="..\3rdParty\Zlib\ZLIBSTAT.LIB">
       <Filter>Libs</Filter>
     </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="res\tdlupdate.exe.manifest">
+      <Filter>Resource Files</Filter>
+    </Manifest>
   </ItemGroup>
 </Project>

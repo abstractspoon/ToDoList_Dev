@@ -12,6 +12,8 @@
 	#error include 'stdafx.h' before including this file for PCH
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "tdcenum.h"
 
 #include "..\shared\Localizer.h"
@@ -43,6 +45,7 @@ protected:
 	virtual void WinHelp(DWORD dwData, UINT nCmd = HELP_CONTEXT);
 	virtual int DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT nIDPrompt = 0);
 	virtual int ExitInstance();
+	virtual BOOL OnIdle(LONG lCount);
 	//}}AFX_VIRTUAL
 
 protected:

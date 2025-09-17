@@ -55,8 +55,8 @@ namespace unvell.ReoGrid.Editor
 			this.cmbCellBody = new System.Windows.Forms.ComboBox();
 			this.labRowHeaderWidth = new System.Windows.Forms.Label();
 			this.numRowHeaderWidth = new System.Windows.Forms.NumericUpDown();
-			this.colorComboBox1 = new unvell.UIControls.ColorComboBox();
 			this.chkAutoFit = new System.Windows.Forms.CheckBox();
+			this.colorComboBox1 = new unvell.UIControls.ColorComboBox();
 			((System.ComponentModel.ISupportInitialize)(this.numRowHeaderWidth)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -64,9 +64,9 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labText.AutoSize = true;
 			this.labText.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labText.Location = new System.Drawing.Point(72, 19);
+			this.labText.Location = new System.Drawing.Point(6, 19);
 			this.labText.Name = "labText";
-			this.labText.Size = new System.Drawing.Size(31, 13);
+			this.labText.Size = new System.Drawing.Size(28, 13);
 			this.labText.TabIndex = 0;
 			this.labText.Text = "Text";
 			this.labText.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -82,17 +82,18 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labTextColor.AutoSize = true;
 			this.labTextColor.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labTextColor.Location = new System.Drawing.Point(45, 50);
+			this.labTextColor.Location = new System.Drawing.Point(6, 50);
 			this.labTextColor.Name = "labTextColor";
-			this.labTextColor.Size = new System.Drawing.Size(58, 13);
+			this.labTextColor.Size = new System.Drawing.Size(61, 13);
 			this.labTextColor.TabIndex = 2;
 			this.labTextColor.Text = "Text Colour";
 			this.labTextColor.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
 			// btnOK
 			// 
+			this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.btnOK.Location = new System.Drawing.Point(89, 170);
+			this.btnOK.Location = new System.Drawing.Point(148, 159);
 			this.btnOK.Name = "btnOK";
 			this.btnOK.Size = new System.Drawing.Size(75, 23);
 			this.btnOK.TabIndex = 8;
@@ -102,8 +103,9 @@ namespace unvell.ReoGrid.Editor
 			// 
 			// btnCancel
 			// 
+			this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.btnCancel.Location = new System.Drawing.Point(170, 170);
+			this.btnCancel.Location = new System.Drawing.Point(229, 159);
 			this.btnCancel.Name = "btnCancel";
 			this.btnCancel.Size = new System.Drawing.Size(75, 23);
 			this.btnCancel.TabIndex = 9;
@@ -114,9 +116,9 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labCellBody.AutoSize = true;
 			this.labCellBody.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labCellBody.Location = new System.Drawing.Point(12, 106);
+			this.labCellBody.Location = new System.Drawing.Point(6, 106);
 			this.labCellBody.Name = "labCellBody";
-			this.labCellBody.Size = new System.Drawing.Size(91, 13);
+			this.labCellBody.Size = new System.Drawing.Size(88, 13);
 			this.labCellBody.TabIndex = 4;
 			this.labCellBody.Text = "Default Cell Body";
 			this.labCellBody.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -134,9 +136,9 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.labRowHeaderWidth.AutoSize = true;
 			this.labRowHeaderWidth.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.labRowHeaderWidth.Location = new System.Drawing.Point(35, 134);
+			this.labRowHeaderWidth.Location = new System.Drawing.Point(6, 133);
 			this.labRowHeaderWidth.Name = "labRowHeaderWidth";
-			this.labRowHeaderWidth.Size = new System.Drawing.Size(68, 13);
+			this.labRowHeaderWidth.Size = new System.Drawing.Size(65, 13);
 			this.labRowHeaderWidth.TabIndex = 6;
 			this.labRowHeaderWidth.Text = "Panel Width";
 			this.labRowHeaderWidth.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -147,6 +149,17 @@ namespace unvell.ReoGrid.Editor
 			this.numRowHeaderWidth.Name = "numRowHeaderWidth";
 			this.numRowHeaderWidth.Size = new System.Drawing.Size(64, 20);
 			this.numRowHeaderWidth.TabIndex = 7;
+			// 
+			// chkAutoFit
+			// 
+			this.chkAutoFit.AutoSize = true;
+			this.chkAutoFit.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.chkAutoFit.Location = new System.Drawing.Point(117, 77);
+			this.chkAutoFit.Name = "chkAutoFit";
+			this.chkAutoFit.Size = new System.Drawing.Size(90, 17);
+			this.chkAutoFit.TabIndex = 10;
+			this.chkAutoFit.Text = "Auto fit to cell";
+			this.chkAutoFit.UseVisualStyleBackColor = true;
 			// 
 			// colorComboBox1
 			// 
@@ -160,23 +173,12 @@ namespace unvell.ReoGrid.Editor
 			this.colorComboBox1.TabIndex = 3;
 			this.colorComboBox1.Text = "colorComboBox1";
 			// 
-			// chkAutoFit
-			// 
-			this.chkAutoFit.AutoSize = true;
-			this.chkAutoFit.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.chkAutoFit.Location = new System.Drawing.Point(117, 77);
-			this.chkAutoFit.Name = "chkAutoFit";
-			this.chkAutoFit.Size = new System.Drawing.Size(90, 17);
-			this.chkAutoFit.TabIndex = 10;
-			this.chkAutoFit.Text = "Auto fit to cell";
-			this.chkAutoFit.UseVisualStyleBackColor = true;
-			// 
 			// HeaderPropertyDialog
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.btnCancel;
-			this.ClientSize = new System.Drawing.Size(334, 213);
+			this.ClientSize = new System.Drawing.Size(316, 190);
 			this.Controls.Add(this.chkAutoFit);
 			this.Controls.Add(this.numRowHeaderWidth);
 			this.Controls.Add(this.labRowHeaderWidth);
@@ -192,6 +194,7 @@ namespace unvell.ReoGrid.Editor
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "HeaderPropertyDialog";
+			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Header Properties";
 			((System.ComponentModel.ISupportInitialize)(this.numRowHeaderWidth)).EndInit();

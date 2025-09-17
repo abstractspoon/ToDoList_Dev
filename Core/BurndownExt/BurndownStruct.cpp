@@ -3,9 +3,14 @@
 
 #include "stdafx.h"
 #include "BurndownStruct.h"
+#include "BurndownStatic.h"
+#include "BurndownGraphs.h"
 
 #include "..\Shared\mapex.h"
 #include "..\shared\timehelper.h"
+#include "..\shared\datehelper.h"
+
+#include "..\Interfaces\IPreferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -19,6 +24,11 @@ CColorArray& CColorArray::operator=(const CColorArray& other)
 {
 	Copy(other);
 	return *this;
+}
+
+BOOL CColorArray::operator==(const CColorArray& other) const
+{
+	return Misc::MatchAll(*this, other, TRUE); // order sensitive
 }
 
 int CColorArray::Set(COLORREF color1, COLORREF color2, COLORREF color3)
@@ -48,64 +58,435 @@ BOOL CColorArray::Has(COLORREF color) const
 	return Misc::HasT(color, *this);
 }
 
-// --------------------------------------------------------------------------
-
-void CGraphColorMap::Copy(const CGraphColorMap& other)
+COLORREF CColorArray::GetAt(int nIndex) const
 {
-	RemoveAll();
-
-	POSITION pos = other.GetStartPosition();
-
-	while (pos)
-	{
-		CColorArray aColors;
-		BURNDOWN_GRAPH nGraph;
-
-		other.GetNextAssoc(pos, nGraph, aColors);
-		SetAt(nGraph, aColors);
-	}
-}
-
-int CGraphColorMap::GetColorCount(BURNDOWN_GRAPH nGraph) const
-{
-	CColorArray aColors;
-	Lookup(nGraph, aColors);
-
-	return aColors.GetSize();
-}
-
-COLORREF CGraphColorMap::GetColor(BURNDOWN_GRAPH nGraph, int nIndex) const
-{
-	CColorArray aColors;
-	Lookup(nGraph, aColors);
-
-	if (aColors.GetSize() > nIndex)
-		return aColors[nIndex];
+	if (GetSize() > nIndex)
+		return CDWordArray::GetAt(nIndex);
 
 	ASSERT(0);
 	return CLR_NONE;
 }
 
-BOOL CGraphColorMap::SetColor(BURNDOWN_GRAPH nGraph, int nIndex, COLORREF color)
+BOOL CColorArray::SetAt(int nIndex, COLORREF color)
 {
 	if (color == CLR_NONE)
 		return FALSE;
 
-	CColorArray aColors;
-	Lookup(nGraph, aColors);
-
-	if (aColors.GetSize() > nIndex)
+	if (GetSize() > nIndex)
 	{
-		if (aColors[nIndex] != color)
-		{
-			aColors[nIndex] = color;
-			SetAt(nGraph, aColors);
-		}
+		if (GetAt(nIndex) != color)
+			CDWordArray::SetAt(nIndex, color);
+
 		return TRUE;
 	}
 
 	ASSERT(0);
 	return FALSE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+BOOL CGraphColorMap::Set(const CGraphColorMap& other)
+{
+	if (Misc::MatchAllStrT<CColorArray>(other, *this))
+		return FALSE;
+
+	Misc::CopyStrT<CColorArray>(other, *this);
+	return TRUE;
+}
+
+int CGraphColorMap::GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const
+{
+	ASSERT(!IsCustomAttributeGraph(nGraph));
+
+	return GetColors(Misc::Format(nGraph), aColors);
+}
+
+int CGraphColorMap::GetColors(const CString& sCustAttribID, CColorArray& aColors) const
+{
+	if (!Lookup(sCustAttribID, aColors))
+		aColors.RemoveAll();
+
+	return aColors.GetSize();
+}
+
+BOOL CGraphColorMap::SetColors(BURNDOWN_GRAPH nGraph, const CColorArray& aColors)
+{
+	ASSERT(!IsCustomAttributeGraph(nGraph));
+
+	return SetColors(Misc::Format(nGraph), aColors);
+}
+
+BOOL CGraphColorMap::SetColors(const CString& sCustAttribID, const CColorArray& aColors)
+{
+	if (aColors.GetSize() == 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	SetAt(sCustAttribID, const_cast<CColorArray&>(aColors));
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+BOOL CGraphAttributes::Initialise(const CGraphsMap& mapGraphs)
+{
+	if (m_mapColors.GetCount())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return Update(mapGraphs);
+}
+
+BOOL CGraphAttributes::Update(const CGraphsMap& mapGraphs)
+{
+	mapGraphs.GetColors(m_mapColors);
+
+	POSITION pos = mapGraphs.GetStartPosition();
+	BURNDOWN_GRAPH nGraph;
+
+	while (pos)
+	{
+		const CGraphBase* pGraph = mapGraphs.GetNext(pos, nGraph);
+
+		BURNDOWN_GRAPHOPTION nOption = pGraph->GetOption();
+		ASSERT(nOption != BGO_INVALID);
+
+		if (IsCustomAttributeGraph(nGraph))
+			m_mapOptions.SetAt(mapGraphs.GetCustomAttributeID(pGraph), nOption);
+		else
+			m_mapOptions.SetAt(Misc::Format(nGraph), nOption);
+	}
+
+	return (m_mapColors.GetCount() > 0);
+}
+
+int CGraphAttributes::GetColors(BURNDOWN_GRAPH nGraph, CColorArray& aColors) const
+{
+	return m_mapColors.GetColors(nGraph, aColors);
+}
+
+int CGraphAttributes::GetColors(const CString& sCustAttribID, CColorArray& aColors) const
+{
+	return m_mapColors.GetColors(sCustAttribID, aColors);
+}
+
+BOOL CGraphAttributes::SetColors(const CGraphColorMap& mapColors)
+{
+	return m_mapColors.Set(mapColors);
+}
+
+BURNDOWN_GRAPHOPTION CGraphAttributes::GetOption(BURNDOWN_GRAPH nGraph) const
+{
+	return GetOption(Misc::Format(nGraph));
+}
+
+BURNDOWN_GRAPHOPTION CGraphAttributes::GetOption(const CString& sCustAttribID) const
+{
+	BURNDOWN_GRAPHOPTION nOption = BGO_INVALID;
+	m_mapOptions.Lookup(sCustAttribID, nOption);
+
+	return nOption;
+}
+
+BOOL CGraphAttributes::SetOption(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption)
+{
+	return SetOption(Misc::Format(nGraph), nOption);
+}
+
+BOOL CGraphAttributes::SetOption(const CString& sCustAttribID, BURNDOWN_GRAPHOPTION nOption)
+{
+	if (nOption == BGO_INVALID)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	BURNDOWN_GRAPHOPTION nCurOption = BGO_INVALID;
+	
+	if (!m_mapOptions.Lookup(sCustAttribID, nCurOption))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (nOption == nCurOption)
+		return FALSE;
+
+	m_mapOptions[sCustAttribID] = nOption;
+	return TRUE;
+}
+
+void CGraphAttributes::Save(IPreferences* pPrefs, LPCTSTR szKey) const
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CString sAttribKey(szKey);
+	sAttribKey += _T("\\GraphAttributes");
+
+	pPrefs->DeleteProfileSection(sAttribKey);
+
+	POSITION pos = m_mapColors.GetStartPosition();
+	CString sGraph;
+	CColorArray aColors;
+	BURNDOWN_GRAPHOPTION nOption;
+
+	int nItem = 0;
+
+	while (pos)
+	{
+		m_mapColors.GetNextAssoc(pos, sGraph, aColors);
+		m_mapOptions.Lookup(sGraph, nOption);
+
+		CString sGraphKey = Misc::MakeKey(_T("Graph%d"), nItem);
+		CString sAttrib = Misc::Format(_T("%s:%s:%d"), sGraph, Misc::FormatArray(aColors, '|'), nOption);
+
+		pPrefs->WriteProfileString(sAttribKey, sGraphKey, sAttrib);
+		nItem++;
+	}
+
+	pPrefs->WriteProfileInt(sAttribKey, _T("Count"), nItem);
+}
+
+BOOL CGraphAttributes::Load(const IPreferences* pPrefs, LPCTSTR szKey)
+{
+	CString sAttribKey(szKey);
+	sAttribKey += _T("\\GraphAttributes");
+
+	int nCount = pPrefs->GetProfileInt(sAttribKey, _T("Count"), 0);
+	CColorArray aColors;
+
+	if (nCount == 0)
+	{
+		// backward compatibility
+		for (int nItem = 0; nItem < NUM_GRAPHTYPES; nItem++)
+		{
+			BURNDOWN_GRAPHTYPE nType = GRAPHTYPES[nItem].nType;
+
+			int nFirst = (nType + 1);
+			int nLast = (nFirst + 10);
+
+			for (int nGraph = nFirst; nGraph < nLast; nGraph++)
+			{
+				CString sGraph = Misc::Format(nGraph);
+
+				CString sColorKey = (_T("GraphColors") + sGraph);
+				CString sColors = pPrefs->GetProfileString(szKey, sColorKey);
+
+				if (!sColors.IsEmpty())
+				{
+					Misc::Split(sColors, aColors, '|');
+					m_mapColors.SetAt(sGraph, aColors);
+
+					CString sOptionKey = (_T("GraphOption") + sGraph);
+					BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sOptionKey, GetDefaultOption(nType));
+
+					m_mapOptions.SetAt(sGraph, nOption);
+				}
+			}
+		}
+	}
+	else
+	{
+		for (int nItem = 0; nItem < nCount; nItem++)
+		{
+			CString sGraphKey = Misc::MakeKey(_T("Graph%d"), nItem);
+
+			CString sAttrib = pPrefs->GetProfileString(sAttribKey, sGraphKey);
+			ASSERT(!sAttrib.IsEmpty());
+
+			CStringArray aParts;
+			
+			if (Misc::Split(sAttrib, aParts, ':') == 3)
+			{
+				CString sGraph = aParts[0];
+
+				Misc::Split(aParts[1], aColors, '|');
+				m_mapColors.SetAt(sGraph, aColors);
+
+				BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)_ttoi(aParts[2]);
+				m_mapOptions.SetAt(sGraph, nOption);
+			}
+			else
+			{
+				ASSERT(0);
+			}
+		}
+	}
+
+	return (m_mapColors.GetCount() > 0);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+CUSTOMATTRIBDEF::CUSTOMATTRIBDEF()
+	:
+	nGraph(BCG_UNKNOWNGRAPH),
+	nType(BCT_UNKNOWNTYPE)
+{
+}
+
+BOOL CUSTOMATTRIBDEF::operator==(const CUSTOMATTRIBDEF& other) const
+{
+	return ((nType == other.nType) &&
+			(sLabel == other.sLabel) &&
+			(sListData == other.sListData) &&
+			(sUniqueID.CompareNoCase(other.sUniqueID) == 0));
+}
+
+BOOL CUSTOMATTRIBDEF::operator!=(const CUSTOMATTRIBDEF& other) const
+{
+	return !(*this == other);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+int CCustomAttributeDefinitionArray::Find(const CString& sID) const
+{
+	int nDef = GetSize();
+
+	while (nDef--)
+	{
+		if (sID.CompareNoCase(GetAt(nDef).sUniqueID) == 0)
+			return nDef;
+	}
+
+	return -1;
+}
+
+int CCustomAttributeDefinitionArray::Find(BURNDOWN_GRAPH nGraph) const
+{
+	int nDef = GetSize();
+
+	while (nDef--)
+	{
+		if (nGraph == GetAt(nDef).nGraph)
+			return nDef;
+	}
+
+	return -1;
+}
+
+BOOL CCustomAttributeDefinitionArray::Update(const ITASKLISTBASE* pTasks)
+{
+	if (!pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
+		return FALSE;
+
+	BOOL bChange = FALSE;
+
+	// Retrieve new definitions
+	CCustomAttributeDefinitionArray aNewCustAttribDefs;
+
+	int nNumDef = pTasks->GetCustomAttributeCount(), nDef = 0;
+	CUSTOMATTRIBDEF def;
+
+	for (; nDef < nNumDef; nDef++)
+	{
+		if (pTasks->IsCustomAttributeEnabled(nDef))
+		{
+			BURNDOWN_GRAPHTYPE nType = BCT_UNKNOWNTYPE;
+			DWORD dwCustType = pTasks->GetCustomAttributeType(nDef);
+
+			if (dwCustType & TDCCA_LISTMASK)
+			{
+				nType = BCT_FREQUENCY;
+			}
+			else if (pTasks->GetCustomAttributeFeatures(nDef) & TDCCAF_ACCUMULATE)
+			{
+				switch (dwCustType & TDCCA_DATAMASK)
+				{
+				case TDCCA_INTEGER:
+				case TDCCA_DOUBLE:
+					nType = BCT_TIMESERIES;
+					break;
+				}
+			}
+
+			if (nType != BCT_UNKNOWNTYPE)
+			{
+				def.sUniqueID = pTasks->GetCustomAttributeID(nDef);
+				def.sLabel = pTasks->GetCustomAttributeLabel(nDef);
+				def.sListData = pTasks->GetCustomAttributeListData(nDef);
+				def.nType = nType;
+				def.nGraph = BCG_UNKNOWNGRAPH;
+
+				aNewCustAttribDefs.Add(def); // Process afterwards
+			}
+		}
+	}
+
+	if (aNewCustAttribDefs.GetSize() > 0)
+	{
+		// Update or add definitions preserving as much as possible
+		nDef = aNewCustAttribDefs.GetSize();
+
+		while (nDef--)
+		{
+			CUSTOMATTRIBDEF& defNew = aNewCustAttribDefs[nDef];
+			int nExist = Find(defNew.sUniqueID);
+
+			if (nExist == -1)
+			{
+				defNew.nGraph = GetFirstUnusedGraph();
+				Add(defNew);
+
+				bChange = TRUE;
+			}
+			else
+			{
+				const CUSTOMATTRIBDEF& defExist = GetAt(nExist);
+
+				defNew.nGraph = defExist.nGraph;
+
+				if (defNew != defExist)
+				{
+					SetAt(nExist, defNew);
+					bChange = TRUE;
+				}
+			}
+		}
+	}
+
+	// Finally delete any definitions no longer existing
+	//
+	// Note: We wait until the end to remove any no longer existing
+	//		 custom attributes so that their 'nGraph' values do not 
+	//		 get reused until the next time. This makes it much easier 
+	//		 to detect when the active graph is invalidated.
+	nDef = GetSize();
+
+	while (nDef--)
+	{
+		if (aNewCustAttribDefs.Find(GetAt(nDef).sUniqueID) == -1)
+		{
+			RemoveAt(nDef);
+			bChange = TRUE;
+		}
+	}
+
+	return bChange;
+}
+
+BURNDOWN_GRAPH CCustomAttributeDefinitionArray::GetFirstUnusedGraph() const
+{
+	CSet<BURNDOWN_GRAPH> mapGraphs;
+
+	int nDef = GetSize();
+
+	while (nDef--)
+		mapGraphs.Add(GetAt(nDef).nGraph);
+
+	for (int nGraph = BCG_CUSTOMATTRIB_FIRST; nGraph <= BCG_CUSTOMATTRIB_LAST; nGraph++)
+	{
+		if (!mapGraphs.Has((BURNDOWN_GRAPH)nGraph))
+			return (BURNDOWN_GRAPH)nGraph;
+	}
+
+	return BCG_UNKNOWNGRAPH;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -127,7 +508,7 @@ STATSITEM::~STATSITEM()
 {
 }
 
-void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef)
 {
 	// Sanity Checks
 	ASSERT(!pTasks->IsTaskReference(hTask));
@@ -154,9 +535,11 @@ void STATSITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 
 	sPriority = pTasks->GetTaskAttribute(hTask, TDCA_PRIORITY, false, true);
 	sRisk = pTasks->GetTaskAttribute(hTask, TDCA_RISK, false, true);
+
+	GetCustomAttributeValues(pTasks, hTask, aCustAttribDef, mapCustomAttrib);
 }
 
-void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef)
 {
 	// Sanity Checks
 	ASSERT(!pTasks->IsTaskReference(hTask));
@@ -209,6 +592,9 @@ void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 
 	if (pTasks->IsAttributeAvailable(TDCA_RISK))
 		sRisk = pTasks->GetTaskAttribute(hTask, TDCA_RISK, false, true);
+
+	if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
+		GetCustomAttributeValues(pTasks, hTask, aCustAttribDef, mapCustomAttrib);
 }
 
 void STATSITEM::ValidateStartDate()
@@ -218,6 +604,17 @@ void STATSITEM::ValidateStartDate()
 		CDateHelper::Min(dtStart, dtDone);
 	else
 		CDateHelper::Min(dtStart, dtDue);
+}
+
+void STATSITEM::GetCustomAttributeValues(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CCustomAttributeDefinitionArray& aCustAttribDef, CMapStringToString& mapValues)
+{
+	int nDef = aCustAttribDef.GetSize();
+
+	while (nDef--)
+	{
+		const CString& sID = aCustAttribDef[nDef].sUniqueID;
+		mapValues[sID] = pTasks->GetTaskCustomAttributeData(hTask, sID, false);
+	}
 }
 
 double STATSITEM::GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bIsRate)

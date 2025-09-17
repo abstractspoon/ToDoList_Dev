@@ -10,17 +10,25 @@
 #include "tdcenum.h"
 #include "tdcstruct.h"
 
+#include "..\shared\ownerdrawcomboboxbase.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskAttributeComboBox window
 
-class CTDLAttributeComboBox : public CComboBox
+enum // options
 {
-// Construction
-public:
-	CTDLAttributeComboBox(BOOL bIncRelativeDates);
+	TDLACB_INCRELATIVEDATES		= 0x1,
+	TDLACB_GROUPCUSTOMATTRIBS	= 0x2,
+};
 
-// Operations
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDLAttributeComboBox : public COwnerdrawComboBoxBase
+{
 public:
+	CTDLAttributeComboBox(DWORD dwOptions = 0);
+	virtual ~CTDLAttributeComboBox();
+
 	void SetAttributeFilter(const CTDCAttributeMap& mapAttrib);
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, BOOL bRelative = FALSE);
@@ -34,36 +42,44 @@ public:
 	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttribID);
 	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttribID, CString& sCustAttribID);
 
-	// Attributes
 protected:
 	CTDCCustomAttribDefinitionArray m_aAttribDefs;
 	CTDCAttributeMap m_mapWantedAttrib;
-	BOOL m_bIncRelativeDates;
+	DWORD m_dwOptions;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLTaskAttributeComboBox)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLAttributeComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLTaskAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void BuildCombo();
 	DWORD EncodeItemData(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate = FALSE) const;
 	void DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttribID, BOOL& bRelativeDate) const;
 	BOOL AttributeIsDate(TDC_ATTRIBUTE nAttribID) const;
 	BOOL AttributeIsTimePeriod(TDC_ATTRIBUTE nAttribID) const;
-	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
+
+	virtual void BuildCombo();
+	virtual BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+
+	// -------------------------------------------------------------
+
+private:
+	struct SORTITEM
+	{
+		SORTITEM() : nAttribID(TDCA_NONE), bRelativeDate(FALSE) {}
+
+		CString sItem;
+		TDC_ATTRIBUTE nAttribID;
+		BOOL bRelativeDate;
+	};
+	typedef CArray<SORTITEM, SORTITEM&> CSortItemArray;
+
+	void CheckAddItem(TDC_ATTRIBUTE nAttribID, UINT nStrResID, CSortItemArray& aItems);
+	void CheckAddItem(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSortItemArray& aItems);
+	void AddItem(const CString& sItem, TDC_ATTRIBUTE nAttribID, CSortItemArray& aItems);
+	void AddItemsToCombo(const CSortItemArray& aItems);
+
+	static int SortProc(const void* v1, const void* v2);
 };
 
 /////////////////////////////////////////////////////////////////////////////

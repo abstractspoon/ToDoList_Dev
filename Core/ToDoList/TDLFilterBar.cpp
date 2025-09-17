@@ -36,7 +36,7 @@ const int LABELHEIGHT	= 9;
 
 static CTRLITEM FILTERCTRLS[] = 
 {
-	CTRLITEM(IDC_SHOWFILTERCOMBO,			IDC_FILTERLABEL,			TDCA_NONE),
+	CTRLITEM(IDC_SHOWFILTERCOMBO,		IDC_FILTERLABEL,			TDCA_NONE),
 	CTRLITEM(IDC_TITLEFILTERTEXT,		IDC_TITLEFILTERLABEL,		TDCA_TASKNAME),
 	CTRLITEM(IDC_STARTFILTERCOMBO,		IDC_STARTFILTERLABEL,		TDCA_STARTDATE),
 	CTRLITEM(IDC_USERSTARTDATE,			0,							TDCA_STARTDATE),
@@ -125,8 +125,7 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	DDX_DateTimeCtrl(pDX, IDC_USERSTARTDATE, m_filter.dtUserStart);
 	DDX_DateTimeCtrl(pDX, IDC_USERDUEDATE, m_filter.dtUserDue);
 	
-	CDialogHelper::DDX_CBData(pDX, m_cbRecurrence, m_filter.nRecurrence, TDIR_NONE);
-
+	m_cbRecurrence.DDX(pDX, m_filter.nRecurrence);
 	m_cbPriorityFilter.DDX(pDX, m_filter.nPriority);
 	m_cbRiskFilter.DDX(pDX, m_filter.nRisk);
 
@@ -149,12 +148,8 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		// filter
-		if (m_filter.IsAdvanced())
-			m_cbShowFilter.SelectAdvancedFilter(m_sAdvancedFilter);
-		else
-			m_cbShowFilter.SelectFilter(m_filter.nShow);
-		
+		// filters
+		m_cbShowFilter.SelectFilter(m_filter.nShow, m_sAdvancedFilter);
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
 		m_cbDueFilter.SelectFilter(m_filter.nDueBy);
@@ -267,26 +262,32 @@ void CTDLFilterBar::ClearCheckboxHistory()
 	}
 }
 
+void CTDLFilterBar::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	m_cbPriorityFilter.SetNumLevels(nNumLevels);
+	m_cbRiskFilter.SetNumLevels(nNumLevels);
+}
+
 void CTDLFilterBar::OnSelchangeFilter() 
 {
-	CString sAdvanced;
-	FILTER_SHOW nShow = m_cbShowFilter.GetSelectedFilter(sAdvanced);
+	CString sAdvFilter;
+	FILTER_SHOW nShow = m_cbShowFilter.GetSelectedFilter(sAdvFilter);
 
 	// Refresh the labels if switching from custom to not, or vice versa
-	if (sAdvanced.IsEmpty() != m_sAdvancedFilter.IsEmpty())
+	if (sAdvFilter.IsEmpty() != m_sAdvancedFilter.IsEmpty())
 		Invalidate(FALSE);
 
 	// Only notify the parent if something actually changed
-	if ((nShow != m_filter.nShow) || ((nShow == FS_ADVANCED) && (sAdvanced != m_sAdvancedFilter)))
+	if ((nShow != m_filter.nShow) || ((nShow == FS_ADVANCED) && (sAdvFilter != m_sAdvancedFilter)))
 	{
 		m_filter.nShow = nShow;
-		m_sAdvancedFilter = sAdvanced;
+		m_sAdvancedFilter = sAdvFilter;
 
 		// Update the Options combo with the stored custom flags before notifying the parent
 		if (nShow == FS_ADVANCED)
 		{
 			DWORD dwCustomFlags = 0;
-			m_mapCustomFlags.Lookup(sAdvanced, dwCustomFlags);
+			m_mapCustomFlags.Lookup(sAdvFilter, dwCustomFlags);
 
 			m_cbOptions.SetSelectedOptions(dwCustomFlags);
 		}
@@ -412,7 +413,7 @@ void CTDLFilterBar::OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFil
 
 	UpdateData();
 
-	if (Misc::StateChanged(bWasShowingBuddy, bShowBuddy))
+	if (Misc::StatesDiffer(bWasShowingBuddy, bShowBuddy))
 		ReposControls();
 
 	NotifyParentFilterChange();
@@ -468,33 +469,26 @@ BOOL CTDLFilterBar::PreTranslateMessage(MSG* pMsg)
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
-BOOL CTDLFilterBar::SelectFilter(int nFilter)
+BOOL CTDLFilterBar::SelectFilter(FILTER_SHOW nShow, LPCTSTR szAdvFilter)
 {
-	if (nFilter < 0 || nFilter >= m_cbShowFilter.GetCount())
+	if (!m_cbShowFilter.SelectFilter(nShow, szAdvFilter))
 		return FALSE;
 
-	m_cbShowFilter.SetCurSel(nFilter);
-	OnSelchangeFilter();
-
-	return TRUE;
+ 	OnSelchangeFilter();
+ 	return TRUE;
 }
 
-int CTDLFilterBar::GetSelectedFilter() const
+FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sAdvFilter, DWORD& dwCustomFlags) const
 {
-	return m_cbShowFilter.GetCurSel();
-}
-
-FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
-{
-	sCustom.Empty();
+	sAdvFilter.Empty();
 	dwCustomFlags = 0;
 
 	if (m_filter.IsAdvanced())
 	{
 		filter.Reset(FS_ADVANCED);
 
-		sCustom = m_sAdvancedFilter;
-		m_mapCustomFlags.Lookup(sCustom, dwCustomFlags);
+		sAdvFilter = m_sAdvancedFilter;
+		m_mapCustomFlags.Lookup(sAdvFilter, dwCustomFlags);
 	}
 	else
 	{
@@ -505,32 +499,32 @@ FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD&
 	return filter.nShow;
 }
 
-BOOL CTDLFilterBar::SetAdvancedFilterIncludesDoneTasks(const CString& sCustom, BOOL bIncDone)
+BOOL CTDLFilterBar::SetAdvancedFilterIncludesDoneTasks(const CString& sAdvFilter, BOOL bIncDone)
 {
-	if (!m_cbShowFilter.HasAdvancedFilter(sCustom))
+	if (!m_cbShowFilter.HasAdvancedFilter(sAdvFilter))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
 	DWORD dwFlags = 0;
-	m_mapCustomFlags.Lookup(sCustom, dwFlags);
+	m_mapCustomFlags.Lookup(sAdvFilter, dwFlags);
 
 	Misc::SetFlag(dwFlags, FO_HIDEDONE, !bIncDone);
 
 	CString sActive;
 
-	if ((GetFilter(sActive) == FS_ADVANCED) && (sCustom == sActive))
+	if ((GetFilter(sActive) == FS_ADVANCED) && (sAdvFilter == sActive))
 		m_cbOptions.SetSelectedOptions(dwFlags);
 
-	m_mapCustomFlags[sCustom] = dwFlags;
+	m_mapCustomFlags[sAdvFilter] = dwFlags;
 
 	return TRUE;
 }
 
-FILTER_SHOW CTDLFilterBar::GetFilter(CString& sCustom) const
+FILTER_SHOW CTDLFilterBar::GetFilter(CString& sAdvFilter) const
 {
-	return m_cbShowFilter.GetSelectedFilter(sCustom);
+	return m_cbShowFilter.GetSelectedFilter(sAdvFilter);
 }
 
 FILTER_SHOW CTDLFilterBar::GetFilter() const
@@ -538,19 +532,14 @@ FILTER_SHOW CTDLFilterBar::GetFilter() const
 	return m_cbShowFilter.GetSelectedFilter();
 }
 
-void CTDLFilterBar::AddAdvancedFilters(const CStringArray& aFilters)
+void CTDLFilterBar::SetAdvancedFilters(const CStringArray& aFilters)
 {
-	m_cbShowFilter.AddAdvancedFilters(aFilters); 
+	m_cbShowFilter.SetAdvancedFilters(aFilters); 
 }
 
-const CStringArray& CTDLFilterBar::GetAdvancedFilterNames() const
+const CStringArray& CTDLFilterBar::AdvancedFilterNames() const
 {
-	return m_cbShowFilter.GetAdvancedFilterNames(); 
-}
-
-void CTDLFilterBar::RemoveAdvancedFilters()
-{
-	m_cbShowFilter.RemoveAdvancedFilters(); 
+	return m_cbShowFilter.AdvancedFilterNames(); 
 }
 
 void CTDLFilterBar::ShowDefaultFilters(BOOL bShow)
@@ -613,6 +602,28 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 	}
 }
 
+void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID, CEnCheckComboBox& combo, const CStringArray& aData)
+{
+	BOOL bIsSorted = CDialogHelper::HasStyle(combo, CBS_SORT);
+	BOOL bWantSorted = !tdc.IsAutoListContentReadOnly(nAttribID);
+
+	if (Misc::StatesDiffer(bIsSorted, bWantSorted))
+	{
+		int nCtrlID = combo.GetDlgCtrlID();
+		CRect rCombo = GetChildRect(&combo);
+
+		DWORD dwStyle = combo.GetStyle();
+		Misc::SetFlag(dwStyle, CBS_SORT, bWantSorted);
+
+		combo.DestroyWindow();
+		VERIFY(combo.Create(dwStyle, rCombo, this, nCtrlID));
+
+		combo.SetFont(CWnd::GetFont());
+	}
+
+	combo.SetStrings(aData);
+}
+
 void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
 {
 	TDCAUTOLISTDATA tld;
@@ -620,23 +631,15 @@ void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBU
 
 	BOOL bAllAttrib = (nAttribID == TDCA_ALL);
 
-	if (bAllAttrib || (nAttribID == TDCA_ALLOCTO))
-		m_cbAllocToFilter.SetStrings(tld.aAllocTo);
+#define UPDATECOMBODATA(att, combo, data) \
+	if (bAllAttrib || (att == TDCA_ALLOCTO)) UpdateDropListData(tdc, att, combo, data);
 
-	if (bAllAttrib || (nAttribID == TDCA_ALLOCBY))
-		m_cbAllocByFilter.SetStrings(tld.aAllocBy);
-
-	if (bAllAttrib || (nAttribID == TDCA_CATEGORY))
-		m_cbCategoryFilter.SetStrings(tld.aCategory);
-
-	if (bAllAttrib || (nAttribID == TDCA_STATUS))
-		m_cbStatusFilter.SetStrings(tld.aStatus);
-
-	if (bAllAttrib || (nAttribID == TDCA_VERSION))
-		m_cbVersionFilter.SetStrings(tld.aVersion);
-
-	if (bAllAttrib || (nAttribID == TDCA_TAGS))
-		m_cbTagFilter.SetStrings(tld.aTags);
+	UPDATECOMBODATA(TDCA_ALLOCTO, m_cbAllocToFilter, tld.aAllocTo);
+	UPDATECOMBODATA(TDCA_ALLOCBY, m_cbAllocByFilter, tld.aAllocBy);
+	UPDATECOMBODATA(TDCA_CATEGORY, m_cbCategoryFilter, tld.aCategory);
+	UPDATECOMBODATA(TDCA_STATUS, m_cbStatusFilter, tld.aStatus);
+	UPDATECOMBODATA(TDCA_VERSION, m_cbVersionFilter, tld.aVersion);
+	UPDATECOMBODATA(TDCA_TAGS, m_cbTagFilter, tld.aTags);
 
 	if (bAllAttrib)
 	{
@@ -770,21 +773,29 @@ void CTDLFilterBar::RebuildOptionsCombo()
 
 BOOL CTDLFilterBar::WantShowFilter(TDC_ATTRIBUTE nType) const
 {
+	BOOL bAdvancedOrSelected = ((m_filter.nShow == FS_SELECTED) || m_filter.IsAdvanced());
+
 	switch (nType)
 	{
 	case TDCA_NONE:
 		return TRUE;
 
 	case TDCA_TASKNAME:
-		return !m_filter.IsAdvanced();
+		return !bAdvancedOrSelected;
 
 	default:
 		if ((nType >= TDCA_CUSTOMATTRIB_FIRST) && (nType <= TDCA_CUSTOMATTRIB_LAST))
-			return !m_filter.IsAdvanced();
+			return !bAdvancedOrSelected;
 		break;
 	}
 
-	return (!m_filter.IsAdvanced() && m_mapVisibility.Has(nType));
+	return (!bAdvancedOrSelected && m_mapVisibility.Has(nType));
+}
+
+void CTDLFilterBar::SetISODateFormat(BOOL bIso)
+{
+	m_dtcUserDue.SetISOFormat(bIso);
+	m_dtcUserStart.SetISOFormat(bIso);
 }
 
 void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)

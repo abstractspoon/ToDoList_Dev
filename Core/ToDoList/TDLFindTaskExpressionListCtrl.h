@@ -46,6 +46,9 @@ public:
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
+	void SetNumPriorityRiskLevels(int nNumLevels);
+	void SetPriorityColors(const CDWordArray& aColors);
+	void SetISODateFormat(BOOL bIso);
 
 	BOOL AddRule();
 	BOOL DeleteSelectedRule();
@@ -75,17 +78,15 @@ protected:
 	CTDLIconComboBox				m_cbCustomIcons;
 
 	CSearchParamArray				m_aSearchParams;
-	CTDCCustomAttribDefinitionArray m_aAttribDefs;
+	CTDCCustomAttribDefinitionArray m_aCustAttribDefs;
 	TDCAUTOLISTDATA					m_tldListContents;
 	CTDCImageList					m_ilIcons;
+	BOOL							m_bIsoDateFormat;
 
 	const CContentMgr&				m_mgrContent;
-// Overrides
+
 protected:
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFindTaskExpressionListCtrl)
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:

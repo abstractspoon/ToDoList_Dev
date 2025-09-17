@@ -17,8 +17,7 @@
 #include "tdcstartupoptions.h"
 #include "tdcanonymizetasklist.h"
 #include "TDLDebugFormatGetLastErrorDlg.h"
-
-#include "PreferencesUITasklistColorsPage.h" // Alternate line colour
+#include "TDCDarkMode.h"
 
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\driveinfo.h"
@@ -32,12 +31,11 @@
 #include "..\shared\localizer.h"
 #include "..\shared\fileregister.h"
 #include "..\shared\osversion.h"
-#include "..\shared\rtlstylemgr.h"
+#include "..\shared\rtlInputmgr.h"
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
-#include "..\shared\DarkMode.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -1107,7 +1105,10 @@ BOOL CToDoListApp::SetPreferences(BOOL bIni, LPCTSTR szPrefs, BOOL bExisting)
 		while (nTry--)
 		{
 			if (CPreferences::Initialise(szPrefs, TRUE))
+			{
+				CPreferences::CullIniBackups();
 				return TRUE;
+			}
 
 			FileMisc::LogText(_T("Existing ini file is not readable (%d)"), (10 - nTry));
 			Sleep(100);
@@ -1263,87 +1264,28 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 
 int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/) 
 {
-	HWND hwndMain = NULL;
-
 	// make sure app window is visible
-	if (m_pMainWnd)
-	{
-		hwndMain = *m_pMainWnd;
-
-		if (::GetForegroundWindow() != hwndMain)
-			m_pMainWnd->SendMessage(WM_TDL_SHOWWINDOW, 0, 0);
-	}
-	else
-	{
-		hwndMain = ::GetDesktopWindow();
-	}
+	if (m_pMainWnd && (::GetForegroundWindow() != *m_pMainWnd))
+		m_pMainWnd->SendMessage(WM_TDL_SHOWWINDOW, 0, 0);
 	
-	CString sTitle(AfxGetAppName()), sInstruction, sText(lpszPrompt);
-	CStringArray aPrompt;
-	
-	int nNumInputs = Misc::Split(lpszPrompt, aPrompt, '|');
-	
-	switch (nNumInputs)
-	{
-	case 0:
-		ASSERT(0);
-		break;
-		
-	case 1:
-		// do nothing
-		break;
-		
-	case 2:
-		sInstruction = aPrompt[0];
-		sText = aPrompt[1];
-		break;
-		
-	case 3:
-		sTitle = aPrompt[0];
-		sInstruction = aPrompt[1];
-		sText = aPrompt[2];
-	}
-	
-	return CMessageBox::Show(hwndMain, sTitle, sInstruction, sText, nType);
+	return CMessageBox::AfxShow(lpszPrompt, nType);
 }
 
 void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences& prefs)
 {
-	ASSERT(!CDarkMode::IsEnabled());
+	ASSERT(!CTDCDarkMode::IsEnabled());
 
-	if (CDarkMode::IsSupported())
+	if (CTDCDarkMode::IsSupported())
 	{
 		BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
 
-		if (bDarkMode == -1)
+		if (bDarkMode == -1) // First time fallback
 		{
 			bDarkMode = cmdInfo.HasOption(SWITCH_DARKMODE);
 			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
 		}
 
-		// Fixup 'Alternate Line' and 'Completed Task' colours
-		COLORREF crAltLines = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
-		COLORREF crDoneTasks = prefs.GetProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DEF_TASKDONECOLOR);
-
-		const COLORREF DARKMODE_ALTLINECOLOR = DM_3DFACE;
-		const COLORREF DARKMODE_TASKDONECOLOR = GetSysColor(COLOR_3DFACE);
-
-		if (bDarkMode && (crAltLines == DEF_ALTERNATELINECOLOR))
-		{
-			prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DARKMODE_ALTLINECOLOR);
-
-			if (crDoneTasks == DEF_TASKDONECOLOR)
-				prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DARKMODE_TASKDONECOLOR);
-		}
-		else if (!bDarkMode && (crAltLines == DARKMODE_ALTLINECOLOR))
-		{
-			prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTERNATELINECOLOR);
-
-			if (crDoneTasks == DARKMODE_TASKDONECOLOR)
-				prefs.WriteProfileInt(_T("Preferences\\Colors"), _T("TaskDone"), DEF_TASKDONECOLOR);
-		}
-
-		CDarkMode::Enable(bDarkMode);
+		CTDCDarkMode::Initialize(prefs);
 	}
 }
 
@@ -1352,11 +1294,13 @@ void CToDoListApp::OnToolsToggleDarkMode()
 	// Prompt to restart the app
 	CPreferences prefs;
 
+	BOOL bDarkMode = CTDCDarkMode::IsEnabled();
+
 	switch (CMessageBox::AfxShow(IDS_RESTARTTOCHANGEDARKMODE, MB_YESNOCANCEL))
 	{
 	case IDYES:
 		{
-			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
 			
 			// Restart
 			HWND hwndMain = *AfxGetMainWnd();
@@ -1377,7 +1321,7 @@ void CToDoListApp::OnToolsToggleDarkMode()
 		break;
 
 	case IDNO:
-		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !CDarkMode::IsEnabled());
+		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
 		break;
 
 	case IDCANCEL:
@@ -1387,8 +1331,8 @@ void CToDoListApp::OnToolsToggleDarkMode()
 
 void CToDoListApp::OnUpdateToolsToggleDarkMode(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(CDarkMode::IsSupported());
-	pCmdUI->SetCheck(CDarkMode::IsEnabled());
+	pCmdUI->Enable(CTDCDarkMode::IsSupported());
+	pCmdUI->SetCheck(CTDCDarkMode::IsEnabled());
 }
 
 void CToDoListApp::OnImportPrefs() 
@@ -1574,10 +1518,15 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	{
 		CRect rWindow;
 		m_pMainWnd->GetWindowRect(rWindow);
-		CPoint ptPos = rWindow.CenterPoint();
 
+		CPoint ptPos = rWindow.CenterPoint();
 		params.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
+	
+	// Check dark mode before closing the main window
+	// because it turns off dark mode as its last action
+	if (CTDCDarkMode::IsEnabled())
+		params.SetOption(SWITCH_DARKMODE);
 	
 #ifdef _DEBUG // ----------------------------------------------------
 	if (bTestDownload)
@@ -1612,10 +1561,7 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 		}
 	}
 
-	if (CDarkMode::IsEnabled())
-		params.SetOption(SWITCH_DARKMODE);
-
-	if (CRTLStyleMgr::IsRTL())
+	if (CRTLInputMgr::IsEnabled())
 		params.SetOption(SWITCH_RTL);
 
 	if (bPreRelease)
@@ -1887,7 +1833,7 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 	cmdInfo.SetOption(SWITCH_APPID, TDLAPPID);
 	cmdInfo.SetOption(SWITCH_SHOWUI);
 
-	if (CDarkMode::IsEnabled())
+	if (CTDCDarkMode::IsEnabled())
 		cmdInfo.SetOption(SWITCH_DARKMODE);
 
 	// Pass the centroid of the main wnd so that the
@@ -1896,8 +1842,8 @@ void CToDoListApp::OnDebugShowUpdateDlg()
 	{
 		CRect rWindow;
 		m_pMainWnd->GetWindowRect(rWindow);
-		CPoint ptPos = rWindow.CenterPoint();
 
+		CPoint ptPos = rWindow.CenterPoint();
 		cmdInfo.SetOption(SWITCH_POSITION, MAKELPARAM(ptPos.x, ptPos.y));
 	}
 
@@ -2125,7 +2071,8 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 	CScopedLogTimer log(_T("CleanupAppFolder"));
 
 	CString sAppFolder = FileMisc::GetAppFolder();
-	CString sTasklists = FileMisc::GetAppResourceFolder(_T("Resources\\TaskLists"));
+	CString sTasklistsFolder = FileMisc::GetAppResourceFolder(_T("Resources\\TaskLists"));
+	CString sTranslationsFolder = FileMisc::GetAppResourceFolder(_T("Resources\\Translations"));
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("7.0")) < 0)
 	{
@@ -2152,9 +2099,9 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		FileMisc::DeleteFolderContents(sTranslations, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY, _T("*.gif"));
 
 		// Wrongly installed resource files
-		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.txt")), 395, TRUE);
-		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.csv")), 10602, TRUE);
-		FileMisc::DeleteFileBySize((sTasklists + _T("\\Introduction.xml")), 177520, TRUE);
+		FileMisc::DeleteFileBySize((sTasklistsFolder + _T("\\Introduction.txt")), 395, TRUE);
+		FileMisc::DeleteFileBySize((sTasklistsFolder + _T("\\Introduction.csv")), 10602, TRUE);
+		FileMisc::DeleteFileBySize((sTasklistsFolder + _T("\\Introduction.xml")), 177520, TRUE);
 	}
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("7.2.11")) < 0)
@@ -2166,11 +2113,11 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		CString sExamples = FileMisc::GetAppResourceFolder(_T("Resources\\Examples"));
 		FileMisc::CreateFolder(sExamples);
 
-		FileMisc::MoveFile(sTasklists + _T("\\Introduction.tdl"), sExamples + _T("\\Introduction.tdl"), TRUE, TRUE);
-		FileMisc::MoveFile(sTasklists + _T("\\ToDoListDocumentation.tdl"), sExamples + _T("\\ToDoListDocumentation.tdl"), TRUE, TRUE);
+		FileMisc::MoveFile(sTasklistsFolder + _T("\\Introduction.tdl"), sExamples + _T("\\Introduction.tdl"), TRUE, TRUE);
+		FileMisc::MoveFile(sTasklistsFolder + _T("\\ToDoListDocumentation.tdl"), sExamples + _T("\\ToDoListDocumentation.tdl"), TRUE, TRUE);
 
 		// Intentionally use raw API call so it will fail if any files remain in the folder
-		RemoveDirectory(sTasklists);
+		::RemoveDirectory(sTasklistsFolder);
 
 		// Rename/move install instructions
 		CString sResources = FileMisc::GetAppResourceFolder();
@@ -2180,7 +2127,7 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		FileMisc::DeleteFileBySize(sReadmes + _T("\\Readme.Linux.txt"), 3260, TRUE);
 
 		// Intentionally use raw API call so it will fail if any files remain in the folder
-		RemoveDirectory(sReadmes);
+		::RemoveDirectory(sReadmes);
 	}
 
 	if (FileMisc::CompareVersions(szPrevVer, _T("8.1")) < 0)
@@ -2193,6 +2140,13 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 	{
 		// remove old components
 		FileMisc::DeleteFile(sAppFolder + _T("\\MarkdownSharp.dll"), TRUE);
+	}
+
+	if (FileMisc::CompareVersions(szPrevVer, _T("9.1")) < 0)
+	{
+		// remove unwanted translations
+		FileMisc::DeleteFile(sTranslationsFolder + _T("\\Brazilian Portuguese (PT-BR).csv"), TRUE);
+		FileMisc::DeleteFile(sTranslationsFolder + _T("\\Non-specific RTL Language.csv"), TRUE);
 	}
 }
 
@@ -2233,4 +2187,15 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 			}
 		}
 	}
+}
+
+BOOL CToDoListApp::OnIdle(LONG lCount)
+{
+	if (m_pMainWnd)
+	{
+		if (((CToDoListWnd*)m_pMainWnd)->DoIdleProcessing())
+			return TRUE;
+	}
+	
+	return CWinApp::OnIdle(lCount);
 }

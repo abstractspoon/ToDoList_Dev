@@ -90,80 +90,8 @@ CTaskListExporterBase::~CTaskListExporterBase()
 	
 }
 
-IIMPORTEXPORT_RESULT CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const
-{
-	if (sOutput.IsEmpty())
-		return IIER_SOMEFAILED;
-
-	if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM))
-		return IIER_BADFILE;
-
-	return IIER_SUCCESS;
-}
-
-bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, DWORD dwFlags, 
-									   IPreferences* pPrefs, LPCTSTR /*szKey*/)
-{
-	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
-	PARENTTITLECOMMENTSNLY = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportParentTitleCommentsOnly"), FALSE);
-
-	PRINTING = Misc::HasFlag(dwFlags, IIEF_PRINTING);
-	TASKLISTPATH = pTasks->GetFileName(true);
-
-	BuildAttribList(pTasks);
-
-	return true;
-}
-
-IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, 
-								   IPreferences* pPrefs, LPCTSTR szKey)
-{
-	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLISTBASE);
-
-	if (pTasks == NULL)
-	{
-		ASSERT(0);
-		return IIER_BADINTERFACE;
-	}
-
-	// else
-	MULTIFILE = TRUE;
-
-	if (!InitConsts(pTasks, szDestFilePath, dwFlags, pPrefs, szKey))
-	{
-		ASSERT(0);
-		return IIER_CANCELLED;
-	}
-
-	CString sOutput;
-	
-	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
-	{
-		pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
-		
-		if (pTasks == NULL)
-		{
-			ASSERT(0);
-			return IIER_BADINTERFACE;
-		}
-
-		// add title block
-		sOutput += FormatTitle(pTasks);
-		
-		// then header
-		sOutput += FormatHeader(pTasks);
-		
-		// then tasks
-		sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
-
-		sOutput += ENDL;
-	}
-	
-	return ExportOutput(szDestFilePath, sOutput);
-}
-
-IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, 
-								   IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, 
+												   DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 	ASSERT(pTasks);
@@ -178,7 +106,7 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile
 		return IIER_CANCELLED;
 
 	// add title block
-	CString sOutput = FormatTitle(pTasks);
+	CString sOutput = FormatTitle(pTasks, TRUE);
 	
 	// then header
 	sOutput += FormatHeader(pTasks);
@@ -187,6 +115,76 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile
 	sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
 	
 	return ExportOutput(szDestFilePath, sOutput);
+}
+
+IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, 
+												   DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
+{
+	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLISTBASE);
+
+	if (pTasks == NULL)
+	{
+		ASSERT(0);
+		return IIER_BADINTERFACE;
+	}
+
+	// else
+	MULTIFILE = TRUE;
+
+	if (!InitConsts(pTasks, szDestFilePath, dwFlags, pPrefs, szKey))
+		return IIER_CANCELLED;
+
+	CString sOutput = FormatTitle(pSrcTaskFile);
+	
+	for (int nTaskList = 0; nTaskList < pSrcTaskFile->GetTaskListCount(); nTaskList++)
+	{
+		pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(nTaskList), IID_TASKLISTBASE);
+		
+		if (pTasks == NULL)
+		{
+			ASSERT(0);
+			return IIER_BADINTERFACE;
+		}
+
+		// add title block
+		// Don't export date because either it's empty or handled already
+		sOutput += FormatTitle(pTasks, FALSE);
+		
+		// then header
+		sOutput += FormatHeader(pTasks);
+		
+		// then tasks
+		sOutput += ExportTaskAndSubtasks(pTasks, NULL, 0);
+
+		sOutput += ENDL;
+	}
+	
+	return ExportOutput(szDestFilePath, sOutput);
+}
+
+IIMPORTEXPORT_RESULT CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const
+{
+	if (sOutput.IsEmpty())
+		return IIER_SOMEFAILED;
+
+	if (!FileMisc::SaveFile(szDestFilePath, sOutput, SFEF_UTF8WITHOUTBOM))
+		return IIER_BADFILE;
+
+	return IIER_SUCCESS;
+}
+
+bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, 
+									   DWORD dwFlags, IPreferences* pPrefs, LPCTSTR /*szKey*/)
+{
+	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
+	PARENTTITLECOMMENTSNLY = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportParentTitleCommentsOnly"), FALSE);
+
+	PRINTING = Misc::HasFlag(dwFlags, IIEF_PRINTING);
+	TASKLISTPATH = pTasks->GetFileName(true);
+
+	BuildAttribList(pTasks);
+
+	return true;
 }
 
 CString CTaskListExporterBase::FormatHeader(const ITASKLISTBASE* pTasks) const
@@ -398,10 +396,6 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		sItem = FormatAttribute(pTasks, hTask, nAttribID, sAttribLabel, TDL_TASKHIGHESTPRIORITY, TDL_TASKPRIORITY);
 		break;
 
-	case TDCA_PROJECTNAME:
-		sItem = FormatAttribute(pTasks, NULL, nAttribID, sAttribLabel, TDL_PROJECTNAME, TDL_FILENAME);
-		break;
-
 	case TDCA_RISK:
 		sItem = FormatAttribute(pTasks, hTask, nAttribID, sAttribLabel, TDL_TASKHIGHESTRISK, TDL_TASKRISK);
 		break;
@@ -602,8 +596,8 @@ void CTaskListExporterBase::BuildLabelMap()
 	{
 		for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 		{
-			const TDCATTRIBUTE& attrib = ATTRIBUTES[nAtt];
-			ATTRIBLABELS[attrib.nAttributeID] = CEnString(attrib.nAttribResID);
+			const TDCATTRIBUTE& attrib = TASKATTRIBUTES[nAtt];
+			ATTRIBLABELS[attrib.nAttributeID] = CEnString(attrib.nLabelResID);
 		}
 
 		ATTRIBLABELS[TDCA_CUSTOMATTRIB] = ""; // placeholder only
@@ -680,3 +674,26 @@ CString CTaskListExporterBase::GetAttribLabel(TDC_ATTRIBUTE nAttribID)
 
 	return sLabel;
 }
+
+CString CTaskListExporterBase::FormatTitle(const IMultiTaskList* pTasks) const
+{
+	return FormatTitle(pTasks->GetReportTitle(), pTasks->GetReportDate(), TRUE);
+}
+
+CString CTaskListExporterBase::FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const
+{
+	return FormatTitle(pTasks->GetReportTitle(), pTasks->GetReportDate(), bWantDate);
+}
+
+// static helper
+CString CTaskListExporterBase::FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate, BOOL bWantDate)
+{
+	if (!bWantDate || Misc::IsEmpty(szReportDate))
+		return szReportTitle;
+
+	if (Misc::IsEmpty(szReportTitle))
+		return szReportDate;
+
+	return Misc::Format(_T("%s (%s)"), szReportTitle, szReportDate);
+}
+

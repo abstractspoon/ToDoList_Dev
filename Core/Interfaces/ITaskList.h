@@ -87,6 +87,9 @@ class IMultiTaskList : public IUnknown
 public:
 	virtual int GetTaskListCount() const = 0;
 	virtual const ITaskList* GetTaskList(int nTaskList = 0) const = 0;
+
+	virtual LPCWSTR GetReportTitle() const = 0;
+	virtual LPCWSTR GetReportDate() const = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -439,6 +442,7 @@ public:
 
 	virtual double GetTaskTimeRemaining(HTASKITEM hTask, TDC_UNITS& cUnits) const = 0;
 
+	virtual unsigned long GetCustomAttributeFeatures(int nIndex) const = 0;
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

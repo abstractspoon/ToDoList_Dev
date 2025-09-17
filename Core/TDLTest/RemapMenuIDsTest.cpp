@@ -23,7 +23,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CRemapMenuIDsTest::CRemapMenuIDsTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CRemapMenuIDsTest::CRemapMenuIDsTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CRemapMenuIDsTest"), utils)
 {
 
 }
@@ -48,7 +50,7 @@ void CRemapMenuIDsTest::TestTDLCustomToolbar()
 	CTDCScopedTest test(*this, _T("CTDLCustomToolbar::RemapMenuItemIDs"));
 	
 	CMap<UINT, UINT, UINT, UINT&> mapCmdIDs;
-	CToolbarButtonArray aButtons;
+	CTDCToolbarButtonArray aButtons;
 
 	{
 		// Replace one menu item
@@ -285,7 +287,7 @@ void CRemapMenuIDsTest::TestTDCFilter()
 	}
 }
 
-void CRemapMenuIDsTest::InitButtonArray(CToolbarButtonArray& aButtons, UINT nIDFrom, UINT nIDTo)
+void CRemapMenuIDsTest::InitButtonArray(CTDCToolbarButtonArray& aButtons, UINT nIDFrom, UINT nIDTo)
 {
 	aButtons.SetSize(nIDTo - nIDFrom + 1);
 

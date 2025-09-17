@@ -40,6 +40,8 @@ struct TIMEUNIT
 	UINT nMenuID;
 };
 
+// -----------------------------------------------------------------
+
 enum
 {
 	ID_MINS = 0x8000,
@@ -51,6 +53,9 @@ enum
 	ID_YEARS,
 };
 
+// -----------------------------------------------------------------
+
+// These will have their labels filled in later
 static TIMEUNIT TIMEUNITS[] = 
 {
 	{ THU_MINS,		_T(""),	TIME_MIN_ABBREV,	ID_MINS },
@@ -61,8 +66,11 @@ static TIMEUNIT TIMEUNITS[] =
 	{ THU_MONTHS,	_T(""), TIME_MONTH_ABBREV,	ID_MONTHS },
 	{ THU_YEARS,	_T(""),	TIME_YEAR_ABBREV,	ID_YEARS },
 };
+const int NUM_UNITS = sizeof(TIMEUNITS) / sizeof(TIMEUNIT);
 
-static LPCTSTR UNITLABELS[] = 
+// -----------------------------------------------------------------
+
+const LPCTSTR UNITLABELS[] = 
 {
 	TIME_MINS,	
 	TIME_HOURS,	
@@ -73,7 +81,7 @@ static LPCTSTR UNITLABELS[] =
 	TIME_YEARS	
 };
 
-const int NUM_UNITS = sizeof(TIMEUNITS) / sizeof (TIMEUNIT);
+// -----------------------------------------------------------------
 
 const TIMEUNIT& GetTimeUnit(TH_UNITS nUnits)
 {
@@ -204,7 +212,11 @@ void CTimeEdit::OnShowWindow(BOOL bShow, UINT nStatus)
 	if (bShow)
 	{
 		UpdateButtonText(m_nUnits);
-		SetTime(GetTime());
+
+		if (m_nUnits == THU_NULL)
+			SetWindowText(NULL);
+		else
+			SetTime(GetTime());
 	}
 }
 
@@ -257,6 +269,17 @@ void CTimeEdit::SetUnits(TH_UNITS nUnits)
 		m_nUnits = nUnits;
 		UpdateButtonText(m_nUnits);
 	}
+}
+
+BOOL CTimeEdit::HasValidTime() const
+{
+	if (!IsValidUnits(m_nUnits))
+		return FALSE;
+
+	CString sTime;
+	GetWindowText(sTime);
+
+	return !sTime.IsEmpty();
 }
 
 void CTimeEdit::SetMaxDecimalPlaces(int nMaxDecPlaces)

@@ -65,6 +65,7 @@ public:
 
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
+	bool DoIdleProcessing() { return false; }
 
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
@@ -77,7 +78,8 @@ protected:
 
 	CStatsItemArray m_data;
 	CGraphsMap m_mapGraphs;
-	COleDateTimeRange m_dtDataRange, m_dtPrevActiveRange;
+	CCustomAttributeDefinitionArray m_aCustomAttribDefs;
+	CGraphAttributes m_graphAttrib;
 
 	CStatic	m_stFrame;
 	CBurndownChart m_chart;
@@ -94,6 +96,11 @@ protected:
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
 	BOOL m_bVisible;
+	COleDateTimeRange m_dtDataRange;
+	
+	COleDateTimeRange m_dtPrevActiveRange;
+	CString m_sPrevCustomGraph;
+
 
 protected:
 // Overrides
@@ -124,6 +131,7 @@ protected:
 	void UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings, BOOL bCheckExist);
+	BOOL UpdateCustomAttributeDefinitions(const ITASKLISTBASE* pTasks);
 
 	void RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility);
 	void UpdateRangeSlider(const COleDateTimeRange& dtActiveRange);
@@ -131,7 +139,7 @@ protected:
 	void UpdateRangeSliderStep();
 	BOOL GetSliderDateRange(COleDateTimeRange& dtActiveRange) const;
 	void ResizeSlider(int nParentWidth = -1);
-
+	void SetActiveGraph(BURNDOWN_GRAPH nGraph, BOOL bRebuild);
 };
 
 //{{AFX_INSERT_LOCATION}}

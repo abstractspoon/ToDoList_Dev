@@ -150,6 +150,10 @@ SOURCE=.\TDCTaskMatcherTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCTaskTimeLogTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTaskCtrlBaseTest.cpp
 # End Source File
 # Begin Source File
@@ -171,6 +175,10 @@ SOURCE=.\TimeHelperTest.cpp
 # Begin Source File
 
 SOURCE=.\ToDoCtrlDataTest.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ToDoCtrlMgrTest.cpp
 # End Source File
 # Begin Source File
 
@@ -246,6 +254,10 @@ SOURCE=.\TDCTaskMatcherTest.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCTaskTimeLogTest.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTaskCtrlBaseTest.h
 # End Source File
 # Begin Source File
@@ -263,6 +275,10 @@ SOURCE=.\TimeHelperTest.h
 # Begin Source File
 
 SOURCE=.\ToDoCtrlDataTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ToDoCtrlMgrTest.h
 # End Source File
 # Begin Source File
 

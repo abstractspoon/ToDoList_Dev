@@ -131,9 +131,6 @@ namespace GraphicsMisc
 	BOOL CreateFont(CFont& font, LPCTSTR szFaceName, int nPoint = -1, DWORD dwFlags = 0);
 	BOOL CreateFont(CFont& fontOut, HFONT fontIn, DWORD dwFlags = 0, DWORD dwMask = GMFS_ALL);
 
-	UINT GetRTLDrawTextFlags(HWND hwnd);
-	UINT GetRTLDrawTextFlags(CDC* pDC);
-	
 	HICON LoadIcon(UINT nIDIcon, int nSize = 16);
 	HBITMAP IconToPARGB32Bitmap(HICON hIcon);
 	CSize GetIconSize(HICON hIcon);
@@ -171,13 +168,14 @@ namespace GraphicsMisc
 	int GetFontPixelSize(HFONT hFont);
 	int GetFontPointSize(HWND hWnd);
 	int GetFontPixelSize(HWND hWnd);
+	BOOL GetFontMetrics(HWND hWnd, TEXTMETRIC& tm, HFONT hFont = NULL);
 	HFONT GetFont(HWND hWnd, BOOL bFallback = TRUE);
 	BOOL SameFont(HFONT hFont, LPCTSTR szFaceName, int nPoint);
-	BOOL SameFontNameSize(HFONT hFont1, HFONT hFont2);
+	BOOL IsSameFontNameAndSize(HFONT hFont1, HFONT hFont2);
 	CFont& WingDings();
 	CFont& Marlett();
 	int DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UINT nFlags, CFont* pFont = NULL);
-	CFont* PrepareDCFont(CDC* pDC, HWND hwndRef = NULL, CFont* pFont = NULL, int nStockFont = DEFAULT_GUI_FONT); // returns 'old' font
+	HFONT PrepareDCFont(CDC* pDC, HWND hwndRef = NULL, HFONT hFont = NULL, int nStockFont = DEFAULT_GUI_FONT); // returns 'old' font
 	
 	int GetTextWidth(const CString& sText, HWND hWndRef, HFONT hFontRef = NULL);
 	int GetTextWidth(const CString& sText, CWnd& wndRef, CFont* pRefFont = NULL);
@@ -185,6 +183,7 @@ namespace GraphicsMisc
 	int GetTabbedTextWidth(CDC* pDC, const CString& sText, int nTabWidth);
 	int GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...);
 	float GetAverageCharWidth(CDC* pDC, CFont* pFont = NULL);
+	float GetAverageCharWidth(HWND hWndRef, HFONT hFont = NULL);
 	int GetAverageStringWidth(const CString& sText, CDC* pDC, CFont* pFont = NULL);
 	int GetAverageMaxStringWidth(const CString& sText, CDC* pDC, CFont* pFont = NULL);
 	
@@ -239,12 +238,20 @@ namespace GraphicsMisc
 
 	BOOL FillItemRect(CDC* pDC, CRect& rItem, COLORREF color, HWND hwnd); // will update rItem
 	BOOL FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND hwnd);
-	BOOL CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
+	
+	void CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
+	CRect CalcCentredRect(int nSize, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
+	CRect CalcCentredRect(int cx, int cy, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
+
 	CPoint CentrePoint(LPCRECT prcRect);
 	void AlignRect(LPRECT pRect, LPCRECT prcOther, int nDrawTextFlags); // DT_LEFT, etc
 
+	BOOL DrawCentred(CDC* pDC, HIMAGELIST hIl, int nImage, LPCRECT prcImage, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE, UINT nStyle = ILD_TRANSPARENT);
+	BOOL DrawCentred(CDC* pDC, HICON hIcon, LPCRECT prcIcon, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
+
 	BOOL DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE nState, const CRect& rItem, DWORD dwFlags, LPCRECT prClip = NULL); 
 	COLORREF GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags);
+	COLORREF GetExplorerItemSelectionBorderColor(GM_ITEMSTATE nState, DWORD dwFlags);
 	COLORREF GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags);
 	COLORREF GetSolidColor(HBRUSH hBrush);
 
@@ -261,6 +268,10 @@ namespace GraphicsMisc
 	BOOL DwmSetWindowAttributeEx(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize);
 	BOOL DwmGetWindowAttributeEx(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize);
 	BOOL DwmIsCompositionEnabled();
+
+	BOOL FitRect(CRect& rect, const CRect& rOther);
+	BOOL FitRectToWindow(CRect& rect, HWND hWnd, BOOL bScreen = FALSE);
+	BOOL FitRectToScreen(CRect& rect, LPPOINT pPtRef = NULL, UINT nFallback = MONITOR_DEFAULTTONULL);
 
 	BOOL GetAvailableScreenSpace(const CPoint& point, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);
 	BOOL GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);

@@ -484,7 +484,7 @@ BOOL CWeekend::IsValid(DWORD dwWeekendDays)
 
 BOOL CWeekend::IsWeekend(const COleDateTime& date) const
 {
-	ASSERT(CDateHelper::IsDateSet(date));
+	NULLDATE_CHECKRET(date, FALSE);
 
 	if (m_dwDays)
 		return IsWeekend(CDateHelper::GetDayOfWeek(date));
@@ -675,7 +675,9 @@ COleDateTime CWorkingWeek::AddDuration(COleDateTime& dtFrom, double dAmount, WW_
 COleDateTime CWorkingWeek::AddDurationInHours(COleDateTime& dtFrom, double dHours) const
 {
 	// Sanity checks
-	if ((dHours == 0.0) || !CDateHelper::IsDateSet(dtFrom))
+	NULLDATE_CHECKRET(dtFrom, CDateHelper::NullDate());
+
+	if (dHours == 0.0)
 	{
 		ASSERT(0);
 		return dtFrom;
@@ -842,12 +844,8 @@ COleDateTime CWorkingWeek::ToWeekday(const COleDateTime& date, BOOL bForwards) c
 
 BOOL CWorkingWeek::MakeWeekday(COleDateTime& date, BOOL bForwards, BOOL bTruncateTime) const
 {
-	if (!CDateHelper::IsDateSet(date))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-	
+	NULLDATE_CHECKRET(date, FALSE);
+
 	if (!HasWeekend())
 	{
 		return FALSE;

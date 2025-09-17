@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Web.UI;
 
 using MSDN.Html.Editor;
+using UIComponents;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -520,19 +521,18 @@ namespace HTMLReportExporter
 
 		private void OnBackColorClick(object sender, EventArgs e)
 		{
-			using (ColorDialog colorDialog = new ColorDialog())
+			using (var dlg = new ColorDialogEx())
 			{
-				colorDialog.FullOpen = true;
-				colorDialog.AnyColor = true;
-				colorDialog.SolidColorOnly = true;
-				colorDialog.AllowFullOpen = true;
-				colorDialog.Color = (HasBackColor ? BackColor : Color.White);
-				//colorDialog.CustomColors = _customColors;
+				dlg.FullOpen = true;
+				dlg.AnyColor = true;
+				dlg.SolidColorOnly = true;
+				dlg.AllowFullOpen = true;
+				dlg.Color = (HasBackColor ? BackColor : Color.White);
 
-				if (colorDialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				if (dlg.ShowDialog() == DialogResult.OK)
 				{
 					//_customColors = colorDialog.CustomColors;
-					BackColor = colorDialog.Color;
+					BackColor = dlg.Color;
 				}
 			}
 		}

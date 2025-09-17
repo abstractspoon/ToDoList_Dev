@@ -29,7 +29,6 @@
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HtmlEditorControl));
 			this.browserPanel = new System.Windows.Forms.Panel();
-			this.editorWebBrowser = new WebBrowserEx.WebBrowserEx();
 			this.toolstripEditor = new IIControls.ToolStripEx();
 			this.toolstripEnableEditing = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
@@ -153,6 +152,7 @@
 			this.contextInsertText = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertHtml = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertTable = new System.Windows.Forms.ToolStripMenuItem();
+			this.editorWebBrowser = new WebBrowserEx.WebBrowserEx();
 			this.browserPanel.SuspendLayout();
 			this.toolstripEditor.SuspendLayout();
 			this.contextEditor.SuspendLayout();
@@ -165,15 +165,6 @@
 			resources.ApplyResources(this.browserPanel, "browserPanel");
 			this.browserPanel.Name = "browserPanel";
 			this.browserPanel.Resize += new System.EventHandler(this.browserPanelResize);
-			// 
-			// editorWebBrowser
-			// 
-			this.editorWebBrowser.IsWebBrowserContextMenuEnabled = false;
-			resources.ApplyResources(this.editorWebBrowser, "editorWebBrowser");
-			this.editorWebBrowser.Name = "editorWebBrowser";
-			this.editorWebBrowser.ScriptErrorsSuppressed = true;
-			this.editorWebBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.BrowserDocumentComplete);
-			this.editorWebBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.BrowserBeforeNavigate);
 			// 
 			// toolstripEditor
 			// 
@@ -1180,6 +1171,15 @@
 			this.contextInsertTable.Name = "contextInsertTable";
 			this.contextInsertTable.Tag = "InsertTable";
 			this.contextInsertTable.Click += new System.EventHandler(this.contextEditorClick);
+			// 
+			// editorWebBrowser
+			// 
+			this.editorWebBrowser.IsWebBrowserContextMenuEnabled = false;
+			resources.ApplyResources(this.editorWebBrowser, "editorWebBrowser");
+			this.editorWebBrowser.Name = "editorWebBrowser";
+			this.editorWebBrowser.ScriptErrorsSuppressed = true;
+			this.editorWebBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.BrowserDocumentComplete);
+			this.editorWebBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.BrowserBeforeNavigate);
 			// 
 			// HtmlEditorControl
 			// 

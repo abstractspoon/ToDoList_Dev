@@ -98,6 +98,13 @@ void HostedTimeComboBox::SetEnabled(bool enabled)
 	m_Combo.EnableWindow(enabled);
 }
 
+void HostedTimeComboBox::SetISOFormat(bool iso)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_Combo.SetISOFormat(iso);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 HostedTimeComboBox* Combo(IntPtr ptr)
@@ -121,6 +128,7 @@ void TimeComboBox::OnHandleCreated(EventArgs^ e)
 	m_pMFCInfo = IntPtr(HostedTimeComboBox::Attach(Win32::GetHwnd(Handle), Win32::GetHfont(Font->ToHfont())));
 
 	CheckSetTime();
+	SetISOFormat(m_IsoFormat);
 }
 
 void TimeComboBox::OnHandleDestroyed(EventArgs^ e)
@@ -204,6 +212,14 @@ void TimeComboBox::SetEnabled(bool enabled)
 
 	if (m_pMFCInfo != IntPtr::Zero)
 		Combo(m_pMFCInfo)->SetEnabled(enabled);
+}
+
+void TimeComboBox::SetISOFormat(bool iso)
+{
+	m_IsoFormat = iso;
+
+	if (m_pMFCInfo != IntPtr::Zero)
+		Combo(m_pMFCInfo)->SetISOFormat(iso);
 }
 
 

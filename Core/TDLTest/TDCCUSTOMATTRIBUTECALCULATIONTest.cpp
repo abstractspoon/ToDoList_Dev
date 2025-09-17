@@ -43,7 +43,7 @@ const DWORD ID_CHILD2 = 3;
 
 CTDCCUSTOMATTRIBUTECALCULATIONTest::CTDCCUSTOMATTRIBUTECALCULATIONTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(utils)
+	CTDLTestBase(_T("CTDCCUSTOMATTRIBUTECALCULATIONTest"), utils)
 {
 
 }
@@ -451,6 +451,8 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONSimple()
 {
+	CTDCScopedTest test(*this, _T("TDCCUSTOMATTRIBUTECALCULATION (Simple)"));
+
 	CTDCCustomAttribDefinitionArray aAttribDefs;
 	InitCustomAttributes(aAttribDefs);
 
@@ -521,24 +523,89 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONSimple
 		if (nAtt != -1)
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAtt];
-			double dValue = 0.0;
 
-			data.SetTaskCustomAttributeData(ID_PARENT, ID_DATE, _T("41254.0"));
-			data.SetTaskCustomAttributeData(ID_CHILD1, ID_DATE, _T("41258.0"));
-			data.SetTaskCustomAttributeData(ID_CHILD2, ID_DATE, _T("41262.0"));
+			// Null Dates
+			{
+				double dValue = 0.0;
 
-			data.SetTaskCustomAttributeData(ID_PARENT, ID_DOUBLE, _T("4.0"));
-			data.SetTaskCustomAttributeData(ID_CHILD1, ID_DOUBLE, _T("8.0"));
-			data.SetTaskCustomAttributeData(ID_CHILD2, ID_DOUBLE, _T("2.0"));
+				data.SetTaskCustomAttributeData(ID_PARENT, ID_DATE, _T(""));
+				data.SetTaskCustomAttributeData(ID_CHILD1, ID_DATE, _T(""));
+				data.SetTaskCustomAttributeData(ID_CHILD2, ID_DATE, _T(""));
 
-			ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
-			ExpectEQ(dValue, 41258.0);
+				data.SetTaskCustomAttributeData(ID_PARENT, ID_DOUBLE, _T("4.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD1, ID_DOUBLE, _T("8.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD2, ID_DOUBLE, _T("2.0"));
 
-			ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
-			ExpectEQ(dValue, 41266.0);
+				ExpectFalse(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
+				ExpectFalse(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
+				ExpectFalse(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
+			}
 
-			ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
-			ExpectEQ(dValue, 41264.0);
+			// 'Zero Hour' - December 30, 1899, midnight
+			{
+				double dValue = 0.0;
+
+				data.SetTaskCustomAttributeData(ID_PARENT, ID_DATE, _T("0.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD1, ID_DATE, _T("0.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD2, ID_DATE, _T("0.0"));
+
+				data.SetTaskCustomAttributeData(ID_PARENT, ID_DOUBLE, _T("4.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD1, ID_DOUBLE, _T("-8.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD2, ID_DOUBLE, _T("2.0"));
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
+				ExpectEQ(dValue, 4.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
+				ExpectEQ(dValue, -8.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
+				ExpectEQ(dValue, 2.0);
+			}
+
+			// Positive dates
+			{
+				double dValue = 0.0;
+
+				data.SetTaskCustomAttributeData(ID_PARENT, ID_DATE, _T("41254.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD1, ID_DATE, _T("41258.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD2, ID_DATE, _T("41262.0"));
+
+				data.SetTaskCustomAttributeData(ID_PARENT, ID_DOUBLE, _T("4.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD1, ID_DOUBLE, _T("8.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD2, ID_DOUBLE, _T("2.0"));
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
+				ExpectEQ(dValue, 41258.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
+				ExpectEQ(dValue, 41266.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
+				ExpectEQ(dValue, 41264.0);
+			}
+
+			// Negative dates
+			{
+				double dValue = 0.0;
+
+				data.SetTaskCustomAttributeData(ID_PARENT, ID_DATE, _T("-41254.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD1, ID_DATE, _T("-41258.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD2, ID_DATE, _T("-41262.0"));
+
+				data.SetTaskCustomAttributeData(ID_PARENT, ID_DOUBLE, _T("4.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD1, ID_DOUBLE, _T("8.0"));
+				data.SetTaskCustomAttributeData(ID_CHILD2, ID_DOUBLE, _T("2.0"));
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
+				ExpectEQ(dValue, -41250.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
+				ExpectEQ(dValue, -41250.0);
+
+				ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
+				ExpectEQ(dValue, -41260.0);
+			}
 		}
 	}
 }

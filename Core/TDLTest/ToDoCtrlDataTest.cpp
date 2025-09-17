@@ -31,7 +31,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CToDoCtrlDataTest::CToDoCtrlDataTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CToDoCtrlDataTest::CToDoCtrlDataTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CToDoCtrlDataTest"), utils)
 {
 	m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 //	m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
@@ -59,6 +61,8 @@ TESTRESULT CToDoCtrlDataTest::Run()
 {
 	ClearTotals();
 
+	TestSetTaskPriorityRisk();
+	TestOffsetTaskPriorityRisk();
 	TestAdjustNewRecurringTasksDates();
 
 	// Performance
@@ -85,7 +89,7 @@ void CToDoCtrlDataTest::BeginPerformanceTest(LPCTSTR szFunction, BOOL bWithAttri
 
 void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CToDoCtrlDataTest::HierarchyDataModelCreationPerformance\n"));
 		return;
@@ -117,7 +121,7 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 
 void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CToDoCtrlDataTest::FlatListDataModelPerformance\n"));
 		return;
@@ -152,7 +156,7 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 
 void CToDoCtrlDataTest::TestDataModelCreationPerformance(const CTaskFile& tasks, CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 
@@ -168,7 +172,7 @@ void CToDoCtrlDataTest::TestDataModelCreationPerformance(const CTaskFile& tasks,
 
 void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 
@@ -210,7 +214,7 @@ void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData&
 
 void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 
@@ -257,7 +261,7 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 
 void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 
@@ -284,12 +288,9 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlD
 
 void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	// Mocks ----------------------------------------
-	CTreeCtrl tree;
-	const CTreeCtrlHelper tch(tree);
-
 	const CTDCImageList ilIcons;
 	const TDCAUTOLISTDATA tld;
 	const CTDCColumnIDMap mapVisibleCols;
@@ -320,7 +321,7 @@ void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& da
 
 void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	DWORD dwTickStart = GetTickCount();
 	DWORD dwMaxTaskID = data.GetTaskCount();
@@ -343,12 +344,14 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& dat
 
 void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates()
 {
-	CTDCScopedTest test(*this, _T("CToDoCtrlDataTest::AdjustNewRecurringTasksDates"));
+	CTDCScopedTest test(*this, _T("CToDoCtrlData::AdjustNewRecurringTasksDates"));
 
 	TestAdjustNewRecurringTasksDates(TDIRO_STARTDATE);
 	TestAdjustNewRecurringTasksDates(TDIRO_DUEDATE);
 	TestAdjustNewRecurringTasksDates(TDIRO_DONEDATE);
 }
+
+////////////////////////////////////////////////////////////////////////////
 
 void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRecalcFrom)
 {
@@ -356,7 +359,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 	int NUM_PRIMES = (sizeof(PRIMES) / sizeof(PRIMES[0])), i;
 
 	//  nRegularity								dwSpecific1				dwSpecific2
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 
 	//	TDIR_DAY_EVERY_NDAYS					every 'n' days			--- (0)
 	for (i = 0; i < NUM_PRIMES; i++)
@@ -364,18 +367,18 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		TestAdjustNewRecurringTasksDates(TDIR_DAY_EVERY_NDAYS, PRIMES[i], 0, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_DAY_EVERY_WEEKDAY					--- (0)					--- (0)
 	TestAdjustNewRecurringTasksDates(TDIR_DAY_EVERY_WEEKDAY, 0, 0, nRecalcFrom);
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_DAY_EVERY_NWEEKDAYS				every 'n' days			--- (0)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
 		TestAdjustNewRecurringTasksDates(TDIR_DAY_EVERY_NWEEKDAYS, PRIMES[i], 0, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_WEEK_SPECIFIC_DOWS_NWEEKS			every 'n' weeks			weekdays (DHW_...)
 	DWORD DOWS[] =
 	{
@@ -397,14 +400,14 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		}
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_WEEK_EVERY_NWEEKS					every 'n' weeks			--- (0)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
 		TestAdjustNewRecurringTasksDates(TDIR_WEEK_EVERY_NWEEKS, PRIMES[i], 0, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_MONTH_EVERY_NMONTHS				every 'n' months		preserve weekday (BOOL)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -417,7 +420,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		TestAdjustNewRecurringTasksDates(TDIR_MONTH_EVERY_NMONTHS, PRIMES[i], TRUE, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_MONTH_SPECIFIC_DAY_NMONTHS			every 'n' months		day of month (1-31)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -427,7 +430,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		}
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS		first(0), last(!0)		every 'n' months
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -440,7 +443,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		TestAdjustNewRecurringTasksDates(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS, TRUE, PRIMES[i], nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_MONTH_SPECIFIC_DOW_NMONTHS			LOWORD = which (1-5)	every 'n' months
 	//                                          HIWORD = DOW   (1-7)		
 	for (i = 0; i < NUM_PRIMES; i++)
@@ -454,7 +457,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		}
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_YEAR_SPECIFIC_DAY_MONTHS			month (1-12)			day of month (1-31)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -464,7 +467,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		}
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//	TDIR_YEAR_EVERY_NYEARS					every 'n' years			preserve weekday (BOOL)
 	for (i = 0; i < NUM_PRIMES; i++)
 	{
@@ -477,7 +480,7 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 		TestAdjustNewRecurringTasksDates(TDIR_YEAR_EVERY_NYEARS, PRIMES[i], TRUE, nRecalcFrom);
 	}
 
-	//  ---------------------------------------------------------------------------------
+	//  -------------------------------------|-----------------------|-------------------
 	//  TDIR_YEAR_SPECIFIC_DOW_MONTHS			LOWORD = which (1-5)	specific month (1-12)
 	//                                          HIWORD = DOW   (1-7)		
 	for (DWORD dwMonth = 1; dwMonth < 12; dwMonth++)
@@ -494,10 +497,10 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_RECURFROMOPTION nRe
 
 void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom)
 {
-	BeginSubTest(GetRegularityText(nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom));
+	CTDCScopedSubTest subtest(*this, GetRegularityText(nRegularity, dwSpecific1, dwSpecific2, nRecalcFrom));
 
 	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
-	CUndoAction undo(data, TDCUAT_ADD, FALSE);
+	CUndoAction undo(data, TDCUAT_ADD, FALSE); // Otherwise CToDoCtrlData will assert
 
 	const DWORD dwTaskID = 1;
 	TODOITEM* pTDI = data.NewTask(TODOITEM());
@@ -543,8 +546,6 @@ void CToDoCtrlDataTest::TestAdjustNewRecurringTasksDates(TDC_REGULARITY nRegular
 		if (nRecalcFrom == TDIRO_DONEDATE)
 			data.SetTaskDate(dwTaskID, TDCD_DONE, dtNext);
 	}
-
-	EndSubTest();
 }
 
 CString CToDoCtrlDataTest::GetRegularityText(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom)
@@ -579,4 +580,218 @@ CString CToDoCtrlDataTest::GetRegularityText(TDC_REGULARITY nRegularity, DWORD d
 	ASSERT(szRegularity);
 
 	return Misc::Format(_T("%s(%ld, %ld, %s)"), szRegularity, dwSpecific1, dwSpecific2, szFrom);
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+void CToDoCtrlDataTest::TestSetTaskPriorityRisk()
+{
+	{
+		CTDCScopedTest test(*this, _T("CToDoCtrlData::SetTaskPriority"));
+
+		TestSetTaskPriorityRisk(TRUE);
+	}
+
+	{
+		CTDCScopedTest test(*this, _T("CToDoCtrlData::SetTaskRisk"));
+
+		TestSetTaskPriorityRisk(FALSE);
+	}
+}
+
+void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk()
+{
+	{
+		CTDCScopedTest test(*this, _T("CToDoCtrlData::OffsetTaskPriority"));
+
+		for (int nNumLevels = TDC_PRIORITYORRISK_MINLEVELS;
+				 nNumLevels <= TDC_PRIORITYORRISK_MAXLEVELS; nNumLevels++)
+		{
+			TestOffsetTaskPriorityRisk(TRUE, nNumLevels);
+		}
+	}
+
+	{
+		CTDCScopedTest test(*this, _T("CToDoCtrlData::OffsetTaskRisk"));
+
+		for (int nNumLevels = TDC_PRIORITYORRISK_MINLEVELS;
+			 nNumLevels <= TDC_PRIORITYORRISK_MAXLEVELS; nNumLevels++)
+		{
+			TestOffsetTaskPriorityRisk(FALSE, nNumLevels);
+		}
+	}
+}
+
+// -----------------------------------------------
+
+#define GET_PRIORITYRISK() \
+	(bPriority ? data.GetTaskPriority(dwTaskID) : data.GetTaskRisk(dwTaskID))
+
+#define SET_PRIORITYRISK(value) \
+	(bPriority ? data.SetTaskPriority(dwTaskID, value, FALSE) : data.SetTaskRisk(dwTaskID, value, FALSE))
+
+#define OFFSET_PRIORITYRISK(offset) \
+	(bPriority ? data.SetTaskPriority(dwTaskID, offset, TRUE) : data.SetTaskRisk(dwTaskID, offset, TRUE))
+
+// -----------------------------------------------
+
+void CToDoCtrlDataTest::TestSetTaskPriorityRisk(BOOL bPriority)
+{
+	ASSERT(IsTestActive());
+
+	CTDCStyleMap aStyles;
+	CTDCCustomAttribDefinitionArray aCustAttrib;
+
+	CToDoCtrlData data(aStyles, aCustAttrib);
+	CUndoAction undo(data, TDCUAT_ADD, FALSE); // Otherwise CToDoCtrlData will assert
+
+	const DWORD dwTaskID = 1;
+	TODOITEM* pTDI = data.NewTask(TODOITEM());
+
+	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
+	ExpectEQ(GET_PRIORITYRISK(), TDC_PRIORITYORRISK_NONE); // default value
+	
+	for (int nValue = (TDC_PRIORITYORRISK_MIN - 10);
+			(nValue <= TDC_PRIORITYORRISK_MAX + 10); nValue++)
+	{
+		int nCurValue = GET_PRIORITYRISK();
+		TDC_SET nSet = SET_PRIORITYRISK(nValue);
+
+		int nNewValue = GET_PRIORITYRISK();
+
+		if (nValue == TDC_PRIORITYORRISK_NONE)
+		{
+			ExpectEQ(nSet, SET_NOCHANGE); // it started off as this value
+			ExpectEQ(nNewValue, nValue);
+		}
+		else if ((nValue >= TDC_PRIORITYORRISK_MIN) && (nValue <= TDC_PRIORITYORRISK_MAX))
+		{
+			ExpectEQ(nSet, SET_CHANGE);
+			ExpectEQ(GET_PRIORITYRISK(), nValue);
+		}
+		else
+		{
+			ExpectEQ(nSet, SET_FAILED);
+			ExpectEQ(GET_PRIORITYRISK(), nCurValue);
+		}
+	}
+}
+
+void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk(BOOL bPriority, int nNumLevels)
+{
+	CTDCStyleMap aStyles;
+	CTDCCustomAttribDefinitionArray aCustAttrib;
+
+	CToDoCtrlData data(aStyles, aCustAttrib);
+	data.SetNumPriorityRiskLevels(nNumLevels);
+
+	CUndoAction undo(data, TDCUAT_ADD, FALSE); // Otherwise CToDoCtrlData will assert
+
+	const DWORD dwTaskID = 1;
+	TODOITEM* pTDI = data.NewTask(TODOITEM());
+
+	VERIFY(data.AddTask(dwTaskID, pTDI, 0, 0));
+
+	const int nMaxLevel = (nNumLevels - 1);
+
+	// Offset < 0
+	{
+		const int OFFSETS[] = { -1, -3, -5, -7 };
+		const int NUM_OFFSETS = (sizeof(OFFSETS), sizeof(OFFSETS[0]));
+
+		for (int i = 0; i < NUM_OFFSETS; i++)
+		{
+			const int nOffset = OFFSETS[i];
+
+			for (int nStart = TDC_PRIORITYORRISK_NONE; nStart <= TDC_PRIORITYORRISK_MAX; nStart++)
+			{
+				if (nStart == -1)
+					nStart = TDC_PRIORITYORRISK_MIN;
+
+				CTDCScopedSubTest subtest(*this, Misc::Format(_T("Num Levels = %d, Offset = %d, Start = %d"), nNumLevels, nOffset, nStart));
+
+				SET_PRIORITYRISK(nStart);
+				ExpectEQ(GET_PRIORITYRISK(), nStart);
+
+				for (int k = 0; k < 10; k++)
+				{
+					int nCurValue = GET_PRIORITYRISK();
+					ASSERT(TODOITEM::IsValidPriorityOrRisk(nCurValue));
+
+					TDC_SET nSet = OFFSET_PRIORITYRISK(nOffset);
+					int nNewValue = GET_PRIORITYRISK();
+
+					int nAttempt = (nCurValue + nOffset);
+
+					if (nCurValue <= 0)
+					{
+						ExpectEQ(nNewValue, TDC_PRIORITYORRISK_NONE);
+					}
+					else if (nAttempt <= 0)
+					{
+						ExpectEQ(nNewValue, TDC_PRIORITYORRISK_MIN);
+					}
+					else if (nAttempt > nMaxLevel)
+					{
+						ExpectEQ(nNewValue, nMaxLevel);
+					}
+					else
+					{
+						ExpectEQ(nNewValue, nAttempt);
+					}
+				}
+			}
+		}
+	}
+
+	// Offset > 0
+	{
+		const int OFFSETS[] = { 1, 3, 5, 7 };
+		const int NUM_OFFSETS = (sizeof(OFFSETS), sizeof(OFFSETS[0]));
+
+		for (int i = 0; i < NUM_OFFSETS; i++)
+		{
+			const int nOffset = OFFSETS[i];
+
+			for (int nStart = TDC_PRIORITYORRISK_NONE; nStart <= TDC_PRIORITYORRISK_MAX; nStart++)
+			{
+				if (nStart == -1)
+					nStart = TDC_PRIORITYORRISK_MIN;
+
+				CTDCScopedSubTest subtest(*this, Misc::Format(_T("Num Levels = %d, Offset = %d, Start = %d"), nNumLevels, nOffset, nStart));
+
+				SET_PRIORITYRISK(nStart);
+				ExpectEQ(GET_PRIORITYRISK(), nStart);
+
+				for (int j = 0; j < 10; j++)
+				{
+					int nCurValue = GET_PRIORITYRISK();
+					ASSERT(TODOITEM::IsValidPriorityOrRisk(nCurValue));
+
+					TDC_SET nSet = OFFSET_PRIORITYRISK(nOffset);
+					int nNewValue = GET_PRIORITYRISK();
+
+					int nAttempt = (nCurValue + nOffset);
+
+					if (nCurValue == TDC_PRIORITYORRISK_NONE)
+					{
+						ExpectEQ(nNewValue, TDC_PRIORITYORRISK_MIN);
+					}
+					else if (nCurValue > nMaxLevel)
+					{
+						ExpectEQ(nNewValue, nCurValue);
+					}
+					else if (nAttempt > nMaxLevel)
+					{
+						ExpectEQ(nNewValue, nMaxLevel);
+					}
+					else
+					{
+						ExpectEQ(nNewValue, nAttempt);
+					}
+				}
+			}
+		}
+	}
+
 }

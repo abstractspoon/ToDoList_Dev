@@ -21,7 +21,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int NUM_Y_TICKS = 10;
+const int DEFAULT_NUMYTICKS = 10;
 
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
@@ -49,7 +49,7 @@ END_MESSAGE_MAP()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph)
+BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph, BOOL bRebuild)
 {
 	if (!pGraph)
 	{
@@ -61,14 +61,14 @@ BOOL CBurndownChart::SetActiveGraph(const CGraphBase* pGraph)
 	{
 		m_pGraph = pGraph;
 
-		if (m_dtExtents.IsValid())
+		if (bRebuild && m_dtExtents.IsValid())
 			RebuildGraph(m_dtExtents);
 	}
 
 	return TRUE;
 }
 
-void CBurndownChart::OnColoursChanged()
+void CBurndownChart::OnColorsChanged()
 {
 	CHECK_GRAPH();
 
@@ -87,15 +87,14 @@ void CBurndownChart::OnOptionChanged(BURNDOWN_GRAPHOPTION nOption)
 	}
 }
 
-void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
+void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty, BOOL bRebuild)
 {
-	CHECK_GRAPH();
-
-	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) && 
-		m_pGraph->HasType(BCT_FREQUENCY) &&
-		m_dtExtents.IsValid())
+	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) && bRebuild &&	m_dtExtents.IsValid())
 	{
-		RebuildGraph(m_dtExtents);
+		CHECK_GRAPH();
+
+		if (m_pGraph->HasType(BCT_FREQUENCY))
+			RebuildGraph(m_dtExtents);
 	}
 }
 
@@ -192,6 +191,7 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 		m_pGraph->BuildGraph(m_calculator, m_datasets);
 	}
 
+	RecalcNumYTicks();
 	RebuildXScale();
 	CalcDatas();
 
@@ -207,7 +207,7 @@ CString CBurndownChart::GetYTickText(int nTick, double dValue) const
 		switch (m_pGraph->GetGraph())
 		{
 		case BCG_MINMAX_DUEDONEDATES:
-			return COleDateTime(dValue).Format(VAR_DATEVALUEONLY);
+			return m_pGraph->FormatDate(dValue);
 		}
 	}
 
@@ -233,29 +233,74 @@ int CBurndownChart::GetNumYSubTicks(double dInterval) const
 	return nNumSub;
 }
 
+void CBurndownChart::RecalcNumYTicks()
+{
+	double dUnused1, dUnused2;
+	int nNumYTicks;
+
+	if (CalcMinMax(dUnused1, dUnused2, nNumYTicks))
+		SetNumYTicks(nNumYTicks);
+}
+
 BOOL CBurndownChart::GetMinMax(double& dMin, double& dMax, BOOL /*bDataOnly*/) const
+{
+	int nUnused;
+
+	return CalcMinMax(dMin, dMax, nUnused);
+}
+
+BOOL CBurndownChart::CalcMinMax(double& dMin, double& dMax, int& nNumYTicks) const
 {
 	if (m_data.GetSize() == 0)
 		return FALSE;
 
 	CHECK_GRAPH_RET(FALSE);
 
-	if (!m_pGraph->GetMinMax(dMin, dMax) || (dMin > dMax))
+	if (!m_pGraph->GetDataMinMax(dMin, dMax) || (dMin > dMax))
 		return FALSE;
 
-	switch (m_pGraph->GetGraph())
-	{
-	case BCG_MINMAX_DUEDONEDATES:
-		{
-			double dDiff = max(10.0, (dMax - dMin));
-			dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, NUM_Y_TICKS);
-		}
-		break;
+	nNumYTicks = DEFAULT_NUMYTICKS;
 
-	default: // All else
-		dMin = 0.0;
-		dMax = HMXUtils::CalcMaxYAxisValue(dMax, NUM_Y_TICKS);
-		break;
+	if ((dMin < 0.0) && (dMax == 0.0))
+	{
+		dMin = -HMXUtils::CalcMaxYAxisValue(-dMin, nNumYTicks);
+	}
+	else if ((dMin == 0.0) && (dMax > 0.0))
+	{
+		dMax = HMXUtils::CalcMaxYAxisValue(dMax, nNumYTicks);
+	}
+	else if ((dMin < 0.0) && (dMax > 0.0))
+	{
+		// Whichever is the greater of 'abs(min) and max', use that
+		// to calculate our overall scale and then calculate the
+		// 'other' end of the scale from that
+		int nOtherTicks = 0;
+
+		if (dMax > -dMin)
+		{
+			dMax = HMXUtils::CalcMaxYAxisValue(dMax, nNumYTicks);
+
+			double dTick = (dMax / nNumYTicks);
+
+			nOtherTicks = (int)((-dMin / dTick) + 1);
+			dMin = (-nOtherTicks * dTick);
+		}
+		else // -dMin > dMax
+		{
+			dMin = -HMXUtils::CalcMaxYAxisValue(-dMin, nNumYTicks);
+
+			double dTick = (-dMin / DEFAULT_NUMYTICKS); // +ve
+
+			nOtherTicks = (int)((dMax / dTick) + 1);
+			dMax = (nOtherTicks * dTick);
+		}
+
+		nNumYTicks += nOtherTicks;
+	}
+	else // trickier
+	{
+		double dDiff = max(1.0, (dMax - dMin));
+		dMax = dMin + HMXUtils::CalcMaxYAxisValue(dDiff, nNumYTicks);
 	}
 
 	return TRUE;
@@ -288,7 +333,7 @@ void CBurndownChart::PreSubclassWindow()
 	SetBkGnd(GetSysColor(COLOR_WINDOW));
 	SetXLabelsAreTicks(TRUE);
 	SetXLabelAngle(45);
-	SetNumYTicks(NUM_Y_TICKS);
+	SetNumYTicks(DEFAULT_NUMYTICKS);
 
 	VERIFY(InitTooltip(TRUE));
 }
@@ -351,3 +396,25 @@ BOOL CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	return CHMXChartEx::DrawDataset(dc, m_datasets[nDatasetIndex], m_pGraph->GetColors(), alpha);
 }
 
+BOOL CBurndownChart::XScaleHasRTLDates() const 
+{ 
+	switch (m_pGraph->GetType())
+	{
+	case BCT_TIMESERIES:
+	case BCT_MINMAX:
+		return CDateHelper::WantRTLDates();
+	}
+
+	return FALSE; 
+}
+
+BOOL CBurndownChart::YScaleHasRTLDates() const 
+{ 
+	switch (m_pGraph->GetGraph())
+	{
+	case BCG_MINMAX_DUEDONEDATES:
+		return CDateHelper::WantRTLDates();
+	}
+
+	return FALSE; 
+}

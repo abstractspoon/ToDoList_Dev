@@ -14,43 +14,29 @@
 
 class CTDLRiskComboBox : public COwnerdrawComboBoxBase
 {
-// Construction
 public:
-	CTDLRiskComboBox(BOOL bIncludeAny);
+	CTDLRiskComboBox(BOOL bIncludeAny, BOOL bIncludeNone = TRUE);
+	virtual ~CTDLRiskComboBox();
 
-	int GetSelectedRisk() const; // -2 -> 10
-	void SetSelectedRisk(int nRisk); // -2 -> 10
+	void SetNumLevels(int nNumLevels);
+	int GetNumLevels() const { return m_nNumLevels; }
+
+	int GetSelectedRisk() const;
+	void SetSelectedRisk(int nRisk);
 
 	void DDX(CDataExchange* pDX, int& nRisk);
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLRiskComboBox)
-protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
+	BOOL m_bIncludeAny, m_bIncludeNone;
+	int m_nNumLevels;
 
 protected:
-	BOOL m_bIncludeAny;
-
-	// Implementation
-public:
-	virtual ~CTDLRiskComboBox();
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CTDLRiskComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
-   void BuildCombo();
-
+   virtual void BuildCombo();
    virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-	   DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+							DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 };
 
 /////////////////////////////////////////////////////////////////////////////

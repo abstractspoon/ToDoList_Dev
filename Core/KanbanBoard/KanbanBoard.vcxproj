@@ -169,44 +169,22 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="KanbanAttributeComboBox.cpp" />
-    <ClCompile Include="KanbanBoard.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="KanbanCtrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="KanbanBoard.cpp" />
+    <ClCompile Include="KanbanCtrl.cpp" />
     <ClCompile Include="KanbanFixedColumnListCtrl.cpp" />
-    <ClCompile Include="KanbanColumnCtrl.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="KanbanColumnCtrl.cpp" />
     <ClCompile Include="KanbanColumnCtrlArray.cpp" />
     <ClCompile Include="KanbanGroupByComboBox.cpp" />
     <ClCompile Include="KanbanOptionComboBox.cpp" />
-    <ClCompile Include="KanbanPreferencesDlg.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="KanbanStruct.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="KanbanWnd.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="KanbanPreferencesDlg.cpp" />
+    <ClCompile Include="KanbanStruct.cpp" />
+    <ClCompile Include="KanbanWnd.cpp" />
     <ClCompile Include="StdAfx.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\column_toolbar.bmp" />
-    <None Include="res\column_toolbar_std.bmp" />
     <None Include="res\help_button.ico" />
     <None Include="res\KanbanBoard.rc2" />
     <None Include="res\toolbar.bmp" />
@@ -215,8 +193,6 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="KanbanBoard.rc">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>

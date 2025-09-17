@@ -20,6 +20,10 @@ typedef __int64 time64_t;
 
 //////////////////////////////////////////////////////////////////////
 
+#define NULLDATE_CHECKRET(dt, ret) if (!CDateHelper::IsDateSet(dt)) { ASSERT(0); return ret; }
+
+//////////////////////////////////////////////////////////////////////
+
 class COleDateTimeRange
 {
 public:
@@ -60,6 +64,7 @@ public:
 	BOOL HasStart() const;
 	BOOL HasEnd() const;
 	BOOL IsSameDay() const;
+	BOOL IsSameMonth() const;
 
 	COleDateTime GetStart() const;
 	COleDateTime GetEnd() const;
@@ -70,12 +75,13 @@ public:
 	int GetDayCount() const;
 	int GetWeekdayCount() const;
 
-	BOOL Offset(int nAmount, DH_UNITS nUnits);
+	BOOL Offset(int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth = FALSE);
 	BOOL OffsetStart(int nAmount, DH_UNITS nUnits);
-	BOOL OffsetEnd(int nAmount, DH_UNITS nUnits);
+	BOOL OffsetEnd(int nAmount, DH_UNITS nUnits, BOOL bPreserveEndOfMonth = FALSE);
 	BOOL Expand(int nAmount, DH_UNITS nUnits);
 
-	CString Format(DWORD dwFlags = 0, TCHAR cDelim = '-') const;
+	CString Format(DWORD dwFlags = 0, LPCTSTR szDelim = _T(" - ")) const;
+	CString FormatDateOnly(LPCTSTR szFormat, LPCTSTR szDelim = _T(" - ")) const;
 	double CalcProportion(const COleDateTime& date) const; // returns 0.0-1.0
 
 	// returns 'end of day' if bInclusive is TRUE and date has no time
@@ -89,6 +95,10 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
+//
+// NOTE: To avoid confusion every COleDateTime and SYSTEMTIME MUST 
+// represents a Gregorian date, which will be converted internally to 
+// and from Jalali as required, UNLESS NOTED OTHERWISE
 
 class CDateHelper  
 {
@@ -122,14 +132,18 @@ public:
 	static BOOL IsValidDayInMonth(int nDay, int nMonth, int nYear);
 	static BOOL IsValidDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth);
 
-	static double GetDate(DH_DATE nDate); // 12am
+	static COleDateTime GetDate(DH_DATE nDate); // 12am
 
 	static CString FormatDate(const COleDateTime& date, DWORD dwFlags = 0, TCHAR cDateTimeSep = ' ');
 	static CString FormatCurrentDate(DWORD dwFlags = 0);
+	static CString FormatDateOnly(const COleDateTime& date, LPCTSTR szFormat);
 	
 	// DOW = 'day of week'
 	static BOOL FormatDate(const COleDateTime& date, DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
 	static BOOL FormatCurrentDate(DWORD dwFlags, CString& sDate, CString& sTime, CString& sDow);
+
+	static BOOL WantRTLDates();
+	static BOOL WantISOWeekOfYear();
 
 	static BOOL DecodeDate(const CString& sDate, COleDateTime& date, BOOL bAndTime);
 	static BOOL DecodeDate(const CString& sDate, double& date, BOOL bAndTime);
@@ -147,10 +161,10 @@ public:
 	static OLE_DAYOFWEEK GetFirstDayOfWeek();
 	static OLE_DAYOFWEEK GetLastDayOfWeek();
 	static OLE_DAYOFWEEK GetNextDayOfWeek(OLE_DAYOFWEEK nDOW);
-	static int GetDaysInMonth(int nMonth, int nYear); 
-	static int GetDaysInMonth(const COleDateTime& date); 
+	static int GetDaysInMonth(int nMonth, int nYear);
+	static int GetDaysInMonth(const COleDateTime& date);
 	static int GetDaysInMonth(const SYSTEMTIME& st);
-	static int GetWeekofYear(const COleDateTime& date);
+	static int GetWeekOfYear(const COleDateTime& date);
 	static COleDateTime GetEndOfPreviousDay(const COleDateTime& date);
 	static COleDateTime GetEndOfDay(const COleDateTime& date);
 	static COleDateTime GetStartOfNextDay(const COleDateTime& date);
@@ -159,28 +173,29 @@ public:
 	static void GetNextMonth(int& nMonth, int& nYear, BOOL bNext = TRUE);
 	static void IncrementMonth(int& nMonth, int& nYear, int nBy = 1);
 	static void IncrementMonth(SYSTEMTIME& st, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
-	static void IncrementMonth(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
-	static void IncrementYear(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
+	static BOOL IncrementMonth(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
+	static BOOL IncrementYear(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = FALSE);
 	
 	static int CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive);
 	static int GetDateInMonths(int nMonth, int nYear);
 	static int GetDateInMonths(const COleDateTime& date);
 	static COleDateTime GetDateFromMonths(int nNumMonths);
+	static void GetDateFromMonths(int nNumMonths, int& nMonth, int& nYear);
 
 	static COleDateTime CalcDate(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
 	static int CalcDayOfMonth(OLE_DAYOFWEEK nDOW, int nWhich, int nMonth, int nYear);
+	static BOOL FromDate(const COleDateTime& date, int& nDay, int& nMonth, int& nYear);
+	static COleDateTime ToDate(int nDay, int nMonth, int nYear);
 
 	static CString GetDayOfWeekName(OLE_DAYOFWEEK nDOW, BOOL bShort = FALSE); // 1-7, sun-sat
-	static CString GetMonthName(int nMonth, BOOL bShort = FALSE); // 1-12, jan-nov
+	static CString GetMonthName(int nMonth, BOOL bShort = FALSE); // 1-12
 	static void GetDayOfWeekNames(BOOL bShort, CStringArray& aNames); // sun-sat
-	static void GetMonthNames(BOOL bShort, CStringArray& aMonths); // jan-dec
+	static void GetMonthNames(BOOL bShort, CStringArray& aMonths); // 1-12
 	static int GetMaxDayOfWeekNameWidth(CDC* pDC, BOOL bShort = FALSE);
 	static CSize GetMaxDayOfWeekNameExtent(CDC* pDC, BOOL bShort = FALSE);
 	static int GetMaxMonthNameWidth(CDC* pDC, BOOL bShort = FALSE);
 	static CSize GetMaxMonthNameExtent(CDC* pDC, BOOL bShort = FALSE);
 
-	static BOOL IsLeapYear(const COleDateTime& date = COleDateTime::GetCurrentTime());
-	static BOOL IsLeapYear(int nYear);
 	static BOOL IsToday(const COleDateTime& date);
 	static BOOL IsEndOfDay(const COleDateTime& date, BOOL bNoTimeIsEndOfDay);
 	static BOOL IsSameDay(const COleDateTime& date1, const COleDateTime& date2);
@@ -193,6 +208,7 @@ public:
 
 	static void SplitDate(const COleDateTime& date, double& dDateOnly, double& dTimeOnly);
 	static COleDateTime MakeDate(const COleDateTime& dtDateOnly, const COleDateTime& dtTimeOnly);
+	static COleDateTime MakeDate(const COleDateTime& dtDateOnly, int nHour, int nMin, int nSec = 0);
 
 	static BOOL DateHasTime(const COleDateTime& date);
 	static COleDateTime GetTimeOnly(const COleDateTime& date);
@@ -203,6 +219,8 @@ public:
 	static COleDateTime GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays);
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
 	static int GetDayCount(DWORD dwDays);
+
+	static BOOL IsDayOfMonth(const COleDateTime& date, int nDay); // 1 <= nDay <= 31
 
 	static COleDateTime GetStartOfWeek(const COleDateTime& date);
 	static COleDateTime GetEndOfWeek(const COleDateTime& date);
@@ -216,12 +234,15 @@ public:
 	static COleDateTime GetEndOfDecade(const COleDateTime& date, BOOL bZeroBased = TRUE);
 	static COleDateTime GetStartOfQuarterCentury(const COleDateTime& date, BOOL bZeroBased = TRUE);
 	static COleDateTime GetEndOfQuarterCentury(const COleDateTime& date, BOOL bZeroBased = TRUE);
+	static COleDateTime GetStartOfEpoch(const COleDateTime& date, int nEpochLen, BOOL bZeroBased = TRUE);
+	static COleDateTime GetEndOfEpoch(const COleDateTime& date, int nEpochLen, BOOL bZeroBased = TRUE);
 
 	static BOOL GetTimeT(const COleDateTime& date, time_t& timeT);
 	static BOOL GetTimeT64(const COleDateTime& date, time64_t& timeT);
 	static COleDateTime GetDate(time64_t date);
 	static COleDateTime GetDate(double date, COleDateTime::DateTimeStatus status);
 
+	static COleDateTime GetNearestEpoch(const COleDateTime& date, int nEpochLen, BOOL bEnd, BOOL bZeroBased = TRUE);
 	static COleDateTime GetNearestQuarterCentury(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased = TRUE);
 	static COleDateTime GetNearestDecade(const COleDateTime& date, BOOL bEnd, BOOL bZeroBased = TRUE);
 	static COleDateTime GetNearestYear(const COleDateTime& date, BOOL bEnd);
@@ -256,6 +277,17 @@ protected:
 	static BOOL IsValidUnit(TCHAR nUnits);
 	static BOOL DecodeOffsetEx(LPCTSTR szDate, int& nAmount, DH_UNITS& nUnits, DH_UNITS nDefUnits, BOOL bMustHaveSign);
 	static COleDateTime GetNearestDayPart(const COleDateTime& date, int nNumParts, BOOL bEnd);
+	static int GetStartOfEpochYear(const COleDateTime& date, int nEpochLength, BOOL bZeroBased);
+	static COleDateTime GetNearestMonth(const COleDateTime& date, int nInterval, BOOL bEnd);
+	static BOOL IsLeapYear(const COleDateTime& date = COleDateTime::GetCurrentTime());
+	static BOOL IsLeapYear(int nYear);
+
+	static int GetGregorianDaysInMonth(int nMonth, int nYear);
+	static BOOL IsGregorianLeapYear(int nYear);
+	static CString GetGregorianDayOfWeekName(OLE_DAYOFWEEK nDOW, BOOL bShort);
+	static CString GetGregorianMonthName(int nMonth, BOOL bShort);
+	static int GetGregorianWeekOfYear(const COleDateTime& date);
+
 };
 
 #endif // !defined(AFX_DATEHELPER_H__2A4E63F6_A106_4295_BCBA_06D03CD67AE7__INCLUDED_)

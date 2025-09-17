@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "..\shared\EnCommandlineInfo.h"
+#include "..\shared\Misc.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -22,7 +23,8 @@ public:
 	CTestUtils(const CTestUtils& utils);
 	
 	BOOL Initialise(const CString& sOutputDir, const CString& sControlDir);
-	BOOL HasCommandlineFlag(TCHAR cFlag) const;
+	
+	BOOL GetWantPerformanceTests() const { return HasCommandlineFlag(_T("p")); }
 	
 	CString GetOutputFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const;
 	CString GetControlFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const;
@@ -38,6 +40,8 @@ public:
 	
 	int Compare(const CString& s1, const CString& s2, BOOL bCaseSensitive = TRUE) const;
 	int Compare(LPCTSTR sz1, LPCTSTR sz2, BOOL bCaseSensitive = TRUE) const;
+
+	BOOL HasCommandlineFlag(LPCTSTR szFlag) const;
 
 protected:
 	CString m_sOutputDir;
@@ -82,7 +86,7 @@ struct TESTRESULT
 		return ((nNumError != other.nNumError) || (nNumSuccess != other.nNumSuccess));
 	}
 
-	void ReportResults() const
+	void ReportResults(LPCTSTR szTest, BOOL bAssertErrors) const
 	{
 		if (!GetTotal())
 		{
@@ -90,14 +94,18 @@ struct TESTRESULT
 		}
 		else
 		{
+			ASSERT(!Misc::IsEmpty(szTest));
+
 			if (nNumError)
 			{
-				_tprintf(_T("\n  %2d/%2d tests FAILED\n"), nNumError, GetTotal());
-				DebugBreak();
+				_tprintf(_T("\n  %2d/%2d of '%s' tests FAILED\n"), nNumError, GetTotal(), szTest);
+
+				if (bAssertErrors && ::IsDebuggerPresent())
+					ASSERT(0);
 			}
 
 			if (nNumSuccess)
-				_tprintf(_T("\n  %2d/%2d tests SUCCEEDED\n"), nNumSuccess, GetTotal());
+				_tprintf(_T("\n  %2d/%2d of '%s' tests SUCCEEDED\n"), nNumSuccess, GetTotal(), szTest);
 		}
 	}
 
@@ -109,11 +117,25 @@ struct TESTRESULT
 
 class CTDLTestBase;
 
+// ------------------------------------------
+
 class CTDCScopedTest
 {
 public:
 	CTDCScopedTest(CTDLTestBase& base, LPCTSTR szTest);
 	~CTDCScopedTest();
+
+protected:
+	CTDLTestBase& m_base;
+};
+
+// ------------------------------------------
+
+class CTDCScopedSubTest
+{
+public:
+	CTDCScopedSubTest(CTDLTestBase& base, LPCTSTR szTest);
+	~CTDCScopedSubTest();
 
 protected:
 	CTDLTestBase& m_base;
@@ -125,6 +147,7 @@ class CTDLTestBase
 {
 	friend class CTDLTestSelfTest;
 	friend class CTDCScopedTest;
+	friend class CTDCScopedSubTest;
 
 public:
 	virtual ~CTDLTestBase();
@@ -134,7 +157,10 @@ public:
 	static BOOL SelfTest();
 	
 protected:
-	CTDLTestBase(const CTestUtils& utils);
+	CTDLTestBase(LPCTSTR szName, const CTestUtils& utils);
+
+	BOOL IsTestActive() const { return !m_sCurTest.IsEmpty(); }
+	BOOL IsSubTestActive() const { return !m_sCurSubTest.IsEmpty(); }
 
 	BOOL BeginTest(LPCTSTR szTest);
 	BOOL EndTest();
@@ -168,6 +194,7 @@ protected:
 	
 	BOOL ExpectEQ(float f1, float f2, float fTol = 1e-6) const;
 	BOOL ExpectEQ(double d1, double d2, double dTol = 1e-12) const;
+	BOOL ExpectEQ(const COleDateTime& dt1, const COleDateTime& dt2, double dTol = 1e-12) const;
 	
 	BOOL ExpectEQ(bool b1, bool b2) const;
 	
@@ -195,6 +222,7 @@ protected:
 	
 	BOOL ExpectNE(float f1, float f2, float fTol = 1e-6) const;
 	BOOL ExpectNE(double d1, double d2, double dTol = 1e-12) const;
+	BOOL ExpectNE(const COleDateTime& dt1, const COleDateTime& dt2, double dTol = 1e-12) const;
 	
 	BOOL ExpectNE(bool b1, bool b2) const;
 	
@@ -219,7 +247,7 @@ private:
 	TESTRESULT m_resTotal;
 
 	mutable UINT m_nCurTest;
-	CString m_sCurTest, m_sCurSubTest;
+	CString m_sName, m_sCurTest, m_sCurSubTest;
 
 private:
 	CTDLTestBase();
@@ -311,7 +339,6 @@ private:
 				sOutput.Format(_T("  Test [%2d] failed:    Expected \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
 			else
 				sOutput.Format(_T("  Test [%s] failed:    Expected \"%s\" %s \"%s\""), m_sCurSubTest, szFmt1, sOp, szFmt2);
-
 
 			if (!Misc::IsEmpty(szTrail))
 			{

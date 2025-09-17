@@ -23,8 +23,6 @@ class CWorkingWeek;
 
 class CPreferencesTaskPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesTaskPage)
-
 // Construction
 public:
 	CPreferencesTaskPage();

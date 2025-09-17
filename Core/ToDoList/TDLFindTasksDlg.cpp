@@ -64,7 +64,8 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	m_sizeDocked(0, 0), 
 	m_sizeDockedMax(0, 0),
 	m_rUndocked(0, 0, 0, 0),
-	m_lcFindSetup(mgrContent)
+	m_lcFindSetup(mgrContent),
+	m_hResultsFont(NULL)
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
@@ -174,6 +175,9 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 	m_icon.Load(IDI_FIND_DIALOG_STD);
 	SetIcon(m_icon, FALSE);
 
+	if (m_hResultsFont)
+		SetResultsFont(m_hResultsFont);
+
 	m_mgrPrompts.SetComboEditPrompt(m_cbSearches, IDS_FT_SAVESEARCHPROMPT);
 
 	// always add a default search
@@ -197,12 +201,12 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 void CTDLFindTasksDlg::BuildOptionCombos()
 {
-	CDialogHelper::AddString(m_cbTasklists, IDS_FIND_ACTIVETASKLIST, FALSE);
-	CDialogHelper::AddString(m_cbTasklists, IDS_FIND_ALLTASKLISTS, TRUE);
+	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ACTIVETASKLIST, FALSE);
+	CDialogHelper::AddStringT(m_cbTasklists, IDS_FIND_ALLTASKLISTS, TRUE);
 	
-	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEDONE, FI_COMPLETED);
-	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEPARENTS, FI_PARENT);
-	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEFILTEREDOUT, FI_FILTEREDOUT);
+	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEDONE, FI_COMPLETED);
+	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEPARENTS, FI_PARENT);
+	CDialogHelper::AddStringT(m_cbInclude, IDS_FIND_INCLUDEFILTEREDOUT, FI_FILTEREDOUT);
 
 	CLocalizer::EnableTranslation(m_cbInclude, FALSE);
 
@@ -213,7 +217,7 @@ BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 {
 	if (m_cbInclude.GetSafeHwnd())
 	{
-		int nItem = FindItemByData(m_cbInclude, nOption);
+		int nItem = FindItemByDataT(m_cbInclude, nOption);
 		
 		if (nItem != CB_ERR)
 			return m_cbInclude.GetCheck(nItem);
@@ -224,10 +228,18 @@ BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 
 void CTDLFindTasksDlg::CheckIncludeOption(FIND_INCLUDE nOption, BOOL bCheck)
 {
-	int nItem = FindItemByData(m_cbInclude, nOption);
+	int nItem = FindItemByDataT(m_cbInclude, nOption);
 
 	if (nItem != CB_ERR)
 		m_cbInclude.SetCheck(nItem, (bCheck ? CCBC_CHECKED : CCBC_UNCHECKED));
+}
+
+void CTDLFindTasksDlg::SetResultsFont(HFONT hFont) 
+{ 
+	m_hResultsFont = hFont;
+
+	if (m_lcResults.GetSafeHwnd())
+		m_lcResults.SendMessage(WM_SETFONT, (WPARAM)hFont, TRUE); 
 }
 
 void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
@@ -362,15 +374,11 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 {
 	BOOL bWasDocked = IsDocked();
 	BOOL bIsDocked = IsDocked(nPos);
-	CFont* pOldResultsFont = NULL;
 
 	if (GetSafeHwnd())
 	{
 		if (nPos == m_nDockPos)
 			return TRUE;
-
-		// else
-		pOldResultsFont = m_lcResults.GetFont();
 
 		DestroyWindow();
 	}
@@ -419,9 +427,6 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 
 	if (!CRuntimeDlg::Create(CEnString(IDS_FIND_TASKS), dwStyle, dwExStyle, rect, AfxGetMainWnd(), IDC_STATIC))
 		return FALSE;
-
-	if (pOldResultsFont)
-		m_lcResults.SetFont(pOldResultsFont);
 
 	return TRUE;
 }
@@ -613,6 +618,21 @@ void CTDLFindTasksDlg::SetAttributeListData(const TDCAUTOLISTDATA& tldActive, co
 void CTDLFindTasksDlg::SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons)
 {
 	m_lcFindSetup.SetActiveTasklist(sTasklist, bWantDefaultIcons);
+}
+
+void CTDLFindTasksDlg::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	m_lcFindSetup.SetNumPriorityRiskLevels(nNumLevels);
+}
+
+void CTDLFindTasksDlg::SetGroupHeaderBackColor(COLORREF crBack)
+{
+	m_lcResults.SetGroupHeaderBackColor(crBack);
+}
+
+void CTDLFindTasksDlg::SetStrikeThroughCompletedTasks(BOOL bStrikeThru)
+{
+	m_lcResults.SetStrikeThroughCompletedTasks(bStrikeThru);
 }
 
 void CTDLFindTasksDlg::AddResults(const CFilteredToDoCtrl* pTDC, const CResultArray& aResults, BOOL bShowValueOnly, LPCTSTR szHeaderText)
@@ -1362,12 +1382,13 @@ int CTDLFindTasksDlg::GetSelectedItem()
 	return m_nCurSel;
 }
 
-void CTDLFindTasksDlg::OnItemchangedRulelist(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
+void CTDLFindTasksDlg::OnItemchangedRulelist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-//	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-
-	if (m_toolbar.GetSafeHwnd())
-		m_toolbar.RefreshButtonStates();
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+	{
+		if (m_toolbar.GetSafeHwnd())
+			m_toolbar.RefreshButtonStates();
+	}
 
 	// enable 'set as filter' provided there is something to set
 	EnableApplyAsFilterButton();

@@ -21,7 +21,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CPreferencesTest::CPreferencesTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CPreferencesTest::CPreferencesTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CPreferencesTest"), utils)
 {
 
 }
@@ -43,7 +45,7 @@ TESTRESULT CPreferencesTest::Run()
 
 void CPreferencesTest::TestSectionPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CPreferencesTest::SectionPerformance\n"));
 		return;
@@ -114,7 +116,7 @@ void CPreferencesTest::TestSectionPerformance()
 
 void CPreferencesTest::TestArrayPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CPreferencesTest::TestArrayPerformance\n"));
 		return;

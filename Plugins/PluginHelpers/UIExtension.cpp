@@ -191,6 +191,37 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, String
 
 }
 
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, double value, bool append)
+	:
+	nAttrib(attrib),
+	dataType(DataType::Double),
+	dValue(value),
+	bAppend(append)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+	:
+	nAttrib(attrib),
+	dataType(DataType::Time),
+	dValue(time),
+	nTimeUnits(units),
+	bAppend(append)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, int value, bool append)
+	:
+	nAttrib(attrib),
+	dataType(DataType::Integer),
+	nValue(value),
+	bAppend(append)
+{
+
+}
+
 UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, String^ value, bool append)
 	:
 	nAttrib(attrib),
@@ -274,6 +305,40 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute
 
 }
 
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, double value, bool append)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Double),
+	dValue(value),
+	bAppend(append)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Time),
+	dValue(time),
+	nTimeUnits(units),
+	bAppend(append)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, int value, bool append)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Integer),
+	nValue(value),
+	bAppend(append)
+{
+
+}
+
 UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append)
 	:
 	dwSelectedTaskID(taskID),
@@ -306,6 +371,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 	{
 	case DataType::Double:
 		mod.dValue = dValue;
+		mod.bAppend = bAppend;
 		break;
 
 	case DataType::Date:
@@ -317,6 +383,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 
 	case DataType::Integer:
 		mod.nValue = nValue;
+		mod.bAppend = bAppend;
 		break;
 
 	case DataType::Bool:
@@ -348,6 +415,7 @@ bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 	case DataType::Time:
 		mod.dValue = dValue;
 		mod.nTimeUnits = Task::MapUnits(nTimeUnits);
+		mod.bAppend = bAppend;
 		break;
 	}
 
@@ -429,6 +497,33 @@ bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, String^ value)
 	return true;
 }
 
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, double value, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, value, append));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, time, units, append));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, int value, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(attrib, value, append));
+	return true;
+}
+
 bool UIExtension::ParentNotify::AddMod(Task::Attribute attrib, String^ value, bool append)
 {
 	if (Task::MapAttribute(attrib) == TDCA_NONE)
@@ -500,6 +595,33 @@ bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, St
 		return false;
 
 	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, double value, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value, append));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, time, units, append));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute attrib, int value, bool append)
+{
+	if (Task::MapAttribute(attrib) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, attrib, value, append));
 	return true;
 }
 
@@ -600,6 +722,30 @@ bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, String^ value)
 {
 	ClearMods();
 	AddMod(attrib, value);
+
+	return NotifyMod(true);
+}
+
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, double value, bool append)
+{
+	ClearMods();
+	AddMod(attrib, value, append);
+
+	return NotifyMod(true);
+}
+
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, double time, Task::TimeUnits units, bool append)
+{
+	ClearMods();
+	AddMod(attrib, time, units, append);
+
+	return NotifyMod(true);
+}
+
+bool UIExtension::ParentNotify::NotifyMod(Task::Attribute attrib, int value, bool append)
+{
+	ClearMods();
+	AddMod(attrib, value, append);
 
 	return NotifyMod(true);
 }
@@ -781,11 +927,16 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 
 bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent)
 {
+	return Draw(hwnd, g, x, y, cx, cy, style, transparent, false, false);
+}
+
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent, bool clipLeft, bool clipRight)
+{
 	if (style == Style::None)
 		return false;
 
 	// Must retrieve clip rect before getting HDC
-	Drawing::Rectangle rClip = Rectangle::Truncate(g->ClipBounds);
+	Drawing::Rectangle clipRect = Rectangle::Truncate(g->ClipBounds);
 	HDC hDC = Win32::GetHdc(g->GetHdc());
 
 	if (hDC == NULL)
@@ -793,19 +944,29 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 
 	GM_ITEMSTATE state = Map(style);
 	int nSaveDC = ::SaveDC(hDC);
-		
-	::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
+
+	::IntersectClipRect(hDC, clipRect.Left, clipRect.Top, clipRect.Right, clipRect.Bottom);
 
 	DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_PREDRAW | GMIB_POSTDRAW : 0));
+
+	if (clipLeft)
+		flags |= GMIB_CLIPLEFT;
+
+	if (clipRight)
+		flags |= GMIB_CLIPRIGHT;
+
+	CRect rItem(x, y, (x + cx), (y + cy));
+	LPCRECT prcClip = ((clipLeft || clipRight) ? &rItem : NULL);
 
 	BOOL bRes = GraphicsMisc::DrawExplorerItemSelection(CDC::FromHandle(hDC), 
 														Win32::GetHwnd(hwnd), 
 														state, 
-														CRect(x, y, (x + cx), (y + cy)), 
-														flags);
+														rItem, 
+														flags,
+														prcClip);
 	::RestoreDC(hDC, nSaveDC);
 	g->ReleaseHdc();
-	g->SetClip(rClip); // restore clip rect
+	g->SetClip(clipRect); // restore clip rect
 
 	return (bRes != FALSE);
 }
@@ -835,6 +996,14 @@ Drawing::Color UIExtension::SelectionRect::GetColor(Style style)
 	return ColorUtil::DrawingColor::ToColor(color);
 }
 
+Drawing::Color UIExtension::SelectionRect::GetBorderColor(Style style)
+{
+	GM_ITEMSTATE state = Map(style);
+	COLORREF color = GraphicsMisc::GetExplorerItemSelectionBorderColor(state, GMIB_THEMECLASSIC);
+
+	return ColorUtil::DrawingColor::ToColor(color);
+}
+
 Drawing::Color UIExtension::SelectionRect::GetTextColor(Style style, Drawing::Color baseColor)
 {
 	GM_ITEMSTATE state = Map(style);
@@ -849,23 +1018,22 @@ Drawing::Color UIExtension::SelectionRect::GetTextColor(Style style, Drawing::Co
 
 Windows::Forms::Cursor^ UIExtension::AppCursor(UIExtension::AppCursorType cursorType)
 {
-	String^ cursorName = nullptr;
+	LPCWSTR szCursor = NULL;
 
 	switch (cursorType)
 	{
 	case UIExtension::AppCursorType::LockedTask:
-		cursorName = gcnew String("locked");
+		szCursor = L"locked";
 		break;
 
 	case UIExtension::AppCursorType::NoDrag:
-		cursorName = gcnew String("nodrag");
+		szCursor = L"nodrag";
 		break;
 	}
 
-	if (cursorName != nullptr)
+	if (szCursor != NULL)
 	{
-		String^ subFolder = gcnew String("Resources\\Cursors");
-		HCURSOR hCursor = GraphicsMisc::LoadAppCursor(MS(cursorName), MS(subFolder));
+		HCURSOR hCursor = GraphicsMisc::LoadAppCursor(szCursor, L"Resources\\Cursors");
 		
 		if (hCursor != NULL)
 	 		return gcnew Cursor(static_cast<IntPtr>(hCursor));
@@ -905,7 +1073,7 @@ Windows::Forms::Cursor^ UIExtension::OleDragCursor(OleDragCursorType cursorType)
 
 Windows::Forms::Cursor^ UIExtension::HandCursor()
 {
-	static HCURSOR hCursor = ::LoadCursor(NULL, IDC_HAND);
+	HCURSOR hCursor = ::LoadCursor(NULL, IDC_HAND);
 
 	return gcnew Cursor(static_cast<IntPtr>(hCursor));
 }

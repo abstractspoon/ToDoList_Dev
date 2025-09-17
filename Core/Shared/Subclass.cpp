@@ -27,18 +27,17 @@ class CSubclassWndMap : private CMapPtrToPtr
 public:
 	CSubclassWndMap();
 	~CSubclassWndMap();
-	static CSubclassWndMap& GetHookMap();
+
 	void Add(HWND hwnd, CSubclassWnd* pSubclassWnd);
 	void Remove(CSubclassWnd* pSubclassWnd);
 	void RemoveAll(HWND hwnd);
+
 	CSubclassWnd* Lookup(HWND hwnd);
 };
 
-// This trick is used so the hook map isn't
-// instantiated until someone actually requests it.
-//
-#define	theHookMap	(CSubclassWndMap::GetHookMap())
-#define	theSafeMap	(CSubclassWnd::GetValidMap())
+static CSubclassWndMap theHookMap;
+static CMapPtrToPtr theSafeMap;
+static MSG curMsg;
 
 ISubclassCallback* CSubclassWnd::s_pCallback = NULL;
 
@@ -174,8 +173,6 @@ LRESULT CSubclassWnd::Default()
 
 const MSG* CSubclassWnd::GetCurrentMessage()
 {
-	static MSG curMsg;
-	
 	curMsg = AfxGetThreadState()->m_lastSentMsg;
 	return &curMsg;
 }
@@ -241,33 +238,6 @@ LRESULT CALLBACK CSubclassWnd::HookWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARA
 
 	curMsg = oldMsg;			// pop state
 	return lr;
-}
-
-BOOL CSubclassWnd::PostMessage(UINT message, WPARAM wParam, LPARAM lParam) const
-{
-	if (IsValid())
-		return ::PostMessage(m_hWndHooked, message, wParam, lParam);
-
-	// else
-	return FALSE;
-}
-
-BOOL CSubclassWnd::SendMessage(UINT message, WPARAM wParam, LPARAM lParam) const
-{
-	if (IsValid())
-		return ::SendMessage(m_hWndHooked, message, wParam, lParam);
-
-	// else
-	return FALSE;
-}
-
-CMapPtrToPtr& CSubclassWnd::GetValidMap()
-{
-	// By creating theMap here, C++ doesn't instantiate it until/unless
-	// it's ever used! This is a good trick to use in C++, to
-	// instantiate/initialize a static object the first time it's used.
-	static CMapPtrToPtr theMap;
-	return theMap;
 }
 
 BOOL CSubclassWnd::IsValid(const CSubclassWnd* pScWnd)
@@ -337,19 +307,6 @@ CSubclassWndMap::CSubclassWndMap()
 CSubclassWndMap::~CSubclassWndMap()
 {
 //	ASSERT(IsEmpty());	// all hooks should be removed!	
-}
-
-//////////////////
-// Get the one and only global hook map
-// 
-CSubclassWndMap& CSubclassWndMap::GetHookMap()
-{
-	// By creating theMap here, C++ doesn't instantiate it until/unless
-	// it's ever used! This is a good trick to use in C++, to
-	// instantiate/initialize a static object the first time it's used.
-	//
-	static CSubclassWndMap theMap;
-	return theMap;
 }
 
 /////////////////

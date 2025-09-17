@@ -40,8 +40,7 @@ public:
 	static void AppendArrayRule(const CStringArray& aValues, TDC_ATTRIBUTE nAttribID, CSearchParamArray& aRules,
 								DWORD dwFlags = 0, DWORD dwMask = 0);
 
-	static void AppendPriorityRiskRule(int nValue, TDC_ATTRIBUTE nAttribID, CSearchParamArray& aRules,
-									   int nAnyValue, int nNoValue);
+	static void AppendPriorityOrRiskRule(int nValue, BOOL bPriority, CSearchParamArray& aRules);
 
 protected:
 	static BOOL AppendCustomAttributeDateFilter(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSearchParamArray& aRules);

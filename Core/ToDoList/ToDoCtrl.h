@@ -49,8 +49,30 @@ struct TDCTASKCOMPLETION;
 
 class CToDoCtrl : public CRuntimeDlg
 {
+private:
+	struct IDLETASKS
+	{
+		IDLETASKS(CToDoCtrl& tdc);
+
+		void RefreshAttributeValues(const CTDCAttributeMap& aAttribIDs = TDCA_ALL);
+		BOOL Process();
+
+	protected:
+		CToDoCtrl& m_tdc;
+		CTDCAttributeMap m_mapRefreshAttribIDs;
+
+	protected:
+		BOOL HasTasks() const;
+	};
+
+	friend struct IDLETASKS;
+
+	// ----------------------------------------------------
+
 	friend class CTDCSourceControl;
 	friend class CTDCFindReplace;
+
+	// ----------------------------------------------------
 
 // Construction
 public:
@@ -87,9 +109,6 @@ public:
 	BOOL VerifyPassword(const CString& sExplanation = _T("")) const;
 	BOOL ModifyPassword();
 	BOOL WantPasswordReprompting() const;
-
-	void SetMaximizeState(TDC_MAXSTATE nState);
-	virtual BOOL WantTaskContextMenu() const { return TRUE; }
 
 	TDC_FILE CheckIn();
 	TDC_FILE CheckOut(CString& sCheckedOutTo, BOOL bForce = FALSE);
@@ -159,16 +178,19 @@ public:
 	BOOL HasDueTodayColor() const { return m_taskTree.HasDueTodayColor(); }
 
 	void SetUITheme(const CUIThemeFile& theme);
+	void SetNumPriorityRiskLevels(int nNumLevels);
 	void ResizeAttributeColumnsToFit();
 
 	// these return the full list of items in each droplist
 	int GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tld);
+	BOOL IsAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID) const;
 	void SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly = TRUE);
 
-	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditText = TRUE, DWORD dwDependency = 0);
+	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel = TRUE, DWORD dwDependency = 0);
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
-	BOOL CanCreateNewTask(TDC_INSERTWHERE nWhere, const CString& sText) const;
+	BOOL CreateNewSubtaskInTask(const CString& sText, BOOL bTop); // 'Edit label' is implied
+	BOOL CanCreateNewSubtaskInTask() const;
 
 	void SetSubtaskDragDropPos(BOOL bTop = TRUE) { m_bDragDropSubtasksAtTop = bTop; }
 	BOOL SplitSelectedTask(int nNumSubtasks = 2);
@@ -216,7 +238,6 @@ public:
 	BOOL ClearSelectedTaskIcon(); 
 
 	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
-	BOOL IsSelectedTaskDone() const { return m_taskTree.SelectionHasDone(); }
 
 	BOOL OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount, TDC_UNITS nUnits, DWORD dwFlags = 0);
 	BOOL CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const;
@@ -236,7 +257,7 @@ public:
 	int GetSelectedTaskFileLinks(CStringArray& aFiles) const { return m_ctrlAttributes.GetFileLinks(aFiles); }
 
 	BOOL SelectedTasksHaveIcon() const { return m_taskTree.SelectionHasIcon(); }
-	BOOL SelectedTasksAreAllDone() const { return m_taskTree.SelectionAreAllDone(); }
+	BOOL SelectedTasksAreAllDone(BOOL bIncGoodAsDone) const { return m_taskTree.SelectionAreAllDone(bIncGoodAsDone); }
 	BOOL SelectedTasksHaveDependencies() const { return m_taskTree.SelectionHasDependencies(); }
 	BOOL SelectedTasksHaveDependents() const { return m_taskTree.SelectionHasDependents(); }
 	BOOL SelectedTasksHaveFlagged() const { return m_taskTree.SelectionHasFlagged(); }
@@ -251,7 +272,7 @@ public:
 	BOOL GetTaskTimes(DWORD dwTaskID, TDCTIMEPERIOD& timeEst, TDCTIMEPERIOD& timeSpent) const;
 	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bSelected = FALSE) const;
 	int GetTaskIconIndex(DWORD dwTaskID) const { return m_taskTree.GetTaskIconIndex(dwTaskID); }
-	COleDateTime GetTaskDate(DWORD dwID, TDC_DATE nDate) const;
+	COleDateTime GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const;
 
 	double CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeEstimate(nUnits); }
 	double CalcSelectedTaskTimeSpent(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeSpent(nUnits); }
@@ -371,25 +392,26 @@ public:
 	BOOL IsTaskLabelEditing() const;
 	void NotifyParentSelectionChange() const;
 
-	virtual BOOL TasksHaveFocus() const { return m_taskTree.HasFocus(); }
-	virtual BOOL CommentsHaveFocus() const { return m_ctrlComments.HasFocus(); }
-	virtual void SetFocusToTasks();
-	virtual void SetFocusToComments();
+	virtual void SetFocus(TDC_SETFOCUSTO nLocation);
+	virtual BOOL HasFocus(TDC_SETFOCUSTO nLocation) const;
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
+	virtual BOOL DoIdleProcessing();
+	virtual void SetMaximizeState(TDC_MAXSTATE nState);
+	virtual BOOL WantTaskContextMenu() const { return TRUE; }
 
+	TDC_MAXSTATE GetMaximizeState() const { return m_layout.GetMaximiseState(); }
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	BOOL SelectTasksInHistory(BOOL bForward);
 	void SelectAll(BOOL bVisibleOnly = TRUE);
 	BOOL CanSelectAll() const { return (GetTaskCount() > 0); }
-	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID = 0) const;
+	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const;
 
 	BOOL SetTreeFont(HFONT hFont); // setter responsible for deleting
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting
 
-	const CImageList& GetCheckImageList() const { return m_taskTree.GetCheckImageList(); }
 	const CTDCImageList& GetTaskIconImageList() const;
 
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
@@ -410,7 +432,6 @@ public:
 	void RefreshReminders();
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos);
 	void SetCompletionStatus(const CString& sStatus);
-	void SetFocusToProjectName();
 	COleDateTime GetEarliestDueDate() const { return m_calculator.GetEarliestDueDate(); } // entire tasklist
 
 	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull) const;
@@ -509,6 +530,7 @@ protected:
 	CTDCSourceControl m_sourceControl;
 	CTDCFindReplace m_findReplace;
 	CTDCReminderHelper m_reminders;
+	CTDCMultiTasker m_multitasker;
 
 	CString m_sProjectName;
 	CONTENTFORMAT m_cfComments, m_cfDefault;
@@ -530,7 +552,10 @@ protected:
 	BOOL m_bInSelectedTaskEdit;
 	BOOL m_bPendingUpdateControls;
 
-// Overrides
+private:
+	IDLETASKS m_idleTasks;
+
+	// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CToDoCtrl)
 public:
@@ -586,6 +611,7 @@ protected:
 	afx_msg LRESULT OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCEditTaskReminder(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnTDCClearTaskReminder(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCClearTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCNotifyAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCToggleTimeTracking(WPARAM wParam, LPARAM lParam);
@@ -682,6 +708,7 @@ protected:
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles) { m_taskTree.OnStylesUpdated(styles, TRUE); }
 	virtual void OnTaskIconsChanged() { m_taskTree.OnImageListChange(); }
 	virtual void OnCustomAttributesChanged();
+	virtual void OnFirstSave(const CTaskFile& /*tasks*/) {}
 	
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree = FALSE) const; // keyed by last filepath
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildingTree = FALSE); // returns the previously selected item if any
@@ -696,22 +723,20 @@ protected:
 	virtual BOOL CopySelectedTasks() const;
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
+	virtual void DeselectAll() { m_taskTree.DeselectAll(); }
 
 	// -------------------------------------------------------------------------------
 	
-	void UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags = 0);
-	void UpdateControls(BOOL bIncComments = TRUE, HTREEITEM hti = NULL);
+	BOOL UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags = 0);
+	void UpdateControls(BOOL bIncComments = TRUE);
 	void IncrementTrackedTime(BOOL bEnding);
 	BOOL FindReplaceSelectedTaskAttribute(BOOL bReplacingAllTasks);
 
 	// internal versions so we can tell how we've been called
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal);
-	BOOL SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppends, BOOL bEdit);
-	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
-	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
-	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
-	BOOL SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
-	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
+	BOOL SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL bOffset, BOOL bRecalcTime);
+	BOOL SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bOffset, BOOL bRecalcTime);
+	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEditLabel, DWORD dwDependency);
 	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date);
 	BOOL SetSelectedTaskColor(COLORREF color);
 
@@ -726,11 +751,10 @@ protected:
 	BOOL GetSelectedTaskCustomAttributeData(const CString& sAttribID, TDCCADATA& data, BOOL bFormatted = FALSE) const { return m_ctrlAttributes.GetCustomAttributeData(sAttribID, data, bFormatted); }
 
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
-	BOOL CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID = 0) const;
 	BOOL CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const;
 	BOOL ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID);
 
-	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
+	BOOL SetSelectedTaskCompletion(const COleDateTime& date);
 	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);
 	BOOL SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks);
 	BOOL CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, BOOL& bAndSubtasks) /*const*/;
@@ -746,8 +770,8 @@ protected:
 	BOOL GetClipboardID(CString& sClipID, BOOL bArchive) const;
 
 	void ShowHideControls();
-	void EnableDisableControls(HTREEITEM hti);
-	void EnableDisableComments(HTREEITEM hti);
+	void EnableDisableControls(BOOL bHasSelection = -1);
+	void EnableDisableComments(BOOL bHasSelection = -1);
 	void ReposProjectName(CRect& rAvailable);
 	BOOL HandleCustomColumnClick(TDC_COLUMN nColID);
 
@@ -772,7 +796,6 @@ protected:
 	BOOL DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDialog);
 	BOOL AdjustTaskTimeSpent(DWORD dwTaskID, double dHours);
 
-	TDC_SET SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, BOOL bAppend, CDWordArray& aModTaskIDs);
 	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, BOOL bAppend);
 	BOOL SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aAll, const CStringArray& aChecked, const CStringArray& aMixed);
 
@@ -819,7 +842,7 @@ protected:
 	void FixupParentCompletion(DWORD dwParentID);
 
 	// used for building/creating the tree for saving/loading
-	// not for overriding
+	// NOT FOR OVERRIDING
 	int GetAllTasks(CTaskFile& tasks) const;
 	HTREEITEM SetAllTasks(const CTaskFile& tasks);
 
@@ -836,6 +859,8 @@ protected:
 	void UpdateAutoListData(TDC_ATTRIBUTE nAttribID = TDCA_ALL);
 	void UpdateDefaultTaskCustomAttributeValues();
 	void SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs = CDWordArray());
+	BOOL IsNewTaskMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const;
+	BOOL IsNewTaskTitleEditMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const;
 
 	static BOOL HandleModResult(DWORD dwTaskID, TDC_SET nRes, CDWordArray& aModTaskIDs);
 	static BOOL XMLHeaderIsUnicode(LPCTSTR szXmlHeader);

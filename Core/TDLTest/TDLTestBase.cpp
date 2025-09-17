@@ -7,6 +7,7 @@
 
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\datehelper.h"
 
 #include <math.h>
 
@@ -57,9 +58,9 @@ BOOL CTestUtils::Initialise(const CString& sOutputDir, const CString& sControlDi
 	return TRUE;
 }
 
-BOOL CTestUtils::HasCommandlineFlag(TCHAR cFlag) const
+BOOL CTestUtils::HasCommandlineFlag(LPCTSTR szFlag) const
 {
-	return m_cmdInfo.HasOption(cFlag);
+	return m_cmdInfo.HasOption(szFlag);
 }
 
 CString CTestUtils::GetOutputFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const
@@ -76,7 +77,6 @@ CString CTestUtils::GetFilePath(const CString& sRoot, const CString& sSubDir,
 								const CString& sFilename, const CString& sExt)
 {
 	ASSERT(FileMisc::IsPath(sRoot) && !sSubDir.IsEmpty() && !sFilename.IsEmpty() && !sExt.IsEmpty());
-	
 	
 	if (FileMisc::IsPath(sRoot) && !sSubDir.IsEmpty() && !sFilename.IsEmpty() && !sExt.IsEmpty())
 	{
@@ -127,6 +127,22 @@ CTDCScopedTest::CTDCScopedTest(CTDLTestBase& base, LPCTSTR szTest)
 CTDCScopedTest::~CTDCScopedTest()
 {
 	m_base.EndTest();
+}
+
+CTDCScopedSubTest::CTDCScopedSubTest(CTDLTestBase& base, LPCTSTR szTest)
+	:
+	m_base(base)
+{
+	if (m_base.IsTestActive() && !m_base.IsSubTestActive())
+		m_base.BeginSubTest(szTest);
+	else
+		ASSERT(0);
+}
+
+CTDCScopedSubTest::~CTDCScopedSubTest()
+{
+	if (m_base.IsSubTestActive())
+		m_base.EndSubTest();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -298,19 +314,26 @@ public:
 static CEnCommandLineInfo cmdInfoEmpty;
 
 // private constructor for self test
-CTDLTestBase::CTDLTestBase() : m_utils(cmdInfoEmpty)
+CTDLTestBase::CTDLTestBase() 
+	: 
+	m_utils(cmdInfoEmpty),
+	m_nCurTest(0)
 {
 }
 
-CTDLTestBase::CTDLTestBase(const CTestUtils& utils) : m_utils(utils) 
+CTDLTestBase::CTDLTestBase(LPCTSTR szName, const CTestUtils& utils)
+	: 
+	m_sName(szName),
+	m_utils(utils),
+	m_nCurTest(0)
 {
-
+	ASSERT(!m_sName.IsEmpty());
 }
 
 CTDLTestBase::~CTDLTestBase()
 {
 	if (m_resTotal != m_resTest)
-		m_resTotal.ReportResults();
+		m_resTotal.ReportResults(m_sName, FALSE);
 }
 
 BOOL CTDLTestBase::BeginTest(LPCTSTR szTest) 
@@ -344,7 +367,7 @@ BOOL CTDLTestBase::EndTest()
 		return FALSE;
 	}
 
-	m_resTest.ReportResults();
+	m_resTest.ReportResults(m_sCurTest, TRUE);
 	m_resTotal += m_resTest;
 	
 	_tprintf(_T("\nTest '%s' ended ----------\n"), (LPCTSTR)m_sCurTest);
@@ -362,7 +385,7 @@ BOOL CTDLTestBase::BeginSubTest(LPCTSTR szSubTest)
 	}
 
 	// Must be within a main test
-	if (m_sCurTest.IsEmpty())
+	if (!IsTestActive())
 	{
 		ASSERT(0);
 		return FALSE;
@@ -594,6 +617,24 @@ BOOL CTDLTestBase::ExpectEQ(double d1, double d2, double dTol) const
 BOOL CTDLTestBase::ExpectNE(double d1, double d2, double dTol) const
 {
 	return ExpectCompareT(d1, _T("%lf"), d2, _T("%lf"), dTol, OP_NE);
+}
+
+// -------------------------------------------------------------------------------------------------------
+
+BOOL CTDLTestBase::ExpectEQ(const COleDateTime& dt1, const COleDateTime& dt2, double dTol) const
+{
+	if (Misc::StatesDiffer(CDateHelper::IsDateSet(dt1), CDateHelper::IsDateSet(dt2)))
+		return FALSE;
+
+	return ExpectEQ(dt1.m_dt, dt2.m_dt, dTol); // RECURSIVE CALL
+}
+
+BOOL CTDLTestBase::ExpectNE(const COleDateTime& dt1, const COleDateTime& dt2, double dTol) const
+{
+	if (Misc::StatesDiffer(CDateHelper::IsDateSet(dt1), CDateHelper::IsDateSet(dt2)))
+		return TRUE;
+
+	return ExpectNE(dt1.m_dt, dt2.m_dt, dTol);
 }
 
 // -------------------------------------------------------------------------------------------------------

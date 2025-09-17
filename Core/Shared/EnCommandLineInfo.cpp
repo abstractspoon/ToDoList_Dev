@@ -105,9 +105,9 @@ void CEnCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL /*bLast*
 	// because our base class will strip off the leading
 	// dash and tell us that it is in fact a flag itself.
 	// So if we already have a 'current' flag AND the value
-	// is a number AND our base class is telling us that it
+	// begins with a digit AND our base class is telling us that it
 	// is a flag then we treat it as a negative number
-	if (!m_sCurFlag.IsEmpty() && bFlag && Misc::IsNumber(sParam)) 
+	if (!m_sCurFlag.IsEmpty() && bFlag && _istdigit(sParam[0])) 
 	{
 		// sanity check
 		ASSERT(sParam[0] != '-');

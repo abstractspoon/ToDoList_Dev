@@ -31,6 +31,7 @@ public:
 	void UpdateSourceControlStatus(BOOL bIsDisabled, BOOL bIsCheckedOut);
 	void UpdateNewTaskIcons(const CPreferencesDlg& prefs);
 	void UpdateCustomToolbar(const CToolBar& toolbar);
+	void UpdateStaticDialogIcons();
 
 protected:
 	UINT m_nNewTaskCmdID, m_nNewSubtaskCmdID;

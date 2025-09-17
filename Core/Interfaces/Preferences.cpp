@@ -22,6 +22,11 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+const LPCTSTR REALQUOTE = _T("\"");
+const LPCTSTR SAFEQUOTE = _T("{QUOTES}");
+
+//////////////////////////////////////////////////////////////////////
+
 INIENTRY::INIENTRY(LPCTSTR szName, LPCTSTR szValue, BOOL bQuote) 
 	: sName(szName), sValue(szValue), bQuoted(bQuote) 
 {
@@ -29,6 +34,8 @@ INIENTRY::INIENTRY(LPCTSTR szName, LPCTSTR szValue, BOOL bQuote)
 
 CString INIENTRY::Format() const
 {
+	ASSERT(sValue.Find('\"') == -1);
+
 	CString sEntry;
 
 	if (bQuoted)
@@ -47,7 +54,8 @@ BOOL INIENTRY::Parse(const CString& sEntry)
 		return FALSE;
 
 	// remove quotes
-	bQuoted = sValue.Replace(_T("\""), _T(""));
+	bQuoted = sValue.Remove('\"');
+	ASSERT((bQuoted == 0) || (bQuoted == 2));
 
 	return !sName.IsEmpty();
 }
@@ -57,6 +65,22 @@ BOOL INIENTRY::operator==(const INIENTRY& ie) const
 	return ((sName == ie.sName) && 
 			(sValue == ie.sValue) && 
 			(bQuoted == ie.bQuoted));
+}
+
+CString INIENTRY::SafeQuote(const CString& sValue)
+{
+	CString sSafe(sValue);
+	sSafe.Replace(REALQUOTE, SAFEQUOTE);
+
+	return sSafe;
+}
+
+CString INIENTRY::UnSafeQuote(const CString& sValue)
+{
+	CString sUnsafe(sValue);
+	sUnsafe.Replace(SAFEQUOTE, REALQUOTE);
+
+	return sUnsafe;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -73,8 +97,9 @@ INISECTION::INISECTION(const INISECTION& other) : sSection(other.sSection)
 
 //////////////////////////////////////////////////////////////////////
 
-static CString ENDL = _T("\r\n");
-static CString NULLSTR;
+const CString ENDL = _T("\r\n");
+const CString NULLSTR;
+const LPCTSTR BACKUPFOLDER = _T("ini.Backup");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -118,7 +143,7 @@ CPreferences::CPreferences() : m_iPrefs(*this)
 	{
 		if (s_bIni)
 		{
-			// check for existing backup file first
+			// check for existing temporary backup file first
 			CString sBackupPath = CFileBackup::BuildBackupPath(s_sPrefsPath, FBS_OVERWRITE);
 			
 			if (FileMisc::FileExists(sBackupPath))
@@ -247,6 +272,17 @@ BOOL CPreferences::IsInitialised()
 	return !s_sPrefsPath.IsEmpty();
 }
 
+void CPreferences::CullIniBackups(int nNumToKeep)
+{
+	if (!s_bIni)
+		return;
+
+	CString sPattern = CFileBackup::BuildBackupPath(s_sPrefsPath, 0, BACKUPFOLDER, NULLSTR);
+	FileMisc::AddToFileName(sPattern, _T("*"));
+
+	CFileBackup::CullBackups(sPattern, FBS_DATETIMESTAMP);
+}
+
 BOOL CPreferences::IsEmpty()
 {
 	return (s_mapSections.GetCount() == 0);
@@ -346,7 +382,7 @@ BOOL CPreferences::SaveInternal(BOOL bExternal)
 	CString sPrefsContents = Misc::FormatArray(aSectionValues, ENDL);
 
 	// backup file first
-	CFileBackup backup(s_sPrefsPath, FBS_OVERWRITE | FBS_DATESTAMP, _T("ini.Backup"));
+	CFileBackup backup(s_sPrefsPath, FBS_OVERWRITE | FBS_DATESTAMP, BACKUPFOLDER, NULLSTR);
 	
 	// write prefs
 	{
@@ -558,12 +594,14 @@ BOOL CPreferences::WriteIniString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTST
 
 double CPreferences::GetProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, double dDefault) const
 {
-	CString sValue = GetProfileString(lpszSection, lpszEntry, Misc::Format(dDefault, 6));
+	// we don't localise the default value
+	CString sValue = GetProfileString(lpszSection, lpszEntry);
 	
 	if (sValue.IsEmpty())
 		return dDefault;
-	else
-		return Misc::Atof(sValue);
+	
+	// else
+	return Misc::Atof(sValue);
 }
 
 bool CPreferences::WriteProfileDouble(LPCTSTR lpszSection, LPCTSTR lpszEntry, double dValue)
@@ -976,12 +1014,13 @@ bool CPreferences::CIPreferencesImpl::WriteProfileInt(LPCWSTR lpszSection, LPCWS
 	return (m_prefs.WriteProfileInt(lpszSection, lpszEntry, nValue) != FALSE);
 }
 
+static CString STRING_VAL;
+
 LPCWSTR CPreferences::CIPreferencesImpl::GetProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszDefault) const
 {
-	static CString sValue;
-	sValue = m_prefs.GetProfileString(lpszSection, lpszEntry, lpszDefault);
+	STRING_VAL = m_prefs.GetProfileString(lpszSection, lpszEntry, lpszDefault);
 
-	return sValue;
+	return STRING_VAL;
 }
 
 bool CPreferences::CIPreferencesImpl::WriteProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszValue)

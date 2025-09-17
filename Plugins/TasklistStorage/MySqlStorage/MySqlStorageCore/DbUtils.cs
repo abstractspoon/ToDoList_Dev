@@ -12,6 +12,7 @@ namespace MySqlStorage
 		Unknown = -1,
 		Success = 0,
 		Server,
+		Port,
 		DatabaseName,
 		Username,
 		Password,

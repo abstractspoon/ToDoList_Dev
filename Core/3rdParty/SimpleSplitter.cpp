@@ -202,12 +202,16 @@ void CSimpleSplitter::SetRelativePaneSizes(const int sizes[], BOOL bRecalcLayout
 		ASSERT(sizes[i] >= 0);
 		total += sizes[i];
 	}
-	for (i = 0; i < m_aPanes.GetSize() - 1; i++)
+
+	if (total > 0)
 	{
-		m_aPaneSizes[i] = MulDivRound(sizes[i], FULL_SIZE, total);
-		total_in += m_aPaneSizes[i];
+		for (i = 0; i < m_aPanes.GetSize() - 1; i++)
+		{
+			m_aPaneSizes[i] = MulDivRound(sizes[i], FULL_SIZE, total);
+			total_in += m_aPaneSizes[i];
+		}
+		m_aPaneSizes[m_aPanes.GetSize() - 1] = FULL_SIZE - total_in;
 	}
-	m_aPaneSizes[m_aPanes.GetSize() - 1] = FULL_SIZE - total_in;
 	
 	if (bRecalcLayout)
 		RecalcLayout();

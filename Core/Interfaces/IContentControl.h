@@ -152,6 +152,8 @@ public:
 class IContentControl  
 {
 public:
+	virtual void Release() = 0;
+
 	// custom/binary data format
 	virtual int GetContent(unsigned char* pContent) const = 0;
 	virtual bool SetContent(const unsigned char* pContent, int nLength, bool bResetSelection) = 0;
@@ -168,10 +170,9 @@ public:
 	virtual void SetReadOnly(bool bReadOnly) = 0;
 	virtual HWND GetHwnd() const = 0;
 
-	virtual void Release() = 0;
-
 	virtual bool ProcessMessage(MSG* pMsg) = 0;
 	virtual void FilterToolTipMessage(MSG* pMsg) = 0;
+	virtual bool DoIdleProcessing() = 0;
 
 	virtual ISpellCheck* GetSpellCheckInterface() = 0;
 	

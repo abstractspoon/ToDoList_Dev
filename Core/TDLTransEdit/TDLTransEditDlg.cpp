@@ -65,6 +65,7 @@ BEGIN_MESSAGE_MAP(CTDLTransEditDlg, CDialog)
 	ON_COMMAND(ID_TOOLS_CLEANUP, OnToolsCleanUp)
 	ON_COMMAND(ID_FILE_OPEN_TRANSLATION, OnFileOpenTranslation)
 	ON_COMMAND(ID_FILE_SAVE_TRANSLATION, OnFileSaveTranslation)
+	ON_COMMAND(ID_FILE_CLOSE_TRANSLATION, OnFileCloseTranslation)
 	ON_WM_SIZE()
 	ON_NOTIFY(LVN_ENDLABELEDIT, IDC_DICTIONARY, OnEndlabeleditDictionary)
 	ON_COMMAND(ID_FILE_CLOSE, OnFileExit)
@@ -170,6 +171,23 @@ void CTDLTransEditDlg::OnFileSaveTranslation()
 
 		// Notify all instances of ToDoList.exe
 		EnumWindows(NotifyLangFileChange, (LPARAM)(LPCTSTR)m_dictionary.GetDictionaryPath());
+	}
+}
+
+void CTDLTransEditDlg::OnFileCloseTranslation() 
+{
+	if (!m_dictionary.IsEmpty())
+	{
+		m_dictionary.DeleteDictionary();
+
+		m_lcDictItems.DeleteAllItems();
+		m_bEdited = FALSE;
+
+		m_sTranslation.Empty();
+		m_sEnglish.Empty();
+		UpdateData(FALSE);
+
+		UpdateCaption();
 	}
 }
 
@@ -578,6 +596,7 @@ void CTDLTransEditDlg::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSys
 	{
 	case 0: // File
 		pPopupMenu->EnableMenuItem(ID_FILE_SAVE_TRANSLATION, ((!IsReadOnly() && m_bEdited) ? MF_ENABLED : MF_DISABLED));
+		pPopupMenu->EnableMenuItem(ID_FILE_CLOSE_TRANSLATION, (!m_dictionary.IsEmpty() ? MF_ENABLED : MF_DISABLED));
 		break;
 
 	case 1: // Options

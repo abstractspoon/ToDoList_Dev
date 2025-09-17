@@ -11,6 +11,7 @@
 
 #include "..\shared\EnToolBar.h"
 #include "..\shared\ToolBarHelper.h"
+#include "..\shared\MenuIconMgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -38,17 +39,18 @@ public:
 public:
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
 	void SetUITheme(const CUIThemeFile& theme);
+	BOOL HasFocus() const { return m_lcAttributes.HasFocus(); }
 
 	void SetDefaultAutoListData(const TDCAUTOLISTDATA& tldDefault);
 	void SetAutoListData(TDC_ATTRIBUTE nAttribID, const TDCAUTOLISTDATA& tld);
 	void GetAutoListData(TDC_ATTRIBUTE nAttribID, TDCAUTOLISTDATA& tld) const;
 	void SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly);
+	BOOL IsAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID) const;
 
 	TDC_ATTRIBUTE GetSelectedAttributeID() const;
 	CString GetSelectedAttributeLabel() const;
 
-	void RefreshSelectedTasksValues();
-	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
+	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs = TDCA_ALL);
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateTimeFormatting();
 
@@ -58,6 +60,7 @@ public:
 	void SetPriorityColors(const CDWordArray& aColors);
 	void SetPercentDoneIncrement(int nAmount);
 	void SetTimeTrackTaskID(DWORD dwTaskID);
+	void SetNumPriorityRiskLevels(int nNumLevels);
 
 	void RedrawValue(TDC_ATTRIBUTE nAttribID);
 	void SelectValue(TDC_ATTRIBUTE nAttribID);
@@ -108,6 +111,7 @@ protected:
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CTDLTaskAttributeListCtrl m_lcAttributes;
+	CMenuIconMgr m_mgrMenuIcons;
 
 protected:
 	virtual int DoModal() { return IDCANCEL; }
@@ -118,25 +122,42 @@ protected:
 	afx_msg int OnCreate(LPCREATESTRUCT pCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnItemChanged(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 
-	afx_msg void OnGroupAttributes();
+	afx_msg void OnToggleSingleClickEditing();
+	afx_msg void OnToggleGrouping();
 	afx_msg void OnToggleSorting();
+	afx_msg void OnMoveAttributeUp();
+	afx_msg void OnMoveAttributeDown();
+	afx_msg void OnResetAttributeMoves();
+	afx_msg void OnSetLabelBkgndColor();
+	afx_msg void OnClearLabelBkgndColor();
+	afx_msg void OnCopyAttributeValue();
+	afx_msg void OnPasteAttributeValue();
+	afx_msg void OnClearAttributeValue();
+
+	afx_msg void OnUpdateMoveAttributeUp(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateMoveAttributeDown(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateResetAttributeMoves(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSetLabelBkgndColor(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateClearLabelBkgndColor(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCopyAttributeValue(CCmdUI* pCmdUI);
+	afx_msg void OnUpdatePasteAttributeValue(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateClearAttributeValue(CCmdUI* pCmdUI);
 
 	afx_msg LRESULT OnEditTaskAttribute(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnClearTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditTaskReminder(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnClearTaskReminder(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAttributeEdited(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAutoItemAddedOrDeleted(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnClearTaskAttribute(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToggleTimeTracking(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAddTimeToLogFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSelectDependencies(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetLinkTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDisplayLink(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCopyTaskAttribute(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnPasteTaskAttribute(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCanCopyTaskAttribute(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCanPasteTaskAttribute(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 

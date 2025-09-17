@@ -114,9 +114,9 @@ public:
 
 	BOOL Add(TDC_ATTRIBUTE nAttribID);
 	int Append(const CTDCAttributeMap& other);
-	TDC_ATTRIBUTE GetFirst() const;
 
-	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttribID);
+	TDC_ATTRIBUTE GetFirst() const;
+	BOOL HasAttribOrAll(TDC_ATTRIBUTE nAttribID) const;
 
 protected:
 	TDC_ATTRIBUTE GetDefaultValue() { return TDCA_NONE; }

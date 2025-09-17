@@ -75,6 +75,10 @@ namespace HTMLReportExporter
 		private const String PlaceHolderRegex = @"(?<=\$\()(.*?)(?=\))";
 		private const String AtomicAttribute = "ATOMICSELECTION";
 
+		// -----------------------------------------------------------
+
+		public const String TaskColorPlaceholder = "$(textColor)";
+
 		public static bool IsPlaceholder(MSHTML.IHTMLElement element, bool atomic = false)
 		{
 			if (element == null)
@@ -225,17 +229,22 @@ namespace HTMLReportExporter
 			var custAttrib = tasks.GetCustomAttributes();
 
 			foreach (var attrib in custAttrib)
-				attribs.Add(attrib.Id.ToLower(), attrib.Label);
+				attribs.Add(attrib.Id, attrib.Label);
 
 			return attribs;
 		}
 
 		// ----------------------------------------------------
 
-		public static String ReplaceReportAttributePlaceholders(TaskList tasks, String content)
+		public static String ReplaceReportAttributePlaceholders(string reportTitle, string reportDate, String content)
 		{
-			return content.Replace("$(reportTitle)", tasks.GetReportTitle())
-						  .Replace("$(reportDate)", tasks.GetReportDate());
+			return content.Replace("$(reportTitle)", reportTitle)
+						  .Replace("$(reportDate)", reportDate);
+		}
+
+		public static String ClearReportAttributePlaceholders(String content)
+		{
+			return ReplaceReportAttributePlaceholders("", "", content);
 		}
 
 		public static bool ContentContainsTaskAttributePlaceholders(String content, TaskList tasks)
@@ -263,7 +272,7 @@ namespace HTMLReportExporter
 
 			foreach (var attrib in customAttribs)
 			{
-				if (content.IndexOf(FormatPlaceholder(attrib.Key, depth)) != -1)
+				if (content.IndexOf(FormatPlaceholder(attrib.Key.ToLower(), depth)) != -1)
 					return true;
 			}
 
@@ -368,12 +377,14 @@ namespace HTMLReportExporter
 				{
 					var attribVal = task.GetCustomAttributeValue(attrib.Key, true);
 
-					content = ReplaceTaskAttributePlaceholder(content, attribVal, attrib.Key, depth, isLeafTask);
+					content = ReplaceTaskAttributePlaceholder(content, attribVal, attrib.Key.ToLower(), depth, isLeafTask);
 				}
+
+				content = content.Replace(TaskColorPlaceholder, task.GetTextForeWebColor());
+
 			}
 
 			return content;
 		}
-
 	}
 }

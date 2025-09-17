@@ -25,17 +25,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-const int TDC_NOPRIORITYORISK = -2;
-const int TDC_MINPRIORITYORISK = 0;
-const int TDC_MAXPRIORITYORISK = 10;
-
-///////////////////////////////////////////////////////////////////////////////////
-
 struct TDCTIMEPERIOD
 {
-	// Note: Different units
 	TDCTIMEPERIOD(double dAmount = 0.0, TDC_UNITS nUnits = TDCU_HOURS);
-	TDCTIMEPERIOD(double dAmount, TH_UNITS nUnits);
+	TDCTIMEPERIOD(double dAmount, TH_UNITS nUnits);	// Note different units type
+	TDCTIMEPERIOD(LPCTSTR szPeriod);
 	
 	TDCTIMEPERIOD& operator=(const TDCTIMEPERIOD& other);
 

@@ -3,9 +3,10 @@
 
 #include "stdafx.h"
 #include "MiniCalendarCtrl.h"
-
 #include "datehelper.h"
 #include "misc.h"
+
+#include "..\3rdParty\JalaliCalendar.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -123,8 +124,8 @@ int CMiniCalendarCtrl::DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol,
 
 	if (nWeekWidth)
 	{
-		COleDateTime dtStart(iYear, iMonth, 1, 0, 0, 0), dt(dtStart);
-
+		COleDateTime dtStart = DateFromMonthYear(iMonth, iYear);
+	
 		while (dtStart.GetDayOfWeek() != m_iFirstDayOfWeek)
 			dtStart -= 1;
 
@@ -133,7 +134,7 @@ int CMiniCalendarCtrl::DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol,
 		for (int nRow = 1; nRow <= 6; nRow++)
 		{
 			// Draw week number
-			int nWeek = CDateHelper::GetWeekofYear(dtStart);
+			int nWeek = CDateHelper::GetWeekOfYear(dtStart);
 			CRect rect((iLeftX + WEEKNUMBERPADDING), iRowY, (iLeftX + nWeekWidth), iRowY+m_iDaysHeight);
 
 			dc.SelectObject(m_FontInfo[FMC_FONT_DAYS].m_pFont);
@@ -146,10 +147,10 @@ int CMiniCalendarCtrl::DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol,
 
 		// Draw divider between week numbers and days
 		dc.FillSolidRect(iLeftX + nWeekWidth + WEEKNUMBERPADDING, iY, 1, (6 * (2 + m_iDaysHeight)), GetSysColor(COLOR_3DDKSHADOW));
-	}
 
-	// Base class
-	iLeftX += (nWeekWidth / 2);
+		// Base class
+		iLeftX += (nWeekWidth / 2);
+	}
 
 	return CFPSMiniCalendarCtrl::DrawDays(dc, iY, iLeftX, iRow, iCol, iMonth, iYear);
 }

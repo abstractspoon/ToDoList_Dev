@@ -26,8 +26,6 @@ enum
 
 class CPreferencesFilePage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesFilePage)
-
 // Construction
 public:
 	CPreferencesFilePage();

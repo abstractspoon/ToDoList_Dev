@@ -79,7 +79,7 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 
 		if (m_bShiftHorzScrollingEnabled && bShift)
 		{
-			::SendMessage(hwndPt, WM_HSCROLL, (bRight ? SB_PAGERIGHT : SB_PAGELEFT), 0L);
+			::SendMessage(hwndPt, WM_HSCROLL, (bRight ? SB_LINERIGHT : SB_LINELEFT), 0L);
 			return TRUE; // handled
 		}
 
@@ -130,7 +130,7 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 				// 1) the windows is a .NET control OR
 				// 2) the CTRL key is down, because that implies some other sort of operation like zooming
 				bForwardToParent = !Misc::IsKeyPressed(VK_CONTROL) && 
-									!CWinClasses::IsWindowsFormsControl(sClass);
+									!CWinClasses::IsWinFormsControl(sClass);
 			}
 
 			if (bForwardToParent)

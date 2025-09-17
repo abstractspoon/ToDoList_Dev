@@ -33,6 +33,10 @@ namespace Abstractspoon
 				static bool RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 				static bool AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 
+				static bool SetRTLReading(IntPtr hWnd, bool rtl);
+				static bool SyncRTLReadingWithParent(IntPtr hWnd);
+				static bool HasRTLReading(IntPtr hWnd);
+
 				static int GetHScrollPos(IntPtr hWnd);
 				static int GetVScrollPos(IntPtr hWnd);
 
@@ -59,7 +63,14 @@ namespace Abstractspoon
 				static void EnableExplorerTheming(IntPtr hWnd);
 
 			protected:
-				static void DoFrameChange(IntPtr hWnd);
+				static void DoFrameChange(IntPtr hWnd) { DoFrameChangeEx(hWnd, false); }
+				static void DoFrameChangeEx(IntPtr hWnd, bool bIncrementWidth);
+
+				ref class RTLChangeEventReceiver
+				{
+				public:
+					static void Handler(Object^ sender, EventArgs^ e);
+				};
 			};
 
 			public ref class DlgUnits

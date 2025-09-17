@@ -31,8 +31,6 @@ enum
 	PFP_FULLPATH,
 };
 
-IMPLEMENT_DYNCREATE(CPreferencesFile2Page, CPreferencesPageBase)
-
 CPreferencesFile2Page::CPreferencesFile2Page(const CTDCImportExportMgr* pExportMgr)
 	:
 	CPreferencesPageBase(IDD_PREFFILE2_PAGE),
@@ -213,8 +211,6 @@ void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_nBackupFolderType = pPrefs->GetProfileInt(szKey, _T("BackupFolderType"), PFP_RELATIVETOTASKLIST);
 	
 	// saving
-	m_nAutoSaveFrequency = pPrefs->GetProfileInt(szKey, _T("AutoSaveFrequency"), 1);
-	m_bAutoSave = pPrefs->GetProfileInt(szKey, _T("AutoSave"), (m_nAutoSaveFrequency > 0));
 	m_bAutoExport = pPrefs->GetProfileInt(szKey, _T("AutoHtmlExport"), FALSE);
 	m_sExportFolderPath = pPrefs->GetProfileString(szKey, _T("ExportFolderPath"));
 	m_sSaveExportStylesheet = pPrefs->GetProfileString(szKey, _T("SaveExportStylesheet"));
@@ -223,6 +219,13 @@ void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_bOtherExport = pPrefs->GetProfileInt(szKey, _T("OtherExport"), FALSE);
 	m_bExportFilteredOnly = pPrefs->GetProfileInt(szKey, _T("ExportFilteredOnly"), FALSE);
 	m_bAutoSaveOnRunTools = pPrefs->GetProfileInt(szKey, _T("AutoSaveOnRunTools"), TRUE);
+	m_nAutoSaveFrequency = pPrefs->GetProfileInt(szKey, _T("AutoSaveFrequency"), 1);
+
+#ifdef _DEBUG
+	m_bAutoSave = pPrefs->GetProfileInt(szKey, _T("AutoSave"), FALSE);
+#else
+	m_bAutoSave = pPrefs->GetProfileInt(szKey, _T("AutoSave"), (m_nAutoSaveFrequency > 0));
+#endif
 
 	m_sOtherExportTypeID = pPrefs->GetProfileString(szKey, _T("OtherExporterTypeID"));
 
@@ -253,13 +256,10 @@ void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 
 	m_eSaveExportStylesheet.SetCurrentFolder(sFolder);
 	m_sSaveExportStylesheet = FileMisc::GetRelativePath(m_sSaveExportStylesheet, sFolder, FALSE);
-
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
 void CPreferencesFile2Page::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("BackupOnSave"), m_bBackupOnSave);
 	pPrefs->WriteProfileString(szKey, _T("BackupLocation"), m_sBackupLocation);
 	pPrefs->WriteProfileInt(szKey, _T("KeepBackups"), m_nKeepBackups);
@@ -280,8 +280,6 @@ void CPreferencesFile2Page::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 	pPrefs->WriteProfileString(szKey, _T("ExportFolderPath"), m_sExportFolderPath);
 	pPrefs->WriteProfileString(szKey, _T("SaveExportStylesheet"), m_sSaveExportStylesheet);
 	pPrefs->WriteProfileString(szKey, _T("OtherExporterTypeID"), m_sOtherExportTypeID);
-
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 void CPreferencesFile2Page::OnBackuponsave() 

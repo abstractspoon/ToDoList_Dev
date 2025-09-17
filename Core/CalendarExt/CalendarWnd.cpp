@@ -45,7 +45,6 @@ IMPLEMENT_DYNAMIC(CCalendarWnd, CDialog)
 CCalendarWnd::CCalendarWnd()
 	:	
 	m_bReadOnly(FALSE),
-	m_stSelectedTaskDates(TRUE), // we handle the click
 	m_MiniCalendar(m_BigCalendar.Data()),
 	m_dlgPrefs(this)
 {
@@ -153,7 +152,10 @@ BOOL CCalendarWnd::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// non-translatables
-	CLocalizer::EnableTranslation(*GetDlgItem(IDC_SELECTEDTASKDATES), FALSE);
+	CLocalizer::EnableTranslation(m_stSelectedTaskDates, FALSE);
+
+	if (CDateHelper::WantRTLDates())
+		m_stSelectedTaskDates.ModifyStyleEx(0, WS_EX_RTLREADING);
 
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
@@ -188,12 +190,12 @@ BOOL CCalendarWnd::OnInitDialog()
 
 void CCalendarWnd::InitSnapCombo()
 {
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHOUR,	TCCSM_NEARESTHOUR);
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY,	TCCSM_NEARESTDAY);
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, TCCSM_NEARESTHALFDAY);
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE,			TCCSM_FREE);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_NEARESTHOUR,	TCCSM_NEARESTHOUR);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_NEARESTDAY,	TCCSM_NEARESTDAY);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, TCCSM_NEARESTHALFDAY);
+	CDialogHelper::AddStringT(m_cbSnapModes, IDS_SNAP_FREE,			TCCSM_FREE);
 
-	CDialogHelper::SelectItemByData(m_cbSnapModes, m_BigCalendar.GetDefaultSnapMode());
+	CDialogHelper::SelectItemByDataT(m_cbSnapModes, m_BigCalendar.GetDefaultSnapMode());
 }
 
 void CCalendarWnd::OnSelChangeNumWeeks()
@@ -207,7 +209,7 @@ void CCalendarWnd::OnSelChangeNumWeeks()
 
 void CCalendarWnd::OnSelChangeSnapMode()
 {
-	m_BigCalendar.SetDefaultSnapMode(CDialogHelper::GetSelectedItemData(m_cbSnapModes, TCCSM_FREE));
+	m_BigCalendar.SetDefaultSnapMode(CDialogHelper::GetSelectedItemDataT(m_cbSnapModes, TCCSM_FREE));
 }
 
 void CCalendarWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 
@@ -235,6 +237,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	Misc::SetFlag(dwPrefs, TCCO_SHOWISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 
 	m_BigCalendar.SetOptions(dwPrefs);
+	m_MiniCalendar.SetOptions(dwPrefs);
 
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	CWeekend::Initialise(dwWeekends);
@@ -264,7 +267,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		TCC_SNAPMODE nSnap = (TCC_SNAPMODE)pPrefs->GetProfileInt(szKey, _T("SnapMode"), TCCSM_NEARESTHOUR);
 		m_BigCalendar.SetDefaultSnapMode(nSnap);
-		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
+		CDialogHelper::SelectItemByDataT(m_cbSnapModes, nSnap);
 	
 		// make sure 'today' is visible
 		COleDateTime dtToday = COleDateTime::GetCurrentTime();
@@ -296,6 +299,9 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_SHOWDATEINEVERYCELL,				m_dlgPrefs.GetDisplayDateInEveryCell());
 	Misc::SetFlag(dwOptions, TCCO_SHOWWEEKNUMINCELLDATE,			m_dlgPrefs.GetDisplayWeekNumberInCell());
 
+	CString sHideParentTag;
+	Misc::SetFlag(dwOptions, TCCO_HIDEPARENTTASKS,					m_dlgPrefs.GetHideParentTasks(sHideParentTag));
+
 	// Preserve app preferences
 	Misc::SetFlag(dwOptions, TCCO_TASKTEXTCOLORISBKGND,				m_BigCalendar.HasOption(TCCO_TASKTEXTCOLORISBKGND));
 	Misc::SetFlag(dwOptions, TCCO_STRIKETHRUDONETASKS,				m_BigCalendar.HasOption(TCCO_STRIKETHRUDONETASKS));
@@ -304,11 +310,8 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_ENABLELABELTIPS,					m_BigCalendar.HasOption(TCCO_ENABLELABELTIPS));
 	Misc::SetFlag(dwOptions, TCCO_SHOWISODATES,						m_BigCalendar.HasOption(TCCO_SHOWISODATES));
 
-	m_BigCalendar.SetOptions(dwOptions);
-	m_MiniCalendar.SetOptions(dwOptions);
-
-	CString sHideParentTag;
-	m_BigCalendar.SetHideParentTasks(m_dlgPrefs.GetHideParentTasks(sHideParentTag), sHideParentTag);
+	m_BigCalendar.SetOptions(dwOptions, sHideParentTag);
+	m_MiniCalendar.SetOptions(dwOptions, sHideParentTag);
 
 	CDWordArray aHeatMapPalette;
 	TDC_ATTRIBUTE nHeatMapAttrib = TDCA_NONE;
@@ -331,9 +334,6 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 
 		m_BigCalendar.SetUITheme(m_theme);
 		m_MiniCalendar.SetUITheme(m_theme);
-
-		m_stSelectedTaskDates.SetBkColor(m_theme.crAppBackLight);
-		m_stSelectedTaskDates.SetTextColor(m_theme.crAppText);
 
 		if (CThemed::IsAppThemed())
 		{
@@ -412,7 +412,7 @@ bool CCalendarWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		return true;
 
 	case IUI_SETFOCUS:
-		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
+		return (CDialogHelper::IsChildOrSame(&m_BigCalendar, GetFocus()) == FALSE);
 
 	case IUI_SORT:
 		if (pData)
@@ -636,7 +636,7 @@ HBRUSH CCalendarWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 	
-	if (nCtlColor == CTLCOLOR_STATIC && m_brBack.GetSafeHandle())
+	if ((nCtlColor == CTLCOLOR_STATIC) && (pWnd != &m_stSelectedTaskDates) && m_brBack.GetSafeHandle())
 	{
 		pDC->SetTextColor(m_theme.crAppText);
 		pDC->SetBkMode(TRANSPARENT);
@@ -650,6 +650,8 @@ BOOL CCalendarWnd::OnEraseBkgnd(CDC* pDC)
 {
 	// clip out children
 	CDialogHelper::ExcludeCtrl(this, IDC_CALENDAR_FRAME, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_NUMWEEKS, pDC);
+	CDialogHelper::ExcludeCtrl(this, IDC_SNAPMODES, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())
@@ -690,12 +692,17 @@ void CCalendarWnd::OnPreferences()
 
 void CCalendarWnd::ResizeControls(int cx, int cy)
 {
+	if (CLocalizer::IsInitialized())
+	{
+		int nOffset = CDialogHelper::ResizeStaticTextToFit(this, IDC_SELECTEDTASKDATESLABEL);
+
+		if (nOffset != 0)
+			CDialogHelper::OffsetChild(&m_stSelectedTaskDates, nOffset, 0);
+	}
+
 	// calendar frame
 	CRect rFrame = CDialogHelper::GetCtrlRect(this, IDC_CALENDAR_FRAME);
-
-	rFrame.right = cx;
-	rFrame.bottom = cy;
-	GetDlgItem(IDC_CALENDAR_FRAME)->MoveWindow(rFrame);
+	rFrame = CDialogHelper::ResizeCtrl(this, IDC_CALENDAR_FRAME, (cx - rFrame.right), (cy - rFrame.bottom));
 
 	// mini-cal
 	rFrame.DeflateRect(1, 1);
@@ -723,8 +730,7 @@ void CCalendarWnd::SyncMiniCalendar(BOOL bScroll)
 	}
 	else
 	{
-		time_t tSel =  m_BigCalendar.GetFirstSelectedItem();
-		COleDateTime dtSel(tSel);
+		COleDateTime dtSel =  m_BigCalendar.GetFirstSelectedItem();
 		
 		m_MiniCalendar.SetDateSel(dtSel, dtSel);
 		m_MiniCalendar.SetCurrentMonthAndYear(dtSel);
@@ -871,11 +877,11 @@ void CCalendarWnd::UpdateSelectedTaskDates()
 		DWORD dwFlags = (DHFD_TIME | DHFD_NOSEC);
 		dwFlags |= (m_BigCalendar.HasOption(TCCO_SHOWISODATES) ? DHFD_ISO : 0);
 
-		CString sDateRange = COleDateTimeRange(dtStart, dtDue).Format(dwFlags);
-		sSelectedTaskDates.Format(_T("%s: <a href=>%s</a>"), CEnString(IDS_SELTASKDATES_LABEL), sDateRange);
+		sSelectedTaskDates = COleDateTimeRange(dtStart, dtDue).Format(dwFlags);
 	}
 
 	m_stSelectedTaskDates.SetWindowText(sSelectedTaskDates);
+	CDialogHelper::ResizeStaticTextToFit(this, &m_stSelectedTaskDates);
 }
 
 void CCalendarWnd::OnClickSelectedTaskDates()

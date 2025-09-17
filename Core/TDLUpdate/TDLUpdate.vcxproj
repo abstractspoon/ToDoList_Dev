@@ -173,28 +173,15 @@ copy unicode_release\TDLUpdate.exe ..\todolist\unicode_release /y
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="StdAfx.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TDLUpdate.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="TDLWebUpdateProgressDlg.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="TDLWebUpdater.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="TDLUpdate.cpp" />
+    <ClCompile Include="TDLWebUpdateProgressDlg.cpp" />
+    <ClCompile Include="TDLWebUpdater.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TDLUpdate.rc">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
@@ -212,11 +199,6 @@ copy unicode_release\TDLUpdate.exe ..\todolist\unicode_release /y
     <Library Include="..\3rdParty\Zlib\ZLIBSTAT.LIB" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuildStep Include="res\tdlupdate.exe.manifest">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-    </CustomBuildStep>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\3rdParty\3rdParty.vcxproj">
       <Project>{e15c17b8-c080-492f-bbb8-bf9e84a0ea31}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -225,6 +207,9 @@ copy unicode_release\TDLUpdate.exe ..\todolist\unicode_release /y
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="res\tdlupdate.exe.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

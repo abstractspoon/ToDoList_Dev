@@ -55,16 +55,18 @@ public:
 	BOOL HasMultipleValues() const;
 	BOOL HasAnyValues() const;
 	BOOL IsBacklog() const;
-	BOOL IsEmpty() const { return (GetCount() == 0); }
 	BOOL AttributeValuesMatch(const CKanbanColumnCtrl& other) const;
-	UINT GetCount() const { return (CTreeCtrl::GetCount() - m_mapGroupHeaders.GetCount()); }
+	BOOL IsEmpty() const { return (GetCount() == 0); }
+	BOOL IsFull() const;
+	int GetCount() const { return (int)(CTreeCtrl::GetCount() - m_mapGroupHeaders.GetCount()); }
+	int GetMaxCount() const { return m_columnDef.nMaxTaskCount; }
 
 	const KANBANCOLUMN& ColumnDefinition() const { return m_columnDef; }
 	
 	BOOL Create(UINT nID, CWnd* pParentWnd);
 	HTREEITEM AddTask(const KANBANITEM& ki);
-	BOOL DeleteTask(DWORD dwTaskID);
-	BOOL DeleteAll();
+	BOOL RemoveTask(DWORD dwTaskID);
+	BOOL RemoveAll();
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 
 	BOOL Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
@@ -102,7 +104,7 @@ public:
 
 	void SetDropTarget(BOOL bTarget);
 	void SetBackgroundColor(COLORREF color);
-	void SetExcessColor(COLORREF color);
+	void SetFullColor(COLORREF color);
 	void SetMaximumTaskCount(int nMaxTasks);
 
 	void SetOptions(DWORD dwOptions);
@@ -145,7 +147,7 @@ protected:
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder, m_nNumTitleLines;
 	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
-	COLORREF m_crItemShadow, m_crGroupHeaderBkgnd;
+	COLORREF m_crItemShadow, m_crGroupHeaderBkgnd, m_crFullBkgnd;
 
 	TDC_ATTRIBUTE m_nSortBy, m_nGroupBy;
 	BOOL m_bSortAscending;
@@ -185,6 +187,7 @@ protected:
 	afx_msg LRESULT OnGetNextItem(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
 	DECLARE_MESSAGE_MAP()
 

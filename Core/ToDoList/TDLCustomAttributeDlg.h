@@ -112,7 +112,9 @@ public:
 	CCustomAttributeCalcPage();
 
 	BOOL Create(CWnd* pParent);
+
 	void SetAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDef);
+	void ExcludeCustomAttribute(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
 	void SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc);
 	void GetCalculation(TDCCUSTOMATTRIBUTECALCULATION& calc) const;
@@ -127,6 +129,7 @@ protected:
 	//}}AFX_DATA
 	BOOL m_bSecondOperandIsValue;
 	CString m_sResultType;
+	CString m_sExcludedCustAttribID;
 
 	TDCCUSTOMATTRIBUTECALCULATION m_calc;
 	CTDCCustomAttribDefinitionArray m_aAttribDef;
@@ -176,7 +179,6 @@ public:
 	CTDLCustomAttributeDlg(const CString& sTaskFile, 
 						   const CTDCCustomAttribDefinitionArray& aAttribDef,
 						   const CTDCImageList& ilTaskIcons,
-						   const CImageList& ilCheckBoxes,
 						   CWnd* pParent = NULL);   // standard constructor
 
 	int GetAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDef) const;
@@ -205,11 +207,11 @@ protected:
 	CFileEdit	m_eTaskfile;
 	CEnEdit		m_eColumnTitle;
 	CWndPromptManager m_mgrPrompts;
+	CImageList m_ilCheckBoxes;
 
 	CCustomAttributeListPage m_pageList;
 	CCustomAttributeCalcPage m_pageCalc;
 
-	const CImageList& m_ilCheckBoxes;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -103,6 +103,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SampleUIExtensionBridge.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -119,6 +120,9 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ProjectReference Include="..\SampleUIExtensionCore\SampleUIExtensionCore.csproj">
       <Project>{828b1da8-d72c-446b-b601-5117985691ad}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="SampleUIExtensionBridge.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

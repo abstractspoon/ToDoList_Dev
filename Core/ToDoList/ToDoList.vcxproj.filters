@@ -53,9 +53,6 @@
     <None Include="res\depend_link.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\English.gif">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\fileedit_go.ico">
       <Filter>Resource Files</Filter>
     </None>
@@ -141,9 +138,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="RES\XPcheckboxes.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\YourLanguage.GIF">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\ToDoList.rc2">
@@ -251,6 +245,27 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\reminder.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\quickfind_next.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\quickfind_prev.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\timetrack_goto.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\uk_flag.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\yourlang_flag.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\taskattrib_toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\taskattrib_toolbar_std.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

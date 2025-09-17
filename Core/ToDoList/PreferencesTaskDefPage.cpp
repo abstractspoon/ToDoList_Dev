@@ -6,6 +6,7 @@
 #include "PreferencesTaskDefPage.h"
 #include "tdcenum.h"
 #include "tdcmapping.h"
+#include "tdcstatic.h"
 #include "todoitem.h"
 #include "tdltaskicondlg.h"
 #include "tdccontentmgr.h"
@@ -41,8 +42,6 @@ const LPCTSTR NO_SOUND	= _T("None");
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskDefPage property page
-
-IMPLEMENT_DYNCREATE(CPreferencesTaskDefPage, CPreferencesPageBase)
 
 CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDCContentMgr* pMgrContent) 
 	: 
@@ -172,7 +171,18 @@ BOOL CPreferencesTaskDefPage::GetReminder(TDCREMINDER& rem) const
 
 void CPreferencesTaskDefPage::SetPriorityColors(const CDWordArray& aColors)
 {
+	ASSERT(aColors.GetSize() >= m_cbDefPriority.GetNumLevels());
+
 	m_cbDefPriority.SetColors(aColors);
+}
+
+
+void CPreferencesTaskDefPage::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
+
+	m_cbDefPriority.SetNumLevels(nNumLevels);
+	m_cbDefRisk.SetNumLevels(nNumLevels);
 }
 
 void CPreferencesTaskDefPage::SetDefaultCommentsFont(const CString& sFaceName, int nPointSize)
@@ -209,7 +219,6 @@ void CPreferencesTaskDefPage::OnSetdefaultcolor()
 
 void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_nDefPriority = pPrefs->GetProfileInt(szKey, _T("DefaultPriority"), 5); 
 	m_nDefRisk = pPrefs->GetProfileInt(szKey, _T("DefaultRisk"), 0); 
 	m_sDefAllocTo = pPrefs->GetProfileString(szKey, _T("DefaultAllocTo"));
@@ -224,9 +233,9 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	m_bUseCreationDateForDefDueDate = pPrefs->GetProfileInt(szKey, _T("UseCreationForDefDueDate"), FALSE);
 	m_defCost = pPrefs->GetProfileString(szKey, _T("DefaultCost"), _T("0"));
 	m_defTimeEst.dAmount = pPrefs->GetProfileDouble(szKey, _T("DefaultTimeEstimate"), 0);
-	m_defTimeEst.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeEstUnits"), THU_HOURS), FALSE);
+	m_defTimeEst.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeEstUnits"), THU_DAYS), FALSE);
 	m_defTimeSpent.dAmount = pPrefs->GetProfileDouble(szKey, _T("DefaultTimeSpent"), 0);
-	m_defTimeSpent.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeSpentUnits"), THU_HOURS), FALSE);
+	m_defTimeSpent.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("DefaultTimeSpentUnits"), THU_DAYS), FALSE);
 	m_sDefIcon = pPrefs->GetProfileString(szKey, _T("DefaultIcon"));
 	m_nDefReminderLeadinMins = pPrefs->GetProfileInt(szKey, _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
 	m_bReminderBeforeDue = pPrefs->GetProfileInt(szKey, _T("ReminderBeforeDue"), TRUE);
@@ -266,7 +275,6 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 
 void CPreferencesTaskDefPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("DefaultPriority"), m_nDefPriority);
 	pPrefs->WriteProfileInt(szKey, _T("DefaultRisk"), m_nDefRisk);
 	pPrefs->WriteProfileString(szKey, _T("DefaultAllocTo"), m_sDefAllocTo);

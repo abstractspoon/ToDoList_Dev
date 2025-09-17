@@ -17,6 +17,7 @@
 #define IDC_GOTOTODAY                   1029
 #define IDC_PREFERENCES                 1030
 #define IDC_SELECTEDTASKDATES           1032
+#define IDC_SELECTEDTASKDATESLABEL      1033
 #define IDC_DRAGMODE                    1033
 #define IDC_SNAPMODES                   1034
 #define IDC_HEATMAPPALETTE              1035

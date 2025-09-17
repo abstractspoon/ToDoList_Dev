@@ -30,7 +30,12 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTaskListCsvExporter::CTaskListCsvExporter() : m_bExportingForExcel(FALSE), m_bFirstHeader(TRUE), ISODATES(FALSE)
+CTaskListCsvExporter::CTaskListCsvExporter() 
+	: 
+	m_bExportingForExcel(FALSE), 
+	m_bFirstHeader(TRUE), 
+	m_nFirstAttribID(TDCA_NONE),
+	ISODATES(FALSE)
 {
 }
 
@@ -42,6 +47,7 @@ CTaskListCsvExporter::~CTaskListCsvExporter()
 IIMPORTEXPORT_RESULT CTaskListCsvExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	m_bFirstHeader = TRUE;
+	m_nFirstAttribID = TDCA_NONE;
 
 	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, dwFlags, pPrefs, szKey);
 }
@@ -49,6 +55,7 @@ IIMPORTEXPORT_RESULT CTaskListCsvExporter::Export(const ITaskList* pSrcTaskFile,
 IIMPORTEXPORT_RESULT CTaskListCsvExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	m_bFirstHeader = TRUE;
+	m_nFirstAttribID = TDCA_NONE;
 
 	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, dwFlags, pPrefs, szKey);
 }
@@ -84,10 +91,6 @@ bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 		return false;
 
 	ISODATES = pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE);
-	
-	// Add project identifier if exporting multiple files
-	if (MULTIFILE)
-		ARRATTRIBUTES.InsertAt(0, TDCA_PROJECTNAME);
 	
 	// we read direct from app preferences
 	szKey = _T("Preferences");
@@ -135,6 +138,8 @@ CString CTaskListCsvExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
 
 	// else
 	m_bFirstHeader = FALSE;
+	m_nFirstAttribID = TDCA_NONE;
+
 	CString sHeader = CTaskListExporterBase::FormatHeader(pTasks);
 
 	// remove trailing delimiter
@@ -146,7 +151,7 @@ CString CTaskListCsvExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
 CString CTaskListCsvExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const
 {
 	CString sHeader;
-	
+
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
 		sHeader = (sAttribLabel + DELIM);
@@ -162,10 +167,18 @@ CString CTaskListCsvExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttribID, const CS
 			sHeader = (m_aColumnMapping[nMap].sColumnName + DELIM);
 	}
 	
+	// If we're a multi-file export we need to prefix 
+	// the header with 'Tasklist' as the first column
+	if (MULTIFILE && (m_nFirstAttribID == TDCA_NONE))
+	{
+		m_nFirstAttribID = nAttribID; // we'll need this for the 'value' later
+		sHeader = (CEnString(IDS_TDLBC_PROJECTNAME) + DELIM + sHeader);
+	}
+	
 	return sHeader;
 }
 
-CString CTaskListCsvExporter::FormatAttribute(TDC_ATTRIBUTE /*nAttrib*/, const CString& /*sAttribLabel*/, const CString& sValue) const
+CString CTaskListCsvExporter::FormatAttribute(TDC_ATTRIBUTE /*nAttribID*/, const CString& /*sAttribLabel*/, const CString& sValue) const
 {
 	// Note: We always export values even if they are empty
 	CString sAttrib(sValue);
@@ -257,6 +270,13 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 					sItem = FormatAttribute(nAttribID, sAttribLabel, FormatDateWithSeconds(timeT));
 			}
 			break;
+		}
+
+		// If we're a multi-file export and this is the first attribute 
+		// we need to prefix the value with 'Tasklist' as the first column
+		if (MULTIFILE && (nAttribID == m_nFirstAttribID))
+		{
+			sItem = (CTaskListExporterBase::FormatTitle(pTasks, FALSE) + DELIM + sItem);
 		}
 	}
 

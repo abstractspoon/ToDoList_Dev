@@ -32,6 +32,7 @@ struct KANBANCUSTOMATTRIBDEF
 
 	CString sAttribID, sAttribName;
 	BOOL bMultiValue;
+	BOOL bDate;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -39,7 +40,7 @@ struct KANBANCUSTOMATTRIBDEF
 class CKanbanCustomAttributeDefinitionArray : public CArray<KANBANCUSTOMATTRIBDEF, KANBANCUSTOMATTRIBDEF&>
 {
 public:
-	int AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal = FALSE);
+	int AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal, BOOL bDate);
 	BOOL HasDefinition(const CString& sAttribID) const;
 	int FindDefinition(const CString& sAttribID) const;
 
@@ -71,9 +72,12 @@ namespace KBUtils
 	BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
 	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttribID);
 	BOOL IsSortableAttribute(TDC_ATTRIBUTE nAttribID);
+	BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribs);
 
 	BOOL IsTrackableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
 	BOOL IsGroupableAttribute(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+
+	BOOL IsPriorityOrRisk(const CString& sAttribID);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -114,8 +118,8 @@ struct KANBANITEM
 	CString sExternalID, sRecurrence, sCreatedBy;
 	CStringArray aFileLinks;
 
-	int GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CStringArray& aValues) const;
-	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
+	int GetTrackedAttributeValues(const CString& sAttribID, DWORD dwOptions, CStringArray& aValues) const;
+	BOOL HasTrackedAttributeValues(const CString& sAttribID) const;
 	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, BOOL bISODates = FALSE) const;
 	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttribID, const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs, BOOL bISODates = FALSE) const;
 	BOOL HasAttributeDisplayValue(TDC_ATTRIBUTE nAttribID) const;
@@ -129,17 +133,17 @@ struct KANBANITEM
 	BOOL HasColor() const;
 	BOOL IsDone(BOOL bIncludeGoodAs) const;
 	BOOL IsDue() const;
-	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) const;
-	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const CStringArray& aValues) const;
+	BOOL AttributeValuesMatch(const CString& sAttribID, const KANBANITEM& ki) const;
+	BOOL AttributeValuesMatch(const CString& sAttribID, const CStringArray& aValues) const;
 	BOOL MatchesAttribute(const IUISELECTTASK& select) const;
 
-	void AddTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
-	void RemoveTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
-	void RemoveTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues);
-	void RemoveAllTrackedAttributeValues(LPCTSTR szAttrib);
-	void SetTrackedAttributeValue(LPCTSTR szAttrib, LPCTSTR szValue);
+	void AddTrackedAttributeValue(const CString& sAttribID, LPCTSTR szValue);
+	void RemoveTrackedAttributeValue(const CString& sAttribID, LPCTSTR szValue);
+	void RemoveTrackedAttributeValues(const CString& sAttribID, const CStringArray& aValues);
+	void RemoveAllTrackedAttributeValues(const CString& sAttribID);
+	void SetTrackedAttributeValue(const CString& sAttribID, LPCTSTR szValue);
 	void SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, LPCTSTR szValue);
-	void SetTrackedAttributeValues(LPCTSTR szAttrib, const CStringArray& aValues);
+	void SetTrackedAttributeValues(const CString& sAttribID, const CStringArray& aValues);
 	void SetTrackedAttributeValues(TDC_ATTRIBUTE nAttribID, const CStringArray& aValues);
 	void SetTrackedAttributeValue(TDC_ATTRIBUTE nAttribID, int nValue);
 	void SetColor(COLORREF cr);
@@ -149,7 +153,7 @@ protected:
 	COLORREF color;
 
 protected:
-	CString GetTrackedAttributeValue(LPCTSTR szAttrib) const;
+	CString GetTrackedAttributeValue(const CString& sAttribID) const;
 	int GetPriorityOrRisk(TDC_ATTRIBUTE nAttribID, DWORD dwOptions) const;
 };
 typedef CArray<const KANBANITEM*, const KANBANITEM*> CKanbanItemArray;
@@ -188,7 +192,7 @@ public:
 	KANBANITEM* NewItem(DWORD dwTaskID, const CString& sTitle);
 
 	void RemoveDeletedItems(const CDWordSet& mapCurIDs);
-	int BuildTempItemMaps(LPCTSTR szAttribID, DWORD dwOptions, CKanbanItemArrayMap& map) const;
+	int BuildTempItemMaps(const CString& sAttribID, DWORD dwOptions, int nNumPriorityRiskLevels, CKanbanItemArrayMap& map) const;
 
 	int GetPinnedItems(CDWordArray& aTaskIDs) const;
 	void SetPinnedItems(const CDWordArray& aTaskIDs, BOOL bReset = TRUE);
@@ -199,7 +203,7 @@ public:
 	BOOL HasSameParent(const KANBANITEM* pKI1, const KANBANITEM* pKI2) const;
 		
 #ifdef _DEBUG
-	void TraceSummary(LPCTSTR szAttribID, DWORD dwOptions) const;
+	void TraceSummary(const CString& sAttribID, DWORD dwOptions) const;
 #endif
 
 protected:
@@ -228,7 +232,6 @@ struct KANBANCOLUMN
 	CStringArray aAttribValues;
 	int nMaxTaskCount;
 	COLORREF crBackground;
-	COLORREF crExcess;
 };
 
 /////////////////////////////////////////////////////////////////////////////

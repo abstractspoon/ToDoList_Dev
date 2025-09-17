@@ -589,7 +589,7 @@ RMERR CRemoteFile::GetLocalUploadPaths(CStringArray& aLocalFiles, DWORD dwOption
 		CFileDialog dialog(TRUE);
 
 		const UINT BUFSIZE = 1024 * 5;
-		static TCHAR FILEBUF[BUFSIZE] = { 0 };
+		TCHAR FILEBUF[BUFSIZE] = { 0 };
 
 		dialog.m_ofn.lpstrFilter = ALLFILES;
 		dialog.m_ofn.lpstrTitle = _T("Select Files to Upload");

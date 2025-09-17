@@ -9,6 +9,14 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
+#ifndef SHORT_MAX
+#	define SHORT_MAX SHRT_MAX
+#endif
+
+//////////////////////////////////////////////////////////////////////
+
 #include "..\shared\Icon.h"
 #include "..\Shared\TimeHelper.h"
 
@@ -17,8 +25,12 @@
 
 #include <afxtempl.h>
 
+//////////////////////////////////////////////////////////////////////
+
 class CXmlItem;
 class ITransText;
+
+//////////////////////////////////////////////////////////////////////
 
 class CMLOExporter : public IExportTasklist  
 {
@@ -45,19 +57,25 @@ protected:
 	CIcon m_icon;
 
 protected:
-	bool ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, BOOL bAndSiblings);
+	typedef CArray<const ITASKLISTBASE*, const ITASKLISTBASE*> CITaskListArray;
+	IIMPORTEXPORT_RESULT ExportTasklists(const CITaskListArray& aTasklists, LPCTSTR szDestFilePath) const;
 
-	void BuildPlacesMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CMapStringToString& mapPlaces, BOOL bAndSiblings);
-	void ExportPlaces(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj);
+	bool ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pXIDestParent, BOOL bAndSiblings) const;
+
+	void BuildPlacesMap(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CMapStringToString& mapPlaces, BOOL bAndSiblings) const;
+	void ExportPlaces(const ITASKLISTBASE* pSrcTaskFile, CXmlItem* pDestPrj) const;
 
 	CString FormatFileLinks(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask) const;
 	CString FormatDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestItem) const;
 	CString FormatComments(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask) const;
-	CString FormatDestID(const CString& sTitle, DWORD dwID) const;
+
+	CXmlItem* CreateTaskNode(LPCTSTR szTitle, DWORD dwID, CXmlItem* pXIDestParent) const;
 
 	static TH_UNITS MapUnitsToTHUnits(TDC_UNITS nUnits);
 	static CString FormatDate(time64_t tDate);
 	static void AddSpacedContent(const CString& sSrc, CString& sDest);
+	static CString FormatDestID(const CString& sTitle, DWORD dwID);
+	static CString FormatTitle(LPCTSTR szReportTitle, LPCTSTR szReportDate);
 };
 
 #endif // !defined(AFX_MLOEXPORTER_H__F588E6B1_3646_4994_99A2_4223FDDA1A31__INCLUDED_)

@@ -21,13 +21,14 @@ namespace DayViewUIExtension
 		public DayViewCreateTimeBlockDlg(IEnumerable<TaskItem> taskItems, 
 										 UIExtension.TaskIcon taskIcons, 
 										 WorkingWeek workWeek,
+										 bool isoDateTimes,
 										 uint taskId,
 										 TimeBlockSeriesAttributes attribs)
 			:
 			this()
 		{
 			m_TaskCombo.Initialise(taskItems, taskIcons, taskId);
-			m_Attributes.Initialise(workWeek, attribs, false);
+			m_Attributes.Initialise(workWeek, isoDateTimes, attribs, false);
 		}
 
 		public uint SelectedTaskId

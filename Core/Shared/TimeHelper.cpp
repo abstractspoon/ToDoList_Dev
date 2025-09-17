@@ -52,7 +52,7 @@ double CTimeHelper::GetTimeOnly(const COleDateTime& date)
 	return GetTimeOnly(date.m_dt);
 }
 
-BOOL CTimeHelper::IsValidUnit(TH_UNITS nUnits)
+BOOL CTimeHelper::IsValidUnits(TH_UNITS nUnits)
 {
 	switch (nUnits)
 	{
@@ -73,7 +73,7 @@ BOOL CTimeHelper::IsValidUnit(TH_UNITS nUnits)
 double CTimeHelper::Convert(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits) const
 {
 	// sanity check
-	if (!IsValidUnit(nFromUnits) || !IsValidUnit(nToUnits))
+	if (!IsValidUnits(nFromUnits) || !IsValidUnits(nToUnits))
 	{	
 		ASSERT(0);
 		return 0.0;
@@ -307,7 +307,7 @@ CString CTimeHelper::FormatTime(double dTime, int nDecPlaces, TCHAR cSpacer)
 CString CTimeHelper::FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces, TCHAR cSpacer)
 {
 	// sanity check
-	if (nUnits && !IsValidUnit(nUnits))
+	if (nUnits && !IsValidUnits(nUnits))
 	{	
 		ASSERT(0);
 		return _T("");
@@ -330,7 +330,7 @@ CString CTimeHelper::FormatTime(double dTime, TH_UNITS nUnits, int nDecPlaces, T
 void CTimeHelper::SetUnits(TH_UNITS nUnits, TCHAR cUnits)
 {
 	// sanity check
-	if (!IsValidUnit(nUnits))
+	if (!IsValidUnits(nUnits))
 	{	
 		ASSERT(0);
 		return ;
@@ -342,7 +342,7 @@ void CTimeHelper::SetUnits(TH_UNITS nUnits, TCHAR cUnits)
 void CTimeHelper::SetUnits(TH_UNITS nUnits, LPCTSTR szUnits)
 {
 	// sanity check
-	if (!IsValidUnit(nUnits))
+	if (!IsValidUnits(nUnits))
 	{	
 		ASSERT(0);
 		return ;
@@ -355,7 +355,7 @@ void CTimeHelper::SetUnits(TH_UNITS nUnits, LPCTSTR szUnits)
 TCHAR CTimeHelper::GetUnits(TH_UNITS nUnits)
 {
 	// sanity check
-	if (!IsValidUnit(nUnits))
+	if (!IsValidUnits(nUnits))
 	{	
 		ASSERT(0);
 		return 0;
@@ -395,7 +395,7 @@ TH_UNITS CTimeHelper::GetDaysToWeeksUnits(TH_UNITS nUnits) const
 CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFlags) const
 {
 	// sanity check
-	if (!IsValidUnit(nUnitsFrom))
+	if (!IsValidUnits(nUnitsFrom))
 	{	
 		ASSERT(0);
 		return _T("");
@@ -422,6 +422,21 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnitsFrom, DWORD dwFl
 	
 	CString sTime;
 	
+	if (dwFlags & HMS_PRESERVEUNITS)
+	{
+		// Clear values corresponding to units 'higher' than 'nUnitsFrom'
+		switch (nUnitsFrom)
+		{
+		case THU_MINS:		dHours = 0.0;	// fall through
+		case THU_HOURS:		dDays = 0.0;	// fall through
+		case THU_WEEKDAYS:	dWeeks = 0.0;	// fall through
+		case THU_DAYS:		dWeeks = 0.0;	// fall through
+		case THU_WEEKS:		dMonths = 0.0;	// fall through
+		case THU_MONTHS:	dYears = 0.0;	// fall through
+		case THU_YEARS:		break;
+		}
+	}
+
 	if (dYears >= 1.0)
 	{
 		sTime = FormatTimeHMS(dYears, THU_YEARS, THU_MONTHS, MONTHS2YEARS, bDecPlaces, cDelim);
@@ -465,17 +480,15 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeft
 								   double dLeftOverMultiplier, BOOL bDecPlaces, TCHAR cDelim)
 {
 	// sanity check
-	if (!IsValidUnit(nUnits) || !IsValidUnit(nLeftOverUnits) && (nLeftOverUnits != THU_NULL))
+	if (!IsValidUnits(nUnits) || !IsValidUnits(nLeftOverUnits) && (nLeftOverUnits != THU_NULL))
 	{	
 		ASSERT(0);
 		return _T("");
 	}
-
-	CString sTime = FormatTime(dTime, nUnits, 0, '\0');
-	ASSERT(sTime == FormatTimeHMS(Misc::Round(dTime), nUnits));
 	
 	if (bDecPlaces && (nLeftOverUnits != THU_NULL))
 	{
+		CString sTime = FormatTime((int)dTime, nUnits, 0, 0);
 		double dLeftOver = ((dTime - (int)dTime) * dLeftOverMultiplier + FUDGE);
 
 		// Include second element if at least 1
@@ -486,7 +499,13 @@ CString CTimeHelper::FormatTimeHMS(double dTime, TH_UNITS nUnits, TH_UNITS nLeft
 
 			sTime += FormatTimeHMS((int)dLeftOver, nLeftOverUnits);
 		}
+
+		return sTime;
 	}
+
+	// else
+	CString sTime = FormatTime(dTime, nUnits, 0, 0);
+	ASSERT(sTime == FormatTimeHMS(Misc::Round(dTime), nUnits));
 	
 	return sTime;
 }
@@ -496,7 +515,7 @@ CString CTimeHelper::FormatTimeHMS(int nTime, TH_UNITS nUnits)
 	CString sTime;
 
 	// sanity check
-	if (!IsValidUnit(nUnits))
+	if (!IsValidUnits(nUnits))
 		ASSERT(0);
 	else
 		sTime.Format(_T("%d%c"), nTime, GetUnits(nUnits));
@@ -507,7 +526,7 @@ CString CTimeHelper::FormatTimeHMS(int nTime, TH_UNITS nUnits)
 int CTimeHelper::Compare(TH_UNITS nFromUnits, TH_UNITS nToUnits)
 {
 	// sanity check
-	if (!IsValidUnit(nFromUnits) || !IsValidUnit(nToUnits))
+	if (!IsValidUnits(nFromUnits) || !IsValidUnits(nToUnits))
 	{	
 		ASSERT(0);
 		return 0;
@@ -612,7 +631,7 @@ TH_UNITS CTimeHelper::DecodeUnits(TCHAR cUnits, TH_UNITS nDefault)
 		TCHAR cValidUnit;
 
 		MAPUNIT2CH.GetNextAssoc(pos, nTHUnits, cValidUnit);
-		ASSERT(IsValidUnit(nTHUnits));
+		ASSERT(IsValidUnits(nTHUnits));
 
 		if (cUnits == cValidUnit)
 			return nTHUnits;
@@ -656,7 +675,7 @@ BOOL CTimeHelper::DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits
 	// Trailing units
 	nUnits = CTimeHelper::DecodeUnits(sTime, nDefaultUnits);
 	
-	if (!IsValidUnit(nUnits))
+	if (!IsValidUnits(nUnits))
 		nUnits = THU_HOURS;
 	
 	// Rest is number (note: ttof ignores any trailing letters)

@@ -39,21 +39,15 @@ public:
 	// Time Series ---------------------------------------------------
 	
 	double GetDaysEstimated() const;
-	double GetDaysEstimated(const COleDateTime& date) const;
-
-	double GetDaysSpent() const;
 	double GetDaysSpent(const COleDateTime& date) const;
-
-	double GetCostEstimate() const;
-	double GetCostEstimated(const COleDateTime& date) const;
-
-	double GetCostSpent() const;
-	double GetCostSpent(const COleDateTime& date) const;
 
 	int GetIncompleteTaskCount(const COleDateTime& date, int nItemFrom, int& nNextItemFrom) const;
 	BOOL GetStartedEndedTasks(const COleDateTime& date, int &nNumStarted, int &nNumDone) const;
 	BOOL GetDaysEstimatedSpent(const COleDateTime& date, double &dEstDays, double &dSpentDays) const;
 	BOOL GetCostEstimatedSpent(const COleDateTime& date, double &dEstCost, double &dSpentCost) const;
+
+	double GetTotalAttribValue(const CString& sCustAttribID) const;
+	double GetTotalAttribValue(const CString& sCustAttribID, const COleDateTime& date) const;
 
 	int HitTest(const COleDateTime& date) const;
 
@@ -67,6 +61,7 @@ public:
 	int GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 	int GetTagFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 	int GetVersionFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
+	int GetCustomAttributeFrequencies(const CString& sCustAttribID, CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const;
 
 	// Min Max charts ------------------------------------------------
 
@@ -96,6 +91,8 @@ protected:
 
 	double GetAttribValue(const STATSITEM& si, TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType) const;
 	double GetAttribValue(const STATSITEM& si, TIMESERIES_ATTRIB nAttrib, TIMESERIES_ATTRIBTYPE nType, const COleDateTime& date) const;
+	double GetAttribValue(const STATSITEM& si, const CString& sCustAttribID) const;
+	double GetAttribValue(const STATSITEM& si, const CString& sCustAttribID, const COleDateTime& date) const;
 
 	double CalcProportionOfValue(const STATSITEM& si, double dValue, const COleDateTime& date) const;
 	double GetIntersectionProportion(const STATSITEM& si, BOOL bWeekdays) const;
@@ -105,6 +102,7 @@ protected:
 	enum FREQUENCY_ATTRIB		{ F_CATEGORY, F_STATUS, F_ALLOCTO, F_ALLOCBY, F_PRIORITY, F_RISK, F_TAGS, F_VERSION };
 
 	int GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
+	int GetAttribFrequencies(const CString& sCustAttribID, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
 	void AppendFrequencyAttrib(const CString& sAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
 	void AppendFrequencyAttribs(const CStringArray& aAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const;
 

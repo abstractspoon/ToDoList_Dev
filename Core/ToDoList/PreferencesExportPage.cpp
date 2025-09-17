@@ -22,8 +22,6 @@ const UINT RESETBTN = 0xc4;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesExportPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesExportPage, CPreferencesPageBase)
-
 CPreferencesExportPage::CPreferencesExportPage() 
 	: 
 	CPreferencesPageBase(IDD_PREFEXPORT_PAGE),
@@ -118,13 +116,10 @@ void CPreferencesExportPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	m_bExportParentTitleCommentsOnly = pPrefs->GetProfileInt(szKey, _T("ExportParentTitleCommentsOnly"), FALSE);
 	m_bExportSpaceForNotes = pPrefs->GetProfileInt(szKey, _T("ExportSpaceForNotes"), FALSE);
 	m_bUseSpaceIndents = pPrefs->GetProfileInt(szKey, _T("UseSpaceIndents"), TRUE);
-
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
 void CPreferencesExportPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileString(szKey, _T("HtmlFont"), m_sHtmlFont);
 	pPrefs->WriteProfileInt(szKey, _T("HtmlFontSize"), m_nHtmlFontSize);
 	pPrefs->WriteProfileInt(szKey, _T("PreviewSaveAs"), m_bPreviewExport);
@@ -134,8 +129,6 @@ void CPreferencesExportPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey
 	pPrefs->WriteProfileInt(szKey, _T("ExportParentTitleCommentsOnly"), m_bExportParentTitleCommentsOnly);
 	pPrefs->WriteProfileInt(szKey, _T("ExportSpaceForNotes"), m_bExportSpaceForNotes);
 	pPrefs->WriteProfileInt(szKey, _T("UseSpaceIndents"), m_bUseSpaceIndents);
-
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 void CPreferencesExportPage::OnExportspacefornotes() 

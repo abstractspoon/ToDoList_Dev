@@ -18,7 +18,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CXmlFileTest::CXmlFileTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CXmlFileTest::CXmlFileTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CXmlFileTest"), utils)
 {
 
 }
@@ -39,7 +41,7 @@ TESTRESULT CXmlFileTest::Run()
 
 void CXmlFileTest::TestAddPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CXmlFileTest::AddSiblingPerformance\n"));
 		return;

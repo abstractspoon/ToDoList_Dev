@@ -20,6 +20,16 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#pragma warning(push)
+#pragma warning(disable: 4201)
+#include <Mmsystem.h>
+#pragma warning(pop)
+
+// for PlaySound
+#pragma comment(lib, "winmm.lib")
+
+/////////////////////////////////////////////////////////////////////////////
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -205,8 +215,9 @@ BOOL CToDoCtrlReminders::DismissReminder(int nRem)
 	if ((nRem < 0) || (nRem >= m_aReminders.GetSize()))
 		return FALSE;
 
-	// Cache before we delete (for notification)
-	TDCREMINDER rem = m_aReminders[nRem];
+	// Notify first before 'rem' get invalidated by DeleteReminder
+	const TDCREMINDER& rem = m_aReminders[nRem];
+	NotifyReminder(rem, WM_TDCN_REMINDERDISMISSED);
 
 	// If we are dismissing a recurring task's reminder,  
 	// we only disable it so that it can later be copied 
@@ -223,9 +234,6 @@ BOOL CToDoCtrlReminders::DismissReminder(int nRem)
 		DeleteReminder(nRem);
 	}
 
-	// Notify
-	NotifyReminder(rem, WM_TDCN_REMINDERDISMISS);
-
 	return TRUE;
 }
 
@@ -233,7 +241,7 @@ void CToDoCtrlReminders::NotifyReminder(const TDCREMINDER& rem, UINT nMsg)
 {
 	ASSERT(m_pWndNotify);
 
-	m_pWndNotify->SendMessage(nMsg, (WPARAM)rem.pTDC->GetSafeHwnd(), (LPARAM)rem.dwTaskID);
+	m_pWndNotify->PostMessage(nMsg, (WPARAM)rem.pTDC->GetSafeHwnd(), (LPARAM)rem.dwTaskID);
 }
 
 BOOL CToDoCtrlReminders::GetReminder(int nRem, TDCREMINDER& rem) const
@@ -287,7 +295,7 @@ BOOL CToDoCtrlReminders::UpdateRecurringTaskReminders(DWORD dwOldTaskID, DWORD d
 		}
 	}
 
-	return FALSE;
+	return bUpdated;
 }
 
 BOOL CToDoCtrlReminders::NonRecurringReminderHasRecurringParent(const TDCREMINDER& rem, DWORD dwParentID, const CFilteredToDoCtrl* pTDC) const
@@ -356,7 +364,7 @@ BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, cons
 		return FALSE;
 	}
 	
-	BOOL bAllAttribModified = (mapAttrib.Has(TDCA_UNDO) || mapAttrib.Has(TDCA_ALL));
+	BOOL bAllAttribModified = mapAttrib.HasAttribOrAll(TDCA_UNDO);
 	BOOL bUpdated = FALSE;
 
 	if (bAllAttribModified || mapAttrib.Has(TDCA_DELETE))
@@ -369,59 +377,58 @@ BOOL CToDoCtrlReminders::UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, cons
 		bUpdated = RemoveCompletedTasks(pTDC); // removes from list too
 	}
 
-	if (!bAllAttribModified && !mapAttrib.Has(TDCA_DUEDATE) && !mapAttrib.Has(TDCA_STARTDATE) && !mapAttrib.Has(TDCA_TASKNAME))
+	// Remove any relative reminders whose dates have changed 
+	// and which are now in the future. 
+	// Also update any reminders whose task title has changed
+	if (bAllAttribModified || mapAttrib.Has(TDCA_DUEDATE) || mapAttrib.Has(TDCA_STARTDATE) || mapAttrib.Has(TDCA_TASKNAME))
 	{
-		return FALSE;
-	}
+		COleDateTime dtNow = COleDateTime::GetCurrentTime();
 
-	// Look for visible relative task reminders 
-	// whose reminder dates are in the future
-	COleDateTime dtNow = COleDateTime::GetCurrentTime();
+		CTDCReminderArray aRem;
+		int nRem = GetListReminders(*pTDC, aRem);
 
-	CTDCReminderArray aRem;
-	int nRem = GetListReminders(*pTDC, aRem);
-
-	while (nRem--)
-	{
-		TDCREMINDER& rem = aRem[nRem];
-
-		if (!rem.bRelative)
-			continue;
-
-		if (!Misc::HasT(rem.dwTaskID, aTaskIDs))
-			continue;
-
-		if (!bAllAttribModified)
+		while (nRem--)
 		{
-			if (rem.nRelativeFromWhen == TDCR_STARTDATE)
+			TDCREMINDER& rem = aRem[nRem];
+
+			if (!rem.bRelative)
+				continue;
+
+			if (!Misc::HasT(rem.dwTaskID, aTaskIDs))
+				continue;
+
+			if (!bAllAttribModified)
 			{
-				if (!mapAttrib.Has(TDCA_STARTDATE))
-					continue;
+				if (rem.nRelativeFromWhen == TDCR_STARTDATE)
+				{
+					if (!mapAttrib.Has(TDCA_STARTDATE))
+						continue;
+				}
+				else // due date
+				{
+					if (!mapAttrib.Has(TDCA_DUEDATE))
+						continue;
+				}
 			}
-			else // due date
+
+			COleDateTime dtRem;
+
+			// If the reminder date without snooze is in the future,
+			// or the reminder is no longer valid, then clear the 
+			// snooze and remove the reminder from the list
+			if (!rem.GetReminderDate(dtRem, FALSE) || (dtRem > dtNow))
 			{
-				if (!mapAttrib.Has(TDCA_DUEDATE))
-					continue;
+				rem.dDaysSnooze = 0.0;
+
+				RemoveListReminder(rem);
 			}
-		}
-
-		COleDateTime dtRem;
-
-		// If the reminder date without snooze is in the future,
-		// or the reminder is no longer valid, then clear the 
-		// snooze and remove the reminder from the list
-		if (!rem.GetReminderDate(dtRem, FALSE) || (dtRem > dtNow))
-		{
-			rem.dDaysSnooze = 0.0;
-
-			RemoveListReminder(rem);
-		}
-		else
-		{
-			UpdateListReminder(rem);
+			else
+			{
+				UpdateListReminder(rem);
+			}
 		}
 	}
-
+	
 	CheckReminders();
 
 	return bUpdated;
@@ -658,7 +665,11 @@ void CToDoCtrlReminders::DoCheckReminders()
 		}
 
 		if (bDelete)
+		{
+			// Notify before 'rem' gets invalidated by DeleteReminder
+			NotifyReminder(rem, WM_TDCN_REMINDERDISMISSED);
 			DeleteReminder(nRem);
+		}
 	}
 
 	// Only flash the titlebar if we are visible and 
@@ -701,7 +712,7 @@ BOOL CToDoCtrlReminders::BuildStickiesRTFContent(const TDCREMINDER& rem, CString
 	}
 
 	sText += _T("\n\n");
-	sText += rem.FormatNotification();
+	sText += rem.FormatNotification(m_bISODateTimes);
 	sText += _T("\n\n");
 	sText += rem.GetTaskComments();
 
@@ -745,8 +756,8 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 
 			if (!bUseRTF)
 			{
-				CString sNotify(rem.FormatNotification()), 
-						sComments(rem.GetTaskComments());
+				CString sNotify(rem.FormatNotification(m_bISODateTimes));
+				CString sComments(rem.GetTaskComments());
 				
 				sContent = rem.GetTaskTitle();
 		
@@ -769,6 +780,12 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 			{
 				if (bUseRTF)
 					m_stickies.SetStickyAttribute(sStickyID, _T("HEIGHT"), _T("1000"));
+
+				// do we need to play a sound?
+				if (!rem.sSoundFile.IsEmpty())
+					PlaySound(rem.sSoundFile, NULL, (SND_FILENAME | SND_ASYNC));
+				else
+					m_stickies.SendMessage(_T("do alarmstart ") + sStickyID);
 
 				return FALSE; // delete reminder as Stickies takes over
 			}
@@ -839,7 +856,7 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 	}
 
 	RemoveListReminder(rem);
-	NotifyReminder(rem, WM_TDCN_REMINDERSNOOZE);
+	NotifyReminder(rem, WM_TDCN_REMINDERSNOOZED);
 }
 
 void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem)

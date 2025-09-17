@@ -103,8 +103,8 @@ BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTaskLink)
 	{
 		// Shift the focus away from the comments because toggling
 		// the filter may cause the comments to become disabled
-		if (m_ctrlComments.HasFocus())
-			SetFocusToTasks();
+		if (HasFocus(TDCSF_COMMENTS))
+			SetFocus(TDCSF_TASKVIEW);
 	
 		ToggleFilter(); // show all tasks
 		
@@ -376,6 +376,11 @@ int CFilteredToDoCtrl::GetFilteredTasks(CTaskFile& tasks, const TDCGETTASKS& fil
 	return GetTasks(tasks, GetTaskView(), filter);
 }
 
+FILTER_SHOW CFilteredToDoCtrl::GetFilter() const
+{
+	return m_filter.GetFilter();
+}
+
 FILTER_SHOW CFilteredToDoCtrl::GetFilter(TDCFILTER& filter) const
 {
 	return m_filter.GetFilter(filter);
@@ -637,12 +642,16 @@ int CFilteredToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BO
 
 BOOL CFilteredToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const
 {
-	BOOL bWantAdd = CTabbedToDoCtrl::WantAddTreeTaskToList(dwTaskID, pContext);
+	if (!CTabbedToDoCtrl::WantAddTreeTaskToList(dwTaskID, pContext))
+		return FALSE;
 
-	if ((pContext == NULL) || !bWantAdd)
-		return bWantAdd;
-
-	// Hide non-matching parents
+	if (pContext == NULL)
+	{
+		// Assume the tree is our source of truth
+		return (m_taskTree.GetItem(dwTaskID) != NULL);
+	}
+	
+	// else hide parent tasks non-matching the filter
 	const TODOSTRUCTURE* pTDS = NULL;
 	const TODOITEM* pTDI = NULL;
 
@@ -654,10 +663,10 @@ BOOL CFilteredToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pConte
 		const SEARCHPARAMS* pFilter = static_cast<const SEARCHPARAMS*>(pContext);
 		SEARCHRESULT unused;
 
-		bWantAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), unused);
+		return m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), unused);
 	}
 
-	return bWantAdd;
+	return TRUE;
 }
 
 HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
@@ -701,7 +710,7 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 			}
 			else
 			{
-				bWantTask = Misc::HasT(pTDS->GetTaskID(), m_aSelectedTaskIDsForFiltering);
+				bWantTask = Misc::HasT(dwTaskID, m_aSelectedTaskIDsForFiltering);
 
 				// check parents
 				if (!bWantTask && pFilter->bWantAllSubtasks)
@@ -750,9 +759,10 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 			for (int nRule = 0; (nRule < nNumRules) && !bWantTask; nRule++)
 			{
 				const SEARCHPARAM& rule = pFilter->aRules[nRule];
-								
 				CString sWhatMatched;
-				VERIFY(result.GetWhatMatched(rule.GetAttribute(), m_aCustomAttribDefs, sWhatMatched) && (!sWhatMatched.IsEmpty() || bMultiRule));
+
+				BOOL bWhatMatched = result.GetWhatMatched(rule.GetAttribute(), m_aCustomAttribDefs, sWhatMatched);
+				ASSERT((bWhatMatched && (!sWhatMatched.IsEmpty() || bMultiRule)) || rule.AttributeIs(TDCA_SELECTION));
 
 				switch (rule.GetOperator())
 				{
@@ -806,7 +816,7 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 					break;
 
 				default:
-					ASSERT(0);
+					// All the rest are explicit matches on the parent
 					bWantTask = TRUE;
 					break;
 				}
@@ -904,8 +914,8 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 		bListRefiltered = InListView();
 	}
 
-	// This may cause either the list or one of the extensions to be rebuilt
-	// we set flags and ignore it
+	// Calling our base class may cause either the list or one of 
+	// the extensions to be rebuilt which we want to avoid
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
@@ -1015,7 +1025,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 		BOOL bWantShowItem = m_matcher.TaskMatches(dwModTaskID, query, FALSE, result);
 		BOOL bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwModTaskID);
 
-		bNeedRefilter = Misc::StateChanged(bWantShowItem, bTreeHasItem);
+		bNeedRefilter = Misc::StatesDiffer(bWantShowItem, bTreeHasItem);
 
 		// Special case: Modified task is a dependency of a hidden task
 		if (!bNeedRefilter && (nAttribID == TDCA_DONEDATE) && m_filter.HasCompletedDependencyFilter())
@@ -1030,7 +1040,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 				bWantShowItem = m_matcher.TaskMatches(dwDependID, query, FALSE, result);
 				bTreeHasItem = m_taskTree.TreeItemMap().HasItem(dwDependID);
 
-				bNeedRefilter = Misc::StateChanged(bWantShowItem, bTreeHasItem);
+				bNeedRefilter = Misc::StatesDiffer(bWantShowItem, bTreeHasItem);
 			}
 		}
 	}
@@ -1370,6 +1380,10 @@ DWORD CFilteredToDoCtrl::MergeNewTaskIntoDataModel(const CTaskFile& tasks, HTASK
 
 DWORD CFilteredToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate)
 {
+	// The original task must be in the tree view so that the
+	// new task can be placed after it. It it's been filtered 
+	// out we need to toggle the filter to make it appear, then 
+	// add the new task, then restore the filter
 	DWORD dwTaskID = task.GetTaskID(task.GetFirstTask());
 	BOOL bToggleFilter = (HasAnyFilter() && (m_taskTree.GetItem(dwTaskID) == NULL));
 

@@ -55,6 +55,11 @@ static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPHOPTION nOption)
 	return BCT_UNKNOWNTYPE;
 }
 
+static BOOL IsCustomAttributeGraph(BURNDOWN_GRAPH nGraph)
+{
+	return ((nGraph >= BCG_CUSTOMATTRIB_FIRST) && (nGraph <= BCG_CUSTOMATTRIB_LAST));
+}
+
 static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPHTYPE nType)
 {
 	if ((nType == BCT_UNKNOWNTYPE) || (nOption == BGO_INVALID))

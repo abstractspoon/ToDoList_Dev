@@ -41,6 +41,7 @@ protected:
 
 class CToDoCtrlData  
 {
+	friend class CTDCDataHelperBase;
 	friend class CTDCTaskMatcher;
 	friend class CTDCTaskComparer;
 	friend class CTDCTaskCalculator;
@@ -128,7 +129,6 @@ public:
 	BOOL GetTaskRecurrence(DWORD dwTaskID, TDCRECURRENCE& tr) const;
 	BOOL GetNextTaskOccurrence(DWORD dwTaskID, COleDateTime& dtNext, BOOL& bDue);
 	int CalcNextTaskOccurrences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<COleDateTimeRange, COleDateTimeRange&>& aOccur) const;
-	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID);
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
 	BOOL IsTaskReusableRecurring(DWORD dwTaskID) const;
 	BOOL CanTaskRecur(DWORD dwTaskID) const;
@@ -153,7 +153,6 @@ public:
 	DWORD GetTaskReferenceID(DWORD dwTaskID) const;
 	int GetReferencesToTask(DWORD dwTaskID, CDWordArray& aRefIDs) const;
 	BOOL IsReferenceToTask(DWORD dwTestID, DWORD dwTaskID) const;
-	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
 	BOOL IsTaskParent(DWORD dwTaskID) const;
 	int GetTaskParentIDs(DWORD dwTaskID, CDWordArray& aTaskIDs) const;
 
@@ -199,8 +198,8 @@ public:
 	TDC_SET SetTaskMetaData(DWORD dwTaskID, const CString& sKey, const CString& sMetaData);
 	
 	TDC_SET SetTaskPercent(DWORD dwTaskID, int nPercent);
-	TDC_SET SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffset = FALSE); // 0-10 (10 is highest)
-	TDC_SET SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset = FALSE); // 0-10 (10 is highest)
+	TDC_SET SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffset = FALSE);
+	TDC_SET SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset = FALSE);
 	TDC_SET SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst, BOOL bOffset = FALSE);
 	TDC_SET SetTaskTimeSpent(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst, BOOL bOffset = FALSE);
 	TDC_SET SetTaskCost(DWORD dwTaskID, const TDCCOST& cost, BOOL bOffset = FALSE);
@@ -229,9 +228,11 @@ public:
 	BOOL ApplyLastInheritedChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttribID);
 	BOOL ApplyLastInheritedChangeFromParent(DWORD dwChildID, TDC_ATTRIBUTE nAttribID);
 	BOOL InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID);
+	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID);
 
 	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
 	
+	void SetNumPriorityRiskLevels(int nNumLevels) { m_nNumPriorityRiskLevels = nNumLevels; } // for offsetting
 	void SetDefaultCommentsFormat(const CString& format);
 	void SetDefaultTimeUnits(TDC_UNITS nTimeEstUnits, TDC_UNITS nTimeSpentUnits);
 	TDC_UNITS GetDefaultTimeEstimateUnits() const { return m_nDefTimeEstUnits; }
@@ -254,6 +255,7 @@ protected:
 
 	TDC_UNITS m_nDefTimeEstUnits, m_nDefTimeSpentUnits;
 	CTDCAttributeMap m_mapParentAttribs; // inheritable attribs
+	int m_nNumPriorityRiskLevels;
 
 	BOOL m_bUndoRedoing;
 	BOOL m_bUpdateInheritAttrib; // update as changes are made to parents
@@ -294,6 +296,7 @@ protected:
 	BOOL ApplyLastChangeToSubtasks(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, BOOL bIncludeBlank);
 	BOOL ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDSParent, int nChildPos, TDC_ATTRIBUTE nAttribID, BOOL bIncludeBlank);
 	BOOL CheckApplyLastChangeToSubtasks(DWORD dwParentID, TDC_ATTRIBUTE nAttribID, BOOL bIncludeBlank);
+	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID, CDWordSet& aProcessedIDs);
 
 	TDC_SET CopyInheritedParentTaskAttributes(TODOITEM* pTDI, DWORD dwParentID) const;
 
@@ -336,22 +339,23 @@ protected:
 	BOOL IsValidMoveDestination(const CDWordArray& aTaskIDs, DWORD dwDestParentID) const;
 	BOOL SetTaskModified(DWORD dwTaskID);
 	int GetTaskPosition(const TODOSTRUCTURE* pTDS, BOOL bZeroBased = TRUE) const;
+	BOOL ProcessUndoElement(BOOL bUndo, TDCUNDOELEMENT& srcElement, CArrayUndoElements& aReturnedElms, const CToDoCtrlDataStructure& tdsCopy);
 
 	BOOL TaskHasAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
 	BOOL GetTaskAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
 
-	// Too dangerous to be public because 'data' is untyped
-	TDC_SET SetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data);
-
-	BOOL ProcessUndoElement(BOOL bUndo, TDCUNDOELEMENT& srcElement, CArrayUndoElements& aReturnedElms, const CToDoCtrlDataStructure& tdsCopy);
 	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags, BOOL bFitToRecurringScheme);
 	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags, BOOL bFitToRecurringScheme, CMap<DWORD, DWORD, BOOL, BOOL&>& mapProcessedTasks);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart, TDC_UNITS nUnits);
+	TDC_SET SetTaskPriorityOrRisk(DWORD dwTaskID, BOOL bPriority, int nValue);
+	TDC_SET OffsetTaskPriorityOrRisk(DWORD dwTaskID, BOOL bPriority, int nOffset);
+
+	// Too dangerous to be public because 'data' is untyped
+	TDC_SET SetTaskAttributeValue(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data);
 
 	static double CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);
 	static COleDateTime AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits, BOOL bAllowUpdateStart);
 	static COleDateTime CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart);
-	static BOOL CanEditPriorityRisk(int nValue, int nNoValue, BOOL bOffset);
 
 };
 

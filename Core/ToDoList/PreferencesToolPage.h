@@ -24,23 +24,17 @@
 const UINT WM_PTP_TESTTOOL = ::RegisterWindowMessage(_T("WM_PTP_TESTTOOL"));
 
 /////////////////////////////////////////////////////////////////////////////
-
-class CTDCCustomAttribDefinitionArray;
-
-/////////////////////////////////////////////////////////////////////////////
 // CPreferencesToolPage dialog
 
 class CPreferencesToolPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesToolPage)
-
 // Construction
 public:
 	CPreferencesToolPage(int nMaxNumTools = 50);
 	~CPreferencesToolPage();
 
-	int GetUserTools(CUserToolArray& aTools) const; // returns the number of tools
-	BOOL GetUserTool(int nTool, USERTOOL& tool) const; 
+	int GetUserTools(CTDCUserToolArray& aTools) const; // returns the number of tools
+	BOOL GetUserTool(int nTool, TDCUSERTOOL& tool) const; 
 	BOOL GetDisplayUDTsInToolbar() const { return m_bDisplayUDTsInToolbar; }
 	void SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
@@ -66,7 +60,7 @@ protected:
 	BOOL m_bRunMinimized;
 	CString m_sIconPath;
 	
-	CUserToolArray m_aTools;
+	CTDCUserToolArray m_aTools;
 	CStringArray m_aMenuCustomAttribIDs;
 	CStringArray m_aMenuUserVariableIDs;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
@@ -124,15 +118,15 @@ protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
-	int AddNewTool(BOOL bEditLabel);
+	int AddNewTool(BOOL bTDLTool);
 	void EnableControls();
 	int GetCurSel() const;
 	BOOL SetCurSel(int nTool);
 	void RebuildListImages();
 	BOOL InitializeToolbar();
-	BOOL GetToolFromList(int nTool, USERTOOL& tool) const;
-	int AddToolToList(const USERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
-	void RebuildToolsFromList(BOOL bSafeQuotes = FALSE);
+	BOOL GetToolFromList(int nTool, TDCUSERTOOL& tool) const;
+	int AddToolToList(const TDCUSERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	void RebuildToolsFromList();
 	
 	CString MapCmdIDToPlaceholder(UINT nCmdID) const;
 	CString GetNewUserVariableName(LPCTSTR szVarType) const;

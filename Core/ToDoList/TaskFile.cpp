@@ -1352,6 +1352,11 @@ unsigned long CTaskFile::GetCustomAttributeType(int nIndex) const
 	return _ttol(GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBTYPE));
 }
 
+unsigned long CTaskFile::GetCustomAttributeFeatures(int nIndex) const
+{
+	return _ttol(GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBFEATURES));
+}
+
 LPCTSTR CTaskFile::GetCustomAttributeListData(int nIndex) const
 {
 	return GetCustomAttributeValue(nIndex, TDL_CUSTOMATTRIBLISTDATA);
@@ -1690,8 +1695,12 @@ bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttribID) const
 	if (m_mapReadableAttrib.Has(TDCA_NONE))
 		return (nAttribID == TDCA_NONE);
 
-	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_mapReadableAttrib.Has(TDCA_CUSTOMATTRIB_ALL))
-		return true;
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) ||
+		 (nAttribID == TDCA_CUSTOMATTRIB_DEFS))
+	{
+		if (m_mapReadableAttrib.Has(TDCA_CUSTOMATTRIB_ALL))
+			return true;
+	}
 
 	return (m_mapReadableAttrib.Has(nAttribID) != FALSE);
 }
@@ -1901,7 +1910,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 		GETATTRIB(TDCA_FILELINK,		TDL_TASKFILELINKPATH,	GetTaskFileLinks(hSrcTask, tdiDest.aFileLinks));
 
 		// Comments are trickier
-		if (mapAttribs.Has(TDCA_ALL) || mapAttribs.Has(TDCA_COMMENTS))
+		if (mapAttribs.HasAttribOrAll(TDCA_COMMENTS))
 		{
 			if (Misc::HasFlag(dwFlags, TDLMTA_EXCLUDEEMPTYSOURCEVALUES) && 
 				!TaskHasAttribute(hSrcTask, TDL_TASKCOMMENTS) &&
@@ -2023,7 +2032,7 @@ BOOL CTaskFile::MergeTaskAttributes(HTASKITEM hSrcTask, TODOITEM& tdiDest, const
 BOOL CTaskFile::WantGetTaskAttribute(HTASKITEM hSrcTask, LPCTSTR szSrcAttrib, TODOITEM& tdiDest, TDC_ATTRIBUTE nDestAttrib, 
 									 const CTDCAttributeMap& mapAttribs, DWORD dwFlags) const
 {
-	if (!mapAttribs.Has(TDCA_ALL) && !mapAttribs.Has(nDestAttrib))
+	if (!mapAttribs.HasAttribOrAll(nDestAttrib))
 		return FALSE;
 
 	BOOL bHasSrc = TaskHasAttribute(hSrcTask, szSrcAttrib);
@@ -2163,21 +2172,12 @@ BOOL CTaskFile::GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CSt
 
 	Base64Coder b64;
 
-#ifdef _UNICODE
-
-	// if text is unicode then we need to convert it back to multibyte
+	// Convert unicode back to multibyte
 	// to read the binary stream as unsigned chars
 	int nLen = sTemp.GetLength();
 	unsigned char* pBinary = (unsigned char*)Misc::WideToMultiByte((LPCTSTR)sTemp, nLen);
 	b64.Decode(pBinary, nLen);
 	delete [] pBinary;
-
-#else
-
-	b64.Decode(sTemp);
-
-#endif
-
 
 	unsigned long nLenContent;
 	PBYTE pContent = b64.DecodedMessage(nLenContent);
@@ -2942,7 +2942,7 @@ int CTaskFile::GetTaskPriority(HTASKITEM hTask, bool bHighest) const
 		return GetTaskInt(hTask, TDL_TASKPRIORITY);
 
 	// else
-	return TDC_NOPRIORITYORISK;
+	return TDC_PRIORITYORRISK_NONE;
 }
 
 unsigned char CTaskFile::GetTaskPercentDone(HTASKITEM hTask, bool bCalc) const
@@ -3249,6 +3249,8 @@ bool CTaskFile::GetTaskCreationDate64(HTASKITEM hTask, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskCreationDateOle(hTask);
 
+	// Task should always have a creation date so we 
+	// let this assert to catch anything unexpected
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 
@@ -3258,6 +3260,9 @@ bool CTaskFile::GetTaskStartDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT)
 
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCSTARTDATE))
 		date = GetTaskDateOle(hTask, TDL_TASKCALCSTARTDATE, TRUE);
+
+	if (!CDateHelper::IsDateSet(date))
+		return false;
 	
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
@@ -3265,9 +3270,12 @@ bool CTaskFile::GetTaskStartDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT)
 bool CTaskFile::GetTaskDueDate64(HTASKITEM hTask, bool bCalc, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskDueDateOle(hTask);
-	
+
 	if (bCalc && TaskHasAttribute(hTask, TDL_TASKCALCDUEDATE))
 		date = GetTaskDateOle(hTask, TDL_TASKCALCDUEDATE, TRUE);
+
+	if (!CDateHelper::IsDateSet(date))
+		return false;
 
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
@@ -3276,6 +3284,9 @@ bool CTaskFile::GetTaskDoneDate64(HTASKITEM hTask, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskDoneDateOle(hTask);
 
+	if (!CDateHelper::IsDateSet(date))
+		return false;
+
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 
@@ -3283,6 +3294,8 @@ bool CTaskFile::GetTaskLastModified64(HTASKITEM hTask, time64_t& timeT) const
 {
 	COleDateTime date = GetTaskLastModifiedOle(hTask);
 
+	// Task should always have a modification date so we 
+	// let this assert to catch anything unexpected
 	return (CDateHelper::GetTimeT64(date, timeT) != FALSE);
 }
 
@@ -3706,7 +3719,7 @@ int CTaskFile::GetTaskRisk(HTASKITEM hTask, bool bHighest) const
 		return GetTaskInt(hTask, TDL_TASKRISK);
 
 	// else
-	return TDC_NOPRIORITYORISK;
+	return TDC_PRIORITYORRISK_NONE;
 }
 
 LPCTSTR CTaskFile::GetTaskExternalID(HTASKITEM hTask) const
@@ -3821,10 +3834,8 @@ bool CTaskFile::SetTaskCustomAttributeData(HTASKITEM hTask, LPCTSTR szID, LPCTST
 			pXICustDef->SetItemValue(TDL_CUSTOMATTRIBTYPE, (int)temp.GetAttributeType());
 		}
 
-		if (Misc::AddUniqueItems(aData, temp.aDefaultListData))
-		{
+		if (Misc::AppendItems(aData, temp.aDefaultListData, TRUE))
 			pXICustDef->SetItemValue(TDL_CUSTOMATTRIBLISTDATA, temp.EncodeListData());
-		}
 	}
 
 	return true;
@@ -3970,7 +3981,7 @@ bool CTaskFile::SetTaskColor(HTASKITEM hTask, unsigned long nColor)
 bool CTaskFile::SetTaskPriorityOrRisk(HTASKITEM hTask, const CString& sIntItem, int iVal)
 {
 	if (!TODOITEM::IsValidPriorityOrRisk(iVal))
-		iVal = (int)max(TDC_MINPRIORITYORISK, min(TDC_MAXPRIORITYORISK, iVal));
+		iVal = (int)max(TDC_PRIORITYORRISK_MIN, min(TDC_PRIORITYORRISK_MAX, iVal));
 
 	if (!SetTaskInt(hTask, sIntItem, iVal))
 		return false;
@@ -4367,19 +4378,14 @@ time_t CTaskFile::GetTaskDate(HTASKITEM hTask, const CString& sDateItem, BOOL bI
 
 COleDateTime CTaskFile::GetTaskDateOle(HTASKITEM hTask, const CString& sDateItem, BOOL bIncTime) const
 {
-	COleDateTime date;
+	if (!TaskHasAttribute(hTask, sDateItem))
+		return CDateHelper::NullDate();
 
-	if (TaskHasAttribute(hTask, sDateItem))
-	{
-		date = GetTaskDouble(hTask, sDateItem);
+	// else
+	COleDateTime date = GetTaskDouble(hTask, sDateItem);
 
-		if (!bIncTime)
-			date = CDateHelper::GetDateOnly(date);
-	}
-	else
-	{
-		CDateHelper::ClearDate(date);
-	}
+	if (!bIncTime)
+		date = CDateHelper::GetDateOnly(date);
 
 	return date;
 }

@@ -32,8 +32,8 @@
 			this.OK = new System.Windows.Forms.Button();
 			this.Cancel = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
-			this.m_Attributes = new DayViewUIExtension.DayViewTimeBlockAttributesPage();
-			this.m_TaskCombo = new DayViewUIExtension.DayViewTaskComboBox();
+			this.m_Attributes = new DayViewTimeBlockAttributesPage();
+			this.m_TaskCombo = new Abstractspoon.Tdl.PluginHelpers.TaskComboBox();
 			this.SuspendLayout();
 			// 
 			// m_TaskLabel
@@ -130,7 +130,7 @@
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Button Cancel;
 		private System.Windows.Forms.Label label5;
-		private DayViewTaskComboBox m_TaskCombo;
+		private Abstractspoon.Tdl.PluginHelpers.TaskComboBox m_TaskCombo;
 		private DayViewTimeBlockAttributesPage m_Attributes;
 	}
 }

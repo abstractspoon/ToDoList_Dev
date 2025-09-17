@@ -58,10 +58,10 @@ BOOL CTDCImageList::NeedLoadImages(const CString& sTaskList, COLORREF crTranspar
 	if (GetSafeHandle() == NULL)
 		return TRUE;
 
-	if (Misc::StateChanged(bWantToolbars, m_bWantToolbars))
+	if (Misc::StatesDiffer(bWantToolbars, m_bWantToolbars))
 		return TRUE;
 
-	if (Misc::StateChanged(bWantDefaultIcons, m_bWantDefaultIcons))
+	if (Misc::StatesDiffer(bWantDefaultIcons, m_bWantDefaultIcons))
 		return TRUE;
 
 	if ((bWantDefaultIcons || bWantToolbars) && (crTransparent != m_crTransparent))
@@ -191,18 +191,6 @@ CString CTDCImageList::GetImageName(int nIndex) const
 	m_mapIndexToName.Lookup(nIndex, sName);
 
 	return sName;
-}
-
-BOOL CTDCImageList::Draw(CDC* pDC, const CString& sImageName, POINT pt, UINT nStyle) const
-{
-	return Draw(pDC, GetImageIndex(sImageName), pt, nStyle);
-}
-
-BOOL CTDCImageList::Draw(CDC* pDC, int nImage, POINT pt, UINT nStyle) const
-{
-	CTDCImageList* pThis = const_cast<CTDCImageList*>(this);
-
-	return pThis->CImageList::Draw(pDC, nImage, pt, nStyle);
 }
 
 BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORREF crTransparent, 

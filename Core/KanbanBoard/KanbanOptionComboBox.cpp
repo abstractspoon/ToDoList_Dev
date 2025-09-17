@@ -30,9 +30,6 @@ CKanbanOptionComboBox::~CKanbanOptionComboBox()
 
 
 BEGIN_MESSAGE_MAP(CKanbanOptionComboBox, CCheckComboBox)
-	//{{AFX_MSG_MAP(CFilterOptionComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -70,12 +67,12 @@ void CKanbanOptionComboBox::SetSelectedOptions(DWORD dwOptions)
 		// translation done via CEnString
 		CLocalizer::EnableTranslation(*this, FALSE);
 
-		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDEPARENTS, KBCF_HIDEPARENTTASKS);
-		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDEEMPTYCOLS, KBCF_HIDEEMPTYCOLUMNS);
-		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDESUBTASKS, KBCF_HIDESUBTASKS);
-		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDENONEGROUP, KBCF_HIDENONEGROUP);
-		CDialogHelper::AddString(*this, IDS_OPTIONS_SORTGROUPSASCENDING, KBCF_SORTGROUPSASCENDING);
-		CDialogHelper::AddString(*this, IDS_OPTIONS_SORTNONEGROUPBELOW, KBCF_SORTNONEGROUPBELOW);
+		CDialogHelper::AddStringT(*this, IDS_OPTIONS_HIDEPARENTS, KBCF_HIDEPARENTTASKS);
+		CDialogHelper::AddStringT(*this, IDS_OPTIONS_HIDEEMPTYCOLS, KBCF_HIDEEMPTYCOLUMNS);
+		CDialogHelper::AddStringT(*this, IDS_OPTIONS_HIDESUBTASKS, KBCF_HIDESUBTASKS);
+		CDialogHelper::AddStringT(*this, IDS_OPTIONS_HIDENONEGROUP, KBCF_HIDENONEGROUP);
+		CDialogHelper::AddStringT(*this, IDS_OPTIONS_SORTGROUPSASCENDING, KBCF_SORTGROUPSASCENDING);
+		CDialogHelper::AddStringT(*this, IDS_OPTIONS_SORTNONEGROUPBELOW, KBCF_SORTNONEGROUPBELOW);
 
 		EnableTooltip();
 	}

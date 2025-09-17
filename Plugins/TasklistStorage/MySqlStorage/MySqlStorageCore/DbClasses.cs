@@ -30,15 +30,15 @@ namespace MySqlStorage
 			{
 				Copy(defaultInfo);
 			}
+#if DEBUG
 			else
 			{
-#if DEBUG
 				Server = "localhost";
 				DatabaseName = "Tasklists";
 				Username = "root";
 				Password = "password";
-#endif
 			}
+#endif
 		}
 
 		public bool OpenConnection(MySqlConnection conn)
@@ -102,7 +102,10 @@ namespace MySqlStorage
 					switch ((uint)e.InnerException.HResult)
 					{
 					case 0x80004005:
-						error = DbError.Server;
+						if (Port != ConnectionInfo.DefaultPort)
+							error = DbError.Port;
+						else
+							error = DbError.Server;
 						break;
 
 					default:
@@ -167,17 +170,18 @@ namespace MySqlStorage
 			return false;
 		}
 
-		public void Copy(ConnectionInfo fromInfo)
+		public void Copy(ConnectionInfo other)
 		{
-			Server = fromInfo.Server;
-			DatabaseName = fromInfo.DatabaseName;
-			Username = fromInfo.Username;
-			Password = fromInfo.Password;
+			Server = other.Server;
+			DatabaseName = other.DatabaseName;
+			Port = other.Port;
+			Username = other.Username;
+			Password = other.Password;
 
-			TasklistsTable = fromInfo.TasklistsTable;
-			IdColumn = fromInfo.IdColumn;
-			NameColumn = fromInfo.NameColumn;
-			XmlColumn = fromInfo.XmlColumn;
+			TasklistsTable = other.TasklistsTable;
+			IdColumn = other.IdColumn;
+			NameColumn = other.NameColumn;
+			XmlColumn = other.XmlColumn;
 		}
 
 		public string Encode() // Excludes password
@@ -190,7 +194,8 @@ namespace MySqlStorage
 					TasklistsTable,
 					IdColumn,
 					NameColumn,
-					XmlColumn
+					XmlColumn,
+					Port
 				});
 		}
 
@@ -284,6 +289,10 @@ namespace MySqlStorage
 
 		// --------------------------------------------------------
 
+		public const uint DefaultPort = 3306;
+
+		public uint Port = DefaultPort;
+
 		public string Server = string.Empty;
 		public string DatabaseName = string.Empty;
 		public string Username = string.Empty;
@@ -300,7 +309,7 @@ namespace MySqlStorage
 		{
 			var parts = encoded.Split(new[] { "::" }, StringSplitOptions.None);
 
-			if (parts.Length != 7)
+			if (parts.Length < 7)
 				return false;
 
 			Server = parts[0];
@@ -312,6 +321,9 @@ namespace MySqlStorage
 			NameColumn = parts[5];
 			XmlColumn = parts[6];
 
+			if ((parts.Length < 8) || !uint.TryParse(parts[7], out Port))
+				Port = ConnectionInfo.DefaultPort;
+
 			return true;
 		}
 
@@ -319,9 +331,10 @@ namespace MySqlStorage
 		{
 			get
 			{
-				return string.Format("Server={0};Database={1};Uid={2};Pwd={3};",
+				return string.Format("Server={0};Database={1};Port={2};Uid={3};Pwd={4};",
 									 Server,
 									 DatabaseName,
+									 Port,
 									 Username,
 									 Password);
 			}

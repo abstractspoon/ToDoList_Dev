@@ -175,7 +175,12 @@ void Translator::Translate(ToolStripItemCollection^ items, bool isMenu)
 	{
 		auto item = items[nItem];
 
-		item->Text = Translate(item->Text, (isMenu ? Type::Menu : Type::Text));
+		// Only need to translate the text if it's a menu or different from the tooltip
+		if (isMenu || (item->Text != item->ToolTipText))
+		{
+			item->Text = Translate(item->Text, (isMenu ? Type::Menu : Type::Text));
+		}
+
 		item->ToolTipText = Translate(item->ToolTipText, Type::ToolTip);
 
 		// children

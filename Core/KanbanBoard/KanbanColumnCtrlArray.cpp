@@ -9,6 +9,7 @@
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\DeferWndMove.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -266,6 +267,11 @@ void CKanbanColumnCtrlArray::RefreshItemLineHeights()
 	ARRAY_FN(pCol->RefreshItemLineHeights());
 }
 
+void CKanbanColumnCtrlArray::SetRedraw(BOOL bRedraw)
+{
+	ARRAY_FN(pCol->SetRedraw(bRedraw));
+}
+
 void CKanbanColumnCtrlArray::SetOptions(DWORD dwOptions)
 {
 	ARRAY_FN(pCol->SetOptions(dwOptions));
@@ -279,6 +285,11 @@ void CKanbanColumnCtrlArray::SetReadOnly(BOOL bReadOnly)
 void CKanbanColumnCtrlArray::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
 {
 	ARRAY_FN(pCol->SetAttributeLabelVisibility(nLabelVis));
+}
+
+void CKanbanColumnCtrlArray::SetFullColumnColor(COLORREF crFull)
+{
+	ARRAY_FN(pCol->SetFullColor(crFull));
 }
 
 void CKanbanColumnCtrlArray::Exclude(CDC* pDC)
@@ -325,6 +336,11 @@ void CKanbanColumnCtrlArray::Redraw(BOOL bErase, BOOL bUpdate)
 	);
 }
 
+void CKanbanColumnCtrlArray::Offset(CDeferWndMove& dwm, int nAmount)
+{
+	ARRAY_FN(dwm.OffsetChild(pCol, nAmount, 0));
+}
+
 int CKanbanColumnCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 {
 	// Go thru each list removing deleted items
@@ -365,7 +381,7 @@ BOOL CKanbanColumnCtrlArray::DeleteTaskFromOthers(DWORD dwTaskID, const CKanbanC
 	ARRAY_FN
 	(
 		if (pCol != pIgnore) 
-			bSomeDeleted |= pCol->DeleteTask(dwTaskID)
+			bSomeDeleted |= pCol->RemoveTask(dwTaskID)
 	);
 
 	return bSomeDeleted;
@@ -438,10 +454,10 @@ float CKanbanColumnCtrlArray::GetAverageCharWidth()
 	CWnd* pRef = GetAt(0);
 	CClientDC dc(pRef);
 
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, *pRef);
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, *pRef);
 	float fAveCharWidth = GraphicsMisc::GetAverageCharWidth(&dc);
 
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 
 	return fAveCharWidth;
 }

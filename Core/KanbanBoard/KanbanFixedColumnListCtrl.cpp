@@ -23,7 +23,7 @@ enum
 {
 	KFCL_TITLECOL,
 	KFCL_VALUECOL,
-//	KFCL_MAXNUMCOL,
+	KFCL_MAXNUMCOL,
 	KFCL_COLORCOL,
 };
 
@@ -91,8 +91,8 @@ BOOL CKanbanFixedColumnListCtrl::SetColumnDefinitions(const CKanbanColumnArray& 
 		SetItemText(nItem, KFCL_VALUECOL, Misc::FormatArray(colDef.aAttribValues));
 		SetItemColor(nItem, colDef.crBackground);
 		
-// 		if (colDef.nMaxTaskCount > 0)
-// 			SetItemText(nItem, KFCL_MAXNUMCOL, Misc::Format(colDef.nMaxTaskCount));
+		if (colDef.nMaxTaskCount > 0)
+			SetItemText(nItem, KFCL_MAXNUMCOL, Misc::Format(colDef.nMaxTaskCount));
 	}
 
 	return TRUE;
@@ -110,7 +110,7 @@ int CKanbanFixedColumnListCtrl::GetColumnDefinitions(CKanbanColumnArray& aColumn
 		
 		colDef.sTitle = GetItemText(nDef, KFCL_TITLECOL);
 		colDef.crBackground = GetItemColor(nDef);
-// 		colDef.nMaxTaskCount = _ttoi(GetItemText(nDef, KFCL_MAXNUMCOL));
+ 		colDef.nMaxTaskCount = _ttoi(GetItemText(nDef, KFCL_MAXNUMCOL));
 
 		CString sValues(GetItemText(nDef, KFCL_VALUECOL));
 
@@ -137,8 +137,7 @@ void CKanbanFixedColumnListCtrl::InitState()
 	CInputListCtrl::InitState();
 
 	// create child controls 
-	// we need combo to be created first
-	CreateControl(m_cbValues, IDC_VALUES);
+	CreateControl(m_cbValues, IDC_VALUES, CBS_DROPDOWNLIST);
 	CLocalizer::EnableTranslation(m_cbValues, FALSE);
 
 	CRect rClient;
@@ -146,10 +145,10 @@ void CKanbanFixedColumnListCtrl::InitState()
 	
 	AddCol(CEnString(IDS_COLUMNTITLE),	((rClient.Width() * 3) / 10));
 	AddCol(CEnString(IDS_ATTRIBVALUES),	((rClient.Width() * 3) / 10), ILCT_COMBO);
-//	AddCol(CEnString(IDS_MAXTASKCOUNT),	((rClient.Width() * 2) / 10));
+	AddCol(CEnString(IDS_MAXTASKCOUNT),	((rClient.Width() * 2) / 10));
 
 	if (!Misc::IsHighContrastActive())
-		AddCol(CEnString(IDS_BKGNDCOLOR),	((rClient.Width() * 2) / 10), ILCT_BROWSE);
+		AddCol(CEnString(IDS_BKGNDCOLOR), ((rClient.Width() * 2) / 10), ILCT_BROWSE);
 		
 	SetAutoRowPrompt(CEnString(IDS_NEWCOLUMN));
 	AutoAdd(TRUE, FALSE);
@@ -159,10 +158,11 @@ void CKanbanFixedColumnListCtrl::InitState()
 
 void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
+	PrepareEdit(nItem, nCol);
+
 	switch (nCol)
 	{
 	case KFCL_VALUECOL:
-		PrepareEdit(nItem, nCol);
 		ShowControl(m_cbValues, nItem, nCol); 
 		break;
 
@@ -183,7 +183,6 @@ void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 		}
 		break;
 
-	case KFCL_TITLECOL:
 	default:
 		CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
 		break;
@@ -197,13 +196,25 @@ BOOL CKanbanFixedColumnListCtrl::IsEditing() const
 
 void CKanbanFixedColumnListCtrl::PrepareEdit(int nRow, int nCol)
 {
-	if (nCol == KFCL_VALUECOL)
+	switch (nCol)
 	{
-		CStringArray aValues;
-		Misc::Split(GetItemText(nRow, nCol), aValues);
+	case KFCL_VALUECOL:
+		{
+			CStringArray aValues;
+			Misc::Split(GetItemText(nRow, nCol), aValues);
 
-		m_cbValues.SetChecked(aValues);
-	}		
+			m_cbValues.SetChecked(aValues);
+		}
+		break;
+
+	case KFCL_MAXNUMCOL:
+		m_editBox.SetMask(_T("0123456789"));
+		break;
+
+	default:
+		m_editBox.ClearMask();
+		break;
+	}
 }
 
 void CKanbanFixedColumnListCtrl::OnValueEditCancel()
@@ -247,6 +258,9 @@ void CKanbanFixedColumnListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 
 BOOL CKanbanFixedColumnListCtrl::CanMoveSelectedColumnRow(BOOL bUp) const
 {
+	if (!IsWindowEnabled())
+		return FALSE;
+
 	int nRow = GetCurSel();
 	int nNumRows = (GetItemCount() - 1);
 

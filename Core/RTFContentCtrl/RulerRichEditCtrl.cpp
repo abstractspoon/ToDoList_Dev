@@ -55,6 +55,9 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\encolordialog.h"
+#include "..\shared\DarkMode.h"
+
+#include "..\3rdparty\XNamedColors.h"
 
 #include <afxpriv.h>
 
@@ -124,20 +127,27 @@ CRulerRichEditCtrl::~CRulerRichEditCtrl()
 /////////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CRulerRichEditCtrl, CWnd)
-	//{{AFX_MSG_MAP(CRulerRichEditCtrl)
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
 	ON_WM_SETFOCUS()
+	ON_WM_ENABLE()
+	ON_WM_CREATE()
+
+	ON_EN_HSCROLL(RTF_CONTROL, OnEnHScroll)
+	ON_NOTIFY(NM_KILLFOCUS, TOOLBAR_CONTROL, OnKillFocusToolbar)
+	ON_NOTIFY(EN_SELCHANGE, RTF_CONTROL, OnEnSelChange)
+
+	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
 	ON_MESSAGE(WM_GETTEXT, OnGetText )
 	ON_MESSAGE(WM_GETTEXTLENGTH, OnGetTextLength)
-	ON_WM_ENABLE()
+
 	ON_REGISTERED_MESSAGE(urm_RULERACTION, OnTrackRuler)
 	ON_REGISTERED_MESSAGE(urm_GETSCROLLPOS, OnGetScrollPos)
 	ON_REGISTERED_MESSAGE(urm_SETCURRENTFONTNAME, OnSetCurrentFontName)
 	ON_REGISTERED_MESSAGE(urm_SETCURRENTFONTSIZE, OnSetCurrentFontSize)
 	ON_REGISTERED_MESSAGE(urm_SETCURRENTFONTCOLOR, OnSetCurrentFontColor)
-	//}}AFX_MSG_MAP
+
 	ON_COMMAND(ID_EDIT_BACKCOLOR, OnEditBackColor)
 	ON_COMMAND(ID_EDIT_BOLD, OnEditBold)
 	ON_COMMAND(ID_EDIT_BULLET, OnEditBulletList)
@@ -177,12 +187,6 @@ BEGIN_MESSAGE_MAP(CRulerRichEditCtrl, CWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_TEXTCOLOR, OnUpdateEditTextColor)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDERLINE, OnUpdateEditUnderline)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_WORDWRAP, OnUpdateEditWordwrap)
-
-	ON_WM_CREATE()
-	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
-	ON_NOTIFY(NM_KILLFOCUS, TOOLBAR_CONTROL, OnKillFocusToolbar)
-	ON_EN_HSCROLL(RTF_CONTROL, OnEnHScroll)
-	ON_NOTIFY(EN_SELCHANGE, RTF_CONTROL, OnEnSelChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -289,7 +293,6 @@ void CRulerRichEditCtrl::SetRTF(const CString& rtf)
 		m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
 		m_rtf.SetSel(-1, 0);
 	}
-	UpdateEditRect();
 
 	m_rtf.ParseAndFormatText(TRUE);
 }
@@ -319,22 +322,9 @@ void CRulerRichEditCtrl::SetSelectedWebLink(const CString& sWebLink)
 	}
 }
 
-void CRulerRichEditCtrl::UpdateEditRect()
-{
-	// Set up edit rect margins
-	CRect rc;
-	m_rtf.GetClientRect(rc);
-
-	rc.top = SCMARGIN;
-	rc.left = SCMARGIN * 2;
-	rc.right -= SCMARGIN * 2;
-
-	m_rtf.SetRect(rc);
-}
-
 void CRulerRichEditCtrl::CreateMargins()
 {
-	UpdateEditRect();
+	m_rtf.SetMargins(CRect(SCMARGIN * 2, SCMARGIN, SCMARGIN * 2, 0));
 
 	// Get the diff between the window- and client 
 	// rect of the RTF-control. This gives the actual 
@@ -457,10 +447,7 @@ void CRulerRichEditCtrl::OnSize(UINT nType, int cx, int cy)
 	CWnd::OnSize(nType, cx, cy);
 	
 	if (m_rtf.m_hWnd)
-	{
-		UpdateEditRect();
 		LayoutControls(cx, cy);
-	}
 }
 
 void CRulerRichEditCtrl::OnSetFocus(CWnd* /*pOldWnd*/) 
@@ -1082,7 +1069,6 @@ void CRulerRichEditCtrl::DoFont()
 		height = cf.yHeight;
 		height = -(int) ((double) height * twip +.5);
 		lf.lfHeight = height;
-
 	}
 
 	// Effects
@@ -1105,20 +1091,19 @@ void CRulerRichEditCtrl::DoFont()
 
 	// Show font dialog
 	CFontDialog	dlg(&lf);
-
-	// color
-	dlg.m_cf.rgbColors = cf.crTextColor;
+	PrepareDlgTextColor(dlg.m_cf.rgbColors, cf);
 
 	if (dlg.DoModal() == IDOK)
 	{
+		cf.dwMask = cf.dwEffects = 0;
+		PrepareTextCharFormat(cf, dlg.GetColor());
+
 		// Apply new font
 		cf.yHeight = dlg.GetSize() * 2;
 		lstrcpy(cf.szFaceName, dlg.GetFaceName());
 
-		cf.dwMask = CFM_FACE | CFM_SIZE | CFM_COLOR | CFM_BOLD | 
-					CFM_ITALIC | CFM_UNDERLINE | CFM_STRIKEOUT;
-		cf.dwEffects = 0;
-		cf.crTextColor = dlg.GetColor();
+		cf.dwMask |= CFM_FACE | CFM_SIZE | CFM_BOLD | 
+					 CFM_ITALIC | CFM_UNDERLINE | CFM_STRIKEOUT;
 
 		if (dlg.IsBold())
 			cf.dwEffects |= CFE_BOLD;
@@ -1133,18 +1118,14 @@ void CRulerRichEditCtrl::DoFont()
 			cf.dwEffects |= CFE_STRIKEOUT;
 
 		m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
-/*
-		m_toolbar.SetFontColor(cf.crTextColor, TRUE);
-*/
 	}
 
 	m_rtf.SetFocus();
-
 }
 
 void CRulerRichEditCtrl::SetCurrentFontName(const CString& font)
 {
-	CharFormat	cf(CFM_FACE);
+	CharFormat cf(CFM_FACE);
 	lstrcpy(cf.szFaceName, font);
 
 	m_rtf.SendMessage(EM_SETCHARFORMAT, SCF_SELECTION, (LPARAM) &cf);
@@ -1152,7 +1133,7 @@ void CRulerRichEditCtrl::SetCurrentFontName(const CString& font)
 
 void CRulerRichEditCtrl::SetCurrentFontSize(int size)
 {
-	CharFormat	cf(CFM_SIZE);
+	CharFormat cf(CFM_SIZE);
 	cf.yHeight = size * 20;
 
 	m_rtf.SetSelectionCharFormat(cf);
@@ -1160,26 +1141,65 @@ void CRulerRichEditCtrl::SetCurrentFontSize(int size)
 
 void CRulerRichEditCtrl::SetCurrentFontColor(COLORREF color, BOOL bForeground)
 {
-	CharFormat	cf(bForeground ? CFM_COLOR : CFM_BACKCOLOR);
+	CharFormat cf;
 
 	if (bForeground)
-	{
-		if (color == CLR_DEFAULT)
-			cf.dwEffects = CFE_AUTOCOLOR;
-		else
-			cf.crTextColor = color;
-	}
-	else // background
-	{
-		if (color == CLR_DEFAULT)
-			cf.dwEffects = CFE_AUTOBACKCOLOR;
-		else
-			cf.crBackColor = color;
-	}
+		PrepareTextCharFormat(cf, color);
+	else
+		PrepareBkgndCharFormat(cf, color);
 
 	m_rtf.SetSelectionCharFormat(cf);
 }
 
+void CRulerRichEditCtrl::PrepareDlgTextColor(COLORREF& crText, const CharFormat& cf)
+{
+	if ((cf.dwMask & CFM_COLOR) && !(cf.dwEffects & CFE_AUTOCOLOR))
+		crText = cf.crTextColor;
+	else
+		crText = (CDarkMode::IsEnabled() ? colorWhite : colorBlack);
+}
+
+void CRulerRichEditCtrl::PrepareTextCharFormat(CharFormat& cf, COLORREF color)
+{
+	// Intercept setting black/white text colours in Non/Dark Mode,
+	// and instead replace such colours with CFE_AUTOBACKCOLOR
+	BOOL bDarkMode = CDarkMode::IsEnabled();
+	BOOL bIsWhite = (color == colorWhite), bIsBlack = (color == colorBlack);
+
+	if ((color == CLR_DEFAULT) || (bDarkMode && bIsWhite) || (!bDarkMode && bIsBlack))
+	{
+		cf.dwEffects = CFE_AUTOCOLOR;
+	}
+	else
+	{
+		cf.dwEffects &= ~CFE_AUTOCOLOR;
+		cf.crTextColor = color;
+	}
+
+	cf.dwMask |= CFM_COLOR;
+}
+
+void CRulerRichEditCtrl::PrepareBkgndCharFormat(CharFormat& cf, COLORREF color)
+{
+	// Intercept setting white/black background colours in Non/Dark Mode,
+	// and instead replace such colours with CFE_AUTOBACKCOLOR
+	BOOL bDarkMode = CDarkMode::IsEnabled();
+	BOOL bIsWhite = (color == colorWhite), bIsBlack = (color == colorBlack);
+
+	if ((color == CLR_DEFAULT) || (bDarkMode && bIsBlack) || (!bDarkMode && bIsWhite))
+	{
+		cf.dwEffects = CFE_AUTOBACKCOLOR;
+	}	
+	else
+	{
+		cf.dwEffects &= ~CFE_AUTOBACKCOLOR;
+		cf.crBackColor = color;
+	}
+
+	cf.dwMask |= CFM_BACKCOLOR;
+}
+
+// This functionality seems to be obsolete
 void CRulerRichEditCtrl::DoColor()
 {
 	// Get the current color
@@ -1197,9 +1217,7 @@ void CRulerRichEditCtrl::DoColor()
 	if (dlg.DoModal() == IDOK)
 	{
 		// Apply new color
-		cf.dwMask = CFM_COLOR;
-		cf.dwEffects = 0;
-		cf.crTextColor = dlg.GetColor();
+		PrepareTextCharFormat(cf, dlg.GetColor());
 
 		m_rtf.SetSelectionCharFormat(cf);
 	}

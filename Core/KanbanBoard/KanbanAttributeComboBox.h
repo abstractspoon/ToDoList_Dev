@@ -17,45 +17,35 @@
 
 class CKanbanAttributeComboBox : public CComboBox
 {
-// Construction
 public:
-	CKanbanAttributeComboBox();
+	CKanbanAttributeComboBox(BOOL bShowNone);
 	virtual ~CKanbanAttributeComboBox();
 
 	TDC_ATTRIBUTE GetSelectedAttribute() const;
 	TDC_ATTRIBUTE GetSelectedAttribute(CString& sCustomAttribID) const;
 	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttribID, const CString& sCustomAttribID);
 
-	void SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs);
-	void ShowFixedColumns(BOOL bShow = TRUE);
+	void SetCustomAttributeDefs(const CKanbanCustomAttributeDefinitionArray& aAttribDefs);
+	void ShowFixedColumns(TDC_ATTRIBUTE nAttribID);
 
 	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value, CString& sCustomAttribID);
 
-// Attributes
 protected:
-	BOOL m_bShowCustomAttrib;
-	BOOL m_bShowFixedColumns;
+	BOOL m_bShowNone;
+	TDC_ATTRIBUTE m_nFixedColumnsAttribID;
 
 	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CKanbanAttributeComboBox)
 protected:
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CKanbanAttributeComboBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	virtual void BuildCombo();
-	virtual TDC_ATTRIBUTE GetFallbackAttribute() const { return TDCA_STATUS; }
+
+	TDC_ATTRIBUTE GetFallbackAttribute() const { return (m_bShowNone ? TDCA_NONE : TDCA_STATUS); }
 };
 
 /////////////////////////////////////////////////////////////////////////////

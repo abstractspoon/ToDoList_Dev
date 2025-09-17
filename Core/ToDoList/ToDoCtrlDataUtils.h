@@ -10,7 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "tdcreminder.h"
-#include "tdcstruct.h"
+#include "ToDoCtrlData.h"
 
 #include "..\Interfaces\ContentMgr.h"
 
@@ -18,7 +18,6 @@
 
 //////////////////////////////////////////////////////////////////////
 
-class CToDoCtrlData;
 class CBinaryData;
 class CToDoCtrl;
 class CTaskFile;
@@ -32,7 +31,23 @@ typedef void* HTASKITEM;
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskCalculator
+class CTDCDataHelperBase
+{
+protected:
+	CTDCDataHelperBase(const CToDoCtrlData& data) : m_data(data) {}
+
+protected:
+	const CToDoCtrlData& m_data;
+
+protected:
+	const CTDCCustomAttribDefinitionArray& CustomAttribDefs() const { return m_data.m_aCustomAttribDefs; }
+
+	BOOL HasStyle(TDC_STYLE nStyle) const { return m_data.HasStyle(nStyle); }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDCTaskCalculator : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskCalculator(const CToDoCtrlData& data);
@@ -40,7 +55,7 @@ public:
 	BOOL HasOverdueTasks() const;
 	BOOL HasDueTodayTasks() const;
 	BOOL HasLockedTasks() const;
-	double GetEarliestDueDate() const;
+	COleDateTime GetEarliestDueDate() const;
 
 	BOOL IsTaskRecentlyModified(DWORD dwTaskID) const;
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
@@ -50,10 +65,11 @@ public:
 	BOOL IsTaskStarted(DWORD dwTaskID, BOOL bToday = FALSE) const;
 	BOOL IsTaskDueToday(DWORD dwTaskID) const;
 	BOOL IsTaskOverDue(DWORD dwTaskID) const;
+	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
 
-	double GetTaskDueDate(DWORD dwTaskID) const;
-	double GetTaskStartDate(DWORD dwTaskID) const;
-	double GetTaskLastModifiedDate(DWORD dwTaskID) const;
+	COleDateTime GetTaskDueDate(DWORD dwTaskID) const;
+	COleDateTime GetTaskStartDate(DWORD dwTaskID) const;
+	COleDateTime GetTaskLastModifiedDate(DWORD dwTaskID) const;
 	double GetTaskCost(DWORD dwTaskID) const;
 	double GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
 	double GetTaskTimeSpent(DWORD dwTaskID, TDC_UNITS nUnits) const;
@@ -75,9 +91,9 @@ public:
 	BOOL IsTaskDueToday(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	BOOL IsTaskOverDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
-	double GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	COleDateTime GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	COleDateTime GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	COleDateTime GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
 	double GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
@@ -98,17 +114,17 @@ public:
 	BOOL HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs) const;
 
 protected:
-	const CToDoCtrlData& m_data;
-
-protected:
 	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
 	BOOL IsTaskDue(DWORD dwTaskID, BOOL bToday) const;
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const;
 	BOOL GetSubtask(const TODOSTRUCTURE* pTDSParent, int nSubtask, const TODOITEM*& pTDIChild, const TODOSTRUCTURE*& pTDSChild) const;
 
-	BOOL DoCustomAttributeCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits, BOOL bAggregated) const;
+	BOOL DoCustomAttributeCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dResult, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetFirstCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
+	BOOL CustomAttributeOperandDerivesFromDueDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
+	
+	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
 
@@ -125,14 +141,15 @@ protected:
 	double GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, CDWordSet& mapProcessedIDs) const;
 	double GetAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 	double GetWeightedAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
-	double GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest, CDWordSet& mapProcessedIDs) const;
+	COleDateTime GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest, CDWordSet& mapProcessedIDs) const;
 	int GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue, CDWordSet& mapProcessedIDs) const;
 	int GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 	int GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone, CDWordSet& mapProcessedIDs) const;
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CDWordSet& mapProcessedIDs) const;
 
-	static double GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
-	static double GetEarliestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
+	static COleDateTime GetLatestDate(COleDateTime dtDate1, COleDateTime dtDate2, BOOL bNoTimeIsEndOfDay);
+	static COleDateTime GetEarliestDate(COleDateTime dtDate1, COleDateTime dtDate2, BOOL bNoTimeIsEndOfDay);
+	static BOOL CheckSetAlreadyProcessed(DWORD dwTaskID, CDWordSet& mapProcessedIDs);
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -147,14 +164,11 @@ enum // GetTaskTitlePaths
 
 // -------------------------------------------------------------------
 
-class CTDCTaskFormatter
+class CTDCTaskFormatter : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskFormatter(const CToDoCtrlData& data, const CContentMgr& mgrContent);
 	
-	CString GetCommentSize(float fSize) const;
-	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
-
 	CString GetTaskTitlePath(DWORD dwTaskID, DWORD dwFlags) const;
 	CString GetTaskPath(DWORD dwTaskID, int nMaxLen = -1) const;
 	CString GetTaskSubtaskCompletion(DWORD dwTaskID) const;
@@ -163,7 +177,7 @@ public:
 	CString GetTaskTimeSpent(DWORD dwTaskID) const;
 	CString GetTaskTimeRemaining(DWORD dwTaskID) const;
 	CString GetTaskPercentDone(DWORD dwTaskID) const;
-	CString GetTaskCommentsSize(DWORD dwTaskID) const;
+	CString GetTaskCommentsSizeInKB(DWORD dwTaskID) const;
 	CString GetTaskCommentsFormat(DWORD dwTaskID, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(DWORD dwTaskID) const;
 	CString GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const;
@@ -193,7 +207,7 @@ public:
 	CString GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskTimeRemaining(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskCommentsSize(const TODOITEM* pTDI) const;
+	CString GetTaskCommentsSizeInKB(const TODOITEM* pTDI) const;
 	CString GetTaskCommentsFormat(const TODOITEM* pTDI, BOOL bEmptyIsBlank = TRUE) const;
 	CString GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const;
@@ -231,8 +245,12 @@ public:
 	CString GetDependencies(const CTDCDependencyArray& aDepends, TCHAR cSep = 0) const;
 	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
 	
+	CString GetCommentSizeInKB(float fSize) const;
+	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
+
+	BOOL WantFormatValue(double dValue, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	
 protected:
-	const CToDoCtrlData& m_data;
 	const CContentMgr& m_mgrContent;
 
 	CTDCTaskCalculator m_calculator;
@@ -240,7 +258,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskMatcher
+class CTDCTaskMatcher : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders, const CContentMgr& mgrContent);
@@ -261,7 +279,6 @@ public:
 	static int Convert(const CResultArray& aResults, CDWordArray& aTaskIDs);
 
 protected:
-	const CToDoCtrlData& m_data;
 	const CTDCReminderHelper& m_reminders;
 	const CContentMgr& m_mgrContent;
 
@@ -294,7 +311,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskComparer
+class CTDCTaskComparer : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskComparer(const CToDoCtrlData& data, const CContentMgr& mgrContent);
@@ -303,7 +320,6 @@ public:
 	int CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bAscending) const;
 
 protected:
-	const CToDoCtrlData& m_data;
 	CTDCTaskCalculator m_calculator;
 	CTDCTaskFormatter m_formatter;
 
@@ -324,7 +340,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskExporter
+class CTDCTaskExporter : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskExporter(const CToDoCtrlData& data,
@@ -344,7 +360,6 @@ public:
 	BOOL ExportMatchingTaskAttributes(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 
 protected:
-	const CToDoCtrlData& m_data;
 	const CTDLTaskCtrlBase& m_colors;
 	const CContentMgr& m_mgrContent;
 
@@ -364,7 +379,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCMultiTasker
+class CTDCMultiTasker : protected CTDCDataHelperBase
 {
 public:
 	CTDCMultiTasker(const CToDoCtrlData& data, const CContentMgr& mgrContent);
@@ -430,17 +445,18 @@ public:
 	BOOL AnyTaskIsLocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL AnyTaskIsUnlocked(const CDWordArray& aTaskIDs, BOOL bTreatRefsAsUnlocked = FALSE) const;
 	BOOL AnyTaskIsFlagged(const CDWordArray& aTaskIDs) const;
+	BOOL AnyTaskIsDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone) const;
 
-	BOOL AllTasksAreReferences(const CDWordArray& aTaskIDs) const;
-	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs) const;
-	BOOL AllTasksHaveDate(const CDWordArray& aTaskIDs, TDC_DATE nDate) const;
+	BOOL AllTasksAreDone(const CDWordArray& aTaskIDs, BOOL bIncGoodAsDone) const;
 	BOOL AllTasksAreParents(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveSameParent(const CDWordArray& aTaskIDs) const;
 	BOOL AllTasksHaveDependencies(const CDWordArray& aTaskIDs) const;
 
-protected:
-	const CToDoCtrlData& m_data;
+	// Returns TRUE, FALSE, and -1 if attribute not handled
+	int CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
+	int CanEditAnyTask(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttribID) const;
 
+protected:
 	CTDCTaskFormatter m_formatter;
 	CTDCTaskCalculator m_calculator;
 
@@ -466,9 +482,9 @@ public:
 	static BOOL IsSupported(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 };
 
-//////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------
 
-class CTDCTaskColumnSizer
+class CTDCTaskColumnSizer : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskColumnSizer(const CToDoCtrlData& data,
@@ -492,7 +508,6 @@ public:
 	int GetLargestCustomAttributeArraySize(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, const CDWordArray& aTaskIDs) const;
 
 protected:
-	const CToDoCtrlData& m_data;
 	const CContentMgr& m_mgrContent;
 
 	CTDCTaskFormatter m_formatter;
@@ -500,11 +515,6 @@ protected:
 
 protected:
 	// general
-	void GetLongestValues(const TODOITEM* pTDI,
-						  const TODOSTRUCTURE* pTDS,
-						  const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
-						  CTDCLongestItemMap& mapLongest) const;
-
 	CString GetLongestValue(TDC_COLUMN nColID, const CString& sLongestPossible, const CDWordArray& aTaskIDs) const;
 
 	// specific
@@ -518,12 +528,19 @@ protected:
 	static CString GetLongerString(const CString& str1, const CString& str2);
 	static BOOL EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible);
 	static CString GetLongestRecurrenceOption();
+
+	static void GetLongestValues(const TODOITEM* pTDI,
+								 const TODOSTRUCTURE* pTDS,
+								 const CTDCCustomAttribDefinitionArray& aCustAttribDefs,
+								 const CTDCTaskFormatter& formatter,
+								 CTDCLongestItemMap& mapLongest);
+
 };
 
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTaskAttributeCopier
+class CTDCTaskAttributeCopier : protected CTDCDataHelperBase
 {
 public:
 	CTDCTaskAttributeCopier(const CToDoCtrlData& data,
@@ -539,8 +556,6 @@ public:
 	TDC_ATTRIBUTEGROUP GetAttributeGroup(TDC_ATTRIBUTE nAttribID, BOOL bResolveCustomCols = TRUE) const;
 
 protected:
-	const CToDoCtrlData& m_data;
-
 	CTDCTaskFormatter m_formatter;
 
 protected:

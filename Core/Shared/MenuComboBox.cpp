@@ -33,9 +33,6 @@ CMenuComboBox::~CMenuComboBox()
 
 
 BEGIN_MESSAGE_MAP(CMenuComboBox, CTabbedComboBox)
-	//{{AFX_MSG_MAP(CMenuComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -56,11 +53,8 @@ BOOL CMenuComboBox::Initialise(UINT nMenuID, UINT nSeparatorResID)
 
 BOOL CMenuComboBox::Initialise(const CMenu& menu, UINT nSeparatorResID)
 {
-	if (!GetSafeHwnd() || (GetStyle() & CBS_SORT))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	ASSERT(GetSafeHwnd());
+	ASSERT(!HasStyle(CBS_SORT));
 
 	ResetContent();
 
@@ -97,7 +91,7 @@ void CMenuComboBox::AddMenuItem(HMENU hMenu, int nPos, const CString& sPath, int
 
 	if (CEnMenu::IsPopop(hMenu, nPos))
 	{
-		CDialogHelper::AddString(*this, sItem, POPUP_ITEMDATA);
+		CDialogHelper::AddStringT(*this, sItem, POPUP_ITEMDATA);
 
 		// children
 		HMENU hSubMenu = ::GetSubMenu(hMenu, nPos);
@@ -108,7 +102,7 @@ void CMenuComboBox::AddMenuItem(HMENU hMenu, int nPos, const CString& sPath, int
 	}
 	else
 	{
-		int nItem = CDialogHelper::AddString(*this, sItem, ::GetMenuItemID(hMenu, nPos));
+		int nItem = CDialogHelper::AddStringT(*this, sItem, ::GetMenuItemID(hMenu, nPos));
 
 		MCB_ITEMDATA* pItemData = (MCB_ITEMDATA*)GetAddExtItemData(nItem);
 
@@ -119,7 +113,7 @@ void CMenuComboBox::AddMenuItem(HMENU hMenu, int nPos, const CString& sPath, int
 
 CString CMenuComboBox::GetMenuItemText(UINT nMenuID, BOOL bFullPath) const
 {
-	int nItem = CDialogHelper::FindItemByData(*this, nMenuID);
+	int nItem = CDialogHelper::FindItemByDataT(*this, nMenuID);
 
 	return GetItemText(nItem, bFullPath);
 }

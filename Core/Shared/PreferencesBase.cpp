@@ -185,6 +185,40 @@ BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_brBack != NULL)
 	{
+		// Exclude all children except for static-like text
+		CWnd* pChild = GetWindow(GW_CHILD);
+
+		while (pChild)
+		{
+			CString sClass = CWinClasses::GetClass(*pChild);
+			BOOL bExclude = TRUE;
+
+			if (CWinClasses::IsClass(sClass, WC_STATIC))
+			{
+				bExclude = FALSE;
+			}
+			else if (CWinClasses::IsClass(sClass, WC_BUTTON))
+			{
+				switch (CWinClasses::GetStyleType(*pChild, BS_TYPEMASK))
+				{
+				case BS_CHECKBOX:
+				case BS_AUTOCHECKBOX:
+				case BS_RADIOBUTTON:
+				case BS_3STATE:
+				case BS_AUTO3STATE:
+				case BS_GROUPBOX:
+				case BS_AUTORADIOBUTTON:
+					bExclude = FALSE;
+					break;
+				}
+			}
+
+			if (bExclude)
+				ExcludeChild(pChild, pDC);
+
+			pChild = pChild->GetNextWindow();
+		}
+
 		CRect rClient;
 		pDC->GetClipBox(rClient);
 		pDC->FillSolidRect(rClient, m_crBack);
@@ -200,7 +234,7 @@ HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if ((nCtlColor == CTLCOLOR_STATIC) && (m_brBack != NULL))
+	if ((nCtlColor == CTLCOLOR_STATIC) && (m_brBack != NULL) && !CWinClasses::IsEditControl(*pWnd))
 	{
 		hbr = m_brBack;
 		pDC->SetBkMode(TRANSPARENT);

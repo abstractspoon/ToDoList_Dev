@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
 
+using UIComponents;
 using MySql.Data.MySqlClient;
+
 using Abstractspoon.Tdl.PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////
@@ -41,7 +43,7 @@ namespace MySqlStorage
 
 	////////////////////////////////////////////////////////////////////////
 
-	internal class ColumnComboBox : ComboBox
+	internal class ColumnComboBox : OwnerdrawComboBoxBase
 	{
 		int m_MaxColNameWidth = -1;
 
@@ -49,9 +51,8 @@ namespace MySqlStorage
 
 		// --------------------------------------------------
 
-		public ColumnComboBox()
+		public ColumnComboBox() : base(true) // fixed
 		{
-			DrawMode = DrawMode.OwnerDrawFixed;
 		}
 
 		public bool SelectOneOnly()
@@ -115,13 +116,13 @@ namespace MySqlStorage
 
 		protected override void OnDrawItem(DrawItemEventArgs e)
 		{
-			e.DrawBackground();
+			base.OnDrawItem(e);
 
 			if (e.Index >= 0)
 			{
 				var column = (Items[e.Index] as ColumnInfo);
 
-				using (var brush = new SolidBrush(e.ForeColor))
+				using (var brush = TextBrush(e))
 				{
 					var format = new StringFormat()
 					{
@@ -137,8 +138,6 @@ namespace MySqlStorage
 					e.Graphics.DrawString(m_Separator + column.Type, e.Font, brush, typeRect, format);
 				}
 			}
-
-			e.DrawFocusRectangle();
 		}
 
 	}
@@ -206,13 +205,13 @@ namespace MySqlStorage
 		private void Populate(string filter = "")
 		{
 			// Cache selected tasklist
-			var selId = SelectedTasklist?.Key;
+			var selTasklist = SelectedTasklist;
 
 			Items.Clear();
 
 			foreach (var tasklist in m_Tasklists)
 			{
-				if (tasklist.Name.IndexOf(filter, StringComparison.InvariantCultureIgnoreCase) != -1)
+				if (tasklist.Name.IndexOf(filter, StringComparison.InvariantCultureIgnoreCase) == 0)
 				{
 					var item = new ListViewItem(tasklist.Name);
 
@@ -222,6 +221,15 @@ namespace MySqlStorage
 
 					Items.Add(item);
 				}
+			}
+
+			if (Items.Count == 1)
+			{
+				SelectedIndices.Add(0);
+			}
+			else if (selTasklist != null)
+			{
+				SelectedTasklist = selTasklist;
 			}
 		}
 

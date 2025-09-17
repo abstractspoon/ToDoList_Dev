@@ -16,8 +16,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-COLORREF CStaticLink::g_colorUnvisited = RGB(0,0,255);		 // blue
-COLORREF CStaticLink::g_colorVisited   = RGB(128,0,128);		 // purple
+COLORREF CStaticLink::g_colorUnvisited = CLR_NONE; // equivalent to COLOR_HOTLIGHT
+COLORREF CStaticLink::g_colorVisited   = RGB(128,0,128);  // purple
 HCURSOR	CStaticLink::g_hCursorLink = NULL;
 
 IMPLEMENT_DYNAMIC(CStaticLink, CStatic)
@@ -30,6 +30,7 @@ BEGIN_MESSAGE_MAP(CStaticLink, CStatic)
 	ON_WM_CHAR()
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
+	ON_MESSAGE(WM_SETTEXT, OnSetText)
 END_MESSAGE_MAP()
 
 ///////////////////
@@ -38,7 +39,7 @@ END_MESSAGE_MAP()
 CStaticLink::CStaticLink(LPCTSTR lpText, BOOL bDeleteOnDestroy)
 {
 	m_link = lpText;								// link text (NULL ==> window text)
-	m_color = g_colorUnvisited;				// not visited yet
+	m_color = (g_colorUnvisited == CLR_NONE ? GetSysColor(COLOR_HOTLIGHT) : g_colorUnvisited);
 	m_bDeleteOnDestroy = bDeleteOnDestroy;	// delete object with window?
 }
 
@@ -100,6 +101,18 @@ void CStaticLink::OnLButtonDown(UINT /*nFlags*/, CPoint /*point*/)
 	Navigate();
 }
 
+LRESULT CStaticLink::OnSetText(WPARAM wp, LPARAM lp)
+{
+	// Invalidate our background rect
+	CRect rLink;
+	GetWindowRect(rLink);
+
+	GetParent()->ScreenToClient(rLink);
+	GetParent()->InvalidateRect(rLink);
+
+	return Default();
+}
+
 //////////////////
 // Handle key
 //
@@ -115,11 +128,22 @@ void CStaticLink::OnChar(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
 //
 BOOL CStaticLink::Navigate()
 {
+	// See if our parent wants to handle it
+	if (m_link.IsEmpty() && (GetStyle() & SS_NOTIFY))
+	{
+		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), STN_CLICKED), (LPARAM)GetSafeHwnd());
+		return FALSE;
+	}
+
 	// first try whatever the hyperlink is
-	if (m_link.IsEmpty() || !m_link.Navigate()) {
-		if (!m_link.LoadString(GetDlgCtrlID()) || !m_link.Navigate()) {
+	if (m_link.IsEmpty() || !m_link.Navigate()) 
+	{
+		if (!m_link.LoadString(GetDlgCtrlID()) || !m_link.Navigate()) 
+		{
 			GetWindowText(m_link);
-			if (!m_link.Navigate()) {
+
+			if (!m_link.Navigate()) 
+			{
 				MessageBeep(0); // unable to navigate!
 				TRACE(_T("*** CStaticLink: can't navigate %s ***\n"), (LPCTSTR)m_link);
 				return FALSE;

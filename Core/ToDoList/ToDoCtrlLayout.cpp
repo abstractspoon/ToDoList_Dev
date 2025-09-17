@@ -88,8 +88,8 @@ BOOL CToDoCtrlLayout::ModifyLayout(TDC_UILOCATION nAttribsPos,
 
 	if (!bRebuild && (m_nAttribsPos == m_nCommentsPos))
 	{
-		bRebuild = (Misc::StateChanged(m_bAllowStacking, bAllowStacking) ||
-					 Misc::StateChanged(m_bStackCommentsAbove, bStackCommentAbove));
+		bRebuild = (Misc::StatesDiffer(m_bAllowStacking, bAllowStacking) ||
+					 Misc::StatesDiffer(m_bStackCommentsAbove, bStackCommentAbove));
 	}
 
 	m_nAttribsPos = nAttribsPos;
@@ -161,19 +161,21 @@ BOOL CToDoCtrlLayout::ResizeIfRoot(CSimpleSplitter& splitter, const CRect& rect)
 	return TRUE;
 }
 
-BOOL CToDoCtrlLayout::IsCommentsVisible() const
+BOOL CToDoCtrlLayout::IsVisible(TDC_SETFOCUSTO nLocation) const
 {
-	switch (m_nMaxState)
+	switch (nLocation)
 	{
-	case TDCMS_MAXTASKLIST:
-		return m_bShowCommentsAlways;
+	case TDCSF_COMMENTS:	return ((m_nMaxState == TDCMS_MAXTASKLIST) ? m_bShowCommentsAlways : TRUE);
+	case TDCSF_TASKVIEW:	return (m_nMaxState != TDCMS_MAXCOMMENTS);
+	case TDCSF_PROJECTNAME:	return (m_nMaxState == TDCMS_NORMAL);
+	case TDCSF_ATTRIBUTES:	return (m_nMaxState == TDCMS_NORMAL);
+		break;
 
-	case TDCMS_NORMAL:
-	case TDCMS_MAXCOMMENTS:
-		return TRUE;
+	default:
+		ASSERT(0);
+		break;
 	}
 
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -181,7 +183,7 @@ BOOL CToDoCtrlLayout::SetMaximised(TDC_MAXSTATE nState, BOOL bShowCommentsAlways
 {
 	if (m_nMaxState == nState)
 	{
-		if (!Misc::StateChanged(m_bShowCommentsAlways, bShowCommentsAlways))
+		if (!Misc::StatesDiffer(m_bShowCommentsAlways, bShowCommentsAlways))
 			return FALSE;
 
 		switch (nState)
@@ -304,24 +306,24 @@ void CToDoCtrlLayout::RebuildLayout(BOOL bRecalcLayout)
 
 						case TDCUIL_BOTTOM: // Attributes
 							{
-								// .----. .----.
-								// | C  | | T  |
-								// |    | |    |
-								// ·----· ·----·
-								// .-----------.
-								// |     A     |
-								// |           |
-								// ·-----------·
-								m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
-								m_splitterHorz.Create(SSP_HORZ, &m_splitterVert, IDC_HORZSPLITTER);
-
-								m_splitterVert.SetPaneCount(2);
-								m_splitterVert.SetPane(0, &m_splitterHorz);
-								m_splitterVert.SetPane(1, m_pAttributes);
+								// .----..---------.
+								// | C  || T       |
+								// |    ||         |
+								// |    |·---------·
+								// |    |.---------.
+								// |    || A       |
+								// |    ||         |
+								// ·----··---------·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+								m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
 
 								m_splitterHorz.SetPaneCount(2);
 								m_splitterHorz.SetPane(0, m_pComments);
-								m_splitterHorz.SetPane(1, NULL); // Tasks
+								m_splitterHorz.SetPane(1, &m_splitterVert);
+
+								m_splitterVert.SetPaneCount(2);
+								m_splitterVert.SetPane(0, NULL); // Tasks
+								m_splitterVert.SetPane(1, m_pAttributes);
 							}
 							break;
 						}
@@ -403,24 +405,24 @@ void CToDoCtrlLayout::RebuildLayout(BOOL bRecalcLayout)
 
 						case TDCUIL_BOTTOM: // Attributes
 							{
-								// .-----. .-----.
-								// |  T  | |  C  |
-								// |     | |     |
-								// ·-----· ·-----·
-								// .-------------.
-								// |      A      |
-								// |             |
-								// ·-------------·
-								m_splitterVert.Create(SSP_VERT, m_pParent, IDC_VERTSPLITTER);
-								m_splitterHorz.Create(SSP_HORZ, &m_splitterVert, IDC_HORZSPLITTER);
-
-								m_splitterVert.SetPaneCount(2);
-								m_splitterVert.SetPane(0, &m_splitterHorz);
-								m_splitterVert.SetPane(1, m_pAttributes);
+								// .---------..----.
+								// | T       || C  |
+								// |         ||    |
+								// ·---------·|    |
+								// .---------.|    |
+								// | A       ||    |
+								// |         ||    |
+								// ·---------··----·
+								m_splitterHorz.Create(SSP_HORZ, m_pParent, IDC_HORZSPLITTER);
+								m_splitterVert.Create(SSP_VERT, &m_splitterHorz, IDC_VERTSPLITTER);
 
 								m_splitterHorz.SetPaneCount(2);
-								m_splitterHorz.SetPane(0, NULL); // Tasks
+								m_splitterHorz.SetPane(0, &m_splitterVert);
 								m_splitterHorz.SetPane(1, m_pComments);
+
+								m_splitterVert.SetPaneCount(2);
+								m_splitterVert.SetPane(0, NULL); // Tasks
+								m_splitterVert.SetPane(1, m_pAttributes);
 							}
 							break;
 						}

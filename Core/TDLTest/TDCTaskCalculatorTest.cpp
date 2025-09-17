@@ -32,7 +32,7 @@ const LPCTSTR ID_INTEGER = _T("Integer");
 
 CTDCTaskCalculatorTest::CTDCTaskCalculatorTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(utils)
+	CTDLTestBase(_T("CTDCTaskCalculatorTest"), utils)
 {
 	// Simple custom attributes
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
@@ -100,11 +100,11 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data, BOO
 	{
 		InitialiseStyles(bIncludeRefs);
 
-		ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
-		ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-		ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-		ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
-		ExpectEQ(calc.GetTaskStartDate(5), 45004.0);
+		ExpectEQ(calc.GetTaskStartDate(1), COleDateTime(45000.0));
+		ExpectEQ(calc.GetTaskStartDate(2), COleDateTime(45001.0));
+		ExpectEQ(calc.GetTaskStartDate(3), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskStartDate(4), CDateHelper::NullDate()); // completed task
+		ExpectEQ(calc.GetTaskStartDate(5), COleDateTime(45004.0));
 	}
 
 	// Earliest (unaffected by reference task because its date is later)
@@ -112,11 +112,11 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data, BOO
 		InitialiseStyles(bIncludeRefs);
 		m_aStyles[TDCS_USEEARLIESTSTARTDATE] = TRUE;
 
-		ExpectEQ(calc.GetTaskStartDate(1), 45000.0);
-		ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-		ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-		ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
-		ExpectEQ(calc.GetTaskStartDate(5), 45004.0);
+		ExpectEQ(calc.GetTaskStartDate(1), COleDateTime(45000.0));
+		ExpectEQ(calc.GetTaskStartDate(2), COleDateTime(45001.0));
+		ExpectEQ(calc.GetTaskStartDate(3), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskStartDate(4), CDateHelper::NullDate()); // completed task
+		ExpectEQ(calc.GetTaskStartDate(5), COleDateTime(45004.0));
 	}
 
 	// Latest
@@ -126,35 +126,35 @@ void CTDCTaskCalculatorTest::TestGetTaskStartDate(const CToDoCtrlData& data, BOO
 
 		if (bIncludeRefs)
 		{
-			ExpectEQ(calc.GetTaskStartDate(1), 45004.0);
-			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-			ExpectEQ(calc.GetTaskStartDate(3), 45004.0);
-			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
+			ExpectEQ(calc.GetTaskStartDate(1), COleDateTime(45004.0));
+			ExpectEQ(calc.GetTaskStartDate(2), COleDateTime(45001.0));
+			ExpectEQ(calc.GetTaskStartDate(3), COleDateTime(45004.0));
+			ExpectEQ(calc.GetTaskStartDate(4), CDateHelper::NullDate()); // completed task
 		}
 		else
 		{
-			ExpectEQ(calc.GetTaskStartDate(1), 45002.0);
-			ExpectEQ(calc.GetTaskStartDate(2), 45001.0);
-			ExpectEQ(calc.GetTaskStartDate(3), 45002.0);
-			ExpectEQ(calc.GetTaskStartDate(4), 0.0); // completed task
+			ExpectEQ(calc.GetTaskStartDate(1), COleDateTime(45002.0));
+			ExpectEQ(calc.GetTaskStartDate(2), COleDateTime(45001.0));
+			ExpectEQ(calc.GetTaskStartDate(3), COleDateTime(45002.0));
+			ExpectEQ(calc.GetTaskStartDate(4), CDateHelper::NullDate()); // completed task
 		}
 	}
 }
 
 void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskDueDate"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskDueDate"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned (unaffected by reference tasks)
 	{
 		InitialiseStyles(bIncludeRefs);
 
-		ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
-		ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-		ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-		ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-		ExpectEQ(calc.GetTaskDueDate(5), 45005.0);
+		ExpectEQ(calc.GetTaskDueDate(1), COleDateTime(45001.0));
+		ExpectEQ(calc.GetTaskDueDate(2), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskDueDate(3), COleDateTime(45003.0));
+		ExpectEQ(calc.GetTaskDueDate(4), CDateHelper::NullDate()); // completed task
+		ExpectEQ(calc.GetTaskDueDate(5), COleDateTime(45005.0));
 	}
 
 	// Earliest (unaffected by reference tasks because its date is later)
@@ -162,11 +162,11 @@ void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data, BOOL 
 		InitialiseStyles(bIncludeRefs);
 		m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
 
-		ExpectEQ(calc.GetTaskDueDate(1), 45001.0);
-		ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-		ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-		ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-		ExpectEQ(calc.GetTaskDueDate(5), 45005.0);
+		ExpectEQ(calc.GetTaskDueDate(1), COleDateTime(45001.0));
+		ExpectEQ(calc.GetTaskDueDate(2), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskDueDate(3), COleDateTime(45003.0));
+		ExpectEQ(calc.GetTaskDueDate(4), CDateHelper::NullDate()); // completed task
+		ExpectEQ(calc.GetTaskDueDate(5), COleDateTime(45005.0));
 	}
 
 	// Latest
@@ -176,37 +176,37 @@ void CTDCTaskCalculatorTest::TestGetTaskDueDate(const CToDoCtrlData& data, BOOL 
 
 		if (bIncludeRefs)
 		{
-			ExpectEQ(calc.GetTaskDueDate(1), 45005.0);
-			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-			ExpectEQ(calc.GetTaskDueDate(3), 45005.0);
-			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-			ExpectEQ(calc.GetTaskDueDate(5), 45005.0);
+			ExpectEQ(calc.GetTaskDueDate(1), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskDueDate(2), COleDateTime(45002.0));
+			ExpectEQ(calc.GetTaskDueDate(3), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskDueDate(4), CDateHelper::NullDate()); // completed task
+			ExpectEQ(calc.GetTaskDueDate(5), COleDateTime(45005.0));
 		}
 		else
 		{
-			ExpectEQ(calc.GetTaskDueDate(1), 45003.0);
-			ExpectEQ(calc.GetTaskDueDate(2), 45002.0);
-			ExpectEQ(calc.GetTaskDueDate(3), 45003.0);
-			ExpectEQ(calc.GetTaskDueDate(4), 0.0); // completed task
-			ExpectEQ(calc.GetTaskDueDate(5), 45005.0);
+			ExpectEQ(calc.GetTaskDueDate(1), COleDateTime(45003.0));
+			ExpectEQ(calc.GetTaskDueDate(2), COleDateTime(45002.0));
+			ExpectEQ(calc.GetTaskDueDate(3), COleDateTime(45003.0));
+			ExpectEQ(calc.GetTaskDueDate(4), CDateHelper::NullDate()); // completed task
+			ExpectEQ(calc.GetTaskDueDate(5), COleDateTime(45005.0));
 		}
 	}
 }
 
 void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetLastModifiedDateAndUser"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetLastModifiedDate/By"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned (unaffected by reference tasks)
 	{
 		InitialiseStyles(bIncludeRefs);
 
-		ExpectEQ(calc.GetTaskLastModifiedDate(1), 45002.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(3), 45004.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
-		ExpectEQ(calc.GetTaskLastModifiedDate(5), 45006.0);
+		ExpectEQ(calc.GetTaskLastModifiedDate(1), COleDateTime(45002.0));
+		ExpectEQ(calc.GetTaskLastModifiedDate(2), COleDateTime(45003.0));
+		ExpectEQ(calc.GetTaskLastModifiedDate(3), COleDateTime(45004.0));
+		ExpectEQ(calc.GetTaskLastModifiedDate(4), COleDateTime(45005.0));
+		ExpectEQ(calc.GetTaskLastModifiedDate(5), COleDateTime(45006.0));
 
 		ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User1"));
 		ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
@@ -222,11 +222,11 @@ void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlD
 
 		if (bIncludeRefs)
 		{
-			ExpectEQ(calc.GetTaskLastModifiedDate(1), 45006.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(3), 45006.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(5), 45006.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(1), COleDateTime(45006.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(2), COleDateTime(45003.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(3), COleDateTime(45006.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(4), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(5), COleDateTime(45006.0));
 
 			ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User5"));
 			ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
@@ -236,11 +236,11 @@ void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlD
 		}
 		else
 		{
-			ExpectEQ(calc.GetTaskLastModifiedDate(1), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(2), 45003.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(3), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(4), 45005.0);
-			ExpectEQ(calc.GetTaskLastModifiedDate(5), 45006.0);
+			ExpectEQ(calc.GetTaskLastModifiedDate(1), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(2), COleDateTime(45003.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(3), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(4), COleDateTime(45005.0));
+			ExpectEQ(calc.GetTaskLastModifiedDate(5), COleDateTime(45006.0));
 
 			ExpectEQ(calc.GetTaskLastModifiedBy(1), _T("User4"));
 			ExpectEQ(calc.GetTaskLastModifiedBy(2), _T("User2"));
@@ -253,7 +253,7 @@ void CTDCTaskCalculatorTest::TestGetTaskLastModifiedDateAndUser(const CToDoCtrlD
 
 void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskPriority"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskPriority"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned (unaffected by reference tasks)
@@ -580,7 +580,7 @@ void CTDCTaskCalculatorTest::TestGetTaskPriority(const CToDoCtrlData& data, BOOL
 
 void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskRisk"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskRisk"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
@@ -857,7 +857,7 @@ void CTDCTaskCalculatorTest::TestGetTaskRisk(const CToDoCtrlData& data, BOOL bIn
 
 void CTDCTaskCalculatorTest::TestGetTaskPercentDone(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskPercentDone"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskPercentDone"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
@@ -1008,7 +1008,7 @@ void CTDCTaskCalculatorTest::TestGetTaskCost(const CToDoCtrlData& data, BOOL bIn
 
 void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeEstimate"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskTimeEstimate"));
 	CTDCTaskCalculator calc(data);
 
 	// No parental contributions
@@ -1122,7 +1122,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeEstimate(const CToDoCtrlData& data, 
 
 void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeSpent"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskTimeSpent"));
 	CTDCTaskCalculator calc(data);
 
 	// No parental contributions
@@ -1174,7 +1174,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeSpent(const CToDoCtrlData& data, BOO
 
 void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskTimeRemaining"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskTimeRemaining"));
 	CTDCTaskCalculator calc(data);
 
 	TDC_UNITS nUnits = TDCU_NULL;
@@ -1408,7 +1408,7 @@ void CTDCTaskCalculatorTest::TestGetTaskTimeRemaining(const CToDoCtrlData& data,
 
 void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskFlag"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskFlag"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
@@ -1437,7 +1437,7 @@ void CTDCTaskCalculatorTest::TestGetTaskFlag(const CToDoCtrlData& data, BOOL bIn
 
 void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskLock"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskLock"));
 	CTDCTaskCalculator calc(data);
 
 	// Assigned
@@ -1466,7 +1466,7 @@ void CTDCTaskCalculatorTest::TestGetTaskLock(const CToDoCtrlData& data, BOOL bIn
 
 void CTDCTaskCalculatorTest::TestGetTaskCustomAttributeData(const CToDoCtrlData& data, BOOL bIncludeRefs)
 {
-	CTDCScopedTest test(*this, _T("CTDCTaskCalculatorTest::GetTaskCustomAttributeData"));
+	CTDCScopedTest test(*this, _T("CTDCTaskCalculator::GetTaskCustomAttributeData"));
 	CTDCTaskCalculator calc(data);
 
 	InitialiseStyles(bIncludeRefs);

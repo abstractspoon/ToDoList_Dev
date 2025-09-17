@@ -86,7 +86,12 @@ namespace SpreadsheetContentControl
 			return m_EditorControl.ProcessMessage(hwnd, message, wParam, lParam, time, xPos, yPos);
         }
 
-        public bool Undo()
+		public bool DoIdleProcessing()
+		{
+			return false;
+		}
+
+		public bool Undo()
         {
 			m_EditorControl.Undo();
             return true;
@@ -110,19 +115,18 @@ namespace SpreadsheetContentControl
 
         public void SavePreferences(Preferences prefs, String key)
         {
-            // TODO
-
+            m_EditorControl.SavePreferences(prefs, key);
         }
 
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
-            // TODO
+			if (!appOnly)
+				m_EditorControl.LoadPreferences(prefs, key);
+		}
 
-        }
+		// --------------------------------------------------------------------
 
-        // --------------------------------------------------------------------
-
-        protected override void OnResize(System.EventArgs e)
+		protected override void OnResize(System.EventArgs e)
         {
             base.OnResize(e);
 

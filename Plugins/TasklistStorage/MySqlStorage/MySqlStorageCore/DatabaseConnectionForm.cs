@@ -31,7 +31,7 @@ namespace MySqlStorage
 
 			m_Trans = trans;
 
-			Shown += new EventHandler(OnShown);
+			Shown += (s, e) => { m_ConnectionPage.Initialise(m_ConnectionInfo);	};
 		}
 
 		public bool OpenConnection(MySqlConnection conn, ConnectionInfo connInfo, bool prompt)
@@ -51,11 +51,6 @@ namespace MySqlStorage
 			return (conn.State == ConnectionState.Open);
 		}
 
-		private void OnShown(object sender, EventArgs e)
-		{
-			m_ConnectionPage.Initialise(m_ConnectionInfo);
-		}
-
 		private void OnOK(object sender, EventArgs e)
 		{
 			Cursor = Cursors.WaitCursor;
@@ -64,6 +59,7 @@ namespace MySqlStorage
 			var connInfo = new ConnectionInfo(m_ConnectionInfo);
 
 			connInfo.Server = m_ConnectionPage.Server;
+			connInfo.Port = m_ConnectionPage.Port;
 			connInfo.DatabaseName = m_ConnectionPage.Database;
 			connInfo.Username = m_ConnectionPage.Username;
 			connInfo.Password = m_ConnectionPage.Password;

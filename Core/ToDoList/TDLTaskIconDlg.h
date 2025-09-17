@@ -29,11 +29,12 @@ public:
 	CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, int nNumImages = -1, CWnd* pParent = NULL);
 
 	CString GetIconName() const; 
-	CString GetUserIconName(const CString& sImage) const;
 	int GetIconNames(CStringArray& aSelNames) const; 
 
 	int DoModal(HICON hIcon = NULL);
 	int DoModal(UINT nTitleStrID);
+
+	static CString GetUserIconName(const CString& sImage);
 
 protected:
 // Dialog Data

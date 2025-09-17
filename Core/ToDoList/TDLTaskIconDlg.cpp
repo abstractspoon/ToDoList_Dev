@@ -10,6 +10,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
+#include "..\shared\enlistctrl.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -29,14 +30,15 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const LPCTSTR NO_ICON = _T("__NONE__");
+const LPCTSTR NO_ICON	= _T("__NONE__");
+const LPCTSTR PREFS_KEY = _T("TaskIcons");
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskIconDlg dialog
 
 CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sSelName, BOOL bWantNoneItem, int nNumImages, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, _T("TaskIcons"), pParent), 
+	CTDLDialog(CTDLTaskIconDlg::IDD, PREFS_KEY, pParent),
 	m_ilIcons(ilIcons), 
 	m_sIconName(sSelName), 
 	m_bMultiSel(FALSE),
@@ -48,7 +50,7 @@ CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CString& sS
 
 CTDLTaskIconDlg::CTDLTaskIconDlg(const CTDCImageList& ilIcons, const CStringArray& aSelNames, int nNumImages, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLTaskIconDlg::IDD, _T("TaskIcons"), pParent), 
+	CTDLDialog(CTDLTaskIconDlg::IDD, PREFS_KEY, pParent),
 	m_ilIcons(ilIcons), 
 	m_bMultiSel(TRUE),
 	m_bWantNone(FALSE),
@@ -175,10 +177,10 @@ int CTDLTaskIconDlg::GetIconNames(CStringArray& aSelNames) const
 	return aSelNames.GetSize();
 }
 
-CString CTDLTaskIconDlg::GetUserIconName(const CString& sImage) const
+CString CTDLTaskIconDlg::GetUserIconName(const CString& sImage)
 {
 	CPreferences prefs;
-	return prefs.GetProfileString(m_sPrefsKey, sImage);
+	return prefs.GetProfileString(PREFS_KEY, sImage);
 }
 
 void CTDLTaskIconDlg::EnableDisable()
@@ -238,7 +240,7 @@ void CTDLTaskIconDlg::BuildListCtrl()
 		{
 			ASSERT(!m_bMultiSel);
 
-			int nIndex = m_lcIcons.InsertItem(nNumImages, _T("<none>"), -1);
+			int nIndex = m_lcIcons.InsertItem(nNumImages, CEnString(IDS_TDC_NONE), -1);
 			m_lcIcons.SetItemData(nIndex, (DWORD)-1);
 		}
 	}
@@ -285,12 +287,11 @@ void CTDLTaskIconDlg::OnDblclkIconlist(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLTaskIconDlg::OnItemchangedIconlist(NMHDR* pNMHDR, LRESULT* pResult) 
 {
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	int nItem = -1;
 
-	if (!(pNMListView->uOldState & LVIS_SELECTED) &&
-		 (pNMListView->uNewState & LVIS_SELECTED))
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR, &nItem))
 	{
-		int nImage = m_lcIcons.GetItemData(pNMListView->iItem);
+		int nImage = m_lcIcons.GetItemData(nItem);
 
 		if (nImage == -1)
 			m_sIconName = NO_ICON;
@@ -299,9 +300,8 @@ void CTDLTaskIconDlg::OnItemchangedIconlist(NMHDR* pNMHDR, LRESULT* pResult)
 
 		// disable OK button if nothing selected
 		EnableDisable();
+		*pResult = 0;
 	}
-		
-	*pResult = 0;
 }
 
 void CTDLTaskIconDlg::OnBeginlabeleditIconlist(NMHDR* pNMHDR, LRESULT* pResult) 

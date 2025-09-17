@@ -117,18 +117,12 @@ BOOL CStickiesAPI::SendCommand(int nCommandID, LPCTSTR szCommand, LPCTSTR szStic
 	cpd.dwData = nCommandID;
 	cpd.cbData = sCommand.GetLength();
 
-#ifdef _UNICODE
 	LPSTR szMBCommand = Misc::WideToMultiByte(sCommand);
 	cpd.lpData = (void*)szMBCommand;
-#else
-	cpd.lpData = (void*)(LPCTSTR)sCommand;
-#endif
 	
 	LRESULT lr = ::SendMessage(hwndStickies, WM_COPYDATA, (WPARAM)m_hwndCallback, (LPARAM)&cpd);
 
-#ifdef _UNICODE
 	delete [] szMBCommand;
-#endif
 
 	if (GetMajorVersion() >= 10)
 		return (lr == TRUE);

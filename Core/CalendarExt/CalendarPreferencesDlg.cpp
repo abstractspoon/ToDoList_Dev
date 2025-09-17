@@ -124,9 +124,9 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 
 	m_cbHeatMapPalette.Initialize(HEATMAP_PALETTETYPE, HEATMAP_NUMPALETTECOLORS);
 
-	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDONE, TDCA_DONEDATE);
-	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDUE, TDCA_DUEDATE);
-	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMSTARTED, TDCA_STARTDATE);
+	CDialogHelper::AddStringT(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDONE, TDCA_DONEDATE);
+	CDialogHelper::AddStringT(m_cbHeatMapAttribute, IDS_HEATMAP_NUMDUE, TDCA_DUEDATE);
+	CDialogHelper::AddStringT(m_cbHeatMapAttribute, IDS_HEATMAP_NUMSTARTED, TDCA_STARTDATE);
 
 	UpdateData(FALSE);
 	EnableDisableControls();
@@ -156,7 +156,7 @@ void CCalendarPreferencesPage::EnableDisableControls()
 	if (sNewLabel != sCurLabel)
 	{
 		GetDlgItem(IDC_SHOWDONEDATES)->SetWindowText(sNewLabel);
-		CDialogHelper::ResizeButtonStaticTextToFit(this, GetDlgItem(IDC_SHOWDONEDATES));
+		CDialogHelper::ResizeStaticTextToFit(this, IDC_SHOWDONEDATES);
 	}
 }
 

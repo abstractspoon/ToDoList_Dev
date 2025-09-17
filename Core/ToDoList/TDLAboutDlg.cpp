@@ -36,6 +36,7 @@ static char THIS_FILE[] = __FILE__;
 
 static LPCTSTR ABOUTCONTRIBUTION = 
 
+_T("Ali Tavakol\tPersian date handling\n")
 _T("AWIcons\tToolbar icons\n")
 _T("Abin\tIni class for tools importing\n")
 _T("Alex Cohn\tMenu icon code\n")

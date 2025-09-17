@@ -20,8 +20,6 @@ class CUIExtensionMgr;
 
 class CPreferencesUIPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesUIPage)
-
 // Construction
 public:
 	CPreferencesUIPage(const CUIExtensionMgr* pMgrUIExt = NULL);

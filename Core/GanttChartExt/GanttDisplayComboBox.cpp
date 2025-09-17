@@ -5,8 +5,10 @@
 #include "GanttDisplayComboBox.h"
 #include "GanttCtrl.h"
 #include "GanttStatic.h"
+#include "GanttUtils.h"
 
 #include "..\Shared\DialogHelper.h"
+#include "..\Shared\DateHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,9 +29,6 @@ CGanttDisplayComboBox::~CGanttDisplayComboBox()
 
 
 BEGIN_MESSAGE_MAP(CGanttDisplayComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CGanttDisplayComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
 	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
 END_MESSAGE_MAP()
@@ -39,7 +38,7 @@ END_MESSAGE_MAP()
 
 BOOL CGanttDisplayComboBox::SelectDisplay(GTLC_MONTH_DISPLAY nDisplay)
 {
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nDisplay));
+	return (CB_ERR != CDialogHelper::SelectItemByDataT(*this, nDisplay));
 }
 
 // External
@@ -56,12 +55,12 @@ GTLC_MONTH_DISPLAY CGanttDisplayComboBox::GetSelectedDisplay() const
 // Internal
 GTLC_MONTH_DISPLAY CGanttDisplayComboBox::GetSelectedDisplayRaw() const
 {
-	return CDialogHelper::GetSelectedItemData(*this, GTLC_DISPLAY_NONE);
+	return CDialogHelper::GetSelectedItemDataT(*this, GTLC_DISPLAY_NONE);
 }
 
 BOOL CGanttDisplayComboBox::IsEnabledDisplay(GTLC_MONTH_DISPLAY nDisplay) const
 {
-	return (GanttStatic::CompareDisplays(nDisplay, m_nMinEnabledDisplay) <= 0);
+	return (GanttUtils::CompareDisplays(nDisplay, m_nMinEnabledDisplay) <= 0);
 }
 
 void CGanttDisplayComboBox::UpdateDisplayOptions(const CGanttCtrl& ctrl)
@@ -102,8 +101,25 @@ void CGanttDisplayComboBox::UpdateDisplayOptions(const CGanttCtrl& ctrl)
 		{
 			aItems[nItem] += aExamples[nItem];
 		}
+	}
 
-		CDialogHelper::AddString(*this, aItems[nItem], mode.nDisplay);
+	// Finally add the items to the combo, less those that
+	// are not supported by RTL dates because there is no short month name
+	for (nItem = 0; nItem < NUM_DISPLAYMODES; nItem++)
+	{
+		const GTCDISPLAYMODE& mode = DISPLAYMODES[nItem];
+
+		if (CDateHelper::WantRTLDates())
+		{
+			switch (mode.nDisplay)
+			{
+			case GTLC_DISPLAY_QUARTERS_MID:
+			case GTLC_DISPLAY_MONTHS_MID:
+				continue;
+			}
+		}
+
+		CDialogHelper::AddStringT(*this, aItems[nItem], mode.nDisplay);
 	}
 
 	CDialogHelper::RefreshMaxDropWidth(*this, NULL, TABSTOPS);
@@ -145,7 +161,7 @@ void CGanttDisplayComboBox::FixupTabOffsets(const CStringArray& aItems, CStringA
 
 	// Keep track of the widest option
 	CClientDC dc(const_cast<CGanttDisplayComboBox*>(this));
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, *this);
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, *this);
 
 	CArray<int, int> aOptionWidths;
 	aOptionWidths.SetSize(aOptions.GetSize());
@@ -182,7 +198,7 @@ void CGanttDisplayComboBox::FixupTabOffsets(const CStringArray& aItems, CStringA
 		}
 	}
 
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 }
 
 BOOL CGanttDisplayComboBox::OnSelChange()

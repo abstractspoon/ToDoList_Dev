@@ -61,6 +61,7 @@ public:
 
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
+	bool DoIdleProcessing() { return false; }
 
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;

@@ -19,29 +19,17 @@ public:
 		// way of indicating to the the mail client it should render
 		// any attachment in the body.
 
-#ifdef _UNICODE
 		lpszName = Misc::WideToMultiByte(strTo);
 		lpszSubject = Misc::WideToMultiByte(strSubject);
 		lpszNoteText = (strBody.IsEmpty() ? NULL : Misc::WideToMultiByte(strBody));
 		lpszPathName = Misc::WideToMultiByte(strAttachmentFileName);
 
-		bCleanup = true;
-#else
-		lpszName = strTo;
-		lpszSubject = strSubject;
-		lpszNoteText = (strBody.IsEmpty() ? NULL : strBody);
-		lpszPathName = strAttachmentFileName;
-#endif		
-
 		bool bResult = CSendFileTo::SendMail(hWndParent, lpszName, lpszSubject, lpszNoteText, lpszPathName);
 
-		if (bCleanup)
-		{
-			delete lpszName;
-			delete lpszPathName;
-			delete lpszSubject;
-			delete lpszNoteText;
-		}
+		delete lpszName;
+		delete lpszPathName;
+		delete lpszSubject;
+		delete lpszNoteText;
 
 		return bResult;
 	}

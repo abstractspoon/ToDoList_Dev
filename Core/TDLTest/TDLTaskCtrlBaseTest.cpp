@@ -29,7 +29,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDLTaskCtrlBaseTest::CTDLTaskCtrlBaseTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CTDLTaskCtrlBaseTest::CTDLTaskCtrlBaseTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CTDLTaskCtrlBaseTest"), utils)
 {
 	// Calculation styles
 	m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
@@ -85,7 +87,7 @@ TESTRESULT CTDLTaskCtrlBaseTest::Run()
 
 void CTDLTaskCtrlBaseTest::TestColumnRecalculationPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CTDLTaskCtrlBaseTest::ColumnRecalculationPerformance\n"));
 		return;
@@ -99,7 +101,7 @@ void CTDLTaskCtrlBaseTest::TestColumnRecalculationPerformance()
 
 void CTDLTaskCtrlBaseTest::TestTreeColumnRecalculationPerformance()
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	CTaskFile tasks;
 	CTaskFileTest(m_utils).PopulateHierarchy(tasks, 4);
@@ -126,7 +128,7 @@ void CTDLTaskCtrlBaseTest::TestTreeColumnRecalculationPerformance()
 
 void CTDLTaskCtrlBaseTest::TestListColumnRecalculationPerformance()
 {
-	ASSERT(m_utils.HasCommandlineFlag('p'));
+	ASSERT(m_utils.GetWantPerformanceTests());
 
 	CTaskFile tasks;
 	CTaskFileTest(m_utils).PopulateFlatList(tasks, 10000);

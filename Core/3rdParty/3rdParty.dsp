@@ -161,6 +161,10 @@ SOURCE=.\Ini.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\JalaliCalendar.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\LockableHeaderCtrl.cpp
 # End Source File
 # Begin Source File
@@ -226,10 +230,6 @@ SOURCE=.\StatLink.cpp
 # Begin Source File
 
 SOURCE=.\StatusBarACT.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
@@ -346,6 +346,10 @@ SOURCE=.\Zlib\IOAPI.H
 # Begin Source File
 
 SOURCE=.\Zlib\IOWIN32.H
+# End Source File
+# Begin Source File
+
+SOURCE=.\JalaliCalendar.h
 # End Source File
 # Begin Source File
 

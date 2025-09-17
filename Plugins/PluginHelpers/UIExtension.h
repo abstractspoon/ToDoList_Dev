@@ -144,8 +144,12 @@ namespace Abstractspoon
 					bool AddMod(Task::Attribute attrib, int value);
 					bool AddMod(Task::Attribute attrib, bool value);
 					bool AddMod(Task::Attribute attrib, String^ value);
-					bool AddMod(Task::Attribute attrib, String^ value, bool append);
 					bool AddMod(String^ sCustAttribID, String^ value);
+
+					bool AddMod(Task::Attribute attrib, double value, bool append);
+					bool AddMod(Task::Attribute attrib, double time, Task::TimeUnits units, bool append);
+					bool AddMod(Task::Attribute attrib, int value, bool append);
+					bool AddMod(Task::Attribute attrib, String^ value, bool append);
 
 					bool AddMod(UInt32 taskID, Task::Attribute attrib, DateTime value);
 					bool AddMod(UInt32 taskID, Task::Attribute attrib, double value);
@@ -153,8 +157,12 @@ namespace Abstractspoon
 					bool AddMod(UInt32 taskID, Task::Attribute attrib, int value);
 					bool AddMod(UInt32 taskID, Task::Attribute attrib, bool value);
 					bool AddMod(UInt32 taskID, Task::Attribute attrib, String^ value);
-					bool AddMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append);
 					bool AddMod(UInt32 taskID, String^ sCustAttribID, String^ value);
+
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, double value, bool append);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units, bool append);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, int value, bool append);
+					bool AddMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append);
 
 					bool NotifyMod();
 					bool NotifyMod(Task::Attribute attrib, DateTime value);
@@ -163,8 +171,12 @@ namespace Abstractspoon
 					bool NotifyMod(Task::Attribute attrib, int value);
 					bool NotifyMod(Task::Attribute attrib, bool value);
 					bool NotifyMod(Task::Attribute attrib, String^ value);
-					bool NotifyMod(Task::Attribute attrib, String^ value, bool append);
 					bool NotifyMod(String^ sCustAttribID, String^ value);
+
+					bool NotifyMod(Task::Attribute attrib, double value, bool append);
+					bool NotifyMod(Task::Attribute attrib, double time, Task::TimeUnits units, bool append);
+					bool NotifyMod(Task::Attribute attrib, int value, bool append);
+					bool NotifyMod(Task::Attribute attrib, String^ value, bool append);
 
 					bool NotifyMove(UInt32 taskID, UInt32 parentTaskID, UInt32 afterSiblingID);
 					bool NotifyCopy(UInt32 taskID, UInt32 parentTaskID, UInt32 afterSiblingID);
@@ -191,6 +203,10 @@ namespace Abstractspoon
 						IUITaskMod(Task::Attribute attrib, int value);
 						IUITaskMod(Task::Attribute attrib, bool value);
 						IUITaskMod(Task::Attribute attrib, String^ value);
+
+						IUITaskMod(Task::Attribute attrib, double value, bool append);
+						IUITaskMod(Task::Attribute attrib, double time, Task::TimeUnits units, bool append);
+						IUITaskMod(Task::Attribute attrib, int value, bool append);
 						IUITaskMod(Task::Attribute attrib, String^ value, bool append);
 
 						IUITaskMod(String^ customAttribId, String^ value);
@@ -201,6 +217,10 @@ namespace Abstractspoon
 						IUITaskMod(UInt32 taskID, Task::Attribute attrib, int value);
 						IUITaskMod(UInt32 taskID, Task::Attribute attrib, bool value);
 						IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value);
+
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, double value, bool append);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units, bool append);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, int value, bool append);
 						IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value, bool append);
 
 						IUITaskMod(UInt32 taskID, String^ customAttribId, String^ value);
@@ -211,6 +231,7 @@ namespace Abstractspoon
 						Task::Attribute nAttrib;
 						UInt32 dwSelectedTaskID;		
 						String^ szCustomAttribID;
+						bool bAppend;
 
 						//union
 						//{
@@ -225,7 +246,8 @@ namespace Abstractspoon
 						//union
 						//{
 							Task::TimeUnits nTimeUnits;	
-							bool bAppend;
+							bool bCostIsRate;
+							UInt32 dwPrevDependID;
 						//};
 
 					private:
@@ -297,8 +319,10 @@ namespace Abstractspoon
 				public:
 					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool transparent);
 					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent);
+					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent, bool clipLeft, bool clipRight);
 
 					static Drawing::Color GetTextColor(Style style, Drawing::Color baseColor);
+					static Drawing::Color GetBorderColor(Style style);
 					static Drawing::Color GetColor(Style style);
 					static GM_ITEMSTATE Map(Style style);
 				};
@@ -367,6 +391,7 @@ namespace Abstractspoon
 				bool PrepareNewTask(Task^% task);
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
+				bool DoIdleProcessing();
 				bool GetLabelEditRect(Int32% left, Int32% top, Int32% right, Int32% bottom); // screen coordinates
 
 				UIExtension::HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension::HitTestReason reason);

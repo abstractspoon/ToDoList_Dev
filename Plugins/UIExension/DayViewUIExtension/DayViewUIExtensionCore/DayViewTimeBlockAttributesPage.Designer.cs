@@ -110,7 +110,7 @@
 			this.m_ToDateCtrl.Enabled = false;
 			this.m_ToDateCtrl.Format = System.Windows.Forms.DateTimePickerFormat.Short;
 			this.m_ToDateCtrl.Location = new System.Drawing.Point(254, 45);
-			this.m_ToDateCtrl.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_ToDateCtrl.Margin = new System.Windows.Forms.Padding(2);
 			this.m_ToDateCtrl.Name = "m_ToDateCtrl";
 			this.m_ToDateCtrl.ShowCheckBox = true;
 			this.m_ToDateCtrl.Size = new System.Drawing.Size(104, 20);
@@ -122,7 +122,7 @@
 			this.m_FromDateCtrl.Enabled = false;
 			this.m_FromDateCtrl.Format = System.Windows.Forms.DateTimePickerFormat.Short;
 			this.m_FromDateCtrl.Location = new System.Drawing.Point(126, 45);
-			this.m_FromDateCtrl.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_FromDateCtrl.Margin = new System.Windows.Forms.Padding(2);
 			this.m_FromDateCtrl.Name = "m_FromDateCtrl";
 			this.m_FromDateCtrl.Size = new System.Drawing.Size(104, 20);
 			this.m_FromDateCtrl.TabIndex = 30;
@@ -142,7 +142,7 @@
 			// 
 			this.m_DowListBox.Enabled = false;
 			this.m_DowListBox.Location = new System.Drawing.Point(126, 102);
-			this.m_DowListBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.m_DowListBox.Margin = new System.Windows.Forms.Padding(2);
 			this.m_DowListBox.Name = "m_DowListBox";
 			this.m_DowListBox.Size = new System.Drawing.Size(232, 84);
 			this.m_DowListBox.TabIndex = 27;
@@ -150,9 +150,9 @@
 			// 
 			// m_ToTimeCombo
 			// 
-			this.m_ToTimeCombo.Location = new System.Drawing.Point(254, 72);
+			this.m_ToTimeCombo.Location = new System.Drawing.Point(254, 73);
 			this.m_ToTimeCombo.Name = "m_ToTimeCombo";
-			this.m_ToTimeCombo.Size = new System.Drawing.Size(104, 23);
+			this.m_ToTimeCombo.Size = new System.Drawing.Size(104, 22);
 			this.m_ToTimeCombo.TabIndex = 26;
 			this.m_ToTimeCombo.Text = "timeComboBox1";
 			// 
@@ -177,6 +177,7 @@
 			// m_DateCheckBox
 			// 
 			this.m_DateCheckBox.AutoSize = true;
+			this.m_DateCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_DateCheckBox.Location = new System.Drawing.Point(7, 5);
 			this.m_DateCheckBox.Name = "m_DateCheckBox";
 			this.m_DateCheckBox.Size = new System.Drawing.Size(79, 17);

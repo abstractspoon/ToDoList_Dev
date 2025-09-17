@@ -69,7 +69,7 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLTasklistImportDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 
@@ -78,6 +78,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 	virtual void OnRepositionControls(int dx, int dy);
+	virtual BOOL DoIdleProcessing();
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLTasklistImportDlg)

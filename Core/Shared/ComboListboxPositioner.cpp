@@ -31,8 +31,9 @@ CComboListboxPositioner::~CComboListboxPositioner()
 
 BOOL CComboListboxPositioner::Initialize()
 {
-	// We handle our own class name checks for efficiency
-	return Instance().InitHooks(HM_CALLWNDPROCRET/*, WC_COMBOLBOX*/);
+	// We don't pass WC_COMBOLBOX here because it's more
+	// efficient to check the class in OnCallWndRetProc
+	return Instance().InitHooks(HM_CALLWNDPROCRET);
 }
 
 void CComboListboxPositioner::Release()
@@ -42,23 +43,34 @@ void CComboListboxPositioner::Release()
 
 BOOL CComboListboxPositioner::OnCallWndRetProc(const MSG& msg, LRESULT lr)
 {   
-	if (!m_bMovingListBox)
+	// Prevent re-entrancy
+	if (m_bMovingListBox)
+		return FALSE;
+		
+	switch (msg.message)
 	{
-		ASSERT (m_hCallWndRetHook);
-
-		if (msg.message == WM_WINDOWPOSCHANGED)
+	case WM_WINDOWPOSCHANGED:
 		{
+			// Sequence our checks to do the least work necessary
 			const WINDOWPOS* pWPos = (const WINDOWPOS*)msg.lParam;
 
-			if (!Misc::HasFlag(pWPos->flags, (SWP_NOMOVE | SWP_NOSIZE)) && (pWPos->cx || pWPos->cy))
-			{
-				if (::ClassMatches(msg.hwnd, WC_COMBOLBOX))
-				{
-					CAutoFlag af(m_bMovingListBox, TRUE);
-					FixupListBoxPosition(msg.hwnd, *pWPos);
-				}
-			}
+			// We're only interested in visible move/size events where the size is non-zero
+			if (Misc::HasFlag(pWPos->flags, (SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW)) || (!pWPos->cx && !pWPos->cy))
+				return FALSE;
+
+			// Ensure that it's parented to the desktop
+			if (::GetParent(msg.hwnd) != ::GetDesktopWindow())
+				return FALSE;
+				
+			// And that it's a combo-listbox
+			if (!::ClassMatches(msg.hwnd, WC_COMBOLBOX))
+				return FALSE;
+				
+			// Do the fixup
+			CAutoFlag af(m_bMovingListBox, TRUE);
+			FixupListBoxPosition(msg.hwnd, *pWPos);
 		}
+		break;
 	}
 	
 	return FALSE; // continue routing
@@ -70,20 +82,6 @@ void CComboListboxPositioner::FixupListBoxPosition(HWND hwndListbox, const WINDO
 	GraphicsMisc::GetAvailableScreenSpace(rNewPos, rMonitor);
 
 	// Make sure at least some part of the listbox is visible
-	if (CRect().IntersectRect(rNewPos, rMonitor))
-	{
-		if (rNewPos.right > rMonitor.right)
-		{
-			rNewPos.left = rMonitor.right - rNewPos.Width();
-			rNewPos.right = rMonitor.right;
-		}
-		else if (rNewPos.left < rMonitor.left)
-		{
-			rNewPos.right = rMonitor.left + rNewPos.Width();
-			rNewPos.left = rMonitor.left;
-		}
-
-		if (rNewPos.left != wpos.x)
-			::MoveWindow(hwndListbox, rNewPos.left, rNewPos.top, rNewPos.Width(), rNewPos.Height(), TRUE);
-	}
+	if (CRect().IntersectRect(rNewPos, rMonitor) && GraphicsMisc::FitRect(rNewPos, rMonitor) && (rNewPos.left != wpos.x))
+		::MoveWindow(hwndListbox, rNewPos.left, rNewPos.top, rNewPos.Width(), rNewPos.Height(), TRUE);
 }

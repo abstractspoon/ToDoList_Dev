@@ -1,4 +1,4 @@
-// SkinCtrlMgr.h: interface for the CHookWndMgr class.
+// HookWndMgr.h: interface for the CHookWndMgr class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -235,7 +235,6 @@ protected:
 			return FALSE;
 		
 		CSubclassWnd* pHookWnd = GetHookWnd(hWnd);
-		//CWnd* pWnd = CWnd::FromHandle(hWnd);
 		
 		if (pHookWnd)
 		{

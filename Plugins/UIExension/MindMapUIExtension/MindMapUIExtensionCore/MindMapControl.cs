@@ -442,15 +442,16 @@ namespace MindMapUIExtension
 
 		// Message Handlers -----------------------------------------------------------
 
-		protected void BeginUpdate()
+		virtual protected void BeginUpdate()
 		{
 			HoldRedraw = true;
+			Cursor = Cursors.WaitCursor;
 
             EnableExpandNotifications(false);
 			EnableSelectionNotifications(false);
 		}
 
-		protected void EndUpdate()
+		virtual protected void EndUpdate()
 		{
 			HoldRedraw = false;
 
@@ -475,7 +476,7 @@ namespace MindMapUIExtension
                 EnsureItemVisible(SelectedItem);
             }
 
-            if (!m_HoldRedraw)
+            if (!HoldRedraw)
             {
 				e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
 			    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;

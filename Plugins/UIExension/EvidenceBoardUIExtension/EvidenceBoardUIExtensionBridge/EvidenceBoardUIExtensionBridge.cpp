@@ -76,7 +76,7 @@ IUIExtensionWindow* CEvidenceBoardUIExtensionBridge::CreateExtWindow(UINT nCtrlI
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
-		pExtWnd->Release();
+		delete pExtWnd;
 		pExtWnd = NULL;
 	}
 
@@ -97,12 +97,6 @@ void CEvidenceBoardUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs
 
 CEvidenceBoardUIExtensionBridgeWindow::CEvidenceBoardUIExtensionBridgeWindow(ITransText* pTT) : m_pTT(pTT)
 {
-}
-
-void CEvidenceBoardUIExtensionBridgeWindow::Release()
-{
-	::DestroyWindow(GetHwnd());
-	delete this;
 }
 
 BOOL CEvidenceBoardUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
@@ -186,6 +180,11 @@ bool CEvidenceBoardUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->time, 
 										pMsg->pt.x,
 										pMsg->pt.y);
+}
+
+bool CEvidenceBoardUIExtensionBridgeWindow::DoIdleProcessing()
+{
+	return m_wnd->DoIdleProcessing();
 }
 
 bool CEvidenceBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)

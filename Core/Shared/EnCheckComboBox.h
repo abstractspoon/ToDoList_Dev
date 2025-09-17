@@ -1,10 +1,10 @@
-#if !defined(AFX_TDLCATEGORYCOMBOBOX_H__23DEAFA7_C661_477D_B583_FDB36C11FDC3__INCLUDED_)
-#define AFX_TDLCATEGORYCOMBOBOX_H__23DEAFA7_C661_477D_B583_FDB36C11FDC3__INCLUDED_
+#if !defined(AFX_ENCHECKCOMBOBOX_H__23DEAFA7_C661_477D_B583_FDB36C11FDC3__INCLUDED_)
+#define AFX_ENCHECKCOMBOBOX_H__23DEAFA7_C661_477D_B583_FDB36C11FDC3__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// TDLCategoryComboBox.h : header file
+// EnCheckComboBox.h : header file
 //
 
 #include "checkcombobox.h"
@@ -17,41 +17,29 @@ class CEnCheckComboBox : public CCheckComboBox
 {
 	DECLARE_DYNAMIC(CEnCheckComboBox);
 
-	// Construction
 public:
 	CEnCheckComboBox(BOOL bMulti = TRUE, UINT nIDNoneString = 0, UINT nIDAnyString = 0);
+	virtual ~CEnCheckComboBox();
 	
 	BOOL EnableMultiSelection(BOOL bEnable = TRUE);
 	BOOL IsMultiSelectionEnabled() const { return m_bMultiSel; }
 	void ClearMultiSelectionHistory();
 
-	int SetStrings(const CStringArray& aItems);
-
+	int SelectString(int nStartAfter, LPCTSTR lpszString);
 	BOOL GetCheck(int nIndex) const;
 	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
-	int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const; // virtual
 	BOOL SetChecked(const CStringArray& aChecked);
-	BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED); 
+
+	virtual int SetStrings(const CStringArray& aItems);
+	virtual int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
+	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 
 protected:
 	BOOL m_bMultiSel;
 	CEnString m_sNone, m_sAny;
 	
-	// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CEnCheckComboBox)
 protected:
-	//}}AFX_VIRTUAL
-	
-	// Implementation
-public:
-	virtual ~CEnCheckComboBox(); 
-	
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(CEnCheckComboBox)
-	//}}AFX_MSG
 	afx_msg void OnLBSelChange();
 	afx_msg BOOL OnSelEndOK();
 	afx_msg LRESULT OnGetTextLen(WPARAM wParam, LPARAM lParam);
@@ -96,4 +84,4 @@ protected:
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
-#endif // !defined(AFX_TDLCATEGORYCOMBOBOX_H__23DEAFA7_C661_477D_B583_FDB36C11FDC3__INCLUDED_)
+#endif // !defined(AFX_ENCHECKCOMBOBOX_H__23DEAFA7_C661_477D_B583_FDB36C11FDC3__INCLUDED_)

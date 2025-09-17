@@ -23,6 +23,7 @@ static char THIS_FILE[] = __FILE__;
 #define HMX_AREA_XAXIS		10		// percentage
 #define HMX_AREA_MINAXIS	50		// pixels
 #define HMX_XSCALE_OFFSET   14		// pixels
+#define HMX_GRAPH_MARGINS	15		// pixels
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -45,6 +46,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 #define DEG2RAD(d) ((d) * 3.141592654f / 180)
+
+/////////////////////////////////////////////////////////////////////////////
+
+static float s_fScaleFactor = 0.0f;
 
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart
@@ -398,10 +403,12 @@ BOOL CHMXChart::DrawAxes(CDC &dc)
 
 
 	// draw X
-	if (m_dwRenderFlags & HMX_RENDER_YAXIS)
+	if (m_dwRenderFlags & HMX_RENDER_XAXIS)
 	{
-		dc.MoveTo(m_rectXAxis.left, m_rectXAxis.top);
-		dc.LineTo(m_rectXAxis.right, m_rectXAxis.top);
+		int nVPos = (m_rectData.bottom - (int)CalcRelativeYValue(0.0));
+
+		dc.MoveTo(m_rectXAxis.left, nVPos);
+		dc.LineTo(m_rectXAxis.right, nVPos);
 	}
 	
 	if (m_dwRenderFlags & (HMX_RENDER_XAXISSCALE | HMX_RENDER_XAXISTITLE))
@@ -428,7 +435,7 @@ BOOL CHMXChart::DrawHorzGridLines(CDC & dc)
 	if(!nTicks)
 		return FALSE;
 
-	double dY = ((m_dYMax - m_dYMin)/(double)nTicks);
+	double dY = ((m_dYMax - m_dYMin) / nTicks);
 
 	if (!m_penGrid.GetSafeHandle())
 		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
@@ -437,7 +444,7 @@ BOOL CHMXChart::DrawHorzGridLines(CDC & dc)
 
 	for(int f=0; f<=nTicks; f++) 
 	{
-		double dTemp = m_rectData.bottom - CalcRelativeYValue(m_dYMin + (dY*f));
+		double dTemp = m_rectData.bottom - (int)CalcRelativeYValue(m_dYMin + (dY*f));
 
 		dc.MoveTo(m_rectData.left , (int)dTemp);
 		dc.LineTo(m_rectData.right, (int)dTemp);
@@ -592,6 +599,42 @@ int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 //
 //		TRUE if ok, else FALSE
 //
+
+UINT CHMXChart::GetXScaleDrawFlags() const
+{
+	if (m_nXLabelDegrees > 0) // => CDC::TextOut for rotated fonts
+	{
+		UINT nDrawFlags = (TA_BASELINE | TA_RIGHT);
+
+		if (XScaleHasRTLDates())
+			nDrawFlags |= TA_RTLREADING;
+
+		return nDrawFlags;
+	}
+
+	// else => CDC::DrawText
+	UINT nDrawFlags = (DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+
+	if (XScaleHasRTLDates())
+		nDrawFlags |= DT_RTLREADING;
+
+	if (!m_bXLabelsAreTicks)
+		nDrawFlags |= DT_CENTER;
+
+	return nDrawFlags;
+}
+
+UINT CHMXChart::GetYScaleDrawFlags() const
+{
+	// Y scale labels are always horizontal
+	UINT nDrawFlags = (DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_NOCLIP);
+
+	if (YScaleHasRTLDates())
+		nDrawFlags |= DT_RTLREADING;
+
+	return nDrawFlags;
+}
+
 BOOL CHMXChart::DrawXScale(CDC & dc)
 {
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
@@ -611,6 +654,8 @@ BOOL CHMXChart::DrawXScale(CDC & dc)
 
 			// dX is the size of a division
 			double dX = (double)m_rectData.Width()/m_nXMax;
+			
+			UINT nFlags = GetXScaleDrawFlags();
 
 			for(int f=0; f<nCount; f=f+m_nXLabelStep) 
 			{
@@ -625,17 +670,14 @@ BOOL CHMXChart::DrawXScale(CDC & dc)
 
 					if (m_nXLabelDegrees > 0)
 					{
-						dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
+						// Must use CDC::TextOut for rotated fonts
+						dc.SetTextAlign(nFlags);
 						dc.TextOut(rText.left, rText.top, sLabel);
 					}
 					else
 					{
-						rText.right = rText.left + (int)(dX * m_nXLabelStep);
-
-						if (m_bXLabelsAreTicks)
-							dc.DrawText(sLabel, rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
-						else
-							dc.DrawText(sLabel, rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+						rText.right = (rText.left + (int)(dX * m_nXLabelStep));
+						dc.DrawText(sLabel, rText, nFlags);
 					}
 				}
 			}
@@ -651,8 +693,9 @@ BOOL CHMXChart::DrawXScale(CDC & dc)
 		VERIFY(CreateXAxisFont(TRUE, font));
 
 		CFont* pFontOld = dc.SelectObject(&font);
-		dc.DrawText(m_strXText, m_rectXAxis, DT_CENTER | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX);
+		UINT nFlags = (DT_CENTER | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX);
 
+		dc.DrawText(m_strXText, m_rectXAxis, nFlags);
 		dc.SelectObject(pFontOld);
 	}
 
@@ -696,6 +739,8 @@ BOOL CHMXChart::DrawYScale(CDC & dc)
 			int nFontSize = CalcYScaleFontSize(FALSE);
 
 			// draw text
+			UINT nFlags = GetYScaleDrawFlags();
+
 			for(int f=0; f<=nTicks; f++) 
 			{
 				CString sTick = GetYTickText(f, (m_dYMin + dY*f));
@@ -707,7 +752,7 @@ BOOL CHMXChart::DrawYScale(CDC & dc)
 					ASSERT(nBot > nTop);
 
 					CRect rTick(m_rectYAxis.left, nTop, m_rectYAxis.right - 4, nBot);
-					dc.DrawText(sTick, &rTick, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_NOCLIP);
+					dc.DrawText(sTick, &rTick, nFlags);
 
 					int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sTick).cx);
 					rTitle.right = min(rTitle.right, nLabelLeft);
@@ -1301,18 +1346,16 @@ float CHMXChart::NormaliseAngle(float fDegrees)
 
 float CHMXChart::ScaleByDPIFactor(int nValue)
 {
-	static float fScaleFactor = 0.0f;
-
-	if (fScaleFactor == 0.0f)
+	if (s_fScaleFactor == 0.0f)
 	{
 		HDC hDC = ::GetDC(NULL);
 		int nPPI = GetDeviceCaps(hDC, LOGPIXELSY);
 		::ReleaseDC(NULL, hDC);
 
-		fScaleFactor = (nPPI / 96.0f);
+		s_fScaleFactor = (nPPI / 96.0f);
 	}
 
-	return (nValue * fScaleFactor);
+	return (nValue * s_fScaleFactor);
 }
 
 void CHMXChart::DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIESEGMENT, PIESEGMENT&>& aSegments)
@@ -1597,14 +1640,36 @@ BOOL CHMXChart::GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, do
 //
 BOOL CHMXChart::CalcDatas()
 {
-	int f=0, nTemp3;
+	m_nXMax = 0;
+
+	for(int f=0; f<HMX_MAX_DATASET; f++) 
+	{
+		int nDataSize = m_datasets[f].GetDatasetSize();
+		m_nXMax = max(m_nXMax, nDataSize);
+	}
+	
+	if (!GetMinMax(m_dYMin, m_dYMax, FALSE))
+		m_dYMin = m_dYMax = 0;
+
+	// with this 'strange' function I can set m_nYmin & m_nYMax so that 
+	// they are multiply of m_nRoundY
+	if(m_dRoundY > 0.0) 
+	{
+		if (fmod(m_dYMin, m_dRoundY) != 0.0)
+			m_dYMin = (((int)m_dYMin-(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
+
+		if (fmod(m_dYMax, m_dRoundY) != 0.0)
+			m_dYMax = (((int)m_dYMax+(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
+	}
+
+	// prevent divide by zero
+	if (m_dYMax == m_dYMin)
+		m_dYMax = (m_dYMin + 10);
 
 	GetClientRect(m_rectArea);
 
-	int nMargin = 15/*(max(m_rectArea.Height(), m_rectArea.Width()) / HMX_AREA_MARGINS)*/;
-
 	m_rectUsable = m_rectArea;
-	m_rectUsable.DeflateRect(nMargin, nMargin);
+	m_rectUsable.DeflateRect(HMX_GRAPH_MARGINS, HMX_GRAPH_MARGINS);
 
 	// let's calc everything
 	m_rectGraph = m_rectUsable;
@@ -1650,37 +1715,6 @@ BOOL CHMXChart::CalcDatas()
 	m_rectData.bottom  = m_rectXAxis.top;
 	m_rectData.left    = m_rectYAxis.right;
 	m_rectData.right   = m_rectGraph.right;
-
-	m_nXMax = 0;
-
-	for(f=0; f<HMX_MAX_DATASET; f++) 
-	{
-		nTemp3 = m_datasets[f].GetDatasetSize();
-		m_nXMax = max(m_nXMax, nTemp3);
-	}
-	
-	if (!GetMinMax(m_dYMin, m_dYMax, FALSE))
-		m_dYMin = m_dYMax = 0;
-
-	// with this 'strange' function I can set m_nYmin & m_nYMax so that 
-	// they are multiply of m_nRoundY
-	if(m_dRoundY > 0.0) 
-	{
-		if (fmod(m_dYMin, m_dRoundY) != 0.0)
-			m_dYMin = (((int)m_dYMin-(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
-
-		if (fmod(m_dYMax, m_dRoundY) != 0.0)
-			m_dYMax = (((int)m_dYMax+(int)m_dRoundY)/(int)m_dRoundY)*m_dRoundY;
-	}
-
-	// now nYMin & nYMax contain absolute min and absolute max
-	// and these data can be used to calc the graphic's Y scale factor
-	// nXMax contains the maximum number of elements, useful to 
-	// calculate the X scale factor
-
-	// prevent divide by zero
-	if (m_dYMax == 0.0)
-		m_dYMax = (m_dYMin + 10);
 
 	return TRUE;
 }
@@ -1740,7 +1774,7 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 			}
 		}
 
-		if ((m_nNumYTicks > 0) && HasRenderFlag(HMX_RENDER_YAXISSCALE))
+		if ((GetNumYTicks() > 0) && HasRenderFlag(HMX_RENDER_YAXISSCALE))
 		{
 			CFont font;
 			VERIFY(CreateYAxisFont(FALSE, font));

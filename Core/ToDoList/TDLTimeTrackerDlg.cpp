@@ -56,6 +56,7 @@ CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
 void CTDLTimeTrackerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+
 	DDX_Control(pDX, IDC_TASKLISTS, m_cbTasklists);
 	DDX_Control(pDX, IDC_TASKS, m_cbTasks);
 	DDX_Control(pDX, IDC_STARTSTOP, m_btnStart);
@@ -323,7 +324,7 @@ int CTDLTimeTrackerDlg::GetTasklistCBIndex(const CToDoCtrl* pTDC) const
 {
 	ASSERT(m_cbTasklists.GetSafeHwnd());
 	
-	return CDialogHelper::FindItemByData(m_cbTasklists, (DWORD)pTDC);
+	return CDialogHelper::FindItemByDataT(m_cbTasklists, (DWORD)pTDC);
 }
 
 BOOL CTDLTimeTrackerDlg::HasTasklist(const CToDoCtrl* pTDC) const
@@ -347,7 +348,7 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tas
 	else
 		sTitle = pTDC->GetFriendlyProjectName();
 
-	int nTDC = AddString(m_cbTasklists, sTitle, (DWORD)pTDC);
+	int nTDC = AddStringT(m_cbTasklists, sTitle, (DWORD)pTDC);
 	
 	if (nTDC == CB_ERR)
 	{
@@ -391,7 +392,7 @@ BOOL CTDLTimeTrackerDlg::SetTasks(const CToDoCtrl* pTDC, const CTaskFile& tasks)
 
 void CTDLTimeTrackerDlg::UpdateTasklistName(const CToDoCtrl* pTDC)
 {
-	int nTDC = FindItemByData(m_cbTasklists, (DWORD)pTDC);
+	int nTDC = FindItemByDataT(m_cbTasklists, (DWORD)pTDC);
 
 	if (nTDC == CB_ERR)
 	{
@@ -408,7 +409,7 @@ void CTDLTimeTrackerDlg::UpdateTasklistName(const CToDoCtrl* pTDC)
 
 		m_cbTasklists.DeleteString(nTDC);
 
-		int nTDC = AddString(m_cbTasklists, sNewName, (DWORD)pTDC);
+		int nTDC = AddStringT(m_cbTasklists, sNewName, (DWORD)pTDC);
 		ASSERT(nTDC != CB_ERR);
 
 		// Restore 
@@ -420,16 +421,15 @@ void CTDLTimeTrackerDlg::UpdateTasklistName(const CToDoCtrl* pTDC)
 void CTDLTimeTrackerDlg::UpdateAllTasks(const CToDoCtrl* pTDC)
 {
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
+	ASSERT(pTTL);
 
-	if (!pTTL)
-		ASSERT(0);
-	else
+	if (pTTL)
 		pTTL->bNeedFullTaskUpdate = pTTL->bNeedComboRebuild = TRUE;
 }
 
 void CTDLTimeTrackerDlg::DoUpdateAllTasks(const TRACKTASKLIST* pTTL)
 {
-	TDCGETTASKS filter(TDCGT_NOTDONE);
+	TDCGETTASKS filter(TDCGT_NOTDONE, TDCGTF_NOTLOCKED);
 
 	filter.mapAttribs.Add(TDCA_TASKNAME);
 	filter.mapAttribs.Add(TDCA_ICON);
@@ -456,7 +456,7 @@ void CTDLTimeTrackerDlg::UpdateSelectedTasks(const CToDoCtrl* pTDC, const CTDCAt
 	if (mapAttrib.Has(TDCA_PASTE) ||
 		mapAttrib.Has(TDCA_POSITION_SAMEPARENT) ||
 		mapAttrib.Has(TDCA_POSITION_DIFFERENTPARENT) ||
-		(mapAttrib.Has(TDCA_DONEDATE) && !pTDC->SelectedTasksAreAllDone()) ||
+		(mapAttrib.Has(TDCA_DONEDATE) && !pTDC->SelectedTasksAreAllDone(TRUE)) ||
 		(mapAttrib.Has(TDCA_NEWTASK) && !pTDC->IsTaskLabelEditing()))
 	{
 		UpdateAllTasks(pTDC);
@@ -533,7 +533,7 @@ BOOL CTDLTimeTrackerDlg::RemoveTasks(const CToDoCtrl* pTDC, DWORD dwToRemove)
 BOOL CTDLTimeTrackerDlg::SelectTaskList(const CToDoCtrl* pTDC)
 {
 	// Select the tasklist
-	if (CB_ERR == SelectItemByData(m_cbTasklists, (DWORD)pTDC))
+	if (CB_ERR == SelectItemByDataT(m_cbTasklists, (DWORD)pTDC))
 		return FALSE;
 
 	// Update UI
@@ -573,7 +573,7 @@ BOOL CTDLTimeTrackerDlg::RebuildTasklistCombo()
 		else
 			sTitle = pTTL->pTDC->GetFriendlyProjectName();
 		
-		if (AddString(m_cbTasklists, sTitle, (DWORD)pTTL->pTDC) == CB_ERR)
+		if (AddStringT(m_cbTasklists, sTitle, (DWORD)pTTL->pTDC) == CB_ERR)
 		{
 			ASSERT(0);
 			return FALSE;
@@ -749,9 +749,11 @@ void CTDLTimeTrackerDlg::UpdateTaskTime(const CToDoCtrl* pTDC, BOOL bCheckVisibi
 
 	if (HasOption(TTDO_FORMATTIMESASHMS))
 	{
+		DWORD dwFlags = (HMS_ALLOWZERO | HMS_DECIMALPLACES | HMS_PRESERVEUNITS);
+
 		m_sTaskTimes.Format(_T("%s : %s"),
-			th.FormatTimeHMS(timeEst.dAmount, timeEst.GetTHUnits(), (HMS_ALLOWZERO | HMS_DECIMALPLACES)),
-			th.FormatTimeHMS(timeSpent.dAmount, timeSpent.GetTHUnits(), (HMS_ALLOWZERO | HMS_DECIMALPLACES)));
+			th.FormatTimeHMS(timeEst.dAmount, timeEst.GetTHUnits(), dwFlags),
+			th.FormatTimeHMS(timeSpent.dAmount, timeSpent.GetTHUnits(), dwFlags));
 	}
 	else
 	{
@@ -784,27 +786,33 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 		return;
 	}
 	
+	// Between clicking the start/stop button and arriving here
+	// an update may have taken place and invalidated the previously
+	// selected task ID so we need to check before proceeding
 	DWORD dwSelTaskID = GetSelectedTaskID();
 
-	if (pTTL->IsTracking(dwSelTaskID))
+	if (dwSelTaskID)
 	{
-		// notify parent to STOP tracking
-		SendNotifyMessage(WM_TDLTTN_STOPTRACKING, pTTL->pTDC, 0);
+		if (pTTL->IsTracking(dwSelTaskID))
+		{
+			// notify parent to STOP tracking
+			SendNotifyMessage(WM_TDLTTN_STOPTRACKING, pTTL->pTDC, 0);
+		}
+		else
+		{
+			// notify parent to START tracking
+			SendNotifyMessage(WM_TDLTTN_STARTTRACKING, pTTL->pTDC, dwSelTaskID);
+		}
+
+		UpdateTracking(pTTL->pTDC);
+		m_cbTasks.UpdateRecentlyTrackedTasks(pTTL);
+
+		RefreshCaptionText();
+
+		// redraw text colour
+		GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
+		GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
 	}
-	else
-	{
-		// notify parent to START tracking
-		SendNotifyMessage(WM_TDLTTN_STARTTRACKING, pTTL->pTDC, dwSelTaskID);
-	}
-
-	UpdateTracking(pTTL->pTDC);
-	m_cbTasks.UpdateRecentlyTrackedTasks(pTTL);
-
-	RefreshCaptionText();
-
-	// redraw text colour
-	GetDlgItem(IDC_TASKTIME)->Invalidate(FALSE);
-	GetDlgItem(IDC_ELAPSEDTIME)->Invalidate(FALSE);
 }
 
 void CTDLTimeTrackerDlg::OnGoToSelectedTasklist()
@@ -832,28 +840,27 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	{
 		if (nCtlColor == CTLCOLOR_STATIC)
 		{
-			pDC->SetBkMode(TRANSPARENT);
+			COLORREF crBack = GetBkgndColor();
 
 			switch (pWnd->GetDlgCtrlID())
 			{
 			case IDC_TASKTIME:
 			case IDC_ELAPSEDTIME:
 				if (IsTrackingSelectedTasklistAndTask())
-					pDC->SetTextColor(255);
+					pDC->SetTextColor((RGBX(crBack).Luminance() < 128) ? colorPink : colorRed);
 				else
-					pDC->SetTextColor(COLOR_3DDKSHADOW);
-
-				//hbr = GetSysColorBrush(COLOR_3DHIGHLIGHT);
+					pDC->SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
 				break;
 
 			default:
 				if (!m_brBack.GetSafeHandle())
-					m_brBack.CreateSolidBrush(GetBkgndColor());
+					m_brBack.CreateSolidBrush(crBack);
 
 				hbr = (HBRUSH)m_brBack.GetSafeHandle();
 				pDC->SetTextColor(m_theme.crAppText);
 				break;
 			}
+			pDC->SetBkMode(TRANSPARENT);
 		}
 	}
 
@@ -936,13 +943,23 @@ BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 	if (!m_tipCaption.GetSafeHwnd())
 		m_tipCaption.Create(this);
 
+	ExcludeChild(&m_toolbar, pDC);
+	ExcludeChild(&m_cbTasklists, pDC);
+	ExcludeChild(&m_cbTasks, pDC);
+	ExcludeChild(&m_btnStart, pDC);
+	ExcludeChild(&m_eElapsedTime, pDC);
+	ExcludeChild(&m_btnGoToTasklist, pDC);
+	ExcludeChild(&m_btnGoToTask, pDC);
+
+	ExcludeCtrl(this, IDC_QUICKFIND, pDC);
+	ExcludeCtrl(this, IDC_TASKTIME, pDC);
+
 	if (!Misc::IsHighContrastActive())
 	{
 		CRect rClient;
 		GetClientRect(rClient);
 		
 		pDC->FillSolidRect(rClient, GetBkgndColor());
-		
 		return TRUE;
 	}
 
@@ -1276,7 +1293,7 @@ void CTDLTimeTrackerDlg::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 
 void CTDLTimeTrackerDlg::CollapseWindow(BOOL bCollapse)
 {
-	if (Misc::StateChanged(m_bCollapsed, bCollapse))
+	if (Misc::StatesDiffer(m_bCollapsed, bCollapse))
 	{
 		m_bCollapsed = bCollapse;
 

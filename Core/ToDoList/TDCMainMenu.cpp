@@ -46,14 +46,6 @@ CTDCMainMenu::~CTDCMainMenu()
 {
 }
 
-void CTDCMainMenu::SetUITheme(const UITHEME& theme)
-{
-	m_theme = theme;
-
-	if (GetSafeHmenu())
-		UpdateBackgroundColor();
-}
-
 BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 {
 	CWnd* pMainWnd = AfxGetMainWnd();
@@ -88,8 +80,6 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 	}
 #endif
 
-	UpdateBackgroundColor();
-	
 	return TRUE;
 }
 
@@ -177,7 +167,7 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	}
 	else if (IsInRange(nMenuID, ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50))
 	{
-		USERTOOL tool;
+		TDCUSERTOOL tool;
 		int nTool = (nMenuID - ID_TOOLS_USERTOOL1);
 
 		if (prefs.GetUserTool(nTool, tool))
@@ -222,8 +212,8 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	{
 		int nFilter = (nMenuID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
 
-		if (nFilter < filterBar.GetAdvancedFilterNames().GetSize())
-			sTipText = filterBar.GetAdvancedFilterNames().GetAt(nFilter);
+		if (nFilter < filterBar.AdvancedFilterNames().GetSize())
+			sTipText = filterBar.AdvancedFilterNames().GetAt(nFilter);
 	}
 	else
 	{
@@ -278,40 +268,6 @@ void CTDCMainMenu::LoadMenuCommon()
 	}
 }
 
-void CTDCMainMenu::UpdateBackgroundColor()
-{
-	// set the menu background colour
-	// Note: On XP and classic, the menu bar is not distinctive
-	// so we set the menu color a little darker than 3DFACE
-	if (!CThemed::IsAppThemed())
-	{
-		SetBackgroundColor(GraphicsMisc::Darker(GetSysColor(COLOR_3DFACE), 0.1));
-	}
-	else if (COSVersion() < OSV_VISTA)
-	{
-		if (m_theme.crMenuBack == m_theme.crAppBackLight)
-		{
-			if (m_theme.crAppBackDark != m_theme.crAppBackLight)
-			{
-				SetBackgroundColor(m_theme.crAppBackDark);
-			}
-			else
-			{
-				SetBackgroundColor(GraphicsMisc::Darker(m_theme.crAppBackLight, 0.1));
-			}
-		}
-		else
-		{
-			SetBackgroundColor(m_theme.crMenuBack);
-		}
-
-	}
-	else // Vista+ with themes
-	{
-		SetBackgroundColor(m_theme.crMenuBack);
-	}
-}
-
 // test for top-level menus
 BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,  
 									   const CFilteredToDoCtrl& tdc, 
@@ -352,7 +308,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 			return TRUE;
 
 		case ID_VIEW_ACTIVATEFILTER1:
-			PrepareFiltersActivationMenu(pPopupMenu, filterBar);
+			PrepareFiltersActivationMenu(pPopupMenu, filterBar, prefs);
 			return TRUE;
 
 		case ID_ACTIVATEVIEW_TASKTREE:
@@ -370,7 +326,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 
 void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 										  const CFilteredToDoCtrl& tdc,
-										  const CPreferencesDlg& prefs) const
+										  const CPreferencesDlg& prefs)
 {
 	PrepareEditMenu(pMenu, tdc, prefs);
 
@@ -419,7 +375,7 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 
 void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
 											 const CFilteredToDoCtrl& tdc,
-											 const CPreferencesDlg& prefs) const
+											 const CPreferencesDlg& prefs)
 {
 	PrepareFileMenu(pMenu, prefs);
 	PrepareEditMenu(pMenu, tdc, prefs);
@@ -485,46 +441,9 @@ void CTDCMainMenu::PrepareTaskViewActivationMenu(CMenu* pMenu, const CFilteredTo
 	helper.AddExtensionsToMenu(pMenu, mgrUIExt, aTypeIDs);
 
 	// Active view
-	FTC_VIEW nView = tdc.GetTaskView();
-	int nMenuID = 0;
+	int nSelMenuID = TDC::MapTaskViewToActivateID(tdc.GetTaskView());
 
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		nMenuID = ID_ACTIVATEVIEW_TASKTREE;
-		break;
-
-	case FTCV_TASKLIST:
-		nMenuID = ID_ACTIVATEVIEW_LISTVIEW;
-		break;
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		nMenuID = (ID_ACTIVATEVIEW_UIEXTENSION1 + (nView - FTCV_UIEXTENSION1));
-		break;
-
-		// all else
-	default:
-		ASSERT(0);
-		return;
-	}
-
-	pMenu->CheckMenuRadioItem(0, ID_ACTIVATEVIEW_UIEXTENSION16, nMenuID, MF_BYCOMMAND);
+	pMenu->CheckMenuRadioItem(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, nSelMenuID, MF_BYCOMMAND);
 }
 
 BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu) const
@@ -571,9 +490,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 	if (!pMenu)
 		return;
 
-	if (!prefs.GetShowEditMenuAsColumns())
-		return;
-
+	BOOL bVisibleColsEditsOnly = prefs.GetShowEditMenuAsColumns();
 	int nCountLastSep = 0;
 
 	for (int nItem = 0; nItem < (int)pMenu->GetMenuItemCount(); nItem++)
@@ -591,7 +508,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 				if (pPopup)
 				{
-					PrepareEditMenu(pPopup, tdc, prefs);
+					PrepareEditMenu(pPopup, tdc, prefs); // RECURSIVE CALL
 
 					// if the popup is now empty remove it too
 					bDelete = !pPopup->GetMenuItemCount();
@@ -601,18 +518,32 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 		case ID_EDIT_SETTASKLISTCOLOR:
 		case ID_EDIT_CLEARTASKLISTCOLOR:
-			bDelete = !CTabCtrlEx::IsSupportedFlag(TCE_TABCOLORS);
+			{
+				bDelete = !CTabCtrlEx::IsSupportedFlag(TCE_TABCOLORS);
+			}
 			break;
 
 		case ID_EDIT_TASKCOLOR:
 		case ID_EDIT_CLEARTASKCOLOR:
-			bDelete = !((prefs.GetTextColorOption() == COLOROPT_DEFAULT) ||
-						tdc.IsEditFieldShowing(TDCA_COLOR));
+			if (prefs.GetTextColorOption() != TEXTOPT_DEFAULT)
+			{
+				bDelete = TRUE;
+			}
+			else if (bVisibleColsEditsOnly && !tdc.IsEditFieldShowing(TDCA_COLOR))
+			{
+				bDelete = TRUE;
+			}
 			break;
 
 		case ID_EDIT_DECTASKPRIORITY:
 		case ID_EDIT_INCTASKPRIORITY:
 		case ID_EDIT_SETPRIORITYNONE:
+			if (bVisibleColsEditsOnly)
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY);
+			}
+			break;
+
 		case ID_EDIT_SETPRIORITY0:
 		case ID_EDIT_SETPRIORITY1:
 		case ID_EDIT_SETPRIORITY2:
@@ -624,61 +555,110 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		case ID_EDIT_SETPRIORITY8:
 		case ID_EDIT_SETPRIORITY9:
 		case ID_EDIT_SETPRIORITY10:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY);
+			if (bVisibleColsEditsOnly && !tdc.IsColumnOrEditFieldShowing(TDCC_PRIORITY, TDCA_PRIORITY))
+			{
+				bDelete = TRUE;
+			}
+			else
+			{
+				int nPriority = (int)(nMenuID - ID_EDIT_SETPRIORITY0);
+				int nNumLevels = prefs.GetNumPriorityRiskLevels();
+
+				if (nPriority >= nNumLevels)
+				{
+					bDelete = TRUE;
+				}
+				else if ((nNumLevels < 11) && (nPriority == 0))
+				{
+					UINT aStrResIDs[11];
+					TDC::GetPriorityRiskLevelStringResourceIDs(nNumLevels, aStrResIDs);
+
+					for (int nLevel = 0; nLevel < nNumLevels; nLevel++)
+					{
+						CEnMenu::SetMenuString(*pMenu, 
+											   (nLevel + ID_EDIT_SETPRIORITY0),
+											   Misc::Format(_T("%d (%s)"), nLevel, CEnString(aStrResIDs[nLevel])),
+											   MF_BYCOMMAND);
+					}
+				}
+			}
 			break;
 
 		case ID_EDIT_OFFSETDATES:
-			bDelete = !(tdc.IsColumnOrEditFieldShowing(TDCC_STARTDATE, TDCA_STARTDATE) ||
-						tdc.IsColumnOrEditFieldShowing(TDCC_DUEDATE, TDCA_DUEDATE) ||
-						tdc.IsColumnOrEditFieldShowing(TDCC_DONEDATE, TDCA_DONEDATE));
+			if (bVisibleColsEditsOnly)
+			{
+				bDelete = !(tdc.IsColumnOrEditFieldShowing(TDCC_STARTDATE, TDCA_STARTDATE) ||
+							tdc.IsColumnOrEditFieldShowing(TDCC_DUEDATE, TDCA_DUEDATE) ||
+							tdc.IsColumnOrEditFieldShowing(TDCC_DONEDATE, TDCA_DONEDATE));
+			}
 			break;
 
 		case ID_EDIT_CLOCK_TASK:
-			bDelete = !(tdc.IsColumnShowing(TDCC_TRACKTIME) ||
-						tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT));
+			if (bVisibleColsEditsOnly)
+			{
+				bDelete = !(tdc.IsColumnShowing(TDCC_TRACKTIME) ||
+							tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT));
+			}
 			break;
 
 		case ID_SHOWTIMELOGFILE:
 		case ID_ADDTIMETOLOGFILE:
-			bDelete = !((tdc.IsColumnShowing(TDCC_TRACKTIME) ||
-						 tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT)) &&
-						prefs.GetLogTimeTracking());
+			if (bVisibleColsEditsOnly && prefs.GetLogTimeTracking())
+			{
+				bDelete = !(tdc.IsColumnShowing(TDCC_TRACKTIME) ||
+							tdc.IsColumnOrEditFieldShowing(TDCC_TIMESPENT, TDCA_TIMESPENT));
+			}
 			break;
 
 		case ID_EDIT_DECTASKPERCENTDONE:
 		case ID_EDIT_INCTASKPERCENTDONE:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PERCENT, TDCA_PERCENT);
+			if (bVisibleColsEditsOnly)
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PERCENT, TDCA_PERCENT);
+			}
 			break;
 
 		case ID_EDIT_OPENFILELINK1:
 		case ID_EDIT_SETFILELINK:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_FILELINK, TDCA_FILELINK);
+			if (bVisibleColsEditsOnly)
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_FILELINK, TDCA_FILELINK);
+			}
 			break;
 
 		case ID_EDIT_FLAGTASK:
-			bDelete = !tdc.IsColumnShowing(TDCC_FLAG);
-			break;
-
-		case ID_EDIT_LOCKTASK:
-			bDelete = FALSE;
+			if (bVisibleColsEditsOnly)
+			{
+				bDelete = !tdc.IsColumnShowing(TDCC_FLAG);
+			}
 			break;
 
 		case ID_EDIT_RECURRENCE:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_RECURRENCE, TDCA_RECURRENCE);
+			if (bVisibleColsEditsOnly)
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_RECURRENCE, TDCA_RECURRENCE);
+			}
 			break;
 
 		case ID_EDIT_GOTODEPENDENCY:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_DEPENDENCY, TDCA_DEPENDENCY);
+			if (bVisibleColsEditsOnly)
+			{
+				bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_DEPENDENCY, TDCA_DEPENDENCY);
+			}
 			break;
 
+		case ID_EDIT_LOCKTASK:
 		case ID_EDIT_SETTASKICON:
 		case ID_EDIT_CLEARTASKICON:
+			// Always visible
 			break;
 			
 		case ID_SEPARATOR:
-			bIsSeparator = TRUE;
-			bDelete = (nCountLastSep == 0);
-			nCountLastSep = 0;
+			{
+				bIsSeparator = TRUE;
+				bDelete = (nCountLastSep == 0);
+				nCountLastSep = 0;
+			}
 			break;
 
 		default:
@@ -809,27 +789,24 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 	}
 }
 
-void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar)
+void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar, const CPreferencesDlg& prefs)
 {
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, CTDCFilter::GetDefaultFilterNames(), IDS_FILTERPLACEHOLDER);
-	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.GetAdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
+	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.AdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
 
-	// Restore selection
-	int nSelFilter = filterBar.GetSelectedFilter();
+	// Enable state
+	BOOL bWantDefFilters = prefs.GetShowDefaultFiltersInFilterBar();
 
-	if (filterBar.GetFilter() == FS_ADVANCED)
+	for (int nFilter = 0; nFilter < NUM_SHOWFILTER; nFilter++)
 	{
-		CString sFilter;
-		VERIFY((filterBar.GetFilter(sFilter) == FS_ADVANCED) && !sFilter.IsEmpty());
-
-		int nFilter = Misc::Find(sFilter, filterBar.GetAdvancedFilterNames(), FALSE, TRUE);
-		ASSERT(nFilter != -1);
-
-		nSelFilter = (NUM_SHOWFILTER + 1 + nFilter); // +1 for separator
+		BOOL bEnable = (bWantDefFilters || (nFilter == 0));
+		pMenu->EnableMenuItem(ID_VIEW_ACTIVATEFILTER1 + nFilter, (bEnable ? MF_ENABLED : MF_DISABLED));
 	}
 
-	if (nSelFilter != -1)
-		pMenu->CheckMenuRadioItem(0, pMenu->GetMenuItemCount(), nSelFilter, MF_BYPOSITION);
+	// Restore selection
+	UINT nSelMenuID = GetSelectedFilterMenuID(filterBar);
+
+	pMenu->CheckMenuRadioItem(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, nSelMenuID, MF_BYCOMMAND);
 }
 
 void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID)
@@ -866,6 +843,64 @@ void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const 
 	}
 }
 
+BOOL CTDCMainMenu::GetFilterToActivate(UINT nMenuID,
+									   const CTDLFilterBar& filterBar,
+									   const CPreferencesDlg& prefs,
+									   FILTER_SHOW& nShow,
+									   CString& sAdvFilter)
+{
+	if (IsInRange(nMenuID, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24))
+	{
+		int nFilter = (nMenuID - ID_VIEW_ACTIVATEFILTER1);
+
+		if ((nFilter >= 0) && (nFilter < NUM_SHOWFILTER))
+		{
+			nShow = (FILTER_SHOW)SHOW_FILTERS[nFilter][1];
+			sAdvFilter.Empty();
+
+			if (!prefs.GetShowDefaultFiltersInFilterBar())
+				return (nShow == FS_ALL);
+
+			// else
+			return TRUE;
+		}
+	}
+	else if (IsInRange(nMenuID, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24))
+	{
+		int nFilter = (nMenuID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
+
+		if ((nFilter >= 0) && (nFilter < filterBar.AdvancedFilterNames().GetSize()))
+		{
+			nShow = FS_ADVANCED;
+
+			sAdvFilter = filterBar.AdvancedFilterNames()[nFilter];
+			ASSERT(!sAdvFilter.IsEmpty());
+
+			return TRUE;
+		}
+	}
+
+	ASSERT(0);
+	return FALSE;
+}
+
+UINT CTDCMainMenu::GetSelectedFilterMenuID(const CTDLFilterBar& filterBar)
+{
+	CString sAdvFilter;
+	FILTER_SHOW nShow = filterBar.GetFilter(sAdvFilter);
+
+	if (nShow == FS_ADVANCED)
+	{
+		int nFilter = Misc::Find(sAdvFilter, filterBar.AdvancedFilterNames(), FALSE, TRUE);
+		ASSERT(nFilter != -1);
+
+		return (ID_VIEW_ACTIVATEADVANCEDFILTER1 + nFilter);
+	}
+
+	// else
+	return (ID_VIEW_ACTIVATEFILTER1 + nShow - FS_ALL);
+}
+
 void CTDCMainMenu::PrepareUserStorageMenu(CMenu* pMenu, const CTDLTasklistStorageMgr& mgrStorage, CMenuIconMgr& mgrMenuIcons)
 {
 	ASSERT(pMenu);
@@ -890,7 +925,8 @@ void CTDCMainMenu::PrepareUserStorageMenu(CMenu* pMenu, const CTDLTasklistStorag
 
 		for (int nStore = 0; nStore < nNumStorage; nStore++)
 		{
-			CString sMenuItem, sText = mgrStorage.GetStorageMenuText(nStore);
+			CString sMenuItem;
+			CEnString sText(mgrStorage.GetStorageMenuText(nStore));
 
 			if (nStore < 9)
 				sMenuItem.Format(_T("&%d %s"), nStore + 1, sText);
@@ -919,7 +955,7 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 	if (!pMenu)
 		return;
 
-	CUserToolArray aTools;
+	CTDCUserToolArray aTools;
 	prefs.GetUserTools(aTools);
 
 	CTDCToolsHelper(FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons);

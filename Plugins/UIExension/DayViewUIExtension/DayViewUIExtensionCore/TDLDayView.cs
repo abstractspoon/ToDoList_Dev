@@ -6,7 +6,6 @@ using System.Diagnostics;
 
 using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
-using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace DayViewUIExtension
 {
@@ -16,12 +15,16 @@ namespace DayViewUIExtension
 	{
 		public string CustomAttributeId { get; private set; }
 
-		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
+		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, Calendar.SelectionTool.Mode mode, Calendar.SelectionTool.State state) 
+			: 
+			base(appointment, mode, state)
 		{
 			CustomAttributeId = "";
 		}
 
-		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, string attribId, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
+		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, string attribId, Calendar.SelectionTool.Mode mode, Calendar.SelectionTool.State state) 
+			: 
+			base(appointment, mode, state)
 		{
 			CustomAttributeId = attribId;
 		}
@@ -47,6 +50,7 @@ namespace DayViewUIExtension
 		private bool m_HideTasksSpanningWeekends = false;
 		private bool m_HideTasksSpanningDays = false;
 		private bool m_ShowFutureOcurrences = true;
+		private bool m_TreatOverdueTasksAsDueToday = false;
 
 		private TaskItems m_TaskItems;
 		private DateSortedTasks m_DateSortedTasks;
@@ -55,7 +59,6 @@ namespace DayViewUIExtension
 		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
 		private List<CustomAttributeDefinition> m_CustomDateDefs;
 
-		//private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
 		private UIExtension.TaskRecurrences m_TaskRecurrences;
 		private Translator m_Trans;
@@ -84,7 +87,7 @@ namespace DayViewUIExtension
 			dayGripWidth = 1; // to match app styling
 
 			m_Trans = trans;
-			m_TaskIcons = taskIcons;
+			m_RenderHelper.TaskIcons = taskIcons;
 			m_ToolbarRenderer = new UIThemeToolbarRenderer();
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
@@ -140,8 +143,7 @@ namespace DayViewUIExtension
 
 			bool startPortion = (tip.Rect.Right < tdlView.Rectangle.Right);
 
-			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, TextOffset);
-			tip.Rect.Inflate(TextPadding, TextPadding);
+			tip.Rect.Offset(startPortion ? tdlView.TextHorzOffset : 0, m_RenderHelper.TextOffset);
 
 			var appt = tdlView.Appointment;
 			tip.Id = appt.Id;
@@ -171,8 +173,8 @@ namespace DayViewUIExtension
 
 				var pos = PointToClient(MousePosition);
 				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
-				tip.Rect.Location = pos;
 
+				tip.Rect.Location = pos;
 				tip.InitialDelay = 500;
 			}
 			else // 'Real' task
@@ -214,6 +216,9 @@ namespace DayViewUIExtension
 				}
 			}
 
+			// Inflate the rect now we've done all our calculations
+			tip.Rect.Inflate(m_RenderHelper.TextPadding, m_RenderHelper.TextPadding);
+
 			return tip;
 		}
 
@@ -232,7 +237,7 @@ namespace DayViewUIExtension
 					if (args.Appointment is TaskCustomDateAttribute)
 					{
 						custAttribId = (args.Appointment as TaskCustomDateAttribute).AttributeId;
-						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
+						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.State));
 					}
 					else if (args.Appointment is TaskTimeBlock)
 					{
@@ -240,7 +245,7 @@ namespace DayViewUIExtension
 					}
 					else
 					{
-						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, move.Mode, move.Finished));
+						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, move.Mode, move.State));
 					}
 				}
 			}
@@ -360,6 +365,21 @@ namespace DayViewUIExtension
 				if (value != m_ShowFutureOcurrences)
 				{
 					m_ShowFutureOcurrences = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool TreatOverdueTasksAsDueToday
+		{
+			get { return m_TreatOverdueTasksAsDueToday; }
+			set
+			{
+				if (value != m_TreatOverdueTasksAsDueToday)
+				{
+					m_TreatOverdueTasksAsDueToday = value;
+					m_TaskItems.TreatOverdueTasksAsDueToday = value;
+
 					Invalidate();
 				}
 			}
@@ -667,6 +687,7 @@ namespace DayViewUIExtension
 				return false;
 
 			SelectedAppointment = null;
+			Invalidate();
 
 			return SelectTask(taskId);
 		}
@@ -785,25 +806,28 @@ namespace DayViewUIExtension
 			return view;
 		}
 
-		override protected Calendar.AppointmentView GetAppointmentViewAt(int x, int y)
+		override protected bool AppointmentViewContains(Calendar.AppointmentView view, int x, int y)
 		{
-			var view = base.GetAppointmentViewAt(x, y);
+			if ((view == null) || !view.Rectangle.Contains(x, y))
+				return false;
 
-			if ((view != null) && view.IsLong && !DisplayLongTasksContinuous)
+			if (view.IsLong && !DisplayLongTasksContinuous)
 			{
 				var tdlView = (view as TDLAppointmentView);
 
 				if ((x < tdlView.EndOfStart) || (x > tdlView.StartOfEnd))
-					return view;
+					return true;
 
 				if (DisplayActiveTasksToday && IsTodayVisible)
 				{
 					if ((x > tdlView.StartOfToday) && (x < tdlView.EndOfToday))
-						return view;
+						return true;
 				}
+
+				return false;
 			}
 
-			return view;
+			return true;
 		}
 
 		public Calendar.Appointment GetAppointment(uint taskID)
@@ -866,7 +890,7 @@ namespace DayViewUIExtension
 					rect.X += 1;
 					rect.Y += 1;
 
-					rect.Height = (GetFontHeight() + 4); // 4 = border
+					rect.Height = (m_RenderHelper.FontHeight + 4); // 4 = border
 				}
 
 				return true;
@@ -1059,7 +1083,9 @@ namespace DayViewUIExtension
 			bool newTask = (m_TaskItems.ContainsKey(taskId) == false);
 
 			TaskItem taskItem = m_TaskItems.GetItem(taskId, newTask);
+
 			taskItem.UpdateTaskAttributes(task, m_CustomDateDefs, type, newTask, metaDataKey, depth);
+			taskItem.TreatOverdueTasksAsDueToday = m_TreatOverdueTasksAsDueToday;
 
 			// Update Time Blocks
 			if (newTask || 
@@ -1089,7 +1115,7 @@ namespace DayViewUIExtension
 				DateTime endDate = SelectedDates.End;
 
 				if (TaskItem.IsStartOfDay(endDate))
-					endDate = endDate.AddSeconds(-1);
+					endDate = endDate.AddSeconds(-1); // end of day before
 
 				task.SetDueDate(endDate);
 			}
@@ -1114,7 +1140,7 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		private bool m_StrikeThruDoneTasks;
+		private bool m_StrikeThruDoneTasks = false;
 
 		public bool StrikeThruDoneTasks
 		{
@@ -1129,7 +1155,18 @@ namespace DayViewUIExtension
 			}
 		}
 
-		private bool m_TaskColorIsBackground;
+		public bool DisplayDatesInISO
+		{
+			get { return m_RenderHelper.DisplayDatesInISO; }
+
+			set
+			{
+				m_RenderHelper.DisplayDatesInISO = value;
+				base.AmPmDisplay = (value == false);
+			}
+		}
+
+		private bool m_TaskColorIsBackground = false;
 
 		public bool TaskColorIsBackground
         {
@@ -1144,7 +1181,7 @@ namespace DayViewUIExtension
             }
         }
 
-		private bool m_ShowParentsAsFolder;
+		private bool m_ShowParentsAsFolder = false;
 
 		public bool ShowParentsAsFolder
 		{
@@ -1189,79 +1226,6 @@ namespace DayViewUIExtension
             return time;
         }
 
-		protected override void DrawDay(PaintEventArgs e, Rectangle rect, DateTime date)
-		{
-			e.Graphics.FillRectangle(SystemBrushes.Window, rect);
-
-			if (SystemInformation.HighContrast)
-			{
-				// Draw selection first because it's opaque
-				DrawDaySelection(e, rect, date);
-
-				DrawDaySlotSeparators(e, rect, date);
-				DrawNonWorkHours(e, rect, date);
-				DrawTodayBackground(e, rect, date);
-				DrawDayAppointments(e, rect, date);
-			}
-			else
-			{
-				DrawDaySlotSeparators(e, rect, date);
-				DrawNonWorkHours(e, rect, date);
-				DrawTodayBackground(e, rect, date);
-				DrawDayAppointments(e, rect, date);
-
-				// Draw selection last because it's translucent
-				DrawDaySelection(e, rect, date);
-			}
-
-			DrawTodayTime(e, rect, date);
-			DrawDayGripper(e, rect);
-		}
-
-		private bool WantDrawToday(DateTime date)
-		{
-			if (!Theme.HasAppColor(UITheme.AppColor.Today))
-				return false;
-			
-			return (date.Date == DateTime.Now.Date);
-		}
-
-		protected void DrawTodayBackground(PaintEventArgs e, Rectangle rect, DateTime date)
-		{
-			if (!WantDrawToday(date))
-				return;
-
-			using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
-			{
-				e.Graphics.FillRectangle(brush, rect);
-			}
-		}
-
-		protected void DrawTodayTime(PaintEventArgs e, Rectangle rect, DateTime date)
-		{
-			if (date.Date != DateTime.Now.Date)
-				return;
-
-			int vPos = GetHourScrollPos(DateTime.Now);
-
-			if ((vPos > rect.Top) && (vPos < rect.Bottom))
-			{
-				Color color = Theme.GetAppDrawingColor(UITheme.AppColor.Today);
-
-				using (var pen = new Pen(color, DPIScaling.Scale(2.0f)))
-				{
-					e.Graphics.DrawLine(pen, rect.Left, vPos, rect.Right, vPos);
-
-					// Draw a blob at the end point to draw attention to the line
-					// Note: we avoid the start because that might conflict with a task's 'bar'
-					using (var brush = new SolidBrush(color))
-					{
-						e.Graphics.FillEllipse(brush, RectUtil.CentredRect(new Point(rect.Right, vPos), DPIScaling.Scale(10)));
-					}
-				}
-			}
-		}
-
 		void UpdateTodayTime()
 		{
 			var today = DateTime.Now.Date;
@@ -1272,54 +1236,6 @@ namespace DayViewUIExtension
 
 				if ((vPos >= HeaderHeight) && (vPos < ClientRectangle.Bottom))
 					Invalidate();
-			}
-		}
-
-		protected void DrawNonWorkHours(PaintEventArgs e, Rectangle rect, DateTime date)
-		{
-			if (Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(date.DayOfWeek))
-			{
-				var weekendColor = Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
-
-				// If this is also 'today' then convert to gray so it doesn't 
-				// impose too much when the today colour is laid on top
-				if (WantDrawToday(date))
-					weekendColor = DrawingColor.ToGray(weekendColor);
-
-				using (var brush = new SolidBrush(weekendColor))
-					e.Graphics.FillRectangle(brush, rect);
-			}
-			else if (Theme.HasAppColor(UITheme.AppColor.NonWorkingHours))
-			{
-				var nonWorkColor = Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128);
-
-				// If this is also 'today' then convert to gray so it doesn't 
-				// impose too much when the today colour is laid on top
-				if (WantDrawToday(date))
-					nonWorkColor = DrawingColor.ToGray(nonWorkColor);
-
-				using (SolidBrush brush = new SolidBrush(nonWorkColor))
-				{
-					DrawNonWorkHours(e, new HourMin(0, 0), WorkStart, rect, brush);
-					DrawNonWorkHours(e, LunchStart, LunchEnd, rect, brush);
-					DrawNonWorkHours(e, WorkEnd, new HourMin(24, 0), rect, brush);
-				}
-			}
-		}
-		
-		protected void DrawNonWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect, Brush brush)
-		{
-			if (start < end)
-			{
-				Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
-
-				if (hoursRect.Y < HeaderHeight)
-				{
-					hoursRect.Height -= HeaderHeight - hoursRect.Y;
-					hoursRect.Y = HeaderHeight;
-				}
-
-				e.Graphics.FillRectangle(brush, hoursRect);
 			}
 		}
 
@@ -1346,46 +1262,65 @@ namespace DayViewUIExtension
 			return base.EnsureVisible(appt, partialOK);
 		}
 
-		protected override bool WantDrawAppointmentSelected(Calendar.Appointment appt)
-		{
-			return (GetAppointmentSelectedState(appt) != UIExtension.SelectionRect.Style.None);
-		}
-
-		protected UIExtension.SelectionRect.Style GetAppointmentSelectedState(Calendar.Appointment appt)
-		{
-			if (base.SavingToImage)
-				return UIExtension.SelectionRect.Style.None;
-
-			if (m_SelectedTaskID == appt.Id)
-				return (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
-
-			// Check interrelatedness of types
-			if (Focused)
-			{
-				var realAppt = GetRealAppointment(appt);
-				var selAppt = GetAppointment(m_SelectedTaskID);
-				var selRealAppt = GetRealAppointment(selAppt);
-
-				if (selRealAppt == realAppt)
-				{
-					// If this date's 'real' task is selected show the extension date as 'lightly' selected
-					if ((appt is TaskExtensionItem))
-						return UIExtension.SelectionRect.Style.DropHighlighted;
-
-					// If this is the real task for a selected custom date or time block, 
-					// show the real task as 'lightly' selected
-					if ((selAppt is TaskCustomDateAttribute) || (selAppt is TaskTimeBlock))
-						return UIExtension.SelectionRect.Style.DropHighlighted;
-				}
-			}
-
-			// else
-			return UIExtension.SelectionRect.Style.None;
-		}
-
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
 		{
 			args.Appointments = GetMatchingAppointments(args.StartDate, args.EndDate);
+		}
+
+		protected override bool AppointmentsIntersect(Calendar.Appointment appt, Calendar.Appointment apptOther)
+		{
+			if (!base.AppointmentsIntersect(appt, apptOther))
+				return false;
+
+			if (appt.IsLongAppt() && !DisplayLongTasksContinuous)
+			{
+				// Note: TaskItem.EndDate already takes account of TreatOverdueTasksAsDueToday
+
+				// Test if one appointment's start/end dates 
+				// match the start/end dates of the other
+				if ((appt.StartDate.Date == apptOther.StartDate.Date) ||
+					(appt.StartDate.Date == apptOther.EndDate.Date) ||
+					(appt.EndDate.Date == apptOther.EndDate.Date) ||
+					(appt.EndDate.Date == apptOther.StartDate.Date))
+				{
+					return true;
+				}
+
+				if (DisplayActiveTasksToday)
+				{
+					// If one appointment intersects with today, test if 
+					// the other's start/end dates also matches today
+					if (appt.IntersectsToday)
+					{
+						if (apptOther.IntersectsToday)
+							return true;
+
+						DateTime today = DateTime.Today;
+
+						if ((today == appt.StartDate.Date) || 
+							(today == appt.EndDate.Date))
+						{
+							return true;
+						}
+					}
+					else if (apptOther.IntersectsToday)
+					{
+						DateTime today = DateTime.Today;
+
+						if ((today == apptOther.StartDate.Date) ||
+							(today == apptOther.EndDate.Date))
+						{
+							return true;
+						}
+					}
+				}
+
+				// else
+				return false;
+			}
+
+			// else
+			return true;
 		}
 
 		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end)
@@ -1592,7 +1527,10 @@ namespace DayViewUIExtension
 				custDate.ClearDate();
 
 				// Notify parent of change
-				AppointmentMove?.Invoke(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, custDate.AttributeId, Calendar.SelectionTool.Mode.None, true));
+				AppointmentMove?.Invoke(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, 
+																			  custDate.AttributeId, 
+																			  Calendar.SelectionTool.Mode.None, 
+																			  Calendar.SelectionTool.State.Finished));
 
 				// Move selection to 'real' task
 				SelectTask(custDate.RealTaskId, true);
@@ -1698,43 +1636,130 @@ namespace DayViewUIExtension
 			return true;
 		}
 
+		private bool HasCalculatedStartDate(Calendar.Appointment appt)
+		{
+			if (appt is TaskItem)
+				return (appt as TaskItem).HasCalculatedStartDate;
+
+			return false;
+		}
+
+		private bool HasCalculatedEndDate(Calendar.Appointment appt)
+		{
+			if (appt is TaskItem)
+				return (appt as TaskItem).HasCalculatedEndDate;
+
+			if (appt is TaskCustomDateAttribute)
+				return (appt as TaskCustomDateAttribute).HasCalculatedEndDate;
+
+			return false;
+		}
+
 		private bool CanModifyAppointmentDates(Calendar.Appointment appt, Calendar.SelectionTool.Mode mode)
 		{
-			if ((appt != null) && !appt.Locked)
+			if (appt == null)
+				return false;
+			
+			if (appt.Locked)
+				return false;
+			
+			if (appt is TaskFutureOccurrence)
+				return false;
+
+			bool isTimeBlock = (appt is TaskTimeBlock);
+
+			if (ReadOnly && !isTimeBlock)
+				return false;
+
+			var taskItem = (appt as TaskItem);
+
+			// Disable start date editing for tasks with dependencies that are auto-calculated
+			// Disable resizing for custom date attributes
+			bool isCustomDate = (appt is TaskCustomDateAttribute);
+			bool hasDepends = ((taskItem != null) && taskItem.HasDependencies);
+			bool hasLockedDepends = (hasDepends && DependencyDatesAreCalculated);
+
+			switch (mode)
 			{
-				var taskItem = (appt as TaskItem);
-
-				// Disable modification of parents with calculated dates
-				if ((taskItem != null) && taskItem.IsCalculatedParent)
-					return false;
-
-				// Disable start date editing for tasks with dependencies that are auto-calculated
-				// Disable resizing for custom date attributes
-				bool isCustomDate = (appt is TaskCustomDateAttribute);
-				bool isTimeBlock = (appt is TaskTimeBlock);
-				bool hasDepends = ((taskItem != null) && taskItem.HasDependencies);
-				bool hasLockedDepends = (hasDepends && DependencyDatesAreCalculated);
-
-				switch (mode)
+			case Calendar.SelectionTool.Mode.Move:
+				if (hasLockedDepends)
 				{
-				case Calendar.SelectionTool.Mode.Move:
-					return (isTimeBlock || (!ReadOnly && !hasLockedDepends));
-
-				case Calendar.SelectionTool.Mode.ResizeTop:
-					return (isTimeBlock || (!ReadOnly && (!isCustomDate && !hasLockedDepends)));
-
-				case Calendar.SelectionTool.Mode.ResizeLeft:
-					return (!isTimeBlock && !isCustomDate && !hasLockedDepends);
-
-				case Calendar.SelectionTool.Mode.ResizeBottom:
-					return (isTimeBlock || !isCustomDate);
-
-				case Calendar.SelectionTool.Mode.ResizeRight:
-					return (!isTimeBlock && !isCustomDate);
+					// can't change the start date if it's dependent
+					// on the end date of another task
+					return false;
 				}
+				else if (HasCalculatedStartDate(appt))
+				{
+					// can't move a task with a calculated start date
+					return false;
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeTop:
+				if (isCustomDate)
+				{
+					// custom dates are ALWAYS long tasks
+					return false; 
+				}
+				else if (hasLockedDepends)
+				{
+					// can't change the start date if it's dependent
+					// on the end date of another task
+					return false; 
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeLeft:
+				if (isTimeBlock)
+				{
+					// time blocks are NEVER long tasks
+					return false; 
+				}
+				else if (isCustomDate)
+				{
+					// custom dates are of FIXED length
+					return false;
+				}
+				else if (hasLockedDepends)
+				{
+					// can't change the start date if it's dependent
+					// on the end date of another task
+					return false;
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeBottom:
+				if (isCustomDate)
+				{
+					// custom dates are ALWAYS long tasks
+					return false;
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeRight:
+				if (isTimeBlock)
+				{
+					// time blocks are NEVER long tasks
+					return false;
+				}
+				else if (isCustomDate)
+				{
+					// custom dates are of FIXED length
+					return false;
+				}
+				else if (HasCalculatedEndDate(appt))
+				{
+					// can't resize a task with a calculated end date
+					return false;
+				}
+				break;
+
+			default:
+				return false;
 			}
-			// catch all
-			return false;
+
+			// all else
+			return true;
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
@@ -1799,7 +1824,8 @@ namespace DayViewUIExtension
 					if (realAppt.Locked)
 						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
-					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+					if (mode == Calendar.SelectionTool.Mode.Move)
+						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 				}
 			}
 
@@ -1873,7 +1899,7 @@ namespace DayViewUIExtension
 			int minDayWidth = 0;
 
 			using (Graphics g = Graphics.FromHwnd(Handle))
-				minDayWidth = CalculateMinimumDayWidthForImage(g);
+				minDayWidth = m_RenderHelper.CalculateMinimumDayWidthForImage(g);
 
 			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * Math.Max(dayWidth, minDayWidth)));
 

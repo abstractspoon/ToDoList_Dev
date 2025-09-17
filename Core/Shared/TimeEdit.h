@@ -32,6 +32,7 @@ public:
 
 	inline TH_UNITS GetUnits() const { return m_nUnits; }
 	void SetUnits(TH_UNITS nUnits);
+	BOOL HasValidTime() const;
 
 	inline int GetMaxDecimalPlaces() const { return m_nMaxDecPlaces; }
 	void SetMaxDecimalPlaces(int nMaxDecPlaces);

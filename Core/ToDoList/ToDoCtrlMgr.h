@@ -61,7 +61,7 @@ public:
 
 	int FindToDoCtrl(HWND hwndTDC) const;
 	int FindToDoCtrl(const CFilteredToDoCtrl* pTDC) const;
-	int FindToDoCtrl(LPCTSTR szFilePath) const;
+	int FindToDoCtrl(LPCTSTR szFilePath, BOOL bFileNameOnly = FALSE) const;
 	int FindToDoCtrl(const TSM_TASKLISTINFO& info) const;
 	int FindPristineToDoCtrl() const;
 	
@@ -73,6 +73,7 @@ public:
 	TDCM_PATHTYPE GetFilePathType(int nIndex) const;
 	TDCM_PATHTYPE RefreshPathType(int nIndex); 
 	CString GetFriendlyProjectName(int nIndex) const;
+	CString FormatFriendlyProjectNames() const;
 	CString GetDisplayPath(int nIndex) const;
 	CString FormatProjectNameWithFileName(int nIndex) const;
 	int GetNextMostSelectableToDoCtrl(int nIndex) const;
@@ -142,6 +143,9 @@ public:
 
 	int GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	BOOL AnyHasCustomAttributeFeature(DWORD dwFeature) const;
+	
+	// For testability
+	static BOOL CreateBackup(const CString& sPath, const CString& sBackupFolder, int nNumKeepBackups);
 
 	// Implementation
 protected:
@@ -195,9 +199,8 @@ protected:
 	BOOL AreToDoCtrlsSortedByName() const;
 
 	int UpdateTabItemImage(int nIndex) const;
-	void BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nKeepBackups) const;
+	void BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nNumKeepBackups) const;
 
-	static BOOL CreateBackup(const CString& sPath, const CString& sBackupFolder, int nKeepBackups);
 	static CFilteredToDoCtrl& GetFallbackToDoCtrl();
 };
 

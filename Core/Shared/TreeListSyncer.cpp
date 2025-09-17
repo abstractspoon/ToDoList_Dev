@@ -11,6 +11,9 @@
 #include "copywndcontents.h"
 #include "enbitmap.h"
 
+// #include "scopedtimer.h"
+// #include "FileMisc.h"
+
 #include "..\3rdParty\Detours\detours.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -821,14 +824,12 @@ void CTreeListSyncer::InitItemHeights()
 
 BOOL CTreeListSyncer::OsIsXP()
 {
-	static BOOL bXP(COSVersion() < OSV_VISTA);
-	return bXP;
+	return (COSVersion() < OSV_VISTA);
 }
 
 BOOL CTreeListSyncer::OsIsLinux()
 {
-	static BOOL bLinux(COSVersion() == OSV_LINUX);
-	return bLinux;
+	return (COSVersion() == OSV_LINUX);
 }
 
 int CTreeListSyncer::GetItemHeight(HWND hwnd)
@@ -1397,6 +1398,9 @@ void CTreeListSyncer::ResyncListHeader(HWND hwnd)
 
 BOOL CTreeListSyncer::GetHScrollDeadSpace(CRect& rDead) const
 {
+	if (!m_scLeft.IsWindowVisible() || !m_scRight.IsWindowVisible())
+		return FALSE;
+
 	rDead.SetRectEmpty();
 
 	CRect rLeft;
@@ -1413,7 +1417,7 @@ BOOL CTreeListSyncer::GetHScrollDeadSpace(CRect& rDead) const
 		rDead.top = rDead.bottom;
 		rDead.bottom = rLeft.bottom;
 	}
-	else // rRight.bottomrLeft > .bottom
+	else // rRight.bottom > rLeft.bottom
 	{
 		rDead = rLeft;
 		rDead.top = rDead.bottom;
@@ -1433,6 +1437,16 @@ void CTreeListSyncer::SetSplitBarColor(COLORREF crSplitBar)
 
 BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 {
+	// If everything is hidden then don't proceed
+	HWND hwndPrimary = PrimaryWnd();
+
+	if (!::IsWindowVisible(hwndPrimary) &&
+		!::IsWindowVisible(OtherWnd(hwndPrimary)) &&
+		!::IsWindowVisible(m_hwndPrimaryHeader))
+	{
+		return FALSE;
+	}
+
 	BOOL bHandled = FALSE;
 	CRect rDead;
 
@@ -1443,7 +1457,7 @@ BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 #else
 		CThemed th;
 		
-		if (th.IsNonClientThemed() && th.Open(GetCWnd(), _T("SCROLLBAR")))
+		if (th.IsNonClientThemed() && th.Open(hwndPrimary, _T("SCROLLBAR")))
 			th.DrawBackground(pDC, SBP_LOWERTRACKHORZ, SCRBS_NORMAL, rDead);
 		else
 			pDC->FillSolidRect(rDead, ::GetSysColor(COLOR_SCROLLBAR));
@@ -1455,7 +1469,7 @@ BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 
 	CRect rHeader;
 
-	if (OsIsLinux() && GetHeaderRect(PrimaryWnd(), rHeader, NULL))
+	if (OsIsLinux() && GetHeaderRect(hwndPrimary, rHeader, NULL))
 	{
 		rHeader.top = (rHeader.bottom - LINUX_VOFFSET_FUDGE);
 
@@ -1599,11 +1613,14 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		break;
 
 	case WM_MOUSEWHEEL:
-		// If the right-side window has a vertical scrollbar forward it on
-		if (HasVScrollBar())
+		if (!Misc::IsKeyPressed(VK_CONTROL)) // ie. NOT zooming
 		{
-			m_scRight.PostMessage(WM_MOUSEWHEEL, wp, lp);
-			return 0L;
+			// If the right-side window has a vertical scrollbar forward it on
+			if (HasVScrollBar())
+			{
+				m_scRight.PostMessage(WM_MOUSEWHEEL, wp, lp);
+				return 0L;
+			}
 		}
 		break;
 
@@ -1740,7 +1757,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				}
 				else if (IsList(hwnd))
 				{
-					return OnListCustomDraw((NMLVCUSTOMDRAW*)pNMHDR);
+					return OnListCustomDraw((NMLVCUSTOMDRAW*)pNMHDR, m_aListDrawColOrder, m_aListDrawColWidths);
 				}
 				else if (IsTree(hwnd))
 				{
@@ -2036,7 +2053,7 @@ LRESULT CTreeListSyncer::OnTreeCustomDraw(NMTVCUSTOMDRAW* /*pTVCD*/)
 	return CDRF_DODEFAULT;
 }
 
-LRESULT CTreeListSyncer::OnListCustomDraw(NMLVCUSTOMDRAW* /*pLVCD*/)
+LRESULT CTreeListSyncer::OnListCustomDraw(NMLVCUSTOMDRAW* /*pLVCD*/, const CIntArray& /*aColOrder*/, const CIntArray& /*aColWidths*/)
 {
 	return CDRF_DODEFAULT;
 }
@@ -2314,6 +2331,31 @@ BOOL CTreeListSyncer::IsListFullRowSelect(HWND hwnd)
 	return (ListView_GetExtendedListViewStyle(hwnd) & LVS_EX_FULLROWSELECT);
 }
 
+void CTreeListSyncer::RefreshListDrawColAttributes(HWND hwndList)
+{
+	ASSERT(IsList(hwndList));
+
+ 	HWND hwndHdr = ListView_GetHeader(hwndList);
+	ASSERT(hwndHdr);
+
+	int nNumCol = Header_GetItemCount(hwndHdr);
+
+	// Order
+	m_aListDrawColOrder.SetSize(nNumCol);
+	VERIFY(Header_GetOrderArray(hwndHdr, nNumCol, m_aListDrawColOrder.GetData()));
+
+	// Widths
+	m_aListDrawColWidths.SetSize(nNumCol);
+
+	HD_ITEM hdi = { HDI_WIDTH, 0 };
+
+	for (int nCol = 0; nCol < nNumCol; nCol++)
+	{
+		VERIFY(Header_GetItem(hwndHdr, nCol, &hdi));
+		m_aListDrawColWidths[nCol] = hdi.cxy;
+	}
+}
+
 LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (hRealWnd != Left() && hRealWnd != Right())
@@ -2322,6 +2364,10 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	}
 	else if (!IsResyncEnabled())
 	{
+		// Eat all paint messages until syncing is re-enabled
+		if (msg == WM_PAINT)
+			return 0L;
+
 		return ScDefault(hRealWnd);
 	}
 
@@ -2383,6 +2429,17 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 				}
 				break;
 			}
+		}
+		break;
+
+	case WM_PAINT:
+		if (IsList(hRealWnd))
+		{
+// 			FileMisc::EnableLogging(TRUE);
+// 			CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
+
+			RefreshListDrawColAttributes(hRealWnd);
+			return ScDefault(hRealWnd);
 		}
 		break;
 
@@ -2790,6 +2847,9 @@ void CTreeListSyncer::FixupListListItemIsDataLinkage(int nFrom)
 
 BOOL CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 {
+	if (Misc::IsKeyPressed(VK_CONTROL)) // ie. zooming
+		return FALSE;
+
 	int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
 	ASSERT(zDelta);
 

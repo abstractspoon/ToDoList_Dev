@@ -65,6 +65,8 @@ public:
 	BOOL PostMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0);
 
 	BOOL ProcessMessage(MSG* pMsg);
+	BOOL DoIdleProcessing();
+
 	BOOL HasFocus() const;
 	void SetFocus();
 

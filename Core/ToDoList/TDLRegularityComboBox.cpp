@@ -29,9 +29,6 @@ CTDLRegularityComboBox::~CTDLRegularityComboBox()
 
 
 BEGIN_MESSAGE_MAP(CTDLRegularityComboBox, COwnerdrawComboBoxBase)
-	//{{AFX_MSG_MAP(CTDLRegularityComboBox)
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -50,7 +47,17 @@ TDC_REGULARITY CTDLRegularityComboBox::GetSelectedRegularity() const
 
 int CTDLRegularityComboBox::SetSelectedRegularity(TDC_REGULARITY nRegularity)
 {
-	return CDialogHelper::SelectItemByData(*this, nRegularity);
+	CheckBuildCombo();
+
+	return CDialogHelper::SelectItemByDataT(*this, nRegularity);
+}
+
+void CTDLRegularityComboBox::DDX(CDataExchange* pDX, TDC_REGULARITY& value)
+{
+	if (pDX->m_bSaveAndValidate)
+		value = GetSelectedRegularity();
+	else
+		SetSelectedRegularity(value);
 }
 
 CString CTDLRegularityComboBox::GetRegularity(TDC_REGULARITY nRegularity)
@@ -58,33 +65,19 @@ CString CTDLRegularityComboBox::GetRegularity(TDC_REGULARITY nRegularity)
 	return TDCRECURRENCE::GetRegularityText(nRegularity, TRUE);
 }
 
-void CTDLRegularityComboBox::PreSubclassWindow() 
-{
-	COwnerdrawComboBoxBase::PreSubclassWindow();
-
-	BuildCombo();
-}
-
-int CTDLRegularityComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	BuildCombo();
-	
-	return 0;
-}
-
 void CTDLRegularityComboBox::BuildCombo()
 {
-	if (m_bIncludeAny)
-		CDialogHelper::AddString(*this, CEnString(IDS_TDC_ANY), TDIR_NONE);
+	ASSERT(GetSafeHwnd());
+	ASSERT(GetCount() == 0);
 
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_ONCE), TDIR_ONCE);
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_DAILY), TDIR_DAILY);
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_WEEKLY), TDIR_WEEKLY);
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_MONTHLY), TDIR_MONTHLY);
-	CDialogHelper::AddString(*this, GetRegularity(TDIR_YEARLY), TDIR_YEARLY);
+	if (m_bIncludeAny)
+		CDialogHelper::AddStringT(*this, CEnString(IDS_TDC_ANY), TDIR_NONE);
+
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_ONCE), TDIR_ONCE);
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_DAILY), TDIR_DAILY);
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_WEEKLY), TDIR_WEEKLY);
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_MONTHLY), TDIR_MONTHLY);
+	CDialogHelper::AddStringT(*this, GetRegularity(TDIR_YEARLY), TDIR_YEARLY);
 }
 
 void CTDLRegularityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
@@ -94,10 +87,8 @@ void CTDLRegularityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem,
 		return;
 
 	// Draw <any> in window prompt color
-	if (!(nItemState & ODS_SELECTED) && !bList && (nItem == 0))
-	{
+	if (!(nItemState & ODS_SELECTED) && !bList && m_bIncludeAny && (nItem == 0))
 		crText = CWndPrompt::GetTextColor();
-	}
 
 	// all else
 	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);

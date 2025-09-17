@@ -22,8 +22,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesUIPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesUIPage, CPreferencesPageBase)
-
 CPreferencesUIPage::CPreferencesUIPage(const CUIExtensionMgr* pMgrUIExt) 
 	: 
 	CPreferencesPageBase(IDD_PREFUI_PAGE),
@@ -132,7 +130,6 @@ void CPreferencesUIPage::OnStackEditFieldsAndComments()
 
 void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_bShowEditMenuAsColumns = pPrefs->GetProfileInt(szKey, _T("ShowEditMenuAsColumns"), FALSE);
 	m_bShowCommentsAlways = pPrefs->GetProfileInt(szKey, _T("ShowCommentsAlways"), FALSE);
 	m_bSpecifyToolbarImage = pPrefs->GetProfileInt(szKey, _T("SpecifyToolbarImage"), FALSE);
@@ -161,8 +158,17 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_bStackEditFieldsAndComments = pPrefs->GetProfileInt(szKey, _T("StackEditFieldsAndComments"), TRUE);
 	m_bStackCommentsAboveEditFields = pPrefs->GetProfileInt(szKey, _T("StackCommentsAboveEditFields"), TRUE);
 	m_bIncludeWebLinksInCommentsPaste = pPrefs->GetProfileInt(szKey, _T("IncludeWebLinksInCommentsPaste"), TRUE);
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 
+	// First time handling of new 'Attribute Editor'
+	// If the attributes were previously on the bottom move them to the side
+	if ((m_nCtrlsPos == PUIP_LOCATEBOTTOM) && !pPrefs->GetProfileInt(szKey, _T("AttributeEditor"), FALSE))
+	{
+		if (m_nCommentsPos != PUIP_LOCATEBOTTOM)
+			m_nCtrlsPos = m_nCommentsPos;
+		else
+			m_nCtrlsPos = PUIP_LOCATERIGHT;
+	}
+	
 	// task view visibility
 	CStringArray aViews;
 	int nView = pPrefs->GetProfileInt(_T("Preferences\\ViewVisibility"), _T("HiddenCount"), -1);
@@ -184,7 +190,6 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 
 void CPreferencesUIPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("ShowEditMenuAsColumns"), m_bShowEditMenuAsColumns);
 	pPrefs->WriteProfileInt(szKey, _T("ShowCommentsAlways"), m_bShowCommentsAlways);
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyToolbarImage"), m_bSpecifyToolbarImage);
@@ -212,7 +217,7 @@ void CPreferencesUIPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	pPrefs->WriteProfileInt(szKey, _T("StackEditFieldsAndComments"), m_bStackEditFieldsAndComments);
 	pPrefs->WriteProfileInt(szKey, _T("StackCommentsAboveEditFields"), m_bStackCommentsAboveEditFields);
 	pPrefs->WriteProfileInt(szKey, _T("IncludeWebLinksInCommentsPaste"), m_bIncludeWebLinksInCommentsPaste);
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
+	pPrefs->WriteProfileInt(szKey, _T("AttributeEditor"), TRUE);
 
 	pPrefs->WriteProfileString(szKey, _T("UIThemeFile"), m_sUIThemeFile);
 

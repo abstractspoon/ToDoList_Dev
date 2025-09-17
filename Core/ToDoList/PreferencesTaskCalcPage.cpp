@@ -18,8 +18,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskCalcPage property page
 
-IMPLEMENT_DYNCREATE(CPreferencesTaskCalcPage, CPreferencesPageBase)
-
 CPreferencesTaskCalcPage::CPreferencesTaskCalcPage() 
 	: 
 	CPreferencesPageBase(IDD_PREFTASKCALC_PAGE)
@@ -143,7 +141,6 @@ void CPreferencesTaskCalcPage::OnAutocalcpercentdone()
 
 void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_bTreatSubCompletedAsDone = pPrefs->GetProfileInt(szKey, _T("TreatSubCompletedAsDone"), TRUE);
 	m_bAveragePercentSubCompletion = pPrefs->GetProfileInt(szKey, _T("AveragePercentSubCompletion"), TRUE);
 	m_bIncludeDoneInAverageCalc = pPrefs->GetProfileInt(szKey, _T("IncludeDoneInAverageCalc"), TRUE);
@@ -181,13 +178,10 @@ void CPreferencesTaskCalcPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 
 	m_recentModTime.dAmount = pPrefs->GetProfileDouble(szKey, _T("RecentModTime"), 1.0);
 	m_recentModTime.SetTHUnits((TH_UNITS)pPrefs->GetProfileInt(szKey, _T("RecentModTimeUnits"), THU_HOURS), FALSE);
-
-//	m_b = pPrefs->GetProfileInt(szKey, _T(""), FALSE);
 }
 
 void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("TreatSubCompletedAsDone"), m_bTreatSubCompletedAsDone);
 	pPrefs->WriteProfileInt(szKey, _T("AveragePercentSubCompletion"), m_bAveragePercentSubCompletion);
 	pPrefs->WriteProfileInt(szKey, _T("IncludeDoneInAverageCalc"), m_bIncludeDoneInAverageCalc);
@@ -218,8 +212,6 @@ void CPreferencesTaskCalcPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 	// cleanup old entry	
 	pPrefs->DeleteProfileEntry(szKey, _T("UseEarliestDueDate"));
-
-//	pPrefs->WriteProfileInt(szKey, _T(""), m_b);
 }
 
 COleDateTimeSpan CPreferencesTaskCalcPage::GetRecentlyModifiedPeriod() const

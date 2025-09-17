@@ -136,6 +136,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data,
 	m_dwOptions(0),
 	m_crItemShadow(CLR_NONE),
 	m_crGroupHeaderBkgnd(CLR_NONE),
+	m_crFullBkgnd(255),
 	m_bReadOnly(FALSE),
 	m_tch(*this)
 {
@@ -163,6 +164,7 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_SETFOCUS()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_CHAR()
+	ON_WM_HSCROLL()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(TVM_HITTEST, OnHitTest)
@@ -274,6 +276,12 @@ BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	return CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);
 }
 
+void CKanbanColumnCtrl::OnHScroll(UINT nSBCode, UINT /*nPos*/, CScrollBar* /*pScrollBar*/)
+{
+	// Forward to parent because it must be coming from a mouse-wheel
+	GetParent()->SendMessage(WM_HSCROLL, nSBCode, (LPARAM)GetSafeHwnd());
+}
+
 void CKanbanColumnCtrl::SetDropTarget(BOOL bTarget)
 {
 	if (bTarget != m_bDropTarget)
@@ -289,12 +297,30 @@ LRESULT CKanbanColumnCtrl::OnThemeChanged(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
+BOOL CKanbanColumnCtrl::IsFull() const 
+{ 
+	if (GetMaxCount() > 0)
+		return (GetCount() >= GetMaxCount()); 
+
+	// else
+	return FALSE;
+}
+
 void CKanbanColumnCtrl::RefreshBkgndColor()
 {
+	if (!GetSafeHwnd())
+		return;
+
 	COLORREF crBack = GetSysColor(COLOR_WINDOW);
 
-	if (m_columnDef.crBackground != CLR_NONE)
+	if ((m_crFullBkgnd != CLR_NONE) && IsFull())
+	{
+		crBack = m_crFullBkgnd;
+	}
+	else if (m_columnDef.crBackground != CLR_NONE)
+	{
 		crBack = m_columnDef.crBackground;
+	}
 
 	if (m_bDropTarget)
 	{
@@ -334,16 +360,25 @@ void CKanbanColumnCtrl::RecalcItemShadowColor()
 	m_crItemShadow = RGB(btShadow, btShadow, btShadow);
 }
 
-void CKanbanColumnCtrl::SetExcessColor(COLORREF /*color*/)
+void CKanbanColumnCtrl::SetFullColor(COLORREF color)
 {
-	// TODO
-	ASSERT(0);
+	if (color == GetSysColor(COLOR_WINDOW))
+		color = CLR_NONE;
+
+	if (m_crFullBkgnd != color)
+	{
+		m_crFullBkgnd = color;
+		RefreshBkgndColor();
+	}
 }
 
-void CKanbanColumnCtrl::SetMaximumTaskCount(int /*nMaxTasks*/)
+void CKanbanColumnCtrl::SetMaximumTaskCount(int nMaxTasks)
 {
-	// TODO
-	ASSERT(0);
+	if (m_columnDef.nMaxTaskCount != nMaxTasks)
+	{
+		m_columnDef.nMaxTaskCount = nMaxTasks;
+		RefreshBkgndColor();
+	}
 }
 
 void CKanbanColumnCtrl::OnDisplayAttributeChanged()
@@ -440,10 +475,17 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 
 		if (GetSafeHwnd())
 		{
+			if (Misc::FlagHasChanged(KBCF_SHOWTASKCOLORASBAR, dwPrevOptions, m_dwOptions) ||
+				Misc::FlagHasChanged(KBCF_COLORBARBYPRIORITY, dwPrevOptions, m_dwOptions) ||
+				Misc::FlagHasChanged(KBCF_SHOWMIXEDCOMPLETIONSTATE, dwPrevOptions, m_dwOptions))
+			{
+ 				Invalidate(FALSE);
+			}
+
 			if (Misc::FlagHasChanged(KBCF_HIDEEMPTYATTRIBUTES, dwPrevOptions, m_dwOptions))
+			{
 				RefreshItemLineHeights();
-// 			else
-// 				Invalidate(FALSE);
+			}
 
 			if (IsGrouping())
 			{
@@ -457,8 +499,6 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 					if (HasOption(KBCF_SORTGROUPSASCENDING))
 						DoSort();
 				}
-// 				else
-// 					Invalidate(FALSE);
 			}
 
 			if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS) && !m_tooltip.GetSafeHwnd())
@@ -498,6 +538,7 @@ int CKanbanColumnCtrl::CalcItemTitleTextHeight() const
 
 HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki)
 {
+	BOOL bWasFull = IsFull();
 	HTREEITEM hti = FindItem(ki.dwTaskID);
 
 	if (hti)
@@ -521,6 +562,9 @@ HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki)
 	{
 		m_mapHTItems.AddItem(*this, hti);
 		RefreshItemLineHeights(hti);
+
+		if (!bWasFull && IsFull())
+			RefreshBkgndColor();
 	}
 
 	return hti;
@@ -732,9 +776,7 @@ CString CKanbanColumnCtrl::FormatTaskGroupHeaderText(DWORD dwHeaderID) const
 	}
 
 	// Prefix the text by the column name
-	CString sLabel(KBUtils::GetAttributeLabel(m_nGroupBy, KBCAL_LONG, m_aCustAttribDefs));
-	
-	return (sLabel + sGroupBy);
+	return KBUtils::FormatAttribute(m_nGroupBy, sGroupBy, KBCAL_LONG, m_aCustAttribDefs);
 }
 
 void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
@@ -887,7 +929,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = KBUtils::GetAttributeLabel(TDCA_PARENT, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KBUtils::FormatAttribute(TDCA_PARENT, _T(""), nLabelVis, m_aCustAttribDefs);
 
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(crText);
@@ -970,7 +1012,7 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 
 	// Draw label
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
-	CString sLabel = KBUtils::GetAttributeLabel(TDCA_FILELINK, nLabelVis, m_aCustAttribDefs);
+	CString sLabel = KBUtils::FormatAttribute(TDCA_FILELINK, _T(""), nLabelVis, m_aCustAttribDefs);
 
 	if (!sLabel.IsEmpty())
 	{
@@ -1166,7 +1208,7 @@ void CKanbanColumnCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect&
 		{
 			iImage = KLCC_CHECKED;
 		}
-		else if (pKI->bSomeSubtaskDone)
+		else if (pKI->bSomeSubtaskDone && HasOption(KBCF_SHOWMIXEDCOMPLETIONSTATE))
 		{
 			iImage = KLCC_MIXED;
 		}
@@ -1339,14 +1381,41 @@ BOOL CKanbanColumnCtrl::GetItemTooltipRect(HTREEITEM hti, CRect& rTip) const
 void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttribID, const CString& sValue, int nFlags, COLORREF crText) const
 {
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
+
+	// Common code
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(crText);
+
+	// Special handling for RTL dates - avoid where possible
+	if (!sValue.IsEmpty() && KBUtils::IsDateAttribute(nAttribID, m_aCustAttribDefs) && CDateHelper::WantRTLDates())
+	{
+		// Draw date separately from label
+		CRect rAttrib(rLine);
+		CString sLabel = KBUtils::GetAttributeLabel(nAttribID, nLabelVis, m_aCustAttribDefs);
+
+		if (!sLabel.IsEmpty())
+		{
+			sLabel += _T(": "); // to match KBUtils::FormatAttribute
+
+			pDC->DrawText(sLabel, rAttrib, (nFlags | DT_CALCRECT));
+			pDC->DrawText(sLabel, rLine, nFlags);
+
+			rAttrib.left = rAttrib.right;
+			rAttrib.right = rLine.right;
+		}
+
+		pDC->DrawText(sValue, rAttrib, (nFlags | DT_RTLREADING));
+		rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
+
+		return;
+	}
+
+	// all else
 	CString sAttrib = KBUtils::FormatAttribute(nAttribID, sValue, nLabelVis, m_aCustAttribDefs);
 
 	if (!sAttrib.IsEmpty())
 	{
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(crText);
 		pDC->DrawText(sAttrib, rLine, nFlags);
-
 		rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
 	}
 }
@@ -1708,20 +1777,25 @@ HTREEITEM CKanbanColumnCtrl::FindItem(const IUISELECTTASK& select, BOOL bNext, H
 	return NULL; // no match
 }
 
-BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
+BOOL CKanbanColumnCtrl::RemoveTask(DWORD dwTaskID)
 {
+	BOOL bWasFull = IsFull();
 	HTREEITEM hti = FindItem(dwTaskID);
 
 	if (hti && CTreeCtrl::DeleteItem(hti))
 	{
 		VERIFY(m_mapHTItems.RemoveKey(dwTaskID));
+
+		if (bWasFull && !IsFull())
+			RefreshBkgndColor();
+
 		return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CKanbanColumnCtrl::DeleteAll()
+BOOL CKanbanColumnCtrl::RemoveAll()
 {
 	m_mapHTItems.RemoveAll();
 	m_aSelTaskIDs.RemoveAll();
@@ -2389,7 +2463,7 @@ BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
 				CDWordArray aNewTaskIDs;
 				tsh.GetItemData(aNewTaskIDs);
 
-				Misc::AddUniqueItems(aNewTaskIDs, m_aSelTaskIDs);
+				Misc::AppendItems(aNewTaskIDs, m_aSelTaskIDs, TRUE);
 			}
 			else
 			{
@@ -2654,7 +2728,7 @@ CString CKanbanColumnCtrl::HitTestFileLink(HTREEITEM hti, CPoint point) const
 			{
 				if (m_nAttribLabelVisibility != KBCAL_NONE)
 				{
-					CString sLabel = KBUtils::GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility, m_aCustAttribDefs);
+					CString sLabel = KBUtils::FormatAttribute(TDCA_FILELINK, _T(""), m_nAttribLabelVisibility, m_aCustAttribDefs);
 
 					if (!sLabel.IsEmpty())
 						rLinks.left += GraphicsMisc::GetTextWidth(sLabel, *this, m_fonts.GetHFont());
@@ -3012,9 +3086,24 @@ BOOL CKanbanColumnCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanC
 	if (pSrcCol->AttributeValuesMatch(*pDestCol))
 		return FALSE;
 
-	// Can't copy FROM the backlog
+	// Can't COPY from the backlog
 	if (pSrcCol->IsBacklog() && Misc::ModKeysArePressed(MKS_CTRL))
 		return FALSE;
+
+	// Can't exceed max count unless ALT key is pressed
+	if (!pDestCol->HasOption(KBCF_ALTKEYOVERRIDESMAXCOUNT) || !Misc::IsKeyPressed(VK_MENU))
+	{
+		int nDestMaxCount = pDestCol->GetMaxCount();
+
+		if (nDestMaxCount > 0)
+		{
+			int nDestCount = pDestCol->GetCount();
+			int nSrcCount = pSrcCol->GetSelectedCount();
+
+			if ((nDestCount + nSrcCount) > nDestMaxCount)
+				return FALSE;
+		}
+	}
 
 	return TRUE;
 }

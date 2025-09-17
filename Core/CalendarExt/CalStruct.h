@@ -164,12 +164,19 @@ struct TASKCALEXTENSIONITEM : public TASKCALITEM
 
 	const DWORD dwRealTaskID;
 };
+
+#define ASEXTENSIONITEM(tci) dynamic_cast<const TASKCALEXTENSIONITEM*>(tci)
+#define ISEXTENSIONITEM(tci) (NULL != ASEXTENSIONITEM(tci))
+
 /////////////////////////////////////////////////////////////////////////////
 
 struct TASKCALFUTUREOCURRENCE : public TASKCALEXTENSIONITEM
 {
 	TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange);
 };
+
+#define ASFUTUREOCCURRENCE(tci) dynamic_cast<const TASKCALFUTUREOCURRENCE*>(tci)
+#define ISFUTUREOCCURRENCE(tci) (NULL != ASFUTUREOCCURRENCE(tci))
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -182,6 +189,9 @@ struct TASKCALCUSTOMDATE : public TASKCALEXTENSIONITEM
 
 	const CString sCustomAttribID;
 };
+
+#define ASCUSTOMDATE(tci) dynamic_cast<const TASKCALCUSTOMDATE*>(tci)
+#define ISCUSTOMDATE(tci) (NULL != ASCUSTOMDATE(tci))
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -210,6 +220,8 @@ public:
 	DWORD GetNextTaskID(POSITION& pos) const;
 	BOOL HasTask(DWORD dwTaskID) const;
 	BOOL IsParentTask(DWORD dwTaskID) const;
+
+	static BOOL WantHideTask(const TASKCALITEM* pTCI, DWORD dwOptions, LPCTSTR szHideParentTag);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -218,6 +230,8 @@ class CTaskCalExtensionItemMap : public CTaskCalItemMap
 {
 public:
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
+
+	DWORD FindCustomDate(DWORD dwRealTaskID, const CString& sCustAttribID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -267,7 +281,7 @@ public:
 	BOOL HasHeat() const { return m_mapHeat.GetCount(); }
 
 	BOOL SetColorPalette(const CDWordArray& aColors);
-	BOOL Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions);
+	BOOL Recalculate(const CTaskCalItemMap& mapData, TDC_ATTRIBUTE nAttribID, DWORD dwOptions, LPCTSTR szHideParentTag);
 
 	int GetHeat(const COleDateTime& date) const;
 	COLORREF GetColor(const COleDateTime& date) const;

@@ -52,6 +52,7 @@
     <Compile Include="MindMapControl.Designer.cs">
       <DependentUpon>MindMapControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="MindMapTaskItem.cs" />
     <Compile Include="MindMapUtils.cs" />
     <Compile Include="MindMapItem.cs" />
     <Compile Include="MindMapOptionsComboBox.cs" />

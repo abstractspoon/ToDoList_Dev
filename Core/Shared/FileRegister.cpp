@@ -7,6 +7,7 @@
 #include "regkey.h"
 #include "Filemisc.h"
 #include "misc.h"
+#include "MessageBox.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -57,7 +58,7 @@ BOOL CFileRegister::RegisterFileType(LPCTSTR szFileDesc, int nIcon, BOOL bAllowS
 				sMessage.Format(_T("The file extension %s is used by %s for its %s.\n\nWould you like %s to be the default application for this file type."),
 								m_sExt, AfxGetAppName(), szFileDesc, AfxGetAppName());
 				
-				nRet = AfxMessageBox(sMessage, MB_YESNO | MB_ICONQUESTION);
+				nRet = CMessageBox::AfxShow(sMessage, MB_YESNO | MB_ICONQUESTION);
 			}
 
 			bChange = TRUE;

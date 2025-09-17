@@ -39,6 +39,8 @@ struct TDCCUSTOMATTRIBUTECALCULATIONOPERAND
 
 const DWORD TDCCA_INVALID = TDCCA_STRING;
 
+// -------------------------------------------------------
+
 struct TDCCUSTOMATTRIBUTECALCULATION
 {
 	TDCCUSTOMATTRIBUTECALCULATION();
@@ -108,7 +110,6 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	inline DWORD GetDataType() const { return (dwAttribType & TDCCA_DATAMASK); }
 	inline DWORD GetListType() const { return (dwAttribType & TDCCA_LISTMASK); }
-	inline BOOL HasFeature(DWORD dwFeature) const { return SupportsFeature(dwFeature) && (dwFeatures & dwFeature); }
 
 	inline BOOL IsDataType(DWORD dwDataType) const { return (GetDataType() == dwDataType); }
 	inline BOOL IsList() const { return (GetListType() != TDCCA_NOTALIST); }
@@ -119,8 +120,10 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	int GetUniqueListData(CStringArray& aData) const;
 	CString EncodeListData() const;
 	BOOL DecodeListData(const CString& sListData);
+	BOOL GetListIconName(const CString& sImage, CString& sName) const;
 
 	BOOL SupportsFeature(DWORD dwFeature) const;
+	BOOL HasFeature(DWORD dwFeature) const;
 	BOOL IsAggregated() const;
 	BOOL ValidateData(TDCCADATA& data) const;
 
@@ -215,7 +218,6 @@ public:
 	int Find(TDC_ATTRIBUTE nCustAttribID, int nIgnore = -1) const;
 	int Find(TDC_COLUMN nCustColID, int nIgnore = -1) const;
 
-	BOOL CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
 	BOOL AnyHasFeature(DWORD dwFeature) const;
 	BOOL MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	
@@ -246,6 +248,8 @@ public:
 	BOOL IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone = TRUE) const;
 	DWORD GetCalculationOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
+	BOOL CalculationHasFeature(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, DWORD dwFeature) const;
+	BOOL AnyCalculationUsesAnyAttribute(const CTDCAttributeMap& mapAttribIDs) const;
 
 	// VC6 fixes
 	const TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) const { return ElementAt(nIndex); }

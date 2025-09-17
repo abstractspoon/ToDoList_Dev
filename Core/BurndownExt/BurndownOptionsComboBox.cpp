@@ -69,9 +69,6 @@ CBurndownOptionsComboBox::~CBurndownOptionsComboBox()
 
 
 BEGIN_MESSAGE_MAP(CBurndownOptionsComboBox, CComboBox)
-	//{{AFX_MSG_MAP(CCBurndownOptionsComboBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -90,13 +87,6 @@ BOOL CBurndownOptionsComboBox::SetActiveGraphType(BURNDOWN_GRAPHTYPE nType)
 	}
 
 	m_nGraphType = nType;
-
-	// We build the combo in a specific order
-	if (!GetSafeHwnd() || (GetStyle() & CBS_SORT))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
 
 	// Build our own sorted array because we have leading numbers
 	CArray<SORTITEM, SORTITEM&> aOptions;
@@ -124,7 +114,7 @@ BOOL CBurndownOptionsComboBox::SetActiveGraphType(BURNDOWN_GRAPHTYPE nType)
 	for (nItem = 0; nItem < aOptions.GetSize(); nItem++)
 	{
 		const SORTITEM& st = aOptions[nItem];
-		CDialogHelper::AddString(*this, st.sLabel, st.nOption);
+		CDialogHelper::AddStringT(*this, st.sLabel, st.nOption);
 	}
 
 	CDialogHelper::RefreshMaxDropWidth(*this);
@@ -149,10 +139,10 @@ void CBurndownOptionsComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPHOPTION& nOp
 
 BURNDOWN_GRAPHOPTION CBurndownOptionsComboBox::GetSelectedOption() const
 {
-	return (BURNDOWN_GRAPHOPTION)CDialogHelper::GetSelectedItemData(*this, BCT_UNKNOWNTYPE);
+	return CDialogHelper::GetSelectedItemDataT(*this, BGO_INVALID);
 }
 
 BOOL CBurndownOptionsComboBox::SetSelectedOption(BURNDOWN_GRAPHOPTION nOption)
 {
-	return (CDialogHelper::SelectItemByData(*this, nOption) != CB_ERR);
+	return (CDialogHelper::SelectItemByDataT(*this, nOption) != CB_ERR);
 }

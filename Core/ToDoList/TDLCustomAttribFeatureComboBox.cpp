@@ -51,8 +51,6 @@ CTDLCustomAttribFeatureComboBox::~CTDLCustomAttribFeatureComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CTDLCustomAttribFeatureComboBox, CCheckComboBox)
-	//{{AFX_MSG_MAP(CTDLCustomAttribFeatureComboBox)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -84,7 +82,7 @@ void CTDLCustomAttribFeatureComboBox::BuildCombo(DWORD dwDataType, DWORD dwListT
 		const TDCFEATURE& feature = FEATURES[nFeature];
 
 		if (TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwDataType, dwListType, feature.dwFeature))
-			CDialogHelper::AddString(*this, feature.nStringID, feature.dwFeature);
+			CDialogHelper::AddStringT(*this, feature.nStringID, feature.dwFeature);
 	}
 
 	SetCheckedByItemData(dwSelectedFeatures);

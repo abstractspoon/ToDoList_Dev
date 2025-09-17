@@ -8,6 +8,7 @@
 #include "Mapex.h"
 #include "Themed.h"
 #include "OSVersion.h"
+#include "Misc.h"
 
 #include <math.h>
 
@@ -40,20 +41,25 @@ double HMXUtils::CalcYAxisInterval(double dDataMax, int nNumTicks)
 {
 	ASSERT(nNumTicks > 0);
 
-	const double INTERVALS[] = { 0.01, 0.02, 0.025, 0.05, 0.1, 0.2, 0.25, 0.5, 1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000 };
-	const int NUM_INT = (sizeof(INTERVALS) / sizeof(INTERVALS[0]));
+	// Calculate the initial power of 10
+	int nPower = (int)log10(dDataMax / nNumTicks);
+	double dMultiplier = pow(10, nPower);
 
-	// Find the first tick increment that gives us a range
+	// Find the first interval that gives us a range
 	// greater than or equal to dDataMax
-	for (int nInc = 0; nInc < NUM_INT; nInc++)
+	const double INTERVAL[] = { 0.1, 0.2, 0.25, 0.5, 1.0, 2.0, 2.5, 5.0 };
+	const int NUM_INT = (sizeof(INTERVAL) / sizeof(INTERVAL[0]));
+
+	for (int nInt = 0; nInt < NUM_INT; nInt++)
 	{
-		double dMaxYAxis = (nNumTicks * INTERVALS[nInc]);
+		double dInterval = (INTERVAL[nInt] * dMultiplier);
+		double dMaxYAxis = (nNumTicks * dInterval);
 
 		if (dDataMax <= dMaxYAxis)
-			return INTERVALS[nInc];
+			return dInterval;
 	}
 
-	return 10000;
+	return pow(10, nPower + 1);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -137,7 +143,14 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 
 BOOL CHMXChartEx::DrawHorzGridLines(CDC& dc)
 {
-	double dInterval = HMXUtils::CalcYAxisInterval((m_dYMax - m_dYMin), 10);
+	double dMin, dMax;
+
+	if (!GetMinMax(dMin, dMax, FALSE))
+		return FALSE;
+
+	double dRange = (dMax - dMin);
+	double dInterval = HMXUtils::CalcYAxisInterval(dRange, 10);
+
 	int nNumSubTicks = GetNumYSubTicks(dInterval);
 
 	if (nNumSubTicks > 1)
@@ -146,16 +159,16 @@ BOOL CHMXChartEx::DrawHorzGridLines(CDC& dc)
 		CPen* pPenOld = dc.SelectObject(&penSubGrid);
 
 		int nTotalTicks = (GetNumYTicks() * nNumSubTicks);
-		double nY = ((m_dYMax - m_dYMin) / nTotalTicks);
+		double nY = (dRange / nTotalTicks);
 
 		for (int f = 0; f <= nTotalTicks; f++)
 		{
 			if (f % nNumSubTicks)
 			{
-				double nTemp = m_rectData.bottom - (nY*f) * m_rectData.Height() / (m_dYMax - m_dYMin);
+				int nVPos = Misc::Round(m_rectData.bottom - (((nY*f) * m_rectData.Height()) / dRange));
 
-				dc.MoveTo(m_rectData.left, (int)nTemp);
-				dc.LineTo(m_rectData.right, (int)nTemp);
+				dc.MoveTo(m_rectData.left, nVPos);
+				dc.LineTo(m_rectData.right, nVPos);
 			}
 		}
 

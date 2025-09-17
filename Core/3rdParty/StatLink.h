@@ -108,5 +108,6 @@ protected:
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg LRESULT OnSetText(WPARAM wp, LPARAM lp);
 	DECLARE_DYNAMIC(CStaticLink)
 };

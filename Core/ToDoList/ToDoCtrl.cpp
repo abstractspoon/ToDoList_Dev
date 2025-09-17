@@ -7,7 +7,7 @@
 #include "taskclipboard.h"
 #include "tdcmsg.h"
 #include "tdcmapping.h"
-#include "tdstringres.h"
+#include "tdcstringres.h"
 #include "resource.h"
 #include "TDCtasktimelog.h"
 #include "todoitem.h"
@@ -23,6 +23,8 @@
 #include "TDCTaskCompletion.h"
 #include "tdccontentmgr.h"
 #include "TDLRecurringTaskEdit.h"
+#include "ToDoCtrlDataUtils.h"
+#include "TDLSelectTaskDlg.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\clipboard.h"
@@ -128,8 +130,7 @@ enum
 
 enum // flags for UpdateTask
 {
-	UTF_TIMEUNITSONLY	= 0x01,
-	UTF_RECALCTIME		= 0x02,	
+	UTF_RECALCTIME		= 0x01,	
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -170,6 +171,43 @@ HICON CToDoCtrl::s_hIconAddLogDlg = NULL;
 
 //////////////////////////////////////////////////////////////////////////////
 
+CToDoCtrl::IDLETASKS::IDLETASKS(CToDoCtrl& tdc) : m_tdc(tdc)
+{
+}
+
+void CToDoCtrl::IDLETASKS::RefreshAttributeValues(const CTDCAttributeMap& mapAttribIDs)
+{
+	ASSERT(!mapAttribIDs.IsEmpty());
+
+	if (mapAttribIDs.Has(TDCA_ALL))
+	{
+		m_mapRefreshAttribIDs.Set(TDCA_ALL);
+	}
+	else if (!m_mapRefreshAttribIDs.Has(TDCA_ALL))
+	{
+		m_mapRefreshAttribIDs.Append(mapAttribIDs);
+	}
+}
+
+BOOL CToDoCtrl::IDLETASKS::Process()
+{
+	if (!m_mapRefreshAttribIDs.IsEmpty())
+	{
+		m_tdc.m_ctrlAttributes.RefreshSelectedTasksValues(m_mapRefreshAttribIDs);
+
+		m_mapRefreshAttribIDs.RemoveAll();
+	}
+
+	return HasTasks();
+}
+
+BOOL CToDoCtrl::IDLETASKS::HasTasks() const
+{
+	return !m_mapRefreshAttribIDs.IsEmpty();
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent, 
 					 const CShortcutManager& mgrShortcuts, 
 					 const CONTENTFORMAT& cfDefault, 
@@ -206,6 +244,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
+	m_idleTasks(*this),
 
 	m_data(m_styles, m_aCustomAttribDefs),
 	m_timeTracking(m_data, m_taskTree.TSH()),
@@ -213,6 +252,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	m_attribCopier(m_data, mgrContent),
 	m_exporter(m_data, m_taskTree, mgrContent),
 	m_matcher(m_data, m_reminders, mgrContent),
+	m_multitasker(m_data, mgrContent),
 
 	m_ctrlComments(TRUE,
 				   TRUE,
@@ -329,6 +369,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_DISPLAYLINK, OnTDCDisplayLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKATTRIBUTE, OnTDCEditTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnTDCEditTaskReminder)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKREMINDER, OnTDCClearTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKATTRIBUTE, OnTDCClearTaskAttribute)
 	ON_REGISTERED_MESSAGE(WM_TDCM_TOGGLETIMETRACKING, OnTDCToggleTimeTracking)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ADDTIMETOLOGFILE, OnTDCAddTimeToLogFile)
@@ -509,6 +550,18 @@ BOOL CToDoCtrl::Create(const CRect& rect, CWnd* pParentWnd, UINT nID, BOOL bVisi
 	return CRuntimeDlg::Create(_T("ToDoCtrl"), dwStyle | DS_SETFONT, WS_EX_CONTROLPARENT, rect, pParentWnd, nID);
 }
 
+BOOL CToDoCtrl::DoIdleProcessing()
+{
+	if (m_ctrlComments.HasFocus() && m_ctrlComments.DoIdleProcessing())
+		return TRUE;
+
+	// else
+	if (m_taskTree.DoIdleProcessing())
+		return TRUE;
+
+	return m_idleTasks.Process();
+}
+
 BOOL CToDoCtrl::OnInitDialog() 
 {
 	CRuntimeDlg::OnInitDialog();
@@ -541,7 +594,7 @@ BOOL CToDoCtrl::OnInitDialog()
 	
 	// Initial state
 	UpdateControls();
-	SetFocusToTasks();
+	SetFocus(TDCSF_TASKVIEW);
 
 	// notify parent that we have been created
 	GetParent()->SendMessage(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, GetDlgCtrlID()), (LPARAM)GetSafeHwnd());
@@ -551,7 +604,6 @@ BOOL CToDoCtrl::OnInitDialog()
 	m_timerMidnight.Enable(*this);
 	
 	return FALSE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CToDoCtrl::LoadTaskIcons()
@@ -576,7 +628,7 @@ BOOL CToDoCtrl::SetTreeFont(HFONT hFont)
 {
 	ASSERT(hFont);
 
-	if (hFont && !GraphicsMisc::SameFontNameSize(hFont, m_hFontTree))
+	if (hFont && !GraphicsMisc::IsSameFontNameAndSize(hFont, m_hFontTree))
 	{
 		m_hFontTree = hFont;
 
@@ -595,17 +647,9 @@ BOOL CToDoCtrl::SetCommentsFont(HFONT hFont)
 {
 	ASSERT(hFont);
 
-	if (hFont && !GraphicsMisc::SameFontNameSize(hFont, m_hFontComments))
+	if (hFont && !GraphicsMisc::IsSameFontNameAndSize(hFont, m_hFontComments))
 	{
 		m_hFontComments = hFont;
-
-#ifdef _DEBUG
-		CString sFaceName;
-		int nPointSize = GraphicsMisc::GetFontNameAndPointSize(m_hFontComments, sFaceName);
-
-		ASSERT(!sFaceName.IsEmpty());
-		ASSERT(nPointSize > 0);
-#endif
 
 		// we've had some trouble with plugins using the richedit control 
 		// so after a font change we always resend the content
@@ -653,7 +697,7 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 
 		case TDCMS_MAXTASKLIST:
 			if (!HasStyle(TDCS_SHOWCOMMENTSALWAYS) || !m_ctrlComments.HasFocus())
-				SetFocusToTasks();
+				SetFocus(TDCSF_TASKVIEW);
 			break;
 
 		case TDCMS_MAXCOMMENTS:
@@ -772,8 +816,8 @@ void CToDoCtrl::Resize(int cx, int cy)
 		}
 
 		m_layout.Resize(cx, cy);
-
 		ShowHideControls();
+
 		UpdateSelectedTaskPath();
 	}
 }
@@ -832,11 +876,16 @@ void CToDoCtrl::ShowHideControls()
 		m_ctrlComments.ShowWindow(SW_SHOW);
 		break;
 	}
+
+	EnableDisableControls();
 }
 
-void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
+void CToDoCtrl::EnableDisableControls(BOOL bHasSelection)
 {
-	EnableDisableComments(hti);
+	if (bHasSelection == -1)
+		bHasSelection = (GetUpdateControlsItem() && HasSelection());
+
+	EnableDisableComments(bHasSelection);
 
 	if (m_layout.HasMaximiseState(TDCMS_NORMAL) && HasStyle(TDCS_SHOWPROJECTNAME))
 		SetCtrlState(this, IDC_PROJECTNAME, (IsReadOnly() ? RTCS_READONLY : RTCS_ENABLED));
@@ -844,16 +893,19 @@ void CToDoCtrl::EnableDisableControls(HTREEITEM hti)
 		SetCtrlState(this, IDC_PROJECTNAME, RTCS_DISABLED);
 }
 
-void CToDoCtrl::EnableDisableComments(HTREEITEM hti)
+void CToDoCtrl::EnableDisableComments(BOOL bHasSelection)
 {
+	if (bHasSelection == -1)
+		bHasSelection = (GetUpdateControlsItem() && HasSelection());
+
 	CONTENTFORMAT cfComments;
 	GetSelectedTaskCustomComments(cfComments);
 	BOOL bEditComments = (m_mgrContent.FindContent(cfComments) != -1);
 
-	BOOL bCommentsVis = m_layout.IsCommentsVisible();
+	BOOL bCommentsVis = m_layout.IsVisible(TDCSF_COMMENTS);
 	RT_CTRLSTATE nCommentsState = RTCS_ENABLED, nComboState = RTCS_ENABLED;
 
-	if (!bCommentsVis || !hti)
+	if (!bCommentsVis || !bHasSelection)
 	{
 		nComboState = nCommentsState = RTCS_DISABLED;
 	}
@@ -874,7 +926,7 @@ void CToDoCtrl::UpdateSelectedTaskPath()
 	m_taskTree.UpdateSelectedTaskPath();
 }
 
-void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
+void CToDoCtrl::UpdateControls(BOOL bIncComments)
 {
 	if (m_bDeletingTasks)
 		return;
@@ -896,25 +948,20 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	}
 	ASSERT(!m_bPendingUpdateControls);
 
-	if (!hti)
-		hti = GetUpdateControlsItem();
-	
 	CDWordArray aSelTaskIDs;
+	BOOL bHasSelection = (NULL != GetUpdateControlsItem());
 
-	if (hti)
-		GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+	if (bHasSelection)
+		bHasSelection = GetSelectedTaskIDs(aSelTaskIDs, TRUE);
 
 	m_ctrlAttributes.SetSelectedTaskIDs(aSelTaskIDs);
-
-	// update data controls excluding comments
-	UpdateData(FALSE);
 
 	// and task header
 	UpdateSelectedTaskPath();
 	
 	// Do the control enabling before updating the comments
 	// to prevent unwanted intermediate comments states
-	EnableDisableControls(hti);
+	EnableDisableControls(bHasSelection);
 
 	// Finally update comments
 	if (bIncComments)
@@ -930,9 +977,9 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_ctrlComments.GetSelectedFormat(cfPrev);
 
 		CONTENTFORMAT cfComments;
-		const CBinaryData& customComments = (hti ? m_taskTree.GetSelectedTaskCustomComments(cfComments) : emptyComments);
+		const CBinaryData& customComments = (bHasSelection ? m_taskTree.GetSelectedTaskCustomComments(cfComments) : emptyComments);
 		
-		CString sTextComments = (hti ? m_taskTree.GetSelectedTaskComments() : sEmptyComments);
+		CString sTextComments = (bHasSelection ? m_taskTree.GetSelectedTaskComments() : sEmptyComments);
 		
 		// if more than one comments type is selected then sCommentsType
 		// will be empty which will put the comments type combo in an
@@ -949,7 +996,9 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 			ASSERT(!m_ctrlComments.IsUpdatingFormat());
 
 			m_bPendingUpdateControls = FALSE;
-			UpdateControls();
+			UpdateControls(); // RECURSIVE CALL
+
+			return;
 		}
 		
 		UpdateComments(sTextComments, customComments);
@@ -958,7 +1007,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		// format changed because the new control will have 
 		// been created enabled and we may not want that
 		if (m_cfComments.IsEmpty() && (m_cfComments != cfPrev))
-			EnableDisableComments(hti);
+			EnableDisableComments(bHasSelection);
 	}
 }
 
@@ -970,17 +1019,17 @@ void CToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	if (!bShow)
 		m_ctrlComments.SetFocus();
 
-	m_taskTree.Show(bShow);
+	m_taskTree.ShowWindow(bShow ? SW_SHOW : SW_HIDE);
 	m_taskTree.EnableWindow(bShow);
 }
 
-void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
+BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 {
 	if (!m_taskTree.GetSafeHwnd())
-		return;
+		return FALSE;
 	
 	if (!CanEditSelectedTask(nAttribID))
-		return;
+		return FALSE;
 	
 	// special case to circumvent CSaveFocus else it can mess up IME input
 	if (nAttribID == TDCA_COMMENTS)
@@ -991,68 +1040,86 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 		m_nCommentsState = CS_PENDING;
 		SetModified(TDCA_COMMENTS, aModTaskIDs);
 
-		return;
+		return aModTaskIDs.GetSize();
 	}	
 	
 	// else
 	CSaveFocus sf;
-	UpdateData();
+	BOOL bChange = FALSE;
 	
 	switch (nAttribID)
 	{
 	case TDCA_TASKNAME:
-		SetSelectedTaskTitle(m_ctrlAttributes.GetTaskTitle(), TRUE);
+		bChange = SetSelectedTaskTitle(m_ctrlAttributes.GetTaskTitle(), TRUE);
 		break;
 
 	case TDCA_DONEDATE:
-		{
-			COleDateTime date = m_ctrlAttributes.GetDoneDate();
-			
-			if (SetSelectedTaskDate(TDCD_DONE, date, TRUE))
-				m_ctrlAttributes.RefreshSelectedTasksValues();
-		}
+ 		bChange = SetSelectedTaskDate(TDCD_DONE, m_ctrlAttributes.GetDoneDate()); // NOT TDCD_DONEDATE
 		break;
 		
 	case TDCA_DONETIME:
- 		SetSelectedTaskDate(TDCD_DONETIME, m_ctrlAttributes.GetDoneTime(), TRUE);
+ 		bChange = SetSelectedTaskDate(TDCD_DONETIME, m_ctrlAttributes.GetDoneTime());
 		break;
 		
 	case TDCA_STARTDATE:
-		SetSelectedTaskDate(TDCD_STARTDATE, m_ctrlAttributes.GetStartDate(), TRUE);
+		bChange = SetSelectedTaskDate(TDCD_STARTDATE, m_ctrlAttributes.GetStartDate());
 		break;
 		
 	case TDCA_STARTTIME:
-		SetSelectedTaskDate(TDCD_STARTTIME, m_ctrlAttributes.GetStartTime(), TRUE);
+		bChange = SetSelectedTaskDate(TDCD_STARTTIME, m_ctrlAttributes.GetStartTime());
 		break;
 		
 	case TDCA_DUEDATE:
-		SetSelectedTaskDate(TDCD_DUEDATE, m_ctrlAttributes.GetDueDate(), TRUE);
+		bChange = SetSelectedTaskDate(TDCD_DUEDATE, m_ctrlAttributes.GetDueDate());
 		break;
 		
 	case TDCA_DUETIME:
-		SetSelectedTaskDate(TDCD_DUETIME, m_ctrlAttributes.GetDueTime(), TRUE);
+		bChange = SetSelectedTaskDate(TDCD_DUETIME, m_ctrlAttributes.GetDueTime());
 		break;
 		
+	case TDCA_FLAG:
+		bChange = SetSelectedTaskFlag(m_ctrlAttributes.GetFlag());
+		break;
+
+	case TDCA_LOCK:
+		bChange = SetSelectedTaskLock(m_ctrlAttributes.GetLock());
+		break;
+		
+	case TDCA_PRIORITY:
+		bChange = SetSelectedTaskPriority(m_ctrlAttributes.GetPriority());
+		break;
+
+	case TDCA_RISK:
+		bChange = SetSelectedTaskRisk(m_ctrlAttributes.GetRisk());
+		break;
+
+	case TDCA_EXTERNALID:
+		bChange = SetSelectedTaskExternalID(m_ctrlAttributes.GetExternalID());
+		break;
+
+	case TDCA_ALLOCBY:
+		bChange = SetSelectedTaskAllocBy(m_ctrlAttributes.GetAllocBy());
+		break;
+
+	case TDCA_STATUS:
+		bChange = SetSelectedTaskStatus(m_ctrlAttributes.GetStatus());
+		break;
+
+	case TDCA_VERSION:
+		bChange = SetSelectedTaskVersion(m_ctrlAttributes.GetVersion());
+		break;
+
+	case TDCA_PERCENT:
+		bChange = SetSelectedTaskPercentDone(m_ctrlAttributes.GetPercentDone());
+		break;
+
 	case TDCA_COST:
 		{
 			TDCCOST cost;
 			
 			if (m_ctrlAttributes.GetCost(cost))
-				SetSelectedTaskCost(cost);
+				bChange = SetSelectedTaskCost(cost);
 		}
-		break;
-		
-	case TDCA_FLAG:
-		SetSelectedTaskFlag(m_ctrlAttributes.GetFlag());
-		break;
-
-	case TDCA_LOCK:
-		SetSelectedTaskLock(m_ctrlAttributes.GetLock());
-		break;
-		
-	case TDCA_RECURRENCE:
-	case TDCA_COLOR:
-		ASSERT(0);
 		break;
 		
 	case TDCA_DEPENDENCY:
@@ -1060,40 +1127,16 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			CTDCDependencyArray aDepends;
 			m_ctrlAttributes.GetDependencies(aDepends);
 
-			SetSelectedTaskDependencies(aDepends, FALSE, TRUE);
+			bChange = SetSelectedTaskDependencies(aDepends);
 		}
 		break;
 		
-	case TDCA_PRIORITY:
-		SetSelectedTaskPriority(m_ctrlAttributes.GetPriority());
-		break;
-		
-	case TDCA_RISK:
-		SetSelectedTaskRisk(m_ctrlAttributes.GetRisk());
-		break;
-		
-	case TDCA_EXTERNALID:
-		SetSelectedTaskExternalID(m_ctrlAttributes.GetExternalID());
-		break;
-		
-	case TDCA_ALLOCBY:
-		SetSelectedTaskAllocBy(m_ctrlAttributes.GetAllocBy());
-		break;
-		
-	case TDCA_STATUS:
-		SetSelectedTaskStatus(m_ctrlAttributes.GetStatus());
-		break;
-		
-	case TDCA_VERSION:
-		SetSelectedTaskVersion(m_ctrlAttributes.GetVersion());
-		break;
-
 	case TDCA_ALLOCTO:
 		{
 			CStringArray aMatched, aMixed;
 			m_ctrlAttributes.GetAllocTo(aMatched, aMixed);
 
-			SetSelectedTaskArray(TDCA_ALLOCTO, m_tldAll.aAllocTo, aMatched, aMixed);
+			bChange = SetSelectedTaskArray(TDCA_ALLOCTO, m_tldAll.aAllocTo, aMatched, aMixed);
 		}
 		break;
 		
@@ -1102,7 +1145,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			CStringArray aMatched, aMixed;
 			m_ctrlAttributes.GetCategories(aMatched, aMixed);
 
-			SetSelectedTaskArray(TDCA_CATEGORY, m_tldAll.aCategory, aMatched, aMixed);
+			bChange = SetSelectedTaskArray(TDCA_CATEGORY, m_tldAll.aCategory, aMatched, aMixed);
 		}
 		break;
 		
@@ -1111,12 +1154,8 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			CStringArray aMatched, aMixed;
 			m_ctrlAttributes.GetTags(aMatched, aMixed);
 
-			SetSelectedTaskArray(TDCA_TAGS, m_tldAll.aTags, aMatched, aMixed);
+			bChange = SetSelectedTaskArray(TDCA_TAGS, m_tldAll.aTags, aMatched, aMixed);
 		}
-		break;
-		
-	case TDCA_PERCENT:
-		SetSelectedTaskPercentDone(m_ctrlAttributes.GetPercentDone());
 		break;
 		
 	case TDCA_TIMEESTIMATE:
@@ -1124,10 +1163,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			TDCTIMEPERIOD tp;
 			m_ctrlAttributes.GetTimeEstimate(tp);
 
-			if (dwFlags & UTF_TIMEUNITSONLY)
-				SetSelectedTaskTimeEstimateUnits(tp.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
-			else
-				SetSelectedTaskTimeEstimate(tp);
+			bChange = SetSelectedTaskTimeEstimate(tp, FALSE, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
 		}
 		break;
 		
@@ -1136,10 +1172,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			TDCTIMEPERIOD tp;
 			m_ctrlAttributes.GetTimeSpent(tp);
 
-			if (dwFlags & UTF_TIMEUNITSONLY)
-				SetSelectedTaskTimeSpentUnits(tp.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
-			else
-				SetSelectedTaskTimeSpent(tp);
+			bChange = SetSelectedTaskTimeSpent(tp, FALSE, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
 		}
 		break;
 		
@@ -1150,10 +1183,15 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 
 			BOOL bAppend = (GetSelectedTaskCount() > 1);
 
-			SetSelectedTaskFileLinks(aFiles, bAppend, TRUE);
+			bChange = SetSelectedTaskFileLinks(aFiles, bAppend);
 		}
 		break;
 		
+	case TDCA_RECURRENCE:
+	case TDCA_COLOR:
+		ASSERT(0);
+		break;
+
 	default:
 		// handle custom attributes
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
@@ -1162,11 +1200,13 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 			TDCCADATA data;
 
 			if (m_ctrlAttributes.GetCustomAttributeData(sAttribID, data))
-				SetSelectedTaskCustomAttributeData(sAttribID, data);
+				bChange = SetSelectedTaskCustomAttributeData(sAttribID, data);
 			else
-				SetSelectedTaskCustomAttributeData(sAttribID, TDCCADATA());
+				bChange = SetSelectedTaskCustomAttributeData(sAttribID, TDCCADATA());
 		}
 	}
+
+	return bChange;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data)
@@ -1179,11 +1219,11 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 
 	Flush();
 	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
+	CDWordArray aModTaskIDs;
+	POSITION pos = TSH().GetFirstItemPos();
+	
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
@@ -1239,6 +1279,7 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 {
 	// update the combos before copying over the current defaults
 	m_ctrlAttributes.SetDefaultAutoListData(tld);
+	m_ctrlAttributes.GetAutoListData(TDCA_ALL, m_tldAll);
 
 	m_tldDefault.Copy(tld, TDCA_ALL);
 }
@@ -1246,6 +1287,11 @@ void CToDoCtrl::SetDefaultAutoListData(const TDCAUTOLISTDATA& tld)
 void CToDoCtrl::SetAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID, BOOL bReadOnly)
 {
 	m_ctrlAttributes.SetAutoListDataReadOnly(nListAttribID, bReadOnly);
+}
+
+BOOL CToDoCtrl::IsAutoListContentReadOnly(TDC_ATTRIBUTE nListAttribID) const
+{
+	return m_ctrlAttributes.IsAutoListDataReadOnly(nListAttribID);
 }
 
 BOOL CToDoCtrl::RenameTaskAttributeValues(TDC_ATTRIBUTE nListAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord)
@@ -1284,19 +1330,10 @@ BOOL CToDoCtrl::EditSelectedTaskColor()
 
 	CEnColorDialog dialog(GetSelectedTaskColor());
 
-	CPreferences prefs;
-	dialog.LoadPreferences(prefs);
+	if (dialog.DoModal(CPreferences()) != IDOK)
+		return FALSE;
 
-	if (dialog.DoModal() == IDOK)
-	{
-		dialog.SavePreferences(prefs);
-		
-		if (SetSelectedTaskColor(dialog.GetColor()))
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_COLOR);
-	}
-
-	// else
-	return FALSE;
+	return SetSelectedTaskColor(dialog.GetColor());
 }
 
 BOOL CToDoCtrl::SetSelectedTaskColor(COLORREF color)
@@ -1359,6 +1396,9 @@ BOOL CToDoCtrl::ClearSelectedTaskIcon()
 
 BOOL CToDoCtrl::SetSelectedTaskIcon(const CString& sIcon)
 {
+	if (!CanEditSelectedTask(TDCA_ICON))
+		return FALSE;
+
 	Flush();
 	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
@@ -1391,7 +1431,7 @@ BOOL CToDoCtrl::CanPasteText() const
 
 	// Special case
 	if (nAttribID == TDCA_COMMENTS)
-		return CommentsHaveFocus();
+		return HasFocus(TDCSF_COMMENTS);
 
 	return FALSE;
 }
@@ -1530,15 +1570,11 @@ BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle, BOOL bAllowMultiple)
 
 BOOL CToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 {
-	if (m_taskTree.GetSelectionBoundingRect(rSelection))
-	{
-		m_taskTree.ClientToScreen(rSelection);
-		ScreenToClient(rSelection);
+	if (!m_taskTree.GetSelectionBoundingRect(rSelection))
+		return FALSE;
 
-		return TRUE;
-	}
-
-	return FALSE;
+	m_taskTree.MapWindowPoints((CWnd*)this, rSelection);
+	return TRUE;
 }
 
 COleDateTime CToDoCtrl::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const
@@ -1589,7 +1625,7 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority, BOOL bOffset)
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
 		if (mapProcessed.Has(dwTaskID))
 			continue;
@@ -1600,9 +1636,6 @@ BOOL CToDoCtrl::SetSelectedTaskPriority(int nPriority, BOOL bOffset)
 	
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
-
-	if (bOffset)
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PRIORITY);
 		
 	SetModified(TDCA_PRIORITY, aModTaskIDs);
 	return TRUE;
@@ -1626,7 +1659,7 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk, BOOL bOffset)
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
 		if (mapProcessed.Has(dwTaskID))
 			continue;
@@ -1637,9 +1670,6 @@ BOOL CToDoCtrl::SetSelectedTaskRisk(int nRisk, BOOL bOffset)
 	
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
-
-	if (bOffset)
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_RISK);
 		
 	SetModified(TDCA_RISK, aModTaskIDs);
 	return TRUE;
@@ -1700,30 +1730,18 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 	return SetSelectedTaskPriority((bUp ? 1 : -1), TRUE); // offset
 }
 
-// external version
 BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date)
 {
-	return SetSelectedTaskDate(nDate, date, FALSE);
-}
-
-// internal version
-BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited)
-{
-	// if this is a start/due edit then it must be a component 
-	if (bDateEdited && ((nDate == TDCD_DUE) || (nDate == TDCD_START)))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
 	// special case
 	if (nDate == TDCD_DONE)
-		return SetSelectedTaskCompletion(date, bDateEdited);
+		return SetSelectedTaskCompletion(date);
 
 	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
 	if (!CanEditSelectedTask(nAttribID))
 		return FALSE;
+
+	Flush();
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
@@ -1739,8 +1757,6 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
-	BOOL bUpdateTimeEst = FALSE;
-
 	switch (nDate)
 	{
 	case TDCD_CREATE:
@@ -1750,41 +1766,25 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	case TDCD_START:
 	case TDCD_STARTDATE:
 	case TDCD_STARTTIME:
-		{
-			bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
-			SetModified(TDCA_STARTDATE, aModTaskIDs);
-		}
+		SetModified(TDCA_STARTDATE, aModTaskIDs);
 		break;
 
 	case TDCD_DUE:
 	case TDCD_DUEDATE:
 	case TDCD_DUETIME:
-		{
-			bUpdateTimeEst = HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES);
-			SetModified(TDCA_DUEDATE, aModTaskIDs);
-		}
+		SetModified(TDCA_DUEDATE, aModTaskIDs);
 		break;
 
 	case TDCD_DONETIME:
 		SetModified(TDCA_DONEDATE, aModTaskIDs);
 		break;
 
-		//case TDCD_DONE:
+	//case TDCD_DONE:
 	default:
 		ASSERT(0);
 		return FALSE;
 	}
 
-	// only update controls if the date was changed implicitly
-	if (!bDateEdited)
-	{
-		UpdateControls(FALSE); // don't update comments
-	}
-	else if (bUpdateTimeEst)
-	{
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
-	}
-	
 	return TRUE;
 }
 
@@ -1861,21 +1861,24 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 		while (posTask)
 		{
 			DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(posTask));
+			CDWordArray aSelModTaskIDs;
 
 			TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
 												 nDate,
 												 nAmount,
 												 nUnits,
 												 dwFlags,
-												 aDateModTaskIDs);
+												 aSelModTaskIDs);
 
-			HandleModResult(dwTaskID, nRes, aDateModTaskIDs);
+			aDateModTaskIDs.Append(aSelModTaskIDs);
 		}
 
 		if (aDateModTaskIDs.GetSize())
 		{
-			mapAttribs.Add(TDC::MapDateToAttribute(nDate));
-			Misc::AddUniqueItems(aDateModTaskIDs, aModTaskIDs);
+			TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
+			m_taskTree.GetAttributesAffectedByMod(nAttribID, mapAttribs);
+
+			Misc::AppendItems(aDateModTaskIDs, aModTaskIDs, TRUE);
 		}
 	}
 
@@ -2054,7 +2057,7 @@ BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) cons
 BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 {
 	if (nCompletion == TDCTC_UNDONE)
-		return SetSelectedTaskCompletion(CDateHelper::NullDate(), FALSE);
+		return SetSelectedTaskCompletion(CDateHelper::NullDate());
 
 	CDWordArray aTaskIDs;
 	DWORD dwUnused;
@@ -2085,16 +2088,10 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 		ASSERT(aTaskIDs.GetSize());
 	}
 
-	if (!SetSelectedTaskCompletion(aTasks))
-		return FALSE;
-
-	if (aTasks.HasStateChange())
-		UpdateControls(FALSE);
-
-	return TRUE;
+	return SetSelectedTaskCompletion(aTasks);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited)
+BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date)
 {
 	Flush();
 
@@ -2109,13 +2106,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEd
 	if (!aTasks.Add(aTaskIDs, date))
 		return FALSE;
 
-	if (!SetSelectedTaskCompletion(aTasks))
-		return FALSE;
-
-	if (!bDateEdited || aTasks.HasStateChange())
-		UpdateControls(FALSE);
-
-	return TRUE;
+	return SetSelectedTaskCompletion(aTasks);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks)
@@ -2153,7 +2144,6 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks)
 	if (m_aRecreateTaskIDs.GetSize())
 	{
 		// Don't recalc column widths until after the new tasks are created
-		m_taskTree.EnableRecalcColumns(FALSE);
 		PostMessage(WM_TDC_RECREATERECURRINGTASK, 0, m_aRecreateTaskIDs.GetSize());
 	}
 
@@ -2317,7 +2307,6 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 
 	// always
 	m_aRecreateTaskIDs.RemoveAll();
-	m_taskTree.EnableRecalcColumns();
 
 	return 0L;
 }
@@ -2353,11 +2342,6 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 	}
 }
 
-BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset)
-{
-	return SetSelectedTaskPercentDone(nPercent, bOffset, CDateHelper::NullDate());
-}
-
 BOOL CToDoCtrl::CanSetSelectedTaskPercentDone(BOOL bToToday) const
 {
 	if (!CanEditSelectedTask(TDCA_PERCENT))
@@ -2389,7 +2373,13 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDoneToToday()
 	return SetSelectedTaskPercentDone(-1, FALSE, CDateHelper::GetEndOfDay(COleDateTime::GetCurrentTime()));
 }
 
-// internal helper
+// External
+BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset)
+{
+	return SetSelectedTaskPercentDone(nPercent, bOffset, CDateHelper::NullDate());
+}
+
+// Internal
 BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date)
 {
 	// Sanity check
@@ -2412,14 +2402,14 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 	// Percent edits can cause completion changes
 	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
 
-	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
+	POSITION pos = TSH().GetFirstItemPos();
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
-		if (bOffset && mapProcessed.Has(dwTaskID))
+		if (mapProcessed.Has(dwTaskID))
 			continue;
 
 		int nTaskPercent = nPercent;
@@ -2445,8 +2435,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 		if (!aTasksForCompletion.Add(dwTaskID, nTaskPercent))
 			HandleModResult(dwTaskID, m_data.SetTaskPercent(dwTaskID, nTaskPercent), aModTaskIDs);
 
-		if (bOffset)
-			mapProcessed.Add(dwTaskID);
+		mapProcessed.Add(dwTaskID);
 	}
 
 	if (aTasksForCompletion.GetSize())
@@ -2485,15 +2474,13 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
 
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
 
-		if (bOffset && mapProcessed.Has(dwTaskID))
+		if (mapProcessed.Has(dwTaskID))
 			continue;
 
 		HandleModResult(dwTaskID, m_data.SetTaskCost(dwTaskID, cost, bOffset), aModTaskIDs);
-
-		if (bOffset)
-			mapProcessed.Add(dwTaskID);
+		mapProcessed.Add(dwTaskID);
 	}
 
 	if (!aModTaskIDs.GetSize())
@@ -2549,212 +2536,120 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 	return SetSelectedTaskPercentDone((bUp ? m_nPercentIncrement : -m_nPercentIncrement), TRUE);
 }
 
+// External
 BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL bOffset)
 {
-	if (!CanEditSelectedTask(TDCA_TIMEESTIMATE))
-		return FALSE;
-
-	Flush();
-	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-		
-	// Keep track of what we've processed to avoid offsetting
-	// the same task multiple times via references
-	CDWordSet mapProcessed;
-
-	while (pos)
-	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-
-		if (bOffset && mapProcessed.Has(dwTaskID))
-			continue;
-
-		// ignore parent tasks
-		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-			continue;
-
-		if (m_data.SetTaskTimeEstimate(dwTaskID, timeEst, bOffset) == SET_CHANGE)
-			aModTaskIDs.Add(dwTaskID);
-
-		if (bOffset)
-			mapProcessed.Add(dwTaskID);
-	}
-	
-	if (aModTaskIDs.GetSize())
-	{
-		// Update the time estimate field
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
-
-		// Recalc other attributes if only one item selected
- 		if (GetSelectedTaskCount() == 1)
-		{
-			// update % complete?
-			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-			{
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-			}
-
-			// update start/due date?
-			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-			{
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_STARTDATE);
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DUEDATE);
-			}
-		}
-
-		SetModified(TDCA_TIMEESTIMATE, aModTaskIDs);
-	}
-
-	return TRUE;
+	return SetSelectedTaskTimeEstimate(timeEst, bOffset, FALSE);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bOffset)
-{
-	if (!CanEditSelectedTask(TDCA_TIMESPENT))
-		return FALSE;
-
-	Flush();
-	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-		
-	// Keep track of what we've processed to avoid offsetting
-	// the same task multiple times via references
-	CDWordSet mapProcessed;
-
-	while (pos)
-	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-
-		if (bOffset && mapProcessed.Has(dwTaskID))
-			continue;
-
-		// ignore parent tasks
-		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
-			continue;
-
-		if (m_data.SetTaskTimeSpent(dwTaskID, timeSpent, bOffset) == SET_CHANGE)
-			aModTaskIDs.Add(dwTaskID);
-
-		if (bOffset)
-			mapProcessed.Add(dwTaskID);
-	}
-	
-	if (aModTaskIDs.GetSize())
-	{
-		// Update the time spent field
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
-		
-		// update % complete?
-		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && (GetSelectedTaskCount() == 1))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-		}
-		
-		SetModified(TDCA_TIMESPENT, aModTaskIDs);
-	}
-	
-	return TRUE;
-}
-
-BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime)
+// Internal
+BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL bOffset, BOOL bRecalcTime)
 {
 	if (!CanEditSelectedTask(TDCA_TIMEESTIMATE))
 		return FALSE;
 
 	Flush();
 	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
+	CDWordArray aModTaskIDs;
+	POSITION pos = TSH().GetFirstItemPos();
+	
+	// Keep track of what we've processed to avoid offsetting
+	// the same task multiple times via references
+	CDWordSet mapProcessed;
+
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = GetTrueTaskID(TSH().GetNextItem(pos));
+
+		if (mapProcessed.Has(dwTaskID))
+			continue;
 
 		// ignore parent tasks
 		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 			continue;
 
-		TDCTIMEPERIOD timeEst;
-		m_data.GetTaskTimeEstimate(dwTaskID, timeEst);
+		if (bRecalcTime) // Just changing the units
+ 		{
+			TDCTIMEPERIOD tpCur;
+			m_data.GetTaskTimeEstimate(dwTaskID, tpCur);
 
-		if (timeEst.SetUnits(nUnits, bRecalcTime))
-			HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, timeEst), aModTaskIDs);
+			ASSERT(tpCur.nUnits != timeEst.nUnits);
+
+			if (tpCur.SetUnits(timeEst.nUnits, TRUE))
+				HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, tpCur), aModTaskIDs);
+		}
+		else // Set or Offset
+		{
+			HandleModResult(dwTaskID, m_data.SetTaskTimeEstimate(dwTaskID, timeEst, bOffset), aModTaskIDs);
+		}
+
+		mapProcessed.Add(dwTaskID);
 	}
-	
+
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
-
-	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMEESTIMATE);
-
-	// update other controls if only one item selected
-	if (GetSelectedTaskCount() == 1)
-	{
-		if (!bRecalcTime && HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-		}
-
-		// update due date?
-		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DUEDATE);
-		}
-	}
 
 	SetModified(TDCA_TIMEESTIMATE, aModTaskIDs);
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime)
+// External
+BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bOffset)
+{
+	return SetSelectedTaskTimeSpent(timeSpent, bOffset, FALSE);
+}
+
+// Internal
+BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bOffset, BOOL bRecalcTime)
 {
 	if (!CanEditSelectedTask(TDCA_TIMESPENT))
 		return FALSE;
 
 	Flush();
 	
-	POSITION pos = TSH().GetFirstItemPos();
-	CDWordArray aModTaskIDs;
-	
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+		
+	CDWordArray aModTaskIDs;
+	POSITION pos = TSH().GetFirstItemPos();
+	
+	// Keep track of what we've processed to avoid offsetting
+	// the same task multiple times via references
+	CDWordSet mapProcessed;
 
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
+		if (mapProcessed.Has(dwTaskID))
+			continue;
+
 		// ignore parent tasks
 		if (m_data.IsTaskParent(dwTaskID) && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 			continue;
 
-		TDCTIMEPERIOD timeSpent;
-		m_data.GetTaskTimeSpent(dwTaskID, timeSpent);
+		if (bRecalcTime) // Just changing the units
+ 		{
+			TDCTIMEPERIOD tpCur;
+			m_data.GetTaskTimeSpent(dwTaskID, tpCur);
 
-		if (timeSpent.SetUnits(nUnits, bRecalcTime))
-			HandleModResult(dwTaskID, m_data.SetTaskTimeSpent(dwTaskID, timeSpent), aModTaskIDs);
+			ASSERT(tpCur.nUnits != timeSpent.nUnits);
+
+			if (tpCur.SetUnits(timeSpent.nUnits, TRUE))
+				HandleModResult(dwTaskID, m_data.SetTaskTimeSpent(dwTaskID, tpCur), aModTaskIDs);
+		}
+		else // Set or offset
+		{
+			HandleModResult(dwTaskID, m_data.SetTaskTimeSpent(dwTaskID, timeSpent, bOffset), aModTaskIDs);
+		}
+
+		mapProcessed.Add(dwTaskID);
 	}
 	
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
-
-	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_TIMESPENT);
-
-	// update controls if only one item selected
-	if (GetSelectedTaskCount() == 1)
-	{
-		// update % complete?
-		if (!bRecalcTime && HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_PERCENT);
-		}
-	}
-
+	
 	SetModified(TDCA_TIMESPENT, aModTaskIDs);
 	return TRUE;
 }
@@ -2849,23 +2744,16 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
 		if (!aTasksForCompletion.Add(dwTaskID, sStatus))
+		{
+			// regular status change
 			HandleModResult(dwTaskID, m_data.SetTaskStatus(dwTaskID, sStatus), aModTaskIDs);
+		}
 	}
 
 	if (aTasksForCompletion.GetSize())
-	{
-		if (!SetSelectedTaskCompletion(aTasksForCompletion))
-			return FALSE;
+		return SetSelectedTaskCompletion(aTasksForCompletion);
 
-		// else
-		m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DONEDATE);
-
-		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
-		SetModified(TDCA_DONEDATE, aModTaskIDs);
-
-		return TRUE;
-	}
-
+	// else regular status change
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
@@ -2875,20 +2763,6 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, BOOL bAppend)
 {
-	CDWordArray aModTaskIDs;
-
-	if (SET_CHANGE != SetSelectedTaskArray(nAttribID, aItems, bAppend, aModTaskIDs))
-		return FALSE;
-
-	ASSERT(aModTaskIDs.GetSize());
-	m_ctrlAttributes.RefreshSelectedTasksValue(nAttribID);
-
-	return TRUE;
-}
-
-TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aItems, 
-										BOOL bAppend, CDWordArray& aModTaskIDs)
-{
 	if (!CanEditSelectedTask(nAttribID))
 		return SET_FAILED;
 
@@ -2896,7 +2770,7 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringAr
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	aModTaskIDs.RemoveAll();
+	CDWordArray aModTaskIDs;
 	POSITION pos = TSH().GetFirstItemPos();
 
 	while (pos)
@@ -2906,15 +2780,19 @@ TDC_SET CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringAr
 	}
 
 	if (!aModTaskIDs.GetSize())
-		return SET_NOCHANGE;
+		return FALSE;
 
 	SetModified(nAttribID, aModTaskIDs);
-	return SET_CHANGE;
+	return TRUE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray& aAll, 
 									 const CStringArray& aChecked, const CStringArray& aMixed)
 {
+	Flush();
+
+	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+
 	CStringArray aUnchecked, aTaskItems;
 	BOOL bMergeItems = FALSE;
 
@@ -2927,10 +2805,8 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray
 		bMergeItems = TRUE;
 	}
 	
-	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
-
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+	POSITION pos = TSH().GetFirstItemPos();
 
 	while (pos)
 	{
@@ -2940,7 +2816,7 @@ BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttribID, const CStringArray
 		// and if the task itself has any current array items
 		if (bMergeItems && m_data.GetTaskArray(dwTaskID, nAttribID, aTaskItems))
 		{
-			Misc::AddUniqueItems(aChecked, aTaskItems);
+			Misc::AppendItems(aChecked, aTaskItems, TRUE);
 			Misc::RemoveItems(aUnchecked, aTaskItems);
 		}
 		else
@@ -2970,36 +2846,18 @@ BOOL CToDoCtrl::SetSelectedTaskTags(const CStringArray& aTags, BOOL bAppend)
 
 BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend)
 {
-	return SetSelectedTaskFileLinks(aFilePaths, bAppend, FALSE);
-}
-
-BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited)
-{
 	CStringArray aFileLinks;
 
 	if (bAppend)
 		GetSelectedTaskFileLinks(aFileLinks); // full paths
 
-	Misc::AddUniqueItems(aFilePaths, aFileLinks);
-
-	// convert to relative paths
+	Misc::AppendItems(aFilePaths, aFileLinks, TRUE);
 	MakeRelativePaths(aFileLinks);
 
-	CDWordArray aModTaskIDs;
-
-	if (SET_CHANGE != SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend, aModTaskIDs))
-		return FALSE;
-	
-	m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_FILELINK);
-	return TRUE;
+	return SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppend)
-{
-	return SetSelectedTaskDependencies(aDepends, bAppend, FALSE);
-}
-
-BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppend, BOOL bEdit)
 {
 	if (!CanEditSelectedTask(TDCA_DEPENDENCY))
 		return SET_FAILED;
@@ -3019,15 +2877,6 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends,
 
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
-
-	if (aModTaskIDs.GetSize())
-	{
-		// Start and due dates might also have changed
-		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-		{
-			m_ctrlAttributes.RefreshSelectedTasksValues();
-		}
-	}
 
 	SetModified(TDCA_DEPENDENCY, aModTaskIDs);
 	return TRUE;
@@ -3066,16 +2915,10 @@ BOOL CToDoCtrl::TimeTrackSelectedTask()
 
 BOOL CToDoCtrl::CanTimeTrackSelectedTask() const
 {
-	if (!CanEditSelectedTask(TDCA_TIMESPENT) || (GetSelectedTaskCount() != 1))
+	if (!CanEditSelectedTask(TDCA_TIMESPENT))
 		return FALSE;
 
-	DWORD dwTaskID = GetSelectedTaskID();
-	
-	if (dwTaskID)
-		return m_timeTracking.CanTrackTask(dwTaskID);
-
-	// else
-	return FALSE;
+	return m_timeTracking.CanTrackSelectedTask();
 }
 
 BOOL CToDoCtrl::IsSelectedTaskBeingTimeTracked() const
@@ -3122,54 +2965,63 @@ BOOL CToDoCtrl::SetSelectedTaskExternalID(const CString& sExtID)
 
 BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 {
+	if (nFile < 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	CStringArray aFiles;
 	int nNumFiles = m_ctrlAttributes.GetFileLinks(aFiles);
 
-	if (nFile < (nNumFiles - 1))
+	if (nFile < nNumFiles)
 		return GotoFile(aFiles[nFile]);
 
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditText, DWORD dwDependency)
+BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditLabel, DWORD dwDependency)
 {
-	if (!CanCreateNewTask(nWhere, sText))
+	if (sText.IsEmpty() || !CanCreateNewTask(nWhere))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
+
+	// Are we an archive and should we warn user if we are
+	if (m_bArchive && 
+		HasStyle(TDCS_WARNADDDELETEARCHIVE) && 
+		(IDNO == CMessageBox::AfxShow(IDS_TDC_CONFIRMADD_TITLE, IDS_TDC_WARNADDTOARCHIVE, MB_YESNO | MB_ICONQUESTION)))
+	{
+		return FALSE;
+	}
 	
 	Flush();
 
-	// handle special case when tasklist is empty
-	if (GetTaskCount() == 0)
-		nWhere = TDC_INSERTATBOTTOM;
-	
 	HTREEITEM htiParent = NULL, htiAfter = NULL;
 
-	if (m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
+	if (!m_taskTree.GetInsertLocation(nWhere, htiParent, htiAfter))
 	{
-		HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditText, dwDependency);
-		ASSERT(htiNew);
-
-		DWORD dwTaskID = GetTaskID(htiNew);
-		ASSERT(dwTaskID == (m_dwNextUniqueID - 1));
-
-		return (htiNew != NULL);
+		ASSERT(0);
+		return FALSE;
 	}
 
-	// else
-	ASSERT(0);
-	return FALSE;
+	HTREEITEM htiNew = InsertNewTask(sText, htiParent, htiAfter, bEditLabel, dwDependency);
+	ASSERT(htiNew);
+
+	DWORD dwTaskID = GetTaskID(htiNew);
+	ASSERT(dwTaskID == (m_dwNextUniqueID - 1));
+
+	return (htiNew != NULL);
 }
 
 BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 {
-	if (!CanEditSelectedTask(TDCA_NEWTASK))
-		return FALSE;
-
 	switch (nInsertWhere)
 	{
 	case TDC_INSERTATTOP:
 	case TDC_INSERTATBOTTOM:
-		return TRUE;
+		return !IsReadOnly();
 
 	case TDC_INSERTATTOPOFSELTASKPARENT:
 	case TDC_INSERTATBOTTOMOFSELTASKPARENT:
@@ -3177,6 +3029,7 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	case TDC_INSERTBEFORESELTASK:
 	case TDC_INSERTATTOPOFSELTASK: 
 	case TDC_INSERTATBOTTOMOFSELTASK:
+		if (CanEditSelectedTask(TDCA_NEWTASK))
 		{
 			HTREEITEM htiParent = NULL, htiAfter = NULL;
 
@@ -3186,7 +3039,7 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 				break; // handled below
 
 			case 1:
-				VERIFY (m_taskTree.GetInsertLocation(nInsertWhere, htiParent, htiAfter));
+				VERIFY(m_taskTree.GetInsertLocation(nInsertWhere, htiParent, htiAfter));
 				break;
 
 			default:
@@ -3204,30 +3057,61 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 			return !m_data.IsTaskReference(GetTaskID(htiParent));
 		}
 		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 
-	ASSERT(0);
 	return FALSE;
 }
 
-BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nWhere, const CString& sText) const
+BOOL CToDoCtrl::CreateNewSubtaskInTask(const CString& sText, BOOL bTop)
 {
-	if (!CanCreateNewTask(nWhere))
-		return FALSE;
-	
-	if (sText.IsEmpty())
+	// Get all editable tasks 
+	TDCGETTASKS filter(TDCGT_ALL, TDCGTF_NOTLOCKED);
+
+	filter.mapAttribs.Add(TDCA_TASKNAME);
+	filter.mapAttribs.Add(TDCA_ICON);
+
+	CTaskFile tasks;
+	GetTasks(tasks, filter);
+
+	// Prepare the dialog
+	CTDLSelectTaskDlg dialog(tasks,
+							 GetTaskIconImageList(),
+							 GetPreferencesKey(_T("NewSubtaskInTask")));
+
+	dialog.SetStrikethroughCompletedTasks(HasStyle(TDCS_STRIKETHOUGHDONETASKS));
+	dialog.SetShowParentTasksAsFolders(HasStyle(TDCS_SHOWPARENTSASFOLDERS));
+	dialog.SetSelectedTaskID(GetSelectedTaskID());
+	dialog.SetCompletedTaskColor(m_taskTree.GetCompletedTaskColor());
+
+	if (dialog.DoModal(NULL, IDS_SELECTSUBTASKPARENT_TITLE) != IDOK)
 		return FALSE;
 
-	// are we an archive and should we warn user if we are
-	if (m_bArchive && HasStyle(TDCS_WARNADDDELETEARCHIVE))
+	// Select the chosen task
+	if (!SelectTask(dialog.GetSelectedTaskID(), FALSE))
 	{
-		if (CMessageBox::AfxShow(IDS_TDC_CONFIRMADD_TITLE, IDS_TDC_WARNADDTOARCHIVE, MB_YESNO | MB_ICONQUESTION) != IDYES) 
-		{
-			return FALSE;
-		}
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Create the task
+	TDC_INSERTWHERE nInsert = (bTop ? TDC_INSERTATTOPOFSELTASK : TDC_INSERTATBOTTOMOFSELTASK);
+
+	if (!CreateNewTask(sText, nInsert, TRUE))
+	{
+		ASSERT(0);
+		return FALSE;
 	}
 
 	return TRUE;
+}
+
+BOOL CToDoCtrl::CanCreateNewSubtaskInTask() const
+{
+	return m_taskTree.GetItemCount();
 }
 
 TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
@@ -3240,15 +3124,12 @@ TODOITEM* CToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 }
 
 HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, 
-								BOOL bEdit, DWORD dwDependency)
+									BOOL bEditLabel, DWORD dwDependency)
 {
+	ASSERT((htiParent == TVI_ROOT) || CanEditTask(GetTaskID(htiParent), TDCA_NEWTASK));
+	ASSERT(!sText.IsEmpty());
+
 	m_dwLastAddedID = 0;
-	
-	if (!CanEditSelectedTask(TDCA_NEWTASK))
-		return NULL;
-	
-	if (sText.IsEmpty())
-		return NULL;
 	
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_ADD);
 
@@ -3304,7 +3185,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 			// if the parent was marked as done and the new task 
 			// is NOT cancellable, we mark the parent as incomplete.
-			if (!bEdit && m_data.IsTaskDone(dwParentID))
+			if (!bEditLabel && m_data.IsTaskDone(dwParentID))
 				FixupParentCompletion(dwParentID);
 		}
 		
@@ -3322,10 +3203,10 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 		m_taskTree.InvalidateAll();
 
-		if (bEdit)
+		if (bEditLabel)
 			EditSelectedTaskTitle(TRUE);
 		else
-			SetFocusToTasks();
+			SetFocus(TDCSF_TASKVIEW);
 	}
 	else // cleanup
 	{
@@ -3337,7 +3218,22 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 BOOL CToDoCtrl::CanSplitSelectedTask() const 
 { 
-	return (CanEditSelectedTask(TDCA_POSITION) && m_taskTree.CanSplitSelectedTask()); 
+	if (!CanEditSelectedTask(TDCA_NEWTASK))
+		return FALSE; 
+
+	switch (m_taskTree.GetSelectedCount())
+	{
+	case 0:
+		return FALSE;
+
+	case 1:
+		return (!m_taskTree.SelectionHasDone(FALSE) && 
+				!m_taskTree.SelectionHasSubtasks() &&
+				!m_taskTree.SelectionHasReferences());
+	}
+
+	// For the rest we filter during the actual splitting
+	return TRUE;
 }
 
 BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
@@ -3362,10 +3258,13 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 		
 		DWORD dwTaskID = GetTaskID(hti);
 
+		if (m_calculator.IsTaskLocked(dwTaskID))
+			continue;
+
 		const TODOITEM* pTDI = GetTask(dwTaskID);
 		ASSERT(pTDI);
 		
-		if (!pTDI || pTDI->IsDone())
+		if (!pTDI || pTDI->IsDone() || pTDI->IsReference())
 			continue;
 		
 		// Calculate how to apportion time to subtasks
@@ -3546,9 +3445,6 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 			// Delete data object last
 			m_data.DeleteTask(dwTaskID, TRUE); // TRUE == with undo
 		}
-		
-		// Note: CToDoCtrlData ought to have already cleaned up the data
-		//VERIFY(!m_taskTree.RemoveOrphanTreeItemReferences());
 	}
 	m_taskTree.UpdateAll();
 
@@ -3563,7 +3459,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 
 	// restore focus
 	if (!focus.RestoreFocus())
-		SetFocusToTasks();
+		SetFocus(TDCSF_TASKVIEW);
 
 	return TRUE;
 }
@@ -3644,8 +3540,8 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 	int nMinLen = GraphicsMisc::ScaleByDPIFactor(200);
 	rPos.right = max(rPos.right, rPos.left + nMinLen);
 
-	// create edit if nec.
-	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_TASKLABELEDIT, WS_POPUP | WS_BORDER))
+	// create edit on request
+	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_TASKLABELEDIT, (WS_POPUP | WS_BORDER | ES_AUTOHSCROLL)))
 		return FALSE;
 
 	// start
@@ -3705,7 +3601,7 @@ LRESULT CToDoCtrl::OnLabelEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 		// or if the edit box loses the focus so we need to check
 		// the lParam and only set the focus if the user chose return
 		if (lParam)
-			SetFocusToTasks();
+			SetFocus(TDCSF_TASKVIEW);
 
 		if (!sText.IsEmpty())
 		{
@@ -3786,7 +3682,7 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		m_data.ClearRedoStack(); // Not undoable
 	}
 
-	SetFocusToTasks();
+	SetFocus(TDCSF_TASKVIEW);
 	SetEditTitleTaskID(0);
 
 	return 0L;
@@ -3833,7 +3729,7 @@ BOOL CToDoCtrl::DeleteAllTasks()
 
 	// must do these first
 	Flush();
-	m_taskTree.DeselectAll();
+	DeselectAll();
 	
 	CWaitCursor cursor;
 	
@@ -3956,12 +3852,19 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 		// Fix up focus
 		if (!bEnable && (GetFocus() == GetDlgItem(IDC_PROJECTNAME)))
 		{
-			SetFocusToTasks();
+			SetFocus(TDCSF_TASKVIEW);
 		}
 		dwResult = TDCSS_WANTRESIZE;
 		break;
 
 	case TDCS_SHOWCOMMENTSALWAYS:
+		if (m_layout.GetMaximiseState() == TDCMS_MAXTASKLIST)
+		{
+			m_layout.SetMaximised(TDCMS_MAXTASKLIST, bEnable);
+			dwResult = TDCSS_WANTRESIZE;
+		}
+		break;
+
 	case TDCS_COLORTEXTBYPRIORITY:
 	case TDCS_COLORTEXTBYATTRIBUTE:
 	case TDCS_COLORTEXTBYNONE:
@@ -4135,7 +4038,7 @@ int CToDoCtrl::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttrib) 
 
 BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttrib)
 {
-	ASSERT(CanEditSelectedTask(TDCA_CUSTOMATTRIBDEFS));
+	ASSERT(CanEditSelectedTask(TDCA_CUSTOMATTRIB_DEFS));
 
 	if (!Misc::MatchAllT(m_aCustomAttribDefs, aAttrib, TRUE))
 	{
@@ -4143,7 +4046,7 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 		OnCustomAttributesChanged();
 
 		// update interface
-		SetModified(TDCA_CUSTOMATTRIBDEFS);
+		SetModified(TDCA_CUSTOMATTRIB_DEFS);
 		UpdateControls(FALSE); // don't update comments
 
 		return TRUE;
@@ -4249,9 +4152,8 @@ BOOL CToDoCtrl::IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAt
 
 TDC_FILE CToDoCtrl::Save(const CString& sFilePath, BOOL bFlush)
 {
-	CTaskFile tasks;
-
-	return Save(tasks, sFilePath, bFlush);
+	CTaskFile unused;
+	return Save(unused, sFilePath, bFlush);
 }
 
 TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL bFlush)
@@ -4271,12 +4173,12 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 		return TDCF_NOTALLOWED;
 	}
 	
+	BOOL bFirstSave = (!HasFilePath() || !FileMisc::IsSamePath(m_sLastSavePath, sFilePath));
+
 	// can't save if not checked-out
 	// unless we're saving to another filename or this is our first save
 	if (m_sourceControl.IsSourceControlled() && !m_sourceControl.IsCheckedOut())
 	{
-		BOOL bFirstSave = (!HasFilePath() || !FileMisc::IsSamePath(m_sLastSavePath, sFilePath));
-		
 		if (!bFirstSave)
 			return TDCF_SSC_NOTCHECKEDOUT;
 	}
@@ -4326,8 +4228,10 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 	if (nResult == TDCF_SUCCESS)
 	{
 		SetFilePath(sSavePath);
-
 		m_bModified = FALSE;
+
+		if (bFirstSave)
+			OnFirstSave(tasks);
 	}
 
 	return nResult;
@@ -4392,7 +4296,10 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
 {
 	if (tasks.GetAutoListData(m_tldAll))
+	{
 		m_ctrlAttributes.SetAutoListData(TDCA_ALL, m_tldAll);
+		UpdateAutoListData();
+	}
 }
 
 void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter) const
@@ -4539,8 +4446,8 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 // thin wrapper
 TDC_FILE CToDoCtrl::Load(const CString& sFilePath, LPCTSTR szDefaultPassword)
 {
-	CTaskFile file;
-	return Load(sFilePath, file, szDefaultPassword);
+	CTaskFile unused;
+	return Load(sFilePath, unused, szDefaultPassword);
 }
 
 TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/, LPCTSTR szDefaultPassword)
@@ -4670,8 +4577,6 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	
 	if (!GetSafeHwnd())
 		return FALSE;
-
-	CHoldRecalcColumns hr(m_taskTree);
 
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTimer log;
@@ -4819,6 +4724,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	m_dtLastTaskMod = COleDateTime::GetCurrentTime();
 
 	Resize();
+	UpdateData(FALSE);
 
 	// restore previously visibility
 	if (bHidden)
@@ -4978,7 +4884,6 @@ BOOL CToDoCtrl::ArchiveDoneTasks(TDC_ARCHIVE nRemove, BOOL bRemoveFlagged)
 	CacheTreeSelection(cache);
 	
 	RemoveArchivedTasks(xiDone, nRemove, bRemoveFlagged);
-
 	RestoreTreeSelection(cache);
 
 	return TRUE;
@@ -5184,9 +5089,9 @@ HTREEITEM CToDoCtrl::InsertTreeItem(const TODOITEM* pTDI, DWORD dwTaskID, HTREEI
 	// add unique items to combo-boxes
 	if (bAddToCombos)
 	{
-		Misc::AddUniqueItems(pTDI->aAllocTo, m_tldAll.aAllocTo);
-		Misc::AddUniqueItems(pTDI->aCategories, m_tldAll.aCategory);
-		Misc::AddUniqueItems(pTDI->aTags, m_tldAll.aTags);
+		Misc::AppendItems(pTDI->aAllocTo, m_tldAll.aAllocTo, TRUE);
+		Misc::AppendItems(pTDI->aCategories, m_tldAll.aCategory, TRUE);
+		Misc::AppendItems(pTDI->aTags, m_tldAll.aTags, TRUE);
 
 		Misc::AddUniqueItem(pTDI->sAllocBy, m_tldAll.aAllocBy);
 		Misc::AddUniqueItem(pTDI->sStatus, m_tldAll.aStatus);
@@ -5267,6 +5172,18 @@ void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTask
 	SetModified(mapAttribIDs, aModTaskIDs, !m_findReplace.IsReplacing());
 }
 
+BOOL CToDoCtrl::IsNewTaskMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
+{
+	return (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
+}
+
+BOOL CToDoCtrl::IsNewTaskTitleEditMod(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
+{
+	return (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
+			(aModTaskIDs.GetSize() == 1) &&
+			(aModTaskIDs[0] == m_dwLastAddedID));
+}
+
 void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort)
 {
 	ASSERT(aModTaskIDs.GetSize() || 
@@ -5285,11 +5202,13 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	if (mapAttribIDs.Has(TDCA_PASTE))
 		UpdateAutoListData();
 	
-	// Avoid notifying the tree ctrl when the user is in 
-	// the process of creating a new task because this will
-	// recalculate the column widths which could have a
-	// significant impact on the responsiveness of the UI
-	BOOL bNewTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
+	// For new tasks we want to do as little processing as possible 
+	// so as not to delay the appearance of the title edit field.
+	BOOL bNewTask = IsNewTaskMod(mapAttribIDs, aModTaskIDs);
+	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mapAttribIDs, aModTaskIDs);
+
+	if (bNewTaskTitleEdit || mapAttribIDs.Has(TDCA_PASTE))
+		m_taskTree.SetLargestTaskID(m_dwNextUniqueID);
 
 	if (!bNewTask)
 		m_taskTree.SetModified(mapAttribIDs, bAllowResort);
@@ -5302,7 +5221,10 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	if (mapAttribIDs.Has(TDCA_PROJECTNAME))
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
 	else
-		m_ctrlAttributes.RefreshSelectedTasksValues(mapAttribIDs);
+		m_idleTasks.RefreshAttributeValues(mapAttribIDs);
+
+	if (mapAttribIDs.Has(TDCA_LOCK))
+		EnableDisableComments();
 }
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -5596,9 +5518,7 @@ BOOL CToDoCtrl::CanDropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarge
 BOOL CToDoCtrl::DropSelectedTasks(DD_DROPEFFECT nDrop, HTREEITEM htiDropTarget, HTREEITEM htiDropAfter)
 {
 	if (!CanDropSelectedTasks(nDrop, htiDropTarget))
-	{
 		return FALSE;
-	}
 
 	CLockUpdates lu(*this);
 
@@ -5981,7 +5901,7 @@ BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg)
 				if (pFocus && IsChild(pFocus))
 				{
 					if (!CtrlWantsEnter(*pFocus))
-						SetFocusToTasks();
+						SetFocus(TDCSF_TASKVIEW);
 
 					return FALSE; // allow further routing
 				}
@@ -5999,7 +5919,7 @@ BOOL CToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection)
 		return FALSE;
 
 	Flush(); // end any editing action
-	SetFocusToTasks(); // else datetime controls get their focus screwed
+	SetFocus(TDCSF_TASKVIEW); // else datetime controls get their focus screwed
 
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 
@@ -6102,7 +6022,7 @@ void CToDoCtrl::SetProjectName(const CString& sProjectName)
 		m_bModified = TRUE;
 
 		if (GetSafeHwnd())
-			UpdateDataEx(this, IDC_PROJECTNAME, m_sProjectName, FALSE);
+			UpdateData(FALSE);
 	}
 }
 
@@ -6766,8 +6686,6 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent
 	TCH().SelectItem(NULL);
 	TSH().RemoveAll();
 
-	CHoldRecalcColumns hr(m_taskTree);
-
 	while (hTask)
 	{
 		htiDestAfter = PasteTaskToTree(tasks, hTask, htiDestParent, htiDestAfter, nResetIDs, TRUE);
@@ -6817,22 +6735,29 @@ void CToDoCtrl::OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult)
 LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 {
 	TDC_COLUMN nColID = (TDC_COLUMN)wParam;
+	ASSERT(nColID != TDCC_NONE);
+
 	DWORD dwTaskID = lParam;
+	ASSERT(dwTaskID);
+
+	// Note: We only assert that the entry conditions are met
+	// because this should all have been dealt with by the caller
+	BOOL bSelTask = m_taskTree.IsTaskSelected(dwTaskID);
 
 	switch (nColID)
 	{
 	case TDCC_CLIENT:
-		ASSERT(CanEditSelectedTask(TDCA_TASKNAME, dwTaskID));
-		EditSelectedTaskTitle(FALSE);
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_TASKNAME));
+		EditSelectedTaskTitle();
 		break;
 		
 	case TDCC_DONE:
-		ASSERT(CanEditSelectedTask(TDCA_DONEDATE, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_DONEDATE));
 		SetSelectedTaskCompletion(m_data.IsTaskDone(dwTaskID) ? TDCTC_UNDONE : TDCTC_DONE);
 		break;
 		
 	case TDCC_TRACKTIME:
-		ASSERT(CanEditSelectedTask(TDCA_TIMESPENT, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_TIMESPENT));
 		{
 			HTREEITEM hti = m_taskTree.GetTreeSelectedItem();
 
@@ -6845,17 +6770,17 @@ LRESULT CToDoCtrl::OnTDCNotifyColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case TDCC_FLAG:
-		ASSERT(CanEditSelectedTask(TDCA_FLAG, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_FLAG));
 		SetSelectedTaskFlag(!m_data.IsTaskFlagged(dwTaskID));
 		break;
 		
 	case TDCC_LOCK:
-		ASSERT(CanEditSelectedTask(TDCA_LOCK, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_LOCK));
 		SetSelectedTaskLock(!m_data.IsTaskLocked(dwTaskID));
 		break;
 
 	case TDCC_ICON:
-		ASSERT(CanEditSelectedTask(TDCA_ICON, dwTaskID));
+		ASSERT(bSelTask && CanEditTask(dwTaskID, TDCA_ICON));
 
 		// Cancel any drag started by clicking on the tree item icon
 		m_treeDragDrop.CancelDrag();
@@ -6913,7 +6838,6 @@ LRESULT CToDoCtrl::OnTDCNotifyTaskAttributeEdited(WPARAM wParam, LPARAM lParam)
 	case TDCA_TIMESPENT:
 		if (lParam && (GetSelectedTaskCount() == 1)) // Time units change only
 		{
-			int nRecalcTime = IDNO;
 			TDCTIMEPERIOD time;
 
 			// see if the current time is non-zero and if so we prompt
@@ -6925,8 +6849,7 @@ LRESULT CToDoCtrl::OnTDCNotifyTaskAttributeEdited(WPARAM wParam, LPARAM lParam)
 					return 0L;
 
 				case IDYES:
-					UpdateTask(nAttribID, UTF_RECALCTIME);
-					return 1L;
+					return UpdateTask(nAttribID, UTF_RECALCTIME);
 
 				case IDNO:
 					// Default handling
@@ -6937,18 +6860,21 @@ LRESULT CToDoCtrl::OnTDCNotifyTaskAttributeEdited(WPARAM wParam, LPARAM lParam)
 		break;
 
 	default:
-		// Default handling
 		break;
 	}
 
-	// All else
-	UpdateTask(nAttribID);
-	return 0L;
+	// Default handling
+	return UpdateTask(nAttribID);
 }
 
 LRESULT CToDoCtrl::OnTDCEditTaskReminder(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	return GetParent()->SendMessage(WM_TDCM_EDITTASKREMINDER);
+}
+
+LRESULT CToDoCtrl::OnTDCClearTaskReminder(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	return GetParent()->SendMessage(WM_TDCM_CLEARTASKREMINDER);
 }
 
 LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
@@ -6969,6 +6895,10 @@ LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 	case TDCA_RECURRENCE:
 		return EditSelectedTaskRecurrence();
 
+	case TDCA_REMINDER:
+		// Use WM_TDCM_EDITTASKREMINDER instead
+		break;
+
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
@@ -6979,13 +6909,11 @@ LRESULT CToDoCtrl::OnTDCEditTaskAttribute(WPARAM wParam, LPARAM lParam)
 			{
 			case TDCCA_ICON:
 				if (!pDef->IsList())
-				{
-					HandleCustomColumnClick(pDef->GetColumnID());
-					return 1L;
-				}
+					return HandleCustomColumnClick(pDef->GetColumnID());
 				break;
 			}
 		}
+		break;
 	}
 
 	// All else
@@ -7131,6 +7059,15 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 	if (!m_timeTracking.CanTrackTask(dwTaskID))
 		return FALSE;
 
+	// Verify that we have been saved
+	if (!HasFilePath())
+	{
+		CMessageBox::AfxShow(CEnString(IDS_TITLE_TIMETRACKING), 
+							 CEnString(IDS_MESSAGE_SAVETASKLISTTOENABLEFEATURE), 
+							 (MB_OK | MB_ICONEXCLAMATION));
+		return FALSE;
+	}
+
 	// if there's a current task being tracked then end it
 	EndTimeTracking(TRUE, bNotify);
 
@@ -7230,9 +7167,9 @@ BOOL CToDoCtrl::DoAddTimeToLogFile(DWORD dwTaskID, double dHours, BOOL bShowDial
 	{
 		// if we are readonly, we need to prevent
 		// the dialog showing 'Add time to time spent'
-		BOOL bShowAddToTimeSpent = (CanEditSelectedTask(TDCA_TIMESPENT) && !bTracked);
+		BOOL bShowAddToTimeSpent = (!bTracked && CanEditSelectedTask(TDCA_TIMESPENT));
 
-		CTDLAddLoggedTimeDlg dialog(dwTaskID, sTaskTitle, bShowAddToTimeSpent, dHours, this);
+		CTDLAddLoggedTimeDlg dialog(dwTaskID, bShowAddToTimeSpent, HasStyle(TDCS_SHOWDATESINISO), dHours, this);
 
 		if (dialog.DoModal(s_hIconAddLogDlg) != IDOK)
 			return FALSE;
@@ -7307,7 +7244,7 @@ BOOL CToDoCtrl::AddTimeToTaskLogFile(DWORD dwTaskID, double dHours, const COleDa
 						HasStyle(TDCS_LOGTASKTIMESEPARATELY)))
 	{
 		UpdateWindow();
-		AfxMessageBox(CEnString(IDS_LOGFILELOCKED));
+		AfxMessageBox(Misc::Format(_T("%s\n\n%s"), CEnString(IDS_LOGFILELOCKED), CEnString(IDS_LOGFILELOCKED_EXTRA)));
 
 		return FALSE;
 	}
@@ -7562,7 +7499,7 @@ HTREEITEM CToDoCtrl::RebuildTree(const void* pContext)
 	
 	if (BuildTreeItem(NULL, m_data.GetStructure(), pContext))
 	{
-		m_taskTree.SetNextUniqueTaskID(m_dwNextUniqueID);
+		m_taskTree.SetLargestTaskID(m_dwNextUniqueID);
 
 		hti = m_taskTree.GetChildItem();
 	}
@@ -7844,7 +7781,7 @@ BOOL CToDoCtrl::RestoreTreeSelection(const TDCSELECTIONCACHE& cache)
 		if (bSelChange)
 			UpdateControls();
 
-		m_ctrlAttributes.RefreshSelectedTasksValues();
+		m_idleTasks.RefreshAttributeValues();
 		return TRUE;
 	}
 
@@ -7884,27 +7821,43 @@ int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncC
 
 BOOL CToDoCtrl::PasteTaskAttributeValues(const CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttribs, DWORD dwFlags)
 {
-	if (!CanEditSelectedTask(mapAttribs))
-		return FALSE;
-
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
+	POSITION posSel = TSH().GetFirstItemPos();
 
-	while (pos)
+	while (posSel)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
-		const TODOITEM* pTDI = GetTask(dwTaskID);
+		DWORD dwTaskID = TSH().GetNextItemData(posSel);
 
-		if (pTDI)
+		if (m_calculator.IsTaskLocked(dwTaskID))
+			continue;
+
+		// For each task, build a set of editable attributes only
+		CTDCAttributeMap mapTaskAttribs;
+		POSITION posAttrib = mapAttribs.GetStartPosition();
+
+		while (posAttrib)
 		{
-			TODOITEM tdiCopy = *pTDI;
+			TDC_ATTRIBUTE nAttribID = mapAttribs.GetNext(posAttrib);
 
-			if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapAttribs, m_aCustomAttribDefs, dwFlags))
+			if (CanEditTask(dwTaskID, nAttribID))
+				mapTaskAttribs.Add(nAttribID);
+		}
+
+		if (!mapTaskAttribs.IsEmpty())
+		{
+			const TODOITEM* pTDI = GetTask(dwTaskID);
+
+			if (pTDI)
 			{
-				if (m_data.SetTaskAttributes(dwTaskID, tdiCopy) == SET_CHANGE)
-					aModTaskIDs.Add(dwTaskID);
+				TODOITEM tdiCopy = *pTDI;
+
+				if (tasks.MergeTaskAttributes(hTask, tdiCopy, mapTaskAttribs, m_aCustomAttribDefs, dwFlags))
+				{
+					if (m_data.SetTaskAttributes(dwTaskID, tdiCopy) == SET_CHANGE)
+						aModTaskIDs.Add(dwTaskID);
+				}
 			}
 		}
 	}
@@ -7935,7 +7888,6 @@ BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL 
 	{
 		if (m_aCustomAttribDefs.Append(aAttribDefs))
 			OnCustomAttributesChanged();
-			//RebuildCustomAttributeUI();
 	}
 
 	// add the tasks
@@ -8135,7 +8087,11 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 
 		if (!bMatch) //  no children matched -> 'Check ourselves'
 		{
-			if (filter.nFilter == TDCGT_ALL)
+			if (filter.HasFlag(TDCGTF_NOTLOCKED) && m_calculator.IsTaskLocked(dwTaskID))
+			{
+				// no match
+			}
+			else if (filter.nFilter == TDCGT_ALL)
 			{
 				bMatch = TRUE; // always
 			}
@@ -8143,7 +8099,7 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 			{
 				BOOL bDone = pTDI->IsDone();
 				BOOL bGoodAsDone = (bDone ? TRUE : m_calculator.IsTaskDone(dwTaskID));
-			
+
 				switch (filter.nFilter)
 				{
 				case TDCGT_DUE:
@@ -8209,42 +8165,106 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 	return FALSE;
 }
 
-void CToDoCtrl::SetFocusToTasks()
+void CToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 {
-	if (!m_taskTree.HasFocus())
+	switch (nLocation)
 	{
-		// NOTE: if the comments was the last window focused
-		// before we were disabled, and we revert the focus
-		// to the tree, then the comments gets very confused
-		// and will not want to take the focus even though it
-		// contains the caret, so we force it to have the focus
-		// before switching to the tree.
-		SetFocusToComments();
-		
-		m_taskTree.SetFocus();
+	case TDCSF_TASKVIEW:
+		if (!m_taskTree.HasFocus())
+		{
+			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
+			{
+				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
+				SetMaximizeState(TDCMS_MAXTASKLIST);
+			}
+			else
+			{
+				// NOTE: if the comments was the last window focused
+				// before we were disabled, and we revert the focus
+				// to the tree, then the comments gets very confused
+				// and will not want to take the focus even though it
+				// contains the caret, so we force it to have the focus
+				// before switching to the tree.
+				if (m_layout.IsVisible(TDCSF_COMMENTS))
+					m_ctrlComments.SetFocus();
+
+				m_taskTree.SetFocus();
+			}
+
+			// ensure the selected tree item is visible
+			if (!m_taskTree.EnsureSelectionVisible(TRUE))
+				SelectItem(m_taskTree.GetChildItem());
+		}
+		break;
+
+	case TDCSF_COMMENTS:
+		{
+			if (!m_layout.IsVisible(TDCSF_COMMENTS))
+			{
+				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXTASKLIST);
+				SetMaximizeState(TDCMS_MAXCOMMENTS);
+			}
+			else
+			{
+				m_ctrlComments.SetFocus();
+			}
+		}
+		break;
+
+	case TDCSF_ATTRIBUTES:
+		{
+			if (!m_layout.IsVisible(nLocation))
+			{
+				ASSERT(m_layout.GetMaximiseState() != TDCMS_NORMAL);
+				SetMaximizeState(TDCMS_NORMAL);
+			}
+
+			m_ctrlAttributes.SetFocus();
+		}
+		break;
+
+	case TDCSF_PROJECTNAME:
+		{
+			if (!m_layout.IsVisible(nLocation))
+			{
+				ASSERT(m_layout.GetMaximiseState() != TDCMS_NORMAL);
+				SetMaximizeState(TDCMS_NORMAL);
+			}
+
+			GetDlgItem(IDC_PROJECTNAME)->SetFocus();
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		return;
 	}
 
-	// ensure the selected tree item is visible
-	if (!m_taskTree.EnsureSelectionVisible(TRUE))
-		SelectItem(m_taskTree.GetChildItem());
+	InvalidateAllCtrls(this, FALSE);
 }
 
-void CToDoCtrl::SetFocusToComments()
+BOOL CToDoCtrl::HasFocus(TDC_SETFOCUSTO nLocation) const
 {
-	// ignore if comments are not visible
-	if (m_layout.HasMaximiseState(TDCMS_MAXTASKLIST))
-		return;
+	if (!m_layout.IsVisible(nLocation))
+		return FALSE;
 
-	m_ctrlComments.SetFocus();
-}
+	switch (nLocation)
+	{
+	case TDCSF_TASKVIEW:
+		return m_taskTree.HasFocus();
 
-void CToDoCtrl::SetFocusToProjectName()
-{
-	// ignore if comments is maximised
-	if (m_layout.HasMaximiseState(TDCMS_MAXTASKLIST))
-		return;
+	case TDCSF_COMMENTS:
+		return m_ctrlComments.HasFocus();
 
-	GetDlgItem(IDC_PROJECTNAME)->SetFocus();
+	case TDCSF_ATTRIBUTES:
+		return m_ctrlAttributes.HasFocus();
+
+	case TDCSF_PROJECTNAME:
+		return (GetFocus() == GetDlgItem(IDC_PROJECTNAME));
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 CString CToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
@@ -8271,7 +8291,7 @@ CString CToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 			sText.LoadString(IDS_TDC_FIELD_PROJECT);
 		}
 
-		sText.Replace(_T("&"), _T(""));
+		sText.Remove('&');
 	}
 
 	return sText;
@@ -8330,8 +8350,14 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 	{
 		if (pData->HasFiles())
 		{
-			if (pData->dwTaskID && !pData->bImportTasks)
-				return CanEditSelectedTask(TDCA_FILELINK);
+			if (pData->dwTaskID)
+			{
+				if (m_data.IsTaskLocked(pData->dwTaskID))
+					return FALSE;
+
+				if (!pData->bImportTasks)
+					return CanEditTask(pData->dwTaskID, TDCA_FILELINK);
+			}
 
 			// Check with parent
 			TDCDROPIMPORT data(pData->dwTaskID, *pData->pFilePaths);
@@ -8340,8 +8366,14 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 
 		if (pData->pOutlookSelection || CMSOutlookHelper::IsOutlookObject(pData->pObject))
 		{
-			if (pData->dwTaskID && !pData->bImportTasks)
-				return CanEditSelectedTask(TDCA_FILELINK);
+			if (pData->dwTaskID)
+			{
+				if (m_data.IsTaskLocked(pData->dwTaskID))
+					return FALSE;
+
+				if (!pData->bImportTasks)
+					return CanEditTask(pData->dwTaskID, TDCA_FILELINK);
+			}
 
 			// else 
 			return CanEditSelectedTask(TDCA_NEWTASK);
@@ -8421,7 +8453,7 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
-				SetSelectedTaskFileLinks(aFiles, TRUE, FALSE);
+				SetSelectedTaskFileLinks(aFiles, TRUE);
 			}
 		}
 		else if (pData->HasText())
@@ -8445,7 +8477,7 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 			}
 		}
 
-		SetFocusToTasks();
+		SetFocus(TDCSF_TASKVIEW);
 		PostMessage(WM_TDC_FIXUPPOSTDROPSELECTION, 0L, (LPARAM)pData->dwTaskID);
 	}
 
@@ -9341,11 +9373,7 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 			CTDCDependencyArray aDepends;
 			dialog.GetDependencies(aDepends);
 
-			if (SetSelectedTaskDependencies(aDepends))
-			{
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_DEPENDENCY);
-				return TRUE;
-			}
+			return SetSelectedTaskDependencies(aDepends);
 		}
 	}
 
@@ -9356,7 +9384,7 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 
 BOOL CToDoCtrl::EditSelectedTaskRecurrence()
 {
-	if (CanEditSelectedTask(TDCA_RECURRENCE) && !IsSelectedTaskDone())
+	if (CanEditSelectedTask(TDCA_RECURRENCE))
 	{
 		TDCRECURRENCE tr;
 		GetSelectedTaskRecurrence(tr);
@@ -9374,11 +9402,7 @@ BOOL CToDoCtrl::EditSelectedTaskRecurrence()
 			TDCRECURRENCE trNew;
 			dialog.GetRecurrenceOptions(trNew);
 
-			if (SetSelectedTaskRecurrence(trNew))
-			{
-				m_ctrlAttributes.RefreshSelectedTasksValue(TDCA_RECURRENCE);
-				return TRUE;
-			}
+			return SetSelectedTaskRecurrence(trNew);
 		}
 	}
 
@@ -9518,8 +9542,6 @@ void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 	CScopedLogTimer timer(_T("ExpandTasks(%s)"), Misc::Format(bExpand));
 	////////////////////////////////////////////////////////////////////
 
-	CHoldRecalcColumns hr(m_taskTree);
-
 	CHTIList prevSel;
 	TSH().CopySelection(prevSel);
 
@@ -9613,7 +9635,7 @@ void CToDoCtrl::SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand)
 
 				// Its parents
 				if (m_data.GetTaskParentIDs(dwTaskID, aParentIDs))
-					Misc::AddUniqueItems(aParentIDs, aTaskIDs);
+					Misc::AppendItems(aParentIDs, aTaskIDs, TRUE);
 			}
 		}
 
@@ -9767,13 +9789,12 @@ BOOL CToDoCtrl::ShowTaskLink(const CString& sLink, BOOL bURL)
 	{
 		if (SelectTask(dwTaskID, TRUE))
 		{
-			SetFocusToTasks();
+			SetFocus(TDCSF_TASKVIEW);
 			return TRUE;
 		}
-		else
-		{
-			CMessageBox::AfxShow(IDS_TDC_TASKIDNOTFOUND_TITLE, IDS_TDC_TASKIDNOTFOUND);
-		}
+
+		// else
+		CMessageBox::AfxShow(IDS_TDC_TASKIDNOTFOUND_TITLE, IDS_TDC_TASKIDNOTFOUND);
 	}
 	else
 	{
@@ -9889,20 +9910,22 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
  		CWaitCursor cursor;
 		CLockUpdates lu(*this);
 		HOLD_REDRAW(*this, m_taskTree);
-		
-		TDCSELECTIONCACHE cache;
-		CacheTreeSelection(cache);
 
-		// fix up selection first in case we are about to delete the selected item
-		m_taskTree.DeselectAll();
+		TDCSELECTIONCACHE cache;
+		CDWordArray aTaskIDs;
 
 		// get the list of the task IDs that will be undone/redone
-		CDWordArray aTaskIDs;
+		// and clear selection if we will be removing the selection
 		TDC_UNDOACTIONTYPE nUndoType = m_data.GetLastUndoActionType(bUndo);
+		BOOL bClearSelection = ((nUndoType == TDCUAT_DELETE && !bUndo) || 
+								(nUndoType == TDCUAT_ADD && bUndo));
 
-		// but not if the result is that the items in question were deleted
-		if (!(nUndoType == TDCUAT_DELETE && !bUndo) && 
-			!(nUndoType == TDCUAT_ADD && bUndo))
+		if (bClearSelection)
+		{
+			CacheTreeSelection(cache);
+			DeselectAll();
+		}
+		else
 		{
 			m_data.GetLastUndoActionTaskIDs(bUndo, aTaskIDs);
 		}
@@ -9916,14 +9939,13 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 			m_taskTree.OnUndoRedo(bUndo);
 
 			// restore selection
-			if (!aTaskIDs.GetSize() || !m_taskTree.SelectTasks(aTaskIDs))
+			if (bClearSelection || !SelectTasks(aTaskIDs))
 			{
 				if (!RestoreTreeSelection(cache))
-					m_taskTree.SelectTasksInHistory(FALSE);
+					SelectTasksInHistory(FALSE);
 			}
 			
 			// update current selection
-			m_ctrlAttributes.RefreshSelectedTasksValues();
 			UpdateControls();
 
 			// If the operation just un/redone was an edit then we treat it as such
@@ -9956,6 +9978,8 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 		else if (elm.nOp == TDCUEO_DELETE)
 		{
 			// find tree item and delete it
+			CAutoFlag af(m_bDeletingTasks, TRUE);
+
 			// note: DeleteTask on the Parent will already have disposed of the children
 			// so we can expect hti to be NULL on occasion. ie don't ASSERT it
 			HTREEITEM hti = m_taskTree.GetItem(elm.dwTaskID);
@@ -10052,6 +10076,14 @@ void CToDoCtrl::SetUITheme(const CUIThemeFile& theme)
 	Invalidate();
 }
 
+void CToDoCtrl::SetNumPriorityRiskLevels(int nNumLevels)
+{
+	ASSERT(TDC::IsValidNumPriorityRiskLevels(nNumLevels));
+
+	m_data.SetNumPriorityRiskLevels(nNumLevels);
+	m_ctrlAttributes.SetNumPriorityRiskLevels(nNumLevels);
+}
+
 HBRUSH CToDoCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
 	HBRUSH hbr = CRuntimeDlg::OnCtlColor(pDC, pWnd, nCtlColor);
@@ -10109,17 +10141,11 @@ BOOL CToDoCtrl::CanClearSelectedTaskFocusedAttribute() const
 {
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 
-	if (!CanEditSelectedTask(nAttribID))
-		return FALSE;
-
 	return CanClearSelectedTaskAttribute(nAttribID);
 }
 
 BOOL CToDoCtrl::ClearSelectedTaskFocusedAttribute()
 {
-	if (!CanClearSelectedTaskFocusedAttribute())
-		return FALSE;
-
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 
 	return ClearSelectedTaskAttribute(nAttribID);
@@ -10132,11 +10158,12 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const
 
 	switch (nAttribID)
 	{
-	case TDCA_LOCK:
+	case TDCA_LOCK:			
 		return TRUE;
 
 	case TDCA_TASKNAME:
 	case TDCA_PROJECTNAME:
+	case TDCA_COMMENTS:		
 		return FALSE;
 	}
 
@@ -10149,6 +10176,9 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID) const
 
 BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 {
+	if (!CanClearSelectedTaskAttribute(nAttribID))
+		return FALSE;
+
 	switch (nAttribID)
 	{
 	case TDCA_DONEDATE:		return SetSelectedTaskDate(TDCD_DONE, 0.0);
@@ -10159,8 +10189,8 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_DUETIME:		return SetSelectedTaskDate(TDCD_DUETIME, 0.0);
 	case TDCA_STARTTIME:	return SetSelectedTaskDate(TDCD_STARTTIME, 0.0);
 		
-	case TDCA_PRIORITY:		return SetSelectedTaskPriority(FM_NOPRIORITY);
-	case TDCA_RISK:			return SetSelectedTaskRisk(FM_NORISK);
+	case TDCA_PRIORITY:		return SetSelectedTaskPriority(TDC_PRIORITYORRISK_NONE);
+	case TDCA_RISK:			return SetSelectedTaskRisk(TDC_PRIORITYORRISK_NONE);
 		
 	case TDCA_ALLOCTO:		return SetSelectedTaskAllocTo(CStringArray());
 	case TDCA_CATEGORY:		return SetSelectedTaskCategories(CStringArray());
@@ -10176,7 +10206,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_PERCENT:		return SetSelectedTaskPercentDone(0);
 	case TDCA_FLAG:			return SetSelectedTaskFlag(FALSE);
 	case TDCA_LOCK:			return SetSelectedTaskLock(FALSE);
-	case TDCA_COLOR:		return SetSelectedTaskColor(0);
+	case TDCA_COLOR:		return SetSelectedTaskColor(CLR_NONE);
 	case TDCA_RECURRENCE:	return SetSelectedTaskRecurrence(TDCRECURRENCE());
 	case TDCA_ICON:			return ClearSelectedTaskIcon();
 		
@@ -10189,6 +10219,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 			time.dAmount = 0.0;
 			return SetSelectedTaskTimeEstimate(time);
 		}
+		break;
 
 	case TDCA_TIMESPENT:
 		{
@@ -10199,6 +10230,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 			time.dAmount = 0.0;
 			return SetSelectedTaskTimeSpent(time);
 		}
+		break;
 
 	case TDCA_COST:
 		{ 
@@ -10209,6 +10241,8 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 			cost.dAmount = 0.0;
 			return SetSelectedTaskCost(cost);
 		}
+		break;
+
 
 	// These cannot be cleared
 	case TDCA_SUBTASKDONE:
@@ -10222,15 +10256,23 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 	case TDCA_ID:
 	case TDCA_PARENTID:
 	case TDCA_PATH:
+	case TDCA_TASKNAME:
 		ASSERT(0);
 		return FALSE;
+
+	case TDCA_REMINDER:		
+		// Handled by WM_TDCM_CLEARTASKREMINDER
+		break;
+
+	default:
+		{
+			CString sCustomAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
+
+			if (!sCustomAttribID.IsEmpty())
+				return SetSelectedTaskCustomAttributeData(sCustomAttribID, TDCCADATA());
+		}
+		break;
 	}
-
-	// fall thru to custom attributes
-	CString sCustomAttribID = m_aCustomAttribDefs.GetAttributeTypeID(nAttribID);
-
-	if (!sCustomAttribID.IsEmpty())
-		return SetSelectedTaskCustomAttributeData(sCustomAttribID, TDCCADATA());
 
 	// else something we've missed
 	ASSERT(0);
@@ -10242,33 +10284,18 @@ CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMax
 	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep, nMaxTasks); 
 }
 
-BOOL CToDoCtrl::CanEditSelectedTask(const CTDCAttributeMap& mapAttribs, DWORD dwTaskID) const
+BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID) const
 {
-	if (mapAttribs.IsEmpty())
-		return FALSE;
-
-	POSITION pos = mapAttribs.GetStartPosition();
-
-	while (pos)
+	CDWordArray aTaskIDs;
+	
+	// Special case: Nothing selected
+	if (!GetSelectedTaskIDs(aTaskIDs, TRUE))
+		return CanEditTask(0, nAttribID);
+	
+	// Look for first editable task
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 	{
-		if (!CanEditSelectedTask(mapAttribs.GetNext(pos)), dwTaskID)
-			return FALSE;
-	}
-
-	return TRUE;
-}
-
-BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const 
-{ 
-	if (dwTaskID)
-		return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, nAttribID));
-
-	// else look for first UNLOCKED task
-	POSITION pos = TSH().GetFirstItemPos();
-
-	while (pos)
-	{
-		if (CanEditTask(TSH().GetNextItemData(pos), nAttribID))
+		if (CanEditTask(aTaskIDs[nID], nAttribID))
 			return TRUE;
 	}
 
@@ -10280,122 +10307,56 @@ BOOL CToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 	if (IsReadOnly())
 		return FALSE;
 
-	BOOL bLockedTask = m_calculator.IsTaskLocked(dwTaskID);
+	// These do not depend on a specific task
+	switch (nAttribID)
+	{
+	case TDCA_NEWTASK:
+	case TDCA_PASTE:
+		if (dwTaskID == 0)
+			return TRUE;
+		break;
+
+	case TDCA_UNDO:
+	case TDCA_CUSTOMATTRIB_DEFS:
+	case TDCA_ENCRYPT:
+	case TDCA_PROJECTNAME:
+		return TRUE;
+	}
+
+	// Task specific editing
+	BOOL bCanEdit = m_multitasker.CanEditTask(dwTaskID, nAttribID);
+
+	if (bCanEdit != -1)
+		return bCanEdit; // Handled by multi-tasker
 
 	switch (nAttribID)
 	{
-	case TDCA_NONE:
-		return FALSE;
-
-	case TDCA_PERCENT:
-		if (bLockedTask)
-		{
-			return FALSE;
-		}
-		else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-		{
-			return FALSE;
-		}
-		else if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && m_data.IsTaskParent(dwTaskID))
-		{
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_ALL:		
-	case TDCA_ALLOCBY:		
-	case TDCA_ALLOCTO:		
-	case TDCA_ANYTEXTATTRIBUTE:		
-	case TDCA_CATEGORY:		
-	case TDCA_COLOR:		
-	case TDCA_COMMENTS:		
-	case TDCA_COST:			
-	case TDCA_CREATEDBY:	
-	case TDCA_CREATIONDATE:	
-	case TDCA_DEPENDENCY:	
-	case TDCA_DONEDATE:		
-	case TDCA_DONETIME:		
-	case TDCA_DUEDATE:		
-	case TDCA_DUETIME:		
-	case TDCA_EXTERNALID:	
-	case TDCA_FILELINK:		
-	case TDCA_FLAG:			
-	case TDCA_ICON:		
-	case TDCA_METADATA:
-	case TDCA_OFFSETTASK:
-	case TDCA_PRIORITY:		
-	case TDCA_RECURRENCE:	
-	case TDCA_RISK:			
-	case TDCA_STATUS:		
-	case TDCA_TAGS:			
-	case TDCA_TASKNAME:		
-	case TDCA_TASKNAMEORCOMMENTS:		
-	case TDCA_VERSION:		
-		return (bLockedTask == FALSE);
-
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
-		if (bLockedTask)
-		{
-			return FALSE;
-		}
-		else if (!HasStyle(TDCS_ALLOWPARENTTIMETRACKING) && m_data.IsTaskParent(dwTaskID))
-		{
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_STARTDATE:
-	case TDCA_STARTTIME:
-		if (bLockedTask)
-		{
-			return FALSE;
-		}
-		else if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && m_data.TaskHasDependencies(dwTaskID))
-		{
-			// Ignore tasks with dependencies where their dates 
-			// are automatically calculated
-			return FALSE;
-		}
-		else if ((nAttribID == TDCA_STARTTIME) && !m_data.TaskHasDate(dwTaskID, TDCD_START))
-		{
-			// Ignore tasks without a start date set
-			return FALSE;
-		}
-		return TRUE;
-
-	case TDCA_DELETE:
-		if (bLockedTask && !m_data.IsTaskReference(dwTaskID))
-		{
-			// Can't delete locked tasks unless they are references
-			return FALSE;
-		}
-		else if (m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
-		{
-			// Can't delete subtasks if immediate parent is locked
-			return FALSE;
-		}
-		return TRUE;
-
 	case TDCA_NEWTASK:
 	case TDCA_PASTE:
-	case TDCA_PROJECTNAME:
-	case TDCA_UNDO:
-	case TDCA_CUSTOMATTRIBDEFS:
-	case TDCA_POSITION:
-	case TDCA_ENCRYPT:
-		return TRUE;
+		return !m_calculator.IsTaskLocked(dwTaskID);
 
-	case TDCA_LOCK:
-		return TRUE;
+	case TDCA_DELETE:
+		// Can only delete tasks if their immediate parent is UNLOCKED
+		if (!m_data.IsTaskLocked(m_data.GetTaskParentID(dwTaskID)))
+		{
+			// AND the task is UNLOCKED 
+			if (!m_calculator.IsTaskLocked(dwTaskID))
+				return TRUE;
+
+			// OR the task is a REFERENCE to the locked task
+			return m_data.IsTaskReference(dwTaskID);
+		}
+		break;
+
+	case TDCA_OFFSETTASK:
+		return (CanEditTask(dwTaskID, TDCA_STARTDATE) &&  // RECURSIVE CALL
+				CanEditTask(dwTaskID, TDCA_DUEDATE));     // RECURSIVE CALL
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-			return !bLockedTask;
+		ASSERT(0); // Unexpectedly unhandled
 		break;
 	}
 
-	// all else
 	return FALSE;
 }
 

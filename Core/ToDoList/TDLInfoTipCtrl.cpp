@@ -8,6 +8,7 @@
 #include "ToDoCtrlDataDefines.h"
 #include "ToDoCtrlData.h"
 #include "ToDoCtrlDataUtils.h"
+#include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
@@ -87,7 +88,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 
 	// Calculate offset to make item values line up
 	CClientDC dc(const_cast<CTDLInfoTipCtrl*>(this));
-	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, GetSafeHwnd());
+	HFONT hOldFont = GraphicsMisc::PrepareDCFont(&dc, GetSafeHwnd());
 
 	// 1. Normalise the labels by adding a tab 
 	// 2. Keep track of the widest label
@@ -118,6 +119,16 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 			break;
 
 		default:
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(iti.nAttributeID))
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_CUSTDEF_ALT(m_aCustomAttribDefs, iti.nAttributeID, pDef, break);
+
+				if (pDef->IsDataType(TDCCA_STRING) && !pDef->IsList())
+					break;
+			}
+
+			// All else
 			nMaxValueLen = max(nMaxValueLen, iti.sValue.GetLength());
 			break;
 		}
@@ -193,7 +204,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		sTip += _T("\n");
 	}
 
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 
 	return sTip;
 }

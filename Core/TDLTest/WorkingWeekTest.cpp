@@ -18,7 +18,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CWorkingWeekTest::CWorkingWeekTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CWorkingWeekTest::CWorkingWeekTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CWorkingWeekTest"), utils)
 {
 
 }
@@ -40,7 +42,7 @@ TESTRESULT CWorkingWeekTest::Run()
 
 void CWorkingWeekTest::TestAddDuration()
 {
-	CTDCScopedTest test(*this, _T("CWorkingWeekTest::AddDuration"));
+	CTDCScopedTest test(*this, _T("CWorkingWeek::AddDurationInMinutes/Hours/Days/Weeks"));
 
 	// -----------------------------------------------------------------------
 
@@ -94,12 +96,12 @@ void CWorkingWeekTest::TestAddDuration()
 
 		COleDateTime date(-44000.0);
 
-		ExpectEQ(week.AddDurationInMinutes(date, 30).m_dt, CWorkingDay::GetDateAtTimeInHours(-44000.0, 9.5));
-		ExpectEQ(week.AddDurationInMinutes(date, -30).m_dt, CWorkingDay::GetDateAtTimeInHours(-44001.0, 17.5));
+		ExpectEQ(week.AddDurationInMinutes(date, 30), CWorkingDay::GetDateAtTimeInHours(-44000.0, 9.5));
+		ExpectEQ(week.AddDurationInMinutes(date, -30), CWorkingDay::GetDateAtTimeInHours(-44001.0, 17.5));
 
 		ASSERT(date.m_dt == -44000.0);
-		ExpectEQ(week.AddDurationInHours(date, 9).m_dt, CWorkingDay::GetDateAtTimeInHours(-43999.0, 10));
-		ExpectEQ(week.AddDurationInHours(date, -9).m_dt, CWorkingDay::GetDateAtTimeInHours(-44002.0, 17));
+		ExpectEQ(week.AddDurationInHours(date, 9), CWorkingDay::GetDateAtTimeInHours(-43999.0, 10));
+		ExpectEQ(week.AddDurationInHours(date, -9), CWorkingDay::GetDateAtTimeInHours(-44002.0, 17));
 
 		ASSERT(date.m_dt == -44000.0);
 		ExpectEQ(week.AddDurationInDays(date, 9).m_dt, -43992.75);   // end of 9th day
@@ -113,16 +115,18 @@ void CWorkingWeekTest::TestAddDuration()
 
 void CWorkingWeekTest::TestCalculateDuration()
 {
-	CTDCScopedTest test(*this, _T("CWorkingWeekTest::CalculateDuration"));
+	CTDCScopedTest test(*this, _T("CWorkingWeek::CalculateDuration"));
 
 	// -----------------------------------------------------------------------
 
-
+	// TODO
 }
 
 //////////////////////////////////////////////////////////////////////
 
-CWorkingDayTest::CWorkingDayTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CWorkingDayTest::CWorkingDayTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CWorkingDayTest"), utils)
 {
 
 }
@@ -143,7 +147,7 @@ TESTRESULT CWorkingDayTest::Run()
 
 void CWorkingDayTest::TestAddDurationInHours()
 {
-	CTDCScopedTest test(*this, _T("CWorkingDayTest::AddDurationInHours"));
+	CTDCScopedTest test(*this, _T("CWorkingDay::AddDurationInHours"));
 
 	// -----------------------------------------------------------------------
 

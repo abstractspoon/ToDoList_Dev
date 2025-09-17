@@ -442,7 +442,6 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 	if (hti && !CanExpandItem(hti, bExpand))
 		return;
 
-	CHoldRecalcColumns hr(*this);
 	HTREEITEM htiSel = GetSelectedItem();
 	
 	// scope redraw holding else EnsureVisible doesn't work
@@ -554,22 +553,24 @@ void CTDLTaskTreeCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
 
 	VERIFY(m_data.GetTask(GetTaskID(hti), pTDI, pTDS));
 
-	CFont* pOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
+	HFONT hOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
 
 	CTreeDragDropRenderer::OnGetDragItemRect(dc, hti, rItem);
 
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 	rItem.left -= ICON_SIZE;
 }
 
 void CTDLTaskTreeCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
 {
 	DWORD dwTaskID = m_dragTree.GetItemData(hti);
-	int nImage = GetTaskIconIndex(dwTaskID);
 
-	if (nImage != -1)
-		m_ilTaskIcons.Draw(&dc, nImage, rItem.TopLeft());
-
+	GraphicsMisc::DrawCentred(&dc, 
+							  m_ilTaskIcons,
+							  GetTaskIconIndex(dwTaskID),
+							  rItem,
+							  FALSE, 
+							  TRUE);
 	CRect rText(rItem);
 	rText.OffsetRect(ICON_SIZE, 0);
 
@@ -578,24 +579,20 @@ void CTDLTaskTreeCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem
 
 	VERIFY(m_data.GetTask(GetTaskID(hti), pTDI, pTDS));
 
-	CFont* pOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
+	HFONT hOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
 
 	CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rText);
 
-	dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 }
 
 BOOL CTDLTaskTreeCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 {
-	if (TSH().GetBoundingRect(rSelection))
-	{
-		m_tcTasks.ClientToScreen(rSelection);
-		ScreenToClient(rSelection);
-		
-		return TRUE;
-	}
-	
-	return FALSE;
+	if (!TSH().GetBoundingRect(rSelection))
+		return FALSE;
+
+	m_tcTasks.MapWindowPoints((CWnd*)this, rSelection);
+	return TRUE;
 }
 
 BOOL CTDLTaskTreeCtrl::IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const
@@ -613,10 +610,10 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetTreeItemState(HTREEITEM hti) const
 	if (!m_bSavingToImage)
 	{
 		if (m_tcTasks.GetItemState(hti, TVIS_DROPHILITED) & TVIS_DROPHILITED)
-		{
 			return GMIS_DROPHILITED;
-		}
-		else if (IsItemSelected(hti))
+
+		// else
+		if (IsItemSelected(hti))
 		{
 			DWORD dwTaskID = GetTaskID(hti);
 		
@@ -628,6 +625,7 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetTreeItemState(HTREEITEM hti) const
 		}
 	}
 	
+	// all else
 	return GMIS_NONE;
 }
 
@@ -639,7 +637,7 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetColumnItemState(int nItem) const
 void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 {
 	// only called when the focus is actually on the columns
-	// ie. not when Syncing Column Selection)
+	// ie. not when Syncing Column Selection
 	
 	// sync only the item that has changed 
 	HTREEITEM hti = (HTREEITEM)m_lcColumns.GetItemData(pNMLV->iItem);
@@ -647,7 +645,7 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 	BOOL bWasSel = (pNMLV->uOldState & LVIS_SELECTED);
 	BOOL bSel = (pNMLV->uNewState & LVIS_SELECTED);
 	
-	if (Misc::StateChanged(bSel, bWasSel))
+	if (Misc::StatesDiffer(bSel, bWasSel))
 		TSH().SetItem(hti, (bSel ? TSHS_SELECT : TSHS_DESELECT), FALSE);
 	
 	// then sync focused item
@@ -657,7 +655,7 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 	BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
 	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
 
-	if (Misc::StateChanged(bFocused, bWasFocused))
+	if (Misc::StatesDiffer(bFocused, bWasFocused))
 	{
 		TSH().FixupTreeSelection();
 		
@@ -927,17 +925,11 @@ LRESULT CTDLTaskTreeCtrl::OnTreeGetDispInfo(NMTVDISPINFO* pTVDI)
 			pTVDI->item.mask |= TVIF_STATE;
 			pTVDI->item.stateMask = TVIS_STATEIMAGEMASK;
 
-			if (pTDI->IsDone())
+			switch (GetTaskCheckState(pTDI, pTDS))
 			{
-				pTVDI->item.state = TCHC_CHECKED;
-			}
-			else if (m_data.TaskHasCompletedSubtasks(pTDS))
-			{
-				pTVDI->item.state = TCHC_MIXED;
-			}
-			else 
-			{
-				pTVDI->item.state = TCHC_UNCHECKED;
+			case CTDLTaskCtrlBase::TTCBC_UNCHECKED:	pTVDI->item.state = TCHC_UNCHECKED; break;
+			case CTDLTaskCtrlBase::TTCBC_MIXED:		pTVDI->item.state = TCHC_MIXED;		break;
+			case CTDLTaskCtrlBase::TTCBC_CHECKED:	pTVDI->item.state = TCHC_CHECKED;	break;
 			}
 		}
 	}
@@ -1377,7 +1369,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						
 						bSelChange = TRUE;
 					}
-					else if (m_bReadOnly || !::DragDetect(hRealWnd, pt))
+					else if (HasStyle(TDCS_READONLY) || !::DragDetect(hRealWnd, pt))
 					{
 						// if this is not the beginning of a drag then toggle selection
 						TSH().SetItem(htiHit, TSHS_TOGGLE);
@@ -1417,12 +1409,9 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					}
 					else if (nHitFlags & TVHT_ONITEMICON)
 					{
-// 						if (!m_bReadOnly && SelectionHasUnlocked(TRUE))
-// 						{
-							// save item handle so we don't re-handle in LButtonUp handler
-							m_htiLastHandledLBtnDown = htiHit;
-							bColClick = TRUE;
-// 						}
+						// save item handle so we don't re-handle in LButtonUp handler
+						m_htiLastHandledLBtnDown = htiHit;
+						bColClick = TRUE;
 					}
 					else
 					{
@@ -1467,7 +1456,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						int nSelCount = TSH().GetCount();
 						ASSERT (nSelCount);
 						
-						if (!m_bReadOnly && 
+						if (!HasStyle(TDCS_READONLY) &&
 							(nHitFlags & TVHT_ONITEMLABEL) && 
 							(nSelCount == 1) && 
 							(htiLastHandledLBtnDown == NULL) &&

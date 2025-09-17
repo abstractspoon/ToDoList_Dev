@@ -11,13 +11,15 @@
 
 IMPLEMENT_DYNAMIC(CTDLQuickFindComboBox, CAutoComboBox)
 
-CTDLQuickFindComboBox::CTDLQuickFindComboBox(DWORD dwFlags) : CAutoComboBox(dwFlags)
+CTDLQuickFindComboBox::CTDLQuickFindComboBox(DWORD dwFlags) 
+	: 
+	CAutoComboBox(&m_quickEdit, dwFlags)
 {
 	m_iconPrev.Load(IDI_QUICKFIND_PREV);
 	m_iconNext.Load(IDI_QUICKFIND_NEXT);
 
-	m_edit.AddButton(TDLQFB_PREV, m_iconPrev, CEnString(IDS_QUICKFIND_PREVMATCH));
-	m_edit.AddButton(TDLQFB_NEXT, m_iconNext, CEnString(IDS_QUICKFIND_NEXTMATCH));
+	m_quickEdit.AddButton(TDLQFB_PREV, m_iconPrev, CEnString(IDS_QUICKFIND_PREVMATCH));
+	m_quickEdit.AddButton(TDLQFB_NEXT, m_iconNext, CEnString(IDS_QUICKFIND_NEXTMATCH));
 }
 
 CTDLQuickFindComboBox::~CTDLQuickFindComboBox()
@@ -25,53 +27,23 @@ CTDLQuickFindComboBox::~CTDLQuickFindComboBox()
 }
 
 BEGIN_MESSAGE_MAP(CTDLQuickFindComboBox, CAutoComboBox)
-	ON_WM_CTLCOLOR()
-	ON_WM_DESTROY()
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 END_MESSAGE_MAP()
 
 // CTDLQuickFindComboBox message handlers //////////////////////////////
 
-HBRUSH CTDLQuickFindComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	HBRUSH hbr = CAutoComboBox::OnCtlColor(pDC, pWnd, nCtlColor);
-
-	if ((nCtlColor == CTLCOLOR_EDIT) && (m_edit.GetSafeHwnd() == NULL))
-	{
-		VERIFY(m_edit.SubclassDlgItem(1001, this));
-
-		// CEnEdit disables its tooltips when embedded in a combobox
-		// simply because they don't seem to work
-		// So we have to handle it ourselves
-		EnableToolTips(TRUE);
-	}
-
-	return hbr;
-}
-
-void CTDLQuickFindComboBox::OnDestroy()
-{
-	if (m_edit.GetSafeHwnd())
-		m_edit.UnsubclassWindow();
-
-	CAutoComboBox::OnDestroy();
-}
-
 int CTDLQuickFindComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	ASSERT(m_edit.GetSafeHwnd());
+	ASSERT(m_quickEdit.GetSafeHwnd());
 
-	ClientToScreen(&point);
-	m_edit.ScreenToClient(&point);
+	::MapWindowPoints(m_hWnd, m_quickEdit, &point, 1);
 
-	int nTool = m_edit.OnToolHitTest(point, pTI);
+	int nTool = m_quickEdit.OnToolHitTest(point, pTI);
 
 	if (nTool != -1)
 	{
 		pTI->hwnd = m_hWnd;
-
-		m_edit.ClientToScreen(&pTI->rect);
-		ScreenToClient(&pTI->rect);
+		::MapWindowPoints(m_quickEdit, m_hWnd, (LPPOINT)&pTI->rect, 2);
 
 		return nTool;
 	}
@@ -80,9 +52,22 @@ int CTDLQuickFindComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CAutoComboBox::OnToolHitTest(point, pTI);
 }
 
+void CTDLQuickFindComboBox::OnSubclassChild(HWND hwndChild)
+{
+	CAutoComboBox::OnSubclassChild(hwndChild);
+
+	if (m_quickEdit.GetSafeHwnd() == hwndChild)
+	{
+		// CEnEdit disables its tooltips when embedded in a combobox
+		// simply because they don't seem to work
+		// So we have to handle it ourselves
+		EnableToolTips(TRUE);
+	}
+}
+
 LRESULT CTDLQuickFindComboBox::OnEEBtnClick(WPARAM wp, LPARAM lp)
 {
-	// Forward to parent
+	// Forward to app
 	if (wp == 1001)
 	{
 		switch (lp)

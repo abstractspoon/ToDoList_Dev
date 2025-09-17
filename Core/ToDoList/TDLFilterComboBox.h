@@ -15,56 +15,35 @@
 
 class CTDLFilterComboBox : public CTabbedComboBox
 {
-// Construction
 public:
 	CTDLFilterComboBox();
+	virtual ~CTDLFilterComboBox();
 
-// Attributes
-public:
 	FILTER_SHOW GetSelectedFilter() const;
-	FILTER_SHOW GetSelectedFilter(CString& sAdvanced) const;
-	BOOL SelectFilter(FILTER_SHOW nFilter);
-	BOOL SelectAdvancedFilter(const CString& sAdvanced);
+	FILTER_SHOW GetSelectedFilter(CString& sAdvFilter) const;
+	BOOL SelectFilter(FILTER_SHOW nShow, LPCTSTR szAdvFilter = NULL);
 	
-	void AddAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel = NULL);
-	const CStringArray& GetAdvancedFilterNames() const;
-	BOOL HasAdvancedFilter(const CString& sAdvanced) const;
-	void RemoveAdvancedFilters();
+	void SetAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel = NULL);
+	const CStringArray& AdvancedFilterNames() const;
+	BOOL HasAdvancedFilter(const CString& sAdvFilter) const;
+
 	void ShowDefaultFilters(BOOL bShow);
 
-// Operations
 protected:
 	BOOL m_bShowDefaultFilters;
 	CStringArray m_aAdvancedFilterNames;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFilterComboBox)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-
-// Implementation
-public:
-	virtual ~CTDLFilterComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLFilterComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void FillCombo();
-	void RefillCombo(LPCTSTR szAdvancedSel = NULL);
-	void RestoreSelection(FILTER_SHOW nFilter, LPCTSTR szAdvanced = NULL);
-	int AddDefaultFilterItem(int nItem);
+	virtual void BuildCombo();
 
-	static CString FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter, BOOL bIncAdvancedLabel = TRUE);
+	void RebuildCombo(LPCTSTR szAdvancedSel = NULL);
+	int AddDefaultFilterItem(int nItem);
+	int GetDefaultFilterCount() const;
+
+	static CString FormatAdvancedFilterDisplayString(int nFilter, const CString& sFilter);
 	static BOOL ExtractAdvancedFilterName(const CString& sDisplay, CString& sFilter);
 };
 

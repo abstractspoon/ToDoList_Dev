@@ -72,13 +72,12 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 
 	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
 	{
-		const TDCATTRIBUTE& att = ATTRIBUTES[nAtt];
+		const TDCATTRIBUTE& att = TASKATTRIBUTES[nAtt];
 
 		// ignore certain attributes
 		switch (att.nAttributeID)
 		{
 		case TDCA_COLOR:
-		case TDCA_PROJECTNAME:
 		case TDCA_RECURRENCE:
 		case TDCA_POSITION:
 		case TDCA_TASKNAMEORCOMMENTS:
@@ -90,11 +89,11 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		case TDCA_NONE:
 			// Allow mapping to 'none' when importing
 			if (m_bImporting)
-				CDialogHelper::AddString(m_cbAttributes, _T(""), att.nAttributeID);
+				CDialogHelper::AddStringT(m_cbAttributes, _T(""), att.nAttributeID);
 			break;
 
 		default:
-			CDialogHelper::AddString(m_cbAttributes, CEnString(att.nAttribResID), att.nAttributeID);
+			CDialogHelper::AddStringT(m_cbAttributes, CEnString(att.nLabelResID), att.nAttributeID);
 			break;
 		}
 	}
@@ -102,8 +101,8 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 	// add custom attribute placeholder if importing
 	if (m_bImporting)
 	{
-		CDialogHelper::AddString(m_cbAttributes, CEnString(IDS_CSV_CUSTOMATTRIB), TDCA_NEW_CUSTOMATTRIBUTE);
-		CDialogHelper::AddString(m_cbAttributes, CEnString(IDS_CSV_CUSTOMLISTATTRIB), TDCA_NEW_CUSTOMATTRIBUTE_LIST);
+		CDialogHelper::AddStringT(m_cbAttributes, CEnString(IDS_CSV_CUSTOMATTRIB), TDCA_NEW_CUSTOMATTRIBUTE);
+		CDialogHelper::AddStringT(m_cbAttributes, CEnString(IDS_CSV_CUSTOMLISTATTRIB), TDCA_NEW_CUSTOMATTRIBUTE_LIST);
 	}
 
 	m_header.EnableTracking(FALSE);
@@ -178,7 +177,7 @@ CString CTDLImportExportAttributeMappingListCtrl::GetAttributeName(TDC_ATTRIBUTE
 	if (nAtt == TDCA_EXISTING_CUSTOMATTRIBUTE)
 		return CEnString(IDS_CSV_EXISTCUSTOMATTRIB);
 	
-	return TDC::GetAttributeName(nAtt);
+	return TDC::GetAttributeLabel(nAtt);
 }
 
 int CTDLImportExportAttributeMappingListCtrl::FindRow(TDC_ATTRIBUTE nAtt, int nIgnoreRow) const

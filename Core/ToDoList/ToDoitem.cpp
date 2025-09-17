@@ -37,6 +37,11 @@ TDCTIMEPERIOD::TDCTIMEPERIOD(double dTime, TH_UNITS nTimeUnits) : dAmount(dTime)
 	SetTHUnits(nTimeUnits, FALSE);
 }
 
+TDCTIMEPERIOD::TDCTIMEPERIOD(LPCTSTR szPeriod) : dAmount(0), nUnits(TDCU_HOURS)
+{
+	VERIFY(Parse(szPeriod));
+}
+
 BOOL TDCTIMEPERIOD::operator==(const TDCTIMEPERIOD& other) const
 {
 	return ((dAmount == other.dAmount) && (nUnits == other.nUnits));
@@ -792,8 +797,8 @@ TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments)
 	sTitle(szTitle), 
 	sComments(szComments),
 	color(0), 
-	nPriority(TDC_NOPRIORITYORISK),
-	nRisk(TDC_NOPRIORITYORISK),
+	nPriority(TDC_PRIORITYORRISK_NONE),
+	nRisk(TDC_PRIORITYORRISK_NONE),
 	nPercentDone(0),
 	bFlagged(FALSE),
 	bLocked(FALSE),
@@ -1182,22 +1187,64 @@ COleDateTime TODOITEM::GetDate(TDC_DATE nDate) const
 {
 	switch (nDate)
 	{
-	case TDCD_CREATE:		return dateCreated;
-	case TDCD_START:		return dateStart;
-	case TDCD_STARTDATE:	return CDateHelper::GetDateOnly(dateStart);
-	case TDCD_STARTTIME:	return CDateHelper::GetTimeOnly(dateStart);
-	case TDCD_DUE:			return dateDue;
-	case TDCD_DUEDATE:		return CDateHelper::GetDateOnly(dateDue);
-	case TDCD_DUETIME:		return CDateHelper::GetTimeOnly(dateDue);
-	case TDCD_DONE:			return dateDone;
-	case TDCD_DONEDATE:		return CDateHelper::GetDateOnly(dateDone);
-	case TDCD_DONETIME:		return CDateHelper::GetTimeOnly(dateDone);
-	case TDCD_LASTMOD:		return dateLastMod;
+	case TDCD_CREATE:		
+		return dateCreated;
+
+	case TDCD_LASTMOD:		
+		return dateLastMod;
+
+		// --------------------------------
+
+	case TDCD_START:		
+		return dateStart;
+
+	case TDCD_STARTDATE:	
+		if (CDateHelper::IsDateSet(dateStart))
+			return CDateHelper::GetDateOnly(dateStart);
+		break;
+
+	case TDCD_STARTTIME:	
+		if (CDateHelper::IsDateSet(dateStart))
+			return CDateHelper::GetTimeOnly(dateStart);
+		break;
+
+		// --------------------------------
+
+	case TDCD_DUE:			
+		return dateDue;
+
+	case TDCD_DUEDATE:		
+		if (CDateHelper::IsDateSet(dateDue))
+			return CDateHelper::GetDateOnly(dateDue);
+		break;
+
+	case TDCD_DUETIME:
+		if (CDateHelper::IsDateSet(dateDue))
+			return CDateHelper::GetTimeOnly(dateDue);
+		break;
+
+		// --------------------------------
+
+	case TDCD_DONE:			
+		return dateDone;
+
+	case TDCD_DONEDATE:		
+		if (CDateHelper::IsDateSet(dateDone))
+			return CDateHelper::GetDateOnly(dateDone);
+		break;
+
+	case TDCD_DONETIME:
+		if (CDateHelper::IsDateSet(dateDone))
+			return CDateHelper::GetTimeOnly(dateDone);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 	
 	// else
-	ASSERT(0);
-	return 0.0;
+	return CDateHelper::NullDate();
 }
 
 BOOL TODOITEM::GetStartDueDates(COleDateTimeRange& dtRange) const
@@ -1292,10 +1339,10 @@ void TODOITEM::SetMetaData(const CString& sKey, const CString& sData)
 
 BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
 {
-	if (nValue > TDC_MAXPRIORITYORISK)
+	if (nValue > TDC_PRIORITYORRISK_MAX)
 		return FALSE;
 
-	if ((nValue < TDC_MINPRIORITYORISK) && (nValue != TDC_NOPRIORITYORISK))
+	if ((nValue < TDC_PRIORITYORRISK_MIN) && (nValue != TDC_PRIORITYORRISK_NONE))
 		return FALSE;
 
 	return TRUE;
@@ -1373,8 +1420,8 @@ BOOL TODOITEM::HasAttributeValue(TDC_ATTRIBUTE nAttribID) const
 	case TDCA_ICON:			return !sIcon.IsEmpty();			
 							 
 	case TDCA_COLOR:		return (color != 0);		
-	case TDCA_PRIORITY:		return (nPriority != TDC_NOPRIORITYORISK);		
-	case TDCA_RISK:			return (nRisk != TDC_NOPRIORITYORISK);			
+	case TDCA_PRIORITY:		return (nPriority != TDC_PRIORITYORRISK_NONE);		
+	case TDCA_RISK:			return (nRisk != TDC_PRIORITYORRISK_NONE);			
 	case TDCA_PERCENT:		return (nPercentDone > 0);	
 	case TDCA_FLAG:			return bFlagged;		
 	case TDCA_LOCK:			return bLocked;		

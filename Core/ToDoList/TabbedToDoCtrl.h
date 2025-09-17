@@ -14,9 +14,6 @@
 #include "tdlviewTabcontrol.h"
 #include "tdltasklistctrloptionscombobox.h"
 
-#include "..\shared\misc.h"
-#include "..\shared\subclass.h"
-
 #include "..\Interfaces\UIExtensionMgr.h"
 
 #include <afxtempl.h>
@@ -62,14 +59,13 @@ public:
 	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTaskLink);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs);
 
+	int GetTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int GetSelectedTaskCount() const;
 	BOOL ScrollToSelectedTask();
 	BOOL HasSelection() const { return GetSelectedTaskCount(); }
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect); 
-	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID = 0) const;
-	BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
 	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 
@@ -109,8 +105,10 @@ public:
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual void NotifyEndPreferencesUpdate();
+	virtual BOOL DoIdleProcessing();
 	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered = FALSE) const;
 	virtual int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes, BOOL bOrdered = FALSE) const;
+	virtual void DeselectAll();
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
@@ -129,8 +127,8 @@ public:
 	BOOL CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const;
 	void ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand = TRUE);
 
-	void SetFocusToTasks();
-	BOOL TasksHaveFocus() const;
+	void SetFocus(TDC_SETFOCUSTO nLocation);
+	BOOL HasFocus(TDC_SETFOCUSTO nLocation) const;
 
 	BOOL SelectTasksInHistory(BOOL bForward);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
@@ -207,6 +205,7 @@ protected:
 
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnLabelEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
@@ -254,11 +253,13 @@ protected:
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 	virtual void OnTaskIconsChanged();
 	virtual void OnCustomAttributesChanged();
+	virtual void OnFirstSave(const CTaskFile& tasks);
 
 	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE, const void* pContext = NULL);
-	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const;
+	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext = NULL) const;
 	virtual BOOL GetLabelEditRect(CRect& rScreen); // screen coords
 	virtual DWORD HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const;
+	virtual BOOL CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const;
 
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
@@ -272,9 +273,9 @@ protected:
 	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 	void BuildListGroupByCombo();
-	void BuildListOptionsCombo();
+	void InitListOptionsCombo();
 	void ResortList(BOOL bAllowToggle = FALSE);
-	BOOL HasListOption(DWORD dwOption) const { return Misc::HasFlag(m_dwListOptions, dwOption); }
+	BOOL HasListOption(DWORD dwOption) const;
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree(BOOL bEnsureSelection);
@@ -343,10 +344,10 @@ protected:
 	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttribID) const;
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, DWORD dwFlags, CTaskFile& tasks) const;
+	BOOL CanEditSelectedExtensionTask(const IUITASKMOD& mod, DWORD& dwTaskID) const;
 	
 	int GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	int GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
-	BOOL CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const;
 	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
 
 	BOOL AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;

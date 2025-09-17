@@ -10,6 +10,8 @@
 #include "tasklisthtmlexporter.h"
 #include "tasklisttxtexporter.h"
 #include "TDCAnonymizeTasklist.h"
+#include "TDCAnonymizeTaskTimeLog.h"
+#include "TDCDarkMode.h"
 #include "tdcmapping.h"
 #include "tdcmsg.h"
 #include "tdcstatic.h"
@@ -38,7 +40,7 @@
 #include "tdlToolsUserInputDlg.h"
 #include "tdltransformdialog.h"
 #include "tdlwelcomewizard.h"
-#include "tdstringres.h"
+#include "tdcstringres.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\AcceleratorString.h"
@@ -68,7 +70,7 @@
 #include "..\shared\passworddialog.h"
 #include "..\shared\regkey.h"
 #include "..\shared\remotefile.h"
-#include "..\shared\rtlstylemgr.h"
+#include "..\shared\rtlInputmgr.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\sendfiletoEx.h"
 #include "..\shared\serverdlg.h"
@@ -138,7 +140,7 @@ static CEnString TDL_FILEFILTER;
 /////////////////////////////////////////////////////////////////////////////
 
 const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
-const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print\\Print"), _T("html"));
+const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print\\Print"), _T("html"), FALSE); // IE is very fussy about embedded paths
 const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("png"));
 
 /////////////////////////////////////////////////////////////////////////////
@@ -185,6 +187,128 @@ enum
 	// INTERVAL_AUTOMINIMIZE	= calculated
 };
 
+//////////////////////////////////////////////////////////////////////
+
+CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
+	:
+	m_tdl(tdl),
+	m_bUpdateCaption(FALSE),
+	m_bUpdateTimeTrackAllTasks(-1),
+	m_bRefreshTimeTrackStatus(FALSE),
+	m_bUpdateMenuSSCStatus(FALSE),
+	m_bRefreshPauseTimeTracking(FALSE),
+	m_nUpdateAutoListDataAttribID(TDCA_NONE),
+	m_bUpdateFocusedControl(FALSE)
+{
+}
+
+void CToDoListWnd::IDLETASKS::UpdateStatusBar(const CTDCAttributeMap& mapAttrib)
+{
+	if (mapAttrib.Has(TDCA_ALL))
+	{
+		m_mapStatusBarAttrib.Set(TDCA_ALL);
+	}
+	else if (!m_mapStatusBarAttrib.Has(TDCA_ALL))
+	{
+		m_mapStatusBarAttrib.Append(mapAttrib);
+	}
+}
+
+void CToDoListWnd::IDLETASKS::UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib)
+{
+	if (m_bUpdateTimeTrackAllTasks == -1)
+		m_bUpdateTimeTrackAllTasks = (bAllTasks != FALSE);
+	else
+		m_bUpdateTimeTrackAllTasks |= (bAllTasks != FALSE);
+
+	if (!mapAttrib.MatchAll(m_mapTimeTrackAttrib))
+	{
+		if (mapAttrib.Has(TDCA_ALL) || !m_mapTimeTrackAttrib.IsEmpty())
+			m_mapTimeTrackAttrib.Set(TDCA_ALL);
+		else
+			m_mapTimeTrackAttrib.Append(mapAttrib);
+	}
+}
+
+BOOL CToDoListWnd::IDLETASKS::Process()
+{
+	ASSERT(!m_tdl.m_bClosing);
+
+	if (!m_tdl.m_bClosing)
+	{
+		if (m_bUpdateCaption)
+		{
+			m_tdl.UpdateCaption();
+
+			m_bUpdateCaption = FALSE;
+		}
+		else if (!m_mapStatusBarAttrib.IsEmpty())
+		{
+			m_tdl.UpdateStatusBar(m_mapStatusBarAttrib);
+
+			m_mapStatusBarAttrib.RemoveAll();
+		}
+		else if (m_bUpdateTimeTrackAllTasks != -1)
+		{
+			m_tdl.UpdateTimeTrackerTasks(m_bUpdateTimeTrackAllTasks, m_mapTimeTrackAttrib);
+
+			m_bUpdateTimeTrackAllTasks = -1;
+			m_mapTimeTrackAttrib.RemoveAll();
+		}
+		else if (m_bRefreshTimeTrackStatus)
+		{
+			m_tdl.RefreshTimeTrackingStatus();
+
+			m_bRefreshTimeTrackStatus = FALSE;
+		}
+		else if (m_bUpdateMenuSSCStatus)
+		{
+			m_tdl.UpdateMenuIconMgrSourceControlStatus();
+
+			m_bUpdateMenuSSCStatus = FALSE;
+		}
+		else if (m_bRefreshPauseTimeTracking)
+		{
+			m_tdl.RefreshPauseTimeTracking();
+
+			m_bRefreshPauseTimeTracking = FALSE;
+		}
+		else if (m_nUpdateAutoListDataAttribID != TDCA_NONE)
+		{
+			m_tdl.UpdateFilterBarListData(m_nUpdateAutoListDataAttribID);
+			m_tdl.UpdateFindTasksListData(m_nUpdateAutoListDataAttribID);
+
+			m_nUpdateAutoListDataAttribID = TDCA_NONE;
+		}
+		else if (m_bRefreshTabOrder)
+		{
+			m_tdl.RefreshTabOrder();
+
+			m_bRefreshTabOrder = FALSE;
+		}
+		else if (m_bUpdateFocusedControl)
+		{
+			CFocusWatcher::UpdateFocus();
+
+			m_bUpdateFocusedControl = FALSE;
+		}
+	}
+
+	return HasTasks();
+}
+
+BOOL CToDoListWnd::IDLETASKS::HasTasks() const
+{
+	return (m_bUpdateCaption ||
+			m_bRefreshTimeTrackStatus ||
+			m_bUpdateMenuSSCStatus ||
+			m_bRefreshPauseTimeTracking ||
+			m_bRefreshTabOrder ||
+			(m_nUpdateAutoListDataAttribID != TDCA_NONE) ||
+			(m_bUpdateTimeTrackAllTasks != -1) ||
+			!m_mapStatusBarAttrib.IsEmpty());
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListWnd 
 
@@ -195,7 +319,6 @@ CToDoListWnd::CToDoListWnd()
 	m_mruList(0, _T("MRU"), _T("TaskList%d"), 16, MRU_MAX_ITEM_LEN, CEnString(IDS_RECENTFILES)),
 	m_nLastSelItem(-1), 
 	m_nMaxState(TDCMS_NORMAL), 
-	m_nPrevMaxState(TDCMS_NORMAL),
 	m_bShowFilterBar(TRUE),
 	m_bShowStatusBar(TRUE),
 	m_bInNewTask(FALSE),
@@ -230,7 +353,8 @@ CToDoListWnd::CToDoListWnd()
 	m_bSplitting(FALSE),
 	m_statusBar(m_tdiDefault),
 	m_findFilterHelper(m_dlgFindTasks, m_filterBar),
-	m_dlgFindTasks(m_mgrContent)
+	m_dlgFindTasks(m_mgrContent),
+	m_idleTasks(*this)
 {
 	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
 	
@@ -243,7 +367,7 @@ CToDoListWnd::CToDoListWnd()
 
 	// RTL keyboard input
 	if (Prefs().GetEnableRTLInput())
-		CRTLStyleMgr::Initialize();
+		CRTLInputMgr::Initialize();
 
 	CFilteredToDoCtrl::EnableExtendedSelection(FALSE, TRUE);
 	CEnListCtrl::EnableSelectionTheming(TRUE, TRUE);
@@ -342,7 +466,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_SPELLCHECKTITLE, OnSpellchecktitle)
 	ON_COMMAND(ID_EDIT_TASKCOLOR, OnEditTaskcolor)
 	ON_COMMAND(ID_EDIT_TOGGLETASKDONE, OnEditToggleTaskDone)
-	ON_COMMAND(ID_EDIT_TASKTEXT, OnEditTasktext)
 	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
 	ON_COMMAND(ID_EXIT, OnExit)
 	ON_COMMAND(ID_FILE_CHANGEPASSWORD, OnFileChangePassword)
@@ -360,6 +483,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENCIES, OnMoveSelectTaskDependencies)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENTS, OnMoveSelectTaskDependents)
 	ON_COMMAND(ID_NEW, OnNewTasklist)
+	ON_COMMAND(ID_NEWSUBTASK_INTASK, OnNewSubtaskInTask)
 	ON_COMMAND(ID_NEXTTASK, OnGotoNexttask)
 	ON_COMMAND(ID_NEXTTOPLEVELTASK, OnNexttopleveltask)
 	ON_COMMAND(ID_OPEN_RELOAD, OnReload)
@@ -386,6 +510,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_TASKLIST_SELECTCOLUMNS, OnTasklistSelectColumns)
 	ON_COMMAND(ID_TOOLS_ADDTOSOURCECONTROL, OnToolsAddtoSourceControl)
 	ON_COMMAND(ID_TOOLS_ANALYSELOGGEDTIME, OnToolsAnalyseLoggedTime)
+	ON_COMMAND(ID_TOOLS_ANONYMIZE_TASKTIMELOG, OnToolsAnonymizeTaskTimeLog)
 	ON_COMMAND(ID_TOOLS_ANONYMIZE_TASKLIST, OnToolsAnonymizeTasklist)
 	ON_COMMAND(ID_TOOLS_CHECKIN, OnToolsCheckin)
 	ON_COMMAND(ID_TOOLS_CHECKOUT, OnToolsCheckout)
@@ -426,6 +551,11 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_RESIZECOLSTOFIT, OnViewResizeColsToFit)
 	ON_COMMAND(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnViewRestoreDefaultTaskViewFontSize)
 	ON_COMMAND(ID_VIEW_SAVETOIMAGE, OnViewSaveToImage)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOTASKS, OnViewSetFocusToTasks)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOCOMMENTS, OnViewSetFocusToComments)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOATTRIBUTES, OnViewSetFocusToAttributes)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOPROJECTNAME, OnViewSetFocusToProjectName)
+	ON_COMMAND(ID_VIEW_SETFOCUSTOFILTERBAR, OnViewSetFocusToFilterBar)
 	ON_COMMAND(ID_VIEW_SHOWALLBARS, OnViewShowAllBars)
 	ON_COMMAND(ID_VIEW_SHOWFILTERBAR, OnViewShowfilterbar)
 	ON_COMMAND(ID_VIEW_SHOWREMINDERS, OnViewShowRemindersWindow)
@@ -457,7 +587,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND_RANGE(ID_TOOLS_SHOWTASKS_DUETODAY, ID_TOOLS_SHOWTASKS_DUEENDNEXTMONTH, OnToolsShowtasksDue)
 	ON_COMMAND_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, OnUserTool)
 	ON_COMMAND_RANGE(ID_TRAYICON_SHOWDUETASKS1, ID_TRAYICON_SHOWDUETASKS20, OnTrayiconShowDueTasks)
-	ON_COMMAND_RANGE(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, OnViewActivateAdvancedFilter)
+	ON_COMMAND_RANGE(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, OnViewActivateFilter)
 	ON_COMMAND_RANGE(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, OnViewActivateFilter)
 	ON_COMMAND_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnViewExpandTasks)
 	ON_COMMAND_RANGE(ID_VIEW_EXPANDTASK, ID_VIEW_COLLAPSEALL, OnViewExpandTasks)
@@ -472,7 +602,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_MESSAGE(WM_GETICON, OnGetIcon)
 	ON_MESSAGE(WM_HOTKEY, OnHotkey)
 	ON_MESSAGE(WM_POSTONCREATE, OnPostOnCreate)
-	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnUpdateUDTsInToolbar)
+	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnRefreshUDTsInToolbar)
 
 	ON_NOTIFY(NM_CLICK, IDC_TRAYICON, OnTrayIconClick)
 	ON_NOTIFY(NM_DBLCLK, IDC_TRAYICON, OnTrayIconDblClk)
@@ -485,7 +615,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_NOTIFY(TCN_SELCHANGING, IDC_TABCONTROL, OnTabCtrlSelchanging)
 	ON_NOTIFY(TTN_NEEDTEXT, 0, OnNeedTooltipText)
 
-	ON_REGISTERED_MESSAGE(WM_FBN_FILTERCHANGE, OnSelchangeFilter)
+	ON_REGISTERED_MESSAGE(WM_FBN_FILTERCHANGE, OnFilterChange)
 	ON_REGISTERED_MESSAGE(WM_FTD_ADDSEARCH, OnFindAddSearch)
 	ON_REGISTERED_MESSAGE(WM_FTD_APPLYASFILTER, OnFindApplyAsFilter)
 	ON_REGISTERED_MESSAGE(WM_FTD_CLOSE, OnFindDlgClose)
@@ -511,12 +641,13 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_LENGTHYOPERATION, OnToDoCtrlDoLengthyOperation)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
 	ON_REGISTERED_MESSAGE(WM_TDCM_EDITTASKREMINDER, OnToDoCtrlEditTaskReminder)
+	ON_REGISTERED_MESSAGE(WM_TDCM_CLEARTASKREMINDER, OnToDoCtrlClearTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
 	ON_REGISTERED_MESSAGE(WM_TDCN_FILTERCHANGE, OnToDoCtrlNotifyFilterChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_RECREATERECURRINGTASK, OnToDoCtrlNotifyRecreateRecurringTask)
-	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERDISMISS, OnNotifyReminderModified)
-	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERSNOOZE, OnNotifyReminderModified)
+	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERDISMISSED, OnNotifyReminderModified)
+	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERSNOOZED, OnNotifyReminderModified)
 	ON_REGISTERED_MESSAGE(WM_TDCN_SELECTIONCHANGE, OnToDoCtrlNotifySelChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_SOURCECONTROLSAVE, OnToDoCtrlNotifySourceControlSave)
 	ON_REGISTERED_MESSAGE(WM_TDCN_TIMETRACK, OnToDoCtrlNotifyTimeTrack)
@@ -611,7 +742,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_GOTOTASK, OnUpdateMoveGoToTask)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
-	ON_UPDATE_COMMAND_UI(ID_NEW, OnUpdateNewTasklist)
+	ON_UPDATE_COMMAND_UI(ID_NEW, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_NEWSUBTASK_INTASK, OnUpdateNewSubtaskInTask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTASK, OnUpdateGotoNexttask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTOPLEVELTASK, OnUpdateNexttopleveltask)
 	ON_UPDATE_COMMAND_UI(ID_OPEN_RELOAD, OnUpdateReload)
@@ -619,7 +751,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_PREVTOPLEVELTASK, OnUpdatePrevtopleveltask)
 	ON_UPDATE_COMMAND_UI(ID_PRINT, OnUpdatePrint)
 	ON_UPDATE_COMMAND_UI(ID_SAVEALL, OnUpdateSaveall)
-	ON_UPDATE_COMMAND_UI(ID_SAVEAS, OnUpdateSaveas)
+	ON_UPDATE_COMMAND_UI(ID_SAVEAS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_SAVE_NORMAL, OnUpdateSave)
 	ON_UPDATE_COMMAND_UI(ID_SCROLLTOSELTASK, OnUpdateScrollToSelectedTask)
 	ON_UPDATE_COMMAND_UI(ID_SENDTASKS, OnUpdateSendTasks)
@@ -633,13 +765,14 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_CUSTOMCOLUMNS, OnUpdateTasklistCustomcolumns)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ADDTOSOURCECONTROL, OnUpdateToolsAddtoSourceControl)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANALYSELOGGEDTIME, OnUpdateToolsAnalyseLoggedTime)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANONYMIZE_TASKTIMELOG, OnUpdateShowTimelogfile) // same as ID_SHOWTIMELOGFILE
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANONYMIZE_TASKLIST, OnUpdateToolsAnonymizeTasklist)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CHECKIN, OnUpdateToolsCheckin)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CHECKOUT, OnUpdateToolsCheckout)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_CLEANUPINIPREFERENCES, OnUpdateToolsCleanupIniPreferences)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_COPYTASKLISTPATH, OnUpdateToolsCopyTasklistPath)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_EXPORT, OnUpdateExport)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORT, OnUpdateImport)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_IMPORT, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_REMOVEFROMSOURCECONTROL, OnUpdateToolsRemovefromsourcecontrol)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTINEXPLORER, OnUpdateToolsSelectinExplorer)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SPELLCHECKTASKLIST, OnUpdateSpellcheckTasklist)
@@ -649,7 +782,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_VIEWLOG, OnUpdateToolsViewLogFile)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CLEARFILTER, OnUpdateViewClearfilter)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CUSTOMTOOLBAR, OnUpdateViewCustomToolbar)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_CYCLETASKVIEWS, OnUpdateViewCycleTaskViews)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_CYCLETASKVIEWS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_DECREMENTTASKVIEWFONTSIZE, OnUpdateViewDecrementTaskViewFontSize)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FILTER, OnUpdateViewFilter)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_HIDEALLBARS, OnUpdateViewHideAllBars)
@@ -668,9 +801,14 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RESIZECOLSTOFIT, OnUpdateViewResizeColsToFit)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RESTOREDEFAULTTASKVIEWFONTSIZE, OnUpdateViewRestoreDefaultTaskViewFontSize)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SAVETOIMAGE, OnUpdateViewSaveToImage)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOTASKS, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOCOMMENTS, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOATTRIBUTES, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOPROJECTNAME, AlwaysEnabled)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SETFOCUSTOFILTERBAR, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWALLBARS, OnUpdateViewShowAllBars)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWFILTERBAR, OnUpdateViewShowfilterbar)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWREMINDERS, OnUpdateViewShowRemindersWindow)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWREMINDERS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWTASKLISTTABBAR, OnUpdateViewShowTasklistTabbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWTREELISTTABBAR, OnUpdateViewShowTreeListTabbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SORTTASKLISTTABS, OnUpdateViewSorttasklisttabs)
@@ -678,11 +816,12 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEALLTASKEXPANDED, OnUpdateViewExpandTasks)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEFILTER, OnUpdateViewTogglefilter)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKEXPANDED, OnUpdateViewExpandTasks)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKSANDCOMMENTS, OnUpdateViewToggletasksandcomments)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETASKSANDCOMMENTS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLETREEANDLIST, OnUpdateViewToggleTreeandList)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_UNMAXTASKLISTANDCOMMENTS, OnUpdateUnmaximizeTasklistAndComments)
 	ON_UPDATE_COMMAND_UI(ID_WINDOW1, OnUpdateWindow)
 
+	ON_UPDATE_COMMAND_UI_RANGE(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, OnUpdateActivateTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnUpdateSetPriority)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, OnUpdateFileSaveToUserStorage)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK, ID_NEWSUBTASK, OnUpdateNewTask)
@@ -695,6 +834,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnUpdateSortBy)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SPLITTASKINTO_TWO, ID_SPLITTASKINTO_FIVE, OnUpdateSplitTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, OnUpdateUserTool)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, OnUpdateViewActivateFilter)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, OnUpdateViewActivateFilter)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnUpdateViewExpandTasks)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDTASK, ID_VIEW_COLLAPSEALL, OnUpdateViewExpandTasks)
 
@@ -715,7 +856,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_LBUTTONUP()
 	ON_WM_MEASUREITEM()
 	ON_WM_MOUSEMOVE()
-	ON_WM_MOVE()
 	ON_WM_NCLBUTTONDBLCLK()
 	ON_WM_NCDESTROY()
 	ON_WM_QUERYENDSESSION()
@@ -796,6 +936,14 @@ BOOL CToDoListWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 
 		FileMisc::LogText(_T("CToDoListWnd::OnCommand(%s)"), sMenuItem);
 	}
+
+	// Special case
+	if (wParam == ID_EDIT_TASKTEXT)
+	{
+		// lParam tells us if this should be treated as a new-task edit
+		GetToDoCtrl().EditSelectedTaskTitle(lParam);
+		return TRUE;
+	}
 	
 	return CFrameWnd::OnCommand(wParam, lParam);
 }
@@ -819,7 +967,6 @@ void CToDoListWnd::InitUITheme()
 		m_theme.Reset();
 
 	m_pPrefs->SetUITheme(m_theme);
-	m_menubar.SetUITheme(m_theme);
 }
 	
 void CToDoListWnd::UpdateUITheme()
@@ -899,6 +1046,15 @@ void CToDoListWnd::UpdateToolbarColors(CEnToolBar& toolbar, const CUIThemeFile& 
 	}
 }
 
+BOOL CToDoListWnd::DoIdleProcessing()
+{
+	if (GetTDCCount() && GetToDoCtrl().DoIdleProcessing())
+		return TRUE;
+
+	// else do our own idle processing
+	return m_idleTasks.Process();
+}
+
 BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 {
 	m_startupOptions = startup;
@@ -921,7 +1077,7 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 BOOL CToDoListWnd::EnableLogging(BOOL bEnable)
 {
 	// Quick exit if state hasn't changed
-	if (!Misc::StateChanged(bEnable, FileMisc::IsLoggingEnabled()))
+	if (!Misc::StatesDiffer(bEnable, FileMisc::IsLoggingEnabled()))
 		return TRUE;
 
 	BOOL bRes = FileMisc::EnableLogging(bEnable, _T("Abstractspoon"));
@@ -1086,6 +1242,11 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_VIEW_PREV_SEL,					VK_LEFT,		HOTKEYF_ALT | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_REFRESHFILTER,				VK_F5,			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_RESIZECOLSTOFIT,				VK_ADD,			HOTKEYF_CONTROL);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOTASKS,				'T',			HOTKEYF_ALT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOCOMMENTS,			'C',			HOTKEYF_ALT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOATTRIBUTES,		'A',			HOTKEYF_ALT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOFILTERBAR,			'B',			HOTKEYF_ALT);
+	m_mgrShortcuts.AddShortcut(ID_VIEW_SETFOCUSTOPROJECTNAME,		'P',			HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLEFILTER,				VK_F12,			0);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLETASKEXPANDED,			VK_SPACE,		HOTKEYF_CONTROL | HOTKEYF_ALT);
 	m_mgrShortcuts.AddShortcut(ID_VIEW_TOGGLEALLTASKEXPANDED,		VK_SPACE,		HOTKEYF_SHIFT | HOTKEYF_ALT);
@@ -1132,11 +1293,12 @@ void CToDoListWnd::InitMenuIconManager()
 	}
 
 	if (!m_mgrMenuIcons.HasImages())
-		m_mgrMenuIcons.Populate(Prefs());
+		m_mgrMenuIcons.Populate(Prefs()); // Once only
 
 	m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
+	m_mgrMenuIcons.UpdateStaticDialogIcons();
 
-	UpdateMenuIconMgrSourceControlStatus();
+	m_idleTasks.UpdateMenuSourceControlStatus();
 }
 
 void CToDoListWnd::OnShowKeyboardshortcuts() 
@@ -1265,7 +1427,7 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 		
 			// if the status bar is hidden then add text to title bar
 			if (!m_bShowStatusBar)
-				UpdateCaption();
+				m_idleTasks.UpdateCaption();
 		}
 	}
 
@@ -1292,10 +1454,19 @@ BOOL CToDoListWnd::InitFilterbar()
 	if (!m_filterBar.Create(this))
 		return FALSE;
 
-	m_filterBar.EnableMultiSelection(Prefs().GetMultiSelFilters());
-	m_filterBar.ShowDefaultFilters(Prefs().GetShowDefaultFiltersInFilterBar());
-	m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
+	const CPreferencesDlg& prefs = Prefs();
+
+	m_filterBar.EnableMultiSelection(prefs.GetMultiSelFilters());
+	m_filterBar.SetISODateFormat(prefs.GetDisplayDatesInISO());
+	m_filterBar.ShowDefaultFilters(prefs.GetShowDefaultFiltersInFilterBar());
+	m_filterBar.SetTitleFilterOption(prefs.GetTitleFilterOption());
+	m_filterBar.SetNumPriorityRiskLevels(prefs.GetNumPriorityRiskLevels());
 	m_filterBar.SetUITheme(m_theme);
+
+	CDWordArray aPriorityColors;
+	prefs.GetPriorityColors(aPriorityColors);
+
+	m_filterBar.SetPriorityColors(aPriorityColors);
 
 	RefreshFilterBarAdvancedFilters();
 
@@ -1425,7 +1596,7 @@ BOOL CToDoListWnd::InitCustomToolbar()
 	if (!m_bShowingCustomToolbar || m_toolbarCustom.GetSafeHwnd())
 		return TRUE;
 
-	CToolbarButtonArray aTBButtons;
+	CTDCToolbarButtonArray aTBButtons;
 
 	if (!Prefs().GetCustomToolbarButtons(aTBButtons))
 		return TRUE; // not an error
@@ -1449,7 +1620,8 @@ BOOL CToDoListWnd::InitCustomToolbar()
 	}
 
 	m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
-	
+	m_mgrMenuIcons.UpdateStaticDialogIcons();
+
 	return TRUE;
 }
 
@@ -1575,7 +1747,7 @@ BOOL CToDoListWnd::SendShortcutCommand(UINT nCmdID)
 	case ID_EDIT_CUT:
 	case ID_EDIT_COPY:
 		// tree must have the focus
-		if (!GetToDoCtrl().TasksHaveFocus())
+		if (!GetToDoCtrl().HasFocus(TDCSF_TASKVIEW))
 		{
 			bSendCommand = FALSE;
 			GetToDoCtrl().ClearCopiedItem();
@@ -1587,7 +1759,7 @@ BOOL CToDoListWnd::SendShortcutCommand(UINT nCmdID)
 	case ID_EDIT_PASTE: 
 	case ID_DELETEALLTASKS:
 	case ID_DELETETASK:
-		bSendCommand = GetToDoCtrl().TasksHaveFocus();
+		bSendCommand = GetToDoCtrl().HasFocus(TDCSF_TASKVIEW);
 		break;
 	}
 
@@ -1639,7 +1811,7 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 			case VK_TAB: // tabbing away from Quick Find -> tasks
 				if (::IsChild(m_cbQuickFind, pMsg->hwnd))
 				{
-					GetToDoCtrl().SetFocusToTasks();
+					GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 					return TRUE;
 				}
 				break;
@@ -1687,7 +1859,7 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 				{
 					if (::IsChild(m_filterBar, pMsg->hwnd) && !CtrlWantsEnter(pMsg->hwnd))
 					{
-						GetToDoCtrl().SetFocusToTasks();
+						GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 						return TRUE;
 					}
 				}
@@ -1814,7 +1986,7 @@ void CToDoListWnd::OnDeleteTask()
 	{
 		tdc.DeleteSelectedTask();
 	
-		UpdateStatusBar();
+		m_idleTasks.UpdateStatusBar();
 	}
 }
 
@@ -1824,7 +1996,7 @@ void CToDoListWnd::OnDeleteAllTasks()
 
 	if (!tdc.IsReadOnly() && tdc.DeleteAllTasks())
 	{
-		UpdateStatusBar();
+		m_idleTasks.UpdateStatusBar();
 	}
 }
 
@@ -2041,7 +2213,7 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 	if (userPrefs.GetAddFilesToMRU() && !bUsesStorage)
 		m_mruList.Add(sFilePath);
 
-	UpdateCaption();
+	m_idleTasks.UpdateCaption();
 
 	// auto-export after saving
 	TDCEXPORTTASKLIST* pExport = PrepareNewExportAfterSave(nTDC, tasks);
@@ -2171,7 +2343,7 @@ void CToDoListWnd::OnLoad()
 			}
 		}
 		
-		RefreshTabOrder();
+		m_idleTasks.RefreshTabOrder();
 	}
 }
 
@@ -2250,9 +2422,6 @@ void CToDoListWnd::SaveSettings()
 	prefs.WriteProfileInt(_T("Pos"), _T("Hidden"), !m_bVisible);
 	prefs.WriteProfileInt(_T("Pos"), _T("Maximized"), IsZoomed());
 	
-	// version
-	prefs.WriteProfileString(_T("Version"), _T("Version"), GetVersion(FALSE));
-	
 	// last open files
 	int nCount = GetTDCCount();
 	int nSel = GetSelToDoCtrl(); // and last active file
@@ -2318,7 +2487,7 @@ void CToDoListWnd::SaveSettings()
 	m_mgrContent.SavePreferences(prefs, _T("ContentControls"));
 }
 
-LRESULT CToDoListWnd::OnUpdateUDTsInToolbar(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CToDoListWnd::OnRefreshUDTsInToolbar(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	UpdateUDTsInToolbar(UDT_INIT);
 
@@ -2374,6 +2543,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// reminders
 	m_dlgReminders.Initialize(this);
+	m_dlgReminders.SetISODateTimeFormat(userPrefs.GetDisplayDatesInISO());
 
 	if (userPrefs.GetRemindersUseTreeFont())
 		m_dlgReminders.SetRemindersFont(m_fontTree);
@@ -2425,7 +2595,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	}
 
 	if (!m_sTitlePrefix.IsEmpty())
-		UpdateCaption();
+		m_idleTasks.UpdateCaption();
 	
 	m_startupOptions.Reset(); // always
 	
@@ -2511,6 +2681,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	Resize();
 	UpdateWindow();
+	Invalidate(TRUE);
 
 	// if there's only one tasklist open and it's pristine then it's
 	// the original one so add a sample task unless 'empty' flag is set
@@ -2533,10 +2704,8 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	// current focus
 	PostMessage(WM_FW_FOCUSCHANGE, (WPARAM)::GetFocus(), 0L);
 	
-	RefreshTabOrder();
-	Invalidate(TRUE);
-
-	UpdateStatusBar();
+	m_idleTasks.RefreshTabOrder();
+	m_idleTasks.UpdateStatusBar();
 
 	// find tasks dialog
 	if (prefs.GetProfileInt(SETTINGS_KEY, _T("FindTasksVisible"), 0))
@@ -2550,7 +2719,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 			m_dlgFindTasks.RefreshSearch();
 
 		// Find dialog will have stolen focus
-		GetToDoCtrl().SetFocusToTasks();
+		GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 	}
 
 	// log the app and its dlls for debugging
@@ -2715,7 +2884,7 @@ void CToDoListWnd::RestoreVisibility()
 			// tray when minimized then hide here too
 			else if ((nDefShowState == SW_SHOWMINIMIZED) || (nDefShowState == SW_SHOWMINNOACTIVE))
 			{
-				if (Prefs().HasSysTrayOptions(STO_ONMINIMIZE, STO_ONMINCLOSE))
+				if (userPrefs.HasSysTrayOptions(STO_ONMINIMIZE, STO_ONMINCLOSE))
 				{
 					m_bVisible = FALSE;
 				}
@@ -2821,9 +2990,8 @@ void CToDoListWnd::RestorePosition()
 void CToDoListWnd::OnNewTasklist() 
 {
 	CreateNewTaskList(FALSE, TRUE);
-	RefreshTabOrder();
 
-	GetToDoCtrl().SetFocusToProjectName();
+	GetToDoCtrl().SetFocus(TDCSF_PROJECTNAME);
 }
 
 BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser)
@@ -2857,6 +3025,9 @@ BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser)
 
 		Resize();
 		Invalidate();
+
+		if (GetTDCCount() > 1)
+			m_idleTasks.RefreshTabOrder();
 	}
 
 	return (pNew != NULL);
@@ -2870,23 +3041,21 @@ void CToDoListWnd::OnUpdateDeletetask(CCmdUI* pCmdUI)
 void CToDoListWnd::OnUpdateEditTasktext(CCmdUI* pCmdUI) 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSelCount = tdc.GetSelectedTaskCount();
 	
-	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_TASKNAME) && (nSelCount == 1));	
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_TASKNAME) && (tdc.GetSelectedTaskCount() == 1));
 }
 
 void CToDoListWnd::OnUpdateTaskcolor(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_COLOR) && (Prefs().GetTextColorOption() == COLOROPT_DEFAULT));	
+	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_COLOR) && (Prefs().GetTextColorOption() == TEXTOPT_DEFAULT));	
 }
 
 void CToDoListWnd::OnUpdateEditToggleTaskDone(CCmdUI* pCmdUI) 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSelCount = tdc.GetSelectedTaskCount();
 	
-	if (nSelCount == 1)
-		pCmdUI->SetCheck(tdc.IsSelectedTaskDone() ? 1 : 0);
+	if (tdc.GetSelectedTaskCount() == 1)
+		pCmdUI->SetCheck(tdc.SelectedTasksAreAllDone(FALSE) ? 1 : 0);
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_DONEDATE));	
 }
@@ -2903,11 +3072,6 @@ void CToDoListWnd::OnUpdateSave(CCmdUI* pCmdUI)
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(GetTDCCount() && tdc.IsModified() && !tdc.IsReadOnly());	
-}
-
-void CToDoListWnd::OnUpdateNewTasklist(CCmdUI* pCmdUI)  
-{
-	pCmdUI->Enable(TRUE);	
 }
 
 BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC) 
@@ -3076,11 +3240,11 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 		break;
 
 	case ID_SORTBY_NONE:
-		pCmdUI->Enable(TRUE);
+		AlwaysEnabled(pCmdUI);
 		break;
 		
 	case ID_SORTBY_COLOR:
-		pCmdUI->Enable(Prefs().GetTextColorOption() == COLOROPT_DEFAULT);
+		pCmdUI->Enable(Prefs().GetTextColorOption() == TEXTOPT_DEFAULT);
 		break;
 		
 	case ID_SORTBY_PATH:
@@ -3120,6 +3284,7 @@ BOOL CToDoListWnd::CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertW
 	{
 		// This location always works
 		nInsertWhere = TDC::MapInsertIDToInsertWhere(ID_NEWTASK_ATTOP);
+		ASSERT(tdc.CanCreateNewTask(nInsertWhere));
 	}
 
 	if (!tdc.CreateNewTask(sTitle, nInsertWhere, bEdit, dwDependency))
@@ -3169,18 +3334,13 @@ void CToDoListWnd::OnUpdateEditCleartaskcolor(CCmdUI* pCmdUI)
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_COLOR) && 
-					(Prefs().GetTextColorOption() == COLOROPT_DEFAULT) &&
+					(Prefs().GetTextColorOption() == TEXTOPT_DEFAULT) &&
 					tdc.SelectedTasksHaveColor());	
 }
 
 void CToDoListWnd::OnEditToggleTaskDone() 
 {
 	GetToDoCtrl().SetSelectedTaskCompletion(TDCTC_TOGGLE);
-}
-
-void CToDoListWnd::OnEditTasktext() 
-{
-	GetToDoCtrl().EditSelectedTaskTitle();
 }
 
 void CToDoListWnd::OnTrayIconClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
@@ -3324,15 +3484,14 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyListChange(WPARAM /*wp*/, LPARAM lp)
 		break;
 	}
 
-	UpdateFilterBarListData(nAttribID);
-	RefreshFindTasksListData(nAttribID);
+	m_idleTasks.UpdateAutoListData(nAttribID);
 	
 	return 0L;
 }
 
 LRESULT CToDoListWnd::OnToDoCtrlNotifySelChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	UpdateStatusBar();
+	m_idleTasks.UpdateStatusBar();
 
 	return 0L;
 }
@@ -3343,10 +3502,10 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyViewChange(WPARAM wp, LPARAM lp)
 	{
 		if (lp != (LPARAM)wp)
 		{
-			CFocusWatcher::UpdateFocus();
-
 			RefreshFilterBarControls(TDCA_ALL);
-			UpdateStatusBar();
+
+			m_idleTasks.UpdateStatusBar();
+			m_idleTasks.UpdateFocusedControl();
 		}
 		else
 		{
@@ -3465,7 +3624,7 @@ void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC 
 		m_mgrToDoCtrls.RefreshTimeTracking(nSel);
 
 	// update tray icon
-	OnTimerTimeTracking();
+	m_idleTasks.RefreshTimeTrackingStatus();
 }
 
 void CToDoListWnd::StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom)
@@ -3492,8 +3651,8 @@ void CToDoListWnd::StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom)
 		// update tab image
 		m_mgrToDoCtrls.RefreshTimeTracking(nTDC);
 		
-		// update tray icon
-		OnTimerTimeTracking();
+		// update icons
+		m_idleTasks.RefreshTimeTrackingStatus();
 	}
 }
 
@@ -3611,26 +3770,23 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	if (pMod->mapAttrib.Has(TDCA_PROJECTNAME))
 	{
 		if (Prefs().GetKeepTabsOrdered())
-			RefreshTabOrder();
+			m_idleTasks.RefreshTabOrder();
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_DUEDATE) || 
 		pMod->mapAttrib.Has(TDCA_DONEDATE))
 	{
-		OnTimerDueItems(nTDC);
+		RefreshTasklistDueItemStatus(nTDC);
 	}
 
-	if (pMod->mapAttrib.Has(TDCA_CUSTOMATTRIBDEFS))
+	if (pMod->mapAttrib.Has(TDCA_CUSTOMATTRIB_DEFS))
 	{
 		// Ignore modification callback if it came from us
 		if (m_bSettingAttribDefs)
-		{
 			return 0L;
-		}
-		else if (m_dlgFindTasks.GetSafeHwnd())
-		{
+
+		if (m_dlgFindTasks.GetSafeHwnd())
 			UpdateFindDialogCustomAttributes(&tdc);
-		}
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_ICON))
@@ -3640,19 +3796,16 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	}
 
 	if (pMod->mapAttrib.Has(TDCA_PASTE))
-	{
-		UpdateFilterBarListData(TDCA_ALL);
-		RefreshFindTasksListData(TDCA_ALL);
-	}
+		m_idleTasks.UpdateAutoListData();
 
-	UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
-	UpdateStatusBar(pMod->mapAttrib);
+	m_idleTasks.UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+	m_idleTasks.UpdateStatusBar(pMod->mapAttrib);
 
 	if (m_dlgReminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))
 		tdc.RefreshReminders();
 
 	if (nTDC == GetSelToDoCtrl())
-		UpdateCaption();
+		m_idleTasks.UpdateCaption();
 	else
 		m_mgrToDoCtrls.UpdateTabItemText(nTDC);
 
@@ -3814,11 +3967,6 @@ void CToDoListWnd::OnSaveas()
 	}
 }
 
-void CToDoListWnd::OnUpdateSaveas(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(TRUE);
-}
-
 void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
 	UINT nMenuID = 0;
@@ -3939,11 +4087,11 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				switch (nMenuID)
 				{
 				case MM_TASKCONTEXT:
-					m_menubar.PrepareTaskContextMenu(pPopup, tdc, Prefs());
+					CTDCMainMenu::PrepareTaskContextMenu(pPopup, tdc, Prefs());
 					break;
 
 				case MM_TABCTRLCONTEXT:
-					m_menubar.PrepareTabCtrlContextMenu(pPopup, tdc, Prefs());
+					CTDCMainMenu::PrepareTabCtrlContextMenu(pPopup, tdc, Prefs());
 					break;
 				}
 				
@@ -4066,7 +4214,7 @@ void CToDoListWnd::Show(BOOL bAllowToggle)
 	if (m_bVisible && !IsIconic())
 	{
 		// refresh all tasklists if we are visible
-		OnTimerCheckReloadTasklists(-1, TRUE);
+		CheckReloadToDoCtrls(-1, TRUE);
 	}
 }
 
@@ -4249,7 +4397,7 @@ BOOL CToDoListWnd::OnOpenRecentFile(UINT nID)
 		}
 	}
 
-	RefreshTabOrder();
+	m_idleTasks.RefreshTabOrder();
 	
 	// always return TRUE to say we handled it
 	return TRUE;
@@ -4453,6 +4601,22 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 		if (SelectToDoCtrl(nExist, TRUE))
 			return TDCF_SUCCESS;
 	}
+	else if (nType == TDCPP_FILE)
+	{
+		// Look for an existing tab whose taskfile could not be loaded
+		// and which matches just the file name
+		nExist = m_mgrToDoCtrls.FindToDoCtrl(sFilePath, TRUE);
+
+		if ((nExist != -1) && !m_mgrToDoCtrls.FileExists(nExist))
+		{
+			if (ReloadTaskList(nExist, TRUE, TRUE, sFilePath) &&
+				SelectToDoCtrl(nExist, TRUE))
+			{
+				CheckRemovePristineTasklist();
+				return TDCF_SUCCESS;
+			}
+		}
+	}
 	
 	// create a new todoltrl for this tasklist 
 	const CPreferencesDlg& userPrefs = Prefs();
@@ -4487,14 +4651,14 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 		if (bNotifyDueTasks)
 			DoDueTaskNotification(nTDC, userPrefs.GetNotifyDueByOnLoad());
 		
-		UpdateCaption();
-		UpdateStatusBar();
-		OnTimerDueItems(nTDC);
+		m_idleTasks.UpdateCaption();
+		m_idleTasks.UpdateStatusBar();
 		
 		// update search
 		if (userPrefs.GetRefreshFindOnLoad() && m_dlgFindTasks.GetSafeHwnd())
 			m_dlgFindTasks.RefreshSearch();
 
+		RefreshTasklistDueItemStatus(nTDC);
 		CheckRemovePristineTasklist();
 	}
 	else if (GetTDCCount() >= 1) // only delete if there's another ctrl existing
@@ -5069,13 +5233,12 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			bResizeDlg = TRUE;
 
 		m_filterBar.ShowDefaultFilters(newPrefs.GetShowDefaultFiltersInFilterBar());
+		m_filterBar.SetNumPriorityRiskLevels(newPrefs.GetNumPriorityRiskLevels());
+		m_filterBar.SetISODateFormat(newPrefs.GetDisplayDatesInISO());
 
-		BOOL bEnableMultiSel = newPrefs.GetMultiSelFilters();
-		BOOL bPrevMultiSel = oldPrefs.GetMultiSelFilters();
-
-		if (bPrevMultiSel != bEnableMultiSel)
+		if (Misc::StatesDiffer(newPrefs.GetMultiSelFilters(), oldPrefs.GetMultiSelFilters()))
 		{
-			m_filterBar.EnableMultiSelection(bEnableMultiSel);
+			m_filterBar.EnableMultiSelection(newPrefs.GetMultiSelFilters());
 			bRefreshFilter = TRUE;
 		}
 
@@ -5087,6 +5250,11 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			CFilteredToDoCtrl::SetRecentlyModifiedPeriod(newPrefs.GetRecentlyModifiedPeriod());
 			bRefreshFilter = (m_filterBar.GetFilter() == FS_RECENTMOD);
 		}
+
+		CDWordArray aPriorityColors;
+		newPrefs.GetPriorityColors(aPriorityColors);
+
+		m_filterBar.SetPriorityColors(aPriorityColors);
 		
 		if (bRefreshFilter)
 			OnViewRefreshfilter();
@@ -5094,15 +5262,23 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		// hotkey
 		UpdateGlobalHotkey();
 		
-		RefreshTabOrder();
-		RefreshPauseTimeTracking();
-		UpdateCaption();
+		m_idleTasks.RefreshTabOrder();
+		m_idleTasks.RefreshPauseTimeTracking();
+		m_idleTasks.UpdateCaption();
+		m_idleTasks.UpdateAutoListData();
 
-		// colours
+		// Find tasks dialog
 		if (m_dlgFindTasks.GetSafeHwnd())
-			m_dlgFindTasks.RefreshUserPreferences();
+		{
+			m_dlgFindTasks.SetNumPriorityRiskLevels(newPrefs.GetNumPriorityRiskLevels());
+			m_dlgFindTasks.SetGroupHeaderBackColor(newPrefs.GetGroupHeaderBackgroundColor());
+			m_dlgFindTasks.SetStrikeThroughCompletedTasks(newPrefs.GetStrikethroughDone());
+			m_dlgFindTasks.SetPriorityColors(aPriorityColors);
+			m_dlgFindTasks.SetISODateFormat(newPrefs.GetDisplayDatesInISO());
+		}
 
 		m_dlgReminders.EnableReducedFlashing(newPrefs.GetReduceReminderDialogFlashing());
+		m_dlgReminders.SetISODateTimeFormat(newPrefs.GetDisplayDatesInISO());
 		
 		// active tasklist userPrefs
 		CheckUpdateActiveToDoCtrlPreferences();
@@ -5113,10 +5289,10 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		UpdateFindTasksAndRemindersFonts();
 
 		// then refresh filter bar for any new default cats, statuses, etc
-		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFilterBarControls();
 
 		// Recreate custom toolbar as required before any resize
-		CToolbarButtonArray aOldButtons, aNewButtons;
+		CTDCToolbarButtonArray aOldButtons, aNewButtons;
 
 		oldPrefs.GetCustomToolbarButtons(aOldButtons);
 		newPrefs.GetCustomToolbarButtons(aNewButtons);
@@ -5129,6 +5305,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			InitCustomToolbar();
 
 			m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
+			m_mgrMenuIcons.UpdateStaticDialogIcons();
 		}
 		
 		if (bResizeDlg)
@@ -5152,7 +5329,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 
 		if (!bUpdateUDTs)
 		{
-			CUserToolArray aOldTools, aNewTools;
+			CTDCUserToolArray aOldTools, aNewTools;
 
 			if (oldPrefs.GetDisplayUDTsInToolbar())
 				oldPrefs.GetUserTools(aOldTools);
@@ -5195,9 +5372,8 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 			}
 		}
 	}
-	
 	// RTL change requires a restart
-	if (oldPrefs.GetEnableRTLInput() != bEnableRTL)
+	else if (oldPrefs.GetEnableRTLInput() != bEnableRTL)
 	{
 		// if the language file exists and has changed then inform the user that they need to restart
 		if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGERTLINPUT, MB_YESNO) == IDYES)
@@ -5401,13 +5577,13 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	else if (startup.HasFlag(TLD_NEWTASK))
 	{
 		CEnString sNewTask;
-		BOOL bEditTask = FALSE;
+		BOOL bEditLabel = FALSE;
 
 		// we edit the task name if no name was supplied
 		if (!startup.GetNewTaskTitle(sNewTask))
 		{
 			sNewTask.LoadString(IDS_TASK);
-			bEditTask = TRUE;
+			bEditLabel = TRUE;
 		}
 
 		TDC_INSERTWHERE nWhere = TDC::MapInsertIDToInsertWhere(GetNewTaskCmdID()); // default
@@ -5439,9 +5615,9 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			tdc.SetSelectedTaskDate(TDCD_CREATE, date);
 
 		// edit task title?
-		if (bEditTask)
+		if (bEditLabel)
 		{	
-			PostMessage(WM_COMMAND, ID_EDIT_TASKTEXT);
+			PostMessage(WM_COMMAND, ID_EDIT_TASKTEXT, TRUE); // TRUE -> New task
 			return TRUE;
 		}
 	}
@@ -5726,7 +5902,7 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 			if (ProcessStartupOptions(*pStartup, FALSE))
 			{
 				if (m_sTitlePrefix != sOldPrefix)
-					UpdateCaption();
+					m_idleTasks.UpdateCaption();
 
 				return TRUE;
 			}
@@ -5770,7 +5946,7 @@ BOOL CToDoListWnd::ImportFile(LPCTSTR szFilePath, BOOL bSilent)
 	if (!tdc.PasteTasks(tasks, TDC_INSERTATTOP, TRUE))
 		return FALSE;
 
-	UpdateCaption();
+	m_idleTasks.UpdateCaption();
 	return TRUE;
 }
 
@@ -5792,7 +5968,7 @@ void CToDoListWnd::OnEditCut()
 
 void CToDoListWnd::OnUpdateEditCut(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_DELETE));	
+	OnUpdateDeletetask(pCmdUI);	
 }
 
 void CToDoListWnd::OnEditPasteSub() 
@@ -5834,7 +6010,8 @@ void CToDoListWnd::OnEditPasteAttributes()
 
 void CToDoListWnd::OnUpdateEditPasteAttributes(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(CTaskClipboard::HasAttributeTask());
+	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_PASTE) && 
+				   CTaskClipboard::HasAttributeTask());
 }
 
 void CToDoListWnd::OnEditPasteAfter() 
@@ -5874,8 +6051,8 @@ void CToDoListWnd::OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWher
 	{
 		DoImportPasteFromClipboard(nImportWhere);
 
-		RefreshFilterBarControls(TDCA_ALL, FALSE);
-		UpdateTimeTrackerTasks(FALSE, TDCA_PASTE);
+		RefreshFilterBarControls();
+		m_idleTasks.UpdateTimeTrackerTasks(FALSE, TDCA_PASTE);
 	}
 }
 
@@ -6011,34 +6188,17 @@ void CToDoListWnd::OnUpdateEditCopy(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMaximizeTasklist() 
 {
-	// toggle max state on or off
-	switch (m_nMaxState)
-	{
-	case TDCMS_MAXTASKLIST:
-		// turn off maximize tasklist by restoring previous max state
-		m_nMaxState = m_nPrevMaxState;
-		m_nPrevMaxState = TDCMS_NORMAL; // reset
-		break;
-
-	case TDCMS_MAXCOMMENTS:
-		// turn on maximize tasklist and save previous max state
+	if (m_nMaxState == TDCMS_MAXTASKLIST)
+		m_nMaxState = TDCMS_NORMAL;
+	else
 		m_nMaxState = TDCMS_MAXTASKLIST;
-		m_nPrevMaxState = TDCMS_MAXCOMMENTS;
-		break;
 
-	case TDCMS_NORMAL:
-		// turn on maximize tasklist
-		m_nMaxState = TDCMS_MAXTASKLIST;
-		m_nPrevMaxState = TDCMS_NORMAL; // reset
-		break;
-	}
-	
 	// update active tasklist
 	GetToDoCtrl().SetMaximizeState(m_nMaxState);
 	Invalidate();
 
 	// and caption
-	UpdateCaption();
+	m_idleTasks.UpdateCaption();
 }
 
 void CToDoListWnd::OnUpdateMaximizeTasklist(CCmdUI* pCmdUI) 
@@ -6048,34 +6208,17 @@ void CToDoListWnd::OnUpdateMaximizeTasklist(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnMaximizeComments() 
 {
-	// toggle max state on or off
-	switch (m_nMaxState)
-	{
-	case TDCMS_MAXCOMMENTS:
-		// toggle off maximize comments by restoring previous max state
-		m_nMaxState = m_nPrevMaxState;
-		m_nPrevMaxState = TDCMS_NORMAL; // reset
-		break;
-
-	case TDCMS_MAXTASKLIST:
-		// turn on maximize comments and save previous max state
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		m_nMaxState = TDCMS_NORMAL;
+	else
 		m_nMaxState = TDCMS_MAXCOMMENTS;
-		m_nPrevMaxState = TDCMS_MAXTASKLIST;
-		break;
 
-	case TDCMS_NORMAL:
-		// turn on maximize comments
-		m_nMaxState = TDCMS_MAXCOMMENTS;
-		m_nPrevMaxState = TDCMS_NORMAL; // reset
-		break;
-	}
-	
 	// update active tasklist
 	GetToDoCtrl().SetMaximizeState(m_nMaxState);
 	Invalidate();
 
 	// and caption
-	UpdateCaption();
+	m_idleTasks.UpdateCaption();
 }
 
 void CToDoListWnd::OnUpdateMaximizeComments(CCmdUI* pCmdUI) 
@@ -6094,7 +6237,7 @@ void CToDoListWnd::OnUnmaximizeTasklistAndComments()
 		Invalidate();
 
 		// and caption
-		UpdateCaption();
+		m_idleTasks.UpdateCaption();
 	}
 }
 
@@ -6115,7 +6258,7 @@ void CToDoListWnd::OnReload()
 	
 	// else reload
 	ReloadTaskList(nSel);
-	RefreshTabOrder();
+	m_idleTasks.RefreshTabOrder();
 }
 
 void CToDoListWnd::OnUpdateReload(CCmdUI* pCmdUI) 
@@ -6123,10 +6266,10 @@ void CToDoListWnd::OnUpdateReload(CCmdUI* pCmdUI)
 	pCmdUI->Enable(m_mgrToDoCtrls.HasFilePath(GetSelToDoCtrl()));
 }
 
-BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotifyError)
+BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotifyError, LPCTSTR szFilePath)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
-	CString sFilePath = tdc.GetFilePath();
+	CString sFilePath = (szFilePath ? szFilePath : tdc.GetFilePath());
 
 	TSM_TASKLISTINFO storageInfo;
 
@@ -6154,11 +6297,11 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 		if (bNotifyDueTasks)
 			DoDueTaskNotification(nIndex, userPrefs.GetNotifyDueByOnLoad());
 		
-		UpdateCaption();
-		UpdateStatusBar();
+		m_idleTasks.UpdateCaption();
+		m_idleTasks.UpdateStatusBar();
+		m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 
-		RefreshFilterBarControls(TDCA_ALL);
-		UpdateTimeTrackerTasks(TRUE);
+		RefreshFilterBarControls();
 	}
 	else if (bNotifyError)
 	{
@@ -6621,9 +6764,12 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg)
 
 				sHtmlOutput += _T("<html>\n<head>\n");
 				sHtmlOutput += _T("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-16\">\n");
-				sHtmlOutput += _T("</head>\n<style>\n");
+				sHtmlOutput += _T("</head>\n");
+				sHtmlOutput += _T("<style>\n");
+ 				sHtmlOutput += _T("body { color:Black;background-color:White; } \n");
 				sHtmlOutput += _T("img { max-width: 100%; } \n");
-				sHtmlOutput += _T("</style>\n<body>\n");
+				sHtmlOutput += _T("</style>\n");
+				sHtmlOutput += _T("<body>\n");
 
 				CString sTitle = dlg.GetTitle(), sDate = CDateHelper::FormatDate(dlg.GetDate());
 
@@ -6733,7 +6879,7 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 
 	if (!pTDC->IsDelayLoaded() && SelectToDoCtrl(nSel, FALSE))
 	{
-		pTDC->SetFocusToTasks();
+		pTDC->SetFocus(TDCSF_TASKVIEW);
 	
 		// if this is the only control then set or terminate the various status 
 		// check timers
@@ -6742,6 +6888,8 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 
 		Invalidate();
 		UpdateWindow();
+
+		m_idleTasks.UpdateFocusedControl();
 	}
 	else
 	{
@@ -6848,31 +6996,31 @@ void CToDoListWnd::OnTimer(UINT nIDEvent)
 	switch (nIDEvent)
 	{
 	case TIMER_READONLYSTATUS:
-		OnTimerReadOnlyStatus();
+		RefreshTasklistReadOnlyStatus();
 		break;
 		
 	case TIMER_TIMESTAMPCHANGE:
-		OnTimerTimestampChange();
+		RefreshTasklistTimestampChange();
 		break;
 		
 	case TIMER_AUTOSAVE:
-		OnTimerAutoSave();
+		AutoSaveTasklists();
 		break;
 		
 	case TIMER_CHECKOUTSTATUS:
-		OnTimerCheckoutStatus();
+		RefreshTasklistCheckoutStatus();
 		break;
 		
 	case TIMER_DUEITEMS:
-		OnTimerDueItems();
+		RefreshTasklistDueItemStatus();
 		break;
 		
 	case TIMER_TIMETRACKING:
-		OnTimerTimeTracking();
+		m_idleTasks.RefreshTimeTrackingStatus();
 		break;
 		
 	case TIMER_AUTOMINIMIZE:
-		OnTimerAutoMinimize();
+		CheckAutoMinimizeApp();
 		break;
 	}
 }
@@ -6892,7 +7040,7 @@ BOOL CToDoListWnd::IsActivelyTimeTracking() const
 	return FALSE;
 }
 
-void CToDoListWnd::OnTimerTimeTracking()
+void CToDoListWnd::RefreshTimeTrackingStatus()
 {
 	AF_NOREENTRANT // macro helper
 		
@@ -6988,7 +7136,7 @@ LPARAM CToDoListWnd::OnToDoCtrlNotifyTimeTrackReminder(WPARAM wParam, LPARAM lPa
 	return TRUE;
 }
 
-void CToDoListWnd::OnTimerDueItems(int nCtrl)
+void CToDoListWnd::RefreshTasklistDueItemStatus(int nCtrl)
 {
 	AF_NOREENTRANT // macro helper
 
@@ -7003,7 +7151,7 @@ void CToDoListWnd::OnTimerDueItems(int nCtrl)
 		m_tabCtrl.Invalidate(FALSE);
 }
 
-void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl, BOOL bForceCheckRemote)
+void CToDoListWnd::RefreshTasklistReadOnlyStatus(int nCtrl, BOOL bForceCheckRemote)
 {
 	AF_NOREENTRANT // macro helper
 
@@ -7076,7 +7224,7 @@ void CToDoListWnd::OnTimerReadOnlyStatus(int nCtrl, BOOL bForceCheckRemote)
 			else // update the UI
 			{
 				if (nCtrl == m_tabCtrl.GetCurSel())
-					UpdateCaption();
+					m_idleTasks.UpdateCaption();
 				
 				m_mgrToDoCtrls.UpdateToDoCtrlReadOnlyUIState(nCtrl);
 				m_mgrToDoCtrls.UpdateTabItemText(nCtrl);
@@ -7111,7 +7259,7 @@ BOOL CToDoListWnd::WantCheckReloadFiles(RELOAD_OPTION nOption) const
 	return FALSE;
 }
 
-void CToDoListWnd::OnTimerTimestampChange(int nCtrl, BOOL bForceCheckRemote)
+void CToDoListWnd::RefreshTasklistTimestampChange(int nCtrl, BOOL bForceCheckRemote)
 {
 	AF_NOREENTRANT // macro helper
 		
@@ -7181,7 +7329,7 @@ void CToDoListWnd::OnTimerTimestampChange(int nCtrl, BOOL bForceCheckRemote)
 			{
 				// update UI
 				if (nCtrl == m_tabCtrl.GetCurSel())
-					UpdateCaption();
+					m_idleTasks.UpdateCaption();
 				
 				m_mgrToDoCtrls.UpdateToDoCtrlReadOnlyUIState(nCtrl);
 				m_mgrToDoCtrls.UpdateTabItemText(nCtrl);
@@ -7197,7 +7345,7 @@ void CToDoListWnd::OnTimerTimestampChange(int nCtrl, BOOL bForceCheckRemote)
 	}
 }
 
-void CToDoListWnd::OnTimerAutoSave()
+void CToDoListWnd::AutoSaveTasklists()
 {
 	AF_NOREENTRANT // macro helper
 		
@@ -7205,7 +7353,7 @@ void CToDoListWnd::OnTimerAutoSave()
 	SaveAll(TDLS_AUTOSAVE | TDLS_NOFLUSH);
 }
 
-void CToDoListWnd::OnTimerAutoMinimize()
+void CToDoListWnd::CheckAutoMinimizeApp()
 {
 	AF_NOREENTRANT // macro helper
 
@@ -7237,7 +7385,7 @@ BOOL CToDoListWnd::WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed)
 	return bCheckRemoteFiles;
 }
 
-void CToDoListWnd::OnTimerCheckoutStatus(int nCtrl, BOOL bForceCheckRemote)
+void CToDoListWnd::RefreshTasklistCheckoutStatus(int nCtrl, BOOL bForceCheckRemote)
 {
 	if (!m_mgrToDoCtrls.AnyIsSourceControlled())
 		return;
@@ -7310,7 +7458,7 @@ void CToDoListWnd::OnTimerCheckoutStatus(int nCtrl, BOOL bForceCheckRemote)
 	if (!sCheckedInFiles.IsEmpty() || !sCheckedOutFiles.IsEmpty())
 	{
 		// update UI
-		UpdateCaption();
+		m_idleTasks.UpdateCaption();
 
 		CString sMessage;
 
@@ -7367,7 +7515,7 @@ void CToDoListWnd::OnUpdateUserTool(CCmdUI* pCmdUI)
 		ASSERT(CTDCToolsHelper::IsToolCmdID(pCmdUI->m_nID));
 		int nTool = (pCmdUI->m_nID - ID_TOOLS_USERTOOL1);
 
-		USERTOOL tool;
+		TDCUSERTOOL tool;
 		pCmdUI->Enable(Prefs().GetUserTool(nTool, tool));
 	}
 }
@@ -7378,7 +7526,7 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 	int nTool = (nCmdID - ID_TOOLS_USERTOOL1);
 
 	const CPreferencesDlg& prefs = Prefs();
-	USERTOOL tool;
+	TDCUSERTOOL tool;
 	
 	if (prefs.GetUserTool(nTool, tool))
 	{
@@ -7421,30 +7569,27 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 
 void CToDoListWnd::OnViewActivateFilter(UINT nCmdID)
 {
-	int nFilter = (nCmdID - ID_VIEW_ACTIVATEFILTER1);
+	FILTER_SHOW nShow = FS_ALL;
+	CString sAdvFilter;
 
-	if ((nFilter < 0) || (nFilter >= 24))
-	{
-		ASSERT(0);
-		return;
-	}
-
-	VERIFY(m_filterBar.SelectFilter(nFilter));
+	if (m_menubar.GetFilterToActivate(nCmdID, m_filterBar, Prefs(), nShow, sAdvFilter))
+		VERIFY(m_filterBar.SelectFilter(nShow, sAdvFilter));
 }
 
-void CToDoListWnd::OnViewActivateAdvancedFilter(UINT nCmdID)
+void CToDoListWnd::OnUpdateViewActivateFilter(CCmdUI* pCmdUI)
 {
-	int nCustomFilter = (nCmdID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
-
-	if ((nCustomFilter < 0) || (nCustomFilter >= 24))
+	// For toolbar only. CTDCMainMenu handles menu state.
+	if (pCmdUI->m_pMenu == NULL)
 	{
-		ASSERT(0);
-		return;
+		FILTER_SHOW nUnused;
+		CString sUnused;
+
+		BOOL bEnable = CTDCMainMenu::GetFilterToActivate(pCmdUI->m_nID, m_filterBar, Prefs(), nUnused, sUnused);
+		BOOL bCheck = (pCmdUI->m_nID == CTDCMainMenu::GetSelectedFilterMenuID(m_filterBar));
+
+		pCmdUI->Enable(bEnable);
+		pCmdUI->SetCheck(bCheck);
 	}
-
-	int nNumDefaultFilters = (Prefs().GetShowDefaultFiltersInFilterBar() ? NUM_SHOWFILTER : 1);
-
-	VERIFY(m_filterBar.SelectFilter(nNumDefaultFilters + nCustomFilter));
 }
 
 void CToDoListWnd::OnShowTaskView(UINT nCmdID) 
@@ -7541,8 +7686,8 @@ void CToDoListWnd::OnFileOpenFromUserStorage(UINT nCmdID)
 			HandleLoadTasklistError(nOpen, storageInfo.szDisplayPath);
 		
 		// refresh UI
-		UpdateCaption();
-		UpdateStatusBar();
+		m_idleTasks.UpdateCaption();
+		m_idleTasks.UpdateStatusBar();
 		Resize();
 		UpdateWindow();
 	}
@@ -7637,13 +7782,16 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 
 	m_mgrToDoCtrls.SetStorageDetails(nTDC, storageInfo);
 		
-	UpdateCaption();
+	m_idleTasks.UpdateCaption();
 	Resize();
 	UpdateWindow();
 }
 
 void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
 {
+	// Do default first so that menubar can override
+	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+
 	if (!bSysMenu)
 	{
 		m_menubar.HandleInitMenuPopup(pPopupMenu,
@@ -7654,8 +7802,6 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 									  m_mgrUIExtensions,
 									  m_mgrMenuIcons);
 	}
-
-	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
 }
 
 LRESULT CToDoListWnd::OnPostTranslateMenu(WPARAM /*wp*/, LPARAM lp)
@@ -7790,7 +7936,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 
 	if (bWantInToolbar && (bAddToMainToolbar || bAddToCustomToolbar))
 	{
-		CUserToolArray aTools;
+		CTDCUserToolArray aTools;
 		prefs.GetUserTools(aTools);
 
 		if (bAddToMainToolbar)
@@ -7831,7 +7977,7 @@ void CToDoListWnd::OnArchiveCompletedtasks()
 		if (nArchiveTDC != -1 && m_mgrToDoCtrls.IsLoaded(nArchiveTDC))
 			ReloadTaskList(nArchiveTDC, FALSE, FALSE);
 	
-		UpdateCaption();
+		m_idleTasks.UpdateCaption();
 	}
 	else
 	{
@@ -7860,7 +8006,7 @@ void CToDoListWnd::OnArchiveSelectedTasks()
 		if (nArchiveTDC != -1 && m_mgrToDoCtrls.IsLoaded(nArchiveTDC))
 			ReloadTaskList(nArchiveTDC, FALSE, FALSE);
 	
-		UpdateCaption();
+		m_idleTasks.UpdateCaption();
 	}
 }
 
@@ -8159,10 +8305,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		UpdateToDoCtrlPreferences(&tdcShow);
 
 		// update the filter selection
- 		RefreshFilterBarControls(TDCA_ALL);
- 		
- 		UpdateStatusBar();
-		UpdateCaption();
+ 		RefreshFilterBarControls();
 
 		if (Prefs().GetShareCommentsSize() && (m_nLastSelItem != -1))
 		{
@@ -8205,13 +8348,12 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 		// update find dialog with this ToDoCtrl's custom attributes
 		UpdateFindDialogActiveTasklist(&tdcShow);
-		RefreshFindTasksListData(TDCA_ALL);
 
 		// leave focus setting till last else the 'old' tasklist flashes
-		tdcShow.SetFocusToTasks();
+		tdcShow.SetFocus(TDCSF_TASKVIEW);
 
 		// check for external changes to file
-		OnTimerCheckReloadTasklists(nCurSel, TRUE);
+		CheckReloadToDoCtrls(nCurSel, TRUE);
 
 		// notify user of due tasks if req
 		DoDueTaskNotification(nCurSel, nDueBy);
@@ -8219,8 +8361,12 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		UpdateAeroFeatures();
 	}
 
-	UpdateMenuIconMgrSourceControlStatus();
-	RefreshPauseTimeTracking();
+	m_idleTasks.UpdateCaption();
+	m_idleTasks.UpdateStatusBar();
+	m_idleTasks.UpdateFocusedControl();
+	m_idleTasks.UpdateMenuSourceControlStatus();
+	m_idleTasks.RefreshPauseTimeTracking();
+	m_idleTasks.UpdateAutoListData();
 
 	///////////////////////////////////////////////////////////////////////
 	// PERMANENT LOGGING
@@ -8230,11 +8376,11 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
-void CToDoListWnd::OnTimerCheckReloadTasklists(int nCtrl, BOOL bForceCheckRemote)
+void CToDoListWnd::CheckReloadToDoCtrls(int nCtrl, BOOL bForceCheckRemote)
 {
-	OnTimerTimestampChange(nCtrl, bForceCheckRemote);
-	OnTimerReadOnlyStatus(nCtrl, bForceCheckRemote);
-	OnTimerCheckoutStatus(nCtrl, bForceCheckRemote);
+	RefreshTasklistTimestampChange(nCtrl, bForceCheckRemote);
+	RefreshTasklistReadOnlyStatus(nCtrl, bForceCheckRemote);
+	RefreshTasklistCheckoutStatus(nCtrl, bForceCheckRemote);
 }
 
 void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
@@ -8305,7 +8451,7 @@ void CToDoListWnd::CheckResizeFilterBar()
 	InvalidateRect(rFilter, TRUE);
 }
 
-void CToDoListWnd::RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID)
+void CToDoListWnd::UpdateFindTasksListData(TDC_ATTRIBUTE nAttribID)
 {
 	BOOL bRefreshAll = (nAttribID == TDCA_ALL);
 	BOOL bCustAttrib = TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
@@ -8338,12 +8484,13 @@ void CToDoListWnd::RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilter
 
 	if (m_pPrefs->RemapMenuItemIDs(mapMenuIDs) & PREFS_REMAPPEDTOOLBAR)
 	{
-		CToolbarButtonArray aTBButtons;
+		CTDCToolbarButtonArray aTBButtons;
 		VERIFY(Prefs().GetCustomToolbarButtons(aTBButtons));
 
 		VERIFY(m_toolbarCustom.ModifyButtonAttributes(aTBButtons, m_menubar));
 
 		m_mgrMenuIcons.UpdateCustomToolbar(m_toolbarCustom);
+		m_mgrMenuIcons.UpdateStaticDialogIcons();
 	}
 }
 
@@ -8484,10 +8631,7 @@ BOOL CToDoListWnd::CloseToDoCtrl(int nIndex)
 		BOOL bCheckPassword = (!m_bClosing && (&GetToDoCtrl(nNewSel) != &tdcSel));
 
 		if (!SelectToDoCtrl(nNewSel, bCheckPassword))
-		{
 			CreateNewTaskList(FALSE, FALSE);
-			RefreshTabOrder();
-		}
 
 		if (!m_bClosing)
 		{
@@ -8498,6 +8642,8 @@ BOOL CToDoListWnd::CloseToDoCtrl(int nIndex)
 
 			Invalidate();
 			GetToDoCtrl().Invalidate();
+
+			m_idleTasks.UpdateFocusedControl();
 		}
 	}
 	
@@ -8697,25 +8843,24 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 		tdcHide.EnableWindow(FALSE);
 	}
 	
-	tdcShow.SetFocusToTasks();
+	tdcShow.SetFocus(TDCSF_TASKVIEW);
 	tdcShow.Invalidate(TRUE);
 	tdcShow.UpdateWindow();
 	
 	if (!m_bClosing)
 	{
 		// Reload as required
-		OnTimerCheckReloadTasklists(nIndex, TRUE);
+		CheckReloadToDoCtrls(nIndex, TRUE);
 
 		// update various dependencies
-		UpdateCaption();
-		UpdateStatusBar();
-		UpdateMenuIconMgrSourceControlStatus();
-		UpdateCwd();
+		m_idleTasks.UpdateCaption();
+		m_idleTasks.UpdateStatusBar();
+		m_idleTasks.UpdateMenuSourceControlStatus();
+		m_idleTasks.UpdateAutoListData();
+		m_idleTasks.RefreshPauseTimeTracking();
 		
-		RefreshFilterBarControls(TDCA_ALL);
-		RefreshFindTasksListData(TDCA_ALL);
-		RefreshPauseTimeTracking();
-
+		UpdateCwd();
+		RefreshFilterBarControls();
 		DoDueTaskNotification(GetSelToDoCtrl(), nNotifyDueTasksBy);
 	}
 
@@ -8749,7 +8894,7 @@ void CToDoListWnd::CheckUpdateActiveToDoCtrlPreferences()
 		UpdateToDoCtrlPreferences(&GetToDoCtrl(nSel));
 
 		// and filter bar relies on this tdc's visible columns
-		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFilterBarControls();
 	}
 }
 
@@ -8988,6 +9133,8 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 
 void CToDoListWnd::OnNcDestroy()
 {
+	CTDCDarkMode::Release();
+
 	if (CPreferences::UsesIni())
 		CPreferences::Save();
 
@@ -9223,7 +9370,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromText, const CString& sImportFrom,
 						VERIFY(tdc.PasteTasks(tasks, nWhere, bSelectAll));
 					}
 
-					UpdateCaption();
+					m_idleTasks.UpdateCaption();
 				}
 			}
 		}
@@ -9231,7 +9378,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromText, const CString& sImportFrom,
 		HandleImportTasklistError(nRes, sImportPath, bFromText, bSomeSuceeded);
 	}
 
-	UpdateStatusBar(TDCA_PASTE);
+	m_idleTasks.UpdateStatusBar(TDCA_PASTE);
 
 	return bSomeSuceeded;
 }
@@ -9496,7 +9643,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 
 LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
 {
-	USERTOOL* pTool = (USERTOOL*)lp;
+	TDCUSERTOOL* pTool = (TDCUSERTOOL*)lp;
 	
 	if (pTool)
 	{
@@ -9599,7 +9746,7 @@ void CToDoListWnd::OnSysCommand(UINT nID, LPARAM lParam)
 			PostAppRestoreFocus();
 
 			if (bWasMinimised)
-				OnTimerCheckReloadTasklists(-1, TRUE);
+				CheckReloadToDoCtrls(-1, TRUE);
 		}
 		return;
 	}
@@ -9607,20 +9754,14 @@ void CToDoListWnd::OnSysCommand(UINT nID, LPARAM lParam)
 	CFrameWnd::OnSysCommand(nID, lParam);
 }
 
-
-void CToDoListWnd::OnUpdateImport(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(TRUE);
-}
-
 UINT CToDoListWnd::GetNewTaskCmdID() const
 {
-	return TDC::MapNewTaskPosToCmdID(Prefs().GetNewTaskPos(), FALSE);
+	return TDC::MapNewTaskPosToNewTaskID(Prefs().GetNewTaskPos(), FALSE);
 }
 
 UINT CToDoListWnd::GetNewSubtaskCmdID() const
 {
-	return TDC::MapNewTaskPosToCmdID(Prefs().GetNewSubtaskPos(), TRUE);
+	return TDC::MapNewTaskPosToNewTaskID(Prefs().GetNewSubtaskPos(), TRUE);
 }
 
 void CToDoListWnd::OnNewTask(UINT nCmdID) 
@@ -9652,6 +9793,7 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 		dwDependencyID = GetToDoCtrl().GetSelectedTaskID();
 		break;
 
+	case ID_NEWSUBTASK_INTASK: // Handled by OnNewSubtaskInTask
 	default:
 		ASSERT(0);
 		return;
@@ -9659,7 +9801,7 @@ void CToDoListWnd::OnNewTask(UINT nCmdID)
 
 	TDC_INSERTWHERE nInsert = TDC::MapInsertIDToInsertWhere(nCmdID);
 
-	VERIFY (CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE, dwDependencyID));
+	VERIFY(CreateNewTask(CEnString(IDS_TASK), nInsert, TRUE, dwDependencyID));
 }
 
 void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI) 
@@ -9692,6 +9834,7 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 		bDependent = TRUE;
 		break;
 
+	case ID_NEWSUBTASK_INTASK: // Handled by OnUpdateNewSubtaskInTask
 	default:
 		ASSERT(0);
 		return;
@@ -9702,6 +9845,18 @@ void CToDoListWnd::OnUpdateNewTask(CCmdUI* pCmdUI)
 	pCmdUI->Enable(CanCreateNewTask(nInsert, bDependent));
 }
 
+void CToDoListWnd::OnNewSubtaskInTask()
+{
+	BOOL bTop = (GetNewSubtaskCmdID() == ID_NEWSUBTASK_ATTOP);
+	
+	GetToDoCtrl().CreateNewSubtaskInTask(CEnString(IDS_TASK), bTop);
+}
+
+void CToDoListWnd::OnUpdateNewSubtaskInTask(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().CanCreateNewSubtaskInTask());
+}
+
 BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependent) const
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
@@ -9709,12 +9864,13 @@ BOOL CToDoListWnd::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere, BOOL bDependen
 	if (tdc.CanCreateNewTask(nInsertWhere))
 		return TRUE;
 
-	// Special case: Map to the default position
 	if ((tdc.GetTaskCount() == 0) && !bDependent)
 	{
-		UINT nNewTaskID = GetNewTaskCmdID();
+		// Special case: Always allow if the default 
+		// command ID maps to the same location
+		UINT nNewTaskCmdID = GetNewTaskCmdID();
 		
-		if (TDC::MapInsertIDToInsertWhere(nNewTaskID) == nInsertWhere)
+		if (TDC::MapInsertIDToInsertWhere(nNewTaskCmdID) == nInsertWhere)
 			return TRUE;
 	}
 
@@ -9776,8 +9932,8 @@ void CToDoListWnd::OnToolsCheckout()
 
 		if (nFileRes == TDCF_SUCCESS)
 		{
-			UpdateCaption();
-			UpdateMenuIconMgrSourceControlStatus();
+			m_idleTasks.UpdateCaption();
+			m_idleTasks.UpdateMenuSourceControlStatus();
 			break;
 		}
 
@@ -9892,8 +10048,8 @@ void CToDoListWnd::OnToolsCheckin()
 		if (nCheckin == TDCF_SUCCESS)
 		{
 			// Update UI
-			UpdateCaption();
-			UpdateMenuIconMgrSourceControlStatus();
+			m_idleTasks.UpdateCaption();
+			m_idleTasks.UpdateMenuSourceControlStatus();
 		}
 		else
 		{
@@ -9995,6 +10151,7 @@ void CToDoListWnd::OnExport()
 	const CString sTasklistPath = m_mgrToDoCtrls.GetFilePath(nSelTDC, FALSE);
 
 	CTDLExportDlg dialog(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC),
+						 m_mgrToDoCtrls.FormatFriendlyProjectNames(),
 						 m_mgrImportExport,
 						 (nTDCCount == 1),
 						 (tdc.GetTaskView() != FTCV_TASKLIST),
@@ -10034,6 +10191,8 @@ void CToDoListWnd::OnExport()
 	int nExporter = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 	ASSERT(nExporter != -1);
 
+	DWORD dwExportFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
+
 	BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nExporter);
 	CString sExportPath = (bExportToClipboard ? TEMP_CLIPBOARD_FILEPATH : dialog.GetExportPath());
 	
@@ -10056,15 +10215,13 @@ void CToDoListWnd::OnExport()
 		LogIntermediateTaskList(tasks);
 
 		// Do the export
-		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
-
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sExportPath, nExporter, dwFlags);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sExportPath, nExporter, dwExportFlags);
 
 		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	} 
 	else if (dialog.GetExportOneFile())	// Multiple tasklists to one file --------------------------
 	{
-		CMultiTaskFile taskFiles;
+		CMultiTaskFile taskFiles(dialog.GetExportTitle(), dialog.GetExportDate());
 		
 		for (int nCtrl = 0; nCtrl < nTDCCount; nCtrl++)
 		{
@@ -10098,9 +10255,7 @@ void CToDoListWnd::OnExport()
 		Resize();
 
 		// Do the export
-		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
-
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(taskFiles, sExportPath, nExporter, dwFlags);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(taskFiles, sExportPath, nExporter, dwExportFlags);
 
 		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	}
@@ -10171,9 +10326,10 @@ void CToDoListWnd::OnExport()
 				LogIntermediateTaskList(tasks);
 
 				// Do the export
-				DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
+				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sFilePath, nExporter, dwExportFlags);
 
-				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sFilePath, nExporter, dwFlags);
+				// Every export after the first one should be silent
+				dwExportFlags |= IIEF_SILENT;
 
 				// Show error messages but that's all
 				HandleExportTasklistResult(nRes, _T(""), FALSE, FALSE);
@@ -10308,7 +10464,7 @@ void CToDoListWnd::OnUpdateExport(CCmdUI* pCmdUI)
 	{
 		if (GetToDoCtrl().GetTaskCount())
 		{
-			pCmdUI->Enable(TRUE);
+			AlwaysEnabled(pCmdUI);
 			return;
 		}
 	}
@@ -10482,7 +10638,7 @@ void CToDoListWnd::OnUpdateGotoNexttask(CCmdUI* pCmdUI)
 }
 //------------------------------------------------------------------------
 
-BOOL CToDoListWnd::InitFindDialog()
+BOOL CToDoListWnd::InitFindTasksDialog()
 {
 	if (!m_dlgFindTasks.GetSafeHwnd())
 	{
@@ -10494,8 +10650,18 @@ BOOL CToDoListWnd::InitFindDialog()
 		if (CThemed::IsAppThemed())
 			m_dlgFindTasks.SetUITheme(m_theme);
 
-		if (Prefs().GetFindTasksUseTreeFont())
+		const CPreferencesDlg& prefs = Prefs();
+
+		if (prefs.GetFindTasksUseTreeFont())
 			m_dlgFindTasks.SetResultsFont(m_fontTree);
+
+		m_dlgFindTasks.SetNumPriorityRiskLevels(prefs.GetNumPriorityRiskLevels());
+		m_dlgFindTasks.SetISODateFormat(prefs.GetDisplayDatesInISO());
+
+		CDWordArray aColors;
+		prefs.GetPriorityColors(aColors);
+
+		m_dlgFindTasks.SetPriorityColors(aColors);
 	}
 
 	return TRUE;
@@ -10568,7 +10734,7 @@ void CToDoListWnd::OnFindTasks()
 void CToDoListWnd::ShowFindDialog(BOOL bAllowResizeApp)
 {
 	// Create the find dialog first time only
-	InitFindDialog();
+	InitFindTasksDialog();
 
 	if (IsWindowVisible())
 	{
@@ -10620,7 +10786,7 @@ LRESULT CToDoListWnd::OnFindDlgClose(WPARAM /*wp*/, LPARAM /*lp*/)
 	if (m_dlgFindTasks.IsDocked())
 		OnFindDlgDockChange(m_dlgFindTasks.GetDockPosition(), DMP_UNDOCKED);
 	
-	GetToDoCtrl().SetFocusToTasks();
+	GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 
 	return 0L;
 }
@@ -10707,7 +10873,7 @@ LRESULT CToDoListWnd::OnFindSelectResult(WPARAM /*wp*/, LPARAM lp)
 
 	if (tdc.SelectTask(pResult->dwTaskID, TRUE))
 	{
-		tdc.SetFocusToTasks();
+		tdc.SetFocus(TDCSF_TASKVIEW);
 
 		Invalidate();
 		UpdateWindow();
@@ -10738,7 +10904,7 @@ LRESULT CToDoListWnd::OnFindSelectAll(WPARAM /*wp*/, LPARAM /*lp*/)
 			tdc.SelectTasks(aTaskIDs);
 	}
 
-	tdcSel.SetFocusToTasks();
+	tdcSel.SetFocus(TDCSF_TASKVIEW);
 
 	return 0;
 }
@@ -10755,10 +10921,10 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	tdc.SetAdvancedFilter(filter);
 	
-	RefreshFilterBarControls(TDCA_ALL);
-	UpdateTimeTrackerTasks(TRUE);
+	RefreshFilterBarControls();
+	m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 
-	tdc.SetFocusToTasks();
+	tdc.SetFocus(TDCSF_TASKVIEW);
 
 	return 0;
 }
@@ -10773,11 +10939,11 @@ LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM lp)
 
 	// See RemapAdvancedFilterMenuItemIDs for more detail
 	CStringArray aPrevFilters;
-	aPrevFilters.Copy(m_filterBar.GetAdvancedFilterNames());
+	aPrevFilters.Copy(m_filterBar.AdvancedFilterNames());
 
 	VERIFY(Misc::RemoveItem(szFilter, aPrevFilters));
 
-	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.GetAdvancedFilterNames());
+	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.AdvancedFilterNames());
 
 	return 0;
 }
@@ -10797,12 +10963,12 @@ LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM lp)
 
 	// See RemapAdvancedFilterMenuItemIDs for more detail
 	CStringArray aPrevFilters;
-	aPrevFilters.Copy(m_filterBar.GetAdvancedFilterNames());
+	aPrevFilters.Copy(m_filterBar.AdvancedFilterNames());
 
 	VERIFY(Misc::AddUniqueItem(szFilter, aPrevFilters));
 	Misc::SortArray(aPrevFilters);
 
-	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.GetAdvancedFilterNames());
+	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.AdvancedFilterNames());
 
 	CPreferences::Save();
 
@@ -10947,9 +11113,10 @@ void CToDoListWnd::ResetPrefs()
 	delete m_pPrefs;
 
 	m_pPrefs = new CPreferencesDlg(&m_mgrShortcuts, 
-									&m_mgrContent, 
-									&m_mgrImportExport,
-									&m_mgrUIExtensions);
+								   &m_mgrContent, 
+								   &m_mgrImportExport,
+								   &m_mgrUIExtensions,
+								   &m_mgrStorage);
 	
 	// update
 	m_pPrefs->SetUITheme(m_theme);
@@ -11063,7 +11230,7 @@ void CToDoListWnd::OnFileResetversion()
 		tdc.ResetFileVersion();
 		tdc.SetModified();
 		
-		UpdateCaption();
+		m_idleTasks.UpdateCaption();
 	}
 }
 
@@ -11128,7 +11295,7 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 	}
 
 	if (!bClosingWindows)
-		UpdateCaption();
+		m_idleTasks.UpdateCaption();
 	
     return nSaveAll;
 }
@@ -11240,14 +11407,14 @@ void CToDoListWnd::OnViewSelectedTask(BOOL bNext)
 
 	if (tdc.SelectTasksInHistory(bNext))
 	{
-		UpdateStatusBar();
+		m_idleTasks.UpdateStatusBar();
 
 		// Update the filter bar if the filter auto-toggled 
 		// because the required tasks were hidden
 		if (bWasFiltered && !tdc.HasAnyFilter())
 		{
-			RefreshFilterBarControls(TDCA_ALL);
-			UpdateTimeTrackerTasks(TRUE);
+			RefreshFilterBarControls();
+			m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 		}
 	}
 }
@@ -11447,15 +11614,25 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
     if (m_bClosing)
         return; 
 
-	// Reload tasklists as required
-	if (bActive)
-		OnTimerCheckReloadTasklists(-1, TRUE);
+	// Essential house-keeping
+	if (!bActive)
+	{
+		// Finish up whatever the user was doing
+		if (GetTDCCount())
+			GetToDoCtrl().Flush();
+	}
+	else
+	{
+		// Reload tasklists as required
+		CheckReloadToDoCtrls(-1, TRUE);
+	}
 
 	// Don't do any further processing if the Reminder window or Time tracker
 	// is active because the two windows get into a fight for activation!
 	if (m_dlgReminders.IsForegroundWindow() || m_dlgTimeTracker.IsForegroundWindow())
 		return;
 
+	// More house-keeping
 	if (!bActive)
 	{
 		// save tasklists if required
@@ -11511,7 +11688,7 @@ LRESULT CToDoListWnd::OnAppRestoreFocus(WPARAM /*wp*/, LPARAM lp)
 	}
 	else if (GetTDCCount() && (hWnd == GetToDoCtrl().GetSafeHwnd()))
 	{
-		GetToDoCtrl().SetFocusToTasks();
+		GetToDoCtrl().SetFocus(TDCSF_TASKVIEW);
 	}
 	else if (::IsWindowEnabled(hWnd) && ::IsWindowVisible(hWnd) && (::GetFocus() != hWnd))
 	{
@@ -11665,9 +11842,9 @@ void CToDoListWnd::OnEditGotoDependency()
 
 void CToDoListWnd::OnUpdateEditGotoDependency(CCmdUI* pCmdUI) 
 {
-	CTDCDependencyArray aDepends;
+	CTDCDependencyArray aUnused;
 
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskDependencies(aDepends) > 0);	
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskDependencies(aUnused) > 0);	
 }
 
 void CToDoListWnd::OnEditDependency()
@@ -11691,7 +11868,7 @@ void CToDoListWnd::OnUpdateEditRecurrence(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_RECURRENCE) && !tdc.IsSelectedTaskDone());	
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_RECURRENCE));
 }
 
 void CToDoListWnd::OnFileOpenarchive() 
@@ -11715,7 +11892,7 @@ void CToDoListWnd::OnViewShowfilterbar()
 	m_bShowFilterBar = !m_bShowFilterBar;
 
 	if (m_bShowFilterBar)
-		RefreshFilterBarControls(TDCA_ALL);
+		RefreshFilterBarControls();
 
 	m_filterBar.ShowWindow(m_bShowFilterBar ? SW_SHOW : SW_HIDE);
 
@@ -11742,8 +11919,8 @@ void CToDoListWnd::OnViewClearfilter()
 		else
 			m_filterBar.RefreshFilterControls(tdc); // so menu updates work
 
-		UpdateStatusBar();
-		UpdateTimeTrackerTasks(TRUE);
+		m_idleTasks.UpdateStatusBar();
+		m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 	}
 }
 
@@ -11763,12 +11940,12 @@ void CToDoListWnd::OnViewTogglefilter()
 		tdc.ToggleFilter();
 
 		if (m_bShowFilterBar)
-			RefreshFilterBarControls(TDCA_ALL);
+			RefreshFilterBarControls();
 		else
 			m_filterBar.RefreshFilterControls(tdc); // so menu updates work
 
-		UpdateStatusBar();
-		UpdateTimeTrackerTasks(TRUE);
+		m_idleTasks.UpdateStatusBar();
+		m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 	}
 }
 
@@ -11784,34 +11961,34 @@ void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
 		pCmdUI->SetCheck((bCanToggle && tdc.HasAnyFilter()) ? 0 : 1);
 }
 
-LRESULT CToDoListWnd::OnSelchangeFilter(WPARAM wp, LPARAM lp) 
+LRESULT CToDoListWnd::OnFilterChange(WPARAM wp, LPARAM lp) 
 {
-	int nCtrlID = (int)wp;
-	HWND hWnd = (HWND)lp;
-
-	ASSERT((nCtrlID == m_filterBar.GetDlgCtrlID()) && (hWnd == m_filterBar));
+	ASSERT((wp == m_filterBar.GetDlgCtrlID()) && ((HWND)lp == m_filterBar));
 
 	TDCFILTER filter;
 	CString sCustom;
-	DWORD dwCustomFlags;
+	DWORD dwCustomFlags = 0;
 
 	m_filterBar.GetFilter(filter, sCustom, dwCustomFlags);
-
-	// Refresh filter controls if we've switched 
-	// from a custom to default filter or vice versa
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	BOOL bUpdateFilterCtrls = Misc::StateChanged(sCustom.IsEmpty(), !tdc.HasAdvancedFilter());
-
-	OnChangeFilter(filter, sCustom, dwCustomFlags, bUpdateFilterCtrls);
+	DoChangeFilter(filter, sCustom, dwCustomFlags);
 
 	return 0L;
 }
 
-void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bUpdateFilterCtrls)
+void CToDoListWnd::DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	FILTER_SHOW nOldFilter = tdc.GetFilter(), nNewFilter = filter.nShow;
 
-	if (!sCustom.IsEmpty())
+	ASSERT(((nNewFilter == FS_ADVANCED) && !sCustom.IsEmpty()) ||
+		   ((nNewFilter != FS_ADVANCED) && sCustom.IsEmpty()));
+
+	// Refresh filter controls if we're switching to/from a 
+	// 'custom' or 'selected' filter
+	BOOL bRefreshFilterCtrls = (Misc::StatesDiffer((nOldFilter == FS_ADVANCED), (nNewFilter == FS_ADVANCED)) ||
+								Misc::StatesDiffer((nOldFilter == FS_SELECTED), (nNewFilter == FS_SELECTED)));
+
+	if (nNewFilter == FS_ADVANCED)
 	{
 		// Synchronise 'Find Tasks' dialog flags
 		VERIFY(m_findFilterHelper.UpdateFindDlgAdvancedFilter(sCustom, dwCustomFlags));
@@ -11831,13 +12008,13 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 		tdc.ClearFilter();
 	}
 
-	if (bUpdateFilterCtrls)
-		RefreshFilterBarControls(TDCA_ALL);
+	if (bRefreshFilterCtrls)
+		RefreshFilterBarControls();
 	else
 		CheckResizeFilterBar();
 
-	UpdateStatusBar();
-	UpdateTimeTrackerTasks(TRUE);
+	m_idleTasks.UpdateStatusBar();
+	m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 }
 
 void CToDoListWnd::OnViewFilter() 
@@ -11849,9 +12026,12 @@ void CToDoListWnd::OnViewFilter()
 	
 	CTDLFilterDlg dialog(prefs.GetTitleFilterOption(),
 						 prefs.GetMultiSelFilters(),
-						 m_filterBar.GetAdvancedFilterNames(),
+						 prefs.GetShowDefaultFiltersInFilterBar(),
+						 m_filterBar.AdvancedFilterNames(),
 						 GetToDoCtrl(),
-						 aPriorityColors);
+						 aPriorityColors,
+						 prefs.GetNumPriorityRiskLevels(),
+						 prefs.GetDisplayDatesInISO());
 
 	if (dialog.DoModal(CMDICON(ID_VIEW_FILTER)) == IDOK)
 	{
@@ -11860,7 +12040,7 @@ void CToDoListWnd::OnViewFilter()
 		DWORD dwCustomFlags = 0;
 		
 		dialog.GetFilter(filter, sCustom, dwCustomFlags);
-		OnChangeFilter(filter, sCustom, dwCustomFlags, TRUE);
+		DoChangeFilter(filter, sCustom, dwCustomFlags);
 	}
 }
 
@@ -11877,7 +12057,7 @@ void CToDoListWnd::OnViewRefreshfilter()
 	// refresh the current one
 	TDCFILTER filter;
 	CString sCustom;
-	DWORD dwCustomFlags;
+	DWORD dwCustomFlags = 0;
 
 	m_filterBar.GetFilter(filter, sCustom, dwCustomFlags);
 	
@@ -11887,13 +12067,13 @@ void CToDoListWnd::OnViewRefreshfilter()
 	}
 	else
 	{
-		OnChangeFilter(filter, sCustom, dwCustomFlags, FALSE);
+		DoChangeFilter(filter, sCustom, dwCustomFlags);
 
 		if (Prefs().GetExpandTasksOnLoad())
 			tdc.ExpandTasks(TDCEC_ALL);
 	}
 
-	UpdateStatusBar();
+	m_idleTasks.UpdateStatusBar();
 }
 
 void CToDoListWnd::OnUpdateViewRefreshfilter(CCmdUI* pCmdUI) 
@@ -11942,8 +12122,8 @@ void CToDoListWnd::OnTasklistSelectColumns()
 				GetToDoCtrl(nTDC).SetColumnFieldVisibility(vis);
 		}
 
-		RefreshFilterBarControls(TDCA_ALL);
-		UpdateStatusBar(); // Time Est/Spent, Cost visibility may have changed
+		RefreshFilterBarControls();
+		m_idleTasks.UpdateStatusBar(); // Time Est/Spent, Cost visibility may have changed
 
 		// reload the menu if we dynamically alter it
 		if (Prefs().GetShowEditMenuAsColumns())
@@ -11982,9 +12162,11 @@ void CToDoListWnd::OnEditOffsetDates()
 		Misc::SetFlag(dwFlags, TDCOTD_OFFSETSUBTASKREFS,	dialog.GetOffsetSubtaskReferences());
 		Misc::SetFlag(dwFlags, TDCOTD_OFFSETFROMTODAY,		dialog.GetOffsetFromToday());
 		Misc::SetFlag(dwFlags, TDCOTD_PRESERVEENDOFMONTH,	dialog.GetPreserveEndOfMonth());
+		
+		DWORD dwWhat = dialog.GetOffsetWhat();
+		ASSERT(dwWhat);
 
 		CTDCDateSet mapDates;
-		DWORD dwWhat = dialog.GetOffsetWhat();
 
 		if (dwWhat & ODD_STARTDATE)
 			mapDates.Add(TDCD_START);
@@ -11996,7 +12178,9 @@ void CToDoListWnd::OnEditOffsetDates()
 			mapDates.Add(TDCD_DONE);
 
 		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-		tdc.OffsetSelectedTaskDates(mapDates, nAmount, nUnits, dwFlags);
+
+		if (!mapDates.IsEmpty())
+			tdc.OffsetSelectedTaskDates(mapDates, nAmount, nUnits, dwFlags);
 		
 		if (dwWhat & ODD_REMINDER)
 		{
@@ -12066,20 +12250,27 @@ void CToDoListWnd::OnPrintpreview()
 void CToDoListWnd::OnShowTimelogfile() 
 {
 	CString sLogPath = GetToDoCtrl().GetSelectedTaskTimeLogPath();
-	
-	if (FileMisc::FileExists(sLogPath))
+
+	DisplayTimelogfile(sLogPath);
+}
+
+void CToDoListWnd::DisplayTimelogfile(LPCTSTR szFilePath)
+{
+	HWND hwndThis = AfxGetMainWnd()->GetSafeHwnd();
+
+	if (FileMisc::FileExists(szFilePath))
 	{
 		// special handling for excel
 		if (CFileRegister::IsRegisteredApp(_T("csv"), _T("EXCEL.EXE"), TRUE))
 		{
 			CString sParams;
-			sParams.Format(_T("/r \"%s\""), sLogPath); // readonly 
+			sParams.Format(_T("/r \"%s\""), szFilePath); // readonly 
 
-			FileMisc::Run(*this, CFileRegister::GetRegisteredAppPath(_T("csv")), sParams);
+			FileMisc::Run(hwndThis, CFileRegister::GetRegisteredAppPath(_T("csv")), sParams);
 		}
 		else
 		{
-			FileMisc::Run(*this, sLogPath);
+			FileMisc::Run(hwndThis, szFilePath);
 		}
 	}
 }
@@ -12114,11 +12305,10 @@ void CToDoListWnd::OnUpdateAddtimetologfile(CCmdUI* pCmdUI)
 void CToDoListWnd::OnToolsAnalyseLoggedTime() 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	const CPreferencesDlg& userPrefs = Prefs();
 	const CTDCCustomAttribDefinitionArray& aCustAttribDefs = tdc.GetCustomAttributeDefs();
 
 	CString sTaskFile(tdc.GetFilePath());
-	CTDLAnalyseLoggedTimeDlg dialog(sTaskFile, aCustAttribDefs);
+	CTDLAnalyseLoggedTimeDlg dialog(sTaskFile, aCustAttribDefs, Prefs().GetDisplayDatesInISO());
 
 	BOOL bContinue = TRUE;
 
@@ -12538,7 +12728,7 @@ LRESULT CToDoListWnd::OnSessionStatusChange(WPARAM wp, LPARAM lp)
 
 	case SESSIONSTATUS_LOCK:
 	case SESSIONSTATUS_SCREENSAVER:
-		RefreshPauseTimeTracking();
+		m_idleTasks.RefreshPauseTimeTracking();
 		break;
 	}
 	
@@ -12558,9 +12748,9 @@ void CToDoListWnd::OnViewStatusBar()
 	SendMessage(WM_SIZE, SIZE_RESTORED, 0L);
 
 	if (m_bShowStatusBar)
-		UpdateStatusBar();
+		m_idleTasks.UpdateStatusBar();
 	else
-		UpdateCaption();
+		m_idleTasks.UpdateCaption();
 }
 
 void CToDoListWnd::OnUpdateViewStatusBar(CCmdUI* pCmdUI) 
@@ -12769,7 +12959,7 @@ void CToDoListWnd::OnUpdateCommentsInsertDateAndOrTime(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	pCmdUI->Enable(tdc.CommentsHaveFocus() && tdc.CanPasteDateTime());
+	pCmdUI->Enable(tdc.HasFocus(TDCSF_COMMENTS) && tdc.CanPasteDateTime());
 }
 
 BOOL CToDoListWnd::CanInsertDateAndTime() const
@@ -12972,10 +13162,10 @@ void CToDoListWnd::OnEditUndoRedo(BOOL bUndo)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	if (tdc.UndoLastAction(bUndo))
+	if (tdc.UndoLastAction(bUndo) && !tdc.HasFocus(TDCSF_COMMENTS))
 	{
-		UpdateStatusBar();
-		UpdateTimeTrackerTasks(TRUE);
+		m_idleTasks.UpdateStatusBar();
+		m_idleTasks.UpdateTimeTrackerTasks(TRUE);
 	}
 }
 
@@ -12986,55 +13176,82 @@ void CToDoListWnd::OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo)
 
 void CToDoListWnd::OnViewCycleTaskViews() 
 {
-	GetToDoCtrl().SetNextTaskView();
-}
+	CLockUpdates lu(*this);
 
-void CToDoListWnd::OnUpdateViewCycleTaskViews(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(m_nMaxState != TDCMS_MAXCOMMENTS);
+	GetToDoCtrl().SetNextTaskView();
+
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		OnMaximizeTasklist();
 }
 
 void CToDoListWnd::OnViewToggleTreeandList() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	switch (tdc.GetTaskView())
+	switch (GetToDoCtrl().GetTaskView())
 	{
 	case FTCV_TASKTREE:
-		tdc.SetTaskView(FTCV_TASKLIST);
+		OnActivateTaskView(ID_ACTIVATEVIEW_LISTVIEW);
 		break;
 
 	case FTCV_TASKLIST:
 	default:
-		tdc.SetTaskView(FTCV_TASKTREE);
+		OnActivateTaskView(ID_ACTIVATEVIEW_TASKTREE);
 		break;
 	}
 }
 
 void CToDoListWnd::OnUpdateViewToggleTreeandList(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_nMaxState != TDCMS_MAXCOMMENTS);
+	pCmdUI->Enable(GetToDoCtrl().IsListViewTabShowing());
 }
 
 void CToDoListWnd::OnViewToggletasksandcomments() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	if (!tdc.TasksHaveFocus())
-		tdc.SetFocusToTasks();
+	if (!tdc.HasFocus(TDCSF_TASKVIEW))
+		SetToDoCtrlFocus(TDCSF_TASKVIEW);
 	else
-		tdc.SetFocusToComments();
+		SetToDoCtrlFocus(TDCSF_COMMENTS);
 }
 
-void CToDoListWnd::OnUpdateViewToggletasksandcomments(CCmdUI* pCmdUI) 
+void CToDoListWnd::SetToDoCtrlFocus(TDC_SETFOCUSTO nLocation)
 {
-	pCmdUI->Enable(m_nMaxState == TDCMS_NORMAL || 
-					(m_nMaxState == TDCMS_MAXTASKLIST && Prefs().GetShowCommentsAlways()));
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	TDC_MAXSTATE nPrevMaxState = tdc.GetMaximizeState();
+
+	tdc.SetFocus(nLocation);
+	m_nMaxState = tdc.GetMaximizeState();
+
+	if (m_nMaxState != nPrevMaxState)
+		Invalidate(FALSE);
 }
 
-void CToDoListWnd::OnMove(int x, int y) 
+void CToDoListWnd::OnViewSetFocusToTasks()
 {
-	CFrameWnd::OnMove(x, y);
+	SetToDoCtrlFocus(TDCSF_TASKVIEW);
+}
+
+void CToDoListWnd::OnViewSetFocusToComments()
+{
+	SetToDoCtrlFocus(TDCSF_COMMENTS);
+}
+
+void CToDoListWnd::OnViewSetFocusToAttributes()
+{
+	SetToDoCtrlFocus(TDCSF_ATTRIBUTES);
+}
+
+void CToDoListWnd::OnViewSetFocusToProjectName()
+{
+	SetToDoCtrlFocus(TDCSF_PROJECTNAME);
+}
+
+void CToDoListWnd::OnViewSetFocusToFilterBar()
+{
+	if (!m_bShowFilterBar)
+		OnViewShowfilterbar();
+
+	m_filterBar.SetFocus();
 }
 
 void CToDoListWnd::OnEditSettaskicon() 
@@ -13089,6 +13306,12 @@ LRESULT CToDoListWnd::OnToDoCtrlGetTaskReminder(WPARAM wParam, LPARAM lParam)
 	return (LRESULT)tRem;
 }
 
+LRESULT CToDoListWnd::OnToDoCtrlClearTaskReminder(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	OnEditClearReminder();
+	return 0L;
+}
+
 LRESULT CToDoListWnd::OnToDoCtrlEditTaskReminder(WPARAM wp, LPARAM lp)
 {
 	if (wp && lp)
@@ -13106,9 +13329,9 @@ LRESULT CToDoListWnd::OnToDoCtrlEditTaskReminder(WPARAM wp, LPARAM lp)
 
 		OnEditSetReminder(nTDC, dwTaskID);
 	}
-	else if (!wp && !lp) // active tasklist and its selection
+	else if (!wp && !lp)
 	{
-		OnEditSetReminder(GetSelToDoCtrl(), 0);
+		OnEditSetReminder();
 	}
 	else
 	{
@@ -13139,23 +13362,19 @@ void CToDoListWnd::OnEditSetReminder(int nTDC, DWORD dwTaskID)
 		return;
 	}
 
-	DWORD dwFlags = (nNumSel == 1) ? 0 : TDCREM_MULTIPLETASKS;
-	
 	// get the first reminder as a reference
 	TDCREMINDER rem;
-	
-	// handle new reminder
-	if (!m_dlgReminders.GetFirstTaskReminder(&tdc, aTaskIDs, rem))
+	BOOL bNewReminder = (FALSE == m_dlgReminders.GetFirstTaskReminder(&tdc, aTaskIDs, rem));
+
+	if (bNewReminder)
 	{
 		rem.dwTaskID = aTaskIDs[0];
 		rem.pTDC = &tdc;
-
-		dwFlags |= TDCREM_NEWREMINDER;
 	}
 
-	CTDLSetReminderDlg dialog(CMDICON(ID_EDIT_SETREMINDER));
+	CTDLSetReminderDlg dialog(CMDICON(ID_EDIT_SETREMINDER), Prefs().GetDisplayDatesInISO());
 
-	switch (dialog.DoModal(rem, dwFlags))
+	switch (dialog.DoModal(rem, bNewReminder))
 	{
 	case IDOK:
 		{
@@ -13197,7 +13416,7 @@ void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	BOOL bEnable = (tdc.HasSelection() && !tdc.SelectedTasksAreAllDone());
+	BOOL bEnable = tdc.CanEditSelectedTask(TDCA_REMINDER);
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable && pCmdUI->m_pMenu)
@@ -13343,8 +13562,7 @@ void CToDoListWnd::OnTasklistCustomColumns()
 	{
 		CTDLCustomAttributeDlg dialog(tdc.GetFilePath(),
 									  tdc.GetCustomAttributeDefs(),
-									  tdc.GetTaskIconImageList(),
-									  tdc.GetCheckImageList());
+									  tdc.GetTaskIconImageList());
 
 		if (dialog.DoModal(CMDICON(ID_TASKLIST_CUSTOMCOLUMNS)) == IDOK)
 		{
@@ -13358,7 +13576,7 @@ void CToDoListWnd::OnTasklistCustomColumns()
 
 			if (tdc.SetCustomAttributeDefs(aAttrib))
 			{
-				RefreshFilterBarControls(TDCA_ALL);
+				RefreshFilterBarControls();
 				UpdateFindDialogActiveTasklist();
 
 				// Auto-enable attribute inheritance first time only
@@ -13436,7 +13654,7 @@ void CToDoListWnd::OnToolsRemovefromsourcecontrol()
 	CWaitCursor cursor;
 
 	if (m_mgrToDoCtrls.AddToSourceControl(GetSelToDoCtrl(), FALSE))
-		UpdateMenuIconMgrSourceControlStatus();
+		m_idleTasks.UpdateMenuSourceControlStatus();
 }
 
 void CToDoListWnd::OnUpdateToolsRemovefromsourcecontrol(CCmdUI* pCmdUI) 
@@ -13449,7 +13667,7 @@ void CToDoListWnd::OnToolsAddtoSourceControl()
 	CWaitCursor cursor;
 	
 	if (m_mgrToDoCtrls.AddToSourceControl(GetSelToDoCtrl()))
-		UpdateMenuIconMgrSourceControlStatus();
+		m_idleTasks.UpdateMenuSourceControlStatus();
 }
 
 void CToDoListWnd::OnUpdateToolsAddtoSourceControl(CCmdUI* pCmdUI) 
@@ -13813,28 +14031,28 @@ void CToDoListWnd::OnViewShowRemindersWindow()
 	m_dlgReminders.ShowWindow();
 }
 
-void CToDoListWnd::OnUpdateViewShowRemindersWindow(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateActivateTaskView(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(TRUE);
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		pCmdUI->Enable(TRUE);
+	else
+		pCmdUI->Enable(TDC::MapActivateIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
 }
 
 void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 {
-	switch (nCmdID)
-	{
-	case ID_ACTIVATEVIEW_TASKTREE:
-		GetToDoCtrl().SetTaskView(FTCV_TASKTREE);
-		break;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	case ID_ACTIVATEVIEW_LISTVIEW:
-		GetToDoCtrl().SetTaskView(FTCV_TASKLIST);
-		break;
+	FTC_VIEW nOldView = tdc.GetTaskView();
+	FTC_VIEW nNewView = TDC::MapActivateIDToTaskView(nCmdID);
 
-	default:
-		ASSERT ((nCmdID >= ID_ACTIVATEVIEW_UIEXTENSION1) && (nCmdID <= ID_ACTIVATEVIEW_UIEXTENSION16));
-		GetToDoCtrl().SetTaskView((FTC_VIEW)(FTCV_UIEXTENSION1 + (nCmdID - ID_ACTIVATEVIEW_UIEXTENSION1)));
-		break;
-	}
+	CLockUpdates lu(*this);
+
+	if (nNewView != nOldView)
+		tdc.SetTaskView(nNewView);
+
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		OnMaximizeTasklist();
 }
 
 LRESULT CToDoListWnd::OnModifyKeyboardShortcuts(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -14025,22 +14243,38 @@ void CToDoListWnd::OnUpdateToolsViewLogFile(CCmdUI* pCmdUI)
 	pCmdUI->Enable(FileMisc::FileExists(FileMisc::GetLogFilePath()));
 }
 
-void CToDoListWnd::OnToolsAnonymizeTasklist() 
+void CToDoListWnd::OnToolsAnonymizeTaskTimeLog() 
+{
+	CString sAnonFilePath;
+	CString sLogPath = GetToDoCtrl().GetSelectedTaskTimeLogPath();
+
+	if (CTDCAnonymizeTaskTimeLog::Anonymize(sLogPath, sAnonFilePath))
+	{
+		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZETASKTIMELOG_SUCCESS, MB_YESNO))
+			DisplayTimelogfile(sAnonFilePath);
+	}
+	else
+	{
+		CMessageBox::AfxShow(IDS_ANONYMIZETASKTIMELOG_FAIL);
+	}
+}
+
+void CToDoListWnd::OnToolsAnonymizeTasklist()
 {
 	CString sAnonFilePath;
 
 	if (CTDCAnonymizeTasklist::Anonymize(GetToDoCtrl().GetFilePath(), sAnonFilePath))
 	{
-		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZE_SUCCESS, MB_YESNO))
+		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZETASKLIST_SUCCESS, MB_YESNO))
 			OpenTaskList(sAnonFilePath, FALSE);
 	}
 	else
 	{
-		CMessageBox::AfxShow(IDS_ANONYMIZE_FAIL);
+		CMessageBox::AfxShow(IDS_ANONYMIZETASKLIST_FAIL);
 	}
 }
 
-void CToDoListWnd::OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(GetToDoCtrl().HasFilePath());
 }

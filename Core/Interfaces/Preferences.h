@@ -23,7 +23,10 @@ struct INIENTRY
 	CString Format() const;
 	BOOL Parse(const CString& sEntry);
 	BOOL operator==(const INIENTRY& ie) const;
-	
+
+	static CString SafeQuote(const CString& sValue);
+	static CString UnSafeQuote(const CString& sValue);
+
 	CString sName;
 	CString sValue;
 	BOOL bQuoted;
@@ -57,6 +60,7 @@ public:
 	static BOOL Initialise(LPCTSTR szPrefsPath, BOOL bIni);
 	static BOOL Save();
 	static void Release();
+	static void CullIniBackups(int nNumToKeep = 10);
 
 	static BOOL IsInitialised();
 	static BOOL UsesIni() { return s_bIni; }

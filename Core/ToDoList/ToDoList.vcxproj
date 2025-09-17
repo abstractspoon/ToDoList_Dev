@@ -188,20 +188,13 @@ unicode_release\TDLTest.exe
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="StdAfx.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ToDoList.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="ToDoList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ToDoList.rc">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
@@ -228,7 +221,6 @@ unicode_release\TDLTest.exe
     <None Include="res\datetime_toolbar.bmp" />
     <None Include="res\datetime_toolbar_std.bmp" />
     <None Include="res\depend_link.ico" />
-    <None Include="res\English.gif" />
     <None Include="res\fileedit_browse.ico" />
     <None Include="res\fileedit_go.ico" />
     <None Include="res\find_dialog_std.ico" />
@@ -257,7 +249,6 @@ unicode_release\TDLTest.exe
     <None Include="res\udtprefs_toolbar_std.bmp" />
     <None Include="res\update_filter.ico" />
     <None Include="RES\XPcheckboxes.bmp" />
-    <None Include="res\YourLanguage.GIF" />
     <None Include="Unicode_Debug\Itenso.Rtf.Converter.Html.dll" />
     <None Include="Unicode_Debug\Itenso.Rtf.Interpreter.dll" />
     <None Include="Unicode_Debug\Itenso.Rtf.Parser.dll" />
@@ -291,6 +282,8 @@ unicode_release\TDLTest.exe
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\quickfind_next.ico" />
+    <Image Include="res\quickfind_prev.ico" />
     <Image Include="res\reminder.ico" />
     <Image Include="res\select_icon.ico" />
     <Image Include="res\reset.ico" />
@@ -298,6 +291,11 @@ unicode_release\TDLTest.exe
     <Image Include="res\style_para.bmp" />
     <Image Include="res\style_table.bmp" />
     <Image Include="res\style_wrap.bmp" />
+    <Image Include="res\taskattrib_toolbar.bmp" />
+    <Image Include="res\taskattrib_toolbar_std.bmp" />
+    <Image Include="res\timetrack_goto.ico" />
+    <Image Include="res\uk_flag.bmp" />
+    <Image Include="res\yourlang_flag.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -18,7 +18,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTimeHelperTest::CTimeHelperTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CTimeHelperTest::CTimeHelperTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(_T("CTimeHelperTest"), utils)
 {
 
 }
@@ -39,7 +41,7 @@ TESTRESULT CTimeHelperTest::Run()
 
 void CTimeHelperTest::TestGetTime()
 {
-	CTDCScopedTest test(*this, _T("CTimeHelperTest::GetTime"));
+	CTDCScopedTest test(*this, _T("CTimeHelper::GetTime"));
 
 	// -----------------------------------------------------------------------
 

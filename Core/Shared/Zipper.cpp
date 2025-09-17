@@ -176,18 +176,12 @@ bool CZipper::AddFileToZip(LPCTSTR szFilePath, bool bIgnoreFilePath)
 	if (hInputFile == INVALID_HANDLE_VALUE)
 		return false;
 
-	// convert unicode to ansi as required
-#ifdef _UNICODE
+	// Path names must be ANSI
 	char szAnsiPath[MAX_PATH] = { 0 };
-	
 	::WideCharToMultiByte(CP_ACP, 0, szFileName, lstrlen(szFileName), szAnsiPath, MAX_PATH, NULL, NULL);
-	const char* pPath = szAnsiPath;
-#else
-	const char* pPath = szFileName;
-#endif
 
 	int nRet = zipOpenNewFileInZip(m_uzFile, 
-									pPath,
+									szAnsiPath,
 									&zfi, 
 									NULL, 
 									0,
@@ -279,20 +273,14 @@ bool CZipper::AddFileToZip(LPCTSTR szFilePath, LPCTSTR szRelFolderPath)
 	zmakepath(szFileName, NULL, szRelFolderPath, szName, szExt);
 
 	PrepareZipPath(szFileName);
-	// convert unicode to ansi as required
 
-#ifdef _UNICODE
+	// Path names must be ANSI
 	char szAnsiPath[MAX_PATH] = { 0 };
-	
 	::WideCharToMultiByte(CP_ACP, 0, szFileName, lstrlen(szFileName), szAnsiPath, MAX_PATH, NULL, NULL);
-	const char* pPath = szAnsiPath;
-#else
-	const char* pPath = szFileName;
-#endif
 
 	// open the file in the zip making sure we remove any leading '\'
 	int nRet = zipOpenNewFileInZip(m_uzFile, 
-									pPath,
+									szAnsiPath,
 									&zfi, 
 									NULL, 
 									0,
@@ -363,18 +351,12 @@ bool CZipper::AddFileToZip(const BYTE* pFileContents, int nSize, LPCTSTR szRelFi
 	lstrcpy(szFilePath, szRelFilePath);
 	PrepareZipPath(szFilePath);
 
-	// convert unicode to ansi as required
-#ifdef _UNICODE
+	// Path names must be ANSI
 	char szAnsiPath[MAX_PATH] = { 0 };
-	
 	::WideCharToMultiByte(CP_ACP, 0, szFilePath, lstrlen(szFilePath), szAnsiPath, MAX_PATH, NULL, NULL);
-	const char* pPath = szAnsiPath;
-#else
-	const char* pPath = szFilePath;
-#endif
 
 	int nRet = zipOpenNewFileInZip(m_uzFile, 
-									pPath,
+									szAnsiPath,
 									&zfi, 
 									NULL, 
 									0,
@@ -467,18 +449,12 @@ bool CZipper::AddFolderToZip(LPCTSTR szFolderPath, bool bIgnoreFilePath)
 
 	if (lstrlen(szFolderName))
 	{
-		// convert unicode to ansi as required
-#ifdef _UNICODE
+		// Path names must be ANSI
 		char szAnsiPath[MAX_PATH] = { 0 };
-		
 		::WideCharToMultiByte(CP_ACP, 0, szFolderName, lstrlen(szFolderName), szAnsiPath, MAX_PATH, NULL, NULL);
-		const char* pPath = szAnsiPath;
-#else
-		const char* pPath = szFolderName;
-#endif
 
 		int nRet = zipOpenNewFileInZip(m_uzFile, 
-										pPath,
+										szAnsiPath,
 										&zfi, 
 										NULL, 
 										0,
@@ -548,17 +524,11 @@ bool CZipper::OpenZip(LPCTSTR szFilePath, LPCTSTR szRootFolder, bool bAppend)
 	if (bAppend && ::GetFileAttributes(szFullPath) == 0xffffffff)
 		bAppend = false;
 
-	// convert unicode to ansi as required
-#ifdef _UNICODE
+	// Path names must be ANSI
 	char szAnsiPath[MAX_PATH] = { 0 };
-	
 	::WideCharToMultiByte(CP_ACP, 0, szFullPath, lstrlen(szFullPath), szAnsiPath, MAX_PATH, NULL, NULL);
-	const char* pPath = szAnsiPath;
-#else
-	const char* pPath = szFullPath;
-#endif
 	
-	m_uzFile = zipOpen(pPath, bAppend ? APPEND_STATUS_ADDINZIP : APPEND_STATUS_CREATE);
+	m_uzFile = zipOpen(szAnsiPath, bAppend ? APPEND_STATUS_ADDINZIP : APPEND_STATUS_CREATE);
 
 	if (m_uzFile)
 	{

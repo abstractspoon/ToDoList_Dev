@@ -101,21 +101,11 @@ BOOL CStickiesWnd::InitStickiesAPI(const CString& sStickiesPath)
 /////////////////////////////////////////////////////////////////////////////
 // CStickiesWnd message handlers
 
-BOOL CStickiesWnd::CreateSticky(const CString& sTitle, CString& sStickyID, const CString& sContent, BOOL bRTF, time_t tAlarm, COLORREF color)
+BOOL CStickiesWnd::CreateSticky(const CString& sTitle, CString& sStickyID, const CString& sContent, BOOL bRTF)
 {
-	CString sReply, sCommand, sExtra;
+	CString sReply;
 
-	if (tAlarm == 0)
-	{
-		sCommand = _T("do new sticky");
-	}
-	else
-	{
-		sCommand = _T("do new sleeping encoded");
-		sExtra = FormatStickyCreationString(sTitle, tAlarm, color);
-	}
-
-	if (SendMessage(sCommand, sReply, _T(""), sExtra))
+	if (SendMessage(_T("do new sticky"), sReply))
 	{
 		CStringArray aParts;
 		
@@ -127,11 +117,8 @@ BOOL CStickiesWnd::CreateSticky(const CString& sTitle, CString& sStickyID, const
 			// set other sticky attributes
 			if (!sStickyID.IsEmpty())
 			{
-				if (tAlarm == 0)
-				{
-					VERIFY(SetStickyAttribute(sStickyID, _T("ontop"), _T("1")));
-					VERIFY(SetStickyTitle(sStickyID, sTitle));
-				}
+				VERIFY(SetStickyAttribute(sStickyID, _T("ontop"), _T("1")));
+				VERIFY(SetStickyTitle(sStickyID, sTitle));
 
 				if (!sContent.IsEmpty())
 					VERIFY(SetStickyContent(sStickyID, sContent, bRTF));

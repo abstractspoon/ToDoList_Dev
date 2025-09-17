@@ -10,6 +10,7 @@
 #include "enimagelist.h"
 #include "dlgunits.h"
 #include "osversion.h"
+#include "MessageBox.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -26,11 +27,10 @@ IMPLEMENT_DYNAMIC(CInputListCtrl, CEnListCtrl)
 #define MAXCOLWIDTH 600
 #define MINCOLWIDTH 80
 #define IDC_EDITBOX 101
-#define WM_SHOWPOPUPMENU (WM_APP+1001)
 
 /////////////////////////////////////////////////////////////////////////////
 
-static DWORD PROMPT = 0xfefefefe;
+const DWORD PROMPT = 0xfefefefe;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ CInputListCtrl::CColumnData2::CColumnData2()
 	: 
 	CColumnData(), 
 	bEditEnabled(TRUE), 
-	nType(ILCT_TEXT) 
+	nType(ILCT_TEXT)
 {
 }
 
@@ -61,11 +61,11 @@ BEGIN_MESSAGE_MAP(CInputListCtrl, CEnListCtrl)
 	ON_WM_SETFOCUS()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
-	ON_WM_CREATE()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	//}}AFX_MSG_MAP
 	ON_WM_SIZE()
+	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEWHEEL()
@@ -83,8 +83,6 @@ END_MESSAGE_MAP()
 
 void CInputListCtrl::InitState()
 {
-	m_nItemLastSelected = -1;
-	m_nColLastSelected = -1;
 	m_nEditItem = -1;
 	m_nEditCol = -1;
 	m_bAutoAddRows = FALSE;
@@ -94,9 +92,9 @@ void CInputListCtrl::InitState()
 	m_sAutoColPrompt = "(new col)";
 	m_bAllowDuplication = TRUE;
 	m_bNotifyDuplicates = FALSE;
-	m_bBaseClassEdit = FALSE;
 	m_nCurCol = -1;
 	m_nLastEditCol = m_nLastEditRow = -1;
+	m_bSingleClickEditing = FALSE;
 
 	// Hot tracker might have been initialised in PreSubclassWindow
 	if (GetSafeHwnd() && CThemed::AreControlsThemed() && !m_hotTrack.IsInitialized())
@@ -117,6 +115,11 @@ void CInputListCtrl::AllowDuplicates(BOOL bAllow, BOOL bNotify)
 { 
 	m_bAllowDuplication = bAllow; 
 	m_bNotifyDuplicates = bNotify;
+}
+
+void CInputListCtrl::SetSingleClickEditing(BOOL bEnable)
+{
+	m_bSingleClickEditing = bEnable;
 }
 
 void CInputListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point) 
@@ -183,41 +186,53 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 	if (bWasEditing && IsCellSelected(nItem, nCol))
 		return;
 	
-	// if this is the second click or the user clicked on the column button
-	// then edit else update clicked pos unless we did not have the focus
 	if (nItem != -1)
 	{
+		// If we are single-click editing OR a button was clicked
+		// we can edit immediately regardless if the item was already selected
 		CRect rBtn;
+		BOOL bBtnClick = (GetButtonRect(nItem, nCol, rBtn) && rBtn.PtInRect(point));
 
-		if (CanEditCell(nItem, nCol) && GetButtonRect(nItem, nCol, rBtn) && rBtn.PtInRect(point))
+		if (CanEditCell(nItem, nCol) && (m_bSingleClickEditing || bBtnClick))
 		{
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
 
-			EditCell(nItem, nCol, TRUE);
+			if (bBtnClick)
+			{
+				// Draw button pressed (unpressing handled in OnLButtonUp)
+				InvalidateRect(rBtn);
+				UpdateWindow();
+			}
+
+			EditCell(nItem, nCol, bBtnClick);
 		}
-		else if (CanEditSelectedCell() && bHadFocus && nItem == nSelItem && nCol == nSelCol)
+		// else if we already had the focus and the user clicked 
+		// on the selected item then we can also edit
+		else if (CanEditSelectedCell() && bHadFocus && (nItem == nSelItem) && (nCol == nSelCol))
 		{
 			EditCell(nItem, nCol, FALSE);
 		}
-		else
+		else // we just scroll the clicked item into view
 		{
-			m_nItemLastSelected = nItem;
-			m_nColLastSelected = nCol;
-
 			SetCurSel(nItem, nCol, TRUE); // notifies parent
 			SetItemFocus(nItem, TRUE);
-
-			// scroll cell into view
-			ScrollCellIntoView(nItem, nCol);
 		}
 
 		m_nCurCol = nCol;
+		ScrollCellIntoView(nItem, nCol);
 	}
 	else
 	{
 		HideAllControls();
 	}
+}
+
+void CInputListCtrl::OnDestroy()
+{
+	OnCancelEdit();
+
+	CEnListCtrl::OnDestroy();
 }
 
 void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
@@ -281,10 +296,6 @@ void CInputListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 				ClientToScreen(rEdit);
 			
 			GetEditControl()->Show(rEdit, FALSE);
-
-			// this says that we are handling the edit
-			// not a derived class.
-			m_bBaseClassEdit = TRUE;
 		}
 	}
 }
@@ -453,38 +464,34 @@ void CInputListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CEnListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 	
 	nItem = GetFocusedItem();
-	m_nItemLastSelected = nItem;
 	
-	// if its the right or left cursor keys then update column position
-	if (nChar == VK_LEFT && nCol > 0)
+	switch (nChar)
 	{
-		nCol--;
-		
-		// scroll cell into view
-		ScrollCellIntoView(nItem, nCol);
-	}
-	else if (nChar == VK_RIGHT && nCol < GetColumnCount() - 1)
-	{
-		nCol++;
-		
-		// scroll cell into view
-		ScrollCellIntoView(nItem, nCol);
-	}
-	else if (nChar == VK_DELETE && CanDeleteSelectedCell())
-	{
-		// if the delete key is pressed and we're in col0 or row0 
-		// then delete corresponding row or column
-		// unless its the prompt row or column 
-		DeleteSelectedCell();
-	}
-	else if ((nChar == VK_F2 || nChar == VK_SPACE || nChar == VK_RETURN) && CanEditSelectedCell())
-	{
-		// if its the space bar then edit the current cell
-		EditCell(nItem, nCol, FALSE);
+	case VK_LEFT:
+		if (nCol > 0)
+			ScrollCellIntoView(nItem, --nCol);
+		break;
+
+	case VK_RIGHT:
+		if (nCol < GetColumnCount() - 1)
+			ScrollCellIntoView(nItem, ++nCol);
+		break;
+
+	case VK_DELETE:
+		if (CanDeleteSelectedCell())
+			DeleteSelectedCell();
+		break;
+
+	case VK_F2:
+	case VK_SPACE:
+	case VK_RETURN:
+		if (CanEditSelectedCell())
+			EditCell(nItem, nCol, FALSE);
+		break;
 	}
 
-	// update the list selection if its changed
-	SetCurSel(nItem, nCol, TRUE); // notifies parent
+	// update list selection notify parent
+	SetCurSel(nItem, nCol, TRUE);
 }
 
 void CInputListCtrl::DrawItemBackground(CDC* /*pDC*/, int /*nItem*/, const CRect& /*rItem*/, COLORREF /*crBack*/, 
@@ -558,6 +565,12 @@ void CInputListCtrl::DrawCell(CDC* pDC, int nItem, int nCol,
 void CInputListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, 
 								  const CString& sText, COLORREF crText, UINT nDrawTextFlags)
 {
+	if (sText.IsEmpty())
+		return;
+
+	if (!IsWindowEnabled() && IsPrompt(nRow))
+		return;
+
 	if (GetCellType(nRow, nCol) == ILCT_CHECK)
 		return;
 
@@ -577,6 +590,8 @@ IL_COLUMNTYPE CInputListCtrl::GetCellType(int /*nRow*/, int nCol) const
 
 DWORD CInputListCtrl::GetButtonState(int nRow, int nCol, BOOL bSelected) const
 {
+	ASSERT(CellHasButton(nRow, nCol));
+
 	if (!IsButtonEnabled(nRow, nCol))
 		return DFCS_INACTIVE;
 
@@ -616,8 +631,26 @@ BOOL CInputListCtrl::DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType
 	return FALSE;
 }
 
+void CInputListCtrl::CheckApplyPushedState(const CRect& rBtn, DWORD& dwState) const
+{
+	if (!Misc::HasFlag(dwState, DFCS_PUSHED) && Misc::IsKeyPressed(VK_LBUTTON))
+	{
+		CPoint pt(GetMessagePos());
+		ScreenToClient(&pt);
+
+		if (rBtn.PtInRect(pt))
+		{
+			// Replace 'hot' with 'pushed'
+			Misc::SetFlag(dwState, DFCS_PUSHED, TRUE);
+			Misc::SetFlag(dwState, DFCS_HOT, FALSE);
+		}
+	}
+}
+
 void CInputListCtrl::DrawBlankButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
+	CheckApplyPushedState(rBtn, dwState);
+
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBONOARROW, dwState);
 }
 
@@ -625,18 +658,11 @@ void CInputListCtrl::DrawIconButton(CDC* pDC, const CRect& rBtn, HICON hIcon, DW
 {
 	DrawBlankButton(pDC, rBtn, dwState);
 
-	const int ICON_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
-
-	CRect rIcon(0, 0, ICON_SIZE, ICON_SIZE);
-	GraphicsMisc::CentreRect(rIcon, rBtn);
-
-	::DrawIconEx(*pDC, rIcon.left, rIcon.top, hIcon, ICON_SIZE, ICON_SIZE, 0, NULL, DI_NORMAL);
+	GraphicsMisc::DrawCentred(pDC, hIcon, rBtn);
 }
 
 void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
-	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
-
 	if (CThemed::AreControlsThemed() && (COSVersion() >= OSV_WIN7))
 	{
 		// Draw underlying button
@@ -646,10 +672,13 @@ void CInputListCtrl::DrawDateButton(CDC* pDC, const CRect& rBtn, DWORD dwState) 
 		CThemed th;
 		th.Open(this, _T("DATEPICKER"));
 
+		BOOL bEnabled = !Misc::HasFlag(dwState, DFCS_INACTIVE);
 		th.DrawBackground(pDC, DP_SHOWCALENDARBUTTONRIGHT, (bEnabled ? DPSCBR_NORMAL : DPSCBR_DISABLED), rBtn);
 	}
 	else
 	{
+		CheckApplyPushedState(rBtn, dwState);
+
 		CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBO, dwState);
 	}
 }
@@ -659,8 +688,7 @@ void CInputListCtrl::DrawMenuButton(CDC* pDC, const CRect& rBtn, DWORD dwState) 
 	DrawBlankButton(pDC, rBtn, dwState);
 
 	// Draw arrow
-	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
-
+	BOOL bEnabled = !Misc::HasFlag(dwState, DFCS_INACTIVE);
 	pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 
 	UINT nFlags = DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_NOCLIP | DT_CENTER;
@@ -677,7 +705,7 @@ void CInputListCtrl::DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState
 	rText.left += (rText.Width() % 2);
 	rText.top += (rText.Height() % 2);
 
-	BOOL bEnabled = ((dwState & DFCS_INACTIVE) == 0);
+	BOOL bEnabled = !Misc::HasFlag(dwState, DFCS_INACTIVE);
 
 	pDC->SetTextColor(GetSysColor(bEnabled ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
 	pDC->DrawText(_T("..."), rText, DT_CENTER | DT_VCENTER);
@@ -685,25 +713,40 @@ void CInputListCtrl::DrawBrowseButton(CDC* pDC, const CRect& rBtn, DWORD dwState
 
 void CInputListCtrl::DrawComboButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
+	CheckApplyPushedState(rBtn, dwState);
+
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_COMBO, dwState);
 }
 
 void CInputListCtrl::DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const
 {
+	CheckApplyPushedState(rBtn, dwState);
+
 	CThemed::DrawFrameControl(this, pDC, rBtn, DFC_BUTTON, (DFCS_BUTTONCHECK | dwState));
 }
 
 BOOL CInputListCtrl::CellHasButton(int nRow, int nCol) const
 {
-	CRect rUnused;
-	return GetButtonRect(nRow, nCol, rUnused);
+	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
+	
+	switch (nType)
+	{
+	case ILCT_TEXT:
+		return FALSE;
+
+	case ILCT_CHECK:
+		return TRUE;
+	}
+
+	// All else
+	return CanEditCell(nRow, nCol);
 }
 
 BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) const
 {
 	rBtn.SetRectEmpty();
 
-	if (!CanEditCell(nRow, nCol))
+	if (!CellHasButton(nRow, nCol))
 		return FALSE;
 
 	IL_COLUMNTYPE nType = GetCellType(nRow, nCol);
@@ -734,9 +777,6 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) const
 		rBtn.right = (rBtn.left + EE_BTNWIDTH_DEFAULT);
 		break;
 
-	case ILCT_TEXT:
-		return FALSE;
-
 	default:
 		ASSERT(0);
 		return FALSE;
@@ -747,12 +787,12 @@ BOOL CInputListCtrl::GetButtonRect(int nRow, int nCol, CRect& rBtn) const
 
 BOOL CInputListCtrl::CanDeleteSelectedCell() const
 {
-	return CanEditSelectedCell();
+	return (CanEditSelectedCell() && !IsPrompt(GetCurSel(), m_nCurCol));
 }
 
 BOOL CInputListCtrl::CanDeleteCell(int nRow, int nCol) const
 {
-	return CanEditCell(nRow, nCol);
+	return (CanEditCell(nRow, nCol) && !IsPrompt(nRow, nCol));
 }
 
 BOOL CInputListCtrl::DeleteSelectedCell()
@@ -873,16 +913,8 @@ void CInputListCtrl::OnKillFocus(CWnd* pNewWnd)
 	if (pNewWnd == this)
 		return;
 
-	// if we're not editing then clear the current selection
-	if (!IsEditing())
-	{
-		m_nItemLastSelected = -1;
-		m_nColLastSelected = -1;
-	}
-	else
-	{
+	if (IsEditing())
 		HideAllControls(pNewWnd);
-	}
 
 	CRect rItem;
 	GetItemRect(GetCurSel(), rItem, LVIR_BOUNDS);
@@ -891,11 +923,10 @@ void CInputListCtrl::OnKillFocus(CWnd* pNewWnd)
 	CEnListCtrl::OnKillFocus(pNewWnd);
 }
 
-BOOL CInputListCtrl::OnSelItemChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+BOOL CInputListCtrl::OnSelItemChanged(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	HideAllControls();
-
-	*pResult = 0;
+	if (IsSelectionChange((NMLISTVIEW*)pNMHDR))
+		HideAllControls();
 
 	return FALSE; // continue routing
 }
@@ -914,10 +945,10 @@ BOOL CInputListCtrl::SetCellText(int nRow, int nCol, const CString& sText)
 
 	// only allow text setting if within valid range and if user is
 	// not trying to change prompt string if auto adding
-	if (((m_bAutoAddRows && (nRow >= 0) && (nRow < GetItemCount() - 1)) || 
-			(!m_bAutoAddRows && (nRow >= 0) && (nRow < GetItemCount()))) &&
-		 ((m_bAutoAddCols && (nCol >= 0) && (nCol < GetColumnCount() - 1)) ||
-			(!m_bAutoAddCols && nCol >= 0 && (nCol < GetColumnCount()))))
+	if (((m_bAutoAddRows && (nRow >= 0) && (nRow < GetItemCount() - 1)) ||
+		(!m_bAutoAddRows && (nRow >= 0) && (nRow < GetItemCount()))) &&
+		((m_bAutoAddCols && (nCol >= 0) && (nCol < GetColumnCount() - 1)) ||
+		(!m_bAutoAddCols && nCol >= 0 && (nCol < GetColumnCount()))))
 	{
 		SetItemText(nRow, nCol, sText);
 		return TRUE;
@@ -1003,20 +1034,18 @@ void CInputListCtrl::SetCurSel(int nRow, int nCol, BOOL bNotifyParent)
 	if (nRow < 0 || nRow >= GetItemCount() || nCol < 0 || nCol >= GetColumnCount())
 		return;
 
-	// don't update if nothing's changed
+	// don't update if nothing has changed
 	if (IsCellSelected(nRow, nCol))
 		return;
 
-	CRect rItem;
-	int nSel = GetCurSel();
-	RedrawItems(nSel, nSel);
+	// Redraw current selection
+	RedrawItems(GetCurSel(), m_nCurCol);
 
 	m_nCurCol = nCol;
 	CEnListCtrl::SetCurSel(nRow, bNotifyParent == TRUE);
 
-	m_nColLastSelected = nCol;
-	m_nItemLastSelected = nRow;
-	RedrawItems(nRow, nRow);
+	// Redraw new selection
+	RedrawItems(GetCurSel(), m_nCurCol);
 }
 
 int CInputListCtrl::GetLastEdit(int* pRow, int* pCol)
@@ -1038,7 +1067,7 @@ BOOL CInputListCtrl::GetCurSel(int& nRow, int& nCol) const
 	return ((nRow != -1) && (nCol != -1));
 }
 
-int CInputListCtrl::InsertRow(CString sRowText, int nRow, int nImage)
+int CInputListCtrl::InsertRow(const CString& sRowText, int nRow, int nImage)
 {
 	if (m_bAutoAddRows && nRow == GetItemCount())
 		nRow--; // add before prompt
@@ -1214,7 +1243,7 @@ CRect CInputListCtrl::ScrollCellIntoView(int nRow, int nCol)
 	return rCell;
 }
 
-void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell)
+void CInputListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
 {
 	CEnListCtrl::GetCellEditRect(nRow, nCol, rCell);
 }
@@ -1236,18 +1265,6 @@ void CInputListCtrl::PreSubclassWindow()
 	ModifyStyle(0, WS_CLIPCHILDREN);
 
 	InitState();
-	RefreshItemHeight();
-}
-
-int CInputListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CEnListCtrl::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	InitState();
-	RefreshItemHeight();
-	
-	return 0;
 }
 
 void CInputListCtrl::HideControl(CWnd& ctrl, const CWnd* pWndIgnore)
@@ -1302,7 +1319,7 @@ void CInputListCtrl::ShowControl(CWnd& ctrl, int nRow, int nCol, BOOL bBtnClick)
 			pEdit->SetSel(0, -1);
 		}
 
-		if (bBtnClick || pEdit)
+		if (bBtnClick || !pEdit)
 			ctrl.SendMessage(CB_SHOWDROPDOWN, TRUE);
 	}
 	else if (ctrl.IsKindOf(RUNTIME_CLASS(CEdit)))
@@ -1338,35 +1355,53 @@ void CInputListCtrl::EndEdit()
 		SetFocus();
 }
 
-void CInputListCtrl::CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles)
+BOOL CInputListCtrl::CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles)
 {
 	dwComboStyles |= (WS_CHILD | WS_VSCROLL);
 
 	if ((dwComboStyles & 0xf) == 0)
 		dwComboStyles |= CBS_DROPDOWNLIST;
 
-	if (ctrl.Create(dwComboStyles, CRect(0, 0, 0, 0), this, nID))
-		PostCreateControl(ctrl);
+	if (!ctrl.Create(dwComboStyles, CRect(0, 0, 0, 0), this, nID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// else
+	PostCreateControl(ctrl);
+	return TRUE;
 }
 
-void CInputListCtrl::CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles)
+BOOL CInputListCtrl::CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles)
 {
 	dwEditStyles |= WS_CHILD;
 
-	if (ctrl.Create(dwEditStyles, CRect(0, 0, 0, 0), this, nID))
+	if (!ctrl.Create(dwEditStyles, CRect(0, 0, 0, 0), this, nID))
 	{
-		ctrl.ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
-
-		PostCreateControl(ctrl);
+		ASSERT(0);
+		return FALSE;
 	}
+
+	ctrl.ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
+	PostCreateControl(ctrl);
+
+	return TRUE;
 }
 
-void CInputListCtrl::CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles)
+BOOL CInputListCtrl::CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles)
 {
 	dwDateTimeStyles |= WS_CHILD;
 
-	if (ctrl.Create(dwDateTimeStyles, CRect(0, 0, 0, 0), this, nID))
-		PostCreateControl(ctrl);
+	if (!ctrl.Create(dwDateTimeStyles, CRect(0, 0, 0, 0), this, nID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// else
+	PostCreateControl(ctrl);
+	return TRUE;
 }
 
 void CInputListCtrl::PostCreateControl(CWnd& ctrl)
@@ -1375,11 +1410,12 @@ void CInputListCtrl::PostCreateControl(CWnd& ctrl)
 	ctrl.ShowWindow(SW_HIDE);
 
 	CRect rWnd;
-	ctrl.GetClientRect(rWnd);
+	ctrl.GetWindowRect(rWnd);
 
 	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)) ||
 		ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
 	{
+		// Reduce a bit else the row height can seem excessive
  		rWnd.bottom -= 2;
 	}
 
@@ -1394,9 +1430,48 @@ CPopupEditCtrl* CInputListCtrl::GetEditControl()
 		return NULL;
 
 	if (!m_editBox.m_hWnd)
-		m_editBox.Create(this, IDC_EDITBOX, (WS_CHILD | WS_BORDER));
+		VERIFY(CheckRecreateEditControl(FALSE));
 
 	return &m_editBox;
+}
+
+BOOL CInputListCtrl::CheckRecreateEditControl(BOOL bMultiline)
+{
+	ASSERT (m_hWnd);
+
+	if (m_hWnd)
+	{
+		// Seems the only way to change the ES_MULTILINE style
+		// is to recreate the edit box
+		if (m_editBox.m_hWnd)
+		{
+			BOOL bIsMultiline = (m_editBox.GetStyle() & ES_MULTILINE);
+
+			if (Misc::StatesDiffer(bMultiline, bIsMultiline))
+				m_editBox.DestroyWindow();
+		}
+
+		if (!m_editBox.m_hWnd)
+		{
+			// Note: The default client border (WS_BORDER) is generally
+			// preferred because it is more distinctive but in the case
+			// of multiline we use a non-client border (WS_EX_CLIENTEDGE)
+			// because otherwise the vertical scrollbar appears detached
+			UINT dwStyle = (WS_CHILD | ES_LEFT);
+
+			if (bMultiline)
+			{
+				m_editBox.Create(this, IDC_EDITBOX, (dwStyle | ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL));
+				m_editBox.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
+			}
+			else
+			{
+				m_editBox.Create(this, IDC_EDITBOX, (dwStyle | WS_BORDER | ES_AUTOHSCROLL));
+			}
+		}
+	}
+
+	return (!m_editBox.GetSafeHwnd() == NULL);
 }
 
 void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
@@ -1426,7 +1501,7 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 				if (m_bNotifyDuplicates)
 				{
 					sMessage.Format(_T("The item '%s' already exists in the list"), sText);
-					AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+					CMessageBox::AfxShow(sMessage, MB_OK | MB_ICONEXCLAMATION);
 					SetFocus();
 				}
 
@@ -1464,7 +1539,7 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 				if (m_bNotifyDuplicates)
 				{
 					sMessage.Format(_T("The item '%s' already exists in the list"), sText);
-					AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+					CMessageBox::AfxShow(sMessage, MB_OK | MB_ICONEXCLAMATION);
 					SetFocus();
 				}
 
@@ -1500,7 +1575,7 @@ void CInputListCtrl::OnEndEdit(UINT /*uIDCtrl*/, int* pResult)
 				if (m_bNotifyDuplicates)
 				{
 					sMessage.Format(_T("The item '%s' already exists in the list"), sText);
-					AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+					CMessageBox::AfxShow(sMessage, MB_OK | MB_ICONEXCLAMATION);
 					SetFocus();
 				}
 				
@@ -1604,16 +1679,20 @@ void CInputListCtrl::OnCancelEdit()
 
 void CInputListCtrl::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-	CWnd* pFocus;
-
 	// note: if we are currently editing then don't pass on
 	// else the edit box loses the focus
-	pFocus = GetFocus();
+	CWnd* pFocus = GetFocus();
 
 	if (m_editBox.m_hWnd && (pFocus == &m_editBox || m_editBox.IsWindowVisible()))
 		return;
 
 	CEnListCtrl::OnLButtonUp(nFlags, point);
+
+	// Redraw previously pressed button
+	CRect rBtn;
+
+	if (GetButtonRect(GetCurSel(), m_nCurCol, rBtn))
+		InvalidateRect(rBtn);
 }
 
 BOOL CInputListCtrl::IsPrompt(int nItem, int nCol) const
@@ -1684,7 +1763,7 @@ void CInputListCtrl::SetColumnType(int nCol, IL_COLUMNTYPE nType)
 	
 		// Recalc the minimum height
 		int nCol = GetColumnCount();
-		int nNewMinHeight = 0;
+		int nNewMinHeight = GetMinItemHeight();
 
 		while (nCol--)
 		{
@@ -1775,7 +1854,10 @@ BOOL CInputListCtrl::PreTranslateMessage(MSG* pMsg)
 				CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
 
 				if ((pWnd != &m_editBox) && IsChild(pWnd))
+				{
 					HideControl(*pWnd);
+					return TRUE;
+				}
 			}
 			break;
 
@@ -1784,7 +1866,10 @@ BOOL CInputListCtrl::PreTranslateMessage(MSG* pMsg)
 				CWnd* pWnd = CWnd::FromHandle(pMsg->hwnd);
 
 				if ((pWnd != &m_editBox) && IsChild(pWnd))
+				{
 					OnEditCancel(0, TRUE);
+					return TRUE;
+				}
 			}
 			break;
 		}
@@ -1822,9 +1907,7 @@ void CInputListCtrl::RecalcHotButtonRects()
 
 BOOL CInputListCtrl::IsButtonHot(int nRow, int nCol) const
 {
-	CRect rBtn;
-
-	if (!GetButtonRect(nRow, nCol, rBtn))
+	if (!CellHasButton(nRow, nCol))
 		return FALSE;
 
 	int nButton = ((nRow * GetColumnCount()) + nCol);

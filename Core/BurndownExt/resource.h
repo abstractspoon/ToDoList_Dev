@@ -26,6 +26,7 @@
 #define IDC_PPHOST                      16019
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_ACTIVEDATERANGE_LABEL       16028
+#define IDC_ACTIVEDATERANGE_TEXT        16029
 #define IDC_ACTIVEDATERANGE             16034
 #define IDD_BURNDOWN_DLG                17000
 #define IDD_STATISTICS_DLG              17000
@@ -70,6 +71,7 @@
 #define IDS_MINMAX                      57712
 #define IDS_DISPLAY_DUEDONEDATES        57713
 #define IDS_TOOLTIP_DUEDONEDATES        57714
+#define IDS_CUSTOMATTRIB_GRAPH          57715
 
 // Next default values for new objects
 // 

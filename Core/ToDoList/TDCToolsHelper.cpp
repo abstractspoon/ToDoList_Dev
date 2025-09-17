@@ -43,11 +43,11 @@ const UINT LAST_TOOLID = (ID_TOOLS_USERTOOL1 + MAX_NUM_TOOLS - 1);
 
 //////////////////////////////////////////////////////////////////////
 
-USERTOOL::USERTOOL() : bRunMinimized(FALSE)
+TDCUSERTOOL::TDCUSERTOOL() : bRunMinimized(FALSE)
 {
 }
 
-BOOL USERTOOL::operator==(const USERTOOL& other) const
+BOOL TDCUSERTOOL::operator==(const TDCUSERTOOL& other) const
 {
 	return ((sToolName == other.sToolName) &&
 			(sToolPath == other.sToolPath) &&
@@ -77,17 +77,17 @@ BOOL CTDCToolsHelper::IsToolCmdID(UINT nCmdID)
 	return ((nCmdID >= FIRST_TOOLID) && (nCmdID <= LAST_TOOLID));
 }
 
-BOOL CTDCToolsHelper::RunTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+BOOL CTDCToolsHelper::RunTool(const TDCUSERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 {
 	return RunTestTool(tool, args, aCustAttribDefs, FALSE);
 }
 
-BOOL CTDCToolsHelper::TestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
+BOOL CTDCToolsHelper::TestTool(const TDCUSERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
 {
 	return RunTestTool(tool, args, aCustAttribDefs, TRUE);
 }
 
-BOOL CTDCToolsHelper::RunTestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bTest)
+BOOL CTDCToolsHelper::RunTestTool(const TDCUSERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs, BOOL bTest)
 {
 	CString sToolPath(GetToolPath(tool));
 
@@ -152,7 +152,7 @@ BOOL CTDCToolsHelper::CheckToDoListVersionCompatibility(const CString& sToolPath
 	return FALSE;
 }
 
-CString CTDCToolsHelper::GetToolPath(const USERTOOL& tool)
+CString CTDCToolsHelper::GetToolPath(const TDCUSERTOOL& tool)
 {
 	CString sToolPath = tool.sToolPath;
 	CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE);
@@ -160,7 +160,7 @@ CString CTDCToolsHelper::GetToolPath(const USERTOOL& tool)
 	return sToolPath;
 }
 
-BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
+BOOL CTDCToolsHelper::PrepareCmdline(const TDCUSERTOOL& tool, const USERTOOLARGS& args, 
 									 const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline)
 {
 	CString sToolPath(GetToolPath(tool));
@@ -344,11 +344,11 @@ BOOL CTDCToolsHelper::GetToolButtonRange(const CEnToolBar& toolbar, int& nFirstB
 	return ((nFirstBtn != -1) && (nLastBtn >= nFirstBtn));
 }
 
-void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped)
+void CTDCToolsHelper::AddToolsToToolbar(const CTDCUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped)
 {
 	ASSERT(toolbar.GetSafeHwnd());
 
-	CToolIndexArray aIndices;
+	CTDCToolIndexArray aIndices;
 	int nNumItems = BuildToolIndexArray(aTools, aIndices, bGrouped);
 
 	if (nNumItems == 0)
@@ -408,7 +408,7 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 	toolbar.DeleteDuplicateSeparators(nStartPos);
 }
 
-void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped)
+void CTDCToolsHelper::AddToolsToMenu(const CTDCUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped)
 {
 	// Before deleting, work out where we will re-insert
 	const int MENUSTARTPOS = CEnMenu::FindFirstMenuItem(menu, FIRST_TOOLID, LAST_TOOLID);
@@ -426,7 +426,7 @@ void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, 
 	CEnMenu::RemoveDuplicateSeparators(menu, MENUSTARTPOS);
 
 	// if we have any tools to add we do it here
-	CToolIndexArray aIndices;
+	CTDCToolIndexArray aIndices;
 	int nNumItems = CTDCToolsHelper::BuildToolIndexArray(aTools, aIndices, bGrouped);
 
 	if (nNumItems)
@@ -444,7 +444,7 @@ void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, 
 			}
 			else
 			{
-				const USERTOOL& tool = aTools[nTool];
+				const TDCUSERTOOL& tool = aTools[nTool];
 				CString sMenuItem(tool.sToolName);
 
 				if (nTool < 9)
@@ -482,7 +482,7 @@ LPCTSTR CTDCToolsHelper::GetDefaultFileExt()
 	return m_bTDLEnabled ? TDLEXT : XMLEXT;
 }
 
-int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped)
+int CTDCToolsHelper::BuildToolIndexArray(const CTDCUserToolArray& aTools, CTDCToolIndexArray& aIndices, BOOL bGrouped)
 {
 	aIndices.RemoveAll();
 
@@ -500,7 +500,7 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 	if (bGrouped && (nNumTools > 2))
 	{
 		// Separate tools by type
-		CMapStringToContainer<CToolIndexArray> mapTools;
+		CMapStringToContainer<CTDCToolIndexArray> mapTools;
 
 		for (int nTool = 0; nTool < nNumTools; nTool++)
 		{
@@ -522,7 +522,7 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 				sGroup = _T("_FOLDER_");
 			}
 				
-			CToolIndexArray* pIndices = mapTools.GetAddMapping(sGroup);
+			CTDCToolIndexArray* pIndices = mapTools.GetAddMapping(sGroup);
 			ASSERT(pIndices);
 
 			pIndices->Add(nTool);
@@ -533,11 +533,11 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 		if (nNumGroups > 1)
 		{
 			// Sort grouped arrays by their first index for overall ordering
-			CArray<CToolIndexArray*, CToolIndexArray*&> aIndexArrays;
+			CArray<CTDCToolIndexArray*, CTDCToolIndexArray*&> aIndexArrays;
 
 			POSITION pos = mapTools.GetStartPosition();
 			CString sUnused;
-			CToolIndexArray* pIndices;
+			CTDCToolIndexArray* pIndices;
 
 			while (pos)
 			{
@@ -545,7 +545,7 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 				aIndexArrays.Add(pIndices);
 			}
 						
-			Misc::SortArrayT<CToolIndexArray*>(aIndexArrays, IndexArraySortProc);
+			Misc::SortArrayT<CTDCToolIndexArray*>(aIndexArrays, IndexArraySortProc);
 
 			// Build final index array with separators between groups
 			aIndices.RemoveAll();
@@ -571,16 +571,16 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 
 int CTDCToolsHelper::IndexArraySortProc(const void* pV1, const void* pV2)
 {
-	typedef CToolIndexArray* PToolIndexArray;
+	typedef CTDCToolIndexArray* PToolIndexArray;
 
-	const CToolIndexArray* pIndices1 = *(static_cast<const PToolIndexArray*>(pV1));
-	const CToolIndexArray* pIndices2 = *(static_cast<const PToolIndexArray*>(pV2));
+	const CTDCToolIndexArray* pIndices1 = *(static_cast<const PToolIndexArray*>(pV1));
+	const CTDCToolIndexArray* pIndices2 = *(static_cast<const PToolIndexArray*>(pV2));
 
 	// Compare first index
 	return (pIndices1->GetAt(0) - pIndices2->GetAt(0));
 }
 
-int CTDCToolsHelper::AddToolToImageList(const USERTOOL& tool, CTDCImageList& ilTools)
+int CTDCToolsHelper::AddToolToImageList(const TDCUSERTOOL& tool, CTDCImageList& ilTools)
 {
 	CString sIconPath = tool.sIconPath;
 	HICON hIcon = NULL;

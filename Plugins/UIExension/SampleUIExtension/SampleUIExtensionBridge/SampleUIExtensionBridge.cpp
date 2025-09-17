@@ -178,6 +178,11 @@ bool CSampleUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->pt.y);
 }
 
+bool CSampleUIExtensionBridgeWindow::DoIdleProcessing()
+{
+	return m_wnd->DoIdleProcessing();
+}
+
 bool CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND /*nCmd*/, IUIAPPCOMMANDDATA* /*pData*/)
 {
 // 	switch (nCmd)

@@ -14,6 +14,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define WM_WCLB_INIT (WM_APP-1)
+
 /////////////////////////////////////////////////////////////////////////////
 // CWeekdayCheckListBox
 
@@ -25,11 +26,7 @@ CDayOfWeekCheckListBox::~CDayOfWeekCheckListBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CDayOfWeekCheckListBox, CCheckListBoxEx)
-	//{{AFX_MSG_MAP(CWeekdayCheckListBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 	ON_MESSAGE(WM_WCLB_INIT, OnInitListbox)
 END_MESSAGE_MAP()
@@ -68,7 +65,7 @@ LRESULT CDayOfWeekCheckListBox::OnInitListbox(WPARAM /*wp*/, LPARAM /*lp*/)
 	for (int nDay = 0; nDay < 7; nDay++)
 	{
 		OLE_DAYOFWEEK nDOW = OLE_DAYSOFWEEK[nDay];
-		CDialogHelper::AddString(*this, CDateHelper::GetDayOfWeekName(nDOW, FALSE), nDOW);
+		CDialogHelper::AddStringT(*this, CDateHelper::GetDayOfWeekName(nDOW, FALSE), nDOW);
 	}
 
 	CDialogHelper::RefreshMaxColumnWidth(*this);

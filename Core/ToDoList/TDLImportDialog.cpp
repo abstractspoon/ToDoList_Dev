@@ -109,10 +109,11 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_CBData(pDX, m_cbTasklistPos, m_nActiveTasklistPos, (int)(m_bTasklistHasSelection ? SELECTEDTASK : BOTTOMOFTASKLIST));
 
-	if (pDX->m_bSaveAndValidate)
-		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
-	else
-		m_cbFormat.SetSelectedTypeID(m_sFormatTypeID);
+	m_cbFormat.DDX(pDX, m_sFormatTypeID);
+// 	if (pDX->m_bSaveAndValidate)
+// 		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
+// 	else
+// 		m_cbFormat.SetSelectedTypeID(m_sFormatTypeID);
 }
 
 BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
@@ -240,18 +241,18 @@ BOOL CTDLImportDialog::OnInitDialog()
 	// Build active tasklist pos
 	if (m_bTasklistHasSelection)
 	{
-		AddString(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
-		AddString(m_cbTasklistPos, IDS_IMPORTTOSELTASK, SELECTEDTASK);
-		AddString(m_cbTasklistPos, IDS_IMPORTTOBELOWSELTASK, BELOWSELECTEDTASK);
-		AddString(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOSELTASK, SELECTEDTASK);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOBELOWSELTASK, BELOWSELECTEDTASK);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
 	}
 	else
 	{
-		AddString(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
-		AddString(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
+		AddStringT(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
 	}
 
-	SelectItemByData(m_cbTasklistPos, m_nActiveTasklistPos);
+	SelectItemByDataT(m_cbTasklistPos, m_nActiveTasklistPos);
 
 	m_eFilePath.SetFilter(GetCurrentImporterFilter());
 

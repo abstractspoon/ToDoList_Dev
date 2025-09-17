@@ -154,56 +154,41 @@ copy unicode_release\TDLTest.exe ..\todolist\unicode_release /y
       <Command>mkdir ..\ToDoList
 mkdir ..\ToDoList\unicode_debug
 copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
+
+unicode_debug\TDLTest.exe
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DateHelperTest.cpp" />
     <ClCompile Include="FileMiscTest.cpp" />
-    <ClCompile Include="ImportExportMgrTest.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="ImportExportMgrTest.cpp" />
     <ClCompile Include="MiscTest.cpp" />
     <ClCompile Include="PreferencesTest.cpp" />
     <ClCompile Include="RemapMenuIDsTest.cpp" />
     <ClCompile Include="StdAfx.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TaskFileTest.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="TaskFileTest.cpp" />
     <ClCompile Include="TDCCUSTOMATTRIBUTECALCULATIONTest.cpp" />
     <ClCompile Include="TDCDEPENDENCYTest.cpp" />
     <ClCompile Include="TDCRECURRENCETest.cpp" />
     <ClCompile Include="TDCTaskCalculatorTest.cpp" />
     <ClCompile Include="TDCTaskMatcherTest.cpp" />
+    <ClCompile Include="TDCTaskTimeLogTest.cpp" />
     <ClCompile Include="TDLTaskCtrlBaseTest.cpp" />
-    <ClCompile Include="TDLTest.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <ClCompile Include="TDLTestBase.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="TDLTest.cpp" />
+    <ClCompile Include="TDLTestBase.cpp" />
     <ClCompile Include="TimeHelperTest.cpp" />
-    <ClCompile Include="ToDoCtrlDataTest.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile Include="ToDoCtrlDataTest.cpp" />
+    <ClCompile Include="ToDoCtrlMgrTest.cpp" />
     <ClCompile Include="ToDoCtrlTaskLinkTest.cpp" />
     <ClCompile Include="WorkingWeekTest.cpp" />
     <ClCompile Include="XmlFileTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TDLTest.rc">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
@@ -222,11 +207,13 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClInclude Include="TDCRECURRENCETest.h" />
     <ClInclude Include="TDCTaskCalculatorTest.h" />
     <ClInclude Include="TDCTaskMatcherTest.h" />
+    <ClInclude Include="TDCTaskTimeLogTest.h" />
     <ClInclude Include="TDLTaskCtrlBaseTest.h" />
     <ClInclude Include="TDLTest.h" />
     <ClInclude Include="TDLTestBase.h" />
     <ClInclude Include="TimeHelperTest.h" />
     <ClInclude Include="ToDoCtrlDataTest.h" />
+    <ClInclude Include="ToDoCtrlMgrTest.h" />
     <ClInclude Include="ToDoCtrlTaskLinkTest.h" />
     <ClInclude Include="WorkingWeekTest.h" />
     <ClInclude Include="XmlFileTest.h" />
@@ -244,6 +231,9 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ProjectReference Include="..\ToDoListLib\ToDoListLib.vcxproj">
       <Project>{940be78e-1486-7f9b-02b3-6f0113741a6a}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\ToDoList\RES\app_std.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

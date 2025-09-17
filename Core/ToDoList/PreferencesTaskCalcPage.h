@@ -38,8 +38,6 @@ enum PTCP_CALCSTARTDATE
 
 class CPreferencesTaskCalcPage : public CPreferencesPageBase
 {
-	DECLARE_DYNCREATE(CPreferencesTaskCalcPage)
-
 // Construction
 public:
 	CPreferencesTaskCalcPage();

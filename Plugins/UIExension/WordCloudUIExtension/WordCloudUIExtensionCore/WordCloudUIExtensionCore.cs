@@ -97,9 +97,9 @@ namespace WordCloudUIExtension
 
 		// IUIExtension ------------------------------------------------------------------
 
-		public override Boolean Focused
+		public new Boolean Focused
         {
-            get { return (base.Focused || m_WordCloud.Focused || m_TaskMatchesList.Focused); }
+            get { return m_TaskMatchesList.Focused; }
         }
 
 		public bool SelectTask(UInt32 taskId)
@@ -408,7 +408,12 @@ namespace WordCloudUIExtension
 		{
 			return false;
 		}
-	   
+
+		public bool DoIdleProcessing()
+		{
+			return false;
+		}
+
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
 			Rectangle editRect = m_TaskMatchesList.GetSelectedMatchEditRect();
@@ -565,8 +570,9 @@ namespace WordCloudUIExtension
             m_TaskMatchesList.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
             m_TaskMatchesList.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
 			m_TaskMatchesList.ShowLabelTips = !prefs.GetProfileBool("Preferences", "ShowInfoTips", false);
+			m_TaskMatchesList.ShowMixedCompletionState = prefs.GetProfileBool("Preferences", "ShowMixedCompletionState", true);
 
-            UpdateBlacklist();
+			UpdateBlacklist();
         }
 
 		void ShowSplitterBar(bool show = true)
@@ -1010,7 +1016,7 @@ namespace WordCloudUIExtension
 
 		private void OnWordCloudEditIgnoreList(object sender, EventArgs e)
 		{
-			if (EditIgnoreListDlg.DoEdit(m_UserIgnoreFilePath))
+			if (EditIgnoreListDlg.DoEdit(m_Trans, m_UserIgnoreFilePath))
 			{
 				UpdateBlacklist();
 			}

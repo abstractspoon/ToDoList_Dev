@@ -153,11 +153,11 @@ BOOL CNcGutter::InsertColumn(int nPos, UINT nColID, LPCTSTR szTitle, UINT nWidth
 	if (szTitle)
 	{
 		CWindowDC dc(GetCWnd());
-		CFont* pOldFont = PrepareFont(&dc, TRUE);
+		HFONT hOldFont = PrepareFont(&dc, TRUE);
 		
 		pCD->nTextWidth = dc.GetTextExtent(szTitle).cx;
 		
-		dc.SelectObject(pOldFont);
+		dc.SelectObject(hOldFont);
 	}
 	else
 		pCD->nTextWidth = 0;
@@ -239,10 +239,10 @@ void CNcGutter::SetHeaderTitle(UINT nColID, LPCTSTR szTitle, LPCTSTR szFont, BOO
 			if (szTitle)
 			{
 				CWindowDC dc(GetCWnd());
-				CFont* pOldFont = PrepareFont(&dc, TRUE, pCD->hFont);
+				HFONT hOldFont = PrepareFont(&dc, TRUE, pCD->hFont);
 				
 				pCD->nTextWidth = dc.GetTextExtent(szTitle).cx;
-				dc.SelectObject(pOldFont);
+				dc.SelectObject(hOldFont);
 			}
 			else
 				pCD->nTextWidth = 0;
@@ -458,7 +458,7 @@ BOOL CNcGutter::RecalcColumn(UINT nColID)
 	int nCurWidth = GetGutterWidth(); // cache this
 
 	CWindowDC dc(GetCWnd());
-	CFont* pOldFont = PrepareFont(&dc, FALSE);
+	HFONT hOldFont = PrepareFont(&dc, FALSE);
 
 	NCGRECALCCOLUMN ncrc = { nColID, &dc, 0 };
 
@@ -478,8 +478,7 @@ BOOL CNcGutter::RecalcColumn(UINT nColID)
 	else
 		pCD->nWidth = 0;
 
-	if (pOldFont)
-		dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 
 	// check for a change
 	int nNewWidth = GetGutterWidth();
@@ -1133,7 +1132,7 @@ void CNcGutter::OnHotChange(int nPrevHot, int nHot)
 			bDrawNonClient = (pCD->bClickable);
 		}
 
-		CFont* pOldFont = PrepareFont(&dc, TRUE);
+		HFONT hOldFont = PrepareFont(&dc, TRUE);
 
 		if (bDrawNonClient)
 		{
@@ -1153,19 +1152,18 @@ void CNcGutter::OnHotChange(int nPrevHot, int nHot)
 			}
 		}
 
-		dc.SelectObject(pOldFont);
+		dc.SelectObject(hOldFont);
 	}
 }
 
-CFont* CNcGutter::PrepareFont(CDC* pDC, BOOL bHeader, HFONT hFont)
+HFONT CNcGutter::PrepareFont(CDC* pDC, BOOL bHeader, HFONT hFont)
 {
-	CFont* pFont = CFont::FromHandle(hFont);
 	HWND hWnd = NULL;
 	
 	if (IsHooked())
 		hWnd = (bHeader ? ::GetParent(GetHwnd()) : GetHwnd());
 
-	return GraphicsMisc::PrepareDCFont(pDC, hWnd, pFont);
+	return GraphicsMisc::PrepareDCFont(pDC, hWnd, hFont);
 }
 
 DWORD CNcGutter::ItemHitTest(const CPoint& ptClient) const
@@ -1477,7 +1475,7 @@ void CNcGutter::OnNcPaint()
 		m_dcMem.FillSolidRect(rGutter, ::GetSysColor(COLOR_WINDOW));
 		
 		// iterate the top level items
-		CFont* pOldFont = PrepareFont(&m_dcMem, FALSE);
+		HFONT hOldFont = PrepareFont(&m_dcMem, FALSE);
 		
 		int nItem = 1;
 		CRect rItem;
@@ -1503,7 +1501,7 @@ void CNcGutter::OnNcPaint()
 		PostNcDraw(&m_dcMem, rItems);
 		
 		// cleanup			
-		m_dcMem.SelectObject(pOldFont);
+		m_dcMem.SelectObject(hOldFont);
 		
 		// non-client header
 		if (HasStyle(NCGS_SHOWHEADER))
@@ -1531,13 +1529,13 @@ void CNcGutter::OnNcPaint()
 	// 1. the client header
 	if (HasStyle(NCGS_SHOWHEADER))
 	{
-		CFont* pOldFont = PrepareFont(&dc, FALSE);
+		HFONT hOldFont = PrepareFont(&dc, FALSE);
 
 		GetHeaderRect(rHeader, GHR_CLIENT, FALSE);
 		NcDrawHeader(&dc, rHeader, CLIENT, &ptCursor);
 
 		// cleanup			
-		dc.SelectObject(pOldFont);
+		dc.SelectObject(hOldFont);
 	}
 				
 	// 2. if the window base does not match the client bottom then 
@@ -1609,21 +1607,23 @@ void CNcGutter::NcDrawHeaderColumn(CDC* pDC, int nCol, CRect rColumn, CThemed* p
 		if (bSorted)
 			rText.right -= (SORTWIDTH + 2);
 
-		UINT nFlags = (DEFTEXTFLAGS | pCD->nTextAlign | GraphicsMisc::GetRTLDrawTextFlags(GetHwnd()));
+		UINT nFlags = (DEFTEXTFLAGS | pCD->nTextAlign);
 		
 		if (pCD->hFont)
 		{
-			CFont* pOldFont = PrepareFont(pDC, TRUE, pCD->hFont);
+			HFONT hOldFont = PrepareFont(pDC, TRUE, pCD->hFont);
 
 			if (pCD->bSymbolFont)
 				GraphicsMisc::DrawAnsiSymbol(pDC, (char)pCD->sTitle[0], rText, nFlags, CFont::FromHandle(pCD->hFont));
 			else
 				pDC->DrawText(pCD->sTitle, rText, nFlags);
 
-			pDC->SelectObject(pOldFont);
+			pDC->SelectObject(hOldFont);
 		}
 		else
+		{
 			pDC->DrawText(pCD->sTitle, rText, nFlags);
+		}
 
 		// adjust for sort arrow
 		if (bSorted)
@@ -1671,7 +1671,7 @@ void CNcGutter::NcDrawHeader(CDC* pDC, const CRect& rHeader, HCHDRPART nPart, co
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 
-	CFont* pOldFont = PrepareFont(pDC, TRUE); // default header font
+	HFONT hOldFont = PrepareFont(pDC, TRUE); // default header font
 	CRect rColumn(rHeader);
 
 	if (nPart == NONCLIENT)
@@ -1705,7 +1705,7 @@ void CNcGutter::NcDrawHeader(CDC* pDC, const CRect& rHeader, HCHDRPART nPart, co
 	}
 
 	// cleanup
-	pDC->SelectObject(pOldFont);
+	pDC->SelectObject(hOldFont);
 }
 
 void CNcGutter::OnPrint(HDC hdc, UINT& nFlags)
@@ -1899,13 +1899,12 @@ void CNcGutter::RedrawItem(DWORD dwItem)
 
 	// prepare the DC
 	CWindowDC dc(GetCWnd());
-	CFont* pOldFont = PrepareFont(&dc, FALSE);
+	HFONT hOldFont = PrepareFont(&dc, FALSE);
 
 	NcDrawItem(&dc, dwItem, GetParentItem(dwItem), -1, -1, rGutter, rItem, FALSE);
 
 	// cleanup
-	if (pOldFont)
-		dc.SelectObject(pOldFont);
+	dc.SelectObject(hOldFont);
 }
 
 void CNcGutter::PostNcDrawItem(CDC* pDC, DWORD dwItem, const CRect& rItem, int nLevel, BOOL bParent)
@@ -2027,7 +2026,7 @@ int CNcGutter::RecalcGutterWidth()
 
 		if (pCD->bCalcWidth)
 		{
-			CFont* pOldFont = PrepareFont(&dc, FALSE);
+			HFONT hOldFont = PrepareFont(&dc, FALSE);
 			
 			ncrc.nColID = pCD->nColID;
 			ncrc.nWidth = 0;
@@ -2044,10 +2043,11 @@ int CNcGutter::RecalcGutterWidth()
 					pCD->nWidth += SORTWIDTH;
 			}
 			else
+			{
 				pCD->nWidth = 0;
+			}
 			
-			if (pOldFont)
-				dc.SelectObject(pOldFont);
+			dc.SelectObject(hOldFont);
 
 		}
 		nGutter += pCD->nWidth;

@@ -14,48 +14,32 @@
 
 class CTDLPriorityComboBox : public CColorComboBox
 {
-// Construction
 public:
-	CTDLPriorityComboBox(BOOL bIncludeAny);
-	
-	BOOL SetColors(const CDWordArray& aColors); // must have 11 elements (0-10)
+	CTDLPriorityComboBox(BOOL bIncludeAny, BOOL bIncludeNone = TRUE);
+	virtual ~CTDLPriorityComboBox();
+
+	BOOL SetColors(const CDWordArray& aColors);
+	void SetNumLevels(int nLevels);
+	int GetNumLevels() const { return m_nNumLevels; }
 
 	int IncrementPriority(int nAmount);
-	int GetSelectedPriority() const; // -2 -> 10
-	void SetSelectedPriority(int nPriority); // -2 -> 10
+	int GetSelectedPriority() const;
+	void SetSelectedPriority(int nPriority);
 
 	void DDX(CDataExchange* pDX, int& nPriority);
 
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLPriorityComboBox)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-protected:
 	CDWordArray m_aColors;
-	BOOL m_bIncludeAny;
+	BOOL m_bIncludeAny, m_bIncludeNone;
+	int m_nNumLevels;
 
-// Implementation
-public:
-	virtual ~CTDLPriorityComboBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLPriorityComboBox)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 
 protected:
-   void BuildCombo();
-
-   virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
-	   DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
-
+	virtual void BuildCombo();
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState, 
+							 DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 };
 
 /////////////////////////////////////////////////////////////////////////////

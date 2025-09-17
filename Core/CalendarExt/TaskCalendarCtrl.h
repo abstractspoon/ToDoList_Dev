@@ -65,10 +65,9 @@ public:
 	TCC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
 	void SetDefaultSnapMode(TCC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
 
-	void SetOptions(DWORD dwOption);
+	void SetOptions(DWORD dwOption, LPCTSTR szHideParentTag = NULL);
 	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
-	void SetHideParentTasks(BOOL bHide, const CString& sTag);
 
 	void SetAlternateWeekColor(COLORREF crAltWeek);
 	void SetGridLineColor(COLORREF crGrid);
@@ -212,12 +211,15 @@ protected:
 	double CalcDateDragTolerance() const;
 	void GetAllowableDragLimits(CRect& rLimits) const;
 	double GetSnapIncrement() const;
-	void FixupSelection(BOOL bScrollToTask);
 	BOOL SelectGridCell(int nRow, int nCol);
 	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
-	BOOL ClearSelectedCustomDate();
+
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
+	void CacheSelection(DWORD& dwRealTaskID, CString& sCustDateAttribID) const;
+	void RestoreSelection(DWORD dwRealTaskID, const CString& sCustDateAttribID, BOOL bEnsureVisible);
+	BOOL ClearSelectedCustomDate();
+	void FixupSelection(BOOL bScrollToTask);
 
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL IsExtensionItem(DWORD dwTaskID) const;
@@ -246,11 +248,8 @@ protected:
 
 	// helpers
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
-	static BOOL HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew);
+	static BOOL HasOptionChanged(int nOption, DWORD dwOldOptions, DWORD dwNewOptions);
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
-	static BOOL IsExtensionItem(const TASKCALITEM* pTCI);
-	static BOOL IsFutureOccurrence(const TASKCALITEM* pTCI);
-	static BOOL IsCustomDate(const TASKCALITEM* pTCI);
 
 };
 

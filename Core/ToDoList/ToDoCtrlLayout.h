@@ -48,7 +48,7 @@ public:
 	BOOL HasMaximiseState(TDC_MAXSTATE nState) const { return (m_nMaxState == nState); }
 	BOOL HasSplitters() const { return (m_splitterHorz.GetPaneCount() || m_splitterVert.GetPaneCount()); }
 
-	BOOL IsCommentsVisible() const;
+	BOOL IsVisible(TDC_SETFOCUSTO nLocation) const;
 	BOOL IsRebuildingLayout() const { return m_bRebuildingLayout; }
 
 	void SaveState(CPreferences& prefs, LPCTSTR szKey) const;

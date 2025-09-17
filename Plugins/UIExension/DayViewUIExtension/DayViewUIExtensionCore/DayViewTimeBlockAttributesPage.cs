@@ -32,13 +32,22 @@ namespace DayViewUIExtension
 			InitializeComponent();
 		}
 
-		public void Initialise(WorkingWeek workWeek, TimeBlockSeriesAttributes attribs, bool editMode, 
+		public void Initialise(WorkingWeek workWeek,
+								bool isoDateTimes,
+								TimeBlockSeriesAttributes attribs, 
+								bool editMode, 
 								TimeBlockSeriesAttributes.EditMask mask = TimeBlockSeriesAttributes.EditMask.None)
 		{
 			TimeComboBox.SetWorkingWeek(workWeek);
 
 			m_DowListBox.SetSelectedDays(workWeek.WeekDays()); // default
 			m_EditMode = editMode;
+
+			m_FromTimeCombo.SetISOFormat(isoDateTimes);
+			m_ToTimeCombo.SetISOFormat(isoDateTimes);
+
+			DateUtil.SetShortDateFormat(m_FromDateCtrl, isoDateTimes);
+			DateUtil.SetShortDateFormat(m_ToDateCtrl, isoDateTimes);
 
 			if (attribs != null)
 			{

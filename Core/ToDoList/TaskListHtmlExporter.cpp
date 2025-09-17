@@ -36,6 +36,7 @@ static LPCTSTR COMMENTS_DONECOLOR = _T("#808080");
 static LPCTSTR DOCTYPE = _T("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n\n");
 static LPCTSTR TAB = _T("&nbsp;&nbsp;&nbsp;&nbsp;");
 static LPCTSTR SPACE = _T("&nbsp;");
+static LPCTSTR CHARSET = _T("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-16\">\n");
 
 CTaskListHtmlExporter::CTaskListHtmlExporter() 
 	: 
@@ -63,6 +64,7 @@ IIMPORTEXPORT_RESULT CTaskListHtmlExporter::ExportOutput(LPCTSTR szDestFilePath,
 	sHtmlOutput += _T("<style type=\"text/css\">\n");
 	sHtmlOutput += _T("@media print { thead {display: table-header-group;} }\n");
 	sHtmlOutput += _T("table { border-collapse: collapse; }\n");
+	sHtmlOutput += _T("body { color:Black;background-color:White; } \n");
 	sHtmlOutput += _T("</style>\n");
 	sHtmlOutput += _T("<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n");
 	sHtmlOutput += CHARSET;
@@ -127,16 +129,6 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 		INDENT = TAB;
 	}
 	
-	// charset
-#ifdef _UNICODE
-	CString sCS = "UTF-16"; 
-#else
-	CString sCS = pTasks->GetHtmlCharSet();
-#endif
-	
-	if (!sCS.IsEmpty())
-		CHARSET.Format(_T("<meta http-equiv=\"content-type\" content=\"text/html; charset=%s\">\n"), sCS);
-
 	if (WantAttribute(TDCA_COMMENTS))
 	{
 		COMMENTSPERCENTWIDTH = 30; // minimum
@@ -188,34 +180,31 @@ IIMPORTEXPORT_RESULT CTaskListHtmlExporter::Export(const IMultiTaskList* pSrcTas
 	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, dwFlags, pPrefs, szKey);
 }
 
-CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks) const
+CString CTaskListHtmlExporter::FormatTitle(const IMultiTaskList* pTasks) const
 {
-	CString sTitleBlock;
-			
-	// title and date
-	CString sTitle = pTasks->GetReportTitle();
-	CString sDate = pTasks->GetReportDate();
-			
-	if (!sTitle.IsEmpty())
-	{
-		CString sProjTitle;
-		sProjTitle.Format(_T("<h2>%s</h2>%s"), sTitle, sDate);
-		
-		sTitleBlock += DEFAULTFONT;
-		sTitleBlock += sProjTitle;
-	}
-	else if (!sDate.IsEmpty())
+	CString sTitleBlock, sTitleText = CTaskListExporterBase::FormatTitle(pTasks);
+
+	if (!sTitleText.IsEmpty())
 	{
 		sTitleBlock += DEFAULTFONT;
-		sTitleBlock += sDate;
+		sTitleBlock += Misc::Format(_T("<h1>%s</h1><p></p>"), sTitleText);
 	}
 
-	sTitleBlock += _T("<p/>");
-	
-	if (IsTableStyle())
+	return sTitleBlock;
+}
+
+CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const
+{
+	CString sTitleBlock, sTitleText = CTaskListExporterBase::FormatTitle(pTasks, bWantDate);
+
+	if (!sTitleText.IsEmpty())
 	{
-		sTitleBlock += _T("<table border=\"1\">\n");
+		sTitleBlock += DEFAULTFONT;
+		sTitleBlock += Misc::Format(_T("<h2>%s</h2><p></p>"), sTitleText);
 	}
+
+	if (IsTableStyle())
+		sTitleBlock += _T("<table border=\"1\">\n");
 
 	return sTitleBlock;
 }

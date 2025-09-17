@@ -55,6 +55,7 @@ public:
 
 	BOOL SetCurrentPeriod(const COleDateTimeRange& dtPeriod);
 	const COleDateTimeRange& GetDataDateRange() const { return m_dtDataRange; }
+	CString FormatCurrentPeriod() const;
 
 	BOOL CanMoveSelectedTask(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
@@ -67,7 +68,8 @@ public:
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }
 	CString GetSortByAllocTo() const { return m_sSortByAllocTo; }
 
-	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
+	void SetOptions(DWORD dwOptions);
+	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
 	BOOL SetBackgroundColors(COLORREF crBkgnd, COLORREF crText);
@@ -113,7 +115,7 @@ protected:
 	// virtual overrides
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
-	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths);
 	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
 
 	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
@@ -124,7 +126,7 @@ protected:
 	void DrawTreeItemIcon(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
 	void PostDrawTreeItem(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
 
-	LRESULT OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
+	LRESULT OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths);
 	LRESULT OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	LRESULT OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 			
@@ -146,7 +148,7 @@ protected:
 	BOOL DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider);
 	
 	// Non-virtual members
-	void DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADITEM& wi, BOOL bSelected);
+	void DrawAllocationListItem(CDC* pDC, int nItem, const CIntArray& aColOrder, const CIntArray& aColWidths, const WORKLOADITEM& wi, BOOL bSelected);
 	void DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocationTotals& mapAlloc, int nDecimals, BOOL bSelected);
 	void DrawTotalsHeader(CDC* pDC);
 

@@ -138,7 +138,7 @@ namespace Calendar
 			if (resized)
 			{
 				m_dayView.Invalidate();
-				m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, false));
+				m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, State.Moved));
 			}
 		}
 
@@ -446,7 +446,7 @@ namespace Calendar
 			if (m_mode != Mode.None)
 			{
 				if (m_mode != Mode.Move || (m_startDate != m_dayView.SelectedAppointment.StartDate))
-					m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
+					m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, State.Finished));
 
 				m_dayView.Invalidate();
 
@@ -484,6 +484,7 @@ namespace Calendar
 					DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
 					m_delta = (m_startDate - downPos);
 
+					m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, State.Started));
 				}
 			}
 		}
@@ -498,6 +499,13 @@ namespace Calendar
 			ResizeRight,
 			Move,
 			None
+		}
+
+		public enum State
+		{
+			Started,
+			Moved,
+			Finished
 		}
 	}
 }

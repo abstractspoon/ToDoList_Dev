@@ -104,7 +104,6 @@ protected:
 
 protected:
 	void PrepareTaskCombo(int nRow);
-	void PopulateTaskCombo(HTASKITEM hTask, int nLevel);
 };
 
 // ----------------------------------------------

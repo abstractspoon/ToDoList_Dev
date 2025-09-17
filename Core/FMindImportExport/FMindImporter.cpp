@@ -143,11 +143,17 @@ bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITASKLISTBASE* pDestTas
 		pDestTaskFile->SetTaskStartDate64(hTask, tDate);
 
 	// times
+	double dTime = GetAttribValueD(pFMTask, FM_CUSTOMTIMEEST);
 	TDC_UNITS cUnits = (TDC_UNITS)GetAttribValueI(pFMTask, FM_CUSTOMTIMEESTUNITS);
-	pDestTaskFile->SetTaskTimeEstimate(hTask, GetAttribValueD(pFMTask, FM_CUSTOMTIMEEST), cUnits);
 
+	if (dTime != 0.0)
+		pDestTaskFile->SetTaskTimeEstimate(hTask, dTime, cUnits);
+
+	dTime = GetAttribValueD(pFMTask, FM_CUSTOMTIMESPENT);
 	cUnits = (TDC_UNITS)GetAttribValueI(pFMTask, FM_CUSTOMTIMESPENTUNITS);
-	pDestTaskFile->SetTaskTimeSpent(hTask, GetAttribValueD(pFMTask, FM_CUSTOMTIMESPENT), cUnits);
+
+	if (dTime != 0.0)
+		pDestTaskFile->SetTaskTimeSpent(hTask, dTime, cUnits);
 
 	// recurrence
 	TDC_REGULARITY nRegularity = (TDC_REGULARITY)GetAttribValueI(pFMTask, FM_CUSTOMREGULARITY);

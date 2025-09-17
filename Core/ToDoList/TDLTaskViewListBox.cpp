@@ -172,7 +172,7 @@ void CTDLTaskViewListBox::SetHiddenViews(const CStringArray& aTypeIDs)
 
 			if (nFind != -1)
 			{
-				int nItem = CDialogHelper::FindItemByData(*this, nFind);
+				int nItem = CDialogHelper::FindItemByDataT(*this, nFind);
 				ASSERT(nItem != -1);
 				
 				SetCheck(nItem, FALSE);

@@ -11,6 +11,8 @@
 
 #include "..\Interfaces\Preferences.h"
 
+#include <afxpriv.h> // WM_KICKIDLE
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
@@ -56,7 +58,8 @@ BEGIN_MESSAGE_MAP(CTDLDialog, CDialog)
 	ON_WM_GETMINMAXINFO()
 	ON_WM_DESTROY()
 	ON_WM_SHOWWINDOW()
-	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetAppIcon)
+	ON_MESSAGE(WM_KICKIDLE, OnKickIdle)
+	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -178,7 +181,7 @@ void CTDLDialog::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 	}
 }
 
-LRESULT CTDLDialog::OnGetAppIcon(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CTDLDialog::OnGetFileIcon(WPARAM /*wParam*/, LPARAM lParam)
 {
 	if (FileMisc::HasExtension((LPCTSTR)lParam, _T("tdl")))
 	{
@@ -204,7 +207,14 @@ BOOL CTDLDialog::SetIcon(UINT nIconID)
 
 int CTDLDialog::DoModal(HICON hIcon)
 {
-	m_iconDlg.SetIcon(hIcon, FALSE); // Not owned
+	if (hIcon)
+		m_iconDlg.SetIcon(hIcon, FALSE); // Not owned
 
 	return CDialog::DoModal();
 }
+
+LRESULT CTDLDialog::OnKickIdle(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	return DoIdleProcessing();
+}
+

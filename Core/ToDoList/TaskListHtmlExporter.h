@@ -44,8 +44,7 @@ public:
 
 protected:
 	// Pseudo-const variables
-	CString CHARSET, INDENT;
-	CString DEFAULTFONT, HTMLNOTES, TASKLISTLINK;
+	CString INDENT, DEFAULTFONT, HTMLNOTES, TASKLISTLINK;
 	BOOL STRIKETHRUDONE;
 	int EXPORTSTYLE;
 	int COMMENTSPERCENTWIDTH;
@@ -63,7 +62,8 @@ protected:
 	virtual bool InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 	virtual CString GetSpaceForNotes() const { return HTMLNOTES; }
 
-	virtual CString FormatTitle(const ITASKLISTBASE* pTasks) const;
+	virtual CString FormatTitle(const IMultiTaskList* pTasks) const;
+	virtual CString FormatTitle(const ITASKLISTBASE* pTasks, BOOL bWantDate) const;
 	virtual CString FormatHeaderItem(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const;
 	virtual CString FormatHeader(const ITASKLISTBASE* pTasks) const;
 

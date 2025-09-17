@@ -93,11 +93,7 @@ SOURCE=.\AcceleratorString.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\autocombobox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\BaseTabCtrl.cpp
+SOURCE=.\AutoComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -105,7 +101,7 @@ SOURCE=.\BinaryData.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\browserdlg.cpp
+SOURCE=.\BrowserDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -113,11 +109,11 @@ SOURCE=.\CalendarCtrlEx.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\checkcombobox.cpp
+SOURCE=.\CheckComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\checklistboxex.cpp
+SOURCE=.\CheckListBoxEx.cpp
 # End Source File
 # Begin Source File
 
@@ -133,11 +129,11 @@ SOURCE=.\ColorBrewerCombobox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\colorbutton.cpp
+SOURCE=.\ColorButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\colorcombobox.cpp
+SOURCE=.\ColorComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -161,15 +157,11 @@ SOURCE=.\CtrlTextHighlighter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\custombutton.cpp
+SOURCE=.\CustomButton.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\DarkMode.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\DatabaseEx.cpp
 # End Source File
 # Begin Source File
 
@@ -189,11 +181,11 @@ SOURCE=.\DayOfWeekcombobox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\deferWndMove.cpp
+SOURCE=.\DeferWndMove.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\delayredraw.cpp
+SOURCE=.\DelayRedraw.cpp
 # End Source File
 # Begin Source File
 
@@ -205,7 +197,7 @@ SOURCE=.\DlgUnits.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\driveinfo.cpp
+SOURCE=.\DriveInfo.cpp
 # End Source File
 # Begin Source File
 
@@ -221,7 +213,7 @@ SOURCE=.\EnBitmapEx.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\enbrowserctrl.cpp
+SOURCE=.\EnBrowserCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -229,7 +221,7 @@ SOURCE=.\EnCheckComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\encolordialog.cpp
+SOURCE=.\EnColorDialog.cpp
 # End Source File
 # Begin Source File
 
@@ -237,11 +229,11 @@ SOURCE=.\EnCommandLineInfo.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\enedit.cpp
+SOURCE=.\EnEdit.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\enfiledialog.cpp
+SOURCE=.\EnFileDialog.cpp
 # End Source File
 # Begin Source File
 
@@ -253,7 +245,7 @@ SOURCE=.\EnImageList.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\enlistctrl.cpp
+SOURCE=.\EnListCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -265,7 +257,7 @@ SOURCE=.\EnRecentFileList.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\enstatic.cpp
+SOURCE=.\EnStatic.cpp
 # End Source File
 # Begin Source File
 
@@ -273,11 +265,7 @@ SOURCE=.\EnString.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\EnTabCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\entoolbar.cpp
+SOURCE=.\EnToolBar.cpp
 # End Source File
 # Begin Source File
 
@@ -285,7 +273,7 @@ SOURCE=.\FileComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\fileedit.cpp
+SOURCE=.\FileEdit.cpp
 # End Source File
 # Begin Source File
 
@@ -317,10 +305,6 @@ SOURCE=.\FontCache.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\framewndcontainer.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\GraphicsMisc.cpp
 # End Source File
 # Begin Source File
@@ -329,7 +313,7 @@ SOURCE=.\GroupLine.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\historycombobox.cpp
+SOURCE=.\HistoryComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -353,7 +337,7 @@ SOURCE=.\Icon.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\iconbutton.cpp
+SOURCE=.\IconButton.cpp
 # End Source File
 # Begin Source File
 
@@ -369,19 +353,15 @@ SOURCE=.\InputListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\LightBox.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Localizer.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\MASKEDIT.CPP
+SOURCE=.\MaskEdit.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\menubutton.cpp
+SOURCE=.\MenuButton.cpp
 # End Source File
 # Begin Source File
 
@@ -417,11 +397,11 @@ SOURCE=.\MonthCalCtrlEx.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\monthcheckcombobox.cpp
+SOURCE=.\MonthCheckComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\monthcombobox.cpp
+SOURCE=.\MonthComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -441,31 +421,7 @@ SOURCE=.\MSWordHelper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\MultiSelTreeCtrl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\NcGutter.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\odbcfieldcombobox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\OdbcFields.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\odbctablecombobox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\OdbcTables.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\odbcvaluecombobox.cpp
 # End Source File
 # Begin Source File
 
@@ -481,19 +437,19 @@ SOURCE=.\OSVersion.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ownerdrawcomboboxbase.cpp
+SOURCE=.\OwnerdrawComboBoxBase.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\passworddialog.cpp
+SOURCE=.\PasswordDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\popupEditctrl.cpp
+SOURCE=.\PopupEditCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\popupListboxctrl.cpp
+SOURCE=.\PopupListBoxCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -517,10 +473,6 @@ SOURCE=.\RCCtrlParser.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\RecordsetEx.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Recurrence.cpp
 # End Source File
 # Begin Source File
@@ -537,7 +489,7 @@ SOURCE=.\RemoteFileDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\richeditbasectrl.cpp
+SOURCE=.\RichEditBaseCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -549,15 +501,11 @@ SOURCE=.\RichEditNcBorder.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\RoundCorner.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\Rtf2HtmlConverter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\RTLStyleMgr.cpp
+SOURCE=.\RTLInputMgr.cpp
 # End Source File
 # Begin Source File
 
@@ -593,7 +541,7 @@ SOURCE=.\SizeGrip.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\soundedit.cpp
+SOURCE=.\SoundEdit.cpp
 # End Source File
 # Begin Source File
 
@@ -602,10 +550,6 @@ SOURCE=.\StatusBarACTEx.cpp
 # Begin Source File
 
 SOURCE=.\StatusBarProgress.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\StdAfx.cpp
 # End Source File
 # Begin Source File
 
@@ -625,11 +569,11 @@ SOURCE=.\Subclass.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\symbolbutton.cpp
+SOURCE=.\SymbolButton.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\tabbedcombobox.cpp
+SOURCE=.\TabbedComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -637,7 +581,7 @@ SOURCE=.\TabbedPropertyPageHost.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\tabctrlex.cpp
+SOURCE=.\TabCtrlEx.cpp
 # End Source File
 # Begin Source File
 
@@ -645,7 +589,7 @@ SOURCE=.\Themed.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\timecombobox.cpp
+SOURCE=.\TimeComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -665,7 +609,7 @@ SOURCE=.\ToolTipCtrlEx.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TRAYICON.CPP
+SOURCE=.\TrayIcon.cpp
 # End Source File
 # Begin Source File
 
@@ -697,7 +641,7 @@ SOURCE=.\UrlParser.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\urlricheditctrl.cpp
+SOURCE=.\UrlRichEditCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -705,7 +649,7 @@ SOURCE=.\VersionInfo.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\webbrowserctrl.cpp
+SOURCE=.\WebBrowserCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -721,11 +665,7 @@ SOURCE=.\WindowIcons.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\winhelpbutton.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\WndMisc.cpp
+SOURCE=.\WinHelpButton.cpp
 # End Source File
 # Begin Source File
 
@@ -741,7 +681,7 @@ SOURCE=.\XmlFile.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\xmlfileex.cpp
+SOURCE=.\XmlFileEx.cpp
 # End Source File
 # Begin Source File
 
@@ -765,7 +705,7 @@ SOURCE=.\AcceleratorString.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\autocombobox.h
+SOURCE=.\AutoComboBox.h
 # End Source File
 # Begin Source File
 
@@ -773,15 +713,11 @@ SOURCE=.\AutoFlag.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\BaseTabCtrl.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\BinaryData.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\browserdlg.h
+SOURCE=.\BrowserDlg.h
 # End Source File
 # Begin Source File
 
@@ -789,11 +725,11 @@ SOURCE=.\CalendarCtrlEx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\checkcombobox.h
+SOURCE=.\CheckComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\checklistboxex.h
+SOURCE=.\CheckListBoxEx.h
 # End Source File
 # Begin Source File
 
@@ -809,11 +745,11 @@ SOURCE=.\ColorBrewerCombobox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\colorbutton.h
+SOURCE=.\ColorButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\colorcombobox.h
+SOURCE=.\ColorComboBox.h
 # End Source File
 # Begin Source File
 
@@ -837,15 +773,11 @@ SOURCE=.\CtrlTextHighlighter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\custombutton.h
+SOURCE=.\CustomButton.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\DarkMode.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DatabaseEx.h
 # End Source File
 # Begin Source File
 
@@ -869,11 +801,11 @@ SOURCE=.\DayOfWeekcombobox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\deferWndMove.h
+SOURCE=.\DeferWndMove.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\delayredraw.h
+SOURCE=.\DelayRedraw.h
 # End Source File
 # Begin Source File
 
@@ -885,7 +817,7 @@ SOURCE=.\DlgUnits.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\driveinfo.h
+SOURCE=.\DriveInfo.h
 # End Source File
 # Begin Source File
 
@@ -901,7 +833,7 @@ SOURCE=.\EnBitmapEx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\enbrowserctrl.h
+SOURCE=.\EnBrowserCtrl.h
 # End Source File
 # Begin Source File
 
@@ -909,7 +841,7 @@ SOURCE=.\EnCheckComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\encolordialog.h
+SOURCE=.\EnColorDialog.h
 # End Source File
 # Begin Source File
 
@@ -917,11 +849,11 @@ SOURCE=.\EnCommandLineInfo.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\enedit.h
+SOURCE=.\EnEdit.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\enfiledialog.h
+SOURCE=.\EnFileDialog.h
 # End Source File
 # Begin Source File
 
@@ -933,7 +865,7 @@ SOURCE=.\EnImageList.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\enlistctrl.h
+SOURCE=.\EnListCtrl.h
 # End Source File
 # Begin Source File
 
@@ -945,7 +877,7 @@ SOURCE=.\EnRecentFileList.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\enstatic.h
+SOURCE=.\EnStatic.h
 # End Source File
 # Begin Source File
 
@@ -953,11 +885,7 @@ SOURCE=.\EnString.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\EnTabCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\entoolbar.h
+SOURCE=.\EnToolBar.h
 # End Source File
 # Begin Source File
 
@@ -965,7 +893,7 @@ SOURCE=.\FileComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\fileedit.h
+SOURCE=.\FileEdit.h
 # End Source File
 # Begin Source File
 
@@ -973,7 +901,7 @@ SOURCE=.\FileIcons.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\FILEMISC.H
+SOURCE=.\FileMisc.h
 # End Source File
 # Begin Source File
 
@@ -997,10 +925,6 @@ SOURCE=.\FontCache.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\framewndcontainer.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\GraphicsMisc.h
 # End Source File
 # Begin Source File
@@ -1009,7 +933,7 @@ SOURCE=.\GroupLine.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\historycombobox.h
+SOURCE=.\HistoryComboBox.h
 # End Source File
 # Begin Source File
 
@@ -1029,7 +953,7 @@ SOURCE=.\HookWndMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\hotkeyctrlex.h
+SOURCE=.\HotKeyCtrlEx.h
 # End Source File
 # Begin Source File
 
@@ -1045,7 +969,7 @@ SOURCE=.\Icon.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\iconbutton.h
+SOURCE=.\IconButton.h
 # End Source File
 # Begin Source File
 
@@ -1069,15 +993,15 @@ SOURCE=.\Localizer.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mapex.h
+SOURCE=.\MapEx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\MASKEDIT.H
+SOURCE=.\MaskEdit.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\menubutton.h
+SOURCE=.\MenuButton.h
 # End Source File
 # Begin Source File
 
@@ -1113,11 +1037,11 @@ SOURCE=.\MonthCalCtrlEx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\monthcheckcombobox.h
+SOURCE=.\MonthCheckComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\monthcombobox.h
+SOURCE=.\MonthComboBox.h
 # End Source File
 # Begin Source File
 
@@ -1141,31 +1065,7 @@ SOURCE=.\MSWordHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\MultiSelTreeCtrl.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\NcGutter.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\odbcfieldcombobox.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\OdbcFields.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\odbctablecombobox.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\OdbcTables.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\odbcvaluecombobox.h
 # End Source File
 # Begin Source File
 
@@ -1181,19 +1081,19 @@ SOURCE=.\OSVersion.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ownerdrawcomboboxbase.h
+SOURCE=.\OwnerdrawComboBoxBase.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\passworddialog.h
+SOURCE=.\PasswordDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\popupEditCtrl.h
+SOURCE=.\PopupEditCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\popupListboxctrl.h
+SOURCE=.\PopupListBoxCtrl.h
 # End Source File
 # Begin Source File
 
@@ -1217,10 +1117,6 @@ SOURCE=.\RCCtrlParser.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\RecordsetEx.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Recurrence.h
 # End Source File
 # Begin Source File
@@ -1237,7 +1133,7 @@ SOURCE=.\RemoteFileDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\richeditbasectrl.h
+SOURCE=.\RichEditBaseCtrl.h
 # End Source File
 # Begin Source File
 
@@ -1249,15 +1145,11 @@ SOURCE=.\RichEditNcBorder.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\RoundCorner.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Rtf2HtmlConverter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\RTLStyleMgr.h
+SOURCE=.\RTLInputMgr.h
 # End Source File
 # Begin Source File
 
@@ -1297,7 +1189,7 @@ SOURCE=.\SizeGrip.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\soundedit.h
+SOURCE=.\SoundEdit.h
 # End Source File
 # Begin Source File
 
@@ -1321,7 +1213,7 @@ SOURCE=.\StickiesWnd.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\stringres.h
+SOURCE=.\StringRes.h
 # End Source File
 # Begin Source File
 
@@ -1333,15 +1225,11 @@ SOURCE=.\Subclass.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\symbolbutton.h
+SOURCE=.\SymbolButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\SysColors.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\tabbedcombobox.h
+SOURCE=.\TabbedComboBox.h
 # End Source File
 # Begin Source File
 
@@ -1349,7 +1237,7 @@ SOURCE=.\TabbedPropertyPageHost.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tabctrlex.h
+SOURCE=.\TabCtrlEx.h
 # End Source File
 # Begin Source File
 
@@ -1357,7 +1245,7 @@ SOURCE=.\Themed.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\timecombobox.h
+SOURCE=.\TimeComboBox.h
 # End Source File
 # Begin Source File
 
@@ -1377,7 +1265,7 @@ SOURCE=.\ToolTipCtrlEx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TRAYICON.H
+SOURCE=.\TrayIcon.h
 # End Source File
 # Begin Source File
 
@@ -1409,7 +1297,7 @@ SOURCE=.\UrlParser.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\urlricheditctrl.h
+SOURCE=.\UrlRichEditCtrl.h
 # End Source File
 # Begin Source File
 
@@ -1417,11 +1305,11 @@ SOURCE=.\VersionInfo.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\wclassdefines.h
+SOURCE=.\WClassDefines.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\webbrowserctrl.h
+SOURCE=.\WebBrowserCtrl.h
 # End Source File
 # Begin Source File
 
@@ -1441,11 +1329,7 @@ SOURCE=.\WinHelpButton.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\winstyles.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\WndMisc.h
+SOURCE=.\WinStyles.h
 # End Source File
 # Begin Source File
 
@@ -1465,7 +1349,7 @@ SOURCE=.\XmlFile.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\xmlfileex.h
+SOURCE=.\XmlFileEx.h
 # End Source File
 # Begin Source File
 

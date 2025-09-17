@@ -61,7 +61,7 @@ namespace MySqlStorage
 			};
 
 			Win32.EnableExplorerTheming(m_Tasklists.Handle);
-			Win32.SetEditCue(m_Filter.Handle, "<optional>");
+			Win32.SetEditCue(m_Filter.Handle, m_Trans.Translate("<optional>", Translator.Type.Text));
 		}
 
 		public TasklistInfo TasklistInfo
@@ -108,6 +108,8 @@ namespace MySqlStorage
 					m_HandlingSelectionChange = false;
 				}
 			}
+
+			EnableDisableOK();
 		}
 
 		private void OnDoubleClickTaskLists(object sender, EventArgs e)
@@ -137,17 +139,27 @@ namespace MySqlStorage
 
 		private void UpdateControlData()
 		{
-			m_Database.Text = string.Format("{0}/{1}", 
-											m_TasklistInfo.Connection.Server, 
+			m_Database.Text = string.Format("{0}:{1}/{2}", 
+											m_TasklistInfo.Connection.Server,
+											m_TasklistInfo.Connection.Port,
 											m_TasklistInfo.Connection.DatabaseName);
 
 			m_Tasklist.Text = m_TasklistInfo.Tasklist.Name;
 			m_Tasklists.Initialise(m_Connection, m_TasklistInfo.Connection, m_OpenTasklist);
+
+			EnableDisableOK();
 		}
 
 		private void OnFilterTextChanged(object sender, EventArgs e)
 		{
 			m_Tasklists.Filter = m_Filter.Text;
+
+			EnableDisableOK();
+		}
+
+		private void EnableDisableOK()
+		{
+			OK.Enabled = (m_Tasklists.SelectedTasklist != null);
 		}
 
 	}

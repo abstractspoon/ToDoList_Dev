@@ -27,8 +27,6 @@ const LPCTSTR ENDL = _T("\r\n");
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesTaskDef2Page property page
 
-IMPLEMENT_DYNCREATE(CPreferencesTaskDef2Page, CPreferencesPageBase)
-
 CPreferencesTaskDef2Page::CPreferencesTaskDef2Page() 
 	: 
 	CPreferencesPageBase(IDD_PREFTASKDEF2_PAGE)
@@ -205,7 +203,10 @@ int CPreferencesTaskDef2Page::GetListItems(TDC_ATTRIBUTE nList, CStringArray& aI
 
 	CStringArray aDef;
 	Misc::Split(sDef, aDef, ENDL);
-	Misc::AddUniqueItems(aDef, aItems);
+	Misc::AppendItems(aDef, aItems, TRUE);
+
+	if (!GetListIsReadonly(nList))
+		Misc::SortArray(aItems);
 
 	return aItems.GetSize();
 }
@@ -246,62 +247,6 @@ CString* CPreferencesTaskDef2Page::GetListText(TDC_ATTRIBUTE nList)
 	return pList;
 }
 
-BOOL CPreferencesTaskDef2Page::AddListItem(TDC_ATTRIBUTE nList, LPCTSTR szItem)
-{
-	UpdateData();
-
-	CString* pList = GetListText(nList);
-
-	if (pList)
-	{
-		// parse string into array
-		CStringArray aItems;
-
-		if (Misc::Split(*pList, aItems, ENDL))
-		{
-			// add to array
-			if (Misc::AddUniqueItem(szItem, aItems))
-			{
-				// update edit control
-				*pList = Misc::FormatArray(aItems, ENDL);
-				UpdateData(FALSE);
-
-				return TRUE;
-			}
-		}
-	}
-
-	return FALSE; // not unique
-}
-
-BOOL CPreferencesTaskDef2Page::DeleteListItem(TDC_ATTRIBUTE nList, LPCTSTR szItem)
-{
-	UpdateData();
-
-	CString* pList = GetListText(nList);
-
-	if (pList)
-	{
-		// parse string into array
-		CStringArray aItems;
-
-		if (Misc::Split(*pList, aItems, ENDL))
-		{
-			// delete from array
-			if (Misc::RemoveItem(szItem, aItems))
-			{
-				// update edit control
-				*pList = Misc::FormatArray(aItems, ENDL);
-				UpdateData(FALSE);
-
-				return TRUE;
-			}
-		}
-	}
-
-	return FALSE; // not found
-}
-
 void CPreferencesTaskDef2Page::OnAttribUseChange()
 {
 	UpdateData();
@@ -335,7 +280,7 @@ void CPreferencesTaskDef2Page::UpdateCustomAttributeInfoVisibility()
 
 	if (bShowInfo)
 	{
-		int nCustAttrib = FindItemByData(m_lbInheritAttrib, TDCA_CUSTOMATTRIB);
+		int nCustAttrib = FindItemByDataT(m_lbInheritAttrib, TDCA_CUSTOMATTRIB);
 		bShowInfo = ((nCustAttrib != -1) && m_lbInheritAttrib.GetCheck(nCustAttrib));
 	}
 
@@ -380,7 +325,6 @@ int CPreferencesTaskDef2Page::GetInheritParentAttributes(CTDCAttributeMap& mapAt
 
 void CPreferencesTaskDef2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
-	// load settings
 	m_bInheritParentAttributes = pPrefs->GetProfileInt(szKey, _T("InheritParentAttributes"), pPrefs->GetProfileInt(szKey, _T("UseParentAttributes")));
 	m_bUpdateInheritAttributes = pPrefs->GetProfileInt(szKey, _T("UpdateInheritAttributes"), FALSE);
 	m_bCatListReadonly = pPrefs->GetProfileInt(szKey, _T("CatListReadonly"), FALSE);
@@ -411,9 +355,7 @@ void CPreferencesTaskDef2Page::LoadPreferences(const IPreferences* pPrefs, LPCTS
 CString CPreferencesTaskDef2Page::LoadDefaultListItems(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	CStringArray aItems;
-
 	CPreferences::GetProfileArray(pPrefs, szKey, aItems);
-	Misc::SortArray(aItems);
 
 	return Misc::FormatArray(aItems, ENDL);
 }
@@ -428,7 +370,6 @@ void CPreferencesTaskDef2Page::SaveDefaultListItems(LPCTSTR szValueList, IPrefer
 
 void CPreferencesTaskDef2Page::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// save settings
 	pPrefs->WriteProfileInt(szKey, _T("InheritParentAttributes"), m_bInheritParentAttributes);
 	pPrefs->WriteProfileInt(szKey, _T("UpdateInheritAttributes"), m_bUpdateInheritAttributes);
 	pPrefs->WriteProfileInt(szKey, _T("CatListReadonly"), m_bCatListReadonly);

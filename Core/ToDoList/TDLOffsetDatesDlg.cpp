@@ -77,6 +77,9 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_PRESERVEENDOFMONTH, m_bPreserveEndOfMonth);
 	DDX_Control(pDX, IDC_WHATLIST, m_lbOffsetWhat);
+
+	if (pDX->m_bSaveAndValidate)
+		m_dwOffsetWhat = m_lbOffsetWhat.GetCheckedItemData();
 }
 
 
@@ -85,6 +88,7 @@ BEGIN_MESSAGE_MAP(CTDLOffsetDatesDlg, CTDLDialog)
 	ON_CBN_SELCHANGE(IDC_BYUNITS, OnSelchangeUnits)
 	ON_BN_CLICKED(IDC_OFFSETSUBTASKS, OnClickOffsetSubtasks)
 	//}}AFX_MSG_MAP
+	ON_CONTROL(CLBN_CHKCHANGE, IDC_WHATLIST, OnClickWhatList)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -95,15 +99,16 @@ BOOL CTDLOffsetDatesDlg::OnInitDialog()
 	CTDLDialog::OnInitDialog();
 
 	// Same order as previous checkboxes
-	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_STARTDATE, ODD_STARTDATE);
-	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_DUEDATE,   ODD_DUEDATE);
-	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_DONEDATE,  ODD_DONEDATE);
-	CDialogHelper::AddString(m_lbOffsetWhat, IDS_TDLBC_REMINDER,  ODD_REMINDER);
+	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_STARTDATE, ODD_STARTDATE);
+	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_DUEDATE,   ODD_DUEDATE);
+	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_DONEDATE,  ODD_DONEDATE);
+	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_REMINDER,  ODD_REMINDER);
 
 	m_lbOffsetWhat.SetCheckedByItemData(m_dwOffsetWhat);
 
 	GetDlgItem(IDC_PRESERVEENDOFMONTH)->EnableWindow(m_nOffsetByUnits == MONTHS);
 	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
+	GetDlgItem(IDOK)->EnableWindow(m_dwOffsetWhat != 0);
 
 	return TRUE;
 }
@@ -146,9 +151,7 @@ void CTDLOffsetDatesDlg::OnOK()
 	// save state
 	CPreferences prefs;
 
-	m_dwOffsetWhat = m_lbOffsetWhat.GetCheckedItemData();
 	prefs.WriteProfileInt(m_sPrefsKey, _T("What"), m_dwOffsetWhat);
-
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Forward"), m_bForward);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Amount"), m_nOffsetBy);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("AmountPeriod"), m_nOffsetByUnits);
@@ -176,4 +179,11 @@ void CTDLOffsetDatesDlg::OnClickOffsetSubtasks()
 	UpdateData();
 
 	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
+}
+
+void CTDLOffsetDatesDlg::OnClickWhatList()
+{
+	UpdateData();
+
+	GetDlgItem(IDOK)->EnableWindow(m_dwOffsetWhat != 0);
 }

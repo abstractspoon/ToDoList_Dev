@@ -291,6 +291,8 @@ void CTDLCsvImportExportDlg::OnChangeCsvdelimiter()
 		
 		if (BuildImportColumnMapping(aMapping))
 			m_lcColumnSetup.SetColumnMapping(aMapping);
+
+		EnableDisableOK();
 	}
 }
 
@@ -300,8 +302,8 @@ void CTDLCsvImportExportDlg::BuildDefaultMasterColumnMapping()
 
 	for (int nCol = 0; nCol < ATTRIB_COUNT; nCol++)
 	{
-		TDC_ATTRIBUTE attrib = ATTRIBUTES[nCol].nAttributeID;
-		CEnString sName(ATTRIBUTES[nCol].nAttribResID);
+		TDC_ATTRIBUTE attrib = TASKATTRIBUTES[nCol].nAttributeID;
+		CEnString sName(TASKATTRIBUTES[nCol].nLabelResID);
 
 		m_aMasterColumnMapping.Add(TDCATTRIBUTEMAPPING(sName, attrib));
 	}

@@ -82,6 +82,15 @@ BOOL CContentCtrl::ProcessMessage(MSG* pMsg)
 	return FALSE;
 }
 
+BOOL CContentCtrl::DoIdleProcessing()
+{
+	if (m_pContentCtrl)
+		(m_pContentCtrl->DoIdleProcessing() ? TRUE : FALSE);
+
+	// else
+	return FALSE;
+}
+
 BOOL CContentCtrl::Attach(IContentControl* pContentCtrl)
 {
 	ASSERT(pContentCtrl != m_pContentCtrl);

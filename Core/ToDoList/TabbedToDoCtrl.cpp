@@ -119,6 +119,7 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt,
 	m_bTreeNeedResort(FALSE),
 	m_bUpdatingExtensions(FALSE),
 	m_bRecreatingRecurringTasks(FALSE),
+	m_bLoadingTasks(FALSE),
 	m_nExtModifyingAttrib(TDCA_NONE),
 	m_nListViewGroupBy(TDCC_NONE),
 	m_dwListOptions(0),
@@ -144,9 +145,6 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt,
 	// tab is on by default
 	m_styles[TDCS_SHOWTREELISTBAR] = TRUE;
 	m_styles[TDCS_SHOWTASKVIEWTABCLOSEBUTTON] = TRUE;
-
-	// Will be enabled on first showing
-	m_taskList.EnableRecalcColumns(FALSE);
 }
 
 CTabbedToDoCtrl::~CTabbedToDoCtrl()
@@ -162,7 +160,8 @@ void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LISTVIEWOPTIONS, m_cbListOptions);
 
 	DDX_CBData(pDX, m_cbListGroupBy, m_nListViewGroupBy, TDCC_NONE);
-	DDX_CheckItemData(pDX, m_cbListOptions, m_dwListOptions);
+
+	m_cbListOptions.DDX(pDX, m_dwListOptions);
 }
 
 BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
@@ -192,6 +191,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_REGISTERED_MESSAGE(WM_IUI_SHOWFILELINK, OnUIExtShowFileLink)
 	ON_REGISTERED_MESSAGE(WM_IUI_SETTASKLISTMETADATA, OnUIExtSetTasklistMetaData)
 
+	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnLabelEditCancel)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
@@ -247,20 +247,18 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	// Initialise the previously visible tabs
 	SetVisibleTaskViews(s_aDefTaskViews);
 
-	// Build the list-specific comboboxes
+	// Prepare the list-specific comboboxes
 	BuildListGroupByCombo();
-	BuildListOptionsCombo();
+	InitListOptionsCombo();
 
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::BuildListOptionsCombo()
+void CTabbedToDoCtrl::InitListOptionsCombo()
 {
 	// once only
 	if (!m_cbListOptions.GetCount())
 	{
-		m_cbListOptions.BuildCombo();
-
 		m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(CPreferences(), GetPreferencesKey());
 		m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
 
@@ -272,12 +270,12 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 {
 	m_cbListGroupBy.ResetContent();
 
-	AddString(m_cbListGroupBy, IDS_TDC_NONE, TDCC_NONE); // always
+	AddStringT(m_cbListGroupBy, IDS_TDC_NONE, TDCC_NONE); // always
 
 	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
 	{
 		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColumnID, TRUE))
-			AddString(m_cbListGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColumnID);
+			AddStringT(m_cbListGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColumnID);
 	}
 	
 	for (int nAtt = 0; nAtt < m_aCustomAttribDefs.GetSize(); nAtt++)
@@ -287,15 +285,15 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 		if (m_taskList.CanGroupBy(attribDef.GetColumnID(), TRUE))
 		{
 			CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			AddString(m_cbListGroupBy, sAttrib, attribDef.GetColumnID());
+			AddStringT(m_cbListGroupBy, sAttrib, attribDef.GetColumnID());
 		}
 	}
 	
-	if (SelectItemByData(m_cbListGroupBy, m_nListViewGroupBy) == CB_ERR)
+	if (SelectItemByDataT(m_cbListGroupBy, m_nListViewGroupBy) == CB_ERR)
 	{
 		m_nListViewGroupBy = TDCC_NONE;
 
-		VERIFY(SelectItemByData(m_cbListGroupBy, m_nListViewGroupBy) != CB_ERR);
+		VERIFY(SelectItemByDataT(m_cbListGroupBy, m_nListViewGroupBy) != CB_ERR);
 		m_taskList.SetGroupBy(m_nListViewGroupBy);
 	}
 }
@@ -583,6 +581,29 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	m_taskList.SetTasklistFolder(FileMisc::GetFolderFromFilePath(m_sLastSavePath));
 
 	return TRUE;
+}
+
+void CTabbedToDoCtrl::OnFirstSave(const CTaskFile& tasks)
+{
+	// First-time save - Update the extension views
+	FTC_VIEW nView = GetTaskView();
+
+	if (IsExtensionView(nView))
+	{
+		CWaitCursor cursor;
+
+		VIEWDATA* pVData = NULL;
+		IUIExtensionWindow* pExtWnd = NULL;
+
+		if (GetExtensionWnd(nView, pExtWnd, pVData))
+		{
+			pVData->bNeedFullTaskUpdate = FALSE;
+			UpdateExtensionView(pExtWnd, tasks, IUI_ALL);
+		}
+	}
+
+	// Mark all the rest as needing update
+	SetExtensionsNeedTaskUpdate(TRUE, nView);
 }
 
 void CTabbedToDoCtrl::LoadState()
@@ -949,9 +970,6 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				pLVData->bNeedFontUpdate = FALSE;
 				m_taskList.SetFont(m_taskTree.GetFont());
 			}
-
-			// This does nothing if already enabled
-			m_taskList.EnableRecalcColumns(TRUE);
 		}
 		break;
 
@@ -1096,6 +1114,50 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 	GetParent()->SendMessage(WM_TDCN_VIEWPOSTCHANGE, nOldView, nNewView);
 	
 	return 0L;
+}
+
+BOOL CTabbedToDoCtrl::DoIdleProcessing()
+{
+	if (InTreeView())
+		return CToDoCtrl::DoIdleProcessing();
+
+	FTC_VIEW nView = GetTaskView();
+	
+	switch (nView)
+	{
+	case FTCV_TASKLIST:
+		if (m_taskList.DoIdleProcessing())
+			return TRUE;
+		break;
+		
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd && pExtWnd->GetHwnd());
+
+			if (pExtWnd->DoIdleProcessing())
+				return TRUE;
+		}
+		break;
+	}
+
+	// Not in tree view and nothing else to do
+	return CToDoCtrl::DoIdleProcessing();
 }
 
 void CTabbedToDoCtrl::ShowListViewSpecificCtrls(BOOL bShow)
@@ -1254,7 +1316,7 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
 
 	// Special cases
-	if (mapAttrib.Has(TDCA_NEWTASK) || mapAttrib.Has(TDCA_ALL))
+	if (mapAttrib.HasAttribOrAll(TDCA_NEWTASK))
 	{
 		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK) || mapAttrib.HasOnly(TDCA_ALL));
 
@@ -1597,10 +1659,6 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lPar
 	}
 
 	DWORD dwTaskID = wParam;
-
-	if (m_calculator.IsTaskLocked(dwTaskID))
-		return FALSE;
-
 	IUINEXTTASKOCCURRENCES* pOccurrences = (IUINEXTTASKOCCURRENCES*)lParam;
 
 	// Get the range for which we want the future occurrences
@@ -1648,22 +1706,24 @@ BOOL CTabbedToDoCtrl::CanEditTask(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID) const
 		return FALSE;
 
 	if (GetUpdateControlsItem() == NULL)
-		return !(CTDCAttributeMap::IsTaskAttribute(nAttribID) || (nAttribID == TDCA_DELETE));
+	{
+		// Disable task editing
+		switch (nAttribID)
+		{
+		case TDCA_DELETE:
+			return FALSE;
+
+		default:
+			return !TDC::IsTaskAttribute(nAttribID);
+		}
+	}
 
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttribID, DWORD dwTaskID) const
-{
-	return CToDoCtrl::CanEditSelectedTask(nAttribID, dwTaskID);
-}
-
-BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
+BOOL CTabbedToDoCtrl::CanEditSelectedExtensionTask(const IUITASKMOD& mod, DWORD& dwTaskID) const
 {
 	dwTaskID = mod.dwSelectedTaskID;
-
-	if (!CanEditSelectedTask(mod.nAttributeID, dwTaskID))
-		return FALSE;
 
 	if (dwTaskID && (GetSelectedTaskCount() == 1))
 	{
@@ -1671,7 +1731,11 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 		dwTaskID = 0; // same as 'selected'
 	}
 
-	return TRUE;
+	if (dwTaskID == 0)
+		return CanEditSelectedTask(mod.nAttributeID);
+
+	// else
+	return (m_taskTree.IsTaskSelected(dwTaskID) && CanEditTask(dwTaskID, mod.nAttributeID));
 }
 
 BOOL CTabbedToDoCtrl::SplitSelectedTask(int nNumSubtasks)
@@ -1690,7 +1754,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
 
-	if (!CanEditSelectedTask(mod, dwTaskID))
+	if (!CanEditSelectedExtensionTask(mod, dwTaskID))
 	{
 		ASSERT(0);
 		return 0;
@@ -1780,9 +1844,9 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			TDCTIMEPERIOD time(mod.dValue, mod.nTimeUnits);
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, time));
+				bChange = (SET_CHANGE == m_data.SetTaskTimeEstimate(dwTaskID, time, mod.bAppend));
 			else
-				bChange = SetSelectedTaskTimeEstimate(time);
+				bChange = SetSelectedTaskTimeEstimate(time, mod.bAppend);
 		}
 		break;
 
@@ -1791,9 +1855,9 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			TDCTIMEPERIOD time(mod.dValue, mod.nTimeUnits);
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, time));
+				bChange = (SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, time, mod.bAppend));
 			else
-				bChange = SetSelectedTaskTimeSpent(time);
+				bChange = SetSelectedTaskTimeSpent(time, mod.bAppend);
 		}
 		break;
 
@@ -2311,6 +2375,7 @@ void CTabbedToDoCtrl::ReposTaskCtrl(const CRect& rTasks)
 void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 {
 	FTC_VIEW nView = GetTaskView();
+	int nShow = (bShow ? SW_SHOW : SW_HIDE);
 
 	switch (nView)
 	{
@@ -2320,7 +2385,10 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 		break;
 
 	case FTCV_TASKLIST:
-		m_taskList.ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+		m_taskList.ShowWindow(nShow);
+		m_taskList.EnableWindow(bShow);
+
+		ShowListViewSpecificCtrls(bShow);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -2339,6 +2407,16 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd);
+
+			if (pExtWnd)
+			{
+				::ShowWindow(pExtWnd->GetHwnd(), nShow);
+				::EnableWindow(pExtWnd->GetHwnd(), bShow);
+			}
+		}
 		break;
 
 	default:
@@ -2346,7 +2424,7 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 	}
 
 	// handle tab control
-	m_tabViews.ShowWindow(bShow && HasStyle(TDCS_SHOWTREELISTBAR) ? SW_SHOW : SW_HIDE);
+	m_tabViews.ShowWindow((bShow && HasStyle(TDCS_SHOWTREELISTBAR)) ? SW_SHOW : SW_HIDE);
 }
 
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
@@ -2425,18 +2503,7 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 			break;
 
 		case FTCV_TASKLIST:
-			{
-				// Show/Hide list-specific controls
-				int nShow = (nState != TDCMS_MAXCOMMENTS) ? SW_SHOW : SW_HIDE;
-
-				for (int nCtrl = 0; nCtrl < NUM_TTDCCTRLS; nCtrl++)
-				{
-					const TDCCONTROL& ctrl = TTDCCONTROLS[nCtrl];
-
-					if (ctrl.nID != IDC_TASKLISTTABCTRL)
-						GetDlgItem(ctrl.nID)->ShowWindow(nShow);
-				}
-			}
+			ShowListViewSpecificCtrls(nState != TDCMS_MAXCOMMENTS);
 			break;
 
 		case FTCV_UIEXTENSION1:
@@ -2495,10 +2562,7 @@ BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 
 	case FTCV_TASKLIST:
 		if (m_taskList.GetSelectionBoundingRect(rSelection))
-		{
-			m_taskList.ClientToScreen(rSelection);
-			ScreenToClient(rSelection);
-		}
+			m_taskList.MapWindowPoints((CWnd*)this, rSelection);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -2647,6 +2711,14 @@ void CTabbedToDoCtrl::SelectAll()
 	}
 }
 
+void CTabbedToDoCtrl::DeselectAll()
+{
+	if (InListView())
+		m_taskList.DeselectAll();
+
+	CToDoCtrl::DeselectAll();
+}
+
 int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue, BOOL bOrdered) const
 {
 	if (InListView())
@@ -2663,6 +2735,11 @@ int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedT
 
 	// else
 	return CToDoCtrl::GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes, bOrdered);
+}
+
+int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
+{
+	return GetTasks(tasks, GetTaskView(), filter);
 }
 
 int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
@@ -3417,6 +3494,11 @@ BOOL CTabbedToDoCtrl::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
 	return FALSE;
 }
 
+BOOL CTabbedToDoCtrl::HasListOption(DWORD dwOption) const 
+{ 
+	return Misc::HasFlag(m_dwListOptions, dwOption); 
+}
+
 void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, const void* pContext)
 {
 	GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = FALSE;
@@ -3432,6 +3514,11 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 	if (!GetAllTaskIDs(aTaskIDs, bWantParents, bWantCollapsed))
 	{
 		m_taskList.DeleteAll(); 
+
+		VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
+		ASSERT(pLVData);
+
+		pLVData->bHasSelectedTask = FALSE;
 		return;
 	}
 
@@ -3457,11 +3544,11 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 
 			if (WantAddTreeTaskToList(dwTaskID, pContext))
 			{
-				VERIFY (m_taskList.InsertItem(dwTaskID) >= 0);
+				VERIFY (m_taskList.InsertTaskItem(dwTaskID) >= 0);
 			}	
 		}
 
-		m_taskList.SetNextUniqueTaskID(m_dwNextUniqueID);
+		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
 		m_taskList.OnBuildComplete();
 
 		ResortList();
@@ -3474,7 +3561,7 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 	BuildListGroupByCombo();
 }
 
-BOOL CTabbedToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const
+BOOL CTabbedToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* /*pContext*/) const
 {
 	ASSERT(!m_data.IsTaskParent(dwTaskID) || !(HasListOption(LVO_HIDEPARENTS) || HasStyle(TDCS_ALWAYSHIDELISTPARENTS)));
 	
@@ -3562,14 +3649,11 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	// so as not to delay the appearance of the title edit field.
 	// So, we don't update 'other' views until we receive a successful 
 	// title edit notification unless they are the active view
-	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
+	BOOL bNewSingleTask = IsNewTaskMod(mapAttribIDs, aModTaskIDs);
+	BOOL bNewTaskTitleEdit = IsNewTaskTitleEditMod(mapAttribIDs, aModTaskIDs);
 
-	BOOL bNewSingleTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && 
-							(aModTaskIDs.GetSize() == 1));
-
-	BOOL bNewTaskTitleEdit = (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
-								(aModTaskIDs.GetSize() == 1) &&
-								(dwModTaskID == m_dwLastAddedID));
+	if (bNewTaskTitleEdit || mapAttribIDs.Has(TDCA_PASTE))
+		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
 
 	// For custom attributes we always update the extensions
 	// with ALL custom attribute values
@@ -3606,7 +3690,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 		else
 		{
 			// Ensure new task is selected for label editing
-			SelectTask(dwModTaskID, FALSE);
+			SelectTask(aModTaskIDs[0], FALSE);
 		}
 		break;
 
@@ -3639,7 +3723,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 		else
 		{
 			// Ensure new task is selected for label editing
-			SelectTask(dwModTaskID, FALSE);
+			SelectTask(aModTaskIDs[0], FALSE);
 		}
 		break;
 	}
@@ -3656,6 +3740,12 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 
 	if (!bInListView && pVData->bNeedFullTaskUpdate)
 		return;
+
+	if (mapAttribIDs.Has(TDCA_NEWTASK) || 
+		mapAttribIDs.Has(TDCA_PASTE))
+	{
+		m_taskList.SetLargestTaskID(m_dwNextUniqueID);
+	}
 
 	if (mapAttribIDs.Has(TDCA_DELETE) ||
 		mapAttribIDs.Has(TDCA_ARCHIVE))
@@ -3678,13 +3768,21 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 	}
 	else if (mapAttribIDs.Has(TDCA_NEWTASK) && aModTaskIDs.GetSize())
 	{
-		int nSel = m_taskList.GetSelectedItem();
+		DWORD dwTaskID = aModTaskIDs[0];
+		ASSERT(dwTaskID);
 
-		if (nSel != -1)
-			nSel++;
+		int nPos = m_taskList.GetSelectedItem();
 
-		ASSERT(aModTaskIDs[0]);
-		m_taskList.InsertItem(aModTaskIDs[0], nSel);
+		if (nPos != -1)
+			nPos++;
+
+		if (WantAddTreeTaskToList(dwTaskID))
+		{
+			VERIFY(m_taskList.InsertTaskItem(dwTaskID, nPos) >= 0);
+		
+			if (bInListView)
+				SyncListSelectionToTree(TRUE);
+		}
 	}
 	else if (mapAttribIDs.Has(TDCA_NEWTASK) ||
 			 mapAttribIDs.Has(TDCA_UNDO) ||
@@ -3834,6 +3932,31 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 	{
 		// do nothing
 	}
+	else if (mapAttribIDs.HasOnly(TDCA_ALL))
+	{
+		// If this is an UNDO then our base class will have pre-selected
+		// the previously selected tasks (ie. aModTaskIDs) BUT if our current
+		// view does not don't support/ multi-selection, say, then the 
+		// current selection will no longer match aModTaskIDs, so our first job
+		// if to ensure that it does so that the correct tasks get updated.
+
+		// Get the current selection
+		CDWordArray aSelTaskIDs;
+		m_taskTree.GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+		// Does it match the modified tasks
+		BOOL bFixupSelection = !Misc::MatchAll(aModTaskIDs, aSelTaskIDs);
+
+		if (bFixupSelection)
+			m_taskTree.SelectTasks(aModTaskIDs);
+
+		// Do the update
+		UpdateExtensionViewsSelection(mapAttribIDs);
+
+		// restore the previous selection if required
+		if (bFixupSelection)
+			m_taskTree.SelectTasks(aSelTaskIDs);
+	}
 	else // all else
 	{
 		UpdateExtensionViewsSelection(mapAttribIDs);
@@ -3904,15 +4027,16 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 	ASSERT(HasAnyExtensionViews());
 
 	ASSERT(mapAttribIDs.HasOnly(TDCA_DELETE) ||
-			mapAttribIDs.HasOnly(TDCA_UNDO) ||
-			mapAttribIDs.HasOnly(TDCA_PASTE) ||
-			mapAttribIDs.HasOnly(TDCA_MERGE) ||
-			mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
-			mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
-			mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
-			mapAttribIDs.HasOnly(TDCA_POSITION) ||
-			mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
-			mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
+		   mapAttribIDs.HasOnly(TDCA_UNDO) ||
+		   mapAttribIDs.HasOnly(TDCA_PASTE) ||
+		   mapAttribIDs.HasOnly(TDCA_NEWTASK) ||
+		   mapAttribIDs.HasOnly(TDCA_MERGE) ||
+		   mapAttribIDs.HasOnly(TDCA_ARCHIVE) ||
+		   mapAttribIDs.HasOnly(TDCA_PROJECTNAME) ||
+		   mapAttribIDs.HasOnly(TDCA_ENCRYPT) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
+		   mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
 
 	FTC_VIEW nView = GetTaskView();
 
@@ -4009,11 +4133,9 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 		// Include parents if this is an undo 
 		// OR there is a colour change
 		// OR a calculated attribute change
-		BOOL bUndo = mapAttribIDs.Has(TDCA_ALL);
-		ASSERT(!bUndo || mapAttribIDs.HasOnly(TDCA_ALL));
+ 		ASSERT(!mapAttribIDs.Has(TDCA_ALL) || mapAttribIDs.HasOnly(TDCA_ALL));
 
-		if (bUndo || 
-			mapAttribIDs.Has(TDCA_COLOR) || 
+		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) || 
 			ModAffectsAggregatedAttributes(mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_ALLPARENTS;
@@ -4021,7 +4143,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// DONT include subtasks UNLESS the completion date
 		// has changed OR this is an inherited attribute
-		if (!mapAttribIDs.Has(TDCA_DONEDATE) && 
+		if (!mapAttribIDs.HasAttribOrAll(TDCA_DONEDATE) && 
 			!WantUpdateInheritedAttibutes(mapAttribIDs))
 		{
 			dwFlags |= TDCGSTF_NOTSUBTASKS;
@@ -4029,13 +4151,13 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// Include references to selected tasks if a 
 		// 'Reference-specific' colour is not set
-		if (mapAttribIDs.Has(TDCA_COLOR) && 
+		if (mapAttribIDs.HasAttribOrAll(TDCA_COLOR) && 
 			!m_taskTree.HasReferenceTaskColor())
 		{
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
 		}
 	
-		if (mapAttribIDs.Has(TDCA_DEPENDENCY))
+		if (mapAttribIDs.HasAttribOrAll(TDCA_DEPENDENCY))
 			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
 	}
 
@@ -4085,7 +4207,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	case 1:
 		{
 			POSITION pos = mapAttribIDs.GetStartPosition();
-			sAttrib = TDC::GetAttributeName(mapAttribIDs.GetNext(pos));
+			sAttrib = TDC::GetAttributeLabel(mapAttribIDs.GetNext(pos));
 		}
 		break;
 
@@ -4405,7 +4527,7 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 		if (bNewTask || (pVData && pVData->sort.Matches(mapAttribIDs, m_styles, m_aCustomAttribDefs)))
 		{
 			if ((nExtView == nView) && HasStyle(TDCS_RESORTONMODIFY))
-				Resort(FALSE);
+				Resort();
 			else
 				pVData->bNeedResort = TRUE;
 		}
@@ -4712,6 +4834,15 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
+LRESULT CTabbedToDoCtrl::OnLabelEditCancel(WPARAM wParam, LPARAM lParam)
+{
+	// user hit escape key so we may need to clear the selection
+	if (InListView() && (GetSelectedTaskID() == m_dwLastAddedID))
+		m_taskList.DeselectAll();
+
+	return CToDoCtrl::OnLabelEditCancel(wParam, lParam);
+}
+
 void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// special case - ALT key
@@ -4977,7 +5108,7 @@ BOOL CTabbedToDoCtrl::IsSorting() const
 
 BOOL CTabbedToDoCtrl::IsMultiSorting() const
 {
-	return GetSort().bMulti;
+	return GetSort().IsMultiSorting();
 }
 
 void CTabbedToDoCtrl::MultiSort(const TDSORTCOLUMNS& sort)
@@ -6113,29 +6244,24 @@ BOOL CTabbedToDoCtrl::ScrollToSelectedTask()
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::SetFocusToTasks()
+void CTabbedToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 {
+	if (nLocation != TDCSF_TASKVIEW)
+	{
+		CToDoCtrl::SetFocus(nLocation);
+		return;
+	}
+
 	FTC_VIEW nView = GetTaskView();
 
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		CToDoCtrl::SetFocusToTasks();
+		CToDoCtrl::SetFocus(nLocation);
 		break;
 
 	case FTCV_TASKLIST:
-		if (GetFocus() != &m_taskList)
-		{
-			// See CToDoCtrl::SetFocusToTasks() for why we need this
-			SetFocusToComments();
-			
-			m_taskList.SetFocus();
-		}
-			
-		m_taskList.EnsureSelectionVisible(TRUE);
-		break;
-
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
 	case FTCV_UIEXTENSION3:
@@ -6152,7 +6278,29 @@ void CTabbedToDoCtrl::SetFocusToTasks()
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		ExtensionDoAppCommand(nView, IUI_SETFOCUS);
+		// Basically a copy of CToDoCtrl's handling of FTCV_TASKTREE
+		if (!HasFocus(TDCSF_TASKVIEW))
+		{
+			if (!m_layout.IsVisible(TDCSF_TASKVIEW))
+			{
+				ASSERT(m_layout.GetMaximiseState() == TDCMS_MAXCOMMENTS);
+				SetMaximizeState(TDCMS_MAXTASKLIST);
+			}
+			else
+			{
+				// See CToDoCtrl::SetFocus(TDCSF_TASKVIEW) for why we need this
+				if (m_layout.IsVisible(TDCSF_COMMENTS))
+					m_ctrlComments.SetFocus();
+
+				if (InListView())
+					m_taskList.SetFocus();
+				else
+					ExtensionDoAppCommand(nView, IUI_SETFOCUS);
+			}
+
+			// ensure the selected item is visible
+			ScrollToSelectedTask();
+		}
 		break;
 
 	default:
@@ -6160,15 +6308,18 @@ void CTabbedToDoCtrl::SetFocusToTasks()
 	}
 }
 
-BOOL CTabbedToDoCtrl::TasksHaveFocus() const
+BOOL CTabbedToDoCtrl::HasFocus(TDC_SETFOCUSTO nLocation) const
 { 
+	if (nLocation != TDCSF_TASKVIEW)
+		return CToDoCtrl::HasFocus(nLocation);
+
 	FTC_VIEW nView = GetTaskView();
 
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::TasksHaveFocus(); 
+		return CToDoCtrl::HasFocus(nLocation); 
 
 	case FTCV_TASKLIST:
 		return m_taskList.HasFocus();
@@ -6497,6 +6648,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 		if (!cacheList.SelectionMatches(cacheTree))
 		{
 			cacheTree.dwFirstVisibleTaskID = 0;
+			bSelChange = TRUE;
 
 			if (m_taskList.RestoreSelection(cacheTree, bEnsureSelection))
 			{
@@ -6505,14 +6657,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 				CacheListSelection(cacheList);
 
 				if (!cacheList.SelectionMatches(cacheTree))
-				{
 					RestoreTreeSelection(cacheList);
-					bSelChange = TRUE;
-				}
-			}
-			else
-			{
-				bSelChange = TRUE;
 			}
 		}
 	}
@@ -6644,10 +6789,13 @@ void CTabbedToDoCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 	}
 }
 
-void CTabbedToDoCtrl::OnListSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CTabbedToDoCtrl::OnListSelChanged(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	*pResult = 0;
-	OnListSelChanged();
+	if (CEnListCtrl::IsSelectionChange((NMLISTVIEW*)pNMHDR))
+	{
+		OnListSelChanged();
+		*pResult = 0;
+	}
 }
 
 void CTabbedToDoCtrl::OnListSelChanged()
@@ -6677,7 +6825,7 @@ void CTabbedToDoCtrl::OnListSelChanged()
 		else
 			m_taskTree.RestoreSelection(cacheList);
 	}
-	else if (Misc::StateChanged(bListHadSelection, pLVData->bHasSelectedTask))
+	else if (Misc::StatesDiffer(bListHadSelection, pLVData->bHasSelectedTask))
 	{
 		UpdateControls();
 		NotifyParentSelectionChange();
@@ -6888,42 +7036,7 @@ void CTabbedToDoCtrl::UpdateSelectedTaskPath()
 		return;
 
 	CToDoCtrl::UpdateSelectedTaskPath();
-
-	// extra processing
-	FTC_VIEW nView = GetTaskView();
-
-	switch (nView)
-	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-		// handled above
-		break;
-
-	case FTCV_TASKLIST:
-		m_taskList.UpdateSelectedTaskPath();
-		break;
-
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		break;
-
-	default:
-		ASSERT(0);
-	}
+	m_taskList.UpdateSelectedTaskPath();
 }
 
 void CTabbedToDoCtrl::SaveTasksState(CPreferences& prefs, BOOL bRebuildingTree) const

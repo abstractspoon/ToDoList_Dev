@@ -1812,7 +1812,7 @@ COLORREF CDibData::GetPixel(int x, int y) const
 	BYTE Red, Green, Blue;
 	if( m_wBitsPerPixel <= 8 )
 	{
-		RGBQUAD rgbq;
+		RGBQUAD rgbq = { 0 };
 		if( !GetPaletteEntries((UINT)dwPixel, 1, &rgbq) )
 			return CLR_INVALID;
 		Red = rgbq.rgbRed, Green = rgbq.rgbGreen, Blue = rgbq.rgbBlue;
@@ -1876,13 +1876,13 @@ BOOL CDibData::SetPixel(int x, int y, COLORREF clPixel)
 	if( clPixel == CLR_INVALID)
 		return FALSE;
 
-	RGBQUAD rgbq;
+	RGBQUAD rgbq = { 0 };
 	rgbq.rgbRed   = GetRValue(clPixel);
 	rgbq.rgbGreen = GetGValue(clPixel);
 	rgbq.rgbBlue  = GetBValue(clPixel);
 	rgbq.rgbReserved = 0;
 
-	DWORD dwPixel;
+	DWORD dwPixel = 0;
 	if( m_wBitsPerPixel <= 8 )
 	{
 		dwPixel = GetNearestPaletteIndex(&rgbq);
@@ -2165,7 +2165,7 @@ GetConvertedDIB(WORD wBitsPerPixel, BOOL bOptimize/* = FALSE*/)
 	{
 		if( wSrcBitsPerPixel >= 16 && wDstBitsPerPixel == 8 )
 		{
-			RGBQUAD rgbqOp[256];
+			RGBQUAD rgbqOp[256] = { 0 };
 			UINT uColors = GetOptimalColors(rgbqOp, 256, wDstBitsPerPixel);
 
 			if( uColors < 256 )
@@ -2560,7 +2560,7 @@ UINT CDibData::GetNearestPaletteIndex(const LPRGBQUAD pColor) const
 */
 UINT CDibData::GetNearestPaletteIndex(COLORREF clrSrc) const
 {
-	RGBQUAD rgbq;
+	RGBQUAD rgbq = { 0 };
 	rgbq.rgbRed   = GetRValue(clrSrc);
 	rgbq.rgbGreen = GetGValue(clrSrc);
 	rgbq.rgbBlue  = GetBValue(clrSrc);

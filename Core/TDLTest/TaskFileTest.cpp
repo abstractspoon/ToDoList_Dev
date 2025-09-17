@@ -21,7 +21,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const TCHAR NO_ATTRIBUTES = 'n';
+const LPCTSTR NO_ATTRIBUTES = _T("na");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ static const CTDCCustomAttribDefinitionArray EMPTY_CUSTATTRIB;
 
 CTaskFileTest::CTaskFileTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(utils),
+	CTDLTestBase(_T("CTaskFileTest"), utils),
 	NUM_PERFTESTLEVELS(utils.HasCommandlineFlag(NO_ATTRIBUTES) ? 5 : 4),
 	m_bWantPerformanceAttributes(!utils.HasCommandlineFlag(NO_ATTRIBUTES))
 {
@@ -79,7 +79,7 @@ TESTRESULT CTaskFileTest::Run()
 
 void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 {
-	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(OverwriteAll)"));
+	CTDCScopedTest test(*this, _T("CTaskFile::MergeTaskAttributes(OverwriteAll)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -133,7 +133,7 @@ void CTaskFileTest::TestMergeTaskAttributesOverwriteAll()
 
 void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
 {
-	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(ExcludeEmptySrcValues)"));
+	CTDCScopedTest test(*this, _T("CTaskFile::MergeTaskAttributes(ExcludeEmptySrcValues)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -186,7 +186,7 @@ void CTaskFileTest::TestMergeTaskAttributesExcludingEmptySrcValues()
 
 void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 {
-	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValues)"));
+	CTDCScopedTest test(*this, _T("CTaskFile::MergeTaskAttributes(PreserveNonEmptyDestValues)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -256,7 +256,7 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValues()
 
 void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues()
 {
-	CTDCScopedTest test(*this, _T("CTaskFileTest::MergeTaskAttributes(PreserveNonEmptyDestValuesAndExcludeEmptySrcValues)"));
+	CTDCScopedTest test(*this, _T("CTaskFile::MergeTaskAttributes(PreserveNonEmptyDestValuesAndExcludeEmptySrcValues)"));
 
 	CTaskFile tasksSrc;
 	HTASKITEM hSrcEmpty = NULL, hSrcFull = NULL;
@@ -405,7 +405,7 @@ void CTaskFileTest::BeginPerformanceTest(LPCTSTR szFunction)
 
 void CTaskFileTest::TestHierarchyConstructionPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CTaskFileTest::HierarchyConstructionPerformance\n"));
 		return;
@@ -435,7 +435,7 @@ void CTaskFileTest::TestHierarchyConstructionPerformance()
 
 void CTaskFileTest::TestFlatListConstructionPerformance()
 {
-	if (!m_utils.HasCommandlineFlag('p'))
+	if (!m_utils.GetWantPerformanceTests())
 	{
 		_tprintf(_T("Add '-p' to run CTaskFileTest::FlatListConstructionPerformance\n"));
 		return;

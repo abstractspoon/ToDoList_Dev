@@ -49,6 +49,7 @@ protected:
 	BOOL m_bExportingForExcel;
 	
 	mutable BOOL m_bFirstHeader;
+	mutable TDC_ATTRIBUTE m_nFirstAttribID;
 
 protected:
 	// base-class overrides
@@ -59,6 +60,8 @@ protected:
 	virtual CString FormatAttribute(const ITASKLISTBASE* pTasks, HTASKITEM hTask, int nDepth, TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const;
 	virtual CString FormatHeaderItem(TDC_ATTRIBUTE nAttribID, const CString& sAttribLabel) const;
 	virtual CString FormatHeader(const ITASKLISTBASE* pTasks) const;
+	virtual CString FormatTitle(const IMultiTaskList* /*pTasks*/) const { return _T(""); }
+	virtual CString FormatTitle(const ITASKLISTBASE* /*pTasks*/, BOOL /*bWantDate*/) const { return _T(""); }
 
 	virtual bool InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 

@@ -136,16 +136,12 @@ BOOL CBinaryData::Base64Decode(const CString& sEncoded)
 {
 	Base64Coder b64;
 	
-#ifdef _UNICODE
-	// if text is unicode then we need to convert it back to multibyte
+	// Convert unicode text to multibyte
 	// to read the binary stream as unsigned chars
 	int nLen = sEncoded.GetLength();
 	unsigned char* pBinary = (unsigned char*)Misc::WideToMultiByte((LPCTSTR)sEncoded, nLen);
 	b64.Decode(pBinary, nLen);
 	delete [] pBinary;
-#else
-	b64.Decode(sEncoded);
-#endif
 	
 	unsigned long nLenContent;
 	PBYTE pContent = b64.DecodedMessage(nLenContent);
