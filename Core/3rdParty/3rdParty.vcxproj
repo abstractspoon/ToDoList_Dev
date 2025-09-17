@@ -125,6 +125,7 @@
     <ClCompile Include="ColourPicker.cpp" />
     <ClCompile Include="ColourPopup.cpp" />
     <ClCompile Include="Compression.cpp" />
+    <ClCompile Include="cpp-expression-parser\shunting-yard.cpp" />
     <ClCompile Include="DibData.cpp" />
     <ClCompile Include="DragDrop.cpp" />
     <ClCompile Include="FileVersionInfo.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="ColourPopup.h" />
     <ClInclude Include="Compression.h" />
     <ClInclude Include="COMUTIL.H" />
+    <ClInclude Include="cpp-expression-parser\shunting-yard.h" />
     <ClInclude Include="DibData.h" />
     <ClInclude Include="DragDrop.h" />
     <ClInclude Include="FileVersionInfo.h" />
