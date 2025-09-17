@@ -818,10 +818,10 @@ void CTDCTaskMatcherTest::TestMultipleRules(const CToDoCtrlData& data)
 		
 	{
 		CTDCScopedSubTest subtest(*this, _T("Name OR Name"));
-
 		SEARCHPARAMS query;
-		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task1"), OR));
-		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task4")));
+
+		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task1"), OR));	// -> Task 1
+		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task4")));		// -> Task 4
 
 		ExpectEQ(2, matcher.FindTasks(query, FALSE, aTaskIDs));
 
@@ -831,21 +831,21 @@ void CTDCTaskMatcherTest::TestMultipleRules(const CToDoCtrlData& data)
 
 	{
 		CTDCScopedSubTest subtest(*this, _T("Name AND Name"));
-
 		SEARCHPARAMS query;
-		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task1"), AND));
-		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task4")));
+
+		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task1"), AND)); // -> Task 1
+		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task4")));		// -> Task 4
 
 		ExpectEQ(0, matcher.FindTasks(query, FALSE, aTaskIDs));
 	}
 
 	{
 		CTDCScopedSubTest subtest(*this, _T("Name OR Name OR Priority"));
-
 		SEARCHPARAMS query;
-		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task2"), OR));
-		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task3"), OR));
-		query.aRules.Add(SEARCHPARAM(TDCA_PRIORITY, FOP_EQUALS, 4)); // -> Task 1
+
+		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task2"), OR));	// -> Task 2
+		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task3"), OR));	// -> Task 3
+		query.aRules.Add(SEARCHPARAM(TDCA_PRIORITY, FOP_EQUALS, 4));				// -> Task 1
 
 		ExpectEQ(3, matcher.FindTasks(query, FALSE, aTaskIDs));
 
@@ -855,11 +855,11 @@ void CTDCTaskMatcherTest::TestMultipleRules(const CToDoCtrlData& data)
 
 	{
 		CTDCScopedSubTest subtest(*this, _T("Name OR Name AND Category"));
-
 		SEARCHPARAMS query;
-		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task"), OR));
-		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task5"), AND));
-		query.aRules.Add(SEARCHPARAM(TDCA_CATEGORY, FOP_INCLUDES, _T("Cat5.2")));
+
+		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task"), OR));	// -> None
+		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_EQUALS, _T("Task5"), AND)); // -> Task 5
+		query.aRules.Add(SEARCHPARAM(TDCA_CATEGORY, FOP_INCLUDES, _T("Cat5.2")));	// -> Task 5
 
 		ExpectEQ(1, matcher.FindTasks(query, FALSE, aTaskIDs));
 		ExpectTrue(aTaskIDs[0] == 5);
@@ -867,12 +867,13 @@ void CTDCTaskMatcherTest::TestMultipleRules(const CToDoCtrlData& data)
 
 	{
 		CTDCScopedSubTest subtest(*this, _T("Risk AND Name Or Priority AND Risk"));
-
 		SEARCHPARAMS query;
-		query.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_LESS, 7, AND)); // -> Tasks 1/2
+
+		query.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_LESS, 7, AND));					// -> Tasks 1/2
 		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_INCLUDES, _T("Task"), OR)); // -> All
+
 		query.aRules.Add(SEARCHPARAM(TDCA_PRIORITY, FOP_GREATER_OR_EQUAL, 7, AND)); // -> Tasks 4/5/6
-		query.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_GREATER, 8)); // -> Tasks 5/6
+		query.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_GREATER, 8));					// -> Tasks 5/6
 
 		ExpectEQ(4, matcher.FindTasks(query, FALSE, aTaskIDs));
 
@@ -884,14 +885,14 @@ void CTDCTaskMatcherTest::TestMultipleRules(const CToDoCtrlData& data)
 		CTDCScopedSubTest subtest(*this, _T("Risk AND Name Or Priority AND Risk OR Cost AND Cost"));
 
 		SEARCHPARAMS query;
-		query.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_LESS, 7, AND)); // -> Tasks 1/2
+		query.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_LESS, 7, AND));					// -> Tasks 1/2
 		query.aRules.Add(SEARCHPARAM(TDCA_TASKNAME, FOP_INCLUDES, _T("Task"), OR)); // -> All
 
 		query.aRules.Add(SEARCHPARAM(TDCA_PRIORITY, FOP_GREATER_OR_EQUAL, 7, AND)); // -> Tasks 4/5/6
-		query.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_GREATER, 8, OR)); // -> Tasks 5/6
+		query.aRules.Add(SEARCHPARAM(TDCA_RISK, FOP_GREATER, 8, OR));				// -> Tasks 5/6
 
-		query.aRules.Add(SEARCHPARAM(TDCA_COST, FOP_GREATER, 22.0, AND)); // -> Tasks 3/4/5/6
-		query.aRules.Add(SEARCHPARAM(TDCA_COST, FOP_LESS, 25.0)); // -> Tasks 1/2/3/4
+		query.aRules.Add(SEARCHPARAM(TDCA_COST, FOP_GREATER, 22.0, AND));			// -> Tasks 3/4/5/6
+		query.aRules.Add(SEARCHPARAM(TDCA_COST, FOP_LESS, 25.0));					// -> Tasks 1/2/3/4
 
 		Misc::SortArray(aTaskIDs);
 		ExpectEQ(6, matcher.FindTasks(query, FALSE, aTaskIDs));
