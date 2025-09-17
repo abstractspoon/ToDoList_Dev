@@ -94,7 +94,7 @@ TESTRESULT CTDCTaskMatcherTest::Run()
 void CTDCTaskMatcherTest::TestIndividualRules(const CToDoCtrlData& data)
 {
 	// These tests are just for single rules
-	CTDCScopedTest test(*this, _T("CTDCTaskMatcherTest::SimpleMatching"));
+	CTDCScopedTest test(*this, _T("CTDCTaskMatcherTest::IndividualRules"));
 
 	// Simple text
 	{
@@ -809,7 +809,7 @@ void CTDCTaskMatcherTest::TestMultipleRules(const CToDoCtrlData& data)
 {
 	// These tests are testing the logical aspects of a ruleset
 	// ie. We presume that the individual rules work correctly
-	CTDCScopedTest test(*this, _T("CTDCTaskMatcherTest::ComplexMatching"));
+	CTDCScopedTest test(*this, _T("CTDCTaskMatcherTest::MultipleRules"));
 
 	CTDCTaskMatcher matcher(data, reminders, contentMgr);
 	CDWordArray aTaskIDs;
