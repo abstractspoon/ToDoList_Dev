@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "cpp_expression_parser_master"=.\cpp_expression_parser_master.dsp - Package Owner=<4>
+Project: "cpp_expression_parser"=.\cpp_expression_parser.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
