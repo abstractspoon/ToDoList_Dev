@@ -119,6 +119,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Base64Coder.cpp" />
+    <ClCompile Include="Calculator.cpp" />
     <ClCompile Include="CalendarCtrl.cpp" />
     <ClCompile Include="ClipboardBackup.cpp" />
     <ClCompile Include="ColorDef.cpp" />
@@ -164,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base64Coder.h" />
+    <ClInclude Include="Calculator.h" />
     <ClInclude Include="CalendarCtrl.h" />
     <ClInclude Include="ClipboardBackup.h" />
     <ClInclude Include="ColorBrewerPalettes.h" />

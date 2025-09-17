@@ -89,6 +89,10 @@ SOURCE=.\Base64Coder.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\Calculator.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CalendarCtrl.cpp
 # End Source File
 # Begin Source File
@@ -217,6 +221,10 @@ SOURCE=.\ShellIcons.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=".\cpp-expression-parser\shunting-yard.cpp"
+# End Source File
+# Begin Source File
+
 SOURCE=.\SimpleSplitter.cpp
 # End Source File
 # Begin Source File
@@ -258,6 +266,10 @@ SOURCE=.\XPTabCtrl.cpp
 # Begin Source File
 
 SOURCE=.\Base64Coder.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\Calculator.h
 # End Source File
 # Begin Source File
 
@@ -422,6 +434,10 @@ SOURCE=.\sha2.h
 # Begin Source File
 
 SOURCE=.\ShellIcons.h
+# End Source File
+# Begin Source File
+
+SOURCE=".\cpp-expression-parser\shunting-yard.h"
 # End Source File
 # Begin Source File
 
