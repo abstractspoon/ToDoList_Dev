@@ -31,32 +31,32 @@ class calculator
 {
 public:
 	calculator() {}
-	calculator(const char* expr,
-			   std::map<std::string, double>* vars = 0,
-			   std::map<std::string, int> opPrecedence = opPrecedence);
+	calculator(const wchar_t* expr,
+			   std::map<std::wstring, double>* vars = 0,
+			   std::map<std::wstring, int> opPrecedence = opPrecedence);
 	~calculator();
 
-	void compile(const char* expr,
-				 std::map<std::string, double>* vars = 0,
-				 std::map<std::string, int> opPrecedence = opPrecedence);
-	double eval(std::map<std::string, double>* vars = 0);
-	std::string str();
+	void compile(const wchar_t* expr,
+				 std::map<std::wstring, double>* vars = 0,
+				 std::map<std::wstring, int> opPrecedence = opPrecedence);
+	double eval(std::map<std::wstring, double>* vars = 0);
+	std::wstring str();
 
-	static double calculate(const char* expr,
-							std::map<std::string, double>* vars = 0);
+	static double calculate(const wchar_t* expr,
+							std::map<std::wstring, double>* vars = 0);
 private:
 	TokenQueue_t RPN;
 
-	static std::map<std::string, int> opPrecedence;
-	static std::map<std::string, int> buildOpPrecedence();
+	static std::map<std::wstring, int> opPrecedence;
+	static std::map<std::wstring, int> buildOpPrecedence();
 
 private:
 	static double calculate(TokenQueue_t RPN,
-							std::map<std::string, double>* vars = 0);
+							std::map<std::wstring, double>* vars = 0);
 	static void cleanRPN(TokenQueue_t& rpn);
-	static TokenQueue_t toRPN(const char* expr,
-							  std::map<std::string, double>* vars,
-							  std::map<std::string, int> opPrecedence = opPrecedence);
+	static TokenQueue_t toRPN(const wchar_t* expr,
+							  std::map<std::wstring, double>* vars,
+							  std::map<std::wstring, int> opPrecedence = opPrecedence);
 
 };
 

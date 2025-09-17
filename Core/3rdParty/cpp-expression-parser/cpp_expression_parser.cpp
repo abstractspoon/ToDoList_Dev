@@ -1,4 +1,4 @@
- cpp_expression_parser_master.cpp : Defines the entry point for the application.
+ // cpp_expression_parser.cpp : Defines the entry point for the application.
 
 
 #include "stdafx.h"
@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 
-void Assert(double actual, double expected, const char* expr = 0) 
+void Assert(double actual, double expected, const wchar_t* expr = 0) 
 {
 	double diff = actual - expected;
 	if (diff < 0) diff *= -1;
@@ -40,62 +40,62 @@ void Assert(double actual, double expected, const char* expr = 0)
 	}
  }
  
- void Assert(const char* expr, double expected,
-	 std::map<std::string, double>* vars = 0) 
+ void Assert(const wchar_t* expr, double expected,
+	 std::map<std::wstring, double>* vars = 0) 
  {
 	 double actual = calculator::calculate(expr, vars);
 	 Assert(actual, expected, expr);
  }
  
- int main(int argc, char** argv)
+ int main(int argc, wchar_t** argv)
  {
-	 std::map<std::string, double> vars;
-	 vars["pi"] = 3.14;
-	 vars["b1"] = 0;
+	 std::map<std::wstring, double> vars;
+	 vars[L"pi"] = 3.14;
+	 vars[L"b1"] = 0;
 	 
 	 std::cout << "\nTests with static calculate::calculate()\n" << std::endl;
 	 
-	 Assert("-pi + 1", -2.14, &vars);
-	 Assert("-pi + 1 * b1", -3.14, &vars);
+	 Assert(L"-pi + 1", -2.14, &vars);
+	 Assert(L"-pi + 1 * b1", -3.14, &vars);
 	 
-	 Assert("(20+10)*3/2-3", 42.0);
-	 Assert("1 << 4", 16.0);
-	 Assert("1+(-2*3)", -5);
+	 Assert(L"(20+10)*3/2-3", 42.0);
+	 Assert(L"1 << 4", 16.0);
+	 Assert(L"1+(-2*3)", -5);
 	 
 	 std::cout << "\nTests with calculate::compile() & calculate::eval()\n" << std::endl;
 	 
 	 calculator c1;
-	 c1.compile("-pi+1", &vars);
+	 c1.compile(L"-pi+1", &vars);
 	 Assert(c1.eval(), -2.14);
 	 
-	 calculator c2("pi+4", &vars);
+	 calculator c2(L"pi+4", &vars);
 	 Assert(c2.eval(), 7.14);
 	 Assert(c2.eval(), 7.14);
 	 
-	 calculator c3("pi+b1+b2", &vars);
+	 calculator c3(L"pi+b1+b2", &vars);
 	 
-	 vars["b2"] = 1;
+	 vars[L"b2"] = 1;
 	 Assert(c3.eval(&vars), 4.14);
 	 
-	 vars["b2"] = .86;
+	 vars[L"b2"] = .86;
 	 Assert(c3.eval(&vars), 4);
 	 
 	 std::cout << "\nTesting boolean expressions\n" << std::endl;
 	 
-	 Assert("3 < 3", false);
-	 Assert("3 <= 3", true);
-	 Assert("3 > 3", false);
-	 Assert("3 >= 3", true);
-	 Assert("3 == 3", true);
-	 Assert("3 != 3", false);
-	 
-	 Assert("(3 && true) == true", true);
-	 Assert("(3 && 0) == true", false);
-	 Assert("(3 || 0) == true", true);
-	 Assert("(false || 0) == true", false);
-	 Assert("((1 || 0) || (0 || 1)) && (((1 || 0) || (0 || 1)) || ((1 || 0) || (0 || 1))) == true", true);
-	 Assert("((1 || 0) || (0 || 1)) && (((1 || 0) || (0 || 1)) && ((1 || 0) || (0 || 1))) == true", true);
-	 Assert("((1 || 0) || (0 || 1)) && (((0 || 0) || (0 || 1)) && ((1 || 0) || (0 || 1))) == true", true);
+	 Assert(L"3 < 3", false);
+	 Assert(L"3 <= 3", true);
+	 Assert(L"3 > 3", false);
+	 Assert(L"3 >= 3", true);
+	 Assert(L"3 == 3", true);
+	 Assert(L"3 != 3", false);
+
+	 Assert(L"(3 && true) == true", true);
+	 Assert(L"(3 && 0) == true", false);
+	 Assert(L"(3 || 0) == true", true);
+	 Assert(L"(false || 0) == true", false);
+	 Assert(L"((1 || 0) || (0 || 1)) && (((1 || 0) || (0 || 1)) || ((1 || 0) || (0 || 1))) == true", true);
+	 Assert(L"((1 || 0) || (0 || 1)) && (((1 || 0) || (0 || 1)) && ((1 || 0) || (0 || 1))) == true", true);
+	 Assert(L"((1 || 0) || (0 || 1)) && (((0 || 0) || (0 || 1)) && ((1 || 0) || (0 || 1))) == true", true);
 	 
 	 std::cout << "\nTesting exception management\n" << std::endl;
 	 
@@ -110,7 +110,7 @@ void Assert(double actual, double expected, const char* expr = 0)
 	 
 	 try 
 	 {
-		 vars.erase("b2");
+		 vars.erase(L"b2");
 		 c3.eval(&vars);
 	 } 
 	 catch(std::domain_error err) 
@@ -120,8 +120,8 @@ void Assert(double actual, double expected, const char* expr = 0)
 	 
 	 try 
 	 {
-		 vars.erase("b1");
-		 vars["b2"] = 0;
+		 vars.erase(L"b1");
+		 vars[L"b2"] = 0;
 		 c3.eval(&vars);
 		 std::cout << "  Do not THROW as expected" << std::endl;
 	 } 
