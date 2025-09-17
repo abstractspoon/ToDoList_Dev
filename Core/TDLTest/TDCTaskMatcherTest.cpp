@@ -85,13 +85,13 @@ TESTRESULT CTDCTaskMatcherTest::Run()
 	CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 	PopulateDataModel(data);
 
-	TestSimpleMatching(data);
-	TestComplexMatching(data);
+	TestIndividualRules(data);
+	TestMultipleRules(data);
 
 	return GetTotals();
 }
 
-void CTDCTaskMatcherTest::TestSimpleMatching(const CToDoCtrlData& data)
+void CTDCTaskMatcherTest::TestIndividualRules(const CToDoCtrlData& data)
 {
 	// These tests are just for single rules
 	CTDCScopedTest test(*this, _T("CTDCTaskMatcherTest::SimpleMatching"));
@@ -100,61 +100,61 @@ void CTDCTaskMatcherTest::TestSimpleMatching(const CToDoCtrlData& data)
 	{
 		CTDCScopedSubTest subtest(*this, _T("Text"));
 
-		TestSimpleTextMatching(data, TDCA_TASKNAME, _T("Task"));
-		TestSimpleTextMatching(data, TDCA_COMMENTS, _T("Comments"));
-		TestSimpleTextMatching(data, TDCA_ALLOCBY, _T("AllocBy"));
-		TestSimpleTextMatching(data, TDCA_STATUS, _T("Stat"));
-		TestSimpleTextMatching(data, TDCA_VERSION, _T("Ver"));
-		TestSimpleTextMatching(data, TDCA_EXTERNALID, _T("ExtID"));
+		TestTextAttributeRules(data, TDCA_TASKNAME, _T("Task"));
+		TestTextAttributeRules(data, TDCA_COMMENTS, _T("Comments"));
+		TestTextAttributeRules(data, TDCA_ALLOCBY, _T("AllocBy"));
+		TestTextAttributeRules(data, TDCA_STATUS, _T("Stat"));
+		TestTextAttributeRules(data, TDCA_VERSION, _T("Ver"));
+		TestTextAttributeRules(data, TDCA_EXTERNALID, _T("ExtID"));
 	}
 
 	// Array of strings
 	{
 		CTDCScopedSubTest subtest(*this, _T("Text Array"));
 
-		TestSimpleTextArrayMatching(data, TDCA_CATEGORY, _T("Cat"));
-		TestSimpleTextArrayMatching(data, TDCA_ALLOCTO, _T("AllocTo"));
-		TestSimpleTextArrayMatching(data, TDCA_TAGS, _T("Tag"));
-		TestSimpleTextArrayMatching(data, TDCA_FILELINK, _T("File"));
+		TestTextArrayAttributeRules(data, TDCA_CATEGORY, _T("Cat"));
+		TestTextArrayAttributeRules(data, TDCA_ALLOCTO, _T("AllocTo"));
+		TestTextArrayAttributeRules(data, TDCA_TAGS, _T("Tag"));
+		TestTextArrayAttributeRules(data, TDCA_FILELINK, _T("File"));
 	}
 
 	// Integers
 	{
 		CTDCScopedSubTest subtest(*this, _T("Integers"));
 
-		TestSimpleIntegerMatching(data, TDCA_PERCENT, BASE_PERCENT);
-		TestSimpleIntegerMatching(data, TDCA_PRIORITY, BASE_PRIORITY);
-		TestSimpleIntegerMatching(data, TDCA_RISK, BASE_RISK);
+		TestIntegerAttributeRules(data, TDCA_PERCENT, BASE_PERCENT);
+		TestIntegerAttributeRules(data, TDCA_PRIORITY, BASE_PRIORITY);
+		TestIntegerAttributeRules(data, TDCA_RISK, BASE_RISK);
 	}
 
 	// Doubles
 	{
 		CTDCScopedSubTest subtest(*this, _T("Doubles"));
 
-		TestSimpleDoubleMatching(data, TDCA_COST, BASE_COST);
+		TestDoubleAttributeRules(data, TDCA_COST, BASE_COST);
 	}
 
 	// Time Periods
 	{
 		CTDCScopedSubTest subtest(*this, _T("Time Periods"));
 
-		TestSimpleTimePeriodMatching(data, TDCA_TIMEESTIMATE, BASE_TIMEEST);
-		TestSimpleTimePeriodMatching(data, TDCA_TIMESPENT, BASE_TIMESPENT);
+		TestTimePeriodAttributeRules(data, TDCA_TIMEESTIMATE, BASE_TIMEEST);
+		TestTimePeriodAttributeRules(data, TDCA_TIMESPENT, BASE_TIMESPENT);
 	}
 
 	// Dates
 	{
 		CTDCScopedSubTest subtest(*this, _T("Dates"));
 
-		TestSimpleDateMatching(data, TDCA_CREATIONDATE, BASE_CREATION);
-		TestSimpleDateMatching(data, TDCA_STARTDATE, BASE_START);
-		TestSimpleDateMatching(data, TDCA_DUEDATE, BASE_DUE);
+		TestDateAttributeRules(data, TDCA_CREATIONDATE, BASE_CREATION);
+		TestDateAttributeRules(data, TDCA_STARTDATE, BASE_START);
+		TestDateAttributeRules(data, TDCA_DUEDATE, BASE_DUE);
 		//	TestSimpleDateMatching(data, TDCA_DONEDATE, BASE_DONE);
-		TestSimpleDateMatching(data, TDCA_LASTMODDATE, BASE_LASTMOD);
+		TestDateAttributeRules(data, TDCA_LASTMODDATE, BASE_LASTMOD);
 	}
 }
 
-void CTDCTaskMatcherTest::TestSimpleTextMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix)
+void CTDCTaskMatcherTest::TestTextAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix)
 {
 	CTDCTaskMatcher matcher(data, reminders, contentMgr);
 	CDWordArray aTaskIDs; // get overwritten by each test
@@ -256,7 +256,7 @@ void CTDCTaskMatcherTest::TestSimpleTextMatching(const CToDoCtrlData& data, TDC_
 	}
 }
 
-void CTDCTaskMatcherTest::TestSimpleTextArrayMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix)
+void CTDCTaskMatcherTest::TestTextArrayAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix)
 {
 	CTDCTaskMatcher matcher(data, reminders, contentMgr);
 	CDWordArray aTaskIDs; // get overwritten by each test
@@ -601,21 +601,21 @@ void CTDCTaskMatcherTest::TestSimpleNumberMatching(const CToDoCtrlData& data, SE
 	}
 }
 
-void CTDCTaskMatcherTest::TestSimpleIntegerMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nBase)
+void CTDCTaskMatcherTest::TestIntegerAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nBase)
 {
 	SEARCHPARAM rule(nAttibID);
 
 	TestSimpleNumberMatching(data, rule, nBase);
 }
 
-void CTDCTaskMatcherTest::TestSimpleDoubleMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase)
+void CTDCTaskMatcherTest::TestDoubleAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase)
 {
 	SEARCHPARAM rule(nAttibID);
 
 	TestSimpleNumberMatching(data, rule, dBase);
 }
 
-void CTDCTaskMatcherTest::TestSimpleTimePeriodMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase)
+void CTDCTaskMatcherTest::TestTimePeriodAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase)
 {
 	SEARCHPARAM rule(nAttibID);
 	rule.SetTimeUnits(TDCU_DAYS);
@@ -623,7 +623,7 @@ void CTDCTaskMatcherTest::TestSimpleTimePeriodMatching(const CToDoCtrlData& data
 	TestSimpleNumberMatching(data, rule, dBase);
 }
 
-void CTDCTaskMatcherTest::TestSimpleDateMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase)
+void CTDCTaskMatcherTest::TestDateAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase)
 {
 	CTDCTaskMatcher matcher(data, reminders, contentMgr);
 	CDWordArray aTaskIDs; // get overwritten by each test
@@ -805,7 +805,7 @@ void CTDCTaskMatcherTest::TestSimpleDateMatching(const CToDoCtrlData& data, TDC_
 	}
 }
 
-void CTDCTaskMatcherTest::TestComplexMatching(const CToDoCtrlData& data)
+void CTDCTaskMatcherTest::TestMultipleRules(const CToDoCtrlData& data)
 {
 	// These tests are testing the logical aspects of a ruleset
 	// ie. We presume that the individual rules work correctly

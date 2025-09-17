@@ -34,16 +34,16 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 protected:
-	void TestSimpleMatching(const CToDoCtrlData& data);
-	void TestComplexMatching(const CToDoCtrlData& data);
+	void TestIndividualRules(const CToDoCtrlData& data);
+	void TestMultipleRules(const CToDoCtrlData& data);
 
-	void TestSimpleTextMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
-	void TestSimpleTextArrayMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
+	void TestTextAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
+	void TestTextArrayAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
 	
-	void TestSimpleIntegerMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nBase);
-	void TestSimpleDoubleMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
-	void TestSimpleTimePeriodMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
-	void TestSimpleDateMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
+	void TestIntegerAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nBase);
+	void TestDoubleAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
+	void TestTimePeriodAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
+	void TestDateAttributeRules(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
 
 	void PopulateDataModel(CToDoCtrlData& data) const;
 	void InitialiseStyles();
