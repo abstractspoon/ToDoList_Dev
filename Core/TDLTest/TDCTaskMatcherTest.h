@@ -40,10 +40,10 @@ protected:
 	void TestSimpleTextMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
 	void TestSimpleTextArrayMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, const CString& sPrefix);
 	
-	void TestSimpleIntegerMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nOffset);
-	void TestSimpleDoubleMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset);
-	void TestSimpleTimePeriodMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset);
-	void TestSimpleDateMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dOffset);
+	void TestSimpleIntegerMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, int nBase);
+	void TestSimpleDoubleMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
+	void TestSimpleTimePeriodMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
+	void TestSimpleDateMatching(const CToDoCtrlData& data, TDC_ATTRIBUTE nAttibID, double dBase);
 
 	void PopulateDataModel(CToDoCtrlData& data) const;
 	void InitialiseStyles();
@@ -54,7 +54,7 @@ protected:
 	static BOOL ContainsOneTaskID(const CDWordArray& aTasks, DWORD dwTaskID);
 
 	template <class T>
-	void TestSimpleNumberMatching(const CToDoCtrlData& data, SEARCHPARAM& rule, T tOffset) const;
+	void TestSimpleNumberMatching(const CToDoCtrlData& data, SEARCHPARAM& rule, T tBase) const;
 
 };
 
