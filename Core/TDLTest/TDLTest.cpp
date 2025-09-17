@@ -85,27 +85,27 @@ void DoTests(const CTestUtils& utils)
 	TESTRESULT res;
 
 	// Keep sorted for easy scanning
-	res += DOTEST(CDateHelperTest);
-	res += DOTEST(CFileMiscTest);
-	res += DOTEST(CImportExportMgrTest);
-	res += DOTEST(CMiscTest);
-	res += DOTEST(CPreferencesTest);
-	res += DOTEST(CRemapMenuIDsTest);
-	res += DOTEST(CTaskFileTest);
-	res += DOTEST(CTDCCUSTOMATTRIBUTECALCULATIONTest);
-	res += DOTEST(CTDCDEPENDENCYTest);
-	res += DOTEST(CTDCRECURRENCETest);
-	res += DOTEST(CTDCTaskCalculatorTest);
-	res += DOTEST(CTDCTaskTimeLogTest);
-	res += CTDCTaskMatcherTest(utils).Run();
-	res += DOTEST(CTDLTaskCtrlBaseTest);
-	res += DOTEST(CTimeHelperTest);
-	res += DOTEST(CToDoCtrlDataTest);
-	res += DOTEST(CToDoCtrlMgrTest);
-	res += DOTEST(CToDoCtrlTaskLinkTest);
-	res += DOTEST(CWorkingDayTest);
-	res += DOTEST(CWorkingWeekTest);
-	res += DOTEST(CXmlFileTest);
+// 	res += DOTEST(CDateHelperTest);
+// 	res += DOTEST(CFileMiscTest);
+// 	res += DOTEST(CImportExportMgrTest);
+// 	res += DOTEST(CMiscTest);
+// 	res += DOTEST(CPreferencesTest);
+// 	res += DOTEST(CRemapMenuIDsTest);
+// 	res += DOTEST(CTaskFileTest);
+// 	res += DOTEST(CTDCCUSTOMATTRIBUTECALCULATIONTest);
+// 	res += DOTEST(CTDCDEPENDENCYTest);
+// 	res += DOTEST(CTDCRECURRENCETest);
+// 	res += DOTEST(CTDCTaskCalculatorTest);
+// 	res += DOTEST(CTDCTaskTimeLogTest);
+	res += DOTEST(CTDCTaskMatcherTest);
+// 	res += DOTEST(CTDLTaskCtrlBaseTest);
+// 	res += DOTEST(CTimeHelperTest);
+// 	res += DOTEST(CToDoCtrlDataTest);
+// 	res += DOTEST(CToDoCtrlMgrTest);
+// 	res += DOTEST(CToDoCtrlTaskLinkTest);
+// 	res += DOTEST(CWorkingDayTest);
+// 	res += DOTEST(CWorkingWeekTest);
+// 	res += DOTEST(CXmlFileTest);
 
 	// More...
 

@@ -39,7 +39,7 @@ const CContentMgr contentMgr;
 
 CTDCTaskMatcherTest::CTDCTaskMatcherTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(utils)
+	CTDLTestBase(_T("CTDCTaskMatcherTest"), utils)
 {
 	// Simple custom attributes
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
