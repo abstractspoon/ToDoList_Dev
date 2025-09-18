@@ -2580,6 +2580,10 @@
 #define IDS_SELECTSUBTASKPARENT_TITLE   51679
 #define IDS_LANGCOMBO_COMPLETION        51680
 #define IDS_LANGCOMBO_LANGCOUNTRY       51681
+#define IDS_FIND_GROUPSTART             51682
+#define IDS_FIND_GROUPEND               51683
+#define IDS_FIND_GROUPHEADER            51684
+#define IDS_FIND_INVALIDSEARCH          51685
 
 // Next default values for new objects
 // 
