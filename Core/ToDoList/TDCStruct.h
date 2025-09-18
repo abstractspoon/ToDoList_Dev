@@ -428,6 +428,7 @@ public:
 	BOOL IsStartOfGroup(int nRule) const;
 	BOOL IsLastRule(int nRule) const;
 	BOOL IsLastRuleInGroup(int nRule) const;
+	BOOL RuleSupportsAndOr(int nRule) const;
 
 protected:
 	void CountGroupings(int& nNumBegin, int& nNumEnd) const;

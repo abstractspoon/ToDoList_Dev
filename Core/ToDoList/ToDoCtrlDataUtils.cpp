@@ -248,99 +248,11 @@ BOOL CTDCTaskMatcher::AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUC
 
 //////////////////////////////////////////////////////////////////////////
 
-class CMatchExpression
-{
-public:
-	CMatchExpression(const CSearchParamArray& aRules)
-	{
-		m_sExpression = m_sResult = BuildExpression(aRules);
-	}
-
-	BOOL IsValidExpression() const { return !m_sExpression.IsEmpty(); }
-
-	BOOL SetRuleMatch(int nRule, BOOL bMatch)
-	{
-		// Avoid any memory allocation or moves by making
-		// the result the same size as the variable
-		return (m_sResult.Replace(GetRuleVariable(nRule), (bMatch ? _T(" 1") : _T(" 0"))) == 1);
-	}
-
-	BOOL EvaluateResult() const
-	{
-		if (m_sResult.IsEmpty())
-			return FALSE;
-
-		return (CCalculator::Evaluate(m_sResult) != 0.0);
-	}
-
-protected:
-	CString m_sExpression;
-	CString m_sResult;
-
-protected:
-	static CString BuildExpression(const CSearchParamArray& aRules)
-	{
-		if (!aRules.IsValid())
-			return _T("");
-
-		CString sExpression;
-		int nNumRules = aRules.GetSize();
-
-		for (int nRule = 0; nRule < nNumRules; nRule++)
-		{
-			const SEARCHPARAM& rule = aRules[nRule];
-
-			switch (rule.GetAttribute())
-			{
-			case TDCA_MATCHGROUPSTART:
-				sExpression += '(';
-				break;
-
-			case TDCA_MATCHGROUPEND:
-				sExpression += ')';
-				break;
-
-			default:
-				sExpression += GetRuleVariable(nRule);
-				break;
-			}
-			sExpression += GetRuleOperator(nRule, aRules);
-		}
-
-		return sExpression;
-	}
-
-	static CString GetRuleOperator(int nRule, const CSearchParamArray& aRules)
-	{
-		if (aRules.IsStartOfGroup(nRule) ||
-			aRules.IsLastRule(nRule) ||
-			aRules.IsLastRuleInGroup(nRule))
-		{
-			return _T("");
-		}
-
-		// else
-		return (aRules[nRule].GetAnd() ? _T("&&") : _T("||"));
-	}
-
-	static CString GetRuleVariable(int nRule)
-	{
-		TCHAR cVar[3] = { 0 };
-
-		cVar[0] = ('A' + (nRule / 26)); 
-		cVar[1] = ('A' + (nRule % 26));
-
-		return cVar;
-	}
-};
-
-//////////////////////////////////////////////////////////////////////////
-
 BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 									const SEARCHPARAMS& query, BOOL bCheckDueToday, SEARCHRESULT& result) const
 {
 	// sanity checks
-	if (!pTDI || !pTDS || !query.aRules.GetSize())
+	if (!pTDI || !pTDS || !query.aRules.IsValid())
 	{
 		ASSERT(0);
 		return FALSE;
@@ -370,25 +282,38 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	}
 	else // multiple rules
 	{
-		// Build a string representing the ruleset as a logical expression
-		// encoding each rule as a unique variable
-		CMatchExpression expr(query.aRules);
+		// Build a expression of each rule's match result
+		// combined with their logical operators
+		CString sExpression;
 
-		// Evaluate each individual rule, replacing its variable with '1' or '0'
-		// whilst at the same time keeping track of what matched in 'result'
 		for (int nRule = 0; nRule < nNumRules; nRule++)
 		{
 			const SEARCHPARAM& rule = query.aRules[nRule];
 
-			if (rule.GetAttribType() != FT_GROUP)
+			switch (rule.GetAttribute())
 			{
-				BOOL bMatch = TaskMatches(pTDI, pTDS, query, rule, bCheckDueToday, bIsDone, result);
-				expr.SetRuleMatch(nRule, bMatch);
+			case TDCA_MATCHGROUPSTART:
+				sExpression += '(';
+				break;
+
+			case TDCA_MATCHGROUPEND:
+				sExpression += ')';
+				break;
+
+			default:
+				if (TaskMatches(pTDI, pTDS, query, rule, bCheckDueToday, bIsDone, result))
+					sExpression += '1';
+				else
+					sExpression += '0';
+				break;
 			}
+
+			if (query.aRules.RuleSupportsAndOr(nRule))
+				sExpression += (rule.GetAnd() ? _T("&&") : _T("||"));
 		}
 
 		// Evaludate the expression
-		if (!expr.EvaluateResult())
+		if (!CCalculator::Evaluate(sExpression))
 			return FALSE;
 	}
 

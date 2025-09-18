@@ -1582,6 +1582,11 @@ BOOL CSearchParamArray::IsLastRuleInGroup(int nRule) const
 	return (GetAt(nRule + 1).GetAttribute() == TDCA_MATCHGROUPEND);
 }
 
+BOOL CSearchParamArray::RuleSupportsAndOr(int nRule) const
+{
+	return !(IsStartOfGroup(nRule) || IsLastRule(nRule) || IsLastRuleInGroup(nRule));
+}
+
 ///////////////////////////////////////////////////////////////////////
 
 SEARCHPARAMS::SEARCHPARAMS()

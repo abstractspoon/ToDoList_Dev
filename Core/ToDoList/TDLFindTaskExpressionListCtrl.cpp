@@ -643,12 +643,8 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditCell(int nRow, int nCol) const
 			break;
 
 		case ANDOR_COL:
-			if (m_aSearchParams.IsStartOfGroup(nRow) ||
-				m_aSearchParams.IsLastRule(nRow) ||
-				m_aSearchParams.IsLastRuleInGroup(nRow))
-			{
+			if (!m_aSearchParams.RuleSupportsAndOr(nRow))
 				return FALSE;
-			}
 			break;
 		}
 	}
@@ -1328,17 +1324,15 @@ void CTDLFindTaskExpressionListCtrl::RefreshAndOrColumnText()
 	for (int nRule = 0; nRule < nNumRules; nRule++)
 	{
 		// Hide text for start of group, last rule, and last rule of group
-		if (m_aSearchParams.IsStartOfGroup(nRule) ||
-			m_aSearchParams.IsLastRule(nRule) ||
-			m_aSearchParams.IsLastRuleInGroup(nRule))
-		{
-			SetItemText(nRule, ANDOR_COL, _T(""));
-		}
-		else
+		CEnString sText;
+
+		if (m_aSearchParams.RuleSupportsAndOr(nRule))
 		{
 			const SEARCHPARAM& rule = m_aSearchParams[nRule];
-			SetItemText(nRule, ANDOR_COL, CEnString(rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR));
+			sText.LoadString(rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR);
 		}
+
+		SetItemText(nRule, ANDOR_COL, sText);
 	}
 }
 
