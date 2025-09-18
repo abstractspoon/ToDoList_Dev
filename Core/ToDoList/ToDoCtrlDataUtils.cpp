@@ -302,9 +302,9 @@ protected:
 
 			default:
 				sExpression += GetRuleVariable(nRule);
-				sExpression += GetRuleOperator(nRule, aRules);
 				break;
 			}
+			sExpression += GetRuleOperator(nRule, aRules);
 		}
 
 		return sExpression;

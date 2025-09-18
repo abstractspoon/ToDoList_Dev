@@ -219,6 +219,9 @@ void CTDLPriorityComboBox::SetNumLevels(int nNumLevels)
 	{
 		m_nNumLevels = nNumLevels;
 
+		if (m_nNumLevels > m_aColors.GetSize())
+			m_aColors.RemoveAll();
+
 		if (GetSafeHwnd())
 		{
 			int nSel = GetCurSel(); // save

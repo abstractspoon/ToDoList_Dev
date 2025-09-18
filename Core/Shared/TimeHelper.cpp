@@ -75,7 +75,7 @@ double CTimeHelper::Convert(double dTime, TH_UNITS nFromUnits, TH_UNITS nToUnits
 	// sanity check
 	if (!IsValidUnits(nFromUnits) || !IsValidUnits(nToUnits))
 	{	
-		ASSERT(0);
+		ASSERT(dTime == 0.0);
 		return 0.0;
 	}
 	

@@ -643,7 +643,8 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditCell(int nRow, int nCol) const
 			break;
 
 		case ANDOR_COL:
-			if (m_aSearchParams.IsLastRule(nRow) ||
+			if (m_aSearchParams.IsStartOfGroup(nRow) ||
+				m_aSearchParams.IsLastRule(nRow) ||
 				m_aSearchParams.IsLastRuleInGroup(nRow))
 			{
 				return FALSE;
