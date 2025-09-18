@@ -827,13 +827,20 @@ int CTDLFindTasksDlg::GetResultIDs(const CFilteredToDoCtrl* pTDC, CDWordArray& a
 
 void CTDLFindTasksDlg::RefreshSearch()
 {
-	ASSERT (GetSafeHwnd());
-	
-	OnFind();
+	ASSERT(GetSafeHwnd());
+
+	if (m_lcFindSetup.IsValid())
+		OnFind();
 }
 
 void CTDLFindTasksDlg::OnFind() 
 {
+	if (!m_lcFindSetup.IsValid())
+	{
+		AfxMessageBox(IDS_FIND_INVALIDSEARCH);
+		return;
+	}
+
 	m_lcFindSetup.EndEdit();
 	UpdateData();
 
@@ -1819,6 +1826,12 @@ BOOL CTDLFindTasksDlg::OnEraseBkgnd(CDC* pDC)
 
 void CTDLFindTasksDlg::OnApplyasfilter() 
 {
+	if (!m_lcFindSetup.IsValid())
+	{
+		AfxMessageBox(IDS_FIND_INVALIDSEARCH);
+		return;
+	}
+
 	CString sSearch;
 	m_cbSearches.GetWindowText(sSearch);
 
