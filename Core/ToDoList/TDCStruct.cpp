@@ -1534,23 +1534,30 @@ COleDateTime SEARCHPARAM::ValueAsDate() const
 
 BOOL CSearchParamArray::IsValid() const
 {
-	int nNumBegin, nNumEnd;
-	CountGroupings(nNumBegin, nNumEnd);
+	int nNumStarts, nNumEnds;
+	
+	if (!IsBalanced(nNumStarts, nNumEnds))
+		return FALSE;
 
-	return ((nNumBegin == nNumEnd) && (GetSize() > (nNumBegin + nNumEnd)));
+	// Must have at least one 'real' rule
+	return (GetSize() > (nNumStarts + nNumEnds));
 }
 
 BOOL CSearchParamArray::IsBalanced() const
 {
-	int nNumBegin, nNumEnd;
-	CountGroupings(nNumBegin, nNumEnd);
-
-	return (nNumEnd == nNumBegin);
+	int nUnused, nUnused2;
+	return IsBalanced(nUnused, nUnused2);
 }
 
-void CSearchParamArray::CountGroupings(int& nNumBegin, int& nNumEnd) const
+BOOL CSearchParamArray::IsBalanced(int& nNumStarts, int& nNumEnds) const
 {
-	nNumBegin = nNumEnd = 0;
+	CountGroupings(nNumStarts, nNumEnds);
+	return (nNumEnds == nNumStarts);
+}
+
+void CSearchParamArray::CountGroupings(int& nNumStarts, int& nNumEnds) const
+{
+	nNumStarts = nNumEnds = 0;
 
 	int nNumRules = GetSize();
 
@@ -1558,8 +1565,8 @@ void CSearchParamArray::CountGroupings(int& nNumBegin, int& nNumEnd) const
 	{
 		switch (GetAt(nRule).GetAttribute())
 		{
-		case TDCA_MATCHGROUPSTART:	nNumBegin++;	break;
-		case TDCA_MATCHGROUPEND:	nNumEnd++;		break;
+		case TDCA_MATCHGROUPSTART:	nNumStarts++;	break;
+		case TDCA_MATCHGROUPEND:	nNumEnds++;		break;
 		}
 	}
 }

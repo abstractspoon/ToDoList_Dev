@@ -829,17 +829,39 @@ void CTDLFindTasksDlg::RefreshSearch()
 {
 	ASSERT(GetSafeHwnd());
 
-	if (m_lcFindSetup.IsValid())
+	if (m_lcFindSetup.IsValid()) // Handle invalid searches silently
 		OnFind();
+}
+
+BOOL CTDLFindTasksDlg::CheckReportSearchValidity() const
+{
+	if (m_lcFindSetup.IsValid())
+		return TRUE;
+
+	// What message to display?
+	int nNumGroupStarts, nNumGroupEnds;
+	CEnString sMsg;
+
+	if (!m_lcFindSetup.IsBalanced(nNumGroupStarts, nNumGroupEnds))
+	{
+		int nDiff = abs(nNumGroupStarts - nNumGroupEnds);
+		UINT nTypeStrID = ((nNumGroupStarts > nNumGroupEnds) ? IDS_FIND_GROUPSTART : IDS_FIND_GROUPEND);
+
+		sMsg.Format(IDS_MESSAGE_UNMATCHEDSEARCHGROUPS, nDiff, CEnString(nTypeStrID));
+	}
+	else
+	{
+		sMsg.LoadString(IDS_MESSAGE_NOSEARCHRULES);
+	}
+
+	AfxMessageBox(sMsg, MB_ICONWARNING | MB_OK);
+	return FALSE;
 }
 
 void CTDLFindTasksDlg::OnFind() 
 {
-	if (!m_lcFindSetup.IsValid())
-	{
-		AfxMessageBox(IDS_FIND_INVALIDSEARCH);
+	if (!CheckReportSearchValidity())
 		return;
-	}
 
 	m_lcFindSetup.EndEdit();
 	UpdateData();
@@ -1826,11 +1848,8 @@ BOOL CTDLFindTasksDlg::OnEraseBkgnd(CDC* pDC)
 
 void CTDLFindTasksDlg::OnApplyasfilter() 
 {
-	if (!m_lcFindSetup.IsValid())
-	{
-		AfxMessageBox(IDS_FIND_INVALIDSEARCH);
+	if (!CheckReportSearchValidity())
 		return;
-	}
 
 	CString sSearch;
 	m_cbSearches.GetWindowText(sSearch);

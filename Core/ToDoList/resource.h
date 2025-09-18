@@ -2584,6 +2584,8 @@
 #define IDS_FIND_GROUPEND               51683
 #define IDS_FIND_GROUPHEADER            51684
 #define IDS_FIND_INVALIDSEARCH          51685
+#define IDS_MESSAGE_NOSEARCHRULES       51685
+#define IDS_MESSAGE_UNMATCHEDSEARCHGROUPS 51686
 
 // Next default values for new objects
 // 

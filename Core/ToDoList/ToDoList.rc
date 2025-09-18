@@ -6128,7 +6128,10 @@ BEGIN
     IDS_FIND_GROUPSTART     "<Group Start>"
     IDS_FIND_GROUPEND       "<Group End>"
     IDS_FIND_GROUPHEADER    "Grouping"
-    IDS_FIND_INVALIDSEARCH  "Invalid search rules"
+    IDS_MESSAGE_NOSEARCHRULES 
+                            "Invalid Search|The current search contains no rules."
+    IDS_MESSAGE_UNMATCHEDSEARCHGROUPS 
+                            "Invalid Search|The current search contains %d unmatched %s."
 END
 
 #endif    // English (Australia) resources

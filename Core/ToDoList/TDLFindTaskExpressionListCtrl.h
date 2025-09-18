@@ -38,6 +38,7 @@ public:
 	virtual ~CTDLFindTaskExpressionListCtrl();
 
 	BOOL IsValid() const { return m_aSearchParams.IsValid(); }
+	BOOL IsBalanced(int& nNumGroupStarts, int& nNumGroupEnds) const { return m_aSearchParams.IsBalanced(nNumGroupStarts, nNumGroupEnds); }
 	void ClearSearch();
 
 	void SetSearchParams(const SEARCHPARAM& param);
