@@ -1537,7 +1537,7 @@ BOOL CSearchParamArray::IsValid() const
 	int nNumBegin, nNumEnd;
 	CountGroupings(nNumBegin, nNumEnd);
 
-	return ((nNumEnd == nNumEnd) && (GetSize() > (nNumBegin + nNumEnd)));
+	return ((nNumBegin == nNumEnd) && (GetSize() > (nNumBegin + nNumEnd)));
 }
 
 BOOL CSearchParamArray::IsBalanced() const
