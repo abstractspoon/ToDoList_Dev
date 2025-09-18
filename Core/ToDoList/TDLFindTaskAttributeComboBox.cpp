@@ -125,11 +125,11 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 		break;
 
 	case TDCA_MATCHGROUPSTART:
-		sName = _T("<Begin Group>");
+		sName.LoadString(IDS_FIND_GROUPSTART);
 		break;
 
 	case TDCA_MATCHGROUPEND:
-		sName = _T("<End Group>");
+		sName.LoadString(IDS_FIND_GROUPEND);
 		break;
 
 	default:
