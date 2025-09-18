@@ -1048,18 +1048,21 @@ void CTDLFindTaskExpressionListCtrl::ValidateListData() const
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRule];
 
-		// check matching attribute text less '(Custom/Relative)' suffixes
-		CString sRuleAttrib = m_cbAttributes.GetAttributeName(rule);
-		CString sListAttrib = GetItemText(nRule, ATTRIB_COL);
-		ASSERT (Misc::SplitLeft(sRuleAttrib, '(') == Misc::SplitLeft(sListAttrib, '('));
+		if (rule.GetAttribType() != FT_GROUP)
+		{
+			// check matching attribute text less '(Custom/Relative)' suffixes
+			CString sRuleAttrib = m_cbAttributes.GetAttributeName(rule);
+			CString sListAttrib = GetItemText(nRule, ATTRIB_COL);
+			ASSERT(Misc::SplitLeft(sRuleAttrib, '(') == Misc::SplitLeft(sListAttrib, '('));
 
-		// check matching operator text 
-		CString sRuleOp = GetOpName(rule.GetOperator());
-		CString sListOp = GetItemText(nRule, OPERATOR_COL);
-		ASSERT (sListOp.IsEmpty() || sRuleOp == sListOp);
+			// check matching operator text 
+			CString sRuleOp = GetOpName(rule.GetOperator());
+			CString sListOp = GetItemText(nRule, OPERATOR_COL);
+			ASSERT(sListOp.IsEmpty() || sRuleOp == sListOp);
 
-		// check valid operator
-		ASSERT(rule.HasValidOperator());
+			// check valid operator
+			ASSERT(rule.HasValidOperator());
+		}
 	}
 #endif
 }
