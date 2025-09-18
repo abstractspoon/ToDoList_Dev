@@ -332,6 +332,8 @@ struct TDCOPERATOR
 	UINT nOpResID;
 };
 
+// ------------------------------------------------------------------------
+
 struct SEARCHPARAM
 {
 	friend struct SEARCHPARAMS;
@@ -415,7 +417,21 @@ protected:
 	mutable FIND_ATTRIBTYPE nAttribType;
 };
 
-typedef CArray<SEARCHPARAM, SEARCHPARAM&> CSearchParamArray;
+// ------------------------------------------------------------------------
+
+class CSearchParamArray : public CArray<SEARCHPARAM, SEARCHPARAM&>
+{
+public:
+	BOOL IsValid() const; // Has some actual rules 
+	BOOL IsBalanced() const; // Begin/End groups
+
+	BOOL IsStartOfGroup(int nRule) const;
+	BOOL IsLastRule(int nRule) const;
+	BOOL IsLastRuleInGroup(int nRule) const;
+
+protected:
+	void CountGroupings(int& nNumBegin, int& nNumEnd) const;
+};
 
 // ------------------------------------------------------------------------
 
@@ -452,6 +468,8 @@ protected:
 protected:
 	void InitAttributeMap() const;
 };
+
+// ------------------------------------------------------------------------
 
 struct SEARCHRESULT
 {

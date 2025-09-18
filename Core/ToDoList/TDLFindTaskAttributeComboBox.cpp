@@ -49,8 +49,8 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 	int nItem = InsertString(0, _T("Grouping"));
 	SetHeadingItem(nItem);
 
-	CDialogHelper::InsertStringT(*this, 1, _T("<Begin Group>"), EncodeItemData(TDCA_BEGINGROUP));
-	CDialogHelper::InsertStringT(*this, 2, _T("<End Group>"), EncodeItemData(TDCA_ENDGROUP));
+	CDialogHelper::InsertStringT(*this, 1, _T("<Begin Group>"), EncodeItemData(TDCA_MATCHGROUPSTART));
+	CDialogHelper::InsertStringT(*this, 2, _T("<End Group>"), EncodeItemData(TDCA_MATCHGROUPEND));
 
 	if (!bHadHeadings)
 	{
@@ -124,11 +124,11 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 		sName.LoadString(IDS_TDLBC_REMINDER);
 		break;
 
-	case TDCA_BEGINGROUP:
+	case TDCA_MATCHGROUPSTART:
 		sName = _T("<Begin Group>");
 		break;
 
-	case TDCA_ENDGROUP:
+	case TDCA_MATCHGROUPEND:
 		sName = _T("<End Group>");
 		break;
 

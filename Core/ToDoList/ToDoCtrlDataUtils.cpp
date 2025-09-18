@@ -280,8 +280,11 @@ protected:
 protected:
 	static CString BuildExpression(const CSearchParamArray& aRules)
 	{
+		if (!aRules.IsValid())
+			return _T("");
+
 		CString sExpression;
-		int nNumRules = aRules.GetSize(), nNumBeginGroup = 0, nNumEndGroup = 0;
+		int nNumRules = aRules.GetSize();
 
 		for (int nRule = 0; nRule < nNumRules; nRule++)
 		{
@@ -289,14 +292,12 @@ protected:
 
 			switch (rule.GetAttribute())
 			{
-			case TDCA_BEGINGROUP:
+			case TDCA_MATCHGROUPSTART:
 				sExpression += '(';
-				nNumBeginGroup++;
 				break;
 
-			case TDCA_ENDGROUP:
+			case TDCA_MATCHGROUPEND:
 				sExpression += ')';
-				nNumEndGroup++;
 				break;
 
 			default:
@@ -306,38 +307,16 @@ protected:
 			}
 		}
 
-		if (nNumBeginGroup != nNumEndGroup)
-			return _T(""); // Unbalanced grouping
-
-		if ((nNumBeginGroup + nNumEndGroup) == nNumRules)
-			return _T(""); // No 'real' rules
-
-		// else
 		return sExpression;
 	}
 
 	static CString GetRuleOperator(int nRule, const CSearchParamArray& aRules)
 	{
-		int nNumRules = aRules.GetSize();
-		ASSERT(nRule < nNumRules);
-
-		// Never for the last rule
-		if (nRule == (nNumRules - 1))
-			return _T("");
-
-		switch (aRules[nRule].GetAttribute())
+		if (aRules.IsStartOfGroup(nRule) ||
+			aRules.IsLastRule(nRule) ||
+			aRules.IsLastRuleInGroup(nRule))
 		{
-		case TDCA_BEGINGROUP:
-			return _T(""); // Never
-
-		default:
-			if (nRule < (nNumRules - 1))
-			{
-				// Not for a rule followed by an 'end group'
-				if (aRules[nRule + 1].GetAttribute() == TDCA_ENDGROUP)
-					return _T("");
-			}
-			break;
+			return _T("");
 		}
 
 		// else

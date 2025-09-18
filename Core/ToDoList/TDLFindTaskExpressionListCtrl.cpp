@@ -643,16 +643,10 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditCell(int nRow, int nCol) const
 			break;
 
 		case ANDOR_COL:
-			if (rule.GetAttribute() == TDCA_BEGINGROUP)
+			if (m_aSearchParams.IsLastRule(nRow) ||
+				m_aSearchParams.IsLastRuleInGroup(nRow))
 			{
 				return FALSE;
-			}
-			else if (nRow < (nNumRules - 1))
-			{
-				// If the next rule is a <end group> then disable
-				// the and/or of 'this' rule
-				if (m_aSearchParams[nRow + 1].GetAttribute() == TDCA_ENDGROUP)
-					return FALSE;
 			}
 			break;
 		}
@@ -1332,26 +1326,18 @@ void CTDLFindTaskExpressionListCtrl::RefreshAndOrColumnText()
 
 	for (int nRule = 0; nRule < nNumRules; nRule++)
 	{
-		const SEARCHPARAM& rule = m_aSearchParams[nRule];
-
-		// Hide text for last rule
-		BOOL bShowEmpty = (nRule == (nNumRules - 1));
-
-		// And for the beginning of a group
-		if (!bShowEmpty)
+		// Hide text for start of group, last rule, and last rule of group
+		if (m_aSearchParams.IsStartOfGroup(nRule) ||
+			m_aSearchParams.IsLastRule(nRule) ||
+			m_aSearchParams.IsLastRuleInGroup(nRule))
 		{
-			bShowEmpty = (rule.GetAttribute() == TDCA_BEGINGROUP);
-
-			// and the last rule of a group
-			if (!bShowEmpty)
-			{
-				if (nRule < nNumRules - 1)
-					bShowEmpty = (m_aSearchParams[nRule + 1].GetAttribute() == TDCA_ENDGROUP);
-			}
+			SetItemText(nRule, ANDOR_COL, _T(""));
 		}
-
-		CEnString sAndOr(bShowEmpty ? 0 : (rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR));
-		SetItemText(nRule, ANDOR_COL, sAndOr);
+		else
+		{
+			const SEARCHPARAM& rule = m_aSearchParams[nRule];
+			SetItemText(nRule, ANDOR_COL, CEnString(rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR));
+		}
 	}
 }
 

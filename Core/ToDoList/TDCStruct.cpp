@@ -1192,8 +1192,8 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 	case TDCA_LASTMODDATE:
 		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
 
-	case TDCA_BEGINGROUP:
-	case TDCA_ENDGROUP:
+	case TDCA_MATCHGROUPSTART:
+	case TDCA_MATCHGROUPEND:
 		return FT_GROUP;
 	}
 
@@ -1528,6 +1528,58 @@ COleDateTime SEARCHPARAM::ValueAsDate() const
 	// all else
 	ASSERT(0);
 	return CDateHelper::NullDate();
+}
+
+///////////////////////////////////////////////////////////////////////
+
+BOOL CSearchParamArray::IsValid() const
+{
+	int nNumBegin, nNumEnd;
+	CountGroupings(nNumBegin, nNumEnd);
+
+	return ((nNumEnd == nNumEnd) && (GetSize() > (nNumBegin + nNumEnd)));
+}
+
+BOOL CSearchParamArray::IsBalanced() const
+{
+	int nNumBegin, nNumEnd;
+	CountGroupings(nNumBegin, nNumEnd);
+
+	return (nNumEnd == nNumBegin);
+}
+
+void CSearchParamArray::CountGroupings(int& nNumBegin, int& nNumEnd) const
+{
+	nNumBegin = nNumEnd = 0;
+
+	int nNumRules = GetSize();
+
+	for (int nRule = 0; nRule < nNumRules; nRule++)
+	{
+		switch (GetAt(nRule).GetAttribute())
+		{
+		case TDCA_MATCHGROUPSTART:	nNumBegin++;	break;
+		case TDCA_MATCHGROUPEND:	nNumEnd++;		break;
+		}
+	}
+}
+
+BOOL CSearchParamArray::IsStartOfGroup(int nRule) const
+{
+	return (GetAt(nRule).GetAttribute() == TDCA_MATCHGROUPSTART);
+}
+
+BOOL CSearchParamArray::IsLastRule(int nRule) const
+{
+	return (nRule >= (GetSize() - 1));
+}
+
+BOOL CSearchParamArray::IsLastRuleInGroup(int nRule) const
+{
+	if (IsLastRule(nRule))
+		return FALSE;
+
+	return (GetAt(nRule + 1).GetAttribute() == TDCA_MATCHGROUPEND);
 }
 
 ///////////////////////////////////////////////////////////////////////

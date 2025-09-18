@@ -37,11 +37,12 @@ public:
 	CTDLFindTaskExpressionListCtrl(const CContentMgr& mgrContent);
 	virtual ~CTDLFindTaskExpressionListCtrl();
 
+	BOOL IsValid() const { return m_aSearchParams.IsValid(); }
+	void ClearSearch();
+
 	void SetSearchParams(const SEARCHPARAM& param);
 	void SetSearchParams(const CSearchParamArray& params);
 	int GetSearchParams(CSearchParamArray& params) const;
-
-	void ClearSearch();
 
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
