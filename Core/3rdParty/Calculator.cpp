@@ -23,5 +23,14 @@ CCalculator::~CCalculator()
 
 double CCalculator::Evaluate(LPCWSTR szExpression)
 {
-	return calculator::calculate(szExpression);
+	try
+	{
+		return calculator::calculate(szExpression);
+	}
+	catch (...)
+	{
+		
+	}
+
+	return 0.0;
 }

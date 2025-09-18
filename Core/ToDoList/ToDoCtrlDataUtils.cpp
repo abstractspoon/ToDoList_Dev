@@ -246,6 +246,117 @@ BOOL CTDCTaskMatcher::AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUC
 	return FALSE;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+class CMatchExpression
+{
+public:
+	CMatchExpression(const CSearchParamArray& aRules)
+	{
+		m_sExpression = m_sResult = BuildExpression(aRules);
+	}
+
+	BOOL IsValidExpression() const { return !m_sExpression.IsEmpty(); }
+
+	BOOL SetRuleMatch(int nRule, BOOL bMatch)
+	{
+		// Avoid any memory allocation or moves by making
+		// the result the same size as the variable
+		return (m_sResult.Replace(GetRuleVariable(nRule), (bMatch ? _T(" 1") : _T(" 0"))) == 1);
+	}
+
+	BOOL EvaluateResult() const
+	{
+		if (m_sResult.IsEmpty())
+			return FALSE;
+
+		return (CCalculator::Evaluate(m_sResult) != 0.0);
+	}
+
+protected:
+	CString m_sExpression;
+	CString m_sResult;
+
+protected:
+	static CString BuildExpression(const CSearchParamArray& aRules)
+	{
+		CString sExpression;
+		int nNumRules = aRules.GetSize(), nNumBeginGroup = 0, nNumEndGroup = 0;
+
+		for (int nRule = 0; nRule < nNumRules; nRule++)
+		{
+			const SEARCHPARAM& rule = aRules[nRule];
+
+			switch (rule.GetAttribute())
+			{
+			case TDCA_BEGINGROUP:
+				sExpression += '(';
+				nNumBeginGroup++;
+				break;
+
+			case TDCA_ENDGROUP:
+				sExpression += ')';
+				nNumEndGroup++;
+				break;
+
+			default:
+				sExpression += GetRuleVariable(nRule);
+				sExpression += GetRuleOperator(nRule, aRules);
+				break;
+			}
+		}
+
+		if (nNumBeginGroup != nNumEndGroup)
+			return _T(""); // Unbalanced grouping
+
+		if ((nNumBeginGroup + nNumEndGroup) == nNumRules)
+			return _T(""); // No 'real' rules
+
+		// else
+		return sExpression;
+	}
+
+	static CString GetRuleOperator(int nRule, const CSearchParamArray& aRules)
+	{
+		int nNumRules = aRules.GetSize();
+		ASSERT(nRule < nNumRules);
+
+		// Never for the last rule
+		if (nRule == (nNumRules - 1))
+			return _T("");
+
+		switch (aRules[nRule].GetAttribute())
+		{
+		case TDCA_BEGINGROUP:
+			return _T(""); // Never
+
+		default:
+			if (nRule < (nNumRules - 1))
+			{
+				// Not for a rule followed by an 'end group'
+				if (aRules[nRule + 1].GetAttribute() == TDCA_ENDGROUP)
+					return _T("");
+			}
+			break;
+		}
+
+		// else
+		return (aRules[nRule].GetAnd() ? _T("&&") : _T("||"));
+	}
+
+	static CString GetRuleVariable(int nRule)
+	{
+		TCHAR cVar[3] = { 0 };
+
+		cVar[0] = ('A' + (nRule / 26)); 
+		cVar[1] = ('A' + (nRule % 26));
+
+		return cVar;
+	}
+};
+
+//////////////////////////////////////////////////////////////////////////
+
 BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 									const SEARCHPARAMS& query, BOOL bCheckDueToday, SEARCHRESULT& result) const
 {
@@ -282,34 +393,23 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	{
 		// Build a string representing the ruleset as a logical expression
 		// encoding each rule as a unique variable
-		CString sExpression;
+		CMatchExpression expr(query.aRules);
 
-		for (int nRule = 0; nRule < nNumRules; nRule++)
-		{
-			const SEARCHPARAM& rule = query.aRules[nRule];
-			TCHAR cRuleVar = ('A' + nRule);
-
-			sExpression += cRuleVar;
-		
-			if (nRule != (nNumRules - 1))
-				sExpression += (rule.GetAnd() ? _T("&&") :  _T("||"));
-		}
-
-		// Now evaluate each rule, replacing its variable with '1' or '0'
+		// Evaluate each individual rule, replacing its variable with '1' or '0'
 		// whilst at the same time keeping track of what matched in 'result'
 		for (int nRule = 0; nRule < nNumRules; nRule++)
 		{
 			const SEARCHPARAM& rule = query.aRules[nRule];
-			TCHAR cRuleVar = ('A' + nRule);
 
-			if (TaskMatches(pTDI, pTDS, query, query.aRules[nRule], bCheckDueToday, bIsDone, result))
-				sExpression.Replace(cRuleVar, '1');
-			else
-				sExpression.Replace(cRuleVar, '0');
+			if (rule.GetAttribType() != FT_GROUP)
+			{
+				BOOL bMatch = TaskMatches(pTDI, pTDS, query, rule, bCheckDueToday, bIsDone, result);
+				expr.SetRuleMatch(nRule, bMatch);
+			}
 		}
 
 		// Evaludate the expression
-		if (CCalculator::Evaluate(sExpression) == 0.0)
+		if (!expr.EvaluateResult())
 			return FALSE;
 	}
 
