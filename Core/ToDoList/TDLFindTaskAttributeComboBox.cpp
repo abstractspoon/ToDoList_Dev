@@ -46,11 +46,11 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 	BOOL bHadHeadings = (m_nNumHeadings > 0);
 
 	// Add grouping to the head of the list
-	int nItem = InsertString(0, _T("Grouping"));
+	int nItem = InsertString(0, IDS_FIND_GROUPHEADER);
 	SetHeadingItem(nItem);
 
-	CDialogHelper::InsertStringT(*this, 1, _T("<Begin Group>"), EncodeItemData(TDCA_MATCHGROUPSTART));
-	CDialogHelper::InsertStringT(*this, 2, _T("<End Group>"), EncodeItemData(TDCA_MATCHGROUPEND));
+	CDialogHelper::InsertStringT(*this, 1, IDS_FIND_GROUPSTART, EncodeItemData(TDCA_MATCHGROUPSTART));
+	CDialogHelper::InsertStringT(*this, 2, IDS_FIND_GROUPEND, EncodeItemData(TDCA_MATCHGROUPEND));
 
 	if (!bHadHeadings)
 	{
