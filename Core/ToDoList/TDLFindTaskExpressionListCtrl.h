@@ -121,6 +121,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	virtual int GetItemIndent(int nItem) const;
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL DeleteSelectedCell();
 	virtual BOOL CanEditCell(int nRow, int nCol) const;

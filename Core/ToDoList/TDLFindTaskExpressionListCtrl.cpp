@@ -53,7 +53,8 @@ enum
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(16);
+const int DEPTH_INDENT	= GraphicsMisc::ScaleByDPIFactor(10);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1611,6 +1612,16 @@ BOOL CTDLFindTaskExpressionListCtrl::PreTranslateMessage(MSG* pMsg)
 	}
 	
 	return CInputListCtrl::PreTranslateMessage(pMsg);
+}
+
+int CTDLFindTaskExpressionListCtrl::GetItemIndent(int nItem) const
+{
+	int nIndent = 0;
+
+	if (!IsPrompt(nItem))
+		nIndent = (m_aSearchParams.GetRuleDepth(nItem) * DEPTH_INDENT);
+
+	return max(0, nIndent);
 }
 
 void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, 

@@ -1594,6 +1594,28 @@ BOOL CSearchParamArray::RuleSupportsAndOr(int nRule) const
 	return !(IsStartOfGroup(nRule) || IsLastRule(nRule) || IsLastRuleInGroup(nRule));
 }
 
+BOOL CSearchParamArray::GetRuleDepth(int nAtRule) const
+{
+	int nDepth = 0;
+
+	for (int nRule = 0; nRule <= nAtRule; nRule++)
+	{
+		switch (GetAt(nRule).GetAttribute())
+		{
+		case TDCA_MATCHGROUPSTART:
+			if ((nRule < nAtRule))
+				nDepth++;	
+			break;
+
+		case TDCA_MATCHGROUPEND:
+			nDepth--;	
+			break;
+		}
+	}
+
+	return nDepth;
+}
+
 ///////////////////////////////////////////////////////////////////////
 
 SEARCHPARAMS::SEARCHPARAMS()
