@@ -1691,7 +1691,6 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 			}
 			return;
 
-
 		case FT_COLOR:
 			if (!sText.IsEmpty())
 			{
