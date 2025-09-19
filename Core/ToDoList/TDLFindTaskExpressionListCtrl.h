@@ -125,11 +125,12 @@ protected:
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL DeleteSelectedCell();
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
-	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void OnCancelEdit();
 	virtual void InitState();
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);
+	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 
 	void PrepareEdit(int nRow, int nCol);
 	void PrepareControl(CWnd& ctrl, int nRow, int nCol);

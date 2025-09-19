@@ -1624,6 +1624,14 @@ int CTDLFindTaskExpressionListCtrl::GetItemIndent(int nItem) const
 	return max(0, nIndent);
 }
 
+COLORREF CTDLFindTaskExpressionListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
+{
+	if ((nCol == ATTRIB_COL) && !IsPrompt(nItem) && (m_aSearchParams[nItem].GetAttribType() == FT_GROUP))
+		return ::GetSysColor(COLOR_3DDKSHADOW);
+
+	return CInputListCtrl::GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
+}
+
 void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, 
 													const CRect& rText, const CString& sText, 
 													COLORREF crText, UINT nDrawTextFlags)
