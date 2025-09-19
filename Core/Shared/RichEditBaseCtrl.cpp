@@ -26,7 +26,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const CRect DEFMARGINS					= CRect(8, 4, 8, 0);
+const int   BASEMARGIN					= GraphicsMisc::ScaleByDPIFactor(4);
+const CRect DEFMARGINS					= CRect((BASEMARGIN * 2), BASEMARGIN, (BASEMARGIN * 2), 0);
 const CSize DEFPOPUPLISTSIZE			= CSize(GraphicsMisc::ScaleByDPIFactor(75), GraphicsMisc::ScaleByDPIFactor(200));
 
 /////////////////////////////////////////////////////////////////////////////
@@ -146,6 +147,8 @@ void CRichEditBaseCtrl::OnSetFocus(CWnd* pOldWnd)
 	CAutoFlag af(m_bInOnFocus, TRUE);
 
 	CRichEditCtrl::OnSetFocus(pOldWnd);
+
+	CheckUpdateMargins();
 }
 
 LRESULT CRichEditBaseCtrl::OnEditSetSelection(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -167,6 +170,9 @@ LRESULT CRichEditBaseCtrl::OnSetFont(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 LRESULT CRichEditBaseCtrl::OnSetText(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
+	// Ensure the margins are set
+	CheckUpdateMargins();
+
 	// prevent spurious change notifications occurring as
 	// a result of spell-checking or auto-url detection
 	TemporarilyDisableChangeNotifications();
@@ -245,6 +251,9 @@ BOOL CRichEditBaseCtrl::Redo()
 
 LRESULT CRichEditBaseCtrl::OnPaste(WPARAM wParam, LPARAM lParam)
 {
+	// Ensure the margins are set
+	CheckUpdateMargins();
+
 	LRESULT lr = Default();
 
 	if (!m_bHasTables && CClipboard::HasFormat(CBF_RTF))
@@ -268,6 +277,9 @@ BOOL CRichEditBaseCtrl::HasTables(const CString& sRtf, BOOL bAnsiEncoded)
 
 BOOL CRichEditBaseCtrl::PasteSpecial(CLIPFORMAT nFormat)
 {
+	// Ensure the margins are set
+	CheckUpdateMargins();
+
 	if ((nFormat == 0) || !CClipboard().HasFormat(nFormat))
 		return FALSE;
 
@@ -278,6 +290,9 @@ BOOL CRichEditBaseCtrl::PasteSpecial(CLIPFORMAT nFormat)
 
 BOOL CRichEditBaseCtrl::PasteSimpleText()
 {
+	// Ensure the margins are set
+	CheckUpdateMargins();
+
 	if (!CanPasteSimpleText())
 		return FALSE;
 
@@ -287,6 +302,9 @@ BOOL CRichEditBaseCtrl::PasteSimpleText()
 
 BOOL CRichEditBaseCtrl::InsertSimpleText(LPCWSTR szText, bool bAtEnd)
 {
+	// Ensure the margins are set
+	CheckUpdateMargins();
+
 	if (!CanEdit() || (Misc::IsEmpty(szText) && bAtEnd))
 		return FALSE;
 
@@ -348,6 +366,9 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 	if (!GetSafeHwnd())
 		return FALSE;
 	
+	// Ensure the margins are set
+	CheckUpdateMargins();
+
 	LPTSTR szText = NULL;
 	int nTextLen = sText.GetLength();
 	BOOL bWantUnicode = (nCodePage == CP_UNICODE);
@@ -987,11 +1008,27 @@ void CRichEditBaseCtrl::SetMargins(LPCRECT pMargins)
 	else
 		m_rMargins = *pMargins;
 
+	if (GetSafeHwnd())
+		CheckUpdateMargins();
+}
+
+void CRichEditBaseCtrl::CheckUpdateMargins()
+{
+	ASSERT(GetSafeHwnd());
+
+	// Check if the margins need updating
+	CRect rClient, rText;
+	GetClientRect(rClient);
+	GetRect(rText);
+
+	CRect rMargins(rClient);
+	rMargins -= rText;
+
+	if (rMargins == m_rMargins)
+		return;
+
 	// Make sure we're big enough for our margins
 	// else SetRect() will fail
-	CRect rClient;
-	GetClientRect(rClient);
-
 	int nCxMargin = (m_rMargins.left + m_rMargins.right);
 	int nCyMargin = (m_rMargins.top + m_rMargins.bottom);
 
@@ -1409,6 +1446,9 @@ int CRichEditBaseCtrl::GetRTFLength() const
 
 void CRichEditBaseCtrl::SetRTF(const CString& rtf)
 {
+	// Ensure the margins are set
+	CheckUpdateMargins();
+
 	// Don't notify our parent about this since
 	// that's where it came from
 	TemporarilyDisableChangeNotifications();

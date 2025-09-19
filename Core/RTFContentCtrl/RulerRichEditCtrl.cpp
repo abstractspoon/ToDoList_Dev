@@ -324,7 +324,7 @@ void CRulerRichEditCtrl::SetSelectedWebLink(const CString& sWebLink)
 
 void CRulerRichEditCtrl::CreateMargins()
 {
-	m_rtf.SetMargins(CRect(SCMARGIN * 2, SCMARGIN, SCMARGIN * 2, 0));
+	m_rtf.SetMargins((SCMARGIN * 2), SCMARGIN, (SCMARGIN * 2), 0);
 
 	// Get the diff between the window- and client 
 	// rect of the RTF-control. This gives the actual 
