@@ -58,7 +58,7 @@ void CEnString::CompareIgnoreString(LPCTSTR szText)
 		s_pTT->IgnoreString(*this);
 }
 
-void CEnString::Format(LPCTSTR lpszFormat, ...)
+CEnString& CEnString::Format(LPCTSTR lpszFormat, ...)
 {
 	CString strFormat(lpszFormat);
 		
@@ -73,9 +73,11 @@ void CEnString::Format(LPCTSTR lpszFormat, ...)
 
 		CompareIgnoreString(strFormat);
 	}
+
+	return *this;
 }
 
-void CEnString::Format(UINT nFormatID, ...)
+CEnString& CEnString::Format(UINT nFormatID, ...)
 {
 	CString strFormat;
 		
@@ -88,6 +90,8 @@ void CEnString::Format(UINT nFormatID, ...)
 
 		CompareIgnoreString(strFormat);
 	}
+	
+	return *this;
 }
 
 // static helper

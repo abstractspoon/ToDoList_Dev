@@ -239,8 +239,9 @@ void CTDLAnalyseLoggedTimeDlg::BuildGroupByCombo()
 
 		if (!attribDef.IsList() || !attribDef.IsMultiList())
 		{
-			CEnString sItem(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			CDialogHelper::AddStringT(m_cbGroupByAttrib, sItem, attribDef.GetAttributeID());
+			CDialogHelper::AddStringT(m_cbGroupByAttrib, 
+										CEnString().Format(IDS_CUSTOMCOLUMN, attribDef.sLabel),
+										attribDef.GetAttributeID());
 		}
 	}
 

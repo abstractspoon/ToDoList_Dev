@@ -106,8 +106,9 @@ void CTDLMultiSortDlg::BuildCombos()
 
 			ASSERT(attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT));
 
-			CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			AddStringT(combo, sColumn, nColID);
+			AddStringT(combo, 
+						CEnString().Format(IDS_CUSTOMCOLUMN, attribDef.sLabel), 
+						nColID);
 		}
 
 		// add blank item at top of 2nd and 3rd combo

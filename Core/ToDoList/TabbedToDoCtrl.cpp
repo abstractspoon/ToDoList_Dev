@@ -284,8 +284,9 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 
 		if (m_taskList.CanGroupBy(attribDef.GetColumnID(), TRUE))
 		{
-			CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			AddStringT(m_cbListGroupBy, sAttrib, attribDef.GetColumnID());
+			AddStringT(m_cbListGroupBy, 
+						CEnString().Format(IDS_CUSTOMCOLUMN, attribDef.sLabel), 
+						attribDef.GetColumnID());
 		}
 	}
 	
@@ -3153,7 +3154,9 @@ void CTabbedToDoCtrl::BeginExtensionProgress(const VIEWDATA* pVData, UINT nMsg)
 	if (nMsg == 0)
 		nMsg = IDS_UPDATINGTABBEDVIEW;
 
-	CEnString sMsg(nMsg, pVData->pExtension->GetMenuText());
+	CEnString sMsg;
+	sMsg.Format(nMsg, pVData->pExtension->GetMenuText());
+
 	GetParent()->SendMessage(WM_TDCM_LENGTHYOPERATION, TRUE, (LPARAM)(LPCTSTR)sMsg);
 }
 

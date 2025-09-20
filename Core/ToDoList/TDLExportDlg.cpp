@@ -10,6 +10,7 @@
 #include "..\shared\dialoghelper.h"
 #include "..\shared\misc.h"
 #include "..\Shared\DateHelper.h"
+#include "..\Shared\MessageBox.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -187,14 +188,14 @@ void CTDLExportDlg::OnOK()
 			FileMisc::SplitPath(sPath, &sDrive, &sFolder);
 			FileMisc::MakePath(sPath, sDrive, sFolder, sExportPath);
 
-			CString sMessage;
+			CEnString sMessage;
 			
 			if (bExportAllTasklists)
 				sMessage.Format(IDS_ED_CONFIRMEXPORTPATHMULTI, sPath);
 			else
 				sMessage.Format(IDS_ED_CONFIRMEXPORTPATH, sPath);
 							
-			UINT nRet = MessageBox(sMessage, CEnString(IDS_ED_CONFIRMEXPORTPATH_TITLE), MB_YESNO);
+			UINT nRet = CMessageBox::AfxShow(CEnString(IDS_ED_CONFIRMEXPORTPATH_TITLE), sMessage, MB_YESNO);
 
 			if (nRet == IDNO)
 			{
@@ -213,9 +214,9 @@ void CTDLExportDlg::OnOK()
 
 		if (bBadFolder)
 		{
-			CEnString sMessage(IDS_ED_NOMAKEEXPORTPATH, sExportPath);
-			
-			UINT nRet = MessageBox(sMessage, CEnString(IDS_ED_NOMAKEEXPORTPATH_TITLE), MB_OKCANCEL);
+			UINT nRet = CMessageBox::AfxShow(CEnString(IDS_ED_NOMAKEEXPORTPATH_TITLE),
+											CEnString().Format(IDS_ED_NOMAKEEXPORTPATH, sExportPath), 
+											MB_OKCANCEL);
 
 			if (nRet == IDOK)
 				m_ppHost.SetActivePage(0); // don't close dialog

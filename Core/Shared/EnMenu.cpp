@@ -351,9 +351,8 @@ BOOL CEnMenu::TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTST
 
 		// set menu text
 		UINT nFlags = (MF_BYCOMMAND | MF_STRING | nState);
-		CEnString sCmdText(szFormat, ++nPos);
 
-		::ModifyMenu(hSubMenu, nCmdID, nFlags, nCmdID, sCmdText);
+		::ModifyMenu(hSubMenu, nCmdID, nFlags, nCmdID, CEnString().Format(szFormat, ++nPos));
 	}
 
 	return TRUE;

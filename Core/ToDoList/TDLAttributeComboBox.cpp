@@ -163,12 +163,12 @@ void CTDLAttributeComboBox::CheckAddItem(const TDCCUSTOMATTRIBUTEDEFINITION& att
 	if (!WantAttribute(attribDef.GetAttributeID()))
 		return;
 
-	CString sItem;
+	CEnString sItem;
 
 	if (m_dwOptions & TDLACB_GROUPCUSTOMATTRIBS)
-		sItem = attribDef.sLabel; // No need to suffix
+		sItem = attribDef.sLabel; // No need for suffix
 	else
-		sItem = CEnString(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+		sItem.Format(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 
 	AddItem(sItem, attribDef.GetAttributeID(), aItems);
 }
@@ -188,7 +188,7 @@ void CTDLAttributeComboBox::AddItem(const CString& sItem, TDC_ATTRIBUTE nAttribI
 		si.bRelativeDate = TRUE;
 
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && !Misc::HasFlag(m_dwOptions, TDLACB_GROUPCUSTOMATTRIBS))
-			si.sItem = CEnString(IDS_CUSTOMRELDATECOLUMN, si.sItem);
+			si.sItem = CEnString().Format(IDS_CUSTOMRELDATECOLUMN, si.sItem);
 		else 
 			si.sItem += (' ' + CEnString(IDS_TDLBC_RELATIVESUFFIX));
 

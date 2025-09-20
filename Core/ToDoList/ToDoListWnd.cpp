@@ -1646,7 +1646,7 @@ void CToDoListWnd::OnQuickFindNext()
 		{
 			// return to start
 			if (!tdc.SelectNextTask(m_sQuickFind, TDC_SELECTFIRST))
-				CMessageBox::AfxShow(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
+				CMessageBox::AfxShow(CEnString().Format(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
 }
@@ -1666,7 +1666,7 @@ void CToDoListWnd::OnQuickFindPrev()
 		{
 			// return to end
 			if (!tdc.SelectNextTask(m_sQuickFind, TDC_SELECTLAST))
-				CMessageBox::AfxShow(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
+				CMessageBox::AfxShow(CEnString().Format(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
 }
@@ -1711,7 +1711,7 @@ void CToDoListWnd::ProcessQuickFindTextChange(BOOL bComboSelChange)
 		{
 			if (bComboSelChange)
 			{
-				CMessageBox::AfxShow(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind), MB_OK);
+				CMessageBox::AfxShow(CEnString().Format(IDS_QUICKFIND_NOTFOUND, m_sQuickFind), MB_OK);
 				m_cbQuickFind.SetFocus();
 			}
 
@@ -4133,10 +4133,7 @@ void CToDoListWnd::OnTrayiconShowDueTasks(UINT nCmdID)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
 
 	if (!DoDueTaskNotification(nTDC, PFP_DUETODAY))
-	{
-		CEnString sMessage(IDS_NODUETODAY, m_mgrToDoCtrls.GetFriendlyProjectName(nTDC));
-		CMessageBox::AfxShow(sMessage);
-	}
+		CMessageBox::AfxShow(CEnString().Format(IDS_NODUETODAY, m_mgrToDoCtrls.GetFriendlyProjectName(nTDC)));
 }
 
 LRESULT CToDoListWnd::OnHotkey(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -7201,8 +7198,8 @@ void CToDoListWnd::RefreshTasklistReadOnlyStatus(int nCtrl, BOOL bForceCheckRemo
 			
 			if (nReloadOption == RO_ASK)
 			{
-				CString sFilePath = tdc.GetFilePath();
-				CEnString sMessage(bReadOnly ? IDS_WRITABLETOREADONLY : IDS_READONLYTOWRITABLE, sFilePath);
+				CEnString sMessage;
+				sMessage.Format(bReadOnly ? IDS_WRITABLETOREADONLY : IDS_READONLYTOWRITABLE, tdc.GetFilePath());
 				
 				if (!bReadOnly) // might been modified
 					sMessage += CEnString(IDS_WANTRELOAD);
@@ -7235,8 +7232,9 @@ void CToDoListWnd::RefreshTasklistReadOnlyStatus(int nCtrl, BOOL bForceCheckRemo
 	// do we need to notify the user?
 	if (!sFileList.IsEmpty())
 	{
-		CEnString sMessage(IDS_TASKLISTSRELOADED, sFileList);
-		m_trayIcon.ShowBalloon(sMessage, CEnString(IDS_READONLYCHANGE_BALLOONTITLE), NIIF_INFO);
+		m_trayIcon.ShowBalloon(CEnString().Format(IDS_TASKLISTSRELOADED, sFileList), 
+								CEnString(IDS_READONLYCHANGE_BALLOONTITLE), 
+								NIIF_INFO);
 	}
 }
 
@@ -7308,11 +7306,12 @@ void CToDoListWnd::RefreshTasklistTimestampChange(int nCtrl, BOOL bForceCheckRem
 			
 			if (nReloadOption == RO_ASK)
 			{
-				CString sFilePath = tdc.GetFilePath();
-			
-				CEnString sMessage(IDS_MODIFIEDELSEWHERE, sFilePath);
+				CEnString sMessage;
+				sMessage.Format(IDS_MODIFIEDELSEWHERE, tdc.GetFilePath());
+
+				sMessage += ENDL;
 				sMessage += CEnString(IDS_WANTRELOAD);
-				
+
 				bReload = (CMessageBox::AfxShow(IDS_TIMESTAMPCHANGE_TITLE, sMessage, MB_YESNOCANCEL) == IDYES);
 			}
 			
@@ -7340,8 +7339,9 @@ void CToDoListWnd::RefreshTasklistTimestampChange(int nCtrl, BOOL bForceCheckRem
 	// do we need to notify the user?
 	if (!sFileList.IsEmpty())
 	{
-		CEnString sMessage(IDS_TASKLISTSRELOADED, sFileList);
-		m_trayIcon.ShowBalloon(sMessage, CEnString(IDS_TIMESTAMPCHANGE_BALLOONTITLE), NIIF_INFO);
+		m_trayIcon.ShowBalloon(CEnString().Format(IDS_TASKLISTSRELOADED, sFileList), 
+								CEnString(IDS_TIMESTAMPCHANGE_BALLOONTITLE), 
+								NIIF_INFO);
 	}
 }
 
@@ -7463,14 +7463,14 @@ void CToDoListWnd::RefreshTasklistCheckoutStatus(int nCtrl, BOOL bForceCheckRemo
 		CString sMessage;
 
 		if (!sCheckedInFiles.IsEmpty())
-			sMessage += CEnString(IDS_TASKLISTSAUTOCHECKEDIN, sCheckedInFiles);
+			sMessage += CEnString().Format(IDS_TASKLISTSAUTOCHECKEDIN, sCheckedInFiles);
 		
 		if (!sCheckedOutFiles.IsEmpty())
 		{
 			if (!sCheckedInFiles.IsEmpty())
 				sMessage += ENDL;
 
-			sMessage += CEnString(IDS_TASKLISTSAUTOCHECKEDOUT, sCheckedOutFiles);
+			sMessage += CEnString().Format(IDS_TASKLISTSAUTOCHECKEDOUT, sCheckedOutFiles);
 		}
 
 		m_trayIcon.ShowBalloon(sMessage, CEnString(IDS_SOURCECONTROLCHANGE_BALLOONTITLE), NIIF_INFO);
@@ -8553,10 +8553,11 @@ TDC_FILE CToDoListWnd::ConfirmSaveTaskList(int nIndex, DWORD dwFlags)
 
 			// save tasklist
 			CString sName(m_mgrToDoCtrls.FormatProjectNameWithFileName(nIndex));
-			CEnString sMessage(IDS_SAVEBEFORECLOSE, sName);
 			
 			// don't allow user to cancel if closing down
-			int nRet = CMessageBox::AfxShow(IDS_CONFIRMSAVE_TITLE, sMessage, bClosingWindows ? MB_YESNO : MB_YESNOCANCEL);
+			int nRet = CMessageBox::AfxShow(IDS_CONFIRMSAVE_TITLE, 
+											CEnString().Format(IDS_SAVEBEFORECLOSE, sName), 
+											bClosingWindows ? MB_YESNO : MB_YESNOCANCEL);
 			
 			if (nRet == IDYES)
 			{
@@ -9440,7 +9441,7 @@ void CToDoListWnd::HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CS
 	}
 
 	if (nMessageID)
-		CMessageBox::AfxShow(CEnString(nMessageID, sImportPath), (MB_OK | nIcon));
+		CMessageBox::AfxShow(CEnString().Format(nMessageID, sImportPath), (MB_OK | nIcon));
 }
 
 void CToDoListWnd::HandleExportTasklistResult(IIMPORTEXPORT_RESULT nRes, const CString& sExportPath, BOOL bToClipboard, BOOL bPreview)
@@ -9955,14 +9956,16 @@ void CToDoListWnd::OnToolsCheckout()
 		FileMisc::GetFileLastModified(sFilePath, stLastMod);
 
 		CEnString sMessage;
-		sMessage.Format(IDS_CHECKEDOUTBYOTHER, sFilePath, sCheckedOutTo, 
+		sMessage.Format(IDS_CHECKEDOUTBYOTHER, 
+						sFilePath, 
+						sCheckedOutTo, 
 						COleDateTime(stLastMod).Format(VAR_DATEVALUEONLY));
 
 		UINT nFlags = (MB_OK | MB_ICONEXCLAMATION);
 		
 		if (m_bAllowForcedCheckOut)
 		{
-			sMessage += CEnString(IDS_QUERYFORCEDCHECKOUT, sCheckedOutTo);
+			sMessage += CEnString().Format(IDS_QUERYFORCEDCHECKOUT, sCheckedOutTo);
 			nFlags |= MB_YESNO;
 		}
 
@@ -10016,10 +10019,9 @@ void CToDoListWnd::OnToolsCheckin()
 	{
 		if (Prefs().GetConfirmSaveOnExit())
 		{
-			CString sName = m_mgrToDoCtrls.GetFriendlyProjectName(nSel);
-			CEnString sMessage(IDS_SAVEBEFORECHECKIN, sName);
-			
-			int nRet = CMessageBox::AfxShow(IDS_CHECKIN_TITLE, sMessage, MB_YESNOCANCEL);
+			int nRet = CMessageBox::AfxShow(IDS_CHECKIN_TITLE, 
+											CEnString().Format(IDS_SAVEBEFORECHECKIN, m_mgrToDoCtrls.GetFriendlyProjectName(nSel)), 
+											MB_YESNOCANCEL);
 			
 			switch (nRet)
 			{
@@ -11104,7 +11106,7 @@ void CToDoListWnd::OnToolsShowtasksDue(UINT nCmdID)
 	
 	if (!DoDueTaskNotification(GetSelToDoCtrl(), nDueBy))
 	{
-		CMessageBox::AfxShow(CEnString(nIDDueBy, m_mgrToDoCtrls.GetFriendlyProjectName(GetSelToDoCtrl())), MB_OK);
+		CMessageBox::AfxShow(CEnString().Format(nIDDueBy, m_mgrToDoCtrls.GetFriendlyProjectName(GetSelToDoCtrl())), MB_OK);
 	}
 }
 
@@ -12507,7 +12509,7 @@ LRESULT CToDoListWnd::OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam)
 
 	if (!ValidateTaskLinkFilePath(sPath))
 	{
-		CMessageBox::AfxShow(CEnString(IDS_TASKLISTNOTFOUND, sPath));
+		CMessageBox::AfxShow(CEnString().Format(IDS_TASKLISTNOTFOUND, sPath));
 		return FALSE;
 	}
 

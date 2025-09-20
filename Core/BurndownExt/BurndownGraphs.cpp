@@ -1732,7 +1732,7 @@ CCustomAttributeTimeSeriesGraph::CCustomAttributeTimeSeriesGraph(const CUSTOMATT
 
 CString CCustomAttributeTimeSeriesGraph::GetTitle() const
 {
-	return CEnString(IDS_CUSTOMATTRIB_GRAPH, m_custDefinition.sLabel);
+	return CEnString().Format(IDS_CUSTOMATTRIB_GRAPH, m_custDefinition.sLabel);
 }
 
 void CCustomAttributeTimeSeriesGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const
@@ -1814,7 +1814,7 @@ CCustomAttributeFrequencyGraph::CCustomAttributeFrequencyGraph(const CUSTOMATTRI
 
 CString CCustomAttributeFrequencyGraph::GetTitle() const
 {
-	return CEnString(IDS_CUSTOMATTRIB_GRAPH, m_custDefinition.sLabel);
+	return CEnString().Format(IDS_CUSTOMATTRIB_GRAPH, m_custDefinition.sLabel);
 }
 
 void CCustomAttributeFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const

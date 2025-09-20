@@ -1137,7 +1137,7 @@ void CTDLCustomAttributeDlg::OnOK()
 			CString sID(attrib.sUniqueID);
 			sID.MakeLower();
 
-			AfxMessageBox(CEnString(IDS_MULTIPLEUNIQUEIDSEXIST, sID), MB_OK | MB_ICONERROR);
+			AfxMessageBox(CEnString().Format(IDS_MULTIPLEUNIQUEIDSEXIST, sID), MB_OK | MB_ICONERROR);
 			return;
 		}
 	}

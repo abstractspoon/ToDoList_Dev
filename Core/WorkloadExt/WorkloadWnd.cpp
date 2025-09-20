@@ -1046,7 +1046,7 @@ void CWorkloadWnd::UpdatePeriod()
 	m_ctrlWorkload.SetCurrentPeriod(m_dtPeriod);
 
 	if (m_dtPeriod.IsValid())
-		m_sPeriodDuration = CEnString(IDS_PERIODDURATION, m_dtPeriod.GetWeekdayCount());
+		m_sPeriodDuration = CEnString().Format(IDS_PERIODDURATION, m_dtPeriod.GetWeekdayCount());
 	else
 		m_sPeriodDuration.Empty();
 

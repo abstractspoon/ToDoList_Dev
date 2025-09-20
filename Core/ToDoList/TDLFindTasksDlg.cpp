@@ -1669,8 +1669,12 @@ void CTDLFindTasksDlg::OnDeleteSearch()
 	if (sDeletedSearch.IsEmpty())
 		return;
 
-	if (CMessageBox::AfxShow(IDS_FINDTASKS, CEnString(IDS_FIND_CONFIRMDELETESEARCH, sDeletedSearch), MB_YESNO) == IDNO)
+	if (CMessageBox::AfxShow(IDS_FINDTASKS, 
+							CEnString().Format(IDS_FIND_CONFIRMDELETESEARCH, sDeletedSearch), 
+							MB_YESNO) == IDNO)
+	{
 		return;
+	}
 
 	// Remove deleted search
 	int nSearch = m_cbSearches.FindStringExact(-1, sDeletedSearch);
