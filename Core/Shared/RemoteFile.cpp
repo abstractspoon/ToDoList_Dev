@@ -1313,11 +1313,15 @@ RMERR CRemoteFile::UploadFile(LPCTSTR szFromLocalPath, const FILERESULT* pRemote
 
 	if (bRemoteExists && (dwOptions & RMO_CONFIRMOVERWRITE))
 	{
-		CEnString sMessage(_T("The remote file '%s' already exists on the server.\n\nAre you sure you want to overwrite it?"), sRemotePath);
+		CEnString sMessage;
+		sMessage.Format(_T("The remote file '%s' already exists on the server.\n\nAre you sure you want to overwrite it?"), sRemotePath);
 
-		int nRet = CMessageBox::AfxShow(m_pParent, CEnString(_T("Confirm Overwrite")), sMessage, MB_YESNO);
+		int nRet = CMessageBox::AfxShow(m_pParent, 
+										CEnString(_T("Confirm Overwrite")), 
+										sMessage, 
+										MB_YESNO);
 
-		if (nRet != IDYES && nRet != IDOK)
+		if ((nRet != IDYES) && (nRet != IDOK))
 			return RMERR_USERCANCELLED;
 	}
 

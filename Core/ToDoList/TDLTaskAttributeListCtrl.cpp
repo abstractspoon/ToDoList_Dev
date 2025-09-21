@@ -764,7 +764,7 @@ void CTDLTaskAttributeListCtrl::Populate()
 
 				if (attribDef.bEnabled)
 				{
-					CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+					CString sAttrib = CEnString().Format(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 
 					int nRow = AddRow(sAttrib);
 					SetItemData(nRow, attribDef.GetAttributeID());

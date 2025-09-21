@@ -64,11 +64,7 @@ CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml)
 	// add custom protocol to comments field for linking to task IDs
 	m_rtf.AddProtocol(TDL_LINK, TRUE);
 
-	CString sTooltip;
-	sTooltip.LoadString(ID_HELP);
-	Misc::Trim(sTooltip);
-
-	CWinHelpButton::SetDefaultTooltip(CLocalizer::TranslateText((LPCTSTR)sTooltip));
+	CWinHelpButton::SetDefaultTooltip(CEnString(ID_HELP));
 }
 
 CRTFContentControl::~CRTFContentControl()

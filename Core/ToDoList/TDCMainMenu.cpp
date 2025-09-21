@@ -776,10 +776,11 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 			ASSERT(attribDef.bEnabled && attribDef.SupportsFeature(TDCCAF_SORT));
 
 			UINT nMenuID = ((nColID - TDCC_CUSTOMCOLUMN_FIRST) + ID_SORTBY_CUSTOMCOLUMN_FIRST);
-			CEnString sColumn(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 
-			pMenu->InsertMenu(nInsert, MF_BYPOSITION, nMenuID, sColumn);
-			nInsert++;
+			pMenu->InsertMenu(nInsert++, 
+								MF_BYPOSITION, 
+								nMenuID, 
+								CEnString().Format(IDS_CUSTOMCOLUMN, attribDef.sLabel));
 		}
 
 		// Resort the menu if we're not translated else 

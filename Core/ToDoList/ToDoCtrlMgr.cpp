@@ -676,7 +676,8 @@ BOOL CToDoCtrlMgr::ShowDueTaskNotification(int nIndex, LPCTSTR szFilePath, BOOL 
 		pBrowser = new CTDLBrowserDlg(bBrowser);
 		m_mapBrowsers[&tdc] = pBrowser;
 
-		CEnString sTitle(IDS_DUETASKS_TITLE, GetFriendlyProjectName(nIndex));
+		CEnString sTitle;
+		sTitle.Format(IDS_DUETASKS_TITLE, GetFriendlyProjectName(nIndex));
 		
 		if (!pBrowser->Create(sTitle, szFilePath, AfxGetMainWnd()))
 			return FALSE;
@@ -713,9 +714,7 @@ BOOL CToDoCtrlMgr::VerifyPassword(int nIndex, BOOL bForce) const
 		return TRUE;
 
 	// else
-	CEnString sExplanation(IDS_SELECTENCRYPTED, GetFriendlyProjectName(nIndex));
-		
-	return tdc.VerifyPassword(sExplanation);
+	return tdc.VerifyPassword(CEnString().Format(IDS_SELECTENCRYPTED, GetFriendlyProjectName(nIndex)));
 }
 
 TDCM_DUESTATUS CToDoCtrlMgr::GetDueItemStatus(int nIndex) const

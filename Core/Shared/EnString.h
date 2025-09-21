@@ -24,40 +24,15 @@ class CEnString : public CString
 {
 public:
 	CEnString();
+	~CEnString(); // non-virtual else it messes up LPCTSTR operator
+	
 	CEnString(LPCTSTR lpsz);
 	CEnString(UINT nStrID, HWND hwndRef = NULL);
 	CEnString(UINT nStrID, HMENU hMenu);
 	CEnString(const CString& str);
 
-	template <class T>
-	CEnString(UINT nFormatID, T data)
-	{
-		CString strFormat;
-
-		if (nFormatID && LoadString(nFormatID, NULL, strFormat))
-		{
-			CString::Format(strFormat, data);
-			CompareIgnoreString(strFormat);
-		}
-	}
-
-	template <class T>
-	CEnString(LPCTSTR szFormat, T data)
-	{
-		if (!Misc::IsEmpty(szFormat))
-		{
-			CString strFormat(szFormat);
-			TranslateString(strFormat);
-
-			CString::Format(strFormat, data);
-			CompareIgnoreString(strFormat);
-		}
-	}
-
-	~CEnString(); // non-virtual else it messes up LPCTSTR operator
-
-	void Format(UINT nFormatID, ...);
-	void Format(LPCTSTR lpszFormat, ...);
+	CEnString& Format(UINT nFormatID, ...);
+	CEnString& Format(LPCTSTR lpszFormat, ...);
 
 	BOOL LoadString(UINT nFormatID, HWND hwndRef = NULL);
 	BOOL LoadString(UINT nFormatID, HMENU hMenu);

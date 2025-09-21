@@ -38,15 +38,12 @@ CKanbanPreferencesPage::CKanbanPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	m_crFullColumn(255),
 	m_cbAttributes(TRUE) // include <none>
 {
-	//{{AFX_DATA_INIT(CKanbanPreferencesPage)
-	//}}AFX_DATA_INIT
 }
 
 void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPreferencesPageBase::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CKanbanPreferencesPage)
 	DDX_Check(pDX, IDC_SHOWTASKCOLORASBAR, m_bShowTaskColorAsBar);
 	DDX_Control(pDX, IDC_DISPLAYATTRIBUTES, m_lbDisplayAttrib);
 	DDX_Control(pDX, IDC_ATTRIBUTES, m_cbAttributes);
@@ -54,7 +51,6 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_ALWAYSSHOWBACKLOG, m_bAlwaysShowBacklog);
 	DDX_Control(pDX, IDC_COLUMNDEFS, m_lcFixedColumnDefs);
 	DDX_Check(pDX, IDC_HIDEEMPTYATTRIBS, m_bHideEmptyAttributeValues);
-	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_COLORBARBYPRIORITY, m_bColorBarByPriority);
 	DDX_Check(pDX, IDC_INDENTSUBTASKS, m_bIndentSubtasks);
 	DDX_Check(pDX, IDC_SPECFIFYFULLCOLOUR, m_bSpecifyFullColor);
@@ -66,13 +62,11 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPreferencesPageBase)
-	//{{AFX_MSG_MAP(CKanbanPreferencesPage)
 	ON_CBN_SELENDOK(IDC_ATTRIBUTES, OnSelchangeAttribute)
 	ON_BN_CLICKED(IDC_MOVECOL_DOWN, OnMoveFixedColDown)
 	ON_BN_CLICKED(IDC_MOVECOL_UP, OnMoveFixedColUp)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COLUMNDEFS, OnItemchangedColumndefs)
 	ON_BN_CLICKED(IDC_FIXEDCOLUMNS, OnChangeColumnType)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SPECFIFYFULLCOLOUR, OnSpecifyFullColor)
 	ON_BN_CLICKED(IDC_SETFULLCOLOR, OnSetFullColor)
 	ON_BN_CLICKED(IDC_FIXEDCOLUMNS, OnSortSubtasksBelowParents)

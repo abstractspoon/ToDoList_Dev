@@ -8,6 +8,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\fileregister.h"
+#include "..\Shared\EnString.h"
 
 #include <math.h>
 
@@ -22,21 +23,16 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // COptionsDlg dialog
 
-
 COptionsDlg::COptionsDlg(BOOL bImport, BOOL bIncludeProject, LPCTSTR szIndent, CWnd* pParent /*=NULL*/)
 	: 
 	CDialog(IDD_OPTIONSDIALOG, pParent), 
 	m_bIncludeProject(bIncludeProject),
 	m_sIndent(szIndent),
-	m_icon(CFileRegister::GetRegisteredIcon(_T("txt")))
+	m_icon(CFileRegister::GetRegisteredIcon(_T("txt"))),
+	m_sLabel(CEnString(bImport ? IDS_IMPORTLABEL : IDS_EXPORTLABEL)),
+	m_sTitle(CEnString(bImport ? IDS_IMPORTTITLE : IDS_EXPORTTITLE)),
+	m_sProjectLabel(CEnString(bImport ? IDS_IMPORTPROJECTLABEL : IDS_EXPORTPROJECTLABEL))
 {
-	//{{AFX_DATA_INIT(COptionsDlg)
-
-	//}}AFX_DATA_INIT
-	m_sLabel.LoadString(bImport ? IDS_IMPORTLABEL : IDS_EXPORTLABEL);
-	m_sTitle.LoadString(bImport ? IDS_IMPORTTITLE : IDS_EXPORTTITLE);
-	m_sProjectLabel.LoadString(bImport ? IDS_IMPORTPROJECTLABEL : IDS_EXPORTPROJECTLABEL);
-
 	if (m_sIndent == _T("\t"))
 		m_nIndent = 0;
 	else
@@ -47,12 +43,11 @@ COptionsDlg::COptionsDlg(BOOL bImport, BOOL bIncludeProject, LPCTSTR szIndent, C
 void COptionsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(COptionsDlg)
+
 	DDX_Control(pDX, IDC_TABWIDTHS, m_cbIndent);
 	DDX_Text(pDX, IDC_CBLABEL, m_sLabel);
 	DDX_CBIndex(pDX, IDC_TABWIDTHS, m_nIndent);
 	DDX_Check(pDX, IDC_PROJECTINCLUDED, m_bIncludeProject);
-	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -74,8 +69,6 @@ void COptionsDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(COptionsDlg, CDialog)
-	//{{AFX_MSG_MAP(COptionsDlg)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

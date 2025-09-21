@@ -124,7 +124,11 @@ BOOL CTDCToolsHelper::RunTestTool(const TDCUSERTOOL& tool, const USERTOOLARGS& a
 	
 	// error handling
 	if (dwRes < SE_ERR_SUCCESS)
-		CMessageBox::AfxShow(IDS_TH_RUNTOOLERROR_TITLE, CEnString(IDS_TH_RUNTOOLERROR, tool.sToolName), MB_OK | MB_ICONERROR);
+	{
+		CMessageBox::AfxShow(IDS_TH_RUNTOOLERROR_TITLE, 
+							CEnString().Format(IDS_TH_RUNTOOLERROR, tool.sToolName), 
+							MB_OK | MB_ICONERROR);
+	}
 
 	return (dwRes >= SE_ERR_SUCCESS);
 }

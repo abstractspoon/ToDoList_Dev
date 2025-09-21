@@ -35,7 +35,7 @@ class CKanbanPreferencesPage : public CPreferencesPageBase
 
 // Construction
 public:
-	CKanbanPreferencesPage(CWnd* pParent = NULL);   // standard constructor
+	CKanbanPreferencesPage(CWnd* pParent = NULL);
 
 	BOOL HasFixedColumns() const;
 	int GetFixedColumnDefinitions(CKanbanColumnArray& aColumnDefs) const;
@@ -58,9 +58,6 @@ public:
 	void SetAttributeValues(const CKanbanAttributeValueMap& mapValues);
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CKanbanPreferencesPage)
-	//}}AFX_DATA
 	CKanbanAttributeComboBox	m_cbAttributes;
 	CKanbanFixedColumnListCtrl	m_lcFixedColumnDefs;
 	CGroupLineManager m_mgrGroupLines;
@@ -85,20 +82,12 @@ protected:
 	CKanbanAttributeValueMap m_mapAttribValues;
 	CKanbanAttributeArray m_aDisplayAttrib;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CKanbanPreferencesPage)
-	//}}AFX_VIRTUAL
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
 
-// Implementation
 protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(CKanbanPreferencesPage)
 	afx_msg void OnSpecifyFullColor();
 	afx_msg void OnSetFullColor();
 	afx_msg void OnChangeColumnType();
@@ -106,7 +95,6 @@ protected:
 	afx_msg void OnMoveFixedColDown();
 	afx_msg void OnMoveFixedColUp();
 	afx_msg void OnItemchangedColumndefs(NMHDR* pNMHDR, LRESULT* pResult);
-	//}}AFX_MSG
 	afx_msg void OnShowColorAsBar();
 	afx_msg void OnPopulateFixedColumns();
 	afx_msg void OnSortSubtasksBelowParents();
@@ -156,15 +144,8 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void DoHelp();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CKanbanPreferencesDlg)
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_KanbanPREFERENCESDLG_H__4BEDF571_7002_4C0D_B355_1334515CA1F9__INCLUDED_)

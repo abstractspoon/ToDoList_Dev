@@ -131,7 +131,7 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 
 void CTDLShowReminderDlg::UpdateTitleText()
 {
-	SetWindowText(CEnString(IDS_TASKREMINDERDLG_TITLE, m_lcReminders.GetItemCount()));
+	SetWindowText(CEnString().Format(IDS_TASKREMINDERDLG_TITLE, m_lcReminders.GetItemCount()));
 }
 
 BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)

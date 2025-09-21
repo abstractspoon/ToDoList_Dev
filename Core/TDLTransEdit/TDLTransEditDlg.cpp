@@ -350,9 +350,13 @@ BOOL CTDLTransEditDlg::PromptAndSave()
 {
 	if (!IsReadOnly() && m_bEdited)
 	{
-		CEnString sText(IDS_SAVECHANGES, FileMisc::GetFileNameFromPath(m_dictionary.GetDictionaryPath()));
+		CString sDictName = FileMisc::GetFileNameFromPath(m_dictionary.GetDictionaryPath());
 
-		int nRet = CMessageBox::Show(this, m_sBaseTitle, _T("Save Changes?"), sText, MB_YESNOCANCEL);
+		int nRet = CMessageBox::Show(this, 
+									m_sBaseTitle, 
+									CEnString(_T("Save Changes?")), 
+									CEnString().Format(IDS_SAVECHANGES, sDictName), 
+									MB_YESNOCANCEL);
 
 		switch (nRet)
 		{

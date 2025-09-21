@@ -23,9 +23,9 @@ class CTDCCustomAttribDefinitionArray;
 
 class CTDLAttributeListBox : public CCheckListBoxEx
 {
-// Construction
 public:
 	CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bIncludeReadonly = TRUE);
+	virtual ~CTDLAttributeListBox();
 
 	void SetSelectedAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs);
 
@@ -34,44 +34,29 @@ public:
 
 	int GetAvailableAttributes(CTDCAttributeMap& mapAttrib, BOOL bIncCustAttrib = TRUE) const;
 
-// Attributes
 protected:
 	struct ATTRIBVIS
 	{
 		ATTRIBVIS() : nAttributeID(TDCA_NONE), bVisible(FALSE) {}
 		ATTRIBVIS(UINT nIDName, TDC_ATTRIBUTE nAttribID, BOOL bVis) 
+			:
+			sName(CEnString(nIDName)),
+			nAttributeID(nAttribID),
+			bVisible(bVis)
 		{ 
-			sName.LoadString(nIDName); 
-			nAttributeID = nAttribID;
-			bVisible = bVis; 
 		}
 
-		CEnString sName;
+		CString sName;
 		CString sCustAttribID;
 		TDC_ATTRIBUTE nAttributeID;
 		BOOL bVisible;
 	};
 	CArray<ATTRIBVIS, ATTRIBVIS&> m_aAttribs;
 
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLAttribListBox)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLAttributeListBox();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLAttribListBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
+	virtual void PreSubclassWindow();
+
+protected:
 	afx_msg BOOL OnReflectCheckChange();
 	afx_msg LRESULT OnInitListBox(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
@@ -80,10 +65,5 @@ protected:
 	int GetAttributes(CTDCAttributeMap& mapAttrib, BOOL bSelected, BOOL bIncCustAttrib) const;
 
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDATTRIBLISTBOX_H__C5D9EFCE_7B59_498F_88E4_890286A344A5__INCLUDED_)

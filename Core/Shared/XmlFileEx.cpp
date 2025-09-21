@@ -240,9 +240,7 @@ BOOL CXmlFileEx::Decrypt(LPCWSTR szPassword)
 			}
 			else if (!bHasInitialPassword)
 			{
-				CEnString sMessage(s_sDecryptFailed, GetFileName());
-
-				if (IDNO == CMessageBox::AfxShow(sMessage, MB_YESNO))
+				if (IDNO == CMessageBox::AfxShow(CEnString().Format(s_sDecryptFailed, GetFileName()), MB_YESNO))
 				{
 					m_nFileError = XFL_CANCELLED;
 					return FALSE;

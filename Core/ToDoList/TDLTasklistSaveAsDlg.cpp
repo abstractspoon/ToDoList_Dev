@@ -67,7 +67,7 @@ int CTDLTasklistSaveAsDlg::DoModal()
 			if (FileMisc::FileExists(m_sNewFilePath) && !FileMisc::IsSamePath(m_sNewFilePath, m_sOrgFilePath))
 			{
 				UINT nMsgResult = ::MessageBox(*this,
-											   CEnString(IDS_CONFIRMSAVEAS, m_sNewFilePath),
+											   CEnString().Format(IDS_CONFIRMSAVEAS, m_sNewFilePath),
 											   CEnString(IDS_CONFIRMSAVEAS_TITLE),
 											   MB_ICONWARNING | MB_YESNO);
 				if (nMsgResult != IDYES)
