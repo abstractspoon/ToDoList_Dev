@@ -121,12 +121,8 @@ HBRUSH CTDLTransformDialog::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if ((pWnd->GetDlgCtrlID() == IDC_STYLESHEETNOTFOUND) && !Misc::IsHighContrastActive())
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(255);
-		hbr = GetSysColorBrush(COLOR_3DFACE);
-	}
+	if (pWnd->GetDlgCtrlID() == IDC_STYLESHEETNOTFOUND)
+		pDC->SetTextColor(GetErrorLabelTextColor());
 
 	return hbr;
 }

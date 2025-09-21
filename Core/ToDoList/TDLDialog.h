@@ -21,6 +21,8 @@ class CTDLDialog : public CDialog, protected CDialogHelper
 
 	int DoModal(HICON hIcon = NULL); // Caller owns icon
 
+	static COLORREF GetErrorLabelTextColor();
+
 // Construction
 protected:
 	CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey = NULL, CWnd* pParent = NULL);   // standard constructor
