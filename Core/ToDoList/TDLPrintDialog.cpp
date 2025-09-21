@@ -485,11 +485,8 @@ HBRUSH CTDLPrintStylePage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if ((pWnd->GetDlgCtrlID() == IDC_STYLESHEETNOTFOUND) && !Misc::IsHighContrastActive())
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(255);
-	}
+	if (pWnd->GetDlgCtrlID() == IDC_STYLESHEETNOTFOUND)
+		pDC->SetTextColor(CTDLDialog::GetErrorLabelTextColor());
 
 	return hbr;
 }

@@ -90,7 +90,7 @@ int CTDLStatusBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	while (nPane--)
 	{
-		SetPaneText(nPane, CEnString(SB_PANES[nPane].nID, _T("")));
+		SetPaneText(nPane, CEnString().Format(SB_PANES[nPane].nID, _T("")));
 		SetPaneTooltip(nPane, CEnString((UINT)SB_PANES[nPane].lpszTip));
 	}
 
@@ -197,7 +197,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 
 		default: // > 1
 			{
-				sTextValue = CEnString(ID_SB_MULTISELTASK, nSelCount);
+				sTextValue = CEnString().Format(ID_SB_MULTISELTASK, nSelCount);
 
 				const int MAXTIPLEN = 255; // CToolInfo
 				int nMaxTasks = min(nSelCount, 10), nNumTasks = nMaxTasks;

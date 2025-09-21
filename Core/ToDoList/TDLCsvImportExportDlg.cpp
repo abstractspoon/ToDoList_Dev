@@ -567,11 +567,8 @@ HBRUSH CTDLCsvImportExportDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if ((pWnd->GetDlgCtrlID() == IDC_IMPORT_MUSTMAPTITLE) && !Misc::IsHighContrastActive())
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(255);
-	}
+	if (pWnd->GetDlgCtrlID() == IDC_IMPORT_MUSTMAPTITLE)
+		pDC->SetTextColor(GetErrorLabelTextColor());
 
 	return hbr;
 }

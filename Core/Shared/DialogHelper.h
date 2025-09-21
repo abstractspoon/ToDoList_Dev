@@ -195,7 +195,7 @@ public:
 	template <class T, class S>
 	static int AddStringT(S& ctrl, UINT nIDItem, T itemData)
 	{
-		return AddStringT(ctrl, CEnString(nIDItem), itemData);
+		return AddStringT(ctrl, CEnString(nIDItem, ctrl), itemData);
 	}
 
 	template <class T, class S>
@@ -212,7 +212,7 @@ public:
 	template <class T, class S>
 	static int InsertStringT(S& ctrl, int nPos, UINT nIDItem, T itemData)
 	{
-		return InsertStringT(ctrl, nPos, CEnString(nIDItem), itemData);
+		return InsertStringT(ctrl, nPos, CEnString(nIDItem, ctrl), itemData);
 	}
 	
 	// comboboxes

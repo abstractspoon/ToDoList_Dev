@@ -8,6 +8,7 @@
 #include "enstring.h"
 #include "holdredraw.h"
 #include "WndPrompt.h"
+#include "enstring.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,11 +19,13 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CEnCheckComboBox
 
-CEnCheckComboBox::CEnCheckComboBox(BOOL bMulti, UINT nIDNoneString, UINT nIDAnyString) : 
-	CCheckComboBox(ACBS_ALLOWDELETE), m_bMultiSel(bMulti)
+CEnCheckComboBox::CEnCheckComboBox(BOOL bMulti, UINT nIDNoneString, UINT nIDAnyString) 
+	: 
+	CCheckComboBox(ACBS_ALLOWDELETE), 
+	m_bMultiSel(bMulti),
+	m_sNone(CEnString(nIDNoneString)),
+	m_sAny(CEnString(nIDAnyString))
 {
-	m_sNone.LoadString(nIDNoneString);
-	m_sAny.LoadString(nIDAnyString);
 }
 
 CEnCheckComboBox::~CEnCheckComboBox()

@@ -194,7 +194,7 @@ BOOL CToDoListApp::HasVSRedistributable()
 		{
 			LPCTSTR MSVCREDIST_URL = _T("https://www.microsoft.com/en-au/download/details.aspx?id=48145"); 
 			
-			if (AfxMessageBox(CEnString(IDS_MSVCREDIST_MSG, 2015), MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
+			if (AfxMessageBox(CEnString().Format(IDS_MSVCREDIST_MSG, 2015), MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
 				FileMisc::Run(::GetDesktopWindow(), MSVCREDIST_URL);
 
 			// Always quit
@@ -1389,8 +1389,7 @@ void CToDoListApp::OnImportPrefs()
 	}
 	else // notify user
 	{
-		CEnString sMessage(IDS_INVALIDPREFFILE, sIniPath);
-		AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+		AfxMessageBox(CEnString().Format(IDS_INVALIDPREFFILE, sIniPath), MB_OK | MB_ICONEXCLAMATION);
 	}
 }
 

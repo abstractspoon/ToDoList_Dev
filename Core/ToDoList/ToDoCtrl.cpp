@@ -1936,7 +1936,7 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 		if (aCircularIDs.GetSize() == 1)
 			sMessage += CEnString(IDS_TDC_SELTASKHASCIRCULARDEPENDENCY);
 		else
-			sMessage += CEnString(IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES, Misc::FormatArray(aToDoIDs));
+			sMessage += CEnString().Format(IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES, Misc::FormatArray(aToDoIDs));
 		
 		AfxMessageBox(sMessage, MB_OK | MB_ICONERROR);
 		return FALSE;
@@ -4207,9 +4207,10 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 
 			if (temp.LoadHeader(sSavePath) && (temp.GetFileVersion() > m_nFileVersion))
 			{
-				CEnString sMessage(IDS_TDC_CONFIRMOVERWRITE, sSavePath);
 
-				if (CMessageBox::AfxShow(IDS_TDC_CONFIRMOVERWRITE_TITLE, sMessage, MB_ICONWARNING | MB_YESNO) != IDYES)
+				if (CMessageBox::AfxShow(IDS_TDC_CONFIRMOVERWRITE_TITLE, 
+										CEnString().Format(IDS_TDC_CONFIRMOVERWRITE, sSavePath),
+										MB_ICONWARNING | MB_YESNO) != IDYES)
 				{
 					return TDCF_CANCELLED;
 				}
@@ -4396,8 +4397,7 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 				}
 				else // Different sizes and dates -> prompt
 				{
-					CEnString sMessage(IDS_BACKUPFILEFOUND, sFilePath);
-					int nRet = AfxMessageBox(sMessage, MB_YESNOCANCEL);
+					int nRet = AfxMessageBox(CEnString().Format(IDS_BACKUPFILEFOUND, sFilePath), MB_YESNOCANCEL);
 
 					switch (nRet)
 					{

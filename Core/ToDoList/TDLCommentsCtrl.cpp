@@ -30,6 +30,8 @@ enum
 	IDC_CTRL,
 };
 
+const int LABELLEN_DLU = 40;
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCommentsCtrl dialog
 
@@ -51,13 +53,8 @@ CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bShowLabel, BOOL bShowToolbar, int nComb
 
 	if (m_bShowLabel)
 	{
-		CString sLabel;
-		sLabel.LoadString(IDS_TDC_FIELD_COMMENTS);
-		int nLabelLen = 40;
-
-		AddRCControl(_T("CONTROL"), WC_STATIC, sLabel, SS_CENTERIMAGE, 0, 0, 1, nLabelLen, 12, IDC_COMBOLABEL);
-
-		nComboOffsetDLU = (nLabelLen + 3);
+		AddRCControl(_T("CONTROL"), WC_STATIC, CEnString(IDS_TDC_FIELD_COMMENTS), SS_CENTERIMAGE, 0, 0, 1, LABELLEN_DLU, 12, IDC_COMBOLABEL);
+		nComboOffsetDLU = (LABELLEN_DLU + 3);
 	}
 
 	AddRCControl(_T("CONTROL"), WC_COMBOBOX, _T(""), 

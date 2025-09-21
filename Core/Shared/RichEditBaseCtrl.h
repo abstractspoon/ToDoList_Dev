@@ -314,6 +314,7 @@ protected:
 	BOOL InsertSoftReturn();
 	void GetCharacterAtCaret(CHARRANGE& cr, BOOL bForwards) const;
 	COLORREF GetBkgndColor() const;
+	void CheckUpdateMargins();
 
 	BOOL EnableLanguageOptions(DWORD dwOption, BOOL bEnable);
 	BOOL EnableEditStyles(DWORD dwStyles, BOOL bEnable);

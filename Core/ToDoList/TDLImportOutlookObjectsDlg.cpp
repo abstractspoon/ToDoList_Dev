@@ -7,6 +7,7 @@
 
 #include "..\shared\MSoutlookhelper.h"
 #include "..\shared\misc.h"
+#include "..\shared\enstring.h"
 
 #include "..\3rdparty\msoutl.h"
 
@@ -89,8 +90,6 @@ const UINT NUM_FIELDS = sizeof(FIELDS) / sizeof(OUTLOOK_FIELD);
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportOutlookObjectsDlg dialog
 
-CEnString CTDLImportOutlookObjectsDlg::CONFIDENTIAL;
-
 CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refItem, LPCTSTR szAltTitle, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_OUTLOOKMSGIMPORT_DIALOG, _T("ImportOutlook"), pParent), 
@@ -107,17 +106,14 @@ CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refI
 void CTDLImportOutlookObjectsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLImportOutlookObjectsDlg)
+
 	DDX_Check(pDX, IDC_HIDEUNMAPPED, m_bHideUnmapped);
 	DDX_Check(pDX, IDC_HIDECONFIDENTIAL, m_bHideConfidential);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_FIELDMAPPING, m_lcFieldMapping);
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLImportOutlookObjectsDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLImportOutlookObjectsDlg)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_HIDEUNMAPPED, OnHideAttributes)
 	ON_BN_CLICKED(IDC_HIDECONFIDENTIAL, OnHideAttributes)
 	ON_CONTROL(TDCN_IMPORTMAPPINGCHANGE, IDC_FIELDMAPPING, OnMappingChange)
@@ -335,10 +331,7 @@ CString CTDLImportOutlookObjectsDlg::FormatFieldAndData(const OUTLOOK_FIELD& oaF
 	}
 	else if (CMSOutlookHelper::IsConfidential(oaField.nFieldType) && CMSOutlookHelper::HasDenyConfidential())
 	{
-		if (CONFIDENTIAL.IsEmpty())
-			CONFIDENTIAL.LoadString(IDS_OUTLOOK_CONFIDENTIAL);
-
-		sFieldAndData.Format(_T("%s [%s]"), sField, CONFIDENTIAL);
+		sFieldAndData.Format(_T("%s [%s]"), sField, CEnString(IDS_OUTLOOK_CONFIDENTIAL));
 	}
 
 	return sFieldAndData;
@@ -399,11 +392,8 @@ HBRUSH CTDLImportOutlookObjectsDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlCo
 {
 	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 	
-	if ((pWnd->GetDlgCtrlID() == IDC_IMPORT_MUSTMAPTITLE) && !Misc::IsHighContrastActive())
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(255);
-	}
+	if (pWnd->GetDlgCtrlID() == IDC_IMPORT_MUSTMAPTITLE)
+		pDC->SetTextColor(GetErrorLabelTextColor());
 	
 	return hbr;
 }

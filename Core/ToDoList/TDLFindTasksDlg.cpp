@@ -65,9 +65,9 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	m_sizeDockedMax(0, 0),
 	m_rUndocked(0, 0, 0, 0),
 	m_lcFindSetup(mgrContent),
-	m_hResultsFont(NULL)
+	m_hResultsFont(NULL),
+	m_sResultsLabel(IDS_FTD_RESULTS)
 {
-	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
 	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_RULES), 0, 0, 0, 49, 287, 8, IDC_RULESLABEL);
 	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 58, 370, 96, IDC_FINDLIST);
@@ -89,11 +89,10 @@ CTDLFindTasksDlg::~CTDLFindTasksDlg()
 void CTDLFindTasksDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CRuntimeDlg::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLFindTasksDlg)
+
 	DDX_Control(pDX, IDC_INCLUDE, m_cbInclude);
 	DDX_Control(pDX, IDC_SEARCHLIST, m_cbSearches);
 	DDX_Control(pDX, IDC_TASKLISTOPTIONS, m_cbTasklists);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_FINDLIST, m_lcFindSetup);
 	DDX_Control(pDX, IDC_RESULTS, m_lcResults);
 	DDX_CBIndex(pDX, IDC_TASKLISTOPTIONS, m_bAllTasklists);
@@ -103,9 +102,7 @@ void CTDLFindTasksDlg::DoDataExchange(CDataExchange* pDX)
 IMPLEMENT_DYNAMIC(CTDLFindTasksDlg, CRuntimeDlg)
 
 BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CRuntimeDlg)
-	//{{AFX_MSG_MAP(CTDLFindTasksDlg)
 	ON_COMMAND(ID_FIND_HELP, OnFindHelp)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_APPLYASFILTER, OnApplyasfilter)
 	ON_BN_CLICKED(IDC_SELECTALL, OnSelectall)
 	ON_CBN_EDITCHANGE(IDC_SEARCHLIST, OnEditchangeSearchlist)
@@ -1698,8 +1695,12 @@ void CTDLFindTasksDlg::OnDeleteSearch()
 	if (sDeletedSearch.IsEmpty())
 		return;
 
-	if (CMessageBox::AfxShow(IDS_FINDTASKS, CEnString(IDS_FIND_CONFIRMDELETESEARCH, sDeletedSearch), MB_YESNO) == IDNO)
+	if (CMessageBox::AfxShow(IDS_FINDTASKS, 
+							CEnString().Format(IDS_FIND_CONFIRMDELETESEARCH, sDeletedSearch), 
+							MB_YESNO) == IDNO)
+	{
 		return;
+	}
 
 	// Remove deleted search
 	int nSearch = m_cbSearches.FindStringExact(-1, sDeletedSearch);

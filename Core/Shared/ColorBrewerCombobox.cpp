@@ -6,6 +6,7 @@
 #include "Misc.h"
 #include "GraphicsMisc.h"
 #include "DialogHelper.h"
+#include "EnString.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,10 +19,9 @@ static char THIS_FILE[] = __FILE__;
 
 CColorBrewerComboBox::CColorBrewerComboBox(DWORD dwBrewerFlags, UINT nIDNoneString) 
 	: 
-	m_brewer(dwBrewerFlags)
+	m_brewer(dwBrewerFlags),
+	m_sNone(CEnString(nIDNoneString))
 {
-	if (nIDNoneString)
-		m_sNone.LoadString(nIDNoneString);
 }
 
 CColorBrewerComboBox::~CColorBrewerComboBox()

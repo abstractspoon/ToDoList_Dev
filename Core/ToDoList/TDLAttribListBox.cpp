@@ -78,9 +78,6 @@ CTDLAttributeListBox::~CTDLAttributeListBox()
 }
 
 BEGIN_MESSAGE_MAP(CTDLAttributeListBox, CCheckListBoxEx)
-	//{{AFX_MSG_MAP(CTDLAttributeListBox)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT_EX(CLBN_CHKCHANGE, OnReflectCheckChange)
 	ON_MESSAGE(WM_INITLISTBOX, OnInitListBox)
 END_MESSAGE_MAP()

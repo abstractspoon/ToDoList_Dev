@@ -2171,7 +2171,7 @@ CString CWorkloadCtrl::FormatTimeSpan(double dDays, int nDecimals)
 	if (nDecimals > 0)
 		Misc::TrimTrailingDecimalZeros(sValue);
 
-	return CEnString(IDS_TIMESPAN_FORMAT, sValue);
+	return CEnString().Format(IDS_TIMESPAN_FORMAT, sValue);
 }
 
 HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMNID nCol)

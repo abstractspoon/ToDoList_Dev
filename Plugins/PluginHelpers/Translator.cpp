@@ -139,7 +139,7 @@ void Translator::Translate(Control^ ctrl)
 	}
 	else if (ISTYPE(ctrl, ToolStrip))
 	{
-		Translate(ASTYPE(ctrl, ToolStrip)->Items, false);
+		Translate(ASTYPE(ctrl, ToolStrip)->Items, ISTYPE(ctrl, ToolStripDropDownMenu));
 	}
 	else if (ISTYPE(ctrl, ComboBox))
 	{

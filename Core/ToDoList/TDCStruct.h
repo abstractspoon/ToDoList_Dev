@@ -671,7 +671,7 @@ struct TDCATTRIBUTEMAPPING
 	TDCATTRIBUTEMAPPING(UINT nNameID, TDC_ATTRIBUTE nAttribID, DWORD dwData = 0);
 
 	TDC_ATTRIBUTE nAttributeID;
-	CEnString sColumnName;
+	CString sColumnName;
 	DWORD dwItemData;
 };
 

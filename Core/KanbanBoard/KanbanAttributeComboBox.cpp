@@ -85,7 +85,7 @@ void CKanbanAttributeComboBox::BuildCombo()
 		if (sAttrib.IsEmpty())
 			ASSERT(KBUtils::IsCustomAttribute(m_nFixedColumnsAttribID) && !m_aCustAttribDefs.GetSize());
 		else
-			CDialogHelper::AddStringT(*this, CEnString(IDS_FIXEDCOLUMNS, sAttrib), TDCA_FIXEDCOLUMNS);
+			CDialogHelper::AddStringT(*this, CEnString().Format(IDS_FIXEDCOLUMNS, sAttrib), TDCA_FIXEDCOLUMNS);
 	}
 
 	// Restore selection

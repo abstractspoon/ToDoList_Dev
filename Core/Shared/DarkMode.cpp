@@ -1522,7 +1522,6 @@ return TrueCallWindowProc(lpPrevWndFunc, hWnd, nMsg, wp, lp)
 		break;
 
 	case WM_CTLCOLORBTN:
-	case WM_CTLCOLORDLG:
 	case WM_CTLCOLOREDIT:
 	case WM_CTLCOLORLISTBOX:
 	case WM_CTLCOLORSTATIC:

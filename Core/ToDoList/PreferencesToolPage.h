@@ -39,10 +39,6 @@ public:
 	void SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 protected:
-
-// Dialog Data
-	//{{AFX_DATA(CPreferencesToolPage)
-	//}}AFX_DATA
 	CMenuButton	m_btnArgMenu;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
@@ -65,11 +61,6 @@ protected:
 	CStringArray m_aMenuUserVariableIDs;
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CPreferencesToolPage)
-	//}}AFX_VIRTUAL
-
 protected:
 	virtual void OnOK();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -78,11 +69,8 @@ protected:
 
 // Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CPreferencesToolPage)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
-	//}}AFX_MSG
 	afx_msg void OnNewExternalTool();
 	afx_msg void OnNewTDLTool();
 	afx_msg void OnDeleteTool();
@@ -135,8 +123,5 @@ protected:
 	static CLA_TYPE MapCmdIDToType(UINT nCmdID);
 	
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_PREFERENCESTOOLPAGE_H__6B9BF0B2_D6DE_4868_B97E_8F6288C77778__INCLUDED_)

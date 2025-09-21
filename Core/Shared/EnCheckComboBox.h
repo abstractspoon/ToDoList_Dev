@@ -8,7 +8,6 @@
 //
 
 #include "checkcombobox.h"
-#include "enstring.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnCheckComboBox window
@@ -37,7 +36,7 @@ public:
 
 protected:
 	BOOL m_bMultiSel;
-	CEnString m_sNone, m_sAny;
+	CString m_sNone, m_sAny;
 	
 protected:
 	afx_msg void OnLBSelChange();
