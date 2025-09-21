@@ -15,17 +15,13 @@
 
 class COptionsDlg : public CDialog
 {
-// Construction
 public:
-	COptionsDlg(BOOL bImport, BOOL bIncludeProject, LPCTSTR szIndent, CWnd* pParent = NULL);   // standard constructor
+	COptionsDlg(BOOL bImport, BOOL bIncludeProject, LPCTSTR szIndent, CWnd* pParent = NULL);
 
 	CString GetIndent() const { return m_sIndent; }
 	BOOL GetWantProject() const { return m_bIncludeProject; }
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(COptionsDlg)
-	//}}AFX_DATA
 	BOOL m_bIncludeProject;
 	BOOL m_bImport;
 	int m_nIndent;
@@ -37,23 +33,12 @@ protected:
 	CComboBox m_cbIndent;
 	CIcon m_icon;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(COptionsDlg)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(COptionsDlg)
 	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_OPTIONSDLG_H__D9ADE42C_81F7_476C_B8D9_7B3D5FA2C91E__INCLUDED_)

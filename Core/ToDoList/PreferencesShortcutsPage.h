@@ -25,7 +25,6 @@ class CMenuIconMgr;
 
 class CPreferencesShortcutsPage : public CPreferencesPageBase 
 {
-// Construction
 public:
 	CPreferencesShortcutsPage(const CMenuIconMgr& mgrIcons, CShortcutManager* pMgrShortcuts);
 	~CPreferencesShortcutsPage();
@@ -34,15 +33,11 @@ public:
 	BOOL RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs);
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CPreferencesShortcutsPage)
 	CHotKeyCtrlEx	m_hkCur;
 	COrderedTreeCtrl	m_tcCommands;
 	CHotKeyCtrlEx	m_hkNew;
 	CEnString	m_sOtherCmdID;
 	BOOL	m_bShowCommandIDs;
-	//}}AFX_DATA
-
 	CFontCache m_fonts;
 
 	const CMenuIconMgr& m_mgrMenuIcons;
@@ -51,11 +46,6 @@ protected:
 	CMap<UINT, UINT, DWORD, DWORD&> m_mapID2Shortcut;
 	CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&> m_mapShortcut2HTI;
 
-// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(CPreferencesShortcutsPage)
-	//}}AFX_VIRTUAL
-
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void OnOK();
@@ -63,12 +53,8 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnFirstShow();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CPreferencesShortcutsPage)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	//}}AFX_MSG
 	afx_msg void OnSelchangedShortcuts(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnAssignshortcut();
 	afx_msg void OnShowCmdIDs();
@@ -102,8 +88,5 @@ protected:
 	static BOOL IsMiscCommandID(UINT nCmdID);
 
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_PREFERERENCESSHORTCUTSPAGE_H__DA5D005D_C6CC_453A_A431_A2B85A920CE5__INCLUDED_)

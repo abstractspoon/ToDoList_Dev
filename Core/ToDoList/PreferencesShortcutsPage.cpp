@@ -47,9 +47,7 @@ CPreferencesShortcutsPage::CPreferencesShortcutsPage(const CMenuIconMgr& mgrIcon
 	m_pMgrShortcuts(pMgrShortcuts), 
 	m_tcCommands(NCGS_SHOWHEADER)
 {
-	//{{AFX_DATA_INIT(CPreferencesShortcutsPage)
 	m_bShowCommandIDs = FALSE;
-	//}}AFX_DATA_INIT
 
 	m_tcCommands.AddGutterColumn(PSP_SHORTCUTCOLUMNID, CEnString(IDS_PSP_SHORTCUT));
 	m_tcCommands.AddGutterColumn(PSP_COMMANDIDCOLUMNID, CEnString(IDS_TDC_COLUMN_ID), 0, DT_CENTER);
@@ -69,8 +67,7 @@ CPreferencesShortcutsPage::~CPreferencesShortcutsPage()
 void CPreferencesShortcutsPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPreferencesPageBase::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CPreferencesShortcutsPage)
-	//}}AFX_DATA_MAP
+
 	DDX_Control(pDX, IDC_CURHOTKEY, m_hkCur);
 	DDX_Control(pDX, IDC_COMMANDS, m_tcCommands);
 	DDX_Control(pDX, IDC_NEWHOTKEY, m_hkNew);
@@ -79,9 +76,7 @@ void CPreferencesShortcutsPage::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesShortcutsPage, CPreferencesPageBase)
-	//{{AFX_MSG_MAP(CPreferencesShortcutsPage)
 	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_ASSIGNSHORTCUT, OnAssignshortcut)
 	ON_BN_CLICKED(IDC_SHOWCMDIDS, OnShowCmdIDs)
 	ON_BN_CLICKED(IDC_COPYALL, OnCopyall)

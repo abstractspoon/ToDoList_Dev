@@ -107,17 +107,14 @@ CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refI
 void CTDLImportOutlookObjectsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLImportOutlookObjectsDlg)
+
 	DDX_Check(pDX, IDC_HIDEUNMAPPED, m_bHideUnmapped);
 	DDX_Check(pDX, IDC_HIDECONFIDENTIAL, m_bHideConfidential);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_FIELDMAPPING, m_lcFieldMapping);
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLImportOutlookObjectsDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLImportOutlookObjectsDlg)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_HIDEUNMAPPED, OnHideAttributes)
 	ON_BN_CLICKED(IDC_HIDECONFIDENTIAL, OnHideAttributes)
 	ON_CONTROL(TDCN_IMPORTMAPPINGCHANGE, IDC_FIELDMAPPING, OnMappingChange)

@@ -23,7 +23,6 @@ class CTDCCustomAttribDefinitionArray;
 
 class CTDLAttributeListBox : public CCheckListBoxEx
 {
-// Construction
 public:
 	CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bIncludeReadonly = TRUE);
 
@@ -34,7 +33,6 @@ public:
 
 	int GetAvailableAttributes(CTDCAttributeMap& mapAttrib, BOOL bIncCustAttrib = TRUE) const;
 
-// Attributes
 protected:
 	struct ATTRIBVIS
 	{
@@ -53,25 +51,13 @@ protected:
 	};
 	CArray<ATTRIBVIS, ATTRIBVIS&> m_aAttribs;
 
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLAttribListBox)
-	protected:
+protected:
 	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
 
-// Implementation
 public:
 	virtual ~CTDLAttributeListBox();
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLAttribListBox)
-		// NOTE - the ClassWizard will add and remove member functions here.
-	//}}AFX_MSG
 	afx_msg BOOL OnReflectCheckChange();
 	afx_msg LRESULT OnInitListBox(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
@@ -80,10 +66,5 @@ protected:
 	int GetAttributes(CTDCAttributeMap& mapAttrib, BOOL bSelected, BOOL bIncCustAttrib) const;
 
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDATTRIBLISTBOX_H__C5D9EFCE_7B59_498F_88E4_890286A344A5__INCLUDED_)

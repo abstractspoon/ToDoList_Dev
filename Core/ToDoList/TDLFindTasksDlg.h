@@ -41,7 +41,6 @@ class CTDLFindTasksDlg : public CRuntimeDlg
 {
 	DECLARE_DYNAMIC(CTDLFindTasksDlg)
 
-// Construction
 public:
 	CTDLFindTasksDlg(const CContentMgr& mgrContent);
 	~CTDLFindTasksDlg();
@@ -91,9 +90,6 @@ public:
 	int GetDockedDimension(DM_POS nPos, BOOL bMaximized) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLFindTasksDlg)
-	//}}AFX_DATA
 	CCheckComboBox m_cbInclude;
 	CComboBox m_cbSearches, m_cbTasklists;
 	CTDLFindTaskExpressionListCtrl m_lcFindSetup;
@@ -124,28 +120,18 @@ protected:
 	CRect m_rUndocked;
 	HFONT m_hResultsFont;
 
-// Overrides
 protected:
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFindTasksDlg)
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
 	virtual void OnCancel();
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 
-	//}}AFX_VIRTUAL
-
-// Implementation
 protected:
 	int DoModal() { return -1; } // not for public use
 
-	// Generated message map functions
-	//{{AFX_MSG(CTDLFindTasksDlg)
-	afx_msg void OnFindHelp();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnFindHelp();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnAddRule();
@@ -193,10 +179,11 @@ protected:
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 
 protected:
-	// pseudo-handler
+	// pseudo-handlers
 	void OnSaveSearch(BOOL bNotifyParent); 
 	void OnChangeDock(DM_POS nNewPos);
 
+protected:
 	BOOL Create(DM_POS nPos);
 	void SaveSettings();
 	void ResizeDlg(BOOL bOrientationChange, int cx = 0, int cy = 0);
@@ -234,8 +221,5 @@ protected:
 	static BOOL IsDocked(DM_POS nPos) { return (nPos != DMP_UNDOCKED); }
 
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLFINDTASKSDLG_H__9118493D_32FD_434D_B549_8947D00277CD__INCLUDED_)

@@ -89,11 +89,10 @@ CTDLFindTasksDlg::~CTDLFindTasksDlg()
 void CTDLFindTasksDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CRuntimeDlg::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLFindTasksDlg)
+
 	DDX_Control(pDX, IDC_INCLUDE, m_cbInclude);
 	DDX_Control(pDX, IDC_SEARCHLIST, m_cbSearches);
 	DDX_Control(pDX, IDC_TASKLISTOPTIONS, m_cbTasklists);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_FINDLIST, m_lcFindSetup);
 	DDX_Control(pDX, IDC_RESULTS, m_lcResults);
 	DDX_CBIndex(pDX, IDC_TASKLISTOPTIONS, m_bAllTasklists);
@@ -103,9 +102,7 @@ void CTDLFindTasksDlg::DoDataExchange(CDataExchange* pDX)
 IMPLEMENT_DYNAMIC(CTDLFindTasksDlg, CRuntimeDlg)
 
 BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CRuntimeDlg)
-	//{{AFX_MSG_MAP(CTDLFindTasksDlg)
 	ON_COMMAND(ID_FIND_HELP, OnFindHelp)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_APPLYASFILTER, OnApplyasfilter)
 	ON_BN_CLICKED(IDC_SELECTALL, OnSelectall)
 	ON_CBN_EDITCHANGE(IDC_SEARCHLIST, OnEditchangeSearchlist)
