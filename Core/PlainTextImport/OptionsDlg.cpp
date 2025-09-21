@@ -8,6 +8,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\fileregister.h"
+#include "..\Shared\EnString.h"
 
 #include <math.h>
 
@@ -27,12 +28,11 @@ COptionsDlg::COptionsDlg(BOOL bImport, BOOL bIncludeProject, LPCTSTR szIndent, C
 	CDialog(IDD_OPTIONSDIALOG, pParent), 
 	m_bIncludeProject(bIncludeProject),
 	m_sIndent(szIndent),
-	m_icon(CFileRegister::GetRegisteredIcon(_T("txt")))
+	m_icon(CFileRegister::GetRegisteredIcon(_T("txt"))),
+	m_sLabel(CEnString(bImport ? IDS_IMPORTLABEL : IDS_EXPORTLABEL)),
+	m_sTitle(CEnString(bImport ? IDS_IMPORTTITLE : IDS_EXPORTTITLE)),
+	m_sProjectLabel(CEnString(bImport ? IDS_IMPORTPROJECTLABEL : IDS_EXPORTPROJECTLABEL))
 {
-	m_sLabel.LoadString(bImport ? IDS_IMPORTLABEL : IDS_EXPORTLABEL);
-	m_sTitle.LoadString(bImport ? IDS_IMPORTTITLE : IDS_EXPORTTITLE);
-	m_sProjectLabel.LoadString(bImport ? IDS_IMPORTPROJECTLABEL : IDS_EXPORTPROJECTLABEL);
-
 	if (m_sIndent == _T("\t"))
 		m_nIndent = 0;
 	else

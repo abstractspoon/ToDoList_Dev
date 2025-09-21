@@ -11,7 +11,6 @@
 
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
-#include "..\shared\enstring.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\treectrlhelper.h"
 #include "..\shared\misc.h"
@@ -45,9 +44,9 @@ CPreferencesShortcutsPage::CPreferencesShortcutsPage(const CMenuIconMgr& mgrIcon
 	CPreferencesPageBase(IDD_PREFSHORTCUTS_PAGE),
 	m_mgrMenuIcons(mgrIcons),
 	m_pMgrShortcuts(pMgrShortcuts), 
-	m_tcCommands(NCGS_SHOWHEADER)
+	m_tcCommands(NCGS_SHOWHEADER),
+	m_bShowCommandIDs(FALSE)
 {
-	m_bShowCommandIDs = FALSE;
 
 	m_tcCommands.AddGutterColumn(PSP_SHORTCUTCOLUMNID, CEnString(IDS_PSP_SHORTCUT));
 	m_tcCommands.AddGutterColumn(PSP_COMMANDIDCOLUMNID, CEnString(IDS_TDC_COLUMN_ID), 0, DT_CENTER);
@@ -498,6 +497,7 @@ void CPreferencesShortcutsPage::OnChangeShortcut()
 	HTREEITEM htiOther = NULL;
 
 	m_mapShortcut2HTI.Lookup(dwShortcut, htiOther);
+	m_sOtherCmdID.Empty();
 
 	if (CToDoCtrl::IsReservedShortcut(dwShortcut))
 	{
@@ -508,8 +508,6 @@ void CPreferencesShortcutsPage::OnChangeShortcut()
 	{
 		m_sOtherCmdID.Format(IDS_PSP_CURRENTLYASSIGNED, m_tcCommands.GetItemText(htiOther));
 	}
-	else
-		m_sOtherCmdID.Empty();
 
 	GetDlgItem(IDC_ASSIGNSHORTCUT)->EnableWindow(!bReserved);
 	UpdateData(FALSE);

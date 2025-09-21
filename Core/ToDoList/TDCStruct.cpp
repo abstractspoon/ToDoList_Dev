@@ -3010,17 +3010,19 @@ TDCATTRIBUTEMAPPING::TDCATTRIBUTEMAPPING()
 }
 
 TDCATTRIBUTEMAPPING::TDCATTRIBUTEMAPPING(const CString& sName, TDC_ATTRIBUTE nAttribID, DWORD dwData)
+	:
+	sColumnName(sName),
+	nAttributeID(nAttribID),
+	dwItemData(dwData)
 {
-	sColumnName = sName;
-	nAttributeID = nAttribID;
-	dwItemData = dwData;
 }
 
-TDCATTRIBUTEMAPPING::TDCATTRIBUTEMAPPING(UINT nNameID, TDC_ATTRIBUTE nAttribID, DWORD dwData)
+TDCATTRIBUTEMAPPING::TDCATTRIBUTEMAPPING(UINT nNameID, TDC_ATTRIBUTE nAttribID, DWORD dwData) 
+	:
+	sColumnName(CEnString(nNameID)),
+	nAttributeID(nAttribID),
+	dwItemData(dwData)
 {
-	sColumnName.LoadString(nNameID);
-	nAttributeID = nAttribID;
-	dwItemData = dwData;
 }
 
 /////////////////////////////////////////////////////////////////////////////

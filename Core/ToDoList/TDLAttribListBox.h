@@ -25,6 +25,7 @@ class CTDLAttributeListBox : public CCheckListBoxEx
 {
 public:
 	CTDLAttributeListBox(const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bIncludeReadonly = TRUE);
+	virtual ~CTDLAttributeListBox();
 
 	void SetSelectedAttributes(const CTDCAttributeMap& mapAttrib, const CStringSet& mapCustomAttribIDs);
 
@@ -38,13 +39,14 @@ protected:
 	{
 		ATTRIBVIS() : nAttributeID(TDCA_NONE), bVisible(FALSE) {}
 		ATTRIBVIS(UINT nIDName, TDC_ATTRIBUTE nAttribID, BOOL bVis) 
+			:
+			sName(CEnString(nIDName)),
+			nAttributeID(nAttribID),
+			bVisible(bVis)
 		{ 
-			sName.LoadString(nIDName); 
-			nAttributeID = nAttribID;
-			bVisible = bVis; 
 		}
 
-		CEnString sName;
+		CString sName;
 		CString sCustAttribID;
 		TDC_ATTRIBUTE nAttributeID;
 		BOOL bVisible;
@@ -53,9 +55,6 @@ protected:
 
 protected:
 	virtual void PreSubclassWindow();
-
-public:
-	virtual ~CTDLAttributeListBox();
 
 protected:
 	afx_msg BOOL OnReflectCheckChange();

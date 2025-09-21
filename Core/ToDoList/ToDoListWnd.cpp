@@ -135,8 +135,6 @@ const LPCTSTR ENDL			= _T("\n");
 const LPCTSTR TDL_EXT		= _T("tdl");
 const LPCTSTR XML_EXT		= _T("xml");
 
-static CEnString TDL_FILEFILTER;
-
 /////////////////////////////////////////////////////////////////////////////
 
 const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
@@ -356,8 +354,6 @@ CToDoListWnd::CToDoListWnd()
 	m_dlgFindTasks(m_mgrContent),
 	m_idleTasks(*this)
 {
-	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
-	
 	// must do this before initializing any controls
 	SetupUIStrings();
 	
@@ -2168,7 +2164,7 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 											TDL_EXT, 
 											m_mgrToDoCtrls.GetFileName(nTDC, FALSE), 
 											EOFN_DEFAULTSAVE, 
-											TDL_FILEFILTER, 
+											CEnString(IDS_TDLFILEFILTER),
 											this);
 					
 					dialog.m_ofn.nFilterIndex = 1; // .tdl
@@ -2313,8 +2309,8 @@ void CToDoListWnd::OnLoad()
 							TDL_EXT,
 							NULL,
 							EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT,
-							TDL_FILEFILTER,
-							this);
+						   CEnString(IDS_TDLFILEFILTER),
+						   this);
 	
 	const UINT BUFSIZE = 1024 * 5;
 	static TCHAR FILEBUF[BUFSIZE] = { 0 };
@@ -3916,7 +3912,7 @@ void CToDoListWnd::OnSaveas()
 		CTDLTasklistSaveAsDlg dialog(sCurFilePath, 
 									 sCurProjName,
 									 TDL_EXT,
-									 TDL_FILEFILTER);
+									 CEnString(IDS_TDLFILEFILTER));
 
 		if (IDOK != dialog.DoModal())
 			return;
@@ -3943,7 +3939,7 @@ void CToDoListWnd::OnSaveas()
 							   TDL_EXT,
 							   sNewFilePath,
 							   EOFN_DEFAULTSAVE,
-							   TDL_FILEFILTER,
+							   CEnString(IDS_TDLFILEFILTER),
 							   this);
 	
 		// always use .tdl for initializing the file dialog
@@ -13083,7 +13079,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		{
 		case TDSA_TASKLIST:
 			sAttachment = sFilePath;
-			sBody.LoadString(IDS_TASKLISTATTACHED);
+			sBody = CEnString(IDS_TASKLISTATTACHED);
 			break;
 			
 		case TDSA_BODYTEXT:

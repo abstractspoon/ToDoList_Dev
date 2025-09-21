@@ -12,7 +12,6 @@
 #include "tdcstruct.h"
 
 #include "..\shared\MSOutlookHelper.h"
-#include "..\shared\enstring.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -47,9 +46,6 @@ protected:
 	// items
 	CTDCAttributeMapping m_aMasterMapping;
 
-	static CEnString CONFIDENTIAL;
-
-// Overrides
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void OnOK();

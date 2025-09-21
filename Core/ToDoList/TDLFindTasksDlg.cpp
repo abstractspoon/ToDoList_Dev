@@ -65,9 +65,9 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(const CContentMgr& mgrContent)
 	m_sizeDockedMax(0, 0),
 	m_rUndocked(0, 0, 0, 0),
 	m_lcFindSetup(mgrContent),
-	m_hResultsFont(NULL)
+	m_hResultsFont(NULL),
+	m_sResultsLabel(IDS_FTD_RESULTS)
 {
-	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
 	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_RULES), 0, 0, 0, 49, 287, 8, IDC_RULESLABEL);
 	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 58, 370, 96, IDC_FINDLIST);

@@ -7,7 +7,6 @@
 // OptionsDlg.h : header file
 //
 
-#include "..\Shared\EnString.h"
 #include "..\Shared\Icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -26,7 +25,7 @@ protected:
 	BOOL m_bImport;
 	int m_nIndent;
 
-	CEnString m_sTitle, m_sProjectLabel;
+	CString m_sTitle, m_sProjectLabel;
 	CString m_sIndent;
 	CString	m_sLabel;
 

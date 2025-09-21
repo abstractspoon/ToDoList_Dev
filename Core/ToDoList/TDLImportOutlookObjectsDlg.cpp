@@ -7,6 +7,7 @@
 
 #include "..\shared\MSoutlookhelper.h"
 #include "..\shared\misc.h"
+#include "..\shared\enstring.h"
 
 #include "..\3rdparty\msoutl.h"
 
@@ -88,8 +89,6 @@ const UINT NUM_FIELDS = sizeof(FIELDS) / sizeof(OUTLOOK_FIELD);
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportOutlookObjectsDlg dialog
-
-CEnString CTDLImportOutlookObjectsDlg::CONFIDENTIAL;
 
 CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refItem, LPCTSTR szAltTitle, CWnd* pParent /*=NULL*/)
 	: 
@@ -332,10 +331,7 @@ CString CTDLImportOutlookObjectsDlg::FormatFieldAndData(const OUTLOOK_FIELD& oaF
 	}
 	else if (CMSOutlookHelper::IsConfidential(oaField.nFieldType) && CMSOutlookHelper::HasDenyConfidential())
 	{
-		if (CONFIDENTIAL.IsEmpty())
-			CONFIDENTIAL.LoadString(IDS_OUTLOOK_CONFIDENTIAL);
-
-		sFieldAndData.Format(_T("%s [%s]"), sField, CONFIDENTIAL);
+		sFieldAndData.Format(_T("%s [%s]"), sField, CEnString(IDS_OUTLOOK_CONFIDENTIAL));
 	}
 
 	return sFieldAndData;
