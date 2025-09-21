@@ -847,7 +847,7 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 			case IDC_TASKTIME:
 			case IDC_ELAPSEDTIME:
 				if (IsTrackingSelectedTasklistAndTask())
-					pDC->SetTextColor((RGBX(crBack).Luminance() < 128) ? colorPink : colorRed);
+					pDC->SetTextColor((RGBX(crBack).Luminance() < 128) ? colorYellow : colorRed);
 				else
 					pDC->SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
 				break;
