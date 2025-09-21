@@ -128,22 +128,25 @@ void CTDCDarkMode::Initialize(CPreferences& prefs)
 
 void CTDCDarkMode::Release()
 {
-	// Only save colours if we're:
-	//
-	// 1. Currently in Dark Mode 
-	// OR
-	// 2. We will be in Dark Mode next time 
-	// OR
-	// 3. We've been in DarkMode at some point in the past
-	//
-	// This reduces the processing for people who will never use Dark Mode
-	CPreferences prefs;
-
-	if (IsEnabled() || 
-		prefs.GetProfileInt(PREFSSECTION, ISDARKMODE, FALSE) ||
-		prefs.HasProfileSection(DMPREFSCOLORSECTION))
+	if (IsSupported())
 	{
-		SaveColors(prefs);
+		// Only save colours if we're:
+		//
+		// 1. Currently in Dark Mode 
+		// OR
+		// 2. We will be in Dark Mode next time 
+		// OR
+		// 3. We've been in DarkMode at some point in the past
+		//
+		// This reduces the processing for people who will never use Dark Mode
+		CPreferences prefs;
+
+		if (IsEnabled() ||
+			prefs.GetProfileInt(PREFSSECTION, ISDARKMODE, FALSE) ||
+			prefs.HasProfileSection(DMPREFSCOLORSECTION))
+		{
+			SaveColors(prefs);
+		}
 	}
 
 	CDarkMode::Enable(FALSE);

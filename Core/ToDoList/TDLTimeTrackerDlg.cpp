@@ -969,7 +969,7 @@ BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 
 COLORREF CTDLTimeTrackerDlg::GetBkgndColor() const
 {
-	return m_theme.crAppBackLight;
+	return (Misc::IsHighContrastActive() ? GetSysColor(COLOR_3DFACE) : m_theme.crAppBackLight);
 }
 
 void CTDLTimeTrackerDlg::OnChangeQuickFind()
