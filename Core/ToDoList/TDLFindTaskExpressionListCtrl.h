@@ -32,7 +32,6 @@ class CContentMgr;
 
 class CTDLFindTaskExpressionListCtrl : public CInputListCtrl
 {
-// Construction
 public:
 	CTDLFindTaskExpressionListCtrl(const CContentMgr& mgrContent);
 	virtual ~CTDLFindTaskExpressionListCtrl();
@@ -66,7 +65,6 @@ public:
 	void CancelEdit();
 	void ClearSearch();
 
-// Attributes
 protected:
 	CComboBox						m_cbOperators;
 	CTDLFindTaskAttributeComboBox	m_cbAttributes;
@@ -92,10 +90,7 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLFindTaskExpressionListCtrl)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	//}}AFX_MSG
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnAttribEditCancel();
 	afx_msg void OnAttribEditOK();
@@ -147,8 +142,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_FINDTASKEXPRESSIONLISTCTRL_H__42272309_6C54_4901_A56D_D6FDA87F1E48__INCLUDED_)

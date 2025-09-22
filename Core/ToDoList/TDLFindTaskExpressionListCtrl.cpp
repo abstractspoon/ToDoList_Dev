@@ -91,9 +91,7 @@ CTDLFindTaskExpressionListCtrl::~CTDLFindTaskExpressionListCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CTDLFindTaskExpressionListCtrl, CInputListCtrl)
-	//{{AFX_MSG_MAP(CTDLFindTaskExpressionListCtrl)
 	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_WM_CHAR()
 	ON_CBN_CLOSEUP(ATTRIB_ID, OnAttribEditCancel)
 	ON_CBN_SELENDCANCEL(ATTRIB_ID, OnAttribEditCancel)
@@ -113,7 +111,6 @@ BEGIN_MESSAGE_MAP(CTDLFindTaskExpressionListCtrl, CInputListCtrl)
 	ON_CBN_SELENDOK(RECURRENCE_ID, OnRecurrenceEditOK)
 	ON_CBN_SELCHANGE(CUSTOMICON_ID, OnCustomIconEditChange)
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnValueEditOK)
-	//ON_NOTIFY_REFLECT_EX(LVN_ITEMCHANGED, OnSelItemChanged)
 	ON_NOTIFY(DTN_DATETIMECHANGE, DATE_ID, OnDateChange)
 	ON_NOTIFY(DTN_CLOSEUP, DATE_ID, OnDateCloseUp)
 	ON_EN_CHANGE(TIME_ID, OnTimeChange)
