@@ -1738,7 +1738,7 @@ COLORREF CInputListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, B
 
 	// else 
 	if (bIsPrompt || !IsWindowEnabled())
-		return ::GetSysColor(COLOR_3DDKSHADOW);
+		return GetPromptColor();
 	
 	// else
 	return GetColumnTextColor(nCol);

@@ -39,7 +39,6 @@ public:
 
 	BOOL IsValid() const { return m_aSearchParams.IsValid(); }
 	BOOL IsBalanced(int& nNumGroupStarts, int& nNumGroupEnds) const { return m_aSearchParams.IsBalanced(nNumGroupStarts, nNumGroupEnds); }
-	void ClearSearch();
 
 	void SetSearchParams(const SEARCHPARAM& param);
 	void SetSearchParams(const CSearchParamArray& params);
@@ -65,6 +64,7 @@ public:
 
 	virtual BOOL IsEditing() const;
 	void CancelEdit();
+	void ClearSearch();
 
 // Attributes
 protected:
@@ -141,7 +141,7 @@ protected:
 	void ValidateListData() const;
 	void UpdateValueColumnText(int nRow);
 	void AddOperatorToCombo(FIND_OPERATOR op);
-	void RefreshAndOrColumnText();
+	void MoveSelectedRule(BOOL bUp);
 
 	static CString GetOpName(FIND_OPERATOR op);
 };

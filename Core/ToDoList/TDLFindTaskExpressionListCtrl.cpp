@@ -58,6 +58,11 @@ const int DEPTH_INDENT	= GraphicsMisc::ScaleByDPIFactor(10);
 
 /////////////////////////////////////////////////////////////////////////////
 
+// This works both in and out of Dark Mode
+const COLORREF ANDOR_DEACTIVATEDCOLOR = RGB(170, 170, 170);
+
+/////////////////////////////////////////////////////////////////////////////
+
 const float COL_PROPORTIONS[] = { 15.0f/47, 13.0f/47, 13.0f/47, 6.0f/47 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -644,7 +649,7 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditCell(int nRow, int nCol) const
 			break;
 
 		case ANDOR_COL:
-			if (!m_aSearchParams.RuleSupportsAndOr(nRow))
+			if (m_aSearchParams.IsStartOfGroup(nRow))
 				return FALSE;
 			break;
 		}
@@ -709,9 +714,6 @@ BOOL CTDLFindTaskExpressionListCtrl::AddRule()
 
 	int nRow = InsertRule(GetRuleCount(), rule);
 
-	// make sure the 'and/or' text of the preceding rule is set
-	RefreshAndOrColumnText();
-
 	SetCurSel(nRow, ATTRIB_COL);
 	EnsureVisible(nRow, FALSE);
 
@@ -728,10 +730,6 @@ BOOL CTDLFindTaskExpressionListCtrl::DeleteSelectedRule()
 		m_aSearchParams.RemoveAt(nRow);
 
 		ValidateListData();
-	
-		// Fixup And/or column
-		RefreshAndOrColumnText();
-
 		SetCurSel(nRow);
 		EnsureVisible(nRow, FALSE);
 
@@ -744,44 +742,7 @@ BOOL CTDLFindTaskExpressionListCtrl::DeleteSelectedRule()
 void CTDLFindTaskExpressionListCtrl::MoveSelectedRuleUp()
 {
 	if (CanMoveSelectedRuleUp())
-	{
-		int nRow, nCol;
-		GetCurSel(nRow, nCol);
-
-		// save off rule
-		SEARCHPARAM rule = m_aSearchParams[nRow];
-
-		// delete rule
-		m_aSearchParams.RemoveAt(nRow);
-		DeleteItem(nRow);
-
-		// reinsert rule
-		nRow = InsertRule(nRow - 1, rule);
-
-		// sanity check
-		ValidateListData();
-
-		// restore selection
-		SetCurSel(nRow, nCol);
-		EnsureVisible(nRow, FALSE);
-	}
-}
-
-int CTDLFindTaskExpressionListCtrl::InsertRule(int nRow, const SEARCHPARAM& rule)
-{
-	m_aSearchParams.InsertAt(nRow, SEARCHPARAM(rule));
-
-	CString sItem = m_cbAttributes.GetAttributeName(rule);
-	int nNew = InsertRow(sItem, nRow);
-
-	SetItemText(nNew, OPERATOR_COL, GetOpName(rule.GetOperator()));
-
-	UpdateValueColumnText(nRow);
-	
-	// Fixup And/or column
-	RefreshAndOrColumnText();
-
-	return nNew;
+		MoveSelectedRule(TRUE);
 }
 
 BOOL CTDLFindTaskExpressionListCtrl::CanMoveSelectedRuleUp() const
@@ -794,32 +755,48 @@ BOOL CTDLFindTaskExpressionListCtrl::CanMoveSelectedRuleUp() const
 void CTDLFindTaskExpressionListCtrl::MoveSelectedRuleDown()
 {
 	if (CanMoveSelectedRuleDown())
-	{
-		int nRow, nCol;
-		GetCurSel(nRow, nCol);
-
-		// save off rule
-		SEARCHPARAM rule = m_aSearchParams[nRow];
-
-		// delete rule
-		m_aSearchParams.RemoveAt(nRow);
-		DeleteItem(nRow);
-
-		// reinsert rule
-		nRow = InsertRule(nRow + 1, rule);
-	
-		// sanity check
-		ValidateListData();
-
-		// restore selection
-		SetCurSel(nRow, nCol);
-		EnsureVisible(nRow, FALSE);
-	}
+		MoveSelectedRule(FALSE);
 }
 
 BOOL CTDLFindTaskExpressionListCtrl::CanMoveSelectedRuleDown() const
 {
 	return (GetCurSel() < GetRuleCount() - 1);
+}
+
+void CTDLFindTaskExpressionListCtrl::MoveSelectedRule(BOOL bUp)
+{
+	int nRow, nCol;
+	GetCurSel(nRow, nCol);
+
+	// save off rule
+	SEARCHPARAM rule = m_aSearchParams[nRow];
+
+	// delete rule
+	m_aSearchParams.RemoveAt(nRow);
+	DeleteItem(nRow);
+
+	// reinsert rule
+	nRow = InsertRule((bUp ? (nRow - 1) : (nRow + 1)), rule);
+
+	// sanity check
+	ValidateListData();
+
+	// restore selection
+	SetCurSel(nRow, nCol);
+	EnsureVisible(nRow, FALSE);
+}
+
+int CTDLFindTaskExpressionListCtrl::InsertRule(int nRow, const SEARCHPARAM& rule)
+{
+	m_aSearchParams.InsertAt(nRow, SEARCHPARAM(rule));
+
+	CString sItem = m_cbAttributes.GetAttributeName(rule);
+	int nNew = InsertRow(sItem, nRow);
+
+	SetItemText(nNew, OPERATOR_COL, GetOpName(rule.GetOperator()));
+	UpdateValueColumnText(nRow);
+
+	return nNew;
 }
 
 void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
@@ -1083,7 +1060,7 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 	if (nRow != CB_ERR)
 	{
 		SEARCHPARAM& rule = m_aSearchParams[nRow];
-		SEARCHPARAM ruleNew(rule);
+		SEARCHPARAM ruleNew;
 
 		if (m_cbAttributes.GetSelectedAttribute(ruleNew) && (rule != ruleNew))
 		{
@@ -1105,7 +1082,7 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 				rule.ClearValue();
 				UpdateValueColumnText(nRow);
 			}
-			
+
 			ValidateListData();
 		}
 	}
@@ -1316,28 +1293,8 @@ void CTDLFindTaskExpressionListCtrl::BuildListCtrl()
 		UpdateValueColumnText(nItem);
 	}
 	
-	RefreshAndOrColumnText();
 	ValidateListData();
 	SetCurSel(0);
-}
-
-void CTDLFindTaskExpressionListCtrl::RefreshAndOrColumnText()
-{
-	int nNumRules = m_aSearchParams.GetSize();
-
-	for (int nRule = 0; nRule < nNumRules; nRule++)
-	{
-		// Hide text for start of group, last rule, and last rule of group
-		CEnString sText;
-
-		if (m_aSearchParams.RuleSupportsAndOr(nRule))
-		{
-			const SEARCHPARAM& rule = m_aSearchParams[nRule];
-			sText.LoadString(rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR);
-		}
-
-		SetItemText(nRule, ANDOR_COL, sText);
-	}
 }
 
 void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
@@ -1626,8 +1583,23 @@ int CTDLFindTaskExpressionListCtrl::GetItemIndent(int nItem) const
 
 COLORREF CTDLFindTaskExpressionListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	if ((nCol == ATTRIB_COL) && !IsPrompt(nItem) && (m_aSearchParams[nItem].GetAttribType() == FT_GROUP))
-		return ::GetSysColor(COLOR_3DDKSHADOW);
+	if (!bSelected && !IsPrompt(nItem))
+	{
+		switch (nCol)
+		{
+		case ATTRIB_COL:
+			// Show groups less intensly
+			if (m_aSearchParams[nItem].GetAttribType() == FT_GROUP)
+				return ::GetSysColor(COLOR_3DDKSHADOW);
+			break;
+
+		case ANDOR_COL:
+			// Show 'and/or' deactivated if there no following rule
+			if (m_aSearchParams.IsLastRule(nItem) || m_aSearchParams.IsLastRuleInGroup(nItem))
+				return ANDOR_DEACTIVATEDCOLOR;
+			break;
+		}
+	}
 
 	return CInputListCtrl::GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
@@ -1636,77 +1608,100 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 													const CRect& rText, const CString& sText, 
 													COLORREF crText, UINT nDrawTextFlags)
 {
-	if ((nCol == VALUE_COL) && !IsPrompt(nRow))
+	if (!IsPrompt(nRow))
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRow];
 
-		switch (rule.GetAttribType())
+		switch (nCol)
 		{
-		case FT_ICON:
-			if (!sText.IsEmpty())
+		case VALUE_COL:
 			{
-				CRect rIcon(rText);
-				rIcon.DeflateRect(0, ((rText.Height() - IMAGE_SIZE) / 2));
-
-				// Don't use sText because it might have been truncated
-				CString sIcons(GetItemText(nRow, nCol));
-
-				CStringArray aIcons;
-				int nNumIcons = Misc::Split(sIcons, aIcons);
-
-				for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+				switch (rule.GetAttribType())
 				{
-					if (GraphicsMisc::DrawCentred(pDC, 
-												  m_ilIcons,
-												  m_ilIcons.GetImageIndex(aIcons[nIcon]),
-												  rIcon,
-												  FALSE,
-												  TRUE)) // vertically centred
+				case FT_ICON:
+					if (!sText.IsEmpty())
 					{
-						rIcon.left += (IMAGE_SIZE + 2);
+						CRect rIcon(rText);
+						rIcon.DeflateRect(0, ((rText.Height() - IMAGE_SIZE) / 2));
+
+						// Don't use sText because it might have been truncated
+						CString sIcons(GetItemText(nRow, nCol));
+
+						CStringArray aIcons;
+						int nNumIcons = Misc::Split(sIcons, aIcons);
+
+						for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+						{
+							if (GraphicsMisc::DrawCentred(pDC, 
+														  m_ilIcons,
+														  m_ilIcons.GetImageIndex(aIcons[nIcon]),
+														  rIcon,
+														  FALSE,
+														  TRUE)) // vertically centred
+							{
+								rIcon.left += (IMAGE_SIZE + 2);
+							}
+						}
+
+						if (nNumIcons == 1) // Draw icon name?
+						{
+							CString sIconName;
+
+							if (rule.IsCustomAttribute())
+							{
+								// When switching tasklists it's possible that
+								// the new tasklist does not support the same custom
+								// attributes as the one for which the rules were
+								// configured so we DON'T want this to assert
+								int nCust = m_aCustAttribDefs.Find(rule.GetCustomAttributeID());
+
+								if ((nCust != -1) && m_aCustAttribDefs[nCust].IsList())
+									m_aCustAttribDefs[nCust].GetListIconName(sIcons, sIconName);
+							}
+
+							if (sIconName.IsEmpty())
+								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+
+							CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, sIconName, crText, nDrawTextFlags);
+						}
 					}
-				}
+					return;
 
-				if (nNumIcons == 1) // Draw icon name?
-				{
-					CString sIconName;
-
-					if (rule.IsCustomAttribute())
+				case FT_COLOR:
+					if (!sText.IsEmpty())
 					{
-						// When switching tasklists it's possible that
-						// the new tasklist does not support the same custom
-						// attributes as the one for which the rules were
-						// configured so we DON'T want this to assert
-						int nCust = m_aCustAttribDefs.Find(rule.GetCustomAttributeID());
+						COLORREF color = _ttoi(GetItemText(nRow, nCol));
 
-						if ((nCust != -1) && m_aCustAttribDefs[nCust].IsList())
-							m_aCustAttribDefs[nCust].GetListIconName(sIcons, sIconName);
+						CRect rColor(rText);
+						rColor.DeflateRect(2, 2);
+
+						pDC->FillSolidRect(rColor, color);
 					}
+					return;
 
-					if (sIconName.IsEmpty())
-						sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
+				case FT_DATE:
+					if (CDateHelper::WantRTLDates())
+						nDrawTextFlags |= DT_RTLREADING;
+					break;
 
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, sIconName, crText, nDrawTextFlags);
+				case FT_GROUP:
+					return;
 				}
 			}
-			return;
-
-		case FT_COLOR:
-			if (!sText.IsEmpty())
-			{
-				COLORREF color = _ttoi(GetItemText(nRow, nCol));
-
-				CRect rColor(rText);
-				rColor.DeflateRect(2, 2);
-
-				pDC->FillSolidRect(rColor, color);
-			}
-			return;
-
-		case FT_DATE:
-			if (CDateHelper::WantRTLDates())
-				nDrawTextFlags |= DT_RTLREADING;
 			break;
+
+		case OPERATOR_COL:
+			if (rule.GetAttribType() == FT_GROUP)
+				return;
+			break;
+
+		case ANDOR_COL:
+			if (!m_aSearchParams.IsStartOfGroup(nRow))
+			{
+				CEnString sAndOr(rule.GetAnd() ? IDS_FP_AND : IDS_FP_OR);
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sAndOr, crText, nDrawTextFlags);
+			}
+			return;
 		}
 	}
 

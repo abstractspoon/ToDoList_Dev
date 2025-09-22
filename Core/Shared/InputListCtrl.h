@@ -192,6 +192,8 @@ protected:
 	void DrawCheckBoxButton(CDC* pDC, const CRect& rBtn, DWORD dwState) const;
 	BOOL DrawButton(CDC* pDC, const CRect& rBtn, IL_COLUMNTYPE nType, DWORD dwState) const;
 
+	static COLORREF GetPromptColor() { return GetSysColor(COLOR_3DDKSHADOW); }
+
 private:
 	void RecalcHotButtonRects();
 	BOOL IsButtonHot(int nRow, int nCol) const;
