@@ -1113,8 +1113,8 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType() const
 		nAttribType = GetAttribType(nAttributeID, bRelativeDate);
 
 	ASSERT((nAttribType != FT_NONE) ||
-		(nAttributeID == TDCA_NONE) ||
-		   (nAttributeID == TDCA_SELECTION));
+			(nAttributeID == TDCA_NONE) ||
+			(nAttributeID == TDCA_SELECTION));
 
 	return nAttribType;
 }
@@ -1191,6 +1191,10 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelati
 	case TDCA_DUETIME:
 	case TDCA_LASTMODDATE:
 		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
+
+	case TDCA_MATCHGROUPSTART:
+	case TDCA_MATCHGROUPEND:
+		return FT_GROUP;
 	}
 
 	// custom attribute type must be set explicitly by caller
@@ -1352,6 +1356,10 @@ void SEARCHPARAM::SetValue(const CString& sVal)
 		nValue = _ttoi(sVal);
 		break;
 
+	case FT_GROUP:
+		ASSERT(sVal.IsEmpty());
+		break;
+
 	default:
 		ASSERT(0);
 		break;
@@ -1435,10 +1443,16 @@ CString SEARCHPARAM::ValueAsString() const
 	case FT_ICON:
 	case FT_DEPENDENCY:
 		return sValue;
+
+	case FT_GROUP:
+		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 
 	// all else
-	ASSERT(0);
 	return _T("");
 }
 
@@ -1514,6 +1528,92 @@ COleDateTime SEARCHPARAM::ValueAsDate() const
 	// all else
 	ASSERT(0);
 	return CDateHelper::NullDate();
+}
+
+///////////////////////////////////////////////////////////////////////
+
+BOOL CSearchParamArray::IsValid() const
+{
+	int nNumStarts, nNumEnds;
+	
+	if (!IsBalanced(nNumStarts, nNumEnds))
+		return FALSE;
+
+	// Must have at least one 'real' rule
+	return (GetSize() > (nNumStarts + nNumEnds));
+}
+
+BOOL CSearchParamArray::IsBalanced() const
+{
+	int nUnused, nUnused2;
+	return IsBalanced(nUnused, nUnused2);
+}
+
+BOOL CSearchParamArray::IsBalanced(int& nNumStarts, int& nNumEnds) const
+{
+	CountGroupings(nNumStarts, nNumEnds);
+	return (nNumEnds == nNumStarts);
+}
+
+void CSearchParamArray::CountGroupings(int& nNumStarts, int& nNumEnds) const
+{
+	nNumStarts = nNumEnds = 0;
+
+	int nNumRules = GetSize();
+
+	for (int nRule = 0; nRule < nNumRules; nRule++)
+	{
+		switch (GetAt(nRule).GetAttribute())
+		{
+		case TDCA_MATCHGROUPSTART:	nNumStarts++;	break;
+		case TDCA_MATCHGROUPEND:	nNumEnds++;		break;
+		}
+	}
+}
+
+BOOL CSearchParamArray::IsStartOfGroup(int nRule) const
+{
+	return (GetAt(nRule).GetAttribute() == TDCA_MATCHGROUPSTART);
+}
+
+BOOL CSearchParamArray::IsLastRule(int nRule) const
+{
+	return (nRule >= (GetSize() - 1));
+}
+
+BOOL CSearchParamArray::IsLastRuleInGroup(int nRule) const
+{
+	if (IsLastRule(nRule))
+		return FALSE;
+
+	return (GetAt(nRule + 1).GetAttribute() == TDCA_MATCHGROUPEND);
+}
+
+BOOL CSearchParamArray::RuleSupportsAndOr(int nRule) const
+{
+	return !(IsStartOfGroup(nRule) || IsLastRule(nRule) || IsLastRuleInGroup(nRule));
+}
+
+BOOL CSearchParamArray::GetRuleDepth(int nAtRule) const
+{
+	int nDepth = 0;
+
+	for (int nRule = 0; nRule <= nAtRule; nRule++)
+	{
+		switch (GetAt(nRule).GetAttribute())
+		{
+		case TDCA_MATCHGROUPSTART:
+			if ((nRule < nAtRule))
+				nDepth++;	
+			break;
+
+		case TDCA_MATCHGROUPEND:
+			nDepth--;	
+			break;
+		}
+	}
+
+	return nDepth;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1646,7 +1746,12 @@ void SEARCHPARAMS::InitAttributeMap() const
 		int nRule = aRules.GetSize();
 
 		while (nRule--)
-			mapAttrib.Add(aRules[nRule].nAttributeID);
+		{
+			const SEARCHPARAM& rule = aRules[nRule];
+
+			if (rule.GetAttribType() != FT_GROUP)
+				mapAttrib.Add(rule.nAttributeID);
+		}
 	}
 }
 

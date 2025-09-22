@@ -39,6 +39,26 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTaskAttributeComboBox message handlers
 
+void CTDLFindTaskAttributeComboBox::BuildCombo()
+{
+	CTDLAttributeComboBox::BuildCombo();
+
+	BOOL bHadHeadings = (m_nNumHeadings > 0);
+
+	// Add grouping to the head of the list
+	int nItem = InsertString(0, CEnString(IDS_FIND_GROUPHEADER));
+	SetHeadingItem(nItem);
+
+	CDialogHelper::InsertStringT(*this, 1, IDS_FIND_GROUPSTART, EncodeItemData(TDCA_MATCHGROUPSTART));
+	CDialogHelper::InsertStringT(*this, 2, IDS_FIND_GROUPEND, EncodeItemData(TDCA_MATCHGROUPEND));
+
+	if (!bHadHeadings)
+	{
+		nItem = InsertString(3, CEnString(IDS_ATTRIBUTES));
+		SetHeadingItem(nItem);
+	}
+}
+
 BOOL CTDLFindTaskAttributeComboBox::WantAttribute(TDC_ATTRIBUTE nAttribID) const
 {
 	if (nAttribID == TDCA_TODAY) 
@@ -102,6 +122,14 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 
 	case TDCA_REMINDER:
 		sName.LoadString(IDS_TDLBC_REMINDER);
+		break;
+
+	case TDCA_MATCHGROUPSTART:
+		sName.LoadString(IDS_FIND_GROUPSTART);
+		break;
+
+	case TDCA_MATCHGROUPEND:
+		sName.LoadString(IDS_FIND_GROUPEND);
 		break;
 
 	default:

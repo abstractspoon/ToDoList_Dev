@@ -828,6 +828,8 @@ void CEnListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			// Draw images for column zero
 			if (nCol == 0)
 			{
+				rCell.left += GetItemIndent(nItem);
+
 				// draw item images if required
 				int nImageWidth = 0;
 

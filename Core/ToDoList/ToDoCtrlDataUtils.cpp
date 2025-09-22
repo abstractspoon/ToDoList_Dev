@@ -16,6 +16,8 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
 
+#include "..\3rdParty\Calculator.h"
+
 #include "..\Interfaces\ContentMgr.h"
 #include "..\Interfaces\TasklistSchemaDef.h"
 
@@ -170,7 +172,7 @@ int CTDCTaskMatcher::FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 		ASSERT(pTDIChild && pTDSChild);
 
 		if (pTDIChild && pTDSChild)
-			FindTasks(pTDIChild, pTDSChild, query, bCheckDueToday, aResults);
+			FindTasks(pTDIChild, pTDSChild, query, bCheckDueToday, aResults); // RECURSIVE CALL
 	}
 	
 	return (aResults.GetSize() - nResults);
@@ -244,11 +246,13 @@ BOOL CTDCTaskMatcher::AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUC
 	return FALSE;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 									const SEARCHPARAMS& query, BOOL bCheckDueToday, SEARCHRESULT& result) const
 {
-	// sanity check
-	if (!pTDI || !pTDS)
+	// sanity checks
+	if (!pTDI || !pTDS || !query.aRules.IsValid())
 	{
 		ASSERT(0);
 		return FALSE;
@@ -267,454 +271,450 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	
 	if (bIsDone && query.bIgnoreDone)
 		return FALSE;
-	
-	BOOL bMatches = TRUE;
-	BOOL bCaseSensitive = query.bCaseSensitive;
 
+	// Special case: Only one rule
 	int nNumRules = query.aRules.GetSize();
-	
-	for (int nRule = 0; nRule < nNumRules && bMatches; nRule++)
+
+	if (nNumRules == 1)
 	{
-		const SEARCHPARAM& rule = query.aRules[nRule];
+		if (!TaskMatches(pTDI, pTDS, query, query.aRules[0], bCheckDueToday, bIsDone, result))
+			return FALSE;
+	}
+	else // multiple rules
+	{
+		// Build a expression of each rule's match result
+		// combined with their logical operators
+		CString sExpression;
 
-		CString sWhatMatched;
-		TDC_ATTRIBUTE nWhatMatched = rule.GetAttribute(); // default
-
-		BOOL bMatch = TRUE, bLastRule = (nRule == nNumRules - 1);
-		
-		switch (rule.GetAttribute())
+		for (int nRule = 0; nRule < nNumRules; nRule++)
 		{
-		case TDCA_TASKNAME:
-			bMatch = ValueMatches(pTDI->sTitle, rule, bCaseSensitive, sWhatMatched);
-			break;
-			
-		case TDCA_TASKNAMEORCOMMENTS:
-			bMatch = TitleOrCommentsMatches(pTDI, rule, bCaseSensitive, sWhatMatched, nWhatMatched);
-			break;
+			const SEARCHPARAM& rule = query.aRules[nRule];
 
-		case TDCA_COMMENTS:
-			bMatch = ValueMatches(pTDI->sComments, pTDI->customComments, rule, sWhatMatched);
-			break;
-			
-		case TDCA_ALLOCTO:
-			bMatch = ArrayMatches(pTDI->aAllocTo, rule, bCaseSensitive, sWhatMatched);
-			break;
-			
-		case TDCA_ALLOCBY:
-			bMatch = ValueMatchesAsArray(pTDI->sAllocBy, rule, bCaseSensitive, sWhatMatched);
-			break;
-
-		case TDCA_REMINDER:
-			if (rule.OperatorIs(FOP_NOT_SET) && bIsDone)
+			switch (rule.GetAttribute())
 			{
-				bMatch = TRUE;
-			}
-			else
-			{
-				BOOL bHasReminder = m_reminders.TaskHasReminder(pTDS->GetTaskID());
-				bMatch = (rule.OperatorIs(FOP_SET) ? bHasReminder : !bHasReminder);
+			case TDCA_MATCHGROUPSTART:
+				sExpression += '(';
+				break;
 
-				if (bMatch && rule.OperatorIs(FOP_SET))
-					sWhatMatched = CEnString(IDS_ATTRIBSET);
-			}
-			break;
+			case TDCA_MATCHGROUPEND:
+				sExpression += ')';
+				break;
 
-		case TDCA_PATH:
-			{
-				CString sPath = m_formatter.GetTaskPath(pTDS);
-
-				// needs care in the handling of trailing back-slashes 
-				// when testing for equality
-				if ((rule.GetOperator() == FOP_EQUALS) || (rule.GetOperator() == FOP_NOT_EQUALS))
-				{
-					FileMisc::TerminatePath(sPath, FileMisc::IsPathTerminated(rule.ValueAsString()));
-				}
-				
-				bMatch = ValueMatches(sPath, rule, FALSE, sWhatMatched);
-			}
-			break;
-			
-		case TDCA_CREATEDBY:
-			bMatch = ValueMatchesAsArray(pTDI->sCreatedBy, rule, bCaseSensitive, sWhatMatched);
-			break;
-			
-		case TDCA_STATUS:
-			bMatch = ValueMatchesAsArray(pTDI->sStatus, rule, bCaseSensitive, sWhatMatched);
-			break;
-			
-		case TDCA_CATEGORY:
-			bMatch = ArrayMatches(pTDI->aCategories, rule, bCaseSensitive, sWhatMatched);
-			break;
-			
-		case TDCA_TAGS:
-			bMatch = ArrayMatches(pTDI->aTags, rule, bCaseSensitive, sWhatMatched);
-			break;
-			
-		case TDCA_EXTERNALID:
-			bMatch = ValueMatchesAsArray(pTDI->sExternalID, rule, bCaseSensitive, sWhatMatched);
-			break;
-
-		case TDCA_RECENTMODIFIED:
-			bMatch = m_calculator.IsTaskRecentlyModified(pTDI, pTDS);
-
-			if (bMatch)
-				sWhatMatched = FormatResultDate(pTDI->dateLastMod);
-			break;
-			
-		case TDCA_CREATIONDATE:
-			// ignore time
-			bMatch = ValueMatches(pTDI->dateCreated, rule, FALSE, TDCD_CREATE, sWhatMatched);
-			break;
-			
-		case TDCA_STARTDATE:
-		case TDCA_STARTTIME:
-			{
-				BOOL bIncTime = ((rule.GetAttribute() == TDCA_STARTTIME) || rule.IsNowRelativeDate());
-
-				// CalcStartDate will ignore completed tasks so we have
-				// to handle that specific situation
-				if (bIsDone)
-				{
-					bMatch = ValueMatches(pTDI->dateStart, rule, bIncTime, TDCD_START, sWhatMatched);
-				}
+			default:
+				if (TaskMatches(pTDI, pTDS, query, rule, bCheckDueToday, bIsDone, result))
+					sExpression += '1';
 				else
-				{
-					COleDateTime dtStart = m_calculator.GetTaskStartDate(pTDI, pTDS);
-					bMatch = ValueMatches(dtStart, rule, bIncTime, TDCD_START, sWhatMatched);
-				}
-			}
-			break;
-			
-		case TDCA_DUEDATE:
-		case TDCA_DUETIME:
-			{
-				BOOL bIncTime = ((rule.GetAttribute() == TDCA_DUETIME) || rule.IsNowRelativeDate());
-
-				// CalcDueDate will ignore completed tasks so we have
-				// to handle that specific situation
-				if (bIsDone)
-				{
-					bMatch = ValueMatches(pTDI->dateDue, rule, bIncTime, TDCD_DUE, sWhatMatched);
-				}
-				else
-				{
-					COleDateTime dtDue = m_calculator.GetTaskDueDate(pTDI, pTDS);
-					bMatch = ValueMatches(dtDue, rule, bIncTime, TDCD_DUE, sWhatMatched);
-					
-					// handle overdue tasks
-					if (bMatch && query.bIgnoreOverDue && m_calculator.IsTaskOverDue(pTDI, pTDS))
-					{
-						bMatch = FALSE;
-					}
-				}
-			}
-			break;
-			
-		case TDCA_DONEDATE:
-			// there's a special case here where if the parent
-			// is completed then the task is also treated as completed
-			if (rule.OperatorIs(FOP_SET))
-			{
-				bMatch = bIsDone;
-			}
-			else if (rule.OperatorIs(FOP_NOT_SET))
-			{
-				bMatch = !bIsDone;
-			}
-			else
-			{
-				// ignore time
-				bMatch = ValueMatches(pTDI->dateDone, rule, FALSE, TDCD_DONE, sWhatMatched);
-			}
-			break;
-			
-		case TDCA_LASTMODDATE:
-			// ignore time
-			bMatch = ValueMatches(m_calculator.GetTaskLastModifiedDate(pTDI, pTDS), rule, FALSE, TDCD_LASTMOD, sWhatMatched);
-			break;
-			
-		case TDCA_LASTMODBY:
-			bMatch = ValueMatches(m_calculator.GetTaskLastModifiedBy(pTDI, pTDS), rule, bCaseSensitive, sWhatMatched);
-			break;
-			
-		case TDCA_PRIORITY:
-			{
-				// done items have even less than zero priority!
-				// and due items have greater than the highest priority
-				int nPriority = pTDI->nPriority;
-
-				if (bIsDone && HasStyle(TDCS_DONEHAVELOWESTPRIORITY))
-				{
-					nPriority = TDC_PRIORITYORRISK_DONETASKS;
-				}
-				else if (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY))
-				{
-					if (m_calculator.IsTaskOverDue(pTDI, pTDS) || (bCheckDueToday && m_calculator.IsTaskDueToday(pTDI, pTDS)))
-						nPriority = TDC_PRIORITYORRISK_OVERDUETASKS;
-				}
-
-				bMatch = PriorityRiskValueMatches(nPriority, rule, sWhatMatched);
-			}
-			break;
-			
-		case TDCA_RISK:
-			{
-				int nRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
-				bMatch = PriorityRiskValueMatches(nRisk, rule, sWhatMatched);
-			}
-			break;
-			
-		case TDCA_ID:
-			bMatch = ValueMatches((int)pTDS->GetTaskID(), rule, sWhatMatched);
-			break;
-			
-		case TDCA_PARENTID:
-			bMatch = ValueMatches((int)pTDS->GetParentTaskID(), rule, sWhatMatched);
-			break;
-			
-		case TDCA_PERCENT:
-			{
-				int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
-				bMatch = ValueMatches(nPercent, rule, sWhatMatched);
-			}
-			break;
-			
-		case TDCA_TIMEESTIMATE:
-			{
-				double dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS);
-				bMatch = ValueMatches(dTime, rule, sWhatMatched);
-			}
-			break;
-			
-		case TDCA_TIMESPENT:
-			{
-				double dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, TDCU_HOURS);
-				bMatch = ValueMatches(dTime, rule, sWhatMatched);
-			}
-			break;
-			
-		case TDCA_COST:
-			{
-				double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
-				bMatch = ValueMatches(dCost, rule, sWhatMatched);
-			}
-			break;
-
-		case TDCA_COLOR:
-			bMatch = ValueMatches((int)pTDI->color, rule, sWhatMatched);
-			break;
-			
-		case TDCA_COMMENTSSIZE:
-			bMatch = ValueMatches(pTDI->GetCommentsSizeInKB(), rule, sWhatMatched);
-			break;
-			
-		case TDCA_COMMENTSFORMAT:
-			bMatch = ValueMatches(m_mgrContent.GetContentDescription(pTDI->cfComments), rule, TRUE, sWhatMatched);
-			break;
-
-		case TDCA_FLAG:
-			{
-				bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bFlagged : !pTDI->bFlagged);
-
-				if (bMatch && pTDI->bFlagged)
-					sWhatMatched = CEnString(IDS_ATTRIBSET);
-			}
-			break;
-
-		case TDCA_LOCK:
-			{
-				bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bLocked : !pTDI->bLocked);
-
-				if (bMatch && pTDI->bLocked)
-					sWhatMatched = CEnString(IDS_ATTRIBSET);
-			}
-			break;
-			
-		case TDCA_VERSION:
-			bMatch = ValueMatchesAsArray(pTDI->sVersion, rule, FALSE, sWhatMatched); // Ignore case
-			break;
-			
-		case TDCA_ICON:
-			bMatch = ValueMatches(pTDI->sIcon, rule, FALSE, sWhatMatched); // Ignore case
-			break;
-
-		case TDCA_FILELINK:
-			bMatch = ArrayMatches(pTDI->aFileLinks, rule, FALSE, sWhatMatched); // Ignore case
-			break;
-
-		case TDCA_DEPENDENCY:
-			if (rule.OperatorIs(FOP_DEPENDS_COMPLETE))
-			{
-				bMatch = TRUE;
-				sWhatMatched = CEnString(IDS_FT_MATCHES);
-
-				// look for first incomplete 'local' dependency
-				CDWordArray aDependIDs;
-				int nDepend = pTDI->GetLocalDependencies(aDependIDs);
-
-				while (nDepend--)
-				{
-					DWORD dwDependID = aDependIDs[nDepend];
-
-					if (!m_data.IsTaskDone(dwDependID))
-					{
-						bMatch = FALSE;
-						sWhatMatched.Empty();
-						break;
-					}
-				}
-			}
-			else
-			{
-				CStringArray aItems;
-				pTDI->aDependencies.Format(aItems);
-
-				bMatch = ArrayMatches(aItems, rule, FALSE, sWhatMatched); // case insensitive
-			}
-			break;
-
-		case TDCA_RECURRENCE:
-			bMatch = ValueMatches(pTDI->trRecurrence, rule, sWhatMatched);
-			break;
-
-		case TDCA_POSITION:
-			{
-				bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, sWhatMatched);
-
-				if (bMatch)
-					sWhatMatched = m_formatter.GetTaskPosition(pTDS);
-			}
-			break;
-			
-		case TDCA_ANYTEXTATTRIBUTE:
-			bMatch = AnyTextAttributeMatches(pTDI, pTDS, rule, query.aAttribDefs, bCaseSensitive, sWhatMatched, nWhatMatched);
-			break;
-
-		case TDCA_SUBTASKDONE:
-			if (rule.OperatorIs(FOP_SET))
-			{
-				bMatch = pTDS->HasSubTasks();
-			}
-			else if (rule.OperatorIs(FOP_NOT_SET))
-			{
-				bMatch = !pTDS->HasSubTasks();
-			}
-			else
-			{
-				bMatch = ValueMatches(m_calculator.GetTaskSubtaskCompletion(pTDI, pTDS), rule, sWhatMatched);
-			}
-			break;
-
-		case TDCA_SELECTION:
-			break; // ignore
-
-		default:
-			// test for custom attributes
-			if (rule.IsCustomAttribute())
-			{
-				CString sUniqueID = rule.GetCustomAttributeID();
-				ASSERT (!sUniqueID.IsEmpty());
-
-				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
-				GET_CUSTDEF_ALT(query.aAttribDefs, sUniqueID, pDef, break);
-				
-				TDCCADATA data;
-				pTDI->GetCustomAttributeValue(sUniqueID, data);
-
-				bMatch = ValueMatches(data, pDef->GetAttributeType(), rule, bCaseSensitive, sWhatMatched);
-				
-				if (bMatch)
-					nWhatMatched = pDef->GetAttributeID();
-			}
-			else
-			{
-				ASSERT (0);
-			}
-			break;
-		}
-		
-		// save off result
-		if (bMatch)
-			result.mapMatched[nWhatMatched] = sWhatMatched;
-		
-		// handle this result
-		bMatches &= bMatch;
-		
-		// are we at the end of this group?
-		if (rule.GetOr() || bLastRule) // == 'OR' or end of aRules
-		{
-			// if the group result is a match then we're done because
-			// whatever may come after this is 'ORed' and so cannot change 
-			// the result
-			if (bMatches || bLastRule)
-			{
+					sExpression += '0';
 				break;
 			}
-			else // we're not at the end so we reset bMatches and keep going
-			{
-				bMatches = TRUE;
-			}
+
+			if (query.aRules.RuleSupportsAndOr(nRule))
+				sExpression += (rule.GetAnd() ? _T("&&") : _T("||"));
 		}
-		// or is there another group ahead of us ?
-		else if (!bMatches) 
-		{
-			int nNext = nRule + 1;
-			
-			while (nNext < nNumRules)
-			{
-				const SEARCHPARAM& ruleNext = query.aRules[nNext];
-				bLastRule = (nNext == nNumRules - 1);
-				
-				if (ruleNext.GetOr() && !bLastRule)
-				{
-					nRule = nNext; // start of next group
-					bMatches = TRUE;
-					break;
-				}
-				
-				// keep looking
-				nNext++;
-			}
-		}	
+
+		// Evaludate the expression
+		if (!CCalculator::Evaluate(sExpression))
+			return FALSE;
 	}
 
-	if (bMatches)
+	// Match success
+	if (bIsDone)
 	{
-		if (bIsDone)
+		if (pTDI->IsDone())
+			result.dwFlags |= RF_DONE;
+		else
+			result.dwFlags |= RF_GOODASDONE;
+	}
+
+	DWORD dwTaskID = result.dwTaskID = pTDS->GetTaskID();
+
+	if (pTDI->dwTaskRefID)
+	{
+		result.dwFlags |= RF_REFERENCE;
+		dwTaskID = pTDI->dwTaskRefID; // True task ID
+	}
+
+	if (m_data.IsTaskParent(dwTaskID)) // True task ID
+		result.dwFlags |= RF_PARENT;
+
+	if (m_data.GetTaskParentID(dwTaskID) == 0) // True task ID
+		result.dwFlags |= RF_TOPMOST;
+
+	return TRUE;
+}
+
+BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+								  const SEARCHPARAMS& query, const SEARCHPARAM& rule,
+								  BOOL bCheckDueToday, BOOL bIsDone, SEARCHRESULT& result) const
+{
+	// sanity check
+	if (!pTDI || !pTDS)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+
+	CString sWhatMatched;
+	TDC_ATTRIBUTE nWhatMatched = rule.GetAttribute(); // default
+
+	BOOL bMatch = TRUE; // greedy
+
+	switch (rule.GetAttribute())
+	{
+	case TDCA_TASKNAME:
+		bMatch = ValueMatches(pTDI->sTitle, rule, query.bCaseSensitive, sWhatMatched);
+		break;
+
+	case TDCA_TASKNAMEORCOMMENTS:
+		bMatch = TitleOrCommentsMatches(pTDI, rule, query.bCaseSensitive, sWhatMatched, nWhatMatched);
+		break;
+
+	case TDCA_COMMENTS:
+		bMatch = ValueMatches(pTDI->sComments, pTDI->customComments, rule, sWhatMatched);
+		break;
+
+	case TDCA_ALLOCTO:
+		bMatch = ArrayMatches(pTDI->aAllocTo, rule, query.bCaseSensitive, sWhatMatched);
+		break;
+
+	case TDCA_ALLOCBY:
+		bMatch = ValueMatchesAsArray(pTDI->sAllocBy, rule, query.bCaseSensitive, sWhatMatched);
+		break;
+
+	case TDCA_REMINDER:
+		if (rule.OperatorIs(FOP_NOT_SET) && bIsDone)
 		{
-			if (pTDI->IsDone())
-				result.dwFlags |= RF_DONE;
-			else
-				result.dwFlags |= RF_GOODASDONE;
-		}
-		
-		DWORD dwTaskID = pTDS->GetTaskID();
-
-		if (m_data.IsTaskReference(dwTaskID))
-		{
-			result.dwFlags |= RF_REFERENCE;
-
-			dwTaskID = m_data.GetTrueTaskID(dwTaskID);
-
-			if (m_data.IsTaskParent(dwTaskID))
-				result.dwFlags |= RF_PARENT;
-
-			if (m_data.GetTaskParentID(dwTaskID) == 0)
-				result.dwFlags |= RF_TOPMOST;
+			bMatch = TRUE;
 		}
 		else
 		{
-			if (pTDS->HasSubTasks())
-				result.dwFlags |= RF_PARENT;
+			BOOL bHasReminder = m_reminders.TaskHasReminder(pTDS->GetTaskID());
+			bMatch = (rule.OperatorIs(FOP_SET) ? bHasReminder : !bHasReminder);
 
-			if (pTDS->GetParentTaskID() == 0)
-				result.dwFlags |= RF_TOPMOST;
+			if (bMatch && rule.OperatorIs(FOP_SET))
+				sWhatMatched = CEnString(IDS_ATTRIBSET);
 		}
-		
-		result.dwTaskID = pTDS->GetTaskID();
+		break;
+
+	case TDCA_PATH:
+		{
+			CString sPath = m_formatter.GetTaskPath(pTDS);
+
+			// needs care in the handling of trailing back-slashes 
+			// when testing for equality
+			if ((rule.GetOperator() == FOP_EQUALS) || (rule.GetOperator() == FOP_NOT_EQUALS))
+			{
+				FileMisc::TerminatePath(sPath, FileMisc::IsPathTerminated(rule.ValueAsString()));
+			}
+
+			bMatch = ValueMatches(sPath, rule, FALSE, sWhatMatched);
+		}
+		break;
+
+	case TDCA_CREATEDBY:
+		bMatch = ValueMatchesAsArray(pTDI->sCreatedBy, rule, query.bCaseSensitive, sWhatMatched);
+		break;
+
+	case TDCA_STATUS:
+		bMatch = ValueMatchesAsArray(pTDI->sStatus, rule, query.bCaseSensitive, sWhatMatched);
+		break;
+
+	case TDCA_CATEGORY:
+		bMatch = ArrayMatches(pTDI->aCategories, rule, query.bCaseSensitive, sWhatMatched);
+		break;
+
+	case TDCA_TAGS:
+		bMatch = ArrayMatches(pTDI->aTags, rule, query.bCaseSensitive, sWhatMatched);
+		break;
+
+	case TDCA_EXTERNALID:
+		bMatch = ValueMatchesAsArray(pTDI->sExternalID, rule, query.bCaseSensitive, sWhatMatched);
+		break;
+
+	case TDCA_RECENTMODIFIED:
+		bMatch = m_calculator.IsTaskRecentlyModified(pTDI, pTDS);
+
+		if (bMatch)
+			sWhatMatched = FormatResultDate(pTDI->dateLastMod);
+		break;
+
+	case TDCA_CREATIONDATE:
+		// ignore time
+		bMatch = ValueMatches(pTDI->dateCreated, rule, FALSE, TDCD_CREATE, sWhatMatched);
+		break;
+
+	case TDCA_STARTDATE:
+	case TDCA_STARTTIME:
+		{
+			BOOL bIncTime = ((rule.GetAttribute() == TDCA_STARTTIME) || rule.IsNowRelativeDate());
+
+			// CalcStartDate will ignore completed tasks so we have
+			// to handle that specific situation
+			if (bIsDone)
+			{
+				bMatch = ValueMatches(pTDI->dateStart, rule, bIncTime, TDCD_START, sWhatMatched);
+			}
+			else
+			{
+				COleDateTime dtStart = m_calculator.GetTaskStartDate(pTDI, pTDS);
+				bMatch = ValueMatches(dtStart, rule, bIncTime, TDCD_START, sWhatMatched);
+			}
+		}
+		break;
+
+	case TDCA_DUEDATE:
+	case TDCA_DUETIME:
+		{
+			BOOL bIncTime = ((rule.GetAttribute() == TDCA_DUETIME) || rule.IsNowRelativeDate());
+
+			// CalcDueDate will ignore completed tasks so we have
+			// to handle that specific situation
+			if (bIsDone)
+			{
+				bMatch = ValueMatches(pTDI->dateDue, rule, bIncTime, TDCD_DUE, sWhatMatched);
+			}
+			else
+			{
+				COleDateTime dtDue = m_calculator.GetTaskDueDate(pTDI, pTDS);
+				bMatch = ValueMatches(dtDue, rule, bIncTime, TDCD_DUE, sWhatMatched);
+
+				// handle overdue tasks
+				if (bMatch && query.bIgnoreOverDue && m_calculator.IsTaskOverDue(pTDI, pTDS))
+				{
+					bMatch = FALSE;
+				}
+			}
+		}
+		break;
+
+	case TDCA_DONEDATE:
+		// there's a special case here where if the parent
+		// is completed then the task is also treated as completed
+		if (rule.OperatorIs(FOP_SET))
+		{
+			bMatch = bIsDone;
+		}
+		else if (rule.OperatorIs(FOP_NOT_SET))
+		{
+			bMatch = !bIsDone;
+		}
+		else
+		{
+			// ignore time
+			bMatch = ValueMatches(pTDI->dateDone, rule, FALSE, TDCD_DONE, sWhatMatched);
+		}
+		break;
+
+	case TDCA_LASTMODDATE:
+		// ignore time
+		bMatch = ValueMatches(m_calculator.GetTaskLastModifiedDate(pTDI, pTDS), rule, FALSE, TDCD_LASTMOD, sWhatMatched);
+		break;
+
+	case TDCA_LASTMODBY:
+		bMatch = ValueMatches(m_calculator.GetTaskLastModifiedBy(pTDI, pTDS), rule, query.bCaseSensitive, sWhatMatched);
+		break;
+
+	case TDCA_PRIORITY:
+		{
+			// done items have even less than zero priority!
+			// and due items have greater than the highest priority
+			int nPriority = pTDI->nPriority;
+
+			if (bIsDone && HasStyle(TDCS_DONEHAVELOWESTPRIORITY))
+			{
+				nPriority = TDC_PRIORITYORRISK_DONETASKS;
+			}
+			else if (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY))
+			{
+				if (m_calculator.IsTaskOverDue(pTDI, pTDS) || (bCheckDueToday && m_calculator.IsTaskDueToday(pTDI, pTDS)))
+					nPriority = TDC_PRIORITYORRISK_OVERDUETASKS;
+			}
+
+			bMatch = PriorityRiskValueMatches(nPriority, rule, sWhatMatched);
+		}
+		break;
+
+	case TDCA_RISK:
+		{
+			int nRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
+			bMatch = PriorityRiskValueMatches(nRisk, rule, sWhatMatched);
+		}
+		break;
+
+	case TDCA_ID:
+		bMatch = ValueMatches((int)pTDS->GetTaskID(), rule, sWhatMatched);
+		break;
+
+	case TDCA_PARENTID:
+		bMatch = ValueMatches((int)pTDS->GetParentTaskID(), rule, sWhatMatched);
+		break;
+
+	case TDCA_PERCENT:
+		{
+			int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
+			bMatch = ValueMatches(nPercent, rule, sWhatMatched);
+		}
+		break;
+
+	case TDCA_TIMEESTIMATE:
+		{
+			double dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS);
+			bMatch = ValueMatches(dTime, rule, sWhatMatched);
+		}
+		break;
+
+	case TDCA_TIMESPENT:
+		{
+			double dTime = m_calculator.GetTaskTimeSpent(pTDI, pTDS, TDCU_HOURS);
+			bMatch = ValueMatches(dTime, rule, sWhatMatched);
+		}
+		break;
+
+	case TDCA_COST:
+		{
+			double dCost = m_calculator.GetTaskCost(pTDI, pTDS);
+			bMatch = ValueMatches(dCost, rule, sWhatMatched);
+		}
+		break;
+
+	case TDCA_COLOR:
+		bMatch = ValueMatches((int)pTDI->color, rule, sWhatMatched);
+		break;
+
+	case TDCA_COMMENTSSIZE:
+		bMatch = ValueMatches(pTDI->GetCommentsSizeInKB(), rule, sWhatMatched);
+		break;
+
+	case TDCA_COMMENTSFORMAT:
+		bMatch = ValueMatches(m_mgrContent.GetContentDescription(pTDI->cfComments), rule, TRUE, sWhatMatched);
+		break;
+
+	case TDCA_FLAG:
+		{
+			bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bFlagged : !pTDI->bFlagged);
+
+			if (bMatch && pTDI->bFlagged)
+				sWhatMatched = CEnString(IDS_ATTRIBSET);
+		}
+		break;
+
+	case TDCA_LOCK:
+		{
+			bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bLocked : !pTDI->bLocked);
+
+			if (bMatch && pTDI->bLocked)
+				sWhatMatched = CEnString(IDS_ATTRIBSET);
+		}
+		break;
+
+	case TDCA_VERSION:
+		bMatch = ValueMatchesAsArray(pTDI->sVersion, rule, FALSE, sWhatMatched); // Ignore case
+		break;
+
+	case TDCA_ICON:
+		bMatch = ValueMatches(pTDI->sIcon, rule, FALSE, sWhatMatched); // Ignore case
+		break;
+
+	case TDCA_FILELINK:
+		bMatch = ArrayMatches(pTDI->aFileLinks, rule, FALSE, sWhatMatched); // Ignore case
+		break;
+
+	case TDCA_DEPENDENCY:
+		if (rule.OperatorIs(FOP_DEPENDS_COMPLETE))
+		{
+			bMatch = TRUE;
+			sWhatMatched = CEnString(IDS_FT_MATCHES);
+
+			// look for first incomplete 'local' dependency
+			CDWordArray aDependIDs;
+			int nDepend = pTDI->GetLocalDependencies(aDependIDs);
+
+			while (nDepend--)
+			{
+				DWORD dwDependID = aDependIDs[nDepend];
+
+				if (!m_data.IsTaskDone(dwDependID))
+				{
+					bMatch = FALSE;
+					sWhatMatched.Empty();
+					break;
+				}
+			}
+		}
+		else
+		{
+			CStringArray aItems;
+			pTDI->aDependencies.Format(aItems);
+
+			bMatch = ArrayMatches(aItems, rule, FALSE, sWhatMatched); // case insensitive
+		}
+		break;
+
+	case TDCA_RECURRENCE:
+		bMatch = ValueMatches(pTDI->trRecurrence, rule, sWhatMatched);
+		break;
+
+	case TDCA_POSITION:
+		{
+			bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, sWhatMatched);
+
+			if (bMatch)
+				sWhatMatched = m_formatter.GetTaskPosition(pTDS);
+		}
+		break;
+
+	case TDCA_ANYTEXTATTRIBUTE:
+		bMatch = AnyTextAttributeMatches(pTDI, pTDS, rule, query.aAttribDefs, query.bCaseSensitive, sWhatMatched, nWhatMatched);
+		break;
+
+	case TDCA_SUBTASKDONE:
+		if (rule.OperatorIs(FOP_SET))
+		{
+			bMatch = pTDS->HasSubTasks();
+		}
+		else if (rule.OperatorIs(FOP_NOT_SET))
+		{
+			bMatch = !pTDS->HasSubTasks();
+		}
+		else
+		{
+			bMatch = ValueMatches(m_calculator.GetTaskSubtaskCompletion(pTDI, pTDS), rule, sWhatMatched);
+		}
+		break;
+
+	case TDCA_SELECTION:
+		break; // ignore
+
+	default:
+		// test for custom attributes
+		if (rule.IsCustomAttribute())
+		{
+			CString sUniqueID = rule.GetCustomAttributeID();
+			ASSERT(!sUniqueID.IsEmpty());
+
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_CUSTDEF_ALT(query.aAttribDefs, sUniqueID, pDef, break);
+
+			TDCCADATA data;
+			pTDI->GetCustomAttributeValue(sUniqueID, data);
+
+			bMatch = ValueMatches(data, pDef->GetAttributeType(), rule, query.bCaseSensitive, sWhatMatched);
+
+			if (bMatch)
+				nWhatMatched = pDef->GetAttributeID();
+		}
+		else
+		{
+			ASSERT(0);
+		}
+		break;
 	}
-	
-	return bMatches;
+
+	if (bMatch)
+		result.mapMatched[nWhatMatched] = sWhatMatched;
+
+	return bMatch;
 }
 
 BOOL CTDCTaskMatcher::TitleOrCommentsMatches(const TODOITEM* pTDI, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched, TDC_ATTRIBUTE &nWhatMatched) const

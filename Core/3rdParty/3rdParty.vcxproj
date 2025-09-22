@@ -119,12 +119,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Base64Coder.cpp" />
+    <ClCompile Include="Calculator.cpp" />
     <ClCompile Include="CalendarCtrl.cpp" />
     <ClCompile Include="ClipboardBackup.cpp" />
     <ClCompile Include="ColorDef.cpp" />
     <ClCompile Include="ColourPicker.cpp" />
     <ClCompile Include="ColourPopup.cpp" />
     <ClCompile Include="Compression.cpp" />
+    <ClCompile Include="cpp-expression-parser\shunting-yard.cpp" />
     <ClCompile Include="DibData.cpp" />
     <ClCompile Include="DragDrop.cpp" />
     <ClCompile Include="FileVersionInfo.cpp" />
@@ -163,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Base64Coder.h" />
+    <ClInclude Include="Calculator.h" />
     <ClInclude Include="CalendarCtrl.h" />
     <ClInclude Include="ClipboardBackup.h" />
     <ClInclude Include="ColorBrewerPalettes.h" />
@@ -171,6 +174,7 @@
     <ClInclude Include="ColourPopup.h" />
     <ClInclude Include="Compression.h" />
     <ClInclude Include="COMUTIL.H" />
+    <ClInclude Include="cpp-expression-parser\shunting-yard.h" />
     <ClInclude Include="DibData.h" />
     <ClInclude Include="DragDrop.h" />
     <ClInclude Include="FileVersionInfo.h" />

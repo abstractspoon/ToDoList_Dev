@@ -1702,7 +1702,7 @@ END
 IDD_RECURRING_YEARLY_PAGE DIALOGEX 0, 0, 254, 113
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "&Every",IDC_RECREATE,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP,0,0,254,10
@@ -6125,6 +6125,13 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_LANGCOMBO_COMPLETION "Completion"
     IDS_LANGCOMBO_LANGCOUNTRY "Language (Country)"
+    IDS_FIND_GROUPSTART     "<Group Start>"
+    IDS_FIND_GROUPEND       "<Group End>"
+    IDS_FIND_GROUPHEADER    "Grouping"
+    IDS_MESSAGE_NOSEARCHRULES 
+                            "Invalid Search|The current search contains no rules."
+    IDS_MESSAGE_UNMATCHEDSEARCHGROUPS 
+                            "Invalid Search|The current search contains %d unmatched %s."
 END
 
 #endif    // English (Australia) resources

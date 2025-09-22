@@ -286,6 +286,10 @@ protected:
 	CTDCTaskFormatter m_formatter;
 
 protected:
+	BOOL TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
+					 const SEARCHPARAMS& query, const SEARCHPARAM& rule, 
+					 BOOL bCheckDueToday, BOOL bIsDone, SEARCHRESULT& result) const;
+
 	BOOL TitleOrCommentsMatches(const TODOITEM* pTDI, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched, TDC_ATTRIBUTE &nWhatMatched) const;
 	BOOL AnyTextAttributeMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAM& rule,
 								 const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bCaseSensitive,

@@ -212,6 +212,7 @@ protected:
 	int LoadSearches();
 	int SaveSearches();
 	int GetSearchParams(LPCTSTR szName, SEARCHPARAMS& params) const;
+	BOOL CheckReportSearchValidity() const;
 
 	CRect GetSplitterRect() const;
 	BOOL GetSplitterRect(CRect& rSplitter, int nSplitPos) const;

@@ -32,16 +32,16 @@ class CContentMgr;
 
 class CTDLFindTaskExpressionListCtrl : public CInputListCtrl
 {
-// Construction
 public:
 	CTDLFindTaskExpressionListCtrl(const CContentMgr& mgrContent);
 	virtual ~CTDLFindTaskExpressionListCtrl();
 
+	BOOL IsValid() const { return m_aSearchParams.IsValid(); }
+	BOOL IsBalanced(int& nNumGroupStarts, int& nNumGroupEnds) const { return m_aSearchParams.IsBalanced(nNumGroupStarts, nNumGroupEnds); }
+
 	void SetSearchParams(const SEARCHPARAM& param);
 	void SetSearchParams(const CSearchParamArray& params);
 	int GetSearchParams(CSearchParamArray& params) const;
-
-	void ClearSearch();
 
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tld, TDC_ATTRIBUTE nAttribID);
@@ -63,8 +63,8 @@ public:
 
 	virtual BOOL IsEditing() const;
 	void CancelEdit();
+	void ClearSearch();
 
-// Attributes
 protected:
 	CComboBox						m_cbOperators;
 	CTDLFindTaskAttributeComboBox	m_cbAttributes;
@@ -90,10 +90,7 @@ protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLFindTaskExpressionListCtrl)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	//}}AFX_MSG
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnAttribEditCancel();
 	afx_msg void OnAttribEditOK();
@@ -119,14 +116,16 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	virtual int GetItemIndent(int nItem) const;
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL DeleteSelectedCell();
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
-	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void OnCancelEdit();
 	virtual void InitState();
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 	virtual void HideAllControls(const CWnd* pWndIgnore = NULL);
+	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 
 	void PrepareEdit(int nRow, int nCol);
 	void PrepareControl(CWnd& ctrl, int nRow, int nCol);
@@ -137,14 +136,11 @@ protected:
 	void ValidateListData() const;
 	void UpdateValueColumnText(int nRow);
 	void AddOperatorToCombo(FIND_OPERATOR op);
-	void RefreshAndOrColumnText();
+	void MoveSelectedRule(BOOL bUp);
 
 	static CString GetOpName(FIND_OPERATOR op);
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_FINDTASKEXPRESSIONLISTCTRL_H__42272309_6C54_4901_A56D_D6FDA87F1E48__INCLUDED_)
