@@ -144,6 +144,7 @@
 			// 
 			// InputTextCtrl
 			// 
+			this.InputTextCtrl.AllowDrop = true;
 			this.InputTextCtrl.ContextMenuStrip = this.contextMenuStrip1;
 			this.InputTextCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.InputTextCtrl.HideSelection = false;

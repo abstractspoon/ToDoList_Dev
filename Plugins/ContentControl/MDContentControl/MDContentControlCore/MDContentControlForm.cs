@@ -40,6 +40,17 @@ namespace MDContentControl
 
 		// -----------------------------------------------------------------
 
+		private static readonly string[] AllowableDropFormats = 
+		{
+			// In preferred order
+			DataFormats.Html,
+			DataFormats.Rtf,
+			DataFormats.Text,
+			DataFormats.FileDrop
+		};
+
+		// -----------------------------------------------------------------
+
 		public MDContentControlForm()
 		{
 			InitializeComponent();
@@ -60,19 +71,18 @@ namespace MDContentControl
 			Win32.AddBorder(InputTextCtrl.Handle);
 			Win32.AddBorder(PreviewBrowser.Handle);
 
-			InputTextCtrl.TextChanged += (s, e) =>
+			InputTextCtrl.TextChanged		+= (s, e) =>	{ InputTextChanged?	.Invoke(this, e);	};
+			InputTextCtrl.LostFocus			+= (s, e) =>	{ InputLostFocus?	.Invoke(this, e);	};
+			InputTextCtrl.NeedLinkTooltip	+= (s, e) =>	{ NeedLinkTooltip?	.Invoke(this, e);	};
+
+			InputTextCtrl.DragEnter += (s, e) =>
 			{
-				InputTextChanged?.Invoke(this, e);
-			};
-			
-			InputTextCtrl.LostFocus += (s, e) =>
-			{
-				InputLostFocus?.Invoke(this, e);
+				OnInputDragEnter(e);
 			};
 
-			InputTextCtrl.NeedLinkTooltip += (s, e) =>
+			InputTextCtrl.DragDrop += (s, e) =>
 			{
-				NeedLinkTooltip?.Invoke(this, e);
+				OnInputDragDrop(e);
 			};
 		}
 
@@ -218,6 +228,88 @@ namespace MDContentControl
 
 			m_SettingTextOrFont = false;
 			return true;
+		}
+
+		void OnInputDragEnter(DragEventArgs e)
+		{
+			foreach (var fmt in AllowableDropFormats)
+			{
+				if (e.Data.GetDataPresent(fmt))
+				{
+					e.Effect = DragDropEffects.Copy;
+					return;
+				}
+			}
+			// else
+			e.Effect = DragDropEffects.None;
+		}
+
+		void OnInputDragDrop(DragEventArgs e)
+		{
+			foreach (var fmt in AllowableDropFormats)
+			{
+				if (InsertDropContent(e.Data, fmt))
+					break;
+			}
+		}
+
+		bool InsertDropContent(IDataObject obj, string fmt)
+		{
+			if (ReadOnly || !InputTextCtrl.Enabled)
+				return false;
+
+			string content;
+
+			if (!TryGetTextContent(obj, fmt, out content))
+				return false;
+
+			return InsertTextContent(content, false);
+		}
+
+		bool TryGetTextContent(IDataObject obj, string fmt, out string content)
+		{
+			content = null;
+
+			if (!obj.GetDataPresent(fmt, true))
+				return false;
+
+			if (fmt == DataFormats.Text)
+			{
+				content = obj.GetData(fmt).ToString();
+			}
+			else if (fmt == DataFormats.Rtf)
+			{
+				var rtf = obj.GetData(fmt).ToString();
+				content = RichTextBoxEx.RtfToHtml(rtf);
+			}
+			else if (fmt == DataFormats.Html)
+			{
+				var html = obj.GetData(fmt, true).ToString();
+
+				const string StartFrag = "<!--StartFragment-->";
+				const string EndFrag = "<!--EndFragment-->";
+
+				int startFrag = html.IndexOf(StartFrag), endFrag = html.IndexOf(EndFrag);
+
+				if ((startFrag != -1) && (endFrag != -1))
+				{
+					startFrag += StartFrag.Length;
+					content = html.Substring(startFrag, (endFrag - startFrag));
+				}
+				else if ((startFrag == -1) && (endFrag == -1))
+				{
+					content = html; // as-is
+				}
+				// else Something wrong
+			}
+			else if (fmt == DataFormats.FileDrop)
+			{
+				var files = (string[])obj.GetData(DataFormats.FileDrop);
+
+				InsertTextContent(string.Join("\n", files), false);
+			}
+
+			return !string.IsNullOrWhiteSpace(content);
 		}
 
 		public bool ReadOnly

@@ -10,6 +10,7 @@
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
 #include <shared\GraphicsMisc.h>
+#include <shared\Rtf2HtmlConverter.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -273,4 +274,20 @@ void RichTextBoxEx::Outdent()
 	{
 		SelectionIndent = Math::Max(0, (SelectionIndent - TabWidth));
 	}
+}
+
+String^ RichTextBoxEx::RtfToHtml(String^ rtf)
+{
+	CRtfHtmlConverter converter(FALSE); // Don't use MSWord
+
+	// Convert Rtf to multibyte
+	MarshalledString msRtf(rtf);
+
+	CString sRtf(msRtf), sHtml;
+	Misc::EncodeAsMultiByte(sRtf, CP_UTF8);
+
+	if (converter.ConvertRtfToHtml((LPCSTR)(LPCWSTR)sRtf, NULL, sHtml, NULL))
+		return gcnew String(sHtml);
+
+	return nullptr;
 }

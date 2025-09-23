@@ -31,6 +31,8 @@ namespace Abstractspoon
 
 				NeedLinkTooltipEventHandler^ NeedLinkTooltip;
 
+				static String^ RtfToHtml(String^ rtf);
+
 			protected:
 				String^ m_CurrentLink;
 				LabelTip^ m_LinkTip;
