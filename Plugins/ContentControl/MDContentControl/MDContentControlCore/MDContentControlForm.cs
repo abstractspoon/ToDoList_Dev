@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Command.Handling;
+using ImageHelper;
 
 using Markdig;
 using Markdig.Syntax;
@@ -304,9 +305,21 @@ namespace MDContentControl
 			}
 			else if (fmt == DataFormats.FileDrop)
 			{
+				// Convert files to links
 				var files = (string[])obj.GetData(DataFormats.FileDrop);
+				var fileLinks = new List<string>();
 
-				InsertTextContent(string.Join("\n", files), false);
+				foreach (var file in files)
+				{
+					var fileLink = string.Format("[{0}]({1})", Path.GetFileName(file), new Uri(file).AbsoluteUri);
+
+					if (ImageUtils.IsImagePath(file))
+						fileLinks.Add('!' + fileLink);
+					else
+						fileLinks.Add(fileLink);
+				}
+
+				InsertTextContent(string.Join("\n", fileLinks), false);
 			}
 
 			return !string.IsNullOrWhiteSpace(content);
