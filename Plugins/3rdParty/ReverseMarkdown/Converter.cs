@@ -28,7 +28,7 @@ namespace ReverseMarkdown
                 typeof(IConverter).GetTypeInfo().Assembly
             };
 
-            if (additionalAssemblies == null)
+            if (additionalAssemblies != null)
                 assemblies.AddRange(additionalAssemblies);
 
             var types = new List<Type>();
