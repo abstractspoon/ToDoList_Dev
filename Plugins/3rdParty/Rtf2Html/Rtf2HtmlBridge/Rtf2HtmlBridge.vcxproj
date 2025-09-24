@@ -110,7 +110,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(OutDir)rtf2htmlbridge.dll ..\..\..\todolist\Unicode_debug /y</Command>
+      <Command>copy $(OutDir)rtf2htmlbridge.dll $(SolutionDir)..\core\todolist\Unicode_debug /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -132,7 +132,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(OutDir)rtf2htmlbridge.dll ..\..\..\todolist\Unicode_release /y</Command>
+      <Command>copy $(OutDir)rtf2htmlbridge.dll $(SolutionDir)..\core\todolist\Unicode_release /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode_Debug|Win32'">

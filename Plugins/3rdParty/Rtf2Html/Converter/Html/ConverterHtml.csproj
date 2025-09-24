@@ -138,6 +138,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath)  $(SolutionDir)\..\..\ToDoList\Unicode_$(ConfigurationName)\ /y</PostBuildEvent>
+    <PostBuildEvent>copy $(TargetPath)  $(SolutionDir)\..\Core\ToDoList\Unicode_$(ConfigurationName)\ /y</PostBuildEvent>
   </PropertyGroup>
 </Project>
