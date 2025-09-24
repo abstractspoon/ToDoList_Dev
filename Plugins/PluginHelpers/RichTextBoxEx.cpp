@@ -17,9 +17,12 @@
 using namespace System::Diagnostics;
 using namespace System::Drawing;
 using namespace System::Windows::Forms;
+using namespace System::IO;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+
 using namespace IIControls;
+using namespace Itenso::Solutions::Community::Rtf2Html;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -281,18 +284,58 @@ void RichTextBoxEx::Outdent()
 	}
 }
 
-String^ RichTextBoxEx::RtfToHtml(String^ rtf)
+String^ RichTextBoxEx::RtfToHtml(String^ rtf, bool useMSWord)
 {
-	CRtfHtmlConverter converter(FALSE); // Don't use MSWord
-
-	// Convert Rtf to multibyte
-	MarshalledString msRtf(rtf);
-
-	CString sRtf(msRtf), sHtml;
-	Misc::EncodeAsMultiByte(sRtf, CP_UTF8);
-
-	if (converter.ConvertRtfToHtml((LPCSTR)(LPCWSTR)sRtf, NULL, sHtml, NULL))
-		return gcnew String(sHtml);
-
-	return nullptr;
+	return RtfToHtml(rtf, "", useMSWord);
 }
+
+
+#undef GetTempPath
+
+String^ RichTextBoxEx::RtfToHtml(String^ rtf, String^ imageFolder, bool useMSWord)
+{
+	if (useMSWord)
+	{
+		CRtfHtmlConverter converter(TRUE);
+
+		// Convert Rtf to multibyte
+		MarshalledString msRtf(rtf);
+
+		CString sRtf(msRtf), sHtml;
+		Misc::EncodeAsMultiByte(sRtf, CP_UTF8);
+
+		if (converter.ConvertRtfToHtml((LPCSTR)(LPCWSTR)sRtf, NULL, sHtml, MS(imageFolder)))
+			return gcnew String(sHtml);
+
+		return nullptr;
+	}
+
+	// else use 'Intenso' components directly
+	// to avoid unnecessary temporary string copies
+	auto tempRtfPath = Path::ChangeExtension(Path::GetTempFileName(), "rtf");
+
+	// Make sure format is '\rtf1\'
+	if (rtf->StartsWith("{\\rtf\\"))
+		rtf = rtf->Replace("{\\rtf\\", "{\\rtf1\\");
+
+	File::WriteAllText(tempRtfPath, rtf, System::Text::Encoding::ASCII);
+
+	auto rtf2Html = gcnew Program(tempRtfPath,
+								  Path::GetTempPath(),
+								  imageFolder,
+								  "/IT:png",			// image file format
+								  "/DS:content",		// return only body of html
+								  String::Empty,		// unused
+								  String::Empty,		// unused
+								  String::Empty,		// unused 
+								  String::Empty,		// unused 
+								  String::Empty,		// unused 
+								  String::Empty);		// unused
+
+	if (!rtf2Html->Execute())
+		return nullptr;
+
+	return File::ReadAllText(Path::ChangeExtension(tempRtfPath, "html"));
+}
+
+#define GetTempPath GetTempPathW

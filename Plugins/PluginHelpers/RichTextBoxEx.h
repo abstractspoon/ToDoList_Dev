@@ -33,7 +33,8 @@ namespace Abstractspoon
 
 				// ----------------------------------------------
 
-				static String^ RtfToHtml(String^ rtf);
+				static String^ RtfToHtml(String^ rtf, bool useMSWord);
+				static String^ RtfToHtml(String^ rtf, String^ imageFolder, bool useMSWord);
 
 				// ----------------------------------------------
 

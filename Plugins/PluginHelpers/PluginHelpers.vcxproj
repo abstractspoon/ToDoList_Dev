@@ -225,6 +225,9 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ProjectReference Include="..\3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj">
       <Project>{5873de0f-6853-4c8e-91a4-7a6861069a9a}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\3rdParty\Rtf2Html\Rtf2Html\Rtf2Html.csproj">
+      <Project>{edf5d000-687f-4d4b-8687-bdb02fa14f96}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\3rdParty\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
     </ProjectReference>

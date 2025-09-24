@@ -297,7 +297,7 @@ namespace MDContentControl
 			else if (fmt == DataFormats.Rtf)
 			{
 				var rtf = obj.GetData(fmt).ToString();
-				content = RichTextBoxEx.RtfToHtml(rtf);
+				content = RichTextBoxEx.RtfToHtml(rtf, false); // don't use MSWord
 			}
 			else if (fmt == DataFormats.Html)
 			{
