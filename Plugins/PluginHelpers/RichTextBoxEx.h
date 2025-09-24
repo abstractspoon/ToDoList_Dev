@@ -31,7 +31,14 @@ namespace Abstractspoon
 
 				NeedLinkTooltipEventHandler^ NeedLinkTooltip;
 
+				// ----------------------------------------------
+
 				static String^ RtfToHtml(String^ rtf);
+
+				// ----------------------------------------------
+
+				delegate bool PasteEventHandler(Object^ sender, Windows::Forms::IDataObject^ pObj);
+				event PasteEventHandler^ PasteEvent;
 
 			protected:
 				String^ m_CurrentLink;

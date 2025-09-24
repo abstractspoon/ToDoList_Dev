@@ -85,6 +85,11 @@ namespace MDContentControl
 			{
 				OnInputDragDrop(e);
 			};
+
+			InputTextCtrl.PasteEvent += (s, e) =>
+			{
+				return OnInputPaste(e);
+			};
 		}
 
 		public static string ConvertToHtml(Byte[] content, string imageDir)
@@ -254,6 +259,17 @@ namespace MDContentControl
 			}
 		}
 
+		bool OnInputPaste(IDataObject obj)
+		{
+			foreach (var fmt in AllowableDropFormats)
+			{
+				if (InsertDropContent(obj, fmt))
+					break;
+			}
+
+			return true; // we handle everything
+		}
+
 		bool InsertDropContent(IDataObject obj, string fmt)
 		{
 			if (ReadOnly || !InputTextCtrl.Enabled)
@@ -271,7 +287,7 @@ namespace MDContentControl
 		{
 			content = null;
 
-			if (!obj.GetDataPresent(fmt, true))
+			if (!obj.GetDataPresent(fmt))
 				return false;
 
 			if (fmt == DataFormats.Text)
@@ -285,7 +301,7 @@ namespace MDContentControl
 			}
 			else if (fmt == DataFormats.Html)
 			{
-				var html = obj.GetData(fmt, true).ToString();
+				var html = obj.GetData(fmt).ToString();
 
 				const string StartFrag = "<!--StartFragment-->";
 				const string EndFrag = "<!--EndFragment-->";

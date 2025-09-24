@@ -49,6 +49,11 @@ void RichTextBoxEx::WndProc(Message% m)
 
 	switch (m.Msg)
 	{
+	case EM_PASTESPECIAL:
+		if (PasteEvent(this, Clipboard::GetDataObject()))
+			return;
+		break;
+
 	case WM_NOTIFY + WM_REFLECT:
 		{
 			NMHDR* pNMHDR = (NMHDR*)(int)m.LParam;
