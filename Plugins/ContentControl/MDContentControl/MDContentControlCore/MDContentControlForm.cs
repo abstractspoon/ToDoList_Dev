@@ -296,8 +296,12 @@ namespace MDContentControl
 			}
 			else if (fmt == DataFormats.Rtf)
 			{
+				// Convert RTF to HTML
 				var rtf = obj.GetData(fmt).ToString();
 				content = RichTextBoxEx.RtfToHtml(rtf, false); // don't use MSWord
+				var html = RichTextBoxEx.RtfToHtml(rtf, false); // don't use MSWord
+
+				content = html;
 			}
 			else if (fmt == DataFormats.Html)
 			{
@@ -311,13 +315,14 @@ namespace MDContentControl
 				if ((startFrag != -1) && (endFrag != -1))
 				{
 					startFrag += StartFrag.Length;
-					content = html.Substring(startFrag, (endFrag - startFrag));
+					html = html.Substring(startFrag, (endFrag - startFrag));
 				}
-				else if ((startFrag == -1) && (endFrag == -1))
+				else if ((startFrag == -1) != (endFrag == -1))
 				{
-					content = html; // as-is
+					// Start/End Mismatch
+					html = null;
 				}
-				// else Something wrong
+				content = html;
 			}
 			else if (fmt == DataFormats.FileDrop)
 			{
