@@ -328,19 +328,23 @@ namespace MDContentControl
 			{
 				// Convert files to links
 				var files = (string[])obj.GetData(DataFormats.FileDrop);
-				var fileLinks = new List<string>();
 
-				foreach (var file in files)
+				if (files.Count() > 0)
 				{
-					var fileLink = string.Format("[{0}]({1})", Path.GetFileName(file), new Uri(file).AbsoluteUri);
+					var fileLinks = new List<string>();
 
-					if (ImageUtils.IsImagePath(file))
-						fileLinks.Add('!' + fileLink);
-					else
-						fileLinks.Add(fileLink);
+					foreach (var file in files)
+					{
+						var fileLink = string.Format("[{0}]({1})", Path.GetFileName(file), new Uri(file).AbsoluteUri);
+
+						if (ImageUtils.IsImagePath(file))
+							fileLinks.Add('!' + fileLink);
+						else
+							fileLinks.Add(fileLink);
+					}
+
+					content = string.Join("\n", fileLinks);
 				}
-
-				InsertTextContent(string.Join("\n", fileLinks), false);
 			}
 
 			return !string.IsNullOrWhiteSpace(content);
