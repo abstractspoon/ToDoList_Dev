@@ -7,10 +7,11 @@
     <ProjectGuid>{BC9D5A49-21FC-4642-B5FD-975A085963F9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ReverseMarkdown2</RootNamespace>
-    <AssemblyName>ReverseMarkdown2</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <RootNamespace>ReverseMarkdown</RootNamespace>
+    <AssemblyName>ReverseMarkdown</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
