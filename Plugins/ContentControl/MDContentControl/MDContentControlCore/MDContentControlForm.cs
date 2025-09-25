@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using Abstractspoon.Tdl.PluginHelpers;
 using Command.Handling;
 using ImageHelper;
+using ReverseMarkdown;
 
 using Markdig;
 using Markdig.Syntax;
@@ -46,7 +47,7 @@ namespace MDContentControl
 			// In preferred order
 			DataFormats.Html,
 			DataFormats.Rtf,
-			DataFormats.Text,
+			DataFormats.UnicodeText,
 			DataFormats.FileDrop
 		};
 
@@ -298,31 +299,29 @@ namespace MDContentControl
 			{
 				// Convert RTF to HTML
 				var rtf = obj.GetData(fmt).ToString();
-				content = RichTextBoxEx.RtfToHtml(rtf, false); // don't use MSWord
 				var html = RichTextBoxEx.RtfToHtml(rtf, false); // don't use MSWord
 
-				content = html;
+				// Then convert HTML to MD
+				var htmlToMd = new ReverseMarkdown.Converter();
+				content = htmlToMd.Convert(html);
+//				content = html;
 			}
 			else if (fmt == DataFormats.Html)
 			{
-				var html = obj.GetData(fmt).ToString();
+				var data = new DataObject(obj);
 
-				const string StartFrag = "<!--StartFragment-->";
-				const string EndFrag = "<!--EndFragment-->";
+				// Extract HTML 'body'
+				string html = string.Empty, srcUrl = string.Empty;
 
-				int startFrag = html.IndexOf(StartFrag), endFrag = html.IndexOf(EndFrag);
-
-				if ((startFrag != -1) && (endFrag != -1))
+				if (ClipboardUtil.GetHtml(obj, ref html, ref srcUrl))
 				{
-					startFrag += StartFrag.Length;
-					html = html.Substring(startFrag, (endFrag - startFrag));
+					var htmlToMd = new ReverseMarkdown.Converter();
+					content = htmlToMd.Convert(html);
+
+					// Append source URL as required
+					// TODO
 				}
-				else if ((startFrag == -1) != (endFrag == -1))
-				{
-					// Start/End Mismatch
-					html = null;
-				}
-				content = html;
+				//content = html;
 			}
 			else if (fmt == DataFormats.FileDrop)
 			{

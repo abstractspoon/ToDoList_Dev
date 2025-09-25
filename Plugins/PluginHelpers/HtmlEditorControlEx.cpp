@@ -5,6 +5,7 @@
 #include "DPIScaling.h"
 #include "Translator.h"
 #include "FormsUtil.h"
+#include "ClipboardUtil.h"
 #include "PluginHelpers.h"
 #include "HtmlEditorControlEx.h"
 
@@ -319,14 +320,14 @@ void HtmlEditorControlEx::TextPaste()
 
 		if (Clipboard::ContainsText(TextDataFormat::Html))
 		{
-			CString sHtml = CClipboard().GetText(CBF_HTML);
-			Misc::EncodeAsUnicode(sHtml, CP_UTF8);
+			String^ html = String::Empty;
+			String^ srcUrl = String::Empty;
 
-			CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl);
-
-			if (!sHtml.IsEmpty())
+			if (ClipboardUtil::GetHtml(html, srcUrl))
 			{
-				SelectedHtml = gcnew String(sHtml);
+				SelectedHtml = html;
+				sSourceUrl = MS(srcUrl);
+
 				bHandled = TRUE;
 			}
 		}

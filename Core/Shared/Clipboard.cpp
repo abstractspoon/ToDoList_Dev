@@ -13,9 +13,11 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const CString STARTHTML = _T("StartHTML:");
-const CString ENDHTML = _T("EndHTML:");
-const CString SRCURL = _T("SourceURL:");
+const CString STARTHTML		= _T("StartHTML:");
+const CString ENDHTML		= _T("EndHTML:");
+const CString SRCURL		= _T("SourceURL:");
+const CString STARTFRAGMENT = _T("<!--StartFragment-->");
+const CString ENDFRAGMENT	= _T("<!--EndFragment-->");
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -206,7 +208,8 @@ CString& CClipboard::PackageHTMLFragment(CString& sContent, const CString& sSour
 	FormatAndReplace(sHeader.GetLength(), 10, _T("BBBBBBBBBB"), sHeader);
 	
 	// Start Fragment
-	sHeader += _T("<html>\n<body>\n<!--StartFragment-->");
+	sHeader += _T("<html>\n<body>\n");
+	sHeader += STARTFRAGMENT;
 	FormatAndReplace(sHeader.GetLength(), 10, _T("DDDDDDDDDD"), sHeader);
 	
 	// End Fragment
@@ -216,7 +219,8 @@ CString& CClipboard::PackageHTMLFragment(CString& sContent, const CString& sSour
 	FormatAndReplace(sHeader.GetLength(), 10, _T("EEEEEEEEEE"), sHeader);
 	
 	// End Html
-	sHeader += _T("<!--EndFragment-->\n</body>\n</html>");
+	sHeader += ENDFRAGMENT;
+	sHeader += _T("\n</body>\n</html>");
 	FormatAndReplace(sHeader.GetLength(), 10, _T("CCCCCCCCCC"), sHeader);
 	
 	// copy back final result
@@ -259,7 +263,20 @@ CString& CClipboard::UnpackageHTMLFragment(CString& sContent, CString& sSourceUr
 			
 			nStart = _ttoi(szStart);
 			nEnd = _ttoi(szEnd);
-			
+
+			// Strip start and end fragment comments
+			int nStartFrag = sContent.Find(STARTFRAGMENT, nStart);
+
+			if (nStartFrag != -1)
+			{
+				nStart = max(nStart, (nStartFrag + STARTFRAGMENT.GetLength()));
+
+				int nEndFrag = sContent.Find(ENDFRAGMENT, nStartFrag);
+
+				if (nEndFrag != -1)
+					nEnd = min(nEnd, nEndFrag);
+			}
+
 			sContent = sContent.Mid(nStart, (nEnd - nStart));
 		}
 	}
