@@ -13,45 +13,64 @@
 using namespace System;
 using namespace System::Diagnostics;
 using namespace System::Windows::Forms;
+using namespace System::Runtime::InteropServices;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ClipboardUtil::GetHtml(String^% html, String^% sourceUrl)
+bool ClipboardUtil::GetHtmlFragment(String^% html)
 {
-	return GetHtml(Clipboard::GetDataObject(), html, sourceUrl);
+	String^ unused;
+
+	return GetHtmlFragment(Clipboard::GetDataObject(), html, unused);
 }
 
-bool ClipboardUtil::GetHtml(Windows::Forms::IDataObject^ obj, String^% html, String^% sourceUrl)
+bool ClipboardUtil::GetHtmlFragment(String^% html, String^% sourceUrl)
+{
+	return GetHtmlFragment(Clipboard::GetDataObject(), html, sourceUrl);
+}
+
+bool ClipboardUtil::GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html)
+{
+	String^ unused;
+
+	return GetHtmlFragment(obj, html, unused);
+}
+
+bool ClipboardUtil::GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html, String^% sourceUrl)
 {
 	if (!obj->GetDataPresent(DataFormats::Html))
 		return false;
 
-	::IUnknown* punk = (::IUnknown*)System::Runtime::InteropServices::Marshal::GetIUnknownForObject(obj).ToPointer();
-
-	::IDataObject* pdata = nullptr;
-	HRESULT hr = punk->QueryInterface(__uuidof(::IDataObject), (void**)&pdata);
-
 	bool success = false;
+	::IUnknown* punk = (::IUnknown*)Marshal::GetIUnknownForObject(obj).ToPointer();
 
-	if (SUCCEEDED(hr))
+	if (punk)
 	{
-		CString sHtml = CClipboard().GetText(pdata, CBF_HTML); // Returned in UTF8
-		Misc::EncodeAsUnicode(sHtml, CP_UTF8);
+		::IDataObject* pdata = nullptr;
+		HRESULT hr = punk->QueryInterface(__uuidof(::IDataObject), (void**)&pdata);
 
-		CString sSourceUrl;
-		CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl);
-
-		if (!sHtml.IsEmpty())
+		if (SUCCEEDED(hr))
 		{
-			html = gcnew String(sHtml);
-			sourceUrl = gcnew String(sSourceUrl);
+			// Note: HTML content is always returned as UTF8
+			CString sHtml = CClipboard().GetText(pdata, CBF_HTML), sSourceUrl;
 
-			success = true;
+			// Convert to Unicode
+			Misc::EncodeAsUnicode(sHtml, CP_UTF8);
+
+			if (!CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl).IsEmpty())
+			{
+				html = gcnew String(sHtml);
+				sourceUrl = gcnew String(sSourceUrl);
+
+				success = true;
+			}
+
+			pdata->Release();
 		}
 
-		pdata->Release();
+		punk->Release();
 	}
 
 	return success;

@@ -313,7 +313,7 @@ namespace MDContentControl
 				// Extract HTML 'body'
 				string html = string.Empty, srcUrl = string.Empty;
 
-				if (ClipboardUtil.GetHtml(obj, ref html, ref srcUrl))
+				if (ClipboardUtil.GetHtmlFragment(obj, ref html, ref srcUrl))
 				{
 					var htmlToMd = new ReverseMarkdown.Converter();
 					content = htmlToMd.Convert(html);

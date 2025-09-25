@@ -323,7 +323,7 @@ void HtmlEditorControlEx::TextPaste()
 			String^ html = String::Empty;
 			String^ srcUrl = String::Empty;
 
-			if (ClipboardUtil::GetHtml(html, srcUrl))
+			if (ClipboardUtil::GetHtmlFragment(html, srcUrl))
 			{
 				SelectedHtml = html;
 				sSourceUrl = MS(srcUrl);
