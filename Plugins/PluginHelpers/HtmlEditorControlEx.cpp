@@ -355,7 +355,7 @@ void HtmlEditorControlEx::TextPaste()
 		if (sSourceUrl.IsEmpty() && !CClipboard().GetHTMLSourceLink(sSourceUrl))
 			return;
 
-		SelectedHtml = String::Format(L"<a href=\"{0}\">{1}</a>", gcnew String(sSourceUrl), m_Trans->Translate(L"Source", Translator::Type::Text));
+		SelectedHtml = String::Format(L"<br><a href=\"{0}\">{1}</a>", gcnew String(sSourceUrl), m_Trans->Translate(L"Source", Translator::Type::Text));
 	}
 }
 
