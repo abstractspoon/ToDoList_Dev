@@ -11,7 +11,7 @@
     <RootNamespace>Itenso.Sys</RootNamespace>
     <AssemblyName>Itenso.Sys</AssemblyName>
     <AssemblyOriginatorKeyFile>..\keys\ItensoRtfConverter.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
