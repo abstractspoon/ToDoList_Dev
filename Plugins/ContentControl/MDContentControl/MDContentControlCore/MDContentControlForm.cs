@@ -34,6 +34,7 @@ namespace MDContentControl
 		bool m_SettingTextOrFont = false;
 
 		string m_TempFile = Path.GetTempFileName();
+		Translator m_Trans;
 
 		// -----------------------------------------------------------------
 
@@ -53,8 +54,10 @@ namespace MDContentControl
 
 		// -----------------------------------------------------------------
 
-		public MDContentControlForm()
+		public MDContentControlForm(Translator trans = null)
 		{
+			m_Trans = trans;
+
 			InitializeComponent();
 
 			// This line is essential to high DPI system but
@@ -211,6 +214,9 @@ namespace MDContentControl
 			}
 		}
 
+		public bool IncludeSourceUrlWhenPasting = false;
+
+
 		public void SetInputFont(string fontName, int pointSize)
 		{
 			m_SettingTextOrFont = true;
@@ -255,7 +261,7 @@ namespace MDContentControl
 		{
 			foreach (var fmt in AllowableDropFormats)
 			{
-				if (InsertDropContent(e.Data, fmt))
+				if (InsertContent(e.Data, fmt))
 					break;
 			}
 		}
@@ -264,27 +270,27 @@ namespace MDContentControl
 		{
 			foreach (var fmt in AllowableDropFormats)
 			{
-				if (InsertDropContent(obj, fmt))
+				if (InsertContent(obj, fmt))
 					break;
 			}
 
 			return true; // we handle everything
 		}
 
-		bool InsertDropContent(IDataObject obj, string fmt)
+		bool InsertContent(IDataObject obj, string fmt)
 		{
 			if (ReadOnly || !InputTextCtrl.Enabled)
 				return false;
 
 			string content;
 
-			if (!TryGetTextContent(obj, fmt, out content))
+			if (!TryGetContentAsText(obj, fmt, out content))
 				return false;
 
 			return InsertTextContent(content, false);
 		}
 
-		bool TryGetTextContent(IDataObject obj, string fmt, out string content)
+		bool TryGetContentAsText(IDataObject obj, string fmt, out string content)
 		{
 			content = null;
 
@@ -304,7 +310,6 @@ namespace MDContentControl
 				// Then convert HTML to MD
 				var htmlToMd = new ReverseMarkdown.Converter();
 				content = htmlToMd.Convert(html);
-//				content = html;
 			}
 			else if (fmt == DataFormats.Html)
 			{
@@ -319,7 +324,11 @@ namespace MDContentControl
 					content = htmlToMd.Convert(html);
 
 					// Append source URL as required
-					// TODO
+					if (IncludeSourceUrlWhenPasting && !string.IsNullOrWhiteSpace(srcUrl))
+					{
+						var srcLink = string.Format("\n[{0}]({1})", m_Trans.Translate("Source", Translator.Type.Text), srcUrl);
+						content = content + srcLink;
+					}
 				}
 				//content = html;
 			}

@@ -119,6 +119,8 @@ namespace MDContentControl
 
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
+			IncludeSourceUrlWhenPasting = prefs.GetProfileBool("Preferences", "IncludeWebLinksInCommentsPaste", true);
+
 			var fontName = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
 			var htmlSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
 			int pointSize = MSDN.Html.Editor.HtmlFontConversion.PointsFromHtml(htmlSize);

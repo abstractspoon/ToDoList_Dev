@@ -19,6 +19,10 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define RELEASE_INTERFACE(i) if (i) { i->Release(); i = NULL; }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool ClipboardUtil::GetHtmlFragment(String^% html)
 {
 	String^ unused;
@@ -67,10 +71,10 @@ bool ClipboardUtil::GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% h
 				success = true;
 			}
 
-			pdata->Release();
 		}
 
-		punk->Release();
+		RELEASE_INTERFACE(pdata);
+		RELEASE_INTERFACE(punk);
 	}
 
 	return success;
