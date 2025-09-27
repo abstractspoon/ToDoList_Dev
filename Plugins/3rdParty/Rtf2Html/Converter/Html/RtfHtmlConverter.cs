@@ -120,12 +120,17 @@ namespace Itenso.Rtf.Converter.Html
 		// ----------------------------------------------------------------------
 		public string Convert()
 		{
+			return Convert(HtmlTextWriter.DefaultTabString);
+		}
+
+		public string Convert(string tabString)
+		{
 			string html;
 			this.documentImages.Clear();
 
 			using ( StringWriter stringWriter = new StringWriter() )
 			{
-				using ( this.writer = new HtmlTextWriter( stringWriter ) )
+				using ( this.writer = new HtmlTextWriter( stringWriter, tabString ))
 				{
 					RenderDocumentSection();
 					RenderHtmlSection();
