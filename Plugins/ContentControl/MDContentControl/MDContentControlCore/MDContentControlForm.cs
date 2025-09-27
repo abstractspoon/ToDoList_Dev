@@ -34,7 +34,10 @@ namespace MDContentControl
 		bool m_SettingTextOrFont = false;
 
 		string m_TempFile = Path.GetTempFileName();
-		Translator m_Trans;
+
+		// -----------------------------------------------------------------
+
+		protected Translator Trans { get; private set; }
 
 		// -----------------------------------------------------------------
 
@@ -56,7 +59,7 @@ namespace MDContentControl
 
 		public MDContentControlForm(Translator trans = null)
 		{
-			m_Trans = trans;
+			Trans = trans;
 
 			InitializeComponent();
 
@@ -313,8 +316,6 @@ namespace MDContentControl
 			}
 			else if (fmt == DataFormats.Html)
 			{
-				var data = new DataObject(obj);
-
 				// Extract HTML 'body'
 				string html = string.Empty, srcUrl = string.Empty;
 
@@ -326,11 +327,10 @@ namespace MDContentControl
 					// Append source URL as required
 					if (IncludeSourceUrlWhenPasting && !string.IsNullOrWhiteSpace(srcUrl))
 					{
-						var srcLink = string.Format("\n[{0}]({1})", m_Trans.Translate("Source", Translator.Type.Text), srcUrl);
+						var srcLink = string.Format("\\\n[{0}]({1})", Trans.Translate("Source", Translator.Type.Text), srcUrl);
 						content = content + srcLink;
 					}
 				}
-				//content = html;
 			}
 			else if (fmt == DataFormats.FileDrop)
 			{

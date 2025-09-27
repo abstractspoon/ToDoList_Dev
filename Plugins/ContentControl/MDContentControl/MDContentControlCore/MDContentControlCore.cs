@@ -13,14 +13,11 @@ namespace MDContentControl
         private IntPtr m_hwndParent;
 		private int m_PrevSplitPos = -1;
 
-		private Translator m_Trans;
-
 		// ITDLContentControl ------------------------------------------------------------------
 
-		public MDContentControlCore(IntPtr hwndParent, Translator trans)
+		public MDContentControlCore(IntPtr hwndParent, Translator trans) : base(trans)
         {
             m_hwndParent = hwndParent;
-			m_Trans = trans;
 
             InputTextChanged += (s, e) =>
 			{
@@ -41,10 +38,10 @@ namespace MDContentControl
 				if (!string.IsNullOrEmpty(tooltip))
 					tooltip = (tooltip + "\n");
 
-				e.tooltip = (tooltip + m_Trans.Translate("'CTRL + click' to follow link", Translator.Type.ToolTip));
+				e.tooltip = (tooltip + Trans.Translate("'CTRL + click' to follow link", Translator.Type.ToolTip));
 			};
 
-			m_Trans.Translate(ContextMenu.Items, true);
+			Trans.Translate(ContextMenu.Items, true);
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------

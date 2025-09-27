@@ -6,6 +6,7 @@
 #include "RichTextBoxEx.h"
 #include "UIExtension.h"
 #include "ContentControl.h"
+#include "ClipboardUtil.h" // for DataObjectEx
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -53,7 +54,7 @@ void RichTextBoxEx::WndProc(Message% m)
 	switch (m.Msg)
 	{
 	case EM_PASTESPECIAL:
-		if (PasteEvent(this, Clipboard::GetDataObject()))
+		if (PasteEvent(this, gcnew DataObjectEx()))
 			return;
 		break;
 
