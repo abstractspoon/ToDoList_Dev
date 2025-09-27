@@ -121,4 +121,19 @@
   <data name="markdown" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\markdown.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="ToolbarCopy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarCopy.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ToolBarCut" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolBarCut.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ToolbarDelete" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarDelete.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ToolbarPaste" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarPaste.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ToolbarWordWrap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ToolbarWordWrap.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

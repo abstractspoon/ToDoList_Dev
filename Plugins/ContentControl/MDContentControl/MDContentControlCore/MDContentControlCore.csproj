@@ -62,6 +62,11 @@
     </Compile>
     <Compile Include="MDContentControlCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MDContentControlForm.resx">
@@ -70,7 +75,10 @@
     <EmbeddedResource Include="MDContentControlCore.resx">
       <DependentUpon>MDContentControlCore.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\3rdParty\CommandHandling\CommandHandling.csproj">
@@ -92,6 +100,21 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\markdown.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ToolbarCopy.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ToolBarCut.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ToolbarDelete.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ToolbarPaste.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ToolbarWordWrap.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
