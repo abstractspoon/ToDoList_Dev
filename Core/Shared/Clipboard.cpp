@@ -229,7 +229,7 @@ CString& CClipboard::PackageHTMLFragment(CString& sContent, const CString& sSour
 	return sContent;
 }
 
-CString& CClipboard::UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl)
+CString& CClipboard::UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl, BOOL bIgnoreAboutBlank)
 {
 	// check that it is packaged
 	int nStart = sContent.Find(STARTHTML);
@@ -249,6 +249,9 @@ CString& CClipboard::UnpackageHTMLFragment(CString& sContent, CString& sSourceUr
 			if (nEOL > nSrcUrl)
 			{
 				sSourceUrl = sContent.Mid(nSrcUrl, (nEOL - nSrcUrl));
+
+				if (bIgnoreAboutBlank && WebMisc::IsAboutBlank(sSourceUrl))
+					sSourceUrl.Empty();
 			}
 		}
 		

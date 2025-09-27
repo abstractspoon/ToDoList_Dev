@@ -99,7 +99,7 @@ public:
 	static BOOL HasFormat(UINT nFormat);
 	static CString GetFormatName(UINT nFormat);
 	static CString& PackageHTMLFragment(CString& sContent, const CString& sSourceUrl = _T(""));
-	static CString& UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl);
+	static CString& UnpackageHTMLFragment(CString& sContent, CString& sSourceUrl, BOOL bIgnoreAboutBlank = TRUE);
 
 	static int GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs);
 	static int GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs, CStringArray& aFormatNames);
