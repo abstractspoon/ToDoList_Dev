@@ -29,7 +29,9 @@ const int TabWidth = 48;
 CreateParams^ RichTextBoxEx::CreateParams::get()
 {
 	auto cp = RichTextBox::CreateParams::get();
-	cp->ClassName = L"RichEdit50W";
+
+	if (!DesignMode)
+		cp->ClassName = L"RichEdit50W";
 
 	return cp;
 }

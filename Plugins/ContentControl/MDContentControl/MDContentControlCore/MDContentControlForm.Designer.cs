@@ -30,6 +30,7 @@
 		{
 			this.components = new System.ComponentModel.Container();
 			this.SplitContainer = new System.Windows.Forms.SplitContainer();
+			this.InputTextCtrl = new Abstractspoon.Tdl.PluginHelpers.RichTextBoxEx();
 			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -40,7 +41,6 @@
 			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.wordwrapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.PreviewBrowser = new System.Windows.Forms.WebBrowser();
-			this.InputTextCtrl = new Abstractspoon.Tdl.PluginHelpers.RichTextBoxEx();
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
 			this.SplitContainer.Panel1.SuspendLayout();
 			this.SplitContainer.Panel2.SuspendLayout();
@@ -70,6 +70,20 @@
 			this.SplitContainer.SplitterWidth = 3;
 			this.SplitContainer.TabIndex = 0;
 			// 
+			// InputTextCtrl
+			// 
+			this.InputTextCtrl.ContextMenuStrip = this.contextMenuStrip1;
+			this.InputTextCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.InputTextCtrl.HideSelection = false;
+			this.InputTextCtrl.Location = new System.Drawing.Point(0, 0);
+			this.InputTextCtrl.Name = "InputTextCtrl";
+			this.InputTextCtrl.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+			this.InputTextCtrl.ShortcutsEnabled = false;
+			this.InputTextCtrl.Size = new System.Drawing.Size(559, 267);
+			this.InputTextCtrl.TabIndex = 0;
+			this.InputTextCtrl.Text = "";
+			this.InputTextCtrl.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+			// 
 			// contextMenuStrip1
 			// 
 			this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -79,14 +93,16 @@
             this.deleteToolStripMenuItem,
             this.toolStripSeparator1,
             this.selectAllToolStripMenuItem,
-			this.toolStripSeparator2,
-			this.wordwrapToolStripMenuItem});
+            this.toolStripSeparator2,
+            this.wordwrapToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(165, 120);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(165, 170);
 			this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
 			// 
 			// cutToolStripMenuItem
 			// 
+			this.cutToolStripMenuItem.Image = global::MDContentControl.Properties.Resources.ToolBarCut;
+			this.cutToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.cutToolStripMenuItem.Name = "cutToolStripMenuItem";
 			this.cutToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
 			this.cutToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
@@ -95,6 +111,8 @@
 			// 
 			// copyToolStripMenuItem
 			// 
+			this.copyToolStripMenuItem.Image = global::MDContentControl.Properties.Resources.ToolbarCopy;
+			this.copyToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
 			this.copyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
 			this.copyToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
@@ -103,6 +121,8 @@
 			// 
 			// pasteToolStripMenuItem
 			// 
+			this.pasteToolStripMenuItem.Image = global::MDContentControl.Properties.Resources.ToolbarPaste;
+			this.pasteToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
 			this.pasteToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
 			this.pasteToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
@@ -111,6 +131,8 @@
 			// 
 			// deleteToolStripMenuItem
 			// 
+			this.deleteToolStripMenuItem.Image = global::MDContentControl.Properties.Resources.ToolbarDelete;
+			this.deleteToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
 			this.deleteToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
 			this.deleteToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
@@ -137,6 +159,8 @@
 			// 
 			// wordwrapToolStripMenuItem
 			// 
+			this.wordwrapToolStripMenuItem.Image = global::MDContentControl.Properties.Resources.ToolbarWordWrap;
+			this.wordwrapToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.wordwrapToolStripMenuItem.Name = "wordwrapToolStripMenuItem";
 			this.wordwrapToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
 			this.wordwrapToolStripMenuItem.Text = "Word &Wrap";
@@ -157,20 +181,6 @@
 			this.PreviewBrowser.WebBrowserShortcutsEnabled = false;
 			this.PreviewBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
 			this.PreviewBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.HtmlPreview_Navigating);
-			// 
-			// InputTextCtrl
-			// 
-			this.InputTextCtrl.ContextMenuStrip = this.contextMenuStrip1;
-			this.InputTextCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.InputTextCtrl.HideSelection = false;
-			this.InputTextCtrl.Location = new System.Drawing.Point(0, 0);
-			this.InputTextCtrl.Name = "InputTextCtrl";
-			this.InputTextCtrl.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-			this.InputTextCtrl.ShortcutsEnabled = false;
-			this.InputTextCtrl.Size = new System.Drawing.Size(559, 267);
-			this.InputTextCtrl.TabIndex = 0;
-			this.InputTextCtrl.Text = "";
-			this.InputTextCtrl.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
 			// 
 			// MDContentControlForm
 			// 
