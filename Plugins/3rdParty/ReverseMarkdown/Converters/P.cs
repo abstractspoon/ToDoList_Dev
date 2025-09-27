@@ -18,7 +18,7 @@ namespace ReverseMarkdown.Converters
 
             var content = Converter.Config.CleanupUnnecessarySpaces ? TreatChildren(node).Trim() : TreatChildren(node); 
 
-            return $"{indentation}{TreatChildren(node)}{newlineAfter}";
+            return $"{indentation}{content}{newlineAfter}";
         }
 
         private static string IndentationFor(HtmlNode node)
