@@ -293,6 +293,25 @@ namespace MDContentControl
 			return InsertTextContent(content, false);
 		}
 
+		string HtmlToMarkdown(string html)
+		{
+			var htmlToMd = new ReverseMarkdown.Converter(new Config()
+			{
+				UnknownTags = Config.UnknownTagsOption.Bypass,
+				SuppressDivNewlines = true,
+				RemoveComments = true
+			});
+
+			return htmlToMd.Convert(html);
+		}
+
+		void DebugSaveContent(string content, string extension)
+		{
+#if DEBUG
+			File.WriteAllText(Path.ChangeExtension("c:\\temp\\content", extension), content, Encoding.UTF8);
+#endif
+		}
+
 		bool TryGetContentAsText(IDataObject obj, string fmt, out string content)
 		{
 			content = null;
@@ -308,11 +327,13 @@ namespace MDContentControl
 			{
 				// Convert RTF to HTML
 				var rtf = obj.GetData(fmt).ToString();
-				var html = RichTextBoxEx.RtfToHtml(rtf, false); // don't use MSWord
+				DebugSaveContent(rtf, "rtf");
 
-				// Then convert HTML to MD
-				var htmlToMd = new ReverseMarkdown.Converter();
-				content = htmlToMd.Convert(html);
+				var html = RichTextBoxEx.RtfToHtml(rtf, false); // don't use MSWord
+				DebugSaveContent(html, "html");
+
+				content = HtmlToMarkdown(html);
+				DebugSaveContent(content, "md");
 			}
 			else if (fmt == DataFormats.Html)
 			{
@@ -321,8 +342,7 @@ namespace MDContentControl
 
 				if (ClipboardUtil.GetHtmlFragment(obj, ref html, ref srcUrl))
 				{
-					var htmlToMd = new ReverseMarkdown.Converter();
-					content = htmlToMd.Convert(html);
+					content = HtmlToMarkdown(html);
 
 					// Append source URL as required
 					if (IncludeSourceUrlWhenPasting && !string.IsNullOrWhiteSpace(srcUrl))
