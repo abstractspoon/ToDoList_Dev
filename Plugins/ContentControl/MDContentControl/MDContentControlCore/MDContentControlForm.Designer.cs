@@ -37,6 +37,8 @@
 			this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+			this.wordwrapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.PreviewBrowser = new System.Windows.Forms.WebBrowser();
 			this.InputTextCtrl = new Abstractspoon.Tdl.PluginHelpers.RichTextBoxEx();
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
@@ -76,7 +78,9 @@
             this.pasteToolStripMenuItem,
             this.deleteToolStripMenuItem,
             this.toolStripSeparator1,
-            this.selectAllToolStripMenuItem});
+            this.selectAllToolStripMenuItem,
+			this.toolStripSeparator2,
+			this.wordwrapToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
 			this.contextMenuStrip1.Size = new System.Drawing.Size(165, 120);
 			this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
@@ -125,6 +129,18 @@
 			this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
 			this.selectAllToolStripMenuItem.Text = "Select &All";
 			this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator2
+			// 
+			this.toolStripSeparator2.Name = "toolStripSeparator2";
+			this.toolStripSeparator2.Size = new System.Drawing.Size(161, 6);
+			// 
+			// wordwrapToolStripMenuItem
+			// 
+			this.wordwrapToolStripMenuItem.Name = "wordwrapToolStripMenuItem";
+			this.wordwrapToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.wordwrapToolStripMenuItem.Text = "Word &Wrap";
+			this.wordwrapToolStripMenuItem.Click += new System.EventHandler(this.wordwrapToolStripMenuItem_Click);
 			// 
 			// PreviewBrowser
 			// 
@@ -184,6 +200,8 @@
 		private System.Windows.Forms.ToolStripMenuItem pasteToolStripMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
 		private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
 		private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem wordwrapToolStripMenuItem;
 	}
 }

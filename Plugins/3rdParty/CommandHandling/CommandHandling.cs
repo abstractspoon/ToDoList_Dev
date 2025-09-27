@@ -116,6 +116,17 @@ namespace Command.Handling
 			return true;
 		}
 
+		public static bool CheckCommand(String commandId, bool check, ToolStripItemCollection items)
+		{
+			ToolStripMenuItem menu = GetMenuItem(commandId, items);
+
+			if (menu == null)
+				return false;
+
+			menu.Checked = check;
+			return true;
+		}
+
 		public static Keys GetMenuShortcut(String commandId, ToolStripItemCollection items)
 		{
 			ToolStripMenuItem menu = GetMenuItem(commandId, items);
