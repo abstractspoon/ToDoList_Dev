@@ -219,6 +219,23 @@ namespace MDContentControl
 
 		public bool IncludeSourceUrlWhenPasting = false;
 
+		public bool WordWrap
+		{
+			get
+			{
+				return InputTextCtrl.WordWrap;
+			}
+
+			set
+			{
+				InputTextCtrl.WordWrap = value;
+				InputTextCtrl.ScrollBars = (value ? RichTextBoxScrollBars.Vertical : RichTextBoxScrollBars.Both);
+
+				// Gets readded
+				Win32.RemoveClientEdge(InputTextCtrl.Handle);
+				Win32.AddBorder(InputTextCtrl.Handle);
+			}
+		}
 
 		public void SetInputFont(string fontName, int pointSize)
 		{
@@ -590,6 +607,11 @@ namespace MDContentControl
 			InputTextCtrl.SelectAll();
 		}
 
+		private void wordwrapToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			WordWrap = !WordWrap;
+		}
+
 		private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			InputTextCtrl.Paste(DataFormats.GetFormat(DataFormats.Text));
@@ -635,6 +657,8 @@ namespace MDContentControl
 			CommandHandling.EnableCommand("copyToolStripMenuItem", hasSelection, contextMenuStrip1.Items);
 			CommandHandling.EnableCommand("deleteToolStripMenuItem", enabled && hasText, contextMenuStrip1.Items);
 			CommandHandling.EnableCommand("pasteToolStripMenuItem", InputTextCtrl.CanPaste(DataFormats.GetFormat(DataFormats.Text)), contextMenuStrip1.Items);
+
+			CommandHandling.CheckCommand("wordwrapToolStripMenuItem", WordWrap, contextMenuStrip1.Items);
 		}
 
 		protected override void OnGotFocus(EventArgs e)

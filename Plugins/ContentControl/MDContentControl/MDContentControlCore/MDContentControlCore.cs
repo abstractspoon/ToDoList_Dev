@@ -112,7 +112,8 @@ namespace MDContentControl
         public void SavePreferences(Preferences prefs, String key)
         {
 			prefs.WriteProfileInt(key, "SplitPos", SplitPos);
-        }
+			prefs.WriteProfileBool(key, "WordWrap", WordWrap);
+		}
 
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
@@ -127,6 +128,7 @@ namespace MDContentControl
 			if (!appOnly)
 			{
 				m_PrevSplitPos = prefs.GetProfileInt(key, "SplitPos", ClientSize.Height / 2);
+				WordWrap = prefs.GetProfileBool(key, "WordWrap", true);
 			}
 		}
 
