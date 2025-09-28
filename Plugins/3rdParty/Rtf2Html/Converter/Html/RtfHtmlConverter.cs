@@ -224,7 +224,8 @@ namespace Itenso.Rtf.Converter.Html
 		// ----------------------------------------------------------------------
 		protected virtual void RenderBrTag()
 		{
-			RenderBeginTag( HtmlTextWriterTag.Br );
+			//RenderBeginTag( HtmlTextWriterTag.Br );
+			Writer.WriteBreak();
 		} // RenderBrTag
 
 		// ----------------------------------------------------------------------
