@@ -2836,6 +2836,7 @@ IDB_UK_FLAG             BITMAP  MOVEABLE PURE   "res\\uk_flag.bmp"
 IDB_YOURLANG_FLAG       BITMAP  MOVEABLE PURE   "res\\yourlang_flag.bmp"
 IDR_ATTRIBCTRL_TOOLBAR  BITMAP  MOVEABLE PURE   "res\\taskattrib_toolbar.bmp"
 IDB_ATTRIBCTRL_TOOLBAR  BITMAP  MOVEABLE PURE   "res\\taskattrib_toolbar_std.bmp"
+IDB_SIMPLETEXT_MENU     BITMAP  DISCARDABLE     "res\\simpletext_menu.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4154,7 +4155,7 @@ BEGIN
         MENUITEM "&Copy\tCtrl+C",               ID_COMMENTS_COPY
         MENUITEM "&Paste\tCtrl+V",              ID_COMMENTS_PASTE
         MENUITEM "Past&e Tasks as Links",       ID_COMMENTS_PASTEASREF
-        MENUITEM "&Delete\tDel",                ID_COMMENTS_DELETE
+        MENUITEM "&Delete\tDelete",             ID_COMMENTS_DELETE
         MENUITEM SEPARATOR
         MENUITEM "Select &All\tCtrl+A",         ID_COMMENTS_SELECTALL
         MENUITEM SEPARATOR

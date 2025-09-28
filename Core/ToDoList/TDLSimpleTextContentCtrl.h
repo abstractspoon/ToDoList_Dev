@@ -8,6 +8,7 @@
 //
 
 #include "..\shared\urlricheditctrl.h"
+#include "..\shared\menuiconmgr.h"
 
 #include "..\Interfaces\richeditspellcheck.h"
 #include "..\Interfaces\IContentControl.h"
@@ -56,6 +57,7 @@ protected:
 	BOOL m_bWordWrap;
 
 	CRichEditSpellCheck m_reSpellCheck;
+	CMenuIconMgr m_mgrMenuIcons;
 
 	static BOOL s_bInlineSpellChecking;
 	static BOOL s_bPasteSourceUrls;
@@ -89,6 +91,7 @@ protected:
 	void SetWordWrap(BOOL bWrap);
 	BOOL Paste();
 	BOOL CanPaste();
+	void InitMenuIconManager();
 
 };
 
