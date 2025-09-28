@@ -72,10 +72,8 @@ CRTFContentControl::~CRTFContentControl()
 }
 
 BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
-	//{{AFX_MSG_MAP(CRTFContentControl)
 	ON_WM_CONTEXTMENU()
 	ON_WM_CREATE()
-	//}}AFX_MSG_
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)

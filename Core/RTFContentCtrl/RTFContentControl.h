@@ -22,12 +22,12 @@
 class CRtfHtmlConverter;
 
 /////////////////////////////////////////////////////////////////////////////
-// CRTFContentControl window
+
 class CRTFContentControl : public CRulerRichEditCtrl, public IContentControl
 {
-// Construction
 public:
 	CRTFContentControl(CRtfHtmlConverter& rtfHtml);
+	virtual ~CRTFContentControl();
 
 	// ICustomControl implementation
 	int GetContent(unsigned char* pContent) const;
@@ -60,7 +60,6 @@ public:
 	static void EnableInlineSpellChecking(BOOL bEnable) { s_bInlineSpellChecking = bEnable; }
 	static BOOL IsInlineSpellCheckingEnabled() { return s_bInlineSpellChecking; }
 
-// Attributes
 protected:
 	CToolbarHelper m_tbHelper;
 	CRichEditSpellCheck m_reSpellCheck;
@@ -71,22 +70,9 @@ protected:
 
 	static BOOL s_bInlineSpellChecking;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CRTFContentControl)
-	public:
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CRTFContentControl();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CRTFContentControl)
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditCopyAsHtml();
 	afx_msg void OnEditCopyFormatting();
