@@ -154,10 +154,15 @@ END
 
 TOOLBAR_CONTROL TOOLBAR DISCARDABLE  16, 15
 BEGIN
-    BUTTON      ID_EDIT_FONT
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    BUTTON      ID_EDIT_DELETE
     SEPARATOR
+    BUTTON      ID_EDIT_FONT
     BUTTON      ID_EDIT_BOLD
     BUTTON      ID_EDIT_ITALIC
+    SEPARATOR
     BUTTON      ID_EDIT_UNDERLINE
     BUTTON      ID_EDIT_STRIKETHRU
     SEPARATOR
@@ -528,6 +533,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_EDIT_FONT            "\nFont Dialog"
     ID_EDIT_BOLD            "\nBold"
+    ID_EDIT_DELETE          "\nDelete"
     ID_EDIT_ITALIC          "\nItalic"
     ID_EDIT_UNDERLINE       "\nUnderline"
     ID_EDIT_LEFTALIGN       "\nLeft Align"
@@ -576,6 +582,13 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_CTRLCLICKTOFOLLOWLINK "'CTRL + click' to follow link"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_COPY            "\nCopy"
+    ID_EDIT_CUT             "\nCut"
+    ID_EDIT_PASTE           "\nPaste"
 END
 
 #endif    // English (Australia) resources
