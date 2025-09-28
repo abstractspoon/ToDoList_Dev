@@ -322,10 +322,10 @@ namespace MDContentControl
 			return htmlToMd.Convert(html);
 		}
 
-		void DebugSaveContent(string content, string extension)
+		void DebugSaveContent(string content, string filename)
 		{
 #if DEBUG
-			File.WriteAllText(Path.ChangeExtension("c:\\temp\\content", extension), content, Encoding.UTF8);
+			File.WriteAllText(("c:\\temp\\" + filename), content, Encoding.UTF8);
 #endif
 		}
 
@@ -344,13 +344,13 @@ namespace MDContentControl
 			{
 				// Convert RTF to HTML
 				var rtf = obj.GetData(fmt).ToString();
-				DebugSaveContent(rtf, "rtf");
+				DebugSaveContent(rtf, "rtf2md.rtf");
 
 				var html = RichTextBoxEx.RtfToHtml(rtf, false); // don't use MSWord
-				DebugSaveContent(html, "html");
+				DebugSaveContent(html, "rtf2md.html");
 
 				content = HtmlToMarkdown(html);
-				DebugSaveContent(content, "md");
+				DebugSaveContent(content, "rtf2md.md");
 			}
 			else if (fmt == DataFormats.Html)
 			{
@@ -359,7 +359,10 @@ namespace MDContentControl
 
 				if (ClipboardUtil.GetHtmlFragment(obj, ref html, ref srcUrl))
 				{
+					DebugSaveContent(html, "rtf2html.html");
+
 					content = HtmlToMarkdown(html);
+					DebugSaveContent(content, "rtf2html.md");
 
 					// Append source URL as required
 					if (IncludeSourceUrlWhenPasting && !string.IsNullOrWhiteSpace(srcUrl))
