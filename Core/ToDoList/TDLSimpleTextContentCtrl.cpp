@@ -77,12 +77,10 @@ CTDLSimpleTextContentCtrl::~CTDLSimpleTextContentCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
-	//{{AFX_MSG_MAP(CTDLSimpleTextContentCtrl)
 	ON_WM_CONTEXTMENU()
 	ON_WM_SETCURSOR()
 	ON_WM_DESTROY()
 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 	ON_WM_HELPINFO()
 	ON_WM_GETDLGCODE()
 	ON_COMMAND_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnCommentsMenuCmd)
