@@ -237,6 +237,8 @@ void CRichEditBaseCtrl::Initialise()
 	EnableInlineSpellChecking(TRUE);
 	EnableAutoFontChanging(FALSE);
 	EnableAutoUrlDetection();
+
+	PostMessage(WM_REBC_REENABLECHANGENOTIFY);
 }
 
 BOOL CRichEditBaseCtrl::Undo()
