@@ -7,6 +7,7 @@
 #include "UIExtension.h"
 #include "ContentControl.h"
 #include "ClipboardUtil.h" // for DataObjectEx
+#include "DragDropUtil.h"
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -20,6 +21,7 @@ using namespace System::Drawing;
 using namespace System::Windows::Forms;
 using namespace System::IO;
 
+using namespace Microsoft::VisualStudio::OLE::Interop;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 using namespace IIControls;
@@ -287,11 +289,16 @@ void RichTextBoxEx::Outdent()
 	}
 }
 
+bool RichTextBoxEx::IsRichTextItem(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	return (DragDropUtil::ObjectHasFormat(obj, (CLIPFORMAT)CBF_RTF) ||
+			DragDropUtil::ObjectHasFormat(obj, (CLIPFORMAT)CBF_RETEXTOBJ));
+}
+
 String^ RichTextBoxEx::RtfToHtml(String^ rtf, bool useMSWord)
 {
 	return RtfToHtml(rtf, "", useMSWord);
 }
-
 
 #undef GetTempPath
 

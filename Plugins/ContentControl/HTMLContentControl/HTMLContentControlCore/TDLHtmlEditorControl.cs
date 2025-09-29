@@ -81,6 +81,12 @@ namespace HTMLContentControl
 			DoDrop(title, url);
 		}
 
+		protected void OnRichTextDrop(object sender, String rtf, String url)
+		{
+			// TODO
+			int breakpoint = 0;
+		}
+
 		protected override void OnHandleCreated(EventArgs e)
 		{
 			base.OnHandleCreated(e);
@@ -112,7 +118,9 @@ namespace HTMLContentControl
 			if (m_DragDrop == null)
 			{
 				m_DragDrop = new TDLDropTarget(defDropTarget);
+
 				m_DragDrop.OutlookDrop += new TDLDropTarget.OutlookDropEventHandler(OnOutlookDrop);
+				m_DragDrop.RichTextDrop += new TDLDropTarget.RichTextDropEventHandler(OnRichTextDrop);
 			}
 
 			return Marshal.GetComInterfaceForObject(m_DragDrop, typeof(Microsoft.VisualStudio.OLE.Interop.IDropTarget), CustomQueryInterfaceMode.Ignore);
