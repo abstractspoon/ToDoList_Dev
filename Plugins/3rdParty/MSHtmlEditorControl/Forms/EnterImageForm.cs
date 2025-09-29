@@ -149,25 +149,6 @@ namespace MSDN.Html.Editor
 			}
 		} 
 
-		public static bool IsImagePath(string path)
-		{
-			try
-			{
-				string extension = System.IO.Path.GetExtension(path);
-
-				if (String.IsNullOrEmpty(extension))
-					return false;
-
-				string filter = String.Format("*{0};", extension.ToLower());
-
-				return ImageUtils.ImageFilter.Contains(filter);
-			}
-			catch (Exception /*e*/)
-			{
-				return false;
-			}
-		}
-
 		private void fileBrowseBtn_Click(object sender, EventArgs e)
 		{
 			var dlg = new OpenFileDialog

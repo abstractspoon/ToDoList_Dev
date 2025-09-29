@@ -12,6 +12,8 @@ using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Command.Handling;
+using ImageHelper;
+using ReverseMarkdown;
 
 using Markdig;
 using Markdig.Syntax;
@@ -35,13 +37,30 @@ namespace MDContentControl
 
 		// -----------------------------------------------------------------
 
+		protected Translator Trans { get; private set; }
+
+		// -----------------------------------------------------------------
+
 		const int WS_EX_RTLREADING = 0x00002000;
 		const int WS_EX_LEFTSCROLLBAR = 0x00004000;
 
 		// -----------------------------------------------------------------
 
-		public MDContentControlForm()
+		private static readonly string[] AllowableDropFormats = 
 		{
+			// In preferred order
+			DataFormats.Html,
+			DataFormats.Rtf,
+			DataFormats.UnicodeText,
+			DataFormats.FileDrop
+		};
+
+		// -----------------------------------------------------------------
+
+		public MDContentControlForm(Translator trans = null)
+		{
+			Trans = trans;
+
 			InitializeComponent();
 
 			// This line is essential to high DPI system but
@@ -60,19 +79,23 @@ namespace MDContentControl
 			Win32.AddBorder(InputTextCtrl.Handle);
 			Win32.AddBorder(PreviewBrowser.Handle);
 
-			InputTextCtrl.TextChanged += (s, e) =>
+			InputTextCtrl.TextChanged		+= (s, e) =>	{ InputTextChanged?	.Invoke(this, e);	};
+			InputTextCtrl.LostFocus			+= (s, e) =>	{ InputLostFocus?	.Invoke(this, e);	};
+			InputTextCtrl.NeedLinkTooltip	+= (s, e) =>	{ NeedLinkTooltip?	.Invoke(this, e);	};
+
+			InputTextCtrl.DragEnter += (s, e) =>
 			{
-				InputTextChanged?.Invoke(this, e);
-			};
-			
-			InputTextCtrl.LostFocus += (s, e) =>
-			{
-				InputLostFocus?.Invoke(this, e);
+				OnInputDragEnter(e);
 			};
 
-			InputTextCtrl.NeedLinkTooltip += (s, e) =>
+			InputTextCtrl.DragDrop += (s, e) =>
 			{
-				NeedLinkTooltip?.Invoke(this, e);
+				OnInputDragDrop(e);
+			};
+
+			InputTextCtrl.PasteEvent += (s, e) =>
+			{
+				return OnInputPaste(e);
 			};
 		}
 
@@ -194,6 +217,8 @@ namespace MDContentControl
 			}
 		}
 
+		public bool IncludeSourceUrlWhenPasting = false;
+
 		public bool WordWrap
 		{
 			get
@@ -236,6 +261,141 @@ namespace MDContentControl
 
 			m_SettingTextOrFont = false;
 			return true;
+		}
+
+		void OnInputDragEnter(DragEventArgs e)
+		{
+			foreach (var fmt in AllowableDropFormats)
+			{
+				if (e.Data.GetDataPresent(fmt))
+				{
+					e.Effect = DragDropEffects.Copy;
+					return;
+				}
+			}
+			// else
+			e.Effect = DragDropEffects.None;
+		}
+
+		void OnInputDragDrop(DragEventArgs e)
+		{
+			foreach (var fmt in AllowableDropFormats)
+			{
+				if (InsertContent(e.Data, fmt))
+					break;
+			}
+		}
+
+		bool OnInputPaste(IDataObject obj)
+		{
+			foreach (var fmt in AllowableDropFormats)
+			{
+				if (InsertContent(obj, fmt))
+					break;
+			}
+
+			return true; // we handle everything
+		}
+
+		bool InsertContent(IDataObject obj, string fmt)
+		{
+			if (ReadOnly || !InputTextCtrl.Enabled)
+				return false;
+
+			string content;
+
+			if (!TryGetContentAsText(obj, fmt, out content))
+				return false;
+
+			return InsertTextContent(content, false);
+		}
+
+		string HtmlToMarkdown(string html)
+		{
+			var htmlToMd = new ReverseMarkdown.Converter(new Config()
+			{
+				UnknownTags = Config.UnknownTagsOption.Bypass,
+				SuppressDivNewlines = true,
+				RemoveComments = true
+			});
+
+			return htmlToMd.Convert(html);
+		}
+
+		void DebugSaveContent(string content, string filename)
+		{
+#if DEBUG
+			File.WriteAllText(("c:\\temp\\" + filename), content, Encoding.UTF8);
+#endif
+		}
+
+		bool TryGetContentAsText(IDataObject obj, string fmt, out string content)
+		{
+			content = null;
+
+			if (!obj.GetDataPresent(fmt))
+				return false;
+
+			if (fmt == DataFormats.Text)
+			{
+				content = obj.GetData(fmt).ToString();
+			}
+			else if (fmt == DataFormats.Rtf)
+			{
+				// Convert RTF to HTML
+				var rtf = obj.GetData(fmt).ToString();
+				DebugSaveContent(rtf, "rtf2md.rtf");
+
+				var html = RichTextBoxEx.RtfToHtml(rtf, false); // don't use MSWord
+				DebugSaveContent(html, "rtf2md.html");
+
+				content = HtmlToMarkdown(html);
+				DebugSaveContent(content, "rtf2md.md");
+			}
+			else if (fmt == DataFormats.Html)
+			{
+				// Extract HTML 'body'
+				string html = string.Empty, srcUrl = string.Empty;
+
+				if (ClipboardUtil.GetHtmlFragment(obj, ref html, ref srcUrl))
+				{
+					DebugSaveContent(html, "rtf2html.html");
+
+					content = HtmlToMarkdown(html);
+					DebugSaveContent(content, "rtf2html.md");
+
+					// Append source URL as required
+					if (IncludeSourceUrlWhenPasting && !string.IsNullOrWhiteSpace(srcUrl))
+					{
+						var srcLink = string.Format("\\\n[{0}]({1})", Trans.Translate("Source", Translator.Type.Text), srcUrl);
+						content = content + srcLink;
+					}
+				}
+			}
+			else if (fmt == DataFormats.FileDrop)
+			{
+				// Convert files to links
+				var files = (string[])obj.GetData(DataFormats.FileDrop);
+
+				if (files.Count() > 0)
+				{
+					var fileLinks = new List<string>();
+
+					foreach (var file in files)
+					{
+						var fileLink = string.Format("[{0}]({1})", Path.GetFileName(file), new Uri(file).AbsoluteUri);
+
+						if (ImageUtils.IsImagePath(file))
+							fileLinks.Add('!' + fileLink);
+						else
+							fileLinks.Add(fileLink);
+					}
+
+					content = string.Join("\n", fileLinks);
+				}
+			}
+
+			return !string.IsNullOrWhiteSpace(content);
 		}
 
 		public bool ReadOnly

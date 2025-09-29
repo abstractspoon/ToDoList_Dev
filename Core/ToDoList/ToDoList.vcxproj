@@ -249,18 +249,6 @@ unicode_release\TDLTest.exe
     <None Include="res\udtprefs_toolbar_std.bmp" />
     <None Include="res\update_filter.ico" />
     <None Include="RES\XPcheckboxes.bmp" />
-    <None Include="Unicode_Debug\Itenso.Rtf.Converter.Html.dll" />
-    <None Include="Unicode_Debug\Itenso.Rtf.Interpreter.dll" />
-    <None Include="Unicode_Debug\Itenso.Rtf.Parser.dll" />
-    <None Include="Unicode_Debug\Itenso.Solutions.Community.Rtf2Html.dll" />
-    <None Include="Unicode_Debug\Itenso.Sys.dll" />
-    <None Include="Unicode_Debug\Rtf2HtmlBridge.dll" />
-    <None Include="Unicode_Release\Itenso.Rtf.Converter.Html.dll" />
-    <None Include="Unicode_Release\Itenso.Rtf.Interpreter.dll" />
-    <None Include="Unicode_Release\Itenso.Rtf.Parser.dll" />
-    <None Include="Unicode_Release\Itenso.Solutions.Community.Rtf2Html.dll" />
-    <None Include="Unicode_Release\Itenso.Sys.dll" />
-    <None Include="Unicode_Release\Rtf2HtmlBridge.dll" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="RES\todolist.exe.manifest" />

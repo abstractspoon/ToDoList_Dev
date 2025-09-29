@@ -14,7 +14,7 @@
     <ProjectGuid>{0090C2A3-F40F-4D69-A656-006833F7D27C}</ProjectGuid>
     <RootNamespace>TimeLogUIExtensionBridge</RootNamespace>
     <ProjectName>LoggedTimeUIExtensionBridge</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

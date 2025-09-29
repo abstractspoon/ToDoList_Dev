@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MDContentControl</RootNamespace>
     <AssemblyName>MDContentControlCore</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -85,9 +85,17 @@
       <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
       <Name>CommandHandling</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\ImageHelper\ImageHelper.csproj">
+      <Project>{819992e3-fc33-4fcd-8aa5-5bc8329b2c20}</Project>
+      <Name>ImageHelper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj">
       <Project>{5873de0f-6853-4c8e-91a4-7a6861069a9a}</Project>
       <Name>MSHTMLEditorControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\ReverseMarkdown\ReverseMarkdown.csproj">
+      <Project>{bc9d5a49-21fc-4642-b5fd-975a085963f9}</Project>
+      <Name>ReverseMarkdown</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\WebBrowserEx\WebBrowserEx.csproj">
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>

@@ -25,6 +25,26 @@ namespace ImageHelper
 			get { return "Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif"; }
 		}
 
+		public static bool IsImagePath(string path)
+		{
+			try
+			{
+				string extension = System.IO.Path.GetExtension(path);
+
+				if (String.IsNullOrEmpty(extension))
+					return false;
+
+				string filter = String.Format("*{0};", extension.ToLower());
+
+				return ImageFilter.Contains(filter);
+			}
+			catch (Exception /*e*/)
+			{
+			}
+
+			return false;
+		}
+		
 		public static bool DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect, Rectangle clipRect)
 		{
 			if (!destRect.HasArea() || !clipRect.HasArea())

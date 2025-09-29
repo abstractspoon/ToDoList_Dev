@@ -14,6 +14,7 @@
     <ProjectGuid>{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PluginHelpers</RootNamespace>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -123,6 +124,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ClipboardUtil.h" />
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="Compression.h" />
     <ClInclude Include="DateRangeLink.h" />
@@ -158,6 +160,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     <ClInclude Include="YearMonthComboBox.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ClipboardUtil.cpp" />
     <ClCompile Include="ColorUtil.cpp" />
     <ClCompile Include="Compression.cpp" />
     <ClCompile Include="DateRangeLink.cpp" />
@@ -224,6 +227,9 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     </ProjectReference>
     <ProjectReference Include="..\3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj">
       <Project>{5873de0f-6853-4c8e-91a4-7a6861069a9a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\3rdParty\Rtf2Html\Rtf2Html\Rtf2Html.csproj">
+      <Project>{edf5d000-687f-4d4b-8687-bdb02fa14f96}</Project>
     </ProjectReference>
     <ProjectReference Include="..\3rdParty\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>

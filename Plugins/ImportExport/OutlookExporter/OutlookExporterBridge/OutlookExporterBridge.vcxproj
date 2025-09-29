@@ -14,6 +14,7 @@
     <ProjectGuid>{7B12BBC1-1C0B-4CED-A7BD-19C4B4B66424}</ProjectGuid>
     <RootNamespace>OutlookExporterBridge</RootNamespace>
     <ProjectName>OutlookExporterBridge</ProjectName>
+	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

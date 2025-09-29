@@ -51,6 +51,7 @@ using Pavonis.COM.IOleCommandTarget;
 
 using Command.Handling;
 using UIComponents;
+using ImageHelper;
 
 #endregion
 
@@ -2141,7 +2142,7 @@ namespace MSDN.Html.Editor
 			{
 				var text = Clipboard.GetText().Trim('\"');
 
-				if (EnterImageForm.IsImagePath(text))
+				if (ImageUtils.IsImagePath(text))
 				{
 					if (File.Exists(text) || !IsValidHref(text))
 						text = Utils.FilePathToUrl(text, true);
@@ -2174,7 +2175,7 @@ namespace MSDN.Html.Editor
 				if (File.Exists(filePath) || !IsValidHref(filePath))
 					fileUrl = Utils.FilePathToUrl(filePath, true);
 
-				if (EnterImageForm.IsImagePath(filePath))
+				if (ImageUtils.IsImagePath(filePath))
 					InsertImagePrompt(fileUrl);
 				else
 					InsertLinkPrompt(fileUrl, Path.GetFileName(filePath));
@@ -4357,7 +4358,7 @@ namespace MSDN.Html.Editor
 
 		virtual protected bool IsValidImageHref(string href)
 		{
-			return (IsValidHref(href) && EnterImageForm.IsImagePath(href));
+			return (IsValidHref(href) && ImageUtils.IsImagePath(href));
 
 		} //IsValidHref
 
