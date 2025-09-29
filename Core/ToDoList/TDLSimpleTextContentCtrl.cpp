@@ -24,6 +24,8 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\osversion.h"
 
+#include "..\3rdParty\XNamedColors.h"
+
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\ITaskList.h"
 #include "..\Interfaces\richeditspellcheck.h"
@@ -77,12 +79,10 @@ CTDLSimpleTextContentCtrl::~CTDLSimpleTextContentCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
-	//{{AFX_MSG_MAP(CTDLSimpleTextContentCtrl)
 	ON_WM_CONTEXTMENU()
 	ON_WM_SETCURSOR()
 	ON_WM_DESTROY()
 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 	ON_WM_HELPINFO()
 	ON_WM_GETDLGCODE()
 	ON_COMMAND_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnCommentsMenuCmd)
@@ -338,6 +338,25 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 	}
 	
 	return false;
+}
+
+void CTDLSimpleTextContentCtrl::InitMenuIconManager()
+{
+	if (!m_mgrMenuIcons.Initialize(this))
+		return;
+
+	m_mgrMenuIcons.ClearImages();
+
+	CUIntArray aCmdIDs;
+
+	aCmdIDs.Add(ID_COMMENTS_CUT);
+	aCmdIDs.Add(ID_COMMENTS_COPY);
+	aCmdIDs.Add(ID_COMMENTS_PASTE);
+	aCmdIDs.Add(ID_COMMENTS_DELETE);
+	aCmdIDs.Add(ID_COMMENTS_WORDWRAP);
+	aCmdIDs.Add(ID_COMMENTS_INLINESPELLCHECK);
+
+	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_SIMPLETEXT_MENU, colorMagenta);
 }
 
 void CTDLSimpleTextContentCtrl::OnSelectPopupListItem(const CString& sSelItem)
@@ -825,7 +844,8 @@ int CTDLSimpleTextContentCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	LimitText(1024 * 1024 * 1024); // one gigabyte
 	EnableToolTips();
-	
+	InitMenuIconManager();
+
 	CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
 	
 	return 0;

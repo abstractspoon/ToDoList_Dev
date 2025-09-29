@@ -1262,7 +1262,11 @@ BOOL CTransDictionary::TranslateMenuShortcut(CString& sShortcut)
 		}
 		else if (sPart == "DEL" || sPart == "DELETE")
 		{
-			sPart = Misc::GetKeyName(VK_DELETE);
+			sPart = Misc::GetKeyName(VK_DELETE, TRUE);
+		}
+		else if (sPart == "NUM DEL")
+		{
+			sPart = Misc::GetKeyName(VK_DELETE, FALSE);
 		}
 		else if (sPart == "ESC" || sPart == "ESCAPE")
 		{
@@ -1273,8 +1277,10 @@ BOOL CTransDictionary::TranslateMenuShortcut(CString& sShortcut)
 			ASSERT(i == (nNumParts - 1));
 
 			// Try for a single key or function key else quit
-			BOOL bSingleKey = (sPart.GetLength() == 1);
-			BOOL bFuncKey = ((sPart.GetLength() == 2) && (sPart[0] == 'F'));
+			int nLen = sPart.GetLength();
+
+			BOOL bSingleKey = (nLen == 1);
+			BOOL bFuncKey = (((nLen == 2) || (nLen == 3)) && (sPart[0] == 'F'));
 
 			if (!bSingleKey && !bFuncKey)
 				return FALSE;

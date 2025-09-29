@@ -72,10 +72,8 @@ CRTFContentControl::~CRTFContentControl()
 }
 
 BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
-	//{{AFX_MSG_MAP(CRTFContentControl)
 	ON_WM_CONTEXTMENU()
 	ON_WM_CREATE()
-	//}}AFX_MSG_
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
@@ -475,6 +473,7 @@ void CRTFContentControl::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_SHRINKFONT,		0xBC,		HOTKEYF_CONTROL | HOTKEYF_EXT); 
 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTESIMPLE,		VK_INSERT,	HOTKEYF_SHIFT   | HOTKEYF_EXT); 
+	m_mgrShortcuts.AddShortcut(ID_EDIT_DELETE,			VK_DELETE,	HOTKEYF_EXT);
 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_COPY,			'C',		HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTE,			'V',		HOTKEYF_CONTROL); 
@@ -502,6 +501,10 @@ void CRTFContentControl::InitMenuIconManager()
 	
 	CUIntArray aCmdIDs;
 	
+	aCmdIDs.Add(ID_EDIT_CUT);
+	aCmdIDs.Add(ID_EDIT_COPY);
+	aCmdIDs.Add(ID_EDIT_PASTE);
+	aCmdIDs.Add(ID_EDIT_DELETE);
 	aCmdIDs.Add(ID_EDIT_FONT);
 	aCmdIDs.Add(ID_EDIT_BOLD);
 	aCmdIDs.Add(ID_EDIT_ITALIC);

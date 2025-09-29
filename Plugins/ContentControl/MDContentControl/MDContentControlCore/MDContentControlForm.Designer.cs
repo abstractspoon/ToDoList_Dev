@@ -134,6 +134,7 @@
 			this.deleteToolStripMenuItem.Image = global::MDContentControl.Properties.Resources.ToolbarDelete;
 			this.deleteToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+			this.deleteToolStripMenuItem.ShortcutKeyDisplayString = "Delete";
 			this.deleteToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
 			this.deleteToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
 			this.deleteToolStripMenuItem.Text = "&Delete";

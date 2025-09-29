@@ -8,6 +8,7 @@
 //
 
 #include "..\shared\urlricheditctrl.h"
+#include "..\shared\menuiconmgr.h"
 
 #include "..\Interfaces\richeditspellcheck.h"
 #include "..\Interfaces\IContentControl.h"
@@ -20,6 +21,7 @@ class CTDLSimpleTextContentCtrl : public CUrlRichEditCtrl, public IContentContro
 // Construction
 public:
 	CTDLSimpleTextContentCtrl();
+	virtual ~CTDLSimpleTextContentCtrl();
 	
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 
@@ -51,33 +53,22 @@ public:
 	static void EnableInlineSpellChecking(BOOL bEnable) { s_bInlineSpellChecking = bEnable; }
 	static BOOL IsInlineSpellCheckingEnabled() { return s_bInlineSpellChecking; }
 
-// Attributes
 protected:
 	BOOL m_bWordWrap;
 
 	CRichEditSpellCheck m_reSpellCheck;
+	CMenuIconMgr m_mgrMenuIcons;
 
 	static BOOL s_bInlineSpellChecking;
 	static BOOL s_bPasteSourceUrls;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLSimpleTextContentCtrl)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLSimpleTextContentCtrl();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDLSimpleTextContentCtrl)
+	virtual void PreSubclassWindow();
+
+protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnCommentsMenuCmd(UINT nCmdID);
 	afx_msg void OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI);
@@ -100,6 +91,7 @@ protected:
 	void SetWordWrap(BOOL bWrap);
 	BOOL Paste();
 	BOOL CanPaste();
+	void InitMenuIconManager();
 
 };
 
