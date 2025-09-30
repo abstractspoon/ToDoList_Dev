@@ -19,145 +19,13 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define RELEASE_INTERFACE(i) if (i) { i->Release(); i = NULL; }
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-DataObjectEx::DataObjectEx() 
-	: 
-	m_Obj(nullptr)
-{
-}
-
-DataObjectEx::DataObjectEx(Windows::Forms::IDataObject^ obj) 
-	: 
-	m_Obj(obj)
-{
-}
-
-Object^ DataObjectEx::GetData(String^ format)
-{
-	return GetData(format, false);
-}
-
-Object^ DataObjectEx::GetData(Type^ format)
-{
-	if (m_Obj)
-		return m_Obj->GetData(format);
-
-	// else
-	return Clipboard::GetDataObject()->GetData(format);
-}
-
-Object^ DataObjectEx::GetData(String^ format, bool autoConvert)
-{
-	if ((format != DataFormats::Html) || 
-		!GetDataPresent(DataFormats::Html, autoConvert))
-	{
-		if (m_Obj)
-			return m_Obj->GetData(format, autoConvert);
-
-		// else
-		return Clipboard::GetDataObject()->GetData(format, autoConvert);
-	}
-
-	// else use Win32 API to properly handle UTF8 to Unicode conversion
-	if (m_Obj)
-		return ClipboardUtil::GetHtml(gcnew OleDataObjectEx(m_Obj));
-
-	// else
-	return ClipboardUtil::GetHtml();
-}
-
-bool DataObjectEx::GetDataPresent(String^ format)
-{
-	if (m_Obj)
-		return m_Obj->GetDataPresent(format);
-
-	// else
-	return Clipboard::GetDataObject()->GetDataPresent(format);
-}
-
-bool DataObjectEx::GetDataPresent(Type^ format)
-{
-	if (m_Obj)
-		return m_Obj->GetDataPresent(format);
-
-	// else
-	return Clipboard::GetDataObject()->GetDataPresent(format);
-}
-
-bool DataObjectEx::GetDataPresent(String^ format, bool autoConvert)
-{
-	if (m_Obj)
-		return m_Obj->GetDataPresent(format, autoConvert);
-
-	// else
-	return Clipboard::GetDataObject()->GetDataPresent(format);
-}
-
-cli::array<String^>^ DataObjectEx::GetFormats()
-{
-	if (m_Obj)
-		return m_Obj->GetFormats();
-
-	// else
-	return Clipboard::GetDataObject()->GetFormats();
-}
-
-cli::array<String^>^ DataObjectEx::GetFormats(bool autoConvert)
-{
-	if (m_Obj)
-		return m_Obj->GetFormats(autoConvert);
-
-	// else
-	return Clipboard::GetDataObject()->GetFormats(autoConvert);
-}
-
-void DataObjectEx::SetData(Object^ data)
-{
-	if (m_Obj)
-		m_Obj->SetData(data);
-
-	// else
-	Clipboard::GetDataObject()->SetData(data);
-}
-
-void DataObjectEx::SetData(String^ format, Object^ data)
-{
-	if (m_Obj)
-		m_Obj->SetData(format, data);
-
-	// else
-	Clipboard::GetDataObject()->SetData(format, data);
-}
-
-void DataObjectEx::SetData(Type^ format, Object^ data)
-{
-	if (m_Obj)
-		m_Obj->SetData(format, data);
-
-	// else
-	Clipboard::GetDataObject()->SetData(format, data);
-}
-
-void DataObjectEx::SetData(String^ format, bool autoConvert, Object^ data)
-{
-	if (m_Obj)
-		m_Obj->SetData(format, autoConvert, data);
-
-
-	// else
-	Clipboard::GetDataObject()->SetData(format, autoConvert, data);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define INIT_UNK_DATA(obj)                                                          \
+#define INIT_INTERFACES(obj)                                                        \
 m_pUnk = (::IUnknown*)Marshal::GetIUnknownForObject(obj).ToPointer();               \
 if (m_pUnk) { ::IDataObject* pdata = nullptr;                                       \
 	if (SUCCEEDED(m_pUnk->QueryInterface(__uuidof(::IDataObject), (void**)&pdata))) \
 		m_pData = pdata; }
+
+#define RELEASE_INTERFACE(i) if (i) { i->Release(); i = NULL; }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -166,7 +34,7 @@ OleDataObjectEx::OleDataObjectEx(Microsoft::VisualStudio::OLE::Interop::IDataObj
 	m_pUnk(nullptr),
 	m_pData(nullptr)
 {
-	INIT_UNK_DATA(obj)
+	INIT_INTERFACES(obj)
 }
 
 OleDataObjectEx::OleDataObjectEx(Windows::Forms::IDataObject^ obj)
@@ -174,16 +42,13 @@ OleDataObjectEx::OleDataObjectEx(Windows::Forms::IDataObject^ obj)
 	m_pUnk(nullptr),
 	m_pData(nullptr)
 {
-	INIT_UNK_DATA(obj)
+	INIT_INTERFACES(obj)
 }
 
 OleDataObjectEx::~OleDataObjectEx()
 {
-	if (m_pData)
-		m_pData->Release();
-
-	if (m_pUnk)
-		m_pUnk->Release();
+	RELEASE_INTERFACE(m_pData)
+	RELEASE_INTERFACE(m_pUnk)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,12 +74,13 @@ bool ClipboardUtil::GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% h
 
 bool ClipboardUtil::GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html, String^% sourceUrl)
 {
-	auto data = GetDataObject(obj)->GetData(DataFormats::Html, true);
+	auto objEx = gcnew OleDataObjectEx(obj);
 
-	if ((data == nullptr) || !ISTYPE(data, String))
+	if (!objEx->IsValid())
 		return false;
 
-	CString sHtml(MS(data->ToString())), sSourceUrl;
+	auto temp = ClipboardUtil::GetHtml(objEx);
+	CString sHtml = MS(temp), sSourceUrl;
 
 	if (CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl).IsEmpty())
 		return false;
@@ -223,14 +89,6 @@ bool ClipboardUtil::GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% h
 	sourceUrl = gcnew String(sSourceUrl);
 
 	return true;
-}
-
-Windows::Forms::IDataObject^ ClipboardUtil::GetDataObject(Windows::Forms::IDataObject^ obj)
-{
-	if (ISTYPE(obj, DataObjectEx))
-		return obj;
-
-	return gcnew DataObjectEx(obj);
 }
 
 bool ClipboardUtil::IsDropFile(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)

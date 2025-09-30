@@ -284,6 +284,8 @@ void HtmlEditorControlEx::TextPaste()
 	if (DoPasteUrlOrFiles())
 		return;
 
+	CString sSourceUrl;
+
 	if (!InitialiseClipboardSupport())
 	{
 		if (Clipboard::ContainsText(TextDataFormat::Html) || Clipboard::ContainsText())
@@ -307,8 +309,6 @@ void HtmlEditorControlEx::TextPaste()
 			}
 		}
 	}
-
-	CString sSourceUrl;
 
 	if (s_ClipboardEnabled)
 	{
