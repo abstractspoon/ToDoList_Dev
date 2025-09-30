@@ -76,6 +76,15 @@ namespace HTMLContentControl
 			InitialiseFeatures();
 		}
 
+		protected override void OnHandleCreated(EventArgs e)
+		{
+			base.OnHandleCreated(e);
+
+			m_TextChangeTimer.Tick += new EventHandler(OnTextChangeTimer);
+			m_TextChangeTimer.Interval = 200;
+			m_TextChangeTimer.Start();
+		}
+
 		protected override void OnHandleDestroyed(EventArgs e)
 		{
 			m_TextChangeTimer.Tick -= new EventHandler(OnTextChangeTimer);
