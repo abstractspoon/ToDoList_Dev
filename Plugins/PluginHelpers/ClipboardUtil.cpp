@@ -62,24 +62,11 @@ Object^ DataObjectEx::GetData(String^ format, bool autoConvert)
 	}
 
 	// else use Win32 API to properly handle UTF8 to Unicode conversion
-	CString sHtml;
-
 	if (m_Obj)
-	{
-		auto objEx = gcnew OleDataObjectEx(m_Obj);
+		return ClipboardUtil::GetHtml(gcnew OleDataObjectEx(m_Obj));
 
-		if (objEx->IsValid())
-			sHtml = CClipboard::GetText(objEx->Data(), CBF_HTML);
-	}
-	else
-	{
-		sHtml = CClipboard().GetText(CBF_HTML);
-	}
-
-	// HTML content is always returned as UTF8 So we need to convert to Unicode
-	Misc::EncodeAsUnicode(sHtml, CP_UTF8);
-
-	return gcnew String(sHtml);
+	// else
+	return ClipboardUtil::GetHtml();
 }
 
 bool DataObjectEx::GetDataPresent(String^ format)
@@ -298,6 +285,43 @@ String^ ClipboardUtil::GetRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject
 
 		// RTF content is always returned as UTF8 So we need to convert to Unicode
 		return gcnew String(Misc::EncodeAsUnicode(sRtf, CP_UTF8));
+	}
+
+	// else
+	return String::Empty;
+}
+
+bool ClipboardUtil::IsHtml(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	OleDataObjectEx^ objEx = gcnew OleDataObjectEx(obj);
+
+	if (!objEx->IsValid())
+		return false;
+
+	return (CClipboard::HasFormat(objEx->Data(), CBF_HTML) != FALSE);
+}
+
+String^ ClipboardUtil::GetHtml()
+{
+	CString sHtml = CClipboard().GetText(CBF_HTML);
+
+	// HTML content is always returned as UTF8 So we need to convert to Unicode
+	return gcnew String(Misc::EncodeAsUnicode(sHtml, CP_UTF8));
+}
+
+String^ ClipboardUtil::GetHtml(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	return GetHtml(gcnew OleDataObjectEx(obj));
+}
+
+String^ ClipboardUtil::GetHtml(OleDataObjectEx^ objEx)
+{
+	if (objEx && objEx->IsValid())
+	{
+		CString sHtml = CClipboard::GetText(objEx->Data(), CBF_HTML);
+
+		// HTML content is always returned as UTF8 So we need to convert to Unicode
+		return gcnew String(Misc::EncodeAsUnicode(sHtml, CP_UTF8));
 	}
 
 	// else

@@ -65,17 +65,23 @@ namespace Abstractspoon
 			public ref class ClipboardUtil
 			{
 			public:
-				static bool GetHtmlFragment(String^% html); 
-				static bool GetHtmlFragment(String^% html, String^% sourceUrl);
-
-				static bool GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html);
-				static bool GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html, String^% sourceUrl);
-
 				static bool IsDropFile(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
 				static cli::array<String^>^ GetDropFiles(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
 
 				static bool IsRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
 				static String^ GetRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+
+				static bool IsHtml(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+
+				static String^ GetHtml();
+				static String^ GetHtml(OleDataObjectEx^ objEx);
+				static String^ GetHtml(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+
+				static bool GetHtmlFragment(String^% html);
+				static bool GetHtmlFragment(String^% html, String^% sourceUrl);
+
+				static bool GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html);
+				static bool GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html, String^% sourceUrl);
 
 			private:
 				static Windows::Forms::IDataObject^ GetDataObject(Windows::Forms::IDataObject^ obj);
