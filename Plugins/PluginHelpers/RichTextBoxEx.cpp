@@ -20,6 +20,7 @@ using namespace System::Diagnostics;
 using namespace System::Drawing;
 using namespace System::Windows::Forms;
 using namespace System::IO;
+using namespace System::Runtime::InteropServices;
 
 using namespace Microsoft::VisualStudio::OLE::Interop;
 using namespace Abstractspoon::Tdl::PluginHelpers;
@@ -30,6 +31,10 @@ using namespace Itenso::Solutions::Community::Rtf2Html;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 const int TabWidth = 48;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define RELEASE_INTERFACE(i) if (i) { i->Release(); i = NULL; }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -289,10 +294,41 @@ void RichTextBoxEx::Outdent()
 	}
 }
 
-bool RichTextBoxEx::IsRichTextItem(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+bool RichTextBoxEx::IsRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
 {
 	return (DragDropUtil::ObjectHasFormat(obj, (CLIPFORMAT)CBF_RTF) ||
 			DragDropUtil::ObjectHasFormat(obj, (CLIPFORMAT)CBF_RETEXTOBJ));
+}
+
+String^ RichTextBoxEx::GetRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	String^ rtf = String::Empty;
+
+	::IUnknown* punk = (::IUnknown*)Marshal::GetIUnknownForObject(obj).ToPointer();
+
+	if (punk)
+	{
+		::IDataObject* pdata = nullptr;
+		HRESULT hr = punk->QueryInterface(__uuidof(::IDataObject), (void**)&pdata);
+
+		if (SUCCEEDED(hr))
+		{
+			CString sRtf = CClipboard().GetText(pdata, CBF_RTF);
+
+			if (sRtf.IsEmpty())
+				sRtf = CClipboard().GetText(pdata, CBF_RETEXTOBJ);
+
+			// RTF content is always returned as UTF8 So we need to convert to Unicode
+			Misc::EncodeAsUnicode(sRtf, CP_UTF8);
+
+			rtf = gcnew String(sRtf);
+		}
+
+		RELEASE_INTERFACE(pdata);
+		RELEASE_INTERFACE(punk);
+	}
+
+	return rtf;
 }
 
 String^ RichTextBoxEx::RtfToHtml(String^ rtf, bool useMSWord)

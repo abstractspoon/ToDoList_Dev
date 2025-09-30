@@ -33,7 +33,8 @@ namespace Abstractspoon
 
 				// ----------------------------------------------
 
-				static bool IsRichTextItem(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+				static bool IsRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+				static String^ GetRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
 
 				static String^ RtfToHtml(String^ rtf, bool useMSWord);
 				static String^ RtfToHtml(String^ rtf, String^ imageFolder, bool useMSWord);

@@ -78,22 +78,16 @@ namespace HTMLContentControl
 
 		protected void OnOutlookDrop(object sender, String title, String url)
 		{
-			DoDrop(title, url);
+			Focus();
+
+			DoDropUrl(title, url);
 		}
 
-		protected void OnRichTextDrop(object sender, String rtf, String url)
+		protected void OnRichTextDrop(object sender, String rtf)
 		{
-			// TODO
-			int breakpoint = 0;
-		}
+			Focus();
 
-		protected override void OnHandleCreated(EventArgs e)
-		{
-			base.OnHandleCreated(e);
-
-			m_TextChangeTimer.Tick += new EventHandler(OnTextChangeTimer);
-			m_TextChangeTimer.Interval = 200;
-			m_TextChangeTimer.Start();
+			SelectedHtml = RichTextBoxEx.RtfToHtml(rtf, false);
 		}
 
 		protected override void OnHandleDestroyed(EventArgs e)
@@ -613,11 +607,11 @@ namespace HTMLContentControl
 			{
 				e.Cancel = true; // everything else
 
-				DoDrop(e.Url, e.Url);
+				DoDropUrl(e.Url, e.Url);
 			}
 		}
 
-		private bool DoDrop(string title, string url)
+		private bool DoDropUrl(string text, string url)
 		{
 			if (!IsEditable) 
 				return false;
@@ -642,7 +636,7 @@ namespace HTMLContentControl
 			if (newElm == null)
 				return false;
 
-			newElm.InnerText = (isImage ? "." : title);
+			newElm.InnerText = (isImage ? "." : text);
 
 			if (element.TagName == "BODY")
 				element.AppendChild(newElm);
@@ -657,7 +651,7 @@ namespace HTMLContentControl
 			if (isImage)
 				success = InsertImage(url, "", MSDN.Html.Editor.ImageAlignOption.Default);
 			else
-				success = InsertLinkPrompt(url, title);
+				success = InsertLinkPrompt(url, text);
 
 			if (!success)
 			{

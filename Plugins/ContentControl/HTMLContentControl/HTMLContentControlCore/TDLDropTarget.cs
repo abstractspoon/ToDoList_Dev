@@ -19,7 +19,7 @@ namespace HTMLContentControl
 	public class TDLDropTarget : IOleDropTarget
 	{
 		public delegate void OutlookDropEventHandler(object sender, String title, String url);
-		public delegate void RichTextDropEventHandler(object sender, String rtf, String url);
+		public delegate void RichTextDropEventHandler(object sender, String rtf);
 
 		// ---------------------------------------------------------------
 
@@ -39,7 +39,7 @@ namespace HTMLContentControl
 		public void DragEnter(IOleDataObject pDataObj, uint grfKeyState, IOlePoint pt, ref uint pdwEffect)
 		{
 			if (((OutlookDrop != null) && OutlookUtil.IsOutlookItem(pDataObj)) ||
-				((RichTextDrop != null) && RichTextBoxEx.IsRichTextItem(pDataObj)))
+				((RichTextDrop != null) && RichTextBoxEx.IsRtf(pDataObj)))
 			{
 				m_CurrentObject = pDataObj;
 				pdwEffect = DragDropUtil.DRAGDROP_COPY;
@@ -138,18 +138,12 @@ namespace HTMLContentControl
 							}
 						}
 					}
-					else if (RichTextBoxEx.IsRichTextItem(pDataObj))
+					else if (RichTextBoxEx.IsRtf(pDataObj))
 					{
-						if (pDataObj is System.Windows.Forms.DataObject)
-						{
-							string html = string.Empty;
-							string url = string.Empty;
+						string rtf = RichTextBoxEx.GetRtf(pDataObj);
+						RichTextDrop(this, rtf);
 
-							ClipboardUtil.GetHtmlFragment((pDataObj as System.Windows.Forms.DataObject), ref html, ref url);
-							RichTextDrop(this, html, url);
-
-							pdwEffect = DragDropUtil.DRAGDROP_COPY;
-						}
+						pdwEffect = DragDropUtil.DRAGDROP_COPY;
 					}
 				}
 				catch (System.Exception /*e*/)
