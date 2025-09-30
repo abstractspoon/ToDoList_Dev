@@ -74,6 +74,9 @@ namespace Abstractspoon
 				static bool IsDropFile(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
 				static cli::array<String^>^ GetDropFiles(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
 
+				static bool IsRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+				static String^ GetRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+
 			private:
 				static Windows::Forms::IDataObject^ GetDataObject(Windows::Forms::IDataObject^ obj);
 			};

@@ -290,33 +290,6 @@ void RichTextBoxEx::Outdent()
 	}
 }
 
-bool RichTextBoxEx::IsRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
-{
-	return (DragDropUtil::ObjectHasFormat(obj, (CLIPFORMAT)CBF_RTF) ||
-			DragDropUtil::ObjectHasFormat(obj, (CLIPFORMAT)CBF_RETEXTOBJ));
-}
-
-String^ RichTextBoxEx::GetRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
-{
-	OleDataObjectEx^ objEx = gcnew OleDataObjectEx(obj);
-
-	if (objEx->IsValid())
-	{
-		CString sRtf = CClipboard::GetText(objEx->Data(), CBF_RTF);
-
-		if (sRtf.IsEmpty())
-			sRtf = CClipboard().GetText(objEx->Data(), CBF_RETEXTOBJ);
-
-		// RTF content is always returned as UTF8 So we need to convert to Unicode
-		Misc::EncodeAsUnicode(sRtf, CP_UTF8);
-
-		return gcnew String(sRtf);
-	}
-
-	// else
-	return String::Empty;
-}
-
 String^ RichTextBoxEx::RtfToHtml(String^ rtf, bool useMSWord)
 {
 	return RtfToHtml(rtf, "", useMSWord);

@@ -41,7 +41,7 @@ namespace HTMLContentControl
 		public void DragEnter(IOleDataObject pDataObj, uint grfKeyState, IOlePoint pt, ref uint pdwEffect)
 		{
 			if (((OutlookDrop != null)	&& OutlookUtil.IsOutlookItem(pDataObj)) ||
-				((RichTextDrop != null) && RichTextBoxEx.IsRtf(pDataObj)) ||
+				((RichTextDrop != null) && ClipboardUtil.IsRtf(pDataObj)) ||
 				((FileDrop != null)		&& ClipboardUtil.IsDropFile(pDataObj)))
 			{
 				m_CurrentObject = pDataObj;
@@ -141,9 +141,9 @@ namespace HTMLContentControl
 							}
 						}
 					}
-					else if (RichTextBoxEx.IsRtf(pDataObj))
+					else if (ClipboardUtil.IsRtf(pDataObj))
 					{
-						string rtf = RichTextBoxEx.GetRtf(pDataObj);
+						string rtf = ClipboardUtil.GetRtf(pDataObj);
 						RichTextDrop(this, rtf);
 
 						pdwEffect = DragDropUtil.DRAGDROP_COPY;

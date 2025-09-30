@@ -274,3 +274,32 @@ cli::array<String^>^ ClipboardUtil::GetDropFiles(Microsoft::VisualStudio::OLE::I
 	return filePaths;
 }
 
+bool ClipboardUtil::IsRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	OleDataObjectEx^ objEx = gcnew OleDataObjectEx(obj);
+
+	if (!objEx->IsValid())
+		return false;
+
+	return ((CClipboard::HasFormat(objEx->Data(), CBF_RTF) != FALSE) || 
+			(CClipboard::HasFormat(objEx->Data(), CBF_RETEXTOBJ) != FALSE));
+}
+
+String^ ClipboardUtil::GetRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	OleDataObjectEx^ objEx = gcnew OleDataObjectEx(obj);
+
+	if (objEx->IsValid())
+	{
+		CString sRtf = CClipboard::GetText(objEx->Data(), CBF_RTF);
+
+		if (sRtf.IsEmpty())
+			sRtf = CClipboard().GetText(objEx->Data(), CBF_RETEXTOBJ);
+
+		// RTF content is always returned as UTF8 So we need to convert to Unicode
+		return gcnew String(Misc::EncodeAsUnicode(sRtf, CP_UTF8));
+	}
+
+	// else
+	return String::Empty;
+}
