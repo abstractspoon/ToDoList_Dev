@@ -66,19 +66,10 @@ Object^ DataObjectEx::GetData(String^ format, bool autoConvert)
 
 	if (m_Obj)
 	{
-		::IUnknown* punk = (::IUnknown*)Marshal::GetIUnknownForObject(m_Obj).ToPointer();
+		auto objEx = gcnew OleDataObjectEx(m_Obj);
 
-		if (punk)
-		{
-			::IDataObject* pdata = nullptr;
-			HRESULT hr = punk->QueryInterface(__uuidof(::IDataObject), (void**)&pdata);
-
-			if (SUCCEEDED(hr))
-				sHtml = CClipboard().GetText(pdata, CBF_HTML);
-
-			RELEASE_INTERFACE(pdata);
-			RELEASE_INTERFACE(punk);
-		}
+		if (objEx->IsValid())
+			sHtml = CClipboard::GetText(objEx->Data(), CBF_HTML);
 	}
 	else
 	{
@@ -175,6 +166,41 @@ void DataObjectEx::SetData(String^ format, bool autoConvert, Object^ data)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define INIT_UNK_DATA(obj)                                                          \
+m_pUnk = (::IUnknown*)Marshal::GetIUnknownForObject(obj).ToPointer();               \
+if (m_pUnk) { ::IDataObject* pdata = nullptr;                                       \
+	if (SUCCEEDED(m_pUnk->QueryInterface(__uuidof(::IDataObject), (void**)&pdata))) \
+		m_pData = pdata; }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+OleDataObjectEx::OleDataObjectEx(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+	:
+	m_pUnk(nullptr),
+	m_pData(nullptr)
+{
+	INIT_UNK_DATA(obj)
+}
+
+OleDataObjectEx::OleDataObjectEx(Windows::Forms::IDataObject^ obj)
+	:
+	m_pUnk(nullptr),
+	m_pData(nullptr)
+{
+	INIT_UNK_DATA(obj)
+}
+
+OleDataObjectEx::~OleDataObjectEx()
+{
+	if (m_pData)
+		m_pData->Release();
+
+	if (m_pUnk)
+		m_pUnk->Release();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool ClipboardUtil::GetHtmlFragment(String^% html)
 {
 	String^ unused;
@@ -219,3 +245,32 @@ Windows::Forms::IDataObject^ ClipboardUtil::GetDataObject(Windows::Forms::IDataO
 
 	return gcnew DataObjectEx(obj);
 }
+
+bool ClipboardUtil::IsDropFile(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	auto objEx = gcnew OleDataObjectEx(obj);
+
+	if (!objEx->IsValid())
+		return false;
+
+	return (CClipboard::HasFormat(objEx->Data(), CF_HDROP) != FALSE);
+}
+
+cli::array<String^>^ ClipboardUtil::GetDropFiles(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	auto objEx = gcnew OleDataObjectEx(obj);
+
+	if (!objEx->IsValid())
+		return nullptr;
+
+	CStringArray aFilePaths;
+	int nNumFiles = CClipboard::GetDropFilePaths(objEx->Data(), aFilePaths);
+
+	auto filePaths = gcnew cli::array<String^>(nNumFiles);
+
+	for (int nFile = 0; nFile < nNumFiles; nFile++)
+		filePaths[nFile] = gcnew String(aFilePaths[nFile]);
+
+	return filePaths;
+}
+

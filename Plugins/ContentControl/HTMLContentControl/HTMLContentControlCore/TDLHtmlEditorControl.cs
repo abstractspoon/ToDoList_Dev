@@ -76,20 +76,6 @@ namespace HTMLContentControl
 			InitialiseFeatures();
 		}
 
-		protected void OnOutlookDrop(object sender, String title, String url)
-		{
-			Focus();
-
-			DoDropUrl(title, url);
-		}
-
-		protected void OnRichTextDrop(object sender, String rtf)
-		{
-			Focus();
-
-			SelectedHtml = RichTextBoxEx.RtfToHtml(rtf, false);
-		}
-
 		protected override void OnHandleDestroyed(EventArgs e)
 		{
 			m_TextChangeTimer.Tick -= new EventHandler(OnTextChangeTimer);
@@ -113,11 +99,35 @@ namespace HTMLContentControl
 			{
 				m_DragDrop = new TDLDropTarget(defDropTarget);
 
-				m_DragDrop.OutlookDrop += new TDLDropTarget.OutlookDropEventHandler(OnOutlookDrop);
+				m_DragDrop.OutlookDrop	+= new TDLDropTarget.OutlookDropEventHandler(OnOutlookDrop);
 				m_DragDrop.RichTextDrop += new TDLDropTarget.RichTextDropEventHandler(OnRichTextDrop);
+				m_DragDrop.FileDrop		+= new TDLDropTarget.FileDropEventHandler(OnFileDrop);
 			}
 
 			return Marshal.GetComInterfaceForObject(m_DragDrop, typeof(Microsoft.VisualStudio.OLE.Interop.IDropTarget), CustomQueryInterfaceMode.Ignore);
+		}
+
+		protected void OnOutlookDrop(object sender, String title, String url)
+		{
+			Focus();
+
+			DoDropUrl(title, url);
+		}
+
+		protected void OnRichTextDrop(object sender, String rtf)
+		{
+			Focus();
+
+			SelectedHtml = RichTextBoxEx.RtfToHtml(rtf, false);
+		}
+
+		protected void OnFileDrop(object sender, String[] filePaths)
+		{
+			Focus();
+
+			// Only handle the first file to be consistent with HtmlEditorControl
+			if (filePaths.Length > 0)
+				DoPasteFile(filePaths[0]);
 		}
 
 		protected override void InitialiseDocument()

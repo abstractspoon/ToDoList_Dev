@@ -20,6 +20,7 @@ namespace HTMLContentControl
 	{
 		public delegate void OutlookDropEventHandler(object sender, String title, String url);
 		public delegate void RichTextDropEventHandler(object sender, String rtf);
+		public delegate void FileDropEventHandler(object sender, String[] filePaths);
 
 		// ---------------------------------------------------------------
 
@@ -28,6 +29,7 @@ namespace HTMLContentControl
 
 		public event OutlookDropEventHandler OutlookDrop;
 		public event RichTextDropEventHandler RichTextDrop;
+		public event FileDropEventHandler FileDrop;
 
 		// ---------------------------------------------------------------
 
@@ -38,8 +40,9 @@ namespace HTMLContentControl
 
 		public void DragEnter(IOleDataObject pDataObj, uint grfKeyState, IOlePoint pt, ref uint pdwEffect)
 		{
-			if (((OutlookDrop != null) && OutlookUtil.IsOutlookItem(pDataObj)) ||
-				((RichTextDrop != null) && RichTextBoxEx.IsRtf(pDataObj)))
+			if (((OutlookDrop != null)	&& OutlookUtil.IsOutlookItem(pDataObj)) ||
+				((RichTextDrop != null) && RichTextBoxEx.IsRtf(pDataObj)) ||
+				((FileDrop != null)		&& ClipboardUtil.IsDropFile(pDataObj)))
 			{
 				m_CurrentObject = pDataObj;
 				pdwEffect = DragDropUtil.DRAGDROP_COPY;
@@ -142,6 +145,13 @@ namespace HTMLContentControl
 					{
 						string rtf = RichTextBoxEx.GetRtf(pDataObj);
 						RichTextDrop(this, rtf);
+
+						pdwEffect = DragDropUtil.DRAGDROP_COPY;
+					}
+					else if (ClipboardUtil.IsDropFile(pDataObj))
+					{
+						string[] filePaths = ClipboardUtil.GetDropFiles(pDataObj);
+						FileDrop(this, filePaths);
 
 						pdwEffect = DragDropUtil.DRAGDROP_COPY;
 					}

@@ -24,14 +24,22 @@ namespace MSDN.Html.Editor
 			if (string.IsNullOrEmpty(path))
 				return string.Empty;
 
-			if (noEscapeNonAscii == false)
-				return Uri.EscapeUriString(path);
+			try
+			{
+				if (noEscapeNonAscii == false)
+					return Uri.EscapeUriString(path);
 
-			// else do it manually
-			// Note: Uri.Uri(string, bool) is deprecated but we have 
-			// to use it because Internet Explorer does not handle
-			// escaped non-ASCII characters well (eg. Cyrillic)
-			return EscapeSpaces(new Uri(path, true).AbsoluteUri);
+				// else do it manually
+				// Note: Uri.Uri(string, bool) is deprecated but we have 
+				// to use it because Internet Explorer does not handle
+				// escaped non-ASCII characters well (eg. Cyrillic)
+				return EscapeSpaces(new Uri(path, true).AbsoluteUri);
+			}
+			catch (System.Exception ex)
+			{
+			}
+
+			return path;
 		}
 
 		/// <summary>

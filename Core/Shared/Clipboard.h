@@ -106,12 +106,16 @@ public:
 	static CString GetText(LPDATAOBJECT lpDataOb);
 	static CString GetText(LPDATAOBJECT lpDataOb, UINT nFormat);
 	static BOOL HasText(LPDATAOBJECT lpDataOb);
+	static BOOL HasFormat(LPDATAOBJECT lpDataOb, UINT nFormat);
+	static int GetDropFilePaths(LPDATAOBJECT lpDataOb, CStringArray& aFilePaths);
 
 	static int GetAvailableFormats(COleDataObject* pObject, CDWordArray& aFormatIDs);
 	static int GetAvailableFormats(COleDataObject* pObject, CDWordArray& aFormatIDs, CStringArray& aFormatNames);
 	static CString GetText(COleDataObject* pObject);
 	static CString GetText(COleDataObject* pObject, UINT nFormat);
 	static BOOL HasText(COleDataObject* pObject);
+	static BOOL HasFormat(COleDataObject* pObject, UINT nFormat);
+	static int GetDropFilePaths(COleDataObject* pObject, CStringArray& aFilePaths);
 
 protected:
 	HWND m_hWnd;

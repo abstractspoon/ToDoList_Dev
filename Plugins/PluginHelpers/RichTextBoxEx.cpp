@@ -6,7 +6,7 @@
 #include "RichTextBoxEx.h"
 #include "UIExtension.h"
 #include "ContentControl.h"
-#include "ClipboardUtil.h" // for DataObjectEx
+#include "ClipboardUtil.h" // for Ole/DataObjectEx
 #include "DragDropUtil.h"
 
 #include <shared\Clipboard.h>
@@ -31,10 +31,6 @@ using namespace Itenso::Solutions::Community::Rtf2Html;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 const int TabWidth = 48;
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define RELEASE_INTERFACE(i) if (i) { i->Release(); i = NULL; }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -302,33 +298,23 @@ bool RichTextBoxEx::IsRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ ob
 
 String^ RichTextBoxEx::GetRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
 {
-	String^ rtf = String::Empty;
+	OleDataObjectEx^ objEx = gcnew OleDataObjectEx(obj);
 
-	::IUnknown* punk = (::IUnknown*)Marshal::GetIUnknownForObject(obj).ToPointer();
-
-	if (punk)
+	if (objEx->IsValid())
 	{
-		::IDataObject* pdata = nullptr;
-		HRESULT hr = punk->QueryInterface(__uuidof(::IDataObject), (void**)&pdata);
+		CString sRtf = CClipboard::GetText(objEx->Data(), CBF_RTF);
 
-		if (SUCCEEDED(hr))
-		{
-			CString sRtf = CClipboard().GetText(pdata, CBF_RTF);
+		if (sRtf.IsEmpty())
+			sRtf = CClipboard().GetText(objEx->Data(), CBF_RETEXTOBJ);
 
-			if (sRtf.IsEmpty())
-				sRtf = CClipboard().GetText(pdata, CBF_RETEXTOBJ);
+		// RTF content is always returned as UTF8 So we need to convert to Unicode
+		Misc::EncodeAsUnicode(sRtf, CP_UTF8);
 
-			// RTF content is always returned as UTF8 So we need to convert to Unicode
-			Misc::EncodeAsUnicode(sRtf, CP_UTF8);
-
-			rtf = gcnew String(sRtf);
-		}
-
-		RELEASE_INTERFACE(pdata);
-		RELEASE_INTERFACE(punk);
+		return gcnew String(sRtf);
 	}
 
-	return rtf;
+	// else
+	return String::Empty;
 }
 
 String^ RichTextBoxEx::RtfToHtml(String^ rtf, bool useMSWord)

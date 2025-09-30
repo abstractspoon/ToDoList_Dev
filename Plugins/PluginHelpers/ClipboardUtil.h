@@ -44,6 +44,24 @@ namespace Abstractspoon
 
 			// ----------------------------------------------------------------------
 
+			public ref class OleDataObjectEx
+			{
+			public:
+				OleDataObjectEx(Windows::Forms::IDataObject^ obj);
+				OleDataObjectEx(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+
+				~OleDataObjectEx();
+
+				bool IsValid() { return (m_pData != nullptr); }
+				::IDataObject* Data() { return m_pData; }
+
+			private:
+				::IUnknown* m_pUnk;
+				::IDataObject* m_pData;
+			};
+
+			// ----------------------------------------------------------------------
+
 			public ref class ClipboardUtil
 			{
 			public:
@@ -52,6 +70,9 @@ namespace Abstractspoon
 
 				static bool GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html);
 				static bool GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html, String^% sourceUrl);
+
+				static bool IsDropFile(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+				static cli::array<String^>^ GetDropFiles(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
 
 			private:
 				static Windows::Forms::IDataObject^ GetDataObject(Windows::Forms::IDataObject^ obj);
