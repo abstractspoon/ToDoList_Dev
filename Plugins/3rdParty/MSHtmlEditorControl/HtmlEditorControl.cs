@@ -2136,6 +2136,19 @@ namespace MSDN.Html.Editor
 
         } //TextPaste
 
+		protected void DoPasteFile(string filePath)
+		{
+			var fileUrl = "";
+
+			if (File.Exists(filePath) || !IsValidHref(filePath))
+				fileUrl = Utils.FilePathToUrl(filePath, true);
+
+			if (ImageUtils.IsImagePath(filePath))
+				InsertImagePrompt(fileUrl);
+			else
+				InsertLinkPrompt(fileUrl, Path.GetFileName(filePath));
+		}
+
 		protected bool DoPasteUrlOrFiles()
 		{
 			if (Clipboard.ContainsText())
@@ -2169,17 +2182,7 @@ namespace MSDN.Html.Editor
 			}
 			else if (Clipboard.ContainsFileDropList())
 			{
-				var filePath = Clipboard.GetFileDropList()[0];
-				var fileUrl = "";
-
-				if (File.Exists(filePath) || !IsValidHref(filePath))
-					fileUrl = Utils.FilePathToUrl(filePath, true);
-
-				if (ImageUtils.IsImagePath(filePath))
-					InsertImagePrompt(fileUrl);
-				else
-					InsertLinkPrompt(fileUrl, Path.GetFileName(filePath));
-
+				DoPasteFile(Clipboard.GetFileDropList()[0]);
 				return true;
 			}
 

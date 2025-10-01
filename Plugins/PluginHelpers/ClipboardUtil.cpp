@@ -19,158 +19,36 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define INIT_INTERFACES(obj)                                                        \
+m_pUnk = (::IUnknown*)Marshal::GetIUnknownForObject(obj).ToPointer();               \
+if (m_pUnk) { ::IDataObject* pdata = nullptr;                                       \
+	if (SUCCEEDED(m_pUnk->QueryInterface(__uuidof(::IDataObject), (void**)&pdata))) \
+		m_pData = pdata; }
+
 #define RELEASE_INTERFACE(i) if (i) { i->Release(); i = NULL; }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-DataObjectEx::DataObjectEx() 
-	: 
-	m_Obj(nullptr)
+OleDataObjectEx::OleDataObjectEx(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+	:
+	m_pUnk(nullptr),
+	m_pData(nullptr)
 {
+	INIT_INTERFACES(obj)
 }
 
-DataObjectEx::DataObjectEx(Windows::Forms::IDataObject^ obj) 
-	: 
-	m_Obj(obj)
+OleDataObjectEx::OleDataObjectEx(Windows::Forms::IDataObject^ obj)
+	:
+	m_pUnk(nullptr),
+	m_pData(nullptr)
 {
+	INIT_INTERFACES(obj)
 }
 
-Object^ DataObjectEx::GetData(String^ format)
+OleDataObjectEx::~OleDataObjectEx()
 {
-	return GetData(format, false);
-}
-
-Object^ DataObjectEx::GetData(Type^ format)
-{
-	if (m_Obj)
-		return m_Obj->GetData(format);
-
-	// else
-	return Clipboard::GetDataObject()->GetData(format);
-}
-
-Object^ DataObjectEx::GetData(String^ format, bool autoConvert)
-{
-	if ((format != DataFormats::Html) || 
-		!GetDataPresent(DataFormats::Html, autoConvert))
-	{
-		if (m_Obj)
-			return m_Obj->GetData(format, autoConvert);
-
-		// else
-		return Clipboard::GetDataObject()->GetData(format, autoConvert);
-	}
-
-	// else use Win32 API to properly handle UTF8 to Unicode conversion
-	CString sHtml;
-
-	if (m_Obj)
-	{
-		::IUnknown* punk = (::IUnknown*)Marshal::GetIUnknownForObject(m_Obj).ToPointer();
-
-		if (punk)
-		{
-			::IDataObject* pdata = nullptr;
-			HRESULT hr = punk->QueryInterface(__uuidof(::IDataObject), (void**)&pdata);
-
-			if (SUCCEEDED(hr))
-				sHtml = CClipboard().GetText(pdata, CBF_HTML);
-
-			RELEASE_INTERFACE(pdata);
-			RELEASE_INTERFACE(punk);
-		}
-	}
-	else
-	{
-		sHtml = CClipboard().GetText(CBF_HTML);
-	}
-
-	// HTML content is always returned as UTF8 So we need to convert to Unicode
-	Misc::EncodeAsUnicode(sHtml, CP_UTF8);
-
-	return gcnew String(sHtml);
-}
-
-bool DataObjectEx::GetDataPresent(String^ format)
-{
-	if (m_Obj)
-		return m_Obj->GetDataPresent(format);
-
-	// else
-	return Clipboard::GetDataObject()->GetDataPresent(format);
-}
-
-bool DataObjectEx::GetDataPresent(Type^ format)
-{
-	if (m_Obj)
-		return m_Obj->GetDataPresent(format);
-
-	// else
-	return Clipboard::GetDataObject()->GetDataPresent(format);
-}
-
-bool DataObjectEx::GetDataPresent(String^ format, bool autoConvert)
-{
-	if (m_Obj)
-		return m_Obj->GetDataPresent(format, autoConvert);
-
-	// else
-	return Clipboard::GetDataObject()->GetDataPresent(format);
-}
-
-cli::array<String^>^ DataObjectEx::GetFormats()
-{
-	if (m_Obj)
-		return m_Obj->GetFormats();
-
-	// else
-	return Clipboard::GetDataObject()->GetFormats();
-}
-
-cli::array<String^>^ DataObjectEx::GetFormats(bool autoConvert)
-{
-	if (m_Obj)
-		return m_Obj->GetFormats(autoConvert);
-
-	// else
-	return Clipboard::GetDataObject()->GetFormats(autoConvert);
-}
-
-void DataObjectEx::SetData(Object^ data)
-{
-	if (m_Obj)
-		m_Obj->SetData(data);
-
-	// else
-	Clipboard::GetDataObject()->SetData(data);
-}
-
-void DataObjectEx::SetData(String^ format, Object^ data)
-{
-	if (m_Obj)
-		m_Obj->SetData(format, data);
-
-	// else
-	Clipboard::GetDataObject()->SetData(format, data);
-}
-
-void DataObjectEx::SetData(Type^ format, Object^ data)
-{
-	if (m_Obj)
-		m_Obj->SetData(format, data);
-
-	// else
-	Clipboard::GetDataObject()->SetData(format, data);
-}
-
-void DataObjectEx::SetData(String^ format, bool autoConvert, Object^ data)
-{
-	if (m_Obj)
-		m_Obj->SetData(format, autoConvert, data);
-
-
-	// else
-	Clipboard::GetDataObject()->SetData(format, autoConvert, data);
+	RELEASE_INTERFACE(m_pData)
+	RELEASE_INTERFACE(m_pUnk)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -196,12 +74,13 @@ bool ClipboardUtil::GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% h
 
 bool ClipboardUtil::GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% html, String^% sourceUrl)
 {
-	auto data = GetDataObject(obj)->GetData(DataFormats::Html, true);
+	auto objEx = gcnew OleDataObjectEx(obj);
 
-	if ((data == nullptr) || !ISTYPE(data, String))
+	if (!objEx->IsValid())
 		return false;
 
-	CString sHtml(MS(data->ToString())), sSourceUrl;
+	auto temp = ClipboardUtil::GetHtml(objEx);
+	CString sHtml = MS(temp), sSourceUrl;
 
 	if (CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl).IsEmpty())
 		return false;
@@ -212,10 +91,97 @@ bool ClipboardUtil::GetHtmlFragment(Windows::Forms::IDataObject^ obj, String^% h
 	return true;
 }
 
-Windows::Forms::IDataObject^ ClipboardUtil::GetDataObject(Windows::Forms::IDataObject^ obj)
+bool ClipboardUtil::IsDropFile(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
 {
-	if (ISTYPE(obj, DataObjectEx))
-		return obj;
+	auto objEx = gcnew OleDataObjectEx(obj);
 
-	return gcnew DataObjectEx(obj);
+	if (!objEx->IsValid())
+		return false;
+
+	return (CClipboard::HasFormat(objEx->Data(), CF_HDROP) != FALSE);
+}
+
+cli::array<String^>^ ClipboardUtil::GetDropFiles(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	auto objEx = gcnew OleDataObjectEx(obj);
+
+	if (!objEx->IsValid())
+		return nullptr;
+
+	CStringArray aFilePaths;
+	int nNumFiles = CClipboard::GetDropFilePaths(objEx->Data(), aFilePaths);
+
+	auto filePaths = gcnew cli::array<String^>(nNumFiles);
+
+	for (int nFile = 0; nFile < nNumFiles; nFile++)
+		filePaths[nFile] = gcnew String(aFilePaths[nFile]);
+
+	return filePaths;
+}
+
+bool ClipboardUtil::IsRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	OleDataObjectEx^ objEx = gcnew OleDataObjectEx(obj);
+
+	if (!objEx->IsValid())
+		return false;
+
+	return ((CClipboard::HasFormat(objEx->Data(), CBF_RTF) != FALSE) || 
+			(CClipboard::HasFormat(objEx->Data(), CBF_RETEXTOBJ) != FALSE));
+}
+
+String^ ClipboardUtil::GetRtf(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	OleDataObjectEx^ objEx = gcnew OleDataObjectEx(obj);
+
+	if (objEx->IsValid())
+	{
+		CString sRtf = CClipboard::GetText(objEx->Data(), CBF_RTF);
+
+		if (sRtf.IsEmpty())
+			sRtf = CClipboard().GetText(objEx->Data(), CBF_RETEXTOBJ);
+
+		// RTF content is always returned as UTF8 So we need to convert to Unicode
+		return gcnew String(Misc::EncodeAsUnicode(sRtf, CP_UTF8));
+	}
+
+	// else
+	return String::Empty;
+}
+
+bool ClipboardUtil::IsHtml(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	OleDataObjectEx^ objEx = gcnew OleDataObjectEx(obj);
+
+	if (!objEx->IsValid())
+		return false;
+
+	return (CClipboard::HasFormat(objEx->Data(), CBF_HTML) != FALSE);
+}
+
+String^ ClipboardUtil::GetHtml()
+{
+	CString sHtml = CClipboard().GetText(CBF_HTML);
+
+	// HTML content is always returned as UTF8 So we need to convert to Unicode
+	return gcnew String(Misc::EncodeAsUnicode(sHtml, CP_UTF8));
+}
+
+String^ ClipboardUtil::GetHtml(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj)
+{
+	return GetHtml(gcnew OleDataObjectEx(obj));
+}
+
+String^ ClipboardUtil::GetHtml(OleDataObjectEx^ objEx)
+{
+	if (objEx && objEx->IsValid())
+	{
+		CString sHtml = CClipboard::GetText(objEx->Data(), CBF_HTML);
+
+		// HTML content is always returned as UTF8 So we need to convert to Unicode
+		return gcnew String(Misc::EncodeAsUnicode(sHtml, CP_UTF8));
+	}
+
+	// else
+	return String::Empty;
 }

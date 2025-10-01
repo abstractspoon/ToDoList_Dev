@@ -6,7 +6,6 @@
 #include "RichTextBoxEx.h"
 #include "UIExtension.h"
 #include "ContentControl.h"
-#include "ClipboardUtil.h" // for DataObjectEx
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -56,7 +55,7 @@ void RichTextBoxEx::WndProc(Message% m)
 	switch (m.Msg)
 	{
 	case EM_PASTESPECIAL:
-		if (PasteEvent(this, gcnew DataObjectEx()))
+		if (PasteEvent(this, Clipboard::GetDataObject()))
 			return;
 		break;
 
@@ -291,7 +290,6 @@ String^ RichTextBoxEx::RtfToHtml(String^ rtf, bool useMSWord)
 {
 	return RtfToHtml(rtf, "", useMSWord);
 }
-
 
 #undef GetTempPath
 

@@ -397,12 +397,12 @@ int CClipboard::GetDropFilePaths(CStringArray& aFilePaths) const
 	
 	aFilePaths.RemoveAll();
 	
-	HANDLE hData = ::GetClipboardData(CF_HDROP);
+	HDROP hDrop = (HDROP)::GetClipboardData(CF_HDROP);
 	
-	if (hData == NULL)
+	if (hDrop == NULL)
 		return 0;
 	
-	return FileMisc::GetDropFilePaths((HDROP)hData, aFilePaths);
+	return FileMisc::GetDropFilePaths(hDrop, aFilePaths);
 }
 
 BOOL CClipboard::GetHTMLSourceLink(CString& sLink, BOOL bIgnoreAboutBlank) const
@@ -443,13 +443,18 @@ BOOL CClipboard::GetHTMLSourceLink(CString& sLink, BOOL bIgnoreAboutBlank) const
 
 BOOL CClipboard::HasText(LPDATAOBJECT lpDataOb)
 {
+	return HasFormat(lpDataOb, CB_TEXTFORMAT);
+}
+
+BOOL CClipboard::HasFormat(LPDATAOBJECT lpDataOb, UINT nFormat)
+{
 	if (!lpDataOb)
 		return FALSE;
 
 	COleDataObject dataobj;
 	dataobj.Attach(lpDataOb, FALSE);
 
-	return HasText(&dataobj);
+	return HasFormat(&dataobj, nFormat);
 }
 
 int CClipboard::GetAvailableFormats(LPDATAOBJECT lpDataOb, CDWordArray& aFormatIDs)
@@ -489,12 +494,28 @@ CString CClipboard::GetText(LPDATAOBJECT lpDataOb, UINT nFormat)
 	return GetText(&dataobj, nFormat);
 }
 
+int CClipboard::GetDropFilePaths(LPDATAOBJECT lpDataOb, CStringArray& aFilePaths)
+{
+	if (!lpDataOb)
+		return 0;
+
+	COleDataObject dataobj;
+	dataobj.Attach(lpDataOb, FALSE);
+
+	return GetDropFilePaths(&dataobj, aFilePaths);
+}
+
 BOOL CClipboard::HasText(COleDataObject* pObject)
+{
+	return HasFormat(pObject, CB_TEXTFORMAT);
+}
+
+BOOL CClipboard::HasFormat(COleDataObject* pObject, UINT nFormat)
 {
 	if (!pObject || !pObject->m_lpDataObject)
 		return FALSE;
 
-	return pObject->IsDataAvailable(CB_TEXTFORMAT);
+	return pObject->IsDataAvailable(nFormat);
 }
 
 int CClipboard::GetAvailableFormats(COleDataObject* pObject, CDWordArray& aFormatIDs)
@@ -540,4 +561,21 @@ CString CClipboard::GetText(COleDataObject* pObject, UINT nFormat)
 	::GlobalUnlock(hGlobal);
 
 	return sText;
+}
+
+int CClipboard::GetDropFilePaths(COleDataObject* pObject, CStringArray& aFilePaths)
+{
+	aFilePaths.RemoveAll();
+
+	HGLOBAL hGlobal = pObject->GetGlobalData(CF_HDROP);
+
+	if (!hGlobal)
+		return 0;
+
+	HDROP hDrop = (HDROP)GlobalLock(hGlobal);
+	int nNumFiles = FileMisc::GetDropFilePaths(hDrop, aFilePaths);
+
+	::GlobalUnlock(hGlobal);
+
+	return nNumFiles;
 }

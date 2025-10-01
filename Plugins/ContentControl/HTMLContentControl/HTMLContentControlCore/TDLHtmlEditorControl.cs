@@ -76,11 +76,6 @@ namespace HTMLContentControl
 			InitialiseFeatures();
 		}
 
-		protected void OnOutlookDrop(object sender, String title, String url)
-		{
-			DoDrop(title, url);
-		}
-
 		protected override void OnHandleCreated(EventArgs e)
 		{
 			base.OnHandleCreated(e);
@@ -112,10 +107,36 @@ namespace HTMLContentControl
 			if (m_DragDrop == null)
 			{
 				m_DragDrop = new TDLDropTarget(defDropTarget);
-				m_DragDrop.OutlookDrop += new TDLDropTarget.OutlookDropEventHandler(OnOutlookDrop);
+
+				m_DragDrop.OutlookDrop	+= new TDLDropTarget.OutlookDropEventHandler(OnOutlookDrop);
+				m_DragDrop.RichTextDrop += new TDLDropTarget.RichTextDropEventHandler(OnRichTextDrop);
+				m_DragDrop.FileDrop		+= new TDLDropTarget.FileDropEventHandler(OnFileDrop);
 			}
 
 			return Marshal.GetComInterfaceForObject(m_DragDrop, typeof(Microsoft.VisualStudio.OLE.Interop.IDropTarget), CustomQueryInterfaceMode.Ignore);
+		}
+
+		protected void OnOutlookDrop(object sender, String title, String url)
+		{
+			Focus();
+
+			DoDropUrl(title, url);
+		}
+
+		protected void OnRichTextDrop(object sender, String rtf)
+		{
+			Focus();
+
+			SelectedHtml = RichTextBoxEx.RtfToHtml(rtf, false);
+		}
+
+		protected void OnFileDrop(object sender, String[] filePaths)
+		{
+			Focus();
+
+			// Only handle the first file to be consistent with HtmlEditorControl
+			if (filePaths.Length > 0)
+				DoPasteFile(filePaths[0]);
 		}
 
 		protected override void InitialiseDocument()
@@ -605,11 +626,11 @@ namespace HTMLContentControl
 			{
 				e.Cancel = true; // everything else
 
-				DoDrop(e.Url, e.Url);
+				DoDropUrl(e.Url, e.Url);
 			}
 		}
 
-		private bool DoDrop(string title, string url)
+		private bool DoDropUrl(string text, string url)
 		{
 			if (!IsEditable) 
 				return false;
@@ -634,7 +655,7 @@ namespace HTMLContentControl
 			if (newElm == null)
 				return false;
 
-			newElm.InnerText = (isImage ? "." : title);
+			newElm.InnerText = (isImage ? "." : text);
 
 			if (element.TagName == "BODY")
 				element.AppendChild(newElm);
@@ -649,7 +670,7 @@ namespace HTMLContentControl
 			if (isImage)
 				success = InsertImage(url, "", MSDN.Html.Editor.ImageAlignOption.Default);
 			else
-				success = InsertLinkPrompt(url, title);
+				success = InsertLinkPrompt(url, text);
 
 			if (!success)
 			{

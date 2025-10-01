@@ -19,6 +19,8 @@ namespace HTMLContentControl
 	public class TDLDropTarget : IOleDropTarget
 	{
 		public delegate void OutlookDropEventHandler(object sender, String title, String url);
+		public delegate void RichTextDropEventHandler(object sender, String rtf);
+		public delegate void FileDropEventHandler(object sender, String[] filePaths);
 
 		// ---------------------------------------------------------------
 
@@ -26,6 +28,8 @@ namespace HTMLContentControl
 		private IOleDataObject m_CurrentObject;
 
 		public event OutlookDropEventHandler OutlookDrop;
+		public event RichTextDropEventHandler RichTextDrop;
+		public event FileDropEventHandler FileDrop;
 
 		// ---------------------------------------------------------------
 
@@ -36,17 +40,19 @@ namespace HTMLContentControl
 
 		public void DragEnter(IOleDataObject pDataObj, uint grfKeyState, IOlePoint pt, ref uint pdwEffect)
 		{
-			if ((OutlookDrop != null) && OutlookUtil.IsOutlookItem(pDataObj))
+			if (((OutlookDrop != null)	&& OutlookUtil.IsOutlookItem(pDataObj)) ||
+				((RichTextDrop != null) && ClipboardUtil.IsRtf(pDataObj)) ||
+				((FileDrop != null)		&& ClipboardUtil.IsDropFile(pDataObj)))
 			{
 				m_CurrentObject = pDataObj;
-				pdwEffect = DragDropUtil.DRAGDROP_LINK;
+				pdwEffect = DragDropUtil.DRAGDROP_COPY;
 			}
 			else if (m_DefaultDropTarget != null)
 			{
 				m_DefaultDropTarget.DragEnter(pDataObj, grfKeyState, pt, pdwEffect);
 
 				if (pdwEffect != DragDropUtil.DRAGDROP_NONE)
-					pdwEffect = DragDropUtil.DRAGDROP_LINK;
+					pdwEffect = DragDropUtil.DRAGDROP_COPY;
 			}
 		}
 
@@ -66,14 +72,14 @@ namespace HTMLContentControl
 		{
 			if (m_CurrentObject != null)
 			{
-				pdwEffect = DragDropUtil.DRAGDROP_LINK;
+				pdwEffect = DragDropUtil.DRAGDROP_COPY;
 			}
 			else if (m_DefaultDropTarget != null)
 			{
 				m_DefaultDropTarget.DragOver(grfKeyState, pt, pdwEffect);
 
 				if (pdwEffect != DragDropUtil.DRAGDROP_NONE)
-					pdwEffect = DragDropUtil.DRAGDROP_LINK;
+					pdwEffect = DragDropUtil.DRAGDROP_COPY;
 			}
 		}
 
@@ -83,54 +89,71 @@ namespace HTMLContentControl
 			{
 				try
 				{
-					var outlook = new Application();
-					var selection = outlook.ActiveExplorer().Selection;
-
-					if ((selection != null) && (selection.Count >= 1))
+					if (OutlookUtil.IsOutlookItem(pDataObj))
 					{
-						var title = "";
-						var id = "";
+						var outlook = new Application();
+						var selection = outlook.ActiveExplorer().Selection;
 
-						var item = selection[1];
+						if ((selection != null) && (selection.Count >= 1))
+						{
+							var title = "";
+							var id = "";
 
-						if (item is MailItem)
-						{
-							title = (item as MailItem).Subject;
-							id = (item as MailItem).EntryID;
-						}
-						else if (item is ContactItem)
-						{
-							title = (item as ContactItem).Subject;
-							id = (item as ContactItem).EntryID;
-						}
-						else if (item is JournalItem)
-						{
-							title = (item as JournalItem).Subject;
-							id = (item as JournalItem).EntryID;
-						}
-						else if (item is TaskItem)
-						{
-							title = (item as TaskItem).Subject;
-							id = (item as TaskItem).EntryID;
-						}
-						else if (item is NoteItem)
-						{
-							title = (item as NoteItem).Subject;
-							id = (item as NoteItem).EntryID;
-						}
-						else if (item is AppointmentItem)
-						{
-							title = (item as AppointmentItem).Subject;
-							id = (item as AppointmentItem).EntryID;
-						}
+							var item = selection[1];
 
-						if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(id))
-						{
-							var url = OutlookUtil.FormatItemAsUrl(id);
-							OutlookDrop(this, title, url);
+							if (item is MailItem)
+							{
+								title = (item as MailItem).Subject;
+								id = (item as MailItem).EntryID;
+							}
+							else if (item is ContactItem)
+							{
+								title = (item as ContactItem).Subject;
+								id = (item as ContactItem).EntryID;
+							}
+							else if (item is JournalItem)
+							{
+								title = (item as JournalItem).Subject;
+								id = (item as JournalItem).EntryID;
+							}
+							else if (item is TaskItem)
+							{
+								title = (item as TaskItem).Subject;
+								id = (item as TaskItem).EntryID;
+							}
+							else if (item is NoteItem)
+							{
+								title = (item as NoteItem).Subject;
+								id = (item as NoteItem).EntryID;
+							}
+							else if (item is AppointmentItem)
+							{
+								title = (item as AppointmentItem).Subject;
+								id = (item as AppointmentItem).EntryID;
+							}
 
-							pdwEffect = DragDropUtil.DRAGDROP_LINK;
+							if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(id))
+							{
+								var url = OutlookUtil.FormatItemAsUrl(id);
+								OutlookDrop(this, title, url);
+
+								pdwEffect = DragDropUtil.DRAGDROP_COPY;
+							}
 						}
+					}
+					else if (ClipboardUtil.IsRtf(pDataObj))
+					{
+						string rtf = ClipboardUtil.GetRtf(pDataObj);
+						RichTextDrop(this, rtf);
+
+						pdwEffect = DragDropUtil.DRAGDROP_COPY;
+					}
+					else if (ClipboardUtil.IsDropFile(pDataObj))
+					{
+						string[] filePaths = ClipboardUtil.GetDropFiles(pDataObj);
+						FileDrop(this, filePaths);
+
+						pdwEffect = DragDropUtil.DRAGDROP_COPY;
 					}
 				}
 				catch (System.Exception /*e*/)
@@ -143,7 +166,7 @@ namespace HTMLContentControl
 				m_DefaultDropTarget.Drop(pDataObj, grfKeyState, pt, pdwEffect);
 
 				if (pdwEffect != DragDropUtil.DRAGDROP_NONE)
-					pdwEffect = DragDropUtil.DRAGDROP_LINK;
+					pdwEffect = DragDropUtil.DRAGDROP_COPY;
 			}
 
 			m_CurrentObject = null;

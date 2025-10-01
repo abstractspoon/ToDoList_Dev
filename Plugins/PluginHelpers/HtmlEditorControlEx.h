@@ -61,8 +61,9 @@ namespace Abstractspoon
 				// Pseudo event handler
 				bool OnSetForeColor(MSHTML::IHTMLTxtRange^ range, Drawing::Color color);
 
-				Windows::Forms::DialogResult ShowDialog(Windows::Forms::Form^ dialog, Drawing::Icon^ icon);
 				void PreShowDialog(Windows::Forms::Form^ dialog, Drawing::Icon^ icon);
+
+				Windows::Forms::DialogResult ShowDialog(Windows::Forms::Form^ dialog, Drawing::Icon^ icon);
 				Windows::Forms::DialogResult PostShowDialog(Windows::Forms::Form^ dialog, Windows::Forms::DialogResult res);
 
 				void Translate();
