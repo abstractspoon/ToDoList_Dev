@@ -18,9 +18,7 @@ using namespace System::Diagnostics;
 using namespace System::Drawing;
 using namespace System::Windows::Forms;
 using namespace System::IO;
-using namespace System::Runtime::InteropServices;
 
-using namespace Microsoft::VisualStudio::OLE::Interop;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 using namespace IIControls;
