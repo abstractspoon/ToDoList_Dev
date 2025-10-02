@@ -4094,7 +4094,7 @@ LRESULT CKanbanCtrl::OnColumnEditTaskDone(WPARAM /*wp*/, LPARAM lp)
 
 	if (lr)
 	{
-		ASSERT(m_pSelectedColumn);
+		ASSERT(m_pSelectedColumn || (GetVisibleTaskCount() == 0));
 
 		if (m_pSelectedColumn)
 			m_pSelectedColumn->Invalidate(FALSE);
