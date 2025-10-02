@@ -1463,20 +1463,20 @@ void CTDLFindTasksDlg::OnSaveSearch(BOOL bNotifyParent)
 {
 	m_lcFindSetup.EndEdit();
 	
+	// Add search to combo if it's new
 	CString sSearch;
 	m_cbSearches.GetWindowText(sSearch);
 
-	SaveSearch(sSearch);
-	m_sActiveSearch = sSearch;
-
-	// is it a new search?
 	BOOL bNewSearch = (m_cbSearches.FindStringExact(-1, sSearch) == CB_ERR);
 
 	if (bNewSearch)
 	{
-		m_cbSearches.AddString(sSearch); // yes
+		m_cbSearches.AddString(sSearch);
 		Misc::AddUniqueItem(sSearch, m_aSavedSearches);
 	}
+
+	m_sActiveSearch = sSearch;
+	SaveSearches(); // will also save active search
 		
 	// notify parent
 	if (bNotifyParent)

@@ -74,6 +74,7 @@
 			// 
 			this.InputTextCtrl.AllowDrop = true;
 			this.InputTextCtrl.ContextMenuStrip = this.contextMenuStrip1;
+			this.InputTextCtrl.DetectUrls = false;
 			this.InputTextCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.InputTextCtrl.HideSelection = false;
 			this.InputTextCtrl.Location = new System.Drawing.Point(0, 0);
@@ -97,7 +98,7 @@
             this.toolStripSeparator2,
             this.wordwrapToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(165, 170);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(165, 148);
 			this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
 			// 
 			// cutToolStripMenuItem
