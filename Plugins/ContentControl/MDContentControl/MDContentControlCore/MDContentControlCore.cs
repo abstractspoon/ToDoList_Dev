@@ -48,12 +48,23 @@ namespace MDContentControl
 
 		public Byte[] GetContent()
         {
-            return System.Text.Encoding.Unicode.GetBytes(InputText);
+			string text = InputText;
+			int lenText = text.Length;
+
+            var bytes = System.Text.Encoding.Unicode.GetBytes(text);
+			int lenBytes = bytes.Length;
+
+			return bytes;
         }
 
         public bool SetContent(Byte[] content, bool bResetSelection)
         {
-			InputText = System.Text.Encoding.Unicode.GetString(content);
+			int lenBytes = content.Length;
+
+			var text = System.Text.Encoding.Unicode.GetString(content);
+			int lenText = text.Length;
+
+			InputText = text;
             return true;
         }
 
