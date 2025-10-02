@@ -1328,9 +1328,14 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 		VERIFY(mapAttrib.GetIntersection(mapAllAttribIDs, filter.mapAttribs));
 	}
 
-	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter));
+	// Note: GetSelectedTask can legitimately return no tasks
+	// in which case it will not call PrepareTaskfileForTasks
+	// but we still proceed so we have to call it instead
+	if (!GetSelectedTasks(tasks, FTCV_TASKTREE, filter))
+	{
+		PrepareTaskfileForTasks(tasks, filter);
+	}
 
-	// Globals
 	if (mapAttrib.IsEmpty() || mapAttrib.Has(TDCA_NEWTASK))
 		AddGlobalsToTaskFile(tasks, TDCA_ALL);
 	else
