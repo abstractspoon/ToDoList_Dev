@@ -45,6 +45,7 @@ protected:
 	void TestMergeTaskAttributesExcludingEmptySrcValues();
 	void TestMergeTaskAttributesPreservingNonEmptyDestValues();
 	void TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues();
+	void TestSetGetCustomComments();
 
 	void TestHierarchyConstructionPerformance();
 	void TestFlatListConstructionPerformance();
