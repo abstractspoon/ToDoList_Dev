@@ -55,7 +55,14 @@ int CBinaryData::GetEquivalentStringLength(int nByteLength)
 
 unsigned char* CBinaryData::GetBuffer(int nByteLength)
 {
-    return (unsigned char*)CString::GetBuffer(GetEquivalentStringLength(nByteLength));
+	// Clear the returned buffer so that if the byte length 
+	// is not even we will not get a stray uninitialised 
+	// character at the end
+	int nStrLen = GetEquivalentStringLength(nByteLength);
+	LPTSTR szBuf = CString::GetBuffer(nStrLen);
+
+	ZeroMemory(szBuf, (nStrLen * CHARLEN));
+    return (unsigned char*)szBuf;
 }
 
 void CBinaryData::ReleaseBuffer(int nByteLength)
