@@ -68,6 +68,7 @@ TESTRESULT CTaskFileTest::Run()
 	TestMergeTaskAttributesExcludingEmptySrcValues();
 	TestMergeTaskAttributesPreservingNonEmptyDestValues();
 	TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExcludingEmptySrcValues();
+	TestSetGetCustomComments();
 
 	// -----------------------------------------------------
 
@@ -291,6 +292,35 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExclud
 			ExpectTrue(tdiDestCopy == tdiSrcFull);
 		}
 	}
+}
+
+void CTaskFileTest::TestSetGetCustomComments()
+{
+	// A very specific test when custom comments of odd character lengths
+	// because the conversion to Unicode and back will add a character
+	// to the original byte length
+	CTDCScopedTest test(*this, _T("CTaskFile::SetGetCustomComments"));
+
+	CTaskFile tasks;
+	HTASKITEM hTask = tasks.NewTask(_T(""), NULL, 0, 0);
+
+	ExpectTrue(hTask != NULL);
+
+	const LPCSTR szContent =
+		"[ColouredParagraphs.rtf](file:///C:/Users/Daniel%20G/Documents/ColouredParagraphs.rtf)\n\n"
+		"![singleclickediting.png](file:///C:/Users/Daniel%20G/Pictures/singleclickediting.png)\n";
+
+	const int nLenContent = strlen(szContent);
+	ExpectEQ((nLenContent % 2), 1);
+
+	CBinaryData dataIn((PBYTE)szContent, nLenContent);
+	ExpectTrue(tasks.SetTaskCustomComments(hTask, dataIn, _T("Test")));
+
+	CBinaryData dataOut;
+	CString sType;
+
+	ExpectTrue(tasks.GetTaskCustomComments(hTask, dataOut, sType));
+	ExpectEQ(dataOut.AsString(), dataIn.AsString());
 }
 
 void CTaskFileTest::PrepareMergeTestTasks(CTaskFile& tasksSrc, HTASKITEM& hSrcEmpty, HTASKITEM& hSrcFull, 
@@ -707,4 +737,3 @@ void CTaskFileTest::PopulateArrayWithRandomStrings(CStringArray& aValues, int nC
 		aValues[nCount] = Misc::Format(szFormat, i + 1);
 	}
 }
-

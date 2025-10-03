@@ -2173,23 +2173,24 @@ BOOL CTaskFile::GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CSt
 	sType = GetTaskString(hTask, TDL_TASKCOMMENTSTYPE);
 
 	// custom comments
-	CString sTemp = GetTaskString(hTask, TDL_TASKCUSTOMCOMMENTS);
+	CString sEncoded = GetTaskString(hTask, TDL_TASKCUSTOMCOMMENTS);
 
-	if (sTemp.IsEmpty())
+	if (sEncoded.IsEmpty())
 		return TRUE; // not an error
-
-	Base64Coder b64;
 
 	// Convert unicode back to multibyte
 	// to read the binary stream as unsigned chars
-	int nLen = sTemp.GetLength();
-	unsigned char* pBinary = (unsigned char*)Misc::WideToMultiByte((LPCTSTR)sTemp, nLen);
-	b64.Decode(pBinary, nLen);
-	delete [] pBinary;
+	int nLen = sEncoded.GetLength();
+	Misc::EncodeAsMultiByte(sEncoded);
 
-	unsigned long nLenContent;
+	// Decode
+	Base64Coder b64;
+	b64.Decode((const PBYTE)(LPCSTR)(LPCTSTR)sEncoded, nLen);
+
+	unsigned long nLenContent = 0;
 	PBYTE pContent = b64.DecodedMessage(nLenContent);
 
+	// Copy to target
 	PBYTE szContent = (PBYTE)content.GetBuffer(nLenContent);
 	CopyMemory(szContent, pContent, nLenContent);
 	content.ReleaseBuffer(nLenContent);
