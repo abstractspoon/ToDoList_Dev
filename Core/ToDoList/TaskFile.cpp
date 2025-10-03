@@ -2148,8 +2148,7 @@ BOOL CTaskFile::SetTaskCustomComments(HTASKITEM hTask, const CBinaryData& conten
 		b64.Encode((const PBYTE)content.Get(), content.GetLength());
 
  		// Base64Coder will convert ansi to unicode as required
-		CString sEncoded(b64.EncodedMessage());
-		bRes = SetTaskString(hTask, TDL_TASKCUSTOMCOMMENTS, sEncoded, XIT_ELEMENT);
+		bRes = SetTaskString(hTask, TDL_TASKCUSTOMCOMMENTS, b64.EncodedMessage(), XIT_ELEMENT);
 	}
 
 	if (bRes)
