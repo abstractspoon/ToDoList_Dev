@@ -997,7 +997,8 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttribID, const CDWordAr
 	}
 	else if (aModTaskIDs.GetSize() == 1)
 	{ 
-		// Task edit on single task
+		// If this is a single task edit we do some further 
+		// checks in order to avoid an unnecessary refilter
 		DWORD dwModTaskID = aModTaskIDs[0];
 
 		// Optimisations

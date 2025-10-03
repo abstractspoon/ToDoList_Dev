@@ -770,7 +770,22 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 	{
 	case TDCFS_FILTER:
 	case TDCFS_ADVANCED:
-		return HasFilterAttribute(nModType, aCustomAttribDefs);
+		if (HasFilterAttribute(nModType, aCustomAttribDefs))
+		{
+			return TRUE;
+		}
+		else // test for filter flags
+		{
+			switch (nModType)
+			{
+			case TDCA_DONEDATE:
+				return HasFilterFlag(FO_HIDEDONE);
+
+			case TDCA_DUEDATE:
+			case TDCA_DUETIME:
+				return HasFilterFlag(FO_HIDEOVERDUE);
+			}
+		}
 	}
 
 	// All else

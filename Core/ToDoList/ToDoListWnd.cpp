@@ -10943,6 +10943,8 @@ LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM lp)
 
 	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.AdvancedFilterNames());
 
+	CPreferences::Save();
+
 	return 0;
 }
 

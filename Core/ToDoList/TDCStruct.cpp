@@ -1691,6 +1691,9 @@ BOOL SEARCHPARAMS::HasAttribute(TDC_ATTRIBUTE nAttribID) const
 	case TDCA_EXTERNALID:
 		return (mapAttrib.Has(nAttribID) ||
 				mapAttrib.Has(TDCA_ANYTEXTATTRIBUTE));
+
+	case TDCA_ALL:
+		return !mapAttrib.IsEmpty();
 	}
 
 	// all else
