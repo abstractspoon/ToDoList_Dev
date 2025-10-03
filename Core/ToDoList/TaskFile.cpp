@@ -1449,6 +1449,10 @@ unsigned long CTaskFile::GetFileVersion() const
 
 BOOL CTaskFile::SetEarliestTaskDueDate(const COleDateTime& date)
 {
+	if (!CDateHelper::IsDateSet(date))
+		return DeleteItem(TDL_EARLIESTDUEDATE);
+
+	// else
 	return (NULL != SetItemValue(TDL_EARLIESTDUEDATE, date));
 }
 
@@ -1563,13 +1567,17 @@ void CTaskFile::SetFilePath(LPCTSTR szFilePath)
 		DeleteItem(TDL_FILENAME);
 }
 
-BOOL CTaskFile::SetLastModified(const COleDateTime& tLastMod)
+BOOL CTaskFile::SetLastModified(const COleDateTime& date)
 {
-	if (SetItemValue(TDL_LASTMOD, tLastMod))
-		return (NULL != SetItemValue(TDL_LASTMODSTRING, FormatDate(tLastMod)));
+	if (!CDateHelper::IsDateSet(date))
+		return DeleteItem(TDL_LASTMOD);
+
+	if (NULL == SetItemValue(TDL_LASTMOD, date))
+		return FALSE;
 
 	// else
-	return FALSE;
+	VERIFY(SetItemValue(TDL_LASTMODSTRING, FormatDate(date)));
+	return TRUE
 }
 
 COleDateTime CTaskFile::GetLastModifiedOle() const
@@ -4457,7 +4465,7 @@ BOOL CTaskFile::DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, con
 bool CTaskFile::SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COleDateTime& date, 
 							const CString& sDateStringItem)
 {
-	if (SetTaskDouble(hTask, sDateItem, date))
+	if (CDateHelper::IsDateSet(date) && SetTaskDouble(hTask, sDateItem, date))
 	{
 		if (!sDateStringItem.IsEmpty())
 			return SetTaskString(hTask, sDateStringItem, FormatDate(date));
@@ -4472,7 +4480,7 @@ bool CTaskFile::SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COl
 bool CTaskFile::SetTaskDate(HTASKITEM hTask, const CString& sDateItem, time_t tVal)
 {
 	if (tVal == 0) 
-        return SetTaskDate(hTask, sDateItem, COleDateTime(0.0));
+        return SetTaskDate(hTask, sDateItem, CDateHelper::NullDate());
 
 	//fabio_2005
 #if _MSC_VER >= 1400
