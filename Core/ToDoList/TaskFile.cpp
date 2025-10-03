@@ -1577,7 +1577,7 @@ BOOL CTaskFile::SetLastModified(const COleDateTime& date)
 
 	// else
 	VERIFY(SetItemValue(TDL_LASTMODSTRING, FormatDate(date)));
-	return TRUE
+	return TRUE;
 }
 
 COleDateTime CTaskFile::GetLastModifiedOle() const
