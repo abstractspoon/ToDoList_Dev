@@ -296,9 +296,9 @@ void CTaskFileTest::TestMergeTaskAttributesPreservingNonEmptyDestValuesAndExclud
 
 void CTaskFileTest::TestSetGetCustomComments()
 {
-	// A very specific test when custom comments of odd character lengths
-	// because the conversion to Unicode and back will add a character
-	// to the original byte length
+	// A very specific test to ensure that content having both even and odd
+	// lengths will be handled correctly because the conversion to Unicode 
+	// and back can add a character to the original byte length
 	CTDCScopedTest test(*this, _T("CTaskFile::SetGetCustomComments"));
 
 	CTaskFile tasks;
@@ -306,21 +306,32 @@ void CTaskFileTest::TestSetGetCustomComments()
 
 	ExpectTrue(hTask != NULL);
 
-	const LPCSTR szContent =
+	const LPCSTR szContent[2] =
+	{
+		// Even
+		"[ColouredParagraphs2.rtf](file:///C:/Users/Daniel%20G/Documents/ColouredParagraphs.rtf)\n\n"
+		"![singleclickediting.png](file:///C:/Users/Daniel%20G/Pictures/singleclickediting.png)\n",
+
+		// Odd
 		"[ColouredParagraphs.rtf](file:///C:/Users/Daniel%20G/Documents/ColouredParagraphs.rtf)\n\n"
-		"![singleclickediting.png](file:///C:/Users/Daniel%20G/Pictures/singleclickediting.png)\n";
+		"![singleclickediting.png](file:///C:/Users/Daniel%20G/Pictures/singleclickediting.png)\n",
+	};
 
-	const int nLenContent = strlen(szContent);
-	ExpectEQ((nLenContent % 2), 1);
+	for (int nTest = 0; nTest <= 1; nTest++)
+	{
+		const int nLenContent = strlen(szContent[nTest]);
+		ExpectEQ((nLenContent % 2), nTest);
 
-	CBinaryData dataIn((PBYTE)szContent, nLenContent);
-	ExpectTrue(tasks.SetTaskCustomComments(hTask, dataIn, _T("Test")));
+		CBinaryData dataIn((PBYTE)szContent[nTest], nLenContent);
+		ExpectTrue(tasks.SetTaskCustomComments(hTask, dataIn, _T("Test")));
 
-	CBinaryData dataOut;
-	CString sType;
+		CBinaryData dataOut;
+		CString sType;
+		ExpectTrue(tasks.GetTaskCustomComments(hTask, dataOut, sType));
 
-	ExpectTrue(tasks.GetTaskCustomComments(hTask, dataOut, sType));
-	ExpectEQ(dataOut.AsString(), dataIn.AsString());
+		ExpectEQ(sType, _T("Test"));
+		ExpectEQ(dataOut.AsString(), dataIn.AsString());
+	}
 }
 
 void CTaskFileTest::PrepareMergeTestTasks(CTaskFile& tasksSrc, HTASKITEM& hSrcEmpty, HTASKITEM& hSrcFull, 
