@@ -3251,6 +3251,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	switch (dwDataType)
 	{
 	case TDCCA_DATE:
+		if (!data.IsEmpty())
 		{
 			double dDate = 0.0;
 			m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dDate);
