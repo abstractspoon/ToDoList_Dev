@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Linq;
 
 using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
@@ -56,7 +57,7 @@ namespace DayViewUIExtension
 		private DateSortedTasks m_DateSortedTasks;
 		private TimeBlocks m_TimeBlocks;
 
-		private Dictionary<uint, TaskExtensionItem> m_ExtensionItems;
+		private Dictionary<uint, Calendar.Appointment> m_MatchingAppts;
 		private List<CustomAttributeDefinition> m_CustomDateDefs;
 
 		private LabelTip m_LabelTip;
@@ -96,7 +97,7 @@ namespace DayViewUIExtension
 			m_TaskItems = new TaskItems();
 			m_DateSortedTasks = new DateSortedTasks(m_TaskItems);
 			m_TimeBlocks = new TimeBlocks();
-			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
+			m_MatchingAppts = new Dictionary<uint, Calendar.Appointment>();
 			m_CustomDateDefs = new List<CustomAttributeDefinition>();
 
 			base.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
@@ -337,12 +338,12 @@ namespace DayViewUIExtension
 			if (dwTaskID == 0)
 				return false;
 
-			TaskExtensionItem extItem;
+			Calendar.Appointment appt;
 
-			if (m_ExtensionItems.TryGetValue(dwTaskID, out extItem))
-				return IsItemDisplayable(extItem);
+			if (!m_MatchingAppts.TryGetValue(dwTaskID, out appt))
+				appt = m_TaskItems.GetItem(dwTaskID);
 
-			return IsItemDisplayable(m_TaskItems.GetItem(dwTaskID));
+			return ((appt == null) ? false : IsItemDisplayable(appt));
 		}
 
 		public void SetHideParentTasks(bool hide, string tag)
@@ -467,10 +468,13 @@ namespace DayViewUIExtension
 					return 0;
 
 				// If an extension item is selected, return the 'real' task Id
-				TaskExtensionItem extItem;
+				Calendar.Appointment appt;
 
-				if (m_ExtensionItems.TryGetValue(m_SelectedTaskID, out extItem))
-					return extItem.RealTaskId;
+				if (m_MatchingAppts.TryGetValue(m_SelectedTaskID, out appt))
+				{
+					if (appt is TaskExtensionItem)
+						return (appt as TaskExtensionItem).RealTaskId;
+				}
 
 				// else
 				return m_SelectedTaskID;
@@ -716,11 +720,11 @@ namespace DayViewUIExtension
             StartDate = DateTime.Now;
 
 			// And scroll vertically to first short task
-			var appointments = GetMatchingAppointments(StartDate, EndDate);
+			RebuildMatchingAppointments(StartDate, EndDate);
 
-			if (appointments != null)
+			if (m_MatchingAppts.Count > 0)
 			{
-				foreach (var appt in appointments)
+				foreach (var appt in m_MatchingAppts.Values)
 				{
 					if (!IsLongAppt(appt) && EnsureVisible(appt, false))
 						break;
@@ -832,10 +836,10 @@ namespace DayViewUIExtension
 
 		public Calendar.Appointment GetAppointment(uint taskID)
 		{
-			TaskExtensionItem extItem;
+			Calendar.Appointment appt;
 
-			if (m_ExtensionItems.TryGetValue(taskID, out extItem))
-				return extItem;
+			if (m_MatchingAppts.TryGetValue(taskID, out appt))
+				return appt;
 
 			return m_TaskItems.GetItem(taskID);
 		}
@@ -1068,6 +1072,7 @@ namespace DayViewUIExtension
 			SelectedDates.Start = SelectedDates.End;
 
             AdjustVScrollbar();
+			RebuildMatchingAppointments(StartDate, EndDate);
             Invalidate();
         }
 
@@ -1264,7 +1269,11 @@ namespace DayViewUIExtension
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
 		{
-			args.Appointments = GetMatchingAppointments(args.StartDate, args.EndDate);
+// 			RebuildMatchingAppointments(args.StartDate, args.EndDate);
+
+			args.Appointments = m_MatchingAppts.Values
+											   .Where(x => IsItemWithinRange(x, args.StartDate, args.EndDate))
+											   .ToList();
 		}
 
 		protected override bool AppointmentsIntersect(Calendar.Appointment appt, Calendar.Appointment apptOther)
@@ -1323,12 +1332,17 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end)
+		private void RebuildMatchingAppointments(DateTime start, DateTime end)
 		{
-			// Extension items are always populated on demand
-			m_ExtensionItems.Clear();
+			// Cache enough information to restore the selected item after the rebuild
+			var realApptId = SelectedTaskId;
+			string custAttribID = null;
 
-			var appts = new List<Calendar.Appointment>();
+			if (SelectedAppointment is TaskCustomDateAttribute)
+				custAttribID = (SelectedAppointment as TaskCustomDateAttribute).AttributeId;
+
+			// Extension items are always populated on demand
+			m_MatchingAppts = new Dictionary<uint, Calendar.Appointment>();
 			uint nextExtId = (((m_MaxTaskID / 1000) + 1) * 1000);
 
 			foreach (var pair in m_TaskItems)
@@ -1338,7 +1352,7 @@ namespace DayViewUIExtension
 				if (IsItemDisplayable(item))
 				{
 					if (IsItemWithinRange(item, start, end))
-						appts.Add(item);
+						m_MatchingAppts[item.Id] = item;
 
 					if (m_ShowFutureOcurrences && item.IsRecurring && !item.IsDoneOrGoodAsDone)
 					{
@@ -1355,8 +1369,7 @@ namespace DayViewUIExtension
 
 								if (IsItemWithinRange(futureAppt, start, end))
 								{
-									m_ExtensionItems[nextExtId++] = futureAppt;
-									appts.Add(futureAppt);
+									m_MatchingAppts[nextExtId++] = futureAppt;
 								}
 							}
 						}
@@ -1373,10 +1386,12 @@ namespace DayViewUIExtension
 						{
 							var customDate = new TaskCustomDateAttribute(item, nextExtId, attrib.Id, date);
 
-							if (IsItemDisplayable(customDate) && IsItemWithinRange(customDate, start, end))
+							// Note: we want ALL custom dates regardless of whether
+							// they are visible because this is the only way to preserve
+							// custom date selection when the custom date is not visible
+							if (IsItemDisplayable(customDate)/* && IsItemWithinRange(customDate, start, end)*/)
 							{
-								m_ExtensionItems[nextExtId++] = customDate;
-								appts.Add(customDate);
+								m_MatchingAppts[nextExtId++] = customDate;
 							}
 						}
 					}
@@ -1394,17 +1409,38 @@ namespace DayViewUIExtension
 
 							if (IsItemWithinRange(timeBlock, start, end))
 							{
-								m_ExtensionItems[nextExtId++] = timeBlock;
-								appts.Add(timeBlock);
+								m_MatchingAppts[nextExtId++] = timeBlock;
 							}
 						}
 					}
 				}
 			}
 
-			appts.Sort((a, b) => TaskItem.CompareDates(a, b));
+			// Restore the previously selected item
+			if (realApptId != 0)
+			{
+				Calendar.Appointment appt = null;
 
-			return appts;
+				if (custAttribID == null)
+				{
+					SelectedAppointment = GetAppointment(realApptId);
+				}
+				else
+				{
+					foreach (var match in m_MatchingAppts.Values)
+					{
+						var dateItem = (match as TaskCustomDateAttribute);
+
+						if ((dateItem?.Id == realApptId) && (dateItem?.AttributeId == custAttribID))
+						{
+							SelectedAppointment = match;
+							break;
+						}
+					}
+				}
+			}
+
+			FixupSelection(false, true);
 		}
 
 		private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
@@ -1424,9 +1460,10 @@ namespace DayViewUIExtension
         private void OnWeekChanged(object sender, Calendar.WeekChangeEventArgs args)
         {
             FixupSelection(false, true);
-        }
+			RebuildMatchingAppointments(args.StartDate, args.EndDate);
+		}
 
-        protected override void OnGotFocus(EventArgs e)
+		protected override void OnGotFocus(EventArgs e)
         {
             base.OnGotFocus(e);
 
