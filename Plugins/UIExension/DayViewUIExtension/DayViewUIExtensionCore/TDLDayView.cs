@@ -351,7 +351,7 @@ namespace DayViewUIExtension
 			else
 				m_HideParentTasksTag = string.Empty;
 
-			FixupSelection(false, true);
+			RebuildMatchingAppointments();
 		}
 
 		public bool ShowFutureOccurrences
@@ -362,7 +362,7 @@ namespace DayViewUIExtension
 				if (value != m_ShowFutureOcurrences)
 				{
 					m_ShowFutureOcurrences = value;
-					Invalidate();
+					RebuildMatchingAppointments();
 				}
 			}
 		}
@@ -377,7 +377,7 @@ namespace DayViewUIExtension
 					m_TreatOverdueTasksAsDueToday = value;
 					m_TaskItems.TreatOverdueTasksAsDueToday = value;
 
-					Invalidate();
+					RebuildMatchingAppointments();
 				}
 			}
 		}
@@ -397,7 +397,7 @@ namespace DayViewUIExtension
 				if (value != m_DisplayLongTasksContinuous)
 				{
 					m_DisplayLongTasksContinuous = value;
-					FixupSelection(false, true);
+					RebuildMatchingAppointments();
 				}
 			}
 		}
@@ -412,7 +412,7 @@ namespace DayViewUIExtension
 				if (value != m_DisplayActiveTasksToday)
 				{
 					m_DisplayActiveTasksToday = value;
-					FixupSelection(false, true);
+					RebuildMatchingAppointments();
 				}
 			}
 		}
@@ -425,7 +425,7 @@ namespace DayViewUIExtension
 				if (value != m_HideTasksWithoutTimes)
 				{
 					m_HideTasksWithoutTimes = value;
-					FixupSelection(false, true);
+					RebuildMatchingAppointments();
 				}
 			}
 		}
@@ -438,7 +438,7 @@ namespace DayViewUIExtension
 				if (value != m_HideTasksSpanningWeekends)
 				{
 					m_HideTasksSpanningWeekends = value;
-					FixupSelection(false, true);
+					RebuildMatchingAppointments();
 				}
 			}
 		}
@@ -451,7 +451,7 @@ namespace DayViewUIExtension
 				if (value != m_HideTasksSpanningDays)
 				{
 					m_HideTasksSpanningDays = value;
-					FixupSelection(false, true);
+					RebuildMatchingAppointments();
 				}
 			}
 		}
@@ -700,6 +700,7 @@ namespace DayViewUIExtension
 
 			if (m_MatchingAppts.Count > 0)
 			{
+				// Scroll to the first 'in-day' appointment
 				foreach (var appt in m_MatchingAppts)
 				{
 					if (!IsLongAppt(appt) && EnsureVisible(appt, false))
@@ -1048,7 +1049,7 @@ namespace DayViewUIExtension
 			SelectedDates.Start = SelectedDates.End;
 
             AdjustVScrollbar();
-			RebuildMatchingAppointments(StartDate, EndDate);
+			RebuildMatchingAppointments();
             Invalidate();
         }
 
@@ -1304,6 +1305,11 @@ namespace DayViewUIExtension
 			return true;
 		}
 
+		private void RebuildMatchingAppointments()
+		{
+			RebuildMatchingAppointments(StartDate, EndDate);
+		}
+
 		private void RebuildMatchingAppointments(DateTime start, DateTime end)
 		{
 			// Cache enough information to restore the selected item after the rebuild
@@ -1419,6 +1425,7 @@ namespace DayViewUIExtension
 			}
 
 			FixupSelection(false, true);
+			Invalidate();
 		}
 
 		private void OnSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
