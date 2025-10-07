@@ -337,10 +337,7 @@ namespace DayViewUIExtension
 			if (taskId == 0)
 				return false;
 
-			Calendar.Appointment appt = m_TaskItems.GetItem(taskId);
-
-			if (appt == null)
-				appt = m_MatchingAppts.Find(x => (x.Id == taskId));
+			var appt = GetAppointment(taskId);
 
 			return IsItemDisplayable(appt);
 		}
@@ -461,13 +458,14 @@ namespace DayViewUIExtension
 
 		public uint SelectedTaskId
 		{
+			// We always return the 'real task' Id
 			get
 			{
 				if (!IsTaskDisplayable(m_SelectedTaskID))
 					return 0;
 
 				// If an extension item is selected, return the 'real' task Id
-				Calendar.Appointment appt = m_MatchingAppts.Find(x => (x.Id == m_SelectedTaskID));
+				var appt = GetAppointment(m_SelectedTaskID);
 
 				if (appt is TaskExtensionItem)
 					return (appt as TaskExtensionItem).RealTaskId;
@@ -636,22 +634,6 @@ namespace DayViewUIExtension
 			return SelectedAppointment;
 		}
 
-		uint GetRealTaskId(uint taskId)
-		{
-			if (taskId == 0)
-				return 0;
-
-			TaskItem item = m_TaskItems.GetItem(taskId);
-
-			if (item != null)
-				return taskId;
-
-			var extItem = (m_MatchingAppts.Find(x => (x.Id == taskId)) as TaskExtensionItem);
-			Debug.Assert(extItem != null);
-			
-			return ((extItem == null) ? 0 : extItem.RealTaskId);
-		}
-
 		// External
 		public bool SelectTask(uint taskId)
 		{
@@ -715,9 +697,6 @@ namespace DayViewUIExtension
 		public void GoToToday()
         {
             StartDate = DateTime.Now;
-
-			// And scroll vertically to first short task
-			RebuildMatchingAppointments(StartDate, EndDate);
 
 			if (m_MatchingAppts.Count > 0)
 			{
@@ -843,7 +822,7 @@ namespace DayViewUIExtension
 
 		public Calendar.Appointment GetRealAppointment(Calendar.Appointment appt)
 		{
-			if ((appt != null) && (appt is TaskExtensionItem))
+			if (appt is TaskExtensionItem)
 				return (appt as TaskExtensionItem).RealTask;
 
 			return appt;
