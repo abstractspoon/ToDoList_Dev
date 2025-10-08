@@ -297,6 +297,7 @@ protected:
 	afx_msg LRESULT OnEditSetSelection(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnReenableChangeNotifications(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnInitialise(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDropListEndEdit(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropListCancelEdit(WPARAM wp, LPARAM lp);
 

@@ -33,6 +33,7 @@ const CSize DEFPOPUPLISTSIZE			= CSize(GraphicsMisc::ScaleByDPIFactor(75), Graph
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_REBC_REENABLECHANGENOTIFY = ::RegisterWindowMessage(_T("WM_REBC_REENABLECHANGENOTIFY"));
+const UINT WM_REBC_INITIALISE			= ::RegisterWindowMessage(_T("WM_REBC_INITIALISE"));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -122,6 +123,7 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 	ON_REGISTERED_MESSAGE(WM_REBC_REENABLECHANGENOTIFY, OnReenableChangeNotifications)
+	ON_REGISTERED_MESSAGE(WM_REBC_INITIALISE, OnInitialise)
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnDropListEndEdit)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnDropListCancelEdit)
 
@@ -224,9 +226,16 @@ void CRichEditBaseCtrl::OnTimer(UINT nIDEvent)
 
 void CRichEditBaseCtrl::PreSubclassWindow() 
 {
-	Initialise();
-
 	CRichEditCtrl::PreSubclassWindow();
+
+	// Too early to do some initialisation
+	PostMessage(WM_REBC_INITIALISE);
+}
+
+LRESULT CRichEditBaseCtrl::OnInitialise(WPARAM wParam, LPARAM lParam)
+{
+	Initialise(); // virtual method
+	return 0L;
 }
 
 void CRichEditBaseCtrl::Initialise()
@@ -234,11 +243,10 @@ void CRichEditBaseCtrl::Initialise()
 	SetOLECallback(&m_callback);
 	SetMargins(m_rMargins);
 
-	EnableInlineSpellChecking(TRUE);
-	EnableAutoFontChanging(FALSE);
 	EnableAutoUrlDetection();
-
-	PostMessage(WM_REBC_REENABLECHANGENOTIFY);
+	EnableAutoFontChanging(FALSE);
+	EnableInlineSpellChecking(TRUE);
+	EnableChangeNotifications(TRUE);
 }
 
 BOOL CRichEditBaseCtrl::Undo()
