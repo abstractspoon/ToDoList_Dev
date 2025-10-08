@@ -63,44 +63,35 @@ public:
 	BOOL GetWantCommentsWithVisible() const { return m_bIncludeComments; }
 
 	void SetWantWhatTasks(TSD_TASKS nWhat);
+	void OnOK();
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTaskSelectionDlg)
-	enum { IDD = IDD_TASKSELECTION_DIALOG };
 	int		m_nAttribOption;
+	int		m_nWhatTasks;
+
 	BOOL	m_bSelectedParentTask;
 	BOOL	m_bIncludeComments;
-	//}}AFX_DATA
-	CTDLAttributeListBox	m_lbAttribList;
 	BOOL	m_bSelectedSubtasks;
 	BOOL	m_bCompletedTasks;
 	BOOL	m_bIncompleteTasks;
-	int		m_nWhatTasks;
-    CString m_sRegKey;
 	BOOL	m_bEnableSubtaskSelection;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTaskSelectionDlg)
-public:
-	virtual void OnOK();
+	CTDLAttributeListBox m_lbAttribList;
+    CString m_sRegKey;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
-	// Generated message map functions
-	//{{AFX_MSG(CTaskSelectionDlg)
+
+protected:
+
 	afx_msg void OnChangeAttribOption();
-	//}}AFX_MSG
 	afx_msg void OnChangetasksOption();
 	afx_msg void OnIncludeDone();
 	afx_msg void OnIncludeNotDone();
 	afx_msg void OnEnable(BOOL bEnable);
+	afx_msg void OnClearUserAttribSelection();
+
 	DECLARE_MESSAGE_MAP()
 
 	void UpdateEnableStates();

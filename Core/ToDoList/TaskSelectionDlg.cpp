@@ -33,8 +33,6 @@ CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAtt
 	m_sRegKey(szRegKey), 
 	m_bEnableSubtaskSelection(bEnableSubtaskSelection)
 {
-	//{{AFX_DATA_INIT(CTaskSelectionDlg)
-	//}}AFX_DATA_INIT
 	CPreferences prefs;
 
 	m_bCompletedTasks = prefs.GetProfileInt(m_sRegKey, _T("CompletedTasks"), TRUE);
@@ -87,13 +85,12 @@ CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAtt
 void CTaskSelectionDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTaskSelectionDlg)
+
 	DDX_Radio(pDX, IDC_ALLTASKS, m_nWhatTasks);
 	DDX_Check(pDX, IDC_INCLUDEPARENTTASK, m_bSelectedParentTask);
 	DDX_Control(pDX, IDC_CUSTOMATTRIBLIST, m_lbAttribList);
 	DDX_Check(pDX, IDC_INCLUDESUBTASKS, m_bSelectedSubtasks);
 	DDX_Check(pDX, IDC_INCLUDECOMMENTS, m_bIncludeComments);
-	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_INCLUDEDONE, m_bCompletedTasks);
 	DDX_Check(pDX, IDC_INCLUDENOTDONE, m_bIncompleteTasks);
 
@@ -103,27 +100,24 @@ void CTaskSelectionDlg::DoDataExchange(CDataExchange* pDX)
 	static int NUM_RADIO_BTNS = sizeof(RADIO_BTNS) / sizeof(RADIO_BTNS[0]);
 
 	CDialogHelper::DDX_Radio(pDX, RADIO_BTNS, NUM_RADIO_BTNS, m_nAttribOption);
-//	DDX_Radio(pDX, IDC_ALLATTRIB, m_nAttribOption);
 }
 
 
 BEGIN_MESSAGE_MAP(CTaskSelectionDlg, CDialog)
-//{{AFX_MSG_MAP(CTaskSelectionDlg)
+	ON_WM_DESTROY()
+	ON_WM_ENABLE()
 	ON_BN_CLICKED(IDC_ALLATTRIB, OnChangeAttribOption)
 	ON_BN_CLICKED(IDC_CUSTOMATTRIB, OnChangeAttribOption)
 	ON_BN_CLICKED(IDC_VISIBLEATTRIB, OnChangeAttribOption)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_ALLTASKS, OnChangetasksOption)
 	ON_BN_CLICKED(IDC_FILTERTASKS, OnChangetasksOption)
 	ON_BN_CLICKED(IDC_INCLUDEDONE, OnIncludeDone)
 	ON_BN_CLICKED(IDC_SELTASK, OnChangetasksOption)
 	ON_BN_CLICKED(IDC_INCLUDENOTDONE, OnIncludeNotDone)
-	ON_WM_DESTROY()
-	ON_WM_ENABLE()
+	ON_BN_CLICKED(IDC_CLEARALLATTRIB, OnClearUserAttribSelection)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTaskSelectionDlg message handlers
 
 BOOL CTaskSelectionDlg::Create(UINT nIDRefFrame, CWnd* pParent, UINT nID)
 {
@@ -257,6 +251,7 @@ BOOL CTaskSelectionDlg::OnInitDialog()
 
 void CTaskSelectionDlg::UpdateEnableStates()
 {
+	GetDlgItem(IDC_CLEARALLATTRIB)->EnableWindow(m_nAttribOption == TSDA_USER);
 	GetDlgItem(IDC_CUSTOMATTRIBLIST)->EnableWindow(m_nAttribOption == TSDA_USER);
 	GetDlgItem(IDC_INCLUDECOMMENTS)->EnableWindow(m_nAttribOption == TSDA_VISIBLE);
 
@@ -277,22 +272,19 @@ void CTaskSelectionDlg::SetWantWhatTasks(TSD_TASKS nWhat)
 	if (GetSafeHwnd())
 	{
 		UpdateData(FALSE);
-		
-		BOOL bWantSelTasks = GetWantSelectedTasks();
-		
-		GetDlgItem(IDC_INCLUDEDONE)->EnableWindow(!bWantSelTasks);
-		GetDlgItem(IDC_INCLUDENOTDONE)->EnableWindow(!bWantSelTasks);
-		GetDlgItem(IDC_INCLUDEPARENTTASK)->EnableWindow(bWantSelTasks);
-		GetDlgItem(IDC_INCLUDESUBTASKS)->EnableWindow(bWantSelTasks && m_bEnableSubtaskSelection);
+		UpdateEnableStates();
 	}
 }
 
 void CTaskSelectionDlg::OnChangeAttribOption() 
 {
 	UpdateData();
+	UpdateEnableStates();
+}
 
-	GetDlgItem(IDC_CUSTOMATTRIBLIST)->EnableWindow(m_nAttribOption == TSDA_USER);
-	GetDlgItem(IDC_INCLUDECOMMENTS)->EnableWindow(m_nAttribOption == TSDA_VISIBLE);
+void CTaskSelectionDlg::OnClearUserAttribSelection()
+{
+	m_lbAttribList.SetAllChecked(FALSE);
 }
 
 int CTaskSelectionDlg::GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttributeMap& mapAttrib) const
