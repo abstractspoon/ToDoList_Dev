@@ -669,10 +669,10 @@ namespace DayViewUIExtension
 			if (!seriesList.AddSeries(attribs))
 				return false;
 
-			SelectedAppointment = null;
-			Invalidate();
+			m_SelectedTaskID = taskId;
+			StartDate = attribs.FromDate; // will trigger RebuildMatchingAppointments
 
-			return SelectTask(taskId);
+			return true;
 		}
 
 		public bool DuplicateSelectedTimeBlock()
@@ -690,13 +690,13 @@ namespace DayViewUIExtension
 			if (!seriesList.DuplicateBlock(block.TimeBlock))
 				return false;
 
-			Invalidate();
+			RebuildMatchingAppointments();
 			return true;
 		}
 
 		public void GoToToday()
         {
-            StartDate = DateTime.Now;
+            StartDate = DateTime.Now; // will trigger RebuildMatchingAppointments
 
 			if (m_MatchingAppts.Count > 0)
 			{
@@ -713,7 +713,7 @@ namespace DayViewUIExtension
 			}
 
 			Invalidate();
-        }
+		}
 
 		public bool AppointmentSupportsTaskContextMenu(Calendar.Appointment appt)
 		{
