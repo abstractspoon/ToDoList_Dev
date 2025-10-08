@@ -1050,7 +1050,6 @@ namespace DayViewUIExtension
 
             AdjustVScrollbar();
 			RebuildMatchingAppointments();
-            Invalidate();
         }
 
 		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey, int depth, ref bool datesChanged)
