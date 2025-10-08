@@ -2464,7 +2464,7 @@ BOOL CTDLTaskCtrlBase::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		}
 	}
 	
-	// else
+	// All else
 	return CWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
@@ -4688,7 +4688,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 
 	switch (nColID)
 	{
-		// Edit operations
+		// Edit operations -----------------------------
 	case TDCC_DONE:
 	case TDCC_FLAG:
 	case TDCC_ICON:
@@ -4697,7 +4697,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	case TDCC_REMINDER:
 		return m_multitasker.CanEditTask(dwTaskID, TDC::MapColumnToAttribute(nColID));
 
-		// Edit operation
+		// Edit operation ------------------------------
 	case TDCC_TRACKTIME:
 		{
 			// check tasklist is editable, task is trackable and 
@@ -4712,15 +4712,19 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 					(!bTaskSelected || bSingleSelection) &&
 					m_calculator.IsTaskTimeTrackable(dwTaskID));
 		}
+		break;
 
-		// Non-edit operation
+		// Non-edit operation --------------------------
 	case TDCC_FILELINK:
-		if (pCursor)
-			return (HitTestFileLinkColumn(*pCursor) != -1);
-		else
-			return m_data.TaskHasFileLink(dwTaskID);
+		{
+			if (pCursor)
+				return (HitTestFileLinkColumn(*pCursor) != -1);
+			else
+				return m_data.TaskHasFileLink(dwTaskID);
+		}
+		break;
 
-		// Non-edit operation
+		// Non-edit operation --------------------------
 	case TDCC_DEPENDENCY:
 		return m_data.TaskHasDependencies(dwTaskID);
 
@@ -4732,11 +4736,11 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 
 			switch (pDef->GetDataType())
 			{
-				// Edit operation
+				// Edit operation ----------------------
 			case TDCCA_BOOL:
 				return bEditableTask;
 
-				// Edit operation
+				// Edit operation ----------------------
 			case TDCCA_ICON:
 				switch (pDef->GetListType())
 				{
@@ -4746,7 +4750,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 				}
 				break;
 
-				// Non-edit operation
+				// Non-edit operation ------------------
 			case TDCCA_FILELINK:
 				{
 					TDCCADATA data;
