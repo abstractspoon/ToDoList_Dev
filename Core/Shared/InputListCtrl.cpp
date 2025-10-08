@@ -117,7 +117,7 @@ void CInputListCtrl::AllowDuplicates(BOOL bAllow, BOOL bNotify)
 	m_bNotifyDuplicates = bNotify;
 }
 
-void CInputListCtrl::SetSingleClickEditing(BOOL bEnable)
+void CInputListCtrl::EnableSingleClickEditing(BOOL bEnable)
 {
 	m_bSingleClickEditing = bEnable;
 }

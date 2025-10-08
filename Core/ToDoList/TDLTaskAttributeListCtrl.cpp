@@ -546,7 +546,7 @@ void CTDLTaskAttributeListCtrl::LoadState(const CPreferences& prefs, LPCTSTR szK
 	m_bSortAscending = prefs.GetProfileInt(szKey, _T("AttribSortAscending"), TRUE);
 	m_bGrouped = (SupportsGrouping() && prefs.GetProfileInt(szKey, _T("AttribGrouped"), FALSE));
 
-	SetSingleClickEditing(prefs.GetProfileInt(szKey, _T("SingleClickEditing"), FALSE));
+	EnableSingleClickEditing(prefs.GetProfileInt(szKey, _T("SingleClickEditing"), FALSE));
 
 	m_aAttribState.Load(prefs, szKey);
 

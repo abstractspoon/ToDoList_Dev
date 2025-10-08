@@ -193,7 +193,7 @@ void CTDLTaskAttributeCtrl::OnToggleGrouping()
 
 void CTDLTaskAttributeCtrl::OnToggleSingleClickEditing()
 {
-	m_lcAttributes.SetSingleClickEditing(!m_lcAttributes.HasSingleClickEditing());
+	m_lcAttributes.EnableSingleClickEditing(!m_lcAttributes.HasSingleClickEditing());
 	UpdateToolbarButtons();
 }
 
