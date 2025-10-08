@@ -918,7 +918,6 @@ namespace Calendar
 
 			AdjustVScrollbar();
 			Invalidate();
-			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
 		}
 
 		protected override void OnSizeChanged(EventArgs e)

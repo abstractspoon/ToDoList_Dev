@@ -32,6 +32,7 @@ namespace DayViewUIExtension
 		private bool m_SettingMonthYear = false;
 		private bool m_SettingDayViewStartDate = false;
 		private bool m_AllowModifyTimeEstimate = false;
+		private uint m_SelectedTaskId = 0;
 
 		private WeekLabel m_WeekLabel;
 		private MonthComboBox m_MonthCombo;
@@ -64,13 +65,14 @@ namespace DayViewUIExtension
 			UpdateMonthYearCombos(DateTime.Now);
 		}
 
-		public bool SelectTask(UInt32 dwTaskID)
+		public bool SelectTask(UInt32 taskId)
 		{
-            if (m_DayView.SelectedTaskId == dwTaskID)
+            if (taskId == m_SelectedTaskId)
                 return true;
 
-			bool selected = m_DayView.SelectTask(dwTaskID);
+			bool selected = m_DayView.SelectTask(taskId);
 
+			m_SelectedTaskId = (selected ? taskId : 0);
 			m_WeekLabel.StartDate = m_DayView.StartDate;
 
 			UpdateMonthYearCombos(m_DayView.StartDate);
@@ -79,7 +81,7 @@ namespace DayViewUIExtension
 			return selected;
 		}
 
-		public bool SelectTasks(UInt32[] pdwTaskIDs)
+		public bool SelectTasks(UInt32[] taskIds)
 		{
             // not currently supported
 			return false;
@@ -313,7 +315,7 @@ namespace DayViewUIExtension
 
 		public bool CanScrollToSelectedTask()
 		{
-			return (m_DayView.SelectedTaskId != 0);
+			return (m_SelectedTaskId != 0);
 		}
 
 		public new Boolean Focus()
@@ -409,6 +411,7 @@ namespace DayViewUIExtension
 			if (appt is TaskCustomDateAttribute)
 			{
 				var item = AddMenuItem(menu, "Clear Custom Date", Keys.Delete, -1);
+				item.ShortcutKeyDisplayString = "Delete";
 				item.Click += (s, a) => { m_DayView.DeleteSelectedCustomDate();	};
 			}
 			else if (appt is TaskTimeBlock)
@@ -417,6 +420,7 @@ namespace DayViewUIExtension
 				item.Click += (s, a) => { CreateTimeBlock(); };
 
 				item = AddMenuItem(menu, "Delete Time Block", Keys.Delete, 7);
+				item.ShortcutKeyDisplayString = "Delete";
 				item.Click += (s, a) => { m_DayView.DeleteSelectedTimeBlock(); };
 
 				item = AddMenuItem(menu, "Duplicate Time Block", (Keys.Control | Keys.D), 8);
@@ -771,7 +775,7 @@ namespace DayViewUIExtension
 													new UIExtension.TaskIcon(m_HwndParent),
 													m_WorkWeek,
 													m_DayView.DisplayDatesInISO,
-													m_DayView.SelectedTaskId,
+													m_SelectedTaskId,
 													attribs);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
@@ -978,14 +982,21 @@ namespace DayViewUIExtension
 			switch (m_DayView.SelectionType)
 			{
 			case Calendar.SelectionType.Appointment:
-				UpdatedSelectedTaskDatesText();
-				UpdateToolbarButtonStates();
+				if (m_DayView.SelectedTaskId != m_SelectedTaskId)
+				{
+					m_SelectedTaskId = m_DayView.SelectedTaskId;
 
-				notify.NotifySelChange(m_DayView.SelectedTaskId);
+					UpdatedSelectedTaskDatesText();
+					UpdateToolbarButtonStates();
+
+					notify.NotifySelChange(m_SelectedTaskId);
+				}
 				break;
 
 			case Calendar.SelectionType.DateRange:
-				UpdateToolbarButtonStates();
+				{
+					UpdateToolbarButtonStates();
+				}
 				break;
 			}
 		}
