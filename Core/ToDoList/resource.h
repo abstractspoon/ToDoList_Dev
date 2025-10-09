@@ -1206,9 +1206,9 @@
 #define ID_SORTBY_CUSTOMCOLUMN63        33263
 #define ID_SORTBY_CUSTOMCOLUMN64        33264
 #define ID_SORTBY_CUSTOMCOLUMN_LAST     33264
-#define ID_SORTBY_MULTI                 33901
-#define ID_SORTBY_NONE                  33902
-#define ID_SORTBY_ALLCOLUMNS_LAST       33902
+#define ID_SORTBY_MULTI                 33265
+#define ID_SORTBY_NONE                  33266
+#define ID_SORTBY_ALLCOLUMNS_LAST       33270
 #define ID_COMMENTS_CUT                 34150
 #define ID_COMMENTS_COPY                34151
 #define ID_COMMENTS_PASTE               34152
