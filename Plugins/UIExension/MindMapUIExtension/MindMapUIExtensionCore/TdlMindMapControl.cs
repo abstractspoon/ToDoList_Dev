@@ -427,7 +427,7 @@ namespace MindMapUIExtension
                 break;
 
             case UIExtension.SelectTask.SelectNextTask:
-				node = TreeCtrl.GetNextItem(SelectedNode);
+				node = TreeCtrl.GetNextItem(SelectedNode, false); // no wrap
                 break;
 
             case UIExtension.SelectTask.SelectNextTaskInclCurrent:
@@ -435,7 +435,7 @@ namespace MindMapUIExtension
 				break;
 
             case UIExtension.SelectTask.SelectPrevTask:
-				node = TreeCtrl.GetPrevItem(SelectedNode);
+				node = TreeCtrl.GetPrevItem(SelectedNode, false); // no wrap
 
 				if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
 					node = LastNode;
@@ -459,9 +459,42 @@ namespace MindMapUIExtension
 				}
 
 				if (forward)
-					node = TreeCtrl.GetNextItem(node);
+					node = TreeCtrl.GetNextItem(node, false); // no wrap
 				else
-					node = TreeCtrl.GetPrevItem(node);
+					node = TreeCtrl.GetPrevItem(node, false); // no wrap
+			}
+
+			return false;
+		}
+
+		protected override void OnKeyPress(KeyPressEventArgs e)
+		{
+			if (SelectNextTask(new string(e.KeyChar, 1)))
+				return;
+
+			base.OnKeyPress(e);
+		}
+
+		protected bool SelectNextTask(string startingWith)
+		{
+			if (IsEmpty())
+				return false;
+
+			TreeNode node = TreeCtrl.GetNextVisibleItem(SelectedNode, true); // wrap
+
+			while (node != null)
+			{
+				if (TaskItem(node).ID == 0)
+				{
+					// Skip root node
+				}
+				else if (node.Text.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase))
+				{
+					SelectedNode = node;
+					return true;
+				}
+
+				node = TreeCtrl.GetNextVisibleItem(node, true); // wrap
 			}
 
 			return false;

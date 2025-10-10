@@ -32,7 +32,7 @@ HWND TreeCtrl::GetTreeHwnd(TreeNode^ node)
 	return static_cast<HWND>(node->TreeView->Handle.ToPointer());
 }
 
-TreeNode^ TreeCtrl::GetNextItem(TreeNode^ node)
+TreeNode^ TreeCtrl::GetNextItem(TreeNode^ node, bool wrap)
 {
 	if (node == nullptr)
 		return nullptr;
@@ -58,10 +58,13 @@ TreeNode^ TreeCtrl::GetNextItem(TreeNode^ node)
 		}
 	}
 
+	if ((next == nullptr) && wrap)
+		next = node->TreeView->Nodes[0];
+
 	return next;
 }
 
-TreeNode^ TreeCtrl::GetPrevItem(TreeNode^ node)
+TreeNode^ TreeCtrl::GetPrevItem(TreeNode^ node, bool wrap)
 {
 	if (node == nullptr)
 		return nullptr;
@@ -79,6 +82,9 @@ TreeNode^ TreeCtrl::GetPrevItem(TreeNode^ node)
 		prev = node->Parent;
 	}
 
+	if ((prev == nullptr) && wrap)
+		prev = GetLastItem(node);
+
 	return prev;
 }
 
@@ -91,6 +97,27 @@ TreeNode^ TreeCtrl::GetLastItem(TreeNode^ node)
 		return node;
 
 	return GetLastItem(node->LastNode); // RECURSIVE CALL
+}
+
+
+TreeNode^ TreeCtrl::GetNextVisibleItem(TreeNode^ node, bool wrap)
+{
+	TreeNode^ next = node->NextVisibleNode;
+
+	if ((next == nullptr) && wrap)
+		next = node->TreeView->Nodes[0];
+
+	return next;
+}
+
+TreeNode^ TreeCtrl::GetPrevVisibleItem(TreeNode^ node, bool wrap)
+{
+	TreeNode^ prev = node->PrevVisibleNode;
+
+	if ((prev == nullptr) && wrap)
+		prev = GetLastItem(node);
+
+	return prev;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
