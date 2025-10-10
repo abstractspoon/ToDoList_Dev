@@ -87,7 +87,6 @@ CTaskCalendarCtrl::~CTaskCalendarCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
-	//{{AFX_MSG_MAP(CTaskCalendarCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SETCURSOR()
@@ -96,23 +95,21 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
 	ON_WM_KEYDOWN()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 	ON_WM_VSCROLL()
 	ON_WM_SETFOCUS()
 	ON_WM_SETCURSOR()
 	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
-	ON_WM_CONTEXTMENU()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
+	ON_WM_SIZE()
+	ON_WM_CONTEXTMENU()
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
-	ON_WM_SIZE()
 
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTaskCalendarCtrl message handlers
 
 LRESULT CTaskCalendarCtrl::OnGetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 {
