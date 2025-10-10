@@ -28,6 +28,7 @@ public:
 	BOOL SelectTask(const TRACKTASKLIST* pTTL);
 
 	const CToDoCtrl* GetToDoCtrl() const { return m_pTDC; }
+	CString GetSelectedTaskPath(BOOL bIncFilename = TRUE) const;
 
 protected:
 	const CToDoCtrl* m_pTDC;

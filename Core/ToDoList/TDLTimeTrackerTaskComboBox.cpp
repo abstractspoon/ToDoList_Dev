@@ -301,3 +301,20 @@ BOOL CTDLTimeTrackerTaskComboBox::SelectTask(const TRACKTASKLIST* pTTL)
 
 	return SelectTask(dwTaskID);
 }
+
+CString CTDLTimeTrackerTaskComboBox::GetSelectedTaskPath(BOOL bIncFilename) const
+{
+	ASSERT(m_pTDC);
+
+	CString sPath;
+
+	if (m_pTDC)
+	{
+		sPath = m_pTDC->GetTaskPath(GetSelectedTaskID());
+
+		if (bIncFilename)
+			sPath += GetSelectedTaskName();
+	}
+
+	return sPath;
+}

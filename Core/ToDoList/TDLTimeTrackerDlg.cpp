@@ -13,6 +13,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\mapex.h"
 #include "..\shared\Misc.h"
+#include "..\shared\ShortcutManager.h"
 
 #include "..\3rdparty\XNamedColors.h"
 
@@ -709,13 +710,18 @@ void CTDLTimeTrackerDlg::UpdatePlayButton(BOOL bCheckVisibility)
 	{
 		BOOL bTracking = IsTrackingSelectedTasklistAndTask();
 
+		CEnString sTooltip(bTracking ? IDS_STOP_TRACKING : IDS_START_TRACKING);
+
+		if (m_dwStartStopShortcut)
+			sTooltip += Misc::Format(_T(" (%s)"), CShortcutManager::GetShortcutText(m_dwStartStopShortcut));
+
+		m_btnStart.SetTooltip(sTooltip);
 		m_btnStart.SetIcon(m_ilBtns.ExtractIcon(bTracking ? BTN_STOPENABLED : BTN_STARTENABLED));
-		m_btnStart.SetTooltip(CEnString(bTracking ? IDS_STOP_TRACKING : IDS_START_TRACKING));
 	}
 	else
 	{
-		m_btnStart.SetIcon(m_ilBtns.ExtractIcon(BTN_STARTDISABLED));
 		m_btnStart.SetTooltip(NULL);
+		m_btnStart.SetIcon(m_ilBtns.ExtractIcon(BTN_STARTDISABLED));
 	}
 
 	m_btnStart.EnableWindow(bEnable);
@@ -1034,7 +1040,8 @@ BOOL CTDLTimeTrackerDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*
 		break;
 		
 	case IDC_TASKS:
-		sTooltip = GetSelectedItem(m_cbTasks);
+		sTooltip = m_cbTasks.GetSelectedTaskPath();
+		sTooltip.Replace(_T("\\"), _T(" \\ "));
 		break;
 
 	case IDC_GOTOTASKLIST:
