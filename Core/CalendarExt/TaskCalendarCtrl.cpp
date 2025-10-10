@@ -102,6 +102,7 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
 	ON_WM_MOUSEWHEEL()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_WM_SIZE()
+	ON_WM_CHAR()
 	ON_WM_CONTEXTMENU()
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
@@ -2595,6 +2596,38 @@ BOOL CTaskCalendarCtrl::SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND n
 		while (nFrom != -1);
 	}
 
+	return FALSE;
+}
+
+void CTaskCalendarCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (SelectNextTask(nChar))
+		return;
+
+	CCalendarCtrl::OnChar(nChar, nRepCnt, nFlags);
+}
+
+BOOL CTaskCalendarCtrl::SelectNextTask(UINT nChar)
+{
+	const CTaskCalItemArray& aTasks = m_aSortedTasks.GetTasks();
+	int nFrom = aTasks.GetNextItem(GetSelectedTaskID());
+
+	do
+	{
+		const TASKCALITEM* pTCI = aTasks[nFrom];
+		ASSERT(pTCI);
+
+		if (!IsHiddenTask(pTCI, TRUE) && pTCI->NameStartsWith((TCHAR)nChar))
+		{
+			if (SelectTask(pTCI->GetTaskID(), TRUE))
+				return TRUE;
+		}
+
+		nFrom = Misc::NextIndexT(aTasks, nFrom, TRUE, TRUE); // forwards + wrap
+	}
+	while (nFrom != -1);
+
+	// else
 	return FALSE;
 }
 

@@ -122,7 +122,6 @@ protected:
 protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
-	// Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
@@ -131,6 +130,7 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnCaptureChanged(CWnd *pWnd);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSetFocus(CWnd* pFocus);
@@ -210,6 +210,7 @@ protected:
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
 
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
+	BOOL SelectNextTask(UINT nChar);
 	void CacheSelection(DWORD& dwRealTaskID, CString& sCustDateAttribID) const;
 	void RestoreSelection(DWORD dwRealTaskID, const CString& sCustDateAttribID, BOOL bEnsureVisible);
 	BOOL ClearSelectedCustomDate();
