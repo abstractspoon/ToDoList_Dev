@@ -376,6 +376,57 @@ namespace EvidenceBoardUIExtension
 			get { return ((DraggedNode == null) ? NullId : DraggedNode.Data); }
 		}
 
+		public BaseNode GetNextNode(BaseNode node, bool wrap)
+		{
+			if (node.IsRoot && (node.Count == 0))
+				return null;
+
+			// First child
+			if (node.IsParent)
+				return node.FirstChild;
+
+			// Next sibling
+			var next = node.NextNode;
+
+			if (next == null)
+			{
+				// work our way up the tree until we find a suitable parent
+				BaseNode parent = node;
+
+				while (next == null)
+				{
+					parent = parent.Parent;
+
+					if (parent.IsRoot)
+						break;
+
+					next = parent.NextNode;
+				}
+
+				// Wrap around to the first item
+				if ((next == null) && wrap)
+				{
+					Debug.Assert(parent.IsRoot); // parent must be root
+					next = parent.FirstChild;
+				}
+			}
+
+			return next;
+		}
+
+		public BaseNode GetNextVisibleNode(BaseNode node, bool wrap)
+		{
+			BaseNode next = node;
+
+			do 
+			{
+				next = GetNextNode(next, wrap);
+			}
+			while ((next != null) && !IsNodeVisible(next));
+
+			return next;
+		}
+
 		public bool SelectNode(uint nodeId, bool notify, bool ensureVisible)
 		{
 			var node = GetNode(nodeId);

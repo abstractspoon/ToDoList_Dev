@@ -2226,7 +2226,40 @@ namespace EvidenceBoardUIExtension
 
 			base.OnMouseClick(e);
 		}
+		
+		protected override void OnKeyPress(KeyPressEventArgs e)
+		{
+			if (SelectNextTask(new string(e.KeyChar, 1)))
+				return;
 
+			base.OnKeyPress(e);
+		}
+
+		protected bool SelectNextTask(string startingWith)
+		{
+			var start = (GetNode(SelectedNodeIds.LastOrDefault()) ?? RootNode);
+			Debug.Assert(IsNodeVisible(start));
+
+			var next = GetNextVisibleNode(start, true); // wrap
+
+			while ((next != null) && (next != start))
+			{
+				var taskItem = GetTaskItem(next);
+
+				if ((next.Data == 0) || (taskItem == null))
+				{
+					// Skip root node
+				}
+				else if (taskItem.Title.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase))
+				{
+					return SelectTask(taskItem.TaskId);
+				}
+
+				next = GetNextVisibleNode(next, true); // wrap
+			}
+
+			return false;
+		}
 
 		private void OnEditLabelTimer(object sender, EventArgs e)
 		{

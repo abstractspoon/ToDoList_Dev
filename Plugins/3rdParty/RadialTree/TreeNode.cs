@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
+using System.Diagnostics;
 
 namespace RadialTree
 {
@@ -58,6 +58,11 @@ namespace RadialTree
         /// Whether the node is a leaf with no children.
         /// </summary>
         public bool IsLeaf { get { return _children.Count == 0; } }
+
+        /// <summary>
+        /// Whether the node is a leaf with no children.
+        /// </summary>
+        public bool IsParent { get { return !IsLeaf; } }
 
         /// <summary>
         /// The child nodes of the tree.
@@ -267,5 +272,23 @@ namespace RadialTree
         {
             _children.Clear();
         }
+
+		// Returns the next sibling node
+		public TreeNode<T> NextNode
+		{
+			get
+			{
+				if (IsRoot)
+					return null;
+
+				int index = Parent.Children.IndexOf(this);
+				Debug.Assert(index >= 0);
+
+				if (index >= (Parent.Count - 1))
+					return null;
+
+				return Parent[index + 1];
+			}
+		}
 	}
 }
