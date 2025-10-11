@@ -58,6 +58,7 @@ TreeNode^ TreeCtrl::GetNextItem(TreeNode^ node, bool wrap)
 		}
 	}
 
+	// Wrap around to the first item
 	if ((next == nullptr) && wrap)
 		next = node->TreeView->Nodes[0];
 

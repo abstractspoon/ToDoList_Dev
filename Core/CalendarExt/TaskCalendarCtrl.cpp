@@ -2610,11 +2610,13 @@ void CTaskCalendarCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 BOOL CTaskCalendarCtrl::SelectNextTask(TCHAR cStartingWith)
 {
 	const CTaskCalItemArray& aTasks = m_aSortedTasks.GetTasks();
-	int nFrom = aTasks.GetNextItem(GetSelectedTaskID());
 
-	do
+	int nStart = aTasks.FindItem(GetSelectedTaskID());
+	int nNext = Misc::NextIndexT(aTasks, nStart, TRUE, TRUE); // forwards + wrap
+
+	while ((nNext != -1) && (nNext != nStart))
 	{
-		const TASKCALITEM* pTCI = aTasks[nFrom];
+		const TASKCALITEM* pTCI = aTasks[nNext];
 		ASSERT(pTCI);
 
 		if (!IsHiddenTask(pTCI, TRUE) && pTCI->NameStartsWith(cStartingWith))
@@ -2623,9 +2625,8 @@ BOOL CTaskCalendarCtrl::SelectNextTask(TCHAR cStartingWith)
 				return TRUE;
 		}
 
-		nFrom = Misc::NextIndexT(aTasks, nFrom, TRUE, TRUE); // forwards + wrap
+		nNext = Misc::NextIndexT(aTasks, nNext, TRUE, TRUE); // forwards + wrap
 	}
-	while (nFrom != -1);
 
 	// else
 	return FALSE;

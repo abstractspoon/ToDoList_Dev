@@ -480,21 +480,21 @@ namespace MindMapUIExtension
 			if (IsEmpty())
 				return false;
 
-			TreeNode node = TreeCtrl.GetNextVisibleItem(SelectedNode, true); // wrap
+			TreeNode next = TreeCtrl.GetNextVisibleItem(SelectedNode, true); // wrap
 
-			while (node != null)
+			while ((next != null) && (next != SelectedNode))
 			{
-				if (TaskItem(node).ID == 0)
+				if (TaskItem(next).ID == 0)
 				{
 					// Skip root node
 				}
-				else if (node.Text.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase))
+				else if (next.Text.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase))
 				{
-					SelectedNode = node;
+					SelectedNode = next;
 					return true;
 				}
 
-				node = TreeCtrl.GetNextVisibleItem(node, true); // wrap
+				next = TreeCtrl.GetNextVisibleItem(next, true); // wrap
 			}
 
 			return false;
