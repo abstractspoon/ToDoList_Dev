@@ -49,18 +49,20 @@ TreeNode^ TreeCtrl::GetNextItem(TreeNode^ node, bool wrap)
 	{
 		TreeNode^ parent = node;
 
-		while ((parent != nullptr) && (next == nullptr))
+		while (next == nullptr)
 		{
 			parent = parent->Parent;
 
-			if (parent != nullptr)
-				next = parent->NextNode;
-		}
-	}
+			if (parent == nullptr)
+				break;
 
-	// Wrap around to the first item
-	if ((next == nullptr) && wrap)
-		next = node->TreeView->Nodes[0];
+			next = parent->NextNode;
+		}
+
+		// Wrap around to the first item
+		if ((next == nullptr) && wrap)
+			next = node->TreeView->Nodes[0];
+	}
 
 	return next;
 }
