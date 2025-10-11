@@ -518,7 +518,7 @@ namespace MindMapUIExtension
 					break;
 
 				case UIExtension.GetTask.GetPrevTask:
-					if (node.PrevVisibleNode != null)
+					if (node.PrevNode != null)
 					{
 						taskID = UniqueID(node.PrevNode);
 						return true;

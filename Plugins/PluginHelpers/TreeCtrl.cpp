@@ -102,7 +102,6 @@ TreeNode^ TreeCtrl::GetLastItem(TreeNode^ node)
 	return GetLastItem(node->LastNode); // RECURSIVE CALL
 }
 
-
 TreeNode^ TreeCtrl::GetNextVisibleItem(TreeNode^ node, bool wrap)
 {
 	TreeNode^ next = node->NextVisibleNode;
