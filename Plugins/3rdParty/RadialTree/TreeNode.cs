@@ -75,6 +75,7 @@ namespace RadialTree
 		public bool IsCollapsed { get { return (!IsLeaf && (!_expanded && !IsRoot)); } }
 
 		public TreeNode<T> FirstChild { get { return (IsLeaf ? null : Children[0]); } }
+		public TreeNode<T> LastChild { get { return (IsLeaf ? null : Children[Count - 1]); } }
 
 		public bool AllParentsExpanded
 		{
@@ -289,6 +290,97 @@ namespace RadialTree
 
 				return Parent[index + 1];
 			}
+		}
+
+		// Returns the previous sibling node
+		public TreeNode<T> PrevNode
+		{
+			get
+			{
+				if (IsRoot)
+					return null;
+
+				int index = Parent.Children.IndexOf(this);
+				Debug.Assert(index >= 0);
+
+				if (index == 0)
+					return null;
+
+				return Parent[index - 1];
+			}
+		}
+
+		public static TreeNode<T> GetNextNode(TreeNode<T> node, bool wrap)
+		{
+			if (node == null)
+				return null;
+
+			// First child
+			if (node.IsParent)
+				return node.FirstChild;
+
+			// Next sibling
+			var next = node.NextNode;
+
+			if (next == null)
+			{
+				// work our way up the tree until we find a suitable parent
+				var parent = node;
+
+				while ((next == null) && !parent.IsRoot)
+				{
+					parent = parent.Parent;
+
+					if (parent.IsRoot)
+						break;
+
+					next = parent.NextNode;
+				}
+
+				// Wrap around to the first item
+				if ((next == null) && wrap)
+				{
+					Debug.Assert(parent.IsRoot);
+					next = parent;
+				}
+			}
+
+			return next;
+		}
+
+		public static TreeNode<T> GetPrevNode(TreeNode<T> node, bool wrap)
+		{
+			if (node == null)
+				return null;
+
+			// try our prior sibling
+			var prev = node.PrevNode;
+
+			// if we have one then first try its last child
+			if (prev != null)
+			{
+				prev = GetLastNode(prev);
+			}
+			else // get parent
+			{
+				prev = node.Parent;
+			}
+
+			if ((prev == null) && wrap)
+			{
+				Debug.Assert(prev.IsRoot);
+				prev = GetLastNode(node);
+			}
+
+			return prev;
+		}
+
+		public static TreeNode<T> GetLastNode(TreeNode<T> node)
+		{
+			if ((node == null) || node.IsLeaf)
+				return node;
+
+			return GetLastNode(node.LastChild); // RECURSIVE CALL
 		}
 	}
 }
