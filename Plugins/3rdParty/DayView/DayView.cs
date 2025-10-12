@@ -478,7 +478,7 @@ namespace Calendar
             selectionType = SelectionType.DateRange;
 
             Invalidate();
-			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
+			RaiseWeekChange(new WeekChangeEventArgs(StartDate, DaysShowing));
         }
 		
 		// ------------------------------------------------------------------

@@ -6,22 +6,14 @@ namespace Calendar
 {
 	public class WeekChangeEventArgs : EventArgs
 	{
-        public WeekChangeEventArgs(DateTime start)
+        public WeekChangeEventArgs(DateTime start, int daysShowing)
         {
-            m_StartDate = start;
+            StartDate = start.Date;
+			EndDate = StartDate.AddDays(daysShowing);
         }
 
-        private DateTime m_StartDate;
-
-        public DateTime StartDate
-        {
-            get { return m_StartDate; }
-        }
-
-        public DateTime EndDate
-        {
-            get { return m_StartDate.AddDays(7); }
-        }
+        public DateTime StartDate { private set; get; }
+		public DateTime EndDate { private set; get; }
 	}
 
 	public delegate void WeekChangeEventHandler(object sender, WeekChangeEventArgs args);
