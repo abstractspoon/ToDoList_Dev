@@ -50,22 +50,35 @@ namespace DayViewUIExtension
 				return FindIndex(x => (x.Id == taskID));
 			}
 
-			public int NextIndex(uint taskID, bool forwards)
+			public int NextIndex(uint taskID, bool forwards, bool wrap = false)
 			{
-				return NextIndex(FindItem(taskID), forwards);
+				return NextIndex(FindItem(taskID), forwards, wrap);
 			}
 
-			public int NextIndex(int item, bool forwards)
+			public int NextIndex(int item, bool forwards, bool wrap = false)
 			{
 				if (item == -1)
 					return -1;
 
-				item = (forwards ? item + 1 : item - 1);
+				if (forwards)
+				{
+					if (item < (Count - 1))
+						return (item + 1);
 
-				if ((item < 0) || (item >= Count))
-					return -1;
+					if (wrap)
+						return 0;
+				}
+				else // back
+				{
+					if (item > 0)
+						return (item - 1);
 
-				return item;
+					if (wrap)
+						return (Count - 1);
+				}
+
+				// all else
+				return -1;
 			}
 		}
 
