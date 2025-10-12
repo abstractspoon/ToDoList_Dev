@@ -668,14 +668,6 @@ CString TASKCALITEM::GetName(BOOL bFormatted) const
 	return sFormattedName;
 }
 
-BOOL TASKCALITEM::NameStartsWith(TCHAR cFirst) const
-{
-	ASSERT(!sName.IsEmpty());
-
-	return ((sName[0] == cFirst) || 
-			(Misc::ToUpper(sName[0]) == Misc::ToUpper(cFirst)));
-}
-
 void TASKCALITEM::ReformatName()
 {
 	// Prefix time if specified

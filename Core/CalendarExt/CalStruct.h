@@ -99,7 +99,6 @@ public:
 	BOOL HasColor() const;
 
 	CString GetName(BOOL bFormatted = TRUE) const;
-	BOOL NameStartsWith(TCHAR cFirst) const;
 
 	BOOL IsParent() const;
 	BOOL IsCalculatedParent() const;

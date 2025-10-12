@@ -2619,10 +2619,16 @@ BOOL CTaskCalendarCtrl::SelectNextTask(TCHAR cStartingWith)
 		const TASKCALITEM* pTCI = aTasks[nNext];
 		ASSERT(pTCI);
 
-		if (!IsHiddenTask(pTCI, TRUE) && pTCI->NameStartsWith(cStartingWith))
+		if (IsHiddenTask(pTCI, TRUE))
+		{
+			// skip those
+		}
+		else if (Misc::Find(cStartingWith, pTCI->GetName(FALSE)) == 0)
 		{
 			if (SelectTask(pTCI->GetTaskID(), TRUE))
 				return TRUE;
+
+			ASSERT(0);
 		}
 
 		nNext = Misc::NextIndexT(aTasks, nNext, TRUE, TRUE); // forwards + wrap
