@@ -2273,7 +2273,12 @@ namespace EvidenceBoardUIExtension
 				var taskItem = GetTaskItem(next);
 
 				if (taskItem?.Title.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase) == true)
-					return SelectTask(taskItem.TaskId);
+				{
+					if (SelectTask(taskItem.TaskId))
+						return true;
+
+					Debug.Assert(false);
+				}
 
 				next = GetNextVisibleNode(next, true); // wrap
 			}

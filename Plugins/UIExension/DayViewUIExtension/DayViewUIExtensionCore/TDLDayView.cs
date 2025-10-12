@@ -628,7 +628,10 @@ namespace DayViewUIExtension
 				}
 				else if (appt.Title.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase))
 				{
-					return SelectTask(appt.Id, true);
+					if (SelectTask(appt.Id, true))
+						return true;
+
+					Debug.Assert(false);
 				}
 
 				next = taskItems.NextIndex(next, true, true); // wrap
