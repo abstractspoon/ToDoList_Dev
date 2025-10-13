@@ -168,8 +168,7 @@ CKanbanCtrl::~CKanbanCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
-	//{{AFX_MSG_MAP(CKanbanCtrl)
-	//}}AFX_MSG_MAP
+	ON_WM_CHAR()
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_CREATE()
@@ -237,6 +236,54 @@ void CKanbanCtrl::OnDestroy()
 	CWnd::OnDestroy();
 }
 
+void CKanbanCtrl::OnChar(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
+{
+	// No default processing
+	const TCHAR szStartingWith[2] = { (TCHAR)nChar, 0L };
+
+	SelectNextTask(szStartingWith);
+}
+
+void CKanbanCtrl::SelectNextTask(LPCTSTR szStartingWith)
+{
+	CKanbanColumnCtrl* pCol = GetSelColumn();
+
+	if (pCol && pCol->IsEmpty())
+		pCol = GetNextColumn(pCol, TRUE, TRUE, TRUE); // wrap
+
+	if (!pCol)
+		return;
+
+	HTREEITEM htiStart = pCol->GetLastSelectedItem();
+
+	if (!htiStart)
+		htiStart = pCol->GetFirstItem();
+
+	HTREEITEM hti = htiStart;
+
+	do
+	{
+		hti = pCol->GetNextSiblingItem(hti);
+
+		if (!hti)
+		{
+			pCol = GetNextColumn(pCol, TRUE, TRUE, TRUE); // wrap
+			hti = pCol->GetFirstItem();
+		}
+
+		const KANBANITEM* pKI = GetKanbanItem(pCol->GetItemData(hti));
+
+		if (pKI && Misc::HasPrefix(szStartingWith, pKI->sTitle))
+		{
+			SelectColumn(pCol, FALSE);
+			pCol->SelectItem(hti, FALSE);
+
+			return;
+		}
+	}
+	while (hti != htiStart);
+}
+
 void CKanbanCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
 	m_aColumns.FilterToolTipMessage(pMsg);
@@ -277,7 +324,7 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentCol)
 	if (!pAdjacentCol->GetCount())
 		return FALSE;
 
-	// scroll into view first
+	// scroll current selection into view first
 	m_pSelectedColumn->ScrollToSelection();
 
 	CRect rItem;
@@ -286,7 +333,7 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentCol)
 	HTREEITEM htiClosest = pAdjacentCol->HitTest(rItem.CenterPoint());
 
 	if (!htiClosest)
-		htiClosest = pAdjacentCol->TCH().GetLastItem();
+		htiClosest = pAdjacentCol->GetLastItem();
 
 	SelectColumn(pAdjacentCol, FALSE);
 	ASSERT(m_pSelectedColumn == pAdjacentCol);
@@ -514,7 +561,7 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		pCol = m_aColumns.GetFirstNonEmpty();
 
 		if (pCol)
-			htiStart = pCol->TCH().GetFirstItem();
+			htiStart = pCol->GetFirstItem();
 		break;
 
 	case IUI_SELECTNEXTTASK:
@@ -544,7 +591,7 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		bForwards = FALSE;
 
 		if (pCol)
-			htiStart = pCol->TCH().GetLastItem();
+			htiStart = pCol->GetLastItem();
 		break;
 
 	default:
@@ -554,7 +601,6 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 
 	if (pCol)
 	{
-		const CKanbanColumnCtrl* pStartCol = pCol;
 		HTREEITEM hti = htiStart;
 		
 		do
@@ -568,10 +614,10 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 			}
 
 			// else next/prev column
-			pCol = GetNextColumn(pCol, bForwards, TRUE);
+			pCol = GetNextColumn(pCol, bForwards, TRUE, FALSE); // no wrap
 			hti = NULL;
 		}
-		while (pCol != pStartCol);
+		while (pCol);
 	}
 
 	// all else
@@ -2459,14 +2505,14 @@ CKanbanColumnCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL 
 	}
 
 	// try any other list in the specified direction
-	const CKanbanColumnCtrl* pCol = GetNextColumn(m_pSelectedColumn, bForward, TRUE);
+	const CKanbanColumnCtrl* pCol = GetNextColumn(m_pSelectedColumn, bForward, TRUE, FALSE); // no wrap
 
 	if (!pCol)
 		return NULL;
 
 	const CKanbanColumnCtrl* pStartCol = pCol;
 
-	do
+	while (pCol)
 	{
 		hti = pCol->FindItem(dwTaskID);
 
@@ -2474,9 +2520,8 @@ CKanbanColumnCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL 
 			return const_cast<CKanbanColumnCtrl*>(pCol);
 
 		// else
-		pCol = GetNextColumn(pCol, bForward, TRUE);
+		pCol = GetNextColumn(pCol, bForward, TRUE, FALSE); // no wrap
 	}
-	while (pCol != pStartCol);
 
 	return NULL;
 }
@@ -3035,7 +3080,33 @@ void CKanbanCtrl::ScrollToSelectedTask()
 	CKanbanColumnCtrl* pCol = GetSelColumn();
 
 	if (pCol)
-		pCol->ScrollToSelection();
+	{
+		pCol->ScrollToSelection(); // vertical
+		ScrollToColumn(pCol);  // horizontal
+	}
+}
+
+void CKanbanCtrl::ScrollToColumn(const CKanbanColumnCtrl* pCol)
+{
+	ASSERT(pCol);
+
+	if (pCol)
+	{
+		CRect rCol, rClient;
+		GetClientRect(rClient);
+
+		pCol->GetClientRect(rCol);
+		pCol->MapWindowPoints(this, rCol);
+
+		if (rCol.left < 0)
+		{
+			OnHScroll(SB_THUMBPOSITION, (m_sbHorz.GetScrollPos() + rCol.left), &m_sbHorz);
+		}
+		else if (rCol.right > rClient.right)
+		{
+			OnHScroll(SB_THUMBPOSITION, (m_sbHorz.GetScrollPos() + (rCol.right - rClient.Width())), &m_sbHorz);
+		}
+	}
 }
 
 bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
@@ -3131,10 +3202,10 @@ int CKanbanCtrl::HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const
 
 DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
-	BOOL bForward = ((nCmd == IUI_GETPREVVISIBLETASK) || (nCmd == IUI_GETPREVTOPLEVELTASK));
-
+	BOOL bNext = ((nCmd == IUI_GETNEXTTASK) || (nCmd == IUI_GETNEXTVISIBLETASK) || (nCmd == IUI_GETNEXTTOPLEVELTASK));
 	HTREEITEM hti = NULL;
-	const CKanbanColumnCtrl* pCol = LocateTask(dwTaskID, hti, bForward);
+
+	const CKanbanColumnCtrl* pCol = LocateTask(dwTaskID, hti, !bNext);
 	
 	if (!pCol || (UsingFixedColumns() && !pCol->IsWindowVisible()))
 	{
@@ -3150,37 +3221,37 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	{
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
-		hti = pCol->GetNextSiblingItem(hti);
-		break;
-
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVVISIBLETASK:
-		hti = pCol->GetPrevSiblingItem(hti);
-		break;
-
-	case IUI_GETNEXTTOPLEVELTASK:
 		while (pCol)
 		{
-			hti = pCol->GetNextTopLevelItem(hti, TRUE);
+			if (hti)
+				hti = pCol->GetNextItem(hti, (bNext ? TVGN_NEXT : TVGN_PREVIOUS));
+			else
+				hti = (bNext ? pCol->GetFirstItem() : pCol->GetLastItem());
 
 			if (hti)
 				break;
 
 			// else
-			pCol = GetNextColumn(pCol, TRUE, TRUE);
+			pCol = GetNextColumn(pCol, bNext, FALSE, FALSE); // no wrap
 		}
 		break;
 
+	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		while (pCol)
 		{
-			hti = pCol->GetNextTopLevelItem(hti, FALSE);
+			if (hti)
+				hti = pCol->GetNextTopLevelItem(hti, bNext);
+			else
+				hti = (bNext ? pCol->GetFirstItem() : pCol->GetLastItem());
 
 			if (hti)
 				break;
 
 			// else
-			pCol = GetNextColumn(pCol, FALSE, TRUE);
+			pCol = GetNextColumn(pCol, bNext, FALSE, FALSE); // no wrap
 		}
 		break;
 
@@ -3191,14 +3262,14 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	return (hti ? pCol->GetTaskID(hti) : 0);
 }
 
-const CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty) const
+const CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty, BOOL bWrap) const
 {
-	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns());
+	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns(), bWrap);
 }
 
-CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty)
+CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty, BOOL bWrap)
 {
-	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns());
+	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns(), bWrap);
 }
 
 BOOL CKanbanCtrl::IsDragging() const
@@ -3249,6 +3320,7 @@ BOOL CKanbanCtrl::SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent)
 		m_pSelectedColumn = pCol;
 
 		FixupColumnFocus();
+		ScrollToColumn(m_pSelectedColumn);
 
 		if (pCol->GetCount() > 0)
 		{

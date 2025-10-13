@@ -32,7 +32,6 @@ struct UITHEME;
 
 class CTaskCalendarCtrl : public CCalendarCtrlEx
 {
-// Construction
 public:
 	CTaskCalendarCtrl();
 	virtual ~CTaskCalendarCtrl();
@@ -123,36 +122,31 @@ protected:
 protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTaskCalendarCtrl)
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnCaptureChanged(CWnd *pWnd);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSetFocus(CWnd* pFocus);
 	afx_msg void OnKillFocus(CWnd* pFocus);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
+
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 
 	DECLARE_MESSAGE_MAP()
 	
 protected:
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTaskCalendarCtrl)
-	//}}AFX_VIRTUAL
 	virtual void DrawHeader(CDC* pDC);
 	virtual void DrawCells(CDC* pDC);
 	virtual void DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday);
@@ -216,6 +210,7 @@ protected:
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
 
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
+	BOOL SelectNextTask(LPCTSTR szStartingWith);
 	void CacheSelection(DWORD& dwRealTaskID, CString& sCustDateAttribID) const;
 	void RestoreSelection(DWORD dwRealTaskID, const CString& sCustDateAttribID, BOOL bEnsureVisible);
 	BOOL ClearSelectedCustomDate();
@@ -254,8 +249,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TASKCALENDARCTRL_H__09FB7C3D_BBA8_43B3_A7B3_1D95C946892B__INCLUDED_)

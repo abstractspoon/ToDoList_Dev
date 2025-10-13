@@ -673,13 +673,27 @@ int Misc::FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL 
 
 int Misc::Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive, int iStart)
 {
+	if (sSearchIn.IsEmpty())
+		return -1;
+
+	if (iStart >= sSearchIn.GetLength())
+		return -1;
+
 	int nFind = sSearchIn.Find(cSearchFor, iStart);
 
-	if (bCaseSensitive || (nFind != -1))
-		return nFind;
+	if (!bCaseSensitive)
+	{
+		int nFind2 = sSearchIn.Find(ToggleCase(cSearchFor), iStart);
 
-	// Case-sensitive
-	nFind = sSearchIn.Find(ToggleCase(cSearchFor));
+		if (nFind == -1)
+		{
+			nFind = nFind2;
+		}
+		else if (nFind2 != -1)
+		{
+			nFind = min(nFind, nFind2);
+		}
+	}
 
 	return nFind;
 }
@@ -687,6 +701,9 @@ int Misc::Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive, 
 int Misc::Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive, BOOL bWholeWord, int iStart)
 {
 	if (sSearchFor.GetLength() > sSearchIn.GetLength())
+		return -1;
+
+	if (iStart >= sSearchIn.GetLength())
 		return -1;
 
 	CString sWord(sSearchFor), sText(sSearchIn);

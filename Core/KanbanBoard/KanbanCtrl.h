@@ -132,7 +132,6 @@ protected:
 	CKanbanCustomAttributeDefinitionArray m_aCustomAttribDefs;
 
 protected:
-	// Generated message map functions
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -153,6 +152,7 @@ protected:
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
@@ -195,18 +195,20 @@ protected:
 	CKanbanColumnCtrl* LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL bForward) const;
 	CKanbanColumnCtrl* AddNewColumn(const KANBANCOLUMN& colDef);
 	CKanbanColumnCtrl* GetSelColumn();
-	CKanbanColumnCtrl* GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty);
+	CKanbanColumnCtrl* GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty, BOOL bWrap);
 
 	const CKanbanColumnCtrl* GetSelColumn() const;
-	const CKanbanColumnCtrl* GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty) const;
+	const CKanbanColumnCtrl* GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty, BOOL bWrap) const;
 
 	int GetSelColumnIndex() const;
 	BOOL SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent = TRUE);
+	void ScrollToColumn(const CKanbanColumnCtrl* pCol);
 	BOOL IsSelectedColumn(HWND hWnd) const;
 	void FixupSelectedColumn();
 	void FixupColumnFocus();
 	BOOL DeleteColumn(int nCol);
 	BOOL SelectClosestAdjacentItemToSelection(int nAdjacentCol);
+	void SelectNextTask(LPCTSTR szStartingWith);
 	int MapHeaderItemToColumn(int nItem) const;
 	int CalcMinRequiredColumnsWidth() const;
 

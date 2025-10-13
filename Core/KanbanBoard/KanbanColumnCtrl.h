@@ -38,7 +38,6 @@ class CKanbanColumnCtrl : public CTreeCtrl, protected CDragDropData
 {
 	DECLARE_DYNAMIC(CKanbanColumnCtrl);
 
-// Construction
 public:
 	CKanbanColumnCtrl(const CKanbanItemMap& data,
 					  const KANBANCOLUMN& columnDef,
@@ -46,6 +45,7 @@ public:
 					  const CDWordArray& aPriorityColors,
 					  const CKanbanAttributeArray& aDisplayAttrib,
 					  const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs);
+	virtual ~CKanbanColumnCtrl();
 	
 	CString GetAttributeID() const;
 	int GetAttributeValues(CStringArray& aValues) const;
@@ -90,6 +90,9 @@ public:
 	BOOL HasTasks(const CDWordArray& aTaskIDs) const;
 	BOOL IsTaskSelected(DWORD dwTaskID) const;
 	int GetSelectedCount() const;
+
+	HTREEITEM GetFirstItem() const{	return m_tch.GetFirstItem(); }
+	HTREEITEM GetLastItem() const { return m_tch.GetLastItem(); }
 	HTREEITEM GetFirstSelectedItem() const;
 	HTREEITEM GetLastSelectedItem() const;
 	HTREEITEM GetNextTopLevelItem(HTREEITEM hti, BOOL bNext) const;
@@ -116,9 +119,6 @@ public:
 	void RefreshItemLineHeights(DWORD dwTaskID);
 
 	void FilterToolTipMessage(MSG* pMsg);
-
-	const CTreeCtrlHelper& TCH() const { return m_tch; }
-	CTreeCtrlHelper& TCH() { return m_tch; }
 
 	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol);
 
@@ -155,22 +155,10 @@ protected:
 	typedef CMap<DWORD, DWORD, CString, CString&> CGroupHeaderMap;
 	CGroupHeaderMap m_mapGroupHeaders;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CKanbanListCtrlEx)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CKanbanColumnCtrl();
-
 protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CKanbanListCtrlEx)
-	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
@@ -265,8 +253,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_KANBANCOLUMNCTRL_H__059495EC_3D8D_4607_A4CF_20C142F8A294__INCLUDED_)

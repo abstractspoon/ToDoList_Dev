@@ -599,6 +599,47 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+
+		protected override void OnKeyPress(KeyPressEventArgs e)
+		{
+			if (SelectNextTask(new string(e.KeyChar, 1)))
+				return;
+
+			base.OnKeyPress(e);
+		}
+
+		protected bool SelectNextTask(string startingWith)
+		{
+			var taskItems = m_DateSortedTasks.Items;
+
+			if (taskItems.Count == 0)
+				return false;
+
+			int start = taskItems.FindItem(m_SelectedTaskID);
+			int next = taskItems.NextIndex(start, true, true); // wrap
+
+			while ((next != -1) && (next != start))
+			{
+				var appt = taskItems[next];
+
+				if (!IsItemDisplayable(appt))
+				{
+					// Skip hidden tasks
+				}
+				else if (appt.Title.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase))
+				{
+					if (SelectTask(appt.Id, true))
+						return true;
+
+					Debug.Assert(false);
+				}
+
+				next = taskItems.NextIndex(next, true, true); // wrap
+			}
+
+			return false;
+		}
+
 		public Calendar.Appointment FixupSelection(bool scrollToTask, bool allowNotify)
 		{
 			// Our base class clears the selected appointment whenever

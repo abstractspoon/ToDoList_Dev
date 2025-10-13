@@ -474,6 +474,11 @@ namespace EvidenceBoardUIExtension
 		{
 			switch (type)
 			{
+			case UIExtension.UpdateType.All:
+				UpdateBackgroundImage(tasks);
+				UpdateTaskAttributes(tasks, true);
+				break;
+
 			case UIExtension.UpdateType.Edit:
 			case UIExtension.UpdateType.New:
 				UpdateTaskAttributes(tasks, false);
@@ -483,11 +488,6 @@ namespace EvidenceBoardUIExtension
 				ClearSelection();
 				UpdateTaskAttributes(tasks, true);
 				RecalcLayout();
-				break;
-
-			case UIExtension.UpdateType.All:
-				UpdateBackgroundImage(tasks);
-				UpdateTaskAttributes(tasks, true);
 				break;
 
 			case UIExtension.UpdateType.Unknown:
@@ -832,11 +832,11 @@ namespace EvidenceBoardUIExtension
 			return SelectNode(taskId, false, true);
 		}
 
-		public new bool SelectNode(uint taskId, bool notify, bool ensureVisible)
+		public new bool SelectNode(uint taskId, bool notify, bool scrollToNode)
 		{
 			ClearUserLinkSelection();
 
-			if (base.SelectNode(taskId, notify, ensureVisible))
+			if (base.SelectNode(taskId, notify, scrollToNode))
 				return true;
 
 			base.SelectNode(NullId, notify, false);
@@ -850,38 +850,40 @@ namespace EvidenceBoardUIExtension
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
-// 			if ((text == String.Empty) || IsEmpty())
-// 				return false;
+			if ((text == String.Empty) || (RootNode?.Count == 0))
+				return false;
 
-			/*
-			TreeNode node = null; // start node
+			BaseNode selNode = GetNode(SelectedNodeIds.LastOrDefault());
+			BaseNode node = null; // start node
 			bool forward = true;
 
 			switch (selectTask)
 			{
 			case UIExtension.SelectTask.SelectFirstTask:
-				node = RootNode.Nodes[0];
+				node = RootNode.FirstChild;
 				break;
 
 			case UIExtension.SelectTask.SelectNextTask:
-				node = TreeCtrl.GetNextNode(SelectedNode);
+				node = GetNextNode(selNode, false); // no wrap
 				break;
 
 			case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-				node = SelectedNode;
+				node = selNode;
 				break;
 
 			case UIExtension.SelectTask.SelectPrevTask:
-				node = TreeCtrl.GetPrevNode(SelectedNode);
+				{
+					node = BaseNode.GetPrevNode(selNode, false); // no wrap
 
-				if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
-					node = LastNode;
+					if ((node == null) || (node == RootNode))
+						node = BaseNode.GetLastNode(RootNode);
 
-				forward = false;
+					forward = false;
+				}
 				break;
 
 			case UIExtension.SelectTask.SelectLastTask:
-				node = LastNode;
+				node = BaseNode.GetLastNode(RootNode);
 				forward = false;
 				break;
 			}
@@ -889,26 +891,24 @@ namespace EvidenceBoardUIExtension
 			// Avoid recursion
 			while (node != null)
 			{ 
-				if (StringUtil.Find(node.Text, text, caseSensitive, wholeWord))
+				if (!node.IsRoot && StringUtil.Find(GetTaskItem(node).Title, text, caseSensitive, wholeWord))
 				{
-					SelectedNode = node;
+					SelectNode(node.Data, true, true);
 					return true;
 				}
 
 				if (forward)
-					node = TreeCtrl.GetNextNode(node);
+					node = BaseNode.GetNextNode(node, false); // no wrap
 				else
-					node = TreeCtrl.GetPrevNode(node);
+					node = BaseNode.GetPrevNode(node, false); // no wrap
 			}
-			*/
 
 			return false;
 		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
 		{
-			/*
-			TreeNode node = FindNode(taskID);
+			BaseNode node = GetNode(taskID);
 
 			if (node == null)
 				return false;
@@ -918,42 +918,50 @@ namespace EvidenceBoardUIExtension
 				case UIExtension.GetTask.GetNextTask:
 					if (node.NextNode != null)
 					{
-						taskID = UniqueID(node.NextNode);
+						taskID = node.NextNode.Data;
 						return true;
 					}
 					break;
 
 				case UIExtension.GetTask.GetPrevTask:
-					if (node.PrevVisibleNode != null)
+					if (node.PrevNode != null)
 					{
-						taskID = UniqueID(node.PrevNode);
+						taskID = node.PrevNode.Data;
 						return true;
 					}
 					break;
 
 				case UIExtension.GetTask.GetNextVisibleTask:
-					if (node.NextVisibleNode != null)
 					{
-						taskID = UniqueID(node.NextVisibleNode);
-						return true;
+						var next = GetNextVisibleNode(node, false); // no wrap
+
+						if (next != null)
+						{
+							taskID = next.Data;
+							return true;
+						}
 					}
 					break;
 
 				case UIExtension.GetTask.GetPrevVisibleTask:
-					if (node.PrevVisibleNode != null)
 					{
-						taskID = UniqueID(node.PrevVisibleNode);
-						return true;
+						var prev = GetPrevVisibleNode(node, false); // no wrap
+
+						if (prev != null)
+						{
+							taskID = prev.Data;
+							return true;
+						}
 					}
 					break;
 
 				case UIExtension.GetTask.GetNextTopLevelTask:
 					{
-						var topLevelParent = TopLevelParent(node);
+						var topLevelParent = GetTopLevelParent(node);
 
 						if ((topLevelParent != null) && (topLevelParent.NextNode != null))
 						{
-							taskID = UniqueID(topLevelParent.NextNode);
+							taskID = topLevelParent.NextNode.Data;
 							return true;
 						}
 					}
@@ -961,20 +969,32 @@ namespace EvidenceBoardUIExtension
 
 				case UIExtension.GetTask.GetPrevTopLevelTask:
 					{
-						var topLevelParent = TopLevelParent(node);
+						var topLevelParent = GetTopLevelParent(node);
 
 						if ((topLevelParent != null) && (topLevelParent.PrevNode != null))
 						{
-							taskID = UniqueID(topLevelParent.PrevNode);
+							taskID = topLevelParent.PrevNode.Data;
 							return true;
 						}
 					}
 					break;
 			}
-			*/
 
 			// all else
 			return false;
+		}
+
+		BaseNode GetTopLevelParent(BaseNode node)
+		{
+			if ((node == null) || node.IsRoot)
+				return null;
+
+			var parent = node;
+
+			while (!parent.Parent.IsRoot)
+				parent = parent.Parent;
+
+			return parent;
 		}
 
 		public bool CanSaveToImage()
@@ -1002,7 +1022,11 @@ namespace EvidenceBoardUIExtension
 
 		private void UpdateTaskAttributes(TaskList tasks, bool rebuild)
 		{
-			BaseNode rootNode = base.RootNode;
+			// Cache and clear selection without notifying parent
+			var selTaskIds = SelectedNodeIds.ToList();
+			SelectNodes(new List<uint>());
+
+			var rootNode = base.RootNode;
 
 			if (rebuild)
 			{
@@ -1055,7 +1079,9 @@ namespace EvidenceBoardUIExtension
 				}
 			}
 
-			Invalidate();
+			// Restore selection after removing invalid Ids
+			selTaskIds.RemoveAll(t => !m_TaskItems.Keys.Contains(t));
+			SelectNodes(selTaskIds, true);
 		}
 
 		public IEnumerable<string> UserLinkTypes
@@ -2226,7 +2252,39 @@ namespace EvidenceBoardUIExtension
 
 			base.OnMouseClick(e);
 		}
+		
+		protected override void OnKeyPress(KeyPressEventArgs e)
+		{
+			if (SelectNextTask(new string(e.KeyChar, 1)))
+				return;
 
+			base.OnKeyPress(e);
+		}
+
+		protected bool SelectNextTask(string startingWith)
+		{
+			var start = (GetNode(SelectedNodeIds.LastOrDefault()) ?? RootNode);
+			Debug.Assert(IsNodeVisible(start));
+
+			var next = GetNextVisibleNode(start, true); // wrap
+
+			while ((next != null) && (next != start))
+			{
+				var taskItem = GetTaskItem(next);
+
+				if (taskItem?.Title.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase) == true)
+				{
+					if (SelectTask(taskItem.TaskId))
+						return true;
+
+					Debug.Assert(false);
+				}
+
+				next = GetNextVisibleNode(next, true); // wrap
+			}
+
+			return false;
+		}
 
 		private void OnEditLabelTimer(object sender, EventArgs e)
 		{

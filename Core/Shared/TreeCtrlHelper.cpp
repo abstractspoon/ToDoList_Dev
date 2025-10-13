@@ -474,7 +474,7 @@ void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL
 	}
 
 	// horizontal visibility
-	if (!bHorzVisible)
+	if (!bHorzVisible && HasStyle(WS_HSCROLL))
 	{
 		CRect rClient, rItem;
 		m_tree.GetClientRect(rClient);

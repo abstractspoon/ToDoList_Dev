@@ -376,16 +376,69 @@ namespace EvidenceBoardUIExtension
 			get { return ((DraggedNode == null) ? NullId : DraggedNode.Data); }
 		}
 
-		public bool SelectNode(uint nodeId, bool notify, bool ensureVisible)
+		public BaseNode GetNextNode(BaseNode node, bool wrap)
+		{
+			return BaseNode.GetNextNode(node, wrap);
+		}
+
+		public BaseNode GetNextVisibleNode(BaseNode node, bool wrap)
+		{
+			var next = node;
+
+			do 
+			{
+				next = BaseNode.GetNextNode(next, wrap);
+			}
+			while ((next != null) && !IsNodeVisible(next));
+
+			return next;
+		}
+
+		public BaseNode GetPrevVisibleNode(BaseNode node, bool wrap)
+		{
+			var prev = node;
+
+			do
+			{
+				prev = BaseNode.GetPrevNode(prev, wrap);
+			}
+			while ((prev != null) && !IsNodeVisible(prev));
+
+			return prev;
+		}
+
+		protected void ExpandAllParents(BaseNode node)
+		{
+			if (!node.AllParentsExpanded)
+			{
+				var parent = node.Parent;
+
+				while (parent != null)
+				{
+					parent.Expand(true);
+					parent = parent.Parent;
+				}
+
+				RecalcExtents(IsZoomedToExtents);
+			}
+		}
+
+		public bool SelectNode(uint nodeId, bool notify, bool scrollToNode)
 		{
 			var node = GetNode(nodeId);
+
+			if (node == null)
+				return false;
+
+			// Selectability depends on all parents being expanded
+			ExpandAllParents(node);
 
 			if (IsSelectableNode(node))
 			{
 				m_SelectedNodes.Clear();
 				m_SelectedNodes.Add(node);
 
-				if (ensureVisible)
+				if (scrollToNode)
 					ScrollToSelection(false);
 
 				Invalidate();

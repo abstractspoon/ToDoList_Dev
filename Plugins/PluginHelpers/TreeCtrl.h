@@ -21,9 +21,13 @@ namespace Abstractspoon
 			public:
 				static bool SetItemIntegral(Windows::Forms::TreeNode^ node, int integral);
 
-				static Windows::Forms::TreeNode^ GetNextItem(Windows::Forms::TreeNode^ node);
-				static Windows::Forms::TreeNode^ GetPrevItem(Windows::Forms::TreeNode^ node);
+				static Windows::Forms::TreeNode^ GetNextItem(Windows::Forms::TreeNode^ node, bool wrap);
+				static Windows::Forms::TreeNode^ GetPrevItem(Windows::Forms::TreeNode^ node, bool wrap);
 				static Windows::Forms::TreeNode^ GetLastItem(Windows::Forms::TreeNode^ node);
+
+				static Windows::Forms::TreeNode^ GetNextVisibleItem(Windows::Forms::TreeNode^ node, bool wrap);
+				static Windows::Forms::TreeNode^ GetPrevVisibleItem(Windows::Forms::TreeNode^ node, bool wrap);
+				static Windows::Forms::TreeNode^ GetLastVisibleItem(Windows::Forms::TreeNode^ node);
 
 			protected:
 				static HTREEITEM GetTreeItem(Windows::Forms::TreeNode^ node);

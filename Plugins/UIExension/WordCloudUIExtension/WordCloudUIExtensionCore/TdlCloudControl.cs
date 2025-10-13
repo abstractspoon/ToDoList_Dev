@@ -180,6 +180,37 @@ namespace WordCloudUIExtension
 			base.OnMouseClick(e);
 		}
 
+		protected override void OnKeyPress(KeyPressEventArgs e)
+		{
+			if (SelectNextWord(new string(e.KeyChar, 1)))
+				return;
+
+			base.OnKeyPress(e);
+		}
+
+		protected bool SelectNextWord(string startingWith)
+		{
+			var words = WeightedWords.ToList();
+			words.Reverse();
+
+			int selWord = words.FindIndex(w => w.Text.Equals(m_SelectedWord));
+			int nextWord = FindWord(words, (selWord + 1), startingWith);
+
+			if ((nextWord == -1) && (selWord > 0))
+				nextWord = FindWord(words, 0, startingWith);
+
+			if (nextWord == selWord)
+				return false;
+
+			SelectedWord = words[nextWord].Text;
+			return true;
+		}
+
+		private static int FindWord(List<IWord> words, int startingFrom, string startingWith)
+		{
+			return words.FindIndex(startingFrom, (w => w.Text.StartsWith(startingWith, StringComparison.InvariantCultureIgnoreCase)));
+		}
+
 		protected override void OnLostFocus(EventArgs e)
 		{
 			base.OnLostFocus(e);
