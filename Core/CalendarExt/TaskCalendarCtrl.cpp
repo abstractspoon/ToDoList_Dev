@@ -2601,13 +2601,15 @@ BOOL CTaskCalendarCtrl::SelectTask(const IUISELECTTASK& select, IUI_APPCOMMAND n
 
 void CTaskCalendarCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	if (SelectNextTask((TCHAR)nChar))
+	const TCHAR szStartingWith[2] = { (TCHAR)nChar, 0L };
+
+	if (SelectNextTask(szStartingWith))
 		return;
 
 	CCalendarCtrl::OnChar(nChar, nRepCnt, nFlags);
 }
 
-BOOL CTaskCalendarCtrl::SelectNextTask(TCHAR cStartingWith)
+BOOL CTaskCalendarCtrl::SelectNextTask(LPCTSTR szStartingWith)
 {
 	const CTaskCalItemArray& aTasks = m_aSortedTasks.GetTasks();
 
@@ -2623,7 +2625,7 @@ BOOL CTaskCalendarCtrl::SelectNextTask(TCHAR cStartingWith)
 		{
 			// skip those
 		}
-		else if (Misc::Find(cStartingWith, pTCI->GetName(FALSE)) == 0)
+		else if (Misc::HasPrefix(szStartingWith, pTCI->GetName(FALSE)))
 		{
 			if (SelectTask(pTCI->GetTaskID(), TRUE))
 				return TRUE;

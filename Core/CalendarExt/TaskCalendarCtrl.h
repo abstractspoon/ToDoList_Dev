@@ -210,7 +210,7 @@ protected:
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
 
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
-	BOOL SelectNextTask(TCHAR cStartingWith);
+	BOOL SelectNextTask(LPCTSTR szStartingWith);
 	void CacheSelection(DWORD& dwRealTaskID, CString& sCustDateAttribID) const;
 	void RestoreSelection(DWORD dwRealTaskID, const CString& sCustDateAttribID, BOOL bEnsureVisible);
 	BOOL ClearSelectedCustomDate();
