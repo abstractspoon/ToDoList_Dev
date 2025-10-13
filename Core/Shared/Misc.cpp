@@ -774,7 +774,7 @@ int Misc::Replace(const CString& sSearchFor, const CString& sReplaceWith, CStrin
 	return nNumReplaced;
 }
 
-BOOL Misc::HasPrefix(LPCTSTR szText, LPCTSTR szPrefix, BOOL bCaseSensitive)
+BOOL Misc::HasPrefix(LPCTSTR szPrefix, LPCTSTR szText, BOOL bCaseSensitive)
 {
 	if (IsEmpty(szText) || IsEmpty(szPrefix))
 		return FALSE;
@@ -790,7 +790,7 @@ BOOL Misc::HasPrefix(LPCTSTR szText, LPCTSTR szPrefix, BOOL bCaseSensitive)
 	return (_tcsnicmp(szText, szPrefix, nLenPrefix) == 0);
 }
 
-BOOL Misc::HasSuffix(LPCTSTR szText, LPCTSTR szSuffix, BOOL bCaseSensitive)
+BOOL Misc::HasSuffix(LPCTSTR szSuffix, LPCTSTR szText, BOOL bCaseSensitive)
 {
 	if (IsEmpty(szText) || IsEmpty(szSuffix))
 		return FALSE;
@@ -807,9 +807,9 @@ BOOL Misc::HasSuffix(LPCTSTR szText, LPCTSTR szSuffix, BOOL bCaseSensitive)
 	return (_tcsicmp(szText + (nLenText - nLenSuffix), szSuffix) == 0);
 }
 
-BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive, BOOL bTrimResult)
+BOOL Misc::RemovePrefix(LPCTSTR szPrefix, CString& sText, BOOL bCaseSensitive, BOOL bTrimResult)
 {
-	if (!HasPrefix(sText, szPrefix, bCaseSensitive))
+	if (!HasPrefix(szPrefix, sText, bCaseSensitive))
 		return FALSE;
 
 	sText = sText.Mid(lstrlen(szPrefix));
@@ -820,9 +820,9 @@ BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive, B
 	return TRUE;
 }
 
-BOOL Misc::RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive, BOOL bTrimResult)
+BOOL Misc::RemoveSuffix(LPCTSTR szSuffix, CString& sText, BOOL bCaseSensitive, BOOL bTrimResult)
 {
-	if (!HasSuffix(sText, szSuffix, bCaseSensitive))
+	if (!HasSuffix(szSuffix, sText, bCaseSensitive))
 		return FALSE;
 
 	sText = sText.Left(sText.GetLength() - lstrlen(szSuffix));

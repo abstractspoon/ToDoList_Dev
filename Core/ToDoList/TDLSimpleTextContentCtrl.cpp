@@ -285,7 +285,7 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 						// Trim trailing newline/tab pair else next line gets indented
 						// but without trimming the result because that would remove
 						// any remaining tabs
-						if (Misc::RemoveSuffix(sSel, CRTAB, FALSE, FALSE))
+						if (Misc::RemoveSuffix(CRTAB, sSel, FALSE, FALSE))
 						{
 							sSel += CR; // restore carriage return
 							cr.cpMax--;
