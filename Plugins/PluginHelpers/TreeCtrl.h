@@ -27,6 +27,7 @@ namespace Abstractspoon
 
 				static Windows::Forms::TreeNode^ GetNextVisibleItem(Windows::Forms::TreeNode^ node, bool wrap);
 				static Windows::Forms::TreeNode^ GetPrevVisibleItem(Windows::Forms::TreeNode^ node, bool wrap);
+				static Windows::Forms::TreeNode^ GetLastVisibleItem(Windows::Forms::TreeNode^ node);
 
 			protected:
 				static HTREEITEM GetTreeItem(Windows::Forms::TreeNode^ node);

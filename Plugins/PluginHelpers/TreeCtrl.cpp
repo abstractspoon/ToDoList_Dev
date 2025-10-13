@@ -104,22 +104,41 @@ TreeNode^ TreeCtrl::GetLastItem(TreeNode^ node)
 
 TreeNode^ TreeCtrl::GetNextVisibleItem(TreeNode^ node, bool wrap)
 {
+	if (node == nullptr)
+		return nullptr;
+
 	TreeNode^ next = node->NextVisibleNode;
 
 	if ((next == nullptr) && wrap)
-		next = node->TreeView->Nodes[0];
+		next = node->TreeView->Nodes[0]; // Visible by definition
 
 	return next;
 }
 
 TreeNode^ TreeCtrl::GetPrevVisibleItem(TreeNode^ node, bool wrap)
 {
+	if (node == nullptr)
+		return nullptr;
+
 	TreeNode^ prev = node->PrevVisibleNode;
 
 	if ((prev == nullptr) && wrap)
-		prev = GetLastItem(node);
+		prev = GetLastVisibleItem(node);
 
 	return prev;
+}
+
+TreeNode^ TreeCtrl::GetLastVisibleItem(TreeNode^ node)
+{
+	TreeNode^ last = GetLastItem(node);
+
+	if (last == nullptr)
+		return nullptr;
+
+	if (!last->IsVisible)
+		last = last->PrevVisibleNode;
+
+	return last;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
