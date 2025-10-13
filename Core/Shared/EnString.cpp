@@ -305,9 +305,9 @@ CSize CEnString::FormatDCEx(CDC* pDC, int nWidth, int nStyle)
 
 	// Remove any existing ellipsis
 	if (bEndEllipsis)
-		Misc::RemoveSuffix(sThis, ELLIPSIS);
+		sThis.TrimRight('.');
 	else
-		Misc::RemovePrefix(sThis, ELLIPSIS);
+		sThis.TrimLeft('.');
 	
 	// truncate string if too long adding ellipsis (...)
 	if ((sizeText.cx + sizeEllipsis.cx) > nWidth)

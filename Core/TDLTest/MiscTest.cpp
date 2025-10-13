@@ -263,44 +263,44 @@ void CMiscTest::TestHasPrefix()
 		// Empty arguments
 		ExpectFalse(Misc::HasPrefix(_T(""), _T(""), TRUE));
 		ExpectFalse(Misc::HasPrefix(_T(""), _T(""), FALSE));
-		ExpectFalse(Misc::HasPrefix(_T("abc"), _T(""), TRUE));
-		ExpectFalse(Misc::HasPrefix(_T("abc"), _T(""), FALSE));
 		ExpectFalse(Misc::HasPrefix(_T(""), _T("abc"), TRUE));
 		ExpectFalse(Misc::HasPrefix(_T(""), _T("abc"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("abc"), _T(""), TRUE));
+		ExpectFalse(Misc::HasPrefix(_T("abc"), _T(""), FALSE));
 	}
 
 	{
 		// Variable case
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("a"), TRUE));
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("ab"), TRUE));
+		ExpectTrue(Misc::HasPrefix(_T("a"), _T("abc"), TRUE));
+		ExpectTrue(Misc::HasPrefix(_T("ab"), _T("abc"), TRUE));
 		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("abc"), TRUE));
 
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("a"), FALSE));
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("ab"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("a"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("ab"), _T("abc"), FALSE));
 		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("abc"), FALSE));
 
-		ExpectFalse(Misc::HasPrefix(_T("abc"), _T("A"), TRUE));
-		ExpectFalse(Misc::HasPrefix(_T("abc"), _T("AB"), TRUE));
-		ExpectFalse(Misc::HasPrefix(_T("abc"), _T("ABC"), TRUE));
+		ExpectFalse(Misc::HasPrefix(_T("A"), _T("abc"), TRUE));
+		ExpectFalse(Misc::HasPrefix(_T("AB"), _T("abc"), TRUE));
+		ExpectFalse(Misc::HasPrefix(_T("ABC"), _T("abc"), TRUE));
 
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("A"), FALSE));
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("AB"), FALSE));
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("ABC"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("A"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("AB"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("ABC"), _T("abc"), FALSE));
 
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("A"), FALSE));
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("Ab"), FALSE));
-		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("AbC"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("A"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("Ab"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("AbC"), _T("abc"), FALSE));
 	}
 
 	{
 		// Leading whitespace
-		ExpectFalse(Misc::HasPrefix(_T(" abc"), _T("c"), FALSE));
-		ExpectFalse(Misc::HasPrefix(_T("\tabc"), _T("bc"), FALSE));
-		ExpectFalse(Misc::HasPrefix(_T("\nabc"), _T("abc"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("a"), _T(" abc"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("ab"), _T("\tabc"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("abc"), _T("\nabc"), FALSE));
 
-		ExpectFalse(Misc::HasPrefix(_T(" abc"), _T("C"), FALSE));
-		ExpectFalse(Misc::HasPrefix(_T("\tabc"), _T("BC"), FALSE));
-		ExpectFalse(Misc::HasPrefix(_T("\nabc"), _T("ABC"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("A"), _T(" abc"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("AB"), _T("\tabc"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("ABC"), _T("\nabc"), FALSE));
 	}
 }
 
@@ -313,44 +313,44 @@ void CMiscTest::TestHasSuffix()
 		// Empty arguments
 		ExpectFalse(Misc::HasSuffix(_T(""), _T(""), TRUE));
 		ExpectFalse(Misc::HasSuffix(_T(""), _T(""), FALSE));
-		ExpectFalse(Misc::HasSuffix(_T("abc"), _T(""), TRUE));
-		ExpectFalse(Misc::HasSuffix(_T("abc"), _T(""), FALSE));
 		ExpectFalse(Misc::HasSuffix(_T(""), _T("abc"), TRUE));
 		ExpectFalse(Misc::HasSuffix(_T(""), _T("abc"), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("abc"), _T(""), TRUE));
+		ExpectFalse(Misc::HasSuffix(_T("abc"), _T(""), FALSE));
 	}
 
 	{
 		// Variable case
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("c"), TRUE));
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("bc"), TRUE));
+		ExpectTrue(Misc::HasSuffix(_T("c"), _T("abc"), TRUE));
+		ExpectTrue(Misc::HasSuffix(_T("bc"), _T("abc"), TRUE));
 		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("abc"), TRUE));
 
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("c"), FALSE));
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("bc"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("c"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("bc"), _T("abc"), FALSE));
 		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("abc"), FALSE));
 
-		ExpectFalse(Misc::HasSuffix(_T("abc"), _T("C"), TRUE));
-		ExpectFalse(Misc::HasSuffix(_T("abc"), _T("BC"), TRUE));
-		ExpectFalse(Misc::HasSuffix(_T("abc"), _T("ABC"), TRUE));
+		ExpectFalse(Misc::HasSuffix(_T("C"), _T("abc"), TRUE));
+		ExpectFalse(Misc::HasSuffix(_T("BC"), _T("abc"), TRUE));
+		ExpectFalse(Misc::HasSuffix( _T("ABC"), _T("abc"),TRUE));
 
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("C"), FALSE));
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("BC"), FALSE));
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("ABC"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("C"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("BC"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("ABC"), _T("abc"), FALSE));
 
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("C"), FALSE));
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("bC"), FALSE));
-		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("AbC"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("C"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("bC"), _T("abc"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("AbC"), _T("abc"), FALSE));
 	}
 
 	{
 		// Trailing whitespace
-		ExpectFalse(Misc::HasSuffix(_T("abc "), _T("c"), FALSE));
-		ExpectFalse(Misc::HasSuffix(_T("abc\t"), _T("bc"), FALSE));
-		ExpectFalse(Misc::HasSuffix(_T("abc\n"), _T("abc"), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("c"), _T("abc "), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("bc"), _T("abc\t"), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("abc"), _T("abc\n"), FALSE));
 
-		ExpectFalse(Misc::HasSuffix(_T("abc "), _T("C"), FALSE));
-		ExpectFalse(Misc::HasSuffix(_T("abc\t"), _T("BC"), FALSE));
-		ExpectFalse(Misc::HasSuffix(_T("abc\n"), _T("ABC"), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("C"), _T("abc "), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("BC"), _T("abc\t"), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("ABC"), _T("abc\n"), FALSE));
 	}
 }
 

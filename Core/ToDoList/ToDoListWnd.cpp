@@ -14190,7 +14190,7 @@ BOOL CALLBACK CToDoListWnd::FindOtherInstance(HWND hWnd, LPARAM lParam)
 	CString sCaption;
 	CWnd::FromHandle(hWnd)->GetWindowText(sCaption);
 
-	if (Misc::HasSuffix(sCaption, COPYRIGHT))
+	if (Misc::HasSuffix(COPYRIGHT, sCaption))
 	{
 		TDCFINDWND* pFind = (TDCFINDWND*)lParam;
 		ASSERT(pFind);

@@ -422,7 +422,7 @@ int CWinClasses::GetStyleType(HWND hWnd, DWORD dwTypeMask)
 
 BOOL CWinClasses::IsWinFormsControl(LPCTSTR szClass, LPCTSTR szWndClass)
 {
-	if (!Misc::HasPrefix(szClass, _T("WindowsForms"), FALSE))
+	if (!Misc::HasPrefix(_T("WindowsForms"), szClass))
 		return FALSE;
 
 	if (Misc::IsEmpty(szWndClass))
