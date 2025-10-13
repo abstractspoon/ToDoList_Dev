@@ -277,7 +277,7 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentCol)
 	if (!pAdjacentCol->GetCount())
 		return FALSE;
 
-	// scroll into view first
+	// scroll current selection into view first
 	m_pSelectedColumn->ScrollToSelection();
 
 	CRect rItem;
@@ -3035,7 +3035,34 @@ void CKanbanCtrl::ScrollToSelectedTask()
 	CKanbanColumnCtrl* pCol = GetSelColumn();
 
 	if (pCol)
-		pCol->ScrollToSelection();
+	{
+		pCol->ScrollToSelection(); // vertical
+		ScrollToSelectedColumn();  // horizontal
+	}
+}
+
+void CKanbanCtrl::ScrollToSelectedColumn()
+{
+	CKanbanColumnCtrl* pCol = GetSelColumn();
+
+	if (pCol)
+	{
+		// Scroll horizontally to column
+		CRect rCol, rClient;
+		GetClientRect(rClient);
+
+		pCol->GetClientRect(rCol);
+		pCol->MapWindowPoints(this, rCol);
+
+		if (rCol.left < 0)
+		{
+			OnHScroll(SB_THUMBPOSITION, (m_sbHorz.GetScrollPos() + rCol.left), &m_sbHorz);
+		}
+		else if (rCol.right > rClient.right)
+		{
+			OnHScroll(SB_THUMBPOSITION, (m_sbHorz.GetScrollPos() + (rCol.right - rClient.Width())), &m_sbHorz);
+		}
+	}
 }
 
 bool CKanbanCtrl::PrepareNewTask(ITaskList* pTask) const
@@ -3249,6 +3276,7 @@ BOOL CKanbanCtrl::SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent)
 		m_pSelectedColumn = pCol;
 
 		FixupColumnFocus();
+		ScrollToSelectedColumn();
 
 		if (pCol->GetCount() > 0)
 		{
