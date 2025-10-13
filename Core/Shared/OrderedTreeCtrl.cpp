@@ -550,11 +550,14 @@ CString COrderedTreeCtrl::FormatPosition(DWORD dwItem, DWORD dwParentItem, int n
 		g_mapParentPos[dwItem] = sPos;
 	
 	// modify for actual output
-	if (bHasChildren && (TCH().IsItemExpanded(hti) == FALSE))
-		sPos += "...";
-	
+	if (bHasChildren && !TCH().IsItemExpanded(hti))
+	{
+		sPos += _T("...");
+	}
 	else if (nLevel == 0)
-		sPos += ".";
+	{
+		sPos += '.';
+	}
 	
 	return sPos;
 }

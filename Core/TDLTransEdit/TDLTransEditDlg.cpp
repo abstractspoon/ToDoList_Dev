@@ -198,7 +198,7 @@ BOOL CALLBACK CTDLTransEditDlg::NotifyLangFileChange(HWND hWnd, LPARAM lParam)
 	CString sCaption;
 	CWnd::FromHandle(hWnd)->GetWindowText(sCaption);
 
-	if (Misc::HasSuffix(sCaption, COPYRIGHT))
+	if (Misc::HasSuffix(COPYRIGHT, sCaption))
 	{
 		LPCTSTR szLangFilePath = (LPCTSTR)lParam;
 

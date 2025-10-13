@@ -193,10 +193,10 @@ namespace Misc
 	CString& TrimAlpha(CString& sText);
 
 	BOOL RemoveAt(CString& sText, int nPos);
-	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);
-	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);
-	BOOL HasPrefix(LPCTSTR szText, LPCTSTR szPrefix, BOOL bCaseSensitive = FALSE);
-	BOOL HasSuffix(LPCTSTR szText, LPCTSTR szSuffix, BOOL bCaseSensitive = FALSE);
+	BOOL RemovePrefix(LPCTSTR szPrefix, CString& sText, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);
+	BOOL RemoveSuffix(LPCTSTR szSuffix, CString& sText, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);
+	BOOL HasPrefix(LPCTSTR szPrefix, LPCTSTR szText, BOOL bCaseSensitive = FALSE);
+	BOOL HasSuffix(LPCTSTR szSuffix, LPCTSTR szText, BOOL bCaseSensitive = FALSE);
 	BOOL IsEmpty(LPCTSTR szText);
 	BOOL IsEmpty(LPCSTR szText);
 	BOOL HasEmpty(const CStringArray& aItems);

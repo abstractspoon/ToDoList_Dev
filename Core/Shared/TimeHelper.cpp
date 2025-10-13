@@ -287,16 +287,16 @@ BOOL CTimeHelper::RemovePM(CString& sTime)
 {
 	Misc::Trim(sTime); // remove whitespace
 
-	return (Misc::RemovePrefix(sTime, Misc::GetPM()) || 
-			Misc::RemoveSuffix(sTime, Misc::GetPM()));
+	return (Misc::RemovePrefix(Misc::GetPM(), sTime) || 
+			Misc::RemoveSuffix(Misc::GetPM(), sTime));
 }
 
 BOOL CTimeHelper::RemoveAM(CString& sTime)
 {
 	Misc::Trim(sTime); // remove whitespace
 	
-	return (Misc::RemovePrefix(sTime, Misc::GetAM()) || 
-			Misc::RemoveSuffix(sTime, Misc::GetAM()));
+	return (Misc::RemovePrefix(Misc::GetAM(), sTime) || 
+			Misc::RemoveSuffix(Misc::GetAM(), sTime));
 }
 
 CString CTimeHelper::FormatTime(double dTime, int nDecPlaces, TCHAR cSpacer)

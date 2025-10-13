@@ -330,7 +330,7 @@ BOOL FileMisc::IsPathTerminated(const CString& sPath)
 
 CString& FileMisc::ReplaceExtension(CString& sFilePath, LPCTSTR szExt)
 {
-	if (!Misc::HasSuffix(sFilePath, szExt))
+	if (!Misc::HasSuffix(szExt, sFilePath))
 	{
 		CString sDrive, sDir, sFile;
 

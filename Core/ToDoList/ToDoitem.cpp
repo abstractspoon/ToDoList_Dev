@@ -700,7 +700,7 @@ BOOL TDCTASKLINK::Parse(const CString& sLink, BOOL bURL, const CString& sFolder,
 	sFile = sLink;
 
 	// strip off protocol
-	if (!Misc::RemovePrefix(sFile, TDL_PROTOCOL) && bURL)
+	if (!Misc::RemovePrefix(TDL_PROTOCOL, sFile) && bURL)
 		return FALSE;
 
 	dwTaskID = 0;

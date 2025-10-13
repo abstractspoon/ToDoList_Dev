@@ -615,7 +615,7 @@ BOOL CTDLExportToPage::RemoveExporterFileExtension(CString& sPathName, LPCTSTR s
 		return FALSE;
 
 	CString sExt = GetExporterFileExtension(szFormatTypeID);
-	return Misc::RemoveSuffix(sPathName, sExt, TRUE);
+	return Misc::RemoveSuffix(sExt, sPathName, TRUE);
 }
 
 void CTDLExportToPage::EnsureExporterFileExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt) const
