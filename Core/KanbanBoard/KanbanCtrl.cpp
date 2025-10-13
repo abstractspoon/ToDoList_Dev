@@ -170,6 +170,7 @@ CKanbanCtrl::~CKanbanCtrl()
 BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	//{{AFX_MSG_MAP(CKanbanCtrl)
 	//}}AFX_MSG_MAP
+	ON_WM_CHAR()
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_CREATE()
@@ -235,6 +236,54 @@ void CKanbanCtrl::OnDestroy()
 	m_bClosing = TRUE;
 
 	CWnd::OnDestroy();
+}
+
+void CKanbanCtrl::OnChar(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
+{
+	// No default processing
+	const TCHAR szStartingWith[2] = { (TCHAR)nChar, 0L };
+
+	SelectNextTask(szStartingWith);
+}
+
+void CKanbanCtrl::SelectNextTask(LPCTSTR szStartingWith)
+{
+	CKanbanColumnCtrl* pCol = GetSelColumn();
+
+	if (pCol && pCol->IsEmpty())
+		pCol = GetNextColumn(pCol, TRUE, TRUE, TRUE); // wrap
+
+	if (!pCol)
+		return;
+
+	HTREEITEM htiStart = pCol->GetLastSelectedItem();
+
+	if (!htiStart)
+		htiStart = pCol->GetFirstItem();
+
+	HTREEITEM hti = htiStart;
+
+	do
+	{
+		hti = pCol->GetNextSiblingItem(hti);
+
+		if (!hti)
+		{
+			pCol = GetNextColumn(pCol, TRUE, TRUE, TRUE); // wrap
+			hti = pCol->GetFirstItem();
+		}
+
+		const KANBANITEM* pKI = GetKanbanItem(pCol->GetItemData(hti));
+
+		if (pKI && Misc::HasPrefix(szStartingWith, pKI->sTitle))
+		{
+			SelectColumn(pCol, FALSE);
+			pCol->SelectItem(hti, FALSE);
+
+			return;
+		}
+	}
+	while (hti != htiStart);
 }
 
 void CKanbanCtrl::FilterToolTipMessage(MSG* pMsg) 

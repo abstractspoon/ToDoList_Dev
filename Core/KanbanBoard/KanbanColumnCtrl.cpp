@@ -548,7 +548,7 @@ HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki)
 	}
 
 	hti = CTreeCtrl::InsertItem(TVIF_TEXT | TVIF_PARAM,
-								ki.sTitle, // for keyboard navigation
+								NULL,
 								0,
 								0,
 								0,
@@ -2584,16 +2584,8 @@ void CKanbanColumnCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		return;
 	}
 
-	// Cache tree selection before default handling
-	HTREEITEM htiCurSel = CTreeCtrl::GetSelectedItem();
-
-	CTreeCtrl::OnChar(nChar, nRepCnt, nFlags);
-
-	// If the selection has changed treat it as a user action
-	HTREEITEM htiNewSel = CTreeCtrl::GetSelectedItem();
-
-	if (htiNewSel != htiCurSel)
-		SelectItem(htiNewSel, FALSE);
+	// Forward to parent and skip further processing
+	GetParent()->SendMessage(WM_CHAR, nChar, MAKELPARAM(nRepCnt, nFlags));
 }
 
 void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
@@ -2631,24 +2623,16 @@ void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
 		break;
 	}
 
-	if (htiSel)
-	{
-		if (!htiNext)
-			htiNext = htiSel;
+	if (!htiNext)
+		htiNext = htiSel;
 
-		if (HandleExtendedSelection(htiNext))
+	if (htiNext)
+	{
+		if (HandleExtendedSelection(htiNext) || SelectItem(htiNext, FALSE))
 		{
 			NotifyParentSelectionChange(htiNext, FALSE);
 			Invalidate(FALSE);
 		}
-		else 
-		{
-			SelectItem(htiNext, FALSE);
-		}
-	}
-	else
-	{
-		CTreeCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 	}
 }
 
