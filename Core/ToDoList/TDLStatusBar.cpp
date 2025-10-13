@@ -179,7 +179,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 				if (!sPath.IsEmpty())
 				{
 					// Strip last delimiter
-					Misc::RemoveSuffix(_T("\\"), sPath);
+					sPath.TrimRight('\\');
 
 					// Space out delimiters for easier reading
 					sPath.Replace(_T("\\"), _T(" \\ "));
