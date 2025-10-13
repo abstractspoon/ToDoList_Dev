@@ -240,7 +240,7 @@ BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		CRect rClient, rItem;
 		GetClientRect(rClient);
 
-		HTREEITEM htiLast = TCH().GetLastVisibleItem();
+		HTREEITEM htiLast = m_tch.GetLastVisibleItem();
 		CTreeCtrl::GetItemRect(htiLast, rItem, FALSE);
 
 		BOOL bAtBottom = (rItem.bottom < rClient.bottom);
@@ -414,7 +414,7 @@ void CKanbanColumnCtrl::RefreshItemLineHeights(HTREEITEM hti)
 		int nNumLines = m_nNumTitleLines;
 		nNumLines += GetItemDisplayAttributeCount(*pKI);
 
-		TCH().SetItemIntegral(hti, nNumLines);
+		m_tch.SetItemIntegral(hti, nNumLines);
 	}
 }
 
@@ -454,7 +454,7 @@ int CKanbanColumnCtrl::GetItemDisplayAttributeCount(const KANBANITEM& ki) const
 
 void CKanbanColumnCtrl::RefreshItemLineHeights(DWORD dwTaskID)
 {
-	HTREEITEM hti = TCH().FindItem(dwTaskID);
+	HTREEITEM hti = m_tch.FindItem(dwTaskID);
 
 	if (hti)
 		RefreshItemLineHeights(hti);
@@ -1490,7 +1490,7 @@ HTREEITEM CKanbanColumnCtrl::GetNextTopLevelItem(HTREEITEM hti, BOOL bNext) cons
 		if (hti)
 			hti = GetNextSiblingItem(hti);
 		else
-			hti = TCH().GetFirstItem();
+			hti = GetFirstItem();
 
 		while (hti)
 		{
@@ -1505,7 +1505,7 @@ HTREEITEM CKanbanColumnCtrl::GetNextTopLevelItem(HTREEITEM hti, BOOL bNext) cons
 		if (hti)
 			hti = GetPrevSiblingItem(hti);
 		else
-			hti = TCH().GetLastItem();
+			hti = GetLastItem();
 
 		while (hti)
 		{
@@ -1623,7 +1623,7 @@ void CKanbanColumnCtrl::ScrollToSelection()
 		HTREEITEM hti = (htiPartial ? htiPartial : FindItem(m_aSelTaskIDs[0]));
 		
 		if (hti)
-			TCH().EnsureItemVisible(hti, FALSE);
+			m_tch.EnsureItemVisible(hti, FALSE);
 	}
 }
 
@@ -1650,7 +1650,7 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 		if (hti)
 		{
 			m_aSelTaskIDs.Add(dwTaskID);
-			TCH().EnsureItemVisible(hti, FALSE);
+			m_tch.EnsureItemVisible(hti, FALSE);
 		}
 	}
 
@@ -1757,7 +1757,7 @@ HTREEITEM CKanbanColumnCtrl::FindItem(const IUISELECTTASK& select, BOOL bNext, H
 	HTREEITEM htiNext = NULL;
 
 	if (htiStart == NULL)
-		htiNext = (bNext ? m_tch.GetFirstItem() : m_tch.GetLastItem());
+		htiNext = (bNext ? GetFirstItem() : GetLastItem());
 	else
 		htiNext = GetNextItem(htiStart, (bNext ? TVGN_NEXT : TVGN_PREVIOUS));
 
@@ -2596,7 +2596,7 @@ void CKanbanColumnCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		SelectItem(htiNewSel, FALSE);
 }
 
-void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
 {
 	HTREEITEM htiSel = NULL, htiNext = NULL;
 
@@ -2614,20 +2614,20 @@ void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	case VK_PRIOR:
 		htiSel = GetFirstSelectedItem();
-		htiNext = TCH().GetPrevPageVisibleItem(htiSel);
+		htiNext = m_tch.GetPrevPageVisibleItem(htiSel);
 		break;
 
 	case VK_NEXT:
 		htiSel = GetLastSelectedItem();
-		htiNext = TCH().GetNextPageVisibleItem(htiSel);
+		htiNext = m_tch.GetNextPageVisibleItem(htiSel);
 		break;
 
 	case VK_HOME:
-		htiNext = TCH().GetFirstItem();
+		htiNext = GetFirstItem();
 		break;
 
 	case VK_END:
-		htiNext = TCH().GetLastItem();
+		htiNext = GetLastItem();
 		break;
 	}
 
@@ -2939,8 +2939,8 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 
 	CRect rFirst, rLast;
 
-	if (GetItemBounds(TCH().GetFirstItem(), rFirst) &&
-		GetItemBounds(TCH().GetLastVisibleItem(), rLast))
+	if (GetItemBounds(GetFirstItem(), rFirst) &&
+		GetItemBounds(m_tch.GetLastVisibleItem(), rLast))
 	{
 		reqSize.cy = (rLast.bottom - rFirst.top);
 	}

@@ -286,7 +286,7 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentCol)
 	HTREEITEM htiClosest = pAdjacentCol->HitTest(rItem.CenterPoint());
 
 	if (!htiClosest)
-		htiClosest = pAdjacentCol->TCH().GetLastItem();
+		htiClosest = pAdjacentCol->GetLastItem();
 
 	SelectColumn(pAdjacentCol, FALSE);
 	ASSERT(m_pSelectedColumn == pAdjacentCol);
@@ -514,7 +514,7 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		pCol = m_aColumns.GetFirstNonEmpty();
 
 		if (pCol)
-			htiStart = pCol->TCH().GetFirstItem();
+			htiStart = pCol->GetFirstItem();
 		break;
 
 	case IUI_SELECTNEXTTASK:
@@ -544,7 +544,7 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		bForwards = FALSE;
 
 		if (pCol)
-			htiStart = pCol->TCH().GetLastItem();
+			htiStart = pCol->GetLastItem();
 		break;
 
 	default:

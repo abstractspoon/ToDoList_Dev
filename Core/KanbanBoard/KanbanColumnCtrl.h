@@ -90,6 +90,9 @@ public:
 	BOOL HasTasks(const CDWordArray& aTaskIDs) const;
 	BOOL IsTaskSelected(DWORD dwTaskID) const;
 	int GetSelectedCount() const;
+
+	HTREEITEM GetFirstItem() const{	return m_tch.GetFirstItem(); }
+	HTREEITEM GetLastItem() const { return m_tch.GetLastItem(); }
 	HTREEITEM GetFirstSelectedItem() const;
 	HTREEITEM GetLastSelectedItem() const;
 	HTREEITEM GetNextTopLevelItem(HTREEITEM hti, BOOL bNext) const;
@@ -116,9 +119,6 @@ public:
 	void RefreshItemLineHeights(DWORD dwTaskID);
 
 	void FilterToolTipMessage(MSG* pMsg);
-
-	const CTreeCtrlHelper& TCH() const { return m_tch; }
-	CTreeCtrlHelper& TCH() { return m_tch; }
 
 	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol);
 
