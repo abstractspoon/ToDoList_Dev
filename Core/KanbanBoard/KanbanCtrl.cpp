@@ -168,8 +168,6 @@ CKanbanCtrl::~CKanbanCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
-	//{{AFX_MSG_MAP(CKanbanCtrl)
-	//}}AFX_MSG_MAP
 	ON_WM_CHAR()
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
@@ -3084,17 +3082,16 @@ void CKanbanCtrl::ScrollToSelectedTask()
 	if (pCol)
 	{
 		pCol->ScrollToSelection(); // vertical
-		ScrollToSelectedColumn();  // horizontal
+		ScrollToColumn(pCol);  // horizontal
 	}
 }
 
-void CKanbanCtrl::ScrollToSelectedColumn()
+void CKanbanCtrl::ScrollToColumn(const CKanbanColumnCtrl* pCol)
 {
-	CKanbanColumnCtrl* pCol = GetSelColumn();
+	ASSERT(pCol);
 
 	if (pCol)
 	{
-		// Scroll horizontally to column
 		CRect rCol, rClient;
 		GetClientRect(rClient);
 
@@ -3229,7 +3226,7 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 		while (pCol)
 		{
 			if (hti)
-				hti = (bNext ? pCol->GetNextSiblingItem(hti) : pCol->GetPrevSiblingItem(hti));
+				hti = pCol->GetNextItem(hti, (bNext ? TVGN_NEXT : TVGN_PREVIOUS));
 			else
 				hti = (bNext ? pCol->GetFirstItem() : pCol->GetLastItem());
 
@@ -3323,7 +3320,7 @@ BOOL CKanbanCtrl::SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent)
 		m_pSelectedColumn = pCol;
 
 		FixupColumnFocus();
-		ScrollToSelectedColumn();
+		ScrollToColumn(m_pSelectedColumn);
 
 		if (pCol->GetCount() > 0)
 		{

@@ -132,7 +132,6 @@ protected:
 	CKanbanCustomAttributeDefinitionArray m_aCustomAttribDefs;
 
 protected:
-	// Generated message map functions
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -203,7 +202,7 @@ protected:
 
 	int GetSelColumnIndex() const;
 	BOOL SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent = TRUE);
-	void ScrollToSelectedColumn();
+	void ScrollToColumn(const CKanbanColumnCtrl* pCol);
 	BOOL IsSelectedColumn(HWND hWnd) const;
 	void FixupSelectedColumn();
 	void FixupColumnFocus();

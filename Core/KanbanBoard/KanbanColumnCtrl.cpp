@@ -149,9 +149,7 @@ CKanbanColumnCtrl::~CKanbanColumnCtrl()
 IMPLEMENT_DYNAMIC(CKanbanColumnCtrl, CTreeCtrl);
 
 BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
-	//{{AFX_MSG_MAP(CKanbanListCtrlEx)
 	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
 	ON_WM_LBUTTONDOWN()
@@ -172,7 +170,6 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CKanbanListCtrlEx message handlers
 
 BOOL CKanbanColumnCtrl::Create(UINT nID, CWnd* pParentWnd)
 {

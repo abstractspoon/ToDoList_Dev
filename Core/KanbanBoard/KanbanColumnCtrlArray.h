@@ -17,6 +17,7 @@ class CDeferWndMove;
 class CKanbanColumnCtrlArray : public CArray<CKanbanColumnCtrl*, CKanbanColumnCtrl*&>
 {
 public:
+	CKanbanColumnCtrlArray() {}
 	virtual ~CKanbanColumnCtrlArray();
 	
 	void RemoveAll();
