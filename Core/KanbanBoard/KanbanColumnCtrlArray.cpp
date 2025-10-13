@@ -463,70 +463,45 @@ float CKanbanColumnCtrlArray::GetAverageCharWidth()
 }
 
 CKanbanColumnCtrl* CKanbanColumnCtrlArray::GetNext(const CKanbanColumnCtrl* pCol, BOOL bNext, 
-												BOOL bExcludeEmpty, BOOL bFixedColumns) const
+													BOOL bExcludeEmpty, BOOL bFixedColumns, BOOL bWrap) const
 {
-	int nCol = -1;
+	int nStart = -1;
 
 	if (pCol)
 	{
-		nCol = Misc::FindT(pCol, *this);
+		nStart = Misc::FindT(pCol, *this);
 
-		if (nCol == -1)
+		if (nStart == -1)
 		{
 			ASSERT(0);
 			return NULL;
 		}
 	}
-	else if (bNext)
-	{
-		nCol = -1;
-	}
-	else // prev
-	{
-		nCol = GetSize();
-	}
 
-	if (bNext)
+	int nNext = (pCol ? Misc::NextIndexT(*this, nStart, bNext, bWrap) : (bNext ? 0 : (GetSize() - 1)));
+
+	while (nNext != -1)
 	{
-		for (int nNext = (nCol + 1); nNext < GetSize(); nNext++)
+		CKanbanColumnCtrl* pNext = GetAt(nNext);
+		ASSERT(pNext);
+
+		if (bExcludeEmpty && !pNext->GetCount())
 		{
-			CKanbanColumnCtrl* pNext = GetAt(nNext);
-			ASSERT(pNext);
-
-			if (bExcludeEmpty && !pNext->GetCount())
-				continue;
-
-			if (bFixedColumns && !pNext->IsWindowVisible())
-				continue;
-
-			// else
+			// skip
+		}
+		else if (bFixedColumns && !pNext->IsWindowVisible())
+		{
+			// skip
+		}
+		else
+		{
 			return pNext;
 		}
 
-		// return to start
-		return GetFirstNonEmpty();
+		nNext = Misc::NextIndexT(*this, nNext, bNext, bWrap);
 	}
 
-	// else prev
-	int nPrev(nCol);
-
-	while (nPrev--)
-	{
-		CKanbanColumnCtrl* pPrev = GetAt(nPrev);
-		ASSERT(pPrev);
-
-		if (bExcludeEmpty && !pPrev->GetCount())
-			continue;
-
-		if (bFixedColumns && !pPrev->IsWindowVisible())
-			continue;
-
-		// else
-		return pPrev;
-	}
-
-	// return to end
-	return GetLastNonEmpty();
+	return NULL;
 }
 
 CKanbanColumnCtrl* CKanbanColumnCtrlArray::HitTest(const CPoint& ptScreen, HTREEITEM* pHit, UINT* pHitFlags) const

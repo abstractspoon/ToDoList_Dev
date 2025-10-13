@@ -52,7 +52,7 @@ public:
 	BOOL CanSaveToImage() const;
 	BOOL SaveToImage(CBitmap& bmImage);
 
-	CKanbanColumnCtrl* GetNext(const CKanbanColumnCtrl* pList, BOOL bNext, BOOL bExcludeEmpty, BOOL bFixedColumns) const;
+	CKanbanColumnCtrl* GetNext(const CKanbanColumnCtrl* pList, BOOL bNext, BOOL bExcludeEmpty, BOOL bFixedColumns, BOOL bWrap) const;
 	CKanbanColumnCtrl* HitTest(const CPoint& ptScreen, HTREEITEM* pHit = NULL, UINT* pHitFlags = NULL) const;
 
 	void OnDisplayAttributeChanged();

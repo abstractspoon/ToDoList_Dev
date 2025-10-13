@@ -195,10 +195,10 @@ protected:
 	CKanbanColumnCtrl* LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL bForward) const;
 	CKanbanColumnCtrl* AddNewColumn(const KANBANCOLUMN& colDef);
 	CKanbanColumnCtrl* GetSelColumn();
-	CKanbanColumnCtrl* GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty);
+	CKanbanColumnCtrl* GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty, BOOL bWrap);
 
 	const CKanbanColumnCtrl* GetSelColumn() const;
-	const CKanbanColumnCtrl* GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty) const;
+	const CKanbanColumnCtrl* GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty, BOOL bWrap) const;
 
 	int GetSelColumnIndex() const;
 	BOOL SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent = TRUE);

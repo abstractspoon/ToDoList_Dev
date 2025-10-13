@@ -554,7 +554,6 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 
 	if (pCol)
 	{
-		const CKanbanColumnCtrl* pStartCol = pCol;
 		HTREEITEM hti = htiStart;
 		
 		do
@@ -568,10 +567,10 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 			}
 
 			// else next/prev column
-			pCol = GetNextColumn(pCol, bForwards, TRUE);
+			pCol = GetNextColumn(pCol, bForwards, TRUE, FALSE); // no wrap
 			hti = NULL;
 		}
-		while (pCol != pStartCol);
+		while (pCol);
 	}
 
 	// all else
@@ -2459,14 +2458,14 @@ CKanbanColumnCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL 
 	}
 
 	// try any other list in the specified direction
-	const CKanbanColumnCtrl* pCol = GetNextColumn(m_pSelectedColumn, bForward, TRUE);
+	const CKanbanColumnCtrl* pCol = GetNextColumn(m_pSelectedColumn, bForward, TRUE, FALSE); // no wrap
 
 	if (!pCol)
 		return NULL;
 
 	const CKanbanColumnCtrl* pStartCol = pCol;
 
-	do
+	while (pCol)
 	{
 		hti = pCol->FindItem(dwTaskID);
 
@@ -2474,9 +2473,8 @@ CKanbanColumnCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL 
 			return const_cast<CKanbanColumnCtrl*>(pCol);
 
 		// else
-		pCol = GetNextColumn(pCol, bForward, TRUE);
+		pCol = GetNextColumn(pCol, bForward, TRUE, FALSE); // no wrap
 	}
-	while (pCol != pStartCol);
 
 	return NULL;
 }
@@ -3158,10 +3156,10 @@ int CKanbanCtrl::HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const
 
 DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
-	BOOL bForward = ((nCmd == IUI_GETPREVVISIBLETASK) || (nCmd == IUI_GETPREVTOPLEVELTASK));
-
+	BOOL bNext = ((nCmd == IUI_GETNEXTTASK) || (nCmd == IUI_GETNEXTVISIBLETASK) || (nCmd == IUI_GETNEXTTOPLEVELTASK));
 	HTREEITEM hti = NULL;
-	const CKanbanColumnCtrl* pCol = LocateTask(dwTaskID, hti, bForward);
+
+	const CKanbanColumnCtrl* pCol = LocateTask(dwTaskID, hti, !bNext);
 	
 	if (!pCol || (UsingFixedColumns() && !pCol->IsWindowVisible()))
 	{
@@ -3177,37 +3175,37 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	{
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
-		hti = pCol->GetNextSiblingItem(hti);
-		break;
-
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVVISIBLETASK:
-		hti = pCol->GetPrevSiblingItem(hti);
-		break;
-
-	case IUI_GETNEXTTOPLEVELTASK:
 		while (pCol)
 		{
-			hti = pCol->GetNextTopLevelItem(hti, TRUE);
+			if (hti)
+				hti = (bNext ? pCol->GetNextSiblingItem(hti) : pCol->GetPrevSiblingItem(hti));
+			else
+				hti = (bNext ? pCol->GetFirstItem() : pCol->GetLastItem());
 
 			if (hti)
 				break;
 
 			// else
-			pCol = GetNextColumn(pCol, TRUE, TRUE);
+			pCol = GetNextColumn(pCol, bNext, FALSE, FALSE); // no wrap
 		}
 		break;
 
+	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTOPLEVELTASK:
 		while (pCol)
 		{
-			hti = pCol->GetNextTopLevelItem(hti, FALSE);
+			if (hti)
+				hti = pCol->GetNextTopLevelItem(hti, bNext);
+			else
+				hti = (bNext ? pCol->GetFirstItem() : pCol->GetLastItem());
 
 			if (hti)
 				break;
 
 			// else
-			pCol = GetNextColumn(pCol, FALSE, TRUE);
+			pCol = GetNextColumn(pCol, bNext, FALSE, FALSE); // no wrap
 		}
 		break;
 
@@ -3218,14 +3216,14 @@ DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 	return (hti ? pCol->GetTaskID(hti) : 0);
 }
 
-const CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty) const
+const CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty, BOOL bWrap) const
 {
-	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns());
+	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns(), bWrap);
 }
 
-CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty)
+CKanbanColumnCtrl* CKanbanCtrl::GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty, BOOL bWrap)
 {
-	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns());
+	return m_aColumns.GetNext(pCol, bNext, bExcludeEmpty, UsingFixedColumns(), bWrap);
 }
 
 BOOL CKanbanCtrl::IsDragging() const
