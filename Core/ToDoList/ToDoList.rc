@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,1,997,2
+ FILEVERSION 9,1,997,3
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "9, 1, 997, 2\0"
+            VALUE "FileVersion", "9, 1, 997, 3\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-25\0"
             VALUE "LegalTrademarks", "\0"
@@ -914,7 +914,7 @@ END
 IDD_TASKSELECTION_DIALOG DIALOGEX 0, 0, 369, 172
 STYLE DS_NOIDLEMSG | DS_CONTROL | WS_CHILD | WS_VISIBLE
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Tasks",IDC_STATIC,0,0,109,172
     CONTROL         "&All tasks",IDC_ALLTASKS,"Button",BS_AUTORADIOBUTTON | 
