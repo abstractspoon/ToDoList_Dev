@@ -22,6 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+const int DROPMARK_WIDTH	= 2;
 const int COLORBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(3);
 const int PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
 const int SIZE_CLOSEBTN		= (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::WantDPIScaling() ? 1 : 0));
@@ -111,7 +112,7 @@ BOOL CTabCtrlEx::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 BOOL CTabCtrlEx::NeedCustomPaint() const
 {
 	BOOL bPreDraw = ((m_dwFlags & TCE_TABCOLORS) && IsSupportedFlag(TCE_TABCOLORS));
-	BOOL bPostDraw = (m_dwFlags & (TCE_POSTDRAW | TCE_CLOSEBUTTON));
+	BOOL bPostDraw = (m_dwFlags & (TCE_POSTDRAW | TCE_CLOSEBUTTON | TCE_DRAGDROP));
 
 	return (bPreDraw || bPostDraw || IsExtendedTabThemedXP());
 }
@@ -656,10 +657,16 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 
 	if (HasFlag(TCE_DRAGDROP) && m_bDragging)
 	{
-		DrawTabDropMark(NULL); // hide old pos
+		int nPrevPos = m_nDropPos;
+		int nPrevTab = m_nDropTab;
 
 		m_nDropTab = GetTabDropIndex(point, m_nDropPos);
-		DrawTabDropMark(NULL); // draw new pos
+
+		if (m_nDropTab != nPrevTab)
+		{
+			Invalidate(FALSE);
+			UpdateWindow();
+		}
 	}
 	else	
 	{
@@ -1078,24 +1085,32 @@ int CTabCtrlEx::FindItemByData(DWORD dwItemData) const
 
 int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 {
-	ASSERT(HasFlag(TCE_DRAGDROP));
-	
 	if (!HasFlag(TCE_DRAGDROP))
+	{
+		ASSERT(0);
 		return -1;
+	}
 	
 	int nNumTab = GetItemCount();
 
 	if (nNumTab == 0)
 		return -1;
-
-	// note: that the drop index can be past the
-	// last tab
+	
+	// Get the tab under the mouse
 	CRect rTab;
 
 	for (int nTab = 0; nTab < nNumTab; nTab++)
 	{
 		if (GetItemRect(nTab, rTab) && rTab.PtInRect(point))
 		{
+			// What we return depends on whether we are dragging right or left
+			if (nTab > m_nDragTab)
+			{
+				nDropPos = rTab.right;
+				return nTab + 1;
+			}
+
+			// else
 			nDropPos = rTab.left;
 			return nTab;
 		}
@@ -1110,8 +1125,9 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 		nDropPos = rTab.left;
 		return nNumTab;
 	}
+
 	// and before first tab
-	else if (GetItemRect(0, rTab))
+	if (GetItemRect(0, rTab))
 	{
 		rTab.right = rTab.left;
 		rTab.left -= 100;
@@ -1128,36 +1144,32 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 
 void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 {
-	if (!(m_dwFlags & TCE_POSTDRAW) || !m_bDragging)
+	if (!(m_dwFlags & TCE_DRAGDROP) || !m_bDragging || !HasTabMoved())
 		return;
 
-	// must have a valid/different drop tab
-	//TRACE(_T("CTabCtrlEx::DrawTabDropMark(Drag = %d, Drop = %d)\n"), m_nDragTab, m_nDropTab);
-	
-	if (HasTabMoved())
-	{
-		BOOL bReleaseDC = (pDC == NULL);
-		
-		if (bReleaseDC)
-			pDC = GetDC();
-		
-		CRect rTab;
-		GetItemRect(0, rTab); // only need top and bottom
-		
-		if (m_nDropTab == 0) // special case
-			rTab.left = m_nDropPos;
-		else
-			rTab.left = (m_nDropPos - 2);
-		
-		rTab.right = (rTab.left + 2);
-		
-		pDC->SetROP2(R2_NOT);
-		pDC->SelectStockObject(BLACK_PEN);
-		pDC->Rectangle(rTab);
-		
-		if (bReleaseDC)
-			ReleaseDC(pDC);
-	}
+	// Draw as I-Beam
+	CRect rVert;
+	GetItemRect(0, rVert); // only need top and bottom
+
+	// Special cases: First or Selected tabs
+	if ((m_nDropTab == 0) || (m_nDropTab == (GetCurSel() + 1)))
+		rVert.left = m_nDropPos;
+	else
+		rVert.left = (m_nDropPos - DROPMARK_WIDTH);
+
+	rVert.right = (rVert.left + DROPMARK_WIDTH);
+
+	pDC->SelectStockObject(BLACK_PEN);
+	pDC->Rectangle(rVert);
+
+	CRect rTop(rVert);
+	rTop.InflateRect(1, 0);
+	rTop.bottom = rTop.top + DROPMARK_WIDTH;
+	pDC->Rectangle(rTop);
+
+	CRect rBot(rTop);
+	rBot.OffsetRect(0, rVert.Height() - DROPMARK_WIDTH);
+	pDC->Rectangle(rBot);
 }
 
 BOOL CTabCtrlEx::HasTabMoved() const
