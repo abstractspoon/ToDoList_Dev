@@ -90,6 +90,7 @@ protected:
 	static HRESULT DrawThemesPart(HDC hDC, int iPartId, int iStateId, LPCTSTR uiPartNameID, LPRECT prcRcBx);
 	static BOOL IsThemeActiveXP();
 	static int DWordAlign(int n);
+	static UINT GetTabDrawFlags(ETabOrientation taborient);
 };
 /////////////////////////////////////////////////////////////////////////////
 //{{AFX_INSERT_LOCATION}}
