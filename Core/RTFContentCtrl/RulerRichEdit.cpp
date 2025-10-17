@@ -152,33 +152,21 @@ CRulerRichEdit::~CRulerRichEdit()
 }
 
 BEGIN_MESSAGE_MAP(CRulerRichEdit, CUrlRichEditCtrl)
-//{{AFX_MSG_MAP(CRulerRichEdit)
 	ON_WM_HSCROLL()
 	ON_WM_GETDLGCODE()
 	ON_WM_LBUTTONDBLCLK()
-	ON_WM_CREATE()
-	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_DROPFILES, OnDropFiles)
 	ON_MESSAGE(WM_IME_STARTCOMPOSITION, OnIMEStartComposition)
 	ON_MESSAGE(WM_IME_ENDCOMPOSITION, OnIMEEndComposition)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CRulerRichEdit message handlers
 
 void CRulerRichEdit::SetFileLinkOption(RE_PASTE nLinkOption, BOOL bDefault, BOOL bReduceImageColors) 
 { 
 	m_nFileLinkOption = nLinkOption; 
 	m_bLinkOptionIsDefault = bDefault;
 	m_bReduceImageColors = bReduceImageColors;
-}
-
-int CRulerRichEdit::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-	if (CUrlRichEditCtrl::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-	return 0;
 }
 
 void CRulerRichEdit::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 

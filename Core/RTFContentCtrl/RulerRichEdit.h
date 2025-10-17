@@ -19,7 +19,6 @@ class CRtfHtmlConverter;
 class CRulerRichEdit : public CUrlRichEditCtrl
 {
 public:
-// Construction/destruction
 	CRulerRichEdit(CRtfHtmlConverter& rtfHtml);
 	virtual ~CRulerRichEdit();
 
@@ -53,13 +52,9 @@ protected:
 	static BOOL s_bConvertWithMSWord;
 
 protected:
-// Message handlers
-	//{{AFX_MSG(CRulerRichEdit)
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg UINT OnGetDlgCode();
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	//}}AFX_MSG
 	afx_msg LRESULT OnDropFiles(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnIMEStartComposition(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnIMEEndComposition(WPARAM wp, LPARAM lp);
