@@ -64,9 +64,9 @@ struct NMTABCTRLEX
 
 class CTabCtrlEx : public CXPTabCtrl
 {
-// Construction
 public:
 	CTabCtrlEx(DWORD dwFlags = 0, ETabOrientation orientation = e_tabTop);
+	virtual ~CTabCtrlEx();
 
 	BOOL SetItemText(int nTab, LPCTSTR szText);
 	CString GetItemText(int nTab) const;
@@ -90,7 +90,6 @@ public:
 	
 	static BOOL IsSupportedFlag(DWORD dwFlag);
 		
-// Attributes
 protected:
 	DWORD m_dwFlags;
 	UINT m_nBtnDown; // VK_ mouse button
@@ -105,23 +104,11 @@ protected:
 	HWND m_hwndPreDragFocus;
 	int m_nDragTab, m_nDropTab, m_nDropPos;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTabCtrlEx)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTabCtrlEx();
-
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual BOOL WantTabCloseButton(int /*nTab*/) const { return TRUE; }
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTabCtrlEx)
-	//}}AFX_MSG
 	afx_msg void OnPaint();
 	afx_msg void OnMButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMButtonUp(UINT nFlags, CPoint point);
@@ -175,8 +162,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TABCTRLEX_H__F97F9C15_5623_4A5E_ACB5_C10D4C8EB75D__INCLUDED_)

@@ -54,8 +54,6 @@ CTabCtrlEx::~CTabCtrlEx()
 }
 
 BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
-	//{{AFX_MSG_MAP(CTabCtrlEx)
-	//}}AFX_MSG_MAP
 	ON_WM_CHAR()
 	ON_WM_PAINT()
 	ON_WM_MBUTTONDOWN()
@@ -78,7 +76,6 @@ BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTabCtrlEx message handlers
 
 BOOL CTabCtrlEx::IsSupportedFlag(DWORD dwFlag)
 {
