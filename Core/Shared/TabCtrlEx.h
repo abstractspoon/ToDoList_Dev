@@ -144,6 +144,7 @@ protected:
 
 	BOOL HasFlag(DWORD dwFlag) const { return ((m_dwFlags & dwFlag) == dwFlag); }
 	BOOL IsValidClick(UINT nBtn, const CPoint& ptUp) const;
+	BOOL IsDragging() const { return (HasFlag(TCE_DRAGDROP) && m_bDragging); }
 	void OnButtonDown(UINT nBtn, UINT nFlags, CPoint point);
 	void OnButtonUp(UINT nBtn, UINT nFlags, CPoint point);
 	BOOL GetTabCloseButtonRect(int nTab, CRect& rBtn) const;

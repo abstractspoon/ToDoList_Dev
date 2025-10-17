@@ -654,7 +654,7 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CXPTabCtrl::OnMouseMove(nFlags, point);
 
-	if (HasFlag(TCE_DRAGDROP) && m_bDragging)
+	if (IsDragging())
 	{
 		int nPrevTab = m_nDropTab;
 		m_nDropTab = GetTabDropIndex(point, m_nDropPos);
@@ -722,7 +722,7 @@ LRESULT CTabCtrlEx::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
 
 CSize CTabCtrlEx::OnGetDragSize(CDC& dc)
 {
-	ASSERT(m_bDragging);
+	ASSERT(IsDragging());
 	ASSERT(m_nDragTab != -1);
 
 	CRect rTab;
@@ -810,7 +810,7 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 	NMTABCTRLEX nmtce = { 0 };
 	BOOL bTabMoved = FALSE;
 
-	if (HasFlag(TCE_DRAGDROP) && m_bDragging)
+	if (IsDragging())
 	{
 		ASSERT(GetItemCount() > 1);
 
@@ -1003,7 +1003,7 @@ void CTabCtrlEx::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CTabCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	if (m_bDragging && (nChar == VK_ESCAPE))
+	if (IsDragging() && (nChar == VK_ESCAPE))
 		ReleaseCapture();
 
 	CXPTabCtrl::OnChar(nChar, nRepCnt, nFlags);
@@ -1011,21 +1011,24 @@ void CTabCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CTabCtrlEx::OnCaptureChanged(CWnd *pWnd) 
 {
-	if (m_hwndPreDragFocus && ::IsWindow(m_hwndPreDragFocus))
-		::SetFocus(m_hwndPreDragFocus);
+	if (IsDragging())
+	{
+		if (m_hwndPreDragFocus && ::IsWindow(m_hwndPreDragFocus))
+			::SetFocus(m_hwndPreDragFocus);
 
-	m_hwndPreDragFocus = NULL;
-	m_nBtnDown = VK_CANCEL;
-	m_bDragging = FALSE;
-	m_nMouseInCloseButton = -1;
-	m_nDragTab = m_nDropTab = m_nDropPos = -1;
-	m_ptBtnDown = 0;
+		m_hwndPreDragFocus = NULL;
+		m_nBtnDown = VK_CANCEL;
+		m_bDragging = FALSE;
+		m_nMouseInCloseButton = -1;
+		m_nDragTab = m_nDropTab = m_nDropPos = -1;
+		m_ptBtnDown = 0;
 
-	m_ilDragImage.DragLeave(this);
-	m_ilDragImage.EndDrag();
-	m_ilDragImage.DeleteImageList();
+		m_ilDragImage.DragLeave(this);
+		m_ilDragImage.EndDrag();
+		m_ilDragImage.DeleteImageList();
 
-	Invalidate(FALSE);
+		Invalidate(FALSE);
+	}
 
 	CXPTabCtrl::OnCaptureChanged(pWnd);
 }
@@ -1192,7 +1195,7 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 
 void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 {
-	if (!(m_dwFlags & TCE_DRAGDROP) || !m_bDragging || !HasTabMoved())
+	if (!IsDragging() || !HasTabMoved())
 		return;
 
 	// Draw as I-Beam
@@ -1222,7 +1225,7 @@ void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 
 BOOL CTabCtrlEx::HasTabMoved() const
 {
-	if (!(m_dwFlags & TCE_DRAGDROP) || !m_bDragging)
+	if (!IsDragging())
 	{
 		ASSERT(0);
 		return FALSE;
