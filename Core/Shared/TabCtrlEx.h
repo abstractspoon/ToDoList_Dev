@@ -8,6 +8,7 @@
 //
 
 #include "..\3rdparty\XPTabCtrl.h"
+#include "..\3rdparty\DragDrop.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTabCtrlEx window
@@ -62,11 +63,11 @@ struct NMTABCTRLEX
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CTabCtrlEx : public CXPTabCtrl
+class CTabCtrlEx : public CXPTabCtrl, protected CDragDropData
 {
-// Construction
 public:
 	CTabCtrlEx(DWORD dwFlags = 0, ETabOrientation orientation = e_tabTop);
+	virtual ~CTabCtrlEx();
 
 	BOOL SetItemText(int nTab, LPCTSTR szText);
 	CString GetItemText(int nTab) const;
@@ -90,36 +91,26 @@ public:
 	
 	static BOOL IsSupportedFlag(DWORD dwFlag);
 		
-// Attributes
 protected:
 	DWORD m_dwFlags;
-	UINT m_nBtnDown;
+	UINT m_nBtnDown; // VK_ mouse button
 	CPoint m_ptBtnDown;
-	CFont m_fontClose;
+	CFont m_fontClose, m_fontBold;
 	int m_nMouseInCloseButton; // tab index
-	BOOL m_bDragging;
-	int m_nDragTab, m_nDropTab, m_nDropPos;
-	BOOL m_bUpdatingTabWidth;
-	CFont m_fontBold;
 	BOOL m_bFirstPaint;
+	BOOL m_bUpdatingTabWidth;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTabCtrlEx)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTabCtrlEx();
+	// Drag state
+	BOOL m_bDragging;
+	HWND m_hwndPreDragFocus;
+	int m_nDragTab, m_nDropTab, m_nDropPos;
+	CImageList m_ilDragImage;
 
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual BOOL WantTabCloseButton(int /*nTab*/) const { return TRUE; }
 
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTabCtrlEx)
-	//}}AFX_MSG
 	afx_msg void OnPaint();
 	afx_msg void OnMButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMButtonUp(UINT nFlags, CPoint point);
@@ -136,8 +127,14 @@ protected:
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	// IDragDropRenderer interface
+	virtual CSize OnGetDragSize(CDC& dc);
+	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
 
 protected:
 	virtual void PostDrawTab(CDC& dc, int nTab, const CRect& rClip);
@@ -147,6 +144,7 @@ protected:
 
 	BOOL HasFlag(DWORD dwFlag) const { return ((m_dwFlags & dwFlag) == dwFlag); }
 	BOOL IsValidClick(UINT nBtn, const CPoint& ptUp) const;
+	BOOL IsDragging() const { return (HasFlag(TCE_DRAGDROP) && m_bDragging); }
 	void OnButtonDown(UINT nBtn, UINT nFlags, CPoint point);
 	void OnButtonUp(UINT nBtn, UINT nFlags, CPoint point);
 	BOOL GetTabCloseButtonRect(int nTab, CRect& rBtn) const;
@@ -172,8 +170,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TABCTRLEX_H__F97F9C15_5623_4A5E_ACB5_C10D4C8EB75D__INCLUDED_)

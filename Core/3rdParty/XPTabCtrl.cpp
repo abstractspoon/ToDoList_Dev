@@ -184,8 +184,7 @@ void CXPTabCtrl::DoPaint(CDC* pDC)
 		return;
 	}
 
-	UINT uiVertBottm = (m_eTabOrientation & 1) ? 8 : 0;		//  8=bottom
-	uiVertBottm |= (m_eTabOrientation & 2) ? 16 : 0;		// 16=vertical
+	UINT uiVertBottm = GetTabDrawFlags(m_eTabOrientation);
 
 	UINT uiFlags = 1 | uiVertBottm;						//  1=body	
 	DrawThemesXpTabItem(pDC, -1, rcClient, uiFlags);	// TABP_PANE=9,0,'TAB'
@@ -230,6 +229,14 @@ void CXPTabCtrl::DoPaint(CDC* pDC)
 		uiFlags = uiVertBottm | 2;							// 2= selected
 		DrawThemesXpTabItem(pDC, ixSel, rcItem, uiFlags);
 	}
+}
+
+UINT CXPTabCtrl::GetTabDrawFlags(ETabOrientation taborient)
+{
+	UINT uiVertBottm = (taborient & 1) ? 8 : 0;		//  8=bottom
+	uiVertBottm |= (taborient & 2) ? 16 : 0;		// 16=vertical
+
+	return uiVertBottm;
 }
 
 void CXPTabCtrl::DrawThemesXpTabItem(CDC* pDC, int ixItem, const CRect& rcItem, UINT uiFlag)

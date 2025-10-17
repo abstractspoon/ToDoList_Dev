@@ -22,6 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+const int DROPMARK_WIDTH	= 2;
 const int COLORBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(3);
 const int PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
 const int SIZE_CLOSEBTN		= (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::WantDPIScaling() ? 1 : 0));
@@ -42,7 +43,8 @@ CTabCtrlEx::CTabCtrlEx(DWORD dwFlags, ETabOrientation orientation)
 	m_nBtnDown(VK_CANCEL), 
 	m_nMouseInCloseButton(-1),
 	m_bUpdatingTabWidth(FALSE),
-	m_bFirstPaint(TRUE)
+	m_bFirstPaint(TRUE),
+	m_hwndPreDragFocus(NULL)
 {
 	RemoveUnsupportedFlags(m_dwFlags);
 }
@@ -52,8 +54,7 @@ CTabCtrlEx::~CTabCtrlEx()
 }
 
 BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
-	//{{AFX_MSG_MAP(CTabCtrlEx)
-	//}}AFX_MSG_MAP
+	ON_WM_CHAR()
 	ON_WM_PAINT()
 	ON_WM_MBUTTONDOWN()
 	ON_WM_MBUTTONUP()
@@ -75,7 +76,6 @@ BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTabCtrlEx message handlers
 
 BOOL CTabCtrlEx::IsSupportedFlag(DWORD dwFlag)
 {
@@ -111,7 +111,7 @@ BOOL CTabCtrlEx::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 BOOL CTabCtrlEx::NeedCustomPaint() const
 {
 	BOOL bPreDraw = ((m_dwFlags & TCE_TABCOLORS) && IsSupportedFlag(TCE_TABCOLORS));
-	BOOL bPostDraw = (m_dwFlags & (TCE_POSTDRAW | TCE_CLOSEBUTTON));
+	BOOL bPostDraw = (m_dwFlags & (TCE_POSTDRAW | TCE_CLOSEBUTTON | TCE_DRAGDROP));
 
 	return (bPreDraw || bPostDraw || IsExtendedTabThemedXP());
 }
@@ -654,12 +654,23 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CXPTabCtrl::OnMouseMove(nFlags, point);
 
-	if (HasFlag(TCE_DRAGDROP) && m_bDragging)
+	if (IsDragging())
 	{
-		DrawTabDropMark(NULL); // hide old pos
-
+		int nPrevTab = m_nDropTab;
 		m_nDropTab = GetTabDropIndex(point, m_nDropPos);
-		DrawTabDropMark(NULL); // draw new pos
+
+		if (m_nDropTab != nPrevTab)
+		{
+			m_ilDragImage.DragShowNolock(FALSE);
+
+			Invalidate(FALSE);
+			UpdateWindow();
+
+			m_ilDragImage.DragShowNolock(TRUE);
+		}
+
+		ClientToScreen(&point);
+		m_ilDragImage.DragMove(point);
 	}
 	else	
 	{
@@ -709,6 +720,22 @@ LRESULT CTabCtrlEx::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
 	return Default();
 }
 
+CSize CTabCtrlEx::OnGetDragSize(CDC& dc)
+{
+	ASSERT(IsDragging());
+	ASSERT(m_nDragTab != -1);
+
+	CRect rTab;
+	GetItemRect(m_nDragTab, rTab);
+
+	return rTab.Size();
+}
+
+void CTabCtrlEx::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask)
+{
+	DrawThemesXpTabItem(&dc, m_nDragTab, rc, GetTabDrawFlags(m_eTabOrientation));
+}
+
 void CTabCtrlEx::OnLButtonDown(UINT nFlags, CPoint point) 
 {
 	OnButtonDown(VK_LBUTTON, nFlags, point);
@@ -739,10 +766,20 @@ void CTabCtrlEx::OnButtonDown(UINT nBtn, UINT /*nFlags*/, CPoint point)
 				m_nDragTab = nHitTab;
 				m_nDropTab = GetTabDropIndex(point, m_nDropPos);
 				m_ptBtnDown = point;
+				m_hwndPreDragFocus = ::GetFocus();
+
+				CSize sizeImage;
+				
+				if (CreateDragImage(this, m_ilDragImage, sizeImage))
+				{
+					m_ilDragImage.BeginDrag(0, CPoint(sizeImage.cx / 2, sizeImage.cy / 2));
+
+					ClientToScreen(&point);
+					m_ilDragImage.DragEnter(NULL, point);
+				}
 
 				SetCapture();
-
-				DrawTabDropMark(NULL);
+				SetFocus(); // Required for keyboard cancellation
 
 				// eat so that it does not cause a selection change
 				return;
@@ -773,7 +810,7 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 	NMTABCTRLEX nmtce = { 0 };
 	BOOL bTabMoved = FALSE;
 
-	if (HasFlag(TCE_DRAGDROP) && m_bDragging)
+	if (IsDragging())
 	{
 		ASSERT(GetItemCount() > 1);
 
@@ -964,13 +1001,34 @@ void CTabCtrlEx::OnLButtonUp(UINT nFlags, CPoint point)
 	OnButtonUp(VK_LBUTTON, nFlags, point);
 }
 
+void CTabCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (IsDragging() && (nChar == VK_ESCAPE))
+		ReleaseCapture();
+
+	CXPTabCtrl::OnChar(nChar, nRepCnt, nFlags);
+}
+
 void CTabCtrlEx::OnCaptureChanged(CWnd *pWnd) 
 {
-	m_nBtnDown = VK_CANCEL;
-	m_bDragging = FALSE;
-	m_nMouseInCloseButton = -1;
-	m_nDragTab = m_nDropTab = m_nDropPos = -1;
-	m_ptBtnDown = 0;
+	if (IsDragging())
+	{
+		if (m_hwndPreDragFocus && ::IsWindow(m_hwndPreDragFocus))
+			::SetFocus(m_hwndPreDragFocus);
+
+		m_hwndPreDragFocus = NULL;
+		m_nBtnDown = VK_CANCEL;
+		m_bDragging = FALSE;
+		m_nMouseInCloseButton = -1;
+		m_nDragTab = m_nDropTab = m_nDropPos = -1;
+		m_ptBtnDown = 0;
+
+		m_ilDragImage.DragLeave(this);
+		m_ilDragImage.EndDrag();
+		m_ilDragImage.DeleteImageList();
+
+		Invalidate(FALSE);
+	}
 
 	CXPTabCtrl::OnCaptureChanged(pWnd);
 }
@@ -1078,24 +1136,32 @@ int CTabCtrlEx::FindItemByData(DWORD dwItemData) const
 
 int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 {
-	ASSERT(HasFlag(TCE_DRAGDROP));
-	
 	if (!HasFlag(TCE_DRAGDROP))
+	{
+		ASSERT(0);
 		return -1;
+	}
 	
 	int nNumTab = GetItemCount();
 
 	if (nNumTab == 0)
 		return -1;
-
-	// note: that the drop index can be past the
-	// last tab
+	
+	// Get the tab under the mouse
 	CRect rTab;
 
 	for (int nTab = 0; nTab < nNumTab; nTab++)
 	{
 		if (GetItemRect(nTab, rTab) && rTab.PtInRect(point))
 		{
+			// What we return depends on whether we are dragging right or left
+			if (nTab > m_nDragTab)
+			{
+				nDropPos = rTab.right;
+				return nTab + 1;
+			}
+
+			// else
 			nDropPos = rTab.left;
 			return nTab;
 		}
@@ -1110,8 +1176,9 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 		nDropPos = rTab.left;
 		return nNumTab;
 	}
+
 	// and before first tab
-	else if (GetItemRect(0, rTab))
+	if (GetItemRect(0, rTab))
 	{
 		rTab.right = rTab.left;
 		rTab.left -= 100;
@@ -1128,41 +1195,37 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 
 void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 {
-	if (!(m_dwFlags & TCE_POSTDRAW) || !m_bDragging)
+	if (!IsDragging() || !HasTabMoved())
 		return;
 
-	// must have a valid/different drop tab
-	//TRACE(_T("CTabCtrlEx::DrawTabDropMark(Drag = %d, Drop = %d)\n"), m_nDragTab, m_nDropTab);
-	
-	if (HasTabMoved())
-	{
-		BOOL bReleaseDC = (pDC == NULL);
-		
-		if (bReleaseDC)
-			pDC = GetDC();
-		
-		CRect rTab;
-		GetItemRect(0, rTab); // only need top and bottom
-		
-		if (m_nDropTab == 0) // special case
-			rTab.left = m_nDropPos;
-		else
-			rTab.left = (m_nDropPos - 2);
-		
-		rTab.right = (rTab.left + 2);
-		
-		pDC->SetROP2(R2_NOT);
-		pDC->SelectStockObject(BLACK_PEN);
-		pDC->Rectangle(rTab);
-		
-		if (bReleaseDC)
-			ReleaseDC(pDC);
-	}
+	// Draw as I-Beam
+	CRect rVert;
+	GetItemRect(0, rVert); // only need top and bottom
+
+	// Special cases: First or Selected tabs
+	if ((m_nDropTab == 0) || (m_nDropTab == (GetCurSel() + 1)))
+		rVert.left = m_nDropPos;
+	else
+		rVert.left = (m_nDropPos - DROPMARK_WIDTH);
+
+	rVert.right = (rVert.left + DROPMARK_WIDTH);
+
+	pDC->SelectStockObject(BLACK_PEN);
+	pDC->Rectangle(rVert);
+
+	CRect rTop(rVert);
+	rTop.InflateRect(1, 0);
+	rTop.bottom = rTop.top + DROPMARK_WIDTH;
+	pDC->Rectangle(rTop);
+
+	CRect rBot(rTop);
+	rBot.OffsetRect(0, rVert.Height() - DROPMARK_WIDTH);
+	pDC->Rectangle(rBot);
 }
 
 BOOL CTabCtrlEx::HasTabMoved() const
 {
-	if (!(m_dwFlags & TCE_DRAGDROP) || !m_bDragging)
+	if (!IsDragging())
 	{
 		ASSERT(0);
 		return FALSE;
