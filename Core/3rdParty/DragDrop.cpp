@@ -8,6 +8,7 @@
 //
 #include "stdafx.h"
 #include "DragDrop.h"
+#include "XNamedColors.h"
 
 #include <windowsx.h> // for GET_X_LPARAM
 #include <afxpriv.h> // for AfxLoadString
@@ -478,7 +479,7 @@ BOOL CDragDropData::CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage
 	dcMem.SetBkMode(TRANSPARENT);
 	dcMem.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
-	COLORREF crMask;
+	COLORREF crMask = colorMagenta;
 	OnDrawDragData(dcMem, rc, crMask); // call virtual fn to draw
 
 	dcMem.SelectObject(pOldFont);
