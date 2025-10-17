@@ -43,7 +43,8 @@ CTabCtrlEx::CTabCtrlEx(DWORD dwFlags, ETabOrientation orientation)
 	m_nBtnDown(VK_CANCEL), 
 	m_nMouseInCloseButton(-1),
 	m_bUpdatingTabWidth(FALSE),
-	m_bFirstPaint(TRUE)
+	m_bFirstPaint(TRUE),
+	m_hwndPreDragFocus(NULL)
 {
 	RemoveUnsupportedFlags(m_dwFlags);
 }
@@ -55,6 +56,7 @@ CTabCtrlEx::~CTabCtrlEx()
 BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
 	//{{AFX_MSG_MAP(CTabCtrlEx)
 	//}}AFX_MSG_MAP
+	ON_WM_CHAR()
 	ON_WM_PAINT()
 	ON_WM_MBUTTONDOWN()
 	ON_WM_MBUTTONUP()
@@ -749,7 +751,8 @@ void CTabCtrlEx::OnButtonDown(UINT nBtn, UINT /*nFlags*/, CPoint point)
 
 				SetCapture();
 
-				DrawTabDropMark(NULL);
+				m_hwndPreDragFocus = ::GetFocus();
+				SetFocus(); // Required for keyboard cancellation
 
 				// eat so that it does not cause a selection change
 				return;
@@ -971,13 +974,27 @@ void CTabCtrlEx::OnLButtonUp(UINT nFlags, CPoint point)
 	OnButtonUp(VK_LBUTTON, nFlags, point);
 }
 
+void CTabCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (m_bDragging && (nChar == VK_ESCAPE))
+		ReleaseCapture();
+
+	CXPTabCtrl::OnChar(nChar, nRepCnt, nFlags);
+}
+
 void CTabCtrlEx::OnCaptureChanged(CWnd *pWnd) 
 {
+	if (m_hwndPreDragFocus && ::IsWindow(m_hwndPreDragFocus))
+		::SetFocus(m_hwndPreDragFocus);
+
+	m_hwndPreDragFocus = NULL;
 	m_nBtnDown = VK_CANCEL;
 	m_bDragging = FALSE;
 	m_nMouseInCloseButton = -1;
 	m_nDragTab = m_nDropTab = m_nDropPos = -1;
 	m_ptBtnDown = 0;
+
+	Invalidate(FALSE);
 
 	CXPTabCtrl::OnCaptureChanged(pWnd);
 }

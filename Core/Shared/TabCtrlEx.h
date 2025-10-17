@@ -93,15 +93,17 @@ public:
 // Attributes
 protected:
 	DWORD m_dwFlags;
-	UINT m_nBtnDown;
+	UINT m_nBtnDown; // VK_ mouse button
 	CPoint m_ptBtnDown;
-	CFont m_fontClose;
+	CFont m_fontClose, m_fontBold;
 	int m_nMouseInCloseButton; // tab index
-	BOOL m_bDragging;
-	int m_nDragTab, m_nDropTab, m_nDropPos;
-	BOOL m_bUpdatingTabWidth;
-	CFont m_fontBold;
 	BOOL m_bFirstPaint;
+	BOOL m_bUpdatingTabWidth;
+
+	// Drag state
+	BOOL m_bDragging;
+	HWND m_hwndPreDragFocus;
+	int m_nDragTab, m_nDropTab, m_nDropPos;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -136,6 +138,7 @@ protected:
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	DECLARE_MESSAGE_MAP()
 
