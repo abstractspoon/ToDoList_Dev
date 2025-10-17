@@ -656,16 +656,21 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 
 	if (HasFlag(TCE_DRAGDROP) && m_bDragging)
 	{
-		int nPrevPos = m_nDropPos;
 		int nPrevTab = m_nDropTab;
-
 		m_nDropTab = GetTabDropIndex(point, m_nDropPos);
 
 		if (m_nDropTab != nPrevTab)
 		{
+			m_ilDragImage.DragShowNolock(FALSE);
+
 			Invalidate(FALSE);
 			UpdateWindow();
+
+			m_ilDragImage.DragShowNolock(TRUE);
 		}
+
+		ClientToScreen(&point);
+		m_ilDragImage.DragMove(point);
 	}
 	else	
 	{
@@ -715,6 +720,22 @@ LRESULT CTabCtrlEx::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
 	return Default();
 }
 
+CSize CTabCtrlEx::OnGetDragSize(CDC& dc)
+{
+	ASSERT(m_bDragging);
+	ASSERT(m_nDragTab != -1);
+
+	CRect rTab;
+	GetItemRect(m_nDragTab, rTab);
+
+	return rTab.Size();
+}
+
+void CTabCtrlEx::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask)
+{
+	DrawThemesXpTabItem(&dc, m_nDragTab, rc, GetTabDrawFlags(m_eTabOrientation));
+}
+
 void CTabCtrlEx::OnLButtonDown(UINT nFlags, CPoint point) 
 {
 	OnButtonDown(VK_LBUTTON, nFlags, point);
@@ -745,10 +766,19 @@ void CTabCtrlEx::OnButtonDown(UINT nBtn, UINT /*nFlags*/, CPoint point)
 				m_nDragTab = nHitTab;
 				m_nDropTab = GetTabDropIndex(point, m_nDropPos);
 				m_ptBtnDown = point;
+				m_hwndPreDragFocus = ::GetFocus();
+
+				CSize sizeImage;
+				
+				if (CreateDragImage(this, m_ilDragImage, sizeImage))
+				{
+					m_ilDragImage.BeginDrag(0, CPoint(sizeImage.cx / 2, sizeImage.cy / 2));
+
+					ClientToScreen(&point);
+					m_ilDragImage.DragEnter(NULL, point);
+				}
 
 				SetCapture();
-
-				m_hwndPreDragFocus = ::GetFocus();
 				SetFocus(); // Required for keyboard cancellation
 
 				// eat so that it does not cause a selection change
@@ -990,6 +1020,10 @@ void CTabCtrlEx::OnCaptureChanged(CWnd *pWnd)
 	m_nMouseInCloseButton = -1;
 	m_nDragTab = m_nDropTab = m_nDropPos = -1;
 	m_ptBtnDown = 0;
+
+	m_ilDragImage.DragLeave(this);
+	m_ilDragImage.EndDrag();
+	m_ilDragImage.DeleteImageList();
 
 	Invalidate(FALSE);
 

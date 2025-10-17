@@ -8,6 +8,7 @@
 //
 
 #include "..\3rdparty\XPTabCtrl.h"
+#include "..\3rdparty\DragDrop.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTabCtrlEx window
@@ -62,7 +63,7 @@ struct NMTABCTRLEX
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CTabCtrlEx : public CXPTabCtrl
+class CTabCtrlEx : public CXPTabCtrl, protected CDragDropData
 {
 public:
 	CTabCtrlEx(DWORD dwFlags = 0, ETabOrientation orientation = e_tabTop);
@@ -103,6 +104,7 @@ protected:
 	BOOL m_bDragging;
 	HWND m_hwndPreDragFocus;
 	int m_nDragTab, m_nDropTab, m_nDropPos;
+	CImageList m_ilDragImage;
 
 protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
@@ -128,6 +130,11 @@ protected:
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	// IDragDropRenderer interface
+	virtual CSize OnGetDragSize(CDC& dc);
+	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
 
 protected:
 	virtual void PostDrawTab(CDC& dc, int nTab, const CRect& rClip);
