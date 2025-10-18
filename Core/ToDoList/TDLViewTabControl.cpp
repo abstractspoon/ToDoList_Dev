@@ -22,7 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLViewTabControl::CTDLViewTabControl() 
 : 
-	CTabCtrlEx(TCE_MBUTTONCLOSE | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT, e_tabBottom), 
+	CTabCtrlEx(TCE_MBUTTONCLOSE | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT | TCE_DRAGDROP, e_tabBottom), 
 	m_nSelTab(-1),
 	m_bShowingTabs(TRUE),
 	m_rOverall(0, 0, 0, 0)
