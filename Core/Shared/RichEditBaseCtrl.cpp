@@ -102,6 +102,7 @@ CRichEditBaseCtrl::CRichEditBaseCtrl(BOOL bAutoRTL)
 	m_rMargins(DEFMARGINS),
 	m_bAutoRTL(bAutoRTL),
 	m_pPopupListOwner(NULL),
+	m_bFirstOnSize(TRUE),
 	m_crBkgnd(CLR_DEFAULT)
 {
    m_callback.SetOwner(this);
@@ -119,11 +120,11 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_WM_DESTROY()
 	ON_WM_SETFOCUS()
 	ON_WM_PAINT()
+	ON_WM_SIZE()
 
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 	ON_REGISTERED_MESSAGE(WM_REBC_REENABLECHANGENOTIFY, OnReenableChangeNotifications)
-	ON_REGISTERED_MESSAGE(WM_REBC_INITIALISE, OnInitialise)
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnDropListEndEdit)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnDropListCancelEdit)
 
@@ -187,6 +188,8 @@ void CRichEditBaseCtrl::OnDestroy()
 	// destroy the find dialog. it will delete itself
 	m_findState.DestroyDialog();
 
+	m_bFirstOnSize = TRUE; // In case of recreation
+
 	CRichEditCtrl::OnDestroy();
 }
 
@@ -224,18 +227,20 @@ void CRichEditBaseCtrl::OnTimer(UINT nIDEvent)
 		EnableChangeNotifications(TRUE);
 }
 
-void CRichEditBaseCtrl::PreSubclassWindow() 
+void CRichEditBaseCtrl::OnSize(UINT nType, int cx, int cy)
 {
-	CRichEditCtrl::PreSubclassWindow();
+	CRichEditCtrl::OnSize(nType, cx, cy);
 
-	// Too early to do some initialisation
-	PostMessage(WM_REBC_INITIALISE);
-}
+	if (m_bFirstOnSize)
+	{
+		// Note: Initialisation has to wait until after WM_CREATE
+		// but in the case of a rich edit created indirectly via 
+		// via a dialog template we will never receive WM_CREATE 
+		// so our best next message is WM_SIZE.
+		m_bFirstOnSize = FALSE;
 
-LRESULT CRichEditBaseCtrl::OnInitialise(WPARAM wParam, LPARAM lParam)
-{
-	Initialise(); // virtual method
-	return 0L;
+		Initialise();
+	}
 }
 
 void CRichEditBaseCtrl::Initialise()

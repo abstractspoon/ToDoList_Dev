@@ -207,6 +207,7 @@ protected:
 	BOOL m_bInOnFocus;
 	BOOL m_bAutoRTL;
 	BOOL m_bHasTables;
+	BOOL m_bFirstOnSize;
 
 	CRect m_rMargins;
 	FIND_STATE m_findState;
@@ -217,7 +218,6 @@ protected:
 	CWnd* m_pPopupListOwner;
 	
 protected:
-	virtual void PreSubclassWindow();
 	virtual int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	
@@ -288,6 +288,7 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnPaint();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 	afx_msg LRESULT OnPaste(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditSetBkgndColor(WPARAM wParam, LPARAM lParam);
@@ -297,7 +298,6 @@ protected:
 	afx_msg LRESULT OnEditSetSelection(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnReenableChangeNotifications(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnInitialise(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDropListEndEdit(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropListCancelEdit(WPARAM wp, LPARAM lp);
 
