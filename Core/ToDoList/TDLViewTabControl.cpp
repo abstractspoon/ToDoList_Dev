@@ -43,16 +43,12 @@ CTDLViewTabControl::~CTDLViewTabControl()
 
 
 BEGIN_MESSAGE_MAP(CTDLViewTabControl, CTabCtrlEx)
-	//{{AFX_MSG_MAP(CTDCViewTabControl)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-	//}}AFX_MSG_MAP
 	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnSelChange)
 	ON_NOTIFY_REFLECT(TCN_CLOSETAB, OnCloseTab)
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDCViewTabControl message handlers
 
 BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData, int nVertOffset)
 {
@@ -198,13 +194,6 @@ CWnd* CTDLViewTabControl::GetActiveWnd() const
 FTC_VIEW CTDLViewTabControl::GetActiveView() const
 {
 	return ((m_nSelTab == -1) ? FTCV_UNSET : GetTabView(m_nSelTab));
-}
-
-void* CTDLViewTabControl::GetActiveViewData() const
-{
-	int nIndex = TabToIndex(m_nSelTab);
-
-	return ((nIndex == -1) ? NULL : m_aViews[nIndex].pData);
 }
 
 HWND CTDLViewTabControl::GetViewHwnd(FTC_VIEW nView) const

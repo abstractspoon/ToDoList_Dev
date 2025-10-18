@@ -15,6 +15,7 @@
 #include "..\shared\enstring.h"
 
 class CDeferWndMove;
+class CPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDCViewTabControl window
@@ -24,13 +25,14 @@ class CTDLViewTabControl : public CTabCtrlEx
 // Construction
 public:
 	CTDLViewTabControl();
+	virtual ~CTDLViewTabControl();
 
-public:
 	BOOL AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData = NULL, int nVertOffset = 0);
 	BOOL DetachView(HWND hWnd);
 	BOOL DetachView(FTC_VIEW nView);
 
 	void Resize(const CRect& rect, CDeferWndMove* pDWM = NULL);
+	void ShowTabControl(BOOL bShow = TRUE);
 
 	BOOL SetActiveView(CWnd* pWnd, BOOL bNotify = FALSE);
 	BOOL SetActiveView(FTC_VIEW nView, BOOL bNotify = FALSE);
@@ -41,12 +43,7 @@ public:
 	HWND GetViewHwnd(FTC_VIEW nView) const;
 	BOOL SetViewHwnd(FTC_VIEW nView, HWND hWnd);
 	CString GetViewName(FTC_VIEW nView) const;
-
-	void* GetActiveViewData() const;
 	void* GetViewData(FTC_VIEW nView) const;
-
-	void ShowTabControl(BOOL bShow = TRUE);
-
 	BOOL ShowViewTab(FTC_VIEW nView, BOOL bShow = TRUE);
 	BOOL IsViewTabShowing(FTC_VIEW nView) const;
 
@@ -82,27 +79,17 @@ protected:
 	BOOL m_bShowingTabs;
 	CRect m_rOverall; // tabs plus views
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDCViewTabControl)
-	protected:
-	virtual void PreSubclassWindow();
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CTDLViewTabControl();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CTDCViewTabControl)
-	//}}AFX_MSG
+	virtual void PreSubclassWindow();
+
+protected:
 	afx_msg void OnSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCloseTab(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
 	DECLARE_MESSAGE_MAP()
 
+protected:
 	int FindView(HWND hWnd) const;
 	int FindView(FTC_VIEW nView) const;
 	int FindTab(FTC_VIEW nView) const;
@@ -122,8 +109,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TODOCTRLVIEWTABCONTROL_H__4829AF79_C5C1_4D5F_8AB1_A6D0FFD5793E__INCLUDED_)
