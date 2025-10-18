@@ -1214,7 +1214,7 @@ void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 	pDC->Rectangle(rVert);
 
 	CRect rTop(rVert);
-	rTop.InflateRect(1, 0);
+	rTop.InflateRect(DROPMARK_WIDTH, 0);
 	rTop.bottom = rTop.top + DROPMARK_WIDTH;
 	pDC->Rectangle(rTop);
 
