@@ -227,7 +227,8 @@ GANTTITEM::GANTTITEM()
 	nPosition(-1),
 	bLocked(FALSE),
 	bSomeSubtaskDone(FALSE),
-	nPercent(0)
+	nPercent(0),
+	dtDone(CDateHelper::NullDate())
 {
 }
 
