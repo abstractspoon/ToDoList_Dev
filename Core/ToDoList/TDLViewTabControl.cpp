@@ -45,6 +45,7 @@ CTDLViewTabControl::~CTDLViewTabControl()
 BEGIN_MESSAGE_MAP(CTDLViewTabControl, CTabCtrlEx)
 	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnSelChange)
 	ON_NOTIFY_REFLECT(TCN_CLOSETAB, OnCloseTab)
+	ON_NOTIFY_REFLECT(TCN_ENDDRAG, OnEndDrag)
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
@@ -566,6 +567,18 @@ void CTDLViewTabControl::OnCloseTab(NMHDR* pNMHDR, LRESULT* pResult)
 		if (nView != FTCV_TASKTREE)
 			ShowViewTab(nView, FALSE);
 	}
+}
+
+void CTDLViewTabControl::OnEndDrag(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	*pResult = 0;
+	
+	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
+
+	int nFrom = pNMTCE->iTab, nTo = (int)pNMTCE->dwExtra;
+	ASSERT((nFrom >= 0) && (nTo >= 0));
+
+	MoveTab(nFrom, nTo);
 }
 
 BOOL CTDLViewTabControl::WantTabCloseButton(int nTab) const

@@ -91,6 +91,7 @@ protected:
 protected:
 	afx_msg void OnSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCloseTab(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnEndDrag(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
 	DECLARE_MESSAGE_MAP()
