@@ -922,21 +922,7 @@ BOOL CTabCtrlEx::MoveTab(int nFrom, int nTo)
 		return FALSE;
 
 	// cache selection so we can restore it afterwards
-	int nSel = GetCurSel(), nNewSel = nSel;
-
-	// work out what the new selection should be
-	if (nFrom == nSel)
-	{
-		nNewSel = nTo;
-	}
-	else if ((nFrom > nSel) && (nTo <= nSel))
-	{
-		nNewSel++;
-	}
-	else if ((nFrom < nSel) && (nTo >= nSel))
-	{
-		nNewSel--;
-	}
+	int nSel = GetCurSel();
 
 	// make copy of existing tab state
 	TCITEM tci = { 0 };
@@ -952,7 +938,18 @@ BOOL CTabCtrlEx::MoveTab(int nFrom, int nTo)
 	VERIFY(InsertItem(nTo, &tci) != -1);
 
 	// Restore selection
-	SetCurSel(nNewSel);
+	if (nFrom == nSel)
+	{
+		SetCurSel(nTo);
+	}
+	else if ((nFrom > nSel) && (nTo <= nSel))
+	{
+		SetCurSel(nSel + 1);
+	}
+	else if ((nFrom < nSel) && (nTo >= nSel))
+	{
+		SetCurSel(nSel - 1);
+	}
 
 	return TRUE;
 }
