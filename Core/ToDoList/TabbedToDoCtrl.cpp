@@ -4766,26 +4766,20 @@ BOOL CTabbedToDoCtrl::AddView(IUIExtension* pExtension)
 BOOL CTabbedToDoCtrl::RemoveView(IUIExtension* pExtension)
 {
 	// search for any views having this type
+	CString sExtType = pExtension->GetTypeID();
 	int nView = m_aExtViews.GetSize();
 
 	while (nView--)
 	{
-		IUIExtensionWindow* pExtWnd = m_aExtViews[nView];
+		IUIExtensionWindow* pExtWnd = m_aExtViews[nView]; // can be NULL
 
-		if (pExtWnd) // can be NULL
+		if (pExtWnd && (pExtWnd->GetTypeID() == sExtType))
 		{
-			CString sExtType = pExtension->GetTypeID();
-			CString sExtWndType = pExtWnd->GetTypeID();
+			VERIFY (m_tabViews.DetachView(pExtWnd->GetHwnd()));
+			::DestroyWindow(pExtWnd->GetHwnd());
 
-			if (sExtType == sExtWndType)
-			{
-				VERIFY (m_tabViews.DetachView(pExtWnd->GetHwnd()));
-				::DestroyWindow(pExtWnd->GetHwnd());
-
-				m_aExtViews.RemoveAt(nView);
-
-				return TRUE;
-			}
+			m_aExtViews.RemoveAt(nView);
+			return TRUE;
 		}
 	}
 
