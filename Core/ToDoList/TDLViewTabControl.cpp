@@ -36,7 +36,7 @@ CTDLViewTabControl::~CTDLViewTabControl()
 
 	while (nIndex--)
 	{
-		delete m_aViews[nIndex].pData;
+		delete m_aViews[nIndex].pVData;
 		::DestroyIcon(m_aViews[nIndex].hIcon);
 	}
 }
@@ -50,7 +50,7 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 
-BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData, int nVertOffset)
+BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, IVIEWTABDATA* pData, int nVertOffset)
 {
 	ASSERT (hWnd == NULL || ::IsWindow(hWnd));
 
@@ -234,11 +234,11 @@ BOOL CTDLViewTabControl::SetViewHwnd(FTC_VIEW nView, HWND hWnd)
 	return TRUE;
 }
 
-void* CTDLViewTabControl::GetViewData(FTC_VIEW nView) const
+IVIEWTABDATA* CTDLViewTabControl::GetViewData(FTC_VIEW nView) const
 {
 	int nIndex = FindView(nView);
 
-	return (nIndex == -1) ? NULL : m_aViews[nIndex].pData;
+	return (nIndex == -1) ? NULL : m_aViews[nIndex].pVData;
 }
 
 FTC_VIEW CTDLViewTabControl::GetView(int nIndex) const

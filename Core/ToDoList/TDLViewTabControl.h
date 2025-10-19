@@ -18,16 +18,22 @@ class CDeferWndMove;
 class CPreferences;
 
 /////////////////////////////////////////////////////////////////////////////
+
+struct IVIEWTABDATA
+{
+	virtual ~IVIEWTABDATA() {}
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDCViewTabControl window
 
 class CTDLViewTabControl : public CTabCtrlEx
 {
-// Construction
 public:
 	CTDLViewTabControl();
 	virtual ~CTDLViewTabControl();
 
-	BOOL AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData = NULL, int nVertOffset = 0);
+	BOOL AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, IVIEWTABDATA* pData = NULL, int nVertOffset = 0);
 	BOOL DetachView(HWND hWnd);
 	BOOL DetachView(FTC_VIEW nView);
 
@@ -43,19 +49,19 @@ public:
 	HWND GetViewHwnd(FTC_VIEW nView) const;
 	BOOL SetViewHwnd(FTC_VIEW nView, HWND hWnd);
 	CString GetViewName(FTC_VIEW nView) const;
-	void* GetViewData(FTC_VIEW nView) const;
+	IVIEWTABDATA* GetViewData(FTC_VIEW nView) const;
 	BOOL ShowViewTab(FTC_VIEW nView, BOOL bShow = TRUE);
 	BOOL IsViewTabShowing(FTC_VIEW nView) const;
 
 protected:
 	struct TDCVIEW
 	{
-		TDCVIEW(HWND hWnd = NULL, FTC_VIEW view = FTCV_UNSET, LPCTSTR szLabel = NULL, HICON icon = NULL, void* data = NULL, int vertOffset = 0) 
+		TDCVIEW(HWND hWnd = NULL, FTC_VIEW view = FTCV_UNSET, LPCTSTR szLabel = NULL, HICON icon = NULL, IVIEWTABDATA* data = NULL, int vertOffset = 0) 
 			: 
 			hwndView(hWnd), 
 			nView(view), 
 			sViewLabel(szLabel), 
-			pData(data),
+			pVData(data),
 			hIcon(NULL),
 			nVertOffset(vertOffset)
 		{
@@ -70,11 +76,11 @@ protected:
 		FTC_VIEW nView;
 		CString sViewLabel;
 		HICON hIcon;
-		void* pData;
+		IVIEWTABDATA* pVData;
 		int nVertOffset;
 	};
-
 	CArray<TDCVIEW, TDCVIEW&> m_aViews;
+
 	int m_nSelTab;
 	BOOL m_bShowingTabs;
 	CRect m_rOverall; // tabs plus views

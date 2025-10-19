@@ -836,7 +836,7 @@ void CFilteredToDoCtrl::RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgres
 
 	if (pExtWnd)
 	{
-		VIEWDATA* pData = GetViewData(nView);
+		TDCEXTVIEWDATA* pData = GetViewData(nView);
 		ASSERT(pData);
 
 		if (bShowProgress)

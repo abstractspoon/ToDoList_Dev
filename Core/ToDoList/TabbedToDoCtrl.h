@@ -20,10 +20,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct VIEWDATA
+struct TDCEXTVIEWDATA : public IVIEWTABDATA
 {
-    VIEWDATA();
-	virtual ~VIEWDATA();
+    TDCEXTVIEWDATA();
+	virtual ~TDCEXTVIEWDATA();
 
 	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
 	BOOL WantAnyAttribute(const CTDCAttributeMap& other) const;
@@ -49,7 +49,6 @@ public:
 					const CShortcutManager& mgrShortcuts,
 					const CONTENTFORMAT& cfDefault,
 					const TDCCOLEDITFILTERVISIBILITY& visDefault);
-
 	virtual ~CTabbedToDoCtrl();
 	
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
@@ -178,11 +177,7 @@ protected:
 	static CStringArray s_aDefTaskViews;
 	static UINT WM_TDC_RESTORELASTTASKVIEW;	// private message
 
-// Overrides
 protected:
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTabbedToDoCtrl)
-	//}}AFX_VIRTUAL
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 
@@ -190,11 +185,8 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTabbedToDoCtrl)
 	afx_msg void OnDestroy();
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	//}}AFX_MSG
 	afx_msg void OnTabCtrlRClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListSelChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListClick(NMHDR* pNMHDR, LRESULT* pResult);
@@ -284,8 +276,8 @@ protected:
 	DWORD GetSingleSelectedTaskID() const;
 	int CacheListSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 
-	VIEWDATA* GetActiveViewData() const;
-	VIEWDATA* GetViewData(FTC_VIEW nView) const;
+	TDCEXTVIEWDATA* GetActiveViewData() const;
+	TDCEXTVIEWDATA* GetViewData(FTC_VIEW nView) const;
 	
 	BOOL AddView(IUIExtension* pExtension);
 	BOOL RemoveView(IUIExtension* pExtension);
@@ -314,7 +306,7 @@ protected:
 	BOOL ExtensionCanDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA& data) const;
 	IUIExtensionWindow* GetCreateExtensionWnd(FTC_VIEW nView);
 	IUIExtensionWindow* GetExtensionWnd(FTC_VIEW nView) const;
-	BOOL GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, VIEWDATA*& pData) const;
+	BOOL GetExtensionWnd(FTC_VIEW nView, IUIExtensionWindow*& pExtWnd, TDCEXTVIEWDATA*& pData) const;
 	BOOL HasAnyExtensionViews() const;
 	BOOL AnyExtensionViewWantsChange(TDC_ATTRIBUTE nAttribID) const;
 	BOOL AnyExtensionViewWantsChanges(const CTDCAttributeMap& mapAttribIDs) const;
@@ -323,7 +315,7 @@ protected:
 	BOOL GetExtensionViewWantedChanges(int nExt, const CTDCAttributeMap& mapAttribIDs, CTDCAttributeMap& mapAttribsWanted) const;
 	BOOL ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttribID) const;
 	BOOL AllExtensionViewsNeedFullUpdate() const;
-	void BeginExtensionProgress(const VIEWDATA* pData, UINT nMsg = 0);
+	void BeginExtensionProgress(const TDCEXTVIEWDATA* pData, UINT nMsg = 0);
 	void EndExtensionProgress();
 	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType);
 	void SetExtensionsReadOnly(BOOL bReadOnly);
@@ -355,10 +347,10 @@ protected:
 	void AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttribIDs) const;
 	void ShowListViewSpecificCtrls(BOOL bShow);
 
-	virtual VIEWDATA* NewViewData() { return new VIEWDATA(); }
+	virtual TDCEXTVIEWDATA* NewViewData() { return new TDCEXTVIEWDATA(); }
 
 	static FTC_VIEW GetExtensionView(int nExt) { return (FTC_VIEW)(nExt + FTCV_FIRSTUIEXTENSION); }
-	static int PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData);
+	static int PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, TDCEXTVIEWDATA* pData);
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);
 	static void PrepareAttributesForExtensionViewUpdate(CTDCAttributeMap& mapAttribIDs);
