@@ -825,11 +825,10 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 			nmtce.iTab = m_nDragTab;
 			nmtce.hdr.code = TCN_ENDDRAG;
 
-			// calculating number of positions needs care
-			nmtce.dwExtra = (m_nDropTab - m_nDragTab);
-
-			if (m_nDropTab > m_nDragTab)
-				nmtce.dwExtra--;
+			if (m_nDragTab < m_nDropTab)
+				nmtce.dwExtra = (m_nDropTab - 1);
+			else
+				nmtce.dwExtra = m_nDropTab;
 		}
 		// fall thru
 	}	
@@ -915,6 +914,58 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 		
 		GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&nmtce);
 	}
+}
+
+BOOL CTabCtrlEx::MoveTab(int nFrom, int nTo)
+{
+	if (!CanMoveTab(nFrom, nTo))
+		return FALSE;
+
+	// cache selection so we can restore it afterwards
+	int nSel = GetCurSel(), nNewSel = nSel;
+
+	// work out what the new selection should be
+	if (nFrom == nSel)
+	{
+		nNewSel = nTo;
+	}
+	else if ((nFrom > nSel) && (nTo <= nSel))
+	{
+		nNewSel++;
+	}
+	else if ((nFrom < nSel) && (nTo >= nSel))
+	{
+		nNewSel--;
+	}
+
+	// make copy of existing tab state
+	TCITEM tci = { 0 };
+	TCHAR szText[256] = { 0 };
+
+	tci.mask = (TCIF_TEXT | TCIF_IMAGE);
+	tci.pszText = szText;
+	tci.cchTextMax = 255;
+
+	GetItem(nFrom, &tci);
+
+	VERIFY(DeleteItem(nFrom));
+	VERIFY(InsertItem(nTo, &tci) != -1);
+
+	// Restore selection
+	SetCurSel(nNewSel);
+
+	return TRUE;
+}
+
+BOOL CTabCtrlEx::CanMoveTab(int nFrom, int nTo) const
+{
+	int nNumTabs = GetItemCount();
+
+	return ((nFrom >= 0) &&
+		(nFrom < nNumTabs) &&
+			(nTo >= 0) &&
+			(nTo < nNumTabs) &&
+			(nTo != nFrom));
 }
 
 int CTabCtrlEx::HitTest(TCHITTESTINFO* pHitTestInfo) const
@@ -1347,4 +1398,3 @@ void CTabCtrlEx::OnSize(UINT nType, int cx, int cy)
 
 	EnsureSelVisible();
 }
-

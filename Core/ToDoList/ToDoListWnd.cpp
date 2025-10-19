@@ -8219,19 +8219,13 @@ void CToDoListWnd::OnTabCtrlEndDrag(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
 	
-	// check valid tab indices
-	ASSERT((pNMTCE->iTab != -1) && (pNMTCE->dwExtra != 0));
-
-	if ((pNMTCE->iTab != -1) && (pNMTCE->dwExtra != 0))
-	{
-		m_mgrToDoCtrls.MoveToDoCtrl(pNMTCE->iTab, pNMTCE->dwExtra);
+	VERIFY(m_mgrToDoCtrls.MoveToDoCtrl(pNMTCE->iTab, (int)pNMTCE->dwExtra));
 		
-		// disable alpha-sorting on tabs
-		if (Prefs().GetKeepTabsOrdered())
-		{
-			CPreferences().WriteProfileInt(PREF_KEY, _T("KeepTabsOrdered"), FALSE);
-			ResetPrefs();
-		}
+	// disable alpha-sorting on tabs
+	if (Prefs().GetKeepTabsOrdered())
+	{
+		CPreferences().WriteProfileInt(PREF_KEY, _T("KeepTabsOrdered"), FALSE);
+		ResetPrefs();
 	}
 
 	*pResult = 0;

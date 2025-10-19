@@ -88,7 +88,10 @@ public:
 	void EnsureSelVisible();
 	BOOL ModifyFlags(DWORD dwRemove, DWORD dwAdd);
 	void GetTabContentRect(const CRect& rTab, int nTab, CRect& rContent) const;
-	
+
+	BOOL MoveTab(int nFrom, int nTo);
+	BOOL CanMoveTab(int nFrom, int nTo) const;
+
 	static BOOL IsSupportedFlag(DWORD dwFlag);
 		
 protected:
