@@ -928,7 +928,7 @@ BOOL CTabCtrlEx::MoveTab(int nFrom, int nTo)
 	TCITEM tci = { 0 };
 	TCHAR szText[256] = { 0 };
 
-	tci.mask = (TCIF_TEXT | TCIF_IMAGE);
+	tci.mask = (TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM);
 	tci.pszText = szText;
 	tci.cchTextMax = 255;
 
@@ -950,6 +950,7 @@ BOOL CTabCtrlEx::MoveTab(int nFrom, int nTo)
 	{
 		SetCurSel(nSel - 1);
 	}
+	EnsureVisible(nTo);
 
 	return TRUE;
 }
@@ -959,7 +960,7 @@ BOOL CTabCtrlEx::CanMoveTab(int nFrom, int nTo) const
 	int nNumTabs = GetItemCount();
 
 	return ((nFrom >= 0) &&
-		(nFrom < nNumTabs) &&
+			(nFrom < nNumTabs) &&
 			(nTo >= 0) &&
 			(nTo < nNumTabs) &&
 			(nTo != nFrom));
@@ -1343,7 +1344,14 @@ BOOL CTabCtrlEx::SetScrollPos(int nPos)
 
 void CTabCtrlEx::EnsureSelVisible()
 {
-	if (GetItemCount() == 0)
+	EnsureVisible(GetCurSel());
+}
+
+void CTabCtrlEx::EnsureVisible(int nTab)
+{
+	int nNumItems = GetItemCount();
+
+	if ((nNumItems == 0) || (nTab < 0) || (nTab >= nNumItems))
 		return;
 
 	CRect rSpin;
@@ -1354,24 +1362,23 @@ void CTabCtrlEx::EnsureSelVisible()
 		return;
 	}
 
-	CRect rActiveTab;
-	int nSelTab = GetCurSel();
-	GetItemRect(nSelTab, rActiveTab);
+	CRect rTab;
+	GetItemRect(nTab, rTab);
 
-	if ((rActiveTab.left >= 0) && (rActiveTab.right <= rSpin.left))
+	if ((rTab.left >= 0) && (rTab.right <= rSpin.left))
 		return;
 
 	int nScrollPos = GetScrollPos();
 
-	if (rActiveTab.left < 0)
+	if (rTab.left < 0)
 	{
 		// Scroll left
 		while (nScrollPos--)
 		{
 			SetScrollPos(nScrollPos);
-			GetItemRect(nSelTab, rActiveTab);
+			GetItemRect(nTab, rTab);
 
-			if (rActiveTab.left >= 0)
+			if (rTab.left >= 0)
 				break;
 		}
 	}
@@ -1381,9 +1388,9 @@ void CTabCtrlEx::EnsureSelVisible()
 		for (int nPos = (nScrollPos + 1); nPos < GetItemCount(); nPos++)
 		{
 			SetScrollPos(nPos);
-			GetItemRect(nSelTab, rActiveTab);
+			GetItemRect(nTab, rTab);
 
-			if (rActiveTab.right <= rSpin.left)
+			if (rTab.right <= rSpin.left)
 				break;
 		}
 	}

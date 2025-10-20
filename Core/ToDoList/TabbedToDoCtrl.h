@@ -324,7 +324,7 @@ protected:
 	void SetListViewNeedFontUpdate(BOOL bUpdate);
 	BOOL ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& aModTaskIDs, CTDCTaskCompletionArray& aTasksForCompletion, CTDCAttributeMap& mapModAttribs);
 	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttribIDs) const;
-	CString GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtWnd);
+	CString GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtWnd) const;
 	void UpdateExtensionViewsSelection(const CTDCAttributeMap& mapAttribIDs);
 	void UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttribIDs);
 	void UpdateExtensionViewsProjectName();
@@ -346,6 +346,14 @@ protected:
 	HTASKITEM AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, HTASKITEM hPrevSiblingTask, const TDCGETTASKS& filter) const;
 	void AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttribIDs) const;
 	void ShowListViewSpecificCtrls(BOOL bShow);
+
+	void SaveAllExtensionViewPreferences(CPreferences& prefs, const CString& sKey) const;
+	void SaveExtensionViewOrder(CPreferences& prefs, const CString& sKey) const;
+	void SaveHiddenExtensions(CPreferences& prefs, const CString& sKey) const;
+	void SaveListViewState(CPreferences& prefs, const CString& sKey) const;
+	void RestoreExtensionViewOrder(const CPreferences& prefs, const CString& sKey);
+	void RestoreHiddenExtensions(const CPreferences& prefs, const CString& sKey);
+	void RestoreListViewState(const CPreferences& prefs, const CString& sKey);
 
 	virtual TDCEXTVIEWDATA* NewViewData() { return new TDCEXTVIEWDATA(); }
 

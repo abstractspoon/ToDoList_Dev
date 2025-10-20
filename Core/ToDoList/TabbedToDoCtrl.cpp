@@ -610,52 +610,24 @@ void CTabbedToDoCtrl::LoadState()
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey(); // no subkey
 
-	// restore view visibility
-	CStringArray aTypeIDs;
-	m_mgrUIExt.GetExtensionTypeIDs(aTypeIDs);
+	RestoreHiddenExtensions(prefs, sKey);
+	RestoreExtensionViewOrder(prefs, sKey);
 
-	if (prefs.GetProfileInt(sKey, _T("ListViewVisible"), TRUE))
-		aTypeIDs.Add(LISTVIEW_TYPE);
-
-	// remove hidden extensions from list of all extensions
-	// this ensures that new extensions always appear first time
-	int nExt = prefs.GetProfileInt(sKey, _T("HiddenExtensionCount"), -1);
-
-	if (nExt >= 0)
-	{
-		while (nExt--)
-		{
-			CString sSubKey = Misc::MakeKey(_T("HiddenExt%d"), nExt);
-			CString sTypeID = prefs.GetProfileString(sKey, sSubKey);
-
-			Misc::RemoveItem(sTypeID, aTypeIDs);
-		}
-
-		SetVisibleTaskViews(aTypeIDs);
-	}
-	else
-	{
-		SetVisibleTaskViews(s_aDefTaskViews);
-	}
-
-	// Listview options
-	m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(prefs, sKey);
-	m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
-
-	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
-	m_taskList.SetGroupBy(m_nListViewGroupBy, HasListOption(LVO_SORTGROUPSASCENDING), HasListOption(LVO_SORTNONEGROUPBELOW));
+	// Restore list view after hidden extensions
+	// because it handles its own visibility
+	RestoreListViewState(prefs, sKey);
 
 	// Last active view
 	FTC_VIEW nCurView = GetTaskView();
 	FTC_VIEW nView = (FTC_VIEW)prefs.GetProfileInt(sKey, _T("View"), FTCV_UNSET);
 
-	// Under high DPI displays (For reasons I don't understand) the plugin views 
-	// which derive from CDialog have the vertical positions of their controls 
-	// messed up unless we delay their creation
-	if (GraphicsMisc::WantDPIScaling())
-		PostMessage(WM_TDC_RESTORELASTTASKVIEW, nCurView, nView);
-	else
-		SendMessage(WM_TDC_RESTORELASTTASKVIEW, nCurView, nView);
+	// 1. Under high DPI displays (For reasons I don't understand) the plugin views 
+	//    which derive from CDialog have the vertical positions of their controls 
+	//    messed up unless we delay their creation
+	// 2. If the user has reordered the tabs and the last active view is out of
+	//    sight on initialisation we need to delay the restoration until after the
+	//    spin button may have been created else it will fail
+	PostMessage(WM_TDC_RESTORELASTTASKVIEW, nCurView, nView);
 
 	// clear the view so we don't keep restoring it
 	prefs.WriteProfileInt(sKey, _T("View"), FTCV_UNSET);
@@ -666,44 +638,148 @@ void CTabbedToDoCtrl::SaveState()
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey(); // no subkey
 	
-	// save view
+	// Active view
 	if (GetTaskView() != FTCV_UNSET)
 		prefs.WriteProfileInt(sKey, _T("View"), GetTaskView());
 
-	// save listview state
+	SaveListViewState(prefs, sKey);
+	SaveExtensionViewOrder(prefs, sKey);
+	SaveHiddenExtensions(prefs, sKey);
+	SaveAllExtensionViewPreferences(prefs, sKey);
+}
+
+void CTabbedToDoCtrl::SaveListViewState(CPreferences& prefs, const CString& sKey) const
+{
 	prefs.WriteProfileInt(sKey, _T("ListViewVisible"), IsListViewTabShowing());
 	prefs.WriteProfileInt(sKey, _T("ListViewGroupBy"), m_nListViewGroupBy);
-	
+
 	CTDLTaskListCtrlOptionsComboBox::SaveOptions(m_dwListOptions, prefs, sKey);
+}
 
-	// save hidden extensions
-	CStringArray aVisTypeIDs, aTypeIDs;
+void CTabbedToDoCtrl::RestoreListViewState(const CPreferences& prefs, const CString& sKey)
+{
+	m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(prefs, sKey);
+	m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
 
+	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
+	m_taskList.SetGroupBy(m_nListViewGroupBy, HasListOption(LVO_SORTGROUPSASCENDING), HasListOption(LVO_SORTNONEGROUPBELOW));
+
+	if (!prefs.GetProfileInt(sKey, _T("ListViewVisible"), TRUE))
+		m_tabViews.ShowViewTab(FTCV_TASKLIST, FALSE);
+}
+
+void CTabbedToDoCtrl::SaveExtensionViewOrder(CPreferences& prefs, const CString& sKey) const
+{
+	CTDCViewArray aViewOrder;
+	int nTab = m_tabViews.GetViewOrder(aViewOrder);
+
+	CStringArray aTypeIDs;
+
+	while (nTab--)
+	{
+		FTC_VIEW nView = aViewOrder[nTab];
+
+		// Extensions may get added in later releases so
+		// the 'view id' is not enough to identify extensions
+		if (IsExtensionView(aViewOrder[nTab]))
+			aTypeIDs.InsertAt(0, GetViewData(nView)->pExtension->GetTypeID());
+		else 
+			aTypeIDs.InsertAt(0, Misc::Format(nView));
+	}
+
+	prefs.WriteProfileArray(sKey + _T("\\ViewOrder"), aTypeIDs);
+}
+
+void CTabbedToDoCtrl::RestoreExtensionViewOrder(const CPreferences& prefs, const CString& sKey)
+{
+	CStringArray aTypeIDs;
+
+	if (prefs.GetProfileArray(sKey + _T("\\ViewOrder"), aTypeIDs))
+	{
+		CTDCViewArray aViewOrder;
+		int nExt = aTypeIDs.GetSize();
+
+		while (nExt--)
+		{
+			CString sTypeID = aTypeIDs[nExt];
+
+			// Extensions may get added in later releases so
+			// the 'view id' is not enough to identify extensions
+			int nExt = m_mgrUIExt.FindUIExtension(sTypeID);
+
+			if (nExt != -1)
+				aViewOrder.InsertAt(0, (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt));
+			else
+				aViewOrder.InsertAt(0, (FTC_VIEW)_ttoi(sTypeID));
+		}
+
+		m_tabViews.SetViewOrder(aViewOrder);
+	}
+}
+
+void CTabbedToDoCtrl::SaveHiddenExtensions(CPreferences& prefs, const CString& sKey) const
+{
+	CStringArray aTypeIDs;
 	m_mgrUIExt.GetExtensionTypeIDs(aTypeIDs);
+
+	CStringArray aVisTypeIDs;
 	GetVisibleTaskViews(aVisTypeIDs);
 
 	// remove visible items to leave hidden ones
 	Misc::RemoveItems(aVisTypeIDs, aTypeIDs);
 
-	int nExt = aTypeIDs.GetSize();
+	prefs.WriteProfileArray(sKey + _T("\\HiddenExtensions"), aTypeIDs);
 
-	prefs.WriteProfileInt(sKey, _T("HiddenExtensionCount"), nExt);
-
-	while (nExt--)
+	// Cleanup old settings
+	if (prefs.GetProfileInt(sKey, _T("HiddenExtensionCount"), -1) >= 0)
 	{
-		CString sSubKey = Misc::MakeKey(_T("HiddenExt%d"), nExt);
-		prefs.WriteProfileString(sKey, sSubKey, aTypeIDs[nExt]);
+		prefs.DeleteProfileEntry(sKey, _T("HiddenExtensionCount"));
+		int nExt = 16;
+
+		while (nExt--)
+			prefs.DeleteProfileEntry(sKey, Misc::MakeKey(_T("HiddenExt%d"), nExt));
+	}
+}
+
+void CTabbedToDoCtrl::RestoreHiddenExtensions(const CPreferences& prefs, const CString& sKey)
+{
+	CStringArray aTypeIDs;
+	m_mgrUIExt.GetExtensionTypeIDs(aTypeIDs);
+
+	CStringArray aHiddenTypeIDs;
+
+	if (!prefs.GetProfileArray(sKey + _T("\\HiddenExtensions"), aHiddenTypeIDs))
+	{
+		// Backwards compatibility
+		int nExt = prefs.GetProfileInt(sKey, _T("HiddenExtensionCount"));
+
+		// remove hidden extensions from list of all extensions
+		// this ensures that new extensions always appear first time
+		while (nExt--)
+		{
+			CString sSubKey = Misc::MakeKey(_T("HiddenExt%d"), nExt);
+			aHiddenTypeIDs.Add(prefs.GetProfileString(sKey, sSubKey));
+		}
 	}
 
-	// extension preferences
-	SaveAllTaskViewPreferences();
+	if (aHiddenTypeIDs.GetSize())
+	{
+		Misc::RemoveItems(aHiddenTypeIDs, aTypeIDs);
+		SetVisibleTaskViews(aTypeIDs);
+	}
+	else
+	{
+		SetVisibleTaskViews(s_aDefTaskViews);
+	}
 }
 
 void CTabbedToDoCtrl::SaveAllTaskViewPreferences()
 {
-	CPreferences prefs;
-	CString sKey = GetPreferencesKey(); // no subkey
+	SaveAllExtensionViewPreferences(CPreferences(), GetPreferencesKey());
+}
 
+void CTabbedToDoCtrl::SaveAllExtensionViewPreferences(CPreferences& prefs, const CString& sKey) const
+{
 	// save view
 	int nExt = m_aExtViews.GetSize();
 
@@ -896,7 +972,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	return pExtWnd;
 }
 
-CString CTabbedToDoCtrl::GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtWnd)
+CString CTabbedToDoCtrl::GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtWnd) const
 {
 	CString sSubKey;
 	sSubKey.Format(_T("UIExtensions\\%s"), pExtWnd->GetTypeID());
@@ -7273,6 +7349,8 @@ LRESULT CTabbedToDoCtrl::OnRestoreLastTaskView(WPARAM nCurView, LPARAM nNewView)
 {
 	if (((FTC_VIEW)nNewView != FTCV_UNSET) && ((FTC_VIEW)nNewView != (FTC_VIEW)nCurView))
 		SetTaskView((FTC_VIEW)nNewView);
+
+	m_tabViews.EnsureSelVisible();
 	
 	return 0L;
 }

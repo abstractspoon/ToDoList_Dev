@@ -86,6 +86,7 @@ public:
 	BOOL SetScrollPos(int nPos);
 
 	void EnsureSelVisible();
+	void EnsureVisible(int nTab);
 	BOOL ModifyFlags(DWORD dwRemove, DWORD dwAdd);
 	void GetTabContentRect(const CRect& rTab, int nTab, CRect& rContent) const;
 

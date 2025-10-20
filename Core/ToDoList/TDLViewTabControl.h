@@ -14,8 +14,12 @@
 #include "..\shared\tabctrlex.h"
 #include "..\shared\enstring.h"
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CDeferWndMove;
 class CPreferences;
+
+typedef CArray<FTC_VIEW, FTC_VIEW> CTDCViewArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -52,6 +56,9 @@ public:
 	IVIEWTABDATA* GetViewData(FTC_VIEW nView) const;
 	BOOL ShowViewTab(FTC_VIEW nView, BOOL bShow = TRUE);
 	BOOL IsViewTabShowing(FTC_VIEW nView) const;
+
+	int GetViewOrder(CTDCViewArray& aViewOrder) const;
+	void SetViewOrder(const CTDCViewArray& aViewOrder);
 
 protected:
 	struct TDCVIEW
@@ -97,19 +104,16 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	int FindView(HWND hWnd) const;
-	int FindView(FTC_VIEW nView) const;
-	int FindTab(FTC_VIEW nView) const;
-	CWnd* GetViewWnd(const TDCVIEW& view) const;
-	FTC_VIEW GetView(int nIndex) const;
+	int GetViewIndex(HWND hWnd) const;
+	int GetViewIndex(FTC_VIEW nView) const;
+	int GetTabIndex(FTC_VIEW nView) const;
 	FTC_VIEW GetTabView(int nTab) const;
 	void GetViewRect(const TDCVIEW& view, CRect& rView) const;
 	BOOL SwitchToTab(int nNewIndex);
 	BOOL CalcTabViewRects(const CRect& rPos, CRect& rTabs, CRect& rView) const;
 	BOOL DoTabChange(int nOldTab, int nNewTab, BOOL bNotify);
 
-	int IndexToTab(int nIndex) const;
-	int TabToIndex(int nTab) const;
+	int TabToViewIndex(int nTab) const;
 
 	// Virtual overrides
 	BOOL WantTabCloseButton(int nTab) const;

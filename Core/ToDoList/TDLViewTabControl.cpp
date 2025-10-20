@@ -56,7 +56,7 @@ BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, 
 	ASSERT (hWnd == NULL || ::IsWindow(hWnd));
 
 	// window and enum must be unique
-	if ((hWnd && FindView(hWnd) != -1) || (FindView(nView) != -1))
+	if ((hWnd && GetViewIndex(hWnd) != -1) || (GetViewIndex(nView) != -1))
 		return FALSE;
 
 	// prepare tab bar
@@ -79,7 +79,7 @@ BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, 
 
 BOOL CTDLViewTabControl::DetachView(HWND hWnd)
 {
-	int nFind = FindView(hWnd);
+	int nFind = GetViewIndex(hWnd);
 
 	if (nFind != -1)
 	{
@@ -92,7 +92,7 @@ BOOL CTDLViewTabControl::DetachView(HWND hWnd)
 
 BOOL CTDLViewTabControl::DetachView(FTC_VIEW nView)
 {
-	int nFind = FindView(nView);
+	int nFind = GetViewIndex(nView);
 
 	if (nFind != -1)
 	{
@@ -111,11 +111,6 @@ void CTDLViewTabControl::GetViewRect(const TDCVIEW& view, CRect& rView) const
 	rView.top += view.nVertOffset;
 }
 
-CWnd* CTDLViewTabControl::GetViewWnd(const TDCVIEW& view) const
-{
-	return CWnd::FromHandle(view.hwndView);
-}
-
 BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 {
 	ASSERT (GetSafeHwnd());
@@ -126,7 +121,7 @@ BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 	if ((nTab == m_nSelTab) || (nTab < 0))
 		return FALSE;
 
-	int nIndex = TabToIndex(nTab);
+	int nIndex = TabToViewIndex(nTab);
 	
 	if (nIndex == -1)
 		return FALSE;
@@ -154,7 +149,7 @@ BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 	}
 	else // just hide the currently visible view
 	{
-		int nOldIndex = TabToIndex(m_nSelTab);
+		int nOldIndex = TabToViewIndex(m_nSelTab);
 		hwndOld = m_aViews[nOldIndex].hwndView;
 	}
 
@@ -187,7 +182,7 @@ CWnd* CTDLViewTabControl::GetActiveWnd() const
 	if (GetSafeHwnd() == NULL)
 		return NULL;
 
-	int nIndex = TabToIndex(m_nSelTab);
+	int nIndex = TabToViewIndex(m_nSelTab);
 
 	return (nIndex == -1) ? NULL : CWnd::FromHandle(m_aViews[nIndex].hwndView);
 }
@@ -199,7 +194,7 @@ FTC_VIEW CTDLViewTabControl::GetActiveView() const
 
 HWND CTDLViewTabControl::GetViewHwnd(FTC_VIEW nView) const
 {
-	int nIndex = FindView(nView);
+	int nIndex = GetViewIndex(nView);
 
 	if (nIndex < 0 || nIndex > m_aViews.GetSize())
 		return NULL;
@@ -209,7 +204,7 @@ HWND CTDLViewTabControl::GetViewHwnd(FTC_VIEW nView) const
 
 CString CTDLViewTabControl::GetViewName(FTC_VIEW nView) const
 {
-	int nIndex = FindView(nView);
+	int nIndex = GetViewIndex(nView);
 
 	if (nIndex < 0 || nIndex > m_aViews.GetSize())
 		return _T("");
@@ -221,7 +216,7 @@ CString CTDLViewTabControl::GetViewName(FTC_VIEW nView) const
 
 BOOL CTDLViewTabControl::SetViewHwnd(FTC_VIEW nView, HWND hWnd)
 {
-	int nIndex = FindView(nView);
+	int nIndex = GetViewIndex(nView);
 
 	if (nIndex < 0 || nIndex > m_aViews.GetSize())
 		return NULL;
@@ -237,39 +232,20 @@ BOOL CTDLViewTabControl::SetViewHwnd(FTC_VIEW nView, HWND hWnd)
 
 IVIEWTABDATA* CTDLViewTabControl::GetViewData(FTC_VIEW nView) const
 {
-	int nIndex = FindView(nView);
+	int nIndex = GetViewIndex(nView);
 
 	return (nIndex == -1) ? NULL : m_aViews[nIndex].pVData;
 }
 
-FTC_VIEW CTDLViewTabControl::GetView(int nIndex) const
-{
-	if (nIndex < 0 || nIndex > m_aViews.GetSize())
-		return FTCV_UNSET;
-
-	// else
-	return m_aViews[nIndex].nView;
-}
-
-int CTDLViewTabControl::TabToIndex(int nTab) const
+int CTDLViewTabControl::TabToViewIndex(int nTab) const
 {
 	FTC_VIEW nView = GetTabView(nTab);
 	ASSERT(nView != FTCV_UNSET);
 
-	int nIndex = FindView(nView);
+	int nIndex = GetViewIndex(nView);
 	ASSERT(nIndex >= 0 && nIndex < m_aViews.GetSize());
 
 	return nIndex;
-}
-
-int CTDLViewTabControl::IndexToTab(int nIndex) const
-{
-	FTC_VIEW nView = m_aViews[nIndex].nView;
-
-	int nTab = FindTab(nView);
-	ASSERT(nTab >= 0);
-
-	return nTab;
 }
 
 FTC_VIEW CTDLViewTabControl::GetTabView(int nTab) const
@@ -279,10 +255,10 @@ FTC_VIEW CTDLViewTabControl::GetTabView(int nTab) const
 
 BOOL CTDLViewTabControl::SetActiveView(CWnd* pWnd, BOOL bNotify)
 {
-	int nNewIndex = FindView(pWnd->GetSafeHwnd());
+	int nNewIndex = GetViewIndex(pWnd->GetSafeHwnd());
 	ASSERT(nNewIndex != -1);
 
-	int nNewTab = IndexToTab(nNewIndex);
+	int nNewTab = GetTabIndex(m_aViews[nNewIndex].nView);
 	int nOldTab = m_nSelTab;
 
 	return DoTabChange(nOldTab, nNewTab, bNotify);
@@ -290,7 +266,7 @@ BOOL CTDLViewTabControl::SetActiveView(CWnd* pWnd, BOOL bNotify)
 
 BOOL CTDLViewTabControl::SetActiveView(FTC_VIEW nView, BOOL bNotify)
 {
-	int nNewTab = FindTab(nView);
+	int nNewTab = GetTabIndex(nView);
 	int nOldTab = m_nSelTab;
 
 	return DoTabChange(nOldTab, nNewTab, bNotify);
@@ -304,7 +280,7 @@ void CTDLViewTabControl::Resize(const CRect& rect, CDeferWndMove* pDWM)
 
 	if (CalcTabViewRects(rect, rTabs, rView))
 	{
-		int nActive = TabToIndex(m_nSelTab);
+		int nActive = TabToViewIndex(m_nSelTab);
 
 		CWnd* pView = ((nActive == -1) ? NULL : CWnd::FromHandle(m_aViews[nActive].hwndView));
 		ASSERT(pView);
@@ -327,7 +303,7 @@ void CTDLViewTabControl::Resize(const CRect& rect, CDeferWndMove* pDWM)
 	}
 }
 
-int CTDLViewTabControl::FindView(HWND hWnd) const
+int CTDLViewTabControl::GetViewIndex(HWND hWnd) const
 {
 	int nIndex = m_aViews.GetSize();
 
@@ -341,7 +317,7 @@ int CTDLViewTabControl::FindView(HWND hWnd) const
 	return -1;
 }
 
-int CTDLViewTabControl::FindView(FTC_VIEW nView) const
+int CTDLViewTabControl::GetViewIndex(FTC_VIEW nView) const
 {
 	int nIndex = m_aViews.GetSize();
 
@@ -355,7 +331,7 @@ int CTDLViewTabControl::FindView(FTC_VIEW nView) const
 	return -1;
 }
 
-int CTDLViewTabControl::FindTab(FTC_VIEW nView) const
+int CTDLViewTabControl::GetTabIndex(FTC_VIEW nView) const
 {
 	// find tab with view as its item data
 	return FindItemByData(nView);
@@ -468,7 +444,7 @@ void CTDLViewTabControl::OnSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 void CTDLViewTabControl::ActivateNextView(BOOL bNext)
 {
-	int nCurTab = FindTab(GetActiveView());
+	int nCurTab = GetTabIndex(GetActiveView());
 	int nOldTab = nCurTab, nNewTab = nCurTab;
 
 	// keep iterating until we find a valid view or until
@@ -511,7 +487,7 @@ BOOL CTDLViewTabControl::DoTabChange(int nOldTab, int nNewTab, BOOL bNotify)
 	}
 
 	// check if the previous view had the focus
-	int nOldIndex = TabToIndex(nOldTab);
+	int nOldIndex = TabToViewIndex(nOldTab);
 
 	HWND hOldView = (nOldIndex != -1) ? m_aViews[nOldIndex].hwndView : NULL;
 	BOOL bHadFocus = TRUE;
@@ -543,7 +519,7 @@ BOOL CTDLViewTabControl::DoTabChange(int nOldTab, int nNewTab, BOOL bNotify)
 			GetParent()->SendMessage(WM_TDCN_VIEWPOSTCHANGE, GetTabView(nOldTab), GetTabView(nNewTab));
 
 		// restore focus		
-		int nNewIndex = TabToIndex(nNewTab);
+		int nNewIndex = TabToViewIndex(nNewTab);
 		HWND hNewView = m_aViews[nNewIndex].hwndView;
 
 		if (bHadFocus)
@@ -579,6 +555,7 @@ void CTDLViewTabControl::OnEndDrag(NMHDR* pNMHDR, LRESULT* pResult)
 	ASSERT((nFrom >= 0) && (nTo >= 0));
 
 	MoveTab(nFrom, nTo);
+	m_nSelTab = GetCurSel();
 }
 
 BOOL CTDLViewTabControl::WantTabCloseButton(int nTab) const
@@ -588,7 +565,7 @@ BOOL CTDLViewTabControl::WantTabCloseButton(int nTab) const
 
 BOOL CTDLViewTabControl::IsViewTabShowing(FTC_VIEW nView) const
 {
-	return (FindTab(nView) != -1);
+	return (GetTabIndex(nView) != -1);
 }
 
 BOOL CTDLViewTabControl::ShowViewTab(FTC_VIEW nView, BOOL bShow)
@@ -597,13 +574,13 @@ BOOL CTDLViewTabControl::ShowViewTab(FTC_VIEW nView, BOOL bShow)
 	ASSERT(nView != FTCV_TASKTREE);
 
 	// find index of TDCVIEW item
-	int nItem = FindView(nView);
+	int nItem = GetViewIndex(nView);
 
 	if (nItem == -1)
 		return FALSE; // item must exist
 
 	// find tab with that as its item data
-	int nTab = FindTab(nView);
+	int nTab = GetTabIndex(nView);
 
 	if (!bShow)
 	{
@@ -649,7 +626,7 @@ BOOL CTDLViewTabControl::ShowViewTab(FTC_VIEW nView, BOOL bShow)
 
 	while (nPrevItem--)
 	{
-		nInsert = FindTab(m_aViews[nPrevItem].nView);
+		nInsert = GetTabIndex(m_aViews[nPrevItem].nView);
 
 		if (nInsert != -1)
 		{
@@ -687,3 +664,28 @@ BOOL CTDLViewTabControl::OnEraseBkgnd(CDC* pDC)
 	return CTabCtrlEx::OnEraseBkgnd(pDC);
 }
 
+int CTDLViewTabControl::GetViewOrder(CTDCViewArray& aViewOrder) const
+{
+	aViewOrder.RemoveAll();
+
+	int nTab = GetItemCount();
+
+	while (nTab--)
+		aViewOrder.InsertAt(0, GetTabView(nTab));
+
+	return aViewOrder.GetSize();
+}
+
+void CTDLViewTabControl::SetViewOrder(const CTDCViewArray& aViewOrder)
+{
+	for (int nNewPos = 0; nNewPos < aViewOrder.GetSize(); nNewPos++)
+	{
+		FTC_VIEW nView = aViewOrder[nNewPos];
+		int nOldPos = GetTabIndex(nView);
+
+		MoveTab(nOldPos, nNewPos);
+	}
+
+	m_nSelTab = GetCurSel();
+	EnsureSelVisible();
+}
