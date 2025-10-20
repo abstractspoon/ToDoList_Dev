@@ -3244,7 +3244,7 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 		break;
 		
 	case ID_SORTBY_PATH:
-		pCmdUI->Enable(tdc.GetTaskView() == FTCV_TASKLIST);
+		pCmdUI->Enable(tdc.GetActiveTaskView() == FTCV_TASKLIST);
 		break;
 		
 	default:
@@ -5844,7 +5844,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		else // use last state of transform dialog to determine what tasks to output
 		{
 			CTDLTransformDialog dialog(_T(""), 
-										(tdc.GetTaskView() != FTCV_TASKLIST),
+										(tdc.GetActiveTaskView() != FTCV_TASKLIST),
 									   _T(""),
 									   tdc.GetCustomAttributeDefs());
 
@@ -6699,10 +6699,10 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CTDLPrintDialog dialog(sTitle,
 						   bPreview,
 						   m_mgrImportExport,
-						   (tdc.GetTaskView() != FTCV_TASKLIST),
+						   (tdc.GetActiveTaskView() != FTCV_TASKLIST),
 						   tdc.GetStylesheetPath(),
 						   tdc.GetCustomAttributeDefs(),
-						   (tdc.CanSaveTaskViewToImage() ? tdc.GetTaskViewName() : _T("")));
+						   (tdc.CanSaveTaskViewToImage() ? tdc.GetActiveTaskViewName() : _T("")));
 	
 	if (dialog.DoModal(CMDICON(bPreview ? ID_PRINTPREVIEW : ID_PRINT)) != IDOK)
 		return;
@@ -10146,7 +10146,7 @@ void CToDoListWnd::OnExport()
 						 m_mgrToDoCtrls.FormatFriendlyProjectNames(),
 						 m_mgrImportExport,
 						 (nTDCCount == 1),
-						 (tdc.GetTaskView() != FTCV_TASKLIST),
+						 (tdc.GetActiveTaskView() != FTCV_TASKLIST),
 						 userPrefs.GetExportVisibleColsOnly(),
 						 sTasklistPath,
 						 userPrefs.GetSaveExportFolderPath(),
@@ -10474,7 +10474,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
 	CTDLTransformDialog dialog(sTitle, 
-								(tdc.GetTaskView() != FTCV_TASKLIST),
+								(tdc.GetActiveTaskView() != FTCV_TASKLIST),
 								tdc.GetStylesheetPath(),
 								tdc.GetCustomAttributeDefs());
 	
@@ -13037,7 +13037,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	CTDLSendTasksDlg dialog(m_mgrImportExport, 
 							bSelected, 
-							(tdc.GetTaskView() != FTCV_TASKLIST), 
+							(tdc.GetActiveTaskView() != FTCV_TASKLIST), 
 							tdc.GetCustomAttributeDefs());
 
 	if (dialog.DoModal(CMDICON(ID_SENDTASKS)) == IDOK)
@@ -13172,7 +13172,7 @@ void CToDoListWnd::OnViewCycleTaskViews()
 {
 	CLockUpdates lu(*this);
 
-	GetToDoCtrl().SetNextTaskView();
+	GetToDoCtrl().ActivateNextTaskView();
 
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
 		OnMaximizeTasklist();
@@ -13180,7 +13180,7 @@ void CToDoListWnd::OnViewCycleTaskViews()
 
 void CToDoListWnd::OnViewToggleTreeandList() 
 {
-	switch (GetToDoCtrl().GetTaskView())
+	switch (GetToDoCtrl().GetActiveTaskView())
 	{
 	case FTCV_TASKTREE:
 		OnActivateTaskView(ID_ACTIVATEVIEW_LISTVIEW);
@@ -13760,7 +13760,7 @@ void CToDoListWnd::OnViewSaveToImage()
 	}
 
 	sFilePath += '.';
-	sFilePath += tdc.GetTaskViewName();
+	sFilePath += tdc.GetActiveTaskViewName();
 	sFilePath += '.';
 	sFilePath += m_sTaskViewImageExt;
 
@@ -13798,7 +13798,7 @@ void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI)
 	if (tdc.CanSaveTaskViewToImage())
 	{
 		pCmdUI->Enable(TRUE);
-		sMenuItem.Replace(_T("%s"), tdc.GetTaskViewName());
+		sMenuItem.Replace(_T("%s"), tdc.GetActiveTaskViewName());
 	}
 	else
 	{
@@ -14030,20 +14030,20 @@ void CToDoListWnd::OnUpdateActivateTaskView(CCmdUI* pCmdUI)
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
 		pCmdUI->Enable(TRUE);
 	else
-		pCmdUI->Enable(TDC::MapActivateIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
+		pCmdUI->Enable(TDC::MapActivateIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetActiveTaskView());
 }
 
 void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	FTC_VIEW nOldView = tdc.GetTaskView();
+	FTC_VIEW nOldView = tdc.GetActiveTaskView();
 	FTC_VIEW nNewView = TDC::MapActivateIDToTaskView(nCmdID);
 
 	CLockUpdates lu(*this);
 
 	if (nNewView != nOldView)
-		tdc.SetTaskView(nNewView);
+		tdc.ActivateTaskView(nNewView);
 
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
 		OnMaximizeTasklist();

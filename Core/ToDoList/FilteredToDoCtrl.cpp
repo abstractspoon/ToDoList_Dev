@@ -161,7 +161,7 @@ BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	if (!CTabbedToDoCtrl::LoadTasks(tasks))
 		return FALSE;
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	// save visible state
 	BOOL bHidden = !IsWindowVisible();
@@ -373,7 +373,7 @@ BOOL CFilteredToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
 int CFilteredToDoCtrl::GetFilteredTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
 	// synonym for GetTasks which always returns the filtered tasks
-	return GetTasks(tasks, GetTaskView(), filter);
+	return GetTasks(tasks, GetActiveTaskView(), filter);
 }
 
 FILTER_SHOW CFilteredToDoCtrl::GetFilter() const
@@ -388,7 +388,7 @@ FILTER_SHOW CFilteredToDoCtrl::GetFilter(TDCFILTER& filter) const
 
 void CFilteredToDoCtrl::SetFilter(const TDCFILTER& filter)
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	if (m_bDelayLoaded)
 	{
@@ -521,7 +521,7 @@ BOOL CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit)
 	if (!RefreshTreeFilter())
 		return FALSE;
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{

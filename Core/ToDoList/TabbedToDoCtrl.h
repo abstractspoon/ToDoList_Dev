@@ -68,10 +68,10 @@ public:
 	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 
-	void SetTaskView(FTC_VIEW nView);
-	void SetNextTaskView();
-	FTC_VIEW GetTaskView() const { return m_tabViews.GetActiveView(); }
-	CString GetTaskViewName() const;
+	void ActivateTaskView(FTC_VIEW nView);
+	void ActivateNextTaskView();
+	FTC_VIEW GetActiveTaskView() const { return m_tabViews.GetActiveView(); }
+	CString GetActiveTaskViewName() const;
 	void ShowListViewTab(BOOL bVisible = TRUE);
 	BOOL IsListViewTabShowing() const;
 	void SaveAllTaskViewPreferences();

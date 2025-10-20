@@ -347,7 +347,7 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 	}
 
 	// Likewise for copying column attributes
-	if (tdc.IsExtensionView(tdc.GetTaskView()))
+	if (tdc.IsExtensionView(tdc.GetActiveTaskView()))
 	{
 		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_TASKLIST_COPYCOLUMNVALUES);
 
@@ -441,7 +441,7 @@ void CTDCMainMenu::PrepareTaskViewActivationMenu(CMenu* pMenu, const CFilteredTo
 	helper.AddExtensionsToMenu(pMenu, mgrUIExt, aTypeIDs);
 
 	// Active view
-	int nSelMenuID = TDC::MapTaskViewToActivateID(tdc.GetTaskView());
+	int nSelMenuID = TDC::MapTaskViewToActivateID(tdc.GetActiveTaskView());
 
 	pMenu->CheckMenuRadioItem(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, nSelMenuID, MF_BYCOMMAND);
 }

@@ -420,7 +420,7 @@ LRESULT CTabbedToDoCtrl::OnTDCGetTaskReminder(WPARAM wp, LPARAM lp)
 BOOL CTabbedToDoCtrl::PreTranslateMessage(MSG* pMsg) 
 {
 	// see if an UI extension wants this
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -508,7 +508,7 @@ void CTabbedToDoCtrl::EndSelectedTaskEdit()
 	CToDoCtrl::EndSelectedTaskEdit();
 
 	if (InExtensionView())
-		SyncExtensionSelectionToTree(GetTaskView());
+		SyncExtensionSelectionToTree(GetActiveTaskView());
 }
 
 BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
@@ -522,7 +522,7 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 			return FALSE;
 	}
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -585,7 +585,7 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 void CTabbedToDoCtrl::OnFirstSave(const CTaskFile& tasks)
 {
 	// First-time save - Update the extension views
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	if (IsExtensionView(nView))
 	{
@@ -618,7 +618,7 @@ void CTabbedToDoCtrl::LoadState()
 	RestoreListViewState(prefs, sKey);
 
 	// Last active view
-	FTC_VIEW nCurView = GetTaskView();
+	FTC_VIEW nCurView = GetActiveTaskView();
 	FTC_VIEW nView = (FTC_VIEW)prefs.GetProfileInt(sKey, _T("View"), FTCV_UNSET);
 
 	// 1. Under high DPI displays (For reasons I don't understand) the plugin views 
@@ -639,8 +639,8 @@ void CTabbedToDoCtrl::SaveState()
 	CString sKey = GetPreferencesKey(); // no subkey
 	
 	// Active view
-	if (GetTaskView() != FTCV_UNSET)
-		prefs.WriteProfileInt(sKey, _T("View"), GetTaskView());
+	if (GetActiveTaskView() != FTCV_UNSET)
+		prefs.WriteProfileInt(sKey, _T("View"), GetActiveTaskView());
 
 	SaveListViewState(prefs, sKey);
 	SaveExtensionViewOrder(prefs, sKey);
@@ -1196,7 +1196,7 @@ BOOL CTabbedToDoCtrl::DoIdleProcessing()
 	if (InTreeView())
 		return CToDoCtrl::DoIdleProcessing();
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -1494,10 +1494,10 @@ TDCEXTVIEWDATA* CTabbedToDoCtrl::GetViewData(FTC_VIEW nView) const
 
 TDCEXTVIEWDATA* CTabbedToDoCtrl::GetActiveViewData() const
 {
-	return GetViewData(GetTaskView());
+	return GetViewData(GetActiveTaskView());
 }
 
-void CTabbedToDoCtrl::SetTaskView(FTC_VIEW nView) 
+void CTabbedToDoCtrl::ActivateTaskView(FTC_VIEW nView) 
 {
 	// take a note of what task is currently singly selected
 	// so that we can prevent unnecessary calls to UpdateControls
@@ -1511,7 +1511,7 @@ void CTabbedToDoCtrl::SetTaskView(FTC_VIEW nView)
 		UpdateControls();
 }
 
-void CTabbedToDoCtrl::SetNextTaskView() 
+void CTabbedToDoCtrl::ActivateNextTaskView() 
 {
 	// take a note of what task is currently singly selected
 	// so that we can prevent unnecessary calls to UpdateControls
@@ -1524,9 +1524,9 @@ void CTabbedToDoCtrl::SetNextTaskView()
 		UpdateControls();
 }
 
-CString CTabbedToDoCtrl::GetTaskViewName() const
+CString CTabbedToDoCtrl::GetActiveTaskViewName() const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	if (nView == FTCV_UNSET)
 		nView = FTCV_TASKTREE;
@@ -1539,7 +1539,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 	if (m_bUpdatingExtensions)
 		return 0;
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -1615,7 +1615,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 
 LRESULT CTabbedToDoCtrl::OnUIExtSortChange(WPARAM wParam, LPARAM lParam)
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -1660,7 +1660,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtSortChange(WPARAM wParam, LPARAM lParam)
 
 LRESULT CTabbedToDoCtrl::OnUIExtDoHelp(WPARAM /*wParam*/, LPARAM lParam)
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -2132,7 +2132,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 
 	case TDCA_METADATA:
 		{
-			IUIExtensionWindow* pExtWnd = GetExtensionWnd(GetTaskView());
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(GetActiveTaskView());
 			ASSERT(pExtWnd && pExtWnd->GetHwnd());
 
 			if (pExtWnd)
@@ -2411,7 +2411,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 			if (pMove->bCopy)
 				UpdateExtensionViewsTasks(TDCA_POSITION);
 			else
-				SetExtensionsNeedTaskUpdate(TRUE, GetTaskView());
+				SetExtensionsNeedTaskUpdate(TRUE, GetActiveTaskView());
 		}
 	}
 	catch (...)
@@ -2454,7 +2454,7 @@ void CTabbedToDoCtrl::ReposTaskCtrl(const CRect& rTasks)
 
 void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	int nShow = (bShow ? SW_SHOW : SW_HIDE);
 
 	switch (nView)
@@ -2511,7 +2511,7 @@ BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_tabViews.GetSafeHwnd())
 	{
-		FTC_VIEW nView = GetTaskView();
+		FTC_VIEW nView = GetActiveTaskView();
 
 		switch (nView)
 		{
@@ -2573,7 +2573,7 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 
 	if (nState != nPrevState)
 	{
-		FTC_VIEW nView = GetTaskView();
+		FTC_VIEW nView = GetActiveTaskView();
 		
 		switch (nView)
 		{
@@ -2620,7 +2620,7 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 
 BOOL CTabbedToDoCtrl::WantTaskContextMenu() const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	return (ViewSupportsNewTask(nView) || ViewHasTaskSelection(nView));
 }
@@ -2628,7 +2628,7 @@ BOOL CTabbedToDoCtrl::WantTaskContextMenu() const
 BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 {
 	rSelection.SetRectEmpty();
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	if (!ViewHasTaskSelection(nView))
 		return FALSE;
@@ -2682,7 +2682,7 @@ BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 
 BOOL CTabbedToDoCtrl::CanSelectAll() const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -2727,7 +2727,7 @@ BOOL CTabbedToDoCtrl::CanSelectAll() const
 
 void CTabbedToDoCtrl::SelectAll()
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -2819,12 +2819,12 @@ int CTabbedToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedT
 
 int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
-	return GetTasks(tasks, GetTaskView(), filter);
+	return GetTasks(tasks, GetActiveTaskView(), filter);
 }
 
 int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
-	return GetSelectedTasks(tasks, GetTaskView(), filter);
+	return GetSelectedTasks(tasks, GetActiveTaskView(), filter);
 }
 
 int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const
@@ -2919,7 +2919,7 @@ void CTabbedToDoCtrl::SetEditTitleTaskID(DWORD dwTaskID)
 
 DWORD CTabbedToDoCtrl::HitTestTask(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -3176,7 +3176,7 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 		CString sKey = GetPreferencesKey(_T("UIExtensions"));
 		
 		int nExt = m_aExtViews.GetSize();
-		FTC_VIEW nCurView = GetTaskView();
+		FTC_VIEW nCurView = GetActiveTaskView();
 
 		while (nExt--)
 		{
@@ -3262,7 +3262,7 @@ void CTabbedToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 
 CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	HWND hwndView = m_tabViews.GetViewHwnd(nView);
 
 	// Task view tab-bar just returns the active task view
@@ -3311,7 +3311,7 @@ CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 
 DWORD CTabbedToDoCtrl::GetNextNonSelectedTaskID() const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	DWORD dwNextSelID = 0;
 
 	switch (nView)
@@ -3352,7 +3352,7 @@ DWORD CTabbedToDoCtrl::GetNextNonSelectedTaskID() const
 
 DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -3453,7 +3453,7 @@ TODOITEM* CTabbedToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 	}
 
 	// give active extension view a chance to initialise
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -3497,7 +3497,7 @@ TODOITEM* CTabbedToDoCtrl::CreateNewTask(HTREEITEM htiParent)
 
 BOOL CTabbedToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	// locations requiring a selected task
 	switch (nInsertWhere)
@@ -3742,7 +3742,7 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	CTDCAttributeMap mapExtAttribIDs(mapAttribIDs);
 	PrepareAttributesForExtensionViewUpdate(mapExtAttribIDs);
 
-	switch (GetTaskView())
+	switch (GetActiveTaskView())
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
@@ -3962,7 +3962,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 	if (!HasAnyExtensionViews() || mapAttribIDs.Has(TDCA_NONE))
 		return;
 
-	FTC_VIEW nCurView = GetTaskView();
+	FTC_VIEW nCurView = GetActiveTaskView();
 
 	if (mapAttribIDs.Has(TDCA_NEWTASK))
 	{
@@ -4120,7 +4120,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 		   mapAttribIDs.HasOnly(TDCA_POSITION_SAMEPARENT) ||
 		   mapAttribIDs.HasOnly(TDCA_POSITION_DIFFERENTPARENT));
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	if (IsExtensionView(nView))
 	{
@@ -4189,7 +4189,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	// then we've nothing to do
 	if (AllExtensionViewsNeedFullUpdate())
 	{
-		ASSERT(!IsExtensionView(GetTaskView()));
+		ASSERT(!IsExtensionView(GetActiveTaskView()));
 		return;
 	}
 
@@ -4267,7 +4267,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 				UpdateExtensionView(pExtWnd, tasks, nUpdate);
 				nNumUpdated++;
 
-				if (nExtView == GetTaskView())
+				if (nExtView == GetActiveTaskView())
 					SyncExtensionSelectionToTree(nExtView);
 			}
 			else
@@ -4409,7 +4409,7 @@ int CTabbedToDoCtrl::GetExtensionViewWantedChanges(int nExt, const CTDCAttribute
 
 BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttribID) const
 {
-	FTC_VIEW nCurView = GetTaskView();
+	FTC_VIEW nCurView = GetActiveTaskView();
 	FTC_VIEW nExtView = GetExtensionView(nExt);
 
 	const TDCEXTVIEWDATA* pVData = GetViewData(nExtView);
@@ -4540,7 +4540,7 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 	BOOL bTreeNeedsResort = m_taskTree.ModsNeedResort(mapAttribIDs);
 	BOOL bListNeedsResort = m_taskList.ModsNeedResort(mapAttribIDs);
 	
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -4618,7 +4618,7 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 
 const TDSORT& CTabbedToDoCtrl::GetSort() const 
 { 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -4684,7 +4684,7 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTaskLink)
 	if (!HandleUnsavedComments())
 		return FALSE;
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	TDCEXTVIEWDATA* pVData = GetViewData(nView);
 	
 	switch (nView)
@@ -4745,7 +4745,7 @@ BOOL CTabbedToDoCtrl::SetTreeFont(HFONT hFont)
 	if (CToDoCtrl::SetTreeFont(hFont))
 	{
 		// Update other views
-		FTC_VIEW nView = GetTaskView();
+		FTC_VIEW nView = GetActiveTaskView();
 
 		switch (nView)
 		{
@@ -4937,7 +4937,7 @@ void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON nReason) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -4997,7 +4997,7 @@ TDC_HITTEST CTabbedToDoCtrl::HitTest(const CPoint& ptScreen, TDC_HITTESTREASON n
 
 TDC_COLUMN CTabbedToDoCtrl::HitTestColumn(const CPoint& ptScreen) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -5036,7 +5036,7 @@ int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 {
 	mapColIDs.RemoveAll();
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -5091,7 +5091,7 @@ void CTabbedToDoCtrl::Resort(BOOL bAllowToggle)
 	if (m_bLoadingTasks && !InTreeView())
 		return;
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -5141,7 +5141,7 @@ void CTabbedToDoCtrl::Resort(BOOL bAllowToggle)
 
 BOOL CTabbedToDoCtrl::IsSortingBy(TDC_COLUMN nBy) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -5195,7 +5195,7 @@ void CTabbedToDoCtrl::MultiSort(const TDSORTCOLUMNS& sort)
 		return;
 	}
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -5279,7 +5279,7 @@ void CTabbedToDoCtrl::RefreshExtensionViewSort(FTC_VIEW nView)
 
 BOOL CTabbedToDoCtrl::CanMultiSort() const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -5314,7 +5314,7 @@ BOOL CTabbedToDoCtrl::CanMultiSort() const
 
 void CTabbedToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -5389,7 +5389,7 @@ void CTabbedToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 
 BOOL CTabbedToDoCtrl::CanSortBy(TDC_COLUMN nBy) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -5451,7 +5451,7 @@ BOOL CTabbedToDoCtrl::ExtensionCanSortBy(FTC_VIEW nView, TDC_ATTRIBUTE nBy) cons
 
 BOOL CTabbedToDoCtrl::CanMoveSelectedTask(TDC_MOVETASK nDirection) const 
 { 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -5508,7 +5508,7 @@ BOOL CTabbedToDoCtrl::CanMoveSelectedTask(TDC_MOVETASK nDirection) const
 
 BOOL CTabbedToDoCtrl::MoveSelectedTask(TDC_MOVETASK nDirection) 
 { 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -5696,7 +5696,7 @@ BOOL CTabbedToDoCtrl::GotoNextTask(TDC_GOTO nDirection)
 		return FALSE;
 	}
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -5755,7 +5755,7 @@ TTC_NEXTTASK CTabbedToDoCtrl::MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLev
 
 BOOL CTabbedToDoCtrl::CanGotoNextTask(TDC_GOTO nDirection) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -5800,7 +5800,7 @@ BOOL CTabbedToDoCtrl::GotoNextTopLevelTask(TDC_GOTO nDirection)
 {
 	ASSERT(CanGotoNextTopLevelTask(nDirection));
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -5844,7 +5844,7 @@ BOOL CTabbedToDoCtrl::GotoNextTopLevelTask(TDC_GOTO nDirection)
 
 BOOL CTabbedToDoCtrl::CanGotoNextTopLevelTask(TDC_GOTO nDirection) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -5887,7 +5887,7 @@ BOOL CTabbedToDoCtrl::CanGotoNextTopLevelTask(TDC_GOTO nDirection) const
 
 void CTabbedToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -5950,7 +5950,7 @@ void CTabbedToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 
 BOOL CTabbedToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const 
 { 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6012,7 +6012,7 @@ BOOL CTabbedToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) con
 
 int CTabbedToDoCtrl::GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom, int nTo) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6206,7 +6206,7 @@ HTREEITEM CTabbedToDoCtrl::GetUpdateControlsItem() const
 {
 	HTREEITEM hti = CToDoCtrl::GetUpdateControlsItem();
 
-	if (!ViewHasTaskSelection(GetTaskView()))
+	if (!ViewHasTaskSelection(GetActiveTaskView()))
 		hti = NULL;
 
 	return hti;
@@ -6214,7 +6214,7 @@ HTREEITEM CTabbedToDoCtrl::GetUpdateControlsItem() const
 
 CString CTabbedToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMaxTasks) const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6255,7 +6255,7 @@ CString CTabbedToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, in
 
 int CTabbedToDoCtrl::GetSelectedTaskCount() const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6286,7 +6286,7 @@ int CTabbedToDoCtrl::GetSelectedTaskCount() const
 BOOL CTabbedToDoCtrl::ScrollToSelectedTask() 
 {
 	// else
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6328,7 +6328,7 @@ void CTabbedToDoCtrl::SetFocus(TDC_SETFOCUSTO nLocation)
 		return;
 	}
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6389,7 +6389,7 @@ BOOL CTabbedToDoCtrl::HasFocus(TDC_SETFOCUSTO nLocation) const
 	if (nLocation != TDCSF_TASKVIEW)
 		return CToDoCtrl::HasFocus(nLocation);
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6428,7 +6428,7 @@ BOOL CTabbedToDoCtrl::HasFocus(TDC_SETFOCUSTO nLocation) const
 int CTabbedToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const
 {
 	aResults.RemoveAll();
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6488,7 +6488,7 @@ BOOL CTabbedToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttribID) const
 	if (!CToDoCtrl::CanDoFindReplace(nAttribID))
 		return FALSE;
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6525,7 +6525,7 @@ BOOL CTabbedToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttribID) const
 BOOL CTabbedToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, 
 									BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace)
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6666,7 +6666,7 @@ BOOL CTabbedToDoCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 
 void CTabbedToDoCtrl::SyncActiveViewSelectionToTree()
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6829,7 +6829,7 @@ BOOL CTabbedToDoCtrl::SelectTasksInHistory(BOOL bForward)
 
 void CTabbedToDoCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -6928,7 +6928,7 @@ LRESULT CTabbedToDoCtrl::OnMidnight(WPARAM wParam, LPARAM lParam)
 		CAutoFlag af(m_bUpdatingExtensions, TRUE);
 
 		int nExt = m_aExtViews.GetSize();
-		FTC_VIEW nCurView = GetTaskView();
+		FTC_VIEW nCurView = GetActiveTaskView();
 
 		while (nExt--)
 		{
@@ -7004,7 +7004,7 @@ LRESULT CTabbedToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 
 	TLDT_DATA* pData = (TLDT_DATA*)wParam;
 	CWnd* pTarget = (CWnd*)lParam;
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -7060,7 +7060,7 @@ LRESULT CTabbedToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 
 BOOL CTabbedToDoCtrl::GetLabelEditRect(CRect& rScreen)
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 
 	switch (nView)
 	{
@@ -7141,22 +7141,22 @@ HTREEITEM CTabbedToDoCtrl::LoadTasksState(const CPreferences& prefs, BOOL bRebui
 
 BOOL CTabbedToDoCtrl::IsViewSet() const 
 { 
-	return (GetTaskView() != FTCV_UNSET); 
+	return (GetActiveTaskView() != FTCV_UNSET); 
 }
 
 BOOL CTabbedToDoCtrl::InListView() const 
 { 
-	return (GetTaskView() == FTCV_TASKLIST); 
+	return (GetActiveTaskView() == FTCV_TASKLIST); 
 }
 
 BOOL CTabbedToDoCtrl::InTreeView() const 
 { 
-	return ((GetTaskView() == FTCV_TASKTREE) || !IsViewSet()); 
+	return ((GetActiveTaskView() == FTCV_TASKTREE) || !IsViewSet()); 
 }
 
 BOOL CTabbedToDoCtrl::InExtensionView() const
 {
-	return IsExtensionView(GetTaskView());
+	return IsExtensionView(GetActiveTaskView());
 }
 
 BOOL CTabbedToDoCtrl::IsExtensionView(FTC_VIEW nView)
@@ -7260,7 +7260,7 @@ int CTabbedToDoCtrl::GetVisibleTaskViews(CStringArray& aTypeIDs) const
 
 BOOL CTabbedToDoCtrl::CanResizeAttributeColumnsToFit() const
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -7296,7 +7296,7 @@ BOOL CTabbedToDoCtrl::CanResizeAttributeColumnsToFit() const
 
 void CTabbedToDoCtrl::ResizeAttributeColumnsToFit()
 {
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -7348,7 +7348,7 @@ void CTabbedToDoCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 LRESULT CTabbedToDoCtrl::OnRestoreLastTaskView(WPARAM nCurView, LPARAM nNewView)
 {
 	if (((FTC_VIEW)nNewView != FTCV_UNSET) && ((FTC_VIEW)nNewView != (FTC_VIEW)nCurView))
-		SetTaskView((FTC_VIEW)nNewView);
+		ActivateTaskView((FTC_VIEW)nNewView);
 
 	m_tabViews.EnsureSelVisible();
 	
@@ -7385,7 +7385,7 @@ BOOL CTabbedToDoCtrl::SaveTaskViewToImage(const CString& sFilePath)
 	if (!CanSaveTaskViewToImage())
 		return FALSE;
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
@@ -7432,7 +7432,7 @@ BOOL CTabbedToDoCtrl::CanSaveTaskViewToImage() const
 	if (!CToDoCtrl::CanSaveTaskViewToImage())
 		return FALSE;
 
-	FTC_VIEW nView = GetTaskView();
+	FTC_VIEW nView = GetActiveTaskView();
 	
 	switch (nView)
 	{
