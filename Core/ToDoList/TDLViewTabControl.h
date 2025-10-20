@@ -57,6 +57,9 @@ public:
 	BOOL ShowViewTab(FTC_VIEW nView, BOOL bShow = TRUE);
 	BOOL IsViewTabShowing(FTC_VIEW nView) const;
 
+	int GetVisibleViews(CTDCViewArray& aVisible) const;
+	void SetVisibleViews(const CTDCViewArray& aVisible);
+
 	int GetViewOrder(CTDCViewArray& aViewOrder) const;
 	void SetViewOrder(const CTDCViewArray& aViewOrder);
 
@@ -86,7 +89,7 @@ protected:
 		IVIEWTABDATA* pVData;
 		int nVertOffset;
 	};
-	CArray<TDCVIEW, TDCVIEW&> m_aViews;
+	CArray<TDCVIEW, TDCVIEW&> m_aViews; // Master list of all views
 
 	int m_nSelTab;
 	BOOL m_bShowingTabs;

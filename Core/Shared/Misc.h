@@ -446,7 +446,6 @@ namespace Misc
 		return (FindT<T, S>(toFind, aValues) != -1);
 	}
 
-
 	template <class T> 
 	BOOL RemoveLastT(T& aValues)
 	{

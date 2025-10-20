@@ -689,3 +689,35 @@ void CTDLViewTabControl::SetViewOrder(const CTDCViewArray& aViewOrder)
 	m_nSelTab = GetCurSel();
 	EnsureSelVisible();
 }
+
+int CTDLViewTabControl::GetVisibleViews(CTDCViewArray& aVisible) const
+{
+	return GetViewOrder(aVisible);
+}
+
+void CTDLViewTabControl::SetVisibleViews(const CTDCViewArray& aVisible)
+{
+	// We have to cycle through all the views
+	int nIndex = m_aViews.GetSize();
+
+	while (nIndex--)
+	{
+		const TDCVIEW& view = m_aViews.GetAt(nIndex);
+		BOOL bIsVis = IsViewTabShowing(view.nView);
+
+		// Task tree is always visible
+		if (view.nView == FTCV_TASKTREE)
+		{
+			ASSERT(bIsVis);
+			continue;
+		}
+
+		int bWantVis = Misc::HasT(view.nView, aVisible);
+
+		if (Misc::StatesDiffer(bIsVis, bWantVis))
+		{
+			ASSERT(view.nView != FTCV_TASKTREE);
+			ShowViewTab(view.nView, bWantVis);
+		}
+	}
+}

@@ -611,7 +611,7 @@ void CTabbedToDoCtrl::LoadState()
 	CString sKey = GetPreferencesKey(); // no subkey
 
 	RestoreHiddenExtensions(prefs, sKey);
-	RestoreExtensionViewOrder(prefs, sKey);
+	RestoreTabViewOrder(prefs, sKey);
 
 	// Restore list view after hidden extensions
 	// because it handles its own visibility
@@ -664,70 +664,45 @@ void CTabbedToDoCtrl::RestoreListViewState(const CPreferences& prefs, const CStr
 	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
 	m_taskList.SetGroupBy(m_nListViewGroupBy, HasListOption(LVO_SORTGROUPSASCENDING), HasListOption(LVO_SORTNONEGROUPBELOW));
 
-	if (!prefs.GetProfileInt(sKey, _T("ListViewVisible"), TRUE))
-		m_tabViews.ShowViewTab(FTCV_TASKLIST, FALSE);
+	ShowListViewTab(prefs.GetProfileInt(sKey, _T("ListViewVisible"), TRUE));
 }
 
 void CTabbedToDoCtrl::SaveExtensionViewOrder(CPreferences& prefs, const CString& sKey) const
 {
-	CTDCViewArray aViewOrder;
-	int nTab = m_tabViews.GetViewOrder(aViewOrder);
+	CTDCViewArray aViews;
+	int nTab = m_tabViews.GetViewOrder(aViews);
 
 	CStringArray aTypeIDs;
-
-	while (nTab--)
-	{
-		FTC_VIEW nView = aViewOrder[nTab];
-
-		// Extensions may get added in later releases so
-		// the 'view id' is not enough to identify extensions
-		if (IsExtensionView(aViewOrder[nTab]))
-			aTypeIDs.InsertAt(0, GetViewData(nView)->pExtension->GetTypeID());
-		else 
-			aTypeIDs.InsertAt(0, Misc::Format(nView));
-	}
+	MapViewsToTypeIDs(aViews, aTypeIDs, m_mgrUIExt);
 
 	prefs.WriteProfileArray(sKey + _T("\\ViewOrder"), aTypeIDs);
 }
 
-void CTabbedToDoCtrl::RestoreExtensionViewOrder(const CPreferences& prefs, const CString& sKey)
+void CTabbedToDoCtrl::RestoreTabViewOrder(const CPreferences& prefs, const CString& sKey)
 {
 	CStringArray aTypeIDs;
 
 	if (prefs.GetProfileArray(sKey + _T("\\ViewOrder"), aTypeIDs))
 	{
-		CTDCViewArray aViewOrder;
-		int nExt = aTypeIDs.GetSize();
+		CTDCViewArray aViews;
+		MapTypeIDsToViews(aTypeIDs, aViews, m_mgrUIExt);
 
-		while (nExt--)
-		{
-			CString sTypeID = aTypeIDs[nExt];
-
-			// Extensions may get added in later releases so
-			// the 'view id' is not enough to identify extensions
-			int nExt = m_mgrUIExt.FindUIExtension(sTypeID);
-
-			if (nExt != -1)
-				aViewOrder.InsertAt(0, (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt));
-			else
-				aViewOrder.InsertAt(0, (FTC_VIEW)_ttoi(sTypeID));
-		}
-
-		m_tabViews.SetViewOrder(aViewOrder);
+		m_tabViews.SetViewOrder(aViews);
 	}
 }
 
 void CTabbedToDoCtrl::SaveHiddenExtensions(CPreferences& prefs, const CString& sKey) const
 {
+	// Get all the available extensions
 	CStringArray aTypeIDs;
 	m_mgrUIExt.GetExtensionTypeIDs(aTypeIDs);
 
+	// Remove the visible extensions
 	CStringArray aVisTypeIDs;
 	GetVisibleTaskViews(aVisTypeIDs);
-
-	// remove visible items to leave hidden ones
 	Misc::RemoveItems(aVisTypeIDs, aTypeIDs);
 
+	// Save them
 	prefs.WriteProfileArray(sKey + _T("\\HiddenExtensions"), aTypeIDs);
 
 	// Cleanup old settings
@@ -7013,7 +6988,6 @@ LRESULT CTabbedToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 		CToDoCtrl::OnDropObject(wParam, lParam);
 		break;
 
-
  	case FTCV_TASKLIST:
 		if (pTarget == &m_taskList.List())
 		{
@@ -7192,7 +7166,6 @@ BOOL CTabbedToDoCtrl::IsExtensionView(HWND hWnd) const
 
 	// else
 	return FALSE;
-
 }
 
 void CTabbedToDoCtrl::ShowListViewTab(BOOL bVisible)
@@ -7207,55 +7180,85 @@ BOOL CTabbedToDoCtrl::IsListViewTabShowing() const
 
 void CTabbedToDoCtrl::SetVisibleTaskViews(const CStringArray& aTypeIDs)
 {
-	// Excludes the task tree which can never be hidden
-	ASSERT(GetSafeHwnd());
+	CTDCViewArray aViews;
+	MapTypeIDsToViews(aTypeIDs, aViews, m_mgrUIExt);
 
-	int nExt = m_mgrUIExt.GetNumUIExtensions();
-
-	while (nExt--)
-	{
-		FTC_VIEW nView = (FTC_VIEW)(FTCV_UIEXTENSION1 + nExt);
-
-		TDCEXTVIEWDATA* pVData = GetViewData(nView);
-		ASSERT(pVData);
-
-		// update tab control
-		CString sTypeID = m_mgrUIExt.GetUIExtensionTypeID(nExt);
-		BOOL bVisible = Misc::Contains(sTypeID, aTypeIDs, FALSE, TRUE);
-
-		m_tabViews.ShowViewTab(nView, bVisible);
-	}
-
-	ShowListViewTab(Misc::Contains(LISTVIEW_TYPE, aTypeIDs, FALSE, TRUE));
-
-	// Sanity check (-1 for tree)
-	ASSERT((m_tabViews.GetItemCount() - 1) == aTypeIDs.GetSize());
+	m_tabViews.SetVisibleViews(aViews);
 }
 
 int CTabbedToDoCtrl::GetVisibleTaskViews(CStringArray& aTypeIDs) const
 {
-	// Excludes the task tree which can never be hidden
-	ASSERT(GetSafeHwnd());
+	CTDCViewArray aViews;
+	m_tabViews.GetVisibleViews(aViews);
 
-	aTypeIDs.RemoveAll();
-
-	int nExt = m_mgrUIExt.GetNumUIExtensions();
-
-	while (nExt--)
-	{
-		FTC_VIEW nView = (FTC_VIEW)(FTCV_UIEXTENSION1 + nExt);
-
-		if (m_tabViews.IsViewTabShowing(nView))
-			aTypeIDs.Add(m_mgrUIExt.GetUIExtensionTypeID(nExt));
-	}
-
-	if (IsListViewTabShowing())
-		aTypeIDs.Add(LISTVIEW_TYPE);
-
-	// Sanity check (-1 for tree)
-	ASSERT((m_tabViews.GetItemCount() - 1) == aTypeIDs.GetSize());
+	MapViewsToTypeIDs(aViews, aTypeIDs, m_mgrUIExt);
 
 	return aTypeIDs.GetSize();
+}
+
+void CTabbedToDoCtrl::MapTypeIDsToViews(const CStringArray& aTypeIDs, CTDCViewArray& aViews, const CUIExtensionMgr& mgr)
+{
+	int nID = aTypeIDs.GetSize();
+	aViews.SetSize(nID);
+
+	while (nID--)
+		aViews[nID] = GetViewFromTypeID(aTypeIDs[nID], mgr);
+}
+
+void CTabbedToDoCtrl::MapViewsToTypeIDs(const CTDCViewArray& aViews, CStringArray& aTypeIDs, const CUIExtensionMgr& mgr)
+{
+	int nView = aViews.GetSize();
+	aTypeIDs.SetSize(nView);
+
+	while (nView--)
+		aTypeIDs[nView] = GetTypeIDFromView(aViews[nView], mgr);
+}
+
+CString CTabbedToDoCtrl::GetTypeIDFromView(FTC_VIEW nView, const CUIExtensionMgr& mgr)
+{
+	switch (nView)
+	{
+	case FTCV_TASKTREE: return TASKTREE_TYPEID;
+	case FTCV_TASKLIST: return LISTVIEW_TYPEID;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		return mgr.GetUIExtensionTypeID(nView - FTCV_FIRSTUIEXTENSION);
+	}
+
+	ASSERT(0);
+	return _T("");
+}
+
+FTC_VIEW CTabbedToDoCtrl::GetViewFromTypeID(const CString& sTypeID, const CUIExtensionMgr& mgr)
+{
+	if (sTypeID == TASKTREE_TYPEID)
+		return FTCV_TASKTREE;
+
+	if (sTypeID == LISTVIEW_TYPEID)
+		return FTCV_TASKLIST;
+
+	int nExt = mgr.FindUIExtension(sTypeID);
+
+	if (nExt != -1)
+		return (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+
+	ASSERT(0);
+	return FTCV_UNSET;
 }
 
 BOOL CTabbedToDoCtrl::CanResizeAttributeColumnsToFit() const
@@ -7351,7 +7354,6 @@ LRESULT CTabbedToDoCtrl::OnRestoreLastTaskView(WPARAM nCurView, LPARAM nNewView)
 		ActivateTaskView((FTC_VIEW)nNewView);
 
 	m_tabViews.EnsureSelVisible();
-	
 	return 0L;
 }
 

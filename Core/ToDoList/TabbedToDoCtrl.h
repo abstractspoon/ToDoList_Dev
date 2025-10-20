@@ -351,7 +351,7 @@ protected:
 	void SaveExtensionViewOrder(CPreferences& prefs, const CString& sKey) const;
 	void SaveHiddenExtensions(CPreferences& prefs, const CString& sKey) const;
 	void SaveListViewState(CPreferences& prefs, const CString& sKey) const;
-	void RestoreExtensionViewOrder(const CPreferences& prefs, const CString& sKey);
+	void RestoreTabViewOrder(const CPreferences& prefs, const CString& sKey);
 	void RestoreHiddenExtensions(const CPreferences& prefs, const CString& sKey);
 	void RestoreListViewState(const CPreferences& prefs, const CString& sKey);
 
@@ -362,6 +362,11 @@ protected:
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);
 	static void PrepareAttributesForExtensionViewUpdate(CTDCAttributeMap& mapAttribIDs);
+
+	static void MapTypeIDsToViews(const CStringArray& aTypeIDs, CTDCViewArray& aViews, const CUIExtensionMgr& mgr);
+	static void MapViewsToTypeIDs(const CTDCViewArray& aViews, CStringArray& aTypeIDs, const CUIExtensionMgr& mgr);
+	static CString GetTypeIDFromView(FTC_VIEW nView, const CUIExtensionMgr& mgr);
+	static FTC_VIEW GetViewFromTypeID(const CString& sTypeID, const CUIExtensionMgr& mgr);
 
 };
 
