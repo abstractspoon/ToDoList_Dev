@@ -920,8 +920,8 @@
 #define ID_EDIT_TASKTEXT                32806
 #define ID_EDIT_TOGGLETASKDONE          32807
 #define ID_EDIT_TASKCOLOR               32808
-#define ID_MOVETASKUP                   32809
-#define ID_MOVETASKDOWN                 32810
+#define ID_MOVE_TASKUP                  32809
+#define ID_MOVE_TASKDOWN                32810
 #define ID_TRAYICON_CLOSE               32811
 #define ID_SAVEAS                       32813
 #define ID_SAVE_NORMAL                  32816
@@ -935,8 +935,8 @@
 #define ID_ARCHIVE_COMPLETEDTASKS       32842
 #define ID_PRINT                        32847
 #define ID_TDD_MOVETASK                 32848
-#define ID_MOVETASKLEFT                 32849
-#define ID_MOVETASKRIGHT                32850
+#define ID_MOVE_TASKLEFT                32849
+#define ID_MOVE_TASKRIGHT               32850
 #define ID_CLOSE                        32851
 #define ID_SAVEALL                      32852
 #define ID_CLOSEALL                     32853
@@ -994,8 +994,8 @@
 #define ID_NEXTTOPLEVELTASK             32932
 #define ID_PREVTOPLEVELTASK             32933
 #define ID_EDIT_FINDTASKS               32934
-#define ID_VIEW_MOVETASKLISTLEFT        32938
-#define ID_VIEW_MOVETASKLISTRIGHT       32939
+#define ID_MOVE_TASKLISTTABLEFT         32938
+#define ID_MOVE_TASKLISTTABRIGHT        32939
 #define ID_TOOLS_SHOWTASKS_DUETODAY     32941
 #define ID_TOOLS_SHOWTASKS_DUETOMORROW  32942
 #define ID_TOOLS_SHOWTASKS_DUEENDTHISWEEK 32943
@@ -1046,7 +1046,7 @@
 #define ID_WINDOW15                     33020
 #define ID_WINDOW16                     33021
 #define ID_TOOLS_TRANSFORM              33024
-#define ID_VIEW_SORTTASKLISTTABS        33025
+#define ID_MOVE_SORTTASKLISTTABS        33025
 #define ID_EDIT_DECTASKPRIORITY         33026
 #define ID_EDIT_INCTASKPRIORITY         33027
 #define ID_EDIT_INCTASKPERCENTDONE      33028

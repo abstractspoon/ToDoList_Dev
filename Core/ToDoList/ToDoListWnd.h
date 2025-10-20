@@ -562,8 +562,8 @@ protected:
 	afx_msg void OnUpdateViewHideAllBars(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewMainToolbar(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateViewMovetasklistleft(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateViewMovetasklistright(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateMovetasklistleft(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateMovetasklistright(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewNext(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewNextSel(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewPrev(CCmdUI* pCmdUI);
@@ -577,7 +577,7 @@ protected:
 	afx_msg void OnUpdateViewShowTasklistTabbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowTreeListTabbar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowfilterbar(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateViewSorttasklisttabs(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSorttasklisttabs(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewStatusBar(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewToggleTreeandList(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewTogglefilter(CCmdUI* pCmdUI);
