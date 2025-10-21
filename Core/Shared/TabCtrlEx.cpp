@@ -22,7 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int DROPMARK_WIDTH	= 2;
+const int DROPMARK_WIDTH	= GraphicsMisc::ScaleByDPIFactor(2);
 const int COLORBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(3);
 const int PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
 const int SIZE_CLOSEBTN		= (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::WantDPIScaling() ? 1 : 0));
@@ -1247,7 +1247,8 @@ void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 	if (!IsDragging() || !HasTabMoved())
 		return;
 
-	// Draw as I-Beam
+	// Draw as a vertical bar with right or left facing 
+	// triangle depending on direction of drag
 	CRect rVert;
 	GetItemRect(0, rVert); // only need top and bottom
 
@@ -1259,17 +1260,34 @@ void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 
 	rVert.right = (rVert.left + DROPMARK_WIDTH);
 
+	pDC->SelectStockObject(BLACK_BRUSH);
 	pDC->SelectStockObject(BLACK_PEN);
 	pDC->Rectangle(rVert);
 
-	CRect rTop(rVert);
-	rTop.InflateRect(DROPMARK_WIDTH, 0);
-	rTop.bottom = rTop.top + DROPMARK_WIDTH;
-	pDC->Rectangle(rTop);
+	// Triangle
+	BOOL bRightFacing = (m_nDragTab < m_nDropTab);
+	POINT ptTri[3] = { 0 };
 
-	CRect rBot(rTop);
-	rBot.OffsetRect(0, rVert.Height() - DROPMARK_WIDTH);
-	pDC->Rectangle(rBot);
+	const int nTriSize = (2 * DROPMARK_WIDTH);
+
+	if (bRightFacing)
+	{
+		ptTri[0].x = rVert.left;
+		ptTri[1].x = (ptTri[0].x - nTriSize);
+	}
+	else
+	{
+		ptTri[0].x = rVert.right;
+		ptTri[1].x = (ptTri[0].x + nTriSize);
+	}
+
+	ptTri[0].y = rVert.CenterPoint().y;
+	ptTri[1].y = (ptTri[0].y - nTriSize);
+
+	ptTri[2] = ptTri[1];
+	ptTri[2].y += (2 * nTriSize);
+	
+	pDC->Polygon(ptTri, 3);
 }
 
 BOOL CTabCtrlEx::HasTabMoved() const
