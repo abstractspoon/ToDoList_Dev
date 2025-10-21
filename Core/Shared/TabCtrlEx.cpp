@@ -23,11 +23,15 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const int DROPMARK_WIDTH	= GraphicsMisc::ScaleByDPIFactor(2);
+const int DRAGSCROLL_WIDTH	= GraphicsMisc::ScaleByDPIFactor(50);
 const int COLORBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(3);
 const int PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
 const int SIZE_CLOSEBTN		= (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::WantDPIScaling() ? 1 : 0));
 
 const UINT WM_TCMUPDATETABWIDTH = (WM_USER + 1);
+
+const UINT ID_DRAGSCROLL_TIMER = 1;
+const UINT DRAGSCROLL_INTERVAL = 200;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTabCtrlEx
@@ -65,9 +69,11 @@ BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_WM_SIZE()
-	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_WM_ERASEBKGND()
+	ON_WM_TIMER()
+
 	ON_NOTIFY_REFLECT_EX(TCN_SELCHANGE, OnTabSelChange)
+	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_MESSAGE(TCM_INSERTITEM, OnChangeTabItem)
 	ON_MESSAGE(TCM_SETITEM, OnChangeTabItem)
 	ON_MESSAGE(TCM_DELETEITEM, OnChangeTabItem)
@@ -669,6 +675,13 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 			m_ilDragImage.DragShowNolock(TRUE);
 		}
 
+		// If the mouse is within DRAGSCROLL_WIDTH distance
+		// of the client edges and the spin control is
+		// visible then set a timer for auto-scrolling
+		if (HitTestDragScrollZone(point) != 0)
+			SetTimer(ID_DRAGSCROLL_TIMER, DRAGSCROLL_INTERVAL, NULL);
+
+		// Last action because it modifies point
 		ClientToScreen(&point);
 		m_ilDragImage.DragMove(point);
 	}
@@ -699,6 +712,60 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 			m_nMouseInCloseButton = nTab;
 		}
 	}	
+}
+
+int CTabCtrlEx::HitTestDragScrollZone(CPoint pt) const
+{
+	if (!IsDragging() || (m_nDropTab == -1) || !HasSpinButtonCtrl())
+		return 0;
+
+	// Left check is very simple
+	if (pt.x < DRAGSCROLL_WIDTH)
+		return -1;
+
+	// Right check
+	if (HitTest(pt) != -1)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		// Exclude the spin button ctrl
+		CRect rSpin;
+		GetSpinButtonCtrl()->GetClientRect(rSpin);
+
+		rClient.right -= rSpin.Width();
+
+		if ((pt.x < rClient.right) && (pt.x > (rClient.right - DRAGSCROLL_WIDTH)))
+			return 1;
+	}
+
+	// All else
+	return 0;
+}
+
+void CTabCtrlEx::OnTimer(UINT nIDEvent)
+{
+	ASSERT(nIDEvent == ID_DRAGSCROLL_TIMER);
+
+	CPoint ptMouse = ::GetMessagePos();
+	ScreenToClient(&ptMouse);
+
+	int nHit = HitTestDragScrollZone(ptMouse);
+
+	if (nHit == 0)
+	{
+		KillTimer(ID_DRAGSCROLL_TIMER);
+		return;
+	}
+
+	int nOldPos = GetScrollPos();
+	int nNewPos = (nOldPos + nHit);
+
+	if (nNewPos >= 0)
+	{
+		SendMessage(WM_HSCROLL, MAKELPARAM(SB_THUMBPOSITION, nNewPos));
+		Invalidate(FALSE);
+	}
 }
 
 LRESULT CTabCtrlEx::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)

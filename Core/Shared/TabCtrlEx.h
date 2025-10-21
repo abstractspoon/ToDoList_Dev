@@ -132,6 +132,7 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnTimer(UINT nIDEvent);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -161,6 +162,7 @@ protected:
 	CString GetRequiredTabText(int nTab, const CString& sCurText);
 	COLORREF GetItemBkColor(int nTab);
 	COLORREF GetItemTagColor(int nTab);
+	int HitTestDragScrollZone(CPoint pt) const; // -1, 0, 1
 
 	void DrawTabDropMark(CDC* pDC);
 	void DrawTabCloseButton(CDC* pDC, int nTab);
