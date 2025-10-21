@@ -1314,47 +1314,37 @@ void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 	if (!IsDragging() || !HasTabMoved())
 		return;
 
-	// Draw as a vertical bar with right or left facing 
-	// triangle depending on direction of drag
-	CRect rVert;
-	GetItemRect(0, rVert); // only need top and bottom
+	// Draw like a tree insertion marker but vertical
+	CRect rMarker;
+	GetItemRect(0, rMarker); // only need top and bottom
 
 	// Special cases: First or Selected tabs
 	if ((m_nDropTab == 0) || (m_nDropTab == (GetCurSel() + 1)))
-		rVert.left = m_nDropPos;
+		rMarker.left = m_nDropPos;
 	else
-		rVert.left = (m_nDropPos - DROPMARK_WIDTH);
+		rMarker.left = (m_nDropPos - DROPMARK_WIDTH);
 
-	rVert.right = (rVert.left + DROPMARK_WIDTH);
+	rMarker.right = (rMarker.left + DROPMARK_WIDTH);
+	rMarker.DeflateRect(0, 1); // To avoid clipping
 
-	pDC->SelectStockObject(BLACK_BRUSH);
+	pDC->FillSolidRect(rMarker, colorBlack);
+
+	// Top/bottom 'flanges'
 	pDC->SelectStockObject(BLACK_PEN);
-	pDC->Rectangle(rVert);
+	rMarker.InflateRect(DROPMARK_WIDTH, 0);
 
-	// Triangle
-	BOOL bRightFacing = (m_nDragTab < m_nDropTab);
-	POINT ptTri[3] = { 0 };
-
-	const int nTriSize = (2 * DROPMARK_WIDTH);
-
-	if (bRightFacing)
+	for (int nLine = 0; nLine < DROPMARK_WIDTH; nLine++)
 	{
-		ptTri[0].x = rVert.left;
-		ptTri[1].x = (ptTri[0].x - nTriSize);
-	}
-	else
-	{
-		ptTri[0].x = rVert.right;
-		ptTri[1].x = (ptTri[0].x + nTriSize);
-	}
+		// top
+		pDC->MoveTo(rMarker.left, rMarker.top);
+		pDC->LineTo(rMarker.right, rMarker.top);
 
-	ptTri[0].y = rVert.CenterPoint().y;
-	ptTri[1].y = (ptTri[0].y - nTriSize);
+		// bottom
+		pDC->MoveTo(rMarker.left, rMarker.bottom);
+		pDC->LineTo(rMarker.right, rMarker.bottom);
 
-	ptTri[2] = ptTri[1];
-	ptTri[2].y += (2 * nTriSize);
-	
-	pDC->Polygon(ptTri, 3);
+		rMarker.DeflateRect(1, 1);
+	}
 }
 
 BOOL CTabCtrlEx::HasTabMoved() const
