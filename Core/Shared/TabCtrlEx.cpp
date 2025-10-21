@@ -1315,17 +1315,19 @@ void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 		return;
 
 	// Draw like a tree insertion marker but vertical
+	int nSel = GetCurSel();
+
 	CRect rMarker;
-	GetItemRect(0, rMarker); // only need top and bottom
+	GetItemRect(nSel, rMarker); // only need top and bottom
 
 	// Special cases: First or Selected tabs
-	if ((m_nDropTab == 0) || (m_nDropTab == (GetCurSel() + 1)))
+	if ((m_nDropTab == 0) || (m_nDropTab == (nSel + 1)))
 		rMarker.left = m_nDropPos;
 	else
 		rMarker.left = (m_nDropPos - DROPMARK_WIDTH);
 
 	rMarker.right = (rMarker.left + DROPMARK_WIDTH);
-	rMarker.DeflateRect(0, 1); // To avoid clipping
+	rMarker.top++; // To avoid clipping
 
 	pDC->FillSolidRect(rMarker, colorBlack);
 
