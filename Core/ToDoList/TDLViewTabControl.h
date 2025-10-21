@@ -63,6 +63,9 @@ public:
 	int GetViewOrder(CTDCViewArray& aViewOrder) const;
 	void SetViewOrder(const CTDCViewArray& aViewOrder);
 
+	BOOL CanMoveActiveTaskViewTab(BOOL bLeft) const;
+	BOOL MoveActiveTaskViewTab(BOOL bLeft);
+
 protected:
 	struct TDCVIEW
 	{

@@ -721,3 +721,20 @@ void CTDLViewTabControl::SetVisibleViews(const CTDCViewArray& aVisible)
 		}
 	}
 }
+
+BOOL CTDLViewTabControl::CanMoveActiveTaskViewTab(BOOL bLeft) const
+{
+	return CanMoveTab(m_nSelTab, (bLeft ? (m_nSelTab - 1) : (m_nSelTab + 1)));
+}
+
+BOOL CTDLViewTabControl::MoveActiveTaskViewTab(BOOL bLeft)
+{
+	if (!CanMoveActiveTaskViewTab(bLeft))
+		return FALSE;
+
+	if (!MoveTab(m_nSelTab, (bLeft ? (m_nSelTab - 1) : (m_nSelTab + 1))))
+		return FALSE;
+
+	m_nSelTab = GetCurSel();
+	return TRUE;
+}

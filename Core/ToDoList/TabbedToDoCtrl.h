@@ -77,6 +77,8 @@ public:
 	void SaveAllTaskViewPreferences();
 	void SetVisibleTaskViews(const CStringArray& aTypeIDs);
 	int GetVisibleTaskViews(CStringArray& aTypeIDs) const;
+	BOOL CanMoveActiveTaskViewTab(BOOL bLeft) const { return m_tabViews.CanMoveActiveTaskViewTab(bLeft); }
+	BOOL MoveActiveTaskViewTab(BOOL bLeft) { return m_tabViews.MoveActiveTaskViewTab(bLeft); }
 
 	static BOOL IsExtensionView(FTC_VIEW nView);
 	static void SetDefaultTaskViews(const CStringArray& aTypeIDs);

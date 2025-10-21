@@ -475,8 +475,10 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_MOVE_TASKLEFT, OnMovetaskleft)
 	ON_COMMAND(ID_MOVE_TASKRIGHT, OnMovetaskright)
 	ON_COMMAND(ID_MOVE_TASKUP, OnMovetaskup)
-	ON_COMMAND(ID_MOVE_TASKLISTTABLEFT, OnViewMovetasklistleft)
-	ON_COMMAND(ID_MOVE_TASKLISTTABRIGHT, OnViewMovetasklistright)
+	ON_COMMAND(ID_MOVE_TASKLISTTABLEFT, OnMovetasklistleft)
+	ON_COMMAND(ID_MOVE_TASKLISTTABRIGHT, OnMovetasklistright)
+	ON_COMMAND(ID_MOVE_TASKVIEWTABLEFT, OnMovetaskViewleft)
+	ON_COMMAND(ID_MOVE_TASKVIEWTABRIGHT, OnMovetaskViewright)
 	ON_COMMAND(ID_MOVE_GOTOTASK, OnMoveGoToTask)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENCIES, OnMoveSelectTaskDependencies)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENTS, OnMoveSelectTaskDependents)
@@ -737,6 +739,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKUP, OnUpdateMovetaskup)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKLISTTABLEFT, OnUpdateMovetasklistleft)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKLISTTABRIGHT, OnUpdateMovetasklistright)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKVIEWTABLEFT, OnUpdateMovetaskViewleft)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKVIEWTABRIGHT, OnUpdateMovetaskViewright)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_GOTOTASK, OnUpdateMoveGoToTask)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
@@ -11034,26 +11038,50 @@ LRESULT CToDoListWnd::OnCanDropFile(WPARAM wParam, LPARAM lParam)
 			FileMisc::HasExtension(sFile, _T("xml")));
 }
 
-void CToDoListWnd::OnViewMovetasklistright() 
+void CToDoListWnd::OnMovetasklistright() 
 {
 	m_mgrToDoCtrls.MoveToDoCtrl(GetSelToDoCtrl(), 1);
 }
 
 void CToDoListWnd::OnUpdateMovetasklistright(CCmdUI* pCmdUI) 
 {
+	int nSel = GetSelToDoCtrl();
+
 	pCmdUI->Enable(!Prefs().GetKeepTabsOrdered() &&
-					m_mgrToDoCtrls.CanMoveToDoCtrl(GetSelToDoCtrl(), 1));
+					m_mgrToDoCtrls.CanMoveToDoCtrl(nSel, (nSel + 1)));
 }
 
-void CToDoListWnd::OnViewMovetasklistleft() 
+void CToDoListWnd::OnMovetasklistleft() 
 {
 	m_mgrToDoCtrls.MoveToDoCtrl(GetSelToDoCtrl(), -1);
 }
 
 void CToDoListWnd::OnUpdateMovetasklistleft(CCmdUI* pCmdUI) 
 {
+	int nSel = GetSelToDoCtrl();
+
 	pCmdUI->Enable(!Prefs().GetKeepTabsOrdered() &&
-					m_mgrToDoCtrls.CanMoveToDoCtrl(GetSelToDoCtrl(), -1));
+					m_mgrToDoCtrls.CanMoveToDoCtrl(nSel, (nSel - 1)));
+}
+
+void CToDoListWnd::OnMovetaskViewright()
+{
+	GetToDoCtrl().MoveActiveTaskViewTab(FALSE);
+}
+
+void CToDoListWnd::OnUpdateMovetaskViewright(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().CanMoveActiveTaskViewTab(FALSE));
+}
+
+void CToDoListWnd::OnMovetaskViewleft()
+{
+	GetToDoCtrl().MoveActiveTaskViewTab(TRUE);
+}
+
+void CToDoListWnd::OnUpdateMovetaskViewleft(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().CanMoveActiveTaskViewTab(TRUE));
 }
 
 void CToDoListWnd::OnToolsShowtasksDue(UINT nCmdID) 

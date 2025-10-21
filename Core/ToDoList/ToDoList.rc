@@ -3587,8 +3587,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Order Tasklist Tab&s by Name", ID_MOVE_SORTTASKLISTTABS
         MENUITEM SEPARATOR
-        MENUITEM "Move Task View Tab &Left",    ID_MOVE_TASKVIEWLEFT
-        MENUITEM "Move Task View Tab Rig&ht",   ID_MOVE_TASKVIEWRIGHT
+        MENUITEM "Move Task View Tab &Left",    ID_MOVE_TASKVIEWTABLEFT
+        MENUITEM "Move Task View Tab Rig&ht",   ID_MOVE_TASKVIEWTABRIGHT
     END
     POPUP "&Sort By"
     BEGIN
@@ -4299,8 +4299,8 @@ BEGIN
         MENUITEM "List View",                   ID_SHOWVIEW_LISTVIEW
         MENUITEM "Task View Visibility 1",      ID_SHOWVIEW_UIEXTENSION1
         MENUITEM SEPARATOR
-        MENUITEM "Move Tab &Left",              ID_MOVE_TASKVIEWLEFT
-        MENUITEM "Move Tab Rig&ht",             ID_MOVE_TASKVIEWRIGHT
+        MENUITEM "Move Tab &Left",              ID_MOVE_TASKVIEWTABLEFT
+        MENUITEM "Move Tab Rig&ht",             ID_MOVE_TASKVIEWTABRIGHT
     END
 END
 

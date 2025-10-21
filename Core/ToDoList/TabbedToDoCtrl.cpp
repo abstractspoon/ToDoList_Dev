@@ -4843,12 +4843,13 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 	if (menu.LoadMenu(IDR_TASKVIEWVISIBILITY))
 	{
+		// Initialise the menu
 		CMenu* pPopup = menu.GetSubMenu(0);
-		CPoint ptCursor(GetMessagePos());
 
-		// prepare list view
 		// NOTE: task tree is already prepared
 		pPopup->CheckMenuItem(ID_SHOWVIEW_LISTVIEW, IsListViewTabShowing() ? MF_CHECKED : 0);
+		pPopup->EnableMenuItem(ID_MOVE_TASKVIEWTABLEFT, (CanMoveActiveTaskViewTab(TRUE) ? MF_ENABLED : MF_DISABLED));
+		pPopup->EnableMenuItem(ID_MOVE_TASKVIEWTABRIGHT, (CanMoveActiveTaskViewTab(FALSE) ? MF_ENABLED : MF_DISABLED));
 
 		// extension views
 		CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
@@ -4859,12 +4860,14 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 		helper.UpdateExtensionVisibilityState(pPopup, m_mgrUIExt, aTypeIDs);
 
+		// Show the menu
+		CPoint ptCursor(GetMessagePos());
 		UINT nCmdID = ::TrackPopupMenu(*pPopup, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_LEFTBUTTON, 
 										ptCursor.x, ptCursor.y, 0, GetSafeHwnd(), NULL);
-
 		m_tabViews.Invalidate(FALSE);
 		m_tabViews.UpdateWindow();
 
+		// Handle the result
 		switch (nCmdID)
 		{
 		case ID_SHOWVIEW_TASKTREE:
@@ -4874,6 +4877,14 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		case ID_SHOWVIEW_LISTVIEW:
 			ShowListViewTab(!IsListViewTabShowing());
 			break;
+
+		case ID_MOVE_TASKVIEWTABLEFT:
+			MoveActiveTaskViewTab(TRUE);
+			break;
+
+		case ID_MOVE_TASKVIEWTABRIGHT:
+			MoveActiveTaskViewTab(FALSE);
+			break;
 			
 		default:
 			if (helper.ProcessExtensionVisibilityMenuCmd(nCmdID, m_mgrUIExt, aTypeIDs))
@@ -4882,7 +4893,7 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		}
 	}
 	
-	*pResult = 0;
+	*pResult = 1; // we handled it
 }
 
 LRESULT CTabbedToDoCtrl::OnLabelEditCancel(WPARAM wParam, LPARAM lParam)
@@ -7469,4 +7480,3 @@ BOOL CTabbedToDoCtrl::CanSaveTaskViewToImage() const
 	
 	return FALSE;
 }
-
