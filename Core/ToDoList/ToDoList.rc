@@ -5014,7 +5014,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_POSTEXPORTPREFS     "Your registry settings have been successfully exported.\n\nDo you want to start using these preferences immediately?"
     IDS_POSTIMPORTPREFS     "Your preferences have been successfully imported into the registry.\n\nDo you want to start using these settings immediately?"
-    IDS_PREF_UITABBAR       "User Interface>General>Tab bar"
+    IDS_PREF_UITABBAR       "User Interface>General>Tasklist Tab Bar"
     IDS_PREF_UICOMMENTS     "User Interface>General>Task Comments"
     IDS_PTP_PLACEHOLDERS    "Placeholders"
     IDS_TH_TESTTOOL         "Tool '%s' will be run using the following commandline arguments:\n\n%s\n\nDo you want to continue?"
