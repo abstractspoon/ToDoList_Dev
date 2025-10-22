@@ -107,7 +107,7 @@ protected:
 	// Drag state
 	BOOL m_bDragging;
 	HWND m_hwndPreDragFocus;
-	int m_nDragTab, m_nDropTab, m_nDropPos;
+	int m_nDragTab, m_nDropTab;
 	CImageList m_ilDragImage;
 
 protected:
@@ -136,6 +136,10 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	// Pseudo message handlers
+	void OnButtonDown(UINT nBtn, UINT nFlags, CPoint point);
+	void OnButtonUp(UINT nBtn, UINT nFlags, CPoint point);
+
 protected:
 	// IDragDropRenderer interface
 	virtual CSize OnGetDragSize(CDC& dc);
@@ -150,12 +154,8 @@ protected:
 	BOOL HasFlag(DWORD dwFlag) const { return ((m_dwFlags & dwFlag) == dwFlag); }
 	BOOL IsValidClick(UINT nBtn, const CPoint& ptUp) const;
 	BOOL IsDragging() const { return (HasFlag(TCE_DRAGDROP) && m_bDragging); }
-	void OnButtonDown(UINT nBtn, UINT nFlags, CPoint point);
-	void OnButtonUp(UINT nBtn, UINT nFlags, CPoint point);
 	BOOL GetTabCloseButtonRect(int nTab, CRect& rBtn) const;
-	int GetTabDropIndex(CPoint point, int& nDropPos) const;
 	BOOL HasTabMoved() const;
-	int HitTestCloseButton(const CPoint& point) const;
 	BOOL NeedCustomPaint() const;
 	void UpdateTabItemWidths();
 	CString GetRequiredTabText(int nTab);
@@ -163,14 +163,16 @@ protected:
 	COLORREF GetItemBkColor(int nTab);
 	COLORREF GetItemTagColor(int nTab);
 	void InvalidateTabsUnderSpinButtonCtrl();
+
+	int HitTestDropTab(CPoint point, LPRECT prInsertionMark = NULL) const;
+	int HitTestCloseButton(const CPoint& point) const;
 	int HitTestDragScrollZone(CPoint pt) const; // -1, 0, 1
 
 	void DrawTabDropMark(CDC* pDC);
 	void DrawTabCloseButton(CDC* pDC, int nTab);
 	void DrawTabTag(CDC* pDC, int nTab, const CRect& rTab);
 	void DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab, COLORREF& crText);
-
-
+	
 	static void RemoveUnsupportedFlags(DWORD& dwFlags);
 };
 

@@ -41,7 +41,6 @@ CTabCtrlEx::CTabCtrlEx(DWORD dwFlags, ETabOrientation orientation)
 	CXPTabCtrl(orientation), 
 	m_nDragTab(-1), 
 	m_nDropTab(-1),
-	m_nDropPos(-1),
 	m_bDragging(FALSE),
 	m_dwFlags(dwFlags), 
 	m_nBtnDown(VK_CANCEL), 
@@ -663,7 +662,7 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 	if (IsDragging())
 	{
 		int nPrevTab = m_nDropTab;
-		m_nDropTab = GetTabDropIndex(point, m_nDropPos);
+		m_nDropTab = HitTestDropTab(point);
 
 		if (m_nDropTab != nPrevTab)
 		{
@@ -831,7 +830,7 @@ void CTabCtrlEx::OnButtonDown(UINT nBtn, UINT /*nFlags*/, CPoint point)
 			{
 				m_bDragging = TRUE;
 				m_nDragTab = nHitTab;
-				m_nDropTab = GetTabDropIndex(point, m_nDropPos);
+				m_nDropTab = HitTestDropTab(point);
 				m_ptBtnDown = point;
 				m_hwndPreDragFocus = ::GetFocus();
 
@@ -881,7 +880,7 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 	{
 		ASSERT(GetItemCount() > 1);
 
-		m_nDropTab = GetTabDropIndex(point, m_nDropPos);
+		m_nDropTab = HitTestDropTab(point);
 		bTabMoved = HasTabMoved();
 
 		Invalidate(FALSE);
@@ -1136,7 +1135,7 @@ void CTabCtrlEx::OnCaptureChanged(CWnd *pWnd)
 		m_nBtnDown = VK_CANCEL;
 		m_bDragging = FALSE;
 		m_nMouseInCloseButton = -1;
-		m_nDragTab = m_nDropTab = m_nDropPos = -1;
+		m_nDragTab = m_nDropTab = -1;
 		m_ptBtnDown = 0;
 
 		m_ilDragImage.DragLeave(this);
@@ -1250,7 +1249,7 @@ int CTabCtrlEx::FindItemByData(DWORD dwItemData) const
 	return -1;
 }
 
-int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
+int CTabCtrlEx::HitTestDropTab(CPoint point, LPRECT prInsertionMark) const
 {
 	if (!HasFlag(TCE_DRAGDROP))
 	{
@@ -1273,23 +1272,39 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 			// What we return depends on whether we are dragging right or left
 			if (nTab > m_nDragTab)
 			{
-				nDropPos = rTab.right;
+				// dragging right
+				if (prInsertionMark)
+				{
+					*prInsertionMark = rTab;
+					prInsertionMark->left = prInsertionMark->right;
+				}
+
 				return nTab + 1;
 			}
 
-			// else
-			nDropPos = rTab.left;
+			// dragging left
+			if (prInsertionMark)
+			{
+				*prInsertionMark = rTab;
+				prInsertionMark->right = prInsertionMark->left;
+			}
+
 			return nTab;
 		}
 	}
-	
+
 	// handle beyond last tab
 	rTab.left = rTab.right;
-	rTab.right += 100;
+	rTab.right += 100; // arbitrary width
 
 	if (rTab.PtInRect(point))
 	{
-		nDropPos = rTab.left;
+		if (prInsertionMark)
+		{
+			*prInsertionMark = rTab;
+			prInsertionMark->right = prInsertionMark->left;
+		}
+
 		return nNumTab;
 	}
 
@@ -1297,11 +1312,16 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 	if (GetItemRect(0, rTab))
 	{
 		rTab.right = rTab.left;
-		rTab.left -= 100;
+		rTab.left -= 100; // arbitrary width
 
 		if (rTab.PtInRect(point))
 		{
-			nDropPos = rTab.right;
+			if (prInsertionMark)
+			{
+				*prInsertionMark = rTab;
+				prInsertionMark->left = prInsertionMark->right;
+			}
+
 			return 0;
 		}
 	}
@@ -1315,19 +1335,24 @@ void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
 		return;
 
 	// Draw like a tree insertion marker but vertical
-	int nSel = GetCurSel();
+	CPoint pt = GetMessagePos();
+	ScreenToClient(&pt);
 
-	CRect rMarker;
-	GetItemRect(nSel, rMarker); // only need top and bottom
+	CRect rClient, rMarker;
 
-	// Special cases: First or Selected tabs
-	if ((m_nDropTab == 0) || (m_nDropTab == (nSel + 1)))
-		rMarker.left = m_nDropPos;
-	else
-		rMarker.left = (m_nDropPos - DROPMARK_WIDTH);
+	GetClientRect(rClient);
+	VERIFY(HitTestDropTab(pt, rMarker) == m_nDropTab);
+	
+	rMarker.left = (rMarker.right - DROPMARK_WIDTH);
 
-	rMarker.right = (rMarker.left + DROPMARK_WIDTH);
-	rMarker.top++; // To avoid clipping
+	if (rMarker.left <= 0)
+	{
+		rMarker.OffsetRect(DROPMARK_WIDTH, 0);
+	}
+	else if (rMarker.right >= rClient.right)
+	{
+		rMarker.OffsetRect(-DROPMARK_WIDTH, 0);
+	}
 
 	pDC->FillSolidRect(rMarker, colorBlack);
 
