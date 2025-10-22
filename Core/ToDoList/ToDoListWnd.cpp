@@ -1216,8 +1216,8 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_HELP_WIKI,						VK_F1,			0);
 	m_mgrShortcuts.AddShortcut(ID_LOAD_NORMAL,						'O',			HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_MOVE_GOTOTASK,					'G',			HOTKEYF_CONTROL);
-	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKDOWN,						VK_DOWN,		HOTKEYF_CONTROL | HOTKEYF_EXT);
-	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKLEFT,						VK_LEFT,		HOTKEYF_CONTROL | HOTKEYF_EXT);
+	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKDOWN,					VK_DOWN,		HOTKEYF_CONTROL | HOTKEYF_EXT);
+	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKLEFT,					VK_LEFT,		HOTKEYF_CONTROL | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKRIGHT,					VK_RIGHT,		HOTKEYF_CONTROL | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKUP,						VK_UP,			HOTKEYF_CONTROL | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_NEWSUBTASK_ATBOTTOM,				'N',			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
