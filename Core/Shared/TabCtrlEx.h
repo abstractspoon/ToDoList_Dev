@@ -162,6 +162,7 @@ protected:
 	CString GetRequiredTabText(int nTab, const CString& sCurText);
 	COLORREF GetItemBkColor(int nTab);
 	COLORREF GetItemTagColor(int nTab);
+	void InvalidateTabsUnderSpinButtonCtrl();
 	int HitTestDragScrollZone(CPoint pt) const; // -1, 0, 1
 
 	void DrawTabDropMark(CDC* pDC);
@@ -169,8 +170,6 @@ protected:
 	void DrawTabTag(CDC* pDC, int nTab, const CRect& rTab);
 	void DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab, COLORREF& crText);
 
-	// pseudo message handler
-	void InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
 	static void RemoveUnsupportedFlags(DWORD& dwFlags);
 };

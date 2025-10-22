@@ -1364,35 +1364,34 @@ BOOL CTabCtrlEx::HasTabMoved() const
 
 void CTabCtrlEx::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	InvalidateTabs(nSBCode, nPos, pScrollBar);
+	if (pScrollBar == (CWnd*)GetSpinButtonCtrl())
+		InvalidateTabsUnderSpinButtonCtrl();
 	
 	CXPTabCtrl::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
 void CTabCtrlEx::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	InvalidateTabs(nSBCode, nPos, pScrollBar);
+	if (pScrollBar == (CWnd*)GetSpinButtonCtrl())
+		InvalidateTabsUnderSpinButtonCtrl();
 	
 	CXPTabCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
-void CTabCtrlEx::InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+void CTabCtrlEx::InvalidateTabsUnderSpinButtonCtrl()
 {
-	// Prevent render artifacts on the tab that was beneath the spin control
-	if (pScrollBar == (CWnd*)GetSpinButtonCtrl())
+	// Prevent render artifacts on the tab(s) that was beneath the spin control
+	CRect rSpin, rTab;
+	GetSpinButtonCtrlRect(rSpin);
+
+	int iTab = GetItemCount();
+
+	while (iTab--)
 	{
-		CRect rSpin, rTab;
-		GetSpinButtonCtrlRect(rSpin);
-		
-		int iTab = GetItemCount();
+		GetItemRect(iTab, rTab);
 
-		while (iTab--)
-		{
-			GetItemRect(iTab, rTab);
-
-			if (CRect().IntersectRect(rSpin, rTab))
-				InvalidateRect(rTab, FALSE);
-		}
+		if (CRect().IntersectRect(rSpin, rTab))
+			InvalidateRect(rTab, FALSE);
 	}
 }
 
