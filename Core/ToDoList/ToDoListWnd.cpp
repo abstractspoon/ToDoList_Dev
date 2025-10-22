@@ -471,13 +471,18 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_HELP_KEYBOARDSHORTCUTS, OnShowKeyboardshortcuts)
 	ON_COMMAND(ID_LOAD_NORMAL, OnLoad)
 	ON_COMMAND(ID_MINIMIZETOTRAY, OnMinimizeToTray)
-	ON_COMMAND(ID_MOVETASKDOWN, OnMovetaskdown)
-	ON_COMMAND(ID_MOVETASKLEFT, OnMovetaskleft)
-	ON_COMMAND(ID_MOVETASKRIGHT, OnMovetaskright)
-	ON_COMMAND(ID_MOVETASKUP, OnMovetaskup)
+	ON_COMMAND(ID_MOVE_TASKDOWN, OnMovetaskdown)
+	ON_COMMAND(ID_MOVE_TASKLEFT, OnMovetaskleft)
+	ON_COMMAND(ID_MOVE_TASKRIGHT, OnMovetaskright)
+	ON_COMMAND(ID_MOVE_TASKUP, OnMovetaskup)
+	ON_COMMAND(ID_MOVE_TASKLISTTABLEFT, OnMovetasklistleft)
+	ON_COMMAND(ID_MOVE_TASKLISTTABRIGHT, OnMovetasklistright)
+	ON_COMMAND(ID_MOVE_TASKVIEWTABLEFT, OnMovetaskViewleft)
+	ON_COMMAND(ID_MOVE_TASKVIEWTABRIGHT, OnMovetaskViewright)
 	ON_COMMAND(ID_MOVE_GOTOTASK, OnMoveGoToTask)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENCIES, OnMoveSelectTaskDependencies)
 	ON_COMMAND(ID_MOVE_SELECTTASKDEPENDENTS, OnMoveSelectTaskDependents)
+	ON_COMMAND(ID_MOVE_SORTTASKLISTTABS, OnViewSorttasklisttabs)
 	ON_COMMAND(ID_NEW, OnNewTasklist)
 	ON_COMMAND(ID_NEWSUBTASK_INTASK, OnNewSubtaskInTask)
 	ON_COMMAND(ID_NEXTTASK, OnGotoNexttask)
@@ -536,8 +541,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_MAINTOOLBAR, OnViewMainToolbar)
 	ON_COMMAND(ID_VIEW_MAXCOMMENTS, OnMaximizeComments)
 	ON_COMMAND(ID_VIEW_MAXTASKLIST, OnMaximizeTasklist)
-	ON_COMMAND(ID_VIEW_MOVETASKLISTLEFT, OnViewMovetasklistleft)
-	ON_COMMAND(ID_VIEW_MOVETASKLISTRIGHT, OnViewMovetasklistright)
 	ON_COMMAND(ID_VIEW_NEXT, OnViewNextTasklist)
 	ON_COMMAND(ID_VIEW_NEXT_SEL, OnViewNextSelectedTask)
 	ON_COMMAND(ID_VIEW_PREV, OnViewPrevTasklist)
@@ -558,7 +561,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_SHOWTASKLISTTABBAR, OnViewShowTasklistTabbar)
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_COMMAND(ID_VIEW_SHOWTREELISTTABBAR, OnViewShowTreeListTabbar)
-	ON_COMMAND(ID_VIEW_SORTTASKLISTTABS, OnViewSorttasklisttabs)
 	ON_COMMAND(ID_VIEW_STATUS_BAR, OnViewStatusBar)
 	ON_COMMAND(ID_VIEW_TOGGLEFILTER, OnViewTogglefilter)
 	ON_COMMAND(ID_VIEW_TOGGLETASKSANDCOMMENTS, OnViewToggletasksandcomments)
@@ -731,13 +733,18 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_FILE_MRU1, OnUpdateRecentFileMenu)
 	ON_UPDATE_COMMAND_UI(ID_FILE_OPENARCHIVE, OnUpdateFileOpenarchive)
 	ON_UPDATE_COMMAND_UI(ID_FILE_RESETVERSION, OnUpdateFileResetversion)
-	ON_UPDATE_COMMAND_UI(ID_MOVETASKDOWN, OnUpdateMovetaskdown)
-	ON_UPDATE_COMMAND_UI(ID_MOVETASKLEFT, OnUpdateMovetaskleft)
-	ON_UPDATE_COMMAND_UI(ID_MOVETASKRIGHT, OnUpdateMovetaskright)
-	ON_UPDATE_COMMAND_UI(ID_MOVETASKUP, OnUpdateMovetaskup)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKDOWN, OnUpdateMovetaskdown)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKLEFT, OnUpdateMovetaskleft)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKRIGHT, OnUpdateMovetaskright)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKUP, OnUpdateMovetaskup)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKLISTTABLEFT, OnUpdateMovetasklistleft)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKLISTTABRIGHT, OnUpdateMovetasklistright)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKVIEWTABLEFT, OnUpdateMovetaskViewleft)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_TASKVIEWTABRIGHT, OnUpdateMovetaskViewright)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_GOTOTASK, OnUpdateMoveGoToTask)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
+	ON_UPDATE_COMMAND_UI(ID_MOVE_SORTTASKLISTTABS, OnUpdateSorttasklisttabs)
 	ON_UPDATE_COMMAND_UI(ID_NEW, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_NEWSUBTASK_INTASK, OnUpdateNewSubtaskInTask)
 	ON_UPDATE_COMMAND_UI(ID_NEXTTASK, OnUpdateGotoNexttask)
@@ -786,8 +793,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MAINTOOLBAR, OnUpdateViewMainToolbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MAXCOMMENTS, OnUpdateMaximizeComments)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_MAXTASKLIST, OnUpdateMaximizeTasklist)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_MOVETASKLISTLEFT, OnUpdateViewMovetasklistleft)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_MOVETASKLISTRIGHT, OnUpdateViewMovetasklistright)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_NEXT, OnUpdateViewNext)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_NEXT_SEL, OnUpdateViewNextSel)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PREV, OnUpdateViewPrev)
@@ -807,7 +812,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWREMINDERS, AlwaysEnabled)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWTASKLISTTABBAR, OnUpdateViewShowTasklistTabbar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWTREELISTTABBAR, OnUpdateViewShowTreeListTabbar)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SORTTASKLISTTABS, OnUpdateViewSorttasklisttabs)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_STATUS_BAR, OnUpdateViewStatusBar)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEALLTASKEXPANDED, OnUpdateViewExpandTasks)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_TOGGLEFILTER, OnUpdateViewTogglefilter)
@@ -1151,8 +1155,9 @@ void CToDoListWnd::OnDestroy()
 
 BOOL CToDoListWnd::InitTabCtrl()
 {
-	UINT nFlags = (WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | TCS_HOTTRACK | TCS_TABS | 
-					TCS_SINGLELINE | TCS_RIGHTJUSTIFY | TCS_TOOLTIPS);
+	UINT nFlags = (WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | 
+				   TCS_HOTTRACK | TCS_TABS | TCS_SINGLELINE | 
+				   TCS_RIGHTJUSTIFY | TCS_TOOLTIPS | TCS_SCROLLOPPOSITE);
 
 	if (Prefs().GetStackTabbarItems())
 		nFlags |= TCS_MULTILINE;
@@ -1211,10 +1216,10 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_HELP_WIKI,						VK_F1,			0);
 	m_mgrShortcuts.AddShortcut(ID_LOAD_NORMAL,						'O',			HOTKEYF_CONTROL); 
 	m_mgrShortcuts.AddShortcut(ID_MOVE_GOTOTASK,					'G',			HOTKEYF_CONTROL);
-	m_mgrShortcuts.AddShortcut(ID_MOVETASKDOWN,						VK_DOWN,		HOTKEYF_CONTROL | HOTKEYF_EXT);
-	m_mgrShortcuts.AddShortcut(ID_MOVETASKLEFT,						VK_LEFT,		HOTKEYF_CONTROL | HOTKEYF_EXT);
-	m_mgrShortcuts.AddShortcut(ID_MOVETASKRIGHT,					VK_RIGHT,		HOTKEYF_CONTROL | HOTKEYF_EXT);
-	m_mgrShortcuts.AddShortcut(ID_MOVETASKUP,						VK_UP,			HOTKEYF_CONTROL | HOTKEYF_EXT);
+	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKDOWN,					VK_DOWN,		HOTKEYF_CONTROL | HOTKEYF_EXT);
+	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKLEFT,					VK_LEFT,		HOTKEYF_CONTROL | HOTKEYF_EXT);
+	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKRIGHT,					VK_RIGHT,		HOTKEYF_CONTROL | HOTKEYF_EXT);
+	m_mgrShortcuts.AddShortcut(ID_MOVE_TASKUP,						VK_UP,			HOTKEYF_CONTROL | HOTKEYF_EXT);
 	m_mgrShortcuts.AddShortcut(ID_NEWSUBTASK_ATBOTTOM,				'N',			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_NEWTASK_AFTERSELECTEDTASK,		'N',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_NEWTASK_BEFORESELECTEDTASK,		'N',			HOTKEYF_CONTROL | HOTKEYF_ALT);
@@ -3244,7 +3249,7 @@ void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 		break;
 		
 	case ID_SORTBY_PATH:
-		pCmdUI->Enable(tdc.GetTaskView() == FTCV_TASKLIST);
+		pCmdUI->Enable(tdc.GetActiveTaskView() == FTCV_TASKLIST);
 		break;
 		
 	default:
@@ -5844,7 +5849,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		else // use last state of transform dialog to determine what tasks to output
 		{
 			CTDLTransformDialog dialog(_T(""), 
-										(tdc.GetTaskView() != FTCV_TASKLIST),
+										(tdc.GetActiveTaskView() != FTCV_TASKLIST),
 									   _T(""),
 									   tdc.GetCustomAttributeDefs());
 
@@ -6699,10 +6704,10 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	CTDLPrintDialog dialog(sTitle,
 						   bPreview,
 						   m_mgrImportExport,
-						   (tdc.GetTaskView() != FTCV_TASKLIST),
+						   (tdc.GetActiveTaskView() != FTCV_TASKLIST),
 						   tdc.GetStylesheetPath(),
 						   tdc.GetCustomAttributeDefs(),
-						   (tdc.CanSaveTaskViewToImage() ? tdc.GetTaskViewName() : _T("")));
+						   (tdc.CanSaveTaskViewToImage() ? tdc.GetActiveTaskViewName() : _T("")));
 	
 	if (dialog.DoModal(CMDICON(bPreview ? ID_PRINTPREVIEW : ID_PRINT)) != IDOK)
 		return;
@@ -8219,19 +8224,13 @@ void CToDoListWnd::OnTabCtrlEndDrag(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
 	
-	// check valid tab indices
-	ASSERT((pNMTCE->iTab != -1) && (pNMTCE->dwExtra != 0));
-
-	if ((pNMTCE->iTab != -1) && (pNMTCE->dwExtra != 0))
-	{
-		m_mgrToDoCtrls.MoveToDoCtrl(pNMTCE->iTab, pNMTCE->dwExtra);
+	VERIFY(m_mgrToDoCtrls.MoveToDoCtrl(pNMTCE->iTab, (int)pNMTCE->dwExtra));
 		
-		// disable alpha-sorting on tabs
-		if (Prefs().GetKeepTabsOrdered())
-		{
-			CPreferences().WriteProfileInt(PREF_KEY, _T("KeepTabsOrdered"), FALSE);
-			ResetPrefs();
-		}
+	// disable alpha-sorting on tabs
+	if (Prefs().GetKeepTabsOrdered())
+	{
+		CPreferences().WriteProfileInt(PREF_KEY, _T("KeepTabsOrdered"), FALSE);
+		ResetPrefs();
 	}
 
 	*pResult = 0;
@@ -10152,7 +10151,7 @@ void CToDoListWnd::OnExport()
 						 m_mgrToDoCtrls.FormatFriendlyProjectNames(),
 						 m_mgrImportExport,
 						 (nTDCCount == 1),
-						 (tdc.GetTaskView() != FTCV_TASKLIST),
+						 (tdc.GetActiveTaskView() != FTCV_TASKLIST),
 						 userPrefs.GetExportVisibleColsOnly(),
 						 sTasklistPath,
 						 userPrefs.GetSaveExportFolderPath(),
@@ -10480,7 +10479,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	CString sTitle = m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC);
 
 	CTDLTransformDialog dialog(sTitle, 
-								(tdc.GetTaskView() != FTCV_TASKLIST),
+								(tdc.GetActiveTaskView() != FTCV_TASKLIST),
 								tdc.GetStylesheetPath(),
 								tdc.GetCustomAttributeDefs());
 	
@@ -11040,26 +11039,50 @@ LRESULT CToDoListWnd::OnCanDropFile(WPARAM wParam, LPARAM lParam)
 			FileMisc::HasExtension(sFile, _T("xml")));
 }
 
-void CToDoListWnd::OnViewMovetasklistright() 
+void CToDoListWnd::OnMovetasklistright() 
 {
 	m_mgrToDoCtrls.MoveToDoCtrl(GetSelToDoCtrl(), 1);
 }
 
-void CToDoListWnd::OnUpdateViewMovetasklistright(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateMovetasklistright(CCmdUI* pCmdUI) 
 {
+	int nSel = GetSelToDoCtrl();
+
 	pCmdUI->Enable(!Prefs().GetKeepTabsOrdered() &&
-					m_mgrToDoCtrls.CanMoveToDoCtrl(GetSelToDoCtrl(), 1));
+					m_mgrToDoCtrls.CanMoveToDoCtrl(nSel, (nSel + 1)));
 }
 
-void CToDoListWnd::OnViewMovetasklistleft() 
+void CToDoListWnd::OnMovetasklistleft() 
 {
 	m_mgrToDoCtrls.MoveToDoCtrl(GetSelToDoCtrl(), -1);
 }
 
-void CToDoListWnd::OnUpdateViewMovetasklistleft(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateMovetasklistleft(CCmdUI* pCmdUI) 
 {
+	int nSel = GetSelToDoCtrl();
+
 	pCmdUI->Enable(!Prefs().GetKeepTabsOrdered() &&
-					m_mgrToDoCtrls.CanMoveToDoCtrl(GetSelToDoCtrl(), -1));
+					m_mgrToDoCtrls.CanMoveToDoCtrl(nSel, (nSel - 1)));
+}
+
+void CToDoListWnd::OnMovetaskViewright()
+{
+	GetToDoCtrl().MoveActiveTaskViewTab(FALSE);
+}
+
+void CToDoListWnd::OnUpdateMovetaskViewright(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().CanMoveActiveTaskViewTab(FALSE));
+}
+
+void CToDoListWnd::OnMovetaskViewleft()
+{
+	GetToDoCtrl().MoveActiveTaskViewTab(TRUE);
+}
+
+void CToDoListWnd::OnUpdateMovetaskViewleft(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().CanMoveActiveTaskViewTab(TRUE));
 }
 
 void CToDoListWnd::OnToolsShowtasksDue(UINT nCmdID) 
@@ -11760,7 +11783,7 @@ void CToDoListWnd::OnViewSorttasklisttabs()
 	SelectToDoCtrl(nSel, FALSE);
 }
 
-void CToDoListWnd::OnUpdateViewSorttasklisttabs(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateSorttasklisttabs(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable((GetTDCCount() > 1) && !Prefs().GetKeepTabsOrdered());
 }
@@ -13043,7 +13066,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	CTDLSendTasksDlg dialog(m_mgrImportExport, 
 							bSelected, 
-							(tdc.GetTaskView() != FTCV_TASKLIST), 
+							(tdc.GetActiveTaskView() != FTCV_TASKLIST), 
 							tdc.GetCustomAttributeDefs());
 
 	if (dialog.DoModal(CMDICON(ID_SENDTASKS)) == IDOK)
@@ -13178,7 +13201,7 @@ void CToDoListWnd::OnViewCycleTaskViews()
 {
 	CLockUpdates lu(*this);
 
-	GetToDoCtrl().SetNextTaskView();
+	GetToDoCtrl().ActivateNextTaskView();
 
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
 		OnMaximizeTasklist();
@@ -13186,7 +13209,7 @@ void CToDoListWnd::OnViewCycleTaskViews()
 
 void CToDoListWnd::OnViewToggleTreeandList() 
 {
-	switch (GetToDoCtrl().GetTaskView())
+	switch (GetToDoCtrl().GetActiveTaskView())
 	{
 	case FTCV_TASKTREE:
 		OnActivateTaskView(ID_ACTIVATEVIEW_LISTVIEW);
@@ -13766,7 +13789,7 @@ void CToDoListWnd::OnViewSaveToImage()
 	}
 
 	sFilePath += '.';
-	sFilePath += tdc.GetTaskViewName();
+	sFilePath += tdc.GetActiveTaskViewName();
 	sFilePath += '.';
 	sFilePath += m_sTaskViewImageExt;
 
@@ -13804,7 +13827,7 @@ void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI)
 	if (tdc.CanSaveTaskViewToImage())
 	{
 		pCmdUI->Enable(TRUE);
-		sMenuItem.Replace(_T("%s"), tdc.GetTaskViewName());
+		sMenuItem.Replace(_T("%s"), tdc.GetActiveTaskViewName());
 	}
 	else
 	{
@@ -14036,20 +14059,20 @@ void CToDoListWnd::OnUpdateActivateTaskView(CCmdUI* pCmdUI)
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
 		pCmdUI->Enable(TRUE);
 	else
-		pCmdUI->Enable(TDC::MapActivateIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetTaskView());
+		pCmdUI->Enable(TDC::MapActivateIDToTaskView(pCmdUI->m_nID) != GetToDoCtrl().GetActiveTaskView());
 }
 
 void CToDoListWnd::OnActivateTaskView(UINT nCmdID)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	FTC_VIEW nOldView = tdc.GetTaskView();
+	FTC_VIEW nOldView = tdc.GetActiveTaskView();
 	FTC_VIEW nNewView = TDC::MapActivateIDToTaskView(nCmdID);
 
 	CLockUpdates lu(*this);
 
 	if (nNewView != nOldView)
-		tdc.SetTaskView(nNewView);
+		tdc.ActivateTaskView(nNewView);
 
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
 		OnMaximizeTasklist();

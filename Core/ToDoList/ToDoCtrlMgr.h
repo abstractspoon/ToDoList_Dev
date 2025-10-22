@@ -118,8 +118,8 @@ public:
 	TDC_FILE CheckOut(int nIndex, CString& sCheckedOutTo, BOOL bForce = FALSE);
 	TDC_FILE CheckIn(int nIndex);
 	
-	void MoveToDoCtrl(int nIndex, int nNumPlaces);
-	BOOL CanMoveToDoCtrl(int nIndex, int nNumPlaces) const;
+	BOOL MoveToDoCtrl(int nFrom, int nTo);
+	BOOL CanMoveToDoCtrl(int nFrom, int nTo) const;
 
 	int SortToDoCtrlsByName();
 	void GetAutoListData(TDCAUTOLISTDATA& tldActive, TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID) const;

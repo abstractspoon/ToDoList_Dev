@@ -3400,11 +3400,6 @@ BEGIN
         MENUITEM "&Previous TaskList",          ID_VIEW_PREV
         MENUITEM "&Next TaskList",              ID_VIEW_NEXT
         MENUITEM SEPARATOR
-        MENUITEM "Move Tasklist Tab &Left",     ID_VIEW_MOVETASKLISTLEFT
-        MENUITEM "Move Tasklist Tab Rig&ht",    ID_VIEW_MOVETASKLISTRIGHT
-        MENUITEM SEPARATOR
-        MENUITEM "Order Tab&s by Name",         ID_VIEW_SORTTASKLISTTABS
-        MENUITEM SEPARATOR
         POPUP "Exp&and"
         BEGIN
             MENUITEM "&All Tasks",                  ID_VIEW_EXPANDALL
@@ -3581,11 +3576,19 @@ BEGIN
         MENUITEM "Select &Previous Top Level Task", ID_PREVTOPLEVELTASK
         MENUITEM "Select &Next Top Level Task", ID_NEXTTOPLEVELTASK
         MENUITEM SEPARATOR
-        MENUITEM "Move Task &Up",               ID_MOVETASKUP
-        MENUITEM "Move Task &Down",             ID_MOVETASKDOWN
+        MENUITEM "Move Task &Up",               ID_MOVE_TASKUP
+        MENUITEM "Move Task &Down",             ID_MOVE_TASKDOWN
         MENUITEM SEPARATOR
-        MENUITEM "Move Task &Left (Up One Level)", ID_MOVETASKLEFT
-        MENUITEM "Move Task &Right (Down One Level)", ID_MOVETASKRIGHT
+        MENUITEM "Move Task &Left (Up One Level)", ID_MOVE_TASKLEFT
+        MENUITEM "Move Task &Right (Down One Level)", ID_MOVE_TASKRIGHT
+        MENUITEM SEPARATOR
+        MENUITEM "Move Tasklist Tab &Left",     ID_MOVE_TASKLISTTABLEFT
+        MENUITEM "Move Tasklist Tab Rig&ht",    ID_MOVE_TASKLISTTABRIGHT
+        MENUITEM SEPARATOR
+        MENUITEM "Order Tasklist Tab&s by Name", ID_MOVE_SORTTASKLISTTABS
+        MENUITEM SEPARATOR
+        MENUITEM "Move Task View Tab &Left",    ID_MOVE_TASKVIEWTABLEFT
+        MENUITEM "Move Task View Tab Rig&ht",   ID_MOVE_TASKVIEWTABRIGHT
     END
     POPUP "&Sort By"
     BEGIN
@@ -4096,10 +4099,10 @@ BEGIN
 
         END
         MENUITEM SEPARATOR
-        MENUITEM "&Order Tabs by Name",         ID_VIEW_SORTTASKLISTTABS
+        MENUITEM "&Order Tasklist Tabs by Name", ID_MOVE_SORTTASKLISTTABS
         MENUITEM SEPARATOR
-        MENUITEM "Mo&ve Tab Left",              ID_VIEW_MOVETASKLISTLEFT
-        MENUITEM "Move T&ab Right",             ID_VIEW_MOVETASKLISTRIGHT
+        MENUITEM "Mo&ve Tab Left",              ID_MOVE_TASKLISTTABLEFT
+        MENUITEM "Move T&ab Right",             ID_MOVE_TASKLISTTABRIGHT
         MENUITEM SEPARATOR
         MENUITEM "&Close Tasklist",             ID_CLOSE
         MENUITEM "Close &All Other Tasklists",  ID_CLOSEALLBUTTHIS
@@ -4295,6 +4298,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "List View",                   ID_SHOWVIEW_LISTVIEW
         MENUITEM "Task View Visibility 1",      ID_SHOWVIEW_UIEXTENSION1
+        MENUITEM SEPARATOR
+        MENUITEM "Move Tab &Left",              ID_MOVE_TASKVIEWTABLEFT
+        MENUITEM "Move Tab Rig&ht",             ID_MOVE_TASKVIEWTABRIGHT
     END
 END
 
@@ -4743,8 +4749,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_MOVETASKLEFT         "Move the Selected Task Up One Level"
-    ID_MOVETASKRIGHT        "Move the Selected Task Down One Level"
+    ID_MOVE_TASKLEFT        "Move the Selected Task Up One Level"
+    ID_MOVE_TASKRIGHT       "Move the Selected Task Down One Level"
     ID_SAVEALL              "\nSave All Tasklists"
 END
 
@@ -4753,8 +4759,8 @@ BEGIN
     ID_NEWTASK_BEFORESELECTEDTASK "\tNew Task"
     ID_NEWSUBTASK_ATTOP     "\nNew Subtask"
     ID_EDIT_TASKTEXT        "\nEdit Task Title"
-    ID_MOVETASKUP           "Move the Selected Task Up One Position"
-    ID_MOVETASKDOWN         "Move the Selected Task Down One Position"
+    ID_MOVE_TASKUP          "Move the Selected Task Up One Position"
+    ID_MOVE_TASKDOWN        "Move the Selected Task Down One Position"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5008,7 +5014,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_POSTEXPORTPREFS     "Your registry settings have been successfully exported.\n\nDo you want to start using these preferences immediately?"
     IDS_POSTIMPORTPREFS     "Your preferences have been successfully imported into the registry.\n\nDo you want to start using these settings immediately?"
-    IDS_PREF_UITABBAR       "User Interface>General>Tab bar"
+    IDS_PREF_UITABBAR       "User Interface>General>Tasklist Tab Bar"
     IDS_PREF_UICOMMENTS     "User Interface>General>Task Comments"
     IDS_PTP_PLACEHOLDERS    "Placeholders"
     IDS_TH_TESTTOOL         "Tool '%s' will be run using the following commandline arguments:\n\n%s\n\nDo you want to continue?"

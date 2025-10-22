@@ -1001,70 +1001,28 @@ int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pTDC, const TSM_TASKLISTINFO* p
 	return nSel;
 }
 
-void CToDoCtrlMgr::MoveToDoCtrl(int nIndex, int nNumPlaces)
+BOOL CToDoCtrlMgr::MoveToDoCtrl(int nFrom, int nTo)
 {
-	CHECKVALIDINDEX(nIndex);
-
-	if (nNumPlaces == 0)
-		return;
-
-	int nOrgCount = m_tabCtrl.GetItemCount();
-
-	if (!CanMoveToDoCtrl(nIndex, nNumPlaces))
-		return;
-
-	// cache selection so we can restore it afterwards
-	int nSel = GetSelToDoCtrl(), nNewSel = nSel;
-
-	// work out what the new selection should be
-	if (nIndex == nSel)
-	{
-		nNewSel = (nIndex + nNumPlaces);
-	}
-	else if (nIndex > nSel && (nIndex + nNumPlaces) <= nSel)
-	{
-		nNewSel++;
-	}
-	else if (nIndex < nSel && (nIndex + nNumPlaces) >= nSel)
-	{
-		nNewSel--;
-	}
-
-	// make copies of existing
-	TCITEM tci;
-	TCHAR szText[128];
-	tci.mask = TCIF_TEXT | TCIF_IMAGE;
-	tci.pszText = szText;
-	tci.cchTextMax = 127;
-		
-	m_tabCtrl.GetItem(nIndex, &tci);
-	TDCITEM tdci = GetTDCItem(nIndex); // copy
-
-	// remove and re-add
-	m_aToDoCtrls.RemoveAt(nIndex);
-	m_tabCtrl.DeleteItem(nIndex);
-
-	nIndex += nNumPlaces;
-
-	m_aToDoCtrls.InsertAt(nIndex, tdci);
-	m_tabCtrl.InsertItem(nIndex, &tci);
-
-	// set selection
-	m_tabCtrl.SetCurSel(nNewSel);
-
-	ASSERT (nOrgCount == m_tabCtrl.GetItemCount());
-}
-
-BOOL CToDoCtrlMgr::CanMoveToDoCtrl(int nIndex, int nNumPlaces) const
-{
-	CHECKVALIDINDEXRET(nIndex, FALSE);
-
-	if (nNumPlaces == 0)
+	if (!CanMoveToDoCtrl(nFrom, nTo))
 		return FALSE;
 
-	nIndex += nNumPlaces;
+	if (!m_tabCtrl.MoveTab(nFrom, nTo))
+		return FALSE;
 
-	return (nIndex >= 0 && nIndex < GetCount());
+	// remove and re-add
+	TDCITEM tdci = GetTDCItem(nFrom); // copy
+
+	m_aToDoCtrls.RemoveAt(nFrom);
+	m_aToDoCtrls.InsertAt(nTo, tdci);
+
+	return TRUE;
+}
+
+BOOL CToDoCtrlMgr::CanMoveToDoCtrl(int nFrom, int nTo) const
+{
+	CHECKVALIDINDEXRET(nFrom, FALSE);
+
+	return m_tabCtrl.CanMoveTab(nFrom, nTo);
 }
 
 BOOL CToDoCtrlMgr::ArchiveDoneTasks(int nIndex)

@@ -86,9 +86,13 @@ public:
 	BOOL SetScrollPos(int nPos);
 
 	void EnsureSelVisible();
+	void EnsureVisible(int nTab);
 	BOOL ModifyFlags(DWORD dwRemove, DWORD dwAdd);
 	void GetTabContentRect(const CRect& rTab, int nTab, CRect& rContent) const;
-	
+
+	BOOL MoveTab(int nFrom, int nTo);
+	BOOL CanMoveTab(int nFrom, int nTo) const;
+
 	static BOOL IsSupportedFlag(DWORD dwFlag);
 		
 protected:
@@ -103,7 +107,7 @@ protected:
 	// Drag state
 	BOOL m_bDragging;
 	HWND m_hwndPreDragFocus;
-	int m_nDragTab, m_nDropTab, m_nDropPos;
+	int m_nDragTab, m_nDropTab;
 	CImageList m_ilDragImage;
 
 protected:
@@ -128,8 +132,13 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnTimer(UINT nIDEvent);
 
 	DECLARE_MESSAGE_MAP()
+
+	// Pseudo message handlers
+	void OnButtonDown(UINT nBtn, UINT nFlags, CPoint point);
+	void OnButtonUp(UINT nBtn, UINT nFlags, CPoint point);
 
 protected:
 	// IDragDropRenderer interface
@@ -145,27 +154,25 @@ protected:
 	BOOL HasFlag(DWORD dwFlag) const { return ((m_dwFlags & dwFlag) == dwFlag); }
 	BOOL IsValidClick(UINT nBtn, const CPoint& ptUp) const;
 	BOOL IsDragging() const { return (HasFlag(TCE_DRAGDROP) && m_bDragging); }
-	void OnButtonDown(UINT nBtn, UINT nFlags, CPoint point);
-	void OnButtonUp(UINT nBtn, UINT nFlags, CPoint point);
 	BOOL GetTabCloseButtonRect(int nTab, CRect& rBtn) const;
-	int GetTabDropIndex(CPoint point, int& nDropPos) const;
 	BOOL HasTabMoved() const;
-	int HitTestCloseButton(const CPoint& point) const;
 	BOOL NeedCustomPaint() const;
 	void UpdateTabItemWidths();
 	CString GetRequiredTabText(int nTab);
 	CString GetRequiredTabText(int nTab, const CString& sCurText);
 	COLORREF GetItemBkColor(int nTab);
 	COLORREF GetItemTagColor(int nTab);
+	void InvalidateTabsUnderSpinButtonCtrl();
 
-	void DrawTabDropMark(CDC* pDC);
+	int HitTestDropTab(CPoint point, LPRECT prInsertionMark = NULL) const;
+	int HitTestCloseButton(const CPoint& point) const;
+	int HitTestDragScrollZone(CPoint pt) const; // -1, 0, 1
+
+	void DrawDragInsertionMark(CDC* pDC);
 	void DrawTabCloseButton(CDC* pDC, int nTab);
 	void DrawTabTag(CDC* pDC, int nTab, const CRect& rTab);
 	void DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab, COLORREF& crText);
-
-	// pseudo message handler
-	void InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-
+	
 	static void RemoveUnsupportedFlags(DWORD& dwFlags);
 };
 

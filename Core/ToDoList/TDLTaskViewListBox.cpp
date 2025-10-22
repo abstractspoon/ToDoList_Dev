@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLTaskViewListBox.h"
+#include "TDCStatic.h"
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\EnString.h"
@@ -165,7 +166,7 @@ void CTDLTaskViewListBox::SetHiddenViews(const CStringArray& aTypeIDs)
 
 			int nFind = m_pMgrUIExt->FindUIExtension(sTypeID);
 
-			if ((nFind == -1) && (sTypeID == LISTVIEW_TYPE))
+			if ((nFind == -1) && (sTypeID == LISTVIEW_TYPEID))
 				nFind = LISTVIEW_INDEX;
 
 			ASSERT(nFind != -1);
@@ -218,7 +219,7 @@ int CTDLTaskViewListBox::GetViews(CStringArray& aTypeIDs, BOOL bVisible) const
 				DWORD dwItemData = GetItemData(nItem);
 				
 				if (dwItemData == LISTVIEW_INDEX)
-					aTypeIDs.Add(LISTVIEW_TYPE);
+					aTypeIDs.Add(LISTVIEW_TYPEID);
 				else
 					aTypeIDs.Add(m_pMgrUIExt->GetUIExtensionTypeID((int)dwItemData));
 			}
@@ -227,7 +228,7 @@ int CTDLTaskViewListBox::GetViews(CStringArray& aTypeIDs, BOOL bVisible) const
 	else if (bVisible)
 	{
 		m_pMgrUIExt->GetExtensionTypeIDs(aTypeIDs);
-		aTypeIDs.Add(LISTVIEW_TYPE);
+		aTypeIDs.Add(LISTVIEW_TYPEID);
 
 		// remove hidden views
 		Misc::RemoveItems(m_aHiddenViews, aTypeIDs);

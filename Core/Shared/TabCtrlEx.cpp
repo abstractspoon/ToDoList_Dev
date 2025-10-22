@@ -22,12 +22,16 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int DROPMARK_WIDTH	= 2;
+const int DROPMARK_WIDTH	= GraphicsMisc::ScaleByDPIFactor(2);
+const int DRAGSCROLL_WIDTH	= GraphicsMisc::ScaleByDPIFactor(50);
 const int COLORBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(3);
 const int PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
 const int SIZE_CLOSEBTN		= (GraphicsMisc::ScaleByDPIFactor(8) + (GraphicsMisc::WantDPIScaling() ? 1 : 0));
 
 const UINT WM_TCMUPDATETABWIDTH = (WM_USER + 1);
+
+const UINT ID_DRAGSCROLL_TIMER = 1;
+const UINT DRAGSCROLL_INTERVAL = 200;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTabCtrlEx
@@ -37,7 +41,6 @@ CTabCtrlEx::CTabCtrlEx(DWORD dwFlags, ETabOrientation orientation)
 	CXPTabCtrl(orientation), 
 	m_nDragTab(-1), 
 	m_nDropTab(-1),
-	m_nDropPos(-1),
 	m_bDragging(FALSE),
 	m_dwFlags(dwFlags), 
 	m_nBtnDown(VK_CANCEL), 
@@ -65,9 +68,11 @@ BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_WM_SIZE()
-	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_WM_ERASEBKGND()
+	ON_WM_TIMER()
+
 	ON_NOTIFY_REFLECT_EX(TCN_SELCHANGE, OnTabSelChange)
+	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_MESSAGE(TCM_INSERTITEM, OnChangeTabItem)
 	ON_MESSAGE(TCM_SETITEM, OnChangeTabItem)
 	ON_MESSAGE(TCM_DELETEITEM, OnChangeTabItem)
@@ -300,7 +305,7 @@ void CTabCtrlEx::OnPaint()
 	}
 
 	// draw drop marker
-	DrawTabDropMark(&dc);
+	DrawDragInsertionMark(&dc);
 }
 
 CFont* CTabCtrlEx::GetTabFont(int nTab)
@@ -657,7 +662,7 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 	if (IsDragging())
 	{
 		int nPrevTab = m_nDropTab;
-		m_nDropTab = GetTabDropIndex(point, m_nDropPos);
+		m_nDropTab = HitTestDropTab(point);
 
 		if (m_nDropTab != nPrevTab)
 		{
@@ -669,6 +674,13 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 			m_ilDragImage.DragShowNolock(TRUE);
 		}
 
+		// If the mouse is within DRAGSCROLL_WIDTH distance
+		// of the client edges and the spin control is
+		// visible then set a timer for auto-scrolling
+		if (HitTestDragScrollZone(point) != 0)
+			SetTimer(ID_DRAGSCROLL_TIMER, DRAGSCROLL_INTERVAL, NULL);
+
+		// Last action because it modifies point
 		ClientToScreen(&point);
 		m_ilDragImage.DragMove(point);
 	}
@@ -699,6 +711,60 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 			m_nMouseInCloseButton = nTab;
 		}
 	}	
+}
+
+int CTabCtrlEx::HitTestDragScrollZone(CPoint pt) const
+{
+	if (!IsDragging() || (m_nDropTab == -1) || !HasSpinButtonCtrl())
+		return 0;
+
+	// Left check is very simple
+	if (pt.x < DRAGSCROLL_WIDTH)
+		return -1;
+
+	// Right check
+	if (HitTest(pt) != -1)
+	{
+		CRect rClient;
+		GetClientRect(rClient);
+
+		// Exclude the spin button ctrl
+		CRect rSpin;
+		GetSpinButtonCtrl()->GetClientRect(rSpin);
+
+		rClient.right -= rSpin.Width();
+
+		if ((pt.x < rClient.right) && (pt.x > (rClient.right - DRAGSCROLL_WIDTH)))
+			return 1;
+	}
+
+	// All else
+	return 0;
+}
+
+void CTabCtrlEx::OnTimer(UINT nIDEvent)
+{
+	ASSERT(nIDEvent == ID_DRAGSCROLL_TIMER);
+
+	CPoint ptMouse = ::GetMessagePos();
+	ScreenToClient(&ptMouse);
+
+	int nHit = HitTestDragScrollZone(ptMouse);
+
+	if (nHit == 0)
+	{
+		KillTimer(ID_DRAGSCROLL_TIMER);
+		return;
+	}
+
+	int nOldPos = GetScrollPos();
+	int nNewPos = (nOldPos + nHit);
+
+	if (nNewPos >= 0)
+	{
+		SendMessage(WM_HSCROLL, MAKELPARAM(SB_THUMBPOSITION, nNewPos));
+		Invalidate(FALSE);
+	}
 }
 
 LRESULT CTabCtrlEx::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -764,7 +830,7 @@ void CTabCtrlEx::OnButtonDown(UINT nBtn, UINT /*nFlags*/, CPoint point)
 			{
 				m_bDragging = TRUE;
 				m_nDragTab = nHitTab;
-				m_nDropTab = GetTabDropIndex(point, m_nDropPos);
+				m_nDropTab = HitTestDropTab(point);
 				m_ptBtnDown = point;
 				m_hwndPreDragFocus = ::GetFocus();
 
@@ -814,7 +880,7 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 	{
 		ASSERT(GetItemCount() > 1);
 
-		m_nDropTab = GetTabDropIndex(point, m_nDropPos);
+		m_nDropTab = HitTestDropTab(point);
 		bTabMoved = HasTabMoved();
 
 		Invalidate(FALSE);
@@ -825,11 +891,10 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 			nmtce.iTab = m_nDragTab;
 			nmtce.hdr.code = TCN_ENDDRAG;
 
-			// calculating number of positions needs care
-			nmtce.dwExtra = (m_nDropTab - m_nDragTab);
-
-			if (m_nDropTab > m_nDragTab)
-				nmtce.dwExtra--;
+			if (m_nDragTab < m_nDropTab)
+				nmtce.dwExtra = (m_nDropTab - 1);
+			else
+				nmtce.dwExtra = m_nDropTab;
 		}
 		// fall thru
 	}	
@@ -915,6 +980,56 @@ void CTabCtrlEx::OnButtonUp(UINT nBtn, UINT nFlags, CPoint point)
 		
 		GetParent()->SendMessage(WM_NOTIFY, nmtce.hdr.idFrom, (LPARAM)&nmtce);
 	}
+}
+
+BOOL CTabCtrlEx::MoveTab(int nFrom, int nTo)
+{
+	if (!CanMoveTab(nFrom, nTo))
+		return FALSE;
+
+	// cache selection so we can restore it afterwards
+	int nSel = GetCurSel();
+
+	// make copy of existing tab state
+	TCITEM tci = { 0 };
+	TCHAR szText[256] = { 0 };
+
+	tci.mask = (TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM);
+	tci.pszText = szText;
+	tci.cchTextMax = 255;
+
+	GetItem(nFrom, &tci);
+
+	VERIFY(DeleteItem(nFrom));
+	VERIFY(InsertItem(nTo, &tci) != -1);
+
+	// Restore selection
+	if (nFrom == nSel)
+	{
+		SetCurSel(nTo);
+	}
+	else if ((nFrom > nSel) && (nTo <= nSel))
+	{
+		SetCurSel(nSel + 1);
+	}
+	else if ((nFrom < nSel) && (nTo >= nSel))
+	{
+		SetCurSel(nSel - 1);
+	}
+	EnsureVisible(nTo);
+
+	return TRUE;
+}
+
+BOOL CTabCtrlEx::CanMoveTab(int nFrom, int nTo) const
+{
+	int nNumTabs = GetItemCount();
+
+	return ((nFrom >= 0) &&
+			(nFrom < nNumTabs) &&
+			(nTo >= 0) &&
+			(nTo < nNumTabs) &&
+			(nTo != nFrom));
 }
 
 int CTabCtrlEx::HitTest(TCHITTESTINFO* pHitTestInfo) const
@@ -1020,7 +1135,7 @@ void CTabCtrlEx::OnCaptureChanged(CWnd *pWnd)
 		m_nBtnDown = VK_CANCEL;
 		m_bDragging = FALSE;
 		m_nMouseInCloseButton = -1;
-		m_nDragTab = m_nDropTab = m_nDropPos = -1;
+		m_nDragTab = m_nDropTab = -1;
 		m_ptBtnDown = 0;
 
 		m_ilDragImage.DragLeave(this);
@@ -1134,7 +1249,7 @@ int CTabCtrlEx::FindItemByData(DWORD dwItemData) const
 	return -1;
 }
 
-int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
+int CTabCtrlEx::HitTestDropTab(CPoint point, LPRECT prInsertionMark) const
 {
 	if (!HasFlag(TCE_DRAGDROP))
 	{
@@ -1157,23 +1272,39 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 			// What we return depends on whether we are dragging right or left
 			if (nTab > m_nDragTab)
 			{
-				nDropPos = rTab.right;
+				// dragging right
+				if (prInsertionMark)
+				{
+					*prInsertionMark = rTab;
+					prInsertionMark->left = prInsertionMark->right;
+				}
+
 				return nTab + 1;
 			}
 
-			// else
-			nDropPos = rTab.left;
+			// dragging left
+			if (prInsertionMark)
+			{
+				*prInsertionMark = rTab;
+				prInsertionMark->right = prInsertionMark->left;
+			}
+
 			return nTab;
 		}
 	}
-	
+
 	// handle beyond last tab
 	rTab.left = rTab.right;
-	rTab.right += 100;
+	rTab.right += 100; // arbitrary width
 
 	if (rTab.PtInRect(point))
 	{
-		nDropPos = rTab.left;
+		if (prInsertionMark)
+		{
+			*prInsertionMark = rTab;
+			prInsertionMark->right = prInsertionMark->left;
+		}
+
 		return nNumTab;
 	}
 
@@ -1181,11 +1312,16 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 	if (GetItemRect(0, rTab))
 	{
 		rTab.right = rTab.left;
-		rTab.left -= 100;
+		rTab.left -= 100; // arbitrary width
 
 		if (rTab.PtInRect(point))
 		{
-			nDropPos = rTab.right;
+			if (prInsertionMark)
+			{
+				*prInsertionMark = rTab;
+				prInsertionMark->left = prInsertionMark->right;
+			}
+
 			return 0;
 		}
 	}
@@ -1193,34 +1329,49 @@ int CTabCtrlEx::GetTabDropIndex(CPoint point, int& nDropPos) const
 	return -1;
 }
 
-void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
+void CTabCtrlEx::DrawDragInsertionMark(CDC* pDC)
 {
 	if (!IsDragging() || !HasTabMoved())
 		return;
 
-	// Draw as I-Beam
-	CRect rVert;
-	GetItemRect(0, rVert); // only need top and bottom
+	// Draw like a tree insertion marker but vertical
+	CPoint pt = GetMessagePos();
+	ScreenToClient(&pt);
 
-	// Special cases: First or Selected tabs
-	if ((m_nDropTab == 0) || (m_nDropTab == (GetCurSel() + 1)))
-		rVert.left = m_nDropPos;
-	else
-		rVert.left = (m_nDropPos - DROPMARK_WIDTH);
+	CRect rClient, rMarker;
 
-	rVert.right = (rVert.left + DROPMARK_WIDTH);
+	GetClientRect(rClient);
+	VERIFY(HitTestDropTab(pt, rMarker) == m_nDropTab);
+	
+	rMarker.left = (rMarker.right - DROPMARK_WIDTH);
 
+	if (rMarker.left <= 0)
+	{
+		rMarker.OffsetRect(DROPMARK_WIDTH, 0);
+	}
+	else if (rMarker.right >= rClient.right)
+	{
+		rMarker.OffsetRect(-DROPMARK_WIDTH, 0);
+	}
+
+	pDC->FillSolidRect(rMarker, colorBlack);
+
+	// Top/bottom 'flanges'
 	pDC->SelectStockObject(BLACK_PEN);
-	pDC->Rectangle(rVert);
+	rMarker.InflateRect(DROPMARK_WIDTH, 0);
 
-	CRect rTop(rVert);
-	rTop.InflateRect(DROPMARK_WIDTH, 0);
-	rTop.bottom = rTop.top + DROPMARK_WIDTH;
-	pDC->Rectangle(rTop);
+	for (int nLine = 0; nLine < DROPMARK_WIDTH; nLine++)
+	{
+		// top
+		pDC->MoveTo(rMarker.left, rMarker.top);
+		pDC->LineTo(rMarker.right, rMarker.top);
 
-	CRect rBot(rTop);
-	rBot.OffsetRect(0, rVert.Height() - DROPMARK_WIDTH);
-	pDC->Rectangle(rBot);
+		// bottom
+		pDC->MoveTo(rMarker.left, rMarker.bottom);
+		pDC->LineTo(rMarker.right, rMarker.bottom);
+
+		rMarker.DeflateRect(1, 1);
+	}
 }
 
 BOOL CTabCtrlEx::HasTabMoved() const
@@ -1238,35 +1389,34 @@ BOOL CTabCtrlEx::HasTabMoved() const
 
 void CTabCtrlEx::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	InvalidateTabs(nSBCode, nPos, pScrollBar);
+	if (pScrollBar == (CWnd*)GetSpinButtonCtrl())
+		InvalidateTabsUnderSpinButtonCtrl();
 	
 	CXPTabCtrl::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
 void CTabCtrlEx::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	InvalidateTabs(nSBCode, nPos, pScrollBar);
+	if (pScrollBar == (CWnd*)GetSpinButtonCtrl())
+		InvalidateTabsUnderSpinButtonCtrl();
 	
 	CXPTabCtrl::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
-void CTabCtrlEx::InvalidateTabs(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+void CTabCtrlEx::InvalidateTabsUnderSpinButtonCtrl()
 {
-	// Prevent render artifacts on the tab that was beneath the spin control
-	if (pScrollBar == (CWnd*)GetSpinButtonCtrl())
+	// Prevent render artifacts on the tab(s) that was beneath the spin control
+	CRect rSpin, rTab;
+	GetSpinButtonCtrlRect(rSpin);
+
+	int iTab = GetItemCount();
+
+	while (iTab--)
 	{
-		CRect rSpin, rTab;
-		GetSpinButtonCtrlRect(rSpin);
-		
-		int iTab = GetItemCount();
+		GetItemRect(iTab, rTab);
 
-		while (iTab--)
-		{
-			GetItemRect(iTab, rTab);
-
-			if (CRect().IntersectRect(rSpin, rTab))
-				InvalidateRect(rTab, FALSE);
-		}
+		if (CRect().IntersectRect(rSpin, rTab))
+			InvalidateRect(rTab, FALSE);
 	}
 }
 
@@ -1295,7 +1445,14 @@ BOOL CTabCtrlEx::SetScrollPos(int nPos)
 
 void CTabCtrlEx::EnsureSelVisible()
 {
-	if (GetItemCount() == 0)
+	EnsureVisible(GetCurSel());
+}
+
+void CTabCtrlEx::EnsureVisible(int nTab)
+{
+	int nNumItems = GetItemCount();
+
+	if ((nNumItems == 0) || (nTab < 0) || (nTab >= nNumItems))
 		return;
 
 	CRect rSpin;
@@ -1306,24 +1463,23 @@ void CTabCtrlEx::EnsureSelVisible()
 		return;
 	}
 
-	CRect rActiveTab;
-	int nSelTab = GetCurSel();
-	GetItemRect(nSelTab, rActiveTab);
+	CRect rTab;
+	GetItemRect(nTab, rTab);
 
-	if ((rActiveTab.left >= 0) && (rActiveTab.right <= rSpin.left))
+	if ((rTab.left >= 0) && (rTab.right <= rSpin.left))
 		return;
 
 	int nScrollPos = GetScrollPos();
 
-	if (rActiveTab.left < 0)
+	if (rTab.left < 0)
 	{
 		// Scroll left
 		while (nScrollPos--)
 		{
 			SetScrollPos(nScrollPos);
-			GetItemRect(nSelTab, rActiveTab);
+			GetItemRect(nTab, rTab);
 
-			if (rActiveTab.left >= 0)
+			if (rTab.left >= 0)
 				break;
 		}
 	}
@@ -1333,9 +1489,9 @@ void CTabCtrlEx::EnsureSelVisible()
 		for (int nPos = (nScrollPos + 1); nPos < GetItemCount(); nPos++)
 		{
 			SetScrollPos(nPos);
-			GetItemRect(nSelTab, rActiveTab);
+			GetItemRect(nTab, rTab);
 
-			if (rActiveTab.right <= rSpin.left)
+			if (rTab.right <= rSpin.left)
 				break;
 		}
 	}
@@ -1347,4 +1503,3 @@ void CTabCtrlEx::OnSize(UINT nType, int cx, int cy)
 
 	EnsureSelVisible();
 }
-
