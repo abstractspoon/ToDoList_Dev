@@ -168,7 +168,7 @@ protected:
 	int HitTestCloseButton(const CPoint& point) const;
 	int HitTestDragScrollZone(CPoint pt) const; // -1, 0, 1
 
-	void DrawTabDropMark(CDC* pDC);
+	void DrawDragInsertionMark(CDC* pDC);
 	void DrawTabCloseButton(CDC* pDC, int nTab);
 	void DrawTabTag(CDC* pDC, int nTab, const CRect& rTab);
 	void DrawTabBackColor(CDC* pDC, int nTab, BOOL bHot, CRect& rTab, COLORREF& crText);

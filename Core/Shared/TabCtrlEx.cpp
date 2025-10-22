@@ -305,7 +305,7 @@ void CTabCtrlEx::OnPaint()
 	}
 
 	// draw drop marker
-	DrawTabDropMark(&dc);
+	DrawDragInsertionMark(&dc);
 }
 
 CFont* CTabCtrlEx::GetTabFont(int nTab)
@@ -1329,7 +1329,7 @@ int CTabCtrlEx::HitTestDropTab(CPoint point, LPRECT prInsertionMark) const
 	return -1;
 }
 
-void CTabCtrlEx::DrawTabDropMark(CDC* pDC)
+void CTabCtrlEx::DrawDragInsertionMark(CDC* pDC)
 {
 	if (!IsDragging() || !HasTabMoved())
 		return;
