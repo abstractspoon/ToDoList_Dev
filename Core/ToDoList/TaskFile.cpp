@@ -2140,21 +2140,18 @@ BOOL CTaskFile::SetTaskCustomComments(HTASKITEM hTask, const CBinaryData& conten
 	if (!TaskFromHandle(hTask))
 		return FALSE;
 
-	BOOL bRes = TRUE;
+	if (!SetTaskString(hTask, TDL_TASKCOMMENTSTYPE, sType))
+		return FALSE;
 
-	if (!content.IsEmpty())
-	{
-		Base64Coder b64;
-		b64.Encode((const PBYTE)content.Get(), content.GetLength());
+	if (content.IsEmpty())
+		return TRUE;
 
- 		// Base64Coder will convert ansi to unicode as required
-		bRes = SetTaskString(hTask, TDL_TASKCUSTOMCOMMENTS, b64.EncodedMessage(), XIT_ELEMENT);
-	}
+	CString sEncoded;
 
-	if (bRes)
-		bRes = SetTaskString(hTask, TDL_TASKCOMMENTSTYPE, sType);
-
-	return bRes;
+	if (!content.Base64Encode(sEncoded))
+		return FALSE;
+	
+	return SetTaskString(hTask, TDL_TASKCUSTOMCOMMENTS, sEncoded, XIT_ELEMENT);
 }
 
 BOOL CTaskFile::SetTaskHtmlComments(HTASKITEM hTask, const CString& sContent, BOOL bForTransform)
@@ -2175,27 +2172,7 @@ BOOL CTaskFile::GetTaskCustomComments(HTASKITEM hTask, CBinaryData& content, CSt
 	// custom comments
 	CString sEncoded = GetTaskString(hTask, TDL_TASKCUSTOMCOMMENTS);
 
-	if (sEncoded.IsEmpty())
-		return TRUE; // not an error
-
-	// Convert unicode back to multibyte
-	// to read the binary stream as unsigned chars
-	int nLen = sEncoded.GetLength();
-	Misc::EncodeAsMultiByte(sEncoded);
-
-	// Decode
-	Base64Coder b64;
-	b64.Decode((const PBYTE)(LPCSTR)(LPCTSTR)sEncoded, nLen);
-
-	unsigned long nLenContent = 0;
-	PBYTE pContent = b64.DecodedMessage(nLenContent);
-
-	// Copy to target
-	PBYTE szContent = (PBYTE)content.GetBuffer(nLenContent);
-	CopyMemory(szContent, pContent, nLenContent);
-	content.ReleaseBuffer(nLenContent);
-	
-	return (nLenContent > 0);
+	return (sEncoded.IsEmpty() || content.Base64Decode(sEncoded));
 }
 
 BOOL CTaskFile::SetTaskCategories(HTASKITEM hTask, const CStringArray& aCategories)
