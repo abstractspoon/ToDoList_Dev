@@ -36,6 +36,6 @@
     <ResourceCompile Include="JSViewUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\JSViewUIExtensionCore\Resources\WordCloud.ico" />
+    <Image Include="..\JSViewUIExtensionCore\Resources\JsView.ico" />
   </ItemGroup>
 </Project>

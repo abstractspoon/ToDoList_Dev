@@ -125,12 +125,12 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ResourceCompile Include="JSViewUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\JSViewUIExtensionCore\Resources\WordCloud.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\JSViewUIExtensionCore\JSViewUIExtensionCore.csproj">
       <Project>{778c2eee-f200-4294-aa38-24f7611e7c54}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\JSViewUIExtensionCore\Resources\JsView.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -103,8 +103,8 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\jsview.ico" />
-    <Content Include="Resources\toolbar_std.bmp" />
+    <EmbeddedResource Include="Resources\jsview.ico" />
+    <EmbeddedResource Include="Resources\toolbar_std.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
