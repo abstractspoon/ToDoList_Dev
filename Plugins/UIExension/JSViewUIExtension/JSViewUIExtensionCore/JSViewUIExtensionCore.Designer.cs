@@ -41,7 +41,7 @@
 			this.m_WebView.Location = new System.Drawing.Point(1, 0);
 			this.m_WebView.Name = "m_WebView";
 			this.m_WebView.Size = new System.Drawing.Size(536, 339);
-			this.m_WebView.Source = new System.Uri("https://www.abstractspoon.com", System.UriKind.Absolute);
+			this.m_WebView.Source = new System.Uri("about:blank", System.UriKind.Absolute);
 			this.m_WebView.TabIndex = 0;
 			this.m_WebView.Text = "webView2";
 			this.m_WebView.ZoomFactor = 1D;

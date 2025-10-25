@@ -27,10 +27,18 @@ namespace JSONExporterPlugin
 		{
 		}
 
+		public string Export(TaskList srcTasks,
+							 string reportTitle = "",
+							 string reportDate = "",
+							 Translator trans = null)
+		{
+			return Export(new List<TaskList> { srcTasks }, reportTitle, reportDate, trans);
+		}
+
 		public string Export(IList<TaskList> srcTasks, 
 							 string reportTitle,
 							 string reportDate,
-							 Translator trans)
+							 Translator trans = null)
         {
 			if (srcTasks.Count == 1)
 			{
@@ -53,12 +61,20 @@ namespace JSONExporterPlugin
 
 				JObject jRoot = new JObject();
 
-				jRoot.Add(new JProperty(trans.Translate("Report Name", Translator.Type.Text), reportTitle));
-				jRoot.Add(new JProperty(trans.Translate("Report Date", Translator.Type.Text), reportDate));
-				jRoot.Add(new JProperty(trans.Translate("Tasklists", Translator.Type.Text), jTasklists));
+				jRoot.Add(new JProperty(Translate(trans, "Report Name"), reportTitle));
+				jRoot.Add(new JProperty(Translate(trans, "Report Date"), reportDate));
+				jRoot.Add(new JProperty(Translate(trans, "Tasklists"), jTasklists));
 
 				return jRoot.ToString();
 			}
+		}
+
+		private string Translate(Translator trans, string text)
+		{
+			if (trans == null)
+				return text;
+			
+			return trans.Translate(text, Translator.Type.Text);
 		}
 
 		public JObject ExportTasklist(TaskList tasklist,
@@ -79,10 +95,10 @@ namespace JSONExporterPlugin
 
 			JObject jTasklist = new JObject();
 
-			jTasklist.Add(new JProperty(trans.Translate("Report Name", Translator.Type.Text), reportTitle));
-			jTasklist.Add(new JProperty(trans.Translate("Report Date", Translator.Type.Text), reportDate));
-			jTasklist.Add(new JProperty(trans.Translate("FilePath", Translator.Type.Text), tasklist.GetFilePath()));
-			jTasklist.Add(new JProperty(trans.Translate("Tasks", Translator.Type.Text), jTasks));
+			jTasklist.Add(new JProperty(Translate(trans, "Report Name"), reportTitle));
+			jTasklist.Add(new JProperty(Translate(trans, "Report Date"), reportDate));
+			jTasklist.Add(new JProperty(Translate(trans, "FilePath"), tasklist.GetFilePath()));
+			jTasklist.Add(new JProperty(Translate(trans, "Tasks"), jTasks));
 
 			return jTasklist;
 		}
@@ -110,7 +126,7 @@ namespace JSONExporterPlugin
                     subtask = subtask.GetNextTask();
                 }
 
-				jTask.Add(new JProperty(trans.Translate("Subtasks", Translator.Type.Text), jSubtasks));
+				jTask.Add(new JProperty(Translate(trans, "Subtasks"), jSubtasks));
             }
 
 			// Add to parent
@@ -164,7 +180,7 @@ namespace JSONExporterPlugin
 						{
 							attribList.Add(new AttribItem()
 							{
-								Label = trans.Translate(attribName, Translator.Type.Text),
+								Label = Translate(trans, attribName),
 								AttribId = attrib
 							} );
 						}

@@ -55,6 +55,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
@@ -82,6 +83,10 @@
     <ProjectReference Include="..\..\..\3rdParty\UIComponents\UIComponents.csproj">
       <Project>{d2dd86f1-5957-463f-8673-49f045dcc8e9}</Project>
       <Name>UIComponents</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ImportExport\JSONExporter\JSONExporterCore\JSONExporterCore.csproj">
+      <Project>{5db1f8cd-27f8-453b-b2fb-2875f71aa325}</Project>
+      <Name>JSONExporterCore</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
