@@ -122,7 +122,8 @@ namespace JSViewUIExtension
 					SaveTasklistAsJavascript(tasks);
 
 					// Create HTML page to consume this data
-					CreateHtmlPlaceHolder();
+					// Note: If this already exists then we will not overwrite it
+					CreateDefaultHtmlPage();
 				}
 				catch
 				{
@@ -161,8 +162,11 @@ namespace JSViewUIExtension
 			File.WriteAllLines(JsDataFilePath, jsContent);
 		}
 
-		private void CreateHtmlPlaceHolder()
+		private void CreateDefaultHtmlPage()
 		{
+			if (File.Exists(HtmlFilePath))
+				return;
+
 			using (var file = new System.IO.StreamWriter(HtmlFilePath))
 			{
 				using (var html = new HtmlTextWriter(file))
