@@ -69,7 +69,7 @@ namespace JSONExporterPlugin
 			}
 		}
 
-		private string Translate(Translator trans, string text)
+		private static string Translate(Translator trans, string text)
 		{
 			if (trans == null)
 				return text;
@@ -135,7 +135,7 @@ namespace JSONExporterPlugin
 			return true;
         }
 
-		private List<AttribItem> GetAttributeList(TaskList tasks, Translator trans)
+		private static List<AttribItem> GetAttributeList(TaskList tasks, Translator trans)
 		{
 			var attribList = new List<AttribItem>();
 
