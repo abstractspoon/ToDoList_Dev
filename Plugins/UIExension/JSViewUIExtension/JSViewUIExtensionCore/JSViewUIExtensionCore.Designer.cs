@@ -28,27 +28,27 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.webView = new Microsoft.Web.WebView2.WinForms.WebView2();
+			this.m_WebView = new Microsoft.Web.WebView2.WinForms.WebView2();
 			this.SuspendLayout();
 			// 
-			// webView
+			// m_WebView
 			// 
-			this.webView.AccessibleName = "webView";
-			this.webView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.m_WebView.AccessibleName = "webView";
+			this.m_WebView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.webView.BackColor = System.Drawing.SystemColors.Window;
-			this.webView.Location = new System.Drawing.Point(1, 0);
-			this.webView.Name = "webView";
-			this.webView.Size = new System.Drawing.Size(536, 339);
-			this.webView.Source = new System.Uri("https://www.abstractspoon.com", System.UriKind.Absolute);
-			this.webView.TabIndex = 0;
-			this.webView.Text = "webView2";
-			this.webView.ZoomFactor = 1D;
+			this.m_WebView.BackColor = System.Drawing.SystemColors.Window;
+			this.m_WebView.Location = new System.Drawing.Point(1, 0);
+			this.m_WebView.Name = "m_WebView";
+			this.m_WebView.Size = new System.Drawing.Size(536, 339);
+			this.m_WebView.Source = new System.Uri("https://www.abstractspoon.com", System.UriKind.Absolute);
+			this.m_WebView.TabIndex = 0;
+			this.m_WebView.Text = "webView2";
+			this.m_WebView.ZoomFactor = 1D;
 			// 
 			// JSViewUIExtensionCore
 			// 
-			this.Controls.Add(this.webView);
+			this.Controls.Add(this.m_WebView);
 			this.Name = "JSViewUIExtensionCore";
 			this.Size = new System.Drawing.Size(540, 342);
 			this.ResumeLayout(false);
@@ -57,6 +57,6 @@
 
 		#endregion
 
-		private Microsoft.Web.WebView2.WinForms.WebView2 webView;
+		private Microsoft.Web.WebView2.WinForms.WebView2 m_WebView;
 	}
 }

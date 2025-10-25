@@ -42,8 +42,20 @@ namespace JSViewUIExtension
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
 			InitializeComponent();
+			InitializeAsync();
 		}
 
+		async void InitializeAsync()
+        {
+			await m_WebView.EnsureCoreWebView2Async(null);
+//			m_WebView.CoreWebView2.Settings.IsBuiltInErrorPageEnabled = false;
+
+//			await m_WebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.chrome.webview.postMessage(window.document.URL);");
+//			await m_WebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.chrome.webview.addEventListener(\'message\', event => alert(event.data));");
+
+			// Disable context menu
+			await m_WebView.CoreWebView2.ExecuteScriptAsync("window.addEventListener('contextmenu', window => {window.preventDefault();});");
+		}
 
 		// IUIExtension ------------------------------------------------------------------
 
@@ -219,6 +231,13 @@ namespace JSViewUIExtension
         }
 
 		// PRIVATE ------------------------------------------------------------------------------
+
+		protected override void OnHandleDestroyed(EventArgs e)
+		{
+			m_WebView.Dispose();
+
+			base.OnHandleDestroyed(e);
+		}
 
 		private void NotifyParentSelChange(UInt32 taskId)
 		{
