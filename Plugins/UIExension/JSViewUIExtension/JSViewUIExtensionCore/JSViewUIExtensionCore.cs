@@ -16,20 +16,9 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace JSViewUIExtension
 {
-	[System.ComponentModel.DesignerCategory("")]
-
-	public class JSViewUIExtensionCore : Panel, IUIExtension
+	public partial class JSViewUIExtensionCore : UserControl, IUIExtension
 	{
-        private const int ComboHeight = 16;
-		private const int ComboWidth = 200;
-		private const int ComboSpacing = 6;
-		private const int MatchListDefaultWidth = 200;
         private const string FontName = "Tahoma";
-
-        private static int MinSplitWidth = DPIScaling.Scale(25 * 2);
-		private static int LabelTop = DPIScaling.Scale(2); 
-		private static int ComboTop = DPIScaling.Scale(20);
-        private static int LabelHeight = (ComboTop - LabelTop);
 
         // -------------------------------------------------------------
 
@@ -230,13 +219,6 @@ namespace JSViewUIExtension
         }
 
 		// PRIVATE ------------------------------------------------------------------------------
-
-		private void InitializeComponent()
-		{
-			this.BackColor = Color.White;
-
-			// TODO
-		}
 
 		private void NotifyParentSelChange(UInt32 taskId)
 		{
