@@ -82,7 +82,7 @@ namespace JSViewUIExtension
 			// Disable context menu
 //			await m_WebView.CoreWebView2.ExecuteScriptAsync("window.addEventListener('contextmenu', window => {window.preventDefault();});");
 
-			Navigate(HtmlFileUri);
+			Navigate(HtmlFileUri); // will have already been built in UpdateTasks
 		}
 
 		// IUIExtension ------------------------------------------------------------------
