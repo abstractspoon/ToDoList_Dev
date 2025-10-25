@@ -23,7 +23,7 @@ namespace JSViewUIExtension
 	{
         private const string FontName = "Tahoma";
 
-		private readonly string RootPath = Application.StartupPath;
+		private static string ResourcePath = Application.StartupPath;
 
 		private readonly string JsDataFilePath = FilePathFromName("JSViewData.js");
 		private readonly string JsCodeFilePath = FilePathFromName("JSViewCode.js");
@@ -35,7 +35,7 @@ namespace JSViewUIExtension
 
 		private static string FilePathFromName(string fileName)
 		{
-			return Path.Combine(Application.StartupPath, fileName);
+			return Path.Combine(ResourcePath, fileName);
 		}
 
 		private static string UriFromFileName(string fileName)
@@ -119,91 +119,92 @@ namespace JSViewUIExtension
 				try
 				{
 					// Create js data file which wraps json of the tasks
-					string json = new JSONExporter().Export(tasks);
-
-					var jsContent = new string[]
-					{
-						"var json = `",
-						json.Replace('\\', '/'),
-						"`;",
-						"var tasks = JSON.parse(json).Tasks;"
-					};
-					File.WriteAllLines(JsDataFilePath, jsContent);
+					SaveTasklistAsJavascript(tasks);
 
 					// Create HTML page to consume this data
-					using (var file = new System.IO.StreamWriter(HtmlFilePath))
-					{
-						using (var html = new HtmlTextWriter(file))
-						{
-// 							html.Write(DocType);
-// 							html.WriteLine();
-							html.RenderBeginTag(HtmlTextWriterTag.Html);
-							{
-								{
-									html.RenderBeginTag(HtmlTextWriterTag.Head);
-									html.Write('\n');
-									{
-										{
-											html.AddAttribute("type", "text/javascript");
-											html.AddAttribute("src", "https://www.gstatic.com/charts/loader.js");
-											html.RenderBeginTag(HtmlTextWriterTag.Script);
-											html.RenderEndTag();
-										}
-
-										{
-											html.AddAttribute("type", "text/javascript");
-											html.AddAttribute("src", JsDataFileUri);
-											html.RenderBeginTag(HtmlTextWriterTag.Script);
-											html.RenderEndTag();
-										}
-
-										{
-											html.AddAttribute("type", "text/javascript");
-											html.AddAttribute("src", JsCodeFileUri);
-											html.RenderBeginTag(HtmlTextWriterTag.Script);
-											html.RenderEndTag();
-										}
-									}
-									html.RenderEndTag();
-								}
-								{
-									html.RenderBeginTag(HtmlTextWriterTag.Body);
-
-									{
-										html.AddAttribute("id", "curve_chart");
-										html.AddAttribute("style", "width:600px; height:400px");
-										html.RenderBeginTag(HtmlTextWriterTag.Div);
-										html.RenderEndTag();
-									}
-
-									html.RenderEndTag();
-								}
-							}
-							html.RenderEndTag();
-						}
-					}
-
-					// Navigate
-					Navigate(HtmlFileUri);
+					CreateHtmlPlaceHolder();
 				}
 				catch
 				{
+					// TODO
 				}
 				break;
 
 			case UIExtension.UpdateType.New:
 			case UIExtension.UpdateType.Edit:
 				// In-place update
-				//changedTaskIds = new HashSet<UInt32>();
+				{
+					//changedTaskIds = new HashSet<UInt32>();
+					//Task task = tasks.GetFirstTask();
+					// 
+					//while (task.IsValid() && ProcessTaskUpdate(task, type, changedTaskIds))
+					//task = task.GetNextTask();
+				}
 				break;
 			}
 
-			// 			Task task = tasks.GetFirstTask();
-			// 
-			// 			while (task.IsValid() && ProcessTaskUpdate(task, type, changedTaskIds))
-			// 				task = task.GetNextTask();
+			// Refresh page
+			Navigate(HtmlFileUri);
+		}
 
-			// TODO
+		private void SaveTasklistAsJavascript(TaskList tasks)
+		{
+			string json = new JSONExporter().Export(tasks);
+
+			var jsContent = new string[]
+			{
+						"var json = `",
+						json.Replace('\\', '/'),
+						"`;",
+						"var tasks = JSON.parse(json).Tasks;"
+			};
+			File.WriteAllLines(JsDataFilePath, jsContent);
+		}
+
+		private void CreateHtmlPlaceHolder()
+		{
+			using (var file = new System.IO.StreamWriter(HtmlFilePath))
+			{
+				using (var html = new HtmlTextWriter(file))
+				{
+					// html.Write(DocType);
+					// html.WriteLine();
+
+					html.RenderBeginTag(HtmlTextWriterTag.Html);
+					html.RenderBeginTag(HtmlTextWriterTag.Head);
+
+					// Google charting library
+					html.AddAttribute("type", "text/javascript");
+					html.AddAttribute("src", "https://www.gstatic.com/charts/loader.js");
+					html.RenderBeginTag(HtmlTextWriterTag.Script);
+					html.RenderEndTag(); // script
+
+					// Our javascript tasklist
+					html.AddAttribute("type", "text/javascript");
+					html.AddAttribute("src", JsDataFileUri);
+					html.RenderBeginTag(HtmlTextWriterTag.Script);
+					html.RenderEndTag(); // script
+
+					// The user's code
+					html.AddAttribute("type", "text/javascript");
+					html.AddAttribute("src", JsCodeFileUri);
+					html.RenderBeginTag(HtmlTextWriterTag.Script);
+					html.RenderEndTag(); // script
+
+					html.RenderEndTag(); // Head
+
+					// Body
+					html.RenderBeginTag(HtmlTextWriterTag.Body);
+
+					html.AddAttribute("id", "curve_chart");
+					html.AddAttribute("style", "width:600px; height:400px");
+					html.RenderBeginTag(HtmlTextWriterTag.Div);
+					html.RenderEndTag();
+
+					html.RenderEndTag(); // Body
+					html.RenderEndTag(); // Html
+				}
+			}
 		}
 
 		private bool ProcessTaskUpdate(Task task, 
