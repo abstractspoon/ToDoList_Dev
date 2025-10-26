@@ -61,6 +61,24 @@ namespace JSViewUIExtension.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string representing the default Javascript code
+        /// </summary>
+        internal static string JSViewDefaultCode {
+            get {
+                return ResourceManager.GetString("JSViewDefaultCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string representing the default HTML page
+        /// </summary>
+        internal static string JSViewDefaultPage {
+            get {
+                return ResourceManager.GetString("JSViewDefaultPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap toolbar_std {

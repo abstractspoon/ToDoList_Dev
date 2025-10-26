@@ -23,7 +23,8 @@ namespace JSViewUIExtension
 	{
         private const string FontName = "Tahoma";
 
-		private static string ResourcePath = Application.StartupPath;
+		private static   string ResourcePath	= Application.StartupPath;
+		private readonly string ResourcePathUri = UriFromFileName("");
 
 		private readonly string JsDataFilePath = FilePathFromName("JSViewData.js");
 		private readonly string JsCodeFilePath = FilePathFromName("JSViewCode.js");
@@ -69,6 +70,17 @@ namespace JSViewUIExtension
 
 			InitializeComponent();
 			InitializeAsync();
+
+			// Initialise default Javascript and HTML files
+#if !DEBUG
+			if (!File.Exists(HtmlFilePath))
+#endif
+				File.WriteAllText(HtmlFilePath, JSViewUIExtension.Properties.Resources.JSViewDefaultPage);
+
+#if !DEBUG
+			if (!File.Exists(JsDataFilePath))
+#endif
+				File.WriteAllText(JsCodeFilePath, JSViewUIExtension.Properties.Resources.JSViewDefaultCode);
 		}
 
 		async void InitializeAsync()
@@ -109,25 +121,14 @@ namespace JSViewUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-// 			HashSet<UInt32> changedTaskIds = null;
 
 			switch (type)
 			{
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
 				// Rebuild
-				try
 				{
-					// Create js data file which wraps json of the tasks
-					SaveTasklistAsJavascript(tasks);
-
-					// Create HTML page to consume this data
-					// Note: If this already exists then we will not overwrite it
-					CreateDefaultHtmlPage();
-				}
-				catch
-				{
-					// TODO
+					ExportTasklistToJsonAsJavascript(tasks);
 				}
 				break;
 
@@ -135,6 +136,7 @@ namespace JSViewUIExtension
 			case UIExtension.UpdateType.Edit:
 				// In-place update
 				{
+		 			//HashSet<UInt32> changedTaskIds = null;
 					//changedTaskIds = new HashSet<UInt32>();
 					//Task task = tasks.GetFirstTask();
 					// 
@@ -148,7 +150,7 @@ namespace JSViewUIExtension
 			Navigate(HtmlFileUri);
 		}
 
-		private void SaveTasklistAsJavascript(TaskList tasks)
+		private void ExportTasklistToJsonAsJavascript(TaskList tasks)
 		{
 			string json = new JSONExporter().Export(tasks);
 
@@ -159,56 +161,8 @@ namespace JSViewUIExtension
 						"`;",
 						"var tasks = JSON.parse(json).Tasks;"
 			};
+
 			File.WriteAllLines(JsDataFilePath, jsContent);
-		}
-
-		private void CreateDefaultHtmlPage()
-		{
-			if (File.Exists(HtmlFilePath))
-				return;
-
-			using (var file = new System.IO.StreamWriter(HtmlFilePath))
-			{
-				using (var html = new HtmlTextWriter(file))
-				{
-					// html.Write(DocType);
-					// html.WriteLine();
-
-					html.RenderBeginTag(HtmlTextWriterTag.Html);
-					html.RenderBeginTag(HtmlTextWriterTag.Head);
-
-					// Google charting library
-					html.AddAttribute("type", "text/javascript");
-					html.AddAttribute("src", "https://www.gstatic.com/charts/loader.js");
-					html.RenderBeginTag(HtmlTextWriterTag.Script);
-					html.RenderEndTag(); // script
-
-					// Our javascript tasklist
-					html.AddAttribute("type", "text/javascript");
-					html.AddAttribute("src", JsDataFileUri);
-					html.RenderBeginTag(HtmlTextWriterTag.Script);
-					html.RenderEndTag(); // script
-
-					// The user's code
-					html.AddAttribute("type", "text/javascript");
-					html.AddAttribute("src", JsCodeFileUri);
-					html.RenderBeginTag(HtmlTextWriterTag.Script);
-					html.RenderEndTag(); // script
-
-					html.RenderEndTag(); // Head
-
-					// Body
-					html.RenderBeginTag(HtmlTextWriterTag.Body);
-
-					html.AddAttribute("id", "curve_chart");
-					html.AddAttribute("style", "width:600px; height:400px");
-					html.RenderBeginTag(HtmlTextWriterTag.Div);
-					html.RenderEndTag();
-
-					html.RenderEndTag(); // Body
-					html.RenderEndTag(); // Html
-				}
-			}
 		}
 
 		private bool ProcessTaskUpdate(Task task, 
