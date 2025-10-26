@@ -15,7 +15,7 @@ namespace JSONExporterPlugin
     {
 		private class AttribItem
 		{
-			public string Label = "";
+			public string Label = string.Empty;
 			public Task.Attribute AttribId = Task.Attribute.Unknown;
 			public string CustAttribId = "";
 			public CustomAttributeDefinition.Attribute CustAttribType = CustomAttributeDefinition.Attribute.Unknown;
