@@ -5,12 +5,12 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginHelpers", "PluginHelpers\PluginHelpers.vcxproj", "{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayViewUIExtensionCore", "UIExension\DayViewUIExtension\DayViewUIExtensionCore\DayViewUIExtensionCore.csproj", "{92FEFDB8-3F95-4404-A620-8003B51C5A53}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayViewUIExtensionCore", "UIExtension\DayViewUIExtension\DayViewUIExtensionCore\DayViewUIExtensionCore.csproj", "{92FEFDB8-3F95-4404-A620-8003B51C5A53}"
 	ProjectSection(ProjectDependencies) = postProject
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DayViewUIExtensionBridge", "UIExension\DayViewUIExtension\DayViewUIExtensionBridge\DayViewUIExtensionBridge.vcxproj", "{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DayViewUIExtensionBridge", "UIExtension\DayViewUIExtension\DayViewUIExtensionBridge\DayViewUIExtensionBridge.vcxproj", "{B382AA74-CAF8-4D01-B0A4-6A49F0979E45}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D17A4D6A-4CAA-4470-8A19-F42463C021FD} = {D17A4D6A-4CAA-4470-8A19-F42463C021FD}
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
@@ -19,12 +19,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DayViewUIExtensionBridge", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayView", "3rdParty\DayView\DayView.csproj", "{D17A4D6A-4CAA-4470-8A19-F42463C021FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleUIExtensionCore", "UIExension\SampleUIExtension\SampleUIExtensionCore\SampleUIExtensionCore.csproj", "{828B1DA8-D72C-446B-B601-5117985691AD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleUIExtensionCore", "UIExtension\SampleUIExtension\SampleUIExtensionCore\SampleUIExtensionCore.csproj", "{828B1DA8-D72C-446B-B601-5117985691AD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleUIExtensionBridge", "UIExension\SampleUIExtension\SampleUIExtensionBridge\SampleUIExtensionBridge.vcxproj", "{E687CC37-AA5B-4E28-91B9-A0E72B0E9B7D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SampleUIExtensionBridge", "UIExtension\SampleUIExtension\SampleUIExtensionBridge\SampleUIExtensionBridge.vcxproj", "{E687CC37-AA5B-4E28-91B9-A0E72B0E9B7D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 	EndProjectSection
@@ -71,13 +71,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdownLog", "3rdParty\Mar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WordCloudUIExtension", "WordCloudUIExtension", "{5555F901-96D1-4963-831D-52CB958536F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordCloudUIExtensionCore", "UIExension\WordCloudUIExtension\WordCloudUIExtensionCore\WordCloudUIExtensionCore.csproj", "{8A0A687F-D652-4B51-9E33-6EFD7DA640F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordCloudUIExtensionCore", "UIExtension\WordCloudUIExtension\WordCloudUIExtensionCore\WordCloudUIExtensionCore.csproj", "{8A0A687F-D652-4B51-9E33-6EFD7DA640F2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{34649D7D-04A9-4092-AD0B-F7022C123FD7} = {34649D7D-04A9-4092-AD0B-F7022C123FD7}
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordCloudUIExtensionBridge", "UIExension\WordCloudUIExtension\WordCloudUIExtensionBridge\WordCloudUIExtensionBridge.vcxproj", "{6B403FF9-0BAF-46B0-9059-B625398DBD1B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordCloudUIExtensionBridge", "UIExtension\WordCloudUIExtension\WordCloudUIExtensionBridge\WordCloudUIExtensionBridge.vcxproj", "{6B403FF9-0BAF-46B0-9059-B625398DBD1B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8A0A687F-D652-4B51-9E33-6EFD7DA640F2} = {8A0A687F-D652-4B51-9E33-6EFD7DA640F2}
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
@@ -100,13 +100,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookExporterCore", "Impo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MindMapUIExtension", "MindMapUIExtension", "{E2E4B548-D88C-47D2-A9A3-DD66A98C050E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MindMapUIExtensionBridge", "UIExension\MindMapUIExtension\MindMapUIExtensionBridge\MindMapUIExtensionBridge.vcxproj", "{0B0D4095-C793-4B6E-82BA-E865423BBAED}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MindMapUIExtensionBridge", "UIExtension\MindMapUIExtension\MindMapUIExtensionBridge\MindMapUIExtensionBridge.vcxproj", "{0B0D4095-C793-4B6E-82BA-E865423BBAED}"
 	ProjectSection(ProjectDependencies) = postProject
 		{828B1DA8-D72C-446B-ABCD-5117985691AD} = {828B1DA8-D72C-446B-ABCD-5117985691AD}
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MindMapUIExtensionCore", "UIExension\MindMapUIExtension\MindMapUIExtensionCore\MindMapUIExtensionCore.csproj", "{828B1DA8-D72C-446B-ABCD-5117985691AD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MindMapUIExtensionCore", "UIExtension\MindMapUIExtension\MindMapUIExtensionCore\MindMapUIExtensionCore.csproj", "{828B1DA8-D72C-446B-ABCD-5117985691AD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 	EndProjectSection
@@ -202,12 +202,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EvidenceBoardUIExtension", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadialTree", "3rdParty\RadialTree\RadialTree.csproj", "{1DB9C8CC-031B-49B5-AC6C-23D9C75FDB0C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EvidenceBoardUIExtensionBridge", "UIExension\EvidenceBoardUIExtension\EvidenceBoardUIExtensionBridge\EvidenceBoardUIExtensionBridge.vcxproj", "{13FC13FB-60BE-4735-9681-C3F84B4E3C54}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EvidenceBoardUIExtensionBridge", "UIExtension\EvidenceBoardUIExtension\EvidenceBoardUIExtensionBridge\EvidenceBoardUIExtensionBridge.vcxproj", "{13FC13FB-60BE-4735-9681-C3F84B4E3C54}"
 	ProjectSection(ProjectDependencies) = postProject
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvidenceBoardUIExtensionCore", "UIExension\EvidenceBoardUIExtension\EvidenceBoardUIExtensionCore\EvidenceBoardUIExtensionCore.csproj", "{D03AA054-9987-44DC-B03F-691D79506DA9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvidenceBoardUIExtensionCore", "UIExtension\EvidenceBoardUIExtension\EvidenceBoardUIExtensionCore\EvidenceBoardUIExtensionCore.csproj", "{D03AA054-9987-44DC-B03F-691D79506DA9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrollHelper", "3rdParty\ScrollHelper\ScrollHelper.csproj", "{F189401E-AB95-40CB-96AC-D6A0371117C1}"
 EndProject
@@ -227,9 +227,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlDiffView", "3rdParty\Xml
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LoggedTimeUIExtension", "LoggedTimeUIExtension", "{25D29C53-034D-462D-92B3-BB3C2F14F81B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoggedTimeUIExtensionBridge", "UIExension\LoggedTimeUIExtension\LoggedTimeUIExtensionBridge\LoggedTimeUIExtensionBridge.vcxproj", "{0090C2A3-F40F-4D69-A656-006833F7D27C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoggedTimeUIExtensionBridge", "UIExtension\LoggedTimeUIExtension\LoggedTimeUIExtensionBridge\LoggedTimeUIExtensionBridge.vcxproj", "{0090C2A3-F40F-4D69-A656-006833F7D27C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggedTimeUIExtensionCore", "UIExension\LoggedTimeUIExtension\LoggedTimeUIExtensionCore\LoggedTimeUIExtensionCore.csproj", "{4B4C2975-69B4-4EBC-8802-CAAE2DB37B96}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggedTimeUIExtensionCore", "UIExtension\LoggedTimeUIExtension\LoggedTimeUIExtensionCore\LoggedTimeUIExtensionCore.csproj", "{4B4C2975-69B4-4EBC-8802-CAAE2DB37B96}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JSONExporter", "JSONExporter", "{9BA2ED13-1849-4341-A0D3-F5F364B2612D}"
 EndProject
