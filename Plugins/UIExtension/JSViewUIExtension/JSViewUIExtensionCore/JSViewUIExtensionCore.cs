@@ -68,19 +68,10 @@ namespace JSViewUIExtension
 			m_Trans = trans;
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
+			BorderStyle = BorderStyle.FixedSingle;
+
 			InitializeComponent();
 			InitializeAsync();
-
-			// Initialise default Javascript and HTML files
-#if !DEBUG
-			if (!File.Exists(HtmlFilePath))
-#endif
-				File.WriteAllText(HtmlFilePath, JSViewUIExtension.Properties.Resources.JSViewDefaultPage);
-
-#if !DEBUG
-			if (!File.Exists(JsDataFilePath))
-#endif
-				File.WriteAllText(JsCodeFilePath, JSViewUIExtension.Properties.Resources.JSViewDefaultCode);
 		}
 
 		async void InitializeAsync()
@@ -121,7 +112,6 @@ namespace JSViewUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-
 			switch (type)
 			{
 			case UIExtension.UpdateType.Delete:
@@ -145,6 +135,13 @@ namespace JSViewUIExtension
 				}
 				break;
 			}
+
+			// Initialise default Javascript and HTML files
+			if (!File.Exists(HtmlFilePath))
+				File.WriteAllText(HtmlFilePath, JSViewUIExtension.Properties.Resources.JSViewDefaultPage);
+
+			if (!File.Exists(JsCodeFilePath))
+				File.WriteAllText(JsCodeFilePath, JSViewUIExtension.Properties.Resources.JSViewDefaultCode);
 
 			// Refresh page
 			Navigate(HtmlFileUri);
