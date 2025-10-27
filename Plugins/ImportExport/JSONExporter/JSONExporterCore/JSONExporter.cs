@@ -13,16 +13,6 @@ namespace JSONExporterPlugin
 {
     public class JSONExporter
     {
-		private class AttribItem
-		{
-			public string Label = string.Empty;
-			public Task.Attribute AttribId = Task.Attribute.Unknown;
-			public string CustAttribId = "";
-			public CustomAttributeDefinition.Attribute CustAttribType = CustomAttributeDefinition.Attribute.Unknown;
-		}
-
-		// --------------------------------------------------------------------------------------
-
 		public JSONExporter()
 		{
 		}
@@ -40,11 +30,11 @@ namespace JSONExporterPlugin
 							 string reportDate,
 							 Translator trans = null)
         {
+			JObject jOutput = null;
+
 			if (srcTasks.Count == 1)
 			{
-				JObject jTasklist = ExportTasklist(srcTasks[0], reportTitle, reportDate, trans);
-
-				return jTasklist.ToString();
+				jOutput = ExportTasklist(srcTasks[0], reportTitle, reportDate, trans);
 			}
 			else
 			{
@@ -59,14 +49,16 @@ namespace JSONExporterPlugin
 					jTasklists.Add(jTasklist);
 				}
 
-				JObject jRoot = new JObject();
+				jOutput = new JObject();
 
 				jRoot.Add(new JProperty(Translate(trans, "Report Name"), reportTitle));
 				jRoot.Add(new JProperty(Translate(trans, "Report Date"), reportDate));
 				jRoot.Add(new JProperty(Translate(trans, "Tasklists"), jTasklists));
-
-				return jRoot.ToString();
 			}
+
+			return jOutput.ToString()
+						  .Replace("\\\\", "/")
+						  .Replace("\\n", " ");
 		}
 
 		private static string Translate(Translator trans, string text)
@@ -103,14 +95,14 @@ namespace JSONExporterPlugin
 			return jTasklist;
 		}
 
-		private bool ExportTask(TaskList tasks, Task task, IList<AttribItem> attribList, JArray jTasks, Translator trans)
+		private bool ExportTask(TaskList tasks, Task task, IList<TaskAttributeItem> attribList, JArray jTasks, Translator trans)
         {
             // add ourselves
 			JObject jTask = new JObject();
 
 			foreach (var item in attribList)
 			{
-				jTask.Add(new JProperty(item.Label, GetNativeAttributeValue(tasks, task, item)));
+				jTask.Add(new JProperty(item.Label, task.GetAttributeValue(item, true, true)));
 			}
 
             // then our subtasks in an array
@@ -137,57 +129,13 @@ namespace JSONExporterPlugin
 
 		private static List<AttribItem> GetAttributeList(TaskList tasks, Translator trans)
 		{
-			var attribList = new List<AttribItem>();
+			var attribList = tasks.GetAvailableAttributes(trans);
 
-			// Construct basic list of attributes
-			// excluding those whose positions are fixed
-			foreach (Task.Attribute attrib in Enum.GetValues(typeof(Task.Attribute)))
-			{
-				switch (attrib)
-				{
-				case Task.Attribute.ProjectName:
-					// Not a task attribute
-					break;
+			// Not interested in HtmlComments
+			int find = attribList.FindIndex(x => (x.AttributeId == Task.Attribute.HtmlComments));
 
-				case Task.Attribute.HtmlComments:
-					// Not wanted
-					break;
-
-				case Task.Attribute.CustomAttribute:
-					if (tasks.IsAttributeAvailable(attrib))
-					{
-						var custAttribs = tasks.GetCustomAttributes();
-
-						foreach (var custAttrib in custAttribs)
-						{
-							attribList.Add(new AttribItem()
-							{
-								Label = custAttrib.Label,
-								AttribId = attrib,
-								CustAttribId = custAttrib.Id,
-								CustAttribType = custAttrib.AttributeType
-							});
-						}
-					}
-					break;
-
-				default:
-					if (tasks.IsAttributeAvailable(attrib))
-					{
-						var attribName = TaskList.GetAttributeName(attrib);
-
-						if (!String.IsNullOrEmpty(attribName))
-						{
-							attribList.Add(new AttribItem()
-							{
-								Label = Translate(trans, attribName),
-								AttribId = attrib
-							} );
-						}
-					}
-					break;
-				}
-			}
+			if (find != -1)
+				attribList.RemoveAt(find);
 
 			// Sort alphabetically
 			if (attribList.Count > 1)

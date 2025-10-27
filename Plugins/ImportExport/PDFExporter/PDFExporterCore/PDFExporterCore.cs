@@ -1,7 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Diagnostics;
@@ -66,16 +66,6 @@ namespace PDFExporter
 	[System.ComponentModel.DesignerCategory("")]
 	public class PDFExporterCore
 	{
-		private class AttribItem
-		{
-			public string Label = "";
-			public Task.Attribute AttribId = Task.Attribute.Unknown;
-			public string CustAttribId = "";
-			public CustomAttributeDefinition.Attribute CustAttribType = CustomAttributeDefinition.Attribute.Unknown;
-		}
-
-		// --------------------------------------------------------------------------------------
-
 		private Translator m_Trans;
 		private String m_TypeId;
         private String m_TempFolder;
@@ -160,81 +150,33 @@ namespace PDFExporter
             return true;
 		}
 
-		private IList<AttribItem> GetAttributeList(TaskList tasks)
+		private static bool RemoveAttributeFromList(Task.Attribute attribId, List<TaskAttributeItem> attribList)
 		{
-			var attribList = new List<AttribItem>();
-			var attribs = tasks.GetAvailableAttributes();
+			int find = attribList.FindIndex(x => x.AttributeId == attribId);
 
-			foreach (var attrib in attribs)
-			{
-				switch (attrib)
-				{
-				case Task.Attribute.Comments:
-					m_WantComments = true;
-					break;
+			if (find == -1)
+				return false;
 
-				case Task.Attribute.HtmlComments:
-					m_WantComments = true;
-					break;
+			attribList.RemoveAt(find);
+			return true;
+		}
 
-				case Task.Attribute.Position:
-					m_WantPosition = true;
-					break;
+		private IList<TaskAttributeItem> GetAttributeList(TaskList tasks)
+		{
+			var attribItems = tasks.GetAvailableAttributes(m_Trans);
 
-				case Task.Attribute.MetaData:
-					// Not a user attribute
-					break;
+			// These are handled separately
+			m_WantPosition = RemoveAttributeFromList(Task.Attribute.Position, attribItems);
+			m_WantComments = RemoveAttributeFromList(Task.Attribute.Comments, attribItems);
+			m_WantComments |= RemoveAttributeFromList(Task.Attribute.HtmlComments, attribItems);
 
-				case Task.Attribute.ProjectName:
-					// Not a task attribute
-					break;
+			// These are handled separately
+			RemoveAttributeFromList(Task.Attribute.Title, attribItems);
+			RemoveAttributeFromList(Task.Attribute.Color, attribItems);
 
-				case Task.Attribute.Color:
-					// handled separately
-					break;
+			attribItems.Sort((a, b) => String.Compare(a.Label, b.Label));
 
-				case Task.Attribute.Title:
-					// handled separately
-					break;
-
-				case Task.Attribute.CustomAttribute:
-					if (tasks.IsAttributeAvailable(attrib))
-					{
-						var custAttribs = tasks.GetCustomAttributes();
-
-						foreach (var custAttrib in custAttribs)
-						{
-							attribList.Add(new AttribItem()
-							{
-								Label = custAttrib.Label,
-								AttribId = attrib,
-								CustAttribId = custAttrib.Id,
-								CustAttribType = custAttrib.AttributeType
-							});
-						}
-					}
-					break;
-
-				default:
-					{
-						var attribName = TaskList.GetAttributeName(attrib);
-
-						if (!String.IsNullOrEmpty(attribName))
-						{
-							attribList.Add(new AttribItem()
-							{
-								Label = m_Trans.Translate(attribName, Translator.Type.Text),
-								AttribId = attrib
-							});
-						}
-					}
-					break;
-				}
-			}
-
-			attribList.Sort((a, b) => String.Compare(a.Label, b.Label));
-
-			return attribList;
+			return attribItems;
 		}
 
 		public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
@@ -378,7 +320,7 @@ namespace PDFExporter
 			return section;
 		}
 
-		private Section CreateSection(Task task, IList<AttribItem> attribList, Section parent)
+		private Section CreateSection(Task task, IList<TaskAttributeItem> attribList, Section parent)
 		{
 			Section section = null;
 
@@ -406,10 +348,10 @@ namespace PDFExporter
 				{
 					var attribVal = string.Empty;
 
-					if (attrib.AttribId == Task.Attribute.CustomAttribute)
-						attribVal = task.GetCustomAttributeValue(attrib.CustAttribId, true);
+					if (attrib.AttributeId == Task.Attribute.CustomAttribute)
+						attribVal = task.GetCustomAttributeValue(attrib.CustomAttributeId, true);
 					else
-						attribVal = task.GetAttributeValue(attrib.AttribId, true, true);
+						attribVal = task.GetAttributeValue(attrib.AttributeId, true, true);
 
 					if (!string.IsNullOrWhiteSpace(attribVal))
 					{
