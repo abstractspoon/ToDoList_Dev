@@ -19,6 +19,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+using namespace System::Globalization;
+
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +89,7 @@ bool TaskList::IsAttributeAvailable(Task::Attribute attrib)
 		(m_pTaskList ? m_pTaskList->IsAttributeAvailable(nAttrib) : false));
 }
 
-List<Task::Attribute>^ TaskList::GetAvailableAttributes()
+List<Task::Attribute>^ TaskList::GetAvailableAttributeIds()
 {
 	auto attribs = gcnew List<Task::Attribute>();
 	auto enumValues = System::Enum::GetValues(Task::Attribute::typeid);
@@ -110,6 +112,65 @@ List<Task::Attribute>^ TaskList::GetAvailableAttributes()
 	}
 
 	return attribs;
+}
+
+List<TaskAttributeItem^>^ TaskList::GetAvailableAttributes()
+{
+	return GetAvailableAttributes(nullptr);
+}
+
+List<TaskAttributeItem^>^ TaskList::GetAvailableAttributes(Translator^ trans)
+{
+	auto attribList = gcnew List<TaskAttributeItem^>();
+	auto attribs = GetAvailableAttributeIds();
+
+	for each(auto attrib in attribs)
+	{
+		switch (attrib)
+		{
+		case Task::Attribute::MetaData:
+		case Task::Attribute::ProjectName:
+			// Not task attributes
+			break;
+
+		case Task::Attribute::CustomAttribute:
+			if (IsAttributeAvailable(attrib))
+			{
+				auto custAttribs = GetCustomAttributes();
+
+				for each(auto custAttrib in custAttribs)
+				{
+					auto attribItem = gcnew TaskAttributeItem();
+
+					attribItem->Label = custAttrib->Label; // Not translated
+					attribItem->AttributeId = Task::Attribute::CustomAttribute; // Always
+					attribItem->CustomAttributeId = custAttrib->Id;
+					attribItem->CustomAttributeType = custAttrib->AttributeType;
+
+					attribList->Add(attribItem);
+				}
+			}
+			break;
+
+		default:
+			{
+				auto attribName = GetAttributeName(attrib, trans); // Translated as required
+
+				if (!String::IsNullOrEmpty(attribName))
+				{
+					auto attribItem = gcnew TaskAttributeItem();
+
+					attribItem->Label = attribName;
+					attribItem->AttributeId = attrib;
+
+					attribList->Add(attribItem);
+				}
+			}
+			break;
+		}
+	}
+
+	return attribList;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -291,6 +352,16 @@ Task^ TaskList::GetFirstTask()
 
 	// else
 	return gcnew Task(m_pTaskList, m_pTaskList->GetFirstTask(nullptr));
+}
+
+String^ TaskList::GetAttributeName(Task::Attribute attrib, Translator^ trans)
+{
+	auto name = GetAttributeName(attrib);
+
+	if ((trans != nullptr) && !String::IsNullOrWhiteSpace(name))
+		name = trans->Translate(name, Translator::Type::Text); 
+
+	return name;
 }
 
 String^ TaskList::GetAttributeName(Task::Attribute attrib)
@@ -1318,7 +1389,6 @@ Task::Attribute Task::MapAttribute(TDC_ATTRIBUTE attrib)
 	case TDCA_SUBTASKDONE:		return Task::Attribute::SubtaskDone;
 	case TDCA_METADATA:			return Task::Attribute::MetaData;
 	case TDCA_PROJECTNAME:		return Task::Attribute::ProjectName;
-		//  case TDCA_
 	}
 
 	return Attribute::Unknown;
@@ -1366,7 +1436,6 @@ TDC_ATTRIBUTE Task::MapAttribute(Task::Attribute attrib)
 	case Task::Attribute::TimeSpent:		return TDCA_TIMESPENT;
 	case Task::Attribute::Title:			return TDCA_TASKNAME;
 	case Task::Attribute::Version:			return TDCA_VERSION;
-		//  case IUI_
 	}
 
 	return TDCA_NONE;
