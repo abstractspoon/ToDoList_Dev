@@ -51,9 +51,9 @@ namespace JSONExporterPlugin
 
 				jOutput = new JObject();
 
-				jRoot.Add(new JProperty(Translate(trans, "Report Name"), reportTitle));
-				jRoot.Add(new JProperty(Translate(trans, "Report Date"), reportDate));
-				jRoot.Add(new JProperty(Translate(trans, "Tasklists"), jTasklists));
+				jOutput.Add(new JProperty(Translate(trans, "Report Name"), reportTitle));
+				jOutput.Add(new JProperty(Translate(trans, "Report Date"), reportDate));
+				jOutput.Add(new JProperty(Translate(trans, "Tasklists"), jTasklists));
 			}
 
 			return jOutput.ToString()
@@ -102,7 +102,7 @@ namespace JSONExporterPlugin
 
 			foreach (var item in attribList)
 			{
-				jTask.Add(new JProperty(item.Label, task.GetAttributeValue(item, true, true)));
+				jTask.Add(new JProperty(item.Label, GetNativeAttributeValue(tasks, task, item)));
 			}
 
             // then our subtasks in an array
@@ -127,7 +127,7 @@ namespace JSONExporterPlugin
 			return true;
         }
 
-		private static List<AttribItem> GetAttributeList(TaskList tasks, Translator trans)
+		private static List<TaskAttributeItem> GetAttributeList(TaskList tasks, Translator trans)
 		{
 			var attribList = tasks.GetAvailableAttributes(trans);
 
@@ -144,13 +144,13 @@ namespace JSONExporterPlugin
 			return attribList;
 		}
 
-		private object GetNativeAttributeValue(TaskList tasks, Task task, AttribItem item)
+		private object GetNativeAttributeValue(TaskList tasks, Task task, TaskAttributeItem item)
 		{
-			if (item.AttribId != Task.Attribute.CustomAttribute)
+			if (item.AttributeId != Task.Attribute.CustomAttribute)
 			{
-				var attribValue = task.GetAttributeValue(item.AttribId, true, true);
+				var attribValue = task.GetAttributeValue(item.AttributeId, true, true);
 
-				switch (item.AttribId)
+				switch (item.AttributeId)
 				{
 				case Task.Attribute.Id:
 				case Task.Attribute.ParentId:
@@ -178,9 +178,9 @@ namespace JSONExporterPlugin
 			}
 
 			// custom attributes
-			var custAttribValue = task.GetCustomAttributeValue(item.CustAttribId, true);
+			var custAttribValue = task.GetCustomAttributeValue(item.CustomAttributeId, true);
 
-			switch (item.CustAttribType)
+			switch (item.CustomAttributeType)
 			{
 			case CustomAttributeDefinition.Attribute.Integer:
 				return ParseAttributeValue(custAttribValue, typeof(int), 0);
