@@ -2,6 +2,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "Translator.h"
+
 #include <Interfaces\ITasklist.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29,6 +31,8 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
+			ref class TaskAttributeItem;
+
 			public ref class Task
 			{
 			public:
@@ -297,6 +301,27 @@ namespace Abstractspoon
 
 			////////////////////////////////////////////////////////////////////////////////////////////////
 
+			public ref class TaskAttributeItem
+			{
+			public:
+				TaskAttributeItem()
+					:
+					Label(String::Empty),
+					AttributeId(Task::Attribute::Unknown),
+					CustomAttributeId(String::Empty),
+					CustomAttributeType(CustomAttributeDefinition::Attribute::Unknown)
+				{
+				}
+
+			public:
+				String^ Label;
+				Task::Attribute AttributeId;
+				String^ CustomAttributeId;
+				CustomAttributeDefinition::Attribute CustomAttributeType;
+			};
+
+			////////////////////////////////////////////////////////////////////////////////////////////////
+
 			public ref class TaskList
 			{
 			public:
@@ -305,7 +330,10 @@ namespace Abstractspoon
 
 				bool IsValid();
 				bool IsAttributeAvailable(Task::Attribute attrib);
-				List<Task::Attribute>^ GetAvailableAttributes();
+
+				List<Task::Attribute>^ GetAvailableAttributeIds();
+				List<TaskAttributeItem^>^ GetAvailableAttributes();
+				List<TaskAttributeItem^>^ GetAvailableAttributes(Translator^ trans);
 
 				String^ GetReportTitle();
 				String^ GetReportDate();
@@ -329,6 +357,7 @@ namespace Abstractspoon
 				Boolean ClearMetaData(String^ sKey);
 				
 				static String^ GetAttributeName(Task::Attribute attrib);
+				static String^ GetAttributeName(Task::Attribute attrib, Translator^ trans);
 				
 			private: // -------------------------------------------------------
 				ITASKLISTBASE* m_pTaskList;
