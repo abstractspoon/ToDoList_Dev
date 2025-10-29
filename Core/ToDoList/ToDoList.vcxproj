@@ -175,9 +175,10 @@ copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y
       <OutputFile>.\Unicode_Release/ToDoList.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>mkdir ..\..\ToDoList_Plugins
-mkdir ..\..\ToDoList_Plugins\release
-copy unicode_release\ToDoList.exe ..\..\todolist_Plugins\release /y
+      <Command>mkdir ..\..\Plugins
+mkdir ..\..\Plugins\release
+
+copy unicode_release\ToDoList.exe ..\..\Plugins\release /y
 
 unicode_release\TDLTest.exe
 </Command>
