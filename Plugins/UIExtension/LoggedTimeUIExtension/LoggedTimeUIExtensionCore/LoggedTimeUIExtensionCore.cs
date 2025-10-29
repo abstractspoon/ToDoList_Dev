@@ -18,11 +18,11 @@ namespace LoggedTimeUIExtension
 	[System.ComponentModel.DesignerCategory("")]
 	public class LoggedTimeUIExtensionCore : Panel, IUIExtension
 	{
-		private IntPtr m_HwndParent = IntPtr.Zero;
-		private LoggedTimeView m_TimeLog = null;
-		private Translator m_Trans = null;
+		private IntPtr m_HwndParent;
+		private LoggedTimeView m_TimeLog;
+		private Translator m_Trans;
 		private String m_TypeId, m_UiName;
-		private WorkingWeek m_WorkWeek = null;
+		private WorkingWeek m_WorkWeek;
 
 		private const string FontName = "Tahoma";
 
@@ -338,14 +338,6 @@ namespace LoggedTimeUIExtension
 		void OnTimeLogAccessStatusChanged(object sender, LogAccessEventArgs e)
 		{
 			UpdateToolbarButtonStates();
-
-			if (!e.Success)
-			{
-				MessageBox.Show(TaskTimeLog.FormatLogAccessError(m_Trans, e.Loading),
-								m_Trans.Translate("Logged Time", Translator.Type.Text), 
-								MessageBoxButtons.OK, 
-								MessageBoxIcon.Exclamation);
-			}
 		}
 
 		bool OnTimeLogContextMenu(object sender, MouseEventArgs e)

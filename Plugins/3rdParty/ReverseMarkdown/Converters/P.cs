@@ -16,7 +16,11 @@ namespace ReverseMarkdown.Converters
             var indentation = IndentationFor(node);
             var newlineAfter = NewlineAfter(node);
 
-            var content = Converter.Config.CleanupUnnecessarySpaces ? TreatChildren(node).Trim() : TreatChildren(node); 
+            var content = TreatChildren(node);
+            if (Converter.Config.CleanupUnnecessarySpaces)
+            {
+                content = content.Trim();
+            }
 
             return $"{indentation}{content}{newlineAfter}";
         }

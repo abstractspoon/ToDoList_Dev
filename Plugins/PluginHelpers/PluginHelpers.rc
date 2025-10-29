@@ -17,6 +17,7 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -80,6 +81,51 @@ BEGIN
     BEGIN
         VALUE "Translation", 0xc09, 1200
     END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_LOG_ALTCOLOR        "Colour"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_LOG_COMMENT         "Comment"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_LOG_TASKID          "Task ID"
+    IDS_LOG_TASKTITLE       "Title"
+    IDS_LOG_USERID          "User ID"
+    IDS_LOG_ENDDATE         "End Date"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_LOG_ENDTIME         "End Time"
+    IDS_LOG_STARTDATE       "Start Date"
+    IDS_LOG_STARTTIME       "Start Time"
+    IDS_LOG_TIMESPENT       "Time Spent (Hrs)"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_LOG_PATH            "Path"
+    IDS_LOG_PERIOD          "Period"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_LOG_TYPE            "Type"
+    IDS_LOG_TYPETRACKED     "Tracked"
+    IDS_LOG_TYPEADJUSTED    "Adjusted"
 END
 
 #endif    // English (Australia) resources
