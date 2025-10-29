@@ -92,16 +92,13 @@ namespace JSONExporterPlugin
 			}
 
 			// Tasks
-			var jTasks = new JArray();
-
 			var attribList = GetAttributeList(tasklist);
 			var task = tasklist.GetFirstTask();
 
-			while (task.IsValid())
-			{
-				ExportTask(tasklist, task, attribList, jTasks);
+			var jTasks = new JArray();
+
+			while (ExportTask(tasklist, task, attribList, jTasks))
 				task = task.GetNextTask();
-			}
 
 			jTasklist.Add(new JProperty(Translate("Tasks"), jTasks));
 
@@ -110,13 +107,18 @@ namespace JSONExporterPlugin
 
 		private bool ExportTask(TaskList tasks, Task task, IList<TaskAttributeItem> attribs, JArray jTasks)
         {
+			if (!task.IsValid())
+				return false;
+
             // add ourselves
 			var jTask = new JObject();
 			var attribVals = GetAttributeValues(tasks, task, attribs);
 
-			foreach (var attribVal in attribVals)
+			Debug.Assert(attribVals.Count == attribs.Count);
+
+			for (int i = 0; i < attribs.Count; i++)
 			{
-				jTask.Add(new JProperty(attribVal.Item1.Label, attribVal.Item2));
+				jTask.Add(new JProperty(attribs[i].Label, attribVals[i]));
 			}
 
             // then our subtasks in an array
@@ -126,11 +128,8 @@ namespace JSONExporterPlugin
             {
                 JArray jSubtasks = new JArray();
 
-                while (subtask.IsValid())
-                {
-                    ExportTask(tasks, subtask, attribs, jSubtasks); // RECURSIVE CALL
+                while (ExportTask(tasks, subtask, attribs, jSubtasks)) // RECURSIVE CALL
                     subtask = subtask.GetNextTask();
-                }
 
 				jTask.Add(new JProperty(Translate("Subtasks"), jSubtasks));
             }
@@ -158,15 +157,12 @@ namespace JSONExporterPlugin
 			return attribList;
 		}
 
-		public static IList<Tuple<TaskAttributeItem, object>> GetAttributeValues(TaskList tasks, Task task, IEnumerable<TaskAttributeItem> attribs)
+		public static IList<object> GetAttributeValues(TaskList tasks, Task task, IEnumerable<TaskAttributeItem> attribs)
 		{
-			var attribVals = new List<Tuple<TaskAttributeItem, object>>();
+			var attribVals = new List<object>();
 
 			foreach (var attrib in attribs)
-			{
-				var attribVal = GetNativeAttributeValue(tasks, task, attrib);
-				attribVals.Add(new Tuple<TaskAttributeItem, object>(attrib, attribVal));
-			}
+				attribVals.Add(GetNativeAttributeValue(tasks, task, attrib));
 
 			return attribVals;
 		}
