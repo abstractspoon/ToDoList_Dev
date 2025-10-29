@@ -90,7 +90,7 @@ LINK32=link.exe
 # SUBTRACT LINK32 /pdb:none /map
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_Release	copy unicode_release\TransText.dll ..\todolist\unicode_release /y	copy unicode_release\TransText.pdb ..\todolist\unicode_release /y
+PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_Release	copy unicode_release\TransText.dll ..\todolist\unicode_release /y	copy unicode_release\TransText.pdb ..\todolist\unicode_release /y	mkdir ..\..\Plugins	mkdir ..\..\Plugins\Release	copy unicode_release\TransText.dll ..\..\Plugins\release /y
 # End Special Build Tool
 
 !ENDIF 
