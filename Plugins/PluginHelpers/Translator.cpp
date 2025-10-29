@@ -7,6 +7,8 @@
 #include "Translator.h"
 
 #include <Shared\wclassdefines.h>
+#include <Shared\localizer.h>
+
 #include <Interfaces\ITransText.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,6 +22,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 Translator::Translator(ITransText* pTransText) : m_pTransText(pTransText) 
 {
+	InitialiseLocalizer();
 } 
 
 // private constructor
@@ -246,6 +249,12 @@ void Translator::AddPreTranslation(String^ sText, String^ sTranslation)
 		m_mapPreTranslate = gcnew Dictionary<String^, String^>();
 
 	m_mapPreTranslate[sText] = sTranslation;
+}
+
+void Translator::InitialiseLocalizer()
+{
+	if (!CLocalizer::IsInitialized() && m_pTransText)
+		CLocalizer::Initialize(m_pTransText);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -341,7 +341,7 @@ namespace LoggedTimeUIExtension
 
 			if (!e.Success)
 			{
-				MessageBox.Show(TaskTimeLog.FormatLogAccessError(m_Trans, e.Loading),
+				MessageBox.Show(new TaskTimeLog(m_Trans).FormatLogAccessError(e.Loading),
 								m_Trans.Translate("Logged Time", Translator.Type.Text), 
 								MessageBoxButtons.OK, 
 								MessageBoxIcon.Exclamation);

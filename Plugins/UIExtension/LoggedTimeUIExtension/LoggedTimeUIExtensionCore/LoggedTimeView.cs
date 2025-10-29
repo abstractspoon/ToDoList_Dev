@@ -71,7 +71,7 @@ namespace LoggedTimeUIExtension
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
 
-			m_LogFiles = new LogFiles();
+			m_LogFiles = new LogFiles(m_Trans);
 			m_TaskItems = new TaskItems();
 //			m_DateSortedTasks = new DateSortedTasks(m_LogEntries);
 
@@ -341,7 +341,7 @@ namespace LoggedTimeUIExtension
 			// Temporarily disable file watcher
 			EnableFileWatching(false);
 
-			bool success = TaskTimeLog.AddEntry(m_TasklistPath, newEntry, logSeparately);
+			bool success = new TaskTimeLog(m_Trans).AddEntry(m_TasklistPath, newEntry, logSeparately);
 
 			EnableFileWatching(true);
 

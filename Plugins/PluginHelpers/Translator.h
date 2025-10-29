@@ -61,6 +61,7 @@ namespace Abstractspoon
 				void Translate(ITranslatable^ ctrl);
 
 				void AddPreTranslation(String^ sText, String^ sTranslation);
+				void InitialiseLocalizer();
 
 			private:
 				ITransText* m_pTransText;

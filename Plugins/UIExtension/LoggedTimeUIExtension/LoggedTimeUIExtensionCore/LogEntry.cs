@@ -147,6 +147,7 @@ namespace LoggedTimeUIExtension
 
 	public class LogFile
 	{
+		private Translator m_Trans;
 		private List<LogEntry> m_Entries;
 
 		public uint TaskId { get; private set; }
@@ -154,8 +155,9 @@ namespace LoggedTimeUIExtension
 		public bool IsAccessible { get; private set; } = true;
 		public bool WasAccessible { get; private set; } = true;
 
-		public LogFile()
+		public LogFile(Translator trans)
 		{
+			m_Trans = trans;
 			m_Entries = new List<LogEntry>();
 		}
 
@@ -217,7 +219,7 @@ namespace LoggedTimeUIExtension
 
 		public bool LoadEntries(string tasklistPath, uint taskId, ref uint nextEntryId)
 		{
-			var logEntries = TaskTimeLog.LoadEntries(tasklistPath, taskId);
+			var logEntries = new TaskTimeLog(m_Trans).LoadEntries(tasklistPath, taskId);
 
 			if (logEntries != null)
 			{
@@ -318,7 +320,7 @@ namespace LoggedTimeUIExtension
 
 			try
 			{
-				IsAccessible = TaskTimeLog.SaveEntries(tasklistPath, logEntries, TaskId);
+				IsAccessible = new TaskTimeLog(m_Trans).SaveEntries(tasklistPath, logEntries, TaskId);
 			}
 			catch (Exception)
 			{
@@ -333,11 +335,13 @@ namespace LoggedTimeUIExtension
 
 	public class LogFiles
 	{
+		private Translator m_Trans;
 		private List<LogFile> m_LogFiles;
 		private uint m_NextEntryId;
 
-		public LogFiles()
+		public LogFiles(Translator trans)
 		{
+			m_Trans = trans;
 			m_LogFiles = new List<LogFile>();
 		}
 
@@ -410,7 +414,7 @@ namespace LoggedTimeUIExtension
 
 			if (logFile == null)
 			{
-				logFile = new LogFile();
+				logFile = new LogFile(m_Trans);
 				m_LogFiles.Add(logFile);
 			}
 
@@ -486,7 +490,7 @@ namespace LoggedTimeUIExtension
 			bool newLogFile = (logFile == null);
 
 			if (newLogFile)
-				logFile = new LogFile();
+				logFile = new LogFile(m_Trans);
 
 			if (!logFile.LoadEntries(tasklistPath, taskId, ref m_NextEntryId))
 				return false;
