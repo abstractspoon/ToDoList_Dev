@@ -102,9 +102,6 @@
     <ClInclude Include="TaskComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TaskTimeLog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DateRangeLink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -115,6 +112,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ClipboardUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TaskTimeLogUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -203,9 +203,6 @@
     <ClCompile Include="TaskComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TaskTimeLog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DateRangeLink.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -213,6 +210,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ClipboardUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskTimeLogUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

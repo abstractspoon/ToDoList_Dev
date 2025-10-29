@@ -39,11 +39,11 @@ namespace Abstractspoon
 
 			// -------------------------------------------------------
 
-			public ref class TaskTimeLog
+			public ref class TaskTimeLogUtil
 			{
 			public:
-				TaskTimeLog();
-				TaskTimeLog(Translator^ trans);
+				TaskTimeLogUtil();
+				TaskTimeLogUtil(Translator^ trans);
 				
 				List<TaskTimeLogEntry^>^ LoadEntries(String^ tasklistPath);
 				List<TaskTimeLogEntry^>^ LoadEntries(String^ tasklistPath, UInt32 taskId);
