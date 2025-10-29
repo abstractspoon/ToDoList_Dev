@@ -34,6 +34,7 @@ namespace LoggedTimeUIExtension
 		private TaskItems m_TaskItems;
 		private LogFiles m_LogFiles;
 		private LogEntry m_CachedLogEntry;
+		private TaskTimeLogUtil m_LogUtil;
 
 		private string m_TasklistPath = string.Empty;
 
@@ -71,8 +72,9 @@ namespace LoggedTimeUIExtension
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
 
-			m_LogFiles = new LogFiles();
 			m_TaskItems = new TaskItems();
+			m_LogUtil = new TaskTimeLogUtil(trans);
+			m_LogFiles = new LogFiles(m_LogUtil);
 //			m_DateSortedTasks = new DateSortedTasks(m_LogEntries);
 
 			base.NotifyDayWidth += new Calendar.DayWidthEventHandler(OnNotifyDayWidth);
@@ -341,7 +343,7 @@ namespace LoggedTimeUIExtension
 			// Temporarily disable file watcher
 			EnableFileWatching(false);
 
-			bool success = TaskTimeLog.AddEntry(m_TasklistPath, newEntry, logSeparately);
+			bool success = m_LogUtil.AddEntry(m_TasklistPath, newEntry, logSeparately);
 
 			EnableFileWatching(true);
 
@@ -351,7 +353,7 @@ namespace LoggedTimeUIExtension
 				Invalidate();
 			}
 
-			var logPath = TaskTimeLog.GetLogPath(m_TasklistPath, (logSeparately ? taskId : 0));
+			var logPath = TaskTimeLogUtil.GetLogPath(m_TasklistPath, (logSeparately ? taskId : 0));
 			HandleLogAccessResult(logPath, false);
 
 			return success;
@@ -712,6 +714,15 @@ namespace LoggedTimeUIExtension
 					Loading = loading,
 					Success = logFile.IsAccessible
 				});
+
+				if (!logFile.IsAccessible)
+				{
+					MessageBox.Show(m_LogUtil.FormatLogAccessError(loading),
+									m_Trans.Translate("Logged Time", Translator.Type.Text),
+									MessageBoxButtons.OK,
+									MessageBoxIcon.Exclamation);
+				}
+
 			}
 
 			if (logFile.IsAccessible)
@@ -752,7 +763,7 @@ namespace LoggedTimeUIExtension
 			if (logPath == null)
 			{
 				m_LogFiles.LoadLogFiles(m_TasklistPath);
-				HandleLogAccessResult(TaskTimeLog.GetLogPath(m_TasklistPath), true);
+				HandleLogAccessResult(TaskTimeLogUtil.GetLogPath(m_TasklistPath), true);
 			}
 			else
 			{

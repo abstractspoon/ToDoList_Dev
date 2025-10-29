@@ -147,6 +147,7 @@ namespace LoggedTimeUIExtension
 
 	public class LogFile
 	{
+		private TaskTimeLogUtil m_LogUtil;
 		private List<LogEntry> m_Entries;
 
 		public uint TaskId { get; private set; }
@@ -154,8 +155,9 @@ namespace LoggedTimeUIExtension
 		public bool IsAccessible { get; private set; } = true;
 		public bool WasAccessible { get; private set; } = true;
 
-		public LogFile()
+		public LogFile(TaskTimeLogUtil logUtil)
 		{
+			m_LogUtil = logUtil;
 			m_Entries = new List<LogEntry>();
 		}
 
@@ -217,7 +219,7 @@ namespace LoggedTimeUIExtension
 
 		public bool LoadEntries(string tasklistPath, uint taskId, ref uint nextEntryId)
 		{
-			var logEntries = TaskTimeLog.LoadEntries(tasklistPath, taskId);
+			var logEntries = m_LogUtil.LoadEntries(tasklistPath, taskId);
 
 			if (logEntries != null)
 			{
@@ -260,7 +262,7 @@ namespace LoggedTimeUIExtension
 				}
 
 				TaskId = taskId;
-				FilePath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
+				FilePath = TaskTimeLogUtil.GetLogPath(tasklistPath, taskId);
 			}
 
 			WasAccessible = IsAccessible;
@@ -318,7 +320,7 @@ namespace LoggedTimeUIExtension
 
 			try
 			{
-				IsAccessible = TaskTimeLog.SaveEntries(tasklistPath, logEntries, TaskId);
+				IsAccessible = m_LogUtil.SaveEntries(tasklistPath, logEntries, TaskId);
 			}
 			catch (Exception)
 			{
@@ -333,11 +335,13 @@ namespace LoggedTimeUIExtension
 
 	public class LogFiles
 	{
+		private TaskTimeLogUtil m_LogUtil;
 		private List<LogFile> m_LogFiles;
 		private uint m_NextEntryId;
 
-		public LogFiles()
+		public LogFiles(TaskTimeLogUtil logUtil)
 		{
+			m_LogUtil = logUtil;
 			m_LogFiles = new List<LogFile>();
 		}
 
@@ -362,7 +366,7 @@ namespace LoggedTimeUIExtension
 
 		public LogFile GetLogFile(string tasklistPath, uint taskId)
 		{
-			string logPath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
+			string logPath = TaskTimeLogUtil.GetLogPath(tasklistPath, taskId);
 
 			return m_LogFiles.Find(x => LogFiles.IsSamePath(x.FilePath, logPath));
 		}
@@ -405,12 +409,12 @@ namespace LoggedTimeUIExtension
 
 		public bool AddEntry(LogEntry entry, bool logSeparately)
 		{
-			var logPath = TaskTimeLog.GetLogPath(TasklistPath, (logSeparately ? entry.TaskId : 0));
+			var logPath = TaskTimeLogUtil.GetLogPath(TasklistPath, (logSeparately ? entry.TaskId : 0));
 			var logFile = GetLogFile(logPath);
 
 			if (logFile == null)
 			{
-				logFile = new LogFile();
+				logFile = new LogFile(m_LogUtil);
 				m_LogFiles.Add(logFile);
 			}
 
@@ -426,7 +430,7 @@ namespace LoggedTimeUIExtension
 			LoadLogFile(tasklistPath, 0);
 
 			// Separate 'Task' log files
-			var filter = TaskTimeLog.GetLogFileFilter(tasklistPath, true);
+			var filter = TaskTimeLogUtil.GetLogFileFilter(tasklistPath, true);
 
 			if (Directory.Exists(Path.GetDirectoryName(filter)))
 			{
@@ -460,7 +464,7 @@ namespace LoggedTimeUIExtension
 		public bool IsLogFile(string logPath, bool main)
 		{
 			if (main)
-				return IsSamePath(logPath, TaskTimeLog.GetLogPath(TasklistPath));
+				return IsSamePath(logPath, TaskTimeLogUtil.GetLogPath(TasklistPath));
 
 			// else
 			if (!IsSamePath(Path.GetDirectoryName(logPath), Path.ChangeExtension(TasklistPath, null)))
@@ -480,13 +484,13 @@ namespace LoggedTimeUIExtension
 
 		private bool LoadLogFile(string tasklistPath, uint taskId)
 		{
-			var logPath = TaskTimeLog.GetLogPath(tasklistPath, taskId);
+			var logPath = TaskTimeLogUtil.GetLogPath(tasklistPath, taskId);
 			var logFile = GetLogFile(logPath);
 
 			bool newLogFile = (logFile == null);
 
 			if (newLogFile)
-				logFile = new LogFile();
+				logFile = new LogFile(m_LogUtil);
 
 			if (!logFile.LoadEntries(tasklistPath, taskId, ref m_NextEntryId))
 				return false;

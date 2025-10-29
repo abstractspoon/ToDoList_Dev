@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "pluginhelpers.h"
-#include "TaskTimeLog.h"
+#include "TaskTimeLogUtil.h"
 #include "Translator.h"
 
 #include <ToDoList\TDCTaskTimeLog.h>
@@ -19,15 +19,33 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 const CString EMPTY_STR;
 
+const LPCWSTR LOG_LOAD_ERR = L"The log file could not be loaded.";
+const LPCWSTR LOG_SAVE_ERR = L"The log file could not be updated.";
+const LPCWSTR LOG_ERR_SUGGEST = L"Please ensure that the file is not already open for editing and \n"
+								L"that you have the correct permissions and then try again.";
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-List<TaskTimeLogEntry^>^ TaskTimeLog::LoadEntries(String^ tasklistPath)
+TaskTimeLogUtil::TaskTimeLogUtil() : m_Trans(nullptr)
+{
+}
+
+TaskTimeLogUtil::TaskTimeLogUtil(Translator^ trans) : m_Trans(trans)
+{
+	if (m_Trans != nullptr)
+		m_Trans->InitialiseLocalizer();
+}
+
+List<TaskTimeLogEntry^>^ TaskTimeLogUtil::LoadEntries(String^ tasklistPath)
 {
 	return LoadEntries(tasklistPath, 0);
 }
 
-List<TaskTimeLogEntry^>^ TaskTimeLog::LoadEntries(String^ tasklistPath, UInt32 taskId)
+List<TaskTimeLogEntry^>^ TaskTimeLogUtil::LoadEntries(String^ tasklistPath, UInt32 taskId)
 {
+	// Point any resource loading to our local copies
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	String^ logFilePath = GetLogPath(tasklistPath, taskId);
 	CTaskTimeLogItemArray aLogEntries;
 	CString sUnused;
@@ -68,13 +86,16 @@ List<TaskTimeLogEntry^>^ TaskTimeLog::LoadEntries(String^ tasklistPath, UInt32 t
 	return logEntries;
 }
 
-bool TaskTimeLog::SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries)
+bool TaskTimeLogUtil::SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries)
 {
 	return SaveEntries(tasklistPath, logEntries, 0);
 }
 
-bool TaskTimeLog::SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries, UInt32 taskId)
+bool TaskTimeLogUtil::SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries, UInt32 taskId)
 {
+	// Point any resource loading to our local copies
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CTaskTimeLogItemArray aLogEntries;
 	aLogEntries.SetSize(logEntries->Count);
 
@@ -88,36 +109,41 @@ bool TaskTimeLog::SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ log
 
 	String^ logFilePath = GetLogPath(tasklistPath, taskId);
 
+	// Note: We don't preserve the existing header 
 	return (CTDCTaskTimeLog::SaveLogFile(MS(logFilePath), aLogEntries, FALSE) != FALSE);
 }
 
-bool TaskTimeLog::AddEntry(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately)
+bool TaskTimeLogUtil::AddEntry(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately)
 {
+	// Point any resource loading to our local copies
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	TASKTIMELOGITEM li;
 	Copy(logEntry, li);
 
 	return (CTDCTaskTimeLog(MS(tasklistPath)).LogTime(li, logSeparately) != FALSE);
 }
 
-String^ TaskTimeLog::FormatLogAccessError(Translator^ trans, bool loading)
+String^ TaskTimeLogUtil::FormatLogAccessError(bool loading)
 {
-	String^ part1 = trans->Translate(loading ?
-									 "The log file could not be loaded." :
-									 "The log file could not be updated.",
-									 Translator::Type::Text);
-	String^ part2 = trans->Translate("Please ensure that the file is not already open for editing and \n"
-									 "that you have the correct permissions and then try again.",
-									 Translator::Type::Text);
+	String^ part1 = gcnew String(loading ? LOG_LOAD_ERR : LOG_SAVE_ERR);
+	String^ part2 = gcnew String(LOG_ERR_SUGGEST);
+
+	if (m_Trans)
+	{
+		part1 = m_Trans->Translate(part1, Translator::Type::Text);
+		part2 = m_Trans->Translate(part2, Translator::Type::Text);
+	}
 
 	return String::Format(L"{0}\n\n{1}", part1, part2);
 }
 
-String^ TaskTimeLog::GetLogPath(String^ tasklistPath)
+String^ TaskTimeLogUtil::GetLogPath(String^ tasklistPath)
 {
 	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogPath());
 }
 
-String^ TaskTimeLog::GetLogPath(String^ tasklistPath, UInt32 taskId)
+String^ TaskTimeLogUtil::GetLogPath(String^ tasklistPath, UInt32 taskId)
 {
 	if (taskId == 0)
 		return GetLogPath(tasklistPath);
@@ -126,12 +152,12 @@ String^ TaskTimeLog::GetLogPath(String^ tasklistPath, UInt32 taskId)
 	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogPath(taskId, true));
 }
 
-String^ TaskTimeLog::GetLogFileFilter(String^ tasklistPath, bool logSeparately)
+String^ TaskTimeLogUtil::GetLogFileFilter(String^ tasklistPath, bool logSeparately)
 {
 	return ToString(CTDCTaskTimeLog(MS(tasklistPath)).GetLogFileFilter(logSeparately));
 }
 
-void TaskTimeLog::Copy(TaskTimeLogEntry^ from, TASKTIMELOGITEM& to)
+void TaskTimeLogUtil::Copy(TaskTimeLogEntry^ from, TASKTIMELOGITEM& to)
 {
 	to.dwTaskID = from->TaskId;
 	to.dtFrom = from->From.ToOADate();
@@ -149,7 +175,7 @@ void TaskTimeLog::Copy(TaskTimeLogEntry^ from, TASKTIMELOGITEM& to)
 		to.crAltColor = from->AltColor.ToArgb();
 }
 
-CString TaskTimeLog::ToString(String^ str)
+CString TaskTimeLogUtil::ToString(String^ str)
 {
 	if (String::IsNullOrWhiteSpace(str))
 		return EMPTY_STR;
@@ -158,7 +184,7 @@ CString TaskTimeLog::ToString(String^ str)
 	return CString(MS(str));
 }
 
-String^ TaskTimeLog::ToString(const CString& str)
+String^ TaskTimeLogUtil::ToString(const CString& str)
 {
 	if (str.IsEmpty())
 		return String::Empty;

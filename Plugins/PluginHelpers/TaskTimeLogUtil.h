@@ -39,22 +39,28 @@ namespace Abstractspoon
 
 			// -------------------------------------------------------
 
-			public ref class TaskTimeLog
+			public ref class TaskTimeLogUtil
 			{
 			public:
-				static List<TaskTimeLogEntry^>^ LoadEntries(String^ tasklistPath);
-				static List<TaskTimeLogEntry^>^ LoadEntries(String^ tasklistPath, UInt32 taskId);
+				TaskTimeLogUtil();
+				TaskTimeLogUtil(Translator^ trans);
+				
+				List<TaskTimeLogEntry^>^ LoadEntries(String^ tasklistPath);
+				List<TaskTimeLogEntry^>^ LoadEntries(String^ tasklistPath, UInt32 taskId);
 
-				static bool SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries);
-				static bool SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries, UInt32 taskId);
+				bool SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries);
+				bool SaveEntries(String^ tasklistPath, List<TaskTimeLogEntry^>^ logEntries, UInt32 taskId);
 
-				static bool AddEntry(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately);
+				bool AddEntry(String^ tasklistPath, TaskTimeLogEntry^ logEntry, bool logSeparately);
+				
+				String^ FormatLogAccessError(bool loading);
 
 				static String^ GetLogPath(String^ tasklistPath);
 				static String^ GetLogPath(String^ tasklistPath, UInt32 taskId);
 				static String^ GetLogFileFilter(String^ tasklistPath, bool logSeparately);
-				
-				static String^ FormatLogAccessError(Translator^ trans, bool loading);
+
+			private:
+				Translator^ m_Trans;
 
 			private:
 				static String^ ToString(const CString& str);
