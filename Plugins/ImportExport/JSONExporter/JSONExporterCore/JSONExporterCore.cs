@@ -48,8 +48,8 @@ namespace JSONExporterPlugin
 									 Preferences prefs, 
 									 string sKey)
 		{
-			var exporter = new JSONExporter();
-			var json = exporter.Export(srcTasks, reportTitle, reportDate, m_Trans);
+			var exporter = new JSONExporter(m_Trans);
+			var json = exporter.Export(srcTasks, reportTitle, reportDate);
 
 			if (string.IsNullOrWhiteSpace(json))
 				return false;
