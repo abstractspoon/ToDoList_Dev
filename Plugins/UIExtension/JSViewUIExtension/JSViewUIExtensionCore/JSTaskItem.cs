@@ -43,15 +43,22 @@ namespace JSViewUIExtension
 
 			foreach (var attrib in attribs)
 			{
-				var objVal = JSONUtil.GetNativeAttributeValue(task, attrib);
-				m_AttribVals[new AttribKey(attrib.AttributeId, attrib.CustomAttributeId)] = objVal;
+				var attribVal = JSONUtil.GetNativeAttributeValue(task, attrib);
+				m_AttribVals[new AttribKey(attrib.AttributeId, attrib.CustomAttributeId)] = attribVal;
 			}
-
 		}
 
 		public bool MergeAttributes(Task task, IEnumerable<TaskAttributeItem> attribs)
 		{
-			return false; // no change
+			bool changed = false;
+
+			foreach (var attrib in attribs)
+			{
+				var newVal = JSONUtil.GetNativeAttributeValue(task, attrib);
+				changed |= MergeAttribute(attrib, newVal);
+			}
+
+			return changed;
 		}
 
 		public JObject ToJson()
@@ -67,6 +74,30 @@ namespace JSViewUIExtension
 		}
 
 		public uint TaskId { private set; get; }
+
+		private bool MergeAttribute(TaskAttributeItem attrib, object newVal)
+		{
+			if (newVal == null)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
+			var key = new AttribKey(attrib.AttributeId, attrib.CustomAttributeId);
+			object curVal = null;
+
+			if (!m_AttribVals.TryGetValue(key, out curVal) || (curVal == null))
+			{
+				m_AttribVals[key] = newVal;
+				return true;
+			}
+
+			if (newVal.Equals(curVal))
+				return false;
+
+			m_AttribVals[key] = newVal;
+			return true;
+		}
 	}
 
 	class JsTaskItems

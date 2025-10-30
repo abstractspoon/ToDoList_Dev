@@ -49,7 +49,7 @@ namespace JSONExporterPlugin
 				}
 
 				// All the rest
-				return attribValue;
+				return attribValue ?? String.Empty;
 			}
 
 			// custom attributes
@@ -92,7 +92,7 @@ namespace JSONExporterPlugin
 			}
 
 			// All the rest as string
-			return custAttribValue;
+			return custAttribValue ?? String.Empty;
 		}
 
 		private static object ParseAttributeValue(string attribValue, System.Type type, object fallback)
@@ -123,7 +123,7 @@ namespace JSONExporterPlugin
 			}
 
 			// else
-			return fallback;
+			return fallback ?? String.Empty;
 		}
 	}
 }
