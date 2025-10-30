@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="JSONExporter.cs" />
     <Compile Include="JSONExporterCore.cs" />
+    <Compile Include="JSONUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

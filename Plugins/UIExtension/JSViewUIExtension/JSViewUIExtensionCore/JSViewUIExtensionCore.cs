@@ -149,7 +149,7 @@ namespace JSViewUIExtension
 			var jOutput = new JObject();
 			jOutput.Add(new JProperty("Tasks", m_Items.ToJson()));
 
-			string json = JsonExporter.ToJson(jOutput);
+			string json = JSONUtil.ToJson(jOutput);
 
 			var jsContent = new string[]
 			{

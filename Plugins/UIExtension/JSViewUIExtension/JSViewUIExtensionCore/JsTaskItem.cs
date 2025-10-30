@@ -43,7 +43,7 @@ namespace JSViewUIExtension
 
 			foreach (var attrib in attribs)
 			{
-				var objVal = JsonExporter.GetNativeAttributeValue(task, attrib);
+				var objVal = JSONUtil.GetNativeAttributeValue(task, attrib);
 				m_AttribVals[new AttribKey(attrib.AttributeId, attrib.CustomAttributeId)] = objVal;
 			}
 
