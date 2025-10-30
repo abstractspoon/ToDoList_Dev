@@ -11,9 +11,9 @@ using System.Reflection;
 using System.Web.UI;
 
 using JSONExporterPlugin;
+using Newtonsoft.Json.Linq;
 
 using Abstractspoon.Tdl.PluginHelpers;
-using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -52,7 +52,7 @@ namespace JSViewUIExtension
 		private String m_TypeId, m_UiName;
 		private Font m_ControlsFont;
 
-
+		private JsTaskItems m_Items;
 
 // 		private IIControls.ToolStripEx m_Toolbar;
 // 		private ImageList m_TBImageList;
@@ -66,7 +66,9 @@ namespace JSViewUIExtension
 			m_UiName = uiName;
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
+
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
+			m_Items = new JsTaskItems();
 
 			BorderStyle = BorderStyle.FixedSingle;
 
@@ -112,27 +114,21 @@ namespace JSViewUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
+			var attribs = tasks.GetAvailableAttributes();
+
 			switch (type)
 			{
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
 				// Rebuild
-				{
-					ExportTasklistToJsonAsJavascript(tasks);
-				}
+				m_Items.Populate(tasks, attribs);
 				break;
 
 			case UIExtension.UpdateType.New:
 			case UIExtension.UpdateType.Edit:
 				// In-place update
-				{
-		 			//HashSet<UInt32> changedTaskIds = null;
-					//changedTaskIds = new HashSet<UInt32>();
-					//Task task = tasks.GetFirstTask();
-					// 
-					//while (task.IsValid() && ProcessTaskUpdate(task, type, changedTaskIds))
-					//task = task.GetNextTask();
-				}
+				if (!m_Items.MergeAttributes(tasks, attribs))
+					return;
 				break;
 			}
 
@@ -144,9 +140,32 @@ namespace JSViewUIExtension
 				File.WriteAllText(JsCodeFilePath, JSViewUIExtension.Properties.Resources.JSViewDefaultCode);
 
 			// Refresh page
+			ExportItemsToJsonAsJavascript();
 			Navigate(HtmlFileUri);
 		}
 
+		private void ExportItemsToJsonAsJavascript()
+		{
+			var jOutput = new JObject();
+			jOutput.Add(new JProperty("Tasks", m_Items.ToJson()));
+
+			string json = JsonExporter.ToJson(jOutput);
+
+			var jsContent = new string[]
+			{
+				"var json = `",
+				json.Replace('\\', '/'),
+				"`;",
+				"var tasks = JSON.parse(json).Tasks;"
+
+				// Add translated attribute attributes!
+				// TODO
+			};
+
+			File.WriteAllLines(JsDataFilePath, jsContent);
+		}
+
+/*
 		private void ExportTasklistToJsonAsJavascript(TaskList tasks)
 		{
 			string json = new JSONExporter().Export(tasks);
@@ -161,7 +180,9 @@ namespace JSViewUIExtension
 
 			File.WriteAllLines(JsDataFilePath, jsContent);
 		}
+*/
 
+/*
 		private bool ProcessTaskUpdate(Task task, 
 									   UIExtension.UpdateType type,
 									   HashSet<UInt32> taskIds)
@@ -186,6 +207,7 @@ namespace JSViewUIExtension
 
 			return true;
 		}
+*/
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskId)
 		{

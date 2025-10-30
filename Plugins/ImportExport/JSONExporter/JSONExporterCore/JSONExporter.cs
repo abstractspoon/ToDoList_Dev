@@ -65,6 +65,11 @@ namespace JSONExporterPlugin
 				jOutput.Add(new JProperty(Translate("Tasklists"), jTasklists));
 			}
 
+			return ToJson(jOutput);
+		}
+
+		public static string ToJson(JObject jOutput)
+		{
 			return jOutput.ToString()
 						  .Replace("\\\\", "/")
 						  .Replace("\\n", " ");
@@ -105,20 +110,18 @@ namespace JSONExporterPlugin
 			return jTasklist;
 		}
 
-		private bool ExportTask(TaskList tasks, Task task, IList<TaskAttributeItem> attribs, JArray jTasks)
+		private bool ExportTask(TaskList tasks, Task task, IEnumerable<TaskAttributeItem> attribs, JArray jTasks)
         {
 			if (!task.IsValid())
 				return false;
 
             // add ourselves
 			var jTask = new JObject();
-			var attribVals = GetAttributeValues(tasks, task, attribs);
 
-			Debug.Assert(attribVals.Count == attribs.Count);
-
-			for (int i = 0; i < attribs.Count; i++)
+			foreach (var attrib in attribs)
 			{
-				jTask.Add(new JProperty(attribs[i].Label, attribVals[i]));
+				var objVal = GetNativeAttributeValue(task, attrib);
+				jTask.Add(new JProperty(attrib.Label, objVal));
 			}
 
             // then our subtasks in an array
@@ -157,17 +160,7 @@ namespace JSONExporterPlugin
 			return attribList;
 		}
 
-		public static IList<object> GetAttributeValues(TaskList tasks, Task task, IEnumerable<TaskAttributeItem> attribs)
-		{
-			var attribVals = new List<object>();
-
-			foreach (var attrib in attribs)
-				attribVals.Add(GetNativeAttributeValue(tasks, task, attrib));
-
-			return attribVals;
-		}
-
-		private static object GetNativeAttributeValue(TaskList tasks, Task task, TaskAttributeItem item)
+		public static object GetNativeAttributeValue(Task task, TaskAttributeItem item)
 		{
 			if (item.AttributeId != Task.Attribute.CustomAttribute)
 			{

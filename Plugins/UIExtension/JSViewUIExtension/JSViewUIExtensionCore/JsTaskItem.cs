@@ -4,43 +4,69 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 
+using Newtonsoft.Json.Linq;
+using JSONExporterPlugin;
+
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace JSViewUIExtension
 {
 	class JsTaskItem
 	{
-		private Dictionary<string, object> m_Attributes = new Dictionary<string, object>();
-		public List<JsTaskItem> m_Subtasks  = new List<JsTaskItem>();
+		struct AttribKey
+		{
+			public AttribKey(Task.Attribute attribID, string custAttribID)
+			{
+				AttribID = attribID;
+				CustAttribID = custAttribID;
+			}
+
+			public Task.Attribute AttribID;
+			public string CustAttribID;
+		}
+
+		// ----------------------------------------------------
+
+		private Dictionary<AttribKey, object> m_AttribVals = new Dictionary<AttribKey, object>();
+		private List<JsTaskItem> m_Subtasks  = new List<JsTaskItem>();
 
 		// ----------------------------------------------------
 
 		public JsTaskItem(uint taskId)
 		{
 			TaskId = taskId;
-			Attributes = new Dictionary<string, object>();
-			Subtasks = new List<JsTaskItem>();
 		}
 
-		public void PopulateAttributes(Task task)
+		public void PopulateAttributes(Task task, IEnumerable<TaskAttributeItem> attribs)
 		{
+			m_AttribVals.Clear();
+
+			foreach (var attrib in attribs)
+			{
+				var objVal = JsonExporter.GetNativeAttributeValue(task, attrib);
+				m_AttribVals[new AttribKey(attrib.AttributeId, attrib.CustomAttributeId)] = objVal;
+			}
+
 		}
 
-		public bool MergeAttributes(Task task)
+		public bool MergeAttributes(Task task, IEnumerable<TaskAttributeItem> attribs)
 		{
 			return false; // no change
 		}
 
-		string ToJson()
+		public JObject ToJson()
 		{
 
 
-			return string.Empty;
+			return null;
+		}
+
+		public void AddSubtask(JsTaskItem jsSubtask)
+		{
+			m_Subtasks.Add(jsSubtask);
 		}
 
 		public uint TaskId { private set; get; }
-		public IEnumerable<KeyValuePair<string, object>> Attributes { get; }
-		public IEnumerable<JsTaskItem> Subtasks { get; }
 	}
 
 	class JsTaskItems
@@ -64,7 +90,7 @@ namespace JSViewUIExtension
 			get { return m_Items; }
 		}
 
-		public int Populate(TaskList tasks)
+		public int Populate(TaskList tasks, IEnumerable<TaskAttributeItem> attribs)
 		{
 			m_Items.Clear();
 			m_ItemLookup.Clear();
@@ -73,36 +99,54 @@ namespace JSViewUIExtension
 
 			while (task.IsValid())
 			{
-				AddTask(task, null);
+				AddTask(task, null, attribs);
 				task = task.GetNextTask();
 			}
 
 			return m_ItemLookup.Count;
 		}
 
-		public bool Merge(TaskList tasks)
+		public bool MergeAttributes(TaskList tasks, IEnumerable<TaskAttributeItem> attribs)
 		{
 			bool changed = false;
 			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid())
 			{
-				uint taskId = task.GetID();
-				uint parentId = task.GetParentID();
-
-				var jsItem = GetTask(taskId);
-
-				if (jsItem == null)
-				{
-					var jsParent = GetTask(parentId);
-					changed |= AddTask(task, jsParent);
-				}
-				else
-				{
-					changed |= jsItem.MergeAttributes(task);
-				}
-
+				changed |= MergeAttributes(task, attribs);
 				task = task.GetNextTask();
+			}
+
+			return changed;
+		}
+
+		private bool MergeAttributes(Task task, IEnumerable<TaskAttributeItem> attribs)
+		{
+			bool changed = false;
+
+			if (!task.IsValid())
+				return false;
+
+			uint taskId = task.GetID();
+			uint parentId = task.GetParentID();
+
+			var jsItem = GetTask(taskId);
+
+			if (jsItem == null)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
+			changed = jsItem.MergeAttributes(task, attribs);
+
+			// subtasks
+			Task subtask = task.GetFirstSubtask();
+
+			while (subtask.IsValid())
+			{
+				changed |= MergeAttributes(subtask, attribs); // RECURSIVE CALL
+				subtask = subtask.GetNextTask();
 			}
 
 			return changed;
@@ -118,9 +162,19 @@ namespace JSViewUIExtension
 			return null;
 		}
 
+		public JArray ToJson()
+		{
+			var tasks = new JArray();
+
+			foreach (var item in m_Items)
+				tasks.Add(item.ToJson());
+
+			return tasks;
+		}
+
 		// -------------------------------------------------------
 
-		private bool AddTask(Task task, JsTaskItem jsParent)
+		private bool AddTask(Task task, JsTaskItem jsParent, IEnumerable<TaskAttributeItem> attribs)
 		{
 			// Sanity checks
 			if (!task.IsValid())
@@ -142,12 +196,12 @@ namespace JSViewUIExtension
 				return true;
 
 			var jsItem = new JsTaskItem(taskId);
-			jsItem.PopulateAttributes(task);
+			jsItem.PopulateAttributes(task, attribs);
 
 			if (jsParent == null)
 				m_Items.Add(jsItem);
 			else
-				jsParent.m_Subtasks.Add(jsItem);
+				jsParent.AddSubtask(jsItem);
 
 			m_ItemLookup[taskId] = jsItem;
 
@@ -156,7 +210,7 @@ namespace JSViewUIExtension
 
 			while (subtask.IsValid())
 			{
-				AddTask(subtask, jsItem);
+				AddTask(subtask, jsItem, attribs); // RECURSIVE CALL
 				subtask = subtask.GetNextTask();
 			}
 
