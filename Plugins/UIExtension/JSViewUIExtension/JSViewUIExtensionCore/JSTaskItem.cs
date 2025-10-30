@@ -11,7 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace JSViewUIExtension
 {
-	class JsTaskItem
+	class JSTaskItem
 	{
 		struct AttribKey
 		{
@@ -28,11 +28,11 @@ namespace JSViewUIExtension
 		// ----------------------------------------------------
 
 		private Dictionary<AttribKey, object> m_AttribVals = new Dictionary<AttribKey, object>();
-		private List<JsTaskItem> m_Subtasks  = new List<JsTaskItem>();
+		private List<JSTaskItem> m_Subtasks  = new List<JSTaskItem>();
 
 		// ----------------------------------------------------
 
-		public JsTaskItem(uint taskId)
+		public JSTaskItem(uint taskId)
 		{
 			TaskId = taskId;
 		}
@@ -61,7 +61,7 @@ namespace JSViewUIExtension
 			return null;
 		}
 
-		public void AddSubtask(JsTaskItem jsSubtask)
+		public void AddSubtask(JSTaskItem jsSubtask)
 		{
 			m_Subtasks.Add(jsSubtask);
 		}
@@ -72,20 +72,20 @@ namespace JSViewUIExtension
 	class JsTaskItems
 	{
 		// Fast lookup of all tasks
-		private Dictionary<uint, JsTaskItem> m_ItemLookup;
+		private Dictionary<uint, JSTaskItem> m_ItemLookup;
 
 		// Top-level tasks
-		private List<JsTaskItem> m_Items;
+		private List<JSTaskItem> m_Items;
 
 		// ----------------------------------------------------
 
 		public JsTaskItems()
 		{
-			m_ItemLookup = new Dictionary<uint, JsTaskItem>();
-			m_Items = new List<JsTaskItem>();
+			m_ItemLookup = new Dictionary<uint, JSTaskItem>();
+			m_Items = new List<JSTaskItem>();
 		}
 
-		public IEnumerable<JsTaskItem> Items
+		public IEnumerable<JSTaskItem> Items
 		{
 			get { return m_Items; }
 		}
@@ -152,9 +152,9 @@ namespace JSViewUIExtension
 			return changed;
 		}
 
-		public JsTaskItem GetTask(uint taskId)
+		public JSTaskItem GetTask(uint taskId)
 		{
-			JsTaskItem jsItem;
+			JSTaskItem jsItem;
 
 			if (m_ItemLookup.TryGetValue(taskId, out jsItem))
 				return jsItem;
@@ -174,7 +174,7 @@ namespace JSViewUIExtension
 
 		// -------------------------------------------------------
 
-		private bool AddTask(Task task, JsTaskItem jsParent, IEnumerable<TaskAttributeItem> attribs)
+		private bool AddTask(Task task, JSTaskItem jsParent, IEnumerable<TaskAttributeItem> attribs)
 		{
 			// Sanity checks
 			if (!task.IsValid())
@@ -195,7 +195,7 @@ namespace JSViewUIExtension
 			if (task.GetReferenceID() != 0)
 				return true;
 
-			var jsItem = new JsTaskItem(taskId);
+			var jsItem = new JSTaskItem(taskId);
 			jsItem.PopulateAttributes(task, attribs);
 
 			if (jsParent == null)
