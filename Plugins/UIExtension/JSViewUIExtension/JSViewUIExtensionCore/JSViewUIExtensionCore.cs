@@ -114,21 +114,25 @@ namespace JSViewUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			var attribs = tasks.GetAvailableAttributes();
+			var attribs = JSONUtil.GetAttributeList(tasks); // No translation
 
 			switch (type)
 			{
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
-				// Rebuild
-				m_Items.Populate(tasks, attribs);
+				{
+					// Rebuild
+					m_Items.Populate(tasks, attribs);
+				}
 				break;
 
 			case UIExtension.UpdateType.New:
 			case UIExtension.UpdateType.Edit:
-				// In-place update
-				if (!m_Items.MergeAttributes(tasks, attribs))
-					return;
+				{
+					// In-place update
+					if (!m_Items.MergeAttributes(tasks, attribs))
+						return;
+				}
 				break;
 			}
 
@@ -147,7 +151,7 @@ namespace JSViewUIExtension
 		private void ExportItemsToJsonAsJavascript()
 		{
 			var jOutput = new JObject();
-			jOutput.Add(new JProperty("Tasks", m_Items.ToJson()));
+			jOutput.Add(new JProperty("Tasks", m_Items.ToJson())); // No translation
 
 			string json = JSONUtil.ToJson(jOutput);
 
@@ -164,50 +168,6 @@ namespace JSViewUIExtension
 
 			File.WriteAllLines(JsDataFilePath, jsContent);
 		}
-
-/*
-		private void ExportTasklistToJsonAsJavascript(TaskList tasks)
-		{
-			string json = new JSONExporter().Export(tasks);
-
-			var jsContent = new string[]
-			{
-						"var json = `",
-						json.Replace('\\', '/'),
-						"`;",
-						"var tasks = JSON.parse(json).Tasks;"
-			};
-
-			File.WriteAllLines(JsDataFilePath, jsContent);
-		}
-*/
-
-/*
-		private bool ProcessTaskUpdate(Task task, 
-									   UIExtension.UpdateType type,
-									   HashSet<UInt32> taskIds)
-		{
-			if (!task.IsValid())
-				return false;
-
-			// Ignore reference tasks
-			if (task.GetReferenceID() != 0)
-				return true;
-
-			// TODO
-
-			if (taskIds != null)
-				taskIds.Add(task.GetID());
-
-			// Process children
-			Task subtask = task.GetFirstSubtask();
-
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, taskIds))
-				subtask = subtask.GetNextTask();
-
-			return true;
-		}
-*/
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskId)
 		{

@@ -95,6 +95,33 @@ namespace JSONExporterPlugin
 			return custAttribValue ?? String.Empty;
 		}
 
+		public static string Translate(Translator trans, string text)
+		{
+			if (trans == null)
+				return text;
+
+			return trans.Translate(text, Translator.Type.Text);
+		}
+
+		public static List<TaskAttributeItem> GetAttributeList(TaskList tasks, Translator trans = null)
+		{
+			var attribList = tasks.GetAvailableAttributes(trans);
+
+			// Exclude HtmlComments as it messes up the json
+			int find = attribList.FindIndex(x => (x.AttributeId == Task.Attribute.HtmlComments));
+
+			if (find != -1)
+				attribList.RemoveAt(find);
+
+			// Sort alphabetically
+			if (attribList.Count > 1)
+				attribList.Sort((x, y) => string.Compare(x.Label, y.Label, true));
+
+			return attribList;
+		}
+
+		// -----------------------------------------------------------
+
 		private static object ParseAttributeValue(string attribValue, System.Type type, object fallback)
 		{
 			if (!string.IsNullOrEmpty(attribValue))

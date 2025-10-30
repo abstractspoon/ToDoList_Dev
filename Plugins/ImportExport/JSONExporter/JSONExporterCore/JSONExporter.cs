@@ -81,7 +81,7 @@ namespace JSONExporterPlugin
 			}
 
 			// Tasks
-			var attribList = GetAttributeList(tasklist);
+			var attribList = JSONUtil.GetAttributeList(tasklist, m_Trans);
 			var task = tasklist.GetFirstTask();
 
 			var jTasks = new JArray();
@@ -96,10 +96,7 @@ namespace JSONExporterPlugin
 
 		private string Translate(string text)
 		{
-			if (m_Trans == null)
-				return text;
-
-			return m_Trans.Translate(text, Translator.Type.Text);
+			return JSONUtil.Translate(m_Trans, text);
 		}
 
 		private bool ExportTask(TaskList tasks, Task task, IEnumerable<TaskAttributeItem> attribs, JArray jTasks)
@@ -134,23 +131,6 @@ namespace JSONExporterPlugin
 
 			return true;
         }
-
-		private List<TaskAttributeItem> GetAttributeList(TaskList tasks)
-		{
-			var attribList = tasks.GetAvailableAttributes(m_Trans);
-
-			// Not interested in HtmlComments
-			int find = attribList.FindIndex(x => (x.AttributeId == Task.Attribute.HtmlComments));
-
-			if (find != -1)
-				attribList.RemoveAt(find);
-
-			// Sort alphabetically
-			if (attribList.Count > 1)
-				attribList.Sort((x, y) => string.Compare(x.Label, y.Label, true));
-
-			return attribList;
-		}
 
 	}
 }

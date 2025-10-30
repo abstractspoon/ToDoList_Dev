@@ -15,12 +15,14 @@ namespace JSViewUIExtension
 	{
 		struct AttribKey
 		{
-			public AttribKey(Task.Attribute attribID, string custAttribID)
+			public AttribKey(TaskAttributeItem attrib)
 			{
-				AttribID = attribID;
-				CustAttribID = custAttribID;
+				Label = attrib.Label;
+				AttribID = attrib.AttributeId;
+				CustAttribID = attrib.CustomAttributeId;
 			}
 
+			public string Label;
 			public Task.Attribute AttribID;
 			public string CustAttribID;
 		}
@@ -44,7 +46,7 @@ namespace JSViewUIExtension
 			foreach (var attrib in attribs)
 			{
 				var attribVal = JSONUtil.GetNativeAttributeValue(task, attrib);
-				m_AttribVals[new AttribKey(attrib.AttributeId, attrib.CustomAttributeId)] = attribVal;
+				m_AttribVals[new AttribKey(attrib)] = attribVal;
 			}
 		}
 
@@ -61,11 +63,30 @@ namespace JSViewUIExtension
 			return changed;
 		}
 
-		public JObject ToJson()
+		public JObject ToJson(Translator trans)
 		{
+			var jTask = new JObject();
 
+			// Our attributes
+			foreach (var key in m_AttribVals.Keys)
+			{
+				var label = JSONUtil.Translate(trans, key.Label);
+				jTask.Add(new JProperty(label, m_AttribVals[key]));
+			}
 
-			return null;
+			// our subtasks as an array
+			if (m_Subtasks.Count > 0)
+			{
+				JArray jSubtasks = new JArray();
+
+				foreach (var subtask in m_Subtasks) // RECURSIVE CALL
+					jSubtasks.Add(subtask.ToJson(trans));
+
+				var label =  JSONUtil.Translate(trans, "Subtasks");
+				jTask.Add(new JProperty(label, jSubtasks));
+			}
+
+			return jTask;
 		}
 
 		public void AddSubtask(JSTaskItem jsSubtask)
@@ -83,7 +104,7 @@ namespace JSViewUIExtension
 				return false;
 			}
 
-			var key = new AttribKey(attrib.AttributeId, attrib.CustomAttributeId);
+			var key = new AttribKey(attrib);
 			object curVal = null;
 
 			if (!m_AttribVals.TryGetValue(key, out curVal) || (curVal == null))
@@ -193,12 +214,12 @@ namespace JSViewUIExtension
 			return null;
 		}
 
-		public JArray ToJson()
+		public JArray ToJson(Translator trans = null)
 		{
 			var tasks = new JArray();
 
 			foreach (var item in m_Items)
-				tasks.Add(item.ToJson());
+				tasks.Add(item.ToJson(trans));
 
 			return tasks;
 		}
