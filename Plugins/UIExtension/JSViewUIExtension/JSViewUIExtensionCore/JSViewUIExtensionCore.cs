@@ -281,7 +281,6 @@ namespace JSViewUIExtension
 			}
 		}
 
-
 		protected override void OnHandleDestroyed(EventArgs e)
 		{
 			m_WebView.Dispose();
