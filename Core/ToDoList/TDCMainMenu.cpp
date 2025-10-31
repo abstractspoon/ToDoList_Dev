@@ -67,25 +67,27 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 
 void CTDCMainMenu::PrepareMenu(const CPreferencesDlg& prefs)
 {
-	CString sUILang = CLocalizer::GetDictionaryPath();
-
-	// Sanity check because it shouldn't bet possible to 
-	// change the UI language without restarting the app
-	ASSERT(m_bmUILang.GetSafeHandle() == NULL);
-
-	if (sUILang.IsEmpty())
+	// Only have to prepare the bitmap once per session 
+	// because it's not possible to change the UI language 
+	// without restarting the app
+	if (m_bmUILang.GetSafeHandle() == NULL)
 	{
-		m_bmUILang.LoadBitmap(IDB_UK_FLAG);
-	}
-	else
-	{
-		// load icon file
-		CString sIconPath(sUILang);
-		FileMisc::ReplaceExtension(sIconPath, _T("png"));
+		CString sUILang = CLocalizer::GetDictionaryPath();
 
-		m_bmUILang.LoadImage(sIconPath);
+		if (sUILang.IsEmpty())
+		{
+			m_bmUILang.LoadBitmap(IDB_UK_FLAG);
+		}
+		else
+		{
+			// load icon file
+			CString sIconPath(sUILang);
+			FileMisc::ReplaceExtension(sIconPath, _T("png"));
+
+			m_bmUILang.LoadImage(sIconPath);
+		}
 	}
-	VERIFY(AddBitmapButton(m_bmUILang, ID_PREFS_EDITUILANGUAGE));
+	VERIFY(AddBitmapButton(m_bmUILang, ID_PREFERENCES_EDITUILANGUAGE));
 
 #ifdef _DEBUG
 	// Right-align 'Debug' menu and don't translate
@@ -482,7 +484,7 @@ BOOL CTDCMainMenu::HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 		switch (lpDrawItemStruct->itemID)
 		{
 		case ID_CLOSE:
-		case ID_PREFS_EDITUILANGUAGE:
+		case ID_PREFERENCES_EDITUILANGUAGE:
 			VERIFY(DrawBitmapButton(lpDrawItemStruct));
 			return TRUE;
 		}
@@ -501,7 +503,7 @@ BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureIt
 			VERIFY(MeasureBitmapButton(lpMeasureItemStruct));
 			return TRUE;
 
-		case ID_PREFS_EDITUILANGUAGE:
+		case ID_PREFERENCES_EDITUILANGUAGE:
 			lpMeasureItemStruct->itemWidth = 20;
 			lpMeasureItemStruct->itemHeight = 16;
 			return TRUE;

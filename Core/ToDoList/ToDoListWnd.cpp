@@ -489,6 +489,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_NEXTTOPLEVELTASK, OnNexttopleveltask)
 	ON_COMMAND(ID_OPEN_RELOAD, OnReload)
 	ON_COMMAND(ID_PREFERENCES, OnPreferences)
+	ON_COMMAND(ID_PREFERENCES_EDITUILANGUAGE, OnPreferencesEditUILanguage)
 	ON_COMMAND(ID_PREVTASK, OnGotoPrevtask)
 	ON_COMMAND(ID_PREVTOPLEVELTASK, OnPrevtopleveltask)
 	ON_COMMAND(ID_PRINT, OnPrint)
@@ -5127,7 +5128,12 @@ void CToDoListWnd::OnAbout()
 	dialog.DoModal();
 }
 
-void CToDoListWnd::OnPreferences() 
+void CToDoListWnd::OnPreferencesEditUILanguage()
+{
+	DoPreferences(PREFPAGE_GEN, IDC_LANGUAGE);
+}
+
+void CToDoListWnd::OnPreferences()
 {
 	DoPreferences();
 }

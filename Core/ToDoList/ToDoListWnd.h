@@ -342,6 +342,7 @@ protected:
 	afx_msg void OnNewTasklist();
 	afx_msg void OnNexttopleveltask();
 	afx_msg void OnPreferences();
+	afx_msg void OnPreferencesEditUILanguage();
 	afx_msg void OnPrevtopleveltask();
 	afx_msg void OnPrint();
 	afx_msg void OnPrintpreview();
