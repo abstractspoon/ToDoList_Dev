@@ -9,6 +9,7 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Web.UI;
+using Microsoft.Web.WebView2.Core;
 
 using JSONExporterPlugin;
 using Newtonsoft.Json.Linq;
@@ -79,6 +80,23 @@ namespace JSViewUIExtension
 		async void InitializeAsync()
         {
 			await m_WebView.EnsureCoreWebView2Async(null);
+
+			m_WebView.WebMessageReceived += (s, e) =>
+			{
+				string message = e.TryGetWebMessageAsString();
+
+				if (!string.IsNullOrWhiteSpace(message))
+				{
+					if (message.StartsWith("SelectTask="))
+					{
+						string strId = message.Substring(11);
+						uint taskId;
+
+						if (uint.TryParse(strId, out taskId))
+							new UIExtension.ParentNotify(m_HwndParent).NotifySelChange(taskId);
+					}
+				}
+			};
 //			m_WebView.CoreWebView2.Settings.IsBuiltInErrorPageEnabled = false;
 
 //			await m_WebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.chrome.webview.postMessage(window.document.URL);");
@@ -86,6 +104,8 @@ namespace JSViewUIExtension
 
 			// Disable context menu
 //			await m_WebView.CoreWebView2.ExecuteScriptAsync("window.addEventListener('contextmenu', window => {window.preventDefault();});");
+
+
 
 			Navigate(HtmlFileUri); // will have already been built in UpdateTasks
 		}
@@ -305,5 +325,9 @@ namespace JSViewUIExtension
 			parent.NotifySelChange(taskId);
 		}
 
+		void OnPageMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+		{
+
+		}
 	}
 }

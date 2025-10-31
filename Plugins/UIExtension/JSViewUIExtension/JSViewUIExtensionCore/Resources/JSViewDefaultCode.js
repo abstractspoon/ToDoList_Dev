@@ -1,7 +1,13 @@
 google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(OnLoad);
 
-chrome.webview.addEventListener('message', OnMessage);
+var data = null;
+var rowIdMapping = null;
+
+var barChart = null;
+var scatterChart = null;
+var areaChart = null;
+var colChart = null;
 
 var allColors = 
 [
@@ -38,40 +44,73 @@ var allColors =
     '#743411'
 ];
 
-function OnLoad()
+function InitCharts()
 {
-    drawCharts();
-}
-
-function OnMessage(message)
-{
-    location.replace(location.href);
-}
-
-function drawCharts()
-{
-    // Row 1
-    drawChart(new google.visualization.BarChart(document.getElementById('curve_chart11')), 0, 1);
-    drawChart(new google.visualization.ScatterChart(document.getElementById('curve_chart12')), 2, 3);
+//    barChart = new google.visualization.BarChart(document.getElementById('curve_chart11'));
+    scatterChart = new google.visualization.ScatterChart(document.getElementById('curve_chart12'));
+//    areaChart = new google.visualization.AreaChart(document.getElementById('curve_chart21'));
+//    colChart = new google.visualization.ColumnChart(document.getElementById('curve_chart22'));
     
-    // Row 2
-    drawChart(new google.visualization.AreaChart(document.getElementById('curve_chart21')), 4, 5);
-    drawChart(new google.visualization.ColumnChart(document.getElementById('curve_chart22')), 6, 7);
+    google.visualization.events.addListener(scatterChart, 'select', OnSelectScatter);
 }
 
-function drawChart(chart, color1, color2) 
+
+function PopulateData()
 {
-    var data = new google.visualization.DataTable();
+    data = new google.visualization.DataTable();
+    rowIdMapping = new Map();
 
     data.addColumn('string', 'Task');
     data.addColumn('number', 'Priority');
     data.addColumn('number', 'Risk');
-  
+
     for (let i = 0; i < tasks.length; i++) 
     {  
         data.addRow([tasks[i].Title, tasks[i].Priority, tasks[i].Risk]);
+        rowIdMapping[i] = tasks[i]["Task ID"];
     }
+}
 
+function OnLoad()
+{
+    InitCharts();
+    PopulateData();
+    DrawCharts();
+    
+    chrome.webview.addEventListener('message', OnAppMessage);
+}
+
+function OnAppMessage(message)
+{
+    if (message.data == 'Refresh')
+    {
+//        PopulateData();
+        location.reload(location.href);
+    }
+}
+
+function OnSelectScatter(e)
+{
+    var selRow = scatterChart.getSelection()[0].row;
+    var selId = rowIdMapping[selRow];
+    
+    //alert('Task ' + selId + 'selected');
+    window.chrome.webview.postMessage('SelectTask=' + selId);
+}
+
+function DrawCharts()
+{
+    // Row 1
+    DrawChart(barChart, 0, 1);
+    DrawChart(scatterChart, 2, 3);
+    
+    // Row 2
+    DrawChart(areaChart, 4, 5);
+    DrawChart(colChart, 6, 7);
+}
+
+function DrawChart(chart, color1, color2) 
+{
     var options = 
     {
         animation: {"startup": true, duration: 1000, easing: 'out'},  
@@ -82,4 +121,5 @@ function drawChart(chart, color1, color2)
     };
 
     chart.draw(data, options);
+    
 }
