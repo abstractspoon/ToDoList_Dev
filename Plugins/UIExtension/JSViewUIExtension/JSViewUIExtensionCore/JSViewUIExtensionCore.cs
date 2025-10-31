@@ -94,12 +94,12 @@ namespace JSViewUIExtension
 
 		public bool SelectTask(UInt32 taskId)
 		{
-			return false;
+			return true/*false*/;
 		}
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
 		{
-			return false;
+			return true/*false*/;
 		}
 
 		public bool ScrollToSelectedTask()
@@ -145,28 +145,14 @@ namespace JSViewUIExtension
 
 			// Refresh page
 			ExportItemsToJsonAsJavascript();
-			Navigate(HtmlFileUri);
-		}
 
-		private void ExportItemsToJsonAsJavascript()
-		{
-			var jOutput = new JObject();
-			jOutput.Add(new JProperty("Tasks", m_Items.ToJson())); // No translation
-
-			string json = JSONUtil.ToJson(jOutput);
-
-			var jsContent = new string[]
+			if (m_WebView.CoreWebView2 != null)
 			{
-				"var json = `",
-				json.Replace('\\', '/'),
-				"`;",
-				"var tasks = JSON.parse(json).Tasks;"
-
-				// Add translated attribute attributes!
-				// TODO
-			};
-
-			File.WriteAllLines(JsDataFilePath, jsContent);
+				if (m_WebView.CoreWebView2.Source == "about:blank")
+					Navigate(HtmlFileUri);
+				else
+					m_WebView.CoreWebView2.PostWebMessageAsString("Refresh");
+			}
 		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskId)
@@ -269,6 +255,27 @@ namespace JSViewUIExtension
         }
 
 		// PRIVATE ------------------------------------------------------------------------------
+
+		private void ExportItemsToJsonAsJavascript()
+		{
+			var jOutput = new JObject();
+			jOutput.Add(new JProperty("Tasks", m_Items.ToJson())); // No translation
+
+			string json = JSONUtil.ToJson(jOutput);
+
+			var jsContent = new string[]
+			{
+				"var json = `",
+				json.Replace('\\', '/'),
+				"`;",
+				"var tasks = JSON.parse(json).Tasks;"
+
+				// Add translated attribute attributes!
+				// TODO
+			};
+
+			File.WriteAllLines(JsDataFilePath, jsContent);
+		}
 
 		private void Navigate(string uri)
 		{

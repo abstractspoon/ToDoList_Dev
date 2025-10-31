@@ -1,5 +1,7 @@
 google.charts.load('current', {'packages':['corechart']});
-google.charts.setOnLoadCallback(drawCharts);
+google.charts.setOnLoadCallback(OnLoad);
+
+chrome.webview.addEventListener('message', OnMessage);
 
 var allColors = 
 [
@@ -35,6 +37,16 @@ var allColors =
     '#0c5922',
     '#743411'
 ];
+
+function OnLoad()
+{
+    drawCharts();
+}
+
+function OnMessage(message)
+{
+    location.replace(location.href);
+}
 
 function drawCharts()
 {
