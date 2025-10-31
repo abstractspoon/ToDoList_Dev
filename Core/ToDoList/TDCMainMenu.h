@@ -14,6 +14,7 @@
 #include "tdcenum.h"
 
 #include "..\Shared\EnMenu.h"
+#include "..\Shared\EnBitmap.h"
 
 #include "..\Interfaces\UITheme.h"
 
@@ -79,10 +80,12 @@ public:
 
 protected:
 	UITHEME m_theme;
+	CEnBitmap m_bmUILang;
 
 protected:
 	void LoadMenuCommon();
 	void TranslateDynamicMenuItems();
+	void PrepareMenu(const CPreferencesDlg& prefs);
 
 	static void PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs);
 	static void PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);

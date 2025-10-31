@@ -60,27 +60,41 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 		return FALSE;
 
 	LoadMenuCommon();
-
-	if (!prefs.GetShowTabCloseButtons())
-		AddMDIButton(MEB_CLOSE, ID_CLOSE);
-
-#ifdef _DEBUG
-	ModifyMenu(AM_DEBUG, MF_BYPOSITION | MFT_RIGHTJUSTIFY, 0, _T("&Debug"));
-
-	// don't translate the debug menu
-	CLocalizer::EnableTranslation(::GetSubMenu(GetSafeHmenu(), AM_DEBUG), FALSE);
-
-	// 'Run from Explorer' not supported below Vista
-	if (COSVersion() < OSV_VISTA)
-	{
-		CMenu* pSubMenu = GetSubMenu(AM_DEBUG);
-		ASSERT(pSubMenu);
-
-		pSubMenu->DeleteMenu(ID_DEBUG_RESTARTAPPFROMEXPLORER, MF_BYCOMMAND);
-	}
-#endif
+	PrepareMenu(prefs);
 
 	return TRUE;
+}
+
+void CTDCMainMenu::PrepareMenu(const CPreferencesDlg& prefs)
+{
+	CString sUILang = CLocalizer::GetDictionaryPath();
+
+	// Sanity check because it shouldn't bet possible to 
+	// change the UI language without restarting the app
+	ASSERT(m_bmUILang.GetSafeHandle() == NULL);
+
+	if (sUILang.IsEmpty())
+	{
+		m_bmUILang.LoadBitmap(IDB_UK_FLAG);
+	}
+	else
+	{
+		// load icon file
+		CString sIconPath(sUILang);
+		FileMisc::ReplaceExtension(sIconPath, _T("png"));
+
+		m_bmUILang.LoadImage(sIconPath);
+	}
+	VERIFY(AddBitmapButton(m_bmUILang, ID_PREFS_EDITUILANGUAGE));
+
+#ifdef _DEBUG
+	// Right-align 'Debug' menu and don't translate
+	ModifyMenu(AM_DEBUG, MF_BYPOSITION | MFT_RIGHTJUSTIFY, 0, _T("&Debug"));
+	CLocalizer::EnableTranslation(::GetSubMenu(GetSafeHmenu(), AM_DEBUG), FALSE);
+#endif
+
+	if (!prefs.GetShowTabCloseButtons())
+		VERIFY(AddMDIButton(MEB_CLOSE, ID_CLOSE));
 }
 
 BOOL CTDCMainMenu::LoadMenu()
@@ -463,10 +477,15 @@ BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu) const
 
 BOOL CTDCMainMenu::HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const
 {
-	if ((nIDCtl == 0) && (lpDrawItemStruct->itemID == ID_CLOSE))
+	if (nIDCtl == 0)
 	{
-		VERIFY(DrawMDIButton(lpDrawItemStruct));
-		return TRUE;
+		switch (lpDrawItemStruct->itemID)
+		{
+		case ID_CLOSE:
+		case ID_PREFS_EDITUILANGUAGE:
+			VERIFY(DrawBitmapButton(lpDrawItemStruct));
+			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -474,10 +493,19 @@ BOOL CTDCMainMenu::HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const
 {
-	if (nIDCtl == 0 && lpMeasureItemStruct->itemID == ID_CLOSE)
+	if (nIDCtl == 0)
 	{
-		VERIFY(MeasureMDIButton(lpMeasureItemStruct));
-		return TRUE;
+		switch (lpMeasureItemStruct->itemID)
+		{
+		case ID_CLOSE:
+			VERIFY(MeasureBitmapButton(lpMeasureItemStruct));
+			return TRUE;
+
+		case ID_PREFS_EDITUILANGUAGE:
+			lpMeasureItemStruct->itemWidth = 20;
+			lpMeasureItemStruct->itemHeight = 16;
+			return TRUE;
+		}
 	}
 
 	return FALSE;

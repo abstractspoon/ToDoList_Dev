@@ -4337,14 +4337,21 @@ void CToDoListWnd::OnDebugRestartApp()
 
 void CToDoListWnd::OnDebugRestartAppFromExplorer()
 {
-	DoExit(FALSE); // don't restart
-
-	CString sParams = AfxGetApp()->m_lpCmdLine;
-	sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTART, Misc::Format(::GetCurrentProcessId()));
-
-	if (!FileMisc::RunFromExplorer(FileMisc::GetModuleFilePath(), sParams))
+	if (COSVersion() >= OSV_VISTA)
 	{
-		AfxMessageBox(_T("Failed to restart app from Explorer"));
+		DoExit(FALSE); // don't restart
+
+		CString sParams = AfxGetApp()->m_lpCmdLine;
+		sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTART, Misc::Format(::GetCurrentProcessId()));
+
+		if (!FileMisc::RunFromExplorer(FileMisc::GetModuleFilePath(), sParams))
+		{
+			AfxMessageBox(_T("Failed to restart app from Explorer"));
+		}
+	}
+	else
+	{
+		AfxMessageBox(_T("Not supported on XP"));
 	}
 }
 

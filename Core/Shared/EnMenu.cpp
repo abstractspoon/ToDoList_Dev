@@ -80,13 +80,25 @@ CEnMenu::~CEnMenu()
 {
 }
 
-BOOL CEnMenu::AddMDIButton(MENUEX_BTN nBtn, UINT nCmdID, BOOL bRightJustify) 
+BOOL CEnMenu::AddBitmapButton(HBITMAP hbm, UINT nCmdID, BOOL bRightJustify)
 {
 	ASSERT (GetSafeHmenu());
 
 	if (!GetSafeHmenu())
 		return FALSE;
 
+	UINT nFlags = (bRightJustify ? MFT_RIGHTJUSTIFY : 0);
+
+	if (hbm)
+		nFlags |= MFT_BITMAP;
+	else
+		nFlags |= MFT_OWNERDRAW;
+
+	return InsertMenu((UINT)-1, nFlags, nCmdID, CBitmap::FromHandle(hbm));
+}
+
+BOOL CEnMenu::AddMDIButton(MENUEX_BTN nBtn, UINT nCmdID, BOOL bRightJustify) 
+{
 	HBITMAP hbm = NULL;
 	BOOL bVistaPlus = (COSVersion() >= OSV_VISTA);
 
@@ -111,24 +123,14 @@ BOOL CEnMenu::AddMDIButton(MENUEX_BTN nBtn, UINT nCmdID, BOOL bRightJustify)
 		}
 	}
 	
-	UINT nFlags = (bRightJustify ? MFT_RIGHTJUSTIFY : 0);
-	
-	if (!IsThemed() || bVistaPlus)
-		nFlags |= MFT_BITMAP;
-	else
-		nFlags |= MFT_OWNERDRAW;
-		
-	if (InsertMenu((UINT)-1, nFlags, nCmdID, CBitmap::FromHandle(hbm)))
-	{
-		m_mapCmd2ID[nCmdID] = nBtn;
-		return TRUE;
-	}
+	if (!AddBitmapButton(hbm, nCmdID, bRightJustify))
+		return FALSE;
 
-	// else
-	return FALSE;
+	m_mapMDIBtn2Index[nCmdID] = nBtn;
+	return TRUE;
 }
 
-BOOL CEnMenu::DeleteMDIMenu(UINT nCmdID)
+BOOL CEnMenu::DeleteBitmapButton(UINT nCmdID)
 {
 	// CMenu::DeleteMenu won't work on bitmap buttons directly
 	// so we must traverse all menu items looking for nCmdID
@@ -141,7 +143,7 @@ BOOL CEnMenu::DeleteMDIMenu(UINT nCmdID)
 		if (nCmdID == nMenuCmdID)
 		{
 			DeleteMenu(nItem, MF_BYPOSITION);
-			m_mapCmd2ID.RemoveKey(nCmdID);
+			m_mapMDIBtn2Index.RemoveKey(nCmdID);
 
 			return TRUE;
 		}
@@ -155,7 +157,7 @@ BOOL CEnMenu::IsThemed()
 	return CThemed().IsNonClientThemed();
 }
 
-BOOL CEnMenu::DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const
+BOOL CEnMenu::DrawBitmapButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const
 {
 	if (!IsThemed())
 		return FALSE;
@@ -165,7 +167,7 @@ BOOL CEnMenu::DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const
 	CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 
 	int nBtn = -1;
-	m_mapCmd2ID.Lookup(lpDrawItemStruct->itemID, nBtn);
+	m_mapMDIBtn2Index.Lookup(lpDrawItemStruct->itemID, nBtn);
 
 	CThemed th;
 		
@@ -194,7 +196,7 @@ BOOL CEnMenu::DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const
 	return TRUE;
 }
 
-BOOL CEnMenu::MeasureMDIButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct) const
+BOOL CEnMenu::MeasureBitmapButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct) const
 {
 	int nSize = GraphicsMisc::ScaleByDPIFactor(4);
 
