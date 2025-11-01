@@ -38,10 +38,7 @@ BOOL LoadBitmapAsIconOnce(UINT nResID, CIcon& icon)
 		return FALSE;
 
 	if (GraphicsMisc::WantDPIScaling())
-	{
-		int nSize = GraphicsMisc::ScaleByDPIFactor(32);
 		VERIFY(bm.ResizeImage(GraphicsMisc::GetDPIScaleFactor(), colorMagenta));	
-	}
 
 	return icon.Attach(bm.ExtractIcon(colorMagenta));
 }
