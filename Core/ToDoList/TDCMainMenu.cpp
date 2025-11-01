@@ -65,8 +65,18 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 	return TRUE;
 }
 
+#ifndef HBMMENU_MBAR_CLOSE
+#	define HBMMENU_MBAR_CLOSE          ((HBITMAP)5)
+#endif
+
 void CTDCMainMenu::PrepareMenu(const CPreferencesDlg& prefs)
 {
+#ifdef _DEBUG
+	// Right-align 'Debug' menu and don't translate
+	ModifyMenu(AM_DEBUG, MF_BYPOSITION | MFT_RIGHTJUSTIFY, 0, _T("&Debug"));
+	CLocalizer::EnableTranslation(::GetSubMenu(GetSafeHmenu(), AM_DEBUG), FALSE);
+#endif
+
 	// Only have to prepare the bitmap once per session 
 	// because it's not possible to change the UI language 
 	// without restarting the app
@@ -87,16 +97,17 @@ void CTDCMainMenu::PrepareMenu(const CPreferencesDlg& prefs)
 			m_bmUILang.LoadImage(sIconPath);
 		}
 	}
-	VERIFY(AddBitmapButton(m_bmUILang, ID_PREFERENCES_EDITUILANGUAGE));
-
-#ifdef _DEBUG
-	// Right-align 'Debug' menu and don't translate
-	ModifyMenu(AM_DEBUG, MF_BYPOSITION | MFT_RIGHTJUSTIFY, 0, _T("&Debug"));
-	CLocalizer::EnableTranslation(::GetSubMenu(GetSafeHmenu(), AM_DEBUG), FALSE);
-#endif
+	VERIFY(InsertMenu((UINT)-1, (MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_PREFERENCES_EDITUILANGUAGE, &m_bmUILang));
+//	VERIFY(AddBitmapButton(m_bmUILang, ID_PREFERENCES_EDITUILANGUAGE));
 
 	if (!prefs.GetShowTabCloseButtons())
-		VERIFY(AddMDIButton(MEB_CLOSE, ID_CLOSE));
+	{
+		if (!m_bmTabClose.GetSafeHandle())
+			m_bmTabClose.Attach(HBMMENU_MBAR_CLOSE);
+
+		VERIFY(InsertMenu((UINT)-1, (MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_CLOSE, &m_bmTabClose));
+		//VERIFY(AddMDIButton(MEB_CLOSE, ID_CLOSE));
+	}
 }
 
 BOOL CTDCMainMenu::LoadMenu()
@@ -477,6 +488,7 @@ BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu) const
 	return FALSE;
 }
 
+/*
 BOOL CTDCMainMenu::HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const
 {
 	if (nIDCtl == 0)
@@ -511,7 +523,7 @@ BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureIt
 	}
 
 	return FALSE;
-}
+}*/
 
 void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs)
 {

@@ -48,8 +48,8 @@ public:
 							 const CUIExtensionMgr& mgrUIExt,
 							 CMenuIconMgr& mgrMenuIcons) const;
 
-	BOOL HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const;
-	BOOL HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const;
+// 	BOOL HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const;
+// 	BOOL HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const;
 	BOOL HandlePostTranslateMenu(HMENU hMenu) const;
 
 	CString GetDynamicItemTooltip(UINT nMenuID,
@@ -80,7 +80,7 @@ public:
 
 protected:
 	UITHEME m_theme;
-	CEnBitmap m_bmUILang;
+	CEnBitmap m_bmUILang, m_bmTabClose;
 
 protected:
 	void LoadMenuCommon();

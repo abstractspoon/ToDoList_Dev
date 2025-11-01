@@ -21,6 +21,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+/*
 #ifndef HBMMENU_MBAR_CLOSE
 #	define HBMMENU_CALLBACK            ((HBITMAP) -1)
 #	define HBMMENU_SYSTEM              ((HBITMAP)  1)
@@ -34,6 +35,7 @@ static char THIS_FILE[]=__FILE__;
 #	define HBMMENU_POPUP_MAXIMIZE      ((HBITMAP) 10)
 #	define HBMMENU_POPUP_MINIMIZE      ((HBITMAP) 11)
 #endif
+*/
 
 //////////////////////////////////////////////////////////////////////
 
@@ -80,6 +82,7 @@ CEnMenu::~CEnMenu()
 {
 }
 
+/*
 BOOL CEnMenu::AddBitmapButton(HBITMAP hbm, UINT nCmdID, BOOL bRightJustify)
 {
 	ASSERT (GetSafeHmenu());
@@ -205,6 +208,7 @@ BOOL CEnMenu::MeasureBitmapButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct) const
 
 	return TRUE;
 }
+*/
 
 void CEnMenu::SetBackgroundColor(COLORREF color)
 {

@@ -36,13 +36,13 @@ public:
 	BOOL LoadMenu(UINT nMenuResID, HWND hWndRef = NULL, BOOL bTranslate = FALSE, BOOL bRecursiveTranslate = FALSE);
 	void SetBackgroundColor(COLORREF color);
 	
-	BOOL AddBitmapButton(HBITMAP hbm, UINT nCmdID, BOOL bRightJustify = TRUE);
-	BOOL AddMDIButton(MENUEX_BTN nBtn, UINT nCmdID, BOOL bRightJustify = TRUE);
-	BOOL DeleteBitmapButton(UINT nCmdID);
-
-	// for themed buttons only
-	BOOL DrawBitmapButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const; 
-	BOOL MeasureBitmapButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct) const; 
+// 	BOOL AddBitmapButton(HBITMAP hbm, UINT nCmdID, BOOL bRightJustify = TRUE);
+// 	BOOL AddMDIButton(MENUEX_BTN nBtn, UINT nCmdID, BOOL bRightJustify = TRUE);
+// 	BOOL DeleteBitmapButton(UINT nCmdID);
+// 
+// 	// for themed buttons only
+// 	BOOL DrawBitmapButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const; 
+// 	BOOL MeasureBitmapButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct) const; 
 
 	int FindMenuItem(UINT nCmdID) const;
 	int FindMenuItem(HMENU hSubMenu) const;
@@ -114,11 +114,11 @@ protected:
 	static ITransText* s_pTT;
 
 protected:
-	CMap<UINT, UINT, int, int> m_mapMDIBtn2Index;
+//	CMap<UINT, UINT, int, int> m_mapMDIBtn2Index;
 	CBrush m_brBkgnd;
 
 protected:
-	static BOOL IsThemed();
+//	static BOOL IsThemed();
 	static int FindMenuItem(HMENU hMenu, DWORD dwItem, HMENU& hParentMenu, BOOL bItemIsMenu);
 	static void DoCleanUp(HMENU hMenu, HMENU hCmdMenu, int nCmdPos);
 	static int MenuSortProc(const void* v1, const void* v2);

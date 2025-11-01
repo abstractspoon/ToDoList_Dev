@@ -847,7 +847,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_COPYDATA()
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
-	ON_WM_DRAWITEM()
+// 	ON_WM_DRAWITEM()
 	ON_WM_ENABLE()
 	ON_WM_ENDSESSION()
 	ON_WM_ERASEBKGND()
@@ -855,7 +855,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_INITMENUPOPUP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
-	ON_WM_MEASUREITEM()
+// 	ON_WM_MEASUREITEM()
 	ON_WM_MOUSEMOVE()
 	ON_WM_NCLBUTTONDBLCLK()
 	ON_WM_NCDESTROY()
@@ -11336,6 +11336,7 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
     return nSaveAll;
 }
 
+/*
 void CToDoListWnd::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
 	if (m_menubar.HandleDrawItem(nIDCtl, lpDrawItemStruct))
@@ -11351,6 +11352,7 @@ void CToDoListWnd::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemSt
 	
 	CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
 }
+*/
 
 void CToDoListWnd::OnLButtonDown(UINT nFlags, CPoint point)
 {
