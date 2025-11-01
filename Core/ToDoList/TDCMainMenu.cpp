@@ -91,9 +91,7 @@ void CTDCMainMenu::AddLanguageButton()
 	if (m_bmUILang.GetSafeHandle() == NULL)
 	{
 		CString sUILang = CLocalizer::GetDictionaryPath();
-
 		CEnBitmap bmp;
-		int nReqSize = GraphicsMisc::ScaleByDPIFactor(16);
 		
 		if (sUILang.IsEmpty())
 		{
@@ -104,13 +102,14 @@ void CTDCMainMenu::AddLanguageButton()
 			CString sIconPath(sUILang);
 			FileMisc::ReplaceExtension(sIconPath, _T("png"));
 			
-			if (!bmp.LoadImageFile(sIconPath))
+			if (!bmp.LoadImage(sIconPath))
 				VERIFY(bmp.LoadBitmap(IDB_YOURLANG_FLAG));
 		}
 
+		int nReqSize = GraphicsMisc::ScaleByDPIFactor(16);
 		bmp.ResizeImage(nReqSize, nReqSize, colorMagenta);
-		bmp.ConvertToPARGB32(colorMagenta);
 
+		bmp.ConvertToPARGB32(colorMagenta);
 		m_bmUILang.Attach(bmp.Detach());
 	}
 
