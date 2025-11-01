@@ -81,32 +81,34 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 
 void CTDCMainMenu::AddLanguageButton()
 {
+	// Avoid non-supportive setups
+	if (!CThemed::IsNonClientThemed() || (COSVersion() < OSV_VISTA))
+		return;
+
 	// Only have to prepare the bitmap once per session 
 	// because it's not possible to change the UI language 
 	// without restarting the app
 	if (m_bmUILang.GetSafeHandle() == NULL)
 	{
 		CString sUILang = CLocalizer::GetDictionaryPath();
-
+		
 		if (sUILang.IsEmpty())
 		{
 			m_bmUILang.LoadBitmap(IDB_UK_FLAG);
 		}
-		else
+		else // load icon file
 		{
-			// load icon file
 			CString sIconPath(sUILang);
 			FileMisc::ReplaceExtension(sIconPath, _T("png"));
-
-			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, 16, 16));
-
-			if (icon.IsValid())
-				m_bmUILang.Attach(GraphicsMisc::IconToPARGB32Bitmap(icon));
-			else
+			
+			int nSize = GraphicsMisc::ScaleByDPIFactor(16);
+			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, nSize, nSize));
+			
+			if (!icon.IsValid() || !m_bmUILang.Attach(GraphicsMisc::IconToPARGB32Bitmap(icon)))
 				m_bmUILang.LoadImage(sIconPath);
 		}
 	}
-
+	
 	VERIFY(AppendMenu((MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_PREFERENCES_EDITUILANGUAGE, &m_bmUILang));
 }
 
