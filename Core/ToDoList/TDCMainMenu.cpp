@@ -34,6 +34,12 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+#ifndef HBMMENU_MBAR_CLOSE
+#	define HBMMENU_MBAR_CLOSE          ((HBITMAP)5)
+#endif
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -60,23 +66,21 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 		return FALSE;
 
 	LoadMenuCommon();
-	PrepareMenu(prefs);
 
-	return TRUE;
-}
+	AddLanguageButton();
+	AddTabCloseButton(prefs);
 
-#ifndef HBMMENU_MBAR_CLOSE
-#	define HBMMENU_MBAR_CLOSE          ((HBITMAP)5)
-#endif
-
-void CTDCMainMenu::PrepareMenu(const CPreferencesDlg& prefs)
-{
-#ifdef _DEBUG
 	// Right-align 'Debug' menu and don't translate
+#ifdef _DEBUG
 	ModifyMenu(AM_DEBUG, MF_BYPOSITION | MFT_RIGHTJUSTIFY, 0, _T("&Debug"));
 	CLocalizer::EnableTranslation(::GetSubMenu(GetSafeHmenu(), AM_DEBUG), FALSE);
 #endif
 
+	return TRUE;
+}
+
+void CTDCMainMenu::AddLanguageButton()
+{
 	// Only have to prepare the bitmap once per session 
 	// because it's not possible to change the UI language 
 	// without restarting the app
@@ -97,16 +101,17 @@ void CTDCMainMenu::PrepareMenu(const CPreferencesDlg& prefs)
 			m_bmUILang.LoadImage(sIconPath);
 		}
 	}
-	VERIFY(InsertMenu((UINT)-1, (MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_PREFERENCES_EDITUILANGUAGE, &m_bmUILang));
-//	VERIFY(AddBitmapButton(m_bmUILang, ID_PREFERENCES_EDITUILANGUAGE));
+	VERIFY(AppendMenu((MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_PREFERENCES_EDITUILANGUAGE, &m_bmUILang));
+}
 
+void CTDCMainMenu::AddTabCloseButton(const CPreferencesDlg& prefs)
+{
 	if (!prefs.GetShowTabCloseButtons())
 	{
 		if (!m_bmTabClose.GetSafeHandle())
 			m_bmTabClose.Attach(HBMMENU_MBAR_CLOSE);
 
-		VERIFY(InsertMenu((UINT)-1, (MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_CLOSE, &m_bmTabClose));
-		//VERIFY(AddMDIButton(MEB_CLOSE, ID_CLOSE));
+		VERIFY(AppendMenu((MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_CLOSE, &m_bmTabClose));
 	}
 }
 

@@ -85,7 +85,8 @@ protected:
 protected:
 	void LoadMenuCommon();
 	void TranslateDynamicMenuItems();
-	void PrepareMenu(const CPreferencesDlg& prefs);
+	void AddLanguageButton();
+	void AddTabCloseButton(const CPreferencesDlg& prefs);
 
 	static void PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs);
 	static void PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);
