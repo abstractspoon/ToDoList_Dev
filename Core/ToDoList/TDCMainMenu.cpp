@@ -98,9 +98,15 @@ void CTDCMainMenu::AddLanguageButton()
 			CString sIconPath(sUILang);
 			FileMisc::ReplaceExtension(sIconPath, _T("png"));
 
-			m_bmUILang.LoadImage(sIconPath);
+			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sIconPath, CLR_NONE, 16, 16));
+
+			if (icon.IsValid())
+				m_bmUILang.Attach(GraphicsMisc::IconToPARGB32Bitmap(icon));
+			else
+				m_bmUILang.LoadImage(sIconPath);
 		}
 	}
+
 	VERIFY(AppendMenu((MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_PREFERENCES_EDITUILANGUAGE, &m_bmUILang));
 }
 
