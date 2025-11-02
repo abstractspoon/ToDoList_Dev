@@ -21,13 +21,10 @@ CTDLLanguageDlg::CTDLLanguageDlg(LPCTSTR szSelLangFile, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_LANGUAGE_DIALOG, _T("Language"), pParent),
 	m_cbLanguages(_T("*.csv")),
-	m_bFirstTime(TRUE)
+	m_bFirstTime(Misc::IsEmpty(szSelLangFile))
 {
-	if (!Misc::IsEmpty(szSelLangFile))
-	{
+	if (!m_bFirstTime)
 		m_cbLanguages.SelectLanguageFile(szSelLangFile);
-		m_bFirstTime = FALSE;
-	}
 }
 
 CTDLLanguageDlg::~CTDLLanguageDlg()
