@@ -29,6 +29,7 @@
 #include "tdlfilterdlg.h"
 #include "TDLGoToTaskDlg.h"
 #include "tdlimportdialog.h"
+#include "TDLLanguageDlg.h"
 #include "tdlKeyboardShortcutDisplayDlg.h"
 #include "tdlmultisortdlg.h"
 #include "tdlOffsetDatesDlg.h"
@@ -5130,7 +5131,25 @@ void CToDoListWnd::OnAbout()
 
 void CToDoListWnd::OnPreferencesEditUILanguage()
 {
-	DoPreferences(PREFPAGE_GEN, IDC_LANGUAGE);
+	CString sCurLangFile = CLocalizer::GetDictionaryPath();
+	CTDLLanguageDlg dialog(sCurLangFile);
+
+	if (dialog.DoModal() == IDOK)
+	{
+		CPreferences().WriteProfileString(PREF_KEY, _T("LanguageFile"), dialog.GetSelectedLanguageFile(TRUE)); // relative path
+
+		// language changes may require restart so do that first
+		// Note: we check against the currently active dictionary rather 
+		// than their last choice so that if they change the language back
+		// within the same session they will not be prompted to restart
+		if (UpdateLanguageTranslationAndCheckForRestart(sCurLangFile,
+														dialog.GetSelectedLanguageFile(),
+														FALSE,
+														FALSE))
+		{
+			DoExit(TRUE);
+		}
+	}
 }
 
 void CToDoListWnd::OnPreferences()
@@ -5172,7 +5191,10 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		CPreferences::Save();
 
 		// language changes may require restart so do that first
-		if (UpdateLanguageTranslationAndCheckForRestart(oldPrefs))
+		if (UpdateLanguageTranslationAndCheckForRestart(CLocalizer::GetDictionaryPath(),
+														newPrefs.GetLanguageFile(),
+														oldPrefs.GetEnableRTLInput(),
+														newPrefs.GetEnableRTLInput()))
 		{
 			DoExit(TRUE);
 			return FALSE;
@@ -5361,19 +5383,15 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 	return bModified;
 }
 
-BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs)
+BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(LPCTSTR szOldLangFile, LPCTSTR szNewLangFile, 
+															   BOOL bOldRTLInput, BOOL bNewRTLInput)
 {
-	const CPreferencesDlg& prefs = Prefs();
-
-	CString sLangFile = prefs.GetLanguageFile();
-	BOOL bEnableRTL = prefs.GetEnableRTLInput();
-	
-	BOOL bDefLang = (CTDLLanguageComboBox::GetDefaultLanguage() == sLangFile);
+	BOOL bDefLang = (CTDLLanguageComboBox::GetDefaultLanguage() == szNewLangFile);
 		
 	// language change requires a restart
-	if (oldPrefs.GetLanguageFile() != sLangFile)
+	if (!FileMisc::IsSamePath(szNewLangFile, szOldLangFile))
 	{
-		if (bDefLang || FileMisc::FileExists(sLangFile))
+		if (bDefLang || FileMisc::FileExists(szNewLangFile))
 		{
 			// if the language file exists and has changed then inform the user that they need to restart
 			// Note: restarting will also handle 'bAdd2Dict' and 'bEnableRTL'
@@ -5384,7 +5402,7 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 		}
 	}
 	// RTL change requires a restart
-	else if (oldPrefs.GetEnableRTLInput() != bEnableRTL)
+	else if (Misc::StatesDiffer(bOldRTLInput, bNewRTLInput))
 	{
 		// if the language file exists and has changed then inform the user that they need to restart
 		if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGERTLINPUT, MB_YESNO) == IDYES)
@@ -5396,7 +5414,6 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 	// no need to restart
 	return FALSE;
 }
-
 
 BOOL CToDoListWnd::InitMenubar()
 {

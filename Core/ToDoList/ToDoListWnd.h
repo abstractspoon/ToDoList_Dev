@@ -774,7 +774,7 @@ protected:
 	void UpdateWindowIcons();
 	void UpdateTrayIcon();
 	void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib);
-	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
+	BOOL UpdateLanguageTranslationAndCheckForRestart(LPCTSTR szOldLangFile, LPCTSTR szNewLangFile, BOOL bOldRTLInput, BOOL bNewRTLInput);
 	void UpdateTaskTreeAndCommentsFonts();
 	void UpdateFindTasksAndRemindersFonts();
 

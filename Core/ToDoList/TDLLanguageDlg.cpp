@@ -17,13 +17,13 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLLanguageDlg dialog
 
-CTDLLanguageDlg::CTDLLanguageDlg(CWnd* pParent /*=NULL*/)
+CTDLLanguageDlg::CTDLLanguageDlg(LPCTSTR szSelLangFile, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLLanguageDlg::IDD, _T("Language"), pParent), 
 	m_cbLanguages(_T("*.csv"))
 {
-	//{{AFX_DATA_INIT(CTDLLanguageDlg)
-	//}}AFX_DATA_INIT
+	if (!Misc::IsEmpty(szSelLangFile))
+		m_cbLanguages.SelectLanguageFile(szSelLangFile);
 }
 
 CTDLLanguageDlg::~CTDLLanguageDlg()
@@ -61,9 +61,9 @@ BOOL CTDLLanguageDlg::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-CString CTDLLanguageDlg::GetLanguageFile() const 
+CString CTDLLanguageDlg::GetSelectedLanguageFile(BOOL bRelative) const
 { 
-	return m_cbLanguages.GetSelectedLanguageFile(); 
+	return m_cbLanguages.GetSelectedLanguageFile(bRelative); 
 }
 
 CString CTDLLanguageDlg::GetDefaultLanguage() 

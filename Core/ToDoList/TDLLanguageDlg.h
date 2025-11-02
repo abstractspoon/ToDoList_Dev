@@ -17,10 +17,10 @@ class CTDLLanguageDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLLanguageDlg(CWnd* pParent = NULL);   // standard constructor
+	CTDLLanguageDlg(LPCTSTR szSelLangFile = NULL, CWnd* pParent = NULL);   // standard constructor
 	virtual ~CTDLLanguageDlg();
 
-	CString GetLanguageFile() const;
+	CString GetSelectedLanguageFile(BOOL bRelative = FALSE) const;
 	static CString GetDefaultLanguage();
 
 // Dialog Data
