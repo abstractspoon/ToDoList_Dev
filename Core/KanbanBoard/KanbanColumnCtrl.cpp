@@ -204,7 +204,7 @@ int CKanbanColumnCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		OnDisplayAttributeChanged();
 	}
 
-	if (GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255))
+	if (GraphicsMisc::CreateCheckImageList(m_ilCheckboxes, IDB_CHECKBOXES, 255))
 		SetImageList(&m_ilCheckboxes, TVSIL_STATE);
 
 	TreeView_SetExtendedStyle(GetSafeHwnd(), TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER);
