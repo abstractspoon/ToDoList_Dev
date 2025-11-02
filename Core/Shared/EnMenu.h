@@ -14,15 +14,6 @@
 
 ///////////////////////////////////////////////////////////////////////
 
-enum MENUEX_BTN
-{
-	MEB_MINIMIZE,
-	MEB_RESTORE,
-	MEB_CLOSE,
-};
-
-///////////////////////////////////////////////////////////////////////
-
 class ITransText;
 
 ///////////////////////////////////////////////////////////////////////
@@ -34,16 +25,7 @@ public:
 	virtual ~CEnMenu();
 
 	BOOL LoadMenu(UINT nMenuResID, HWND hWndRef = NULL, BOOL bTranslate = FALSE, BOOL bRecursiveTranslate = FALSE);
-	void SetBackgroundColor(COLORREF color);
 	
-// 	BOOL AddBitmapButton(HBITMAP hbm, UINT nCmdID, BOOL bRightJustify = TRUE);
-// 	BOOL AddMDIButton(MENUEX_BTN nBtn, UINT nCmdID, BOOL bRightJustify = TRUE);
-// 	BOOL DeleteBitmapButton(UINT nCmdID);
-// 
-// 	// for themed buttons only
-// 	BOOL DrawBitmapButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const; 
-// 	BOOL MeasureBitmapButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct) const; 
-
 	int FindMenuItem(UINT nCmdID) const;
 	int FindMenuItem(HMENU hSubMenu) const;
 	int FindFirstMenuItem(UINT nCmdIDStart, UINT nCmdIDEnd) const;
@@ -59,6 +41,7 @@ public:
 	HMENU GetParentMenu(HMENU hMenu) const;
 
 	BOOL CopyMenuContents(const CMenu* pMenu);
+	void SetBackgroundColor(COLORREF color);
 
 	BOOL IsSeparator(int nPos) const;
 	BOOL IsPopop(int nPos) const;

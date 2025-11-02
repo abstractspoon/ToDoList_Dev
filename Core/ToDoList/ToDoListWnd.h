@@ -233,12 +233,10 @@ protected:
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnDestroy();
-// 	afx_msg void OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
 	afx_msg void OnEndSession(BOOL bEnding);
 	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-// 	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnNcDestroy();
 	afx_msg void OnNcLButtonDblClk(UINT nHitTest, CPoint point);
@@ -774,7 +772,6 @@ protected:
 	void UpdateWindowIcons();
 	void UpdateTrayIcon();
 	void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib);
-	BOOL UpdateLanguageTranslationAndCheckForRestart(LPCTSTR szOldLangFile, LPCTSTR szNewLangFile, BOOL bOldRTLInput, BOOL bNewRTLInput);
 	void UpdateTaskTreeAndCommentsFonts();
 	void UpdateFindTasksAndRemindersFonts();
 
@@ -796,6 +793,7 @@ protected:
 	void CheckRemovePristineTasklist();
 	void CheckUpdateActiveToDoCtrlPreferences();
 	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
+	BOOL CheckQueryLanguageRestart(LPCTSTR szOldLangFile, LPCTSTR szNewLangFile, BOOL bOldRTLInput, BOOL bNewRTLInput);
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
 	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);

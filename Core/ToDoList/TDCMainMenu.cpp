@@ -505,43 +505,6 @@ BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu) const
 	return FALSE;
 }
 
-/*
-BOOL CTDCMainMenu::HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const
-{
-	if (nIDCtl == 0)
-	{
-		switch (lpDrawItemStruct->itemID)
-		{
-		case ID_CLOSE:
-		case ID_PREFERENCES_EDITUILANGUAGE:
-			VERIFY(DrawBitmapButton(lpDrawItemStruct));
-			return TRUE;
-		}
-	}
-
-	return FALSE;
-}
-
-BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const
-{
-	if (nIDCtl == 0)
-	{
-		switch (lpMeasureItemStruct->itemID)
-		{
-		case ID_CLOSE:
-			VERIFY(MeasureBitmapButton(lpMeasureItemStruct));
-			return TRUE;
-
-		case ID_PREFERENCES_EDITUILANGUAGE:
-			lpMeasureItemStruct->itemWidth = 20;
-			lpMeasureItemStruct->itemHeight = 16;
-			return TRUE;
-		}
-	}
-
-	return FALSE;
-}*/
-
 void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs)
 {
 	ASSERT(pMenu);

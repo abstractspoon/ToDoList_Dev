@@ -40,6 +40,7 @@ public:
 	BOOL LoadMenu();
 	BOOL LoadMenu(const CPreferencesDlg& prefs);
 
+	BOOL HandlePostTranslateMenu(HMENU hMenu) const;
 	BOOL HandleInitMenuPopup(CMenu* pPopupMenu, 
 							 const CFilteredToDoCtrl& tdc, 
 							 const CPreferencesDlg& prefs,
@@ -47,10 +48,6 @@ public:
 							 const CTDLTasklistStorageMgr& mgrStorage,
 							 const CUIExtensionMgr& mgrUIExt,
 							 CMenuIconMgr& mgrMenuIcons) const;
-
-// 	BOOL HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const;
-// 	BOOL HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const;
-	BOOL HandlePostTranslateMenu(HMENU hMenu) const;
 
 	CString GetDynamicItemTooltip(UINT nMenuID,
 								  const CRecentFileList& mru,
