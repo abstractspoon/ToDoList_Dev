@@ -276,7 +276,7 @@ void CTreeListTreeCtrl::EnableCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable)
 	if (bEnable)
 	{
 		if (!m_ilCheckboxes.GetSafeHandle())
-			VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, nUnthemedBitmapID, 255));
+			VERIFY(GraphicsMisc::CreateCheckImageList(m_ilCheckboxes, nUnthemedBitmapID, 255));
 
 		SetImageList(&m_ilCheckboxes, TVSIL_STATE);
 	}

@@ -405,78 +405,82 @@ BOOL CThemed::GetTextExtent(CDC* pDC, int nPart, int nState, const CString& sTex
 	return GetThemeTextExtent(pDC ? *pDC : (HDC)NULL, nPart, nState, sText, sText.GetLength(), dwTextFlags, prBounding, rExtent);
 }
 
-BOOL CThemed::BuildImageList(CImageList& il, int nPart, const int nStates[], int nNumStates, COLORREF crMask, LPCRECT prPadding)
+BOOL CThemed::CreateCheckImageList(CImageList& ilCheck, const int nStates[], int nNumStates, COLORREF crMask, LPCRECT prPadding)
 {
-	ASSERT (!il.GetSafeHandle());
-	
-	if (il.GetSafeHandle())
+	if (ilCheck.GetSafeHandle() || !nNumStates)
+	{
+		ASSERT(0);
 		return FALSE;
-	
-	if (!nNumStates)
-		return FALSE;
-	
-	CSize sizePart;
-	GetSize(nPart, 1, sizePart);
+	}
 
-	// create a bitmap containing the required images
-	HWND hWnd = m_hWnd ? m_hWnd : GetDesktopWindow();
-	CClientDC dc(CWnd::FromHandle(hWnd));
+	if (!CThemed::AreControlsThemed())
+		return FALSE;
+
+	CThemed thCheck;
+	CWnd* pWnd = CWnd::GetDesktopWindow();
+
+	if (!thCheck.Open(pWnd, _T("BUTTON")))
+	{
+		return FALSE;
+		ASSERT(0);
+	}
+		
+	CSize sizeCheck;
+	thCheck.GetSize(BP_CHECKBOX, 1, sizeCheck);
+
+	ASSERT(sizeCheck.cx == sizeCheck.cy);
+
+	CClientDC dc(pWnd);
 	CDC dcBack;
 	
-	if (dcBack.CreateCompatibleDC(&dc))
+	if (!dcBack.CreateCompatibleDC(&dc))
+		return FALSE;
+
+	// Pad check boxes to a minimum unscaled size of 16
+	CRect rPadding(0, 0, 0, 0);
+
+	if (prPadding)
+		rPadding.CopyRect(prPadding);
+
+	double dScale = (dc.GetDeviceCaps(LOGPIXELSY) / 96.0);
+	int nPadding = ((int)(16 * dScale) - sizeCheck.cx);
+
+	if (nPadding > 0)
 	{
-		CRect rPadding(0, 0, 0, 0);
-
-		if (prPadding)
-			rPadding.CopyRect(prPadding);
-		
-		// Pad check boxes to a minimum unscaled size of 16
-		if (nPart == BP_CHECKBOX)
-		{
-			ASSERT(sizePart.cx == sizePart.cy);
-
-			double dScale = (dc.GetDeviceCaps(LOGPIXELSY) / 96.0);
-			int nPadding = ((int)(16 * dScale) - sizePart.cx);
-
-			if (nPadding > 0)
-			{
-				rPadding.left += (nPadding / 2);
-				rPadding.right += (nPadding - (nPadding / 2));
-				rPadding.top += (nPadding - (nPadding / 2));
-				rPadding.bottom += (nPadding / 2);
-			}
-		}
-
-		int nImWidth = sizePart.cx + (rPadding.left + rPadding.right);
-		int nImHeight = sizePart.cy + (rPadding.top + rPadding.bottom);
-
-		CBitmap bitmap;
-
-		if (bitmap.CreateCompatibleBitmap(&dc, nImWidth * nNumStates, nImHeight))
-		{
-			CGdiObject* pOld = dcBack.SelectObject(&bitmap);
-			dcBack.FillSolidRect(0, 0, nImWidth * nNumStates, nImHeight, crMask);
-
-			CRect rState(rPadding.TopLeft(), sizePart);
-
-			for (int nState = 0; nState < nNumStates; nState++)
-			{
-				if (nStates[nState] != -1)
-					DrawBackground(&dcBack, nPart, nStates[nState], rState);
-				
-				// next state
-				rState.OffsetRect(nImWidth, 0);
-			}
-			
-			dcBack.SelectObject(pOld);
-			
-			// create imagelist
-			if (il.Create(nImWidth, nImHeight, ILC_COLOR32 | ILC_MASK, 0, 1))
-				il.Add(&bitmap, crMask);
-		}
+		rPadding.left += (nPadding / 2);
+		rPadding.right += (nPadding - (nPadding / 2));
+		rPadding.top += (nPadding - (nPadding / 2));
+		rPadding.bottom += (nPadding / 2);
 	}
-	
-	return (il.GetSafeHandle() != NULL);
+
+	int nImWidth = sizeCheck.cx + (rPadding.left + rPadding.right);
+	int nImHeight = sizeCheck.cy + (rPadding.top + rPadding.bottom);
+
+	CBitmap bitmap;
+
+	if (!bitmap.CreateCompatibleBitmap(&dc, nImWidth * nNumStates, nImHeight))
+		return FALSE;
+
+	if (!ilCheck.Create(nImWidth, nImHeight, ILC_COLOR32 | ILC_MASK, 0, 1))
+		return FALSE;
+
+	CGdiObject* pOld = dcBack.SelectObject(&bitmap);
+	dcBack.FillSolidRect(0, 0, nImWidth * nNumStates, nImHeight, crMask);
+
+	CRect rState(rPadding.TopLeft(), sizeCheck);
+
+	for (int nState = 0; nState < nNumStates; nState++)
+	{
+		if (nStates[nState] != -1)
+			thCheck.DrawBackground(&dcBack, BP_CHECKBOX, nStates[nState], rState);
+
+		// next state
+		rState.OffsetRect(nImWidth, 0);
+	}
+
+	dcBack.SelectObject(pOld);
+
+	return (ilCheck.Add(&bitmap, crMask) != -1);
 }
 
 BOOL CThemed::GetThemeBackgroundContentRect(CDC* pDC, int nPart, int nState, const CRect& rBounding, CRect& rContent)
