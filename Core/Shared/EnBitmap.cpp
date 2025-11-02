@@ -164,7 +164,29 @@ BOOL CEnBitmap::ResizeImage(int cx, int cy, COLORREF crBack)
 	if (hbm == NULL)
 		return FALSE;
 
-	DeleteObject();
+	if (hbm == m_hObject)
+		return TRUE;
+
+	GraphicsMisc::VerifyDeleteObject(*this);
+	return Attach(hbm);
+}
+
+BOOL CEnBitmap::ConvertToPARGB32(COLORREF crMask)
+{
+	ASSERT(m_hObject);
+
+	HICON hIcon = ExtractIcon((HBITMAP)m_hObject, crMask);
+	ASSERT(hIcon);
+
+	HBITMAP hbm = GraphicsMisc::IconToPARGB32Bitmap(hIcon);
+	ASSERT(hbm);
+
+	::DestroyIcon(hIcon);
+
+	if (hbm == NULL)
+		return FALSE;
+
+	GraphicsMisc::VerifyDeleteObject(*this);
 	return Attach(hbm);
 }
 
@@ -522,7 +544,8 @@ HICON CEnBitmap::ExtractIcon(HBITMAP hbm, COLORREF crMask, int cx, int cy)
 			}
 		}
 
-		GraphicsMisc::VerifyDeleteObject(hbmResized);
+		if (hbmResized != hbm)
+			GraphicsMisc::VerifyDeleteObject(hbmResized);
 	}
 
 	ASSERT(hIcon);

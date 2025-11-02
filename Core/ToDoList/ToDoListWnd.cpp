@@ -29,6 +29,7 @@
 #include "tdlfilterdlg.h"
 #include "TDLGoToTaskDlg.h"
 #include "tdlimportdialog.h"
+#include "TDLLanguageDlg.h"
 #include "tdlKeyboardShortcutDisplayDlg.h"
 #include "tdlmultisortdlg.h"
 #include "tdlOffsetDatesDlg.h"
@@ -489,6 +490,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_NEXTTOPLEVELTASK, OnNexttopleveltask)
 	ON_COMMAND(ID_OPEN_RELOAD, OnReload)
 	ON_COMMAND(ID_PREFERENCES, OnPreferences)
+	ON_COMMAND(ID_PREFERENCES_EDITUILANGUAGE, OnPreferencesEditUILanguage)
 	ON_COMMAND(ID_PREVTASK, OnGotoPrevtask)
 	ON_COMMAND(ID_PREVTOPLEVELTASK, OnPrevtopleveltask)
 	ON_COMMAND(ID_PRINT, OnPrint)
@@ -846,7 +848,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_COPYDATA()
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
-	ON_WM_DRAWITEM()
 	ON_WM_ENABLE()
 	ON_WM_ENDSESSION()
 	ON_WM_ERASEBKGND()
@@ -854,7 +855,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_INITMENUPOPUP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
-	ON_WM_MEASUREITEM()
 	ON_WM_MOUSEMOVE()
 	ON_WM_NCLBUTTONDBLCLK()
 	ON_WM_NCDESTROY()
@@ -4337,14 +4337,21 @@ void CToDoListWnd::OnDebugRestartApp()
 
 void CToDoListWnd::OnDebugRestartAppFromExplorer()
 {
-	DoExit(FALSE); // don't restart
-
-	CString sParams = AfxGetApp()->m_lpCmdLine;
-	sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTART, Misc::Format(::GetCurrentProcessId()));
-
-	if (!FileMisc::RunFromExplorer(FileMisc::GetModuleFilePath(), sParams))
+	if (COSVersion() >= OSV_VISTA)
 	{
-		AfxMessageBox(_T("Failed to restart app from Explorer"));
+		DoExit(FALSE); // don't restart
+
+		CString sParams = AfxGetApp()->m_lpCmdLine;
+		sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTART, Misc::Format(::GetCurrentProcessId()));
+
+		if (!FileMisc::RunFromExplorer(FileMisc::GetModuleFilePath(), sParams))
+		{
+			AfxMessageBox(_T("Failed to restart app from Explorer"));
+		}
+	}
+	else
+	{
+		AfxMessageBox(_T("Not supported on XP"));
 	}
 }
 
@@ -5120,7 +5127,30 @@ void CToDoListWnd::OnAbout()
 	dialog.DoModal();
 }
 
-void CToDoListWnd::OnPreferences() 
+void CToDoListWnd::OnPreferencesEditUILanguage()
+{
+	CString sCurLangFile = CLocalizer::GetDictionaryPath();
+	CTDLLanguageDlg dialog(sCurLangFile);
+
+	if (dialog.DoModal() == IDOK)
+	{
+		CPreferences().WriteProfileString(PREF_KEY, _T("LanguageFile"), dialog.GetSelectedLanguageFile(TRUE)); // relative path
+
+		// language changes may require restart so do that first
+		// Note: we check against the currently active dictionary rather 
+		// than their last choice so that if they change the language back
+		// within the same session they will not be prompted to restart
+		if (CheckQueryLanguageRestart(sCurLangFile,
+														dialog.GetSelectedLanguageFile(),
+														FALSE,
+														FALSE))
+		{
+			DoExit(TRUE);
+		}
+	}
+}
+
+void CToDoListWnd::OnPreferences()
 {
 	DoPreferences();
 }
@@ -5159,7 +5189,10 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		CPreferences::Save();
 
 		// language changes may require restart so do that first
-		if (UpdateLanguageTranslationAndCheckForRestart(oldPrefs))
+		if (CheckQueryLanguageRestart(CLocalizer::GetDictionaryPath(),
+														newPrefs.GetLanguageFile(),
+														oldPrefs.GetEnableRTLInput(),
+														newPrefs.GetEnableRTLInput()))
 		{
 			DoExit(TRUE);
 			return FALSE;
@@ -5348,19 +5381,15 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 	return bModified;
 }
 
-BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs)
+BOOL CToDoListWnd::CheckQueryLanguageRestart(LPCTSTR szOldLangFile, LPCTSTR szNewLangFile, 
+															   BOOL bOldRTLInput, BOOL bNewRTLInput)
 {
-	const CPreferencesDlg& prefs = Prefs();
-
-	CString sLangFile = prefs.GetLanguageFile();
-	BOOL bEnableRTL = prefs.GetEnableRTLInput();
-	
-	BOOL bDefLang = (CTDLLanguageComboBox::GetDefaultLanguage() == sLangFile);
+	BOOL bDefLang = (CTDLLanguageComboBox::GetDefaultLanguage() == szNewLangFile);
 		
 	// language change requires a restart
-	if (oldPrefs.GetLanguageFile() != sLangFile)
+	if (!FileMisc::IsSamePath(szNewLangFile, szOldLangFile))
 	{
-		if (bDefLang || FileMisc::FileExists(sLangFile))
+		if (bDefLang || FileMisc::FileExists(szNewLangFile))
 		{
 			// if the language file exists and has changed then inform the user that they need to restart
 			// Note: restarting will also handle 'bAdd2Dict' and 'bEnableRTL'
@@ -5371,7 +5400,7 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 		}
 	}
 	// RTL change requires a restart
-	else if (oldPrefs.GetEnableRTLInput() != bEnableRTL)
+	else if (Misc::StatesDiffer(bOldRTLInput, bNewRTLInput))
 	{
 		// if the language file exists and has changed then inform the user that they need to restart
 		if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGERTLINPUT, MB_YESNO) == IDYES)
@@ -5383,7 +5412,6 @@ BOOL CToDoListWnd::UpdateLanguageTranslationAndCheckForRestart(const CPreference
 	// no need to restart
 	return FALSE;
 }
-
 
 BOOL CToDoListWnd::InitMenubar()
 {
@@ -11321,22 +11349,6 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 		m_idleTasks.UpdateCaption();
 	
     return nSaveAll;
-}
-
-void CToDoListWnd::OnDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
-{
-	if (m_menubar.HandleDrawItem(nIDCtl, lpDrawItemStruct))
-		return;
-
-	CFrameWnd::OnDrawItem(nIDCtl, lpDrawItemStruct);
-} 
-
-void CToDoListWnd::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
-{
-	if (m_menubar.HandleMeasureItem(nIDCtl, lpMeasureItemStruct))
-		return;
-	
-	CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
 }
 
 void CToDoListWnd::OnLButtonDown(UINT nFlags, CPoint point)

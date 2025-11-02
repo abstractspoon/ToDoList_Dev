@@ -49,6 +49,7 @@ public:
 	CSize GetSize() const;
 	HICON ExtractIcon(COLORREF crMask = CLR_NONE, int cx = 0, int cy = 0);
 	BOOL ResizeImage(int cx, int cy, COLORREF crBack = CLR_NONE);
+	BOOL ConvertToPARGB32(COLORREF crMask);
 
 	// helpers
 	static HBITMAP LoadImageFile(LPCTSTR szImagePath, COLORREF crBack = CLR_NONE, int cx = 0, int cy = 0);

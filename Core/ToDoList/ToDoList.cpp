@@ -1160,7 +1160,7 @@ BOOL CToDoListApp::InitTranslation(BOOL bFirstTime, BOOL bQuiet)
 
 			// else
 			CLocalizer::Release();
-			m_sLanguageFile = dialog.GetLanguageFile();
+			m_sLanguageFile = dialog.GetSelectedLanguageFile();
 		}
 	}
 

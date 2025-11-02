@@ -582,7 +582,7 @@ void CTDLTaskCtrlBase::DoUpdateSelectedTaskPath()
 			// Space out delimiters for easier reading
 			sPath.Replace(_T("\\"), _T(" \\ "));
 
-			sHeader.Format(_T("%s [%s]"), sHeader, sPath);
+			sHeader = Misc::Format(_T("%s [%s]"), sHeader, sPath);
 		}
 	}
 	
