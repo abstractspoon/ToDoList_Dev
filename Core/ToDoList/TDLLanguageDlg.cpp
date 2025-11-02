@@ -19,11 +19,15 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLLanguageDlg::CTDLLanguageDlg(LPCTSTR szSelLangFile, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLLanguageDlg::IDD, _T("Language"), pParent), 
-	m_cbLanguages(_T("*.csv"))
+	CTDLDialog(IDD_LANGUAGE_DIALOG, _T("Language"), pParent),
+	m_cbLanguages(_T("*.csv")),
+	m_bFirstTime(TRUE)
 {
 	if (!Misc::IsEmpty(szSelLangFile))
+	{
 		m_cbLanguages.SelectLanguageFile(szSelLangFile);
+		m_bFirstTime = FALSE;
+	}
 }
 
 CTDLLanguageDlg::~CTDLLanguageDlg()
@@ -33,19 +37,15 @@ CTDLLanguageDlg::~CTDLLanguageDlg()
 void CTDLLanguageDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLLanguageDlg)
+
 	DDX_Control(pDX, IDC_LANGUAGES, m_cbLanguages);
-	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLLanguageDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLLanguageDlg)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLLanguageDlg message handlers
 
 BOOL CTDLLanguageDlg::OnInitDialog() 
 {
@@ -54,9 +54,9 @@ BOOL CTDLLanguageDlg::OnInitDialog()
 	SetIcon(IDR_MAINFRAME);
 
 	// Initialise language to user's UI language
-	m_cbLanguages.SelectUserLanguage();
-	m_cbLanguages.SetFocus();
-	
+	if (m_bFirstTime)
+		m_cbLanguages.SelectUserLanguage();
+
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
