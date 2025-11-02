@@ -291,7 +291,7 @@ namespace GraphicsMisc
 	void DrawGlassWithGradient(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder = -1);
 
 	BOOL FlashWindowEx(HWND hWnd, DWORD dwFlags, UINT  uCount, DWORD dwTimeout);
-	BOOL InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UINT nFallbackBmpID, COLORREF crBkgnd, LPCRECT prPadding = NULL);
+	BOOL CreateCheckImageList(CImageList& ilCheckboxes, UINT nFallbackBmpID, COLORREF crBkgnd, LPCRECT prPadding = NULL);
 	BOOL DrawShortcutOverlay(CDC* pDC, LPCRECT pRect);
 
 };

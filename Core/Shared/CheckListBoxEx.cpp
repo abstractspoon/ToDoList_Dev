@@ -6,6 +6,7 @@
 #include "themed.h"
 #include "dialoghelper.h"
 #include "Misc.h"
+#include "EnImageList.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -184,16 +185,9 @@ void CCheckListBoxEx::PreSubclassWindow()
 {
 	CCheckListBox::PreSubclassWindow();
 	
-	CThemed th;
-	
-	if (th.Open(this, _T("BUTTON")) && th.AreControlsThemed())
+	if (CThemed::CreateCheckImageList(m_ilCheck, CHECKSTATES, NUMCHECKSTATES))
 	{
-		th.BuildImageList(m_ilCheck, BP_CHECKBOX, CHECKSTATES, NUMCHECKSTATES);
-
-		IMAGEINFO ii;
-		m_ilCheck.GetImageInfo(0, &ii);
-		m_nCheckHeight = (ii.rcImage.bottom - ii.rcImage.top);
-
+		m_nCheckHeight = CEnImageList::GetImageSize(m_ilCheck);
 		SetItemHeight(0, (m_nCheckHeight + 1));
 	}
 }

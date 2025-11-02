@@ -2340,7 +2340,7 @@ BOOL GraphicsMisc::FlashWindowEx(HWND hWnd, DWORD dwFlags, UINT uCount, DWORD dw
 	return FALSE;
 }
 
-BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UINT nFallbackBmpID, COLORREF crBkgnd, LPCRECT prPadding)
+BOOL GraphicsMisc::CreateCheckImageList(CImageList& ilCheckboxes, UINT nFallbackBmpID, COLORREF crBkgnd, LPCRECT prPadding)
 {
 	if (ilCheckboxes.GetSafeHandle())
 		return TRUE;
@@ -2348,15 +2348,11 @@ BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UI
 	const int nStates[] = { -1, CBS_UNCHECKEDNORMAL, CBS_CHECKEDNORMAL, CBS_MIXEDNORMAL };
 	const int nNumStates = sizeof(nStates) / sizeof(int);
 
-	CThemed th;
-
-	if (th.Open(hWnd, _T("BUTTON")) && th.AreControlsThemed())
-	{
-		th.BuildImageList(ilCheckboxes, BP_CHECKBOX, nStates, nNumStates, crBkgnd, prPadding);
-	}
-
+	if (CThemed::CreateCheckImageList(ilCheckboxes, nStates, nNumStates, crBkgnd, prPadding))
+		return TRUE;
+	
 	// unthemed + fallback
-	if (!ilCheckboxes.GetSafeHandle() && nFallbackBmpID)
+	if (nFallbackBmpID)
 	{
 		CBitmap bitmap;
 		
@@ -2369,11 +2365,13 @@ BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UI
 				ilCheckboxes.Add(&bitmap, crBkgnd) == 0)
 			{
 				CEnImageList::ScaleByDPIFactor(ilCheckboxes, crBkgnd);
+				return TRUE;
 			}
 		}
 	}
 
-	return (NULL != ilCheckboxes.GetSafeHandle());
+	// All else
+	return FALSE;
 }
 
 int GraphicsMisc::GetSystemDPI()
