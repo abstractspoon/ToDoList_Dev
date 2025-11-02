@@ -14,7 +14,7 @@
     <ProjectGuid>{3122F292-3C62-4EC8-A68A-5741C5E7F5B8}</ProjectGuid>
     <RootNamespace>JSONExporterBridge</RootNamespace>
     <ProjectName>JSONExporterBridge</ProjectName>
-	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+	<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
