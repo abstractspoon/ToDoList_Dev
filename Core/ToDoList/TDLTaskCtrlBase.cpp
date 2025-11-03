@@ -342,7 +342,7 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Add some padding to the right of the checkbox for tree/list
 	// so that the checkboxes, icons and labels have consistent positioning
 	CRect rPadding(0, 0, (IsTreeList() ? 3 : 0), 0);
-	VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckboxes, IDB_CHECKBOXES, 255, rPadding));
+	VERIFY(GraphicsMisc::CreateCheckImageList(m_ilCheckboxes, IDB_CHECKBOXES, 255, rPadding));
 
 	BuildColumns();
 	OnColumnVisibilityChange(CTDCColumnIDMap());
@@ -582,7 +582,7 @@ void CTDLTaskCtrlBase::DoUpdateSelectedTaskPath()
 			// Space out delimiters for easier reading
 			sPath.Replace(_T("\\"), _T(" \\ "));
 
-			sHeader.Format(_T("%s [%s]"), sHeader, sPath);
+			sHeader = Misc::Format(_T("%s [%s]"), sHeader, sPath);
 		}
 	}
 	

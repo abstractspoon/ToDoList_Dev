@@ -1056,7 +1056,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	m_lcAttributes.SetItemState(0, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	OnItemchangedAttriblist(NULL, NULL);
 
-	VERIFY(GraphicsMisc::InitCheckboxImageList(*this, m_ilCheckBoxes, IDB_CHECKBOXES, 255));
+	VERIFY(GraphicsMisc::CreateCheckImageList(m_ilCheckBoxes, IDB_CHECKBOXES, 255));
 	ListView_SetImageList(m_lcAttributes, m_ilCheckBoxes, LVSIL_SMALL);
 
 	m_mgrPrompts.SetComboPrompt(m_cbFeatures, IDS_TDC_NONE);

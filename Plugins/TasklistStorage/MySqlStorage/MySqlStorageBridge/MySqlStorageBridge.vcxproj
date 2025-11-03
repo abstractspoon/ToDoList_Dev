@@ -14,7 +14,7 @@
     <ProjectGuid>{82ACF56A-73B2-4646-851D-3520ABEE6A2D}</ProjectGuid>
     <RootNamespace>MySqlStorageBridge</RootNamespace>
     <ProjectName>MySqlStorageBridge</ProjectName>
-	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+	<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

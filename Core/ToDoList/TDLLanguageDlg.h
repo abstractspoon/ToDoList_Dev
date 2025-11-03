@@ -15,37 +15,23 @@
 
 class CTDLLanguageDlg : public CTDLDialog
 {
-// Construction
 public:
-	CTDLLanguageDlg(CWnd* pParent = NULL);   // standard constructor
+	CTDLLanguageDlg(LPCTSTR szSelLangFile = NULL, CWnd* pParent = NULL);   // standard constructor
 	virtual ~CTDLLanguageDlg();
 
-	CString GetLanguageFile() const;
+	CString GetSelectedLanguageFile(BOOL bRelative = FALSE) const;
 	static CString GetDefaultLanguage();
 
-// Dialog Data
-	enum { IDD = IDD_LANGUAGE_DIALOG };
-
-	CTDLLanguageComboBox	m_cbLanguages;
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLLanguageDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
 protected:
+	CTDLLanguageComboBox m_cbLanguages;
+	BOOL m_bFirstTime;
 
-	// Generated message map functions
-	//{{AFX_MSG(CTDLLanguageDlg)
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
+
+protected:
 	DECLARE_MESSAGE_MAP()
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLLANGUAGEDLG_H__F1F61CB0_9292_431D_9049_1F3ED11478A1__INCLUDED_)

@@ -12,14 +12,11 @@
 #include <afxtempl.h>
 #include "EnBitmapEx.h"
 
-enum MENUEX_BTN
-{
-	MEB_MINIMIZE,
-	MEB_RESTORE,
-	MEB_CLOSE,
-};
+///////////////////////////////////////////////////////////////////////
 
 class ITransText;
+
+///////////////////////////////////////////////////////////////////////
 
 class CEnMenu : public CMenu  
 {
@@ -28,16 +25,7 @@ public:
 	virtual ~CEnMenu();
 
 	BOOL LoadMenu(UINT nMenuResID, HWND hWndRef = NULL, BOOL bTranslate = FALSE, BOOL bRecursiveTranslate = FALSE);
-	void SetBackgroundColor(COLORREF color);
 	
-	// pass -1 as nThemeBMID is you want ownerdraw
-	BOOL AddMDIButton(MENUEX_BTN nBtn, UINT nCmdID, BOOL bRightJustify = TRUE);
-	BOOL DeleteMDIMenu(UINT nCmdID);
-
-	// for themed buttons only
-	BOOL DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const; 
-	BOOL MeasureMDIButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct) const; 
-
 	int FindMenuItem(UINT nCmdID) const;
 	int FindMenuItem(HMENU hSubMenu) const;
 	int FindFirstMenuItem(UINT nCmdIDStart, UINT nCmdIDEnd) const;
@@ -53,6 +41,7 @@ public:
 	HMENU GetParentMenu(HMENU hMenu) const;
 
 	BOOL CopyMenuContents(const CMenu* pMenu);
+	void SetBackgroundColor(COLORREF color);
 
 	BOOL IsSeparator(int nPos) const;
 	BOOL IsPopop(int nPos) const;
@@ -108,11 +97,11 @@ protected:
 	static ITransText* s_pTT;
 
 protected:
-	CMap<UINT, UINT, int, int> m_mapCmd2ID;
+//	CMap<UINT, UINT, int, int> m_mapMDIBtn2Index;
 	CBrush m_brBkgnd;
 
 protected:
-	static BOOL IsThemed();
+//	static BOOL IsThemed();
 	static int FindMenuItem(HMENU hMenu, DWORD dwItem, HMENU& hParentMenu, BOOL bItemIsMenu);
 	static void DoCleanUp(HMENU hMenu, HMENU hCmdMenu, int nCmdPos);
 	static int MenuSortProc(const void* v1, const void* v2);

@@ -46,14 +46,31 @@ namespace MDContentControl
 
 		// -----------------------------------------------------------------
 
-		private static readonly string[] AllowableDropFormats = 
+		static readonly string[] s_AllowableDropFormats;
+		
+		static MDContentControlForm()
 		{
-			// In preferred order
-			DataFormats.Html,
-			DataFormats.Rtf,
-			DataFormats.UnicodeText,
-			DataFormats.FileDrop
-		};
+			// XP compatibility
+			if (OSVersion.IsBelowVista())
+			{
+				s_AllowableDropFormats = new string[]
+				{
+					DataFormats.UnicodeText,
+					DataFormats.FileDrop
+				};
+			}  
+			else
+			{
+				s_AllowableDropFormats = new string[]
+				{
+					// In preferred order
+					DataFormats.Html,
+					DataFormats.Rtf,
+					DataFormats.UnicodeText,
+					DataFormats.FileDrop
+				};
+			}
+		}
 
 		// -----------------------------------------------------------------
 
@@ -79,9 +96,9 @@ namespace MDContentControl
 			Win32.AddBorder(InputTextCtrl.Handle);
 			Win32.AddBorder(PreviewBrowser.Handle);
 
-			InputTextCtrl.TextChanged		+= (s, e) =>	{ InputTextChanged?	.Invoke(this, e);	};
-			InputTextCtrl.LostFocus			+= (s, e) =>	{ InputLostFocus?	.Invoke(this, e);	};
-			InputTextCtrl.NeedLinkTooltip	+= (s, e) =>	{ NeedLinkTooltip?	.Invoke(this, e);	};
+			InputTextCtrl.TextChanged		+= (s, e) => { InputTextChanged?.Invoke(this, e); };
+			InputTextCtrl.LostFocus			+= (s, e) => { InputLostFocus?	.Invoke(this, e); };
+			InputTextCtrl.NeedLinkTooltip	+= (s, e) => { NeedLinkTooltip?	.Invoke(this, e); };
 
 			InputTextCtrl.DragEnter += (s, e) =>
 			{
@@ -265,7 +282,7 @@ namespace MDContentControl
 
 		void OnInputDragEnter(DragEventArgs e)
 		{
-			foreach (var fmt in AllowableDropFormats)
+			foreach (var fmt in s_AllowableDropFormats)
 			{
 				if (e.Data.GetDataPresent(fmt))
 				{
@@ -279,7 +296,7 @@ namespace MDContentControl
 
 		void OnInputDragDrop(DragEventArgs e)
 		{
-			foreach (var fmt in AllowableDropFormats)
+			foreach (var fmt in s_AllowableDropFormats)
 			{
 				if (InsertContent(e.Data, fmt))
 					break;
@@ -288,7 +305,7 @@ namespace MDContentControl
 
 		bool OnInputPaste(IDataObject obj)
 		{
-			foreach (var fmt in AllowableDropFormats)
+			foreach (var fmt in s_AllowableDropFormats)
 			{
 				if (InsertContent(obj, fmt))
 					break;
@@ -336,7 +353,7 @@ namespace MDContentControl
 			if (!obj.GetDataPresent(fmt))
 				return false;
 
-			if (fmt == DataFormats.Text)
+			if (fmt == DataFormats.UnicodeText)
 			{
 				content = obj.GetData(fmt).ToString();
 			}

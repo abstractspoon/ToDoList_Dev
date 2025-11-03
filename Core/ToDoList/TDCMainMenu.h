@@ -14,6 +14,7 @@
 #include "tdcenum.h"
 
 #include "..\Shared\EnMenu.h"
+#include "..\Shared\EnBitmap.h"
 
 #include "..\Interfaces\UITheme.h"
 
@@ -39,6 +40,7 @@ public:
 	BOOL LoadMenu();
 	BOOL LoadMenu(const CPreferencesDlg& prefs);
 
+	BOOL HandlePostTranslateMenu(HMENU hMenu) const;
 	BOOL HandleInitMenuPopup(CMenu* pPopupMenu, 
 							 const CFilteredToDoCtrl& tdc, 
 							 const CPreferencesDlg& prefs,
@@ -46,10 +48,6 @@ public:
 							 const CTDLTasklistStorageMgr& mgrStorage,
 							 const CUIExtensionMgr& mgrUIExt,
 							 CMenuIconMgr& mgrMenuIcons) const;
-
-	BOOL HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const;
-	BOOL HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const;
-	BOOL HandlePostTranslateMenu(HMENU hMenu) const;
 
 	CString GetDynamicItemTooltip(UINT nMenuID,
 								  const CRecentFileList& mru,
@@ -79,10 +77,13 @@ public:
 
 protected:
 	UITHEME m_theme;
+	CEnBitmap m_bmUILang, m_bmTabClose;
 
 protected:
 	void LoadMenuCommon();
 	void TranslateDynamicMenuItems();
+	void AddLanguageButton();
+	void AddTabCloseButton(const CPreferencesDlg& prefs);
 
 	static void PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs);
 	static void PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);

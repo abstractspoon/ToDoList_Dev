@@ -34,6 +34,12 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+#ifndef HBMMENU_MBAR_CLOSE
+#	define HBMMENU_MBAR_CLOSE          ((HBITMAP)5)
+#endif
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -61,26 +67,64 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 
 	LoadMenuCommon();
 
-	if (!prefs.GetShowTabCloseButtons())
-		AddMDIButton(MEB_CLOSE, ID_CLOSE);
+	AddLanguageButton();
+	AddTabCloseButton(prefs);
 
+	// Right-align 'Debug' menu and don't translate
 #ifdef _DEBUG
 	ModifyMenu(AM_DEBUG, MF_BYPOSITION | MFT_RIGHTJUSTIFY, 0, _T("&Debug"));
-
-	// don't translate the debug menu
 	CLocalizer::EnableTranslation(::GetSubMenu(GetSafeHmenu(), AM_DEBUG), FALSE);
-
-	// 'Run from Explorer' not supported below Vista
-	if (COSVersion() < OSV_VISTA)
-	{
-		CMenu* pSubMenu = GetSubMenu(AM_DEBUG);
-		ASSERT(pSubMenu);
-
-		pSubMenu->DeleteMenu(ID_DEBUG_RESTARTAPPFROMEXPLORER, MF_BYCOMMAND);
-	}
 #endif
 
 	return TRUE;
+}
+
+void CTDCMainMenu::AddLanguageButton()
+{
+	// Avoid non-supportive setups
+	if (!CThemed::IsNonClientThemed() || (COSVersion() < OSV_VISTA))
+		return;
+
+	// Only have to prepare the bitmap once per session 
+	// because it's not possible to change the UI language 
+	// without restarting the app
+	if (m_bmUILang.GetSafeHandle() == NULL)
+	{
+		CString sUILang = CLocalizer::GetDictionaryPath();
+		CEnBitmap bmp;
+		
+		if (sUILang.IsEmpty())
+		{
+			VERIFY(bmp.LoadBitmap(IDB_UK_FLAG));
+		}
+		else 
+		{
+			CString sIconPath(sUILang);
+			FileMisc::ReplaceExtension(sIconPath, _T("png"));
+			
+			if (!bmp.LoadImage(sIconPath))
+				VERIFY(bmp.LoadBitmap(IDB_YOURLANG_FLAG));
+		}
+
+		int nReqSize = GraphicsMisc::ScaleByDPIFactor(16);
+		bmp.ResizeImage(nReqSize, nReqSize, colorMagenta);
+
+		bmp.ConvertToPARGB32(colorMagenta);
+		m_bmUILang.Attach(bmp.Detach());
+	}
+
+	VERIFY(AppendMenu((MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_PREFERENCES_EDITUILANGUAGE, &m_bmUILang));
+}
+
+void CTDCMainMenu::AddTabCloseButton(const CPreferencesDlg& prefs)
+{
+	if (!prefs.GetShowTabCloseButtons())
+	{
+		if (!m_bmTabClose.GetSafeHandle())
+			m_bmTabClose.Attach(HBMMENU_MBAR_CLOSE);
+
+		VERIFY(AppendMenu((MFT_RIGHTJUSTIFY | MFT_BITMAP), ID_CLOSE, &m_bmTabClose));
+	}
 }
 
 BOOL CTDCMainMenu::LoadMenu()
@@ -455,28 +499,6 @@ BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu) const
 	if (pSortMenu && (hMenu == pSortMenu->GetSafeHmenu()))
 	{
 		CEnMenu::SortMenuStrings(hMenu, ID_SORTBY_DEFAULTCOLUMNS_FIRST, ID_SORTBY_CUSTOMCOLUMN_LAST);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL CTDCMainMenu::HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const
-{
-	if ((nIDCtl == 0) && (lpDrawItemStruct->itemID == ID_CLOSE))
-	{
-		VERIFY(DrawMDIButton(lpDrawItemStruct));
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const
-{
-	if (nIDCtl == 0 && lpMeasureItemStruct->itemID == ID_CLOSE)
-	{
-		VERIFY(MeasureMDIButton(lpMeasureItemStruct));
 		return TRUE;
 	}
 
