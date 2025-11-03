@@ -336,7 +336,7 @@ namespace MDContentControl
 			if (!obj.GetDataPresent(fmt))
 				return false;
 
-			if (fmt == DataFormats.Text)
+			if (fmt == DataFormats.UnicodeText)
 			{
 				content = obj.GetData(fmt).ToString();
 			}
