@@ -14,7 +14,7 @@
     <ProjectGuid>{ECA8069A-97C6-4BE3-9BA2-D028709A05AA}</ProjectGuid>
     <RootNamespace>HTMLContentControlBridge</RootNamespace>
     <ProjectName>HTMLContentControlBridge</ProjectName>
-	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+	<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
