@@ -8902,7 +8902,7 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOO
 		int nRet = pSpellChecker->DoModal(CPreferences(), TRUE);
 		UpdateWindow();
 			
-		if ((nRet == IDOK) && CanEditSelectedTask(TDCA_TASKNAMEORCOMMENTS))
+		if ((nRet == IDOK) && CanEditSelectedTask(bCheckTitle ? TDCA_TASKNAME : TDCA_COMMENTS))
 		{
 			int nChange = SET_NOCHANGE;
 			
