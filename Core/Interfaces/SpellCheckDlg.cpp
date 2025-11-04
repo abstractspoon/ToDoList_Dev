@@ -25,16 +25,15 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// statics
 
 CMap<UINT, UINT, CString, CString&> CSpellCheckDlg::s_mapText;
 
 HICON CSpellCheckDlg::s_hIconDlg = NULL;
 
 /////////////////////////////////////////////////////////////////////////////
-// CSpellCheckDlg dialog
 
-CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
+CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) 
+	:
 	m_pSpellChecker(NULL), 
 	m_reSpellCheck(m_reText),
 	m_pPrefs(NULL),
@@ -77,11 +76,10 @@ CSpellCheckDlg::~CSpellCheckDlg()
 void CSpellCheckDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CRuntimeDlg::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CSpellCheckDlg)
+
 	DDX_Control(pDX, IDC_SCD_SUGGESTIONS, m_lbSuggestions);
 	DDX_Text(pDX, IDC_SCD_MISSPELTWORD, m_sMisspeltWord);
 	DDX_LBString(pDX, IDC_SCD_SUGGESTIONS, m_sSuggestion);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_SCD_URL, m_stURL);
 	DDX_Control(pDX, IDC_SCD_DICTIONARIES, m_cbDictionaries);
 
@@ -109,19 +107,16 @@ void CSpellCheckDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CSpellCheckDlg, CRuntimeDlg)
-	//{{AFX_MSG_MAP(CSpellCheckDlg)
 	ON_BN_CLICKED(IDC_SCD_REPLACE, OnReplace)
 	ON_BN_CLICKED(IDC_SCD_NEXT, OnContinue)
 	ON_LBN_SELCHANGE(IDC_SCD_SUGGESTIONS, OnSelchangeSuggestions)
 	ON_BN_CLICKED(IDC_SCD_RESTART, OnRestart)
 	ON_WM_DESTROY()
-	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_SCD_DICTIONARIES, OnChangeDictionary)
 	ON_LBN_DBLCLK(IDC_SCD_SUGGESTIONS, OnDblClkSuggestions)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CSpellCheckDlg message handlers
 
 int CSpellCheckDlg::DoModal(IPreferences* pPrefs, BOOL bEndOnNoErrors)
 { 
@@ -142,8 +137,20 @@ int CSpellCheckDlg::DoModal(IPreferences* pPrefs, BOOL bEndOnNoErrors)
 		dwFlags &= ~DS_CENTER;
 
 	int nRes = CRuntimeDlg::DoModal(GetItemText(SCD_TITLE, _T("Spell Checking")), dwFlags); 
-
 	m_pPrefs = NULL;
+
+	switch (nRes)
+	{
+	case IDCANCEL:
+		// If the cancel button was pressed
+		// AND an 'external spellchecker' is being used (so there is no 'OK' button)
+		// AND Changes were made
+		// THEN treat this as an 'okay'
+		if (m_bMadeChanges && IsUsingExternalChecker())
+			nRes = IDOK;
+		break;
+	}
+
 	return nRes;
 }
 
@@ -212,9 +219,9 @@ void CSpellCheckDlg::SetSpellCheck(ISpellCheck* pSpellCheck)
 		m_reText.SetWindowText(m_sText);
 		m_lbSuggestions.ResetContent();
 
-		UpdateOKCancelLabels();
-
+		UpdateButtonStates();
 		UpdateData(FALSE);
+
 		StartChecking();
 	}
 }
@@ -244,15 +251,8 @@ void CSpellCheckDlg::OnReplace()
 	m_sText = m_pSpellCheck->GetReferenceTextBeingChecked();
 
 	// update richedit with 'fixed' text
-	if (m_pSpellCheck != &m_reSpellCheck)
-	{
-		// Can't get saving/restoring scrollpos to work
-		//int nFirstVis = m_reText.GetFirstVisibleLine();
-
+	if (IsUsingExternalChecker())
 		m_reText.SetWindowText(m_sText);
-
-		//m_reText.SetFirstVisibleLine(nFirstVis);
-	}
 		
 	OnContinue();
 }
@@ -389,7 +389,7 @@ BOOL CSpellCheckDlg::OnInitDialog()
 	}
 
 	// make the rich edit appear disabled if not using text
-	if (m_pSpellCheck != &m_reSpellCheck)
+	if (IsUsingExternalChecker())
 		m_reText.SetBackgroundColor(FALSE, GetSysColor(COLOR_3DFACE));
 
 	m_reText.SetWindowText(m_sText);
@@ -407,7 +407,6 @@ BOOL CSpellCheckDlg::OnInitDialog()
 	}
 
 	UpdateButtonStates();
-	UpdateOKCancelLabels();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
@@ -456,21 +455,15 @@ BOOL CSpellCheckDlg::StartChecking(CHECKFROM nFrom)
 void CSpellCheckDlg::UpdateButtonStates()
 {
 	BOOL bInit = IsInitialized();
+	BOOL bShowOK = (bInit && !IsUsingExternalChecker());
 
 	GetDlgItem(IDC_SCD_REPLACE)->EnableWindow(bInit && !m_sMisspeltWord.IsEmpty());
 	GetDlgItem(IDC_SCD_NEXT)->EnableWindow(bInit);
 	GetDlgItem(IDC_SCD_RESTART)->EnableWindow(bInit);
 
-	GetDlgItem(IDOK)->EnableWindow(bInit && (m_pSpellCheck == &m_reSpellCheck));
-}
-
-void CSpellCheckDlg::UpdateOKCancelLabels()
-{
-	BOOL bInit = IsInitialized();
-	BOOL bShowOK = (bInit && (m_pSpellCheck == &m_reSpellCheck));
-
-	GetDlgItem(IDOK)->EnableWindow(bShowOK);
+	// OK, Cancel and Close
 	GetDlgItem(IDOK)->ShowWindow(bShowOK ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDOK)->EnableWindow(bShowOK);
 
 	CEnString sCancelText(bShowOK ? BTN_CANCEL : BTN_CLOSE);
 	sCancelText.Translate();
