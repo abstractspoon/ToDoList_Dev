@@ -83,6 +83,9 @@ namespace LoggedTimeUIExtension
 		public string Type { get; private set; }
 		public string Comment { get; private set; }
 
+		// If we set the fill colour to Color.Empty and then ask for it
+		// back our base class will return SystemColors.Window instead
+		// so we need this attribute to return to us the 'true' fill color
 		public Color TrueFillColor
 		{
 			get { return ((FillColor == SystemColors.Window) ? Color.Empty : FillColor); }
@@ -312,7 +315,7 @@ namespace LoggedTimeUIExtension
 					Person = entry.Person,
 					TaskPath = entry.TaskPath,
 					Type = entry.Type,
-					AltColor = entry.FillColor
+					AltColor = entry.TrueFillColor
 				});
 			}
 
