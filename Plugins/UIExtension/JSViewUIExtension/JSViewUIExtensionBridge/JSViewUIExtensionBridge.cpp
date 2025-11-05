@@ -36,6 +36,17 @@ const LPCWSTR JSVIEW_NAME = L"JS Dashboard";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+DLL_DECLSPEC ::IUIExtension* CreateUIExtensionInterface()
+{
+	// Requires dotnet 4.5 which is not available on XP
+	if (OSVersion::IsBelowVista())
+		return nullptr;
+
+	return new CJSViewUIExtensionBridge();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 CJSViewUIExtensionBridge::CJSViewUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
 	m_hIcon = Win32::LoadHIcon(L"JSViewUIExtensionBridge.dll", IDI_JSVIEW, 16, true);

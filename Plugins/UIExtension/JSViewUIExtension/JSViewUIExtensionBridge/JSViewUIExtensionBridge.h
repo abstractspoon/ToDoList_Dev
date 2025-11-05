@@ -86,9 +86,3 @@ DLL_DECLSPEC int GetInterfaceVersion()
 {
 	return IUIEXTENSION_VERSION;
 }
-
-DLL_DECLSPEC IUIExtension* CreateUIExtensionInterface()
-{
-	return new CJSViewUIExtensionBridge();
-}
-
