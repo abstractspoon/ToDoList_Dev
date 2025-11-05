@@ -12,6 +12,8 @@ using System.Web.UI;
 using Microsoft.Web.WebView2.Core;
 
 using JSONExporterPlugin;
+using JSViewUIExtension.Properties;
+
 using Newtonsoft.Json.Linq;
 
 using Abstractspoon.Tdl.PluginHelpers;
@@ -24,26 +26,35 @@ namespace JSViewUIExtension
 	{
         private const string FontName = "Tahoma";
 
-		private static   string ResourcePath	= Application.StartupPath;
-		private readonly string ResourcePathUri = UriFromFileName("");
-
-		private readonly string JsDataFilePath = FilePathFromName("JSViewData.js");
-		private readonly string JsCodeFilePath = FilePathFromName("JSViewCode.js");
-		private readonly string HtmlFilePath   = FilePathFromName("JSViewData.html");
-
-		private readonly string JsDataFileUri = UriFromFileName("JSViewData.js");
-		private readonly string JsCodeFileUri = UriFromFileName("JSViewCode.js");
-		private readonly string HtmlFileUri	  = UriFromFileName("JSViewData.html");
+		private static string ResourcePath	= Application.StartupPath;
+					   
+		private static readonly string JsDataFilePath;
+		private static readonly string JsCodeFilePath;
+		private static readonly string HtmlFilePath;
+					   
+		private static readonly string JsDataFileUri;
+		private static readonly string JsCodeFileUri;
+		private static readonly string HtmlFileUri;
 
 		private static string FilePathFromName(string fileName)
 		{
 			return Path.Combine(ResourcePath, fileName);
 		}
 
-		private static string UriFromFileName(string fileName)
+		private static string UriFromFilePath(string filePath)
 		{
-			string filePath = FilePathFromName(fileName);
 			return new Uri(filePath).AbsoluteUri;
+		}
+
+		static JSViewUIExtensionCore()
+		{
+			JsDataFilePath	= FilePathFromName("JSViewData.js");
+			JsCodeFilePath	= FilePathFromName("JSViewCode.js");
+			HtmlFilePath	= FilePathFromName("JSViewData.html");
+
+			JsDataFileUri	= UriFromFilePath(JsDataFilePath);
+			JsCodeFileUri	= UriFromFilePath(JsCodeFilePath);
+			HtmlFileUri		= UriFromFilePath(HtmlFilePath);
 		}
 
 		private uint m_SelectedTaskId;
@@ -153,10 +164,10 @@ namespace JSViewUIExtension
 
 			// Initialise default Javascript and HTML files
 			if (!File.Exists(HtmlFilePath))
-				File.WriteAllText(HtmlFilePath, JSViewUIExtension.Properties.Resources.JSViewDefaultPage);
+				File.WriteAllText(HtmlFilePath, Resources.JSViewDefaultPage);
 
 			if (!File.Exists(JsCodeFilePath))
-				File.WriteAllText(JsCodeFilePath, JSViewUIExtension.Properties.Resources.JSViewDefaultCode);
+				File.WriteAllText(JsCodeFilePath, Resources.JSViewDefaultCode);
 
 			// Refresh page
 			ExportItemsToJsonAsJavascript();
@@ -283,12 +294,14 @@ namespace JSViewUIExtension
 
 			var jsContent = new string[]
 			{
+				// 1. Add the tasks
 				"var json = `",
 				json.Replace('\\', '/'),
 				"`;",
-				"var tasks = JSON.parse(json).Tasks;"
+				"var tasks = JSON.parse(json).Tasks;",
+				"\n\n",
 
-				// Add translated attribute attributes!
+				// 2. Add translated attribute attributes
 				// TODO
 			};
 
