@@ -46,6 +46,8 @@ namespace JSViewUIExtension
 			return new Uri(filePath).AbsoluteUri;
 		}
 
+		private uint m_SelectedTaskId;
+
 		// -------------------------------------------------------------
 
 		private IntPtr m_HwndParent;
@@ -81,22 +83,9 @@ namespace JSViewUIExtension
         {
 			await m_WebView.EnsureCoreWebView2Async(null);
 
-			m_WebView.WebMessageReceived += (s, e) =>
-			{
-				string message = e.TryGetWebMessageAsString();
+ 			m_WebView.WebMessageReceived += new EventHandler<CoreWebView2WebMessageReceivedEventArgs>(OnWebMessageReceived);
+			m_WebView.NavigationCompleted += new EventHandler<CoreWebView2NavigationCompletedEventArgs>(OnNavigationCompleted);
 
-				if (!string.IsNullOrWhiteSpace(message))
-				{
-					if (message.StartsWith("SelectTask="))
-					{
-						string strId = message.Substring(11);
-						uint taskId;
-
-						if (uint.TryParse(strId, out taskId))
-							new UIExtension.ParentNotify(m_HwndParent).NotifySelChange(taskId);
-					}
-				}
-			};
 //			m_WebView.CoreWebView2.Settings.IsBuiltInErrorPageEnabled = false;
 
 //			await m_WebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.chrome.webview.postMessage(window.document.URL);");
@@ -114,6 +103,12 @@ namespace JSViewUIExtension
 
 		public bool SelectTask(UInt32 taskId)
 		{
+			m_SelectedTaskId = taskId;
+
+			m_WebView?.CoreWebView2?.PostWebMessageAsString(string.Format("SelectTask={0}", taskId));
+
+			// TODO
+
 			return true/*false*/;
 		}
 
@@ -325,9 +320,26 @@ namespace JSViewUIExtension
 			parent.NotifySelChange(taskId);
 		}
 
-		void OnPageMessage(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+		private void OnWebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
 		{
+			string message = e.TryGetWebMessageAsString();
 
+			if (!string.IsNullOrWhiteSpace(message))
+			{
+				if (message.StartsWith("SelectTask="))
+				{
+					string strId = message.Substring(11);
+					uint taskId;
+
+					if (uint.TryParse(strId, out taskId))
+						new UIExtension.ParentNotify(m_HwndParent).NotifySelChange(taskId);
+				}
+			}
+		}
+
+		private void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+		{
+			SelectTask(m_SelectedTaskId);
 		}
 	}
 }
