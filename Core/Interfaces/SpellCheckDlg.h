@@ -128,7 +128,7 @@ protected:
 	void HighlightWord(BOOL bHighlight = TRUE);
 	BOOL InitDictionary(const CString& sDict);
 	void UpdateButtonStates();
-	BOOL IsUsingExternalChecker() const { return (m_pSpellCheck && (m_pSpellCheck != &m_reSpellCheck)); }
+	BOOL IsUsingExternalChecker() /*const*/ { return (m_pSpellCheck && (m_pSpellCheck != &m_reSpellCheck)); }
 
 	CString GetItemText(UINT nIDItem, const CString& sDefault = _T(""));
 
