@@ -3249,6 +3249,7 @@ BEGIN
             MENUITEM "&Task Title",                 ID_EDIT_SPELLCHECKTITLE
             MENUITEM "&Task Comments",              ID_EDIT_SPELLCHECKCOMMENTS
 
+            MENUITEM SEPARATOR
             MENUITEM "&Active Tasklist",            ID_TOOLS_SPELLCHECKTASKLIST
 
         END

@@ -426,7 +426,7 @@ public:
 	int GetLastModifiedTaskIDs(CDWordArray& aTaskIDs) const { return m_data.GetLastUndoActionTaskIDs(TRUE, aTaskIDs); }
 
 	// misc
-	void Spellcheck();
+	void Spellcheck(); // Entire tasklist
 	void SetMaxInfotipCommentsLength(int nLength) { m_nMaxInfotipCommentsLength = max(-1, nLength); } // -1 to switch off
 	COleDateTime GetLastTaskModified() const { return m_dtLastTaskMod; }
 	void RefreshReminders();
