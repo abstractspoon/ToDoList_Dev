@@ -12,11 +12,12 @@ namespace JSONExporterPlugin
 {
 	public class JSONUtil
 	{
-		public static string ToJson(JObject jOutput)
+		static string Clean(string value)
 		{
-			return jOutput.ToString()
-						  .Replace("\\\\", "/")
-						  .Replace("\\n", " ");
+			return value.Replace("\\\\", "/")
+						.Replace("\\n", " ")
+						.Replace("\"", " ")
+						.Replace("`", " ");
 		}
 
 		public static object GetNativeAttributeValue(Task task, TaskAttributeItem item)
@@ -42,14 +43,14 @@ namespace JSONExporterPlugin
 				case Task.Attribute.DueDate:
 				case Task.Attribute.DoneDate:
 				case Task.Attribute.LastModifiedDate:
-					return ParseAttributeValue(attribValue, typeof(DateTime), "");
+					return ParseAttributeValue(attribValue, typeof(DateTime), string.Empty);
 
 				case Task.Attribute.Cost:
 					return ParseAttributeValue(attribValue, typeof(double), 0.0);
 				}
 
 				// All the rest
-				return attribValue ?? String.Empty;
+				return Clean(attribValue ?? String.Empty);
 			}
 
 			// custom attributes
@@ -92,7 +93,7 @@ namespace JSONExporterPlugin
 			}
 
 			// All the rest as string
-			return custAttribValue ?? String.Empty;
+			return Clean(custAttribValue ?? String.Empty);
 		}
 
 		public static string Translate(Translator trans, string text)

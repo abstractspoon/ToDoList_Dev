@@ -64,7 +64,7 @@ namespace JSONExporterPlugin
 				jOutput.Add(new JProperty(Translate("Tasklists"), jTasklists));
 			}
 
-			return JSONUtil.ToJson(jOutput);
+			return jOutput.ToString();
 		}
 
 		public JObject ExportTasklist(TaskList tasklist,
