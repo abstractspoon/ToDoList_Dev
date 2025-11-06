@@ -1,4 +1,6 @@
 google.charts.load('current', {'packages':['corechart']});
+google.charts.load('current', {'packages':['treemap']});
+
 google.charts.setOnLoadCallback(OnLoad);
 
 // General data and functions -------------------------------------------------------------
@@ -74,7 +76,9 @@ function RedrawActiveView()
             break;
               
         case 'treemap_id':
-            // TODO
+            InitTreeMap();
+            PopulateTreeMap();
+            DrawTreeMap();
             break;
     }
 }
@@ -221,3 +225,73 @@ function DrawDashboardChart(chart, color1, color2)
 
 // TreeMap data and functions---------------------------------------------------------------
 
+var treeMapDataTable = null;
+var treeMapRow2TaskMapping = null;
+var treeMapTask2RowMapping = null;
+
+var treeMapChart = null;
+
+// -------------------------------------------------
+
+function InitTreeMap()
+{
+    treeMapChart = new google.visualization.TreeMap(document.getElementById('treemap_chart'));
+    
+    
+    
+    // google.visualization.events.addListener(treeMapChart, 'select', OnTreeMapSelect);
+}
+
+function PopulateTreeMap()
+{
+    treeMapDataTable = new google.visualization.DataTable();
+
+    treeMapRow2TaskMapping = new Map();
+    treeMapTask2RowMapping = new Map();
+
+    treeMapDataTable.addColumn('string', 'Task');
+    treeMapDataTable.addColumn('string', 'Parent');
+    treeMapDataTable.addColumn('number', 'Priority');
+    treeMapDataTable.addColumn('number', 'Risk');
+
+    treeMapDataTable.addRow(['Tasklist', null, 0, 0]);
+
+    for (let i = 0; i < tasks.length; i++) 
+    {
+        AddTaskToTreeMap(tasks[i], 'Tasklist');
+    }
+}
+
+function AddTaskToTreeMap(task, parentName)
+{
+    var id = task["Task ID"];
+    var title = task.Title + ' (' + id + ')';
+    
+    treeMapDataTable.addRow([title, parentName, task.Priority, task.Risk]);
+    
+    var row = (treeMapDataTable.getNumberOfRows() - 1);
+    treeMapRow2TaskMapping[row] = id;
+    treeMapTask2RowMapping[id] = row;
+        
+    if (task.Subtasks != null)
+    {
+        for (let i = 0; i < task.Subtasks.length; i++) 
+        {
+            AddTaskToTreeMap(task.Subtasks[i], title); // RECURSIVE CALL
+        }
+    }
+}
+
+function DrawTreeMap() 
+{
+    var options = 
+    {
+//        animation: {"startup": true, duration: 1000, easing: 'out'},  
+//        colors: [ allColors[color1], allColors[color2] ],
+//        curveType: 'function',
+//        legend: { position: 'bottom' },
+//        title: 'Priority & Risk',
+    };
+
+    treeMapChart.draw(treeMapDataTable, options);
+}
