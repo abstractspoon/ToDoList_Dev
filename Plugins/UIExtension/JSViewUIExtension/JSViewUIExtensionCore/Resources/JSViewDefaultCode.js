@@ -1,15 +1,7 @@
 google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(OnLoad);
 
-var data = null;
-var rowIdMapping = null;
-var idRowMapping = null;
-
-var barChart = null;
-var scatterChart = null;
-var areaChart = null;
-var columnChart = null;
-
+// General data and functions -------------------------------------------------------------
 var selectedId = 0;
 
 var allColors = 
@@ -47,47 +39,44 @@ var allColors =
     '#743411'
 ];
 
-function InitCharts()
+function ShowHideView(divName, viewId)
 {
-    barChart = new google.visualization.BarChart(document.getElementById('curve_chart11'));
-    scatterChart = new google.visualization.ScatterChart(document.getElementById('curve_chart12'));
-    areaChart = new google.visualization.AreaChart(document.getElementById('curve_chart21'));
-    columnChart = new google.visualization.ColumnChart(document.getElementById('curve_chart22'));
+    var show = (viewId == divName);
+    var display = (show ? 'block' : "none");
     
-    google.visualization.events.addListener(barChart, 'select', OnSelectBar);
-    google.visualization.events.addListener(scatterChart, 'select', OnSelectScatter);
-    google.visualization.events.addListener(areaChart, 'select', OnSelectArea);
-    google.visualization.events.addListener(columnChart, 'select', OnSelectColumn);
+    document.getElementById(divName).style.display = display;
+    RedrawActiveView();
 }
 
-function PopulateData()
+function OnChangeView(newView) 
 {
-    data = new google.visualization.DataTable();
-    rowIdMapping = new Map();
-    idRowMapping = new Map();
-
-    data.addColumn('string', 'Task');
-    data.addColumn('number', 'Priority');
-    data.addColumn('number', 'Risk');
-
-    for (let i = 0; i < tasks.length; i++) 
-    {
-        var id = tasks[i]["Task ID"];
-        var title = tasks[i].Title + ' (' + id + ')';
-        
-        data.addRow([title, tasks[i].Priority, tasks[i].Risk]);
-        rowIdMapping[i] = id;
-        idRowMapping[id] = i;
-    }
+    ShowHideView('dashboard_id', newView);
+    ShowHideView('treemap_id', newView);
+    // New views here
 }
-
+        
 function OnLoad()
 {
-    InitCharts();
-    PopulateData();
-    DrawCharts();
-    
+    RedrawActiveView();
     chrome.webview.addEventListener('message', OnAppMessage);
+}
+
+function RedrawActiveView()
+{
+    var view = document.getElementById('views').value;
+
+    switch (view)
+    {
+        case 'dashboard_id':
+            InitDashboard();
+            PopulateDashboard();
+            DrawDashboard();
+            break;
+              
+        case 'treemap_id':
+            // TODO
+            break;
+    }
 }
 
 function OnAppMessage(message)
@@ -100,19 +89,106 @@ function OnAppMessage(message)
     else if (message.data.indexOf('SelectTask=') == 0)
     {
         var id = message.data.substr(11);
-        SelectTask(id, false);
+        var view = document.getElementById('views').value;
+
+        switch (view)
+        {
+            case 'dashboard_id':
+                SelectDashboardTask(id, false);
+                break;
+                
+            case 'treemap_id':
+                // TODO
+                break;
+        }
     }
 }
 
-function SelectTask(id, fromChart)
+// Dashboard data and functions---------------------------------------------------------------
+
+var dashboardDataTable = null;
+var dashboardRow2TaskMapping = null;
+var dashboardTask2RowMapping = null;
+
+var dashboardChart11 = null;
+var dashboardChart12 = null;
+var dashboardChart21 = null;
+var dashboardChart22 = null;
+
+// -----------------------------------------
+
+function InitDashboard()
+{
+    dashboardChart11 = new google.visualization.BarChart    (document.getElementById('dashboard_chart11'));
+    dashboardChart12 = new google.visualization.ScatterChart(document.getElementById('dashboard_chart12'));
+    dashboardChart21 = new google.visualization.AreaChart   (document.getElementById('dashboard_chart21'));
+    dashboardChart22 = new google.visualization.ColumnChart (document.getElementById('dashboard_chart22'));
+    
+    google.visualization.events.addListener(dashboard_chart11, 'select', OnDashboard11Select);
+    google.visualization.events.addListener(dashboard_chart12, 'select', OnDashboard12Select);
+    google.visualization.events.addListener(dashboard_chart21, 'select', OnDashboard21Select);
+    google.visualization.events.addListener(dashboard_chart22, 'select', OnDashboard22Select);
+}
+
+function PopulateDashboard()
+{
+    dashboardDataTable = new google.visualization.DataTable();
+    
+    dashboardRow2TaskMapping = new Map();
+    dashboardTask2RowMapping = new Map();
+
+    dashboardDataTable.addColumn('string', 'Task');
+    dashboardDataTable.addColumn('number', 'Priority');
+    dashboardDataTable.addColumn('number', 'Risk');
+
+    for (let i = 0; i < tasks.length; i++) 
+    {
+        var id = tasks[i]["Task ID"];
+        var title = tasks[i].Title + ' (' + id + ')';
+        
+        dashboardDataTable.addRow([title, tasks[i].Priority, tasks[i].Risk]);
+        dashboardRow2TaskMapping[i] = id;
+        dashboardTask2RowMapping[id] = i;
+    }
+}
+
+function OnDashboard11Select(e)
+{
+    OnSelectDashboardTask(dashboard_chart11);
+}
+
+function OnDashboard12Select(e)
+{
+    OnSelectDashboardTask(dashboard_chart12);
+}
+
+function OnDashboard21Select(e)
+{
+    OnSelectDashboardTask(dashboard_chart21);
+}
+
+function OnDashboard22Select(e)
+{
+    OnSelectDashboardTask(dashboard_chart22);
+}
+
+function OnSelectDashboardTask(chart)
+{
+    var row = chart.getSelection()[0].row;
+    var id = dashboardRow2TaskMapping[row];
+    
+    SelectDashboardTask(id, true);
+}
+
+function SelectDashboardTask(id, fromChart)
 {
     selectedId = id;
-    var row = idRowMapping[id];
+    var row = dashboardTask2RowMapping[id];
     
-    barChart.setSelection([{'row': row}]);
-    scatterChart.setSelection([{'row': row}]);
-    areaChart.setSelection([{'row': row}]);
-    columnChart.setSelection([{'row': row}]);
+    dashboardChart11.setSelection([{'row': row}]);
+    dashboardChart12.setSelection([{'row': row}]);
+    dashboardChart21.setSelection([{'row': row}]);
+    dashboardChart22.setSelection([{'row': row}]);
     
     if (fromChart == true)
     {
@@ -121,46 +197,15 @@ function SelectTask(id, fromChart)
     }
 }
 
-function OnSelectBar(e)
+function DrawDashboard()
 {
-    OnSelectChart(barChart);
+    DrawDashboardChart(dashboardChart11, 0, 1);
+    DrawDashboardChart(dashboardChart12, 2, 3);
+    DrawDashboardChart(dashboardChart21, 4, 5);
+    DrawDashboardChart(dashboardChart22, 6, 7);
 }
 
-function OnSelectScatter(e)
-{
-    OnSelectChart(scatterChart);
-}
-
-function OnSelectArea(e)
-{
-    OnSelectChart(areaChart);
-}
-
-function OnSelectColumn(e)
-{
-    OnSelectChart(columnChart);
-}
-
-function OnSelectChart(chart)
-{
-    var row = chart.getSelection()[0].row;
-    var id = rowIdMapping[row];
-    
-    SelectTask(id, true);
-}
-
-function DrawCharts()
-{
-    // Row 1
-    DrawChart(barChart, 0, 1);
-    DrawChart(scatterChart, 2, 3);
-    
-    // Row 2
-    DrawChart(areaChart, 4, 5);
-    DrawChart(columnChart, 6, 7);
-}
-
-function DrawChart(chart, color1, color2) 
+function DrawDashboardChart(chart, color1, color2) 
 {
     var options = 
     {
@@ -171,6 +216,8 @@ function DrawChart(chart, color1, color2)
         title: 'Priority & Risk',
     };
 
-    chart.draw(data, options);
-    
+    chart.draw(dashboardDataTable, options);
 }
+
+// TreeMap data and functions---------------------------------------------------------------
+
