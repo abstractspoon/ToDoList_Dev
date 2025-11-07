@@ -84,7 +84,6 @@ public:
 					CWnd* pParent = NULL);
 	virtual ~CPreferencesDlg();
 
-	void InitializePreferences(); // one time only
 	int DoModal(int nInitPage = -1, UINT nInitCtrlID = 0);
 	
 	// Globals

@@ -204,12 +204,6 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlg message handlers
 
-void CPreferencesDlg::InitializePreferences()
-{
-	LoadPreferences(m_prefs, PREFSKEY); // this initializes the dialog data
-	SavePreferences(m_prefs, PREFSKEY); // this writes it back to the prefs
-}
-
 int CPreferencesDlg::DoModal(int nInitPage, UINT nInitCtrlID) 
 { 
 	return CPreferencesDlgBase::DoModal(m_prefs, PREFSKEY, nInitPage, nInitCtrlID); 

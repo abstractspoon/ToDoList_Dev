@@ -1713,7 +1713,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 			if (!Misc::Contains(aCurValues[nCurVal], aNewValues, FALSE, TRUE))
 			{
 				CKanbanColumnCtrl* pCurCol = m_aColumns.Get(aCurValues[nCurVal]);
-				ASSERT(pCurCol);
+				ASSERT(pCurCol || UsingFixedColumns());
 
 				if (pCurCol)
 				{
