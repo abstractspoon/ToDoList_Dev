@@ -311,9 +311,9 @@ namespace JSViewUIExtension
 			jOutput.Add(new JProperty("Tasks", m_Items.ToJson())); // No translation
 
 			string json = jOutput.ToString();
-#if DEBUG
-			File.WriteAllText(FilePathFromName("JSViewData.json"), json);
-#endif
+// #if DEBUG
+// 			File.WriteAllText(FilePathFromName("JSViewData.json"), json);
+// #endif
 
 			var jsContent = new string[]
 			{

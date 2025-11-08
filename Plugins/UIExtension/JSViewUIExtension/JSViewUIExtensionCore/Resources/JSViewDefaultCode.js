@@ -4,8 +4,6 @@ google.charts.load('current', {'packages':['treemap']});
 google.charts.setOnLoadCallback(OnLoad);
 
 // General data and functions -------------------------------------------------------------
-var selectedId = 0;
-
 var allColors = 
 [
     '#3366cc',
@@ -41,46 +39,89 @@ var allColors =
     '#743411'
 ];
 
+function SupportsHTML5Storage() 
+{
+    try 
+    {
+        return 'sessionStorage' in window && window['sessionStorage'] !== null;
+    } 
+    catch (e) 
+    {
+        return false;
+    }
+}
+
 function ShowHideView(divName, viewId)
 {
     var show = (viewId == divName);
-    var display = (show ? 'block' : "none");
+    var display = (show ? 'block' : 'none');
     
     document.getElementById(divName).style.display = display;
-    RedrawActiveView();
 }
 
-function OnChangeView(newView) 
+function OnChangeView(view) 
 {
-    ShowHideView('dashboard_id', newView);
-    ShowHideView('treemap_id', newView);
+    sessionStorage.setItem('SelectedView', view);
+    
+    ShowHideView('dashboard_id', view);
+    ShowHideView('treemap_id', view);
     // New views here
+    
+    RefreshSelectedView();
 }
         
 function OnLoad()
 {
-    RedrawActiveView();
+    if (!SupportsHTML5Storage())
+        alert('local storage not supported');
+
+    RefreshSelectedView();
     chrome.webview.addEventListener('message', OnAppMessage);
 }
 
-function RedrawActiveView()
+function RefreshSelectedView()
 {
-    var view = document.getElementById('views').value;
+    var view = sessionStorage.getItem('SelectedView');
+    document.getElementById('views').value = view;
 
     switch (view)
     {
         case 'dashboard_id':
             InitDashboard();
-            PopulateDashboard();
             DrawDashboard();
             break;
               
         case 'treemap_id':
             InitTreeMap();
-            PopulateTreeMap();
             DrawTreeMap();
             break;
     }
+    
+    RestoreSelectedTask();
+}
+
+function SelectTask(id, fromChart)
+{
+    var view = sessionStorage.getItem('SelectedView');
+
+    switch (view)
+    {
+        case 'dashboard_id':
+        case '':
+            SelectDashboardTask(id, fromChart);
+            break;
+              
+        case 'treemap_id':
+            // TODO
+            break;
+    }
+    sessionStorage.setItem('SelectedId', id);
+}
+
+function RestoreSelectedTask()
+{
+    var id = sessionStorage.getItem('SelectedId');
+    SelectTask(id, false);
 }
 
 function OnAppMessage(message)
@@ -88,23 +129,11 @@ function OnAppMessage(message)
     if (message.data == 'Refresh')
     {
         location.reload(location.href);
-        SelectTask(selectedId, false);
     }
     else if (message.data.indexOf('SelectTask=') == 0)
     {
         var id = message.data.substr(11);
-        var view = document.getElementById('views').value;
-
-        switch (view)
-        {
-            case 'dashboard_id':
-                SelectDashboardTask(id, false);
-                break;
-                
-            case 'treemap_id':
-                // TODO
-                break;
-        }
+        SelectTask(id, false);
     }
 }
 
@@ -123,15 +152,20 @@ var dashboardChart22 = null;
 
 function InitDashboard()
 {
-    dashboardChart11 = new google.visualization.BarChart    (document.getElementById('dashboard_chart11'));
-    dashboardChart12 = new google.visualization.ScatterChart(document.getElementById('dashboard_chart12'));
-    dashboardChart21 = new google.visualization.AreaChart   (document.getElementById('dashboard_chart21'));
-    dashboardChart22 = new google.visualization.ColumnChart (document.getElementById('dashboard_chart22'));
-    
-    google.visualization.events.addListener(dashboardChart11, 'select', OnDashboard11Select);
-    google.visualization.events.addListener(dashboardChart12, 'select', OnDashboard12Select);
-    google.visualization.events.addListener(dashboardChart21, 'select', OnDashboard21Select);
-    google.visualization.events.addListener(dashboardChart22, 'select', OnDashboard22Select);
+    if (dashboardChart11 == null)
+    {
+        dashboardChart11 = new google.visualization.BarChart    (document.getElementById('dashboard_chart11'));
+        dashboardChart12 = new google.visualization.ScatterChart(document.getElementById('dashboard_chart12'));
+        dashboardChart21 = new google.visualization.AreaChart   (document.getElementById('dashboard_chart21'));
+        dashboardChart22 = new google.visualization.ColumnChart (document.getElementById('dashboard_chart22'));
+        
+        google.visualization.events.addListener(dashboardChart11, 'select', OnDashboard11Select);
+        google.visualization.events.addListener(dashboardChart12, 'select', OnDashboard12Select);
+        google.visualization.events.addListener(dashboardChart21, 'select', OnDashboard21Select);
+        google.visualization.events.addListener(dashboardChart22, 'select', OnDashboard22Select);
+        
+        PopulateDashboard()
+    }
 }
 
 function PopulateDashboard()
@@ -147,7 +181,7 @@ function PopulateDashboard()
 
     for (let i = 0; i < tasks.length; i++) 
     {
-        var id = tasks[i]["Task ID"];
+        var id = tasks[i]['Task ID'];
         var title = tasks[i].Title + ' (' + id + ')';
         
         dashboardDataTable.addRow([title, tasks[i].Priority, tasks[i].Risk]);
@@ -186,7 +220,6 @@ function OnSelectDashboardTask(chart)
 
 function SelectDashboardTask(id, fromChart)
 {
-    selectedId = id;
     var row = dashboardTask2RowMapping[id];
     
     dashboardChart11.setSelection([{'row': row}]);
@@ -213,7 +246,7 @@ function DrawDashboardChart(chart, color1, color2)
 {
     var options = 
     {
-        animation: {"startup": true, duration: 1000, easing: 'out'},  
+        animation: {'startup': true, duration: 1000, easing: 'out'},  
         colors: [ allColors[color1], allColors[color2] ],
         curveType: 'function',
         legend: { position: 'bottom' },
@@ -235,11 +268,14 @@ var treeMapChart = null;
 
 function InitTreeMap()
 {
-    treeMapChart = new google.visualization.TreeMap(document.getElementById('treemap_chart'));
-    
-    
-    
-    // google.visualization.events.addListener(treeMapChart, 'select', OnTreeMapSelect);
+    if (treeMapChart == null)
+    {
+        treeMapChart = new google.visualization.TreeMap(document.getElementById('treemap_chart'));
+
+        //google.visualization.events.addListener(treeMapChart, 'select', OnTreeMapSelect);
+        
+        PopulateTreeMap();
+   }
 }
 
 function PopulateTreeMap()
@@ -264,7 +300,7 @@ function PopulateTreeMap()
 
 function AddTaskToTreeMap(task, parentName)
 {
-    var id = task["Task ID"];
+    var id = task['Task ID'];
     var title = task.Title + ' (' + id + ')';
     
     treeMapDataTable.addRow([title, parentName, task.Priority, task.Risk]);
@@ -286,7 +322,7 @@ function DrawTreeMap()
 {
     var options = 
     {
-//        animation: {"startup": true, duration: 1000, easing: 'out'},  
+//        animation: {'startup': true, duration: 1000, easing: 'out'},  
 //        colors: [ allColors[color1], allColors[color2] ],
 //        curveType: 'function',
 //        legend: { position: 'bottom' },
