@@ -82,6 +82,10 @@ function OnLoad()
 function RefreshSelectedView()
 {
     var view = sessionStorage.getItem('SelectedView');
+    
+    if (view == null)
+        view = 'dashboard_id';
+    
     document.getElementById('views').value = view;
 
     switch (view)
