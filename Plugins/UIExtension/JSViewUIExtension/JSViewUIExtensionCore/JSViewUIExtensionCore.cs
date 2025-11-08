@@ -24,55 +24,35 @@ namespace JSViewUIExtension
 {
 	public partial class JSViewUIExtensionCore : System.Windows.Forms.UserControl, IUIExtension
 	{
-        private const string FontName = "Tahoma";
+        const string FontName = "Tahoma";
 
-		private static string ResourcePath	= Application.StartupPath;
-					   
-		private static readonly string JsDataFilePath;
-		private static readonly string JsCodeFilePath;
-		private static readonly string HtmlFilePath;
-					   
-		private static readonly string JsDataFileUri;
-		private static readonly string JsCodeFileUri;
-		private static readonly string HtmlFileUri;
-
-		private static string FilePathFromName(string fileName)
-		{
-			return Path.Combine(ResourcePath, fileName);
-		}
-
-		private static string UriFromFilePath(string filePath)
-		{
-			return new Uri(filePath).AbsoluteUri;
-		}
-
-		static JSViewUIExtensionCore()
-		{
-			JsDataFilePath	= FilePathFromName("JSViewData.js");
-			JsCodeFilePath	= FilePathFromName("JSViewCode.js");
-			HtmlFilePath	= FilePathFromName("JSViewData.html");
-
-			JsDataFileUri	= UriFromFilePath(JsDataFilePath);
-			JsCodeFileUri	= UriFromFilePath(JsCodeFilePath);
-			HtmlFileUri		= UriFromFilePath(HtmlFilePath);
-		}
-
-		private uint m_SelectedTaskId;
+		const string DataPlaceholder = "{{{JSVIEW_USERDATA}}}";
+		const string CodePlaceholder = "{{{JSVIEW_USERCODE}}}";
 
 		// -------------------------------------------------------------
 
-		private IntPtr m_HwndParent;
-		private Translator m_Trans;
-		private String m_TypeId, m_UiName;
-		private Font m_ControlsFont;
+		IntPtr m_HwndParent;
+		Translator m_Trans;
+		String m_TypeId, m_UiName;
+		Font m_ControlsFont;
 
-		private JsTaskItems m_Items;
+		JsTaskItems m_Items;
+		uint m_SelectedTaskId;
+		string m_TasklistPath;
+		DateTime m_HtmlCreationDate = DateUtil.NullDate;
+		DateTime m_CodeCreationDate = DateUtil.NullDate;
 
-// 		private IIControls.ToolStripEx m_Toolbar;
-// 		private ImageList m_TBImageList;
-// 		private UIThemeToolbarRenderer m_TBRenderer;
+		// -------------------------------------------------------------
 
-        // -------------------------------------------------------------
+		string JsDataFilePath	{ get { return FilePathFromName("JSViewData.js"); } }
+		string JsCodeFilePath	{ get { return FilePathFromName("JSViewCode.js"); } }
+		string HtmlFilePath		{ get { return FilePathFromName("JSView.html"); } }
+
+		string JsDataFileUri	{ get { return UriFromFilePath(JsDataFilePath); } }
+		string JsCodeFileUri	{ get { return UriFromFilePath(JsCodeFilePath); } }
+		string HtmlFileUri		{ get { return UriFromFilePath(HtmlFilePath); } }
+
+		// -------------------------------------------------------------
 
 		public JSViewUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
 		{
@@ -162,12 +142,24 @@ namespace JSViewUIExtension
 				break;
 			}
 
-			// Initialise default Javascript and HTML files
-			if (!File.Exists(HtmlFilePath))
-				File.WriteAllText(HtmlFilePath, Resources.JSViewDefaultPage);
+			m_TasklistPath = tasks.GetFilePath();
 
-			if (!File.Exists(JsCodeFilePath))
+			// Initialise/update default Javascript and HTML files
+			if (!HasFileChanged(HtmlFilePath, m_HtmlCreationDate))
+			{
+				string html = Resources.JSViewDefaultPage
+									   .Replace(DataPlaceholder, JsDataFileUri)
+									   .Replace(CodePlaceholder, JsCodeFileUri);
+
+				File.WriteAllText(HtmlFilePath, html);
+				m_HtmlCreationDate = File.GetLastWriteTime(HtmlFilePath);
+			}
+
+			if (!HasFileChanged(JsCodeFilePath, m_CodeCreationDate))
+			{
 				File.WriteAllText(JsCodeFilePath, Resources.JSViewDefaultCode);
+				m_CodeCreationDate = File.GetLastWriteTime(JsCodeFilePath);
+			}
 
 			// Refresh page
 			ExportItemsToJsonAsJavascript();
@@ -268,21 +260,52 @@ namespace JSViewUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+			prefs.WriteProfileString(key, "HtmlCreationDate", m_HtmlCreationDate.ToString("s"));
+			prefs.WriteProfileString(key, "CodeCreationDate", m_CodeCreationDate.ToString("s"));
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
 		{
             if (!appOnly)
-            { 
-                // private settings
-            }
+            {
+				// private settings
+				DateTime.TryParse(prefs.GetProfileString(key, "HtmlCreationDate", ""), out m_HtmlCreationDate);
+				DateTime.TryParse(prefs.GetProfileString(key, "CodeCreationDate", ""), out m_CodeCreationDate);
+			}
 
-            // App settings
-        }
+			// App settings
+		}
 
 		// PRIVATE ------------------------------------------------------------------------------
 
-		private void ExportItemsToJsonAsJavascript()
+		bool HasFileChanged(string filePath, DateTime creationDate)
+		{
+			if (!File.Exists(filePath))
+				return false;
+
+			if (creationDate != DateUtil.NullDate)
+			{
+				var lastMod = File.GetLastWriteTime(filePath);
+				return (lastMod != creationDate);
+			}
+
+			// If we weren't provided with a creation date then we 
+			// have no way of knowing if the file has been changed 
+			// or not so we err on the side of caution
+			return true;
+		}
+
+		string FilePathFromName(string fileName)
+		{
+			return Path.ChangeExtension(m_TasklistPath, fileName);
+		}
+
+		static string UriFromFilePath(string filePath)
+		{
+			return new Uri(filePath).AbsoluteUri;
+		}
+
+		void ExportItemsToJsonAsJavascript()
 		{
 			var jOutput = new JObject();
 			jOutput.Add(new JProperty("Tasks", m_Items.ToJson())); // No translation
@@ -308,7 +331,7 @@ namespace JSViewUIExtension
 			File.WriteAllLines(JsDataFilePath, jsContent);
 		}
 
-		private void Navigate(string uri)
+		void Navigate(string uri)
 		{
 			if (m_WebView != null && m_WebView.CoreWebView2 != null)
 			{
@@ -326,14 +349,14 @@ namespace JSViewUIExtension
 			base.OnHandleDestroyed(e);
 		}
 
-		private void NotifyParentSelChange(UInt32 taskId)
+		void NotifyParentSelChange(UInt32 taskId)
 		{
 			var parent = new UIExtension.ParentNotify(m_HwndParent);
 
 			parent.NotifySelChange(taskId);
 		}
 
-		private void OnWebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+		void OnWebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
 		{
 			string message = e.TryGetWebMessageAsString();
 
@@ -350,7 +373,7 @@ namespace JSViewUIExtension
 			}
 		}
 
-		private void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+		void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
 			SelectTask(m_SelectedTaskId);
 		}
