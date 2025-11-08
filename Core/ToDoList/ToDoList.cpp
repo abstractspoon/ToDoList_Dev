@@ -72,15 +72,16 @@ CLimitSingleInstance g_SingleInstanceObj(_T("{3A4EFC98-9BA9-473D-A3CF-6B0FE64447
 
 /////////////////////////////////////////////////////////////////////////////
 
-LPCTSTR REGKEY				= _T("AbstractSpoon");
-LPCTSTR APPREGKEY			= _T("Software\\AbstractSpoon\\ToDoList");
-LPCTSTR UNINSTALLREGKEY		= _T("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\AbstractSpoon_ToDoList");
-LPCTSTR APPDATAINI			= _T("Abstractspoon\\ToDoList\\ToDoList.ini");
+const LPCTSTR REGKEY			= _T("AbstractSpoon");
+const LPCTSTR APPREGKEY			= _T("Software\\AbstractSpoon\\ToDoList");
+const LPCTSTR UNINSTALLREGKEY	= _T("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\AbstractSpoon_ToDoList");
+const LPCTSTR APPDATAINI		= _T("Abstractspoon\\ToDoList\\ToDoList.ini");
+const LPCTSTR PREFSKEY			= _T("Preferences");
 
-LPCTSTR WIKI_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id="); 
-LPCTSTR FORUM_URL			= _T("https://www.abstractspoon.com/phpBB/"); 
-LPCTSTR LICENSE_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software"); 
-LPCTSTR DONATE_URL			= _T("https://www.paypal.com/donate/?hosted_button_id=Z3KT3PNZZGHX2"); 
+const LPCTSTR WIKI_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id="); 
+const LPCTSTR FORUM_URL			= _T("https://www.abstractspoon.com/phpBB/"); 
+const LPCTSTR LICENSE_URL		= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software"); 
+const LPCTSTR DONATE_URL		= _T("https://www.paypal.com/donate/?hosted_button_id=Z3KT3PNZZGHX2"); 
 
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CToDoListApp object
@@ -371,7 +372,7 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 
 	// if no other instance had it open and _we_ are single instance
 	// we then see if any of the instances is willing to handle it
-	BOOL bMultiInstance = CPreferences().GetProfileInt(_T("Preferences"), _T("MultiInstance"), FALSE);
+	BOOL bMultiInstance = CPreferences().GetProfileInt(PREFSKEY, _T("MultiInstance"), FALSE);
 	BOOL bTasklistOpened = FALSE;
 
 	if ((hwndOtherInst == NULL) && !bMultiInstance)
@@ -980,17 +981,17 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 
 		// Save language choice 
 		FileMisc::MakeRelativePath(m_sLanguageFile, FileMisc::GetAppFolder(), FALSE);
-		prefs.WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_sLanguageFile);
+		prefs.WriteProfileString(PREFSKEY, _T("LanguageFile"), m_sLanguageFile);
 
 		// Dark Mode
 		InitDarkMode(cmdInfo, prefs);
 		
 		// Multi-instance. Don't overwrite existing value
 		if (bSetMultiInstance)
-			prefs.WriteProfileInt(_T("Preferences"), _T("MultiInstance"), TRUE);
+			prefs.WriteProfileInt(PREFSKEY, _T("MultiInstance"), TRUE);
 
 		// check for web updates
-		if (prefs.GetProfileInt(_T("Preferences"), _T("AutoCheckForUpdates"), FALSE))
+		if (prefs.GetProfileInt(PREFSKEY, _T("AutoCheckForUpdates"), FALSE))
 		{
 			TDL_WEBUPDATE_CHECK nCheck = CheckForUpdates(FALSE);
 
@@ -1023,34 +1024,33 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		SetPreferences(bUseIni, sIniPath, FALSE);
 		
 		// initialize prefs to defaults
-		CPreferencesDlg().InitializePreferences();
+		CPreferences prefs;
+		CPreferencesDlg().SavePreferences(prefs, PREFSKEY);
 
 		// Save language choice 
-		CPreferences prefs;
-
 		FileMisc::MakeRelativePath(m_sLanguageFile, FileMisc::GetAppFolder(), FALSE);
-		prefs.WriteProfileString(_T("Preferences"), _T("LanguageFile"), m_sLanguageFile);
+		prefs.WriteProfileString(PREFSKEY, _T("LanguageFile"), m_sLanguageFile);
 		
 		// set up some default preferences
 		if (wizard.GetShareTasklists()) 
 		{
 			// set up source control for remote tasklists
-			prefs.WriteProfileInt(_T("Preferences"), _T("EnableSourceControl"), TRUE);
-			prefs.WriteProfileInt(_T("Preferences"), _T("SourceControlLanOnly"), TRUE);
-			prefs.WriteProfileInt(_T("Preferences"), _T("AutoCheckOut"), TRUE);
-			prefs.WriteProfileInt(_T("Preferences"), _T("CheckoutOnCheckin"), TRUE);
-			prefs.WriteProfileInt(_T("Preferences"), _T("CheckinOnClose"), TRUE);
-			prefs.WriteProfileInt(_T("Preferences"), _T("CheckinNoEditTime"), 1);
-			prefs.WriteProfileInt(_T("Preferences"), _T("CheckinNoEdit"), TRUE);
-			prefs.WriteProfileInt(_T("Preferences"), _T("Use3rdPartySourceControl"), FALSE);
+			prefs.WriteProfileInt(PREFSKEY, _T("EnableSourceControl"), TRUE);
+			prefs.WriteProfileInt(PREFSKEY, _T("SourceControlLanOnly"), TRUE);
+			prefs.WriteProfileInt(PREFSKEY, _T("AutoCheckOut"), TRUE);
+			prefs.WriteProfileInt(PREFSKEY, _T("CheckoutOnCheckin"), TRUE);
+			prefs.WriteProfileInt(PREFSKEY, _T("CheckinOnClose"), TRUE);
+			prefs.WriteProfileInt(PREFSKEY, _T("CheckinNoEditTime"), 1);
+			prefs.WriteProfileInt(PREFSKEY, _T("CheckinNoEdit"), TRUE);
+			prefs.WriteProfileInt(PREFSKEY, _T("Use3rdPartySourceControl"), FALSE);
 		}
 
 		// setup column visibility
 		TDCCOLEDITFILTERVISIBILITY vis;
 		wizard.GetColumnVisibility(vis);
 
-		vis.Save(prefs, _T("Preferences"));
-		prefs.WriteProfileInt(_T("Preferences"), _T("ShowEditMenuAsColumns"), wizard.GetHideAttributes());
+		vis.Save(prefs, PREFSKEY);
+		prefs.WriteProfileInt(PREFSKEY, _T("ShowEditMenuAsColumns"), wizard.GetHideAttributes());
 
 		// Save this config
 		if (prefs.UsesIni())
@@ -1135,7 +1135,7 @@ BOOL CToDoListApp::InitTranslation(BOOL bFirstTime, BOOL bQuiet)
 	{
 		ASSERT(CPreferences::IsInitialised());
 
-		m_sLanguageFile = CPreferences().GetProfileString(_T("Preferences"), _T("LanguageFile"));
+		m_sLanguageFile = CPreferences().GetProfileString(PREFSKEY, _T("LanguageFile"));
 
 		// language is stored as relative path
 		if (!m_sLanguageFile.IsEmpty() && (m_sLanguageFile != CTDLLanguageComboBox::GetDefaultLanguage()))
@@ -1260,6 +1260,9 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 			}
 		}
 	}
+
+	// Upgrade user prefs storage to latest format
+	CPreferencesDlg().SavePreferences(prefs, PREFSKEY);
 }
 
 int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/) 
@@ -1277,12 +1280,12 @@ void CToDoListApp::InitDarkMode(const CEnCommandLineInfo& cmdInfo, CPreferences&
 
 	if (CTDCDarkMode::IsSupported())
 	{
-		BOOL bDarkMode = prefs.GetProfileInt(_T("Preferences"), _T("DarkMode"), -1);
+		BOOL bDarkMode = prefs.GetProfileInt(PREFSKEY, _T("DarkMode"), -1);
 
 		if (bDarkMode == -1) // First time fallback
 		{
 			bDarkMode = cmdInfo.HasOption(SWITCH_DARKMODE);
-			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), bDarkMode);
+			prefs.WriteProfileInt(PREFSKEY, _T("DarkMode"), bDarkMode);
 		}
 
 		CTDCDarkMode::Initialize(prefs);
@@ -1300,7 +1303,7 @@ void CToDoListApp::OnToolsToggleDarkMode()
 	{
 	case IDYES:
 		{
-			prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
+			prefs.WriteProfileInt(PREFSKEY, _T("DarkMode"), !bDarkMode);
 			
 			// Restart
 			HWND hwndMain = *AfxGetMainWnd();
@@ -1321,7 +1324,7 @@ void CToDoListApp::OnToolsToggleDarkMode()
 		break;
 
 	case IDNO:
-		prefs.WriteProfileInt(_T("Preferences"), _T("DarkMode"), !bDarkMode);
+		prefs.WriteProfileInt(PREFSKEY, _T("DarkMode"), !bDarkMode);
 		break;
 
 	case IDCANCEL:
