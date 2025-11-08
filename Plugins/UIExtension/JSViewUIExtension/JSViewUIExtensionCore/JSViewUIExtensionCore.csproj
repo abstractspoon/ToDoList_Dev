@@ -113,9 +113,6 @@
     <EmbeddedResource Include="Resources\toolbar_std.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\JSViewDefaultCode.js" />
   </ItemGroup>
   <ItemGroup>
@@ -136,13 +133,6 @@ copy $(SolutionDir)3rdParty\Microsoft\Microsoft.Web.WebView2.Winforms.dll "$(Sol
 copy $(SolutionDir)3rdParty\Microsoft\WebView2Loader.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 	</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\..\..\packages\Microsoft.Web.WebView2.0.9.579\build\Microsoft.Web.WebView2.targets" Condition="Exists('..\..\..\packages\Microsoft.Web.WebView2.0.9.579\build\Microsoft.Web.WebView2.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\packages\Microsoft.Web.WebView2.0.9.579\build\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.Web.WebView2.0.9.579\build\Microsoft.Web.WebView2.targets'))" />
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
