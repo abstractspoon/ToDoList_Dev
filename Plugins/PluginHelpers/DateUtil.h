@@ -92,6 +92,11 @@ namespace Abstractspoon
 				static int DateInMonths(DateTime date);
 				static DateTime DateFromMonths(int nMonths);
 
+				static property DateTime NullDate 
+				{ 
+					DateTime get() { return DateTime::MinValue; }
+				}
+
 				static int GetDay(DateTime date);
 				static int GetMonth(DateTime date);
 				static int GetYear(DateTime date);
