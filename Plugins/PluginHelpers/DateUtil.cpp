@@ -14,11 +14,32 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace Abstractspoon::Tdl::PluginHelpers;
-
 using namespace System::Collections::Generic;
 using namespace System::Drawing;
 using namespace System::Windows::Forms;
+using namespace System::Diagnostics;
+
+using namespace Abstractspoon::Tdl::PluginHelpers;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+// private to this file
+static COleDateTime GetOleDate(DateTime date)
+{
+	if ((date == DateTime::MinValue) || (date == DateTime::MaxValue))
+		return CDateHelper::NullDate();
+
+	COleDateTime dt(date.Year,
+					date.Month,
+					date.Day,
+					date.Hour,
+					date.Minute,
+					date.Second);
+
+	Debug::Assert((dt.m_dt == date.ToOADate()) || (dt.m_dt < 0.0));
+
+	return dt;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -259,7 +280,7 @@ List<DayOfWeek>^ WorkingWeek::WeekDays()
 
 int DateUtil::WeekOfYear(DateTime date)
 {
-	return CDateHelper::GetWeekOfYear(date.ToOADate());
+	return CDateHelper::GetWeekOfYear(GetOleDate(date));
 }
 
 int DateUtil::GetMaxDayOfWeekNameWidth(Graphics^ graphics, Font^ font, bool shortName)
@@ -307,7 +328,7 @@ String^ DateUtil::GetMonthName(int nMonth, bool shortName)
 
 int DateUtil::DateInMonths(DateTime date)
 {
-	return CDateHelper::GetDateInMonths(date.ToOADate());
+	return CDateHelper::GetDateInMonths(GetOleDate(date));
 }
 
 DateTime DateUtil::DateFromMonths(int nMonths)
@@ -320,7 +341,7 @@ void DateUtil::FromDate(DateTime date, int% year, int% month, int% day)
 	if (CJalaliCalendar::IsActive())
 	{
 		int GYear, GMonth, GDay;
-		CJalaliCalendar::FromGregorian(date.ToOADate(), &GYear, &GMonth, &GDay);
+		CJalaliCalendar::FromGregorian(GetOleDate(date), &GYear, &GMonth, &GDay);
 
 		year = GYear;
 		month = GMonth;
@@ -377,17 +398,17 @@ String^ DateUtil::FormatRange(DateTime dateFrom, DateTime dateTo, bool bWithTime
 	if (bISO)
 		dwFlags |= DHFD_ISO;
 
-	return gcnew String(COleDateTimeRange(dateFrom.ToOADate(), dateTo.ToOADate()).Format(dwFlags));
+	return gcnew String(COleDateTimeRange(GetOleDate(dateFrom), GetOleDate(dateTo)).Format(dwFlags));
 }
 
 String^ DateUtil::FormatDateOnly(DateTime date, String^ format)
 {
-	return gcnew String(CDateHelper::FormatDateOnly(date.ToOADate(), MS(format)));
+	return gcnew String(CDateHelper::FormatDateOnly(GetOleDate(date), MS(format)));
 }
 
 String^ DateUtil::FormatDateOnlyRange(DateTime dateFrom, DateTime dateTo, String^ format)
 {
-	return gcnew String(COleDateTimeRange(dateFrom.ToOADate(), dateTo.ToOADate()).FormatDateOnly(MS(format), L" - "));
+	return gcnew String(COleDateTimeRange(GetOleDate(dateFrom), GetOleDate(dateTo)).FormatDateOnly(MS(format), L" - "));
 }
 
 TimeSpan DateUtil::TimeOnly(DateTime date)
