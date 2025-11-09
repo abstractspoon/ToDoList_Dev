@@ -70,7 +70,19 @@ namespace Abstractspoon
 			public ref class OSVersion
 			{
 			public:
-				static bool IsBelowVista();
+				enum class OSV
+				{
+					Unknown,
+					XP,
+					Vista,
+					Win7,
+					Win8,
+					Win81,
+					Win10,
+				};
+
+			public:
+				static property OSV Ver { OSV get(); }
 			};
 
 			// ----------------------------------------------------------------------------

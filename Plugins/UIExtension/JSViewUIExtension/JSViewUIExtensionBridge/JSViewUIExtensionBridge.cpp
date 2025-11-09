@@ -39,7 +39,8 @@ const LPCWSTR JSVIEW_NAME = L"JS View";
 DLL_DECLSPEC ::IUIExtension* CreateUIExtensionInterface()
 {
 	// Requires dotnet 4.5 which is not available on XP
-	if (OSVersion::IsBelowVista())
+	// and Edge consistently crashes on Windows 7
+	if (OSVersion::Ver <= OSVersion::OSV::Win7)
 		return nullptr;
 
 	return new CJSViewUIExtensionBridge();

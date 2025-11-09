@@ -51,7 +51,7 @@ namespace MDContentControl
 		static MDContentControlForm()
 		{
 			// XP compatibility
-			if (OSVersion.IsBelowVista())
+			if (OSVersion.Ver <= OSVersion.OSV.XP)
 			{
 				s_AllowableDropFormats = new string[]
 				{

@@ -116,9 +116,20 @@ void Log::LogText(String^ text)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool OSVersion::IsBelowVista()
+OSVersion::OSV OSVersion::Ver::get()
 {
-	return (COSVersion() < OSV_VISTA);
+	switch (COSVersion())
+	{
+	case OSV_XP:	return OSV::XP;
+	case OSV_XPP:	return OSV::XP;
+	case OSV_VISTA:	return OSV::Vista;
+	case OSV_WIN7:	return OSV::Win7;
+	case OSV_WIN8:	return OSV::Win8;
+	case OSV_WIN81:	return OSV::Win8;
+	case OSV_WIN10:	return OSV::Win10;
+	}
+
+	return OSV::Unknown;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
