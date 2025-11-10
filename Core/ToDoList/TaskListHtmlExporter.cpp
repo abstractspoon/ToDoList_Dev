@@ -391,8 +391,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	CString sItem = CTaskListExporterBase::FormatAttribute(pTasks, hTask, nDepth, nAttribID, sAttribLabel);
 
 	// extra processing
-	CString sTextColor = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKTEXTWEBCOLOR);
-	CString sBackColor = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKBACKWEBCOLOR);
+	CString sColor = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKTEXTWEBCOLOR);
 	BOOL bColor = TRUE;
 	BOOL bStrikeThru = (STRIKETHRUDONE && pTasks->IsTaskDone(hTask));
 	BOOL bBlockQuote = FALSE;
@@ -547,8 +546,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 			// replace tab characters with multiple &nbsp;
 			sItem.Replace(_T("\t"), TAB);
 			
-			sTextColor = pTasks->IsTaskDone(hTask) ? COMMENTS_DONECOLOR : _T("#606060");
-			sBackColor.Empty();
+			sColor = pTasks->IsTaskDone(hTask) ? COMMENTS_DONECOLOR : _T("#606060");
 			bStrikeThru = FALSE;
 			bBlockQuote = !IsTableStyle();
 		}
@@ -565,16 +563,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		}
 		
 		if (bColor)
-		{
-			CString sColored;
-
-			if (sBackColor.IsEmpty())
-				sColored.Format(_T("<span style=\"color:%s\">%s</span>"), sTextColor, sItem);
-			else
-				sColored.Format(_T("<span style=\"color:%s;background-color:%s;\">%s</span>"), sTextColor, sBackColor, sItem);
-
-			sItem = sColored;
-		}
+			sItem.Format(_T("<span style=\"color:%s\">%s</span>"), sColor, sItem);
 		
 		if (bBlockQuote)
 		{
