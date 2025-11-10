@@ -47,6 +47,9 @@ namespace JSONExporterPlugin
 
 				case Task.Attribute.Cost:
 					return ParseAttributeValue(attribValue, typeof(double), 0.0);
+
+				case Task.Attribute.Color:
+					return task.GetWebColor();
 				}
 
 				// All the rest
