@@ -140,8 +140,7 @@ namespace Abstractspoon
 				System::Drawing::Color GetPriorityDrawingColor();
 				System::Windows::Media::Color GetPriorityMediaColor();
 
-				String^ GetTextForeWebColor();
-				String^ GetTextBackWebColor();
+				String^ GetTextWebColor();
 				String^ GetPriorityWebColor();
 
 				List<String^>^ GetAllocatedTo();

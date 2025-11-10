@@ -701,14 +701,9 @@ System::Windows::Media::Color Task::GetPriorityMediaColor()
 	return ColorUtil::MediaColor::ToColor(color);
 }
 
-String^ Task::GetTextForeWebColor()
+String^ Task::GetTextWebColor()
 {
 	return GETTASKATTRIB(TDL_TASKTEXTWEBCOLOR);
-}
-
-String^ Task::GetTextBackWebColor()
-{
-	return GETTASKATTRIB(TDL_TASKBACKWEBCOLOR);
 }
 
 String^ Task::GetPriorityWebColor()

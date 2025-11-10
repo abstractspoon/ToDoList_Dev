@@ -2898,7 +2898,10 @@ LPCTSTR CTaskFile::GetTaskWebColor(HTASKITEM hTask) const
 	else
 		color = GetTaskULong(hTask, TDL_TASKCOLOR);
 	
-	return GraphicsMisc::GetWebColor((COLORREF)color);
+	static CString sColor;
+	sColor = GraphicsMisc::GetWebColor((COLORREF)color);
+
+	return sColor;
 }
 
 LPCTSTR CTaskFile::GetTaskPriorityWebColor(HTASKITEM hTask) const

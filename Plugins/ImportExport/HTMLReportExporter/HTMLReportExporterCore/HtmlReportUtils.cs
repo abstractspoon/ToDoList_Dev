@@ -380,7 +380,7 @@ namespace HTMLReportExporter
 					content = ReplaceTaskAttributePlaceholder(content, attribVal, attrib.Key.ToLower(), depth, isLeafTask);
 				}
 
-				content = content.Replace(TaskColorPlaceholder, task.GetTextForeWebColor());
+				content = content.Replace(TaskColorPlaceholder, task.GetTextWebColor());
 
 			}
 
