@@ -306,6 +306,7 @@ namespace DayViewUIExtension
 			Size = new Size(798, 328);
 			SlotsPerHour = 4;
 			TabIndex = 0;
+			TabStop = true;
 			Text = "m_dayView";
 			ReadOnly = false;
 
