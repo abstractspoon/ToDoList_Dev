@@ -5140,7 +5140,7 @@ void CToDoListWnd::OnPreferencesEditUILanguage()
 		// Note: we check against the currently active dictionary rather 
 		// than their last choice so that if they change the language back
 		// within the same session they will not be prompted to restart
-		if (CheckQueryLanguageRestart(sCurLangFile,
+		if (CheckPromptLanguageRestart(sCurLangFile,
 														dialog.GetSelectedLanguageFile(),
 														FALSE,
 														FALSE))
@@ -5189,7 +5189,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		CPreferences::Save();
 
 		// language changes may require restart so do that first
-		if (CheckQueryLanguageRestart(CLocalizer::GetDictionaryPath(),
+		if (CheckPromptLanguageRestart(CLocalizer::GetDictionaryPath(),
 														newPrefs.GetLanguageFile(),
 														oldPrefs.GetEnableRTLInput(),
 														newPrefs.GetEnableRTLInput()))
@@ -5381,36 +5381,25 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 	return bModified;
 }
 
-BOOL CToDoListWnd::CheckQueryLanguageRestart(LPCTSTR szOldLangFile, LPCTSTR szNewLangFile, 
-															   BOOL bOldRTLInput, BOOL bNewRTLInput)
+BOOL CToDoListWnd::CheckPromptLanguageRestart(LPCTSTR szOldLangFile, LPCTSTR szNewLangFile, 
+											   BOOL bOldRTLInput, BOOL bNewRTLInput)
 {
-	BOOL bDefLang = (CTDLLanguageComboBox::GetDefaultLanguage() == szNewLangFile);
-		
-	// language change requires a restart
+	// language/RTL change requires a restart
+	if (Misc::IsEmpty(szOldLangFile))
+		szOldLangFile = CTDLLanguageComboBox::GetDefaultLanguage();
+
+	int nMsgID = 0;
+
 	if (!FileMisc::IsSamePath(szNewLangFile, szOldLangFile))
 	{
-		if (bDefLang || FileMisc::FileExists(szNewLangFile))
-		{
-			// if the language file exists and has changed then inform the user that they need to restart
-			// Note: restarting will also handle 'bAdd2Dict' and 'bEnableRTL'
-			if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGELANGUAGE, MB_YESNO) == IDYES)
-			{
-				return TRUE;
-			}
-		}
+		nMsgID = IDS_RESTARTTOCHANGELANGUAGE;
 	}
-	// RTL change requires a restart
 	else if (Misc::StatesDiffer(bOldRTLInput, bNewRTLInput))
 	{
-		// if the language file exists and has changed then inform the user that they need to restart
-		if (CMessageBox::AfxShow(IDS_RESTARTTOCHANGERTLINPUT, MB_YESNO) == IDYES)
-		{
-			return TRUE;
-		}
+		nMsgID = IDS_RESTARTTOCHANGERTLINPUT;
 	}
-	
-	// no need to restart
-	return FALSE;
+
+	return (nMsgID && CMessageBox::AfxShow(nMsgID, MB_YESNO) == IDYES);
 }
 
 BOOL CToDoListWnd::InitMenubar()
