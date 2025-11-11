@@ -793,7 +793,7 @@ protected:
 	void CheckRemovePristineTasklist();
 	void CheckUpdateActiveToDoCtrlPreferences();
 	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
-	BOOL CheckQueryLanguageRestart(LPCTSTR szOldLangFile, LPCTSTR szNewLangFile, BOOL bOldRTLInput, BOOL bNewRTLInput);
+	BOOL CheckPromptLanguageRestart(LPCTSTR szOldLangFile, LPCTSTR szNewLangFile, BOOL bOldRTLInput, BOOL bNewRTLInput);
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
 	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
