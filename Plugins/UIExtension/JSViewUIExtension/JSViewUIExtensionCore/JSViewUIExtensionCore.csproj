@@ -118,6 +118,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\JSViewDefaultPage.html" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\JSViewDefaultStyles.css" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"

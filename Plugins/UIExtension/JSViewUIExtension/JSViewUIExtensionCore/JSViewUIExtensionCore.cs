@@ -26,8 +26,9 @@ namespace JSViewUIExtension
 	{
         const string FontName = "Tahoma";
 
-		const string DataPlaceholder = "{{{JSVIEW_USERDATA}}}";
-		const string CodePlaceholder = "{{{JSVIEW_USERCODE}}}";
+		const string DataPlaceholder	= "{{{JSVIEW_USERDATA}}}";
+		const string CodePlaceholder	= "{{{JSVIEW_USERCODE}}}";
+		const string StylesPlaceholder	= "{{{JSVIEW_STYLESHEET}}}";
 
 		// -------------------------------------------------------------
 
@@ -39,18 +40,25 @@ namespace JSViewUIExtension
 		JsTaskItems m_Items;
 		uint m_SelectedTaskId;
 		string m_TasklistPath;
+
 		DateTime m_HtmlCreationDate = DateUtil.NullDate;
 		DateTime m_CodeCreationDate = DateUtil.NullDate;
+		DateTime m_StylesCreationDate = DateUtil.NullDate;
 
 		// -------------------------------------------------------------
 
-		string JsDataFilePath	{ get { return FilePathFromName("JSViewData.js"); } }
-		string JsCodeFilePath	{ get { return FilePathFromName("JSViewCode.js"); } }
-		string HtmlFilePath		{ get { return FilePathFromName("JSView.html"); } }
+		// Data files -> Tasklist folder
+		string JsDataFilePath	{ get { return FilePathFromName("JSViewData.js", true); } }
+		string HtmlFilePath		{ get { return FilePathFromName("JSView.html", true); } }
+
+		// Code files -> Exe folder
+		string JsCodeFilePath	{ get { return FilePathFromName("JSViewCode.js", false); } }
+		string StylesFilePath	{ get { return FilePathFromName("JSView.css", false); } }
 
 		string JsDataFileUri	{ get { return UriFromFilePath(JsDataFilePath); } }
 		string JsCodeFileUri	{ get { return UriFromFilePath(JsCodeFilePath); } }
 		string HtmlFileUri		{ get { return UriFromFilePath(HtmlFilePath); } }
+		string StylesFileUri	{ get { return UriFromFilePath(StylesFilePath); } }
 
 		// -------------------------------------------------------------
 
@@ -149,6 +157,7 @@ namespace JSViewUIExtension
 			{
 				string html = Resources.JSViewDefaultPage
 									   .Replace(DataPlaceholder, JsDataFileUri)
+									   .Replace(StylesPlaceholder, StylesFileUri)
 									   .Replace(CodePlaceholder, JsCodeFileUri);
 
 				File.WriteAllText(HtmlFilePath, html);
@@ -159,6 +168,12 @@ namespace JSViewUIExtension
 			{
 				File.WriteAllText(JsCodeFilePath, Resources.JSViewDefaultCode);
 				m_CodeCreationDate = File.GetLastWriteTime(JsCodeFilePath);
+			}
+
+			if (!HasFileChanged(StylesFilePath, m_StylesCreationDate))
+			{
+				File.WriteAllText(StylesFilePath, Resources.JSViewDefaultStyles);
+				m_StylesCreationDate = File.GetLastWriteTime(StylesFilePath);
 			}
 
 			// Refresh page
@@ -295,9 +310,13 @@ namespace JSViewUIExtension
 			return true;
 		}
 
-		string FilePathFromName(string fileName)
+		string FilePathFromName(string fileName, bool dataFile)
 		{
-			return Path.ChangeExtension(m_TasklistPath, fileName);
+			if (dataFile)
+				return Path.ChangeExtension(m_TasklistPath, fileName);
+
+			// else
+			return Path.Combine(Application.StartupPath, fileName);
 		}
 
 		static string UriFromFilePath(string filePath)

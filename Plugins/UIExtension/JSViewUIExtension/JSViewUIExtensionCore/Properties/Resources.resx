@@ -130,4 +130,7 @@
   <data name="JSViewDefaultPage" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\JSViewDefaultPage.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
+  <data name="JSViewDefaultStyles" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\JSViewDefaultStyles.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
 </root>

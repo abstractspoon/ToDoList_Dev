@@ -61,7 +61,29 @@ namespace JSViewUIExtension.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string representing the default Javascript code
+        ///   Looks up a localized string similar to google.charts.load(&apos;current&apos;, {&apos;packages&apos;:[&apos;corechart&apos;]});
+        ///google.charts.load(&apos;current&apos;, {&apos;packages&apos;:[&apos;treemap&apos;]});
+        ///
+        ///google.charts.setOnLoadCallback(OnLoad);
+        ///
+        ///// General data and functions -------------------------------------------------------------
+        ///var allColors = 
+        ///[
+        ///    &apos;#3366cc&apos;,
+        ///    &apos;#dc3912&apos;,
+        ///    &apos;#ff9900&apos;,
+        ///    &apos;#109618&apos;,
+        ///    &apos;#990099&apos;,
+        ///    &apos;#0099c6&apos;,
+        ///    &apos;#dd4477&apos;,
+        ///    &apos;#66aa00&apos;,
+        ///    &apos;#b82e2e&apos;,
+        ///    &apos;#316395&apos;,
+        ///    &apos;#994499&apos;,
+        ///    &apos;#22aa99&apos;,
+        ///    &apos;#aaaa11&apos;,
+        ///    &apos;#6633cc&apos;,
+        ///    &apos;#e673 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JSViewDefaultCode {
             get {
@@ -70,11 +92,31 @@ namespace JSViewUIExtension.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string representing the default HTML page
+        ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
+        ///&lt;html&gt;
+        ///    &lt;head&gt;
+        ///        &lt;style&gt;
+        ///            body { font-family: Tahoma; font-size: small }
+        ///        &lt;/style&gt;
+        ///    
+        ///        &lt;script type=&quot;text/javascript&quot; src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js&quot;&gt;&lt;/script&gt;
+        ///        &lt;script type=&quot;text/javascript&quot; src=&quot;https://www.gstatic.com/charts/loader.js&quot;&gt;&lt;/script&gt;
+        ///
+        ///        &lt;script type=&quot;text/javascript&quot; src=&quot;{{{JSVIEW_USERDATA}}}&quot;&gt;&lt;/script&gt;
+        ///        &lt;script type=&quot;text/javascript&quot; src=&quot;{{{JSVIEW_USERCODE}}}&quot;&gt;&lt;/script&gt; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JSViewDefaultPage {
             get {
                 return ResourceManager.GetString("JSViewDefaultPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string JSViewDefaultStyles {
+            get {
+                return ResourceManager.GetString("JSViewDefaultStyles", resourceCulture);
             }
         }
         
