@@ -311,7 +311,7 @@ function PopulateTreeMap()
     treeMapDataTable.addColumn('string', 'WebColor');
     treeMapDataTable.addColumn('string', 'Title');
 
-    treeMapDataTable.addRow(['0', null, 1, 1, '#000000', null]);
+    treeMapDataTable.addRow(['0', '', 1, 1, '#000000', 'Tasklist']);
     
     for (let i = 0; i < tasks.length; i++) 
     {
@@ -359,7 +359,7 @@ function DrawTreeMap()
 //        minColor: '#009688',
 //        midColor: '#f7f7f7',
 //        maxColor: '#ee8100',
-        headerHeight: 0,
+//        headerHeight: 50,
         height: 500,
         useWeightedAverageForAggregation: true,
         showTooltips: false,
@@ -377,41 +377,52 @@ function DrawTreeMap()
     treeMapChart.draw(treeMapDataTable, options);
 }
 
-function OnMapTreeReady()
+function OnTreeMapReady()
 {
     FixupTreeMapTextAndColors(-1);
 }
 
-function OnMapTreeDrilldown()
+function OnTreeMapDrilldown()
 {
-    FixupTreeMapTextAndColors(-1);
+    var row = treeMapChart.getSelection()[0].row;
+    
+    if (row != null)
+    {
+        var id = treeMapRow2TaskMapping[row];
+        
+        if (id != null)
+            SelectTask(id, true);
+    }
 }
 
-function OnMapTreeHighlight(row)
+function OnTreeMapRollup(row)
 {
     var hiliteRow = row["row"];
-    FixupTreeMapTextAndColors(hiliteRow);
+    var id = treeMapRow2TaskMapping[hiliteRow];
+    
+    SelectTask(id, true);
+}
+
+function OnTreeMapHighlight(row)
+{
+    var hiliteRow = row["row"];
+    var id = treeMapRow2TaskMapping[hiliteRow];
+
+    SelectTask(id, true);
     
     // Notify the app
-    var id = treeMapRow2TaskMapping[hiliteRow];
     window.chrome.webview.postMessage('SelectTask=' + id);
 }
 
-function OnMapTreeUnhighlight(row)
+function OnTreeMapUnhighlight(row)
 {
-    FixupTreeMapTextAndColors(-1);
-}
-
-function OnMapTreeRollup(row)
-{
-    var hiliteRow = row["row"];
-    var id = treeMapRow2TaskMapping[hiliteRow];
-    
     FixupTreeMapTextAndColors(-1);
 }
 
 function FixupTreeMapTextAndColors(hiliteRow) 
 {
+    var selectedCell = null;
+    
     if (hiliteRow == -1)
     {
         var id = sessionStorage.getItem('SelectedId');
@@ -434,52 +445,73 @@ function FixupTreeMapTextAndColors(hiliteRow)
         {
             var cell = $(item);
             
-            // If we've been here before then the item text, which
-            // was originally the task ID, will have been replaced
-            // with the task title and the ID will have been inserted
-            // as a 'foreign object' so we look for that first and 
-            // add it if it wasn't found
-            var id = cell.find('foreignObject').attr('id');
-            
-            if (id == null)
+            if (!cell.attr('style'))
             {
-                id = cell.find('text').text(); // default
-                
-                var foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
-                $(foreignObject).attr('id', id);
-                cell.append(foreignObject);
-            }
-                
-            if (id != null)
-            {
-                var row = treeMapTask2RowMapping[id];
-                
-                if (row != null)
+                // Modify the existing highlight object to match app theming
+                if (selectedCell != null)
                 {
-                    var fillColor = treeMapDataTable.getValue(row, 4);
-                    var borderColor = '#FFFFFF';
+                    cell.empty();
+                    selectedCell.find('rect').clone().appendTo(cell);
+                    selectedCell.find('text').clone().appendTo(cell);
                     
-                    if (hiliteRow && (row == hiliteRow))
-                    {
-                        fillColor = '#A0D7FF';
-                        borderColor = '#5AB4FF';
-                    }
-                    
+                    // Colors from GraphicsMisc::DrawExplorerItemSelection()
                     cell.find('rect')
-                        .css('fill', fillColor)
-                        .css('stroke', borderColor);
+                        .css('fill', '#A0D7FF')
+                        .css('stroke', '#5AB4FF')
+                        .css('fill-opacity', 1.0);
+                }
+                else
+                {
+                    alert('No selected cell');
+                    cell.css('display', 'none');
+                }
+            }
+            else
+            {
+                // If we've been here before then the item text, which
+                // was originally the task ID, will have been replaced
+                // with the task title and the ID will have been inserted
+                // as a 'foreign object' so we look for that first and 
+                // add it if it wasn't found
+                var id = cell.find('foreignObject').attr('id');
+                
+                if (id == null)
+                {
+                    id = cell.find('text').text(); // default
                     
-                    // We always replace the text because the tree map
-                    // will frequently restore the original text when
-                    // we least expect it
-                    cell.find('text')
-                        .text(treeMapDataTable.getValue(row, 5));
-                            
-                    if (replaceText)
+                    if (id && (id != ''))
                     {
                         var foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
                         $(foreignObject).attr('id', id);
                         cell.append(foreignObject);
+                    }
+                }
+                    
+                if (id != null)
+                {
+                    var row = treeMapTask2RowMapping[id];
+                    
+                    if (row != null)
+                    {
+                        var fillColor = treeMapDataTable.getValue(row, 4);
+                        var borderColor = '#FFFFFF';
+                        
+                        if (hiliteRow && (row == hiliteRow))
+                            selectedCell = cell;
+                        
+                        cell.find('rect')
+                            .css('fill', fillColor)
+                            .css('stroke', borderColor)
+                            .css('fill-opacity', 1)
+                            .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
+                        
+                        cell.find('text')
+                            .css('user-select', 'none') // Prevent double-click from selecting text
+                            .text(treeMapDataTable.getValue(row, 5));
+                    }
+                    else // root node
+                    {
+                        cell.find('text').text('Tasklist');
                     }
                 }
             }
