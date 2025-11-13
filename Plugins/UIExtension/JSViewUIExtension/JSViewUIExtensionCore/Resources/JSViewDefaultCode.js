@@ -104,24 +104,6 @@ function RefreshSelectedView()
     RestoreSelectedTask();
 }
 
-function SelectTask(id, fromChart)
-{
-    var view = sessionStorage.getItem('SelectedView');
-    sessionStorage.setItem('SelectedId', id);
-
-    switch (view)
-    {
-        case 'dashboard_id':
-        case '':
-            SelectDashboardTask(id, fromChart);
-            break;
-              
-        case 'treemap_id':
-            SelectTreeMapTask(id, fromChart);
-            break;
-    }
-}
-
 function RestoreSelectedTask()
 {
     var id = sessionStorage.getItem('SelectedId');
@@ -138,6 +120,24 @@ function OnAppMessage(message)
     {
         var id = message.data.substr(11);
         SelectTask(id, false);
+    }
+}
+
+function SelectTask(id, fromChart)
+{
+    var view = sessionStorage.getItem('SelectedView');
+    sessionStorage.setItem('SelectedId', id);
+
+    switch (view)
+    {
+        case 'dashboard_id':
+        case '':
+            SelectDashboardTask(id, fromChart);
+            break;
+              
+        case 'treemap_id':
+            SelectTreeMapTask(id, fromChart);
+            break;
     }
 }
 
@@ -284,21 +284,7 @@ function InitTreeMap()
         PopulateTreeMap();
     }
 }
-/*
-function OnTreeMapSelectTask()
-{
-    alert('OnTreeMapSelectTask');
-    var row = treeMapChart.getSelection()[0].row;
-   
-    if (row)
-    {
-        var id = dashboardRow2TaskMapping[row];
-       
-        if (id)
-            SelectTreeMapTask(id, true);
-    }
-}
-*/
+
 function SelectTreeMapTask(id, fromChart)
 {
     var row = treeMapTask2RowMapping[id];
@@ -408,7 +394,6 @@ function OnMapTreeHighlight(row)
     
     // Notify the app
     var id = treeMapRow2TaskMapping[hiliteRow];
-    
     window.chrome.webview.postMessage('SelectTask=' + id);
 }
 
@@ -448,7 +433,22 @@ function FixupTreeMapTextAndColors(hiliteRow)
         function(i, item) 
         {
             var cell = $(item);
-            var id = cell.find('text').text();
+            
+            // If we've been here before then the item text, which
+            // was originally the task ID, will have been replaced
+            // with the task title and the ID will have been inserted
+            // as a 'foreign object' so we look for that first and 
+            // add it if it wasn't found
+            var id = cell.find('foreignObject').attr('id');
+            
+            if (id == null)
+            {
+                id = cell.find('text').text(); // default
+                
+                var foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
+                $(foreignObject).attr('id', id);
+                cell.append(foreignObject);
+            }
                 
             if (id != null)
             {
@@ -469,8 +469,18 @@ function FixupTreeMapTextAndColors(hiliteRow)
                         .css('fill', fillColor)
                         .css('stroke', borderColor);
                     
+                    // We always replace the text because the tree map
+                    // will frequently restore the original text when
+                    // we least expect it
                     cell.find('text')
                         .text(treeMapDataTable.getValue(row, 5));
+                            
+                    if (replaceText)
+                    {
+                        var foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
+                        $(foreignObject).attr('id', id);
+                        cell.append(foreignObject);
+                    }
                 }
             }
         }
