@@ -107,6 +107,7 @@ function RefreshSelectedView()
 function SelectTask(id, fromChart)
 {
     var view = sessionStorage.getItem('SelectedView');
+    sessionStorage.setItem('SelectedId', id);
 
     switch (view)
     {
@@ -116,10 +117,9 @@ function SelectTask(id, fromChart)
             break;
               
         case 'treemap_id':
-            // TODO
+            SelectTreeMapTask(id, fromChart);
             break;
     }
-    sessionStorage.setItem('SelectedId', id);
 }
 
 function RestoreSelectedTask()
@@ -276,10 +276,39 @@ function InitTreeMap()
     {
         treeMapChart = new google.visualization.TreeMap(document.getElementById('treemap_chart'));
 
-        //google.visualization.events.addListener(treeMapChart, 'select', OnTreeMapSelect);
-        
+        google.visualization.events.addListener(treeMapChart, "ready", OnMapTreeReady);
+        google.visualization.events.addListener(treeMapChart, "drilldown", OnMapTreeDrilldown);
+        google.visualization.events.addListener(treeMapChart, "rollup", OnMapTreeRollup);
+        google.visualization.events.addListener(treeMapChart, "highlight", OnMapTreeHighlight);
+       
         PopulateTreeMap();
-   }
+    }
+}
+/*
+function OnTreeMapSelectTask()
+{
+    alert('OnTreeMapSelectTask');
+    var row = treeMapChart.getSelection()[0].row;
+   
+    if (row)
+    {
+        var id = dashboardRow2TaskMapping[row];
+       
+        if (id)
+            SelectTreeMapTask(id, true);
+    }
+}
+*/
+function SelectTreeMapTask(id, fromChart)
+{
+    var row = treeMapTask2RowMapping[id];
+    FixupTreeMapTextAndColors(row);
+    
+    if (fromChart == true)
+    {
+        // Notify the app
+        window.chrome.webview.postMessage('SelectTask=' + id);
+    }
 }
 
 function PopulateTreeMap()
@@ -289,25 +318,34 @@ function PopulateTreeMap()
     treeMapRow2TaskMapping = new Map();
     treeMapTask2RowMapping = new Map();
 
-    treeMapDataTable.addColumn('string', 'Task');
-    treeMapDataTable.addColumn('string', 'Parent');
-    treeMapDataTable.addColumn('number', 'Priority');
-    treeMapDataTable.addColumn('number', 'Risk');
+    treeMapDataTable.addColumn('string', 'TaskId');
+    treeMapDataTable.addColumn('string', 'ParentId');
+    treeMapDataTable.addColumn('number', 'Size');
+    treeMapDataTable.addColumn('number', 'ColorVal');
+    treeMapDataTable.addColumn('string', 'WebColor');
+    treeMapDataTable.addColumn('string', 'Title');
 
-    treeMapDataTable.addRow(['Tasklist', null, 0, 0]);
-
+    treeMapDataTable.addRow(['0', null, 1, 1, '#000000', null]);
+    
     for (let i = 0; i < tasks.length; i++) 
     {
-        AddTaskToTreeMap(tasks[i], 'Tasklist');
+        AddTaskToTreeMap(tasks[i], '0');
     }
 }
 
-function AddTaskToTreeMap(task, parentName)
+function AddTaskToTreeMap(task, parentId)
 {
-    var id = task['Task ID'];
-    var title = task.Title + ' (' + id + ')';
-    
-    treeMapDataTable.addRow([title, parentName, task.Priority, task.Risk]);
+    var id = task['Task ID'].toString();
+
+    treeMapDataTable.addRow(
+    [
+        id,
+        parentId, 
+        1,
+        ((task['Completion Date'] == '') ? 0 : 1),
+        task['Colour'],
+        task['Title']
+    ]);
     
     var row = (treeMapDataTable.getNumberOfRows() - 1);
     treeMapRow2TaskMapping[row] = id;
@@ -317,7 +355,7 @@ function AddTaskToTreeMap(task, parentName)
     {
         for (let i = 0; i < task.Subtasks.length; i++) 
         {
-            AddTaskToTreeMap(task.Subtasks[i], title); // RECURSIVE CALL
+            AddTaskToTreeMap(task.Subtasks[i], id); // RECURSIVE CALL
         }
     }
 }
@@ -326,12 +364,115 @@ function DrawTreeMap()
 {
     var options = 
     {
-//        animation: {'startup': true, duration: 1000, easing: 'out'},  
-//        colors: [ allColors[color1], allColors[color2] ],
-//        curveType: 'function',
-//        legend: { position: 'bottom' },
-//        title: 'Priority & Risk',
+        enableHighlight: false,
+        maxDepth: 1,
+        maxPostDepth: 0,
+//        minHighlightColor: '#8c6bb1',
+//        midHighlightColor: '#9ebcda',
+//        maxHighlightColor: '#edf8fb',
+//        minColor: '#009688',
+//        midColor: '#f7f7f7',
+//        maxColor: '#ee8100',
+        headerHeight: 0,
+        height: 500,
+        useWeightedAverageForAggregation: true,
+        showTooltips: false,
+        
+        // Use click to highlight and double-click to drill down.
+        eventsConfig: 
+        {
+          highlight: ['click'],
+          unhighlight: [/*'mouseout'*/], // disable (for now)
+          rollup: ['contextmenu'],
+          drilldown: ['dblclick'],
+        }
     };
 
     treeMapChart.draw(treeMapDataTable, options);
+}
+
+function OnMapTreeReady()
+{
+    FixupTreeMapTextAndColors(-1);
+}
+
+function OnMapTreeDrilldown()
+{
+    FixupTreeMapTextAndColors(-1);
+}
+
+function OnMapTreeHighlight(row)
+{
+    var hiliteRow = row["row"];
+    FixupTreeMapTextAndColors(hiliteRow);
+    
+    // Notify the app
+    var id = treeMapRow2TaskMapping[hiliteRow];
+    
+    window.chrome.webview.postMessage('SelectTask=' + id);
+}
+
+function OnMapTreeUnhighlight(row)
+{
+    FixupTreeMapTextAndColors(-1);
+}
+
+function OnMapTreeRollup(row)
+{
+    var hiliteRow = row["row"];
+    var id = treeMapRow2TaskMapping[hiliteRow];
+    
+    FixupTreeMapTextAndColors(-1);
+}
+
+function FixupTreeMapTextAndColors(hiliteRow) 
+{
+    if (hiliteRow == -1)
+    {
+        var id = sessionStorage.getItem('SelectedId');
+        
+        if (id != null)
+            hiliteRow = treeMapTask2RowMapping[id];
+    }
+    
+    var treechart = $("#treemap_id");
+    var svg = treechart.find("svg");
+    var cells = svg.find("g");
+
+    cells.each
+    (
+        // Note: 'i' is an index into the array of svg elements
+        // in the graph and bears no relationship whatsoever with
+        // the 'row' index into treeMapDataTable, hence we require
+        // a somewhat elaborate method for converting between them
+        function(i, item) 
+        {
+            var cell = $(item);
+            var id = cell.find('text').text();
+                
+            if (id != null)
+            {
+                var row = treeMapTask2RowMapping[id];
+                
+                if (row != null)
+                {
+                    var fillColor = treeMapDataTable.getValue(row, 4);
+                    var borderColor = '#FFFFFF';
+                    
+                    if (hiliteRow && (row == hiliteRow))
+                    {
+                        fillColor = '#A0D7FF';
+                        borderColor = '#5AB4FF';
+                    }
+                    
+                    cell.find('rect')
+                        .css('fill', fillColor)
+                        .css('stroke', borderColor);
+                    
+                    cell.find('text')
+                        .text(treeMapDataTable.getValue(row, 5));
+                }
+            }
+        }
+    );
 }
