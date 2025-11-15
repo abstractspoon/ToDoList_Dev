@@ -387,7 +387,12 @@ namespace JSViewUIExtension
 					uint taskId;
 
 					if (uint.TryParse(strId, out taskId))
-						new UIExtension.ParentNotify(m_HwndParent).NotifySelChange(taskId);
+					{
+						if (new UIExtension.ParentNotify(m_HwndParent).NotifySelChange(taskId))
+							m_SelectedTaskId = taskId;
+						else
+							SelectTask(m_SelectedTaskId);
+					}
 				}
 			}
 		}

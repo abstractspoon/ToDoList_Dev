@@ -79,13 +79,19 @@ function OnLoad()
     chrome.webview.addEventListener('message', OnAppMessage);
 }
 
-function RefreshSelectedView()
+function GetSelectedView()
 {
     var view = sessionStorage.getItem('SelectedView');
     
     if (view == null)
         view = 'dashboard_id';
     
+    return view;
+}
+
+function RefreshSelectedView()
+{
+    var view = GetSelectedView();
     document.getElementById('views').value = view;
 
     switch (view)
@@ -106,7 +112,7 @@ function RefreshSelectedView()
 
 function RestoreSelectedTask()
 {
-    var id = sessionStorage.getItem('SelectedId');
+    var id = GetSelectedTaskId();
     SelectTask(id, false);
 }
 
@@ -125,20 +131,49 @@ function OnAppMessage(message)
 
 function SelectTask(id, fromChart)
 {
-    var view = sessionStorage.getItem('SelectedView');
     sessionStorage.setItem('SelectedId', id);
 
-    switch (view)
+    switch (GetSelectedView())
     {
         case 'dashboard_id':
         case '':
-            SelectDashboardTask(id, fromChart);
+            SelectDashboardTask(id);
             break;
               
         case 'treemap_id':
-            SelectTreeMapTask(id, fromChart);
+            SelectTreeMapTask(id);
             break;
     }
+        
+    if (fromChart == true)
+    {
+        // Notify the app
+        window.chrome.webview.postMessage('SelectTask=' + id);
+    }
+}
+
+function GetSelectedTaskId()
+{
+    var id = sessionStorage.getItem('SelectedId');
+    
+    if (id == null)
+        id = '';
+    
+    return id;
+}
+
+function GetSelectedChartId(chart, row2TaskMapping)
+{
+    var row = chart.getSelection()[0].row;
+    
+    return row2TaskMapping[row];
+}
+
+function SetSelectedChartRow(id, chart, task2RowMapping)
+{
+    var row = task2RowMapping[id];
+    
+    chart.setSelection([{'row': row}]);
 }
 
 // Dashboard data and functions---------------------------------------------------------------
@@ -216,26 +251,18 @@ function OnDashboard22Select(e)
 
 function OnSelectDashboardTask(chart)
 {
-    var row = chart.getSelection()[0].row;
-    var id = dashboardRow2TaskMapping[row];
+    var id = GetSelectedChartId(chart, dashboardRow2TaskMapping);
     
-    SelectDashboardTask(id, true);
+    SelectTask(id, true);
 }
 
-function SelectDashboardTask(id, fromChart)
+// Never call this directly; Only via SelectTask()
+function SelectDashboardTask(id)
 {
-    var row = dashboardTask2RowMapping[id];
-    
-    dashboardChart11.setSelection([{'row': row}]);
-    dashboardChart12.setSelection([{'row': row}]);
-    dashboardChart21.setSelection([{'row': row}]);
-    dashboardChart22.setSelection([{'row': row}]);
-    
-    if (fromChart == true)
-    {
-        // Notify the app
-        window.chrome.webview.postMessage('SelectTask=' + id);
-    }
+    SetSelectedChartRow(id, dashboardChart11, dashboardTask2RowMapping);
+    SetSelectedChartRow(id, dashboardChart12, dashboardTask2RowMapping);
+    SetSelectedChartRow(id, dashboardChart21, dashboardTask2RowMapping);
+    SetSelectedChartRow(id, dashboardChart22, dashboardTask2RowMapping);
 }
 
 function DrawDashboard()
@@ -276,24 +303,13 @@ function InitTreeMap()
     {
         treeMapChart = new google.visualization.TreeMap(document.getElementById('treemap_chart'));
 
-        google.visualization.events.addListener(treeMapChart, "ready", OnMapTreeReady);
-        google.visualization.events.addListener(treeMapChart, "drilldown", OnMapTreeDrilldown);
-        google.visualization.events.addListener(treeMapChart, "rollup", OnMapTreeRollup);
-        google.visualization.events.addListener(treeMapChart, "highlight", OnMapTreeHighlight);
+        google.visualization.events.addListener(treeMapChart, "ready", OnTreeMapReady);
+        google.visualization.events.addListener(treeMapChart, "drilldown", OnTreeMapDrilldown);
+        google.visualization.events.addListener(treeMapChart, "rollup", OnTreeMapRollup);
+        google.visualization.events.addListener(treeMapChart, "highlight", OnTreeMapHighlight);
+        google.visualization.events.addListener(treeMapChart, "unhighlight", OnTreeMapUnhighlight);
        
         PopulateTreeMap();
-    }
-}
-
-function SelectTreeMapTask(id, fromChart)
-{
-    var row = treeMapTask2RowMapping[id];
-    FixupTreeMapTextAndColors(row);
-    
-    if (fromChart == true)
-    {
-        // Notify the app
-        window.chrome.webview.postMessage('SelectTask=' + id);
     }
 }
 
@@ -311,7 +327,7 @@ function PopulateTreeMap()
     treeMapDataTable.addColumn('string', 'WebColor');
     treeMapDataTable.addColumn('string', 'Title');
 
-    treeMapDataTable.addRow(['0', '', 1, 1, '#000000', 'Tasklist']);
+    AddTreeMapItem('0', '', true, '#C0C0C0', 'Tasklist');
     
     for (let i = 0; i < tasks.length; i++) 
     {
@@ -319,23 +335,27 @@ function PopulateTreeMap()
     }
 }
 
-function AddTaskToTreeMap(task, parentId)
+function AddTreeMapItem(id, parentId, done, color, title)
 {
-    var id = task['Task ID'].toString();
-
     treeMapDataTable.addRow(
     [
         id,
         parentId, 
         1,
-        ((task['Completion Date'] == '') ? 0 : 1),
-        task['Colour'],
-        task['Title']
+        (done ? 0 : 1),
+        color,
+        title
     ]);
     
     var row = (treeMapDataTable.getNumberOfRows() - 1);
     treeMapRow2TaskMapping[row] = id;
     treeMapTask2RowMapping[id] = row;
+}
+
+function AddTaskToTreeMap(task, parentId)
+{
+    var id = task['Task ID'].toString();
+    AddTreeMapItem(id, parentId, (task['Completion Date'] != ''), task['Colour'], task['Title']);
         
     if (task.Subtasks != null)
     {
@@ -368,8 +388,7 @@ function DrawTreeMap()
         eventsConfig: 
         {
           highlight: ['click'],
-          unhighlight: [/*'mouseout'*/], // disable (for now)
-          rollup: ['contextmenu'],
+          rollup: ['contextmenu'], // right-click
           drilldown: ['dblclick'],
         }
     };
@@ -379,62 +398,131 @@ function DrawTreeMap()
 
 function OnTreeMapReady()
 {
-    FixupTreeMapTextAndColors(-1);
+    RefreshTreeMapTextAndColors();
 }
 
 function OnTreeMapDrilldown()
 {
-    var row = treeMapChart.getSelection()[0].row;
+    // This is effectively a double-click handler
+    // so select the task just clicked
+    var id = GetSelectedChartId(treeMapChart, treeMapRow2TaskMapping);
     
-    if (row != null)
+    var path = GetTreeMapFullPath(id);
+    
+    SelectTask(id, true);
+    RefreshTreeMapTextAndColors();
+}
+
+function OnTreeMapRollup(unused)
+{
+    // If the currently selected item is no longer visible
+    // move the selection to its parent
+    var selId = GetSelectedTaskId();
+    
+    if (!IsTreeMapIdVisible(selId))
     {
-        var id = treeMapRow2TaskMapping[row];
+        let row = treeMapTask2RowMapping[selId];
+        let parentId = treeMapDataTable.getValue(row, 1);
         
-        if (id != null)
-            SelectTask(id, true);
+        SelectTask(parentId, true);
+    }
+    else
+    {
+        RefreshTreeMapTextAndColors();
     }
 }
 
-function OnTreeMapRollup(row)
+// We never call this directly; Only via SelectTask()
+// after the selected task id has been saved 
+function SelectTreeMapTask(id)
 {
-    var hiliteRow = row["row"];
-    var id = treeMapRow2TaskMapping[hiliteRow];
+    // Navigate to the task if it's not currently visible
+    if (!IsTreeMapIdVisible(id))
+    {
+        let path = GetTreeMapFullPath(id);
+        
+        if (path.length == 1)
+        {
+            SetSelectedChartRow('0', treeMapChart, treeMapTask2RowMapping);
+        }
+        else
+        {
+            while (path.length > 1)
+                SetSelectedChartRow(path.pop(), treeMapChart, treeMapTask2RowMapping);
+        }
+    }
+    
+    RefreshTreeMapTextAndColors();
+}
+
+function GetTreeMapCellId(cell)
+{
+    var jCell = $(cell);
+    
+    if (!jCell.attr('style'))
+        return -1;
+    
+    var id = jCell.find('foreignObject').attr('id');
+        
+    if (id == null)
+        id = jCell.find('text').text(); // default
+    
+    return id;
+}
+
+function IsTreeMapIdVisible(id)
+{
+    var treechart = $("#treemap_id");
+    var svg = treechart.find("svg");
+    var cells = svg.find("g");
+    
+    for (let i = 0; i < cells.length; i++)
+    {
+        if (GetTreeMapCellId(cells[i]) == id)
+            return true;
+    };
+    
+    return false;
+}
+
+function GetTreeMapFullPath(id)
+{
+    var path = [];
+    
+    while (id && (id != '0'))
+    {
+        path.push(id);
+        
+        let row = treeMapTask2RowMapping[id];
+        id = treeMapDataTable.getValue(row, 1); // parent id
+    }
+    
+    return path;
+}
+
+function OnTreeMapHighlight(clickedItem)
+{
+    var row = clickedItem["row"];
+    var id = treeMapRow2TaskMapping[row];
     
     SelectTask(id, true);
 }
 
-function OnTreeMapHighlight(row)
+function OnTreeMapUnhighlight(unused)
 {
-    var hiliteRow = row["row"];
-    var id = treeMapRow2TaskMapping[hiliteRow];
-
-    SelectTask(id, true);
-    
-    // Notify the app
-    window.chrome.webview.postMessage('SelectTask=' + id);
+    // Even though we have specified 'enableHighlight: false'
+    // Google still restores text and colours on 'mouse-leave'
+    RefreshTreeMapTextAndColors();
 }
 
-function OnTreeMapUnhighlight(row)
+function RefreshTreeMapTextAndColors() 
 {
-    FixupTreeMapTextAndColors(-1);
-}
-
-function FixupTreeMapTextAndColors(hiliteRow) 
-{
-    var selectedCell = null;
-    
-    if (hiliteRow == -1)
-    {
-        var id = sessionStorage.getItem('SelectedId');
-        
-        if (id != null)
-            hiliteRow = treeMapTask2RowMapping[id];
-    }
+    var selId = GetSelectedTaskId();
     
     var treechart = $("#treemap_id");
     var svg = treechart.find("svg");
     var cells = svg.find("g");
-
+    
     cells.each
     (
         // Note: 'i' is an index into the array of svg elements
@@ -443,28 +531,12 @@ function FixupTreeMapTextAndColors(hiliteRow)
         // a somewhat elaborate method for converting between them
         function(i, item) 
         {
-            var cell = $(item);
+            var jCell = $(item);
             
-            if (!cell.attr('style'))
+            if (!jCell.attr('style'))
             {
-                // Modify the existing highlight object to match app theming
-                if (selectedCell != null)
-                {
-                    cell.empty();
-                    selectedCell.find('rect').clone().appendTo(cell);
-                    selectedCell.find('text').clone().appendTo(cell);
-                    
-                    // Colors from GraphicsMisc::DrawExplorerItemSelection()
-                    cell.find('rect')
-                        .css('fill', '#A0D7FF')
-                        .css('stroke', '#5AB4FF')
-                        .css('fill-opacity', 1.0);
-                }
-                else
-                {
-                    alert('No selected cell');
-                    cell.css('display', 'none');
-                }
+                // Always hide the default highlight
+                jCell.css('display', 'none');
             }
             else
             {
@@ -473,46 +545,44 @@ function FixupTreeMapTextAndColors(hiliteRow)
                 // with the task title and the ID will have been inserted
                 // as a 'foreign object' so we look for that first and 
                 // add it if it wasn't found
-                var id = cell.find('foreignObject').attr('id');
+                let id = jCell.find('foreignObject').attr('id');
                 
                 if (id == null)
                 {
-                    id = cell.find('text').text(); // default
+                    id = jCell.find('text').text(); // default
                     
                     if (id && (id != ''))
                     {
                         var foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
                         $(foreignObject).attr('id', id);
-                        cell.append(foreignObject);
+                        jCell.append(foreignObject);
                     }
                 }
                     
                 if (id != null)
                 {
-                    var row = treeMapTask2RowMapping[id];
+                    let row = treeMapTask2RowMapping[id];
                     
-                    if (row != null)
+                    if (row == null)
+                        row = 0;
+                    
+                    let fillColor = treeMapDataTable.getValue(row, 4);
+                    let borderColor = '#FFFFFF';
+                    
+                    if (id == selId)
                     {
-                        var fillColor = treeMapDataTable.getValue(row, 4);
-                        var borderColor = '#FFFFFF';
-                        
-                        if (hiliteRow && (row == hiliteRow))
-                            selectedCell = cell;
-                        
-                        cell.find('rect')
-                            .css('fill', fillColor)
-                            .css('stroke', borderColor)
-                            .css('fill-opacity', 1)
-                            .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
-                        
-                        cell.find('text')
-                            .css('user-select', 'none') // Prevent double-click from selecting text
-                            .text(treeMapDataTable.getValue(row, 5));
+                        fillColor = '#A0D7FF';
+                        borderColor = '#5AB4FF';
                     }
-                    else // root node
-                    {
-                        cell.find('text').text('Tasklist');
-                    }
+                    
+                    jCell.find('rect')
+                         .css('fill', fillColor)
+                         .css('stroke', borderColor)
+                         .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
+                    
+                    jCell.find('text')
+                         .css('user-select', 'none') // Prevent double-click from selecting text
+                         .text(treeMapDataTable.getValue(row, 5));
                 }
             }
         }
