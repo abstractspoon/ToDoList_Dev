@@ -1664,6 +1664,14 @@ void CTaskFile::SetAvailableAttributes(const CTDCAttributeMap& mapAttrib)
 {
 	m_mapReadableAttrib.Copy(mapAttrib);
 
+	// Add 'always available' attributes
+	if (!mapAttrib.Has(TDCA_ALL))
+	{
+		m_mapReadableAttrib.Add(TDCA_TASKNAME);
+		m_mapReadableAttrib.Add(TDCA_ID);
+		m_mapReadableAttrib.Add(TDCA_PARENTID);
+	}
+
 	POSITION pos = mapAttrib.GetStartPosition();
 
 	while (pos)

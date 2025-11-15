@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.Linq;
 using System.IO;
 using System.Reflection;
-using System.Web.UI;
+using System.Diagnostics;
 using Microsoft.Web.WebView2.Core;
 
 using JSONExporterPlugin;
@@ -128,28 +128,6 @@ namespace JSViewUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			var attribs = JSONUtil.GetAttributeList(tasks); // No translation
-
-			switch (type)
-			{
-			case UIExtension.UpdateType.Delete:
-			case UIExtension.UpdateType.All:
-				{
-					// Rebuild
-					m_Items.Populate(tasks, attribs);
-				}
-				break;
-
-			case UIExtension.UpdateType.New:
-			case UIExtension.UpdateType.Edit:
-				{
-					// In-place update
-					if (!m_Items.MergeAttributes(tasks, attribs))
-						return;
-				}
-				break;
-			}
-
 			m_TasklistPath = tasks.GetFilePath();
 
 			// Initialise/update default Javascript and HTML files
@@ -176,15 +154,47 @@ namespace JSViewUIExtension
 				m_StylesCreationDate = File.GetLastWriteTime(StylesFilePath);
 			}
 
-			// Refresh page
-			ExportItemsToJsonAsJavascript();
+			// Update tasks
+			var attribs = JSONUtil.GetAttributeList(tasks); // No translation
 
-			if (m_WebView.CoreWebView2 != null)
+			switch (type)
 			{
-				if (m_WebView.CoreWebView2.Source == "about:blank")
-					Navigate(HtmlFileUri);
-				else
-					m_WebView.CoreWebView2.PostWebMessageAsString("Refresh");
+			case UIExtension.UpdateType.Delete:
+			case UIExtension.UpdateType.All:
+				{
+					// Rebuild all items
+					m_Items.Populate(tasks, attribs);
+
+					// Refresh page
+					ExportItemsToJsonAsJavascript();
+
+					if (m_WebView.CoreWebView2 != null)
+					{
+						if (m_WebView.CoreWebView2.Source == "about:blank")
+							Navigate(HtmlFileUri);
+						else
+							m_WebView.CoreWebView2.PostWebMessageAsString("Refresh");
+					}
+				}
+				break;
+
+			case UIExtension.UpdateType.New:
+			case UIExtension.UpdateType.Edit:
+				{
+					Debug.Assert(m_WebView.CoreWebView2 != null);
+
+					// In-place update
+					if (m_Items.MergeAttributes(tasks, attribs))
+					{
+						// Selectively refresh page
+						var items = new JsTaskItems();
+						items.Populate(tasks, attribs);
+
+						var message = string.Format("Refresh={0}", items.ToJson());
+						m_WebView.CoreWebView2.PostWebMessageAsString(message);
+					}
+				}
+				break;
 			}
 		}
 
@@ -256,13 +266,7 @@ namespace JSViewUIExtension
 
 		public void SetUITheme(UITheme theme)
 		{
-            this.BackColor = /*m_Toolbar.BackColor =*/ theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-
-			// Set the toolbar colors to be the same as the back color
-// 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
-// 			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
-// 
-// 			m_TBRenderer.SetUITheme(theme);
+            this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -277,6 +281,7 @@ namespace JSViewUIExtension
 		{
 			prefs.WriteProfileString(key, "HtmlCreationDate", m_HtmlCreationDate.ToString("s"));
 			prefs.WriteProfileString(key, "CodeCreationDate", m_CodeCreationDate.ToString("s"));
+			prefs.WriteProfileString(key, "StylesCreationDate", m_StylesCreationDate.ToString("s"));
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -286,6 +291,7 @@ namespace JSViewUIExtension
 				// private settings
 				DateTime.TryParse(prefs.GetProfileString(key, "HtmlCreationDate", ""), out m_HtmlCreationDate);
 				DateTime.TryParse(prefs.GetProfileString(key, "CodeCreationDate", ""), out m_CodeCreationDate);
+				DateTime.TryParse(prefs.GetProfileString(key, "StylesCreationDate", ""), out m_StylesCreationDate);
 			}
 
 			// App settings
@@ -343,7 +349,7 @@ namespace JSViewUIExtension
 				"var tasks = JSON.parse(json).Tasks;",
 				"\n\n",
 
-				// 2. Add translated attribute attributes
+				// 3. Add translated attribute attributes
 				// TODO
 			};
 

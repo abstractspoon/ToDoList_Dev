@@ -59,6 +59,24 @@ function ShowHideView(divName, viewId)
     document.getElementById(divName).style.display = display;
 }
 
+function OnAppMessage(message)
+{  
+    if (message.data == 'Refresh')
+    {
+        location.reload(location.href);
+    }
+    else if (message.data.indexOf('Refresh=') == 0)
+    {
+        var json = message.data.substr(8);
+        MergeSelectedTaskAttributes(JSON.parse(json));
+    }
+    else if (message.data.indexOf('SelectTask=') == 0)
+    {
+        var id = message.data.substr(11);
+        SelectTask(id, false);
+    }
+}
+
 function OnChangeView(view) 
 {
     sessionStorage.setItem('SelectedView', view);
@@ -110,23 +128,39 @@ function RefreshSelectedView()
     RestoreSelectedTask();
 }
 
+function MergeSelectedTaskAttributes(selTasks)
+{
+    // Update global tasklist so that a subsequent refresh
+    // will have the changed tasks
+    UpdateGlobalTasks(selTasks);
+    
+    // Keep all views up to date
+    UpdateDashboardSelectedTasks(selTasks);
+    UpdateTreeMapSelectedTasks(selTasks);
+    
+    switch (GetSelectedView())
+    {
+        case 'dashboard_id':
+            DrawDashboard();
+            break;
+              
+        case 'treemap_id':
+            DrawTreeMap();
+            break;
+    }
+    
+    RestoreSelectedTask();
+}
+
+function UpdateGlobalTasks(selTasks)
+{
+    // TODO
+}
+
 function RestoreSelectedTask()
 {
     var id = GetSelectedTaskId();
     SelectTask(id, false);
-}
-
-function OnAppMessage(message)
-{  
-    if (message.data == 'Refresh')
-    {
-        location.reload(location.href);
-    }
-    else if (message.data.indexOf('SelectTask=') == 0)
-    {
-        var id = message.data.substr(11);
-        SelectTask(id, false);
-    }
 }
 
 function SelectTask(id, fromChart)
@@ -226,6 +260,35 @@ function PopulateDashboard()
         dashboardDataTable.addRow([title, tasks[i].Priority, tasks[i].Risk]);
         dashboardRow2TaskMapping[i] = id;
         dashboardTask2RowMapping[id] = i;
+    }
+}
+
+function UpdateDashboardSelectedTasks(selTasks)
+{
+    // Only we've been already populated
+    if (dashboardTask2RowMapping)
+    {
+        for (let i = 0; i < selTasks.length; i++) 
+        {
+            var selTask = selTasks[i];
+            var id = selTask['Task ID'].toString();
+            var row = dashboardTask2RowMapping[id];
+            
+            if (row != null)
+            {
+                if (selTask.Title)
+                    dashboardDataTable.setValue(row, 0, (selTask.Title + ' (' + id + ')'));
+
+                if (selTask.Priority)
+                    dashboardDataTable.setValue(row, 1, selTask.Priority);
+
+                if (selTask.Risk)
+                    dashboardDataTable.setValue(row, 2, selTask.Risk);
+                
+    //            if (selTask.SubTasks != null)
+    //                UpdateDashboardSelectedTasks(selTask.SubTasks); // Recursive call
+            }
+        }
     }
 }
 
@@ -335,6 +398,20 @@ function PopulateTreeMap()
     }
 }
 
+function AddTaskToTreeMap(task, parentId)
+{
+    var id = task['Task ID'].toString();
+    AddTreeMapItem(id, parentId, (task['Completion Date'] != ''), task['Colour'], task['Title']);
+        
+    if (task.Subtasks != null)
+    {
+        for (let i = 0; i < task.Subtasks.length; i++) 
+        {
+            AddTaskToTreeMap(task.Subtasks[i], id); // RECURSIVE CALL
+        }
+    }
+}
+
 function AddTreeMapItem(id, parentId, done, color, title)
 {
     treeMapDataTable.addRow(
@@ -352,16 +429,28 @@ function AddTreeMapItem(id, parentId, done, color, title)
     treeMapTask2RowMapping[id] = row;
 }
 
-function AddTaskToTreeMap(task, parentId)
+function UpdateTreeMapSelectedTasks(selTasks)
 {
-    var id = task['Task ID'].toString();
-    AddTreeMapItem(id, parentId, (task['Completion Date'] != ''), task['Colour'], task['Title']);
-        
-    if (task.Subtasks != null)
+    // Only we've been already populated
+    if (treeMapTask2RowMapping)
     {
-        for (let i = 0; i < task.Subtasks.length; i++) 
+        for (let i = 0; i < selTasks.length; i++) 
         {
-            AddTaskToTreeMap(task.Subtasks[i], id); // RECURSIVE CALL
+            var selTask = selTasks[i];
+            var id = selTask['Task ID'].toString();
+            var row = treeMapTask2RowMapping[id];
+            
+            if (row != null)
+            {
+                if (selTask.Title)
+                    treeMapDataTable.setValue(row, 5, selTask.Title);
+
+                if (selTask.Colour)
+                    treeMapDataTable.setValue(row, 4, selTask.Colour);
+                
+                if (selTask.SubTasks != null)
+                    UpdateTreeMapSelectedTasks(selTask.SubTasks); // Recursive call
+            }
         }
     }
 }
@@ -406,7 +495,6 @@ function OnTreeMapDrilldown()
     // This is effectively a double-click handler
     // so select the task just clicked
     var id = GetSelectedChartId(treeMapChart, treeMapRow2TaskMapping);
-    
     var path = GetTreeMapFullPath(id);
     
     SelectTask(id, true);
