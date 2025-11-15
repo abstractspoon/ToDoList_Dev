@@ -12,14 +12,6 @@ namespace JSONExporterPlugin
 {
 	public class JSONUtil
 	{
-		static string Clean(string value)
-		{
-			return value.Replace("\\\\", "/")
-						.Replace("\\n", " ")
-						.Replace("\"", " ")
-						.Replace("`", " ");
-		}
-
 		public static object GetNativeAttributeValue(Task task, TaskAttributeItem item)
 		{
 			if (item.AttributeId != Task.Attribute.CustomAttribute)
@@ -125,8 +117,17 @@ namespace JSONExporterPlugin
 		}
 
 		// -----------------------------------------------------------
+		// private helpers
 
-		private static object ParseAttributeValue(string attribValue, System.Type type, object fallback)
+		static string Clean(string value)
+		{
+			return value.Replace("\\\\", "/")
+						.Replace("\\n", " ")
+						.Replace("\"", " ")
+						.Replace("`", " ");
+		}
+
+		static object ParseAttributeValue(string attribValue, System.Type type, object fallback)
 		{
 			if (!string.IsNullOrEmpty(attribValue))
 			{
