@@ -131,21 +131,29 @@ function RefreshSelectedView()
 function MergeSelectedTaskAttributes(selTasks)
 {
     // Update global tasklist so that a subsequent refresh
-    // will have the changed tasks
+    // will also have the changed tasks
     UpdateGlobalTasks(selTasks);
-    
-    // Keep all views up to date
-    UpdateDashboardSelectedTasks(selTasks);
-    UpdateTreeMapSelectedTasks(selTasks);
     
     switch (GetSelectedView())
     {
         case 'dashboard_id':
-            DrawDashboard();
+            {
+                // Keep all views up to date but we only redraw if the dashboard changed
+                UpdateTreeMapSelectedTasks(selTasks);
+                
+                if (UpdateDashboardSelectedTasks(selTasks))
+                    DrawDashboard();
+            }
             break;
               
         case 'treemap_id':
-            DrawTreeMap();
+            {
+                // Keep all views up to date but we only redraw if the treemap changed
+                UpdateDashboardSelectedTasks(selTasks);
+                
+                if (UpdateTreeMapSelectedTasks(selTasks))
+                    DrawTreeMap();
+            }
             break;
     }
     
@@ -210,6 +218,18 @@ function SetSelectedChartRow(id, chart, task2RowMapping)
     chart.setSelection([{'row': row}]);
 }
 
+function CheckUpdateDataValue(dataTable, row, col, newValue)
+{
+    if (!row || !col || !newValue)
+        return false;
+    
+    if (newValue == dataTable.getValue(row, col))
+        return false;
+    
+    dataTable.setValue(row, col, newValue);
+    return true;
+}
+
 // Dashboard data and functions---------------------------------------------------------------
 
 var dashboardDataTable = null;
@@ -265,6 +285,8 @@ function PopulateDashboard()
 
 function UpdateDashboardSelectedTasks(selTasks)
 {
+    let changed = false;
+    
     // Only we've been already populated
     if (dashboardTask2RowMapping)
     {
@@ -276,20 +298,17 @@ function UpdateDashboardSelectedTasks(selTasks)
             
             if (row != null)
             {
-                if (selTask.Title)
-                    dashboardDataTable.setValue(row, 0, (selTask.Title + ' (' + id + ')'));
-
-                if (selTask.Priority)
-                    dashboardDataTable.setValue(row, 1, selTask.Priority);
-
-                if (selTask.Risk)
-                    dashboardDataTable.setValue(row, 2, selTask.Risk);
+                changed |= CheckUpdateDataValue(dashboardDataTable, row, 0, (selTask.Title + ' (' + id + ')'));
+                changed |= CheckUpdateDataValue(dashboardDataTable, row, 1, selTask.Priority);
+                changed |= CheckUpdateDataValue(dashboardDataTable, row, 2, selTask.Risk);
                 
     //            if (selTask.SubTasks != null)
     //                UpdateDashboardSelectedTasks(selTask.SubTasks); // Recursive call
             }
         }
     }
+    
+    return changed;
 }
 
 function OnDashboard11Select(e)
@@ -444,17 +463,16 @@ function UpdateTreeMapSelectedTasks(selTasks)
             
             if (row != null)
             {
-                if (selTask.Title)
-                    treeMapDataTable.setValue(row, 5, selTask.Title);
-
-                if (selTask.Colour)
-                    treeMapDataTable.setValue(row, 4, selTask.Colour);
+                changed |= CheckUpdateDataValue(treeMapDataTable, row, 5, selTask.Title);
+                changed |= CheckUpdateDataValue(treeMapDataTable, row, 4, selTask.Colour);
                 
                 if (selTask.SubTasks != null)
-                    UpdateTreeMapSelectedTasks(selTask.SubTasks); // Recursive call
+                    changed |= UpdateTreeMapSelectedTasks(selTask.SubTasks); // Recursive call
             }
         }
     }
+    
+    return changed;
 }
 
 function DrawTreeMap() 
