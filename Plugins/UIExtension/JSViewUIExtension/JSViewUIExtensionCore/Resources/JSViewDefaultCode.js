@@ -270,9 +270,9 @@ function UpdateDashboardSelectedTasks(selTasks)
     {
         for (let i = 0; i < selTasks.length; i++) 
         {
-            var selTask = selTasks[i];
-            var id = selTask['Task ID'].toString();
-            var row = dashboardTask2RowMapping[id];
+            let selTask = selTasks[i];
+            let id = selTask['Task ID'].toString();
+            let row = dashboardTask2RowMapping[id];
             
             if (row != null)
             {
@@ -314,7 +314,7 @@ function OnDashboard22Select(e)
 
 function OnSelectDashboardTask(chart)
 {
-    var id = GetSelectedChartId(chart, dashboardRow2TaskMapping);
+    let id = GetSelectedChartId(chart, dashboardRow2TaskMapping);
     
     SelectTask(id, true);
 }
@@ -400,7 +400,7 @@ function PopulateTreeMap()
 
 function AddTaskToTreeMap(task, parentId)
 {
-    var id = task['Task ID'].toString();
+    let id = task['Task ID'].toString();
     AddTreeMapItem(id, parentId, (task['Completion Date'] != ''), task['Colour'], task['Title']);
         
     if (task.Subtasks != null)
@@ -424,21 +424,23 @@ function AddTreeMapItem(id, parentId, done, color, title)
         title
     ]);
     
-    var row = (treeMapDataTable.getNumberOfRows() - 1);
+    let row = (treeMapDataTable.getNumberOfRows() - 1);
     treeMapRow2TaskMapping[row] = id;
     treeMapTask2RowMapping[id] = row;
 }
 
 function UpdateTreeMapSelectedTasks(selTasks)
 {
+    let changed = false;
+        
     // Only we've been already populated
     if (treeMapTask2RowMapping)
     {
         for (let i = 0; i < selTasks.length; i++) 
         {
-            var selTask = selTasks[i];
-            var id = selTask['Task ID'].toString();
-            var row = treeMapTask2RowMapping[id];
+            let selTask = selTasks[i];
+            let id = selTask['Task ID'].toString();
+            let row = treeMapTask2RowMapping[id];
             
             if (row != null)
             {
@@ -457,7 +459,7 @@ function UpdateTreeMapSelectedTasks(selTasks)
 
 function DrawTreeMap() 
 {
-    var options = 
+    let options = 
     {
         enableHighlight: false,
         maxDepth: 1,
@@ -494,8 +496,8 @@ function OnTreeMapDrilldown()
 {
     // This is effectively a double-click handler
     // so select the task just clicked
-    var id = GetSelectedChartId(treeMapChart, treeMapRow2TaskMapping);
-    var path = GetTreeMapFullPath(id);
+    let id = GetSelectedChartId(treeMapChart, treeMapRow2TaskMapping);
+    let path = GetTreeMapFullPath(id);
     
     SelectTask(id, true);
     RefreshTreeMapTextAndColors();
@@ -505,7 +507,7 @@ function OnTreeMapRollup(unused)
 {
     // If the currently selected item is no longer visible
     // move the selection to its parent
-    var selId = GetSelectedTaskId();
+    let selId = GetSelectedTaskId();
     
     if (!IsTreeMapIdVisible(selId))
     {
@@ -545,12 +547,12 @@ function SelectTreeMapTask(id)
 
 function GetTreeMapCellId(cell)
 {
-    var jCell = $(cell);
+    let jCell = $(cell);
     
     if (!jCell.attr('style'))
         return -1;
     
-    var id = jCell.find('foreignObject').attr('id');
+    let id = jCell.find('foreignObject').attr('id');
         
     if (id == null)
         id = jCell.find('text').text(); // default
@@ -560,9 +562,9 @@ function GetTreeMapCellId(cell)
 
 function IsTreeMapIdVisible(id)
 {
-    var treechart = $("#treemap_id");
-    var svg = treechart.find("svg");
-    var cells = svg.find("g");
+    let treechart = $("#treemap_id");
+    let svg = treechart.find("svg");
+    let cells = svg.find("g");
     
     for (let i = 0; i < cells.length; i++)
     {
@@ -575,7 +577,7 @@ function IsTreeMapIdVisible(id)
 
 function GetTreeMapFullPath(id)
 {
-    var path = [];
+    let path = [];
     
     while (id && (id != '0'))
     {
@@ -590,8 +592,8 @@ function GetTreeMapFullPath(id)
 
 function OnTreeMapHighlight(clickedItem)
 {
-    var row = clickedItem["row"];
-    var id = treeMapRow2TaskMapping[row];
+    let row = clickedItem["row"];
+    let id = treeMapRow2TaskMapping[row];
     
     SelectTask(id, true);
 }
@@ -605,11 +607,11 @@ function OnTreeMapUnhighlight(unused)
 
 function RefreshTreeMapTextAndColors() 
 {
-    var selId = GetSelectedTaskId();
+    let selId = GetSelectedTaskId();
     
-    var treechart = $("#treemap_id");
-    var svg = treechart.find("svg");
-    var cells = svg.find("g");
+    let treechart = $("#treemap_id");
+    let svg = treechart.find("svg");
+    let cells = svg.find("g");
     
     cells.each
     (
@@ -619,7 +621,7 @@ function RefreshTreeMapTextAndColors()
         // a somewhat elaborate method for converting between them
         function(i, item) 
         {
-            var jCell = $(item);
+            let jCell = $(item);
             
             if (!jCell.attr('style'))
             {
