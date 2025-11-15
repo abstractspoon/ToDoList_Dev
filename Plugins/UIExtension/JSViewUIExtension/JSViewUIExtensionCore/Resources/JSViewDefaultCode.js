@@ -683,14 +683,29 @@ function RefreshTreeMapTextAndColors()
                         borderColor = '#5AB4FF';
                     }
                     
-                    jCell.find('rect')
-                         .css('fill', fillColor)
-                         .css('stroke', borderColor)
-                         .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
+                    let rect = jCell.find('rect');
+                    let text = jCell.find('text');
                     
-                    jCell.find('text')
-                         .css('user-select', 'none') // Prevent double-click from selecting text
-                         .text(treeMapDataTable.getValue(row, 5));
+                    $(rect).css('fill', fillColor)
+                           .css('stroke', borderColor)
+                           .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
+
+                    let title = treeMapDataTable.getValue(row, 5);
+                    
+                    $(text).css('user-select', 'none') // Prevent double-click from selecting text
+                           .text(title);
+                    
+                    // Modify the text to fit the rect width
+                    let availWidth = $(rect).attr('width') - 10; // add padding
+                    let actualWidth = $(text)[0].getBBox().width;
+                    
+                    while (actualWidth > availWidth)
+                    {
+                        title = title.substring(0, (title.length / 2));
+                        $(text).text(title + '...');
+                            
+                        actualWidth = $(text)[0].getBBox().width;
+                    }
                 }
             }
         }

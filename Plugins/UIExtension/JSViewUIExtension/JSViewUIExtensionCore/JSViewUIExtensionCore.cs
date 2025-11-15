@@ -113,7 +113,7 @@ namespace JSViewUIExtension
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
 		{
-			return true/*false*/;
+			return false;
 		}
 
 		public bool ScrollToSelectedTask()
