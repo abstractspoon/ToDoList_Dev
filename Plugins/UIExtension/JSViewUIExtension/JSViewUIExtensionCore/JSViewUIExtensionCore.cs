@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Linq;
 using System.IO;
-using System.Reflection;
+using System.Threading;
 using System.Diagnostics;
 using Microsoft.Web.WebView2.Core;
 
@@ -192,6 +192,11 @@ namespace JSViewUIExtension
 
 						var message = string.Format("Refresh={0}", items.ToJson());
 						m_WebView.CoreWebView2.PostWebMessageAsString(message);
+
+						// And update data file so that subsequent
+						// 'in-page' refreshes work as expected
+						var thread = new Thread(() => ExportItemsToJsonAsJavascript());
+						thread.Start();
 					}
 				}
 				break;
