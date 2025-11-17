@@ -3,6 +3,8 @@ google.charts.load('current', {'packages':['treemap']});
 
 google.charts.setOnLoadCallback(OnLoad);
 
+window.onresize = RefreshSelectedView;
+
 // General data and functions -------------------------------------------------------------
 var allColors = 
 [
