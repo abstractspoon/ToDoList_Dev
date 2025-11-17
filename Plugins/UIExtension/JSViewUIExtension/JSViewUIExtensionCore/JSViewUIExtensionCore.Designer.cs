@@ -49,6 +49,7 @@
 			// JSViewUIExtensionCore
 			// 
 			this.Controls.Add(this.m_WebView);
+			this.Margin = new System.Windows.Forms.Padding(0);
 			this.Name = "JSViewUIExtensionCore";
 			this.Size = new System.Drawing.Size(540, 342);
 			this.ResumeLayout(false);

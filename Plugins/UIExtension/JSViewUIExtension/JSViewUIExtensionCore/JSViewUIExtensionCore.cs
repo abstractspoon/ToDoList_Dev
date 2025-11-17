@@ -72,8 +72,6 @@ namespace JSViewUIExtension
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_Items = new JsTaskItems();
 
-			BorderStyle = BorderStyle.FixedSingle;
-
 			InitializeComponent();
 			InitializeAsync();
 		}
@@ -94,7 +92,7 @@ namespace JSViewUIExtension
 //			await m_WebView.CoreWebView2.ExecuteScriptAsync("window.addEventListener('contextmenu', window => {window.preventDefault();});");
 
 
-
+			UpdateBrowserBackColor();
 			Navigate(HtmlFileUri); // will have already been built in UpdateTasks
 		}
 
@@ -272,6 +270,7 @@ namespace JSViewUIExtension
 		public void SetUITheme(UITheme theme)
 		{
             this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			UpdateBrowserBackColor();
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -303,6 +302,15 @@ namespace JSViewUIExtension
 		}
 
 		// PRIVATE ------------------------------------------------------------------------------
+
+		void UpdateBrowserBackColor()
+		{
+			if (m_WebView.CoreWebView2 != null)
+			{
+				var message = string.Format("BackColor={0}", ColorTranslator.ToHtml(this.BackColor));
+				m_WebView.CoreWebView2.PostWebMessageAsString(message);
+			}
+		}
 
 		bool HasFileChanged(string filePath, DateTime creationDate)
 		{
@@ -410,6 +418,7 @@ namespace JSViewUIExtension
 
 		void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
+			UpdateBrowserBackColor();
 			SelectTask(m_SelectedTaskId);
 		}
 	}

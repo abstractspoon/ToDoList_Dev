@@ -1,0 +1,22 @@
+ 
+*
+{
+	font-family: Tahoma;
+	font-size: 9pt;
+}
+ 
+body
+{
+	margin: 0px;
+	padding: 0px;
+	border: none;
+}
+
+.content
+{
+	border: 1px solid gray; 
+	background: white; 
+	height: 100%;
+	margin: 3px 0px 0px 0px;
+}
+

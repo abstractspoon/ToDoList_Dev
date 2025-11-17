@@ -65,6 +65,10 @@ function OnAppMessage(message)
     {
         location.reload(location.href);
     }
+    else if (message.data.indexOf('BackColor=') == 0)
+    {
+        document.body.style.backgroundColor = message.data.substr(10);
+    }
     else if (message.data.indexOf('Refresh=') == 0)
     {
         var json = message.data.substr(8);
