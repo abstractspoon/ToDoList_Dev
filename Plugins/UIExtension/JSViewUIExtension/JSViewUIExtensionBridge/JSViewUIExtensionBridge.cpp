@@ -247,7 +247,7 @@ bool CJSViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOM
 		}
 
 	case IUI_SCROLLTOSELECTEDTASK:
-		return m_wnd->SelectTask(m_wnd->ScrollToSelectedTask());
+		return m_wnd->ScrollToSelectedTask();
 	}
 
 	// all else

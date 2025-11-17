@@ -17,6 +17,7 @@ body
 	border: 1px solid gray; 
 	background: white; 
 	height: 100%;
+	width: 99%; /* prevent horz scrollbar */
 	margin: 3px 0px 0px 0px;
 }
 
