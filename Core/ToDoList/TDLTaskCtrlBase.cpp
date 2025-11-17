@@ -3027,6 +3027,10 @@ void CTDLTaskCtrlBase::DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITE
 				date = m_calculator.GetTaskStartDate(pTDI, pTDS);
 				bCalculated = (date != pTDI->dateStart);
 			}
+			else
+			{
+				break; // nothing to draw
+			}
 
 			DrawColumnDate(pDC, date, TDCD_START, rColumn, crText, bCalculated);
 		}
@@ -3046,6 +3050,10 @@ void CTDLTaskCtrlBase::DrawColumnRowText(CDC* pDC, DWORD dwTaskID, const TODOITE
 			{
 				date = m_calculator.GetTaskDueDate(pTDI, pTDS);
 				bCalculated = (date != pTDI->dateDue);
+			}
+			else
+			{
+				break; // nothing to draw
 			}
 
 			DrawColumnDate(pDC, date, TDCD_DUE, rColumn, crText, bCalculated);
