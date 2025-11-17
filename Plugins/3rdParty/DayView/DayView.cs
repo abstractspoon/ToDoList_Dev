@@ -901,6 +901,22 @@ namespace Calendar
                 editbox.Top += e.OldValue - e.NewValue;
         }
 
+		protected override void OnKeyDown(KeyEventArgs e)
+		{
+			switch (e.KeyCode)
+			{
+			case Keys.Left:
+				DoHorizontalScroll(false);
+				break;
+
+			case Keys.Right:
+				DoHorizontalScroll(true);
+				break;
+			}
+
+			base.OnKeyDown(e);
+		}
+
         void OnHScroll(object sender, ScrollEventArgs e)
         {
 			if (e.NewValue == e.OldValue)
