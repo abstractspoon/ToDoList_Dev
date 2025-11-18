@@ -40,26 +40,14 @@ namespace JSViewUIExtension
 
 		JsTaskItems m_Items;
 		uint m_SelectedTaskId;
-		string m_TasklistPath;
 
-		DateTime m_HtmlCreationDate = DateUtil.NullDate;
-		DateTime m_CodeCreationDate = DateUtil.NullDate;
-		DateTime m_StylesCreationDate = DateUtil.NullDate;
+		// Data resource files -> Tasklist folder
+		ResourceFile m_JsDataFile	= new ResourceFile("JSViewData.js", true);
+		ResourceFile m_HtmlFile		= new ResourceFile("JSView.html", true);
 
-		// -------------------------------------------------------------
-
-		// Data files -> Tasklist folder
-		string JsDataFilePath	{ get { return FilePathFromName("JSViewData.js", true); } }
-		string HtmlFilePath		{ get { return FilePathFromName("JSView.html", true); } }
-
-		// Code files -> Exe folder
-		string JsCodeFilePath	{ get { return FilePathFromName("JSViewCode.js", false); } }
-		string StylesFilePath	{ get { return FilePathFromName("JSView.css", false); } }
-
-		string JsDataFileUri	{ get { return UriFromFilePath(JsDataFilePath); } }
-		string JsCodeFileUri	{ get { return UriFromFilePath(JsCodeFilePath); } }
-		string HtmlFileUri		{ get { return UriFromFilePath(HtmlFilePath); } }
-		string StylesFileUri	{ get { return UriFromFilePath(StylesFilePath); } }
+		// Code resource files -> Exe folder
+		ResourceFile m_JsCodeFile	= new ResourceFile("JSViewCode.js", false);
+		ResourceFile m_StylesFile	= new ResourceFile("JSView.css", false);
 
 		// -------------------------------------------------------------
 
@@ -86,7 +74,7 @@ namespace JSViewUIExtension
 			await m_WebView.EnsureCoreWebView2Async(null);
 
 			UpdateBrowserBackColor();
-			m_WebView.CoreWebView2.Navigate(HtmlFileUri); // will have already been built in UpdateTasks
+			m_WebView.CoreWebView2.Navigate(m_HtmlFile.Uri); // will have already been built in UpdateTasks
 		}
 
 		// IUIExtension ------------------------------------------------------------------
@@ -118,39 +106,16 @@ namespace JSViewUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			m_TasklistPath = tasks.GetFilePath();
+			// 'Data' files are stored with the tasklist
+			m_HtmlFile.TasklistPath = m_JsDataFile.TasklistPath = tasks.GetFilePath();
 
-			// Initialise/update default Javascript and HTML files
-			bool someRecreated = false;
+			// Tracked whether HTML file was updated
+			string defaultHtml = Resources.JSViewDefaultPage
+										  .Replace(DataPlaceholder, m_JsDataFile.Uri)
+										  .Replace(StylesPlaceholder, m_StylesFile.Uri)
+										  .Replace(CodePlaceholder, m_JsCodeFile.Uri);
 
-			if (!HasFileChanged(HtmlFilePath, m_HtmlCreationDate))
-			{
-				string html = Resources.JSViewDefaultPage
-									   .Replace(DataPlaceholder, JsDataFileUri)
-									   .Replace(StylesPlaceholder, StylesFileUri)
-									   .Replace(CodePlaceholder, JsCodeFileUri);
-
-				File.WriteAllText(HtmlFilePath, html);
-				m_HtmlCreationDate = File.GetLastWriteTime(HtmlFilePath);
-
-				someRecreated = true;
-			}
-
-			if (!HasFileChanged(JsCodeFilePath, m_CodeCreationDate))
-			{
-				File.WriteAllText(JsCodeFilePath, Resources.JSViewDefaultCode);
-				m_CodeCreationDate = File.GetLastWriteTime(JsCodeFilePath);
-
-				someRecreated = true;
-			}
-
-			if (!HasFileChanged(StylesFilePath, m_StylesCreationDate))
-			{
-				File.WriteAllText(StylesFilePath, Resources.JSViewDefaultStyles);
-				m_StylesCreationDate = File.GetLastWriteTime(StylesFilePath);
-
-				someRecreated = true;
-			}
+			bool htmlUpdated = m_HtmlFile.CheckUpdate(defaultHtml);
 
 			// Update tasks
 			var attribs = JSONUtil.GetAttributeList(tasks); // No translation
@@ -168,8 +133,8 @@ namespace JSViewUIExtension
 
 					if (m_WebView.CoreWebView2 != null)
 					{
-						if (someRecreated || (m_WebView.CoreWebView2.Source == AboutBlank))
-							m_WebView.CoreWebView2.Navigate(HtmlFileUri);
+						if (htmlUpdated || (m_WebView.CoreWebView2.Source == AboutBlank))
+							m_WebView.CoreWebView2.Navigate(m_HtmlFile.Uri);
 						else
 							m_WebView.CoreWebView2.PostWebMessageAsString("Refresh");
 					}
@@ -283,9 +248,9 @@ namespace JSViewUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-			prefs.WriteProfileString(key, "HtmlCreationDate", m_HtmlCreationDate.ToString("s"));
-			prefs.WriteProfileString(key, "CodeCreationDate", m_CodeCreationDate.ToString("s"));
-			prefs.WriteProfileString(key, "StylesCreationDate", m_StylesCreationDate.ToString("s"));
+			m_HtmlFile.Save(prefs, key);
+			m_JsCodeFile.Save(prefs, key);
+			m_StylesFile.Save(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -293,9 +258,13 @@ namespace JSViewUIExtension
             if (!appOnly)
             {
 				// private settings
-				DateTime.TryParse(prefs.GetProfileString(key, "HtmlCreationDate", ""), out m_HtmlCreationDate);
-				DateTime.TryParse(prefs.GetProfileString(key, "CodeCreationDate", ""), out m_CodeCreationDate);
-				DateTime.TryParse(prefs.GetProfileString(key, "StylesCreationDate", ""), out m_StylesCreationDate);
+				m_HtmlFile.Load(prefs, key);
+				m_JsCodeFile.Load(prefs, key);
+				m_StylesFile.Load(prefs, key);
+
+				// One time update
+				m_JsCodeFile.CheckUpdate(Resources.JSViewDefaultCode);
+				m_StylesFile.CheckUpdate(Resources.JSViewDefaultStyles);
 			}
 
 			// App settings
@@ -307,37 +276,6 @@ namespace JSViewUIExtension
 		{
 			var message = string.Format("BackColor={0}", ColorTranslator.ToHtml(this.BackColor));
 			m_WebView?.CoreWebView2?.PostWebMessageAsString(message);
-		}
-
-		bool HasFileChanged(string filePath, DateTime creationDate)
-		{
-			if (!File.Exists(filePath))
-				return false;
-
-			if (creationDate != DateUtil.NullDate)
-			{
-				var lastMod = File.GetLastWriteTime(filePath);
-				return (lastMod != creationDate);
-			}
-
-			// If we weren't provided with a creation date then we 
-			// have no way of knowing if the file has been changed 
-			// or not so we err on the side of caution
-			return true;
-		}
-
-		string FilePathFromName(string fileName, bool dataFile)
-		{
-			if (dataFile)
-				return Path.ChangeExtension(m_TasklistPath, fileName);
-
-			// else
-			return Path.Combine(Application.StartupPath, fileName);
-		}
-
-		static string UriFromFilePath(string filePath)
-		{
-			return new Uri(filePath).AbsoluteUri;
 		}
 
 		void ExportItemsToJsonAsJavascript()
@@ -363,7 +301,7 @@ namespace JSViewUIExtension
 				// TODO
 			};
 
-			File.WriteAllLines(JsDataFilePath, jsContent);
+			File.WriteAllLines(m_JsDataFile.Path, jsContent);
 		}
 
 		protected override void OnHandleDestroyed(EventArgs e)
@@ -410,7 +348,115 @@ namespace JSViewUIExtension
 
 		void OnNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
 		{
-			e.Cancel = ((e.Uri != AboutBlank) && (e.Uri != HtmlFileUri));
+			e.Cancel = ((e.Uri != AboutBlank) && (e.Uri != m_HtmlFile.Uri));
+		}
+	}
+
+	class ResourceFile
+	{
+		string		m_TasklistPath	= string.Empty;
+		string		m_FileName		= string.Empty;
+		DateTime	m_CreationDate	= DateUtil.NullDate;
+		bool		m_DataFile		= true;
+
+		// --------------------------------------
+
+		public ResourceFile(string fileName, bool dataFile)
+		{
+			m_FileName = fileName;
+			m_DataFile = dataFile;
+		}
+
+		public string TasklistPath 
+		{
+			get { return m_TasklistPath; }
+
+			set
+			{
+				// Sanity checks (for now)
+				Debug.Assert(m_DataFile);
+				Debug.Assert(string.IsNullOrEmpty(m_TasklistPath) ||
+							 (value == m_TasklistPath));
+
+				m_TasklistPath = value;
+			}
+		}
+
+		public DateTime CreationDate
+		{
+			get { return m_CreationDate; }
+
+			set
+			{
+				Debug.Assert(m_CreationDate == DateUtil.NullDate);
+				m_CreationDate = value;
+			}
+		}
+
+		public string Path
+		{
+			get
+			{
+				if (m_DataFile)
+					return System.IO.Path.ChangeExtension(m_TasklistPath, m_FileName);
+
+				// else
+				return System.IO.Path.Combine(Application.StartupPath, m_FileName);
+			}
+		}
+
+		public string Uri
+		{
+			get
+			{
+				return new Uri(Path).AbsoluteUri;
+			}
+		}
+
+		public bool CheckUpdate(string defaultContents)
+		{
+			if (HasChanged())
+				return false;
+
+			File.WriteAllText(Path, defaultContents);
+			m_CreationDate = File.GetCreationTime(Path);
+
+			return true;
+		}
+
+		bool HasChanged()
+		{
+			if (!File.Exists(Path))
+				return false;
+
+			if (CreationDate != DateUtil.NullDate)
+			{
+				var lastMod = File.GetLastWriteTime(Path);
+				return (lastMod != CreationDate);
+			}
+
+			// If we weren't provided with a creation date then we 
+			// have no way of knowing if the file has been changed 
+			// or not so we err on the side of caution
+			return true;
+		}
+
+		public void Save(Preferences prefs, String key)
+		{
+			var entry = string.Format("{0}.CreationDate", m_FileName);
+			prefs.WriteProfileString(key, entry, CreationDate.ToString("s"));
+		}
+
+		public bool Load(Preferences prefs, String key)
+		{
+			DateTime date;
+			var entry = string.Format("{0}.CreationDate", m_FileName);
+
+			if (!DateTime.TryParse(prefs.GetProfileString(key, entry, ""), out date))
+				return false;
+
+			CreationDate = date;
+			return true;
 		}
 	}
 }
