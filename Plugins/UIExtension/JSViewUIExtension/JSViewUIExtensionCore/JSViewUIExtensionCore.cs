@@ -30,6 +30,7 @@ namespace JSViewUIExtension
 		const string DataPlaceholder	= "{{{JSVIEW_USERDATA}}}";
 		const string CodePlaceholder	= "{{{JSVIEW_USERCODE}}}";
 		const string StylesPlaceholder	= "{{{JSVIEW_STYLESHEET}}}";
+		const string ColorsPlaceholder  = "{{{JSVIEW_COLORUTIL}}}";
 
 		// -------------------------------------------------------------
 
@@ -48,6 +49,7 @@ namespace JSViewUIExtension
 		// Code resource files -> Exe folder
 		ResourceFile m_JsCodeFile	= new ResourceFile("JSViewCode.js", false);
 		ResourceFile m_StylesFile	= new ResourceFile("JSView.css", false);
+		ResourceFile m_ColorsFile	= new ResourceFile("JSColorUtil.js", false);
 
 		// -------------------------------------------------------------
 
@@ -113,6 +115,7 @@ namespace JSViewUIExtension
 			string defaultHtml = Resources.JSViewDefaultPage
 										  .Replace(DataPlaceholder, m_JsDataFile.Uri)
 										  .Replace(StylesPlaceholder, m_StylesFile.Uri)
+										  .Replace(ColorsPlaceholder, m_ColorsFile.Uri)
 										  .Replace(CodePlaceholder, m_JsCodeFile.Uri);
 
 			bool htmlUpdated = m_HtmlFile.CheckUpdate(defaultHtml);
@@ -248,9 +251,11 @@ namespace JSViewUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
+			// Note: m_JsDataFile is always updated
 			m_HtmlFile.Save(prefs, key);
 			m_JsCodeFile.Save(prefs, key);
 			m_StylesFile.Save(prefs, key);
+			m_ColorsFile.Save(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -261,10 +266,12 @@ namespace JSViewUIExtension
 				m_HtmlFile.Load(prefs, key);
 				m_JsCodeFile.Load(prefs, key);
 				m_StylesFile.Load(prefs, key);
+				m_ColorsFile.Load(prefs, key);
 
-				// One time update
+				// One time update for code files
 				m_JsCodeFile.CheckUpdate(Resources.JSViewDefaultCode);
 				m_StylesFile.CheckUpdate(Resources.JSViewDefaultStyles);
+				m_ColorsFile.CheckUpdate(Resources.JSViewDefaultColorUtil);
 			}
 
 			// App settings
@@ -351,6 +358,8 @@ namespace JSViewUIExtension
 			e.Cancel = ((e.Uri != AboutBlank) && (e.Uri != m_HtmlFile.Uri));
 		}
 	}
+
+	////////////////////////////////////////////////////////////////////////////
 
 	class ResourceFile
 	{

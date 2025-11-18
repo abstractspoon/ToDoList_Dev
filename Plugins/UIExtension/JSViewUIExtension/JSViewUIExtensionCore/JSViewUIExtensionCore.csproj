@@ -121,6 +121,9 @@
   <ItemGroup>
     <None Include="Resources\JSViewDefaultStyles.css" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\JSViewDefaultColorUtil.js" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"

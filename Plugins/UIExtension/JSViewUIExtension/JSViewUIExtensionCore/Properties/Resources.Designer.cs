@@ -66,6 +66,8 @@ namespace JSViewUIExtension.Properties {
         ///
         ///google.charts.setOnLoadCallback(OnLoad);
         ///
+        ///window.onresize = RefreshSelectedView;
+        ///
         ///// General data and functions -------------------------------------------------------------
         ///var allColors = 
         ///[
@@ -81,9 +83,7 @@ namespace JSViewUIExtension.Properties {
         ///    &apos;#316395&apos;,
         ///    &apos;#994499&apos;,
         ///    &apos;#22aa99&apos;,
-        ///    &apos;#aaaa11&apos;,
-        ///    &apos;#6633cc&apos;,
-        ///    &apos;#e673 [rest of string was truncated]&quot;;.
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JSViewDefaultCode {
             get {
@@ -92,18 +92,47 @@ namespace JSViewUIExtension.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to // Copyright (c) Andrew J. Peterson, NDP Software
+        ///
+        ///var ColorHelper;
+        ///
+        ///(function () {
+        ///
+        ///  function isArray(object) {
+        ///    return typeof object === &apos;object&apos; &amp;&amp;
+        ///        Object.prototype.toString.call(object) === &apos;[object Array]&apos;;
+        ///  }
+        ///
+        ///
+        ///  /*
+        ///   Use a singleton cache of all color strings we see.
+        ///   Each key points to a structure, which can have hex, rgb, etc. values in it.
+        ///   */
+        ///  var immutableCache = {};
+        ///
+        ///  // returns (or creates) the cached color structure
+        ///  var colorCache = function (c) {
+        ///    [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string JSViewDefaultColorUtil {
+            get {
+                return ResourceManager.GetString("JSViewDefaultColorUtil", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;!DOCTYPE html&gt;
         ///&lt;html&gt;
         ///    &lt;head&gt;
-        ///        &lt;style&gt;
-        ///            body { font-family: Tahoma; font-size: small }
-        ///        &lt;/style&gt;
         ///    
         ///        &lt;script type=&quot;text/javascript&quot; src=&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js&quot;&gt;&lt;/script&gt;
         ///        &lt;script type=&quot;text/javascript&quot; src=&quot;https://www.gstatic.com/charts/loader.js&quot;&gt;&lt;/script&gt;
         ///
         ///        &lt;script type=&quot;text/javascript&quot; src=&quot;{{{JSVIEW_USERDATA}}}&quot;&gt;&lt;/script&gt;
-        ///        &lt;script type=&quot;text/javascript&quot; src=&quot;{{{JSVIEW_USERCODE}}}&quot;&gt;&lt;/script&gt; [rest of string was truncated]&quot;;.
+        ///        &lt;script type=&quot;text/javascript&quot; src=&quot;{{{JSVIEW_USERCODE}}}&quot;&gt;&lt;/script&gt;
+        ///        &lt;script type=&quot;text/javascript&quot; src=&quot;{{{JSVIEW_COLORUTIL}}}&quot;&gt;&lt;/script&gt;
+        ///        
+        ///     [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JSViewDefaultPage {
             get {
@@ -112,7 +141,30 @@ namespace JSViewUIExtension.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to  
+        ///*
+        ///{
+        ///	font-family: Tahoma;
+        ///	font-size: 9pt;
+        ///}
+        /// 
+        ///body
+        ///{
+        ///	margin: 0px;
+        ///	padding: 0px;
+        ///	border: none;
+        ///}
+        ///
+        ///.content
+        ///{
+        ///	border: 1px solid gray; 
+        ///	background: white; 
+        ///	height: 100%;
+        ///	width: 99%; /* prevent horz scrollbar */
+        ///	margin: 3px 0px 0px 0px;
+        ///}
+        ///
+        ///.
         /// </summary>
         internal static string JSViewDefaultStyles {
             get {

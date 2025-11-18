@@ -6,40 +6,6 @@ google.charts.setOnLoadCallback(OnLoad);
 window.onresize = RefreshSelectedView;
 
 // General data and functions -------------------------------------------------------------
-var allColors = 
-[
-    '#3366cc',
-    '#dc3912',
-    '#ff9900',
-    '#109618',
-    '#990099',
-    '#0099c6',
-    '#dd4477',
-    '#66aa00',
-    '#b82e2e',
-    '#316395',
-    '#994499',
-    '#22aa99',
-    '#aaaa11',
-    '#6633cc',
-    '#e67300',
-    '#8b0707',
-    '#651067',
-    '#329262',
-    '#5574a6',
-    '#3b3eac',
-    '#b77322',
-    '#16d620',
-    '#b91383',
-    '#f4359e',
-    '#9c5935',
-    '#a9c413',
-    '#2a778d',
-    '#668d1c',
-    '#bea413',
-    '#0c5922',
-    '#743411'
-];
 
 function SupportsHTML5Storage() 
 {
@@ -166,11 +132,6 @@ function MergeSelectedTaskAttributes(selTasks)
     RestoreSelectedTask();
 }
 
-function UpdateGlobalTasks(selTasks)
-{
-    // TODO
-}
-
 function RestoreSelectedTask()
 {
     var id = GetSelectedTaskId();
@@ -203,6 +164,14 @@ function SelectTask(id, fromChart)
             window.chrome.webview.postMessage('SelectTask=' + id);
         }
     }
+}
+
+function GetBestTextColor(fillColor)
+{
+    let rgb = fillColor.toRGB();
+    let grey = ((rgb[2] + (rgb[1] * 6) + (rgb[0] * 3)) / 10);
+    
+    return ((grey < 128) ? 'White'.toHexColor() : 'Black'.toHexColor());
 }
 
 function GetSelectedTaskId()
@@ -363,10 +332,10 @@ function SelectDashboardTask(id, prevId)
 
 function DrawDashboard()
 {
-    DrawDashboardChart(dashboardChart11, 0, 1);
-    DrawDashboardChart(dashboardChart12, 2, 3);
-    DrawDashboardChart(dashboardChart21, 4, 5);
-    DrawDashboardChart(dashboardChart22, 6, 7);
+    DrawDashboardChart(dashboardChart11, 'Red', 'Blue');
+    DrawDashboardChart(dashboardChart12, 'Green', 'Orange');
+    DrawDashboardChart(dashboardChart21, 'Yellow', 'Coral');
+    DrawDashboardChart(dashboardChart22, 'Purple', 'Turquoise');
 }
 
 function DrawDashboardChart(chart, color1, color2) 
@@ -374,7 +343,7 @@ function DrawDashboardChart(chart, color1, color2)
     var options = 
     {
         animation: {'startup': true, duration: 1000, easing: 'out'},  
-        colors: [ allColors[color1], allColors[color2] ],
+        colors: [ color1.toHexColor(), color2.toHexColor() ],
         curveType: 'function',
         legend: { position: 'bottom' },
         title: 'Priority & Risk',
@@ -699,10 +668,12 @@ function RefreshTreeMapTextAndColors(specificId)
                     row = 0;
                 
                 let fillColor = treeMapDataTable.getValue(row, 4);
-                let borderColor = '#FFFFFF';
+                let textColor = GetBestTextColor(fillColor);
+                let borderColor = 'White'.toHexColor(); // spacing between items
                 
                 if (id == selId)
                 {
+                    textColor = fillColor.darken(10);
                     fillColor = '#A0D7FF';
                     borderColor = '#5AB4FF';
                 }
@@ -716,7 +687,8 @@ function RefreshTreeMapTextAndColors(specificId)
 
                 let title = treeMapDataTable.getValue(row, 5);
                 
-                $(text).css('user-select', 'none') // Prevent double-click from selecting text
+                $(text).css('user-select', 'none') // Prevent double-click from selecting textColor
+                       .css('fill', textColor)
                        .text(title);
 
                 // Modify the text to fit the rect width
