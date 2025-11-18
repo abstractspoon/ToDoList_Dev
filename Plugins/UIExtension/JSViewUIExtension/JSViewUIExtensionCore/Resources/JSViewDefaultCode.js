@@ -635,8 +635,11 @@ function OnTreeMapHighlight(item)
 {
     let row = item["row"];
     let id = treeMapRow2TaskMapping[row];
-    
-    SelectTask(id, true);
+
+    if (id != GetSelectedTaskId())
+        SelectTask(id, true);
+    else
+        RefreshTreeMapTextAndColors(id); // still required because Google!
 }
 
 function OnTreeMapUnhighlight(item)
