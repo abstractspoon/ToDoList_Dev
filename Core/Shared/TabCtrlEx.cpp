@@ -44,7 +44,7 @@ CTabCtrlEx::CTabCtrlEx(DWORD dwFlags, ETabOrientation orientation)
 	m_bDragging(FALSE),
 	m_dwFlags(dwFlags), 
 	m_nBtnDown(VK_CANCEL), 
-	m_nMouseInCloseButton(-1),
+	m_nHotCloseButton(-1),
 	m_bUpdatingTabWidth(FALSE),
 	m_bFirstPaint(TRUE),
 	m_hwndPreDragFocus(NULL)
@@ -515,7 +515,7 @@ void CTabCtrlEx::DrawTabCloseButton(CDC* pDC, int nTab)
 	GetTabCloseButtonRect(nTab, rBtn);
 	
 	// set the color to white-on-red if the cursor is over the 'x' else gray
-	if (m_nMouseInCloseButton == nTab)
+	if (nTab == m_nHotCloseButton)
 	{
 		pDC->SetTextColor(colorWhite);
 		pDC->FillSolidRect(rBtn, colorIndianRed);
@@ -688,7 +688,7 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		int nTab = HitTestCloseButton(point);
 	
-		if (m_nMouseInCloseButton != nTab)
+		if (nTab != m_nHotCloseButton)
 		{
 			CRect rBtn;
 	
@@ -702,13 +702,13 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 				TrackMouseEvent(&tme);
 			}
 	
-			if (m_nMouseInCloseButton != -1)
+			if (m_nHotCloseButton != -1)
 			{
-				VERIFY(GetTabCloseButtonRect(m_nMouseInCloseButton, rBtn));
+				VERIFY(GetTabCloseButtonRect(m_nHotCloseButton, rBtn));
 				InvalidateRect(rBtn, FALSE);
 			}
 	
-			m_nMouseInCloseButton = nTab;
+			m_nHotCloseButton = nTab;
 		}
 	}	
 }
@@ -769,10 +769,10 @@ void CTabCtrlEx::OnTimer(UINT nIDEvent)
 
 LRESULT CTabCtrlEx::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	if (m_nMouseInCloseButton != -1)
+	if (m_nHotCloseButton != -1)
 	{
 		CRect rBtn;
-		VERIFY(GetTabCloseButtonRect(m_nMouseInCloseButton, rBtn));
+		VERIFY(GetTabCloseButtonRect(m_nHotCloseButton, rBtn));
 
 		InvalidateRect(rBtn, FALSE);
 	}
@@ -781,7 +781,7 @@ LRESULT CTabCtrlEx::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
 	TRACKMOUSEEVENT tme = { sizeof(tme), TME_LEAVE | TME_CANCEL, m_hWnd, 0 };
 	TrackMouseEvent(&tme);
 	
-	m_nMouseInCloseButton = -1;
+	m_nHotCloseButton = -1;
 
 	return Default();
 }
@@ -1126,17 +1126,18 @@ void CTabCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CTabCtrlEx::OnCaptureChanged(CWnd *pWnd) 
 {
+	m_nHotCloseButton = -1;
+	m_nBtnDown = VK_CANCEL;
+	m_ptBtnDown = 0;
+
 	if (IsDragging())
 	{
 		if (m_hwndPreDragFocus && ::IsWindow(m_hwndPreDragFocus))
 			::SetFocus(m_hwndPreDragFocus);
 
 		m_hwndPreDragFocus = NULL;
-		m_nBtnDown = VK_CANCEL;
 		m_bDragging = FALSE;
-		m_nMouseInCloseButton = -1;
 		m_nDragTab = m_nDropTab = -1;
-		m_ptBtnDown = 0;
 
 		m_ilDragImage.DragLeave(this);
 		m_ilDragImage.EndDrag();

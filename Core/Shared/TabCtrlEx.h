@@ -100,7 +100,7 @@ protected:
 	UINT m_nBtnDown; // VK_ mouse button
 	CPoint m_ptBtnDown;
 	CFont m_fontClose, m_fontBold;
-	int m_nMouseInCloseButton; // tab index
+	int m_nHotCloseButton; // tab index
 	BOOL m_bFirstPaint;
 	BOOL m_bUpdatingTabWidth;
 
