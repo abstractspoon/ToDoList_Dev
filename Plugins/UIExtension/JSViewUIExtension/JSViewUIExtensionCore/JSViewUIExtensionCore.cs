@@ -24,7 +24,8 @@ namespace JSViewUIExtension
 {
 	public partial class JSViewUIExtensionCore : System.Windows.Forms.UserControl, IUIExtension
 	{
-        const string FontName = "Tahoma";
+        const string FontName   = "Tahoma";
+        const string AboutBlank = "about:blank";
 
 		const string DataPlaceholder	= "{{{JSVIEW_USERDATA}}}";
 		const string CodePlaceholder	= "{{{JSVIEW_USERCODE}}}";
@@ -78,22 +79,14 @@ namespace JSViewUIExtension
 
 		async void InitializeAsync()
         {
+			m_WebView.WebMessageReceived += new EventHandler<CoreWebView2WebMessageReceivedEventArgs>(OnWebMessageReceived);
+			m_WebView.NavigationCompleted += new EventHandler<CoreWebView2NavigationCompletedEventArgs>(OnNavigationCompleted);
+			m_WebView.NavigationStarting += new EventHandler<CoreWebView2NavigationStartingEventArgs>(OnNavigationStarting);
+
 			await m_WebView.EnsureCoreWebView2Async(null);
 
- 			m_WebView.WebMessageReceived += new EventHandler<CoreWebView2WebMessageReceivedEventArgs>(OnWebMessageReceived);
-			m_WebView.NavigationCompleted += new EventHandler<CoreWebView2NavigationCompletedEventArgs>(OnNavigationCompleted);
-
-//			m_WebView.CoreWebView2.Settings.IsBuiltInErrorPageEnabled = false;
-
-//			await m_WebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.chrome.webview.postMessage(window.document.URL);");
-//			await m_WebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync("window.chrome.webview.addEventListener(\'message\', event => alert(event.data));");
-
-			// Disable context menu
-//			await m_WebView.CoreWebView2.ExecuteScriptAsync("window.addEventListener('contextmenu', window => {window.preventDefault();});");
-
-
 			UpdateBrowserBackColor();
-			Navigate(HtmlFileUri); // will have already been built in UpdateTasks
+			m_WebView.CoreWebView2.Navigate(HtmlFileUri); // will have already been built in UpdateTasks
 		}
 
 		// IUIExtension ------------------------------------------------------------------
@@ -101,7 +94,6 @@ namespace JSViewUIExtension
 		public bool SelectTask(UInt32 taskId)
 		{
 			m_SelectedTaskId = taskId;
-
 			m_WebView?.CoreWebView2?.PostWebMessageAsString(string.Format("SelectTask={0}", taskId));
 
 			// TODO
@@ -129,6 +121,8 @@ namespace JSViewUIExtension
 			m_TasklistPath = tasks.GetFilePath();
 
 			// Initialise/update default Javascript and HTML files
+			bool someRecreated = false;
+
 			if (!HasFileChanged(HtmlFilePath, m_HtmlCreationDate))
 			{
 				string html = Resources.JSViewDefaultPage
@@ -138,18 +132,24 @@ namespace JSViewUIExtension
 
 				File.WriteAllText(HtmlFilePath, html);
 				m_HtmlCreationDate = File.GetLastWriteTime(HtmlFilePath);
+
+				someRecreated = true;
 			}
 
 			if (!HasFileChanged(JsCodeFilePath, m_CodeCreationDate))
 			{
 				File.WriteAllText(JsCodeFilePath, Resources.JSViewDefaultCode);
 				m_CodeCreationDate = File.GetLastWriteTime(JsCodeFilePath);
+
+				someRecreated = true;
 			}
 
 			if (!HasFileChanged(StylesFilePath, m_StylesCreationDate))
 			{
 				File.WriteAllText(StylesFilePath, Resources.JSViewDefaultStyles);
 				m_StylesCreationDate = File.GetLastWriteTime(StylesFilePath);
+
+				someRecreated = true;
 			}
 
 			// Update tasks
@@ -168,8 +168,8 @@ namespace JSViewUIExtension
 
 					if (m_WebView.CoreWebView2 != null)
 					{
-						if (m_WebView.CoreWebView2.Source == "about:blank")
-							Navigate(HtmlFileUri);
+						if (someRecreated || (m_WebView.CoreWebView2.Source == AboutBlank))
+							m_WebView.CoreWebView2.Navigate(HtmlFileUri);
 						else
 							m_WebView.CoreWebView2.PostWebMessageAsString("Refresh");
 					}
@@ -305,11 +305,8 @@ namespace JSViewUIExtension
 
 		void UpdateBrowserBackColor()
 		{
-			if (m_WebView.CoreWebView2 != null)
-			{
-				var message = string.Format("BackColor={0}", ColorTranslator.ToHtml(this.BackColor));
-				m_WebView.CoreWebView2.PostWebMessageAsString(message);
-			}
+			var message = string.Format("BackColor={0}", ColorTranslator.ToHtml(this.BackColor));
+			m_WebView?.CoreWebView2?.PostWebMessageAsString(message);
 		}
 
 		bool HasFileChanged(string filePath, DateTime creationDate)
@@ -369,17 +366,6 @@ namespace JSViewUIExtension
 			File.WriteAllLines(JsDataFilePath, jsContent);
 		}
 
-		void Navigate(string uri)
-		{
-			if (m_WebView != null && m_WebView.CoreWebView2 != null)
-			{
-				// 				if (!uri.StartsWith("https://") || !uri.StartsWith("http://"))
-				// 					uri = "https://" + uri;
-
-				m_WebView.CoreWebView2.Navigate(uri);
-			}
-		}
-
 		protected override void OnHandleDestroyed(EventArgs e)
 		{
 			m_WebView.Dispose();
@@ -420,6 +406,11 @@ namespace JSViewUIExtension
 		{
 			UpdateBrowserBackColor();
 			SelectTask(m_SelectedTaskId);
+		}
+
+		void OnNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+		{
+			e.Cancel = ((e.Uri != AboutBlank) && (e.Uri != HtmlFileUri));
 		}
 	}
 }
