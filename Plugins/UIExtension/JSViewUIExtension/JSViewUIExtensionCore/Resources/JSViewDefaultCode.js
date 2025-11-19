@@ -179,7 +179,7 @@ function SelectTask(id, fromChart)
             break;
     }
         
-    if (fromChart == true)
+    if (fromChart)
     {
         // Notify the app
         window.chrome.webview.postMessage('SelectTask=' + id);
@@ -281,8 +281,8 @@ function PopulateDashboard()
 
     for (let i = 0; i < tasks.length; i++) 
     {
-        var id = tasks[i]['Task ID'];
-        var title = tasks[i].Title + ' (' + id + ')';
+        let id = tasks[i]['Task ID'];
+        let title = tasks[i].Title + ' (' + id + ')';
         
         dashboardDataTable.addRow([title, tasks[i].Priority, tasks[i].Risk]);
         dashboardRow2TaskMapping[i] = id;
@@ -341,7 +341,6 @@ function OnDashboard22Select(e)
 function OnSelectDashboardTask(chart)
 {
     let id = GetSelectedChartId(chart, dashboardRow2TaskMapping);
-    
     SelectTask(id, true);
 }
 
@@ -364,7 +363,7 @@ function DrawDashboard()
 
 function DrawDashboardChart(chart, color1, color2) 
 {
-    var options = 
+    let options = 
     {
         animation: {'startup': true, duration: 1000, easing: 'out'},  
         colors: [ color1.toHexColor(), color2.toHexColor() ],
