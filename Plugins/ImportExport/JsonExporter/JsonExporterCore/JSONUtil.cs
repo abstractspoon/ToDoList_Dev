@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Globalization;
+using System.Drawing;
 
 using Newtonsoft.Json.Linq;
 
@@ -41,7 +42,15 @@ namespace JSONExporterPlugin
 					return ParseAttributeValue(attribValue, typeof(double), 0.0);
 
 				case Task.Attribute.Color:
-					return task.GetWebColor();
+					{
+						var color = task.GetTextDrawingColor();
+
+						if (color != Color.Empty)
+							return ColorTranslator.ToHtml(color);
+
+						attribValue = string.Empty;
+					}
+					break;
 				}
 
 				// All the rest

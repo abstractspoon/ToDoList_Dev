@@ -130,10 +130,6 @@ function RefreshSelectedView()
 
 function MergeSelectedTaskAttributes(selTasks)
 {
-    // Update global tasklist so that a subsequent refresh
-    // will also have the changed tasks
-    UpdateGlobalTasks(selTasks);
-    
     switch (GetSelectedView())
     {
         case 'dashboard_id':
@@ -193,6 +189,9 @@ function SelectTask(id, fromChart)
 
 function GetBestTextColor(fillColor)
 {
+    if (fillColor == "")
+        return 'Black'.toHexColor();
+    
     let rgb = fillColor.toRGB();
     let grey = ((rgb[2] + (rgb[1] * 6) + (rgb[0] * 3)) / 10);
     
@@ -228,7 +227,7 @@ function SetSelectedChartRow(id, chart, task2RowMapping)
 
 function CheckUpdateDataValue(dataTable, row, col, newValue)
 {
-    if (!row || !col || !newValue)
+    if ((row == null) || (col == null) || (newValue == null))
         return false;
     
     if (newValue == dataTable.getValue(row, col))
@@ -697,22 +696,37 @@ function RefreshTreeMapTextAndColors(specificId)
                     row = 0;
              
                 let baseColor = treeMapDataTable.getValue(row, 4);
-                
-                let fillColor = baseColor.lighten(45);
-                let borderColor = baseColor;
-                let textColor = baseColor;
+                let fillColor = "";
+                let borderColor = "";
+                let textColor = "";
                 
                 if (id == selId)
                 {
                     fillColor = '#A0D7FF';
                     borderColor = '#5AB4FF';
-                    textColor = baseColor.darken(20);
+                    
+                    if (baseColor == "")
+                        textColor = 'Black'.toHexColor();
+                    else
+                        textColor = baseColor.darken(20);
+                }
+                else if (baseColor == "")
+                {
+                    fillColor = 'White'.toHexColor();
+                    borderColor = 'Gray'.toHexColor();
+                    textColor = 'Black'.toHexColor();
                 }
                 else if ((id == 0) || colorTaskBkgnd)
                 {
                     fillColor = baseColor;
                     borderColor = baseColor;
                     textColor = GetBestTextColor(baseColor);
+                }
+                else
+                {
+                    fillColor = baseColor.lighten(45);
+                    borderColor = baseColor;
+                    textColor = baseColor;
                 }
                 
                 let rect = jCell.find('rect');
@@ -722,14 +736,15 @@ function RefreshTreeMapTextAndColors(specificId)
                        .css('stroke', borderColor)
                        .css('stroke-width', '1px')
                        .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
-                
-                // Put a 1 pixel gap between items       
+           
+                // Put a 2 pixel gap between items       
                 if (!$(fo).attr('rectAdjusted'))
                 {
                     $(fo).attr('rectAdjusted', true);
                     
-                    $(rect).attr('width', $(rect).attr('width') - 3); 
-                    $(rect).attr('height', $(rect).attr('height') - 3);
+                    $(rect).attr('width', $(rect).attr('width') - 3) 
+                           .attr('height', $(rect).attr('height') - 3)
+                           .attr('shape-rendering', 'crispEdges');
                 }
 
                 let title = treeMapDataTable.getValue(row, 5);
