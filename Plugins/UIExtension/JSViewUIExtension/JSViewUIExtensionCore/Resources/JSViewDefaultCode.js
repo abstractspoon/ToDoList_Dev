@@ -7,6 +7,19 @@ window.onresize = RefreshSelectedView;
 
 // General data and functions -------------------------------------------------------------
 
+function OnLoad()
+{
+    if (!SupportsHTML5Storage())
+        alert('local storage not supported');
+
+    if (GetPreference('BackColor', null))
+        document.body.style.backgroundColor = GetPreference('BackColor', null);
+    
+    RefreshSelectedView();
+  
+    chrome.webview.addEventListener('message', OnAppMessage);
+}
+
 function SupportsHTML5Storage() 
 {
     try 
@@ -33,20 +46,44 @@ function OnAppMessage(message)
     {
         location.reload(location.href);
     }
-    else if (message.data.indexOf('BackColor=') == 0)
-    {
-        document.body.style.backgroundColor = message.data.substr(10);
-    }
     else if (message.data.indexOf('Refresh=') == 0)
     {
-        var json = message.data.substr(8);
+        let json = message.data.substr(8);
         MergeSelectedTaskAttributes(JSON.parse(json));
     }
     else if (message.data.indexOf('SelectTask=') == 0)
     {
-        var id = message.data.substr(11);
+        let id = message.data.substr(11);
         SelectTask(id, false);
     }
+    else if (message.data.indexOf('Preferences=') == 0)
+    {
+        let colorTaskBkgnd = GetPreference('ColorTaskBackground', false);
+        let strikethruDone = GetPreference('StrikethroughDone', true);
+        let backColor = GetPreference('BackColor', null);
+        
+        let prefs = message.data.substr(12);
+        sessionStorage.setItem('Preferences', prefs);
+        
+        if (backColor != GetPreference('BackColor', null))
+            document.body.style.backgroundColor = GetPreference('BackColor', null);
+        
+        if ((GetPreference('ColorTaskBackground', false) != colorTaskBkgnd) ||
+            (GetPreference('StrikethroughDone', true) != strikethruDone))
+        {
+            RefreshSelectedView();
+        }
+    }
+}
+
+function GetPreference(pref, defValue)
+{
+    var prefs = JSON.parse(sessionStorage.getItem('Preferences'));
+    
+    if (!prefs || (prefs[pref] == null))
+        return defValue;
+    
+    return prefs[pref];
 }
 
 function OnChangeView(view) 
@@ -60,15 +97,6 @@ function OnChangeView(view)
     RefreshSelectedView();
 }
         
-function OnLoad()
-{
-    if (!SupportsHTML5Storage())
-        alert('local storage not supported');
-
-    RefreshSelectedView();
-    chrome.webview.addEventListener('message', OnAppMessage);
-}
-
 function GetSelectedView()
 {
     var view = sessionStorage.getItem('SelectedView');
@@ -140,30 +168,27 @@ function RestoreSelectedTask()
 
 function SelectTask(id, fromChart)
 {
-    let selId = GetSelectedTaskId();
-    
-    if (id != selId)
-    {
-        sessionStorage.setItem('SelectedId', id);
+    let prevId = GetSelectedTaskId();
+    sessionStorage.setItem('SelectedId', id);
 
-        switch (GetSelectedView())
-        {
-            case 'dashboard_id':
-            case '':
-                SelectDashboardTask(id, selId);
-                break;
-                  
-            case 'treemap_id':
-                SelectTreeMapTask(id, selId);
-                break;
-        }
-            
-        if (fromChart == true)
-        {
-            // Notify the app
-            window.chrome.webview.postMessage('SelectTask=' + id);
-        }
+    switch (GetSelectedView())
+    {
+        case 'dashboard_id':
+        case '':
+            SelectDashboardTask(id, prevId);
+            break;
+              
+        case 'treemap_id':
+            SelectTreeMapTask(id, prevId);
+            break;
     }
+        
+    if (fromChart == true)
+    {
+        // Notify the app
+        window.chrome.webview.postMessage('SelectTask=' + id);
+    }
+    
 }
 
 function GetBestTextColor(fillColor)
@@ -391,8 +416,9 @@ function PopulateTreeMap()
     treeMapDataTable.addColumn('number', 'ColorVal');
     treeMapDataTable.addColumn('string', 'WebColor');
     treeMapDataTable.addColumn('string', 'Title');
+    treeMapDataTable.addColumn('number', 'Done');
 
-    AddTreeMapItem('0', '', true, '#C0C0C0', 'Tasklist');
+    AddTreeMapItem('0', '', false, '#C0C0C0', 'Tasklist');
     
     for (let i = 0; i < tasks.length; i++) 
     {
@@ -420,10 +446,11 @@ function AddTreeMapItem(id, parentId, done, color, title)
     [
         id,
         parentId, 
-        1,
-        (done ? 0 : 1),
+        1, // size
+        1, // colorVal
         color,
-        title
+        title,
+        done ? 1 : 0,
     ]);
     
     let row = (treeMapDataTable.getNumberOfRows() - 1);
@@ -435,7 +462,7 @@ function UpdateTreeMapSelectedTasks(selTasks)
 {
     let changed = false;
         
-    // Only we've been already populated
+    // Only if we've been already populated
     if (treeMapTask2RowMapping)
     {
         for (let i = 0; i < selTasks.length; i++) 
@@ -517,10 +544,8 @@ function OnTreeMapRollup(unused)
         
         SelectTask(parentId, true);
     }
-    else
-    {
-        RefreshTreeMapTextAndColors();
-    }
+
+    RefreshTreeMapTextAndColors();
 }
 
 // We never call this directly; Only via SelectTask()
@@ -629,6 +654,9 @@ function RefreshTreeMapTextAndColors(specificId)
     let svg = treechart.find("svg");
     let cells = svg.find("g");
     
+    let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
+    let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
+    
     for (let i = 0; i < cells.length; i++)
     {
         let cell = cells[i];
@@ -646,7 +674,8 @@ function RefreshTreeMapTextAndColors(specificId)
             // with the task title and the ID will have been inserted
             // as a 'foreign object' so we look for that first and 
             // add it if it wasn't found
-            let id = jCell.find('foreignObject').attr('id');
+            let fo = jCell.find('foreignObject');
+            let id = fo.attr('id');
             
             if (id == null)
             {
@@ -654,9 +683,9 @@ function RefreshTreeMapTextAndColors(specificId)
                 
                 if (id && (id != ''))
                 {
-                    var foreignObject = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
-                    $(foreignObject).attr('id', id);
-                    jCell.append(foreignObject);
+                    fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
+                    $(fo).attr('id', id);
+                    jCell.append(fo);
                 }
             }
                 
@@ -666,16 +695,24 @@ function RefreshTreeMapTextAndColors(specificId)
                 
                 if (row == null)
                     row = 0;
+             
+                let baseColor = treeMapDataTable.getValue(row, 4);
                 
-                let fillColor = treeMapDataTable.getValue(row, 4);
-                let textColor = GetBestTextColor(fillColor);
-                let borderColor = 'White'.toHexColor(); // spacing between items
+                let fillColor = baseColor.lighten(45);
+                let borderColor = baseColor;
+                let textColor = baseColor;
                 
                 if (id == selId)
                 {
-                    textColor = fillColor.darken(10);
                     fillColor = '#A0D7FF';
                     borderColor = '#5AB4FF';
+                    textColor = baseColor.darken(20);
+                }
+                else if ((id == 0) || colorTaskBkgnd)
+                {
+                    fillColor = baseColor;
+                    borderColor = baseColor;
+                    textColor = GetBestTextColor(baseColor);
                 }
                 
                 let rect = jCell.find('rect');
@@ -683,12 +720,24 @@ function RefreshTreeMapTextAndColors(specificId)
                 
                 $(rect).css('fill', fillColor)
                        .css('stroke', borderColor)
+                       .css('stroke-width', '1px')
                        .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
+                
+                // Put a 1 pixel gap between items       
+                if (!$(fo).attr('rectAdjusted'))
+                {
+                    $(fo).attr('rectAdjusted', true);
+                    
+                    $(rect).attr('width', $(rect).attr('width') - 3); 
+                    $(rect).attr('height', $(rect).attr('height') - 3);
+                }
 
                 let title = treeMapDataTable.getValue(row, 5);
+                let textDecoration = ((strikethruDone && (treeMapDataTable.getValue(row, 6) == 1)) ? 'line-through' : "");
                 
                 $(text).css('user-select', 'none') // Prevent double-click from selecting textColor
                        .css('fill', textColor)
+                       .css('text-decoration', textDecoration)
                        .text(title);
 
                 // Modify the text to fit the rect width
@@ -697,7 +746,7 @@ function RefreshTreeMapTextAndColors(specificId)
                 
                 while (actualWidth > availWidth)
                 {
-                    title = title.substring(0, (title.length / 2));
+                    title = title.substring(0, (title.length - 4));
                     $(text).text(title + '...');
                         
                     actualWidth = $(text)[0].getBBox().width;

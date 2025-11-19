@@ -40,6 +40,7 @@ namespace JSViewUIExtension
 		Font m_ControlsFont;
 
 		JsTaskItems m_Items;
+		JObject m_AppPrefs;
 		uint m_SelectedTaskId;
 
 		// Data resource files -> Tasklist folder
@@ -62,6 +63,7 @@ namespace JSViewUIExtension
 
 			m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 			m_Items = new JsTaskItems();
+			m_AppPrefs = new JObject();
 
 			InitializeComponent();
 			InitializeAsync();
@@ -75,7 +77,7 @@ namespace JSViewUIExtension
 
 			await m_WebView.EnsureCoreWebView2Async(null);
 
-			UpdateBrowserBackColor();
+			UpdateBrowserAppPreferences();
 			m_WebView.CoreWebView2.Navigate(m_HtmlFile.Uri); // will have already been built in UpdateTasks
 		}
 
@@ -238,7 +240,9 @@ namespace JSViewUIExtension
 		public void SetUITheme(UITheme theme)
 		{
             this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-			UpdateBrowserBackColor();
+
+			m_AppPrefs["BackColor"] = ColorTranslator.ToHtml(this.BackColor);
+			UpdateBrowserAppPreferences();
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -275,13 +279,17 @@ namespace JSViewUIExtension
 			}
 
 			// App settings
+			m_AppPrefs["ColorTaskBackground"] = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
+			m_AppPrefs["StrikethroughDone"] = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
+
+			UpdateBrowserAppPreferences();
 		}
 
 		// PRIVATE ------------------------------------------------------------------------------
 
-		void UpdateBrowserBackColor()
+		void UpdateBrowserAppPreferences()
 		{
-			var message = string.Format("BackColor={0}", ColorTranslator.ToHtml(this.BackColor));
+			var message = string.Format("Preferences={0}", m_AppPrefs.ToString());
 			m_WebView?.CoreWebView2?.PostWebMessageAsString(message);
 		}
 
@@ -349,7 +357,7 @@ namespace JSViewUIExtension
 
 		void OnNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
-			UpdateBrowserBackColor();
+			UpdateBrowserAppPreferences();
 			SelectTask(m_SelectedTaskId);
 		}
 
