@@ -164,6 +164,12 @@ function RestoreSelectedTask()
 
 function SelectTask(id, fromChart)
 {
+    if (id == '0')
+    {
+        RefreshTreeMapTextAndColors(id);
+        return;
+    }
+    
     let prevId = GetSelectedTaskId();
     sessionStorage.setItem('SelectedId', id);
 
