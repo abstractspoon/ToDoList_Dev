@@ -193,17 +193,6 @@ function SelectTask(id, fromChart)
     
 }
 
-function GetBestTextColor(fillColor)
-{
-    if (fillColor == "")
-        return 'Black'.toHexColor();
-    
-    let rgb = fillColor.toRGB();
-    let grey = ((rgb[2] + (rgb[1] * 6) + (rgb[0] * 3)) / 10);
-    
-    return ((grey < 128) ? 'White'.toHexColor() : 'Black'.toHexColor());
-}
-
 function GetSelectedTaskId()
 {
     var id = sessionStorage.getItem('SelectedId');
@@ -495,13 +484,8 @@ function DrawTreeMap()
     {
         enableHighlight: false,
         maxDepth: 1,
-        maxPostDepth: 0,
-//        minHighlightColor: '#8c6bb1',
-//        midHighlightColor: '#9ebcda',
-//        maxHighlightColor: '#edf8fb',
-//        minColor: '#009688',
-//        midColor: '#f7f7f7',
-//        maxColor: '#ee8100',
+        maxPostDepth: 3,
+        midColor: '#808080',
         headerHeight: 30,
         height: 500,
         useWeightedAverageForAggregation: true,
@@ -586,15 +570,13 @@ function SelectTreeMapTask(id, prevId)
 
 function GetTreeMapCellId(cell)
 {
-    let jCell = $(cell);
-    
-    if (!jCell.attr('style'))
+    if ($(cell).attr('style') == null)
         return -1;
     
-    let id = jCell.find('foreignObject').attr('id');
+    let id = $(cell).find('foreignObject').attr('id');
         
     if (id == null)
-        id = jCell.find('text').text(); // default
+        id = $(cell).find('text').text(); // default
     
     return id;
 }
@@ -664,115 +646,141 @@ function RefreshTreeMapTextAndColors(specificId)
     for (let i = 0; i < cells.length; i++)
     {
         let cell = cells[i];
-        let jCell = $(cell);
-        
-        if (!jCell.attr('style'))
-        {
-            // Always hide the default highlight
-            jCell.css('display', 'none');
-        }
-        else
-        {
-            // If we've been here before then the item text, which
-            // was originally the task ID, will have been replaced
-            // with the task title and the ID will have been inserted
-            // as a 'foreign object' so we look for that first and 
-            // add it if it wasn't found
-            let fo = jCell.find('foreignObject');
-            let id = fo.attr('id');
+      
+        // Put a 2 pixel gap between items       
+        let rect = $(cell).find('rect');
+        let fo = $(cell).find('foreignObject');
             
-            if (id == null)
+        if (!fo.attr('rectAdjusted'))
+        {
+            fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
+            $(fo).attr('rectAdjusted', true);
+            
+            $(rect).attr('width', $(rect).attr('width') - 3) 
+                   .attr('height', $(rect).attr('height') - 3)
+                   .attr('y', Math.max($(rect).attr('y'), 1))
+                   .attr('shape-rendering', 'crispEdges');
+            $(cell).append(fo);
+        }
+        
+        // Hide the default highlight Element
+        if ($(cell).children().length > 3)
+        {
+            $(cell).css('display', 'none');
+        }
+        
+        // Get the task ID of the Element
+        // Note: If we've been here before then the item text, which
+        // was originally the task ID, will have been replaced
+        // with the task title and the ID will have been inserted
+        // as a 'foreign object' so we look for that first and 
+        // add it if it wasn't found
+        let id = $(fo).attr('id');
+        
+        if (id == null)
+        {
+            id = $(cell).find('text').text(); // default
+            
+            if (Number.isNaN(id))
+                $(fo).attr('id', ''); // avoid further processing
+            else
+                $(fo).attr('id', id);
+        }
+            
+        if (!Number.isNaN(id) && ((specificId == null) || (id == specificId)))
+        {
+            let row = treeMapTask2RowMapping[id];
+            
+            if (row == null)
+                row = 0;
+         
+            // Render task 'box'
+            let baseColor = treeMapDataTable.getValue(row, 4);
+            let fillColor = "";
+            let borderColor = "";
+            
+            if (id == selId)
             {
-                id = jCell.find('text').text(); // default
-                
-                if (id && (id != ''))
-                {
-                    fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
-                    $(fo).attr('id', id);
-                    jCell.append(fo);
-                }
+                fillColor = '#A0D7FF';
+                borderColor = '#5AB4FF';
             }
-                
-            if (id && ((specificId == null) || (id == specificId)))
+            else if (baseColor == '')
             {
-                let row = treeMapTask2RowMapping[id];
-                
-                if (row == null)
-                    row = 0;
-             
-                let baseColor = treeMapDataTable.getValue(row, 4);
-                let fillColor = "";
-                let borderColor = "";
-                let textColor = "";
-                
-                if (id == selId)
-                {
-                    fillColor = '#A0D7FF';
-                    borderColor = '#5AB4FF';
-                    
-                    if (baseColor == "")
-                        textColor = 'Black'.toHexColor();
-                    else
-                        textColor = baseColor.darken(20);
-                }
-                else if (baseColor == "")
-                {
-                    fillColor = 'White'.toHexColor();
-                    borderColor = 'Gray'.toHexColor();
-                    textColor = 'Black'.toHexColor();
-                }
-                else if ((id == 0) || colorTaskBkgnd)
-                {
-                    fillColor = baseColor;
-                    borderColor = baseColor;
-                    textColor = GetBestTextColor(baseColor);
-                }
-                else
-                {
-                    fillColor = baseColor.lighten(45);
-                    borderColor = baseColor;
-                    textColor = baseColor;
-                }
-                
-                let jRect = $(jCell.find('rect'));
-                let jText = $(jCell.find('text'));
-                
-                jRect.css('fill', fillColor)
-                     .css('stroke', borderColor)
-                     .css('stroke-width', '1px')
-                     .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
-           
-                // Put a 2 pixel gap between items       
-                if (!$(fo).attr('rectAdjusted'))
-                {
-                    $(fo).attr('rectAdjusted', true);
-                    
-                    jRect.attr('width', jRect.attr('width') - 3) 
-                         .attr('height', jRect.attr('height') - 3)
-                         .attr('y', Math.max(jRect.attr('y'), 1))
-                         .attr('shape-rendering', 'crispEdges');
-                }
-
+                fillColor = 'White'.toHexColor();
+                borderColor = 'Gray'.toHexColor();
+            }
+            else if ((id == 0) || colorTaskBkgnd)
+            {
+                fillColor = baseColor;
+                borderColor = baseColor;
+            }
+            else
+            {
+                fillColor = baseColor.lighten(45);
+                borderColor = baseColor;
+            }
+            
+            $(rect).css('fill', fillColor)
+                   .css('stroke', borderColor)
+                   .css('stroke-width', '1px')
+                   .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
+        
+            // Render task text
+            let text = $(cell).find('text');
+            
+            if ($(text)[0])
+            {
                 let title = treeMapDataTable.getValue(row, 5);
                 let textDecoration = ((strikethruDone && (treeMapDataTable.getValue(row, 6) == 1)) ? 'line-through' : "");
+                let textColor = GetTreeMapTextColor(baseColor, (id == selId), colorTaskBkgnd);
                 
-                jText.css('user-select', 'none') // Prevent double-click from selecting textColor
-                     .css('fill', textColor)
-                     .css('text-decoration', textDecoration)
-                     .text(title);
+                $(text).css('user-select', 'none') // Prevent double-click from selecting textColor
+                       .css('fill', textColor)
+                       .css('text-decoration', textDecoration)
+                       .text(title);
 
                 // Modify the text to fit the rect width
-                let availWidth = (jRect.attr('width') - 10); // add padding
-                let actualWidth = jText[0].getBBox().width;
+                let availWidth = ($(rect).attr('width') - 10); // add padding
+                let actualWidth = $(text)[0].getBBox().width;
                 
                 while (actualWidth > availWidth)
                 {
                     title = title.substring(0, (title.length - 4));
-                    jText.text(title + '...');
+                    $(text).text(title + '...');
+                    
+                    if (title.length == 0)
+                        break;
                         
-                    actualWidth = jText[0].getBBox().width;
+                    actualWidth = $(text)[0].getBBox().width;
                 }
             }
         }
     }    
+}
+
+function GetTreeMapTextColor(baseColor, selected, colorTaskBkgnd)
+{
+    if (baseColor == "")
+        return 'Black'.toHexColor();
+    
+    if (selected)
+    {
+        // match core app by setting luminance 
+        // to a maximum value of 30%
+        let hsl = baseColor.toHSL();
+        hsl[2] = Math.min(30, hsl[2]);
+        
+        return ColorHelper.hslToHexColor(hsl);
+    }
+    
+    if (colorTaskBkgnd)
+    {
+        let rgb = baseColor.toRGB();
+        let grey = ((rgb[2] + (rgb[1] * 6) + (rgb[0] * 3)) / 10);
+        
+        return ((grey < 128) ? 'White'.toHexColor() : 'Black'.toHexColor());
+    }
+    
+    // else
+    return baseColor;
 }
