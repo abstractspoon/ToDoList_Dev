@@ -502,7 +502,7 @@ function DrawTreeMap()
 //        minColor: '#009688',
 //        midColor: '#f7f7f7',
 //        maxColor: '#ee8100',
-//        headerHeight: 50,
+        headerHeight: 30,
         height: 500,
         useWeightedAverageForAggregation: true,
         showTooltips: false,
@@ -734,42 +734,43 @@ function RefreshTreeMapTextAndColors(specificId)
                     textColor = baseColor;
                 }
                 
-                let rect = jCell.find('rect');
-                let text = jCell.find('text');
+                let jRect = $(jCell.find('rect'));
+                let jText = $(jCell.find('text'));
                 
-                $(rect).css('fill', fillColor)
-                       .css('stroke', borderColor)
-                       .css('stroke-width', '1px')
-                       .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
+                jRect.css('fill', fillColor)
+                     .css('stroke', borderColor)
+                     .css('stroke-width', '1px')
+                     .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
            
                 // Put a 2 pixel gap between items       
                 if (!$(fo).attr('rectAdjusted'))
                 {
                     $(fo).attr('rectAdjusted', true);
                     
-                    $(rect).attr('width', $(rect).attr('width') - 3) 
-                           .attr('height', $(rect).attr('height') - 3)
-                           .attr('shape-rendering', 'crispEdges');
+                    jRect.attr('width', jRect.attr('width') - 3) 
+                         .attr('height', jRect.attr('height') - 3)
+                         .attr('y', Math.max(jRect.attr('y'), 1))
+                         .attr('shape-rendering', 'crispEdges');
                 }
 
                 let title = treeMapDataTable.getValue(row, 5);
                 let textDecoration = ((strikethruDone && (treeMapDataTable.getValue(row, 6) == 1)) ? 'line-through' : "");
                 
-                $(text).css('user-select', 'none') // Prevent double-click from selecting textColor
-                       .css('fill', textColor)
-                       .css('text-decoration', textDecoration)
-                       .text(title);
+                jText.css('user-select', 'none') // Prevent double-click from selecting textColor
+                     .css('fill', textColor)
+                     .css('text-decoration', textDecoration)
+                     .text(title);
 
                 // Modify the text to fit the rect width
-                let availWidth = $(rect).attr('width') - 10; // add padding
-                let actualWidth = $(text)[0].getBBox().width;
+                let availWidth = (jRect.attr('width') - 10); // add padding
+                let actualWidth = jText[0].getBBox().width;
                 
                 while (actualWidth > availWidth)
                 {
                     title = title.substring(0, (title.length - 4));
-                    $(text).text(title + '...');
+                    jText.text(title + '...');
                         
-                    actualWidth = $(text)[0].getBBox().width;
+                    actualWidth = jText[0].getBBox().width;
                 }
             }
         }
