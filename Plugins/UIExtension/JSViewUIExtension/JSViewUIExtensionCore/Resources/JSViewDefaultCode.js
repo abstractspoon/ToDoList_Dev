@@ -360,11 +360,17 @@ function DrawDashboardChart(chart, color1, color2)
 {
     let options = 
     {
-        animation: {'startup': true, duration: 1000, easing: 'out'},  
         colors: [ color1.toHexColor(), color2.toHexColor() ],
         curveType: 'function',
         legend: { position: 'bottom' },
         title: 'Priority & Risk',
+        
+        animation: 
+        {
+            'startup': true, 
+            duration: 1000, 
+            easing: 'out'
+        },  
     };
 
     chart.draw(dashboardDataTable, options);
