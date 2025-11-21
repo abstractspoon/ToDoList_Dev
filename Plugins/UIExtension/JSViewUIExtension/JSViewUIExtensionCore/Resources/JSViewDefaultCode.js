@@ -415,9 +415,13 @@ function PopulateTreeMap()
     treeMapDataTable.addColumn('number', 'ColorVal');
     treeMapDataTable.addColumn('string', 'WebColor');
     treeMapDataTable.addColumn('string', 'Title');
-    treeMapDataTable.addColumn('number', 'Done');
+    treeMapDataTable.addColumn('boolean', 'Done');
 
-    AddTreeMapItem('0', '', false, '#C0C0C0', 'Tasklist');
+    AddTreeMapItem('0', 
+                   '', 
+                   false, 
+                   '#C0C0C0', 
+                   'Tasklist');
     
     for (let i = 0; i < tasks.length; i++) 
     {
@@ -428,7 +432,12 @@ function PopulateTreeMap()
 function AddTaskToTreeMap(task, parentId)
 {
     let id = task['Task ID'].toString();
-    AddTreeMapItem(id, parentId, (task['Completion Date'] != ''), task['Colour'], task['Title']);
+    
+    AddTreeMapItem(id, 
+                   parentId, 
+                   (task['Completion Date'] != ''), 
+                   task['Colour'], 
+                   task['Title']);
         
     if (task.Subtasks != null)
     {
@@ -449,7 +458,7 @@ function AddTreeMapItem(id, parentId, done, color, title)
         1, // colorVal
         color,
         title,
-        done ? 1 : 0,
+        done,
     ]);
     
     let row = (treeMapDataTable.getNumberOfRows() - 1);
