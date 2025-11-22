@@ -498,19 +498,19 @@ function DrawTreeMap()
     let options = 
     {
         enableHighlight: false,
-        maxDepth: 1,
-        maxPostDepth: 3,
-        midColor: '#808080',
-        headerHeight: 30,
-        height: 500,
-        useWeightedAverageForAggregation: true,
-        showTooltips: false,
+        maxDepth:        1,
+        maxPostDepth:    3,
+        midColor:        '#808080',
+        headerHeight:    30,
+        height:          500,
+        showTooltips:    true,
+        generateTooltip: OnTreeMapGetTooltip,
         
         // Use click to highlight and double-click to drill down.
         eventsConfig: 
         {
           highlight: ['click'],
-          rollup: ['contextmenu'], // right-click
+          rollup:    ['contextmenu'], // right-click
           drilldown: ['dblclick'],
         }
     };
@@ -521,6 +521,13 @@ function DrawTreeMap()
 function OnTreeMapReady()
 {
     RefreshTreeMapTextAndColors();
+}
+
+function OnTreeMapGetTooltip(row, size, value)
+{
+    return '<div class="tooltip">' + 
+           treeMapDataTable.getValue(row, 5) + 
+           '</div>';
 }
 
 function OnTreeMapDrilldown()
@@ -739,7 +746,7 @@ function RefreshTreeMapTextAndColors(specificId)
                    .css('stroke', borderColor)
                    .css('stroke-width', '1px')
                    .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
-        
+
             // Render task text
             let text = $(cell).find('text');
             

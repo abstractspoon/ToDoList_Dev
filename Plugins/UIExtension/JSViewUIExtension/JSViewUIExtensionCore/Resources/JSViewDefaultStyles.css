@@ -1,4 +1,4 @@
- 
+
 *
 {
 	font-family: Tahoma;
@@ -21,3 +21,10 @@ body
 	margin: 3px 0px 0px 0px;
 }
 
+.tooltip /* Styled as Windows 10 */
+{
+	background: white; 
+	border: 1px solid #404040; 
+	padding: 2px 3px 2px 3px;
+	color: #404040;
+}
