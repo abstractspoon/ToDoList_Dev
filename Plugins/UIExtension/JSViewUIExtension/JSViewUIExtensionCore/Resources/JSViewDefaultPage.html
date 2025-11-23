@@ -13,16 +13,30 @@
     </head>
    
     <body>
-    
-        <!--- View combo ---->
-        <div id="view_combo">
-            <label for="views">Active view</label>
-            <select name="views" id="views" onchange="OnChangeView(this.value)">
-              <option value="dashboard_id">Dashboard</option>
-              <option value="treemap_id">Tree Map</option>
-            </select>
-        </div>
-  
+        <div>
+            <!--- View combo ---->
+            <div id="view_combo" style="display:inline-block">
+                <label for="views" style="display:inline">Active view</label>
+
+                <select name="views" id="views" onchange="OnChangeView(this.value)">
+                    <option value="dashboard_id">Dashboard</option>
+                    <option value="treemap_id">Tree Map</option>
+                </select>
+            </div>
+            
+            <!--- TreeMap depth combo ---->
+            <div id="treemapdepth_combo" style="display:none; padding-left:10px"> <!-- hidden by default -->
+                <label for="treemapdepth" style="display:inline">Depth</label>
+
+                <select name="treemapdepth" id="treemapdepth" onchange="OnChangeTreeMapDepth(this.value)">
+                    <option value="0">No subtasks</option>
+                    <option value="1">1 level of subtasks</option>
+                    <option value="2">2 levels of subtasks</option>
+                    <option value="3">3 levels of subtasks</option>
+                </select>
+            </div>
+        </div>        
+
         <!-- Page Content ---->
         <div class="content" id="content_id">
     

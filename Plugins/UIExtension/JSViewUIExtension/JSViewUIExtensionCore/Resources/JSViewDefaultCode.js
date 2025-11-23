@@ -14,10 +14,10 @@ function OnLoad()
 
     if (GetPreference('BackColor', null))
         document.body.style.backgroundColor = GetPreference('BackColor', null);
-    
-    RefreshSelectedView();
   
     chrome.webview.addEventListener('message', OnAppMessage);
+    
+    OnChangeView(GetSelectedView());
 }
 
 function SupportsHTML5Storage() 
@@ -30,14 +30,6 @@ function SupportsHTML5Storage()
     {
         return false;
     }
-}
-
-function ShowHideView(divName, viewId)
-{
-    var show = (viewId == divName);
-    var display = (show ? 'block' : 'none');
-    
-    document.getElementById(divName).style.display = display;
 }
 
 function OnAppMessage(message)
@@ -94,7 +86,26 @@ function OnChangeView(view)
     ShowHideView('treemap_id', view);
     // New views here
     
+    // Dependent UI
+    if (view == 'treemap_id')
+    {
+        document.getElementById('treemapdepth_combo').style.display = 'inline-block';
+        document.getElementById('treemapdepth').value = GetTreeMapDepth().toString();
+    }
+    else
+    {
+        document.getElementById('treemapdepth_combo').style.display = 'none';
+    }
+    
     RefreshSelectedView();
+}
+
+function ShowHideView(divName, viewId)
+{
+    var show = (viewId == divName);
+    var display = (show ? 'block' : 'none');
+    
+    document.getElementById(divName).style.display = display;
 }
         
 function GetSelectedView()
@@ -190,7 +201,6 @@ function SelectTask(id, fromChart)
         // Notify the app
         window.chrome.webview.postMessage('SelectTask=' + id);
     }
-    
 }
 
 function GetSelectedTaskId()
@@ -499,7 +509,7 @@ function DrawTreeMap()
     {
         enableHighlight: false,
         maxDepth:        1,
-        maxPostDepth:    3,
+        maxPostDepth:    GetTreeMapDepth(),
         midColor:        '#808080',
         headerHeight:    30,
         height:          500,
@@ -521,6 +531,25 @@ function DrawTreeMap()
 function OnTreeMapReady()
 {
     RefreshTreeMapTextAndColors();
+}
+
+function GetTreeMapDepth()
+{
+    var depth = sessionStorage.getItem('TreeMapDepth');
+    
+    if (depth == null)
+        return 0;
+    
+    return Number(depth);
+}
+
+function OnChangeTreeMapDepth(depth)
+{
+    if (Number(depth) != GetTreeMapDepth())
+    {
+        sessionStorage.setItem('TreeMapDepth', depth);
+        DrawTreeMap();
+    }
 }
 
 function OnTreeMapGetTooltip(row, size, value)

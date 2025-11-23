@@ -2,7 +2,7 @@
 *
 {
 	font-family: Tahoma;
-	font-size: 9pt;
+	font-size: 8.75pt;
 }
  
 body
@@ -21,10 +21,27 @@ body
 	margin: 3px 0px 0px 0px;
 }
 
+select
+{
+    outline: none;
+};
+
+select:focus, 
+{
+	border: 1px solid #0080FF; 
+	background: ; 
+}
+
+select:hover 
+{
+	border: 1px solid #0080FF; 
+}
+
 .tooltip /* Styled as Windows 10 */
 {
 	background: white; 
 	border: 1px solid #404040; 
 	padding: 2px 3px 2px 3px;
 	color: #404040;
+	user-select: none
 }
