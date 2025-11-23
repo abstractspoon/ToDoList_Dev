@@ -24,12 +24,11 @@ body
 select
 {
     outline: none;
-};
+}
 
 select:focus, 
 {
 	border: 1px solid #0080FF; 
-	background: ; 
 }
 
 select:hover 
@@ -43,5 +42,5 @@ select:hover
 	border: 1px solid #404040; 
 	padding: 2px 3px 2px 3px;
 	color: #404040;
-	user-select: none
+	user-select: none;
 }

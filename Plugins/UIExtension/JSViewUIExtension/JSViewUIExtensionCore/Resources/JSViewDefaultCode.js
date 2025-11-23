@@ -755,8 +755,11 @@ function RefreshTreeMapTextAndColors(specificId)
     for (let i = 0; i < cells.length; i++)
     {
         let cell = cells[i];
+
+        // prevent selection border when tooltip are active
+        $(cell).css('outline', 'none'); 
       
-        // Put a 2 pixel gap between items       
+        // Put a 2 pixel gap between cell rects       
         let rect = $(cell).find('rect');
         let fo = $(cell).find('foreignObject');
             
