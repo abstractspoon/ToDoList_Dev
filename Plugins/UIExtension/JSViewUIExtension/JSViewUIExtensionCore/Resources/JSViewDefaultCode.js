@@ -5,6 +5,20 @@ google.charts.setOnLoadCallback(OnLoad);
 
 window.onresize = RefreshSelectedView;
 
+// ----------------------------------------------------------------------------------------
+
+// App Messages
+const SelectedTaskMsg = "SelectedTask";
+const PreferencesMsg  = "Preferences";
+const RefreshMsg      = "Refresh";
+const SessionStateMsg = "SessionState";
+
+// Session Storage Keys
+const SelectedViewKey = "SelectedView";
+const SelectedTaskKey = "SelectedTask";
+const PreferencesKey  = "Preferences";
+const TreeMapDepthKey = "TreeMapDepth";
+
 // General data and functions -------------------------------------------------------------
 
 function OnLoad()
@@ -34,28 +48,26 @@ function SupportsHTML5Storage()
 
 function OnAppMessage(message)
 {  
-    if (message.data == 'Refresh')
+    let value = {}, key = ParseAppMessage(message.data, value);
+
+    if (key == RefreshMsg)
     {
-        location.reload(location.href);
+        if (value.value == null)
+            location.reload(location.href);
+        else
+            MergeSelectedTaskAttributes(JSON.parse(value.value));
     }
-    else if (message.data.indexOf('Refresh=') == 0)
+    else if (key == SelectedTaskMsg)
     {
-        let json = message.data.substr(8);
-        MergeSelectedTaskAttributes(JSON.parse(json));
+        SelectTask(value.value, false);
     }
-    else if (message.data.indexOf('SelectTask=') == 0)
-    {
-        let id = message.data.substr(11);
-        SelectTask(id, false);
-    }
-    else if (message.data.indexOf('Preferences=') == 0)
+    else if (key == PreferencesMsg)
     {
         let colorTaskBkgnd = GetPreference('ColorTaskBackground', false);
         let strikethruDone = GetPreference('StrikethroughDone', true);
         let backColor = GetPreference('BackColor', null);
         
-        let prefs = message.data.substr(12);
-        sessionStorage.setItem('Preferences', prefs);
+        SetStorage(PreferencesKey, value.value);
         
         if (backColor != GetPreference('BackColor', null))
             document.body.style.backgroundColor = GetPreference('BackColor', null);
@@ -66,11 +78,35 @@ function OnAppMessage(message)
             RefreshSelectedView();
         }
     }
+    else if (key == SessionStateMsg)
+    {
+        let state = JSON.parse(value.value);
+        
+        if (state[TreeMapDepthKey] != null)
+            SetStorage(TreeMapDepthKey, state['TreeMapDepth'], false);
+            
+        if (state[SelectedViewKey] != null)
+        {
+            if (state[SelectedViewKey] != GetSelectedView())
+                OnChangeView(state[SelectedViewKey]);
+        }    
+    }
+}
+
+function ParseAppMessage(message, /*out*/ value)
+{
+    var equals = message.indexOf('=');
+    
+    if (equals == -1)
+        return message;
+    
+    value.value = message.substr(equals + 1);
+    return message.substr(0, equals);
 }
 
 function GetPreference(pref, defValue)
 {
-    var prefs = JSON.parse(sessionStorage.getItem('Preferences'));
+    let prefs = JSON.parse(GetStorage('Preferences'));
     
     if (!prefs || (prefs[pref] == null))
         return defValue;
@@ -78,9 +114,29 @@ function GetPreference(pref, defValue)
     return prefs[pref];
 }
 
+function GetStorage(key)
+{
+	return sessionStorage.getItem(key);
+}
+
+function SetStorage(key, value)
+{
+	sessionStorage.setItem(key, value);
+    
+    // Notify the app about view changes and treemap depth changes
+    if ((key == SelectedViewKey) || (key == TreeMapDepthKey))
+    {
+        let msg = {};
+        msg[SelectedViewKey] = GetSelectedView();
+        msg[TreeMapDepthKey] = GetTreeMapDepth();
+        
+        NotifyApp(SessionStateMsg, JSON.stringify(msg).toString());
+    }
+}
+
 function OnChangeView(view) 
 {
-    sessionStorage.setItem('SelectedView', view);
+    SetStorage(SelectedViewKey, view);
     
     ShowHideView('dashboard_id', view);
     ShowHideView('treemap_id', view);
@@ -102,15 +158,15 @@ function OnChangeView(view)
 
 function ShowHideView(divName, viewId)
 {
-    var show = (viewId == divName);
-    var display = (show ? 'block' : 'none');
+    let show = (viewId == divName);
+    let display = (show ? 'block' : 'none');
     
     document.getElementById(divName).style.display = display;
 }
         
 function GetSelectedView()
 {
-    var view = sessionStorage.getItem('SelectedView');
+    let view = GetStorage('SelectedView');
     
     if (view == null)
         view = 'dashboard_id';
@@ -120,7 +176,7 @@ function GetSelectedView()
 
 function RefreshSelectedView()
 {
-    var view = GetSelectedView();
+    let view = GetSelectedView();
     document.getElementById('views').value = view;
 
     switch (view)
@@ -169,8 +225,13 @@ function MergeSelectedTaskAttributes(selTasks)
 
 function RestoreSelectedTask()
 {
-    var id = GetSelectedTaskId();
+    let id = GetSelectedTaskId();
     SelectTask(id, false);
+}
+
+function NotifyApp(key, value)
+{
+    window.chrome.webview.postMessage(key + '=' + value);
 }
 
 function SelectTask(id, fromChart)
@@ -182,7 +243,7 @@ function SelectTask(id, fromChart)
     }
     
     let prevId = GetSelectedTaskId();
-    sessionStorage.setItem('SelectedId', id);
+    SetStorage(SelectedTaskKey, id, fromChart); // will notify app if from the chart
 
     switch (GetSelectedView())
     {
@@ -197,15 +258,12 @@ function SelectTask(id, fromChart)
     }
         
     if (fromChart)
-    {
-        // Notify the app
-        window.chrome.webview.postMessage('SelectTask=' + id);
-    }
+        NotifyApp('SelectedTask', id);
 }
 
 function GetSelectedTaskId()
 {
-    var id = sessionStorage.getItem('SelectedId');
+    let id = GetStorage('SelectedTask');
     
     if (id == null)
         id = '';
@@ -215,7 +273,7 @@ function GetSelectedTaskId()
 
 function GetSelectedChartId(chart, row2TaskMapping)
 {
-    var sel = chart.getSelection()[0];
+    let sel = chart.getSelection()[0];
     
     if (sel == null)
         return GetSelectedTaskId();
@@ -225,7 +283,7 @@ function GetSelectedChartId(chart, row2TaskMapping)
 
 function SetSelectedChartRow(id, chart, task2RowMapping)
 {
-    var row = task2RowMapping[id];
+    let row = task2RowMapping[id];
     
     chart.setSelection([{'row': row}]);
 }
@@ -535,7 +593,7 @@ function OnTreeMapReady()
 
 function GetTreeMapDepth()
 {
-    var depth = sessionStorage.getItem('TreeMapDepth');
+    let depth = GetStorage('TreeMapDepth');
     
     if (depth == null)
         return 0;
@@ -547,7 +605,7 @@ function OnChangeTreeMapDepth(depth)
 {
     if (Number(depth) != GetTreeMapDepth())
     {
-        sessionStorage.setItem('TreeMapDepth', depth);
+        SetStorage(TreeMapDepthKey, depth); // will notify app
         DrawTreeMap();
     }
 }
