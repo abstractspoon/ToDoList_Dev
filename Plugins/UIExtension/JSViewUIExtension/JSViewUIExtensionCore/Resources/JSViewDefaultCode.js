@@ -584,13 +584,14 @@ function DrawTreeMap()
     let options = 
     {
         enableHighlight: false,
+        fontSize:        0.1, // to prevent Google replacing task IDs with '…'
+        generateTooltip: OnTreeMapGetTooltip,
+        headerHeight:    30,
+        height:          500,
         maxDepth:        1,
         maxPostDepth:    GetTreeMapDepth(),
         midColor:        '#808080',
-        headerHeight:    30,
-        height:          500,
         showTooltips:    true,
-        generateTooltip: OnTreeMapGetTooltip,
         
         // Use click to highlight and double-click to drill down.
         eventsConfig: 
@@ -852,8 +853,10 @@ function RefreshTreeMapTextAndColors(specificId)
             {
                 // This means that Google has overwritten the 
                 // task ID and our whole solution fails for this
-                // cell. No idea how to fix this at present.
-                let breakpoint = 0;
+                // cell. 
+                // I fixed it by reducing the font size to zero but
+                // will leave this in to catch any future occurrence
+                alert('Bad Task ID');
             }
             
             if (Number.isNaN(id))
@@ -961,23 +964,18 @@ function RefreshTreeMapTextAndColors(specificId)
                        .text(title);
 
                 // Modify the text to fit the rect width
-                let availWidth = ($(rect).attr('width') - 10); // add padding
+                let availWidth = ($(rect).attr('width') - 4); // add padding
                 let actualWidth = $(text)[0].getBBox().width;
                 
                 while (actualWidth > availWidth)
                 {
+                    title = title.substring(0, (title.length - 4));
+                    $(text).text(title + '...');
+                    
                     if (title.length == 0)
-                    {
-                        $(text).text('');
                         break;
-                    }
-                    else
-                    {
-                        title = title.substring(0, (title.length - 4));
-                        $(text).text(title + '...');
                         
-                        actualWidth = $(text)[0].getBBox().width;
-                    }
+                    actualWidth = $(text)[0].getBBox().width;
                 }
             }
         }
