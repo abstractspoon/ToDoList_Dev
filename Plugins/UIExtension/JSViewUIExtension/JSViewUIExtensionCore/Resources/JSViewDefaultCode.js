@@ -195,6 +195,24 @@ function RefreshSelectedView()
     RestoreSelectedTask();
 }
 
+function RedrawSelectedView()
+{
+    let view = GetSelectedView();
+
+    switch (view)
+    {
+        case 'dashboard_id':
+            DrawDashboard();
+            break;
+              
+        case 'treemap_id':
+            DrawTreeMap();
+            break;
+    }
+    
+    RestoreSelectedTask();
+}
+
 function MergeSelectedTaskAttributes(selTasks)
 {
     switch (GetSelectedView())
@@ -622,7 +640,6 @@ function OnTreeMapDrilldown()
     // This is effectively a double-click handler
     // so select the task just clicked
     let id = GetSelectedChartId(treeMapChart, treeMapRow2TaskMapping);
-    let path = GetTreeMapFullPath(id);
     
     SelectTask(id, true);
     RefreshTreeMapTextAndColors();
@@ -652,16 +669,19 @@ function SelectTreeMapTask(id, prevId)
     // Navigate to the task if it's not currently visible
     if (!IsTreeMapIdVisible(id))
     {
-        let path = GetTreeMapFullPath(id);
+        let idPath = GetTreeMapFullIdPath(id);
         
-        if (path.length == 1)
+        if (idPath.length == 1)
         {
             SetSelectedChartRow('0', treeMapChart, treeMapTask2RowMapping);
         }
         else
         {
-            while (path.length > 1)
-                SetSelectedChartRow(path.pop(), treeMapChart, treeMapTask2RowMapping);
+            while (idPath.length > 1)
+            {
+            	let id = idPath.pop();
+            	SetSelectedChartRow(id, treeMapChart, treeMapTask2RowMapping);
+            }
         }
         
         RefreshTreeMapTextAndColors();
@@ -675,19 +695,6 @@ function SelectTreeMapTask(id, prevId)
         RefreshTreeMapTextAndColors(prevId);
         RefreshTreeMapTextAndColors(id);
     }
-}
-
-function GetTreeMapCellId(cell)
-{
-    if ($(cell).attr('style') == null)
-        return -1;
-    
-    let id = $(cell).find('foreignObject').attr('id');
-        
-    if (id == null)
-        id = $(cell).find('text').text(); // default
-    
-    return id;
 }
 
 function IsTreeMapIdVisible(id)
@@ -705,19 +712,48 @@ function IsTreeMapIdVisible(id)
     return false;
 }
 
+function GetTreeMapCellId(cell)
+{
+    if ($(cell).attr('style') == null)
+        return '-1';
+    
+    let id = $(cell).find('foreignObject').attr('id');
+        
+    if (id == null)
+        id = $(cell).find('text').text(); // default
+    
+    return id;
+}
+
 function GetTreeMapFullPath(id)
 {
-    let path = [];
+    let idPath = GetTreeMapFullIdPath(id);
+    let fullPath = new Array(treeMapDataTable.getValue(0, 5)); // root cell
+    
+    while (idPath.length > 0)
+    {
+        let id = idPath.pop();
+        let row = treeMapTask2RowMapping[id];
+        
+        fullPath.push(treeMapDataTable.getValue(row, 5));
+    }
+    
+    return fullPath.join(" \\ ");
+}
+
+function GetTreeMapFullIdPath(id)
+{
+    let idPath = [];
     
     while (id && (id != '0'))
     {
-        path.push(id);
+        idPath.push(id);
         
         let row = treeMapTask2RowMapping[id];
         id = treeMapDataTable.getValue(row, 1); // parent id
     }
     
-    return path;
+    return idPath;
 }
 
 function OnTreeMapHighlight(item)
@@ -743,14 +779,17 @@ function OnTreeMapUnhighlight(item)
 
 function RefreshTreeMapTextAndColors(specificId) 
 {
-    let selId = GetSelectedTaskId();
+    let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
+    let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
     
+    // First pass: 
+    // 1. Reduce cell height and width to create a gap between items
+    // 2. Save cells which have task IDs to a separate list for subsequent passes
     let treechart = $("#treemap_id");
     let svg = treechart.find("svg");
     let cells = svg.find("g");
     
-    let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
-    let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
+    let idCells = new Array();
     
     for (let i = 0; i < cells.length; i++)
     {
@@ -759,20 +798,36 @@ function RefreshTreeMapTextAndColors(specificId)
         // prevent selection border when tooltip are active
         $(cell).css('outline', 'none'); 
       
-        // Put a 2 pixel gap between cell rects       
+        // Reduce width/height to create a gap between cells
         let rect = $(cell).find('rect');
         let fo = $(cell).find('foreignObject');
             
         if (!fo.attr('rectAdjusted'))
         {
             fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
-            $(fo).attr('rectAdjusted', true);
-            
-            $(rect).attr('width', $(rect).attr('width') - 3) 
-                   .attr('height', $(rect).attr('height') - 3)
-                   .attr('y', Math.max($(rect).attr('y'), 1))
-                   .attr('shape-rendering', 'crispEdges');
             $(cell).append(fo);
+            
+            let width = ($(rect).attr('width') - 2); // 2 => 1 pixel
+            let height = ($(rect).attr('height') - 2); // 2 => 1 pixel
+            
+            // Clip rects to 'y = 0'
+            let y = $(rect).attr('y');
+            
+            if (y < 0)
+            {
+                height += y;
+                y = 0;
+            }
+            
+            $(rect).attr('width', width) 
+                   .attr('height', height)
+                   .attr('y', y)
+                   .attr('shape-rendering', 'crispEdges');
+                   
+            $(rect).css('stroke-width', '1px')
+                   .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
+            
+            $(fo).attr('rectAdjusted', true);
         }
         
         // Hide the default highlight Element
@@ -792,14 +847,68 @@ function RefreshTreeMapTextAndColors(specificId)
         if (id == null)
         {
             id = $(cell).find('text').text(); // default
+        
+            if (id == '…')
+            {
+                // This means that Google has overwritten the 
+                // task ID and our whole solution fails for this
+                // cell. No idea how to fix this at present.
+                let breakpoint = 0;
+            }
             
             if (Number.isNaN(id))
                 $(fo).attr('id', ''); // avoid further processing
             else
                 $(fo).attr('id', id);
         }
+        
+        if (id != '')
+            idCells.push(cell);
+    }
+    
+    // Second pass: Determine which cell (if any) is the parent
+    let parentId = '';
+    
+    if (idCells.length >= 2)
+    {
+        // Note: We work in reverse because observation suggests that
+        //       the parent task (always) comes last
+        idCells = idCells.reverse();
+        let lastIndex = (idCells.length - 1);
+        
+        for (let i = 0; i < idCells.length; i++)
+        {
+            let cell = idCells[i];
+            let nextCell = ((i == lastIndex) ? idCells[0] : idCells[i + 1]);
             
-        if (!Number.isNaN(id) && ((specificId == null) || (id == specificId)))
+            let id = GetTreeMapCellId(cell);
+            let nextId = GetTreeMapCellId(nextCell);
+            
+            let row = treeMapTask2RowMapping[id];
+            let nextRow = treeMapTask2RowMapping[nextId];
+            
+            let pid = treeMapDataTable.getValue(row, 1);
+            let nextPid = treeMapDataTable.getValue(nextRow, 1);
+            
+            if (pid != nextPid)
+            {
+                parentId = ((pid == nextId) ? nextId : id);
+                break; // always
+            }
+        }
+    }
+      
+    // Third pass: 
+    // 1. Color the cells rects
+    // 2. Render task text
+    let selId = GetSelectedTaskId();
+    
+    for (let i = 0; i < idCells.length; i++)
+    {
+        let cell = idCells[i];
+        let id = GetTreeMapCellId(cell);
+            
+        if ((specificId == null) || (id == specificId))
         {
             let row = treeMapTask2RowMapping[id];
             
@@ -832,17 +941,17 @@ function RefreshTreeMapTextAndColors(specificId)
                 borderColor = baseColor;
             }
             
+            let rect = $(cell).find('rect');
+            
             $(rect).css('fill', fillColor)
-                   .css('stroke', borderColor)
-                   .css('stroke-width', '1px')
-                   .css('cursor', 'default'); // Hide 'hand' cursor because we use double-clicking to drill down
+                   .css('stroke', borderColor);
 
             // Render task text
             let text = $(cell).find('text');
             
             if ($(text)[0])
             {
-                let title = treeMapDataTable.getValue(row, 5);
+                let title = ((id == parentId) ? GetTreeMapFullPath(id) : treeMapDataTable.getValue(row, 5));
                 let textDecoration = ((strikethruDone && (treeMapDataTable.getValue(row, 6) == 1)) ? 'line-through' : "");
                 let textColor = GetTreeMapTextColor(baseColor, (id == selId), colorTaskBkgnd);
                 
@@ -857,13 +966,18 @@ function RefreshTreeMapTextAndColors(specificId)
                 
                 while (actualWidth > availWidth)
                 {
-                    title = title.substring(0, (title.length - 4));
-                    $(text).text(title + '...');
-                    
                     if (title.length == 0)
+                    {
+                        $(text).text('');
                         break;
+                    }
+                    else
+                    {
+                        title = title.substring(0, (title.length - 4));
+                        $(text).text(title + '...');
                         
-                    actualWidth = $(text)[0].getBBox().width;
+                        actualWidth = $(text)[0].getBBox().width;
+                    }
                 }
             }
         }
