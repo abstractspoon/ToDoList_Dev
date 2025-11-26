@@ -182,17 +182,13 @@ function RefreshSelectedView()
     switch (view)
     {
         case 'dashboard_id':
-            InitDashboard();
-            DrawDashboard();
+            OnRefreshDashboard();
             break;
               
         case 'treemap_id':
-            InitTreeMap();
-            DrawTreeMap();
+            OnRefreshTreeMap();
             break;
     }
-    
-    RestoreSelectedTask();
 }
 
 function OnResizeSelectedView()
@@ -424,6 +420,14 @@ function OnSelectDashboardTask(chart)
     SelectTask(id, true);
 }
 
+function OnRefreshDashboard()
+{
+    InitDashboard();
+    DrawDashboard();
+    
+    RestoreSelectedTask();
+}
+
 function OnResizeDashboard()
 {
     DrawDashboard();
@@ -613,19 +617,32 @@ function DrawTreeMap()
     treeMapChart.draw(treeMapDataTable, options);
 }
 
+function OnRefreshTreeMap()
+{
+    // Refreshing will return the map to the top level
+    // so we'll need to drill back down to where we were
+    let headerId = GetStorage('HeaderId');
+                
+    InitTreeMap();
+    DrawTreeMap();
+    
+    RestoreSelectedTask();
+    TreeMapDrilldownTo(headerId);
+}
+
 function OnResizeTreeMap()
 {
     // Drawing will return the map to the top level
-    // so we need to drill back down to where we were
-    let headerId = GetTreemapHeaderId();
+    // so we'll need to drill back down to where we were
+    let headerId = GetTreeMapHeaderId();
                 
     DrawTreeMap();
     TreeMapDrilldownTo(headerId);
 }
 
-function TreeMapDrilldownTo(id, force = false)
+function TreeMapDrilldownTo(id)
 {
-    if (id && (force || !IsTreeMapIdVisible(id)))
+    if (id)
     {
         let idPath = GetTreeMapFullIdPath(id);
         
@@ -679,6 +696,9 @@ function OnTreeMapDrilldown()
     
     SelectTask(id, true);
     RefreshTreeMapTextAndColors();
+    
+    // Save the id as the new 'header id'
+    SetStorage('HeaderId', id);
 }
 
 function OnTreeMapRollup(unused)
@@ -694,6 +714,9 @@ function OnTreeMapRollup(unused)
         
         SelectTask(parentId, true);
     }
+    
+    // Save the new 'header id'
+    SetStorage('HeaderId', GetTreeMapHeaderId());
 
     RefreshTreeMapTextAndColors();
 }
@@ -705,22 +728,7 @@ function SelectTreeMapTask(id, prevId = null)
     // Navigate to the task if it's not currently visible
     if (!IsTreeMapIdVisible(id))
     {
-        let idPath = GetTreeMapFullIdPath(id);
-        
-        if (idPath.length == 1)
-        {
-            SetSelectedChartRow('0', treeMapChart, treeMapTask2RowMapping);
-        }
-        else
-        {
-            while (idPath.length > 1)
-            {
-            	let id = idPath.pop();
-            	SetSelectedChartRow(id, treeMapChart, treeMapTask2RowMapping);
-            }
-        }
-        
-        RefreshTreeMapTextAndColors();
+        TreeMapDrilldownTo(id);
     }
     else if (prevId == null)
     {
@@ -818,7 +826,7 @@ function RefreshTreeMapTextAndColors(specificId)
     let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
     let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
     
-    let headerId = GetTreemapHeaderId(); // will also initialise cell Ids
+    let headerId = GetTreeMapHeaderId(); // will also initialise cell Ids
     let selId = GetSelectedTaskId();
     
     let treechart = $("#treemap_id");
@@ -902,8 +910,6 @@ function RefreshTreeMapTextAndColors(specificId)
                 fillColor = baseColor.lighten(45);
                 borderColor = baseColor;
             }
-            
-            let rect = $(cell).find('rect');
             
             $(rect).css('fill', fillColor)
                    .css('stroke', borderColor);
@@ -997,7 +1003,7 @@ function InitialiseTreeMapCellIds()
     return idCells;
 }
 
-function GetTreemapHeaderId() 
+function GetTreeMapHeaderId() 
 {
     let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
     let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
