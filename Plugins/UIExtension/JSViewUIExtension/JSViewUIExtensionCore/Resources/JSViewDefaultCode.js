@@ -472,6 +472,10 @@ var treeMapChart = null;
 
 // -------------------------------------------------
 
+const HeaderHeight = 30;
+
+// -------------------------------------------------
+
 function InitTreeMap()
 {
     if (treeMapChart == null)
@@ -586,7 +590,7 @@ function DrawTreeMap()
         enableHighlight: false,
         fontSize:        0.1, // to prevent Google replacing task IDs with '…'
         generateTooltip: OnTreeMapGetTooltip,
-        headerHeight:    30,
+        headerHeight:    HeaderHeight,
         height:          500,
         maxDepth:        1,
         maxPostDepth:    GetTreeMapDepth(),
@@ -639,7 +643,8 @@ function OnTreeMapGetTooltip(row, size, value)
 function OnTreeMapDrilldown()
 {
     // This is effectively a double-click handler
-    // so select the task just clicked
+    // so select the task just clicked so that it
+    // becomes the selected parent in the next level
     let id = GetSelectedChartId(treeMapChart, treeMapRow2TaskMapping);
     
     SelectTask(id, true);
@@ -729,7 +734,7 @@ function GetTreeMapCellId(cell)
 function GetTreeMapFullPath(id)
 {
     let idPath = GetTreeMapFullIdPath(id);
-    let fullPath = new Array(treeMapDataTable.getValue(0, 5)); // root cell
+    let fullPath = new Array();
     
     while (idPath.length > 0)
     {
@@ -746,7 +751,7 @@ function GetTreeMapFullIdPath(id)
 {
     let idPath = [];
     
-    while (id && (id != '0'))
+    while (id && !Number.isNaN(id))
     {
         idPath.push(id);
         
@@ -783,14 +788,12 @@ function RefreshTreeMapTextAndColors(specificId)
     let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
     let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
     
-    // First pass: 
-    // 1. Reduce cell height and width to create a gap between items
-    // 2. Save cells which have task IDs to a separate list for subsequent passes
+    let headerId = GetTreemapHeaderCellId(); // will also initialise cell Ids
+    let selId = GetSelectedTaskId();
+    
     let treechart = $("#treemap_id");
     let svg = treechart.find("svg");
     let cells = svg.find("g");
-    
-    let idCells = new Array();
     
     for (let i = 0; i < cells.length; i++)
     {
@@ -805,9 +808,6 @@ function RefreshTreeMapTextAndColors(specificId)
             
         if (!fo.attr('rectAdjusted'))
         {
-            fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
-            $(cell).append(fo);
-            
             let width = ($(rect).attr('width') - 2); // 2 => 1 pixel
             let height = ($(rect).attr('height') - 2); // 2 => 1 pixel
             
@@ -837,81 +837,10 @@ function RefreshTreeMapTextAndColors(specificId)
             $(cell).css('display', 'none');
         }
         
-        // Get the task ID of the Element
-        // Note: If we've been here before then the item text, which
-        // was originally the task ID, will have been replaced
-        // with the task title and the ID will have been inserted
-        // as a 'foreign object' so we look for that first and 
-        // add it if it wasn't found
-        let id = $(fo).attr('id');
-        
-        if (id == null)
-        {
-            id = $(cell).find('text').text(); // default
-        
-            if (id == '…')
-            {
-                // This means that Google has overwritten the 
-                // task ID and our whole solution fails for this
-                // cell. 
-                // I fixed it by reducing the font size to zero but
-                // will leave this in to catch any future occurrence
-                alert('Bad Task ID');
-            }
-            
-            if (Number.isNaN(id))
-                $(fo).attr('id', ''); // avoid further processing
-            else
-                $(fo).attr('id', id);
-        }
-        
-        if (id != '')
-            idCells.push(cell);
-    }
-    
-    // Second pass: Determine which cell (if any) is the parent
-    let parentId = '';
-    
-    if (idCells.length >= 2)
-    {
-        // Note: We work in reverse because observation suggests that
-        //       the parent task (always) comes last
-        idCells = idCells.reverse();
-        let lastIndex = (idCells.length - 1);
-        
-        for (let i = 0; i < idCells.length; i++)
-        {
-            let cell = idCells[i];
-            let nextCell = ((i == lastIndex) ? idCells[0] : idCells[i + 1]);
-            
-            let id = GetTreeMapCellId(cell);
-            let nextId = GetTreeMapCellId(nextCell);
-            
-            let row = treeMapTask2RowMapping[id];
-            let nextRow = treeMapTask2RowMapping[nextId];
-            
-            let pid = treeMapDataTable.getValue(row, 1);
-            let nextPid = treeMapDataTable.getValue(nextRow, 1);
-            
-            if (pid != nextPid)
-            {
-                parentId = ((pid == nextId) ? nextId : id);
-                break; // always
-            }
-        }
-    }
-      
-    // Third pass: 
-    // 1. Color the cells rects
-    // 2. Render task text
-    let selId = GetSelectedTaskId();
-    
-    for (let i = 0; i < idCells.length; i++)
-    {
-        let cell = idCells[i];
+        // Process only those cells having a task Id
         let id = GetTreeMapCellId(cell);
             
-        if ((specificId == null) || (id == specificId))
+        if (id && (!specificId || (id == specificId)))
         {
             let row = treeMapTask2RowMapping[id];
             
@@ -954,7 +883,7 @@ function RefreshTreeMapTextAndColors(specificId)
             
             if ($(text)[0])
             {
-                let title = ((id == parentId) ? GetTreeMapFullPath(id) : treeMapDataTable.getValue(row, 5));
+                let title = ((id == headerId) ? GetTreeMapFullPath(id) : treeMapDataTable.getValue(row, 5));
                 let textDecoration = ((strikethruDone && (treeMapDataTable.getValue(row, 6) == 1)) ? 'line-through' : "");
                 let textColor = GetTreeMapTextColor(baseColor, (id == selId), colorTaskBkgnd);
                 
@@ -977,9 +906,114 @@ function RefreshTreeMapTextAndColors(specificId)
                         
                     actualWidth = $(text)[0].getBBox().width;
                 }
+                       
+                // Because we set the font size to 0.1 to get around
+                // the problem where Google auto-added ellipses, the
+                // header text is mis-aligned vertically
+                if ((id == headerId) && ($(rect).attr('y') == '0'))
+                {
+                    let textHeight = $(text)[0].getBBox().height;
+                    let rectHeight = Number($(rect).attr('height'));
+                    
+                    let y = (((rectHeight - textHeight) / 2) + textHeight);
+                    $(text).attr('y', y);
+                }
             }
         }
     }    
+}
+
+function InitialiseTreeMapCellIds()
+{
+    let treechart = $("#treemap_id");
+    let svg = treechart.find("svg");
+    let cells = svg.find("g");
+    let idCells = new Array();
+    
+    for (let i = 0; i < cells.length; i++)
+    {
+        let cell = cells[i];
+        let fo = $(cell).find('foreignObject');
+        let id = $(fo).attr('id');
+        
+        if (id == null) // First time ONLY
+        {
+            fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject' );
+            
+            id = $(cell).find('text').text(); // default
+        
+            if (id == '…')
+            {
+                // This means that Google has overwritten the 
+                // task ID and our whole solution fails for this
+                // cell. 
+                // I fixed it by reducing the font size to zero but
+                // will leave this in to catch any future occurrence
+                alert('Bad Task ID');
+            }
+            
+            if (Number.isNaN(id))
+                $(fo).attr('id', ''); // avoid further processing
+            else
+                $(fo).attr('id', id);
+            
+            $(cell).append(fo);
+        }        
+        
+        if (id != '')
+            idCells.push(cell);
+    }
+    
+    return idCells;
+}
+
+function GetTreemapHeaderCellId() 
+{
+    let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
+    let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
+    
+    let idCells = InitialiseTreeMapCellIds();
+    
+    if (idCells.length == 1)
+    {
+        // Must exist
+        return $(idCells[0]).find('foreignObject').attr('id');
+    }
+    
+    if (idCells.length > 1)
+    {
+        // Note: We work in reverse because observation suggests that
+        //       the header task (always) comes last
+        idCells = idCells.reverse();
+        let lastIndex = (idCells.length - 1);
+        
+        for (let i = 0; i < idCells.length; i++)
+        {
+            let cell = idCells[i];
+            let nextCell = ((i == lastIndex) ? idCells[0] : idCells[i + 1]);
+            
+            let id = GetTreeMapCellId(cell);
+            let nextId = GetTreeMapCellId(nextCell);
+            
+            let row = treeMapTask2RowMapping[id];
+            let nextRow = treeMapTask2RowMapping[nextId];
+            
+            let pid = treeMapDataTable.getValue(row, 1);
+            let nextPid = treeMapDataTable.getValue(nextRow, 1);
+            
+            if (pid != nextPid)
+            {
+                if (pid == nextId)
+                    return nextId;
+                
+                // else
+                return id;
+            }
+        }
+    }
+    
+    alert('No header task found');
+    return '';
 }
 
 function GetTreeMapTextColor(baseColor, selected, colorTaskBkgnd)
