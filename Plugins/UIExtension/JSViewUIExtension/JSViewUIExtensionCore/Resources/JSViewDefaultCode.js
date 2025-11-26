@@ -3,7 +3,7 @@ google.charts.load('current', {'packages':['treemap']});
 
 google.charts.setOnLoadCallback(OnLoad);
 
-window.onresize = RedrawSelectedView;
+window.onresize = OnResizeSelectedView;
 
 // ----------------------------------------------------------------------------------------
 
@@ -195,22 +195,20 @@ function RefreshSelectedView()
     RestoreSelectedTask();
 }
 
-function RedrawSelectedView()
+function OnResizeSelectedView()
 {
     let view = GetSelectedView();
 
     switch (view)
     {
         case 'dashboard_id':
-            DrawDashboard();
+            OnResizeDashboard();
             break;
               
         case 'treemap_id':
-            DrawTreeMap();
+            OnResizeTreeMap();
             break;
     }
-    
-    RestoreSelectedTask();
 }
 
 function MergeSelectedTaskAttributes(selTasks)
@@ -254,6 +252,7 @@ function NotifyApp(key, value)
 
 function SelectTask(id, fromChart)
 {
+    // Prevent selection of the 'Tasklist' root
     if (id == '0')
     {
         RefreshTreeMapTextAndColors(id);
@@ -423,6 +422,11 @@ function OnSelectDashboardTask(chart)
 {
     let id = GetSelectedChartId(chart, dashboardRow2TaskMapping);
     SelectTask(id, true);
+}
+
+function OnResizeDashboard()
+{
+    DrawDashboard();
 }
 
 // Never call this directly; Only via SelectTask()
@@ -609,6 +613,32 @@ function DrawTreeMap()
     treeMapChart.draw(treeMapDataTable, options);
 }
 
+function OnResizeTreeMap()
+{
+    // Drawing will return the map to the top level
+    // so we need to drill back down to where we were
+    let headerId = GetTreemapHeaderId();
+                
+    DrawTreeMap();
+    TreeMapDrilldownTo(headerId);
+}
+
+function TreeMapDrilldownTo(id, force = false)
+{
+    if (id && (force || !IsTreeMapIdVisible(id)))
+    {
+        let idPath = GetTreeMapFullIdPath(id);
+        
+        while (idPath.length > 0)
+        {
+            let id = idPath.pop();
+            SetSelectedChartRow(id, treeMapChart, treeMapTask2RowMapping);
+        }
+        
+        RefreshTreeMapTextAndColors();
+    }
+}
+
 function OnTreeMapReady()
 {
     RefreshTreeMapTextAndColors();
@@ -670,7 +700,7 @@ function OnTreeMapRollup(unused)
 
 // We never call this directly; Only via SelectTask()
 // after the selected task id has been saved 
-function SelectTreeMapTask(id, prevId)
+function SelectTreeMapTask(id, prevId = null)
 {
     // Navigate to the task if it's not currently visible
     if (!IsTreeMapIdVisible(id))
@@ -788,7 +818,7 @@ function RefreshTreeMapTextAndColors(specificId)
     let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
     let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
     
-    let headerId = GetTreemapHeaderCellId(); // will also initialise cell Ids
+    let headerId = GetTreemapHeaderId(); // will also initialise cell Ids
     let selId = GetSelectedTaskId();
     
     let treechart = $("#treemap_id");
@@ -967,7 +997,7 @@ function InitialiseTreeMapCellIds()
     return idCells;
 }
 
-function GetTreemapHeaderCellId() 
+function GetTreemapHeaderId() 
 {
     let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
     let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
@@ -1012,7 +1042,6 @@ function GetTreemapHeaderCellId()
         }
     }
     
-    alert('No header task found');
     return '';
 }
 
