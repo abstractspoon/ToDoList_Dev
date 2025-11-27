@@ -695,6 +695,8 @@ function OnTreeMapDrilldown()
     let id = GetSelectedChartId(treeMapChart, treeMapRow2TaskMapping);
     
     SelectTask(id, true);
+    EnsureVisible(id);
+    
     RefreshTreeMapTextAndColors();
     
     // Save the id as the new 'header id'
@@ -710,14 +712,15 @@ function OnTreeMapRollup(unused)
     if (!IsTreeMapIdVisible(selId))
     {
         let row = treeMapTask2RowMapping[selId];
-        let parentId = treeMapDataTable.getValue(row, 1);
+        selId = treeMapDataTable.getValue(row, 1);
         
-        SelectTask(parentId, true);
+        SelectTask(selId, true);
     }
     
     // Save the new 'header id'
     SetStorage('HeaderId', GetTreeMapHeaderId());
 
+    EnsureVisible(selId);
     RefreshTreeMapTextAndColors();
 }
 
@@ -728,11 +731,11 @@ function SelectTreeMapTask(id, prevId = null)
     // Navigate to the task if it's not currently visible
     if (!IsTreeMapIdVisible(id))
     {
-        TreeMapDrilldownTo(id);
+        TreeMapDrilldownTo(id); // Will also refresh text and colors
     }
     else if (prevId == null)
     {
-        RefreshTreeMapTextAndColors();
+        RefreshTreeMapTextAndColors(); // All cells
     }
     else
     {
@@ -741,19 +744,23 @@ function SelectTreeMapTask(id, prevId = null)
     }
 }
 
+function EnsureVisible(id)
+{
+    let cell = GetTreeMapCell(id);
+    
+    if (cell)
+    {
+        let rect = $(cell).find('rect');
+        let x = $(rect).attr('x');
+        let y = $(rect).attr('y');
+        
+        window.scroll(x, y);
+    }
+}
+
 function IsTreeMapIdVisible(id)
 {
-    let treechart = $("#treemap_id");
-    let svg = treechart.find("svg");
-    let cells = svg.find("g");
-    
-    for (let i = 0; i < cells.length; i++)
-    {
-        if (GetTreeMapCellId(cells[i]) == id)
-            return true;
-    };
-    
-    return false;
+    return (GetTreeMapCell(id) != null);
 }
 
 function GetTreeMapCellId(cell)
@@ -767,6 +774,21 @@ function GetTreeMapCellId(cell)
         id = $(cell).find('text').text(); // default
     
     return id;
+}
+
+function GetTreeMapCell(id)
+{
+    let treechart = $("#treemap_id");
+    let svg = treechart.find("svg");
+    let cells = svg.find("g");
+    
+    for (let i = 0; i < cells.length; i++)
+    {
+        if (GetTreeMapCellId(cells[i]) == id)
+            return cells[i];
+    };
+    
+    return null;
 }
 
 function GetTreeMapFullPath(id)
