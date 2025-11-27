@@ -3,7 +3,7 @@ google.charts.load('current', {'packages':['treemap']});
 
 google.charts.setOnLoadCallback(OnLoad);
 
-window.onresize = OnResizeSelectedView;
+window.onresize = OnResize;
 
 // ----------------------------------------------------------------------------------------
 
@@ -182,16 +182,16 @@ function RefreshSelectedView()
     switch (view)
     {
         case 'dashboard_id':
-            OnRefreshDashboard();
+            RefreshDashboard();
             break;
               
         case 'treemap_id':
-            OnRefreshTreeMap();
+            RefreshTreeMap();
             break;
     }
 }
 
-function OnResizeSelectedView()
+function OnResize()
 {
     let view = GetSelectedView();
 
@@ -420,7 +420,7 @@ function OnSelectDashboardTask(chart)
     SelectTask(id, true);
 }
 
-function OnRefreshDashboard()
+function RefreshDashboard()
 {
     InitDashboard();
     DrawDashboard();
@@ -617,7 +617,7 @@ function DrawTreeMap()
     treeMapChart.draw(treeMapDataTable, options);
 }
 
-function OnRefreshTreeMap()
+function RefreshTreeMap()
 {
     // Refreshing will return the map to the top level
     // so we'll need to drill back down to where we were
