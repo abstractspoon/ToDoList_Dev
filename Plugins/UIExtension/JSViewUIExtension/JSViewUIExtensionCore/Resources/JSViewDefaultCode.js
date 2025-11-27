@@ -888,12 +888,17 @@ function RefreshTreeMapTextAndColors(specificId)
             // Render task 'box'
             let baseColor = treeMapDataTable.getValue(row, 4);
             let fillColor = "";
+            let fillOpacity = Number($(rect).css('fill-opacity'));
             let borderColor = "";
             
             if (id == selId)
             {
                 fillColor = '#A0D7FF';
                 borderColor = '#5AB4FF';
+                
+                // Increase opacity of selected task color
+                // because it's easily lost
+                fillOpacity = Math.max(fillOpacity, 0.85);
             }
             else if (baseColor == '')
             {
@@ -912,6 +917,7 @@ function RefreshTreeMapTextAndColors(specificId)
             }
             
             $(rect).css('fill', fillColor)
+                   .css('fill-opacity', fillOpacity)
                    .css('stroke', borderColor);
 
             // Render task text
