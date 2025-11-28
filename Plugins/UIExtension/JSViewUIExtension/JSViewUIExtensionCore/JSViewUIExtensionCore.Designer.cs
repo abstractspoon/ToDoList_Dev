@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.m_WebView = new Microsoft.Web.WebView2.WinForms.WebView2();
+			this.m_WebView = new WebView2Ex();
 			this.SuspendLayout();
 			// 
 			// m_WebView
@@ -58,6 +58,6 @@
 
 		#endregion
 
-		private Microsoft.Web.WebView2.WinForms.WebView2 m_WebView;
+		private WebView2Ex m_WebView;
 	}
 }

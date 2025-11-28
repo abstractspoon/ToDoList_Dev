@@ -9,12 +9,12 @@ using System.Linq;
 using System.IO;
 using System.Threading;
 using System.Diagnostics;
+
 using Microsoft.Web.WebView2.Core;
+using Newtonsoft.Json.Linq;
 
 using JSONExporterPlugin;
 using JSViewUIExtension.Properties;
-
-using Newtonsoft.Json.Linq;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -304,32 +304,28 @@ namespace JSViewUIExtension
 			NotifyBrowser(PreferencesMsg, m_AppPrefs);
 		}
 
-		// PRIVATE ------------------------------------------------------------------------------
 
-		void ExportItemsToJsonAsJavascript()
+		public new Boolean Focus()
 		{
-			var jOutput = new JObject();
-			jOutput.Add(new JProperty("Tasks", m_Items.ToJson())); // No translation
+			if (Focused)
+				return false;
 
-			string json = jOutput.ToString();
-// #if DEBUG
-// 			File.WriteAllText(FilePathFromName("JSViewData.json"), json);
-// #endif
+			// else
+			return m_WebView.Focus();
+		}
 
-			var jsContent = new string[]
-			{
-				// 1. Add the tasks
-				"var json = `",
-				json.Replace('\\', '/'),
-				"`;",
-				"var tasks = JSON.parse(json).Tasks;",
-				"\n\n",
+		public new Boolean Focused
+		{
+			get { return m_WebView.Focused; }
+		}
 
-				// 3. Add translated attribute attributes
-				// TODO
-			};
+		// Message handlers ------------------------------------------------------------------------------
 
-			File.WriteAllLines(m_JsDataFile.Path, jsContent);
+		protected override void OnGotFocus(EventArgs e)
+		{
+			base.OnGotFocus(e);
+
+			m_WebView.Focus();
 		}
 
 		protected override void OnHandleDestroyed(EventArgs e)
@@ -339,11 +335,23 @@ namespace JSViewUIExtension
 			base.OnHandleDestroyed(e);
 		}
 
-		void NotifyParentSelChange(UInt32 taskId)
+		void OnBrowserNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
-			var parent = new UIExtension.ParentNotify(m_HwndParent);
+			NotifyBrowser(PreferencesMsg, m_AppPrefs);
+			NotifyBrowser(SelectedTaskMsg, m_SelectedTaskId);
 
-			parent.NotifySelChange(taskId);
+			if (m_BrowserStatePending)
+			{
+				Debug.Assert(!string.IsNullOrEmpty(m_BrowserState));
+
+				NotifyBrowser(SessionStateMsg, m_BrowserState.Replace('\'', '\"'));
+				m_BrowserStatePending = false;
+			}
+		}
+
+		void OnBrowserNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
+		{
+			e.Cancel = ((e.Uri != AboutBlank) && (e.Uri != m_HtmlFile.Uri));
 		}
 
 		void OnBrowserMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
@@ -375,6 +383,41 @@ namespace JSViewUIExtension
 			}
 		}
 
+		// PRIVATE ------------------------------------------------------------------------------
+
+		void ExportItemsToJsonAsJavascript()
+		{
+			var jOutput = new JObject();
+			jOutput.Add(new JProperty("Tasks", m_Items.ToJson())); // No translation
+
+			string json = jOutput.ToString();
+// #if DEBUG
+// 			File.WriteAllText(FilePathFromName("JSViewData.json"), json);
+// #endif
+
+			var jsContent = new string[]
+			{
+				// 1. Add the tasks
+				"var json = `",
+				json.Replace('\\', '/'),
+				"`;",
+				"var tasks = JSON.parse(json).Tasks;",
+				"\n\n",
+
+				// 3. Add translated attribute attributes
+				// TODO
+			};
+
+			File.WriteAllLines(m_JsDataFile.Path, jsContent);
+		}
+
+		void NotifyParentSelChange(UInt32 taskId)
+		{
+			var parent = new UIExtension.ParentNotify(m_HwndParent);
+
+			parent.NotifySelChange(taskId);
+		}
+
 		string ParseBrowserMessage(string message, out string key)
 		{
 			var parts = message?.Split('=');
@@ -388,25 +431,6 @@ namespace JSViewUIExtension
 			// else
 			key = message;
 			return string.Empty;
-		}
-
-		void OnBrowserNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
-		{
-			NotifyBrowser(PreferencesMsg, m_AppPrefs);
-			NotifyBrowser(SelectedTaskMsg, m_SelectedTaskId);
-
-			if (m_BrowserStatePending)
-			{
-				Debug.Assert(!string.IsNullOrEmpty(m_BrowserState));
-
-				NotifyBrowser(SessionStateMsg, m_BrowserState.Replace('\'', '\"'));
-				m_BrowserStatePending = false;
-			}
-		}
-
-		void OnBrowserNavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
-		{
-			e.Cancel = ((e.Uri != AboutBlank) && (e.Uri != m_HtmlFile.Uri));
 		}
 	}
 
