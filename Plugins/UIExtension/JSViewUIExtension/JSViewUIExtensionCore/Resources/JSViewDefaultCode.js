@@ -4,6 +4,7 @@ google.charts.load('current', {'packages':['treemap']});
 google.charts.setOnLoadCallback(OnLoad);
 
 window.onresize = OnResize;
+window.onkeydown = OnKeyDown;
 
 // ----------------------------------------------------------------------------------------
 
@@ -18,6 +19,12 @@ const SelectedViewKey = "SelectedView";
 const SelectedTaskKey = "SelectedTask";
 const PreferencesKey  = "Preferences";
 const TreeMapDepthKey = "TreeMapDepth";
+
+// Cursor Keys
+const LeftArrow  = 37;
+const UpArrow    = 38;
+const RightArrow = 39;
+const DownArrow  = 40;
 
 // General data and functions -------------------------------------------------------------
 
@@ -203,6 +210,22 @@ function OnResize()
               
         case 'treemap_id':
             OnResizeTreeMap();
+            break;
+    }
+}
+
+function OnKeyDown(event)
+{
+    let view = GetSelectedView();
+
+    switch (view)
+    {
+        case 'dashboard_id':
+            OnKeyDownDashboard(event);
+            break;
+              
+        case 'treemap_id':
+            OnKeyDownTreeMap(event);
             break;
     }
 }
@@ -418,6 +441,11 @@ function OnSelectDashboardTask(chart)
 {
     let id = GetSelectedChartId(chart, dashboardRow2TaskMapping);
     SelectTask(id, true);
+}
+
+function OnKeyDownDashboard(unused)
+{
+    // Do nothing
 }
 
 function RefreshDashboard()
@@ -647,13 +675,164 @@ function TreeMapDrilldownTo(id)
         let idPath = GetTreeMapFullIdPath(id);
         
         while (idPath.length > 0)
-        {
-            let id = idPath.pop();
-            SetSelectedChartRow(id, treeMapChart, treeMapTask2RowMapping);
-        }
-        
-        RefreshTreeMapTextAndColors();
+function OnKeyDownTreeMap(event)
+{
+    switch (event.keyCode)
+    {
+    case LeftArrow:
+    case RightArrow:
+    case UpArrow:
+    case DownArrow:
+        event.preventDefault = SelectNextTreeMapTask(event.keyCode);
+        break;
     }
+}
+
+function CellRect(cell) 
+{
+    let rect = $(cell).find('rect');
+    
+    this.x = Number($(rect).attr('x'));
+    this.y = Number($(rect).attr('y'));
+    this.cx = Number($(rect).attr('width'));
+    this.cy = Number($(rect).attr('height'));
+}
+    
+CellRect.prototype.top     = function() { return (this.y); };
+CellRect.prototype.bot     = function() { return (this.y + this.cy); };
+CellRect.prototype.left    = function() { return (this.x); };
+CellRect.prototype.right   = function() { return (this.x + this.cx); };
+CellRect.prototype.centreX = function() { return (this.x + (this.cx / 2.0)); };
+CellRect.prototype.centreY = function() { return (this.y + (this.cy / 2.0)); };
+
+function SelectNextTreeMapTask(keyCode)
+{
+    let selId = GetSelectedTaskId();
+    
+    if (!selId)
+        return false;
+    
+    let selCell = GetTreeMapCell(selId);
+    let selRect = new CellRect(selCell);
+ 
+    let idCells = InitialiseTreeMapCellIds();
+    let nextCell = null;
+    
+    switch (keyCode)
+    {
+    case LeftArrow:
+        {
+            // Look for a task immediately LEFT of the selected one
+            // whose centre is closest to the selected task in Y
+            let closestoffset = 1000000000.0;
+            
+            for (let i = 0; i < idCells.length; i++)
+            {
+                let cell = idCells[i];
+                let rect = new CellRect(cell);
+                
+                if ((rect.right() < selRect.left()) && (rect.right() > (selRect.left() - 4)))
+                {
+                    let offset = Math.abs(selRect.centreY() - rect.centreY());
+                    
+                    if (offset < closestoffset)
+                    {
+                        nextCell = cell;
+                        closestoffset = offset;
+                    }
+                }                        
+            }
+        }
+        break;
+        
+    case RightArrow:
+        {
+            // Look for a task immediately RIGHT of the selected one
+            // whose centre is closest to the selected task in X
+            let closestOffset = 1000000000.0;
+            
+            for (let i = 0; i < idCells.length; i++)
+            {
+                let cell = idCells[i];
+                let rect = new CellRect(cell);
+                
+                if ((rect.left() > selRect.right()) && (rect.left() < (selRect.right() + 4)))
+                {
+                    let offset = Math.abs(selRect.centreY() - rect.centreY());
+                    
+                    if (offset < closestOffset)
+                    {
+                        nextCell = cell;
+                        closestOffset = offset;
+                    }
+                }                        
+            }
+        }
+        break;
+        
+    case UpArrow:
+        {
+            // Look for a task immediately ABOVE the selected one
+            // whose centre is closest to the selected task in X
+            let closestoffset = 1000000000.0;
+            
+            for (let i = 0; i < idCells.length; i++)
+            {
+                let cell = idCells[i];
+                let rect = new CellRect(cell);
+                
+                if ((rect.bot() < selRect.top()) && (rect.bot() > (selRect.top() - 4)))
+                {
+                    let offset = Math.abs(selRect.centreX() - rect.centreX());
+                    
+                    if (offset < closestoffset)
+                    {
+                        nextCell = cell;
+                        closestoffset = offset;
+                    }
+                }                        
+            }
+        }
+        break;
+        
+    case DownArrow:
+        {
+            // Look for a task immediately BELOW the selected one
+            // whose centre is closest to the selected task in X
+            let closestOffset = 1000000000.0;
+            
+            for (let i = 0; i < idCells.length; i++)
+            {
+                let cell = idCells[i];
+                let rect = new CellRect(cell);
+                
+                if ((rect.top() > selRect.bot()) && (rect.top() < (selRect.bot() + 4)))
+                {
+                    let offset = Math.abs(selRect.centreX() - rect.centreX());
+                    
+                    if (offset < closestOffset)
+                    {
+                        nextCell = cell;
+                        closestOffset = offset;
+                    }
+                }                        
+            }
+        }
+        break;
+    }
+            
+    if (nextCell)
+    {
+        let nextId = GetTreeMapCellId(nextCell);
+        
+        SelectTask(nextId);
+        EnsureTreeMapTaskIsVisible(nextId);
+        
+        return true;
+    }
+    
+    // all else
+    return false;
 }
 
 function OnTreeMapReady()
@@ -695,7 +874,7 @@ function OnTreeMapDrilldown()
     let id = GetSelectedChartId(treeMapChart, treeMapRow2TaskMapping);
     
     SelectTask(id, true);
-    EnsureVisible(id);
+    EnsureTreeMapTaskIsVisible(id);
     
     RefreshTreeMapTextAndColors();
     
@@ -720,7 +899,7 @@ function OnTreeMapRollup(unused)
     // Save the new 'header id'
     SetStorage('HeaderId', GetTreeMapHeaderId());
 
-    EnsureVisible(selId);
+    EnsureTreeMapTaskIsVisible(selId);
     RefreshTreeMapTextAndColors();
 }
 
@@ -744,7 +923,7 @@ function SelectTreeMapTask(id, prevId = null)
     }
 }
 
-function EnsureVisible(id)
+function EnsureTreeMapTaskIsVisible(id)
 {
     let cell = GetTreeMapCell(id);
     
@@ -786,7 +965,7 @@ function GetTreeMapCell(id)
     {
         if (GetTreeMapCellId(cells[i]) == id)
             return cells[i];
-    };
+    }
     
     return null;
 }
