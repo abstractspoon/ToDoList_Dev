@@ -1147,6 +1147,9 @@ function RefreshTreeMapTextAndColors(specificId)
             let fillOpacity = Number($(rect).css('fill-opacity'));
             let borderColor = "";
             
+            const SelectionOpacity = 0.85;
+            const NonSelectionOpacity = 0.5;
+            
             if (id == selId)
             {
                 fillColor = '#A0D7FF';
@@ -1154,27 +1157,34 @@ function RefreshTreeMapTextAndColors(specificId)
                 
                 // Increase opacity of selected task color
                 // because it's easily lost
-                fillOpacity = Math.max(fillOpacity, 0.85);
-            }
-            else if (baseColor == '')
-            {
-                fillColor = 'White'.toHexColor();
-                borderColor = 'Gray'.toHexColor();
-            }
-            else if ((id == 0) || colorTaskBkgnd)
-            {
-                fillColor = baseColor;
-                borderColor = baseColor;
+                fillOpacity = Math.max(fillOpacity, SelectionOpacity);
             }
             else
             {
-                fillColor = baseColor.lighten(45);
-                borderColor = baseColor;
+                if (fillOpacity == SelectionOpacity)
+                    fillOpacity = NonSelectionOpacity;
+                
+                if (baseColor == '')
+                {
+                    fillColor = 'White'.toHexColor();
+                    borderColor = 'Gray'.toHexColor();
+                }
+                else if ((id == 0) || colorTaskBkgnd)
+                {
+                    fillColor = baseColor;
+                    borderColor = baseColor;
+                }
+                else
+                {
+                    fillColor = baseColor.lighten(45);
+                    borderColor = baseColor;
+                }
             }
             
             $(rect).css('fill', fillColor)
                    .css('fill-opacity', fillOpacity)
-                   .css('stroke', borderColor);
+                   .css('stroke', borderColor)
+                   .css('stroke-opacity', fillOpacity);
 
             // Render task text
             let text = $(cell).find('text');
