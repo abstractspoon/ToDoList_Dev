@@ -20,12 +20,6 @@ const SelectedTaskKey = "SelectedTask";
 const PreferencesKey  = "Preferences";
 const TreeMapDepthKey = "TreeMapDepth";
 
-// Cursor Keys
-const LeftArrow  = 37;
-const UpArrow    = 38;
-const RightArrow = 39;
-const DownArrow  = 40;
-
 // General data and functions -------------------------------------------------------------
 
 function OnLoad()
@@ -269,12 +263,17 @@ function NotifyApp(key, value)
     window.chrome.webview.postMessage(key + '=' + value);
 }
 
+function IsSelectableTask(id)
+{
+    return (id && !Number.isNaN(id) && (Number(id) > 0));
+}
+
 function SelectTask(id, fromChart)
 {
     // Prevent selection of the 'Tasklist' root
-    if (id == '0')
+    if (!IsSelectableTask(id))
     {
-        RefreshTreeMapTextAndColors(id);
+        alert('Task not selectable. ID: ' + id);
         return;
     }
     
@@ -307,7 +306,7 @@ function GetSelectedTaskId()
     return id;
 }
 
-function GetSelectedChartId(chart, row2TaskMapping)
+function GetSelectedIdFromChart(chart, row2TaskMapping)
 {
     let sel = chart.getSelection()[0];
     
@@ -439,7 +438,7 @@ function OnDashboard22Select(e)
 
 function OnSelectDashboardTask(chart)
 {
-    let id = GetSelectedChartId(chart, dashboardRow2TaskMapping);
+    let id = GetSelectedIdFromChart(chart, dashboardRow2TaskMapping);
     SelectTask(id, true);
 }
 
@@ -512,22 +511,27 @@ const HeaderHeight = 30;
 
 // -------------------------------------------------
 
-function TreeMapCellRect(cell) 
+class TreeMapRect extends DOMRect
 {
-    let rect = $(cell).find('rect');
-    
-    this.x = Number($(rect).attr('x'));
-    this.y = Number($(rect).attr('y'));
-    this.cx = Number($(rect).attr('width'));
-    this.cy = Number($(rect).attr('height'));
+    get centreX() { return (this.left + (this.width / 2.0)); };
+    get centreY() { return (this.top + (this.height / 2.0)); };
 }
-    
-TreeMapCellRect.prototype.top     = function() { return (this.y); };
-TreeMapCellRect.prototype.bot     = function() { return (this.y + this.cy); };
-TreeMapCellRect.prototype.left    = function() { return (this.x); };
-TreeMapCellRect.prototype.right   = function() { return (this.x + this.cx); };
-TreeMapCellRect.prototype.centreX = function() { return (this.x + (this.cx / 2.0)); };
-TreeMapCellRect.prototype.centreY = function() { return (this.y + (this.cy / 2.0)); };
+
+// -------------------------------------------------
+
+class TreeMapCellRect extends TreeMapRect
+{
+    constructor(cell) 
+    {
+        super();
+        let rect = $($(cell).find('rect'));
+        
+        this.x = Number(rect.attr('x'));
+        this.y = Number(rect.attr('y'));
+        this.width = Number(rect.attr('width'));
+        this.height = Number(rect.attr('height'));
+    }
+}
 
 // -------------------------------------------------
 
@@ -696,18 +700,39 @@ function TreeMapDrilldownTo(id)
         while (idPath.length > 0)
 function OnKeyDownTreeMap(event)
 {
-    switch (event.keyCode)
+    switch (event.code)
     {
-    case LeftArrow:
-    case RightArrow:
-    case UpArrow:
-    case DownArrow:
-        event.preventDefault = SelectNextTreeMapTask(event.keyCode);
+    case 'ArrowLeft':
+    case 'ArrowRight':
+    case 'ArrowUp':
+    case 'ArrowDown':
+        if (SelectFirstAdjacentTreeMapTask(event.code))
+            event.preventDefault();
+        break;
+        
+    case 'Home':
+        if (SelectLastAdjacentTreeMapTask('ArrowLeft'))
+            event.preventDefault();
+        break;
+        
+    case 'End':
+        if (SelectLastAdjacentTreeMapTask('ArrowRight'))
+            event.preventDefault();
+        break;
+        
+    case 'PageUp':
+        if (SelectLastAdjacentTreeMapTask('ArrowUp'))
+            event.preventDefault();
+        break;
+        
+    case 'PageDown':
+        if (SelectLastAdjacentTreeMapTask('ArrowDown'))
+            event.preventDefault();
         break;
     }
 }
 
-function SelectNextTreeMapTask(keyCode)
+function SelectFirstAdjacentTreeMapTask(keyCode, ensureVisible = true)
 {
     let selId = GetSelectedTaskId();
     
@@ -722,6 +747,11 @@ function SelectNextTreeMapTask(keyCode)
     for (let i = 0; i < idCells.length; i++)
     {
         let cell = idCells[i];
+        
+        // Root node is not selectable
+        if (!IsSelectableTask(GetTreeMapCellId(cell)))
+            continue;
+        
         let offset = {};
         
         if (IsCellAdjacentTo(cell, selCell, keyCode, offset))
@@ -739,13 +769,28 @@ function SelectNextTreeMapTask(keyCode)
         let nextId = GetTreeMapCellId(nextCell);
         
         SelectTask(nextId, true);
-        EnsureTreeMapTaskIsVisible(nextId);
+        
+        if (ensureVisible)
+            EnsureTreeMapSelectionVisible();
         
         return true;
     }
     
     // all else
     return false;
+}
+
+function SelectLastAdjacentTreeMapTask(keyCode)
+{
+    let selChange = false;
+    
+    while (SelectFirstAdjacentTreeMapTask(keyCode, false))
+        selChange = true;
+    
+    if (selChange)
+        EnsureTreeMapSelectionVisible();
+    
+    return selChange;
 }
 
 function IsCellAdjacentTo(cell, otherCell, keyCode, /*out*/ centreOffset)
@@ -755,34 +800,34 @@ function IsCellAdjacentTo(cell, otherCell, keyCode, /*out*/ centreOffset)
     
     switch (keyCode)
     {
-    case LeftArrow: // 'cell' is left of 'otherCell'
-        if ((rect.right() < otherRect.left()) && (rect.right() > (otherRect.left() - 4)))
+    case 'ArrowLeft': // Is 'cell' to left of 'otherCell'?
+        if ((rect.right < otherRect.left) && (rect.right > (otherRect.left - 4)))
         {
-            centreOffset.value = Math.abs(rect.centreY() - otherRect.centreY());
+            centreOffset.value = Math.abs(rect.centreY - otherRect.centreY);
             return true;
         }
         break;
         
-    case RightArrow: // 'cell' is right of 'otherCell'
-        if ((rect.left() > otherRect.right()) && (rect.left() < (otherRect.right() + 4)))
+    case 'ArrowRight': // Is 'cell' to right of 'otherCell'?
+        if ((rect.left > otherRect.right) && (rect.left < (otherRect.right + 4)))
         {
-            centreOffset.value = Math.abs(rect.centreY() - otherRect.centreY());
+            centreOffset.value = Math.abs(rect.centreY - otherRect.centreY);
             return true;
         }
         break;
         
-    case UpArrow: // 'cell' is above 'otherCell'
-        if ((rect.bot() < otherRect.top()) && (rect.bot() > (otherRect.top() - 4)))
+    case 'ArrowUp': // Is 'cell' above 'otherCell'?
+        if ((rect.bottom < otherRect.top) && (rect.bottom > (otherRect.top - 4)))
         {
-            centreOffset.value = Math.abs(rect.centreX() - otherRect.centreX());
+            centreOffset.value = Math.abs(rect.centreX - otherRect.centreX);
             return true;
         }
         break;
         
-    case DownArrow: // 'cell' is below 'otherCell'
-        if ((rect.top() > otherRect.bot()) && (rect.top() < (otherRect.bot() + 4)))
+    case 'ArrowDown': // Is 'cell' below 'otherCell'?
+        if ((rect.top > otherRect.bottom) && (rect.top < (otherRect.bottom + 4)))
         {
-            centreOffset.value = Math.abs(rect.centreX() - otherRect.centreX());
+            centreOffset.value = Math.abs(rect.centreX - otherRect.centreX);
             return true;
         }
         break;
@@ -827,15 +872,19 @@ function OnTreeMapDrilldown()
     // This is effectively a double-click handler
     // so select the task just clicked so that it
     // becomes the selected parent in the next level
-    let id = GetSelectedChartId(treeMapChart, treeMapRow2TaskMapping);
+    let id = GetSelectedIdFromChart(treeMapChart, treeMapRow2TaskMapping);
     
-    SelectTask(id, true);
-    EnsureTreeMapTaskIsVisible(id);
+    if (IsSelectableTask(id))
+    {
+        SelectTask(id, true);
+        EnsureTreeMapSelectionVisible();
+        
+        // Save the id as the new 'header id'
+        SetStorage('HeaderId', id);
+    }
     
+    // Still need this because Google will overwrite our values
     RefreshTreeMapTextAndColors();
-    
-    // Save the id as the new 'header id'
-    SetStorage('HeaderId', id);
 }
 
 function OnTreeMapRollup(unused)
@@ -855,7 +904,7 @@ function OnTreeMapRollup(unused)
     // Save the new 'header id'
     SetStorage('HeaderId', GetTreeMapHeaderId());
 
-    EnsureTreeMapTaskIsVisible(selId);
+    EnsureTreeMapSelectionVisible();
     RefreshTreeMapTextAndColors();
 }
 
@@ -879,17 +928,33 @@ function SelectTreeMapTask(id, prevId = null)
     }
 }
 
-function EnsureTreeMapTaskIsVisible(id)
+function EnsureTreeMapSelectionVisible()
 {
-    let cell = GetTreeMapCell(id);
+    let selId = GetSelectedTaskId();
+    let cell = GetTreeMapCell(selId);
     
     if (cell)
     {
-        let rect = $(cell).find('rect');
-        let x = $(rect).attr('x');
-        let y = $(rect).attr('y');
+        // Since we have largely eliminated the horizontal
+        // scrollbar it's only necessary to scroll in 'y'
+        // And we only scroll if the item is not entirely visible
+        let clientHeight = document.documentElement.clientHeight;
+        let cellRect = cell.getBoundingClientRect();
         
-        window.scroll(x, y);
+        const xScroll = document.documentElement.scrollLeft;
+        let yScroll = document.documentElement.scrollTop;
+        
+        if (cellRect.top < 0) // partly above the client rect
+        {
+            yScroll += cellRect.top;
+        }
+        else if (cellRect.bottom > clientHeight) // partly below the client rect 
+        {
+            yScroll += (cellRect.bottom - clientHeight);
+        }
+        
+        if (yScroll != document.documentElement.scrollTop)
+            window.scroll(xScroll, yScroll);
     }
 }
 
@@ -957,12 +1022,13 @@ function GetTreeMapFullIdPath(id)
     return idPath;
 }
 
+// Effectively the 'OnMouseClick' handler
 function OnTreeMapHighlight(item)
 {
     let row = item["row"];
     let id = treeMapRow2TaskMapping[row];
 
-    if (id != GetSelectedTaskId())
+    if (IsSelectableTask(id) && (id != GetSelectedTaskId()))
         SelectTask(id, true);
     else
         RefreshTreeMapTextAndColors(id); // still required because Google!
