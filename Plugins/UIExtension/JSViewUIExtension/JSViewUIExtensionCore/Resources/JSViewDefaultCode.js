@@ -255,7 +255,9 @@ function MergeSelectedTaskAttributes(selTasks)
 function RestoreSelectedTask()
 {
     let id = GetSelectedTaskId();
-    SelectTask(id, false);
+    
+    if (IsSelectableTask(id))
+        SelectTask(id, false);
 }
 
 function NotifyApp(key, value)
@@ -439,7 +441,9 @@ function OnDashboard22Select(e)
 function OnSelectDashboardTask(chart)
 {
     let id = GetSelectedIdFromChart(chart, dashboardRow2TaskMapping);
-    SelectTask(id, true);
+    
+    if (IsSelectableTask(id))
+        SelectTask(id, true);
 }
 
 function OnKeyDownDashboard(unused)
@@ -678,7 +682,7 @@ function RefreshTreeMap()
     DrawTreeMap();
     
     RestoreSelectedTask();
-    TreeMapDrilldownTo(headerId);
+    TreeMapDrilldownTo(headerId, true);
 }
 
 function OnResizeTreeMap()
@@ -688,20 +692,50 @@ function OnResizeTreeMap()
     let headerId = GetTreeMapHeaderId();
                 
     DrawTreeMap();
-    TreeMapDrilldownTo(headerId);
+    TreeMapDrilldownTo(headerId, false);
 }
 
-function TreeMapDrilldownTo(id)
+function TreeMapDrilldownTo(id, ensureVisible = true)
 {
     if (id)
     {
-        let idPath = GetTreeMapFullIdPath(id);
+        SetSelectedChartRow(id, treeMapChart, treeMapTask2RowMapping);
+        RefreshTreeMapTextAndColors();
         
-        while (idPath.length > 0)
+        if (ensureVisible)
+            EnsureTreeMapSelectionVisible();
+    }
+}
+
 function OnKeyDownTreeMap(event)
 {
     switch (event.code)
     {
+    case 'Enter':
+        {
+            let headerId = GetTreeMapHeaderId();
+            let selId = GetSelectedTaskId();
+            
+            if (selId == headerId)
+            {
+                treeMapChart.goUpAndDraw();
+                OnTreeMapRollup();
+            }
+            else
+            {
+                TreeMapDrilldownTo(selId, true);
+            }
+        }
+        break;
+        
+    case 'Escape':
+        if (IsSelectableTask(GetTreeMapHeaderId()))
+        {
+            treeMapChart.goUpAndDraw();
+            OnTreeMapRollup();
+        }
+        break;
+        
     case 'ArrowLeft':
     case 'ArrowRight':
     case 'ArrowUp':
@@ -767,7 +801,6 @@ function SelectFirstAdjacentTreeMapTask(keyCode, ensureVisible = true)
     if (nextCell)
     {
         let nextId = GetTreeMapCellId(nextCell);
-        
         SelectTask(nextId, true);
         
         if (ensureVisible)
@@ -915,7 +948,7 @@ function SelectTreeMapTask(id, prevId = null)
     // Navigate to the task if it's not currently visible
     if (!IsTreeMapIdVisible(id))
     {
-        TreeMapDrilldownTo(id); // Will also refresh text and colors
+        TreeMapDrilldownTo(id, true); // Will also refresh text and colors
     }
     else if (prevId == null)
     {
