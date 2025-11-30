@@ -5,6 +5,8 @@ google.charts.setOnLoadCallback(OnLoad);
 
 window.onresize = OnResize;
 window.onkeydown = OnKeyDown;
+window.onblur = OnFocusChanged;
+window.onfocus = OnFocusChanged;
 
 // ----------------------------------------------------------------------------------------
 
@@ -47,9 +49,9 @@ function SupportsHTML5Storage()
     }
 }
 
-function OnAppMessage(message)
+function OnAppMessage(event)
 {  
-    let value = {}, key = ParseAppMessage(message.data, value);
+    let value = {}, key = ParseAppMessage(event.data, value);
 
     if (key == RefreshMsg)
     {
@@ -192,7 +194,7 @@ function RefreshSelectedView()
     }
 }
 
-function OnResize()
+function OnResize(event)
 {
     let view = GetSelectedView();
 
@@ -220,6 +222,23 @@ function OnKeyDown(event)
               
         case 'treemap_id':
             OnKeyDownTreeMap(event);
+            break;
+    }
+}
+
+function OnFocusChanged(event)
+{
+    let hasFocus = (event.type == 'focus');
+    let view = GetSelectedView();
+
+    switch (view)
+    {
+        case 'dashboard_id':
+            OnFocusChangedDashboard(hasFocus);
+            break;
+              
+        case 'treemap_id':
+            OnFocusChangedTreeMap(hasFocus);
             break;
     }
 }
@@ -451,6 +470,11 @@ function OnKeyDownDashboard(unused)
     // Do nothing
 }
 
+function OnFocusChangedDashboard(hasFocus)
+{
+    // Do nothing
+}
+
 function RefreshDashboard()
 {
     InitDashboard();
@@ -513,6 +537,12 @@ var treeMapChart = null;
 
 const HeaderHeight = 30;
 
+const FocusedSelectionFillColor     = '#A0D7FF';
+const FocusedSelectionBorderColor   = '#5AB4FF';
+
+const UnfocusedSelectionFillColor   = '#CCE8FF';
+const UnfocusedSelectionBorderColor = FocusedSelectionFillColor;
+
 // -------------------------------------------------
 
 class TreeMapRect extends DOMRect
@@ -550,7 +580,7 @@ function InitTreeMap()
         google.visualization.events.addListener(treeMapChart, "rollup", OnTreeMapRollup);
         google.visualization.events.addListener(treeMapChart, "highlight", OnTreeMapHighlight);
         google.visualization.events.addListener(treeMapChart, "unhighlight", OnTreeMapUnhighlight);
-       
+
         PopulateTreeMap();
     }
 }
@@ -705,6 +735,11 @@ function TreeMapDrilldownTo(id, ensureVisible = true)
         if (ensureVisible)
             EnsureTreeMapSelectionVisible();
     }
+}
+
+function OnFocusChangedTreeMap(unused)
+{
+    RefreshTreeMapTextAndColors(GetSelectedTaskId());
 }
 
 function OnKeyDownTreeMap(event)
@@ -1152,8 +1187,16 @@ function RefreshTreeMapTextAndColors(specificId)
             
             if (id == selId)
             {
-                fillColor = '#A0D7FF';
-                borderColor = '#5AB4FF';
+                if (document.hasFocus())
+                {
+                    fillColor = FocusedSelectionFillColor;
+                    borderColor = FocusedSelectionBorderColor;
+                }
+                else
+                {
+                    fillColor = UnfocusedSelectionFillColor;
+                    borderColor = UnfocusedSelectionBorderColor;
+                }
                 
                 // Increase opacity of selected task color
                 // because it's easily lost

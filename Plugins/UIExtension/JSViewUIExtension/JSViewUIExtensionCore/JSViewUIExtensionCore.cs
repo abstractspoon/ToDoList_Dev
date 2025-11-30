@@ -48,7 +48,9 @@ namespace JSViewUIExtension
 		JObject m_AppPrefs;
 		uint m_SelectedTaskId;
 		string m_BrowserState;
+
 		bool m_BrowserStatePending; // true if we haven't yet restored the previous browser state
+		bool m_SetFocusPending; // true if we need to set focus to the browser when it's ready
 
 		// Data resource files -> Tasklist folder
 		ResourceFile m_JsDataFile	= new ResourceFile("JSViewData.js", true);
@@ -304,19 +306,9 @@ namespace JSViewUIExtension
 			NotifyBrowser(PreferencesMsg, m_AppPrefs);
 		}
 
-
-		public new Boolean Focus()
-		{
-			if (Focused)
-				return false;
-
-			// else
-			return m_WebView.Focus();
-		}
-
 		public new Boolean Focused
 		{
-			get { return m_WebView.Focused; }
+			get { return (m_SetFocusPending || m_WebView.Focused); }
 		}
 
 		// Message handlers ------------------------------------------------------------------------------
@@ -325,7 +317,10 @@ namespace JSViewUIExtension
 		{
 			base.OnGotFocus(e);
 
-			m_WebView.Focus();
+			m_SetFocusPending = (m_WebView.CoreWebView2 == null);
+
+			if (!m_SetFocusPending)
+				m_WebView.Focus();
 		}
 
 		protected override void OnHandleDestroyed(EventArgs e)
@@ -346,6 +341,12 @@ namespace JSViewUIExtension
 
 				NotifyBrowser(SessionStateMsg, m_BrowserState.Replace('\'', '\"'));
 				m_BrowserStatePending = false;
+			}
+
+			if (m_SetFocusPending)
+			{
+				m_WebView.Focus();
+				m_SetFocusPending = false;
 			}
 		}
 
