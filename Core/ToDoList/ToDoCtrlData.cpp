@@ -2428,33 +2428,26 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	case TDCD_STARTDATE:
 	case TDCD_DUE:
 	case TDCD_DUEDATE:
-		// Date offsets fail on hours and minutes
-		// AND date does NOT need to be initialised if offsetting from TODAY
+		// Start/Due Date offsets require:
+		// 1. Date units
+		// 2. Initialised date if NOT offsetting from today
 		return (bUnitsAreDate && (bOffsetFromToday || TaskHasDate(dwTaskID, nDate)));
 
 	case TDCD_DONE:
 	case TDCD_DONEDATE:
-		// Date offsets fail on hours and minutes
-		// AND date must already be initialised
+		// Done Date offsets require:
+		// 1. Date units
+		// 2. Initialised date
 		return (bUnitsAreDate && TaskHasDate(dwTaskID, nDate));
 
 	case TDCD_STARTTIME:
-		// Time offsets only work on hours and minutes
-		// AND date must already be initialised
-		// AND cannot offset from today
-		return (bUnitsAreTime && !bOffsetFromToday && TaskHasDate(dwTaskID, TDCD_START));
-
 	case TDCD_DUETIME:
-		// Time offsets only work on hours and minutes
-		// AND date must already be initialised
-		// AND cannot offset from today
-		return (bUnitsAreTime && !bOffsetFromToday && TaskHasDate(dwTaskID, TDCD_DUE));
-
 	case TDCD_DONETIME:
-		// Time offsets only work on hours and minutes
-		// AND date must already be initialised
-		// AND cannot offset from today
-		return (bUnitsAreTime && !bOffsetFromToday && TaskHasDate(dwTaskID, TDCD_DONE));
+		// Time offsets require:
+		// 1. Time units
+		// 2. No 'offset from today'
+		// 3. Initialised date
+		return (bUnitsAreTime && !bOffsetFromToday && TaskHasDate(dwTaskID, TDC::MapTimeToDate(nDate)));
 	}
 
 	// all else
