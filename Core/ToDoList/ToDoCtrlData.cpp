@@ -2419,66 +2419,39 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	if (!HasTask(dwTaskID))
 		return FALSE;
 
+	BOOL bUnitsAreTime = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+	BOOL bUnitsAreDate = (!bUnitsAreTime && (nUnits != TDCU_NULL));
+
 	switch (nDate)
 	{
 	case TDCD_START:
 	case TDCD_STARTDATE:
 	case TDCD_DUE:
 	case TDCD_DUEDATE:
+		// Date offsets fail on hours and minutes
+		// AND date does NOT need to be initialised if offsetting from TODAY
+		return (bUnitsAreDate && (bFromToday || TaskHasDate(dwTaskID, nDate)));
+
 	case TDCD_DONE:
 	case TDCD_DONEDATE:
-		{
-			// This fails on hours and minutes
-			if (TDC::MapUnitsToDHUnits(nUnits) == DHU_NULL)
-				return FALSE;
-		}
-		break;
+		// Date offsets fail on hours and minutes
+		// AND date must already be initialised
+		return (bUnitsAreDate && TaskHasDate(dwTaskID, nDate));
 
 	case TDCD_STARTTIME:
-		{
-			if ((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS))
-				return FALSE;
-
-			nDate = TDCD_START;
-		}
-		break;
+		// Time offsets only work on hours and minutes
+		// AND date must already be initialised
+		return (bUnitsAreTime && TaskHasDate(dwTaskID, TDCD_START));
 
 	case TDCD_DUETIME:
-		{
-			if ((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS))
-				return FALSE;
-
-			nDate = TDCD_DUE;
-		}
-		break;
+		// Time offsets only work on hours and minutes
+		// AND date must already be initialised
+		return (bUnitsAreTime && TaskHasDate(dwTaskID, TDCD_DUE));
 
 	case TDCD_DONETIME:
-		{
-			if ((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS))
-				return FALSE;
-
-			nDate = TDCD_DONE;
-		}
-		break;
-
-	default: // All the rest
-		return FALSE;
-	}
-
-	if (TaskHasDate(dwTaskID, nDate))
-		return TRUE;
-
-	// Allow start and due dates to be created by offsetting from today
-	if (bFromToday)
-	{
-		switch (nDate)
-		{
-		case TDCD_START:
-		case TDCD_STARTDATE:
-		case TDCD_DUE:
-		case TDCD_DUEDATE:
-			return TRUE;
-		}
+		// Time offsets only work on hours and minutes
+		// AND date must already be initialised
+		return (bUnitsAreTime && TaskHasDate(dwTaskID, TDCD_DONE));
 	}
 
 	// all else
@@ -2561,7 +2534,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 			if (bModTimeOnly)
 			{
 				// Modify time only
-				ASSERT(date.m_dt < 1.0);
+				//ASSERT(date.m_dt < 1.0);
 
 				switch (TDC::MapUnitsToTHUnits(nUnits))
 				{
