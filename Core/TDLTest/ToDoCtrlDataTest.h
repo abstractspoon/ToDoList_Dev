@@ -52,6 +52,10 @@ protected:
 
 	void TestCanOffsetTaskDate();
 	void TestCanOffsetTaskDate(const CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags);
+	void TestOffsetTaskDate();
+	void TestOffsetTaskDate(LPCTSTR szSubTest, CToDoCtrlData& data, DWORD dwTaskID);
+	void TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags);
+
 	static CString GetRegularityText(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom);
 	static CString GetDateTypeText(TDC_DATE nDate);
 	static CString GetUnitsText(TDC_UNITS nUnit);

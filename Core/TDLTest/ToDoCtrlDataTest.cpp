@@ -12,6 +12,7 @@
 #include "..\todolist\todoctrlfind.h"
 #include "..\todolist\tdcstruct.h"
 #include "..\todolist\tdltasktreectrl.h"
+#include "..\todolist\tdcmapping.h"
 
 #include "..\shared\treectrlhelper.h"
 #include "..\shared\datehelper.h"
@@ -64,7 +65,9 @@ TESTRESULT CToDoCtrlDataTest::Run()
 	TestSetTaskPriorityRisk();
 	TestOffsetTaskPriorityRisk();
 	TestAdjustNewRecurringTasksDates();
+
 	TestCanOffsetTaskDate();
+	TestOffsetTaskDate();
 
 	// Performance
 	TestHierarchyDataModelPerformance();
@@ -914,6 +917,244 @@ void CToDoCtrlDataTest::TestCanOffsetTaskDate(const CToDoCtrlData& data, DWORD d
 	}
 
 	ExpectEQ(data.CanOffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags), bExpectedResult);
+}
+
+// ------------------------------------------------------------
+
+void CToDoCtrlDataTest::TestOffsetTaskDate()
+{
+	CTDCScopedTest test(*this, _T("CToDoCtrlData::OffsetTaskDate"));
+
+	CTDCStyleMap aStyles;
+	CTDCCustomAttribDefinitionArray aCustAttrib;
+
+	CToDoCtrlData data(aStyles, aCustAttrib);
+	CUndoAction undo(data, TDCUAT_ADD, FALSE); // Otherwise CToDoCtrlData will assert
+
+	const DWORD dwTaskID = 1;
+	TODOITEM* pTDI = data.NewTask(TODOITEM());
+
+	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
+
+	// No dates
+	{
+		pTDI->dateStart = CDateHelper::NullDate();
+		pTDI->dateDue   = CDateHelper::NullDate();
+		pTDI->dateDone  = CDateHelper::NullDate();
+
+		TestOffsetTaskDate(_T("No dates"), data, dwTaskID);
+	}
+
+	// Dates no Times
+	{
+		pTDI->dateStart = COleDateTime(40000.0);
+		pTDI->dateDue   = COleDateTime(40001.0);
+		pTDI->dateDone  = COleDateTime(40002.0);
+
+		TestOffsetTaskDate(_T("Dates no Times"), data, dwTaskID);
+	}
+
+	// Dates and Times
+	{
+		pTDI->dateStart = COleDateTime(40000.25);
+		pTDI->dateDue   = COleDateTime(40001.50);
+		pTDI->dateDone  = COleDateTime(40002.75);
+
+		TestOffsetTaskDate(_T("Dates and Times"), data, dwTaskID);
+	}
+}
+
+void CToDoCtrlDataTest::TestOffsetTaskDate(LPCTSTR szSubTest, CToDoCtrlData& data, DWORD dwTaskID)
+{
+	const TDC_DATE DATES[] = { TDCD_CREATE, TDCD_START, TDCD_STARTDATE, TDCD_STARTTIME, TDCD_DUE, TDCD_DUEDATE, TDCD_DUETIME, TDCD_DONE, TDCD_DONEDATE, TDCD_DONETIME, TDCD_LASTMOD, TDCD_CUSTOM, TDCD_REMINDER };
+	const int NUM_DATES = (sizeof(DATES) / sizeof(DATES[0]));
+
+	const TDC_UNITS UNITS[] = { TDCU_MINS, TDCU_HOURS, TDCU_DAYS, TDCU_WEEKDAYS, TDCU_WEEKS, TDCU_MONTHS, TDCU_YEARS };
+	const int NUM_UNITS = (sizeof(UNITS) / sizeof(UNITS[0]));
+
+	const int AMOUNTS[] = { 1, 3, 5, 7, 11 };
+	const int NUM_AMOUNTS = (sizeof(AMOUNTS), sizeof(AMOUNTS[0]));
+
+	for (int i = 0; i < NUM_DATES; i++)
+	{
+		const TDC_DATE nDate = DATES[i];
+
+		for (int j = 0; j < NUM_UNITS; j++)
+		{
+			const TDC_UNITS nUnits = UNITS[j];
+
+			CTDCScopedSubTest subtest(*this, Misc::Format(_T("%s, %s, %s"), szSubTest, GetDateTypeText(nDate), GetUnitsText(nUnits)));
+
+			for (int k = 0; k < NUM_AMOUNTS; k++)
+			{
+				const int nAmount = AMOUNTS[k];
+
+				TestOffsetTaskDate(data, dwTaskID, nDate, nAmount, nUnits, 0);
+				TestOffsetTaskDate(data, dwTaskID, nDate, -nAmount, nUnits, 0);
+
+				TestOffsetTaskDate(data, dwTaskID, nDate, nAmount, nUnits, TDCOTD_OFFSETFROMTODAY);
+				TestOffsetTaskDate(data, dwTaskID, nDate, -nAmount, nUnits, TDCOTD_OFFSETFROMTODAY);
+			}
+		}
+	}
+}
+
+// -------------------------------------
+
+#define DATEOFFSET_NOCHANGE \
+	ExpectEQ(SET_NOCHANGE, data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags, aModTaskIDs)); \
+	ExpectEQ(0, aModTaskIDs.GetSize())
+
+#define DATEOFFSET_CHANGE(amount) \
+	aModTaskIDs.RemoveAll();      \
+	ExpectEQ(SET_CHANGE, data.OffsetTaskDate(dwTaskID, nDate, amount, nUnits, dwFlags, aModTaskIDs)); \
+	ExpectEQ(1, aModTaskIDs.GetSize()); \
+	ExpectEQ(1UL, aModTaskIDs[0])
+
+// -------------------------------------
+
+void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate,
+										   int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
+{
+	BOOL bOffsetFromToday = Misc::HasFlag(dwFlags, TDCOTD_OFFSETFROMTODAY);
+	BOOL bZeroAmount = (nAmount == 0);
+	BOOL bHasValidUnits = IsValidUnits(nUnits);
+	BOOL bUnitsAreTime = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+	BOOL bUnitsAreDate = (bHasValidUnits && !bUnitsAreTime);
+
+	CDWordArray aModTaskIDs;
+
+	switch (nDate)
+	{
+	case TDCD_CREATE:
+	case TDCD_LASTMOD:
+	case TDCD_NONE:
+	case TDCD_REMINDER:
+	case TDCD_CUSTOM:
+		DATEOFFSET_NOCHANGE;
+		break;
+
+	case TDCD_START:
+	case TDCD_STARTDATE:
+	case TDCD_DUE:
+	case TDCD_DUEDATE:
+	case TDCD_DONE:
+	case TDCD_DONEDATE:
+		{
+			// Dates only support date units 
+			// Start and Due date can be uninitialised if offsetting from today
+			// Done date cannot be uninitialised if offsetting from today
+			BOOL bMustBeInitialised = ((nDate == TDCD_DONE) || (nDate == TDCD_DONEDATE) || !bOffsetFromToday);
+
+			if (!bUnitsAreDate || (bMustBeInitialised && !data.TaskHasDate(dwTaskID, nDate)) || (bZeroAmount && !bOffsetFromToday))
+			{
+				DATEOFFSET_NOCHANGE;
+			}
+			else
+			{
+				const COleDateTime dtTaskOrg = data.GetTaskDate(dwTaskID, nDate);
+				const COleDateTime dtFrom = (bOffsetFromToday ? CDateHelper::GetDate(DHD_TODAY) : dtTaskOrg);
+				
+				DATEOFFSET_CHANGE(nAmount);
+
+				COleDateTime dtTaskNew = data.GetTaskDate(dwTaskID, nDate);
+
+				if (nAmount > 0)
+					ExpectTrue(dtTaskNew > dtFrom);
+				else
+					ExpectTrue(dtTaskNew < dtFrom);
+
+				// Reverse offset to get original date and time
+				DATEOFFSET_CHANGE(-nAmount);
+
+				dtTaskNew = data.GetTaskDate(dwTaskID, nDate);
+
+				if (bOffsetFromToday)
+				{
+					if (-nAmount > 0)
+						ExpectTrue(dtTaskNew > dtFrom);
+					else
+						ExpectTrue(dtTaskNew < dtFrom);
+
+					// Restore original task date
+					data.SetTaskDate(dwTaskID, nDate, dtTaskOrg);
+				}
+				else
+				{
+					ExpectTrue(dtTaskNew == dtFrom);
+				}
+			}
+		}
+		break;
+
+	case TDCD_STARTTIME:
+	case TDCD_DUETIME:
+	case TDCD_DONETIME:
+		{
+			// Times only support time units and
+			// and do not support offsetting from today
+			// and date must already be initialised
+			TDC_DATE nMappedDate = TDC::MapTimeToDate(nDate);
+
+			if (!bUnitsAreTime || bZeroAmount || bOffsetFromToday || !data.TaskHasDate(dwTaskID, nMappedDate))
+			{
+				DATEOFFSET_NOCHANGE;
+			}
+			else
+			{
+				const COleDateTime dtTaskOrg = data.GetTaskDate(dwTaskID, nMappedDate);
+
+				// A negative offset
+				if ((nAmount < 0) && !CDateHelper::DateHasTime(dtTaskOrg))
+				{
+					DATEOFFSET_NOCHANGE;
+				}
+				else
+				{
+					// CToDoCtrlData rejects offsets which would result in overflow
+					if (nUnits == TDCU_HOURS)
+					{
+						if (!CDateHelper::IsSameDay(dtTaskOrg, dtTaskOrg.m_dt + (nAmount / 24.0)))
+						{
+							DATEOFFSET_NOCHANGE;
+							return;
+						}
+					}
+					else
+					{
+						ASSERT(nUnits == TDCU_MINS);
+
+						if (!CDateHelper::IsSameDay(dtTaskOrg, dtTaskOrg.m_dt + (nAmount / (60 * 24.0))))
+						{
+							DATEOFFSET_NOCHANGE;
+							return;
+						}
+					}
+
+					DATEOFFSET_CHANGE(nAmount);
+
+					COleDateTime dtTaskNew = data.GetTaskDate(dwTaskID, nMappedDate);
+
+					if (nAmount > 0)
+						ExpectTrue(dtTaskNew > dtTaskOrg);
+					else
+						ExpectTrue(dtTaskNew < dtTaskOrg);
+
+					// Reverse offset to get original date and time
+					DATEOFFSET_CHANGE(-nAmount);
+
+					dtTaskNew = data.GetTaskDate(dwTaskID, nMappedDate);
+
+					ExpectTrue(dtTaskNew == dtTaskOrg);
+
+					// Restore original task date
+					data.SetTaskDate(dwTaskID, nDate, dtTaskOrg);
+				}
+
+			}
+		}
+		break;
+	}
 }
 
 CString CToDoCtrlDataTest::GetDateTypeText(TDC_DATE nDate)

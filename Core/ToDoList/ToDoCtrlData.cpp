@@ -9,7 +9,6 @@
 #include "TDCStatic.h"
 #include "tdcmapping.h"
 
-#include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
@@ -2513,52 +2512,51 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 
 	TDC_SET nRes = SET_NOCHANGE;
 
-	BOOL bFromToday = (dwFlags & TDCOTD_OFFSETFROMTODAY);
-	BOOL bPreserveEndOfMonth = (dwFlags & TDCOTD_PRESERVEENDOFMONTH);
-
 	if (CanOffsetTaskDate(dwTrueTaskID, nDate, nAmount, nUnits, dwFlags))
 	{
 		TODOITEM* pTDI = NULL;
 		EDIT_GET_TDI(dwTrueTaskID, pTDI);
 
-		CDateHelper dh;
-		COleDateTime date = (bFromToday ? dh.GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
+		COleDateTime dtNew = pTDI->GetDate(nDate);
+
+		if (dwFlags & TDCOTD_OFFSETFROMTODAY)
+			dtNew = CDateHelper::GetDate(DHD_TODAY);
+
 		BOOL bModTimeOnly = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
 
 		if (nAmount != 0)
 		{
 			if (bModTimeOnly)
 			{
-				// Modify time only
-				//ASSERT(date.m_dt < 1.0);
+				ASSERT((dtNew.m_dt >= 0.0) && (dtNew.m_dt < 1.0));
 
-				switch (TDC::MapUnitsToTHUnits(nUnits))
-				{
-				case THU_HOURS:
-					date.m_dt += (nAmount / 24.0);
-					break;
+				// This needs special care in handling rounding errors
+				// to ensure that offsets are reversible
+				const double ONE_DAY_IN_MINS = (24.0 * 60);
+				int nTimeInMins = Misc::Round(dtNew.m_dt * ONE_DAY_IN_MINS);
 
-				case THU_MINS:
-					date.m_dt += (nAmount / (24.0 * 60));
-					break;
+				if (nUnits == TDCU_HOURS)
+					nTimeInMins += (nAmount * 60);
+				else
+					nTimeInMins += nAmount;
 
-				default:
-					ASSERT(0);
-				}
+				// Disallow overflow
+				if ((nTimeInMins >= 0) && (nTimeInMins < ONE_DAY_IN_MINS))
+					dtNew.m_dt = (nTimeInMins / ONE_DAY_IN_MINS);
 			}
 			else // Modify date AND time
 			{
-				VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits)));
+				VERIFY(CDateHelper().OffsetDate(dtNew, nAmount, TDC::MapUnitsToDHUnits(nUnits)));
 			}
 		}
 
 		// Special case: Task is recurring and the date was changed -> must fall on a valid date
 		if (bFitToRecurringScheme && pTDI->IsRecurring() && !bModTimeOnly)
 		{
-			pTDI->trRecurrence.FitDayToScheme(date);
+			pTDI->trRecurrence.FitDayToScheme(dtNew);
 		}
 
-		nRes = SetTaskDate(dwTrueTaskID, pTDI, nDate, date, FALSE); // DON'T recalc time estimate
+		nRes = SetTaskDate(dwTrueTaskID, pTDI, nDate, dtNew, FALSE); // DON'T recalc time estimate
 
 		mapProcessedTasks[dwTrueTaskID] = (nRes == SET_CHANGE);
 	}
