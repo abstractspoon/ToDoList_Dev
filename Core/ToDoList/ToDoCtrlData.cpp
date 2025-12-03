@@ -2512,7 +2512,6 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 
 	TDC_SET nRes = SET_NOCHANGE;
 
-
 	if (CanOffsetTaskDate(dwTrueTaskID, nDate, nAmount, nUnits, dwFlags))
 	{
 		TODOITEM* pTDI = NULL;
