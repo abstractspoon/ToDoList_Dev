@@ -2579,7 +2579,10 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 			}
 			else // Modify date AND time
 			{
-				VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits)));
+				VERIFY(CDateHelper().OffsetDate(date, 
+												nAmount, 
+												TDC::MapUnitsToDHUnits(nUnits),
+												bPreserveEndOfMonth));
 			}
 		}
 
