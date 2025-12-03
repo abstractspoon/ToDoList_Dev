@@ -2512,21 +2512,21 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 
 	TDC_SET nRes = SET_NOCHANGE;
 
+
 	if (CanOffsetTaskDate(dwTrueTaskID, nDate, nAmount, nUnits, dwFlags))
 	{
 		TODOITEM* pTDI = NULL;
 		EDIT_GET_TDI(dwTrueTaskID, pTDI);
 
-		COleDateTime dtNew = pTDI->GetDate(nDate);
+		BOOL bOffsetFromToday = (dwFlags & TDCOTD_OFFSETFROMTODAY);
+		BOOL bPreserveEndOfMonth = (dwFlags & TDCOTD_PRESERVEENDOFMONTH);
+		BOOL bOffsetTimeOnly = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
 
-		if (dwFlags & TDCOTD_OFFSETFROMTODAY)
-			dtNew = CDateHelper::GetDate(DHD_TODAY);
-
-		BOOL bModTimeOnly = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+		COleDateTime dtNew = (bOffsetFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
 
 		if (nAmount != 0)
 		{
-			if (bModTimeOnly)
+			if (bOffsetTimeOnly)
 			{
 				ASSERT((dtNew.m_dt >= 0.0) && (dtNew.m_dt < 1.0));
 
@@ -2546,7 +2546,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 			}
 			else // Modify date AND time
 			{
-				VERIFY(CDateHelper().OffsetDate(date, 
+				VERIFY(CDateHelper().OffsetDate(dtNew, 
 												nAmount, 
 												TDC::MapUnitsToDHUnits(nUnits),
 												bPreserveEndOfMonth));
@@ -2554,7 +2554,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		}
 
 		// Special case: Task is recurring and the date was changed -> must fall on a valid date
-		if (bFitToRecurringScheme && pTDI->IsRecurring() && !bModTimeOnly)
+		if (bFitToRecurringScheme && pTDI->IsRecurring() && !bOffsetTimeOnly)
 		{
 			pTDI->trRecurrence.FitDayToScheme(dtNew);
 		}
