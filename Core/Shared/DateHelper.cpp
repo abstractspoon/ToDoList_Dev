@@ -484,31 +484,33 @@ int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, const COleDateTime
 {
 	NULLDATE_CHECKRET(dateFrom, 0);
 	NULLDATE_CHECKRET(dateTo, 0);
-	
-	COleDateTime dFrom = GetDateOnly(dateFrom);
-	COleDateTime dTo = GetDateOnly(dateTo);
+
+	BOOL bSwap = (dateFrom > dateTo);
+
+	COleDateTime dtFrom = GetDateOnly(bSwap ? dateTo : dateFrom);
+	COleDateTime dtTo = GetDateOnly(bSwap ? dateFrom : dateTo);
 
 	if (bInclusive)
-		dTo.m_dt += 1;
+		dtTo.m_dt += 1;
 
-	int nDays = (int)(double)(dTo - dFrom);
+	int nDays = (int)(dtTo.m_dt - dtFrom.m_dt);
 
 	if (m_week.HasWeekend() && (nDays > 0))
 	{
 		nDays = 0;
 
-		while (dFrom < dTo)
+		while (dtFrom < dtTo)
 		{
-			OLE_DAYOFWEEK nDOW = GetDayOfWeek(dFrom);
+			OLE_DAYOFWEEK nDOW = GetDayOfWeek(dtFrom);
 
 			if (!m_week.Weekend().IsWeekend(nDOW))
 				nDays++;
 
-			dFrom += 1;
+			dtFrom += 1;
 		}
 	}
 
-	return nDays;
+	return (bSwap ? -nDays : nDays);
 }
 
 int CDateHelper::CalcDaysFromTo(const COleDateTime& dateFrom, DH_DATE nTo, BOOL bInclusive) const
@@ -526,9 +528,9 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, B
 	// sanity checks
 	NULLDATE_CHECKRET(date, FALSE);
 
-	if (!IsValidUnit(nUnits) && (nUnits != DHU_NULL))
+	if (!IsValidUnit(nUnits))
 	{
-		ASSERT(0);
+		ASSERT((nUnits == DHU_NULL));
 		return FALSE;
 	}
 

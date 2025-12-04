@@ -6,8 +6,6 @@
 #include "TDLTest.h"
 #include "DateHelperTest.h"
 
-#include "..\shared\Datehelper.h"
-
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -42,6 +40,7 @@ TESTRESULT CDateHelperTest::Run()
 	TestMakeDate();
 	TestCompare();
 	Test64BitDates();
+	TestOffsetDate();
 
 	return GetTotals();
 }
@@ -492,4 +491,202 @@ void CDateHelperTest::Test64BitDates()
 		COleDateTime dtNowCheck = CDateHelper::GetDate(tNow);
 		ExpectEQ(dtNow, dtNowCheck);
 	}
+}
+
+void CDateHelperTest::TestOffsetDate()
+{
+	CTDCScopedTest test(*this, _T("CDateHelper::OffsetDate"));
+ 
+	// 24/7 working week
+	{
+		CTwentyFourSevenWeek week;
+
+		CDateHelper dh(week);
+		ExpectTrue(dh.WorkingWeek().GetLengthInDays() == 7);
+
+		// Don't preserve end of month
+		{
+			TestOffsetDate(dh, 1, FALSE);  // Forwards
+			TestOffsetDate(dh, -1, FALSE); // Backwards
+		}
+
+		// Preserve end of month
+		{
+			TestOffsetDate(dh, 1, TRUE);   // Forwards
+			TestOffsetDate(dh, -1, TRUE);  // Backwards
+		}
+	}
+ 
+	// 'Standard' working week
+	// Note: Make it 24 hour day to simplify checks
+	{
+		CWorkingWeek week((DWORD)(DHW_SATURDAY | DHW_SUNDAY), 24);
+
+		CDateHelper dh(week);
+		ExpectTrue(dh.WorkingWeek().GetLengthInDays() == 5);
+
+		// Don't preserve end of month
+		{
+			TestOffsetDate(dh, 1, FALSE);  // Forwards
+			TestOffsetDate(dh, -1, FALSE); // Backwards
+		}
+
+		// Preserve end of month
+		{
+ 			TestOffsetDate(dh, 1, TRUE);   // Forwards
+ 			TestOffsetDate(dh, -1, TRUE);  // Backwards
+		}
+	}
+}
+
+void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPreserveEndOfMonth)
+{
+	// Invalid arguments
+	{
+		CTDCScopedSubTest test(*this, _T("Invalid Arguments"));
+
+		// Date (CDateHelper will intentionally assert the Null dates)
+#ifndef _DEBUG
+		COleDateTime dtNull(CDateHelper::NullDate());
+		ExpectFalse(CDateHelper::IsDateSet(dtNull));
+
+		ExpectFalse(dh.OffsetDate(dtNull, 10, DHU_DAYS, bPreserveEndOfMonth));
+		ExpectFalse(dh.OffsetDate(dtNull, -10, DHU_DAYS, bPreserveEndOfMonth));
+
+		// dtNull should still be null
+		ExpectFalse(CDateHelper::IsDateSet(dtNull));
+#endif
+		// Amount
+		ExpectFalse(dh.OffsetDate(COleDateTime::GetCurrentTime(), 0, DHU_DAYS, bPreserveEndOfMonth));
+		ExpectFalse(dh.OffsetDate(COleDateTime::GetCurrentTime(), 0, DHU_DAYS, bPreserveEndOfMonth));
+
+		// Units
+		ExpectFalse(dh.OffsetDate(COleDateTime::GetCurrentTime(), 10, DHU_NULL, bPreserveEndOfMonth));
+		ExpectFalse(dh.OffsetDate(COleDateTime::GetCurrentTime(), -10, DHU_NULL, bPreserveEndOfMonth));
+	}
+
+	// Valid arguments
+	{
+		const DH_UNITS UNITS[] = { DHU_WEEKDAYS, DHU_DAYS, DHU_WEEKS, DHU_MONTHS, DHU_YEARS };
+		const int NUM_UNITS = (sizeof(UNITS) / sizeof(UNITS[0]));
+
+		// ---------------------------------------
+
+		const int DAYS[] = { 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, -1 }; // -1 -> last day of month
+		const int NUM_DAYS = (sizeof(DAYS) / sizeof(DAYS[0]));
+
+		// ---------------------------------------
+
+		const int OFFSETS[] = { 1, 2, 3, 5, 7, 11 };
+		const int NUM_OFFSETS = (sizeof(OFFSETS) / sizeof(OFFSETS[0]));
+
+		// ---------------------------------------
+
+		const int nYear = 2024; // For 29th feb
+
+		for (int nMonth = 1; nMonth <= 12; nMonth++)
+		{
+			const int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
+
+			for (int i = 1; i < NUM_DAYS; i++)
+			{
+				const int nDay = ((DAYS[i] == -1) ? nNumDays : DAYS[i]);
+
+				// We add a time component so we can show that
+				// time is preserved during offsets
+				const COleDateTime date(nYear, nMonth, nDay, 3, 37, 59);
+
+				for (int j = 0; j < NUM_UNITS; j++)
+				{
+					const DH_UNITS nUnits = UNITS[j];
+
+					for (int k = 0; k < NUM_OFFSETS; k++)
+					{
+						const int nOffset = (nDir * OFFSETS[k]);
+
+						TestOffsetDate(dh, date, nUnits, nOffset, bPreserveEndOfMonth);
+					}
+				}
+			}
+		}
+	}
+}
+
+void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& date, DH_UNITS nUnits, int nOffset, BOOL bPreserveEndOfMonth)
+{
+
+	CTDCScopedSubTest test(*this, Misc::Format(_T("%s, %d %s, %d-day week, %s"),
+											   CDateHelper::FormatDate(date),
+											   nOffset,
+											   GetUnitsText(nUnits),
+											   dh.WorkingWeek().GetLengthInDays(),
+											   bPreserveEndOfMonth ? _T("Preserve EOM") : _T("Don't preserve EOM")));
+	COleDateTime dtOffset(date);
+
+	// Common tests
+	ExpectTrue(dh.OffsetDate(dtOffset, nOffset, nUnits, bPreserveEndOfMonth));
+	ExpectEQ(CDateHelper::GetTimeOnly(date), CDateHelper::GetTimeOnly(dtOffset));
+
+#ifdef _DEBUG
+// 	CString sDate = CDateHelper::FormatDate(date);
+// 	CString sOffsetDate = CDateHelper::FormatDate(dtOffset);
+#endif
+
+	// Custom tests
+	switch (nUnits)
+	{
+	case DHU_DAYS:		
+		ExpectEQ((double)nOffset, (dtOffset.m_dt - date.m_dt));
+		break;
+
+	case DHU_WEEKS:
+		ExpectEQ((nOffset * 7.0), (dtOffset.m_dt - date.m_dt));
+		break;
+
+	case DHU_WEEKDAYS:	
+		{
+			int nOffsetCheck = dh.CalcDaysFromTo(date, dtOffset, FALSE);
+
+			if (dh.Weekend().IsWeekend(date) && (nOffset > 0))
+				nOffsetCheck++;
+
+			ExpectEQ(nOffset, nOffsetCheck);
+		}
+		break;
+
+	case DHU_MONTHS:	
+	case DHU_YEARS:
+		{
+			int nMonthOffset = ((nUnits == DHU_MONTHS) ? nOffset : (12 * nOffset));
+			ExpectEQ(nMonthOffset, (CDateHelper::GetDateInMonths(dtOffset) - CDateHelper::GetDateInMonths(date)));
+
+			if (bPreserveEndOfMonth && CDateHelper::IsEndOfMonth(date))
+			{
+				ExpectTrue(CDateHelper::IsEndOfMonth(dtOffset));
+			}
+			else if (date.GetDay() > CDateHelper::GetDaysInMonth(dtOffset))
+			{
+				ExpectTrue(CDateHelper::IsEndOfMonth(dtOffset));
+			}
+			else
+			{
+				ExpectEQ(dtOffset.GetDay(), date.GetDay());
+			}
+		}
+		break;
+	}
+}
+
+CString CDateHelperTest::GetUnitsText(DH_UNITS nUnits)
+{
+	switch (nUnits)
+	{
+	case DHU_DAYS:		return _T("Days");
+	case DHU_WEEKDAYS:	return _T("Weekdays");
+	case DHU_WEEKS:		return _T("Weeks");
+	case DHU_MONTHS:	return _T("Months");
+	case DHU_YEARS:		return _T("Years");
+	}
+	
+	return _T("");
 }

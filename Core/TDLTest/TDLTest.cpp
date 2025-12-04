@@ -83,6 +83,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 void DoTests(const CTestUtils& utils)
 {
 	TESTRESULT res;
+	DWORD dwStartTick = GetTickCount();
 
 	// Keep sorted for easy scanning
 	res += DOTEST(CDateHelperTest);
@@ -110,6 +111,8 @@ void DoTests(const CTestUtils& utils)
 	// More...
 
 	res.ReportResults(_T("All"), FALSE);
+
+	_tprintf(_T("\n  %d tests took %d seconds\n"), res.GetTotal(), (((GetTickCount() - dwStartTick) / 1000) + 1));
 
 	// When we are NOT DEBUGGING we just assert once at the end
 	// else we assert in the actual test that failed
