@@ -40,6 +40,7 @@ TESTRESULT CDateHelperTest::Run()
 	TestMakeDate();
 	TestCompare();
 	Test64BitDates();
+	TestOffsetDate();
 
 	return GetTotals();
 }
@@ -515,6 +516,27 @@ void CDateHelperTest::TestOffsetDate()
 			TestOffsetDate(dh, -1, TRUE);  // Backwards
 		}
 	}
+ 
+	// 'Standard' working week
+	// Note: Make it 24 hour day to simplify checks
+	{
+		CWorkingWeek week((DWORD)(DHW_SATURDAY | DHW_SUNDAY), 24);
+
+		CDateHelper dh(week);
+		ExpectTrue(dh.WorkingWeek().GetLengthInDays() == 5);
+
+		// Don't preserve end of month
+		{
+			TestOffsetDate(dh, 1, FALSE);  // Forwards
+			TestOffsetDate(dh, -1, FALSE); // Backwards
+		}
+
+		// Preserve end of month
+		{
+ 			TestOffsetDate(dh, 1, TRUE);   // Forwards
+ 			TestOffsetDate(dh, -1, TRUE);  // Backwards
+		}
+	}
 }
 
 void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPreserveEndOfMonth)
@@ -549,6 +571,7 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 	// time is preserved during offsets
 	const COleDateTime DATES[] =
 	{
+		// leap year
 		COleDateTime(2024, 1,   1, 1, 8, 2),
 		COleDateTime(2024, 1,  31, 2, 7, 4),
 		COleDateTime(2024, 2,  28, 3, 6, 6),
@@ -557,6 +580,25 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 		COleDateTime(2024, 9,  30, 6, 3, 3),
 		COleDateTime(2024, 11, 11, 7, 2, 5),
 		COleDateTime(2024, 12, 31, 8, 1, 7),
+
+		// Arbitrary past non-leap year
+		COleDateTime(1039, 1,   1, 1, 8, 2),
+		COleDateTime(1039, 1,  31, 2, 7, 4),
+		COleDateTime(1039, 2,  28, 3, 6, 6),
+		COleDateTime(1039, 6,  15, 5, 4, 1),
+		COleDateTime(1039, 9,  30, 6, 3, 3),
+		COleDateTime(1039, 11, 11, 7, 2, 5),
+		COleDateTime(1039, 12, 31, 8, 1, 7),
+
+		// Arbitrary future year
+		COleDateTime(3039, 1,   1, 1, 8, 2),
+		COleDateTime(3039, 1,  31, 2, 7, 4),
+		COleDateTime(3039, 2,  28, 3, 6, 6),
+		COleDateTime(3039, 6,  15, 5, 4, 1),
+		COleDateTime(3039, 9,  30, 6, 3, 3),
+		COleDateTime(3039, 11, 11, 7, 2, 5),
+		COleDateTime(3039, 12, 31, 8, 1, 7),
+
 	};
 	const int NUM_DATES = (sizeof(DATES) / sizeof(DATES[0]));
 
@@ -612,7 +654,14 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 		break;
 
 	case DHU_WEEKDAYS:	
-		ExpectEQ(nOffset, dh.CalcDaysFromTo(date, dtOffset, FALSE)); // takes weekend into account
+		if (dh.Weekend().IsWeekend(date) && (nOffset > 0))
+		{
+			ExpectEQ(nOffset, dh.CalcDaysFromTo(date, dtOffset, FALSE) + 1);
+		}
+		else
+		{
+			ExpectEQ(nOffset, dh.CalcDaysFromTo(date, dtOffset, FALSE));
+		}
 		break;
 
 	case DHU_WEEKS:		
@@ -620,14 +669,25 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 		break;
 
 	case DHU_MONTHS:	
+	case DHU_YEARS:
 		{
-			ExpectEQ(nOffset, (CDateHelper::GetDateInMonths(dtOffset) - CDateHelper::GetDateInMonths(date)));
-		}
-		break;
+			if (nUnits == DHU_MONTHS)
+				ExpectEQ(nOffset, (CDateHelper::GetDateInMonths(dtOffset) - CDateHelper::GetDateInMonths(date)));
+			else
+				ExpectEQ(nOffset * 12, (CDateHelper::GetDateInMonths(dtOffset) - CDateHelper::GetDateInMonths(date)));
 
-	case DHU_YEARS:		
-		{
-			ExpectEQ(nOffset * 12, (CDateHelper::GetDateInMonths(dtOffset) - CDateHelper::GetDateInMonths(date)));
+			// Common tests
+			if (bPreserveEndOfMonth)
+			{
+				ExpectTrue(!CDateHelper::IsEndOfMonth(date) || CDateHelper::IsEndOfMonth(dtOffset));
+			}
+			else
+			{
+				if (date.GetDay() > CDateHelper::GetDaysInMonth(dtOffset))
+					ExpectTrue(CDateHelper::IsEndOfMonth(dtOffset));
+				else
+					ExpectEQ(date.GetDay(), dtOffset.GetDay());
+			}
 		}
 		break;
 	}
