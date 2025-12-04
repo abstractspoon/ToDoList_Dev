@@ -572,19 +572,26 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 
 		// ---------------------------------------
 
-		const int OFFSETS[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
+		const int DAYS[] = { 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, -1 }; // -1 -> last day of month
+		const int NUM_DAYS = (sizeof(DAYS) / sizeof(DAYS[0]));
+
+		// ---------------------------------------
+
+		const int OFFSETS[] = { 2, 3, 5, 7, 11 };
 		const int NUM_OFFSETS = (sizeof(OFFSETS) / sizeof(OFFSETS[0]));
 
 		// ---------------------------------------
 
-		const int nYear = 2024; // leap year to handle 29th feb
+		const int nYear = 2024; // For 29th feb
 
 		for (int nMonth = 1; nMonth <= 12; nMonth++)
 		{
 			const int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 
-			for (int nDay = 1; nDay <= nNumDays; nDay++)
+			for (int i = 1; i < NUM_DAYS; i++)
 			{
+				const int nDay = ((DAYS[i] == -1) ? nNumDays : DAYS[i]);
+
 				// We add a time component so we can show that
 				// time is preserved during offsets
 				const COleDateTime date(nYear, nMonth, nDay, 3, 37, 59);
@@ -631,13 +638,13 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 		break;
 
 	case DHU_WEEKDAYS:	
-		if (dh.Weekend().IsWeekend(date) && (nOffset > 0))
 		{
-			ExpectEQ(nOffset, dh.CalcDaysFromTo(date, dtOffset, FALSE) + 1);
-		}
-		else
-		{
-			ExpectEQ(nOffset, dh.CalcDaysFromTo(date, dtOffset, FALSE));
+			int nOffsetCheck = dh.CalcDaysFromTo(date, dtOffset, FALSE);
+
+			if (dh.Weekend().IsWeekend(date) && (nOffset > 0))
+				nOffsetCheck++;
+
+			ExpectEQ(nOffset, nOffsetCheck);
 		}
 		break;
 
