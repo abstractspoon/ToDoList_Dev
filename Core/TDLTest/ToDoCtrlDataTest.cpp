@@ -1065,13 +1065,14 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 					ExpectTrue(dtTaskNew < dtFrom);
 
 				// Reverse offset to get original date and time
-				DATEOFFSET_CHANGE(-nAmount);
+				nAmount = -nAmount;
+				DATEOFFSET_CHANGE(nAmount);
 
 				dtTaskNew = data.GetTaskDate(dwTaskID, nDate);
 
 				if (bOffsetFromToday)
 				{
-					if (-nAmount > 0)
+					if (nAmount > 0)
 						ExpectTrue(dtTaskNew > dtFrom);
 					else
 						ExpectTrue(dtTaskNew < dtFrom);
