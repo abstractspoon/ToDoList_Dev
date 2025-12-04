@@ -577,7 +577,7 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 
 		// ---------------------------------------
 
-		const int OFFSETS[] = { 2, 3, 5, 7, 11 };
+		const int OFFSETS[] = { 1, 2, 3, 5, 7, 11 };
 		const int NUM_OFFSETS = (sizeof(OFFSETS) / sizeof(OFFSETS[0]));
 
 		// ---------------------------------------
@@ -614,8 +614,9 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 
 void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& date, DH_UNITS nUnits, int nOffset, BOOL bPreserveEndOfMonth)
 {
-	CTDCScopedSubTest test(*this, Misc::Format(_T("%f, %d %s, %d-day week, %s"),
-											   date.m_dt,
+
+	CTDCScopedSubTest test(*this, Misc::Format(_T("%s, %d %s, %d-day week, %s"),
+											   CDateHelper::FormatDate(date),
 											   nOffset,
 											   GetUnitsText(nUnits),
 											   dh.WorkingWeek().GetLengthInDays(),
@@ -625,6 +626,11 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 	// Common tests
 	ExpectTrue(dh.OffsetDate(dtOffset, nOffset, nUnits, bPreserveEndOfMonth));
 	ExpectEQ(CDateHelper::GetTimeOnly(date), CDateHelper::GetTimeOnly(dtOffset));
+
+#ifdef _DEBUG
+// 	CString sDate = CDateHelper::FormatDate(date);
+// 	CString sOffsetDate = CDateHelper::FormatDate(dtOffset);
+#endif
 
 	// Custom tests
 	switch (nUnits)
@@ -651,22 +657,20 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 	case DHU_MONTHS:	
 	case DHU_YEARS:
 		{
-			if (nUnits == DHU_MONTHS)
-				ExpectEQ(nOffset, (CDateHelper::GetDateInMonths(dtOffset) - CDateHelper::GetDateInMonths(date)));
-			else
-				ExpectEQ(nOffset * 12, (CDateHelper::GetDateInMonths(dtOffset) - CDateHelper::GetDateInMonths(date)));
+			int nMonthOffset = ((nUnits == DHU_MONTHS) ? nOffset : (12 * nOffset));
+			ExpectEQ(nMonthOffset, (CDateHelper::GetDateInMonths(dtOffset) - CDateHelper::GetDateInMonths(date)));
 
-			// Common tests
-			if (bPreserveEndOfMonth)
+			if (bPreserveEndOfMonth && CDateHelper::IsEndOfMonth(date))
 			{
-				ExpectTrue(!CDateHelper::IsEndOfMonth(date) || CDateHelper::IsEndOfMonth(dtOffset));
+				ExpectTrue(CDateHelper::IsEndOfMonth(dtOffset));
+			}
+			else if (date.GetDay() > CDateHelper::GetDaysInMonth(dtOffset))
+			{
+				ExpectTrue(CDateHelper::IsEndOfMonth(dtOffset));
 			}
 			else
 			{
-				if (date.GetDay() > CDateHelper::GetDaysInMonth(dtOffset))
-					ExpectTrue(CDateHelper::IsEndOfMonth(dtOffset));
-				else
-					ExpectEQ(date.GetDay(), dtOffset.GetDay());
+				ExpectEQ(dtOffset.GetDay(), date.GetDay());
 			}
 		}
 		break;
