@@ -565,68 +565,41 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 		ExpectFalse(dh.OffsetDate(COleDateTime::GetCurrentTime(), -10, DHU_NULL, bPreserveEndOfMonth));
 	}
 
-	// ------------------------------------------------------------
-
-	// The dates have a time component so we can show that
-	// time is preserved during offsets
-	const COleDateTime DATES[] =
+	// Valid arguments
 	{
-		// leap year
-		COleDateTime(2024, 1,   1, 1, 8, 2),
-		COleDateTime(2024, 1,  31, 2, 7, 4),
-		COleDateTime(2024, 2,  28, 3, 6, 6),
-		COleDateTime(2024, 2,  29, 4, 5, 8),
-		COleDateTime(2024, 6,  15, 5, 4, 1),
-		COleDateTime(2024, 9,  30, 6, 3, 3),
-		COleDateTime(2024, 11, 11, 7, 2, 5),
-		COleDateTime(2024, 12, 31, 8, 1, 7),
+		const DH_UNITS UNITS[] = { DHU_WEEKDAYS, DHU_DAYS, DHU_WEEKS, DHU_MONTHS, DHU_YEARS };
+		const int NUM_UNITS = (sizeof(UNITS) / sizeof(UNITS[0]));
 
-		// Arbitrary past non-leap year
-		COleDateTime(1039, 1,   1, 1, 8, 2),
-		COleDateTime(1039, 1,  31, 2, 7, 4),
-		COleDateTime(1039, 2,  28, 3, 6, 6),
-		COleDateTime(1039, 6,  15, 5, 4, 1),
-		COleDateTime(1039, 9,  30, 6, 3, 3),
-		COleDateTime(1039, 11, 11, 7, 2, 5),
-		COleDateTime(1039, 12, 31, 8, 1, 7),
+		// ---------------------------------------
 
-		// Arbitrary future year
-		COleDateTime(3039, 1,   1, 1, 8, 2),
-		COleDateTime(3039, 1,  31, 2, 7, 4),
-		COleDateTime(3039, 2,  28, 3, 6, 6),
-		COleDateTime(3039, 6,  15, 5, 4, 1),
-		COleDateTime(3039, 9,  30, 6, 3, 3),
-		COleDateTime(3039, 11, 11, 7, 2, 5),
-		COleDateTime(3039, 12, 31, 8, 1, 7),
+		const int OFFSETS[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
+		const int NUM_OFFSETS = (sizeof(OFFSETS) / sizeof(OFFSETS[0]));
 
-	};
-	const int NUM_DATES = (sizeof(DATES) / sizeof(DATES[0]));
+		// ---------------------------------------
 
-	// ---------------------------------------
+		const int nYear = 2024; // leap year to handle 29th feb
 
-	const DH_UNITS UNITS[] = { DHU_WEEKDAYS, DHU_DAYS, DHU_WEEKS, DHU_MONTHS, DHU_YEARS };
-	const int NUM_UNITS = (sizeof(UNITS) / sizeof(UNITS[0]));
-
-	// ---------------------------------------
-
-	const int OFFSETS[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
-	const int NUM_OFFSETS = (sizeof(OFFSETS) / sizeof(OFFSETS[0]));
-
-	// ---------------------------------------
-
-	for (int i = 0; i < NUM_DATES; i++)
-	{
-		const COleDateTime& date = DATES[i];
-
-		for (int j = 0; j < NUM_UNITS; j++)
+		for (int nMonth = 1; nMonth <= 12; nMonth++)
 		{
-			const DH_UNITS nUnits = UNITS[j];
+			const int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 
-			for (int k = 0; k < NUM_OFFSETS; k++)
+			for (int nDay = 1; nDay <= nNumDays; nDay++)
 			{
-				const int nOffset = (nDir * OFFSETS[k]);
+				// We add a time component so we can show that
+				// time is preserved during offsets
+				const COleDateTime date(nYear, nMonth, nDay, 3, 37, 59);
 
-				TestOffsetDate(dh, date, nUnits, nOffset, bPreserveEndOfMonth);
+				for (int j = 0; j < NUM_UNITS; j++)
+				{
+					const DH_UNITS nUnits = UNITS[j];
+
+					for (int k = 0; k < NUM_OFFSETS; k++)
+					{
+						const int nOffset = (nDir * OFFSETS[k]);
+
+						TestOffsetDate(dh, date, nUnits, nOffset, bPreserveEndOfMonth);
+					}
+				}
 			}
 		}
 	}
