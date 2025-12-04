@@ -626,6 +626,10 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 		ExpectEQ((double)nOffset, (dtOffset.m_dt - date.m_dt));
 		break;
 
+	case DHU_WEEKS:
+		ExpectEQ((nOffset * 7.0), (dtOffset.m_dt - date.m_dt));
+		break;
+
 	case DHU_WEEKDAYS:	
 		if (dh.Weekend().IsWeekend(date) && (nOffset > 0))
 		{
@@ -635,10 +639,6 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 		{
 			ExpectEQ(nOffset, dh.CalcDaysFromTo(date, dtOffset, FALSE));
 		}
-		break;
-
-	case DHU_WEEKS:		
-		ExpectEQ((nOffset * 7.0), (dtOffset.m_dt - date.m_dt));
 		break;
 
 	case DHU_MONTHS:	
