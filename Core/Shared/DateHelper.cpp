@@ -526,9 +526,9 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits, B
 	// sanity checks
 	NULLDATE_CHECKRET(date, FALSE);
 
-	if (!IsValidUnit(nUnits) && (nUnits != DHU_NULL))
+	if (!IsValidUnit(nUnits))
 	{
-		ASSERT(0);
+		ASSERT((nUnits == DHU_NULL));
 		return FALSE;
 	}
 
