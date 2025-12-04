@@ -9,7 +9,6 @@
 #include "TDCStatic.h"
 #include "tdcmapping.h"
 
-#include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
@@ -2411,13 +2410,16 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 
 BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags) const
 {
-	BOOL bFromToday = (dwFlags & TDCOTD_OFFSETFROMTODAY);
+	BOOL bOffsetFromToday = (dwFlags & TDCOTD_OFFSETFROMTODAY);
 
-	if (!nAmount && !bFromToday)
+	if (!nAmount && !bOffsetFromToday)
 		return FALSE;
 
 	if (!HasTask(dwTaskID))
 		return FALSE;
+
+	BOOL bUnitsAreTime = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+	BOOL bUnitsAreDate = (!bUnitsAreTime && (nUnits != TDCU_NULL));
 
 	switch (nDate)
 	{
@@ -2425,60 +2427,26 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	case TDCD_STARTDATE:
 	case TDCD_DUE:
 	case TDCD_DUEDATE:
+		// Start/Due Date offsets require:
+		// 1. Date units
+		// 2. Initialised date if NOT offsetting from today
+		return (bUnitsAreDate && (bOffsetFromToday || TaskHasDate(dwTaskID, nDate)));
+
 	case TDCD_DONE:
 	case TDCD_DONEDATE:
-		{
-			// This fails on hours and minutes
-			if (TDC::MapUnitsToDHUnits(nUnits) == DHU_NULL)
-				return FALSE;
-		}
-		break;
+		// Done Date offsets require:
+		// 1. Date units
+		// 2. Initialised date
+		return (bUnitsAreDate && TaskHasDate(dwTaskID, nDate));
 
 	case TDCD_STARTTIME:
-		{
-			if ((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS))
-				return FALSE;
-
-			nDate = TDCD_START;
-		}
-		break;
-
 	case TDCD_DUETIME:
-		{
-			if ((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS))
-				return FALSE;
-
-			nDate = TDCD_DUE;
-		}
-		break;
-
 	case TDCD_DONETIME:
-		{
-			if ((nUnits != TDCU_HOURS) && (nUnits != TDCU_MINS))
-				return FALSE;
-
-			nDate = TDCD_DONE;
-		}
-		break;
-
-	default: // All the rest
-		return FALSE;
-	}
-
-	if (TaskHasDate(dwTaskID, nDate))
-		return TRUE;
-
-	// Allow start and due dates to be created by offsetting from today
-	if (bFromToday)
-	{
-		switch (nDate)
-		{
-		case TDCD_START:
-		case TDCD_STARTDATE:
-		case TDCD_DUE:
-		case TDCD_DUEDATE:
-			return TRUE;
-		}
+		// Time offsets require:
+		// 1. Time units
+		// 2. No 'offset from today'
+		// 3. Initialised date
+		return (bUnitsAreTime && !bOffsetFromToday && TaskHasDate(dwTaskID, TDC::MapTimeToDate(nDate)));
 	}
 
 	// all else
@@ -2544,42 +2512,40 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 
 	TDC_SET nRes = SET_NOCHANGE;
 
-	BOOL bFromToday = (dwFlags & TDCOTD_OFFSETFROMTODAY);
-	BOOL bPreserveEndOfMonth = (dwFlags & TDCOTD_PRESERVEENDOFMONTH);
-
 	if (CanOffsetTaskDate(dwTrueTaskID, nDate, nAmount, nUnits, dwFlags))
 	{
 		TODOITEM* pTDI = NULL;
 		EDIT_GET_TDI(dwTrueTaskID, pTDI);
 
-		CDateHelper dh;
-		COleDateTime date = (bFromToday ? dh.GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
-		BOOL bModTimeOnly = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+		BOOL bOffsetFromToday = (dwFlags & TDCOTD_OFFSETFROMTODAY);
+		BOOL bPreserveEndOfMonth = (dwFlags & TDCOTD_PRESERVEENDOFMONTH);
+		BOOL bOffsetTimeOnly = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+
+		COleDateTime dtNew = (bOffsetFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
 
 		if (nAmount != 0)
 		{
-			if (bModTimeOnly)
+			if (bOffsetTimeOnly)
 			{
-				// Modify time only
-				ASSERT(date.m_dt < 1.0);
+				ASSERT((dtNew.m_dt >= 0.0) && (dtNew.m_dt < 1.0));
 
-				switch (TDC::MapUnitsToTHUnits(nUnits))
-				{
-				case THU_HOURS:
-					date.m_dt += (nAmount / 24.0);
-					break;
+				// This needs special care in handling rounding errors
+				// to ensure that offsets are reversible
+				const double ONE_DAY_IN_MINS = (24.0 * 60);
+				int nTimeInMins = Misc::Round(dtNew.m_dt * ONE_DAY_IN_MINS);
 
-				case THU_MINS:
-					date.m_dt += (nAmount / (24.0 * 60));
-					break;
+				if (nUnits == TDCU_HOURS)
+					nTimeInMins += (nAmount * 60);
+				else
+					nTimeInMins += nAmount;
 
-				default:
-					ASSERT(0);
-				}
+				// Disallow overflow
+				if ((nTimeInMins >= 0) && (nTimeInMins < ONE_DAY_IN_MINS))
+					dtNew.m_dt = (nTimeInMins / ONE_DAY_IN_MINS);
 			}
 			else // Modify date AND time
 			{
-				VERIFY(CDateHelper().OffsetDate(date, 
+				VERIFY(CDateHelper().OffsetDate(dtNew, 
 												nAmount, 
 												TDC::MapUnitsToDHUnits(nUnits),
 												bPreserveEndOfMonth));
@@ -2587,12 +2553,12 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		}
 
 		// Special case: Task is recurring and the date was changed -> must fall on a valid date
-		if (bFitToRecurringScheme && pTDI->IsRecurring() && !bModTimeOnly)
+		if (bFitToRecurringScheme && pTDI->IsRecurring() && !bOffsetTimeOnly)
 		{
-			pTDI->trRecurrence.FitDayToScheme(date);
+			pTDI->trRecurrence.FitDayToScheme(dtNew);
 		}
 
-		nRes = SetTaskDate(dwTrueTaskID, pTDI, nDate, date, FALSE); // DON'T recalc time estimate
+		nRes = SetTaskDate(dwTrueTaskID, pTDI, nDate, dtNew, FALSE); // DON'T recalc time estimate
 
 		mapProcessedTasks[dwTrueTaskID] = (nRes == SET_CHANGE);
 	}
