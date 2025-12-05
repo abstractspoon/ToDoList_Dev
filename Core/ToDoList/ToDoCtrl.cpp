@@ -1833,7 +1833,7 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
+BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDATEOFFSET& offset)
 {
 	if (!CanOffsetSelectedTaskDates(mapDates))
 		return FALSE;
@@ -1844,7 +1844,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 
 	// remove duplicate subtasks if we're going to be processing subtasks anyway
 	CHTIList htiSel;
-	TSH().CopySelection(htiSel, (dwFlags & TDCOTD_OFFSETSUBTASKS));
+	TSH().CopySelection(htiSel, (offset.dwFlags & TDCOTD_OFFSETSUBTASKS));
 
 	CDWordArray aModTaskIDs;
 	CTDCAttributeMap mapAttribs;
@@ -1865,9 +1865,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount
 
 			TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
 												 nDate,
-												 nAmount,
-												 nUnits,
-												 dwFlags,
+												 offset,
 												 aSelModTaskIDs);
 
 			aDateModTaskIDs.Append(aSelModTaskIDs);

@@ -14,6 +14,16 @@
 
 //////////////////////////////////////////////////////////////////////
 
+TDCDATEOFFSET::TDCDATEOFFSET(int amount, TDC_UNITS units, DWORD flags)
+	: 
+	nAmount(amount), 
+	nUnits(units), 
+	dwFlags(flags) 
+{
+}
+
+//////////////////////////////////////////////////////////////////////
+
 TDCDROPIMPORT::TDCDROPIMPORT(DWORD dwID, const CStringArray& sDropFiles) 
 	: 
 	dwTaskID(dwID)

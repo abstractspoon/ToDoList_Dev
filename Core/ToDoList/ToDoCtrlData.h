@@ -85,7 +85,7 @@ public:
 	BOOL MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
 	BOOL MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
 	BOOL FixupParentCompletion(DWORD dwParentID, BOOL bClearStatus);
-	BOOL CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags) const;
+	BOOL CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset) const;
 
 	// undo/redo
 	BOOL BeginNewUndoAction(TDC_UNDOACTIONTYPE nType);
@@ -219,7 +219,7 @@ public:
 	TDC_SET RenameTasksAttributeValue(const CString& sAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord);
 
 	TDC_SET InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date);
-	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags, CDWordArray& aModTaskIDs);
+	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset, CDWordArray& aModTaskIDs);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 	TDC_SET AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
 
@@ -344,8 +344,8 @@ protected:
 	BOOL TaskHasAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
 	BOOL GetTaskAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
 
-	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags, BOOL bFitToRecurringScheme);
-	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags, BOOL bFitToRecurringScheme, CMap<DWORD, DWORD, BOOL, BOOL&>& mapProcessedTasks);
+	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset, BOOL bFitToRecurringScheme);
+	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset, BOOL bFitToRecurringScheme, CMap<DWORD, DWORD, BOOL, BOOL&>& mapProcessedTasks);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart, TDC_UNITS nUnits);
 	TDC_SET SetTaskPriorityOrRisk(DWORD dwTaskID, BOOL bPriority, int nValue);
 	TDC_SET OffsetTaskPriorityOrRisk(DWORD dwTaskID, BOOL bPriority, int nOffset);

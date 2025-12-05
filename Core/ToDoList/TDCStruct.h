@@ -17,6 +17,17 @@
 
 //////////////////////////////////////////////////////////////////////
 
+struct TDCDATEOFFSET
+{
+	TDCDATEOFFSET(int amount = 0, TDC_UNITS units = TDCU_NULL, DWORD dwFlags = 0);
+
+	int nAmount;
+	TDC_UNITS nUnits;
+	DWORD dwFlags;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 struct TDCDROPIMPORT
 {
 	TDCDROPIMPORT(DWORD dwID, const CStringArray& sDropFiles);
