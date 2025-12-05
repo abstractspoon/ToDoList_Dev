@@ -278,9 +278,23 @@ double CTimeHelper::DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds)
 	return min(max(dTime, 0.0), 24.0);
 }
 
+COleDateTime CTimeHelper::RoundToNearestSecond(const COleDateTime& date)
+{
+	double dHours = (date.m_dt * 24);
+	dHours = RoundHoursToNearestSecond(dHours);
+
+	return (dHours / 24);
+}
+
 double CTimeHelper::RoundHoursToNearestSecond(double dHours)
 {
-	return (Misc::Round(dHours * 60 * 60) / 3600.0);
+	int nHours = (int)dHours;
+	
+	// Prevent overflow
+	dHours -= nHours;
+	dHours = (Misc::Round(dHours * 60 * 60) / 3600.0);
+
+	return (nHours + dHours);
 }
 
 BOOL CTimeHelper::RemovePM(CString& sTime)

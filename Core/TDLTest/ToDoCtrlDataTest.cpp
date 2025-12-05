@@ -801,6 +801,45 @@ void CToDoCtrlDataTest::TestOffsetTaskPriorityRisk(BOOL bPriority, int nNumLevel
 
 ////////////////////////////////////////////////////////////////////////////
 
+const TDC_DATE DATES[] =
+{
+	TDCD_CREATE,
+	TDCD_START,
+	TDCD_STARTDATE,
+	TDCD_STARTTIME,
+	TDCD_DUE,
+	TDCD_DUEDATE,
+	TDCD_DUETIME,
+	TDCD_DONE,
+	TDCD_DONEDATE,
+	TDCD_DONETIME,
+	TDCD_LASTMOD,
+	TDCD_CUSTOM,
+	TDCD_REMINDER
+};
+const int NUM_DATES = (sizeof(DATES) / sizeof(DATES[0]));
+
+// ---------------------------------------
+
+const TDC_UNITS UNITS[] =
+{
+	TDCU_MINS,
+	TDCU_HOURS,
+	TDCU_DAYS,
+	TDCU_WEEKDAYS,
+	TDCU_WEEKS,
+	TDCU_MONTHS,
+	TDCU_YEARS
+};
+const int NUM_UNITS = (sizeof(UNITS) / sizeof(UNITS[0]));
+
+// ---------------------------------------
+
+const int OFFSETS[] = { 0, 1, 3, 5, 7, 11 };
+const int NUM_OFFSETS = (sizeof(OFFSETS) / sizeof(OFFSETS[0]));
+
+// ---------------------------------------
+
 void CToDoCtrlDataTest::TestCanOffsetTaskDate()
 {
 	CTDCScopedTest test(*this, _T("CToDoCtrlData::CanOffsetTaskDate"));
@@ -816,15 +855,6 @@ void CToDoCtrlDataTest::TestCanOffsetTaskDate()
 
 	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
 
-	const TDC_DATE DATES[] = { TDCD_CREATE, TDCD_START, TDCD_STARTDATE,	TDCD_STARTTIME,	TDCD_DUE, TDCD_DUEDATE, TDCD_DUETIME, TDCD_DONE, TDCD_DONEDATE, TDCD_DONETIME, TDCD_LASTMOD, TDCD_CUSTOM, TDCD_REMINDER };
-	const int NUM_DATES = (sizeof(DATES) / sizeof(DATES[0]));
-
-	const TDC_UNITS UNITS[] = { TDCU_MINS, TDCU_HOURS, TDCU_DAYS, TDCU_WEEKDAYS, TDCU_WEEKS, TDCU_MONTHS, TDCU_YEARS };
-	const int NUM_UNITS = (sizeof(UNITS) / sizeof(UNITS[0]));
-
-	const int AMOUNTS[] = { 1, 3, 5, 7, 11 };
-	const int NUM_AMOUNTS = (sizeof(AMOUNTS), sizeof(AMOUNTS[0]));
-
 	for (int i = 0; i < NUM_DATES; i++)
 	{
 		const TDC_DATE nDate = DATES[i];
@@ -835,9 +865,9 @@ void CToDoCtrlDataTest::TestCanOffsetTaskDate()
 
 			CTDCScopedSubTest subtest(*this, Misc::Format(_T("Uninitialised Task, %s, %s"), GetDateTypeText(nDate), GetUnitsText(nUnits)));
 
-			for (int k = 0; k < NUM_AMOUNTS; k++)
+			for (int k = 0; k < NUM_OFFSETS; k++)
 			{
-				const int nAmount = AMOUNTS[k];
+				const int nAmount = OFFSETS[k];
 
 				TestCanOffsetTaskDate(data, dwTaskID, nDate, nAmount, nUnits, 0);
 				TestCanOffsetTaskDate(data, dwTaskID, nDate, -nAmount, nUnits, 0);
@@ -936,6 +966,10 @@ void CToDoCtrlDataTest::TestOffsetTaskDate()
 
 	ExpectTrue(data.AddTask(dwTaskID, pTDI, 0, 0));
 
+	// We only need to test a few interesting dates because
+	// CDateHelper::OffsetDate, on which CToDoCtrlData::OffsetTaskDate 
+	// is built, already has extensive tests.
+
 	// No dates
 	{
 		pTDI->dateStart = CDateHelper::NullDate();
@@ -947,18 +981,18 @@ void CToDoCtrlDataTest::TestOffsetTaskDate()
 
 	// Dates no Times
 	{
-		pTDI->dateStart = COleDateTime(40000.0);
-		pTDI->dateDue   = COleDateTime(40001.0);
-		pTDI->dateDone  = COleDateTime(40002.0);
+		pTDI->dateStart = COleDateTime(2021, 1,  1, 0, 0, 0);
+		pTDI->dateDue   = COleDateTime(2022, 2, 28, 0, 0, 0);
+		pTDI->dateDone  = COleDateTime(2023, 1, 31, 0, 0, 0);
 
 		TestOffsetTaskDate(_T("Dates no Times"), data, dwTaskID);
 	}
 
 	// Dates and Times
 	{
-		pTDI->dateStart = COleDateTime(40000.25);
-		pTDI->dateDue   = COleDateTime(40001.50);
-		pTDI->dateDone  = COleDateTime(40002.75);
+		pTDI->dateStart = COleDateTime(2024,  2, 29, 1, 2, 3);
+		pTDI->dateDue   = COleDateTime(2025,  8, 31, 9, 5, 6);
+		pTDI->dateDone  = COleDateTime(2026, 12, 31, 23, 53, 9);
 
 		TestOffsetTaskDate(_T("Dates and Times"), data, dwTaskID);
 	}
@@ -966,15 +1000,6 @@ void CToDoCtrlDataTest::TestOffsetTaskDate()
 
 void CToDoCtrlDataTest::TestOffsetTaskDate(LPCTSTR szSubTest, CToDoCtrlData& data, DWORD dwTaskID)
 {
-	const TDC_DATE DATES[] = { TDCD_CREATE, TDCD_START, TDCD_STARTDATE, TDCD_STARTTIME, TDCD_DUE, TDCD_DUEDATE, TDCD_DUETIME, TDCD_DONE, TDCD_DONEDATE, TDCD_DONETIME, TDCD_LASTMOD, TDCD_CUSTOM, TDCD_REMINDER };
-	const int NUM_DATES = (sizeof(DATES) / sizeof(DATES[0]));
-
-	const TDC_UNITS UNITS[] = { TDCU_MINS, TDCU_HOURS, TDCU_DAYS, TDCU_WEEKDAYS, TDCU_WEEKS, TDCU_MONTHS, TDCU_YEARS };
-	const int NUM_UNITS = (sizeof(UNITS) / sizeof(UNITS[0]));
-
-	const int AMOUNTS[] = { 1, 3, 5, 7, 11 };
-	const int NUM_AMOUNTS = (sizeof(AMOUNTS), sizeof(AMOUNTS[0]));
-
 	for (int i = 0; i < NUM_DATES; i++)
 	{
 		const TDC_DATE nDate = DATES[i];
@@ -983,17 +1008,21 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(LPCTSTR szSubTest, CToDoCtrlData& dat
 		{
 			const TDC_UNITS nUnits = UNITS[j];
 
-			CTDCScopedSubTest subtest(*this, Misc::Format(_T("%s, %s, %s"), szSubTest, GetDateTypeText(nDate), GetUnitsText(nUnits)));
-
-			for (int k = 0; k < NUM_AMOUNTS; k++)
+			for (int k = 0; k < NUM_OFFSETS; k++)
 			{
-				const int nAmount = AMOUNTS[k];
+				int nOffset = OFFSETS[k];
 
-				TestOffsetTaskDate(data, dwTaskID, nDate, nAmount, nUnits, 0);
-				TestOffsetTaskDate(data, dwTaskID, nDate, -nAmount, nUnits, 0);
+				for (int m = 0; m < 2; m++) // for +/- offset
+				{
+					CTDCScopedSubTest subtest(*this, Misc::Format(_T("%s, %s, %d %s"), szSubTest, GetDateTypeText(nDate), nOffset, GetUnitsText(nUnits)));
 
-				TestOffsetTaskDate(data, dwTaskID, nDate, nAmount, nUnits, TDCOTD_OFFSETFROMTODAY);
-				TestOffsetTaskDate(data, dwTaskID, nDate, -nAmount, nUnits, TDCOTD_OFFSETFROMTODAY);
+					TestOffsetTaskDate(data, dwTaskID, nDate, nOffset, nUnits, 0);
+					TestOffsetTaskDate(data, dwTaskID, nDate, nOffset, nUnits, TDCOTD_OFFSETFROMTODAY);
+					TestOffsetTaskDate(data, dwTaskID, nDate, nOffset, nUnits, TDCOTD_PRESERVEENDOFMONTH);
+					TestOffsetTaskDate(data, dwTaskID, nDate, nOffset, nUnits, TDCOTD_OFFSETFROMTODAY | TDCOTD_PRESERVEENDOFMONTH);
+
+					nOffset = -nOffset;
+				}
 			}
 		}
 	}
@@ -1002,22 +1031,22 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(LPCTSTR szSubTest, CToDoCtrlData& dat
 // -------------------------------------
 
 #define DATEOFFSET_NOCHANGE \
-	ExpectEQ(SET_NOCHANGE, data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags, aModTaskIDs)); \
+	ExpectEQ(SET_NOCHANGE, data.OffsetTaskDate(dwTaskID, nDate, nOffset, nUnits, dwFlags, aModTaskIDs)); \
 	ExpectEQ(0, aModTaskIDs.GetSize())
 
-#define DATEOFFSET_CHANGE(amount) \
+#define DATEOFFSET_CHANGE(offset) \
 	aModTaskIDs.RemoveAll();      \
-	ExpectEQ(SET_CHANGE, data.OffsetTaskDate(dwTaskID, nDate, amount, nUnits, dwFlags, aModTaskIDs)); \
+	ExpectEQ(SET_CHANGE, data.OffsetTaskDate(dwTaskID, nDate, offset, nUnits, dwFlags, aModTaskIDs)); \
 	ExpectEQ(1, aModTaskIDs.GetSize()); \
 	ExpectEQ(1UL, aModTaskIDs[0])
 
 // -------------------------------------
 
 void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate,
-										   int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
+										   int nOffset, TDC_UNITS nUnits, DWORD dwFlags)
 {
 	BOOL bOffsetFromToday = Misc::HasFlag(dwFlags, TDCOTD_OFFSETFROMTODAY);
-	BOOL bZeroAmount = (nAmount == 0);
+	BOOL bZeroOffset = (nOffset == 0);
 	BOOL bHasValidUnits = IsValidUnits(nUnits);
 	BOOL bUnitsAreTime = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
 	BOOL bUnitsAreDate = (bHasValidUnits && !bUnitsAreTime);
@@ -1046,7 +1075,16 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 			// Done date cannot be uninitialised if offsetting from today
 			BOOL bMustBeInitialised = ((nDate == TDCD_DONE) || (nDate == TDCD_DONEDATE) || !bOffsetFromToday);
 
-			if (!bUnitsAreDate || (bMustBeInitialised && !data.TaskHasDate(dwTaskID, nDate)) || (bZeroAmount && !bOffsetFromToday))
+			// Don't combine these 'no change' tests to simplify debugging
+			if (!bUnitsAreDate)
+			{
+				DATEOFFSET_NOCHANGE;
+			}
+			else if (bMustBeInitialised && !data.TaskHasDate(dwTaskID, nDate))
+			{
+				DATEOFFSET_NOCHANGE;
+			}
+			else if (bZeroOffset && !bOffsetFromToday)
 			{
 				DATEOFFSET_NOCHANGE;
 			}
@@ -1055,35 +1093,73 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 				const COleDateTime dtTaskOrg = data.GetTaskDate(dwTaskID, nDate);
 				const COleDateTime dtFrom = (bOffsetFromToday ? CDateHelper::GetDate(DHD_TODAY) : dtTaskOrg);
 				
-				DATEOFFSET_CHANGE(nAmount);
+				DATEOFFSET_CHANGE(nOffset);
 
 				COleDateTime dtTaskNew = data.GetTaskDate(dwTaskID, nDate);
+				BOOL bIsReversible = !bOffsetFromToday;
 
-				if (nAmount > 0)
-					ExpectTrue(dtTaskNew > dtFrom);
-				else
-					ExpectTrue(dtTaskNew < dtFrom);
+				// These tests copied verbatim(ish) from CDateHelperTest::TestOffsetDate
+				switch (nUnits)
+				{
+				case TDCU_DAYS:
+					ExpectEQ((double)nOffset, (dtTaskNew.m_dt - dtFrom.m_dt));
+					break;
+
+				case TDCU_WEEKS:
+					ExpectEQ((nOffset * 7.0), (dtTaskNew.m_dt - dtFrom.m_dt));
+					break;
+
+				case TDCU_WEEKDAYS:
+					{
+						CDateHelper dh;
+						int nOffsetCheck = dh.CalcDaysFromTo(dtFrom, dtTaskNew, FALSE);
+
+						if (dh.Weekend().IsWeekend(dtFrom) && (nOffset > 0))
+							nOffsetCheck++;
+
+						ExpectEQ(nOffset, nOffsetCheck);
+
+						bIsReversible = !dh.WorkingWeek().HasWeekend();
+					}
+					break;
+
+				case TDCU_MONTHS:
+				case TDCU_YEARS:
+					{
+						BOOL bPreserveEndOfMonth = Misc::HasFlag(dwFlags, TDCOTD_PRESERVEENDOFMONTH);
+
+						int nMonthOffset = ((nUnits == DHU_MONTHS) ? nOffset : (12 * nOffset));
+						ExpectEQ(nMonthOffset, (CDateHelper::GetDateInMonths(dtTaskNew) - CDateHelper::GetDateInMonths(dtFrom)));
+
+						if (bPreserveEndOfMonth && CDateHelper::IsEndOfMonth(dtFrom))
+						{
+							ExpectTrue(CDateHelper::IsEndOfMonth(dtTaskNew));
+						}
+						else if (dtFrom.GetDay() > CDateHelper::GetDaysInMonth(dtTaskNew))
+						{
+							ExpectTrue(CDateHelper::IsEndOfMonth(dtTaskNew));
+
+							bIsReversible = FALSE; // because the date was truncated
+						}
+						else
+						{
+							ExpectEQ(dtTaskNew.GetDay(), dtFrom.GetDay());
+						}
+					}
+					break;
+				}
 
 				// Reverse offset to get original date and time
-				nAmount = -nAmount;
-				DATEOFFSET_CHANGE(nAmount);
-
-				dtTaskNew = data.GetTaskDate(dwTaskID, nDate);
-
-				if (bOffsetFromToday)
+				if (bIsReversible)
 				{
-					if (nAmount > 0)
-						ExpectTrue(dtTaskNew > dtFrom);
-					else
-						ExpectTrue(dtTaskNew < dtFrom);
+					DATEOFFSET_CHANGE(-nOffset);
 
-					// Restore original task date
-					data.SetTaskDate(dwTaskID, nDate, dtTaskOrg);
+					dtTaskNew = data.GetTaskDate(dwTaskID, nDate);
+					ExpectEQ(dtTaskNew, dtFrom);
 				}
-				else
-				{
-					ExpectTrue(dtTaskNew == dtFrom);
-				}
+
+				// Restore task date
+				data.SetTaskDate(dwTaskID, nDate, dtTaskOrg);
 			}
 		}
 		break;
@@ -1097,7 +1173,20 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 			// and date must already be initialised
 			TDC_DATE nMappedDate = TDC::MapTimeToDate(nDate);
 
-			if (!bUnitsAreTime || bZeroAmount || bOffsetFromToday || !data.TaskHasDate(dwTaskID, nMappedDate))
+			// Don't combine these 'no change' tests to simplify debugging
+			if (!bUnitsAreTime)
+			{
+				DATEOFFSET_NOCHANGE;
+			}
+			else if (bZeroOffset)
+			{
+				DATEOFFSET_NOCHANGE;
+			}
+			else if (bOffsetFromToday)
+			{
+				DATEOFFSET_NOCHANGE;
+			}
+			else if (!data.TaskHasDate(dwTaskID, nMappedDate))
 			{
 				DATEOFFSET_NOCHANGE;
 			}
@@ -1106,7 +1195,7 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 				const COleDateTime dtTaskOrg = data.GetTaskDate(dwTaskID, nMappedDate);
 
 				// A negative offset
-				if ((nAmount < 0) && !CDateHelper::DateHasTime(dtTaskOrg))
+				if ((nOffset < 0) && !CDateHelper::DateHasTime(dtTaskOrg))
 				{
 					DATEOFFSET_NOCHANGE;
 				}
@@ -1115,7 +1204,7 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 					// CToDoCtrlData rejects offsets which would result in overflow
 					if (nUnits == TDCU_HOURS)
 					{
-						if (!CDateHelper::IsSameDay(dtTaskOrg, dtTaskOrg.m_dt + (nAmount / 24.0)))
+						if (!CDateHelper::IsSameDay(dtTaskOrg, dtTaskOrg.m_dt + (nOffset / 24.0)))
 						{
 							DATEOFFSET_NOCHANGE;
 							return;
@@ -1125,33 +1214,31 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 					{
 						ASSERT(nUnits == TDCU_MINS);
 
-						if (!CDateHelper::IsSameDay(dtTaskOrg, dtTaskOrg.m_dt + (nAmount / (60 * 24.0))))
+						if (!CDateHelper::IsSameDay(dtTaskOrg, dtTaskOrg.m_dt + (nOffset / (60 * 24.0))))
 						{
 							DATEOFFSET_NOCHANGE;
 							return;
 						}
 					}
 
-					DATEOFFSET_CHANGE(nAmount);
+					DATEOFFSET_CHANGE(nOffset);
 
 					COleDateTime dtTaskNew = data.GetTaskDate(dwTaskID, nMappedDate);
 
-					if (nAmount > 0)
+					if (nOffset > 0)
 						ExpectTrue(dtTaskNew > dtTaskOrg);
 					else
 						ExpectTrue(dtTaskNew < dtTaskOrg);
 
 					// Reverse offset to get original date and time
-					DATEOFFSET_CHANGE(-nAmount);
+					DATEOFFSET_CHANGE(-nOffset);
 
 					dtTaskNew = data.GetTaskDate(dwTaskID, nMappedDate);
-
-					ExpectTrue(dtTaskNew == dtTaskOrg);
-
-					// Restore original task date
-					data.SetTaskDate(dwTaskID, nDate, dtTaskOrg);
+ 					ExpectEQ(dtTaskNew, dtTaskOrg, (1.0 / (24 * 60 * 60)));
 				}
 
+				// Restore task date
+				data.SetTaskDate(dwTaskID, nDate, dtTaskOrg);
 			}
 		}
 		break;
@@ -1185,13 +1272,13 @@ CString CToDoCtrlDataTest::GetUnitsText(TDC_UNITS nUnits)
 {
 	switch (nUnits)
 	{
-	case TDCU_MINS:		return _T("TDCU_MINS");
-	case TDCU_HOURS:	return _T("TDCU_HOURS");
-	case TDCU_DAYS:		return _T("TDCU_DAYS");
-	case TDCU_WEEKDAYS:	return _T("TDCU_WEEKDAYS");
-	case TDCU_WEEKS:	return _T("TDCU_WEEKS");
-	case TDCU_MONTHS:	return _T("TDCU_MONTHS");
-	case TDCU_YEARS:	return _T("TDCU_YEARS");
+	case TDCU_MINS:		return _T("Minutes");
+	case TDCU_HOURS:	return _T("Hours");
+	case TDCU_DAYS:		return _T("Days");
+	case TDCU_WEEKDAYS:	return _T("Weekdays");
+	case TDCU_WEEKS:	return _T("Weeks");
+	case TDCU_MONTHS:	return _T("Months");
+	case TDCU_YEARS:	return _T("Years");
 	}
 
 	return _T("UNKNOWN");

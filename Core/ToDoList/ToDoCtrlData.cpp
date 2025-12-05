@@ -2456,8 +2456,6 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 // External
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags, CDWordArray& aModTaskIDs)
 {
-	ASSERT(nAmount || (dwFlags & TDCOTD_OFFSETFROMTODAY));
-
 	CMap<DWORD, DWORD, BOOL, BOOL&> mapProcessedTasks;
 
 	TDC_SET nRes = OffsetTaskDate(dwTaskID, 
@@ -2529,19 +2527,18 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 			{
 				ASSERT((dtNew.m_dt >= 0.0) && (dtNew.m_dt < 1.0));
 
-				// This needs special care in handling rounding errors
-				// to ensure that offsets are reversible
-				const double ONE_DAY_IN_MINS = (24.0 * 60);
-				int nTimeInMins = Misc::Round(dtNew.m_dt * ONE_DAY_IN_MINS);
+				COleDateTime dtTime(dtNew);
 
 				if (nUnits == TDCU_HOURS)
-					nTimeInMins += (nAmount * 60);
+					dtTime.m_dt += (nAmount / 24.0);
 				else
-					nTimeInMins += nAmount;
+					dtTime.m_dt += (nAmount / (60 * 24.0));
 
-				// Disallow overflow
-				if ((nTimeInMins >= 0) && (nTimeInMins < ONE_DAY_IN_MINS))
-					dtNew.m_dt = (nTimeInMins / ONE_DAY_IN_MINS);
+				// Prevent overflow
+				dtTime = CTimeHelper::RoundToNearestSecond(dtTime);
+
+				if ((dtTime.m_dt >= 0.0) && (dtTime.m_dt < 1.0))
+					dtNew = dtTime;
 			}
 			else // Modify date AND time
 			{

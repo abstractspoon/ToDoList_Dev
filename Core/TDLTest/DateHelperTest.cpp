@@ -567,17 +567,24 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 
 	// Valid arguments
 	{
-		const DH_UNITS UNITS[] = { DHU_WEEKDAYS, DHU_DAYS, DHU_WEEKS, DHU_MONTHS, DHU_YEARS };
+		const DH_UNITS UNITS[] = 
+		{ 
+			DHU_WEEKDAYS, 
+			DHU_DAYS, 
+			DHU_WEEKS, 
+			DHU_MONTHS, 
+			DHU_YEARS 
+		};
 		const int NUM_UNITS = (sizeof(UNITS) / sizeof(UNITS[0]));
 
 		// ---------------------------------------
 
-		const int DAYS[] = { 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, -1 }; // -1 -> last day of month
+		const int DAYS[] = { 1, 3, 5, 7, 11, 13, 17, 19, 23, -1 }; // -1 -> last day of month
 		const int NUM_DAYS = (sizeof(DAYS) / sizeof(DAYS[0]));
 
 		// ---------------------------------------
 
-		const int OFFSETS[] = { 1, 2, 3, 5, 7, 11 };
+		const int OFFSETS[] = { 1, 3, 5, 7, 11 };
 		const int NUM_OFFSETS = (sizeof(OFFSETS) / sizeof(OFFSETS[0]));
 
 		// ---------------------------------------
@@ -588,7 +595,7 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 		{
 			const int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
 
-			for (int i = 1; i < NUM_DAYS; i++)
+			for (int i = 0; i < NUM_DAYS; i++)
 			{
 				const int nDay = ((DAYS[i] == -1) ? nNumDays : DAYS[i]);
 
@@ -614,7 +621,6 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPres
 
 void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& date, DH_UNITS nUnits, int nOffset, BOOL bPreserveEndOfMonth)
 {
-
 	CTDCScopedSubTest test(*this, Misc::Format(_T("%s, %d %s, %d-day week, %s"),
 											   CDateHelper::FormatDate(date),
 											   nOffset,
