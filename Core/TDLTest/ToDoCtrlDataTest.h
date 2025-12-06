@@ -51,10 +51,10 @@ protected:
 	void TestOffsetTaskPriorityRisk(BOOL bPriority, int nNumLevels);
 
 	void TestCanOffsetTaskDate();
-	void TestCanOffsetTaskDate(const CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags);
+	void TestCanOffsetTaskDate(const CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset);
 	void TestOffsetTaskDate();
 	void TestOffsetTaskDate(LPCTSTR szSubTest, CToDoCtrlData& data, DWORD dwTaskID);
-	void TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags);
+	void TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset);
 
 	static CString GetRegularityText(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom);
 	static CString GetDateTypeText(TDC_DATE nDate);

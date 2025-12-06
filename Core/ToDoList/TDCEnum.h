@@ -941,16 +941,6 @@ enum TDLID_IMPORTTO
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum TDC_OFFSETTASKDATES
-{
-	TDCOTD_OFFSETSUBTASKS		= 0x01,
-	TDCOTD_OFFSETSUBTASKREFS	= 0x02,
-	TDCOTD_OFFSETFROMTODAY		= 0x04,
-	TDCOTD_PRESERVEENDOFMONTH	= 0x08,
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 enum TDC_ATTRIBUTEGROUP
 {
 	TDCAG_NONE = -1,

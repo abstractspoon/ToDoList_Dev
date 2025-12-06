@@ -14,6 +14,29 @@
 
 //////////////////////////////////////////////////////////////////////
 
+TDCDATEOFFSET::TDCDATEOFFSET(int amount, TDC_UNITS units)
+	: 
+	nAmount(amount), 
+	nUnits(units), 
+	bAndSubtasks(FALSE),
+	bAndSubtaskRefs(FALSE),
+	bFromToday(FALSE),
+	bPreserveEndOfMonth(FALSE)
+{
+}
+
+BOOL TDCDATEOFFSET::HasTimeUnits() const
+{
+	return ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+}
+
+BOOL TDCDATEOFFSET::HasDateUnits() const
+{
+	return (!HasTimeUnits() && IsValidUnits(nUnits));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 TDCDROPIMPORT::TDCDROPIMPORT(DWORD dwID, const CStringArray& sDropFiles) 
 	: 
 	dwTaskID(dwID)
