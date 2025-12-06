@@ -1796,6 +1796,7 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
 		return FALSE;
 	}
 
+	BOOL bCanAdjustDependDates = (!m_taskTree.SelectionHasDependencies() || !HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
 	POSITION pos = mapDates.GetStartPosition();
 
 	while (pos)
@@ -1819,12 +1820,8 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
 		case TDCD_DUE:
 		case TDCD_DUEDATE:
 		case TDCD_DUETIME:
-			{
-				BOOL bCanAdjustDependDates = (!m_taskTree.SelectionHasDependencies() ||
-											  !HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
-				if (!bCanAdjustDependDates)
-					return FALSE;
-			}
+			if (!bCanAdjustDependDates)
+				return FALSE;
 			break;
 
 		default:
