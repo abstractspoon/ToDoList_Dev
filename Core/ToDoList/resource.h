@@ -350,6 +350,7 @@
 #define IDC_OFFSETFROMTODAY             1061
 #define IDC_SYNCTIMEESTANDDATES         1061
 #define IDC_MERGETOACTIVETASKLIST       1061
+#define IDC_OFFSETFROMDATE              1061
 #define IDC_EXPORTPATH                  1062
 #define IDC_SETDONECOLOR                1062
 #define IDC_AUTOCALCPERCENTDONE         1062
@@ -880,6 +881,7 @@
 #define IDC_TASKCOMBO                   1591
 #define IDC_SHOWDONETASKS               1592
 #define IDC_CLEARALLATTRIB              1595
+#define IDC_OFFSETDATE                  1596
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -2598,7 +2600,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        339
 #define _APS_NEXT_COMMAND_VALUE         34789
-#define _APS_NEXT_CONTROL_VALUE         1596
+#define _APS_NEXT_CONTROL_VALUE         1597
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

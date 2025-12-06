@@ -12176,14 +12176,14 @@ void CToDoListWnd::OnEditOffsetDates()
 		TDCDATEOFFSET offset;
 		offset.nAmount = dialog.GetOffsetAmount(offset.nUnits);
 
-		if (!offset.nAmount && !dialog.GetOffsetFromToday())
-			return;
+// 		if (!offset.nAmount && !dialog.GetOffsetFromToday())
+// 			return;
 
 		ASSERT(offset.nUnits != TDCU_NULL);
 
 		offset.bAndSubtasks = dialog.GetOffsetSubtasks();
 		offset.bAndSubtaskRefs = dialog.GetOffsetSubtaskReferences();
-		offset.bFromToday = dialog.GetOffsetFromToday();
+// 		offset.bFromToday = dialog.GetOffsetFromToday();
 		offset.bPreserveEndOfMonth = dialog.GetPreserveEndOfMonth();
 		
 		DWORD dwWhat = dialog.GetOffsetWhat();
