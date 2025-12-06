@@ -891,10 +891,6 @@ void CToDoCtrlDataTest::TestCanOffsetTaskDate()
 void CToDoCtrlDataTest::TestCanOffsetTaskDate(const CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate,
 											  const TDCDATEOFFSET& offset)
 {
-	BOOL bHasValidUnits = IsValidUnits(offset.nUnits);
-	BOOL bUnitsAreTime = ((offset.nUnits == TDCU_HOURS) || (offset.nUnits == TDCU_MINS));
-	BOOL bUnitsAreDate = (bHasValidUnits && !bUnitsAreTime);
-
 	BOOL bExpectedResult = -1;
 
 	switch (nDate)
@@ -922,21 +918,21 @@ void CToDoCtrlDataTest::TestCanOffsetTaskDate(const CToDoCtrlData& data, DWORD d
 	case TDCD_DUEDATE:	
 		// Start and Due dates only support date units 
 		// and Start/Due dates can be uninitialised if offsetting from today
-		bExpectedResult = (bUnitsAreDate && (offset.bFromToday || data.TaskHasDate(dwTaskID, nDate)));
+		bExpectedResult = (offset.HasDateUnits() && (offset.bFromToday || data.TaskHasDate(dwTaskID, nDate)));
 		break;
 
 	case TDCD_STARTTIME:
 		// Start time only supports time units 
 		// and does not support offsetting from today
 		// and Start date must already be initialised
-		bExpectedResult = (bUnitsAreTime && !offset.bFromToday && data.TaskHasDate(dwTaskID, TDCD_START));
+		bExpectedResult = (offset.HasTimeUnits() && !offset.bFromToday && data.TaskHasDate(dwTaskID, TDCD_START));
 		break;
 
 	case TDCD_DUETIME:	
 		// Done time only supports time units 
 		// and does not support offsetting from today
 		// and Due date must already be initialised
-		bExpectedResult = (bUnitsAreTime && !offset.bFromToday && data.TaskHasDate(dwTaskID, TDCD_DUE));
+		bExpectedResult = (offset.HasTimeUnits() && !offset.bFromToday && data.TaskHasDate(dwTaskID, TDCD_DUE));
 		break;
 
 	case TDCD_DONE:
@@ -944,13 +940,13 @@ void CToDoCtrlDataTest::TestCanOffsetTaskDate(const CToDoCtrlData& data, DWORD d
 		// Done date only support date units 
 		// and does not support offsetting from today
 		// and Done date must already be initialised
-		bExpectedResult = (bUnitsAreDate && data.TaskHasDate(dwTaskID, nDate));
+		bExpectedResult = (offset.HasDateUnits() && data.TaskHasDate(dwTaskID, nDate));
 		break;
 
 	case TDCD_DONETIME:
 		// Done time only support time units 
 		// and Done date must already be initialised
-		bExpectedResult = (bUnitsAreTime && !offset.bFromToday && data.TaskHasDate(dwTaskID, TDCD_DONE));
+		bExpectedResult = (offset.HasTimeUnits() && !offset.bFromToday && data.TaskHasDate(dwTaskID, TDCD_DONE));
 		break;
 	}
 
@@ -1078,11 +1074,6 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(LPCTSTR szSubTest, CToDoCtrlData& dat
 void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate,
 										   const TDCDATEOFFSET& offset)
 {
-	BOOL bZeroOffset = (offset.nAmount == 0);
-	BOOL bHasValidUnits = IsValidUnits(offset.nUnits);
-	BOOL bUnitsAreTime = ((offset.nUnits == TDCU_HOURS) || (offset.nUnits == TDCU_MINS));
-	BOOL bUnitsAreDate = (bHasValidUnits && !bUnitsAreTime);
-
 	CDWordArray aModTaskIDs;
 
 	switch (nDate)
@@ -1108,7 +1099,7 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 			BOOL bMustBeInitialised = ((nDate == TDCD_DONE) || (nDate == TDCD_DONEDATE) || !offset.bFromToday);
 
 			// Don't combine these 'no change' tests to simplify debugging
-			if (!bUnitsAreDate)
+			if (!offset.HasDateUnits())
 			{
 				DATEOFFSET_NOCHANGE(offset);
 			}
@@ -1116,7 +1107,7 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 			{
 				DATEOFFSET_NOCHANGE(offset);
 			}
-			else if (bZeroOffset && !offset.bFromToday)
+			else if (!offset.nAmount && !offset.bFromToday)
 			{
 				DATEOFFSET_NOCHANGE(offset);
 			}
@@ -1207,11 +1198,11 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 			TDC_DATE nMappedDate = TDC::MapTimeToDate(nDate);
 
 			// Don't combine these 'no change' tests to simplify debugging
-			if (!bUnitsAreTime)
+			if (!offset.HasTimeUnits())
 			{
 				DATEOFFSET_NOCHANGE(offset);
 			}
-			else if (bZeroOffset)
+			else if (offset.nAmount == 0)
 			{
 				DATEOFFSET_NOCHANGE(offset);
 			}

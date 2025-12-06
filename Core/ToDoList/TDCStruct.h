@@ -21,6 +21,9 @@ struct TDCDATEOFFSET
 {
 	TDCDATEOFFSET(int amount = 0, TDC_UNITS units = TDCU_NULL);
 
+	BOOL HasTimeUnits() const;
+	BOOL HasDateUnits() const;
+
 	int nAmount;
 	TDC_UNITS nUnits;
 

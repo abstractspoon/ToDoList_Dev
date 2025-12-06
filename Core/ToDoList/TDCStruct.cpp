@@ -25,6 +25,16 @@ TDCDATEOFFSET::TDCDATEOFFSET(int amount, TDC_UNITS units)
 {
 }
 
+BOOL TDCDATEOFFSET::HasTimeUnits() const
+{
+	return ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+}
+
+BOOL TDCDATEOFFSET::HasDateUnits() const
+{
+	return (!HasTimeUnits() && IsValidUnits(nUnits));
+}
+
 //////////////////////////////////////////////////////////////////////
 
 TDCDROPIMPORT::TDCDROPIMPORT(DWORD dwID, const CStringArray& sDropFiles) 
