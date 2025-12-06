@@ -2416,9 +2416,6 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 	if (!HasTask(dwTaskID))
 		return FALSE;
 
-	BOOL bUnitsAreTime = ((offset.nUnits == TDCU_HOURS) || (offset.nUnits == TDCU_MINS));
-	BOOL bUnitsAreDate = (!bUnitsAreTime && (offset.nUnits != TDCU_NULL));
-
 	switch (nDate)
 	{
 	case TDCD_START:
@@ -2428,14 +2425,14 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		// Start/Due Date offsets require:
 		// 1. Date units
 		// 2. Initialised date if NOT offsetting from today
-		return (bUnitsAreDate && (offset.bFromToday || TaskHasDate(dwTaskID, nDate)));
+		return (offset.HasDateUnits() && (offset.bFromToday || TaskHasDate(dwTaskID, nDate)));
 
 	case TDCD_DONE:
 	case TDCD_DONEDATE:
 		// Done Date offsets require:
 		// 1. Date units
 		// 2. Initialised date
-		return (bUnitsAreDate && TaskHasDate(dwTaskID, nDate));
+		return (offset.HasDateUnits() && TaskHasDate(dwTaskID, nDate));
 
 	case TDCD_STARTTIME:
 	case TDCD_DUETIME:
@@ -2444,7 +2441,7 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		// 1. Time units
 		// 2. No 'offset from today'
 		// 3. Initialised date
-		return (bUnitsAreTime && !offset.bFromToday && TaskHasDate(dwTaskID, TDC::MapTimeToDate(nDate)));
+		return (offset.HasTimeUnits() && !offset.bFromToday && TaskHasDate(dwTaskID, TDC::MapTimeToDate(nDate)));
 	}
 
 	// all else
@@ -2511,13 +2508,11 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		TODOITEM* pTDI = NULL;
 		EDIT_GET_TDI(dwTrueTaskID, pTDI);
 
-		BOOL bOffsetTimeOnly = ((offset.nUnits == TDCU_HOURS) || (offset.nUnits == TDCU_MINS));
-
 		COleDateTime dtNew = (offset.bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
 
 		if (offset.nAmount != 0)
 		{
-			if (bOffsetTimeOnly)
+			if (offset.HasTimeUnits())
 			{
 				ASSERT((dtNew.m_dt >= 0.0) && (dtNew.m_dt < 1.0));
 
@@ -2544,7 +2539,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		}
 
 		// Special case: Task is recurring and the date was changed -> must fall on a valid date
-		if (bFitToRecurringScheme && pTDI->IsRecurring() && !bOffsetTimeOnly)
+		if (bFitToRecurringScheme && pTDI->IsRecurring() && offset.HasDateUnits())
 		{
 			pTDI->trRecurrence.FitDayToScheme(dtNew);
 		}
