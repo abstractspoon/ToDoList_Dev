@@ -2410,9 +2410,7 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 
 BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset) const
 {
-	BOOL bOffsetFromToday = (offset.dwFlags & TDCOTD_OFFSETFROMTODAY);
-
-	if (!offset.nAmount && !bOffsetFromToday)
+	if (!offset.nAmount && !offset.bFromToday)
 		return FALSE;
 
 	if (!HasTask(dwTaskID))
@@ -2430,7 +2428,7 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		// Start/Due Date offsets require:
 		// 1. Date units
 		// 2. Initialised date if NOT offsetting from today
-		return (bUnitsAreDate && (bOffsetFromToday || TaskHasDate(dwTaskID, nDate)));
+		return (bUnitsAreDate && (offset.bFromToday || TaskHasDate(dwTaskID, nDate)));
 
 	case TDCD_DONE:
 	case TDCD_DONEDATE:
@@ -2446,7 +2444,7 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		// 1. Time units
 		// 2. No 'offset from today'
 		// 3. Initialised date
-		return (bUnitsAreTime && !bOffsetFromToday && TaskHasDate(dwTaskID, TDC::MapTimeToDate(nDate)));
+		return (bUnitsAreTime && !offset.bFromToday && TaskHasDate(dwTaskID, TDC::MapTimeToDate(nDate)));
 	}
 
 	// all else
@@ -2483,7 +2481,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		}
 
 		ASSERT(aModTaskIDs.GetSize());
-		ASSERT((aModTaskIDs.GetSize() == 1) || (offset.dwFlags & TDCOTD_OFFSETSUBTASKS));
+		ASSERT((aModTaskIDs.GetSize() == 1) || offset.bAndSubtasks);
 	}
 
 	return nRes;
@@ -2513,11 +2511,9 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		TODOITEM* pTDI = NULL;
 		EDIT_GET_TDI(dwTrueTaskID, pTDI);
 
-		BOOL bOffsetFromToday = (offset.dwFlags & TDCOTD_OFFSETFROMTODAY);
-		BOOL bPreserveEndOfMonth = (offset.dwFlags & TDCOTD_PRESERVEENDOFMONTH);
 		BOOL bOffsetTimeOnly = ((offset.nUnits == TDCU_HOURS) || (offset.nUnits == TDCU_MINS));
 
-		COleDateTime dtNew = (bOffsetFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
+		COleDateTime dtNew = (offset.bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
 
 		if (offset.nAmount != 0)
 		{
@@ -2543,7 +2539,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 				VERIFY(CDateHelper().OffsetDate(dtNew, 
 												offset.nAmount,
 												TDC::MapUnitsToDHUnits(offset.nUnits),
-												bPreserveEndOfMonth));
+												offset.bPreserveEndOfMonth));
 			}
 		}
 
@@ -2559,12 +2555,9 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 	}
 
 	// children
-	BOOL bAndSubtasks = (offset.dwFlags & TDCOTD_OFFSETSUBTASKS);
-	BOOL bAndSubtaskRefs = (offset.dwFlags & TDCOTD_OFFSETSUBTASKREFS);
+	ASSERT(offset.bAndSubtasks || !offset.bAndSubtaskRefs);
 
-	ASSERT(bAndSubtasks || !bAndSubtaskRefs);
-
-	if (bAndSubtasks)
+	if (offset.bAndSubtasks)
 	{
 		const TODOSTRUCTURE* pTDS = LocateTask(dwTaskID);
 
@@ -2578,7 +2571,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		{
 			DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
 
-			if (!bAndSubtaskRefs && IsTaskReference(dwChildID))
+			if (!offset.bAndSubtaskRefs && IsTaskReference(dwChildID))
 				continue;
 
 			// else
@@ -4471,8 +4464,11 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 
 	TDC_SET nRes = SET_NOCHANGE;
 
-	BOOL bPreserveEndOfMonth = TRUE; // TODO
-	DWORD dwOffsetFlags = (TDCOTD_OFFSETSUBTASKS | (bPreserveEndOfMonth ? TDCOTD_PRESERVEENDOFMONTH : 0));
+	TDCDATEOFFSET offset;
+
+	offset.nUnits = TDCU_DAYS;
+	offset.bAndSubtasks = TRUE;
+	offset.bPreserveEndOfMonth = TRUE; // TODO
 
 	if (bDueDate) // dtNext is the new due date
 	{
@@ -4480,11 +4476,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 
 		if (bHasDue)
 		{
-			TDCDATEOFFSET offset;
-
 			offset.nAmount = (int)Misc::Round(dtNext - dtDue, 4);
-			offset.nUnits = TDCU_DAYS;
-			offset.dwFlags = dwOffsetFlags;
 
 			// Make sure the new date fits the recurring scheme
 			BOOL bFitToRecurringScheme = TRUE;
@@ -4510,7 +4502,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 					COleDateTime dtNewStart = dtNext;
 					CDateHelper::IncrementMonth(dtNewStart, 
 												-(int)dDurationInMonths, 
-												bPreserveEndOfMonth);
+												offset.bPreserveEndOfMonth);
 
 					offset.nAmount = (int)Misc::Round(dtNewStart - dtStart, 4);
 
@@ -4543,16 +4535,11 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 	{
 		ASSERT(bHasStart);
 
-		TDCDATEOFFSET offset;
-
-		offset.nAmount = (int)Misc::Round(dtNext - dtStart, 4);
-		offset.nUnits = TDCU_DAYS;
-		offset.dwFlags = dwOffsetFlags;
-
 		// bump dates by required amount
 		// Make sure the new date fits the recurring scheme
+		offset.nAmount = (int)Misc::Round(dtNext - dtStart, 4);
+
 		BOOL bFitToRecurringScheme = TRUE;
-		BOOL bPreserveEndOfMonth = TRUE; // TODO
 
 		if (SET_CHANGE == OffsetTaskDate(dwNewTaskID,
 										 TDCD_STARTDATE,
@@ -4574,7 +4561,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 				COleDateTime dtNewDue = dtNext;
 				CDateHelper::IncrementMonth(dtNewDue, 
 											(int)dDurationInMonths, 
-											bPreserveEndOfMonth);
+											offset.bPreserveEndOfMonth);
 
 				offset.nAmount = (int)Misc::Round(dtNewDue - dtDue, 4);
 

@@ -14,11 +14,14 @@
 
 //////////////////////////////////////////////////////////////////////
 
-TDCDATEOFFSET::TDCDATEOFFSET(int amount, TDC_UNITS units, DWORD flags)
+TDCDATEOFFSET::TDCDATEOFFSET(int amount, TDC_UNITS units)
 	: 
 	nAmount(amount), 
 	nUnits(units), 
-	dwFlags(flags) 
+	bAndSubtasks(FALSE),
+	bAndSubtaskRefs(FALSE),
+	bFromToday(FALSE),
+	bPreserveEndOfMonth(FALSE)
 {
 }
 

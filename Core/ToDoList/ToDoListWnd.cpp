@@ -12181,10 +12181,10 @@ void CToDoListWnd::OnEditOffsetDates()
 
 		ASSERT(offset.nUnits != TDCU_NULL);
 
-		Misc::SetFlag(offset.dwFlags, TDCOTD_OFFSETSUBTASKS,		dialog.GetOffsetSubtasks());
-		Misc::SetFlag(offset.dwFlags, TDCOTD_OFFSETSUBTASKREFS,		dialog.GetOffsetSubtaskReferences());
-		Misc::SetFlag(offset.dwFlags, TDCOTD_OFFSETFROMTODAY,		dialog.GetOffsetFromToday());
-		Misc::SetFlag(offset.dwFlags, TDCOTD_PRESERVEENDOFMONTH,	dialog.GetPreserveEndOfMonth());
+		offset.bAndSubtasks = dialog.GetOffsetSubtasks();
+		offset.bAndSubtaskRefs = dialog.GetOffsetSubtaskReferences();
+		offset.bFromToday = dialog.GetOffsetFromToday();
+		offset.bPreserveEndOfMonth = dialog.GetPreserveEndOfMonth();
 		
 		DWORD dwWhat = dialog.GetOffsetWhat();
 		ASSERT(dwWhat);
@@ -12210,7 +12210,7 @@ void CToDoListWnd::OnEditOffsetDates()
 			CDWordArray aTaskIDs;
 			DWORD dwUnused;
 
-			int nTask = tdc.GetSelectedTaskIDs(aTaskIDs, dwUnused, dialog.GetOffsetSubtasks());
+			int nTask = tdc.GetSelectedTaskIDs(aTaskIDs, dwUnused, offset.bAndSubtasks);
 
 			while (nTask--)
 			{
@@ -12218,8 +12218,8 @@ void CToDoListWnd::OnEditOffsetDates()
 											  offset.nAmount,
 											  offset.nUnits,
 											  &tdc, 
-											  (offset.dwFlags & TDCOTD_OFFSETSUBTASKS),
-											  (offset.dwFlags & TDCOTD_OFFSETFROMTODAY));
+											  offset.bAndSubtasks,
+											  offset.bFromToday);
 			}
 		}
 	}

@@ -1796,7 +1796,6 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
 		return FALSE;
 	}
 
-	BOOL bCanAdjustDependDates = (!m_taskTree.SelectionHasDependencies() || !HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
 	POSITION pos = mapDates.GetStartPosition();
 
 	while (pos)
@@ -1815,13 +1814,17 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
 			break;
 
 		case TDCD_START:
-		case TDCD_DUE:
 		case TDCD_STARTDATE:
-		case TDCD_DUEDATE:
 		case TDCD_STARTTIME:
+		case TDCD_DUE:
+		case TDCD_DUEDATE:
 		case TDCD_DUETIME:
-			if (!bCanAdjustDependDates)
-				return FALSE;
+			{
+				BOOL bCanAdjustDependDates = (!m_taskTree.SelectionHasDependencies() ||
+											  !HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
+				if (!bCanAdjustDependDates)
+					return FALSE;
+			}
 			break;
 
 		default:
@@ -1844,7 +1847,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDA
 
 	// remove duplicate subtasks if we're going to be processing subtasks anyway
 	CHTIList htiSel;
-	TSH().CopySelection(htiSel, (offset.dwFlags & TDCOTD_OFFSETSUBTASKS));
+	TSH().CopySelection(htiSel, offset.bAndSubtasks);
 
 	CDWordArray aModTaskIDs;
 	CTDCAttributeMap mapAttribs;

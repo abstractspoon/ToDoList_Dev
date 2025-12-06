@@ -19,11 +19,15 @@
 
 struct TDCDATEOFFSET
 {
-	TDCDATEOFFSET(int amount = 0, TDC_UNITS units = TDCU_NULL, DWORD dwFlags = 0);
+	TDCDATEOFFSET(int amount = 0, TDC_UNITS units = TDCU_NULL);
 
 	int nAmount;
 	TDC_UNITS nUnits;
-	DWORD dwFlags;
+
+	BOOL bFromToday;
+	BOOL bAndSubtasks;
+	BOOL bAndSubtaskRefs;
+	BOOL bPreserveEndOfMonth;
 };
 
 //////////////////////////////////////////////////////////////////////
