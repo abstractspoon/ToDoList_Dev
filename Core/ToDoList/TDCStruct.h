@@ -17,6 +17,28 @@
 
 //////////////////////////////////////////////////////////////////////
 
+struct TDCDATEOFFSET
+{
+	TDCDATEOFFSET(int amount = 0, TDC_UNITS units = TDCU_NULL);
+
+	BOOL HasTimeUnits() const;
+	BOOL HasDateUnits() const;
+	BOOL IsValid() const;
+
+	BOOL HasFromDate() const;
+	COleDateTime GetFromDate(TDC_DATE nDate) const;
+
+	int nAmount;
+	TDC_UNITS nUnits;
+	COleDateTime dtFrom; // Optional
+
+	BOOL bAndSubtasks;
+	BOOL bAndSubtaskRefs;
+	BOOL bPreserveEndOfMonth;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 struct TDCDROPIMPORT
 {
 	TDCDROPIMPORT(DWORD dwID, const CStringArray& sDropFiles);

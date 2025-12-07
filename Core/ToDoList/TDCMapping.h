@@ -475,24 +475,37 @@ namespace TDC
 		return WWD_NULL;
 	}
 
+	static TDC_DATE MapTimeToDate(TDC_DATE nTime)
+	{
+		switch (nTime)
+		{
+		case TDCD_STARTTIME:	return TDCD_START;
+		case TDCD_DUETIME:		return TDCD_DUE;
+		case TDCD_DONETIME:		return TDCD_DONE;
+		}
+
+		ASSERT(0);
+		return TDCD_NONE;
+	}
+
 	static TDC_ATTRIBUTE MapDateToAttribute(TDC_DATE nDate)
 	{
 		switch (nDate)
 		{
-		case TDCD_CREATE:	return TDCA_CREATIONDATE;
-		case TDCD_LASTMOD:	return TDCA_LASTMODDATE;
+		case TDCD_CREATE:		return TDCA_CREATIONDATE;
+		case TDCD_LASTMOD:		return TDCA_LASTMODDATE;
 			
 		case TDCD_START:	
-		case TDCD_STARTDATE:return TDCA_STARTDATE;
-		case TDCD_STARTTIME:return TDCA_STARTTIME;
+		case TDCD_STARTDATE:	return TDCA_STARTDATE;
+		case TDCD_STARTTIME:	return TDCA_STARTTIME;
 			
 		case TDCD_DUE:		
-		case TDCD_DUEDATE:	return TDCA_DUEDATE;
-		case TDCD_DUETIME:	return TDCA_DUETIME;	
+		case TDCD_DUEDATE:		return TDCA_DUEDATE;
+		case TDCD_DUETIME:		return TDCA_DUETIME;	
 
 		case TDCD_DONE:		
-		case TDCD_DONEDATE:	return TDCA_DONEDATE;
-		case TDCD_DONETIME:	return TDCA_DONETIME;
+		case TDCD_DONEDATE:		return TDCA_DONEDATE;
+		case TDCD_DONETIME:		return TDCA_DONETIME;
 		}
 		
 		// else

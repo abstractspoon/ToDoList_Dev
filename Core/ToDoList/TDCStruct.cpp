@@ -14,6 +14,62 @@
 
 //////////////////////////////////////////////////////////////////////
 
+TDCDATEOFFSET::TDCDATEOFFSET(int amount, TDC_UNITS units)
+	: 
+	nAmount(amount), 
+	nUnits(units), 
+	dtFrom(CDateHelper::NullDate()),
+	bAndSubtasks(FALSE),
+	bAndSubtaskRefs(FALSE),
+	bPreserveEndOfMonth(FALSE)
+{
+}
+
+BOOL TDCDATEOFFSET::HasTimeUnits() const
+{
+	return ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
+}
+
+BOOL TDCDATEOFFSET::HasDateUnits() const
+{
+	return (!HasTimeUnits() && IsValidUnits(nUnits));
+}
+
+BOOL TDCDATEOFFSET::IsValid() const
+{
+	return (IsValidUnits(nUnits) && (nAmount || HasFromDate()));
+}
+
+BOOL TDCDATEOFFSET::HasFromDate() const
+{
+	return CDateHelper::IsDateSet(dtFrom);
+}
+
+
+COleDateTime TDCDATEOFFSET::GetFromDate(TDC_DATE nDate) const
+{
+	if (!HasFromDate() || (nDate == TDCD_NONE))
+		return CDateHelper::NullDate();
+
+	switch (nDate)
+	{
+	case TDCD_STARTDATE:
+	case TDCD_DUEDATE:
+	case TDCD_DONEDATE:
+		return CDateHelper::GetDateOnly(dtFrom);
+
+	case TDCD_STARTTIME:
+	case TDCD_DUETIME:
+	case TDCD_DONETIME:
+		return CDateHelper::GetTimeOnly(dtFrom);
+	}
+
+	// All else
+	return dtFrom;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 TDCDROPIMPORT::TDCDROPIMPORT(DWORD dwID, const CStringArray& sDropFiles) 
 	: 
 	dwTaskID(dwID)

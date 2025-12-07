@@ -9,7 +9,17 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "TDLTestBase.h"
+
+#include "..\shared\DateHelper.h"
+
+//////////////////////////////////////////////////////////////////////
+
+class CWorkingWeek;
+
+//////////////////////////////////////////////////////////////////////
 
 class CDateHelperTest : public CTDLTestBase  
 {
@@ -28,6 +38,13 @@ protected:
 	void TestMakeDate();
 	void TestCompare();
 	void Test64BitDates();
+	void TestOffsetDate();
+
+protected:
+	void TestOffsetDate(const CDateHelper& dh, int nDir, BOOL bPreserveEndOfMonth);
+	void TestOffsetDate(const CDateHelper& dh, const COleDateTime& date, DH_UNITS nUnits, int nOffset, BOOL bPreserveEndOfMonth);
+
+	static CString GetUnitsText(DH_UNITS nUnits);
 };
 
 #endif // !defined(AFX_DATEHELPERTEST_H__6A11464D_D4DA_4ABA_8FDB_310C9A5252E5__INCLUDED_)

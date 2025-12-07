@@ -239,7 +239,7 @@ public:
 
 	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
 
-	BOOL OffsetSelectedTaskDates(const CTDCDateSet& mapDates, int nAmount, TDC_UNITS nUnits, DWORD dwFlags = 0);
+	BOOL OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDATEOFFSET& offset);
 	BOOL CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const;
 
 	CString GetSelectedTaskComments() const { return m_taskTree.GetSelectedTaskComments(); }
