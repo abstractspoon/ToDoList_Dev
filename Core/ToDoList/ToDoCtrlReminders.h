@@ -20,6 +20,8 @@
 class CFilteredToDoCtrl;
 class CTDCAttributeMap;
 
+struct TDCDATEOFFSET;
+
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrlReminders window
 
@@ -46,7 +48,7 @@ public:
 	BOOL UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib);
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 	void CheckReminders();
-	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday);
+	int OffsetReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC, const TDCDATEOFFSET& offset);
 	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
 	BOOL UpdateRecurringTaskReminders(DWORD dwOldTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC);
 
@@ -97,7 +99,7 @@ protected:
 	BOOL NonRecurringReminderHasRecurringParent(const TDCREMINDER& rem, DWORD dwParentID, const CFilteredToDoCtrl* pTDC) const;
 	BOOL IsRecurringReminder(const TDCREMINDER& rem, BOOL bIncludeParent = TRUE) const;
 
-	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday);
+	static BOOL OffsetReminder(TDCREMINDER& rem, const TDCDATEOFFSET& offset);
 };
 
 /////////////////////////////////////////////////////////////////////////////

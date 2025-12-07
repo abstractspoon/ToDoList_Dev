@@ -6,6 +6,7 @@
 #include "ToDoCtrlReminders.h"
 #include "filteredToDoCtrl.h"
 #include "tdcmapping.h"
+#include "tdcstruct.h"
 
 #include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
@@ -925,60 +926,48 @@ void CToDoCtrlReminders::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 }
 
-int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, 
-									   BOOL bAndSubtasks, BOOL bFromToday)
+int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC, const TDCDATEOFFSET& offset)
 {
 	int nRem = FindReminder(dwTaskID, pTDC);
 	int nNumOffset = 0;
 
 	if (nRem != -1)
 	{
-		if (OffsetReminder(m_aReminders[nRem],
-						   dAmount,
-						   nUnits,
-						   bFromToday))
-		{
+		if (OffsetReminder(m_aReminders[nRem], offset))
 			nNumOffset++;
-		}
 	}
 
-	if (bAndSubtasks)
+	if (offset.bAndSubtasks)
 	{
 		CDWordArray aSubtaskIDs;
 		int nSubtask = pTDC->GetSubTaskIDs(dwTaskID, aSubtaskIDs);
 
 		while (nSubtask--)
-		{
-			nNumOffset += OffsetReminder(aSubtaskIDs[nSubtask],
-										 dAmount,
-										 nUnits,
-										 pTDC,
-										 TRUE, // And subtasks
-										 bFromToday); // RECURSIVE CALL
-		}
+			nNumOffset += OffsetReminder(aSubtaskIDs[nSubtask], pTDC, offset); // RECURSIVE CALL
 	}
 
 	return nNumOffset;
 }
 
-BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, 
-										BOOL bFromToday)
+BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, const TDCDATEOFFSET& offset)
 {
 	if (rem.bRelative)
 		return FALSE;
 
-	if (!dAmount && !bFromToday)
+	BOOL bOffsetFromDate = CDateHelper::IsDateSet(offset.dtFrom);
+
+	if (!offset.nAmount && !offset.HasFromDate())
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	COleDateTime date = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : rem.dtAbsolute);
+	COleDateTime date = (offset.HasFromDate() ? offset.GetFromDate(TDCD_REMINDER) : rem.dtAbsolute);
 
-	if (dAmount)
+	if (offset.nAmount)
 	{
 		// Preserve end of month
-		if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits), TRUE))
+		if (!CDateHelper().OffsetDate(date, offset.nAmount, TDC::MapUnitsToDHUnits(offset.nUnits), TRUE))
 			return FALSE;
 	}
 
