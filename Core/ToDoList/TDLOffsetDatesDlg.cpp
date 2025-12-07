@@ -107,11 +107,7 @@ BOOL CTDLOffsetDatesDlg::OnInitDialog()
 
 	m_lbOffsetWhat.SetCheckedByItemData(m_dwOffsetWhat);
 
-	GetDlgItem(IDC_PRESERVEENDOFMONTH)->EnableWindow(m_nOffsetByUnits == MONTHS);
-	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
-	GetDlgItem(IDC_OFFSETDATE)->EnableWindow(m_bOffsetFromDate);
-
-	GetDlgItem(IDOK)->EnableWindow(m_dwOffsetWhat != 0);
+	EnableDisableControls();
 
 	return TRUE;
 }
@@ -182,27 +178,32 @@ void CTDLOffsetDatesDlg::OnOK()
 void CTDLOffsetDatesDlg::OnSelchangeUnits() 
 {
 	UpdateData();
-
-	GetDlgItem(IDC_PRESERVEENDOFMONTH)->EnableWindow(m_nOffsetByUnits == MONTHS);
+	EnableDisableControls();
 }
 
 void CTDLOffsetDatesDlg::OnClickOffsetSubtasks()
 {
 	UpdateData();
-
-	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
+	EnableDisableControls();
 }
 
 void CTDLOffsetDatesDlg::OnClickWhatList()
 {
 	UpdateData();
-
-	GetDlgItem(IDOK)->EnableWindow(m_dwOffsetWhat != 0);
+	EnableDisableControls();
 }
 
 void CTDLOffsetDatesDlg::OnClickOffsetFromDate()
 {
 	UpdateData();
+	EnableDisableControls();
+}
 
+void CTDLOffsetDatesDlg::EnableDisableControls()
+{
+	GetDlgItem(IDC_PRESERVEENDOFMONTH)->EnableWindow((m_nOffsetByUnits == MONTHS) || (m_nOffsetByUnits == YEARS));
+	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
 	GetDlgItem(IDC_OFFSETDATE)->EnableWindow(m_bOffsetFromDate);
+
+	GetDlgItem(IDOK)->EnableWindow(m_dwOffsetWhat != 0);
 }
