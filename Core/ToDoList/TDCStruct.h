@@ -23,11 +23,15 @@ struct TDCDATEOFFSET
 
 	BOOL HasTimeUnits() const;
 	BOOL HasDateUnits() const;
+	BOOL IsValid() const;
+
+	BOOL HasFromDate() const;
+	COleDateTime GetFromDate(TDC_DATE nDate) const;
 
 	int nAmount;
 	TDC_UNITS nUnits;
+	COleDateTime dtFrom; // Optional
 
-	BOOL bFromToday;
 	BOOL bAndSubtasks;
 	BOOL bAndSubtaskRefs;
 	BOOL bPreserveEndOfMonth;
