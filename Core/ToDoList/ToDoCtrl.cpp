@@ -1853,8 +1853,8 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDA
 
 	while (posDate)
 	{
-		CDWordArray aDateModTaskIDs;
 		TDC_DATE nDate = mapDates.GetNext(posDate);
+		CDWordArray aDateModTaskIDs;
 
 		POSITION posTask = htiSel.GetHeadPosition();
 

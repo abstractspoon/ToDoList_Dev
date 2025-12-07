@@ -12174,16 +12174,17 @@ void CToDoListWnd::OnEditOffsetDates()
 	if (dialog.DoModal(CMDICON(ID_EDIT_OFFSETDATES)) == IDOK)
 	{
 		TDCDATEOFFSET offset;
+		
 		offset.nAmount = dialog.GetOffsetAmount(offset.nUnits);
+		offset.dtFrom = dialog.GetOffsetFromDate();
 
-		if (!offset.nAmount && !dialog.GetOffsetFromToday())
+		if (!offset.IsValid())
 			return;
 
 		ASSERT(offset.nUnits != TDCU_NULL);
 
 		offset.bAndSubtasks = dialog.GetOffsetSubtasks();
 		offset.bAndSubtaskRefs = dialog.GetOffsetSubtaskReferences();
-		offset.bFromToday = dialog.GetOffsetFromToday();
 		offset.bPreserveEndOfMonth = dialog.GetPreserveEndOfMonth();
 		
 		DWORD dwWhat = dialog.GetOffsetWhat();
@@ -12213,14 +12214,7 @@ void CToDoListWnd::OnEditOffsetDates()
 			int nTask = tdc.GetSelectedTaskIDs(aTaskIDs, dwUnused, offset.bAndSubtasks);
 
 			while (nTask--)
-			{
-				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], 
-											  offset.nAmount,
-											  offset.nUnits,
-											  &tdc, 
-											  offset.bAndSubtasks,
-											  offset.bFromToday);
-			}
+				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], &tdc, offset);
 		}
 	}
 }

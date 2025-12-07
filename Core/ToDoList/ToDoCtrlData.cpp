@@ -2410,7 +2410,7 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 
 BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset) const
 {
-	if (!offset.nAmount && !offset.bFromToday)
+	if (!offset.IsValid())
 		return FALSE;
 
 	if (!HasTask(dwTaskID))
@@ -2425,7 +2425,7 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		// Start/Due Date offsets require:
 		// 1. Date units
 		// 2. Initialised date if NOT offsetting from today
-		return (offset.HasDateUnits() && (offset.bFromToday || TaskHasDate(dwTaskID, nDate)));
+		return (offset.HasDateUnits() && (offset.HasFromDate() || TaskHasDate(dwTaskID, nDate)));
 
 	case TDCD_DONE:
 	case TDCD_DONEDATE:
@@ -2441,7 +2441,7 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		// 1. Time units
 		// 2. No 'offset from today'
 		// 3. Initialised date
-		return (offset.HasTimeUnits() && !offset.bFromToday && TaskHasDate(dwTaskID, TDC::MapTimeToDate(nDate)));
+		return (offset.HasTimeUnits() && !offset.HasFromDate() && TaskHasDate(dwTaskID, TDC::MapTimeToDate(nDate)));
 	}
 
 	// all else
@@ -2508,7 +2508,8 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 		TODOITEM* pTDI = NULL;
 		EDIT_GET_TDI(dwTrueTaskID, pTDI);
 
-		COleDateTime dtNew = (offset.bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
+		COleDateTime dtNew = (offset.HasFromDate() ? offset.GetFromDate(nDate) : pTDI->GetDate(nDate));
+		ASSERT(CDateHelper::IsDateSet(dtNew));
 
 		if (offset.nAmount != 0)
 		{
