@@ -51,26 +51,26 @@ function SupportsHTML5Storage()
 
 function OnAppMessage(event)
 {  
-    let value = {}, key = ParseAppMessage(event.data, value);
+    let msg = JSON.parse(event.data);
 
-    if (key == RefreshMsg)
+    if (msg.msg == RefreshMsg)
     {
-        if (value.value == null)
-            location.reload(location.href);
+        if (msg.tasks)
+            MergeSelectedTaskAttributes(msg.tasks);
         else
-            MergeSelectedTaskAttributes(JSON.parse(value.value));
+            location.reload(location.href);
     }
-    else if (key == SelectedTaskMsg)
+    else if (msg.msg == SelectedTaskMsg)
     {
-        SelectTask(value.value, false);
+        SelectTask(msg.id, false);
     }
-    else if (key == PreferencesMsg)
+    else if (msg.msg == PreferencesMsg)
     {
         let colorTaskBkgnd = GetPreference('ColorTaskBackground', false);
         let strikethruDone = GetPreference('StrikethroughDone', true);
         let backColor = GetPreference('BackColor', null);
         
-        SetStorage(PreferencesKey, value.value);
+        SetStorage(PreferencesKey, JSON.stringify(msg.prefs).toString());
         
         if (backColor != GetPreference('BackColor', null))
             document.body.style.backgroundColor = GetPreference('BackColor', null);
@@ -81,30 +81,17 @@ function OnAppMessage(event)
             RefreshSelectedView();
         }
     }
-    else if (key == SessionStateMsg)
+    else if (msg.msg == SessionStateMsg)
     {
-        let state = JSON.parse(value.value);
-        
-        if (state[TreeMapDepthKey] != null)
-            SetStorage(TreeMapDepthKey, state['TreeMapDepth'], false);
+        if (msg.state[TreeMapDepthKey] != null)
+            SetStorage(TreeMapDepthKey, msg.state['TreeMapDepth'], false);
             
-        if (state[SelectedViewKey] != null)
+        if (msg.state[SelectedViewKey] != null)
         {
-            if (state[SelectedViewKey] != GetSelectedView())
-                OnChangeView(state[SelectedViewKey]);
+            if (msg.state[SelectedViewKey] != GetSelectedView())
+                OnChangeView(msg.state[SelectedViewKey]);
         }    
     }
-}
-
-function ParseAppMessage(message, /*out*/ value)
-{
-    var equals = message.indexOf('=');
-    
-    if (equals == -1)
-        return message;
-    
-    value.value = message.substr(equals + 1);
-    return message.substr(0, equals);
 }
 
 function GetPreference(pref, defValue)
@@ -133,7 +120,7 @@ function SetStorage(key, value)
         msg[SelectedViewKey] = GetSelectedView();
         msg[TreeMapDepthKey] = GetTreeMapDepth();
         
-        NotifyApp(SessionStateMsg, JSON.stringify(msg).toString());
+        NotifyApp(SessionStateMsg, "state", JSON.stringify(msg).toString());
     }
 }
 
@@ -279,9 +266,14 @@ function RestoreSelectedTask()
         SelectTask(id, false);
 }
 
-function NotifyApp(key, value)
+function NotifyApp(msgKey, valueKey, value)
 {
-    window.chrome.webview.postMessage(key + '=' + value);
+    let msg = { };
+    
+    msg['msg'] = msgKey;
+    msg[valueKey] = value;
+    
+    window.chrome.webview.postMessage(JSON.stringify(msg));
 }
 
 function IsSelectableTask(id)
@@ -314,7 +306,7 @@ function SelectTask(id, fromChart)
     }
         
     if (fromChart)
-        NotifyApp('SelectedTask', id);
+        NotifyApp('SelectedTask', "id", id);
 }
 
 function GetSelectedTaskId()
