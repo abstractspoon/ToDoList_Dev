@@ -128,6 +128,8 @@ const UINT ONE_MINUTE = 10000;
 const UINT ONE_MINUTE = 60000;
 #endif
 
+const LPARAM NEWTASKFROMCMDLINE = 1L;
+
 /////////////////////////////////////////////////////////////////////////////
 
 const LPCTSTR SETTINGS_KEY	= _T("Settings");
@@ -941,7 +943,7 @@ BOOL CToDoListWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 	if (wParam == ID_EDIT_TASKTEXT)
 	{
 		// lParam tells us if this should be treated as a new-task edit
-		GetToDoCtrl().EditSelectedTaskTitle(lParam);
+		GetToDoCtrl().EditSelectedTaskTitle(lParam == NEWTASKFROMCMDLINE);
 		return TRUE;
 	}
 	
@@ -5632,7 +5634,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		// edit task title?
 		if (bEditLabel)
 		{	
-			PostMessage(WM_COMMAND, ID_EDIT_TASKTEXT, TRUE); // TRUE -> New task
+			PostMessage(WM_COMMAND, ID_EDIT_TASKTEXT, NEWTASKFROMCMDLINE);
 			return TRUE;
 		}
 	}
