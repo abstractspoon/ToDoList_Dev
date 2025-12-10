@@ -241,7 +241,19 @@ namespace JSViewUIExtension
 
 		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
 		{
-			return false;
+			var rect = m_WebView.CallJsFunction<RectangleF>("GetSelectedTaskLabelRect()");
+
+			if (rect.IsEmpty)
+				return false;
+
+			var labelRect = m_WebView.RectangleToScreen(Rectangle.Truncate(rect));
+
+			left = labelRect.Left;
+			top = labelRect.Top;
+			right = labelRect.Right;
+			bottom = labelRect.Bottom;
+
+			return true;
 		}
 
 		public UIExtension.HitTestResult HitTest(Int32 xPos, Int32 yPos, UIExtension.HitTestReason reason)

@@ -266,12 +266,24 @@ function RestoreSelectedTask()
         SelectTask(id, false);
 }
 
-function NotifyApp(msgKey, valueKey, value)
+function NotifyApp(msgKey, value1Key, value1, value2Key = null, value2 = null, value3Key = null, value3 = null)
 {
     let msg = { };
     
     msg['msg'] = msgKey;
-    msg[valueKey] = value;
+    
+    if (value1Key)
+    {
+        msg[value1Key] = value1;
+        
+        if (value2Key)
+        {
+            msg[value2Key] = value2;
+            
+            if (value3Key)
+                msg[value3Key] = value3;
+        }
+    }
     
     window.chrome.webview.postMessage(JSON.stringify(msg));
 }
@@ -307,6 +319,25 @@ function SelectTask(id, fromChart)
         
     if (fromChart)
         NotifyApp('SelectedTask', "id", id);
+}
+
+function GetSelectedTaskLabelRect()
+{
+    let view = GetSelectedView();
+    let rect = null;
+
+    switch (view)
+    {
+        case 'dashboard_id':
+            rect = GetSelectedDashboardTaskLabelRect();
+            break;
+              
+        case 'treemap_id':
+            rect = GetSelectedTreeMapTaskLabelRect();
+            break;
+    }
+    
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
 }
 
 function GetSelectedTaskId()
@@ -489,6 +520,11 @@ function SelectDashboardTask(id, prevId)
     SetSelectedChartRow(id, dashboardChart22, dashboardTask2RowMapping);
 }
 
+function GetSelectedDashboardTaskLabelRect()
+{
+    return null;
+}
+              
 function DrawDashboard()
 {
     DrawDashboardChart(dashboardChart11, 'Red', 'Blue');
@@ -986,9 +1022,55 @@ function SelectTreeMapTask(id, prevId = null)
         RefreshTreeMapTextAndColors(prevId);
         RefreshTreeMapTextAndColors(id);
     }
+    
+    EnsureTreeMapSelectionVisible();
 }
 
-function EnsureTreeMapSelectionVisible()
+function GetSelectedTreeMapTaskLabelRect()
+{
+    EnsureTreeMapSelectionVisible(true);
+    
+    let selId = GetSelectedTaskId();
+    let cell = GetTreeMapCell(selId);
+    
+    return GetTreeMapCellLabelRect(cell);
+}
+
+function GetTreeMapCellLabelRect(cell)
+{
+    if (cell)
+    {
+        let fo = $(cell).find('foreignObject');
+        
+        if (fo)
+        {
+            let labelRect = new DOMRect;
+            
+            labelRect.x = $(fo).attr('labelRect_x');
+            labelRect.y = $(fo).attr('labelRect_y');
+            labelRect.width = $(fo).attr('labelRect_width');
+            labelRect.height = $(fo).attr('labelRect_height');
+            
+            // Convert to viewport coords
+            // Note: This takes the scrolled state into account
+            let bbox = cell.getBoundingClientRect();
+            let rect = $(cell).find('rect');
+            
+            const padding = 2;
+                    
+            labelRect.x += (bbox.x - $(rect).attr('x') - padding);
+            labelRect.y += (bbox.y - $(rect).attr('y') - padding);
+            labelRect.width += (2 * padding);
+            labelRect.height += (2 * padding);
+        
+            return labelRect;
+        }
+    }
+    
+    return null;
+}
+
+function EnsureTreeMapSelectionVisible(labelOnly = false)
 {
     let selId = GetSelectedTaskId();
     let cell = GetTreeMapCell(selId);
@@ -999,7 +1081,7 @@ function EnsureTreeMapSelectionVisible()
         // scrollbar it's only necessary to scroll in 'y'
         // And we only scroll if the item is not entirely visible
         let clientHeight = document.documentElement.clientHeight;
-        let cellRect = cell.getBoundingClientRect();
+        let cellRect = (labelOnly ? GetTreeMapCellLabelRect(cell) : cell.getBoundingClientRect());
         
         const xScroll = document.documentElement.scrollLeft;
         let yScroll = document.documentElement.scrollTop;
@@ -1089,9 +1171,14 @@ function OnTreeMapHighlight(item)
     let id = treeMapRow2TaskMapping[row];
 
     if (IsSelectableTask(id) && (id != GetSelectedTaskId()))
+    {
         SelectTask(id, true);
+        EnsureTreeMapSelectionVisible(true);
+    }
     else
+    {
         RefreshTreeMapTextAndColors(id); // still required because Google!
+    }
 }
 
 function OnTreeMapUnhighlight(item)
@@ -1237,9 +1324,9 @@ function RefreshTreeMapTextAndColors(specificId)
 
                 // Modify the text to fit the rect width
                 let availWidth = ($(rect).attr('width') - 4); // add padding
-                let actualWidth = $(text)[0].getBBox().width;
+                let labelRect = $(text)[0].getBBox();
                 
-                while (actualWidth > availWidth)
+                while (labelRect.width > availWidth)
                 {
                     title = title.substring(0, (title.length - 4));
                     $(text).text(title + '...');
@@ -1247,7 +1334,17 @@ function RefreshTreeMapTextAndColors(specificId)
                     if (title.length == 0)
                         break;
                         
-                    actualWidth = $(text)[0].getBBox().width;
+                    labelRect = $(text)[0].getBBox();
+                }
+                
+                // Save the label rect so it's available when the app
+                // queries for it via GetSelectedTaskLabelRect
+                if (!fo.attr('labelRect_x'))
+                {
+                    $(fo).attr('labelRect_x', labelRect.x);
+                    $(fo).attr('labelRect_y', labelRect.y);
+                    $(fo).attr('labelRect_width', labelRect.width);
+                    $(fo).attr('labelRect_height', labelRect.height);
                 }
                        
                 // Because we set the font size to 0.1 to get around
@@ -1255,7 +1352,7 @@ function RefreshTreeMapTextAndColors(specificId)
                 // header text is mis-aligned vertically
                 if ((id == headerId) && ($(rect).attr('y') == '0'))
                 {
-                    let textHeight = $(text)[0].getBBox().height;
+                    let textHeight = labelRect.height;
                     let rectHeight = Number($(rect).attr('height'));
                     
                     let y = (((rectHeight - textHeight) / 2) + textHeight);
