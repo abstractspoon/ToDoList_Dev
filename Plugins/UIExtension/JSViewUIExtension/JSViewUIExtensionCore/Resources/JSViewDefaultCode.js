@@ -11,16 +11,51 @@ window.onfocus = OnFocusChanged;
 // ----------------------------------------------------------------------------------------
 
 // App Messages
-const SelectedTaskMsg = "SelectedTask";
-const PreferencesMsg  = "Preferences";
-const RefreshMsg      = "Refresh";
-const SessionStateMsg = "SessionState";
+const SetSelectedTaskMsg     = "SetSelectedTask";
+const SetPreferencesMsg      = "SetPreferences";
+const RefreshContentMsg      = "RefreshContent";
+const RestoreSessionStateMsg = "RestoreSessionState";
 
 // Session Storage Keys
 const SelectedViewKey = "SelectedView";
 const SelectedTaskKey = "SelectedTask";
 const PreferencesKey  = "Preferences";
 const TreeMapDepthKey = "TreeMapDepth";
+
+// View IDs
+const DashboardViewId = "dashboard_id";
+const TreeMapViewId   = "treemap_id";
+
+// External functions called by the app ---------------------------------------------------
+function GetSelectedTaskLabelRect()
+{
+    let view = GetSelectedView();
+    let rect = null;
+
+    switch (view)
+    {
+        case DashboardViewId:
+            rect = GetSelectedDashboardTaskLabelRect();
+            break;
+              
+        case TreeMapViewId:
+            rect = GetSelectedTreeMapTaskLabelRect();
+            break;
+    }
+    
+    return { x:      rect.x, 
+             y:      rect.y, 
+             width:  rect.width, 
+             height: rect.height };
+}
+
+// Called by the app only
+function GetSessionState()
+{
+    return { [SelectedViewKey]: GetSelectedView(), 
+             [DashboardViewId]: GetDashboardSessionState(),
+             [TreeMapViewId]  : GetTreeMapSessionState() };
+}
 
 // General data and functions -------------------------------------------------------------
 
@@ -53,18 +88,18 @@ function OnAppMessage(event)
 {  
     let msg = JSON.parse(event.data);
 
-    if (msg.msg == RefreshMsg)
+    if (msg.msg == RefreshContentMsg)
     {
         if (msg.tasks)
             MergeSelectedTaskAttributes(msg.tasks);
         else
             location.reload(location.href);
     }
-    else if (msg.msg == SelectedTaskMsg)
+    else if (msg.msg == SetSelectedTaskMsg)
     {
         SelectTask(msg.id, false);
     }
-    else if (msg.msg == PreferencesMsg)
+    else if (msg.msg == SetPreferencesMsg)
     {
         let colorTaskBkgnd = GetPreference('ColorTaskBackground', false);
         let strikethruDone = GetPreference('StrikethroughDone', true);
@@ -81,16 +116,9 @@ function OnAppMessage(event)
             RefreshSelectedView();
         }
     }
-    else if (msg.msg == SessionStateMsg)
+    else if (msg.msg == RestoreSessionStateMsg)
     {
-        if (msg.state[TreeMapDepthKey] != null)
-            SetStorage(TreeMapDepthKey, msg.state['TreeMapDepth'], false);
-            
-        if (msg.state[SelectedViewKey] != null)
-        {
-            if (msg.state[SelectedViewKey] != GetSelectedView())
-                OnChangeView(msg.state[SelectedViewKey]);
-        }    
+        RestoreSessionState(JSON.parse(msg.state));
     }
 }
 
@@ -112,28 +140,18 @@ function GetStorage(key)
 function SetStorage(key, value)
 {
 	sessionStorage.setItem(key, value);
-    
-    // Notify the app about view changes and treemap depth changes
-    if ((key == SelectedViewKey) || (key == TreeMapDepthKey))
-    {
-        let msg = {};
-        msg[SelectedViewKey] = GetSelectedView();
-        msg[TreeMapDepthKey] = GetTreeMapDepth();
-        
-        NotifyApp(SessionStateMsg, "state", JSON.stringify(msg).toString());
-    }
 }
 
 function OnChangeView(view) 
 {
     SetStorage(SelectedViewKey, view);
     
-    ShowHideView('dashboard_id', view);
-    ShowHideView('treemap_id', view);
+    ShowHideView(DashboardViewId, view);
+    ShowHideView(TreeMapViewId, view);
     // New views here
     
     // Dependent UI
-    if (view == 'treemap_id')
+    if (view == TreeMapViewId)
     {
         document.getElementById('treemapdepth_combo').style.display = 'inline-block';
         document.getElementById('treemapdepth').value = GetTreeMapDepth().toString();
@@ -156,10 +174,10 @@ function ShowHideView(divName, viewId)
         
 function GetSelectedView()
 {
-    let view = GetStorage('SelectedView');
+    let view = GetStorage(SelectedViewKey);
     
     if (view == null)
-        view = 'dashboard_id';
+        view = DashboardViewId;
     
     return view;
 }
@@ -171,11 +189,11 @@ function RefreshSelectedView()
 
     switch (view)
     {
-        case 'dashboard_id':
+        case DashboardViewId:
             RefreshDashboard();
             break;
               
-        case 'treemap_id':
+        case TreeMapViewId:
             RefreshTreeMap();
             break;
     }
@@ -187,11 +205,11 @@ function OnResize(event)
 
     switch (view)
     {
-        case 'dashboard_id':
+        case DashboardViewId:
             OnResizeDashboard();
             break;
               
-        case 'treemap_id':
+        case TreeMapViewId:
             OnResizeTreeMap();
             break;
     }
@@ -203,11 +221,11 @@ function OnKeyDown(event)
 
     switch (view)
     {
-        case 'dashboard_id':
+        case DashboardViewId:
             OnKeyDownDashboard(event);
             break;
               
-        case 'treemap_id':
+        case TreeMapViewId:
             OnKeyDownTreeMap(event);
             break;
     }
@@ -220,11 +238,11 @@ function OnFocusChanged(event)
 
     switch (view)
     {
-        case 'dashboard_id':
+        case DashboardViewId:
             OnFocusChangedDashboard(hasFocus);
             break;
               
-        case 'treemap_id':
+        case TreeMapViewId:
             OnFocusChangedTreeMap(hasFocus);
             break;
     }
@@ -234,7 +252,7 @@ function MergeSelectedTaskAttributes(selTasks)
 {
     switch (GetSelectedView())
     {
-        case 'dashboard_id':
+        case DashboardViewId:
             {
                 // Keep all views up to date but we only redraw if the dashboard changed
                 UpdateTreeMapSelectedTasks(selTasks);
@@ -244,7 +262,7 @@ function MergeSelectedTaskAttributes(selTasks)
             }
             break;
               
-        case 'treemap_id':
+        case TreeMapViewId:
             {
                 // Keep all views up to date but we only redraw if the treemap changed
                 UpdateDashboardSelectedTasks(selTasks);
@@ -264,6 +282,17 @@ function RestoreSelectedTask()
     
     if (IsSelectableTask(id))
         SelectTask(id, false);
+}
+
+function RestoreSessionState(state)
+{
+    RestoreDashboardSessionState(state[DashboardViewId]);
+    RestoreTreeMapSessionState(state[TreeMapViewId]);
+
+    let viewState = state[SelectedViewKey];
+    
+    if (viewState && (viewState != GetSelectedView()))
+        OnChangeView(viewState);
 }
 
 function NotifyApp(msgKey, value1Key, value1, value2Key = null, value2 = null, value3Key = null, value3 = null)
@@ -303,46 +332,27 @@ function SelectTask(id, fromChart)
     }
     
     let prevId = GetSelectedTaskId();
-    SetStorage(SelectedTaskKey, id, fromChart); // will notify app if from the chart
+    SetStorage(SelectedTaskKey, id);
 
     switch (GetSelectedView())
     {
-        case 'dashboard_id':
+        case DashboardViewId:
         case '':
             SelectDashboardTask(id, prevId);
             break;
               
-        case 'treemap_id':
+        case TreeMapViewId:
             SelectTreeMapTask(id, prevId);
             break;
     }
         
     if (fromChart)
-        NotifyApp('SelectedTask', "id", id);
-}
-
-function GetSelectedTaskLabelRect()
-{
-    let view = GetSelectedView();
-    let rect = null;
-
-    switch (view)
-    {
-        case 'dashboard_id':
-            rect = GetSelectedDashboardTaskLabelRect();
-            break;
-              
-        case 'treemap_id':
-            rect = GetSelectedTreeMapTaskLabelRect();
-            break;
-    }
-    
-    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+        NotifyApp(SetSelectedTaskMsg, "id", id);
 }
 
 function GetSelectedTaskId()
 {
-    let id = GetStorage('SelectedTask');
+    let id = GetStorage(SelectedTaskKey);
     
     if (id == null)
         id = '';
@@ -458,6 +468,16 @@ function UpdateDashboardSelectedTasks(selTasks)
     }
     
     return changed;
+}
+
+function RestoreDashboardSessionState(state)
+{
+    // Nothing to do
+}
+
+function GetDashboardSessionState()
+{
+    return {};
 }
 
 function OnDashboard11Select(e)
@@ -937,9 +957,25 @@ function OnTreeMapReady()
     RefreshTreeMapTextAndColors();
 }
 
+function RestoreTreeMapSessionState(state)
+{
+    if (state)
+    {
+        let depthState = state[TreeMapDepthKey];
+    
+        if (depthState && (depthState != GetTreeMapDepth()))
+            SetStorage(TreeMapDepthKey, depthState);
+    }
+}
+
+function GetTreeMapSessionState()
+{
+    return { [TreeMapDepthKey]: GetTreeMapDepth() };
+}
+
 function GetTreeMapDepth()
 {
-    let depth = GetStorage('TreeMapDepth');
+    let depth = GetStorage(TreeMapDepthKey);
     
     if (depth == null)
         return 0;
@@ -951,7 +987,7 @@ function OnChangeTreeMapDepth(depth)
 {
     if (Number(depth) != GetTreeMapDepth())
     {
-        SetStorage(TreeMapDepthKey, depth); // will notify app
+        SetStorage(TreeMapDepthKey, depth);
         DrawTreeMap();
     }
 }

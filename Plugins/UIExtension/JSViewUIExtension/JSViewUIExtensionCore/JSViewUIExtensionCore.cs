@@ -32,10 +32,10 @@ namespace JSViewUIExtension
 		const string StylesPlaceholder	= "{{{JSVIEW_STYLESHEET}}}";
 		const string ColorsPlaceholder  = "{{{JSVIEW_COLORUTIL}}}";
 
-		const string SelectedTaskMsg	= "SelectedTask";
-		const string SessionStateMsg	= "SessionState";
-		const string PreferencesMsg		= "Preferences";
-		const string RefreshMsg			= "Refresh";
+		const string SetSelectedTaskMsg		= "SetSelectedTask";
+		const string RestoreSessionStateMsg	= "RestoreSessionState";
+		const string SetPreferencesMsg		= "SetPreferences";
+		const string RefreshContentMsg		= "RefreshContent";
 
 		// -------------------------------------------------------------
 
@@ -45,10 +45,10 @@ namespace JSViewUIExtension
 		Font m_ControlsFont;
 
 		JsTaskItems m_Items;
-		JObject m_AppPrefs, m_BrowserState;
+		JObject m_AppPrefs; // Simpler than using a Dictionary
+		string m_PreviousBrowserState;
 		uint m_SelectedTaskId;
 
-		bool m_BrowserStatePending; // true if we haven't yet restored the previous browser state
 		bool m_SetFocusPending; // true if we need to set focus to the browser when it's ready
 
 		// Data resource files -> Tasklist folder
@@ -85,11 +85,11 @@ namespace JSViewUIExtension
 
 			await m_WebView.EnsureCoreWebView2Async(null);
 
-			NotifyBrowser(PreferencesMsg, "prefs", m_AppPrefs);
+			SendBrowserMessage(SetPreferencesMsg, "prefs", m_AppPrefs);
 			m_WebView.CoreWebView2.Navigate(m_HtmlFile.Uri); // will have already been built in UpdateTasks
 		}
 
-		void NotifyBrowser(string msg, string valueKey = null, object value = null)
+		void SendBrowserMessage(string msg, string valueKey = null, object value = null)
 		{
 			var jMsg = new JObject { { "msg", msg } };
 
@@ -104,7 +104,7 @@ namespace JSViewUIExtension
 		public bool SelectTask(UInt32 taskId)
 		{
 			m_SelectedTaskId = taskId;
-			NotifyBrowser(SelectedTaskMsg, "id", taskId);
+			SendBrowserMessage(SetSelectedTaskMsg, "id", taskId);
 
 			// TODO
 
@@ -159,7 +159,7 @@ namespace JSViewUIExtension
 						if (htmlUpdated || (m_WebView.CoreWebView2.Source == AboutBlank))
 							m_WebView.CoreWebView2.Navigate(m_HtmlFile.Uri);
 						else
-							NotifyBrowser(RefreshMsg);
+							SendBrowserMessage(RefreshContentMsg);
 					}
 				}
 				break;
@@ -176,7 +176,7 @@ namespace JSViewUIExtension
 						var items = new JsTaskItems();
 						items.Populate(tasks, attribs);
 
-						NotifyBrowser(RefreshMsg, "tasks", items.ToJson());
+						SendBrowserMessage(RefreshContentMsg, "tasks", items.ToJson());
 
 						// And update data file so that subsequent
 						// 'in-page' refreshes work as expected
@@ -271,7 +271,7 @@ namespace JSViewUIExtension
             this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 
 			m_AppPrefs["BackColor"] = ColorTranslator.ToHtml(this.BackColor);
-			NotifyBrowser(PreferencesMsg, "prefs", m_AppPrefs);
+			SendBrowserMessage(SetPreferencesMsg, "prefs", m_AppPrefs);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -284,9 +284,13 @@ namespace JSViewUIExtension
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
-			prefs.WriteProfileString(key, "BrowserSessionState", m_BrowserState.ToString()
-																			   .Replace('\"', '\'')
-																			   .Replace("\r\n", ""));
+			var state = m_WebView.CallJsFunction<JObject>("GetSessionState()");
+
+			// Note: The preferences don't like embedded double-quotes 
+
+			prefs.WriteProfileString(key, "BrowserSessionState", state.ToString()
+																	  .Replace('\"', '\'')
+																	  .Replace("\r\n", ""));
 			// Note: m_JsDataFile is always updated
 			m_HtmlFile.Save(prefs, key);
 			m_JsCodeFile.Save(prefs, key);
@@ -299,13 +303,8 @@ namespace JSViewUIExtension
             if (!appOnly)
             {
 				// private settings
-				var prevState = prefs.GetProfileString(key, "BrowserSessionState", "");
-
-				if (!string.IsNullOrEmpty(prevState))
-				{
-					m_BrowserStatePending = true;
-					m_BrowserState = JObject.Parse(prevState.Replace('\'', '\"'));
-				}
+				m_PreviousBrowserState = prefs.GetProfileString(key, "BrowserSessionState", "")
+											  .Replace('\'', '\"');
 
 				m_HtmlFile.Load(prefs, key);
 				m_JsCodeFile.Load(prefs, key);
@@ -322,7 +321,7 @@ namespace JSViewUIExtension
 			m_AppPrefs["ColorTaskBackground"] = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_AppPrefs["StrikethroughDone"] = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 
-			NotifyBrowser(PreferencesMsg, "prefs", m_AppPrefs);
+			SendBrowserMessage(SetPreferencesMsg, "prefs", m_AppPrefs);
 		}
 
 		public new Boolean Focused
@@ -351,15 +350,13 @@ namespace JSViewUIExtension
 
 		void OnBrowserNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
-			NotifyBrowser(PreferencesMsg, "prefs", m_AppPrefs);
-			NotifyBrowser(SelectedTaskMsg, "id", m_SelectedTaskId);
+			SendBrowserMessage(SetPreferencesMsg, "prefs", m_AppPrefs);
+			SendBrowserMessage(SetSelectedTaskMsg, "id", m_SelectedTaskId);
 
-			if (m_BrowserStatePending)
+			if (!string.IsNullOrEmpty(m_PreviousBrowserState))
 			{
-				Debug.Assert(m_BrowserState != null);
-
-				NotifyBrowser(SessionStateMsg, "state", m_BrowserState);
-				m_BrowserStatePending = false;
+				SendBrowserMessage(RestoreSessionStateMsg, "state", m_PreviousBrowserState);
+				m_PreviousBrowserState = String.Empty;
 			}
 
 			if (m_SetFocusPending)
@@ -378,7 +375,7 @@ namespace JSViewUIExtension
 		{
 			var msg = JObject.Parse(e.TryGetWebMessageAsString());
 
-			if (msg["msg"].ToString() == SelectedTaskMsg)
+			if (msg["msg"].ToString() == SetSelectedTaskMsg)
 			{
 				uint taskId;
 
@@ -389,11 +386,6 @@ namespace JSViewUIExtension
 					else
 						SelectTask(m_SelectedTaskId);
 				}
-			}
-			else if (msg["msg"].ToString() == SessionStateMsg)
-			{
-				if (!m_BrowserStatePending)
-					m_BrowserState = JObject.Parse(msg["state"].ToString());
 			}
 			else
 			{
