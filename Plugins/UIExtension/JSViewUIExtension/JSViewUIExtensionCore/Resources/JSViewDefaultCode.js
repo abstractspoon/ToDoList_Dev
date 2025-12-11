@@ -134,12 +134,12 @@ function GetPreference(pref, defValue)
 
 function GetStorage(key)
 {
-	return sessionStorage.getItem(key);
+    return sessionStorage.getItem(key);
 }
 
 function SetStorage(key, value)
 {
-	sessionStorage.setItem(key, value);
+    sessionStorage.setItem(key, value);
 }
 
 function OnChangeView(view) 
@@ -871,7 +871,7 @@ function SelectFirstAdjacentTreeMapTask(keyCode, ensureVisible = true)
         
         let offset = {};
         
-        if (IsCellAdjacentTo(cell, selCell, keyCode, offset))
+        if (IsTreeMapCellAdjacentTo(cell, selCell, keyCode, offset))
         {            
             if (offset.value < closestoffset)
             {
@@ -909,7 +909,7 @@ function SelectLastAdjacentTreeMapTask(keyCode)
     return selChange;
 }
 
-function IsCellAdjacentTo(cell, otherCell, keyCode, /*out*/ centreOffset)
+function IsTreeMapCellAdjacentTo(cell, otherCell, keyCode, /*out*/ centreOffset)
 {
     let rect = new TreeMapCellRect(cell);
     let otherRect = new TreeMapCellRect(otherCell);
