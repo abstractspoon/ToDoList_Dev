@@ -23,8 +23,212 @@ const PreferencesKey  = "Preferences";
 const TreeMapDepthKey = "TreeMapDepth";
 
 // View IDs
-const DashboardViewId = "dashboard_id";
+const _DashboardViewId = "dashboard_id";
 const TreeMapViewId   = "treemap_id";
+
+// Dashboard class //////////////////////////////////////////////////////////////////////////
+
+class Dashboard
+{
+    // All data is private
+    #dashboardDataTable = null;
+    #dashboardRow2TaskMapping = null;
+    #dashboardTask2RowMapping = null;
+
+    #dashboardChart11 = null;
+    #dashboardChart12 = null;
+    #dashboardChart21 = null;
+    #dashboardChart22 = null;
+
+    // -----------------------------------------
+
+    /* void */ Initialise() 
+    {
+        if (this.#dashboardChart11 == null)
+        {
+            this.#dashboardChart11 = new google.visualization.BarChart    (document.getElementById('dashboard_chart11'));
+            this.#dashboardChart12 = new google.visualization.ScatterChart(document.getElementById('dashboard_chart12'));
+            this.#dashboardChart21 = new google.visualization.AreaChart   (document.getElementById('dashboard_chart21'));
+            this.#dashboardChart22 = new google.visualization.ColumnChart (document.getElementById('dashboard_chart22'));
+            
+            // Listerners are typically 'static' in nature so we need 
+            // some trickery to be able to use a instance method
+            this.On11SelectHandler = this.On11Select.bind(this);
+            google.visualization.events.addListener(this.#dashboardChart11, 'select', this.On11SelectHandler);
+
+            this.On12SelectHandler = this.On12Select.bind(this);
+            google.visualization.events.addListener(this.#dashboardChart12, 'select', this.On12SelectHandler);
+
+            this.On21SelectHandler = this.On21Select.bind(this);
+            google.visualization.events.addListener(this.#dashboardChart21, 'select', this.On21SelectHandler);
+
+            this.On22SelectHandler = this.On22Select.bind(this);
+            google.visualization.events.addListener(this.#dashboardChart22, 'select', this.On22SelectHandler);
+            
+            this.#Populate()
+        }
+    }
+
+    /* void */ #Populate()
+    {
+        this.#dashboardDataTable = new google.visualization.DataTable();
+        
+        this.#dashboardRow2TaskMapping = new Map();
+        this.#dashboardTask2RowMapping = new Map();
+
+        this.#dashboardDataTable.addColumn('string', 'Task');
+        this.#dashboardDataTable.addColumn('number', 'Priority');
+        this.#dashboardDataTable.addColumn('number', 'Risk');
+
+        for (let i = 0; i < tasks.length; i++) 
+        {
+            let id = tasks[i]['Task ID'];
+            let title = tasks[i].Title + ' (' + id + ')';
+            
+            this.#dashboardDataTable.addRow([title, tasks[i].Priority, tasks[i].Risk]);
+            this.#dashboardRow2TaskMapping[i] = id;
+            this.#dashboardTask2RowMapping[id] = i;
+        }
+    }
+
+    /* bool */ UpdateSelectedTasks(selTasks)
+    {
+        let changed = false;
+        
+        // Only we've been already populated
+        if (this.#dashboardTask2RowMapping)
+        {
+            for (let i = 0; i < selTasks.length; i++) 
+            {
+                let selTask = selTasks[i];
+                let id = selTask['Task ID'].toString();
+                let row = this.#dashboardTask2RowMapping[id];
+                
+                if (row != null)
+                {
+                    changed |= CheckUpdateDataValue(dashboardDataTable, row, 0, (selTask.Title + ' (' + id + ')'));
+                    changed |= CheckUpdateDataValue(dashboardDataTable, row, 1, selTask.Priority);
+                    changed |= CheckUpdateDataValue(dashboardDataTable, row, 2, selTask.Risk);
+                    
+        //            if (selTask.SubTasks != null)
+        //                UpdateSelectedTasks(selTask.SubTasks); // Recursive call
+                }
+            }
+        }
+        
+        return changed;
+    }
+
+    /* void */ RestoreSessionState(state)
+    {
+        // Nothing to do
+    }
+
+    /* string */ GetSessionState()
+    {
+        return {};
+    }
+
+    /* void */ On11Select(e)
+    {
+        this.OnSelectTask(this.#dashboardChart11);
+    }
+
+    /* void */ On12Select(e)
+    {
+        this.OnSelectTask(this.#dashboardChart12);
+    }
+
+    /* void */ On21Select(e)
+    {
+        this.OnSelectTask(this.#dashboardChart21);
+    }
+
+    /* void */ On22Select(e)
+    {
+        this.OnSelectTask(this.#dashboardChart22);
+    }
+
+    /* void */ OnSelectTask(chart)
+    {
+        let id = GetSelectedIdFromChart(chart, this.#dashboardRow2TaskMapping);
+        
+        if (IsSelectableTask(id))
+            SelectTask(id, true);
+    }
+
+    /* void */ OnKeyDown(unused)
+    {
+        // Do nothing
+    }
+
+    /* void */ OnFocusChanged(hasFocus)
+    {
+        // Do nothing
+    }
+
+    /* void */ Refresh()
+    {
+        this.Initialise();
+        this.Draw();
+        
+        RestoreSelectedTask();
+    }
+
+    /* void */ OnResize()
+    {
+        this.Draw();
+    }
+
+    // Never call this directly; Only via SelectTask()
+    /* void */ SelectTask(id, prevId)
+    {
+        SetSelectedChartRow(id, this.#dashboardChart11, this.#dashboardTask2RowMapping);
+        SetSelectedChartRow(id, this.#dashboardChart12, this.#dashboardTask2RowMapping);
+        SetSelectedChartRow(id, this.#dashboardChart21, this.#dashboardTask2RowMapping);
+        SetSelectedChartRow(id, this.#dashboardChart22, this.#dashboardTask2RowMapping);
+    }
+
+    /* DOMRect */ GetSelectedTaskLabelRect()
+    {
+        return null;
+    }
+                  
+    /* void */ Draw()
+    {
+        this.DrawChart(this.#dashboardChart11, 'Red', 'Blue');
+        this.DrawChart(this.#dashboardChart12, 'Green', 'Orange');
+        this.DrawChart(this.#dashboardChart21, 'Yellow', 'Coral');
+        this.DrawChart(this.#dashboardChart22, 'Purple', 'Turquoise');
+    }
+
+    /* void */ DrawChart(chart, color1, color2) 
+    {
+        let options = 
+        {
+            colors: [ color1.toHexColor(), color2.toHexColor() ],
+            curveType: 'function',
+            legend: { position: 'bottom' },
+            title: 'Priority & Risk',
+            
+            animation: 
+            {
+                'startup': true, 
+                duration: 1000, 
+                easing: 'out'
+            },  
+        };
+
+        chart.draw(this.#dashboardDataTable, options);
+    }
+
+} // class Dashboard
+
+// Global instances -----------------------------------------------------------------------
+
+let dashboard = new Dashboard();
+
+
 
 // External functions called by the app ---------------------------------------------------
 function GetSelectedTaskLabelRect()
@@ -34,8 +238,8 @@ function GetSelectedTaskLabelRect()
 
     switch (view)
     {
-        case DashboardViewId:
-            rect = GetSelectedDashboardTaskLabelRect();
+        case _DashboardViewId:
+            rect = dashboard.GetSelectedTaskLabelRect();
             break;
               
         case TreeMapViewId:
@@ -53,7 +257,7 @@ function GetSelectedTaskLabelRect()
 function GetSessionState()
 {
     return { [SelectedViewKey]: GetSelectedView(), 
-             [DashboardViewId]: GetDashboardSessionState(),
+             [_DashboardViewId]: dashboard.GetSessionState(),
              [TreeMapViewId]  : GetTreeMapSessionState() };
 }
 
@@ -146,7 +350,7 @@ function OnChangeView(view)
 {
     SetStorage(SelectedViewKey, view);
     
-    ShowHideView(DashboardViewId, view);
+    ShowHideView(_DashboardViewId, view);
     ShowHideView(TreeMapViewId, view);
     // New views here
     
@@ -177,7 +381,7 @@ function GetSelectedView()
     let view = GetStorage(SelectedViewKey);
     
     if (view == null)
-        view = DashboardViewId;
+        view = _DashboardViewId;
     
     return view;
 }
@@ -189,8 +393,8 @@ function RefreshSelectedView()
 
     switch (view)
     {
-        case DashboardViewId:
-            RefreshDashboard();
+        case _DashboardViewId:
+            dashboard.Refresh();
             break;
               
         case TreeMapViewId:
@@ -205,8 +409,8 @@ function OnResize(event)
 
     switch (view)
     {
-        case DashboardViewId:
-            OnResizeDashboard();
+        case _DashboardViewId:
+            dashboard.OnResize();
             break;
               
         case TreeMapViewId:
@@ -221,8 +425,8 @@ function OnKeyDown(event)
 
     switch (view)
     {
-        case DashboardViewId:
-            OnKeyDownDashboard(event);
+        case _DashboardViewId:
+            dashboard.OnKeyDown(event);
             break;
               
         case TreeMapViewId:
@@ -238,8 +442,8 @@ function OnFocusChanged(event)
 
     switch (view)
     {
-        case DashboardViewId:
-            OnFocusChangedDashboard(hasFocus);
+        case _DashboardViewId:
+            dashboard.OnFocusChanged(hasFocus);
             break;
               
         case TreeMapViewId:
@@ -252,20 +456,20 @@ function MergeSelectedTaskAttributes(selTasks)
 {
     switch (GetSelectedView())
     {
-        case DashboardViewId:
+        case _DashboardViewId:
             {
                 // Keep all views up to date but we only redraw if the dashboard changed
                 UpdateTreeMapSelectedTasks(selTasks);
                 
-                if (UpdateDashboardSelectedTasks(selTasks))
-                    DrawDashboard();
+                if (dashboard.UpdateSelectedTasks(selTasks))
+                    dashboard.Draw();
             }
             break;
               
         case TreeMapViewId:
             {
                 // Keep all views up to date but we only redraw if the treemap changed
-                UpdateDashboardSelectedTasks(selTasks);
+                UpdateSelectedTasks(selTasks);
                 
                 if (UpdateTreeMapSelectedTasks(selTasks))
                     DrawTreeMap();
@@ -286,7 +490,7 @@ function RestoreSelectedTask()
 
 function RestoreSessionState(state)
 {
-    RestoreDashboardSessionState(state[DashboardViewId]);
+    dashboard.RestoreSessionState(state[_DashboardViewId]);
     RestoreTreeMapSessionState(state[TreeMapViewId]);
 
     let viewState = state[SelectedViewKey];
@@ -336,9 +540,9 @@ function SelectTask(id, fromChart)
 
     switch (GetSelectedView())
     {
-        case DashboardViewId:
+        case _DashboardViewId:
         case '':
-            SelectDashboardTask(id, prevId);
+            dashboard.SelectTask(id, prevId);
             break;
               
         case TreeMapViewId:
@@ -387,190 +591,6 @@ function CheckUpdateDataValue(dataTable, row, col, newValue)
     
     dataTable.setValue(row, col, newValue);
     return true;
-}
-
-// Dashboard data and functions---------------------------------------------------------------
-
-var dashboardDataTable = null;
-var dashboardRow2TaskMapping = null;
-var dashboardTask2RowMapping = null;
-
-var dashboardChart11 = null;
-var dashboardChart12 = null;
-var dashboardChart21 = null;
-var dashboardChart22 = null;
-
-// -----------------------------------------
-
-function InitDashboard()
-{
-    if (dashboardChart11 == null)
-    {
-        dashboardChart11 = new google.visualization.BarChart    (document.getElementById('dashboard_chart11'));
-        dashboardChart12 = new google.visualization.ScatterChart(document.getElementById('dashboard_chart12'));
-        dashboardChart21 = new google.visualization.AreaChart   (document.getElementById('dashboard_chart21'));
-        dashboardChart22 = new google.visualization.ColumnChart (document.getElementById('dashboard_chart22'));
-        
-        google.visualization.events.addListener(dashboardChart11, 'select', OnDashboard11Select);
-        google.visualization.events.addListener(dashboardChart12, 'select', OnDashboard12Select);
-        google.visualization.events.addListener(dashboardChart21, 'select', OnDashboard21Select);
-        google.visualization.events.addListener(dashboardChart22, 'select', OnDashboard22Select);
-        
-        PopulateDashboard()
-    }
-}
-
-function PopulateDashboard()
-{
-    dashboardDataTable = new google.visualization.DataTable();
-    
-    dashboardRow2TaskMapping = new Map();
-    dashboardTask2RowMapping = new Map();
-
-    dashboardDataTable.addColumn('string', 'Task');
-    dashboardDataTable.addColumn('number', 'Priority');
-    dashboardDataTable.addColumn('number', 'Risk');
-
-    for (let i = 0; i < tasks.length; i++) 
-    {
-        let id = tasks[i]['Task ID'];
-        let title = tasks[i].Title + ' (' + id + ')';
-        
-        dashboardDataTable.addRow([title, tasks[i].Priority, tasks[i].Risk]);
-        dashboardRow2TaskMapping[i] = id;
-        dashboardTask2RowMapping[id] = i;
-    }
-}
-
-function UpdateDashboardSelectedTasks(selTasks)
-{
-    let changed = false;
-    
-    // Only we've been already populated
-    if (dashboardTask2RowMapping)
-    {
-        for (let i = 0; i < selTasks.length; i++) 
-        {
-            let selTask = selTasks[i];
-            let id = selTask['Task ID'].toString();
-            let row = dashboardTask2RowMapping[id];
-            
-            if (row != null)
-            {
-                changed |= CheckUpdateDataValue(dashboardDataTable, row, 0, (selTask.Title + ' (' + id + ')'));
-                changed |= CheckUpdateDataValue(dashboardDataTable, row, 1, selTask.Priority);
-                changed |= CheckUpdateDataValue(dashboardDataTable, row, 2, selTask.Risk);
-                
-    //            if (selTask.SubTasks != null)
-    //                UpdateDashboardSelectedTasks(selTask.SubTasks); // Recursive call
-            }
-        }
-    }
-    
-    return changed;
-}
-
-function RestoreDashboardSessionState(state)
-{
-    // Nothing to do
-}
-
-function GetDashboardSessionState()
-{
-    return {};
-}
-
-function OnDashboard11Select(e)
-{
-    OnSelectDashboardTask(dashboardChart11);
-}
-
-function OnDashboard12Select(e)
-{
-    OnSelectDashboardTask(dashboardChart12);
-}
-
-function OnDashboard21Select(e)
-{
-    OnSelectDashboardTask(dashboardChart21);
-}
-
-function OnDashboard22Select(e)
-{
-    OnSelectDashboardTask(dashboardChart22);
-}
-
-function OnSelectDashboardTask(chart)
-{
-    let id = GetSelectedIdFromChart(chart, dashboardRow2TaskMapping);
-    
-    if (IsSelectableTask(id))
-        SelectTask(id, true);
-}
-
-function OnKeyDownDashboard(unused)
-{
-    // Do nothing
-}
-
-function OnFocusChangedDashboard(hasFocus)
-{
-    // Do nothing
-}
-
-function RefreshDashboard()
-{
-    InitDashboard();
-    DrawDashboard();
-    
-    RestoreSelectedTask();
-}
-
-function OnResizeDashboard()
-{
-    DrawDashboard();
-}
-
-// Never call this directly; Only via SelectTask()
-function SelectDashboardTask(id, prevId)
-{
-    SetSelectedChartRow(id, dashboardChart11, dashboardTask2RowMapping);
-    SetSelectedChartRow(id, dashboardChart12, dashboardTask2RowMapping);
-    SetSelectedChartRow(id, dashboardChart21, dashboardTask2RowMapping);
-    SetSelectedChartRow(id, dashboardChart22, dashboardTask2RowMapping);
-}
-
-function GetSelectedDashboardTaskLabelRect()
-{
-    return null;
-}
-              
-function DrawDashboard()
-{
-    DrawDashboardChart(dashboardChart11, 'Red', 'Blue');
-    DrawDashboardChart(dashboardChart12, 'Green', 'Orange');
-    DrawDashboardChart(dashboardChart21, 'Yellow', 'Coral');
-    DrawDashboardChart(dashboardChart22, 'Purple', 'Turquoise');
-}
-
-function DrawDashboardChart(chart, color1, color2) 
-{
-    let options = 
-    {
-        colors: [ color1.toHexColor(), color2.toHexColor() ],
-        curveType: 'function',
-        legend: { position: 'bottom' },
-        title: 'Priority & Risk',
-        
-        animation: 
-        {
-            'startup': true, 
-            duration: 1000, 
-            easing: 'out'
-        },  
-    };
-
-    chart.draw(dashboardDataTable, options);
 }
 
 // TreeMap data and functions---------------------------------------------------------------
