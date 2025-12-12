@@ -20,10 +20,6 @@ const RestoreSessionStateMsg = "RestoreSessionState";
 const SelectedViewKey = "SelectedView";
 const SelectedTaskKey = "SelectedTask";
 const PreferencesKey  = "Preferences";
-const TreeMapDepthKey = "TreeMapDepth";
-
-// View IDs
-const TreeMapViewId   = "treemap_id";
 
 // DashboardView class //////////////////////////////////////////////////////////////////////////
 
@@ -50,7 +46,8 @@ class DashboardView
         // Do nothing for cost-less instantiation
     }
 
-    /* void */ #Initialise() 
+    /* void */
+    #Initialise() 
     {
         if (this.#dashboardChart11 == null)
         {
@@ -68,7 +65,8 @@ class DashboardView
         }
     }
 
-    /* void */ #Populate()
+    /* void */
+    #Populate()
     {
         this.#dashboardDataTable = new google.visualization.DataTable();
         
@@ -90,7 +88,8 @@ class DashboardView
         }
     }
 
-    /* bool */ UpdateSelectedTasks(selTasks, redraw)
+    /* bool */ 
+    UpdateSelectedTasks(selTasks, redraw)
     {
         let changed = false;
         
@@ -121,7 +120,8 @@ class DashboardView
         return changed;
     }
 
-    /* void */ RestoreSessionState(state)
+    /* void */
+    RestoreSessionState(state)
     {
         // Nothing to do
     }
@@ -131,27 +131,32 @@ class DashboardView
         return {};
     }
 
-    /* void */ #On11Select(e)
+    /* void */
+    #On11Select(e)
     {
         this.#OnSelectTask(this.#dashboardChart11);
     }
 
-    /* void */ #On12Select(e)
+    /* void */
+    #On12Select(e)
     {
         this.#OnSelectTask(this.#dashboardChart12);
     }
 
-    /* void */ #On21Select(e)
+    /* void */
+    #On21Select(e)
     {
         this.#OnSelectTask(this.#dashboardChart21);
     }
 
-    /* void */ #On22Select(e)
+    /* void */
+    #On22Select(e)
     {
         this.#OnSelectTask(this.#dashboardChart22);
     }
 
-    /* void */ #OnSelectTask(chart)
+    /* void */
+    #OnSelectTask(chart)
     {
         let id = GetSelectedIdFromChart(chart, this.#dashboardRow2TaskMapping);
         
@@ -159,17 +164,20 @@ class DashboardView
             SelectTask(id, true);
     }
 
-    /* void */ OnKeyDown(unused)
+    /* void */
+    OnKeyDown(unused)
     {
         // Do nothing
     }
 
-    /* void */ OnFocusChanged(hasFocus)
+    /* void */
+    OnFocusChanged(hasFocus)
     {
         // Do nothing
     }
 
-    /* void */ Refresh()
+    /* void */
+    Refresh()
     {
         this.#Initialise();
         this.#Draw();
@@ -177,13 +185,15 @@ class DashboardView
         RestoreSelectedTask();
     }
 
-    /* void */ OnResize()
+    /* void */
+    OnResize()
     {
         this.#Draw();
     }
 
     // Never call this directly; Only via SelectTask()
-    /* void */ SelectTask(id, prevId)
+    /* void */
+    SelectTask(id, prevId)
     {
         SetSelectedChartRow(id, this.#dashboardChart11, this.#dashboardTask2RowMapping);
         SetSelectedChartRow(id, this.#dashboardChart12, this.#dashboardTask2RowMapping);
@@ -191,12 +201,14 @@ class DashboardView
         SetSelectedChartRow(id, this.#dashboardChart22, this.#dashboardTask2RowMapping);
     }
 
-    /* DOMRect */ GetSelectedTaskLabelRect()
+    /* DOMRect */ 
+    GetSelectedTaskLabelRect()
     {
         return null;
     }
                   
-    /* void */ #Draw()
+    /* void */
+    #Draw()
     {
         this.#DrawChart(this.#dashboardChart11, 'Red', 'Blue');
         this.#DrawChart(this.#dashboardChart12, 'Green', 'Orange');
@@ -204,7 +216,8 @@ class DashboardView
         this.#DrawChart(this.#dashboardChart22, 'Purple', 'Turquoise');
     }
 
-    /* void */ #DrawChart(chart, color1, color2) 
+    /* void */
+    #DrawChart(chart, color1, color2) 
     {
         let options = 
         {
@@ -271,7 +284,8 @@ class TreeMapView
         // Do nothing for cost-less instantiation
     }
 
-    /* void */ #Initialise()
+    /* void */
+    #Initialise()
     {
         if (this.#chart == null)
         {
@@ -287,7 +301,8 @@ class TreeMapView
         }
     }
 
-    /* void */ #Populate()
+    /* void */
+    #Populate()
     {
         this.#dataTable = new google.visualization.DataTable();
 
@@ -316,7 +331,8 @@ class TreeMapView
         }
     }
 
-    /* void */ #AddTask(task, parentId)
+    /* void */
+    #AddTask(task, parentId)
     {
         let id = task['Task ID'].toString();
         
@@ -335,7 +351,8 @@ class TreeMapView
         }
     }
 
-    /* void */ #AddRow(id, parentId, done, color, title)
+    /* void */
+    #AddRow(id, parentId, done, color, title)
     {
         this.#dataTable.addRow(
         [
@@ -353,7 +370,8 @@ class TreeMapView
         this.#task2RowMapping[id] = row;
     }
 
-    /* void */ UpdateSelectedTasks(selTasks)
+    /* void */
+    UpdateSelectedTasks(selTasks)
     {
         let changed = false;
             
@@ -380,7 +398,8 @@ class TreeMapView
         return changed;
     }
 
-    /* void */ #Draw() 
+    /* void */
+    #Draw() 
     {
         const HeaderHeight = 30;
 
@@ -408,7 +427,8 @@ class TreeMapView
         this.#chart.draw(this.#dataTable, options);
     }
 
-    /* void */ Refresh()
+    /* void */
+    Refresh()
     {
         // Refreshing will return the map to the top level
         // so we'll need to drill back down to where we were
@@ -421,7 +441,8 @@ class TreeMapView
         this.#DrilldownTo(headerId, true);
     }
 
-    /* void */ OnResize()
+    /* void */
+    OnResize()
     {
         // Drawing will return the map to the top level
         // so we'll need to drill back down to where we were
@@ -431,7 +452,8 @@ class TreeMapView
         this.#DrilldownTo(headerId, false);
     }
 
-    /* void */ #DrilldownTo(id, ensureVisible = true)
+    /* void */
+    #DrilldownTo(id, ensureVisible = true)
     {
         if (id)
         {
@@ -443,12 +465,14 @@ class TreeMapView
         }
     }
 
-    /* void */ OnFocusChanged(unused)
+    /* void */
+    OnFocusChanged(unused)
     {
         this.#RefreshTextAndColors(GetSelectedTaskId());
     }
 
-    /* void */ OnKeyDown(event)
+    /* void */
+    OnKeyDown(event)
     {
         switch (event.code)
         {
@@ -507,7 +531,8 @@ class TreeMapView
         }
     }
 
-    /* void */ #SelectFirstAdjacentTask(keyCode, ensureVisible = true)
+    /* void */
+    #SelectFirstAdjacentTask(keyCode, ensureVisible = true)
     {
         let selId = GetSelectedTaskId();
         
@@ -554,7 +579,8 @@ class TreeMapView
         return false;
     }
 
-    /* void */ #SelectLastAdjacentTask(keyCode)
+    /* void */
+    #SelectLastAdjacentTask(keyCode)
     {
         let selChange = false;
         
@@ -567,7 +593,8 @@ class TreeMapView
         return selChange;
     }
 
-    /* void */ #IsCellAdjacentTo(cell, otherCell, keyCode, /*out*/ centreOffset)
+    /* void */
+    #IsCellAdjacentTo(cell, otherCell, keyCode, /*out*/ centreOffset)
     {
         let rect = new TreeMapCellRect(cell);
         let otherRect = new TreeMapCellRect(otherCell);
@@ -610,12 +637,14 @@ class TreeMapView
         return false;
     }
 
-    /* void */ #OnReady()
+    /* void */
+    #OnReady()
     {
         this.#RefreshTextAndColors();
     }
 
-    /* void */ RestoreSessionState(state)
+    /* void */
+    RestoreSessionState(state)
     {
         if (state)
         {
@@ -626,12 +655,14 @@ class TreeMapView
         }
     }
 
-    /* string */ GetSessionState()
+    /* string */ 
+    GetSessionState()
     {
         return { [TreeMapDepthKey]: this.GetSubtaskDepth() };
     }
 
-    /* int */ GetSubtaskDepth()
+    /* int */ 
+    GetSubtaskDepth()
     {
         let depth = GetStorage(TreeMapDepthKey);
         
@@ -641,7 +672,8 @@ class TreeMapView
         return Number(depth);
     }
 
-    /* void */ SetSubtaskDepth(depth)
+    /* void */
+    SetSubtaskDepth(depth)
     {
         if (depth != this.GetSubtaskDepth())
         {
@@ -650,14 +682,16 @@ class TreeMapView
         }
     }
 
-    /* string */ #OnGetTooltip(row, size, value)
+    /* string */ 
+    #OnGetTooltip(row, size, value)
     {
         return '<div class="tooltip">' + 
                this.#dataTable.getValue(row, 5) + 
                '</div>';
     }
 
-    /* void */ #OnDrilldown()
+    /* void */
+    #OnDrilldown()
     {
         // This is effectively a double-click handler
         // so select the task just clicked so that it
@@ -677,7 +711,8 @@ class TreeMapView
         this.#RefreshTextAndColors();
     }
 
-    /* void */ #OnRollup()
+    /* void */
+    #OnRollup()
     {
         // If the currently selected item is no longer visible
         // move the selection to its parent
@@ -699,8 +734,8 @@ class TreeMapView
     }
 
     // We never call this directly; Only via SelectTask()
-    // after the selected task id has been saved 
-    /* void */ SelectTask(id, prevId = null)
+    /* void */
+    SelectTask(id, prevId = null)
     {
         // Navigate to the task if it's not currently visible
         if (!this.#IsCellVisible(id))
@@ -720,7 +755,8 @@ class TreeMapView
         this.#EnsureSelectionVisible();
     }
 
-    /* DOMRect */ GetSelectedTaskLabelRect()
+    /* DOMRect */ 
+    GetSelectedTaskLabelRect()
     {
         this.#EnsureSelectionVisible(true);
         
@@ -730,7 +766,8 @@ class TreeMapView
         return this.#GetCellLabelRect(cell);
     }
 
-    /* DOMRect */ #GetCellLabelRect(cell)
+    /* DOMRect */ 
+    #GetCellLabelRect(cell)
     {
         if (cell)
         {
@@ -764,7 +801,8 @@ class TreeMapView
         return null;
     }
 
-    /* void */ #EnsureSelectionVisible(labelOnly = false)
+    /* void */
+    #EnsureSelectionVisible(labelOnly = false)
     {
         let selId = GetSelectedTaskId();
         let cell = this.#GetCell(selId);
@@ -800,12 +838,14 @@ class TreeMapView
         }
     }
 
-    /* void */ #IsCellVisible(id)
+    /* void */
+    #IsCellVisible(id)
     {
         return (this.#GetCell(id) != null);
     }
 
-    /* void */ #GetCellId(cell)
+    /* void */
+    #GetCellId(cell)
     {
         if ($(cell).attr('style') == null)
             return '-1';
@@ -818,7 +858,8 @@ class TreeMapView
         return id;
     }
 
-    /* void */ #GetCell(id)
+    /* void */
+    #GetCell(id)
     {
         let treechart = $("#treemap_id");
         let svg = treechart.find("svg");
@@ -833,7 +874,8 @@ class TreeMapView
         return null;
     }
 
-    /* void */ #GetFullPath(id)
+    /* void */
+    #GetFullPath(id)
     {
         let idPath = this.#GetFullIdPath(id);
         let fullPath = new Array();
@@ -849,7 +891,8 @@ class TreeMapView
         return fullPath.join(" \\ ");
     }
 
-    /* void */ #GetFullIdPath(id)
+    /* void */
+    #GetFullIdPath(id)
     {
         let idPath = [];
         
@@ -865,7 +908,8 @@ class TreeMapView
     }
 
     // Effectively the 'OnMouseClick' handler
-    /* void */ #OnHighlight(item)
+    /* void */
+    #OnHighlight(item)
     {
         let row = item["row"];
         let id = this.#row2TaskMapping[row];
@@ -881,7 +925,8 @@ class TreeMapView
         }
     }
 
-    /* void */ #OnUnhighlight(item)
+    /* void */
+    #OnUnhighlight(item)
     {
         // Even though we have specified 'enableHighlight: false'
         // Google still restores text and colours on 'mouse-leave'
@@ -891,7 +936,8 @@ class TreeMapView
         this.#RefreshTextAndColors(id);
     }
 
-    /* void */ #RefreshTextAndColors(specificId) 
+    /* void */
+    #RefreshTextAndColors(specificId) 
     {
         let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
         let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
@@ -1069,7 +1115,8 @@ class TreeMapView
         }    
     }
 
-    /* void */ #InitialiseCellIds()
+    /* void */
+    #InitialiseCellIds()
     {
         let treechart = $("#treemap_id");
         let svg = treechart.find("svg");
@@ -1113,7 +1160,8 @@ class TreeMapView
         return idCells;
     }
 
-    /* void */ #GetHeaderId() 
+    /* string */
+    #GetHeaderId() 
     {
         let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
         let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
@@ -1161,7 +1209,8 @@ class TreeMapView
         return '';
     }
 
-    /* void */ #GetTextColor(baseColor, selected, colorTaskBkgnd)
+    /* void */
+    #GetTextColor(baseColor, selected, colorTaskBkgnd)
     {
         if (baseColor == "")
             return 'Black'.toHexColor();
