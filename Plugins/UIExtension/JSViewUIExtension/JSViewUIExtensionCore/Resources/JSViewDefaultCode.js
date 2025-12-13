@@ -43,6 +43,9 @@ class ViewBase
     
     /* void */ 
     UpdateSelectedTasks(selTasks, allowRedraw) {}
+    
+    /* DOMRect */ 
+    GetSelectedTaskLabelRect() { return new DOMRect(); }
 
     // Public Message Handlers (For derived classes to override) --------------------
 
@@ -246,12 +249,6 @@ class DashboardView extends ViewBase
         this.SetSelectedChartRow(id, this.#dashboardChart12, this.#dashboardTask2RowMapping);
         this.SetSelectedChartRow(id, this.#dashboardChart21, this.#dashboardTask2RowMapping);
         this.SetSelectedChartRow(id, this.#dashboardChart22, this.#dashboardTask2RowMapping);
-    }
-
-    /* DOMRect */ 
-    GetSelectedTaskLabelRect()
-    {
-        return null;
     }
                   
     /* void */
