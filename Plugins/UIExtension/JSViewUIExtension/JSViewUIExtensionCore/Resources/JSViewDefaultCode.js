@@ -98,14 +98,15 @@ class ViewBase
 class DashboardView extends ViewBase
 {
     // All data is private
-    #dashboardDataTable = null;
-    #dashboardRow2TaskMapping = null;
-    #dashboardTask2RowMapping = null;
+    #dataTable = null;
+    
+    #row2TaskMapping = null;
+    #task2RowMapping = null;
 
-    #dashboardChart11 = null;
-    #dashboardChart12 = null;
-    #dashboardChart21 = null;
-    #dashboardChart22 = null;
+    #chart11 = null;
+    #chart12 = null;
+    #chart21 = null;
+    #chart22 = null;
 
     // -----------------------------------------
     
@@ -122,17 +123,17 @@ class DashboardView extends ViewBase
     /* void */
     #Initialise() 
     {
-        if (this.#dashboardChart11 == null)
+        if (this.#chart11 == null)
         {
-            this.#dashboardChart11 = new google.visualization.BarChart    (document.getElementById('dashboard_chart11'));
-            this.#dashboardChart12 = new google.visualization.ScatterChart(document.getElementById('dashboard_chart12'));
-            this.#dashboardChart21 = new google.visualization.AreaChart   (document.getElementById('dashboard_chart21'));
-            this.#dashboardChart22 = new google.visualization.ColumnChart (document.getElementById('dashboard_chart22'));
+            this.#chart11 = new google.visualization.BarChart    (document.getElementById('dashboard_chart11'));
+            this.#chart12 = new google.visualization.ScatterChart(document.getElementById('dashboard_chart12'));
+            this.#chart21 = new google.visualization.AreaChart   (document.getElementById('dashboard_chart21'));
+            this.#chart22 = new google.visualization.ColumnChart (document.getElementById('dashboard_chart22'));
             
-            google.visualization.events.addListener(this.#dashboardChart11, 'select', this.#On11Select.bind(this));
-            google.visualization.events.addListener(this.#dashboardChart12, 'select', this.#On12Select.bind(this));
-            google.visualization.events.addListener(this.#dashboardChart21, 'select', this.#On21Select.bind(this));
-            google.visualization.events.addListener(this.#dashboardChart22, 'select', this.#On22Select.bind(this));
+            google.visualization.events.addListener(this.#chart11, 'select', this.#On11Select.bind(this));
+            google.visualization.events.addListener(this.#chart12, 'select', this.#On12Select.bind(this));
+            google.visualization.events.addListener(this.#chart21, 'select', this.#On21Select.bind(this));
+            google.visualization.events.addListener(this.#chart22, 'select', this.#On22Select.bind(this));
             
             this.#Populate()
         }
@@ -141,45 +142,45 @@ class DashboardView extends ViewBase
     /* void */
     #Populate()
     {
-        this.#dashboardDataTable = new google.visualization.DataTable();
+        this.#dataTable = new google.visualization.DataTable();
         
-        this.#dashboardRow2TaskMapping = new Map();
-        this.#dashboardTask2RowMapping = new Map();
+        this.#row2TaskMapping = new Map();
+        this.#task2RowMapping = new Map();
 
-        this.#dashboardDataTable.addColumn('string', 'Task');
-        this.#dashboardDataTable.addColumn('number', 'Priority');
-        this.#dashboardDataTable.addColumn('number', 'Risk');
+        this.#dataTable.addColumn('string', 'Task');
+        this.#dataTable.addColumn('number', 'Priority');
+        this.#dataTable.addColumn('number', 'Risk');
 
         for (let i = 0; i < tasks.length; i++) 
         {
             let id = tasks[i]['Task ID'];
             let title = tasks[i].Title + ' (' + id + ')';
             
-            this.#dashboardDataTable.addRow([title, tasks[i].Priority, tasks[i].Risk]);
-            this.#dashboardRow2TaskMapping[i] = id;
-            this.#dashboardTask2RowMapping[id] = i;
+            this.#dataTable.addRow([title, tasks[i].Priority, tasks[i].Risk]);
+            this.#row2TaskMapping[i] = id;
+            this.#task2RowMapping[id] = i;
         }
     }
 
-    /* bool */ 
+    /* void */ 
     UpdateSelectedTasks(selTasks, allowRedraw)
     {
-        let changed = false;
-        
         // Only we've been already populated
-        if (this.#dashboardTask2RowMapping)
+        if (this.#task2RowMapping)
         {
+            let changed = false;
+            
             for (let i = 0; i < selTasks.length; i++) 
             {
                 let selTask = selTasks[i];
                 let id = selTask['Task ID'].toString();
-                let row = this.#dashboardTask2RowMapping[id];
+                let row = this.#task2RowMapping[id];
                 
                 if (row != null)
                 {
-                    changed |= this.CheckUpdateDataValue(dashboardDataTable, row, 0, (selTask.Title + ' (' + id + ')'));
-                    changed |= this.CheckUpdateDataValue(dashboardDataTable, row, 1, selTask.Priority);
-                    changed |= this.CheckUpdateDataValue(dashboardDataTable, row, 2, selTask.Risk);
+                    changed |= this.CheckUpdateDataValue(dataTable, row, 0, (selTask.Title + ' (' + id + ')'));
+                    changed |= this.CheckUpdateDataValue(dataTable, row, 1, selTask.Priority);
+                    changed |= this.CheckUpdateDataValue(dataTable, row, 2, selTask.Risk);
                     
         //            if (selTask.SubTasks != null)
         //                UpdateSelectedTasks(selTask.SubTasks); // Recursive call
@@ -189,38 +190,36 @@ class DashboardView extends ViewBase
             if (changed && allowRedraw)
                 this.#Draw();
         }
-        
-        return changed;
     }
 
     /* void */
     #On11Select(e)
     {
-        this.#OnSelectTask(this.#dashboardChart11);
+        this.#OnSelectTask(this.#chart11);
     }
 
     /* void */
     #On12Select(e)
     {
-        this.#OnSelectTask(this.#dashboardChart12);
+        this.#OnSelectTask(this.#chart12);
     }
 
     /* void */
     #On21Select(e)
     {
-        this.#OnSelectTask(this.#dashboardChart21);
+        this.#OnSelectTask(this.#chart21);
     }
 
     /* void */
     #On22Select(e)
     {
-        this.#OnSelectTask(this.#dashboardChart22);
+        this.#OnSelectTask(this.#chart22);
     }
 
     /* void */
     #OnSelectTask(chart)
     {
-        let id = this.GetSelectedIdFromChart(chart, this.#dashboardRow2TaskMapping);
+        let id = this.GetSelectedIdFromChart(chart, this.#row2TaskMapping);
         
         if (Utils.IsSelectableTask(id))
             SelectTask(id, true);
@@ -245,19 +244,19 @@ class DashboardView extends ViewBase
     /* void */
     SelectTask(id, prevId)
     {
-        this.SetSelectedChartRow(id, this.#dashboardChart11, this.#dashboardTask2RowMapping);
-        this.SetSelectedChartRow(id, this.#dashboardChart12, this.#dashboardTask2RowMapping);
-        this.SetSelectedChartRow(id, this.#dashboardChart21, this.#dashboardTask2RowMapping);
-        this.SetSelectedChartRow(id, this.#dashboardChart22, this.#dashboardTask2RowMapping);
+        this.SetSelectedChartRow(id, this.#chart11, this.#task2RowMapping);
+        this.SetSelectedChartRow(id, this.#chart12, this.#task2RowMapping);
+        this.SetSelectedChartRow(id, this.#chart21, this.#task2RowMapping);
+        this.SetSelectedChartRow(id, this.#chart22, this.#task2RowMapping);
     }
                   
     /* void */
     #Draw()
     {
-        this.#DrawChart(this.#dashboardChart11, 'Red', 'Blue');
-        this.#DrawChart(this.#dashboardChart12, 'Green', 'Orange');
-        this.#DrawChart(this.#dashboardChart21, 'Yellow', 'Coral');
-        this.#DrawChart(this.#dashboardChart22, 'Purple', 'Turquoise');
+        this.#DrawChart(this.#chart11, 'Red', 'Blue');
+        this.#DrawChart(this.#chart12, 'Green', 'Orange');
+        this.#DrawChart(this.#chart21, 'Yellow', 'Coral');
+        this.#DrawChart(this.#chart22, 'Purple', 'Turquoise');
     }
 
     /* void */
@@ -278,7 +277,7 @@ class DashboardView extends ViewBase
             },  
         };
 
-        chart.draw(this.#dashboardDataTable, options);
+        chart.draw(this.#dataTable, options);
     }
 
 } // DashboardView class
@@ -419,11 +418,11 @@ class TreeMapView extends ViewBase
     /* void */
     UpdateSelectedTasks(selTasks, allowRedraw)
     {
-        let changed = false;
-            
         // Only if we've been already populated
         if (this.#task2RowMapping)
         {
+            let changed = false;
+                
             for (let i = 0; i < selTasks.length; i++) 
             {
                 let selTask = selTasks[i];
@@ -439,10 +438,10 @@ class TreeMapView extends ViewBase
                         changed |= this.UpdateSelectedTasks(selTask.SubTasks); // Recursive call
                 }
             }
+            
+            if (changed && allowRedraw)
+                this.#Draw();
         }
-        
-        if (changed && allowRedraw)
-            this.#Draw();
     }
 
     /* void */
