@@ -21,9 +21,51 @@ const SelectedViewKey = "SelectedView";
 const SelectedTaskKey = "SelectedTask";
 const PreferencesKey  = "Preferences";
 
+// ViewBase class ///////////////////////////////////////////////////////////////////////////////
+
+class ViewBase
+{
+    constructor()
+    {
+        // Do nothing for cost-less instantiation
+    }
+
+    /* string */
+    GetSelectedIdFromChart(chart, row2TaskMapping)
+    {
+        let sel = chart.getSelection()[0];
+        
+        if (sel == null)
+            return Utils.GetSelectedTaskId();
+        
+        return row2TaskMapping[sel.row];
+    }
+
+     /* void */
+    SetSelectedChartRow(id, chart, task2RowMapping)
+    {
+        let row = task2RowMapping[id];
+        
+        chart.setSelection([{'row': row}]);
+    }
+
+    /* bool */
+    CheckUpdateDataValue(dataTable, row, col, newValue)
+    {
+        if ((row == null) || (col == null) || (newValue == null))
+            return false;
+        
+        if (newValue == dataTable.getValue(row, col))
+            return false;
+        
+        dataTable.setValue(row, col, newValue);
+        return true;
+    }
+}
+
 // DashboardView class //////////////////////////////////////////////////////////////////////////
 
-class DashboardView
+class DashboardView extends ViewBase
 {
     // All data is private
     #dashboardDataTable = null;
@@ -44,6 +86,7 @@ class DashboardView
     constructor()
     {
         // Do nothing for cost-less instantiation
+        super();
     }
 
     /* void */
@@ -104,9 +147,9 @@ class DashboardView
                 
                 if (row != null)
                 {
-                    changed |= CheckUpdateDataValue(dashboardDataTable, row, 0, (selTask.Title + ' (' + id + ')'));
-                    changed |= CheckUpdateDataValue(dashboardDataTable, row, 1, selTask.Priority);
-                    changed |= CheckUpdateDataValue(dashboardDataTable, row, 2, selTask.Risk);
+                    changed |= this.CheckUpdateDataValue(dashboardDataTable, row, 0, (selTask.Title + ' (' + id + ')'));
+                    changed |= this.CheckUpdateDataValue(dashboardDataTable, row, 1, selTask.Priority);
+                    changed |= this.CheckUpdateDataValue(dashboardDataTable, row, 2, selTask.Risk);
                     
         //            if (selTask.SubTasks != null)
         //                UpdateSelectedTasks(selTask.SubTasks); // Recursive call
@@ -158,9 +201,9 @@ class DashboardView
     /* void */
     #OnSelectTask(chart)
     {
-        let id = GetSelectedIdFromChart(chart, this.#dashboardRow2TaskMapping);
+        let id = this.GetSelectedIdFromChart(chart, this.#dashboardRow2TaskMapping);
         
-        if (IsSelectableTask(id))
+        if (Utils.IsSelectableTask(id))
             SelectTask(id, true);
     }
 
@@ -195,10 +238,10 @@ class DashboardView
     /* void */
     SelectTask(id, prevId)
     {
-        SetSelectedChartRow(id, this.#dashboardChart11, this.#dashboardTask2RowMapping);
-        SetSelectedChartRow(id, this.#dashboardChart12, this.#dashboardTask2RowMapping);
-        SetSelectedChartRow(id, this.#dashboardChart21, this.#dashboardTask2RowMapping);
-        SetSelectedChartRow(id, this.#dashboardChart22, this.#dashboardTask2RowMapping);
+        this.SetSelectedChartRow(id, this.#dashboardChart11, this.#dashboardTask2RowMapping);
+        this.SetSelectedChartRow(id, this.#dashboardChart12, this.#dashboardTask2RowMapping);
+        this.SetSelectedChartRow(id, this.#dashboardChart21, this.#dashboardTask2RowMapping);
+        this.SetSelectedChartRow(id, this.#dashboardChart22, this.#dashboardTask2RowMapping);
     }
 
     /* DOMRect */ 
@@ -250,6 +293,7 @@ class TreeMapCellRect extends DOMRect
     constructor(cell) 
     {
         super();
+        
         let rect = $($(cell).find('rect'));
         
         this.x = Number(rect.attr('x'));
@@ -264,7 +308,7 @@ class TreeMapCellRect extends DOMRect
 
 // -------------------------------------------------------------------------------------
 
-class TreeMapView
+class TreeMapView extends ViewBase
 {
     // All data is private
     #chart = null;              // google.visualization.TreeMap
@@ -282,6 +326,7 @@ class TreeMapView
     constructor()
     {
         // Do nothing for cost-less instantiation
+        super();
     }
 
     /* void */
@@ -386,8 +431,8 @@ class TreeMapView
                 
                 if (row != null)
                 {
-                    changed |= CheckUpdateDataValue(this.#dataTable, row, 5, selTask.Title);
-                    changed |= CheckUpdateDataValue(this.#dataTable, row, 4, selTask.Colour);
+                    changed |= this.CheckUpdateDataValue(this.#dataTable, row, 5, selTask.Title);
+                    changed |= this.CheckUpdateDataValue(this.#dataTable, row, 4, selTask.Colour);
                     
                     if (selTask.SubTasks != null)
                         changed |= this.UpdateSelectedTasks(selTask.SubTasks); // Recursive call
@@ -432,7 +477,7 @@ class TreeMapView
     {
         // Refreshing will return the map to the top level
         // so we'll need to drill back down to where we were
-        let headerId = GetStorage('HeaderId');
+        let headerId = Utils.GetStorage('HeaderId');
                     
         this.#Initialise();
         this.#Draw();
@@ -457,7 +502,7 @@ class TreeMapView
     {
         if (id)
         {
-            SetSelectedChartRow(id, this.#chart, this.#task2RowMapping);
+            this.SetSelectedChartRow(id, this.#chart, this.#task2RowMapping);
             this.#RefreshTextAndColors();
             
             if (ensureVisible)
@@ -468,7 +513,7 @@ class TreeMapView
     /* void */
     OnFocusChanged(unused)
     {
-        this.#RefreshTextAndColors(GetSelectedTaskId());
+        this.#RefreshTextAndColors(Utils.GetSelectedTaskId());
     }
 
     /* void */
@@ -479,7 +524,7 @@ class TreeMapView
         case 'Enter':
             {
                 let headerId = this.#GetHeaderId();
-                let selId = GetSelectedTaskId();
+                let selId = Utils.GetSelectedTaskId();
                 
                 if (selId == headerId)
                 {
@@ -494,7 +539,7 @@ class TreeMapView
             break;
             
         case 'Escape':
-            if (IsSelectableTask(this.#GetHeaderId()))
+            if (Utils.IsSelectableTask(this.#GetHeaderId()))
             {
                 this.#chart.goUpAndDraw();
                 this.#OnRollup();
@@ -534,7 +579,7 @@ class TreeMapView
     /* void */
     #SelectFirstAdjacentTask(keyCode, ensureVisible = true)
     {
-        let selId = GetSelectedTaskId();
+        let selId = Utils.GetSelectedTaskId();
         
         if (!selId)
             return false;
@@ -549,7 +594,7 @@ class TreeMapView
             let cell = idCells[i];
             
             // Root node is not selectable
-            if (!IsSelectableTask(this.#GetCellId(cell)))
+            if (!Utils.IsSelectableTask(this.#GetCellId(cell)))
                 continue;
             
             let offset = {};
@@ -651,7 +696,7 @@ class TreeMapView
             let depthState = state[TreeMapDepthKey];
         
             if (depthState && (depthState != this.GetSubtaskDepth()))
-                SetStorage(TreeMapDepthKey, depthState);
+                Utils.SetStorage(TreeMapDepthKey, depthState);
         }
     }
 
@@ -664,7 +709,7 @@ class TreeMapView
     /* int */ 
     GetSubtaskDepth()
     {
-        let depth = GetStorage(TreeMapDepthKey);
+        let depth = Utils.GetStorage(TreeMapDepthKey);
         
         if (depth == null)
             return 0;
@@ -677,7 +722,7 @@ class TreeMapView
     {
         if (depth != this.GetSubtaskDepth())
         {
-            SetStorage(TreeMapDepthKey, depth);
+            Utils.SetStorage(TreeMapDepthKey, depth);
             this.#Draw();
         }
     }
@@ -696,15 +741,15 @@ class TreeMapView
         // This is effectively a double-click handler
         // so select the task just clicked so that it
         // becomes the selected parent in the next level
-        let id = GetSelectedIdFromChart(this.#chart, this.#row2TaskMapping);
+        let id = this.GetSelectedIdFromChart(this.#chart, this.#row2TaskMapping);
         
-        if (IsSelectableTask(id))
+        if (Utils.IsSelectableTask(id))
         {
             SelectTask(id, true);
             this.#EnsureSelectionVisible();
             
             // Save the id as the new 'header id'
-            SetStorage('HeaderId', id);
+            Utils.SetStorage('HeaderId', id);
         }
         
         // Still need this because Google will overwrite our values
@@ -716,7 +761,7 @@ class TreeMapView
     {
         // If the currently selected item is no longer visible
         // move the selection to its parent
-        let selId = GetSelectedTaskId();
+        let selId = Utils.GetSelectedTaskId();
         
         if (!this.#IsCellVisible(selId))
         {
@@ -727,7 +772,7 @@ class TreeMapView
         }
         
         // Save the new 'header id'
-        SetStorage('HeaderId', this.#GetHeaderId());
+        Utils.SetStorage('HeaderId', this.#GetHeaderId());
 
         this.#EnsureSelectionVisible();
         this.#RefreshTextAndColors();
@@ -760,7 +805,7 @@ class TreeMapView
     {
         this.#EnsureSelectionVisible(true);
         
-        let selId = GetSelectedTaskId();
+        let selId = Utils.GetSelectedTaskId();
         let cell = this.#GetCell(selId);
         
         return this.#GetCellLabelRect(cell);
@@ -804,7 +849,7 @@ class TreeMapView
     /* void */
     #EnsureSelectionVisible(labelOnly = false)
     {
-        let selId = GetSelectedTaskId();
+        let selId = Utils.GetSelectedTaskId();
         let cell = this.#GetCell(selId);
         
         if (cell)
@@ -914,7 +959,7 @@ class TreeMapView
         let row = item["row"];
         let id = this.#row2TaskMapping[row];
 
-        if (IsSelectableTask(id) && (id != GetSelectedTaskId()))
+        if (Utils.IsSelectableTask(id) && (id != Utils.GetSelectedTaskId()))
         {
             SelectTask(id, true);
             this.#EnsureSelectionVisible(true);
@@ -939,11 +984,11 @@ class TreeMapView
     /* void */
     #RefreshTextAndColors(specificId) 
     {
-        let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
-        let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
+        let colorTaskBkgnd = (Utils.GetPreference('ColorTaskBackground', false) == true);
+        let strikethruDone = (Utils.GetPreference('StrikethroughDone', true) == true);
         
         let headerId = this.#GetHeaderId(); // will also initialise cell Ids
-        let selId = GetSelectedTaskId();
+        let selId = Utils.GetSelectedTaskId();
         
         let treechart = $("#treemap_id");
         let svg = treechart.find("svg");
@@ -1163,8 +1208,8 @@ class TreeMapView
     /* string */
     #GetHeaderId() 
     {
-        let colorTaskBkgnd = (GetPreference('ColorTaskBackground', false) == true);
-        let strikethruDone = (GetPreference('StrikethroughDone', true) == true);
+        let colorTaskBkgnd = (Utils.GetPreference('ColorTaskBackground', false) == true);
+        let strikethruDone = (Utils.GetPreference('StrikethroughDone', true) == true);
         
         let idCells = this.#InitialiseCellIds();
         
@@ -1238,51 +1283,18 @@ class TreeMapView
     }
 } // TreeMapView class
 
-// Global instances -----------------------------------------------------------------------
+// Global data ///////////////////////////////////////////////////////////////////////////
 
 let dashboard = new DashboardView();
 let treemap   = new TreeMapView();
 
-// External functions called by the app ---------------------------------------------------
-function GetSelectedTaskLabelRect()
-{
-    let viewId = GetSelectedViewId();
-    let rect = null;
+// Global callbacks and supporting functions//////////////////////////////////////////////
 
-    switch (viewId)
-    {
-        case DashboardView.Id:
-            rect = dashboard.GetSelectedTaskLabelRect();
-            break;
-              
-        case TreeMapView.Id:
-            rect = treemap.GetSelectedTaskLabelRect();
-            break;
-    }
-    
-    return { x:      rect.x, 
-             y:      rect.y, 
-             width:  rect.width, 
-             height: rect.height };
-}
-
-// Called by the app only
-function GetSessionState()
-{
-    return { [SelectedViewKey] : GetSelectedViewId(), 
-             [DashboardView.Id]: dashboard.GetSessionState(),
-             [TreeMapView.Id]  : treemap.GetSessionState() };
-}
-
-// General data and functions -------------------------------------------------------------
-
+/* void */
 function OnLoad()
 {
-    if (!SupportsHTML5Storage())
-        alert('local storage not supported');
-
-    if (GetPreference('BackColor', null))
-        document.body.style.backgroundColor = GetPreference('BackColor', null);
+    if (Utils.GetPreference('BackColor', null))
+        document.body.style.backgroundColor = Utils.GetPreference('BackColor', null);
   
     chrome.webview.addEventListener('message', OnAppMessage);
     
@@ -1290,9 +1302,10 @@ function OnLoad()
     OnChangeView(viewId);
 }
 
+/* void */
 function OnChangeView(viewId) 
 {
-    SetStorage(SelectedViewKey, viewId);
+    Utils.SetStorage(SelectedViewKey, viewId);
     
     ShowHideView(DashboardView.Id, viewId);
     ShowHideView(TreeMapView.Id, viewId);
@@ -1314,18 +1327,16 @@ function OnChangeView(viewId)
     RefreshSelectedView();
 }
 
-function SupportsHTML5Storage() 
+/* void */
+function ShowHideView(divName, viewId)
 {
-    try 
-    {
-        return 'sessionStorage' in window && window['sessionStorage'] !== null;
-    } 
-    catch (e) 
-    {
-        return false;
-    }
+    let show = (viewId == divName);
+    let display = (show ? 'block' : 'none');
+    
+    document.getElementById(divName).style.display = display;
 }
 
+/* void */
 function OnAppMessage(event)
 {  
     let msg = JSON.parse(event.data);
@@ -1343,17 +1354,17 @@ function OnAppMessage(event)
     }
     else if (msg.msg == SetPreferencesMsg)
     {
-        let colorTaskBkgnd = GetPreference('ColorTaskBackground', false);
-        let strikethruDone = GetPreference('StrikethroughDone', true);
-        let backColor = GetPreference('BackColor', null);
+        let colorTaskBkgnd = Utils.GetPreference('ColorTaskBackground', false);
+        let strikethruDone = Utils.GetPreference('StrikethroughDone', true);
+        let backColor = Utils.GetPreference('BackColor', null);
         
-        SetStorage(PreferencesKey, JSON.stringify(msg.prefs).toString());
+        Utils.SetStorage(PreferencesKey, JSON.stringify(msg.prefs).toString());
         
-        if (backColor != GetPreference('BackColor', null))
-            document.body.style.backgroundColor = GetPreference('BackColor', null);
+        if (backColor != Utils.GetPreference('BackColor', null))
+            document.body.style.backgroundColor = Utils.GetPreference('BackColor', null);
         
-        if ((GetPreference('ColorTaskBackground', false) != colorTaskBkgnd) ||
-            (GetPreference('StrikethroughDone', true) != strikethruDone))
+        if ((Utils.GetPreference('ColorTaskBackground', false) != colorTaskBkgnd) ||
+            (Utils.GetPreference('StrikethroughDone', true) != strikethruDone))
         {
             RefreshSelectedView();
         }
@@ -1363,116 +1374,65 @@ function OnAppMessage(event)
         RestoreSessionState(JSON.parse(msg.state));
     }
 }
-
-function GetPreference(pref, defValue)
-{
-    let prefs = JSON.parse(GetStorage('Preferences'));
-    
-    if (!prefs || (prefs[pref] == null))
-        return defValue;
-    
-    return prefs[pref];
-}
-
-function GetStorage(key)
-{
-    return sessionStorage.getItem(key);
-}
-
-function SetStorage(key, value)
-{
-    sessionStorage.setItem(key, value);
-}
-
-function ShowHideView(divName, viewId)
-{
-    let show = (viewId == divName);
-    let display = (show ? 'block' : 'none');
-    
-    document.getElementById(divName).style.display = display;
-}
         
+/* string */
 function GetSelectedViewId()
 {
-    let viewId = GetStorage(SelectedViewKey);
+    let viewId = Utils.GetStorage(SelectedViewKey);
     
     if ((viewId == null) || (viewId == "undefined"))
         viewId = DashboardView.Id;
     
     return viewId;
 }
-
-function RefreshSelectedView()
+        
+/* view object */
+function GetSelectedView()
 {
-    let viewId = GetSelectedViewId();
-    document.getElementById('views').value = viewId;
-
-    switch (viewId)
+    switch (GetSelectedViewId())
     {
-        case DashboardView.Id:
-            dashboard.Refresh();
-            break;
-              
-        case TreeMapView.Id:
-            treemap.Refresh();
-            break;
+        case DashboardView.Id:  return dashboard;
+        case TreeMapView.Id:    return treemap;
     }
+    
+    return null;
 }
 
+/* void */
+function RefreshSelectedView()
+{
+    document.getElementById('views').value = GetSelectedViewId();
+
+    GetSelectedView().Refresh();
+}
+
+/* void */
 function OnChangeSubtaskDepth(depth)
 {
     treemap.SetSubtaskDepth(Number(depth))
 }
 
+/* void */
 function OnResize(event)
 {
-    let viewId = GetSelectedViewId();
-
-    switch (viewId)
-    {
-        case DashboardView.Id:
-            dashboard.OnResize();
-            break;
-              
-        case TreeMapView.Id:
-            treemap.OnResize();
-            break;
-    }
+    GetSelectedView().OnResize();
 }
 
+/* void */
 function OnKeyDown(event)
 {
-    let viewId = GetSelectedViewId();
-
-    switch (viewId)
-    {
-        case DashboardView.Id:
-            dashboard.OnKeyDown(event);
-            break;
-              
-        case TreeMapView.Id:
-            treemap.OnKeyDown(event);
-            break;
-    }
+    GetSelectedView().OnKeyDown(event);
 }
 
+/* void */
 function OnFocusChanged(event)
 {
     let hasFocus = (event.type == 'focus');
-    let viewId = GetSelectedViewId();
-
-    switch (viewId)
-    {
-        case DashboardView.Id:
-            dashboard.OnFocusChanged(hasFocus);
-            break;
-              
-        case TreeMapView.Id:
-            treemap.OnFocusChanged(hasFocus);
-            break;
-    }
+    
+    GetSelectedView().OnFocusChanged(hasFocus);
 }
 
+/* void */
 function MergeSelectedTaskAttributes(selTasks)
 {
     // Keep all views up to date but only redraw the active view
@@ -1484,14 +1444,16 @@ function MergeSelectedTaskAttributes(selTasks)
     RestoreSelectedTask();
 }
 
+/* void */
 function RestoreSelectedTask()
 {
-    let id = GetSelectedTaskId();
+    let id = Utils.GetSelectedTaskId();
     
-    if (IsSelectableTask(id))
+    if (Utils.IsSelectableTask(id))
         SelectTask(id, false);
 }
 
+/* void */
 function RestoreSessionState(state)
 {
     dashboard.RestoreSessionState(state[DashboardView.Id]);
@@ -1503,6 +1465,7 @@ function RestoreSessionState(state)
         OnChangeView(viewState);
 }
 
+/* void */
 function NotifyApp(msgKey, value1Key, value1, value2Key = null, value2 = null, value3Key = null, value3 = null)
 {
     let msg = { };
@@ -1525,74 +1488,85 @@ function NotifyApp(msgKey, value1Key, value1, value2Key = null, value2 = null, v
     window.chrome.webview.postMessage(JSON.stringify(msg));
 }
 
-function IsSelectableTask(id)
-{
-    return (id && !Number.isNaN(id) && (Number(id) > 0));
-}
-
+/* void */
 function SelectTask(id, fromChart)
 {
     // Prevent selection of the 'Tasklist' root
-    if (!IsSelectableTask(id))
+    if (!Utils.IsSelectableTask(id))
     {
         alert('Task not selectable. ID: ' + id);
         return;
     }
     
-    let prevId = GetSelectedTaskId();
-    SetStorage(SelectedTaskKey, id);
+    let prevId = Utils.GetSelectedTaskId();
 
-    switch (GetSelectedViewId())
-    {
-        case DashboardView.Id:
-        case '':
-            dashboard.SelectTask(id, prevId);
-            break;
-              
-        case TreeMapView.Id:
-            treemap.SelectTask(id, prevId);
-            break;
-    }
+    Utils.SetStorage(SelectedTaskKey, id);
+    GetSelectedView().SelectTask(id, prevId);
         
     if (fromChart)
         NotifyApp(SetSelectedTaskMsg, "id", id);
 }
 
-function GetSelectedTaskId()
+// Global functions called directly from the App ///////////////////////////////////////
+
+/* x, y, width, height */
+function GetSelectedTaskLabelRect()
 {
-    let id = GetStorage(SelectedTaskKey);
+    let viewId = GetSelectedViewId();
+    let rect = GetSelectedView().GetSelectedTaskLabelRect();
     
-    if (id == null)
-        id = '';
-    
-    return id;
+    return { x:      rect.x, 
+             y:      rect.y, 
+             width:  rect.width, 
+             height: rect.height };
 }
 
-function GetSelectedIdFromChart(chart, row2TaskMapping)
+/* string */
+function GetSessionState()
 {
-    let sel = chart.getSelection()[0];
-    
-    if (sel == null)
-        return GetSelectedTaskId();
-    
-    return row2TaskMapping[sel.row];
+    return { [SelectedViewKey] : GetSelectedViewId(), 
+             [DashboardView.Id]: dashboard.GetSessionState(),
+             [TreeMapView.Id]  : treemap.GetSessionState() };
 }
 
-function SetSelectedChartRow(id, chart, task2RowMapping)
-{
-    let row = task2RowMapping[id];
-    
-    chart.setSelection([{'row': row}]);
-}
+// Global utilities ///////////////////////////////////////////////////////////////////////////////
 
-function CheckUpdateDataValue(dataTable, row, col, newValue)
+class Utils
 {
-    if ((row == null) || (col == null) || (newValue == null))
-        return false;
+    /* bool */
+    static IsSelectableTask(id)
+    {
+        return (id && !Number.isNaN(id) && (Number(id) > 0));
+    }
     
-    if (newValue == dataTable.getValue(row, col))
-        return false;
-    
-    dataTable.setValue(row, col, newValue);
-    return true;
+    /* string */
+    static GetSelectedTaskId()
+    {
+        let id = Utils.GetStorage(SelectedTaskKey);
+        
+        return (id == null ? ' ' : id);
+    }
+
+    /* void */
+    static GetPreference(pref, defValue)
+    {
+        let prefs = JSON.parse(Utils.GetStorage('Preferences'));
+        
+        if (!prefs || (prefs[pref] == null))
+            return defValue;
+        
+        return prefs[pref];
+    }
+
+    /* string */
+    static GetStorage(key)
+    {
+        return sessionStorage.getItem(key);
+    }
+
+    /* void */
+    static SetStorage(key, value)
+    {
+        sessionStorage.setItem(key, value);
+    }
 }
