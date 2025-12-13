@@ -29,6 +29,33 @@ class ViewBase
     {
         // Do nothing for cost-less instantiation
     }
+    
+    // Public functions (For derived classes to override) ---------------------------
+    
+    /* void */
+    RestoreSessionState(state) {}
+
+    /* json */ 
+    GetSessionState() { return {}; }
+
+    /* void */
+    SelectTask(id, prevId) {}
+    
+    /* void */ 
+    UpdateSelectedTasks(selTasks, allowRedraw) {}
+
+    // Public Message Handlers (For derived classes to override) --------------------
+
+    /* void */
+    OnKeyDown(event) {}
+
+    /* void */
+    OnFocusChanged(hasFocus) {}
+
+    /* void */
+    OnResize() {}
+    
+    // Utility functions for derived classes ----------------------------------------
 
     /* string */
     GetSelectedIdFromChart(chart, row2TaskMapping)
@@ -132,7 +159,7 @@ class DashboardView extends ViewBase
     }
 
     /* bool */ 
-    UpdateSelectedTasks(selTasks, redraw)
+    UpdateSelectedTasks(selTasks, allowRedraw)
     {
         let changed = false;
         
@@ -156,22 +183,11 @@ class DashboardView extends ViewBase
                 }
             }
             
-            if (changed && redraw)
+            if (changed && allowRedraw)
                 this.#Draw();
         }
         
         return changed;
-    }
-
-    /* void */
-    RestoreSessionState(state)
-    {
-        // Nothing to do
-    }
-
-    /* string */ GetSessionState()
-    {
-        return {};
     }
 
     /* void */
@@ -205,18 +221,6 @@ class DashboardView extends ViewBase
         
         if (Utils.IsSelectableTask(id))
             SelectTask(id, true);
-    }
-
-    /* void */
-    OnKeyDown(unused)
-    {
-        // Do nothing
-    }
-
-    /* void */
-    OnFocusChanged(hasFocus)
-    {
-        // Do nothing
     }
 
     /* void */
@@ -416,7 +420,7 @@ class TreeMapView extends ViewBase
     }
 
     /* void */
-    UpdateSelectedTasks(selTasks)
+    UpdateSelectedTasks(selTasks, allowRedraw)
     {
         let changed = false;
             
@@ -440,7 +444,8 @@ class TreeMapView extends ViewBase
             }
         }
         
-        return changed;
+        if (changed && allowRedraw)
+            this.#Draw();
     }
 
     /* void */
@@ -693,14 +698,12 @@ class TreeMapView extends ViewBase
     {
         if (state)
         {
-            let depthState = state[TreeMapDepthKey];
-        
-            if (depthState && (depthState != this.GetSubtaskDepth()))
-                Utils.SetStorage(TreeMapDepthKey, depthState);
+            let depth = state[TreeMapDepthKey];
+            SetSubtaskDepth(Number(depth));
         }
     }
 
-    /* string */ 
+    /* json */ 
     GetSessionState()
     {
         return { [TreeMapDepthKey]: this.GetSubtaskDepth() };
@@ -1521,7 +1524,7 @@ function GetSelectedTaskLabelRect()
              height: rect.height };
 }
 
-/* string */
+/* json */
 function GetSessionState()
 {
     return { [SelectedViewKey] : GetSelectedViewId(), 
