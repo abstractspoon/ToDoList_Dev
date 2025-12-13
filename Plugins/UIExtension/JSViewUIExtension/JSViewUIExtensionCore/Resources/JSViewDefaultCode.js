@@ -1424,7 +1424,11 @@ function OnResize(event)
 /* void */
 function OnKeyDown(event)
 {
-    GetSelectedView().OnKeyDown(event);
+    // Only forward this if the focused element is NOT ID-ed
+    let focused = document.activeElement;
+    
+    if (!focused.id)
+        GetSelectedView().OnKeyDown(event);
 }
 
 /* void */
