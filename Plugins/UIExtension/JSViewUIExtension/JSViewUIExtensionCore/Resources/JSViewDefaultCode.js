@@ -1,4 +1,5 @@
 google.charts.load('current', {'packages':['corechart']});
+google.charts.load('current', {'packages':['sankey']});
 google.charts.load('current', {'packages':['treemap']});
 
 google.charts.setOnLoadCallback(OnLoad);
@@ -92,6 +93,162 @@ class ViewBase
         return true;
     }
 }
+
+// DashboardView class //////////////////////////////////////////////////////////////////////////
+
+class SankeyView extends ViewBase
+{
+    // All data is private
+    #chart = null;              // google.visualization.Sankey
+    #dataTable = null;          // google.visualization.DataTable
+    
+    #row2TaskMapping = null;    // Map<row, id>
+    #task2RowMapping = null;    // Map<id, row>
+
+    // -----------------------------------------
+    
+    static Id = "sankey_id";
+
+    // -----------------------------------------
+    
+    constructor()
+    {
+        // Do nothing for cost-less instantiation
+        super();
+    }
+
+    /* void */
+    #Initialise() 
+    {
+        if (this.#chart == null)
+        {
+            this.#chart = new google.visualization.Sankey(document.getElementById('sankey_chart'));
+            this.#Populate()
+        }
+    }
+
+    /* void */
+    #Populate()
+    {
+        this.#dataTable = new google.visualization.DataTable();
+        
+        this.#row2TaskMapping = new Map();
+        this.#task2RowMapping = new Map();
+
+        this.#dataTable.addColumn('string', 'From');
+        this.#dataTable.addColumn('string', 'To');
+        this.#dataTable.addColumn('number', 'Weight');
+
+        // Top-level tasks
+        for (let i = 0; i < tasks.length; i++) 
+        {
+            this.#AddTask(tasks[i], 'Tasklist', 0);
+        }
+    }
+
+    /* int (total subtask count) */
+    #AddTask(task, parentName, depth)
+    {
+        let totalSubtasks = 1;
+        let numSubtask = (task.Subtasks ? task.Subtasks.length : 0);
+        
+        if (numSubtask)
+        {
+            // Process subtasks first to accumulate subtask count
+            for (let i = 0; i < numSubtask; i++) 
+            {
+                totalSubtasks += this.#AddTask(task.Subtasks[i], task.Title, (depth + 1)); // RECURSIVE CALL
+            }
+        }
+
+        if (depth < 2)
+            this.#AddRow(task.Title, parentName, totalSubtasks);
+        
+        return totalSubtasks;
+    }
+
+    /* void */
+    #AddRow(id, parentId, totalSubtasks)
+    {
+        this.#dataTable.addRow(
+        [
+            id,
+            parentId, 
+            totalSubtasks, // weight
+        ]);
+        
+        let row = (this.#dataTable.getNumberOfRows() - 1);
+        this.#row2TaskMapping[row] = id;
+        this.#task2RowMapping[id] = row;
+    }
+
+    /* bool */ 
+    UpdateSelectedTasks(selTasks, allowRedraw)
+    {
+        let changed = false;
+/*        
+        // Only we've been already populated
+        if (this.#task2RowMapping)
+        {
+            for (let i = 0; i < selTasks.length; i++) 
+            {
+                let selTask = selTasks[i];
+                let id = selTask['Task ID'].toString();
+                let row = this.#task2RowMapping[id];
+                
+                if (row != null)
+                {
+                    changed |= this.CheckUpdateDataValue(dataTable, row, 0, (selTask.Title + ' (' + id + ')'));
+                    changed |= this.CheckUpdateDataValue(dataTable, row, 1, selTask.Priority);
+                    changed |= this.CheckUpdateDataValue(dataTable, row, 2, selTask.Risk);
+                    
+                    if (selTask.SubTasks != null)
+                        UpdateSelectedTasks(selTask.SubTasks); // Recursive call
+                }
+            }
+            
+            if (changed && allowRedraw)
+                this.#Draw();
+        }
+*/        
+        return changed;
+    }
+
+    /* void */
+    Refresh()
+    {
+        this.#Initialise();
+        this.#Draw();
+        
+        RestoreSelectedTask();
+    }
+
+    /* void */
+    OnResize()
+    {
+        this.#Draw();
+    }
+                 
+    /* void */
+    #Draw()
+    {
+        this.#DrawChart(this.#chart, 'Red', 'Blue');
+    }
+
+    /* void */
+    #DrawChart(chart, color1, color2) 
+    {
+        let options = 
+        {
+//            colors: [ color1.toHexColor(), color2.toHexColor() ],
+//            curveType: 'function',
+            height: 1500,
+        };
+        
+        chart.draw(this.#dataTable, options);
+    }
+
+} // SankeyView class
 
 // DashboardView class //////////////////////////////////////////////////////////////////////////
 
@@ -1286,6 +1443,7 @@ class TreeMapView extends ViewBase
 
 let dashboard = new DashboardView();
 let treemap   = new TreeMapView();
+let sankey    = new SankeyView();
 
 // Global callbacks and supporting functions//////////////////////////////////////////////
 
@@ -1308,6 +1466,7 @@ function OnChangeView(viewId)
     
     ShowHideView(DashboardView.Id, viewId);
     ShowHideView(TreeMapView.Id, viewId);
+    ShowHideView(SankeyView.Id, viewId);
     // New views here
     
     // Dependent UI
@@ -1390,8 +1549,9 @@ function GetSelectedView()
 {
     switch (GetSelectedViewId())
     {
-        case DashboardView.Id:  return dashboard;
-        case TreeMapView.Id:    return treemap;
+        case DashboardView.Id: return dashboard;
+        case TreeMapView.Id:   return treemap;
+        case SankeyView.Id:    return sankey;
     }
     
     return null;
@@ -1441,8 +1601,9 @@ function MergeSelectedTaskAttributes(selTasks)
     // Keep all views up to date but only redraw the active view
     let viewId = GetSelectedViewId();
     
-    treemap.UpdateSelectedTasks(selTasks, (viewId == TreeMapView.Id));
     dashboard.UpdateSelectedTasks(selTasks, (viewId == DashboardView.Id));
+    treemap.UpdateSelectedTasks(selTasks, (viewId == TreeMapView.Id));
+    sankey.UpdateSelectedTasks(selTasks, (viewId == SankeyView.Id));
     
     RestoreSelectedTask();
 }
@@ -1461,6 +1622,7 @@ function RestoreSessionState(state)
 {
     dashboard.RestoreSessionState(state[DashboardView.Id]);
     treemap.RestoreSessionState(state[TreeMapView.Id]);
+    sankey.RestoreSessionState(state[SankeyView.Id]);
 
     let viewState = state[SelectedViewKey];
     
@@ -1529,7 +1691,8 @@ function GetSessionState()
 {
     return { [SelectedViewKey] : GetSelectedViewId(), 
              [DashboardView.Id]: dashboard.GetSessionState(),
-             [TreeMapView.Id]  : treemap.GetSessionState() };
+             [TreeMapView.Id]  : treemap.GetSessionState(),
+             [SankeyView.Id]   : sankey.GetSessionState() };
 }
 
 // Global utilities ///////////////////////////////////////////////////////////////////////////////

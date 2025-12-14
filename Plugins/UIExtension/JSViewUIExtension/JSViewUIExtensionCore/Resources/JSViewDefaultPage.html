@@ -22,6 +22,7 @@
                 <select name="views" id="views" onchange="OnChangeView(this.value)">
                     <option value="dashboard_id">Dashboard</option>
                     <option value="treemap_id">Tree Map</option>
+                    <option value="sankey_id">Sankey</option>
                 </select>
             </div>
             
@@ -68,6 +69,11 @@
             <!-- Tree map ------------------------------------------------------------>
             <div id="treemap_id" style="margin: 4px 6px 6px 2px">
                 <div id="treemap_chart" style="width: 100%; height: 90%"></div>
+            </div>
+            
+            <!-- Sankey -------------------------------------------------------------->
+            <div id="sankey_id" style="margin: 4px 6px 6px 2px">
+                <div id="sankey_chart" style="width: 100%; height: 90%"></div>
             </div>
             
             <!-- Other views --------------------------------------------------------->
