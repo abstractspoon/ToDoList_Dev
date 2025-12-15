@@ -21,6 +21,7 @@ const RestoreSessionStateMsg = "RestoreSessionState";
 const SelectedViewKey = "SelectedView";
 const SelectedTaskKey = "SelectedTask";
 const PreferencesKey  = "Preferences";
+const SubtaskDepthKey = "SubtaskDepth";
 
 // ViewBase class ///////////////////////////////////////////////////////////////////////////////
 
@@ -32,6 +33,9 @@ class ViewBase
     }
     
     // Public functions (For derived classes to override) ---------------------------
+    
+    /* string */
+    GetId() { return ''; }
     
     /* void */
     RestoreSessionState(state) {}
@@ -47,6 +51,12 @@ class ViewBase
     
     /* DOMRect */ 
     GetSelectedTaskLabelRect() { return new DOMRect(); }
+    
+    /* int */
+    GetSubtaskDepth() { return -1; } // -1 => Not used
+    
+    /* void */
+    SetSubtaskDepth(depth) {}
 
     // Public Message Handlers (For derived classes to override) --------------------
 
@@ -60,6 +70,7 @@ class ViewBase
     OnResize() {}
     
     // Utility functions for derived classes ----------------------------------------
+    // These would be protected in the 'real' world
 
     /* string */
     GetSelectedIdFromChart(chart, row2TaskMapping)
@@ -92,6 +103,19 @@ class ViewBase
         dataTable.setValue(row, col, newValue);
         return true;
     }
+        
+    /* string */ 
+    GetStorage(key)
+    {
+        return Utils.GetStorage(this.GetId() + '.' + key);
+    }
+
+    /* bool */
+    SetStorage(key, value)
+    {
+        return Utils.SetStorage(this.GetId() + '.' + key, value);
+    }
+
 }
 
 // DashboardView class //////////////////////////////////////////////////////////////////////////
@@ -108,6 +132,12 @@ class SankeyView extends ViewBase
     // -----------------------------------------
     
     static Id = "sankey_id";
+    
+    /* string */
+    GetId()
+    {
+        return SankeyView.Id;
+    }
 
     // -----------------------------------------
     
@@ -121,10 +151,9 @@ class SankeyView extends ViewBase
     #Initialise() 
     {
         if (this.#chart == null)
-        {
             this.#chart = new google.visualization.Sankey(document.getElementById('sankey_chart'));
-            this.#Populate()
-        }
+ 
+        this.#Populate()
     }
 
     /* void */
@@ -161,7 +190,7 @@ class SankeyView extends ViewBase
             }
         }
 
-        if (depth < 2)
+        if (depth <= this.GetSubtaskDepth())
             this.#AddRow(task.Title, parentName, totalSubtasks);
         
         return totalSubtasks;
@@ -213,6 +242,18 @@ class SankeyView extends ViewBase
 */        
         return changed;
     }
+    
+    /* void */
+    RestoreSessionState(state) 
+    {
+        this.SetSubtaskDepth(Number(state[SubtaskDepthKey]));
+    }
+
+    /* json */ 
+    GetSessionState() 
+    { 
+        return { [SubtaskDepthKey]: this.GetSubtaskDepth() }; 
+    }
 
     /* void */
     Refresh()
@@ -228,7 +269,21 @@ class SankeyView extends ViewBase
     {
         this.#Draw();
     }
-                 
+            
+    /* int */
+    GetSubtaskDepth() 
+    { 
+        let depth = this.GetStorage(SubtaskDepthKey);
+        return (depth ? Number(depth) : 0);
+    }
+         
+    /* void */
+    SetSubtaskDepth(depth) 
+    {
+        if (this.SetStorage(SubtaskDepthKey, depth))
+            this.Refresh();
+    }
+         
     /* void */
     #Draw()
     {
@@ -268,6 +323,12 @@ class DashboardView extends ViewBase
     // -----------------------------------------
     
     static Id = "dashboard_id";
+    
+    /* string */
+    GetId()
+    {
+        return DashboardView.Id;
+    }
 
     // -----------------------------------------
     
@@ -441,8 +502,6 @@ class DashboardView extends ViewBase
 
 // TreeMapView classes //////////////////////////////////////////////////////////////////
 
-const TreeMapDepthKey = "TreeMapDepth"; // Session state
-
 // -------------------------------------------------------------------------------------
 
 class TreeMapCellRect extends DOMRect
@@ -473,10 +532,16 @@ class TreeMapView extends ViewBase
     
     #row2TaskMapping = null;    // Map<row, id>
     #task2RowMapping = null;    // Map<id, row>
-
+    
     // -------------------------------------------------
 
     static Id = 'treemap_id';
+    
+    /* string */
+    GetId()
+    {
+        return TreeMapView.Id;
+    }
     
     // -------------------------------------------------
     
@@ -635,7 +700,7 @@ class TreeMapView extends ViewBase
     {
         // Refreshing will return the map to the top level
         // so we'll need to drill back down to where we were
-        let headerId = Utils.GetStorage('HeaderId');
+        let headerId = this.GetStorage('HeaderId');
                     
         this.#Initialise();
         this.#Draw();
@@ -845,42 +910,31 @@ class TreeMapView extends ViewBase
     {
         this.#RefreshTextAndColors();
     }
-
+            
+    /* int */
+    GetSubtaskDepth() 
+    { 
+        let depth = this.GetStorage(SubtaskDepthKey);
+        return (depth ? Number(depth) : 0);
+    }
+         
     /* void */
-    RestoreSessionState(state)
+    SetSubtaskDepth(depth) 
     {
-        if (state)
-        {
-            let depth = state[TreeMapDepthKey];
-            SetSubtaskDepth(Number(depth));
-        }
+        if (this.SetStorage(SubtaskDepthKey, depth))
+            this.Refresh();
+    }
+    
+    /* void */
+    RestoreSessionState(state) 
+    {
+        this.SetSubtaskDepth(Number(state[SubtaskDepthKey]));
     }
 
     /* json */ 
-    GetSessionState()
-    {
-        return { [TreeMapDepthKey]: this.GetSubtaskDepth() };
-    }
-
-    /* int */ 
-    GetSubtaskDepth()
-    {
-        let depth = Utils.GetStorage(TreeMapDepthKey);
-        
-        if (depth == null)
-            return 0;
-        
-        return Number(depth);
-    }
-
-    /* void */
-    SetSubtaskDepth(depth)
-    {
-        if (depth != this.GetSubtaskDepth())
-        {
-            Utils.SetStorage(TreeMapDepthKey, depth);
-            this.#Draw();
-        }
+    GetSessionState() 
+    { 
+        return { [SubtaskDepthKey]: this.GetSubtaskDepth() }; 
     }
 
     /* string */ 
@@ -905,7 +959,7 @@ class TreeMapView extends ViewBase
             this.#EnsureSelectionVisible();
             
             // Save the id as the new 'header id'
-            Utils.SetStorage('HeaderId', id);
+            this.SetStorage('HeaderId', id);
         }
         
         // Still need this because Google will overwrite our values
@@ -928,7 +982,7 @@ class TreeMapView extends ViewBase
         }
         
         // Save the new 'header id'
-        Utils.SetStorage('HeaderId', this.#GetHeaderId());
+        this.SetStorage('HeaderId', this.#GetHeaderId());
 
         this.#EnsureSelectionVisible();
         this.#RefreshTextAndColors();
@@ -1470,16 +1524,17 @@ function OnChangeView(viewId)
     // New views here
     
     // Dependent UI
-    switch (viewId)
+    let selView = GetSelectedView();
+    
+    if (selView.GetSubtaskDepth() != -1)
     {
-        case TreeMapView.Id:
-            document.getElementById('treemapdepth_combo').style.display = 'inline-block';
-            document.getElementById('treemapdepth').value = treemap.GetSubtaskDepth().toString();
-            break;
-            
-        default:
-            document.getElementById('treemapdepth_combo').style.display = 'none';
-            break;
+        document.getElementById('subtask_depth_combo').style.display = 'inline-block';
+        document.getElementById('subtask_depth').value = selView.GetSubtaskDepth().toString();
+    }
+    else    
+    {
+    	// Not used
+        document.getElementById('subtask_depth_combo').style.display = 'none';
     }
     
     RefreshSelectedView();
@@ -1568,7 +1623,7 @@ function RefreshSelectedView()
 /* void */
 function OnChangeSubtaskDepth(depth)
 {
-    treemap.SetSubtaskDepth(Number(depth))
+    GetSelectedView().SetSubtaskDepth(depth);
 }
 
 /* void */
@@ -1730,9 +1785,13 @@ class Utils
         return sessionStorage.getItem(key);
     }
 
-    /* void */
+    /* bool */
     static SetStorage(key, value)
     {
+        if (Utils.GetStorage(key) == value)
+            return false;
+        
         sessionStorage.setItem(key, value);
+        return true;
     }
 }
