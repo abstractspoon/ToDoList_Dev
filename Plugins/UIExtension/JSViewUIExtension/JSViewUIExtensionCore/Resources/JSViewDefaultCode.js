@@ -27,15 +27,17 @@ const SubtaskDepthKey = "SubtaskDepth";
 
 class ViewBase
 {
+    /* string */
+    get Id() { return ''; }
+    
+    // ------------------------------------------------------------------------------
+    
     constructor()
     {
         // Do nothing for cost-less instantiation
     }
     
     // Public functions (For derived classes to override) ---------------------------
-    
-    /* string */
-    GetId() { return ''; }
     
     /* void */
     RestoreSessionState(state) {}
@@ -107,13 +109,13 @@ class ViewBase
     /* string */ 
     GetStorage(key)
     {
-        return Utils.GetStorage(this.GetId() + '.' + key);
+        return Utils.GetStorage(this.Id + '.' + key);
     }
 
     /* bool */
     SetStorage(key, value)
     {
-        return Utils.SetStorage(this.GetId() + '.' + key, value);
+        return Utils.SetStorage(this.Id + '.' + key, value);
     }
 
 }
@@ -128,15 +130,13 @@ class SankeyView extends ViewBase
     
     #row2TaskMapping = null;    // Map<row, id>
     #task2RowMapping = null;    // Map<id, row>
-
+    
     // -----------------------------------------
     
-    static Id = "sankey_id";
-    
     /* string */
-    GetId()
-    {
-        return SankeyView.Id;
+    get Id() 
+    { 
+        return 'sankey_id'; 
     }
 
     // -----------------------------------------
@@ -322,12 +322,10 @@ class DashboardView extends ViewBase
 
     // -----------------------------------------
     
-    static Id = "dashboard_id";
-    
     /* string */
-    GetId()
+    get Id()
     {
-        return DashboardView.Id;
+        return 'dashboard_id';
     }
 
     // -----------------------------------------
@@ -535,12 +533,10 @@ class TreeMapView extends ViewBase
     
     // -------------------------------------------------
 
-    static Id = 'treemap_id';
-    
     /* string */
-    GetId()
+    get Id()
     {
-        return TreeMapView.Id;
+        return 'treemap_id';
     }
     
     // -------------------------------------------------
@@ -1495,9 +1491,12 @@ class TreeMapView extends ViewBase
 
 // Global data ///////////////////////////////////////////////////////////////////////////
 
-let dashboard = new DashboardView();
-let treemap   = new TreeMapView();
-let sankey    = new SankeyView();
+let chartViews = 
+[ 
+    new DashboardView(), 
+    new TreeMapView(), 
+    new SankeyView() 
+];
 
 // Global callbacks and supporting functions//////////////////////////////////////////////
 
@@ -1509,44 +1508,44 @@ function OnLoad()
   
     chrome.webview.addEventListener('message', OnAppMessage);
     
-    let viewId = GetSelectedViewId();
+    let viewId = GetSelectedView().Id;
     OnChangeView(viewId);
 }
 
 /* void */
 function OnChangeView(viewId) 
 {
+    // Keep view combo synchronised
+    document.getElementById('views').value = viewId;
+    
     Utils.SetStorage(SelectedViewKey, viewId);
-    
-    ShowHideView(DashboardView.Id, viewId);
-    ShowHideView(TreeMapView.Id, viewId);
-    ShowHideView(SankeyView.Id, viewId);
-    // New views here
-    
-    // Dependent UI
-    let selView = GetSelectedView();
-    
-    if (selView.GetSubtaskDepth() != -1)
-    {
-        document.getElementById('subtask_depth_combo').style.display = 'inline-block';
-        document.getElementById('subtask_depth').value = selView.GetSubtaskDepth().toString();
-    }
-    else    
-    {
-    	// Not used
-        document.getElementById('subtask_depth_combo').style.display = 'none';
-    }
-    
-    RefreshSelectedView();
-}
 
-/* void */
-function ShowHideView(divName, viewId)
-{
-    let show = (viewId == divName);
-    let display = (show ? 'block' : 'none');
-    
-    document.getElementById(divName).style.display = display;
+    for (let i = 0; i < chartViews.length; i++)
+    {
+        let view = chartViews[i];
+        
+        if (view.Id == viewId) // Selected view
+        {
+            document.getElementById(viewId).style.display = 'block';
+            
+            if (view.GetSubtaskDepth() != -1)
+            {
+                document.getElementById('subtask_depth_combo').style.display = 'inline-block';
+                document.getElementById('subtask_depth').value = view.GetSubtaskDepth().toString();
+            }
+            else    
+            {
+                // Not used
+                document.getElementById('subtask_depth_combo').style.display = 'none';
+            }
+            
+            view.Refresh();
+        }
+        else
+        {
+            document.getElementById(view.Id).style.display = 'none';
+        }            
+    }
 }
 
 /* void */
@@ -1563,7 +1562,7 @@ function OnAppMessage(event)
     }
     else if (msg.msg == SetSelectedTaskMsg)
     {
-        SelectTask(msg.id, false);
+        SelectTask(msg.id.toString(), false);
     }
     else if (msg.msg == SetPreferencesMsg)
     {
@@ -1579,7 +1578,7 @@ function OnAppMessage(event)
         if ((Utils.GetPreference('ColorTaskBackground', false) != colorTaskBkgnd) ||
             (Utils.GetPreference('StrikethroughDone', true) != strikethruDone))
         {
-            RefreshSelectedView();
+            GetSelectedView().Refresh();
         }
     }
     else if (msg.msg == RestoreSessionStateMsg)
@@ -1588,36 +1587,19 @@ function OnAppMessage(event)
     }
 }
         
-/* string */
-function GetSelectedViewId()
-{
-    let viewId = Utils.GetStorage(SelectedViewKey);
-    
-    if ((viewId == null) || (viewId == "undefined"))
-        viewId = DashboardView.Id;
-    
-    return viewId;
-}
-        
 /* view object */
 function GetSelectedView()
 {
-    switch (GetSelectedViewId())
-    {
-        case DashboardView.Id: return dashboard;
-        case TreeMapView.Id:   return treemap;
-        case SankeyView.Id:    return sankey;
-    }
+    let viewId = Utils.GetStorage(SelectedViewKey);
     
-    return null;
-}
-
-/* void */
-function RefreshSelectedView()
-{
-    document.getElementById('views').value = GetSelectedViewId();
-
-    GetSelectedView().Refresh();
+    for (let i = 0; i < chartViews.length; i++)
+    {
+        if (chartViews[i].Id == viewId)
+            return chartViews[i];
+    }
+   
+    // First time
+    return chartViews[0];
 }
 
 /* void */
@@ -1654,11 +1636,12 @@ function OnFocusChanged(event)
 function MergeSelectedTaskAttributes(selTasks)
 {
     // Keep all views up to date but only redraw the active view
-    let viewId = GetSelectedViewId();
+    let selView = GetSelectedView();
     
-    dashboard.UpdateSelectedTasks(selTasks, (viewId == DashboardView.Id));
-    treemap.UpdateSelectedTasks(selTasks, (viewId == TreeMapView.Id));
-    sankey.UpdateSelectedTasks(selTasks, (viewId == SankeyView.Id));
+    chartViews.forEach((view) => 
+    {
+        view.UpdateSelectedTasks(selTasks, (view == selView));
+    });
     
     RestoreSelectedTask();
 }
@@ -1675,14 +1658,17 @@ function RestoreSelectedTask()
 /* void */
 function RestoreSessionState(state)
 {
-    dashboard.RestoreSessionState(state[DashboardView.Id]);
-    treemap.RestoreSessionState(state[TreeMapView.Id]);
-    sankey.RestoreSessionState(state[SankeyView.Id]);
+    // The individual charts
+    chartViews.forEach((view) => 
+    {
+        view.RestoreSessionState(state[view.Id]);
+    });
 
-    let viewState = state[SelectedViewKey];
+    // The previously active view
+    let viewId = state[SelectedViewKey];
     
-    if (viewState && (viewState != GetSelectedViewId()))
-        OnChangeView(viewState);
+    if (viewId && (viewId != GetSelectedView().Id))
+        OnChangeView(viewId);
 }
 
 /* void */
@@ -1732,7 +1718,6 @@ function SelectTask(id, fromChart)
 /* x, y, width, height */
 function GetSelectedTaskLabelRect()
 {
-    let viewId = GetSelectedViewId();
     let rect = GetSelectedView().GetSelectedTaskLabelRect();
     
     return { x:      rect.x, 
@@ -1744,10 +1729,16 @@ function GetSelectedTaskLabelRect()
 /* json */
 function GetSessionState()
 {
-    return { [SelectedViewKey] : GetSelectedViewId(), 
-             [DashboardView.Id]: dashboard.GetSessionState(),
-             [TreeMapView.Id]  : treemap.GetSessionState(),
-             [SankeyView.Id]   : sankey.GetSessionState() };
+    // The active view
+    let state = { [SelectedViewKey] : GetSelectedView().Id };
+
+    // The individual views
+    chartViews.forEach((view) =>
+    {
+        state[view.Id] = view.GetSessionState();
+    });
+    
+    return state;
 }
 
 // Global utilities ///////////////////////////////////////////////////////////////////////////////
