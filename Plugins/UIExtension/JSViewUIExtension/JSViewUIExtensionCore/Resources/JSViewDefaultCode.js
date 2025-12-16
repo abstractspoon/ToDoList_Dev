@@ -1570,7 +1570,7 @@ function OnAppMessage(event)
         let strikethruDone = Utils.GetPreference('StrikethroughDone', true);
         let backColor = Utils.GetPreference('BackColor', null);
         
-        Utils.SetStorage(PreferencesKey, JSON.stringify(msg.prefs).toString());
+        Utils.SetPreferences(msg.prefs);
         
         if (backColor != Utils.GetPreference('BackColor', null))
             document.body.style.backgroundColor = Utils.GetPreference('BackColor', null);
@@ -1760,14 +1760,20 @@ class Utils
     }
 
     /* void */
-    static GetPreference(pref, defValue)
+    static SetPreferences(prefs)
     {
-        let prefs = JSON.parse(Utils.GetStorage('Preferences'));
+        Utils.SetStorage(PreferencesKey, JSON.stringify(prefs).toString());
+    }
+
+    /* void */
+    static GetPreference(key, defValue)
+    {
+        let prefs = JSON.parse(Utils.GetStorage(PreferencesKey));
         
-        if (!prefs || (prefs[pref] == null))
+        if (!prefs || (prefs[key] == null))
             return defValue;
         
-        return prefs[pref];
+        return prefs[key];
     }
 
     /* string */
