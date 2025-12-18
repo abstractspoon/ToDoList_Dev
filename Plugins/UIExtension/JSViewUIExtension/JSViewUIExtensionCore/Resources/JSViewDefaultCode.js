@@ -85,12 +85,16 @@ class ViewBase
         return row2TaskMapping[sel.row];
     }
 
-     /* void */
+    /* bool */
     SetSelectedChartRow(id, chart, task2RowMapping)
     {
         let row = task2RowMapping[id];
         
+        if (!row)
+            return false;
+        
         chart.setSelection([{'row': row}]);
+        return true;
     }
 
     /* bool */
@@ -120,7 +124,7 @@ class ViewBase
 
 }
 
-// DashboardView class //////////////////////////////////////////////////////////////////////////
+// SankeyView class //////////////////////////////////////////////////////////////////////////
 
 class SankeyView extends ViewBase
 {
@@ -167,43 +171,57 @@ class SankeyView extends ViewBase
         this.#dataTable.addColumn('string', 'From');
         this.#dataTable.addColumn('string', 'To');
         this.#dataTable.addColumn('number', 'Weight');
+        this.#dataTable.addColumn('number', 'Leaf');
 
         // Top-level tasks
+        let maxDepth = this.GetSubtaskDepth();
+        
         for (let i = 0; i < tasks.length; i++) 
         {
-            this.#AddTask(tasks[i], 'Tasklist', 0);
+            this.#AddTask(tasks[i], 'Tasklist', 0, maxDepth);
         }
     }
 
     /* int (total subtask count) */
-    #AddTask(task, parentName, depth)
+    #AddTask(task, parentId, depth, maxDepth)
     {
-        let totalSubtasks = 1;
+        let totalSubtasks = 0;
         let numSubtask = (task.Subtasks ? task.Subtasks.length : 0);
         
+        let id = ('[' + task['Task ID'] + '] ' + task['Title']);
+
         if (numSubtask)
         {
             // Process subtasks first to accumulate subtask count
             for (let i = 0; i < numSubtask; i++) 
             {
-                totalSubtasks += this.#AddTask(task.Subtasks[i], task.Title, (depth + 1)); // RECURSIVE CALL
+                totalSubtasks += this.#AddTask(task.Subtasks[i], id, (depth + 1), maxDepth); // RECURSIVE CALL
             }
         }
+        else
+        {
+            totalSubtasks = 1;
+        }
 
-        if (depth <= this.GetSubtaskDepth())
-            this.#AddRow(task.Title, parentName, totalSubtasks);
+        if (depth <= maxDepth)
+        {
+            let leafTask = ((depth == maxDepth) || (numSubtask == 0));
+            this.#AddRow(id, parentId, totalSubtasks, leafTask);
+        }
+        // else we're just counting subtasks for weighting purposes
         
         return totalSubtasks;
     }
 
     /* void */
-    #AddRow(id, parentId, totalSubtasks)
+    #AddRow(id, parentId, totalSubtasks, leafTask)
     {
         this.#dataTable.addRow(
         [
             id,
             parentId, 
             totalSubtasks, // weight
+            leafTask ? 1 : 0
         ]);
         
         let row = (this.#dataTable.getNumberOfRows() - 1);
@@ -283,24 +301,43 @@ class SankeyView extends ViewBase
         if (this.SetStorage(SubtaskDepthKey, depth))
             this.Refresh();
     }
-         
-    /* void */
-    #Draw()
+
+    /* int */
+    #GetMinViewHeight()
     {
-        this.#DrawChart(this.#chart, 'Red', 'Blue');
+        let availHeight = GetViewClientHeight();
+        
+        let leafRows = this.#dataTable.getFilteredRows([{ column: 3, value: 1 }]);
+        let minHeight = (leafRows.length * 20);
+        
+        return Math.max(minHeight, availHeight);
     }
 
     /* void */
-    #DrawChart(chart, color1, color2) 
+    #Draw()
     {
         let options = 
         {
-//            colors: [ color1.toHexColor(), color2.toHexColor() ],
-//            curveType: 'function',
-            height: 1500,
-        };
-        
-        chart.draw(this.#dataTable, options);
+            height: this.#GetMinViewHeight(),
+      
+            sankey: 
+            {
+                node: 
+                { 
+                    colors: [ '#000000' ],
+//                    label: 
+//                    { 
+//                        fontName: 'Times-Roman',
+//                        fontSize: 14,
+//                        color: '#871b47',
+//                        bold: true,
+//                        italic: true 
+//                    } 
+                } 
+            },
+        };        
+
+        this.#chart.draw(this.#dataTable, options);
     }
 
 } // SankeyView class
@@ -484,6 +521,8 @@ class DashboardView extends ViewBase
             curveType: 'function',
             legend: { position: 'bottom' },
             title: 'Priority & Risk',
+            height: (GetViewClientHeight() / 2) - 3,
+            width:  document.documentElement.clientWidth / 2,
             
             animation: 
             {
@@ -673,7 +712,7 @@ class TreeMapView extends ViewBase
             fontSize:        0.1, // to prevent Google replacing task IDs with '…'
             generateTooltip: this.#OnGetTooltip.bind(this),
             headerHeight:    HeaderHeight,
-            height:          500,
+            height:          GetViewClientHeight(),
             maxDepth:        1,
             maxPostDepth:    this.GetSubtaskDepth(),
             midColor:        '#808080',
@@ -1546,6 +1585,8 @@ function OnChangeView(viewId)
             document.getElementById(view.Id).style.display = 'none';
         }            
     }
+    
+    GetSelectedView().OnResize();
 }
 
 /* void */
@@ -1711,6 +1752,16 @@ function SelectTask(id, fromChart)
         
     if (fromChart)
         NotifyApp(SetSelectedTaskMsg, "id", id);
+}
+
+/* int */
+function GetViewClientHeight()
+{
+    let clientHeight = document.documentElement.clientHeight;
+    let contentRect = document.getElementById('content_id').getBoundingClientRect();
+    let yScroll = document.documentElement.scrollTop;
+    
+    return (clientHeight - contentRect.top - 8 + yScroll);
 }
 
 // Global functions called directly from the App ///////////////////////////////////////
