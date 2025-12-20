@@ -515,6 +515,10 @@ class DashboardView extends ViewBase
     /* void */
     #DrawChart(chart, color1, color2) 
     {
+        // Preserve selection because chart.draw clears it
+        let sel = chart.getSelection()[0];
+        let row = (sel ? sel.row : null);
+        
         let options = 
         {
             colors: [ color1.toHexColor(), color2.toHexColor() ],
@@ -533,6 +537,9 @@ class DashboardView extends ViewBase
         };
 
         chart.draw(this.#dataTable, options);
+        
+        if (row != null)
+            chart.setSelection([{'row': row}]);
     }
 
 } // DashboardView class
@@ -1585,8 +1592,6 @@ function OnChangeView(viewId)
             document.getElementById(view.Id).style.display = 'none';
         }            
     }
-    
-    GetSelectedView().OnResize();
 }
 
 /* void */
