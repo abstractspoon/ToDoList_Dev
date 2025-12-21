@@ -44,9 +44,6 @@ class ViewBase
 
     /* json */ 
     GetSessionState() { return {}; }
-
-    /* void */
-    OnTaskSelectionChanged(id, prevId) {}
     
     /* void */ 
     UpdateSelectedTasks(selTasks, allowRedraw) {}
@@ -61,6 +58,9 @@ class ViewBase
     SetSubtaskDepth(depth) {}
 
     // Public Message Handlers (For derived classes to override) --------------------
+
+    /* bool */
+    OnTaskSelectionChanged(id, prevId) { return (id == '0'); }
 
     /* void */
     OnKeyDown(event) {}
@@ -85,16 +85,15 @@ class ViewBase
         return row2TaskMapping[sel.row];
     }
 
-    /* bool */
+    /* void */
     SetSelectedChartRow(id, chart, task2RowMapping)
     {
         let row = task2RowMapping[id];
         
-        if (!row)
-            return false;
-        
-        chart.setSelection([{'row': row}]);
-        return true;
+        if (row == null)
+            chart.setSelection([{}]);
+        else
+            chart.setSelection([{'row': row}]);
     }
 
     /* bool */
@@ -493,7 +492,6 @@ class DashboardView extends ViewBase
         this.#Draw();
     }
 
-    // Never call this directly; Only via SelectTask()
     /* void */
     OnTaskSelectionChanged(id, prevId)
     {
@@ -501,6 +499,8 @@ class DashboardView extends ViewBase
         this.SetSelectedChartRow(id, this.#chart12, this.#task2RowMapping);
         this.SetSelectedChartRow(id, this.#chart21, this.#task2RowMapping);
         this.SetSelectedChartRow(id, this.#chart22, this.#task2RowMapping);
+        
+        return ((this.#task2RowMapping[id] != null) || (id == '0'));
     }
                   
     /* void */
@@ -515,10 +515,6 @@ class DashboardView extends ViewBase
     /* void */
     #DrawChart(chart, color1, color2) 
     {
-        // Preserve selection because chart.draw clears it
-        let sel = chart.getSelection()[0];
-        let row = (sel ? sel.row : null);
-        
         let options = 
         {
             colors: [ color1.toHexColor(), color2.toHexColor() ],
@@ -536,6 +532,10 @@ class DashboardView extends ViewBase
             },  
         };
 
+        // Preserve selection because chart.draw clears it
+        let sel = chart.getSelection()[0];
+        let row = (sel ? sel.row : null);
+        
         chart.draw(this.#dataTable, options);
         
         if (row != null)
@@ -740,14 +740,31 @@ class TreeMapView extends ViewBase
     /* void */
     Refresh()
     {
-        // Refreshing will return the map to the top level
-        // so we'll need to drill back down to where we were
-        let headerId = this.GetStorage('HeaderId');
+        // Cache the header Id because redrawing will return the 
+        // map to the top level
+        let headerId = this.#GetHeaderId();
                     
         this.#Initialise();
         this.#Draw();
         
         RestoreSelectedTask();
+        
+        // Restore the header Id ONLY if it is equal
+        // to the selected task or the selected task's parent
+        // ie. We need to check that a selection change 
+        // hasn't occurred in the meantime
+        let selId = Utils.GetSelectedTaskId();
+        
+        if (selId != headerId)
+        {
+            // Try for parent Id
+            let row = this.#task2RowMapping[selId];
+            let parentId = this.#dataTable.getValue(row, 1);
+            
+            if (parentId != headerId)
+                return;
+        }
+        
         this.#DrilldownTo(headerId, true);
     }
 
@@ -1030,10 +1047,12 @@ class TreeMapView extends ViewBase
         this.#RefreshTextAndColors();
     }
 
-    // We never call this directly; Only via SelectTask()
-    /* void */
+    /* bool */
     OnTaskSelectionChanged(id, prevId = null)
     {
+        if (!this.#task2RowMapping[id])
+            return false;
+        
         // Navigate to the task if it's not currently visible
         if (!this.#IsCellVisible(id))
         {
@@ -1050,6 +1069,7 @@ class TreeMapView extends ViewBase
         }
         
         this.#EnsureSelectionVisible();
+        return true;
     }
 
     /* DOMRect */ 
@@ -1698,7 +1718,7 @@ function RestoreSelectedTask()
     let id = Utils.GetSelectedTaskId();
     
     if (Utils.IsSelectableTask(id))
-        SelectTask(id, false);
+        SelectTask(id, true);
 }
 
 /* void */
@@ -1753,10 +1773,15 @@ function SelectTask(id, fromChart)
     let prevId = Utils.GetSelectedTaskId();
 
     Utils.SetStorage(SelectedTaskKey, id);
-    GetSelectedView().OnTaskSelectionChanged(id, prevId);
-        
-    if (fromChart)
+    
+    if (!GetSelectedView().OnTaskSelectionChanged(id, prevId))
+    {
+        NotifyApp(SetSelectedTaskMsg, "id", '0');
+    }
+    else if (fromChart)
+    {
         NotifyApp(SetSelectedTaskMsg, "id", id);
+    }
 }
 
 /* int */

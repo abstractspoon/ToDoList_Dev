@@ -106,9 +106,7 @@ namespace JSViewUIExtension
 			m_SelectedTaskId = taskId;
 			SendBrowserMessage(SetSelectedTaskMsg, "id", taskId);
 
-			// TODO
-
-			return true/*false*/;
+			return true;
 		}
 
 		public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -351,12 +349,14 @@ namespace JSViewUIExtension
 		void OnBrowserNavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
 			SendBrowserMessage(SetPreferencesMsg, "prefs", m_AppPrefs);
-			SendBrowserMessage(SetSelectedTaskMsg, "id", m_SelectedTaskId);
 
 			if (!string.IsNullOrEmpty(m_PreviousBrowserState))
 			{
 				SendBrowserMessage(RestoreSessionStateMsg, "state", m_PreviousBrowserState);
 				m_PreviousBrowserState = String.Empty;
+
+				// Also set the initial selected task id (once per session)
+				SendBrowserMessage(SetSelectedTaskMsg, "id", m_SelectedTaskId);
 			}
 
 			if (m_SetFocusPending)
@@ -381,10 +381,14 @@ namespace JSViewUIExtension
 
 				if (uint.TryParse(msg["id"].ToString(), out taskId))
 				{
-					if (new UIExtension.ParentNotify(m_HwndParent).NotifySelChange(taskId))
+					if ((new UIExtension.ParentNotify(m_HwndParent).NotifySelChange(taskId)) || (taskId == 0))
+					{
 						m_SelectedTaskId = taskId;
-					else
+					}
+					else if (taskId != m_SelectedTaskId)
+					{
 						SelectTask(m_SelectedTaskId);
+					}
 				}
 			}
 			else
