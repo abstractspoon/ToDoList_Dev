@@ -46,7 +46,7 @@ class ViewBase
     GetSessionState() { return {}; }
 
     /* void */
-    SelectTask(id, prevId) {}
+    OnTaskSelectionChanged(id, prevId) {}
     
     /* void */ 
     UpdateSelectedTasks(selTasks, allowRedraw) {}
@@ -383,10 +383,10 @@ class DashboardView extends ViewBase
             this.#chart21 = new google.visualization.AreaChart   (document.getElementById('dashboard_chart21'));
             this.#chart22 = new google.visualization.ColumnChart (document.getElementById('dashboard_chart22'));
             
-            google.visualization.events.addListener(this.#chart11, 'select', this.#On11Select.bind(this));
-            google.visualization.events.addListener(this.#chart12, 'select', this.#On12Select.bind(this));
-            google.visualization.events.addListener(this.#chart21, 'select', this.#On21Select.bind(this));
-            google.visualization.events.addListener(this.#chart22, 'select', this.#On22Select.bind(this));
+            google.visualization.events.addListener(this.#chart11, 'select', this.#OnClickChart11.bind(this));
+            google.visualization.events.addListener(this.#chart12, 'select', this.#OnClickChart12.bind(this));
+            google.visualization.events.addListener(this.#chart21, 'select', this.#OnClickChart21.bind(this));
+            google.visualization.events.addListener(this.#chart22, 'select', this.#OnClickChart22.bind(this));
             
             this.#Populate()
         }
@@ -446,31 +446,31 @@ class DashboardView extends ViewBase
     }
 
     /* void */
-    #On11Select(e)
+    #OnClickChart11(e)
     {
-        this.#OnSelectTask(this.#chart11);
+        this.#OnClickChart(this.#chart11);
     }
 
     /* void */
-    #On12Select(e)
+    #OnClickChart12(e)
     {
-        this.#OnSelectTask(this.#chart12);
+        this.#OnClickChart(this.#chart12);
     }
 
     /* void */
-    #On21Select(e)
+    #OnClickChart21(e)
     {
-        this.#OnSelectTask(this.#chart21);
+        this.#OnClickChart(this.#chart21);
     }
 
     /* void */
-    #On22Select(e)
+    #OnClickChart22(e)
     {
-        this.#OnSelectTask(this.#chart22);
+        this.#OnClickChart(this.#chart22);
     }
 
     /* void */
-    #OnSelectTask(chart)
+    #OnClickChart(chart)
     {
         let id = this.GetSelectedIdFromChart(chart, this.#row2TaskMapping);
         
@@ -495,7 +495,7 @@ class DashboardView extends ViewBase
 
     // Never call this directly; Only via SelectTask()
     /* void */
-    SelectTask(id, prevId)
+    OnTaskSelectionChanged(id, prevId)
     {
         this.SetSelectedChartRow(id, this.#chart11, this.#task2RowMapping);
         this.SetSelectedChartRow(id, this.#chart12, this.#task2RowMapping);
@@ -1032,7 +1032,7 @@ class TreeMapView extends ViewBase
 
     // We never call this directly; Only via SelectTask()
     /* void */
-    SelectTask(id, prevId = null)
+    OnTaskSelectionChanged(id, prevId = null)
     {
         // Navigate to the task if it's not currently visible
         if (!this.#IsCellVisible(id))
@@ -1753,7 +1753,7 @@ function SelectTask(id, fromChart)
     let prevId = Utils.GetSelectedTaskId();
 
     Utils.SetStorage(SelectedTaskKey, id);
-    GetSelectedView().SelectTask(id, prevId);
+    GetSelectedView().OnTaskSelectionChanged(id, prevId);
         
     if (fromChart)
         NotifyApp(SetSelectedTaskMsg, "id", id);
