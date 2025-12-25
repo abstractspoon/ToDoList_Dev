@@ -1090,8 +1090,8 @@ namespace DayViewUIExtension
 
 			SelectedDates.Start = SelectedDates.End;
 
-            AdjustVScrollbar();
 			RebuildMatchingAppointments();
+			Invalidate();
         }
 
 		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey, int depth, ref bool datesChanged)
@@ -1912,7 +1912,7 @@ namespace DayViewUIExtension
 					base.SlotsPerHour = value;
 
 					ValidateMinSlotHeight();
-					AdjustVScrollbar();
+					Invalidate();
 				}
 			}
 		}
@@ -1928,7 +1928,6 @@ namespace DayViewUIExtension
 					minSlotHeight = m_UserMinSlotHeight;
 
 					ValidateMinSlotHeight();
-					AdjustVScrollbar();
 					Invalidate();
 				}
 			}

@@ -66,10 +66,9 @@ namespace Calendar
         protected int groupSpacing = 1;
         protected int daySpacing = 1;
 		protected int rightClickSelectionMinutes = 60;
+		protected int minSlotHeight = 5;
 
 		public event DayWidthEventHandler NotifyDayWidth;
-
-		static protected int minSlotHeight = 5;
 
         public enum AppHeightDrawMode
         {
@@ -86,7 +85,9 @@ namespace Calendar
 
         public DayView()
         {
-            StartDate = DateTime.Now;
+			slotHeight = minSlotHeight;
+
+			StartDate = DateTime.Now;
 
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 			SetStyle(ControlStyles.UserPaint, true);
@@ -97,7 +98,6 @@ namespace Calendar
             vscroll.Dock = DockStyle.Right;
             vscroll.Visible = allowScroll;
             vscroll.Scroll += new ScrollEventHandler(OnVScroll);
-            AdjustVScrollbar();
 			vscroll.Value = 0;
 
             Controls.Add(vscroll);
@@ -221,7 +221,7 @@ namespace Calendar
 				if (value != showWorkingHoursOnly)
 				{
 					showWorkingHoursOnly = value;
-					AdjustVScrollbar();
+					Invalidate();
 				}
 			}
 		}
@@ -255,7 +255,7 @@ namespace Calendar
 
 		// ------------------------------------------------------------------
 
-		private int slotHeight = minSlotHeight;
+		private int slotHeight = 5;
 
         public int SlotHeight
         {
@@ -265,14 +265,16 @@ namespace Calendar
             }
             set
             {
-                slotHeight = ((value < minSlotHeight) ? minSlotHeight : value);
-                OnSlotHeightChanged();
+				int curHeight = slotHeight;
+				slotHeight = Math.Max(value, minSlotHeight);
+
+				if (slotHeight != curHeight)
+	                OnSlotHeightChanged();
             }
         }
 
         private void OnSlotHeightChanged()
         {
-            AdjustVScrollbar();
             Invalidate();
         }
 		
@@ -404,8 +406,9 @@ namespace Calendar
 
                     EnsureVisible(SelectedAppointment, true);
                     OnDaysToShowChanged();
-                    AdjustVScrollbar();
 					AdjustHScrollbar();
+
+					Invalidate();
 				}
 			}
         }
@@ -709,11 +712,7 @@ namespace Calendar
 				if (value != workStart)
 				{
 					workStart = value;
-
-					if (showWorkingHoursOnly)
-						AdjustVScrollbar();
-					else
-						Invalidate();
+					Invalidate();
 				}
 			}
 		}
@@ -728,11 +727,7 @@ namespace Calendar
 				if (value != workEnd)
 				{
 					workEnd = value;
-
-					if (showWorkingHoursOnly)
-						AdjustVScrollbar();
-					else
-						Invalidate();
+					Invalidate();
 				}
 			}
         }
@@ -932,7 +927,6 @@ namespace Calendar
 			else
 				StartDate = StartDate.AddDays(-HScrollStep);
 
-			AdjustVScrollbar();
 			Invalidate();
 		}
 
@@ -946,8 +940,9 @@ namespace Calendar
 		protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
         {
             base.SetBoundsCore(x, y, width, height, specified);
-            AdjustVScrollbar();
-        }
+
+			Invalidate();
+		}
 
         protected void AdjustVScrollbar()
         {
@@ -1514,8 +1509,6 @@ namespace Calendar
             // Calculate visible rectangle
             Rectangle rect = new Rectangle(0, 0, ClientRectangle.Width - vscroll.Width, ClientRectangle.Height);
 			DoPaint(e, rect);
-
-			AdjustVScrollbar();
         }
 
 		protected void DoPaint(PaintEventArgs e, Rectangle rect)
@@ -1960,7 +1953,22 @@ namespace Calendar
 
         private void DrawDays(PaintEventArgs e, Rectangle rect)
         {
+			// There are a nasty set of dependencies between the 
+			// vertical scrollbar on the one hand, the long and day
+			// appointments on the other:
+			//
+			// 1. The vertical scrollbar requires 'allDayEventsHeaderHeight'
+			//    to have been pre-calculated which happens in 'DrawLongAppointments'.
+			// 2. The day appointments depend on the slot height having
+			//    been pre-calculated which happens in 'AdjustVScrollbar'.
+			// 3. The long and day appointments are rendered here which means
+			//    that the only place AdjustVScrollbar SHOULD be called is here.
+			//    Any need to update the vertical scrollbar can therefore be
+			//    achieved by calling 'Invalidate'.
+			// 4. I could try to re-architect this more cleanly but not for now.
+
             DrawLongAppointments(e.Graphics, rect);
+			AdjustVScrollbar();
 
             // Draw the day appointments
             int dayWidth = rect.Width / daysToShow;

@@ -753,7 +753,6 @@ namespace LoggedTimeUIExtension
 			while (ProcessTaskUpdate(task, type, 0))
 				task = task.GetNextTask();
 
-            AdjustVScrollbar();
             Invalidate();
         }
 
@@ -1154,7 +1153,7 @@ namespace LoggedTimeUIExtension
 					base.SlotsPerHour = value;
 
 					ValidateMinSlotHeight();
-					AdjustVScrollbar();
+					Invalidate();
 				}
 			}
 		}
@@ -1170,7 +1169,6 @@ namespace LoggedTimeUIExtension
 					minSlotHeight = m_UserMinSlotHeight;
 
 					ValidateMinSlotHeight();
-					AdjustVScrollbar();
 					Invalidate();
 				}
 			}
