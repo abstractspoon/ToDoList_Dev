@@ -1829,12 +1829,13 @@ namespace DayViewUIExtension
 			Cursor = GetCursor(e);
 		}
 
-		protected override void OnScroll(ScrollEventArgs se)
+		protected override void OnScroll(ScrollEventArgs e)
 		{
-			base.OnScroll(se);
+			base.OnScroll(e);
 
-			if (se.ScrollOrientation == ScrollOrientation.HorizontalScroll)
-				DoHorizontalScroll(se.NewValue > se.OldValue);
+			// Handle 'shift + mouse-wheel' scrolling
+			if (e.ScrollOrientation == ScrollOrientation.HorizontalScroll)
+				DoHorizontalScroll(e.NewValue > e.OldValue);
 		}
 
 		private Cursor GetCursor(MouseEventArgs e)
