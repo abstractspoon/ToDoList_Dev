@@ -942,8 +942,8 @@ namespace Calendar
 		{
 			hscroll.SuspendLayout();
 
-			hscroll.Left = (HourLabelWidth + hourLabelIndent + 2);
-			hscroll.Width = (Width - hscroll.Left - vscroll.Width - 4);
+			hscroll.Left = (HourLabelWidth + hourLabelIndent + 1);
+			hscroll.Width = (Width - hscroll.Left - vscroll.Width - 2);
 			hscroll.Top = (Height - hscroll.Height - 2);
 
 			hscroll.ResumeLayout();
@@ -955,7 +955,7 @@ namespace Calendar
 
 			vscroll.Left = (Width - vscroll.Width - 2);
 			vscroll.Top = HeaderHeight;
-			vscroll.Height = (Height - vscroll.Top - hscroll.Height);
+			vscroll.Height = (Height - vscroll.Top - hscroll.Height - 2);
 
 			vscroll.ResumeLayout();
 		}
@@ -982,7 +982,7 @@ namespace Calendar
 				slotHeight = minSlotHeight;
 
 			int oneHourHeight = (slotHeight * slotsPerHour);
-			AllowScroll = ((oneHourHeight * VisibleHours) > availHeight);
+			AllowScroll = ((availHeight > 0) && ((oneHourHeight * VisibleHours) > availHeight));
 
 			vscroll.Minimum = 0;
 			vscroll.SmallChange = oneHourHeight;
@@ -1544,8 +1544,8 @@ namespace Calendar
             ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(StartDate, EndDate);
             OnResolveAppointments(args);
 
-//             using (SolidBrush backBrush = new SolidBrush(renderer.BackColor()))
-//                 e.Graphics.FillRectangle(SystemBrushes.ScrollBar/*backBrush*/, rect);
+            using (SolidBrush backBrush = new SolidBrush(renderer.BackColor()))
+                e.Graphics.FillRectangle(backBrush, rect);
 
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 			e.Graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
@@ -1573,21 +1573,26 @@ namespace Calendar
             hourLabelRectangle.Y += HeaderHeight;
 			hourLabelRectangle.Height -= (HeaderHeight + vscroll.Width);
 
-            using (SolidBrush backBrush = new SolidBrush(renderer.BackColor()))
-                e.Graphics.FillRectangle(backBrush, rect);
-
             DrawHourLabels(e, hourLabelRectangle);
 
-            if (!AllowScroll)
+			// Render 'dead space' outside of scrollbars
             {
-				Rectangle scrollrect = rect;
+				Rectangle scrollrect = vscroll.Bounds;
 
-				scrollrect.X = headerRectangle.Width + HourLabelWidth + hourLabelIndent;
-                scrollrect.Width = vscroll.Width;
-                using (SolidBrush backBrush = new SolidBrush(renderer.BackColor()))
-                    e.Graphics.FillRectangle(backBrush, scrollrect);
-            }
-        }
+				scrollrect.Y = 0;
+                scrollrect.Height = rect.Height;
+
+                e.Graphics.FillRectangle(SystemBrushes.ScrollBar, scrollrect);
+			}
+			{
+				Rectangle scrollrect = hscroll.Bounds;
+
+				scrollrect.X = 0;
+				scrollrect.Width = rect.Width;
+
+				e.Graphics.FillRectangle(SystemBrushes.ScrollBar, scrollrect);
+			}
+		}
 
 		protected void DrawHourLabels(PaintEventArgs e, Rectangle rect)
         {
