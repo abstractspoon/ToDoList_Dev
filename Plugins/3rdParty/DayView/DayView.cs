@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Calendar
 {
@@ -916,11 +917,11 @@ namespace Calendar
 			switch (e.KeyCode)
 			{
 			case Keys.Left:
-				DoHorizontalScroll(-1);
+				DoHorizontalScroll(ScrollEventType.SmallDecrement);
 				break;
 
 			case Keys.Right:
-				DoHorizontalScroll(1);
+				DoHorizontalScroll(ScrollEventType.SmallIncrement);
 				break;
 			}
 
@@ -933,20 +934,13 @@ namespace Calendar
 
 			switch (e.Type)
 			{
+			case ScrollEventType.First:
+			case ScrollEventType.Last:
 			case ScrollEventType.SmallDecrement:
-				numDays = -Math.Min(DaysShowing, 7);
-				break;
-
 			case ScrollEventType.SmallIncrement:
-				numDays = Math.Min(DaysShowing, 7);
-				break;
-
 			case ScrollEventType.LargeDecrement:
-				numDays = -Math.Max(DaysShowing, 7);
-				break;
-
 			case ScrollEventType.LargeIncrement:
-				numDays = Math.Max(DaysShowing, 7);
+				DoHorizontalScroll(e.Type);
 				break;
 
 			case ScrollEventType.ThumbPosition:
@@ -959,15 +953,9 @@ namespace Calendar
 					// else move in single weeks
 					if ((DaysShowing % 7) == 0)
 						numDays *= 7;
+
+					StartDate = StartDate.AddDays(numDays);
 				}
-				break;
-
-			case ScrollEventType.First:
-				numDays = hscroll.Minimum;
-				break;
-
-			case ScrollEventType.Last:
-				numDays = hscroll.Maximum;
 				break;
 
 			case ScrollEventType.EndScroll: 
@@ -987,19 +975,49 @@ namespace Calendar
 
 					thread.Start();
 				}
+				break;
+			}
+        }
+
+		protected void DoHorizontalScroll(ScrollEventType type)
+		{
+			int numDays = 0;
+
+			switch (type)
+			{
+			case ScrollEventType.First:
+				numDays = hscroll.Minimum;
+				break;
+
+			case ScrollEventType.Last:
+				numDays = hscroll.Maximum;
+				break;
+
+			case ScrollEventType.SmallDecrement:
+				numDays = -Math.Min(DaysShowing, 7);
+				break;
+
+			case ScrollEventType.SmallIncrement:
+				numDays = Math.Min(DaysShowing, 7);
+				break;
+
+			case ScrollEventType.LargeDecrement:
+				numDays = -Math.Max(DaysShowing, 7);
+				break;
+
+			case ScrollEventType.LargeIncrement:
+				numDays = Math.Max(DaysShowing, 7);
+				break;
+
+			// Not supported by this function
+			case ScrollEventType.ThumbPosition:
+			case ScrollEventType.ThumbTrack:
+			case ScrollEventType.EndScroll:
+				Debug.Assert(false);
 				return;
 			}
 
-			DoHorizontalScroll(numDays);
-        }
-
-		protected void DoHorizontalScroll(int numDays)
-		{
-			if (numDays != 0)
-			{
-				StartDate = StartDate.AddDays(numDays);
-// 				Invalidate();
-			}
+			StartDate = StartDate.AddDays(numDays);
 		}
 
 		protected override void OnSizeChanged(EventArgs e)

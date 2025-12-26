@@ -1082,7 +1082,7 @@ namespace LoggedTimeUIExtension
 
 			// Handle 'shift + mouse-wheel' scrolling
 			if (e.ScrollOrientation == ScrollOrientation.HorizontalScroll)
-				DoHorizontalScroll((e.NewValue > e.OldValue) ? 1 : -1);
+				DoHorizontalScroll(e.Type);
 		}
 
 		private Cursor GetCursor(MouseEventArgs e)
