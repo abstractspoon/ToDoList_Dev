@@ -667,8 +667,8 @@ namespace DayViewUIExtension
 			m_DayView.DaysShowing = numDays;
             m_WeekLabel.NumDays = numDays;
 
-			string format = m_Trans.Translate("Next/Previous {0} days", Translator.Type.ToolTip);
-			m_DayView.HScrollTooltipText = String.Format(format, m_DayView.HScrollStep);
+// 			string format = m_Trans.Translate("Next/Previous {0} days", Translator.Type.ToolTip);
+// 			m_DayView.HScrollTooltipText = String.Format(format, m_DayView.HScrollStep);
 
 			UpdateToolbarButtonStates();
             UpdatedSelectedTaskDatesPosition();

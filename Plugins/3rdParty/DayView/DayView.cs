@@ -7,6 +7,7 @@ using System.Drawing.Text;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 
 namespace Calendar
 {
@@ -108,8 +109,8 @@ namespace Calendar
 //             hscroll.Width = HourLabelWidth;
 //             hscroll.Height = minDayHeaderHeight;
             hscroll.Scroll += new ScrollEventHandler(OnHScroll);
-            hscroll.Minimum = -1000; // ~-20 years
-            hscroll.Maximum = 1000;  // ~20 years
+            hscroll.Minimum = -10000;
+            hscroll.Maximum = 10000;
             hscroll.Value = 0;
 
             Controls.Add(hscroll);
@@ -170,13 +171,13 @@ namespace Calendar
 			return false;
 		}
 
-		public int HScrollStep { get { return Math.Min(DaysShowing, 7); } }
+// 		public int HScrollStep { get { return Math.Min(DaysShowing, 7); } }
 
-		public String HScrollTooltipText
-		{
-			get { return tooltip.GetToolTip(hscroll); }
-			set { tooltip.SetToolTip(hscroll, value); }
-		}
+// 		public String HScrollTooltipText
+// 		{
+// 			get { return tooltip.GetToolTip(hscroll); }
+// 			set { tooltip.SetToolTip(hscroll, value); }
+// 		}
 
 		private int HourLabelWidth
 		{
@@ -397,18 +398,17 @@ namespace Calendar
                     daysToShow = value; // must come before resetting start date
 					StartDate = startDate;
 
-					switch (daysToShow)
-					{
-					case 1:	 HScrollTooltipText = "Change Day";		break;
-					case 7:	 HScrollTooltipText = "Change Week";	break;
-					default: HScrollTooltipText = "Change";			break;
-					}
+// 					switch (daysToShow)
+// 					{
+// 					case 1:	 HScrollTooltipText = "Change Day";		break;
+// 					case 7:	 HScrollTooltipText = "Change Week";	break;
+// 					default: HScrollTooltipText = "Change";			break;
+// 					}
 
                     EnsureVisible(SelectedAppointment, true);
-                    OnDaysToShowChanged();
-
 					RepositionHScrollbar();
-					Invalidate();
+
+                    OnDaysToShowChanged();
 				}
 			}
         }
@@ -901,11 +901,11 @@ namespace Calendar
 			switch (e.KeyCode)
 			{
 			case Keys.Left:
-				DoHorizontalScroll(false);
+				DoHorizontalScroll(-1);
 				break;
 
 			case Keys.Right:
-				DoHorizontalScroll(true);
+				DoHorizontalScroll(1);
 				break;
 			}
 
@@ -914,20 +914,77 @@ namespace Calendar
 
         void OnHScroll(object sender, ScrollEventArgs e)
         {
-			if (e.NewValue == e.OldValue)
-				return;
+			int numDays = 0;
 
-			DoHorizontalScroll(e.NewValue > e.OldValue);
+			switch (e.Type)
+			{
+			case ScrollEventType.SmallDecrement:
+				numDays = -Math.Min(DaysShowing, 7);
+				break;
+
+			case ScrollEventType.SmallIncrement:
+				numDays = Math.Min(DaysShowing, 7);
+				break;
+
+			case ScrollEventType.LargeDecrement:
+				numDays = -Math.Max(DaysShowing, 7);
+				break;
+
+			case ScrollEventType.LargeIncrement:
+				numDays = Math.Max(DaysShowing, 7);
+				break;
+
+			case ScrollEventType.ThumbPosition:
+			case ScrollEventType.ThumbTrack:
+				if (e.NewValue != e.OldValue)
+				{
+					// Move in single days when showing fewer than 7 days
+					numDays = ((e.NewValue > e.OldValue) ? 1 : -1);
+
+					// else move in single weeks
+					if ((DaysShowing % 7) == 0)
+						numDays *= 7;
+				}
+				break;
+
+			case ScrollEventType.First:
+				numDays = hscroll.Minimum;
+				break;
+
+			case ScrollEventType.Last:
+				numDays = hscroll.Maximum;
+				break;
+
+			case ScrollEventType.EndScroll: 
+				{
+					// Adjust thumb to give the semblance of infinite paging
+					//
+					// Some trickery is required because:
+					// 1. We have to delay the reset until this message handling is complete
+					// 2. The reset can only happen on the UI thread
+					int newPos = hscroll.Value;
+
+					if (Math.Abs(newPos) >= (hscroll.Maximum - hscroll.LargeChange))
+						newPos /= 2;
+
+					var reset = new Action(() => hscroll.Value = newPos);
+					var thread = new Thread(() => hscroll.Invoke(reset));
+
+					thread.Start();
+				}
+				return;
+			}
+
+			DoHorizontalScroll(numDays);
         }
 
-		protected void DoHorizontalScroll(bool right)
+		protected void DoHorizontalScroll(int numDays)
 		{
-			if (right)
-				StartDate = StartDate.AddDays(HScrollStep);
-			else
-				StartDate = StartDate.AddDays(-HScrollStep);
-
-			Invalidate();
+			if (numDays != 0)
+			{
+				StartDate = StartDate.AddDays(numDays);
+// 				Invalidate();
+			}
 		}
 
 		protected override void OnSizeChanged(EventArgs e)
@@ -1535,7 +1592,7 @@ namespace Calendar
             Rectangle rect = new Rectangle(0, 0, ClientRectangle.Width, ClientRectangle.Height);
 			DoPaint(e, rect);
 
-			RepositionHScrollbar();
+//			RepositionHScrollbar();
         }
 
 		protected void DoPaint(PaintEventArgs e, Rectangle rect)
