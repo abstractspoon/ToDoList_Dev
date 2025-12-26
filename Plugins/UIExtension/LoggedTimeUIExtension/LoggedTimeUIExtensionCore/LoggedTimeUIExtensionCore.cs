@@ -534,8 +534,8 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.DaysShowing = numDays;
             m_WeekLabel.NumDays = numDays;
 
-// 			string format = m_Trans.Translate("Next/Previous {0} days", Translator.Type.ToolTip);
-// 			m_TimeLog.HScrollTooltipText = String.Format(format, m_TimeLog.HScrollStep);
+			string format = m_Trans.Translate("Next/Previous {0} days", Translator.Type.ToolTip);
+			m_TimeLog.HScrollTooltipText = String.Format(format, m_TimeLog.HScrollStep);
 
 			UpdateToolbarButtonStates();
 		}

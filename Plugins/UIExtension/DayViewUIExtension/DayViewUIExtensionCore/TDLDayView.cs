@@ -1835,7 +1835,15 @@ namespace DayViewUIExtension
 
 			// Handle 'shift + mouse-wheel' scrolling
 			if (e.ScrollOrientation == ScrollOrientation.HorizontalScroll)
-				DoHorizontalScroll((e.NewValue > e.OldValue) ? 1 : -1);
+			{
+				int numDays = ((e.NewValue > e.OldValue) ? 1 : -1);
+
+				// else move in single weeks
+				if ((DaysShowing % 7) == 0)
+					numDays *= 7;
+
+				DoHorizontalScroll(numDays);
+			}
 		}
 
 		private Cursor GetCursor(MouseEventArgs e)

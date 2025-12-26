@@ -51,6 +51,7 @@ namespace Calendar
         private ToolTip tooltip;
         private DrawTool drawTool;
         private SelectionTool selectionTool;
+		private bool legacyScrollbars = false;
 
         #endregion
 
@@ -96,7 +97,6 @@ namespace Calendar
             SetStyle(ControlStyles.Selectable, true);
 
             vscroll = new VScrollBar();
-            //vscroll.Dock = DockStyle.Right;
             vscroll.Visible = allowScroll;
             vscroll.Scroll += new ScrollEventHandler(OnVScroll);
 			vscroll.Value = 0;
@@ -105,9 +105,6 @@ namespace Calendar
 
             hscroll = new HScrollBar();
             hscroll.Visible = true;
-//             hscroll.Location = new Point(0, 0);
-//             hscroll.Width = HourLabelWidth;
-//             hscroll.Height = minDayHeaderHeight;
             hscroll.Scroll += new ScrollEventHandler(OnHScroll);
             hscroll.Minimum = -10000;
             hscroll.Maximum = 10000;
@@ -171,13 +168,31 @@ namespace Calendar
 			return false;
 		}
 
-// 		public int HScrollStep { get { return Math.Min(DaysShowing, 7); } }
+		public int HScrollStep { get { return Math.Min(DaysShowing, 7); } }
 
-// 		public String HScrollTooltipText
-// 		{
-// 			get { return tooltip.GetToolTip(hscroll); }
-// 			set { tooltip.SetToolTip(hscroll, value); }
-// 		}
+		public String HScrollTooltipText
+		{
+			get { return tooltip.GetToolTip(hscroll); }
+			set { tooltip.SetToolTip(hscroll, value); }
+		}
+
+		protected bool LegacyScrollbars
+		{
+			get { return legacyScrollbars; }
+
+			set
+			{
+				if (value != legacyScrollbars)
+				{
+					legacyScrollbars = value;
+					tooltip.Active = value;
+
+					RepositionVScrollbar();
+					RepositionHScrollbar();
+
+				}
+			}
+		}
 
 		private int HourLabelWidth
 		{
@@ -999,9 +1014,18 @@ namespace Calendar
 		{
 			hscroll.SuspendLayout();
 
-			hscroll.Left = (HourLabelWidth + hourLabelIndent + 1);
-			hscroll.Width = (Width - hscroll.Left - vscroll.Width - 2);
-			hscroll.Top = (Height - hscroll.Height - 2);
+			if (LegacyScrollbars)
+			{
+				hscroll.Location = new Point(0, 0);
+				hscroll.Width = (HourLabelWidth + hourLabelIndent);
+				hscroll.Height = minDayHeaderHeight;
+			}
+			else
+			{
+				hscroll.Left = (HourLabelWidth + hourLabelIndent + 1);
+				hscroll.Width = (Width - hscroll.Left - vscroll.Width - 2);
+				hscroll.Top = (Height - hscroll.Height - 2);
+			}
 
 			hscroll.ResumeLayout();
 		}
@@ -1011,8 +1035,17 @@ namespace Calendar
 			vscroll.SuspendLayout();
 
 			vscroll.Left = (Width - vscroll.Width - 2);
-			vscroll.Top = HeaderHeight;
-			vscroll.Height = (Height - vscroll.Top - hscroll.Height - 2);
+
+			if (LegacyScrollbars)
+			{
+				vscroll.Top = 0;
+				vscroll.Height = Height;
+			}
+			else
+			{
+				vscroll.Top = HeaderHeight;
+				vscroll.Height = (Height - vscroll.Top - hscroll.Height - 2);
+			}
 
 			vscroll.ResumeLayout();
 		}
@@ -1032,7 +1065,11 @@ namespace Calendar
 				return;
 
 			// Auto-calculate best 'hour' height
-			int availHeight = (Height - HeaderHeight - vscroll.Width);
+			int availHeight = (Height - HeaderHeight);
+
+			if (!LegacyScrollbars)
+				availHeight -= hscroll.Height;
+
 			slotHeight = ((availHeight / (VisibleHours * slotsPerHour)) + 1);
 
 			if (slotHeight < minSlotHeight)
@@ -1592,7 +1629,8 @@ namespace Calendar
             Rectangle rect = new Rectangle(0, 0, ClientRectangle.Width, ClientRectangle.Height);
 			DoPaint(e, rect);
 
-//			RepositionHScrollbar();
+			if (legacyScrollbars)
+				RepositionHScrollbar(); // because hour label width may have changed
         }
 
 		protected void DoPaint(PaintEventArgs e, Rectangle rect)
@@ -1601,14 +1639,21 @@ namespace Calendar
             ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(StartDate, EndDate);
             OnResolveAppointments(args);
 
-            using (SolidBrush backBrush = new SolidBrush(renderer.BackColor()))
-                e.Graphics.FillRectangle(backBrush, rect);
+			if (LegacyScrollbars)
+			{
+				using (SolidBrush backBrush = new SolidBrush(renderer.BackColor()))
+					e.Graphics.FillRectangle(backBrush, rect);
+			}
+			else
+			{
+				e.Graphics.FillRectangle(SystemBrushes.Control, rect);
+			}
 
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+			e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 			e.Graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
             Rectangle headerRectangle = rect;
-            headerRectangle.X += HourLabelWidth + hourLabelIndent;
+            headerRectangle.X += (HourLabelWidth + hourLabelIndent);
             headerRectangle.Width -= (HourLabelWidth + hourLabelIndent + vscroll.Width);
             headerRectangle.Height = DayHeaderHeight;
 
@@ -1616,38 +1661,45 @@ namespace Calendar
                 DrawDayHeaders(e, headerRectangle);
 
             Rectangle daysRectangle = rect;
-            daysRectangle.X += HourLabelWidth + hourLabelIndent;
-            daysRectangle.Y += HeaderHeight;
-            daysRectangle.Width -= (HourLabelWidth + hourLabelIndent + vscroll.Width);
-			daysRectangle.Height -= hscroll.Height;
+            daysRectangle.X = headerRectangle.X; // previously calculated
+			daysRectangle.Width = headerRectangle.Width; // previously calculated
+			daysRectangle.Y += HeaderHeight;
+			daysRectangle.Height -= HeaderHeight;
 
-			if (e.ClipRectangle.IntersectsWith(daysRectangle))
-            {
-                DrawDays(e, daysRectangle);
-            }
+			if (!LegacyScrollbars)
+				daysRectangle.Height -= hscroll.Height;
+
+            DrawDays(e, ref daysRectangle);
 
             Rectangle hourLabelRectangle = rect;
-            hourLabelRectangle.Y += HeaderHeight;
-			hourLabelRectangle.Height -= (HeaderHeight + vscroll.Width);
+            hourLabelRectangle.Y = daysRectangle.Y; // previously calculated
+			hourLabelRectangle.Height = daysRectangle.Height; // previously calculated
 
-            DrawHourLabels(e, hourLabelRectangle);
-
-			// Render 'dead space' outside of scrollbars
-            {
-				Rectangle scrollrect = vscroll.Bounds;
-
-				scrollrect.Y = 0;
-                scrollrect.Height = rect.Height;
-
-                e.Graphics.FillRectangle(SystemBrushes.ScrollBar, scrollrect);
-			}
+			if (!LegacyScrollbars)
 			{
-				Rectangle scrollrect = hscroll.Bounds;
+				hourLabelRectangle.X += hourLabelIndent;
+				hourLabelRectangle.Width = HourLabelWidth;
 
-				scrollrect.X = 0;
-				scrollrect.Width = rect.Width;
+				using (SolidBrush backBrush = new SolidBrush(renderer.BackColor()))
+					e.Graphics.FillRectangle(backBrush, hourLabelRectangle);
 
-				e.Graphics.FillRectangle(SystemBrushes.ScrollBar, scrollrect);
+				// Draw lines delineating the top of the vertical scrollbar
+				// and the left of the horizontal scrollbar
+				e.Graphics.DrawLine(SystemPens.ControlDark, vscroll.Left, vscroll.Top - 1, vscroll.Right, vscroll.Top -1);
+				e.Graphics.DrawLine(SystemPens.ControlDark, hscroll.Left - 1, hscroll.Top, hscroll.Left - 1, hscroll.Bottom);
+			}
+
+			DrawHourLabels(e, hourLabelRectangle);
+
+			if (LegacyScrollbars && !AllowScroll)
+			{
+				Rectangle scrollrect = rect;
+
+				scrollrect.X = (headerRectangle.Width + HourLabelWidth + hourLabelIndent);
+				scrollrect.Width = vscroll.Width;
+
+				using (SolidBrush backBrush = new SolidBrush(renderer.BackColor()))
+					e.Graphics.FillRectangle(backBrush, scrollrect);
 			}
 		}
 
@@ -1658,10 +1710,7 @@ namespace Calendar
             for (int hour = 0; hour < VisibleHours; hour++)
             {
                 Rectangle hourRectangle = rect;
-
-                hourRectangle.Y = rect.Y + (hour * slotsPerHour * slotHeight) - vscroll.Value;
-                hourRectangle.X += hourLabelIndent;
-				hourRectangle.Width = HourLabelWidth - 1;
+                hourRectangle.Y += ((hour * slotsPerHour * slotHeight) - vscroll.Value);
 
                 var minuteRect = hourRectangle;
                 minuteRect.Height = slotHeight;
@@ -1677,12 +1726,12 @@ namespace Calendar
                 renderer.DrawHourLabel(e.Graphics, hourRectangle, (hour + VisibleStartHour), ampmdisplay);
             }
 
-            e.Graphics.ResetClip();
+			// draw a line at the top for closure
+			if (LegacyScrollbars)
+				e.Graphics.DrawLine(SystemPens.ControlDark, rect.Left, rect.Y, rect.Width, rect.Y);
 
-            // draw a line at the top for closure
-            using (Pen pen = new Pen(Color.DarkGray))
-                e.Graphics.DrawLine(pen, rect.Left, rect.Y, rect.Width, rect.Y);
-        }
+            e.Graphics.ResetClip();
+		}
 
 		protected void UpdateColumnWidth(Graphics g, int colWidth)
 		{
@@ -1691,8 +1740,9 @@ namespace Calendar
 
 		protected void DrawDayHeaders(PaintEventArgs e, Rectangle rect)
         {
-            int dayWidth = (rect.Width / daysToShow);
+			e.Graphics.SetClip(rect);
 
+			int dayWidth = (rect.Width / daysToShow);
 			NotifyDayWidth?.Invoke(this, e.Graphics, dayWidth);
 
             // one day header rectangle
@@ -1706,7 +1756,9 @@ namespace Calendar
                 dayHeaderRectangle.X += dayWidth;
                 headerDate = headerDate.AddDays(1);
             }
-        }
+
+			e.Graphics.ResetClip();
+		}
 
 		protected Rectangle GetHourRangeRectangle(HourMin start, HourMin end, Rectangle baseRectangle)
         {
@@ -2044,7 +2096,7 @@ namespace Calendar
             }
         }
 
-        private void DrawDays(PaintEventArgs e, Rectangle rect)
+        private void DrawDays(PaintEventArgs e, ref Rectangle rect)
         {
 			// There are a nasty set of dependencies between the 
 			// vertical scrollbar on the one hand, the long and day
@@ -2064,24 +2116,24 @@ namespace Calendar
 			AdjustVScrollbar();
 
             // Draw the day appointments
-            int dayWidth = rect.Width / daysToShow;
             appointmentViews.Clear();
 
             DateTime time = startDate;
-            Rectangle rectangle = rect;
-            rectangle.Width = dayWidth;
-            rectangle.Y += allDayEventsHeaderHeight;
-            rectangle.Height -= allDayEventsHeaderHeight;
+            rect.Y += allDayEventsHeaderHeight;
+            rect.Height -= allDayEventsHeaderHeight;
 
-            for (int day = 0; day < daysToShow; day++)
+			Rectangle dayRect = rect;
+			dayRect.Width = (rect.Width / daysToShow);
+
+			for (int day = 0; day < daysToShow; day++)
             {
-				e.Graphics.SetClip(rectangle);
+				e.Graphics.SetClip(dayRect);
 
-				DrawDay(e, rectangle, time);
+				DrawDay(e, dayRect, time);
 
 				e.Graphics.ResetClip();
 
-                rectangle.X += dayWidth;
+                dayRect.X += dayRect.Width;
 				time = time.AddDays(1);
             }
         }
@@ -2150,6 +2202,8 @@ namespace Calendar
             if (numLayers == 0)
                 return;
 
+            g.SetClip(daysRect);
+
             int dayWidth = (daysRect.Width / daysToShow);
             int y = DayHeaderHeight;
             longAppointmentViews.Clear();
@@ -2161,7 +2215,6 @@ namespace Calendar
             backRectangle.Height = allDayEventsHeaderHeight;
 
             renderer.DrawAllDayBackground(g, backRectangle);
-            g.SetClip(backRectangle);
 
             var endOfLastDay = EndDate.AddSeconds(-1);
 
@@ -2201,11 +2254,10 @@ namespace Calendar
 			}
 
 			// Draw a vertical line to close off the long appointments on the left
-			using (Pen m_Pen = new Pen(Color.DarkGray))
-                g.DrawLine(m_Pen, backRectangle.Left, backRectangle.Top, backRectangle.Left, daysRect.Bottom);
+            g.DrawLine(SystemPens.ControlDark, backRectangle.Left, backRectangle.Top, backRectangle.Left, daysRect.Bottom);
 
-            g.SetClip(daysRect);
-        }
+			g.ResetClip();
+		}
 
 		protected virtual bool WantDrawAppointmentSelected(Calendar.Appointment appt)
 		{
