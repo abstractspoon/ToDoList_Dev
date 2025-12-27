@@ -1084,7 +1084,7 @@ int CToDoCtrlData::CalcNextTaskOccurrences(DWORD dwTaskID, const COleDateTimeRan
 COleDateTime CToDoCtrlData::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const
 {
 	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, 0.0);
+	GET_TDI(dwTaskID, pTDI, CDateHelper::NullDate());
 	
 	return pTDI->GetDate(nDate);
 }
@@ -1477,19 +1477,19 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttribI
 	switch (nAttribID)
 	{
 	case TDCA_DONEDATE:		
-		nRes = SetTaskDate(dwTaskID, TDCD_DONE, 0.0);
+		nRes = SetTaskDate(dwTaskID, TDCD_DONE, CDateHelper::NullDate());
 		break;
 
 	case TDCA_DUEDATE:		
-		nRes = SetTaskDate(dwTaskID, TDCD_DUEDATE, 0.0);
-		break;
-
-	case TDCA_DUETIME:		
-		nRes = SetTaskDate(dwTaskID, TDCD_DUETIME, 0.0);
+		nRes = SetTaskDate(dwTaskID, TDCD_DUE, CDateHelper::NullDate());
 		break;
 
 	case TDCA_STARTDATE:	
-		nRes = SetTaskDate(dwTaskID, TDCD_START, 0.0);
+		nRes = SetTaskDate(dwTaskID, TDCD_START, CDateHelper::NullDate());
+		break;
+
+	case TDCA_DUETIME:
+		nRes = SetTaskDate(dwTaskID, TDCD_DUETIME, 0.0);
 		break;
 
 	case TDCA_STARTTIME:	
@@ -3555,7 +3555,7 @@ BOOL CToDoCtrlData::FixupParentCompletion(DWORD dwParentID, BOOL bClearStatus)
 
 	if (pTDIParent->IsDone() && TaskHasIncompleteSubtasks(pTDSParent, FALSE))
 	{
-		SetTaskDate(dwParentID, TDCD_DONE, 0.0);
+		SetTaskDate(dwParentID, TDCD_DONE, CDateHelper::NullDate());
 
 		if (bClearStatus)
 			ClearTaskAttribute(dwParentID, TDCA_STATUS);
@@ -4600,7 +4600,7 @@ BOOL CToDoCtrlData::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTa
 	}
 
 	// reset new task state to 'undone' including all children
-	SetTaskDone(dwNewTaskID, 0.0, TRUE, TRUE);
+	SetTaskDone(dwNewTaskID, CDateHelper::NullDate(), TRUE, TRUE);
 	
 	// we need to move both the due date and the start date forward
 	AdjustNewRecurringTasksDates(dwPrevTaskID, dwNewTaskID, dtNext, bDueDate);

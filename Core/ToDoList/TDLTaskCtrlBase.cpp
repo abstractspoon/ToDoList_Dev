@@ -3262,10 +3262,12 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		if (!data.IsEmpty())
 		{
 			double dDate = 0.0;
-			m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dDate);
-
-			DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE, 
-							pDef->HasFeature(TDCCAF_SHOWTIME), pDef->nTextAlignment);
+			
+			if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dDate))
+			{
+				DrawColumnDate(pDC, dDate, TDCD_CUSTOM, rCol, crText, FALSE,
+							   pDef->HasFeature(TDCCAF_SHOWTIME), pDef->nTextAlignment);
+			}
 		}
 		break;
 		

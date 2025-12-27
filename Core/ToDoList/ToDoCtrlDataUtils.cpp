@@ -3007,7 +3007,7 @@ COleDateTime CTDCTaskCalculator::GetStartDueDate(const TODOITEM* pTDI, const TOD
 		return CDateHelper::NullDate();
 	}
 
-	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, 0.0);
+	CHECKSET_ALREADY_PROCESSED(mapProcessedIDs, pTDS, CDateHelper::NullDate());
 
 	BOOL bDone = IsTaskDone(pTDI, pTDS, TDCCHECKCHILDREN);
 	COleDateTime dtBest = CDateHelper::NullDate();
@@ -3068,7 +3068,7 @@ COleDateTime CTDCTaskCalculator::GetTaskLastModifiedDate(const TODOITEM* pTDI, c
 	const TODOITEM* pLatest = GetLastModifiedTask(pTDI, pTDS, CDWordSet());
 
 	if (!pLatest || !CDateHelper::IsDateSet(pTDI->dateLastMod))
-		return 0.0;
+		return CDateHelper::NullDate();
 
 	return pLatest->dateLastMod;
 }
