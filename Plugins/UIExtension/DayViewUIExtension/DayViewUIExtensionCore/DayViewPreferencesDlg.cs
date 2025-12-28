@@ -80,6 +80,7 @@ namespace DayViewUIExtension
             prefs.WriteProfileBool(prefsKey, "HideTasksSpanningDays", HideTasksSpanningDays);
 			prefs.WriteProfileBool(prefsKey, "ShowFutureOccurrences", ShowFutureOccurrences);
 			prefs.WriteProfileBool(prefsKey, "TreatOverdueTasksAsDueToday", TreatOverdueTasksAsDueToday);
+			prefs.WriteProfileBool(prefsKey, "LegacyScrollbars", LegacyScrollbars);
 
 			prefs.WriteProfileInt(prefsKey, "SlotMinutes", SlotMinutes);
 			prefs.WriteProfileInt(prefsKey, "MinSlotHeight", MinSlotHeight);
@@ -101,6 +102,7 @@ namespace DayViewUIExtension
             m_HideTasksSpanningDays.Checked = prefs.GetProfileBool(prefsKey, "HideTasksSpanningDays", false);
 			m_ShowFutureOccurrences.Checked = prefs.GetProfileBool(prefsKey, "ShowFutureOccurrences", true);
 			m_TreatOverdueTasksAsDueToday.Checked = prefs.GetProfileBool(prefsKey, "TreatOverdueTasksAsDueToday", true);
+			m_LegacyScrollbars.Checked = prefs.GetProfileBool(prefsKey, "LegacyScrollbars", false);
 
 			SlotMinutes = prefs.GetProfileInt(prefsKey, "SlotMinutes", 15);
 			MinSlotHeight = prefs.GetProfileInt(prefsKey, "MinSlotHeight", 5);
@@ -129,6 +131,7 @@ namespace DayViewUIExtension
 			var orgSlotHeight = MinSlotHeight;
 			var orgWorkingOnly = ShowWorkingHoursOnly;
 			var orgDueToday = TreatOverdueTasksAsDueToday;
+			var orgLegacyScrollbars = LegacyScrollbars;
 
 			// Enable states
 			m_HideParentTasksByTag.Enabled = m_HideParentTasks.Checked;
@@ -152,6 +155,7 @@ namespace DayViewUIExtension
 				m_ShowFutureOccurrences.Checked = orgShowFuture;
 				m_ShowWorkingHoursOnly.Checked = orgWorkingOnly;
 				m_TreatOverdueTasksAsDueToday.Checked = orgDueToday;
+				m_LegacyScrollbars.Checked = orgLegacyScrollbars;
 
 				SlotMinutes = orgSlotMins;
 				MinSlotHeight = orgSlotHeight;
@@ -181,6 +185,7 @@ namespace DayViewUIExtension
 		public bool ShowFutureOccurrences { get { return m_ShowFutureOccurrences.Checked; } }
 		public bool ShowWorkingHoursOnly { get { return m_ShowWorkingHoursOnly.Checked; } }
 		public bool TreatOverdueTasksAsDueToday { get { return m_TreatOverdueTasksAsDueToday.Checked; } }
+		public bool LegacyScrollbars { get { return m_LegacyScrollbars.Checked; } }
 
 		public int SlotMinutes
 		{

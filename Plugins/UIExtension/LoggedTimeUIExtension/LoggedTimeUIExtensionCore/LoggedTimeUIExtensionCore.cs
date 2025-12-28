@@ -664,9 +664,7 @@ namespace LoggedTimeUIExtension
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
 
             if (m_PrefsDlg.ShowDialog() == DialogResult.OK)
-            {
 				UpdateTimeLogPreferences();
-            }
 		}
 
 		private void UpdateTimeLogPreferences()
@@ -674,6 +672,7 @@ namespace LoggedTimeUIExtension
 			m_TimeLog.ShowWorkingHoursOnly = m_PrefsDlg.ShowWorkingHoursOnly;
 			m_TimeLog.SlotsPerHour = (60 / m_PrefsDlg.SlotMinutes);
 			m_TimeLog.MinSlotHeight = DPIScaling.Scale(m_PrefsDlg.MinSlotHeight);
+			m_TimeLog.LegacyScrollbars = m_PrefsDlg.LegacyScrollbars;
 
 			UpdateWorkingHourDisplay();
 

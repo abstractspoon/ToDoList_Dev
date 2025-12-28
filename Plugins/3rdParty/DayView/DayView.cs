@@ -177,7 +177,7 @@ namespace Calendar
 			set { tooltip.SetToolTip(hscroll, value); }
 		}
 
-		protected bool LegacyScrollbars
+		public bool LegacyScrollbars
 		{
 			get { return legacyScrollbars; }
 
@@ -190,7 +190,6 @@ namespace Calendar
 
 					RepositionVScrollbar();
 					RepositionHScrollbar();
-
 				}
 			}
 		}

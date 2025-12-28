@@ -72,6 +72,7 @@ namespace LoggedTimeUIExtension
 			prefs.WriteProfileInt(prefsKey, "SlotMinutes", SlotMinutes);
 			prefs.WriteProfileInt(prefsKey, "MinSlotHeight", MinSlotHeight);
 			prefs.WriteProfileBool(prefsKey, "ShowWorkingHoursOnly", m_ShowWorkingHoursOnly.Checked);
+			prefs.WriteProfileBool(prefsKey, "LegacyScrollbars", LegacyScrollbars);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key)
@@ -80,7 +81,9 @@ namespace LoggedTimeUIExtension
 
 			SlotMinutes = prefs.GetProfileInt(prefsKey, "SlotMinutes", 15);
 			MinSlotHeight = prefs.GetProfileInt(prefsKey, "MinSlotHeight", 5);
+
 			m_ShowWorkingHoursOnly.Checked = prefs.GetProfileBool(prefsKey, "ShowWorkingHoursOnly", true);
+			m_LegacyScrollbars.Checked = prefs.GetProfileBool(prefsKey, "LegacyScrollbars", false);
 		}
 
 		public new DialogResult ShowDialog()
@@ -94,6 +97,7 @@ namespace LoggedTimeUIExtension
 			var orgSlotMins = SlotMinutes;
 			var orgSlotHeight = MinSlotHeight;
 			var orgWorkingOnly = ShowWorkingHoursOnly;
+			var orgLegacyScrollbars = LegacyScrollbars;
 
 			var ret = base.ShowDialog(owner);
 
@@ -101,6 +105,7 @@ namespace LoggedTimeUIExtension
 			{
 				// Restore previous state
 				m_ShowWorkingHoursOnly.Checked = orgWorkingOnly;
+				m_LegacyScrollbars.Checked = orgLegacyScrollbars;
 
 				SlotMinutes = orgSlotMins;
 				MinSlotHeight = orgSlotHeight;
@@ -110,6 +115,7 @@ namespace LoggedTimeUIExtension
 		}
 
 		public bool ShowWorkingHoursOnly { get { return m_ShowWorkingHoursOnly.Checked; } }
+		public bool LegacyScrollbars { get { return m_LegacyScrollbars.Checked; } }
 
 		public int SlotMinutes
 		{
