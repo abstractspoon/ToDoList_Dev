@@ -229,7 +229,7 @@ namespace TDC
 		case TDCC_VERSION:			return ID_SORTBY_VERSION;
 
 		default:
-			if (nColumn >= TDCC_CUSTOMCOLUMN_FIRST && nColumn < TDCC_CUSTOMCOLUMN_LAST)
+			if (nColumn >= TDCC_CUSTOMCOLUMN_FIRST && nColumn <= TDCC_CUSTOMCOLUMN_LAST)
 				return (ID_SORTBY_CUSTOMCOLUMN_FIRST + (nColumn - TDCC_CUSTOMCOLUMN_FIRST));
 			break;
 		}
@@ -345,7 +345,7 @@ namespace TDC
 		case TDCC_VERSION:			return TDCA_VERSION;
 
 		default:
-			if (nColumn >= TDCC_CUSTOMCOLUMN_FIRST && nColumn < TDCC_CUSTOMCOLUMN_LAST)
+			if (nColumn >= TDCC_CUSTOMCOLUMN_FIRST && nColumn <= TDCC_CUSTOMCOLUMN_LAST)
 				return (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB_FIRST + (nColumn - TDCC_CUSTOMCOLUMN_FIRST));
 			break;
 		}
@@ -614,7 +614,7 @@ namespace TDC
 			return IUI_EDIT;
 
 		default:
-			if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID < TDCA_CUSTOMATTRIB_LAST))
+			if ((nAttribID >= TDCA_CUSTOMATTRIB_FIRST) && (nAttribID <= TDCA_CUSTOMATTRIB_LAST))
 				return IUI_EDIT;
 			break;
 		}
