@@ -123,7 +123,7 @@ namespace Calendar
 
             Controls.Add(editbox);
 
-            tooltip = new ToolTip();
+            tooltip = new ToolTip() { Active = LegacyScrollbars };
 
             drawTool = NewDrawTool();
             drawTool.DayView = this;
@@ -413,12 +413,12 @@ namespace Calendar
                     daysToShow = value; // must come before resetting start date
 					StartDate = startDate;
 
-// 					switch (daysToShow)
-// 					{
-// 					case 1:	 HScrollTooltipText = "Change Day";		break;
-// 					case 7:	 HScrollTooltipText = "Change Week";	break;
-// 					default: HScrollTooltipText = "Change";			break;
-// 					}
+					switch (daysToShow)
+					{
+					case 1:	 HScrollTooltipText = "Change Day";		break;
+					case 7:	 HScrollTooltipText = "Change Week";	break;
+					default: HScrollTooltipText = "Change";			break;
+					}
 
                     EnsureVisible(SelectedAppointment, true);
 					RepositionHScrollbar();
