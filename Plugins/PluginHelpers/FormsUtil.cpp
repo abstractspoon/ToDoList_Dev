@@ -99,3 +99,44 @@ int FormsUtil::CalcWidestItem(Windows::Forms::ComboBox^ combo)
 
 	return maxWidth;
 }
+
+void FormsUtil::FixThumbScrolling(Message% m)
+{
+	// When 'show window contents while dragging' is DISABLED
+	// WinForms also disables 'live' scrollbar thumb dragging
+	// and only performs the scroll when the tumb is released.
+	//
+	// This is contrary to how Windows itself operates, which
+	// ignores this setting when scrolling all native controls.
+	//
+	// To restore native Windows behaviour for ScrollableControls,
+	// so as to be consistent with the rest of the app we detect the
+	// situation and then replace SB_THUMBTRACK with SB_THUMBPOSITION.
+	switch (m.Msg)
+	{
+	case WM_HSCROLL:
+	case WM_VSCROLL:
+		if (!SystemInformation::DragFullWindows)
+		{
+			if (Win32::LoWord(m.WParam) == SB_THUMBTRACK)
+			{
+				// Must be a scrollable control
+				if (ISTYPE(Control::FromHandle(m.HWnd), ScrollableControl))
+					m.WParam = (IntPtr)Win32::MakeWParam(SB_THUMBPOSITION, Win32::HiWord(m.WParam));
+			}
+		}
+		break;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+void PanelEx::WndProc(Message% m)
+{
+	FormsUtil::FixThumbScrolling(m);
+
+	Panel::WndProc(m);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+

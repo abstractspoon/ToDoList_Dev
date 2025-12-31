@@ -30,7 +30,7 @@
         {
 			EvidenceBoardUIExtension.UserLinkAttributes userLinkAttributes1 = new EvidenceBoardUIExtension.UserLinkAttributes();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EvidenceBoardPreferencesDlg));
-			this.panel1 = new System.Windows.Forms.Panel();
+			this.panel1 = new Abstractspoon.Tdl.PluginHelpers.PanelEx();
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_ParentLinkColor = new UIComponents.ColorButton();
@@ -178,7 +178,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel panel1;
+        private Abstractspoon.Tdl.PluginHelpers.PanelEx panel1;
         private System.Windows.Forms.Button BtnCancel;
         private System.Windows.Forms.Button BtnOK;
 		private System.Windows.Forms.GroupBox groupBox1;

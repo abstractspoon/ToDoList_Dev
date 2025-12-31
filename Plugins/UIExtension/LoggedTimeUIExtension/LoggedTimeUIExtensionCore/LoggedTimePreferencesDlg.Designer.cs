@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-			this.panel1 = new System.Windows.Forms.Panel();
+			this.panel1 = new Abstractspoon.Tdl.PluginHelpers.PanelEx();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_SlotMinuteCombo = new System.Windows.Forms.ComboBox();
 			this.label2 = new System.Windows.Forms.Label();
@@ -157,7 +157,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel panel1;
+        private Abstractspoon.Tdl.PluginHelpers.PanelEx panel1;
         private System.Windows.Forms.Button BtnCancel;
         private System.Windows.Forms.Button BtnOK;
 		private System.Windows.Forms.Label label2;

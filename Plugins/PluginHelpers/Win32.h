@@ -62,6 +62,14 @@ namespace Abstractspoon
 				static HICON LoadHIcon(LPCWSTR szDllPath, UINT nIDIcon, int nSize, bool bScaleByDPI);
 				static void EnableExplorerTheming(IntPtr hWnd);
 
+				// Message cracking
+				static int LoWord(int n) { return LOWORD(n); }
+				static int LoWord(IntPtr n)	{ return LoWord(n.ToInt32()); }
+				static int HiWord(int n) { return HIWORD(n); }
+				static int HiWord(IntPtr n)	{ return HiWord(n.ToInt32()); }
+				static int MakeLParam(int low, int high) { return MAKELPARAM(low, high); }
+				static int MakeWParam(int low, int high) { return MAKEWPARAM(low, high); }
+
 			protected:
 				static void DoFrameChange(IntPtr hWnd) { DoFrameChangeEx(hWnd, false); }
 				static void DoFrameChangeEx(IntPtr hWnd, bool bIncrementWidth);
@@ -72,6 +80,8 @@ namespace Abstractspoon
 					static void Handler(Object^ sender, EventArgs^ e);
 				};
 			};
+
+			// ---------------------------------------------------------
 
 			public ref class DlgUnits
 			{
@@ -85,6 +95,8 @@ namespace Abstractspoon
 			protected:
 				HWND m_hWnd;
 			};
+
+			// ---------------------------------------------------------
 
 			public ref class AppMessageBox
 			{
