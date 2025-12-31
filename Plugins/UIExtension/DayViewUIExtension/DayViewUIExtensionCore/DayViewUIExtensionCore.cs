@@ -822,9 +822,7 @@ namespace DayViewUIExtension
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
 
             if (m_PrefsDlg.ShowDialog() == DialogResult.OK)
-            {
 				UpdateDayViewPreferences();
-            }
 		}
 
 		private void UpdateDayViewPreferences()
@@ -840,6 +838,7 @@ namespace DayViewUIExtension
 			m_DayView.ShowFutureOccurrences = m_PrefsDlg.ShowFutureOccurrences;
 			m_DayView.ShowWorkingHoursOnly = m_PrefsDlg.ShowWorkingHoursOnly;
 			m_DayView.TreatOverdueTasksAsDueToday = m_PrefsDlg.TreatOverdueTasksAsDueToday;
+			m_DayView.LegacyScrollbars = m_PrefsDlg.LegacyScrollbars;
 
 			m_DayView.SlotsPerHour = (60 / m_PrefsDlg.SlotMinutes);
 			m_DayView.MinSlotHeight = DPIScaling.Scale(m_PrefsDlg.MinSlotHeight);

@@ -1117,6 +1117,11 @@ namespace EvidenceBoardUIExtension
 			if (m_LabelTip != null)
 				m_LabelTip.ProcessMessage(m);
 
+			// When 'show window contents while dragging' is DISABLED
+			// WinForms also disables 'live' scrollbar thumb dragging
+			// and only performs the scroll when the tumb is released.
+			FormsUtil.FixThumbScrolling(ref m);
+
 			base.WndProc(ref m);
 		}
 

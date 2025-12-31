@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-			this.panel1 = new System.Windows.Forms.Panel();
+			this.panel1 = new Abstractspoon.Tdl.PluginHelpers.PanelEx();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_SlotMinuteCombo = new System.Windows.Forms.ComboBox();
 			this.label2 = new System.Windows.Forms.Label();
@@ -36,6 +36,7 @@
 			this.m_ShowWorkingHoursOnly = new System.Windows.Forms.CheckBox();
 			this.BtnCancel = new System.Windows.Forms.Button();
 			this.BtnOK = new System.Windows.Forms.Button();
+			this.m_LegacyScrollbars = new System.Windows.Forms.CheckBox();
 			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -52,6 +53,7 @@
 			this.panel1.Controls.Add(this.label2);
 			this.panel1.Controls.Add(this.m_MinSlotHeightCombo);
 			this.panel1.Controls.Add(this.m_ShowWorkingHoursOnly);
+			this.panel1.Controls.Add(this.m_LegacyScrollbars);
 			this.panel1.Location = new System.Drawing.Point(9, 10);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
@@ -132,6 +134,17 @@
 			this.BtnOK.Text = "OK";
 			this.BtnOK.UseVisualStyleBackColor = true;
 			// 
+			// m_LegacyScrollbars
+			// 
+			this.m_LegacyScrollbars.AutoSize = true;
+			this.m_LegacyScrollbars.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.m_LegacyScrollbars.Location = new System.Drawing.Point(13, 89);
+			this.m_LegacyScrollbars.Name = "m_LegacyScrollbars";
+			this.m_LegacyScrollbars.Size = new System.Drawing.Size(174, 17);
+			this.m_LegacyScrollbars.TabIndex = 9;
+			this.m_LegacyScrollbars.Text = "Use legacy scrollbar positioning";
+			this.m_LegacyScrollbars.UseVisualStyleBackColor = true;
+			// 
 			// LoggedTimePreferencesDlg
 			// 
 			this.AcceptButton = this.BtnOK;
@@ -157,7 +170,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel panel1;
+        private Abstractspoon.Tdl.PluginHelpers.PanelEx panel1;
         private System.Windows.Forms.Button BtnCancel;
         private System.Windows.Forms.Button BtnOK;
 		private System.Windows.Forms.Label label2;
@@ -165,5 +178,6 @@
 		private System.Windows.Forms.ComboBox m_SlotMinuteCombo;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.CheckBox m_ShowWorkingHoursOnly;
+		private System.Windows.Forms.CheckBox m_LegacyScrollbars;
 	}
 }
