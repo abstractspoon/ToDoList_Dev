@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HTMLPreferencesDlg));
-			this.panel1 = new System.Windows.Forms.Panel();
+			this.panel1 = new Abstractspoon.Tdl.PluginHelpers.PanelEx();
 			this.enableWatermark = new System.Windows.Forms.CheckBox();
 			this.btnBrowseWatermark = new System.Windows.Forms.Button();
 			this.watermarkImage = new System.Windows.Forms.TextBox();
@@ -137,7 +137,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Panel panel1;
+        private Abstractspoon.Tdl.PluginHelpers.PanelEx panel1;
         private System.Windows.Forms.Button BtnCancel;
         private System.Windows.Forms.Button BtnOK;
 		private System.Windows.Forms.Button btnBrowseWatermark;

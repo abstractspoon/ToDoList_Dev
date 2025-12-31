@@ -474,15 +474,15 @@ enum TDC_DATE
 {
 	TDCD_NONE = -1,
 	TDCD_CREATE,
-	TDCD_START,		// getting only (date+time)
-	TDCD_STARTDATE,	// setting or getting (date only)
-	TDCD_STARTTIME,	// setting or getting (time only)
-	TDCD_DUE,		// getting only (date+time)
-	TDCD_DUEDATE,	// setting or getting (date only)
-	TDCD_DUETIME,	// setting or getting (time only)
-	TDCD_DONE,		// getting only (date+time)
-	TDCD_DONEDATE,	// setting or getting (date only)
-	TDCD_DONETIME,	// setting or getting (time only)
+	TDCD_START,
+	TDCD_STARTDATE,
+	TDCD_STARTTIME,
+	TDCD_DUE,
+	TDCD_DUEDATE,
+	TDCD_DUETIME,
+	TDCD_DONE,
+	TDCD_DONEDATE,
+	TDCD_DONETIME,
 	TDCD_LASTMOD,
 	TDCD_CUSTOM,
 	TDCD_REMINDER,

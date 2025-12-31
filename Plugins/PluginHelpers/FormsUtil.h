@@ -29,8 +29,18 @@ namespace Abstractspoon
 
 				static void RecalcDropWidth(Windows::Forms::ComboBox^ combo);
 				static int CalcWidestItem(Windows::Forms::ComboBox^ combo);
+
+				static void FixThumbScrolling(Windows::Forms::Message% msg);
 			};
 
+			// ---------------------------------------------------------
+
+			public ref class PanelEx : public Windows::Forms::Panel
+			{
+			protected:
+				// Calls FormsUtil::FixThumbScrolling automatically
+				void WndProc(Windows::Forms::Message% m) override;
+			};
 		}
 	}
 }

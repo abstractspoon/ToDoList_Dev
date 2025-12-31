@@ -10179,9 +10179,9 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttribID)
 
 	switch (nAttribID)
 	{
-	case TDCA_DONEDATE:		return SetSelectedTaskDate(TDCD_DONE, 0.0);
-	case TDCA_DUEDATE:		return SetSelectedTaskDate(TDCD_DUE, 0.0);
-	case TDCA_STARTDATE:	return SetSelectedTaskDate(TDCD_START, 0.0);
+	case TDCA_DONEDATE:		return SetSelectedTaskDate(TDCD_DONE, CDateHelper::NullDate());
+	case TDCA_DUEDATE:		return SetSelectedTaskDate(TDCD_DUE, CDateHelper::NullDate());
+	case TDCA_STARTDATE:	return SetSelectedTaskDate(TDCD_START, CDateHelper::NullDate());
 		
 	case TDCA_DONETIME:		return SetSelectedTaskDate(TDCD_DONETIME, 0.0);
 	case TDCA_DUETIME:		return SetSelectedTaskDate(TDCD_DUETIME, 0.0);
