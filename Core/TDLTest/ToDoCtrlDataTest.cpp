@@ -973,6 +973,11 @@ void CToDoCtrlDataTest::TestOffsetTaskDate()
 	// We only need to test a few interesting dates because
 	// CDateHelper::OffsetDate, on which CToDoCtrlData::OffsetTaskDate 
 	// is built, already has extensive tests.
+	//
+	// Note: We use dates far enough in the past that offsetting
+	// negatively 'from today' will not calculate dates which
+	// accidentally match the initialised dates because this
+	// will cause some tests to fail.
 
 	// No dates
 	{
@@ -985,18 +990,18 @@ void CToDoCtrlDataTest::TestOffsetTaskDate()
 
 	// Dates no Times
 	{
-		pTDI->dateStart = COleDateTime(2021, 1,  1, 0, 0, 0);
-		pTDI->dateDue   = COleDateTime(2022, 2, 28, 0, 0, 0);
-		pTDI->dateDone  = COleDateTime(2023, 1, 31, 0, 0, 0);
+		pTDI->dateStart = COleDateTime(1957, 1,  1, 0, 0, 0);
+		pTDI->dateDue   = COleDateTime(1958, 2, 28, 0, 0, 0);
+		pTDI->dateDone  = COleDateTime(1959, 1, 31, 0, 0, 0);
 
 		TestOffsetTaskDate(_T("Dates no Times"), data, dwTaskID);
 	}
 
 	// Dates and Times
 	{
-		pTDI->dateStart = COleDateTime(2024,  2, 29, 1, 2, 3);
-		pTDI->dateDue   = COleDateTime(2025,  8, 31, 9, 5, 6);
-		pTDI->dateDone  = COleDateTime(2026, 12, 31, 23, 53, 9);
+		pTDI->dateStart = COleDateTime(1960,  2, 29, 1, 2, 3);
+		pTDI->dateDue   = COleDateTime(1991,  8, 31, 9, 5, 6);
+		pTDI->dateDone  = COleDateTime(1962, 12, 31, 23, 53, 9);
 
 		TestOffsetTaskDate(_T("Dates and Times"), data, dwTaskID);
 	}
