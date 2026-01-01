@@ -3040,31 +3040,15 @@ bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY& nRegularity,
 	
 	if (pXIRecur)
 	{
-		// backwards compatibility
-		if (pXIRecur->HasItem(TDL_TASKRECURRENCEREG_DEP))
-		{
-			nRegularity = (TDC_REGULARITY)pXIRecur->GetItemValueI(TDL_TASKRECURRENCEREG_DEP);
-			dwSpecific1 = pXIRecur->GetItemValueI(TDL_TASKRECURRENCESPEC1_DEP);
-			dwSpecific2 = pXIRecur->GetItemValueI(TDL_TASKRECURRENCESPEC2_DEP);
-		}
-		else
-		{
-			nRegularity = (TDC_REGULARITY)pXIRecur->GetItemValueI(TDL_TASKRECURRENCEFREQ);
-			dwSpecific1 = pXIRecur->GetItemValueI(TDL_TASKRECURRENCESPEC1);
-			dwSpecific2 = pXIRecur->GetItemValueI(TDL_TASKRECURRENCESPEC2);
-		}
-		
+		nRegularity = (TDC_REGULARITY)pXIRecur->GetItemValueI(TDL_TASKRECURRENCEFREQ);
 		nReuse = (TDC_RECURREUSEOPTION)pXIRecur->GetItemValueI(TDL_TASKRECURRENCEREUSE);
+		dwSpecific1 = pXIRecur->GetItemValueI(TDL_TASKRECURRENCESPEC1);
+		dwSpecific2 = pXIRecur->GetItemValueI(TDL_TASKRECURRENCESPEC2);
 		
 		if (pXIRecur->HasItem(TDL_TASKRECURRENCEFROM))
-		{
 			nRecalcFrom = (TDC_RECURFROMOPTION)pXIRecur->GetItemValueI(TDL_TASKRECURRENCEFROM);
-		}
-		else // fallback
-		{
-			// really a boolean
-			nRecalcFrom = (pXIRecur->GetItemValueI(TDL_TASKRECURRENCEFROMDUE_DEP) ? TDIRO_DUEDATE : TDIRO_DONEDATE);
-		}
+		else
+			nRecalcFrom = TDIRO_DUEDATE;
 		
 		if (pXIRecur->HasItem(TDL_TASKRECURRENCENUM))
 		{
@@ -3085,39 +3069,10 @@ bool CTaskFile::GetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY& nRegularity,
 			nRemainingOccur = -1;
 		}
 		
-		// Enforce TDIRO_DONEDATE for deprecated 'recreate after...' options
-		switch (nRegularity)
-		{
-		case TDIR_DAY_RECREATEAFTERNDAYS_DEP:
-			nRegularity = TDIR_DAY_EVERY_NDAYS;
-			nRecalcFrom = TDIRO_DONEDATE;
-			break;
-			
-		case TDIR_WEEK_RECREATEAFTERNWEEKS_DEP:
-			nRegularity = TDIR_WEEK_EVERY_NWEEKS;
-			nRecalcFrom = TDIRO_DONEDATE;
-			break;
-			
-		case TDIR_MONTH_RECREATEAFTERNMONTHS_DEP:
-			nRegularity = TDIR_MONTH_EVERY_NMONTHS;
-			nRecalcFrom = TDIRO_DONEDATE;
-			break;
-			
-		case TDIR_YEAR_RECREATEAFTERNYEARS_DEP:
-			nRegularity = TDIR_YEAR_EVERY_NYEARS;
-			nRecalcFrom = TDIRO_DONEDATE;
-			break;
-		}
-
 		if (pXIRecur->HasItem(TDL_TASKRECURRENCEPRESERVECOMMENTS))
-		{
 			bPreserveComments = (pXIRecur->GetItemValueI(TDL_TASKRECURRENCEPRESERVECOMMENTS) != FALSE);
-		}
 		else
-		{
-			// Backward compatibility
 			bPreserveComments = (nReuse == TDIRO_REUSE);
-		}
 	
 		return true;
 	}
@@ -4158,18 +4113,6 @@ bool CTaskFile::SetTaskRecurrence(HTASKITEM hTask, TDC_REGULARITY nRegularity,
 
 	if (pXIRecur)
 	{
-		// Enforce TDIRO_DONEDATE for 'recreate after...' options
-		switch (nRegularity)
-		{
-		case TDIR_DAY_RECREATEAFTERNDAYS_DEP:
-		case TDIR_WEEK_RECREATEAFTERNWEEKS_DEP:
-		case TDIR_MONTH_RECREATEAFTERNMONTHS_DEP:
-		case TDIR_YEAR_RECREATEAFTERNYEARS_DEP:
-			ASSERT(0);
-			nRecalcFrom = TDIRO_DONEDATE;
-			break;
-		}
-
 		pXIRecur->SetItemValue(TDL_TASKRECURRENCEFREQ, nRegularity);
 		pXIRecur->SetItemValue(TDL_TASKRECURRENCESPEC1, (int)dwSpecific1);
 		pXIRecur->SetItemValue(TDL_TASKRECURRENCESPEC2, (int)dwSpecific2);
