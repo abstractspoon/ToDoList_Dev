@@ -648,7 +648,7 @@ BOOL CiCalImporter::DecodeRecurrence(const CString& sRecur, TDC_REGULARITY& nReg
 		}
 		else
 		{
-			nRegularity = TDIR_WEEK_RECREATEAFTERNWEEKS_DEP;
+			nRegularity = TDIR_WEEK_EVERY_NWEEKS;
 			dwSpecific1 = _ttoi(sSpecVal1);
 		}
 	}
@@ -679,7 +679,7 @@ BOOL CiCalImporter::DecodeRecurrence(const CString& sRecur, TDC_REGULARITY& nReg
 			}
 			else
 			{
-				nRegularity = TDIR_MONTH_RECREATEAFTERNMONTHS_DEP;
+				nRegularity = TDIR_MONTH_EVERY_NMONTHS;
 				dwSpecific1 = _ttoi(sSpecVal1);
 			}
 		}
@@ -715,7 +715,7 @@ BOOL CiCalImporter::DecodeRecurrence(const CString& sRecur, TDC_REGULARITY& nReg
 		}
 		else
 		{
-			nRegularity = TDIR_YEAR_RECREATEAFTERNYEARS_DEP;
+			nRegularity = TDIR_YEAR_EVERY_NYEARS;
 			dwSpecific1 = 1;
 
 			if (sSpecKey1.CompareNoCase(_T("INTERVAL")) == 0)
