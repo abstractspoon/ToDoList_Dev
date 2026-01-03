@@ -1641,61 +1641,46 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 
 	if (nNumKeepBackups > 0)
 	{
-		// Cull backups of current version
-		CString sBackupPattern = CFileBackup::BuildBackupPath(sPath, FBS_APPVERSION, sBackupFolder, _T(""));
-		FileMisc::AddToFileName(sBackupPattern, _T("*"));
+		CString sBackupPattern = FileMisc::GetFileNameFromPath(sPath);
+		FileMisc::AddToFileName(sBackupPattern, _T(".*"));
 
-		int nNumFoundFiles;
-		int nNumCulled = CFileBackup::CullBackups(sBackupPattern, FBS_DATETIMESTAMP, nNumKeepBackups, nNumFoundFiles);
+		// Build file lists for each distinct version including the current
+		CStringArray aFilenames;
+		int nNumBackups = FileMisc::FindFiles(sBackupFolder, aFilenames, FALSE, sBackupPattern);
 
-		ASSERT((nNumCulled == 0) || (nNumCulled == (nNumFoundFiles - nNumKeepBackups)));
+		CMapStringToStringArray mapBackupFiles;
 
-		// If anything got culled it means we've used up all
-		// of 'nNumKeepBackups' and we can therefore assume 
-		// that all previous versions have been culled.
+		for (int nFile = 0; nFile < nNumBackups; nFile++)
+		{
+			// Extract version from file path
+			CStringArray aNameParts;
 
-		// Otherwise we use the leftover amount to cull from 
-		// previous versions, but always leaving at least one 
-		// backup from each previous version
-		if (nNumCulled == 0)
-		{ 
-			ASSERT(nNumFoundFiles <= nNumKeepBackups);
-
-			// get current app version once only
-			CString sAppVer = FileMisc::GetAppVersion('_');
-			ASSERT(sBackupPattern.Find(sAppVer) != -1);
-
-			// find the first previous version having backups
-			CDWordArray aPrevVer;
-			
-			while (FileMisc::GetPrevAppVersion(aPrevVer, 10, 20) && (nNumKeepBackups > 0)) 
+			if (Misc::Split(aFilenames[nFile], aNameParts, '.') == 4) // <filename>,<app ver>.<datetime>.<ext>
 			{
-				CString sPrevVer = Misc::FormatArray(aPrevVer, '_');
-				sBackupPattern.Replace(sAppVer, sPrevVer);
+				CString sFileVer = aNameParts[1];
+				mapBackupFiles.GetAddMapping(sFileVer)->Add(aFilenames[nFile]);
+			}
+		}
 
-				nNumKeepBackups = max(1, (nNumKeepBackups - nNumFoundFiles));
-				nNumFoundFiles = 0;
+		// Delete all but the last backup for each past version,
+		// and all but the last 'nNumKeepBackups' for the current version
+		CString sCurVer = FileMisc::GetAppVersion('_');
+		POSITION pos = mapBackupFiles.GetStartPosition();
 
-				nNumCulled = CFileBackup::CullBackups(sBackupPattern, FBS_DATETIMESTAMP, nNumKeepBackups, nNumFoundFiles);
+		while (pos)
+		{
+			CString sAppVer;
+			CStringArray* pFiles;
+			
+			mapBackupFiles.GetNextAssoc(pos, sAppVer, pFiles);
+			Misc::SortArray(aFilenames); // earliest -> latest
 
-				switch (nNumFoundFiles)
-				{
-				case 0:
-					ASSERT(nNumCulled == 0);
-					break;
+			int nNumToKeep = ((sAppVer == sCurVer) ? nNumKeepBackups : 1);
 
-				case 1:
-					// We can assume that this version has been
-					// previously culled so we stop looking
-					ASSERT(nNumCulled == 0);
-					nNumKeepBackups = 0;
-					break;
-
-				default:
-					break;
-				}
-
-				sAppVer = sPrevVer; // Try next previous version
+			while (pFiles->GetSize() > nNumToKeep)
+			{
+				FileMisc::DeleteFile(pFiles->GetAt(0));
+				pFiles->RemoveAt(0);
 			}
 		}
 	}

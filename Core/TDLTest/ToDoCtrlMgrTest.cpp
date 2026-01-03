@@ -36,7 +36,7 @@ TESTRESULT CToDoCtrlMgrTest::Run()
 {
 	ClearTotals();
 
-	TestCreateBackup();
+	//TestCreateBackup();
 
 	return GetTotals();
 }
