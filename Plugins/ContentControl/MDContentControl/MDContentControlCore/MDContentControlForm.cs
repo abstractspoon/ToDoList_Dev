@@ -193,6 +193,14 @@ namespace MDContentControl
 
 		protected new ContextMenuStrip ContextMenu { get { return contextMenuStrip1; } }
 
+		public IntPtr SpellCheckHandle
+		{
+			get
+			{
+				return InputTextCtrl.Handle;
+			}
+		}
+
 		public string OutputHtml
 		{
 			get
