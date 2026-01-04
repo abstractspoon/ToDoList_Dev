@@ -35,7 +35,6 @@ HICON CSpellCheckDlg::s_hIconDlg = NULL;
 CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) 
 	:
 	m_pSpellChecker(NULL), 
-	m_reSpellCheck(m_reText),
 	m_pPrefs(NULL),
 	m_stURL(_T("http://wiki.services.openoffice.org/wiki/Dictionaries")),
 	m_bMadeChanges(FALSE),
@@ -330,6 +329,7 @@ BOOL CSpellCheckDlg::OnInitDialog()
 		m_sEnginePath = sDllPath;
 	}
 
+	m_reSpellCheck.Initialise(m_reText); // default
 	m_ncBorder.Initialize(m_reText);
 	m_bMadeChanges = FALSE;
 

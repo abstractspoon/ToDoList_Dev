@@ -477,39 +477,7 @@ CString CRichEditBaseCtrl::GetCharacterAtCaret(BOOL bForwards) const
 
 CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr) const
 {
-	int nLength = int(cr.cpMax - cr.cpMin + 1);
-
-    // create an ANSI buffer 
-    LPTSTR szChar = new TCHAR[nLength];
-	ZeroMemory(szChar, nLength * sizeof(TCHAR));
-
-	if (CWinClasses::IsClass(*this, WC_RICHEDIT50)) 
-	{
-		TEXTRANGE tr;
-		tr.chrg = cr;
-		tr.lpstrText = szChar;
-		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
-	}
-	else // must handle ansi
-	{
-		// create a Ansi buffer of the same length
-		LPSTR lpszChar = new char[nLength];
-
-		TEXTRANGEA tr;
-		tr.chrg = cr;
-		tr.lpstrText = lpszChar;
-		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
-
-		// Convert the Ansi text to Unicode.
-		MultiByteToWideChar(CP_ACP, 0, lpszChar, -1, szChar, nLength);
-
-		delete lpszChar;
-	}
-
-	CString sText(szChar);
-	delete [] szChar;
-
-	return sText;
+	return CRichEditHelper::GetTextRange(m_hWnd, cr);
 }
 
 BOOL CRichEditBaseCtrl::InsertSoftReturn()

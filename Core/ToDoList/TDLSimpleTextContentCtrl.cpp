@@ -65,8 +65,7 @@ const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
 CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl() 
 	: 
 	CUrlRichEditCtrl(CTRLCLICKTOFOLLOW, IDS_CTRLCLICKTOFOLLOWLINK),
-	m_bWordWrap(TRUE),
-	m_reSpellCheck(*this)
+	m_bWordWrap(TRUE)
 {
 	// add custom protocol to comments field for linking to task IDs
 	AddProtocol(TDL_PROTOCOL, TRUE);
@@ -372,6 +371,8 @@ void CTDLSimpleTextContentCtrl::FilterToolTipMessage(MSG* pMsg)
 
 ISpellCheck* CTDLSimpleTextContentCtrl::GetSpellCheckInterface() 
 { 
+	VERIFY(m_reSpellCheck.Initialise(*this));
+
 	return &m_reSpellCheck; 
 }
 

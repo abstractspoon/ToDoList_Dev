@@ -116,15 +116,17 @@ public:
 	static BOOL CreateRichEdit20(CWnd& wnd, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle = 0, BOOL bAutoRTL = TRUE);
 	static BOOL CreateRichEdit50(CWnd& wnd, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle = 0, BOOL bAutoRTL = TRUE);
 	static BOOL InitRichEdit();
-	static void ClearUndo(HWND hWnd);
+	static BOOL IsRichEdit(HWND hWnd);
 
 	static BOOL PasteFile(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL bReduceImageColors);
 	static BOOL PasteFiles(HWND hWnd, const CStringArray& aFiles, RE_PASTE nPasteHow, BOOL bReduceImageColors);
 
+	static CString GetTextRange(HWND hwnd, const CHARRANGE& cr);
+	static void ClearUndo(HWND hWnd);
+
 protected:
 	static BOOL PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL bReduceImageColors, BOOL& bUsedClipboard);
 	static BOOL CreateRichEdit(CWnd& wnd, LPCTSTR szClass, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle, BOOL bAutoRTL);
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

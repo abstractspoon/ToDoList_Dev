@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "RichEditHelper.h"
 #include "wclassdefines.h"
+#include "winclasses.h"
 #include "misc.h"
 #include "filemisc.h"
 #include "webmisc.h"
@@ -288,6 +289,52 @@ BOOL CRichEditHelper::PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE 
 
 	// all else
     return FALSE;
+}
+
+BOOL CRichEditHelper::IsRichEdit(HWND hwnd)
+{
+	return (CWinClasses::IsRichEditControl(hwnd) ||
+			CWinClasses::IsWinFormsControl(hwnd, WC_RICHEDIT) ||
+			CWinClasses::IsWinFormsControl(hwnd, WC_RICHEDIT20) ||
+			CWinClasses::IsWinFormsControl(hwnd, WC_RICHEDIT50));
+}
+
+CString CRichEditHelper::GetTextRange(HWND hwnd, const CHARRANGE& cr)
+{
+	int nLength = int(cr.cpMax - cr.cpMin + 1);
+
+	// create an ANSI buffer 
+	LPTSTR szChar = new TCHAR[nLength];
+	ZeroMemory(szChar, nLength * sizeof(TCHAR));
+
+	if (CWinClasses::IsClass(hwnd, WC_RICHEDIT50) ||
+		CWinClasses::IsWinFormsControl(hwnd, WC_RICHEDIT50))
+	{
+		TEXTRANGE tr;
+		tr.chrg = cr;
+		tr.lpstrText = szChar;
+		::SendMessage(hwnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+	}
+	else // must handle ansi
+	{
+		// create a Ansi buffer of the same length
+		LPSTR lpszChar = new char[nLength];
+
+		TEXTRANGEA tr;
+		tr.chrg = cr;
+		tr.lpstrText = lpszChar;
+		::SendMessage(hwnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+
+		// Convert the Ansi text to Unicode.
+		MultiByteToWideChar(CP_ACP, 0, lpszChar, -1, szChar, nLength);
+
+		delete lpszChar;
+	}
+
+	CString sText(szChar);
+	delete[] szChar;
+
+	return sText;
 }
 
 //////////////////////////////////////////////////////////////////////

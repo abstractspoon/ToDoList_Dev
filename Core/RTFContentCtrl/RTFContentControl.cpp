@@ -57,7 +57,6 @@ BOOL CRTFContentControl::s_bInlineSpellChecking = TRUE;
 CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml) 
 	: 
 	CRulerRichEditCtrl(rtfHtml),
-	m_reSpellCheck(m_rtf),
 	m_mgrShortcuts(TRUE),
 	m_dlgPrefs(this)
 {
@@ -142,6 +141,13 @@ void CRTFContentControl::Release()
 	// Avoid CWnd::DestroyWindow because we get an unexpected assert 
 	// once we have released the memory in OnNcDestroy()
 	::DestroyWindow(m_hWnd);
+}
+
+ISpellCheck* CRTFContentControl::GetSpellCheckInterface() 
+{ 
+	VERIFY(m_reSpellCheck.Initialise(m_rtf));
+
+	return &m_reSpellCheck;
 }
 
 void CRTFContentControl::OnNcDestroy()

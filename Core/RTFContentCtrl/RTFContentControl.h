@@ -43,7 +43,7 @@ public:
 	bool ProcessMessage(MSG* pMsg);
 	bool DoIdleProcessing() { return false; }
 	void FilterToolTipMessage(MSG* pMsg);
-	ISpellCheck* GetSpellCheckInterface() { return &m_reSpellCheck; }
+	ISpellCheck* GetSpellCheckInterface();
 	bool Undo();
 	bool Redo();
 	void SetUITheme(const UITHEME* pTheme);
