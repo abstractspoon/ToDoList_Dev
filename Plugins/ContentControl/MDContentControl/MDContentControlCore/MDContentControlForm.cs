@@ -11,6 +11,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
+
 using Command.Handling;
 using ImageHelper;
 using ReverseMarkdown;
@@ -26,6 +27,7 @@ namespace MDContentControl
 	{
 		public event EventHandler InputTextChanged;
 		public event EventHandler InputLostFocus;
+		public event EventHandler SpellCheckInputText;
 		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
 
 		// -----------------------------------------------------------------
@@ -684,7 +686,8 @@ namespace MDContentControl
 			CommandHandling.EnableCommand("cutToolStripMenuItem", enabled && hasSelection, contextMenuStrip1.Items);
 			CommandHandling.EnableCommand("copyToolStripMenuItem", hasSelection, contextMenuStrip1.Items);
 			CommandHandling.EnableCommand("deleteToolStripMenuItem", enabled && hasText, contextMenuStrip1.Items);
-			CommandHandling.EnableCommand("pasteToolStripMenuItem", InputTextCtrl.CanPaste(DataFormats.GetFormat(DataFormats.Text)), contextMenuStrip1.Items);
+			CommandHandling.EnableCommand("pasteToolStripMenuItem", enabled && InputTextCtrl.CanPaste(DataFormats.GetFormat(DataFormats.Text)), contextMenuStrip1.Items);
+			CommandHandling.EnableCommand("spellCheckToolStripMenuItem", enabled, contextMenuStrip1.Items);
 
 			CommandHandling.CheckCommand("wordwrapToolStripMenuItem", WordWrap, contextMenuStrip1.Items);
 		}
@@ -709,7 +712,10 @@ namespace MDContentControl
 			}
 		}
 
+		private void spellCheckToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			SpellCheckInputText?.Invoke(this, e);
+		}
 	}
-
 
 }

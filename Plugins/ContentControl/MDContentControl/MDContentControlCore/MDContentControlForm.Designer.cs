@@ -41,6 +41,8 @@
 			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.wordwrapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.PreviewBrowser = new System.Windows.Forms.WebBrowser();
+			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+			this.spellCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
 			this.SplitContainer.Panel1.SuspendLayout();
 			this.SplitContainer.Panel2.SuspendLayout();
@@ -96,9 +98,11 @@
             this.toolStripSeparator1,
             this.selectAllToolStripMenuItem,
             this.toolStripSeparator2,
+            this.spellCheckToolStripMenuItem,
+            this.toolStripSeparator3,
             this.wordwrapToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(165, 148);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(165, 198);
 			this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
 			// 
 			// cutToolStripMenuItem
@@ -185,6 +189,18 @@
 			this.PreviewBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
 			this.PreviewBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.HtmlPreview_Navigating);
 			// 
+			// toolStripSeparator3
+			// 
+			this.toolStripSeparator3.Name = "toolStripSeparator3";
+			this.toolStripSeparator3.Size = new System.Drawing.Size(161, 6);
+			// 
+			// spellCheckToolStripMenuItem
+			// 
+			this.spellCheckToolStripMenuItem.Name = "spellCheckToolStripMenuItem";
+			this.spellCheckToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+			this.spellCheckToolStripMenuItem.Text = "C&heck Spelling";
+			this.spellCheckToolStripMenuItem.Click += new System.EventHandler(this.spellCheckToolStripMenuItem_Click);
+			// 
 			// MDContentControlForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -216,5 +232,7 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
 		private System.Windows.Forms.ToolStripMenuItem deleteToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem wordwrapToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem spellCheckToolStripMenuItem;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
 	}
 }
