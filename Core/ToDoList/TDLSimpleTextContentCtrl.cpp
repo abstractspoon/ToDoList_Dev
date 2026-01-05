@@ -880,7 +880,7 @@ CLIPFORMAT CTDLSimpleTextContentCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDat
 		return CMSOutlookHelper::CF_OUTLOOK;
 
 	// FALSE ensures we only get what we allow
-	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF, FALSE);
+	return CRichEditHelper::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF, FALSE);
 }
 
 UINT CTDLSimpleTextContentCtrl::OnGetDlgCode()

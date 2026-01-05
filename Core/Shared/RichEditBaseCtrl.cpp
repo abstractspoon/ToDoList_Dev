@@ -39,7 +39,6 @@ const UINT WM_REBC_INITIALISE			= ::RegisterWindowMessage(_T("WM_REBC_INITIALISE
 
 // Ansi strings
 const LPCSTR  DEFAULT_RTF				= "{\\rtf1\\ansi\\deff0\\f0\\fs60}";
-const LPCSTR  RTF_TABLE_ROW				= "\\trowd";
 
 // Unicode strings
 const LPCTSTR RTF_TABLE_HEADER			= _T("{\\rtf1{\\pard{{\\trowd");
@@ -115,8 +114,7 @@ CRichEditBaseCtrl::~CRichEditBaseCtrl()
 
 
 BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
-	//{{AFX_MSG_MAP(CRichEditBaseCtrl)
-	//}}AFX_MSG_MAP
+
 	ON_WM_DESTROY()
 	ON_WM_SETFOCUS()
 	ON_WM_PAINT()
@@ -137,7 +135,6 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CRichEditBaseCtrl message handlers
 
 BOOL CRichEditBaseCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle)
 {
@@ -275,19 +272,10 @@ LRESULT CRichEditBaseCtrl::OnPaste(WPARAM wParam, LPARAM lParam)
 	{
 		CString sRTF = CClipboard().GetText(CBF_RTF);
 
-		m_bHasTables = HasTables(sRTF, TRUE);
+		m_bHasTables = CRichEditHelper::HasTables(sRTF, TRUE);
 	}
 
 	return lr;
-}
-
-BOOL CRichEditBaseCtrl::HasTables(const CString& sRtf, BOOL bAnsiEncoded)
-{
-	if (bAnsiEncoded)
-		return (strstr((LPCSTR)(LPCTSTR)sRtf, RTF_TABLE_ROW) != NULL);
-
-	// else
-	return (sRtf.Find(CString(RTF_TABLE_ROW)) != -1);
 }
 
 BOOL CRichEditBaseCtrl::PasteSpecial(CLIPFORMAT nFormat)
@@ -401,7 +389,7 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 		delete [] szText;
 
  	if (bResult && !m_bHasTables)
- 		m_bHasTables = HasTables(sText, FALSE);
+ 		m_bHasTables = CRichEditHelper::HasTables(sText, FALSE);
 
 	return bResult;
 }
@@ -1443,20 +1431,12 @@ void CRichEditBaseCtrl::SetRTF(const CString& rtf)
 	
 	StreamIn(SF_RTF, es);
 
-	m_bHasTables = HasTables(sRTF, TRUE);
+	m_bHasTables = CRichEditHelper::HasTables(sRTF, TRUE);
 }
 
 BOOL CRichEditBaseCtrl::EnableInlineSpellChecking(BOOL bEnable)
 {
-	if (!SupportsInlineSpellChecking())
-		return FALSE;
-
-	ASSERT(GetSafeHwnd());
-
-	EnableLanguageOptions(IMF_SPELLCHECKING, bEnable);
-	EnableEditStyles((RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING), bEnable);
-
-	return TRUE;
+	return CRichEditHelper::EnableInlineSpellChecking(GetSafeHwnd(), bEnable);
 }
 
 BOOL CRichEditBaseCtrl::EnableAutoFontChanging(BOOL bEnable)
@@ -1466,102 +1446,22 @@ BOOL CRichEditBaseCtrl::EnableAutoFontChanging(BOOL bEnable)
 
 BOOL CRichEditBaseCtrl::EnableLanguageOptions(DWORD dwOptions, BOOL bEnable)
 {
-	return EnableStateFlags(GetSafeHwnd(), 
-							EM_GETLANGOPTIONS, 
-							EM_SETLANGOPTIONS, 
-							dwOptions, 
-							bEnable);
+	return CRichEditHelper::EnableLanguageOptions(GetSafeHwnd(), dwOptions, bEnable);
 }
 
 BOOL CRichEditBaseCtrl::EnableEditStyles(DWORD dwStyles, BOOL bEnable)
 {
-	return EnableStateFlags(GetSafeHwnd(), 
-							EM_GETEDITSTYLE, 
-							EM_SETEDITSTYLE, 
-							dwStyles, 
-							bEnable);
-}
-
-BOOL CRichEditBaseCtrl::EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable)
-{
-	ASSERT(::IsWindow(hWnd));
-	ASSERT(dwFlags);
-
-	DWORD dwCurFlags = ::SendMessage(hWnd, nGetMsg, 0, 0), dwNewFlags(dwCurFlags);
-
-	if (Misc::ModifyFlags(dwNewFlags, 
-						(bEnable ? 0 : dwFlags),  // remove
-						(bEnable ? dwFlags : 0))) // add
-	{
-		::SendMessage(hWnd, nSetMsg, 0, dwNewFlags);
-	}
-
-	return TRUE;
-
+	return CRichEditHelper::EnableEditStyles(GetSafeHwnd(), dwStyles, bEnable);
 }
 
 BOOL CRichEditBaseCtrl::IsInlineSpellCheckingEnabled() const
 {
-	if (!SupportsInlineSpellChecking())
-		return FALSE;
-
-	ASSERT(GetSafeHwnd());
-
-	DWORD dwLangOpt = ::SendMessage(GetSafeHwnd(), EM_GETLANGOPTIONS, 0, 0);
-	DWORD dwLangFlags = IMF_SPELLCHECKING;
-
-	DWORD dwEditStyle = ::SendMessage(GetSafeHwnd(), EM_GETEDITSTYLE, 0, 0);
-	DWORD dwEditFlags = (RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING);
-
-	return (Misc::HasFlag(dwLangOpt, dwLangFlags) && Misc::HasFlag(dwEditStyle, dwEditFlags));
+	return CRichEditHelper::IsInlineSpellCheckingEnabled(GetSafeHwnd());
 }
 
-BOOL CRichEditBaseCtrl::SupportsInlineSpellChecking()
+BOOL CRichEditBaseCtrl::SupportsInlineSpellChecking() const
 {
-	return (COSVersion() >= OSV_WIN8);
-}
-
-CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format, 
-														const CLIPFORMAT fmtPreferred[], int nNumFmts, BOOL bAllowFallback)
-{
-	CDWordArray aFormatIDs;
-	
-#ifdef _DEBUG
-	CStringArray aFormatNames;
-	CString sFormatNames, sFormatIDs;
-	
-	if (CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs, aFormatNames))
-	{
-		sFormatNames = Misc::FormatArray(aFormatNames, ',', TRUE);
-		sFormatIDs = Misc::FormatArray(aFormatIDs, ',');
-	}
-#else
-	CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs);
-#endif
-	
-	for (int nFmt = 0; nFmt < nNumFmts; nFmt++)
-	{
-		UINT nFormat = fmtPreferred[nFmt];
-		
-		if (format && (format == nFormat))
-			return format;
-		
-		if (Misc::HasT((DWORD)nFormat, aFormatIDs))
-			return nFormat;
-	}
-
-	if (bAllowFallback)
-	{
-		// If a format was passed in then use that
-		if (format)
-			return format;
-
-		// else try for plain text
-		if (Misc::HasT((DWORD)CB_TEXTFORMAT, aFormatIDs))
-			return CB_TEXTFORMAT;
-	}
-
-	return 0;
+	return CRichEditHelper::SupportsInlineSpellChecking();
 }
 
 BOOL CRichEditBaseCtrl::EnableToolTips(BOOL bEnable)

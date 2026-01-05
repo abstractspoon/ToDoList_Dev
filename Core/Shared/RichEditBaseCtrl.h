@@ -23,27 +23,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef IMF_SPELLCHECKING
-#	define IMF_SPELLCHECKING 0x0800
-#endif
- 
-#ifndef EM_SETEDITSTYLE
-#	define EM_SETEDITSTYLE			(WM_USER + 204)
-#	define EM_GETEDITSTYLE			(WM_USER + 205)
-#endif
-
-// Extended edit style masks 
-enum RECB_EDITSTYLE
-{
-	RECBES_NOFOCUSLINKNOTIFY = 0x00000020,
-	RECBES_USECTF			 = 0x00010000,
-	RECBES_CTFALLOWEMBED	 = 0x00200000,
-	RECBES_CTFALLOWSMARTTAG	 = 0x00400000,
-	RECBES_CTFALLOWPROOFING	 = 0x00800000,
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 #ifndef IMF_AUTOFONT
 #	define IMF_AUTOFONT				0x00000002
 #endif
@@ -102,7 +81,6 @@ const UINT WM_REB_NOTIFYSELECTPOPUPLISTITEM = ::RegisterWindowMessage(_T("WM_REB
 
 class CRichEditBaseCtrl : public CRichEditCtrl, protected IFindReplaceCmdHandler
 {
-// Construction
 public:
 	CRichEditBaseCtrl(BOOL bAutoRTL = TRUE);
 	virtual ~CRichEditBaseCtrl();
@@ -189,7 +167,7 @@ public:
 	BOOL EnableAutoFontChanging(BOOL bEnable = TRUE);
 	BOOL EnableInlineSpellChecking(BOOL bEnable = TRUE);
 	BOOL IsInlineSpellCheckingEnabled() const;
-	static BOOL SupportsInlineSpellChecking();
+	BOOL SupportsInlineSpellChecking() const;
 
 	void SetParaAlignment(int alignment);
 	BOOL GetParaAlignment() const;
@@ -201,7 +179,6 @@ public:
 
 	BOOL ShowPopupListBoxAtCaret(const CStringArray& aListItems, CWnd* pNotify = NULL, UINT nID = 0xffff);
 
-	// Attributes
 protected:
 	BOOL m_bEnableSelectOnFocus;
 	BOOL m_bInOnFocus;
@@ -317,14 +294,11 @@ protected:
 	COLORREF GetBkgndColor() const;
 	void CheckUpdateMargins();
 
-	BOOL EnableLanguageOptions(DWORD dwOption, BOOL bEnable);
-	BOOL EnableEditStyles(DWORD dwStyles, BOOL bEnable);
-	BOOL EnableChangeNotifications(BOOL bEnable);
-	BOOL HasChangeNotifications() const;
-
-	static BOOL EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable);
-	static BOOL HasTables(const CString& sRtf, BOOL bAnsiEncoded);
-
+ 	BOOL EnableLanguageOptions(DWORD dwOption, BOOL bEnable);
+ 	BOOL EnableEditStyles(DWORD dwStyles, BOOL bEnable);
+ 	BOOL EnableChangeNotifications(BOOL bEnable);
+ 	BOOL HasChangeNotifications() const;
+ 
 	/////////////////////////////////////////////////////////////////////////////
 	// Stream callback functions
 	// Callbacks to the Save and Load functions.
@@ -332,9 +306,6 @@ protected:
 	static DWORD CALLBACK StreamOutCB(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb);
 	static DWORD CALLBACK StreamOutLenCB(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG *pcb);
 
-	static CLIPFORMAT GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format, 
-							const CLIPFORMAT fmtPreferred[], int nNumFmts, BOOL bAllowFallback);
-	
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -355,8 +326,5 @@ inline BOOL ContainsPos(const CHARRANGE& cr, int nPos)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_RICHEDITBASECTRL_H__E7F84BEA_24A6_42D4_BE92_4B8891484048__INCLUDED_)

@@ -11,6 +11,7 @@
 #include "webmisc.h"
 #include "enbitmap.h"
 #include "clipboard.h"
+#include "OSVersion.h"
 
 #include "..\3rdParty\TOM.h"
 #include "..\3rdParty\clipboardbackup.h"
@@ -39,7 +40,9 @@ static HINSTANCE s_hRichEdit50 = NULL;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CReBase::CReBase(HWND hwndRichEdit) : m_hwndRichedit(hwndRichEdit)
+CReBase::CReBase(HWND hwndRichEdit) 
+	: 
+	m_hwndRichedit(hwndRichEdit)
 {
 }
 
@@ -73,7 +76,11 @@ CReSaveCaret::~CReSaveCaret()
 
 //////////////////////////////////////////////////////////////////////
 
-CTextDocument::CTextDocument(HWND hwndRichEdit) : CReBase(hwndRichEdit), m_pDoc(NULL), m_pRichEditOle(NULL)
+CTextDocument::CTextDocument(HWND hwndRichEdit) 
+	: 
+	CReBase(hwndRichEdit), 
+	m_pDoc(NULL), 
+	m_pRichEditOle(NULL)
 {
 	if (m_hwndRichedit)
 	{
@@ -337,10 +344,144 @@ CString CRichEditHelper::GetTextRange(HWND hwnd, const CHARRANGE& cr)
 	return sText;
 }
 
+
+BOOL CRichEditHelper::EnableInlineSpellChecking(HWND hWnd, BOOL bEnable)
+{
+	if (!SupportsInlineSpellChecking())
+		return FALSE;
+
+	EnableLanguageOptions(hWnd, IMF_SPELLCHECKING, bEnable);
+	EnableEditStyles(hWnd, (RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING), bEnable);
+
+	return TRUE;
+}
+
+BOOL CRichEditHelper::EnableAutoFontChanging(HWND hWnd, BOOL bEnable)
+{
+	return EnableLanguageOptions(hWnd, IMF_AUTOFONT, bEnable);
+}
+
+BOOL CRichEditHelper::EnableLanguageOptions(HWND hWnd, DWORD dwOptions, BOOL bEnable)
+{
+	ASSERT(hWnd);
+
+	return EnableStateFlags(hWnd,
+							EM_GETLANGOPTIONS,
+							EM_SETLANGOPTIONS,
+							dwOptions,
+							bEnable);
+}
+
+BOOL CRichEditHelper::EnableEditStyles(HWND hWnd, DWORD dwStyles, BOOL bEnable)
+{
+	ASSERT(hWnd);
+
+	return EnableStateFlags(hWnd,
+							EM_GETEDITSTYLE,
+							EM_SETEDITSTYLE,
+							dwStyles,
+							bEnable);
+}
+
+BOOL CRichEditHelper::EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable)
+{
+	ASSERT(::IsWindow(hWnd));
+	ASSERT(dwFlags);
+
+	DWORD dwCurFlags = ::SendMessage(hWnd, nGetMsg, 0, 0), dwNewFlags(dwCurFlags);
+
+	if (Misc::ModifyFlags(dwNewFlags,
+						(bEnable ? 0 : dwFlags),  // remove
+						(bEnable ? dwFlags : 0))) // add
+	{
+		::SendMessage(hWnd, nSetMsg, 0, dwNewFlags);
+	}
+
+	return TRUE;
+}
+
+BOOL CRichEditHelper::IsInlineSpellCheckingEnabled(HWND hWnd)
+{
+	if (!SupportsInlineSpellChecking())
+		return FALSE;
+
+	DWORD dwLangOpt = ::SendMessage(hWnd, EM_GETLANGOPTIONS, 0, 0);
+	DWORD dwLangFlags = IMF_SPELLCHECKING;
+
+	DWORD dwEditStyle = ::SendMessage(hWnd, EM_GETEDITSTYLE, 0, 0);
+	DWORD dwEditFlags = (RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING);
+
+	return (Misc::HasFlag(dwLangOpt, dwLangFlags) && Misc::HasFlag(dwEditStyle, dwEditFlags));
+}
+
+BOOL CRichEditHelper::SupportsInlineSpellChecking()
+{
+	return (COSVersion() >= OSV_WIN8);
+}
+
+CLIPFORMAT CRichEditHelper::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format,
+													  const CLIPFORMAT fmtPreferred[], int nNumFmts, BOOL bAllowFallback)
+{
+	CDWordArray aFormatIDs;
+
+#ifdef _DEBUG
+	CStringArray aFormatNames;
+	CString sFormatNames, sFormatIDs;
+
+	if (CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs, aFormatNames))
+	{
+		sFormatNames = Misc::FormatArray(aFormatNames, ',', TRUE);
+		sFormatIDs = Misc::FormatArray(aFormatIDs, ',');
+	}
+#else
+	CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs);
+#endif
+
+	for (int nFmt = 0; nFmt < nNumFmts; nFmt++)
+	{
+		UINT nFormat = fmtPreferred[nFmt];
+
+		if (format && (format == nFormat))
+			return format;
+
+		if (Misc::HasT((DWORD)nFormat, aFormatIDs))
+			return nFormat;
+	}
+
+	if (bAllowFallback)
+	{
+		// If a format was passed in then use that
+		if (format)
+			return format;
+
+		// else try for plain text
+		if (Misc::HasT((DWORD)CB_TEXTFORMAT, aFormatIDs))
+			return CB_TEXTFORMAT;
+	}
+
+	return 0;
+}
+
+BOOL CRichEditHelper::HasTables(const CString& sRtf, BOOL bAnsiEncoded)
+{
+	const LPCSTR  RTF_TABLE_ROW = "\\trowd";
+
+	if (bAnsiEncoded)
+		return (strstr((LPCSTR)(LPCTSTR)sRtf, RTF_TABLE_ROW) != NULL);
+
+	// else
+	return (sRtf.Find(CString(RTF_TABLE_ROW)) != -1);
+}
+
 //////////////////////////////////////////////////////////////////////
 
-CReFileObject::CReFileObject(HWND hwndRichEdit) : 
-   CReBase(hwndRichEdit), m_pObject(NULL), m_pClientSite(NULL), m_pRichEditOle(NULL), m_pStorage(NULL)
+CReFileObject::CReFileObject(HWND hwndRichEdit) 
+	: 
+	CReBase(hwndRichEdit), 
+	m_pObject(NULL), 
+	m_pClientSite(NULL), 
+	m_pRichEditOle(NULL), 
+	m_pStorage(NULL)
 
 {
 	SendMessage(m_hwndRichedit, EM_GETOLEINTERFACE, 0, (LPARAM)&m_pRichEditOle);

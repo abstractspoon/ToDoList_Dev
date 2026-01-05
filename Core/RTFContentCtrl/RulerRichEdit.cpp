@@ -273,7 +273,7 @@ CLIPFORMAT CRulerRichEdit::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFO
 		return CMSOutlookHelper::CF_OUTLOOK;
 
 	// TRUE allows fallback formats if our preferred didn't match
-	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF, TRUE);
+	return CRichEditHelper::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF, TRUE);
 }
 
 UINT CRulerRichEdit::OnGetDlgCode() 
