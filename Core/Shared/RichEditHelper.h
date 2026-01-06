@@ -161,7 +161,6 @@ public:
 protected:
 	static BOOL PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL bReduceImageColors, BOOL& bUsedClipboard);
 	static BOOL CreateRichEdit(CWnd& wnd, LPCTSTR szClass, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle, BOOL bAutoRTL);
-	static BOOL EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable);
 };
 
 /////////////////////////////////////////////////////////////////////////////

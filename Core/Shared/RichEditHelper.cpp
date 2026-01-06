@@ -33,6 +33,10 @@ EXTERN_C const GUID CDECL IID_ITextDocument =
 
 //////////////////////////////////////////////////////////////////////
 
+const DWORD ES_SPELLCHECKFLAGS = (RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING);
+
+//////////////////////////////////////////////////////////////////////
+
 static HINSTANCE s_hRichEdit20 = NULL;
 static HINSTANCE s_hRichEdit50 = NULL;
 
@@ -344,14 +348,34 @@ CString CRichEditHelper::GetTextRange(HWND hwnd, const CHARRANGE& cr)
 	return sText;
 }
 
+BOOL CRichEditHelper::SupportsInlineSpellChecking()
+{
+	return (COSVersion() >= OSV_WIN8);
+}
+
+BOOL CRichEditHelper::IsInlineSpellCheckingEnabled(HWND hWnd)
+{
+	if (!SupportsInlineSpellChecking())
+		return FALSE;
+
+	if (!Misc::HasFlag(::SendMessage(hWnd, EM_GETLANGOPTIONS, 0, 0), IMF_SPELLCHECKING))
+		return FALSE;
+
+	if (!Misc::HasFlag(::SendMessage(hWnd, EM_GETEDITSTYLE, 0, 0), ES_SPELLCHECKFLAGS))
+		return FALSE;
+
+	return TRUE;
+}
 
 BOOL CRichEditHelper::EnableInlineSpellChecking(HWND hWnd, BOOL bEnable)
 {
 	if (!SupportsInlineSpellChecking())
 		return FALSE;
 
-	EnableLanguageOptions(hWnd, IMF_SPELLCHECKING, bEnable);
-	EnableEditStyles(hWnd, (RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING), bEnable);
+	VERIFY(EnableLanguageOptions(hWnd, IMF_SPELLCHECKING, bEnable));
+	VERIFY(EnableEditStyles(hWnd, ES_SPELLCHECKFLAGS, bEnable));
+
+	ASSERT(!Misc::StatesDiffer(bEnable, IsInlineSpellCheckingEnabled(hWnd)));
 
 	return TRUE;
 }
@@ -365,58 +389,32 @@ BOOL CRichEditHelper::EnableLanguageOptions(HWND hWnd, DWORD dwOptions, BOOL bEn
 {
 	ASSERT(hWnd);
 
-	return EnableStateFlags(hWnd,
-							EM_GETLANGOPTIONS,
-							EM_SETLANGOPTIONS,
-							dwOptions,
-							bEnable);
+	DWORD dwCurOptions = ::SendMessage(hWnd, EM_GETEDITSTYLE, 0, 0), dwNewOptions(dwCurOptions);
+
+	if (!Misc::SetFlag(dwNewOptions, dwOptions, bEnable))
+		return TRUE; // no change
+
+	if (::SendMessage(hWnd, EM_SETLANGOPTIONS, 0, dwNewOptions))
+		return TRUE;
+
+	ASSERT(0);
+	return FALSE;
 }
 
 BOOL CRichEditHelper::EnableEditStyles(HWND hWnd, DWORD dwStyles, BOOL bEnable)
 {
 	ASSERT(hWnd);
 
-	return EnableStateFlags(hWnd,
-							EM_GETEDITSTYLE,
-							EM_SETEDITSTYLE,
-							dwStyles,
-							bEnable);
-}
+	DWORD dwCurStyles = ::SendMessage(hWnd, EM_GETEDITSTYLE, 0, 0), dwNewStyles(dwCurStyles);
 
-BOOL CRichEditHelper::EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable)
-{
-	ASSERT(::IsWindow(hWnd));
-	ASSERT(dwFlags);
+	if (!Misc::SetFlag(dwNewStyles, dwStyles, bEnable))
+		return TRUE; // no change
 
-	DWORD dwCurFlags = ::SendMessage(hWnd, nGetMsg, 0, 0), dwNewFlags(dwCurFlags);
+	if (dwNewStyles == ::SendMessage(hWnd, EM_SETEDITSTYLE, (bEnable ? dwStyles : 0), dwStyles))
+		return TRUE;
 
-	if (Misc::ModifyFlags(dwNewFlags,
-						(bEnable ? 0 : dwFlags),  // remove
-						(bEnable ? dwFlags : 0))) // add
-	{
-		::SendMessage(hWnd, nSetMsg, 0, dwNewFlags);
-	}
-
-	return TRUE;
-}
-
-BOOL CRichEditHelper::IsInlineSpellCheckingEnabled(HWND hWnd)
-{
-	if (!SupportsInlineSpellChecking())
-		return FALSE;
-
-	DWORD dwLangOpt = ::SendMessage(hWnd, EM_GETLANGOPTIONS, 0, 0);
-	DWORD dwLangFlags = IMF_SPELLCHECKING;
-
-	DWORD dwEditStyle = ::SendMessage(hWnd, EM_GETEDITSTYLE, 0, 0);
-	DWORD dwEditFlags = (RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING);
-
-	return (Misc::HasFlag(dwLangOpt, dwLangFlags) && Misc::HasFlag(dwEditStyle, dwEditFlags));
-}
-
-BOOL CRichEditHelper::SupportsInlineSpellChecking()
-{
-	return (COSVersion() >= OSV_WIN8);
+	ASSERT(0);
+	return FALSE;
 }
 
 CLIPFORMAT CRichEditHelper::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format,

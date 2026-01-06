@@ -78,6 +78,7 @@ CTDLSimpleTextContentCtrl::~CTDLSimpleTextContentCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
+
 	ON_WM_CONTEXTMENU()
 	ON_WM_SETCURSOR()
 	ON_WM_DESTROY()
@@ -90,6 +91,7 @@ BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
 	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
 	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
 	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
+
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -155,6 +157,19 @@ void CTDLSimpleTextContentCtrl::Enable(bool bEnable)
 HWND CTDLSimpleTextContentCtrl::GetHwnd() const 
 { 
 	return GetSafeHwnd(); 
+}
+
+bool CTDLSimpleTextContentCtrl::DoIdleProcessing() 
+{ 
+#ifndef _DEBUG
+	if (SupportsInlineSpellChecking())
+#endif
+	{
+		if (Misc::StatesDiffer(CUrlRichEditCtrl::IsInlineSpellCheckingEnabled(), s_bInlineSpellChecking))
+			CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
+	}
+
+	return false; 
 }
 
 LPCTSTR CTDLSimpleTextContentCtrl::GetTypeID() const 
@@ -631,7 +646,7 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 #endif
 		{
 			s_bInlineSpellChecking = !s_bInlineSpellChecking;
-			EnableInlineSpellChecking(s_bInlineSpellChecking);
+			CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
 		}
 		break;
 	}

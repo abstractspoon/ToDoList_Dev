@@ -37,7 +37,7 @@ public:
 	HWND GetHwnd() const;
 	void Release();
 	bool ProcessMessage(MSG* pMsg);
-	bool DoIdleProcessing() { return false; }
+	bool DoIdleProcessing();
 	void FilterToolTipMessage(MSG* pMsg);
 	ISpellCheck* GetSpellCheckInterface();
 	bool Undo();
@@ -76,7 +76,6 @@ protected:
 	afx_msg BOOL OnKillFocus();
 	afx_msg LRESULT OnSetWordWrap(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnNcDestroy();
 	afx_msg UINT OnGetDlgCode();
 
 	DECLARE_MESSAGE_MAP()

@@ -376,6 +376,19 @@ HWND CRTFContentControl::GetHwnd() const
 	return GetSafeHwnd();
 }
 
+bool CRTFContentControl::DoIdleProcessing()
+{
+#ifndef _DEBUG
+	if (CRichEditHelper::SupportsInlineSpellChecking())
+#endif
+	{
+		if (Misc::StatesDiffer(m_rtf.IsInlineSpellCheckingEnabled(), s_bInlineSpellChecking))
+			m_rtf.EnableInlineSpellChecking(s_bInlineSpellChecking);
+	}
+
+	return false;
+}
+
 void CRTFContentControl::SetReadOnly(bool bReadOnly)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
