@@ -161,14 +161,7 @@ HWND CTDLSimpleTextContentCtrl::GetHwnd() const
 
 bool CTDLSimpleTextContentCtrl::DoIdleProcessing() 
 { 
-#ifndef _DEBUG
-	if (SupportsInlineSpellChecking())
-#endif
-	{
-		if (Misc::StatesDiffer(CUrlRichEditCtrl::IsInlineSpellCheckingEnabled(), s_bInlineSpellChecking))
-			CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
-	}
-
+	CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
 	return false; 
 }
 

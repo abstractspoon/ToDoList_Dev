@@ -378,14 +378,7 @@ HWND CRTFContentControl::GetHwnd() const
 
 bool CRTFContentControl::DoIdleProcessing()
 {
-#ifndef _DEBUG
-	if (CRichEditHelper::SupportsInlineSpellChecking())
-#endif
-	{
-		if (Misc::StatesDiffer(m_rtf.IsInlineSpellCheckingEnabled(), s_bInlineSpellChecking))
-			m_rtf.EnableInlineSpellChecking(s_bInlineSpellChecking);
-	}
-
+	m_rtf.EnableInlineSpellChecking(s_bInlineSpellChecking);
 	return false;
 }
 
