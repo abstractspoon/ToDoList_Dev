@@ -372,6 +372,9 @@ BOOL CRichEditHelper::EnableInlineSpellChecking(HWND hWnd, BOOL bEnable)
 	if (!SupportsInlineSpellChecking())
 		return FALSE;
 
+	if (!Misc::StatesDiffer(bEnable, IsInlineSpellCheckingEnabled(hWnd)))
+		return TRUE; // no change
+
 	VERIFY(EnableLanguageOptions(hWnd, IMF_SPELLCHECKING, bEnable));
 	VERIFY(EnableEditStyles(hWnd, ES_SPELLCHECKFLAGS, bEnable));
 

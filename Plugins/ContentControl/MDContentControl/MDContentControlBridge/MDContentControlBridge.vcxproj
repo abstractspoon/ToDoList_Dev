@@ -14,7 +14,7 @@
     <ProjectGuid>{F1D92F28-F429-4FBC-95E8-EA2002F46A0C}</ProjectGuid>
     <RootNamespace>MDContentControlBridge</RootNamespace>
     <ProjectName>MDContentControlBridge</ProjectName>
-	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -53,6 +53,7 @@
       <CompileAsManaged>true</CompileAsManaged>
       <AdditionalUsingDirectories>..\..\..\Debug</AdditionalUsingDirectories>
       <AdditionalIncludeDirectories>$(SolutionDir)..\Core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4944</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

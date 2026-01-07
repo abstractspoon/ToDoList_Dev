@@ -9,6 +9,7 @@
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
+#include <shared\RichEditHelper.h>
 #include <shared\GraphicsMisc.h>
 #include <shared\Rtf2HtmlConverter.h>
 
@@ -284,6 +285,16 @@ void RichTextBoxEx::Outdent()
 	{
 		SelectionIndent = Math::Max(0, (SelectionIndent - TabWidth));
 	}
+}
+
+void RichTextBoxEx::EnableInlineSpellChecking(bool enable)
+{
+	CRichEditHelper::EnableInlineSpellChecking(Win32::GetHwnd(Handle), (enable ? TRUE : FALSE));
+}
+
+bool RichTextBoxEx::IsInlineSpellCheckingEnabled()
+{
+	return (CRichEditHelper::IsInlineSpellCheckingEnabled(Win32::GetHwnd(Handle)) != FALSE);
 }
 
 String^ RichTextBoxEx::RtfToHtml(String^ rtf, bool useMSWord)

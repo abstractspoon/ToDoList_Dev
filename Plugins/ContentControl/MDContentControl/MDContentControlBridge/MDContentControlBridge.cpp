@@ -88,12 +88,13 @@ IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned l
 
 void CMDContentBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	// TODO
+	pPrefs->WriteProfileInt(szKey, _T("InlineSpellChecking"), MDContentControl::MDContentControlCore::InlineSpellChecking);
 }
 
 void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	// TODO
+	if (!bAppOnly)
+		MDContentControl::MDContentControlCore::InlineSpellChecking = (pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), FALSE) != FALSE);
 }
 
 // returns the length of the html or zero if not supported
@@ -129,8 +130,6 @@ void CMDContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This is the constructor of a class that has been exported.
-// see ExporterBridge.h for the class definition
 CMDContentControlBridge::CMDContentControlBridge(ITransText* pTT)
 	: 
 	m_pTT(pTT), 
@@ -221,6 +220,11 @@ bool CMDContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 	msclr::auto_gcroot<String^> content = gcnew String(szContent);
 
 	return m_wnd->InsertTextContent(content.get(), bAtEnd);
+}
+
+bool CMDContentControlBridge::DoIdleProcessing() 
+{ 
+	return m_wnd->DoIdleProcessing();
 }
 
 bool CMDContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)

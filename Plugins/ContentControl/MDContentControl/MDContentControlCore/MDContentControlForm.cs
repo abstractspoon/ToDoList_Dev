@@ -28,6 +28,7 @@ namespace MDContentControl
 		public event EventHandler InputTextChanged;
 		public event EventHandler InputLostFocus;
 		public event EventHandler SpellCheckInputText;
+
 		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
 
 		// -----------------------------------------------------------------
@@ -242,6 +243,14 @@ namespace MDContentControl
 
 				m_SettingTextOrFont = false;
 			}
+		}
+
+		public static bool InlineSpellChecking = false;
+
+		public bool DoIdleProcessing()
+		{
+			InputTextCtrl.EnableInlineSpellChecking(InlineSpellChecking);
+			return false;
 		}
 
 		public bool IncludeSourceUrlWhenPasting = false;
@@ -690,6 +699,7 @@ namespace MDContentControl
 			CommandHandling.EnableCommand("spellCheckToolStripMenuItem", enabled, contextMenuStrip1.Items);
 
 			CommandHandling.CheckCommand("wordwrapToolStripMenuItem", WordWrap, contextMenuStrip1.Items);
+			CommandHandling.CheckCommand("inlineSpellCheckToolStripMenuItem", InlineSpellChecking, contextMenuStrip1.Items);
 		}
 
 		protected override void OnGotFocus(EventArgs e)
@@ -715,6 +725,12 @@ namespace MDContentControl
 		private void spellCheckToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			SpellCheckInputText?.Invoke(this, e);
+		}
+
+		private void inlineSpellCheckToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			InlineSpellChecking = !InlineSpellChecking;
+			InputTextCtrl.EnableInlineSpellChecking(InlineSpellChecking);
 		}
 	}
 

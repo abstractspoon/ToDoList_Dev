@@ -74,7 +74,7 @@ public:
    void Release();
    bool ProcessMessage(MSG* pMsg);
    void FilterToolTipMessage(MSG* pMsg) {} //.Net tooltips don't need this
-   bool DoIdleProcessing() { return false; }
+   bool DoIdleProcessing();
 
    ISpellCheck* GetSpellCheckInterface();
 

@@ -32,17 +32,17 @@
 			this.SplitContainer = new System.Windows.Forms.SplitContainer();
 			this.InputTextCtrl = new Abstractspoon.Tdl.PluginHelpers.RichTextBoxEx();
 			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.spellCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-			this.wordwrapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.PreviewBrowser = new System.Windows.Forms.WebBrowser();
+			this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.wordwrapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.inlineSpellCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
 			this.SplitContainer.Panel1.SuspendLayout();
@@ -104,8 +104,54 @@
             this.wordwrapToolStripMenuItem,
             this.inlineSpellCheckToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
-			this.contextMenuStrip1.Size = new System.Drawing.Size(185, 220);
+			this.contextMenuStrip1.Size = new System.Drawing.Size(185, 198);
 			this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
+			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
+			// 
+			// selectAllToolStripMenuItem
+			// 
+			this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
+			this.selectAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
+			this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+			this.selectAllToolStripMenuItem.Text = "Select &All";
+			this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator2
+			// 
+			this.toolStripSeparator2.Name = "toolStripSeparator2";
+			this.toolStripSeparator2.Size = new System.Drawing.Size(181, 6);
+			// 
+			// spellCheckToolStripMenuItem
+			// 
+			this.spellCheckToolStripMenuItem.Name = "spellCheckToolStripMenuItem";
+			this.spellCheckToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+			this.spellCheckToolStripMenuItem.Text = "C&heck Spelling...";
+			this.spellCheckToolStripMenuItem.Click += new System.EventHandler(this.spellCheckToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator3
+			// 
+			this.toolStripSeparator3.Name = "toolStripSeparator3";
+			this.toolStripSeparator3.Size = new System.Drawing.Size(181, 6);
+			// 
+			// PreviewBrowser
+			// 
+			this.PreviewBrowser.AllowWebBrowserDrop = false;
+			this.PreviewBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.PreviewBrowser.Location = new System.Drawing.Point(0, 0);
+			this.PreviewBrowser.Margin = new System.Windows.Forms.Padding(0);
+			this.PreviewBrowser.MinimumSize = new System.Drawing.Size(13, 0);
+			this.PreviewBrowser.Name = "PreviewBrowser";
+			this.PreviewBrowser.ScriptErrorsSuppressed = true;
+			this.PreviewBrowser.Size = new System.Drawing.Size(559, 268);
+			this.PreviewBrowser.TabIndex = 0;
+			this.PreviewBrowser.Url = new System.Uri("about:blank", System.UriKind.Absolute);
+			this.PreviewBrowser.WebBrowserShortcutsEnabled = false;
+			this.PreviewBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
+			this.PreviewBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.HtmlPreview_Navigating);
 			// 
 			// cutToolStripMenuItem
 			// 
@@ -148,36 +194,6 @@
 			this.deleteToolStripMenuItem.Text = "&Delete";
 			this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
 			// 
-			// toolStripSeparator1
-			// 
-			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(181, 6);
-			// 
-			// selectAllToolStripMenuItem
-			// 
-			this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
-			this.selectAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-			this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-			this.selectAllToolStripMenuItem.Text = "Select &All";
-			this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
-			// 
-			// toolStripSeparator2
-			// 
-			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(181, 6);
-			// 
-			// spellCheckToolStripMenuItem
-			// 
-			this.spellCheckToolStripMenuItem.Name = "spellCheckToolStripMenuItem";
-			this.spellCheckToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-			this.spellCheckToolStripMenuItem.Text = "C&heck Spelling";
-			this.spellCheckToolStripMenuItem.Click += new System.EventHandler(this.spellCheckToolStripMenuItem_Click);
-			// 
-			// toolStripSeparator3
-			// 
-			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(181, 6);
-			// 
 			// wordwrapToolStripMenuItem
 			// 
 			this.wordwrapToolStripMenuItem.Image = global::MDContentControl.Properties.Resources.ToolbarWordWrap;
@@ -187,24 +203,10 @@
 			this.wordwrapToolStripMenuItem.Text = "Word &Wrap";
 			this.wordwrapToolStripMenuItem.Click += new System.EventHandler(this.wordwrapToolStripMenuItem_Click);
 			// 
-			// PreviewBrowser
-			// 
-			this.PreviewBrowser.AllowWebBrowserDrop = false;
-			this.PreviewBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.PreviewBrowser.Location = new System.Drawing.Point(0, 0);
-			this.PreviewBrowser.Margin = new System.Windows.Forms.Padding(0);
-			this.PreviewBrowser.MinimumSize = new System.Drawing.Size(13, 0);
-			this.PreviewBrowser.Name = "PreviewBrowser";
-			this.PreviewBrowser.ScriptErrorsSuppressed = true;
-			this.PreviewBrowser.Size = new System.Drawing.Size(559, 268);
-			this.PreviewBrowser.TabIndex = 0;
-			this.PreviewBrowser.Url = new System.Uri("about:blank", System.UriKind.Absolute);
-			this.PreviewBrowser.WebBrowserShortcutsEnabled = false;
-			this.PreviewBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
-			this.PreviewBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.HtmlPreview_Navigating);
-			// 
 			// inlineSpellCheckToolStripMenuItem
 			// 
+			this.inlineSpellCheckToolStripMenuItem.Image = global::MDContentControl.Properties.Resources.ToolbarInlineSpellCheck;
+			this.inlineSpellCheckToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.inlineSpellCheckToolStripMenuItem.Name = "inlineSpellCheckToolStripMenuItem";
 			this.inlineSpellCheckToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
 			this.inlineSpellCheckToolStripMenuItem.Text = "I&nline Spell Checking";

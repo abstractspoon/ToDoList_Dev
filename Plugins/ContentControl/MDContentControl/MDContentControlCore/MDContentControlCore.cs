@@ -90,11 +90,6 @@ namespace MDContentControl
 			return false;
         }
 
-		public bool DoIdleProcessing()
-		{
-			return false;
-		}
-
 		public new bool Undo()
         {
 			return base.Undo();

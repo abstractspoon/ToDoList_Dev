@@ -26,6 +26,9 @@ namespace Abstractspoon
 				void Indent();
 				void Outdent();
 
+				void EnableInlineSpellChecking(bool enable);
+				bool IsInlineSpellCheckingEnabled();
+
 				virtual LabelTipInfo^ ToolHitTest(Drawing::Point ptScreen);
 				virtual Windows::Forms::Control^ GetOwner() { return this; }
 
