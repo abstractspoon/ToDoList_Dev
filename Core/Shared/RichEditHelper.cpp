@@ -410,7 +410,14 @@ BOOL CRichEditHelper::EnableEditStyles(HWND hWnd, DWORD dwStyles, BOOL bEnable)
 	if (!Misc::SetFlag(dwNewStyles, dwStyles, bEnable))
 		return TRUE; // no change
 
-	if (dwNewStyles == ::SendMessage(hWnd, EM_SETEDITSTYLE, (bEnable ? dwStyles : 0), dwStyles))
+	BOOL bWinforms = CWinClasses::IsWinFormsControl(hWnd);
+
+	DWORD dwResult = ::SendMessage(hWnd, EM_SETEDITSTYLE, dwNewStyles, dwStyles);
+	DWORD dwCheck = ::SendMessage(hWnd, EM_GETEDITSTYLE, 0, 0);
+
+	ASSERT(dwResult == dwCheck);
+
+	if ((dwResult == dwNewStyles) || (bWinforms && (dwResult == dwStyles)))
 		return TRUE;
 
 	ASSERT(0);
