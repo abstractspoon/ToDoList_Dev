@@ -372,9 +372,6 @@ BOOL CRichEditHelper::EnableInlineSpellChecking(HWND hWnd, BOOL bEnable)
 	if (!SupportsInlineSpellChecking())
 		return FALSE;
 
-	if (!Misc::StatesDiffer(bEnable, IsInlineSpellCheckingEnabled(hWnd)))
-		return TRUE; // no change
-
 	VERIFY(EnableLanguageOptions(hWnd, IMF_SPELLCHECKING, bEnable));
 	VERIFY(EnableEditStyles(hWnd, ES_SPELLCHECKFLAGS, bEnable));
 
@@ -392,7 +389,7 @@ BOOL CRichEditHelper::EnableLanguageOptions(HWND hWnd, DWORD dwOptions, BOOL bEn
 {
 	ASSERT(hWnd);
 
-	DWORD dwCurOptions = ::SendMessage(hWnd, EM_GETEDITSTYLE, 0, 0), dwNewOptions(dwCurOptions);
+	DWORD dwCurOptions = ::SendMessage(hWnd, EM_GETLANGOPTIONS, 0, 0), dwNewOptions(dwCurOptions);
 
 	if (!Misc::SetFlag(dwNewOptions, dwOptions, bEnable))
 		return TRUE; // no change
