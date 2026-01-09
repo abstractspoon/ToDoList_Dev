@@ -276,6 +276,7 @@ unicode_release\TDLTest.exe
     <Image Include="res\reminder.ico" />
     <Image Include="res\select_icon.ico" />
     <Image Include="res\reset.ico" />
+    <Image Include="res\simpletext_menu.bmp" />
     <Image Include="res\style_image.bmp" />
     <Image Include="res\style_para.bmp" />
     <Image Include="res\style_table.bmp" />
