@@ -2458,8 +2458,11 @@ CString Misc::GetKeyName(WORD wVirtKeyCode, BOOL bExtended)
 	return EMPTY_STR;
 }
 
-BOOL Misc::IsKeyPressed(DWORD dwVirtKey) 
+BOOL Misc::IsKeyPressed(DWORD dwVirtKey, BOOL bAsync) 
 { 
+	if (bAsync)
+		return (GetAsyncKeyState(dwVirtKey) & 0x8000);
+
 	return (GetKeyState(dwVirtKey) & 0x8000); 
 }
 

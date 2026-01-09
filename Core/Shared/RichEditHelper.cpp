@@ -321,7 +321,7 @@ CString CRichEditHelper::GetTextRange(HWND hwnd, const CHARRANGE& cr)
 	if (CWinClasses::IsClass(hwnd, WC_RICHEDIT50) ||
 		CWinClasses::IsWinFormsControl(hwnd, WC_RICHEDIT50))
 	{
-		TEXTRANGE tr;
+		TEXTRANGEW tr;
 		tr.chrg = cr;
 		tr.lpstrText = szChar;
 		::SendMessage(hwnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);

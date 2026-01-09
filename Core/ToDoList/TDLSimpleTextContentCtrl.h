@@ -55,6 +55,7 @@ public:
 
 protected:
 	BOOL m_bWordWrap;
+	BOOL m_bIgnoreNextContextMenu;
 
 	CRichEditSpellCheck m_reSpellCheck;
 	CMenuIconMgr m_mgrMenuIcons;
@@ -74,9 +75,10 @@ protected:
 	afx_msg void OnUpdateCommentsMenuCmd(CCmdUI* pCmdUI);
 	afx_msg BOOL OnChangeText();
 	afx_msg BOOL OnKillFocus();
-	afx_msg LRESULT OnSetWordWrap(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg UINT OnGetDlgCode();
+	afx_msg LRESULT OnSetWordWrap(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnUnInitMenuPopup(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
