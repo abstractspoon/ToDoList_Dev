@@ -65,8 +65,7 @@ const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
 CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl() 
 	: 
 	CUrlRichEditCtrl(CTRLCLICKTOFOLLOW, IDS_CTRLCLICKTOFOLLOWLINK),
-	m_bWordWrap(TRUE),
-	m_bIgnoreNextContextMenu(FALSE)
+	m_bWordWrap(TRUE)
 {
 	// add custom protocol to comments field for linking to task IDs
 	AddProtocol(TDL_PROTOCOL, TRUE);
@@ -91,7 +90,6 @@ BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
 	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
 	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
 	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
-	ON_MESSAGE(WM_UNINITMENUPOPUP, OnUnInitMenuPopup)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -161,11 +159,8 @@ HWND CTDLSimpleTextContentCtrl::GetHwnd() const
 
 bool CTDLSimpleTextContentCtrl::DoIdleProcessing() 
 { 
-	// See UnInitMenuPopup for comments
-	ASSERT(!m_bIgnoreNextContextMenu);
-	m_bIgnoreNextContextMenu = FALSE;
-
 	CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
+
 	return false; 
 }
 
@@ -477,49 +472,10 @@ BOOL CTDLSimpleTextContentCtrl::OnKillFocus()
 	return FALSE; // continue routing
 }
 
-LRESULT CTDLSimpleTextContentCtrl::OnUnInitMenuPopup(WPARAM wp, LPARAM /*lp*/)
-{
-	// Inline Spell Checking works by intercepting WM_RBUTTONUP and
-	// displaying a popup menu for misspelt words. If an item is selected
-	// from this menu, the WM_CONTEXTMENU message is eaten which is the 
-	// expected behaviour.
-	//
-	// However, if the spell check menu is cancelled then WM_CONTEXTMENU
-	// is NOT eaten and our custom context menu pops up. This is especially
-	// troublesome if the cancellation occurs by clicking outside the spell
-	// check menu because then the WM_LBUTTONDOWN/UP messages get handled
-	// by our context menu producing a fairly random outcome which depends 
-	// on exactly where the user clicked away from the spell check menu.
-	//
-	// To deal with this I have developed a hueristic for detecting when the 
-	// spell check menu is being hidden as a consequence of a cancellation
-	// event and then ignoring the subsequent WM_CONTEXTMENU.
-	if (s_bInlineSpellChecking)
-	{
-		const CMenu* pPopupMenu = CMenu::FromHandle((HMENU)wp);
-
-		if (pPopupMenu->GetMenuItemID(0) != ID_COMMENTS_CUT)
-		{
-			m_bIgnoreNextContextMenu = (Misc::IsKeyPressed(VK_LBUTTON, TRUE) || 
-										Misc::IsKeyPressed(VK_ESCAPE));
-
-	// 		if (m_bIgnoreNextContentMenu)
-	// 		{
-	// 			int breakpoint = 0;
-	// 		}
-		}
-	}
-
-	return Default();
-}
-
 void CTDLSimpleTextContentCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
-	if (m_bIgnoreNextContextMenu)
-	{
-		m_bIgnoreNextContextMenu = FALSE;
+	if (WantIgnoreContextMenu())
 		return;
-	}
 
 	if (pWnd == this)
 	{

@@ -47,7 +47,6 @@ CUrlRichEditCtrl::~CUrlRichEditCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CUrlRichEditCtrl, CRichEditBaseCtrl)
-//{{AFX_MSG_MAP(CUrlRichEditCtrl)
 	ON_WM_RBUTTONUP()
 	ON_WM_KEYUP()
 	ON_WM_RBUTTONDOWN()
@@ -57,7 +56,6 @@ BEGIN_MESSAGE_MAP(CUrlRichEditCtrl, CRichEditBaseCtrl)
 	ON_WM_TIMER()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SETCURSOR()
-	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_DROPFILES, OnDropFiles)
@@ -67,7 +65,6 @@ BEGIN_MESSAGE_MAP(CUrlRichEditCtrl, CRichEditBaseCtrl)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CUrlRichEditCtrl message handlers
 
 int CUrlRichEditCtrl::AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify)
 {
@@ -768,6 +765,9 @@ void CUrlRichEditCtrl::OnShowWindow(BOOL bShow, UINT nStatus)
 
 void CUrlRichEditCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point) 
 {
+	if (WantIgnoreContextMenu())
+		return;
+
 	// if we arrived here then it means that noone had derived
 	// from us and handled OnContextMenu. so we must forward to 
 	// our parent else we'll end up in a recursive loop

@@ -380,6 +380,42 @@ BOOL CRichEditHelper::EnableInlineSpellChecking(HWND hWnd, BOOL bEnable)
 	return TRUE;
 }
 
+BOOL CRichEditHelper::IsInlineSpellCheckMenu(HMENU hMenu)
+{
+	if (!SupportsInlineSpellChecking())
+		return FALSE;
+
+	int nItem = ::GetMenuItemCount(hMenu);
+
+	// Hueristic determined by observation
+	//
+	// Working backwards:
+	// Last 2 items always have IDs 4 and 5
+	if (GetMenuItemID(hMenu, --nItem) != 5)
+		return FALSE;
+
+	if (GetMenuItemID(hMenu, --nItem) != 4)
+		return FALSE;
+
+	// Then if we haven't reached the end
+	if (nItem != 0)
+	{
+		// The next item is a separator
+		if (GetMenuItemID(hMenu, --nItem) != 0)
+			return FALSE;
+
+		// Remaining items have a menu ID corresponding
+		// to their position + 1
+		while (nItem)
+		{
+ 			if (GetMenuItemID(hMenu, --nItem) != (nItem + 1))
+ 				return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
 BOOL CRichEditHelper::EnableAutoFontChanging(HWND hWnd, BOOL bEnable)
 {
 	return EnableLanguageOptions(hWnd, IMF_AUTOFONT, bEnable);

@@ -102,7 +102,8 @@ CRichEditBaseCtrl::CRichEditBaseCtrl(BOOL bAutoRTL)
 	m_bAutoRTL(bAutoRTL),
 	m_pPopupListOwner(NULL),
 	m_bFirstOnSize(TRUE),
-	m_crBkgnd(CLR_DEFAULT)
+	m_crBkgnd(CLR_DEFAULT),
+	m_bIgnoreNextContextMenu(FALSE)
 {
    m_callback.SetOwner(this);
 }
@@ -119,6 +120,7 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_WM_SETFOCUS()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
+	ON_WM_CONTEXTMENU()
 
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
@@ -131,6 +133,7 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_MESSAGE(EM_SETSEL, OnEditSetSelection)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
+	ON_MESSAGE(WM_UNINITMENUPOPUP, OnUnInitMenuPopup)
 
 END_MESSAGE_MAP()
 
@@ -1437,6 +1440,61 @@ void CRichEditBaseCtrl::SetRTF(const CString& rtf)
 BOOL CRichEditBaseCtrl::EnableInlineSpellChecking(BOOL bEnable)
 {
 	return CRichEditHelper::EnableInlineSpellChecking(GetSafeHwnd(), bEnable);
+}
+
+LRESULT CRichEditBaseCtrl::OnUnInitMenuPopup(WPARAM wp, LPARAM /*lp*/)
+{
+	// Inline Spell Checking works by intercepting WM_RBUTTONUP and
+	// displaying a popup menu for misspelt words. If an item is selected
+	// from this menu, the WM_CONTEXTMENU message is eaten which is the 
+	// expected behaviour.
+	//
+	// However, if the spell check menu is cancelled then WM_CONTEXTMENU
+	// is NOT eaten and our custom context menu pops up. This is especially
+	// troublesome if the cancellation occurs by clicking outside the spell
+	// check menu because then the WM_LBUTTONDOWN/UP messages get handled
+	// by our context menu producing a fairly random outcome which depends 
+	// on exactly where the user clicked away from the spell check menu.
+	//
+	// To deal with this I have developed a hueristic for detecting when the 
+	// spell check menu is being hidden as a consequence of a cancellation
+	// event and then ignoring the subsequent WM_CONTEXTMENU.
+	ASSERT(!m_bIgnoreNextContextMenu);
+
+	if (IsInlineSpellCheckingEnabled())
+	{
+		if (CRichEditHelper::IsInlineSpellCheckMenu((HMENU)wp))
+		{
+			m_bIgnoreNextContextMenu = (Misc::IsKeyPressed(VK_LBUTTON, TRUE) ||
+										Misc::IsKeyPressed(VK_ESCAPE));
+
+			if (m_bIgnoreNextContextMenu)
+			{
+				int breakpoint = 0;
+			}
+		}
+	}
+
+	return Default();
+}
+
+BOOL CRichEditBaseCtrl::WantIgnoreContextMenu() const
+{
+	BOOL bIgnore = m_bIgnoreNextContextMenu;
+	m_bIgnoreNextContextMenu = FALSE;
+
+	return bIgnore;
+}
+
+void CRichEditBaseCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+{
+	// If we arrived here it means no one overrode the context menu
+	// but we still exit early to avoid the default menu popping up
+	if (WantIgnoreContextMenu())
+		return;
+
+	// else
+	CRichEditCtrl::OnContextMenu(pWnd, point);
 }
 
 BOOL CRichEditBaseCtrl::EnableAutoFontChanging(BOOL bEnable)

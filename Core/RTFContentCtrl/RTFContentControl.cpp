@@ -436,6 +436,9 @@ void CRTFContentControl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	if (pWnd == &m_rtf)
 	{
+		if (m_rtf.WantIgnoreContextMenu())
+			return;
+
 		// prepare a simple edit menu
 		CMenu menu;
 

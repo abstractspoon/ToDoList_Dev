@@ -144,13 +144,12 @@ public:
 
 	static BOOL EnableLanguageOptions(HWND hWnd, DWORD dwOption, BOOL bEnable);
 	static BOOL EnableEditStyles(HWND hWnd, DWORD dwStyles, BOOL bEnable);
-	static BOOL EnableChangeNotifications(HWND hWnd, BOOL bEnable);
-	static BOOL HasChangeNotifications(HWND hWnd);
 
 	static BOOL SupportsInlineSpellChecking();
 	static BOOL EnableAutoFontChanging(HWND hWnd, BOOL bEnable = TRUE);
 	static BOOL EnableInlineSpellChecking(HWND hWnd, BOOL bEnable = TRUE);
 	static BOOL IsInlineSpellCheckingEnabled(HWND hWnd);
+	static BOOL IsInlineSpellCheckMenu(HMENU hMenu);
 
 	static CString GetTextRange(HWND hwnd, const CHARRANGE& cr);
 	static void ClearUndo(HWND hWnd);

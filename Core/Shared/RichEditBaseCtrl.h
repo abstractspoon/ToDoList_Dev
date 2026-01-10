@@ -168,6 +168,7 @@ public:
 	BOOL EnableInlineSpellChecking(BOOL bEnable = TRUE);
 	BOOL IsInlineSpellCheckingEnabled() const;
 	BOOL SupportsInlineSpellChecking() const;
+	BOOL WantIgnoreContextMenu() const; // Clears m_bIgnoreNextContextMenu
 
 	void SetParaAlignment(int alignment);
 	BOOL GetParaAlignment() const;
@@ -185,6 +186,8 @@ protected:
 	BOOL m_bAutoRTL;
 	BOOL m_bHasTables;
 	BOOL m_bFirstOnSize;
+
+	mutable BOOL m_bIgnoreNextContextMenu; // inline spell check related
 
 	CRect m_rMargins;
 	FIND_STATE m_findState;
@@ -266,6 +269,7 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 
 	afx_msg LRESULT OnPaste(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditSetBkgndColor(WPARAM wParam, LPARAM lParam);
@@ -277,6 +281,7 @@ protected:
 	afx_msg LRESULT OnReenableChangeNotifications(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnDropListEndEdit(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropListCancelEdit(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnUnInitMenuPopup(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 		
