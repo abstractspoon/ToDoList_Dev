@@ -8899,52 +8899,54 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOO
 		
 		int nRet = pSpellChecker->DoModal(CPreferences(), TRUE);
 		UpdateWindow();
-			
-		if ((nRet == IDOK) && CanEditSelectedTask(bCheckTitle ? TDCA_TASKNAME : TDCA_COMMENTS))
+
+		switch (nRet)
 		{
-			int nChange = SET_NOCHANGE;
-			
-			if (bCheckTitle)
+		case IDOK:
+			if (CanEditSelectedTask(bCheckTitle ? TDCA_TASKNAME : TDCA_COMMENTS))
 			{
-				CString sTitle = pSpellChecker->GetCorrectedText();
-				nChange = m_data.SetTaskTitle(dwTaskID, sTitle);
-				
-				if (nChange == SET_CHANGE)
+				int nChange = SET_NOCHANGE;
+			
+				if (bCheckTitle)
 				{
-					InvalidateItem(hti, TRUE);
+					CString sTitle = pSpellChecker->GetCorrectedText();
+				
+					if (m_data.SetTaskTitle(dwTaskID, sTitle) == SET_CHANGE)
+					{
+						//InvalidateItem(hti, TRUE);
+
+						CDWordArray aModTaskIDs;
+						aModTaskIDs.Add(dwTaskID);
+
+						SetModified(TDCA_TASKNAME, aModTaskIDs);
+					}
+				}
+				else if (pSpellChecker->MadeChanges()) 
+				{
+					HandleUnsavedComments();
+					UpdateTask(TDCA_COMMENTS);
 				}
 			}
-			else if (pSpellChecker->MadeChanges()) 
-			{
-				UpdateTask(TDCA_COMMENTS);
-				nChange = SET_CHANGE;
-			}
-			
-			if (nChange == SET_CHANGE)
-			{
-				CDWordArray aModTaskIDs;
-				aModTaskIDs.Add(dwTaskID);
+			return TRUE;
 
-				SetModified(TDCA_TASKNAME, aModTaskIDs);
-			}
-		}
-		else if (nRet == IDNOERRORS && bNotifyNoErrors)
-		{
-			if (bCheckTitle)
-				CMessageBox::AfxShow(IDS_TDC_SPELLCHECK_TITLE, IDS_TDC_NOTITLESPELLERRORS, MB_OK);
-			else
-				CMessageBox::AfxShow(IDS_TDC_SPELLCHECK_TITLE, IDS_TDC_NOCOMMENTSPELLERRORS, MB_OK);
-		}
-		else if (nRet == IDCANCEL)
-		{
-			return FALSE;
-		}
+		case IDNOERRORS:
+			if (bNotifyNoErrors)
+			{
+				UINT nMsgID = (bCheckTitle ? IDS_TDC_NOTITLESPELLERRORS : IDS_TDC_NOCOMMENTSPELLERRORS);
 
-		return TRUE;
+				CMessageBox::AfxShow(IDS_TDC_SPELLCHECK_TITLE, nMsgID, MB_OK);
+			}
+			return TRUE;
+
+		case IDCANCEL:
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
 	}
 	
-	// else
-	ASSERT(0);
 	return FALSE;
 }
 
