@@ -1446,10 +1446,10 @@ LRESULT CRichEditBaseCtrl::OnUnInitMenuPopup(WPARAM wp, LPARAM /*lp*/)
 {
 	// Inline Spell Checking works by intercepting WM_RBUTTONUP and
 	// displaying a popup menu for misspelt words. If an item is selected
-	// from this menu, the WM_CONTEXTMENU message is eaten which is the 
-	// expected behaviour.
+	// from this menu, the WM_CONTEXTMENU message is then eaten which is 
+	// the desired behaviour.
 	//
-	// However, if the spell check menu is cancelled then WM_CONTEXTMENU
+	// If, however, the spell check menu is cancelled then WM_CONTEXTMENU
 	// is NOT eaten and our custom context menu pops up. This is especially
 	// troublesome if the cancellation occurs by clicking outside the spell
 	// check menu because then the WM_LBUTTONDOWN/UP messages get handled
@@ -1468,10 +1468,10 @@ LRESULT CRichEditBaseCtrl::OnUnInitMenuPopup(WPARAM wp, LPARAM /*lp*/)
 			m_bIgnoreNextContextMenu = (Misc::IsKeyPressed(VK_LBUTTON, TRUE) ||
 										Misc::IsKeyPressed(VK_ESCAPE));
 
-			if (m_bIgnoreNextContextMenu)
-			{
-				int breakpoint = 0;
-			}
+// 			if (m_bIgnoreNextContextMenu)
+// 			{
+// 				int breakpoint = 0;
+// 			}
 		}
 	}
 

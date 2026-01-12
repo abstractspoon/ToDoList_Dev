@@ -446,14 +446,15 @@ BOOL CRichEditHelper::EnableEditStyles(HWND hWnd, DWORD dwStyles, BOOL bEnable)
 	if (!Misc::SetFlag(dwNewStyles, dwStyles, bEnable))
 		return TRUE; // no change
 
-	BOOL bWinforms = CWinClasses::IsWinFormsControl(hWnd);
-
 	DWORD dwResult = ::SendMessage(hWnd, EM_SETEDITSTYLE, dwNewStyles, dwStyles);
-	DWORD dwCheck = ::SendMessage(hWnd, EM_GETEDITSTYLE, 0, 0);
 
-	ASSERT(dwResult == dwCheck);
+	if (dwResult == dwNewStyles)
+		return TRUE;
 
-	if ((dwResult == dwNewStyles) || (bWinforms && (dwResult == dwStyles)))
+	// Winforms RichTextBox does not return reliable results 
+	// in my experience. Sometimes the check above works,
+	// sometimes it doesn't. So we need a backup check.
+	if (CWinClasses::IsWinFormsControl(hWnd) && (dwResult == dwStyles))
 		return TRUE;
 
 	ASSERT(0);
