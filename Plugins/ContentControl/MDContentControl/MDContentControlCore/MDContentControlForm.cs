@@ -249,7 +249,7 @@ namespace MDContentControl
 
 		public bool DoIdleProcessing()
 		{
-			InputTextCtrl.EnableInlineSpellChecking(InlineSpellChecking);
+			InputTextCtrl.InlineSpellChecking = InlineSpellChecking;
 			return false;
 		}
 
@@ -730,7 +730,7 @@ namespace MDContentControl
 		private void inlineSpellCheckToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			InlineSpellChecking = !InlineSpellChecking;
-			InputTextCtrl.EnableInlineSpellChecking(InlineSpellChecking);
+			InputTextCtrl.InlineSpellChecking = InlineSpellChecking;
 		}
 	}
 

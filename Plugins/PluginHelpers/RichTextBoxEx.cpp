@@ -41,11 +41,6 @@ CreateParams^ RichTextBoxEx::CreateParams::get()
 	return cp;
 }
 
-HWND RichTextBoxEx::HWnd()
-{
-	return Win32::GetHwnd(Handle);
-}
-
 void RichTextBoxEx::WndProc(Message% m)
 {
 	const int WM_REFLECT = (WM_USER + 0x1C00);
@@ -156,7 +151,50 @@ void RichTextBoxEx::WndProc(Message% m)
 		}
 		break;
 
-	case WM_MOUSEMOVE:
+	case WM_RBUTTONUP:
+		// As a consequence of hooking this message to implement all 
+		// its various click handlers and such, Winforms breaks inline
+		// spell checking by its failure to call DefWndProc (See 'WmMouseUp' 
+		// in 'src/System.Windows.Forms/System/Windows/Forms/Control.cs')
+		//
+		// So we override that if inline spellchecking is enabled and
+		// handle things ourselves
+		if (InlineSpellChecking)
+		{
+			m_InRButtonUp = true; // The only way we can distinguish a keyboard context menu
+			ASSERT(!m_IgnoreNextContextMenu);
+
+			DefWndProc(m);
+
+			if (!m_IgnoreNextContextMenu)
+				break;
+
+			m_InRButtonUp = m_IgnoreNextContextMenu = false;
+		}
+		return;
+
+	case WM_INITMENUPOPUP:
+		m_IgnoreNextContextMenu = (CRichEditHelper::IsInlineSpellCheckMenu(static_cast<HMENU>(m.WParam.ToPointer())) != FALSE);
+		break;
+
+	case WM_UNINITMENUPOPUP:
+		if (m_InRButtonUp && 
+			CRichEditHelper::IsInlineSpellCheckMenu(Win32::GetHMenu(m.WParam)))
+		{
+			m_IgnoreNextContextMenu = (Misc::IsKeyPressed(VK_LBUTTON, TRUE) ||
+									   Misc::IsKeyPressed(VK_ESCAPE));
+		}
+		break;
+
+	case WM_CONTEXTMENU:
+		if (m_IgnoreNextContextMenu)
+		{
+			// We only receive this for a keyboard initialisation
+			ASSERT(!m_InRButtonUp);
+
+			m_IgnoreNextContextMenu = false;
+			return;
+		}
 		break;
 
 	case WM_MOUSELEAVE:
@@ -205,7 +243,7 @@ String^ RichTextBoxEx::GetTextRange(const CHARRANGE& cr)
 	TEXTRANGE tr;
 	tr.chrg = cr;
 	tr.lpstrText = szChar;
-	::SendMessage(HWnd(), EM_GETTEXTRANGE, 0, (LPARAM)&tr);
+	::SendMessage(Win32::GetHwnd(Handle), EM_GETTEXTRANGE, 0, (LPARAM)&tr);
 
 	CString sText(szChar);
 	delete[] szChar;
@@ -287,14 +325,14 @@ void RichTextBoxEx::Outdent()
 	}
 }
 
-void RichTextBoxEx::EnableInlineSpellChecking(bool enable)
-{
-	CRichEditHelper::EnableInlineSpellChecking(Win32::GetHwnd(Handle), (enable ? TRUE : FALSE));
-}
-
-bool RichTextBoxEx::IsInlineSpellCheckingEnabled()
+bool RichTextBoxEx::InlineSpellChecking::get()
 {
 	return (CRichEditHelper::IsInlineSpellCheckingEnabled(Win32::GetHwnd(Handle)) != FALSE);
+}
+
+void RichTextBoxEx::InlineSpellChecking::set(bool enable)
+{
+	CRichEditHelper::EnableInlineSpellChecking(Win32::GetHwnd(Handle), (enable ? TRUE : FALSE));
 }
 
 String^ RichTextBoxEx::RtfToHtml(String^ rtf, bool useMSWord)
