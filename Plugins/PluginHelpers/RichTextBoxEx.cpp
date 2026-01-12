@@ -166,12 +166,13 @@ void RichTextBoxEx::WndProc(Message% m)
 
 			DefWndProc(m);
 
-			if (!m_IgnoreNextContextMenu)
-				break;
-
-			m_InRButtonUp = m_IgnoreNextContextMenu = false;
+			if (m_IgnoreNextContextMenu)
+			{
+				m_InRButtonUp = m_IgnoreNextContextMenu = false;
+				return;
+			}
 		}
-		return;
+		break;
 
 	case WM_INITMENUPOPUP:
 		m_IgnoreNextContextMenu = (CRichEditHelper::IsInlineSpellCheckMenu(static_cast<HMENU>(m.WParam.ToPointer())) != FALSE);
@@ -189,10 +190,7 @@ void RichTextBoxEx::WndProc(Message% m)
 	case WM_CONTEXTMENU:
 		if (m_IgnoreNextContextMenu)
 		{
-			// We only receive this for a keyboard initialisation
-			ASSERT(!m_InRButtonUp);
-
-			m_IgnoreNextContextMenu = false;
+			m_InRButtonUp = m_IgnoreNextContextMenu = false;
 			return;
 		}
 		break;
