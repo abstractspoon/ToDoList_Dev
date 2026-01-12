@@ -14,6 +14,27 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifndef IMF_SPELLCHECKING
+#	define IMF_SPELLCHECKING 0x0800
+#endif
+
+#ifndef EM_SETEDITSTYLE
+#	define EM_SETEDITSTYLE			(WM_USER + 204)
+#	define EM_GETEDITSTYLE			(WM_USER + 205)
+#endif
+
+// Extended edit style masks 
+enum RECB_EDITSTYLE
+{
+	RECBES_NOFOCUSLINKNOTIFY	= 0x00000020,
+	RECBES_USECTF				= 0x00010000,
+	RECBES_CTFALLOWEMBED		= 0x00200000,
+	RECBES_CTFALLOWSMARTTAG		= 0x00400000,
+	RECBES_CTFALLOWPROOFING		= 0x00800000,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 #if !defined EM_SETTYPOGRAPHYOPTIONS
 #	define EM_SETTYPOGRAPHYOPTIONS (WM_USER + 202)
 #	define EM_GETTYPOGRAPHYOPTIONS (WM_USER + 203)
@@ -116,15 +137,29 @@ public:
 	static BOOL CreateRichEdit20(CWnd& wnd, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle = 0, BOOL bAutoRTL = TRUE);
 	static BOOL CreateRichEdit50(CWnd& wnd, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle = 0, BOOL bAutoRTL = TRUE);
 	static BOOL InitRichEdit();
-	static void ClearUndo(HWND hWnd);
+	static BOOL IsRichEdit(HWND hWnd);
 
 	static BOOL PasteFile(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL bReduceImageColors);
 	static BOOL PasteFiles(HWND hWnd, const CStringArray& aFiles, RE_PASTE nPasteHow, BOOL bReduceImageColors);
 
+	static BOOL EnableLanguageOptions(HWND hWnd, DWORD dwOption, BOOL bEnable);
+	static BOOL EnableEditStyles(HWND hWnd, DWORD dwStyles, BOOL bEnable);
+
+	static BOOL SupportsInlineSpellChecking();
+	static BOOL EnableAutoFontChanging(HWND hWnd, BOOL bEnable = TRUE);
+	static BOOL EnableInlineSpellChecking(HWND hWnd, BOOL bEnable = TRUE);
+	static BOOL IsInlineSpellCheckingEnabled(HWND hWnd);
+	static BOOL IsInlineSpellCheckMenu(HMENU hMenu);
+
+	static CString GetTextRange(HWND hwnd, const CHARRANGE& cr);
+	static void ClearUndo(HWND hWnd);
+	static BOOL HasTables(const CString& sRtf, BOOL bAnsiEncoded);
+
+	static CLIPFORMAT GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format,
+											  const CLIPFORMAT fmtPreferred[], int nNumFmts, BOOL bAllowFallback);
 protected:
 	static BOOL PasteFileInternal(HWND hWnd, LPCTSTR szFilePath, RE_PASTE nPasteHow, BOOL bReduceImageColors, BOOL& bUsedClipboard);
 	static BOOL CreateRichEdit(CWnd& wnd, LPCTSTR szClass, DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle, BOOL bAutoRTL);
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

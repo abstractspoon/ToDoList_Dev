@@ -19,9 +19,10 @@ namespace Abstractspoon
 			public ref class Win32
 			{
 			public:
+				static HDC GetHdc(IntPtr hDC);
 				static HWND GetHwnd(IntPtr hWnd);
 				static HFONT GetHfont(IntPtr hFont);
-				static HDC GetHdc(IntPtr hDC);
+				static HMENU GetHMenu(IntPtr hMenu);
 				static HBITMAP GetHBitmap(IntPtr hBM);
 
 				static void RemoveBorder(IntPtr hWnd);

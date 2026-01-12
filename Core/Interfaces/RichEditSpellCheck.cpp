@@ -5,7 +5,9 @@
 #include "stdafx.h"
 #include "RichEditSpellCheck.h"
 
-#include "..\Shared\RichEditBaseCtrl.h"
+#include "..\Shared\WinClasses.h"
+#include "..\Shared\WClassDefines.h"
+#include "..\Shared\RichEditHelper.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -14,18 +16,41 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+#define RE() ((CRichEditCtrl&)(*CWnd::FromHandle(m_hwndRichEdit)))
+
+//////////////////////////////////////////////////////////////////////
+
+const CString DELIMS(" \t\r\n.,:;\"'-_/?<>|~`!@#$%^&*(){}[]+=");
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-const CString DELIMS(" \t\r\n.,:;-/?<>|~!@#$%^&*(){}+=");
-
-CRichEditSpellCheck::CRichEditSpellCheck(CRichEditBaseCtrl& re) : m_re(re)
+CRichEditSpellCheck::CRichEditSpellCheck() 
+	: 
+	m_hwndRichEdit(NULL)
 {
 	m_crCurrentWord.cpMin = m_crCurrentWord.cpMax = 0;
 }
 
 CRichEditSpellCheck::~CRichEditSpellCheck()
 {
+}
+
+BOOL CRichEditSpellCheck::Initialise(HWND hwndRE)
+{
+	if (!CWinClasses::IsRichEditControl(hwndRE) &&
+		!CWinClasses::IsWinFormsControl(hwndRE, WC_RICHEDIT) &&
+		!CWinClasses::IsWinFormsControl(hwndRE, WC_RICHEDIT20) &&
+		!CWinClasses::IsWinFormsControl(hwndRE, WC_RICHEDIT50))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_hwndRichEdit = hwndRE;
+	return TRUE;
 }
 
 LPCTSTR CRichEditSpellCheck::GetFirstWord() const
@@ -44,6 +69,8 @@ LPCTSTR CRichEditSpellCheck::GetFirstWord() const
 
 LPCTSTR CRichEditSpellCheck::GetNextWord() const
 {
+	ASSERT(m_hwndRichEdit);
+
 	CHARRANGE cr = { 0 };
 	int nLength = 0;
 
@@ -98,8 +125,8 @@ LPCTSTR CRichEditSpellCheck::GetNextWord() const
 	if (nLength == 0)
 	{
 		// default word detection
-		cr.cpMin = m_re.SendMessage(EM_FINDWORDBREAK, WB_RIGHT, m_crCurrentWord.cpMax);
-		cr.cpMax = m_re.SendMessage(EM_FINDWORDBREAK, WB_RIGHT, cr.cpMin + 1);
+		cr.cpMin = RE().SendMessage(EM_FINDWORDBREAK, WB_RIGHT, m_crCurrentWord.cpMax);
+		cr.cpMax = RE().SendMessage(EM_FINDWORDBREAK, WB_RIGHT, cr.cpMin + 1);
 		
 		nLength = GetWord(cr, m_sCurrentWord);
 	}
@@ -157,7 +184,7 @@ LPCTSTR CRichEditSpellCheck::GetNextWord() const
 LPCTSTR CRichEditSpellCheck::GetReferenceTextBeingChecked() const
 {
 	if (m_sText.IsEmpty())
-		m_re.GetWindowText(m_sText);
+		RE().GetWindowText(m_sText);
 
 	return m_sText;
 }
@@ -170,7 +197,7 @@ LPCTSTR CRichEditSpellCheck::GetCurrentWord() const
 int CRichEditSpellCheck::GetWord(const CHARRANGE& cr, CString& sWord) const
 {
 	if (cr.cpMax > cr.cpMin)
-		sWord = m_re.GetTextRange(cr);
+		sWord = CRichEditHelper::GetTextRange(m_hwndRichEdit, cr);
 	else
 		sWord.Empty();
 
@@ -180,35 +207,35 @@ int CRichEditSpellCheck::GetWord(const CHARRANGE& cr, CString& sWord) const
 
 void CRichEditSpellCheck::SelectCurrentWord()
 {
-	m_re.SetSel(m_crCurrentWord);
+	RE().SetSel(m_crCurrentWord);
 	
 	// need to make sure line is visible
-	CPoint ptSel = m_re.GetCharPos(m_crCurrentWord.cpMax);
+	CPoint ptSel = RE().GetCharPos(m_crCurrentWord.cpMax);
 	
 	CRect rClient;
-	m_re.GetClientRect(rClient);
+	RE().GetClientRect(rClient);
 	
 	if (ptSel.y >= rClient.bottom)
 	{
 		while (ptSel.y >= rClient.bottom)
 		{
-			m_re.LineScroll(1);
-			ptSel = m_re.GetCharPos(m_crCurrentWord.cpMax);
+			RE().LineScroll(1);
+			ptSel = RE().GetCharPos(m_crCurrentWord.cpMax);
 		}
 		
 		// one more for good measure
-		m_re.LineScroll(1);
+		RE().LineScroll(1);
 	}
 	else if (ptSel.y < rClient.top)
 	{
 		while (ptSel.y < rClient.top)
 		{
-			m_re.LineScroll(-1);
-			ptSel = m_re.GetCharPos(m_crCurrentWord.cpMax);
+			RE().LineScroll(-1);
+			ptSel = RE().GetCharPos(m_crCurrentWord.cpMax);
 		}
 		
 		// one more for good measure
-		m_re.LineScroll(-1);
+		RE().LineScroll(-1);
 	}
 }
 
@@ -216,11 +243,11 @@ void CRichEditSpellCheck::ReplaceCurrentWord(LPCTSTR szWord)
 {
 	if (m_sCurrentWord != szWord)
 	{
-		m_re.SetSel(m_crCurrentWord);
-		m_re.ReplaceSel(szWord, TRUE);
+		RE().SetSel(m_crCurrentWord);
+		RE().ReplaceSel(szWord, TRUE);
 
 		// update cached text
-		m_re.GetWindowText(m_sText);
+		RE().GetWindowText(m_sText);
 
 		// update cached selection
 		m_crCurrentWord.cpMax += (lstrlen(szWord) - m_sCurrentWord.GetLength());
@@ -230,5 +257,5 @@ void CRichEditSpellCheck::ReplaceCurrentWord(LPCTSTR szWord)
 void CRichEditSpellCheck::ClearSelection()
 {
 	m_crCurrentWord.cpMin = m_crCurrentWord.cpMax;
-	m_re.SetSel(m_crCurrentWord);
+	RE().SetSel(m_crCurrentWord);
 }

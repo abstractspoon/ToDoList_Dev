@@ -262,7 +262,7 @@ namespace Misc
 	int FilterString(CString& sText, const CString& sFilter);
 
 	BOOL ModKeysArePressed(DWORD dwKeys); 
-	BOOL IsKeyPressed(DWORD dwVirtKey);
+	BOOL IsKeyPressed(DWORD dwVirtKey, BOOL bAsync = FALSE);
 	BOOL IsCursorKey(DWORD dwVirtKey, DWORD dwKeys = MKC_ANY);
 	BOOL IsCursorKeyPressed(DWORD dwKeys = MKC_ANY);
 	CString GetKeyName(WORD wVirtKey, BOOL bExtended = FALSE); 

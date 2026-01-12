@@ -26,6 +26,12 @@ namespace Abstractspoon
 				void Indent();
 				void Outdent();
 
+				property bool InlineSpellChecking
+				{
+					bool get();
+					void set(bool enable);
+				}
+
 				virtual LabelTipInfo^ ToolHitTest(Drawing::Point ptScreen);
 				virtual Windows::Forms::Control^ GetOwner() { return this; }
 
@@ -46,6 +52,10 @@ namespace Abstractspoon
 				LabelTip^ m_LinkTip;
 				int m_LinkTipVOffset = 0;
 
+				// Inline spell check related
+				bool m_InRButtonUp = false;
+				bool m_IgnoreNextContextMenu = false;
+
 			protected:
 				virtual property Windows::Forms::CreateParams^ CreateParams
 				{
@@ -56,7 +66,6 @@ namespace Abstractspoon
 				virtual void OnLinkClicked(Windows::Forms::LinkClickedEventArgs^ e) override;
 
 				String^ GetTextRange(const CHARRANGE& cr);
-				HWND HWnd();
 			};
 		}
 	}

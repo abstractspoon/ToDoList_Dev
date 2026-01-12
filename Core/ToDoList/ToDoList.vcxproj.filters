@@ -68,36 +68,6 @@
     <None Include="res\help_button.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Unicode_Release\Itenso.Rtf.Converter.Html.dll">
-      <Filter>Debug</Filter>
-    </None>
-    <None Include="Unicode_Release\Itenso.Rtf.Interpreter.dll">
-      <Filter>Debug</Filter>
-    </None>
-    <None Include="Unicode_Debug\Itenso.Rtf.Parser.dll">
-      <Filter>Debug</Filter>
-    </None>
-    <None Include="Unicode_Debug\Itenso.Solutions.Community.Rtf2Html.dll">
-      <Filter>Debug</Filter>
-    </None>
-    <None Include="Unicode_Release\Itenso.Sys.dll">
-      <Filter>Debug</Filter>
-    </None>
-    <None Include="Unicode_Debug\Itenso.Rtf.Converter.Html.dll">
-      <Filter>Release</Filter>
-    </None>
-    <None Include="Unicode_Debug\Itenso.Rtf.Interpreter.dll">
-      <Filter>Release</Filter>
-    </None>
-    <None Include="Unicode_Release\Itenso.Rtf.Parser.dll">
-      <Filter>Release</Filter>
-    </None>
-    <None Include="Unicode_Release\Itenso.Solutions.Community.Rtf2Html.dll">
-      <Filter>Release</Filter>
-    </None>
-    <None Include="Unicode_Debug\Itenso.Sys.dll">
-      <Filter>Release</Filter>
-    </None>
     <None Include="res\list_view_std.ico">
       <Filter>Resource Files</Filter>
     </None>
@@ -124,12 +94,6 @@
     </None>
     <None Include="res\task_tree_std.ico">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Unicode_Debug\Rtf2HtmlBridge.dll">
-      <Filter>Release</Filter>
-    </None>
-    <None Include="Unicode_Release\Rtf2HtmlBridge.dll">
-      <Filter>Debug</Filter>
     </None>
     <None Include="res\timetrack_btns.bmp">
       <Filter>Resource Files</Filter>
@@ -266,6 +230,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\taskattrib_toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\simpletext_menu.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
