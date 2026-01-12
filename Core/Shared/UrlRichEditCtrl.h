@@ -27,23 +27,21 @@ enum URE_LINKHANDLING
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CUrlRichEditCtrl window
+
 class CUrlRichEditCtrl : public CRichEditBaseCtrl
 {
-	// Construction
 public:
 	CUrlRichEditCtrl(URE_LINKHANDLING nLinkHandling = CTRLCLICKTOFOLLOW, UINT nIDLinkInstructionMsg = 0);
+	virtual ~CUrlRichEditCtrl();
 	
 	void PathReplaceSel(LPCTSTR lpszPath, BOOL bFile);
 	BOOL GoToUrl(const CString& sUrl) const;
-	CPoint GetContextMenuPos() { return m_ptContextMenu; }
 	int AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify = TRUE);
 	void ParseAndFormatText(BOOL bForceReformat = FALSE);
 	CString GetContextUrl(BOOL bAsFile = FALSE) const;
 	void Paste(BOOL bAppendSourceUrl);
 	BOOL PasteSimpleText(BOOL bAppendSourceUrl);
 
-	// Attributes
 protected:
 	CUrlArray m_aUrls;
 	CUrlParser m_parser;
@@ -56,22 +54,12 @@ protected:
 	LPDATAOBJECT m_lpDragObject;
 	URE_LINKHANDLING m_nLinkHandling;
 
-	// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CUrlRichEditCtrl)
 protected:
 	virtual int OnToolHitTest(CPoint pt, TOOLINFO* pTI) const;
-	//}}AFX_VIRTUAL
 	virtual LRESULT SendNotifyCustomUrl(LPCTSTR szUrl) const;
 	virtual LRESULT SendNotifyFailedUrl(LPCTSTR szUrl) const;
 	
-	// Implementation
-public:
-	virtual ~CUrlRichEditCtrl();
-	
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CUrlRichEditCtrl)
 	afx_msg BOOL OnChangeText();
 	afx_msg void OnRButtonUp(UINT nHitTest, CPoint point);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -82,7 +70,6 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-	//}}AFX_MSG
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetText(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropFiles(WPARAM wp, LPARAM lp);
@@ -113,8 +100,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_URLRICHEDITCTRL_H__B5421D69_41F2_4FCF_AC58_13D2B3D3D3C8__INCLUDED_)

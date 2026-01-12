@@ -1,14 +1,14 @@
-// The following ifdef block is the standard way of creating macros which make exporting 
-// from a DLL simpler. All files within this DLL are compiled with the EXPORTERBRIDGE_EXPORTS
-// symbol defined on the command line. This symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see 
-// EXPORTERBRIDGE_API functions as being imported from a DLL, whereas this DLL sees symbols
-// defined with this macro as being exported.
 
 #include <Interfaces\IContentControl.h>
+#include <Interfaces\ISpellCheck.h>
 
 #include <vcclr.h>
+
+////////////////////////////////////////////////////////////////////////////////
+
 using namespace MDContentControl;
+
+////////////////////////////////////////////////////////////////////////////////
 
 // This class is exported from ExporterBridge.dll
 class CMDContentBridge : public IContent
@@ -42,18 +42,25 @@ protected:
    ~CMDContentBridge();
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+class CRichEditSpellCheck;
+
+////////////////////////////////////////////////////////////////////////////////
+
 class CMDContentControlBridge : public IContentControl
 {
 public:
 	CMDContentControlBridge(ITransText* pTT);
+	virtual ~CMDContentControlBridge();
 
    BOOL Create(UINT nCtrlID, DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
 
+   // IContentControl interface ------------------------------------
    int GetContent(unsigned char* pContent) const;
    bool SetContent(const unsigned char* pContent, int nLength, bool bResetSelection);
    LPCWSTR GetTypeID() const;
 
-   // text content if supported. return false if not supported
    int GetTextContent(LPWSTR szContent, int nLength = -1) const;
    bool SetTextContent(LPCWSTR szContent, bool bResetSelection);
    bool InsertTextContent(LPCWSTR szContent, bool bAtEnd);
@@ -67,7 +74,7 @@ public:
    void Release();
    bool ProcessMessage(MSG* pMsg);
    void FilterToolTipMessage(MSG* pMsg) {} //.Net tooltips don't need this
-   bool DoIdleProcessing() { return false; }
+   bool DoIdleProcessing();
 
    ISpellCheck* GetSpellCheckInterface();
 
@@ -83,7 +90,10 @@ public:
 protected:
    gcroot<MDContentControlCore^> m_wnd;
    ITransText* m_pTT;
+   CRichEditSpellCheck* m_pSpellCheck;
 };
+
+////////////////////////////////////////////////////////////////////////////////
 
 DLL_DECLSPEC int GetInterfaceVersion()
 {

@@ -41,9 +41,9 @@ public:
 	void Release();
 	LPCTSTR GetTypeID() const { return RTF_TYPEID; }
 	bool ProcessMessage(MSG* pMsg);
-	bool DoIdleProcessing() { return false; }
+	bool DoIdleProcessing();
 	void FilterToolTipMessage(MSG* pMsg);
-	ISpellCheck* GetSpellCheckInterface() { return &m_reSpellCheck; }
+	ISpellCheck* GetSpellCheckInterface();
 	bool Undo();
 	bool Redo();
 	void SetUITheme(const UITHEME* pTheme);

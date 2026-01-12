@@ -16,8 +16,10 @@ class CRichEditBaseCtrl;
 class CRichEditSpellCheck : public ISpellCheck  
 {
 public:
-	CRichEditSpellCheck(CRichEditBaseCtrl& re);
+	CRichEditSpellCheck();
 	virtual ~CRichEditSpellCheck();
+
+	BOOL Initialise(HWND hwndRE);
 
 	LPCTSTR GetFirstWord() const;
 	LPCTSTR GetNextWord() const;
@@ -30,7 +32,7 @@ public:
 	LPCTSTR GetReferenceTextBeingChecked() const;
 
 protected:
-	CRichEditBaseCtrl& m_re;
+	HWND m_hwndRichEdit;
 
 	mutable CHARRANGE m_crCurrentWord;
 	mutable CString m_sCurrentWord;
@@ -39,8 +41,6 @@ protected:
 
 protected:
 	int GetWord(const CHARRANGE& cr, CString& sWord) const;
-
-	static int WordBreakProc(LPTSTR szText, int nCurPos, int nTextLen, int nCode);
 
 };
 

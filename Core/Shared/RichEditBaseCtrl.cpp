@@ -39,7 +39,6 @@ const UINT WM_REBC_INITIALISE			= ::RegisterWindowMessage(_T("WM_REBC_INITIALISE
 
 // Ansi strings
 const LPCSTR  DEFAULT_RTF				= "{\\rtf1\\ansi\\deff0\\f0\\fs60}";
-const LPCSTR  RTF_TABLE_ROW				= "\\trowd";
 
 // Unicode strings
 const LPCTSTR RTF_TABLE_HEADER			= _T("{\\rtf1{\\pard{{\\trowd");
@@ -103,7 +102,8 @@ CRichEditBaseCtrl::CRichEditBaseCtrl(BOOL bAutoRTL)
 	m_bAutoRTL(bAutoRTL),
 	m_pPopupListOwner(NULL),
 	m_bFirstOnSize(TRUE),
-	m_crBkgnd(CLR_DEFAULT)
+	m_crBkgnd(CLR_DEFAULT),
+	m_bIgnoreNextContextMenu(FALSE)
 {
    m_callback.SetOwner(this);
 }
@@ -115,12 +115,12 @@ CRichEditBaseCtrl::~CRichEditBaseCtrl()
 
 
 BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
-	//{{AFX_MSG_MAP(CRichEditBaseCtrl)
-	//}}AFX_MSG_MAP
+
 	ON_WM_DESTROY()
 	ON_WM_SETFOCUS()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
+	ON_WM_CONTEXTMENU()
 
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
@@ -133,11 +133,11 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_MESSAGE(EM_SETSEL, OnEditSetSelection)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_SETTEXT, OnSetText)
+	ON_MESSAGE(WM_UNINITMENUPOPUP, OnUnInitMenuPopup)
 
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CRichEditBaseCtrl message handlers
 
 BOOL CRichEditBaseCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle)
 {
@@ -275,19 +275,10 @@ LRESULT CRichEditBaseCtrl::OnPaste(WPARAM wParam, LPARAM lParam)
 	{
 		CString sRTF = CClipboard().GetText(CBF_RTF);
 
-		m_bHasTables = HasTables(sRTF, TRUE);
+		m_bHasTables = CRichEditHelper::HasTables(sRTF, TRUE);
 	}
 
 	return lr;
-}
-
-BOOL CRichEditBaseCtrl::HasTables(const CString& sRtf, BOOL bAnsiEncoded)
-{
-	if (bAnsiEncoded)
-		return (strstr((LPCSTR)(LPCTSTR)sRtf, RTF_TABLE_ROW) != NULL);
-
-	// else
-	return (sRtf.Find(CString(RTF_TABLE_ROW)) != -1);
 }
 
 BOOL CRichEditBaseCtrl::PasteSpecial(CLIPFORMAT nFormat)
@@ -401,7 +392,7 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 		delete [] szText;
 
  	if (bResult && !m_bHasTables)
- 		m_bHasTables = HasTables(sText, FALSE);
+ 		m_bHasTables = CRichEditHelper::HasTables(sText, FALSE);
 
 	return bResult;
 }
@@ -477,39 +468,7 @@ CString CRichEditBaseCtrl::GetCharacterAtCaret(BOOL bForwards) const
 
 CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr) const
 {
-	int nLength = int(cr.cpMax - cr.cpMin + 1);
-
-    // create an ANSI buffer 
-    LPTSTR szChar = new TCHAR[nLength];
-	ZeroMemory(szChar, nLength * sizeof(TCHAR));
-
-	if (CWinClasses::IsClass(*this, WC_RICHEDIT50)) 
-	{
-		TEXTRANGE tr;
-		tr.chrg = cr;
-		tr.lpstrText = szChar;
-		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
-	}
-	else // must handle ansi
-	{
-		// create a Ansi buffer of the same length
-		LPSTR lpszChar = new char[nLength];
-
-		TEXTRANGEA tr;
-		tr.chrg = cr;
-		tr.lpstrText = lpszChar;
-		::SendMessage(m_hWnd, EM_GETTEXTRANGE, 0, (LPARAM)&tr);
-
-		// Convert the Ansi text to Unicode.
-		MultiByteToWideChar(CP_ACP, 0, lpszChar, -1, szChar, nLength);
-
-		delete lpszChar;
-	}
-
-	CString sText(szChar);
-	delete [] szChar;
-
-	return sText;
+	return CRichEditHelper::GetTextRange(m_hWnd, cr);
 }
 
 BOOL CRichEditBaseCtrl::InsertSoftReturn()
@@ -1475,20 +1434,67 @@ void CRichEditBaseCtrl::SetRTF(const CString& rtf)
 	
 	StreamIn(SF_RTF, es);
 
-	m_bHasTables = HasTables(sRTF, TRUE);
+	m_bHasTables = CRichEditHelper::HasTables(sRTF, TRUE);
 }
 
 BOOL CRichEditBaseCtrl::EnableInlineSpellChecking(BOOL bEnable)
 {
-	if (!SupportsInlineSpellChecking())
-		return FALSE;
+	return CRichEditHelper::EnableInlineSpellChecking(GetSafeHwnd(), bEnable);
+}
 
-	ASSERT(GetSafeHwnd());
+LRESULT CRichEditBaseCtrl::OnUnInitMenuPopup(WPARAM wp, LPARAM /*lp*/)
+{
+	// Inline Spell Checking works by intercepting WM_RBUTTONUP and
+	// displaying a popup menu for misspelt words. If an item is selected
+	// from this menu, the WM_CONTEXTMENU message is then eaten which is 
+	// the desired behaviour.
+	//
+	// If, however, the spell check menu is cancelled then WM_CONTEXTMENU
+	// is NOT eaten and our custom context menu pops up. This is especially
+	// troublesome if the cancellation occurs by clicking outside the spell
+	// check menu because then the WM_LBUTTONDOWN/UP messages get handled
+	// by our context menu producing a fairly random outcome which depends 
+	// on exactly where the user clicked away from the spell check menu.
+	//
+	// To deal with this I have developed a hueristic for detecting when the 
+	// spell check menu is being hidden as a consequence of a cancellation
+	// event and then ignoring the subsequent WM_CONTEXTMENU.
+	ASSERT(!m_bIgnoreNextContextMenu);
 
-	EnableLanguageOptions(IMF_SPELLCHECKING, bEnable);
-	EnableEditStyles((RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING), bEnable);
+	if (IsInlineSpellCheckingEnabled())
+	{
+		if (CRichEditHelper::IsInlineSpellCheckMenu((HMENU)wp))
+		{
+			m_bIgnoreNextContextMenu = (Misc::IsKeyPressed(VK_LBUTTON, TRUE) ||
+										Misc::IsKeyPressed(VK_ESCAPE));
 
-	return TRUE;
+// 			if (m_bIgnoreNextContextMenu)
+// 			{
+// 				int breakpoint = 0;
+// 			}
+		}
+	}
+
+	return Default();
+}
+
+BOOL CRichEditBaseCtrl::WantIgnoreContextMenu() const
+{
+	BOOL bIgnore = m_bIgnoreNextContextMenu;
+	m_bIgnoreNextContextMenu = FALSE;
+
+	return bIgnore;
+}
+
+void CRichEditBaseCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+{
+	// If we arrived here it means no one overrode the context menu
+	// but we still exit early to avoid the default menu popping up
+	if (WantIgnoreContextMenu())
+		return;
+
+	// else
+	CRichEditCtrl::OnContextMenu(pWnd, point);
 }
 
 BOOL CRichEditBaseCtrl::EnableAutoFontChanging(BOOL bEnable)
@@ -1498,102 +1504,22 @@ BOOL CRichEditBaseCtrl::EnableAutoFontChanging(BOOL bEnable)
 
 BOOL CRichEditBaseCtrl::EnableLanguageOptions(DWORD dwOptions, BOOL bEnable)
 {
-	return EnableStateFlags(GetSafeHwnd(), 
-							EM_GETLANGOPTIONS, 
-							EM_SETLANGOPTIONS, 
-							dwOptions, 
-							bEnable);
+	return CRichEditHelper::EnableLanguageOptions(GetSafeHwnd(), dwOptions, bEnable);
 }
 
 BOOL CRichEditBaseCtrl::EnableEditStyles(DWORD dwStyles, BOOL bEnable)
 {
-	return EnableStateFlags(GetSafeHwnd(), 
-							EM_GETEDITSTYLE, 
-							EM_SETEDITSTYLE, 
-							dwStyles, 
-							bEnable);
-}
-
-BOOL CRichEditBaseCtrl::EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable)
-{
-	ASSERT(::IsWindow(hWnd));
-	ASSERT(dwFlags);
-
-	DWORD dwCurFlags = ::SendMessage(hWnd, nGetMsg, 0, 0), dwNewFlags(dwCurFlags);
-
-	if (Misc::ModifyFlags(dwNewFlags, 
-						(bEnable ? 0 : dwFlags),  // remove
-						(bEnable ? dwFlags : 0))) // add
-	{
-		::SendMessage(hWnd, nSetMsg, 0, dwNewFlags);
-	}
-
-	return TRUE;
-
+	return CRichEditHelper::EnableEditStyles(GetSafeHwnd(), dwStyles, bEnable);
 }
 
 BOOL CRichEditBaseCtrl::IsInlineSpellCheckingEnabled() const
 {
-	if (!SupportsInlineSpellChecking())
-		return FALSE;
-
-	ASSERT(GetSafeHwnd());
-
-	DWORD dwLangOpt = ::SendMessage(GetSafeHwnd(), EM_GETLANGOPTIONS, 0, 0);
-	DWORD dwLangFlags = IMF_SPELLCHECKING;
-
-	DWORD dwEditStyle = ::SendMessage(GetSafeHwnd(), EM_GETEDITSTYLE, 0, 0);
-	DWORD dwEditFlags = (RECBES_USECTF | RECBES_CTFALLOWEMBED | RECBES_CTFALLOWSMARTTAG | RECBES_CTFALLOWPROOFING);
-
-	return (Misc::HasFlag(dwLangOpt, dwLangFlags) && Misc::HasFlag(dwEditStyle, dwEditFlags));
+	return CRichEditHelper::IsInlineSpellCheckingEnabled(GetSafeHwnd());
 }
 
-BOOL CRichEditBaseCtrl::SupportsInlineSpellChecking()
+BOOL CRichEditBaseCtrl::SupportsInlineSpellChecking() const
 {
-	return (COSVersion() >= OSV_WIN8);
-}
-
-CLIPFORMAT CRichEditBaseCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format, 
-														const CLIPFORMAT fmtPreferred[], int nNumFmts, BOOL bAllowFallback)
-{
-	CDWordArray aFormatIDs;
-	
-#ifdef _DEBUG
-	CStringArray aFormatNames;
-	CString sFormatNames, sFormatIDs;
-	
-	if (CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs, aFormatNames))
-	{
-		sFormatNames = Misc::FormatArray(aFormatNames, ',', TRUE);
-		sFormatIDs = Misc::FormatArray(aFormatIDs, ',');
-	}
-#else
-	CClipboard::GetAvailableFormats(lpDataOb, aFormatIDs);
-#endif
-	
-	for (int nFmt = 0; nFmt < nNumFmts; nFmt++)
-	{
-		UINT nFormat = fmtPreferred[nFmt];
-		
-		if (format && (format == nFormat))
-			return format;
-		
-		if (Misc::HasT((DWORD)nFormat, aFormatIDs))
-			return nFormat;
-	}
-
-	if (bAllowFallback)
-	{
-		// If a format was passed in then use that
-		if (format)
-			return format;
-
-		// else try for plain text
-		if (Misc::HasT((DWORD)CB_TEXTFORMAT, aFormatIDs))
-			return CB_TEXTFORMAT;
-	}
-
-	return 0;
+	return CRichEditHelper::SupportsInlineSpellChecking();
 }
 
 BOOL CRichEditBaseCtrl::EnableToolTips(BOOL bEnable)

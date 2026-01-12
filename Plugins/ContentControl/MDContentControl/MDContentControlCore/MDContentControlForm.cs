@@ -11,6 +11,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
+
 using Command.Handling;
 using ImageHelper;
 using ReverseMarkdown;
@@ -26,6 +27,8 @@ namespace MDContentControl
 	{
 		public event EventHandler InputTextChanged;
 		public event EventHandler InputLostFocus;
+		public event EventHandler SpellCheckInputText;
+
 		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
 
 		// -----------------------------------------------------------------
@@ -193,6 +196,14 @@ namespace MDContentControl
 
 		protected new ContextMenuStrip ContextMenu { get { return contextMenuStrip1; } }
 
+		public IntPtr SpellCheckHandle
+		{
+			get
+			{
+				return InputTextCtrl.Handle;
+			}
+		}
+
 		public string OutputHtml
 		{
 			get
@@ -232,6 +243,14 @@ namespace MDContentControl
 
 				m_SettingTextOrFont = false;
 			}
+		}
+
+		public static bool InlineSpellChecking = false;
+
+		public bool DoIdleProcessing()
+		{
+			InputTextCtrl.InlineSpellChecking = InlineSpellChecking;
+			return false;
 		}
 
 		public bool IncludeSourceUrlWhenPasting = false;
@@ -676,9 +695,11 @@ namespace MDContentControl
 			CommandHandling.EnableCommand("cutToolStripMenuItem", enabled && hasSelection, contextMenuStrip1.Items);
 			CommandHandling.EnableCommand("copyToolStripMenuItem", hasSelection, contextMenuStrip1.Items);
 			CommandHandling.EnableCommand("deleteToolStripMenuItem", enabled && hasText, contextMenuStrip1.Items);
-			CommandHandling.EnableCommand("pasteToolStripMenuItem", InputTextCtrl.CanPaste(DataFormats.GetFormat(DataFormats.Text)), contextMenuStrip1.Items);
+			CommandHandling.EnableCommand("pasteToolStripMenuItem", enabled && InputTextCtrl.CanPaste(DataFormats.GetFormat(DataFormats.Text)), contextMenuStrip1.Items);
+			CommandHandling.EnableCommand("spellCheckToolStripMenuItem", enabled, contextMenuStrip1.Items);
 
 			CommandHandling.CheckCommand("wordwrapToolStripMenuItem", WordWrap, contextMenuStrip1.Items);
+			CommandHandling.CheckCommand("inlineSpellCheckToolStripMenuItem", InlineSpellChecking, contextMenuStrip1.Items);
 		}
 
 		protected override void OnGotFocus(EventArgs e)
@@ -701,7 +722,16 @@ namespace MDContentControl
 			}
 		}
 
-	}
+		private void spellCheckToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			SpellCheckInputText?.Invoke(this, e);
+		}
 
+		private void inlineSpellCheckToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			InlineSpellChecking = !InlineSpellChecking;
+			InputTextCtrl.InlineSpellChecking = InlineSpellChecking;
+		}
+	}
 
 }

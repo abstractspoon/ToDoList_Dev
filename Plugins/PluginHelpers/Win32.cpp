@@ -30,6 +30,11 @@ HWND Win32::GetHwnd(IntPtr hWnd)
 	return static_cast<HWND>(hWnd.ToPointer());
 }
 
+HMENU Win32::GetHMenu(IntPtr hMenu)
+{
+	return static_cast<HMENU>(hMenu.ToPointer());
+}
+
 HFONT Win32::GetHfont(IntPtr hFont)
 {
 	return static_cast<HFONT>(hFont.ToPointer());
