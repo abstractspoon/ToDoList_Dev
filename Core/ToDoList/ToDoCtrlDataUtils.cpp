@@ -3493,12 +3493,15 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	}
 	else if (bIsDate && !attribDef.HasFeature(TDCCAF_SHOWTIME))
 	{
-		attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
+		if (!attribDef.GetDataAsDouble(data, dCalcValue, nUnits))
+			return FALSE;
+
 		dCalcValue = (int)dCalcValue;
 	}
 	else
 	{
-		attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
+		if (!attribDef.GetDataAsDouble(data, dCalcValue, nUnits))
+			return FALSE;
 	}
 
 	if (dCalcValue == DBL_NULL)

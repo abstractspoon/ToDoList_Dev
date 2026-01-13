@@ -1141,10 +1141,14 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetDataAsDouble(const TDCCADATA& data, double
 		dValue = data.AsFraction();
 		return TRUE;
 
+	case TDCCA_DATE:
+		if (data.IsEmpty())
+			break;
+		// else fall thru
+
 	case TDCCA_CALCULATION:
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
-	case TDCCA_DATE:
 		ASSERT(data.IsEmpty() || Misc::IsNumber(data.AsString()));
 		dValue = data.AsDouble();
 		return TRUE;
