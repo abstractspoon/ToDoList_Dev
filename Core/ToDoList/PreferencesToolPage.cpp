@@ -1065,12 +1065,13 @@ void CPreferencesToolPage::OnSize(UINT nType, int cx, int cy)
 		CPoint ptBorders = CDialogHelper::GetCtrlRect(this, IDC_TOOLBAR).TopLeft();
 		
 		// calc offsets
-		CPoint ptImport = CDialogHelper::GetCtrlRect(this, IDC_TESTTOOL).BottomRight();
-		int nXOffset = cx - (ptImport.x + ptBorders.x);
-		int nYOffset = cy - (ptImport.y + ptBorders.y);
+		CPoint ptDetails = CDialogHelper::GetCtrlRect(this, IDC_TOOLDETAILS).BottomRight();
+		int nXOffset = cx - (ptDetails.x + ptBorders.x);
+		int nYOffset = cy - (ptDetails.y + ptBorders.y);
 
 		// Update positions and sizes
 		CDialogHelper::OffsetCtrl(this, IDC_IMPORT, nXOffset, 0);
+		CDialogHelper::OffsetCtrl(this, IDC_TOOLDETAILS, 0, nYOffset);
 		CDialogHelper::OffsetCtrl(this, IDC_PATHLABEL, 0, nYOffset);
 		CDialogHelper::OffsetCtrl(this, IDC_ARGLABEL, 0, nYOffset);
 		CDialogHelper::OffsetCtrl(this, IDC_ICONLABEL, 0, nYOffset);
@@ -1085,6 +1086,7 @@ void CPreferencesToolPage::OnSize(UINT nType, int cx, int cy)
 		CDialogHelper::ResizeChild(&m_eIconPath, nXOffset, 0);
 		CDialogHelper::ResizeChild(&m_eCmdLine, nXOffset, 0);
 		CDialogHelper::ResizeChild(&m_lcTools, nXOffset, nYOffset);
+		CDialogHelper::ResizeCtrl(this, IDC_TOOLDETAILS, nXOffset, 0);
 
 		m_lcTools.SetColumnWidth(2, m_lcTools.GetColumnWidth(2) + nXOffset);
 	}
