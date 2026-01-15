@@ -883,6 +883,7 @@
 #define IDC_CLEARALLATTRIB              1595
 #define IDC_OFFSETDATE                  1596
 #define IDC_TOOLDETAILS                 1597
+#define IDC_REMAININGCOUNT              1598
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -2594,6 +2595,7 @@
 #define IDS_FIND_INVALIDSEARCH          51685
 #define IDS_MESSAGE_NOSEARCHRULES       51685
 #define IDS_MESSAGE_UNMATCHEDSEARCHGROUPS 51686
+#define IDS_TOOLS_REMAININGCOUNT        51687
 
 // Next default values for new objects
 // 
@@ -2601,7 +2603,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        339
 #define _APS_NEXT_COMMAND_VALUE         34789
-#define _APS_NEXT_CONTROL_VALUE         1598
+#define _APS_NEXT_CONTROL_VALUE         1599
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

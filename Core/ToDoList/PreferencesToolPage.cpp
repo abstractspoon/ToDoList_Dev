@@ -173,7 +173,9 @@ void CPreferencesToolPage::OnFirstShow()
 		const TDCUSERTOOL& tool = m_aTools[nTool];
 		VERIFY(AddToolToList(tool) != -1);
 	}
+
 	RebuildListImages();
+	UpdateRemainingCount();
 
 	m_lcTools.SetItemState(0, LVIS_SELECTED, LVIS_SELECTED);
 	OnItemchangedToollist(NULL, NULL);
@@ -198,7 +200,7 @@ void CPreferencesToolPage::OnOK()
 	ASSERT(Misc::MatchAllT(aTools, m_aTools, TRUE));
 }
 
-int CPreferencesToolPage::AddToolToList(const TDCUSERTOOL& tool, int nPos, BOOL bRebuildImages)
+int CPreferencesToolPage::AddToolToList(const TDCUSERTOOL& tool, int nPos, BOOL bRebuildImages, BOOL bUpdateRemaining)
 {
 	// special case
 	if (nPos == -1)
@@ -223,6 +225,9 @@ int CPreferencesToolPage::AddToolToList(const TDCUSERTOOL& tool, int nPos, BOOL 
 
 	if (bRebuildImages)
 		RebuildListImages();
+
+	if (bUpdateRemaining)
+		UpdateRemainingCount();
 	
 	return nIndex;
 }
@@ -262,12 +267,8 @@ int CPreferencesToolPage::AddNewTool(BOOL bTDLTool)
 		tool.sCmdline = MapCmdIDToPlaceholder(ID_TOOLARG_PATHNAME);
 	}
 
-	int nIndex = m_lcTools.InsertItem(m_lcTools.GetItemCount(), tool.sToolName, -1);
-	VERIFY(m_aTools.Add(tool) == nIndex);
-
-	m_lcTools.SetItemText(nIndex, COL_PATH, tool.sToolPath);
-	m_lcTools.SetItemText(nIndex, COL_ARGS, tool.sCmdline);
-	m_lcTools.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
+	int nIndex = m_aTools.Add(tool);
+	VERIFY(AddToolToList(tool, -1, FALSE, TRUE) == nIndex);
 
 	m_lcTools.SetFocus();
 	m_lcTools.EditLabel(nIndex);
@@ -275,6 +276,14 @@ int CPreferencesToolPage::AddNewTool(BOOL bTDLTool)
 	m_toolbar.RefreshButtonStates();
 
 	return nIndex;
+}
+
+void CPreferencesToolPage::UpdateRemainingCount()
+{
+	CEnString sCount;
+	sCount.Format(IDS_TOOLS_REMAININGCOUNT, (m_nMaxNumTools - m_lcTools.GetItemCount()), m_nMaxNumTools);
+
+	SetDlgItemText(IDC_REMAININGCOUNT, sCount);
 }
 
 void CPreferencesToolPage::OnUpdateCmdUINewExternalTool(CCmdUI* pCmdUI)
@@ -307,6 +316,7 @@ void CPreferencesToolPage::OnDeleteTool()
 			m_sToolPath.Empty();
 			m_sIconPath.Empty();
 			
+			UpdateRemainingCount();
 			EnableControls();
 			UpdateData(FALSE);
 		}
@@ -346,7 +356,7 @@ void CPreferencesToolPage::OnCopyTool()
 		TDCUSERTOOL tool = m_aTools[nSel];
 		m_aTools.InsertAt(nSel + 1, tool);
 
-		int nCopy = AddToolToList(tool, (nSel + 1), TRUE);
+		int nCopy = AddToolToList(tool, (nSel + 1), TRUE, TRUE);
 		SetCurSel(nCopy);
 		
 		m_lcTools.SetFocus();
@@ -1009,8 +1019,12 @@ void CPreferencesToolPage::OnImportTools()
 			}
 		}
 		else
+		{
 			bContinue = FALSE; // cancelled
+		}
 	}
+
+	UpdateRemainingCount();
 }
 
 void CPreferencesToolPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
@@ -1072,6 +1086,7 @@ void CPreferencesToolPage::OnSize(UINT nType, int cx, int cy)
 		// Update positions and sizes
 		CDialogHelper::OffsetCtrl(this, IDC_IMPORT, nXOffset, 0);
 		CDialogHelper::OffsetCtrl(this, IDC_TOOLDETAILS, 0, nYOffset);
+		CDialogHelper::OffsetCtrl(this, IDC_REMAININGCOUNT, nXOffset, nYOffset);
 		CDialogHelper::OffsetCtrl(this, IDC_PATHLABEL, 0, nYOffset);
 		CDialogHelper::OffsetCtrl(this, IDC_ARGLABEL, 0, nYOffset);
 		CDialogHelper::OffsetCtrl(this, IDC_ICONLABEL, 0, nYOffset);

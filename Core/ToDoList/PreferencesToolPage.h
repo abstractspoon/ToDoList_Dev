@@ -113,8 +113,9 @@ protected:
 	void RebuildListImages();
 	BOOL InitializeToolbar();
 	BOOL GetToolFromList(int nTool, TDCUSERTOOL& tool) const;
-	int AddToolToList(const TDCUSERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	int AddToolToList(const TDCUSERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE, BOOL bUpdateRemaining = FALSE);
 	void RebuildToolsFromList();
+	void UpdateRemainingCount();
 	
 	CString MapCmdIDToPlaceholder(UINT nCmdID) const;
 	CString GetNewUserVariableName(LPCTSTR szVarType) const;
