@@ -149,7 +149,9 @@ void CPreferencesToolPage::OnFirstShow()
 	VERIFY(InitializeToolbar());
 
 	m_nNumDefaultIcons = m_ilTools.LoadDefaultImages(TRUE);
+
 	m_lcTools.SetImageList(&m_ilTools, LVSIL_SMALL);
+	m_lcTools.AllowOffItemClickDeselection(FALSE);
 
 	m_eToolPath.SetCurrentFolder(FileMisc::GetAppFolder());
 	m_eIconPath.SetCurrentFolder(FileMisc::GetAppFolder());
@@ -537,13 +539,8 @@ void CPreferencesToolPage::RebuildListImages()
 
 	while (nTool--)
 	{
-		LVITEM lvi = { 0 };
-
-		lvi.mask = LVIF_IMAGE;
-		lvi.iItem = nTool;
-		lvi.iImage = CTDCToolsHelper::AddToolToImageList(m_aTools[nTool], m_ilTools);
-
-		m_lcTools.SetItem(&lvi);
+		int nImage = CTDCToolsHelper::AddToolToImageList(m_aTools[nTool], m_ilTools);
+		m_lcTools.SetItemImage(nTool, nImage);
 	}
 }
 

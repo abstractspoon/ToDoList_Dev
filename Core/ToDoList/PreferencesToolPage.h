@@ -16,6 +16,7 @@
 #include "..\shared\menubutton.h"
 #include "..\shared\ToolbarHelper.h"
 #include "..\shared\entoolbar.h"
+#include "..\shared\enlistctrl.h"
 
 #include <afxtempl.h>
 
@@ -44,7 +45,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CEdit m_eCmdLine;
 	CFileEdit m_eToolPath;
-	CListCtrl m_lcTools;
+	CEnListCtrl m_lcTools;
 	CFileEdit m_eIconPath;
 	CTDCImageList m_ilTools;
 
