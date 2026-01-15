@@ -259,6 +259,7 @@ protected:
 	void BuildDataTypeCombo();
 	BOOL AddAttributeToListCtrl(const TDCCUSTOMATTRIBUTEDEFINITION& attrib, BOOL bNew, int nPos = -1);
 	void EnableControls();
+	void UpdateRemainingCount();
 	int GetCurSel();
 	BOOL UniqueIDExists(const CString& sID, int nIgnore = -1) const;
 	void MakeUniqueID(CString& sID, int nIgnore = -1) const;

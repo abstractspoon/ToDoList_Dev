@@ -24,6 +24,10 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+const int MAX_ATTRIBCOUNT = (TDCA_CUSTOMATTRIB_LAST - TDCA_CUSTOMATTRIB_FIRST + 1);
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct TDLCAD_TYPE
 {
 	UINT nIDName;
@@ -1052,12 +1056,15 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nAtt];
 		VERIFY (AddAttributeToListCtrl(attrib, FALSE) >= 0);
 	}
+	UpdateRemainingCount();
 
 	m_lcAttributes.SetItemState(0, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	OnItemchangedAttriblist(NULL, NULL);
 
 	VERIFY(GraphicsMisc::CreateCheckImageList(m_ilCheckBoxes, IDB_CHECKBOXES, 255));
 	ListView_SetImageList(m_lcAttributes, m_ilCheckBoxes, LVSIL_SMALL);
+
+	CThemed::SetWindowTheme(&m_lcAttributes, _T("Explorer"));
 
 	m_mgrPrompts.SetComboPrompt(m_cbFeatures, IDS_TDC_NONE);
 
@@ -1287,6 +1294,14 @@ void CTDLCustomAttributeDlg::EnableControls()
 
 	m_pageCalc.EnableWindow(bIsCalculation && (nSel >= 0));
 	m_pageCalc.ShowWindow(bIsCalculation ? SW_SHOW : SW_HIDE);
+}
+
+void CTDLCustomAttributeDlg::UpdateRemainingCount()
+{
+	CEnString sCount;
+	sCount.Format(IDS_CUSTATTRIB_REMAININGCOUNT, (MAX_ATTRIBCOUNT - m_lcAttributes.GetItemCount()), MAX_ATTRIBCOUNT);
+
+	SetDlgItemText(IDC_REMAININGCOUNT, sCount);
 }
 
 int CTDLCustomAttributeDlg::GetCurSel()
@@ -1705,11 +1720,12 @@ void CTDLCustomAttributeDlg::OnNewAttribute()
 	m_lcAttributes.EditLabel(nIndex);
 
 	EnableControls();
+	UpdateRemainingCount();
 }
 
 void CTDLCustomAttributeDlg::OnUpdateNewAttribute(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(m_lcAttributes.GetItemCount() < 64);
+	pCmdUI->Enable(m_lcAttributes.GetItemCount() < MAX_ATTRIBCOUNT);
 }
 
 void CTDLCustomAttributeDlg::OnDeleteAttribute() 
@@ -1729,6 +1745,7 @@ void CTDLCustomAttributeDlg::OnDeleteAttribute()
 			m_lcAttributes.SetItemState(nSel, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
 		
 		OnItemchangedAttriblist(NULL, NULL);
+		UpdateRemainingCount();
 	}
 }
 
