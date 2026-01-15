@@ -572,7 +572,7 @@ void CPreferencesDlgBase::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 {
 	ASSERT(pPrefs);
 
-	// cycle the page saving the preferences for each one
+	// cycle the pages saving the preferences for each one
 	int nPage = m_ppHost.GetPageCount();
 	
 	while (nPage--)
@@ -585,7 +585,9 @@ void CPreferencesDlgBase::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 	
 	pPrefs->WriteProfileInt(szKey, _T("Height"), m_sizeCurWindow.cy);
 	pPrefs->WriteProfileInt(szKey, _T("Width"), m_sizeCurWindow.cx);
-	pPrefs->WriteProfileInt(szKey, _T("StartPage"), m_ppHost.GetActiveIndex());
+
+	if (m_ppHost.GetActiveIndex() != -1)
+		pPrefs->WriteProfileInt(szKey, _T("StartPage"), m_ppHost.GetActiveIndex());
 }
 
 void CPreferencesDlgBase::SetPageBackgroundColor(COLORREF color)
