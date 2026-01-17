@@ -6,6 +6,7 @@
 #include "graphicsmisc.h"
 #include "deferwndmove.h"
 #include "misc.h"
+#include "osversion.h"
 #include "winclasses.h"
 #include "wclassdefines.h"
 #include "CtrlTextHighlighter.h"
@@ -185,37 +186,46 @@ BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_brBack != NULL)
 	{
-		// Exclude all children except for static-like text
+		// Exclude all children except for:
+		// 1. static-like text
+		// 2. push-buttons on Windows XP
 		CWnd* pChild = GetWindow(GW_CHILD);
-
+		
 		while (pChild)
 		{
 			CString sClass = CWinClasses::GetClass(*pChild);
 			BOOL bExclude = TRUE;
-
+			
 			if (CWinClasses::IsClass(sClass, WC_STATIC))
 			{
 				bExclude = FALSE;
 			}
 			else if (CWinClasses::IsClass(sClass, WC_BUTTON))
 			{
-				switch (CWinClasses::GetStyleType(*pChild, BS_TYPEMASK))
+				if (COSVersion() < OSV_VISTA)
 				{
-				case BS_CHECKBOX:
-				case BS_AUTOCHECKBOX:
-				case BS_RADIOBUTTON:
-				case BS_3STATE:
-				case BS_AUTO3STATE:
-				case BS_GROUPBOX:
-				case BS_AUTORADIOBUTTON:
 					bExclude = FALSE;
-					break;
+				}
+				else
+				{
+					switch (CWinClasses::GetStyleType(*pChild, BS_TYPEMASK))
+					{
+					case BS_CHECKBOX:
+					case BS_AUTOCHECKBOX:
+					case BS_RADIOBUTTON:
+					case BS_3STATE:
+					case BS_AUTO3STATE:
+					case BS_GROUPBOX:
+					case BS_AUTORADIOBUTTON:
+						bExclude = FALSE;
+						break;
+					}
 				}
 			}
-
+			
 			if (bExclude)
 				ExcludeChild(pChild, pDC);
-
+			
 			pChild = pChild->GetNextWindow();
 		}
 
