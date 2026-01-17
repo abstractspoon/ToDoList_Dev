@@ -74,7 +74,7 @@ CPreferencesToolPage::~CPreferencesToolPage()
 void CPreferencesToolPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPreferencesPageBase::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CPreferencesToolPage)
+
 	DDX_Control(pDX, IDC_ARGMENUBTN, m_btnArgMenu);
 	DDX_Control(pDX, IDC_TOOLPATH, m_eToolPath);
 	DDX_Control(pDX, IDC_TOOLLIST, m_lcTools);
@@ -84,15 +84,12 @@ void CPreferencesToolPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_ICONPATH, m_sIconPath);
 	DDX_Control(pDX, IDC_ICONPATH, m_eIconPath);
 	DDX_Control(pDX, IDC_CMDLINE, m_eCmdLine);
-	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_DISPLAYUDTSINTOOLBAR, m_bDisplayUDTsInToolbar);
 }
 
 BEGIN_MESSAGE_MAP(CPreferencesToolPage, CPreferencesPageBase)
-	//{{AFX_MSG_MAP(CPreferencesToolPage)
 	ON_WM_SIZE()
 	ON_WM_INITMENUPOPUP()
-	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_UDTPREFS_NEW, OnNewExternalTool)
 	ON_COMMAND(ID_UDTPREFS_NEWTDL, OnNewTDLTool)
 	ON_COMMAND(ID_UDTPREFS_DELETE, OnDeleteTool)
@@ -127,14 +124,12 @@ BEGIN_MESSAGE_MAP(CPreferencesToolPage, CPreferencesPageBase)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesToolPage message handlers
 
 BOOL CPreferencesToolPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CPreferencesToolPage::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs)

@@ -145,24 +145,21 @@ BOOL CCustomAttributePageBase::Create(UINT nDialogResID, CWnd* pParent)
 CCustomAttributeListPage::CCustomAttributeListPage(const CTDCImageList& ilTaskIcons)
 	:
 	m_btInsertSymbol(1, 0, (MBS_DOWN | MBS_RETURNCMD)),
-	m_ilTaskIcons(ilTaskIcons)
+	m_ilTaskIcons(ilTaskIcons),
+	m_dwListType(TDCCA_NOTALIST),
+	m_dwDataType(TDCCA_STRING)
 {
-	//{{AFX_DATA_INIT(CCustomAttributeListPage)
-	//}}AFX_DATA_INIT
-	m_dwListType = TDCCA_NOTALIST;
-	m_dwDataType = TDCCA_STRING;
 }
 
 void CCustomAttributeListPage::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CCustomAttributeListPage)
+
 	DDX_Control(pDX, IDC_LISTTYPE, m_cbListType);
 	DDX_Text(pDX, IDC_DEFAULTLISTDATA, m_sDefaultListData);
 	DDX_Control(pDX, IDC_INSERTSYMBOL, m_btInsertSymbol);
 	DDX_Control(pDX, IDC_BROWSEIMAGES, m_btBrowseImages);
 	DDX_Control(pDX, IDC_DEFAULTLISTDATA, m_eListData);
-	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -177,17 +174,14 @@ void CCustomAttributeListPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CCustomAttributeListPage, CDialog)
-	//{{AFX_MSG_MAP(CCustomAttributeListPage)
 	ON_CBN_SELCHANGE(IDC_LISTTYPE, OnSelchangeListtype)
 	ON_EN_CHANGE(IDC_DEFAULTLISTDATA, OnChangeDefaultlistdata)
 	ON_BN_CLICKED(IDC_BROWSEIMAGES, OnBrowseimages)
 	ON_BN_CLICKED(IDC_INSERTSYMBOL, OnInsertsymbol)
 	ON_WM_ENABLE()
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLCustomAttributeDlg message handlers
 
 BOOL CCustomAttributeListPage::Create(CWnd* pParent)
 {
@@ -212,8 +206,7 @@ BOOL CCustomAttributeListPage::OnInitDialog()
 	m_btInsertSymbol.SetWindowText(0x2211);
 	m_btInsertSymbol.SetTooltip(CEnString(IDS_CAD_INSERTSYMBOL));
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CCustomAttributeListPage::BuildListCombo()
@@ -536,19 +529,16 @@ CCustomAttributeCalcPage::CCustomAttributeCalcPage()
 	m_cbSecondOperandAttrib(TDLACB_GROUPCUSTOMATTRIBS), // No relative tasks
 	m_bSecondOperandIsValue(TRUE)
 {
-	//{{AFX_DATA_INIT(CCustomAttributeCalcPage)
-	//}}AFX_DATA_INIT
 }
 
 void CCustomAttributeCalcPage::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CCustomAttributeCalcPage)
+
 	DDX_Control(pDX, IDC_FIRSTOPERAND, m_cbFirstOperand);
 	DDX_Control(pDX, IDC_OPERATOR, m_cbOperators);
 	DDX_Control(pDX, IDC_SECONDOPERANDATTRIBUTE, m_cbSecondOperandAttrib);
 	DDX_Control(pDX, IDC_SECONDOPERANDVALUE, m_eSecondOperandValue);
-	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_SECONDOPISATTRIBUTE, m_bSecondOperandIsValue);
 	DDX_Text(pDX, IDC_RESULTTYPE, m_sResultType);
 
@@ -578,18 +568,15 @@ void CCustomAttributeCalcPage::DDX_Operand(CDataExchange* pDX, CTDLAttributeComb
 }
 
 BEGIN_MESSAGE_MAP(CCustomAttributeCalcPage, CDialog)
-	//{{AFX_MSG_MAP(CCustomAttributeCalcPage)
 	ON_CBN_SELCHANGE(IDC_FIRSTOPERAND, OnSelChangeFirstOperand)
 	ON_CBN_SELCHANGE(IDC_OPERATOR, OnSelChangeOperator)
 	ON_CBN_SELCHANGE(IDC_SECONDOPERANDATTRIBUTE, OnSelChangeSecondOperandAttribute)
 	ON_EN_CHANGE(IDC_SECONDOPERANDVALUE, OnChangeSecondOperandValue)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SECONDOPISATTRIBUTE, OnChangeSecondOperandType)
 	ON_BN_CLICKED(IDC_SECONDOPISVALUE, OnChangeSecondOperandType)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLCustomAttributeDlg message handlers
 
 BOOL CCustomAttributeCalcPage::Create(CWnd* pParent)
 {
@@ -605,8 +592,7 @@ BOOL CCustomAttributeCalcPage::OnInitDialog()
 	BuildSecondOperandCombo();
 	EnableControls();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CCustomAttributeCalcPage::SetAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDef)
@@ -934,21 +920,17 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CString& sTaskFile,
 											   const CTDCImageList& ilTaskIcons, 
 											   CWnd* pParent)
 	: 
-	CTDLDialog(CTDLCustomAttributeDlg::IDD, _T("CustomAttributes"), pParent), 
+	CTDLDialog(IDD_ADDCUSTOMATTRIB_DIALOG, _T("CustomAttributes"), pParent),
+
 	m_eTaskfile(FES_NOBROWSE), 
 	m_eUniqueID(_T(". \r\n\t"), ME_EXCLUDE),
 	m_sTaskFile(sTaskFile),
 	m_pageList(ilTaskIcons),
-	m_aAttribDef(aAttribDef)
+	m_aAttribDef(aAttribDef),
+	m_dwDataType(TDCCA_STRING),
+	m_dwFeatures(TDCCAF_SORT),
+	m_nAlignment(DT_LEFT)
 {
-	//{{AFX_DATA_INIT(CTDLCustomAttributeDlg)
-	m_sUniqueID = _T("");
-	//}}AFX_DATA_INIT
-	m_sColumnTitle = _T("");
-	m_dwDataType = TDCCA_STRING;
-	m_dwFeatures = TDCCAF_SORT;
-	m_nAlignment = DT_LEFT;
-	
 	m_eColumnTitle.AddButton(1, 0x2211, CEnString(IDS_SYMBOLS), EE_BTNWIDTH_CALCULATE);
 	m_eColumnTitle.SetDropMenuButton(1);
 
@@ -958,7 +940,7 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CString& sTaskFile,
 void CTDLCustomAttributeDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLCustomAttributeDlg)
+
 	DDX_Control(pDX, IDC_FEATURES, m_cbFeatures);
 	DDX_Control(pDX, IDC_UNIQUEID, m_eUniqueID);
 	DDX_Control(pDX, IDC_DATATYPE, m_cbDataType);
@@ -970,7 +952,6 @@ void CTDLCustomAttributeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_UNIQUEID, m_sUniqueID);
 	DDX_Control(pDX, IDC_COLUMNTITLE, m_eColumnTitle);
 	DDX_Control(pDX, IDC_TASKFILE, m_eTaskfile);
-	//}}AFX_DATA_MAP
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -987,7 +968,6 @@ void CTDLCustomAttributeDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CTDLCustomAttributeDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLCustomAttributeDlg)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ATTRIBUTELIST, OnItemchangedAttriblist)
 	ON_NOTIFY(NM_DBLCLK, IDC_ATTRIBUTELIST, OnDoubleClickItem)
 	ON_CBN_SELCHANGE(IDC_DATATYPE, OnSelchangeDatatype)
@@ -1007,7 +987,6 @@ BEGIN_MESSAGE_MAP(CTDLCustomAttributeDlg, CTDLDialog)
 	ON_COMMAND(ID_CUSTATTRIB_MOVEUP, OnMoveAttributeUp)
 	ON_UPDATE_COMMAND_UI(ID_CUSTATTRIB_MOVEUP, OnUpdateMoveAttributeUp)
 	ON_CBN_CLOSEUP(IDC_FEATURES, OnChangeFeatures)
-	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_CUSTATTRIB_EDIT, OnEditAttribute)
 	ON_UPDATE_COMMAND_UI(ID_CUSTATTRIB_EDIT, OnUpdateEditAttribute)
 
@@ -1017,7 +996,6 @@ BEGIN_MESSAGE_MAP(CTDLCustomAttributeDlg, CTDLDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLCustomAttributeDlg message handlers
 
 BOOL CTDLCustomAttributeDlg::OnInitDialog()
 {
@@ -1068,8 +1046,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 
 	m_mgrPrompts.SetComboPrompt(m_cbFeatures, IDS_TDC_NONE);
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 BOOL CTDLCustomAttributeDlg::InitializeToolbar()

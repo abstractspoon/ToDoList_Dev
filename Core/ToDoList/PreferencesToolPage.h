@@ -25,11 +25,9 @@
 const UINT WM_PTP_TESTTOOL = ::RegisterWindowMessage(_T("WM_PTP_TESTTOOL"));
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesToolPage dialog
 
 class CPreferencesToolPage : public CPreferencesPageBase
 {
-// Construction
 public:
 	CPreferencesToolPage(int nMaxNumTools = 50);
 	~CPreferencesToolPage();
@@ -64,11 +62,10 @@ protected:
 
 protected:
 	virtual void OnOK();
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnFirstShow();
 
-// Implementation
 protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
@@ -86,7 +83,6 @@ protected:
 	afx_msg void OnUpdateCmdUICopyTool(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCmdUIMoveToolUp(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCmdUIMoveToolDown(CCmdUI* pCmdUI);
-
 	afx_msg void OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangedToollist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnChangeToolpath();
@@ -99,6 +95,7 @@ protected:
 	afx_msg void OnTestTool();
 	afx_msg void OnChangeIconPath();
 	afx_msg void OnImportTools();
+
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSelectIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
