@@ -92,6 +92,7 @@ namespace MDContentControl
 
 			contextMenuStrip1.ImageScalingSize = new Size(imageSize, imageSize);
 			contextMenuStrip1.Renderer = new UIThemeToolbarRenderer();
+			inlineSpellCheckToolStripMenuItem.Visible = RichTextBoxEx.SupportsInlineSpellChecking;
 
 			Win32.SyncRTLReadingWithParent(InputTextCtrl.Handle);
 			Win32.SetEditMargins(InputTextCtrl.Handle, DPIScaling.Scale(4));
@@ -103,20 +104,9 @@ namespace MDContentControl
 			InputTextCtrl.LostFocus			+= (s, e) => { InputLostFocus?	.Invoke(this, e); };
 			InputTextCtrl.NeedLinkTooltip	+= (s, e) => { NeedLinkTooltip?	.Invoke(this, e); };
 
-			InputTextCtrl.DragEnter += (s, e) =>
-			{
-				OnInputDragEnter(e);
-			};
-
-			InputTextCtrl.DragDrop += (s, e) =>
-			{
-				OnInputDragDrop(e);
-			};
-
-			InputTextCtrl.PasteEvent += (s, e) =>
-			{
-				return OnInputPaste(e);
-			};
+			InputTextCtrl.DragEnter			+= (s, e) => { OnInputDragEnter(e); };
+			InputTextCtrl.DragDrop			+= (s, e) => { OnInputDragDrop(e); };
+			InputTextCtrl.PasteEvent		+= (s, e) => { return OnInputPaste(e); };
 		}
 
 		public static string ConvertToHtml(Byte[] content, string imageDir)

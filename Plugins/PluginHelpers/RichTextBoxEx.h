@@ -32,6 +32,11 @@ namespace Abstractspoon
 					void set(bool enable);
 				}
 
+				static property bool SupportsInlineSpellChecking
+				{
+					bool get();
+				}
+
 				virtual LabelTipInfo^ ToolHitTest(Drawing::Point ptScreen);
 				virtual Windows::Forms::Control^ GetOwner() { return this; }
 

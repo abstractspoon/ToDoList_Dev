@@ -333,6 +333,11 @@ void RichTextBoxEx::InlineSpellChecking::set(bool enable)
 	CRichEditHelper::EnableInlineSpellChecking(Win32::GetHwnd(Handle), (enable ? TRUE : FALSE));
 }
 
+bool RichTextBoxEx::SupportsInlineSpellChecking::get()
+{
+	return CRichEditHelper::SupportsInlineSpellChecking();
+}
+
 String^ RichTextBoxEx::RtfToHtml(String^ rtf, bool useMSWord)
 {
 	return RtfToHtml(rtf, "", useMSWord);
