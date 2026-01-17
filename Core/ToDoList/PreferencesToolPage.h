@@ -16,6 +16,7 @@
 #include "..\shared\menubutton.h"
 #include "..\shared\ToolbarHelper.h"
 #include "..\shared\entoolbar.h"
+#include "..\shared\enlistctrl.h"
 
 #include <afxtempl.h>
 
@@ -24,11 +25,9 @@
 const UINT WM_PTP_TESTTOOL = ::RegisterWindowMessage(_T("WM_PTP_TESTTOOL"));
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesToolPage dialog
 
 class CPreferencesToolPage : public CPreferencesPageBase
 {
-// Construction
 public:
 	CPreferencesToolPage(int nMaxNumTools = 50);
 	~CPreferencesToolPage();
@@ -44,7 +43,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CEdit m_eCmdLine;
 	CFileEdit m_eToolPath;
-	CListCtrl m_lcTools;
+	CEnListCtrl m_lcTools;
 	CFileEdit m_eIconPath;
 	CTDCImageList m_ilTools;
 
@@ -63,11 +62,10 @@ protected:
 
 protected:
 	virtual void OnOK();
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnFirstShow();
 
-// Implementation
 protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
@@ -85,7 +83,6 @@ protected:
 	afx_msg void OnUpdateCmdUICopyTool(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCmdUIMoveToolUp(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCmdUIMoveToolDown(CCmdUI* pCmdUI);
-
 	afx_msg void OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangedToollist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnChangeToolpath();
@@ -98,6 +95,7 @@ protected:
 	afx_msg void OnTestTool();
 	afx_msg void OnChangeIconPath();
 	afx_msg void OnImportTools();
+
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSelectIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
@@ -113,8 +111,9 @@ protected:
 	void RebuildListImages();
 	BOOL InitializeToolbar();
 	BOOL GetToolFromList(int nTool, TDCUSERTOOL& tool) const;
-	int AddToolToList(const TDCUSERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	int AddToolToList(const TDCUSERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE, BOOL bUpdateRemaining = FALSE);
 	void RebuildToolsFromList();
+	void UpdateRemainingCount();
 	
 	CString MapCmdIDToPlaceholder(UINT nCmdID) const;
 	CString GetNewUserVariableName(LPCTSTR szVarType) const;

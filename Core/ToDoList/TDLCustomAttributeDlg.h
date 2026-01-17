@@ -30,7 +30,7 @@
 class CTDCImageList;
 
 /////////////////////////////////////////////////////////////////////////////
-// CCustomAttributePageBase dialog
+// CCustomAttributePageBase property page
 
 class CCustomAttributePageBase : public CDialog
 {
@@ -40,13 +40,12 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CCustomAttributeListPage dialog
+// CCustomAttributeListPage property page
 
 const UINT WM_CUSTATTRIBLISTCHANGE = (WM_APP + 1);
 
 class CCustomAttributeListPage : public CCustomAttributePageBase
 {
-// Construction
 public:
 	CCustomAttributeListPage(const CTDCImageList& ilTaskIcons);
 
@@ -62,11 +61,8 @@ public:
 	static BOOL BuildSymbolPopupMenu(CMenu& menu);
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CCustomAttributeListPage)
 	CComboBox	m_cbListType;
 	CString	m_sDefaultListData;
-	//}}AFX_DATA
 	CMenuButton	m_btInsertSymbol;
 	CMaskEdit	m_eListData;
 	DWORD m_dwListType, m_dwDataType;
@@ -74,23 +70,15 @@ protected:
 
 	const CTDCImageList& m_ilTaskIcons;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCustomAttributeListPage)
 protected:
-	//}}AFX_VIRTUAL
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CCustomAttributeListPage)
 	afx_msg void OnSelchangeListtype();
 	afx_msg void OnChangeDefaultlistdata();
 	afx_msg void OnBrowseimages();
 	afx_msg void OnInsertsymbol();
-	//}}AFX_MSG
 	afx_msg void OnEnable(BOOL bEnable);
 	DECLARE_MESSAGE_MAP()
 
@@ -101,13 +89,12 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CCustomAttributeCalcPage dialog
+// CCustomAttributeCalcPage property page
 
 const UINT WM_CUSTATTRIBCALCCHANGE = (WM_APP + 2);
 
 class CCustomAttributeCalcPage : public CCustomAttributePageBase
 {
-// Construction
 public:
 	CCustomAttributeCalcPage();
 
@@ -120,13 +107,10 @@ public:
 	void GetCalculation(TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLCustomAttributeDlg)
-	CTDLAttributeComboBox	m_cbFirstOperand;
-	CComboBox	m_cbOperators;
-	CTDLAttributeComboBox	m_cbSecondOperandAttrib;
-	CMaskEdit	m_eSecondOperandValue;
-	//}}AFX_DATA
+	CTDLAttributeComboBox m_cbFirstOperand;
+	CComboBox m_cbOperators;
+	CTDLAttributeComboBox m_cbSecondOperandAttrib;
+	CMaskEdit m_eSecondOperandValue;
 	BOOL m_bSecondOperandIsValue;
 	CString m_sResultType;
 	CString m_sExcludedCustAttribID;
@@ -134,24 +118,16 @@ protected:
 	TDCCUSTOMATTRIBUTECALCULATION m_calc;
 	CTDCCustomAttribDefinitionArray m_aAttribDef;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCustomAttributeCalcPage)
 protected:
-	//}}AFX_VIRTUAL
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CCustomAttributeCalcPage)
 	afx_msg void OnSelChangeFirstOperand();
 	afx_msg void OnSelChangeOperator();
 	afx_msg void OnSelChangeSecondOperandAttribute();
 	afx_msg void OnChangeSecondOperandValue();
 	afx_msg void OnChangeSecondOperandType();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 	void BuildFirstOperandCombo();
@@ -174,24 +150,19 @@ protected:
 
 class CTDLCustomAttributeDlg : public CTDLDialog
 {
-// Construction
 public:
 	CTDLCustomAttributeDlg(const CString& sTaskFile, 
 						   const CTDCCustomAttribDefinitionArray& aAttribDef,
 						   const CTDCImageList& ilTaskIcons,
-						   CWnd* pParent = NULL);   // standard constructor
+						   CWnd* pParent = NULL);
 
 	int GetAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDef) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLCustomAttributeDlg)
-	enum { IDD = IDD_ADDCUSTOMATTRIB_DIALOG };
 	CString	m_sTaskFile;
 	CString	m_sColumnTitle;
 	int		m_nAlignment;
 	CString	m_sUniqueID;
-	//}}AFX_DATA
 	DWORD m_dwDataType;
 	DWORD m_dwFeatures;
 
@@ -212,22 +183,13 @@ protected:
 	CCustomAttributeListPage m_pageList;
 	CCustomAttributeCalcPage m_pageCalc;
 
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLCustomAttributeDlg)
 protected:
-	//}}AFX_VIRTUAL
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 
-// Implementation
 protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(CTDLCustomAttributeDlg)
 	afx_msg void OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDoubleClickItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDatatype();
@@ -247,7 +209,6 @@ protected:
 	afx_msg void OnMoveAttributeUp();
 	afx_msg void OnUpdateMoveAttributeUp(CCmdUI* pCmdUI);
 	afx_msg void OnChangeFeatures();
-	//}}AFX_MSG
 	afx_msg void OnUpdateEditAttribute(CCmdUI* pCmdUI);
 	afx_msg void OnEditAttribute();
 
@@ -259,6 +220,7 @@ protected:
 	void BuildDataTypeCombo();
 	BOOL AddAttributeToListCtrl(const TDCCUSTOMATTRIBUTEDEFINITION& attrib, BOOL bNew, int nPos = -1);
 	void EnableControls();
+	void UpdateRemainingCount();
 	int GetCurSel();
 	BOOL UniqueIDExists(const CString& sID, int nIgnore = -1) const;
 	void MakeUniqueID(CString& sID, int nIgnore = -1) const;
@@ -269,8 +231,5 @@ protected:
 	static void GetTypeStrings(const TDCCUSTOMATTRIBUTEDEFINITION& attrib, CString& sDataType, CString& sListType);
 	static CString MakeID(const CString& sLabel);
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLCUSTOMATTRIBUTEDLG_H__E0C8D9C7_40BA_4571_B412_C8A5491050FB__INCLUDED_)
