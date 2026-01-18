@@ -732,13 +732,12 @@ namespace LoggedTimeUIExtension
 			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, LabelTop - 2);
 			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, LabelTop);
 
-			Rectangle dayViewRect = ClientRectangle;
+			Rectangle timeLogRect = ClientRectangle;
 
-			dayViewRect.Y = ControlTop;
-			dayViewRect.Height -= ControlTop;
-			dayViewRect.Inflate(-1, -1);
+			timeLogRect.Y = ControlTop;
+			timeLogRect.Height -= ControlTop;
 
-			m_TimeLog.Bounds = dayViewRect;
+			m_TimeLog.Bounds = timeLogRect;
 
             Invalidate(true);
         }

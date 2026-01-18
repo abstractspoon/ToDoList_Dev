@@ -907,7 +907,6 @@ namespace DayViewUIExtension
 
 			dayViewRect.Y = ControlTop;
 			dayViewRect.Height -= ControlTop;
-			dayViewRect.Inflate(-1, -1);
 
 			m_DayView.Bounds = dayViewRect;
 
@@ -1222,7 +1221,7 @@ namespace DayViewUIExtension
             get
             {
                 if (m_MonthCombo != null)
-                    return m_MonthCombo.Bounds.Bottom + DPIScaling.Scale(3);
+                    return m_MonthCombo.Bounds.Bottom + DPIScaling.Scale(4);
 
                 // else
                 return 0;
