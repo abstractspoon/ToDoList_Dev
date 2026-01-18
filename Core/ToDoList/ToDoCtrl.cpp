@@ -1211,7 +1211,9 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 
 BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data)
 {
-	if (!CanEditSelectedTask(TDCA_CUSTOMATTRIB))
+	TDC_ATTRIBUTE nAttribID = m_aCustomAttribDefs.GetAttributeID(sAttribID);
+
+	if (!CanEditSelectedTask(nAttribID))
 		return FALSE;
 
 	if (sAttribID.IsEmpty())
@@ -1233,7 +1235,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
-	SetModified(m_aCustomAttribDefs.GetAttributeID(sAttribID), aModTaskIDs);
+	SetModified(nAttribID, aModTaskIDs);
 	return TRUE;
 }
 
