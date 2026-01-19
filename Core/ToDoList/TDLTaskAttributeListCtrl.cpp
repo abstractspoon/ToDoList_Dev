@@ -2718,6 +2718,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			m_multitasker.GetTasksDependencies(m_aSelectedTaskIDs, aDepends);
 
 			m_eDepends.SetDependencies(aDepends);
+			m_eDepends.EnableButton(ID_BTN_VIEWDEPENDS, aDepends.GetSize());
 		}
 		break;
 
