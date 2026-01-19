@@ -189,9 +189,10 @@ REM SUCCESS!
 ECHO [42m Build SUCCEEDED[0m
 ECHO:
 
-ECHO [106m[30m Allow caller to cancel building Zip[0m
-ECHO [106m[30m Remember to close any instances of ToDoList before proceeding[0m
+ECHO [43m[30m Verify compiled version number before zipping[0m
+ECHO [43m[30m Close any instances of ToDoList before zipping[0m
 ECHO:
+ECHO [106m[30m Allow caller to cancel building Zip[0m
 PAUSE
 
 CALL %REPO%\BuildReleaseZip.bat
