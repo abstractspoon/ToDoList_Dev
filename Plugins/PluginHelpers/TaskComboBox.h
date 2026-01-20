@@ -21,7 +21,7 @@ namespace Abstractspoon
 			public interface class ITask
 			{
 			public:
-				virtual property UInt32 Id			{ UInt32 get(); }
+				virtual property UInt32 Id { UInt32 get(); }
 				virtual property String^ Title		{ String^ get(); }
 				virtual property String^ Position	{ String^ get(); }
 				virtual property int Depth			{ int get(); }
@@ -52,6 +52,13 @@ namespace Abstractspoon
 			protected:
 				void OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawItemEventArgs^ e) override;
+				void OnTextChanged(EventArgs^ e) override;
+
+			protected:
+				void SelectNextFind(bool forward);
+				bool SelectNextItem(String^ text, bool forward);
+				int FindNextItem(String^ text, int from, bool forward);
+				bool FindNextItem(String^ text, int from, int to, int increment, int& next);
 			};
 		}
 	}

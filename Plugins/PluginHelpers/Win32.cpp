@@ -351,6 +351,25 @@ void Win32::EnableExplorerTheming(IntPtr hWnd)
 	CThemed::SetWindowTheme(pWnd, _T("Explorer"));
 }
 
+String^ Win32::GetWindowText(IntPtr hWnd)
+{
+	if (!GetWindowTextLength(GetHwnd(hWnd)))
+		return String::Empty;
+
+	CWnd* pWnd = CWnd::FromHandle(GetHwnd(hWnd));
+
+	CString sText;
+	pWnd->GetWindowText(sText);
+
+	return gcnew String(sText);
+}
+
+void Win32::SetWindowText(IntPtr hWnd, String^ text)
+{
+	CWnd* pWnd = CWnd::FromHandle(GetHwnd(hWnd));
+	pWnd->SetWindowText(MS(text));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 DlgUnits::DlgUnits(IntPtr hWnd) : m_hWnd(Win32::GetHwnd(hWnd))
