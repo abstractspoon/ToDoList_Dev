@@ -428,8 +428,9 @@ namespace LoggedTimeUIExtension
 
 			// else
 			m_SelectedLogEntryId = 0;
-			Invalidate();
+			SelectedAppointment = null;
 
+			Invalidate();
 			return true;
 		}
 
