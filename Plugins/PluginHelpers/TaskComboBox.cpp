@@ -29,8 +29,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// Private class which wraps the caller's ITask just so that 
-// we can control what gets returned from ToString()
+// Private class to override ToString()
 
 ref class WrappedITask : ITask
 {
@@ -183,87 +182,3 @@ void TaskComboBox::SelectNextFind(bool bForward)
 	}
 }
 
-bool TaskComboBox::SelectNextItem(String^ text, bool bForward)
-{
-	if (String::IsNullOrEmpty(text))
-	{
-		SelectedIndex = -1;
-		return false;
-	}
-
-	// else
-	int nSel = SelectedIndex;
-	int from = (bForward ? (nSel + 1) : (nSel - 1));
-
-	int nNext = FindNextItem(text, from, bForward);
-
-	if (nNext == nSel)
-		return false;
-
-	SelectedIndex = nNext;
-	return true;
-}
-
-int TaskComboBox::FindNextItem(String^ text, int from, bool bForward)
-{
-	int nNumItems = Items->Count;
-
-	if (nNumItems == 0)
-		return CB_ERR;
-
-	int nNext = CB_ERR;
-
-	if (bForward)
-	{
-		if ((from < 0) || (from >= nNumItems))
-			from = 0;
-
-		// From from to end of combo
-		if (FindNextItem(text, from, (nNumItems - 1), 1, nNext))
-			return nNext;
-
-		// From start of combo to from
-		if ((from > 0) && FindNextItem(text, 0, (from - 1), 1, nNext))
-			return nNext;
-	}
-	else // backwards
-	{
-		if ((from < 0) || (from >= nNumItems))
-			from = (nNumItems - 1);
-
-		// From from to start of combo
-		if (FindNextItem(text, from, 0, -1, nNext))
-			return nNext;
-
-		// From end of combo to from
-		if (FindNextItem(text, (nNumItems - 1), (from + 1), -1, nNext))
-			return nNext;
-	}
-
-	// else
-	return CB_ERR;
-}
-
-bool TaskComboBox::FindNextItem(String^ text, int from, int to, int increment, int& next)
-{
-	// Sanity checks
-	if (!(((increment == 1) && (to >= from)) || ((increment == -1) && (to <= from))))
-	{
-		ASSERT(0);
-		return false;
-	}
-
-	next = CB_ERR;
-	to += increment; // so the != will work to stop the loop
-
-	for (int nItem = from; nItem != to; nItem += increment)
-	{
-		if (Misc::Find(text, Items[nItem]->ToString()) != -1)
-		{
-			next = nItem;
-			break;
-		}
-	}
-
-	return (next != CB_ERR);
-}

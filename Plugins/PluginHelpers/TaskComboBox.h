@@ -28,6 +28,8 @@ namespace Abstractspoon
 				virtual property bool HasIcon		{ bool get(); }
 			};
 
+			// --------------------------------------------------------
+
 			public ref class TaskComboBox : UIComponents::OwnerdrawComboBoxBase
 			{
 			public:
@@ -56,9 +58,6 @@ namespace Abstractspoon
 
 			protected:
 				void SelectNextFind(bool forward);
-				bool SelectNextItem(String^ text, bool forward);
-				int FindNextItem(String^ text, int from, bool forward);
-				bool FindNextItem(String^ text, int from, int to, int increment, int& next);
 			};
 		}
 	}
