@@ -697,7 +697,14 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			GET_CUSTDEF_ALT(query.aAttribDefs, sUniqueID, pDef, break);
 
 			TDCCADATA data;
-			pTDI->GetCustomAttributeValue(sUniqueID, data);
+
+			if (!pTDI->GetCustomAttributeValue(sUniqueID, data) && pDef->IsCalculation())
+			{
+				double dValue;
+
+				if (m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, *pDef, dValue, TDCU_HOURS))
+					data.Set(dValue);
+			}
 
 			bMatch = ValueMatches(data, pDef->GetAttributeType(), rule, query.bCaseSensitive, sWhatMatched);
 
@@ -1158,6 +1165,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const TDCCADATA& data, DWORD dwAttribType, co
 			break;
 			
 		case TDCCA_DOUBLE:	
+		case TDCCA_CALCULATION:
 			bMatch = ValueMatches(data.AsDouble(), rule, sWhatMatched);
 			break;
 			
@@ -1181,9 +1189,11 @@ BOOL CTDCTaskMatcher::ValueMatches(const TDCCADATA& data, DWORD dwAttribType, co
 BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, CString& sWhatMatched) const
 {
 	BOOL bMatch = FALSE;
-	BOOL bTime = (rule.AttributeIs(TDCA_TIMEESTIMATE) || rule.AttributeIs(TDCA_TIMESPENT));
 	double dSearchVal = rule.ValueAsDouble();
-	
+
+	BOOL bTime = (rule.AttributeIs(TDCA_TIMEESTIMATE) || 
+				  rule.AttributeIs(TDCA_TIMESPENT) ||
+				  (TDCCA_TIMEPERIOD == m_data.m_aCustomAttribDefs.GetAttributeDataType(rule.GetCustomAttributeID())));
 	if (bTime)
 	{
 		TH_UNITS nTHUints = TDC::MapUnitsToTHUnits(rule.GetTimeUnits());
