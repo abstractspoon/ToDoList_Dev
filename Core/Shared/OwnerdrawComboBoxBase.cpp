@@ -828,7 +828,7 @@ BOOL COwnerdrawComboBoxBase::SelectNextItem(const CString& sText, BOOL bForward)
 	if (sText.IsEmpty())
 	{
 		SetCurSel(-1, FALSE);
-		return CB_ERR;
+		return FALSE;
 	}
 
 	// else
