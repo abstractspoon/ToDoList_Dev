@@ -340,7 +340,9 @@ namespace LoggedTimeUIExtension
 
 			if (entry.HasTitle)
 				text.Insert(0, entry.Title);
-
+#if DEBUG
+			text.Insert(0, string.Format("[{0}]", entry.Id));
+#endif
 			m_RenderHelper.DrawItemText(g, string.Join("\n", text), rect, textColor, FontStyle.Regular, false);
 		}
 
