@@ -423,15 +423,22 @@ namespace LoggedTimeUIExtension
 			if (!logFile.DeleteEntry(m_SelectedLogEntryId))
 				Debug.Assert(false);
 
-			if (!logFile.SaveEntries(m_TasklistPath))
-				return false;
+			// Temporarily disable file watcher
+			EnableFileWatching(false);
 
-			// else
-			m_SelectedLogEntryId = 0;
-			SelectedAppointment = null;
+			bool success = logFile.SaveEntries(m_TasklistPath);
 
-			Invalidate();
-			return true;
+			EnableFileWatching(true);
+
+			if (success)
+			{
+				m_SelectedLogEntryId = 0;
+				SelectedAppointment = null;
+
+				Invalidate();
+			}
+
+			return success;
 		}
 
 		public bool CacheSelectedLogEntry()
