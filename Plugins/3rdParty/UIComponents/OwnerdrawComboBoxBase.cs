@@ -15,6 +15,10 @@ namespace UIComponents
 
 		// ------------------------------------
 
+		private bool m_FindSelecting = false;
+
+		// ------------------------------------
+
 		public OwnerdrawComboBoxBase(bool drawFixed = true)
 		{
 			this.DrawMode = (drawFixed ? DrawMode.OwnerDrawFixed : DrawMode.OwnerDrawVariable);
@@ -46,7 +50,7 @@ namespace UIComponents
 			}
 		}
 
-		public bool SelectNextItem(String text, bool bForward)
+		public bool SelectNextItem(String text, bool forward)
 		{
 			if (string.IsNullOrEmpty(text))
 			{
@@ -54,35 +58,41 @@ namespace UIComponents
 				return false;
 			}
 
-			// else
-			int nSel = SelectedIndex;
-			int from = (bForward ? (nSel + 1) : (nSel - 1));
+			int sel = SelectedIndex, next = NoMatch;
+			int from = (forward ? (sel + 1) : (sel - 1));
 
-			int nNext = FindNextItem(text, from, bForward);
+			// Prevent re-entrancy
+			{
+				m_FindSelecting = true;
 
-			if (nNext == nSel)
+				next = FindNextItem(text, from, forward);
+
+				m_FindSelecting = false;
+			}
+
+			if (next == sel)
 				return false;
 
-			SelectedIndex = nNext;
+			SelectedIndex = next;
 			return true;
 		}
 
-		protected int FindNextItem(String text, int from, bool bForward)
+		protected int FindNextItem(String text, int from, bool forward)
 		{
-			int nNumItems = Items.Count;
+			int numItems = Items.Count;
 
-			if (nNumItems == 0)
+			if (numItems == 0)
 				return NoMatch;
 
 			int next = NoMatch;
 
-			if (bForward)
+			if (forward)
 			{
-				if ((from < 0) || (from >= nNumItems))
+				if ((from < 0) || (from >= numItems))
 					from = 0;
 
 				// From from to end of combo
-				if (FindNextItem(text, from, (nNumItems - 1), 1, ref next))
+				if (FindNextItem(text, from, (numItems - 1), 1, ref next))
 					return next;
 
 				// From start of combo to from
@@ -91,15 +101,15 @@ namespace UIComponents
 			}
 			else // backwards
 			{
-				if ((from < 0) || (from >= nNumItems))
-					from = (nNumItems - 1);
+				if ((from < 0) || (from >= numItems))
+					from = (numItems - 1);
 
 				// From from to start of combo
 				if (FindNextItem(text, from, 0, -1, ref next))
 					return next;
 
 				// From end of combo to from
-				if (FindNextItem(text, (nNumItems - 1), (from + 1), -1, ref next))
+				if (FindNextItem(text, (numItems - 1), (from + 1), -1, ref next))
 					return next;
 			}
 
