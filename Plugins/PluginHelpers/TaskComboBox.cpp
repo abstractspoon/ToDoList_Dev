@@ -180,5 +180,7 @@ void TaskComboBox::SelectNextFind(bool bForward)
 		Win32::SetWindowText(Handle, editText);
 		::SendMessage(Win32::GetHwnd(Handle), CB_SETEDITSEL, 0, dwSel);
 	}
+
+	SearchUpdated(this, gcnew EventArgs());
 }
 

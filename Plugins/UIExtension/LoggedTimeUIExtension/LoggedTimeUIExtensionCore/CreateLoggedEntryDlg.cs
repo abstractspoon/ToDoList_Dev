@@ -38,28 +38,46 @@ namespace LoggedTimeUIExtension
 			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false, trans);
 			m_TaskCombo.Initialise(taskItems, taskIcons, attrib.TaskId, TaskItem.None(trans.Translate("<none>", Translator.Type.ComboBox)));
 
-			m_TaskCombo.SelectedIndexChanged += OnSelectedTaskChange;
+			m_TaskCombo.SearchUpdated += (s, e) => UpdateSelectedTask();
+			m_TaskCombo.SelectedIndexChanged += (s, e) => UpdateSelectedTask();
 			m_TaskCombo.SelectedIndex = 0;
 
 			trans.Translate(this);
 		}
 
-		protected void OnSelectedTaskChange(object sender, EventArgs e)
+		protected void UpdateSelectedTask()
 		{
-			uint taskId = m_TaskCombo.SelectedTaskId;
-
-			if (taskId == 0)
+			if (m_TaskCombo.SelectedIndex == -1)
 			{
-				m_TaskId.Text = m_Trans.Translate("<none>", Translator.Type.Text);
+				OK.Enabled = false;
+
+				m_TaskId.Text = String.Empty;
 				m_Attributes.ReadOnlyTask = true;
 			}
 			else
 			{
-				m_TaskId.Text = taskId.ToString();
+				OK.Enabled = true;
 
-				var taskItem = m_TaskItems.Where(x => (x.Id == taskId)).FirstOrDefault();
-				m_Attributes.ReadOnlyTask = ((taskItem == null) || taskItem.Locked);
+				uint taskId = m_TaskCombo.SelectedTaskId;
+
+				if (taskId == 0)
+				{
+					m_TaskId.Text = m_Trans.Translate("<none>", Translator.Type.Text);
+					m_Attributes.ReadOnlyTask = true;
+				}
+				else
+				{
+					m_TaskId.Text = taskId.ToString();
+
+					var taskItem = m_TaskItems.Where(x => (x.Id == taskId)).FirstOrDefault();
+					m_Attributes.ReadOnlyTask = ((taskItem == null) || taskItem.Locked);
+				}
 			}
+		}
+
+		protected void OnEditTextChanged(object sender, EventArgs e)
+		{
+			OK.Enabled = (m_TaskCombo.SelectedIndex != -1);
 		}
 
 		public uint TaskId

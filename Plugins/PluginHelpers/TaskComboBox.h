@@ -30,6 +30,10 @@ namespace Abstractspoon
 
 			// --------------------------------------------------------
 
+			public delegate void SearchUpdated(Object^ sender, EventArgs^ args);
+
+			// --------------------------------------------------------
+
 			public ref class TaskComboBox : UIComponents::OwnerdrawComboBoxBase
 			{
 			public:
@@ -46,6 +50,8 @@ namespace Abstractspoon
 
 				property UInt32 SelectedTaskId { UInt32 get(); }
 				property String^ SelectedTaskTitle { String^ get(); }
+
+				event SearchUpdated^ SearchUpdated;
 
 			private:
 				UIExtension::TaskIcon^ m_TaskIcons;
