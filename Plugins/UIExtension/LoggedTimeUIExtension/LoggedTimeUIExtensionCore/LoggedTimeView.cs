@@ -341,12 +341,15 @@ namespace LoggedTimeUIExtension
 				AltColor = fillColor
 			};
 
-			// Temporarily disable file watcher
-			EnableFileWatching(false);
+			// Disable file watcher during saving
+			bool success = false;
+			{
+				EnableFileWatching(false);
 
-			bool success = m_LogUtil.AddEntry(m_TasklistPath, newEntry, logSeparately);
+				success = m_LogUtil.AddEntry(m_TasklistPath, newEntry, logSeparately);
 
-			EnableFileWatching(true);
+				EnableFileWatching(true);
+			}
 
 			if (success)
 			{
@@ -423,12 +426,16 @@ namespace LoggedTimeUIExtension
 			if (!logFile.DeleteEntry(m_SelectedLogEntryId))
 				Debug.Assert(false);
 
-			// Temporarily disable file watcher
-			EnableFileWatching(false);
+			// Disable file watcher during saving
+			bool success = false;
+			{
+				EnableFileWatching(false);
 
-			bool success = logFile.SaveEntries(m_TasklistPath);
+				success = logFile.SaveEntries(m_TasklistPath);
+				HandleLogAccessResult(logFile.FilePath, false);
 
-			EnableFileWatching(true);
+				EnableFileWatching(true);
+			}
 
 			if (success)
 			{
@@ -695,13 +702,16 @@ namespace LoggedTimeUIExtension
 				return false;
 			}
 
-			// Temporarily disable file watcher
-			EnableFileWatching(false);
+			// Disable file watcher during saving
+			bool success = false;
+			{
+				EnableFileWatching(false);
 
-			bool success = logFile.SaveEntries(m_TasklistPath);
-			HandleLogAccessResult(logFile.FilePath, false);
+				success = logFile.SaveEntries(m_TasklistPath);
+				HandleLogAccessResult(logFile.FilePath, false);
 
-			EnableFileWatching(true);
+				EnableFileWatching(true);
+			}
 
 			if (success)
 				ClearCachedLogEntry();
