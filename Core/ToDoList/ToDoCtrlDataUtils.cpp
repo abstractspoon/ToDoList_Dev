@@ -1193,7 +1193,9 @@ BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, CStri
 
 	BOOL bTime = (rule.AttributeIs(TDCA_TIMEESTIMATE) || 
 				  rule.AttributeIs(TDCA_TIMESPENT) ||
-				  (TDCCA_TIMEPERIOD == m_data.m_aCustomAttribDefs.GetAttributeDataType(rule.GetCustomAttributeID())));
+				  (rule.IsCustomAttribute() && 
+				  (TDCCA_TIMEPERIOD == m_data.m_aCustomAttribDefs.GetAttributeDataType(rule.GetCustomAttributeID()))));
+
 	if (bTime)
 	{
 		TH_UNITS nTHUints = TDC::MapUnitsToTHUnits(rule.GetTimeUnits());
