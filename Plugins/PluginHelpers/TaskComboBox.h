@@ -21,7 +21,7 @@ namespace Abstractspoon
 			public interface class ITask
 			{
 			public:
-				virtual property UInt32 Id { UInt32 get(); }
+				virtual property UInt32 Id			{ UInt32 get(); }
 				virtual property String^ Title		{ String^ get(); }
 				virtual property String^ Position	{ String^ get(); }
 				virtual property int Depth			{ int get(); }

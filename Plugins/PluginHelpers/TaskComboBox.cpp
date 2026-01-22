@@ -47,6 +47,17 @@ public:
 	virtual property int Depth { int get()				{ return m_ITask->Depth; } }
 	virtual property bool HasIcon { bool get()			{ return m_ITask->HasIcon; } }
 
+	property bool IsTopLevel 
+	{ 
+		bool get()				
+		{ 
+			if (Position == nullptr)
+				return false;
+
+			return (Position->IndexOf('.') == -1);
+		} 
+	}
+
 private: 
 	ITask^ m_ITask;
 };
@@ -125,7 +136,7 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 	if (e->Index < 0)
 		return;
 
-	auto taskItem = ASTYPE(Items[e->Index], ITask);
+	auto taskItem = ASTYPE(Items[e->Index], WrappedITask);
 
 	if (taskItem != nullptr)
 	{
@@ -153,8 +164,12 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 		}
 
 		auto brush = TextBrush(e);
+		auto font = Font;
 
-		e->Graphics->DrawString(taskItem->Title, Font, brush, rect);
+		if (taskItem->IsTopLevel)
+			font = gcnew System::Drawing::Font(font, FontStyle::Bold);
+
+		e->Graphics->DrawString(taskItem->Title, font, brush, rect);
 		e->DrawFocusRectangle();
 
 		delete brush;
