@@ -1098,7 +1098,13 @@ namespace DayViewUIExtension
 
 				using (SolidBrush brush = new SolidBrush(fillColor))
 				{
+					if (isLong && clipRightBorder)
+						rect.Width++;
+
 					g.FillRectangle(brush, rect);
+
+					if (isLong && clipRightBorder)
+						rect.Width--;
 				}
 
 				if (borderColor != Color.Empty)

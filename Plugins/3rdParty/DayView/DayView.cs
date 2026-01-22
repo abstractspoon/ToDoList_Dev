@@ -64,7 +64,7 @@ namespace Calendar
         protected int appointmentGripWidth = 5;
         protected int dayGripWidth = 5;
         protected int allDayEventsHeaderHeight = 0;
-        protected int longAppointmentSpacing = 1;
+        protected int longAppointmentSpacing = 2;
         protected int appointmentSpacing = 1;
         protected int groupSpacing = 1;
         protected int daySpacing = 1;
@@ -1649,7 +1649,7 @@ namespace Calendar
             Rectangle rect = new Rectangle(0, 0, ClientRectangle.Width, ClientRectangle.Height);
 			DoPaint(e, rect);
 
-			if (legacyScrollbars)
+			if (LegacyScrollbars)
 				RepositionHScrollbar(); // because hour label width may have changed
         }
 
