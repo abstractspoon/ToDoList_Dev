@@ -8,7 +8,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
-using namespace System::Linq;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -56,11 +55,15 @@ namespace Abstractspoon
 			private:
 				UIExtension::TaskIcon^ m_TaskIcons;
 				ITask^ m_NoneTask;
+				Drawing::Font^ m_BoldFont;
 
 			protected:
 				void OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e) override;
 				void OnDrawItem(Windows::Forms::DrawItemEventArgs^ e) override;
 				void OnTextChanged(EventArgs^ e) override;
+
+				int GetListItemTextOffset(Object^ obj) override;
+				int GetListItemTextLength(Object^ obj, Drawing::Graphics^ graphics) override;
 
 			protected:
 				void SelectNextFind(bool forward);

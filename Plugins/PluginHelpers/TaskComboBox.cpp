@@ -47,16 +47,8 @@ public:
 	virtual property int Depth { int get()				{ return m_ITask->Depth; } }
 	virtual property bool HasIcon { bool get()			{ return m_ITask->HasIcon; } }
 
-	property bool IsTopLevel 
-	{ 
-		bool get()				
-		{ 
-			if (Position == nullptr)
-				return false;
-
-			return (Position->IndexOf('.') == -1);
-		} 
-	}
+	property bool IsTopLevel { bool get()				{ return (Depth == 0); } }
+	property bool IsNone { bool get()					{ return (Id == 0); } }
 
 private: 
 	ITask^ m_ITask;
@@ -67,7 +59,8 @@ private:
 TaskComboBox::TaskComboBox()
 	:
 	OwnerdrawComboBoxBase(true), // fixed
-	m_NoneTask(nullptr)
+	m_NoneTask(nullptr),
+	m_BoldFont(nullptr)
 {
 	Sorted = false; // we control the order
 }
@@ -105,6 +98,11 @@ void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
 		if (task->Id == selTaskId)
 			SelectedItem = wrap;
 	}
+
+	if (m_BoldFont == nullptr)
+		m_BoldFont = gcnew System::Drawing::Font(Font, FontStyle::Bold);
+
+	RefreshMaxDropWidth();
 }
 
 UInt32 TaskComboBox::SelectedTaskId::get()
@@ -142,38 +140,55 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 	{
 		auto rect = e->Bounds;
 
-		if (taskItem != m_NoneTask)
+		bool hasIcon = (taskItem->HasIcon && m_TaskIcons->Get(taskItem->Id));
+		bool listItem = !(e->State.HasFlag(DrawItemState::ComboBoxEdit));
+
+		if (listItem)
 		{
-			bool listItem = !(e->State.HasFlag(DrawItemState::ComboBoxEdit));
+			rect.X += GetListItemTextOffset(Items[e->Index]);
 
-			if (listItem)
-			{
-				for (int i = 0; i < taskItem->Depth; i++)
-					rect.X += UIExtension::TaskIcon::IconSize;
-			}
+			// Icon needs to be drawn BEFORE text
+			if (hasIcon)
+				rect.X -= UIExtension::TaskIcon::IconSize;
+		}
 
-			if (taskItem->HasIcon && m_TaskIcons->Get(taskItem->Id))
-			{
-				m_TaskIcons->Draw(e->Graphics, rect.X, rect.Y);
-				rect.X += UIExtension::TaskIcon::IconSize;
-			}
-			else if (listItem)
-			{
-				rect.X += UIExtension::TaskIcon::IconSize;
-			}
+		if (hasIcon)
+		{
+			m_TaskIcons->Draw(e->Graphics, rect.X, rect.Y);
+			rect.X += UIExtension::TaskIcon::IconSize;
 		}
 
 		auto brush = TextBrush(e);
-		auto font = Font;
-
-		if (taskItem->IsTopLevel)
-			font = gcnew System::Drawing::Font(font, FontStyle::Bold);
+		auto font = ((!taskItem->IsNone && taskItem->IsTopLevel) ? m_BoldFont : Font);
 
 		e->Graphics->DrawString(taskItem->Title, font, brush, rect);
 		e->DrawFocusRectangle();
-
-		delete brush;
 	}
+}
+
+int TaskComboBox::GetListItemTextOffset(Object^ obj)
+{
+	auto taskItem = ASTYPE(obj, WrappedITask);
+
+	if ((taskItem == nullptr) || (taskItem == m_NoneTask))
+		return 0;
+
+	int offset = ((UIExtension::TaskIcon::IconSize * taskItem->Depth) +
+				  UIExtension::TaskIcon::IconSize);
+
+	return offset;
+}
+
+int TaskComboBox::GetListItemTextLength(Object^ obj, Graphics^ graphics)
+{
+	auto taskItem = ASTYPE(obj, WrappedITask);
+
+	if ((taskItem == nullptr) || (taskItem == m_NoneTask))
+		return 0;
+
+	auto font = (taskItem->IsTopLevel ? m_BoldFont : Font);
+
+	return (int)graphics->MeasureString(taskItem->Title, font).Width;
 }
 
 void TaskComboBox::OnTextChanged(EventArgs^ e)

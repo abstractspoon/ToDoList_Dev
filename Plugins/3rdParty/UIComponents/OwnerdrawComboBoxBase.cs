@@ -34,6 +34,31 @@ namespace UIComponents
 			return new SolidBrush(TextColor(e));
 		}
 
+		public void RefreshMaxDropWidth()
+		{
+			var graphics = Graphics.FromHwnd(Handle);
+			int maxWidth = 0;
+
+			foreach (var item in Items)
+			{
+				int width = (GetListItemTextOffset(item) + GetListItemTextLength(item, graphics));
+
+				maxWidth = Math.Max(width, maxWidth);
+			}
+
+			DropDownWidth = (maxWidth + SystemInformation.VerticalScrollBarWidth);
+		}
+
+		virtual protected int GetListItemTextOffset(object obj)
+		{
+			return 0;
+		}
+
+		virtual protected int GetListItemTextLength(object obj, Graphics graphics)
+		{
+			return (int)graphics.MeasureString(obj.ToString(), Font).Width;
+		}
+
 		protected override void OnDrawItem(DrawItemEventArgs e)
 		{
 			base.OnDrawItem(e);
