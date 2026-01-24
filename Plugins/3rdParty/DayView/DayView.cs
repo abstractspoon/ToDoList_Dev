@@ -772,6 +772,8 @@ namespace Calendar
 				if (IsValidSlotsPerHour(value))
                 {
                     slotsPerHour = value;
+					
+					AdjustVScrollbar();
                     Invalidate();
                 }
             }
