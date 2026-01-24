@@ -115,7 +115,7 @@
 			// m_Error
 			// 
 			this.m_Error.ForeColor = System.Drawing.Color.Red;
-			this.m_Error.Location = new System.Drawing.Point(4, 289);
+			this.m_Error.Location = new System.Drawing.Point(7, 289);
 			this.m_Error.Name = "m_Error";
 			this.m_Error.Size = new System.Drawing.Size(170, 38);
 			this.m_Error.TabIndex = 13;

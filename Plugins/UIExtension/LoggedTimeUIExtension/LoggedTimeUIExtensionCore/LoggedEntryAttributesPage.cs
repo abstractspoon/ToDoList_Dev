@@ -97,7 +97,7 @@ namespace LoggedTimeUIExtension
 
 		private void OnTimeSpentChanged(object sender, EventArgs e)
 		{
-			if (m_EditMode && m_AddToTimeSpentCheckBox.Enabled)
+			if (m_EditMode)
 			{
 				string format = m_Trans.Translate("Also modify task 'Time Spent' by {0:0.###} hours", Translator.Type.CheckBox);
 				m_AddToTimeSpentCheckBox.Text = string.Format(format, (TimeSpent - m_OrgTimeSpent));

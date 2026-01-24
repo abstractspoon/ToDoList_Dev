@@ -14,6 +14,7 @@ namespace LoggedTimeUIExtension
 	public partial class EditLoggedEntryDlg : Form
 	{
 		LogEntry m_Entry;
+		Translator m_Trans;
 
 		// ---------------------------------------
 
@@ -43,9 +44,10 @@ namespace LoggedTimeUIExtension
 			}
 
 			m_Attributes.Initialise(entry, workWeek, isoDateTimes, readonlyTask, true, trans);
-			m_Attributes.ChangeEvent += (s, e) => { OK.Enabled = (m_Attributes.Dates.Length.Ticks > 0); };
+			m_Attributes.ChangeEvent += (s, e) => ValidateInputs();
 
-			trans.Translate(this);
+			m_Trans = trans;
+			m_Trans.Translate(this);
 		}
 
 		public Calendar.AppointmentDates Dates
@@ -73,6 +75,30 @@ namespace LoggedTimeUIExtension
 			get { return m_Attributes.HoursToAddToTimeSpent; }
 		}
 
+		protected void ValidateInputs()
+		{
+			bool validInputs = (m_Attributes.Dates.IsValid &&
+								((m_Attributes.TimeSpent > 0.0) || !String.IsNullOrWhiteSpace(m_Attributes.Comment)));
+
+			if (validInputs)
+			{
+				OK.Enabled = true;
+				m_Error.Text = string.Empty;
+			}
+			else
+			{
+				OK.Enabled = false;
+
+				if (!m_Attributes.Dates.IsValid)
+				{
+					m_Error.Text = m_Trans.Translate("Invalid 'End' time", Translator.Type.Text);
+				}
+				else
+				{
+					m_Error.Text = m_Trans.Translate("'Time Spent' or 'Comment' required", Translator.Type.Text);
+				}
+			}
+		}
 
 	}
 
