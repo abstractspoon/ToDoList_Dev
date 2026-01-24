@@ -225,6 +225,21 @@ namespace Calendar
         }
 		
 		// ------------------------------------------------------------------
+		
+		protected int RightClickSelectionMinutes
+		{
+			get
+			{
+				int slotMins = (60 / slotsPerHour);
+
+				if (rightClickSelectionMinutes < slotMins)
+					return slotMins;
+
+				return ((rightClickSelectionMinutes / slotMins) * slotMins);
+			}
+		}
+
+		// ------------------------------------------------------------------
 
 		private bool showWorkingHoursOnly = false;
 
@@ -1197,10 +1212,12 @@ namespace Calendar
 							DateTime click = GetDateTimeAt(e.X, e.Y);
 							selectionType = SelectionType.DateRange;
 
-							if ((click < SelectedDates.Start) || (click > SelectedDates.End))
+							if ((click < SelectedDates.Start) || (click >= SelectedDates.End))
 							{
-								SelectedDates.Start = new DateTime(click.Year, click.Month, click.Day, click.Hour, ((click.Minute / 30) * 30), 0);
-								SelectedDates.End = SelectedDates.Start.AddMinutes(rightClickSelectionMinutes);
+								int slotMins = (60 / slotsPerHour);
+
+								SelectedDates.Start = new DateTime(click.Year, click.Month, click.Day, click.Hour, ((click.Minute / slotMins) * slotMins), 0);
+								SelectedDates.End = SelectedDates.Start.AddMinutes(RightClickSelectionMinutes);
 
 								redraw = true;
 							}
