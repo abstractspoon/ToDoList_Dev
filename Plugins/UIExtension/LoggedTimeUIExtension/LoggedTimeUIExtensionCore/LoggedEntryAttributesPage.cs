@@ -11,12 +11,20 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
 {
+	public delegate void AttributeChangeEventHandler(object sender, EventArgs args);
+
 	public partial class LoggedEntryAttributesPage : UserControl
 	{
 		private double m_OrgTimeSpent = 0.0;
 		private bool m_EditMode = false;
 		private bool m_ReadOnlyTask = false;
 		private Translator m_Trans = null;
+
+		// --------------------------------------------------------
+
+		public event AttributeChangeEventHandler ChangeEvent;
+
+		// --------------------------------------------------------
 
 		public LoggedEntryAttributesPage()
 		{
@@ -35,13 +43,16 @@ namespace LoggedTimeUIExtension
 			TimeComboBox.SetWorkingWeek(workWeek);
 			SetDates(workWeek, entry);
 
+			m_FromDateCtrl.ValueChanged += (s, e) => OnAttributeChanged();
+
 			m_FromTimeCombo.SetISOFormat(isoDateTimes);
+			m_FromTimeCombo.ChangeEvent += (s, e) => OnAttributeChanged();
+
 			m_ToTimeCombo.SetISOFormat(isoDateTimes);
+			m_ToTimeCombo.ChangeEvent += (s, e) => OnAttributeChanged();
 
 			DateUtil.SetShortDateFormat(m_FromDateCtrl, isoDateTimes);
-
 			m_EditMode = editMode;
-			ReadOnlyTask = readonlyTask;
 			m_OrgTimeSpent = entry.TimeSpentInHrs;
 
 			m_TimeSpentEdit.Text = entry.TimeSpentInHrs.ToString("N3");
@@ -56,6 +67,8 @@ namespace LoggedTimeUIExtension
 
 			m_TimeSpentEdit.TextChanged += OnTimeSpentChanged; 
 			OnTimeSpentChanged(this, null);
+
+			ReadOnlyTask = readonlyTask;
 		}
 
 		public bool ReadOnlyTask
@@ -67,10 +80,17 @@ namespace LoggedTimeUIExtension
 				m_AddToTimeSpentCheckBox.Enabled = !value;
 			}
 		}
+
+		private void OnAttributeChanged()
+		{
+			ChangeEvent?.Invoke(this, new EventArgs());
+		}
 		
 		private void OnFillColorCheckChange(object sender, EventArgs e)
 		{
 			m_FillColorButton.Enabled = m_FillColorCheckBox.Checked;
+
+			OnAttributeChanged();
 		}
 
 		private void OnTimeSpentChanged(object sender, EventArgs e)
@@ -80,6 +100,8 @@ namespace LoggedTimeUIExtension
 				string format = m_Trans.Translate("Also modify task 'Time Spent' by {0:0.###} hours", Translator.Type.CheckBox);
 				m_AddToTimeSpentCheckBox.Text = string.Format(format, (TimeSpent - m_OrgTimeSpent));
 			}
+
+			OnAttributeChanged();
 		}
 
 		public Calendar.AppointmentDates Dates

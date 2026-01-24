@@ -105,7 +105,6 @@
 			this.m_TaskCombo.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
 			this.m_TaskCombo.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
 			this.m_TaskCombo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.m_TaskCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_TaskCombo.FormattingEnabled = true;
 			this.m_TaskCombo.Location = new System.Drawing.Point(109, 9);
 			this.m_TaskCombo.Name = "m_TaskCombo";

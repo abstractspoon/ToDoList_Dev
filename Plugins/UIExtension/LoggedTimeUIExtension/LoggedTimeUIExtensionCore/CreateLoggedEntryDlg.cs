@@ -36,29 +36,48 @@ namespace LoggedTimeUIExtension
 			m_Trans = trans;
 
 			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false, trans);
-			m_TaskCombo.Initialise(taskItems, taskIcons, attrib.TaskId, TaskItem.None(trans.Translate("<none>", Translator.Type.ComboBox)));
+			m_Attributes.ChangeEvent += (s, e) => UpdateSelectedTask();
 
-			m_TaskCombo.SelectedIndexChanged += OnSelectedTaskChange;
+			m_TaskCombo.Initialise(taskItems, taskIcons, attrib.TaskId, TaskItem.None(trans.Translate("<none>", Translator.Type.ComboBox)));
 			m_TaskCombo.SelectedIndex = 0;
+			m_TaskCombo.SearchUpdated += (s, e) => UpdateSelectedTask();
+			m_TaskCombo.SelectedIndexChanged += (s, e) => UpdateSelectedTask();
 
 			trans.Translate(this);
+
+			UpdateSelectedTask();
 		}
 
-		protected void OnSelectedTaskChange(object sender, EventArgs e)
+		protected void UpdateSelectedTask()
 		{
-			uint taskId = m_TaskCombo.SelectedTaskId;
+			bool validInputs = ((m_TaskCombo.SelectedIndex != -1) &&
+								(m_Attributes.Dates.Length.Ticks > 0));
 
-			if (taskId == 0)
+			if (validInputs)
 			{
-				m_TaskId.Text = m_Trans.Translate("<none>", Translator.Type.Text);
-				m_Attributes.ReadOnlyTask = true;
+				OK.Enabled = true;
+
+				uint taskId = m_TaskCombo.SelectedTaskId;
+
+				if (taskId == 0)
+				{
+					m_TaskId.Text = m_Trans.Translate("<none>", Translator.Type.Text);
+					m_Attributes.ReadOnlyTask = true;
+				}
+				else
+				{
+					m_TaskId.Text = taskId.ToString();
+
+					var taskItem = m_TaskItems.Where(x => (x.Id == taskId)).FirstOrDefault();
+					m_Attributes.ReadOnlyTask = ((taskItem == null) || taskItem.Locked);
+				}
 			}
 			else
 			{
-				m_TaskId.Text = taskId.ToString();
+				OK.Enabled = false;
 
-				var taskItem = m_TaskItems.Where(x => (x.Id == taskId)).FirstOrDefault();
-				m_Attributes.ReadOnlyTask = ((taskItem == null) || taskItem.Locked);
+				m_TaskId.Text = String.Empty;
+				m_Attributes.ReadOnlyTask = true;
 			}
 		}
 

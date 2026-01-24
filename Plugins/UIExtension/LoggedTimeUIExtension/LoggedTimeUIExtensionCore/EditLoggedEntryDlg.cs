@@ -43,6 +43,7 @@ namespace LoggedTimeUIExtension
 			}
 
 			m_Attributes.Initialise(entry, workWeek, isoDateTimes, readonlyTask, true, trans);
+			m_Attributes.ChangeEvent += (s, e) => { OK.Enabled = (m_Attributes.Dates.Length.Ticks > 0); };
 
 			trans.Translate(this);
 		}
