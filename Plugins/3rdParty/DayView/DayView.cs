@@ -1797,7 +1797,9 @@ namespace Calendar
 
 		protected int GetHourScrollPos(DateTime time)
 		{
-			int vPos = ((time.Hour - VisibleStartHour) * slotHeight * slotsPerHour) + ((time.Minute * slotHeight) / (60 / slotsPerHour));
+			int vPos = ((time.Hour - VisibleStartHour) * slotHeight * slotsPerHour) + 
+						((time.Minute * slotHeight) / (60 / slotsPerHour)) +
+						((time.Second * slotHeight) / (3600 / slotsPerHour));
 
 			return (vPos - vscroll.Value + HeaderHeight);
 		}
