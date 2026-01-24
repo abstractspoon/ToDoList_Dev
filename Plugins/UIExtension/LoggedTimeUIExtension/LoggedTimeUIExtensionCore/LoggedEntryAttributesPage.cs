@@ -79,7 +79,7 @@ namespace LoggedTimeUIExtension
 			set
 			{
 				m_ReadOnlyTask = value;
-				m_AddToTimeSpentCheckBox.Enabled = !value;
+				m_AddToTimeSpentCheckBox.Enabled = !m_ReadOnlyTask;
 			}
 		}
 
