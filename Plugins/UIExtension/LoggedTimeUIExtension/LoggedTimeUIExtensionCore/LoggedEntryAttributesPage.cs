@@ -65,6 +65,8 @@ namespace LoggedTimeUIExtension
 			m_FillColorCheckBox.CheckedChanged += OnFillColorCheckChange;
 			OnFillColorCheckChange(this, null);
 
+			m_CommentEdit.TextChanged += (s, e) => OnAttributeChanged();
+
 			m_TimeSpentEdit.TextChanged += OnTimeSpentChanged; 
 			OnTimeSpentChanged(this, null);
 
@@ -101,7 +103,8 @@ namespace LoggedTimeUIExtension
 				m_AddToTimeSpentCheckBox.Text = string.Format(format, (TimeSpent - m_OrgTimeSpent));
 			}
 
-			OnAttributeChanged();
+			if (e != null)
+				OnAttributeChanged();
 		}
 
 		public Calendar.AppointmentDates Dates
@@ -132,7 +135,7 @@ namespace LoggedTimeUIExtension
 
 		public double TimeSpent
 		{
-			get { return m_TimeSpentEdit.GetAmount(m_OrgTimeSpent); }
+			get { return m_TimeSpentEdit.GetAmount(); }
 		}
 
 		bool WantAddToTimeSpent
@@ -156,9 +159,14 @@ namespace LoggedTimeUIExtension
 		{
 			if ((entry == null) || (entry.Dates.Start.Date == DateTime.MinValue))
 			{
-				m_FromDateCtrl.Value = DateTime.Now.Date;
-				m_FromTimeCombo.SetTime(m_FromDateCtrl.Value);
-				m_ToTimeCombo.SetTime(m_FromDateCtrl.Value.AddHours(1));
+				var date = DateTime.Now;
+				m_FromDateCtrl.Value = date.Date;
+
+				var time = new TimeSpan(date.Hour, 0, 0);
+				m_FromTimeCombo.SetTime(time);
+
+				time = time.Add(new TimeSpan(1, 0, 0));
+				m_ToTimeCombo.SetTime(time);
 			}
 			else // valid start date
 			{
