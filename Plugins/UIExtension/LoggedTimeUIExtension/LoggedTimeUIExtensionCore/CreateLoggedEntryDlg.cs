@@ -50,14 +50,10 @@ namespace LoggedTimeUIExtension
 
 		protected void ValidateInputs()
 		{
-			bool validInputs = ((m_TaskCombo.SelectedIndex != -1) && m_Attributes.Dates.IsValid &&
-								((m_Attributes.TimeSpent > 0.0) || !String.IsNullOrWhiteSpace(m_Attributes.Comment)));
+			bool validTask = (m_TaskCombo.SelectedIndex != -1);
 
-			if (validInputs)
+			if (validTask)
 			{
-				OK.Enabled = true;
-				m_Error.Text = string.Empty;
-
 				uint taskId = m_TaskCombo.SelectedTaskId;
 
 				if (taskId == 0)
@@ -75,10 +71,22 @@ namespace LoggedTimeUIExtension
 			}
 			else
 			{
-				OK.Enabled = false;
-
-				m_TaskId.Text = String.Empty;
+				m_TaskId.Text = string.Empty;
 				m_Attributes.ReadOnlyTask = true;
+			}
+
+			// Error text
+			bool validInputs = (validTask && m_Attributes.Dates.IsValid &&
+								((m_Attributes.TimeSpent > 0.0) || !String.IsNullOrWhiteSpace(m_Attributes.Comment)));
+
+			if (validInputs)
+			{
+				OK.Enabled = true;
+				m_Error.Text = string.Empty;
+			}
+			else
+			{
+				OK.Enabled = false;
 
 				if (m_TaskCombo.SelectedIndex == -1)
 				{
