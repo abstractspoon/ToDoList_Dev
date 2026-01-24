@@ -44,6 +44,8 @@ namespace LoggedTimeUIExtension
 			m_TaskCombo.SelectedIndexChanged += (s, e) => UpdateSelectedTask();
 
 			trans.Translate(this);
+
+			UpdateSelectedTask();
 		}
 
 		protected void UpdateSelectedTask()

@@ -20,6 +20,9 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+const int CB_VALUECHANGE = CB_MSGMAX;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 HostedTimeComboBox::HostedTimeComboBox(HWND hwndParent)
 	:
@@ -177,8 +180,6 @@ bool TimeComboBox::SetWorkingWeek(WorkingWeek^ workWeek)
 											   workWeek->WorkDay()->StartOfLunchInHours(),
 											   workWeek->WorkDay()->EndOfLunchInHours()) != FALSE);
 }
-
-const int CB_VALUECHANGE = CB_MSGMAX;
 
 void TimeComboBox::WndProc(Windows::Forms::Message% m)
 {
