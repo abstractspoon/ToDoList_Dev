@@ -43,9 +43,9 @@
 			// 
 			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label5.Location = new System.Drawing.Point(-38, 288);
+			this.label5.Location = new System.Drawing.Point(7, 289);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(390, 2);
+			this.label5.Size = new System.Drawing.Size(329, 2);
 			this.label5.TabIndex = 16;
 			// 
 			// Cancel
