@@ -365,23 +365,6 @@ namespace Calendar
 		
 		// ------------------------------------------------------------------
 
-        private bool minHalfHourApp = false;
-
-        public bool MinHalfHourApp
-        {
-            get
-            {
-                return minHalfHourApp;
-            }
-            set
-            {
-                minHalfHourApp = value;
-                Invalidate();
-            }
-        }
-		
-		// ------------------------------------------------------------------
-
 		private int DayHeaderHeight
 		{
 			get

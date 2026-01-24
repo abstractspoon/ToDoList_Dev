@@ -244,7 +244,6 @@ namespace LoggedTimeUIExtension
  			AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
 			DrawAllAppBorder = false;
 			Location = new Point(0, 0);
-			MinHalfHourApp = false;
 			Name = "m_dayView";
 			Renderer = this;
 			Size = new Size(798, 328);
