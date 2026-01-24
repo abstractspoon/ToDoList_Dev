@@ -12,8 +12,6 @@ namespace LoggedTimeUIExtension
 {
 	// ------------------------------------------------------------------------------
 
-
-// 	public delegate void TDLAppointmentEventHandler(object sender, TDLMoveAppointmentEventArgs args);
 	public delegate bool TDLContextMenuEventHandler(object sender, MouseEventArgs args);
 
 	public class LogAccessEventArgs

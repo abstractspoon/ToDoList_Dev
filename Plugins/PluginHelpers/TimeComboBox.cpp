@@ -178,6 +178,8 @@ bool TimeComboBox::SetWorkingWeek(WorkingWeek^ workWeek)
 											   workWeek->WorkDay()->EndOfLunchInHours()) != FALSE);
 }
 
+const int CB_VALUECHANGE = CB_MSGMAX;
+
 void TimeComboBox::WndProc(Windows::Forms::Message% m)
 {
 	Control::WndProc(m);
@@ -193,6 +195,20 @@ void TimeComboBox::WndProc(Windows::Forms::Message% m)
 		break;
 
 	case WM_COMMAND:
+		switch (HIWORD(m.WParam.ToInt32()))
+		{
+		case CBN_SELCHANGE:
+		case CBN_SELENDOK:
+		case CBN_SELENDCANCEL:
+		case CBN_EDITCHANGE:
+		case CBN_EDITUPDATE:
+		case CBN_CLOSEUP:
+			::PostMessage(Win32::GetHwnd(Handle), CB_VALUECHANGE, 0, 0);
+			break;
+		}
+		break;
+
+	case CB_VALUECHANGE:
 		ChangeEvent(this, gcnew EventArgs());
 		break;
 	}
