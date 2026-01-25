@@ -36,15 +36,16 @@
 			this.m_TaskTitle = new System.Windows.Forms.Label();
 			this.m_TaskId = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
+			this.m_Error = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// label5
 			// 
 			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label5.Location = new System.Drawing.Point(-38, 288);
+			this.label5.Location = new System.Drawing.Point(7, 289);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(390, 2);
+			this.label5.Size = new System.Drawing.Size(329, 2);
 			this.label5.TabIndex = 16;
 			// 
 			// Cancel
@@ -119,6 +120,15 @@
 			this.label3.TabIndex = 20;
 			this.label3.Text = "Task ID";
 			// 
+			// m_Error
+			// 
+			this.m_Error.ForeColor = System.Drawing.Color.Red;
+			this.m_Error.Location = new System.Drawing.Point(7, 290);
+			this.m_Error.Name = "m_Error";
+			this.m_Error.Size = new System.Drawing.Size(170, 38);
+			this.m_Error.TabIndex = 22;
+			this.m_Error.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+			// 
 			// EditLoggedEntryDlg
 			// 
 			this.AcceptButton = this.OK;
@@ -126,6 +136,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
 			this.ClientSize = new System.Drawing.Size(345, 330);
+			this.Controls.Add(this.m_Error);
 			this.Controls.Add(this.m_TaskId);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.m_TaskTitle);
@@ -156,5 +167,6 @@
 		private System.Windows.Forms.Label m_TaskTitle;
 		private System.Windows.Forms.Label m_TaskId;
 		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Label m_Error;
 	}
 }

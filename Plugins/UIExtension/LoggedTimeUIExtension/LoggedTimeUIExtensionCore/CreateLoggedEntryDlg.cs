@@ -36,27 +36,24 @@ namespace LoggedTimeUIExtension
 			m_Trans = trans;
 
 			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false, trans);
-			m_Attributes.ChangeEvent += (s, e) => UpdateSelectedTask();
+			m_Attributes.ChangeEvent += (s, e) => ValidateInputs();
 
 			m_TaskCombo.Initialise(taskItems, taskIcons, attrib.TaskId, TaskItem.None(trans.Translate("<none>", Translator.Type.ComboBox)));
 			m_TaskCombo.SelectedIndex = 0;
-			m_TaskCombo.SearchUpdated += (s, e) => UpdateSelectedTask();
-			m_TaskCombo.SelectedIndexChanged += (s, e) => UpdateSelectedTask();
+			m_TaskCombo.SearchUpdated += (s, e) => ValidateInputs();
+			m_TaskCombo.SelectedIndexChanged += (s, e) => ValidateInputs();
 
 			trans.Translate(this);
 
-			UpdateSelectedTask();
+			ValidateInputs();
 		}
 
-		protected void UpdateSelectedTask()
+		protected void ValidateInputs()
 		{
-			bool validInputs = ((m_TaskCombo.SelectedIndex != -1) &&
-								(m_Attributes.Dates.Length.Ticks > 0));
+			bool validTask = (m_TaskCombo.SelectedIndex != -1);
 
-			if (validInputs)
+			if (validTask)
 			{
-				OK.Enabled = true;
-
 				uint taskId = m_TaskCombo.SelectedTaskId;
 
 				if (taskId == 0)
@@ -74,10 +71,35 @@ namespace LoggedTimeUIExtension
 			}
 			else
 			{
+				m_TaskId.Text = string.Empty;
+				m_Attributes.ReadOnlyTask = true;
+			}
+
+			// Error text
+			bool validInputs = (validTask && m_Attributes.Dates.IsValid &&
+								((m_Attributes.TimeSpent > 0.0) || !String.IsNullOrWhiteSpace(m_Attributes.Comment)));
+
+			if (validInputs)
+			{
+				OK.Enabled = true;
+				m_Error.Text = string.Empty;
+			}
+			else
+			{
 				OK.Enabled = false;
 
-				m_TaskId.Text = String.Empty;
-				m_Attributes.ReadOnlyTask = true;
+				if (m_TaskCombo.SelectedIndex == -1)
+				{
+					m_Error.Text = m_Trans.Translate("Invalid task", Translator.Type.Text);
+				}
+				else if (!m_Attributes.Dates.IsValid)
+				{
+					m_Error.Text = m_Trans.Translate("Invalid 'End' time", Translator.Type.Text);
+				}
+				else
+				{
+					m_Error.Text = m_Trans.Translate("'Time Spent' or 'Comment' required", Translator.Type.Text);
+				}
 			}
 		}
 
