@@ -13,6 +13,10 @@ namespace DayViewUIExtension
 {
 	public partial class DayViewCreateTimeBlockDlg : Form
 	{
+		Translator m_Trans;
+	
+		// -----------------------------------
+
 		public DayViewCreateTimeBlockDlg()
 		{
 			InitializeComponent();
@@ -23,12 +27,22 @@ namespace DayViewUIExtension
 										 WorkingWeek workWeek,
 										 bool isoDateTimes,
 										 uint taskId,
-										 TimeBlockSeriesAttributes attribs)
+										 TimeBlockSeriesAttributes attribs,
+										 Translator trans)
 			:
 			this()
 		{
 			m_TaskCombo.Initialise(taskItems, taskIcons, taskId);
+			m_TaskCombo.SearchUpdated += (s, e) => ValidateInputs();
+			m_TaskCombo.SelectedIndexChanged += (s, e) => ValidateInputs();
+
 			m_Attributes.Initialise(workWeek, isoDateTimes, attribs, false);
+			m_Attributes.ChangeEvent += (s, e) => ValidateInputs();
+
+			m_Trans = trans;
+			m_Trans.Translate(this);
+
+			ValidateInputs();
 		}
 
 		public uint SelectedTaskId
@@ -45,5 +59,49 @@ namespace DayViewUIExtension
 		{
 			OK.Enabled = (SelectedTaskId != 0);
 		}
+
+		protected void ValidateInputs()
+		{
+			bool validTask = (SelectedTaskId > 0);
+
+			if (validTask)
+				m_TaskId.Text = SelectedTaskId.ToString();
+			else
+				m_TaskId.Text = string.Empty;
+
+			// Error text
+			var attrib = Attributes;
+			bool validInputs = (validTask && attrib.IsValid);
+
+			if (validInputs)
+			{
+				OK.Enabled = true;
+				m_Error.Text = string.Empty;
+			}
+			else
+			{
+				OK.Enabled = false;
+
+				if (!validTask)
+				{
+					m_Error.Text = m_Trans.Translate("Invalid task", Translator.Type.Text);
+				}
+				else if ((attrib.FromDate.Date == DateTime.MinValue) ||
+						 (attrib.ToDate.Date == DateTime.MaxValue) ||
+						 (attrib.FromDate.Date > attrib.ToDate.Date))
+				{
+					m_Error.Text = m_Trans.Translate("Invalid 'Date range'", Translator.Type.Text);
+				}
+				else if (attrib.FromTime >= attrib.ToTime)
+				{
+					m_Error.Text = m_Trans.Translate("Invalid 'Time of day'", Translator.Type.Text);
+				}
+				else
+				{
+					m_Error.Text = m_Trans.Translate("Invalid 'Specific days'", Translator.Type.Text);
+				}
+			}
+		}
+
 	}
 }

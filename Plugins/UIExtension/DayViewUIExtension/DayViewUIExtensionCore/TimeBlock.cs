@@ -307,7 +307,7 @@ namespace DayViewUIExtension
 				FromTime = TimeSpan.FromMinutes(fromMins),
 				ToTime = TimeSpan.FromMinutes(toMins),
 				m_DaysOfWeek = daysOfWeek,
-				SyncToTaskDates =(syncToDates != 0)
+				SyncToTaskDates = (syncToDates != 0)
 			};
 		}
 
@@ -315,11 +315,17 @@ namespace DayViewUIExtension
 		{
 			get
 			{
-				return ((FromDate.Date > DateTime.MinValue) &&
-						(ToDate.Date < DateTime.MaxValue) &&
-						(FromDate.Date <= ToDate.Date) &&
-						(FromTime < ToTime) &&
-						(m_DaysOfWeek > 0));
+				if (!SyncToTaskDates)
+				{
+					if ((FromDate.Date == DateTime.MinValue) ||
+						(ToDate.Date == DateTime.MaxValue) ||
+						(FromDate.Date > ToDate.Date))
+					{
+						return false;
+					}
+				}
+
+				return ((FromTime < ToTime) && (m_DaysOfWeek > 0));
 			}
 		}
 

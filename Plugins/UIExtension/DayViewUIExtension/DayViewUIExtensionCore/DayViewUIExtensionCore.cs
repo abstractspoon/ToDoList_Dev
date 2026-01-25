@@ -776,10 +776,10 @@ namespace DayViewUIExtension
 													m_WorkWeek,
 													m_DayView.DisplayDatesInISO,
 													m_SelectedTaskId,
-													attribs);
+													attribs,
+													m_Trans);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
-			m_Trans.Translate(dlg);
 
 			m_DayView.ForceShowSelection = true;
 
