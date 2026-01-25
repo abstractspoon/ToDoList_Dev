@@ -5219,9 +5219,19 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	// if this was the project name being edited make sure
 	// the focus is set back to the name
 	if (mapAttribIDs.Has(TDCA_PROJECTNAME))
+	{
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
+	}
 	else
-		m_idleTasks.RefreshAttributeValues(mapAttribIDs);
+	{
+		// Update the attribute editor if any of the 
+		// modified tasks is also selected
+		CDWordArray aSelTaskIDs;
+		GetSelectedTaskIDs(aSelTaskIDs, TRUE);
+
+		if (Misc::MatchAny(aSelTaskIDs, aModTaskIDs))
+			m_idleTasks.RefreshAttributeValues(mapAttribIDs);
+	}
 
 	if (mapAttribIDs.Has(TDCA_LOCK))
 		EnableDisableComments();
