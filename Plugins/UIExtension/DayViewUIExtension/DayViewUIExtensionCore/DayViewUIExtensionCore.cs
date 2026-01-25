@@ -983,20 +983,14 @@ namespace DayViewUIExtension
 				if (m_DayView.SelectedTaskId != m_SelectedTaskId)
 				{
 					m_SelectedTaskId = m_DayView.SelectedTaskId;
+					notify.NotifySelChange(m_SelectedTaskId);
 
 					UpdatedSelectedTaskDatesText();
-					UpdateToolbarButtonStates();
-
-					notify.NotifySelChange(m_SelectedTaskId);
-				}
-				break;
-
-			case Calendar.SelectionType.DateRange:
-				{
-					UpdateToolbarButtonStates();
 				}
 				break;
 			}
+
+			UpdateToolbarButtonStates();
 		}
 
 		private void UpdatedSelectedTaskDatesText()
