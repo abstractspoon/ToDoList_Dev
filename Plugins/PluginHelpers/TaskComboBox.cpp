@@ -60,9 +60,12 @@ TaskComboBox::TaskComboBox()
 	:
 	OwnerdrawComboBoxBase(true), // fixed
 	m_NoneTask(nullptr),
-	m_BoldFont(nullptr)
+	m_BoldFont(nullptr),
+	m_OrgSelectedIndex(CB_ERR),
+	m_FindEnabled(false)
 {
 	Sorted = false; // we control the order
+	AutoCompleteMode = System::Windows::Forms::AutoCompleteMode::None;
 }
 
 void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
@@ -96,8 +99,9 @@ void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
 		Items->Add(wrap);
 
 		if (task->Id == selTaskId)
-			SelectedItem = wrap;
+			SelectIndex(Items->Count - 1);
 	}
+	m_OrgSelectedIndex = SelectedIndex;
 
 	if (m_BoldFont == nullptr)
 		m_BoldFont = gcnew System::Drawing::Font(Font, FontStyle::Bold);
@@ -193,15 +197,23 @@ int TaskComboBox::GetListItemTextLength(Object^ obj, Graphics^ graphics)
 
 void TaskComboBox::OnTextChanged(EventArgs^ e)
 {
-	SelectNextFind(true);
+	if (m_FindEnabled)
+	{
+		m_FindEnabled = false;
+		SelectNextFind(true);
+	}
 }
 
 void TaskComboBox::SelectNextFind(bool bForward)
 {
-	// Have to use raw Win32 here because the behaviour when 
-	// setting the edit selection works differently in Winforms
+	// We use raw Win32 here so our behaviour exactly
+	// matches the core app
 	String^ editText = Win32::GetWindowText(Handle);
 	DWORD dwSel = ::SendMessage(Win32::GetHwnd(Handle), CB_GETEDITSEL, 0, 0);
+
+	// Prevent flicker
+	HWND hwndEdit = ::GetDlgItem(Win32::GetHwnd(Handle), 1001);
+	::SendMessage(hwndEdit, WM_SETREDRAW, FALSE, 0);
 
 	if (SelectNextItem(editText, bForward))
 	{
@@ -210,7 +222,50 @@ void TaskComboBox::SelectNextFind(bool bForward)
 		Win32::SetWindowText(Handle, editText);
 		::SendMessage(Win32::GetHwnd(Handle), CB_SETEDITSEL, 0, dwSel);
 	}
+	::SendMessage(hwndEdit, WM_SETREDRAW, TRUE, 0);
 
 	SearchUpdated(this, gcnew EventArgs());
 }
 
+bool TaskComboBox::PreProcessMessage(Message% msg)
+{
+	switch (msg.Msg)
+	{
+	case WM_CHAR:
+		m_FindEnabled = true;
+		break;
+
+	case WM_KEYDOWN:
+		{
+			m_FindEnabled = false;
+
+			switch (msg.WParam.ToInt32())
+			{
+			case VK_DELETE:
+			case VK_BACK:
+				m_FindEnabled = true;
+				break;
+
+			case VK_ESCAPE:
+				if (DroppedDown)
+				{
+					DroppedDown = false;
+					SelectedIndex = m_OrgSelectedIndex;
+
+					return true;
+				}
+				break;
+
+			case VK_F3:
+				{
+					bool forward = (ModifierKeys != Keys::Shift);
+					SelectNextFind(forward);
+				}
+				return true;
+			}
+		}
+		break;
+	}
+	
+	return OwnerdrawComboBoxBase::PreProcessMessage(msg);
+}
