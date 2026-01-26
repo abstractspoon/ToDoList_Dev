@@ -703,13 +703,14 @@ namespace DayViewUIExtension
 
 				if (series != null)
 				{
-					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, 
+					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title,
+																block.RealTaskId, 
 																m_WorkWeek, 
 																m_DayView.DisplayDatesInISO,
 																series.Attributes, 
-																m_DefaultTimeBlockEditMask);
+																m_DefaultTimeBlockEditMask,
+																m_Trans);
 					FormsUtil.SetFont(dlg, m_ControlsFont);
-					m_Trans.Translate(dlg);
 
 					if (dlg.ShowDialog() != DialogResult.OK)
 						return false;

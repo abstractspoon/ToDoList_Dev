@@ -244,7 +244,7 @@ namespace DayViewUIExtension
 			Times	= 0x02,
 			Dow		= 0x04,
 
-			All		= 0xff
+			All		= (Dates | Times | Dow)
 		}
 		
 		// ---------------------------------
@@ -311,9 +311,12 @@ namespace DayViewUIExtension
 			};
 		}
 
-		public bool IsValid
+		public bool IsValid(EditMask mask = EditMask.All)
 		{
-			get
+			if ((mask & EditMask.All) == 0)
+				return false;
+
+			if (mask.HasFlag(EditMask.Dates))
 			{
 				if (!SyncToTaskDates)
 				{
@@ -324,9 +327,21 @@ namespace DayViewUIExtension
 						return false;
 					}
 				}
-
-				return ((FromTime < ToTime) && (m_DaysOfWeek > 0));
 			}
+
+			if (mask.HasFlag(EditMask.Times))
+			{
+				if (FromTime >= ToTime)
+					return false;;
+			}
+
+			if (mask.HasFlag(EditMask.Dow))
+			{
+				if (m_DaysOfWeek == 0)
+					return false;
+			}
+
+			return true;
 		}
 
 		public bool SynchroniseDates(Calendar.Appointment appt)
@@ -403,7 +418,7 @@ namespace DayViewUIExtension
 
 		public bool IsValid
 		{
-			get { return ((m_Attributes != null) && m_Attributes.IsValid && (BlockCount > 0)); }
+			get { return ((m_Attributes != null) && m_Attributes.IsValid() && (BlockCount > 0)); }
 		}
 
 		public bool SynchroniseDates(TaskItem taskItem)

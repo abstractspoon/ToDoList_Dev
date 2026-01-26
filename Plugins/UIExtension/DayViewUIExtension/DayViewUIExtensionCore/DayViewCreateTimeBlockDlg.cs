@@ -17,7 +17,7 @@ namespace DayViewUIExtension
 	
 		// -----------------------------------
 
-		public DayViewCreateTimeBlockDlg()
+		public DayViewCreateTimeBlockDlg() // for designer
 		{
 			InitializeComponent();
 		}
@@ -71,7 +71,7 @@ namespace DayViewUIExtension
 
 			// Error text
 			var attrib = Attributes;
-			bool validInputs = (validTask && attrib.IsValid);
+			bool validInputs = (validTask && attrib.IsValid());
 
 			if (validInputs)
 			{

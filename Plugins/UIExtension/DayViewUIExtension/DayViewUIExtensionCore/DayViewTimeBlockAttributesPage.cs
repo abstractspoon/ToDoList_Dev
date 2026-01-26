@@ -87,8 +87,13 @@ namespace DayViewUIExtension
 			if (editMode)
 			{
 				m_DateCheckBox.Checked = mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dates);
+				m_DateCheckBox.CheckedChanged += (s, e) => OnAttributeChanged();
+
 				m_TimeCheckBox.Checked = mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Times);
+				m_TimeCheckBox.CheckedChanged += (s, e) => OnAttributeChanged();
+
 				m_DowCheckBox.Checked = mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dow);
+				m_DowCheckBox.CheckedChanged += (s, e) => OnAttributeChanged();
 			}
 
 			EnableDisableControls();
