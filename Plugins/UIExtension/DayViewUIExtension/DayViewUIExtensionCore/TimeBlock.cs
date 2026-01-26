@@ -332,7 +332,7 @@ namespace DayViewUIExtension
 			if (mask.HasFlag(EditMask.Times))
 			{
 				if (FromTime >= ToTime)
-					return false;;
+					return false;
 			}
 
 			if (mask.HasFlag(EditMask.Dow))

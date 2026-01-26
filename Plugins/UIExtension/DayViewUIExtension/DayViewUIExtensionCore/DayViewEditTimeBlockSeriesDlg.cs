@@ -60,37 +60,35 @@ namespace DayViewUIExtension
 			var attrib = Attributes;
 			var mask = EditMask;
 
-			if (attrib.IsValid(mask))
+			if (mask == 0)
+			{
+				OK.Enabled = false;
+				m_Error.Text = m_Trans.Translate("No options selected", Translator.Type.Text);
+			}
+			else if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dates) &&
+					!attrib.IsValid(TimeBlockSeriesAttributes.EditMask.Dates))
+			{
+				OK.Enabled = false;
+				m_Error.Text = m_Trans.Translate("Invalid 'Date range'", Translator.Type.Text);
+			}
+			else if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Times) &&
+					!attrib.IsValid(TimeBlockSeriesAttributes.EditMask.Times))
+			{
+				OK.Enabled = false;
+				m_Error.Text = m_Trans.Translate("Invalid 'Time of day'", Translator.Type.Text);
+			}
+			else if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dow) &&
+					!attrib.IsValid(TimeBlockSeriesAttributes.EditMask.Dow))
+			{
+				OK.Enabled = false;
+				m_Error.Text = m_Trans.Translate("Invalid 'Specific days'", Translator.Type.Text);
+			}
+			else
 			{
 				OK.Enabled = true;
 				m_Error.Text = string.Empty;
 			}
-			else
-			{
-				OK.Enabled = false;
-
-				if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dates) &&
-					((attrib.FromDate.Date == DateTime.MinValue) ||
-					 (attrib.ToDate.Date == DateTime.MaxValue) ||
-					 (attrib.FromDate.Date > attrib.ToDate.Date)))
-				{
-					m_Error.Text = m_Trans.Translate("Invalid 'Date range'", Translator.Type.Text);
-				}
-				else if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Times) && (attrib.FromTime >= attrib.ToTime))
-				{
-					m_Error.Text = m_Trans.Translate("Invalid 'Time of day'", Translator.Type.Text);
-				}
-				else if (mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dow))
-				{
-					m_Error.Text = m_Trans.Translate("Invalid 'Specific days'", Translator.Type.Text);
-				}
-				else
-				{
-					m_Error.Text = m_Trans.Translate("No options selected", Translator.Type.Text);
-				}
-			}
 		}
-
 	}
 
 

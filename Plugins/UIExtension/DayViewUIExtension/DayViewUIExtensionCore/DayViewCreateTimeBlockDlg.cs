@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
@@ -71,37 +71,32 @@ namespace DayViewUIExtension
 
 			// Error text
 			var attrib = Attributes;
-			bool validInputs = (validTask && attrib.IsValid());
 
-			if (validInputs)
+			if (!validTask)
+			{
+				OK.Enabled = false;
+				m_Error.Text = m_Trans.Translate("Invalid task", Translator.Type.Text);
+			}
+			else if (!attrib.IsValid(TimeBlockSeriesAttributes.EditMask.Dates))
+			{
+				OK.Enabled = false;
+				m_Error.Text = m_Trans.Translate("Invalid 'Date range'", Translator.Type.Text);
+			}
+			else if (!attrib.IsValid(TimeBlockSeriesAttributes.EditMask.Times))
+			{
+				OK.Enabled = false;
+				m_Error.Text = m_Trans.Translate("Invalid 'Time of day'", Translator.Type.Text);
+			}
+			else if (!attrib.IsValid(TimeBlockSeriesAttributes.EditMask.Dow))
+			{
+				OK.Enabled = false;
+				m_Error.Text = m_Trans.Translate("Invalid 'Specific days'", Translator.Type.Text);
+			}
+			else
 			{
 				OK.Enabled = true;
 				m_Error.Text = string.Empty;
 			}
-			else
-			{
-				OK.Enabled = false;
-
-				if (!validTask)
-				{
-					m_Error.Text = m_Trans.Translate("Invalid task", Translator.Type.Text);
-				}
-				else if ((attrib.FromDate.Date == DateTime.MinValue) ||
-						 (attrib.ToDate.Date == DateTime.MaxValue) ||
-						 (attrib.FromDate.Date > attrib.ToDate.Date))
-				{
-					m_Error.Text = m_Trans.Translate("Invalid 'Date range'", Translator.Type.Text);
-				}
-				else if (attrib.FromTime >= attrib.ToTime)
-				{
-					m_Error.Text = m_Trans.Translate("Invalid 'Time of day'", Translator.Type.Text);
-				}
-				else
-				{
-					m_Error.Text = m_Trans.Translate("Invalid 'Specific days'", Translator.Type.Text);
-				}
-			}
 		}
-
 	}
 }
