@@ -181,7 +181,7 @@ bool TimeComboBox::SetWorkingWeek(WorkingWeek^ workWeek)
 											   workWeek->WorkDay()->EndOfLunchInHours()) != FALSE);
 }
 
-void TimeComboBox::WndProc(Windows::Forms::Message% m)
+void TimeComboBox::WndProc(Message% m)
 {
 	Control::WndProc(m);
 
