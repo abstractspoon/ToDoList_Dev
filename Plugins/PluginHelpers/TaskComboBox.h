@@ -50,12 +50,17 @@ namespace Abstractspoon
 				property UInt32 SelectedTaskId { UInt32 get(); }
 				property String^ SelectedTaskTitle { String^ get(); }
 
+				bool PreProcessMessage(Windows::Forms::Message% msg) override;
+
 				event SearchUpdated^ SearchUpdated;
 
 			private:
 				UIExtension::TaskIcon^ m_TaskIcons;
 				ITask^ m_NoneTask;
 				Drawing::Font^ m_BoldFont;
+
+				int m_OrgSelectedIndex;
+				bool m_FindEnabled;
 
 			protected:
 				void OnMeasureItem(Windows::Forms::MeasureItemEventArgs^ e) override;

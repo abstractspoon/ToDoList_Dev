@@ -77,29 +77,36 @@ namespace UIComponents
 
 		public bool SelectNextItem(String text, bool forward)
 		{
+			// Prevent re-entrancy
+			if (m_FindSelecting)
+				return false;
+
 			if (string.IsNullOrEmpty(text))
 			{
-				SelectedIndex = NoMatch;
+				SelectIndex(-1);
 				return false;
 			}
 
-			int sel = SelectedIndex, next = NoMatch;
+			// else
+			int sel = SelectedIndex;
 			int from = (forward ? (sel + 1) : (sel - 1));
 
-			// Prevent re-entrancy
-			{
-				m_FindSelecting = true;
+			int next = FindNextItem(text, from, forward);
 
-				next = FindNextItem(text, from, forward);
-
-				m_FindSelecting = false;
-			}
-
-			if (next == sel)
+			if ((next == NoMatch) || (next == sel))
 				return false;
 
-			SelectedIndex = next;
+			SelectIndex(next);
 			return true;
+		}
+
+		protected void SelectIndex(int index)
+		{
+			m_FindSelecting = true;
+
+			SelectedIndex = index;
+
+			m_FindSelecting = false;
 		}
 
 		protected int FindNextItem(String text, int from, bool forward)
