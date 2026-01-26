@@ -1617,7 +1617,7 @@ namespace DayViewUIExtension
 				{
 					// Move selection to 'real' task
 					SelectTask(block.RealTaskId, true);
-					Invalidate();
+					RebuildMatchingAppointments();
 
 					return true;
 				}
@@ -1643,7 +1643,7 @@ namespace DayViewUIExtension
 				{
 					// Move selection to 'real' task
 					SelectTask(block.RealTaskId, true);
-					Invalidate();
+					RebuildMatchingAppointments();
 
 					return true;
 				}
@@ -1689,7 +1689,7 @@ namespace DayViewUIExtension
 				return false;
 
 			SelectedAppointment = null;
-			Invalidate();
+			RebuildMatchingAppointments();
 
 			return true;
 		}

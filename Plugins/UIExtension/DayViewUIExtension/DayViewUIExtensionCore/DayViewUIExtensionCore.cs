@@ -141,26 +141,29 @@ namespace DayViewUIExtension
 						return m_DayView.CancelAppointmentResizing();
 
 					case Keys.Delete:
+						if (ModifierKeys.HasFlag(Keys.Control))
 						{
-							if (m_DayView.DeleteSelectedCustomDate())
-								return true;
-
-							if (m_DayView.DeleteSelectedTimeBlock())
+							if (m_DayView.DeleteSelectedTimeBlockSeries())
 							{
 								UpdateToolbarButtonStates();
 								return true;
 							}
 						}
-						break;
-
-					case (Keys.Control | Keys.F2):
-						return EditSelectedTimeBlockSeries();
-
-					case (Keys.Control | Keys.Delete):
-						if (m_DayView.DeleteSelectedTimeBlockSeries())
+						else if (m_DayView.DeleteSelectedTimeBlock())
 						{
 							UpdateToolbarButtonStates();
 							return true;
+						}
+						else if (m_DayView.DeleteSelectedCustomDate())
+						{
+							return true;
+						}
+						break;
+
+					case Keys.F2:
+						if (ModifierKeys.HasFlag(Keys.Control))
+						{
+							return EditSelectedTimeBlockSeries();
 						}
 						break;
 					}
