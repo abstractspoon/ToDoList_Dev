@@ -6,7 +6,6 @@
 #include "resource.h"
 #include "KanbanCtrl.h"
 #include "KanbanColumnCtrl.h"
-#include "KanbanColors.h"
 #include "KanbanMsg.h"
 
 #include "..\shared\DialogHelper.h"

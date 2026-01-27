@@ -169,10 +169,6 @@ SOURCE=.\KanbanBoard.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\KanbanColors.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\KanbanColumnCtrl.h
 # End Source File
 # Begin Source File
