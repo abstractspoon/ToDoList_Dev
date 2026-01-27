@@ -13,6 +13,8 @@ namespace LoggedTimeUIExtension
 {
 	public delegate void AttributeChangeEventHandler(object sender, EventArgs args);
 
+	// ---------------------------------------------------
+
 	public partial class LoggedEntryAttributesPage : UserControl
 	{
 		private double m_OrgTimeSpent = 0.0;

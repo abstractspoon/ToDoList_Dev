@@ -33,10 +33,10 @@
 			this.OK = new System.Windows.Forms.Button();
 			this.label = new System.Windows.Forms.Label();
 			this.m_Attributes = new LoggedTimeUIExtension.LoggedEntryAttributesPage();
-			this.m_TaskTitle = new System.Windows.Forms.Label();
 			this.m_TaskId = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
 			this.m_Error = new System.Windows.Forms.Label();
+			this.m_TaskTitle = new System.Windows.Forms.TextBox();
 			this.SuspendLayout();
 			// 
 			// label5
@@ -90,15 +90,6 @@
 			this.m_Attributes.Size = new System.Drawing.Size(335, 223);
 			this.m_Attributes.TabIndex = 18;
 			// 
-			// m_TaskTitle
-			// 
-			this.m_TaskTitle.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.m_TaskTitle.ForeColor = System.Drawing.SystemColors.WindowText;
-			this.m_TaskTitle.Location = new System.Drawing.Point(107, 12);
-			this.m_TaskTitle.Name = "m_TaskTitle";
-			this.m_TaskTitle.Size = new System.Drawing.Size(229, 13);
-			this.m_TaskTitle.TabIndex = 19;
-			// 
 			// m_TaskId
 			// 
 			this.m_TaskId.AutoSize = true;
@@ -129,6 +120,14 @@
 			this.m_Error.TabIndex = 22;
 			this.m_Error.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
+			// m_TaskTitle
+			// 
+			this.m_TaskTitle.Location = new System.Drawing.Point(110, 9);
+			this.m_TaskTitle.Name = "m_TaskTitle";
+			this.m_TaskTitle.ReadOnly = true;
+			this.m_TaskTitle.Size = new System.Drawing.Size(225, 20);
+			this.m_TaskTitle.TabIndex = 23;
+			// 
 			// EditLoggedEntryDlg
 			// 
 			this.AcceptButton = this.OK;
@@ -136,15 +135,15 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.Cancel;
 			this.ClientSize = new System.Drawing.Size(345, 330);
-			this.Controls.Add(this.m_Error);
-			this.Controls.Add(this.m_TaskId);
-			this.Controls.Add(this.label3);
+			this.Controls.Add(this.label);
 			this.Controls.Add(this.m_TaskTitle);
+			this.Controls.Add(this.label3);
+			this.Controls.Add(this.m_TaskId);
+			this.Controls.Add(this.m_Attributes);
 			this.Controls.Add(this.label5);
+			this.Controls.Add(this.m_Error);
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.Cancel);
-			this.Controls.Add(this.m_Attributes);
-			this.Controls.Add(this.label);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Icon = global::LoggedTimeUIExtension.Properties.Resources.LoggedTime;
 			this.Name = "EditLoggedEntryDlg";
@@ -164,9 +163,9 @@
 		private System.Windows.Forms.Button OK;
 		private System.Windows.Forms.Label label;
 		private LoggedEntryAttributesPage m_Attributes;
-		private System.Windows.Forms.Label m_TaskTitle;
 		private System.Windows.Forms.Label m_TaskId;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label m_Error;
+		private System.Windows.Forms.TextBox m_TaskTitle;
 	}
 }

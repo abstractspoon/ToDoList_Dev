@@ -703,13 +703,14 @@ namespace DayViewUIExtension
 
 				if (series != null)
 				{
-					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, 
+					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title,
+																block.RealTaskId, 
 																m_WorkWeek, 
 																m_DayView.DisplayDatesInISO,
 																series.Attributes, 
-																m_DefaultTimeBlockEditMask);
+																m_DefaultTimeBlockEditMask,
+																m_Trans);
 					FormsUtil.SetFont(dlg, m_ControlsFont);
-					m_Trans.Translate(dlg);
 
 					if (dlg.ShowDialog() != DialogResult.OK)
 						return false;
@@ -779,10 +780,10 @@ namespace DayViewUIExtension
 													m_WorkWeek,
 													m_DayView.DisplayDatesInISO,
 													m_SelectedTaskId,
-													attribs);
+													attribs,
+													m_Trans);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
-			m_Trans.Translate(dlg);
 
 			m_DayView.ForceShowSelection = true;
 
@@ -986,20 +987,14 @@ namespace DayViewUIExtension
 				if (m_DayView.SelectedTaskId != m_SelectedTaskId)
 				{
 					m_SelectedTaskId = m_DayView.SelectedTaskId;
+					notify.NotifySelChange(m_SelectedTaskId);
 
 					UpdatedSelectedTaskDatesText();
-					UpdateToolbarButtonStates();
-
-					notify.NotifySelChange(m_SelectedTaskId);
-				}
-				break;
-
-			case Calendar.SelectionType.DateRange:
-				{
-					UpdateToolbarButtonStates();
 				}
 				break;
 			}
+
+			UpdateToolbarButtonStates();
 		}
 
 		private void UpdatedSelectedTaskDatesText()
