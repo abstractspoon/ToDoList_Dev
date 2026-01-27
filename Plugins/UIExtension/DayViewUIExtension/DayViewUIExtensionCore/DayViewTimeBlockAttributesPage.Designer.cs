@@ -190,6 +190,7 @@
 			// m_TimeCheckBox
 			// 
 			this.m_TimeCheckBox.AutoSize = true;
+			this.m_TimeCheckBox.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.m_TimeCheckBox.Location = new System.Drawing.Point(7, 75);
 			this.m_TimeCheckBox.Name = "m_TimeCheckBox";
 			this.m_TimeCheckBox.Size = new System.Drawing.Size(81, 17);

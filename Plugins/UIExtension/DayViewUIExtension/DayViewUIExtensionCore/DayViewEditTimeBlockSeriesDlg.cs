@@ -8,6 +8,9 @@ using System.Diagnostics;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
+
+// ---------------------------------------------------------------
 
 namespace DayViewUIExtension
 {
@@ -37,6 +40,9 @@ namespace DayViewUIExtension
 
 			m_Attributes.Initialise(workWeek, isoDateTimes, attribs, true, mask);
 			m_Attributes.ChangeEvent += (s, e) => ValidateInputs();
+
+			var color = BackColor;
+			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 
 			m_Trans = trans;
 			m_Trans.Translate(this);

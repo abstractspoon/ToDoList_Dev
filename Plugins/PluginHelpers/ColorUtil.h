@@ -37,7 +37,9 @@ namespace Abstractspoon
 					static Drawing::Color ToColor(COLORREF rgbColor);
 					static Drawing::Color ToColor(COLORREF rgbColor, unsigned char opacity);
 					static Drawing::Color ToGray(Drawing::Color color);
+
 					static Drawing::Color GetBestTextColor(Drawing::Color backColor, bool enabled);
+					static Drawing::Color GetErrorLabelTextColor(Drawing::Color backColor);
 
 					static bool IsGray(Drawing::Color color);
 

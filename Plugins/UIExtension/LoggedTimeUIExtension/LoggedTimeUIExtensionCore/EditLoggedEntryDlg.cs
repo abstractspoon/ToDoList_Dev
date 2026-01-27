@@ -8,6 +8,9 @@ using System.Text;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
+
+// ---------------------------------------------------------
 
 namespace LoggedTimeUIExtension
 {
@@ -45,6 +48,8 @@ namespace LoggedTimeUIExtension
 
 			m_Attributes.Initialise(entry, workWeek, isoDateTimes, readonlyTask, true, trans);
 			m_Attributes.ChangeEvent += (s, e) => ValidateInputs();
+
+			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
 
 			m_Trans = trans;
 			m_Trans.Translate(this);
