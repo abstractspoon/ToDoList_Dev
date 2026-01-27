@@ -70,8 +70,7 @@ namespace UIComponents
 			}
 			else
 			{
-				using (var brush = new SolidBrush(SystemColors.Control))
-					e.Graphics.FillRectangle(brush, e.Bounds);
+				e.Graphics.FillRectangle(SystemBrushes.Control, e.Bounds);
 			}
 		}
 
