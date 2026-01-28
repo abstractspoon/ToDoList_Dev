@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,1,998,2
+ FILEVERSION 9,1,998,3
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "9, 1, 998, 2\0"
+            VALUE "FileVersion", "9, 1, 998, 3\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-26\0"
             VALUE "LegalTrademarks", "\0"
