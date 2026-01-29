@@ -2,8 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "MDContentControlBridge.h"
 #include "resource.h"
+#include "MDContentControlBridge.h"
 
 #include <unknwn.h>
 #include <tchar.h>
@@ -13,6 +13,7 @@
 #include <Interfaces\IPreferences.h>
 #include <Interfaces\UITheme.h>
 #include <Interfaces\ISpellcheck.h>
+#include <Interfaces\RichEditSpellcheck.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -87,12 +88,13 @@ IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned l
 
 void CMDContentBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-	// TODO
+	pPrefs->WriteProfileInt(szKey, _T("InlineSpellChecking"), MDContentControl::MDContentControlCore::InlineSpellChecking);
 }
 
 void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-	// TODO
+	if (!bAppOnly)
+		MDContentControl::MDContentControlCore::InlineSpellChecking = (pPrefs->GetProfileInt(szKey, _T("InlineSpellChecking"), FALSE) != FALSE);
 }
 
 // returns the length of the html or zero if not supported
@@ -128,11 +130,16 @@ void CMDContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This is the constructor of a class that has been exported.
-// see ExporterBridge.h for the class definition
 CMDContentControlBridge::CMDContentControlBridge(ITransText* pTT)
-	: m_pTT(pTT)
+	: 
+	m_pTT(pTT), 
+	m_pSpellCheck(nullptr)
 {
+}
+
+CMDContentControlBridge::~CMDContentControlBridge()
+{
+	delete m_pSpellCheck;
 }
 
 BOOL CMDContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
@@ -155,6 +162,8 @@ BOOL CMDContentControlBridge::Create(UINT nCtrlID, DWORD nStyle,
 
 	return false;
 }
+
+// IContentControl interface ///////////////////////////////////////////////
 
 int CMDContentControlBridge::GetContent(unsigned char* pContent) const
 {
@@ -185,7 +194,6 @@ LPCWSTR CMDContentControlBridge::GetTypeID() const
 	return MARKDOWN_GUID;
 }
 
-// text content if supported. return false if not supported
 int CMDContentControlBridge::GetTextContent(LPWSTR szContent, int nLength) const
 {
 	String^ content = m_wnd->GetTextContent();
@@ -212,6 +220,11 @@ bool CMDContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 	msclr::auto_gcroot<String^> content = gcnew String(szContent);
 
 	return m_wnd->InsertTextContent(content.get(), bAtEnd);
+}
+
+bool CMDContentControlBridge::DoIdleProcessing() 
+{ 
+	return m_wnd->DoIdleProcessing();
 }
 
 bool CMDContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
@@ -248,7 +261,11 @@ bool CMDContentControlBridge::ProcessMessage(MSG* pMsg)
 
 ISpellCheck* CMDContentControlBridge::GetSpellCheckInterface()
 {
-	return nullptr;
+	if (m_pSpellCheck == nullptr)
+		m_pSpellCheck = new CRichEditSpellCheck();
+
+	m_pSpellCheck->Initialise(Win32::GetHwnd(m_wnd->SpellCheckHandle));
+	return m_pSpellCheck;
 }
 
 bool CMDContentControlBridge::Undo()

@@ -329,18 +329,21 @@ namespace LoggedTimeUIExtension
 		{
 			var entry = (apptView.Appointment as LogEntry);
 
-			string text = string.Empty;
+			var text = new List<string>()
+			{
+				FormatTimeSpent(entry, m_Trans),
+				FormatDuration(entry, m_Trans)
+			};
 
-			if (!string.IsNullOrEmpty(entry.Title))
-				text = text + entry.Title + '\n';
+			if (entry.HasComment)
+				text.Insert(0, entry.Comment);
 
-			text = text + FormatTimeSpent(entry, m_Trans) + '\n';
-			text = text + FormatDuration(entry, m_Trans) + '\n';
-
-			if (!string.IsNullOrEmpty(entry.Comment))
-				text = text + entry.Comment + '\n';
-
-			m_RenderHelper.DrawItemText(g, text, rect, textColor, FontStyle.Regular, false);
+			if (entry.HasTitle)
+				text.Insert(0, entry.Title);
+#if DEBUG
+			text.Insert(0, string.Format("[{0}]", entry.Id));
+#endif
+			m_RenderHelper.DrawItemText(g, string.Join("\n", text), rect, textColor, FontStyle.Regular, false);
 		}
 
 		public void DrawAppointment(Graphics g, Rectangle daysRect, Calendar.AppointmentView apptView, bool isSelected)

@@ -19,9 +19,10 @@ namespace Abstractspoon
 			public ref class Win32
 			{
 			public:
+				static HDC GetHdc(IntPtr hDC);
 				static HWND GetHwnd(IntPtr hWnd);
 				static HFONT GetHfont(IntPtr hFont);
-				static HDC GetHdc(IntPtr hDC);
+				static HMENU GetHMenu(IntPtr hMenu);
 				static HBITMAP GetHBitmap(IntPtr hBM);
 
 				static void RemoveBorder(IntPtr hWnd);
@@ -61,6 +62,8 @@ namespace Abstractspoon
 				static void SetArrowCursor();
 				static HICON LoadHIcon(LPCWSTR szDllPath, UINT nIDIcon, int nSize, bool bScaleByDPI);
 				static void EnableExplorerTheming(IntPtr hWnd);
+				static String^ GetWindowText(IntPtr hWnd);
+				static void SetWindowText(IntPtr hWnd, String^ text);
 
 				// Message cracking
 				static int LoWord(int n) { return LOWORD(n); }

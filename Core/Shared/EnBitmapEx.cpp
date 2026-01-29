@@ -173,11 +173,13 @@ HICON CEnBitmapEx::CreateDisabledIcon(HICON hIcon)
 {
 	CEnBitmapEx hbmDisabled;
 	const COLORREF crMask = colorMagenta;
+
+	CSize sizeReq = GraphicsMisc::GetIconSize(hIcon);
 	
-	hbmDisabled.CopyImage(hIcon, crMask, 16, 16);
+	hbmDisabled.CopyImage(hIcon, crMask, sizeReq.cx, sizeReq.cy);
 	hbmDisabled.Disable(crMask);
 	
-	return hbmDisabled.ExtractIcon(crMask, 16, 16);
+	return hbmDisabled.ExtractIcon(crMask, sizeReq.cx, sizeReq.cy);
 }
 
 BOOL CEnBitmapEx::CreateDisabledImageList(const CImageList& ilSrc, CImageList& ilDest)

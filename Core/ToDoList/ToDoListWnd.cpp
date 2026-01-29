@@ -5844,7 +5844,15 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		int nNumCmd = startup.GetCommandIDs(aCmdIDs);
 
 		for (int nCmd = 0; nCmd < nNumCmd; nCmd++)
+		{
+			// Usually commands are initiated through user interactions
+			// which allows essential housekeeping to occur during idle time. 
+			// Since that's not the case here we have to simulate the idle
+			// time processing before executing each command.
+			while (DoIdleProcessing());
+
 			SendMessage(WM_COMMAND, MAKEWPARAM(aCmdIDs[nCmd], 0), 0);
+		}
 	}
 
 	// 6. Source Control --------------------------------------

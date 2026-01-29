@@ -916,6 +916,11 @@ COLORREF GraphicsMisc::GetBestTextColor(COLORREF crBack, BOOL bEnabled)
 	return RGB(bLum, bLum, bLum);
 }
 
+COLORREF GraphicsMisc::GetErrorLabelTextColor(COLORREF crBack)
+{
+	return ((RGBX(crBack).Luminance() < 128) ? colorYellow : colorRed);
+}
+
 COLORREF GraphicsMisc::Lighter(COLORREF color, double dAmount, BOOL bRGB)
 {
 	if (color == CLR_NONE)

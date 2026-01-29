@@ -11,8 +11,6 @@
 
 #include "..\Interfaces\Preferences.h"
 
-#include "..\3rdParty\XNamedColors.h"
-
 #include <afxpriv.h> // WM_KICKIDLE
 
 /////////////////////////////////////////////////////////////////////////////
@@ -222,7 +220,5 @@ LRESULT CTDLDialog::OnKickIdle(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 COLORREF CTDLDialog::GetErrorLabelTextColor()
 {
-	COLORREF crBack = GetSysColor(COLOR_3DFACE);
-
-	return ((RGBX(crBack).Luminance() < 128) ? colorYellow : colorRed);
+	return GraphicsMisc::GetErrorLabelTextColor(GetSysColor(COLOR_3DFACE));
 }

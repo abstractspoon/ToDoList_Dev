@@ -35,6 +35,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_TaskId = new System.Windows.Forms.Label();
 			this.m_TaskCombo = new Abstractspoon.Tdl.PluginHelpers.TaskComboBox();
+			this.m_Error = new System.Windows.Forms.Label();
 			this.m_Attributes = new LoggedTimeUIExtension.LoggedEntryAttributesPage();
 			this.SuspendLayout();
 			// 
@@ -75,9 +76,9 @@
 			this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.label5.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.label5.Location = new System.Drawing.Point(-2, 287);
+			this.label5.Location = new System.Drawing.Point(7, 287);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(353, 2);
+			this.label5.Size = new System.Drawing.Size(328, 2);
 			this.label5.TabIndex = 11;
 			// 
 			// label1
@@ -105,12 +106,20 @@
 			this.m_TaskCombo.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
 			this.m_TaskCombo.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
 			this.m_TaskCombo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.m_TaskCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_TaskCombo.FormattingEnabled = true;
 			this.m_TaskCombo.Location = new System.Drawing.Point(109, 9);
 			this.m_TaskCombo.Name = "m_TaskCombo";
 			this.m_TaskCombo.Size = new System.Drawing.Size(226, 21);
 			this.m_TaskCombo.TabIndex = 0;
+			// 
+			// m_Error
+			// 
+			this.m_Error.ForeColor = System.Drawing.Color.Red;
+			this.m_Error.Location = new System.Drawing.Point(7, 289);
+			this.m_Error.Name = "m_Error";
+			this.m_Error.Size = new System.Drawing.Size(170, 38);
+			this.m_Error.TabIndex = 13;
+			this.m_Error.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
 			// m_Attributes
 			// 
@@ -129,6 +138,7 @@
 			this.CancelButton = this.Cancel;
 			this.ClientSize = new System.Drawing.Size(344, 329);
 			this.Controls.Add(this.m_TaskId);
+			this.Controls.Add(this.m_Error);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.label5);
 			this.Controls.Add(this.m_Attributes);
@@ -158,5 +168,6 @@
 		private LoggedEntryAttributesPage m_Attributes;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label m_TaskId;
+		private System.Windows.Forms.Label m_Error;
 	}
 }

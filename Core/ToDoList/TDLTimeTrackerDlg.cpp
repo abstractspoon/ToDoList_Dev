@@ -15,8 +15,6 @@
 #include "..\shared\Misc.h"
 #include "..\shared\ShortcutManager.h"
 
-#include "..\3rdparty\XNamedColors.h"
-
 /////////////////////////////////////////////////////////////////////////
 
 enum // btns
@@ -852,18 +850,22 @@ HBRUSH CTDLTimeTrackerDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 			{
 			case IDC_TASKTIME:
 			case IDC_ELAPSEDTIME:
-				if (IsTrackingSelectedTasklistAndTask())
-					pDC->SetTextColor((RGBX(crBack).Luminance() < 128) ? colorYellow : colorRed);
-				else
-					pDC->SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
+				{
+					if (IsTrackingSelectedTasklistAndTask())
+						pDC->SetTextColor(GraphicsMisc::GetErrorLabelTextColor(crBack));
+					else
+						pDC->SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
+				}
 				break;
 
 			default:
-				if (!m_brBack.GetSafeHandle())
-					m_brBack.CreateSolidBrush(crBack);
+				{
+					if (!m_brBack.GetSafeHandle())
+						m_brBack.CreateSolidBrush(crBack);
 
-				hbr = (HBRUSH)m_brBack.GetSafeHandle();
-				pDC->SetTextColor(m_theme.crAppText);
+					hbr = (HBRUSH)m_brBack.GetSafeHandle();
+					pDC->SetTextColor(m_theme.crAppText);
+				}
 				break;
 			}
 			pDC->SetBkMode(TRANSPARENT);

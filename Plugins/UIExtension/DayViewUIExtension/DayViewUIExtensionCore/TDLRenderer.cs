@@ -627,12 +627,16 @@ namespace DayViewUIExtension
 				if (isLong)
 					format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
 
-				rect.Y += TextOffset;
-
 				if (isLong)
+				{
 					rect.Height = BaseFont.Height;
+					rect.Y += TextPadding;
+				}
 				else
+				{
 					rect.Height -= TextOffset;
+					rect.Y += TextOffset;
+				}
 
 				g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
@@ -1098,7 +1102,13 @@ namespace DayViewUIExtension
 
 				using (SolidBrush brush = new SolidBrush(fillColor))
 				{
+					if (isLong && clipRightBorder)
+						rect.Width++;
+
 					g.FillRectangle(brush, rect);
+
+					if (isLong && clipRightBorder)
+						rect.Width--;
 				}
 
 				if (borderColor != Color.Empty)

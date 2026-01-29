@@ -198,7 +198,6 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
   <ItemGroup>
     <ClInclude Include="KanbanAttributeComboBox.h" />
     <ClInclude Include="KanbanBoard.h" />
-    <ClInclude Include="KanbanColors.h" />
     <ClInclude Include="KanbanCtrl.h" />
     <ClInclude Include="KanbanEnum.h" />
     <ClInclude Include="KanbanFixedColumnListCtrl.h" />

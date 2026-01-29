@@ -103,6 +103,16 @@ namespace MDContentControl.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ToolbarInlineSpellCheck {
+            get {
+                object obj = ResourceManager.GetObject("ToolbarInlineSpellCheck", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ToolbarPaste {
             get {
                 object obj = ResourceManager.GetObject("ToolbarPaste", resourceCulture);

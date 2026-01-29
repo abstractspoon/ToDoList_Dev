@@ -31,6 +31,12 @@ namespace MDContentControl
 				notify.NotifyKillFocus();
 			};
 
+			SpellCheckInputText += (s, e) =>
+			{
+				ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
+				notify.NotifyWantSpellcheck();
+			};
+
 			NeedLinkTooltip += (s, e) =>
 			{
 				var tooltip = ContentControlWnd.HandleNeedLinkTooltip(e.linkUri, m_hwndParent, Handle);
@@ -83,11 +89,6 @@ namespace MDContentControl
 
 			return false;
         }
-
-		public bool DoIdleProcessing()
-		{
-			return false;
-		}
 
 		public new bool Undo()
         {

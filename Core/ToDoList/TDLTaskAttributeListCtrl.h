@@ -72,15 +72,17 @@ public:
 	void SetAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID, BOOL bReadOnly);
 	BOOL IsAutoListDataReadOnly(TDC_ATTRIBUTE nAttribID) const;
 
+	BOOL SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
+	BOOL IsAnyTaskSelected(const CDWordArray& aTaskIDs) const;
 	TDC_ATTRIBUTE GetSelectedAttributeID() const;
 	CString GetSelectedAttributeLabel() const;
 	CString GetAttributeLabel(TDC_ATTRIBUTE nAttribID) const;
+
 	void RefreshSelectedTasksValues();
 	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs);
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateTimeFormatting();
 
-	BOOL SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
 	void SetCurrentFolder(const CString& sFolder);
 	void SetCompletionStatus(const CString& sStatus);
 	void SetPriorityColors(const CDWordArray& aColors);

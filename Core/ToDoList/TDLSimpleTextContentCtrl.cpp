@@ -65,8 +65,7 @@ const long NUM_PREF = sizeof(CF_PREFERRED) / sizeof(CLIPFORMAT);
 CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl() 
 	: 
 	CUrlRichEditCtrl(CTRLCLICKTOFOLLOW, IDS_CTRLCLICKTOFOLLOWLINK),
-	m_bWordWrap(TRUE),
-	m_reSpellCheck(*this)
+	m_bWordWrap(TRUE)
 {
 	// add custom protocol to comments field for linking to task IDs
 	AddProtocol(TDL_PROTOCOL, TRUE);
@@ -156,6 +155,13 @@ void CTDLSimpleTextContentCtrl::Enable(bool bEnable)
 HWND CTDLSimpleTextContentCtrl::GetHwnd() const 
 { 
 	return GetSafeHwnd(); 
+}
+
+bool CTDLSimpleTextContentCtrl::DoIdleProcessing() 
+{ 
+	CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
+
+	return false; 
 }
 
 LPCTSTR CTDLSimpleTextContentCtrl::GetTypeID() const 
@@ -372,6 +378,8 @@ void CTDLSimpleTextContentCtrl::FilterToolTipMessage(MSG* pMsg)
 
 ISpellCheck* CTDLSimpleTextContentCtrl::GetSpellCheckInterface() 
 { 
+	VERIFY(m_reSpellCheck.Initialise(*this));
+
 	return &m_reSpellCheck; 
 }
 
@@ -466,6 +474,9 @@ BOOL CTDLSimpleTextContentCtrl::OnKillFocus()
 
 void CTDLSimpleTextContentCtrl::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
+	if (WantIgnoreContextMenu())
+		return;
+
 	if (pWnd == this)
 	{
 		// build the context menu ourselves
@@ -483,7 +494,6 @@ void CTDLSimpleTextContentCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 				if (!SupportsInlineSpellChecking())
 					pPopup->DeleteMenu(ID_COMMENTS_INLINESPELLCHECK, MF_BYCOMMAND);
 #endif
-
 				// Remove URL commands if URL not clicked on
 				if (m_sContextUrl.IsEmpty())
 				{
@@ -630,7 +640,7 @@ void CTDLSimpleTextContentCtrl::OnCommentsMenuCmd(UINT nCmdID)
 #endif
 		{
 			s_bInlineSpellChecking = !s_bInlineSpellChecking;
-			EnableInlineSpellChecking(s_bInlineSpellChecking);
+			CUrlRichEditCtrl::EnableInlineSpellChecking(s_bInlineSpellChecking);
 		}
 		break;
 	}
@@ -879,7 +889,7 @@ CLIPFORMAT CTDLSimpleTextContentCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDat
 		return CMSOutlookHelper::CF_OUTLOOK;
 
 	// FALSE ensures we only get what we allow
-	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF, FALSE);
+	return CRichEditHelper::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF, FALSE);
 }
 
 UINT CTDLSimpleTextContentCtrl::OnGetDlgCode()

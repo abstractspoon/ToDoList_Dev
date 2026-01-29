@@ -78,6 +78,9 @@ void CTDLLanguageComboBox::BuildCombo()
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
+	ASSERT(GetStyle() & CBS_OWNERDRAWFIXED);
+
+	CLocalizer::EnableTranslation(*this, FALSE);
 
 	// build the language list from csv files in the Resources\Translations folder
 	// These will come out sorted by default

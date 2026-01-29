@@ -429,7 +429,6 @@ namespace DayViewUIExtension
 			UInt32 taskID = task.GetID();
 
 			// Always
-			Position = task.GetPositionString();
 			TaskTextColor = task.GetTextDrawingColor();
 			Locked = task.IsLocked(true);
 			IsParent = task.IsParent();
@@ -444,6 +443,7 @@ namespace DayViewUIExtension
 				HasDependencies = (task.GetDependency().Count > 0);
 				IsRecurring = task.IsRecurring();
 				Depth = depth;
+				Position = task.GetPositionString();
 
 				m_Tags = task.GetTag();
 
@@ -469,6 +469,9 @@ namespace DayViewUIExtension
 			{
 				if (task.IsAttributeAvailable(Task.Attribute.Title))
 					Title = task.GetTitle();
+
+				if (task.IsAttributeAvailable(Task.Attribute.Position))
+					Position = task.GetPositionString();
 
 				if (task.IsAttributeAvailable(Task.Attribute.TimeEstimate))
 				{

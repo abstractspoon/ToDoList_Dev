@@ -83,6 +83,9 @@ namespace LoggedTimeUIExtension
 		public string Type { get; private set; }
 		public string Comment { get; private set; }
 
+		public bool HasTitle { get { return !string.IsNullOrWhiteSpace(Title); } }
+		public bool HasComment { get { return !string.IsNullOrWhiteSpace(Comment); } }
+
 		// If we set the fill colour to Color.Empty and then ask for it
 		// back our base class will return SystemColors.Window instead
 		// so we need this attribute to return to us the 'true' fill color
@@ -230,8 +233,15 @@ namespace LoggedTimeUIExtension
 
 				foreach (var entry in logEntries)
 				{
-					// If the entry bridges midnight, split it into 2
-					if (entry.To.Date > entry.From.Date)
+					// 'To' date/time should be greater than 'From' date/time
+					// 'To' date should be same as 'From' date OR the next day
+					Debug.Assert(entry.To > entry.From);
+					Debug.Assert((entry.To.Date == entry.From.Date) ||
+								(entry.To.Date == entry.From.Date.AddDays(1.0)));
+
+					// If the entry spans midnight we split it into 2
+					if ((entry.To.Date > entry.From.Date) &&
+						(entry.To.TimeOfDay.Ticks > 0))
 					{
 						var dates = new Calendar.AppointmentDates();
 
@@ -240,9 +250,12 @@ namespace LoggedTimeUIExtension
 
 						dates.Start = entry.From;
 						dates.End = entry.To.Date;
+						Debug.Assert(dates.IsValid);
 
 						var daysDuration = (entry.To - entry.From).TotalDays;
+
 						double hoursSpentBeforeMidnight = ((entry.TimeInHours * (entry.To.Date - entry.From).TotalDays) / daysDuration);
+						Debug.Assert(hoursSpentBeforeMidnight > 0.0);
 
 						beforeEntry.Modify(dates, hoursSpentBeforeMidnight, beforeEntry.Comment, beforeEntry.FillColor);
 						m_Entries.Add(beforeEntry);
@@ -252,8 +265,10 @@ namespace LoggedTimeUIExtension
 
 						dates.Start = entry.To.Date;
 						dates.End = entry.To;
+						Debug.Assert(dates.IsValid);
 
 						double hoursSpentAfterMidnight = (entry.TimeInHours - hoursSpentBeforeMidnight);
+						Debug.Assert(hoursSpentAfterMidnight > 0.0);
 
 						afterEntry.Modify(dates, hoursSpentAfterMidnight, afterEntry.Comment, afterEntry.FillColor);
 						m_Entries.Add(afterEntry);

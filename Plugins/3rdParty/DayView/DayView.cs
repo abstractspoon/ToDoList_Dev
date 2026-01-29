@@ -64,7 +64,7 @@ namespace Calendar
         protected int appointmentGripWidth = 5;
         protected int dayGripWidth = 5;
         protected int allDayEventsHeaderHeight = 0;
-        protected int longAppointmentSpacing = 1;
+        protected int longAppointmentSpacing = 2;
         protected int appointmentSpacing = 1;
         protected int groupSpacing = 1;
         protected int daySpacing = 1;
@@ -225,6 +225,21 @@ namespace Calendar
         }
 		
 		// ------------------------------------------------------------------
+		
+		protected int RightClickSelectionMinutes
+		{
+			get
+			{
+				int slotMins = (60 / slotsPerHour);
+
+				if (rightClickSelectionMinutes < slotMins)
+					return slotMins;
+
+				return ((rightClickSelectionMinutes / slotMins) * slotMins);
+			}
+		}
+
+		// ------------------------------------------------------------------
 
 		private bool showWorkingHoursOnly = false;
 
@@ -361,23 +376,6 @@ namespace Calendar
         private void OnDrawAllAppBorderChanged()
         {
             Invalidate();
-        }
-		
-		// ------------------------------------------------------------------
-
-        private bool minHalfHourApp = false;
-
-        public bool MinHalfHourApp
-        {
-            get
-            {
-                return minHalfHourApp;
-            }
-            set
-            {
-                minHalfHourApp = value;
-                Invalidate();
-            }
         }
 		
 		// ------------------------------------------------------------------
@@ -774,6 +772,8 @@ namespace Calendar
 				if (IsValidSlotsPerHour(value))
                 {
                     slotsPerHour = value;
+					
+					AdjustVScrollbar();
                     Invalidate();
                 }
             }
@@ -1081,6 +1081,9 @@ namespace Calendar
 			if (Height < HeaderHeight)
 				return;
 
+			// Preserve 'end of scroll' where possible
+			bool scrollToBottom = (vscroll.Value >= (vscroll.Maximum - vscroll.LargeChange));
+
 			// Auto-calculate best 'hour' height
 			int availHeight = (Height - HeaderHeight);
 
@@ -1103,7 +1106,7 @@ namespace Calendar
 				vscroll.Maximum = (oneHourHeight * VisibleHours) + 1;
 				vscroll.LargeChange = availHeight;
 
-				if (vscroll.Value > (vscroll.Maximum - vscroll.LargeChange))
+				if (scrollToBottom)
 					vscroll.Value = (vscroll.Maximum - vscroll.LargeChange);
 			}
 			else
@@ -1211,10 +1214,12 @@ namespace Calendar
 							DateTime click = GetDateTimeAt(e.X, e.Y);
 							selectionType = SelectionType.DateRange;
 
-							if ((click < SelectedDates.Start) || (click > SelectedDates.End))
+							if ((click < SelectedDates.Start) || (click >= SelectedDates.End))
 							{
-								SelectedDates.Start = new DateTime(click.Year, click.Month, click.Day, click.Hour, ((click.Minute / 30) * 30), 0);
-								SelectedDates.End = SelectedDates.Start.AddMinutes(rightClickSelectionMinutes);
+								int slotMins = (60 / slotsPerHour);
+
+								SelectedDates.Start = new DateTime(click.Year, click.Month, click.Day, click.Hour, ((click.Minute / slotMins) * slotMins), 0);
+								SelectedDates.End = SelectedDates.Start.AddMinutes(RightClickSelectionMinutes);
 
 								redraw = true;
 							}
@@ -1646,7 +1651,7 @@ namespace Calendar
             Rectangle rect = new Rectangle(0, 0, ClientRectangle.Width, ClientRectangle.Height);
 			DoPaint(e, rect);
 
-			if (legacyScrollbars)
+			if (LegacyScrollbars)
 				RepositionHScrollbar(); // because hour label width may have changed
         }
 
@@ -1792,7 +1797,9 @@ namespace Calendar
 
 		protected int GetHourScrollPos(DateTime time)
 		{
-			int vPos = ((time.Hour - VisibleStartHour) * slotHeight * slotsPerHour) + ((time.Minute * slotHeight) / (60 / slotsPerHour));
+			int vPos = ((time.Hour - VisibleStartHour) * slotHeight * slotsPerHour) + 
+						((time.Minute * slotHeight) / (60 / slotsPerHour)) +
+						((time.Second * slotHeight) / (3600 / slotsPerHour));
 
 			return (vPos - vscroll.Value + HeaderHeight);
 		}

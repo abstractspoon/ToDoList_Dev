@@ -30,6 +30,11 @@ HWND Win32::GetHwnd(IntPtr hWnd)
 	return static_cast<HWND>(hWnd.ToPointer());
 }
 
+HMENU Win32::GetHMenu(IntPtr hMenu)
+{
+	return static_cast<HMENU>(hMenu.ToPointer());
+}
+
 HFONT Win32::GetHfont(IntPtr hFont)
 {
 	return static_cast<HFONT>(hFont.ToPointer());
@@ -344,6 +349,25 @@ void Win32::EnableExplorerTheming(IntPtr hWnd)
 	CWnd* pWnd = CWnd::FromHandle(GetHwnd(hWnd));
 
 	CThemed::SetWindowTheme(pWnd, _T("Explorer"));
+}
+
+String^ Win32::GetWindowText(IntPtr hWnd)
+{
+	if (!GetWindowTextLength(GetHwnd(hWnd)))
+		return String::Empty;
+
+	CWnd* pWnd = CWnd::FromHandle(GetHwnd(hWnd));
+
+	CString sText;
+	pWnd->GetWindowText(sText);
+
+	return gcnew String(sText);
+}
+
+void Win32::SetWindowText(IntPtr hWnd, String^ text)
+{
+	CWnd* pWnd = CWnd::FromHandle(GetHwnd(hWnd));
+	pWnd->SetWindowText(MS(text));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

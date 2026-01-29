@@ -1211,10 +1211,12 @@ BOOL CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttribID, DWORD dwFlags)
 
 BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data)
 {
-	if (!CanEditSelectedTask(TDCA_CUSTOMATTRIB))
+	if (sAttribID.IsEmpty())
 		return FALSE;
 
-	if (sAttribID.IsEmpty())
+	TDC_ATTRIBUTE nAttribID = m_aCustomAttribDefs.GetAttributeID(sAttribID);
+
+	if (!CanEditSelectedTask(nAttribID))
 		return FALSE;
 
 	Flush();
@@ -1233,7 +1235,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
-	SetModified(m_aCustomAttribDefs.GetAttributeID(sAttribID), aModTaskIDs);
+	SetModified(nAttribID, aModTaskIDs);
 	return TRUE;
 }
 
@@ -5217,9 +5219,13 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	// if this was the project name being edited make sure
 	// the focus is set back to the name
 	if (mapAttribIDs.Has(TDCA_PROJECTNAME))
+	{
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
-	else
+	}
+	else if (m_ctrlAttributes.IsAnyTaskSelected(aModTaskIDs))
+	{
 		m_idleTasks.RefreshAttributeValues(mapAttribIDs);
+	}
 
 	if (mapAttribIDs.Has(TDCA_LOCK))
 		EnableDisableComments();
@@ -8899,52 +8905,54 @@ BOOL CToDoCtrl::SpellcheckItem(HTREEITEM hti, CSpellCheckDlg* pSpellChecker, BOO
 		
 		int nRet = pSpellChecker->DoModal(CPreferences(), TRUE);
 		UpdateWindow();
-			
-		if ((nRet == IDOK) && CanEditSelectedTask(bCheckTitle ? TDCA_TASKNAME : TDCA_COMMENTS))
+
+		switch (nRet)
 		{
-			int nChange = SET_NOCHANGE;
-			
-			if (bCheckTitle)
+		case IDOK:
+			if (CanEditSelectedTask(bCheckTitle ? TDCA_TASKNAME : TDCA_COMMENTS))
 			{
-				CString sTitle = pSpellChecker->GetCorrectedText();
-				nChange = m_data.SetTaskTitle(dwTaskID, sTitle);
-				
-				if (nChange == SET_CHANGE)
+				int nChange = SET_NOCHANGE;
+			
+				if (bCheckTitle)
 				{
-					InvalidateItem(hti, TRUE);
+					CString sTitle = pSpellChecker->GetCorrectedText();
+				
+					if (m_data.SetTaskTitle(dwTaskID, sTitle) == SET_CHANGE)
+					{
+						//InvalidateItem(hti, TRUE);
+
+						CDWordArray aModTaskIDs;
+						aModTaskIDs.Add(dwTaskID);
+
+						SetModified(TDCA_TASKNAME, aModTaskIDs);
+					}
+				}
+				else if (pSpellChecker->MadeChanges()) 
+				{
+					HandleUnsavedComments();
+					UpdateTask(TDCA_COMMENTS);
 				}
 			}
-			else if (pSpellChecker->MadeChanges()) 
-			{
-				UpdateTask(TDCA_COMMENTS);
-				nChange = SET_CHANGE;
-			}
-			
-			if (nChange == SET_CHANGE)
-			{
-				CDWordArray aModTaskIDs;
-				aModTaskIDs.Add(dwTaskID);
+			return TRUE;
 
-				SetModified(TDCA_TASKNAME, aModTaskIDs);
-			}
-		}
-		else if (nRet == IDNOERRORS && bNotifyNoErrors)
-		{
-			if (bCheckTitle)
-				CMessageBox::AfxShow(IDS_TDC_SPELLCHECK_TITLE, IDS_TDC_NOTITLESPELLERRORS, MB_OK);
-			else
-				CMessageBox::AfxShow(IDS_TDC_SPELLCHECK_TITLE, IDS_TDC_NOCOMMENTSPELLERRORS, MB_OK);
-		}
-		else if (nRet == IDCANCEL)
-		{
-			return FALSE;
-		}
+		case IDNOERRORS:
+			if (bNotifyNoErrors)
+			{
+				UINT nMsgID = (bCheckTitle ? IDS_TDC_NOTITLESPELLERRORS : IDS_TDC_NOCOMMENTSPELLERRORS);
 
-		return TRUE;
+				CMessageBox::AfxShow(IDS_TDC_SPELLCHECK_TITLE, nMsgID, MB_OK);
+			}
+			return TRUE;
+
+		case IDCANCEL:
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
 	}
 	
-	// else
-	ASSERT(0);
 	return FALSE;
 }
 
@@ -9437,31 +9445,28 @@ void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)
 	if (!bEnding && IsTaskLabelEditing() && m_timeTracking.IsTracking(GetSelectedTaskID()))
 		return;
 
-	double dIncrement = m_timeTracking.IncrementTrackedTime(); // hours
+	double dIncHours = m_timeTracking.IncrementTrackedTime();
 	
-	if (dIncrement > 0.0)
+	if (dIncHours > 0.0)
 	{
 		DWORD dwTaskID = m_timeTracking.GetTrackedTaskID(TRUE);
 		ASSERT(dwTaskID);
 
-		// Tracked/logged time is always in hours
-		m_dTrackedTimeElapsedHours += dIncrement;
+		m_dTrackedTimeElapsedHours += dIncHours;
 
-		TDCTIMEPERIOD time(dIncrement, TDCU_HOURS);
-		
-		if ((dwTaskID == GetSelectedTaskID()) && (GetSelectedTaskCount() == 1))
-		{
-			// this will also update the Time Spent field
-			SetSelectedTaskTimeSpent(time, TRUE); // offset
-		}
-		else
-		{
-			CDWordArray aModTaskIDs;
-			aModTaskIDs.Add(dwTaskID);
+		// Note: Because this is a 'behind the scenes' update we
+		// want to avoid interfering with anything the user might 
+		// currently be doing so we avoid 'SetSelectedTaskTimeSpent'
+		// and perform a manual edit.
+		// Note: This is NOT an undoable edit else 'real' edits
+		// would get completely lost in the noise.
+		TDCTIMEPERIOD time(dIncHours, TDCU_HOURS);
+		VERIFY(SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, time, TRUE)); // offset
 
-			m_data.SetTaskTimeSpent(dwTaskID, time, TRUE); // offset
-			SetModified(TDCA_TIMESPENT, aModTaskIDs);
-		}
+		CDWordArray aModTaskIDs;
+		aModTaskIDs.Add(dwTaskID);
+
+		SetModified(TDCA_TIMESPENT, aModTaskIDs);
 
 		// Is a reminder due?
 		if (m_timeTracking.IsReminderDue())

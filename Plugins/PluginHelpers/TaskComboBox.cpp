@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "TaskComboBox.h"
+#include "Win32.h"
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
@@ -28,13 +29,43 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+// Private class to override ToString()
+
+ref class WrappedITask : ITask
+{
+public:
+	WrappedITask(ITask^ task)
+	{
+		m_ITask = task;
+	}
+
+	String^ ToString() override { return Title; }
+
+	virtual property UInt32 Id { UInt32 get()			{ return m_ITask->Id ; } }
+	virtual property String^ Title { String^ get()		{ return m_ITask->Title; }; }
+	virtual property String^ Position { String^ get()	{ return m_ITask->Position; } }
+	virtual property int Depth { int get()				{ return m_ITask->Depth; } }
+	virtual property bool HasIcon { bool get()			{ return m_ITask->HasIcon; } }
+
+	property bool IsTopLevel { bool get()				{ return (Depth == 0); } }
+	property bool IsNone { bool get()					{ return (Id == 0); } }
+
+private: 
+	ITask^ m_ITask;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 TaskComboBox::TaskComboBox()
 	:
 	OwnerdrawComboBoxBase(true), // fixed
-	m_NoneTask(nullptr)
+	m_NoneTask(nullptr),
+	m_BoldFont(nullptr),
+	m_OrgSelectedIndex(CB_ERR),
+	m_FindEnabled(false)
 {
 	Sorted = false; // we control the order
+	AutoCompleteMode = System::Windows::Forms::AutoCompleteMode::None;
 }
 
 void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
@@ -53,8 +84,10 @@ void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
 
 	if (noneTask != nullptr)
 	{
-		Items->Add(noneTask);
-		m_NoneTask = noneTask;
+		auto wrap = gcnew WrappedITask(noneTask);
+		Items->Add(wrap);
+
+		m_NoneTask = wrap;
 	}
 
 	auto sortedTasks = Enumerable::ToList(taskItems);
@@ -62,11 +95,18 @@ void TaskComboBox::Initialise(IEnumerable<ITask^>^ taskItems,
 
 	for each(auto task in sortedTasks)
 	{
-		Items->Add(task);
+		auto wrap = gcnew WrappedITask(task);
+		Items->Add(wrap);
 
 		if (task->Id == selTaskId)
-			SelectedItem = task;
+			SelectIndex(Items->Count - 1);
 	}
+	m_OrgSelectedIndex = SelectedIndex;
+
+	if (m_BoldFont == nullptr)
+		m_BoldFont = gcnew System::Drawing::Font(Font, FontStyle::Bold);
+
+	RefreshMaxDropWidth();
 }
 
 UInt32 TaskComboBox::SelectedTaskId::get()
@@ -98,38 +138,134 @@ void TaskComboBox::OnDrawItem(DrawItemEventArgs^ e)
 	if (e->Index < 0)
 		return;
 
-	auto taskItem = ASTYPE(Items[e->Index], ITask);
+	auto taskItem = ASTYPE(Items[e->Index], WrappedITask);
 
 	if (taskItem != nullptr)
 	{
 		auto rect = e->Bounds;
 
-		if (taskItem != m_NoneTask)
+		bool hasIcon = (taskItem->HasIcon && m_TaskIcons->Get(taskItem->Id));
+		bool listItem = !(e->State.HasFlag(DrawItemState::ComboBoxEdit));
+
+		if (listItem)
 		{
-			bool listItem = !(e->State.HasFlag(DrawItemState::ComboBoxEdit));
+			rect.X += GetListItemTextOffset(Items[e->Index]);
 
-			if (listItem)
-			{
-				for (int i = 0; i < taskItem->Depth; i++)
-					rect.X += UIExtension::TaskIcon::IconSize;
-			}
+			// Icon needs to be drawn BEFORE text
+			if (hasIcon)
+				rect.X -= UIExtension::TaskIcon::IconSize;
+		}
 
-			if (taskItem->HasIcon && m_TaskIcons->Get(taskItem->Id))
-			{
-				m_TaskIcons->Draw(e->Graphics, rect.X, rect.Y);
-				rect.X += UIExtension::TaskIcon::IconSize;
-			}
-			else if (listItem)
-			{
-				rect.X += UIExtension::TaskIcon::IconSize;
-			}
+		if (hasIcon)
+		{
+			m_TaskIcons->Draw(e->Graphics, rect.X, rect.Y);
+			rect.X += UIExtension::TaskIcon::IconSize;
 		}
 
 		auto brush = TextBrush(e);
+		auto font = ((!taskItem->IsNone && taskItem->IsTopLevel) ? m_BoldFont : Font);
 
-		e->Graphics->DrawString(taskItem->Title, Font, brush, rect);
+		e->Graphics->DrawString(taskItem->Title, font, brush, rect);
 		e->DrawFocusRectangle();
-
-		delete brush;
 	}
+}
+
+int TaskComboBox::GetListItemTextOffset(Object^ obj)
+{
+	auto taskItem = ASTYPE(obj, WrappedITask);
+
+	if ((taskItem == nullptr) || (taskItem == m_NoneTask))
+		return 0;
+
+	int offset = ((UIExtension::TaskIcon::IconSize * taskItem->Depth) +
+				  UIExtension::TaskIcon::IconSize);
+
+	return offset;
+}
+
+int TaskComboBox::GetListItemTextLength(Object^ obj, Graphics^ graphics)
+{
+	auto taskItem = ASTYPE(obj, WrappedITask);
+
+	if ((taskItem == nullptr) || (taskItem == m_NoneTask))
+		return 0;
+
+	auto font = (taskItem->IsTopLevel ? m_BoldFont : Font);
+
+	return (int)graphics->MeasureString(taskItem->Title, font).Width;
+}
+
+void TaskComboBox::OnTextChanged(EventArgs^ e)
+{
+	if (m_FindEnabled)
+	{
+		m_FindEnabled = false;
+		SelectNextFind(true);
+	}
+}
+
+void TaskComboBox::SelectNextFind(bool bForward)
+{
+	// We use raw Win32 here so our behaviour exactly
+	// matches the core app
+	String^ editText = Win32::GetWindowText(Handle);
+	DWORD dwSel = ::SendMessage(Win32::GetHwnd(Handle), CB_GETEDITSEL, 0, 0);
+
+	// Prevent flicker
+	HWND hwndEdit = ::GetDlgItem(Win32::GetHwnd(Handle), 1001);
+	::SendMessage(hwndEdit, WM_SETREDRAW, FALSE, 0);
+
+	if (SelectNextItem(editText, bForward))
+	{
+		// Restore the text and selection because the
+		// selection change will have overwritten it
+		Win32::SetWindowText(Handle, editText);
+		::SendMessage(Win32::GetHwnd(Handle), CB_SETEDITSEL, 0, dwSel);
+	}
+	::SendMessage(hwndEdit, WM_SETREDRAW, TRUE, 0);
+
+	SearchUpdated(this, gcnew EventArgs());
+}
+
+bool TaskComboBox::PreProcessMessage(Message% msg)
+{
+	switch (msg.Msg)
+	{
+	case WM_CHAR:
+		m_FindEnabled = true;
+		break;
+
+	case WM_KEYDOWN:
+		{
+			m_FindEnabled = false;
+
+			switch (msg.WParam.ToInt32())
+			{
+			case VK_DELETE:
+			case VK_BACK:
+				m_FindEnabled = true;
+				break;
+
+			case VK_ESCAPE:
+				if (DroppedDown)
+				{
+					DroppedDown = false;
+					SelectedIndex = m_OrgSelectedIndex;
+
+					return true;
+				}
+				break;
+
+			case VK_F3:
+				{
+					bool forward = (ModifierKeys != Keys::Shift);
+					SelectNextFind(forward);
+				}
+				return true;
+			}
+		}
+		break;
+	}
+	
+	return OwnerdrawComboBoxBase::PreProcessMessage(msg);
 }

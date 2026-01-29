@@ -49,12 +49,13 @@ public:
 
 	TDC_ATTRIBUTE GetSelectedAttributeID() const;
 	CString GetSelectedAttributeLabel() const;
+	BOOL SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
+	BOOL IsAnyTaskSelected(const CDWordArray& aTaskIDs) const;
 
 	void RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs = TDCA_ALL);
 	void RefreshSelectedTasksValue(TDC_ATTRIBUTE nAttribID);
 	void RefreshDateTimeFormatting();
 
-	BOOL SetSelectedTaskIDs(const CDWordArray& aTaskIDs);
 	void SetCurrentFolder(const CString& sFolder);
 	void SetCompletionStatus(const CString& sStatus);
 	void SetPriorityColors(const CDWordArray& aColors);

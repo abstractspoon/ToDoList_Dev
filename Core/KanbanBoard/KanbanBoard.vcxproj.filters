@@ -48,9 +48,6 @@
     <ClInclude Include="KanbanBoard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KanbanColors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="KanbanCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>

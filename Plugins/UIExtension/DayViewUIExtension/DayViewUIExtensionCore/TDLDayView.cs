@@ -300,7 +300,6 @@ namespace DayViewUIExtension
 			AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
 			DrawAllAppBorder = false;
 			Location = new Point(0, 0);
-			MinHalfHourApp = false;
 			Name = "m_dayView";
 			Renderer = this;
 			Size = new Size(798, 328);
@@ -1618,7 +1617,7 @@ namespace DayViewUIExtension
 				{
 					// Move selection to 'real' task
 					SelectTask(block.RealTaskId, true);
-					Invalidate();
+					RebuildMatchingAppointments();
 
 					return true;
 				}
@@ -1644,7 +1643,7 @@ namespace DayViewUIExtension
 				{
 					// Move selection to 'real' task
 					SelectTask(block.RealTaskId, true);
-					Invalidate();
+					RebuildMatchingAppointments();
 
 					return true;
 				}
@@ -1690,7 +1689,7 @@ namespace DayViewUIExtension
 				return false;
 
 			SelectedAppointment = null;
-			Invalidate();
+			RebuildMatchingAppointments();
 
 			return true;
 		}

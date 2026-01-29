@@ -141,26 +141,29 @@ namespace DayViewUIExtension
 						return m_DayView.CancelAppointmentResizing();
 
 					case Keys.Delete:
+						if (ModifierKeys.HasFlag(Keys.Control))
 						{
-							if (m_DayView.DeleteSelectedCustomDate())
-								return true;
-
-							if (m_DayView.DeleteSelectedTimeBlock())
+							if (m_DayView.DeleteSelectedTimeBlockSeries())
 							{
 								UpdateToolbarButtonStates();
 								return true;
 							}
 						}
-						break;
-
-					case (Keys.Control | Keys.F2):
-						return EditSelectedTimeBlockSeries();
-
-					case (Keys.Control | Keys.Delete):
-						if (m_DayView.DeleteSelectedTimeBlockSeries())
+						else if (m_DayView.DeleteSelectedTimeBlock())
 						{
 							UpdateToolbarButtonStates();
 							return true;
+						}
+						else if (m_DayView.DeleteSelectedCustomDate())
+						{
+							return true;
+						}
+						break;
+
+					case Keys.F2:
+						if (ModifierKeys.HasFlag(Keys.Control))
+						{
+							return EditSelectedTimeBlockSeries();
 						}
 						break;
 					}
@@ -700,13 +703,14 @@ namespace DayViewUIExtension
 
 				if (series != null)
 				{
-					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title, 
+					var dlg = new DayViewEditTimeBlockSeriesDlg(block.Title,
+																block.RealTaskId, 
 																m_WorkWeek, 
 																m_DayView.DisplayDatesInISO,
 																series.Attributes, 
-																m_DefaultTimeBlockEditMask);
+																m_DefaultTimeBlockEditMask,
+																m_Trans);
 					FormsUtil.SetFont(dlg, m_ControlsFont);
-					m_Trans.Translate(dlg);
 
 					if (dlg.ShowDialog() != DialogResult.OK)
 						return false;
@@ -776,10 +780,10 @@ namespace DayViewUIExtension
 													m_WorkWeek,
 													m_DayView.DisplayDatesInISO,
 													m_SelectedTaskId,
-													attribs);
+													attribs,
+													m_Trans);
 
 			FormsUtil.SetFont(dlg, m_ControlsFont);
-			m_Trans.Translate(dlg);
 
 			m_DayView.ForceShowSelection = true;
 
@@ -907,7 +911,6 @@ namespace DayViewUIExtension
 
 			dayViewRect.Y = ControlTop;
 			dayViewRect.Height -= ControlTop;
-			dayViewRect.Inflate(-1, -1);
 
 			m_DayView.Bounds = dayViewRect;
 
@@ -984,20 +987,14 @@ namespace DayViewUIExtension
 				if (m_DayView.SelectedTaskId != m_SelectedTaskId)
 				{
 					m_SelectedTaskId = m_DayView.SelectedTaskId;
+					notify.NotifySelChange(m_SelectedTaskId);
 
 					UpdatedSelectedTaskDatesText();
-					UpdateToolbarButtonStates();
-
-					notify.NotifySelChange(m_SelectedTaskId);
-				}
-				break;
-
-			case Calendar.SelectionType.DateRange:
-				{
-					UpdateToolbarButtonStates();
 				}
 				break;
 			}
+
+			UpdateToolbarButtonStates();
 		}
 
 		private void UpdatedSelectedTaskDatesText()
@@ -1222,7 +1219,7 @@ namespace DayViewUIExtension
             get
             {
                 if (m_MonthCombo != null)
-                    return m_MonthCombo.Bounds.Bottom + DPIScaling.Scale(3);
+                    return m_MonthCombo.Bounds.Bottom + DPIScaling.Scale(4);
 
                 // else
                 return 0;

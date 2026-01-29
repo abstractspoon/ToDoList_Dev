@@ -1359,6 +1359,11 @@ BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 	return TRUE;
 }
 
+BOOL CTDLTaskAttributeListCtrl::IsAnyTaskSelected(const CDWordArray& aTaskIDs) const
+{
+	return Misc::MatchAny(aTaskIDs, m_aSelectedTaskIDs);
+}
+
 void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues()
 {
 	RefreshSelectedTasksValues(TDCA_ALL);
@@ -1367,7 +1372,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues()
 void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs)
 {
 	CHoldRedraw hr(*this);
-	HideAllControls();
 
 	BOOL bRefreshAll = mapAttribIDs.Has(TDCA_ALL);
 	BOOL bRefreshCustomCalcs = (bRefreshAll || m_aCustomAttribDefs.AnyCalculationUsesAnyAttribute(mapAttribIDs));
@@ -2718,6 +2722,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 			m_multitasker.GetTasksDependencies(m_aSelectedTaskIDs, aDepends);
 
 			m_eDepends.SetDependencies(aDepends);
+			m_eDepends.EnableButton(ID_BTN_VIEWDEPENDS, aDepends.GetSize());
 		}
 		break;
 

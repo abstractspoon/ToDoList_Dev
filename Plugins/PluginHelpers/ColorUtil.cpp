@@ -117,6 +117,11 @@ Drawing::Color ColorUtil::DrawingColor::GetBestTextColor(Drawing::Color backColo
 	return ToColor(GraphicsMisc::GetBestTextColor(ToRgb(backColor), (enabled ? TRUE : FALSE)));
 }
 
+Drawing::Color ColorUtil::DrawingColor::GetErrorLabelTextColor(Drawing::Color backColor)
+{
+	return ToColor(GraphicsMisc::GetErrorLabelTextColor(ToRgb(backColor)));
+}
+
 float ColorUtil::DrawingColor::GetLuminance(Drawing::Color color)
 {
 	COLORREF rgbIn = RGB(color.R, color.G, color.B);

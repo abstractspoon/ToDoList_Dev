@@ -222,6 +222,7 @@ namespace GraphicsMisc
 	COLORREF Darker(COLORREF color, double dAmount, BOOL bRGB = TRUE);
 	COLORREF Blend(COLORREF color1, COLORREF color2, double dAmount);
 	COLORREF GetBestTextColor(COLORREF crBack, BOOL bEnabled = TRUE);
+	COLORREF GetErrorLabelTextColor(COLORREF crBack);
 	void CalculateColorGradient(COLORREF crFrom, COLORREF crTo, int nNumColors, CDWordArray& aColors, BOOL bRGB = TRUE);
 	CString GetWebColor(COLORREF color);
 	COLORREF ParseWebColor(const CString& sHexColor);

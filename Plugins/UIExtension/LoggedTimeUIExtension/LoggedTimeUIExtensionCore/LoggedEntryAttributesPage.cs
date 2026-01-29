@@ -11,12 +11,22 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace LoggedTimeUIExtension
 {
+	public delegate void AttributeChangeEventHandler(object sender, EventArgs args);
+
+	// ---------------------------------------------------
+
 	public partial class LoggedEntryAttributesPage : UserControl
 	{
 		private double m_OrgTimeSpent = 0.0;
 		private bool m_EditMode = false;
 		private bool m_ReadOnlyTask = false;
 		private Translator m_Trans = null;
+
+		// --------------------------------------------------------
+
+		public event AttributeChangeEventHandler ChangeEvent;
+
+		// --------------------------------------------------------
 
 		public LoggedEntryAttributesPage()
 		{
@@ -35,13 +45,16 @@ namespace LoggedTimeUIExtension
 			TimeComboBox.SetWorkingWeek(workWeek);
 			SetDates(workWeek, entry);
 
+			m_FromDateCtrl.ValueChanged += (s, e) => OnAttributeChanged();
+
 			m_FromTimeCombo.SetISOFormat(isoDateTimes);
+			m_FromTimeCombo.ChangeEvent += (s, e) => OnAttributeChanged();
+
 			m_ToTimeCombo.SetISOFormat(isoDateTimes);
+			m_ToTimeCombo.ChangeEvent += (s, e) => OnAttributeChanged();
 
 			DateUtil.SetShortDateFormat(m_FromDateCtrl, isoDateTimes);
-
 			m_EditMode = editMode;
-			ReadOnlyTask = readonlyTask;
 			m_OrgTimeSpent = entry.TimeSpentInHrs;
 
 			m_TimeSpentEdit.Text = entry.TimeSpentInHrs.ToString("N3");
@@ -54,8 +67,12 @@ namespace LoggedTimeUIExtension
 			m_FillColorCheckBox.CheckedChanged += OnFillColorCheckChange;
 			OnFillColorCheckChange(this, null);
 
+			m_CommentEdit.TextChanged += (s, e) => OnAttributeChanged();
+
 			m_TimeSpentEdit.TextChanged += OnTimeSpentChanged; 
 			OnTimeSpentChanged(this, null);
+
+			ReadOnlyTask = readonlyTask;
 		}
 
 		public bool ReadOnlyTask
@@ -64,22 +81,32 @@ namespace LoggedTimeUIExtension
 			set
 			{
 				m_ReadOnlyTask = value;
-				m_AddToTimeSpentCheckBox.Enabled = !value;
+				m_AddToTimeSpentCheckBox.Enabled = !m_ReadOnlyTask;
 			}
+		}
+
+		private void OnAttributeChanged()
+		{
+			ChangeEvent?.Invoke(this, new EventArgs());
 		}
 		
 		private void OnFillColorCheckChange(object sender, EventArgs e)
 		{
 			m_FillColorButton.Enabled = m_FillColorCheckBox.Checked;
+
+			OnAttributeChanged();
 		}
 
 		private void OnTimeSpentChanged(object sender, EventArgs e)
 		{
-			if (m_EditMode && m_AddToTimeSpentCheckBox.Enabled)
+			if (m_EditMode && !m_ReadOnlyTask)
 			{
 				string format = m_Trans.Translate("Also modify task 'Time Spent' by {0:0.###} hours", Translator.Type.CheckBox);
 				m_AddToTimeSpentCheckBox.Text = string.Format(format, (TimeSpent - m_OrgTimeSpent));
 			}
+
+			if (e != null)
+				OnAttributeChanged();
 		}
 
 		public Calendar.AppointmentDates Dates
@@ -110,7 +137,7 @@ namespace LoggedTimeUIExtension
 
 		public double TimeSpent
 		{
-			get { return m_TimeSpentEdit.GetAmount(m_OrgTimeSpent); }
+			get { return m_TimeSpentEdit.GetAmount(); }
 		}
 
 		bool WantAddToTimeSpent
@@ -134,9 +161,14 @@ namespace LoggedTimeUIExtension
 		{
 			if ((entry == null) || (entry.Dates.Start.Date == DateTime.MinValue))
 			{
-				m_FromDateCtrl.Value = DateTime.Now.Date;
-				m_FromTimeCombo.SetTime(m_FromDateCtrl.Value);
-				m_ToTimeCombo.SetTime(m_FromDateCtrl.Value.AddHours(1));
+				var date = DateTime.Now;
+				m_FromDateCtrl.Value = date.Date;
+
+				var time = new TimeSpan(date.Hour, 0, 0);
+				m_FromTimeCombo.SetTime(time);
+
+				time = time.Add(new TimeSpan(1, 0, 0));
+				m_ToTimeCombo.SetTime(time);
 			}
 			else // valid start date
 			{

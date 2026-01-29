@@ -12,8 +12,6 @@ namespace LoggedTimeUIExtension
 {
 	// ------------------------------------------------------------------------------
 
-
-// 	public delegate void TDLAppointmentEventHandler(object sender, TDLMoveAppointmentEventArgs args);
 	public delegate bool TDLContextMenuEventHandler(object sender, MouseEventArgs args);
 
 	public class LogAccessEventArgs
@@ -246,7 +244,6 @@ namespace LoggedTimeUIExtension
  			AppHeightMode = Calendar.DayView.AppHeightDrawMode.TrueHeightAll;
 			DrawAllAppBorder = false;
 			Location = new Point(0, 0);
-			MinHalfHourApp = false;
 			Name = "m_dayView";
 			Renderer = this;
 			Size = new Size(798, 328);
@@ -341,12 +338,15 @@ namespace LoggedTimeUIExtension
 				AltColor = fillColor
 			};
 
-			// Temporarily disable file watcher
-			EnableFileWatching(false);
+			// Disable file watcher during saving
+			bool success = false;
+			{
+				EnableFileWatching(false);
 
-			bool success = m_LogUtil.AddEntry(m_TasklistPath, newEntry, logSeparately);
+				success = m_LogUtil.AddEntry(m_TasklistPath, newEntry, logSeparately);
 
-			EnableFileWatching(true);
+				EnableFileWatching(true);
+			}
 
 			if (success)
 			{
@@ -423,14 +423,26 @@ namespace LoggedTimeUIExtension
 			if (!logFile.DeleteEntry(m_SelectedLogEntryId))
 				Debug.Assert(false);
 
-			if (!logFile.SaveEntries(m_TasklistPath))
-				return false;
+			// Disable file watcher during saving
+			bool success = false;
+			{
+				EnableFileWatching(false);
 
-			// else
-			m_SelectedLogEntryId = 0;
-			Invalidate();
+				success = logFile.SaveEntries(m_TasklistPath);
+				HandleLogAccessResult(logFile.FilePath, false);
 
-			return true;
+				EnableFileWatching(true);
+			}
+
+			if (success)
+			{
+				m_SelectedLogEntryId = 0;
+				SelectedAppointment = null;
+
+				Invalidate();
+			}
+
+			return success;
 		}
 
 		public bool CacheSelectedLogEntry()
@@ -687,13 +699,16 @@ namespace LoggedTimeUIExtension
 				return false;
 			}
 
-			// Temporarily disable file watcher
-			EnableFileWatching(false);
+			// Disable file watcher during saving
+			bool success = false;
+			{
+				EnableFileWatching(false);
 
-			bool success = logFile.SaveEntries(m_TasklistPath);
-			HandleLogAccessResult(logFile.FilePath, false);
+				success = logFile.SaveEntries(m_TasklistPath);
+				HandleLogAccessResult(logFile.FilePath, false);
 
-			EnableFileWatching(true);
+				EnableFileWatching(true);
+			}
 
 			if (success)
 				ClearCachedLogEntry();

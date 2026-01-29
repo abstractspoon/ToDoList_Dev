@@ -8,6 +8,9 @@ using System.Text;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
+
+// ----------------------------------------------------
 
 namespace LoggedTimeUIExtension
 {
@@ -33,32 +36,75 @@ namespace LoggedTimeUIExtension
 			this()
 		{
 			m_TaskItems = taskItems;
-			m_Trans = trans;
 
 			m_Attributes.Initialise(attrib, workWeek, isoDateTimes, false, false, trans);
+			m_Attributes.ChangeEvent += (s, e) => ValidateInputs();
+
 			m_TaskCombo.Initialise(taskItems, taskIcons, attrib.TaskId, TaskItem.None(trans.Translate("<none>", Translator.Type.ComboBox)));
-
-			m_TaskCombo.SelectedIndexChanged += OnSelectedTaskChange;
 			m_TaskCombo.SelectedIndex = 0;
+			m_TaskCombo.SearchUpdated += (s, e) => ValidateInputs();
+			m_TaskCombo.SelectedIndexChanged += (s, e) => ValidateInputs();
 
-			trans.Translate(this);
+			m_Error.ForeColor = DrawingColor.GetErrorLabelTextColor(BackColor);
+
+			m_Trans = trans;
+			m_Trans.Translate(this);
+
+			ValidateInputs();
 		}
 
-		protected void OnSelectedTaskChange(object sender, EventArgs e)
+		protected void ValidateInputs()
 		{
-			uint taskId = m_TaskCombo.SelectedTaskId;
+			bool validTask = (m_TaskCombo.SelectedIndex != -1);
 
-			if (taskId == 0)
+			if (validTask)
 			{
-				m_TaskId.Text = m_Trans.Translate("<none>", Translator.Type.Text);
-				m_Attributes.ReadOnlyTask = true;
+				uint taskId = m_TaskCombo.SelectedTaskId;
+
+				if (taskId == 0)
+				{
+					m_TaskId.Text = m_Trans.Translate("<none>", Translator.Type.Text);
+					m_Attributes.ReadOnlyTask = true;
+				}
+				else
+				{
+					m_TaskId.Text = taskId.ToString();
+
+					var taskItem = m_TaskItems.Where(x => (x.Id == taskId)).FirstOrDefault();
+					m_Attributes.ReadOnlyTask = ((taskItem == null) || taskItem.Locked);
+				}
 			}
 			else
 			{
-				m_TaskId.Text = taskId.ToString();
+				m_TaskId.Text = string.Empty;
+				m_Attributes.ReadOnlyTask = true;
+			}
 
-				var taskItem = m_TaskItems.Where(x => (x.Id == taskId)).FirstOrDefault();
-				m_Attributes.ReadOnlyTask = ((taskItem == null) || taskItem.Locked);
+			// Error text
+			bool validInputs = (validTask && m_Attributes.Dates.IsValid &&
+								((m_Attributes.TimeSpent > 0.0) || !String.IsNullOrWhiteSpace(m_Attributes.Comment)));
+
+			if (validInputs)
+			{
+				OK.Enabled = true;
+				m_Error.Text = string.Empty;
+			}
+			else
+			{
+				OK.Enabled = false;
+
+				if (m_TaskCombo.SelectedIndex == -1)
+				{
+					m_Error.Text = m_Trans.Translate("Invalid task", Translator.Type.Text);
+				}
+				else if (!m_Attributes.Dates.IsValid)
+				{
+					m_Error.Text = m_Trans.Translate("Invalid 'End' time", Translator.Type.Text);
+				}
+				else
+				{
+					m_Error.Text = m_Trans.Translate("'Time Spent' or 'Comment' required", Translator.Type.Text);
+				}
 			}
 		}
 

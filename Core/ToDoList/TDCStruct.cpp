@@ -1169,8 +1169,8 @@ FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType() const
 		nAttribType = GetAttribType(nAttributeID, bRelativeDate);
 
 	ASSERT((nAttribType != FT_NONE) ||
-			(nAttributeID == TDCA_NONE) ||
-			(nAttributeID == TDCA_SELECTION));
+	 	   (nAttributeID == TDCA_NONE) ||
+		   (nAttributeID == TDCA_SELECTION));
 
 	return nAttribType;
 }
@@ -1180,6 +1180,7 @@ void SEARCHPARAM::ClearValue()
 	sValue.Empty();
 	dValue = 0.0;
 	nValue = 0;
+	nTimeUnits = ((nAttribType == FT_TIMEPERIOD) ? TDCU_HOURS : TDCU_NULL);
 }
 
 FIND_ATTRIBTYPE SEARCHPARAM::GetAttribType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate)

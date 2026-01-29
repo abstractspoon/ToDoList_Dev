@@ -11,6 +11,10 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
+	public delegate void AttributeChangeEventHandler(object sender, EventArgs args);
+
+	// ---------------------------------------------------
+
 	public partial class DayViewTimeBlockAttributesPage : UserControl
 	{
 		[Flags]
@@ -25,7 +29,15 @@ namespace DayViewUIExtension
 			All  = 0xff
 		}
 
+		// ---------------------------------------------------
+
 		private bool m_EditMode = false;
+
+		// --------------------------------------------------------
+
+		public event AttributeChangeEventHandler ChangeEvent;
+
+		// ---------------------------------------------------
 
 		public DayViewTimeBlockAttributesPage()
 		{
@@ -39,15 +51,26 @@ namespace DayViewUIExtension
 								TimeBlockSeriesAttributes.EditMask mask = TimeBlockSeriesAttributes.EditMask.None)
 		{
 			TimeComboBox.SetWorkingWeek(workWeek);
-
-			m_DowListBox.SetSelectedDays(workWeek.WeekDays()); // default
 			m_EditMode = editMode;
 
-			m_FromTimeCombo.SetISOFormat(isoDateTimes);
-			m_ToTimeCombo.SetISOFormat(isoDateTimes);
+			m_DowCheckBox.CheckedChanged += (s, e) => OnAttributeChanged();
+			m_SyncToDatesRadioBtn.CheckedChanged += (s, e) => OnAttributeChanged();
+			m_FixedDatesRadioBtn.CheckedChanged += (s, e) => OnAttributeChanged();
+
+			m_DowListBox.SetSelectedDays(workWeek.WeekDays()); // default
+			m_DowListBox.ChangeEvent += (s, e) => OnAttributeChanged();
 
 			DateUtil.SetShortDateFormat(m_FromDateCtrl, isoDateTimes);
+			m_FromDateCtrl.ValueChanged += (s, e) => OnAttributeChanged();
+
 			DateUtil.SetShortDateFormat(m_ToDateCtrl, isoDateTimes);
+			m_ToDateCtrl.ValueChanged += (s, e) => OnAttributeChanged();
+
+			m_FromTimeCombo.SetISOFormat(isoDateTimes);
+			m_FromTimeCombo.ChangeEvent += (s, e) => OnAttributeChanged();
+
+			m_ToTimeCombo.SetISOFormat(isoDateTimes);
+			m_ToTimeCombo.ChangeEvent += (s, e) => OnAttributeChanged();
 
 			if (attribs != null)
 			{
@@ -64,8 +87,13 @@ namespace DayViewUIExtension
 			if (editMode)
 			{
 				m_DateCheckBox.Checked = mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dates);
+				m_DateCheckBox.CheckedChanged += (s, e) => OnAttributeChanged();
+
 				m_TimeCheckBox.Checked = mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Times);
+				m_TimeCheckBox.CheckedChanged += (s, e) => OnAttributeChanged();
+
 				m_DowCheckBox.Checked = mask.HasFlag(TimeBlockSeriesAttributes.EditMask.Dow);
+				m_DowCheckBox.CheckedChanged += (s, e) => OnAttributeChanged();
 			}
 
 			EnableDisableControls();
@@ -96,7 +124,12 @@ namespace DayViewUIExtension
 				m_ToTimeCombo.Enabled = m_TimeCheckBox.Checked;
 			}
 		}
-		
+
+		private void OnAttributeChanged()
+		{
+			ChangeEvent?.Invoke(this, new EventArgs());
+		}
+
 		public TimeBlockSeriesAttributes Attributes
 		{
 			get
