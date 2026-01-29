@@ -5222,15 +5222,9 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	{
 		GetDlgItem(IDC_PROJECTNAME)->SetFocus();
 	}
-	else
+	else if (m_ctrlAttributes.IsAnyTaskSelected(aModTaskIDs))
 	{
-		// Update the attribute editor if any of the 
-		// modified tasks is also selected
-		CDWordArray aSelTaskIDs;
-		GetSelectedTaskIDs(aSelTaskIDs, TRUE);
-
-		if (Misc::MatchAny(aSelTaskIDs, aModTaskIDs))
-			m_idleTasks.RefreshAttributeValues(mapAttribIDs);
+		m_idleTasks.RefreshAttributeValues(mapAttribIDs);
 	}
 
 	if (mapAttribIDs.Has(TDCA_LOCK))

@@ -455,6 +455,7 @@ CONST_FWD_FUNC_RET_1ARG(int, GetDependencies, CTDCDependencyArray&)
 CONST_FWD_FUNC_RET_1ARG(int, GetFileLinks, CStringArray&)
 CONST_FWD_FUNC_RET_1ARG(BOOL, GetCost, TDCCOST&)
 CONST_FWD_FUNC_RET_1ARG(BOOL, IsAutoListDataReadOnly, TDC_ATTRIBUTE)
+CONST_FWD_FUNC_RET_1ARG(BOOL, IsAnyTaskSelected, const CDWordArray&)
 
 // -----------------------------------------------------------------------
 

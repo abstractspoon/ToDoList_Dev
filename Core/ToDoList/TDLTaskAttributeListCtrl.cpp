@@ -1359,6 +1359,11 @@ BOOL CTDLTaskAttributeListCtrl::SetSelectedTaskIDs(const CDWordArray& aTaskIDs)
 	return TRUE;
 }
 
+BOOL CTDLTaskAttributeListCtrl::IsAnyTaskSelected(const CDWordArray& aTaskIDs) const
+{
+	return Misc::MatchAny(aTaskIDs, m_aSelectedTaskIDs);
+}
+
 void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues()
 {
 	RefreshSelectedTasksValues(TDCA_ALL);
