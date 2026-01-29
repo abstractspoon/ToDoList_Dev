@@ -1,4 +1,4 @@
-// Microsoft Visual C++ generated resource script.
+//Microsoft Developer Studio generated resource script.
 //
 #include "resource.h"
 
@@ -13,11 +13,13 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
+#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -25,18 +27,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE MOVEABLE PURE 
 BEGIN
     "\r\n"
     "\0"
@@ -44,7 +46,7 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (United States) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -52,8 +54,10 @@ END
 // English (Australia) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 #pragma code_page(1252)
+#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -62,32 +66,24 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME_STD       ICON                    "..\\ToDoList\\RES\\app_std.ico"
+IDR_MAINFRAME_STD       ICON    DISCARDABLE     "..\\ToDoList\\RES\\app_std.ico"
+IDI_SIMPLETEXT          ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_TIME_TRACK          ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_NULL                ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_DEPENDS_LINK        ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_FILEEDIT_BROWSE     ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_ICON_SELECT         ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+IDI_REMINDER            ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 
-IDI_SIMPLETEXT          ICON                    "..\\ToDoList\\res\\app_std.ico"
-
-IDI_TIME_TRACK          ICON                    "..\\ToDoList\\res\\app_std.ico"
-
-IDI_NULL                ICON                    "..\\ToDoList\\res\\app_std.ico"
-
-IDI_ADD_LOGGED_TIME     ICON                    "..\\ToDoList\\res\\app_std.ico"
-
-IDI_DEPENDS_LINK        ICON                    "..\\ToDoList\\res\\app_std.ico"
-
-IDI_FILEEDIT_BROWSE     ICON                    "..\\ToDoList\\res\\app_std.ico"
-
-IDI_ICON_SELECT         ICON                    "..\\ToDoList\\res\\app_std.ico"
-
-IDI_REMINDER            ICON                    "..\\ToDoList\\res\\app_std.ico"
-
-
+#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 10,0,0,0
+ FILEVERSION 9,0,0,0
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -103,14 +99,18 @@ BEGIN
     BEGIN
         BLOCK "0c0904b0"
         BEGIN
-            VALUE "CompanyName", "TODO: <Company name>"
-            VALUE "FileDescription", "TODO: <File description>"
-            VALUE "FileVersion", "10.0.0.0"
-            VALUE "InternalName", "TDLTest.exe"
-            VALUE "LegalCopyright", "Copyright (C) 2025"
-            VALUE "OriginalFilename", "TDLTest.exe"
-            VALUE "ProductName", "TODO: <Product name>"
-            VALUE "ProductVersion", "1.0.0.1"
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "TODO: <Company name>\0"
+            VALUE "FileDescription", "TODO: <File description>\0"
+            VALUE "FileVersion", "9.0.0.0\0"
+            VALUE "InternalName", "TDLTest.exe\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "TDLTest.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "TODO: <Product name>\0"
+            VALUE "ProductVersion", "1.0.0.1\0"
+            VALUE "SpecialBuild", "\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -119,13 +119,15 @@ BEGIN
     END
 END
 
+#endif    // !_MAC
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_ONCEONLY            "Once"
     IDS_DAILY               "Daily"
@@ -134,7 +136,7 @@ BEGIN
     IDS_YEARLY              "Yearly"
 END
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_LOG_TASKID          "Task ID"
     IDS_LOG_TASKTITLE       "Title"
@@ -142,7 +144,7 @@ BEGIN
     IDS_LOG_ENDDATE         "End Date"
 END
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_LOG_ENDTIME         "End Time"
     IDS_LOG_STARTDATE       "Start Date"
@@ -150,22 +152,22 @@ BEGIN
     IDS_LOG_TIMESPENT       "Time Spent (Hrs)"
 END
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_LOG_COMMENT         "Comment"
 END
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_LOG_TYPE            "Type"
 END
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_LOG_PATH            "Path"
 END
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_LOG_ALTCOLOR        "Colour"
 END
