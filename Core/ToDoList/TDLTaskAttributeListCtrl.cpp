@@ -1367,7 +1367,6 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues()
 void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValues(const CTDCAttributeMap& mapAttribIDs)
 {
 	CHoldRedraw hr(*this);
-	HideAllControls();
 
 	BOOL bRefreshAll = mapAttribIDs.Has(TDCA_ALL);
 	BOOL bRefreshCustomCalcs = (bRefreshAll || m_aCustomAttribDefs.AnyCalculationUsesAnyAttribute(mapAttribIDs));

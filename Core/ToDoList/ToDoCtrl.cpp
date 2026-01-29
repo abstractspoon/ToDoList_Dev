@@ -9451,31 +9451,28 @@ void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)
 	if (!bEnding && IsTaskLabelEditing() && m_timeTracking.IsTracking(GetSelectedTaskID()))
 		return;
 
-	double dIncrement = m_timeTracking.IncrementTrackedTime(); // hours
+	double dIncHours = m_timeTracking.IncrementTrackedTime();
 	
-	if (dIncrement > 0.0)
+	if (dIncHours > 0.0)
 	{
 		DWORD dwTaskID = m_timeTracking.GetTrackedTaskID(TRUE);
 		ASSERT(dwTaskID);
 
-		// Tracked/logged time is always in hours
-		m_dTrackedTimeElapsedHours += dIncrement;
+		m_dTrackedTimeElapsedHours += dIncHours;
 
-		TDCTIMEPERIOD time(dIncrement, TDCU_HOURS);
-		
-		if ((dwTaskID == GetSelectedTaskID()) && (GetSelectedTaskCount() == 1))
-		{
-			// this will also update the Time Spent field
-			SetSelectedTaskTimeSpent(time, TRUE); // offset
-		}
-		else
-		{
-			CDWordArray aModTaskIDs;
-			aModTaskIDs.Add(dwTaskID);
+		// Note: Because this is a 'behind the scenes' update we
+		// want to avoid interfering with anything the user might 
+		// currently be doing so we avoid 'SetSelectedTaskTimeSpent'
+		// and perform a manual edit.
+		// Note: This is NOT an undoable edit else 'real' edits
+		// would get completely lost in the noise.
+		TDCTIMEPERIOD time(dIncHours, TDCU_HOURS);
+		VERIFY(SET_CHANGE == m_data.SetTaskTimeSpent(dwTaskID, time, TRUE)); // offset
 
-			m_data.SetTaskTimeSpent(dwTaskID, time, TRUE); // offset
-			SetModified(TDCA_TIMESPENT, aModTaskIDs);
-		}
+		CDWordArray aModTaskIDs;
+		aModTaskIDs.Add(dwTaskID);
+
+		SetModified(TDCA_TIMESPENT, aModTaskIDs);
 
 		// Is a reminder due?
 		if (m_timeTracking.IsReminderDue())
