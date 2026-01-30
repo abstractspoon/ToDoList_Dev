@@ -3207,7 +3207,6 @@ void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_
 CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize, int nImage, int nCount) const
 {
 	CRect rImage(rSubItem.TopLeft(), CSize(nImageSize, nImageSize));
-	
 	rImage.OffsetRect(LV_COLPADDING, 0);
 
 	GraphicsMisc::CentreRect(rImage, rSubItem, (nCount == 1), TRUE);

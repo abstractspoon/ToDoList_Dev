@@ -2081,7 +2081,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 		{
 			CRect rIcon(rText);
 
-			if (DrawIcon(pDC, sText, rIcon, FALSE))
+			if (DrawIcon(pDC, sText, rIcon, FALSE) && (rIcon.Width() > 0))
 				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rIcon, CTDLTaskIconDlg::GetUserIconName(sText), crText, nDrawTextFlags);
 		}
 		return;
@@ -2117,10 +2117,12 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 			CRect rFile(rText);
 
-			for (int nFile = 0; nFile < nNumFiles; nFile++)
+			for (int nFile = 0; (nFile < nNumFiles) && (rFile.Width() > 0); nFile++)
 			{
 				CString sFile = aFiles[nFile];
-				DrawIcon(pDC, sFile, rFile, TRUE);
+				
+				if (DrawIcon(pDC, sFile, rFile, TRUE) && (rFile.Width() <= 0))
+					break;
 
 				if (!TDCTASKLINK::IsTaskLink(sFile, TRUE))
 					sFile = FileMisc::GetFileNameFromPath(sFile);
@@ -2130,9 +2132,6 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 
 				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rFile, sFile, crText, nDrawTextFlags);
 				rFile.left += pDC->GetTextExtent(sFile).cx;
-
-				if (rFile.left >= rText.right)
-					break;
 			}
 		}
 		return;
@@ -2142,22 +2141,23 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			CTDCDependencyArray aDepends;
 			int nNumDepends = aDepends.Parse(sText);
 
-			CRect rTitle(rText);
+			CRect rDepend(rText);
 
-			for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+			for (int nDepend = 0; (nDepend < nNumDepends) && (rDepend.Width() > 0); nDepend++)
 			{
 				DWORD dwDependsID = aDepends[nDepend].dwTaskID;
 
-				CString sTitle = m_formatter.GetTaskTitlePath(dwDependsID, (TDCTF_TITLEONLY | TDCTF_TRAILINGID));
+				CString sDepend = m_formatter.GetTaskTitlePath(dwDependsID, (TDCTF_TITLEONLY | TDCTF_TRAILINGID));
 				CString sIcon = m_data.GetTaskIcon(dwDependsID);
 	
-				DrawIcon(pDC, m_data.GetTaskIcon(dwDependsID), rTitle, FALSE);
+				if (DrawIcon(pDC, sIcon, rDepend, FALSE) && (rDepend.Width() <= 0))
+					break;
 
 				if (nDepend < (nNumDepends - 1))
-					sTitle += Misc::GetListSeparator() + ' ';
+					sDepend += Misc::GetListSeparator() + ' ';
 
-				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rTitle, sTitle, crText, nDrawTextFlags);
-				rTitle.left += pDC->GetTextExtent(sTitle).cx;
+				CInputListCtrl::DrawCellText(pDC, nRow, nCol, rDepend, sDepend, crText, nDrawTextFlags);
+				rDepend.left += pDC->GetTextExtent(sDepend).cx;
 			}
 		}
 		return;
@@ -2173,9 +2173,9 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 			case TDCCA_FILELINK:
 				{
 					CRect rRest(rText);
-					DrawIcon(pDC, sText, rRest, TRUE);
-	
-					CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, FileMisc::GetFileNameFromPath(sText), crText, nDrawTextFlags);
+					
+					if (!DrawIcon(pDC, sText, rRest, TRUE) || (rRest.Width() > 0))
+						CInputListCtrl::DrawCellText(pDC, nRow, nCol, rRest, FileMisc::GetFileNameFromPath(sText), crText, nDrawTextFlags);
 				}
 				return;
 
@@ -2192,10 +2192,12 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 						CStringArray aIcons;
 						int nNumIcons = SplitValueArray(sMatched, aIcons);
 
-						for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
+						for (int nIcon = 0; (nIcon < nNumIcons) && (rIcon.Width() > 0); nIcon++)
+						{
 							DrawIcon(pDC, aIcons[nIcon], rIcon, FALSE);
+						}
 
-						if (nNumIcons == 1)
+						if ((nNumIcons == 1) && (rIcon.Width() > 0))
 						{
 							if (!pDef->GetListIconName(sText, sIconName))
 								sIconName = CTDLTaskIconDlg::GetUserIconName(sText);
@@ -2206,7 +2208,7 @@ void CTDLTaskAttributeListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol, const
 						CString sImage;
 						
 						if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(sText, sImage, sIconName) &&
-							DrawIcon(pDC, sImage, rIcon, FALSE))
+							DrawIcon(pDC, sImage, rIcon, FALSE) && (rIcon.Width() > 0))
 						{
 							if (sIconName.IsEmpty() && (!pDef->IsList() || !pDef->GetListIconName(sImage, sIconName)))
 								sIconName = CTDLTaskIconDlg::GetUserIconName(sImage);
@@ -2275,6 +2277,13 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, CRect& 
 		return FALSE;
 
 	BOOL bDrawn = FALSE;
+	int nSaveDC = -1;
+
+	if (rIcon.Width() < ICON_SIZE)
+	{
+		nSaveDC = pDC->SaveDC();
+		pDC->IntersectClipRect(rIcon);
+	}
 
 	if (bIconIsFile)
 	{
@@ -2298,6 +2307,9 @@ BOOL CTDLTaskAttributeListCtrl::DrawIcon(CDC* pDC, const CString& sIcon, CRect& 
 
 	if (bDrawn)
 		rIcon.left += (ICON_SIZE + 2);
+
+	if (nSaveDC != -1)
+		pDC->RestoreDC(nSaveDC);
 
 	return bDrawn;
 }
