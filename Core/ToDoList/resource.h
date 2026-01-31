@@ -884,6 +884,8 @@
 #define IDC_OFFSETDATE                  1596
 #define IDC_TOOLDETAILS                 1597
 #define IDC_REMAININGCOUNT              1598
+#define IDC_PLACEHOLDER                 1599
+#define IDC_IMPORTERLIST                1600
 #define IDC_TASKLIST                    2000
 #define IDD_OUTLOOKIMPORTITEMS_DIALOG   2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -903,7 +905,9 @@
 #define IDI_TDLUPDATE                   2005
 #define IDC_HIDEUNFLAGGEDEMAIL          2006
 #define IDI_FOLDER                      2006
+#define IDD_IMPORT_FROM_PAGE            2006
 #define IDI_JOURNAL                     2007
+#define IDD_IMPORT_TO_PAGE              2007
 #define IDI_MAIL                        2008
 #define IDI_APPOINTMENT                 2009
 #define IDI_FLAGGEDMAIL                 2010
@@ -2604,7 +2608,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        339
 #define _APS_NEXT_COMMAND_VALUE         34789
-#define _APS_NEXT_CONTROL_VALUE         1599
+#define _APS_NEXT_CONTROL_VALUE         1601
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
