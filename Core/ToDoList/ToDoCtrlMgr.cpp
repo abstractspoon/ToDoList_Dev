@@ -859,9 +859,7 @@ void CToDoCtrlMgr::CheckNotifyReadonly(int nIndex) const
 {
 	CHECKVALIDINDEX(nIndex);
 	
-	const CPreferencesDlg& userPrefs = Prefs();
-	
-	if (nIndex >= 0 && userPrefs.GetNotifyReadOnly())
+	if ((nIndex >= 0) && Prefs().GetNotifyReadOnly())
 	{
 		CString sDisplayPath = GetDisplayPath(nIndex);
 		CString sFilePath = GetFilePath(nIndex);
@@ -1516,7 +1514,6 @@ void CToDoCtrlMgr::PreparePopupMenu(CMenu& menu, UINT nID1, int nMax) const
 	// delete any unused items
 	for (; nTDC < nMax; nTDC++)
 		menu.RemoveMenu(nID1 + nTDC, MF_BYCOMMAND);
-
 }
 
 int CToDoCtrlMgr::GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const
