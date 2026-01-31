@@ -63,7 +63,7 @@
 #define IDD_CMDLINEOPTIONS_DIALOG       229
 #define IDB_UK_FLAG                     235
 #define IDB_YOURLANG_FLAG               236
-#define IDD_OUTLOOKMSGIMPORT_DIALOG     238
+#define IDD_OUTLOOKATTRIBMAPPING_DIALOG 238
 #define IDI_TASKTREE_STD                240
 #define IDD_ADDCUSTOMATTRIB_DIALOG      241
 #define IDI_LISTVIEW_STD                241
@@ -885,7 +885,7 @@
 #define IDC_TOOLDETAILS                 1597
 #define IDC_REMAININGCOUNT              1598
 #define IDC_TASKLIST                    2000
-#define IDD_IMPORT_OUTLOOK_DIALOG       2000
+#define IDD_OUTLOOKIMPORTITEMS_DIALOG   2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
 #define IDI_NOTE                        2002
 #define IDI_RESET                       2002

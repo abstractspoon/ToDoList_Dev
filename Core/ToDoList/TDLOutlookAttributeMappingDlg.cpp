@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "TDLImportOutlookObjectsDlg.h"
+#include "TDLOutlookAttributeMappingDlg.h"
 
 #include "..\shared\MSoutlookhelper.h"
 #include "..\shared\misc.h"
@@ -88,11 +88,11 @@ static OUTLOOK_FIELD FIELDS[] =
 const UINT NUM_FIELDS = sizeof(FIELDS) / sizeof(OUTLOOK_FIELD);
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportOutlookObjectsDlg dialog
+// CTDLOutlookAttributeMappingDlg dialog
 
-CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refItem, LPCTSTR szAltTitle, CWnd* pParent /*=NULL*/)
+CTDLOutlookAttributeMappingDlg::CTDLOutlookAttributeMappingDlg(OutlookAPI::_Item& refItem, LPCTSTR szAltTitle, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_OUTLOOKMSGIMPORT_DIALOG, _T("ImportOutlook"), pParent), 
+	CTDLDialog(IDD_OUTLOOKATTRIBMAPPING_DIALOG, _T("ImportOutlook"), pParent), 
 	m_refItem(refItem), 
 	m_bHideUnmapped(FALSE), 
 	m_bHideConfidential(TRUE),
@@ -103,7 +103,7 @@ CTDLImportOutlookObjectsDlg::CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refI
 	m_iconDlg.SetIcon(CMSOutlookHelper::GetOutlookIcon());
 }
 
-void CTDLImportOutlookObjectsDlg::DoDataExchange(CDataExchange* pDX)
+void CTDLOutlookAttributeMappingDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 
@@ -113,7 +113,7 @@ void CTDLImportOutlookObjectsDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLImportOutlookObjectsDlg, CTDLDialog)
+BEGIN_MESSAGE_MAP(CTDLOutlookAttributeMappingDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_HIDEUNMAPPED, OnHideAttributes)
 	ON_BN_CLICKED(IDC_HIDECONFIDENTIAL, OnHideAttributes)
 	ON_CONTROL(TDCN_IMPORTMAPPINGCHANGE, IDC_FIELDMAPPING, OnMappingChange)
@@ -121,9 +121,8 @@ BEGIN_MESSAGE_MAP(CTDLImportOutlookObjectsDlg, CTDLDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportOutlookObjectsDlg message handlers
 
-BOOL CTDLImportOutlookObjectsDlg::OnInitDialog() 
+BOOL CTDLOutlookAttributeMappingDlg::OnInitDialog() 
 {
 	CTDLDialog::OnInitDialog();
 
@@ -155,7 +154,7 @@ BOOL CTDLImportOutlookObjectsDlg::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CTDLImportOutlookObjectsDlg::OnOK()
+void CTDLOutlookAttributeMappingDlg::OnOK()
 {
 	CTDLDialog::OnOK();
 
@@ -163,7 +162,7 @@ void CTDLImportOutlookObjectsDlg::OnOK()
 	SaveMasterMapping();
 }
 
-void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
+void CTDLOutlookAttributeMappingDlg::BuildMasterMapping()
 {
 	// restore last state from preferences
 	CString sSection;
@@ -221,7 +220,7 @@ void CTDLImportOutlookObjectsDlg::BuildMasterMapping()
 	}
 }
 
-void CTDLImportOutlookObjectsDlg::RemoveUnwantedAttributes(CTDCAttributeMapping& aMapping) const
+void CTDLOutlookAttributeMappingDlg::RemoveUnwantedAttributes(CTDCAttributeMapping& aMapping) const
 {
 	if (m_bHideUnmapped || m_bHideConfidential)
 	{
@@ -243,7 +242,7 @@ void CTDLImportOutlookObjectsDlg::RemoveUnwantedAttributes(CTDCAttributeMapping&
 	}
 }
 
-void CTDLImportOutlookObjectsDlg::SaveMasterMapping() const
+void CTDLOutlookAttributeMappingDlg::SaveMasterMapping() const
 {
 	CString sSection;
 	sSection.Format(_T("OutlookFieldMapping\\%s"), CMSOutlookHelper::GetItemClass(m_refItem));
@@ -264,7 +263,7 @@ void CTDLImportOutlookObjectsDlg::SaveMasterMapping() const
 	}
 }
 
-void CTDLImportOutlookObjectsDlg::UpdateMasterMapping()
+void CTDLOutlookAttributeMappingDlg::UpdateMasterMapping()
 {
 	CTDCAttributeMapping aMapping;
 	m_lcFieldMapping.GetColumnMapping(aMapping);
@@ -282,7 +281,7 @@ void CTDLImportOutlookObjectsDlg::UpdateMasterMapping()
 	}
 }
 
-CString CTDLImportOutlookObjectsDlg::GetOutlookFieldName(OUTLOOK_FIELDTYPE nFieldType)
+CString CTDLOutlookAttributeMappingDlg::GetOutlookFieldName(OUTLOOK_FIELDTYPE nFieldType)
 {
 	for (int nField = 0; nField < NUM_FIELDS; nField++)
 	{
@@ -296,7 +295,7 @@ CString CTDLImportOutlookObjectsDlg::GetOutlookFieldName(OUTLOOK_FIELDTYPE nFiel
 	return _T("");
 }
 
-int CTDLImportOutlookObjectsDlg::GetColumnMapping(CTDCAttributeMapping& aMapping) 
+int CTDLOutlookAttributeMappingDlg::GetColumnMapping(CTDCAttributeMapping& aMapping) 
 { 
 	// get the latest changes from the list control
 	UpdateMasterMapping();
@@ -320,7 +319,7 @@ int CTDLImportOutlookObjectsDlg::GetColumnMapping(CTDCAttributeMapping& aMapping
 	return aMapping.GetSize();
 }
 
-CString CTDLImportOutlookObjectsDlg::FormatFieldAndData(const OUTLOOK_FIELD& oaField) const
+CString CTDLOutlookAttributeMappingDlg::FormatFieldAndData(const OUTLOOK_FIELD& oaField) const
 {
 	CEnString sField(oaField.nIDFieldName);
 	CEnString sData, sFieldAndData(sField);
@@ -337,7 +336,7 @@ CString CTDLImportOutlookObjectsDlg::FormatFieldAndData(const OUTLOOK_FIELD& oaF
 	return sFieldAndData;
 }
 
-void CTDLImportOutlookObjectsDlg::OnHideAttributes() 
+void CTDLOutlookAttributeMappingDlg::OnHideAttributes() 
 {
 	UpdateMasterMapping();
 
@@ -375,12 +374,12 @@ void CTDLImportOutlookObjectsDlg::OnHideAttributes()
 	m_lcFieldMapping.SetColumnMapping(aMapping);
 }
 
-void CTDLImportOutlookObjectsDlg::OnMappingChange()
+void CTDLOutlookAttributeMappingDlg::OnMappingChange()
 {
 	EnableDisableOK();
 }
 
-void CTDLImportOutlookObjectsDlg::EnableDisableOK()
+void CTDLOutlookAttributeMappingDlg::EnableDisableOK()
 {
 	BOOL bEnable = m_lcFieldMapping.IsAttributeMapped(TDCA_TASKNAME);
 	
@@ -388,7 +387,7 @@ void CTDLImportOutlookObjectsDlg::EnableDisableOK()
 	GetDlgItem(IDC_IMPORT_MUSTMAPTITLE)->ShowWindow(bEnable ? SW_HIDE : SW_SHOW);
 }
 
-HBRUSH CTDLImportOutlookObjectsDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+HBRUSH CTDLOutlookAttributeMappingDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 	

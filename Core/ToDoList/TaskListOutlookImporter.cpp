@@ -6,7 +6,7 @@
 #include "resource.h"
 
 #include "TasklistOutlookImporter.h"
-#include "TDLImportOutlookDlg.h"
+#include "TDLOutlookImportItemsDlg.h"
 
 #include "..\shared\Localizer.h"
 #include "..\shared\MSOutlookHelper.h"
@@ -41,7 +41,7 @@ IIMPORTEXPORT_RESULT CTaskListOutlookImporter::Import(LPCTSTR /*szSrcFilePath*/,
 
 	if (!bSilent)
 	{
-		CTDLImportOutlookDlg dlg;
+		CTDLOutlookImportItemsDlg dlg;
 
 		return dlg.ImportTasks(pDestTaskFile, pPrefs, szKey);
 	}

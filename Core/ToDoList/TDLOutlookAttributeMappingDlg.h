@@ -1,5 +1,5 @@
-#if !defined(AFX_TDLIMPORTOUTLOOKMSGSDLG_H__56B41CA4_32AC_485E_8436_49958724F2C9__INCLUDED_)
-#define AFX_TDLIMPORTOUTLOOKMSGSDLG_H__56B41CA4_32AC_485E_8436_49958724F2C9__INCLUDED_
+#if !defined(AFX_TDLOUTLOOKATTRIBMAPPINGDLG_H__56B41CA4_32AC_485E_8436_49958724F2C9__INCLUDED_)
+#define AFX_TDLOUTLOOKATTRIBMAPPINGDLG_H__56B41CA4_32AC_485E_8436_49958724F2C9__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -7,7 +7,7 @@
 // TDLImportOutlookMsgsDlg.h : header file
 //
 
-#include "TDLImportOutlookObjectSetupListCtrl.h"
+#include "TDLOutlookAttributeMappingListCtrl.h"
 #include "TDLDialog.h"
 #include "tdcstruct.h"
 
@@ -18,12 +18,12 @@
 struct OUTLOOK_FIELD;
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportOutlookObjectsDlg dialog
+// CTDLOutlookAttributeMappingDlg dialog
 
-class CTDLImportOutlookObjectsDlg : public CTDLDialog
+class CTDLOutlookAttributeMappingDlg : public CTDLDialog
 {
 public:
-	CTDLImportOutlookObjectsDlg(OutlookAPI::_Item& refItem, LPCTSTR szAltTitle = NULL, CWnd* pParent = NULL);   // standard constructor
+	CTDLOutlookAttributeMappingDlg(OutlookAPI::_Item& refItem, LPCTSTR szAltTitle = NULL, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL GetWantConfidentialAttributes() const { return !m_bHideConfidential; }
 	int GetColumnMapping(CTDCAttributeMapping& aMapping);
@@ -36,7 +36,7 @@ protected:
 	CString m_sClass;
 	CString m_sAltTitle;
 
-	CTDLImportOutlookObjectSetupListCtrl m_lcFieldMapping;
+	CTDLOutlookAttributeMappingListCtrl m_lcFieldMapping;
 	CMSOutlookItemDataMap m_mapRefData;
 	OutlookAPI::_Item& m_refItem;
 
@@ -67,4 +67,4 @@ protected:
 
 };
 
-#endif // !defined(AFX_TDLIMPORTOUTLOOKMSGSDLG_H__56B41CA4_32AC_485E_8436_49958724F2C9__INCLUDED_)
+#endif // !defined(AFX_TDLOUTLOOKATTRIBMAPPINGDLG_H__56B41CA4_32AC_485E_8436_49958724F2C9__INCLUDED_)
