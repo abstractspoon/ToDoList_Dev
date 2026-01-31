@@ -35,7 +35,6 @@ class CTabCtrlEx;
  
 class CToDoCtrlMgr
 {
-	// Construction
 public:
 	CToDoCtrlMgr(CTabCtrlEx& tabCtrl); 
 	~CToDoCtrlMgr();
@@ -143,11 +142,7 @@ public:
 
 	int GetAllCustomAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	BOOL AnyHasCustomAttributeFeature(DWORD dwFeature) const;
-	
-	// For testability
-	static BOOL CreateBackup(const CString& sPath, const CString& sBackupFolder, int nNumKeepBackups);
 
-	// Implementation
 protected:
 	struct TDCITEM
 	{
@@ -199,12 +194,8 @@ protected:
 	BOOL AreToDoCtrlsSortedByName() const;
 
 	int UpdateTabItemImage(int nIndex) const;
-	void BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nNumKeepBackups) const;
 
 	static CFilteredToDoCtrl& GetFallbackToDoCtrl();
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TODOCTRLMGR_H__13051D32_D372_4205_BA71_05FAC2159F1C__INCLUDED_)
