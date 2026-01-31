@@ -51,7 +51,7 @@ enum TASKLISTPOS
 
 CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLImportDialog::IDD, _T("Importing"), pParent),
+	CTDLDialog(IDD_IMPORT_DIALOG, _T("Importing"), pParent),
 	m_mgrImportExport(mgr),
 	m_cbFormat(mgr, TRUE, FALSE),
 	m_nImportMode(TDCIM_ALL),
@@ -59,8 +59,6 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 	m_bTasklistHasSelection(bTasklistHasSelection),
 	m_sFromText(CClipboard().GetText())
 {
-	//{{AFX_DATA_INIT(CTDLImportDialog)
-	//}}AFX_DATA_INIT
 	CPreferences prefs;
 
 	m_bFromText = prefs.GetProfileInt(m_sPrefsKey, _T("ImportOption"), FALSE);
@@ -97,7 +95,6 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CTDLImportDialog)
 	DDX_Control(pDX, IDC_ACTIVETASKLISTPOSITION, m_cbTasklistPos);
 	DDX_Control(pDX, IDC_INPUTFILE, m_eFilePath);
 	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
@@ -106,18 +103,12 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_CREATETASK, m_nImportTo);
 	DDX_Text(pDX, IDC_INPUTTEXT, m_sFromText);
 	DDX_Radio(pDX, IDC_MERGEBYTITLE, m_bMatchByTaskID);
-	//}}AFX_DATA_MAP
 	DDX_CBData(pDX, m_cbTasklistPos, m_nActiveTasklistPos, (int)(m_bTasklistHasSelection ? SELECTEDTASK : BOTTOMOFTASKLIST));
 
 	m_cbFormat.DDX(pDX, m_sFormatTypeID);
-// 	if (pDX->m_bSaveAndValidate)
-// 		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
-// 	else
-// 		m_cbFormat.SetSelectedTypeID(m_sFormatTypeID);
 }
 
 BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLImportDialog)
 	ON_BN_CLICKED(IDC_FROMTEXT, OnChangeImportFrom)
 	ON_CBN_SELCHANGE(IDC_FORMATOPTIONS, OnSelchangeFormatoptions)
 	ON_EN_CHANGE(IDC_INPUTTEXT, OnChangeClipboardtext)
@@ -128,11 +119,9 @@ BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
 	ON_BN_CLICKED(IDC_ADDTOACTIVETASKLIST, OnChangeImportTo)
 	ON_BN_CLICKED(IDC_ADDTOSELECTEDTASK, OnChangeImportTo)
 	ON_BN_CLICKED(IDC_CREATENEWTASKLIST, OnChangeImportTo)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportDialog message handlers
 
 BOOL CTDLImportDialog::SetImportTo(TDLID_IMPORTTO nImportTo)
 {
