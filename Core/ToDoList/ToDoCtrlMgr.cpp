@@ -1570,9 +1570,6 @@ BOOL CToDoCtrlMgr::DoBackup(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	if (!Prefs().GetBackupOnSave())
-		return TRUE;
-	
 	CString sTDLPath = GetFilePath(nIndex);
 	
 	if (sTDLPath.IsEmpty())
