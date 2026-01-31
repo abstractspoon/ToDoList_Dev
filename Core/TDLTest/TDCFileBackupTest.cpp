@@ -1,12 +1,12 @@
-// FileMiscTest.cpp: implementation of the CToDoCtrlMgrTest class.
+// TDCFileBackupTest.cpp: implementation of the CTDCFileBackupTest class.
 //
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "TDLTest.h"
-#include "ToDoCtrlMgrTest.h"
+#include "TDCFileBackupTest.h"
 
-#include "..\ToDoList\ToDoCtrlMgr.h"
+#include "..\ToDoList\TDCFileBackup.h"
 
 #include "..\shared\FileMisc.h"
 #include "..\shared\Misc.h"
@@ -21,18 +21,18 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CToDoCtrlMgrTest::CToDoCtrlMgrTest(const CTestUtils& utils) 
+CTDCFileBackupTest::CTDCFileBackupTest(const CTestUtils& utils) 
 	: 
-	CTDLTestBase(_T("CToDoCtrlMgrTest"), utils)
+	CTDLTestBase(_T("CTDCFileBackupTest"), utils)
 {
 
 }
 
-CToDoCtrlMgrTest::~CToDoCtrlMgrTest()
+CTDCFileBackupTest::~CTDCFileBackupTest()
 {
 }
 
-TESTRESULT CToDoCtrlMgrTest::Run()
+TESTRESULT CTDCFileBackupTest::Run()
 {
 	ClearTotals();
 
@@ -41,7 +41,7 @@ TESTRESULT CToDoCtrlMgrTest::Run()
 	return GetTotals();
 }
 
-void CToDoCtrlMgrTest::TestCreateBackup()
+void CTDCFileBackupTest::TestCreateBackup()
 {
 	CTDCScopedTest test(*this, _T("CToDoCtrlMgr::CreateBackup"));
 	CStringArray aBackups;
@@ -78,7 +78,7 @@ void CToDoCtrlMgrTest::TestCreateBackup()
 	const int nNumToKeep = 3;
 
 	{
-		ExpectTrue(CToDoCtrlMgr::CreateBackup(_T("FileToBackup.csv"), _T("backup"), nNumToKeep));
+		ExpectTrue(CTDCFileBackup::CreateBackup(_T("FileToBackup.csv"), _T("backup"), nNumToKeep));
 		ExpectEQ(7, FileMisc::FindFiles(_T("backup"), aBackups, FALSE, _T("*.csv")));
 
 		// We expect the oldest of the original v9.0.0.0 backups to have been removed
@@ -108,7 +108,7 @@ void CToDoCtrlMgrTest::TestCreateBackup()
 		// Ensure new date-stamp
 		Sleep(1000);
 
-		ExpectTrue(CToDoCtrlMgr::CreateBackup(_T("FileToBackup.csv"), _T("backup"), nNumToKeep));
+		ExpectTrue(CTDCFileBackup::CreateBackup(_T("FileToBackup.csv"), _T("backup"), nNumToKeep));
 		ExpectEQ(7, FileMisc::FindFiles(_T("backup"), aBackups, FALSE, _T("*.csv")));
 
 		// We expect the 2nd oldest of the original v9.0.0.0 backups to have been removed
@@ -140,7 +140,7 @@ void CToDoCtrlMgrTest::TestCreateBackup()
 		// Ensure new date-stamp
 		Sleep(1000);
 
-		ExpectTrue(CToDoCtrlMgr::CreateBackup(_T("FileToBackup.csv"), _T("backup"), nNumToKeep));
+		ExpectTrue(CTDCFileBackup::CreateBackup(_T("FileToBackup.csv"), _T("backup"), nNumToKeep));
 		ExpectEQ(7, FileMisc::FindFiles(_T("backup"), aBackups, FALSE, _T("*.csv")));
 
 		// We expect none of the original v9.0.0.0 backups to remain
