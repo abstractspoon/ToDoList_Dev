@@ -161,7 +161,7 @@ PAUSE
 EXIT
 )
 
-%MSBUILD% %SOLUTION% /t:Build /p:Configuration=Release /m /v:normal > %OUTPUT_FILE%
+%MSBUILD% %SOLUTION% /t:Build /p:Configuration=Release /p:Platform="Mixed Platforms" /m /v:normal > %OUTPUT_FILE%
 
 REM - Check for compile errors
 FINDSTR /C:"): error" %OUTPUT_FILE%

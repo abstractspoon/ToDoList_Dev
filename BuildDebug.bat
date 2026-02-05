@@ -41,7 +41,7 @@ ECHO SOLUTION = %SOLUTION%
 MKDIR %REPO%\Core\ToDoList\Unicode_Debug 2> NUL
 DEL %OUTPUT_FILE% 2> NUL
 
-%MSBUILD% %SOLUTION% /t:Build /p:Configuration="Unicode Debug" /m /v:normal > %OUTPUT_FILE%
+%MSBUILD% %SOLUTION% /t:Build /p:Configuration="Unicode Debug" /p:Platform="Win32" /m /v:normal > %OUTPUT_FILE%
 ECHO:
 
 REM - Check for compile errors
@@ -122,7 +122,7 @@ ECHO:
 MKDIR %REPO%\Plugins\Debug 2> NUL
 DEL %OUTPUT_FILE% 2> NUL
 
-%MSBUILD% %SOLUTION% /t:Build /p:Configuration=Debug /m /v:normal > %OUTPUT_FILE%
+%MSBUILD% %SOLUTION% /t:Build /p:Configuration=Debug /p:Platform="Mixed Platforms" /m /v:normal > %OUTPUT_FILE%
 
 REM - Check for compile errors
 FINDSTR /C:"): error" %OUTPUT_FILE%
