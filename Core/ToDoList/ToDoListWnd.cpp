@@ -203,15 +203,14 @@ CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
 {
 }
 
-void CToDoListWnd::IDLETASKS::UpdateStatusBar(const CTDCAttributeMap& mapAttrib)
+void CToDoListWnd::IDLETASKS::UpdateStatusBar(const CTDCAttributeMap& mapAttribIDs)
 {
-	if (mapAttrib.Has(TDCA_ALL))
+	if (!mapAttribIDs.MatchAll(m_mapStatusBarAttrib))
 	{
-		m_mapStatusBarAttrib.Set(TDCA_ALL);
-	}
-	else if (!m_mapStatusBarAttrib.Has(TDCA_ALL))
-	{
-		m_mapStatusBarAttrib.Append(mapAttrib);
+		if (mapAttribIDs.Has(TDCA_ALL) || !m_mapStatusBarAttrib.IsEmpty())
+			m_mapStatusBarAttrib.Set(TDCA_ALL);
+		else
+			m_mapStatusBarAttrib.Append(mapAttribIDs);
 	}
 }
 
@@ -3801,7 +3800,13 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	if (pMod->mapAttrib.Has(TDCA_PASTE))
 		m_idleTasks.UpdateAutoListData();
 
-	m_idleTasks.UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+	// If this is a 'new task' notification pass it on to the time-tracker 
+	// immediately because its correct working depends on always being up to date
+	if (pMod->mapAttrib.Has(TDCA_NEWTASK))
+		UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+	else
+		m_idleTasks.UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+
 	m_idleTasks.UpdateStatusBar(pMod->mapAttrib);
 
 	if (m_dlgReminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))

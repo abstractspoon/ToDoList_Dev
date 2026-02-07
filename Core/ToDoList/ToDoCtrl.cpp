@@ -179,13 +179,12 @@ void CToDoCtrl::IDLETASKS::RefreshAttributeValues(const CTDCAttributeMap& mapAtt
 {
 	ASSERT(!mapAttribIDs.IsEmpty());
 
-	if (mapAttribIDs.Has(TDCA_ALL))
+	if (!mapAttribIDs.MatchAll(m_mapRefreshAttribIDs))
 	{
-		m_mapRefreshAttribIDs.Set(TDCA_ALL);
-	}
-	else if (!m_mapRefreshAttribIDs.Has(TDCA_ALL))
-	{
-		m_mapRefreshAttribIDs.Append(mapAttribIDs);
+		if (mapAttribIDs.Has(TDCA_ALL) || !m_mapRefreshAttribIDs.IsEmpty())
+			m_mapRefreshAttribIDs.Set(TDCA_ALL);
+		else
+			m_mapRefreshAttribIDs.Append(mapAttribIDs);
 	}
 }
 
