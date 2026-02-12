@@ -641,37 +641,34 @@ double STATSITEM::GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bI
 COleDateTime STATSITEM::GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
-	COleDateTime date;
 
 	if (pTasks->GetTaskStartDate64(hTask, false, tDate))
-		date = GetDate(tDate);
+		return GetDate(tDate);
 
-	if (!CDateHelper::IsDateSet(date) && pTasks->GetTaskCreationDate64(hTask, tDate))
-		date = GetDate(tDate);
+	if (pTasks->GetTaskCreationDate64(hTask, tDate))
+		return GetDate(tDate);
 
-	return date;
+	return CDateHelper::NullDate();
 }
 
 COleDateTime STATSITEM::GetDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
-	COleDateTime date;
 
 	if (pTasks->GetTaskDoneDate64(hTask, tDate))
-		date = GetDate(tDate);
-
-	return date;
+		return GetDate(tDate);
+	
+	return CDateHelper::NullDate();
 }
 
 COleDateTime STATSITEM::GetDueDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
-	COleDateTime date;
 
 	if (pTasks->GetTaskDueDate64(hTask, false, tDate))
-		date = GetDate(tDate);
+		return GetDate(tDate);
 
-	return date;
+	return CDateHelper::NullDate();
 }
 
 COleDateTime STATSITEM::GetDate(time64_t tDate)
