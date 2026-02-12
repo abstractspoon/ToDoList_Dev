@@ -252,6 +252,9 @@ BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_theme.crAppBackLight != CLR_NONE)
 	{
+		// clip out our children
+		CSaveDC sdc(pDC);
+		
 		ExcludeCtrl(this, IDC_COMBO, pDC);
 		ExcludeCtrl(this, IDC_CTRL, pDC);
 

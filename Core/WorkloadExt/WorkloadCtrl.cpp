@@ -2559,6 +2559,9 @@ void CWorkloadCtrl::OnNotifySplitterChange(int nSplitPos)
 
 BOOL CWorkloadCtrl::HandleEraseBkgnd(CDC* pDC)
 {
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	CDialogHelper::ExcludeChild(&m_lcTotalsLabels, pDC);
 	CDialogHelper::ExcludeChild(&m_lcColumnTotals, pDC);
 	CDialogHelper::ExcludeChild(&m_barChart, pDC);

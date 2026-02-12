@@ -3081,6 +3081,9 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	if (!GetTDCCount())
 		return CFrameWnd::OnEraseBkgnd(pDC);
 
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	CDialogHelper::ExcludeChild(&m_toolbarMain, pDC);
 	CDialogHelper::ExcludeChild(&m_toolbarCustom, pDC);
 	CDialogHelper::ExcludeChild(&m_statusBar, pDC);

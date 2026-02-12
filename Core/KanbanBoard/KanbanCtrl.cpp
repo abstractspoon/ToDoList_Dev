@@ -2603,6 +2603,9 @@ BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_aColumns.GetSize())
 	{
+		// clip out our children
+		CSaveDC sdc(pDC);
+		
 		CDialogHelper::ExcludeChild(&m_header, pDC);
 		CDialogHelper::ExcludeChild(&m_sbHorz, pDC);
 

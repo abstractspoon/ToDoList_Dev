@@ -734,6 +734,9 @@ void CToDoCtrl::SetLayoutPositions(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nC
 
 BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	ExcludeChild(&m_taskTree, pDC);
 	ExcludeChild(&m_ctrlAttributes, pDC);
 	ExcludeChild(&m_ctrlComments, pDC);
@@ -744,8 +747,6 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 	m_layout.ExcludeSplitBars(pDC);
 
 	// fill background with theme brush
-	CSaveDC sdc(pDC);
-
 	if (m_brUIBack.GetSafeHandle())
 	{
 		CRect rect;
