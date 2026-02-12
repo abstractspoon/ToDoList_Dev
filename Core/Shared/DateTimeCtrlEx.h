@@ -100,6 +100,7 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 
+	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGetMonthCal(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
