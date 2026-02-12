@@ -186,6 +186,8 @@ BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_brBack != NULL)
 	{
+		CSaveDC sdc(pDC);
+		
 		// Exclude all children except for:
 		// 1. static-like text
 		// 2. push-buttons on Windows XP

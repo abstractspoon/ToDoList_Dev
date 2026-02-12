@@ -1437,6 +1437,8 @@ void CTreeListSyncer::SetSplitBarColor(COLORREF crSplitBar)
 
 BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 {
+	CSaveDC sdc(pDC);
+	
 	// If everything is hidden then don't proceed
 	HWND hwndPrimary = PrimaryWnd();
 

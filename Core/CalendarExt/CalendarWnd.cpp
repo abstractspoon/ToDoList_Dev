@@ -648,7 +648,9 @@ HBRUSH CCalendarWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 
 BOOL CCalendarWnd::OnEraseBkgnd(CDC* pDC)
 {
-	// clip out children
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	CDialogHelper::ExcludeCtrl(this, IDC_CALENDAR_FRAME, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_NUMWEEKS, pDC);
 	CDialogHelper::ExcludeCtrl(this, IDC_SNAPMODES, pDC);
