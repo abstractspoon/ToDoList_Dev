@@ -35,8 +35,10 @@ static char THIS_FILE[] = __FILE__;
 // installed fonts
 BOOL CALLBACK EnumFontProc( LPLOGFONT lplf, LPTEXTMETRIC /*lptm*/, DWORD /*dwType*/, LPARAM lpData )	
 {	
-	CFontNameComboBox *caller = reinterpret_cast< CFontNameComboBox* > ( lpData );		
-	caller->AddString( lplf->lfFaceName );
+	CFontNameComboBox *caller = reinterpret_cast< CFontNameComboBox* > ( lpData );	
+	
+	if (caller->FindStringExact(0, lplf->lfFaceName) == CB_ERR)
+		caller->AddString( lplf->lfFaceName );
 
 	CClientDC dc( caller );
 	dc.SelectStockObject( ANSI_VAR_FONT );
