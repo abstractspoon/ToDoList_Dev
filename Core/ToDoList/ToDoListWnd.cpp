@@ -12005,7 +12005,7 @@ void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
 
 LRESULT CToDoListWnd::OnFilterChange(WPARAM wp, LPARAM lp) 
 {
-	ASSERT((wp == m_filterBar.GetDlgCtrlID()) && ((HWND)lp == m_filterBar));
+	ASSERT(((int)wp == m_filterBar.GetDlgCtrlID()) && ((HWND)lp == m_filterBar));
 
 	TDCFILTER filter;
 	CString sCustom;
