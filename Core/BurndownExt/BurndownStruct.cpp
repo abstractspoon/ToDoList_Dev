@@ -641,42 +641,32 @@ double STATSITEM::GetCost(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL& bI
 COleDateTime STATSITEM::GetStartDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
-	COleDateTime date;
 
-	if (pTasks->GetTaskStartDate64(hTask, false, tDate))
-		date = GetDate(tDate);
+	if (!pTasks->GetTaskStartDate64(hTask, false, tDate))
+		pTasks->GetTaskCreationDate64(hTask, tDate);
 
-	if (!CDateHelper::IsDateSet(date) && pTasks->GetTaskCreationDate64(hTask, tDate))
-		date = GetDate(tDate);
-
-	return date;
+	return GetDate(tDate);
 }
 
 COleDateTime STATSITEM::GetDoneDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
-	COleDateTime date;
 
-	if (pTasks->GetTaskDoneDate64(hTask, tDate))
-		date = GetDate(tDate);
-
-	return date;
+	pTasks->GetTaskDoneDate64(hTask, tDate);
+	return GetDate(tDate);
 }
 
 COleDateTime STATSITEM::GetDueDate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	time64_t tDate = 0;
-	COleDateTime date;
 
-	if (pTasks->GetTaskDueDate64(hTask, false, tDate))
-		date = GetDate(tDate);
-
-	return date;
+	pTasks->GetTaskDueDate64(hTask, false, tDate);
+	return GetDate(tDate);
 }
 
 COleDateTime STATSITEM::GetDate(time64_t tDate)
 {
-	return (tDate > 0) ? CDateHelper::GetDate(tDate) : COleDateTime();
+	return ((tDate > 0) ? CDateHelper::GetDate(tDate) : CDateHelper::NullDate());
 }
 
 BOOL STATSITEM::HasStart() const

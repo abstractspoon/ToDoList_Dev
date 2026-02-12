@@ -388,7 +388,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		}
 		else // Process children
 		{
-			BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE, bCheckExist);
+			BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE, bCheckExist); // RECURSIVE CALL
 		}
 	}
 
