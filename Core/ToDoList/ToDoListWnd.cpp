@@ -204,7 +204,7 @@ CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
 	m_bRefreshPauseTimeTracking(FALSE),
 	m_nUpdateAutoListDataAttribID(TDCA_NONE),
 	m_bUpdateFocusedControl(FALSE),
-	m_bRestoreMainToolbarImages(FALSE)
+	m_bHandleThemeChange(FALSE)
 {
 }
 
@@ -297,11 +297,15 @@ BOOL CToDoListWnd::IDLETASKS::Process()
 
 			m_bUpdateFocusedControl = FALSE;
 		}
-		else if (m_bRestoreMainToolbarImages)
+		else if (m_bHandleThemeChange)
 		{
-			m_tdl.m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, colorMagenta);
+			// When the theme is changed on Linux (via Wine) nothing
+			// changes EXCEPT for the main toolbar whose images are 
+			// 'restored' to those defined in the toolbar resource
+			if (COSVersion() == OSV_LINUX)
+				m_tdl.m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, colorMagenta);
 
-			m_bRestoreMainToolbarImages = FALSE;
+			m_bHandleThemeChange = FALSE;
 		}
 	}
 
@@ -1935,9 +1939,6 @@ BOOL CToDoListWnd::ProcessShortcut(MSG* pMsg)
 
 BOOL CToDoListWnd::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg->message == WM_THEMECHANGED)
-		return TRUE;
-
 	if (IsWindowEnabled())
 	{
 		// the only way we get a WM_CLOSE here is if it was sent from 
@@ -4170,14 +4171,8 @@ LRESULT CToDoListWnd::OnHotkey(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CToDoListWnd::OnThemeChanged(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-//	AfxMessageBox(_T(""));
-
-	// In general the app will not change until it is restarted
-	// EXCEPT for the main toolbar whose images will be 'restored'
-	// to those defined in the toolbar resource
-//	m_idleTasks.RestoreMainToolbarImages();
-
-	return Default();
+	m_idleTasks.HandleThemeChange();
+	return 0L;
 }
 
 BOOL CToDoListWnd::VerifyToDoCtrlPassword() const

@@ -85,7 +85,7 @@ private:
 		void RefreshTimeTrackingStatus() { m_bRefreshTimeTrackStatus = TRUE; }
 		void RefreshPauseTimeTracking() { m_bRefreshPauseTimeTracking = TRUE; }
 		void RefreshTabOrder() { m_bRefreshTabOrder = TRUE; }
-		void RestoreMainToolbarImages() { m_bRestoreMainToolbarImages = TRUE; }
+		void HandleThemeChange() { m_bHandleThemeChange = TRUE; }
 
 		BOOL Process();
 
@@ -99,7 +99,7 @@ private:
 		BOOL m_bRefreshPauseTimeTracking;
 		BOOL m_bRefreshTabOrder;
 		BOOL m_bUpdateFocusedControl;
-		BOOL m_bRestoreMainToolbarImages;
+		BOOL m_bHandleThemeChange;
 
 		TDC_ATTRIBUTE m_nUpdateAutoListDataAttribID;
 
