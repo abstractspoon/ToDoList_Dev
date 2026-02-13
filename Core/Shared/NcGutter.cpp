@@ -31,7 +31,8 @@ const UINT DEFTEXTFLAGS = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOP
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CNcGutter::CNcGutter(DWORD dwStyles) : 
+CNcGutter::CNcGutter(DWORD dwStyles, LPCTSTR szDefThemeClass) 
+	: 
 	m_bSetRedraw(TRUE), 
 	m_bFirstRecalc(TRUE),
 	m_nHeaderColDown(-1),
@@ -39,10 +40,11 @@ CNcGutter::CNcGutter(DWORD dwStyles) :
 	m_dwStyles(dwStyles),
 	m_fAveCharWidth(0),
 	m_nHeaderHeight(0),
+	m_sDefThemeClass(szDefThemeClass),
 	m_nMinClientWidth(MINCLIENTWIDTH)
 {
 	// add client header hot rect placeholder
-	if (HasStyle(NCGS_SHOWHEADER) && CThemed().AreControlsThemed())
+	if (HasStyle(NCGS_SHOWHEADER) && CThemed::AreControlsThemed())
 		m_hotTrack.AddRect();
 
 	// client column is always last so we add it first
@@ -74,7 +76,7 @@ BOOL CNcGutter::Initialize(HWND hwnd)
 		RecalcGutter();
 
 		// hot tracking
-		if (HasStyle(NCGS_SHOWHEADER) && CThemed().AreControlsThemed())
+		if (HasStyle(NCGS_SHOWHEADER) && CThemed::AreControlsThemed())
 			m_hotTrack.Initialize(GetCWnd());
 
 		return TRUE;
@@ -96,7 +98,7 @@ void CNcGutter::EnableStyle(DWORD dwStyle, BOOL bEnable)
 	// special handling
 	if (dwStyle & NCGS_SHOWHEADER)
 	{
-		if (CThemed().AreControlsThemed())
+		if (CThemed::AreControlsThemed())
 		{
 			if (!bEnable)
 				m_hotTrack.Reset();
@@ -172,7 +174,7 @@ BOOL CNcGutter::InsertColumn(int nPos, UINT nColID, LPCTSTR szTitle, UINT nWidth
 	m_aColumns.InsertAt(nPos, pCD);
 
 	// add a placeholder to the hot tracker
-	if (CThemed().AreControlsThemed())
+	if (CThemed::AreControlsThemed())
 		m_hotTrack.AddRect();
 
 	if (IsHooked())
@@ -769,7 +771,7 @@ LRESULT CNcGutter::OnNcCalcSize(LPNCCALCSIZE_PARAMS lpncsp)
     {
         if (m_nHeaderHeight == 0)
 		{
-			BOOL bThemed = CThemed().AreControlsThemed();
+			BOOL bThemed = CThemed::AreControlsThemed();
             m_nHeaderHeight = CDlgUnits(GetParent()).ToPixelsY(bThemed ? 12 : 10); // handles font sizes
 		}
 
@@ -1548,17 +1550,20 @@ void CNcGutter::OnNcPaint()
 		if (HasStyle(NCGS_RIGHTCOLUMNS) && (GetStyle() & WS_VSCROLL))
 			rGutter.left -= ::GetSystemMetrics(SM_CXVSCROLL);
 
-		if (CThemed().IsNonClientThemed())
+		CThemed th;
+		
+		if (th.IsNonClientThemed() && th.Open(GetCWnd(), _T("SCROLLBAR")))
 		{
-			CThemed th;
-
-			if (th.Open(GetCWnd(), _T("SCROLLBAR")))
-				th.DrawBackground(&dc, SBP_LOWERTRACKHORZ, SCRBS_NORMAL, rGutter);
-			else
-				dc.FillSolidRect(rGutter, ::GetSysColor(COLOR_SCROLLBAR));
+			th.DrawBackground(&dc, SBP_LOWERTRACKHORZ, SCRBS_NORMAL, rGutter);
+			
+			// Restore default theme class
+			if (!m_sDefThemeClass.IsEmpty())
+				th.Open(GetCWnd(), m_sDefThemeClass);
 		}
 		else
+		{
 			dc.FillSolidRect(rGutter, ::GetSysColor(COLOR_SCROLLBAR));
+		}
 	}
 }
 
@@ -1706,6 +1711,10 @@ void CNcGutter::NcDrawHeader(CDC* pDC, const CRect& rHeader, HCHDRPART nPart, co
 
 	// cleanup
 	pDC->SelectObject(hOldFont);
+
+	// Restore theme class
+	if (!m_sDefThemeClass.IsEmpty())
+		th.Open(GetCWnd(), m_sDefThemeClass);
 }
 
 void CNcGutter::OnPrint(HDC hdc, UINT& nFlags)
@@ -2159,7 +2168,7 @@ BOOL CNcGutter::PrepareBitmap(CDC* pDC, CBitmap* pBitmap, const CRect& rect)
 
 void CNcGutter::UpdateHeaderHotRects()
 {
-	if (!HasStyle(NCGS_SHOWHEADER) || !CThemed().AreControlsThemed())
+	if (!HasStyle(NCGS_SHOWHEADER) || !CThemed::AreControlsThemed())
 		return;
 
 	CRect rWindow, rClient, rHeader;
