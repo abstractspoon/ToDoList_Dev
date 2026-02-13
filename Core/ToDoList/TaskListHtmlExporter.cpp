@@ -556,21 +556,13 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	if (!sItem.IsEmpty())
 	{
 		if (bStrikeThru)
-		{
-			CString sStrikeThru;
-			sStrikeThru.Format(_T("<s>%s</s>"), sItem);
-			sItem = sStrikeThru;
-		}
+			sItem = Misc::Format(_T("<s>%s</s>"), sItem);
 		
 		if (bColor)
-			sItem.Format(_T("<span style=\"color:%s\">%s</span>"), sColor, sItem);
+			sItem = Misc::Format(_T("<span style=\"color:%s\">%s</span>"), sColor, sItem);
 		
 		if (bBlockQuote)
-		{
-			CString sBlockQuote;
-			sBlockQuote.Format(_T("<blockquote>%s</blockquote>"), sItem);
-			sItem = sBlockQuote;
-		}
+			sItem = Misc::Format(_T("<blockquote>%s</blockquote>"), sItem);
 	}
 
 	// we've already handled custom attrib above
