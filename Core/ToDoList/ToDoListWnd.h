@@ -85,6 +85,7 @@ private:
 		void RefreshTimeTrackingStatus() { m_bRefreshTimeTrackStatus = TRUE; }
 		void RefreshPauseTimeTracking() { m_bRefreshPauseTimeTracking = TRUE; }
 		void RefreshTabOrder() { m_bRefreshTabOrder = TRUE; }
+		void HandleThemeChange() { m_bHandleThemeChange = TRUE; }
 
 		BOOL Process();
 
@@ -98,6 +99,7 @@ private:
 		BOOL m_bRefreshPauseTimeTracking;
 		BOOL m_bRefreshTabOrder;
 		BOOL m_bUpdateFocusedControl;
+		BOOL m_bHandleThemeChange;
 
 		TDC_ATTRIBUTE m_nUpdateAutoListDataAttribID;
 
@@ -246,7 +248,16 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);
 
-	// Menu handlers
+	afx_msg LRESULT OnAppRestoreFocus(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnDoInitialDueTaskNotify(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnGetIcon(WPARAM bLargeIcon, LPARAM lp);
+	afx_msg LRESULT OnHotkey(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnPostOnCreate(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnRefreshUDTsInToolbar(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
+
+	// Menu command handlers
 	afx_msg void OnAbout();
 	afx_msg void OnActivateTaskView(UINT nCmdID);
 	afx_msg void OnAddtimetologfile();
@@ -441,7 +452,7 @@ protected:
 	afx_msg void OnViewToggletasksandcomments();
 	afx_msg void OnWindow(UINT nCmdID);
 
-	// Menu update handlers
+	// Menu command update handlers
 	afx_msg void OnUpdateActivateTaskView(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateAddtimetologfile(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateArchiveCompletedtasks(CCmdUI* pCmdUI);
@@ -589,10 +600,8 @@ protected:
 	void AlwaysEnabled(CCmdUI* pCmdUI) { pCmdUI->Enable(TRUE); }
 
 	// Registered message handlers
-	afx_msg LRESULT OnAppRestoreFocus(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnCanDropFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnClose(WPARAM wp, LPARAM bForUpdate);
-	afx_msg LRESULT OnDoInitialDueTaskNotify(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnExportThreadFinished(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFilterChange(WPARAM wp, LPARAM lp);
@@ -606,17 +615,12 @@ protected:
 	afx_msg LRESULT OnFindSelectAll(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFindSelectResult(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFocusChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnGetIcon(WPARAM bLargeIcon, LPARAM lp);
-	afx_msg LRESULT OnHotkey(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnModifyKeyboardShortcuts(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnNotifyReminderModified(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnPostOnCreate(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPostTranslateMenu(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesClearMRU(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesEditLanguageFile(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPreferencesTestTool(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnRefreshUDTsInToolbar(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnReminderCompleteTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSessionStatusChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTimeTrackerGoToTasklist(WPARAM wParam, LPARAM lParam);
