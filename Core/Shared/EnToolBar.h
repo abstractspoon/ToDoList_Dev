@@ -80,11 +80,10 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
-	afx_msg void OnDestroy();
-	afx_msg void OnNcPaint();
-
 	afx_msg LRESULT OnRefreshButtonStates(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSizeParent(WPARAM /*wParam*/, LPARAM /*lParam*/) { return 0L; }
+	afx_msg void OnDestroy();
+	afx_msg void OnNcPaint();
 
 	DECLARE_MESSAGE_MAP()
 		
