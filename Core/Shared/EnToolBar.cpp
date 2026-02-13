@@ -65,7 +65,6 @@ BEGIN_MESSAGE_MAP(CEnToolBar, CToolBar)
 	ON_MESSAGE(WM_SIZEPARENT, OnSizeParent)
 	ON_WM_DESTROY()
 	ON_WM_NCPAINT()
-
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////

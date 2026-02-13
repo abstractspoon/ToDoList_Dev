@@ -84,7 +84,6 @@ protected:
 	afx_msg LRESULT OnSizeParent(WPARAM /*wParam*/, LPARAM /*lParam*/) { return 0L; }
 	afx_msg void OnDestroy();
 	afx_msg void OnNcPaint();
-
 	DECLARE_MESSAGE_MAP()
 		
 	virtual LRESULT OnButtonPrePaint(LPNMTBCUSTOMDRAW lpNMCustomDraw);
