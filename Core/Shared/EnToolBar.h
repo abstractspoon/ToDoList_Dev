@@ -85,7 +85,6 @@ protected:
 
 	afx_msg LRESULT OnRefreshButtonStates(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSizeParent(WPARAM /*wParam*/, LPARAM /*lParam*/) { return 0L; }
-	afx_msg LRESULT OnThemeChanged(WPARAM /*wParam*/, LPARAM /*lParam*/);
 
 	DECLARE_MESSAGE_MAP()
 		
