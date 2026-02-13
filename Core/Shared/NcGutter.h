@@ -126,7 +126,7 @@ class CThemed;
 class CNcGutter : protected CSubclassWnd  
 {
 public:
-	CNcGutter(DWORD dwStyles);
+	CNcGutter(DWORD dwStyles, LPCTSTR szDefThemeClass = NULL);
 	virtual ~CNcGutter();
 
 	BOOL Initialize(HWND hwnd);
@@ -183,6 +183,7 @@ protected:
 	float m_fAveCharWidth;
 	UINT m_nHeaderHeight;
 	UINT m_nMinClientWidth;
+	CString m_sDefThemeClass;
 
 	struct COLUMNDESC
 	{

@@ -1458,9 +1458,16 @@ BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 		CThemed th;
 		
 		if (th.IsNonClientThemed() && th.Open(hwndPrimary, _T("SCROLLBAR")))
+		{
 			th.DrawBackground(pDC, SBP_LOWERTRACKHORZ, SCRBS_NORMAL, rDead);
+
+			// Restore default theme class
+			th.Open(hwndPrimary, (IsTree(hwndPrimary) ? _T("TREEVIEW") : _T("LISTVIEW")));
+		}
 		else
+		{	
 			pDC->FillSolidRect(rDead, ::GetSysColor(COLOR_SCROLLBAR));
+		}
 #endif
 		
 		pDC->ExcludeClipRect(rDead);
@@ -3959,9 +3966,8 @@ BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo
 						rHeader.OffsetRect(sizeOther.cx, 0);
 			
 					CThemed th;
-					BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
 
-					if (bThemed)
+					if (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")))
 					{
 						th.DrawBackground(&dcImage, HP_HEADERITEM, HIS_NORMAL, rHeader);
 					}

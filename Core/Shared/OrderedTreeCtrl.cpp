@@ -35,7 +35,7 @@ COrderedTreeCtrl::COrderedTreeCtrl(DWORD dwGutterStyles) :
 	m_ht(*this),
 #pragma warning (default: 4355)
 
-	m_gutter(dwGutterStyles),
+	m_gutter(dwGutterStyles, _T("TREEVIEW")),
 	m_bShowingPosColumn(TRUE), 
 	m_crGridlines(OTC_GRIDCOLOR),
 	m_crAltLines(CLR_NONE),
