@@ -38,6 +38,10 @@ const int CORNER_RADIUS = ((COSVersion() < OSV_WIN8) ? 3 : 0);
 #	define TBSTYLE_EX_MIXEDBUTTONS  0x00000008
 #endif
 
+#ifndef WM_THEMECHANGED
+#	define WM_THEMECHANGED 0x031A
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 
 void AFXAPI AfxDeleteObject(HGDIOBJ* pObject);
@@ -61,10 +65,12 @@ BEGIN_MESSAGE_MAP(CEnToolBar, CToolBar)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_WM_SETTINGCHANGE()
-	ON_MESSAGE(WM_REFRESHBUTTONSTATES, OnRefreshButtonStates)
-	ON_MESSAGE(WM_SIZEPARENT, OnSizeParent)
 	ON_WM_DESTROY()
 	ON_WM_NCPAINT()
+	ON_MESSAGE(WM_REFRESHBUTTONSTATES, OnRefreshButtonStates)
+	ON_MESSAGE(WM_SIZEPARENT, OnSizeParent)
+	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
+
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -277,6 +283,14 @@ LRESULT CEnToolBar::OnRefreshButtonStates(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	RefreshButtonStates(TRUE);
 	return 0L;
+}
+
+LRESULT CEnToolBar::OnThemeChanged(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	GetToolBarCtrl().SetImageList(&m_ilNormal);
+	GetToolBarCtrl().SetDisabledImageList(&m_ilDisabled);
+
+	return 1L;
 }
 
 void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask) 

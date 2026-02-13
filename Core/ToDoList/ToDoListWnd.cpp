@@ -157,10 +157,14 @@ const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"),
 enum
 {
 	WM_POSTONCREATE				= (WM_APP+1),
-	WM_UPDATEUDTSINTOOLBAR,
+	WM_REFRESHUDTSINTOOLBAR,
 	WM_APPRESTOREFOCUS,
 	WM_DOINITIALDUETASKNOTIFY,
 };
+
+#ifndef WM_THEMECHANGED
+#	define WM_THEMECHANGED 0x031A
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -199,7 +203,8 @@ CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
 	m_bUpdateMenuSSCStatus(FALSE),
 	m_bRefreshPauseTimeTracking(FALSE),
 	m_nUpdateAutoListDataAttribID(TDCA_NONE),
-	m_bUpdateFocusedControl(FALSE)
+	m_bUpdateFocusedControl(FALSE),
+	m_bRestoreMainToolbarImages(FALSE)
 {
 }
 
@@ -291,6 +296,12 @@ BOOL CToDoListWnd::IDLETASKS::Process()
 			CFocusWatcher::UpdateFocus();
 
 			m_bUpdateFocusedControl = FALSE;
+		}
+		else if (m_bRestoreMainToolbarImages)
+		{
+			m_tdl.m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, colorMagenta);
+
+			m_bRestoreMainToolbarImages = FALSE;
 		}
 	}
 
@@ -603,7 +614,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_MESSAGE(WM_GETICON, OnGetIcon)
 	ON_MESSAGE(WM_HOTKEY, OnHotkey)
 	ON_MESSAGE(WM_POSTONCREATE, OnPostOnCreate)
-	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnRefreshUDTsInToolbar)
+	ON_MESSAGE(WM_REFRESHUDTSINTOOLBAR, OnRefreshUDTsInToolbar)
+	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
 
 	ON_NOTIFY(NM_CLICK, IDC_TRAYICON, OnTrayIconClick)
 	ON_NOTIFY(NM_DBLCLK, IDC_TRAYICON, OnTrayIconDblClk)
@@ -1923,6 +1935,9 @@ BOOL CToDoListWnd::ProcessShortcut(MSG* pMsg)
 
 BOOL CToDoListWnd::PreTranslateMessage(MSG* pMsg)
 {
+	if (pMsg->message == WM_THEMECHANGED)
+		return TRUE;
+
 	if (IsWindowEnabled())
 	{
 		// the only way we get a WM_CLOSE here is if it was sent from 
@@ -3171,7 +3186,7 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	if (m_bFirstEraseBkgnd)
 	{
 		m_bFirstEraseBkgnd = FALSE;
-		PostMessage(WM_UPDATEUDTSINTOOLBAR);
+		PostMessage(WM_REFRESHUDTSINTOOLBAR);
 	}
 
 	return TRUE;
@@ -4151,6 +4166,18 @@ LRESULT CToDoListWnd::OnHotkey(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	Show(TRUE);
 	return 0L;
+}
+
+LRESULT CToDoListWnd::OnThemeChanged(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+//	AfxMessageBox(_T(""));
+
+	// In general the app will not change until it is restarted
+	// EXCEPT for the main toolbar whose images will be 'restored'
+	// to those defined in the toolbar resource
+//	m_idleTasks.RestoreMainToolbarImages();
+
+	return Default();
 }
 
 BOOL CToDoListWnd::VerifyToDoCtrlPassword() const
