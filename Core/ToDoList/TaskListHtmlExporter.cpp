@@ -422,10 +422,10 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		{
 			DWORD dwTaskID = pTasks->GetTaskID(hTask);
 
-			CString sTaskLink;
-			sTaskLink.Format(_T(" (<a href=\"%s%ld\">tdl://%ld</a>)"), TASKLISTLINK, dwTaskID, dwTaskID);
-
-			sItem += sTaskLink;
+			sItem += Misc::Format(_T(" (<a href=\"%s%ld\">tdl://%ld</a>)"), 
+								  TASKLISTLINK, 
+								  dwTaskID, 
+								  dwTaskID);
 		}
 		break;
 
@@ -438,12 +438,12 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	case TDCA_PRIORITY:
 		{
 			int nPriority = pTasks->GetTaskPriority(hTask, TRUE);
-			CString sPriority;
 
 			if (nPriority >= 0)
 			{
-				CString sPriorityCol = pTasks->GetTaskPriorityWebColor(hTask);
-				sPriority.Format(_T("<font color='%s'>%d</font>"), sPriorityCol, nPriority);
+				CString sPriority = Misc::Format(_T("<font color='%s'>%d</font>"), 
+												 pTasks->GetTaskPriorityWebColor(hTask), 
+												 nPriority);
 
 				sItem = FormatAttribute(nAttribID, sAttribLabel, sPriority, FALSE); // FALSE = Don't encode
 			}
@@ -483,10 +483,10 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 				if (!sFileLinks.IsEmpty())
 					sFileLinks += LISTSEPARATOR;
 
-				CString sFileLink;
-				sFileLink.Format(_T("<a href=\"%s\" %s>%s</a>"), sFilePath, sTarget, sFileName);
-
-				sFileLinks += sFileLink;
+				sFileLinks += Misc::Format(_T("<a href=\"%s\" %s>%s</a>"), 
+										   sFilePath, 
+										   sTarget, 
+										   sFileName);
 			} 
 
 			sItem = FormatAttribute(nAttribID, sAttribLabel, sFileLinks, FALSE); // FALSE = Don't encode
@@ -508,8 +508,9 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 				if (depend.IsLocal())
 					depend.sTasklist = TASKLISTPATH;
 
-				CString sDepend;
-				sDepend.Format(_T("<a href=\"%s\">%s</a>"), depend.Format(_T(""), TRUE), sLinkText);
+				CString sDepend = Misc::Format(_T("<a href=\"%s\">%s</a>"), 
+											   depend.Format(_T(""), TRUE), 
+											   sLinkText);
 
 				if (!sDepends.IsEmpty())
 					sDepends += LISTSEPARATOR;
