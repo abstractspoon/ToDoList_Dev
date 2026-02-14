@@ -12,6 +12,7 @@
 #include "icon.h"
 #include "winclasses.h"
 #include "wclassdefines.h"
+#include "osversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -534,7 +535,7 @@ void CEnEdit::OnNcPaint()
 
 	// If the button extends right up to the border
 	// do default rendering first
-	if (m_nBtnPadding == 0)
+	if ((m_nBtnPadding == 0) || (COSVersion() == OSV_LINUX))
 	{
 		Default();
 	
