@@ -3732,12 +3732,16 @@ void CTDLTaskCtrlBase::OnContextMenu(CWnd* pWnd, CPoint point)
 
 LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 {
+	// For reasons I don't understand, we never receive 
+	// CDDS_ITEMPOSTPAINT on Linux so we have to do it ourselves
+
 	switch (pNMCD->dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		return CDRF_NOTIFYPOSTPAINT;// | CDRF_NOTIFYPOSTERASE;//CDRF_NOTIFYITEMDRAW;
+		return (OsIsLinux() ? (CDRF_NOTIFYPOSTPAINT | CDRF_NOTIFYPOSTERASE) : CDRF_NOTIFYITEMDRAW);
 		
 	case CDDS_ITEMPREPAINT:
+		if (!OsIsLinux())
 		{
 			// don't draw columns having min width unless they
 			// are the current right-clicked item
@@ -3754,8 +3758,6 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		break;
 
 	case CDDS_POSTPAINT:
-		// For reasons I don't understand, we never receive 
-		// CDDS_ITEMPOSTPAINT on Linux so we have to do it ourselves
 		if (OsIsLinux())
 		{
 			NMCUSTOMDRAW nmcd = *pNMCD;
