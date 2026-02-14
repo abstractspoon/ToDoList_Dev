@@ -12,7 +12,6 @@
 #include "icon.h"
 #include "winclasses.h"
 #include "wclassdefines.h"
-#include "osversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -65,14 +64,12 @@ CEnEdit::~CEnEdit()
 }
 
 BEGIN_MESSAGE_MAP(CEnEdit, CMaskEdit)
-	//{{AFX_MSG_MAP(CEnEdit)
 	ON_WM_NCCALCSIZE()
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_WM_NCHITTEST()
-	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 	ON_WM_ENABLE()
@@ -83,7 +80,6 @@ BEGIN_MESSAGE_MAP(CEnEdit, CMaskEdit)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CEnEdit message handlers
 
 BOOL CEnEdit::AddButton(UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, LPCTSTR szFont)
 {
