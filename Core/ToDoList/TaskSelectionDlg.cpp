@@ -23,7 +23,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTaskSelectionDlg dialog
 
-
 CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAttribDefs,
 									 LPCTSTR szRegKey, 
 									 BOOL bEnableSubtaskSelection,
@@ -106,6 +105,7 @@ void CTaskSelectionDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTaskSelectionDlg, CDialog)
 	ON_WM_DESTROY()
 	ON_WM_ENABLE()
+	ON_WM_CTLCOLOR()
 	ON_BN_CLICKED(IDC_ALLATTRIB, OnChangeAttribOption)
 	ON_BN_CLICKED(IDC_CUSTOMATTRIB, OnChangeAttribOption)
 	ON_BN_CLICKED(IDC_VISIBLEATTRIB, OnChangeAttribOption)
@@ -352,3 +352,24 @@ BOOL CTaskSelectionDlg::GetWantIncompleteTasksOnly() const
 {
 	return (!GetWantSelectedTasks() && !m_bCompletedTasks && m_bIncompleteTasks);
 }
+
+HBRUSH CTaskSelectionDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	// Forward background-related requests to our parent
+	UINT nForwardMsg = 0;
+
+	switch (nCtlColor)
+	{
+	case CTLCOLOR_DLG:		nForwardMsg = WM_CTLCOLORDLG;		break;
+	case CTLCOLOR_STATIC:	nForwardMsg = WM_CTLCOLORSTATIC;	break;
+	}
+
+	if (nForwardMsg)
+		return (HBRUSH)GetParent()->SendMessage(nForwardMsg, (WPARAM)pDC->GetSafeHdc(), (LPARAM)pWnd->GetSafeHwnd());
+
+	// all the rest
+	return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+}
+	
+	
+
