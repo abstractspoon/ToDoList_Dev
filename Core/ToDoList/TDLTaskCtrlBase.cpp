@@ -3733,12 +3733,12 @@ void CTDLTaskCtrlBase::OnContextMenu(CWnd* pWnd, CPoint point)
 LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 {
 	// For reasons I don't understand, we never receive 
-	// CDDS_ITEMPOSTPAINT on Linux so we have to do it ourselves
-
+	// CDDS_ITEMPOSTPAINT on Linux so we have to do it 
+	// ourselves in CDDS_POSTPAINT
 	switch (pNMCD->dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		return (OsIsLinux() ? (CDRF_NOTIFYPOSTPAINT | CDRF_NOTIFYPOSTERASE) : CDRF_NOTIFYITEMDRAW);
+		return (OsIsLinux() ? CDRF_NOTIFYPOSTPAINT : CDRF_NOTIFYITEMDRAW);
 		
 	case CDDS_ITEMPREPAINT:
 		if (!OsIsLinux())
