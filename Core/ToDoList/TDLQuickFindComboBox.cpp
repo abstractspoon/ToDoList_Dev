@@ -43,8 +43,6 @@ int CTDLQuickFindComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	if (nTool != -1)
 	{
 		pTI->hwnd = m_hWnd;
-		pTI->uFlags |= TTF_ALWAYSTIP;
-
 		::MapWindowPoints(m_quickEdit, m_hWnd, (LPPOINT)&pTI->rect, 2);
 
 		return nTool;
