@@ -17,6 +17,7 @@
 #include "..\shared\wclassdefines.h"
 #include "..\shared\themed.h"
 #include "..\shared\holdredraw.h"
+#include "..\shared\ToolTipCtrlEx.h"
 
 #include "..\3rdparty\colordef.h"
 
@@ -203,7 +204,6 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelcancelFilter)
 	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeChangeDateFilter)
 
-//	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 
 	ON_WM_ERASEBKGND()
@@ -1071,76 +1071,15 @@ int CTDLFilterBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		break;
 	}
 
-	return CToolTipCtrlEx::SetToolInfo(*pTI, pChild, sTooltip, nCtrlID);
-}
-
-/*
-BOOL CTDLFilterBar::OnToolTipNotify(UINT / *id* /, NMHDR* pNMHDR, LRESULT* / *pResult* /)
-{
-    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
-
-    UINT nCtrlID = CToolTipCtrlEx::GetCtrlID(pTTT);
-
-	static CString sTooltip;
-
-	switch (nCtrlID)
-	{
-	case IDC_SHOWFILTERCOMBO:
-		Misc::Split(CDialogHelper::GetSelectedItem(m_cbShowFilter), sTooltip, '\t');
-		break;
-
-	case IDC_CATEGORYFILTERCOMBO:
-		sTooltip = m_cbCategoryFilter.GetTooltip();
-		break;
-
-	case IDC_ALLOCTOFILTERCOMBO:
-		sTooltip = m_cbAllocToFilter.GetTooltip();
-		break;
-
-	case IDC_STATUSFILTERCOMBO:
-		sTooltip = m_cbStatusFilter.GetTooltip();
-		break;
-
-	case IDC_ALLOCBYFILTERCOMBO:
-		sTooltip = m_cbAllocByFilter.GetTooltip();
-		break;
-
-	case IDC_VERSIONFILTERCOMBO:
-		sTooltip = m_cbVersionFilter.GetTooltip();
-		break;
-
-	case IDC_TAGFILTERCOMBO:
-		sTooltip = m_cbTagFilter.GetTooltip();
-		break;
-
-	case IDC_OPTIONFILTERCOMBO:
-		sTooltip = m_cbOptions.GetTooltip();
-		break;
-
-	default:
-		if (!CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID))
-			return FALSE;
-
-		sTooltip = CTDCCustomFilterAttributeUIHelper::GetControlTooltip(this, nCtrlID);
-		break;
-	}
-
 	if (!sTooltip.IsEmpty())
 	{
-		// disable translation of the tip
-		CLocalizer::EnableTranslation(pNMHDR->hwndFrom, FALSE);
+		CToolTipCtrlEx::EnableMultilineTips(AfxGetTooltipCtrl());
 
-		// Set the tooltip text.
-		::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
-		pTTT->lpszText = (LPTSTR)(LPCTSTR)sTooltip;
-	
-		return TRUE; // handled
+		return CToolTipCtrlEx::SetToolInfo(*pTI, pChild, sTooltip, nCtrlID);
 	}
 
-	pTTT->lpszText = NULL;
-	return FALSE;
-
-}*/
+	return -1;
+}
 
 void CTDLFilterBar::SetUITheme(const CUIThemeFile& theme)
 {

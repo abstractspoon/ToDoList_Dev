@@ -140,7 +140,6 @@ protected:
 	afx_msg void OnSelchangeStartDateFilter();
 	afx_msg void OnChangeDateFilter(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-//	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
 	afx_msg LRESULT OnEEBtnClick(WPARAM wp, LPARAM lp);
 	afx_msg void OnCustomAttributeSelchangeFilter(UINT nCtrlID);
 	afx_msg void OnCustomAttributeSelcancelFilter(UINT nCtrlID);
