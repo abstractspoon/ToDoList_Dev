@@ -3735,7 +3735,7 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 	switch (pNMCD->dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		return CDRF_NOTIFYITEMDRAW;
+		return CDRF_NOTIFYPOSTPAINT;// | CDRF_NOTIFYPOSTERASE;//CDRF_NOTIFYITEMDRAW;
 		
 	case CDDS_ITEMPREPAINT:
 		{
@@ -3750,6 +3750,44 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 
 			if (rItem.Width() > MIN_COL_WIDTH)
 				return CDRF_NOTIFYPOSTPAINT;
+		}
+		break;
+
+	case CDDS_POSTPAINT:
+		// For reasons I don't understand, we never receive 
+		// CDDS_ITEMPOSTPAINT on Linux so we have to do it ourselves
+		if (OsIsLinux())
+		{
+			NMCUSTOMDRAW nmcd = *pNMCD;
+			nmcd.dwDrawStage = CDDS_ITEMPOSTPAINT;
+			
+			if (pNMCD->hdr.hwndFrom == m_hdrTasks)
+			{
+				if (TDCC_CLIENT == m_nSortColID)
+				{
+					nmcd.dwItemSpec = 0;
+					nmcd.lItemlParam = TDCC_CLIENT;
+					
+					OnHeaderCustomDraw(&nmcd);
+				}
+			}
+			else // columns
+			{
+				for (int nCol = 1; nCol < m_hdrColumns.GetItemCount(); nCol++)
+				{
+					TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nCol);
+					const TDCCOLUMN* pTDCC = GetColumn(nColID);
+
+					if ((nColID == m_nSortColID) || (pTDCC && (pTDCC->iImage != -1)))
+					{
+						nmcd.dwItemSpec = nCol;
+						nmcd.lItemlParam = nColID;
+
+						m_hdrColumns.GetItemRect(nCol, &nmcd.rc);
+						OnHeaderCustomDraw(&nmcd);
+					}
+				}
+			}
 		}
 		break;
 
