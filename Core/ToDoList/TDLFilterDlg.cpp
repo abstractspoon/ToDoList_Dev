@@ -187,7 +187,6 @@ BEGIN_MESSAGE_MAP(CTDLFilterDlg, CTDLDialog)
 	ON_CBN_SELENDCANCEL(IDC_CATEGORYFILTERCOMBO, OnSelcancelFilter)
 	ON_CBN_SELENDCANCEL(IDC_PRIORITYFILTERCOMBO, OnSelcancelFilter)
 	ON_CBN_SELENDCANCEL(IDC_RISKFILTERCOMBO, OnSelcancelFilter)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 	ON_EN_CHANGE(IDC_STARTNEXTNDAYS, OnSelchangeStartNextNDays)
 	ON_EN_CHANGE(IDC_DUENEXTNDAYS, OnSelchangeDueNextNDays)
 END_MESSAGE_MAP()
@@ -326,14 +325,17 @@ void CTDLFilterDlg::OnSelchangeDueNextNDays()
 	m_cbDueFilter.SetNextNDays(m_filter.nDueNextNDays);
 }
 
-BOOL CTDLFilterDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResult*/)
+int CTDLFilterDlg::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
-
-	UINT nCtrlID = CToolTipCtrlEx::GetCtrlID(pTTT);
-
+	CWnd* pChild = ChildWindowFromPoint(point);
+	
+	if (!pChild)
+		return -1;
+	
 	static CString sTooltip;
-
+	
+    UINT nCtrlID = pChild->GetDlgCtrlID();
+	
 	switch (nCtrlID)
 	{
 	case IDC_SHOWFILTERCOMBO:
@@ -367,20 +369,14 @@ BOOL CTDLFilterDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 	case IDC_OPTIONFILTERCOMBO:
 		sTooltip = m_cbOptions.GetTooltip();
 		break;
-
-	default:
-		return FALSE;
 	}
 
 	if (!sTooltip.IsEmpty())
 	{
-		// disable translation of the tip
-		CLocalizer::EnableTranslation(pNMHDR->hwndFrom, FALSE);
-
-		// Set the tooltip text.
-		::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
-		pTTT->lpszText = (LPTSTR)(LPCTSTR)sTooltip;
+		CToolTipCtrlEx::EnableMultilineTips(AfxGetTooltipCtrl());
+		
+		return CToolTipCtrlEx::SetToolInfo(*pTI, pChild, sTooltip, nCtrlID);
 	}
-
-	return TRUE; // handled
+	
+	return -1;
 }

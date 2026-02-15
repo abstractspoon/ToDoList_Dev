@@ -75,6 +75,7 @@ protected:
 	//{{AFX_VIRTUAL(CTDLFilterDlg)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	//}}AFX_VIRTUAL
 
 // Implementation
