@@ -27,7 +27,6 @@
 
 class CTDLFilterDlg : public CTDLDialog
 {
-// Construction
 public:
 	CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 				  BOOL bMultiSelFilters,
@@ -42,10 +41,6 @@ public:
 	FILTER_SHOW GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLFilterDlg)
-	enum { IDD = IDD_FILTER_DIALOG };
-	//}}AFX_DATA
 	CEnCheckComboBox			m_cbCategoryFilter;
 	CEnCheckComboBox			m_cbStatusFilter;
 	CEnCheckComboBox			m_cbAllocToFilter;
@@ -70,34 +65,22 @@ protected:
 	CStringArray m_aAdvancedFilterNames;
 	CWndPromptManager m_mgrPrompts;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLFilterDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
 protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(CTDLFilterDlg)
+	virtual void DoDataExchange(CDataExchange* pDX); 
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	virtual BOOL OnInitDialog();
+
+protected:
 	afx_msg void OnClearfilter();
 	afx_msg void OnSelchangeFiltercombo();
-	//}}AFX_MSG
 	afx_msg void OnSelchangeFilter();
 	afx_msg void OnSelcancelFilter();
 	afx_msg void OnSelchangeStartNextNDays();
 	afx_msg void OnSelchangeDueNextNDays();
 	afx_msg void OnSelchangeDatecombo();
-	afx_msg BOOL OnToolTipNotify( UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
 	DECLARE_MESSAGE_MAP()
 		
 	void EnableDisableControls();
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_FILTERDLG_H__9BFA276C_9BD6_4B23_A714_BB9D059CC2EB__INCLUDED_)

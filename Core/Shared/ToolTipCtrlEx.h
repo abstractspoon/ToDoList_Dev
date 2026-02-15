@@ -18,6 +18,11 @@ const UINT WM_TTC_TOOLHITTEST = ::RegisterWindowMessage(_T("WM_TTC_TOOLHITTEST")
 // Ensures the tip does not overlap TOOLINFO::rect
 #define TTF_EXCLUDEBOUNDS 0x2000
 
+//////////////////////////////////////////////////////////////////////
+ 
+// For use with CWnd::EnableTooltips
+HWND AfxGetTooltipCtrl();
+
 /////////////////////////////////////////////////////////////////////////////
 
 class CToolTipCtrlEx : public CToolTipCtrl, protected CSubclasser
@@ -32,7 +37,7 @@ public:
 	void FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage = FALSE);
 	BOOL AdjustRect(LPRECT lprc, BOOL bLarger) const;
 	void Activate(BOOL bActivate);
-	void EnableMultilineTips() { SetMaxTipWidth(SHRT_MAX); }
+	void EnableMultilineTips();
 	void EnableTracking(BOOL bTracking = TRUE, int nXOffset = 0, int nYOffset = 0);
 	BOOL IsTracking() const;
 
@@ -46,6 +51,7 @@ public:
 	static int SetToolInfo(TOOLINFO& ti, HWND hWnd, const CString sTooltip, int nID, LPCRECT pBounds = NULL, UINT nFlags = TTF_TRANSPARENT | TTF_NOTBUTTON);
 
 	static UINT GetCtrlID(const TOOLTIPTEXT* pTTT);
+	static void EnableMultilineTips(HWND hwndTooltips);
 
 protected:
 	BOOL m_bUsingRelayEvent;
