@@ -203,7 +203,7 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelcancelFilter)
 	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeChangeDateFilter)
 
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
+//	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 
 	ON_WM_ERASEBKGND()
@@ -1018,7 +1018,64 @@ BOOL CTDLFilterBar::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResult*/)
+int CTDLFilterBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	CWnd* pChild = ChildWindowFromPoint(point);
+
+	if (!pChild)
+		return -1;
+
+	static CString sTooltip;
+
+    UINT nCtrlID = pChild->GetDlgCtrlID();
+	
+	switch (nCtrlID)
+	{
+	case IDC_SHOWFILTERCOMBO:
+		Misc::Split(CDialogHelper::GetSelectedItem(m_cbShowFilter), sTooltip, '\t');
+		break;
+
+	case IDC_CATEGORYFILTERCOMBO:
+		sTooltip = m_cbCategoryFilter.GetTooltip();
+		break;
+
+	case IDC_ALLOCTOFILTERCOMBO:
+		sTooltip = m_cbAllocToFilter.GetTooltip();
+		break;
+
+	case IDC_STATUSFILTERCOMBO:
+		sTooltip = m_cbStatusFilter.GetTooltip();
+		break;
+
+	case IDC_ALLOCBYFILTERCOMBO:
+		sTooltip = m_cbAllocByFilter.GetTooltip();
+		break;
+
+	case IDC_VERSIONFILTERCOMBO:
+		sTooltip = m_cbVersionFilter.GetTooltip();
+		break;
+
+	case IDC_TAGFILTERCOMBO:
+		sTooltip = m_cbTagFilter.GetTooltip();
+		break;
+
+	case IDC_OPTIONFILTERCOMBO:
+		sTooltip = m_cbOptions.GetTooltip();
+		break;
+
+	default:
+		if (!CTDCCustomFilterAttributeUIHelper::IsCustomControl(nCtrlID))
+			return FALSE;
+
+		sTooltip = CTDCCustomFilterAttributeUIHelper::GetControlTooltip(this, nCtrlID);
+		break;
+	}
+
+	return CToolTipCtrlEx::SetToolInfo(*pTI, pChild, sTooltip, nCtrlID);
+}
+
+/*
+BOOL CTDLFilterBar::OnToolTipNotify(UINT / *id* /, NMHDR* pNMHDR, LRESULT* / *pResult* /)
 {
     TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 
@@ -1076,10 +1133,14 @@ BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 		// Set the tooltip text.
 		::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
 		pTTT->lpszText = (LPTSTR)(LPCTSTR)sTooltip;
+	
+		return TRUE; // handled
 	}
 
-	return TRUE; // handled
-}
+	pTTT->lpszText = NULL;
+	return FALSE;
+
+}*/
 
 void CTDLFilterBar::SetUITheme(const CUIThemeFile& theme)
 {
