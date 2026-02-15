@@ -82,8 +82,6 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	m_bMultiSelection(TRUE),
 	m_nTitleFilter(FT_FILTERONTITLEONLY)
 {
-	//{{AFX_DATA_INIT(CFilterBar)
-	//}}AFX_DATA_INIT
 	m_iconUpdateBtn.Load(IDI_UPDATE_FILTER, 16, FALSE);
 
 	// add update button to 'title text' and 'next 'n' days'
@@ -99,8 +97,7 @@ CTDLFilterBar::~CTDLFilterBar()
 void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CFilterBar)
-	//}}AFX_DATA_MAP
+
 	DDX_Control(pDX, IDC_TAGFILTERCOMBO, m_cbTagFilter);
 	DDX_Control(pDX, IDC_VERSIONFILTERCOMBO, m_cbVersionFilter);
 	DDX_Control(pDX, IDC_OPTIONFILTERCOMBO, m_cbOptions);
@@ -170,9 +167,6 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
-	//{{AFX_MSG_MAP(CFilterBar)
-	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_ALLOCTOFILTERCOMBO, OnSelchangeFilterAttribute)
 	ON_CBN_SELCHANGE(IDC_TAGFILTERCOMBO, OnSelchangeFilterAttribute)
 	ON_CBN_SELCHANGE(IDC_VERSIONFILTERCOMBO, OnSelchangeFilterAttribute)
@@ -206,6 +200,7 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 
+	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
 	ON_WM_HELPINFO()
@@ -214,7 +209,6 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CFilterBar message handlers
 
 BOOL CTDLFilterBar::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
@@ -1014,8 +1008,7 @@ BOOL CTDLFilterBar::OnInitDialog()
 	SetDlgItemText(IDC_TITLEFILTERLABEL, m_filter.GetTitleFilterLabel());
 	EnableToolTips();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE; 
 }
 
 int CTDLFilterBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const

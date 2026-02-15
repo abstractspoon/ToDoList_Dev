@@ -32,9 +32,8 @@ class CDeferWndMove;
 
 class CTDLFilterBar : public CDialog, public CDialogHelper
 {
-// Construction
 public:
-	CTDLFilterBar(CWnd* pParent = NULL);   // standard constructor
+	CTDLFilterBar(CWnd* pParent = NULL); 
 	virtual ~CTDLFilterBar();
 
 	BOOL Create(CWnd* pParentWnd, UINT nID = 0, BOOL bVisible = TRUE);
@@ -67,9 +66,6 @@ public:
 	BOOL CanPasteText() const; // into focused control
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CFilterBar)
-	//}}AFX_DATA
 	CTDLFilterComboBox m_cbShowFilter;
 	CTDLFilterDateComboBox m_cbStartFilter;
 	CTDLFilterDateComboBox m_cbDueFilter;
@@ -103,27 +99,17 @@ protected:
 	BOOL m_bMultiSelection;
 
 protected:
-	int DoModal() { return -1; }
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CFilterBar)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX); 
 	virtual void OnOK() { /* do nothing */ }
 	virtual void OnCancel() { /* do nothing */ }
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnInitDialog();
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+	virtual int DoModal() { return -1; }
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CFilterBar)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSelchangeFilter();
 	afx_msg void OnSelchangeFilterAttribute();
@@ -160,8 +146,5 @@ protected:
 	void RebuildOptionsCombo();
 	void UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID, CEnCheckComboBox& combo, const CStringArray& aData);
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_FILTERBAR_H__FAABD9A1_72C4_4731_B7A4_48251860672C__INCLUDED_)

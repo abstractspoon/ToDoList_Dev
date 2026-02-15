@@ -32,7 +32,7 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 							 BOOL bISODateFormat,
 							 CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLFilterDlg::IDD, _T("Filtering"), pParent), 
+	CTDLDialog(IDD_FILTER_DIALOG, _T("Filtering"), pParent), 
 	m_cbCategoryFilter(bMultiSelFilters, IDS_TDC_NONE, IDS_TDC_ANY),
 	m_cbAllocToFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
 	m_cbAllocByFilter(bMultiSelFilters, IDS_TDC_NOBODY, IDS_TDC_ANYONE),
@@ -82,7 +82,7 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLFilterDlg)
+
 	DDX_Control(pDX, IDC_OPTIONFILTERCOMBO, m_cbOptions);
 	DDX_Control(pDX, IDC_CATEGORYFILTERCOMBO, m_cbCategoryFilter);
 	DDX_Control(pDX, IDC_STATUSFILTERCOMBO, m_cbStatusFilter);
@@ -93,7 +93,6 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_VERSIONFILTERCOMBO, m_cbVersionFilter);
 	DDX_Control(pDX, IDC_TAGFILTERCOMBO, m_cbTagFilter);
 	DDX_Control(pDX, IDC_SHOWFILTERCOMBO, m_cbShowFilter);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_STARTNEXTNDAYS, m_eStartNextNDays);
 	DDX_Control(pDX, IDC_DUENEXTNDAYS, m_eDueNextNDays);
 	DDX_Control(pDX, IDC_STARTFILTERCOMBO, m_cbStartFilter);
@@ -164,10 +163,8 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CTDLFilterDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLFilterDlg)
 	ON_BN_CLICKED(IDC_CLEARFILTER, OnClearfilter)
 	ON_CBN_SELCHANGE(IDC_SHOWFILTERCOMBO, OnSelchangeFiltercombo)
-	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_DUEFILTERCOMBO, OnSelchangeDatecombo)
 	ON_CBN_SELCHANGE(IDC_STARTFILTERCOMBO, OnSelchangeDatecombo)
 	ON_CBN_SELCHANGE(IDC_ALLOCTOFILTERCOMBO, OnSelchangeFilter)
@@ -192,7 +189,6 @@ BEGIN_MESSAGE_MAP(CTDLFilterDlg, CTDLDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLFilterDlg message handlers
 
 FILTER_SHOW CTDLFilterDlg::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
 {
@@ -240,8 +236,7 @@ BOOL CTDLFilterDlg::OnInitDialog()
 
 	EnableToolTips();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE; 
 }
 
 void CTDLFilterDlg::EnableDisableControls()
