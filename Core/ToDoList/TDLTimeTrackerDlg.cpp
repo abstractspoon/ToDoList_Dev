@@ -93,6 +93,7 @@ BEGIN_MESSAGE_MAP(CTDLTimeTrackerDlg, CDialog)
 	ON_WM_HELPINFO()
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
+	ON_WM_WINDOWPOSCHANGING()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////
@@ -1179,6 +1180,17 @@ void CTDLTimeTrackerDlg::OnSize(UINT nType, int cx, int cy)
 	CDialog::OnSize(nType, cx, cy);
 	
 	Resize(cx, cy);
+}
+
+void CTDLTimeTrackerDlg::OnWindowPosChanging(WINDOWPOS* lpwndpos)
+{
+	if ((lpwndpos->flags & SWP_NOSIZE) == 0)
+	{
+		if ((lpwndpos->cx < m_sizeMin.cx) || (!m_bCollapsed && (lpwndpos->cy <m_sizeMin.cy)))
+			lpwndpos->flags |= SWP_NOSIZE;
+	}
+
+	CDialog::OnWindowPosChanging(lpwndpos);
 }
 
 void CTDLTimeTrackerDlg::OnGetMinMaxInfo(MINMAXINFO* lpMMI)

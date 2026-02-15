@@ -128,6 +128,7 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToolHitTest(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);
 
 	DECLARE_MESSAGE_MAP()
 	
