@@ -92,7 +92,6 @@ protected:
 	afx_msg void OnSelchangeStartNextNDays();
 	afx_msg void OnSelchangeDueNextNDays();
 	afx_msg void OnSelchangeDatecombo();
-	afx_msg BOOL OnToolTipNotify( UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
 	DECLARE_MESSAGE_MAP()
 		
 	void EnableDisableControls();
