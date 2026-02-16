@@ -92,13 +92,11 @@ const int PIN_IMAGE_HEIGHT		= GraphicsMisc::ScaleByDPIFactor(12);
 
 const int IMAGE_PADDING			= 2;
 const int BAR_PADDING			= 2;
-const int ITEM_PADDING			= 1;
+const int ITEM_SPACING			= 1;
 const int ITEM_BORDER			= 1;
 
 const CRect TEXT_BORDER			= CRect(1, 1, 2, 0);
 const CString NOFILELINK;
-
-const COLORREF SHADOW_COLOR		= RGB(0xD8, 0xD8, 0xD8);
 
 const BOOL SORT_1ABOVE2 = -1;
 const BOOL SORT_2ABOVE1 = 1;
@@ -134,7 +132,6 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data,
 	m_bDrawTaskFileLinks(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
-	m_crItemShadow(CLR_NONE),
 	m_crGroupHeaderBkgnd(CLR_NONE),
 	m_crFullBkgnd(255),
 	m_bReadOnly(FALSE),
@@ -229,7 +226,8 @@ void CKanbanColumnCtrl::OnKillFocus(CWnd* pNewWnd)
 
 BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	m_tooltip.Pop();
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.Pop();
 
 	// Two bugs in Windows 7
 	if ((COSVersion() < OSV_WIN8) && (GetStyle() & WS_VSCROLL))
@@ -328,8 +326,6 @@ void CKanbanColumnCtrl::RefreshBkgndColor()
 	}
 	
 	TreeView_SetBkColor(*this, crBack);
-
-	RecalcItemShadowColor();
 }
 
 void CKanbanColumnCtrl::SetBackgroundColor(COLORREF color)
@@ -342,19 +338,6 @@ void CKanbanColumnCtrl::SetBackgroundColor(COLORREF color)
 		m_columnDef.crBackground = color;
 		RefreshBkgndColor();
 	}
-}
-
-void CKanbanColumnCtrl::RecalcItemShadowColor()
-{
-	COLORREF crBack = TreeView_GetBkColor(*this);
-	float fLum = (RGBX(crBack).Luminance() / 255.0f);
-
-	const BYTE nDarkestGray = 80, nLightestGray = 216;
-	const BYTE nGrayRange = (nLightestGray - nDarkestGray);
-
-	BYTE btShadow = (BYTE)(nDarkestGray + (fLum * nGrayRange));
-
-	m_crItemShadow = RGB(btShadow, btShadow, btShadow);
 }
 
 void CKanbanColumnCtrl::SetFullColor(COLORREF color)
@@ -645,27 +628,8 @@ int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nColWidth) const
 	return nAvailWidth;
 }
 
-void CKanbanColumnCtrl::DrawItemShadow(CDC* pDC, CRect& rItem) const
-{
-	ASSERT(m_crItemShadow > 0);
-
-	int nSave = pDC->SaveDC();
-
-	rItem.DeflateRect(0, 0, 1, 1);
-	pDC->ExcludeClipRect(rItem);
-
-	CRect rShadow(rItem);
-	rShadow.DeflateRect(3, 3, -1, -1);
-
-	GraphicsMisc::DrawRect(pDC, rShadow, m_crItemShadow);
-
-	pDC->RestoreDC(nSave);
-}
-
 void CKanbanColumnCtrl::DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
-	DrawItemShadow(pDC, rItem);
-
 	if (IsTaskSelected(pKI->dwTaskID))
 	{
 		BOOL bFocused = (::GetFocus() == *this);
@@ -714,7 +678,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				CRect rItem;
 				GetItemRect(hti, rItem);
 
-				rItem.DeflateRect(ITEM_PADDING, ITEM_PADDING);
+				rItem.bottom -= ITEM_SPACING;
 
 				DrawItem(pDC, dwTaskID, rItem);
 			}
@@ -2826,7 +2790,7 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 	int nMinHeaderWidth = (GraphicsMisc::GetTextWidth(&dc, m_columnDef.sTitle) + (2 * LV_PADDING));
 	CSize reqSize(nMinHeaderWidth, 0);
 
-	int nDefItemIndent = ((2 * ITEM_BORDER) + TEXT_BORDER.left + TEXT_BORDER.right) + 1; // +1 for shadow
+	int nDefItemIndent = ((2 * ITEM_BORDER) + TEXT_BORDER.left + TEXT_BORDER.right);
 
 	if (HasOption(KBCF_SHOWTASKCOLORASBAR))
 		nDefItemIndent += (BAR_WIDTH + (2 * BAR_PADDING));
