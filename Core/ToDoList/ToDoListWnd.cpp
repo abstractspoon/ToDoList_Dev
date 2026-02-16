@@ -968,10 +968,6 @@ BOOL CToDoListWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 
 void CToDoListWnd::InitUITheme()
 {
-	// XP and above only ie. Not Linux
-	if (COSVersion() < OSV_XP)
-		return;
-
 	if (!m_pPrefs)
 	{
 		ASSERT(0);
@@ -988,10 +984,6 @@ void CToDoListWnd::InitUITheme()
 	
 void CToDoListWnd::UpdateUITheme()
 {
-	// XP and above only ie. Not Linux
-	if (COSVersion() < OSV_XP)
-		return;
-
 	// cache existing theme and update
 	CUIThemeFile themeCur = m_theme;
 	InitUITheme();
