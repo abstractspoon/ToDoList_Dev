@@ -61,11 +61,6 @@ void CUIExtensionMgr::Initialize() const
 			{
 				if (IsUIExtensionDll(sDllPath))
 				{
-					// Avoid instantiating Non-native (C#) modules on Linux
-					if ((COSVersion() == OSV_LINUX) && !FileMisc::IsNativeModule(sDllPath))
-						continue;
-
-					// else
 					IUIExtension* pExtension = CreateUIExtensionInterface(sDllPath);
 
 					if (pExtension)
