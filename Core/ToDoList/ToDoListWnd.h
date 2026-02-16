@@ -857,7 +857,7 @@ protected:
 	void SetToDoCtrlFocus(TDC_SETFOCUSTO nLocation);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	void DoMoveTask(TDC_MOVETASK nDirection);
-	void DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags/*, BOOL bUpdateFilterCtrls = -1*/);
+	void DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bFromFilterBar);
 
 	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);
 	TDCEXPORTTASKLIST* PrepareNewExportAfterSave(int nTDC, const CTaskFile& tasks);

@@ -12041,23 +12041,34 @@ LRESULT CToDoListWnd::OnFilterChange(WPARAM wp, LPARAM lp)
 	DWORD dwCustomFlags = 0;
 
 	m_filterBar.GetFilter(filter, sCustom, dwCustomFlags);
-	DoChangeFilter(filter, sCustom, dwCustomFlags);
+	DoChangeFilter(filter, sCustom, dwCustomFlags, TRUE);
 
 	return 0L;
 }
 
-void CToDoListWnd::DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags)
+void CToDoListWnd::DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bFromFilterBar)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	FILTER_SHOW nOldFilter = tdc.GetFilter(), nNewFilter = filter.nShow;
 
-	ASSERT(((nNewFilter == FS_ADVANCED) && !sCustom.IsEmpty()) ||
-		   ((nNewFilter != FS_ADVANCED) && sCustom.IsEmpty()));
+	FILTER_SHOW nNewFilter = filter.nShow;
+	BOOL bRefreshFilterCtrls = FALSE;
 
-	// Refresh filter controls if we're switching to/from a 
-	// 'custom' or 'selected' filter
-	BOOL bRefreshFilterCtrls = (Misc::StatesDiffer((nOldFilter == FS_ADVANCED), (nNewFilter == FS_ADVANCED)) ||
+	if (bFromFilterBar)
+	{
+		FILTER_SHOW nOldFilter = tdc.GetFilter();
+		
+		ASSERT(((nNewFilter == FS_ADVANCED) && !sCustom.IsEmpty()) ||
+				((nNewFilter != FS_ADVANCED) && sCustom.IsEmpty()));
+		
+		// Refresh filter controls if we're switching to/from a 
+		// 'custom' or 'selected' filter
+		bRefreshFilterCtrls = (Misc::StatesDiffer((nOldFilter == FS_ADVANCED), (nNewFilter == FS_ADVANCED)) ||
 								Misc::StatesDiffer((nOldFilter == FS_SELECTED), (nNewFilter == FS_SELECTED)));
+	}
+	else // from Filter Dialog
+	{
+		bRefreshFilterCtrls = !tdc.FilterMatches(filter, sCustom, dwCustomFlags);
+	}
 
 	if (nNewFilter == FS_ADVANCED)
 	{
@@ -12111,7 +12122,7 @@ void CToDoListWnd::OnViewFilter()
 		DWORD dwCustomFlags = 0;
 		
 		dialog.GetFilter(filter, sCustom, dwCustomFlags);
-		DoChangeFilter(filter, sCustom, dwCustomFlags);
+		DoChangeFilter(filter, sCustom, dwCustomFlags, FALSE);
 	}
 }
 
@@ -12138,7 +12149,7 @@ void CToDoListWnd::OnViewRefreshfilter()
 	}
 	else
 	{
-		DoChangeFilter(filter, sCustom, dwCustomFlags);
+		DoChangeFilter(filter, sCustom, dwCustomFlags, TRUE);
 
 		if (Prefs().GetExpandTasksOnLoad())
 			tdc.ExpandTasks(TDCEC_ALL);
