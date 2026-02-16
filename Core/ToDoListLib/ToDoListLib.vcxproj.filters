@@ -1026,7 +1026,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="ToDoListLib.vcxproj" />
     <CustomBuild Include="ToDoListLib.vcxproj.filters" />
   </ItemGroup>
 </Project>

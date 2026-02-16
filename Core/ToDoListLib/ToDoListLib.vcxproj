@@ -453,9 +453,6 @@
     <ClInclude Include="..\ToDoList\ToDoListWnd.h" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="ToDoListLib.vcxproj">
-      <FileType>Document</FileType>
-    </CustomBuild>
     <CustomBuild Include="ToDoListLib.vcxproj.filters">
       <FileType>Document</FileType>
     </CustomBuild>
