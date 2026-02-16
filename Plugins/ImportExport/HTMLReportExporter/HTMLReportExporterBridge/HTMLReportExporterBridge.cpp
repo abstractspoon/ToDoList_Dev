@@ -9,6 +9,8 @@
 #include <tchar.h>
 #include <msclr\auto_gcroot.h>
 
+#include <Shared\OSVersion.h>
+
 #include <Interfaces\ITasklist.h>
 #include <Interfaces\ITransText.h>
 #include <Interfaces\IPreferences.h>
@@ -29,6 +31,17 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 const LPCWSTR HTMLREPORTER_GUID = L"95E6E2D4-2301-461A-80FB-C2863E788F37";
 const LPCWSTR HTMLREPORTER_NAME = L"Report Builder";
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+DLL_DECLSPEC IExportTasklist* CreateExportInterface()
+{
+	// Disable this module on Linux because it requires IE and will otherwise crash
+	if (COSVersion == OSV_LINUX)
+		return NULL;
+
+	return new CHTMLReportExporterBridge();
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
