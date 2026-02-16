@@ -42,15 +42,15 @@ public:
 	int SetCheckByItemData(DWORD dwItemData, CCB_CHECKSTATE nCheck = CCBC_CHECKED);
 	int SetCheckedByItemData(DWORD dwFlags);
 	DWORD GetCheckedItemData() const;
-
-	virtual int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
-	virtual BOOL SetChecked(const CStringArray& aItems);
-	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	
 	void EnableTooltip(BOOL bEnable = TRUE);
 	CString GetTooltip() const;
 	void FilterToolTipMessage(MSG* pMsg);
 
+	// overrides
+	virtual int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
+	virtual BOOL SetChecked(const CStringArray& aItems);
+	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	virtual int AddUniqueItem(const CString& sItem); // returns index or CB_ERR
     virtual int SelectString(int nStartAfter, LPCTSTR lpszString);
 
