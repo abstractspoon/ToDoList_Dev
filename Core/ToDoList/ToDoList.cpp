@@ -181,38 +181,8 @@ BOOL CToDoListApp::HandleSimpleQueries(const CEnCommandLineInfo& cmdInfo)
 	return FALSE;
 }
 
-BOOL CToDoListApp::HasVSRedistributable()
-{
-	// Only reliable way to see if the C# plugins will load
-	// is to try to load the PluginHelpers.dll since it has
-	// dependencies on MSVCRT, MFC and .Net
-	// Don't test on Linux
-	if (COSVersion() >= OSV_XP)
-	{
-		const CString PLUGINHELPERS = FileMisc::GetAppFolder(_T("PluginHelpers.dll"));
-
-		if (FileMisc::FileExists(PLUGINHELPERS) && !LoadLibrary(PLUGINHELPERS))
-		{
-			LPCTSTR MSVCREDIST_URL = _T("https://www.microsoft.com/en-au/download/details.aspx?id=48145"); 
-			
-			if (AfxMessageBox(CEnString().Format(IDS_MSVCREDIST_MSG, 2015), MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
-				FileMisc::Run(::GetDesktopWindow(), MSVCREDIST_URL);
-
-			// Always quit
-			return FALSE;
-		}
-	}
-
-	// All good
-	return TRUE;
-}
-
 BOOL CToDoListApp::InitInstance()
 {
-	// .NET plugins require VS redistributable to be installed
-	if (!HasVSRedistributable())
-		return FALSE;
-
 	// Set up icons that might be required during startup
 	if (m_iconBrowse.Load(IDI_FILEEDIT_BROWSE, 16, FALSE) && m_iconGo.Load(IDI_FILEEDIT_GO, 16, FALSE))
 		CFileEdit::SetDefaultButtonImages(m_iconBrowse, m_iconGo);
