@@ -32,7 +32,7 @@ const LPCWSTR HTMLREPORTER_NAME = L"Report Builder";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-DLL_DECLSPEC IExportTasklist* CreateExportInterface()
+IExportTasklist* CreateExportInterface()
 {
 	// Disable this module on Linux because it requires IE and will otherwise crash
 	if (OSVersion::IsLinux())
