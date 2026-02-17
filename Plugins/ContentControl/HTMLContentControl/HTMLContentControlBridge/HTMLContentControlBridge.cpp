@@ -35,6 +35,17 @@ const LPCWSTR HTML_NAME = L"Html";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+IContent* CreateContentInterface()
+{
+	// Disable this module on Linux because it requires IE and will otherwise crash
+	if (OSVersion::IsLinux())
+		return NULL;
+	
+	return new CHTMLContentBridge();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 CHTMLContentBridge::CHTMLContentBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
    m_hIcon = Win32::LoadHIcon(L"HTMLContentControlBridge.dll", IDI_HTML, 16, true);

@@ -37,10 +37,7 @@ DLL_DECLSPEC int GetInterfaceVersion()
    return IIMPORTEXPORT_VERSION;
 }
 
-DLL_DECLSPEC IExportTasklist* CreateExportInterface()
-{
-   return new CHTMLReportExporterBridge();
-}
+DLL_DECLSPEC IExportTasklist* CreateExportInterface();
 
 DLL_DECLSPEC IImportTasklist* CreateImportInterface()
 {

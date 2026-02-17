@@ -90,8 +90,5 @@ DLL_DECLSPEC int GetInterfaceVersion()
    return ICONTENTCTRL_VERSION;
 }
 
-DLL_DECLSPEC IContent* CreateContentInterface()
-{
-   return new CHTMLContentBridge();
-}
+DLL_DECLSPEC IContent* CreateContentInterface();
 
