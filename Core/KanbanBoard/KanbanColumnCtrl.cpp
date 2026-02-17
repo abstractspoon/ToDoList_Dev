@@ -678,8 +678,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				CRect rItem;
 				GetItemRect(hti, rItem);
 
-				rItem.bottom -= ITEM_SPACING;
-
+				rItem.DeflateRect(0, 0, ITEM_SPACING, ITEM_SPACING);
 				DrawItem(pDC, dwTaskID, rItem);
 			}
 			else if (IsGroupHeaderTask(dwTaskID))
