@@ -732,8 +732,8 @@ namespace LoggedTimeUIExtension
         {
             base.OnSizeChanged(e);
 
-			// For reasons I don't yet understand, setting the 
-			// toolbar's location at creation time does not work
+			// Somewhere in WinForms the toolbar gets repositioned even though the toolbar
+			// is not anchored, so we have to restore the correct position each time
 			m_Toolbar.Location = new Point(m_YearCombo.Right + ControlSpacing, LabelTop - 2);
 
 			// Work around a well known winforms bug
