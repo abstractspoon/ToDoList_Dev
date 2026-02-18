@@ -45,6 +45,11 @@ namespace EvidenceBoardUIExtension
 		private Label m_ActiveDateRangeLabel;
 		private MonthRangeSliderCtrl m_DateSlider;
 
+		private static int LabelTop = DPIScaling.Scale(5);
+		private static int ControlSpacing = DPIScaling.Scale(7); // to match core app
+		private static int ComboWidth = DPIScaling.Scale(150);
+		private static int ComboHeight = DPIScaling.Scale(16);
+
 		// ----------------------------------------------------------------------------
 
 		public EvidenceBoardUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
@@ -401,7 +406,7 @@ namespace EvidenceBoardUIExtension
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 
-			InitialiseCtrl(m_OptionsCombo, m_OptionsLabel, 150);
+			InitialiseCtrl(m_OptionsCombo, m_OptionsLabel, ComboWidth);
 			this.Controls.Add(m_OptionsCombo);
 
 			// Link vis combo and label
@@ -412,7 +417,7 @@ namespace EvidenceBoardUIExtension
 			m_LinkVisibilityCombo.Translate(m_Trans);
 			m_LinkVisibilityCombo.DropDownClosed += new EventHandler(OnLinkVisibilityComboClosed);
 
-			InitialiseCtrl(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, 150);
+			InitialiseCtrl(m_LinkVisibilityCombo as ComboBox, m_LinkVisibilityLabel, ComboWidth);
 			this.Controls.Add(m_LinkVisibilityCombo);
 
 			// Toolbar 
@@ -480,7 +485,7 @@ namespace EvidenceBoardUIExtension
 					return Point.Empty;
 
 				// Centre the toolbar vertically on the combo
-				return new Point(m_LinkVisibilityCombo.Right + 10, m_LinkVisibilityCombo.Top - (m_Toolbar.Height - m_LinkVisibilityCombo.Height) / 2);
+				return new Point(m_LinkVisibilityCombo.Right + ControlSpacing, m_LinkVisibilityCombo.Top - (m_Toolbar.Height - m_LinkVisibilityCombo.Height) / 2);
 			}
 		}
 
@@ -494,9 +499,9 @@ namespace EvidenceBoardUIExtension
 			label.ForeColor = SystemColors.WindowText;
 
 			if (prevControl != null)
-				label.Location = new Point((prevControl.Bounds.Right + DPIScaling.Scale(7)), DPIScaling.Scale(5));
+				label.Location = new Point((prevControl.Bounds.Right + ControlSpacing), LabelTop);
 			else
-				label.Location = new Point(0, DPIScaling.Scale(5));
+				label.Location = new Point(0, LabelTop);
 
 			return label;
 		}
@@ -504,7 +509,7 @@ namespace EvidenceBoardUIExtension
 		void InitialiseCtrl(Control ctrl, Label associatedLabel, int width)
 		{
 			ctrl.Font = m_ControlsFont;
-			ctrl.Width = DPIScaling.Scale(width);
+			ctrl.Width = width;
 
 			if (ctrl is ComboBox)
 			{
@@ -659,7 +664,7 @@ namespace EvidenceBoardUIExtension
 
 			// Resize the slider to take up the rest of the width
 			Rectangle rect = ClientRectangle;
-			m_DateSlider.ResizeToFit(rect.Right - m_DateSlider.Left - 10);
+			m_DateSlider.ResizeToFit(rect.Right - m_DateSlider.Left - ControlSpacing);
 
 			// Node control
 			rect.Y = ControlTop;
