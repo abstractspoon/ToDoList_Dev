@@ -776,11 +776,9 @@ void CRTFContentControl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 
 		m_dlgPrefs.LoadPreferences(pPrefs, sKey);
 
-		RE_PASTE nLinkOption = (RE_PASTE)pPrefs->GetProfileInt(sKey, _T("FileLinkOption"), REP_ASIMAGE);
-		BOOL bLinkOptionIsDefault = pPrefs->GetProfileInt(sKey, _T("FileLinkOptionIsDefault"), FALSE);
-		BOOL bReduceImageColors = pPrefs->GetProfileInt(sKey, _T("ReduceImageColors"), TRUE);
-
-		m_rtf.SetFileLinkOption(nLinkOption, bLinkOptionIsDefault, bReduceImageColors);
+		m_rtf.SetFileLinkOption(m_dlgPrefs.GetFileLinkOption(), 
+								(m_dlgPrefs.GetPromptForFileLink() == FALSE),
+								m_dlgPrefs.GetReduceImageColors());
 	}
 }
 
