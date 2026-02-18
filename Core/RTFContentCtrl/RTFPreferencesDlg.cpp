@@ -10,6 +10,7 @@
 #include "..\shared\FileMisc.h"
 #include "..\shared\DialogHelper.h"
 #include "..\shared\mswordhelper.h"
+#include "..\shared\OSVersion.h"
 
 #include "..\Interfaces\iPreferences.h"
 
@@ -25,20 +26,17 @@ static char THIS_FILE[] = __FILE__;
 CRTFPreferencesPage::CRTFPreferencesPage()
 	: 
 	CPreferencesPageBase(IDD_PREFERENCES_PAGE), 
-	m_bPromptForFileLink(TRUE),
-	m_nLinkOption(REP_ASIMAGE),
+	m_bPromptForFileLink(FALSE),
+	m_nLinkOption(REP_ASFILEURL),
+	m_bReduceImageColors(FALSE),
 	m_bConvertWithMSWord(FALSE)
 {
-	//{{AFX_DATA_INIT(CRTFPreferencesPage)
-	//}}AFX_DATA_INIT
 }
-
 
 void CRTFPreferencesPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPreferencesPageBase::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CRTFPreferencesPage)
-	//}}AFX_DATA_MAP
+
 	DDX_Radio(pDX, IDC_FILEURL, m_nLinkOption);
 	DDX_Check(pDX, IDC_USEMSWORD, m_bConvertWithMSWord);
 	DDX_Check(pDX, IDC_PROMPTFORFILELINK, m_bPromptForFileLink);
@@ -46,8 +44,6 @@ void CRTFPreferencesPage::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CRTFPreferencesPage, CPreferencesPageBase)
-	//{{AFX_MSG_MAP(CRTFPreferencesPage)
-	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_PROMPTFORFILELINK, OnClickPromptForLink)
 	ON_BN_CLICKED(IDC_FILEIMAGE, OnChangeLinkOption)
 	ON_BN_CLICKED(IDC_FILELINK, OnChangeLinkOption)
@@ -55,14 +51,20 @@ BEGIN_MESSAGE_MAP(CRTFPreferencesPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_FILEURL, OnChangeLinkOption)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CRTFPreferencesPage message handlers
-
 void CRTFPreferencesPage::SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt, BOOL bReduceImageColors)
 {
-	m_bPromptForFileLink = bPrompt;
-	m_nLinkOption = nLinkOption;
-	m_bReduceImageColors = bReduceImageColors;
+	if (COSVersion() == OSV_LINUX)
+	{
+		m_bPromptForFileLink = FALSE;
+		m_nLinkOption = REP_ASFILEURL;
+		m_bReduceImageColors = FALSE;
+	}
+	else
+	{
+		m_bPromptForFileLink = bPrompt;
+		m_nLinkOption = nLinkOption;
+		m_bReduceImageColors = bReduceImageColors;
+	}
 }
 
 BOOL CRTFPreferencesPage::OnInitDialog() 
@@ -74,10 +76,10 @@ BOOL CRTFPreferencesPage::OnInitDialog()
 	if (!CMSWordHelper::IsWordInstalled(12))
 		GetDlgItem(IDC_USEMSWORD)->EnableWindow(FALSE);
 
+	GetDlgItem(IDC_PROMPTFORFILELINK)->EnableWindow(COSVersion() != OSV_LINUX);
 	OnClickPromptForLink();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CRTFPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -91,64 +93,58 @@ void CRTFPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) c
 void CRTFPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// Note: Parent App handles global settings
-	m_nLinkOption = (RE_PASTE)pPrefs->GetProfileInt(szKey, _T("FileLinkOption"), REP_ASIMAGE);
-	m_bPromptForFileLink = !pPrefs->GetProfileInt(szKey, _T("FileLinkOptionIsDefault"), TRUE);
-	m_bReduceImageColors = pPrefs->GetProfileInt(szKey, _T("ReduceImageColors"), TRUE);
+	RE_PASTE nLinkOption = (RE_PASTE)pPrefs->GetProfileInt(szKey, _T("FileLinkOption"), REP_ASIMAGE);
+	BOOL bPromptForFileLink = !pPrefs->GetProfileInt(szKey, _T("FileLinkOptionIsDefault"), TRUE);
+	BOOL bReduceImageColors = pPrefs->GetProfileInt(szKey, _T("ReduceImageColors"), TRUE);
+
+	SetFileLinkOption(nLinkOption, bPromptForFileLink, bReduceImageColors);
 }
 
 void CRTFPreferencesPage::OnClickPromptForLink()
 {
 	UpdateData();
+
+	BOOL bLinuxOS = (COSVersion() == OSV_LINUX);
 	
 	GetDlgItem(IDC_FILEURL)->EnableWindow(!m_bPromptForFileLink);
-	GetDlgItem(IDC_FILECOPY)->EnableWindow(!m_bPromptForFileLink);
-	GetDlgItem(IDC_FILELINK)->EnableWindow(!m_bPromptForFileLink);
-	GetDlgItem(IDC_FILEIMAGE)->EnableWindow(!m_bPromptForFileLink);
-	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
+	GetDlgItem(IDC_FILECOPY)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink);
+	GetDlgItem(IDC_FILELINK)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink);
+	GetDlgItem(IDC_FILEIMAGE)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink);
+	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
 }
 
 void CRTFPreferencesPage::OnChangeLinkOption()
 {
 	UpdateData();
 	
-	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
+	BOOL bLinuxOS = (COSVersion() == OSV_LINUX);
+	
+	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CCreateFileLinkDlg dialog
+// CRTFPreferencesDlg dialog
 
 CRTFPreferencesDlg::CRTFPreferencesDlg(CWnd* pParent /*=NULL*/)
-	: CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_RTFCOMMENTS, IDI_HELP_BUTTON, pParent)
+	: 
+	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_RTFCOMMENTS, IDI_HELP_BUTTON, pParent)
 {
-	//{{AFX_DATA_INIT(CRTFPreferencesDlg)
-	//}}AFX_DATA_INIT
-
 	m_ppHost.AddPage(&m_page);
 }
-
 
 void CRTFPreferencesDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CPreferencesDlgBase::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CRTFPreferencesDlg)
-	//}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CRTFPreferencesDlg, CPreferencesDlgBase)
-	//{{AFX_MSG_MAP(CRTFPreferencesDlg)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CCreateFileLinkDlg message handlers
 
 BOOL CRTFPreferencesDlg::OnInitDialog() 
 {
 	CPreferencesDlgBase::OnInitDialog();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 int CRTFPreferencesDlg::DoModal(BOOL bUseMSWord)
