@@ -77,7 +77,7 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 	}
 
 	m_ppHost.AddPage(&m_pageFrom, CEnString(IDS_IMPORTDLGFROMPAGE_TITLE));
-	m_ppHost.AddPage(&m_pageTo, CEnString(IDS_IMPORTDLGTOPAGE_TITLE)); // TODO
+	m_ppHost.AddPage(&m_pageTo, CEnString(IDS_IMPORTDLGTOPAGE_TITLE));
 }
 
 void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
@@ -107,14 +107,12 @@ BOOL CTDLImportDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	ASSERT(m_cbFormat.GetCount());
-
 	VERIFY(m_ppHost.Create(IDC_PLACEHOLDER, this));
 
-	EnableOK();
+	ASSERT(m_cbFormat.GetCount());
+	OnSelchangeImporter();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 BOOL CTDLImportDialog::IsCurrentImporterFileBased() const
@@ -593,8 +591,7 @@ BOOL CTDLImportToPage::OnInitDialog()
 	SelectItemByDataT(m_cbTasklistPos, m_nActiveTasklistPos);
 	EnableDisableControls();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLImportToPage::EnableDisableControls()
