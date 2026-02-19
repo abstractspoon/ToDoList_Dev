@@ -413,12 +413,9 @@ void CRTFContentControl::CheckMenuItem(CMenu* pMenu, UINT nCmdID, BOOL bCheck)
 
 void CRTFContentControl::RemoveAdvancedFeatures(CMenu* pMenu) const
 {
-#ifdef _DEBUG
-	UNREFERENCED_PARAMETER(pMenu);
-#else
 	BOOL bRemoveAdvancedFeatures = ((FileMisc::GetModuleDriveType() == DRIVE_FIXED) && 
 									!CMSWordHelper::IsWordInstalled(12));
-	
+
 	if (bRemoveAdvancedFeatures)
 	{
 		CEnMenu::DeleteMenu(*pMenu, ID_EDIT_SUPERSCRIPT, MF_BYCOMMAND, TRUE);
@@ -429,7 +426,6 @@ void CRTFContentControl::RemoveAdvancedFeatures(CMenu* pMenu) const
 	
 	if (!m_rtf.SupportsInlineSpellChecking())
 		pMenu->DeleteMenu(ID_EDIT_INLINESPELLCHECK, MF_BYCOMMAND);
-#endif
 }
 
 void CRTFContentControl::OnContextMenu(CWnd* pWnd, CPoint point) 

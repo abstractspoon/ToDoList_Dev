@@ -10,7 +10,7 @@
 #include "..\shared\FileMisc.h"
 #include "..\shared\DialogHelper.h"
 #include "..\shared\mswordhelper.h"
-#include "..\shared\OSVersion.h"
+#include "..\shared\RichEditHelper.h"
 
 #include "..\Interfaces\iPreferences.h"
 
@@ -53,17 +53,17 @@ END_MESSAGE_MAP()
 
 void CRTFPreferencesPage::SetFileLinkOption(RE_PASTE nLinkOption, BOOL bPrompt, BOOL bReduceImageColors)
 {
-	if (COSVersion() == OSV_LINUX)
-	{
-		m_bPromptForFileLink = FALSE;
-		m_nLinkOption = REP_ASFILEURL;
-		m_bReduceImageColors = FALSE;
-	}
-	else
+	if (CRichEditHelper::SupportsOLEEmbedding())
 	{
 		m_bPromptForFileLink = bPrompt;
 		m_nLinkOption = nLinkOption;
 		m_bReduceImageColors = bReduceImageColors;
+	}
+	else
+	{
+		m_bPromptForFileLink = FALSE;
+		m_nLinkOption = REP_ASFILEURL;
+		m_bReduceImageColors = FALSE;
 	}
 }
 
@@ -71,14 +71,39 @@ BOOL CRTFPreferencesPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	m_groupLine.AddGroupLine(IDC_LINKTOFILE_GROUP, *this);
-
 	if (!CMSWordHelper::IsWordInstalled(12))
 		GetDlgItem(IDC_USEMSWORD)->EnableWindow(FALSE);
 
-	GetDlgItem(IDC_PROMPTFORFILELINK)->EnableWindow(COSVersion() != OSV_LINUX);
-	OnClickPromptForLink();
-	
+	// Hide and disable all file link options where not supported
+	if (!CRichEditHelper::SupportsOLEEmbedding())
+	{
+		CWnd* pChild = GetWindow(GW_CHILD);
+
+		while (pChild)
+		{
+			switch (pChild->GetDlgCtrlID())
+			{
+			case IDC_LINKTOFILE_GROUP:
+			case IDC_REDUCEIMAGECOLORS:
+			case IDC_PROMPTFORFILELINK:
+			case IDC_FILEIMAGE:
+			case IDC_FILELINK:
+			case IDC_FILECOPY:
+			case IDC_FILEURL:
+				pChild->EnableWindow(FALSE);
+				pChild->ShowWindow(SW_HIDE);
+				break;
+			}
+
+			pChild = pChild->GetWindow(GW_HWNDNEXT);
+		}
+	}
+	else
+	{
+		m_groupLine.AddGroupLine(IDC_LINKTOFILE_GROUP, *this);
+		OnClickPromptForLink();
+	}
+		
 	return TRUE;
 }
 
@@ -102,24 +127,24 @@ void CRTFPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR sz
 
 void CRTFPreferencesPage::OnClickPromptForLink()
 {
+	ASSERT(CRichEditHelper::SupportsOLEEmbedding());
+
 	UpdateData();
 
-	BOOL bLinuxOS = (COSVersion() == OSV_LINUX);
-	
 	GetDlgItem(IDC_FILEURL)->EnableWindow(!m_bPromptForFileLink);
-	GetDlgItem(IDC_FILECOPY)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink);
-	GetDlgItem(IDC_FILELINK)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink);
-	GetDlgItem(IDC_FILEIMAGE)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink);
-	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
+	GetDlgItem(IDC_FILECOPY)->EnableWindow(!m_bPromptForFileLink);
+	GetDlgItem(IDC_FILELINK)->EnableWindow(!m_bPromptForFileLink);
+	GetDlgItem(IDC_FILEIMAGE)->EnableWindow(!m_bPromptForFileLink);
+	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
 }
 
 void CRTFPreferencesPage::OnChangeLinkOption()
 {
+	ASSERT(CRichEditHelper::SupportsOLEEmbedding());
+
 	UpdateData();
 	
-	BOOL bLinuxOS = (COSVersion() == OSV_LINUX);
-	
-	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!bLinuxOS && !m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
+	GetDlgItem(IDC_REDUCEIMAGECOLORS)->EnableWindow(!m_bPromptForFileLink && (m_nLinkOption == REP_ASIMAGE));
 }
 
 /////////////////////////////////////////////////////////////////////////////
