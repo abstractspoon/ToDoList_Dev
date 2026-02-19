@@ -135,7 +135,8 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle,
 	m_pageStyle(szStylesheet, mgrImpExp, m_sPrefsKey, szExportToImageView),
 	m_pageTaskSel(aAttribDefs, m_sPrefsKey, bEnableSubtaskSelection),
 	m_sTitle(szTitle),
-	m_nPrevActiveTab(0)
+	m_nPrevActiveTab(0),
+	m_ppHost(TCE_BOLDSELTEXT)
 {
 	CPreferences prefs;
 
