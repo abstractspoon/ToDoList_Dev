@@ -663,7 +663,7 @@ BOOL CEnMenu::SetMenuItemData(HMENU hMenu, UINT nIDItem, DWORD dwItemData, UINT 
 	MENUITEMINFO minfo;
 	minfo.cbSize = sizeof(minfo);
 	minfo.fMask = MIIM_DATA;
-	minfo.dwItemData = 0;
+	minfo.dwItemData = dwItemData;
 
 	return ::GetMenuItemInfo(hMenu, nIDItem, bByPosition, &minfo);
 }
