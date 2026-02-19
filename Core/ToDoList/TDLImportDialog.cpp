@@ -51,9 +51,144 @@ enum TASKLISTPOS
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog dialog
 
+CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent /*=NULL*/)
+	:
+	CTDLDialog(IDD_IMPORT_DIALOG, PREFSKEY, pParent),
+	m_mgrImportExport(mgr),
+	m_cbFormat(mgr, TRUE, FALSE),
+	m_pageFrom(mgr),
+	m_pageTo(bReadonlyTasklist, bTasklistHasSelection),
+	m_ppHost(TCE_BOLDSELTEXT)
+{
+	CPreferences prefs;
+
+	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("ImporterTypeID"));
+
+	// backwards compat
+	if (m_sFormatTypeID.IsEmpty())
+	{
+		int nFormat = prefs.GetProfileInt(m_sPrefsKey, _T("ImportFormat"), -1);
+
+		if (nFormat != -1)
+			m_sFormatTypeID = mgr.GetImporterTypeID(nFormat);
+
+		if (m_sFormatTypeID.IsEmpty())
+			m_sFormatTypeID = mgr.GetTypeID(TDCIT_CSV);
+	}
+
+	m_ppHost.AddPage(&m_pageFrom, CEnString(IDS_IMPORTDLGFROMPAGE_TITLE));
+	m_ppHost.AddPage(&m_pageTo, CEnString(IDS_IMPORTDLGTOPAGE_TITLE)); // TODO
+}
+
+void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
+{
+	CTDLDialog::DoDataExchange(pDX);
+
+	DDX_Control(pDX, IDC_IMPORTERLIST, m_cbFormat);
+
+	m_cbFormat.DDX(pDX, m_sFormatTypeID);
+}
+
+BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
+	ON_CBN_SELCHANGE(IDC_IMPORTERLIST, OnSelchangeImporter)
+	ON_EN_CHANGE(IDC_INPUTTEXT, EnableOK)
+	ON_EN_CHANGE(IDC_INPUTFILE, EnableOK)
+	ON_BN_CLICKED(IDC_REFRESHCLIPBOARD, EnableOK)
+	ON_BN_CLICKED(IDC_FROMFILE, EnableOK)
+	ON_BN_CLICKED(IDC_MERGETOACTIVETASKLIST, EnableOK)
+	ON_BN_CLICKED(IDC_ADDTOACTIVETASKLIST, EnableOK)
+	ON_BN_CLICKED(IDC_ADDTOSELECTEDTASK, EnableOK)
+	ON_BN_CLICKED(IDC_CREATENEWTASKLIST, EnableOK)
+END_MESSAGE_MAP()
+
+//--------------------------------------------------------------
+
+BOOL CTDLImportDialog::OnInitDialog()
+{
+	CTDLDialog::OnInitDialog();
+
+	ASSERT(m_cbFormat.GetCount());
+
+	VERIFY(m_ppHost.Create(IDC_PLACEHOLDER, this));
+
+	EnableOK();
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+BOOL CTDLImportDialog::IsCurrentImporterFileBased() const
+{
+	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
+
+	return m_mgrImportExport.ImporterHasFileExtension(nFormat);
+}
+
+CString CTDLImportDialog::GetCurrentImporterFilter() const
+{
+	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
+
+	return m_mgrImportExport.GetImporterFileFilter(nFormat);
+}
+
+void CTDLImportDialog::OnOK()
+{
+	CTDLDialog::OnOK();
+
+	CPreferences prefs;
+
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportOption"), m_pageFrom.GetImportFromText());
+	prefs.WriteProfileString(m_sPrefsKey, _T("ImportFilePath"), m_pageFrom.GetImportFilePath());
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportToWhere"), m_pageTo.GetImportTo());
+	prefs.WriteProfileString(m_sPrefsKey, _T("ImporterTypeID"), m_sFormatTypeID);
+}
+
+CString CTDLImportDialog::GetFormatTypeID() const
+{
+	return m_sFormatTypeID;
+}
+
+void CTDLImportDialog::OnSelchangeImporter()
+{
+	UpdateData();
+
+	m_pageFrom.SetImporterFormatID(m_sFormatTypeID);
+
+	EnableOK();
+}
+
+void CTDLImportDialog::EnableOK()
+{
+	if (!IsCurrentImporterFileBased())
+	{
+		GetDlgItem(IDOK)->EnableWindow(TRUE);
+	}
+	else if (GetImportFromText())
+	{
+		GetDlgItem(IDOK)->EnableWindow(!m_pageFrom.GetImportText().IsEmpty());
+	}
+	else // import from file
+	{
+		GetDlgItem(IDOK)->EnableWindow(FileMisc::FileExists(m_pageFrom.GetImportFilePath()));
+	}
+}
+
+void CTDLImportDialog::OnChangeClipboardtext()
+{
+	EnableOK();
+}
+
+void CTDLImportDialog::OnChangeFilepath()
+{
+	EnableOK();
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLImportFromPage dialog
+
 CTDLImportFromPage::CTDLImportFromPage(const CTDCImportExportMgr& mgr, CWnd* pParent /*=NULL*/)
 	: 
-	CCmdNotifyPropertyPage(IDD_IMPORT_FROM_PAGE, 0),
+	CCmdNotifyPropertyPage(IDD_IMPORT_FROM_PAGE),
 	m_mgrImportExport(mgr),
 	m_nImportMode(TDCIM_ALL),
 	m_sFromText(CClipboard().GetText())
@@ -63,7 +198,6 @@ CTDLImportFromPage::CTDLImportFromPage(const CTDCImportExportMgr& mgr, CWnd* pPa
 	m_bFromText = prefs.GetProfileInt(PREFSKEY, _T("ImportOption"), FALSE);
 	m_sFromFilePath = prefs.GetProfileString(PREFSKEY, _T("ImportFilePath"));
 }
-
 
 void CTDLImportFromPage::DoDataExchange(CDataExchange* pDX)
 {
@@ -76,7 +210,6 @@ void CTDLImportFromPage::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTDLImportFromPage, CCmdNotifyPropertyPage)
-	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_FROMTEXT, OnChangeImportFrom)
 	ON_EN_CHANGE(IDC_INPUTTEXT, OnChangeClipboardtext)
 	ON_EN_CHANGE(IDC_INPUTFILE, OnChangeFilepath)
@@ -352,27 +485,12 @@ void CTDLImportFromPage::UpdateTextField()
 	}
 }
 
-void CTDLImportFromPage::OnSize(UINT nType, int cx, int cy)
-{
-	if (m_eFilePath.GetSafeHwnd())
-	{
-		CRect rText = GetCtrlRect(this, IDC_INPUTTEXT);
-
-		int dx = (cx - rText.right);
-		int dy = (cy - rText.bottom);
-
-		CDialogHelper::ResizeCtrl(this, IDC_INPUTTEXT, dx, dy);
-		CDialogHelper::ResizeCtrl(this, IDC_INPUTFILE, dx, 0);
-		CDialogHelper::OffsetCtrl(this, IDC_REFRESHCLIPBOARD, dx, dy);
-	}
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportToPage page
 
 CTDLImportToPage::CTDLImportToPage(BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent)
 	:
-	CCmdNotifyPropertyPage(IDD_IMPORT_TO_PAGE, 0), // TODO
+	CCmdNotifyPropertyPage(IDD_IMPORT_TO_PAGE),
 	m_bReadonlyTasklist(bReadonlyTasklist),
 	m_bTasklistHasSelection(bTasklistHasSelection),
 	m_bMatchByTaskID(FALSE),
@@ -539,149 +657,3 @@ TDLID_IMPORTTO CTDLImportToPage::GetImportTo() const
 	return (TDLID_IMPORTTO)-1;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// CTDLImportDialog dialog
-
-CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent /*=NULL*/)
-	:
-	CTDLDialog(IDD_IMPORT_DIALOG, PREFSKEY, pParent),
-	m_mgrImportExport(mgr),
-	m_cbFormat(mgr, TRUE, FALSE),
-	m_pageFrom(mgr),
-	m_pageTo(bReadonlyTasklist, bTasklistHasSelection),
-	m_ppHost(TCE_BOLDSELTEXT)
-{
-	CPreferences prefs;
-
-	m_sFormatTypeID = prefs.GetProfileString(m_sPrefsKey, _T("ImporterTypeID"));
-
-	// backwards compat
-	if (m_sFormatTypeID.IsEmpty())
-	{
-		int nFormat = prefs.GetProfileInt(m_sPrefsKey, _T("ImportFormat"), -1);
-
-		if (nFormat != -1)
-			m_sFormatTypeID = mgr.GetImporterTypeID(nFormat);
-
-		if (m_sFormatTypeID.IsEmpty())
-			m_sFormatTypeID = mgr.GetTypeID(TDCIT_CSV);
-	}
-
-	m_ppHost.AddPage(&m_pageFrom, _T("Import From")); // TODO
-	m_ppHost.AddPage(&m_pageTo, _T("Import To")); // TODO
-}
-
-void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
-{
-	CTDLDialog::DoDataExchange(pDX);
-
-	DDX_Control(pDX, IDC_IMPORTERLIST, m_cbFormat);
-
-	m_cbFormat.DDX(pDX, m_sFormatTypeID);
-}
-
-BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
-	ON_CBN_SELCHANGE(IDC_IMPORTERLIST, OnSelchangeImporter)
-
-	ON_EN_CHANGE(IDC_INPUTTEXT, EnableOK)
-	ON_EN_CHANGE(IDC_INPUTFILE, EnableOK)
-	ON_BN_CLICKED(IDC_REFRESHCLIPBOARD, EnableOK)
-	ON_BN_CLICKED(IDC_FROMFILE, EnableOK)
-	ON_BN_CLICKED(IDC_MERGETOACTIVETASKLIST, EnableOK)
-	ON_BN_CLICKED(IDC_ADDTOACTIVETASKLIST, EnableOK)
-	ON_BN_CLICKED(IDC_ADDTOSELECTEDTASK, EnableOK)
-	ON_BN_CLICKED(IDC_CREATENEWTASKLIST, EnableOK)
-END_MESSAGE_MAP()
-
-//--------------------------------------------------------------
-
-BOOL CTDLImportDialog::OnInitDialog()
-{
-	CTDLDialog::OnInitDialog();
-
-	ASSERT(m_cbFormat.GetCount());
-
-	VERIFY(m_ppHost.Create(IDC_PLACEHOLDER, this));
-
-	EnableOK();
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-BOOL CTDLImportDialog::IsCurrentImporterFileBased() const
-{
-	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
-
-	return m_mgrImportExport.ImporterHasFileExtension(nFormat);
-}
-
-CString CTDLImportDialog::GetCurrentImporterFilter() const
-{
-	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
-
-	return m_mgrImportExport.GetImporterFileFilter(nFormat);
-}
-
-void CTDLImportDialog::OnOK()
-{
-	CTDLDialog::OnOK();
-
-	CPreferences prefs;
-
-	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportOption"), m_pageFrom.GetImportFromText());
-	prefs.WriteProfileString(m_sPrefsKey, _T("ImportFilePath"), m_pageFrom.GetImportFilePath());
-	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportToWhere"), m_pageTo.GetImportTo());
-	prefs.WriteProfileString(m_sPrefsKey, _T("ImporterTypeID"), m_sFormatTypeID);
-}
-
-CString CTDLImportDialog::GetFormatTypeID() const
-{
-	return m_sFormatTypeID;
-}
-
-void CTDLImportDialog::OnSelchangeImporter()
-{
-	UpdateData();
-
-	m_pageFrom.SetImporterFormatID(m_sFormatTypeID);
-
-	EnableOK();
-}
-
-void CTDLImportDialog::EnableOK()
-{
-	if (!IsCurrentImporterFileBased())
-	{
-		GetDlgItem(IDOK)->EnableWindow(TRUE);
-	}
-	else if (GetImportFromText())
-	{
-		GetDlgItem(IDOK)->EnableWindow(!m_pageFrom.GetImportText().IsEmpty());
-	}
-	else // import from file
-	{
-		GetDlgItem(IDOK)->EnableWindow(FileMisc::FileExists(m_pageFrom.GetImportFilePath()));
-	}
-}
-
-void CTDLImportDialog::OnChangeClipboardtext()
-{
-	EnableOK();
-}
-
-void CTDLImportDialog::OnChangeFilepath()
-{
-	EnableOK();
-}
-
-void CTDLImportDialog::OnRepositionControls(int dx, int dy)
-{
-	CTDLDialog::OnRepositionControls(dx, dx);
-
-	if (m_ppHost.GetSafeHwnd())
-		CDialogHelper::ResizeChild(&m_ppHost, dx, dy);
-
-	CDialogHelper::OffsetCtrl(this, IDOK, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDCANCEL, dx, dy);
-}

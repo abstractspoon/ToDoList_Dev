@@ -61,14 +61,12 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
-//	virtual void OnRepositionControls(int dx, int dy);
 
 protected:
 	afx_msg void OnChangeImportFrom();
 	afx_msg void OnChangeClipboardtext();
 	afx_msg void OnChangeFilepath();
 	afx_msg void OnRefreshclipboard();
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	DECLARE_MESSAGE_MAP()
 
 	BOOL IsCurrentImporterFileBased() const;
@@ -102,14 +100,13 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
-	//virtual void OnRepositionControls(int dx, int dy);
 
 protected:
 	afx_msg void OnChangeImportTo();
 	DECLARE_MESSAGE_MAP()
 
-	BOOL IsCurrentImporterFileBased() const;
-	CString GetCurrentImporterFilter() const;
+// 	BOOL IsCurrentImporterFileBased() const;
+// 	CString GetCurrentImporterFilter() const;
 	void EnableDisableControls();
 };
 
@@ -145,7 +142,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
-	virtual void OnRepositionControls(int dx, int dy);
 
 protected:
 	afx_msg void OnChangeImportFrom();
@@ -159,8 +155,6 @@ protected:
 	BOOL IsCurrentImporterFileBased() const;
 	CString GetCurrentImporterFilter() const;
 	void EnableOK();
-	void UpdateTextField();
-	void EnableDisableControls();
 };
 
 #endif // !defined(AFX_TDLIMPORTDIALOG_H__F3B10AEE_B46C_4183_AC05_FB72D7C5AFA4__INCLUDED_)
