@@ -606,7 +606,7 @@ BEGIN
                     IDC_SORTDONETASKSATBOTTOM,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,348,381,10
     CONTROL         "A&utomatically resort after editing",IDC_AUTORESORT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,362,381,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,363,381,10
     CONTROL         "All&ow sorting by clicking on column headers",
                     IDC_ENABLECOLUMNHEADERSORTING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,378,387,10
