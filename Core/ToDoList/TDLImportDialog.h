@@ -20,7 +20,7 @@
 class CTDCImportExportMgr;
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportFromPage dialog
+// CTDLImportFromPage
 
 class CTDLImportFromPage : public CCmdNotifyPropertyPage, CDialogHelper
 {
@@ -43,7 +43,7 @@ protected:
 	CString	m_sFormatTypeID;
 	CString	m_sFromFilePath;
 	CString	m_sFromText;
-	int		m_bFromText;
+	BOOL	m_bFromText;
 
 	const CImportExportMgr& m_mgrImportExport;
 
@@ -80,8 +80,7 @@ protected:
 
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportToPage dialog
-
+// CTDLImportToPage 
 class CTDLImportToPage : public CCmdNotifyPropertyPage, CDialogHelper
 {
 public:
@@ -93,9 +92,9 @@ public:
 protected:
 	CComboBox	m_cbTasklistPos;
 
-	int		m_bMatchByTaskID;
 	int		m_nActiveTasklistPos;
 	int		m_nImportTo;
+	BOOL	m_bMatchByTaskID;
 	BOOL	m_bTasklistHasSelection;
 	BOOL	m_bReadonlyTasklist;
 

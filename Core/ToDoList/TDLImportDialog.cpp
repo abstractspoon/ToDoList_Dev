@@ -84,7 +84,7 @@ BEGIN_MESSAGE_MAP(CTDLImportFromPage, CCmdNotifyPropertyPage)
 	ON_BN_CLICKED(IDC_FROMFILE, OnChangeImportFrom)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
+//----------------------------------------------------------
 
 BOOL CTDLImportFromPage::SetUseFile(LPCTSTR szFilePath)
 {
@@ -174,8 +174,7 @@ BOOL CTDLImportFromPage::OnInitDialog()
 
 	EnableDisableControls();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLImportFromPage::EnableDisableControls()
@@ -368,32 +367,20 @@ void CTDLImportFromPage::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-/*
-void CTDLImportFromPage::OnRepositionControls(int dx, int dy)
-{
-	CDialogHelper::ResizeCtrl(this, IDC_FROMBORDER, dx, dy);
-	CDialogHelper::ResizeCtrl(this, IDC_INPUTTEXT, dx, dy);
-	CDialogHelper::ResizeCtrl(this, IDC_INPUTFILE, dx, 0);
-	CDialogHelper::OffsetCtrl(this, IDC_REFRESHCLIPBOARD, dx, dy);
-}
-*/
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportToPage page
 
-CTDLImportToPage::CTDLImportToPage(BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent /*=NULL*/)
+CTDLImportToPage::CTDLImportToPage(BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent)
 	:
 	CCmdNotifyPropertyPage(IDD_IMPORT_TO_PAGE, 0), // TODO
 	m_bReadonlyTasklist(bReadonlyTasklist),
-	m_bTasklistHasSelection(bTasklistHasSelection)
+	m_bTasklistHasSelection(bTasklistHasSelection),
+	m_bMatchByTaskID(FALSE),
+	m_nImportTo(NEWTASKLIST)
 {
 	CPreferences prefs;
 
-	m_bMatchByTaskID = FALSE; // always
-
-	if (m_bReadonlyTasklist)
-		m_nImportTo = NEWTASKLIST;
-	else
+	if (!m_bReadonlyTasklist)
 		m_nImportTo = prefs.GetProfileEnum(PREFSKEY, _T("ImportToWhere"), ACTIVETASKLIST);
 
 	m_nActiveTasklistPos = prefs.GetProfileInt(PREFSKEY, _T("TasklistPos"), SELECTEDTASK);
@@ -402,13 +389,12 @@ CTDLImportToPage::CTDLImportToPage(BOOL bReadonlyTasklist, BOOL bTasklistHasSele
 		m_nActiveTasklistPos = BOTTOMOFTASKLIST;
 }
 
-
 void CTDLImportToPage::DoDataExchange(CDataExchange* pDX)
 {
 	CCmdNotifyPropertyPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_ACTIVETASKLISTPOSITION, m_cbTasklistPos);
-	DDX_Radio(pDX, IDC_CREATETASK, m_nImportTo);
+	DDX_Radio(pDX, IDC_CREATENEWTASKLIST, m_nImportTo);
 	DDX_Radio(pDX, IDC_MERGEBYTITLE, m_bMatchByTaskID);
 	DDX_CBData(pDX, m_cbTasklistPos, m_nActiveTasklistPos, (int)(m_bTasklistHasSelection ? SELECTEDTASK : BOTTOMOFTASKLIST));
 }
@@ -420,7 +406,7 @@ BEGIN_MESSAGE_MAP(CTDLImportToPage, CCmdNotifyPropertyPage)
 	ON_BN_CLICKED(IDC_CREATENEWTASKLIST, OnChangeImportTo)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------
 
 BOOL CTDLImportToPage::SetImportTo(TDLID_IMPORTTO nImportTo)
 {
@@ -506,7 +492,8 @@ void CTDLImportToPage::EnableDisableControls()
 
 void CTDLImportToPage::OnChangeImportTo()
 {
-	// TODO
+	UpdateData();
+	EnableDisableControls();
 }
 
 void CTDLImportToPage::OnOK()
@@ -552,26 +539,6 @@ TDLID_IMPORTTO CTDLImportToPage::GetImportTo() const
 	return (TDLID_IMPORTTO)-1;
 }
 
-/*
-void CTDLImportToPage::OnRepositionControls(int dx, int dy)
-{
-	CDialogHelper::OffsetCtrl(this, IDC_TOBORDER, dx, 0);
-	CDialogHelper::ResizeCtrl(this, IDC_TOBORDER, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_ADDTOACTIVETASKLIST, dx, 0);
-	CDialogHelper::OffsetCtrl(this, IDC_ACTIVETASKLISTPOSITION, dx, 0);
-	CDialogHelper::OffsetCtrl(this, IDC_CREATENEWTASKLIST, dx, 0);
-
-	CDialogHelper::OffsetCtrl(this, IDC_TODIVIDER, dx, 0);
-	CDialogHelper::OffsetCtrl(this, IDC_MERGETOACTIVETASKLIST, dx, 0);
-	CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTITLE, dx, 0);
-	CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTASKID, dx, 0);
-	CDialogHelper::OffsetCtrl(this, IDC_MERGEBYTASKIDWARNING, dx, 0);
-
-	CDialogHelper::OffsetCtrl(this, IDOK, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDCANCEL, dx, dy);
-}
-*/
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog dialog
 
@@ -604,7 +571,6 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 	m_ppHost.AddPage(&m_pageTo, _T("Import To")); // TODO
 }
 
-
 void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
@@ -627,7 +593,7 @@ BEGIN_MESSAGE_MAP(CTDLImportDialog, CTDLDialog)
 	ON_BN_CLICKED(IDC_CREATENEWTASKLIST, EnableOK)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
+//--------------------------------------------------------------
 
 BOOL CTDLImportDialog::OnInitDialog()
 {
