@@ -142,7 +142,6 @@ protected:
 
 class CTDLExportDlg : public CTDLDialog
 {
-// Construction
 public:
 	CTDLExportDlg(LPCTSTR szSingleFileTitle, 
 				  LPCTSTR szMultiFileTitle,
@@ -168,10 +167,6 @@ public:
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CExportDlg)
-	enum { IDD = IDD_EXPORT_DIALOG };
-	//}}AFX_DATA
 	CString	m_sExportTitle;
 	BOOL	m_bExportDate;
 	int		m_nPrevActiveTab;
@@ -183,20 +178,12 @@ protected:
 	CTabbedPropertyPageHost m_ppHost;
 	const CImportExportMgr& m_mgrImportExport;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CExportDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CExportDlg)
-	//}}AFX_MSG
 	afx_msg void OnSelchangeTasklistoptions();
 	afx_msg void OnExportonefile();
 	afx_msg void OnChangeExportpath();
@@ -209,8 +196,5 @@ protected:
 	void UpdateTitle();
 
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_EXPORTDLG_H__2F5B4FD1_E968_464E_9734_AC995DB13B35__INCLUDED_)

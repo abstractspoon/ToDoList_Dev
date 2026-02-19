@@ -36,7 +36,7 @@ CTDLExportDlg::CTDLExportDlg(LPCTSTR szSingleFileTitle,
 							 LPCTSTR szFilePath,
 							 LPCTSTR szFolderPath,
 							 const CTDCCustomAttribDefinitionArray& aAttribDefs,
-							 CWnd* pParent /*=NULL*/)
+							 CWnd* pParent)
 	: 
 	CTDLDialog(IDD_EXPORT_DIALOG, _T("Exporting"), pParent), 
 	m_pageTo(mgr, bSingleTaskList, szFilePath, szFolderPath, _T("Exporting")),
@@ -44,11 +44,9 @@ CTDLExportDlg::CTDLExportDlg(LPCTSTR szSingleFileTitle,
 	m_mgrImportExport(mgr),
 	m_sSingleFileTitle(szSingleFileTitle),
 	m_sMultiFileTitle(szMultiFileTitle),
-	m_nPrevActiveTab(0)
+	m_nPrevActiveTab(0),
+	m_ppHost(TCE_BOLDSELTEXT)
 {
-	//{{AFX_DATA_INIT(CExportDlg)
-	//}}AFX_DATA_INIT
-
 	// retrieve previous user input
 	CPreferences prefs;
 
@@ -65,21 +63,16 @@ CTDLExportDlg::CTDLExportDlg(LPCTSTR szSingleFileTitle,
 	m_ppHost.ForwardMessage(WM_FE_GETFILEICON);
 }
 
-
 void CTDLExportDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CExportDlg)
 	DDX_Control(pDX, IDC_EXPORTTITLE, m_cbTitle);
 	DDX_CBString(pDX, IDC_EXPORTTITLE, m_sExportTitle);
 	DDX_Check(pDX, IDC_EXPORTDATE, m_bExportDate);
-	//}}AFX_DATA_MAP
 }
 
 BEGIN_MESSAGE_MAP(CTDLExportDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CExportDlg)
-	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
 	ON_BN_CLICKED(IDC_EXPORTONEFILE, OnExportonefile)
 	ON_EN_CHANGE(IDC_EXPORTPATH, OnChangeExportpath)
@@ -89,7 +82,6 @@ BEGIN_MESSAGE_MAP(CTDLExportDlg, CTDLDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CExportDlg message handlers
 
 BOOL CTDLExportDlg::OnInitDialog() 
 {
@@ -101,8 +93,7 @@ BOOL CTDLExportDlg::OnInitDialog()
 	UpdateTitle();
 	EnableOK();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLExportDlg::OnChangeExportTitle()
