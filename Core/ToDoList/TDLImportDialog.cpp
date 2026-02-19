@@ -581,7 +581,8 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 	m_mgrImportExport(mgr),
 	m_cbFormat(mgr, TRUE, FALSE),
 	m_pageFrom(mgr),
-	m_pageTo(bReadonlyTasklist, bTasklistHasSelection)
+	m_pageTo(bReadonlyTasklist, bTasklistHasSelection),
+	m_ppHost(TCE_BOLDSELTEXT)
 {
 	CPreferences prefs;
 
