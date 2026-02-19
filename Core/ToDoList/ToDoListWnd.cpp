@@ -7635,17 +7635,24 @@ void CToDoListWnd::OnViewActivateFilter(UINT nCmdID)
 
 void CToDoListWnd::OnUpdateViewActivateFilter(CCmdUI* pCmdUI)
 {
-	// For toolbar only. CTDCMainMenu handles menu state.
-	if (pCmdUI->m_pMenu == NULL)
+	FILTER_SHOW nUnused;
+	CString sUnused;
+
+	BOOL bEnable = CTDCMainMenu::GetFilterToActivate(pCmdUI->m_nID, m_filterBar, Prefs(), nUnused, sUnused);
+	pCmdUI->Enable(bEnable);
+
+	UINT nSelFilterID = CTDCMainMenu::GetSelectedFilterMenuID(m_filterBar);
+
+	if (pCmdUI->m_pMenu)
 	{
-		FILTER_SHOW nUnused;
-		CString sUnused;
-
-		BOOL bEnable = CTDCMainMenu::GetFilterToActivate(pCmdUI->m_nID, m_filterBar, Prefs(), nUnused, sUnused);
-		BOOL bCheck = (pCmdUI->m_nID == CTDCMainMenu::GetSelectedFilterMenuID(m_filterBar));
-
-		pCmdUI->Enable(bEnable);
-		pCmdUI->SetCheck(bCheck);
+		// Restore selection
+		// Note: It's unfortunate that this will get called for every
+		// filter menu command but I could find no better place for it
+		pCmdUI->m_pMenu->CheckMenuRadioItem(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, nSelFilterID, MF_BYCOMMAND);
+	}
+	else // toolbar
+	{
+		pCmdUI->SetCheck(pCmdUI->m_nID == nSelFilterID);
 	}
 }
 
@@ -7846,11 +7853,9 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 
 void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
 {
-	// Do default first so that menubar can override
-	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
-
 	if (!bSysMenu)
 	{
+		// This ensures that the relevant popup is correctly populated
 		m_menubar.HandleInitMenuPopup(pPopupMenu,
 									  GetToDoCtrl(),
 									  Prefs(),
@@ -7859,6 +7864,9 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 									  m_mgrUIExtensions,
 									  m_mgrMenuIcons);
 	}
+
+	// This sets the enabled or selection state
+	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
 }
 
 LRESULT CToDoListWnd::OnPostTranslateMenu(WPARAM /*wp*/, LPARAM lp)
