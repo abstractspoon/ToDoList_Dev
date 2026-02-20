@@ -29,7 +29,7 @@ public:
 
 	void SetImporterFormatID(LPCTSTR szFormatID);
 	BOOL SetUseFile(LPCTSTR szFilePath);
-	void SetUseClipboard();
+	BOOL SetUseClipboard();
 	BOOL SetUseText(LPCTSTR szText);
 
 	BOOL GetImportFromText() const;
@@ -105,8 +105,6 @@ protected:
 	afx_msg void OnChangeImportTo();
 	DECLARE_MESSAGE_MAP()
 
-// 	BOOL IsCurrentImporterFileBased() const;
-// 	CString GetCurrentImporterFilter() const;
 	void EnableDisableControls();
 };
 
@@ -119,9 +117,9 @@ public:
 	CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL SetImportTo(TDLID_IMPORTTO nImportTo) { return m_pageTo.SetImportTo(nImportTo); }
-	BOOL SetUseFile(LPCTSTR szFilePath) { return m_pageFrom.SetUseFile(szFilePath); }
-	void SetUseClipboard() { return m_pageFrom.SetUseClipboard(); }
-	BOOL SetUseText(LPCTSTR szText) { return m_pageFrom.SetUseText(szText); }
+	BOOL SetUseFile(LPCTSTR szFilePath);
+	void SetUseClipboard();
+	BOOL SetUseText(LPCTSTR szText);
 
 	CString GetFormatTypeID() const;
 	TDLID_IMPORTTO GetImportTo() const { return m_pageTo.GetImportTo(); }
@@ -137,6 +135,7 @@ protected:
 
 	const CImportExportMgr& m_mgrImportExport;
 	CString	m_sFormatTypeID;
+	UINT m_nTitleStrID;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -144,15 +143,11 @@ protected:
 	virtual BOOL OnInitDialog();
 
 protected:
-	afx_msg void OnChangeImportFrom();
 	afx_msg void OnSelchangeImporter();
 	afx_msg void OnChangeClipboardtext();
 	afx_msg void OnChangeFilepath();
-	afx_msg void OnRefreshclipboard();
-	afx_msg void OnChangeImportTo();
 	DECLARE_MESSAGE_MAP()
 
-	BOOL IsCurrentImporterFileBased() const;
 	CString GetCurrentImporterFilter() const;
 	void EnableOK();
 };

@@ -6,6 +6,7 @@
 
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\Misc.h"
+#include "..\shared\FileMisc.h"
 #include "..\shared\DialogHelper.h"
 #include "..\shared\FileIcons.h"
 #include "..\shared\Localizer.h"
@@ -55,7 +56,7 @@ void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts
 		int nExt = Misc::Split(szFileExts, m_aFileExt, ';');
 
 		while (nExt--)
-			m_aFileExt[nExt].TrimLeft(_T(" *."));
+			m_aFileExt[nExt] = FileMisc::GetExtension(m_aFileExt[nExt], FALSE);
 	}
 	else
 	{
@@ -103,6 +104,8 @@ void CImportExportComboBox::BuildCombo()
 	ASSERT(GetSafeHwnd());
 	ASSERT(GetCount() == 0);
 
+	// Cache current selection
+	CString sSelTypeID = GetSelectedTypeID();
 	int nNumImpExp = (m_bImporting ? m_mgrImpExp.GetNumImporters() : m_mgrImpExp.GetNumExporters());
 
 	for (int nImpExp = 0; nImpExp < nNumImpExp; nImpExp++)
@@ -127,6 +130,10 @@ void CImportExportComboBox::BuildCombo()
 
 		CDialogHelper::AddStringT(*this, sItem, nImpExp);
 	}
+
+	// Restore previous selection
+	if (SetSelectedTypeID(sSelTypeID) == CB_ERR)
+		VERIFY(SetCurSel(0) != CB_ERR);
 
 	CLocalizer::EnableTranslation(*this, FALSE);
 }

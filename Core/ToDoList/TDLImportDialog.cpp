@@ -58,7 +58,8 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 	m_cbFormat(mgr, TRUE, FALSE),
 	m_pageFrom(mgr),
 	m_pageTo(bReadonlyTasklist, bTasklistHasSelection),
-	m_ppHost(TCE_BOLDSELTEXT)
+	m_ppHost(TCE_BOLDSELTEXT),
+	m_nTitleStrID(0)
 {
 	CPreferences prefs;
 
@@ -75,6 +76,7 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 		if (m_sFormatTypeID.IsEmpty())
 			m_sFormatTypeID = mgr.GetTypeID(TDCIT_CSV);
 	}
+	m_pageFrom.SetImporterFormatID(m_sFormatTypeID);
 
 	m_ppHost.AddPage(&m_pageFrom, CEnString(IDS_IMPORTDLGFROMPAGE_TITLE));
 	m_ppHost.AddPage(&m_pageTo, CEnString(IDS_IMPORTDLGTOPAGE_TITLE));
@@ -110,16 +112,52 @@ BOOL CTDLImportDialog::OnInitDialog()
 	VERIFY(m_ppHost.Create(IDC_PLACEHOLDER, this));
 
 	ASSERT(m_cbFormat.GetCount());
-	OnSelchangeImporter();
+	ASSERT(!m_sFormatTypeID.IsEmpty());
+
+	if (m_nTitleStrID)
+		SetWindowText(CEnString(m_nTitleStrID));
 
 	return TRUE;
 }
 
-BOOL CTDLImportDialog::IsCurrentImporterFileBased() const
-{
-	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
+BOOL CTDLImportDialog::SetUseFile(LPCTSTR szFilePath) 
+{ 
+	ASSERT(!GetSafeHwnd());
 
-	return m_mgrImportExport.ImporterHasFileExtension(nFormat);
+	if (!m_pageFrom.SetUseFile(szFilePath))
+		return FALSE;
+
+	int nFormat = m_mgrImportExport.FindImporterByPath(szFilePath);
+	ASSERT(nFormat != -1);
+
+	m_sFormatTypeID = m_mgrImportExport.GetImporterTypeID(nFormat);
+	m_pageFrom.SetImporterFormatID(m_sFormatTypeID);
+	m_cbFormat.SetFileBasedOnly(TRUE, szFilePath);
+	m_nTitleStrID = IDS_IMPORTDIALOGTITLE_FILE;
+
+	return TRUE;
+}
+
+void CTDLImportDialog::SetUseClipboard() 
+{ 
+	ASSERT(!GetSafeHwnd());
+
+	m_pageFrom.SetUseClipboard();
+	m_cbFormat.SetFileBasedOnly(TRUE);
+	m_nTitleStrID = IDS_IMPORTDIALOGTITLE_CLIPBOARD;
+}
+
+BOOL CTDLImportDialog::SetUseText(LPCTSTR szText) 
+{ 
+	ASSERT(!GetSafeHwnd());
+
+	if (!m_pageFrom.SetUseText(szText))
+		return FALSE;
+
+	m_cbFormat.SetFileBasedOnly(TRUE);
+	m_nTitleStrID = IDS_IMPORTDIALOGTITLE_TEXT;
+
+	return TRUE;
 }
 
 CString CTDLImportDialog::GetCurrentImporterFilter() const
@@ -157,7 +195,9 @@ void CTDLImportDialog::OnSelchangeImporter()
 
 void CTDLImportDialog::EnableOK()
 {
-	if (!IsCurrentImporterFileBased())
+	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
+
+	if (!m_mgrImportExport.ImporterHasFileExtension(nFormat))
 	{
 		GetDlgItem(IDOK)->EnableWindow(TRUE);
 	}
@@ -219,11 +259,12 @@ END_MESSAGE_MAP()
 
 BOOL CTDLImportFromPage::SetUseFile(LPCTSTR szFilePath)
 {
-	if (Misc::IsEmpty(szFilePath))
+	// These options can only be called once
+	if ((m_nImportMode != TDCIM_ALL) || Misc::IsEmpty(szFilePath))
+	{
+		ASSERT(0);
 		return FALSE;
-
-	m_sFromFilePath = szFilePath;
-	m_nImportMode = TDCIM_FILEONLY;
+	}
 
 	int nFormat = m_mgrImportExport.FindImporterByPath(szFilePath);
 
@@ -231,25 +272,43 @@ BOOL CTDLImportFromPage::SetUseFile(LPCTSTR szFilePath)
 		return FALSE;
 
 	// else
+	m_sFromFilePath = szFilePath;
+	m_nImportMode = TDCIM_FILEONLY;
+	m_sFormatTypeID = m_mgrImportExport.GetImporterTypeID(nFormat);
 	m_bFromText = FALSE;
 	m_sFromText.Empty();
 
 	return TRUE;
 }
 
-void CTDLImportFromPage::SetUseClipboard()
+BOOL CTDLImportFromPage::SetUseClipboard()
 {
+	// These options can only be called once
+	if (m_nImportMode != TDCIM_ALL)
+	{
+		ASSERT(0);
+		return FALSE; 
+	}
+
+	// else
 	m_nImportMode = TDCIM_CLIPBOARDONLY;
 	m_sFromText = CClipboard().GetText();
 	m_bFromText = TRUE;
 	m_sFromFilePath.Empty();
+
+	return TRUE;
 }
 
 BOOL CTDLImportFromPage::SetUseText(LPCTSTR szText)
 {
-	if (Misc::IsEmpty(szText))
+	// These options can only be called once
+	if ((m_nImportMode != TDCIM_ALL) || Misc::IsEmpty(szText))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
+	// else
 	m_nImportMode = TDCIM_TEXTONLY;
 	m_sFromText = szText;
 	m_bFromText = TRUE;
@@ -272,30 +331,6 @@ BOOL CTDLImportFromPage::OnInitDialog()
 
 	m_eFilePath.SetFilter(GetCurrentImporterFilter());
 
-	BOOL bHasFilter = IsCurrentImporterFileBased();
-	ASSERT((m_nImportMode != TDCIM_FILEONLY) || bHasFilter);
-
-	switch (m_nImportMode)
-	{
-	case TDCIM_ALL:
-		break;
-
-	case TDCIM_FILEONLY:
-		ASSERT(!m_bFromText);
-		SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_FILE));
-		break;
-
-	case TDCIM_CLIPBOARDONLY:
-		ASSERT(m_bFromText);
-		SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_CLIPBOARD));
-		break;
-
-	case TDCIM_TEXTONLY:
-		ASSERT(m_bFromText);
-		SetWindowText(CEnString(IDS_IMPORTDIALOGTITLE_TEXT));
-		break;
-	}
-	
 	// Set text font to be mono-spaced
 	if (GraphicsMisc::CreateFont(m_fontMonospace, _T("Lucida Console")))
 		GetDlgItem(IDC_INPUTTEXT)->SetFont(&m_fontMonospace, FALSE);
@@ -310,18 +345,18 @@ BOOL CTDLImportFromPage::OnInitDialog()
 
 void CTDLImportFromPage::EnableDisableControls()
 {
-	BOOL bHasFilter = IsCurrentImporterFileBased();
-	ASSERT((m_nImportMode != TDCIM_FILEONLY) || bHasFilter);
+	BOOL bFileBased = IsCurrentImporterFileBased();
+	ASSERT((m_nImportMode != TDCIM_FILEONLY) || bFileBased);
 
 	switch (m_nImportMode)
 	{
 	case TDCIM_ALL:
 		{
-			GetDlgItem(IDC_FROMFILE)->EnableWindow(bHasFilter);
-			GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bHasFilter);
-			GetDlgItem(IDC_FROMTEXT)->EnableWindow(bHasFilter);
-			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bHasFilter);
-			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bHasFilter);
+			GetDlgItem(IDC_FROMFILE)->EnableWindow(bFileBased);
+			GetDlgItem(IDC_INPUTFILE)->EnableWindow(!m_bFromText && bFileBased);
+			GetDlgItem(IDC_FROMTEXT)->EnableWindow(bFileBased);
+			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(m_bFromText && bFileBased);
+			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(m_bFromText && bFileBased);
 		}
 		break;
 
@@ -358,8 +393,17 @@ void CTDLImportFromPage::EnableDisableControls()
 			GetDlgItem(IDC_FROMTEXT)->EnableWindow(TRUE);
 			GetDlgItem(IDC_INPUTTEXT)->EnableWindow(TRUE);
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->EnableWindow(FALSE);
+
+			// Hide the 'Reload' button and resize the text field to suit
 			GetDlgItem(IDC_REFRESHCLIPBOARD)->ShowWindow(SW_HIDE);
 
+			CRect rText = GetCtrlRect(this, IDC_INPUTTEXT);
+			CRect rBtn = GetCtrlRect(this, IDC_REFRESHCLIPBOARD);
+
+			rText.bottom = rBtn.bottom;
+			GetDlgItem(IDC_INPUTTEXT)->MoveWindow(rText);
+
+			// Rename 'Clipboard' to 'Text'
 			SetDlgItemText(IDC_FROMTEXT, CEnString(IDS_IMPORTFROMTEXT));
 		}
 		break;
@@ -421,30 +465,38 @@ CString CTDLImportFromPage::GetImportText() const
 
 void CTDLImportFromPage::SetImporterFormatID(LPCTSTR szFormatID)
 {
-	int nFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
-	BOOL bHadFilter = m_mgrImportExport.ImporterHasFileExtension(nFormat);
-
-	m_sFormatTypeID = szFormatID;
-	
-	// change the filter on the CFileEdit and clear the filepath
-	// and clear/restore clipboard text depending
-	m_eFilePath.SetFilter(GetCurrentImporterFilter());
-
-	BOOL bHasFilter = IsCurrentImporterFileBased();
-
-	if (bHadFilter && !bHasFilter)
+	if (GetSafeHwnd())
 	{
-		GetDlgItemText(IDC_INPUTTEXT, m_sFromText); // update
-		SetDlgItemText(IDC_INPUTTEXT, _T("")); // clear field
-	}
-	else if (!bHadFilter && bHasFilter)
-	{
-		SetDlgItemText(IDC_INPUTTEXT, m_sFromText); // restore field
-	}
-	
-	SetDlgItemText(IDC_INPUTFILE, _T("")); // clear field
+		int nCurFormat = m_mgrImportExport.FindImporterByType(m_sFormatTypeID);
+		CString sCurFileExt = m_mgrImportExport.GetExporterFileExtension(nCurFormat, FALSE);
 
-	EnableDisableControls();
+		int nNewFormat = m_mgrImportExport.FindImporterByType(szFormatID);
+		CString sNewFileExt = m_mgrImportExport.GetExporterFileExtension(nNewFormat, FALSE);
+
+		// Clear/restore clipboard text as necessary
+		if (!sCurFileExt.IsEmpty() && sNewFileExt.IsEmpty())
+		{
+			GetDlgItemText(IDC_INPUTTEXT, m_sFromText); // update
+			SetDlgItemText(IDC_INPUTTEXT, _T("")); // clear field
+		}
+		else if (sCurFileExt.IsEmpty() && !sNewFileExt.IsEmpty())
+		{
+			SetDlgItemText(IDC_INPUTTEXT, m_sFromText); // restore field
+		}
+	
+		// Clear file path as necessary
+		if (sNewFileExt.CompareNoCase(sCurFileExt) != 0)
+			SetDlgItemText(IDC_INPUTFILE, _T(""));
+
+		m_sFormatTypeID = szFormatID;
+		m_eFilePath.SetFilter(GetCurrentImporterFilter());
+
+		EnableDisableControls();
+	}
+	else
+	{
+		m_sFormatTypeID = szFormatID;
+	}
 }
 
 void CTDLImportFromPage::OnChangeClipboardtext() 
