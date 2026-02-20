@@ -408,7 +408,7 @@ BOOL CRichEditHelper::IsInlineSpellCheckMenu(HMENU hMenu)
 		// to their position + 1
 		while (nItem)
 		{
- 			if (GetMenuItemID(hMenu, --nItem) != (nItem + 1))
+ 			if ((int)GetMenuItemID(hMenu, --nItem) != (nItem + 1))
  				return FALSE;
 		}
 	}
