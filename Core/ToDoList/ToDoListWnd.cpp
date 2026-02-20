@@ -6743,13 +6743,6 @@ void CToDoListWnd::OnPrint()
 
 void CToDoListWnd::DoPrint(BOOL bPreview)
 {
-	if ((!bPreview && !m_IE.SupportsPrint()) ||
-		(bPreview && !m_IE.SupportsPrintPreview()))
-	{
-		AfxMessageBox(bPreview ? IDS_PPREVIEWNOTSUPPORTED : IDS_PRINTNOTSUPPORTED);
-		return;
-	}
-
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	int nSelTDC = GetSelToDoCtrl();
 

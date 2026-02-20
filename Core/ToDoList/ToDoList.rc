@@ -6153,8 +6153,6 @@ BEGIN
                             "Invalid Search|The current search contains %d unmatched %s."
     IDS_TOOLS_REMAININGCOUNT "%d/%d tools remaining"
     IDS_CUSTATTRIB_REMAININGCOUNT "%d/%d attributes remaining"
-    IDS_PPREVIEWNOTSUPPORTED "Print Preview is not supported on this OS."
-    IDS_PRINTNOTSUPPORTED   "Printing is not supported on this OS."
 END
 
 #endif    // English (Australia) resources
