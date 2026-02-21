@@ -197,6 +197,11 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtmlWithIntenso(LPCTSTR szRtfFile, LPCTSTR s
 	
 	CString sRtf2HtmlPath = FileMisc::GetAppFolder() + _T("\\rtf2htmlbridge.dll");
 	HMODULE hMod = LoadLibrary(sRtf2HtmlPath);
+
+#ifdef _DEBUG
+	if (hMod == NULL)
+		AfxMessageBox(sRtf2HtmlPath + '\n' + Misc::FormatGetLastError());
+#endif
 	
 	CString sTempHtml = FileMisc::GetTempFilePath(RTF2HTML_FNAME, _T("html"));
 
@@ -236,11 +241,18 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtmlWithIntenso(LPCTSTR szRtfFile, LPCTSTR s
 				
 				if (bSuccess)
 					bSuccess = (FileMisc::LoadFile(sTempHtml, sHtml) && !sHtml.IsEmpty());
+#ifdef _DEBUG
+				else
+					AfxMessageBox(_T("Failed to convert RTF to HTML"));
+#endif
 			}
 		}
 		catch (...)
 		{
 			bSuccess = FALSE;
+#ifdef _DEBUG
+			AfxMessageBox(_T("Exception converting RTF to HTML"));
+#endif
 		}
 	}
 
