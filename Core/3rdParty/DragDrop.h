@@ -139,7 +139,6 @@ public:
 	void AddWindow(HWND hwnd, int type);
 	void RemoveWindow(HWND hwnd);
 
-	void DragShowNolock(BOOL bShow);
 	inline BOOL IsDragging() const { return m_iState>=LDRAGGING; }
 	void CancelDrag();
     

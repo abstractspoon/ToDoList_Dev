@@ -666,12 +666,8 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 
 		if (m_nDropTab != nPrevTab)
 		{
-			m_ilDragImage.DragShowNolock(FALSE);
-
 			Invalidate(FALSE);
 			UpdateWindow();
-
-			m_ilDragImage.DragShowNolock(TRUE);
 		}
 
 		// If the mouse is within DRAGSCROLL_WIDTH distance

@@ -329,24 +329,8 @@ UINT CDragDropMgr::SendDragMessage(UINT nMessage)
 	if (nMessage == WM_DD_DRAGABORT)
 		return m_pMainWnd->SendMessage(nMessage, nCtrlID, 0);
 
-	if (nMessage == WM_DD_DRAGOVER)
-	{
-		DragShowNolock(FALSE);
-
-		UINT nRes = m_pMainWnd->SendMessage(nMessage, nCtrlID, (LPARAM)&m_ddi);
-
-		DragShowNolock(TRUE);
-		return nRes;
-	}
-
 	// all else
 	return m_pMainWnd->SendMessage(nMessage, nCtrlID, (LPARAM)&m_ddi);
-}
-
-void CDragDropMgr::DragShowNolock(BOOL bShow)
-{
-	if (m_pDragImage)
-		m_pDragImage->DragShowNolock(bShow);
 }
 
 //////////////////
