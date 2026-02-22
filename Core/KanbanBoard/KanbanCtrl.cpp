@@ -3950,13 +3950,12 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (IsDragging())
 	{
-		// get the list and item under the mouse
-		if (m_ilDrag.GetSafeHandle())
-		{
-			ClientToScreen(&point);
-			m_ilDrag.DragMove(point);
-		}
+		ClientToScreen(&point);
 
+		if (m_ilDrag.GetSafeHandle())
+			m_ilDrag.DragMove(point);
+
+		// get the list and item under the mouse
 		const CKanbanColumnCtrl* pDestCol = m_aColumns.HitTest(point);
 		BOOL bValidDest = CanEndDrag(m_pSelectedColumn, pDestCol);
 
