@@ -9,6 +9,7 @@
 #include "stdafx.h"
 #include "DragDrop.h"
 #include "XNamedColors.h"
+#include "OSVersion.h"
 
 #include <windowsx.h> // for GET_X_LPARAM
 #include <afxpriv.h> // for AfxLoadString
@@ -250,7 +251,8 @@ BOOL CDragDropMgr::OnMouseMove(const MSG& msg)
 		SendDragMessage(WM_DD_PREDRAGMOVE);
 
 		// now move drag image
-		m_pDragImage->DragMove(pt);
+		if (m_pDragImage)
+			m_pDragImage->DragMove(pt);
 
 		// update ui
 		UINT nDropEffect = SendDragMessage(WM_DD_DRAGOVER);
@@ -310,13 +312,19 @@ BOOL CDragDropMgr::OnMouseMove(const MSG& msg)
 
 				CSize sizeImage;
 				m_pDragImage = m_ddi.pData->CreateDragImage(pWnd, sizeImage);
-				m_pDragImage->BeginDrag(0, CPoint(sizeImage.cx, sizeImage.cy));
 
-				pWnd->ClientToScreen(&pt);
-				m_pDragImage->DragEnter(NULL, pt);
+				if (m_pDragImage)
+				{
+					m_pDragImage->BeginDrag(0, CPoint(sizeImage.cx, sizeImage.cy));
+
+					pWnd->ClientToScreen(&pt);
+					m_pDragImage->DragEnter(NULL, pt);
+				}
 			} 
             else
-                SetState(NONE);
+			{
+				SetState(NONE);
+			}
 		}
 	}
 	return TRUE;
@@ -438,6 +446,10 @@ CImageList* CDragDropData::CreateDragImage(CWnd* pWnd, CSize& sizeImage)
 
 BOOL CDragDropData::CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage)
 {
+	// The render artifacts are terrible in XP and Linux
+	if (COSVersion() < OSV_VISTA)
+		return FALSE;
+
 	il.DeleteImageList();
 
 	// create memory dc compatible w/source window

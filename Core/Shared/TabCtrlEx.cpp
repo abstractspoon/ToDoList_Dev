@@ -677,8 +677,11 @@ void CTabCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 			SetTimer(ID_DRAGSCROLL_TIMER, DRAGSCROLL_INTERVAL, NULL);
 
 		// Last action because it modifies point
-		ClientToScreen(&point);
-		m_ilDragImage.DragMove(point);
+		if (m_ilDragImage.GetSafeHandle())
+		{
+			ClientToScreen(&point);
+			m_ilDragImage.DragMove(point);
+		}
 	}
 	else	
 	{
@@ -1135,9 +1138,12 @@ void CTabCtrlEx::OnCaptureChanged(CWnd *pWnd)
 		m_bDragging = FALSE;
 		m_nDragTab = m_nDropTab = -1;
 
-		m_ilDragImage.DragLeave(this);
-		m_ilDragImage.EndDrag();
-		m_ilDragImage.DeleteImageList();
+		if (m_ilDragImage.GetSafeHandle())
+		{
+			m_ilDragImage.DragLeave(this);
+			m_ilDragImage.EndDrag();
+			m_ilDragImage.DeleteImageList();
+		}
 
 		Invalidate(FALSE);
 	}
