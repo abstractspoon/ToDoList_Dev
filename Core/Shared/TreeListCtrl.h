@@ -216,6 +216,7 @@ protected:
 
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

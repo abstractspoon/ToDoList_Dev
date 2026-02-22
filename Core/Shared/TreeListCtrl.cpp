@@ -910,6 +910,27 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
 }
 
+LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+	case WM_NOTIFY:
+		{
+			LPNMHDR pNMHDR = (LPNMHDR)lp;
+
+			switch (pNMHDR->code)
+			{
+			case TVN_BEGINLABELEDIT:
+				if (m_treeDragDrop.IsDragging())
+					return 1L; // cancel
+				break;
+			}
+		}
+	}
+
+	return CTreeListSyncer::WindowProc(hRealWnd, msg, wp, lp);
+}
+
 LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())
