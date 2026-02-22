@@ -4,7 +4,6 @@
 
 #include "stdafx.h"
 #include "OSVersion.h"
-#include "regkey.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -131,17 +130,27 @@ OSVERSION COSVersion::GetOSVersion()
 							case 2: // W8, Server 2012, W8.1, Server 2012 R2, W10
 								{
 									// Check registry for Windows 8.1, 10
-									CRegKey2 reg;
+									HKEY hKey = NULL;
 
-									LONG lResult = reg.Open(HKEY_LOCAL_MACHINE, 
-															_T("Software\\Microsoft\\Windows NT\\CurrentVersion"), 
-															TRUE);
+									LONG lResult = RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
+																_T("Software\\Microsoft\\Windows NT\\CurrentVersion"), 
+																REG_OPTION_NON_VOLATILE, 
+																KEY_READ, 
+																&hKey);
 
 									if (lResult == ERROR_SUCCESS)
 									{
 										// Check for Windows 10
 										DWORD dwMajorVer = 0;
-										lResult = reg.Read(_T("CurrentMajorVersionNumber"), dwMajorVer);
+										DWORD dwType = 0;
+										DWORD dwSize = sizeof (DWORD);
+										
+										lResult = RegQueryValueEx(hKey, 
+																	_T("CurrentMajorVersionNumber"), 
+																	NULL, 
+																	&dwType, 
+																	(BYTE*)&dwMajorVer, 
+																	&dwSize);
 										
 										if ((lResult == ERROR_SUCCESS) && (dwMajorVer >= 10))
 										{
@@ -150,13 +159,25 @@ OSVERSION COSVersion::GetOSVersion()
 										}
 
 										// Check for Windows 8.1
-										CString sVersion;
-										lResult = reg.Read(_T("CurrentVersion"), sVersion);
-
-										if ((lResult == ERROR_SUCCESS) && (sVersion == _T("6.3")))
+										BYTE ver[2048] = { 0 };
+										dwSize = 2048;
+										
+										lResult = RegQueryValueEx(hKey, 
+																	_T("CurrentVersion"), 
+																	NULL,
+																	&dwType, 
+																	ver, 
+																	&dwSize);
+										
+										if (lResult == ERROR_SUCCESS)
 										{
-											s_nVersion = OSV_WIN81;
-											break;
+											CString sVersion((LPCTSTR)ver);
+											
+											if (sVersion == _T("6.3"))
+											{
+												s_nVersion = OSV_WIN81;
+												break;
+											}
 										}
 									}
 								}

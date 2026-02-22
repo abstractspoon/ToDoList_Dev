@@ -7,7 +7,8 @@
 #include "MiscTest.h"
 
 #include "..\shared\Misc.h"
-#include "..\shared\OSVersion.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

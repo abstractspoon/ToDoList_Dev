@@ -17,10 +17,10 @@
 #include "..\shared\timehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
-#include "..\shared\osversion.h"
 
 #include "..\Interfaces\Preferences.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\colordef.h"
 
 #include <math.h>

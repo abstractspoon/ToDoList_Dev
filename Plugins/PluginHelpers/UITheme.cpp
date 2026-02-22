@@ -8,11 +8,12 @@
 #include "UIExtension.h"
 #include "DPIScaling.h"
 
-#include <Shared\OSVersion.h>
 #include <Shared\GraphicsMisc.h>
 #include <Shared\DarkMode.h>
 
 #include <Interfaces\UIThemeFile.h>
+
+#include <3rdParty\OSVersion.h>
 
 #using "System.dll"
 

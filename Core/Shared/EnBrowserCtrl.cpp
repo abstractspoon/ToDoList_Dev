@@ -6,7 +6,8 @@
 #include "regkey.h"
 #include "misc.h"
 #include "DarkMode.h"
-#include "OSVersion.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 //fabio_2005
 #if _MSC_VER >= 1300

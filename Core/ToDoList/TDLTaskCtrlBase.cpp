@@ -19,7 +19,6 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\themed.h"
 #include "..\shared\wndprompt.h"
-#include "..\shared\osversion.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\msoutlookhelper.h"
@@ -28,6 +27,7 @@
 #include "..\shared\FileEdit.h"
 #include "..\Shared\DateHelper.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\XNamedColors.h"
 

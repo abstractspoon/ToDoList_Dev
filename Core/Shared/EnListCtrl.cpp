@@ -10,8 +10,9 @@
 #include "graphicsmisc.h"
 #include "enimagelist.h"
 #include "enstring.h"
-#include "OsVersion.h"
 #include "DateHelper.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

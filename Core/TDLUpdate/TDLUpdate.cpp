@@ -15,10 +15,10 @@
 #include "..\shared\localizer.h"
 #include "..\shared\misc.h"
 #include "..\shared\rtlInputmgr.h"
-#include "..\shared\OSVersion.h"
 #include "..\shared\DarkMode.h"
 #include "..\shared\MessageBox.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\base64coder.h"
 
 #ifdef _DEBUG

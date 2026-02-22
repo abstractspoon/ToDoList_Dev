@@ -7,8 +7,9 @@
 #include "DialogHelper.h"
 #include "Mapex.h"
 #include "Themed.h"
-#include "OSVersion.h"
 #include "Misc.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <math.h>
 

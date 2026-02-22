@@ -5,7 +5,6 @@
 #include "entoolbar.h"
 #include "enbitmapex.h"
 #include "imageprocessors.h"
-#include "osversion.h"
 #include "graphicsmisc.h"
 #include "themed.h"
 #include "icon.h"
@@ -13,6 +12,7 @@
 #include "holdredraw.h"
 
 #include "..\3rdparty\XNamedColors.h"
+#include "..\3rdParty\OSVersion.h"
 
 #include <afxpriv.h>
 

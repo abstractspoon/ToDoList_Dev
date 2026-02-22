@@ -189,6 +189,10 @@ SOURCE=.\NewRandom.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\OSVersion.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\ProgressCtrlWithTimer.cpp
 # End Source File
 # Begin Source File
@@ -394,6 +398,10 @@ SOURCE=.\msword.h
 # Begin Source File
 
 SOURCE=.\NewRandom.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OSVersion.h
 # End Source File
 # Begin Source File
 

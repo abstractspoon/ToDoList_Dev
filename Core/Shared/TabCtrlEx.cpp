@@ -7,8 +7,8 @@
 #include "Misc.h"
 #include "GraphicsMisc.h"
 #include "autoflag.h"
-#include "osversion.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdParty\XNamedColors.h"
 #include "..\3rdParty\ColorDef.h"
 

@@ -16,7 +16,6 @@
 #include "..\shared\enstring.h"
 #include "..\shared\deferwndmove.h"
 #include "..\shared\autoflag.h"
-#include "..\shared\osversion.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\savefocus.h"
 #include "..\shared\filemisc.h"
@@ -24,6 +23,8 @@
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\IUIExtension.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <math.h>
 

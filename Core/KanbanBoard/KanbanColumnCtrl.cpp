@@ -18,9 +18,9 @@
 #include "..\shared\copywndcontents.h"
 #include "..\shared\holdredraw.h"
 #include "..\Shared\enimagelist.h"
-#include "..\Shared\osversion.h"
 #include "..\Shared\themed.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\XNamedColors.h"
 #include "..\3rdparty\ColorDef.h"
 

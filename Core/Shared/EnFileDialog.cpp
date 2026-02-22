@@ -5,12 +5,13 @@
 
 #include "stdafx.h"
 #include "enfiledialog.h"
-#include "osversion.h"
 #include "enstring.h"
 #include "filemisc.h"
 #include "misc.h"
 
 #include "..\Interfaces\IPreferences.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -45,7 +45,6 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\misc.h"
 #include "..\shared\msoutlookhelper.h"
-#include "..\shared\osversion.h"
 #include "..\shared\passworddialog.h"
 #include "..\shared\savefocus.h"
 #include "..\shared\ScopedTimer.h"
@@ -57,6 +56,7 @@
 #include "..\shared\webmisc.h"
 #include "..\shared\winclasses.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\msoutl.h"
 #include "..\3rdparty\shellicons.h"
 #include "..\3rdparty\colordef.h"

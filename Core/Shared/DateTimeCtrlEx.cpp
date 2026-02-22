@@ -3,12 +3,13 @@
 
 #include "stdafx.h"
 #include "DateTimeCtrlEx.h"
-#include "OSVersion.h"
 #include "autoflag.h"
 #include "misc.h"
 #include "Graphicsmisc.h"
 #include "themed.h"
 #include "DateHelper.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <math.h>
 

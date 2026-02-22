@@ -9,8 +9,9 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\localizer.h"
 #include "..\shared\misc.h"
-#include "..\shared\osversion.h"
 #include "..\shared\enstring.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

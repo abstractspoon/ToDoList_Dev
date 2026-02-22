@@ -6,10 +6,11 @@
 #include "graphicsmisc.h"
 #include "deferwndmove.h"
 #include "misc.h"
-#include "osversion.h"
 #include "winclasses.h"
 #include "wclassdefines.h"
 #include "CtrlTextHighlighter.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

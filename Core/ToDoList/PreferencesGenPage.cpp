@@ -5,13 +5,14 @@
 #include "resource.h"
 #include "PreferencesGenPage.h"
 
-#include "..\shared\OSVersion.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\fileregister.h"
 #include "..\shared\localizer.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

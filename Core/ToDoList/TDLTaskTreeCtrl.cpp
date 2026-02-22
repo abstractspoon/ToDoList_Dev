@@ -19,9 +19,9 @@
 #include "..\shared\misc.h"
 #include "..\shared\TreeDragDropHelper.h"
 #include "..\shared\themed.h"
-#include "..\shared\osversion.h"
 #include "..\shared\ScopedTimer.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\shellicons.h"
 #include "..\3rdparty\colordef.h"
 

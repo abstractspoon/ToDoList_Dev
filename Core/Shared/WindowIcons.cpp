@@ -4,8 +4,9 @@
 
 #include "WindowIcons.h"
 #include "graphicsmisc.h"
-#include "osversion.h"
 #include "regkey.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <Shlwapi.h.>
 

@@ -5,13 +5,14 @@
 #include "stdafx.h"
 #include "EnMenu.h"
 #include "Themed.h"
-#include "osversion.h"
 #include "graphicsmisc.h"
 #include "misc.h"
 #include "enstring.h"
 #include "AcceleratorString.h"
 
 #include "..\Interfaces\itranstext.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

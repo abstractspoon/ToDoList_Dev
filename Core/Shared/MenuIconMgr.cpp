@@ -7,9 +7,10 @@
 #include "themed.h"
 #include "graphicsmisc.h"
 #include "enbitmapex.h"
-#include "osversion.h"
 #include "icon.h"
 #include "enimagelist.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifndef ULONG_PTR
 	typedef unsigned long ULONG_PTR; 
