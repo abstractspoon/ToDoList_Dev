@@ -302,6 +302,7 @@ protected:
 
 	void RedrawList(BOOL bErase = FALSE);
 	void InvalidateList(int nFrom, int nTo, BOOL bErase = FALSE);
+	void InvalidateListItem(HTREEITEM hti, BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);

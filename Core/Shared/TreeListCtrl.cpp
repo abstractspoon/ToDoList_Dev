@@ -734,34 +734,23 @@ BOOL CTreeListCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
 
 GM_ITEMSTATE CTreeListCtrl::GetItemState(int nItem) const
 {
-	if (IsListItemSelected(m_list, nItem))
-	{
-		if (HasFocus())
-			return GMIS_SELECTED;
-		else
-			return GMIS_SELECTEDNOTFOCUSED;
-	}
-	else if (ListItemHasState(m_list, nItem, LVIS_DROPHILITED))
-	{
-		return GMIS_DROPHILITED;
-	}
+	HTREEITEM hti = (HTREEITEM)m_list.GetItemData(nItem);
 
-	// else
-	return GMIS_NONE;
+	return GetItemState(hti);
 }
 
 GM_ITEMSTATE CTreeListCtrl::GetItemState(HTREEITEM hti) const
 {
-	if (IsTreeItemSelected(m_tree, hti))
+	if (TreeItemHasState(m_tree, hti, TVIS_DROPHILITED))
+	{
+		return GMIS_DROPHILITED;
+	}
+	else if (IsTreeItemSelected(m_tree, hti))
 	{
 		if (HasFocus())
 			return GMIS_SELECTED;
 		else
 			return GMIS_SELECTEDNOTFOCUSED;
-	}
-	else if (TreeItemHasState(m_tree, hti, TVIS_DROPHILITED))
-	{
-		return GMIS_DROPHILITED;
 	}
 
 	// else
@@ -770,7 +759,7 @@ GM_ITEMSTATE CTreeListCtrl::GetItemState(HTREEITEM hti) const
 
 COLORREF CTreeListCtrl::GetRowColor(int nItem) const
 {
-	BOOL bAlternate = (/*!m_bSavingToImage &&*/ !IsListItemLineOdd(nItem) && HasAltLineColor());
+	BOOL bAlternate = (!IsListItemLineOdd(nItem) && HasAltLineColor());
 	COLORREF crBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
 	return crBack;
@@ -1040,6 +1029,26 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	{
 		switch (msg)
 		{
+		case TVM_SELECTITEM:
+			if (wp == TVGN_DROPHILITE)
+			{
+				HTREEITEM htiNew = (HTREEITEM)lp;
+				HTREEITEM htiOld = m_tree.GetDropHilightItem();
+
+				if (htiNew != htiOld)
+				{
+					LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+
+					InvalidateListItem(htiOld);
+					InvalidateListItem(htiNew);
+
+					m_list.UpdateWindow();
+
+					return lr;
+				}
+			}
+			break;
+
 		case WM_RBUTTONDOWN:
 			{
 				HTREEITEM hti = TreeHitTestItem(lp, FALSE);
@@ -2186,6 +2195,15 @@ void CTreeListCtrl::InvalidateList(int nFrom, int nTo, BOOL bErase)
 	rBounds.UnionRect(rFrom, rTo);
 
 	m_list.InvalidateRect(rBounds, bErase);
+}
+
+void CTreeListCtrl::InvalidateListItem(HTREEITEM hti, BOOL bErase)
+{
+	if (hti)
+	{
+		int nItem = FindListItem(m_list, (DWORD)hti);
+		CTreeListSyncer::InvalidateListItem(m_list, nItem);
+	}
 }
 
 void CTreeListCtrl::RedrawTree(BOOL bErase)

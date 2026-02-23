@@ -1165,13 +1165,11 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				{
 					LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 
-					if (htiOld)
-						InvalidateColumnItem(htiOld);
-
-					if (htiNew)
-						InvalidateColumnItem(htiNew);
+					InvalidateColumnItem(htiOld);
+					InvalidateColumnItem(htiNew);
 
 					m_lcColumns.UpdateWindow();
+
 					return lr;
 				}
 			}
@@ -2135,9 +2133,14 @@ BOOL CTDLTaskTreeCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 
 BOOL CTDLTaskTreeCtrl::InvalidateColumnItem(HTREEITEM hti, BOOL bUpdate)
 {
-	int nItem = FindListItem(m_lcColumns, (DWORD)hti);
-		
-	return CTDLTaskCtrlBase::InvalidateColumnItem(nItem, bUpdate);
+	if (hti)
+	{
+		int nItem = FindListItem(m_lcColumns, (DWORD)hti);
+		return CTDLTaskCtrlBase::InvalidateColumnItem(nItem, bUpdate);
+	}
+
+	// else
+	return FALSE;
 }
 
 int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
