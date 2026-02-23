@@ -1410,9 +1410,6 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 			GM_ITEMSTATE nState = GetItemState(nItem);
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
-			if (nState == GMIS_DROPHILITED)
-				AfxMessageBox(_T(""));
-
 			// draw row
 			DrawListItem(pDC, nItem, aColOrder, aColWidths, *pGI, (nState != GMIS_NONE));
 		}
