@@ -94,6 +94,7 @@ public:
 	BOOL SelectItem(HTREEITEM hti);
 	BOOL SelectAll(BOOL bVisibleOnly = TRUE);
 	BOOL InvalidateItem(HTREEITEM hti, BOOL bUpdate = FALSE);
+	BOOL InvalidateColumnItem(HTREEITEM hti, BOOL bUpdate = FALSE);
 	BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate = FALSE);
 	BOOL InvalidateSelection(BOOL bUpdate = FALSE);
 	DWORD GetTaskParentID(HTREEITEM hti) const;

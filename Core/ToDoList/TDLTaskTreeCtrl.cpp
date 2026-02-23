@@ -1158,14 +1158,22 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		case TVM_SELECTITEM:
 			if (wp == TVGN_DROPHILITE)
 			{
-				HTREEITEM hti = (HTREEITEM)lp;
-				HTREEITEM htiDrop = m_tcTasks.GetDropHilightItem();
+				HTREEITEM htiNew = (HTREEITEM)lp;
+				HTREEITEM htiOld = m_tcTasks.GetDropHilightItem();
 				
-				if (htiDrop && (htiDrop != hti))
-					InvalidateItem(htiDrop);
-				
-				if (hti)
-					InvalidateItem(hti);
+				if (htiNew != htiOld)
+				{
+					LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+
+					if (htiOld)
+						InvalidateColumnItem(htiOld);
+
+					if (htiNew)
+						InvalidateColumnItem(htiNew);
+
+					m_lcColumns.UpdateWindow();
+					return lr;
+				}
 			}
 			break;
 			
@@ -2117,14 +2125,19 @@ BOOL CTDLTaskTreeCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 		if (bUpdate)
 			m_tcTasks.UpdateWindow();
 
-		// redraw columns
-		int nItem = FindListItem(m_lcColumns, (DWORD)hti);
-		
-		return CTDLTaskCtrlBase::InvalidateColumnItem(nItem, bUpdate);
+		// redraw column row
+		InvalidateColumnItem(hti, bUpdate);
 	}
 
 	//else
 	return FALSE;
+}
+
+BOOL CTDLTaskTreeCtrl::InvalidateColumnItem(HTREEITEM hti, BOOL bUpdate)
+{
+	int nItem = FindListItem(m_lcColumns, (DWORD)hti);
+		
+	return CTDLTaskCtrlBase::InvalidateColumnItem(nItem, bUpdate);
 }
 
 int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
