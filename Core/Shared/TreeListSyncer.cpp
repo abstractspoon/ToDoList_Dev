@@ -850,24 +850,24 @@ int CTreeListSyncer::GetItemHeight(HWND hwnd)
 	return GraphicsMisc::ScaleByDPIFactor(16);
 }
 
-void CTreeListSyncer::InvalidateTreeItem(HWND hwnd, HTREEITEM hti)
+void CTreeListSyncer::InvalidateTreeItem(HWND hwnd, HTREEITEM hti, BOOL bErase)
 {
 	ASSERT(IsTree(hwnd));
 
 	CRect rItem;
 	TreeView_GetItemRect(hwnd, hti, &rItem, 0);
 						
-	::InvalidateRect(hwnd, rItem, TRUE);
+	::InvalidateRect(hwnd, rItem, bErase);
 }
 
-void CTreeListSyncer::InvalidateListItem(HWND hwnd, int nItem)
+void CTreeListSyncer::InvalidateListItem(HWND hwnd, int nItem, BOOL bErase)
 {
 	ASSERT(IsList(hwnd));
 	
 	CRect rItem;
 	ListView_GetItemRect(hwnd, nItem, &rItem, LVIR_BOUNDS);
 	
-	::InvalidateRect(hwnd, rItem, TRUE);
+	::InvalidateRect(hwnd, rItem, bErase);
 }
 
 BOOL CTreeListSyncer::HasFocus() const

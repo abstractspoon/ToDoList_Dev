@@ -2203,7 +2203,7 @@ void CTreeListCtrl::InvalidateListItem(HTREEITEM hti, BOOL bErase)
 	if (hti)
 	{
 		int nItem = FindListItem(m_list, (DWORD)hti);
-		CTreeListSyncer::InvalidateListItem(m_list, nItem);
+		CTreeListSyncer::InvalidateListItem(m_list, nItem, bErase);
 	}
 }
 
