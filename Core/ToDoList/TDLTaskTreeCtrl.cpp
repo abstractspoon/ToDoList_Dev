@@ -1168,6 +1168,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					InvalidateColumnItem(htiOld);
 					InvalidateColumnItem(htiNew);
 
+					m_tcTasks.UpdateWindow();
 					m_lcColumns.UpdateWindow();
 
 					return lr;

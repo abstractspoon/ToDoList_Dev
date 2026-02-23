@@ -1042,6 +1042,7 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 					InvalidateListItem(htiOld);
 					InvalidateListItem(htiNew);
 
+					m_tree.UpdateWindow();
 					m_list.UpdateWindow();
 
 					return lr;
