@@ -230,7 +230,7 @@ protected:
 	static void InvalidateListItem(HWND hwnd, int nItem);
 	static int InsertListItem(HWND hwndList, int nInsertPos, DWORD dwItemData);
  	static void SelectTreeItem(HWND hwnd, HTREEITEM hti, BOOL bClear = TRUE);
-	static BOOL OsIsXP();
+	static BOOL OsIsXPOrLinux();
 	static BOOL OsIsLinux();
 	static int CalcTotalHeaderItemWidth(HWND hwndHeader);
 	static int CalcMaxVisibleTreeItemWidth(HWND hwnd);

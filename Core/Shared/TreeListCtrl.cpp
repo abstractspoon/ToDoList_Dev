@@ -1634,7 +1634,9 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				if (bSelected)
 					rItem.right = rClient.right;
 
-				DrawTreeItemBackground(pDC, hti, dwItemData, rItem, bSelected);
+				// Below Vista filling the background overwrites the tree insertion marker
+				if (!OsIsXPOrLinux())
+					DrawTreeItemBackground(pDC, hti, dwItemData, rItem, bSelected);
 
 				// draw horz gridline
 				DrawHorzItemDivider(pDC, pTVCD->nmcd.rc);
