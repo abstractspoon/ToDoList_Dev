@@ -1,4 +1,4 @@
-// WorkloadTreeList.h: interface for the CWorkloadTreeList class.
+// TreeListCtrl.h: interface for the CTreeListCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 

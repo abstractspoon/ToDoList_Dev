@@ -1,4 +1,4 @@
-// WorkloadTreeList.cpp: implementation of the CWorkloadTreeList class.
+// TreeListCtrl.cpp: implementation of the CTreeListCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -41,11 +41,11 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 #endif 
 
 //////////////////////////////////////////////////////////////////////
-// CTreeListTreeCtrl
 
 IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
 
 //////////////////////////////////////////////////////////////////////
+// CTreeListTreeCtrl
 
 CTreeListTreeCtrl::CTreeListTreeCtrl(const CEnHeaderCtrl& header)
 	:
@@ -70,7 +70,6 @@ END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////
 
-// CTreeListTreeCtrl message handlers
 HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelImage,
 										LPARAM lParam, HTREEITEM htiParent, HTREEITEM htiAfter)
 {
@@ -313,8 +312,7 @@ void CTreeListTreeCtrl::OnDestroy()
 }
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+// CTreeListCtrl
 
 const int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
@@ -1646,7 +1644,9 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				if (bSelected)
 					rItem.right = rClient.right;
 
-				DrawTreeItemBackground(pDC, hti, dwItemData, rItem, bSelected);
+				// Below Vista filling the background overwrites the tree insertion marker
+				if (!OsIsXPOrLinux())
+					DrawTreeItemBackground(pDC, hti, dwItemData, rItem, bSelected);
 
 				// draw horz gridline
 				DrawHorzItemDivider(pDC, pTVCD->nmcd.rc);

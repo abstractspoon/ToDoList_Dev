@@ -1,4 +1,4 @@
-// TDCTreeListCtrl.h: interface for the CTDCTaskCtrlBase class.
+// TDLTaskCtrlBase.h: interface for the CTDCTaskCtrlBase class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -312,8 +312,8 @@ protected:
 	void OnHeaderClick(TDC_COLUMN nColID);
 	virtual int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
 	
+	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, COLORREF& crText, COLORREF& crBkgnd);
 	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rRow);
-	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd);
 
 protected:
 	// base-class overrides

@@ -1,9 +1,9 @@
-// TDCTreeListCtrl.h: interface for the CTDCListListCtrl class.
+// TDLTaskListCtrl.h: interface for the CTDCListListCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_TDCLISTLISTCTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_)
-#define AFX_TDCLISTLISTCTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_
+#if !defined(AFX_TDLTASKLISTCTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_)
+#define AFX_TDLTASKLISTCTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -204,4 +204,4 @@ protected:
 
 };
 
-#endif // !defined(AFX_TDCLISTLISTCTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_)
+#endif // !defined(AFX_TDLTASKLISTCTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_)

@@ -822,7 +822,7 @@ void CTreeListSyncer::InitItemHeights()
 	}
 }
 
-BOOL CTreeListSyncer::OsIsXP()
+BOOL CTreeListSyncer::OsIsXPOrLinux()
 {
 	return (COSVersion() < OSV_VISTA);
 }
