@@ -345,7 +345,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 								
 		case CDDS_ITEMPREPAINT:
 			{
-				BOOL bFillRow = !OsIsLinux();
+				static BOOL bFillRow = !OsIsLinux();
 				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, pLVCD->clrText, pLVCD->clrTextBk, bFillRow);
 
 				if (bFillRow)

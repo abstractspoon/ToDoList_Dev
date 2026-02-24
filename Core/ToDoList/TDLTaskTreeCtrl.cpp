@@ -530,6 +530,7 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
 
 	DWORD dwRes = CDRF_DODEFAULT;
+	static BOOL bFillRow = !OsIsLinux();
 	
 	switch (pTVCD->nmcd.dwDrawStage)
 	{
@@ -538,11 +539,11 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		break;
 		
 	case CDDS_ITEMPREPAINT:
-		dwRes = OnPrePaintTaskTitle(pTVCD->nmcd, pTVCD->clrText, pTVCD->clrTextBk, !OsIsXPOrLinux());
+		dwRes = OnPrePaintTaskTitle(pTVCD->nmcd, pTVCD->clrText, pTVCD->clrTextBk, bFillRow);
 		break;
 		
 	case CDDS_ITEMPOSTPAINT:
-		dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc, !OsIsXPOrLinux());
+		dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc, bFillRow);
 		break;
 	}
 	
