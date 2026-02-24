@@ -312,8 +312,8 @@ protected:
 	void OnHeaderClick(TDC_COLUMN nColID);
 	virtual int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
 	
-	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, COLORREF& crText, COLORREF& crBkgnd);
-	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rRow);
+	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rRow, BOOL bFillRow = TRUE);
+	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, COLORREF& crText, COLORREF& crBkgnd, BOOL bFillRow = TRUE);
 
 protected:
 	// base-class overrides
