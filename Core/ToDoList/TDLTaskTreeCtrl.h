@@ -1,9 +1,9 @@
-// TDCTreeListCtrl.h: interface for the CTDCTreeListCtrl class.
+// TDLTaskTreeCtrl.h: interface for the CTDLTaskTreeCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_TDCTREELISTCTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_)
-#define AFX_TDCTREELISTCTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_
+#if !defined(AFX_TDLTASKTREECTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_)
+#define AFX_TDLTASKTREECTRL_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once

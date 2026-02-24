@@ -1,4 +1,4 @@
-// TDCTreeListCtrl.h: interface for the CTDCTaskCtrlBase class.
+// TDLTaskCtrlBase.h: interface for the CTDCTaskCtrlBase class.
 //
 //////////////////////////////////////////////////////////////////////
 

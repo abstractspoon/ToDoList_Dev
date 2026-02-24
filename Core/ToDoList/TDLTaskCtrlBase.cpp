@@ -1,4 +1,4 @@
-// TDCTreeListCtrl.cpp: implementation of the CTDCTaskCtrlBase class.
+// TDCTaskCtrlBase.cpp: implementation of the CTDCTaskCtrlBase class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -267,8 +267,6 @@ CTDLTaskCtrlBase::~CTDLTaskCtrlBase()
 ///////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
-	//{{AFX_MSG_MAP(CTDCTaskCtrlBase)
-	//}}AFX_MSG_MAP
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
 	ON_WM_CREATE()
@@ -277,7 +275,6 @@ BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
 	ON_WM_HELPINFO()
 	ON_WM_CONTEXTMENU()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////

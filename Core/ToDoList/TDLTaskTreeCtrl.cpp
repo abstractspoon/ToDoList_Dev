@@ -1,4 +1,4 @@
-// TDCTreeListCtrl.cpp: implementation of the CTDCTreeListCtrl class.
+// TDLTaskTreeCtrl.cpp: implementation of the CTDLTaskTreeCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -99,9 +99,7 @@ CTDLTaskTreeCtrl::~CTDLTaskTreeCtrl()
 ///////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CTDLTaskTreeCtrl, CTDLTaskCtrlBase)
-//{{AFX_MSG_MAP(CTDCTreeListCtrl)
-//}}AFX_MSG_MAP
-ON_WM_SETCURSOR()
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////
