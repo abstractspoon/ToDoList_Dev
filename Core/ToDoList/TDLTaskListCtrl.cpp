@@ -308,7 +308,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				CRect rRow(pLVCD->nmcd.rc);
 
-				if (OsIsXP() || OsIsLinux())
+				if (OsIsXPOrLinux())
 					ListView_GetItemRect(hwndList, nItem, rRow, LVIR_BOUNDS);
 
 				if (rRow.Width())
@@ -345,20 +345,19 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 								
 		case CDDS_ITEMPREPAINT:
 			{
-				BOOL bFillRow = !OsIsXP();
-				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, bFillRow, pLVCD->clrText, pLVCD->clrTextBk);
+				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, pLVCD->clrText, pLVCD->clrTextBk);
 
-				if (bFillRow)
+				if (!OsIsXPOrLinux())
  					ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
 			}
 			break;
 
 		case CDDS_ITEMPOSTPAINT:
 			{
-				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				CRect rRow(pLVCD->nmcd.rc);
 
-				if (OsIsXP() || OsIsLinux())
+				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
+				if (OsIsXPOrLinux())
 					m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
 
 				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd, rRow);
@@ -1566,7 +1565,7 @@ void CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 BOOL CTDLTaskListCtrl::HasHitTestFlag(UINT nFlags, UINT nFlag)
 {
 	return (Misc::HasFlag(nFlags, nFlag) &&
-			(!OsIsXP() || !Misc::HasFlag(nFlags, LVHT_ONITEM)));
+			(!OsIsXPOrLinux() || !Misc::HasFlag(nFlags, LVHT_ONITEM)));
 }
 
 BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
@@ -1820,14 +1819,10 @@ BOOL CTDLTaskListCtrl::EnsureSelectionVisible(BOOL /*bHorzPartialOK*/)
 {
 	if (GetSelectedCount())
 	{
-		if (OsIsLinux() || OsIsXP())
-		{
+		if (OsIsXPOrLinux())
 			m_lcTasks.PostMessage(LVM_ENSUREVISIBLE, GetSelectedItem());
-		}
 		else
-		{
 			m_lcTasks.EnsureVisible(GetSelectedItem(), FALSE);
-		}
 
 		return TRUE;
 	}

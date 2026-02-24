@@ -358,7 +358,7 @@ BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible(BOOL bHorzPartialOK)
 	OSVERSION nOSVer = COSVersion();
 	HTREEITEM htiSel = GetTreeSelectedItem();
 	
-	if (OsIsLinux() || OsIsXP())
+	if (OsIsXPOrLinux())
 	{
 		m_tcTasks.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)htiSel);
 	}
@@ -528,20 +528,25 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 	HTREEITEM hti = (HTREEITEM)pTVCD->nmcd.dwItemSpec;
 	DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
+
+	DWORD dwRes = CDRF_DODEFAULT;
 	
 	switch (pTVCD->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		return CDRF_NOTIFYITEMDRAW;
+		dwRes = CDRF_NOTIFYITEMDRAW;
+		break;
 		
 	case CDDS_ITEMPREPAINT:
-		return OnPrePaintTaskTitle(pTVCD->nmcd, TRUE, pTVCD->clrText, pTVCD->clrTextBk);
+		dwRes = OnPrePaintTaskTitle(pTVCD->nmcd, pTVCD->clrText, pTVCD->clrTextBk);
+		break;
 		
 	case CDDS_ITEMPOSTPAINT:
-		return OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc);
+		dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc);
+		break;
 	}
 	
-	return CDRF_DODEFAULT;
+	return dwRes;
 }
 
 void CTDLTaskTreeCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
