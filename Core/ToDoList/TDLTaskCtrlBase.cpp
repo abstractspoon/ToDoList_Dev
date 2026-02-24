@@ -2603,7 +2603,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 	return CDRF_DODEFAULT;
 }
 
-DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, COLORREF& crText, COLORREF& crBkgnd)
+DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, COLORREF& crText, COLORREF& crBkgnd, BOOL bFillRow)
 {
 	// Fill the item background with the 'unselected' colour.
 	// Although we fill fill the entire row, we are really only
@@ -2621,14 +2621,13 @@ DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, COLORREF& 
 	}
 	crBkgnd = crText = crRowBack;
 
-	// Below Vista filling the background overwrites the tree insertion marker
-	if (!OsIsXPOrLinux())
+	if (bFillRow)
 		GraphicsMisc::FillItemRect(pDC, &nmcd.rc, crRowBack, Tasks());
 
 	return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 }
 
-DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rect)
+DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rect, BOOL bFillRow)
 {
 	// Check row is visible
 	CRect rClient;
@@ -2658,8 +2657,7 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 			CRect rBack;
 			GetItemTitleRect(nmcd, TDCTR_BKGND, rBack);
  
-			// Below Vista filling the background overwrites the tree insertion marker
-			if (!OsIsXPOrLinux())
+			if (bFillRow)
 				pDC->FillSolidRect(rBack, crBack);
 
 			// Draw horizontal grid line -----------------------------

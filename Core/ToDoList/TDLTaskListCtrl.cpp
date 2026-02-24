@@ -345,9 +345,10 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 								
 		case CDDS_ITEMPREPAINT:
 			{
-				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, pLVCD->clrText, pLVCD->clrTextBk);
+				BOOL bFillRow = !OsIsXPOrLinux();
+				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, pLVCD->clrText, pLVCD->clrTextBk, bFillRow);
 
-				if (!OsIsXPOrLinux())
+				if (bFillRow)
  					ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
 			}
 			break;
