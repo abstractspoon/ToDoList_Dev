@@ -169,8 +169,8 @@ protected:
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
 	BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 
-	GM_ITEMSTATE GetItemState(int nItem) const;
-	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
+// 	GM_ITEMSTATE GetItemState(int nItem) const;
+// 	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
 	void RecalcListColumnsToFit();
 
 	COLORREF GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const;

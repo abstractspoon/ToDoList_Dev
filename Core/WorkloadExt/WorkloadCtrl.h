@@ -141,8 +141,8 @@ protected:
 	void OnListHeaderClick(NMHEADER* HDN);
 	void OnResize(int cx, int cy);
 
-	GM_ITEMSTATE GetItemState(int nItem) const;
-	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
+// 	GM_ITEMSTATE GetItemState(int nItem) const;
+// 	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
 	int CalcSplitPosToFitListColumns(int nTotalWidth) const;
 	void DeleteItem(HTREEITEM hti);
 	BOOL DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider);

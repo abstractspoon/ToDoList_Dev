@@ -205,7 +205,7 @@ protected:
 	CThemed m_themeHeader;
 
 	BOOL m_bMovingItem;
-	int m_nPrevDropHilitedItem;
+	//int m_nPrevDropHilitedItem;
 
 	mutable int m_nMinTreeTitleColumnWidth;
 
@@ -307,7 +307,7 @@ protected:
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);
 	void ExpandList();
-	void SetDropHighlight(HTREEITEM hti, int nItem);
+//	void SetDropHighlight(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 

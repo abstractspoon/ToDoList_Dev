@@ -1356,23 +1356,23 @@ HIMAGELIST CGanttCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 	return (HIMAGELIST)GetParent()->SendMessage(WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }
 
-GM_ITEMSTATE CGanttCtrl::GetItemState(int nItem) const
-{
-	if (m_bSavingToImage)
-		return GMIS_NONE;
-
-	// else
-	return CTreeListCtrl::GetItemState(nItem);
-}
-
-GM_ITEMSTATE CGanttCtrl::GetItemState(HTREEITEM hti) const
-{
-	if (m_bSavingToImage)
-		return GMIS_NONE;
-
-	// else
-	return CTreeListCtrl::GetItemState(hti);
-}
+// GM_ITEMSTATE CGanttCtrl::GetItemState(int nItem) const
+// {
+// 	if (m_bSavingToImage)
+// 		return GMIS_NONE;
+// 
+// 	// else
+// 	return CTreeListCtrl::GetItemState(nItem);
+// }
+// 
+// GM_ITEMSTATE CGanttCtrl::GetItemState(HTREEITEM hti) const
+// {
+// 	if (m_bSavingToImage)
+// 		return GMIS_NONE;
+// 
+// 	// else
+// 	return CTreeListCtrl::GetItemState(hti);
+// }
 
 LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
@@ -1409,6 +1409,9 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 			// Draw selection before text
 			GM_ITEMSTATE nState = GetItemState(nItem);
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
+
+			if (nState == GMIS_DROPHILITED)
+				AfxMessageBox(_T(""));
 
 			// draw row
 			DrawListItem(pDC, nItem, aColOrder, aColWidths, *pGI, (nState != GMIS_NONE));
@@ -2090,13 +2093,13 @@ BOOL CGanttCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
 	{
 		if (IsPickingDependencyFromTask() || IsPickingDependencyToTask())
 		{
-			int nHotItem = -1;
+//			int nHotItem = -1;
 			HTREEITEM htiHot = m_tree.HitTest(point);
-			
-			if (htiHot)
-				nHotItem = GetListItem(htiHot);
-			
-			SetDropHighlight(htiHot, nHotItem);
+			m_tree.SelectDropTarget(htiHot);
+// 			if (htiHot)
+// 				nHotItem = GetListItem(htiHot);
+// 			
+// 			SetDropHighlight(htiHot, nHotItem);
 			
 			// track when the cursor leaves the tree ctrl
 			CDialogHelper::TrackMouseLeave(m_tree);
@@ -2125,7 +2128,7 @@ BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 				}
 				else if (m_pDependEdit->SetFromTask(dwFromTaskID))
 				{
-					SetDropHighlight(NULL, -1);
+					m_tree.SelectDropTarget(NULL);
 					ResetDependencyPickLinePos();
 				}
 			}
@@ -2191,21 +2194,21 @@ BOOL CGanttCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint point)
 		{
 			if (IsPickingDependencyFromTask() || IsPickingDependencyToTask())
 			{
-				HTREEITEM htiHot = NULL;
-				int nHotItem = m_list.HitTest(point), nPrevHotItem = m_nPrevDropHilitedItem;
-				
-				if (nHotItem != -1)
-					htiHot = GetTreeItem(nHotItem);
+				int nNewHotItem = m_list.HitTest(point);
+				HTREEITEM htiNewHot = GetTreeItem(nNewHotItem), htiPrevHot = m_tree.GetDropHilightItem();
 
-				SetDropHighlight(htiHot, nHotItem);
+				if (htiNewHot != htiPrevHot)
+					m_tree.SelectDropTarget(htiNewHot);
 
 				if (IsPickingDependencyToTask())
 				{
+					int nPrevHotItem = GetListItem(htiPrevHot);
+					
 					// Drop-highlighting does not play well with the 
 					// dependency line drawing so we brute force it
-					if ((nPrevHotItem != -1) || (nHotItem != -1))
+					if ((nPrevHotItem != -1) || (nNewHotItem != -1))
 					{
-						InvalidateList(nPrevHotItem, nHotItem);
+						InvalidateList(nPrevHotItem, nNewHotItem);
 						RedrawList();
 						ResetDependencyPickLinePos();
 					}
@@ -2247,7 +2250,7 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 				}
 				else if (m_pDependEdit->SetFromTask(dwFromTaskID))
 				{
-					SetDropHighlight(NULL, -1);
+					m_tree.SelectDropTarget(NULL);
 					ResetDependencyPickLinePos();
 				}
 			}
@@ -4308,10 +4311,8 @@ void CGanttCtrl::OnEndDepedencyEdit()
 	SetFocus();
 
 	m_tree.SelectDropTarget(NULL);
-	m_list.SetItemState(m_nPrevDropHilitedItem, 0, LVIS_DROPHILITED);
+	m_list.SetItemState(-1, 0, LVIS_DROPHILITED);
 	m_list.Invalidate(TRUE);
-
-	m_nPrevDropHilitedItem = -1;
 }
 
 void CGanttCtrl::EndDependencyEdit()
