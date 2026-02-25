@@ -1356,24 +1356,6 @@ HIMAGELIST CGanttCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 	return (HIMAGELIST)GetParent()->SendMessage(WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }
 
-// GM_ITEMSTATE CGanttCtrl::GetItemState(int nItem) const
-// {
-// 	if (m_bSavingToImage)
-// 		return GMIS_NONE;
-// 
-// 	// else
-// 	return CTreeListCtrl::GetItemState(nItem);
-// }
-// 
-// GM_ITEMSTATE CGanttCtrl::GetItemState(HTREEITEM hti) const
-// {
-// 	if (m_bSavingToImage)
-// 		return GMIS_NONE;
-// 
-// 	// else
-// 	return CTreeListCtrl::GetItemState(hti);
-// }
-
 LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
@@ -2090,15 +2072,11 @@ BOOL CGanttCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
 	{
 		if (IsPickingDependencyFromTask() || IsPickingDependencyToTask())
 		{
-//			int nHotItem = -1;
 			HTREEITEM htiHot = m_tree.HitTest(point);
 			m_tree.SelectDropTarget(htiHot);
-// 			if (htiHot)
-// 				nHotItem = GetListItem(htiHot);
-// 			
-// 			SetDropHighlight(htiHot, nHotItem);
 			
 			// track when the cursor leaves the tree ctrl
+			// so we can hide the temporary dependency line
 			CDialogHelper::TrackMouseLeave(m_tree);
 
 			return TRUE; // eat

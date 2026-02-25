@@ -325,7 +325,6 @@ CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelW
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_bMovingItem(FALSE),
-//	m_nPrevDropHilitedItem(-1),
 	m_nMinTreeTitleColumnWidth(-1),
 	m_tshDragDrop(m_tree),
 	m_treeDragDrop(m_tshDragDrop, m_tree, pAltRenderer),
@@ -1088,15 +1087,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			}
 			break;
 
-// 		case WM_MOUSELEAVE:
-// 			// Remove any drophilighting from the list
-// 			if (m_nPrevDropHilitedItem != -1)
-// 			{
-// 				m_list.SetItemState(m_nPrevDropHilitedItem, 0, LVIS_DROPHILITED);
-// 				m_nPrevDropHilitedItem = -1;
-// 			}
-// 			break;
-
 		case WM_MOUSEWHEEL: 
 			if (!Misc::IsKeyPressed(VK_CONTROL)) // ie. NOT zooming
 			{
@@ -1233,20 +1223,6 @@ BOOL CTreeListCtrl::OnPrimaryHeaderBeginTracking(NMHEADER* pHDN)
 {
 	return m_treeHeader.IsItemTrackable(pHDN->iItem);
 }
-
-// void CTreeListCtrl::SetDropHighlight(HTREEITEM hti, int nItem)
-// {
-// 	if (m_nPrevDropHilitedItem != -1)
-// 		m_list.SetItemState(m_nPrevDropHilitedItem, 0, LVIS_DROPHILITED);
-// 	
-// 	m_tree.SelectDropTarget(hti);
-// 	
-// 	if (nItem != -1)
-// 		m_list.SetItemState(nItem, LVIS_DROPHILITED, LVIS_DROPHILITED);
-// 	
-// 	m_nPrevDropHilitedItem = nItem;
-// }
-
 
 BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {

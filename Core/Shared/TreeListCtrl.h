@@ -199,14 +199,12 @@ protected:
 	CEnHeaderCtrl m_listHeader, m_treeHeader;
 
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
+	BOOL m_bMovingItem;
 
 	CTreeDragDropHelper m_treeDragDrop;
 	CTreeSelectionHelper m_tshDragDrop;
 	CThemed m_themeHeader;
-
-	BOOL m_bMovingItem;
-	//int m_nPrevDropHilitedItem;
-
+	
 	mutable int m_nMinTreeTitleColumnWidth;
 
 	const int MIN_COL_WIDTH;
@@ -307,7 +305,6 @@ protected:
 	void ExpandList(HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HTREEITEM hti);
 	void ExpandList();
-//	void SetDropHighlight(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 

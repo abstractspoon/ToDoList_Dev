@@ -169,9 +169,6 @@ protected:
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
 	BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 
-// 	GM_ITEMSTATE GetItemState(int nItem) const;
-// 	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
-	void RecalcListColumnsToFit();
 
 	COLORREF GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const;
 	void DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected);
@@ -210,7 +207,6 @@ protected:
 	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected);
 	void DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
 							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, BOOL bSelected);
-
 	enum VERT_DIV
 	{
 		DIV_NONE = -1, DIV_LIGHT, DIV_MID, DIV_DARK
@@ -226,6 +222,7 @@ protected:
 	void BuildListColumns();
 	void UpdateListColumns(int nWidth = -1);
 	void RecalcListColumnWidths(int nFromWidth, int nToWidth);
+	void RecalcListColumnsToFit();
 	void UpdateListColumnsWidthAndText(int nWidth = -1);
 
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
