@@ -1303,24 +1303,6 @@ HIMAGELIST CWorkloadCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 	return (HIMAGELIST)GetParent()->SendMessage(WM_WLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }
 
-GM_ITEMSTATE CWorkloadCtrl::GetItemState(int nItem) const
-{
-	if (!m_bSavingToImage)
-		return CTreeListCtrl::GetItemState(nItem);
-
-	// else
-	return GMIS_NONE;
-}
-
-GM_ITEMSTATE CWorkloadCtrl::GetItemState(HTREEITEM hti) const
-{
-	if (!m_bSavingToImage)
-		return CTreeListCtrl::GetItemState(hti);
-
-	// else
-	return GMIS_NONE;
-}
-
 LRESULT CWorkloadCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
 	ASSERT(pLVCD->nmcd.hdr.idFrom == IDC_ALLOCATIONCOLUMNS);

@@ -1179,6 +1179,20 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		}
 		break;
 
+	case LVM_SETITEMSTATE:
+		{
+			LVITEM* pLVI = (LVITEM*)lp;
+
+			if (pLVI->stateMask & LVIS_DROPHILITED)
+			{
+				if (wp != -1)
+					InvalidateColumnItem(wp);
+				else
+					m_lcColumns.Invalidate(FALSE);
+			}
+		}
+		break;
+
 	case LVM_HITTEST:
 	case LVM_SUBITEMHITTEST:
 		if (IsGrouped())

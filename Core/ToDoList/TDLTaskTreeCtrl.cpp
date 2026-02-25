@@ -1162,14 +1162,21 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		case TVM_SELECTITEM:
 			if (wp == TVGN_DROPHILITE)
 			{
-				HTREEITEM hti = (HTREEITEM)lp;
-				HTREEITEM htiDrop = m_tcTasks.GetDropHilightItem();
+				HTREEITEM htiNew = (HTREEITEM)lp;
+				HTREEITEM htiOld = m_tcTasks.GetDropHilightItem();
 				
-				if (htiDrop && (htiDrop != hti))
-					InvalidateItem(htiDrop);
-				
-				if (hti)
-					InvalidateItem(hti);
+				if (htiNew != htiOld)
+				{
+					LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+
+					InvalidateColumnItem(htiOld);
+					InvalidateColumnItem(htiNew);
+
+					m_tcTasks.UpdateWindow();
+					m_lcColumns.UpdateWindow();
+
+					return lr;
+				}
 			}
 			break;
 			
@@ -1657,6 +1664,8 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 {
 	ASSERT(hti);
 
+	static BOOL bOsIsLinux = OsIsLinux();
+
 	switch (nArea)
 	{
 	case TDCTR_TEXT:
@@ -1685,6 +1694,10 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 		if (GetItemTitleRect(hti, TDCTR_TEXT, rect)) // RECURSIVE CALL
 		{
 			rect.left -= TITLE_BORDER_OFFSET;
+
+			if (bOsIsLinux)
+				rect.top--;
+			
 			return TRUE;
 		}
 		break;
@@ -1692,7 +1705,8 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 	case TDCTR_EDIT:
 		if (GetItemTitleRect(hti, TDCTR_BKGND, rect)) // RECURSIVE CALL
 		{
-			rect.top--;
+			if (!bOsIsLinux)
+				rect.top--;
 			
 			// return in screen coords
 			m_tcTasks.ClientToScreen(rect);
@@ -2121,13 +2135,23 @@ BOOL CTDLTaskTreeCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 		if (bUpdate)
 			m_tcTasks.UpdateWindow();
 
-		// redraw columns
-		int nItem = FindListItem(m_lcColumns, (DWORD)hti);
-		
-		return CTDLTaskCtrlBase::InvalidateColumnItem(nItem, bUpdate);
+		// redraw column row
+		InvalidateColumnItem(hti, bUpdate);
 	}
 
 	//else
+	return FALSE;
+}
+
+BOOL CTDLTaskTreeCtrl::InvalidateColumnItem(HTREEITEM hti, BOOL bUpdate)
+{
+	if (hti)
+	{
+		int nItem = FindListItem(m_lcColumns, (DWORD)hti);
+		return CTDLTaskCtrlBase::InvalidateColumnItem(nItem, bUpdate);
+	}
+
+	// else
 	return FALSE;
 }
 
