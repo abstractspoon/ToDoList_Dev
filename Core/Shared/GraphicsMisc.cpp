@@ -1743,13 +1743,13 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			case GMIS_SELECTED:
 				// Similar to windows 10 colours
 				crBorder = CLASSICTHEME_SEL_BORDERCOLOR;
-				crFill = (bTransparent ? CLASSICTHEME_SEL_BORDERCOLOR : CLASSICTHEME_SEL_BKCOLOR);
+				crFill = (bTransparent ? crBorder : CLASSICTHEME_SEL_BKCOLOR);
 				break;
 			
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
 				crBorder = CLASSICTHEME_SELNOFOCUS_BORDERCOLOR;
-				crFill = (bTransparent ? CLASSICTHEME_SEL_BORDERCOLOR : CLASSICTHEME_SELNOFOCUS_BKCOLOR);
+				crFill = (bTransparent ? crBorder : CLASSICTHEME_SELNOFOCUS_BKCOLOR);
 				break;
 			
 			default:

@@ -1,4 +1,4 @@
-// TDCTreeListCtrl.cpp: implementation of the CTDCListListCtrl class.
+// TDLTaskListCtrl.cpp: implementation of the CTDLTaskListCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -72,8 +72,6 @@ enum
 };
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_DYNAMIC(CTDLTaskListCtrl, CTDLTaskCtrlBase)
 
@@ -110,9 +108,7 @@ CTDLTaskListCtrl::~CTDLTaskListCtrl()
 ///////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CTDLTaskListCtrl, CTDLTaskCtrlBase)
-//{{AFX_MSG_MAP(CTDCListListCtrl)
-//}}AFX_MSG_MAP
-ON_WM_SETCURSOR()
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////
@@ -312,7 +308,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				CRect rRow(pLVCD->nmcd.rc);
 
-				if (OsIsXP() || OsIsLinux())
+				if (OsIsXPOrLinux())
 					ListView_GetItemRect(hwndList, nItem, rRow, LVIR_BOUNDS);
 
 				if (rRow.Width())
@@ -349,8 +345,8 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 								
 		case CDDS_ITEMPREPAINT:
 			{
-				BOOL bFillRow = !OsIsXP();
-				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, bFillRow, pLVCD->clrText, pLVCD->clrTextBk);
+				static BOOL bFillRow = !OsIsLinux();
+				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, pLVCD->clrText, pLVCD->clrTextBk, bFillRow);
 
 				if (bFillRow)
  					ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
@@ -359,10 +355,10 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 
 		case CDDS_ITEMPOSTPAINT:
 			{
-				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				CRect rRow(pLVCD->nmcd.rc);
 
-				if (OsIsXP() || OsIsLinux())
+				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
+				if (OsIsXPOrLinux())
 					m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
 
 				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd, rRow);
@@ -1183,6 +1179,20 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		}
 		break;
 
+	case LVM_SETITEMSTATE:
+		{
+			LVITEM* pLVI = (LVITEM*)lp;
+
+			if (pLVI->stateMask & LVIS_DROPHILITED)
+			{
+				if (wp != -1)
+					InvalidateColumnItem(wp);
+				else
+					m_lcColumns.Invalidate(FALSE);
+			}
+		}
+		break;
+
 	case LVM_HITTEST:
 	case LVM_SUBITEMHITTEST:
 		if (IsGrouped())
@@ -1570,7 +1580,7 @@ void CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 BOOL CTDLTaskListCtrl::HasHitTestFlag(UINT nFlags, UINT nFlag)
 {
 	return (Misc::HasFlag(nFlags, nFlag) &&
-			(!OsIsXP() || !Misc::HasFlag(nFlags, LVHT_ONITEM)));
+			(!OsIsXPOrLinux() || !Misc::HasFlag(nFlags, LVHT_ONITEM)));
 }
 
 BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
@@ -1824,14 +1834,10 @@ BOOL CTDLTaskListCtrl::EnsureSelectionVisible(BOOL /*bHorzPartialOK*/)
 {
 	if (GetSelectedCount())
 	{
-		if (OsIsLinux() || OsIsXP())
-		{
+		if (OsIsXPOrLinux())
 			m_lcTasks.PostMessage(LVM_ENSUREVISIBLE, GetSelectedItem());
-		}
 		else
-		{
 			m_lcTasks.EnsureVisible(GetSelectedItem(), FALSE);
-		}
 
 		return TRUE;
 	}

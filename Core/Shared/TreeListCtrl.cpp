@@ -1,4 +1,4 @@
-// WorkloadTreeList.cpp: implementation of the CWorkloadTreeList class.
+// TreeListCtrl.cpp: implementation of the CTreeListCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -42,11 +42,11 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 #endif 
 
 //////////////////////////////////////////////////////////////////////
-// CTreeListTreeCtrl
 
 IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
 
 //////////////////////////////////////////////////////////////////////
+// CTreeListTreeCtrl
 
 CTreeListTreeCtrl::CTreeListTreeCtrl(const CEnHeaderCtrl& header)
 	:
@@ -71,7 +71,6 @@ END_MESSAGE_MAP()
 
 //////////////////////////////////////////////////////////////////////
 
-// CTreeListTreeCtrl message handlers
 HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelImage,
 										LPARAM lParam, HTREEITEM htiParent, HTREEITEM htiAfter)
 {
@@ -314,8 +313,7 @@ void CTreeListTreeCtrl::OnDestroy()
 }
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
+// CTreeListCtrl
 
 const int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
@@ -328,7 +326,6 @@ CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelW
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_bMovingItem(FALSE),
-	m_nPrevDropHilitedItem(-1),
 	m_nMinTreeTitleColumnWidth(-1),
 	m_tshDragDrop(m_tree),
 	m_treeDragDrop(m_tshDragDrop, m_tree, pAltRenderer),
@@ -735,34 +732,26 @@ BOOL CTreeListCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
 
 GM_ITEMSTATE CTreeListCtrl::GetItemState(int nItem) const
 {
-	if (IsListItemSelected(m_list, nItem))
-	{
-		if (HasFocus())
-			return GMIS_SELECTED;
-		else
-			return GMIS_SELECTEDNOTFOCUSED;
-	}
-	else if (ListItemHasState(m_list, nItem, LVIS_DROPHILITED))
-	{
-		return GMIS_DROPHILITED;
-	}
+	HTREEITEM hti = (HTREEITEM)m_list.GetItemData(nItem);
 
-	// else
-	return GMIS_NONE;
+	return GetItemState(hti);
 }
 
 GM_ITEMSTATE CTreeListCtrl::GetItemState(HTREEITEM hti) const
 {
-	if (IsTreeItemSelected(m_tree, hti))
+	if (!m_bSavingToImage)
 	{
-		if (HasFocus())
-			return GMIS_SELECTED;
-		else
-			return GMIS_SELECTEDNOTFOCUSED;
-	}
-	else if (TreeItemHasState(m_tree, hti, TVIS_DROPHILITED))
-	{
-		return GMIS_DROPHILITED;
+		if (TreeItemHasState(m_tree, hti, TVIS_DROPHILITED))
+		{
+			return GMIS_DROPHILITED;
+		}
+		else if (IsTreeItemSelected(m_tree, hti))
+		{
+			if (HasFocus())
+				return GMIS_SELECTED;
+			else
+				return GMIS_SELECTEDNOTFOCUSED;
+		}
 	}
 
 	// else
@@ -771,7 +760,7 @@ GM_ITEMSTATE CTreeListCtrl::GetItemState(HTREEITEM hti) const
 
 COLORREF CTreeListCtrl::GetRowColor(int nItem) const
 {
-	BOOL bAlternate = (/*!m_bSavingToImage &&*/ !IsListItemLineOdd(nItem) && HasAltLineColor());
+	BOOL bAlternate = (!IsListItemLineOdd(nItem) && HasAltLineColor());
 	COLORREF crBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
 	return crBack;
@@ -911,6 +900,27 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
 }
 
+LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+	case WM_NOTIFY:
+		{
+			LPNMHDR pNMHDR = (LPNMHDR)lp;
+
+			switch (pNMHDR->code)
+			{
+			case TVN_BEGINLABELEDIT:
+				if (m_treeDragDrop.IsDragging())
+					return 1L; // cancel
+				break;
+			}
+		}
+	}
+
+	return CTreeListSyncer::WindowProc(hRealWnd, msg, wp, lp);
+}
+
 LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())
@@ -1020,6 +1030,27 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	{
 		switch (msg)
 		{
+		case TVM_SELECTITEM:
+			if (wp == TVGN_DROPHILITE)
+			{
+				HTREEITEM htiNew = (HTREEITEM)lp;
+				HTREEITEM htiOld = m_tree.GetDropHilightItem();
+
+				if (htiNew != htiOld)
+				{
+					LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+
+					InvalidateListItem(htiOld);
+					InvalidateListItem(htiNew);
+
+					m_tree.UpdateWindow();
+					m_list.UpdateWindow();
+
+					return lr;
+				}
+			}
+			break;
+
 		case WM_RBUTTONDOWN:
 			{
 				HTREEITEM hti = TreeHitTestItem(lp, FALSE);
@@ -1054,15 +1085,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			if (OnTreeMouseMove(wp, lp))
 			{
 				return FALSE; // eat
-			}
-			break;
-
-		case WM_MOUSELEAVE:
-			// Remove any drophilighting from the list
-			if (m_nPrevDropHilitedItem != -1)
-			{
-				m_list.SetItemState(m_nPrevDropHilitedItem, 0, LVIS_DROPHILITED);
-				m_nPrevDropHilitedItem = -1;
 			}
 			break;
 
@@ -1203,20 +1225,6 @@ BOOL CTreeListCtrl::OnPrimaryHeaderBeginTracking(NMHEADER* pHDN)
 	return m_treeHeader.IsItemTrackable(pHDN->iItem);
 }
 
-void CTreeListCtrl::SetDropHighlight(HTREEITEM hti, int nItem)
-{
-	if (m_nPrevDropHilitedItem != -1)
-		m_list.SetItemState(m_nPrevDropHilitedItem, 0, LVIS_DROPHILITED);
-	
-	m_tree.SelectDropTarget(hti);
-	
-	if (nItem != -1)
-		m_list.SetItemState(nItem, LVIS_DROPHILITED, LVIS_DROPHILITED);
-	
-	m_nPrevDropHilitedItem = nItem;
-}
-
-
 BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
 	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
@@ -1332,22 +1340,26 @@ BOOL CTreeListCtrl::GetLabelEditRect(LPRECT pEdit) const
 	HTREEITEM htiSel = GetSelectedItem();
 	
 	// scroll into view first
-	const_cast<CTreeListTreeCtrl&>(m_tree).EnsureVisible(htiSel);
+	::SendMessage(m_tree, TVM_ENSUREVISIBLE, 0, (LPARAM)htiSel);
 
-	if (m_tree.GetItemRect(htiSel, pEdit, TRUE)) // label only
+	CRect rEdit;
+
+	if (GetTreeItemRect(htiSel, 0, rEdit, TRUE)) // label only
 	{
 		// make width of tree column or 200 whichever is larger
-		int nWidth = (m_treeHeader.GetItemWidth(0) - pEdit->left);
+		int nWidth = (m_treeHeader.GetItemWidth(0) - rEdit.left);
 		nWidth = max(nWidth, MIN_LABEL_EDIT_WIDTH);
 
-		pEdit->right = (pEdit->left + nWidth);
+		rEdit.right = (rEdit.left + nWidth);
 
 		// Convert to 'our' coord space
- 		m_tree.MapWindowPoints((CWnd*)this, pEdit);
-		return true;
+ 		m_tree.MapWindowPoints((CWnd*)this, rEdit);
+		
+		*pEdit = rEdit;
+		return TRUE;
 	}
 	
-	return false;
+	return FALSE;
 }
 
 
@@ -1408,6 +1420,9 @@ BOOL CTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.left = rHdrItem.left;
 		rItem.right = rHdrItem.right;
 	}
+
+	if (COSVersion() == OSV_LINUX)
+		rItem.top--;
 
 	return TRUE;
 }
@@ -1616,7 +1631,9 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				if (bSelected)
 					rItem.right = rClient.right;
 
-				DrawTreeItemBackground(pDC, hti, dwItemData, rItem, bSelected);
+				// Below Vista filling the background overwrites the tree insertion marker
+				if (!OsIsXPOrLinux())
+					DrawTreeItemBackground(pDC, hti, dwItemData, rItem, bSelected);
 
 				// draw horz gridline
 				DrawHorzItemDivider(pDC, pTVCD->nmcd.rc);
@@ -2166,6 +2183,15 @@ void CTreeListCtrl::InvalidateList(int nFrom, int nTo, BOOL bErase)
 	rBounds.UnionRect(rFrom, rTo);
 
 	m_list.InvalidateRect(rBounds, bErase);
+}
+
+void CTreeListCtrl::InvalidateListItem(HTREEITEM hti, BOOL bErase)
+{
+	if (hti)
+	{
+		int nItem = FindListItem(m_list, (DWORD)hti);
+		CTreeListSyncer::InvalidateListItem(m_list, nItem, bErase);
+	}
 }
 
 void CTreeListCtrl::RedrawTree(BOOL bErase)
