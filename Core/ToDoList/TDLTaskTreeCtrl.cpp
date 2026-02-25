@@ -1664,7 +1664,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 {
 	ASSERT(hti);
 
-	static bOsIsLinux = OsIsLinux();
+	static BOOL bOsIsLinux = OsIsLinux();
 
 	switch (nArea)
 	{
