@@ -1363,22 +1363,26 @@ BOOL CTreeListCtrl::GetLabelEditRect(LPRECT pEdit) const
 	HTREEITEM htiSel = GetSelectedItem();
 	
 	// scroll into view first
-	const_cast<CTreeListTreeCtrl&>(m_tree).EnsureVisible(htiSel);
+	::SendMessage(m_tree, TVM_ENSUREVISIBLE, 0, (LPARAM)htiSel);
 
-	if (m_tree.GetItemRect(htiSel, pEdit, TRUE)) // label only
+	CRect rEdit;
+
+	if (GetTreeItemRect(htiSel, 0, rEdit, TRUE)) // label only
 	{
 		// make width of tree column or 200 whichever is larger
-		int nWidth = (m_treeHeader.GetItemWidth(0) - pEdit->left);
+		int nWidth = (m_treeHeader.GetItemWidth(0) - rEdit.left);
 		nWidth = max(nWidth, MIN_LABEL_EDIT_WIDTH);
 
-		pEdit->right = (pEdit->left + nWidth);
+		rEdit.right = (rEdit.left + nWidth);
 
 		// Convert to 'our' coord space
- 		m_tree.MapWindowPoints((CWnd*)this, pEdit);
-		return true;
+ 		m_tree.MapWindowPoints((CWnd*)this, rEdit);
+		
+		*pEdit = rEdit;
+		return TRUE;
 	}
 	
-	return false;
+	return FALSE;
 }
 
 
@@ -1439,6 +1443,9 @@ BOOL CTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.left = rHdrItem.left;
 		rItem.right = rHdrItem.right;
 	}
+
+	if (COSVersion() == OSV_LINUX)
+		rItem.top--;
 
 	return TRUE;
 }

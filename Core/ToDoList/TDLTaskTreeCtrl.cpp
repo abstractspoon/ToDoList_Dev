@@ -1664,6 +1664,8 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 {
 	ASSERT(hti);
 
+	static bOsIsLinux = OsIsLinux();
+
 	switch (nArea)
 	{
 	case TDCTR_TEXT:
@@ -1692,6 +1694,10 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 		if (GetItemTitleRect(hti, TDCTR_TEXT, rect)) // RECURSIVE CALL
 		{
 			rect.left -= TITLE_BORDER_OFFSET;
+
+			if (bOsIsLinux)
+				rect.top--;
+			
 			return TRUE;
 		}
 		break;
@@ -1699,7 +1705,8 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 	case TDCTR_EDIT:
 		if (GetItemTitleRect(hti, TDCTR_BKGND, rect)) // RECURSIVE CALL
 		{
-			rect.top--;
+			if (!bOsIsLinux)
+				rect.top--;
 			
 			// return in screen coords
 			m_tcTasks.ClientToScreen(rect);
