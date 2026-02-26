@@ -372,6 +372,8 @@ BEGIN
     CONTROL         "Limit colour depth of images to reduce tasklist file size",
                     IDC_REDUCEIMAGECOLORS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,17,113,230,10
+    CTEXT           "There are no preferences supported by this OS",
+                    IDC_NOPREFSFORTHISOS,7,62,346,10,NOT WS_VISIBLE
 END
 
 IDD_PREFERENCES_DIALOG DIALOG DISCARDABLE  0, 0, 375, 189

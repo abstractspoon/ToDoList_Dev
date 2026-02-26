@@ -353,6 +353,11 @@ BOOL CRichEditHelper::SupportsInlineSpellChecking()
 	return (COSVersion() >= OSV_WIN8);
 }
 
+BOOL CRichEditHelper::SupportsOLEEmbedding()
+{
+	return (COSVersion() != OSV_LINUX);
+}
+
 BOOL CRichEditHelper::IsInlineSpellCheckingEnabled(HWND hWnd)
 {
 	if (!SupportsInlineSpellChecking())

@@ -22,7 +22,6 @@ const UINT WM_RTF_PREFSHELP			= ::RegisterWindowMessage(_T("WM_RTF_PREFSHELP"));
 
 class CRTFPreferencesPage : public CPreferencesPageBase
 {
-// Construction
 public:
 	CRTFPreferencesPage();
 
@@ -39,9 +38,6 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CCreateFileLinkDlg)
-	//}}AFX_DATA
 	CGroupLineManager m_groupLine;
 
 	int m_nLinkOption;
@@ -51,28 +47,20 @@ protected:
 	// global setting
 	BOOL m_bConvertWithMSWord;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCreateFileLinkDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
 protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(CCreateFileLinkDlg)
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
+
+protected:
 	afx_msg void OnClickPromptForLink();
 	afx_msg void OnChangeLinkOption();
 	DECLARE_MESSAGE_MAP()
 };
 
+/////////////////////////////////////////////////////////////////////////
+
 class CRTFPreferencesDlg : public CPreferencesDlgBase
 {
-// Construction
 public:
 	CRTFPreferencesDlg(CWnd* pParent = NULL);
 
@@ -85,23 +73,16 @@ public:
 	BOOL GetConvertWithMSWord() { return m_page.GetConvertWithMSWord(); }
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CCreateFileLinkDlg)
-	//}}AFX_DATA
 	CRTFPreferencesPage m_page;
 
 protected:
-// Overrides
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void DoHelp();
-
-	// Generated message map functions
 
 	DECLARE_MESSAGE_MAP()
 };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
+/////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_RTFPREFERENCESDLG_H__F70FEFCC_D6D8_40D7_8FB3_ACE6CD2DEEDB__INCLUDED_)
