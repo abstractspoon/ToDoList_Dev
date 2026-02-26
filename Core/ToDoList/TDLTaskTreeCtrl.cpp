@@ -530,7 +530,6 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
 
 	DWORD dwRes = CDRF_DODEFAULT;
-	static BOOL bFillRow = !OsIsLinux();
 	
 	switch (pTVCD->nmcd.dwDrawStage)
 	{
@@ -539,11 +538,12 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		break;
 		
 	case CDDS_ITEMPREPAINT:
-		dwRes = OnPrePaintTaskTitle(pTVCD->nmcd, pTVCD->clrText, pTVCD->clrTextBk, bFillRow);
+		dwRes = OnPrePaintTaskTitle(pTVCD->nmcd, pTVCD->clrText, pTVCD->clrTextBk);
 		break;
 		
 	case CDDS_ITEMPOSTPAINT:
-		dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc, bFillRow);
+		// Below Vista filling the background overwrites the tree insertion marker
+		dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc, !OsIsLinux());
 		break;
 	}
 	
