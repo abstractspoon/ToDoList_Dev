@@ -11,6 +11,7 @@
 #include "..\shared\DialogHelper.h"
 #include "..\shared\mswordhelper.h"
 #include "..\shared\RichEditHelper.h"
+#include "..\shared\OSVersion.h"
 
 #include "..\Interfaces\iPreferences.h"
 
@@ -71,35 +72,26 @@ BOOL CRTFPreferencesPage::OnInitDialog()
 {
 	CPreferencesPageBase::OnInitDialog();
 
-	if (!CMSWordHelper::IsWordInstalled(12))
-		GetDlgItem(IDC_USEMSWORD)->EnableWindow(FALSE);
-
-	// Hide and disable all file link options where not supported
-	if (!CRichEditHelper::SupportsOLEEmbedding())
+	// Hide all options for Linux
+	if (COSVersion() == OSV_LINUX)
 	{
 		CWnd* pChild = GetWindow(GW_CHILD);
 
 		while (pChild)
 		{
-			switch (pChild->GetDlgCtrlID())
-			{
-			case IDC_LINKTOFILE_GROUP:
-			case IDC_REDUCEIMAGECOLORS:
-			case IDC_PROMPTFORFILELINK:
-			case IDC_FILEIMAGE:
-			case IDC_FILELINK:
-			case IDC_FILECOPY:
-			case IDC_FILEURL:
-				pChild->EnableWindow(FALSE);
-				pChild->ShowWindow(SW_HIDE);
-				break;
-			}
+			BOOL bHide = (pChild->GetDlgCtrlID() != IDC_NOPREFSFORTHISOS);
+
+			pChild->EnableWindow(!bHide);
+			pChild->ShowWindow(bHide ? SW_HIDE : SW_SHOW);
 
 			pChild = pChild->GetWindow(GW_HWNDNEXT);
 		}
 	}
 	else
 	{
+		if (!CMSWordHelper::IsWordInstalled(12))
+			GetDlgItem(IDC_USEMSWORD)->EnableWindow(FALSE);
+		
 		m_groupLine.AddGroupLine(IDC_LINKTOFILE_GROUP, *this);
 		OnClickPromptForLink();
 	}
