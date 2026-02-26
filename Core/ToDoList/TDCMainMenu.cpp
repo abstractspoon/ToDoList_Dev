@@ -750,7 +750,8 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 	if (bVisibleColumnsOnly)
 	{
-		// Always rebuild from scratch
+		// Always rebuild from scratch because we don't know
+		// what's changed since the last time we popped up
 		{
 			CTDCMainMenu menuBar;
 
@@ -846,20 +847,6 @@ void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBa
 {
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, CTDCFilter::GetDefaultFilterNames(), IDS_FILTERPLACEHOLDER);
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.AdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
-
-	// Enable state
-	BOOL bWantDefFilters = prefs.GetShowDefaultFiltersInFilterBar();
-
-	for (int nFilter = 0; nFilter < NUM_SHOWFILTER; nFilter++)
-	{
-		BOOL bEnable = (bWantDefFilters || (nFilter == 0));
-		pMenu->EnableMenuItem(ID_VIEW_ACTIVATEFILTER1 + nFilter, (bEnable ? MF_ENABLED : MF_DISABLED));
-	}
-
-	// Restore selection
-	UINT nSelMenuID = GetSelectedFilterMenuID(filterBar);
-
-	pMenu->CheckMenuRadioItem(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, nSelMenuID, MF_BYCOMMAND);
 }
 
 void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID)

@@ -226,11 +226,11 @@ protected:
 	static BOOL TreeItemHasState(HWND hwnd, HTREEITEM hti, UINT nStateMask);
 	static void SetTreeItemState(HWND hwnd, HTREEITEM hti, UINT nState, UINT nStateMask);
 	static BOOL ListItemHasState(HWND hwnd, int nItem, UINT nStateMask);
-	static void InvalidateTreeItem(HWND hwnd, HTREEITEM hti);
-	static void InvalidateListItem(HWND hwnd, int nItem);
+	static void InvalidateTreeItem(HWND hwnd, HTREEITEM hti, BOOL bErase = TRUE);
+	static void InvalidateListItem(HWND hwnd, int nItem, BOOL bErase = TRUE);
 	static int InsertListItem(HWND hwndList, int nInsertPos, DWORD dwItemData);
  	static void SelectTreeItem(HWND hwnd, HTREEITEM hti, BOOL bClear = TRUE);
-	static BOOL OsIsXP();
+	static BOOL OsIsXPOrLinux();
 	static BOOL OsIsLinux();
 	static int CalcTotalHeaderItemWidth(HWND hwndHeader);
 	static int CalcMaxVisibleTreeItemWidth(HWND hwnd);
