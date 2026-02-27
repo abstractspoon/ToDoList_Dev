@@ -32,6 +32,8 @@ public:
 
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 	void SetDependencies(const CTDCDependencyArray& aDepends);
+	BOOL HasDependencies() const { return (m_aDepends.GetSize() > 0); }
+
 	void SetDependenciesAreCircular(BOOL bCircular = TRUE, COLORREF crCircular = 255);
 	CString FormatDependencies(TCHAR cSep = NULL);
 	
