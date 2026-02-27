@@ -227,7 +227,8 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// app preferences
-	DWORD dwPrefs = m_BigCalendar.GetOptions(); // preserve calendar-specific prefs
+	CString sHideParentTag;
+	DWORD dwPrefs = m_BigCalendar.GetOptions(sHideParentTag); // preserve calendar-specific prefs
 
 	Misc::SetFlag(dwPrefs, TCCO_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
 	Misc::SetFlag(dwPrefs, TCCO_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
@@ -236,8 +237,8 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	Misc::SetFlag(dwPrefs, TCCO_ENABLELABELTIPS, !pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
 	Misc::SetFlag(dwPrefs, TCCO_SHOWISODATES, pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE));
 
-	m_BigCalendar.SetOptions(dwPrefs);
-	m_MiniCalendar.SetOptions(dwPrefs);
+	m_BigCalendar.SetOptions(dwPrefs, sHideParentTag);
+	m_MiniCalendar.SetOptions(dwPrefs, sHideParentTag);
 
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	CWeekend::Initialise(dwWeekends);

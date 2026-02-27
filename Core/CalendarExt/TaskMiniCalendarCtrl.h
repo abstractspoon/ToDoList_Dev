@@ -30,7 +30,7 @@ public:
 	void EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttribID);
 	void DisableHeatMap();
 
-	void SetOptions(DWORD dwOptions, LPCTSTR szHideParentTag = NULL);
+	void SetOptions(DWORD dwOptions, const CString& sHideParentTag);
 	void SetBorderColor(COLORREF crBorder);
 	void SetUITheme(const UITHEME& theme);
 

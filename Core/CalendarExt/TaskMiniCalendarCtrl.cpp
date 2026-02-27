@@ -50,12 +50,13 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTaskMiniCalendarCtrl message handlers
 
-void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions, LPCTSTR szHideParentTag)
+void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions, const CString& sHideParentTag)
 {
-	if ((m_dwOptions != dwOptions) || (Misc::HasFlag(m_dwOptions, TCCO_HIDEPARENTTASKS) && (m_sHideParentTag != szHideParentTag)))
+	if ((m_dwOptions != dwOptions) || 
+		(Misc::HasFlag(m_dwOptions, TCCO_HIDEPARENTTASKS) && (sHideParentTag != m_sHideParentTag)))
 	{
 		m_dwOptions = dwOptions;
-		m_sHideParentTag = szHideParentTag;
+		m_sHideParentTag = sHideParentTag;
 
 		if (dwOptions & TCCO_DATEDISPLAYOPTIONS)
 			RecalcSpecialDates();

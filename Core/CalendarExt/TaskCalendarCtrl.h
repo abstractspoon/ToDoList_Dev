@@ -64,8 +64,8 @@ public:
 	TCC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
 	void SetDefaultSnapMode(TCC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
 
-	void SetOptions(DWORD dwOption, LPCTSTR szHideParentTag = NULL);
-	DWORD GetOptions() const { return m_dwOptions; }
+	void SetOptions(DWORD dwOption, const CString& sHideParentTag);
+	DWORD GetOptions(CString& sHideParentTag) const;
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
 	void SetAlternateWeekColor(COLORREF crAltWeek);

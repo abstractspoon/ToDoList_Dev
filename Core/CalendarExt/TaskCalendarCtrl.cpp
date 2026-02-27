@@ -147,10 +147,17 @@ BOOL CTaskCalendarCtrl::HasOptionChanged(int nOption, DWORD dwOldOptions, DWORD 
 	return ((dwOldOptions & nOption) != (dwNewOptions & nOption));
 }
 
-void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
+DWORD CTaskCalendarCtrl::GetOptions(CString& sHideParentTag) const 
+{ 
+	sHideParentTag = m_sHideParentTag;
+
+	return m_dwOptions; 
+}
+
+void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, const CString& sHideParentTag)
 {
 	BOOL bHideParentChange = (HasOptionChanged(TCCO_HIDEPARENTTASKS, m_dwOptions, dwNewOptions) ||
-							  (HasOption(TCCO_HIDEPARENTTASKS) && (m_sHideParentTag != szHideParentTag)));
+							  (HasOption(TCCO_HIDEPARENTTASKS) && (sHideParentTag != m_sHideParentTag)));
 
 	BOOL bOtherOptionsChange = HasOptionChanged(~TCCO_HIDEPARENTTASKS, m_dwOptions, dwNewOptions);
 	BOOL bDateDisplayChange = HasOptionChanged(TCCO_DATEDISPLAYOPTIONS, m_dwOptions, dwNewOptions);
@@ -160,7 +167,7 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions, LPCTSTR szHideParentTag)
 		return;
 
 	m_dwOptions = dwNewOptions;
-	m_sHideParentTag = szHideParentTag;
+	m_sHideParentTag = sHideParentTag;
 
 	// Scroll to task if the date visibility options have changed
 	BOOL bScrollToTask = bDateDisplayChange;
