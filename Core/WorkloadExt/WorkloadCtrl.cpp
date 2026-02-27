@@ -2352,6 +2352,7 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const CIntArray&
 
 			rCell.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 
+			pDC->SetBkMode(TRANSPARENT);
 			pDC->SetTextColor(crText);
 			pDC->DrawText(Misc::Format(dDays, 2), &rCell, DT_CENTER);
 		}
