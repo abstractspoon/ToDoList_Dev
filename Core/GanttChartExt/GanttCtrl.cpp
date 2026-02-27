@@ -2974,16 +2974,13 @@ void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rI
 	rText.left = nTextPos;
 	rText.top += 2;
 
-	COLORREF crText, crUnused;
-	GetGanttBarColors(gi, bSelected, crText, crUnused);
-
 	HGDIOBJ hFontOld = NULL;
 
 	if (HasOption(GTLCF_STRIKETHRUDONETASKS) && gi.IsDone(FALSE))
 		hFontOld = pDC->SelectObject(m_tree.Fonts().GetHFont(FALSE, FALSE, FALSE, TRUE));
 	
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->SetTextColor(crText);
+	pDC->SetTextColor(GetTreeTextColor(gi, bSelected));
 	pDC->DrawText(sTrailing, rText, (DT_LEFT | DT_NOPREFIX));
 
 	pDC->SelectObject(hFontOld);
