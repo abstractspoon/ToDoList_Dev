@@ -194,8 +194,6 @@ BOOL TransText::CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
 
 	case TDCLEAN_BADVER:
 	case TDCLEAN_EMPTY:
-		break;
-
 	default:
 		ASSERT(0);
 		break;
