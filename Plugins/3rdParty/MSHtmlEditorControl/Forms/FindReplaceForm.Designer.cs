@@ -53,7 +53,6 @@ namespace MSDN.Html.Editor
 			this.tabControl.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.tabControl.Name = "tabControl";
 			this.tabControl.SelectedIndex = 0;
-			this.tabControl.ShowToolTips = true;
 			this.tabControl.Size = new System.Drawing.Size(442, 254);
 			this.tabControl.TabIndex = 0;
 			this.tabControl.TabStop = false;
@@ -69,7 +68,6 @@ namespace MSDN.Html.Editor
 			this.tabFind.Size = new System.Drawing.Size(434, 221);
 			this.tabFind.TabIndex = 0;
 			this.tabFind.Text = "Find";
-			this.tabFind.ToolTipText = "Find Text";
 			// 
 			// tabReplace
 			// 
@@ -81,7 +79,6 @@ namespace MSDN.Html.Editor
 			this.tabReplace.Size = new System.Drawing.Size(434, 221);
 			this.tabReplace.TabIndex = 1;
 			this.tabReplace.Text = "Replace";
-			this.tabReplace.ToolTipText = "Find and Replace Text";
 			// 
 			// labelFind
 			// 
