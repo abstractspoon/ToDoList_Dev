@@ -7,7 +7,7 @@
 
 #include "tdcenum.h"
 #include "TDLDialog.h"
-#include "TDLDialog.h"
+#include "TDCMapping.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\CheckListBoxEx.h"
@@ -15,20 +15,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg dialog
 
-enum
-{
-	ODD_STARTDATE	= 0x1,
-	ODD_DUEDATE		= 0x2,
-	ODD_DONEDATE	= 0x4,
-	ODD_REMINDER	= 0x8,
-};
-
 class CTDLOffsetDatesDlg : public CTDLDialog
 {
 public:
 	CTDLOffsetDatesDlg(CWnd* pParent = NULL);
 
-	DWORD GetOffsetWhat() const { return m_dwOffsetWhat; }
+	int GetOffsetWhat(CTDCDateSet& mapDates) const;
 	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
 	BOOL GetOffsetSubtaskReferences() const { return (m_bOffsetSubtasks && m_bOffsetSubtaskRefs); }
@@ -43,8 +35,8 @@ protected:
 	BOOL m_bOffsetSubtaskRefs;
 	BOOL m_bOffsetFromDate;
 	BOOL m_bPreserveEndOfMonth;
-	DWORD m_dwOffsetWhat;
 
+	CTDCDateSet m_mapSelDates;
 	CCheckListBoxEx m_lbOffsetWhat;
 	COleDateTime m_dtOffsetFrom;
 

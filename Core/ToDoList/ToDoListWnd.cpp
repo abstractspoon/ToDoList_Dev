@@ -12238,26 +12238,16 @@ void CToDoListWnd::OnEditOffsetDates()
 		offset.bAndSubtaskRefs = dialog.GetOffsetSubtaskReferences();
 		offset.bPreserveEndOfMonth = dialog.GetPreserveEndOfMonth();
 		
-		DWORD dwWhat = dialog.GetOffsetWhat();
-		ASSERT(dwWhat);
-
 		CTDCDateSet mapDates;
+		VERIFY(dialog.GetOffsetWhat(mapDates));
 
-		if (dwWhat & ODD_STARTDATE)
-			mapDates.Add(TDCD_START);
-
-		if (dwWhat & ODD_DUEDATE)
-			mapDates.Add(TDCD_DUE);
-
-		if (dwWhat & ODD_DONEDATE)
-			mapDates.Add(TDCD_DONE);
-
+		BOOL bOffsetReminders = mapDates.Remove(TDCD_REMINDER);
 		CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 		if (!mapDates.IsEmpty())
 			tdc.OffsetSelectedTaskDates(mapDates, offset);
 		
-		if (dwWhat & ODD_REMINDER)
+		if (bOffsetReminders)
 		{
 			CDWordArray aTaskIDs;
 			DWORD dwUnused;
