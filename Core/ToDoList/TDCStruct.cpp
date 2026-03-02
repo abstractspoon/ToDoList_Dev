@@ -53,6 +53,7 @@ COleDateTime TDCDATEOFFSET::GetFromDate(TDC_DATE nDate) const
 
 	switch (nDate)
 	{
+	case TDCD_CUSTOM:
 	case TDCD_STARTDATE:
 	case TDCD_DUEDATE:
 	case TDCD_DONEDATE:

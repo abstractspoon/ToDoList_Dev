@@ -21,6 +21,7 @@
 class CToDoCtrlData;
 class CBinaryData;
 class CDWordSet;
+class CTDCModifiedTaskMap;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -220,6 +221,7 @@ public:
 
 	TDC_SET InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date);
 	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset, CDWordArray& aModTaskIDs);
+	TDC_SET OffsetTaskCustomDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset, CDWordArray& aModTaskIDs);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
 	TDC_SET AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
 
@@ -345,7 +347,8 @@ protected:
 	BOOL GetTaskAttributeValue(const TODOITEM& tdi, TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
 
 	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset, BOOL bFitToRecurringScheme);
-	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset, BOOL bFitToRecurringScheme, CMap<DWORD, DWORD, BOOL, BOOL&>& mapProcessedTasks);
+	TDC_SET OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset, BOOL bFitToRecurringScheme, CTDCModifiedTaskMap& mapProcessedTasks);
+	TDC_SET OffsetTaskCustomDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset, CTDCModifiedTaskMap& mapProcessedTasks);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart, TDC_UNITS nUnits);
 	TDC_SET SetTaskPriorityOrRisk(DWORD dwTaskID, BOOL bPriority, int nValue);
 	TDC_SET OffsetTaskPriorityOrRisk(DWORD dwTaskID, BOOL bPriority, int nOffset);
