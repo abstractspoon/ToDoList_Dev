@@ -62,6 +62,7 @@ protected:
 
 protected:
 	void EnableDisableControls();
+	void UpdateCachedDateAttributes();
 };
 
 #endif // !defined(AFX_OFFSETDATESDLG_H__9B2E2FE0_370B_41F4_98C1_2D3BB6D1526E__INCLUDED_)

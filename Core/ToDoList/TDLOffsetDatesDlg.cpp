@@ -21,12 +21,12 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum
+enum // For backwards compatibility only
 {
-	STARTDATE = 0x1,
-	DUEDATE = 0x2,
-	DONEDATE = 0x4,
-	REMINDER = 0x8,
+	STARTDATE	= 0x1,
+	DUEDATE		= 0x2,
+	DONEDATE	= 0x4,
+	REMINDER	= 0x8,
 };
 
 enum // OFFSET_BY
@@ -39,6 +39,16 @@ enum // OFFSET_BY
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+#define SELECTDEFCOMBOITEM(entry, flag, date) \
+	{ if (prefs.GetProfileInt(m_sPrefsKey, entry, (dwOffsetWhat & flag))) \
+		m_mapSelDates.Add(date); }
+
+#define ADDDEFCOMBOITEM(name, date) \
+	{ int nItem = CDialogHelper::AddStringT(m_lbOffsetWhat, name, date); \
+		m_lbOffsetWhat.SetCheck(nItem, m_mapSelDates.Has(date)); }
+
+/////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg dialog
 
 CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CWnd* pParent)
@@ -49,20 +59,13 @@ CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(const CTDCCustomAttribDefinitionArray& aC
 {
 	// restore state
 	CPreferences prefs;
-	
+
 	DWORD dwOffsetWhat = prefs.GetProfileInt(m_sPrefsKey, _T("What"), 0); // Backwards compatibility
 
-	if (prefs.GetProfileInt(m_sPrefsKey, _T("StartDate"), (dwOffsetWhat & STARTDATE)))
-		m_mapSelDates.Add(TDCD_START);
-
-	if (prefs.GetProfileInt(m_sPrefsKey, _T("DueDate"), (dwOffsetWhat & DUEDATE)))
-		m_mapSelDates.Add(TDCD_DUE);
-
-	if (prefs.GetProfileInt(m_sPrefsKey, _T("DoneDate"), (dwOffsetWhat & DONEDATE)))
-		m_mapSelDates.Add(TDCD_DONE);
-
-	if (prefs.GetProfileInt(m_sPrefsKey, _T("Reminder"), (dwOffsetWhat & REMINDER)))
-		m_mapSelDates.Add(TDCD_REMINDER);
+	SELECTDEFCOMBOITEM(_T("StartDate"),	STARTDATE,	TDCD_START);
+	SELECTDEFCOMBOITEM(_T("DueDate"),	DUEDATE,	TDCD_DUE);
+	SELECTDEFCOMBOITEM(_T("DoneDate"),	DONEDATE,	TDCD_DONE);
+	SELECTDEFCOMBOITEM(_T("Reminder"),	REMINDER,	TDCD_REMINDER);
 
 	m_bForward = prefs.GetProfileInt(m_sPrefsKey, _T("Forward"), TRUE);
 	m_nOffsetBy = prefs.GetProfileInt(m_sPrefsKey, _T("Amount"), 1);
@@ -103,16 +106,14 @@ BOOL CTDLOffsetDatesDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	// Build combo
-#define ADDDEFCOMBOITEM(id, date) \
-	{ int nItem = CDialogHelper::AddStringT(m_lbOffsetWhat, id, date); \
-	m_lbOffsetWhat.SetCheck(nItem, m_mapSelDates.Has(date)); }
-
+	// // Add default date attributes to combo
 	ADDDEFCOMBOITEM(IDS_TDLBC_STARTDATE, TDCD_START);
 	ADDDEFCOMBOITEM(IDS_TDLBC_DUEDATE,   TDCD_DUE);
 	ADDDEFCOMBOITEM(IDS_TDLBC_DONEDATE,  TDCD_DONE);
 	ADDDEFCOMBOITEM(IDS_TDLBC_REMINDER,  TDCD_REMINDER);
 
+	// Add custom date attributes to combo
+	// Note: Custom date attributes are always initially unchecked 
 	int nCust = m_aCustAttribDefs.GetSize();
 
 	while (nCust--)
@@ -125,8 +126,6 @@ BOOL CTDLOffsetDatesDlg::OnInitDialog()
 	}
 	
 	EnableDisableControls();
-	UpdateData(FALSE); // Set check states
-
 	return TRUE;
 }
 
@@ -177,11 +176,8 @@ COleDateTime CTDLOffsetDatesDlg::GetOffsetFromDate() const
 	return CDateHelper::NullDate();
 }
 
-void CTDLOffsetDatesDlg::OnOK()
+void CTDLOffsetDatesDlg::UpdateCachedDateAttributes()
 {
-	CTDLDialog::OnOK();
-
-	// Get selected listbox items
 	m_mapSelDates.RemoveAll();
 	m_mapSelCustAttribIDs.RemoveAll();
 
@@ -199,6 +195,14 @@ void CTDLOffsetDatesDlg::OnOK()
 				m_mapSelCustAttribIDs.Add(m_aCustAttribDefs[nDate - TDCD_CUSTOM].sUniqueID);
 		}
 	}
+}
+
+void CTDLOffsetDatesDlg::OnOK()
+{
+	CTDLDialog::OnOK();
+
+	// Get selected listbox items
+	UpdateCachedDateAttributes();
 
 	// save state
 	CPreferences prefs;
@@ -234,7 +238,7 @@ void CTDLOffsetDatesDlg::OnClickOffsetSubtasks()
 
 void CTDLOffsetDatesDlg::OnClickWhatList()
 {
-	UpdateData();
+	UpdateCachedDateAttributes();
 	EnableDisableControls();
 }
 
@@ -250,5 +254,5 @@ void CTDLOffsetDatesDlg::EnableDisableControls()
 	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
 	GetDlgItem(IDC_OFFSETDATE)->EnableWindow(m_bOffsetFromDate);
 
-	GetDlgItem(IDOK)->EnableWindow(!m_mapSelDates.IsEmpty());
+	GetDlgItem(IDOK)->EnableWindow(!m_mapSelDates.IsEmpty() || !m_mapSelCustAttribIDs.IsEmpty());
 }
