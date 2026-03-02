@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLOffsetDatesDlg.h"
+#include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\Misc.h"
 #include "..\Shared\DateHelper.h"
@@ -40,10 +41,11 @@ enum // OFFSET_BY
 /////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg dialog
 
-CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent)
+CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CWnd* pParent)
 	: 
 	CTDLDialog(IDD_OFFSETDATES_DIALOG, _T("OffsetDates"), pParent),
-	m_dtOffsetFrom(CDateHelper::GetDate(DHD_TODAY)) // always
+	m_dtOffsetFrom(CDateHelper::GetDate(DHD_TODAY)), // always
+	m_aCustAttribDefs(aCustAttribDefs)
 {
 	// restore state
 	CPreferences prefs;
@@ -86,26 +88,6 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_DateTimeCtrl(pDX, IDC_OFFSETDATE, m_dtOffsetFrom);
 	DDX_Check(pDX, IDC_PRESERVEENDOFMONTH, m_bPreserveEndOfMonth);
 	DDX_Control(pDX, IDC_WHATLIST, m_lbOffsetWhat);
-
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_mapSelDates.RemoveAll();
-
-		int nItem = m_lbOffsetWhat.GetCount();
-
-		while (nItem--)
-		{
-			if (m_lbOffsetWhat.GetCheck(nItem))
-				m_mapSelDates.Add((TDC_DATE)m_lbOffsetWhat.GetItemData(nItem));
-		}
-	}
-	else
-	{
-		POSITION pos = m_mapSelDates.GetStartPosition();
-
-		while (pos)
-			m_lbOffsetWhat.SetCheckByData(m_mapSelDates.GetNext(pos));
-	}
 }
 
 BEGIN_MESSAGE_MAP(CTDLOffsetDatesDlg, CTDLDialog)
@@ -121,21 +103,39 @@ BOOL CTDLOffsetDatesDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_STARTDATE, TDCD_START);
-	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_DUEDATE,   TDCD_DUE);
-	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_DONEDATE,  TDCD_DONE);
-	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_REMINDER,  TDCD_REMINDER);
+	// Build combo
+#define ADDDEFCOMBOITEM(id, date) \
+	{ int nItem = CDialogHelper::AddStringT(m_lbOffsetWhat, id, date); \
+	m_lbOffsetWhat.SetCheck(nItem, m_mapSelDates.Has(date)); }
 
+	ADDDEFCOMBOITEM(IDS_TDLBC_STARTDATE, TDCD_START);
+	ADDDEFCOMBOITEM(IDS_TDLBC_DUEDATE,   TDCD_DUE);
+	ADDDEFCOMBOITEM(IDS_TDLBC_DONEDATE,  TDCD_DONE);
+	ADDDEFCOMBOITEM(IDS_TDLBC_REMINDER,  TDCD_REMINDER);
+
+	int nCust = m_aCustAttribDefs.GetSize();
+
+	while (nCust--)
+	{
+		if (m_aCustAttribDefs[nCust].IsDataType(TDCCA_DATE))
+		{
+			CString sAttrib = CEnString().Format(IDS_CUSTOMCOLUMN, m_aCustAttribDefs[nCust].sLabel);
+			CDialogHelper::AddStringT(m_lbOffsetWhat, sAttrib, (TDCD_CUSTOM + nCust));
+		}
+	}
+	
 	EnableDisableControls();
-	UpdateData(FALSE);
+	UpdateData(FALSE); // Set check states
 
 	return TRUE;
 }
 
-int CTDLOffsetDatesDlg::GetOffsetWhat(CTDCDateSet& mapDates) const
+int CTDLOffsetDatesDlg::GetOffsetWhat(CTDCDateSet& mapDates, CStringSet& mapCustAttribIDs) const
 {
 	mapDates.Copy(m_mapSelDates);
-	return m_mapSelDates.GetCount();
+	mapCustAttribIDs.Copy(m_mapSelCustAttribIDs);
+
+	return (m_mapSelDates.GetCount() + m_mapSelCustAttribIDs.GetCount());
 }
 
 int CTDLOffsetDatesDlg::GetOffsetAmount(TDC_UNITS& nUnits) const
@@ -180,6 +180,25 @@ COleDateTime CTDLOffsetDatesDlg::GetOffsetFromDate() const
 void CTDLOffsetDatesDlg::OnOK()
 {
 	CTDLDialog::OnOK();
+
+	// Get selected listbox items
+	m_mapSelDates.RemoveAll();
+	m_mapSelCustAttribIDs.RemoveAll();
+
+	int nItem = m_lbOffsetWhat.GetCount();
+
+	while (nItem--)
+	{
+		if (m_lbOffsetWhat.GetCheck(nItem))
+		{
+			TDC_DATE nDate = (TDC_DATE)m_lbOffsetWhat.GetItemData(nItem);
+
+			if (nDate < TDCD_CUSTOM)
+				m_mapSelDates.Add(nDate);
+			else
+				m_mapSelCustAttribIDs.Add(m_aCustAttribDefs[nDate - TDCD_CUSTOM].sUniqueID);
+		}
+	}
 
 	// save state
 	CPreferences prefs;

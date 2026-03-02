@@ -12220,7 +12220,8 @@ void CToDoListWnd::OnUpdateViewProjectname(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditOffsetDates() 
 {
-	CTDLOffsetDatesDlg dialog;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CTDLOffsetDatesDlg dialog(tdc.GetCustomAttributeDefs());
 	
 	if (dialog.DoModal(CMDICON(ID_EDIT_OFFSETDATES)) == IDOK)
 	{
@@ -12239,10 +12240,11 @@ void CToDoListWnd::OnEditOffsetDates()
 		offset.bPreserveEndOfMonth = dialog.GetPreserveEndOfMonth();
 		
 		CTDCDateSet mapDates;
-		VERIFY(dialog.GetOffsetWhat(mapDates));
+		CStringSet mapCustAttribIDs;
+
+		VERIFY(dialog.GetOffsetWhat(mapDates, mapCustAttribIDs));
 
 		BOOL bOffsetReminders = mapDates.Remove(TDCD_REMINDER);
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 		if (!mapDates.IsEmpty())
 			tdc.OffsetSelectedTaskDates(mapDates, offset);

@@ -13,14 +13,18 @@
 #include "..\shared\CheckListBoxEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CTDCCustomAttribDefinitionArray;
+
+/////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg dialog
 
 class CTDLOffsetDatesDlg : public CTDLDialog
 {
 public:
-	CTDLOffsetDatesDlg(CWnd* pParent = NULL);
+	CTDLOffsetDatesDlg(const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CWnd* pParent = NULL);
 
-	int GetOffsetWhat(CTDCDateSet& mapDates) const;
+	int GetOffsetWhat(CTDCDateSet& mapDates, CStringSet& mapCustAttribIDs) const;
 	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
 	BOOL GetOffsetSubtaskReferences() const { return (m_bOffsetSubtasks && m_bOffsetSubtaskRefs); }
@@ -37,8 +41,11 @@ protected:
 	BOOL m_bPreserveEndOfMonth;
 
 	CTDCDateSet m_mapSelDates;
+	CStringSet m_mapSelCustAttribIDs;
 	CCheckListBoxEx m_lbOffsetWhat;
 	COleDateTime m_dtOffsetFrom;
+
+	const CTDCCustomAttribDefinitionArray& m_aCustAttribDefs;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
