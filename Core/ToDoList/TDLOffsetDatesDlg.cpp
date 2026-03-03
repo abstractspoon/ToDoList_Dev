@@ -171,7 +171,7 @@ BOOL CTDLOffsetDatesDlg::GetPreserveEndOfMonth() const
 COleDateTime CTDLOffsetDatesDlg::GetOffsetFromDate() const
 {
 	if (m_bOffsetFromDate)
-		return m_dtOffsetFrom;
+		return CDateHelper::GetDateOnly(m_dtOffsetFrom);
 
 	return CDateHelper::NullDate();
 }

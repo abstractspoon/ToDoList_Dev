@@ -2477,6 +2477,28 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 	return FALSE;
 }
 
+BOOL CToDoCtrlData::CanOffsetTaskCustomDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset) const
+{
+	if (!offset.IsValid())
+		return FALSE;
+
+	if (!HasTask(dwTaskID))
+		return FALSE;
+
+	if (TDCCA_DATE != m_aCustomAttribDefs.GetAttributeDataType(sCustAttribID, FALSE))
+		return FALSE;
+
+	if (!offset.HasDateUnits())
+		return FALSE;
+	
+	if (offset.HasFromDate())
+		return TRUE;
+	
+	TDCCADATA data(GetTaskCustomAttributeData(dwTaskID, sCustAttribID));
+
+	return CDateHelper::IsDateSet(data.AsDate());
+}
+
 // External
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset, CDWordArray& aModTaskIDs)
 {
@@ -2624,46 +2646,35 @@ TDC_SET CToDoCtrlData::OffsetTaskCustomDate(DWORD dwTaskID, const CString& sCust
 // Internal
 TDC_SET CToDoCtrlData::OffsetTaskCustomDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset, CTDCModifiedTaskMap& mapProcessedTasks)
 {
-	if (!offset.IsValid() || !offset.HasDateUnits())
-		return SET_FAILED;
-
 	DWORD dwTrueTaskID = GetTrueTaskID(dwTaskID);
 
 	if (mapProcessedTasks.HasTaskID(dwTrueTaskID))
 		return SET_NOCHANGE;
 
-	COleDateTime dtNew = CDateHelper::NullDate();
+	TDC_SET nRes = SET_NOCHANGE;
 
-	if (offset.HasFromDate())
+	if (CanOffsetTaskCustomDate(dwTrueTaskID, sCustAttribID, offset))
 	{
-		dtNew = offset.GetFromDate(TDCD_CUSTOM);
-	}
-	else
-	{
-		TDCCADATA data;
+		COleDateTime dtNew = CDateHelper::NullDate();
 
-		if (GetTaskCustomAttributeData(dwTrueTaskID, sCustAttribID, data))
-		{
-			dtNew = data.AsDate();
-		}
+		if (offset.HasFromDate())
+			dtNew = offset.GetFromDate(TDCD_CUSTOM);
 		else
+			dtNew = TDCCADATA(GetTaskCustomAttributeData(dwTrueTaskID, sCustAttribID)).AsDate();
+
+		ASSERT(CDateHelper::IsDateSet(dtNew));
+
+		if (offset.nAmount != 0)
 		{
-			ASSERT(0);
-			return SET_FAILED;
+			VERIFY(CDateHelper().OffsetDate(dtNew, 
+											offset.nAmount,
+											TDC::MapUnitsToDHUnits(offset.nUnits),
+											offset.bPreserveEndOfMonth));
 		}
-	}
-	ASSERT(CDateHelper::IsDateSet(dtNew));
 
-	if (offset.nAmount != 0)
-	{
-		VERIFY(CDateHelper().OffsetDate(dtNew, 
-										offset.nAmount,
-										TDC::MapUnitsToDHUnits(offset.nUnits),
-										offset.bPreserveEndOfMonth));
+		nRes = SetTaskCustomAttributeData(dwTrueTaskID, sCustAttribID, dtNew);
+		mapProcessedTasks[dwTrueTaskID] = (nRes == SET_CHANGE);
 	}
-
-	TDC_SET nRes = SetTaskCustomAttributeData(dwTrueTaskID, sCustAttribID, dtNew);
-	mapProcessedTasks[dwTrueTaskID] = (nRes == SET_CHANGE);
 
 	// children
 	ASSERT(offset.bAndSubtasks || !offset.bAndSubtaskRefs);

@@ -87,6 +87,7 @@ public:
 	BOOL MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
 	BOOL FixupParentCompletion(DWORD dwParentID, BOOL bClearStatus);
 	BOOL CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset) const;
+	BOOL CanOffsetTaskCustomDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset) const;
 
 	// undo/redo
 	BOOL BeginNewUndoAction(TDC_UNDOACTIONTYPE nType);
