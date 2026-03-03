@@ -847,8 +847,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOP, ID_NEWSUBTASK_ATBOTTOM, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOPSELECTED, ID_NEWTASK_ATBOTTOMSELECTED, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK, ID_NEWTASK_DEPENDENTBEFORESELECTEDTASK, OnUpdateNewTask)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetStartDueDates)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetStartDueDates)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnUpdateSortBy)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SPLITTASKINTO_TWO, ID_SPLITTASKINTO_FIVE, OnUpdateSplitTask)
@@ -12246,8 +12246,8 @@ void CToDoListWnd::OnEditOffsetDates()
 
 		BOOL bOffsetReminders = mapDates.Remove(TDCD_REMINDER);
 
-		if (!mapDates.IsEmpty())
-			tdc.OffsetSelectedTaskDates(mapDates, offset);
+		if (!mapDates.IsEmpty() || !mapCustAttribIDs.IsEmpty())
+			tdc.OffsetSelectedTaskDates(mapDates, mapCustAttribIDs, offset);
 		
 		if (bOffsetReminders)
 		{
@@ -12260,6 +12260,11 @@ void CToDoListWnd::OnEditOffsetDates()
 				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], &tdc, offset);
 		}
 	}
+}
+
+void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().HasSelection());
 }
 
 void CToDoListWnd::OnEditOffsetStartDueDates(UINT nCmdID)
@@ -12295,7 +12300,7 @@ void CToDoListWnd::OnEditOffsetStartDueDates(UINT nCmdID)
 	GetToDoCtrl().OffsetSelectedTaskDates(mapDates, offset);
 }
 
-void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateEditOffsetStartDueDates(CCmdUI* pCmdUI) 
 {
 	CTDCDateSet mapDates;
 	mapDates.Add(TDCD_START);

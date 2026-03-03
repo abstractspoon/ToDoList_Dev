@@ -1801,40 +1801,13 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates, const CS
 	// Default date attributes
 	POSITION pos = mapDates.GetStartPosition();
 
-	if (pos)
+	while (pos)
 	{
-		BOOL bCanAdjustDependDates = (!m_taskTree.SelectionHasDependencies() || !HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
+		TDC_DATE nDate = mapDates.GetNext(pos);
+		TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
-		while (pos)
-		{
-			TDC_DATE nDate = mapDates.GetNext(pos);
-
-			if (!CanEditSelectedTask(TDC::MapDateToAttribute(nDate)))
-				return FALSE;
-
-			switch (nDate)
-			{
-			case TDCD_CREATE:
-			case TDCD_DONE:
-			case TDCD_DONEDATE:
-			case TDCD_DONETIME:
-				break;
-
-			case TDCD_START:
-			case TDCD_STARTDATE:
-			case TDCD_STARTTIME:
-			case TDCD_DUE:
-			case TDCD_DUEDATE:
-			case TDCD_DUETIME:
-				if (!bCanAdjustDependDates)
-					return FALSE;
-				break;
-
-			default:
-				ASSERT(0);
-				return FALSE;
-			}
-		}
+		if (CanEditSelectedTask(nAttribID))
+			return TRUE;
 	}
 
 	// Custom date attributes
@@ -1845,11 +1818,11 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates, const CS
 		CString sCustAttribID = mapCustAttribIDs.GetNext(pos);
 		TDC_ATTRIBUTE nCustAttribID = GetCustomAttributeDefs().GetAttributeID(sCustAttribID);
 
-		if (!CanEditSelectedTask(nCustAttribID))
-			return FALSE;
+		if (CanEditSelectedTask(nCustAttribID))
+			return TRUE;
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDATEOFFSET& offset)
@@ -1859,9 +1832,6 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDA
 
 BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet& mapCustAttribIDs, const TDCDATEOFFSET& offset)
 {
-	if (!CanOffsetSelectedTaskDates(mapDates, mapCustAttribIDs))
-		return FALSE;
-
 	Flush();
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
