@@ -102,7 +102,7 @@ public:
 
 	BOOL HasTaskID(DWORD dwTaskID) const
 	{
-		return Misc::HasKeyT(*this, dwTaskID);
+		return Misc::HasKeyT<DWORD, BOOL>(*this, dwTaskID);
 	}
 };
 
