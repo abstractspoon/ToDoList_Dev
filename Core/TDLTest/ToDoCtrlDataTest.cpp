@@ -1066,13 +1066,13 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(LPCTSTR szSubTest, CToDoCtrlData& dat
 
 // -------------------------------------
 
-#define DATEOFFSET_NOCHANGE(offset) \
-	ExpectEQ(SET_NOCHANGE, data.OffsetTaskDate(dwTaskID, nDate, offset, aModTaskIDs)); \
+#define DATEOFFSET_NOCHANGE(date, offset) \
+	ExpectEQ(SET_NOCHANGE, data.OffsetTaskDate(dwTaskID, date, offset, aModTaskIDs)); \
 	ExpectEQ(0, aModTaskIDs.GetSize())
 
-#define DATEOFFSET_CHANGE(offset) \
+#define DATEOFFSET_CHANGE(date, offset) \
 	aModTaskIDs.RemoveAll();      \
-	ExpectEQ(SET_CHANGE, data.OffsetTaskDate(dwTaskID, nDate, offset, aModTaskIDs)); \
+	ExpectEQ(SET_CHANGE, data.OffsetTaskDate(dwTaskID, date, offset, aModTaskIDs)); \
 	ExpectEQ(1, aModTaskIDs.GetSize()); \
 	ExpectEQ(1UL, aModTaskIDs[0])
 
@@ -1090,7 +1090,7 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 	case TDCD_NONE:
 	case TDCD_REMINDER:
 	case TDCD_CUSTOM:
-		DATEOFFSET_NOCHANGE(offset);
+		DATEOFFSET_NOCHANGE(nDate, offset);
 		break;
 
 	case TDCD_START:
@@ -1108,22 +1108,22 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 			// Don't combine these 'no change' tests to simplify debugging
 			if (!offset.HasDateUnits())
 			{
-				DATEOFFSET_NOCHANGE(offset);
+				DATEOFFSET_NOCHANGE(nDate, offset);
 			}
 			else if (bMustBeInitialised && !data.TaskHasDate(dwTaskID, nDate))
 			{
-				DATEOFFSET_NOCHANGE(offset);
+				DATEOFFSET_NOCHANGE(nDate, offset);
 			}
 			else if (!offset.nAmount && !offset.HasFromDate())
 			{
-				DATEOFFSET_NOCHANGE(offset);
+				DATEOFFSET_NOCHANGE(nDate, offset);
 			}
 			else
 			{
 				const COleDateTime dtTaskOrg = data.GetTaskDate(dwTaskID, nDate);
 				const COleDateTime dtFrom = (offset.HasFromDate() ? offset.GetFromDate(nDate) : dtTaskOrg);
 				
-				DATEOFFSET_CHANGE(offset);
+				DATEOFFSET_CHANGE(nDate, offset);
 
 				COleDateTime dtNew = data.GetTaskDate(dwTaskID, nDate);
 				BOOL bReversibleTest = FALSE;
@@ -1136,7 +1136,7 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 					TDCDATEOFFSET reverseOffset = offset;
 					reverseOffset.nAmount = -offset.nAmount;
 
-					DATEOFFSET_CHANGE(reverseOffset);
+					DATEOFFSET_CHANGE(nDate, reverseOffset);
 
 					dtNew = data.GetTaskDate(dwTaskID, nDate);
 					ExpectEQ(dtNew, dtFrom);
@@ -1160,19 +1160,19 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 			// Don't combine these 'no change' tests to simplify debugging
 			if (!offset.HasTimeUnits())
 			{
-				DATEOFFSET_NOCHANGE(offset);
+				DATEOFFSET_NOCHANGE(nDate, offset);
 			}
 			else if (offset.nAmount == 0)
 			{
-				DATEOFFSET_NOCHANGE(offset);
+				DATEOFFSET_NOCHANGE(nDate, offset);
 			}
 			else if (offset.HasFromDate())
 			{
-				DATEOFFSET_NOCHANGE(offset);
+				DATEOFFSET_NOCHANGE(nDate, offset);
 			}
 			else if (!data.TaskHasDate(dwTaskID, nMappedDate))
 			{
-				DATEOFFSET_NOCHANGE(offset);
+				DATEOFFSET_NOCHANGE(nDate, offset);
 			}
 			else
 			{
@@ -1181,7 +1181,7 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 				// A negative offset
 				if ((offset.nAmount < 0) && !CDateHelper::DateHasTime(dtTaskOrg))
 				{
-					DATEOFFSET_NOCHANGE(offset);
+					DATEOFFSET_NOCHANGE(nDate, offset);
 				}
 				else
 				{
@@ -1190,7 +1190,7 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 					{
 						if (!CDateHelper::IsSameDay(dtTaskOrg, dtTaskOrg.m_dt + (offset.nAmount / 24.0)))
 						{
-							DATEOFFSET_NOCHANGE(offset);
+							DATEOFFSET_NOCHANGE(nDate, offset);
 							return;
 						}
 					}
@@ -1200,12 +1200,12 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 
 						if (!CDateHelper::IsSameDay(dtTaskOrg, dtTaskOrg.m_dt + (offset.nAmount / (60 * 24.0))))
 						{
-							DATEOFFSET_NOCHANGE(offset);
+							DATEOFFSET_NOCHANGE(nDate, offset);
 							return;
 						}
 					}
 
-					DATEOFFSET_CHANGE(offset);
+					DATEOFFSET_CHANGE(nDate, offset);
 
 					COleDateTime dtTaskNew = data.GetTaskDate(dwTaskID, nMappedDate);
 
@@ -1218,7 +1218,7 @@ void CToDoCtrlDataTest::TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, 
 					TDCDATEOFFSET reverseOffset = offset;
 					reverseOffset.nAmount = -offset.nAmount;
 
-					DATEOFFSET_CHANGE(reverseOffset);
+					DATEOFFSET_CHANGE(nDate, reverseOffset);
 
 					dtTaskNew = data.GetTaskDate(dwTaskID, nMappedDate);
  					ExpectEQ(dtTaskNew, dtTaskOrg, (1.0 / (24 * 60 * 60)));
@@ -1319,7 +1319,7 @@ void CToDoCtrlDataTest::InitDataForOffsetTaskCustomDateTests(CToDoCtrlData& data
 
 void CToDoCtrlDataTest::TestCanOffsetTaskCustomDate()
 {
-	CTDCScopedTest test(*this, _T("CToDoCtrlData::CanOffsetTaskCustomDate"));
+	CTDCScopedTest test(*this, _T("CToDoCtrlData::CanOffsetTaskDate"));
 
 	CTDCCustomAttribDefinitionArray aCustAttrib;
 	CToDoCtrlData data(m_aStyles, aCustAttrib);
@@ -1340,38 +1340,43 @@ void CToDoCtrlDataTest::TestCanOffsetTaskCustomDate()
 
 			for (int k = 0; k < NUM_OFFSETS; k++)
 			{
-				const int nAmount = OFFSETS[k];
+				int nAmount = OFFSETS[k];
 
-				// No options
+				for (int m = 0; m < 2; m++) // for +/- offset
 				{
-					TDCDATEOFFSET offset(nAmount, nUnits);
+					// No options
+					{
+						TDCDATEOFFSET offset(nAmount, nUnits);
 
-					TestCanOffsetTaskCustomDate(data, dwTaskID, aCustAttrib[nCust], offset);
-				}
+						TestCanOffsetTaskCustomDate(data, dwTaskID, aCustAttrib[nCust], offset);
+					}
 
-				// 'Offset from today' only
-				{
-					TDCDATEOFFSET offset(nAmount, nUnits);
-					offset.dtFrom = COleDateTime::GetCurrentTime();
+					// 'Offset from today' only
+					{
+						TDCDATEOFFSET offset(nAmount, nUnits);
+						offset.dtFrom = COleDateTime::GetCurrentTime();
 
-					TestCanOffsetTaskCustomDate(data, dwTaskID, aCustAttrib[nCust], offset);
-				}
+						TestCanOffsetTaskCustomDate(data, dwTaskID, aCustAttrib[nCust], offset);
+					}
 
-				// 'Preserve end of month' only
-				{
-					TDCDATEOFFSET offset(nAmount, nUnits);
-					offset.bPreserveEndOfMonth = TRUE;
+					// 'Preserve end of month' only
+					{
+						TDCDATEOFFSET offset(nAmount, nUnits);
+						offset.bPreserveEndOfMonth = TRUE;
 
-					TestCanOffsetTaskCustomDate(data, dwTaskID, aCustAttrib[nCust], offset);
-				}
+						TestCanOffsetTaskCustomDate(data, dwTaskID, aCustAttrib[nCust], offset);
+					}
 
-				// 'Offset from today' AND 'preserve end of month'
-				{
-					TDCDATEOFFSET offset(nAmount, nUnits);
-					offset.dtFrom = COleDateTime::GetCurrentTime();
-					offset.bPreserveEndOfMonth = TRUE;
+					// 'Offset from today' AND 'preserve end of month'
+					{
+						TDCDATEOFFSET offset(nAmount, nUnits);
+						offset.dtFrom = COleDateTime::GetCurrentTime();
+						offset.bPreserveEndOfMonth = TRUE;
 
-					TestCanOffsetTaskCustomDate(data, dwTaskID, aCustAttrib[nCust], offset);
+						TestCanOffsetTaskCustomDate(data, dwTaskID, aCustAttrib[nCust], offset);
+					}
+
+					nAmount = -nAmount;
 				}
 			}
 		}
@@ -1388,12 +1393,12 @@ void CToDoCtrlDataTest::TestCanOffsetTaskCustomDate(const CToDoCtrlData& data, D
 		bExpectedResult = CDateHelper::IsDateSet(date);
 	}
 
-	ExpectEQ(data.CanOffsetTaskCustomDate(dwTaskID, def.sUniqueID, offset), bExpectedResult);
+	ExpectEQ(data.CanOffsetTaskDate(dwTaskID, def.sUniqueID, offset), bExpectedResult);
 }
 
 void CToDoCtrlDataTest::TestOffsetTaskCustomDate()
 {
-	CTDCScopedTest test(*this, _T("CToDoCtrlData::OffsetTaskCustomDate"));
+	CTDCScopedTest test(*this, _T("CToDoCtrlData::OffsetTaskDate"));
 
 	CTDCCustomAttribDefinitionArray aCustAttrib;
 	CToDoCtrlData data(m_aStyles, aCustAttrib);
@@ -1454,18 +1459,6 @@ void CToDoCtrlDataTest::TestOffsetTaskCustomDate()
 
 // -------------------------------------
 
-#define CUSTDATEOFFSET_NOCHANGE(offset) \
-	ExpectEQ(SET_NOCHANGE, data.OffsetTaskCustomDate(dwTaskID, def.sUniqueID, offset, aModTaskIDs)); \
-	ExpectEQ(0, aModTaskIDs.GetSize())
-
-#define CUSTDATEOFFSET_CHANGE(offset) \
-	aModTaskIDs.RemoveAll();      \
-	ExpectEQ(SET_CHANGE, data.OffsetTaskCustomDate(dwTaskID, def.sUniqueID, offset, aModTaskIDs)); \
-	ExpectEQ(1, aModTaskIDs.GetSize()); \
-	ExpectEQ(1UL, aModTaskIDs[0])
-
-// -------------------------------------
-
 void CToDoCtrlDataTest::TestOffsetTaskCustomDate(CToDoCtrlData& data, DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& def, const TDCDATEOFFSET& offset)
 {
 	CDWordArray aModTaskIDs;
@@ -1474,24 +1467,24 @@ void CToDoCtrlDataTest::TestOffsetTaskCustomDate(CToDoCtrlData& data, DWORD dwTa
 	// Don't combine these 'no change' tests to simplify debugging
 	if (!def.IsDataType(TDCCA_DATE))
 	{
-		CUSTDATEOFFSET_NOCHANGE(offset);
+		DATEOFFSET_NOCHANGE(def.sUniqueID, offset);
 	}
 	else if (!offset.HasDateUnits())
 	{
-		CUSTDATEOFFSET_NOCHANGE(offset);
+		DATEOFFSET_NOCHANGE(def.sUniqueID, offset);
 	}
 	else if (!offset.HasFromDate() && !CDateHelper::IsDateSet(date))
 	{
-		CUSTDATEOFFSET_NOCHANGE(offset);
+		DATEOFFSET_NOCHANGE(def.sUniqueID, offset);
 	}
 	else if (!offset.nAmount && !offset.HasFromDate())
 	{
-		CUSTDATEOFFSET_NOCHANGE(offset);
+		DATEOFFSET_NOCHANGE(def.sUniqueID, offset);
 	}
 	else
 	{
 		const COleDateTime dtFrom = (offset.HasFromDate() ? offset.GetFromDate(TDCD_CUSTOM) : date);
-		CUSTDATEOFFSET_CHANGE(offset);
+		DATEOFFSET_CHANGE(def.sUniqueID, offset);
 
 		COleDateTime dtNew = GetTaskCustomDate(data, dwTaskID, def);
 		BOOL bReversibleTest = FALSE;
@@ -1504,7 +1497,7 @@ void CToDoCtrlDataTest::TestOffsetTaskCustomDate(CToDoCtrlData& data, DWORD dwTa
 			TDCDATEOFFSET reverseOffset = offset;
 			reverseOffset.nAmount = -offset.nAmount;
 
-			CUSTDATEOFFSET_CHANGE(reverseOffset);
+			DATEOFFSET_CHANGE(def.sUniqueID, reverseOffset);
 
 			dtNew = GetTaskCustomDate(data, dwTaskID, def);
 			ExpectEQ(dtNew, dtFrom);

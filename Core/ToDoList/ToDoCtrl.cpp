@@ -1883,7 +1883,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet&
 			DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(posTask));
 			CDWordArray aSelModTaskIDs;
 
-			TDC_SET nRes = m_data.OffsetTaskCustomDate(dwTaskID,
+			TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
 													   sCustAttribID,
 													   offset,
 													   aSelModTaskIDs);

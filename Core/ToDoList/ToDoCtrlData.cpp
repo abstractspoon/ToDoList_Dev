@@ -2477,7 +2477,7 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 	return FALSE;
 }
 
-BOOL CToDoCtrlData::CanOffsetTaskCustomDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset) const
+BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset) const
 {
 	if (!offset.IsValid())
 		return FALSE;
@@ -2623,11 +2623,11 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const TDCD
 }
 
 // External
-TDC_SET CToDoCtrlData::OffsetTaskCustomDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset, CDWordArray& aModTaskIDs)
+TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset, CDWordArray& aModTaskIDs)
 {
 	CTDCModifiedTaskMap mapProcessedTasks;
 
-	TDC_SET nRes = OffsetTaskCustomDate(dwTaskID,
+	TDC_SET nRes = OffsetTaskDate(dwTaskID,
 										sCustAttribID,
 										offset,
 										mapProcessedTasks);
@@ -2644,7 +2644,7 @@ TDC_SET CToDoCtrlData::OffsetTaskCustomDate(DWORD dwTaskID, const CString& sCust
 }
 
 // Internal
-TDC_SET CToDoCtrlData::OffsetTaskCustomDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset, CTDCModifiedTaskMap& mapProcessedTasks)
+TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, const CString& sCustAttribID, const TDCDATEOFFSET& offset, CTDCModifiedTaskMap& mapProcessedTasks)
 {
 	DWORD dwTrueTaskID = GetTrueTaskID(dwTaskID);
 
@@ -2653,7 +2653,7 @@ TDC_SET CToDoCtrlData::OffsetTaskCustomDate(DWORD dwTaskID, const CString& sCust
 
 	TDC_SET nRes = SET_NOCHANGE;
 
-	if (CanOffsetTaskCustomDate(dwTrueTaskID, sCustAttribID, offset))
+	if (CanOffsetTaskDate(dwTrueTaskID, sCustAttribID, offset))
 	{
 		COleDateTime dtNew = CDateHelper::NullDate();
 
@@ -2697,7 +2697,7 @@ TDC_SET CToDoCtrlData::OffsetTaskCustomDate(DWORD dwTaskID, const CString& sCust
 				continue;
 
 			// else
-			if (SET_CHANGE == OffsetTaskCustomDate(dwChildID,
+			if (SET_CHANGE == OffsetTaskDate(dwChildID,
 												   sCustAttribID,
 												   offset,
 												   mapProcessedTasks)) // RECURSIVE CALL
