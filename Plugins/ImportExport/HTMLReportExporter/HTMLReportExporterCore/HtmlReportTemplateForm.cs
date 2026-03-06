@@ -740,7 +740,7 @@ namespace HTMLReportExporter
 			dialog.Icon = HTMLReportExporter.Properties.Resources.HTMLReporter;
 			dialog.ShowIcon = true;
 			dialog.ImageLink = m_Template.BackImage;
-			dialog.Text = this.toolStripInsertImage.ToolTipText;
+			dialog.Text = "Set Background Image";
 
 			m_Trans.Translate(dialog, dialog.Tooltip);
 
