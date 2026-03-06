@@ -94,6 +94,7 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTDLOffsetDatesDlg, CTDLDialog)
+	ON_WM_CTLCOLOR()
 	ON_CBN_SELCHANGE(IDC_BYUNITS, OnSelchangeUnits)
 	ON_BN_CLICKED(IDC_OFFSETSUBTASKS, OnClickOffsetSubtasks)
 	ON_BN_CLICKED(IDC_OFFSETFROMDATE, OnClickOffsetFromDate)
@@ -254,5 +255,18 @@ void CTDLOffsetDatesDlg::EnableDisableControls()
 	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
 	GetDlgItem(IDC_OFFSETDATE)->EnableWindow(m_bOffsetFromDate);
 
-	GetDlgItem(IDOK)->EnableWindow(!m_mapSelDates.IsEmpty() || !m_mapSelCustAttribIDs.IsEmpty());
+	BOOL bEnableOK = (!m_mapSelDates.IsEmpty() || !m_mapSelCustAttribIDs.IsEmpty());
+
+	GetDlgItem(IDOK)->EnableWindow(bEnableOK);
+	GetDlgItem(IDC_NOATTRIBSELECTED)->ShowWindow(bEnableOK ? SW_HIDE : SW_SHOW);
+}
+
+HBRUSH CTDLOffsetDatesDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	if (pWnd->GetDlgCtrlID() == IDC_NOATTRIBSELECTED)
+		pDC->SetTextColor(CTDLDialog::GetErrorLabelTextColor());
+
+	return hbr;
 }

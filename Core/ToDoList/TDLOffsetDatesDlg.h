@@ -57,6 +57,7 @@ protected:
 	afx_msg void OnClickOffsetSubtasks();
 	afx_msg void OnClickOffsetFromDate();
 	afx_msg void OnClickWhatList();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	DECLARE_MESSAGE_MAP()
 
