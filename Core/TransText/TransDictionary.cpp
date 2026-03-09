@@ -1078,7 +1078,7 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 	if (nNumItems)
 	{
 		int nPercent = ((aNeedTranslationItems.GetSize() * 100) / (aNeedTranslationItems.GetSize() + aTranslatedItems.GetSize()));
-		aLines.Add(Misc::Format(_T("%s %d"), NEED_TRANSLATION, nPercent));
+		aLines.Add(Misc::Format(_T("%s %d%%"), NEED_TRANSLATION, nPercent));
 
 		for (int nItem = 0; nItem < nNumItems; nItem++)
 		{

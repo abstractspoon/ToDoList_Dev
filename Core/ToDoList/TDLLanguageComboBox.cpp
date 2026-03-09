@@ -169,7 +169,7 @@ CString CTDLLanguageComboBox::GetPercentTranslated(const CString& sTransFile)
 		}
 		else if (!sPercent.IsEmpty())
 		{
-			ASSERT(Misc::IsNumber(sPercent));
+			ASSERT(_istdigit(sPercent[0]));
 			sPercent.Format(_T("%d%%"), (100 - _ttoi(sPercent)));
 		}
 	}
