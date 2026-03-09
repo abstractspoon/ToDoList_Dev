@@ -151,15 +151,11 @@ void DICTITEM::FixupFormatString(CString& sFormat)
 	}
 }
 
-BOOL DICTITEM::ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) const
+BOOL DICTITEM::AppendToCsv(CStringArray& aLines) const
 {
-	aTransLines.RemoveAll();
-	aNeedTransLines.RemoveAll();
-
 	if (!m_sTextIn.IsEmpty())
 	{
-		CStringArray& aCsvLines = (m_sTextOut.IsEmpty() ? aNeedTransLines : aTransLines);
-		AddToCSV(m_sTextIn, m_sTextOut, m_sClassID, FALSE, aCsvLines);
+		AppendRowToCSV(m_sTextIn, m_sTextOut, m_sClassID, FALSE, aLines);
 
 		// Alternatives, maintaining original order
 		CDictItemArray aAltItems;
@@ -181,14 +177,14 @@ BOOL DICTITEM::ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) c
 		for (int nAlt = 0; nAlt < aAltItems.GetSize(); nAlt++)
 		{
 			const DICTITEM& di = aAltItems[nAlt];
-			AddToCSV(di.m_sTextIn, di.m_sTextOut, di.m_sClassID, TRUE, aCsvLines);
+			AppendRowToCSV(di.m_sTextIn, di.m_sTextOut, di.m_sClassID, TRUE, aLines);
 		}
 	}
 
-	return (aTransLines.GetSize() > 0 || aNeedTransLines.GetSize() > 0);
+	return (aLines.GetSize() > 0);
 }
 
-void DICTITEM::AddToCSV(const CString& sTextIn, const CString& sTextOut, const CString& sClassID, BOOL bAlternative, CStringArray& aCsvLines)
+void DICTITEM::AppendRowToCSV(const CString& sTextIn, const CString& sTextOut, const CString& sClassID, BOOL bAlternative, CStringArray& aLines)
 {
 		// replace certain chars in text else they'll trip up the dictionary when it's read back in
 	CString sTextInEx(sTextIn), sTextOutEx(sTextOut);
@@ -204,7 +200,7 @@ void DICTITEM::AddToCSV(const CString& sTextIn, const CString& sTextOut, const C
 	if (bAlternative)
 		sLine = _T("  ") + sLine; // indent alternatives
 
-	aCsvLines.Add(sLine);
+	aLines.Add(sLine);
 }
 
 int DICTITEM::CompareAlternativesProc(const void* pFirst, const void* pSecond)
@@ -1074,53 +1070,38 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 	Misc::SortArrayT<DICTITEM*>(aTranslatedItems, CompareProc);
 	Misc::SortArrayT<DICTITEM*>(aNeedTranslationItems, CompareProc);
 
-	// Convert to strings
-	CStringArray aTranslated, aNeedTranslation;
-	CStringArray aTransLines, aNeedTransLines;
+	// Add strings to master list
 
-	int nNumItems = aTranslatedItems.GetSize(), nItem;
-	aTransLines.SetSize(nNumItems);
+	// 1. NEED_TRANSLATION comes first (more important)
+	int nNumItems = aNeedTranslationItems.GetSize();
 
-	for (nItem = 0; nItem < nNumItems; nItem++)
+	if (nNumItems)
 	{
-		const DICTITEM* pDI = aTranslatedItems[nItem];
-
-		if (pDI->ToCsv(aTransLines, aNeedTransLines))
-		{
-			aTranslated.Append(aTransLines);
-			aTranslated.Append(aNeedTransLines);
-		}
-	}
-
-	nNumItems = aNeedTranslationItems.GetSize();
-	aNeedTransLines.SetSize(nNumItems);
-
-	for (nItem = 0; nItem < nNumItems; nItem++)
-	{
-		const DICTITEM* pDI = aNeedTranslationItems[nItem];
-
-		if (pDI->ToCsv(aTransLines, aNeedTransLines))
-		{
-			aNeedTranslation.Append(aTransLines);
-			aNeedTranslation.Append(aNeedTransLines);
-		}
-	}
-
-	// put NEED_TRANSLATION first
-	if (aNeedTranslation.GetSize() > 0)
-	{
-		int nPercent = ((aNeedTranslation.GetSize() * 100) / (aNeedTranslation.GetSize() + aTranslated.GetSize()));
-
+		int nPercent = ((aNeedTranslationItems.GetSize() * 100) / (aNeedTranslationItems.GetSize() + aTranslatedItems.GetSize()));
 		aLines.Add(Misc::Format(_T("%s %d"), NEED_TRANSLATION, nPercent));
-		aLines.Append(aNeedTranslation);
+
+		for (int nItem = 0; nItem < nNumItems; nItem++)
+		{
+			const DICTITEM* pDI = aNeedTranslationItems[nItem];
+			VERIFY(pDI->AppendToCsv(aLines));
+		}
 	}
 
-	if (aTranslated.GetSize() > 0)
+	// 2. Then comes TRANSLATED
+	nNumItems = aTranslatedItems.GetSize();
+
+	if (nNumItems)
 	{
 		aLines.Add(TRANSLATED);
-		aLines.Append(aTranslated);
+
+		for (int nItem = 0; nItem < nNumItems; nItem++)
+		{
+			const DICTITEM* pDI = aTranslatedItems[nItem];
+			VERIFY(pDI->AppendToCsv(aLines));
+		}
 	}
 
+	// Write to disk
 	CString sFileContents = Misc::FormatArray(aLines, _T("\r\n"));
 
 	return FileMisc::SaveFile(szDictPath, sFileContents, SFEF_UTF8);

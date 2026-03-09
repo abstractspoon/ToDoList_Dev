@@ -30,7 +30,7 @@ public:
 	BOOL Translate(CString& sText, HMENU hMenu, BOOL bValidateAccelerator);
 	BOOL IsTranslated() const;
 
-	BOOL ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) const;
+	BOOL AppendToCsv(CStringArray& aLines) const;
 	BOOL FromCsv(const CStringArray& aLines, int& nLine, BOOL bDecodeChars = TRUE);
 	
 	BOOL Merge(const DICTITEM& di);
@@ -76,7 +76,7 @@ protected:
 
 	static void FixupFormatString(CString& sFormat);
 	static int CompareAlternativesProc(const void* pFirst, const void* pSecond);
-	static void AddToCSV(const CString& sTextIn, const CString& sTextOut, const CString& sClassID, BOOL bAlternative, CStringArray& aCsvLines);
+	static void AppendRowToCSV(const CString& sTextIn, const CString& sTextOut, const CString& sClassID, BOOL bAlternative, CStringArray& aLines);
 };
 
 //////////////////////////////////////////////////////////////////////
