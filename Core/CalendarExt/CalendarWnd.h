@@ -7,6 +7,8 @@
 // CalendarWnd.h : header file
 //
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "CalendarExt.h"
 #include "TaskCalendarCtrl.h"
 #include "TaskMiniCalendarCtrl.h"
@@ -20,11 +22,8 @@
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
 
-class CCalendarData;
-struct UITHEME;
-
 /////////////////////////////////////////////////////////////////////////////
-// CCalendarWnd frame
+// CCalendarWnd window
 
 class CCalendarWnd : public CDialog, public IUIExtensionWindow
 {
@@ -36,7 +35,7 @@ public:
 
 	BOOL Create(DWORD dwStyle, const RECT &rect, CWnd* pParentWnd, UINT nID);
 
-	// IUIExtensionWindow
+	// IUIExtensionWindow implementation
 	LPCTSTR GetTypeID() const { return CAL_TYPEID; }
 	HICON GetIcon() const { return m_icon; }
 	LPCTSTR GetMenuText() const;
@@ -68,7 +67,6 @@ public:
 	bool DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData);
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
-//protected member variables
 protected:
 	CTaskCalendarCtrl m_BigCalendar;
 	CTaskMiniCalendarCtrl m_MiniCalendar;
@@ -84,34 +82,27 @@ protected:
 	CIcon m_icon;
 	BOOL m_bReadOnly;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCalendarWnd)
-	protected:
-	//}}AFX_VIRTUAL
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnCancel();
 	virtual void OnOK() {}
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CCalendarWnd)
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnGototoday();
-	//}}AFX_MSG
-	afx_msg void OnPreferences();
-	afx_msg void OnSelChangeNumWeeks();
-	afx_msg void OnSelChangeSnapMode();
-	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnNcDestroy();
+
+	afx_msg void OnGototoday();
+	afx_msg void OnPreferences();
+	afx_msg void OnSelChangeNumWeeks();
+	afx_msg void OnSelChangeSnapMode();
+	afx_msg void OnHelp();
 	afx_msg void OnClickSelectedTaskDates();
 
 	afx_msg void OnBigCalendarNotifyClick(NMHDR* pNMHDR, LRESULT* pResult);
@@ -127,11 +118,12 @@ protected:
 	afx_msg LRESULT OnBigCalendarGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarEditTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnBigCalendarGetTaskFutureDates(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnRecalcDatesLabel(WPARAM wp, LPARAM lp);
+
 	DECLARE_MESSAGE_MAP()
 
-//protected member functions
 protected:
-	void ResizeControls(int cx, int cy);
+	void ResizeControls(int cx = 0, int cy = 0);
 	void UpdateSelectedTaskDates();
 	void InitSnapCombo();
 	void UpdateCalendarCtrlPreferences();
@@ -140,8 +132,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_CALENDARFRAMEWND_H__47616F96_0B5B_4F86_97A2_93B9DC796EB4__INCLUDED_)
