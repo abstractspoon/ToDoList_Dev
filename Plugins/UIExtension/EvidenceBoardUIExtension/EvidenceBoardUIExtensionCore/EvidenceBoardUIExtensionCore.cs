@@ -431,18 +431,16 @@ namespace EvidenceBoardUIExtension
 			this.Controls.Add(m_ActiveDateRangeLabel);
 
 			m_ActiveDateRange = CreateLabel("", m_ActiveDateRangeLabel);
-			Win32.SetRTLReading(m_ActiveDateRange.Handle, DateUtil.WantRTLDates());
 
+			Win32.SetRTLReading(m_ActiveDateRange.Handle, DateUtil.WantRTLDates());
 			this.Controls.Add(m_ActiveDateRange);
 
 			m_DateSlider = new MonthRangeSliderCtrl();
-			m_DateSlider.Height = MonthRangeSliderCtrl.GetRequiredHeight();
+			m_DateSlider.ChangeEvent += new EventHandler(OnDateSliderChange);
 
 			InitialiseCtrl(m_DateSlider, m_ActiveDateRangeLabel, 250);
-
 			this.Controls.Add(m_DateSlider);
 
-			m_DateSlider.ChangeEvent += new EventHandler(OnDateSliderChange);
 		}
 
 		void ShowDateSlider(bool show)

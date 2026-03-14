@@ -7,6 +7,7 @@
 #include "DateUtil.h"
 #include "ColorUtil.h"
 #include "DateRangeLink.h"
+#include "DPIScaling.h"
 
 #include <Shared\Misc.h>
 #include <Shared\DialogHelper.h>
@@ -111,6 +112,7 @@ void DateRangeLink::OnHandleCreated(EventArgs^ e)
 {
 	Control::OnHandleCreated(e);
 
+	Height = DPIScaling::Scale(13);
 	m_pMFCInfo = IntPtr(HostedDateRangeLink::Attach(Win32::GetHwnd(Handle), Win32::GetHfont(Font->ToHfont())));
 
 	CheckSetRange();

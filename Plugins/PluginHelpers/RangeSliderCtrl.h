@@ -67,8 +67,6 @@ namespace Abstractspoon
 				
 				void ResizeToFit(int nMaxWidth);
 
-				static int GetRequiredHeight();
-
 				event System::EventHandler^ ChangeEvent;
 
 			private:
