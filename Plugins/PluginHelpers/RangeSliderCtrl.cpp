@@ -39,9 +39,6 @@ HostedRangeSliderCtrl* HostedRangeSliderCtrl::Attach(IntPtr handleManaged)
 	CRect rClient;
 	pCtrl->m_WndOfManagedHandle.GetClientRect(rClient);
 
-	// But height to match Core app
-	rClient.bottom = RangeSliderCtrl::GetRequiredHeight();
-
 	pCtrl->m_Slider.Create(WS_CHILD | WS_VISIBLE, rClient, &(pCtrl->m_WndOfManagedHandle), 1001);
 
 	return pCtrl;
@@ -192,6 +189,9 @@ void RangeSliderCtrl::OnHandleCreated(EventArgs^ e)
 {
 	Control::OnHandleCreated(e);
 
+	const int REQUIRED_HEIGHT = DPIScaling::Scale(21);
+	Height = REQUIRED_HEIGHT;
+
 	m_pMFCInfo = IntPtr(HostedRangeSliderCtrl::Attach(Handle));
 }
 
@@ -212,11 +212,6 @@ void RangeSliderCtrl::OnSizeChanged(EventArgs^ e)
 
 	if (m_pMFCInfo != IntPtr::Zero)
 		Slider(m_pMFCInfo)->UpdateSize();
-}
-
-int RangeSliderCtrl::GetRequiredHeight()
-{
-	return DPIScaling::Scale(21);
 }
 
 bool RangeSliderCtrl::SetMinMax(double min, double max)
