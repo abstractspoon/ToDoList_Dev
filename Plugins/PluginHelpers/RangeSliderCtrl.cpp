@@ -189,8 +189,15 @@ void RangeSliderCtrl::OnHandleCreated(EventArgs^ e)
 {
 	Control::OnHandleCreated(e);
 
-	const int REQUIRED_HEIGHT = (int)DPIScaling::Scale(21.0f); // Round down not up
-	Height = REQUIRED_HEIGHT;
+	// Fudge to get the height right on most resolutions
+	// because by default DPIScaling rounds up via MulDiv
+	const float fReqHeight = DPIScaling::Scale(21.0f);
+	const int nIntHeight = (int)fReqHeight;
+
+	if ((fReqHeight - nIntHeight) <= 0.5f)
+		Height = nIntHeight;
+	else
+		Height = (nIntHeight + 1);
 
 	m_pMFCInfo = IntPtr(HostedRangeSliderCtrl::Attach(Handle));
 }
