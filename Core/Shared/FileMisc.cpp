@@ -279,13 +279,10 @@ int CFileBackup::CullBackups(const CString& sPattern, DWORD dwFlags, int nNumToK
 	CStringArray aFiles;
 	nNumFound = FileMisc::FindFiles(sFolder, aFiles, FALSE, sFilePattern);
 
-	if (!nNumFound)
+	if (!nNumFound || (nNumFound <= nNumToKeep))
 		return 0;
 
-	if (dwFlags & FBS_DATESTAMP)
-		Misc::SortArray(aFiles);
-	else
-		Misc::SortArray(aFiles, FileDateSortProc);
+	Misc::SortArray(aFiles, FileDateSortProc);
 
 	while (aFiles.GetSize() > nNumToKeep)
 	{
@@ -301,7 +298,10 @@ int CFileBackup::FileDateSortProc(const void* v1, const void* v2)
 	const CString* pFile1 = (CString*)v1;
 	const CString* pFile2 = (CString*)v2;
 
-	return (int)(FileMisc::GetFileLastModified(*pFile2) - FileMisc::GetFileLastModified(*pFile1));
+	time64_t tFileDate1 = FileMisc::GetFileLastModified(*pFile1);
+	time64_t tFileDate2 = FileMisc::GetFileLastModified(*pFile2);
+
+	return (int)(tFileDate1 - tFileDate2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

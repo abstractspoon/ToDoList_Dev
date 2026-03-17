@@ -2026,7 +2026,8 @@ TDC_FILE CToDoListWnd::DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int n
 	DOPROGRESS(IDS_SAVINGPROGRESS);
 		
 	// back file up
-	m_mgrToDoCtrls.DoBackup(nIndex);
+	if (Prefs().GetBackupOnSave())
+		m_mgrToDoCtrls.DoBackup(nIndex);
 	
 	// do the save
 	return tdc.Save(tasks, szFilePath, bFlush);
@@ -8590,7 +8591,9 @@ TDC_FILE CToDoListWnd::ConfirmSaveTaskList(int nIndex, DWORD dwFlags)
 			}
 			else
 			{
-				m_mgrToDoCtrls.DoBackup(nIndex);
+				if (Prefs().GetBackupOnSave())
+					m_mgrToDoCtrls.DoBackup(nIndex);
+
 				tdc.Save(_T(""), bFlush);
 			}
 
