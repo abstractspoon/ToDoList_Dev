@@ -26,18 +26,18 @@ namespace WordCloudUIExtension
 
 	public class WordCloudUIExtensionCore : Panel, IUIExtension
 	{
-        private const int ComboHeight = 16;
-		private const int ComboWidth = 200;
-		private const int ComboSpacing = 6;
-		private const int MatchListDefaultWidth = 200;
         private const string FontName = "Tahoma";
 
         private static int MinSplitWidth = DPIScaling.Scale(25 * 2);
 		private static int LabelTop = DPIScaling.Scale(2); 
 		private static int ComboTop = DPIScaling.Scale(20);
         private static int LabelHeight = (ComboTop - LabelTop);
+        private static int ComboHeight = DPIScaling.Scale(16);
+		private static int ComboWidth = DPIScaling.Scale(150);
+		private static int ControlSpacing = DPIScaling.Scale(7); // Match core app
+		private static int MatchListDefaultWidth = DPIScaling.Scale(200);
 
-        // -------------------------------------------------------------
+		// -------------------------------------------------------------
 
 		private IntPtr m_HwndParent;
         private Task.Attribute m_Attrib;
@@ -702,7 +702,7 @@ namespace WordCloudUIExtension
 			if (prevLabel == null)
 				label.Location = new Point(-2, LabelTop);
 			else
-				label.Location = new Point(prevLabel.Right + ComboSpacing, LabelTop);
+				label.Location = new Point(prevLabel.Right + ControlSpacing, LabelTop);
 
 			label.Size = new Size(ComboWidth, LabelHeight);
 			label.Text = labelText;
@@ -720,7 +720,7 @@ namespace WordCloudUIExtension
 			if (prevCombo == null)
 				combo.Location = new Point(0, ComboTop);
 			else
-				combo.Location = new Point(prevCombo.Right + ComboSpacing, ComboTop);
+				combo.Location = new Point(prevCombo.Right + ControlSpacing, ComboTop);
 			
 			combo.Size = new Size(ComboWidth, ComboHeight);
 			combo.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -858,7 +858,7 @@ namespace WordCloudUIExtension
 					return Point.Empty;
 
 				// Centre the toolbar vertically on the combo
-				return new Point(m_StylesCombo.Right + 10, m_StylesCombo.Top - (m_Toolbar.Height - m_StylesCombo.Height) / 2);
+				return new Point(m_StylesCombo.Right + ControlSpacing, m_StylesCombo.Top - (m_Toolbar.Height - m_StylesCombo.Height) / 2);
 			}
 		}
 

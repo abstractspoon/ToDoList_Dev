@@ -36,7 +36,7 @@ static COleDateTime GetOleDate(DateTime date)
 					date.Minute,
 					date.Second);
 
-	Debug::Assert((dt.m_dt == date.ToOADate()) || (dt.m_dt < 0.0));
+	Debug::Assert((CDateHelper::Compare(dt, date.ToOADate()) == 0) || (dt.m_dt < 0.0));
 
 	return dt;
 }

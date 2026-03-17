@@ -17,6 +17,7 @@
 #include "..\shared\wclassdefines.h"
 #include "..\shared\themed.h"
 #include "..\shared\holdredraw.h"
+#include "..\shared\ToolTipCtrlEx.h"
 
 #include "..\3rdparty\colordef.h"
 
@@ -81,8 +82,6 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	m_bMultiSelection(TRUE),
 	m_nTitleFilter(FT_FILTERONTITLEONLY)
 {
-	//{{AFX_DATA_INIT(CFilterBar)
-	//}}AFX_DATA_INIT
 	m_iconUpdateBtn.Load(IDI_UPDATE_FILTER, 16, FALSE);
 
 	// add update button to 'title text' and 'next 'n' days'
@@ -98,8 +97,7 @@ CTDLFilterBar::~CTDLFilterBar()
 void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CFilterBar)
-	//}}AFX_DATA_MAP
+
 	DDX_Control(pDX, IDC_TAGFILTERCOMBO, m_cbTagFilter);
 	DDX_Control(pDX, IDC_VERSIONFILTERCOMBO, m_cbVersionFilter);
 	DDX_Control(pDX, IDC_OPTIONFILTERCOMBO, m_cbOptions);
@@ -169,9 +167,6 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
-	//{{AFX_MSG_MAP(CFilterBar)
-	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_ALLOCTOFILTERCOMBO, OnSelchangeFilterAttribute)
 	ON_CBN_SELCHANGE(IDC_TAGFILTERCOMBO, OnSelchangeFilterAttribute)
 	ON_CBN_SELCHANGE(IDC_VERSIONFILTERCOMBO, OnSelchangeFilterAttribute)
@@ -203,9 +198,9 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelcancelFilter)
 	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeChangeDateFilter)
 
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 
+	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_CTLCOLOR()
 	ON_WM_HELPINFO()
@@ -214,7 +209,6 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CFilterBar message handlers
 
 BOOL CTDLFilterBar::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 {
@@ -1014,18 +1008,20 @@ BOOL CTDLFilterBar::OnInitDialog()
 	SetDlgItemText(IDC_TITLEFILTERLABEL, m_filter.GetTitleFilterLabel());
 	EnableToolTips();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE; 
 }
 
-BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResult*/)
+int CTDLFilterBar::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
+	CWnd* pChild = ChildWindowFromPoint(point);
 
-    UINT nCtrlID = CToolTipCtrlEx::GetCtrlID(pTTT);
+	if (!pChild)
+		return -1;
 
 	static CString sTooltip;
 
+    UINT nCtrlID = pChild->GetDlgCtrlID();
+	
 	switch (nCtrlID)
 	{
 	case IDC_SHOWFILTERCOMBO:
@@ -1070,15 +1066,12 @@ BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 
 	if (!sTooltip.IsEmpty())
 	{
-		// disable translation of the tip
-		CLocalizer::EnableTranslation(pNMHDR->hwndFrom, FALSE);
+		CToolTipCtrlEx::EnableMultilineTips(AfxGetTooltipCtrl());
 
-		// Set the tooltip text.
-		::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
-		pTTT->lpszText = (LPTSTR)(LPCTSTR)sTooltip;
+		return CToolTipCtrlEx::SetToolInfo(*pTI, pChild, sTooltip, nCtrlID);
 	}
 
-	return TRUE; // handled
+	return -1;
 }
 
 void CTDLFilterBar::SetUITheme(const CUIThemeFile& theme)

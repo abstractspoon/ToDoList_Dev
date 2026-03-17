@@ -388,7 +388,7 @@ void CBurndownWnd::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		}
 		else // Process children
 		{
-			BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE, bCheckExist);
+			BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE, bCheckExist); // RECURSIVE CALL
 		}
 	}
 
@@ -616,6 +616,9 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 
 BOOL CBurndownWnd::OnEraseBkgnd(CDC* pDC) 
 {
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	CDialogHelper::ExcludeChild(&m_chart, pDC);
 	CDialogHelper::ExcludeChild(&m_cbGraphs, pDC);
 	CDialogHelper::ExcludeChild(&m_cbOptions, pDC);

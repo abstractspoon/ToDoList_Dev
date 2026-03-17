@@ -1515,9 +1515,23 @@ void CTDLTaskAttributeListCtrl::RefreshSelectedTasksValue(int nRow)
 		case TDCA_COST:				GETMULTIVALUE_FMT(GetTasksCost, TDCCOST, value.Format(2));			break;
 
 		case TDCA_RECURRENCE:		GETMULTIVALUE_FMT(GetTasksRecurrence, TDCRECURRENCE, value.GetRegularityText());	break;
-		case TDCA_DEPENDENCY:		GETMULTIVALUE_FMT(GetTasksDependencies, CTDCDependencyArray, value.Format());		break;
 		case TDCA_TIMEREMAINING:	GETMULTIVALUE_FMT(GetTasksTimeRemaining, TDCTIMEPERIOD, value.Format(2));			break;
 		
+		case TDCA_DEPENDENCY:		
+			{
+				// We must update 'm_eDepends' immediately because it is 
+				// our 'source of truth' for calls to 'GetDependencies'
+				CTDCDependencyArray aDepends;
+				
+				if (m_multitasker.GetTasksDependencies(m_aSelectedTaskIDs, aDepends))
+					sValue = aDepends.Format();
+				else
+					bValueVaries = TRUE;
+
+				m_eDepends.SetDependencies(aDepends);
+			}
+			break;
+			
 		case TDCA_COMMENTSSIZE:		
 			{
 				GETMULTIVALUE_STR(GetTasksCommentsSize);
@@ -2729,13 +2743,7 @@ void CTDLTaskAttributeListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		break;
 
 	case TDCA_DEPENDENCY:
-		{
-			CTDCDependencyArray aDepends;
-			m_multitasker.GetTasksDependencies(m_aSelectedTaskIDs, aDepends);
-
-			m_eDepends.SetDependencies(aDepends);
-			m_eDepends.EnableButton(ID_BTN_VIEWDEPENDS, aDepends.GetSize());
-		}
+		m_eDepends.EnableButton(ID_BTN_VIEWDEPENDS, m_eDepends.HasDependencies());
 		break;
 
 	case TDCA_ICON: 

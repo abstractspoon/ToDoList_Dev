@@ -762,6 +762,8 @@ HBRUSH CWorkloadWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 BOOL CWorkloadWnd::OnEraseBkgnd(CDC* pDC) 
 {
 	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	CDialogHelper::ExcludeChild(&m_toolbar, pDC);
 	CDialogHelper::ExcludeChild(&m_ctrlWorkload, pDC);
 	CDialogHelper::ExcludeChild(&m_dtcPeriodStart, pDC);

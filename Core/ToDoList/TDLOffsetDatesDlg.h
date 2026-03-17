@@ -7,28 +7,24 @@
 
 #include "tdcenum.h"
 #include "TDLDialog.h"
-#include "TDLDialog.h"
+#include "TDCMapping.h"
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\CheckListBoxEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// COffsetDatesDlg dialog
 
-enum
-{
-	ODD_STARTDATE	= 0x1,
-	ODD_DUEDATE		= 0x2,
-	ODD_DONEDATE	= 0x4,
-	ODD_REMINDER	= 0x8,
-};
+class CTDCCustomAttribDefinitionArray;
+
+/////////////////////////////////////////////////////////////////////////////
+// COffsetDatesDlg dialog
 
 class CTDLOffsetDatesDlg : public CTDLDialog
 {
 public:
-	CTDLOffsetDatesDlg(CWnd* pParent = NULL);
+	CTDLOffsetDatesDlg(const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CWnd* pParent = NULL);
 
-	DWORD GetOffsetWhat() const { return m_dwOffsetWhat; }
+	int GetOffsetWhat(CTDCDateSet& mapDates, CStringSet& mapCustAttribIDs) const;
 	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
 	BOOL GetOffsetSubtaskReferences() const { return (m_bOffsetSubtasks && m_bOffsetSubtaskRefs); }
@@ -43,10 +39,13 @@ protected:
 	BOOL m_bOffsetSubtaskRefs;
 	BOOL m_bOffsetFromDate;
 	BOOL m_bPreserveEndOfMonth;
-	DWORD m_dwOffsetWhat;
 
+	CTDCDateSet m_mapSelDates;
+	CStringSet m_mapSelCustAttribIDs;
 	CCheckListBoxEx m_lbOffsetWhat;
 	COleDateTime m_dtOffsetFrom;
+
+	const CTDCCustomAttribDefinitionArray& m_aCustAttribDefs;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -58,11 +57,13 @@ protected:
 	afx_msg void OnClickOffsetSubtasks();
 	afx_msg void OnClickOffsetFromDate();
 	afx_msg void OnClickWhatList();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void EnableDisableControls();
+	void UpdateCachedDateAttributes();
 };
 
 #endif // !defined(AFX_OFFSETDATESDLG_H__9B2E2FE0_370B_41F4_98C1_2D3BB6D1526E__INCLUDED_)

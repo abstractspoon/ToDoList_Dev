@@ -146,6 +146,7 @@ public:
 	static BOOL EnableEditStyles(HWND hWnd, DWORD dwStyles, BOOL bEnable);
 
 	static BOOL SupportsInlineSpellChecking();
+	static BOOL SupportsOLEEmbedding();
 	static BOOL EnableAutoFontChanging(HWND hWnd, BOOL bEnable = TRUE);
 	static BOOL EnableInlineSpellChecking(HWND hWnd, BOOL bEnable = TRUE);
 	static BOOL IsInlineSpellCheckingEnabled(HWND hWnd);

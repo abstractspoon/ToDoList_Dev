@@ -1,4 +1,4 @@
-// TDCTreeListCtrl.cpp: implementation of the CTDCTaskCtrlBase class.
+// TDCTaskCtrlBase.cpp: implementation of the CTDCTaskCtrlBase class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -267,8 +267,6 @@ CTDLTaskCtrlBase::~CTDLTaskCtrlBase()
 ///////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
-	//{{AFX_MSG_MAP(CTDCTaskCtrlBase)
-	//}}AFX_MSG_MAP
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
 	ON_WM_CREATE()
@@ -277,7 +275,6 @@ BEGIN_MESSAGE_MAP(CTDLTaskCtrlBase, CWnd)
 	ON_WM_HELPINFO()
 	ON_WM_CONTEXTMENU()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////
@@ -2547,7 +2544,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 					// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 					CRect rItem(pLVCD->nmcd.rc);
 
-					if (OsIsXP() || OsIsLinux())
+					if (OsIsXPOrLinux())
 						m_lcColumns.GetItemRect(nItem, rItem, LVIR_BOUNDS);
 
 					// this call will update rFullWidth to full client width
@@ -2606,7 +2603,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 	return CDRF_DODEFAULT;
 }
 
-DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd)
+DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, COLORREF& crText, COLORREF& crBkgnd, BOOL bFillRow)
 {
 	// Fill the item background with the 'unselected' colour.
 	// Although we fill fill the entire row, we are really only
@@ -2630,7 +2627,7 @@ DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFill
 	return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 }
 
-DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rect)
+DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rect, BOOL bFillRow)
 {
 	// Check row is visible
 	CRect rClient;
@@ -2660,7 +2657,8 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 			CRect rBack;
 			GetItemTitleRect(nmcd, TDCTR_BKGND, rBack);
  
-			pDC->FillSolidRect(rBack, crBack);
+			if (bFillRow)
+				pDC->FillSolidRect(rBack, crBack);
 
 			// Draw horizontal grid line -----------------------------
 			CRect rRow(rect);
@@ -3732,12 +3730,16 @@ void CTDLTaskCtrlBase::OnContextMenu(CWnd* pWnd, CPoint point)
 
 LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 {
+	// For reasons I don't understand, we never receive 
+	// CDDS_ITEMPOSTPAINT on Linux so we have to do it 
+	// ourselves in CDDS_POSTPAINT
 	switch (pNMCD->dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		return CDRF_NOTIFYITEMDRAW;
+		return (OsIsLinux() ? CDRF_NOTIFYPOSTPAINT : CDRF_NOTIFYITEMDRAW);
 		
 	case CDDS_ITEMPREPAINT:
+		if (!OsIsLinux())
 		{
 			// don't draw columns having min width unless they
 			// are the current right-clicked item
@@ -3750,6 +3752,42 @@ LRESULT CTDLTaskCtrlBase::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 
 			if (rItem.Width() > MIN_COL_WIDTH)
 				return CDRF_NOTIFYPOSTPAINT;
+		}
+		break;
+
+	case CDDS_POSTPAINT:
+		if (OsIsLinux())
+		{
+			NMCUSTOMDRAW nmcd = *pNMCD;
+			nmcd.dwDrawStage = CDDS_ITEMPOSTPAINT;
+			
+			if (pNMCD->hdr.hwndFrom == m_hdrTasks)
+			{
+				if (TDCC_CLIENT == m_nSortColID)
+				{
+					nmcd.dwItemSpec = 0;
+					nmcd.lItemlParam = TDCC_CLIENT;
+					
+					OnHeaderCustomDraw(&nmcd);
+				}
+			}
+			else // columns
+			{
+				for (int nCol = 1; nCol < m_hdrColumns.GetItemCount(); nCol++)
+				{
+					TDC_COLUMN nColID = (TDC_COLUMN)m_hdrColumns.GetItemData(nCol);
+					const TDCCOLUMN* pTDCC = GetColumn(nColID);
+
+					if ((nColID == m_nSortColID) || (pTDCC && (pTDCC->iImage != -1)))
+					{
+						nmcd.dwItemSpec = nCol;
+						nmcd.lItemlParam = nColID;
+
+						m_hdrColumns.GetItemRect(nCol, &nmcd.rc);
+						OnHeaderCustomDraw(&nmcd);
+					}
+				}
+			}
 		}
 		break;
 

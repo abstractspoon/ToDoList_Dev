@@ -120,7 +120,6 @@ protected:
 	static BOOL SendStartupOptions(HWND hwnd, const CTDCStartupOptions& startup, TDL_COPYDATA nMsg);
 	static BOOL WaitForInstanceToClose(DWORD dwProcessID);
 	static BOOL CommandRequiresUI(UINT nCmdID);
-	static BOOL HasVSRedistributable();
 
 	static CString GetResourcePath(LPCTSTR szSubFolder = NULL, LPCTSTR szFile = NULL);
 	static CString GetHelperAppPath(const CString& sAppName, BOOL bTestDownload = FALSE);

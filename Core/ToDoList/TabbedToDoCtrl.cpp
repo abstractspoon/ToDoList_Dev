@@ -2484,6 +2484,9 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	if (m_tabViews.GetSafeHwnd())
 	{
 		FTC_VIEW nView = GetActiveTaskView();

@@ -89,10 +89,6 @@ void CImportExportMgr::Initialize() const
 			{
 				if (IsImportExportDll(sDllPath))
 				{
-					// Avoid instantiating Non-native (C#) modules on Linux
-					if ((COSVersion() == OSV_LINUX) && !FileMisc::IsNativeModule(sDllPath))
-						continue;
-
 					IImportTasklist* pImporter = CreateImportInterface(sDllPath);
 					
 					if (pImporter)

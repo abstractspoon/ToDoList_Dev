@@ -233,9 +233,10 @@ namespace LoggedTimeUIExtension
 
 				foreach (var entry in logEntries)
 				{
-					// 'To' date/time should be greater than 'From' date/time
+					// 'To' date/time should be greater than or equal to 'From' date/time. 
+					//   Note: 'To' can equal 'From' because times are truncated to nearest minute
 					// 'To' date should be same as 'From' date OR the next day
-					Debug.Assert(entry.To > entry.From);
+					Debug.Assert(entry.To >= entry.From);
 					Debug.Assert((entry.To.Date == entry.From.Date) ||
 								(entry.To.Date == entry.From.Date.AddDays(1.0)));
 

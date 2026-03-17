@@ -234,8 +234,12 @@ DROPEFFECT CTDCTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObjec
 		}
 		else 
 		{
-			TreeView_SelectDropTarget(*pWnd, hitRes.htItem);
-			m_dwPrevItem = hitRes.dwTaskID;
+			// Only process changes
+			if (hitRes.dwTaskID != m_dwPrevItem)
+			{
+				TreeView_SelectDropTarget(*pWnd, hitRes.htItem);
+				m_dwPrevItem = hitRes.dwTaskID;
+			}
 
 			if (hitRes.dwTaskID)
 				m_dwTVHoverStart = GetTickCount();
@@ -245,30 +249,35 @@ DROPEFFECT CTDCTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObjec
 	}
 	else if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
 	{
-		// remove previous highlighting
-		if ((m_dwPrevItem != 0) && (m_dwPrevItem != hitRes.dwTaskID))
+		// Only process changes
+		if (hitRes.dwTaskID != m_dwPrevItem)
 		{
-			LVFINDINFO lvfi = { 0 };
-			lvfi.flags = LVFI_PARAM;
-			lvfi.lParam = m_dwPrevItem;
-			lvfi.vkDirection = VK_DOWN;
+			// remove previous highlighting
+			if (m_dwPrevItem != 0)
+			{
+				LVFINDINFO lvfi = { 0 };
+				lvfi.flags = LVFI_PARAM;
+				lvfi.lParam = m_dwPrevItem;
+				lvfi.vkDirection = VK_DOWN;
 
-			int nPrev = ListView_FindItem(*pWnd, -1, &lvfi);
-			ListView_SetItemState(pWnd->GetSafeHwnd(), nPrev, 0, LVIS_DROPHILITED);
+				int nPrev = ListView_FindItem(*pWnd, -1, &lvfi);
+				ListView_SetItemState(pWnd->GetSafeHwnd(), nPrev, 0, LVIS_DROPHILITED);
+			}
+
+			// Highlight new item
+			if (hitRes.dwTaskID != 0)
+			{
+				LVFINDINFO lvfi = { 0 };
+				lvfi.flags = LVFI_PARAM;
+				lvfi.lParam = hitRes.dwTaskID;
+				lvfi.vkDirection = VK_DOWN;
+
+				int nHit = ListView_FindItem(*pWnd, -1, &lvfi);
+				ListView_SetItemState(pWnd->GetSafeHwnd(), nHit, LVIS_DROPHILITED, LVIS_DROPHILITED);
+			}
+
+			m_dwPrevItem = hitRes.dwTaskID;
 		}
-
-		if (hitRes.dwTaskID != 0)
-		{
-			LVFINDINFO lvfi = { 0 };
-			lvfi.flags = LVFI_PARAM;
-			lvfi.lParam = hitRes.dwTaskID;
-			lvfi.vkDirection = VK_DOWN;
-
-			int nHit = ListView_FindItem(*pWnd, -1, &lvfi);
-			ListView_SetItemState(pWnd->GetSafeHwnd(), nHit, LVIS_DROPHILITED, LVIS_DROPHILITED);
-		}
-
-		m_dwPrevItem = hitRes.dwTaskID;
 	}
 
 	// Allow parent to veto the drop

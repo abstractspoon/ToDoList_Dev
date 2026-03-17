@@ -38,7 +38,6 @@ class CToDoCtrl;
 
 class CTaskSelectionDlg : public CDialog
 {
-// Construction
 public:
 	CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 					  LPCTSTR szRegKey = NULL, 
@@ -84,20 +83,17 @@ protected:
 	virtual BOOL OnInitDialog();
 
 protected:
-
 	afx_msg void OnChangeAttribOption();
 	afx_msg void OnChangetasksOption();
 	afx_msg void OnIncludeDone();
 	afx_msg void OnIncludeNotDone();
 	afx_msg void OnEnable(BOOL bEnable);
 	afx_msg void OnClearUserAttribSelection();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	DECLARE_MESSAGE_MAP()
 
 	void UpdateEnableStates();
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TASKSELECTIONDLG_H__3A5D7E88_CEC3_47DD_8BA6_79EC2C3B7167__INCLUDED_)

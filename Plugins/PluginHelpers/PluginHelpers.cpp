@@ -121,4 +121,9 @@ bool OSVersion::IsBelowVista()
 	return (COSVersion() < OSV_VISTA);
 }
 
+bool OSVersion::IsLinux()
+{
+	return (COSVersion() == OSV_LINUX);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////

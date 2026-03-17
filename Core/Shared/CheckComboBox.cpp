@@ -456,7 +456,7 @@ int CCheckComboBox::AddUniqueItem(const CString& sItem)
 		CStringArray aText;
 		
 		Misc::Split(sItem, aText);
-		return CAutoComboBox::AddUniqueItems(aText);
+		return AddUniqueItems(aText);
 	}
 	
 	// else add single item
@@ -640,8 +640,8 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray
 	ASSERT(Misc::MatchAny(aChecked, aMixed, FALSE, TRUE) == FALSE);
 
 	// make sure the items exist in the list
-	int nAdded = CAutoComboBox::AddUniqueItems(aChecked);
-	nAdded += CAutoComboBox::AddUniqueItems(aMixed);
+	int nAdded = AddUniqueItems(aChecked);
+	nAdded += AddUniqueItems(aMixed);
 
 	// if nothing was added
 	if (!nAdded)

@@ -849,6 +849,7 @@ HBRUSH CKanbanWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 BOOL CKanbanWnd::OnEraseBkgnd(CDC* pDC) 
 {
 	// clip out our children
+	CSaveDC sdc(pDC);
 	CDialogHelper::ExcludeChild(&m_ctrlKanban, pDC);
 		
 	if (m_brBack.GetSafeHandle())

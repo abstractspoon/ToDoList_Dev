@@ -5,6 +5,8 @@
 #include "ToolTipCtrlEx.h"
 #include "OSVersion.h"
 #include "GraphicsMisc.h"
+#include "WinClasses.h"
+#include "WClassDefines.h"
 
 #include "..\3rdParty\MemDC.h"
 
@@ -32,6 +34,22 @@ const int ID_TIMERLEAVE = 1;
 #ifndef TTM_ADJUSTRECT
 #	define TTM_ADJUSTRECT (WM_USER + 31)
 #endif
+
+//////////////////////////////////////////////////////////////////////
+
+HWND AfxGetTooltipCtrl()
+{
+	CToolTipCtrl* pTT = NULL;
+	
+#if _MSC_VER >= 1400
+	pTT = AfxGetModuleThreadState()->m_pToolTip;
+#else
+	pTT = AfxGetThreadState()->m_pToolTip;
+#endif
+	
+	return (pTT ? pTT->GetSafeHwnd() : NULL);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 IMPLEMENT_DYNAMIC(CToolTipCtrlEx, CToolTipCtrl)
@@ -73,6 +91,20 @@ int CToolTipCtrlEx::OnCreate(LPCREATESTRUCT pCreateStruct)
 	SetDelayTime(TTDT_AUTOPOP, 10000);
 
 	return 0;
+}
+
+void CToolTipCtrlEx::EnableMultilineTips()
+{
+	EnableMultilineTips(m_hWnd);
+}
+
+// static
+void CToolTipCtrlEx::EnableMultilineTips(HWND hwndTooltips)
+{
+	ASSERT(hwndTooltips);
+	ASSERT(CWinClasses::IsClass(hwndTooltips, WC_TOOLTIPS));
+
+	::SendMessage(hwndTooltips, TTM_SETMAXTIPWIDTH, 0, SHRT_MAX);
 }
 
 void CToolTipCtrlEx::EnableTracking(BOOL bTracking, int nXOffset, int nYOffset)

@@ -32,6 +32,9 @@ public:
 	
 // Operations
 public:
+	static BOOL SupportsPrint() { return TRUE; }
+	static BOOL SupportsPrintPreview();
+
 	void Print(LPCTSTR szFile = NULL, BOOL bPrintBkgnd = -1);
 	void PrintPreview(LPCTSTR szFile = NULL, BOOL bPrintBkgnd = -1);
 

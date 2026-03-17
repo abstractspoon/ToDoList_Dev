@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,1,998,3
+ FILEVERSION 9,2,997,0
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "9, 1, 998, 3\0"
+            VALUE "FileVersion", "9, 2, 997, 0\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-26\0"
             VALUE "LegalTrademarks", "\0"
@@ -55,7 +55,7 @@ BEGIN
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "Alpha Release of ToDoList 9.2\0"
+            VALUE "SpecialBuild", "Development Preview of ToDoList 9.3\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -606,7 +606,7 @@ BEGIN
                     IDC_SORTDONETASKSATBOTTOM,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,348,381,10
     CONTROL         "A&utomatically resort after editing",IDC_AUTORESORT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,362,381,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,363,381,10
     CONTROL         "All&ow sorting by clicking on column headers",
                     IDC_ENABLECOLUMNHEADERSORTING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,378,387,10
@@ -883,14 +883,15 @@ BEGIN
                     IDC_STATIC,16,119,252,20
 END
 
-IDD_OFFSETDATES_DIALOG DIALOG DISCARDABLE  0, 0, 272, 206
+IDD_OFFSETDATES_DIALOG DIALOG DISCARDABLE  0, 0, 272, 204
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Offset Task Dates"
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "Offset",IDC_STATIC,7,7,39,8
-    LISTBOX         IDC_WHATLIST,50,7,97,46,LBS_OWNERDRAWFIXED | 
-                    LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_TABSTOP
+    LISTBOX         IDC_WHATLIST,50,7,215,46,LBS_SORT | LBS_OWNERDRAWFIXED | 
+                    LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | 
+                    WS_TABSTOP
     LTEXT           "&Direction",IDC_STATIC,7,62,42,8
     COMBOBOX        IDC_DIRECTION,50,60,97,87,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
@@ -911,8 +912,11 @@ BEGIN
     CONTROL         "Preserve 'end of month' dates",IDC_PRESERVEENDOFMONTH,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,50,160,215,10
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,7,176,258,1
-    DEFPUSHBUTTON   "OK",IDOK,159,185,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,215,185,50,14
+    DEFPUSHBUTTON   "OK",IDOK,159,183,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,215,183,50,14
+    CONTROL         "No attributes selected",IDC_NOATTRIBSELECTED,"Static",
+                    SS_LEFTNOWORDWRAP | SS_NOPREFIX | NOT WS_VISIBLE | 
+                    WS_GROUP,33,186,123,8
 END
 
 IDD_TASKSELECTION_DIALOG DIALOGEX 0, 0, 369, 172
@@ -4422,7 +4426,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 265
         TOPMARGIN, 7
-        BOTTOMMARGIN, 199
+        BOTTOMMARGIN, 197
     END
 
     IDD_TRANSFORM_DIALOG, DIALOG
