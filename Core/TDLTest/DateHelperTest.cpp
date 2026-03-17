@@ -638,7 +638,9 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 // 	CString sOffsetDate = CDateHelper::FormatDate(dtOffset);
 #endif
 
-	// Custom tests
+	// Unit-specific tests
+	BOOL bReversibleTest = TRUE;
+
 	switch (nUnits)
 	{
 	case DHU_DAYS:		
@@ -657,6 +659,8 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 				nOffsetCheck++;
 
 			ExpectEQ(nOffset, nOffsetCheck);
+
+			bReversibleTest = !dh.WorkingWeek().HasWeekend();
 		}
 		break;
 
@@ -673,6 +677,8 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 			else if (date.GetDay() > CDateHelper::GetDaysInMonth(dtOffset))
 			{
 				ExpectTrue(CDateHelper::IsEndOfMonth(dtOffset));
+
+				bReversibleTest = FALSE; // because the date will have been truncated
 			}
 			else
 			{
@@ -680,6 +686,12 @@ void CDateHelperTest::TestOffsetDate(const CDateHelper& dh, const COleDateTime& 
 			}
 		}
 		break;
+	}
+
+	if (bReversibleTest)
+	{
+		ExpectTrue(dh.OffsetDate(dtOffset, -nOffset, nUnits, bPreserveEndOfMonth));
+		ExpectEQ(dtOffset, date);
 	}
 }
 

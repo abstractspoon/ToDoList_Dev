@@ -484,8 +484,10 @@ enum TDC_DATE
 	TDCD_DONEDATE,
 	TDCD_DONETIME,
 	TDCD_LASTMOD,
-	TDCD_CUSTOM,
 	TDCD_REMINDER,
+	// Add new dates here
+
+	TDCD_CUSTOM,	// Always last
 };
  
 /////////////////////////////////////////////////////////////////////////////
