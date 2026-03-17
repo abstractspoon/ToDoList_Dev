@@ -298,7 +298,7 @@ void TDCCADATA::Set(const COleDateTime& dtValue)
 	if (CDateHelper::IsDateSet(dtValue))
 		Set(dtValue.m_dt); 
 	else
-		Set(_T(""));
+		sData.Empty();
 }
 
 void TDCCADATA::Set(const CString& sValue) 
