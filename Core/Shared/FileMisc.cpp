@@ -4,12 +4,12 @@
 #include "fileregister.h"
 #include "misc.h"
 #include "driveinfo.h"
-#include "osversion.h"
 #include "clipboard.h"
 
 #include "..\3rdParty\stdiofileex.h"
 #include "..\3rdParty\fileversioninfo.h"
 #include "..\3rdParty\T64Utils.h"
+#include "..\3rdParty\OSVersion.h"
 
 #include <sys/utime.h>
 #include <sys/stat.h>

@@ -5,10 +5,11 @@
 #include "LabelTip.h"
 #include "DPIScaling.h"
 
-#include <Shared\OSVersion.h>
 #include <Shared\Themed.h>
 #include <Shared\GraphicsMisc.h>
 #include <Shared\DarkMode.h>
+
+#include <3rdParty\OSVersion.h>
 
 #include <math.h>
 #include <CommCtrl.h>

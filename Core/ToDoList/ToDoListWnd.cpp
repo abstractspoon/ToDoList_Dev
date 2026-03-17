@@ -67,7 +67,6 @@
 #include "..\shared\misc.h"
 #include "..\shared\mousewheelMgr.h"
 #include "..\shared\msoutlookhelper.h"
-#include "..\shared\osversion.h"
 #include "..\shared\passworddialog.h"
 #include "..\shared\regkey.h"
 #include "..\shared\remotefile.h"
@@ -83,6 +82,7 @@
 #include "..\shared\WorkingWeek.h"
 #include "..\shared\xslfile.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\ShellIcons.h"
 #include "..\3rdparty\XNamedColors.h"

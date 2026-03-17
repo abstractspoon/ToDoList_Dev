@@ -12,7 +12,8 @@
 #include "icon.h"
 #include "winclasses.h"
 #include "wclassdefines.h"
-#include "osversion.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -9,8 +9,9 @@
 #include "graphicsMisc.h"
 #include "Misc.h"
 #include "autoflag.h"
-#include "osversion.h"
 #include "dialoghelper.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 //////////////////////////////////////////////////////////////////////
 

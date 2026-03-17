@@ -19,9 +19,9 @@
 #include "..\shared\misc.h"
 #include "..\shared\TreeDragDropHelper.h"
 #include "..\shared\themed.h"
-#include "..\shared\osversion.h"
 #include "..\shared\ScopedTimer.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\shellicons.h"
 #include "..\3rdparty\colordef.h"
 
@@ -538,12 +538,14 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		break;
 		
 	case CDDS_ITEMPREPAINT:
-		dwRes = OnPrePaintTaskTitle(pTVCD->nmcd, pTVCD->clrText, pTVCD->clrTextBk);
+		{
+			static BOOL bFillRow = !OsIsLinux();
+			dwRes = OnPrePaintTaskTitle(pTVCD->nmcd, pTVCD->clrText, pTVCD->clrTextBk, bFillRow);
+		}
 		break;
 		
 	case CDDS_ITEMPOSTPAINT:
-		// Below Vista filling the background overwrites the tree insertion marker
-		dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc, !OsIsLinux());
+		dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc);
 		break;
 	}
 	

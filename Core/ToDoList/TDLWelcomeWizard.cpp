@@ -13,7 +13,8 @@
 #include "..\Shared\enstring.h"
 #include "..\Shared\Localizer.h"
 #include "..\Shared\icon.h"
-#include "..\Shared\OSVersion.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

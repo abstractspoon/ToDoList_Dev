@@ -433,10 +433,6 @@ SOURCE=.\OrderedTreeCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\OSVersion.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\OwnerdrawComboBoxBase.cpp
 # End Source File
 # Begin Source File
@@ -1074,10 +1070,6 @@ SOURCE=.\OleDropTargetEx.h
 # Begin Source File
 
 SOURCE=.\OrderedTreeCtrl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\OSVersion.h
 # End Source File
 # Begin Source File
 

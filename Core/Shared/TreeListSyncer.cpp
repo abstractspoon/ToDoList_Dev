@@ -5,7 +5,6 @@
 #include "autoflag.h"
 #include "themed.h"
 #include "holdredraw.h"
-#include "osversion.h"
 #include "misc.h"
 #include "Graphicsmisc.h"
 #include "copywndcontents.h"
@@ -15,6 +14,7 @@
 // #include "FileMisc.h"
 
 #include "..\3rdParty\Detours\detours.h"
+#include "..\3rdParty\OSVersion.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
 

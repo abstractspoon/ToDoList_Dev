@@ -8,10 +8,11 @@
 
 #include "..\shared\misc.h"
 #include "..\shared\enstring.h"
-#include "..\shared\osversion.h"
 #include "..\shared\themed.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\darkmode.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

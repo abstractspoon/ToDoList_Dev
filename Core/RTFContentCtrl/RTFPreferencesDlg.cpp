@@ -11,7 +11,8 @@
 #include "..\shared\DialogHelper.h"
 #include "..\shared\mswordhelper.h"
 #include "..\shared\RichEditHelper.h"
-#include "..\shared\OSVersion.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include "..\Interfaces\iPreferences.h"
 

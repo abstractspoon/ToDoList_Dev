@@ -13,13 +13,13 @@
 #include "GraphicsMisc.h"
 #include "DialogHelper.h"
 #include "misc.h"
-#include "osversion.h"
 #include "datetimectrlex.h"
 #include "AutoFlag.h"
 #include "PopupEditCtrl.h"
 
 #include "..\3rdParty\XNamedColors.h" // for debugging
 #include "..\3rdParty\Detours\detours.h"
+#include "..\3rdParty\OSVersion.h"
 
 //////////////////////////////////////////////////////////////////////
 
