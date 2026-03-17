@@ -71,20 +71,21 @@ BOOL CTDCFileBackup::CreateBackup(const CString& sFilePath, const CString& sBack
 		FileMisc::AddToFileName(sBackupPattern, _T(".*"));
 
 		// Build file lists for each distinct version including the current
-		CStringArray aFilenames;
-		int nNumBackups = FileMisc::FindFiles(sBackupFolder, aFilenames, FALSE, sBackupPattern);
+		CStringArray aFilePaths;
+		int nNumBackups = FileMisc::FindFiles(sBackupFolder, aFilePaths, FALSE, sBackupPattern);
 
 		CMapStringToStringArray mapBackupFiles;
 
 		for (int nFile = 0; nFile < nNumBackups; nFile++)
 		{
 			// Extract version from file path
+			CString sFilename = FileMisc::GetFileNameFromPath(aFilePaths[nFile]);
 			CStringArray aNameParts;
 
-			if (Misc::Split(aFilenames[nFile], aNameParts, '.') == 4) // <filename>,<app ver>.<datetime>.<ext>
+			if (Misc::Split(sFilename, aNameParts, '.') == 4) // <filename>,<app ver>.<datetime>.<ext>
 			{
 				CString sFileVer = aNameParts[1];
-				mapBackupFiles.GetAddMapping(sFileVer)->Add(aFilenames[nFile]);
+				mapBackupFiles.GetAddMapping(sFileVer)->Add(aFilePaths[nFile]);
 			}
 		}
 
@@ -99,7 +100,7 @@ BOOL CTDCFileBackup::CreateBackup(const CString& sFilePath, const CString& sBack
 			CStringArray* pFiles;
 			
 			mapBackupFiles.GetNextAssoc(pos, sAppVer, pFiles);
-			Misc::SortArray(aFilenames); // earliest -> latest
+			Misc::SortArray(*pFiles); // earliest -> latest
 
 			int nNumToKeep = ((sAppVer == sCurVer) ? nNumKeepBackups : 1);
 
