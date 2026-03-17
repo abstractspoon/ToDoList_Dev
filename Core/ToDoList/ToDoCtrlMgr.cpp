@@ -1585,7 +1585,6 @@ BOOL CToDoCtrlMgr::DoBackup(int nIndex) const
 		sBackupFolder += FileMisc::GetFileNameFromPath(sTDLPath, FALSE);
 		
 		CTDCFileBackup::BackupLogFiles(sTDLPath, sBackupFolder, nNumKeepBackups, Prefs().GetLogTaskTimeSeparately());
-
 		return TRUE;
 	}
 
