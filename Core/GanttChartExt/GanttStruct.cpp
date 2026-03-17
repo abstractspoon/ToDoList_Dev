@@ -9,6 +9,7 @@
 #include "..\shared\DateHelper.h"
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\DarkMode.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -76,13 +77,13 @@ BOOL GANTTDEPENDENCY::Draw(CDC* pDC, const CRect& rClient, BOOL bDragging)
 	if (!bDragging)
 	{
 		CRect rBox(ptTo.x - 1, ptTo.y - 1, ptTo.x + 2, ptTo.y + 2);
-		pDC->FillSolidRect(rBox, 0);
+		pDC->FillSolidRect(rBox, GetSysColor(COLOR_WINDOWTEXT));
 	}
 		
 	CPoint pts[3];
 	CalcDependencyPath(pts);
 	
-	int nOldROP2 = pDC->SetROP2(bDragging ? R2_NOT : R2_BLACK);
+	int nOldROP2 = pDC->SetROP2(bDragging ? R2_NOT : (CDarkMode::IsEnabled() ? R2_WHITE : R2_BLACK));
 	pDC->Polyline(pts, 3);
 
 	DrawDependencyArrow(pDC, pts[0]);

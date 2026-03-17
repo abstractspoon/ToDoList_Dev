@@ -79,12 +79,12 @@ BEGIN
     CONTROL         "DateTimePicker1",IDC_PERIODENDINCLUSIVE,
                     "SysDateTimePick32",WS_TABSTOP,86,13,73,13
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,164,12,185,13
-    LTEXT           "Acti&ve Date Range:",IDC_ACTIVEDATERANGE_LABEL,354,2,65,
+                    WS_VISIBLE,164,12,182,13
+    LTEXT           "Acti&ve Date Range:",IDC_ACTIVEDATERANGE_LABEL,351,2,65,
                     8
-    LTEXT           "from-to",IDC_ACTIVEDATERANGE_TEXT,425,2,69,8
-    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,353,
-                    12,112,13
+    LTEXT           "from-to",IDC_ACTIVEDATERANGE_TEXT,426,2,69,8
+    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,351,
+                    12,109,13
     CONTROL         "",IDC_WORKLOAD_FRAME,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,0,28,493,281
 END

@@ -67,7 +67,7 @@
     <ClCompile Include="TDCTaskTimeLogTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ToDoCtrlMgrTest.cpp">
+    <ClCompile Include="TDCFileBackupTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -144,7 +144,7 @@
     <ClInclude Include="TDCTaskTimeLogTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ToDoCtrlMgrTest.h">
+    <ClInclude Include="TDCFileBackupTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

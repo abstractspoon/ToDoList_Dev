@@ -71,6 +71,7 @@ namespace Abstractspoon
 			{
 			public:
 				static bool IsBelowVista();
+				static bool IsLinux();
 			};
 
 			// ----------------------------------------------------------------------------

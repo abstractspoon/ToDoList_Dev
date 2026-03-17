@@ -140,6 +140,16 @@ int CEnCheckComboBox::SelectString(int nStartAfter, LPCTSTR lpszString)
 	return CAutoComboBox::SelectString(nStartAfter, lpszString);
 }
 
+int CEnCheckComboBox::AddUniqueItems(const CStringArray& aItems)
+{
+	int nOrgCount = GetCount();
+	
+	CCheckComboBox::AddUniqueItems(aItems);
+	FixupEmptyStringsAtStart();
+
+	return (GetCount() - nOrgCount);
+}
+
 void CEnCheckComboBox::FixupEmptyStringsAtStart()
 {
 	CHoldRedraw hr(*this);

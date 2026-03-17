@@ -14,6 +14,8 @@
 #include "..\Shared\Localizer.h"
 #include "..\Shared\icon.h"
 
+#include "..\3rdParty\OSVersion.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -64,16 +66,10 @@ CTDLWelcomeWizard::~CTDLWelcomeWizard()
 	GraphicsMisc::VerifyDeleteObject(m_hbmHeader);
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLWelcomeWizard, CPropertySheetEx)
-	//{{AFX_MSG_MAP(CWelcomeWizard)
-	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_WIZFINISH, OnWizFinish)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CWelcomeWizard message handlers
 
 BOOL CTDLWelcomeWizard::OnInitDialog() 
 {
@@ -84,8 +80,7 @@ BOOL CTDLWelcomeWizard::OnInitDialog()
 
 	VERIFY (m_btnHelp.Create(IDC_HELPBUTTON, this));
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLWelcomeWizard::OnWizFinish()
@@ -120,13 +115,11 @@ IMPLEMENT_DYNCREATE(CTDLWelcomePage1, CPropertyPageEx)
 
 CTDLWelcomePage1::CTDLWelcomePage1() 
 	: 
-	CPropertyPageEx(CTDLWelcomePage1::IDD, 0), 
+	CPropertyPageEx(IDD_WELCOME_PAGE1, 0),
 	m_bUseIniFile(1),
 	m_bShareTasklists(0),
 	m_hFont(NULL)
 {
-	//{{AFX_DATA_INIT(CWelcomePage1)
-	//}}AFX_DATA_INIT
 	m_psp.dwFlags &= ~(PSP_HASHELP);
 	
 	m_strHeaderTitle = CEnString(IDS_WIZ_INTRO_HEADER);
@@ -140,33 +133,29 @@ CTDLWelcomePage1::~CTDLWelcomePage1()
 void CTDLWelcomePage1::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPageEx::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CWelcomePage1)
+
 	DDX_Radio(pDX, IDC_NOSHARE, m_bShareTasklists);
 	DDX_Radio(pDX, IDC_REGISTRY, m_bUseIniFile);
-	//}}AFX_DATA_MAP
 }
 
 BEGIN_MESSAGE_MAP(CTDLWelcomePage1, CPropertyPageEx)
-	//{{AFX_MSG_MAP(CWelcomePage1)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CWelcomePage1 message handlers
 
 BOOL CTDLWelcomePage1::OnInitDialog() 
 {
 	CDialogHelper::SetFont(this, m_hFont);
+	
 	CPropertyPageEx::OnInitDialog();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	GetDlgItem(IDC_REGISTRY)->EnableWindow(COSVersion() != OSV_LINUX);
+
+	return TRUE;
 }
 
 BOOL CTDLWelcomePage1::OnSetActive() 
 {
 	// disable back button
-	((CPropertySheet*)GetParent())->SetWizardButtons(/*PSWIZB_BACK | */PSWIZB_NEXT);
+	((CPropertySheet*)GetParent())->SetWizardButtons(PSWIZB_NEXT);
 	
 	return CPropertyPageEx::OnSetActive();
 }
@@ -178,11 +167,9 @@ IMPLEMENT_DYNCREATE(CTDLWelcomePage2, CPropertyPageEx)
 
 CTDLWelcomePage2::CTDLWelcomePage2() 
 	: 
-	CPropertyPageEx(CTDLWelcomePage2::IDD, 0),
+	CPropertyPageEx(IDD_WELCOME_PAGE2, 0),
 	m_hFont(NULL)
 {
-	//{{AFX_DATA_INIT(CWelcomePage2)
-	//}}AFX_DATA_INIT
 	m_psp.dwFlags &= ~(PSP_HASHELP);		
 	
 	m_strHeaderTitle = CEnString(IDS_WIZ_INTRO_HEADER);
@@ -196,19 +183,12 @@ CTDLWelcomePage2::~CTDLWelcomePage2()
 void CTDLWelcomePage2::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPageEx::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CWelcomePage2)
+
 	DDX_Control(pDX, IDC_COLUMNLIST, m_lbColumns);
-	//}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLWelcomePage2, CPropertyPageEx)
-	//{{AFX_MSG_MAP(CWelcomePage2)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CWelcomePage2 message handlers
 
 BOOL CTDLWelcomePage2::OnInitDialog() 
 {
@@ -245,14 +225,12 @@ IMPLEMENT_DYNCREATE(CTDLWelcomePage3, CPropertyPageEx)
 
 CTDLWelcomePage3::CTDLWelcomePage3() 
 	: 
-	CPropertyPageEx(CTDLWelcomePage3::IDD, 0),
+	CPropertyPageEx(IDD_WELCOME_PAGE3, 0),
 	m_eSampleTasklist(FES_RELATIVEPATHS), 
 	m_hFont(NULL)
 {
-	//{{AFX_DATA_INIT(CWelcomePage3)
 	m_bHideAttrib = 1;
 	m_bViewSample = 1;
-	//}}AFX_DATA_INIT
 	m_psp.dwFlags &= ~(PSP_HASHELP);		
 
 	m_eSampleTasklist.SetFilter(CEnString(IDS_TDLFILEFILTER));
@@ -270,25 +248,18 @@ CTDLWelcomePage3::~CTDLWelcomePage3()
 void CTDLWelcomePage3::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPageEx::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CWelcomePage3)
+
 	DDX_Control(pDX, IDC_SAMPLETASKLIST, m_eSampleTasklist);
 	DDX_Text(pDX, IDC_SAMPLETASKLIST, m_sSampleTaskList);
 	DDX_Radio(pDX, IDC_ALLOPTIONS, m_bHideAttrib);
 	DDX_Radio(pDX, IDC_NOSAMPLE, m_bViewSample);
-	//}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLWelcomePage3, CPropertyPageEx)
-	//{{AFX_MSG_MAP(CWelcomePage3)
 	ON_BN_CLICKED(IDC_NOSAMPLE, OnNosample)
 	ON_BN_CLICKED(IDC_SAMPLE, OnSample)
-	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CWelcomePage3 message handlers
 
 BOOL CTDLWelcomePage3::OnInitDialog() 
 {
@@ -298,8 +269,7 @@ BOOL CTDLWelcomePage3::OnInitDialog()
 	m_eSampleTasklist.SetButtonWidthDLU(1, 14);
 	m_eSampleTasklist.EnableWindow(m_bViewSample);
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE; 
 }
 
 void CTDLWelcomePage3::OnNosample() 

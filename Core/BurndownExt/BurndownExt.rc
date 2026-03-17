@@ -148,12 +148,12 @@ BEGIN
     COMBOBOX        IDC_OPTIONS,126,13,121,118,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,253,12,38,13
-    LTEXT           "Acti&ve Date Range:",IDC_ACTIVEDATERANGE_LABEL,298,2,65,
+                    WS_VISIBLE,252,12,35,13
+    LTEXT           "Acti&ve Date Range:",IDC_ACTIVEDATERANGE_LABEL,292,2,65,
                     8
-    LTEXT           "from-to",IDC_ACTIVEDATERANGE_TEXT,369,2,108,8
-    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,297,
-                    12,112,13
+    LTEXT           "from-to",IDC_ACTIVEDATERANGE_TEXT,363,2,108,8
+    CONTROL         "",IDC_ACTIVEDATERANGE,"MFCRangeSlider",WS_TABSTOP,292,
+                    12,117,13
     CONTROL         "",IDC_FRAME,"Static",SS_GRAYFRAME,0,28,314,253
     CONTROL         "",IDC_GRAPH,"Button",BS_OWNERDRAW | WS_TABSTOP,8,38,298,
                     234

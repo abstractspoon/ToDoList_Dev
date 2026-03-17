@@ -199,7 +199,6 @@
     <ClCompile Include="NcGutter.cpp" />
     <ClCompile Include="OleDropTargetEx.cpp" />
     <ClCompile Include="OrderedTreeCtrl.cpp" />
-    <ClCompile Include="OSVersion.cpp" />
     <ClCompile Include="OwnerdrawComboBoxBase.cpp" />
     <ClCompile Include="PasswordDialog.cpp" />
     <ClCompile Include="PopupEditCtrl.cpp" />
@@ -362,7 +361,6 @@
     <ClInclude Include="NcGutter.h" />
     <ClInclude Include="OleDropTargetEx.h" />
     <ClInclude Include="OrderedTreeCtrl.h" />
-    <ClInclude Include="OSVersion.h" />
     <ClInclude Include="OwnerdrawComboBoxBase.h" />
     <ClInclude Include="PasswordDialog.h" />
     <ClInclude Include="PopupEditCtrl.h" />

@@ -16,12 +16,12 @@
 #include "..\shared\dlgunits.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\localizer.h"
-#include "..\shared\osversion.h"
 #include "..\shared\messagebox.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\uithemefile.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\XNamedColors.h"
 
 /////////////////////////////////////////////////////////////////////////////

@@ -487,6 +487,7 @@ protected:
 	afx_msg void OnUpdateEditInsertDateAndOrTime(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditLocktask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOffsetDates(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditOffsetStartDueDates(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOpenFileLink(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteAfter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteAsRef(CCmdUI* pCmdUI);
@@ -857,7 +858,7 @@ protected:
 	void SetToDoCtrlFocus(TDC_SETFOCUSTO nLocation);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
 	void DoMoveTask(TDC_MOVETASK nDirection);
-	void DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags/*, BOOL bUpdateFilterCtrls = -1*/);
+	void DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bFromFilterBar);
 
 	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);
 	TDCEXPORTTASKLIST* PrepareNewExportAfterSave(int nTDC, const CTaskFile& tasks);
