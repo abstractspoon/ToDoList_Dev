@@ -245,6 +245,10 @@ SOURCE=..\ToDoList\TDCEnumContainers.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCFileBackup.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCFilter.cpp
 # End Source File
 # Begin Source File
@@ -914,6 +918,10 @@ SOURCE=..\ToDoList\TDCEnum.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCEnumContainers.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCFileBackup.h
 # End Source File
 # Begin Source File
 
