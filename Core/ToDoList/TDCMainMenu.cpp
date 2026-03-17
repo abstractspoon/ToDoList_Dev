@@ -16,14 +16,16 @@
 
 #include "..\Shared\Themed.h"
 #include "..\Shared\GraphicsMisc.h"
-#include "..\Shared\OSVersion.h"
 #include "..\Shared\TabCtrlEx.h"
 #include "..\Shared\MSOutlookHelper.h"
 #include "..\Shared\Localizer.h"
 #include "..\shared\fileicons.h"
+#include "..\shared\enbrowserctrl.h"
 
 #include "..\Interfaces\UIExtensionHelper.h"
 #include "..\Interfaces\UIExtensionMgr.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <afxadv.h> // for CRecentFileList
 
@@ -432,31 +434,60 @@ void CTDCMainMenu::PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs)
 	if (!pMenu)
 		return;
 
-	// insert Min to sys tray if appropriate 
-	BOOL bHasMinToTray = (::GetMenuString(*pMenu, ID_MINIMIZETOTRAY, NULL, 0, MF_BYCOMMAND) != 0);
+	BOOL bHasMinToTrayOption = prefs.HasSysTrayOptions(STO_ONCLOSE, STO_ONMINCLOSE);
+	BOOL bHasMinToTrayID = (::GetMenuString(*pMenu, ID_MINIMIZETOTRAY, NULL, 0, MF_BYCOMMAND) != 0);
 
-	if (prefs.HasSysTrayOptions(STO_ONCLOSE, STO_ONMINCLOSE))
-	{
-		if (!bHasMinToTray)
-			pMenu->InsertMenu(ID_EXIT, MF_BYCOMMAND, ID_MINIMIZETOTRAY, CEnString(ID_MINIMIZETOTRAY));
-	}
-	else if (bHasMinToTray) // then remove
-	{
-		pMenu->DeleteMenu(ID_MINIMIZETOTRAY, MF_BYCOMMAND);
-	}
+	int nCountLastSep = 0;
 
-	// Remove 'Email Tasks' if Outlook is not installed
-	if (!CMSOutlookHelper::IsOutlookInstalled())
+	for (int nItem = 0; nItem < (int)pMenu->GetMenuItemCount(); nItem++)
 	{
-		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_SENDTASKS);
+		BOOL bDelete = FALSE;
+		BOOL bIsSeparator = FALSE;
 
-		if (nPos != -1)
+		UINT nMenuID = pMenu->GetMenuItemID(nItem);
+
+		switch (nMenuID)
 		{
-			// Delete menu item
-			pMenu->DeleteMenu(nPos, MF_BYPOSITION);
+		case ID_SEPARATOR:
+			bIsSeparator = TRUE;
+			bDelete = (nCountLastSep == 0);
+			nCountLastSep = 0;
+			break;
 
-			// And then delete separator
-			pMenu->DeleteMenu(nPos, MF_BYPOSITION);
+		case ID_PRINT:
+			bDelete = !CEnBrowserCtrl::SupportsPrint();
+			break;
+
+		case ID_PRINTPREVIEW:
+			bDelete = !CEnBrowserCtrl::SupportsPrintPreview();
+			break;
+
+		case ID_MINIMIZETOTRAY:
+			bDelete = !bHasMinToTrayOption;
+			break;
+
+		case ID_SENDTASKS:
+			bDelete = !CMSOutlookHelper::IsOutlookInstalled();
+			break;
+
+		case ID_EXIT:
+			if (bHasMinToTrayOption && !bHasMinToTrayID)
+			{
+				pMenu->InsertMenu(ID_EXIT, MF_BYCOMMAND, ID_MINIMIZETOTRAY, CEnString(ID_MINIMIZETOTRAY));
+				nItem++;
+			}
+			break;
+		}
+
+		// delete the item else increment the count since the last separator
+		if (bDelete)
+		{
+			pMenu->DeleteMenu(nItem, MF_BYPOSITION);
+			nItem--;
+		}
+		else if (!bIsSeparator)
+		{
+			nCountLastSep++;
 		}
 	}
 }
@@ -720,7 +751,8 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 	if (bVisibleColumnsOnly)
 	{
-		// Always rebuild from scratch
+		// Always rebuild from scratch because we don't know
+		// what's changed since the last time we popped up
 		{
 			CTDCMainMenu menuBar;
 
@@ -816,20 +848,6 @@ void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBa
 {
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, CTDCFilter::GetDefaultFilterNames(), IDS_FILTERPLACEHOLDER);
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.AdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
-
-	// Enable state
-	BOOL bWantDefFilters = prefs.GetShowDefaultFiltersInFilterBar();
-
-	for (int nFilter = 0; nFilter < NUM_SHOWFILTER; nFilter++)
-	{
-		BOOL bEnable = (bWantDefFilters || (nFilter == 0));
-		pMenu->EnableMenuItem(ID_VIEW_ACTIVATEFILTER1 + nFilter, (bEnable ? MF_ENABLED : MF_DISABLED));
-	}
-
-	// Restore selection
-	UINT nSelMenuID = GetSelectedFilterMenuID(filterBar);
-
-	pMenu->CheckMenuRadioItem(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, nSelMenuID, MF_BYCOMMAND);
 }
 
 void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID)

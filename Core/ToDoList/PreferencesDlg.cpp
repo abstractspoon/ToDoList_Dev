@@ -19,9 +19,10 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\CtrlTextHighlighter.h"
 #include "..\shared\FileIcons.h"
-#include "..\shared\OSVersion.h"
 
 #include "..\Interfaces\TasklistStorageMgr.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

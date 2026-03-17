@@ -11,10 +11,10 @@
 #include "webmisc.h"
 #include "enbitmap.h"
 #include "clipboard.h"
-#include "OSVersion.h"
 
 #include "..\3rdParty\TOM.h"
 #include "..\3rdParty\clipboardbackup.h"
+#include "..\3rdParty\OSVersion.h"
 
 #include <atlconv.h>
 
@@ -353,6 +353,11 @@ BOOL CRichEditHelper::SupportsInlineSpellChecking()
 	return (COSVersion() >= OSV_WIN8);
 }
 
+BOOL CRichEditHelper::SupportsOLEEmbedding()
+{
+	return (COSVersion() != OSV_LINUX);
+}
+
 BOOL CRichEditHelper::IsInlineSpellCheckingEnabled(HWND hWnd)
 {
 	if (!SupportsInlineSpellChecking())
@@ -408,7 +413,7 @@ BOOL CRichEditHelper::IsInlineSpellCheckMenu(HMENU hMenu)
 		// to their position + 1
 		while (nItem)
 		{
- 			if (GetMenuItemID(hMenu, --nItem) != (nItem + 1))
+ 			if ((int)GetMenuItemID(hMenu, --nItem) != (nItem + 1))
  				return FALSE;
 		}
 	}

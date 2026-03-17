@@ -59,7 +59,7 @@ void WeekLabel::StartDate::set(DateTime value)
 		}
 		else
 		{
-			Text = String::Format("{0} - {1} ",
+			Text = String::Format("{0} - {1}",
 								 DateUtil::GetMonthName(startMonth, true),
 								 DateUtil::FormatDateOnly(endDate, MonthYearFormat));
 		}
@@ -73,9 +73,9 @@ void WeekLabel::StartDate::set(DateTime value)
 	int endWeek = DateUtil::WeekOfYear(endDate);
 
 	if (endWeek == startWeek)
-		Text = (Text + String::Format(m_Trans->Translate("(Week {0})", Translator::Type::Label), startWeek));
+		Text = (Text + " " + String::Format(m_Trans->Translate("(Week {0})", Translator::Type::Label), startWeek));
 	else
-		Text = (Text + String::Format(m_Trans->Translate("(Weeks {0}-{1})", Translator::Type::Label), startWeek, endWeek));
+		Text = (Text + " " + String::Format(m_Trans->Translate("(Weeks {0}-{1})", Translator::Type::Label), startWeek, endWeek));
 
 	Invalidate();
 }

@@ -9,9 +9,9 @@
 
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
-#include "..\shared\osversion.h"
 #include "..\shared\DateHelper.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\shellicons.h"
 
 #include "..\Interfaces\Preferences.h"

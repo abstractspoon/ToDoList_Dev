@@ -2603,6 +2603,9 @@ BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_aColumns.GetSize())
 	{
+		// clip out our children
+		CSaveDC sdc(pDC);
+		
 		CDialogHelper::ExcludeChild(&m_header, pDC);
 		CDialogHelper::ExcludeChild(&m_sbHorz, pDC);
 
@@ -3767,8 +3770,11 @@ void CKanbanCtrl::OnCaptureChanged(CWnd* pWnd)
 
 	m_aColumns.SetDropTarget(NULL);
 
-	m_ilDrag.EndDrag();
-	m_ilDrag.DeleteImageList();
+	if (m_ilDrag.GetSafeHandle())
+	{
+		m_ilDrag.EndDrag();
+		m_ilDrag.DeleteImageList();
+	}
 }
 
 BOOL CKanbanCtrl::CanDragTask(DWORD dwTaskID) const
@@ -3944,10 +3950,12 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (IsDragging())
 	{
-		// get the list and item under the mouse
 		ClientToScreen(&point);
-		m_ilDrag.DragMove(point);
 
+		if (m_ilDrag.GetSafeHandle())
+			m_ilDrag.DragMove(point);
+
+		// get the list and item under the mouse
 		const CKanbanColumnCtrl* pDestCol = m_aColumns.HitTest(point);
 		BOOL bValidDest = CanEndDrag(m_pSelectedColumn, pDestCol);
 

@@ -3,12 +3,13 @@
 
 #include "stdafx.h"
 #include "DateTimeCtrlEx.h"
-#include "OSVersion.h"
 #include "autoflag.h"
 #include "misc.h"
 #include "Graphicsmisc.h"
 #include "themed.h"
 #include "DateHelper.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <math.h>
 
@@ -77,6 +78,7 @@ BEGIN_MESSAGE_MAP(CDateTimeCtrlEx, CDateTimeCtrl)
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
 	ON_MESSAGE(DTM_GETMONTHCAL, OnGetMonthCal)
+	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -330,6 +332,14 @@ BOOL CDateTimeCtrlEx::OnDropDown(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 LRESULT CDateTimeCtrlEx::OnGetMonthCal(WPARAM wp, LPARAM lp)
 {
+	return Default();
+}
+
+LRESULT CDateTimeCtrlEx::OnSetFont(WPARAM wp, LPARAM lp)
+{
+	if (COSVersion() == OSV_LINUX)
+		SetMonthCalFont((HFONT)wp);
+
 	return Default();
 }
 

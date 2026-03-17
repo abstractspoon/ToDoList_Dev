@@ -5,10 +5,11 @@
 #include "pluginhelpers.h"
 #include "win32.h"
 
+#include <Shared\Misc.h>
+
 #include <Interfaces\IEnums.h>
 
-#include <Shared\Misc.h>
-#include <Shared\OSVersion.h>
+#include <3rdParty\OSVersion.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -119,6 +120,11 @@ void Log::LogText(String^ text)
 bool OSVersion::IsBelowVista()
 {
 	return (COSVersion() < OSV_VISTA);
+}
+
+bool OSVersion::IsLinux()
+{
+	return (COSVersion() == OSV_LINUX);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

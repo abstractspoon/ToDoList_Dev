@@ -12,9 +12,10 @@
 #include "graphicsmisc.h"
 #include "enstring.h"
 #include "regkey.h"
-#include "osversion.h"
 #include "clipboard.h"
 #include "popupeditctrl.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <atlconv.h>
 

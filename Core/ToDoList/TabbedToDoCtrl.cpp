@@ -22,13 +22,13 @@
 #include "..\shared\deferwndmove.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
-#include "..\shared\osversion.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\icon.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\DlgUnits.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
 
@@ -2484,6 +2484,9 @@ void CTabbedToDoCtrl::ShowTaskCtrl(BOOL bShow)
 
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	if (m_tabViews.GetSafeHwnd())
 	{
 		FTC_VIEW nView = GetActiveTaskView();

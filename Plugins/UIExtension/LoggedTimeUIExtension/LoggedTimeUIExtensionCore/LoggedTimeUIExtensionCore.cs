@@ -29,6 +29,9 @@ namespace LoggedTimeUIExtension
 		private static Color DefGridColor = Color.FromArgb(192, 192, 192);
         private static int LabelTop = DPIScaling.Scale(2);
         private static int ComboTop = (LabelTop + DPIScaling.Scale(2));
+		private static int ControlSpacing = DPIScaling.Scale(7); // to match core app
+		private static int ComboWidth = DPIScaling.Scale(100);
+		private static int ComboHeight = DPIScaling.Scale(16);
 
 		private bool m_SettingMonthYear = false;
 		private bool m_SettingTimeLogStartDate = false;
@@ -373,7 +376,7 @@ namespace LoggedTimeUIExtension
 			m_WeekLabel = new WeekLabel(m_Trans);
 
 			m_WeekLabel.Font = new Font(FontName, 14);
-            m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);
+            m_WeekLabel.Location = new Point(m_Toolbar.Right + ControlSpacing, LabelTop);
             m_WeekLabel.Height = m_Toolbar.Height;
 			m_WeekLabel.TextAlign = System.Drawing.ContentAlignment.TopLeft;
 			m_WeekLabel.AutoSize = true;
@@ -396,6 +399,7 @@ namespace LoggedTimeUIExtension
 			m_Toolbar.Anchor = AnchorStyles.None;
 			m_Toolbar.GripStyle = ToolStripGripStyle.Hidden;
             m_Toolbar.ImageList = m_TBImageList;
+			m_Toolbar.Location = new Point(m_YearCombo.Right + ControlSpacing, LabelTop - 2);
 
 			int imageSize = DPIScaling.Scale(16);
 
@@ -700,8 +704,8 @@ namespace LoggedTimeUIExtension
 			m_MonthCombo = new MonthComboBox();
 
 			m_MonthCombo.Font = m_ControlsFont;
-            m_MonthCombo.Location = new Point(DPIScaling.Scale(0), ComboTop);
-            m_MonthCombo.Size = DPIScaling.Scale(new Size(100, 16));
+            m_MonthCombo.Location = new Point(0, ComboTop);
+            m_MonthCombo.Size = new Size(ComboWidth, ComboHeight);
 			m_MonthCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
 
 			Controls.Add(m_MonthCombo);
@@ -709,8 +713,8 @@ namespace LoggedTimeUIExtension
 			m_YearCombo = new YearComboBox();
 
 			m_YearCombo.Font = m_ControlsFont;
-            m_YearCombo.Location = new Point(DPIScaling.Scale(105), ComboTop);
-            m_YearCombo.Size = DPIScaling.Scale(new Size(100, 16));
+            m_YearCombo.Location = new Point(m_MonthCombo.Right + ControlSpacing, ComboTop);
+            m_YearCombo.Size = new Size(ComboWidth, ComboHeight);
 			m_YearCombo.SelectedIndexChanged += new EventHandler(OnMonthYearSelChanged);
 
 			Controls.Add(m_YearCombo);
@@ -728,9 +732,12 @@ namespace LoggedTimeUIExtension
         {
             base.OnSizeChanged(e);
 
-			m_YearCombo.Location = new Point(m_MonthCombo.Right + 10, ComboTop);
-			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, LabelTop - 2);
-			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, LabelTop);
+			// Somewhere in WinForms the toolbar gets repositioned even though the toolbar
+			// is not anchored, so we have to restore the correct position each time
+			m_Toolbar.Location = new Point(m_YearCombo.Right + ControlSpacing, LabelTop - 2);
+
+			// Work around a well known winforms bug
+			m_YearCombo.SelectionLength = 0;
 
 			Rectangle timeLogRect = ClientRectangle;
 

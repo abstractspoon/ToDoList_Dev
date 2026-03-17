@@ -67,7 +67,6 @@
 #include "..\shared\misc.h"
 #include "..\shared\mousewheelMgr.h"
 #include "..\shared\msoutlookhelper.h"
-#include "..\shared\osversion.h"
 #include "..\shared\passworddialog.h"
 #include "..\shared\regkey.h"
 #include "..\shared\remotefile.h"
@@ -83,6 +82,7 @@
 #include "..\shared\WorkingWeek.h"
 #include "..\shared\xslfile.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\ShellIcons.h"
 #include "..\3rdparty\XNamedColors.h"
@@ -157,10 +157,14 @@ const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"),
 enum
 {
 	WM_POSTONCREATE				= (WM_APP+1),
-	WM_UPDATEUDTSINTOOLBAR,
+	WM_REFRESHUDTSINTOOLBAR,
 	WM_APPRESTOREFOCUS,
 	WM_DOINITIALDUETASKNOTIFY,
 };
+
+#ifndef WM_THEMECHANGED
+#	define WM_THEMECHANGED 0x031A
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -199,19 +203,19 @@ CToDoListWnd::IDLETASKS::IDLETASKS(CToDoListWnd& tdl)
 	m_bUpdateMenuSSCStatus(FALSE),
 	m_bRefreshPauseTimeTracking(FALSE),
 	m_nUpdateAutoListDataAttribID(TDCA_NONE),
-	m_bUpdateFocusedControl(FALSE)
+	m_bUpdateFocusedControl(FALSE),
+	m_bHandleThemeChange(FALSE)
 {
 }
 
-void CToDoListWnd::IDLETASKS::UpdateStatusBar(const CTDCAttributeMap& mapAttrib)
+void CToDoListWnd::IDLETASKS::UpdateStatusBar(const CTDCAttributeMap& mapAttribIDs)
 {
-	if (mapAttrib.Has(TDCA_ALL))
+	if (!mapAttribIDs.MatchAll(m_mapStatusBarAttrib))
 	{
-		m_mapStatusBarAttrib.Set(TDCA_ALL);
-	}
-	else if (!m_mapStatusBarAttrib.Has(TDCA_ALL))
-	{
-		m_mapStatusBarAttrib.Append(mapAttrib);
+		if (mapAttribIDs.Has(TDCA_ALL) || !m_mapStatusBarAttrib.IsEmpty())
+			m_mapStatusBarAttrib.Set(TDCA_ALL);
+		else
+			m_mapStatusBarAttrib.Append(mapAttribIDs);
 	}
 }
 
@@ -292,6 +296,16 @@ BOOL CToDoListWnd::IDLETASKS::Process()
 			CFocusWatcher::UpdateFocus();
 
 			m_bUpdateFocusedControl = FALSE;
+		}
+		else if (m_bHandleThemeChange)
+		{
+			// When the theme is changed on Linux (via Wine) nothing
+			// changes EXCEPT for the main toolbar whose images are 
+			// 'restored' to those defined in the toolbar resource
+			if (COSVersion() == OSV_LINUX)
+				m_tdl.m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, colorMagenta);
+
+			m_bHandleThemeChange = FALSE;
 		}
 	}
 
@@ -604,7 +618,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_MESSAGE(WM_GETICON, OnGetIcon)
 	ON_MESSAGE(WM_HOTKEY, OnHotkey)
 	ON_MESSAGE(WM_POSTONCREATE, OnPostOnCreate)
-	ON_MESSAGE(WM_UPDATEUDTSINTOOLBAR, OnRefreshUDTsInToolbar)
+	ON_MESSAGE(WM_REFRESHUDTSINTOOLBAR, OnRefreshUDTsInToolbar)
+	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
 
 	ON_NOTIFY(NM_CLICK, IDC_TRAYICON, OnTrayIconClick)
 	ON_NOTIFY(NM_DBLCLK, IDC_TRAYICON, OnTrayIconDblClk)
@@ -832,8 +847,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOP, ID_NEWSUBTASK_ATBOTTOM, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOPSELECTED, ID_NEWTASK_ATBOTTOMSELECTED, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK, ID_NEWTASK_DEPENDENTBEFORESELECTEDTASK, OnUpdateNewTask)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetStartDueDates)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetStartDueDates)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnUpdateSortBy)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SPLITTASKINTO_TWO, ID_SPLITTASKINTO_FIVE, OnUpdateSplitTask)
@@ -953,10 +968,6 @@ BOOL CToDoListWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 
 void CToDoListWnd::InitUITheme()
 {
-	// XP and above only ie. Not Linux
-	if (COSVersion() < OSV_XP)
-		return;
-
 	if (!m_pPrefs)
 	{
 		ASSERT(0);
@@ -973,10 +984,6 @@ void CToDoListWnd::InitUITheme()
 	
 void CToDoListWnd::UpdateUITheme()
 {
-	// XP and above only ie. Not Linux
-	if (COSVersion() < OSV_XP)
-		return;
-
 	// cache existing theme and update
 	CUIThemeFile themeCur = m_theme;
 	InitUITheme();
@@ -2019,7 +2026,8 @@ TDC_FILE CToDoListWnd::DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int n
 	DOPROGRESS(IDS_SAVINGPROGRESS);
 		
 	// back file up
-	m_mgrToDoCtrls.DoBackup(nIndex);
+	if (Prefs().GetBackupOnSave())
+		m_mgrToDoCtrls.DoBackup(nIndex);
 	
 	// do the save
 	return tdc.Save(tasks, szFilePath, bFlush);
@@ -3082,6 +3090,9 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	if (!GetTDCCount())
 		return CFrameWnd::OnEraseBkgnd(pDC);
 
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	CDialogHelper::ExcludeChild(&m_toolbarMain, pDC);
 	CDialogHelper::ExcludeChild(&m_toolbarCustom, pDC);
 	CDialogHelper::ExcludeChild(&m_statusBar, pDC);
@@ -3169,7 +3180,7 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	if (m_bFirstEraseBkgnd)
 	{
 		m_bFirstEraseBkgnd = FALSE;
-		PostMessage(WM_UPDATEUDTSINTOOLBAR);
+		PostMessage(WM_REFRESHUDTSINTOOLBAR);
 	}
 
 	return TRUE;
@@ -3801,7 +3812,13 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	if (pMod->mapAttrib.Has(TDCA_PASTE))
 		m_idleTasks.UpdateAutoListData();
 
-	m_idleTasks.UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+	// If this is a 'new task' notification pass it on to the time-tracker 
+	// immediately because its correct working depends on always being up to date
+	if (pMod->mapAttrib.Has(TDCA_NEWTASK))
+		UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+	else
+		m_idleTasks.UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+
 	m_idleTasks.UpdateStatusBar(pMod->mapAttrib);
 
 	if (m_dlgReminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))
@@ -4142,6 +4159,12 @@ void CToDoListWnd::OnTrayiconShowDueTasks(UINT nCmdID)
 LRESULT CToDoListWnd::OnHotkey(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	Show(TRUE);
+	return 0L;
+}
+
+LRESULT CToDoListWnd::OnThemeChanged(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	m_idleTasks.HandleThemeChange();
 	return 0L;
 }
 
@@ -7606,17 +7629,24 @@ void CToDoListWnd::OnViewActivateFilter(UINT nCmdID)
 
 void CToDoListWnd::OnUpdateViewActivateFilter(CCmdUI* pCmdUI)
 {
-	// For toolbar only. CTDCMainMenu handles menu state.
-	if (pCmdUI->m_pMenu == NULL)
+	FILTER_SHOW nUnused;
+	CString sUnused;
+
+	BOOL bEnable = CTDCMainMenu::GetFilterToActivate(pCmdUI->m_nID, m_filterBar, Prefs(), nUnused, sUnused);
+	pCmdUI->Enable(bEnable);
+
+	UINT nSelFilterID = CTDCMainMenu::GetSelectedFilterMenuID(m_filterBar);
+
+	if (pCmdUI->m_pMenu)
 	{
-		FILTER_SHOW nUnused;
-		CString sUnused;
-
-		BOOL bEnable = CTDCMainMenu::GetFilterToActivate(pCmdUI->m_nID, m_filterBar, Prefs(), nUnused, sUnused);
-		BOOL bCheck = (pCmdUI->m_nID == CTDCMainMenu::GetSelectedFilterMenuID(m_filterBar));
-
-		pCmdUI->Enable(bEnable);
-		pCmdUI->SetCheck(bCheck);
+		// Restore selection
+		// Note: It's unfortunate that this will get called for every
+		// filter menu command but I could find no better place for it
+		pCmdUI->m_pMenu->CheckMenuRadioItem(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, nSelFilterID, MF_BYCOMMAND);
+	}
+	else // toolbar
+	{
+		pCmdUI->SetCheck(pCmdUI->m_nID == nSelFilterID);
 	}
 }
 
@@ -7817,11 +7847,9 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 
 void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
 {
-	// Do default first so that menubar can override
-	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
-
 	if (!bSysMenu)
 	{
+		// This ensures that the relevant popup is correctly populated
 		m_menubar.HandleInitMenuPopup(pPopupMenu,
 									  GetToDoCtrl(),
 									  Prefs(),
@@ -7830,6 +7858,9 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 									  m_mgrUIExtensions,
 									  m_mgrMenuIcons);
 	}
+
+	// This sets the enabled or selection state
+	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
 }
 
 LRESULT CToDoListWnd::OnPostTranslateMenu(WPARAM /*wp*/, LPARAM lp)
@@ -8560,7 +8591,9 @@ TDC_FILE CToDoListWnd::ConfirmSaveTaskList(int nIndex, DWORD dwFlags)
 			}
 			else
 			{
-				m_mgrToDoCtrls.DoBackup(nIndex);
+				if (Prefs().GetBackupOnSave())
+					m_mgrToDoCtrls.DoBackup(nIndex);
+
 				tdc.Save(_T(""), bFlush);
 			}
 
@@ -11997,30 +12030,41 @@ void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
 
 LRESULT CToDoListWnd::OnFilterChange(WPARAM wp, LPARAM lp) 
 {
-	ASSERT((wp == m_filterBar.GetDlgCtrlID()) && ((HWND)lp == m_filterBar));
+	ASSERT(((int)wp == m_filterBar.GetDlgCtrlID()) && ((HWND)lp == m_filterBar));
 
 	TDCFILTER filter;
 	CString sCustom;
 	DWORD dwCustomFlags = 0;
 
 	m_filterBar.GetFilter(filter, sCustom, dwCustomFlags);
-	DoChangeFilter(filter, sCustom, dwCustomFlags);
+	DoChangeFilter(filter, sCustom, dwCustomFlags, TRUE);
 
 	return 0L;
 }
 
-void CToDoListWnd::DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags)
+void CToDoListWnd::DoChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bFromFilterBar)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	FILTER_SHOW nOldFilter = tdc.GetFilter(), nNewFilter = filter.nShow;
 
-	ASSERT(((nNewFilter == FS_ADVANCED) && !sCustom.IsEmpty()) ||
-		   ((nNewFilter != FS_ADVANCED) && sCustom.IsEmpty()));
+	FILTER_SHOW nNewFilter = filter.nShow;
+	BOOL bRefreshFilterCtrls = FALSE;
 
-	// Refresh filter controls if we're switching to/from a 
-	// 'custom' or 'selected' filter
-	BOOL bRefreshFilterCtrls = (Misc::StatesDiffer((nOldFilter == FS_ADVANCED), (nNewFilter == FS_ADVANCED)) ||
+	if (bFromFilterBar)
+	{
+		FILTER_SHOW nOldFilter = tdc.GetFilter();
+		
+		ASSERT(((nNewFilter == FS_ADVANCED) && !sCustom.IsEmpty()) ||
+				((nNewFilter != FS_ADVANCED) && sCustom.IsEmpty()));
+		
+		// Refresh filter controls if we're switching to/from a 
+		// 'custom' or 'selected' filter
+		bRefreshFilterCtrls = (Misc::StatesDiffer((nOldFilter == FS_ADVANCED), (nNewFilter == FS_ADVANCED)) ||
 								Misc::StatesDiffer((nOldFilter == FS_SELECTED), (nNewFilter == FS_SELECTED)));
+	}
+	else // from Filter Dialog
+	{
+		bRefreshFilterCtrls = !tdc.FilterMatches(filter, sCustom, dwCustomFlags);
+	}
 
 	if (nNewFilter == FS_ADVANCED)
 	{
@@ -12074,7 +12118,7 @@ void CToDoListWnd::OnViewFilter()
 		DWORD dwCustomFlags = 0;
 		
 		dialog.GetFilter(filter, sCustom, dwCustomFlags);
-		DoChangeFilter(filter, sCustom, dwCustomFlags);
+		DoChangeFilter(filter, sCustom, dwCustomFlags, FALSE);
 	}
 }
 
@@ -12101,7 +12145,7 @@ void CToDoListWnd::OnViewRefreshfilter()
 	}
 	else
 	{
-		DoChangeFilter(filter, sCustom, dwCustomFlags);
+		DoChangeFilter(filter, sCustom, dwCustomFlags, TRUE);
 
 		if (Prefs().GetExpandTasksOnLoad())
 			tdc.ExpandTasks(TDCEC_ALL);
@@ -12179,7 +12223,8 @@ void CToDoListWnd::OnUpdateViewProjectname(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditOffsetDates() 
 {
-	CTDLOffsetDatesDlg dialog;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CTDLOffsetDatesDlg dialog(tdc.GetCustomAttributeDefs());
 	
 	if (dialog.DoModal(CMDICON(ID_EDIT_OFFSETDATES)) == IDOK)
 	{
@@ -12197,26 +12242,17 @@ void CToDoListWnd::OnEditOffsetDates()
 		offset.bAndSubtaskRefs = dialog.GetOffsetSubtaskReferences();
 		offset.bPreserveEndOfMonth = dialog.GetPreserveEndOfMonth();
 		
-		DWORD dwWhat = dialog.GetOffsetWhat();
-		ASSERT(dwWhat);
-
 		CTDCDateSet mapDates;
+		CStringSet mapCustAttribIDs;
 
-		if (dwWhat & ODD_STARTDATE)
-			mapDates.Add(TDCD_START);
+		VERIFY(dialog.GetOffsetWhat(mapDates, mapCustAttribIDs));
 
-		if (dwWhat & ODD_DUEDATE)
-			mapDates.Add(TDCD_DUE);
+		BOOL bOffsetReminders = mapDates.Remove(TDCD_REMINDER);
 
-		if (dwWhat & ODD_DONEDATE)
-			mapDates.Add(TDCD_DONE);
-
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-		if (!mapDates.IsEmpty())
-			tdc.OffsetSelectedTaskDates(mapDates, offset);
+		if (!mapDates.IsEmpty() || !mapCustAttribIDs.IsEmpty())
+			tdc.OffsetSelectedTaskDates(mapDates, mapCustAttribIDs, offset);
 		
-		if (dwWhat & ODD_REMINDER)
+		if (bOffsetReminders)
 		{
 			CDWordArray aTaskIDs;
 			DWORD dwUnused;
@@ -12227,6 +12263,11 @@ void CToDoListWnd::OnEditOffsetDates()
 				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], &tdc, offset);
 		}
 	}
+}
+
+void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().HasSelection());
 }
 
 void CToDoListWnd::OnEditOffsetStartDueDates(UINT nCmdID)
@@ -12262,7 +12303,7 @@ void CToDoListWnd::OnEditOffsetStartDueDates(UINT nCmdID)
 	GetToDoCtrl().OffsetSelectedTaskDates(mapDates, offset);
 }
 
-void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateEditOffsetStartDueDates(CCmdUI* pCmdUI) 
 {
 	CTDCDateSet mapDates;
 	mapDates.Add(TDCD_START);

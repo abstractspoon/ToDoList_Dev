@@ -44,7 +44,6 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\misc.h"
 #include "..\shared\msoutlookhelper.h"
-#include "..\shared\osversion.h"
 #include "..\shared\passworddialog.h"
 #include "..\shared\savefocus.h"
 #include "..\shared\ScopedTimer.h"
@@ -56,6 +55,7 @@
 #include "..\shared\webmisc.h"
 #include "..\shared\winclasses.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\msoutl.h"
 #include "..\3rdparty\shellicons.h"
 #include "..\3rdparty\colordef.h"
@@ -178,13 +178,12 @@ void CToDoCtrl::IDLETASKS::RefreshAttributeValues(const CTDCAttributeMap& mapAtt
 {
 	ASSERT(!mapAttribIDs.IsEmpty());
 
-	if (mapAttribIDs.Has(TDCA_ALL))
+	if (!mapAttribIDs.MatchAll(m_mapRefreshAttribIDs))
 	{
-		m_mapRefreshAttribIDs.Set(TDCA_ALL);
-	}
-	else if (!m_mapRefreshAttribIDs.Has(TDCA_ALL))
-	{
-		m_mapRefreshAttribIDs.Append(mapAttribIDs);
+		if (mapAttribIDs.Has(TDCA_ALL) || !m_mapRefreshAttribIDs.IsEmpty())
+			m_mapRefreshAttribIDs.Set(TDCA_ALL);
+		else
+			m_mapRefreshAttribIDs.Append(mapAttribIDs);
 	}
 }
 
@@ -734,6 +733,9 @@ void CToDoCtrl::SetLayoutPositions(TDC_UILOCATION nAttribsPos, TDC_UILOCATION nC
 
 BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	ExcludeChild(&m_taskTree, pDC);
 	ExcludeChild(&m_ctrlAttributes, pDC);
 	ExcludeChild(&m_ctrlComments, pDC);
@@ -744,8 +746,6 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 	m_layout.ExcludeSplitBars(pDC);
 
 	// fill background with theme brush
-	CSaveDC sdc(pDC);
-
 	if (m_brUIBack.GetSafeHandle())
 	{
 		CRect rect;
@@ -1789,56 +1789,48 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
+BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates, const CStringSet& mapCustAttribIDs) const
 {
-	if (mapDates.IsEmpty())
+	if (mapDates.IsEmpty() && mapCustAttribIDs.IsEmpty())
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	BOOL bCanAdjustDependDates = (!m_taskTree.SelectionHasDependencies() || !HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
+	// Default date attributes
 	POSITION pos = mapDates.GetStartPosition();
 
 	while (pos)
 	{
 		TDC_DATE nDate = mapDates.GetNext(pos);
+		TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
-		if (!CanEditSelectedTask(TDC::MapDateToAttribute(nDate)))
-			return FALSE;
-
-		switch (nDate)
-		{
-		case TDCD_CREATE:
-		case TDCD_DONE:
-		case TDCD_DONEDATE:
-		case TDCD_DONETIME:
-			break;
-
-		case TDCD_START:
-		case TDCD_STARTDATE:
-		case TDCD_STARTTIME:
-		case TDCD_DUE:
-		case TDCD_DUEDATE:
-		case TDCD_DUETIME:
-			if (!bCanAdjustDependDates)
-				return FALSE;
-			break;
-
-		default:
-			ASSERT(0);
-			return FALSE;
-		}
+		if (CanEditSelectedTask(nAttribID))
+			return TRUE;
 	}
 
-	return TRUE;
+	// Custom date attributes
+	pos = mapCustAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		CString sCustAttribID = mapCustAttribIDs.GetNext(pos);
+		TDC_ATTRIBUTE nCustAttribID = GetCustomAttributeDefs().GetAttributeID(sCustAttribID);
+
+		if (CanEditSelectedTask(nCustAttribID))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDATEOFFSET& offset)
 {
-	if (!CanOffsetSelectedTaskDates(mapDates))
-		return FALSE;
+	return OffsetSelectedTaskDates(mapDates, CStringSet(), offset);
+}
 
+BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet& mapCustAttribIDs, const TDCDATEOFFSET& offset)
+{
 	Flush();
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
@@ -1850,13 +1842,12 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDA
 	CDWordArray aModTaskIDs;
 	CTDCAttributeMap mapAttribs;
 
-	POSITION posDate = mapDates.GetStartPosition();
+	// Default date attributes
+	POSITION pos = mapDates.GetStartPosition();
 
-	while (posDate)
+	while (pos)
 	{
-		TDC_DATE nDate = mapDates.GetNext(posDate);
-		CDWordArray aDateModTaskIDs;
-
+		TDC_DATE nDate = mapDates.GetNext(pos);
 		POSITION posTask = htiSel.GetHeadPosition();
 
 		while (posTask)
@@ -1868,18 +1859,42 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDA
 												 nDate,
 												 offset,
 												 aSelModTaskIDs);
+			if (nRes == SET_CHANGE)
+			{
+				TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
+				m_taskTree.GetAttributesAffectedByMod(nAttribID, mapAttribs);
 
-			aDateModTaskIDs.Append(aSelModTaskIDs);
-		}
-
-		if (aDateModTaskIDs.GetSize())
-		{
-			TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
-			m_taskTree.GetAttributesAffectedByMod(nAttribID, mapAttribs);
-
-			Misc::AppendItems(aDateModTaskIDs, aModTaskIDs, TRUE);
+				aModTaskIDs.Append(aSelModTaskIDs);
+			}
 		}
 	}
+
+	// Custom date attributes
+	pos = mapCustAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		CString sCustAttribID = mapCustAttribIDs.GetNext(pos);
+		POSITION posTask = htiSel.GetHeadPosition();
+
+		while (posTask)
+		{
+			DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(posTask));
+			CDWordArray aSelModTaskIDs;
+
+			TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
+													   sCustAttribID,
+													   offset,
+													   aSelModTaskIDs);
+			if (nRes == SET_CHANGE)
+			{
+				mapAttribs.Add(TDCA_CUSTOMATTRIB);
+				aModTaskIDs.Append(aSelModTaskIDs);
+			}
+		}
+	}
+
+	Misc::RemoveDuplicates(aModTaskIDs);
 
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
@@ -9637,10 +9652,11 @@ void CToDoCtrl::SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand)
 
 				// Its parents
 				if (m_data.GetTaskParentIDs(dwTaskID, aParentIDs))
-					Misc::AppendItems(aParentIDs, aTaskIDs, TRUE);
+					aTaskIDs.Append(aParentIDs);
 			}
 		}
 
+		Misc::RemoveDuplicates(aTaskIDs);
 		m_taskTree.ExpandTasks(aTaskIDs);
 	}
 	else // collapsing

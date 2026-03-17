@@ -13,8 +13,8 @@
 *.userprefs
 
 # Build results
-Unicode_Debug/
-Unicode_Release/
+[Uu]nicode_Debug/
+[Uu]nicode_Release/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -25,6 +25,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+[Rr]esources/
 
 # Visual Studio 2015 cache/options directory
 .vs/

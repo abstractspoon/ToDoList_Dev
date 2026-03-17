@@ -6,10 +6,11 @@
 #include "graphicsmisc.h"
 #include "deferwndmove.h"
 #include "misc.h"
-#include "osversion.h"
 #include "winclasses.h"
 #include "wclassdefines.h"
 #include "CtrlTextHighlighter.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -186,6 +187,8 @@ BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_brBack != NULL)
 	{
+		CSaveDC sdc(pDC);
+		
 		// Exclude all children except for:
 		// 1. static-like text
 		// 2. push-buttons on Windows XP

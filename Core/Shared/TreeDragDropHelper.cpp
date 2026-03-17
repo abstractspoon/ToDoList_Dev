@@ -533,8 +533,6 @@ void CTreeDragDropHelper::OnTimer(UINT nIDEvent)
 
 			if (!rect.PtInRect(point))
 			{
-				m_ddMgr.DragShowNolock(FALSE);
-
 				if (point.y <= rect.top)
 				{
 					m_tree.SelectDropTarget(NULL);
@@ -547,8 +545,6 @@ void CTreeDragDropHelper::OnTimer(UINT nIDEvent)
 					m_tree.SetInsertMark(NULL);
 					m_tree.SendMessage(WM_VSCROLL, MAKEWPARAM(SB_LINEDOWN, 0), NULL);
 				}
-
-				m_ddMgr.DragShowNolock(TRUE);
 			}
 		}
 				
@@ -572,13 +568,10 @@ void CTreeDragDropHelper::OnTimer(UINT nIDEvent)
 		{
 			SetTimer(TIMER_EXPAND, 0); // kill the timer
 
-			m_ddMgr.DragShowNolock(FALSE);
-
 			m_tree.SelectDropTarget(NULL);
 			m_tree.SetInsertMark(NULL);
 			m_tree.Expand(htiHit, TVE_EXPAND);
 
-			m_ddMgr.DragShowNolock(TRUE);
 			HighlightDropTarget();
 
 			// For now, notify parent because sometimes Windows doesn't

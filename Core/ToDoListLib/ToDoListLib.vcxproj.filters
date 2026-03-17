@@ -501,6 +501,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\ToDoList\TDLOutlookImportItemsDlg.cpp">
+    <ClCompile Include="..\ToDoList\TDCFileBackup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1022,6 +1023,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLOutlookImportItemsDlg.h">
+    <ClInclude Include="..\ToDoList\TDCFileBackup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

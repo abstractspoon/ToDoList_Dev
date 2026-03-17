@@ -24,15 +24,17 @@ public:
 	BOOL IsMultiSelectionEnabled() const { return m_bMultiSel; }
 	void ClearMultiSelectionHistory();
 
-	int SelectString(int nStartAfter, LPCTSTR lpszString);
 	BOOL GetCheck(int nIndex) const;
 	int GetChecked(CStringArray& aItems, CCB_CHECKSTATE nCheck = CCBC_CHECKED) const;
-	BOOL SetChecked(const CStringArray& aChecked);
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED); 
 
+	// overrides
+	virtual BOOL SetChecked(const CStringArray& aItems);
 	virtual int SetStrings(const CStringArray& aItems);
+	virtual int AddUniqueItems(const CStringArray& aItems); 
 	virtual int GetChecked(CStringArray& aChecked, CStringArray& aMixed) const;
 	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
+	virtual int SelectString(int nStartAfter, LPCTSTR lpszString);
 
 protected:
 	BOOL m_bMultiSel;

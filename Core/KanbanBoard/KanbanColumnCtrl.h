@@ -147,7 +147,7 @@ protected:
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder, m_nNumTitleLines;
 	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
-	COLORREF m_crItemShadow, m_crGroupHeaderBkgnd, m_crFullBkgnd;
+	COLORREF m_crGroupHeaderBkgnd, m_crFullBkgnd;
 
 	TDC_ATTRIBUTE m_nSortBy, m_nGroupBy;
 	BOOL m_bSortAscending;
@@ -206,7 +206,6 @@ protected:
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttribID, const KANBANITEM* pKI) const;
 	int CalcIndentation(HTREEITEM hti) const;
-	void RecalcItemShadowColor();
 
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderItem(HTREEITEM hti) const;
@@ -241,7 +240,6 @@ protected:
 	void DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttribID, const CString& sValue, int nFlags, COLORREF crText) const;
-	void DrawItemShadow(CDC* pDC, CRect& rItem) const;
 	void DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);

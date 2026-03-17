@@ -5,7 +5,6 @@
 #include "autoflag.h"
 #include "themed.h"
 #include "holdredraw.h"
-#include "osversion.h"
 #include "misc.h"
 #include "Graphicsmisc.h"
 #include "copywndcontents.h"
@@ -15,6 +14,7 @@
 // #include "FileMisc.h"
 
 #include "..\3rdParty\Detours\detours.h"
+#include "..\3rdParty\OSVersion.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,7 @@ const int MAX_SPLITBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
 const int MIN_SPLITBAR_WIDTH	= 1; // don't scale
 const int MIN_SPLIT_WIDTH		= (GetSystemMetrics(SM_CXVSCROLL) * 2);
 const int INITIAL_SPLIT_POS		= GraphicsMisc::ScaleByDPIFactor(300);
-const int LINUX_VOFFSET_FUDGE	= 2;
+const int LINUX_VOFFSET_FUDGE	= 1;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -822,7 +822,7 @@ void CTreeListSyncer::InitItemHeights()
 	}
 }
 
-BOOL CTreeListSyncer::OsIsXP()
+BOOL CTreeListSyncer::OsIsXPOrLinux()
 {
 	return (COSVersion() < OSV_VISTA);
 }
@@ -850,24 +850,24 @@ int CTreeListSyncer::GetItemHeight(HWND hwnd)
 	return GraphicsMisc::ScaleByDPIFactor(16);
 }
 
-void CTreeListSyncer::InvalidateTreeItem(HWND hwnd, HTREEITEM hti)
+void CTreeListSyncer::InvalidateTreeItem(HWND hwnd, HTREEITEM hti, BOOL bErase)
 {
 	ASSERT(IsTree(hwnd));
 
 	CRect rItem;
 	TreeView_GetItemRect(hwnd, hti, &rItem, 0);
 						
-	::InvalidateRect(hwnd, rItem, TRUE);
+	::InvalidateRect(hwnd, rItem, bErase);
 }
 
-void CTreeListSyncer::InvalidateListItem(HWND hwnd, int nItem)
+void CTreeListSyncer::InvalidateListItem(HWND hwnd, int nItem, BOOL bErase)
 {
 	ASSERT(IsList(hwnd));
 	
 	CRect rItem;
 	ListView_GetItemRect(hwnd, nItem, &rItem, LVIR_BOUNDS);
 	
-	::InvalidateRect(hwnd, rItem, TRUE);
+	::InvalidateRect(hwnd, rItem, bErase);
 }
 
 BOOL CTreeListSyncer::HasFocus() const
@@ -1458,9 +1458,16 @@ BOOL CTreeListSyncer::HandleEraseBkgnd(CDC* pDC)
 		CThemed th;
 		
 		if (th.IsNonClientThemed() && th.Open(hwndPrimary, _T("SCROLLBAR")))
+		{
 			th.DrawBackground(pDC, SBP_LOWERTRACKHORZ, SCRBS_NORMAL, rDead);
+
+			// Restore default theme class
+			th.Open(hwndPrimary, (IsTree(hwndPrimary) ? _T("TREEVIEW") : _T("LISTVIEW")));
+		}
 		else
+		{	
 			pDC->FillSolidRect(rDead, ::GetSysColor(COLOR_SCROLLBAR));
+		}
 #endif
 		
 		pDC->ExcludeClipRect(rDead);
@@ -3959,9 +3966,8 @@ BOOL CTreeListSyncer::SaveToImage(CBitmap& bmImage, int nOtherFrom, int nOtherTo
 						rHeader.OffsetRect(sizeOther.cx, 0);
 			
 					CThemed th;
-					BOOL bThemed = (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")));
 
-					if (bThemed)
+					if (th.AreControlsThemed() && th.Open(GetCWnd(), _T("HEADER")))
 					{
 						th.DrawBackground(&dcImage, HP_HEADERITEM, HIS_NORMAL, rHeader);
 					}

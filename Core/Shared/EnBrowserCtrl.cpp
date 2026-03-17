@@ -7,6 +7,8 @@
 #include "misc.h"
 #include "DarkMode.h"
 
+#include "..\3rdParty\OSVersion.h"
+
 //fabio_2005
 #if _MSC_VER >= 1300
 #	include <comdef.h>
@@ -124,6 +126,8 @@ void CEnBrowserCtrl::RestorePrintBkgnd()
 
 void CEnBrowserCtrl::Print(LPCTSTR szFile, BOOL bPrintBkgnd)
 {
+	ASSERT (SupportsPrint());
+	
 	InitPrintBkgnd(bPrintBkgnd);
 
 	if (Misc::IsEmpty(szFile))
@@ -140,8 +144,15 @@ void CEnBrowserCtrl::Print(LPCTSTR szFile, BOOL bPrintBkgnd)
 	}
 }
 
+BOOL CEnBrowserCtrl::SupportsPrintPreview()
+{
+	return (COSVersion() != OSV_LINUX);
+}
+
 void CEnBrowserCtrl::PrintPreview(LPCTSTR szFile, BOOL bPrintBkgnd)
 {
+	ASSERT (SupportsPrintPreview());
+
 	InitPrintBkgnd(bPrintBkgnd);
 	
 	if (Misc::IsEmpty(szFile))

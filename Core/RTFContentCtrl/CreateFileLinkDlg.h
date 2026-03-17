@@ -25,33 +25,20 @@ public:
 	BOOL GetReduceImageColors() const { return (m_bReduceImageColors && (m_nLinkOption == REP_ASIMAGE)); }
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CCreateFileLinkDlg)
-	//}}AFX_DATA
 	BOOL	m_bReduceImageColors;
 	BOOL	m_bMakeDefault;
 	int		m_nLinkOption;
 	CString m_sRefFile;
 	CIcon m_icon;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CCreateFileLinkDlg)
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(CCreateFileLinkDlg)
 	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
+
+protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
+/////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_CREATEFILELINKDLG_H__F70FEFCC_D6D8_40D7_8FB3_ACE6CD2DEEDB__INCLUDED_)

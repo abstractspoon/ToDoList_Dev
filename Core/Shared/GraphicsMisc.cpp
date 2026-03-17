@@ -7,7 +7,6 @@
 #include "Misc.h"
 #include "FileMisc.h"
 #include "themed.h"
-#include "osversion.h"
 #include "icon.h"
 #include "EnImageList.h"
 #include "EnBitmapEx.h"
@@ -17,6 +16,7 @@
 #include "..\3rdparty\ShellIcons.h"
 #include "..\3rdparty\GdiPlus.h"
 #include "..\3rdparty\XNamedColors.h"
+#include "..\3rdParty\OSVersion.h"
 
 #include <windef.h>
 #include <afxpriv.h>
@@ -1743,13 +1743,13 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			case GMIS_SELECTED:
 				// Similar to windows 10 colours
 				crBorder = CLASSICTHEME_SEL_BORDERCOLOR;
-				crFill = (bTransparent ? CLASSICTHEME_SEL_BORDERCOLOR : CLASSICTHEME_SEL_BKCOLOR);
+				crFill = (bTransparent ? crBorder : CLASSICTHEME_SEL_BKCOLOR);
 				break;
 			
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
 				crBorder = CLASSICTHEME_SELNOFOCUS_BORDERCOLOR;
-				crFill = (bTransparent ? CLASSICTHEME_SEL_BORDERCOLOR : CLASSICTHEME_SELNOFOCUS_BKCOLOR);
+				crFill = (bTransparent ? crBorder : CLASSICTHEME_SELNOFOCUS_BKCOLOR);
 				break;
 			
 			default:

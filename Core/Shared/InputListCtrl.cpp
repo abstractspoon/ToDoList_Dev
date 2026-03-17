@@ -9,8 +9,9 @@
 #include "misc.h"
 #include "enimagelist.h"
 #include "dlgunits.h"
-#include "osversion.h"
 #include "MessageBox.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

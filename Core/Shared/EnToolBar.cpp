@@ -5,7 +5,6 @@
 #include "entoolbar.h"
 #include "enbitmapex.h"
 #include "imageprocessors.h"
-#include "osversion.h"
 #include "graphicsmisc.h"
 #include "themed.h"
 #include "icon.h"
@@ -13,6 +12,7 @@
 #include "holdredraw.h"
 
 #include "..\3rdparty\XNamedColors.h"
+#include "..\3rdParty\OSVersion.h"
 
 #include <afxpriv.h>
 
@@ -834,7 +834,7 @@ int CEnToolBar::Resize(int cx, CPoint ptTopLeft, int nMaxHeight)
 	int nEstHeight = EstimateHeightRequired(cx);
 	CRect rToolbar(ptTopLeft, CSize(cx, nEstHeight));
 
-	MoveWindow(rToolbar);
+	MoveWindow(rToolbar, FALSE);
 	
 	int nRealHeight = RefreshRowHeights();
 
@@ -844,8 +844,10 @@ int CEnToolBar::Resize(int cx, CPoint ptTopLeft, int nMaxHeight)
 	if (nRealHeight != nEstHeight)
 	{
 		rToolbar.bottom = rToolbar.top + nRealHeight;
-		MoveWindow(rToolbar);
+		MoveWindow(rToolbar, FALSE);
 	}
+
+	Invalidate();
 
 	return GetHeight();
 }

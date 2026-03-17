@@ -885,6 +885,7 @@
 #define IDC_TOOLDETAILS                 1597
 #define IDC_REMAININGCOUNT              1598
 #define IDC_PLACEHOLDER                 1599
+#define IDC_NOATTRIBSELECTED            1599
 #define IDC_IMPORTERLIST                1600
 #define IDC_TASKLIST                    2000
 #define IDD_OUTLOOKIMPORTITEMS_DIALOG   2000

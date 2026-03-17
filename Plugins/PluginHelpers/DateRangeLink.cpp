@@ -7,6 +7,7 @@
 #include "DateUtil.h"
 #include "ColorUtil.h"
 #include "DateRangeLink.h"
+#include "DPIScaling.h"
 
 #include <Shared\Misc.h>
 #include <Shared\DialogHelper.h>
@@ -19,7 +20,6 @@ using namespace System::Collections::Generic;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 HostedDateRangeLink::HostedDateRangeLink(HWND hwndParent)
 {
@@ -110,6 +110,9 @@ DateRangeLink::DateRangeLink() : m_IsoFormat(false)
 void DateRangeLink::OnHandleCreated(EventArgs^ e)
 {
 	Control::OnHandleCreated(e);
+
+	const int REQUIRED_HEIGHT = DPIScaling::Scale(13);
+	Height = REQUIRED_HEIGHT;
 
 	m_pMFCInfo = IntPtr(HostedDateRangeLink::Attach(Win32::GetHwnd(Handle), Win32::GetHfont(Font->ToHfont())));
 

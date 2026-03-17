@@ -32,6 +32,17 @@ const LPCWSTR HTMLREPORTER_NAME = L"Report Builder";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+IExportTasklist* CreateExportInterface()
+{
+	// Disable this module on Linux because it requires IE and will otherwise crash
+	if (OSVersion::IsLinux())
+		return NULL;
+
+	return new CHTMLReportExporterBridge();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
 CHTMLReportExporterBridge::CHTMLReportExporterBridge() : m_pTT(nullptr), m_hIcon(NULL)

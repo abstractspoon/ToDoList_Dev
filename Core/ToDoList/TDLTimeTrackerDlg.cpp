@@ -951,6 +951,9 @@ BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 	if (!m_tipCaption.GetSafeHwnd())
 		m_tipCaption.Create(this);
 
+	// clip out our children
+	CSaveDC sdc(pDC);
+	
 	ExcludeChild(&m_toolbar, pDC);
 	ExcludeChild(&m_cbTasklists, pDC);
 	ExcludeChild(&m_cbTasks, pDC);
