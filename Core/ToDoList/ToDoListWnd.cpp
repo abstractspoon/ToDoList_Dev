@@ -847,8 +847,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOP, ID_NEWSUBTASK_ATBOTTOM, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOPSELECTED, ID_NEWTASK_ATBOTTOMSELECTED, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK, ID_NEWTASK_DEPENDENTBEFORESELECTEDTASK, OnUpdateNewTask)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetStartDueDates)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetStartDueDates)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnUpdateSortBy)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SPLITTASKINTO_TWO, ID_SPLITTASKINTO_FIVE, OnUpdateSplitTask)
@@ -2026,7 +2026,8 @@ TDC_FILE CToDoListWnd::DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int n
 	DOPROGRESS(IDS_SAVINGPROGRESS);
 		
 	// back file up
-	m_mgrToDoCtrls.DoBackup(nIndex);
+	if (Prefs().GetBackupOnSave())
+		m_mgrToDoCtrls.DoBackup(nIndex);
 	
 	// do the save
 	return tdc.Save(tasks, szFilePath, bFlush);
@@ -6743,13 +6744,6 @@ void CToDoListWnd::OnPrint()
 
 void CToDoListWnd::DoPrint(BOOL bPreview)
 {
-	if ((!bPreview && !m_IE.SupportsPrint()) ||
-		(bPreview && !m_IE.SupportsPrintPreview()))
-	{
-		AfxMessageBox(bPreview ? IDS_PPREVIEWNOTSUPPORTED : IDS_PRINTNOTSUPPORTED);
-		return;
-	}
-
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	int nSelTDC = GetSelToDoCtrl();
 
@@ -8597,7 +8591,9 @@ TDC_FILE CToDoListWnd::ConfirmSaveTaskList(int nIndex, DWORD dwFlags)
 			}
 			else
 			{
-				m_mgrToDoCtrls.DoBackup(nIndex);
+				if (Prefs().GetBackupOnSave())
+					m_mgrToDoCtrls.DoBackup(nIndex);
+
 				tdc.Save(_T(""), bFlush);
 			}
 
@@ -12227,7 +12223,8 @@ void CToDoListWnd::OnUpdateViewProjectname(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditOffsetDates() 
 {
-	CTDLOffsetDatesDlg dialog;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CTDLOffsetDatesDlg dialog(tdc.GetCustomAttributeDefs());
 	
 	if (dialog.DoModal(CMDICON(ID_EDIT_OFFSETDATES)) == IDOK)
 	{
@@ -12245,26 +12242,17 @@ void CToDoListWnd::OnEditOffsetDates()
 		offset.bAndSubtaskRefs = dialog.GetOffsetSubtaskReferences();
 		offset.bPreserveEndOfMonth = dialog.GetPreserveEndOfMonth();
 		
-		DWORD dwWhat = dialog.GetOffsetWhat();
-		ASSERT(dwWhat);
-
 		CTDCDateSet mapDates;
+		CStringSet mapCustAttribIDs;
 
-		if (dwWhat & ODD_STARTDATE)
-			mapDates.Add(TDCD_START);
+		VERIFY(dialog.GetOffsetWhat(mapDates, mapCustAttribIDs));
 
-		if (dwWhat & ODD_DUEDATE)
-			mapDates.Add(TDCD_DUE);
+		BOOL bOffsetReminders = mapDates.Remove(TDCD_REMINDER);
 
-		if (dwWhat & ODD_DONEDATE)
-			mapDates.Add(TDCD_DONE);
-
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-		if (!mapDates.IsEmpty())
-			tdc.OffsetSelectedTaskDates(mapDates, offset);
+		if (!mapDates.IsEmpty() || !mapCustAttribIDs.IsEmpty())
+			tdc.OffsetSelectedTaskDates(mapDates, mapCustAttribIDs, offset);
 		
-		if (dwWhat & ODD_REMINDER)
+		if (bOffsetReminders)
 		{
 			CDWordArray aTaskIDs;
 			DWORD dwUnused;
@@ -12275,6 +12263,11 @@ void CToDoListWnd::OnEditOffsetDates()
 				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], &tdc, offset);
 		}
 	}
+}
+
+void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().HasSelection());
 }
 
 void CToDoListWnd::OnEditOffsetStartDueDates(UINT nCmdID)
@@ -12310,7 +12303,7 @@ void CToDoListWnd::OnEditOffsetStartDueDates(UINT nCmdID)
 	GetToDoCtrl().OffsetSelectedTaskDates(mapDates, offset);
 }
 
-void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateEditOffsetStartDueDates(CCmdUI* pCmdUI) 
 {
 	CTDCDateSet mapDates;
 	mapDates.Add(TDCD_START);

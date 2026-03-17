@@ -358,6 +358,8 @@ void DICTITEM::ClearTextOut()
 
 BOOL DICTITEM::Cleanup(const DICTITEM& diMaster)
 {
+	BOOL bCleaned = FALSE;
+
 	// Make the principal item the same
 	if (m_sClassID != diMaster.m_sClassID)
 	{
@@ -391,6 +393,8 @@ BOOL DICTITEM::Cleanup(const DICTITEM& diMaster)
 			// and update principal class ID
 			m_sClassID = diMaster.m_sClassID;
 		}
+
+		bCleaned = TRUE;
 	}
 
 	// Remove alternatives not in the master
@@ -402,22 +406,28 @@ BOOL DICTITEM::Cleanup(const DICTITEM& diMaster)
 		m_mapAlternatives.GetNextAssoc(pos, sAltClassID, sAltTextOut);
 
 		if (!diMaster.m_mapAlternatives.Lookup(sAltClassID, sUnused))
+		{
 			m_mapAlternatives.RemoveKey(sAltClassID);
+			bCleaned = TRUE;
+		}
 	}
 
 	// Add master alternatives not in 'us'
-	pos = m_mapAlternatives.GetStartPosition();
+	pos = diMaster.m_mapAlternatives.GetStartPosition();
 	CString sMasterClassID;
 	
 	while (pos)
 	{
-		m_mapAlternatives.GetNextAssoc(pos, sMasterClassID, sUnused);
+		diMaster.m_mapAlternatives.GetNextAssoc(pos, sMasterClassID, sUnused);
 		
 		if (!m_mapAlternatives.Lookup(sMasterClassID, sUnused))
+		{
 			m_mapAlternatives[sMasterClassID] = _T("");
+			bCleaned = TRUE;
+		}
 	}
 	
-	return FALSE;
+	return bCleaned;
 }
 
 BOOL DICTITEM::Fixup()

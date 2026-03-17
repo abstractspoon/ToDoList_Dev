@@ -9,6 +9,7 @@
 #include "..\shared\EnString.h"
 #include "..\shared\FileMisc.h"
 #include "..\shared\DialogHelper.h"
+#include "..\shared\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -28,29 +29,22 @@ CCreateFileLinkDlg::CCreateFileLinkDlg(LPCTSTR szRefFile, RE_PASTE nLinkOption, 
 	m_bReduceImageColors(bReduceColors),
 	m_icon(IDR_RTFCOMMENTS)
 {
-	//{{AFX_DATA_INIT(CCreateFileLinkDlg)
-	//}}AFX_DATA_INIT
+	ASSERT(COSVersion() != OSV_LINUX);
 }
-
 
 void CCreateFileLinkDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CCreateFileLinkDlg)
+
 	DDX_Check(pDX, IDC_MAKEDEFAULT, m_bMakeDefault);
-	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_FILEURL, m_nLinkOption);
 	DDX_Check(pDX, IDC_REDUCEIMAGECOLORS, m_bReduceImageColors);
 }
 
-
 BEGIN_MESSAGE_MAP(CCreateFileLinkDlg, CDialog)
-	//{{AFX_MSG_MAP(CCreateFileLinkDlg)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CCreateFileLinkDlg message handlers
 
 BOOL CCreateFileLinkDlg::OnInitDialog() 
 {
@@ -97,6 +91,5 @@ BOOL CCreateFileLinkDlg::OnInitDialog()
 
 	SetIcon(m_icon, FALSE);
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }

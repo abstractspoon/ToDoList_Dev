@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDLOffsetDatesDlg.h"
+#include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\Misc.h"
 #include "..\Shared\DateHelper.h"
@@ -20,6 +21,14 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum // For backwards compatibility only
+{
+	STARTDATE	= 0x1,
+	DUEDATE		= 0x2,
+	DONEDATE	= 0x4,
+	REMINDER	= 0x8,
+};
+
 enum // OFFSET_BY
 {
 	WEEKDAYS,
@@ -30,28 +39,33 @@ enum // OFFSET_BY
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+#define SELECTDEFCOMBOITEM(entry, flag, date) \
+	{ if (prefs.GetProfileInt(m_sPrefsKey, entry, (dwOffsetWhat & flag))) \
+		m_mapSelDates.Add(date); }
+
+#define ADDDEFCOMBOITEM(name, date) \
+	{ int nItem = CDialogHelper::AddStringT(m_lbOffsetWhat, name, date); \
+		m_lbOffsetWhat.SetCheck(nItem, m_mapSelDates.Has(date)); }
+
+/////////////////////////////////////////////////////////////////////////////
 // COffsetDatesDlg dialog
 
-CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent)
+CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CWnd* pParent)
 	: 
 	CTDLDialog(IDD_OFFSETDATES_DIALOG, _T("OffsetDates"), pParent),
-	m_dtOffsetFrom(CDateHelper::GetDate(DHD_TODAY)) // always
+	m_dtOffsetFrom(CDateHelper::GetDate(DHD_TODAY)), // always
+	m_aCustAttribDefs(aCustAttribDefs)
 {
 	// restore state
 	CPreferences prefs;
 
-	m_dwOffsetWhat = prefs.GetProfileInt(m_sPrefsKey, _T("What"), 0xffff);
+	DWORD dwOffsetWhat = prefs.GetProfileInt(m_sPrefsKey, _T("What"), 0); // Backwards compatibility
 
-	// Backwards compatibility
-	if (m_dwOffsetWhat == 0xffff)
-	{
-		m_dwOffsetWhat = 0;
-
-		Misc::SetFlag(m_dwOffsetWhat, ODD_STARTDATE, prefs.GetProfileInt(m_sPrefsKey, _T("StartDate"), FALSE));
-		Misc::SetFlag(m_dwOffsetWhat, ODD_DUEDATE, prefs.GetProfileInt(m_sPrefsKey, _T("DueDate"), FALSE));
-		Misc::SetFlag(m_dwOffsetWhat, ODD_DUEDATE, prefs.GetProfileInt(m_sPrefsKey, _T("DoneDate"), FALSE));
-		Misc::SetFlag(m_dwOffsetWhat, ODD_REMINDER, prefs.GetProfileInt(m_sPrefsKey, _T("Reminder"), FALSE));
-	}
+	SELECTDEFCOMBOITEM(_T("StartDate"),	STARTDATE,	TDCD_START);
+	SELECTDEFCOMBOITEM(_T("DueDate"),	DUEDATE,	TDCD_DUE);
+	SELECTDEFCOMBOITEM(_T("DoneDate"),	DONEDATE,	TDCD_DONE);
+	SELECTDEFCOMBOITEM(_T("Reminder"),	REMINDER,	TDCD_REMINDER);
 
 	m_bForward = prefs.GetProfileInt(m_sPrefsKey, _T("Forward"), TRUE);
 	m_nOffsetBy = prefs.GetProfileInt(m_sPrefsKey, _T("Amount"), 1);
@@ -60,11 +74,8 @@ CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent)
 	m_nOffsetByUnits = prefs.GetProfileInt(m_sPrefsKey, _T("AmountPeriod"), WEEKDAYS);
 	m_bPreserveEndOfMonth = prefs.GetProfileInt(m_sPrefsKey, _T("PreserveEndOfMonth"), TRUE);
 
-	// Backwards compatibility
-	m_bOffsetFromDate = prefs.GetProfileInt(m_sPrefsKey, _T("FromDate"), -1);
-
-	if (m_bOffsetFromDate == -1)
-		m_bOffsetFromDate = prefs.GetProfileInt(m_sPrefsKey, _T("FromToday"), FALSE);
+	BOOL bFromToday = prefs.GetProfileInt(m_sPrefsKey, _T("FromToday"), FALSE); // Backwards compatibility
+	m_bOffsetFromDate = prefs.GetProfileInt(m_sPrefsKey, _T("FromDate"), bFromToday);
 }
 
 void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
@@ -80,13 +91,10 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_DateTimeCtrl(pDX, IDC_OFFSETDATE, m_dtOffsetFrom);
 	DDX_Check(pDX, IDC_PRESERVEENDOFMONTH, m_bPreserveEndOfMonth);
 	DDX_Control(pDX, IDC_WHATLIST, m_lbOffsetWhat);
-
-	if (pDX->m_bSaveAndValidate)
-		m_dwOffsetWhat = m_lbOffsetWhat.GetCheckedItemData();
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLOffsetDatesDlg, CTDLDialog)
+	ON_WM_CTLCOLOR()
 	ON_CBN_SELCHANGE(IDC_BYUNITS, OnSelchangeUnits)
 	ON_BN_CLICKED(IDC_OFFSETSUBTASKS, OnClickOffsetSubtasks)
 	ON_BN_CLICKED(IDC_OFFSETFROMDATE, OnClickOffsetFromDate)
@@ -99,17 +107,35 @@ BOOL CTDLOffsetDatesDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	// Same order as previous checkboxes
-	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_STARTDATE, ODD_STARTDATE);
-	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_DUEDATE,   ODD_DUEDATE);
-	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_DONEDATE,  ODD_DONEDATE);
-	CDialogHelper::AddStringT(m_lbOffsetWhat, IDS_TDLBC_REMINDER,  ODD_REMINDER);
+	// // Add default date attributes to combo
+	ADDDEFCOMBOITEM(IDS_TDLBC_STARTDATE, TDCD_START);
+	ADDDEFCOMBOITEM(IDS_TDLBC_DUEDATE,   TDCD_DUE);
+	ADDDEFCOMBOITEM(IDS_TDLBC_DONEDATE,  TDCD_DONE);
+	ADDDEFCOMBOITEM(IDS_TDLBC_REMINDER,  TDCD_REMINDER);
 
-	m_lbOffsetWhat.SetCheckedByItemData(m_dwOffsetWhat);
+	// Add custom date attributes to combo
+	// Note: Custom date attributes are always initially unchecked 
+	int nCust = m_aCustAttribDefs.GetSize();
 
+	while (nCust--)
+	{
+		if (m_aCustAttribDefs[nCust].IsDataType(TDCCA_DATE))
+		{
+			CString sAttrib = CEnString().Format(IDS_CUSTOMCOLUMN, m_aCustAttribDefs[nCust].sLabel);
+			CDialogHelper::AddStringT(m_lbOffsetWhat, sAttrib, (TDCD_CUSTOM + nCust));
+		}
+	}
+	
 	EnableDisableControls();
-
 	return TRUE;
+}
+
+int CTDLOffsetDatesDlg::GetOffsetWhat(CTDCDateSet& mapDates, CStringSet& mapCustAttribIDs) const
+{
+	mapDates.Copy(m_mapSelDates);
+	mapCustAttribIDs.Copy(m_mapSelCustAttribIDs);
+
+	return (m_mapSelDates.GetCount() + m_mapSelCustAttribIDs.GetCount());
 }
 
 int CTDLOffsetDatesDlg::GetOffsetAmount(TDC_UNITS& nUnits) const
@@ -146,19 +172,42 @@ BOOL CTDLOffsetDatesDlg::GetPreserveEndOfMonth() const
 COleDateTime CTDLOffsetDatesDlg::GetOffsetFromDate() const
 {
 	if (m_bOffsetFromDate)
-		return m_dtOffsetFrom;
+		return CDateHelper::GetDateOnly(m_dtOffsetFrom);
 
 	return CDateHelper::NullDate();
+}
+
+void CTDLOffsetDatesDlg::UpdateCachedDateAttributes()
+{
+	m_mapSelDates.RemoveAll();
+	m_mapSelCustAttribIDs.RemoveAll();
+
+	int nItem = m_lbOffsetWhat.GetCount();
+
+	while (nItem--)
+	{
+		if (m_lbOffsetWhat.GetCheck(nItem))
+		{
+			TDC_DATE nDate = (TDC_DATE)m_lbOffsetWhat.GetItemData(nItem);
+
+			if (nDate < TDCD_CUSTOM)
+				m_mapSelDates.Add(nDate);
+			else
+				m_mapSelCustAttribIDs.Add(m_aCustAttribDefs[nDate - TDCD_CUSTOM].sUniqueID);
+		}
+	}
 }
 
 void CTDLOffsetDatesDlg::OnOK()
 {
 	CTDLDialog::OnOK();
 
+	// Get selected listbox items
+	UpdateCachedDateAttributes();
+
 	// save state
 	CPreferences prefs;
 
-	prefs.WriteProfileInt(m_sPrefsKey, _T("What"), m_dwOffsetWhat);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Forward"), m_bForward);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Amount"), m_nOffsetBy);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("AmountPeriod"), m_nOffsetByUnits);
@@ -166,12 +215,13 @@ void CTDLOffsetDatesDlg::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("SubtaskRefs"), m_bOffsetSubtaskRefs);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("FromDate"), m_bOffsetFromDate);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("PreserveEndOfMonth"), m_bPreserveEndOfMonth);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("StartDate"), m_mapSelDates.Has(TDCD_START));
+	prefs.WriteProfileInt(m_sPrefsKey, _T("DueDate"), m_mapSelDates.Has(TDCD_DUE));
+	prefs.WriteProfileInt(m_sPrefsKey, _T("DoneDate"), m_mapSelDates.Has(TDCD_DONE));
+	prefs.WriteProfileInt(m_sPrefsKey, _T("Reminder"), m_mapSelDates.Has(TDCD_REMINDER));
 
 	// Cleanup old prefs
-	prefs.DeleteProfileEntry(m_sPrefsKey, _T("StartDate"));
-	prefs.DeleteProfileEntry(m_sPrefsKey, _T("DueDate"));
-	prefs.DeleteProfileEntry(m_sPrefsKey, _T("DoneDate"));
-	prefs.DeleteProfileEntry(m_sPrefsKey, _T("Reminder"));
+	prefs.DeleteProfileEntry(m_sPrefsKey, _T("What"));
 	prefs.DeleteProfileEntry(m_sPrefsKey, _T("FromToday"));
 }
 
@@ -189,7 +239,7 @@ void CTDLOffsetDatesDlg::OnClickOffsetSubtasks()
 
 void CTDLOffsetDatesDlg::OnClickWhatList()
 {
-	UpdateData();
+	UpdateCachedDateAttributes();
 	EnableDisableControls();
 }
 
@@ -205,5 +255,18 @@ void CTDLOffsetDatesDlg::EnableDisableControls()
 	GetDlgItem(IDC_OFFSETSUBTASKREFS)->EnableWindow(m_bOffsetSubtasks);
 	GetDlgItem(IDC_OFFSETDATE)->EnableWindow(m_bOffsetFromDate);
 
-	GetDlgItem(IDOK)->EnableWindow(m_dwOffsetWhat != 0);
+	BOOL bEnableOK = (!m_mapSelDates.IsEmpty() || !m_mapSelCustAttribIDs.IsEmpty());
+
+	GetDlgItem(IDOK)->EnableWindow(bEnableOK);
+	GetDlgItem(IDC_NOATTRIBSELECTED)->ShowWindow(bEnableOK ? SW_HIDE : SW_SHOW);
+}
+
+HBRUSH CTDLOffsetDatesDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	if (pWnd->GetDlgCtrlID() == IDC_NOATTRIBSELECTED)
+		pDC->SetTextColor(CTDLDialog::GetErrorLabelTextColor());
+
+	return hbr;
 }

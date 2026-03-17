@@ -240,7 +240,8 @@ public:
 	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
 
 	BOOL OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDATEOFFSET& offset);
-	BOOL CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const;
+	BOOL OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet& mapCustAttribIDs, const TDCDATEOFFSET& offset);
+	BOOL CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates, const CStringSet& mapCustAttribIDs = CStringSet()) const;
 
 	CString GetSelectedTaskComments() const { return m_taskTree.GetSelectedTaskComments(); }
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;

@@ -487,6 +487,7 @@ protected:
 	afx_msg void OnUpdateEditInsertDateAndOrTime(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditLocktask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOffsetDates(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditOffsetStartDueDates(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOpenFileLink(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteAfter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteAsRef(CCmdUI* pCmdUI);

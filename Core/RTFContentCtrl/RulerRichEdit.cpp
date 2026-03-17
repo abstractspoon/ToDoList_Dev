@@ -141,7 +141,8 @@ CRulerRichEdit::CRulerRichEdit(CRtfHtmlConverter& rtfHtml)
 	m_bIMEComposing(FALSE), 
 	m_nFileLinkOption(REP_ASIMAGE), 
 	m_bReduceImageColors(TRUE),
-	m_rtfHtml(rtfHtml)
+	m_rtfHtml(rtfHtml),
+	m_bLinkOptionIsDefault(FALSE)
 	
 {
 	EnableSelectOnFocus(FALSE);

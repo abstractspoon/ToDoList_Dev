@@ -683,6 +683,7 @@ void CEnListCtrl::DrawCellText(CDC* pDC, int /*nItem*/, int /*nCol*/,
 {
 	if (!sText.IsEmpty())
 	{
+		pDC->SetBkMode(TRANSPARENT);
 		pDC->SetTextColor(crText);
 		pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, nDrawTextFlags);
 	}
