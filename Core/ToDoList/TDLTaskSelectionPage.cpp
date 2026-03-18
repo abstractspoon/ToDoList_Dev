@@ -355,6 +355,7 @@ BOOL CTDLTaskSelectionPage::GetWantIncompleteTasksOnly() const
 	return (!GetWantSelectedTasks() && !m_bCompletedTasks && m_bIncompleteTasks);
 }
 
+/*
 HBRUSH CTDLTaskSelectionPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	// Forward background-related requests to our parent
@@ -372,6 +373,7 @@ HBRUSH CTDLTaskSelectionPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	// all the rest
 	return CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
 }
+*/
 	
 	
 
