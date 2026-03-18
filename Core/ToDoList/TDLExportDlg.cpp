@@ -253,6 +253,7 @@ COleDateTime CTDLExportDlg::GetExportDate() const
 	return CDateHelper::NullDate();
 }
 
+/*
 /////////////////////////////////////////////////////////////////////////////
 // CTDLExportTaskSelectionPage dialog
 
@@ -307,6 +308,7 @@ void CTDLExportTaskSelectionPage::OnOK()
 
 	m_dlgTaskSel.OnOK();
 }
+*/
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLExportToPage dialog

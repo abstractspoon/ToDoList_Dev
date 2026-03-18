@@ -94,6 +94,7 @@ protected:
 	void RefreshCtrlStates();
 };
 
+/*
 /////////////////////////////////////////////////////////////////////////////
 // CTDLExportTaskSelectionPage dialog
 
@@ -136,6 +137,7 @@ protected:
 	// Implementation
 protected:
 };
+*/
 
 /////////////////////////////////////////////////////////////////////////////
 // CExportDlg dialog
@@ -164,7 +166,7 @@ public:
 	BOOL GetExportOneFile() const { return m_pageTo.GetExportOneFile(); }
 	BOOL GetExportToClipboard() const { return m_pageTo.GetExportToClipboard(); }
 
-	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel/*.GetTaskSelection()*/; }
 
 protected:
 	CString	m_sExportTitle;
@@ -174,7 +176,7 @@ protected:
 
 	CHistoryComboBox m_cbTitle;
 	CTDLExportToPage m_pageTo;
-	CTDLExportTaskSelectionPage m_pageTaskSel;
+	CTDLTaskSelectionPage m_pageTaskSel;
 	CTabbedPropertyPageHost m_ppHost;
 	const CImportExportMgr& m_mgrImportExport;
 
