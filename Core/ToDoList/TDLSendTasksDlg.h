@@ -7,8 +7,8 @@
 // TDLSendTasksDlg.h : header file
 //
 
-#include "TDLTaskSelectionPage.h"
-#include "TDLPrintDialog.h"
+#include "TDLPrintDialog.h" // For CTDLDialog, CTDLHtmlStyleStatic, CTDLHtmlStyleComboBox
+#include "TaskSelectionDlg.h"
 #include "TDCImportExportMgr.h"
 
 #include "..\Interfaces\ImportExportComboBox.h"
