@@ -506,6 +506,7 @@ void CTDLPrintStylePage::OnSelchangeSimplePageOption()
 	UpdateData();
 }
 
+/*
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPrintTaskSelectionPage dialog
 
@@ -557,3 +558,4 @@ void CTDLPrintTaskSelectionPage::SetOutputStyle(TDLPD_STYLE nStyle)
 	if (GetSafeHwnd())
 		m_dlgTaskSel.EnableWindow(m_nExportStyle != TDLPDS_IMAGE);
 }
+*/

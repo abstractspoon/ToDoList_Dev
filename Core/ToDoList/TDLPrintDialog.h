@@ -7,8 +7,8 @@
 // TDLPrintDialog.h : header file
 //
 
-#include "TDLTaskSelectionPage.h"
 #include "TDLDialog.h"
+#include "TDLTaskSelectionPage.h"
 
 #include "..\shared\fileedit.h"
 #include "..\shared\icon.h"
@@ -98,6 +98,7 @@ protected:
 	CString GetBaseStylesheetPath() const;
 };
 
+/*
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPrintTaskSelectionPage dialog
 
@@ -126,6 +127,8 @@ protected:
 protected:
 	DECLARE_MESSAGE_MAP()
 };
+*/
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPrintDialog dialog
 
@@ -149,7 +152,7 @@ public:
 	BOOL GetStylesheet(CString& sStylesheet) const { return m_pageStyle.GetStylesheet(sStylesheet); }
 	BOOL GetOtherExporterTypeID(CString& sExporterID) const { return m_pageStyle.GetOtherExporterTypeID(sExporterID); }
 
-	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel/*.GetTaskSelection()*/; }
 
 protected:
 	enum { IDD = IDD_PRINT_DIALOG };
@@ -161,7 +164,7 @@ protected:
 	
 	CHistoryComboBox m_cbTitle;
 	CTDLPrintStylePage m_pageStyle;
-	CTDLPrintTaskSelectionPage m_pageTaskSel;
+	CTDLTaskSelectionPage m_pageTaskSel;
 	CTabbedPropertyPageHost m_ppHost;
 
 protected:
