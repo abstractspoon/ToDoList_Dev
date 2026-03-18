@@ -101,9 +101,6 @@
     <ClCompile Include="..\ToDoList\TaskListTxtExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TaskSelectionDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDCAnonymizeTasklist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -506,6 +503,9 @@
     <ClCompile Include="..\ToDoList\TDCFileBackup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLTaskSelectionPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -596,9 +596,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TaskListTxtExporter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\TaskSelectionDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCAnonymizeTasklist.h">
@@ -1028,6 +1025,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDCFileBackup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLTaskSelectionPage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

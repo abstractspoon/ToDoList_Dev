@@ -8,8 +8,7 @@
 //
 
 #include "TDLDialog.h"
-#include "TaskSelectionDlg.h"
-#include "TDLDialog.h"
+#include "TDLTaskSelectionPage.h"
 
 #include "..\shared\filemisc.h"
 #include "..\shared\fileedit.h"
@@ -32,7 +31,7 @@ public:
 	CString GetTitle() const { return m_sTitle; }
 	COleDateTime GetDate() const;
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_dlgTaskSel; }
 
 protected:
 // Dialog Data
@@ -40,7 +39,7 @@ protected:
 	enum { IDD = IDD_TRANSFORM_DIALOG };
 	CFileEdit	m_eStylesheet;
 	CString	m_sStylesheet;
-    CTaskSelectionDlg m_dlgTaskSel;
+    CTDLTaskSelectionPage m_dlgTaskSel;
 	//}}AFX_DATA
 	CString	m_sTitle;
 	BOOL	m_bDate;

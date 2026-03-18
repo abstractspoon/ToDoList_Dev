@@ -8,7 +8,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "TaskSelectionDlg.h"
+#include "TDLTaskSelectionPage.h"
 #include "TDLPrintDialog.h"
 #include "TDCImportExportMgr.h"
 
@@ -107,7 +107,7 @@ public:
 								BOOL bVisibleColumnsOnly);
 	~CTDLExportTaskSelectionPage();
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_dlgTaskSel; }
 
 protected:
 	// Dialog Data
@@ -116,7 +116,7 @@ protected:
 	// NOTE: the ClassWizard will add data members here
 	//}}AFX_DATA
 
-	CTaskSelectionDlg m_dlgTaskSel;
+	CTDLTaskSelectionPage m_dlgTaskSel;
 
 	// Overrides
 protected:
@@ -164,7 +164,7 @@ public:
 	BOOL GetExportOneFile() const { return m_pageTo.GetExportOneFile(); }
 	BOOL GetExportToClipboard() const { return m_pageTo.GetExportToClipboard(); }
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
 
 protected:
 	CString	m_sExportTitle;

@@ -7,7 +7,7 @@
 // TDLPrintDialog.h : header file
 //
 
-#include "TaskSelectionDlg.h"
+#include "TDLTaskSelectionPage.h"
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
@@ -109,13 +109,13 @@ public:
 							   LPCTSTR szRegKey, BOOL bEnableSubtaskSelection);
 	~CTDLPrintTaskSelectionPage();
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_dlgTaskSel; }
 	void SetOutputStyle(TDLPD_STYLE nStyle);
 
 protected:
 	enum { IDD = IDD_PRINT_TASKSEL_PAGE };
 
-	CTaskSelectionDlg m_dlgTaskSel;
+	CTDLTaskSelectionPage m_dlgTaskSel;
 	TDLPD_STYLE	m_nExportStyle;
 
 protected:
@@ -149,7 +149,7 @@ public:
 	BOOL GetStylesheet(CString& sStylesheet) const { return m_pageStyle.GetStylesheet(sStylesheet); }
 	BOOL GetOtherExporterTypeID(CString& sExporterID) const { return m_pageStyle.GetOtherExporterTypeID(sExporterID); }
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel.GetTaskSelection(); }
 
 protected:
 	enum { IDD = IDD_PRINT_DIALOG };

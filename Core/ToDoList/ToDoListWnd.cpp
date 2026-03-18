@@ -10476,7 +10476,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments,
 
 int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, 
 						   const CString& sHtmlImageDir, BOOL bTransform,
-						   const CTaskSelectionDlg& taskSel, CTaskFile& tasks) const
+						   const CTDLTaskSelectionPage& taskSel, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter(TDCGT_ALL);
 	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
@@ -13128,7 +13128,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nFormat);
 		CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sFilePath);
 
-		const CTaskSelectionDlg& taskSel = dialog.GetTaskSelection();
+		const CTDLTaskSelectionPage& taskSel = dialog.GetTaskSelection();
 
 		CTaskFile tasks;
 		GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, taskSel, tasks);

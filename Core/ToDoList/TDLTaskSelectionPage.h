@@ -32,14 +32,14 @@ enum TSD_TASKS
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CTaskSelectionDlg dialog
+// CTDLTaskSelectionPage dialog
 
 class CToDoCtrl;
 
-class CTaskSelectionDlg : public CDialog
+class CTDLTaskSelectionPage : public CDialog
 {
 public:
-	CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+	CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 					  LPCTSTR szRegKey = NULL, 
 					  BOOL bEnableSubtaskSelection = TRUE, 
 					  BOOL bVisibleColumnsOnly = FALSE); 

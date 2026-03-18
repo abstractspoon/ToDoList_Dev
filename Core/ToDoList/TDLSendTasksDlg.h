@@ -7,7 +7,7 @@
 // TDLSendTasksDlg.h : header file
 //
 
-#include "TaskSelectionDlg.h"
+#include "TDLTaskSelectionPage.h"
 #include "TDLPrintDialog.h"
 #include "TDCImportExportMgr.h"
 
@@ -38,7 +38,7 @@ public:
 	CString GetFormatTypeID() const { return m_sFormatTypeID; }
 	TDLPD_STYLE GetHtmlStyle() const { return m_nHtmlStyle; } 
 
-	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_dlgTaskSel; }
 
 protected:
 // Dialog Data
@@ -51,7 +51,7 @@ protected:
 	CString	m_sFormatTypeID;
 
 	CImportExportComboBox m_cbFormat;
-	CTaskSelectionDlg m_dlgTaskSel;
+	CTDLTaskSelectionPage m_dlgTaskSel;
 	CTDLHtmlStyleStatic m_stHtmlOptionIcon;
 	CTDLHtmlStyleComboBox m_cbHtmlOptions;
 
