@@ -4,12 +4,13 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// TDLImportDialog.h : header file
-//
+
+/////////////////////////////////////////////////////////////////////////////
 
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
+#include "..\shared\TabbedPropertyPageHost.h"
 
 #include "..\Interfaces\importexportmgr.h"
 #include "..\Interfaces\ImportExportComboBox.h"
@@ -19,45 +20,32 @@
 class CTDCImportExportMgr;
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportDialog dialog
+// CTDLImportFromPage
 
-class CTDLImportDialog : public CTDLDialog
+class CTDLImportFromPage : public CCmdNotifyPropertyPage, CDialogHelper
 {
-// Construction
 public:
-	CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent = NULL);   // standard constructor
+	CTDLImportFromPage(const CTDCImportExportMgr& mgr, CWnd* pParent = NULL);
 
-	BOOL SetImportTo(TDLID_IMPORTTO nImportTo);
+	void SetImporterFormatID(LPCTSTR szFormatID);
 	BOOL SetUseFile(LPCTSTR szFilePath);
-	void SetUseClipboard();
+	BOOL SetUseClipboard();
 	BOOL SetUseText(LPCTSTR szText);
 
-	CString GetFormatTypeID() const;
-	TDLID_IMPORTTO GetImportTo() const;
 	BOOL GetImportFromText() const;
 	CString GetImportFilePath() const;
 	CString GetImportText() const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLImportDialog)
-	enum { IDD = IDD_IMPORT_DIALOG };
-	CComboBox	m_cbTasklistPos;
-	CFileEdit	m_eFilePath;
-	CImportExportComboBox m_cbFormat;
-	int		m_bFromText;
-	CString	m_sFromFilePath;
-	int		m_nImportTo;
+	CFileEdit m_eFilePath;
+	CFont m_fontMonospace;
+
 	CString	m_sFormatTypeID;
+	CString	m_sFromFilePath;
 	CString	m_sFromText;
-	int		m_bMatchByTaskID;
-	//}}AFX_DATA
-	int		m_nActiveTasklistPos;
-	BOOL	m_bTasklistHasSelection;
+	BOOL	m_bFromText;
 
 	const CImportExportMgr& m_mgrImportExport;
-	BOOL m_bReadonlyTasklist;
-	CFont m_fontMonospace;
 
 	enum IMPORT_MODE
 	{
@@ -69,39 +57,99 @@ protected:
 
 	IMPORT_MODE m_nImportMode;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLImportDialog)
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void OnOK();
 	virtual BOOL OnInitDialog();
-	//}}AFX_VIRTUAL
-	virtual void OnRepositionControls(int dx, int dy);
 
-// Implementation
 protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(CTDLImportDialog)
 	afx_msg void OnChangeImportFrom();
-	afx_msg void OnSelchangeFormatoptions();
 	afx_msg void OnChangeClipboardtext();
 	afx_msg void OnChangeFilepath();
 	afx_msg void OnRefreshclipboard();
-	afx_msg void OnChangeImportTo();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 	BOOL IsCurrentImporterFileBased() const;
 	CString GetCurrentImporterFilter() const;
-	void EnableOK();
 	void UpdateTextField();
 	BOOL IsMode(IMPORT_MODE nMode) const { return (m_nImportMode == nMode); }
 	void EnableDisableControls();
 };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLImportToPage 
+class CTDLImportToPage : public CCmdNotifyPropertyPage, CDialogHelper
+{
+public:
+	CTDLImportToPage(BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent = NULL);   // standard constructor
+
+	BOOL SetImportTo(TDLID_IMPORTTO nImportTo);
+	TDLID_IMPORTTO GetImportTo() const;
+
+protected:
+	CComboBox	m_cbTasklistPos;
+
+	int		m_nActiveTasklistPos;
+	int		m_nImportTo;
+	BOOL	m_bMatchByTaskID;
+	BOOL	m_bTasklistHasSelection;
+	BOOL	m_bReadonlyTasklist;
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual void OnOK();
+	virtual BOOL OnInitDialog();
+
+protected:
+	afx_msg void OnChangeImportTo();
+	DECLARE_MESSAGE_MAP()
+
+	void EnableDisableControls();
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLImportDialog dialog
+
+class CTDLImportDialog : public CTDLDialog
+{
+public:
+	CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent = NULL);   // standard constructor
+
+	BOOL SetImportTo(TDLID_IMPORTTO nImportTo) { return m_pageTo.SetImportTo(nImportTo); }
+	BOOL SetUseFile(LPCTSTR szFilePath);
+	void SetUseClipboard();
+	BOOL SetUseText(LPCTSTR szText);
+
+	CString GetFormatTypeID() const;
+	TDLID_IMPORTTO GetImportTo() const { return m_pageTo.GetImportTo(); }
+	BOOL GetImportFromText() const { return m_pageFrom.GetImportFromText(); }
+	CString GetImportFilePath() const { return m_pageFrom.GetImportFilePath(); }
+	CString GetImportText() const { return m_pageFrom.GetImportText(); }
+
+protected:
+	CImportExportComboBox m_cbFormat;
+	CTabbedPropertyPageHost m_ppHost;
+	CTDLImportFromPage m_pageFrom;
+	CTDLImportToPage m_pageTo;
+
+	const CImportExportMgr& m_mgrImportExport;
+	CString	m_sFormatTypeID;
+	UINT m_nTitleStrID;
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual void OnOK();
+	virtual BOOL OnInitDialog();
+
+protected:
+	afx_msg void OnSelchangeImporter();
+	afx_msg void OnChangeClipboardtext();
+	afx_msg void OnChangeFilepath();
+	DECLARE_MESSAGE_MAP()
+
+	CString GetCurrentImporterFilter() const;
+	void EnableOK();
+};
 
 #endif // !defined(AFX_TDLIMPORTDIALOG_H__F3B10AEE_B46C_4183_AC05_FB72D7C5AFA4__INCLUDED_)

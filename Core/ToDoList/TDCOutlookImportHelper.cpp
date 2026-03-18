@@ -8,7 +8,7 @@
 #include "todoitem.h"
 #include "taskfile.h"
 #include "TDCOutlookImportHelper.h"
-#include "TDLImportOutlookObjectsDlg.h"
+#include "TDLOutlookAttributeMappingDlg.h"
 #include "TDCTaskListDropTarget.h"
 
 #include "..\shared\Misc.h"
@@ -55,7 +55,7 @@ int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, ITaskList* pTas
 		return 0; // nothing looking like an outlook object
 	
 	// display the mapping dialog and create the tasks
-	CTDLImportOutlookObjectsDlg dialog(*pItem);
+	CTDLOutlookAttributeMappingDlg dialog(*pItem);
 	CTDCAttributeMapping aMapping;
 	
 	if (dialog.DoModal() != IDOK)
@@ -217,7 +217,7 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 			}
 			else
 			{
-				tdi.sComments += CTDLImportOutlookObjectsDlg::GetOutlookFieldName(oaType);
+				tdi.sComments += CTDLOutlookAttributeMappingDlg::GetOutlookFieldName(oaType);
 				tdi.sComments += _T(": ");
 				tdi.sComments += sData;
 			}

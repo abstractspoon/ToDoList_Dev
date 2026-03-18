@@ -116,6 +116,7 @@ BOOL CTabbedPropertyPageHost::ConstructTabControl()
 		}
 	}
 
+	m_tabCtrl.SetCurSel(0);
 	return TRUE;
 }
 
@@ -207,18 +208,20 @@ BOOL CTabbedPropertyPageHost::CalcTabPageRects(int nWidth, int nHeight, CRect& r
 		nHeight = rClient.Height();
 	}
 
-	// to get round AdjustRect not being const
+	// Calculate the height/width of the tab itself
 	rTabs = CRect(0, 0, nWidth, 0);
-	(const_cast<CTabbedPropertyPageHost*>(this))->m_tabCtrl.AdjustRect(TRUE, rTabs);
+	::SendMessage(m_tabCtrl, TCM_ADJUSTRECT, TRUE, (LPARAM)(LPRECT)rTabs);
 
 	int nTabHeight = rTabs.Height();
 
 	rTabs.SetRect(0, 0, nWidth, nHeight);
 	rPages.SetRect(0, 0, nWidth, nHeight);
 
+	// Adjust page rect for tab border
 	CDlgUnits dlu(GetParent(), TRUE);
-	rPages.DeflateRect(dlu.ToPixelsX(7), dlu.ToPixelsY(7));
+	rPages.DeflateRect(dlu.ToPixelsX(2), dlu.ToPixelsY(2));
 
+	// Adjust page rect for tab height/width
 	switch (m_tabCtrl.GetOrientation())
 	{
 		case e_tabTop:	  

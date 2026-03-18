@@ -257,15 +257,6 @@
     <ClCompile Include="..\ToDoList\TDLImportDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLImportOutlookDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectsDlg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectSetupListCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\ToDoList\TDLInfoTipCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -503,6 +494,13 @@
     <ClCompile Include="..\ToDoList\ToDoList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLOutlookAttributeMappingDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLOutlookAttributeMappingListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLOutlookImportItemsDlg.cpp">
     <ClCompile Include="..\ToDoList\TDCFileBackup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -749,15 +747,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLImportDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\TDLImportOutlookDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\TDLImportOutlookObjectsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ToDoList\TDLImportOutlookObjectSetupListCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLInfoTipCtrl.h">
@@ -1027,6 +1016,13 @@
     <ClInclude Include="..\ToDoList\ToDoList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLOutlookAttributeMappingDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLOutlookAttributeMappingListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLOutlookImportItemsDlg.h">
     <ClInclude Include="..\ToDoList\TDCFileBackup.h">
       <Filter>Header Files</Filter>
     </ClInclude>

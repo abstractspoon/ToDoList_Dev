@@ -493,18 +493,6 @@ SOURCE=..\ToDoList\TDLImportDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDLImportOutlookDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLImportOutlookObjectsDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLImportOutlookObjectSetupListCtrl.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TDLInfoTipCtrl.cpp
 # End Source File
 # Begin Source File
@@ -530,6 +518,18 @@ SOURCE=..\ToDoList\TDLOffsetDatesDlg.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLOleMessageFilter.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLOutlookAttributeMappingDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLOutlookAttributeMappingListCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLOutlookImportItemsDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -1189,18 +1189,6 @@ SOURCE=..\ToDoList\TDLImportDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TDLImportOutlookDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLImportOutlookObjectsDlg.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLImportOutlookObjectSetupListCtrl.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TDLInfoTipCtrl.h
 # End Source File
 # Begin Source File
@@ -1226,6 +1214,18 @@ SOURCE=..\ToDoList\TDLOffsetDatesDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLOleMessageFilter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLOutlookAttributeMappingDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLOutlookAttributeMappingListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLOutlookImportItemsDlg.h
 # End Source File
 # Begin Source File
 
