@@ -8,8 +8,10 @@
 //
 
 #include "TDLPrintDialog.h" // For CTDLDialog, CTDLHtmlStyleStatic, CTDLHtmlStyleComboBox
-#include "TaskSelectionDlg.h"
+#include "TDLTaskSelectionPage.h"
 #include "TDCImportExportMgr.h"
+
+#include "..\shared\tabbedpropertypagehost.h"
 
 #include "..\Interfaces\ImportExportComboBox.h"
 
