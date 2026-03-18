@@ -30,7 +30,7 @@ public:
 	BOOL Translate(CString& sText, HMENU hMenu, BOOL bValidateAccelerator);
 	BOOL IsTranslated() const;
 
-	BOOL ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) const;
+	BOOL AppendToCsv(CStringArray& aLines) const;
 	BOOL FromCsv(const CStringArray& aLines, int& nLine, BOOL bDecodeChars = TRUE);
 	
 	BOOL Merge(const DICTITEM& di);
@@ -46,7 +46,9 @@ public:
 	const CString& GetTextOut() const { return m_sTextOut; }
 	const CString& GetClassID() const { return m_sClassID; }
 	const CMapStringToString& GetAlternatives() const { return m_mapAlternatives; }
+	
 	int GetTextOut(CStringArray& aTextOut) const; // including alternatives
+	int CompareTextIn(const DICTITEM& di) const;
 
 	static void SetTranslationOption(ITT_TRANSLATEOPTION nOption);
 	static ITT_TRANSLATEOPTION GetTranslationOption() { return s_nTranslationOption; }
@@ -63,21 +65,25 @@ protected:
 	static ITT_TRANSLATEOPTION s_nTranslationOption;
 
 protected:
-	static int GetDlgCtrlID(HWND hWnd);
-	static BOOL FromCsv(const CString& sLine, DICTITEM& di, BOOL bDecodeChars);
-
-	static void FixupFormatString(CString& sFormat);
-
 	BOOL Translate(CString& sText, const CString& sClassID);
 	int GetClassIDs(CStringArray& aClassIDs) const;
 	CString GetTextOut(const CString& sClassID) const;
 	BOOL FixupClassID(CString& sClassID) const;
+	int CompareClassIDs(const DICTITEM& di) const;
+
+	static int GetDlgCtrlID(HWND hWnd);
+	static BOOL FromCsv(const CString& sLine, DICTITEM& di, BOOL bDecodeChars);
+
+	static void FixupFormatString(CString& sFormat);
+	static int CompareAlternativesProc(const void* pFirst, const void* pSecond);
+	static void AppendRowToCSV(const CString& sTextIn, const CString& sTextOut, const CString& sClassID, BOOL bAlternative, CStringArray& aLines);
 };
 
 //////////////////////////////////////////////////////////////////////
 
 typedef CMap<CString, LPCTSTR, DICTITEM*, DICTITEM*&> CDictItemMap;
-typedef CArray<DICTITEM*, DICTITEM*&> CDictItemArray;
+typedef CArray<DICTITEM*, DICTITEM*&> CDictItemPtrArray;
+typedef CArray<DICTITEM, DICTITEM&> CDictItemArray;
 
 //////////////////////////////////////////////////////////////////////
 

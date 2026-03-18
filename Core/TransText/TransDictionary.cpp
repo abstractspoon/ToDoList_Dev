@@ -63,7 +63,10 @@ DICTITEM::DICTITEM(const DICTITEM& di)
 }
 
 DICTITEM::DICTITEM(const CString& sText, LPCTSTR szTextOut, LPCTSTR szClassID) 
-	: m_sTextIn(sText), m_sClassID(szClassID), m_sTextOut(szTextOut)
+	: 
+	m_sTextIn(sText), 
+	m_sClassID(szClassID), 
+	m_sTextOut(szTextOut)
 {
 }
 
@@ -148,28 +151,14 @@ void DICTITEM::FixupFormatString(CString& sFormat)
 	}
 }
 
-BOOL DICTITEM::ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) const
+BOOL DICTITEM::AppendToCsv(CStringArray& aLines) const
 {
-	aTransLines.RemoveAll();
-	aNeedTransLines.RemoveAll();
-
 	if (!m_sTextIn.IsEmpty())
 	{
-		// replace certain chars in text else they'll trip up the dictionary when it's read back in
-		CString sTextIn(m_sTextIn), sTextOut(m_sTextOut);
+		AppendRowToCSV(m_sTextIn, m_sTextOut, m_sClassID, FALSE, aLines);
 
-		TransText::EncodeChars(sTextIn);
-		TransText::EncodeChars(sTextOut);
-			
-		CString sLine;
-		sLine.Format(_T("\"%s\"\t\"%s\"\t\"%s\""), sTextIn, sTextOut, m_sClassID);
-
-		if (m_sTextOut.IsEmpty())
-			aNeedTransLines.Add(sLine);
-		else
-			aTransLines.Add(sLine);
-
-		// add alternatives, indented 
+		// Alternatives, maintaining original order
+		CDictItemArray aAltItems;
 		POSITION pos = m_mapAlternatives.GetStartPosition();
 
 		while (pos)
@@ -179,26 +168,84 @@ BOOL DICTITEM::ToCsv(CStringArray& aTransLines, CStringArray& aNeedTransLines) c
 
 			if (!sAltClassID.IsEmpty())
 			{
-				TransText::EncodeChars(sAltTextOut);
-
-				sLine.Format(_T("  \"%s\"\t\"%s\"\t\"%s\""), m_sTextIn, sAltTextOut, sAltClassID);
-
-				if (sAltTextOut.IsEmpty())
-					aNeedTransLines.Add(sLine);
-				else
-					aTransLines.Add(sLine);
+				DICTITEM diAlt(m_sTextIn, sAltTextOut, sAltClassID);
+				aAltItems.Add(diAlt);
 			}
+		}
+		Misc::SortArrayT<DICTITEM>(aAltItems, CompareAlternativesProc);
+
+		for (int nAlt = 0; nAlt < aAltItems.GetSize(); nAlt++)
+		{
+			const DICTITEM& di = aAltItems[nAlt];
+			AppendRowToCSV(di.m_sTextIn, di.m_sTextOut, di.m_sClassID, TRUE, aLines);
 		}
 	}
 
-	return (aTransLines.GetSize() > 0 || aNeedTransLines.GetSize() > 0);
+	return (aLines.GetSize() > 0);
+}
+
+void DICTITEM::AppendRowToCSV(const CString& sTextIn, const CString& sTextOut, const CString& sClassID, BOOL bAlternative, CStringArray& aLines)
+{
+		// replace certain chars in text else they'll trip up the dictionary when it's read back in
+	CString sTextInEx(sTextIn), sTextOutEx(sTextOut);
+
+	TransText::EncodeChars(sTextInEx);
+	TransText::EncodeChars(sTextOutEx);
+
+	const LPCTSTR CSVFORMAT = _T("\"%s\"\t\"%s\"\t\"%s\"");
+
+	CString sLine;
+	sLine.Format(CSVFORMAT, sTextInEx, sTextOutEx, sClassID);
+
+	if (bAlternative)
+		sLine = _T("  ") + sLine; // indent alternatives
+
+	aLines.Add(sLine);
+}
+
+int DICTITEM::CompareAlternativesProc(const void* pFirst, const void* pSecond)
+{
+	const DICTITEM* pDIFirst = static_cast<const DICTITEM*>(pFirst);
+	const DICTITEM* pDISecond = static_cast<const DICTITEM*>(pSecond);
+
+	return pDIFirst->CompareClassIDs(*pDISecond);
+}
+
+int DICTITEM::CompareTextIn(const DICTITEM& di) const
+{
+	int nCompare = 0;
+
+	if (_istdigit(m_sTextIn[0]) && _istdigit(di.m_sTextIn[0]))
+	{
+		// Sort numbers 'naturally'
+		nCompare = Misc::NaturalCompare(m_sTextIn, di.m_sTextIn);
+	}
+	else
+	{
+		// and the rest case-insensitively
+		nCompare = m_sTextIn.CompareNoCase(di.m_sTextIn);
+	}
+
+	// If they're 'identical' do a case-sensitive comparison
+	// to keep the comparison stable
+	if (nCompare == 0)
+		nCompare = m_sTextIn.Compare(di.m_sTextIn);
+
+	ASSERT(nCompare != 0);
+
+	return nCompare;
+}
+
+int DICTITEM::CompareClassIDs(const DICTITEM& di) const
+{
+	return m_sClassID.CompareNoCase(di.m_sClassID);
 }
 
 BOOL DICTITEM::FromCsv(const CStringArray& aLines, int& nLine, BOOL bDecodeChars)
 {
 	const CString& sLine = Misc::GetItem(aLines, nLine);
 
-	if (sLine.Find(NEED_TRANSLATION) == 0 || sLine.Find(TRANSLATED) == 0)
+	if ((sLine.Find(NEED_TRANSLATION) == 0) || (sLine.Find(TRANSLATED) == 0))
 		return FALSE;
 
 	if (FromCsv(sLine, *this, bDecodeChars))
@@ -211,18 +258,17 @@ BOOL DICTITEM::FromCsv(const CStringArray& aLines, int& nLine, BOOL bDecodeChars
 			const CString& sNextLine = Misc::GetItem(aLines, nNextLine);
 			DICTITEM diAlt;
 
-			if (FromCsv(sNextLine, diAlt, bDecodeChars) && diAlt.m_sTextIn == m_sTextIn)
-			{
-				ASSERT(!diAlt.m_sClassID.IsEmpty());
-
-				if (!diAlt.m_sClassID.IsEmpty())
-					m_mapAlternatives[diAlt.m_sClassID] = diAlt.m_sTextOut;
-
-				nLine++;
-				nNextLine++;
-			}
-			else
+			if (!FromCsv(sNextLine, diAlt, bDecodeChars) || (diAlt.m_sTextIn != m_sTextIn))
 				break;
+
+			// else
+			ASSERT(!diAlt.m_sClassID.IsEmpty());
+
+			if (!diAlt.m_sClassID.IsEmpty())
+				m_mapAlternatives[diAlt.m_sClassID] = diAlt.m_sTextOut;
+
+			nLine++;
+			nNextLine++;
 		}
 
 		return TRUE;
@@ -1002,7 +1048,7 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 	aLines.Add(CSVCOLUMN_HEADER);
 
 	// Split dictionary into two parts
-	CDictItemArray aTranslatedItems, aNeedTranslationItems;
+	CDictItemPtrArray aTranslatedItems, aNeedTranslationItems;
 	POSITION pos = m_mapItems.GetStartPosition();
 
 	while (pos)
@@ -1021,56 +1067,41 @@ BOOL CTransDictionary::SaveCsvDictionary(LPCTSTR szDictPath) const
 	}
 
 	// sort by original text to maintain some sort of order
-	qsort(aTranslatedItems.GetData(), aTranslatedItems.GetSize(), sizeof(DICTITEM*), CompareProc);
-	qsort(aNeedTranslationItems.GetData(), aNeedTranslationItems.GetSize(), sizeof(DICTITEM*), CompareProc);
+	Misc::SortArrayT<DICTITEM*>(aTranslatedItems, CompareProc);
+	Misc::SortArrayT<DICTITEM*>(aNeedTranslationItems, CompareProc);
 
-	// Convert to strings
-	CStringArray aTranslated, aNeedTranslation;
-	CStringArray aTransLines, aNeedTransLines;
+	// Add strings to master list
 
-	int nNumItems = aTranslatedItems.GetSize(), nItem;
-	aTransLines.SetSize(nNumItems);
+	// 1. NEED_TRANSLATION comes first (more important)
+	int nNumItems = aNeedTranslationItems.GetSize();
 
-	for (nItem = 0; nItem < nNumItems; nItem++)
+	if (nNumItems)
 	{
-		const DICTITEM* pDI = aTranslatedItems[nItem];
+		int nPercent = ((aNeedTranslationItems.GetSize() * 100) / (aNeedTranslationItems.GetSize() + aTranslatedItems.GetSize()));
+		aLines.Add(Misc::Format(_T("%s %d%%"), NEED_TRANSLATION, nPercent));
 
-		if (pDI->ToCsv(aTransLines, aNeedTransLines))
+		for (int nItem = 0; nItem < nNumItems; nItem++)
 		{
-			aTranslated.Append(aTransLines);
-			aTranslated.Append(aNeedTransLines);
+			const DICTITEM* pDI = aNeedTranslationItems[nItem];
+			VERIFY(pDI->AppendToCsv(aLines));
 		}
 	}
 
-	nNumItems = aNeedTranslationItems.GetSize();
-	aNeedTransLines.SetSize(nNumItems);
+	// 2. Then comes TRANSLATED
+	nNumItems = aTranslatedItems.GetSize();
 
-	for (nItem = 0; nItem < nNumItems; nItem++)
-	{
-		const DICTITEM* pDI = aNeedTranslationItems[nItem];
-
-		if (pDI->ToCsv(aTransLines, aNeedTransLines))
-		{
-			aNeedTranslation.Append(aTransLines);
-			aNeedTranslation.Append(aNeedTransLines);
-		}
-	}
-
-	// put NEED_TRANSLATION first
-	if (aNeedTranslation.GetSize() > 0)
-	{
-		int nPercent = ((aNeedTranslation.GetSize() * 100) / (aNeedTranslation.GetSize() + aTranslated.GetSize()));
-
-		aLines.Add(Misc::Format(_T("%s %d"), NEED_TRANSLATION, nPercent));
-		aLines.Append(aNeedTranslation);
-	}
-
-	if (aTranslated.GetSize() > 0)
+	if (nNumItems)
 	{
 		aLines.Add(TRANSLATED);
-		aLines.Append(aTranslated);
+
+		for (int nItem = 0; nItem < nNumItems; nItem++)
+		{
+			const DICTITEM* pDI = aTranslatedItems[nItem];
+			VERIFY(pDI->AppendToCsv(aLines));
+		}
 	}
 
+	// Write to disk
 	CString sFileContents = Misc::FormatArray(aLines, _T("\r\n"));
 
 	return FileMisc::SaveFile(szDictPath, sFileContents, SFEF_UTF8);
@@ -1108,16 +1139,10 @@ int CTransDictionary::CompareProc(const void* pFirst, const void* pSecond)
 
 	typedef DICTITEM* LPDICTITEM;
 
-	// Compare only the input text
 	const DICTITEM* pDIFirst = *(static_cast<const LPDICTITEM*>(pFirst));
 	const DICTITEM* pDISecond = *(static_cast<const LPDICTITEM*>(pSecond));
 
-	// Sort numbers 'naturally'
-	if (_istdigit(pDIFirst->GetTextIn()[0]) && _istdigit(pDISecond->GetTextIn()[0]))
-		return Misc::NaturalCompare(pDIFirst->GetTextIn(), pDISecond->GetTextIn());
-
-	// and the rest case-insensitively
-	return pDIFirst->GetTextIn().CompareNoCase(pDISecond->GetTextIn());
+	return pDIFirst->CompareTextIn(*pDISecond);
 }
 
 BOOL CTransDictionary::HasDictItem(CString& sText) const
