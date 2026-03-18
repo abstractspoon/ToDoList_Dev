@@ -214,7 +214,7 @@ CTDLPrintStylePage::CTDLPrintStylePage(LPCTSTR szStylesheet,
 	m_mgrImpExp(mgrImpExp),
 	m_sExportToImageView(szExportToImageView),
 	m_sPrefsKey(szPrefsKey),
-	m_cbOtherExporters(mgrImpExp, FALSE, TRUE, _T("html;htm")),
+	m_cbOtherExporters(mgrImpExp, FALSE, TRUE, _T(".html;htm")),
 	m_eStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
 	m_nSimpleStyle(TDLPDS_WRAP)
 {

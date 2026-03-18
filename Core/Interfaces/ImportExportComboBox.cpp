@@ -38,12 +38,10 @@ CImportExportComboBox::~CImportExportComboBox()
 {
 }
 
-
 BEGIN_MESSAGE_MAP(CImportExportComboBox, COwnerdrawComboBoxBase)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportExportComboBox message handlers
 
 void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts)
 {
@@ -56,7 +54,10 @@ void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts
 		int nExt = Misc::Split(szFileExts, m_aFileExt, ';');
 
 		while (nExt--)
-			m_aFileExt[nExt] = FileMisc::GetExtension(m_aFileExt[nExt], FALSE);
+		{
+			if (m_aFileExt[nExt].Find('.') != -1)
+				m_aFileExt[nExt] = FileMisc::GetExtension(m_aFileExt[nExt], FALSE);
+		}
 	}
 	else
 	{
@@ -132,7 +133,7 @@ void CImportExportComboBox::BuildCombo()
 	}
 
 	// Restore previous selection
-	if (SetSelectedTypeID(sSelTypeID) == CB_ERR)
+	if (GetCount() && (SetSelectedTypeID(sSelTypeID) == CB_ERR))
 		VERIFY(SetCurSel(0) != CB_ERR);
 
 	CLocalizer::EnableTranslation(*this, FALSE);
