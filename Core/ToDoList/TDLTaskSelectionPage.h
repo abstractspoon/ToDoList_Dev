@@ -36,7 +36,7 @@ enum TSD_TASKS
 
 class CToDoCtrl;
 
-class CTDLTaskSelectionPage : public CDialog
+class CTDLTaskSelectionPage : public CPropertyPage
 {
 public:
 	CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
@@ -44,7 +44,7 @@ public:
 					  BOOL bEnableSubtaskSelection = TRUE, 
 					  BOOL bVisibleColumnsOnly = FALSE); 
 
-	BOOL Create(UINT nIDRefFrame, CWnd* pParent, UINT nID = IDC_STATIC);
+//	BOOL Create(UINT nIDRefFrame, CWnd* pParent, UINT nID = IDC_STATIC);
 	int DoModal() { ASSERT (0); return IDCANCEL; }
 
 	TSD_TASKS GetWantWhatTasks() const { return (TSD_TASKS)m_nWhatTasks; }

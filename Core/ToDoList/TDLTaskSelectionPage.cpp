@@ -28,6 +28,7 @@ CTDLTaskSelectionPage::CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArr
 									 BOOL bEnableSubtaskSelection,
 									 BOOL bVisibleColumnsOnly) 
 	: 
+	CPropertyPage(IDD_TASKSELECTION_DIALOG),
 	m_lbAttribList(aAttribDefs),
 	m_sRegKey(szRegKey), 
 	m_bEnableSubtaskSelection(bEnableSubtaskSelection)
@@ -80,10 +81,9 @@ CTDLTaskSelectionPage::CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArr
 	}
 }
 
-
 void CTDLTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CPropertyPage::DoDataExchange(pDX);
 
 	DDX_Radio(pDX, IDC_ALLTASKS, m_nWhatTasks);
 	DDX_Check(pDX, IDC_INCLUDEPARENTTASK, m_bSelectedParentTask);
@@ -102,7 +102,7 @@ void CTDLTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLTaskSelectionPage, CDialog)
+BEGIN_MESSAGE_MAP(CTDLTaskSelectionPage, CPropertyPage)
 	ON_WM_DESTROY()
 	ON_WM_ENABLE()
 	ON_WM_CTLCOLOR()
@@ -119,11 +119,12 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 
+/*
 BOOL CTDLTaskSelectionPage::Create(UINT nIDRefFrame, CWnd* pParent, UINT nID)
 {
 	ASSERT (nIDRefFrame && pParent);
 	
-	if (CDialog::Create(IDD_TASKSELECTION_DIALOG, pParent))
+	if (CPropertyPage::Create(IDD_TASKSELECTION_DIALOG, pParent))
 	{
 		if (nID != IDC_STATIC)
 			SetDlgCtrlID(nID);
@@ -150,10 +151,11 @@ BOOL CTDLTaskSelectionPage::Create(UINT nIDRefFrame, CWnd* pParent, UINT nID)
 	
 	return FALSE;
 }
+*/
 
 void CTDLTaskSelectionPage::OnOK() 
 {
-	CDialog::OnOK();
+	CPropertyPage::OnOK();
 	
 	// Save state
 	CPreferences prefs;
@@ -241,7 +243,7 @@ void CTDLTaskSelectionPage::OnIncludeNotDone()
 
 BOOL CTDLTaskSelectionPage::OnInitDialog() 
 {
-	CDialog::OnInitDialog();
+	CPropertyPage::OnInitDialog();
 	
 	UpdateEnableStates();
 
@@ -368,7 +370,7 @@ HBRUSH CTDLTaskSelectionPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		return (HBRUSH)GetParent()->SendMessage(nForwardMsg, (WPARAM)pDC->GetSafeHdc(), (LPARAM)pWnd->GetSafeHwnd());
 
 	// all the rest
-	return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	return CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
 }
 	
 	
