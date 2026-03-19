@@ -428,7 +428,6 @@ void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 	m_stHtmlOptionIcon.SetStyle(m_nHtmlStyle);
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLExportToPage, CCmdNotifyPropertyPage)
 	//{{AFX_MSG_MAP(CExportDlg)
 	ON_CBN_SELENDOK(IDC_FORMATOPTIONS, OnSelchangeExporterFormat)

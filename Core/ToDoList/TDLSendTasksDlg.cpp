@@ -27,11 +27,12 @@ CTDLSendTasksDlg::CTDLSendTasksDlg(const CTDCImportExportMgr& mgr,
 								   const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 								   CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLSendTasksDlg::IDD, _T("SendTasks"), pParent), 
+	CTDLDialog(IDD_SENDTASKS_DIALOG, _T("SendTasks"), pParent),
 	m_mgrImportExport(mgr),
 	m_cbFormat(mgr, FALSE, TRUE),
-	m_dlgTaskSel(aAttribDefs, m_sPrefsKey, bEnableSubtaskSelection),
+	m_pageTaskSel(aAttribDefs, m_sPrefsKey, bEnableSubtaskSelection),
 	m_nHtmlStyle(TDLPDS_WRAP)
+	// Note: No bold text for the tab control
 {
 	//{{AFX_DATA_INIT(CTDLSendTasksDlg)
 	//}}AFX_DATA_INIT
@@ -55,9 +56,10 @@ CTDLSendTasksDlg::CTDLSendTasksDlg(const CTDCImportExportMgr& mgr,
 
 	// bSelected overrides saved state
 	if (bSelectedTasks)
-		m_dlgTaskSel.SetWantWhatTasks(TSDT_SELECTED);
-}
+		m_pageTaskSel.SetWantWhatTasks(TSDT_SELECTED);
 
+	m_ppHost.AddPage(&m_pageTaskSel, CEnString(IDS_EXPORTDLG_TASKSEL));
+}
 
 void CTDLSendTasksDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -89,7 +91,9 @@ BOOL CTDLSendTasksDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 	
-    VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
+//    VERIFY(m_pageTaskSel.Create(IDC_FRAME, this));
+	m_ppHost.Create(IDC_PAGEHOST, this);
+//	m_ppHost.SetActivePage(0);
 
 	UpdateHtmlOptionsVisibility();
 
@@ -100,7 +104,7 @@ BOOL CTDLSendTasksDlg::OnInitDialog()
 void CTDLSendTasksDlg::OnOK()
 {
 	CTDLDialog::OnOK();
-	m_dlgTaskSel.OnOK();
+	m_pageTaskSel.OnOK();
 
 	CPreferences prefs;
 	prefs.WriteProfileInt(m_sPrefsKey, _T("SendTasksAs"), m_nSendTasksAsOption);

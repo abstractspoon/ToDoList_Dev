@@ -40,12 +40,11 @@ public:
 	CString GetFormatTypeID() const { return m_sFormatTypeID; }
 	TDLPD_STYLE GetHtmlStyle() const { return m_nHtmlStyle; } 
 
-	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_dlgTaskSel; }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel; }
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLSendTasksDlg)
-	enum { IDD = IDD_SENDTASKS_DIALOG };
 	//}}AFX_DATA
 
 	TDLPD_STYLE m_nHtmlStyle;
@@ -53,9 +52,10 @@ protected:
 	CString	m_sFormatTypeID;
 
 	CImportExportComboBox m_cbFormat;
-	CTDLTaskSelectionPage m_dlgTaskSel;
+	CTDLTaskSelectionPage m_pageTaskSel;
 	CTDLHtmlStyleStatic m_stHtmlOptionIcon;
 	CTDLHtmlStyleComboBox m_cbHtmlOptions;
+	CTabbedPropertyPageHost m_ppHost;
 
 	const CTDCImportExportMgr& m_mgrImportExport;
 
