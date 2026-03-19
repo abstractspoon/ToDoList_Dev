@@ -209,7 +209,7 @@ CTDLPrintStylePage::CTDLPrintStylePage(LPCTSTR szStylesheet,
 									   LPCTSTR szPrefsKey,
 									   LPCTSTR szExportToImageView)
 	: 
-	CPropertyPage(IDD_PRINT_STYLE_PAGE),
+	CCmdNotifyPropertyPage(IDD_PRINT_STYLE_PAGE),
 	m_mgrImpExp(mgrImpExp),
 	m_sExportToImageView(szExportToImageView),
 	m_sPrefsKey(szPrefsKey),
