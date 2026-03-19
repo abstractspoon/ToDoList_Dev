@@ -166,7 +166,6 @@ END_MESSAGE_MAP()
 void CTDLPrintDialog::OnOK() 
 {
 	CTDLDialog::OnOK();
-
 	m_ppHost.OnOK();
 
 	// save settings
@@ -186,8 +185,8 @@ BOOL CTDLPrintDialog::OnInitDialog()
 	else
 		SetWindowText(CEnString(IDS_PRINTDLG_PRINT_TITLE));
 
-	m_ppHost.Create(IDC_PAGEHOST, this);
-	m_ppHost.SetActivePage(m_nPrevActiveTab);
+	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
+	VERIFY(m_ppHost.SetActivePage(m_nPrevActiveTab));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

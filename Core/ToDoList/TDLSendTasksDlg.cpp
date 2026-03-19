@@ -92,8 +92,8 @@ BOOL CTDLSendTasksDlg::OnInitDialog()
 	CTDLDialog::OnInitDialog();
 	
 //    VERIFY(m_pageTaskSel.Create(IDC_FRAME, this));
-	m_ppHost.Create(IDC_PAGEHOST, this);
 //	m_ppHost.SetActivePage(0);
+	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
 
 	UpdateHtmlOptionsVisibility();
 
@@ -104,7 +104,7 @@ BOOL CTDLSendTasksDlg::OnInitDialog()
 void CTDLSendTasksDlg::OnOK()
 {
 	CTDLDialog::OnOK();
-	m_pageTaskSel.OnOK();
+	m_ppHost.OnOK();
 
 	CPreferences prefs;
 	prefs.WriteProfileInt(m_sPrefsKey, _T("SendTasksAs"), m_nSendTasksAsOption);

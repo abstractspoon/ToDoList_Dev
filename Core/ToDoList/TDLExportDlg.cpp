@@ -87,8 +87,8 @@ BOOL CTDLExportDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	m_ppHost.Create(IDC_PAGEHOST, this);
-	m_ppHost.SetActivePage(m_nPrevActiveTab);
+	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
+	VERIFY(m_ppHost.SetActivePage(m_nPrevActiveTab));
 
 	UpdateTitle();
 	EnableOK();
