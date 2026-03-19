@@ -13,6 +13,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\fileedit.h"
 #include "..\shared\historycombobox.h"
+#include "..\shared\tabbedpropertypagehost.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransformDialog dialog
@@ -31,19 +32,20 @@ public:
 	CString GetTitle() const { return m_sTitle; }
 	COleDateTime GetDate() const;
 
-	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_dlgTaskSel; }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel; }
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLTransformDialog)
-	enum { IDD = IDD_TRANSFORM_DIALOG };
-	CFileEdit	m_eStylesheet;
-	CString	m_sStylesheet;
-    CTDLTaskSelectionPage m_dlgTaskSel;
 	//}}AFX_DATA
+	CString	m_sStylesheet;
 	CString	m_sTitle;
 	BOOL	m_bDate;
+
+	CTabbedPropertyPageHost m_ppHost;
+	CTDLTaskSelectionPage m_pageTaskSel;
 	CHistoryComboBox m_cbTitle;
+	CFileEdit	m_eStylesheet;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -30,9 +30,10 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle,
 										 CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_TRANSFORM_DIALOG, _T("Transform"), pParent), 
-	m_dlgTaskSel(aAttribDefs, _T("Transform"), bEnableSubtaskSelection),
+	m_pageTaskSel(aAttribDefs, _T("Transform"), bEnableSubtaskSelection),
 	m_sTitle(szTitle), 
 	m_eStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
+	// Note: No bold text for the tab control
 {
 	//{{AFX_DATA_INIT(CTDLTransformDialog)
 	//}}AFX_DATA_INIT
@@ -40,9 +41,9 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle,
 	CPreferences prefs;
 
 	m_bDate = prefs.GetProfileInt(m_sPrefsKey, _T("WantDate"), TRUE);
+	m_cbTitle.Load(prefs, _T("Print"));	// share same title history as print dialog
 
-	// share same title history as print dialog
-	m_cbTitle.Load(prefs, _T("Print"));
+	m_ppHost.AddPage(&m_pageTaskSel, CEnString(IDS_EXPORTDLG_TASKSEL));
 
 	InitStylesheet(szStylesheet);
 }
@@ -51,6 +52,7 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle,
 void CTDLTransformDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
+
 	//{{AFX_DATA_MAP(CTDLTransformDialog)
 	DDX_Control(pDX, IDC_STYLESHEET, m_eStylesheet);
 	DDX_Text(pDX, IDC_STYLESHEET, m_sStylesheet);
@@ -75,7 +77,7 @@ END_MESSAGE_MAP()
 void CTDLTransformDialog::OnOK() 
 {
 	CTDLDialog::OnOK();
-	m_dlgTaskSel.OnOK();
+	m_ppHost.OnOK();
 
 	CPreferences prefs;
 
@@ -90,7 +92,8 @@ BOOL CTDLTransformDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 	
-    VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
+//    VERIFY(m_pageTaskSel.Create(IDC_FRAME, this));
+	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
 
 	OnChangeStylesheet();
 	

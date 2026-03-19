@@ -46,6 +46,7 @@ public:
 
 //	BOOL Create(UINT nIDRefFrame, CWnd* pParent, UINT nID = IDC_STATIC);
 	int DoModal() { ASSERT (0); return IDCANCEL; }
+	void SetWantWhatTasks(TSD_TASKS nWhat);
 
 	TSD_TASKS GetWantWhatTasks() const { return (TSD_TASKS)m_nWhatTasks; }
 	BOOL GetWantAllTasks() const { return m_nWhatTasks == TSDT_ALL; }
@@ -60,9 +61,6 @@ public:
 	TSD_ATTRIB GetAttributeOption() const { return (TSD_ATTRIB)m_nAttribOption; }
 	int GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttributeMap& mapAttrib) const;
 	BOOL GetWantCommentsWithVisible() const { return m_bIncludeComments; }
-
-	void SetWantWhatTasks(TSD_TASKS nWhat);
-	void OnOK();
 
 protected:
 	int		m_nAttribOption;
@@ -81,6 +79,7 @@ protected:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
+	virtual void OnOK();
 
 protected:
 	afx_msg void OnChangeAttribOption();
