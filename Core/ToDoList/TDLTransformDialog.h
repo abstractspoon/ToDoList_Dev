@@ -26,7 +26,7 @@ public:
 						BOOL bEnableSubtaskSelection,
 						LPCTSTR szStylesheet,
 						const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-						CWnd* pParent = NULL);   // standard constructor
+						CWnd* pParent = NULL);
 
 	CString GetStylesheet() const;
 	CString GetTitle() const { return m_sTitle; }
@@ -35,9 +35,6 @@ public:
 	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel; }
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CTDLTransformDialog)
-	//}}AFX_DATA
 	CString	m_sStylesheet;
 	CString	m_sTitle;
 	BOOL	m_bDate;
@@ -47,31 +44,19 @@ protected:
 	CHistoryComboBox m_cbTitle;
 	CFileEdit	m_eStylesheet;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLTransformDialog)
-	public:
-	virtual void OnOK();
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	//}}AFX_VIRTUAL
-
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CTDLTransformDialog)
+	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual void OnOK();
 	virtual BOOL OnInitDialog();
+
+protected:
 	afx_msg void OnChangeStylesheet();
 	afx_msg void OnConfigureStylesheet();
-	//}}AFX_MSG
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	void InitStylesheet(LPCTSTR szStylesheet);
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLTRANSFORMDIALOG_H__1A62F94F_687F_421C_97D2_300BAC4A3E7C__INCLUDED_)

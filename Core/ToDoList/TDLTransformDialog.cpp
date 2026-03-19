@@ -22,7 +22,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransformDialog dialog
 
-
 CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, 
 										 BOOL bEnableSubtaskSelection,
 										 LPCTSTR szStylesheet,
@@ -35,9 +34,6 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle,
 	m_eStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 	// Note: No bold text for the tab control
 {
-	//{{AFX_DATA_INIT(CTDLTransformDialog)
-	//}}AFX_DATA_INIT
-	// see what we had last time
 	CPreferences prefs;
 
 	m_bDate = prefs.GetProfileInt(m_sPrefsKey, _T("WantDate"), TRUE);
@@ -48,31 +44,24 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle,
 	InitStylesheet(szStylesheet);
 }
 
-
 void CTDLTransformDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CTDLTransformDialog)
 	DDX_Control(pDX, IDC_STYLESHEET, m_eStylesheet);
 	DDX_Text(pDX, IDC_STYLESHEET, m_sStylesheet);
-	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_TRANSFORMTITLE, m_sTitle);
 	DDX_Check(pDX, IDC_TRANSFORMDATE, m_bDate);
 	DDX_Control(pDX, IDC_TRANSFORMTITLE, m_cbTitle);
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLTransformDialog, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLTransformDialog)
 	ON_EN_CHANGE(IDC_STYLESHEET, OnChangeStylesheet)
 	ON_BN_CLICKED(IDC_CONFIGURESTYLESHEET, OnConfigureStylesheet)
-	//}}AFX_MSG_MAP
 	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLTransformDialog message handlers
 
 void CTDLTransformDialog::OnOK() 
 {
@@ -92,13 +81,11 @@ BOOL CTDLTransformDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 	
-//    VERIFY(m_pageTaskSel.Create(IDC_FRAME, this));
 	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
 
 	OnChangeStylesheet();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLTransformDialog::OnChangeStylesheet() 
@@ -158,5 +145,4 @@ COleDateTime CTDLTransformDialog::GetDate() const
 void CTDLTransformDialog::OnConfigureStylesheet() 
 {
 	// TODO: Add your control notification handler code here
-	
 }

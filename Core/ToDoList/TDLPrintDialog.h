@@ -46,7 +46,6 @@ protected:
 
 class CTDLPrintStylePage : public CPropertyPage
 {
-// Construction
 public:
 	CTDLPrintStylePage(LPCTSTR szStylesheet, 
 					   const CTDCImportExportMgr& mgrImpExp,
@@ -59,8 +58,6 @@ public:
 	BOOL GetOtherExporterTypeID(CString& sExporterID) const;
 
 protected:
-	enum { IDD = IDD_PRINT_STYLE_PAGE };
-
 	CTDLHtmlStyleStatic m_stSimpleIcon;
 	CTDLHtmlStyleComboBox m_cbSimpleOptions;
 	CImportExportComboBox m_cbOtherExporters;
@@ -79,7 +76,7 @@ protected:
 
 protected:
 	virtual void OnOK();
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 
 protected:
@@ -98,43 +95,10 @@ protected:
 	CString GetBaseStylesheetPath() const;
 };
 
-/*
 /////////////////////////////////////////////////////////////////////////////
-// CTDLPrintTaskSelectionPage dialog
-
-class CTDLPrintTaskSelectionPage : public CPropertyPage
-{
-// Construction
-public:
-	CTDLPrintTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-							   LPCTSTR szRegKey, BOOL bEnableSubtaskSelection);
-	~CTDLPrintTaskSelectionPage();
-
-	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_dlgTaskSel; }
-	void SetOutputStyle(TDLPD_STYLE nStyle);
-
-protected:
-	enum { IDD = IDD_PRINT_TASKSEL_PAGE };
-
-	CTDLTaskSelectionPage m_dlgTaskSel;
-	TDLPD_STYLE	m_nExportStyle;
-
-protected:
-	virtual void OnOK();
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual BOOL OnInitDialog();
-
-protected:
-	DECLARE_MESSAGE_MAP()
-};
-*/
-
-/////////////////////////////////////////////////////////////////////////////
-// CTDLPrintDialog dialog
 
 class CTDLPrintDialog : public CTDLDialog
 {
-// Construction
 public:
 	CTDLPrintDialog(LPCTSTR szTitle,
 					BOOL bPreview,
@@ -152,7 +116,7 @@ public:
 	BOOL GetStylesheet(CString& sStylesheet) const { return m_pageStyle.GetStylesheet(sStylesheet); }
 	BOOL GetOtherExporterTypeID(CString& sExporterID) const { return m_pageStyle.GetOtherExporterTypeID(sExporterID); }
 
-	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel/*.GetTaskSelection()*/; }
+	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel; }
 
 protected:
 	enum { IDD = IDD_PRINT_DIALOG };
@@ -175,8 +139,5 @@ protected:
 protected:
 	DECLARE_MESSAGE_MAP()
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_TDLPRINTDIALOG_H__1A62F94F_687F_421C_97D2_300BAC4A3E7C__INCLUDED_)
