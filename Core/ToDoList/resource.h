@@ -33,7 +33,7 @@
 #define IDD_PREFTASKDEF2_PAGE           159
 #define IDD_PREFMULTIUSER_PAGE          180
 #define IDD_PRINT_DIALOG                182
-#define IDD_TASKSELECTION_DIALOG        183
+#define IDD_TASKSELECTION_PAGE          183
 #define IDD_FILTER_DIALOG               186
 #define IDD_TRANSFORM_DIALOG            187
 #define IDD_OFFSETDATES_DIALOG          188

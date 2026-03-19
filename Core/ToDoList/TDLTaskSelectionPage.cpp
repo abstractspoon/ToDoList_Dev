@@ -28,7 +28,7 @@ CTDLTaskSelectionPage::CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArr
 									 BOOL bEnableSubtaskSelection,
 									 BOOL bVisibleColumnsOnly) 
 	: 
-	CCmdNotifyPropertyPage(IDD_TASKSELECTION_DIALOG),
+	CCmdNotifyPropertyPage(IDD_TASKSELECTION_PAGE),
 	m_lbAttribList(aAttribDefs),
 	m_sRegKey(szRegKey), 
 	m_bEnableSubtaskSelection(bEnableSubtaskSelection)
