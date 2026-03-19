@@ -28,7 +28,7 @@ CTDLTaskSelectionPage::CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArr
 									 BOOL bEnableSubtaskSelection,
 									 BOOL bVisibleColumnsOnly) 
 	: 
-	CPropertyPage(IDD_TASKSELECTION_DIALOG),
+	CCmdNotifyPropertyPage(IDD_TASKSELECTION_DIALOG),
 	m_lbAttribList(aAttribDefs),
 	m_sRegKey(szRegKey), 
 	m_bEnableSubtaskSelection(bEnableSubtaskSelection)
@@ -83,7 +83,7 @@ CTDLTaskSelectionPage::CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArr
 
 void CTDLTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	CCmdNotifyPropertyPage::DoDataExchange(pDX);
 
 	DDX_Radio(pDX, IDC_ALLTASKS, m_nWhatTasks);
 	DDX_Check(pDX, IDC_INCLUDEPARENTTASK, m_bSelectedParentTask);
@@ -93,8 +93,8 @@ void CTDLTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_INCLUDEDONE, m_bCompletedTasks);
 	DDX_Check(pDX, IDC_INCLUDENOTDONE, m_bIncompleteTasks);
 
-	// Because our radio buttons are out of sequence
-	// we use a special technique
+	// Because our radio buttons are out of sequence 
+	// (for backwards compatibility) we use a custom handler
 	static UINT RADIO_BTNS[] = { IDC_ALLATTRIB, IDC_VISIBLEATTRIB, IDC_CUSTOMATTRIB, IDC_TITLECOMMENTS };
 	static int NUM_RADIO_BTNS = sizeof(RADIO_BTNS) / sizeof(RADIO_BTNS[0]);
 
@@ -102,7 +102,7 @@ void CTDLTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLTaskSelectionPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CTDLTaskSelectionPage, CCmdNotifyPropertyPage)
 	ON_WM_DESTROY()
 	ON_WM_ENABLE()
 	ON_WM_CTLCOLOR()
@@ -119,43 +119,18 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 
-/*
-BOOL CTDLTaskSelectionPage::Create(UINT nIDRefFrame, CWnd* pParent, UINT nID)
+BOOL CTDLTaskSelectionPage::OnInitDialog() 
 {
-	ASSERT (nIDRefFrame && pParent);
+	CCmdNotifyPropertyPage::OnInitDialog();
 	
-	if (CPropertyPage::Create(IDD_TASKSELECTION_DIALOG, pParent))
-	{
-		if (nID != IDC_STATIC)
-			SetDlgCtrlID(nID);
-		
-		CWnd* pFrame = pParent->GetDlgItem(nIDRefFrame);
-		
-		if (pFrame)
-		{
-			CRect rFrame;
-			pFrame->GetWindowRect(rFrame);
-			pParent->ScreenToClient(rFrame);
-			
-			MoveWindow(rFrame);
+	UpdateEnableStates();
 
-			// insert ourselves after this item in the Z-order
-			SetWindowPos(pFrame, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-
-			// and then hide it
-			pFrame->ShowWindow(SW_HIDE);
-		}
-
-		return TRUE;
-	}
-	
-	return FALSE;
+	return TRUE;
 }
-*/
 
 void CTDLTaskSelectionPage::OnOK() 
 {
-	CPropertyPage::OnOK();
+	CCmdNotifyPropertyPage::OnOK();
 	
 	// Save state
 	CPreferences prefs;
@@ -239,16 +214,6 @@ void CTDLTaskSelectionPage::OnIncludeNotDone()
 	}
 	
 	GetParent()->SendMessage(WM_TASKSELDLG_CHANGE);
-}
-
-BOOL CTDLTaskSelectionPage::OnInitDialog() 
-{
-	CPropertyPage::OnInitDialog();
-	
-	UpdateEnableStates();
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CTDLTaskSelectionPage::UpdateEnableStates()
@@ -354,26 +319,3 @@ BOOL CTDLTaskSelectionPage::GetWantIncompleteTasksOnly() const
 {
 	return (!GetWantSelectedTasks() && !m_bCompletedTasks && m_bIncompleteTasks);
 }
-
-/*
-HBRUSH CTDLTaskSelectionPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	// Forward background-related requests to our parent
-	UINT nForwardMsg = 0;
-
-	switch (nCtlColor)
-	{
-	case CTLCOLOR_DLG:		nForwardMsg = WM_CTLCOLORDLG;		break;
-	case CTLCOLOR_STATIC:	nForwardMsg = WM_CTLCOLORSTATIC;	break;
-	}
-
-	if (nForwardMsg)
-		return (HBRUSH)GetParent()->SendMessage(nForwardMsg, (WPARAM)pDC->GetSafeHdc(), (LPARAM)pWnd->GetSafeHwnd());
-
-	// all the rest
-	return CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
-}
-*/
-	
-	
-

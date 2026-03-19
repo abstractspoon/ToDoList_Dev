@@ -44,7 +44,7 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CTDLPrintStylePage : public CPropertyPage
+class CTDLPrintStylePage : public CCmdNotifyPropertyPage
 {
 public:
 	CTDLPrintStylePage(LPCTSTR szStylesheet, 

@@ -231,7 +231,7 @@ CTDLPrintStylePage::~CTDLPrintStylePage()
 
 void CTDLPrintStylePage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	CCmdNotifyPropertyPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_SIMPLE_ICON, m_stSimpleIcon);
 	DDX_Control(pDX, IDC_SIMPLEPAGE_OPTIONS, m_cbSimpleOptions);
@@ -264,7 +264,7 @@ END_MESSAGE_MAP()
 
 void CTDLPrintStylePage::OnOK()
 {
-	CPropertyPage::OnOK();
+	CCmdNotifyPropertyPage::OnOK();
 
 	// save settings
 	CPreferences prefs;
@@ -282,7 +282,7 @@ void CTDLPrintStylePage::OnOK()
 
 BOOL CTDLPrintStylePage::OnInitDialog()
 {
-	CPropertyPage::OnInitDialog();
+	CCmdNotifyPropertyPage::OnInitDialog();
 
 	// Remove 'simple web page' exporter from droplist
 	int nSimpleExp = m_cbOtherExporters.FindItem(m_mgrImpExp.GetTypeID(TDCET_HTML));
@@ -475,7 +475,7 @@ CString CTDLPrintStylePage::GetBaseStylesheetPath() const
 
 HBRUSH CTDLPrintStylePage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
+	HBRUSH hbr = CCmdNotifyPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
 
 	if (pWnd->GetDlgCtrlID() == IDC_STYLESHEETNOTFOUND)
 		pDC->SetTextColor(CTDLDialog::GetErrorLabelTextColor());
