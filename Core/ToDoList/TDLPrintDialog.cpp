@@ -385,16 +385,10 @@ void CTDLPrintStylePage::EnableDisableControls()
 
 	// Disable OK if stylesheet not valid
 	CString sUnused;
-	BOOL bEnable = ((m_nStyleOption != OPT_STYLESHEET) || GetStylesheet(sUnused));
+	BOOL bEnableOK = ((m_nStyleOption != OPT_STYLESHEET) || GetStylesheet(sUnused));
 
-	//GetDlgItem(IDOK)->EnableWindow(bEnable);
-	GetDlgItem(IDC_CONFIGURESTYLESHEET)->EnableWindow((m_nStyleOption == OPT_STYLESHEET) && bEnable);
-
-	// Helpful text for why OK button is disabled
-	BOOL bMissingStylesheet = (!bEnable && !m_sStylesheet.IsEmpty());
-
-	GetDlgItem(IDC_STYLESHEETNOTFOUND)->EnableWindow(bMissingStylesheet);
-	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bMissingStylesheet ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_CONFIGURESTYLESHEET)->EnableWindow((m_nStyleOption == OPT_STYLESHEET) && bEnableOK);
+	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bEnableOK ? SW_HIDE : SW_SHOW);
 }
 
 void CTDLPrintStylePage::OnChangeStylesheet()

@@ -92,14 +92,10 @@ void CTDLTransformDialog::OnChangeStylesheet()
 {
 	UpdateData();
 
-	BOOL bEnable = FileMisc::FileExists(GetStylesheet());
-	GetDlgItem(IDOK)->EnableWindow(bEnable);
+	BOOL bEnableOK = FileMisc::FileExists(GetStylesheet());
 
-	// Helpful text for why OK button is disabled
-	BOOL bMissingStylesheet = (!bEnable && !m_sStylesheet.IsEmpty());
-
-	GetDlgItem(IDC_STYLESHEETNOTFOUND)->EnableWindow(bMissingStylesheet);
-	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bMissingStylesheet ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDOK)->EnableWindow(bEnableOK);
+	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bEnableOK ? SW_HIDE : SW_SHOW);
 }
 
 CString CTDLTransformDialog::GetStylesheet() const 
