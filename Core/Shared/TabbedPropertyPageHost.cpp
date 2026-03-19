@@ -69,7 +69,7 @@ BOOL CTabbedPropertyPageHost::ConstructTabControl()
 {
 	ASSERT(GetSafeHwnd());
 
-	if (m_tabCtrl.GetSafeHwnd() || GetPageCount() <= 1)
+	if (m_tabCtrl.GetSafeHwnd() || (GetPageCount() < 1))
 		return TRUE;
 
 	DWORD dwStyles = WS_CHILD | WS_VISIBLE;
@@ -196,7 +196,7 @@ void CTabbedPropertyPageHost::OnSize(UINT nType, int cx, int cy)
 
 BOOL CTabbedPropertyPageHost::CalcTabPageRects(int nWidth, int nHeight, CRect& rTabs, CRect& rPages) const
 {
-	if (!m_tabCtrl.GetSafeHwnd() || GetPageCount() <= 1)
+	if (!m_tabCtrl.GetSafeHwnd() || (GetPageCount() < 1))
 		return FALSE;
 
 	if (nWidth == 0 && nHeight == 0)

@@ -81,14 +81,14 @@ BEGIN_MESSAGE_MAP(CTDLExportDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_TOCLIPBOARD, OnExportToClipboardOrPath)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
+// ------------------------------------------------------------
 
 BOOL CTDLExportDlg::OnInitDialog() 
 {
 	CTDLDialog::OnInitDialog();
 
-	m_ppHost.Create(IDC_PAGEHOST, this);
-	m_ppHost.SetActivePage(m_nPrevActiveTab);
+	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
+	VERIFY(m_ppHost.SetActivePage(m_nPrevActiveTab));
 
 	UpdateTitle();
 	EnableOK();
@@ -254,62 +254,7 @@ COleDateTime CTDLExportDlg::GetExportDate() const
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLExportTaskSelectionPage dialog
-
-CTDLExportTaskSelectionPage::CTDLExportTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs,
-														 LPCTSTR szRegKey, 
-														 BOOL bEnableSubtaskSelection,
-														 BOOL bVisibleColumnsOnly)
-	:
-	CCmdNotifyPropertyPage(CTDLExportTaskSelectionPage::IDD),
-	m_dlgTaskSel(aAttribDefs, szRegKey, bEnableSubtaskSelection, bVisibleColumnsOnly)
-{
-	//{{AFX_DATA_INIT(CTDLExportTaskSelectionPage)
-	// NOTE: the ClassWizard will add member initialization here
-	//}}AFX_DATA_INIT
-}
-
-CTDLExportTaskSelectionPage::~CTDLExportTaskSelectionPage()
-{
-}
-
-void CTDLExportTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
-{
-	CCmdNotifyPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLExportTaskSelectionPage)
-	// NOTE: the ClassWizard will add DDX and DDV calls here
-	//}}AFX_DATA_MAP
-}
-
-
-BEGIN_MESSAGE_MAP(CTDLExportTaskSelectionPage, CCmdNotifyPropertyPage)
-	//{{AFX_MSG_MAP(CTDLExportTaskSelectionPage)
-	// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CTDLExportTaskSelectionPage message handlers
-
-BOOL CTDLExportTaskSelectionPage::OnInitDialog()
-{
-	CCmdNotifyPropertyPage::OnInitDialog();
-
-	VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CTDLExportTaskSelectionPage::OnOK()
-{
-	CCmdNotifyPropertyPage::OnOK();
-
-	m_dlgTaskSel.OnOK();
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// CTDLExportToPage dialog
+// CTDLExportToPage page
 
 CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 								   BOOL bSingleTaskList,
@@ -317,7 +262,7 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 								   LPCTSTR szFolderPath,
 								   LPCTSTR szPrefsKey)
 	: 
-	CCmdNotifyPropertyPage(CTDLExportToPage::IDD), 
+	CCmdNotifyPropertyPage(IDD_EXPORT_TO_PAGE),
 	m_mgrImportExport(mgr),
 	m_bSingleTaskList(bSingleTaskList), 
 	m_sFilePath(szFilePath),
@@ -327,10 +272,6 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 	m_cbFormat(mgr, FALSE, FALSE),
 	m_nHtmlStyle(TDLPDS_WRAP)
 {
-	//{{AFX_DATA_INIT(CExportDlg)
-	//}}AFX_DATA_INIT
-
-	// retrieve previous user input
 	CPreferences prefs;
 
 	m_bExportOneFile = prefs.GetProfileInt(m_sPrefsKey, _T("ExportOneFile"), FALSE);
@@ -407,7 +348,6 @@ void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 {
 	CCmdNotifyPropertyPage::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CExportDlg)
 	DDX_Control(pDX, IDC_FORMATOPTIONS, m_cbFormat);
 	DDX_Control(pDX, IDC_EXPORTPATH, m_eExportPath);
 	DDX_CBIndex(pDX, IDC_TASKLISTOPTIONS, m_bExportAllTasklists);
@@ -415,8 +355,6 @@ void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_TOPATH, m_bExportToClipboard);
 	DDX_Text(pDX, IDC_EXPORTPATH, m_sExportPath);
 	DDX_Text(pDX, IDC_TOPATH, m_sPathLabel);
-	//}}AFX_DATA_MAP
-
 	DDX_Control(pDX, IDC_HTMLOPTIONS_ICON, m_stHtmlOptionIcon);
 	DDX_Control(pDX, IDC_HTMLOPTIONS, m_cbHtmlOptions);
 
@@ -426,21 +364,17 @@ void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 	m_stHtmlOptionIcon.SetStyle(m_nHtmlStyle);
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLExportToPage, CCmdNotifyPropertyPage)
-	//{{AFX_MSG_MAP(CExportDlg)
 	ON_CBN_SELENDOK(IDC_FORMATOPTIONS, OnSelchangeExporterFormat)
 	ON_CBN_SELENDOK(IDC_TASKLISTOPTIONS, OnSelchangeTasklistoptions)
 	ON_BN_CLICKED(IDC_EXPORTONEFILE, OnExportonefile)
 	ON_EN_CHANGE(IDC_EXPORTPATH, OnChangeExportpath)
 	ON_BN_CLICKED(IDC_TOPATH, OnExportToClipboardOrPath)
 	ON_BN_CLICKED(IDC_TOCLIPBOARD, OnExportToClipboardOrPath)
-	//}}AFX_MSG_MAP
 	ON_CBN_SELENDOK(IDC_HTMLOPTIONS, OnSelChangeHtmlOption)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CExportDlg message handlers
+// ---------------------------------------------------------
 
 BOOL CTDLExportToPage::OnInitDialog() 
 {

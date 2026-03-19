@@ -166,7 +166,6 @@ END_MESSAGE_MAP()
 void CTDLPrintDialog::OnOK() 
 {
 	CTDLDialog::OnOK();
-
 	m_ppHost.OnOK();
 
 	// save settings
@@ -186,8 +185,8 @@ BOOL CTDLPrintDialog::OnInitDialog()
 	else
 		SetWindowText(CEnString(IDS_PRINTDLG_PRINT_TITLE));
 
-	m_ppHost.Create(IDC_PAGEHOST, this);
-	m_ppHost.SetActivePage(m_nPrevActiveTab);
+	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
+	VERIFY(m_ppHost.SetActivePage(m_nPrevActiveTab));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -210,7 +209,7 @@ CTDLPrintStylePage::CTDLPrintStylePage(LPCTSTR szStylesheet,
 									   LPCTSTR szPrefsKey,
 									   LPCTSTR szExportToImageView)
 	: 
-	CPropertyPage(CTDLPrintStylePage::IDD),
+	CCmdNotifyPropertyPage(IDD_PRINT_STYLE_PAGE),
 	m_mgrImpExp(mgrImpExp),
 	m_sExportToImageView(szExportToImageView),
 	m_sPrefsKey(szPrefsKey),
@@ -232,7 +231,7 @@ CTDLPrintStylePage::~CTDLPrintStylePage()
 
 void CTDLPrintStylePage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	CCmdNotifyPropertyPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_SIMPLE_ICON, m_stSimpleIcon);
 	DDX_Control(pDX, IDC_SIMPLEPAGE_OPTIONS, m_cbSimpleOptions);
@@ -249,10 +248,7 @@ void CTDLPrintStylePage::DoDataExchange(CDataExchange* pDX)
 	m_stSimpleIcon.SetStyle(m_nSimpleStyle);
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLPrintStylePage, CPropertyPage)
-	//{{AFX_MSG_MAP(CTDLPrintStylePage)
-	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_SIMPLEPAGE_OPTIONS, OnSelchangeSimplePageOption)
 	ON_EN_CHANGE(IDC_STYLESHEET, OnChangeStylesheet)
 	ON_BN_CLICKED(IDC_STYLE_IMAGE, OnChangeStyle)
@@ -265,11 +261,10 @@ BEGIN_MESSAGE_MAP(CTDLPrintStylePage, CPropertyPage)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLPrintStylePage message handlers
 
 void CTDLPrintStylePage::OnOK()
 {
-	CPropertyPage::OnOK();
+	CCmdNotifyPropertyPage::OnOK();
 
 	// save settings
 	CPreferences prefs;
@@ -287,7 +282,7 @@ void CTDLPrintStylePage::OnOK()
 
 BOOL CTDLPrintStylePage::OnInitDialog()
 {
-	CPropertyPage::OnInitDialog();
+	CCmdNotifyPropertyPage::OnInitDialog();
 
 	// Remove 'simple web page' exporter from droplist
 	int nSimpleExp = m_cbOtherExporters.FindItem(m_mgrImpExp.GetTypeID(TDCET_HTML));
@@ -344,8 +339,7 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 	UpdateData(FALSE);
 	EnableDisableControls();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLPrintStylePage::InitStylesheet(LPCTSTR szStylesheet)
@@ -391,16 +385,10 @@ void CTDLPrintStylePage::EnableDisableControls()
 
 	// Disable OK if stylesheet not valid
 	CString sUnused;
-	BOOL bEnable = ((m_nStyleOption != OPT_STYLESHEET) || GetStylesheet(sUnused));
+	BOOL bEnableOK = ((m_nStyleOption != OPT_STYLESHEET) || GetStylesheet(sUnused));
 
-	//GetDlgItem(IDOK)->EnableWindow(bEnable);
-	GetDlgItem(IDC_CONFIGURESTYLESHEET)->EnableWindow((m_nStyleOption == OPT_STYLESHEET) && bEnable);
-
-	// Helpful text for why OK button is disabled
-	BOOL bMissingStylesheet = (!bEnable && !m_sStylesheet.IsEmpty());
-
-	GetDlgItem(IDC_STYLESHEETNOTFOUND)->EnableWindow(bMissingStylesheet);
-	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bMissingStylesheet ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_CONFIGURESTYLESHEET)->EnableWindow((m_nStyleOption == OPT_STYLESHEET) && bEnableOK);
+	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bEnableOK ? SW_HIDE : SW_SHOW);
 }
 
 void CTDLPrintStylePage::OnChangeStylesheet()
@@ -481,7 +469,7 @@ CString CTDLPrintStylePage::GetBaseStylesheetPath() const
 
 HBRUSH CTDLPrintStylePage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
+	HBRUSH hbr = CCmdNotifyPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
 
 	if (pWnd->GetDlgCtrlID() == IDC_STYLESHEETNOTFOUND)
 		pDC->SetTextColor(CTDLDialog::GetErrorLabelTextColor());
@@ -504,56 +492,4 @@ void CTDLPrintStylePage::OnConfigureStylesheet()
 void CTDLPrintStylePage::OnSelchangeSimplePageOption()
 {
 	UpdateData();
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// CTDLPrintTaskSelectionPage dialog
-
-CTDLPrintTaskSelectionPage::CTDLPrintTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs,
-													   LPCTSTR szRegKey, BOOL bEnableSubtaskSelection)
-	: 
-	CPropertyPage(CTDLPrintTaskSelectionPage::IDD),
-	m_dlgTaskSel(aAttribDefs, szRegKey, bEnableSubtaskSelection)
-{
-}
-
-CTDLPrintTaskSelectionPage::~CTDLPrintTaskSelectionPage()
-{
-}
-
-void CTDLPrintTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
-{
-	CPropertyPage::DoDataExchange(pDX);
-}
-
-
-BEGIN_MESSAGE_MAP(CTDLPrintTaskSelectionPage, CPropertyPage)
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CTDLPrintTaskSelectionPage message handlers
-
-BOOL CTDLPrintTaskSelectionPage::OnInitDialog()
-{
-	CPropertyPage::OnInitDialog();
-
-	VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
-	m_dlgTaskSel.EnableWindow(m_nExportStyle != TDLPDS_IMAGE);
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-				  // EXCEPTION: OCX Property Pages should return FALSE
-}
-void CTDLPrintTaskSelectionPage::OnOK()
-{
-	CPropertyPage::OnOK();
-
-	m_dlgTaskSel.OnOK();
-}
-
-void CTDLPrintTaskSelectionPage::SetOutputStyle(TDLPD_STYLE nStyle)
-{
-	m_nExportStyle = nStyle;
-
-	if (GetSafeHwnd())
-		m_dlgTaskSel.EnableWindow(m_nExportStyle != TDLPDS_IMAGE);
 }

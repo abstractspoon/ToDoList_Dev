@@ -239,7 +239,7 @@ CTDLImportFromPage::CTDLImportFromPage(const CTDCImportExportMgr& mgr, CWnd* pPa
 
 void CTDLImportFromPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	CCmdNotifyPropertyPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_INPUTFILE, m_eFilePath);
 	DDX_Radio(pDX, IDC_FROMFILE, m_bFromText);

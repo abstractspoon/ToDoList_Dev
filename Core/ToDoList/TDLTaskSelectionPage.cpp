@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "TaskSelectionDlg.h"
+#include "TDLTaskSelectionPage.h"
 #include "ToDoCtrl.h"
 #include "tdcmapping.h"
 
@@ -21,13 +21,14 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CTaskSelectionDlg dialog
+// CTDLTaskSelectionPage dialog
 
-CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAttribDefs,
+CTDLTaskSelectionPage::CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs,
 									 LPCTSTR szRegKey, 
 									 BOOL bEnableSubtaskSelection,
 									 BOOL bVisibleColumnsOnly) 
 	: 
+	CCmdNotifyPropertyPage(IDD_TASKSELECTION_PAGE),
 	m_lbAttribList(aAttribDefs),
 	m_sRegKey(szRegKey), 
 	m_bEnableSubtaskSelection(bEnableSubtaskSelection)
@@ -80,10 +81,9 @@ CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAtt
 	}
 }
 
-
-void CTaskSelectionDlg::DoDataExchange(CDataExchange* pDX)
+void CTDLTaskSelectionPage::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CCmdNotifyPropertyPage::DoDataExchange(pDX);
 
 	DDX_Radio(pDX, IDC_ALLTASKS, m_nWhatTasks);
 	DDX_Check(pDX, IDC_INCLUDEPARENTTASK, m_bSelectedParentTask);
@@ -93,8 +93,8 @@ void CTaskSelectionDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_INCLUDEDONE, m_bCompletedTasks);
 	DDX_Check(pDX, IDC_INCLUDENOTDONE, m_bIncompleteTasks);
 
-	// Because our radio buttons are out of sequence
-	// we use a special technique
+	// Because our radio buttons are out of sequence 
+	// (for backwards compatibility) we use a custom handler
 	static UINT RADIO_BTNS[] = { IDC_ALLATTRIB, IDC_VISIBLEATTRIB, IDC_CUSTOMATTRIB, IDC_TITLECOMMENTS };
 	static int NUM_RADIO_BTNS = sizeof(RADIO_BTNS) / sizeof(RADIO_BTNS[0]);
 
@@ -102,7 +102,7 @@ void CTaskSelectionDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTaskSelectionDlg, CDialog)
+BEGIN_MESSAGE_MAP(CTDLTaskSelectionPage, CCmdNotifyPropertyPage)
 	ON_WM_DESTROY()
 	ON_WM_ENABLE()
 	ON_WM_CTLCOLOR()
@@ -119,41 +119,18 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 
-BOOL CTaskSelectionDlg::Create(UINT nIDRefFrame, CWnd* pParent, UINT nID)
+BOOL CTDLTaskSelectionPage::OnInitDialog() 
 {
-	ASSERT (nIDRefFrame && pParent);
+	CCmdNotifyPropertyPage::OnInitDialog();
 	
-	if (CDialog::Create(IDD_TASKSELECTION_DIALOG, pParent))
-	{
-		if (nID != IDC_STATIC)
-			SetDlgCtrlID(nID);
-		
-		CWnd* pFrame = pParent->GetDlgItem(nIDRefFrame);
-		
-		if (pFrame)
-		{
-			CRect rFrame;
-			pFrame->GetWindowRect(rFrame);
-			pParent->ScreenToClient(rFrame);
-			
-			MoveWindow(rFrame);
+	UpdateEnableStates();
 
-			// insert ourselves after this item in the Z-order
-			SetWindowPos(pFrame, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-
-			// and then hide it
-			pFrame->ShowWindow(SW_HIDE);
-		}
-
-		return TRUE;
-	}
-	
-	return FALSE;
+	return TRUE;
 }
 
-void CTaskSelectionDlg::OnOK() 
+void CTDLTaskSelectionPage::OnOK() 
 {
-	CDialog::OnOK();
+	CCmdNotifyPropertyPage::OnOK();
 	
 	// Save state
 	CPreferences prefs;
@@ -197,7 +174,7 @@ void CTaskSelectionDlg::OnOK()
 	}
 }
 
-void CTaskSelectionDlg::OnChangetasksOption() 
+void CTDLTaskSelectionPage::OnChangetasksOption() 
 {
 	UpdateData();
 	
@@ -212,7 +189,7 @@ void CTaskSelectionDlg::OnChangetasksOption()
 	GetParent()->SendMessage(WM_TASKSELDLG_CHANGE);
 }
 
-void CTaskSelectionDlg::OnIncludeDone() 
+void CTDLTaskSelectionPage::OnIncludeDone() 
 {
 	UpdateData();
 	
@@ -225,7 +202,7 @@ void CTaskSelectionDlg::OnIncludeDone()
 	
 	GetParent()->SendMessage(WM_TASKSELDLG_CHANGE);
 }
-void CTaskSelectionDlg::OnIncludeNotDone() 
+void CTDLTaskSelectionPage::OnIncludeNotDone() 
 {
 	UpdateData();
 	
@@ -239,17 +216,7 @@ void CTaskSelectionDlg::OnIncludeNotDone()
 	GetParent()->SendMessage(WM_TASKSELDLG_CHANGE);
 }
 
-BOOL CTaskSelectionDlg::OnInitDialog() 
-{
-	CDialog::OnInitDialog();
-	
-	UpdateEnableStates();
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CTaskSelectionDlg::UpdateEnableStates()
+void CTDLTaskSelectionPage::UpdateEnableStates()
 {
 	GetDlgItem(IDC_CLEARALLATTRIB)->EnableWindow(m_nAttribOption == TSDA_USER);
 	GetDlgItem(IDC_CUSTOMATTRIBLIST)->EnableWindow(m_nAttribOption == TSDA_USER);
@@ -265,7 +232,7 @@ void CTaskSelectionDlg::UpdateEnableStates()
 	GetDlgItem(IDC_INCLUDESUBTASKS)->ShowWindow(m_bEnableSubtaskSelection ? SW_SHOW : SW_HIDE);
 }
 
-void CTaskSelectionDlg::SetWantWhatTasks(TSD_TASKS nWhat)
+void CTDLTaskSelectionPage::SetWantWhatTasks(TSD_TASKS nWhat)
 {
 	m_nWhatTasks = nWhat;
 
@@ -276,18 +243,18 @@ void CTaskSelectionDlg::SetWantWhatTasks(TSD_TASKS nWhat)
 	}
 }
 
-void CTaskSelectionDlg::OnChangeAttribOption() 
+void CTDLTaskSelectionPage::OnChangeAttribOption() 
 {
 	UpdateData();
 	UpdateEnableStates();
 }
 
-void CTaskSelectionDlg::OnClearUserAttribSelection()
+void CTDLTaskSelectionPage::OnClearUserAttribSelection()
 {
 	m_lbAttribList.SetAllChecked(FALSE);
 }
 
-int CTaskSelectionDlg::GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttributeMap& mapAttrib) const
+int CTDLTaskSelectionPage::GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttributeMap& mapAttrib) const
 {
 	mapAttrib.RemoveAll();
 
@@ -325,7 +292,7 @@ int CTaskSelectionDlg::GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttribute
 	return mapAttrib.GetCount();
 }
 
-void CTaskSelectionDlg::OnEnable(BOOL bEnable)
+void CTDLTaskSelectionPage::OnEnable(BOOL bEnable)
 {
 	CDialogHelper::EnableAllCtrls(this, bEnable);
 
@@ -333,43 +300,22 @@ void CTaskSelectionDlg::OnEnable(BOOL bEnable)
 		UpdateEnableStates();
 }
 
-BOOL CTaskSelectionDlg::GetWantSelectedSubtasks() const
+BOOL CTDLTaskSelectionPage::GetWantSelectedSubtasks() const
 {
 	return (GetWantSelectedTasks() && m_bSelectedSubtasks);
 }
 
-BOOL CTaskSelectionDlg::GetWantSelectedParentTask() const
+BOOL CTDLTaskSelectionPage::GetWantSelectedParentTask() const
 {
 	return (GetWantSelectedTasks() && m_bSelectedParentTask);
 }
 
-BOOL CTaskSelectionDlg::GetWantCompletedTasksOnly() const
+BOOL CTDLTaskSelectionPage::GetWantCompletedTasksOnly() const
 {
 	return (!GetWantSelectedTasks() && m_bCompletedTasks && !m_bIncompleteTasks);
 }
 
-BOOL CTaskSelectionDlg::GetWantIncompleteTasksOnly() const
+BOOL CTDLTaskSelectionPage::GetWantIncompleteTasksOnly() const
 {
 	return (!GetWantSelectedTasks() && !m_bCompletedTasks && m_bIncompleteTasks);
 }
-
-HBRUSH CTaskSelectionDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	// Forward background-related requests to our parent
-	UINT nForwardMsg = 0;
-
-	switch (nCtlColor)
-	{
-	case CTLCOLOR_DLG:		nForwardMsg = WM_CTLCOLORDLG;		break;
-	case CTLCOLOR_STATIC:	nForwardMsg = WM_CTLCOLORSTATIC;	break;
-	}
-
-	if (nForwardMsg)
-		return (HBRUSH)GetParent()->SendMessage(nForwardMsg, (WPARAM)pDC->GetSafeHdc(), (LPARAM)pWnd->GetSafeHwnd());
-
-	// all the rest
-	return CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
-}
-	
-	
-

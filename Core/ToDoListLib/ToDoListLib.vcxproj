@@ -151,7 +151,6 @@
     <ClCompile Include="..\ToDoList\TaskListTdlExporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListTdlImporter.cpp" />
     <ClCompile Include="..\ToDoList\TaskListTxtExporter.cpp" />
-    <ClCompile Include="..\ToDoList\TaskSelectionDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDCAnonymizeTasklist.cpp" />
     <ClCompile Include="..\ToDoList\TDCCustomAttribData.cpp" />
     <ClCompile Include="..\ToDoList\TDCCustomAttributeDef.cpp" />
@@ -253,6 +252,7 @@
     <ClCompile Include="..\ToDoList\TDLTasklistImportDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLTasklistSaveAsDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLTasklistStorageMgr.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskSelectionPage.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskTreeCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskViewListBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLThemeComboBox.cpp" />
@@ -327,7 +327,6 @@
     <ClInclude Include="..\ToDoList\TaskListTdlExporter.h" />
     <ClInclude Include="..\ToDoList\TaskListTdlImporter.h" />
     <ClInclude Include="..\ToDoList\TaskListTxtExporter.h" />
-    <ClInclude Include="..\ToDoList\TaskSelectionDlg.h" />
     <ClInclude Include="..\ToDoList\TDCAnonymizeTasklist.h" />
     <ClInclude Include="..\ToDoList\TDCCustomAttributeDef.h" />
     <ClInclude Include="..\ToDoList\TDCCustomFilterAttributeUIHelper.h" />
@@ -428,6 +427,7 @@
     <ClInclude Include="..\ToDoList\TDLTasklistImportDlg.h" />
     <ClInclude Include="..\ToDoList\TDLTasklistSaveAsDlg.h" />
     <ClInclude Include="..\ToDoList\TDLTasklistStorageMgr.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskSelectionPage.h" />
     <ClInclude Include="..\ToDoList\TDLTaskTreeCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLTaskViewListBox.h" />
     <ClInclude Include="..\ToDoList\TDLThemeComboBox.h" />

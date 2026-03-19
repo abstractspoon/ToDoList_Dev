@@ -33,7 +33,7 @@
 #define IDD_PREFTASKDEF2_PAGE           159
 #define IDD_PREFMULTIUSER_PAGE          180
 #define IDD_PRINT_DIALOG                182
-#define IDD_TASKSELECTION_DIALOG        183
+#define IDD_TASKSELECTION_PAGE          183
 #define IDD_FILTER_DIALOG               186
 #define IDD_TRANSFORM_DIALOG            187
 #define IDD_OFFSETDATES_DIALOG          188
@@ -515,7 +515,6 @@
 #define IDC_CATEGORYFILTERLABEL         1184
 #define IDC_CTRLSPOS                    1184
 #define IDC_CATEGORYFILTERCOMBO         1185
-#define IDC_FRAME                       1185
 #define IDC_LOADGROUP                   1185
 #define IDC_ARCHIVEGROUP                1186
 #define IDC_ALLOCBYFILTERLABEL          1186
@@ -895,10 +894,8 @@
 #define IDD_PRINT_STYLE_PAGE            2002
 #define IDC_CHOOSEFOLDER                2003
 #define IDI_TASK                        2003
-#define IDD_PRINT_TASKSEL_PAGE          2003
 #define IDI_TRAY_TIMETRACK_DARK         2003
 #define IDD_DROPIMPORT_DIALOG           2004
-#define IDD_EXPORT_TASKSEL_PAGE         2004
 #define IDI_TRAY_DARK                   2004
 #define IDC_CURFOLDER                   2005
 #define IDI_CONTACT                     2005

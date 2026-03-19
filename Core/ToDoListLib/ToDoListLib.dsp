@@ -205,10 +205,6 @@ SOURCE=..\ToDoList\TaskListTxtExporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\ToDoList\TaskSelectionDlg.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\ToDoList\TDCAnonymizeTasklist.cpp
 # End Source File
 # Begin Source File
@@ -649,6 +645,10 @@ SOURCE=..\ToDoList\TDLTasklistStorageMgr.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLTaskSelectionPage.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLTaskTreeCtrl.cpp
 # End Source File
 # Begin Source File
@@ -874,10 +874,6 @@ SOURCE=..\ToDoList\TaskListTdlImporter.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TaskListTxtExporter.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TaskSelectionDlg.h
 # End Source File
 # Begin Source File
 
@@ -1342,6 +1338,10 @@ SOURCE=..\ToDoList\TDLTasklistSaveAsDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLTasklistStorageMgr.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskSelectionPage.h
 # End Source File
 # Begin Source File
 
