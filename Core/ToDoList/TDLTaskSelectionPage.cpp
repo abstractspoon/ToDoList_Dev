@@ -123,7 +123,7 @@ BOOL CTDLTaskSelectionPage::OnInitDialog()
 {
 	CCmdNotifyPropertyPage::OnInitDialog();
 	
-	UpdateEnableStates();
+	EnableDisableControls();
 
 	return TRUE;
 }
@@ -216,7 +216,7 @@ void CTDLTaskSelectionPage::OnIncludeNotDone()
 	GetParent()->SendMessage(WM_TASKSELDLG_CHANGE);
 }
 
-void CTDLTaskSelectionPage::UpdateEnableStates()
+void CTDLTaskSelectionPage::EnableDisableControls()
 {
 	GetDlgItem(IDC_CLEARALLATTRIB)->EnableWindow(m_nAttribOption == TSDA_USER);
 	GetDlgItem(IDC_CUSTOMATTRIBLIST)->EnableWindow(m_nAttribOption == TSDA_USER);
@@ -239,14 +239,14 @@ void CTDLTaskSelectionPage::SetWantWhatTasks(TSD_TASKS nWhat)
 	if (GetSafeHwnd())
 	{
 		UpdateData(FALSE);
-		UpdateEnableStates();
+		EnableDisableControls();
 	}
 }
 
 void CTDLTaskSelectionPage::OnChangeAttribOption() 
 {
 	UpdateData();
-	UpdateEnableStates();
+	EnableDisableControls();
 }
 
 void CTDLTaskSelectionPage::OnClearUserAttribSelection()
@@ -297,7 +297,7 @@ void CTDLTaskSelectionPage::OnEnable(BOOL bEnable)
 	CDialogHelper::EnableAllCtrls(this, bEnable);
 
 	if (bEnable)
-		UpdateEnableStates();
+		EnableDisableControls();
 }
 
 BOOL CTDLTaskSelectionPage::GetWantSelectedSubtasks() const

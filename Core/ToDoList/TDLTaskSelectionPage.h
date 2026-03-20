@@ -92,7 +92,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-	void UpdateEnableStates();
+	void EnableDisableControls();
 };
 
 #endif // !defined(AFX_TDLTASKSELECTIONPAGE_H__3A5D7E88_CEC3_47DD_8BA6_79EC2C3B7167__INCLUDED_)

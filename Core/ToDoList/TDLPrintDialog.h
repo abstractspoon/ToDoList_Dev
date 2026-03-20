@@ -112,15 +112,13 @@ public:
 	CString GetTitle() const { return m_sTitle; }
 	COleDateTime GetDate() const;
 
-	TDLPD_STYLE GetExportStyle() const { return m_pageStyle.GetExportStyle(); }
+	TDLPD_STYLE GetExportStyle() const;
 	BOOL GetStylesheet(CString& sStylesheet) const { return m_pageStyle.GetStylesheet(sStylesheet); }
 	BOOL GetOtherExporterTypeID(CString& sExporterID) const { return m_pageStyle.GetOtherExporterTypeID(sExporterID); }
 
 	const CTDLTaskSelectionPage& GetTaskSelection() const { return m_pageTaskSel; }
 
 protected:
-	enum { IDD = IDD_PRINT_DIALOG };
-
 	CString	m_sTitle;
 	BOOL	m_bDate;
 	BOOL	m_bPrintPreview;
@@ -137,6 +135,7 @@ protected:
 	virtual BOOL OnInitDialog();
 
 protected:
+	afx_msg void OnChangeStyle();
 	DECLARE_MESSAGE_MAP()
 };
 

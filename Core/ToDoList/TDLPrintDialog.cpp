@@ -128,7 +128,7 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle,
 								   LPCTSTR szStylesheet, 
 								   const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 								   LPCTSTR szExportToImageView, 
-								   CWnd* pParent /*=NULL*/)
+								   CWnd* pParent)
 	: 
 	CTDLDialog(IDD_PRINT_DIALOG, _T("Print"), pParent), 
 	m_bPrintPreview(bPreview), 
@@ -158,10 +158,31 @@ void CTDLPrintDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTDLPrintDialog, CTDLDialog)
+	ON_EN_CHANGE(IDC_STYLESHEET, OnChangeStyle)
+	ON_BN_CLICKED(IDC_STYLE_TASKVIEW, OnChangeStyle)
+	ON_BN_CLICKED(IDC_STYLE_STYLESHEET, OnChangeStyle)
+	ON_BN_CLICKED(IDC_STYLE_SIMPLE, OnChangeStyle)
+	ON_BN_CLICKED(IDC_STYLE_OTHER, OnChangeStyle)
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CTDLPrintDialog message handlers
+// --------------------------------------------------------------
+
+BOOL CTDLPrintDialog::OnInitDialog() 
+{
+	CTDLDialog::OnInitDialog();
+
+	if (m_bPrintPreview)
+		SetWindowText(CEnString(IDS_PRINTDLG_PREVIEW_TITLE));
+	else
+		SetWindowText(CEnString(IDS_PRINTDLG_PRINT_TITLE));
+
+	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
+	VERIFY(m_ppHost.SetActivePage(m_nPrevActiveTab));
+	
+	OnChangeStyle();
+
+	return TRUE;
+}
 
 void CTDLPrintDialog::OnOK() 
 {
@@ -176,20 +197,12 @@ void CTDLPrintDialog::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("PrevActiveTab"), m_ppHost.GetActiveIndex());
 }
 
-BOOL CTDLPrintDialog::OnInitDialog() 
-{
-	CTDLDialog::OnInitDialog();
+TDLPD_STYLE CTDLPrintDialog::GetExportStyle() const 
+{ 
+	TDLPD_STYLE nStyle = m_pageStyle.GetExportStyle(); 
+	ASSERT(nStyle != TDLPDS_NONE);
 
-	if (m_bPrintPreview)
-		SetWindowText(CEnString(IDS_PRINTDLG_PREVIEW_TITLE));
-	else
-		SetWindowText(CEnString(IDS_PRINTDLG_PRINT_TITLE));
-
-	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
-	VERIFY(m_ppHost.SetActivePage(m_nPrevActiveTab));
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return nStyle;
 }
 
 COleDateTime CTDLPrintDialog::GetDate() const 
@@ -199,6 +212,17 @@ COleDateTime CTDLPrintDialog::GetDate() const
 
 	// else
 	return CDateHelper::NullDate();
+}
+
+void CTDLPrintDialog::OnChangeStyle()
+{
+	TDLPD_STYLE nStyle = m_pageStyle.GetExportStyle();
+
+	// Disable OK for invalid inputs
+	GetDlgItem(IDOK)->EnableWindow(nStyle != TDLPDS_NONE);
+
+	// Disable task selection for 'Task view image' option
+	m_pageTaskSel.EnableWindow(nStyle != TDLPDS_IMAGE);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -251,34 +275,15 @@ void CTDLPrintStylePage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLPrintStylePage, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_SIMPLEPAGE_OPTIONS, OnSelchangeSimplePageOption)
 	ON_EN_CHANGE(IDC_STYLESHEET, OnChangeStylesheet)
-	ON_BN_CLICKED(IDC_STYLE_IMAGE, OnChangeStyle)
+	ON_BN_CLICKED(IDC_STYLE_TASKVIEW, OnChangeStyle)
 	ON_BN_CLICKED(IDC_STYLE_STYLESHEET, OnChangeStyle)
 	ON_BN_CLICKED(IDC_STYLE_SIMPLE, OnChangeStyle)
 	ON_BN_CLICKED(IDC_STYLE_OTHER, OnChangeStyle)
 	ON_BN_CLICKED(IDC_CONFIGURESTYLESHEET, OnConfigureStylesheet)
-	ON_BN_CLICKED(IDC_USESTYLESHEET, OnUsestylesheet)
 	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-
-void CTDLPrintStylePage::OnOK()
-{
-	CCmdNotifyPropertyPage::OnOK();
-
-	// save settings
-	CPreferences prefs;
-
-	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportStyle"), GetExportStyle());
-	prefs.WriteProfileInt(m_sPrefsKey, _T("SimpleStyle"), m_nSimpleStyle);
-	prefs.WriteProfileString(m_sPrefsKey, _T("Stylesheet"), m_sStylesheet);
-	prefs.WriteProfileString(m_sPrefsKey, _T("OtherExporter"), m_cbOtherExporters.GetSelectedTypeID());
-
-	// we store whether this is the same as the default print stylesheet
-	// so we can update as it does
-	CString sDefStylesheet = prefs.GetProfileString(_T("Preferences"), _T("PrintStylesheet"));
-	prefs.WriteProfileInt(m_sPrefsKey, _T("DefaultStylesheet"), (m_sStylesheet.CompareNoCase(sDefStylesheet) == 0));
-}
+// --------------------------------------------------------------
 
 BOOL CTDLPrintStylePage::OnInitDialog()
 {
@@ -340,6 +345,24 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 	EnableDisableControls();
 
 	return TRUE;
+}
+
+void CTDLPrintStylePage::OnOK()
+{
+	CCmdNotifyPropertyPage::OnOK();
+
+	// save settings
+	CPreferences prefs;
+
+	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportStyle"), GetExportStyle());
+	prefs.WriteProfileInt(m_sPrefsKey, _T("SimpleStyle"), m_nSimpleStyle);
+	prefs.WriteProfileString(m_sPrefsKey, _T("Stylesheet"), m_sStylesheet);
+	prefs.WriteProfileString(m_sPrefsKey, _T("OtherExporter"), m_cbOtherExporters.GetSelectedTypeID());
+
+	// we store whether this is the same as the default print stylesheet
+	// so we can update as it does
+	CString sDefStylesheet = prefs.GetProfileString(_T("Preferences"), _T("PrintStylesheet"));
+	prefs.WriteProfileInt(m_sPrefsKey, _T("DefaultStylesheet"), (m_sStylesheet.CompareNoCase(sDefStylesheet) == 0));
 }
 
 void CTDLPrintStylePage::InitStylesheet(LPCTSTR szStylesheet)
@@ -406,12 +429,10 @@ TDLPD_STYLE CTDLPrintStylePage::GetExportStyle() const
 		case OPT_STYLESHEET:
 			if (GetStylesheet(sUnused))
 				return TDLPDS_STYLESHEET;
-			else
-				ASSERT(0);
 			break;
 
 		case OPT_SIMPLE:
-			break; // handled at end 
+			return m_nSimpleStyle;
 
 		case OPT_SCREENSHOT:
 			return TDLPDS_IMAGE;
@@ -419,8 +440,6 @@ TDLPD_STYLE CTDLPrintStylePage::GetExportStyle() const
 		case OPT_OTHEREXPORTER:
 			if (GetOtherExporterTypeID(sUnused))
 				return TDLPDS_OTHERHTMLEXPORTER;
-			else
-				ASSERT(0);
 			break;
 
 		default:
@@ -428,7 +447,7 @@ TDLPD_STYLE CTDLPrintStylePage::GetExportStyle() const
 			return TDLPDS_NONE;
 	}
 
-	return m_nSimpleStyle;
+	return TDLPDS_NONE;
 }
 
 BOOL CTDLPrintStylePage::GetStylesheet(CString& sStylesheet) const

@@ -331,7 +331,6 @@
 #define IDC_SAMPLE                      1059
 #define IDC_DEFAULTCOLS                 1059
 #define IDC_ADDTOACTIVETASKLIST         1059
-#define IDC_STYLE_IMAGE                 1059
 #define IDC_TABCONTROL                  1060
 #define IDC_SETDEFAULTCOLOR             1060
 #define IDC_SETGRIDLINECOLOR            1060
@@ -547,7 +546,6 @@
 #define IDC_STARTFILTERCOMBO            1199
 #define IDC_TASKVIEWSGROUP              1199
 #define IDC_DUEFILTERLABEL              1200
-#define IDC_USESTYLESHEET               1201
 #define IDC_DUEFILTERCOMBO              1201
 #define IDC_STYLESHEET                  1202
 #define IDC_WARNADDDELARCHIVE           1202
