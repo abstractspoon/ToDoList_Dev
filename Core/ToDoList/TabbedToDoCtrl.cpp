@@ -2276,7 +2276,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 					case TDCA_DONEDATE:
 						// These can fail with incomplete dependencies
 						ASSERT(m_taskTree.SelectionHasDependencies() ||
-								TaskHasIncompleteDependencies(mod.dwSelectedTaskID, CString()) ||
+								TaskHasIncompleteDependencies(mod.dwSelectedTaskID) ||
 								aTasksForCompletion.GetSize());
 						break;
 

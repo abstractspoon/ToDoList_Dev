@@ -1925,18 +1925,18 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 	bAndSubtasks = FALSE;
 
 	// If there are no items to be completed then no further restrictions
-	CDWordArray aToDoIDs;
+	CDWordArray aTaskIDs;
 
-	if (aTasks.GetTaskIDsForCompletion(aToDoIDs) == 0)
+	if (aTasks.GetTaskIDsForCompletion(aTaskIDs) == 0)
 		return TRUE;
 
 	// check for circular dependencies
 	CDWordArray aCircularIDs;
 	int nID;
 
-	for (nID = 0; nID < aToDoIDs.GetSize(); nID++)
+	for (nID = 0; nID < aTaskIDs.GetSize(); nID++)
 	{
-		DWORD dwTaskID = aToDoIDs[nID];
+		DWORD dwTaskID = aTaskIDs[nID];
 
 		if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
 			aCircularIDs.Add(dwTaskID);
@@ -1950,39 +1950,51 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 		if (aCircularIDs.GetSize() == 1)
 			sMessage += CEnString(IDS_TDC_SELTASKHASCIRCULARDEPENDENCY);
 		else
-			sMessage += CEnString().Format(IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES, Misc::FormatArray(aToDoIDs));
+			sMessage += CEnString().Format(IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES, Misc::FormatArray(aTaskIDs));
 		
 		AfxMessageBox(sMessage, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 
 	// check for incomplete dependents
-	CString sIncomplete;
+	CDWordArray aLocalDependIDs;
+	CStringArray aNonLocalDependLinks;
 
-	for (nID = 0; nID < aToDoIDs.GetSize(); nID++)
+	for (nID = 0; nID < aTaskIDs.GetSize(); nID++)
+		GetTaskIncompleteDependencies(aTaskIDs[nID], aLocalDependIDs, aNonLocalDependLinks);
+
+	if (aLocalDependIDs.GetSize() || aNonLocalDependLinks.GetSize())
 	{
-		DWORD dwTaskID = aToDoIDs[nID];
+		CEnString sMessage(IDS_TASKCOMPLETION);
+		sMessage += '|';
 
-		if (TaskHasIncompleteDependencies(dwTaskID, sIncomplete))
-		{
-			CEnString sMessage(IDS_TASKCOMPLETION);
-			sMessage += '|';
+		if (aTaskIDs.GetSize() == 1)
 			sMessage += CEnString(IDS_TDC_SELTASKHASDEPENDENCY);
+		else
+			sMessage += CEnString(IDS_TDC_SELTASKSHAVEDEPENDENCIES);
 
-			if (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONERROR))
-				ShowTaskLink(sIncomplete, FALSE);
-
-			return FALSE;
+		if (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONERROR))
+		{
+			if (aLocalDependIDs.GetSize())
+				SelectTasks(aLocalDependIDs);
+			else
+				ShowTaskLink(aNonLocalDependLinks[0], FALSE);
 		}
+
+		return FALSE;
 	}
 
 	bAndSubtasks = (!m_data.WantUpdateInheritedAttibute(TDCA_DONEDATE) &&
-					CheckWantTaskSubtasksCompleted(aToDoIDs));
-
+					CheckWantTaskSubtasksCompleted(aTaskIDs));
 	return TRUE;
 }
 
-BOOL CToDoCtrl::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const
+BOOL CToDoCtrl::TaskHasIncompleteDependencies(DWORD dwTaskID) const
+{
+	return (GetTaskIncompleteDependencies(dwTaskID, CDWordArray(), CStringArray()) > 0);
+}
+
+int CToDoCtrl::GetTaskIncompleteDependencies(DWORD dwTaskID, CDWordArray& aLocalDependIDs, CStringArray& aNonLocalDependLinks) const
 {
 	CTDCDependencyArray aDepends;
 	int nNumDepends = m_data.GetTaskDependencies(dwTaskID, aDepends);
@@ -1995,20 +2007,14 @@ BOOL CToDoCtrl::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomple
 		if (depend.IsLocal())
 		{
 			if (m_data.HasTask(depend.dwTaskID) && !m_data.IsTaskDone(depend.dwTaskID))
-			{
-				sIncomplete = depend.Format();
-				return TRUE;
-			}
+				aLocalDependIDs.Add(depend.dwTaskID);
 		}
 		else if (!depend.sTasklist.IsEmpty()) // pass to parent if we can't handle
 		{
 			BOOL bDependentIsDone = GetParent()->SendMessage(WM_TDCM_ISTASKDONE, depend.dwTaskID, (LPARAM)(LPCTSTR)depend.sTasklist);
 
 			if (!bDependentIsDone)
-			{
-				sIncomplete = depend.Format();
-				return TRUE;
-			}
+				aNonLocalDependLinks.Add(depend.Format());
 		}
 	}
 
@@ -2021,13 +2027,10 @@ BOOL CToDoCtrl::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomple
 		int nPos = pTDS->GetSubTaskCount();
 
 		while (nPos--)
-		{
-			if (TaskHasIncompleteDependencies(pTDS->GetSubTaskID(nPos), sIncomplete))
-				return TRUE;
-		}
+			GetTaskIncompleteDependencies(pTDS->GetSubTaskID(nPos), aLocalDependIDs, aNonLocalDependLinks); // RECURSIVE CALL
 	}
 
-	return FALSE;
+	return (aLocalDependIDs.GetSize() + aNonLocalDependLinks.GetSize());
 }
 
 BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const

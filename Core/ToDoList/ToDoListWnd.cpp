@@ -12761,13 +12761,15 @@ LRESULT CToDoListWnd::OnToDoCtrlIsTaskDone(WPARAM wParam, LPARAM lParam)
 			FileMisc::SplitPath(sPathName, &sDrive, &sFolder);
 			FileMisc::MakePath(sFile, sDrive, sFolder, sFile);
 		}
-		// else its a full path already
 		
 		int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sFile);
 
 		if (nTDC != -1) // already loaded
 		{
-			return GetToDoCtrl(nTDC).IsTaskDone(wParam);
+			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
+
+			if (tdc.HasTask(wParam))
+				return tdc.IsTaskDone(wParam);
 		}
 		else
 		{
@@ -12777,12 +12779,15 @@ LRESULT CToDoListWnd::OnToDoCtrlIsTaskDone(WPARAM wParam, LPARAM lParam)
 			if (tasks.Load(sFile))
 			{
 				HTASKITEM ht = tasks.FindTask(wParam);
-				return ht ? tasks.IsTaskDone(ht) : FALSE;
+
+				if (ht)
+					return tasks.IsTaskDone(ht);
 			}
 		}
 	}
 	
-	return 0L;
+	// Tasklist or task cannot be found
+	return -1;
 }
 
 LRESULT CToDoListWnd::OnSessionStatusChange(WPARAM wp, LPARAM lp)

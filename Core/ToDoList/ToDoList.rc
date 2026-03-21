@@ -2248,6 +2248,7 @@ BEGIN
     CONTROL         "",IDC_TODIVIDER,"Static",SS_ETCHEDHORZ,7,54,366,1
 END
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog Info
@@ -5199,9 +5200,9 @@ BEGIN
     IDS_TDC_FIELD_DEPENDENCY "De&pendency"
     IDS_TDLBC_DEPENDS       "Dependency"
     IDS_TDC_SELTASKHASDEPENDENCY 
-                            "The selected task is dependent on another task that must be completed first.\n\nWould you like to view the dependency?"
+                            "The selected task is dependent on other tasks that must be completed first.\n\nWould you like to view the dependencies?"
     IDS_TDC_SELTASKSHAVEDEPENDENCIES 
-                            "One or more selected tasks are dependent on other tasks that must be completed first."
+                            "One or more selected tasks are dependent on other tasks that must be completed first.\n\nWould you like to view the dependencies?"
     IDS_NOENCRYPTIONDLL     "'%s' could not be opened because it is encrypted and you do not have the encryption component installed.\n\nPlease contact AbstractSpoon Software for more information."
     IDS_UNKNOWNENCRYPTION   "'%s' could not be opened because the method of encryption could not be determined."
     IDS_ENCRYPTEDFILE       "The tasklist '%s' has been encrypted.\n\nPlease enter the required password below."
