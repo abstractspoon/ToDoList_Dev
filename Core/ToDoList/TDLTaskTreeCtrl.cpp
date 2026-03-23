@@ -82,7 +82,7 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),
 	m_htiLastHandledLBtnDown(NULL),
-	m_wKeyPress(0),
+//	m_wKeyPress(0),
 	m_bMovingItem(FALSE),
 	m_bEditLabelTimerStarted(FALSE),
 	m_reminders(*this),
@@ -713,75 +713,37 @@ void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 
 void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
-	// we don't support nothing having being selected unless there
-	// are no items in the tree
-	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL) && (s_nExtendedSelection & HOTKEYF_CONTROL);
-	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT) && (s_nExtendedSelection & HOTKEYF_SHIFT);
-	
-	// cursor handled here
-	// <shift>+cursor handled here
-	if (m_wKeyPress == 0)
-		return;
-
-	HTREEITEM hti = pNMTV->itemNew.hItem;
-
 	// snapshot current selection to test for changes
 	CHTIList lstPrevSel;
 	TSH().CopySelection(lstPrevSel);
 
-	switch (m_wKeyPress)
+	// Update selection
+	BOOL bSelChange = FALSE;
+	TSH().OnTreeNotifyParentSelChange(pNMTV, bSelChange);
+
+	if (bSelChange)
 	{
-	case VK_NEXT:
-	case VK_DOWN:
-	case VK_UP:
-	case VK_PRIOR:
-	case VK_RIGHT:
-	case VK_LEFT:
-	case VK_HOME:
-	case VK_END:
-		if (!bCtrl)
+		if (CanResync())
+			SyncColumnSelectionToTasks();
+
+		HTREEITEM hti = pNMTV->itemNew.hItem;
+
+		if (hti && !TCH().IsItemVisible(hti, FALSE))
 		{
-			TSH().RemoveAll();
+			CLockUpdates lr(m_tcTasks);
 
-			if (bShift)
-			{
-				TSH().AddItems(TSH().GetAnchor(), hti);
-			}
-			else
-			{
-				TSH().SetAnchor(hti);
-				TSH().AddItem(hti);
-			}
+			TCH().EnsureItemVisible(hti, FALSE);
 		}
-		break;
 
-	default:
-		// else handle alphanum method of changing selection
-		TSH().RemoveAll();
-		TSH().SetAnchor(hti);
-		TSH().AddItem(hti);
-		break;
+		// notify parent of selection change
+		// unless up/down cursor key still pressed
+		if (TSH().Matches(lstPrevSel) || Misc::IsCursorKeyPressed(MKC_UPDOWN))
+			return;
+
+		// DON'T KNOW HOW WE CAN EVER GET HERE
+		ASSERT(0);
+		NotifyParentSelChange(SC_BYKEYBOARD);
 	}
-	m_wKeyPress = 0; // always
-
-	// Only propagate this if we're not already in the 
-	// middle of a resync
-	if (CanResync())
-		SyncColumnSelectionToTasks();
-
-	if (hti && !TCH().IsItemVisible(hti, FALSE))
-	{
-		CLockUpdates lr(m_tcTasks);
-
-		TCH().EnsureItemVisible(hti, FALSE);
-	}
-
-	// notify parent of selection change
-	// unless up/down cursor key still pressed
-	if (TSH().Matches(lstPrevSel) || Misc::IsCursorKeyPressed(MKC_UPDOWN))
-		return;
-
-	NotifyParentSelChange(SC_BYKEYBOARD);
 }
 
 BOOL CTDLTaskTreeCtrl::PreTranslateMessage(MSG* pMsg)
@@ -1015,38 +977,7 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				break;
 
 			case TVN_KEYDOWN:
-				{
-					// all we do is get a copy of the key pressed for reference
-					NMTVKEYDOWN* pTVKD = (NMTVKEYDOWN*)pNMHDR;
-					
-					m_wKeyPress = 0;
-					
-					switch (pTVKD->wVKey)
-					{
-					case VK_NEXT:  
-					case VK_DOWN:
-					case VK_UP:
-					case VK_PRIOR: 
-					case VK_RIGHT:
-					case VK_LEFT:
-					case VK_HOME:
-					case VK_END:
-						m_wKeyPress = pTVKD->wVKey;
-						break;
-						
-					default:
-						// handle alphanum method of changing selection
-						{
-							// convert to char because its easier to work out what
-							// are valid chars
-							UINT nChar = MapVirtualKey(pTVKD->wVKey, 2);
-							
-							if (nChar >= 0x20 && nChar <= 0xFF)
-								m_wKeyPress = pTVKD->wVKey;
-						}
-						break;
-					}
-				}
+				TSH().OnTreeNotifyParentKeyDown((NMTVKEYDOWN*)pNMHDR);
 				break;
 				
 			case TVN_ITEMEXPANDED:
@@ -1067,8 +998,8 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 					}
 
 					UpdateAll();
-					RecalcUntrackedColumnWidths();
 
+					RecalcUntrackedColumnWidths();
 					RepackageAndSendToParent(msg, wp, lp);
 				}
 
@@ -1163,10 +1094,11 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			case VK_DOWN:
 			case VK_UP:
 			case VK_PRIOR: 
-				// force a parent notification
-				lstPrevSel.RemoveAll();
-				bSelChange = TRUE;
-				nAction = SC_BYKEYBOARD;
+				{
+					TSH().OnTreeKeyUp(wp, lp, bSelChange);
+
+					nAction = SC_BYKEYBOARD;
+				}
 				break;
 			}
 			break;
@@ -1175,104 +1107,35 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			{
 				EndLabelEditTimer();
 
-				BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-				BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-				BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
+				// snapshot existing selection before we might change it
+				TSH().CopySelection(lstPrevSel, TRUE);
+
+				// Update the selection
+				TSH().OnTreeKeyDown(wp, lp, bSelChange);
 				
-				// <ctrl>+cursor handled here
-				// <ctrl>+<shift>+cursor here
-				if (!bAlt)
+				BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
+
+				if (!bAlt && !bSelChange)
 				{
-					// snapshot existing selection before we might change it
-					TSH().CopySelection(lstPrevSel, TRUE);
-					
-					// get the real currently selected item
-					HTREEITEM hti = m_tcTasks.GetSelectedItem();
-					
-					bCtrl &= (s_nExtendedSelection & HOTKEYF_CONTROL);
-					bShift &= (s_nExtendedSelection & HOTKEYF_SHIFT);
-					
+					// Handle expanding/contracting tasks
+					BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+					BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
+
 					switch (wp)
 					{
-					case VK_NEXT:  
-					case VK_DOWN:
-						if (bCtrl)
-						{
-							HTREEITEM htiNext = NULL;
-							
-							if (wp == VK_NEXT)
-								htiNext = TCH().GetNextPageVisibleItem(hti);
-							else
-								htiNext = TCH().GetNextVisibleItem(hti);
-							
-							if (htiNext)
-							{
-								TCH().SelectItem(htiNext);
-								
-								// toggle items if shift is also down, but not the one 
-								// we're just moving on to
-								if (bShift)
-								{
-									HTREEITEM htiPrev = TCH().GetPrevVisibleItem(htiNext, FALSE);
-									TSH().SetItems(htiPrev, hti, TSHS_TOGGLE);
-								}
-								
-								bSelChange = TRUE;
-							}
-						}
-						break;
-						
-					case VK_UP:
-					case VK_PRIOR: 
-						if (bCtrl)
-						{
-							HTREEITEM htiPrev = NULL;
-							
-							if (wp == VK_PRIOR)
-								TCH().GetPrevPageVisibleItem(hti);
-							else
-								TCH().GetPrevVisibleItem(hti);
-							
-							if (htiPrev)
-							{
-								TCH().SelectItem(htiPrev);
-								
-								// toggle items if shift is also down, but not the one 
-								// we're just moving on to
-								if (bShift)
-								{
-									HTREEITEM htiNext = TCH().GetNextVisibleItem(htiPrev, FALSE);
-									TSH().SetItems(htiNext, hti, TSHS_TOGGLE);
-								}
-								
-								bSelChange = TRUE;
-							}
-						}
-						break;
-						
-					case VK_SPACE:
-						if (bCtrl && !bShift)
-						{
-							// toggle real selected item state
-							TSH().SetItem(hti, TSHS_TOGGLE);
-							
-							bSelChange = TRUE;
-						}
-						break;
-
 					case VK_MULTIPLY:
-						// Eat this if the selected item(s) is already fully expanded
 						if (!bCtrl && !bShift)
 						{
+							// Eat this if the selected item(s) is already fully expanded
 							if (TSH().IsSelectionExpanded(TRUE))
 								return 0L;
 						}
 						break;
 
 					case VK_SUBTRACT:
-						// Eat this if the selected item(s) is already collapsed
 						if (!bCtrl && !bShift)
 						{
+							// Eat this if the selected item(s) is already collapsed
 							if (!TSH().IsSelectionExpanded())
 								return 0L;
 						}

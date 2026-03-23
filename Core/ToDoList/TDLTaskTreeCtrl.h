@@ -174,7 +174,7 @@ protected:
 	CDWordSet m_mapReferenceTaskIDs;
 
 	HTREEITEM m_htiLastHandledLBtnDown;
-	WORD m_wKeyPress;
+//	WORD m_wKeyPress;
 	BOOL m_bMovingItem;
 	BOOL m_bEditLabelTimerStarted;
 

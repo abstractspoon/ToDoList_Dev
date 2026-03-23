@@ -26,7 +26,8 @@ CTreeSelectionHelper::CTreeSelectionHelper(CTreeCtrl& tree)
 	m_nCurSelection(0), 
 	m_htiAnchor(NULL), 
 	m_tch(tree),
-	m_bReadOnly(FALSE)
+	m_bReadOnly(FALSE),
+	m_nLastKeyDown(0)
 {
 
 }
@@ -1141,6 +1142,192 @@ void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 			bSelChange = TRUE;
 		}
 	}
+}
+
+void CTreeSelectionHelper::OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	// <ctrl>+cursor handled here
+	// <ctrl>+<shift>+cursor here
+	if (Misc::IsKeyPressed(VK_MENU))
+		return; 
+
+	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
+
+	// get the real currently selected item
+	HTREEITEM hti = m_tree.GetSelectedItem();
+
+	// 		bCtrl &= (s_nExtendedSelection & HOTKEYF_CONTROL);
+	// 		bShift &= (s_nExtendedSelection & HOTKEYF_SHIFT);
+
+	switch (wp)
+	{
+	case VK_NEXT:
+	case VK_DOWN:
+		if (bCtrl)
+		{
+			HTREEITEM htiNext = NULL;
+
+			if (wp == VK_NEXT)
+				htiNext = TCH().GetNextPageVisibleItem(hti);
+			else
+				htiNext = TCH().GetNextVisibleItem(hti);
+
+			if (htiNext)
+			{
+				m_tch.SelectItem(htiNext);
+
+				// toggle items if shift is also down, but not the one 
+				// we're just moving on to
+				if (bShift)
+				{
+					HTREEITEM htiPrev = TCH().GetPrevVisibleItem(htiNext, FALSE);
+					SetItems(htiPrev, hti, TSHS_TOGGLE);
+				}
+
+				bSelChange = TRUE;
+			}
+		}
+		break;
+
+	case VK_UP:
+	case VK_PRIOR:
+		if (bCtrl)
+		{
+			HTREEITEM htiPrev = NULL;
+
+			if (wp == VK_PRIOR)
+				TCH().GetPrevPageVisibleItem(hti);
+			else
+				TCH().GetPrevVisibleItem(hti);
+
+			if (htiPrev)
+			{
+				m_tch.SelectItem(htiPrev);
+
+				// toggle items if shift is also down, but not the one 
+				// we're just moving on to
+				if (bShift)
+				{
+					HTREEITEM htiNext = TCH().GetNextVisibleItem(htiPrev, FALSE);
+					SetItems(htiNext, hti, TSHS_TOGGLE);
+				}
+
+				bSelChange = TRUE;
+			}
+		}
+		break;
+
+	case VK_SPACE:
+		if (bCtrl && !bShift)
+		{
+			// toggle real selected item state
+			SetItem(hti, TSHS_TOGGLE);
+
+			bSelChange = TRUE;
+		}
+		break;
+	}
+}
+
+void CTreeSelectionHelper::OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	switch (wp)
+	{
+	case VK_NEXT:
+	case VK_DOWN:
+	case VK_UP:
+	case VK_PRIOR:
+		bSelChange = TRUE;
+		break;
+	}
+}
+
+void CTreeSelectionHelper::OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD)
+{
+	m_nLastKeyDown = 0;
+
+	switch (pTVKD->wVKey)
+	{
+	case VK_NEXT:
+	case VK_DOWN:
+	case VK_UP:
+	case VK_PRIOR:
+	case VK_RIGHT:
+	case VK_LEFT:
+	case VK_HOME:
+	case VK_END:
+		m_nLastKeyDown = pTVKD->wVKey;
+		break;
+
+	default:
+		// handle alphanum method of changing selection
+		{
+			// convert to char because its easier to work out what
+			// are valid chars
+			UINT nChar = MapVirtualKey(pTVKD->wVKey, 2);
+
+			if ((nChar >= 0x20) && (nChar <= 0xFF))
+				m_nLastKeyDown = pTVKD->wVKey;
+		}
+		break;
+	}
+}
+
+void CTreeSelectionHelper::OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	if (m_nLastKeyDown == 0)
+		return;
+
+	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);// && (s_nExtendedSelection & HOTKEYF_CONTROL);
+	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);// && (s_nExtendedSelection & HOTKEYF_SHIFT);
+
+	HTREEITEM hti = pNMTV->itemNew.hItem;
+
+	switch (m_nLastKeyDown)
+	{
+	case VK_NEXT:
+	case VK_DOWN:
+	case VK_UP:
+	case VK_PRIOR:
+	case VK_RIGHT:
+	case VK_LEFT:
+	case VK_HOME:
+	case VK_END:
+		if (!bCtrl)
+		{
+			RemoveAll();
+
+			if (bShift)
+			{
+				AddItems(GetAnchor(), hti);
+			}
+			else
+			{
+				SetAnchor(hti);
+				AddItem(hti);
+			}
+
+			bSelChange = TRUE;
+		}
+		break;
+
+	default:
+		{
+			// else handle alphanum method of changing selection
+			RemoveAll();
+			SetAnchor(hti);
+			AddItem(hti);
+
+			bSelChange = TRUE;
+		}
+		break;
+	}
+	m_nLastKeyDown = 0; // always
 }
 
 BOOL CTreeSelectionHelper::SelectSingleItem(HTREEITEM hti, BOOL& bSelChange)

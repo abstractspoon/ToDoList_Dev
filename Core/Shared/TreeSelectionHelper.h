@@ -168,6 +168,11 @@ public:
 	void OnTreeLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 
+	void OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	void OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	void OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD);
+	void OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange);
+
 protected:
 	CTreeCtrl& m_tree;
 	CHTIList m_lstSelection;
@@ -175,8 +180,10 @@ protected:
 	HTREEITEM m_htiAnchor;
 	CTreeCtrlHelper m_tch;
 	CStringArray m_aHistory;
+
 private:
 	BOOL m_bReadOnly;
+	UINT m_nLastKeyDown;
 
 protected:
 	void InvalidateItem(HTREEITEM hti);
