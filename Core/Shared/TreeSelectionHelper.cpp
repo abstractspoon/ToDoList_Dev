@@ -1020,135 +1020,133 @@ BOOL CTreeSelectionHelper::EnsureVisible(BOOL bHorzPartialOK)
 	return TRUE;
 }
 
-void CTreeSelectionHelper::OnTreeMessage(UINT msg, WPARAM wp, LPARAM lp, BOOL& bSelChange)
+void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 {
 	bSelChange = FALSE;
 
-	CHTIList lstPrevSel;
+// 	CHTIList lstPrevSel;
 
-	switch (msg)
+	// allow parent to handle any focus changes
+	// before we change our selection
+	m_tree.SetFocus();
+
+	UINT nHitFlags = 0;
+	CPoint pt(lp);
+	HTREEITEM htiHit = m_tree.HitTest(pt, &nHitFlags);
+
+	// Don't change selection if user is just trying to expand an item
+	if (nHitFlags & TVHT_ONITEMBUTTON)
+		return;
+
+// 	// snapshot existing selection before we might change it
+// 	CopySelection(lstPrevSel, TRUE);
+
+	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
+
+	HTREEITEM htiAnchor = GetAnchor();
+
+	if (!htiAnchor && bShift)
+		htiAnchor = htiHit;
+
+	if (bCtrl)
 	{
-	case WM_RBUTTONDOWN: // --------------------------------------------------------------------------
+		if (bShift)
 		{
-			// allow parent to handle any focus changes
-			// before we change our selection
-			m_tree.SetFocus();
-
-			HTREEITEM hti = m_tree.HitTest(lp);
-
-			if (hti)
-			{
-				// snapshot existing selection before we might change it
-				CopySelection(lstPrevSel, TRUE);
-
-				if (!HasItem(hti))
-				{
-					RemoveAll();
-					AddItem(hti);
-					SetAnchor(hti);
-
-					bSelChange = TRUE;
-				}
-
-				if (hti != m_tree.GetSelectedItem())
-				{
-					m_tree.SelectItem(hti);
-					bSelChange = TRUE;
-				}
-			}
+			SetItems(htiAnchor, htiHit, TSHS_SELECT);
+			bSelChange = TRUE;
 		}
-		break;
-
-	case WM_LBUTTONDOWN: // --------------------------------------------------------------------------
+		else if (m_bReadOnly || !::DragDetect(m_tree, pt))
 		{
-			// allow parent to handle any focus changes
-			// before we change our selection
-			m_tree.SetFocus();
-
-			// Ddon't change selection if user is trying to expand an item
-			UINT nHitFlags = 0;
-			CPoint pt(lp);
-			HTREEITEM htiHit = m_tree.HitTest(pt, &nHitFlags);
-
-			if (nHitFlags & TVHT_ONITEMBUTTON)
-				break;
-
-			// snapshot existing selection before we might change it
-			CopySelection(lstPrevSel, TRUE);
-
-			BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-			BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-
-			HTREEITEM htiAnchor = GetAnchor();
-
-			if (!htiAnchor && bShift)
-				htiAnchor = htiHit;
-
-			if (bCtrl)
-			{
-				if (bShift)
-				{
-					SetItems(htiAnchor, htiHit, TSHS_SELECT);
-					bSelChange = TRUE;
-				}
-				else if (m_bReadOnly || !::DragDetect(m_tree, pt))
-				{
-					// if this is not the beginning of a drag then toggle selection
-					SetItem(htiHit, TSHS_TOGGLE);
-					bSelChange = TRUE;
-				}
-			}
-			else if (bShift)
-			{
-				RemoveAll();
-				SetItems(htiAnchor, htiHit, TSHS_SELECT);
-				bSelChange = TRUE;
-			}
-			else if (htiHit) // !bCtrl && !bShift
-			{
-				// select item if not already
-				if (!HasItem(htiHit))
-					SelectSingleItem(htiHit, bSelChange);
-			}
-
-			// update anchor
-			if (htiHit && !bShift)
-				SetAnchor(htiHit);
+			// if this is not the beginning of a drag then toggle selection
+			SetItem(htiHit, TSHS_TOGGLE);
+			bSelChange = TRUE;
 		}
-		break;
-
-	case WM_LBUTTONUP: // --------------------------------------------------------------------------
-		{
-			BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-			BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-
-			if (!bCtrl && !bShift)
-			{
-				UINT nHitFlags = 0;
-				CPoint ptCursor(lp);
-				HTREEITEM htiHit = m_tree.HitTest(ptCursor, &nHitFlags);
-
-				if (HasItem(htiHit))
-				{
-					int nSelCount = GetCount();
-					ASSERT(nSelCount);
-
-					if (nSelCount > 1)
-						SelectSingleItem(htiHit, bSelChange);
-
-					// Always update anchor
-					SetAnchor(htiHit);
-				}
-			}
-		}
-		break;
+	}
+	else if (bShift)
+	{
+		RemoveAll();
+		SetItems(htiAnchor, htiHit, TSHS_SELECT);
+		bSelChange = TRUE;
+	}
+	else if (htiHit) // !bCtrl && !bShift
+	{
+		// select item if not already
+		if (!HasItem(htiHit))
+			SelectSingleItem(htiHit, bSelChange);
 	}
 
-	bSelChange |= !Matches(lstPrevSel);
+	// update anchor
+	if (htiHit && !bShift)
+		SetAnchor(htiHit);
+// 
+// 	bSelChange |= !Matches(lstPrevSel);
+}
+
+void CTreeSelectionHelper::OnTreeLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+// 	CHTIList lstPrevSel;
+
+	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
+
+	if (!bCtrl && !bShift)
+	{
+		UINT nHitFlags = 0;
+		CPoint ptCursor(lp);
+		HTREEITEM htiHit = m_tree.HitTest(ptCursor, &nHitFlags);
+
+		if (HasItem(htiHit))
+		{
+			int nSelCount = GetCount();
+			ASSERT(nSelCount);
+
+			if (nSelCount > 1)
+				SelectSingleItem(htiHit, bSelChange);
+
+			// Always update anchor
+			SetAnchor(htiHit);
+		}
+	}
+
+// 	bSelChange |= !Matches(lstPrevSel);
+}
+
+void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	// allow parent to handle any focus changes
+	// before we change our selection
+	m_tree.SetFocus();
+
+	HTREEITEM hti = m_tree.HitTest(lp);
+
+	if (hti)
+	{
+		if (!HasItem(hti))
+		{
+			RemoveAll();
+			AddItem(hti);
+			SetAnchor(hti);
+
+			bSelChange = TRUE;
+		}
+
+		if (hti != m_tree.GetSelectedItem())
+		{
+			m_tree.SelectItem(hti);
+			bSelChange = TRUE;
+		}
+	}
 }
 
 BOOL CTreeSelectionHelper::SelectSingleItem(HTREEITEM hti, BOOL& bSelChange)
 {
+	bSelChange = FALSE;
+
 	// Avoid unnecessary selections
 	if (GetCount() == 1)
 	{
@@ -1166,6 +1164,7 @@ BOOL CTreeSelectionHelper::SelectSingleItem(HTREEITEM hti, BOOL& bSelChange)
 		AddItem(hti);
 		SetAnchor(hti);
 
+		bSelChange = TRUE;
 		bSelected = m_tch.SelectItem(hti);
 
 		if (!TCH().IsItemVisible(hti, FALSE))

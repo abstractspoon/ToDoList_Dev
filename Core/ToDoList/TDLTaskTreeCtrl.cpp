@@ -1288,7 +1288,11 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			{
 				EndLabelEditTimer();
 
-				TSH().OnTreeMessage(msg, wp, lp, bSelChange);
+				// snapshot existing selection before we might change it
+				TSH().CopySelection(lstPrevSel, TRUE);
+
+				// Update the selection
+				TSH().OnTreeRButtonDown(wp, lp, bSelChange);
 				
 				nAction = SC_BYMOUSE;
 			}
@@ -1302,7 +1306,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				TSH().CopySelection(lstPrevSel, TRUE);
 
 				// Update the selection
-				TSH().OnTreeMessage(msg, wp, lp, bSelChange);
+				TSH().OnTreeLButtonDown(wp, lp, bSelChange);
 				
 				// don't change selection if user is expanding an item
 				UINT nHitFlags = 0;
@@ -1382,7 +1386,11 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						}
 						else
 						{
-							TSH().OnTreeMessage(msg, wp, lp, bSelChange);
+							// snapshot existing selection before we might change it
+							TSH().CopySelection(lstPrevSel, TRUE);
+
+							// Update the selection
+							TSH().OnTreeLButtonUp(wp, lp, bSelChange);
 						}
 					}
 				}
@@ -1429,6 +1437,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		}
 		else if (bColDblClk)
 		{
+			ASSERT(m_htiLastHandledLBtnDown == NULL);
+
 			if (HandleClientColumnClick(lp, TRUE))
 				return 0L; // eat
 		}

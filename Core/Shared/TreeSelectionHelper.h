@@ -164,7 +164,9 @@ public:
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 
 	// Pseudo message handlers
-	void OnTreeMessage(UINT msg, WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	void OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	void OnTreeLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	void OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 
 protected:
 	CTreeCtrl& m_tree;
