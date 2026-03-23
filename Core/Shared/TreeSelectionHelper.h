@@ -157,11 +157,14 @@ public:
 	int GetItemData(const CHTIList& selection, CDWordArray& aData) const;
 	int GetItemData(CDWordArray& aItemData) const;
 
-	BOOL HasUncheckedItems() const;
-
 	BOOL ParentItemsAreAllExpanded(BOOL bRecursive) const;
 	void ExpandAllParentItems(BOOL bRecursive);
 	BOOL EnsureVisible(BOOL bHorzPartialOK);
+	BOOL HasUncheckedItems() const;
+	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
+
+	// Pseudo message handlers
+	void OnTreeMessage(UINT msg, WPARAM wp, LPARAM lp, BOOL& bSelChange);
 
 protected:
 	CTreeCtrl& m_tree;
@@ -170,11 +173,14 @@ protected:
 	HTREEITEM m_htiAnchor;
 	CTreeCtrlHelper m_tch;
 	CStringArray m_aHistory;
+private:
+	BOOL m_bReadOnly;
 
 protected:
 	void InvalidateItem(HTREEITEM hti);
 	BOOL HasSelectedParent(HTREEITEM hti, const CHTIList& selection) const;
 	void AddAll(HTREEITEM hti);
+	BOOL SelectSingleItem(HTREEITEM hti, BOOL& bSelChange);
 
 	struct SORTITEM
 	{

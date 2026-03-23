@@ -236,6 +236,8 @@ void CTDLTaskTreeCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 	if (styles.HasStyle(TDCS_SHOWINFOTIPS))
 		SetTasksWndStyle(TVS_NOTOOLTIPS, styles.IsStyleEnabled(TDCS_SHOWINFOTIPS), FALSE);
 
+	TSH().SetReadOnly(HasStyle(TDCS_READONLY));
+
 	SyncColumnSelectionToTasks();
 }
 
@@ -1322,68 +1324,32 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			{
 				BOOL bHadFocus = HasFocus();
 
-				// allow parent to handle any focus changes
-				// before we change our selection
-				if (!bHadFocus)
-					m_tcTasks.SetFocus();
+				// snapshot existing selection before we might change it
+				TSH().CopySelection(lstPrevSel, TRUE);
 
+				// Update the selection
+				TSH().OnTreeMessage(msg, wp, lp, bSelChange);
+				
 				// don't change selection if user is expanding an item
 				UINT nHitFlags = 0;
 				CPoint pt(lp);
 				HTREEITEM htiHit = m_tcTasks.HitTest(pt, &nHitFlags);
-
-				if (nHitFlags & TVHT_ONITEMBUTTON)
-					break;
-				
-				// snapshot existing selection before we might change it
-				TSH().CopySelection(lstPrevSel, TRUE);
 				
 				BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
 				BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
 				
-				HTREEITEM htiAnchor = TSH().GetAnchor();
-				
-				if (!htiAnchor && bShift)
-					htiAnchor = htiHit;
-
 				if (bCtrl)
 				{
-					if (bShift)
-					{
-						TSH().SetItems(htiAnchor, htiHit, TSHS_SELECT);
-						
-						bSelChange = TRUE;
-					}
-					else if (HasStyle(TDCS_READONLY) || !::DragDetect(hRealWnd, pt))
-					{
-						// if this is not the beginning of a drag then toggle selection
-						TSH().SetItem(htiHit, TSHS_TOGGLE);
-							
-						bSelChange = TRUE;
-					}
-					
 					// save item handle so we don't rehandle in LButtonUp handler
 					m_htiLastHandledLBtnDown = htiHit;
 				}
 				else if (bShift) 
 				{
-					TSH().RemoveAll();
-					TSH().SetItems(htiAnchor, htiHit, TSHS_SELECT);
-					
 					// save item handle so we don't rehandle in LButtonUp handler
 					m_htiLastHandledLBtnDown = htiHit;
-					
-					bSelChange = TRUE;
 				}
 				else if (htiHit) // !bCtrl && !bShift
 				{
-					// select item if not already
-					if (!TSH().HasItem(htiHit))
-					{
-						SelectItem(htiHit, FALSE, SC_BYMOUSE);
-						bSelChange = TRUE;
-					}
-
 					if (nHitFlags & TVHT_ONITEMLABEL)
 					{
 						// if we didn't previously have the focus then we save
@@ -1405,10 +1371,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						bColClick = !(nHitFlags & TVHT_ONITEMINDENT);
 					}
 				}
-				
-				// update anchor
-				if (htiHit && !bShift)
-					TSH().SetAnchor(htiHit);
 
 				nAction = SC_BYMOUSE;
 			}
@@ -1416,10 +1378,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			
 		case WM_LBUTTONUP: // --------------------------------------------------------------------------
 			{
-				// always clear the last handled item
-				HTREEITEM htiLastHandledLBtnDown = m_htiLastHandledLBtnDown;
-				m_htiLastHandledLBtnDown = NULL;			
-				
 				BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
 				BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
 				
@@ -1431,12 +1389,11 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					
 					// don't reprocess items already handled in the button down handler
 					if ((nHitFlags & (TVHT_ONITEMBUTTON | TVHT_ONITEMICON | TVHT_ONITEMSTATEICON)) || 
-						!htiHit || (htiHit == htiLastHandledLBtnDown))
+						!htiHit || (htiHit == m_htiLastHandledLBtnDown))
 					{
-						break;
+						// ignore
 					}
-
-					if (TSH().HasItem(htiHit))
+					else if (TSH().HasItem(htiHit))
 					{
 						int nSelCount = TSH().GetCount();
 						ASSERT (nSelCount);
@@ -1444,21 +1401,19 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						if (!HasStyle(TDCS_READONLY) &&
 							(nHitFlags & TVHT_ONITEMLABEL) && 
 							(nSelCount == 1) && 
-							(htiLastHandledLBtnDown == NULL) &&
+							(m_htiLastHandledLBtnDown == NULL) &&
 							!SelectionHasLocked())
 						{
 							BeginLabelEditTimer();
 						}
-						else if (nSelCount > 1)
+						else
 						{
-							SelectItem(htiHit, TRUE, SC_BYMOUSE);
+							TSH().OnTreeMessage(msg, wp, lp, bSelChange);
 						}
-						
-						// update anchor
-						TSH().SetAnchor(htiHit);
 					}
 				}
 				
+				m_htiLastHandledLBtnDown = NULL;			
 				nAction = SC_BYMOUSE;
 			}
 			break;

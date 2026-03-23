@@ -5,6 +5,9 @@
 #include "stdafx.h"
 #include "TreeSelectionHelper.h"
 #include "Misc.h"
+#include "HoldRedraw.h"
+#include "TreeListSyncer.h"
+
 #include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
@@ -19,7 +22,11 @@ static char THIS_FILE[]=__FILE__;
 
 CTreeSelectionHelper::CTreeSelectionHelper(CTreeCtrl& tree) 
 	: 
-	m_tree(tree), m_nCurSelection(0), m_htiAnchor(NULL), m_tch(tree)
+	m_tree(tree), 
+	m_nCurSelection(0), 
+	m_htiAnchor(NULL), 
+	m_tch(tree),
+	m_bReadOnly(FALSE)
 {
 
 }
@@ -1011,4 +1018,145 @@ BOOL CTreeSelectionHelper::EnsureVisible(BOOL bHorzPartialOK)
 	}
 
 	return TRUE;
+}
+
+void CTreeSelectionHelper::OnTreeMessage(UINT msg, WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	CHTIList lstPrevSel;
+
+	switch (msg)
+	{
+	case WM_LBUTTONDOWN: // --------------------------------------------------------------------------
+		{
+			// allow parent to handle any focus changes
+			// before we change our selection
+			m_tree.SetFocus();
+
+			// Ddon't change selection if user is trying to expand an item
+			UINT nHitFlags = 0;
+			CPoint pt(lp);
+			HTREEITEM htiHit = m_tree.HitTest(pt, &nHitFlags);
+
+			if (nHitFlags & TVHT_ONITEMBUTTON)
+				break;
+
+			// snapshot existing selection before we might change it
+			CopySelection(lstPrevSel, TRUE);
+
+			BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+			BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
+
+			HTREEITEM htiAnchor = GetAnchor();
+
+			if (!htiAnchor && bShift)
+				htiAnchor = htiHit;
+
+			if (bCtrl)
+			{
+				if (bShift)
+				{
+					SetItems(htiAnchor, htiHit, TSHS_SELECT);
+					bSelChange = TRUE;
+				}
+				else if (m_bReadOnly || !::DragDetect(m_tree, pt))
+				{
+					// if this is not the beginning of a drag then toggle selection
+					SetItem(htiHit, TSHS_TOGGLE);
+					bSelChange = TRUE;
+				}
+			}
+			else if (bShift)
+			{
+				RemoveAll();
+				SetItems(htiAnchor, htiHit, TSHS_SELECT);
+				bSelChange = TRUE;
+			}
+			else if (htiHit) // !bCtrl && !bShift
+			{
+				// select item if not already
+				if (!HasItem(htiHit))
+					SelectSingleItem(htiHit, bSelChange);
+			}
+
+			// update anchor
+			if (htiHit && !bShift)
+				SetAnchor(htiHit);
+		}
+		break;
+
+	case WM_LBUTTONUP: // --------------------------------------------------------------------------
+		{
+			BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+			BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
+
+			if (!bCtrl && !bShift)
+			{
+				UINT nHitFlags = 0;
+				CPoint ptCursor(lp);
+				HTREEITEM htiHit = m_tree.HitTest(ptCursor, &nHitFlags);
+
+				if (HasItem(htiHit))
+				{
+					int nSelCount = GetCount();
+					ASSERT(nSelCount);
+
+					if (nSelCount > 1)
+						SelectSingleItem(htiHit, bSelChange);
+
+					// Always update anchor
+					SetAnchor(htiHit);
+				}
+			}
+		}
+		break;
+	}
+
+	bSelChange |= !Matches(lstPrevSel);
+}
+
+BOOL CTreeSelectionHelper::SelectSingleItem(HTREEITEM hti, BOOL& bSelChange)
+{
+	// Avoid unnecessary selections
+	if (GetCount() == 1)
+	{
+		HTREEITEM htiSel = GetFirstItem();
+
+		if ((hti == htiSel) && (htiSel == m_tree.GetSelectedItem()))
+			return TRUE;
+	}
+
+	BOOL bSelected = FALSE;
+
+	if (hti)
+	{
+		RemoveAll();
+		AddItem(hti);
+		SetAnchor(hti);
+
+		bSelected = m_tch.SelectItem(hti);
+
+		if (!TCH().IsItemVisible(hti, FALSE))
+		{
+			// Don't allow any horizontal movement because this 
+			// will break the way we have implemented click-handling
+			{
+				CLockUpdates hr(m_tree);
+				CHoldHScroll hh(m_tree);
+
+				m_tree.EnsureVisible(hti);
+			}
+
+			if (!TCH().IsItemVisible(hti))
+			{
+				// If the item is still not visible because of the horizontal
+				// hold and this was a mouse selection then we post a message to
+				// ensure that whatever called this has already finished
+				m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
+			}
+		}
+	}
+
+	return bSelected;
 }
