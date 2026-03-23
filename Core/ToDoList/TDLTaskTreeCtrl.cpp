@@ -1288,33 +1288,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			{
 				EndLabelEditTimer();
 
-				// allow parent to handle any focus changes
-				// before we change our selection
-				m_tcTasks.SetFocus();
-
-				HTREEITEM hti = m_tcTasks.HitTest(lp);
-				
-				if (hti)
-				{
-					// snapshot existing selection before we might change it
-					TSH().CopySelection(lstPrevSel, TRUE);
-					
-					if (!TSH().HasItem(hti))
-					{
-						TSH().RemoveAll();
-						TSH().AddItem(hti);
-						TSH().SetAnchor(hti);
-						
-						bSelChange = TRUE;
-					}
-					
-					if (hti != m_tcTasks.GetSelectedItem())
-					{
-						m_tcTasks.SelectItem(hti);
-						
-						bSelChange = TRUE;
-					}
-				}
+				TSH().OnTreeMessage(msg, wp, lp, bSelChange);
 				
 				nAction = SC_BYMOUSE;
 			}

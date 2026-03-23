@@ -1028,6 +1028,37 @@ void CTreeSelectionHelper::OnTreeMessage(UINT msg, WPARAM wp, LPARAM lp, BOOL& b
 
 	switch (msg)
 	{
+	case WM_RBUTTONDOWN: // --------------------------------------------------------------------------
+		{
+			// allow parent to handle any focus changes
+			// before we change our selection
+			m_tree.SetFocus();
+
+			HTREEITEM hti = m_tree.HitTest(lp);
+
+			if (hti)
+			{
+				// snapshot existing selection before we might change it
+				CopySelection(lstPrevSel, TRUE);
+
+				if (!HasItem(hti))
+				{
+					RemoveAll();
+					AddItem(hti);
+					SetAnchor(hti);
+
+					bSelChange = TRUE;
+				}
+
+				if (hti != m_tree.GetSelectedItem())
+				{
+					m_tree.SelectItem(hti);
+					bSelChange = TRUE;
+				}
+			}
+		}
+		break;
+
 	case WM_LBUTTONDOWN: // --------------------------------------------------------------------------
 		{
 			// allow parent to handle any focus changes
