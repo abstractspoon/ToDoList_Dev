@@ -1029,6 +1029,13 @@ void CTDLTaskTreeCtrl::EndLabelEditTimer()
 	}
 }
 
+void CTDLTaskTreeCtrl::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)
+{
+	CTDLTaskCtrlBase::EnableExtendedKeyboardSelection(bCtrl, bShift);
+
+	CTreeSelectionHelper::EnableExtendedKeyboardSelection(bCtrl, bShift);
+}
+
 LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())

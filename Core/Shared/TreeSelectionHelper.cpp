@@ -17,6 +17,10 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+DWORD CTreeSelectionHelper::s_dwAllowableExtendedKeyboardSelection = (HOTKEYF_CONTROL | HOTKEYF_SHIFT);
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -1144,6 +1148,14 @@ void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 	}
 }
 
+void CTreeSelectionHelper::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)
+{
+	s_dwAllowableExtendedKeyboardSelection = 0;
+
+	Misc::SetFlag(s_dwAllowableExtendedKeyboardSelection, HOTKEYF_CONTROL, bCtrl);
+	Misc::SetFlag(s_dwAllowableExtendedKeyboardSelection, HOTKEYF_SHIFT, bShift);
+}
+
 void CTreeSelectionHelper::OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 {
 	bSelChange = FALSE;
@@ -1153,14 +1165,11 @@ void CTreeSelectionHelper::OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 	if (Misc::IsKeyPressed(VK_MENU))
 		return; 
 
-	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-
 	// get the real currently selected item
 	HTREEITEM hti = m_tree.GetSelectedItem();
 
-	// 		bCtrl &= (s_nExtendedSelection & HOTKEYF_CONTROL);
-	// 		bShift &= (s_nExtendedSelection & HOTKEYF_SHIFT);
+	BOOL bCtrl = (Misc::IsKeyPressed(VK_CONTROL) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL));
+	BOOL bShift = (Misc::IsKeyPressed(VK_SHIFT) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT));
 
 	switch (wp)
 	{
@@ -1283,8 +1292,8 @@ void CTreeSelectionHelper::OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& 
 	if (m_nLastKeyDown == 0)
 		return;
 
-	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);// && (s_nExtendedSelection & HOTKEYF_CONTROL);
-	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);// && (s_nExtendedSelection & HOTKEYF_SHIFT);
+	BOOL bCtrl = (Misc::IsKeyPressed(VK_CONTROL) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL));
+	BOOL bShift = (Misc::IsKeyPressed(VK_SHIFT) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT));
 
 	HTREEITEM hti = pNMTV->itemNew.hItem;
 

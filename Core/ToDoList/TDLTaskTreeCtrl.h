@@ -157,6 +157,8 @@ public:
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBeginRebuild();
 	void OnEndRebuild();
+
+	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
 	
 #ifdef _DEBUG
 	void Trace(LPCTSTR szComment);

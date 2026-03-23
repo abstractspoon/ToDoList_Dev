@@ -173,6 +173,8 @@ public:
 	void OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD);
 	void OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange);
 
+	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
+
 protected:
 	CTreeCtrl& m_tree;
 	CHTIList m_lstSelection;
@@ -184,6 +186,8 @@ protected:
 private:
 	BOOL m_bReadOnly;
 	UINT m_nLastKeyDown;
+
+	static DWORD s_dwAllowableExtendedKeyboardSelection;
 
 protected:
 	void InvalidateItem(HTREEITEM hti);

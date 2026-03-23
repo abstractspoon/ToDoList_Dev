@@ -239,7 +239,7 @@ public:
 	void ScreenToClient(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
 
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
-	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
+	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
 
 protected:
 	CListCtrl m_lcColumns;
@@ -286,7 +286,7 @@ protected:
 	CIconCache m_imageIcons;
 
 	static CTDCColumnMap s_mapColumns;
-	static short s_nExtendedSelection;
+	static DWORD s_dwAllowableExtendedKeyboardSelection;
 	static double s_dRecentModPeriod;
 
 private:

@@ -457,7 +457,7 @@ BOOL CToDoCtrl::IsReservedShortcut(DWORD dwShortcut)
 
 void CToDoCtrl::EnableExtendedSelection(BOOL bCtrl, BOOL bShift)
 {
-	CTDLTaskCtrlBase::EnableExtendedSelection(bCtrl, bShift);
+	CTDLTaskTreeCtrl::EnableExtendedKeyboardSelection(bCtrl, bShift);
 }
 
 void CToDoCtrl::SetDialogIcons(HICON hIconIconDlg, HICON hIconDependsDlg, HICON hIconRecurDlg, HICON hIconAddLogDlg)

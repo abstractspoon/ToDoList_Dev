@@ -76,7 +76,7 @@ enum
 //////////////////////////////////////////////////////////////////////
 
 CTDCColumnMap	CTDLTaskCtrlBase::s_mapColumns;
-short			CTDLTaskCtrlBase::s_nExtendedSelection = HOTKEYF_CONTROL | HOTKEYF_SHIFT;
+DWORD			CTDLTaskCtrlBase::s_dwAllowableExtendedKeyboardSelection = (HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 double			CTDLTaskCtrlBase::s_dRecentModPeriod = 0.0;												
 
 //////////////////////////////////////////////////////////////////////
@@ -5802,17 +5802,12 @@ BOOL CTDLTaskCtrlBase::SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const
 
 // -----------------------------------------------------------------
 
-void CTDLTaskCtrlBase::EnableExtendedSelection(BOOL bCtrl, BOOL bShift)
+void CTDLTaskCtrlBase::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)
 {
-	if (bCtrl)
-		s_nExtendedSelection |= HOTKEYF_CONTROL;
-	else
-		s_nExtendedSelection &= ~HOTKEYF_CONTROL;
-	
-	if (bShift)
-		s_nExtendedSelection |= HOTKEYF_SHIFT;
-	else
-		s_nExtendedSelection &= ~HOTKEYF_SHIFT;
+	s_dwAllowableExtendedKeyboardSelection = 0;
+
+	Misc::SetFlag(s_dwAllowableExtendedKeyboardSelection, HOTKEYF_CONTROL, bCtrl);
+	Misc::SetFlag(s_dwAllowableExtendedKeyboardSelection, HOTKEYF_SHIFT, bShift);
 }
 
 BOOL CTDLTaskCtrlBase::IsReservedShortcut(DWORD dwShortcut)
@@ -5833,19 +5828,19 @@ BOOL CTDLTaskCtrlBase::IsReservedShortcut(DWORD dwShortcut)
 	case MAKELONG(VK_PRIOR, HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_DOWN, HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_NEXT, HOTKEYF_CONTROL | HOTKEYF_EXT):
-		return (s_nExtendedSelection & HOTKEYF_CONTROL);
+		return (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL);
 		
 	case MAKELONG(VK_UP, HOTKEYF_SHIFT | HOTKEYF_EXT):
 	case MAKELONG(VK_PRIOR, HOTKEYF_SHIFT | HOTKEYF_EXT):
 	case MAKELONG(VK_DOWN, HOTKEYF_SHIFT | HOTKEYF_EXT):
 	case MAKELONG(VK_NEXT, HOTKEYF_SHIFT | HOTKEYF_EXT):
-		return (s_nExtendedSelection & HOTKEYF_SHIFT);
+		return (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT);
 		
 	case MAKELONG(VK_UP, HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_PRIOR, HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_DOWN, HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_NEXT, HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_EXT):
-		return (s_nExtendedSelection & (HOTKEYF_CONTROL | HOTKEYF_SHIFT)); // both
+		return (s_dwAllowableExtendedKeyboardSelection & (HOTKEYF_CONTROL | HOTKEYF_SHIFT)); // either
 	}
 	
 	// all else
