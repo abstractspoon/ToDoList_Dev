@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "TreeSelectionHelper.h"
 #include "Misc.h"
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -977,4 +978,37 @@ void CTreeSelectionHelper::ExpandAllParentItems(BOOL bRecursive)
 		if (htiParent)
 			tch.ExpandItem(htiParent, TRUE, FALSE, bRecursive);
 	}
+}
+
+BOOL CTreeSelectionHelper::EnsureVisible(BOOL bHorzPartialOK)
+{
+	if (!GetCount())
+		return FALSE;
+
+	OSVERSION nOSVer = COSVersion();
+	HTREEITEM htiSel = m_tree.GetSelectedItem();
+
+	if (nOSVer < OSV_VISTA)
+	{
+		m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)htiSel);
+	}
+	else
+	{
+		// Check there's something to do because holding 
+		// the redraw/scroll has a cost
+		BOOL bAllExpanded = ParentItemsAreAllExpanded(TRUE);
+		BOOL bVisible = (bAllExpanded && TCH().IsItemVisible(htiSel, FALSE, bHorzPartialOK));
+
+		if (!bVisible)
+		{
+			CHoldRedraw hr(m_tree);
+
+			if (!bAllExpanded)
+				ExpandAllParentItems(TRUE);
+
+			m_tch.EnsureItemVisible(htiSel, FALSE, bHorzPartialOK);
+		}
+	}
+
+	return TRUE;
 }

@@ -161,6 +161,7 @@ public:
 
 	BOOL ParentItemsAreAllExpanded(BOOL bRecursive) const;
 	void ExpandAllParentItems(BOOL bRecursive);
+	BOOL EnsureVisible(BOOL bHorzPartialOK);
 
 protected:
 	CTreeCtrl& m_tree;

@@ -352,35 +352,7 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 
 BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible(BOOL bHorzPartialOK)
 {
-	if (!GetSelectedCount())
-		return FALSE;
-
-	OSVERSION nOSVer = COSVersion();
-	HTREEITEM htiSel = GetTreeSelectedItem();
-	
-	if (OsIsXPOrLinux())
-	{
-		m_tcTasks.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)htiSel);
-	}
-	else
-	{
-		// Check there's something to do because holding 
-		// the redraw/scroll has a cost
-		BOOL bAllExpanded = TSH().ParentItemsAreAllExpanded(TRUE);
-		BOOL bVisible = (bAllExpanded && TCH().IsItemVisible(htiSel, FALSE, bHorzPartialOK));
-		
-		if (!bVisible)
-		{
-			CHoldRedraw hr(*this);
-
-			if (!bAllExpanded)
-				TSH().ExpandAllParentItems(TRUE);
-			
-			TCH().EnsureItemVisible(htiSel, FALSE, bHorzPartialOK);
-		}
-	}
-
-	return TRUE;
+	return TSH().EnsureVisible(bHorzPartialOK);
 }
 
 BOOL CTDLTaskTreeCtrl::IsColumnShowing(TDC_COLUMN nColID) const
