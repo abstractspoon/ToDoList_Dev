@@ -79,7 +79,6 @@ public:
 	BOOL RestoreSelection(const TDCSELECTIONCACHE& cache);
 	BOOL RestorePreviousSelection(BOOL bRedraw);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
-// 	BOOL MultiSelectTask(DWORD dwTaskID, BOOL bSelected);
 	BOOL EnsureSelectionVisible(BOOL bHorzPartialOK);
 	BOOL SelectTasksInHistory(BOOL bForward);
 	int GetSelectedTasksInHistory(BOOL bForward, CDWordArray& aTaskIDs) const;
@@ -176,7 +175,6 @@ protected:
 	CDWordSet m_mapReferenceTaskIDs;
 
 	HTREEITEM m_htiLastHandledLBtnDown;
-//	WORD m_wKeyPress;
 	BOOL m_bMovingItem;
 	BOOL m_bEditLabelTimerStarted;
 
@@ -235,7 +233,6 @@ protected:
 	int GetListItem(HTREEITEM hti) const;
 	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
 	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
-//	BOOL MultiSelectItems(HTREEITEM htiFrom, HTREEITEM htiTo, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
 	void BeginLabelEditTimer();
 	void EndLabelEditTimer();

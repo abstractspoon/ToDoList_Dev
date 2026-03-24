@@ -82,7 +82,6 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),
 	m_htiLastHandledLBtnDown(NULL),
-//	m_wKeyPress(0),
 	m_bMovingItem(FALSE),
 	m_bEditLabelTimerStarted(FALSE),
 	m_reminders(*this),
@@ -2067,14 +2066,6 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 	return (aTaskIDs.GetSize());
 }
 
-// BOOL CTDLTaskTreeCtrl::MultiSelectTask(DWORD dwTaskID, BOOL bSelected)
-// {
-// 	if (dwTaskID == 0)
-// 		return FALSE;
-// 
-// 	return MultiSelectItem(GetItem(dwTaskID), (bSelected ? TSHS_SELECT : TSHS_DESELECT), TRUE);
-// }
-
 BOOL CTDLTaskTreeCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
 	// sanity check
@@ -2135,27 +2126,6 @@ BOOL CTDLTaskTreeCtrl::MultiSelectItem(HTREEITEM hti, TSH_SELECT nState, BOOL bR
 	
 	return FALSE;
 }
-
-// BOOL CTDLTaskTreeCtrl::MultiSelectItems(HTREEITEM htiFrom, HTREEITEM htiTo, TSH_SELECT nState, BOOL bRedraw)
-// {
-// 	BOOL bTreeSelChanged = FALSE;
-// 	
-// 	if (TSH().SetItems(htiFrom, htiTo, nState, bRedraw))
-// 	{
-// 		// avoid calling UpdateControls again if it was called 
-// 		// because the tree selection changed inside FixupTreeSelection
-// 		bTreeSelChanged = TSH().FixupTreeSelection();
-// 		
-// 		if (bRedraw)
-// 			RedrawColumns();
-// 		
-// 		SyncColumnSelectionToTasks();
-// 		UpdateSelectedTaskPath();
-// 		NotifyParentSelChange();
-// 	}
-// 	
-// 	return bTreeSelChanged;
-// }
 
 DWORD CTDLTaskTreeCtrl::GetTaskParentID(HTREEITEM hti) const
 {
