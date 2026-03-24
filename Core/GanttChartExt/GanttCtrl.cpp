@@ -260,6 +260,33 @@ BOOL CGanttCtrl::SelectTask(DWORD dwTaskID)
 	return SelectItem(hti);
 }
 
+BOOL CGanttCtrl::SelectTasks(const CDWordArray& aTaskIDs)
+{
+	CHTIList selection;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		HTREEITEM hti = m_tree.GetItem(aTaskIDs[nID]);
+
+		if (!hti)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		selection.AddTail(hti);
+	}
+
+	TSH().SetItems(selection, TSHS_SELECT);
+
+	return TRUE;
+}
+
+int CGanttCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
+{
+	return GetSelectedItemData(aTaskIDs);
+}
+
 BOOL CGanttCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
 	HTREEITEM htiStart = NULL;

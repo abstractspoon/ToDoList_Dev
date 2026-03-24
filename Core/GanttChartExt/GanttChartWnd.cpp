@@ -497,17 +497,28 @@ DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) con
 bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	CAutoFlag af(m_bInSelectTask, TRUE);
 
-	return (m_ctrlGantt.SelectTask(dwTaskID) != FALSE);
+	return SelectTasks(&dwTaskID, 1);
 }
 
-bool CGanttChartWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
+bool CGanttChartWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return false; // only support single selection
+
+	CDWordArray aTaskIDs;
+	aTaskIDs.SetSize(nTaskCount);
+
+	for (int nID = 0; nID < nTaskCount; nID++)
+		aTaskIDs[nID] = pdwTaskIDs[nID];
+
+	if (m_ctrlGantt.SelectTasks(aTaskIDs))
+	{
+		//m_ctrlGantt.GetSelectedTaskIDs(m_aSelTaskIDs);
+		return true;
+	}
+
+	// else
+	return false;
 }
 
 bool CGanttChartWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -892,8 +903,11 @@ void CGanttChartWnd::OnKeyUpGantt(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGanttChartWnd::SendParentSelectionUpdate()
 {
-	DWORD dwTaskID = m_ctrlGantt.GetSelectedTaskID();
-	GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, dwTaskID);
+	//DWORD dwTaskID = m_ctrlGantt.GetSelectedTaskID();
+	CDWordArray aTaskIDs;
+	int nNumTasks = m_ctrlGantt.GetSelectedItemData(aTaskIDs);
+
+	GetParent()->SendMessage(WM_IUI_SELECTTASK, (LPARAM)aTaskIDs.GetData(), nNumTasks);
 }
 
 void CGanttChartWnd::OnClickGanttList(NMHDR* /*pNMHDR*/, LRESULT* pResult) 

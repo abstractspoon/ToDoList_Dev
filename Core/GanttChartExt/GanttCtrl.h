@@ -44,6 +44,10 @@ public:
 
 	DWORD GetSelectedTaskID() const;
 	BOOL SelectTask(DWORD dwTaskID);
+
+	BOOL SelectTasks(const CDWordArray& aTaskIDs);
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
+
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
