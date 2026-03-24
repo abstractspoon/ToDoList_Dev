@@ -67,6 +67,9 @@ public:
 	CTreeCtrlHelper& TCH() { return m_tch; }
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
 
+	CTreeSelectionHelper& TSH() { return m_tsh; }
+	const CTreeSelectionHelper& TSH() const { return m_tsh; }
+
 	CFontCache& Fonts() { return m_fonts; }
 	const CFontCache& Fonts() const { return m_fonts; }
 	
@@ -89,6 +92,7 @@ protected:
 	CFontCache m_fonts;
 	CTreeCtrlHelper m_tch;
 	CImageList m_ilCheckboxes, m_ilImagePlaceholder;
+	CTreeSelectionHelper m_tsh;
 
 	const CEnHeaderCtrl& m_header;
 
@@ -127,7 +131,8 @@ public:
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 	HTREEITEM GetSelectedItem() const;
-	DWORD GetSelectedItemData() const;
+ 	DWORD GetSelectedItemData() const;
+	int GetSelectedItemData(CDWordArray& aItemData) const;
 
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
@@ -236,9 +241,9 @@ protected:
 
 protected:
 	// base class callbacks
-	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
-	void OnNotifySplitterChange(int nSplitPos);
-	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	virtual LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
+	virtual void OnNotifySplitterChange(int nSplitPos);
+	virtual void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	// pseudo-message handlers
 	virtual BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
@@ -334,6 +339,9 @@ protected:
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	BOOL GetTreeIconRect(HTREEITEM hti, CRect& rIcon) const;
 
+	void SyncColumnSelectionToTasks();
+	void NotifyParentSelectionChange();
+
 	BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
 	BOOL HasAltLineColor(HTREEITEM hti) const;
@@ -345,6 +353,9 @@ protected:
 
 	CTreeCtrlHelper& TCH() { return m_tree.TCH(); }
 	const CTreeCtrlHelper& TCH() const { return m_tree.TCH(); }
+
+	CTreeSelectionHelper& TSH() { return m_tree.TSH(); }
+	const CTreeSelectionHelper& TSH() const { return m_tree.TSH(); }
 
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);

@@ -230,29 +230,32 @@ BOOL CTreeSelectionHelper::SetItems(const CHTIList& lstHTI, TSH_SELECT nState, B
 	if (lstHTI.IsEmpty())
 		return FALSE;
 
-	// we can optimise if no items are currently selected
+	BOOL bRes = FALSE;
+
 	if (IsEmpty())
 	{
+		// we can optimise if no items are currently selected
 		if (nState == TSHS_DESELECT)
 			return FALSE; // probable error because selection is already empty
 
 		m_lstSelection.Copy(lstHTI);
+		bRes = TRUE;
+	}
+	else
+	{
+		BOOL bItemRedraw = (bRedraw && (lstHTI.GetCount() < 10));
+		POSITION pos = lstHTI.GetHeadPosition();
 
-		if (bRedraw)
-			m_tree.Invalidate(FALSE);
+		while (pos)
+			bRes |= SetItem(lstHTI.GetNext(pos), nState, bItemRedraw);
 
-		return TRUE;
+		if (bItemRedraw)
+			bRedraw = FALSE;
 	}
 
-	BOOL bRes = FALSE;
-	BOOL bItemRedraw = (bRedraw && (lstHTI.GetCount() < 10));
+	bRes |= FixupTreeSelection();
 
-	POSITION pos = lstHTI.GetHeadPosition();
-
-	while (pos) 
-		bRes |= SetItem(lstHTI.GetNext(pos), nState, bItemRedraw);
-
-	if (bRedraw && !bItemRedraw)
+	if (bRes && bRedraw)
 		m_tree.Invalidate(FALSE);
 
 	return bRes;
@@ -1289,7 +1292,7 @@ void CTreeSelectionHelper::OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& 
 {
 	bSelChange = FALSE;
 
-	if (m_nLastKeyDown == 0)
+	if ((m_nLastKeyDown == 0) || (pNMTV->action != TVC_BYKEYBOARD))
 		return;
 
 	BOOL bCtrl = (Misc::IsKeyPressed(VK_CONTROL) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL));

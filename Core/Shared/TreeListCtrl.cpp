@@ -51,7 +51,8 @@ IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
 CTreeListTreeCtrl::CTreeListTreeCtrl(const CEnHeaderCtrl& header)
 	:
 	m_header(header),
-	m_tch(*this)
+	m_tch(*this),
+	m_tsh(*this)
 {
 }
 
@@ -483,12 +484,17 @@ void CTreeListCtrl::InitItemHeights()
 
 HTREEITEM CTreeListCtrl::GetSelectedItem() const
 {
-	return GetTreeSelItem();
+	return TSH().GetFirstItem();
 }
 
 DWORD CTreeListCtrl::GetSelectedItemData() const
 {
-	return GetItemData(GetSelectedItem());
+	return GetItemData(TSH().GetFirstItem());
+}
+
+int CTreeListCtrl::GetSelectedItemData(CDWordArray& aItemData) const
+{
+	return TSH().GetItemData(aItemData);
 }
 
 BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
@@ -745,7 +751,7 @@ GM_ITEMSTATE CTreeListCtrl::GetItemState(HTREEITEM hti) const
 		{
 			return GMIS_DROPHILITED;
 		}
-		else if (IsTreeItemSelected(m_tree, hti))
+		else if (TSH().HasItem(hti)/*IsTreeItemSelected(m_tree, hti)*/)
 		{
 			if (HasFocus())
 				return GMIS_SELECTED;
@@ -882,6 +888,17 @@ LRESULT CTreeListCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
 	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
+void CTreeListCtrl::SyncColumnSelectionToTasks()
+{
+	ASSERT(CanResync());
+
+	CHTIList selection;
+	TSH().CopySelection(selection);
+
+	if (ResyncListToTreeSelection(m_tree, selection, TSH().GetAnchor()))
+		m_list.UpdateWindow();
+}
+
 void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
 	if (m_bMovingItem)
@@ -892,12 +909,41 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	if ((pNMTV->itemNew.hItem == NULL) && (m_tree.GetCount() != 0))
 		return;
 	
-	// we're NOT interested in keyboard changes
-	// because keyboard gets handled in WM_KEYUP
-	if (pNMTV->action == TVC_BYKEYBOARD)
-		return;
+	// snapshot current selection to test for changes
+	CHTIList lstPrevSel;
+	TSH().CopySelection(lstPrevSel);
 
-	GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
+	// Update selection
+	BOOL bSelChange = FALSE;
+	TSH().OnTreeNotifyParentSelChange(pNMTV, bSelChange);
+
+	if (bSelChange)
+	{
+		if (CanResync())
+			SyncColumnSelectionToTasks();
+
+		HTREEITEM hti = pNMTV->itemNew.hItem;
+
+		if (hti && !TCH().IsItemVisible(hti, FALSE))
+		{
+			CLockUpdates lr(m_tree);
+			TCH().EnsureItemVisible(hti, FALSE);
+		}
+
+		// notify parent of selection change
+		// unless up/down cursor key still pressed
+		if (TSH().Matches(lstPrevSel) || Misc::IsCursorKeyPressed(MKC_UPDOWN))
+			return;
+
+		// DON'T KNOW HOW WE CAN EVER GET HERE
+		ASSERT(0);
+		NotifyParentSelectionChange();
+	}
+}
+
+void CTreeListCtrl::NotifyParentSelectionChange()
+{
+	GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID());
 }
 
 LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -913,6 +959,10 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			case TVN_BEGINLABELEDIT:
 				if (m_treeDragDrop.IsDragging())
 					return 1L; // cancel
+				break;
+
+			case TVN_KEYDOWN:
+				TSH().OnTreeNotifyParentKeyDown((NMTVKEYDOWN*)pNMHDR);
 				break;
 			}
 		}
@@ -1028,6 +1078,8 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	}
 	else if (hRealWnd == m_tree)
 	{
+		BOOL bSelChange = FALSE;
+
 		switch (msg)
 		{
 		case TVM_SELECTITEM:
@@ -1053,39 +1105,40 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 		case WM_RBUTTONDOWN:
 			{
-				HTREEITEM hti = TreeHitTestItem(lp, FALSE);
-
-				if (hti)
-					SelectItem(hti);
+				TSH().OnTreeRButtonDown(wp, lp, bSelChange);
+// 				HTREEITEM hti = TreeHitTestItem(lp, FALSE);
+// 
+// 				if (hti)
+// 					SelectItem(hti);
 			}
 			break;
 
 		case WM_LBUTTONDOWN:
 			if (OnTreeLButtonDown(wp, lp))
-			{
 				return FALSE; // eat
-			}
 			break;
 
 		case WM_LBUTTONUP:
 			if (OnTreeLButtonUp(wp, lp))
-			{
 				return FALSE; // eat
-			}
 			break;
 
 		case WM_LBUTTONDBLCLK:
 			if (OnTreeLButtonDblClk(wp, lp))
-			{
 				return FALSE; // eat
-			}
 			break;
 
 		case WM_MOUSEMOVE:
 			if (OnTreeMouseMove(wp, lp))
-			{
 				return FALSE; // eat
-			}
+			break;
+
+		case WM_KEYDOWN:
+			TSH().OnTreeKeyDown(wp, lp, bSelChange);
+			break;
+
+		case WM_KEYUP:
+			TSH().OnTreeKeyUp(wp, lp, bSelChange);
 			break;
 
 		case WM_MOUSEWHEEL: 
@@ -1144,41 +1197,49 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			}
 			break;
 		}
+
+		if (bSelChange)
+		{
+			if (CanResync())
+				SyncColumnSelectionToTasks();
+
+			NotifyParentSelectionChange();
+		}
 	}
 
 	// else tree or list
-	switch (msg)
-	{
-	case WM_KEYUP:
-		{
-			LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-
-			switch (wp)
-			{
-			case VK_UP:
-			case VK_DOWN:
-			case VK_PRIOR:
-			case VK_NEXT:
-				GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID(), (LPARAM)GetSelectedItem());
-				break;
-
-			default:
-				{
-					NMTVKEYDOWN tvkd = { 0 };
-
-					tvkd.hdr.hwndFrom = hRealWnd;
-					tvkd.hdr.idFrom = ::GetDlgCtrlID(hRealWnd);
-					tvkd.hdr.code = TVN_KEYUP;
-					tvkd.wVKey = LOWORD(wp);
-					tvkd.flags = lp;
-
-					lr = CWnd::SendMessage(WM_NOTIFY, tvkd.hdr.idFrom, (LPARAM)&tvkd);
-				}
-				break;
-			}
-			return lr;
-		}
-	}
+// 	switch (msg)
+// 	{
+// 	case WM_KEYUP:
+// 		{
+// 			LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+// 
+// 			switch (wp)
+// 			{
+// 			case VK_UP:
+// 			case VK_DOWN:
+// 			case VK_PRIOR:
+// 			case VK_NEXT:
+// 				GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID(), (LPARAM)GetSelectedItem());
+// 				break;
+// 
+// 			default:
+// 				{
+// 					NMTVKEYDOWN tvkd = { 0 };
+// 
+// 					tvkd.hdr.hwndFrom = hRealWnd;
+// 					tvkd.hdr.idFrom = ::GetDlgCtrlID(hRealWnd);
+// 					tvkd.hdr.code = TVN_KEYUP;
+// 					tvkd.wVKey = LOWORD(wp);
+// 					tvkd.flags = lp;
+// 
+// 					lr = CWnd::SendMessage(WM_NOTIFY, tvkd.hdr.idFrom, (LPARAM)&tvkd);
+// 				}
+// 				break;
+// 			}
+// 			return lr;
+// 		}
+// 	}
 	
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 }
@@ -1227,25 +1288,48 @@ BOOL CTreeListCtrl::OnPrimaryHeaderBeginTracking(NMHEADER* pHDN)
 
 BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
-	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
-	
-	// Only process if NOT expanding an item
-	if (!(nFlags & TVHT_ONITEMBUTTON) && hti && (hti != GetTreeSelItem(m_tree)))
-	{
-		CLockUpdates hr(m_tree);
+	BOOL bSelChange = FALSE;
+	TSH().OnTreeLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
 
-		m_tree.SetFocus();
-		SelectItem(hti);
+	if (bSelChange)
+	{
+		if (CanResync())
+			SyncColumnSelectionToTasks();
+
+		NotifyParentSelectionChange();
 
 		return TRUE;
 	}
 
-	// not handled
-	return FALSE;
+// 	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
+// 	
+// 	// Only process if NOT expanding an item
+// 	if (!(nFlags & TVHT_ONITEMBUTTON) && hti && (hti != GetTreeSelItem(m_tree)))
+// 	{
+// 		CLockUpdates hr(m_tree);
+// 
+// 		m_tree.SetFocus();
+// 		SelectItem(hti);
+// 
+// 		return TRUE;
+// 	}
+
+	return bSelChange;
 }
 
 BOOL CTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 {
+	BOOL bSelChange = FALSE, bHandled = FALSE;
+	TSH().OnTreeLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
+
+	if (bSelChange)
+	{
+		SyncColumnSelectionToTasks();
+		NotifyParentSelectionChange();
+
+		bHandled = TRUE;
+	}
+
 	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 
 	if (hti && (nFlags & TVHT_ONITEMSTATEICON))
@@ -1254,11 +1338,10 @@ BOOL CTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 		if (!OnTreeCheckChange(hti))
 			GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, GetDlgCtrlID(), (LPARAM)hti);
 		
-		return TRUE; // eat
+		bHandled = TRUE;
 	}
 
-	// not handled
-	return FALSE;
+	return bHandled;
 }
 
 BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
