@@ -21,7 +21,7 @@
 
 #include "..\Shared\EnHeaderCtrl.h"
 #include "..\Shared\TreeListSyncer.h"
-#include "..\Shared\Treeselectionhelper.h"
+#include "..\Shared\TreeListselectionhelper.h"
 #include "..\Shared\TreeDragDropHelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -57,8 +57,8 @@ public:
 	inline CTreeCtrlHelper& TCH() { return m_tch; }
 	inline const CTreeCtrlHelper& TCH() const { return m_tch; }
 	
-	inline CTreeSelectionHelper& TSH() { return m_tsh; }
-	inline const CTreeSelectionHelper& TSH() const { return m_tsh; }
+	inline CTreeListSelectionHelper& TSH() { return m_tsh; }
+	inline const CTreeListSelectionHelper& TSH() const { return m_tsh; }
 	
 	inline const CToDoCtrlFind& Find() const { return m_find; }
 	inline const CHTIMap& TreeItemMap() const { return m_mapTaskIDToHTI; }
@@ -168,7 +168,7 @@ public:
 protected:
 	CTreeCtrl m_tcTasks;
 	CToDoCtrlFind m_find;
-	CTreeSelectionHelper m_tsh;
+	CTreeListSelectionHelper m_tsh;
 	CTreeCtrlHelper m_tch;
 	CTDCReminderHelper m_reminders;
 	CHTIMap m_mapTaskIDToHTI;
@@ -176,7 +176,7 @@ protected:
 
 	HTREEITEM m_htiLastHandledLBtnDown;
 	BOOL m_bMovingItem;
-	BOOL m_bEditLabelTimerStarted;
+//	BOOL m_bEditLabelTimerStarted;
 
 protected:
 	// Message map functions

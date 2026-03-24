@@ -15,7 +15,7 @@
 #include "treectrlhelper.h"
 #include "fontcache.h"
 #include "TreeDragDropHelper.h"
-#include "TreeSelectionHelper.h"
+#include "TreeListSelectionHelper.h"
 #include "themed.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -67,8 +67,8 @@ public:
 	CTreeCtrlHelper& TCH() { return m_tch; }
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
 
-	CTreeSelectionHelper& TSH() { return m_tsh; }
-	const CTreeSelectionHelper& TSH() const { return m_tsh; }
+// 	CTreeListSelectionHelper& TSH() { return m_tsh; }
+// 	const CTreeListSelectionHelper& TSH() const { return m_tsh; }
 
 	CFontCache& Fonts() { return m_fonts; }
 	const CFontCache& Fonts() const { return m_fonts; }
@@ -92,7 +92,7 @@ protected:
 	CFontCache m_fonts;
 	CTreeCtrlHelper m_tch;
 	CImageList m_ilCheckboxes, m_ilImagePlaceholder;
-	CTreeSelectionHelper m_tsh;
+// 	CTreeListSelectionHelper m_tsh;
 
 	const CEnHeaderCtrl& m_header;
 
@@ -206,8 +206,9 @@ protected:
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 	BOOL m_bMovingItem;
 
+	CTreeListSelectionHelper m_tsh;
 	CTreeDragDropHelper m_treeDragDrop;
-	CTreeSelectionHelper m_tshDragDrop;
+	//CTreeSelectionHelper m_tshDragDrop;
 	CThemed m_themeHeader;
 	
 	mutable int m_nMinTreeTitleColumnWidth;
@@ -244,6 +245,7 @@ protected:
 	virtual LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 	virtual void OnNotifySplitterChange(int nSplitPos);
 	virtual void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	virtual void OnListSelectionChange(NMLISTVIEW* pNMLV);
 
 	// pseudo-message handlers
 	virtual BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
@@ -354,8 +356,8 @@ protected:
 	CTreeCtrlHelper& TCH() { return m_tree.TCH(); }
 	const CTreeCtrlHelper& TCH() const { return m_tree.TCH(); }
 
-	CTreeSelectionHelper& TSH() { return m_tree.TSH(); }
-	const CTreeSelectionHelper& TSH() const { return m_tree.TSH(); }
+	CTreeListSelectionHelper& TSH() { return m_tsh; }
+	const CTreeListSelectionHelper& TSH() const { return m_tsh; }
 
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);

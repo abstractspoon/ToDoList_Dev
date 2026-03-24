@@ -51,8 +51,8 @@ IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
 CTreeListTreeCtrl::CTreeListTreeCtrl(const CEnHeaderCtrl& header)
 	:
 	m_header(header),
-	m_tch(*this),
-	m_tsh(*this)
+	m_tch(*this)/*,
+	m_tsh(*this)*/
 {
 }
 
@@ -328,8 +328,8 @@ CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelW
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_bMovingItem(FALSE),
 	m_nMinTreeTitleColumnWidth(-1),
-	m_tshDragDrop(m_tree),
-	m_treeDragDrop(m_tshDragDrop, m_tree, pAltRenderer),
+	m_tsh(m_tree, m_list),
+	m_treeDragDrop(m_tsh, m_tree, pAltRenderer),
 	m_tree(m_treeHeader),
 
 	MIN_LABEL_WIDTH(GraphicsMisc::ScaleByDPIFactor(nMinLabelWidth)),
@@ -825,9 +825,9 @@ LRESULT CTreeListCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM lp)
 {
 	// Make sure the selection helper is synchronised
 	// with the tree's current selection
-	m_tshDragDrop.ClearHistory();
-	m_tshDragDrop.RemoveAll(TRUE, FALSE);
-	m_tshDragDrop.AddItem(m_tree.GetSelectedItem(), FALSE);
+// 	m_tshDragDrop.ClearHistory();
+// 	m_tshDragDrop.RemoveAll(TRUE, FALSE);
+// 	m_tshDragDrop.AddItem(m_tree.GetSelectedItem(), FALSE);
 
 	// Notify derived class
 	// Note: Right-click dragging not supported by default
@@ -937,6 +937,47 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 
 		// DON'T KNOW HOW WE CAN EVER GET HERE
 		ASSERT(0);
+		NotifyParentSelectionChange();
+	}
+}
+
+void CTreeListCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
+{
+	BOOL bSelChange = FALSE;
+	TSH().OnListNotifyParentSelChange(pNMLV, bSelChange);
+
+	if (bSelChange)
+	{
+		BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
+		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+
+		HTREEITEM hti = (HTREEITEM)m_list.GetItemData(pNMLV->iItem);
+		//InvalidateItem(hti, TRUE);
+
+		// notify parent of selection change
+		CPoint pt(GetMessagePos());
+		m_list.ScreenToClient(&pt);
+
+		int nHit = m_list.HitTest(pt);
+
+		if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
+		{
+			// vertical scrolling
+			return;
+		}
+
+		if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
+		{
+			// In the middle of a simple click
+			return;
+		}
+
+// 		if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
+// 		{
+// 			// bulk selecting
+// 			return;
+// 		}
+
 		NotifyParentSelectionChange();
 	}
 }
@@ -1104,13 +1145,7 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			break;
 
 		case WM_RBUTTONDOWN:
-			{
-				TSH().OnTreeRButtonDown(wp, lp, bSelChange);
-// 				HTREEITEM hti = TreeHitTestItem(lp, FALSE);
-// 
-// 				if (hti)
-// 					SelectItem(hti);
-			}
+			TSH().OnTreeRButtonDown(wp, lp, bSelChange);
 			break;
 
 		case WM_LBUTTONDOWN:
@@ -1381,16 +1416,39 @@ BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 	return FALSE;
 }
 
-BOOL CTreeListCtrl::OnListLButtonDown(UINT /*nFlags*/, CPoint point)
+BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 {
-	m_list.ClientToScreen(&point);
-
-	// don't let the selection to be set to -1
-	if (HitTestItem(point, FALSE) == NULL)
+	// Selecting or de-selecting a lot of items can be slow
+	// because OnListSelectionChange is called once for each.
+	// Base class handles simple click de-selection so we
+	// handle bulk selection here
+	if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 	{
-		SetFocus();
-		return TRUE; // eat
+		CTLSHoldResync hr(*this);
+
+		BOOL bSelChange = FALSE;
+		TSH().OnListLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
+
+		if (bSelChange)
+			NotifyParentSelectionChange();
+
+		return TRUE; // eat it
 	}
+	else if (!Misc::IsKeyPressed(VK_CONTROL))
+	{
+		TSH().RemoveAll();
+	}
+
+// 				break;
+// 
+// 	m_list.ClientToScreen(&point);
+// 
+// 	// don't let the selection to be set to -1
+// 	if (HitTestItem(point, FALSE) == NULL)
+// 	{
+// 		SetFocus();
+// 		return TRUE; // eat
+// 	}
 
 	// not handled
 	return FALSE;

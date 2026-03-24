@@ -79,7 +79,7 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 					 mgrContent),
 
 	CTreeDragDropRenderer(m_tsh, m_tcTasks),
-	m_tsh(m_tcTasks),
+	m_tsh(m_tcTasks, m_lcColumns),
 	m_tch(m_tcTasks),
 	m_htiLastHandledLBtnDown(NULL),
 	m_bMovingItem(FALSE),
@@ -615,60 +615,70 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetColumnItemState(int nItem) const
 
 void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 {
-	// only called when the focus is actually on the columns
-	// ie. not when Syncing Column Selection
-	
-	// sync only the item that has changed 
-	HTREEITEM hti = (HTREEITEM)m_lcColumns.GetItemData(pNMLV->iItem);
-	
-	BOOL bWasSel = (pNMLV->uOldState & LVIS_SELECTED);
-	BOOL bSel = (pNMLV->uNewState & LVIS_SELECTED);
-	
-	if (Misc::StatesDiffer(bSel, bWasSel))
-		TSH().SetItem(hti, (bSel ? TSHS_SELECT : TSHS_DESELECT), FALSE);
-	
-	// then sync focused item
-	BOOL bWasFocused = (pNMLV->uOldState & LVIS_FOCUSED);
-	BOOL bFocused = (pNMLV->uNewState & LVIS_FOCUSED);
-	
-	BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
-	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+// 	// only called when the focus is actually on the columns
+// 	// ie. not when Syncing Column Selection
+// 	
+// 	// sync only the item that has changed 
+// 	HTREEITEM hti = (HTREEITEM)m_lcColumns.GetItemData(pNMLV->iItem);
+// 	
+// 	BOOL bWasSel = (pNMLV->uOldState & LVIS_SELECTED);
+// 	BOOL bSel = (pNMLV->uNewState & LVIS_SELECTED);
+// 	
+// 	if (Misc::StatesDiffer(bSel, bWasSel))
+// 		TSH().SetItem(hti, (bSel ? TSHS_SELECT : TSHS_DESELECT), FALSE);
+// 	
+// 	// then sync focused item
+// 	BOOL bWasFocused = (pNMLV->uOldState & LVIS_FOCUSED);
+// 	BOOL bFocused = (pNMLV->uNewState & LVIS_FOCUSED);
+// 	
+// 	BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
+// 	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+// 
+// 	if (Misc::StatesDiffer(bFocused, bWasFocused))
+// 	{
+// 		TSH().FixupTreeSelection();
+// 		
+// 		if (bFocused && !Misc::IsKeyPressed(VK_SHIFT))
+// 			TSH().SetAnchor(hti);
+// 	}
 
-	if (Misc::StatesDiffer(bFocused, bWasFocused))
+	BOOL bSelChange = FALSE;
+	TSH().OnListNotifyParentSelChange(pNMLV, bSelChange);
+
+	if (bSelChange)
 	{
-		TSH().FixupTreeSelection();
-		
-		if (bFocused && !Misc::IsKeyPressed(VK_SHIFT))
-			TSH().SetAnchor(hti);
-	}
+	 	BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
+	 	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+	 
+	 	HTREEITEM hti = (HTREEITEM)m_lcColumns.GetItemData(pNMLV->iItem);
+		InvalidateItem(hti, TRUE);
 	
-	InvalidateItem(hti, TRUE);
-	
-	// notify parent of selection change
-	CPoint pt(GetMessagePos());
-	m_lcColumns.ScreenToClient(&pt);
+		// notify parent of selection change
+		CPoint pt(GetMessagePos());
+		m_lcColumns.ScreenToClient(&pt);
 
-	int nHit = m_lcColumns.HitTest(pt);
+		int nHit = m_lcColumns.HitTest(pt);
 
-	if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
-	{
-		// vertical scrolling
-		return;
+		if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
+		{
+			// vertical scrolling
+			return;
+		}
+
+		if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
+		{
+			// In the middle of a simple click
+			return;
+		}
+
+		if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
+		{
+			// bulk selecting
+			return;
+		}
+
+		NotifyParentSelChange();
 	}
-
-	if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
-	{
-		// In the middle of a simple click
-		return;
-	}
-
-	if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
-	{
-		// bulk selecting
-		return;
-	}
-
-	NotifyParentSelChange();
 }
 
 void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
@@ -1011,18 +1021,18 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 
 void CTDLTaskTreeCtrl::BeginLabelEditTimer()
 {
-	if (!m_bEditLabelTimerStarted)
+//	if (!m_bEditLabelTimerStarted)
 	{
-		m_bEditLabelTimerStarted = TRUE;
+//		m_bEditLabelTimerStarted = TRUE;
 		SetTimer(TIMER_EDITLABEL, 500, NULL);
 	}
 }
 
 void CTDLTaskTreeCtrl::EndLabelEditTimer()
 {
-	if (m_bEditLabelTimerStarted)
+//	if (m_bEditLabelTimerStarted)
 	{
-		m_bEditLabelTimerStarted = FALSE;
+//		m_bEditLabelTimerStarted = FALSE;
 		KillTimer(TIMER_EDITLABEL);
 	}
 }
@@ -1323,29 +1333,33 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 			{
 				CTLSHoldResync hr(*this);
+
+				BOOL bSelChange = FALSE;
+				TSH().OnListLButtonDown(wp, lp, bSelChange);
 				
-				int nAnchor = m_lcColumns.GetSelectionMark();
+// 				int nAnchor = m_lcColumns.GetSelectionMark();
+// 
+// 				if (!Misc::IsKeyPressed(VK_CONTROL))
+// 					DeselectAll();
+// 
+// 				// Add new items to tree and list
+//  				TDC_COLUMN nColID = TDCC_NONE;
+//  				int nHit = HitTestColumnsItem(lp, TRUE, nColID);
+// 
+// 				int nFrom = (nAnchor < nHit) ? nAnchor : nHit;
+// 				int nTo = (nAnchor < nHit) ? nHit : nAnchor;
+// 
+// 				for (int nItem = nFrom; nItem <= nTo; nItem++)
+// 				{
+// 					HTREEITEM hti = GetTreeItem(m_tcTasks, m_lcColumns, nItem);
+// 					ASSERT(hti);
+// 
+// 					TSH().AddItem(hti, FALSE);
+// 					m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
+// 				}
 
-				if (!Misc::IsKeyPressed(VK_CONTROL))
-					DeselectAll();
-
-				// Add new items to tree and list
-				TDC_COLUMN nColID = TDCC_NONE;
-				int nHit = HitTestColumnsItem(lp, TRUE, nColID);
-
-				int nFrom = (nAnchor < nHit) ? nAnchor : nHit;
-				int nTo = (nAnchor < nHit) ? nHit : nAnchor;
-
-				for (int nItem = nFrom; nItem <= nTo; nItem++)
-				{
-					HTREEITEM hti = GetTreeItem(m_tcTasks, m_lcColumns, nItem);
-					ASSERT(hti);
-
-					TSH().AddItem(hti, FALSE);
-					m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
-				}
-
-				NotifyParentSelChange(SC_BYKEYBOARD);
+				if (bSelChange)
+					NotifyParentSelChange(SC_BYKEYBOARD);
 
 				return 0; // eat it
 			}

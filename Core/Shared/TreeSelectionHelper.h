@@ -12,6 +12,8 @@
 #include <afxtempl.h>
 #include "TreectrlHelper.h"
 
+//////////////////////////////////////////////////////////////////////
+
 class CHTIList : public CList<HTREEITEM, HTREEITEM>
 {
 public:
@@ -60,6 +62,8 @@ public:
 	}
 };
 
+//////////////////////////////////////////////////////////////////////
+
 enum TSH_SELECT
 {
 	TSHS_TOGGLE = -1,
@@ -67,7 +71,9 @@ enum TSH_SELECT
 	TSHS_SELECT,
 };
 
-class CTreeSelectionHelper  
+//////////////////////////////////////////////////////////////////////
+
+class CTreeSelectionHelper
 {
 public:
 	CTreeSelectionHelper(CTreeCtrl& tree);
@@ -183,7 +189,6 @@ protected:
 	CTreeCtrlHelper m_tch;
 	CStringArray m_aHistory;
 
-private:
 	BOOL m_bReadOnly;
 	UINT m_nLastKeyDown;
 

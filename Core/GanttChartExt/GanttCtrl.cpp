@@ -97,7 +97,7 @@ const int MAX_HEADER_WIDTH			= 32000; // (SHRT_MAX - tolerance)
 CGanttCtrl::CGanttCtrl() 
 	:
 	CTreeListCtrl(this),
-	CTreeDragDropRenderer(m_tshDragDrop, m_tree),
+	CTreeDragDropRenderer(TSH(), m_tree),
 	m_nMonthWidth(DEF_MONTH_WIDTH),
 	m_nMonthDisplay(GTLC_DISPLAY_MONTHS_LONG),
 	m_dwOptions(GTLCF_AUTOSCROLLTOTASK | GTLCF_SHOWSPLITTERBAR),

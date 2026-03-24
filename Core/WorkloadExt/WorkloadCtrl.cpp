@@ -77,7 +77,7 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 CWorkloadCtrl::CWorkloadCtrl() 
 	:
 	CTreeListCtrl(this),
-	CTreeDragDropRenderer(m_tshDragDrop, m_tree),
+	CTreeDragDropRenderer(m_tsh, m_tree),
 	m_dwOptions(WLCF_SHOWSPLITTERBAR),
 	m_crOverlap(RGB(255, 0, 0)),
 	m_dwMaxTaskID(0),
