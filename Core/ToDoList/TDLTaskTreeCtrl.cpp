@@ -689,7 +689,6 @@ void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 		return;
 
 	NMTREEVIEW nmtv = { 0 };
-
 	nmtv.hdr.code = TVN_SELCHANGED;
 
 	switch (nAction)
