@@ -322,7 +322,7 @@ const int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelWidth, int nMinColWidth)
 	:
-	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
+	CTreeListSyncer(/*TLSF_SYNCSELECTION |*/ TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
