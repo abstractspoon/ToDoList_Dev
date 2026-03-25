@@ -1355,7 +1355,7 @@ BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 BOOL CTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 {
 	BOOL bSelChange = FALSE, bHandled = FALSE;
-	TSH().OnTreeLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
+	TSH().OnTreeLButtonUp(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
 
 	if (bSelChange)
 	{
