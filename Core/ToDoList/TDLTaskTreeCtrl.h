@@ -171,12 +171,10 @@ protected:
 	CTreeListSelectionHelper m_tsh;
 	CTreeCtrlHelper m_tch;
 	CTDCReminderHelper m_reminders;
+	
 	CHTIMap m_mapTaskIDToHTI;
 	CDWordSet m_mapReferenceTaskIDs;
-
-	HTREEITEM m_htiLastHandledLBtnDown;
 	BOOL m_bMovingItem;
-//	BOOL m_bEditLabelTimerStarted;
 
 protected:
 	// Message map functions
@@ -234,8 +232,6 @@ protected:
 	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
 	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
-	void BeginLabelEditTimer();
-	void EndLabelEditTimer();
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);
 	BOOL ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const;

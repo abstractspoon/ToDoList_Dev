@@ -98,12 +98,14 @@ public:
 	BOOL AddItems(HTREEITEM htiFrom, HTREEITEM htiTo, BOOL bRedraw = TRUE);
 	BOOL ToggleItems(HTREEITEM htiFrom, HTREEITEM htiTo, BOOL bRedraw = TRUE);
 	BOOL AddAll(BOOL bRedraw = TRUE);
+	BOOL SelectSingleItem(HTREEITEM hti, BOOL& bSelChange);
 
 	inline HTREEITEM GetFirstItem() const { return GetCount() ? m_lstSelection.GetHead() : NULL; }
 	inline HTREEITEM GetLastItem() const { return GetCount() ? m_lstSelection.GetTail() : NULL; }
 	inline POSITION GetFirstItemPos() const { return GetCount() ? m_lstSelection.GetHeadPosition() : NULL; }
 	inline HTREEITEM GetNextItem(POSITION& pos) const { return m_lstSelection.GetNext(pos); }
 
+	inline HTREEITEM GetSingleSelectedItem() const { return (HasSingleSelection() ? GetFirstItem() : NULL); }
 	inline BOOL HasSingleSelection() const { return (GetCount() == 1); }
 	inline BOOL HasItem(HTREEITEM hti) const { return (hti && GetCount() && (m_lstSelection.Find(hti) != NULL)); }
 	BOOL IsItemSelected(HTREEITEM hti, BOOL bCheckParents) const;
@@ -198,7 +200,7 @@ protected:
 	void InvalidateItem(HTREEITEM hti);
 	BOOL HasSelectedParent(HTREEITEM hti, const CHTIList& selection) const;
 	void AddAll(HTREEITEM hti);
-	BOOL SelectSingleItem(HTREEITEM hti, BOOL& bSelChange);
+	BOOL DragDetect(CPoint pt);
 
 	struct SORTITEM
 	{

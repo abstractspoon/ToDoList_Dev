@@ -39,8 +39,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const UINT TIMER_EDITLABEL		= 101;
-
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
 
@@ -81,9 +79,7 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 	CTreeDragDropRenderer(m_tsh, m_tcTasks),
 	m_tsh(m_tcTasks, m_lcColumns),
 	m_tch(m_tcTasks),
-	m_htiLastHandledLBtnDown(NULL),
 	m_bMovingItem(FALSE),
-	m_bEditLabelTimerStarted(FALSE),
 	m_reminders(*this),
 	m_find(m_tch, data, aCustAttribDefs, m_reminders, mgrContent)
 {
@@ -113,16 +109,17 @@ BOOL CTDLTaskTreeCtrl::CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL 
 {
 	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));
 	
-	return m_tcTasks.Create((dwStyle | 
-							WS_TABSTOP |
-							TVS_SHOWSELALWAYS | 
-							TVS_HASLINES | 
-							TVS_LINESATROOT | 
-							TVS_HASBUTTONS | 
-							TVS_NONEVENHEIGHT),
-							rect, 
-							pParentWnd, 
-							IDC_TASKTREE);
+	return m_tcTasks.Create((dwStyle |
+							 WS_TABSTOP |
+							 TVS_SHOWSELALWAYS |
+							 TVS_HASLINES |
+							 TVS_LINESATROOT |
+							 TVS_HASBUTTONS |
+							 TVS_EDITLABELS |
+							 TVS_NONEVENHEIGHT),
+							 rect,
+							 pParentWnd,
+							 IDC_TASKTREE);
 }
 
 BOOL CTDLTaskTreeCtrl::IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const
@@ -142,54 +139,13 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti)
 // internal version) 
 BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_ACTION nBy)
 { 
-	// Avoid unnecessary selections
-	if (GetSelectedCount() == 1)
-	{
-		HTREEITEM htiSel = GetSelectedItem();
+	BOOL bSelChange = FALSE;
+	BOOL bSelected = TSH().SelectSingleItem(hti, bSelChange);
 
-		if ((hti == htiSel) && (htiSel == m_tcTasks.GetSelectedItem()))
-		{
-			if (bSyncAndNotify)
-				SyncColumnSelectionToTasks();
-
-			return TRUE;
-		}
-	}
-
-	if (TSH().RemoveAll() && !hti)
+	if (bSelChange && !hti)
 		m_lcColumns.Invalidate();
-	
-	BOOL bSelected = FALSE;
-	
-	if (hti)
-	{
-		TSH().AddItem(hti);
-		TSH().SetAnchor(hti);
-		
-		bSelected = TCH().SelectItem(hti);
 
-		if (!TCH().IsItemVisible(hti, FALSE))
-		{
-			// Don't allow any horizontal movement because this 
-			// will break the way we have implemented click-handling
-			{
-				CLockUpdates hr(m_tcTasks);
-				CHoldHScroll hh(m_tcTasks);
-
-				m_tcTasks.EnsureVisible(hti);
-			}
-
-			if ((nBy == SC_BYMOUSE) && !TCH().IsItemVisible(hti))
-			{
-				// If the item is still not visible because of the horizontal
-				// hold and this was a mouse selection then we post a message to
-				// ensure that whatever called this has already finished
-				m_tcTasks.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
-			}
-		}
-	}
-
-	if (bSyncAndNotify)
+	if (bSelChange && bSyncAndNotify)
 	{
 		SyncColumnSelectionToTasks();
 		NotifyParentSelChange(nBy);
@@ -615,33 +571,6 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetColumnItemState(int nItem) const
 
 void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 {
-// 	// only called when the focus is actually on the columns
-// 	// ie. not when Syncing Column Selection
-// 	
-// 	// sync only the item that has changed 
-// 	HTREEITEM hti = (HTREEITEM)m_lcColumns.GetItemData(pNMLV->iItem);
-// 	
-// 	BOOL bWasSel = (pNMLV->uOldState & LVIS_SELECTED);
-// 	BOOL bSel = (pNMLV->uNewState & LVIS_SELECTED);
-// 	
-// 	if (Misc::StatesDiffer(bSel, bWasSel))
-// 		TSH().SetItem(hti, (bSel ? TSHS_SELECT : TSHS_DESELECT), FALSE);
-// 	
-// 	// then sync focused item
-// 	BOOL bWasFocused = (pNMLV->uOldState & LVIS_FOCUSED);
-// 	BOOL bFocused = (pNMLV->uNewState & LVIS_FOCUSED);
-// 	
-// 	BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
-// 	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-// 
-// 	if (Misc::StatesDiffer(bFocused, bWasFocused))
-// 	{
-// 		TSH().FixupTreeSelection();
-// 		
-// 		if (bFocused && !Misc::IsKeyPressed(VK_SHIFT))
-// 			TSH().SetAnchor(hti);
-// 	}
-
 	BOOL bSelChange = FALSE;
 	TSH().OnListNotifyParentSelChange(pNMLV, bSelChange);
 
@@ -797,7 +726,7 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 					ExpandItem(htiHit, !TCH().IsItemExpanded(htiHit), TRUE);
 
 					// save item handle so we don't re-handle in LButtonUp handler
-					m_htiLastHandledLBtnDown = htiHit;
+					//m_htiLastHandledLBtnDown = htiHit;
 
 					return TRUE;
 				}
@@ -951,18 +880,6 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	
 	switch (msg)
 	{
-	case WM_TIMER:
-		if (wp == TIMER_EDITLABEL)
-		{
-			EndLabelEditTimer();
-			
-			if (!IsReadOnly())
-				NotifyParentOfColumnEditClick(TDCC_CLIENT, GetSelectedTaskID());
-			
-			return 0L; // eat
-		}
-		break;
-		
 	case WM_NOTIFY:
 		if (wp == m_scLeft.GetDlgCtrlID() || 
 			wp == m_scRight.GetDlgCtrlID() ||
@@ -978,7 +895,12 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				return 0L; // always eat
 
  			case TVN_BEGINLABELEDIT:
-				return 0L; // we handle this ourselves
+				if (!m_bMovingItem)
+				{
+					// Notify parent and cancel this default editing
+					NotifyParentOfColumnEditClick(TDCC_CLIENT, GetSelectedTaskID());
+				}
+				return 1L; // always
 				
 			case TVN_GETDISPINFO:
 				OnTreeGetDispInfo((NMTVDISPINFO*)pNMHDR);
@@ -1019,24 +941,6 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 	return CTDLTaskCtrlBase::WindowProc(hRealWnd, msg, wp, lp);
 }
 
-void CTDLTaskTreeCtrl::BeginLabelEditTimer()
-{
-//	if (!m_bEditLabelTimerStarted)
-	{
-//		m_bEditLabelTimerStarted = TRUE;
-		SetTimer(TIMER_EDITLABEL, 500, NULL);
-	}
-}
-
-void CTDLTaskTreeCtrl::EndLabelEditTimer()
-{
-//	if (m_bEditLabelTimerStarted)
-	{
-//		m_bEditLabelTimerStarted = FALSE;
-		KillTimer(TIMER_EDITLABEL);
-	}
-}
-
 void CTDLTaskTreeCtrl::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)
 {
 	CTDLTaskCtrlBase::EnableExtendedKeyboardSelection(bCtrl, bShift);
@@ -1051,12 +955,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	
 	if (hRealWnd == m_tcTasks)
 	{
-		BOOL bSelChange = FALSE, bEatMsg = FALSE;
-		BOOL bColClick = FALSE, bColDblClk = FALSE;
-
-		SELCHANGE_ACTION nAction = SC_UNKNOWN;
-		CHTIList lstPrevSel;
-		
 		switch (msg)
 		{
 #ifdef _DEBUG
@@ -1069,16 +967,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			break;
 
 		case WM_CHAR:
-			// prevent beep
 			if (wp == VK_ESCAPE)
-				return 0L;
-			break;
-
-		case WM_TIMER:
-			// eat the tree's internal timer for editing labels
-			// because we implement our own
-			if (wp == 42)
-				return 0L;
+				return 0L; // prevent beep
 			break;
 
 		case TVM_SELECTITEM:
@@ -1102,7 +992,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			}
 			break;
 			
-		case WM_KEYUP: // --------------------------------------------------------------------------
+		case WM_KEYUP: 
 			switch (wp)
 			{
 			case VK_NEXT:  
@@ -1110,29 +1000,36 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			case VK_UP:
 			case VK_PRIOR: 
 				{
+					BOOL bSelChange = FALSE;
 					TSH().OnTreeKeyUp(wp, lp, bSelChange);
-
-					nAction = SC_BYKEYBOARD;
+			
+					if (bSelChange)
+					{
+						SyncColumnSelectionToTasks();
+						NotifyParentSelChange(SC_BYKEYBOARD);
+					}
 				}
 				break;
 			}
 			break;
 
-		case WM_KEYDOWN: // --------------------------------------------------------------------------
+		case WM_KEYDOWN:
 			{
-				EndLabelEditTimer();
-
-				// snapshot existing selection before we might change it
-				TSH().CopySelection(lstPrevSel, TRUE);
-
 				// Update the selection
+				BOOL bSelChange = FALSE;
 				TSH().OnTreeKeyDown(wp, lp, bSelChange);
-				
+			
+				if (bSelChange)
+				{
+					SyncColumnSelectionToTasks();
+					NotifyParentSelChange(SC_BYKEYBOARD);
+				}
+
+				// Handle expanding/contracting tasks
 				BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
 
 				if (!bAlt && !bSelChange)
 				{
-					// Handle expanding/contracting tasks
 					BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
 					BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
 
@@ -1157,130 +1054,63 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						break;
 					}
 				}
-				
-				nAction = SC_BYKEYBOARD;
 			}
 			break;
 			
 		case WM_RBUTTONDOWN: // --------------------------------------------------------------------------
 			{
-				EndLabelEditTimer();
-
-				// snapshot existing selection before we might change it
-				TSH().CopySelection(lstPrevSel, TRUE);
-
 				// Update the selection
+				BOOL bSelChange = FALSE;
 				TSH().OnTreeRButtonDown(wp, lp, bSelChange);
 				
-				nAction = SC_BYMOUSE;
+				if (bSelChange)
+				{
+					SyncColumnSelectionToTasks();
+					NotifyParentSelChange(SC_BYMOUSE);
+				}
+
+				// Allow default handling to produce context menu
 			}
 			break;
 			
 		case WM_LBUTTONDOWN: // --------------------------------------------------------------------------
 			{
-				BOOL bHadFocus = HasFocus();
-
-				// snapshot existing selection before we might change it
-				TSH().CopySelection(lstPrevSel, TRUE);
-
 				// Update the selection
-				TSH().OnTreeLButtonDown(wp, lp, bSelChange);
-				
-				// don't change selection if user is expanding an item
 				UINT nHitFlags = 0;
-				CPoint pt(lp);
-				HTREEITEM htiHit = m_tcTasks.HitTest(pt, &nHitFlags);
+				HTREEITEM htiHit = m_tcTasks.HitTest(lp, &nHitFlags);
+
+				BOOL bHitIcon = (nHitFlags & (TVHT_ONITEMICON | TVHT_ONITEMSTATEICON));
+				BOOL bCtrlOrShift = (wp & (MK_CONTROL | MK_SHIFT));
+
+				BOOL bSelChange = FALSE;
+
+				if (htiHit && (bCtrlOrShift || !bHitIcon))
+					TSH().OnTreeLButtonDown(wp, lp, bSelChange);
 				
-				BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-				BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-				
-				if (bCtrl)
+				if (bSelChange)
 				{
-					// save item handle so we don't rehandle in LButtonUp handler
-					m_htiLastHandledLBtnDown = htiHit;
-				}
-				else if (bShift) 
-				{
-					// save item handle so we don't rehandle in LButtonUp handler
-					m_htiLastHandledLBtnDown = htiHit;
-				}
-				else if (htiHit) // !bCtrl && !bShift
-				{
-					if (nHitFlags & TVHT_ONITEMLABEL)
-					{
-						// if we didn't previously have the focus then we save
-						// off the clicked item so the button up handler will
-						// not initiate a label edit
-						if (bSelChange || !bHadFocus)
-							m_htiLastHandledLBtnDown = htiHit;
-					}
-					else if (nHitFlags & TVHT_ONITEMICON)
-					{
-						// save item handle so we don't re-handle in LButtonUp handler
-						m_htiLastHandledLBtnDown = htiHit;
-						bColClick = TRUE;
-					}
-					else
-					{
-						// save item handle so we don't re-handle in LButtonUp handler
-						m_htiLastHandledLBtnDown = htiHit;
-						bColClick = !(nHitFlags & TVHT_ONITEMINDENT);
-					}
+					SyncColumnSelectionToTasks();
+					NotifyParentSelChange(SC_BYMOUSE);
 				}
 
-				nAction = SC_BYMOUSE;
+				// Handle icon and checkbox clicking
+				if (!bCtrlOrShift && bHitIcon)
+				{
+					if (HandleClientColumnClick(lp, FALSE))
+						return 0L; // we handled it
+				}
+
+				if (bSelChange)
+					return 0L; // we handled it
 			}
 			break;
 			
-		case WM_LBUTTONUP: // --------------------------------------------------------------------------
+		
+		case WM_LBUTTONDBLCLK:
+			if (HandleClientColumnClick(lp, TRUE))
 			{
-				BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-				BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-				
-				if (!bCtrl && !bShift)
-				{
-					UINT nHitFlags = 0;
-					CPoint ptCursor(lp);
-					HTREEITEM htiHit = HitTestItem(ptCursor, &nHitFlags);
-					
-					// don't reprocess items already handled in the button down handler
-					if ((nHitFlags & (TVHT_ONITEMBUTTON | TVHT_ONITEMICON | TVHT_ONITEMSTATEICON)) || 
-						!htiHit || (htiHit == m_htiLastHandledLBtnDown))
-					{
-						// ignore
-					}
-					else if (TSH().HasItem(htiHit))
-					{
-						int nSelCount = TSH().GetCount();
-						ASSERT (nSelCount);
-						
-						if (!HasStyle(TDCS_READONLY) &&
-							(nHitFlags & TVHT_ONITEMLABEL) && 
-							(nSelCount == 1) && 
-							(m_htiLastHandledLBtnDown == NULL) &&
-							!SelectionHasLocked())
-						{
-							BeginLabelEditTimer();
-						}
-						else
-						{
-							// snapshot existing selection before we might change it
-							TSH().CopySelection(lstPrevSel, TRUE);
-
-							// Update the selection
-							TSH().OnTreeLButtonUp(wp, lp, bSelChange);
-						}
-					}
-				}
-				
-				m_htiLastHandledLBtnDown = NULL;			
-				nAction = SC_BYMOUSE;
+				return 0L; // eat
 			}
-			break;
-			
-		case WM_LBUTTONDBLCLK: // --------------------------------------------------------------------------
-			EndLabelEditTimer();
-			bColDblClk = TRUE;
 			break;
 
 		case WM_VSCROLL:
@@ -1291,35 +1121,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			}
 			break;
 		} 
-		// -----------------------------------------------------------------------------------------------
-
-		// Handle selection change before column click/dblclk
-		if (bSelChange)
-		{
-			SyncColumnSelectionToTasks();
-			
-			if (!TSH().Matches(lstPrevSel))
-			{
-				ASSERT(nAction != SC_UNKNOWN);
-				NotifyParentSelChange(nAction);
-			}
-		}
-
-		if (bColClick)
-		{
-			if (HandleClientColumnClick(lp, FALSE))
-				return 0L; // eat
-
-			// else
-			m_htiLastHandledLBtnDown = NULL;
-		}
-		else if (bColDblClk)
-		{
-			ASSERT(m_htiLastHandledLBtnDown == NULL);
-
-			if (HandleClientColumnClick(lp, TRUE))
-				return 0L; // eat
-		}
 	}
 	else if (hRealWnd == m_lcColumns)
 	{
@@ -1336,27 +1137,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 				BOOL bSelChange = FALSE;
 				TSH().OnListLButtonDown(wp, lp, bSelChange);
-				
-// 				int nAnchor = m_lcColumns.GetSelectionMark();
-// 
-// 				if (!Misc::IsKeyPressed(VK_CONTROL))
-// 					DeselectAll();
-// 
-// 				// Add new items to tree and list
-//  				TDC_COLUMN nColID = TDCC_NONE;
-//  				int nHit = HitTestColumnsItem(lp, TRUE, nColID);
-// 
-// 				int nFrom = (nAnchor < nHit) ? nAnchor : nHit;
-// 				int nTo = (nAnchor < nHit) ? nHit : nAnchor;
-// 
-// 				for (int nItem = nFrom; nItem <= nTo; nItem++)
-// 				{
-// 					HTREEITEM hti = GetTreeItem(m_tcTasks, m_lcColumns, nItem);
-// 					ASSERT(hti);
-// 
-// 					TSH().AddItem(hti, FALSE);
-// 					m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
-// 				}
 
 				if (bSelChange)
 					NotifyParentSelChange(SC_BYKEYBOARD);

@@ -1032,25 +1032,19 @@ void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 {
 	bSelChange = FALSE;
 
-// 	CHTIList lstPrevSel;
-
 	// allow parent to handle any focus changes
 	// before we change our selection
 	m_tree.SetFocus();
 
 	UINT nHitFlags = 0;
-	CPoint pt(lp);
-	HTREEITEM htiHit = m_tree.HitTest(pt, &nHitFlags);
+	HTREEITEM htiHit = m_tree.HitTest(lp, &nHitFlags);
 
 	// Don't change selection if user is just trying to expand an item
 	if (nHitFlags & TVHT_ONITEMBUTTON)
 		return;
 
-// 	// snapshot existing selection before we might change it
-// 	CopySelection(lstPrevSel, TRUE);
-
-	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
+	BOOL bCtrl = (wp & MK_CONTROL);
+	BOOL bShift = (wp & MK_SHIFT);
 
 	HTREEITEM htiAnchor = GetAnchor();
 
@@ -1064,7 +1058,7 @@ void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 			SetItems(htiAnchor, htiHit, TSHS_SELECT);
 			bSelChange = TRUE;
 		}
-		else if (m_bReadOnly || !::DragDetect(m_tree, pt))
+		else if (!DragDetect(lp))
 		{
 			// if this is not the beginning of a drag then toggle selection
 			SetItem(htiHit, TSHS_TOGGLE);
@@ -1080,31 +1074,28 @@ void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 	else if (htiHit) // !bCtrl && !bShift
 	{
 		// select item if not already
-		if (!HasItem(htiHit))
+		if (!HasItem(htiHit) || !DragDetect(lp))
 			SelectSingleItem(htiHit, bSelChange);
 	}
 
 	// update anchor
 	if (htiHit && !bShift)
 		SetAnchor(htiHit);
-// 
-// 	bSelChange |= !Matches(lstPrevSel);
+}
+
+BOOL CTreeSelectionHelper::DragDetect(CPoint pt)
+{
+	return (!m_bReadOnly && ::DragDetect(m_tree, pt));
 }
 
 void CTreeSelectionHelper::OnTreeLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 {
 	bSelChange = FALSE;
 
-// 	CHTIList lstPrevSel;
-
-	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-
-	if (!bCtrl && !bShift)
+	if (0 == (wp & (MK_CONTROL | MK_SHIFT)))
 	{
 		UINT nHitFlags = 0;
-		CPoint ptCursor(lp);
-		HTREEITEM htiHit = m_tree.HitTest(ptCursor, &nHitFlags);
+		HTREEITEM htiHit = m_tree.HitTest(lp, &nHitFlags);
 
 		if (HasItem(htiHit))
 		{
@@ -1118,8 +1109,6 @@ void CTreeSelectionHelper::OnTreeLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChang
 			SetAnchor(htiHit);
 		}
 	}
-
-// 	bSelChange |= !Matches(lstPrevSel);
 }
 
 void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
@@ -1339,6 +1328,7 @@ void CTreeSelectionHelper::OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& 
 		}
 		break;
 	}
+
 	m_nLastKeyDown = 0; // always
 }
 
@@ -1356,10 +1346,10 @@ BOOL CTreeSelectionHelper::SelectSingleItem(HTREEITEM hti, BOOL& bSelChange)
 	}
 
 	BOOL bSelected = FALSE;
+	bSelChange = RemoveAll();
 
 	if (hti)
 	{
-		RemoveAll();
 		AddItem(hti);
 		SetAnchor(hti);
 
