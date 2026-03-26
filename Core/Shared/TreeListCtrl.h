@@ -201,10 +201,10 @@ protected:
 
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 	BOOL m_bMovingItem;
+	BOOL m_bBoundSelecting;
 
 	CTreeListSelectionHelper m_tsh;
 	CTreeDragDropHelper m_treeDragDrop;
-	//CTreeSelectionHelper m_tshDragDrop;
 	CThemed m_themeHeader;
 	
 	mutable int m_nMinTreeTitleColumnWidth;

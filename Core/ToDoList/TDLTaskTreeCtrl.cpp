@@ -576,12 +576,10 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 
 	if (bSelChange)
 	{
-	 	BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
-	 	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-	 
 	 	HTREEITEM hti = (HTREEITEM)m_lcColumns.GetItemData(pNMLV->iItem);
-		InvalidateItem(hti, TRUE);
-	
+		TCH().InvalidateItem(hti);
+		m_tcTasks.UpdateWindow();
+
 		// notify parent of selection change
 		CPoint pt(GetMessagePos());
 		m_lcColumns.ScreenToClient(&pt);
@@ -593,6 +591,9 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 			// vertical scrolling
 			return;
 		}
+
+		BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
+		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
 
 		if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
 		{
@@ -651,6 +652,9 @@ void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 
 void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
+	if (m_bMovingItem || IsBoundSelecting())
+		return;
+
 	// snapshot current selection to test for changes
 	CHTIList lstPrevSel;
 	TSH().CopySelection(lstPrevSel);

@@ -35,6 +35,8 @@ const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 
+const int TIMER_BOUNDINGSEL		= 100;
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef GET_WHEEL_DELTA_WPARAM
@@ -327,6 +329,7 @@ CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelW
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_bMovingItem(FALSE),
+	m_bBoundSelecting(FALSE),
 	m_nMinTreeTitleColumnWidth(-1),
 	m_tsh(m_tree, m_list),
 	m_treeDragDrop(m_tsh, m_tree, pAltRenderer),
@@ -915,7 +918,7 @@ void CTreeListCtrl::SyncColumnSelectionToTasks()
 
 void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
-	if (m_bMovingItem)
+	if (m_bMovingItem || m_bBoundSelecting)
 		return;
 	
 	// Ignore setting selection to 'NULL' unless there are no tasks at all
@@ -961,11 +964,9 @@ void CTreeListCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 
 	if (bSelChange)
 	{
-		BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
-		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-
 		HTREEITEM hti = (HTREEITEM)m_list.GetItemData(pNMLV->iItem);
-		//InvalidateItem(hti, TRUE);
+		m_tree.TCH().InvalidateItem(hti);
+		m_tree.UpdateWindow();
 
 		// notify parent of selection change
 		CPoint pt(GetMessagePos());
@@ -979,17 +980,20 @@ void CTreeListCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 			return;
 		}
 
+		BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
+		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+
 		if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
 		{
 			// In the middle of a simple click
 			return;
 		}
 
-// 		if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
-// 		{
-// 			// bulk selecting
-// 			return;
-// 		}
+		if (m_bBoundSelecting && ((nHit == -1) || (m_list.GetSelectedCount() > 2)))
+		{
+			// bulk selecting
+			return;
+		}
 
 		NotifyParentSelectionChange();
 	}
@@ -1020,6 +1024,19 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				break;
 			}
 		}
+		break;
+
+	case WM_TIMER:
+		if ((wp == TIMER_BOUNDINGSEL) &&
+			m_bBoundSelecting && 
+			!Misc::IsKeyPressed(VK_LBUTTON))
+		{
+			m_bBoundSelecting = FALSE;
+			KillTimer(TIMER_BOUNDINGSEL);
+
+			NotifyParentSelectionChange();
+		}
+		break;
 	}
 
 	return CTreeListSyncer::WindowProc(hRealWnd, msg, wp, lp);
@@ -1364,6 +1381,8 @@ BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 
 BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 {
+	m_bBoundSelecting = FALSE;
+
 	// Selecting or de-selecting a lot of items can be slow
 	// because OnListSelectionChange is called once for each.
 	// Base class handles simple click de-selection so we
@@ -1380,9 +1399,22 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 
 		return TRUE; // eat it
 	}
-	else if (0 == (nFlags & MK_CONTROL))
+	else if (::DragDetect(m_list, point))
 	{
-		TSH().RemoveAll();
+		m_bBoundSelecting = -1;
+
+		if (0 == (nFlags & MK_CONTROL))
+	 		TSH().RemoveAll();
+
+		// there's no reliable to way to detect the end of a
+		// bounding-box selection especially if the mouse 
+		// cursor ends up outside the window so we use a timer
+		SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
+	}
+	else // prevent deselection
+	{
+		TRACE(_T("Ate Listview ButtonDown\n"));
+		return TRUE; // eat it
 	}
 
 	// not handled
