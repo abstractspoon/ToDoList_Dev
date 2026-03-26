@@ -2148,6 +2148,17 @@ BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 		{
 			return TRUE; // eat
 		}
+
+		// Prevent base class from handling an icon click as a selection change
+		// which we handle in OnTreeLButtonUp
+		UINT nHitFlags = 0;
+		HTREEITEM htiHit = m_tree.HitTest(point, &nHitFlags);
+
+		BOOL bHitIcon = (nHitFlags & TVHT_ONITEMICON);
+		BOOL bCtrlOrShift = (nFlags & (MK_CONTROL | MK_SHIFT));
+
+		if (!bCtrlOrShift && bHitIcon)
+ 			return TRUE;
 	}
 
 	// All else
