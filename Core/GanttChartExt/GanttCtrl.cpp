@@ -277,9 +277,7 @@ BOOL CGanttCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 		selection.AddTail(hti);
 	}
 
-	TSH().SetItems(selection, TSHS_SELECT);
-
-	return TRUE;
+	return SelectItems(selection);
 }
 
 int CGanttCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
@@ -2152,6 +2150,7 @@ BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 		}
 	}
 
+	// All else
 	return CTreeListCtrl::OnTreeLButtonDown(nFlags, point);
 }
 

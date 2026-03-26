@@ -67,9 +67,6 @@ public:
 	CTreeCtrlHelper& TCH() { return m_tch; }
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
 
-// 	CTreeListSelectionHelper& TSH() { return m_tsh; }
-// 	const CTreeListSelectionHelper& TSH() const { return m_tsh; }
-
 	CFontCache& Fonts() { return m_fonts; }
 	const CFontCache& Fonts() const { return m_fonts; }
 	
@@ -92,7 +89,6 @@ protected:
 	CFontCache m_fonts;
 	CTreeCtrlHelper m_tch;
 	CImageList m_ilCheckboxes, m_ilImagePlaceholder;
-// 	CTreeListSelectionHelper m_tsh;
 
 	const CEnHeaderCtrl& m_header;
 
@@ -249,7 +245,6 @@ protected:
 
 	// pseudo-message handlers
 	virtual BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
-	virtual BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
 	virtual BOOL OnTreeLButtonDblClk(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDown(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
@@ -262,6 +257,7 @@ protected:
 	virtual BOOL OnTreeCheckChange(HTREEITEM /*hti*/) { return FALSE; }
 	virtual void OnListHeaderClick(NMHEADER* /*HDN*/) {}
 
+	virtual BOOL OnTreeLButtonUp(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnListMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
@@ -335,6 +331,7 @@ protected:
 	HTREEITEM GetTreeItem(DWORD dwItemData) const;
 	HTREEITEM GetTreeItem(int nItem) const { return CTreeListSyncer::GetTreeItem(m_tree, m_list, nItem); }
 	BOOL SelectItem(HTREEITEM hti);
+	BOOL SelectItems(const CHTIList& htItems);
 	CString GetItemLabelTip(CPoint ptScreen) const;
 	DWORD GetItemData(HTREEITEM htiFrom) const;
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
