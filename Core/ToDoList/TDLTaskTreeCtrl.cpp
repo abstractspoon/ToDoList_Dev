@@ -612,13 +612,14 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 
 void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
 {
-	ASSERT(CanResync());
+	if (CanResync())
+	{
+		CHTIList selection;
+		TSH().CopySelection(selection);
 
-	CHTIList selection;
-	TSH().CopySelection(selection);
-
-	if (ResyncListToTreeSelection(m_tcTasks, selection, TSH().GetAnchor()))
- 		m_lcColumns.UpdateWindow();
+		if (ResyncListToTreeSelection(m_tcTasks, selection, TSH().GetAnchor()))
+			m_lcColumns.UpdateWindow();
+	}
 }
 
 void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
@@ -660,8 +661,7 @@ void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 
 	if (bSelChange)
 	{
-		if (CanResync())
-			SyncColumnSelectionToTasks();
+		SyncColumnSelectionToTasks();
 
 		HTREEITEM hti = pNMTV->itemNew.hItem;
 
