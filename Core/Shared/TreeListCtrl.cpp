@@ -1145,8 +1145,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	}
 	else if (hRealWnd == m_tree)
 	{
-		BOOL bSelChange = FALSE;
-
 		switch (msg)
 		{
 		case TVM_SELECTITEM:
@@ -1171,7 +1169,10 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			break;
 
 		case WM_RBUTTONDOWN:
-			TSH().OnTreeRButtonDown(wp, lp, bSelChange);
+			{
+				BOOL bUnused = FALSE;
+				TSH().OnTreeRButtonDown(wp, lp, bUnused);
+			}
 			break;
 
 		case WM_LBUTTONDOWN:
@@ -1195,11 +1196,17 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			break;
 
 		case WM_KEYDOWN:
-			TSH().OnTreeKeyDown(wp, lp, bSelChange);
+			{
+				BOOL bUnused = FALSE;
+				TSH().OnTreeKeyDown(wp, lp, bUnused);
+			}
 			break;
 
 		case WM_KEYUP:
-			TSH().OnTreeKeyUp(wp, lp, bSelChange);
+			{
+				BOOL bUnused = FALSE;
+				TSH().OnTreeKeyUp(wp, lp, bUnused);
+			}
 			break;
 
 		case WM_MOUSEWHEEL: 
@@ -1379,6 +1386,8 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 {
 	m_bBoundSelecting = FALSE;
 
+	m_list.SetFocus();
+
 	// Selecting or de-selecting a lot of items can be slow
 	// because OnListSelectionChange is called once for each.
 	// Base class handles simple click de-selection so we
@@ -1410,10 +1419,11 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 		// cursor ends up outside the window so we use a timer
 		SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
 	}
-	else // prevent deselection
-	{
+	else if (m_list.HitTest(point) == -1)
+	{ 
+		// prevent deselection
 		TRACE(_T("Ate Listview ButtonDown\n"));
-		return TRUE; // eat it
+		return TRUE;
 	}
 
 	// not handled

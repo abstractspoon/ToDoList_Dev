@@ -1275,31 +1275,21 @@ void CTreeSelectionHelper::OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& 
 	case VK_END:
 		if (!bCtrl)
 		{
-			RemoveAll();
-
 			if (bShift)
 			{
-				AddItems(GetAnchor(), hti);
+				RemoveAll();
+				bSelChange = AddItems(GetAnchor(), hti);
 			}
 			else
 			{
-				SetAnchor(hti);
-				AddItem(hti);
+				SelectSingleItem(hti, bSelChange);
 			}
-
-			bSelChange = TRUE;
 		}
 		break;
 
 	default:
-		{
-			// else handle alphanum method of changing selection
-			RemoveAll();
-			SetAnchor(hti);
-			AddItem(hti);
-
-			bSelChange = TRUE;
-		}
+		// Handle alphanum method of changing selection
+		SelectSingleItem(hti, bSelChange);
 		break;
 	}
 

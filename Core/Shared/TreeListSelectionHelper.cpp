@@ -88,7 +88,7 @@ void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 
 		for (int nItem = nFrom; nItem <= nTo; nItem++)
 		{
-			HTREEITEM hti = (HTREEITEM)m_list.GetItemData(nItem);
+			HTREEITEM hti = GetTreeItem(nItem);
 			ASSERT(hti);
 
 			AddItem(hti, FALSE);
@@ -136,7 +136,7 @@ void CTreeListSelectionHelper::OnListNotifyParentSelChange(NMLISTVIEW* pNMLV, BO
 	bSelChange = FALSE;
 
 	// sync only the item that has changed 
-	HTREEITEM hti = (HTREEITEM)m_list.GetItemData(pNMLV->iItem);
+	HTREEITEM hti = GetTreeItem(pNMLV->iItem);
 
 	BOOL bWasSel = (pNMLV->uOldState & LVIS_SELECTED);
 	BOOL bSel = (pNMLV->uNewState & LVIS_SELECTED);
