@@ -173,7 +173,6 @@ public:
 
 	// Pseudo message handlers
 	void OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	void OnTreeLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 
 	void OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);

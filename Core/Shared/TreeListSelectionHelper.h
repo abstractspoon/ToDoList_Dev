@@ -21,12 +21,10 @@ public:
 
 	// Pseudo message handlers
 	void OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	void OnListLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnListRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnListNotifyParentSelChange(NMLISTVIEW* pNMLV, BOOL& bSelChange);
 
 	void OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	void OnTreeLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 
 	void OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);

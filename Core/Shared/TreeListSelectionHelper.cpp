@@ -35,11 +35,6 @@ void CTreeListSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 	CTreeSelectionHelper::OnTreeLButtonDown(wp, lp, bSelChange);
 }
 
-void CTreeListSelectionHelper::OnTreeLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
-{
-	CTreeSelectionHelper::OnTreeLButtonUp(wp, lp, bSelChange);
-}
-
 void CTreeListSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 {
 	CTreeSelectionHelper::OnTreeRButtonDown(wp, lp, bSelChange);
@@ -75,7 +70,7 @@ void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 	// handle bulk selection here
 	if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 	{
-		int nAnchor = GetListItem(m_htiAnchor);//m_list.GetSelectionMark();
+		int nAnchor = GetListItem(m_htiAnchor);
 		ASSERT(nAnchor != -1);
 
 		if (!Misc::IsKeyPressed(VK_CONTROL))
@@ -112,16 +107,6 @@ int CTreeListSelectionHelper::GetListItem(HTREEITEM hti) const
 	lvfi.vkDirection = VK_DOWN;
 
 	return m_list.FindItem(&lvfi, -1);
-}
-
-void CTreeListSelectionHelper::OnListLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
-{
-	bSelChange = FALSE;
-}
-
-void CTreeListSelectionHelper::OnListRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
-{
-	bSelChange = FALSE;
 }
 
 void CTreeListSelectionHelper::OnListNotifyParentSelChange(NMLISTVIEW* pNMLV, BOOL& bSelChange)

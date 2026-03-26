@@ -1100,29 +1100,6 @@ BOOL CTreeSelectionHelper::DragDetect(CPoint pt)
 	return (!m_bReadOnly && ::DragDetect(m_tree, pt));
 }
 
-void CTreeSelectionHelper::OnTreeLButtonUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
-{
-	bSelChange = FALSE;
-
-	if (0 == (wp & (MK_CONTROL | MK_SHIFT)))
-	{
-		UINT nHitFlags = 0;
-		HTREEITEM htiHit = m_tree.HitTest(lp, &nHitFlags);
-
-		if (HasItem(htiHit))
-		{
-			int nSelCount = GetCount();
-			ASSERT(nSelCount);
-
-			if (nSelCount > 1)
-				SelectSingleItem(htiHit, bSelChange);
-
-			// Always update anchor
-			SetAnchor(htiHit);
-		}
-	}
-}
-
 void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 {
 	bSelChange = FALSE;
