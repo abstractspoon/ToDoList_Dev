@@ -1039,12 +1039,24 @@ void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 	UINT nHitFlags = 0;
 	HTREEITEM htiHit = m_tree.HitTest(lp, &nHitFlags);
 
-	// Don't change selection if user is just trying to expand an item
 	if (nHitFlags & TVHT_ONITEMBUTTON)
 		return;
 
-	BOOL bCtrl = (wp & MK_CONTROL);
-	BOOL bShift = (wp & MK_SHIFT);
+	// Don't change selection if:
+	//
+	// 1. The expansion button was hit
+	// OR
+	// 2. The hit item was already selected 
+	// AND
+	// 3. The state/icon was clicked 
+	// AND
+	// 4. Neither Ctrl/Shift are pressed
+
+	BOOL bHitIcon = (nHitFlags & (TVHT_ONITEMICON | TVHT_ONITEMSTATEICON));
+	BOOL bCtrl = (wp & MK_CONTROL), bShift = (wp & MK_SHIFT);
+
+	if (HasItem(htiHit) && bHitIcon && !bCtrl && !bShift)
+		return;
 
 	HTREEITEM htiAnchor = GetAnchor();
 

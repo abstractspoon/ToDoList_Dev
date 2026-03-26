@@ -1080,16 +1080,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		case WM_LBUTTONDOWN: // --------------------------------------------------------------------------
 			{
 				// Update the selection
-				UINT nHitFlags = 0;
-				HTREEITEM htiHit = m_tcTasks.HitTest(lp, &nHitFlags);
-
-				BOOL bHitIcon = (nHitFlags & (TVHT_ONITEMICON | TVHT_ONITEMSTATEICON));
-				BOOL bCtrlOrShift = (wp & (MK_CONTROL | MK_SHIFT));
-
 				BOOL bSelChange = FALSE;
-
-				if (htiHit && (bCtrlOrShift || !bHitIcon))
-					TSH().OnTreeLButtonDown(wp, lp, bSelChange);
+				TSH().OnTreeLButtonDown(wp, lp, bSelChange);
 				
 				if (bSelChange)
 				{
@@ -1098,9 +1090,14 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				}
 
 				// Handle icon and checkbox clicking
-				if (!bCtrlOrShift && bHitIcon)
+				if (0 == (wp & (MK_CONTROL | MK_SHIFT)))
 				{
-					if (HandleClientColumnClick(lp, FALSE))
+					UINT nHitFlags = 0;
+					HTREEITEM htiHit = m_tcTasks.HitTest(lp, &nHitFlags);
+
+					BOOL bHitIcon = (nHitFlags & (TVHT_ONITEMICON | TVHT_ONITEMSTATEICON));
+
+					if (bHitIcon && HandleClientColumnClick(lp, FALSE))
 						return 0L; // we handled it
 				}
 
@@ -1108,7 +1105,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					return 0L; // we handled it
 			}
 			break;
-			
 		
 		case WM_LBUTTONDBLCLK:
 			if (HandleClientColumnClick(lp, TRUE))

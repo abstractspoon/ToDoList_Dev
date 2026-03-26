@@ -1401,10 +1401,13 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 	}
 	else if (::DragDetect(m_list, point))
 	{
-		m_bBoundSelecting = -1;
+		m_bBoundSelecting = TRUE;
 
 		if (0 == (nFlags & MK_CONTROL))
-	 		TSH().RemoveAll();
+		{
+			TSH().RemoveAll();
+			TCH().SelectItem(NULL);
+		}
 
 		// there's no reliable to way to detect the end of a
 		// bounding-box selection especially if the mouse 
