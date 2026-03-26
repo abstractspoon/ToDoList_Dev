@@ -99,6 +99,21 @@ void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 	}
 }
 
+void CTreeListSelectionHelper::OnListRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	int nHit = m_list.HitTest(lp);
+
+	if (nHit != -1)
+	{
+		HTREEITEM hti = GetTreeItem(nHit);
+
+		if (!HasItem(hti))
+			SelectSingleItem(hti, bSelChange);
+	}
+}
+
 int CTreeListSelectionHelper::GetListItem(HTREEITEM hti) const
 {
 	LVFINDINFO lvfi = { 0 };
@@ -107,6 +122,11 @@ int CTreeListSelectionHelper::GetListItem(HTREEITEM hti) const
 	lvfi.vkDirection = VK_DOWN;
 
 	return m_list.FindItem(&lvfi, -1);
+}
+
+HTREEITEM CTreeListSelectionHelper::GetTreeItem(int nItem) const
+{
+	return (HTREEITEM)m_list.GetItemData(nItem);
 }
 
 void CTreeListSelectionHelper::OnListNotifyParentSelChange(NMLISTVIEW* pNMLV, BOOL& bSelChange)

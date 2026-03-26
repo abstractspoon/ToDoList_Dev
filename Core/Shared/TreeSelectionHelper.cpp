@@ -1110,23 +1110,8 @@ void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 
 	HTREEITEM hti = m_tree.HitTest(lp);
 
-	if (hti)
-	{
-		if (!HasItem(hti))
-		{
-			RemoveAll();
-			AddItem(hti);
-			SetAnchor(hti);
-
-			bSelChange = TRUE;
-		}
-
-		if (hti != m_tree.GetSelectedItem())
-		{
-			m_tree.SelectItem(hti);
-			bSelChange = TRUE;
-		}
-	}
+	if (hti && !HasItem(hti))
+		SelectSingleItem(hti, bSelChange);
 }
 
 void CTreeSelectionHelper::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)

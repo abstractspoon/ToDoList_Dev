@@ -37,6 +37,7 @@ protected:
 
 protected:
 	int GetListItem(HTREEITEM hti) const;
+	HTREEITEM GetTreeItem(int nItem) const;
 };
 
 #endif // !defined(AFX_TREELISTSELECTIONHELPER_H__098294B4_8B41_4369_8522_FE1637BA7EA1__INCLUDED_)

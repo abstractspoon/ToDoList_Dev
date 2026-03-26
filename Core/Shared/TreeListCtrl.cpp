@@ -1133,10 +1133,8 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 		case WM_RBUTTONDOWN:
 			{
-				int nHit = ListHitTestItem(lp, FALSE);
-
-				if (nHit != -1)
-					SelectItem(GetTreeItem(nHit));
+				BOOL bUnused = FALSE;
+				TSH().OnListRButtonDown(wp, lp, bUnused);
 			}
 			break;
 
