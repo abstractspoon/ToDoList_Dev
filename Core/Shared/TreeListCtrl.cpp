@@ -951,8 +951,6 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 		if (TSH().Matches(lstPrevSel) || Misc::IsCursorKeyPressed(MKC_UPDOWN))
 			return;
 
-		// DON'T KNOW HOW WE CAN EVER GET HERE
-		ASSERT(0);
 		NotifyParentSelectionChange();
 	}
 }
