@@ -61,6 +61,8 @@ CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
 {
 	m_icon.Load(IDR_WORKLOAD);
 	m_dtPeriod.m_bInclusive = TRUE;
+
+	CTreeSelectionHelper::EnableExtendedKeyboardSelection(FALSE, TRUE);
 }
 
 CWorkloadWnd::~CWorkloadWnd()

@@ -57,6 +57,8 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	m_dlgPrefs(this)
 {
 	m_icon.Load(IDR_GANTTCHART);
+
+	CTreeSelectionHelper::EnableExtendedKeyboardSelection(FALSE, TRUE);
 }
 
 CGanttChartWnd::~CGanttChartWnd()

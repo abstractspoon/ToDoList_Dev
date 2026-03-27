@@ -455,7 +455,7 @@ BOOL CToDoCtrl::IsReservedShortcut(DWORD dwShortcut)
 	return CTDLTaskCtrlBase::IsReservedShortcut(dwShortcut);
 }
 
-void CToDoCtrl::EnableExtendedSelection(BOOL bCtrl, BOOL bShift)
+void CToDoCtrl::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)
 {
 	CTDLTaskTreeCtrl::EnableExtendedKeyboardSelection(bCtrl, bShift);
 }
