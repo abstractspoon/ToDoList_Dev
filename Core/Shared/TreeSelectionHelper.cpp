@@ -169,11 +169,11 @@ DWORD CTreeSelectionHelper::GetNextItemData(POSITION& pos) const
 
 int CTreeSelectionHelper::GetCount() const 
 { 
-	if (m_tree.GetCount())
+	if (m_tree.GetSafeHwnd() && m_tree.GetCount())
 		return m_lstSelection.GetCount(); 
 
 	// else
-	return NULL;
+	return 0;
 }
 
 BOOL CTreeSelectionHelper::IsItemSelected(HTREEITEM hti, BOOL bCheckParents) const

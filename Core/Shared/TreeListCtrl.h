@@ -129,6 +129,7 @@ public:
 	HTREEITEM GetSelectedItem() const;
  	DWORD GetSelectedItemData() const;
 	int GetSelectedItemData(CDWordArray& aItemData) const;
+	int GetSelectionCount() const { return TSH().GetCount(); }
 
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
