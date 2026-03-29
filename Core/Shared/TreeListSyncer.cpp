@@ -1554,10 +1554,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		break;
 
 	case WM_SETFOCUS:
-		if (!HasFocus())
-		{
-			::SetFocus(PrimaryWnd());
-		}
+		SetFocus();
 		break;
 	
 	case WM_SETCURSOR:
@@ -2446,7 +2443,18 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 // 			CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
 
 			RefreshListDrawColAttributes(hRealWnd);
-			return ScDefault(hRealWnd);
+			LRESULT lr = ScDefault(hRealWnd);
+
+#ifdef _DEBUG
+			static int nPaintCount = 0;
+
+			if (Misc::IsKeyPressed(VK_LBUTTON))
+				TRACE(_T("\nCTreeListSyncer::List::WM_PAINT(%d) while LButton Down\n"), ++nPaintCount);
+			else
+				nPaintCount = 0;
+#endif // _DEBUG
+
+			return lr;
 		}
 		break;
 
@@ -2789,7 +2797,15 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_SETFOCUS:
 		if (HasFlag(TLSF_SYNCFOCUS))
 		{
-			InvalidateAll(FALSE, TRUE);
+			HWND hwndOther = OtherWnd(hRealWnd);
+
+			// If we're simply switching between the two panes
+			// then no redraw is required
+			if (wp && ((HWND)wp == hwndOther))
+				return 0L; // eat
+
+			// else
+			InvalidateAll(/*FALSE, TRUE*/);
 		}
 		break;
 

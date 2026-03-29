@@ -134,7 +134,7 @@ public:
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
-	void SetFocus();
+ 	void SetFocus() { CTreeListSyncer::SetFocus(); }
 
 	void EnableTreeCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable = TRUE) { m_tree.EnableCheckboxes(nUnthemedBitmapID, bEnable); }
 	void EnableTreeImagePlaceholder(BOOL bEnable = TRUE) { m_tree.EnableImagePlaceholder(bEnable); }
@@ -341,6 +341,7 @@ protected:
 
 	void SyncColumnSelectionToTasks();
 	void NotifyParentSelectionChange();
+	void DeselectAll();
 
 	BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }

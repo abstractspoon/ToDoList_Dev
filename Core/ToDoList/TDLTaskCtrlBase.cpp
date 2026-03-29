@@ -4631,12 +4631,6 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 		nHit = lc.HitTest(pt);
 	}
 
-	// De-selecting a lot of items can be slow because 
-	// OnListSelectionChange is called once for each.
-	// So we try to detect big changes here and handle 
-	// them ourselves.
-	lc.ClientToScreen(&pt);
-
 	if (nHit != -1)
 	{
 		BOOL bHitSelected = IsListItemSelected(m_lcColumns, nHit);
@@ -4647,24 +4641,29 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 			DeselectAll();
 		}
 	}
-	else if (::DragDetect(lc, pt))
+	else
 	{
-		m_bBoundSelecting = -1;
+		lc.ClientToScreen(&pt);
 
-		if (!Misc::IsKeyPressed(VK_CONTROL))
+		if (::DragDetect(lc, pt))
 		{
-			DeselectAll();
-		}
+			m_bBoundSelecting = -1;
 
-		// there's no reliable to way to detect the end of a
-		// bounding-box selection especially if the mouse 
-		// cursor ends up outside the window so we use a timer
-		SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
-	}
-	else // prevent deselection
-	{
-		TRACE(_T("Ate Listview ButtonDown\n"));
-		return TRUE; // eat it
+			if (!Misc::IsKeyPressed(VK_CONTROL))
+			{
+				DeselectAll();
+			}
+
+			// I've found no reliable to way to detect the end of a
+			// bounding-box selection especially if the mouse 
+			// cursor ends up outside the window so we use a timer
+			SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
+		}
+		else // prevent deselection
+		{
+			TRACE(_T("Ate Listview ButtonDown\n"));
+			return TRUE; // eat it
+		}
 	}
 
 	return FALSE;

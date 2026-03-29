@@ -549,7 +549,8 @@ BOOL CTreeListCtrl::SelectItems(const CHTIList& htItems)
 	switch (htItems.GetCount())
 	{
 	case 0:
-		return TSH().RemoveAll();
+		DeselectAll();
+		return TRUE;
 
 	case 1:
 		return SelectItem(htItems.GetHead());
@@ -627,12 +628,6 @@ BOOL CTreeListCtrl::HasAltLineColor(HTREEITEM hti) const
 BOOL CTreeListCtrl::IsListItemLineOdd(int nItem) const
 {
 	return ((nItem % 2) == 1);
-}
-
-void CTreeListCtrl::SetFocus()
-{
-	if (!HasFocus())
-		m_tree.SetFocus();
 }
 
 void CTreeListCtrl::OnSize(UINT nType, int cx, int cy)
@@ -962,9 +957,7 @@ void CTreeListCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 
 	if (bSelChange)
 	{
-		HTREEITEM hti = (HTREEITEM)m_list.GetItemData(pNMLV->iItem);
-		m_tree.TCH().InvalidateItem(hti);
-		m_tree.UpdateWindow();
+		UpdateAll();
 
 		// notify parent of selection change
 		CPoint pt(GetMessagePos());
@@ -1000,6 +993,13 @@ void CTreeListCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 void CTreeListCtrl::NotifyParentSelectionChange()
 {
 	GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID());
+}
+
+void CTreeListCtrl::DeselectAll()
+{
+	CTLSHoldResync hr(*this);
+
+	TSH().DeselectAll();
 }
 
 LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -1136,10 +1136,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				BOOL bUnused = FALSE;
 				TSH().OnListRButtonDown(wp, lp, bUnused);
 			}
-			break;
-
-		case WM_SETFOCUS:
-			m_tree.SetFocus();
 			break;
 		}
 	}
@@ -1386,14 +1382,12 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 {
 	m_bBoundSelecting = FALSE;
 
-	m_list.SetFocus();
-
-	// Selecting or de-selecting a lot of items can be slow
-	// because OnListSelectionChange is called once for each.
-	// Base class handles simple click de-selection so we
-	// handle bulk selection here
 	if (nFlags & MK_SHIFT)
 	{
+		// Selecting or de-selecting a lot of items can be slow
+		// because OnListSelectionChange is called once for each.
+		// Base class handles simple click de-selection so we
+		// handle bulk selection here
 		CTLSHoldResync hr(*this);
 
 		BOOL bSelChange = FALSE;
@@ -1404,26 +1398,41 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 
 		return TRUE; // eat it
 	}
-	else if (::DragDetect(m_list, point))
+
+	int nHit = m_list.HitTest(point);
+
+	if (nHit != -1)
 	{
-		m_bBoundSelecting = TRUE;
+		BOOL bHitSelected = IsListItemSelected(m_list, nHit);
 
-		if (0 == (nFlags & MK_CONTROL))
-		{
-			TSH().RemoveAll();
-			TCH().SelectItem(NULL);
-		}
-
-		// there's no reliable to way to detect the end of a
-		// bounding-box selection especially if the mouse 
-		// cursor ends up outside the window so we use a timer
-		SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
+		if (Misc::ModKeysArePressed(0) && !bHitSelected)
+			DeselectAll();
 	}
-	else if (m_list.HitTest(point) == -1)
-	{ 
-		// prevent deselection
-		TRACE(_T("Ate Listview ButtonDown\n"));
-		return TRUE;
+	else
+	{
+		m_list.ClientToScreen(&point);
+
+		if (::DragDetect(m_list, point))
+		{
+			m_bBoundSelecting = TRUE;
+
+			if (0 == (nFlags & MK_CONTROL))
+				DeselectAll();
+
+			// I've found no reliable to way to detect the end of a
+			// bounding-box selection especially if the mouse 
+			// cursor ends up outside the window so we use a timer
+			SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
+		}
+		else
+		{ 
+			if (!HasFocus())
+				m_list.SetFocus();
+
+			// prevent deselection
+			TRACE(_T("Ate Listview ButtonDown\n"));
+			return TRUE;
+		}
 	}
 
 	// not handled

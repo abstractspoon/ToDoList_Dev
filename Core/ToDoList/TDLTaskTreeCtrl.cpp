@@ -156,13 +156,9 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_
 
 void CTDLTaskTreeCtrl::DeselectAll()
 {
-	// prevent resyncing
 	CTLSHoldResync hr(*this);
 
-	TSH().RemoveAll();
-	TCH().SelectItem(NULL);
-
-	m_lcColumns.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
+	TSH().DeselectAll();
 }
 
 BOOL CTDLTaskTreeCtrl::SelectAll(BOOL bVisibleOnly)
@@ -576,9 +572,7 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 
 	if (bSelChange)
 	{
-	 	HTREEITEM hti = (HTREEITEM)m_lcColumns.GetItemData(pNMLV->iItem);
-		TCH().InvalidateItem(hti);
-		m_tcTasks.UpdateWindow();
+		UpdateAll();
 
 		// notify parent of selection change
 		CPoint pt(GetMessagePos());

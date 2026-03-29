@@ -1034,7 +1034,8 @@ void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 
 	// allow parent to handle any focus changes
 	// before we change our selection
-	m_tree.SetFocus();
+	if (!HasFocus())
+		m_tree.SetFocus();
 
 	UINT nHitFlags = 0;
 	HTREEITEM htiHit = m_tree.HitTest(lp, &nHitFlags);
@@ -1106,7 +1107,8 @@ void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 
 	// allow parent to handle any focus changes
 	// before we change our selection
-	m_tree.SetFocus();
+	if (!HasFocus())
+		m_tree.SetFocus();
 
 	HTREEITEM hti = m_tree.HitTest(lp);
 

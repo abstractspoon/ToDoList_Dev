@@ -201,6 +201,8 @@ protected:
 	void AddAll(HTREEITEM hti);
 	BOOL DragDetect(CPoint pt);
 
+	virtual BOOL HasFocus() const { return (::GetFocus() == m_tree); }
+
 	struct SORTITEM
 	{
 		HTREEITEM hti;

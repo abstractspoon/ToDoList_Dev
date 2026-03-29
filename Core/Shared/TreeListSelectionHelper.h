@@ -19,18 +19,23 @@ public:
 	CTreeListSelectionHelper(CTreeCtrl& tree, CListCtrl& list);
 	virtual ~CTreeListSelectionHelper();
 
-	// Pseudo message handlers
+	void DeselectAll();
+
+	virtual BOOL HasFocus() const;
+
+	// Pseudo List message handlers
 	void OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnListRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnListNotifyParentSelChange(NMLISTVIEW* pNMLV, BOOL& bSelChange);
 
-	void OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	void OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	// Base class tree overrides
+	virtual void OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	virtual void OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 
-	void OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	void OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	void OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD);
-	void OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange);
+	virtual void OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	virtual void OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	virtual void OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD);
+	virtual void OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange);
 
 protected:
 	CListCtrl& m_list;

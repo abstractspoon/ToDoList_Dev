@@ -1982,9 +1982,6 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				// We can't begin dragging from OnListLButtonDown because we need to
 				// let the default handling occur first to ensure that a newly
 				// selected task is properly initialised
-				if (OnListLButtonDown(wp, lp))
-					return 0L; // eat
-
 				LRESULT lr = CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 
 				StartDragging(lp);

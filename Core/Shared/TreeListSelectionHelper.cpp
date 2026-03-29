@@ -27,7 +27,19 @@ CTreeListSelectionHelper::CTreeListSelectionHelper(CTreeCtrl& tree, CListCtrl& l
 
 CTreeListSelectionHelper::~CTreeListSelectionHelper()
 {
+}
 
+void CTreeListSelectionHelper::DeselectAll()
+{
+	RemoveAll(FALSE, FALSE);
+
+	m_tch.SelectItem(NULL);
+	m_list.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
+}
+
+BOOL CTreeListSelectionHelper::HasFocus() const 
+{ 
+	return (CTreeSelectionHelper::HasFocus() || (::GetFocus() == m_list)); 
 }
 
 void CTreeListSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
@@ -70,16 +82,16 @@ void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 	// handle bulk selection here
 	if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 	{
+		// allow parent to handle any focus changes
+		// before we change our selection
+		if (!HasFocus())
+			m_list.SetFocus();
+
 		int nAnchor = GetListItem(m_htiAnchor);
 		ASSERT(nAnchor != -1);
 
 		if (!Misc::IsKeyPressed(VK_CONTROL))
-		{
-			RemoveAll();
-
-			m_tch.SelectItem(NULL);
-			m_list.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
-		}
+			DeselectAll();
 
 		int nHit = m_list.HitTest(lp);
 
@@ -107,6 +119,11 @@ void CTreeListSelectionHelper::OnListRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 
 	if (nHit != -1)
 	{
+		// allow parent to handle any focus changes
+		// before we change our selection
+		if (!HasFocus())
+			m_list.SetFocus();
+
 		HTREEITEM hti = GetTreeItem(nHit);
 
 		if (!HasItem(hti))
@@ -143,7 +160,7 @@ void CTreeListSelectionHelper::OnListNotifyParentSelChange(NMLISTVIEW* pNMLV, BO
 
 	if (Misc::StatesDiffer(bSel, bWasSel))
 	{
-		SetItem(hti, (bSel ? TSHS_SELECT : TSHS_DESELECT), FALSE);
+		SetItem(hti, (bSel ? TSHS_SELECT : TSHS_DESELECT));
 		bSelChange = TRUE;
 	}
 
@@ -153,11 +170,12 @@ void CTreeListSelectionHelper::OnListNotifyParentSelChange(NMLISTVIEW* pNMLV, BO
 
 	if (Misc::StatesDiffer(bFocused, bWasFocused))
 	{
-		FixupTreeSelection();
-
 		if (bFocused && !Misc::IsKeyPressed(VK_SHIFT))
 			SetAnchor(hti);
 
 		bSelChange = TRUE;
 	}
+
+	if (bSelChange)
+		FixupTreeSelection();
 }
