@@ -2445,14 +2445,14 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			RefreshListDrawColAttributes(hRealWnd);
 			LRESULT lr = ScDefault(hRealWnd);
 
-#ifdef _DEBUG
-			static int nPaintCount = 0;
-
-			if (Misc::IsKeyPressed(VK_LBUTTON))
-				TRACE(_T("\nCTreeListSyncer::List::WM_PAINT(%d) while LButton Down\n"), ++nPaintCount);
-			else
-				nPaintCount = 0;
-#endif // _DEBUG
+// #ifdef _DEBUG
+// 			static int nPaintCount = 0;
+// 
+// 			if (Misc::IsKeyPressed(VK_LBUTTON))
+// 				TRACE(_T("\nCTreeListSyncer::List::WM_PAINT(%d) while LButton Down\n"), ++nPaintCount);
+// 			else
+// 				nPaintCount = 0;
+// #endif // _DEBUG
 
 			return lr;
 		}
