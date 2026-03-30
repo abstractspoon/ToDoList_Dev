@@ -148,7 +148,7 @@ public:
 	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	BOOL ItemIsReference(DWORD dwTaskID) const;
 	BOOL ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
-	BOOL ItemHasDependecies(DWORD dwTaskID) const;
+	BOOL ItemHasDependencies(DWORD dwTaskID) const;
 	BOOL IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const;
 
 	COleDateTime CalcMaxDependencyDate(const GANTTITEM& gi) const;

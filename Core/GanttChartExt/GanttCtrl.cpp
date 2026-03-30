@@ -5546,7 +5546,7 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 	{
 	case GTLCD_START:
 	case GTLCD_WHOLE:
-		if (HasOption(GTLCF_DISABLEDEPENDENTDRAGGING) && m_data.ItemHasDependecies(dwTaskID))
+		if (HasOption(GTLCF_DISABLEDEPENDENTDRAGGING) && m_data.ItemHasDependencies(dwTaskID))
 			return FALSE;
 		break;
 	}

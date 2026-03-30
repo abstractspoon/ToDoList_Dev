@@ -539,7 +539,7 @@ BOOL CGanttItemMap::ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const
 	return (pGI && pGI->IsDone(bIncGoodAs));
 }
 
-BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
+BOOL CGanttItemMap::ItemHasDependencies(DWORD dwTaskID) const
 {
 	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
 
