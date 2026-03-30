@@ -77,7 +77,7 @@ public:
 	void ValidateMonthDisplay();
 
 	void ScrollToToday();
-	void ScrollToSelectedTask();
+	BOOL ScrollToSelectedTask();
 	void ScrollToTask(DWORD dwTaskID);
 
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);

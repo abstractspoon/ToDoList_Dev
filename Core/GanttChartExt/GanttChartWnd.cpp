@@ -509,14 +509,7 @@ bool CGanttChartWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 	for (int nID = 0; nID < nTaskCount; nID++)
 		aTaskIDs[nID] = pdwTaskIDs[nID];
 
-	if (m_ctrlGantt.SelectTasks(aTaskIDs))
-	{
-		//m_ctrlGantt.GetSelectedTaskIDs(m_aSelTaskIDs);
-		return true;
-	}
-
-	// else
-	return false;
+	return (m_ctrlGantt.SelectTasks(aTaskIDs) != FALSE);
 }
 
 bool CGanttChartWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -670,7 +663,7 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
-		return (m_ctrlGantt.SelectTask(m_ctrlGantt.GetSelectedTaskID()) != FALSE);
+		return (m_ctrlGantt.ScrollToSelectedTask() != FALSE);
 	}
 
 	return false;
@@ -744,7 +737,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 			return (m_ctrlGantt.CanMoveSelectedTask(pData->move) != FALSE);
 
 	case IUI_SCROLLTOSELECTEDTASK:
-		return (m_ctrlGantt.GetSelectedTaskID() != 0);
+		return (m_ctrlGantt.GetSelectionCount() != 0);
 	}
 
 	// all else
@@ -892,7 +885,6 @@ void CGanttChartWnd::OnKeyUpGantt(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CGanttChartWnd::SendParentSelectionUpdate()
 {
-	//DWORD dwTaskID = m_ctrlGantt.GetSelectedTaskID();
 	CDWordArray aTaskIDs;
 	int nNumTasks = m_ctrlGantt.GetSelectedItemData(aTaskIDs);
 

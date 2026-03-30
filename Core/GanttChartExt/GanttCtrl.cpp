@@ -4976,9 +4976,9 @@ void CGanttCtrl::ScrollToToday()
 	ScrollTo(COleDateTime::GetCurrentTime());
 }
 
-void CGanttCtrl::ScrollToSelectedTask()
+BOOL CGanttCtrl::ScrollToSelectedTask()
 {
-	ScrollToTask(GetSelectedTaskID());
+	return TSH().EnsureVisible(TRUE);
 }
 
 void CGanttCtrl::ScrollToTask(DWORD dwTaskID)
