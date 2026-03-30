@@ -43,6 +43,7 @@ public:
 	BOOL CancelOperation();
 
 	DWORD GetSelectedTaskID() const;
+	DWORD GetSingleSelectedTaskID() const; // returns 0 for multi-selection
 	BOOL SelectTask(DWORD dwTaskID);
 
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);

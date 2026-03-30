@@ -45,10 +45,21 @@ const int TIMER_BOUNDINGSEL		= 100;
 
 //////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
+TLCITEMMOVE::TLCITEMMOVE(const CTreeSelectionHelper& tsh)
+	:
+	htiDestParent(NULL),
+	htiDestAfterSibling(NULL),
+	bCopy(FALSE)
+{
+	tsh.CopySelection(selection, TRUE);
+}
 
 //////////////////////////////////////////////////////////////////////
 // CTreeListTreeCtrl
+
+IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
+
+//////////////////////////////////////////////////////////////////////
 
 CTreeListTreeCtrl::CTreeListTreeCtrl(const CEnHeaderCtrl& header)
 	:
@@ -843,7 +854,9 @@ LRESULT CTreeListCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM lp)
 	// Notify derived class
 	// Note: Right-click dragging not supported by default
 	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lp;
-	TLCITEMMOVE move = { GetSelectedItem(), 0 };
+
+	TLCITEMMOVE move(TSH());
+	move.bCopy = Misc::ModKeysArePressed(MKS_CTRL);
 
 	if (!OnDragBeginItem(move, pDDI->bLeftDrag))
 		return FALSE;
@@ -862,7 +875,8 @@ LRESULT CTreeListCtrl::OnTreeDragOver(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	if (nCursor != DD_DROPEFFECT_NONE)
 	{
-		TLCITEMMOVE move = { GetSelectedItem(), 0 };
+		TLCITEMMOVE move(TSH());
+		move.bCopy = Misc::ModKeysArePressed(MKS_CTRL);
 
 		if (m_treeDragDrop.GetDropTarget(move.htiDestParent, move.htiDestAfterSibling, FALSE))
 		{
@@ -878,8 +892,9 @@ LRESULT CTreeListCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	if (m_treeDragDrop.ProcessMessage(GetCurrentMessage()))
 	{
-		TLCITEMMOVE move = { GetSelectedItem(), 0 };
-		
+		TLCITEMMOVE move(TSH());
+		move.bCopy = Misc::ModKeysArePressed(MKS_CTRL);
+
 		if (m_treeDragDrop.GetDropTarget(move.htiDestParent, move.htiDestAfterSibling, FALSE))
 		{
 			// Notify derived class
@@ -2459,8 +2474,8 @@ BOOL CTreeListCtrl::CanMoveItem(const TLCITEMMOVE& move) const
 	if (move.bCopy)
 		return FALSE;
 	
-	if ((move.htiSel != NULL) && !GetItemData(move.htiSel))
-		return FALSE;
+// 	if ((move.htiSel != NULL) && !GetItemData(move.htiSel))
+// 		return FALSE;
 
 	if ((move.htiDestParent != NULL) && (move.htiDestParent != TVI_ROOT) && !GetItemData(move.htiDestParent))
 		return FALSE;
@@ -2476,22 +2491,35 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 	if (!CanMoveItem(move))
 		return FALSE;
 
-	HTREEITEM htiSel = ((move.htiSel == NULL) ? GetSelectedItem() : move.htiSel);
-	
+	HTREEITEM htiSel = move.selection.GetHead();
+
 	BOOL bSameParent = (move.htiDestParent == m_tree.GetParentItem(htiSel));
 	int nPrevPos = TCH().GetItemTop(htiSel);
 
-	HTREEITEM htiNew = NULL;
-	
+	CHTIList selectionNew;
+	HTREEITEM htiNew = move.htiDestAfterSibling;
+
 	{
 		CAutoFlag af(m_bMovingItem, TRUE);
 		CLockUpdates lu(*this);
 		CHoldRedraw hr(*this);
 
-		htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, move.htiDestAfterSibling);
+		DeselectAll();
+		POSITION pos = move.selection.GetHeadPosition();
 
-		if (htiNew)
-			SelectItem(htiNew);
+		while (pos)
+		{
+			htiSel = move.selection.GetNext(pos);
+			htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, htiNew);
+
+			selectionNew.AddTail(htiNew);
+		}
+
+		if (selectionNew.GetCount())
+		{
+			TSH().SetItems(selectionNew, TSHS_SELECT);
+			TSH().FixupTreeSelection();
+		}
 	}
 	
 	if (htiNew && bSameParent)

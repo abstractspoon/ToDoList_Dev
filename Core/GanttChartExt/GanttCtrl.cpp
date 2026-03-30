@@ -434,7 +434,8 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 			CDWordArray aExpanded;
 			GetExpandedState(aExpanded);
 			
-			DWORD dwSelID = GetSelectedTaskID();
+			CDWordArray aSelTaskIDs;
+			GetSelectedTaskIDs(aSelTaskIDs);
 			
 			RebuildTree(pTasks);
 			RecalcDateRange();
@@ -446,9 +447,9 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 				PreFixVScrollSyncBug();
 			
 			SetExpandedState(aExpanded);
-			SelectTask(dwSelID);
+			SelectTasks(aSelTaskIDs);
 
-			if (dwSelID)
+			if (aSelTaskIDs.GetSize())
 				ScrollToSelectedTask();
 			else
 				ScrollToToday();
@@ -895,6 +896,8 @@ BOOL CGanttCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
 
 void CGanttCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
+	TSH().RemoveAll(TRUE, FALSE);
+
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
 	m_data.RemoveAll();
@@ -1668,10 +1671,17 @@ UINT CGanttCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)
 			return DD_DROPEFFECT_NONE;
 
 		// If the target is a reference, the source must be a reference
-		DWORD dwSelTaskID = GetTaskID(move.htiSel);
+		if (m_data.ItemIsReference(dwTargetID))
+		{
+			CDWordArray aTaskIDs;
+			int nSel = TSH().GetItemData(move.selection, aTaskIDs);
 
-		if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
-			return DD_DROPEFFECT_NONE;
+			while (nSel--)
+			{
+				if (!m_data.ItemIsReference(aTaskIDs[nSel]))
+					return DD_DROPEFFECT_NONE;
+			}
+		}
 	}
 
 	return nCursor;
@@ -1679,22 +1689,13 @@ UINT CGanttCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)
 
 BOOL CGanttCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 {
-	// Prevent dropping on locked tasks unless references
-	DWORD dwTargetID = GetTaskID(move.htiDestParent);
-
-	if (dwTargetID && m_data.ItemIsLocked(dwTargetID, TRUE))
-		return FALSE;
-
-	// If the target is a reference, the source must be a reference
-	DWORD dwSelTaskID = GetTaskID(move.htiSel);
-
-	if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
+	if (OnDragOverItem(move, DD_DROPEFFECT_MOVE) == DD_DROPEFFECT_NONE)
 		return FALSE;
 
 	// Notify parent of move
 	IUITASKMOVE taskMove = { 0 };
 
-	taskMove.dwSelectedTaskID = dwSelTaskID;
+	taskMove.dwSelectedTaskID = 0; // selected tasks
 	taskMove.dwParentID = GetTaskID(move.htiDestParent);
 	taskMove.dwAfterSiblingID = GetTaskID(move.htiDestAfterSibling);
 	taskMove.bCopy = (move.bCopy != FALSE);
@@ -1719,23 +1720,30 @@ BOOL CGanttCtrl::OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag)
 		return TRUE;
 
 	// Prevent dragging of locked tasks
-	DWORD dwTaskID = GetTaskID(move.htiSel);
-	ASSERT(dwTaskID);
+	POSITION pos = move.selection.GetHeadPosition();
 
-	if (m_data.ItemIsLocked(dwTaskID, TRUE))
-		return FALSE;
+	while (pos)
+	{
+		HTREEITEM htiSel = move.selection.GetNext(pos);
 
-	// Prevent dragging of subtasks of locked tasks
-	HTREEITEM htiParent = m_tree.GetParentItem(move.htiSel);
+		DWORD dwTaskID = GetTaskID(htiSel);
+		ASSERT(dwTaskID);
 
-	if (!htiParent || (htiParent == TVI_ROOT))
-		return TRUE;
+	 	if (m_data.ItemIsLocked(dwTaskID, TRUE))
+			return FALSE;
 
-	DWORD dwParentID = GetTaskID(htiParent);
-	ASSERT(dwTaskID);
+		// Prevent dragging of subtasks of locked tasks
+		HTREEITEM htiParent = m_tree.GetParentItem(htiSel);
 
-	if (m_data.ItemIsLocked(dwParentID, TRUE))
-		return FALSE;
+		if (htiParent && (htiParent != TVI_ROOT))
+		{
+			DWORD dwParentID = GetTaskID(htiParent);
+			ASSERT(dwParentID);
+
+			if (m_data.ItemIsLocked(dwParentID, TRUE))
+				return FALSE;
+		}
+	}
 
 	return TRUE;
 }
@@ -6294,9 +6302,9 @@ BOOL CGanttCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
 	if (m_bReadOnly)
 		return FALSE;
 
-	TLCITEMMOVE itemMove = { 0 };
+	TLCITEMMOVE itemMove(TSH());
 
-	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
+// 	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
 	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
 	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 
@@ -6308,9 +6316,9 @@ BOOL CGanttCtrl::MoveSelectedTask(const IUITASKMOVE& move)
 	if (m_bReadOnly)
 		return FALSE;
 
-	TLCITEMMOVE itemMove = { 0 };
+	TLCITEMMOVE itemMove(TSH());
 
-	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
+//	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
 	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
 	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 

@@ -26,7 +26,9 @@
 
 struct TLCITEMMOVE
 {
-	HTREEITEM htiSel;
+	TLCITEMMOVE(const CTreeSelectionHelper& tsh);
+
+	CHTIList selection;
 	HTREEITEM htiDestParent;
 	HTREEITEM htiDestAfterSibling;
 
