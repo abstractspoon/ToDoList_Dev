@@ -42,11 +42,9 @@ public:
 	bool PrepareNewTask(ITaskList* pTask) const;
 	BOOL CancelOperation();
 
-	DWORD GetSelectedTaskID() const;
-	DWORD GetSingleSelectedTaskID() const; // returns 0 for multi-selection
 	BOOL SelectTask(DWORD dwTaskID);
-
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
+	DWORD GetSelectedTaskID() const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
@@ -172,7 +170,6 @@ protected:
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
 	BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
-
 
 	COLORREF GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const;
 	void DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected);

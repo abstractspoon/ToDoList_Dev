@@ -1585,12 +1585,16 @@ void CGanttCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TRUE; // cancel our edit
 
-	if (m_bReadOnly || IsDependencyEditing())
+	ASSERT(TSH().GetCount() == 1);
+
+	if (m_bReadOnly || IsDependencyEditing() || (TSH().GetCount() != 1))
 		return;
 
 	CPoint point(GetMessagePos());
 	int nCol = -1;
+
 	HTREEITEM hti = TreeHitTestItem(point, TRUE, nCol);
+	ASSERT(TSH().GetFirstItem() == hti);
 
 	if (!hti || (nCol == -1))
 		return;
@@ -6304,7 +6308,6 @@ BOOL CGanttCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
 
 	TLCITEMMOVE itemMove(TSH());
 
-// 	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
 	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
 	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 
@@ -6318,7 +6321,6 @@ BOOL CGanttCtrl::MoveSelectedTask(const IUITASKMOVE& move)
 
 	TLCITEMMOVE itemMove(TSH());
 
-//	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
 	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
 	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 
