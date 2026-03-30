@@ -91,8 +91,6 @@ const int MAX_HEADER_WIDTH			= 32000; // (SHRT_MAX - tolerance)
 }
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CGanttCtrl::CGanttCtrl() 
 	:
@@ -128,7 +126,6 @@ BEGIN_MESSAGE_MAP(CGanttCtrl, CTreeListCtrl)
 	ON_NOTIFY(TVN_GETDISPINFO, IDC_TREELISTTREE, OnTreeGetDispInfo)
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
-
 
 int CGanttCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {

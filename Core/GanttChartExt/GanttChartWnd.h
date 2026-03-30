@@ -27,7 +27,6 @@
 
 class CGanttChartWnd : public CDialog, public IUIExtensionWindow
 {
-// Construction
 public:
 	CGanttChartWnd(CWnd* pParent = NULL);
 	virtual ~CGanttChartWnd();
@@ -67,9 +66,6 @@ public:
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CGanttChartWnd)
-	//}}AFX_DATA
 	CGanttSnapComboBox m_cbSnapModes;
 	CGanttCtrl m_ctrlGantt;
 	CGanttDisplayComboBox m_cbDisplayOptions;
@@ -90,20 +86,13 @@ protected:
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, GTLC_SNAPMODE, GTLC_SNAPMODE> m_mapDisplaySnapModes;
 	GANTTDATERANGE m_dtPrevActiveRange;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CGanttChartWnd)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnCancel() {}
 	virtual void OnOK() {}
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CGanttChartWnd)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnKeyUpGantt(NMHDR* pNMHDR, LRESULT* pResult);
@@ -121,7 +110,6 @@ protected:
 	afx_msg void OnUpdateGanttEditDepends(CCmdUI* pCmdUI);
 	afx_msg void OnGanttDeleteDepends();
 	afx_msg void OnUpdateGanttDeleteDepends(CCmdUI* pCmdUI);
-	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSelchangeSnapMode();
 	afx_msg void OnHelp();
@@ -163,8 +151,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_GANTTCHARTWND_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_)

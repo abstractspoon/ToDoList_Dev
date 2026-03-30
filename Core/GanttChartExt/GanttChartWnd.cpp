@@ -48,7 +48,7 @@ const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 /////////////////////////////////////////////////////////////////////////////
 // CGanttChartWnd
 
-CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
+CGanttChartWnd::CGanttChartWnd(CWnd* pParent)
 	: 
 	CDialog(IDD_GANTTTREE_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
@@ -68,15 +68,13 @@ CGanttChartWnd::~CGanttChartWnd()
 void CGanttChartWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CGanttChartWnd)
+
 	DDX_Control(pDX, IDC_SNAPMODES, m_cbSnapModes);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 }
 
 BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
-	//{{AFX_MSG_MAP(CGanttChartWnd)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	ON_NOTIFY(TVN_KEYUP, IDC_GANTTTREE, OnKeyUpGantt)
@@ -93,7 +91,6 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_UPDATE_COMMAND_UI(ID_GANTT_EDITDEPENDS, OnUpdateGanttEditDepends)
 	ON_COMMAND(ID_GANTT_DELETEDEPENDS, OnGanttDeleteDepends)
 	ON_UPDATE_COMMAND_UI(ID_GANTT_DELETEDEPENDS, OnUpdateGanttDeleteDepends)
-	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_WM_SETFOCUS()
@@ -119,7 +116,6 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CGanttChartWnd message handlers
 
 void CGanttChartWnd::OnNcDestroy()
 {
@@ -156,7 +152,7 @@ void CGanttChartWnd::SetReadOnly(bool bReadOnly)
 	m_toolbar.RefreshButtonStates(FALSE);
 }
 
-BOOL CGanttChartWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)
+BOOL CGanttChartWnd::Create(DWORD dwStyle, const RECT& /*rect*/, CWnd* pParentWnd, UINT nID)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -793,8 +789,7 @@ BOOL CGanttChartWnd::OnInitDialog()
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
 
-	return FALSE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return FALSE;
 }
 
 void CGanttChartWnd::Resize(int cx, int cy)
