@@ -359,6 +359,17 @@ void CTDLTaskTreeCtrl::ExpandAll(BOOL bExpand)
 	ExpandItem(NULL, bExpand, TRUE);
 }
 
+void CTDLTaskTreeCtrl::ExpandSelection(BOOL bExpand, BOOL bFully)
+{
+	if (!bExpand || bFully)
+		TSH().RemoveChildDuplicates();
+
+	POSITION pos = TSH().GetFirstItemPos();
+
+	while (pos)
+		ExpandItem(TSH().GetNextItem(pos), bExpand, bFully);
+}
+
 void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 {
 	// avoid unnecessary processing
@@ -1035,7 +1046,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						if (!bCtrl && !bShift)
 						{
 							// Eat this if the selected item(s) is already fully expanded
-							if (TSH().IsSelectionExpanded(TRUE))
+							if (!TSH().IsAnyItemCollapsed())
 								return 0L;
 						}
 						break;
@@ -1044,7 +1055,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						if (!bCtrl && !bShift)
 						{
 							// Eat this if the selected item(s) is already collapsed
-							if (!TSH().IsSelectionExpanded())
+							if (!TSH().IsAnyItemExpanded())
 								return 0L;
 						}
 						break;

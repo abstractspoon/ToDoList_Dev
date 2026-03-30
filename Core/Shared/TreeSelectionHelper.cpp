@@ -404,28 +404,30 @@ BOOL CTreeSelectionHelper::AnyItemsHaveChildren() const
 	return FALSE;
 }
 
-int CTreeSelectionHelper::IsSelectionExpanded(BOOL bFully) const
+int CTreeSelectionHelper::IsAnyItemExpanded(BOOL bFully) const
 {
-	int nSelExpanded = -1;
 	POSITION pos = GetFirstItemPos();
 
 	while (pos)
 	{
-		HTREEITEM hti = GetNextItem(pos);
-		int nExpanded = m_tch.IsItemExpanded(hti, bFully);
-
-		if (nExpanded == 0)
-		{
-			return FALSE;
-		}
-		else if (nExpanded > 0)
-		{
-			nSelExpanded = TRUE;
-		}
+		if (m_tch.IsItemExpanded(GetNextItem(pos), bFully) > 0)
+			return TRUE;
 	}
 
-	// else
-	return nSelExpanded; // can be TRUE or -1
+	return FALSE;
+}
+
+int CTreeSelectionHelper::IsAnyItemCollapsed() const
+{
+	POSITION pos = GetFirstItemPos();
+
+	while (pos)
+	{
+		if (!m_tch.IsItemExpanded(GetNextItem(pos), TRUE))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CTreeSelectionHelper::GetBoundingRect(CRect& rSelection) const
@@ -964,25 +966,31 @@ BOOL CTreeSelectionHelper::HasUncheckedItems() const
 	return FALSE;
 }
 
-BOOL CTreeSelectionHelper::ParentItemsAreAllExpanded(BOOL bRecursive) const
+BOOL CTreeSelectionHelper::AllParentItemsAreExpanded(BOOL bRecursive) const
 {
-	CTreeCtrlHelper tch(m_tree);
 	POSITION pos = GetFirstItemPos();
 
 	while (pos)
 	{
 		HTREEITEM htiSel = GetNextItem(pos);
 		
-		if (!tch.IsParentItemExpanded(htiSel, bRecursive))
+		if (!m_tch.IsParentItemExpanded(htiSel, bRecursive))
 			return FALSE;
 	}
 
 	return TRUE;
 }
 
-void CTreeSelectionHelper::ExpandAllParentItems(BOOL bRecursive)
+void CTreeSelectionHelper::ExpandItems(BOOL bExpand, BOOL bRecursive)
 {
-	CTreeCtrlHelper tch(m_tree);
+	POSITION pos = GetFirstItemPos();
+
+	while (pos)
+		m_tch.ExpandItem(GetNextItem(pos), bExpand, bRecursive);
+}
+
+void CTreeSelectionHelper::ExpandParentItems(BOOL bRecursive)
+{
 	POSITION pos = GetFirstItemPos();
 
 	while (pos)
@@ -991,7 +999,7 @@ void CTreeSelectionHelper::ExpandAllParentItems(BOOL bRecursive)
 		HTREEITEM htiParent = m_tree.GetParentItem(hti);
 
 		if (htiParent)
-			tch.ExpandItem(htiParent, TRUE, FALSE, bRecursive);
+			m_tch.ExpandItem(htiParent, TRUE, FALSE, bRecursive);
 	}
 }
 
@@ -1011,7 +1019,7 @@ BOOL CTreeSelectionHelper::EnsureVisible(BOOL bHorzPartialOK)
 	{
 		// Check there's something to do because holding 
 		// the redraw/scroll has a cost
-		BOOL bAllExpanded = ParentItemsAreAllExpanded(TRUE);
+		BOOL bAllExpanded = AllParentItemsAreExpanded(TRUE);
 		BOOL bVisible = (bAllExpanded && TCH().IsItemVisible(htiSel, FALSE, bHorzPartialOK));
 
 		if (!bVisible)
@@ -1019,7 +1027,7 @@ BOOL CTreeSelectionHelper::EnsureVisible(BOOL bHorzPartialOK)
 			CHoldRedraw hr(m_tree);
 
 			if (!bAllExpanded)
-				ExpandAllParentItems(TRUE);
+				ExpandParentItems(TRUE);
 
 			m_tch.EnsureItemVisible(htiSel, FALSE, bHorzPartialOK);
 		}

@@ -138,6 +138,7 @@ public:
 	HTREEITEM GetItem(DWORD dwTaskID) const;
 	
 	void ExpandAll(BOOL bExpand = TRUE);
+	void ExpandSelection(BOOL bExpand = TRUE, BOOL bFully = FALSE);
 	int GetExpandedTasks(CDWordArray& aExpanded) const;
 
 	// Caller is responsible for ensuring that the parent

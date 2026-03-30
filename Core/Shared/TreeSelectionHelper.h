@@ -124,7 +124,11 @@ public:
 	BOOL AnyItemsHaveChildren() const;
 
 	// TRUE, FALSE, -1 if no children
-	int IsSelectionExpanded(BOOL bFully = FALSE) const;
+	BOOL IsAnyItemExpanded(BOOL bFully = FALSE) const;
+	BOOL IsAnyItemCollapsed() const;
+	BOOL AllParentItemsAreExpanded(BOOL bRecursive) const;
+	void ExpandItems(BOOL bExpand, BOOL bRecursive);
+	void ExpandParentItems(BOOL bRecursive);
 
 	BOOL ItemsAreAllParents() const;
 	BOOL ItemsAreAllSiblings() const;
@@ -165,8 +169,6 @@ public:
 	int GetItemData(const CHTIList& selection, CDWordArray& aData) const;
 	int GetItemData(CDWordArray& aItemData) const;
 
-	BOOL ParentItemsAreAllExpanded(BOOL bRecursive) const;
-	void ExpandAllParentItems(BOOL bRecursive);
 	BOOL EnsureVisible(BOOL bHorzPartialOK);
 	BOOL HasUncheckedItems() const;
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
