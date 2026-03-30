@@ -5888,6 +5888,7 @@ void CTabbedToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
 		CToDoCtrl::ExpandTasks(nWhat, bExpand);
+		break;
 
 	case FTCV_TASKLIST:
 		// no can do!
