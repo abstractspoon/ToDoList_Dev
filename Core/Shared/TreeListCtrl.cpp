@@ -698,14 +698,33 @@ void CTreeListCtrl::ExpandAll(BOOL bExpand)
 	ExpandItem(NULL, bExpand, TRUE);
 }
 
-BOOL CTreeListCtrl::CanExpandAll() const
+void CTreeListCtrl::ExpandSelection(BOOL bExpand, BOOL bAndChildren)
 {
-	return TCH().IsAnyItemCollapsed();
+	if (!bExpand || bAndChildren)
+		TSH().RemoveChildDuplicates();
+
+	POSITION pos = TSH().GetFirstItemPos();
+
+	while (pos)
+		ExpandItem(TSH().GetNextItem(pos), bExpand, bAndChildren);
 }
 
-BOOL CTreeListCtrl::CanCollapseAll() const
+BOOL CTreeListCtrl::CanExpandAll(BOOL bExpand) const
 {
+	if (bExpand)
+		return TCH().IsAnyItemCollapsed();
+
+	// else
 	return TCH().IsAnyItemExpanded();
+}
+
+BOOL CTreeListCtrl::CanExpandSelection(BOOL bExpand) const
+{
+	if (bExpand)
+		return TSH().IsAnyItemCollapsed();
+
+	// else
+	return TSH().IsAnyItemExpanded();
 }
 
 void CTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)

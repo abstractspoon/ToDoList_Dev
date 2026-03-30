@@ -582,11 +582,11 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		return true;
 
 	case IUI_EXPANDSELECTED:
-		m_ctrlGantt.ExpandItem(m_ctrlGantt.GetSelectedItem(), TRUE, TRUE);
+		m_ctrlGantt.ExpandSelection(TRUE, TRUE);
 		return true;
 
 	case IUI_COLLAPSESELECTED:
-		m_ctrlGantt.ExpandItem(m_ctrlGantt.GetSelectedItem(), FALSE);
+		m_ctrlGantt.ExpandSelection(FALSE);
 		return true;
 
 	case IUI_SORT:
@@ -696,10 +696,10 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:
-		return (m_ctrlGantt.CanExpandAll() != FALSE);
+		return (m_ctrlGantt.CanExpandAll(TRUE) != FALSE);
 
 	case IUI_COLLAPSEALL:
-		return (m_ctrlGantt.CanCollapseAll() != FALSE);
+		return (m_ctrlGantt.CanExpandAll(FALSE) != FALSE);
 
 	case IUI_RESIZEATTRIBCOLUMNS:
 		return true;
@@ -708,18 +708,10 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 		return (m_ctrlGantt.GetTaskCount() > 0);
 
 	case IUI_EXPANDSELECTED:
-		{
-			HTREEITEM htiSel = m_ctrlGantt.GetSelectedItem();
-			return (m_ctrlGantt.CanExpandItem(htiSel, TRUE) != FALSE);
-		}
-		break;
+		return (m_ctrlGantt.CanExpandSelection(TRUE) != FALSE);
 
 	case IUI_COLLAPSESELECTED:
-		{
-			HTREEITEM htiSel = m_ctrlGantt.GetSelectedItem();
-			return (m_ctrlGantt.CanExpandItem(htiSel, FALSE) != FALSE);
-		}
-		break;
+		return (m_ctrlGantt.CanExpandSelection(FALSE) != FALSE);
 
 	case IUI_SORT:
 		if (pData)

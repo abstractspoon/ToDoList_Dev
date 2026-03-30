@@ -128,8 +128,7 @@ public:
 	void Show(BOOL bShow = TRUE) { CTreeListSyncer::Show(bShow); }
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
-	HTREEITEM GetSelectedItem() const;
- 	DWORD GetSelectedItemData() const;
+// 	int GetSelectedItems(CHTIList& selection) const { return TSH().CopySelection(selection); }
 	int GetSelectedItemData(CDWordArray& aItemData) const;
 	int GetSelectionCount() const { return TSH().GetCount(); }
 
@@ -149,13 +148,11 @@ public:
 
 	BOOL PointInHeader(const CPoint& ptScreen) const;
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
-	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 
 	void ExpandAll(BOOL bExpand = TRUE);
-	BOOL CanExpandAll() const;
-	BOOL CanCollapseAll() const;
-	virtual void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
-	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
+	void ExpandSelection(BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
+	BOOL CanExpandAll(BOOL bExpand) const;
+	BOOL CanExpandSelection(BOOL bExpand = TRUE) const;
 
 	void ResizeListColumnsToFit(BOOL bForce = FALSE);
 	void AdjustSplitterToFitListColumns();
@@ -287,6 +284,7 @@ protected:
 	virtual void InitItemHeights();
 	virtual int CalcSplitPosToFitListColumns(int nAvailWidth) const;
 	virtual BOOL DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider);
+	virtual void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 
 	enum UPDATETITLEWIDTHACTION 
 	{ 
@@ -313,6 +311,7 @@ protected:
 	void ExpandList();
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
+	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);
@@ -324,6 +323,7 @@ protected:
 	int CalcTreeTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC, int nMaxItemTextWidth) const;
 
+	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
 	int ListHitTestItem(const CPoint& point, BOOL bScreen) const;
@@ -340,6 +340,8 @@ protected:
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	BOOL GetTreeIconRect(HTREEITEM hti, CRect& rIcon) const;
+	HTREEITEM GetSelectedItem() const;
+	DWORD GetSelectedItemData() const;
 
 	void SyncColumnSelectionToTasks();
 	void NotifyParentSelectionChange();
