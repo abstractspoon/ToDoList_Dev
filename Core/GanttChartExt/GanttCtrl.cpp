@@ -1586,7 +1586,7 @@ void CGanttCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 		return;
 
 	// notify app to edit
-	GetParent()->SendMessage(WM_GTLC_EDITTASKTITLE, 0, GetTaskID(hti));
+	GetParent()->SendMessage(WM_GTLC_EDITTASKTITLE, 0, GetSelectedTaskID());
 }
 
 void CGanttCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -1875,10 +1875,9 @@ BOOL CGanttCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
 		{
 			if (!CanDragTask(dwTaskID, nDrag))
 			{
-				if (m_data.ItemIsLocked(dwTaskID, FALSE))
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				// Locked tasks should have been handled in WM_SETCURSOR
+				ASSERT(!m_data.ItemIsLocked(dwTaskID, FALSE));
 
-				// else
 				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
 			}
 			else
@@ -1929,8 +1928,13 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				m_list.ScreenToClient(&ptCursor);
 				int nItem = m_list.HitTest(ptCursor);
 
-				if ((nItem != -1) && m_data.ItemIsLocked(GetTaskID(nItem), FALSE))
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				if (nItem != -1)
+				{
+					DWORD dwHitID = GetTaskID(nItem);
+					
+					if (m_data.ItemIsLocked(dwHitID, FALSE))
+						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				}
 
 				if (!IsDependencyEditing())
 				{
@@ -5536,6 +5540,10 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 	if (m_data.ItemIsLocked(dwTaskID, FALSE))
 		return FALSE;
 
+	// Disable for multi-selection (for now)
+	if ((TSH().GetCount() > 1) && TSH().HasItem(dwTaskID))
+		return FALSE;
+
 	// else
 	switch (nDrag)
 	{
@@ -5552,6 +5560,10 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 
 BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 {
+	// Disable for multi-selection (for now)
+	if (TSH().GetCount() != 1)
+		return FALSE;
+
 	ASSERT(!m_bReadOnly);
 	ASSERT(!IsDependencyEditing());
 
