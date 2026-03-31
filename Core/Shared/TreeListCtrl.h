@@ -20,10 +20,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define TVN_KEYUP (TVN_FIRST-16)
-
-/////////////////////////////////////////////////////////////////////////////
-
 struct TLCITEMMOVE
 {
 	TLCITEMMOVE(const CTreeSelectionHelper& tsh);
@@ -128,7 +124,6 @@ public:
 	void Show(BOOL bShow = TRUE) { CTreeListSyncer::Show(bShow); }
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
-// 	int GetSelectedItems(CHTIList& selection) const { return TSH().CopySelection(selection); }
 	int GetSelectedItemData(CDWordArray& aItemData) const;
 	int GetSelectionCount() const { return TSH().GetCount(); }
 
