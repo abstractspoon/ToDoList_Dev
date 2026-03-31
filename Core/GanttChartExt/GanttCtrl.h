@@ -55,7 +55,6 @@ public:
 	BOOL CanMoveSelectedTask(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
 
-//	BOOL GetSelectedTaskDependencies(CDWordArray& aDepends) const;
 	BOOL AddSelectedTaskDependency(DWORD dwDependID);
 	BOOL EditSelectedTaskDependency(DWORD dwFromDependID, DWORD dwToDependID);
 	BOOL DeleteSelectedTaskDependency(DWORD dwDependID);

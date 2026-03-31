@@ -162,17 +162,6 @@ DWORD CGanttCtrl::GetSelectedTaskID() const
 	return GetSelectedItemData();
 }
 
-// BOOL CGanttCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) const
-// {
-// 	DWORD dwTaskID = GetSelectedTaskID();
-// 	const GANTTITEM* pGI = NULL;
-// 	
-// 	GET_GI_RET(dwTaskID, pGI, FALSE);
-// 	
-// 	aDepends.Copy(pGI->aDependIDs);
-// 	return TRUE;
-// }
-
 BOOL CGanttCtrl::AddSelectedTaskDependency(DWORD dwDependID)
 {
 	// sanity check

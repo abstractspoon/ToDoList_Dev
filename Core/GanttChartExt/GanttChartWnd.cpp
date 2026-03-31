@@ -77,7 +77,6 @@ void CGanttChartWnd::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
-	ON_NOTIFY(TVN_KEYUP, IDC_GANTTTREE, OnKeyUpGantt)
 	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
 	ON_NOTIFY(NM_CLICK, IDC_GANTTLIST, OnClickGanttList)
 	ON_COMMAND(ID_GANTT_GOTOTODAY, OnGanttGotoToday)
@@ -657,7 +656,6 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		if (pData)
 		{
 			ASSERT(pData->move.dwSelectedTaskID == m_ctrlGantt.GetSelectedTaskID());
-
 			return (m_ctrlGantt.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
@@ -862,25 +860,6 @@ BOOL CGanttChartWnd::OnEraseBkgnd(CDC* pDC)
 	
 	// else
 	return CDialog::OnEraseBkgnd(pDC);
-}
-
-void CGanttChartWnd::OnKeyUpGantt(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	ASSERT (!m_bInSelectTask);
-	
-	NMTVKEYDOWN* pTVKD = (NMTVKEYDOWN*)pNMHDR;
-	
-	switch (pTVKD->wVKey)
-	{
-	case VK_UP:
-	case VK_DOWN:
-	case VK_PRIOR:
-	case VK_NEXT:
-		SendParentSelectionUpdate();
-		break;
-	}
-	
-	*pResult = 0;
 }
 
 void CGanttChartWnd::SendParentSelectionUpdate()

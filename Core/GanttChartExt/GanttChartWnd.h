@@ -95,7 +95,6 @@ protected:
 protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnKeyUpGantt(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDisplay();
 	afx_msg void OnClickGanttList(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
