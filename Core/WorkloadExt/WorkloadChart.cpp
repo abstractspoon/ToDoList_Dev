@@ -19,8 +19,8 @@ const COLORREF COLOR_PINK	= RGB(234,  28,  74);
 const COLORREF COLOR_ORANGE	= RGB(255,  91,  21); 
 
 /////////////////////////////////////////////////////////////////////////////
-
 // CWorkloadChart
+
 CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocationTotals& mapPercentLoad) 
 	: 
 	m_mapPercentLoad(mapPercentLoad), 
@@ -46,7 +46,26 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 
-// CWorkloadChart message handlers
+int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CHMXChartEx::OnCreate(lpCreateStruct) != 0)
+		return -1;
+
+	ModifyStyle(0, WS_BORDER);
+
+	// Once only
+	SetDatasetStyle(0, HMX_DATASET_STYLE_VBAR);
+	SetDatasetMin(0, 0.0);
+	SetDatasetMax(0, 100.0);
+	SetDatasetSizeFactor(0, 5); // width factor for vertical bar
+
+	SetYText(CEnString(IDS_PERCENTLOADPERPERSON));
+
+	RebuildChart();
+	VERIFY(InitTooltip(FALSE));
+
+	return 0;
+}
 
 BOOL CWorkloadChart::SaveToImage(CBitmap& bmImage)
 {
@@ -70,27 +89,6 @@ BOOL CWorkloadChart::SaveToImage(CBitmap& bmImage)
 	}
 
 	return (bmImage.GetSafeHandle() != NULL);
-}
-
-int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-	if (CHMXChartEx::OnCreate(lpCreateStruct) != 0)
-		return -1;
-
-	ModifyStyle(0, WS_BORDER);
-
-	// Once only
-	SetDatasetStyle(0, HMX_DATASET_STYLE_VBAR);
-	SetDatasetMin(0, 0.0);
-	SetDatasetMax(0, 100.0);
-	SetDatasetSizeFactor(0, 5); // width factor for vertical bar
-
-	SetYText(CEnString(IDS_PERCENTLOADPERPERSON));
-
-	RebuildChart();
-	VERIFY(InitTooltip(FALSE));
-
-	return 0;
 }
 
 void CWorkloadChart::RebuildChart()

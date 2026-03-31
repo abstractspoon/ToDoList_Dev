@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 // WorkloadWnd.h : header file
 //
+/////////////////////////////////////////////////////////////////////////////
 
 #include "WorkloadCtrl.h"
 #include "WorkloadPreferencesDlg.h"
@@ -26,7 +27,6 @@
 
 class CWorkloadWnd : public CDialog, public IUIExtensionWindow
 {
-// Construction
 public:
 	CWorkloadWnd(CWnd* pParent = NULL);
 	virtual ~CWorkloadWnd();
@@ -66,12 +66,6 @@ public:
 	bool CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const;
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CWorkloadWnd)
-	COleDateTimeRange m_dtPeriod;
-	CString	m_sPeriodDuration;
-	//}}AFX_DATA
-
 	CWorkloadCtrl m_ctrlWorkload;
 	CWorkloadPreferencesDlg m_dlgPrefs;
 	CEnToolBar m_toolbar;
@@ -83,25 +77,20 @@ protected:
 	CBrush m_brBack;
 	UITHEME m_theme;
 	CString m_sSelectedTaskDates;
+	COleDateTimeRange m_dtPeriod;
+	CString	m_sPeriodDuration;
 
 	BOOL m_bReadOnly;
 	BOOL m_bInSelectTask;
 	BOOL m_bUpdatingSlider;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CWorkloadWnd)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnCancel() {}
 	virtual void OnOK() {}
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CWorkloadWnd)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
@@ -126,7 +115,6 @@ protected:
 	afx_msg void OnUpdateMovePeriodEndBackOneMonth(CCmdUI* pCmdUI);
 	afx_msg void OnMovePeriodForwardOneMonth();
 	afx_msg void OnUpdateMovePeriodForwardOneMonth(CCmdUI* pCmdUI);
-	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
@@ -166,8 +154,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_WORKLOADWND_H__1571B442_7ED5_45D8_A040_C359EAE9FDE1__INCLUDED_)

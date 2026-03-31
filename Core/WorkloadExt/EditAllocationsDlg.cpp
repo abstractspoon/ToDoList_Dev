@@ -16,38 +16,28 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CEditAllocationsDlg dialog
 
-
 CEditAllocationsDlg::CEditAllocationsDlg(const WORKLOADITEM& wi, const CStringArray& aAllocTo, LPCTSTR szAllocTo, CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(CEditAllocationsDlg::IDD, pParent), 
+	CDialog(IDD_EDITALLOCATIONS_DIALOG, pParent),
 	m_lcAllocations(wi, aAllocTo),
 	m_icon(IDR_WORKLOAD)
 {
-	//{{AFX_DATA_INIT(CEditAllocationsDlg)
-	//}}AFX_DATA_INIT
-
 	m_sTaskTitle = wi.sTitle;
 	m_sAllocTo = szAllocTo;
 }
 
-
 void CEditAllocationsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CEditAllocationsDlg)
+
 	DDX_Control(pDX, IDC_ALLOCATIONS, m_lcAllocations);
 	DDX_Text(pDX, IDC_TASKTITLE, m_sTaskTitle);
-	//}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CEditAllocationsDlg, CDialog)
-	//{{AFX_MSG_MAP(CEditAllocationsDlg)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CEditAllocationsDlg message handlers
 
 BOOL CEditAllocationsDlg::OnInitDialog() 
 {
@@ -71,8 +61,7 @@ BOOL CEditAllocationsDlg::OnInitDialog()
 
 	SetIcon(m_icon, FALSE);
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 const WORKLOADITEM& CEditAllocationsDlg::GetAllocations() const

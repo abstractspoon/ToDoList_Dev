@@ -127,6 +127,8 @@ BEGIN_MESSAGE_MAP(CGanttCtrl, CTreeListCtrl)
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
+//////////////////////////////////////////////////////////////////////
+
 int CGanttCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CTreeListCtrl::OnCreate(lpCreateStruct) == -1)

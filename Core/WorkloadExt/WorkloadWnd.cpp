@@ -51,7 +51,7 @@ const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadWnd
 
-CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
+CWorkloadWnd::CWorkloadWnd(CWnd* pParent)
 	: 
 	CDialog(IDD_WORKLOAD_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
@@ -72,25 +72,29 @@ CWorkloadWnd::~CWorkloadWnd()
 void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CWorkloadWnd)
+
 	DDX_DateTimeCtrl(pDX, IDC_PERIODBEGIN, m_dtPeriod.m_dtStart);
 	DDX_DateTimeCtrl(pDX, IDC_PERIODENDINCLUSIVE, m_dtPeriod.m_dtEnd);
 	DDX_Text(pDX, IDC_PERIODDURATION, m_sPeriodDuration);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_PERIODBEGIN, m_dtcPeriodStart);
 	DDX_Control(pDX, IDC_PERIODENDINCLUSIVE, m_dtcPeriodEnd);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
-	//{{AFX_MSG_MAP(CWorkloadWnd)
-	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
-	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_PREFS, OnUpdateWorkloadPreferences)
-	ON_COMMAND(ID_WORKLOAD_EDITALLOCATIONS, OnWorkloadEditAllocations)
-	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_EDITALLOCATIONS, OnUpdateWorkloadEditAllocations)
+	ON_WM_HELPINFO()
+	ON_WM_SETFOCUS()
+	ON_WM_ERASEBKGND()
+	ON_WM_NCDESTROY()
+	ON_WM_SIZE()
+	ON_WM_CTLCOLOR()
+	ON_WM_SHOWWINDOW()
+
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODBEGIN, OnChangePeriodBegin)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODENDINCLUSIVE, OnChangePeriodEnd)
 
+	ON_COMMAND(ID_WORKLOAD_EDITALLOCATIONS, OnWorkloadEditAllocations)
+	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
 	ON_COMMAND(ID_MOVEPERIODBACKONEMONTH, OnMovePeriodBackOneMonth)
 	ON_COMMAND(ID_MOVEPERIODSTARTBACKONEMONTH, OnMovePeriodStartBackOneMonth)
 	ON_COMMAND(ID_MOVEPERIODSTARTFORWARDONEMONTH, OnMovePeriodStartForwardOneMonth)
@@ -98,6 +102,7 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_COMMAND(ID_MOVEPERIODENDFORWARDONEMONTH, OnMovePeriodEndForwardOneMonth)
 	ON_COMMAND(ID_MOVEPERIODENDBACKONEMONTH, OnMovePeriodEndBackOneMonth)
 	ON_COMMAND(ID_MOVEPERIODFORWARDONEMONTH, OnMovePeriodForwardOneMonth)
+	ON_COMMAND(ID_HELP, OnHelp)
 
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODBACKONEMONTH, OnUpdateMovePeriodBackOneMonth)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODSTARTBACKONEMONTH, OnUpdateMovePeriodStartBackOneMonth)
@@ -106,15 +111,8 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDFORWARDONEMONTH, OnUpdateMovePeriodEndForwardOneMonth)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDBACKONEMONTH, OnUpdateMovePeriodEndBackOneMonth)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODFORWARDONEMONTH, OnUpdateMovePeriodForwardOneMonth)
-	//}}AFX_MSG_MAP
-	ON_COMMAND(ID_HELP, OnHelp)
-	ON_WM_HELPINFO()
-	ON_WM_SETFOCUS()
-	ON_WM_ERASEBKGND()
-	ON_WM_NCDESTROY()
-	ON_WM_SIZE()
-	ON_WM_CTLCOLOR()
-	ON_WM_SHOWWINDOW()
+	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_PREFS, OnUpdateWorkloadPreferences)
+	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_EDITALLOCATIONS, OnUpdateWorkloadEditAllocations)
 
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
@@ -130,7 +128,36 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CWorkloadWnd message handlers
+
+BOOL CWorkloadWnd::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	// non-translatables
+	CLocalizer::EnableTranslation(*GetDlgItem(IDC_SELECTEDTASKDATES), FALSE);
+
+	// create toolbar
+	if (m_toolbar.CreateEx(this))
+	{
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar));
+
+		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
+		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
+		m_toolbar.RefreshButtonStates(TRUE);
+	}
+
+	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
+	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
+
+	// Date range text needs to be big enough for all eventualities
+	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
+	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
+
+	m_ctrlWorkload.SetFocus();
+
+	return FALSE;
+}
 
 void CWorkloadWnd::OnNcDestroy()
 {
@@ -676,37 +703,6 @@ void CWorkloadWnd::OnSize(UINT nType, int cx, int cy)
 	CDialog::OnSize(nType, cx, cy);
 	
 	Resize(cx, cy);
-}
-
-BOOL CWorkloadWnd::OnInitDialog() 
-{
-	CDialog::OnInitDialog();
-
-	// non-translatables
-	CLocalizer::EnableTranslation(*GetDlgItem(IDC_SELECTEDTASKDATES), FALSE);
-
-	// create toolbar
-	if (m_toolbar.CreateEx(this))
-	{
-		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar));
-
-		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
-		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
-		m_toolbar.RefreshButtonStates(TRUE);
-	}
-
-	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
-	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
-
-	// Date range text needs to be big enough for all eventualities
-	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
-	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
-
- 	m_ctrlWorkload.SetFocus();
-	
-	return FALSE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CWorkloadWnd::Resize(int cx, int cy)

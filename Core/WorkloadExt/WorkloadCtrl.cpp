@@ -71,8 +71,6 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 }
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CWorkloadCtrl::CWorkloadCtrl() 
 	:
@@ -105,6 +103,7 @@ BEGIN_MESSAGE_MAP(CWorkloadCtrl, CTreeListCtrl)
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
+//////////////////////////////////////////////////////////////////////
 
 int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
@@ -146,8 +145,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (m_themeHeader.AreControlsThemed())
 		VERIFY(m_themeHeader.Open(*this, _T("HEADER")));
 
-	// Bar Chart ------------------------------------------------------------------------
-	// Initialise graph
+	// Bar Chart 
 	VERIFY(m_barChart.Create(WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, IDC_BARCHART));
 
 	m_barChart.SetBkGnd(GetSysColor(COLOR_WINDOW));

@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "Ganttstruct.h"
 
 #include "..\shared\TreeListCtrl.h"
