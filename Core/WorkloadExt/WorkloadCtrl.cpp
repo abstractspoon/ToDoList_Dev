@@ -258,6 +258,36 @@ BOOL CWorkloadCtrl::SelectTask(DWORD dwTaskID)
 	return SelectItem(hti);
 }
 
+BOOL CWorkloadCtrl::ScrollToSelectedTask()
+{
+	return TSH().EnsureVisible(TRUE);
+}
+
+BOOL CWorkloadCtrl::SelectTasks(const CDWordArray& aTaskIDs)
+{
+	CHTIList selection;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		HTREEITEM hti = m_tree.GetItem(aTaskIDs[nID]);
+
+		if (!hti)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		selection.AddTail(hti);
+	}
+
+	return SelectItems(selection);
+}
+
+int CWorkloadCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
+{
+	return GetSelectedItemData(aTaskIDs);
+}
+
 BOOL CWorkloadCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
 	HTREEITEM htiStart = NULL;
@@ -327,9 +357,8 @@ BOOL CWorkloadCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
 	if (m_bReadOnly)
 		return FALSE;
 
-	TLCITEMMOVE itemMove = { 0 };
+	TLCITEMMOVE itemMove(TSH());
 
-	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
 	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
 	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 
@@ -341,9 +370,8 @@ BOOL CWorkloadCtrl::MoveSelectedTask(const IUITASKMOVE& move)
 	if (m_bReadOnly)
 		return FALSE;
 
-	TLCITEMMOVE itemMove = { 0 };
+	TLCITEMMOVE itemMove(TSH());
 
-	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
 	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
 	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 
@@ -1716,23 +1744,30 @@ BOOL CWorkloadCtrl::OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag)
 		return TRUE;
 
 	// Prevent dragging of locked tasks
-	DWORD dwTaskID = GetTaskID(move.htiSel);
-	ASSERT(dwTaskID);
+	POSITION pos = move.selection.GetHeadPosition();
 
-	if (m_data.ItemIsLocked(dwTaskID, TRUE))
-		return FALSE;
+	while (pos)
+	{
+		HTREEITEM htiSel = move.selection.GetNext(pos);
 
-	// Prevent dragging of subtasks of locked tasks
-	HTREEITEM htiParent = m_tree.GetParentItem(move.htiSel);
+		DWORD dwTaskID = GetTaskID(htiSel);
+		ASSERT(dwTaskID);
 
-	if (!htiParent || (htiParent == TVI_ROOT))
-		return TRUE;
+		if (m_data.ItemIsLocked(dwTaskID, TRUE))
+			return FALSE;
 
-	DWORD dwParentID = GetTaskID(htiParent);
-	ASSERT(dwTaskID);
+		// Prevent dragging of subtasks of locked tasks
+		HTREEITEM htiParent = m_tree.GetParentItem(htiSel);
 
-	if (m_data.ItemIsLocked(dwParentID, TRUE))
-		return FALSE;
+		if (htiParent && (htiParent != TVI_ROOT))
+		{
+			DWORD dwParentID = GetTaskID(htiParent);
+			ASSERT(dwParentID);
+
+			if (m_data.ItemIsLocked(dwParentID, TRUE))
+				return FALSE;
+		}
+	}
 
 	return TRUE;
 }
@@ -1775,10 +1810,17 @@ UINT CWorkloadCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)
 			return DD_DROPEFFECT_NONE;
 
 		// If the target is a reference, the source must be a reference
-		DWORD dwSelTaskID = GetTaskID(move.htiSel);
+		if (m_data.ItemIsReference(dwTargetID))
+		{
+			CDWordArray aTaskIDs;
+			int nSel = TSH().GetItemData(move.selection, aTaskIDs);
 
-		if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
-			return DD_DROPEFFECT_NONE;
+			while (nSel--)
+			{
+				if (!m_data.ItemIsReference(aTaskIDs[nSel]))
+					return DD_DROPEFFECT_NONE;
+			}
+		}
 	}
 
 	return nCursor;
@@ -1786,26 +1828,17 @@ UINT CWorkloadCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)
 
 BOOL CWorkloadCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 {
-	// Prevent dropping on locked tasks unless references
-	DWORD dwTargetID = GetTaskID(move.htiDestParent);
-
-	if (dwTargetID && m_data.ItemIsLocked(dwTargetID, TRUE))
-		return FALSE;
-
-	// If the target is a reference, the source must be a reference
-	DWORD dwSelTaskID = GetTaskID(move.htiSel);
-
-	if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
+	if (OnDragOverItem(move, DD_DROPEFFECT_MOVE) == DD_DROPEFFECT_NONE)
 		return FALSE;
 
 	// Notify parent of move
 	IUITASKMOVE taskMove = { 0 };
-			
-	taskMove.dwSelectedTaskID = GetTaskID(move.htiSel);
+
+	taskMove.dwSelectedTaskID = 0; // selected tasks
 	taskMove.dwParentID = GetTaskID(move.htiDestParent);
 	taskMove.dwAfterSiblingID = GetTaskID(move.htiDestAfterSibling);
 	taskMove.bCopy = (move.bCopy != FALSE);
-			
+
 	// If copying a task, app will send us a full update 
 	// so we do not need to perform the move ourselves
 	if (GetParent()->SendMessage(WM_WLC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)

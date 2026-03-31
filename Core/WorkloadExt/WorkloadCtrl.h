@@ -43,8 +43,12 @@ public:
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
-	DWORD GetSelectedTaskID() const;
 	BOOL SelectTask(DWORD dwTaskID);
+	BOOL SelectTasks(const CDWordArray& aTaskIDs);
+	DWORD GetSelectedTaskID() const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;	
+	BOOL ScrollToSelectedTask();
+
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	int GetTaskCount() const { return (int)m_tree.GetCount(); }

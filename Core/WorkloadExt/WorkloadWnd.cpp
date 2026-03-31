@@ -43,10 +43,10 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 
 /////////////////////////////////////////////////////////////////////////////
 
+const UINT IDC_WORKLOADCTRL = 1001;
+
 const int PADDING = 3;
 const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
-
-const UINT IDC_WORKLOADCTRL = 1001;
 
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadWnd
@@ -438,17 +438,21 @@ DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	CAutoFlag af(m_bInSelectTask, TRUE);
 
-	return (m_ctrlWorkload.SelectTask(dwTaskID) != FALSE);
+	return SelectTasks(&dwTaskID, 1);
 }
 
-bool CWorkloadWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
+bool CWorkloadWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return false; // only support single selection
+
+	CDWordArray aTaskIDs;
+	aTaskIDs.SetSize(nTaskCount);
+
+	for (int nID = 0; nID < nTaskCount; nID++)
+		aTaskIDs[nID] = pdwTaskIDs[nID];
+
+	return (m_ctrlWorkload.SelectTasks(aTaskIDs) != FALSE);
 }
 
 bool CWorkloadWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -486,11 +490,11 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		return true;
 
 	case IUI_EXPANDSELECTED:
-		m_ctrlWorkload.ExpandItem(m_ctrlWorkload.GetSelectedItem(), TRUE, TRUE);
+		m_ctrlWorkload.ExpandSelection(TRUE, TRUE);
 		return true;
 
 	case IUI_COLLAPSESELECTED:
-		m_ctrlWorkload.ExpandItem(m_ctrlWorkload.GetSelectedItem(), FALSE);
+		m_ctrlWorkload.ExpandSelection(FALSE);
 		return true;
 
 	case IUI_SORT:
@@ -575,7 +579,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
-		return (m_ctrlWorkload.SelectTask(m_ctrlWorkload.GetSelectedTaskID()) != FALSE);
+		return (m_ctrlWorkload.ScrollToSelectedTask() != FALSE);
 	}
 
 	return false;
@@ -597,10 +601,10 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:
-		return (m_ctrlWorkload.CanExpandAll() != FALSE);
+		return (m_ctrlWorkload.CanExpandAll(TRUE) != FALSE);
 		
 	case IUI_COLLAPSEALL:
-		return (m_ctrlWorkload.CanCollapseAll() != FALSE);
+		return (m_ctrlWorkload.CanExpandAll(FALSE) != FALSE);
 		
 	case IUI_RESIZEATTRIBCOLUMNS:
 		return true;
@@ -609,18 +613,10 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		return (m_ctrlWorkload.GetTaskCount() > 0);
 
 	case IUI_EXPANDSELECTED:
-		{
-			HTREEITEM htiSel = m_ctrlWorkload.GetSelectedItem();
-			return (m_ctrlWorkload.CanExpandItem(htiSel, TRUE) != FALSE);
-		}
-		break;
+		return (m_ctrlWorkload.CanExpandSelection(TRUE) != FALSE);
 
 	case IUI_COLLAPSESELECTED:
-		{
-			HTREEITEM htiSel = m_ctrlWorkload.GetSelectedItem();
-			return (m_ctrlWorkload.CanExpandItem(htiSel, FALSE) != FALSE);
-		}
-		break;
+		return (m_ctrlWorkload.CanExpandSelection(FALSE) != FALSE);
 
 	case IUI_SORT:
 		if (pData)
@@ -700,12 +696,12 @@ BOOL CWorkloadWnd::OnInitDialog()
 		m_toolbar.RefreshButtonStates(TRUE);
 	}
 
+	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
+	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
+
 	// Date range text needs to be big enough for all eventualities
 	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
 	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
-
-	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
-	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
 
  	m_ctrlWorkload.SetFocus();
 	
@@ -791,8 +787,10 @@ BOOL CWorkloadWnd::OnEraseBkgnd(CDC* pDC)
 
 void CWorkloadWnd::SendParentSelectionUpdate()
 {
-	DWORD dwTaskID = m_ctrlWorkload.GetSelectedTaskID();
-	GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, dwTaskID);
+	CDWordArray aTaskIDs;
+	int nNumTasks = m_ctrlWorkload.GetSelectedItemData(aTaskIDs);
+
+	GetParent()->SendMessage(WM_IUI_SELECTTASK, (LPARAM)aTaskIDs.GetData(), nNumTasks);
 }
 
 LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp)
@@ -986,7 +984,7 @@ void CWorkloadWnd::OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI)
 
 BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
 {
-	if (m_bReadOnly || !m_ctrlWorkload.GetSafeHwnd())
+	if (m_bReadOnly || !m_ctrlWorkload.GetSafeHwnd() || (m_ctrlWorkload.GetSelectionCount() != 1))
 		return FALSE;
 	
 	if (dwTaskID && (dwTaskID != m_ctrlWorkload.GetSelectedTaskID()))

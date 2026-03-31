@@ -523,6 +523,7 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	m_ctrlGantt.UpdateTasks(pTasks, nUpdate);
+	m_toolbar.RefreshButtonStates(FALSE);
 
 	GANTTDATERANGE dtDataRange;
 
@@ -558,6 +559,8 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData) 
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_toolbar.RefreshButtonStates(FALSE);
 
 	switch (nCmd)
 	{
@@ -1043,6 +1046,8 @@ LRESULT CGanttChartWnd::OnGanttNotifySortChange(WPARAM wp, LPARAM lp)
 LRESULT CGanttChartWnd::OnGanttNotifySelChanged(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	SendParentSelectionUpdate();
+
+	m_toolbar.RefreshButtonStates(FALSE);
 
 	return 0L;
 }

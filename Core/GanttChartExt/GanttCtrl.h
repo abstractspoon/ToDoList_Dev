@@ -77,7 +77,6 @@ public:
 
 	void ScrollToToday();
 	BOOL ScrollToSelectedTask();
-	void ScrollToTask(DWORD dwTaskID);
 
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) ? TRUE : FALSE); }
@@ -270,7 +269,9 @@ protected:
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const;
 	DWORD ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
+
 	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
+	void ScrollToTask(DWORD dwTaskID);
 
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
