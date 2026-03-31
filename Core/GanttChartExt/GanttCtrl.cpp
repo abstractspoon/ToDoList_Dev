@@ -1582,21 +1582,7 @@ void CGanttCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TRUE; // cancel our edit
 
-	ASSERT(TSH().GetCount() == 1);
-
-	if (m_bReadOnly || IsDependencyEditing() || (TSH().GetCount() != 1))
-		return;
-
-	CPoint point(GetMessagePos());
-	int nCol = -1;
-
-	HTREEITEM hti = TreeHitTestItem(point, TRUE, nCol);
-	ASSERT(TSH().GetFirstItem() == hti);
-
-	if (!hti || (nCol == -1))
-		return;
-
-	if (m_treeHeader.GetItemData(nCol) != GTLCC_TITLE)
+	if (m_bReadOnly || IsDependencyEditing())
 		return;
 
 	// notify app to edit

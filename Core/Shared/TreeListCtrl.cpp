@@ -1047,8 +1047,30 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			switch (pNMHDR->code)
 			{
 			case TVN_BEGINLABELEDIT:
-				if (m_treeDragDrop.IsDragging())
+				if (m_bMovingItem)
+				{
 					return 1L; // cancel
+				}
+				else if (m_treeDragDrop.IsDragging())
+				{
+					return 1L; // cancel
+				}
+				else if (TSH().GetCount() != 1)
+				{
+					return 1L; // cancel
+				}
+				else 
+				{
+					CPoint point(GetMessagePos());
+					int nCol = -1;
+
+					HTREEITEM hti = TreeHitTestItem(point, TRUE, nCol);
+
+					if (!hti || (hti != TSH().GetFirstItem()) || (nCol != 0))
+					{
+						return 1L; // cancel
+					}
+				}
 				break;
 
 			case TVN_KEYDOWN:
