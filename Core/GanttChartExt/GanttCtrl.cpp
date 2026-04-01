@@ -110,7 +110,6 @@ CGanttCtrl::CGanttCtrl()
 	m_ptLastDependPick(0),
 	m_pDependEdit(NULL),
 	m_dwMaxTaskID(0),
-	m_bReadOnly(FALSE),
 	m_nDefSnapMode(GTLCSM_FREE)
 {
 
@@ -1573,7 +1572,7 @@ void CGanttCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TRUE; // cancel our edit
 
-	if (m_bReadOnly || IsDependencyEditing())
+	if (IsDependencyEditing())
 		return;
 
 	// notify app to edit
@@ -5893,13 +5892,6 @@ BOOL CGanttCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) co
 
 	// else
 	return FALSE;
-}
-
-void CGanttCtrl::SetReadOnly(bool bReadOnly) 
-{ 
-	m_bReadOnly = bReadOnly;
-
-	CTreeListCtrl::EnableDragAndDrop(!bReadOnly);
 }
 
 // external version

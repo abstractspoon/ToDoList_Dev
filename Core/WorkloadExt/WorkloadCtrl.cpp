@@ -769,11 +769,8 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		}
 	}
 
-	if (bAllocationChange)
-	{
-		ASSERT(bChange);
+	if (bAllocationChange && bChange)
 		UpdateAllocationCalculations(*pWI);
-	}
 	
 	return bChange;
 }
@@ -1650,9 +1647,6 @@ void CWorkloadCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TRUE; // cancel our edit always
 	
-	if (m_bReadOnly)
-		return;
-
 	CPoint point(GetMessagePos());
 	int nCol = -1;
 	HTREEITEM hti = TreeHitTestItem(point, TRUE, nCol);
@@ -3044,11 +3038,4 @@ void CWorkloadCtrl::FilterToolTipMessage(MSG* pMsg)
 	CTreeListCtrl::FilterToolTipMessage(pMsg);
 
 	m_barChart.FilterToolTipMessage(pMsg);
-}
-
-void CWorkloadCtrl::SetReadOnly(BOOL bReadOnly)
-{
-	m_bReadOnly = bReadOnly;
-
-	EnableDragAndDrop(!bReadOnly);
 }

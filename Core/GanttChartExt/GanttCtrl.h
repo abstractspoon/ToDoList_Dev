@@ -83,7 +83,6 @@ public:
 	void SetDefaultBarColor(COLORREF crDefault);
 	void SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color);
 	void SetMilestoneTag(const CString& sTag);
-	void SetReadOnly(bool bReadOnly);
 	
 	void SetDefaultSnapMode(GTLC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
 	GTLC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
@@ -109,8 +108,6 @@ public:
 	static GTLC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttribID);
 
 protected:
-	BOOL m_bReadOnly;
-
 	GANTTDATERANGE m_dtDataRange, m_dtActiveRange;
 	GANTTITEM m_giPreDrag;
 	GANTTSORT m_sort;

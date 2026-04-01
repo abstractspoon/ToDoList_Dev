@@ -122,6 +122,7 @@ public:
 	
 	BOOL Create(CWnd* pParentWnd, const CRect& rect, UINT nID, BOOL bVisible = TRUE);
 	void Show(BOOL bShow = TRUE) { CTreeListSyncer::Show(bShow); }
+	void SetReadOnly(BOOL bReadOnly);
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 	int GetSelectedItemData(CDWordArray& aItemData) const;
@@ -197,6 +198,7 @@ protected:
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 	BOOL m_bMovingItem;
 	BOOL m_bBoundSelecting;
+	BOOL m_bReadOnly;
 
 	CTreeListSelectionHelper m_tsh;
 	CTreeDragDropHelper m_treeDragDrop;

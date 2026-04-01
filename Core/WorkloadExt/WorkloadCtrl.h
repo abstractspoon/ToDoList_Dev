@@ -37,8 +37,6 @@ public:
 	virtual ~CWorkloadCtrl();
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
-	void SetReadOnly(BOOL bReadOnly);
-
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
 
@@ -99,7 +97,6 @@ protected:
 	int m_nSortByAllocToCol;
 	COleDateTimeRange m_dtPeriod, m_dtDataRange;
 	COLORREF m_crOverlap, m_crBkgndText;
-	BOOL m_bReadOnly;
 
 	WORKLOADSORT m_sort;
 	CStringArray m_aAllocTo;

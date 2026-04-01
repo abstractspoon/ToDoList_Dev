@@ -64,16 +64,13 @@ IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
 CTreeListTreeCtrl::CTreeListTreeCtrl(const CEnHeaderCtrl& header)
 	:
 	m_header(header),
-	m_tch(*this)/*,
-	m_tsh(*this)*/
+	m_tch(*this)
 {
 }
 
 CTreeListTreeCtrl::~CTreeListTreeCtrl()
 {
 }
-
-//////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CTreeListTreeCtrl, CTreeCtrl)
 	ON_WM_CREATE()
@@ -83,7 +80,7 @@ BEGIN_MESSAGE_MAP(CTreeListTreeCtrl, CTreeCtrl)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
-//////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------
 
 HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelImage,
 										LPARAM lParam, HTREEITEM htiParent, HTREEITEM htiAfter)
@@ -331,16 +328,17 @@ void CTreeListTreeCtrl::OnDestroy()
 
 const int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
-//////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------
 
 CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelWidth, int nMinColWidth)
 	:
-	CTreeListSyncer(/*TLSF_SYNCSELECTION |*/ TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
+	CTreeListSyncer(TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_bMovingItem(FALSE),
 	m_bBoundSelecting(FALSE),
+	m_bReadOnly(FALSE),
 	m_nMinTreeTitleColumnWidth(-1),
 	m_tsh(m_tree, m_list),
 	m_treeDragDrop(m_tsh, m_tree, pAltRenderer),
@@ -372,6 +370,7 @@ BEGIN_MESSAGE_MAP(CTreeListCtrl, CWnd)
 	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
+// -----------------------------------------------------------------
 
 BOOL CTreeListCtrl::Create(CWnd* pParentWnd, const CRect& rect, UINT nID, BOOL bVisible)
 {
@@ -437,6 +436,14 @@ int CTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
  	PostResize();
 	
 	return 0;
+}
+
+void CTreeListCtrl::SetReadOnly(BOOL bReadOnly)
+{
+	m_bReadOnly = bReadOnly;
+
+	TSH().SetReadOnly(bReadOnly);
+	m_treeDragDrop.EnableDragDrop(!bReadOnly);
 }
 
 void CTreeListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
@@ -1047,7 +1054,11 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			switch (pNMHDR->code)
 			{
 			case TVN_BEGINLABELEDIT:
-				if (m_bMovingItem)
+				if (m_bReadOnly)
+				{
+					return 1L; // cancel
+				}
+				else if (m_bMovingItem)
 				{
 					return 1L; // cancel
 				}
@@ -2512,6 +2523,9 @@ BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg)
 
 BOOL CTreeListCtrl::CanMoveItem(const TLCITEMMOVE& move) const
 {
+	if (m_bReadOnly)
+		return FALSE;
+
 	if (move.bCopy)
 		return FALSE;
 	
