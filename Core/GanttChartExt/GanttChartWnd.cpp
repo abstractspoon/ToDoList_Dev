@@ -1293,17 +1293,6 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 	
 	if (m_dlgDepends.IsPickingCompleted())
 	{
-		// make sure the 'from' task is reselected
-		DWORD dwFromTaskID = m_dlgDepends.GetFromTask();
-
-		if (m_ctrlGantt.GetSelectedTaskID() != dwFromTaskID)
-		{
-			SelectTask(dwFromTaskID, false);
-
-			// explicitly update parent because SelectTask will not
-			SendParentSelectionUpdate();
-		}
-
 		// notify parent
 		IUITASKMOD mod = { TDCA_DEPENDENCY, 0 };
 

@@ -120,7 +120,7 @@ public:
 	void SortSelection(CHTIList& selection, BOOL bAscending) const;
 
 	BOOL ContainsAllItems() const;
-	BOOL InvalidateAll(BOOL bErase = TRUE);
+	BOOL Invalidate(BOOL bErase = TRUE);
 	BOOL AnyItemsHaveChildren() const;
 
 	// TRUE, FALSE, -1 if no children

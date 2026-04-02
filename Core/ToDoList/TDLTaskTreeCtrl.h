@@ -195,7 +195,6 @@ protected:
 	void OnListSelectionChange(NMLISTVIEW* pNMLV);
 	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
-	BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
 	DWORD GetColumnItemTaskID(int nItem) const;
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	BOOL IsColumnShowing(TDC_COLUMN nColID) const;

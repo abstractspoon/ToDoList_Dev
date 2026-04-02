@@ -169,6 +169,11 @@ protected:
 	void DrawTreeItemIcon(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
 	void PostDrawTreeItem(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
+	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
+
+	// Pseudo-message handler
+	BOOL OnDependencyEditLButtonDown(UINT nFlags, CPoint ptScreen);
+	void OnDependencyEditMouseMove(UINT nFlags, CPoint ptScreen);
 
 	// Local methods
 	void DrawListHeaderItem(CDC* pDC, int nCol);
@@ -263,7 +268,7 @@ protected:
 
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const;
-	DWORD ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
+	DWORD ListDependencyHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
 
 	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
 	void ScrollToTask(DWORD dwTaskID);

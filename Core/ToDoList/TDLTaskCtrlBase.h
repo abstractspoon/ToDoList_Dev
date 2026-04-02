@@ -329,7 +329,6 @@ protected:
 	BOOL OnPrimaryHeaderBeginTracking(NMHEADER* /*pHDN*/) { return FALSE; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
-	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 
 protected:
 	enum SELCHANGE_ACTION

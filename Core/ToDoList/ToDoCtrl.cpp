@@ -1529,7 +1529,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 	if (!bInternal && (TSH().GetCount() == 1))
 		UpdateComments(GetSelectedTaskComments(), GetSelectedTaskCustomComments(m_cfComments));
 
-	TSH().InvalidateAll();
+	TSH().Invalidate();
 
 	SetModified(TDCA_COMMENTS, aModTaskIDs);
 	return TRUE;
@@ -5120,7 +5120,7 @@ HTREEITEM CToDoCtrl::InsertTreeItem(const TODOITEM* pTDI, DWORD dwTaskID, HTREEI
 
 void CToDoCtrl::OnTreeChangeFocus(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	TSH().InvalidateAll(FALSE);
+	TSH().Invalidate(FALSE);
 	*pResult = 0;
 }
 

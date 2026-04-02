@@ -500,13 +500,6 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 
 	if (IsTree(hwnd) && IsList(hwndTo)) // sync Tree to list
 	{
-		// cache current tree selection
-		HTREEITEM htiSel = GetTreeSelItem(hwnd);
-
-		// make sure it's really selected
-		if (!IsTreeItemSelected(hwnd, htiSel))
-			htiSel = NULL;
-		
 		// determine whether we need to scroll by comparing the
 		// first visible tree item with the first visible list item
 		
@@ -648,7 +641,7 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 		HTREEITEM htiSel = GetTreeSelItem(hwnd);
 		
 		// make sure it's really selected
-		if (!IsTreeItemSelected(hwnd, htiSel))
+	 	if (!TreeItemHasState(hwnd, htiSel, TVIS_SELECTED))
 			htiSel = NULL;
 		
 		int nSelCount = ListView_GetSelectedCount(hwndTo);
@@ -661,7 +654,7 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 		HTREEITEM htiListTreeSel = GetTreeItem(hwnd, hwndTo, nListSelItem);
 		
 		// restore selection
-		if (htiListTreeSel && htiSel != htiListTreeSel)
+		if (htiListTreeSel && (htiSel != htiListTreeSel))
 		{
 			SelectTreeItem(hwnd, htiListTreeSel, bClearTreeSel);
 			bSynced = TRUE;
@@ -2296,11 +2289,6 @@ void CTreeListSyncer::SetTreeItemState(HWND hwnd, HTREEITEM hti, UINT nState, UI
 	::SendMessage(hwnd, TVM_SETITEM, 0, (LPARAM)&tvi);
 }
 
-BOOL CTreeListSyncer::IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const
-{
-	return TreeItemHasState(hwnd, hti, TVIS_SELECTED);
-}
-
 BOOL CTreeListSyncer::ListItemHasState(HWND hwnd, int nItem, UINT nStateMask)
 {
 	ASSERT(IsList(hwnd));
@@ -2308,11 +2296,6 @@ BOOL CTreeListSyncer::ListItemHasState(HWND hwnd, int nItem, UINT nStateMask)
 	UINT nState = ListView_GetItemState(hwnd, nItem, nStateMask);
 
 	return (((nState & nStateMask) == nStateMask) ? TRUE : FALSE);
-}
-
-BOOL CTreeListSyncer::IsListItemSelected(HWND hwnd, int nItem) const
-{
-	return ListItemHasState(hwnd, nItem, LVIS_SELECTED);
 }
 
 void CTreeListSyncer::OnNotifySplitterChange(int /*nSplitPos*/) 

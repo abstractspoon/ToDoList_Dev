@@ -644,11 +644,6 @@ void CTDLTaskCtrlBase::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-BOOL CTDLTaskCtrlBase::IsListItemSelected(HWND hwnd, int nItem) const
-{
-	return (ListView_GetItemState(hwnd, nItem, LVIS_SELECTED) & LVIS_SELECTED);
-}
-
 void CTDLTaskCtrlBase::SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle)
 {
 	CTreeListSyncer::ModifyStyle(Tasks(), (bSet ? 0 : dwStyles), (bSet ? dwStyles : 0), bExStyle);
@@ -4609,7 +4604,7 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 				// already selected then we generate a NM_CLICK and eat the 
 				// message to prevent a selection change
 				BOOL bMultiSelection = (m_lcColumns.GetSelectedCount() > 1);
-				BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nHit);
+				BOOL bTaskSelected = ListItemHasState(m_lcColumns, nHit, LVIS_SELECTED);
 
 				if (bMultiSelection && bTaskSelected && 
 					ItemColumnSupportsClickHandling(nHit, nColID))
@@ -4633,7 +4628,7 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 
 	if (nHit != -1)
 	{
-		BOOL bHitSelected = IsListItemSelected(m_lcColumns, nHit);
+		BOOL bHitSelected = ListItemHasState(m_lcColumns, nHit, LVIS_SELECTED);
 
 		if (Misc::ModKeysArePressed(0) && 
 			(!bHitSelected || !ItemColumnSupportsClickHandling(nHit, nColID)))
@@ -4751,7 +4746,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 			// and either the task is not selected or it's only singly selected
 			BOOL bNoModifiers = Misc::ModKeysArePressed(0);
 			BOOL bSingleSelection = (GetSelectedCount() == 1);
-			BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nItem);
+			BOOL bTaskSelected = ListItemHasState(m_lcColumns, nItem, LVIS_SELECTED);
 
 			return (bNoModifiers &&
 					bEditableTask &&

@@ -122,14 +122,6 @@ BOOL CTDLTaskTreeCtrl::CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL 
 							 IDC_TASKTREE);
 }
 
-BOOL CTDLTaskTreeCtrl::IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const
-{
-	ASSERT(hwnd == m_tcTasks);
-	UNREFERENCED_PARAMETER(hwnd);
-	
-	return TSH().HasItem(hti);
-}
-
 // external version
 BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti) 
 { 

@@ -296,8 +296,6 @@ protected:
 	int GetBoundingWidth() const;
 	
 	// callbacks for derived classes
-	virtual BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
-	virtual BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 	virtual void OnNotifySplitterChange(int nSplitPos);
 	virtual void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	virtual void HandleItemExpanded(HWND hwndTree, HTREEITEM hti, BOOL bExpand);

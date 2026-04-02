@@ -805,7 +805,7 @@ GM_ITEMSTATE CTreeListCtrl::GetItemState(HTREEITEM hti) const
 		{
 			return GMIS_DROPHILITED;
 		}
-		else if (TSH().HasItem(hti)/*IsTreeItemSelected(m_tree, hti)*/)
+		else if (TSH().HasItem(hti))
 		{
 			if (HasFocus())
 				return GMIS_SELECTED;
@@ -1470,7 +1470,7 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 
 	if (nHit != -1)
 	{
-		BOOL bHitSelected = IsListItemSelected(m_list, nHit);
+		BOOL bHitSelected = TSH().HasItem(GetTreeItem(nHit));
 
 		if (Misc::ModKeysArePressed(0) && !bHitSelected)
 			DeselectAll();

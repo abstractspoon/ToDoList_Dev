@@ -371,7 +371,7 @@ BOOL CTreeSelectionHelper::RemoveAll(BOOL bRemoveFromHistory, BOOL bRedraw)
 	return FALSE;
 }
 
-BOOL CTreeSelectionHelper::InvalidateAll(BOOL bErase)
+BOOL CTreeSelectionHelper::Invalidate(BOOL bErase)
 {
 	POSITION pos = GetFirstItemPos();
 	CRect rItem;
@@ -710,7 +710,7 @@ BOOL CTreeSelectionHelper::NextSelection(const CHTIMap& mapItems, BOOL bRedraw)
 		{
 			// invalidate current selection
 			if (bRedraw)
-				InvalidateAll(FALSE);
+				Invalidate(FALSE);
 
 			// save current selection in history
 			CDWordArray aIDs;
@@ -732,7 +732,7 @@ BOOL CTreeSelectionHelper::NextSelection(const CHTIMap& mapItems, BOOL bRedraw)
 
 			// invalidate new selection
 			if (bRedraw)
-				InvalidateAll(FALSE);
+				Invalidate(FALSE);
 
 			return TRUE;
 		}
@@ -790,7 +790,7 @@ BOOL CTreeSelectionHelper::PrevSelection(const CHTIMap& mapItems, BOOL bRedraw)
 		{
 			// invalidate current selection
 			if (bRedraw)
-				InvalidateAll(FALSE);
+				Invalidate(FALSE);
 
 			// save current selection in history
 			int nSizeHistory = m_aHistory.GetSize();
@@ -815,7 +815,7 @@ BOOL CTreeSelectionHelper::PrevSelection(const CHTIMap& mapItems, BOOL bRedraw)
 
 			// invalidate new selection
 			if (bRedraw)
-				InvalidateAll(FALSE);
+				Invalidate(FALSE);
 
 			return TRUE;
 		}
