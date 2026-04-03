@@ -575,9 +575,18 @@ BOOL CTreeListCtrl::SelectItems(const CHTIList& htItems)
 	}
 
 	// else
-	TSH().RemoveAll(FALSE, FALSE);
-	TSH().SetItems(htItems, TSHS_SELECT);
-	TSH().FixupTreeSelection();
+		CHoldHScroll hs(m_tree);
+		CTLSHoldResync hr2(*this);
+
+		TSH().RemoveAll(FALSE, FALSE);
+		TSH().SetItems(htItems, TSHS_SELECT);
+		TSH().FixupTreeSelection();
+
+		if (!TSH().AllParentItemsAreExpanded(TRUE))
+		{
+			TSH().ExpandParentItems(TRUE);
+			ExpandList();
+		}
 
 	return TRUE;
 }
