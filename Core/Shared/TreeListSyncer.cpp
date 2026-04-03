@@ -2422,12 +2422,6 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_PAINT:
 		if (IsList(hRealWnd))
 		{
-// 			FileMisc::EnableLogging(TRUE);
-// 			CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
-
-			RefreshListDrawColAttributes(hRealWnd);
-			LRESULT lr = ScDefault(hRealWnd);
-
 // #ifdef _DEBUG
 // 			static int nPaintCount = 0;
 // 
@@ -2437,8 +2431,23 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 // 				nPaintCount = 0;
 // #endif // _DEBUG
 
-			return lr;
+// 			FileMisc::EnableLogging(TRUE);
+// 			CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
+// 
+ 			RefreshListDrawColAttributes(hRealWnd);
+// 			return ScDefault(hRealWnd);
 		}
+#ifdef _DEBUG
+// 		else if (IsTree(hRealWnd))
+// 		{
+// 			static int nPaintCount = 0;
+// 
+// 			if (Misc::IsKeyPressed(VK_LBUTTON))
+// 				TRACE(_T("\nCTreeListSyncer::Tree::WM_PAINT(%d) while LButton Down\n"), ++nPaintCount);
+// 			else
+// 				nPaintCount = 0;
+// 		}
+#endif // _DEBUG
 		break;
 
 	case TVM_INSERTITEM:
