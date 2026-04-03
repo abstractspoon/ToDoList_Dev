@@ -88,12 +88,20 @@ void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 			m_list.SetFocus();
 
 		int nAnchor = GetListItem(m_htiAnchor);
-		ASSERT(nAnchor != -1);
+
+		if (nAnchor == -1)
+		{
+			ASSERT(0);
+			return;
+		}
+
+		int nHit = m_list.HitTest(lp);
+
+		if (nHit == -1)
+			return;
 
 		if (!Misc::IsKeyPressed(VK_CONTROL))
 			DeselectAll();
-
-		int nHit = m_list.HitTest(lp);
 
 		int nFrom = (nAnchor < nHit) ? nAnchor : nHit;
 		int nTo = (nAnchor < nHit) ? nHit : nAnchor;

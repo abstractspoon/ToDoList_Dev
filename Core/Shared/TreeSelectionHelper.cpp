@@ -1048,6 +1048,9 @@ void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 	UINT nHitFlags = 0;
 	HTREEITEM htiHit = m_tree.HitTest(lp, &nHitFlags);
 
+	if (htiHit == NULL)
+		return;
+
 	if (nHitFlags & TVHT_ONITEMBUTTON)
 		return;
 
