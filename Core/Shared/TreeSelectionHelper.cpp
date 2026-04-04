@@ -1275,7 +1275,7 @@ void CTreeSelectionHelper::OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 	}
 }
 
-void CTreeSelectionHelper::OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD)
+void CTreeSelectionHelper::OnTreeNotifyKeyDown(NMTVKEYDOWN* pTVKD)
 {
 	m_nLastKeyDown = 0;
 
@@ -1306,7 +1306,7 @@ void CTreeSelectionHelper::OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD)
 	}
 }
 
-void CTreeSelectionHelper::OnTreeNotifyParentExpansion(NMTREEVIEW* pNMTV, BOOL& bSelChange)
+void CTreeSelectionHelper::OnTreeNotifyItemExpanding(NMTREEVIEW* pNMTV, BOOL& bSelChange)
 {
 	bSelChange = FALSE;
 
@@ -1330,7 +1330,7 @@ void CTreeSelectionHelper::OnTreeNotifyParentExpansion(NMTREEVIEW* pNMTV, BOOL& 
 	}
 }
 
-void CTreeSelectionHelper::OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange)
+void CTreeSelectionHelper::OnTreeNotifySelectionChange(NMTREEVIEW* pNMTV, BOOL& bSelChange)
 {
 	bSelChange = FALSE;
 

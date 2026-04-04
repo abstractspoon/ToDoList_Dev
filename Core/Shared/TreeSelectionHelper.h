@@ -183,9 +183,9 @@ public:
 
 	void OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	void OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD);
-	void OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange);
-	void OnTreeNotifyParentExpansion(NMTREEVIEW* pNMTV, BOOL& bSelChange);
+	void OnTreeNotifyKeyDown(NMTVKEYDOWN* pTVKD);
+	void OnTreeNotifySelectionChange(NMTREEVIEW* pNMTV, BOOL& bSelChange);
+	void OnTreeNotifyItemExpanding(NMTREEVIEW* pNMTV, BOOL& bSelChange);
 
 	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
 

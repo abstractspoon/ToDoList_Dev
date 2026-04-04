@@ -965,7 +965,7 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 
 	// Update selection
 	BOOL bSelChange = FALSE;
-	TSH().OnTreeNotifyParentSelChange(pNMTV, bSelChange);
+	TSH().OnTreeNotifySelectionChange(pNMTV, bSelChange);
 
 	if (bSelChange)
 	{
@@ -1078,13 +1078,13 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				break;
 
 			case TVN_KEYDOWN:
-				TSH().OnTreeNotifyParentKeyDown((NMTVKEYDOWN*)pNMHDR);
+				TSH().OnTreeNotifyKeyDown((NMTVKEYDOWN*)pNMHDR);
 				break;
 
 			case TVN_ITEMEXPANDING:
 				{
 					BOOL bSelChange = FALSE;
-					TSH().OnTreeNotifyParentExpansion((NMTREEVIEW*)pNMHDR, bSelChange);
+					TSH().OnTreeNotifyItemExpanding((NMTREEVIEW*)pNMHDR, bSelChange);
 
 					if (bSelChange)
 					{

@@ -655,7 +655,7 @@ void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 
 	// Update selection
 	BOOL bSelChange = FALSE;
-	TSH().OnTreeNotifyParentSelChange(pNMTV, bSelChange);
+	TSH().OnTreeNotifySelectionChange(pNMTV, bSelChange);
 
 	if (bSelChange)
 	{
@@ -899,13 +899,13 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				break;
 
 			case TVN_KEYDOWN:
-				TSH().OnTreeNotifyParentKeyDown((NMTVKEYDOWN*)pNMHDR);
+				TSH().OnTreeNotifyKeyDown((NMTVKEYDOWN*)pNMHDR);
 				break;
 				
 			case TVN_ITEMEXPANDING:
 				{
 					BOOL bSelChange = FALSE;
-					TSH().OnTreeNotifyParentExpansion((NMTREEVIEW*)lp, bSelChange);
+					TSH().OnTreeNotifyItemExpanding((NMTREEVIEW*)lp, bSelChange);
 
 					if (bSelChange)
 					{
