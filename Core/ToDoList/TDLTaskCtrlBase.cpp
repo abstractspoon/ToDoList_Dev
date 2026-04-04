@@ -4621,7 +4621,7 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 			}
 		}
 	}
-	else
+	else // Primary window of a List-List control
 	{
 		nHit = lc.HitTest(pt);
 	}
