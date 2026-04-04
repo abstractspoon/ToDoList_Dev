@@ -1461,33 +1461,22 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 {
 	m_bBoundSelecting = FALSE;
 
-	if (nFlags & MK_SHIFT)
+	CTLSHoldResync hr(*this);
+
+	BOOL bSelChange = FALSE;
+	TSH().OnListLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
+
+	if (bSelChange)
 	{
-		// Selecting or de-selecting a lot of items can be slow
-		// because OnListSelectionChange is called once for each.
-		// Base class handles simple click de-selection so we
-		// handle bulk selection here
-		CTLSHoldResync hr(*this);
-
-		BOOL bSelChange = FALSE;
-		TSH().OnListLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
-
-		if (bSelChange)
-			NotifyParentSelectionChange();
-
+		NotifyParentSelectionChange();
 		return TRUE; // eat it
 	}
 
+	// Check for bounds selection
 	int nHit = m_list.HitTest(point);
+	ASSERT((nHit == -1) || TSH().HasItem(GetTreeItem(nHit)));
 
-	if (nHit != -1)
-	{
-		BOOL bHitSelected = TSH().HasItem(GetTreeItem(nHit));
-
-		if (Misc::ModKeysArePressed(0) && !bHitSelected)
-			DeselectAll();
-	}
-	else
+	if (nHit == -1)
 	{
 		m_list.ClientToScreen(&point);
 

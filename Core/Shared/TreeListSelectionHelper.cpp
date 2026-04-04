@@ -111,10 +111,13 @@ void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 		SetItems(htiAnchor, htiHit, TSHS_SELECT);
 		bSelChange = TRUE;
 	}
-	else if (htiHit && !HasItem(htiHit)) // !bCtrl && !bShift
+	else if (htiHit) // !bCtrl && !bShift
 	{
-		// select item if not already
-		SelectSingleItem(htiHit, bSelChange);
+		// Select item if:
+		// 1. It's not already selected
+		// 2. One or more other items are also selected
+		if (!HasItem(htiHit) || (GetCount() > 1))
+			SelectSingleItem(htiHit, bSelChange);
 	}
 
 	// update anchor
