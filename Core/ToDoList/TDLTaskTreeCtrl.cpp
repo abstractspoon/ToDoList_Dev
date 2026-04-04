@@ -1005,8 +1005,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				if (bSelChange)
 				{
 					SyncColumnSelectionToTasks();
-					UpdateAll();
-
 					NotifyParentSelChange(SC_BYKEYBOARD);
 				}
 
