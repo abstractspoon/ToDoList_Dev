@@ -612,11 +612,8 @@ void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
 {
 	if (CanResync())
 	{
-		CHTIList selection;
-		TSH().CopySelection(selection);
-
-		if (ResyncListToTreeSelection(m_tcTasks, selection, TSH().GetAnchor()))
-			m_lcColumns.UpdateWindow();
+		CTLSResyncing tr(*this);
+		TSH().SyncListSelection();
 	}
 }
 
@@ -978,9 +975,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 					InvalidateColumnItem(htiOld);
 					InvalidateColumnItem(htiNew);
-
-					m_tcTasks.UpdateWindow();
-					m_lcColumns.UpdateWindow();
+					UpdateAll();
 
 					return lr;
 				}
@@ -1017,6 +1012,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				if (bSelChange)
 				{
 					SyncColumnSelectionToTasks();
+					UpdateAll();
+
 					NotifyParentSelChange(SC_BYKEYBOARD);
 				}
 
@@ -1118,21 +1115,17 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 		case WM_LBUTTONDOWN:
-			// Selecting or de-selecting a lot of items can be slow
-			// because OnListSelectionChange is called once for each.
-			// Base class handles simple click de-selection so we
-			// handle bulk selection here
-			if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
 			{
-				CTLSHoldResync hr(*this);
-
 				BOOL bSelChange = FALSE;
 				TSH().OnListLButtonDown(wp, lp, bSelChange);
 
 				if (bSelChange)
-					NotifyParentSelChange(SC_BYKEYBOARD);
+				{
+					SyncColumnSelectionToTasks();
+					NotifyParentSelChange(SC_BYMOUSE);
 
-				return 0; // eat it
+					return 0; // eat it
+				}
 			}
 			break;
 
@@ -1334,8 +1327,8 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 	TSH().SetItems(moved, TSHS_SELECT, FALSE);
 	TSH().SetAnchor(htiFirst);
 	TCH().SelectItem(htiFirst);
-
-	ResyncListToTreeSelection(m_tcTasks, moved, htiFirst);
+	
+	SyncColumnSelectionToTasks();
 
 	// make sure first moved item is visible
 	if (bEnsureVisible && !TCH().IsItemVisible(htiFirst))
@@ -1431,8 +1424,7 @@ BOOL CTDLTaskTreeCtrl::CanMoveSelection(TDC_MOVETASK nDirection) const
 		return FALSE;
 	
 	// Get selected tasks without duplicate subtasks
-	CHTIList selection;
-	TSH().CopySelection(selection, TRUE);
+	const CHTIList& selection = TSH().Items();
 	
 	if (!selection.GetCount() || !TSH().ItemsAreAllSiblings(selection))
 		return FALSE;

@@ -104,6 +104,7 @@ public:
 	inline HTREEITEM GetLastItem() const { return GetCount() ? m_lstSelection.GetTail() : NULL; }
 	inline POSITION GetFirstItemPos() const { return GetCount() ? m_lstSelection.GetHeadPosition() : NULL; }
 	inline HTREEITEM GetNextItem(POSITION& pos) const { return m_lstSelection.GetNext(pos); }
+	inline const CHTIList& Items() const { return m_lstSelection; }
 
 	inline HTREEITEM GetSingleSelectedItem() const { return (HasSingleSelection() ? GetFirstItem() : NULL); }
 	inline BOOL HasSingleSelection() const { return (GetCount() == 1); }
@@ -203,7 +204,6 @@ protected:
 	void AddAll(HTREEITEM hti);
 	BOOL DragDetect(CPoint pt);
 
-	virtual BOOL HasFocus() const { return (::GetFocus() == m_tree); }
 
 	struct SORTITEM
 	{
@@ -221,6 +221,8 @@ protected:
 
 	int FindPrevValidSelection(const CHTIMap& mapItems) const;
 	int FindNextValidSelection(const CHTIMap& mapItems) const;
+
+	virtual BOOL HasFocus() const { return (::GetFocus() == m_tree); }
 };
 
 #endif // !defined(AFX_TREESELECTIONHELPER_H__098294B4_8B41_4369_8522_FE1637BA7EA1__INCLUDED_)

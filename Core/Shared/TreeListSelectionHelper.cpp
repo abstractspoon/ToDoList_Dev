@@ -37,86 +37,89 @@ void CTreeListSelectionHelper::DeselectAll()
 	m_list.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
 }
 
-BOOL CTreeListSelectionHelper::HasFocus() const 
+void CTreeListSelectionHelper::SyncListSelection(BOOL bUpdate)
+{
+	{
+		CLockUpdates lu(m_list);
+		m_list.SetItemState(-1, 0, LVIS_SELECTED);
+
+		POSITION pos = GetFirstItemPos();
+
+		while (pos)
+		{
+			HTREEITEM hti = GetNextItem(pos);
+			int nItem = GetListItem(hti);
+
+			if (hti == m_htiAnchor)
+			{
+				m_list.SetItemState(nItem, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
+				m_list.SetSelectionMark(nItem);
+			}
+			else
+			{
+				m_list.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
+			}
+		}
+	}
+
+	if (bUpdate)
+	{
+		m_tree.UpdateWindow();
+		m_list.UpdateWindow();
+	}
+}
+
+BOOL CTreeListSelectionHelper::HasFocus() const
 { 
 	return (CTreeSelectionHelper::HasFocus() || (::GetFocus() == m_list)); 
-}
-
-void CTreeListSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
-{
-	CTreeSelectionHelper::OnTreeLButtonDown(wp, lp, bSelChange);
-}
-
-void CTreeListSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
-{
-	CTreeSelectionHelper::OnTreeRButtonDown(wp, lp, bSelChange);
-}
-
-void CTreeListSelectionHelper::OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
-{
-	CTreeSelectionHelper::OnTreeKeyDown(wp, lp, bSelChange);
-}
-
-void CTreeListSelectionHelper::OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
-{
-	CTreeSelectionHelper::OnTreeKeyUp(wp, lp, bSelChange);
-}
-
-void CTreeListSelectionHelper::OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD)
-{
-	CTreeSelectionHelper::OnTreeNotifyParentKeyDown(pTVKD);
-}
-
-void CTreeListSelectionHelper::OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange)
-{
-	CTreeSelectionHelper::OnTreeNotifyParentSelChange(pNMTV, bSelChange);
 }
 
 void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 {
 	bSelChange = FALSE;
 
-	// Selecting or de-selecting a lot of items can be slow
-	// because OnListSelectionChange is called once for each.
-	// Base class handles simple click de-selection so we
-	// handle bulk selection here
-	if (Misc::IsKeyPressed(VK_SHIFT)) // bulk-selection
+	int nHit = m_list.HitTest(lp);
+
+	if (nHit == -1)
+		return;
+
+	// allow parent to handle any focus changes
+	// before we change our selection
+	if (!HasFocus())
+		m_list.SetFocus();
+
+	HTREEITEM htiHit = GetTreeItem(nHit);
+
+	BOOL bCtrl = (wp & MK_CONTROL), bShift = (wp & MK_SHIFT);
+	HTREEITEM htiAnchor = GetAnchor();
+
+	if (!htiAnchor && bShift)
+		htiAnchor = htiHit;
+
+	if (bCtrl)
 	{
-		// allow parent to handle any focus changes
-		// before we change our selection
-		if (!HasFocus())
-			m_list.SetFocus();
-
-		int nAnchor = GetListItem(m_htiAnchor);
-
-		if (nAnchor == -1)
-		{
-			ASSERT(0);
-			return;
-		}
-
-		int nHit = m_list.HitTest(lp);
-
-		if (nHit == -1)
-			return;
-
-		if (!Misc::IsKeyPressed(VK_CONTROL))
-			DeselectAll();
-
-		int nFrom = (nAnchor < nHit) ? nAnchor : nHit;
-		int nTo = (nAnchor < nHit) ? nHit : nAnchor;
-
-		for (int nItem = nFrom; nItem <= nTo; nItem++)
-		{
-			HTREEITEM hti = GetTreeItem(nItem);
-			ASSERT(hti);
-
-			AddItem(hti, FALSE);
-			m_list.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
-		}
+		if (bShift)
+			SetItems(htiAnchor, htiHit, TSHS_SELECT);
+		else
+			SetItem(htiHit, TSHS_TOGGLE);
 
 		bSelChange = TRUE;
 	}
+	else if (bShift)
+	{
+		RemoveAll();
+		SetItems(htiAnchor, htiHit, TSHS_SELECT);
+		bSelChange = TRUE;
+	}
+	else if (htiHit && !HasItem(htiHit)) // !bCtrl && !bShift
+	{
+		// select item if not already
+		SelectSingleItem(htiHit, bSelChange);
+	}
+
+	// update anchor
+	if (htiHit && !bShift)
+		SetAnchor(htiHit);
 }
 
 void CTreeListSelectionHelper::OnListRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)

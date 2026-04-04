@@ -20,6 +20,7 @@ public:
 	virtual ~CTreeListSelectionHelper();
 
 	void DeselectAll();
+	void SyncListSelection(BOOL bUpdate = TRUE);
 
 	virtual BOOL HasFocus() const;
 
@@ -27,15 +28,6 @@ public:
 	void OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnListRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnListNotifyParentSelChange(NMLISTVIEW* pNMLV, BOOL& bSelChange);
-
-	// Base class tree overrides
-	virtual void OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	virtual void OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-
-	virtual void OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	virtual void OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
-	virtual void OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD);
-	virtual void OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange);
 
 protected:
 	CListCtrl& m_list;

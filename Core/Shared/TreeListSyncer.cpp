@@ -54,7 +54,10 @@ const int LINUX_VOFFSET_FUDGE	= 1;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-CTLSHoldResync::CTLSHoldResync(CTreeListSyncer& tls) : m_tls(tls), m_bResyncHeld(FALSE)
+CTLSHoldResync::CTLSHoldResync(CTreeListSyncer& tls) 
+	: 
+	m_tls(tls), 
+	m_bResyncHeld(FALSE)
 {
 	if (m_tls.IsResyncEnabled())
 	{
@@ -67,6 +70,22 @@ CTLSHoldResync::~CTLSHoldResync()
 {
 	if (m_bResyncHeld)
 		m_tls.EnableResync(TRUE, m_tls.PrimaryWnd());
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+CTLSResyncing::CTLSResyncing(CTreeListSyncer& tls) 
+	: 
+	m_tls(tls), 
+	m_bWasResyncing(FALSE)
+{
+	m_bWasResyncing = m_tls.m_bResyncing;
+	m_tls.m_bResyncing = TRUE;
+}
+
+CTLSResyncing::~CTLSResyncing()
+{
+	m_tls.m_bResyncing = m_bWasResyncing;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

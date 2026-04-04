@@ -953,11 +953,8 @@ void CTreeListCtrl::SyncColumnSelectionToTasks()
 {
 	if (CanResync())
 	{
-		CHTIList selection;
-		TSH().CopySelection(selection);
-
-		if (ResyncListToTreeSelection(m_tree, selection, TSH().GetAnchor()))
-			m_list.UpdateWindow();
+		CTLSResyncing tr(*this);
+		TSH().SyncListSelection();
 	}
 }
 
@@ -1231,9 +1228,7 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 					InvalidateListItem(htiOld);
 					InvalidateListItem(htiNew);
-
-					m_tree.UpdateWindow();
-					m_list.UpdateWindow();
+					UpdateAll();
 
 					return lr;
 				}
