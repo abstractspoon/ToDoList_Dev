@@ -357,7 +357,6 @@ BEGIN_MESSAGE_MAP(CTreeListCtrl, CWnd)
 	ON_NOTIFY(HDN_ENDDRAG, IDC_TREELISTTREEHEADER, OnTreeHeaderEndDrag)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_TREELISTTREEHEADER, OnTreeHeaderDblClickDivider)
 	ON_NOTIFY(NM_RCLICK, IDC_TREELISTTREEHEADER, OnTreeHeaderRightClick)
-	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TREELISTTREE, OnTreeItemExpanded)
 
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
 	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreePreDragMove)
@@ -876,14 +875,6 @@ void CTreeListCtrl::OnTreeHeaderRightClick(NMHDR* /*pNMHDR*/, LRESULT* /*pResult
 	GetParent()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), (LPARAM)::GetMessagePos());
 }
 
-void CTreeListCtrl::OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* /*pResult*/)
-{
-	LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
-
-	if (!m_bMovingItem)
-		UpdateColumnWidths((pNMTV->action == TVE_EXPAND) ? UTWA_EXPAND : UTWA_COLLAPSE);
-}
-
 LRESULT CTreeListCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM lp)
 {
 	// Notify derived class
@@ -1060,24 +1051,20 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			switch (pNMHDR->code)
 			{
 			case TVN_BEGINLABELEDIT:
-				if (m_bReadOnly)
 				{
-					return 1L; // cancel
-				}
-				else if (m_bMovingItem)
-				{
-					return 1L; // cancel
-				}
-				else if (m_treeDragDrop.IsDragging())
-				{
-					return 1L; // cancel
-				}
-				else if (TSH().GetCount() != 1)
-				{
-					return 1L; // cancel
-				}
-				else 
-				{
+					if (m_bReadOnly)
+						return 1L; // cancel
+
+					if (m_bMovingItem)
+						return 1L; // cancel
+
+					if (m_treeDragDrop.IsDragging())
+						return 1L; // cancel
+
+					if (TSH().GetCount() != 1)
+						return 1L; // cancel
+
+					// else
 					CPoint point(GetMessagePos());
 					int nCol = -1;
 
@@ -1092,6 +1079,27 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 			case TVN_KEYDOWN:
 				TSH().OnTreeNotifyParentKeyDown((NMTVKEYDOWN*)pNMHDR);
+				break;
+
+			case TVN_ITEMEXPANDING:
+				{
+					BOOL bSelChange = FALSE;
+					TSH().OnTreeNotifyParentExpansion((NMTREEVIEW*)pNMHDR, bSelChange);
+
+					if (bSelChange)
+					{
+						SyncColumnSelectionToTasks();
+						NotifyParentSelectionChange();
+					}
+				}
+				break;
+
+			case TVN_ITEMEXPANDED:
+				if (!m_bMovingItem)
+				{
+					LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
+					UpdateColumnWidths((pNMTV->action == TVE_EXPAND) ? UTWA_EXPAND : UTWA_COLLAPSE);
+				}
 				break;
 			}
 		}

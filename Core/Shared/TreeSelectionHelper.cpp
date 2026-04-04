@@ -472,8 +472,9 @@ BOOL CTreeSelectionHelper::ItemsAreAllParents() const
 	return FALSE; // nothing selected
 }
 
-void CTreeSelectionHelper::RemoveHiddenItems()
+int CTreeSelectionHelper::RemoveHiddenItems()
 {
+	int nNumRemoved = 0;
 	POSITION pos = GetFirstItemPos();
 
 	while (pos)
@@ -487,8 +488,11 @@ void CTreeSelectionHelper::RemoveHiddenItems()
 				m_htiAnchor = NULL;
 
 			m_lstSelection.RemoveAt(posPrev);
+			nNumRemoved++;
 		}
 	}
+
+	return nNumRemoved;
 }
 
 BOOL CTreeSelectionHelper::ItemsAreAllSiblings() const
@@ -573,13 +577,14 @@ int CTreeSelectionHelper::SortProc(const void* item1, const void* item2)
 	return (pItem1->nVPos - pItem2->nVPos);
 }
 
-void CTreeSelectionHelper::RemoveChildDuplicates() 
+int CTreeSelectionHelper::RemoveChildDuplicates() 
 { 
-	RemoveChildDuplicates(m_lstSelection); 
+	return RemoveChildDuplicates(m_lstSelection); 
 }
 
-void CTreeSelectionHelper::RemoveChildDuplicates(CHTIList& selection) const
+int CTreeSelectionHelper::RemoveChildDuplicates(CHTIList& selection) const
 {
+	int nNumRemoved = 0;
 	POSITION pos = selection.GetHeadPosition();
 
 	while (pos)
@@ -588,8 +593,45 @@ void CTreeSelectionHelper::RemoveChildDuplicates(CHTIList& selection) const
 		HTREEITEM hti = selection.GetNext(pos);
 
 		if (HasSelectedParent(hti, selection))
+		{
 			selection.RemoveAt(posChild);
+			nNumRemoved++;
+		}
 	}
+
+	return nNumRemoved;
+}
+
+
+int CTreeSelectionHelper::RemoveChildItems(HTREEITEM htiParent)
+{
+	return RemoveChildItems(htiParent, m_lstSelection);
+}
+
+int CTreeSelectionHelper::RemoveChildItems(HTREEITEM htiParent, CHTIList& selection) const
+{
+	if (!htiParent)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	int nNumRemoved = 0;
+	POSITION pos = selection.GetHeadPosition();
+
+	while (pos)
+	{
+		POSITION posChild = pos;
+		HTREEITEM hti = selection.GetNext(pos);
+
+		if (TCH().ItemHasParent(hti, htiParent))
+		{
+			selection.RemoveAt(posChild);
+			nNumRemoved++;
+		}
+	}
+
+	return nNumRemoved;
 }
 
 int CTreeSelectionHelper::CopySelection(CHTIList& selection, BOOL bRemoveChildDupes, BOOL bOrdered) const
@@ -1259,6 +1301,30 @@ void CTreeSelectionHelper::OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD)
 
 			if ((nChar >= 0x20) && (nChar <= 0xFF))
 				m_nLastKeyDown = pTVKD->wVKey;
+		}
+		break;
+	}
+}
+
+void CTreeSelectionHelper::OnTreeNotifyParentExpansion(NMTREEVIEW* pNMTV, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	switch (pNMTV->hdr.code)
+	{
+	case TVN_ITEMEXPANDING:
+		if (pNMTV->action == TVE_COLLAPSE)
+		{
+			bSelChange = RemoveChildItems(pNMTV->itemNew.hItem);
+
+			if (IsEmpty())
+			{
+				ASSERT(bSelChange);
+
+				// move selection to parent
+				SelectSingleItem(pNMTV->itemNew.hItem, bSelChange);
+				ASSERT(bSelChange);
+			}
 		}
 		break;
 	}

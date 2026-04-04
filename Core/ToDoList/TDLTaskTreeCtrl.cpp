@@ -902,29 +902,22 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				TSH().OnTreeNotifyParentKeyDown((NMTVKEYDOWN*)pNMHDR);
 				break;
 				
-			case TVN_ITEMEXPANDED:
+			case TVN_ITEMEXPANDING:
 				{
-					NMTREEVIEW* pNMTV = (NMTREEVIEW*)lp;
+					BOOL bSelChange = FALSE;
+					TSH().OnTreeNotifyParentExpansion((NMTREEVIEW*)lp, bSelChange);
 
-					// make sure at least one selected item is visible 
-					// if collapsing the item
-					if (pNMTV->action == TVE_COLLAPSE)
+					if (bSelChange)
 					{
-						TSH().RemoveHiddenItems();
-
-						if (TSH().GetCount() == 0)
-						{
-							// move selection to parent
-							SelectItem(pNMTV->itemNew.hItem, TRUE, SC_BYMOUSE);
-						}
+						SyncColumnSelectionToTasks();
+						NotifyParentSelChange(SC_BYMOUSE);
 					}
-
-					UpdateAll();
-
-					RecalcUntrackedColumnWidths();
-					RepackageAndSendToParent(msg, wp, lp);
 				}
+				break;
 
+			case TVN_ITEMEXPANDED:
+				RecalcUntrackedColumnWidths();
+				RepackageAndSendToParent(msg, wp, lp);
 				break;
 			}
 		}

@@ -223,7 +223,6 @@ protected:
 	afx_msg void OnTreeHeaderEndDrag(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeHeaderDblClickDivider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeHeaderRightClick(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnTreeDragEnter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTreePreDragMove(WPARAM wp, LPARAM lp);

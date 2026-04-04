@@ -136,11 +136,14 @@ public:
 	BOOL ItemsAreAllSiblings(const CHTIList& selection) const;
 
 	// removes any items which are children of other items in the list
-	void RemoveChildDuplicates();
-	void RemoveChildDuplicates(CHTIList& selection) const;
+	int RemoveChildDuplicates();
+	int RemoveChildDuplicates(CHTIList& selection) const;
+
+	int RemoveChildItems(HTREEITEM htiParent);
+	int RemoveChildItems(HTREEITEM htiParent, CHTIList& selection) const;
 
 	// removes any items whose parent is collapsed
-	void RemoveHiddenItems();
+	int RemoveHiddenItems();
 
 	// returns TRUE if any direct ancestor is selected
 	BOOL HasSelectedParent(HTREEITEM hti) const;
@@ -182,6 +185,7 @@ public:
 	void OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnTreeNotifyParentKeyDown(NMTVKEYDOWN* pTVKD);
 	void OnTreeNotifyParentSelChange(NMTREEVIEW* pNMTV, BOOL& bSelChange);
+	void OnTreeNotifyParentExpansion(NMTREEVIEW* pNMTV, BOOL& bSelChange);
 
 	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
 
