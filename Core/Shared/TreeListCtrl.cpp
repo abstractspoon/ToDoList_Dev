@@ -1214,8 +1214,14 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 		case WM_RBUTTONDOWN:
 			{
-				BOOL bUnused = FALSE;
-				TSH().OnListRButtonDown(wp, lp, bUnused);
+				BOOL bSelChange = FALSE;
+				TSH().OnListRButtonDown(wp, lp, bSelChange);
+
+				if (bSelChange)
+				{
+					SyncColumnSelectionToTasks();
+					NotifyParentSelectionChange();
+				}
 			}
 			break;
 		}
@@ -1245,8 +1251,14 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 		case WM_RBUTTONDOWN:
 			{
-				BOOL bUnused = FALSE;
-				TSH().OnTreeRButtonDown(wp, lp, bUnused);
+				BOOL bSelChange = FALSE;
+				TSH().OnTreeRButtonDown(wp, lp, bSelChange);
+
+				if (bSelChange)
+				{
+					SyncColumnSelectionToTasks();
+					NotifyParentSelectionChange();
+				}
 			}
 			break;
 
@@ -1272,15 +1284,27 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 		case WM_KEYDOWN:
 			{
-				BOOL bUnused = FALSE;
-				TSH().OnTreeKeyDown(wp, lp, bUnused);
+				BOOL bSelChange = FALSE;
+				TSH().OnTreeKeyDown(wp, lp, bSelChange);
+
+				if (bSelChange)
+				{
+					SyncColumnSelectionToTasks();
+					NotifyParentSelectionChange();
+				}
 			}
 			break;
 
 		case WM_KEYUP:
 			{
-				BOOL bUnused = FALSE;
-				TSH().OnTreeKeyUp(wp, lp, bUnused);
+				BOOL bSelChange = FALSE;
+				TSH().OnTreeKeyUp(wp, lp, bSelChange);
+
+				if (bSelChange)
+				{
+					SyncColumnSelectionToTasks();
+					NotifyParentSelectionChange();
+				}
 			}
 			break;
 
