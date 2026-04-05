@@ -1187,28 +1187,28 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		case WM_LBUTTONDBLCLK:
 			if (OnListLButtonDblClk(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // eat
 			}
 			break;
 
 		case WM_LBUTTONDOWN:
 			if (OnListLButtonDown(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // eat
 			}
 			break;
 
 		case WM_LBUTTONUP:
 			if (OnListLButtonUp(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // eat
 			}
 			break;
 
 		case WM_MOUSEMOVE:
 			if (OnListMouseMove(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // eat
 			}
 			break;
 
@@ -1221,6 +1221,8 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				{
 					SyncColumnSelectionToTasks();
 					NotifyParentSelectionChange();
+
+					return 0L; // eat
 				}
 			}
 			break;
@@ -1259,27 +1261,37 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 					SyncColumnSelectionToTasks();
 					NotifyParentSelectionChange();
 				}
+
+				// Let default handling produce context menu
 			}
 			break;
 
 		case WM_LBUTTONDOWN:
 			if (OnTreeLButtonDown(wp, lp))
-				return FALSE; // eat
+			{
+				return 0L; // we handled it
+			}
 			break;
 
 		case WM_LBUTTONUP:
 			if (OnTreeLButtonUp(wp, lp))
-				return FALSE; // eat
+			{
+				return 0L; // we handled it
+			}
 			break;
 
 		case WM_LBUTTONDBLCLK:
 			if (OnTreeLButtonDblClk(wp, lp))
-				return FALSE; // eat
+			{
+				return 0L; // we handled it
+			}
 			break;
 
 		case WM_MOUSEMOVE:
 			if (OnTreeMouseMove(wp, lp))
-				return FALSE; // eat
+			{
+				return 0L; // we handled it
+			}
 			break;
 
 		case WM_KEYDOWN:
@@ -1291,6 +1303,8 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				{
 					SyncColumnSelectionToTasks();
 					NotifyParentSelectionChange();
+
+					return 0L; // we handled it
 				}
 			}
 			break;
@@ -1304,6 +1318,8 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				{
 					SyncColumnSelectionToTasks();
 					NotifyParentSelectionChange();
+
+					return 0L; // we handled it
 				}
 			}
 			break;

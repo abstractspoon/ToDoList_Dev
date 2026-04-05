@@ -948,12 +948,16 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 #endif
 		case WM_ERASEBKGND:
 			if (m_bMovingItem)
-				return TRUE;
+			{
+				return TRUE; // we handled it
+			}
 			break;
 
 		case WM_CHAR:
 			if (wp == VK_ESCAPE)
+			{
 				return 0L; // prevent beep
+			}
 			break;
 
 		case TVM_SELECTITEM:
@@ -990,6 +994,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					{
 						SyncColumnSelectionToTasks();
 						NotifyParentSelChange(SC_BYKEYBOARD);
+
+						return 0L; // we handled it
 					}
 				}
 				break;
@@ -1077,18 +1083,22 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					BOOL bHitIcon = (nHitFlags & (TVHT_ONITEMICON | TVHT_ONITEMSTATEICON));
 
 					if (bHitIcon && HandleClientColumnClick(lp, FALSE))
+					{
 						return 0L; // we handled it
+					}
 				}
 
 				if (bSelChange)
+				{
 					return 0L; // we handled it
+				}
 			}
 			break;
 		
 		case WM_LBUTTONDBLCLK:
 			if (HandleClientColumnClick(lp, TRUE))
 			{
-				return 0L; // eat
+				return 0L; // we handled it
 			}
 			break;
 
@@ -1115,7 +1125,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					SyncColumnSelectionToTasks();
 					NotifyParentSelChange(SC_BYMOUSE);
 
-					return 0; // eat it
+					return 0L; // we handled it
 				}
 			}
 			break;
@@ -1131,7 +1141,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				HTREEITEM hti = CTreeListSyncer::GetTreeItem(m_tcTasks, m_lcColumns, nHit);
 
 				if (hti == NULL)
-					return 0L; // eat it
+					return 0L; // we handled it
 
 				// Allow double-clicking to expand tree item 
 				// if not on an 'active' column
@@ -1140,7 +1150,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				if (TCH().TreeCtrl().ItemHasChildren(hti))
 				{
 					ExpandItem(hti, !TCH().IsItemExpanded(hti));
-					return 0L; // eat it
+					return 0L; // we handled it
 				}
 			}
 			break;
