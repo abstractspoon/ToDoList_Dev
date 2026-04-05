@@ -40,8 +40,8 @@ void CTreeListSelectionHelper::DeselectAll()
 void CTreeListSelectionHelper::SyncListSelection(BOOL bUpdate)
 {
 	{
-		CLockUpdates lu(m_list);
-		m_list.SetItemState(-1, 0, LVIS_SELECTED);
+		CHoldRedraw hr(m_list);
+		m_list.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
 
 		POSITION pos = GetFirstItemPos();
 
@@ -69,11 +69,6 @@ void CTreeListSelectionHelper::SyncListSelection(BOOL bUpdate)
 	}
 }
 
-BOOL CTreeListSelectionHelper::HasFocus() const
-{ 
-	return (CTreeSelectionHelper::HasFocus() || (::GetFocus() == m_list)); 
-}
-
 void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 {
 	bSelChange = FALSE;
@@ -85,8 +80,7 @@ void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 
 	// allow parent to handle any focus changes
 	// before we change our selection
-	if (!HasFocus())
-		m_list.SetFocus();
+	SetFocus();
 
 	HTREEITEM htiHit = GetTreeItem(nHit);
 
@@ -135,8 +129,7 @@ void CTreeListSelectionHelper::OnListRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 	{
 		// allow parent to handle any focus changes
 		// before we change our selection
-		if (!HasFocus())
-			m_list.SetFocus();
+		SetFocus();
 
 		HTREEITEM hti = GetTreeItem(nHit);
 

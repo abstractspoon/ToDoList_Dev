@@ -128,7 +128,7 @@ public:
 	BOOL IsAnyItemExpanded(BOOL bFully = FALSE) const;
 	BOOL IsAnyItemCollapsed() const;
 	BOOL AllParentItemsAreExpanded(BOOL bRecursive) const;
-	void ExpandItems(BOOL bExpand, BOOL bRecursive);
+	void ExpandItems(BOOL bExpand, BOOL bFully = FALSE);
 	void ExpandParentItems(BOOL bRecursive);
 
 	BOOL ItemsAreAllParents() const;
@@ -207,8 +207,8 @@ protected:
 	BOOL HasSelectedParent(HTREEITEM hti, const CHTIList& selection) const;
 	void AddAll(HTREEITEM hti);
 	BOOL DragDetect(CPoint pt);
-
-
+	void SetFocus();
+	
 	struct SORTITEM
 	{
 		HTREEITEM hti;
@@ -225,8 +225,6 @@ protected:
 
 	int FindPrevValidSelection(const CHTIMap& mapItems) const;
 	int FindNextValidSelection(const CHTIMap& mapItems) const;
-
-	virtual BOOL HasFocus() const { return (::GetFocus() == m_tree); }
 };
 
 #endif // !defined(AFX_TREESELECTIONHELPER_H__098294B4_8B41_4369_8522_FE1637BA7EA1__INCLUDED_)

@@ -22,8 +22,6 @@ public:
 	void DeselectAll();
 	void SyncListSelection(BOOL bUpdate = TRUE);
 
-	virtual BOOL HasFocus() const;
-
 	// Pseudo List message handlers
 	void OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
 	void OnListRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);

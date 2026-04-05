@@ -1023,12 +1023,12 @@ BOOL CTreeSelectionHelper::AllParentItemsAreExpanded(BOOL bRecursive) const
 	return TRUE;
 }
 
-void CTreeSelectionHelper::ExpandItems(BOOL bExpand, BOOL bRecursive)
+void CTreeSelectionHelper::ExpandItems(BOOL bExpand, BOOL bFully)
 {
 	POSITION pos = GetFirstItemPos();
 
 	while (pos)
-		m_tch.ExpandItem(GetNextItem(pos), bExpand, bRecursive);
+		m_tch.ExpandItem(GetNextItem(pos), bExpand, bFully);
 }
 
 void CTreeSelectionHelper::ExpandParentItems(BOOL bRecursive)
@@ -1078,14 +1078,19 @@ BOOL CTreeSelectionHelper::EnsureVisible(BOOL bHorzPartialOK)
 	return TRUE;
 }
 
+void CTreeSelectionHelper::SetFocus()
+{
+	if (::GetFocus() != m_tree)
+		m_tree.SetFocus();
+}
+
 void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 {
 	bSelChange = FALSE;
 
 	// allow parent to handle any focus changes
 	// before we change our selection
-	if (!HasFocus())
-		m_tree.SetFocus();
+	SetFocus();
 
 	UINT nHitFlags = 0;
 	HTREEITEM htiHit = m_tree.HitTest(lp, &nHitFlags);
@@ -1160,8 +1165,7 @@ void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 
 	// allow parent to handle any focus changes
 	// before we change our selection
-	if (!HasFocus())
-		m_tree.SetFocus();
+	SetFocus();
 
 	HTREEITEM hti = m_tree.HitTest(lp);
 
