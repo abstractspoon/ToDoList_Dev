@@ -583,6 +583,8 @@ BOOL CTreeListCtrl::SelectItems(const CHTIList& htItems)
 
 	if (!TSH().AllParentItemsAreExpanded(TRUE))
 	{
+		CHoldRedraw hr(*this);
+
 		TSH().ExpandParentItems(TRUE);
 		ExpandList();
 	}
