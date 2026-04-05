@@ -356,6 +356,8 @@ void CTDLTaskTreeCtrl::ExpandSelection(BOOL bExpand, BOOL bFully)
 	if (!bExpand || bFully)
 		TSH().RemoveChildDuplicates();
 
+	// Note: We don;t use CTreeSelectionHelper::ExpandItems here
+	// because we need to expand/collapse the list as we go
 	POSITION pos = TSH().GetFirstItemPos();
 
 	while (pos)
@@ -1012,35 +1014,36 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				{
 					SyncColumnSelectionToTasks();
 					NotifyParentSelChange(SC_BYKEYBOARD);
+
+					return 0L; // we handled it
 				}
-
-				// Handle expanding/contracting tasks
-				BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
-
-				if (!bAlt && !bSelChange)
+				else if (Misc::ModKeysArePressed(0))
 				{
-					BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-					BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-
+					// Handle expanding/contracting tasks
 					switch (wp)
 					{
 					case VK_MULTIPLY:
-						if (!bCtrl && !bShift)
+					case VK_RIGHT:
+						if (TSH().IsAnyItemCollapsed())
 						{
-							// Eat this if the selected item(s) is already fully expanded
-							if (!TSH().IsAnyItemCollapsed())
-								return 0L;
+							ExpandSelection(TRUE, (wp == VK_MULTIPLY));
 						}
-						break;
+						return 0L; // we handled it
 
 					case VK_SUBTRACT:
-						if (!bCtrl && !bShift)
+					case VK_LEFT:
+						if (TSH().IsAnyItemExpanded())
 						{
-							// Eat this if the selected item(s) is already collapsed
-							if (!TSH().IsAnyItemExpanded())
-								return 0L;
+							bSelChange = TSH().RemoveChildDuplicates();
+							ExpandSelection(FALSE);
+							
+							if (bSelChange)
+							{
+								SyncColumnSelectionToTasks();
+								NotifyParentSelChange(SC_BYKEYBOARD);
+							}
 						}
-						break;
+						return 0L; // we handled it
 					}
 				}
 			}

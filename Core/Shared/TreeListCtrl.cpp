@@ -574,18 +574,18 @@ BOOL CTreeListCtrl::SelectItems(const CHTIList& htItems)
 	}
 
 	// else
-		CHoldHScroll hs(m_tree);
-		CTLSHoldResync hr2(*this);
+	CHoldHScroll hs(m_tree);
+	CTLSHoldResync hr2(*this);
 
-		TSH().RemoveAll(FALSE, FALSE);
-		TSH().SetItems(htItems, TSHS_SELECT);
-		TSH().FixupTreeSelection();
+	TSH().RemoveAll(FALSE, FALSE);
+	TSH().SetItems(htItems, TSHS_SELECT);
+	TSH().FixupTreeSelection();
 
-		if (!TSH().AllParentItemsAreExpanded(TRUE))
-		{
-			TSH().ExpandParentItems(TRUE);
-			ExpandList();
-		}
+	if (!TSH().AllParentItemsAreExpanded(TRUE))
+	{
+		TSH().ExpandParentItems(TRUE);
+		ExpandList();
+	}
 
 	return TRUE;
 }
@@ -1305,6 +1305,35 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 					NotifyParentSelectionChange();
 
 					return 0L; // we handled it
+				}
+				else if (Misc::ModKeysArePressed(0))
+				{
+					// Handle expanding/contracting tasks
+					switch (wp)
+					{
+					case VK_MULTIPLY:
+					case VK_RIGHT:
+						if (TSH().IsAnyItemCollapsed())
+						{
+							ExpandSelection(TRUE, (wp == VK_MULTIPLY));
+						}
+						return 0L; // we handled it
+
+					case VK_SUBTRACT:
+					case VK_LEFT:
+						if (TSH().IsAnyItemExpanded())
+						{
+							bSelChange = TSH().RemoveChildDuplicates();
+							ExpandSelection(FALSE);
+
+							if (bSelChange)
+							{
+								SyncColumnSelectionToTasks();
+								NotifyParentSelectionChange();
+							}
+						}
+						return 0L; // we handled it
+					}
 				}
 			}
 			break;
