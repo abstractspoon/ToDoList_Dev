@@ -473,10 +473,14 @@ namespace EvidenceBoardUIExtension
 			{
 				var node = GetNode(nodeId);
 
-				if (IsSelectableNode(node))
-					nodes.Add(node);
-				else
+				if (node == null)
+				{
+					Debug.Assert(false);
 					return false;
+				}
+
+				ExpandAllParents(node);
+				nodes.Add(node);
 			}
 
 			m_SelectedNodes = nodes;
