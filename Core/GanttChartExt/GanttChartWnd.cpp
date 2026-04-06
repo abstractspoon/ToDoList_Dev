@@ -573,13 +573,7 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		return true;	
 	
 	case IUI_COLLAPSEALL:
-		{
-			int nSelCount = m_ctrlGantt.GetSelectionCount();
-			m_ctrlGantt.ExpandAll(FALSE);
-
-			if (nSelCount != m_ctrlGantt.GetSelectionCount())
-				SendParentSelectionUpdate();
-		}
+		m_ctrlGantt.ExpandAll(FALSE);
 		return true;
 
 	case IUI_EXPANDSELECTED:
@@ -587,13 +581,7 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		return true;
 
 	case IUI_COLLAPSESELECTED:
-		{
-			int nSelCount = m_ctrlGantt.GetSelectionCount();
-			m_ctrlGantt.ExpandSelection(FALSE);
-
-			if (nSelCount != m_ctrlGantt.GetSelectionCount())
-				SendParentSelectionUpdate();
-		}
+		m_ctrlGantt.ExpandSelection(FALSE);
 		return true;
 
 	case IUI_SORT:

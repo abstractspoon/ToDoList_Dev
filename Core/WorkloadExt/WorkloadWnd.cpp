@@ -517,13 +517,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		return true;
 
 	case IUI_COLLAPSEALL:
-		{
-			int nSelCount = m_ctrlWorkload.GetSelectionCount();
-			m_ctrlWorkload.ExpandAll(FALSE);
-
-			if (nSelCount != m_ctrlWorkload.GetSelectionCount())
-				SendParentSelectionUpdate();
-		}
+		m_ctrlWorkload.ExpandAll(FALSE);
 		return true;
 
 	case IUI_EXPANDSELECTED:
@@ -531,13 +525,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		return true;
 
 	case IUI_COLLAPSESELECTED:
-		{
-			int nSelCount = m_ctrlWorkload.GetSelectionCount();
-			m_ctrlWorkload.ExpandSelection(FALSE);
-
-			if (nSelCount != m_ctrlWorkload.GetSelectionCount())
-				SendParentSelectionUpdate();
-		}
+		m_ctrlWorkload.ExpandSelection(FALSE);
 		return true;
 
 	case IUI_SORT:

@@ -703,20 +703,30 @@ void CTreeListCtrl::ExpandAll(BOOL bExpand)
 	// currently selected item's top-level parent and
 	// move the selection there else the branch
 	// containing the selected item never closes
+	int nSelCount = GetSelectionCount();
+
 	if (!bExpand)
 	{
 		HTREEITEM htiSel = GetSelectedItem();
 		HTREEITEM htiParent = TCH().GetTopLevelItem(htiSel);
 
 		if (htiParent != htiSel)
-			SelectItem(htiParent);
+			m_tree.SelectItem(htiParent);
 	}
 
 	ExpandItem(NULL, bExpand, TRUE);
+
+	if (GetSelectionCount() != nSelCount)
+	{
+		ASSERT(!bExpand);
+		NotifyParentSelectionChange();
+	}
 }
 
 void CTreeListCtrl::ExpandSelection(BOOL bExpand, BOOL bAndChildren)
 {
+	int nSelCount = GetSelectionCount();
+
 	if (!bExpand || bAndChildren)
 		TSH().RemoveChildDuplicates();
 
@@ -724,6 +734,9 @@ void CTreeListCtrl::ExpandSelection(BOOL bExpand, BOOL bAndChildren)
 
 	while (pos)
 		ExpandItem(TSH().GetNextItem(pos), bExpand, bAndChildren);
+
+	if (GetSelectionCount() != nSelCount)
+		NotifyParentSelectionChange();
 }
 
 BOOL CTreeListCtrl::CanExpandAll(BOOL bExpand) const
@@ -1037,17 +1050,23 @@ void CTreeListCtrl::NotifyParentSelectionChange()
 
 void CTreeListCtrl::DeselectAll()
 {
-	CTLSHoldResync hr(*this);
-
-	TSH().DeselectAll();
+	// For internal use only
+	if (TSH().GetCount())
+	{
+		CTLSHoldResync hr(*this);
+		TSH().DeselectAll();
+	}
 }
 
 void CTreeListCtrl::SelectAll()
 {
 	CTLSHoldResync hr(*this);
 
-	ExpandAll();
+	int nSelCount = TSH().GetCount();
 	TSH().AddAll();
+
+	if (TSH().GetCount() != nSelCount)
+		NotifyParentSelectionChange();
 }
 
 LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)

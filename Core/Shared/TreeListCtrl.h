@@ -134,7 +134,6 @@ public:
 	BOOL SelectItem(HTREEITEM hti);
 	BOOL SelectItems(const CHTIList& htItems);
 	void SelectAll();
-	void DeselectAll();
 	int GetSelectedItemData(CDWordArray& aItemData) const;
 	int GetSelectionCount() const { return TSH().GetCount(); }
 
@@ -313,6 +312,7 @@ protected:
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
+	void DeselectAll();
 
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);
