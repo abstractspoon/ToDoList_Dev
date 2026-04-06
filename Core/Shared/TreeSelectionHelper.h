@@ -173,7 +173,6 @@ protected:
 protected:
 	void InvalidateItem(HTREEITEM hti);
 	BOOL HasSelectedParent(HTREEITEM hti, const CHTIList& selection) const;
-	void AddAll(HTREEITEM hti);
 
 	struct SORTITEM
 	{

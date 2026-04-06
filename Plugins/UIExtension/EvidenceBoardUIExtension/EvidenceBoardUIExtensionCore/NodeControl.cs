@@ -477,7 +477,6 @@ namespace EvidenceBoardUIExtension
 					nodes.Add(node);
 				else
 					return false;
-
 			}
 
 			m_SelectedNodes = nodes;

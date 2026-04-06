@@ -2692,7 +2692,7 @@ BOOL CTabbedToDoCtrl::CanSelectAll() const
 			ASSERT(pExtWnd);
 			
 			if (pExtWnd)
-				return pExtWnd->CanDoAppCommand(IUI_SELECTALL);
+				return pExtWnd->CanDoAppCommand(IUI_SELECTALLVISIBLE);
 		}
 		break;
 
@@ -2727,7 +2727,6 @@ void CTabbedToDoCtrl::SelectAll()
 			}
 			else
 			{
-				// save IDs only if not showing all tasks
 				CDWordArray aTaskIDs;
 
 				for (int nItem = 0; nItem < nNumItems; nItem++)
@@ -2759,8 +2758,8 @@ void CTabbedToDoCtrl::SelectAll()
 			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 			ASSERT(pExtWnd);
 
-			if (pExtWnd && pExtWnd->DoAppCommand(IUI_SELECTALL))
-				CToDoCtrl::SelectAll();
+			if (pExtWnd)
+				pExtWnd->DoAppCommand(IUI_SELECTALLVISIBLE);
 		}
 		break;
 
