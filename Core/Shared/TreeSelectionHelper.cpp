@@ -284,13 +284,13 @@ BOOL CTreeSelectionHelper::AddAll(BOOL bRedraw)
 	// remove all selection to update history
 	RemoveAll(FALSE, FALSE);
 
-	// traverse all top level aItems adding each in turn
+	// Add all visible items
 	HTREEITEM hti = m_tree.GetChildItem(NULL);
 
 	while (hti)
 	{
-		AddAll(hti);
-		hti = m_tree.GetNextItem(hti, TVGN_NEXT);
+		AddItem(hti, FALSE); // no redraw
+		hti = m_tree.GetNextItem(hti, TVGN_NEXTVISIBLE);
 	}
 
 	// redraw
@@ -298,20 +298,6 @@ BOOL CTreeSelectionHelper::AddAll(BOOL bRedraw)
 		m_tree.Invalidate();
 
 	return GetCount();
-}
-
-void CTreeSelectionHelper::AddAll(HTREEITEM hti)
-{
-	AddItem(hti, FALSE); // no redraw
-
-	// add children
-	HTREEITEM htiChild = m_tree.GetChildItem(hti);
-
-	while (htiChild)
-	{
-		AddAll(htiChild);
-		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-	}
 }
 
 BOOL CTreeSelectionHelper::RemoveAll(BOOL bRemoveFromHistory, BOOL bRedraw) 

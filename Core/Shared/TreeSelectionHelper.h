@@ -205,16 +205,14 @@ protected:
 protected:
 	void InvalidateItem(HTREEITEM hti);
 	BOOL HasSelectedParent(HTREEITEM hti, const CHTIList& selection) const;
-	void AddAll(HTREEITEM hti);
 	BOOL DragDetect(CPoint pt);
 	void SetFocus();
-	
+
 	struct SORTITEM
 	{
 		HTREEITEM hti;
 		int nVPos;
 	};
-
 	typedef CArray<SORTITEM, SORTITEM&> CSortArray;
 
 	int BuildSortArray(const CHTIList& lstSelection, CSortArray& aItems) const;

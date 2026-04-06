@@ -76,7 +76,7 @@ namespace EvidenceBoardUIExtension
 
         public bool SelectAll()
         {
-			m_Control.SelectAllNodes();
+			m_Control.SelectAllNodes(true);
 
 			UpdateToolbarButtonStates();
 

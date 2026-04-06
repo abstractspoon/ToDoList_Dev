@@ -203,7 +203,7 @@ bool CEvidenceBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IU
 	case IUI_EXPANDSELECTED:
 		return m_wnd->ExpandSelectedTasks();
 
-	case IUI_SELECTALL:
+	case IUI_SELECTALLVISIBLE:
 		return m_wnd->SelectAll();
 
 	case IUI_SETFOCUS:
@@ -307,12 +307,12 @@ bool CEvidenceBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd,
 	case IUI_EXPANDSELECTED:
 		return m_wnd->CanExpandSelectedTasks;
 
+	case IUI_SELECTALLVISIBLE:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-	case IUI_SELECTALL:
 		return true;
 
 	case IUI_SETFOCUS:
