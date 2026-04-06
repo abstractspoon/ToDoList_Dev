@@ -1042,6 +1042,14 @@ void CTreeListCtrl::DeselectAll()
 	TSH().DeselectAll();
 }
 
+void CTreeListCtrl::SelectAll()
+{
+	CTLSHoldResync hr(*this);
+
+	ExpandAll();
+	TSH().AddAll();
+}
+
 LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch (msg)

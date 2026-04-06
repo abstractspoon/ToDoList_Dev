@@ -125,13 +125,18 @@ public:
 	void SetReadOnly(BOOL bReadOnly);
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
-	int GetSelectedItemData(CDWordArray& aItemData) const;
-	int GetSelectionCount() const { return TSH().GetCount(); }
+	void SetFocus() { CTreeListSyncer::SetFocus(); }
 
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
- 	void SetFocus() { CTreeListSyncer::SetFocus(); }
+
+	BOOL SelectItem(HTREEITEM hti);
+	BOOL SelectItems(const CHTIList& htItems);
+	void SelectAll();
+	void DeselectAll();
+	int GetSelectedItemData(CDWordArray& aItemData) const;
+	int GetSelectionCount() const { return TSH().GetCount(); }
 
 	void EnableTreeCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable = TRUE) { m_tree.EnableCheckboxes(nUnthemedBitmapID, bEnable); }
 	void EnableTreeImagePlaceholder(BOOL bEnable = TRUE) { m_tree.EnableImagePlaceholder(bEnable); }
@@ -329,8 +334,6 @@ protected:
 	int GetListItem(HTREEITEM hti) const;
 	HTREEITEM GetTreeItem(DWORD dwItemData) const;
 	HTREEITEM GetTreeItem(int nItem) const { return CTreeListSyncer::GetTreeItem(m_tree, m_list, nItem); }
-	BOOL SelectItem(HTREEITEM hti);
-	BOOL SelectItems(const CHTIList& htItems);
 	CString GetItemLabelTip(CPoint ptScreen) const;
 	DWORD GetItemData(HTREEITEM htiFrom) const;
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
@@ -341,7 +344,6 @@ protected:
 
 	void SyncColumnSelectionToTasks();
 	void NotifyParentSelectionChange();
-	void DeselectAll();
 
 	BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }

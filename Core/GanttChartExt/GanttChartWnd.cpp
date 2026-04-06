@@ -568,6 +568,10 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlGantt.ExpandAll(TRUE);
 		return true;
 
+	case IUI_SELECTALL:
+		m_ctrlGantt.SelectAll();
+		return true;	
+	
 	case IUI_COLLAPSEALL:
 		{
 			int nSelCount = m_ctrlGantt.GetSelectionCount();
@@ -738,6 +742,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 		}
 		break;
 
+	case IUI_SELECTALL:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
