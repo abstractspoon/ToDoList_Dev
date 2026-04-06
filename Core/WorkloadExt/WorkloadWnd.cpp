@@ -512,7 +512,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlWorkload.ExpandAll(TRUE);
 		return true;
 
-	case IUI_SELECTALL:
+	case IUI_SELECTALLVISIBLE:
 		m_ctrlWorkload.SelectAll();
 		return true;
 
@@ -684,7 +684,7 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		}
 		break;
 
-	case IUI_SELECTALL:
+	case IUI_SELECTALLVISIBLE:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
