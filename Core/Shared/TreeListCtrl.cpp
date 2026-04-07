@@ -1241,6 +1241,20 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			}
 			break;
 
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+			{
+				// In the rare event that the list has gained the 
+				// focus let the tree process these messages 
+				ScWindowProc(m_tree, msg, wp, lp);
+
+				// And move the focus to the tree once we've 
+				// received WM_KEYUP
+				if (msg == WM_KEYUP)
+					m_tree.SetFocus();
+			}
+			return 0L; // we handled it
+
 		case WM_RBUTTONDOWN:
 			{
 				BOOL bSelChange = FALSE;
