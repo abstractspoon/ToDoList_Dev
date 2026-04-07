@@ -228,6 +228,7 @@ protected:
 	BOOL CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL bVisible);
 	void SyncColumnSelectionToTasks();
 	BOOL SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_ACTION nBy); // internal version
+	BOOL ProcessSelectionChange(BOOL bSelChange, SELCHANGE_ACTION nBy);
 	int GetListItem(HTREEITEM hti) const;
 	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
 	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);

@@ -2816,7 +2816,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 				return 0L; // eat
 
 			// else
-			InvalidateAll(/*FALSE, TRUE*/);
+			InvalidateAll();
 		}
 		break;
 

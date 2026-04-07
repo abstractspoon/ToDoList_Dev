@@ -1115,11 +1115,7 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 					BOOL bSelChange = FALSE;
 					TSH().OnTreeNotifyItemExpanding((NMTREEVIEW*)pNMHDR, bSelChange);
 
-					if (bSelChange)
-					{
-						SyncColumnSelectionToTasks();
-						NotifyParentSelectionChange();
-					}
+					ProcessSelectionChange(bSelChange);
 				}
 				break;
 
@@ -1216,28 +1212,28 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		case WM_LBUTTONDBLCLK:
 			if (OnListLButtonDblClk(wp, lp))
 			{
-				return 0L; // eat
+				return 0L; // we handled it
 			}
 			break;
 
 		case WM_LBUTTONDOWN:
 			if (OnListLButtonDown(wp, lp))
 			{
-				return 0L; // eat
+				return 0L; // we handled it
 			}
 			break;
 
 		case WM_LBUTTONUP:
 			if (OnListLButtonUp(wp, lp))
 			{
-				return 0L; // eat
+				return 0L; // we handled it
 			}
 			break;
 
 		case WM_MOUSEMOVE:
 			if (OnListMouseMove(wp, lp))
 			{
-				return 0L; // eat
+				return 0L; // we handled it
 			}
 			break;
 
@@ -1260,13 +1256,9 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				BOOL bSelChange = FALSE;
 				TSH().OnListRButtonDown(wp, lp, bSelChange);
 
-				if (bSelChange)
-				{
-					SyncColumnSelectionToTasks();
-					NotifyParentSelectionChange();
+				ProcessSelectionChange(bSelChange);
 
-					return 0L; // eat
-				}
+				// Let default handling produce context menu
 			}
 			break;
 		}
@@ -1299,11 +1291,7 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				BOOL bSelChange = FALSE;
 				TSH().OnTreeRButtonDown(wp, lp, bSelChange);
 
-				if (bSelChange)
-				{
-					SyncColumnSelectionToTasks();
-					NotifyParentSelectionChange();
-				}
+				ProcessSelectionChange(bSelChange);
 
 				// Let default handling produce context menu
 			}
@@ -1342,11 +1330,8 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				BOOL bSelChange = FALSE;
 				TSH().OnTreeKeyDown(wp, lp, bSelChange);
 
-				if (bSelChange)
+				if (ProcessSelectionChange(bSelChange))
 				{
-					SyncColumnSelectionToTasks();
-					NotifyParentSelectionChange();
-
 					return 0L; // we handled it
 				}
 				else if (Misc::ModKeysArePressed(0))
@@ -1369,11 +1354,7 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 							bSelChange = TSH().RemoveChildDuplicates();
 							ExpandSelection(FALSE);
 
-							if (bSelChange)
-							{
-								SyncColumnSelectionToTasks();
-								NotifyParentSelectionChange();
-							}
+							ProcessSelectionChange(bSelChange);
 						}
 						return 0L; // we handled it
 					}
@@ -1386,13 +1367,8 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				BOOL bSelChange = FALSE;
 				TSH().OnTreeKeyUp(wp, lp, bSelChange);
 
-				if (bSelChange)
-				{
-					SyncColumnSelectionToTasks();
-					NotifyParentSelectionChange();
-
+				if (ProcessSelectionChange(bSelChange))
 					return 0L; // we handled it
-				}
 			}
 			break;
 
@@ -1409,10 +1385,10 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 					WORD wKeys = LOWORD(wp);
 
 					if ((zDelta == 0) || (wKeys != 0))
-						return TRUE; // eat
+						return TRUE; // we handled it
 
 					if (!CanScroll(m_tree, SB_HORZ, (zDelta > 0)))
-						return TRUE; // eat
+						return TRUE; // we handled it
 
 					CHoldRedraw hr(hRealWnd, NCR_PAINT | NCR_UPDATE);
 
@@ -1456,6 +1432,17 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	}
 		
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+BOOL CTreeListCtrl::ProcessSelectionChange(BOOL bSelChange)
+{
+	if (bSelChange)
+	{
+		SyncColumnSelectionToTasks();
+		NotifyParentSelectionChange();
+	}
+
+	return bSelChange;
 }
 
 BOOL CTreeListCtrl::OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
@@ -1513,11 +1500,7 @@ BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 	if (htiHit && (bCtrlOrShift || !bHitCheck))
 		TSH().OnTreeLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
 
-	if (bSelChange)
-	{
-		SyncColumnSelectionToTasks();
-		NotifyParentSelectionChange();
-	}
+	ProcessSelectionChange(bSelChange);
 
 	// Handle checkbox clicking
 	if (!bCtrlOrShift && bHitCheck)
@@ -1578,11 +1561,8 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 	BOOL bSelChange = FALSE;
 	TSH().OnListLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
 
-	if (bSelChange)
-	{
-		NotifyParentSelectionChange();
-		return TRUE; // eat it
-	}
+	if (ProcessSelectionChange(bSelChange))
+		return TRUE; // we handled it
 
 	// Check for bounds selection
 	int nHit = m_list.HitTest(point);

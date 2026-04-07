@@ -909,11 +909,7 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 					BOOL bSelChange = FALSE;
 					TSH().OnTreeNotifyItemExpanding((NMTREEVIEW*)lp, bSelChange);
 
-					if (bSelChange)
-					{
-						SyncColumnSelectionToTasks();
-						NotifyParentSelChange(SC_BYMOUSE);
-					}
+					ProcessSelectionChange(bSelChange, SC_BYMOUSE);
 				}
 				break;
 
@@ -992,13 +988,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					BOOL bSelChange = FALSE;
 					TSH().OnTreeKeyUp(wp, lp, bSelChange);
 			
-					if (bSelChange)
-					{
-						SyncColumnSelectionToTasks();
-						NotifyParentSelChange(SC_BYKEYBOARD);
-
+					if (ProcessSelectionChange(bSelChange, SC_BYKEYBOARD))
 						return 0L; // we handled it
-					}
 				}
 				break;
 			}
@@ -1010,11 +1001,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				BOOL bSelChange = FALSE;
 				TSH().OnTreeKeyDown(wp, lp, bSelChange);
 			
-				if (bSelChange)
+				if (ProcessSelectionChange(bSelChange, SC_BYKEYBOARD))
 				{
-					SyncColumnSelectionToTasks();
-					NotifyParentSelChange(SC_BYKEYBOARD);
-
 					return 0L; // we handled it
 				}
 				else if (Misc::ModKeysArePressed(0))
@@ -1037,11 +1025,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 							bSelChange = TSH().RemoveChildDuplicates();
 							ExpandSelection(FALSE);
 							
-							if (bSelChange)
-							{
-								SyncColumnSelectionToTasks();
-								NotifyParentSelChange(SC_BYKEYBOARD);
-							}
+							ProcessSelectionChange(bSelChange, SC_BYKEYBOARD);
 						}
 						return 0L; // we handled it
 					}
@@ -1055,11 +1039,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				BOOL bSelChange = FALSE;
 				TSH().OnTreeRButtonDown(wp, lp, bSelChange);
 				
-				if (bSelChange)
-				{
-					SyncColumnSelectionToTasks();
-					NotifyParentSelChange(SC_BYMOUSE);
-				}
+				ProcessSelectionChange(bSelChange, SC_BYMOUSE);
 
 				// Allow default handling to produce context menu
 			}
@@ -1071,11 +1051,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				BOOL bSelChange = FALSE;
 				TSH().OnTreeLButtonDown(wp, lp, bSelChange);
 				
-				if (bSelChange)
-				{
-					SyncColumnSelectionToTasks();
-					NotifyParentSelChange(SC_BYMOUSE);
-				}
+				ProcessSelectionChange(bSelChange, SC_BYMOUSE);
 
 				// Handle icon and checkbox clicking
 				if (0 == (wp & (MK_CONTROL | MK_SHIFT)))
@@ -1123,13 +1099,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				BOOL bSelChange = FALSE;
 				TSH().OnListLButtonDown(wp, lp, bSelChange);
 
-				if (bSelChange)
-				{
-					SyncColumnSelectionToTasks();
-					NotifyParentSelChange(SC_BYMOUSE);
-
+				if (ProcessSelectionChange(bSelChange, SC_BYMOUSE))
 					return 0L; // we handled it
-				}
 			}
 			break;
 
@@ -1159,19 +1130,33 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			break;
 
 		case WM_KEYDOWN:
-			switch (wp)
+		case WM_KEYUP:
 			{
-				case VK_MULTIPLY:
-				case VK_SUBTRACT:
-					// Forward on to tree for handling
-					m_tcTasks.PostMessage(msg, wp, lp);
-					return 0L; // eat it
+				// In the rare event that the list has gained the 
+				// focus let the tree process these messages 
+				ScWindowProc(m_tcTasks, msg, wp, lp);
+
+				// And move the focus to the tree once we've 
+				// received WM_KEYUP
+				if (msg == WM_KEYUP)
+					m_tcTasks.SetFocus();
 			}
-			break;
+			return 0L; // we handled it
 		}
 	}
 	
 	return CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+BOOL CTDLTaskTreeCtrl::ProcessSelectionChange(BOOL bSelChange, SELCHANGE_ACTION nBy)
+{
+	if (bSelChange)
+	{
+		SyncColumnSelectionToTasks();
+		NotifyParentSelChange(nBy);
+	}
+
+	return bSelChange;
 }
 
 void CTDLTaskTreeCtrl::ExpandList(HTREEITEM hti)
