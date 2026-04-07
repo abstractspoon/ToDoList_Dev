@@ -1021,6 +1021,8 @@ void CTreeListCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 		if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
 		{
 			// vertical scrolling
+			// SHOULD NO LONGER GET HERE
+			ASSERT(0);
 			return;
 		}
 
@@ -1030,6 +1032,8 @@ void CTreeListCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 		if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
 		{
 			// In the middle of a simple click
+			// SHOULD NO LONGER GET HERE
+			ASSERT(0);
 			return;
 		}
 
