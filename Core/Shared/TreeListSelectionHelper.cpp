@@ -39,10 +39,21 @@ void CTreeListSelectionHelper::DeselectAll()
 
 void CTreeListSelectionHelper::SyncListSelection(BOOL bUpdate)
 {
+	// Scope CHoldRedraw/CLockUpdates to end before UpdateWindow
 	{
-		CHoldRedraw hr(m_list);
+		BOOL bMultiSel = ((m_list.GetSelectedCount() > 1) || (GetCount() > 1));
+
+		// For multi-selection syncing we use CHoldRedraw to ensure
+		// a full redraw at the end
+		CHoldRedraw hr(bMultiSel ? m_list.GetSafeHwnd() : NULL);
+
+		// else we can get away with CLockUpdates which is much more lightweight
+		CLockUpdates lu(bMultiSel ? NULL : m_list.GetSafeHwnd());
+
+		// Clear existing selection which also invalidates each affected item
 		m_list.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
 
+		// Set new selection which also invalidates each affected item
 		POSITION pos = GetFirstItemPos();
 
 		while (pos)
