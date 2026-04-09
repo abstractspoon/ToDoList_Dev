@@ -231,7 +231,7 @@ protected:
 	BOOL ProcessSelectionChange(BOOL bSelChange, SELCHANGE_ACTION nBy);
 	int GetListItem(HTREEITEM hti) const;
 	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
-	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
+	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);

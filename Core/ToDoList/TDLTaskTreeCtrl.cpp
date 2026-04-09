@@ -137,11 +137,8 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_
 	if (bSelChange && !hti)
 		m_lcColumns.Invalidate();
 
-	if (bSelChange && bSyncAndNotify)
-	{
-		SyncColumnSelectionToTasks();
-		NotifyParentSelChange(nBy);
-	}
+	if (bSyncAndNotify)
+		ProcessSelectionChange(bSelChange, nBy);
 	
 	return bSelected;
 }
@@ -161,10 +158,7 @@ BOOL CTDLTaskTreeCtrl::SelectAll(BOOL bVisibleOnly)
 
 	if (TSH().AddAll())
 	{
-		SyncColumnSelectionToTasks();
-		UpdateSelectedTaskPath();
-		NotifyParentSelChange();
-
+		ProcessSelectionChange(TRUE, SC_UNKNOWN);
 		return TRUE;
 	}
 	
@@ -616,6 +610,8 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 
 void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
 {
+	ASSERT(CanResync());
+
 	if (CanResync())
 	{
 		CTLSResyncing tr(*this);
@@ -1158,6 +1154,7 @@ BOOL CTDLTaskTreeCtrl::ProcessSelectionChange(BOOL bSelChange, SELCHANGE_ACTION 
 	{
 		SyncColumnSelectionToTasks();
 		NotifyParentSelChange(nBy);
+		UpdateSelectedTaskPath();
 	}
 
 	return bSelChange;
@@ -1869,28 +1866,20 @@ BOOL CTDLTaskTreeCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 		// updating and syncing the list
 		EnsureSelectionVisible(TRUE);
 		ExpandList();
-		SyncColumnSelectionToTasks();
 
-		UpdateSelectedTaskPath();
-		NotifyParentSelChange();
+		ProcessSelectionChange(TRUE, SC_UNKNOWN);
 	}
 	
 	return bSel;
 }
 
-BOOL CTDLTaskTreeCtrl::MultiSelectItem(HTREEITEM hti, TSH_SELECT nState, BOOL bRedraw) 
+BOOL CTDLTaskTreeCtrl::MultiSelectItem(HTREEITEM hti, TSH_SELECT nState) 
 { 
-	if (TSH().SetItem(hti, nState, bRedraw))
+	if (TSH().SetItem(hti, nState))
 	{
 		TSH().FixupTreeSelection();
+		ProcessSelectionChange(TRUE, SC_UNKNOWN);
 
-		SyncColumnSelectionToTasks();
-		UpdateSelectedTaskPath();
-		NotifyParentSelChange();
-		
-		if (bRedraw)
-			RedrawColumns();
-		
 		return TRUE;
 	}
 	
