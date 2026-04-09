@@ -540,6 +540,8 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 
 	if (bSelChange)
 	{
+		SyncColumnSelectionToTasks();
+
 		NMTREEVIEW nmtv = { *this, GetDlgCtrlID(), TVN_SELCHANGED, 0 };
 
 		nmtv.itemNew.hItem = hti;
@@ -573,21 +575,24 @@ BOOL CTreeListCtrl::SelectItems(const CHTIList& htItems)
 		return SelectItem(htItems.GetHead());
 	}
 
-	// else
-	CHoldHScroll hs(m_tree);
-	CTLSHoldResync hr2(*this);
-
-	TSH().RemoveAll(FALSE, FALSE);
-	TSH().SetItems(htItems, TSHS_SELECT);
-	TSH().FixupTreeSelection();
-
-	if (!TSH().AllParentItemsAreExpanded(TRUE))
+	// Scope CTLSHoldResync to end before SyncColumnSelectionToTasks
 	{
-		CHoldRedraw hr(*this);
+		CHoldHScroll hs(m_tree);
+		CTLSHoldResync hr2(*this);
 
-		TSH().ExpandParentItems(TRUE);
-		ExpandList();
+		TSH().RemoveAll(FALSE, FALSE);
+		TSH().SetItems(htItems, TSHS_SELECT);
+		TSH().FixupTreeSelection();
+
+		if (!TSH().AllParentItemsAreExpanded(TRUE))
+		{
+			CHoldRedraw hr(*this);
+
+			TSH().ExpandParentItems(TRUE);
+			ExpandList();
+		}
 	}
+	SyncColumnSelectionToTasks();
 
 	return TRUE;
 }
@@ -763,11 +768,10 @@ void CTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 	if (hti && !CanExpandItem(hti, bExpand))
 		return;
 
+	// Scope 'holds' to end before EnsureVisible()
 	{
 		CHoldRedraw hr(*this);
-		CAutoFlag af(m_bTreeExpanding, TRUE);
-	
-		EnableResync(FALSE);
+		CTLSHoldResync hr2(*this);
 
 		TCH().ExpandItem(hti, bExpand, bAndChildren);
 
@@ -788,10 +792,8 @@ void CTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 			CollapseList(hti);
 		}
 	
-		m_tree.EnsureVisible(hti);
-	
-		EnableResync(TRUE, m_tree);
 	}
+	m_tree.EnsureVisible(hti);
 
 	UpdateColumnWidths(bExpand ? UTWA_EXPAND : UTWA_COLLAPSE);
 }
@@ -957,6 +959,8 @@ LRESULT CTreeListCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CTreeListCtrl::SyncColumnSelectionToTasks()
 {
+	ASSERT(CanResync());
+
 	if (CanResync())
 	{
 		CTLSResyncing tr(*this);
@@ -1054,23 +1058,20 @@ void CTreeListCtrl::NotifyParentSelectionChange()
 
 void CTreeListCtrl::DeselectAll()
 {
-	// For internal use only
-	if (TSH().GetCount())
+	if (!TSH().IsEmpty())
 	{
-		CTLSHoldResync hr(*this);
+		CHoldRedraw hr(*this);
 		TSH().DeselectAll();
 	}
 }
 
 void CTreeListCtrl::SelectAll()
 {
-	CTLSHoldResync hr(*this);
-
 	int nSelCount = TSH().GetCount();
 	TSH().AddAll();
 
 	if (TSH().GetCount() != nSelCount)
-		NotifyParentSelectionChange();
+		ProcessSelectionChange(TRUE);
 }
 
 LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -1559,8 +1560,6 @@ BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 {
 	m_bBoundSelecting = FALSE;
-
-	CTLSHoldResync hr(*this);
 
 	BOOL bSelChange = FALSE;
 	TSH().OnListLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);

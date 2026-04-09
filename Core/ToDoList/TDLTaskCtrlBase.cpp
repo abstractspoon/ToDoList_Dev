@@ -4647,6 +4647,7 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 			if (!Misc::IsKeyPressed(VK_CONTROL))
 			{
 				DeselectAll();
+				UpdateAll();
 			}
 
 			// I've found no reliable to way to detect the end of a

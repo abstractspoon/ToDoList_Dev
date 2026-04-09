@@ -145,9 +145,11 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_
 
 void CTDLTaskTreeCtrl::DeselectAll()
 {
-	CTLSHoldResync hr(*this);
-
-	TSH().DeselectAll();
+	if (!TSH().IsEmpty())
+	{
+		CHoldRedraw hr(*this);
+		TSH().DeselectAll();
+	}
 }
 
 BOOL CTDLTaskTreeCtrl::SelectAll(BOOL bVisibleOnly)
@@ -587,21 +589,26 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 			return;
 		}
 
-		BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
-		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-
-		if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
+		if (IsBoundSelecting())
 		{
-			// In the middle of a simple click
-			// SHOULD NO LONGER GET HERE
-			ASSERT(0);
-			return;
+			if ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2))
+			{
+				// bulk selecting
+				return;
+			}
 		}
-
-		if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
+		else
 		{
-			// bulk selecting
-			return;
+			BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
+			BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+
+			if ((nHit != -1) && bLBtnDown && !bCtrl && TSH().IsEmpty())
+			{
+				// In the middle of a simple click
+				// SHOULD NO LONGER GET HERE
+				ASSERT(0);
+				return;
+			}
 		}
 
 		NotifyParentSelChange();
