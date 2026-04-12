@@ -1628,7 +1628,7 @@ void CGanttCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
 	CTreeListCtrl::OnTreeSelectionChange(pNMTV);
 
-	if (!m_bMovingItem && HasOption(GTLCF_AUTOSCROLLTOTASK))
+	if (!m_bMovingItem && HasOption(GTLCF_AUTOSCROLLTOTASK) && !Misc::IsCursorKeyPressed(MKC_UPDOWN))
 		ScrollToSelectedTask();
 }
 
@@ -2013,6 +2013,18 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				return 0L; // eat
 			}
 			break;
+
+		case WM_KEYUP:
+			switch (wp)
+			{
+			case VK_UP:
+			case VK_DOWN:
+			case VK_PRIOR:
+			case VK_NEXT:
+				if (HasOption(GTLCF_AUTOSCROLLTOTASK))
+					ScrollToSelectedTask();
+				break;
+			}
 		}
 	}
 
@@ -3581,24 +3593,21 @@ int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) const
 {
 	aDepends.RemoveAll();
 
-	CRect rClient;
-	m_list.GetClientRect(rClient);
+	int nFirstItem = m_list.GetTopIndex();
+	int nLastItem = (nFirstItem + m_list.GetCountPerPage()), nItemCount = m_list.GetItemCount();
 
-	// iterate all list items checking for dependencies
-	HTREEITEM htiFirstVis = m_tree.GetFirstVisibleItem();
-	HTREEITEM htiLastVis = TCH().GetLastVisibleItem();
+	// Note: If we only process the strictly visible tasks 
+	// we will fail to draw dependecies where the dependency
+	// is visible but the task having the dependency is not.
+	// We get around this (temporarily for 9.2) by expanding the 
+	// 'viewport' up/down by an arbitrary number of rows
+	const int ROW_BUFFER = 10;
 
-	HTREEITEM htiFrom = htiFirstVis;
+	nFirstItem = max(nFirstItem - ROW_BUFFER, 0);
+	nLastItem = min(nLastItem + ROW_BUFFER, nItemCount - 1);
 
-	while (htiFrom)
-	{
-		BuildVisibleDependencyList(htiFrom, aDepends);
-
-		if (htiFrom == htiLastVis)
-			break;
-
-		htiFrom = m_tree.GetNextVisibleItem(htiFrom);
-	}
+	for (int nItem = nFirstItem; nItem <= nLastItem; nItem++)
+		BuildVisibleDependencyList(GetTreeItem(nItem), aDepends);
 	
 	return aDepends.GetSize();
 }
