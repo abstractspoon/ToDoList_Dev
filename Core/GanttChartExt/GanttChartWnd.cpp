@@ -1281,13 +1281,23 @@ void CGanttChartWnd::OnGanttDepends(GCDD_MODE nMode)
 {
 	if (!m_bReadOnly)
 	{
-		ASSERT (m_dlgDepends.GetSafeHwnd() == NULL);
-		
-		if (m_dlgDepends.Create(nMode, this))
+		if (m_dlgDepends.GetMode() == nMode)
 		{
-			VERIFY (m_ctrlGantt.BeginDependencyEdit(&m_dlgDepends));
-			m_toolbar.RefreshButtonStates();
+			ASSERT(m_dlgDepends.GetSafeHwnd());
+			m_dlgDepends.Cancel();
 		}
+		else if (m_dlgDepends.GetSafeHwnd() == NULL)
+		{
+			if (m_dlgDepends.Create(nMode, this))
+				VERIFY(m_ctrlGantt.BeginDependencyEdit(&m_dlgDepends));
+		}
+		else
+		{
+			// Should be disabled
+			ASSERT(0);
+		}
+
+		m_toolbar.RefreshButtonStates();
 	}
 }
 
