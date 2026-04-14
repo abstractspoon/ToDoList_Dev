@@ -181,12 +181,14 @@ CScopedTraceTimer::~CScopedTraceTimer()
 		TRACE(_T("\n") + FormatTimeElapsed(m_sScope, m_dwTickStart, m_bStartLogged));
 		TRACE(_T("\n"));
 	}
+#else
+	OutputDebugString(_T("\n") + FormatTimeElapsed(m_sScope, m_dwTickStart, m_bStartLogged));
 #endif
 }
 
 void CScopedTraceTimer::TraceStart()
 {
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	if (!m_sScope.IsEmpty())
 	{
 		TRACE(_T("\n") + FormatStart());
@@ -194,12 +196,12 @@ void CScopedTraceTimer::TraceStart()
 
 		m_bStartLogged = TRUE;
 	}
-#endif
+//#endif
 }
 
 void CScopedTraceTimer::TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
 {
-#ifdef _DEBUG
+//#ifdef _DEBUG
 	if (!Misc::IsEmpty(szSubScope))
 	{
 		CString sScope = Format(szSubScope, szArg1, szArg2, szArg3);
@@ -208,7 +210,7 @@ void CScopedTraceTimer::TraceTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPC
 		TRACE(_T("\n") + sMessage);
 		TRACE(_T("\n"));
 	}
-#endif
+//#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

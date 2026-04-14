@@ -314,8 +314,8 @@ protected:
 	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCOLUMN& col) const;
 
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
-	BOOL BuildDependency(DWORD dwFromTaskID, DWORD, GANTTDEPENDENCY& depend) const;
+	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
+	BOOL BuildDependency(DWORD dwFromTaskID, int nFromItem, DWORD dwToTaskID, int nToItem, GANTTDEPENDENCY& depend) const;
 	int BuildVisibleDependencyList(CGanttDependArray& aDepends) const;
 	int BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray& aDepends) const;
 	BOOL IsDependencyPickLinePosValid() const;
@@ -345,7 +345,7 @@ protected:
 
 private:
 	void PreFixVScrollSyncBug();
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
+//	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
 	const GANTTDATERANGE& ActiveDateRange() const;
 
 };

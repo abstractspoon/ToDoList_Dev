@@ -1753,7 +1753,7 @@ void CGanttCtrl::ClearDependencyPickLine(CDC* pDC)
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
 		GANTTDEPENDENCY depend;
 		
-		if (CalcDependencyEndPos(dwFromTaskID, depend, TRUE))
+		if (CalcDependencyEndPos(dwFromTaskID, -1, depend, TRUE))
 		{
 			depend.SetTo(m_ptLastDependPick);
 			depend.Draw(pDC, rClient, TRUE);
@@ -1793,7 +1793,7 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
 		GANTTDEPENDENCY depend;
 
-		if (!CalcDependencyEndPos(dwFromTaskID, depend, TRUE))
+		if (!CalcDependencyEndPos(dwFromTaskID, -1, depend, TRUE))
 			return FALSE;
 
 		// calc new 'To' point to see if anything has actually changed
@@ -1804,7 +1804,7 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		
 		if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
 		{
-			if (!CalcDependencyEndPos(dwToTaskID, depend, FALSE, &ptTo))
+			if (!CalcDependencyEndPos(dwToTaskID, -1, depend, FALSE, &ptTo))
 				return FALSE;
 		}
 		else // use current cursor pos
@@ -3586,6 +3586,69 @@ DWORD CGanttCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
 
 int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) const
 {
+	CScopedTraceTimer timer(_T("CGanttCtrl::BuildVisibleDependencyList"));
+	aDepends.RemoveAll();
+
+	int nItemCount = m_list.GetItemCount();
+
+	// Determine the visible range
+	int nFirstItem = m_list.GetTopIndex();
+	int nLastItem = (nFirstItem + m_list.GetCountPerPage());
+
+	nLastItem = min(nLastItem, nItemCount - 1);
+
+	// Process ALL tasks looking for dependencies where the
+	// source and target are NOT both above/below the visible range
+	POSITION pos = m_data.GetStartPosition();
+	GANTTITEM* pGI;
+	DWORD dwTaskID;
+
+	while (pos)
+	{
+		m_data.GetNextAssoc(pos, dwTaskID, pGI);
+
+		int nItem = GetListItem(dwTaskID);
+
+		if (nItem >= 0) // else parent is collapsed
+		{
+			// If the source task is visible then all its dependency
+			// lines will be visible else we'll need check each one
+			BOOL bWantDepends = ((nItem >= nFirstItem) && (nItem <= nLastItem));
+
+			for (int nDepend = 0; nDepend < pGI->aDependIDs.GetSize(); nDepend++)
+			{
+				DWORD dwDependID = pGI->aDependIDs[nDepend];
+
+ 				int nDependItem = GetListItem(dwDependID);
+
+				if (!bWantDepends && (nDependItem >= 0))
+				{
+					if ((nItem < nFirstItem) && (nDependItem < nFirstItem))
+						continue;
+
+					if ((nItem > nLastItem) && (nDependItem > nLastItem))
+						continue;
+
+					bWantDepends = TRUE;
+				}
+
+				if (bWantDepends)
+				{
+					GANTTDEPENDENCY depend;
+
+					if (BuildDependency(dwTaskID, nItem, dwDependID, nDependItem, depend))
+						aDepends.Add(depend);
+				}
+			}
+		}
+	}
+
+	return aDepends.GetSize();
+}
+
+/*
+int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) const
+{
 	aDepends.RemoveAll();
 
 	int nFirstItem = m_list.GetTopIndex();
@@ -3627,7 +3690,7 @@ int CGanttCtrl::BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray&
 
 			GANTTDEPENDENCY depend;
 
-			if (BuildDependency(dwFromTaskID, dwToTaskID, depend))
+			if (BuildDependency(dwFromTaskID, -1, dwToTaskID, -1, depend))
 				aDepends.Add(depend);
 		}
 
@@ -3645,8 +3708,9 @@ int CGanttCtrl::BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray&
 
 	return aDepends.GetSize();
 }
+*/
 
-BOOL CGanttCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPENDENCY& depend) const
+BOOL CGanttCtrl::BuildDependency(DWORD dwFromTaskID, int nFromItem, DWORD dwToTaskID, int nToItem, GANTTDEPENDENCY& depend) const
 {
 	if (!m_data.HasItem(dwFromTaskID) || !m_data.HasItem(dwToTaskID))
 	{
@@ -3654,8 +3718,8 @@ BOOL CGanttCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPE
 		return FALSE;
 	}
 
-	if (CalcDependencyEndPos(dwFromTaskID, depend, TRUE) && 
-		CalcDependencyEndPos(dwToTaskID, depend, FALSE))
+	if (CalcDependencyEndPos(dwFromTaskID, nFromItem, depend, TRUE) && 
+		CalcDependencyEndPos(dwToTaskID, nToItem, depend, FALSE))
 	{
 		return TRUE;
 	}
@@ -3664,11 +3728,13 @@ BOOL CGanttCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPE
 	return FALSE;
 }
 
-BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+/*
+BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
 	ASSERT(m_data.HasItem(dwTaskID));
 
-	int nItem = GetListItem(dwTaskID);
+	if (nItem == -1)
+		nItem = GetListItem(dwTaskID);
 
 	if (nItem == -1) // Collapsed 
 	{
@@ -3689,9 +3755,32 @@ BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, B
 
 	return CalcDependencyEndPos(dwTaskID, nItem, depend, bFrom, lpp);
 }
+*/
 
 BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
+	ASSERT(m_data.HasItem(dwTaskID));
+
+	if (nItem == -1)
+		nItem = GetListItem(dwTaskID);
+
+	if (nItem == -1) // Collapsed 
+	{
+		// Use first visible parent as surrogate
+		HTREEITEM htiParent = m_tree.GetParentItem(GetTreeItem(dwTaskID));
+		ASSERT(htiParent);
+
+		while (htiParent)
+		{
+			nItem = GetListItem(htiParent);
+
+			if (nItem != -1)
+				break;
+
+			htiParent = m_tree.GetParentItem(htiParent);
+		}
+	}
+
 	if (nItem == -1)
 		return FALSE;
 
