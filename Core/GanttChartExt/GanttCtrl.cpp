@@ -3585,7 +3585,6 @@ DWORD CGanttCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
 
 int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC) const
 {
-	//CScopedTraceTimer timer(_T("CGanttCtrl::BuildVisibleDependencyList"));
 	DWORD dwTick = GetTickCount();
 
 	// Determine the range of interest
@@ -3627,7 +3626,6 @@ int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC)
 	}
 
 	OutputDebugString(Misc::Format(_T("CGanttCtrl::BuildVisibleDependencyList(%d) took %d ms\n"), aDepends.GetSize(), GetTickCount() - dwTick));
-	//timer.TraceTimeElapsed((_T(" %s depends"), Misc::Format(aDepends.GetSize())));
 
 	return aDepends.GetSize();
 }
@@ -3689,117 +3687,6 @@ int CGanttCtrl::BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMi
 
 	return aDepends.GetSize();
 }
-
-/*
-int CGanttCtrl::BuildVisibleDependencyListOrg(CGanttDependArray& aDepends) const
-{
-	aDepends.RemoveAll();
-
-	int nFirstItem = m_list.GetTopIndex();
-	int nLastItem = (nFirstItem + m_list.GetCountPerPage()), nItemCount = m_list.GetItemCount();
-
-	// Note: If we only process the strictly visible tasks 
-	// we will fail to draw dependecies where the dependency
-	// is visible but the task having the dependency is not.
-	// We get around this (temporarily for 9.2) by expanding the 
-	// 'viewport' up/down by an arbitrary number of rows
-	const int ROW_BUFFER = 10;
-
-	nFirstItem = max(nFirstItem - ROW_BUFFER, 0);
-	nLastItem = min(nLastItem + ROW_BUFFER, nItemCount - 1);
-
-	for (int nItem = nFirstItem; nItem <= nLastItem; nItem++)
-		BuildTaskVisibleDependencyList(GetTreeItem(nItem), aDepends);
-	
-	return aDepends.GetSize();
-}
-
-int CGanttCtrl::BuildTaskVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray& aDepends) const
-{
-	DWORD dwFromTaskID = GetTaskID(htiFrom);
-
-	const GANTTITEM* pGIFrom = GetGanttItem(dwFromTaskID);
-	ASSERT(pGIFrom);
-
-	if (pGIFrom)
-	{
-		int nDepend = pGIFrom->aDependIDs.GetSize();
-
-		while (nDepend--)
-		{
-			DWORD dwToTaskID = pGIFrom->aDependIDs[nDepend];
-
-			if (!m_data.HasItem(dwToTaskID))
-				continue;
-
-			GANTTDEPENDENCY depend;
-
-			if (BuildDependency(dwFromTaskID, -1, dwToTaskID, -1, depend))
-				aDepends.Add(depend);
-		}
-
-		if (pGIFrom->bParent && HasOption(GTLCF_DISPLAYPARENTROLLUPS) && !TCH().IsItemExpanded(htiFrom))
-		{
-			HTREEITEM htiFromChild = m_tree.GetChildItem(htiFrom);
-
-			while (htiFromChild)
-			{
-				BuildTaskVisibleDependencyList(htiFromChild, aDepends); // RECURSIVE CALL
-				htiFromChild = m_tree.GetNextItem(htiFromChild, TVGN_NEXT);
-			}
-		}
-	}
-
-	return aDepends.GetSize();
-}
-
-BOOL CGanttCtrl::BuildDependency(DWORD dwFromTaskID, int nFromItem, DWORD dwToTaskID, int nToItem, GANTTDEPENDENCY& depend) const
-{
-	if (!m_data.HasItem(dwFromTaskID) || !m_data.HasItem(dwToTaskID))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	if (CalcDependencyEndPos(dwFromTaskID, nFromItem, depend, TRUE) && 
-		CalcDependencyEndPos(dwToTaskID, nToItem, depend, FALSE))
-	{
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-*/
-
-/*
-BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
-{
-	ASSERT(m_data.HasItem(dwTaskID));
-
-	if (nItem == -1)
-		nItem = GetListItem(dwTaskID);
-
-	if (nItem == -1) // Collapsed 
-	{
-		// Use first visible parent as surrogate
-		HTREEITEM htiParent = m_tree.GetParentItem(GetTreeItem(dwTaskID));
-		ASSERT(htiParent);
-
-		while (htiParent)
-		{
-			nItem = GetListItem(htiParent);
-
-			if (nItem != -1)
-				break;
-
-			htiParent = m_tree.GetParentItem(htiParent);
-		}
-	}
-
-	return CalcDependencyEndPos(dwTaskID, nItem, depend, bFrom, lpp);
-}
-*/
 
 BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
