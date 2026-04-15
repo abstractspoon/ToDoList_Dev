@@ -3643,54 +3643,52 @@ int CGanttCtrl::GetDependencyListItem(DWORD dwTaskID) const
 	return GetListItem(hti);
 }
 
-int CGanttCtrl::BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMin, int nRangeMax, CGanttDependArray& aDepends) const
+void CGanttCtrl::BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMin, int nRangeMax, CGanttDependArray& aDepends) const
 {
-	if (gi.aDependIDs.GetSize())
+	if (!gi.aDependIDs.GetSize())
+		return;
+
+	int nItem = GetListItem(gi.dwTaskID);
+
+	if (nItem >= 0) // task is visible
 	{
-		int nItem = GetListItem(gi.dwTaskID);
+		// If the source task is within the range then all its dependency
+		// lines will be visible else we'll need check each one
+		BOOL bWantDepends = ((nItem >= nRangeMin) && (nItem <= nRangeMax));
 
-		if (nItem >= 0) // task is visible
+		for (int nDepend = 0; nDepend < gi.aDependIDs.GetSize(); nDepend++)
 		{
-			// If the source task is visible then all its dependency
-			// lines will be visible else we'll need check each one
-			BOOL bWantDepends = ((nItem >= nRangeMin) && (nItem <= nRangeMax));
+			DWORD dwDependID = gi.aDependIDs[nDepend];
+			int nDependItem = GetDependencyListItem(dwDependID);
 
-			for (int nDepend = 0; nDepend < gi.aDependIDs.GetSize(); nDepend++)
+			if (nDependItem == -1)
 			{
-				DWORD dwDependID = gi.aDependIDs[nDepend];
-				int nDependItem = GetDependencyListItem(dwDependID);
-
-				if (nDependItem == -1)
+				// We can arrive here in rare cases during the 
+				// user-expansion of a tree item when the tree 
+				// is in an intermediate state
+				continue;
+			}
+			else
+			{
+				if (!bWantDepends)
 				{
-					// We can arrive here in rare cases during the 
-					// user-expansion of a tree item when the tree 
-					// is in an intermediate state
-					continue;
+					if ((nItem < nRangeMin) && (nDependItem < nRangeMin))
+						continue;
+
+					if ((nItem > nRangeMax) && (nDependItem > nRangeMax))
+						continue;
 				}
-				else
+
+				GANTTDEPENDENCY depend;
+
+				if (CalcDependencyEndPos(gi.dwTaskID, nItem, depend, TRUE) &&
+					CalcDependencyEndPos(dwDependID, nDependItem, depend, FALSE))
 				{
-					if (!bWantDepends)
-					{
-						if ((nItem < nRangeMin) && (nDependItem < nRangeMin))
-							continue;
-
-						if ((nItem > nRangeMax) && (nDependItem > nRangeMax))
-							continue;
-					}
-
-					GANTTDEPENDENCY depend;
-
-					if (CalcDependencyEndPos(gi.dwTaskID, nItem, depend, TRUE) &&
-						CalcDependencyEndPos(dwDependID, nDependItem, depend, FALSE))
-					{
-						aDepends.Add(depend);
-					}
+					aDepends.Add(depend);
 				}
 			}
 		}
 	}
-
-	return aDepends.GetSize();
 }
 
 BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const

@@ -318,7 +318,7 @@ protected:
 	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
 	BOOL BuildDependency(DWORD dwFromTaskID, int nFromItem, DWORD dwToTaskID, int nToItem, GANTTDEPENDENCY& depend) const;
 	int BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC = NULL) const;
-	int BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMin, int nRangeMax, CGanttDependArray& aDepends) const;
+	void BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMin, int nRangeMax, CGanttDependArray& aDepends) const;
 	BOOL IsDependencyPickLinePosValid() const;
 	void ResetDependencyPickLinePos();
 
