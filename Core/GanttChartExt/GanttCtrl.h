@@ -346,7 +346,6 @@ protected:
 
 private:
 	void PreFixVScrollSyncBug();
-//	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
 	const GANTTDATERANGE& ActiveDateRange() const;
 
 };
