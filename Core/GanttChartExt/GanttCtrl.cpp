@@ -3660,7 +3660,14 @@ int CGanttCtrl::BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMi
 				DWORD dwDependID = gi.aDependIDs[nDepend];
 				int nDependItem = GetDependencyListItem(dwDependID);
 
-				if (nDependItem >= 0)
+				if (nDependItem == -1)
+				{
+					// We can arrive here in rare cases during the 
+					// user-expansion of a tree item when the tree 
+					// is in an intermediate state
+					continue;
+				}
+				else
 				{
 					if (!bWantDepends)
 					{
@@ -3679,8 +3686,6 @@ int CGanttCtrl::BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMi
 						aDepends.Add(depend);
 					}
 				}
-				// else dependency is not visible which only
-				// seems to occur temporarily during expansion
 			}
 		}
 	}
@@ -3691,29 +3696,20 @@ int CGanttCtrl::BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMi
 BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
 	ASSERT(m_data.HasItem(dwTaskID));
+	ASSERT((nItem >= 0) || (nItem == -1));
 
 	if (nItem == -1)
-		nItem = GetListItem(dwTaskID);
-
-	if (nItem == -1) // Collapsed 
 	{
-		// Use first visible parent as surrogate
-		HTREEITEM htiParent = m_tree.GetParentItem(GetTreeItem(dwTaskID));
-		ASSERT(htiParent);
+		nItem = GetDependencyListItem(dwTaskID);
 
-		while (htiParent)
+		if (nItem == -1)
 		{
-			nItem = GetListItem(htiParent);
-
-			if (nItem != -1)
-				break;
-
-			htiParent = m_tree.GetParentItem(htiParent);
+			// We can arrive here in rare cases during the 
+			// user-expansion of a tree item when the tree 
+			// is in an intermediate state
+			return FALSE;
 		}
 	}
-
-	if (nItem == -1)
-		return FALSE;
 
 	const GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, FALSE);
