@@ -1402,13 +1402,8 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 			// draw dependencies
 			CGanttDependArray aDepends;
 			
-			if (BuildVisibleDependencyList(aDepends))
+			if (BuildVisibleDependencyList(aDepends, pLVCD->nmcd.hdc))
 			{
-				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-
-				CRect rClient;
-				m_list.GetClientRect(rClient);
-
 				// see if we are currently editing a dependency
 				DWORD dwFromTaskID = 0, dwToTaskID = 0;
 
@@ -1419,6 +1414,10 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 					dwFromTaskID = m_pDependEdit->GetFromDependency(dwToTaskID);
 				}
 				
+				CRect rClient;
+				m_list.GetClientRect(rClient);
+
+				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 				int nDepend = aDepends.GetSize();
 
 				while (nDepend--)
@@ -1426,8 +1425,14 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 					GANTTDEPENDENCY& depend = aDepends[nDepend];
 
 					// don't draw the dependency we are actively editing
-					if (!IsDependencyEditing() || !depend.Matches(dwFromTaskID, dwToTaskID))
-						depend.Draw(pDC, rClient, FALSE);
+					if (IsDependencyEditing() && depend.Matches(dwFromTaskID, dwToTaskID))
+						continue;
+
+					// Don't draw dependencies outside (horizontally) the client rect
+					if (!depend.HitTest(rClient))
+						continue;
+
+					depend.Draw(pDC, FALSE);
 				}
 			}
 
@@ -1746,9 +1751,6 @@ void CGanttCtrl::ClearDependencyPickLine(CDC* pDC)
 		if (bNullDC)
 			pDC = m_list.GetDC();
 			
-		CRect rClient;
-		m_list.GetClientRect(rClient);
-		
 		// calc 'from' point
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
 		GANTTDEPENDENCY depend;
@@ -1756,7 +1758,7 @@ void CGanttCtrl::ClearDependencyPickLine(CDC* pDC)
 		if (CalcDependencyEndPos(dwFromTaskID, -1, depend, TRUE))
 		{
 			depend.SetTo(m_ptLastDependPick);
-			depend.Draw(pDC, rClient, TRUE);
+			depend.Draw(pDC, TRUE);
 		}
 			
 		// clear last drag pos
@@ -1819,19 +1821,16 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		{
 			CClientDC dc(&m_list);
 			
-			CRect rClient;
-			m_list.GetClientRect(rClient);
-			
 			// clear 'old' line
 			if (IsDependencyPickLinePosValid())
 			{
 				depend.SetTo(m_ptLastDependPick);
-				depend.Draw(&dc, rClient, TRUE);
+				depend.Draw(&dc, TRUE);
 			}		
 			
 			// draw 'new' line
 			depend.SetTo(ptTo);
-			depend.Draw(&dc, rClient, TRUE);
+			depend.Draw(&dc, TRUE);
 
 			// update pos
 			m_ptLastDependPick = ptTo;
@@ -3584,17 +3583,35 @@ DWORD CGanttCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
 	return 0;
 }
 
-int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) const
+int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC) const
 {
-	CScopedTraceTimer timer(_T("CGanttCtrl::BuildVisibleDependencyList"));
+	//CScopedTraceTimer timer(_T("CGanttCtrl::BuildVisibleDependencyList"));
+	DWORD dwTick = GetTickCount();
+
+	// Determine the range of interest
+	int nFirstItem = m_list.GetTopIndex(), nLastItem = -1;
+
+	if (hDC)
+	{
+		CRect rClip;
+		GetClipBox(hDC, rClip);
+
+		rClip.OffsetRect(0, -CDialogHelper::GetChildHeight(&m_listHeader));
+
+		int nRowHeight = GetItemHeight(m_list);
+
+		nFirstItem += (rClip.top / nRowHeight);
+		nLastItem = (nFirstItem + (rClip.Height() / nRowHeight));
+	}
+	else
+	{
+		nLastItem += m_list.GetCountPerPage();
+	}
+	ASSERT(nLastItem != -1);
+
 	aDepends.RemoveAll();
 
 	int nItemCount = m_list.GetItemCount();
-
-	// Determine the visible range
-	int nFirstItem = m_list.GetTopIndex();
-	int nLastItem = (nFirstItem + m_list.GetCountPerPage());
-
 	nLastItem = min(nLastItem, nItemCount - 1);
 
 	// Process ALL tasks looking for dependencies where the
@@ -3642,6 +3659,10 @@ int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) const
 			}
 		}
 	}
+
+	OutputDebugString(Misc::Format(_T("CGanttCtrl::BuildVisibleDependencyList(%d) took %d ms\n"), aDepends.GetSize(), GetTickCount() - dwTick));
+
+	//timer.TraceTimeElapsed((_T(" %s depends"), Misc::Format(aDepends.GetSize())));
 
 	return aDepends.GetSize();
 }

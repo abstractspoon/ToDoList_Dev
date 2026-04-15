@@ -173,7 +173,7 @@ struct GANTTDEPENDENCY
 	BOOL HitTest(const CRect& rect) const;
 	BOOL HitTest(const CPoint& point, int nTol = 2) const;
 
-	BOOL Draw(CDC* pDC, const CRect& rClient, BOOL bDragging);
+	BOOL Draw(CDC* pDC, BOOL bDragging);
 
 #ifdef _DEBUG
 	void Trace() const;
