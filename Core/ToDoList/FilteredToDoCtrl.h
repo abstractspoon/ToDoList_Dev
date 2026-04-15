@@ -131,7 +131,7 @@ protected:
 	void RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgress = FALSE);
 
 	void ResetNowFilterTimer();
-	BOOL FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& params, const CHTIMap& htiMap) const;
+	BOOL FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& params) const;
 
 	HTREEITEM RebuildTree(const void* pContext = NULL);
 	BOOL WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const; 

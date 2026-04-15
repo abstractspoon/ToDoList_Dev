@@ -269,7 +269,7 @@ protected:
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const;
 	DWORD ListDependencyHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
-
+	int GetDependencyListItem(DWORD dwTaskID) const;
 	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
 	void ScrollToTask(DWORD dwTaskID);
 
@@ -316,10 +316,10 @@ protected:
 	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCOLUMN& col) const;
 
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
-	BOOL BuildDependency(DWORD dwFromTaskID, DWORD, GANTTDEPENDENCY& depend) const;
-	int BuildVisibleDependencyList(CGanttDependArray& aDepends) const;
-	int BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray& aDepends) const;
+	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
+	BOOL BuildDependency(DWORD dwFromTaskID, int nFromItem, DWORD dwToTaskID, int nToItem, GANTTDEPENDENCY& depend) const;
+	int BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC = NULL) const;
+	void BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMin, int nRangeMax, CGanttDependArray& aDepends) const;
 	BOOL IsDependencyPickLinePosValid() const;
 	void ResetDependencyPickLinePos();
 
@@ -347,7 +347,6 @@ protected:
 
 private:
 	void PreFixVScrollSyncBug();
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
 	const GANTTDATERANGE& ActiveDateRange() const;
 
 };

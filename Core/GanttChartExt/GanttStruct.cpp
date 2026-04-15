@@ -68,11 +68,8 @@ BOOL GANTTDEPENDENCY::Matches(DWORD dwFrom, DWORD dwTo) const
 	return ((dwFromID == dwFrom) && (dwToID == dwTo));
 }
 
-BOOL GANTTDEPENDENCY::Draw(CDC* pDC, const CRect& rClient, BOOL bDragging)
+BOOL GANTTDEPENDENCY::Draw(CDC* pDC, BOOL bDragging)
 {
-	if (!HitTest(rClient))
-		return FALSE;
-	
 	// draw 3x3 box at ptTo
 	if (!bDragging)
 	{
