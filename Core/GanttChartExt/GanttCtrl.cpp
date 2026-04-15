@@ -3605,17 +3605,17 @@ int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC)
 	}
 	else
 	{
-		nLastItem += m_list.GetCountPerPage();
+		nLastItem = (nFirstItem + m_list.GetCountPerPage());
 	}
-	ASSERT(nLastItem != -1);
-
-	aDepends.RemoveAll();
+	ASSERT(nLastItem > nFirstItem);
 
 	int nItemCount = m_list.GetItemCount();
 	nLastItem = min(nLastItem, nItemCount - 1);
 
 	// Process ALL tasks looking for dependencies where the
 	// source and target are NOT both above/below the visible range
+	aDepends.RemoveAll();
+
 	POSITION pos = m_data.GetStartPosition();
 	GANTTITEM* pGI;
 	DWORD dwTaskID;
