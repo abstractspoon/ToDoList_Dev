@@ -3585,8 +3585,6 @@ DWORD CGanttCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
 
 int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC) const
 {
-	DWORD dwTick = GetTickCount();
-
 	// Determine the range of interest
 	int nFirstItem = m_list.GetTopIndex(), nLastItem = -1;
 
@@ -3624,8 +3622,6 @@ int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC)
 		m_data.GetNextAssoc(pos, dwTaskID, pGI);
 		BuildTaskVisibleDependencyList(*pGI, nFirstItem, nLastItem, aDepends);
 	}
-
-	OutputDebugString(Misc::Format(_T("CGanttCtrl::BuildVisibleDependencyList(%d) took %d ms\n"), aDepends.GetSize(), GetTickCount() - dwTick));
 
 	return aDepends.GetSize();
 }
