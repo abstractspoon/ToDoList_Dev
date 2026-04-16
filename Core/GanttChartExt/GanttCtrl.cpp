@@ -3591,7 +3591,7 @@ DWORD CGanttCtrl::ListDependencyHitTest(const CPoint& ptClient, DWORD& dwToTaskI
 int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC) const
 {
 	// Determine the range of interest
-	int nFirstItem = m_list.GetTopIndex(), nLastItem = -1;
+	int nFirstItem = m_list.GetTopIndex(), nLastItem = (nFirstItem + m_list.GetCountPerPage());
 
 	if (hDC)
 	{
@@ -3604,12 +3604,9 @@ int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC)
 
 		nFirstItem += (rClip.top / nRowHeight);
 		nLastItem = (nFirstItem + (rClip.Height() / nRowHeight));
+		
+		ASSERT(nLastItem > nFirstItem);
 	}
-	else
-	{
-		nLastItem = (nFirstItem + m_list.GetCountPerPage());
-	}
-	ASSERT(nLastItem > nFirstItem);
 
 	int nItemCount = m_list.GetItemCount();
 	nLastItem = min(nLastItem, nItemCount - 1);
