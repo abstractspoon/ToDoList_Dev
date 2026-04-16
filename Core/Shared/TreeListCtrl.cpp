@@ -1033,15 +1033,17 @@ void CTreeListCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 		BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
 		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
 
-		if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
+		if (!m_bBoundSelecting)
 		{
-			// In the middle of a simple click
-			// SHOULD NO LONGER GET HERE
-			ASSERT(0);
-			return;
+			if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
+			{
+				// In the middle of a simple click
+				// SHOULD NO LONGER GET HERE
+				ASSERT(0);
+				return;
+			}
 		}
-
-		if (m_bBoundSelecting && ((nHit == -1) || (m_list.GetSelectedCount() > 2)))
+		else if ((nHit == -1) || (m_list.GetSelectedCount() > 2))
 		{
 			// bulk selecting
 			return;
