@@ -2369,8 +2369,13 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 		else
 			m_nExtModifyingAttrib = TDCA_POSITION_DIFFERENTPARENT;
 		
-		HTREEITEM htiDropItem = m_taskTree.GetItem(pMove->dwSelectedTaskID);
-		ASSERT(htiDropItem == GetSelectedItem());
+#ifdef _DEBUG
+		if (pMove->dwSelectedTaskID)
+		{
+			HTREEITEM htiDropItem = m_taskTree.GetItem(pMove->dwSelectedTaskID);
+			ASSERT(htiDropItem == GetSelectedItem());
+		}
+#endif // _DEBUG
 
 		HTREEITEM htiDropTarget = m_taskTree.GetItem(pMove->dwParentID);
 		HTREEITEM htiDropAfter = m_taskTree.GetItem(pMove->dwAfterSiblingID);
@@ -5882,6 +5887,7 @@ void CTabbedToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
 		CToDoCtrl::ExpandTasks(nWhat, bExpand);
+		break;
 
 	case FTCV_TASKLIST:
 		// no can do!

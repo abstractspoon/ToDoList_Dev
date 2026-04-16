@@ -42,16 +42,13 @@ CEditAllocationsListCtrl::~CEditAllocationsListCtrl()
 
 
 BEGIN_MESSAGE_MAP(CEditAllocationsListCtrl, CInputListCtrl)
-	//{{AFX_MSG_MAP(CEditAllocationsListCtrl)
 	ON_WM_DESTROY()
-	//}}AFX_MSG_MAP
 	ON_CBN_CLOSEUP(IDC_ALLOCTO_COMBO, OnAllocationComboCancel)
 	ON_CBN_SELENDCANCEL(IDC_ALLOCTO_COMBO, OnAllocationComboCancel)
 	ON_CBN_SELENDOK(IDC_ALLOCTO_COMBO, OnAllocationComboOK)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CEditAllocationsListCtrl message handlers
 
 void CEditAllocationsListCtrl::InitState()
 {

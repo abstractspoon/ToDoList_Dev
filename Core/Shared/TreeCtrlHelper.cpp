@@ -631,8 +631,13 @@ BOOL CTreeCtrlHelper::IsParentItemExpanded(HTREEITEM hti, BOOL bRecursive) const
 
 	if (bRecursive)
 	{
-		CRect rUnused;
-		return m_tree.GetItemRect(hti, rUnused, FALSE);
+		CRect rItem;
+
+		if (!m_tree.GetItemRect(hti, rItem, FALSE))
+			return FALSE;
+
+		ASSERT(!rItem.IsRectNull());
+		return TRUE;
 	}
 	
 	HTREEITEM htiParent = m_tree.GetParentItem(hti);

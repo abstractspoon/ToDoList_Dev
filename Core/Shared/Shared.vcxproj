@@ -246,6 +246,7 @@
     <ClCompile Include="TreeCtrlHelper.cpp" />
     <ClCompile Include="TreeDragDropHelper.cpp" />
     <ClCompile Include="TreeListCtrl.cpp" />
+    <ClCompile Include="TreeListSelectionHelper.cpp" />
     <ClCompile Include="TreeListSyncer.cpp" />
     <ClCompile Include="TreeSelectionHelper.cpp" />
     <ClCompile Include="Unzipper.cpp" />
@@ -411,6 +412,7 @@
     <ClInclude Include="TreeCtrlHelper.h" />
     <ClInclude Include="TreeDragDropHelper.h" />
     <ClInclude Include="TreeListCtrl.h" />
+    <ClInclude Include="TreeListSelectionHelper.h" />
     <ClInclude Include="TreeListSyncer.h" />
     <ClInclude Include="TreeSelectionHelper.h" />
     <ClInclude Include="Unzipper.h" />

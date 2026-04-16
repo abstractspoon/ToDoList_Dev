@@ -50,6 +50,8 @@ typedef int (CALLBACK *PFNTLSCOMPARE)(LPARAM, LPARAM, LPARAM);
 
 class CTreeListSyncer;
 
+// --------------------------------------------------------------------------
+
 class CTLSHoldResync
 {
 public:
@@ -59,6 +61,17 @@ public:
 protected:
 	CTreeListSyncer& m_tls;
 	BOOL m_bResyncHeld;
+};
+
+class CTLSResyncing
+{
+public:
+	CTLSResyncing(CTreeListSyncer& tls);
+	~CTLSResyncing();
+
+protected:
+	CTreeListSyncer& m_tls;
+	BOOL m_bWasResyncing;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -99,6 +112,7 @@ private:
 class CTreeListSyncer : protected CSubclassWnd, protected CSubclasser 
 {
 	friend class CTLSHoldResync;
+	friend class CTLSResyncing;
 
 public:
 	CTreeListSyncer(DWORD dwFlags = TLSF_SYNCSELECTION | TLSF_SYNCFOCUS);
@@ -296,8 +310,6 @@ protected:
 	int GetBoundingWidth() const;
 	
 	// callbacks for derived classes
-	virtual BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
-	virtual BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 	virtual void OnNotifySplitterChange(int nSplitPos);
 	virtual void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	virtual void HandleItemExpanded(HWND hwndTree, HTREEITEM hti, BOOL bExpand);

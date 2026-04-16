@@ -451,7 +451,7 @@ public:
 	virtual TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
-	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
+	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
 	static void SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan);
 	static void SetDialogIcons(HICON hIconIconDlg, HICON hIconDependsDlg, HICON hIconRecursIcon, HICON hIconAddLogDlg);
 

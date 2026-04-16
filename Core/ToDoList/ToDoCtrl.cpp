@@ -455,9 +455,9 @@ BOOL CToDoCtrl::IsReservedShortcut(DWORD dwShortcut)
 	return CTDLTaskCtrlBase::IsReservedShortcut(dwShortcut);
 }
 
-void CToDoCtrl::EnableExtendedSelection(BOOL bCtrl, BOOL bShift)
+void CToDoCtrl::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)
 {
-	CTDLTaskCtrlBase::EnableExtendedSelection(bCtrl, bShift);
+	CTDLTaskTreeCtrl::EnableExtendedKeyboardSelection(bCtrl, bShift);
 }
 
 void CToDoCtrl::SetDialogIcons(HICON hIconIconDlg, HICON hIconDependsDlg, HICON hIconRecurDlg, HICON hIconAddLogDlg)
@@ -1529,7 +1529,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 	if (!bInternal && (TSH().GetCount() == 1))
 		UpdateComments(GetSelectedTaskComments(), GetSelectedTaskCustomComments(m_cfComments));
 
-	TSH().InvalidateAll();
+	TSH().Invalidate();
 
 	SetModified(TDCA_COMMENTS, aModTaskIDs);
 	return TRUE;
@@ -5120,7 +5120,7 @@ HTREEITEM CToDoCtrl::InsertTreeItem(const TODOITEM* pTDI, DWORD dwTaskID, HTREEI
 
 void CToDoCtrl::OnTreeChangeFocus(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	TSH().InvalidateAll(FALSE);
+	TSH().Invalidate(FALSE);
 	*pResult = 0;
 }
 
@@ -9572,15 +9572,7 @@ void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 		break;
 
 	case TDCEC_SELECTED:
-		{
-			POSITION pos = TSH().GetFirstItemPos();
-			
-			while (pos)
-			{
-				HTREEITEM hti = TSH().GetNextItem(pos);
-				m_taskTree.ExpandItem(hti, bExpand, TRUE);
-			}
-		}
+		m_taskTree.ExpandSelection(bExpand, TRUE);
 		break;
 
 	case TDCEC_DUE:
@@ -9690,21 +9682,10 @@ BOOL CToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const
 		break;
 
 	case TDCEC_SELECTED:
-		{
-			int nFullyExpanded = TSH().IsSelectionExpanded(TRUE);
-			
-			if (nFullyExpanded == -1)	// selected items have no children
-			{
-				return FALSE; // can neither expand nor collapse
-			}
-			else if (bExpand)
-			{
-				return !nFullyExpanded;
-			}
-			
-			// else
-			return TSH().IsSelectionExpanded(FALSE);
-		}
+		if (bExpand)
+			return m_taskTree.TSH().IsAnyItemCollapsed();
+		else
+			return m_taskTree.TSH().IsAnyItemExpanded();
 		break;
 
 	case TDCEC_DUE:

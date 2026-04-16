@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "Workloadstruct.h"
 #include "WorkloadChart.h"
 
@@ -35,16 +37,18 @@ public:
 	virtual ~CWorkloadCtrl();
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
-	void SetReadOnly(BOOL bReadOnly);
-
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
 
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
-	DWORD GetSelectedTaskID() const;
 	BOOL SelectTask(DWORD dwTaskID);
+	BOOL SelectTasks(const CDWordArray& aTaskIDs);
+	DWORD GetSelectedTaskID() const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;	
+	BOOL ScrollToSelectedTask();
+
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	int GetTaskCount() const { return (int)m_tree.GetCount(); }
@@ -93,7 +97,6 @@ protected:
 	int m_nSortByAllocToCol;
 	COleDateTimeRange m_dtPeriod, m_dtDataRange;
 	COLORREF m_crOverlap, m_crBkgndText;
-	BOOL m_bReadOnly;
 
 	WORKLOADSORT m_sort;
 	CStringArray m_aAllocTo;

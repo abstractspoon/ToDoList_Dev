@@ -54,7 +54,10 @@ const int LINUX_VOFFSET_FUDGE	= 1;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-CTLSHoldResync::CTLSHoldResync(CTreeListSyncer& tls) : m_tls(tls), m_bResyncHeld(FALSE)
+CTLSHoldResync::CTLSHoldResync(CTreeListSyncer& tls) 
+	: 
+	m_tls(tls), 
+	m_bResyncHeld(FALSE)
 {
 	if (m_tls.IsResyncEnabled())
 	{
@@ -67,6 +70,22 @@ CTLSHoldResync::~CTLSHoldResync()
 {
 	if (m_bResyncHeld)
 		m_tls.EnableResync(TRUE, m_tls.PrimaryWnd());
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+CTLSResyncing::CTLSResyncing(CTreeListSyncer& tls) 
+	: 
+	m_tls(tls), 
+	m_bWasResyncing(FALSE)
+{
+	m_bWasResyncing = m_tls.m_bResyncing;
+	m_tls.m_bResyncing = TRUE;
+}
+
+CTLSResyncing::~CTLSResyncing()
+{
+	m_tls.m_bResyncing = m_bWasResyncing;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -500,13 +519,6 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 
 	if (IsTree(hwnd) && IsList(hwndTo)) // sync Tree to list
 	{
-		// cache current tree selection
-		HTREEITEM htiSel = GetTreeSelItem(hwnd);
-
-		// make sure it's really selected
-		if (!IsTreeItemSelected(hwnd, htiSel))
-			htiSel = NULL;
-		
 		// determine whether we need to scroll by comparing the
 		// first visible tree item with the first visible list item
 		
@@ -648,7 +660,7 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 		HTREEITEM htiSel = GetTreeSelItem(hwnd);
 		
 		// make sure it's really selected
-		if (!IsTreeItemSelected(hwnd, htiSel))
+	 	if (!TreeItemHasState(hwnd, htiSel, TVIS_SELECTED))
 			htiSel = NULL;
 		
 		int nSelCount = ListView_GetSelectedCount(hwndTo);
@@ -661,7 +673,7 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 		HTREEITEM htiListTreeSel = GetTreeItem(hwnd, hwndTo, nListSelItem);
 		
 		// restore selection
-		if (htiListTreeSel && htiSel != htiListTreeSel)
+		if (htiListTreeSel && (htiSel != htiListTreeSel))
 		{
 			SelectTreeItem(hwnd, htiListTreeSel, bClearTreeSel);
 			bSynced = TRUE;
@@ -1554,10 +1566,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		break;
 
 	case WM_SETFOCUS:
-		if (!HasFocus())
-		{
-			::SetFocus(PrimaryWnd());
-		}
+		SetFocus();
 		break;
 	
 	case WM_SETCURSOR:
@@ -2299,11 +2308,6 @@ void CTreeListSyncer::SetTreeItemState(HWND hwnd, HTREEITEM hti, UINT nState, UI
 	::SendMessage(hwnd, TVM_SETITEM, 0, (LPARAM)&tvi);
 }
 
-BOOL CTreeListSyncer::IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const
-{
-	return TreeItemHasState(hwnd, hti, TVIS_SELECTED);
-}
-
 BOOL CTreeListSyncer::ListItemHasState(HWND hwnd, int nItem, UINT nStateMask)
 {
 	ASSERT(IsList(hwnd));
@@ -2311,11 +2315,6 @@ BOOL CTreeListSyncer::ListItemHasState(HWND hwnd, int nItem, UINT nStateMask)
 	UINT nState = ListView_GetItemState(hwnd, nItem, nStateMask);
 
 	return (((nState & nStateMask) == nStateMask) ? TRUE : FALSE);
-}
-
-BOOL CTreeListSyncer::IsListItemSelected(HWND hwnd, int nItem) const
-{
-	return ListItemHasState(hwnd, nItem, LVIS_SELECTED);
 }
 
 void CTreeListSyncer::OnNotifySplitterChange(int /*nSplitPos*/) 
@@ -2442,12 +2441,32 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_PAINT:
 		if (IsList(hRealWnd))
 		{
+// #ifdef _DEBUG
+// 			static int nPaintCount = 0;
+// 
+// 			if (Misc::IsKeyPressed(VK_LBUTTON))
+// 				TRACE(_T("\nCTreeListSyncer::List::WM_PAINT(%d) while LButton Down\n"), ++nPaintCount);
+// 			else
+// 				nPaintCount = 0;
+// #endif // _DEBUG
+
 // 			FileMisc::EnableLogging(TRUE);
 // 			CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
-
-			RefreshListDrawColAttributes(hRealWnd);
-			return ScDefault(hRealWnd);
+// 
+ 			RefreshListDrawColAttributes(hRealWnd);
+// 			return ScDefault(hRealWnd);
 		}
+#ifdef _DEBUG
+// 		else if (IsTree(hRealWnd))
+// 		{
+// 			static int nPaintCount = 0;
+// 
+// 			if (Misc::IsKeyPressed(VK_LBUTTON))
+// 				TRACE(_T("\nCTreeListSyncer::Tree::WM_PAINT(%d) while LButton Down\n"), ++nPaintCount);
+// 			else
+// 				nPaintCount = 0;
+// 		}
+#endif // _DEBUG
 		break;
 
 	case TVM_INSERTITEM:
@@ -2789,7 +2808,15 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_SETFOCUS:
 		if (HasFlag(TLSF_SYNCFOCUS))
 		{
-			InvalidateAll(FALSE, TRUE);
+			HWND hwndOther = OtherWnd(hRealWnd);
+
+			// If we're simply switching between the two panes
+			// then no redraw is required
+			if (wp && ((HWND)wp == hwndOther))
+				return 0L; // eat
+
+			// else
+			InvalidateAll();
 		}
 		break;
 

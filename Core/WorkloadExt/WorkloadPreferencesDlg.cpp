@@ -26,11 +26,10 @@ const COLORREF DEF_OVERLAP_COLOR	= RGB(255, 0, 0);
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadPreferencesPage dialog
 
-CWorkloadPreferencesPage::CWorkloadPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
-	: CPreferencesPageBase(IDD_PREFERENCES_PAGE)
+CWorkloadPreferencesPage::CWorkloadPreferencesPage(CWnd* /*pParent*/)
+	: 
+	CPreferencesPageBase(IDD_PREFERENCES_PAGE)
 {
-	//{{AFX_DATA_INIT(CWorkloadPreferencesPage)
-	//}}AFX_DATA_INIT
 	m_aColumnVis.SetSize(NUM_TREECOLUMNS + 1);
 }
 
@@ -38,7 +37,6 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
-	//{{AFX_DATA_MAP(CWorkloadPreferencesPage)
 	DDX_Check(pDX, IDC_USETIMESTIMATEFORDURATION, m_bPreferTimeEstimateInCalcs);
 	DDX_Check(pDX, IDC_AUTOCALCALLOCATIONS, m_bAutoCalcAllocations);
 	DDX_Check(pDX, IDC_ENABLEOVERLOAD, m_bEnableOverload);
@@ -47,7 +45,7 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_RECALCEQUALLY, m_bRecalcProportionally);
 	DDX_Check(pDX, IDC_ENABLEOVERLAPCOLOR, m_bEnableOverlapColor);
 	DDX_Check(pDX, IDC_INCLUDEDATELESSTASKSINPERIOD, m_bIncludeDatelessTasksInPeriod);
-	//}}AFX_DATA_MAP
+
 	DDX_Control(pDX, IDC_COLUMNVISIBILITY, m_lbColumnVisibility);
 	DDX_Control(pDX, IDC_SETOVERLOADCOLOR, m_btnOverloadColor);
 	DDX_Control(pDX, IDC_SETUNDERLOADCOLOR, m_btnUnderloadColor);
@@ -63,16 +61,13 @@ void CWorkloadPreferencesPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CWorkloadPreferencesPage, CPreferencesPageBase)
-	//{{AFX_MSG_MAP(CWorkloadPreferencesPage)
 	ON_BN_CLICKED(IDC_ENABLEOVERLOAD, OnEnableOverload)
 	ON_BN_CLICKED(IDC_ENABLEUNDERLOAD, OnEnableUnderload)
 	ON_BN_CLICKED(IDC_RECALCALLOCATIONS, OnSetRecalcAllocations)
 	ON_BN_CLICKED(IDC_ENABLEOVERLAPCOLOR, OnEnableOverlapColor)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-/////////////////////////////////////////////////////////////////////////////
-// CWorkloadPreferencesPage message handlers
+// ---------------------------------------------------------------------------
 
 BOOL CWorkloadPreferencesPage::OnInitDialog() 
 {
@@ -89,8 +84,7 @@ BOOL CWorkloadPreferencesPage::OnInitDialog()
 	AddGroupLine(IDC_ALLOCATIONGROUP);
 	EnableDisableControls();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CWorkloadPreferencesPage::OnEnableOverload() 
@@ -243,23 +237,17 @@ CWorkloadPreferencesDlg::CWorkloadPreferencesDlg(CWnd* pParent /*=NULL*/)
 	: 
 	CPreferencesDlgBase(IDD_PREFERENCES_DIALOG, IDC_PPHOST, IDR_WORKLOAD, IDI_HELP_BUTTON, pParent)
 {
-	//{{AFX_DATA_INIT(CWorkloadPreferencesDlg)
-	//}}AFX_DATA_INIT
-
 	m_ppHost.AddPage(&m_page);
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadPreferencesDlg, CPreferencesDlgBase)
-	//{{AFX_MSG_MAP(CWorkloadPreferencesDlg)
-	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 BOOL CWorkloadPreferencesDlg::OnInitDialog() 
 {
 	CPreferencesDlgBase::OnInitDialog();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CWorkloadPreferencesDlg::DoHelp()

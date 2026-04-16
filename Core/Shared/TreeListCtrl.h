@@ -15,18 +15,16 @@
 #include "treectrlhelper.h"
 #include "fontcache.h"
 #include "TreeDragDropHelper.h"
-#include "TreeSelectionHelper.h"
+#include "TreeListSelectionHelper.h"
 #include "themed.h"
-
-/////////////////////////////////////////////////////////////////////////////
-
-#define TVN_KEYUP (TVN_FIRST-16)
 
 /////////////////////////////////////////////////////////////////////////////
 
 struct TLCITEMMOVE
 {
-	HTREEITEM htiSel;
+	TLCITEMMOVE(const CTreeSelectionHelper& tsh);
+
+	CHTIList selection;
 	HTREEITEM htiDestParent;
 	HTREEITEM htiDestAfterSibling;
 
@@ -124,15 +122,20 @@ public:
 	
 	BOOL Create(CWnd* pParentWnd, const CRect& rect, UINT nID, BOOL bVisible = TRUE);
 	void Show(BOOL bShow = TRUE) { CTreeListSyncer::Show(bShow); }
+	void SetReadOnly(BOOL bReadOnly);
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
-	HTREEITEM GetSelectedItem() const;
-	DWORD GetSelectedItemData() const;
+	void SetFocus() { CTreeListSyncer::SetFocus(); }
 
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
-	void SetFocus();
+
+	BOOL SelectItem(HTREEITEM hti);
+	BOOL SelectItems(const CHTIList& htItems);
+	void SelectAll();
+	int GetSelectedItemData(CDWordArray& aItemData) const;
+	int GetSelectionCount() const { return TSH().GetCount(); }
 
 	void EnableTreeCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable = TRUE) { m_tree.EnableCheckboxes(nUnthemedBitmapID, bEnable); }
 	void EnableTreeImagePlaceholder(BOOL bEnable = TRUE) { m_tree.EnableImagePlaceholder(bEnable); }
@@ -145,13 +148,11 @@ public:
 
 	BOOL PointInHeader(const CPoint& ptScreen) const;
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader = TRUE) const;
-	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 
 	void ExpandAll(BOOL bExpand = TRUE);
-	BOOL CanExpandAll() const;
-	BOOL CanCollapseAll() const;
-	virtual void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
-	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
+	void ExpandSelection(BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
+	BOOL CanExpandAll(BOOL bExpand) const;
+	BOOL CanExpandSelection(BOOL bExpand = TRUE) const;
 
 	void ResizeListColumnsToFit(BOOL bForce = FALSE);
 	void AdjustSplitterToFitListColumns();
@@ -200,9 +201,11 @@ protected:
 
 	COLORREF m_crAltLine, m_crGridLine, m_crBkgnd;
 	BOOL m_bMovingItem;
+	BOOL m_bBoundSelecting;
+	BOOL m_bReadOnly;
 
+	CTreeListSelectionHelper m_tsh;
 	CTreeDragDropHelper m_treeDragDrop;
-	CTreeSelectionHelper m_tshDragDrop;
 	CThemed m_themeHeader;
 	
 	mutable int m_nMinTreeTitleColumnWidth;
@@ -224,7 +227,6 @@ protected:
 	afx_msg void OnTreeHeaderEndDrag(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeHeaderDblClickDivider(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeHeaderRightClick(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* pResult);
 
 	afx_msg LRESULT OnTreeDragEnter(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnTreePreDragMove(WPARAM wp, LPARAM lp);
@@ -236,13 +238,13 @@ protected:
 
 protected:
 	// base class callbacks
-	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
-	void OnNotifySplitterChange(int nSplitPos);
-	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	virtual LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
+	virtual void OnNotifySplitterChange(int nSplitPos);
+	virtual void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	virtual void OnListSelectionChange(NMLISTVIEW* pNMLV);
 
 	// pseudo-message handlers
 	virtual BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);
-	virtual BOOL OnTreeLButtonUp(UINT nFlags, CPoint point);
 	virtual BOOL OnTreeLButtonDblClk(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDown(UINT nFlags, CPoint point);
 	virtual BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
@@ -255,6 +257,7 @@ protected:
 	virtual BOOL OnTreeCheckChange(HTREEITEM /*hti*/) { return FALSE; }
 	virtual void OnListHeaderClick(NMHEADER* /*HDN*/) {}
 
+	virtual BOOL OnTreeLButtonUp(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnTreeMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnListLButtonUp(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
 	virtual BOOL OnListMouseMove(UINT /*nFlags*/, CPoint /*point*/) { return FALSE; }
@@ -281,6 +284,7 @@ protected:
 	virtual void InitItemHeights();
 	virtual int CalcSplitPosToFitListColumns(int nAvailWidth) const;
 	virtual BOOL DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider);
+	virtual void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 
 	enum UPDATETITLEWIDTHACTION 
 	{ 
@@ -307,6 +311,9 @@ protected:
 	void ExpandList();
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
+	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
+	void DeselectAll();
+	BOOL ProcessSelectionChange(BOOL bSelChange);
 
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);
@@ -318,6 +325,7 @@ protected:
 	int CalcTreeTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC, int nMaxItemTextWidth) const;
 
+	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen, int& nCol) const;
 	int ListHitTestItem(const CPoint& point, BOOL bScreen) const;
@@ -327,12 +335,16 @@ protected:
 	int GetListItem(HTREEITEM hti) const;
 	HTREEITEM GetTreeItem(DWORD dwItemData) const;
 	HTREEITEM GetTreeItem(int nItem) const { return CTreeListSyncer::GetTreeItem(m_tree, m_list, nItem); }
-	BOOL SelectItem(HTREEITEM hti);
 	CString GetItemLabelTip(CPoint ptScreen) const;
 	DWORD GetItemData(HTREEITEM htiFrom) const;
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
 	BOOL GetTreeIconRect(HTREEITEM hti, CRect& rIcon) const;
+	HTREEITEM GetSelectedItem() const;
+	DWORD GetSelectedItemData() const;
+
+	void SyncColumnSelectionToTasks();
+	void NotifyParentSelectionChange();
 
 	BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
@@ -345,6 +357,9 @@ protected:
 
 	CTreeCtrlHelper& TCH() { return m_tree.TCH(); }
 	const CTreeCtrlHelper& TCH() const { return m_tree.TCH(); }
+
+	CTreeListSelectionHelper& TSH() { return m_tsh; }
+	const CTreeListSelectionHelper& TSH() const { return m_tsh; }
 
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);

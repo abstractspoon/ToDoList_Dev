@@ -76,7 +76,7 @@ enum
 //////////////////////////////////////////////////////////////////////
 
 CTDCColumnMap	CTDLTaskCtrlBase::s_mapColumns;
-short			CTDLTaskCtrlBase::s_nExtendedSelection = HOTKEYF_CONTROL | HOTKEYF_SHIFT;
+DWORD			CTDLTaskCtrlBase::s_dwAllowableExtendedKeyboardSelection = (HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 double			CTDLTaskCtrlBase::s_dRecentModPeriod = 0.0;												
 
 //////////////////////////////////////////////////////////////////////
@@ -642,11 +642,6 @@ void CTDLTaskCtrlBase::OnSize(UINT nType, int cx, int cy)
 
 		UpdateSelectedTaskPath(); // idle task
 	}
-}
-
-BOOL CTDLTaskCtrlBase::IsListItemSelected(HWND hwnd, int nItem) const
-{
-	return (ListView_GetItemState(hwnd, nItem, LVIS_SELECTED) & LVIS_SELECTED);
 }
 
 void CTDLTaskCtrlBase::SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle)
@@ -4609,7 +4604,7 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 				// already selected then we generate a NM_CLICK and eat the 
 				// message to prevent a selection change
 				BOOL bMultiSelection = (m_lcColumns.GetSelectedCount() > 1);
-				BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nHit);
+				BOOL bTaskSelected = ListItemHasState(m_lcColumns, nHit, LVIS_SELECTED);
 
 				if (bMultiSelection && bTaskSelected && 
 					ItemColumnSupportsClickHandling(nHit, nColID))
@@ -4626,20 +4621,14 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 			}
 		}
 	}
-	else
+	else // Primary window of a List-List control
 	{
 		nHit = lc.HitTest(pt);
 	}
 
-	// De-selecting a lot of items can be slow because 
-	// OnListSelectionChange is called once for each.
-	// So we try to detect big changes here and handle 
-	// them ourselves.
-	lc.ClientToScreen(&pt);
-
 	if (nHit != -1)
 	{
-		BOOL bHitSelected = IsListItemSelected(m_lcColumns, nHit);
+		BOOL bHitSelected = ListItemHasState(m_lcColumns, nHit, LVIS_SELECTED);
 
 		if (Misc::ModKeysArePressed(0) && 
 			(!bHitSelected || !ItemColumnSupportsClickHandling(nHit, nColID)))
@@ -4647,24 +4636,30 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 			DeselectAll();
 		}
 	}
-	else if (::DragDetect(lc, pt))
+	else
 	{
-		m_bBoundSelecting = -1;
+		lc.ClientToScreen(&pt);
 
-		if (!Misc::IsKeyPressed(VK_CONTROL))
+		if (::DragDetect(lc, pt))
 		{
-			DeselectAll();
-		}
+			m_bBoundSelecting = -1;
 
-		// there's no reliable to way to detect the end of a
-		// bounding-box selection especially if the mouse 
-		// cursor ends up outside the window so we use a timer
-		SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
-	}
-	else // prevent deselection
-	{
-		TRACE(_T("Ate Listview ButtonDown\n"));
-		return TRUE; // eat it
+			if (!Misc::IsKeyPressed(VK_CONTROL))
+			{
+				DeselectAll();
+				UpdateAll();
+			}
+
+			// I've found no reliable to way to detect the end of a
+			// bounding-box selection especially if the mouse 
+			// cursor ends up outside the window so we use a timer
+			SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
+		}
+		else // prevent deselection
+		{
+			TRACE(_T("Ate Listview ButtonDown\n"));
+			return TRUE; // eat it
+		}
 	}
 
 	return FALSE;
@@ -4752,7 +4747,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 			// and either the task is not selected or it's only singly selected
 			BOOL bNoModifiers = Misc::ModKeysArePressed(0);
 			BOOL bSingleSelection = (GetSelectedCount() == 1);
-			BOOL bTaskSelected = IsListItemSelected(m_lcColumns, nItem);
+			BOOL bTaskSelected = ListItemHasState(m_lcColumns, nItem, LVIS_SELECTED);
 
 			return (bNoModifiers &&
 					bEditableTask &&
@@ -5802,17 +5797,12 @@ BOOL CTDLTaskCtrlBase::SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const
 
 // -----------------------------------------------------------------
 
-void CTDLTaskCtrlBase::EnableExtendedSelection(BOOL bCtrl, BOOL bShift)
+void CTDLTaskCtrlBase::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)
 {
-	if (bCtrl)
-		s_nExtendedSelection |= HOTKEYF_CONTROL;
-	else
-		s_nExtendedSelection &= ~HOTKEYF_CONTROL;
-	
-	if (bShift)
-		s_nExtendedSelection |= HOTKEYF_SHIFT;
-	else
-		s_nExtendedSelection &= ~HOTKEYF_SHIFT;
+	s_dwAllowableExtendedKeyboardSelection = 0;
+
+	Misc::SetFlag(s_dwAllowableExtendedKeyboardSelection, HOTKEYF_CONTROL, bCtrl);
+	Misc::SetFlag(s_dwAllowableExtendedKeyboardSelection, HOTKEYF_SHIFT, bShift);
 }
 
 BOOL CTDLTaskCtrlBase::IsReservedShortcut(DWORD dwShortcut)
@@ -5833,19 +5823,19 @@ BOOL CTDLTaskCtrlBase::IsReservedShortcut(DWORD dwShortcut)
 	case MAKELONG(VK_PRIOR, HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_DOWN, HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_NEXT, HOTKEYF_CONTROL | HOTKEYF_EXT):
-		return (s_nExtendedSelection & HOTKEYF_CONTROL);
+		return (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL);
 		
 	case MAKELONG(VK_UP, HOTKEYF_SHIFT | HOTKEYF_EXT):
 	case MAKELONG(VK_PRIOR, HOTKEYF_SHIFT | HOTKEYF_EXT):
 	case MAKELONG(VK_DOWN, HOTKEYF_SHIFT | HOTKEYF_EXT):
 	case MAKELONG(VK_NEXT, HOTKEYF_SHIFT | HOTKEYF_EXT):
-		return (s_nExtendedSelection & HOTKEYF_SHIFT);
+		return (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT);
 		
 	case MAKELONG(VK_UP, HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_PRIOR, HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_DOWN, HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_EXT):
 	case MAKELONG(VK_NEXT, HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_EXT):
-		return (s_nExtendedSelection & (HOTKEYF_CONTROL | HOTKEYF_SHIFT)); // both
+		return (s_dwAllowableExtendedKeyboardSelection & (HOTKEYF_CONTROL | HOTKEYF_SHIFT)); // either
 	}
 	
 	// all else

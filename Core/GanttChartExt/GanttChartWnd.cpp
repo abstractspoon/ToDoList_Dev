@@ -48,7 +48,7 @@ const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 /////////////////////////////////////////////////////////////////////////////
 // CGanttChartWnd
 
-CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
+CGanttChartWnd::CGanttChartWnd(CWnd* pParent)
 	: 
 	CDialog(IDD_GANTTTREE_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
@@ -57,6 +57,8 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	m_dlgPrefs(this)
 {
 	m_icon.Load(IDR_GANTTCHART);
+
+	CTreeSelectionHelper::EnableExtendedKeyboardSelection(FALSE, TRUE);
 }
 
 CGanttChartWnd::~CGanttChartWnd()
@@ -66,18 +68,15 @@ CGanttChartWnd::~CGanttChartWnd()
 void CGanttChartWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CGanttChartWnd)
+
 	DDX_Control(pDX, IDC_SNAPMODES, m_cbSnapModes);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_DISPLAY, m_cbDisplayOptions);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 }
 
 BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
-	//{{AFX_MSG_MAP(CGanttChartWnd)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
-	ON_NOTIFY(TVN_KEYUP, IDC_GANTTTREE, OnKeyUpGantt)
 	ON_CBN_SELCHANGE(IDC_DISPLAY, OnSelchangeDisplay)
 	ON_NOTIFY(NM_CLICK, IDC_GANTTLIST, OnClickGanttList)
 	ON_COMMAND(ID_GANTT_GOTOTODAY, OnGanttGotoToday)
@@ -91,7 +90,6 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_UPDATE_COMMAND_UI(ID_GANTT_EDITDEPENDS, OnUpdateGanttEditDepends)
 	ON_COMMAND(ID_GANTT_DELETEDEPENDS, OnGanttDeleteDepends)
 	ON_UPDATE_COMMAND_UI(ID_GANTT_DELETEDEPENDS, OnUpdateGanttDeleteDepends)
-	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_WM_SETFOCUS()
@@ -117,7 +115,6 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CGanttChartWnd message handlers
 
 void CGanttChartWnd::OnNcDestroy()
 {
@@ -154,7 +151,7 @@ void CGanttChartWnd::SetReadOnly(bool bReadOnly)
 	m_toolbar.RefreshButtonStates(FALSE);
 }
 
-BOOL CGanttChartWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)
+BOOL CGanttChartWnd::Create(DWORD dwStyle, const RECT& /*rect*/, CWnd* pParentWnd, UINT nID)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -497,17 +494,21 @@ DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) con
 bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	CAutoFlag af(m_bInSelectTask, TRUE);
 
-	return (m_ctrlGantt.SelectTask(dwTaskID) != FALSE);
+	return SelectTasks(&dwTaskID, 1);
 }
 
-bool CGanttChartWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
+bool CGanttChartWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return false; // only support single selection
+
+	CDWordArray aTaskIDs;
+	aTaskIDs.SetSize(nTaskCount);
+
+	for (int nID = 0; nID < nTaskCount; nID++)
+		aTaskIDs[nID] = pdwTaskIDs[nID];
+
+	return (m_ctrlGantt.SelectTasks(aTaskIDs) != FALSE);
 }
 
 bool CGanttChartWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -522,6 +523,7 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	m_ctrlGantt.UpdateTasks(pTasks, nUpdate);
+	m_toolbar.RefreshButtonStates(FALSE);
 
 	GANTTDATERANGE dtDataRange;
 
@@ -558,22 +560,28 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 { 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	m_toolbar.RefreshButtonStates(FALSE);
+
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:
 		m_ctrlGantt.ExpandAll(TRUE);
 		return true;
 
+	case IUI_SELECTALLVISIBLE:
+		m_ctrlGantt.SelectAll();
+		return true;	
+	
 	case IUI_COLLAPSEALL:
 		m_ctrlGantt.ExpandAll(FALSE);
 		return true;
 
 	case IUI_EXPANDSELECTED:
-		m_ctrlGantt.ExpandItem(m_ctrlGantt.GetSelectedItem(), TRUE, TRUE);
+		m_ctrlGantt.ExpandSelection(TRUE, TRUE);
 		return true;
 
 	case IUI_COLLAPSESELECTED:
-		m_ctrlGantt.ExpandItem(m_ctrlGantt.GetSelectedItem(), FALSE);
+		m_ctrlGantt.ExpandSelection(FALSE);
 		return true;
 
 	case IUI_SORT:
@@ -655,13 +663,12 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		if (pData)
 		{
 			ASSERT(pData->move.dwSelectedTaskID == m_ctrlGantt.GetSelectedTaskID());
-
 			return (m_ctrlGantt.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
-		return (m_ctrlGantt.SelectTask(m_ctrlGantt.GetSelectedTaskID()) != FALSE);
+		return (m_ctrlGantt.ScrollToSelectedTask() != FALSE);
 	}
 
 	return false;
@@ -683,10 +690,10 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:
-		return (m_ctrlGantt.CanExpandAll() != FALSE);
+		return (m_ctrlGantt.CanExpandAll(TRUE) != FALSE);
 
 	case IUI_COLLAPSEALL:
-		return (m_ctrlGantt.CanCollapseAll() != FALSE);
+		return (m_ctrlGantt.CanExpandAll(FALSE) != FALSE);
 
 	case IUI_RESIZEATTRIBCOLUMNS:
 		return true;
@@ -695,18 +702,10 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 		return (m_ctrlGantt.GetTaskCount() > 0);
 
 	case IUI_EXPANDSELECTED:
-		{
-			HTREEITEM htiSel = m_ctrlGantt.GetSelectedItem();
-			return (m_ctrlGantt.CanExpandItem(htiSel, TRUE) != FALSE);
-		}
-		break;
+		return (m_ctrlGantt.CanExpandSelection(TRUE) != FALSE);
 
 	case IUI_COLLAPSESELECTED:
-		{
-			HTREEITEM htiSel = m_ctrlGantt.GetSelectedItem();
-			return (m_ctrlGantt.CanExpandItem(htiSel, FALSE) != FALSE);
-		}
-		break;
+		return (m_ctrlGantt.CanExpandSelection(FALSE) != FALSE);
 
 	case IUI_SORT:
 		if (pData)
@@ -731,6 +730,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 		}
 		break;
 
+	case IUI_SELECTALLVISIBLE:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -743,7 +743,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 			return (m_ctrlGantt.CanMoveSelectedTask(pData->move) != FALSE);
 
 	case IUI_SCROLLTOSELECTEDTASK:
-		return (m_ctrlGantt.GetSelectedTaskID() != 0);
+		return (m_ctrlGantt.GetSelectionCount() != 0);
 	}
 
 	// all else
@@ -788,8 +788,7 @@ BOOL CGanttChartWnd::OnInitDialog()
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
 
-	return FALSE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return FALSE;
 }
 
 void CGanttChartWnd::Resize(int cx, int cy)
@@ -871,29 +870,12 @@ BOOL CGanttChartWnd::OnEraseBkgnd(CDC* pDC)
 	return CDialog::OnEraseBkgnd(pDC);
 }
 
-void CGanttChartWnd::OnKeyUpGantt(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	ASSERT (!m_bInSelectTask);
-	
-	NMTVKEYDOWN* pTVKD = (NMTVKEYDOWN*)pNMHDR;
-	
-	switch (pTVKD->wVKey)
-	{
-	case VK_UP:
-	case VK_DOWN:
-	case VK_PRIOR:
-	case VK_NEXT:
-		SendParentSelectionUpdate();
-		break;
-	}
-	
-	*pResult = 0;
-}
-
 void CGanttChartWnd::SendParentSelectionUpdate()
 {
-	DWORD dwTaskID = m_ctrlGantt.GetSelectedTaskID();
-	GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, dwTaskID);
+	CDWordArray aTaskIDs;
+	int nNumTasks = m_ctrlGantt.GetSelectedItemData(aTaskIDs);
+
+	GetParent()->SendMessage(WM_IUI_SELECTTASK, (LPARAM)aTaskIDs.GetData(), nNumTasks);
 }
 
 void CGanttChartWnd::OnClickGanttList(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
@@ -1069,6 +1051,8 @@ LRESULT CGanttChartWnd::OnGanttNotifySortChange(WPARAM wp, LPARAM lp)
 LRESULT CGanttChartWnd::OnGanttNotifySelChanged(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	SendParentSelectionUpdate();
+
+	m_toolbar.RefreshButtonStates(FALSE);
 
 	return 0L;
 }
@@ -1314,17 +1298,6 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 	
 	if (m_dlgDepends.IsPickingCompleted())
 	{
-		// make sure the 'from' task is reselected
-		DWORD dwFromTaskID = m_dlgDepends.GetFromTask();
-
-		if (m_ctrlGantt.GetSelectedTaskID() != dwFromTaskID)
-		{
-			SelectTask(dwFromTaskID, false);
-
-			// explicitly update parent because SelectTask will not
-			SendParentSelectionUpdate();
-		}
-
 		// notify parent
 		IUITASKMOD mod = { TDCA_DEPENDENCY, 0 };
 

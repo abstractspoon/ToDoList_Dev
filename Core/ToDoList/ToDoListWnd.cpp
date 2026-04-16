@@ -382,7 +382,7 @@ CToDoListWnd::CToDoListWnd()
 	if (Prefs().GetEnableRTLInput())
 		CRTLInputMgr::Initialize();
 
-	CFilteredToDoCtrl::EnableExtendedSelection(FALSE, TRUE);
+	CFilteredToDoCtrl::EnableExtendedKeyboardSelection(FALSE, TRUE);
 	CEnListCtrl::EnableSelectionTheming(TRUE, TRUE);
 
 	m_bAutoMenuEnable = FALSE;
