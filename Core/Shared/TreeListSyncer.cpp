@@ -2770,6 +2770,23 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			PostResync(hRealWnd, FALSE);
 		break;
 
+	case WM_KEYDOWN:
+		switch (wp)
+		{
+		case VK_UP:
+		case VK_DOWN:
+		case VK_PRIOR:
+		case VK_NEXT:
+			{
+				lr = ScDefault(hRealWnd);
+				bDoneDefault = TRUE;
+
+				ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
+			}
+			break;
+		}
+		break;
+
 	case WM_KEYUP:
 		switch (wp)
 		{
