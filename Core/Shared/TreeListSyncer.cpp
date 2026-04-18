@@ -592,11 +592,11 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 		{
 			int nItemHeight = max(GetItemHeight(hwndTo), GetItemHeight(hwnd));
 			ListView_Scroll(hwnd, 0, (nEquivFirstVisItem - nFirstVisItem) * nItemHeight);
+			
+			bSynced = TRUE;
 		}
 		
 		ResyncListHeader(hwnd);
-
-		bSynced = TRUE;
 	}
 	
 	if (bSynced)
