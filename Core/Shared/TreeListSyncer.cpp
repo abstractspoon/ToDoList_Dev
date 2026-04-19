@@ -2439,17 +2439,8 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		break;
 
 	case WM_PAINT:
-		{
-			BOOL bPrimary = (hRealWnd == PrimaryWnd());
-
-			if (!bPrimary && IsList(hRealWnd))
-				RefreshListDrawColAttributes(hRealWnd);
-
-			static int PaintCount = 0;
-			OutputDebugString(Misc::Format(_T("CTreeListSyncer.%s.WM_PAINT(%d)\n"), 
-										   (bPrimary ? _T("Primary") : _T("List")), 
-											++PaintCount));
-		}
+		if (IsList(hRealWnd))
+			RefreshListDrawColAttributes(hRealWnd);
 		break;
 
 	case TVM_INSERTITEM:
