@@ -592,11 +592,11 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 		{
 			int nItemHeight = max(GetItemHeight(hwndTo), GetItemHeight(hwnd));
 			ListView_Scroll(hwnd, 0, (nEquivFirstVisItem - nFirstVisItem) * nItemHeight);
+			
+			bSynced = TRUE;
 		}
 		
 		ResyncListHeader(hwnd);
-
-		bSynced = TRUE;
 	}
 	
 	if (bSynced)
@@ -2440,33 +2440,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 
 	case WM_PAINT:
 		if (IsList(hRealWnd))
-		{
-// #ifdef _DEBUG
-// 			static int nPaintCount = 0;
-// 
-// 			if (Misc::IsKeyPressed(VK_LBUTTON))
-// 				TRACE(_T("\nCTreeListSyncer::List::WM_PAINT(%d) while LButton Down\n"), ++nPaintCount);
-// 			else
-// 				nPaintCount = 0;
-// #endif // _DEBUG
-
-// 			FileMisc::EnableLogging(TRUE);
-// 			CScopedLogTimer timer(_T("CTreeListSyncer(ListDraw)"));
-// 
- 			RefreshListDrawColAttributes(hRealWnd);
-// 			return ScDefault(hRealWnd);
-		}
-#ifdef _DEBUG
-// 		else if (IsTree(hRealWnd))
-// 		{
-// 			static int nPaintCount = 0;
-// 
-// 			if (Misc::IsKeyPressed(VK_LBUTTON))
-// 				TRACE(_T("\nCTreeListSyncer::Tree::WM_PAINT(%d) while LButton Down\n"), ++nPaintCount);
-// 			else
-// 				nPaintCount = 0;
-// 		}
-#endif // _DEBUG
+			RefreshListDrawColAttributes(hRealWnd);
 		break;
 
 	case TVM_INSERTITEM:
@@ -2769,6 +2743,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		}
 		break;
 		
+/*
 	case WM_TIMER:
 		{
  			lr = ScDefault(hRealWnd);
@@ -2777,6 +2752,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
 		}
 		break;
+*/
 		
 	case WM_CHAR:
 		// If this is a list-list configuration then navigating
@@ -2787,6 +2763,24 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			PostResync(hRealWnd, FALSE);
 		break;
 
+	case WM_KEYDOWN:
+		switch (wp)
+		{
+		case VK_UP:
+		case VK_DOWN:
+		case VK_PRIOR:
+		case VK_NEXT:
+			{
+				lr = ScDefault(hRealWnd);
+				bDoneDefault = TRUE;
+
+				ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
+			}
+			break;
+		}
+		break;
+
+/*
 	case WM_KEYUP:
 		switch (wp)
 		{
@@ -2803,6 +2797,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			break;
 		}
 		break;
+*/
 		
 	case WM_KILLFOCUS:
 	case WM_SETFOCUS:
