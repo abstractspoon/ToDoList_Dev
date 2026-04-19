@@ -23,8 +23,6 @@ CFG=Shared - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/Shared", HACAAAAA"
-# PROP Scc_LocalPath "..\..\shared"
 CPP=cl.exe
 RSC=rc.exe
 

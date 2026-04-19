@@ -23,8 +23,6 @@ CFG=Interfaces - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/Interfaces", HACAAAAA"
-# PROP Scc_LocalPath "..\..\Interfaces"
 CPP=cl.exe
 RSC=rc.exe
 

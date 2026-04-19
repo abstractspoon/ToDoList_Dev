@@ -23,8 +23,6 @@ CFG=GanttChartExt - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/GanttChartExt", RHGAAAAA"
-# PROP Scc_LocalPath "..\..\ganttchartext"
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe

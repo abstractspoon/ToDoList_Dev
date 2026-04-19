@@ -23,8 +23,6 @@ CFG=3rdParty - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/3rdParty", WQDAAAAA"
-# PROP Scc_LocalPath "..\..\3rdparty"
 CPP=cl.exe
 RSC=rc.exe
 

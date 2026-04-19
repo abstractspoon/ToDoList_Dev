@@ -23,8 +23,6 @@ CFG=KanbanBoard - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/KanbanBoard", DDHAAAAA"
-# PROP Scc_LocalPath "..\..\kanbanboard"
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe

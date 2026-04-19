@@ -23,8 +23,6 @@ CFG=iCalImportExport - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/iCalImportExport", WFEAAAAA"
-# PROP Scc_LocalPath "."
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe

@@ -23,8 +23,6 @@ CFG=RTFContentCtrl - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/RTFContentCtrl", HIEAAAAA"
-# PROP Scc_LocalPath "..\..\rtfcontentctrl"
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
