@@ -2752,6 +2752,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		}
 		break;
 		
+/*
 	case WM_TIMER:
 		{
  			lr = ScDefault(hRealWnd);
@@ -2760,6 +2761,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
 		}
 		break;
+*/
 		
 	case WM_CHAR:
 		// If this is a list-list configuration then navigating
@@ -2787,6 +2789,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		}
 		break;
 
+/*
 	case WM_KEYUP:
 		switch (wp)
 		{
@@ -2803,6 +2806,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			break;
 		}
 		break;
+*/
 		
 	case WM_KILLFOCUS:
 	case WM_SETFOCUS:
