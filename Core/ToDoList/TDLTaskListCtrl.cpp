@@ -340,11 +340,13 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 								
 		case CDDS_ITEMPREPAINT:
 			{
-				static BOOL bFillRow = !OsIsLinux();
+				// Don't fill the row on XP because it will overwrite
+				// the icon and check-box when hovering with the mouse
+				static BOOL bFillRow = (!OsIsXPOrLinux() || OsIsLinux());
 				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, pLVCD->clrText, pLVCD->clrTextBk, bFillRow);
-
+				
 				if (bFillRow)
- 					ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
+					ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
 			}
 			break;
 
