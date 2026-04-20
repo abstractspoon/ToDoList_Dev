@@ -2537,13 +2537,11 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 					COLORREF crRowBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 					
 					// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
-					CRect rItem(pLVCD->nmcd.rc);
-
-					if (OsIsXPOrLinux())
-						m_lcColumns.GetItemRect(nItem, rItem, LVIR_BOUNDS);
+					if (OsIsXP())
+						m_lcColumns.GetItemRect(nItem, &pLVCD->nmcd.rc, LVIR_BOUNDS);
 
 					// this call will update rFullWidth to full client width
-					CRect rFullWidth(rItem);
+					CRect rFullWidth(pLVCD->nmcd.rc);
 					GraphicsMisc::FillItemRect(pDC, rFullWidth, crRowBack, m_lcColumns);
 
 					// selection state
@@ -2562,7 +2560,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 					// draw task background
 					// Note: using the non-full width item rect
 					if (!bSelected && HasColor(crBack))
-						pDC->FillSolidRect(rItem, crBack);
+						pDC->FillSolidRect(&pLVCD->nmcd.rc, crBack);
 
 					// draw horz gridline before selection
 					DrawGridlines(pDC, rFullWidth, FALSE, TRUE, FALSE);
@@ -2577,7 +2575,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 						if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
 							dwFlags |= GMIB_CLIPLEFT;
 
-						GraphicsMisc::DrawExplorerItemSelection(pDC, m_lcColumns, nState, rItem, dwFlags | GMIB_PREDRAW | GMIB_POSTDRAW);
+						GraphicsMisc::DrawExplorerItemSelection(pDC, m_lcColumns, nState, pLVCD->nmcd.rc, dwFlags | GMIB_PREDRAW | GMIB_POSTDRAW);
 
 						crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 					}
@@ -4383,7 +4381,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			break;
 
  		case WM_ERASEBKGND:
-			if (COSVersion() == OSV_LINUX)
+			if (OsIsLinux())
 			{
 				CRect rClient;
 				m_lcColumns.GetClientRect(rClient);
@@ -4425,7 +4423,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		case WM_RBUTTONDOWN:
 			// Don't let the selection to be set to -1 when clicking below the last item
 			// BUT NOT ON Linux because it interferes with context menu handling
-			if (COSVersion() != OSV_LINUX)
+			if (!OsIsLinux())
 			{
 				// let parent handle any focus changes first
 				m_lcColumns.SetFocus();

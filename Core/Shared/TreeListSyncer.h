@@ -244,10 +244,12 @@ protected:
 	static void InvalidateListItem(HWND hwnd, int nItem, BOOL bErase = TRUE);
 	static int InsertListItem(HWND hwndList, int nInsertPos, DWORD dwItemData);
  	static void SelectTreeItem(HWND hwnd, HTREEITEM hti, BOOL bClear = TRUE);
-	static BOOL OsIsXPOrLinux();
-	static BOOL OsIsLinux();
 	static int CalcTotalHeaderItemWidth(HWND hwndHeader);
 	static int CalcMaxVisibleTreeItemWidth(HWND hwnd);
+
+	static BOOL OsIsXPOrLinux();
+	static BOOL OsIsLinux();
+	static BOOL OsIsXP();
 
 	static DWORD GetStyle(HWND hwnd, BOOL bExStyle);
 	static BOOL HasStyle(HWND hwnd, DWORD dwStyle, BOOL bExStyle);
