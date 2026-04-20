@@ -1,11 +1,13 @@
-#if !defined(AFX_OUTLOOKIMPORTDLG_H__E9D6C9F1_A424_4CB8_9AEF_0CE8641F1C53__INCLUDED_)
-#define AFX_OUTLOOKIMPORTDLG_H__E9D6C9F1_A424_4CB8_9AEF_0CE8641F1C53__INCLUDED_
+#if !defined(AFX_OUTLOOKIMPORTITEMSDLG_H__E9D6C9F1_A424_4CB8_9AEF_0CE8641F1C53__INCLUDED_)
+#define AFX_OUTLOOKIMPORTITEMSDLG_H__E9D6C9F1_A424_4CB8_9AEF_0CE8641F1C53__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 // OutlookImportDlg.h : header file
 //
+
+/////////////////////////////////////////////////////////////////////////////
 
 #include "TDLDialog.h"
 
@@ -33,20 +35,19 @@ typedef void* HTASKITEM;
 /////////////////////////////////////////////////////////////////////////////
 // COutlookImportDlg dialog
 
-class CTDLImportOutlookDlg : public CTDLDialog
+class CTDLOutlookImportItemsDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLImportOutlookDlg(CWnd* pParent = NULL);   // standard constructor
+	CTDLOutlookImportItemsDlg(CWnd* pParent = NULL);
 
 	IIMPORTEXPORT_RESULT ImportTasks(ITaskList* pDestTaskFile, IPreferences* pPrefs, LPCTSTR szKey);
 
 // Dialog Data
-	//{{AFX_DATA(COutlookImportDlg)
 	BOOL	m_bRemoveOutlookTasks;
 	CString	m_sCurFolder;
 	BOOL	m_bHideUnflaggedEmails;
-	//}}AFX_DATA
+
 	CTreeCtrl	m_tcTasks;
 	ITASKLISTBASE* m_pDestTaskFile;
 	OutlookAPI::_Application* m_pOutlook;
@@ -55,25 +56,17 @@ public:
 	CEnImageList m_ilItemTypes;
 	CMap<int, int, int, int&> m_mapItemTypes;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(COutlookImportDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual void OnOK();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(COutlookImportDlg)
 	virtual BOOL OnInitDialog();
 	afx_msg void OnDestroy();
 	afx_msg void OnChoosefolder();
 	afx_msg void OnClickTasklist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHideUnflaggedEmails();
 	afx_msg void OnRefresh();
-	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -86,7 +79,4 @@ protected:
 
 };
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_OUTLOOKIMPORTDLG_H__E9D6C9F1_A424_4CB8_9AEF_0CE8641F1C53__INCLUDED_)
+#endif // !defined(AFX_OUTLOOKIMPORTITEMSDLG_H__E9D6C9F1_A424_4CB8_9AEF_0CE8641F1C53__INCLUDED_)

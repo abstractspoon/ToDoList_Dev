@@ -41,9 +41,9 @@ class CEnEdit : public CMaskEdit
 {
 	DECLARE_DYNAMIC(CEnEdit)
 
-// Construction
 public:
 	CEnEdit(LPCTSTR szMask = NULL, DWORD dwMaskFlags = 0);
+	virtual ~CEnEdit();
 
 	BOOL AddButton(UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
 	BOOL AddButton(UINT nID, UINT nChar, LPCTSTR szTip, int nWidth = EE_BTNWIDTH_DEFAULT, LPCTSTR szFont = NULL);
@@ -75,7 +75,6 @@ public:
 	void EnableButtonPadding(BOOL bEnable = TRUE);
 	void FilterToolTipMessage(MSG* pMsg);
 
-// Attributes
 protected:
 	struct EDITBTN
 	{
@@ -105,42 +104,31 @@ protected:
 	BOOL m_nButtonDown;
 	BOOL m_bParentIsCombo;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CEnEdit)
-	protected:
+protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	//}}AFX_VIRTUAL
 	virtual void OnSetReadOnly(BOOL /*bReadOnly*/) {}
 	virtual void OnBtnClick(UINT /*nID*/) {}
 	virtual void RecalcBtnHotRects();
 	virtual void NcPaint(CDC* pDC, const CRect& rWindow);
 
-// Implementation
-public:
-	virtual ~CEnEdit();
-
-	// Generated message map functions
 protected:
-	//{{AFX_MSG(CEnEdit)
 	afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp);
 	afx_msg void OnNcLButtonDown(UINT nHitTest, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDestroy();
-	//}}AFX_MSG
-#if _MSC_VER >= 1400
-	afx_msg LRESULT OnNcHitTest(CPoint point);
-#else
-	afx_msg UINT OnNcHitTest(CPoint point);
-#endif
 	afx_msg void OnEnable(BOOL bEnable);
 	afx_msg LRESULT OnSetReadOnly(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
 	afx_msg void OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct);
 	afx_msg void OnNcPaint();
 	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
+#if _MSC_VER >= 1400
+	afx_msg LRESULT OnNcHitTest(CPoint point);
+#else
+	afx_msg UINT OnNcHitTest(CPoint point);
+#endif
 	DECLARE_MESSAGE_MAP()
 
 	CRect GetButtonRectByIndex(int nBtn) const; // screen coords
@@ -171,8 +159,5 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_ENEDIT_H__65D418F0_0107_431F_95B2_E31BF25FF286__INCLUDED_)

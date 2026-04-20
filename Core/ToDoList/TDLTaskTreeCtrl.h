@@ -21,7 +21,7 @@
 
 #include "..\Shared\EnHeaderCtrl.h"
 #include "..\Shared\TreeListSyncer.h"
-#include "..\Shared\Treeselectionhelper.h"
+#include "..\Shared\TreeListselectionhelper.h"
 #include "..\Shared\TreeDragDropHelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -57,8 +57,8 @@ public:
 	inline CTreeCtrlHelper& TCH() { return m_tch; }
 	inline const CTreeCtrlHelper& TCH() const { return m_tch; }
 	
-	inline CTreeSelectionHelper& TSH() { return m_tsh; }
-	inline const CTreeSelectionHelper& TSH() const { return m_tsh; }
+	inline CTreeListSelectionHelper& TSH() { return m_tsh; }
+	inline const CTreeListSelectionHelper& TSH() const { return m_tsh; }
 	
 	inline const CToDoCtrlFind& Find() const { return m_find; }
 	inline const CHTIMap& TreeItemMap() const { return m_mapTaskIDToHTI; }
@@ -79,7 +79,6 @@ public:
 	BOOL RestoreSelection(const TDCSELECTIONCACHE& cache);
 	BOOL RestorePreviousSelection(BOOL bRedraw);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
-	BOOL MultiSelectTask(DWORD dwTaskID, BOOL bSelected);
 	BOOL EnsureSelectionVisible(BOOL bHorzPartialOK);
 	BOOL SelectTasksInHistory(BOOL bForward);
 	int GetSelectedTasksInHistory(BOOL bForward, CDWordArray& aTaskIDs) const;
@@ -139,6 +138,7 @@ public:
 	HTREEITEM GetItem(DWORD dwTaskID) const;
 	
 	void ExpandAll(BOOL bExpand = TRUE);
+	void ExpandSelection(BOOL bExpand = TRUE, BOOL bFully = FALSE);
 	int GetExpandedTasks(CDWordArray& aExpanded) const;
 
 	// Caller is responsible for ensuring that the parent
@@ -157,6 +157,8 @@ public:
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBeginRebuild();
 	void OnEndRebuild();
+
+	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
 	
 #ifdef _DEBUG
 	void Trace(LPCTSTR szComment);
@@ -167,16 +169,13 @@ public:
 protected:
 	CTreeCtrl m_tcTasks;
 	CToDoCtrlFind m_find;
-	CTreeSelectionHelper m_tsh;
+	CTreeListSelectionHelper m_tsh;
 	CTreeCtrlHelper m_tch;
 	CTDCReminderHelper m_reminders;
+	
 	CHTIMap m_mapTaskIDToHTI;
 	CDWordSet m_mapReferenceTaskIDs;
-
-	HTREEITEM m_htiLastHandledLBtnDown;
-	WORD m_wKeyPress;
 	BOOL m_bMovingItem;
-	BOOL m_bEditLabelTimerStarted;
 
 protected:
 	// Message map functions
@@ -196,7 +195,6 @@ protected:
 	void OnListSelectionChange(NMLISTVIEW* pNMLV);
 	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
-	BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
 	DWORD GetColumnItemTaskID(int nItem) const;
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	BOOL IsColumnShowing(TDC_COLUMN nColID) const;
@@ -230,13 +228,11 @@ protected:
 	BOOL CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL bVisible);
 	void SyncColumnSelectionToTasks();
 	BOOL SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_ACTION nBy); // internal version
+	BOOL ProcessSelectionChange(BOOL bSelChange, SELCHANGE_ACTION nBy);
 	int GetListItem(HTREEITEM hti) const;
 	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
-	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
-	BOOL MultiSelectItems(HTREEITEM htiFrom, HTREEITEM htiTo, TSH_SELECT nState = TSHS_SELECT, BOOL bRedraw = TRUE);
+	BOOL MultiSelectItem(HTREEITEM hti, TSH_SELECT nState = TSHS_SELECT);
 	BOOL HandleClientColumnClick(const CPoint& pt, BOOL bDblClk);
-	void BeginLabelEditTimer();
-	void EndLabelEditTimer();
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);
 	BOOL ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const;

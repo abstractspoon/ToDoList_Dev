@@ -23,8 +23,6 @@ CFG=TDLTest - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/TDLTest", TXGAAAAA"
-# PROP Scc_LocalPath "..\..\tdltest"
 CPP=cl.exe
 RSC=rc.exe
 
@@ -138,6 +136,10 @@ SOURCE=.\TDCDEPENDENCYTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCFileBackupTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCRECURRENCETest.cpp
 # End Source File
 # Begin Source File
@@ -175,10 +177,6 @@ SOURCE=.\TimeHelperTest.cpp
 # Begin Source File
 
 SOURCE=.\ToDoCtrlDataTest.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\ToDoCtrlMgrTest.cpp
 # End Source File
 # Begin Source File
 
@@ -242,6 +240,10 @@ SOURCE=.\TDCDEPENDENCYTest.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCFileBackupTest.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCRECURRENCETest.h
 # End Source File
 # Begin Source File
@@ -275,10 +277,6 @@ SOURCE=.\TimeHelperTest.h
 # Begin Source File
 
 SOURCE=.\ToDoCtrlDataTest.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ToDoCtrlMgrTest.h
 # End Source File
 # Begin Source File
 

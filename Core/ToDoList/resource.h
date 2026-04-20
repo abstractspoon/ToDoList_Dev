@@ -33,7 +33,7 @@
 #define IDD_PREFTASKDEF2_PAGE           159
 #define IDD_PREFMULTIUSER_PAGE          180
 #define IDD_PRINT_DIALOG                182
-#define IDD_TASKSELECTION_DIALOG        183
+#define IDD_TASKSELECTION_PAGE          183
 #define IDD_FILTER_DIALOG               186
 #define IDD_TRANSFORM_DIALOG            187
 #define IDD_OFFSETDATES_DIALOG          188
@@ -63,7 +63,7 @@
 #define IDD_CMDLINEOPTIONS_DIALOG       229
 #define IDB_UK_FLAG                     235
 #define IDB_YOURLANG_FLAG               236
-#define IDD_OUTLOOKMSGIMPORT_DIALOG     238
+#define IDD_OUTLOOKATTRIBMAPPING_DIALOG 238
 #define IDI_TASKTREE_STD                240
 #define IDD_ADDCUSTOMATTRIB_DIALOG      241
 #define IDI_LISTVIEW_STD                241
@@ -331,7 +331,6 @@
 #define IDC_SAMPLE                      1059
 #define IDC_DEFAULTCOLS                 1059
 #define IDC_ADDTOACTIVETASKLIST         1059
-#define IDC_STYLE_IMAGE                 1059
 #define IDC_TABCONTROL                  1060
 #define IDC_SETDEFAULTCOLOR             1060
 #define IDC_SETGRIDLINECOLOR            1060
@@ -515,7 +514,6 @@
 #define IDC_CATEGORYFILTERLABEL         1184
 #define IDC_CTRLSPOS                    1184
 #define IDC_CATEGORYFILTERCOMBO         1185
-#define IDC_FRAME                       1185
 #define IDC_LOADGROUP                   1185
 #define IDC_ARCHIVEGROUP                1186
 #define IDC_ALLOCBYFILTERLABEL          1186
@@ -548,7 +546,6 @@
 #define IDC_STARTFILTERCOMBO            1199
 #define IDC_TASKVIEWSGROUP              1199
 #define IDC_DUEFILTERLABEL              1200
-#define IDC_USESTYLESHEET               1201
 #define IDC_DUEFILTERCOMBO              1201
 #define IDC_STYLESHEET                  1202
 #define IDC_WARNADDDELARCHIVE           1202
@@ -884,18 +881,19 @@
 #define IDC_OFFSETDATE                  1596
 #define IDC_TOOLDETAILS                 1597
 #define IDC_REMAININGCOUNT              1598
+#define IDC_PLACEHOLDER                 1599
+#define IDC_NOATTRIBSELECTED            1599
+#define IDC_IMPORTERLIST                1600
 #define IDC_TASKLIST                    2000
-#define IDD_IMPORT_OUTLOOK_DIALOG       2000
+#define IDD_OUTLOOKIMPORTITEMS_DIALOG   2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
 #define IDI_NOTE                        2002
 #define IDI_RESET                       2002
 #define IDD_PRINT_STYLE_PAGE            2002
 #define IDC_CHOOSEFOLDER                2003
 #define IDI_TASK                        2003
-#define IDD_PRINT_TASKSEL_PAGE          2003
 #define IDI_TRAY_TIMETRACK_DARK         2003
 #define IDD_DROPIMPORT_DIALOG           2004
-#define IDD_EXPORT_TASKSEL_PAGE         2004
 #define IDI_TRAY_DARK                   2004
 #define IDC_CURFOLDER                   2005
 #define IDI_CONTACT                     2005
@@ -903,7 +901,9 @@
 #define IDI_TDLUPDATE                   2005
 #define IDC_HIDEUNFLAGGEDEMAIL          2006
 #define IDI_FOLDER                      2006
+#define IDD_IMPORT_FROM_PAGE            2006
 #define IDI_JOURNAL                     2007
+#define IDD_IMPORT_TO_PAGE              2007
 #define IDI_MAIL                        2008
 #define IDI_APPOINTMENT                 2009
 #define IDI_FLAGGEDMAIL                 2010
@@ -2597,6 +2597,8 @@
 #define IDS_MESSAGE_UNMATCHEDSEARCHGROUPS 51686
 #define IDS_TOOLS_REMAININGCOUNT        51687
 #define IDS_CUSTATTRIB_REMAININGCOUNT   51688
+#define IDS_IMPORTDLGFROMPAGE_TITLE     51689
+#define IDS_IMPORTDLGTOPAGE_TITLE       51690
 
 // Next default values for new objects
 // 
@@ -2604,7 +2606,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        339
 #define _APS_NEXT_COMMAND_VALUE         34789
-#define _APS_NEXT_CONTROL_VALUE         1599
+#define _APS_NEXT_CONTROL_VALUE         1601
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

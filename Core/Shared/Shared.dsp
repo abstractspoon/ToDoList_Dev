@@ -23,8 +23,6 @@ CFG=Shared - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/Shared", HACAAAAA"
-# PROP Scc_LocalPath "..\..\shared"
 CPP=cl.exe
 RSC=rc.exe
 
@@ -433,10 +431,6 @@ SOURCE=.\OrderedTreeCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\OSVersion.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\OwnerdrawComboBoxBase.cpp
 # End Source File
 # Begin Source File
@@ -622,6 +616,10 @@ SOURCE=.\TreeDragDropHelper.cpp
 # Begin Source File
 
 SOURCE=.\TreeListCtrl.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TreeListSelectionHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -1077,10 +1075,6 @@ SOURCE=.\OrderedTreeCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\OSVersion.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\OwnerdrawComboBoxBase.h
 # End Source File
 # Begin Source File
@@ -1278,6 +1272,10 @@ SOURCE=.\TreeDragDropHelper.h
 # Begin Source File
 
 SOURCE=.\TreeListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TreeListSelectionHelper.h
 # End Source File
 # Begin Source File
 

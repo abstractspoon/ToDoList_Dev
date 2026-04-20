@@ -67,7 +67,6 @@
 #include "..\shared\misc.h"
 #include "..\shared\mousewheelMgr.h"
 #include "..\shared\msoutlookhelper.h"
-#include "..\shared\osversion.h"
 #include "..\shared\passworddialog.h"
 #include "..\shared\regkey.h"
 #include "..\shared\remotefile.h"
@@ -83,6 +82,7 @@
 #include "..\shared\WorkingWeek.h"
 #include "..\shared\xslfile.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\ShellIcons.h"
 #include "..\3rdparty\XNamedColors.h"
@@ -382,7 +382,7 @@ CToDoListWnd::CToDoListWnd()
 	if (Prefs().GetEnableRTLInput())
 		CRTLInputMgr::Initialize();
 
-	CFilteredToDoCtrl::EnableExtendedSelection(FALSE, TRUE);
+	CFilteredToDoCtrl::EnableExtendedKeyboardSelection(FALSE, TRUE);
 	CEnListCtrl::EnableSelectionTheming(TRUE, TRUE);
 
 	m_bAutoMenuEnable = FALSE;
@@ -847,8 +847,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOP, ID_NEWSUBTASK_ATBOTTOM, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_ATTOPSELECTED, ID_NEWTASK_ATBOTTOMSELECTED, OnUpdateNewTask)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_NEWTASK_DEPENDENTAFTERSELECTEDTASK, ID_NEWTASK_DEPENDENTBEFORESELECTEDTASK, OnUpdateNewTask)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
-	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetDates)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnUpdateEditOffsetStartDueDates)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnUpdateEditOffsetStartDueDates)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SHOWVIEW_TASKTREE, ID_SHOWVIEW_UIEXTENSION16, OnUpdateShowTaskView)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST, OnUpdateSortBy)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SPLITTASKINTO_TWO, ID_SPLITTASKINTO_FIVE, OnUpdateSplitTask)
@@ -2026,7 +2026,8 @@ TDC_FILE CToDoListWnd::DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int n
 	DOPROGRESS(IDS_SAVINGPROGRESS);
 		
 	// back file up
-	m_mgrToDoCtrls.DoBackup(nIndex);
+	if (Prefs().GetBackupOnSave())
+		m_mgrToDoCtrls.DoBackup(nIndex);
 	
 	// do the save
 	return tdc.Save(tasks, szFilePath, bFlush);
@@ -8590,7 +8591,9 @@ TDC_FILE CToDoListWnd::ConfirmSaveTaskList(int nIndex, DWORD dwFlags)
 			}
 			else
 			{
-				m_mgrToDoCtrls.DoBackup(nIndex);
+				if (Prefs().GetBackupOnSave())
+					m_mgrToDoCtrls.DoBackup(nIndex);
+
 				tdc.Save(_T(""), bFlush);
 			}
 
@@ -10473,7 +10476,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments,
 
 int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, 
 						   const CString& sHtmlImageDir, BOOL bTransform,
-						   const CTaskSelectionDlg& taskSel, CTaskFile& tasks) const
+						   const CTDLTaskSelectionPage& taskSel, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter(TDCGT_ALL);
 	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
@@ -12220,7 +12223,8 @@ void CToDoListWnd::OnUpdateViewProjectname(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditOffsetDates() 
 {
-	CTDLOffsetDatesDlg dialog;
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CTDLOffsetDatesDlg dialog(tdc.GetCustomAttributeDefs());
 	
 	if (dialog.DoModal(CMDICON(ID_EDIT_OFFSETDATES)) == IDOK)
 	{
@@ -12238,26 +12242,17 @@ void CToDoListWnd::OnEditOffsetDates()
 		offset.bAndSubtaskRefs = dialog.GetOffsetSubtaskReferences();
 		offset.bPreserveEndOfMonth = dialog.GetPreserveEndOfMonth();
 		
-		DWORD dwWhat = dialog.GetOffsetWhat();
-		ASSERT(dwWhat);
-
 		CTDCDateSet mapDates;
+		CStringSet mapCustAttribIDs;
 
-		if (dwWhat & ODD_STARTDATE)
-			mapDates.Add(TDCD_START);
+		VERIFY(dialog.GetOffsetWhat(mapDates, mapCustAttribIDs));
 
-		if (dwWhat & ODD_DUEDATE)
-			mapDates.Add(TDCD_DUE);
+		BOOL bOffsetReminders = mapDates.Remove(TDCD_REMINDER);
 
-		if (dwWhat & ODD_DONEDATE)
-			mapDates.Add(TDCD_DONE);
-
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-		if (!mapDates.IsEmpty())
-			tdc.OffsetSelectedTaskDates(mapDates, offset);
+		if (!mapDates.IsEmpty() || !mapCustAttribIDs.IsEmpty())
+			tdc.OffsetSelectedTaskDates(mapDates, mapCustAttribIDs, offset);
 		
-		if (dwWhat & ODD_REMINDER)
+		if (bOffsetReminders)
 		{
 			CDWordArray aTaskIDs;
 			DWORD dwUnused;
@@ -12268,6 +12263,11 @@ void CToDoListWnd::OnEditOffsetDates()
 				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], &tdc, offset);
 		}
 	}
+}
+
+void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(GetToDoCtrl().HasSelection());
 }
 
 void CToDoListWnd::OnEditOffsetStartDueDates(UINT nCmdID)
@@ -12303,7 +12303,7 @@ void CToDoListWnd::OnEditOffsetStartDueDates(UINT nCmdID)
 	GetToDoCtrl().OffsetSelectedTaskDates(mapDates, offset);
 }
 
-void CToDoListWnd::OnUpdateEditOffsetDates(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateEditOffsetStartDueDates(CCmdUI* pCmdUI) 
 {
 	CTDCDateSet mapDates;
 	mapDates.Add(TDCD_START);
@@ -12761,13 +12761,15 @@ LRESULT CToDoListWnd::OnToDoCtrlIsTaskDone(WPARAM wParam, LPARAM lParam)
 			FileMisc::SplitPath(sPathName, &sDrive, &sFolder);
 			FileMisc::MakePath(sFile, sDrive, sFolder, sFile);
 		}
-		// else its a full path already
 		
 		int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sFile);
 
 		if (nTDC != -1) // already loaded
 		{
-			return GetToDoCtrl(nTDC).IsTaskDone(wParam);
+			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
+
+			if (tdc.HasTask(wParam))
+				return tdc.IsTaskDone(wParam);
 		}
 		else
 		{
@@ -12777,12 +12779,15 @@ LRESULT CToDoListWnd::OnToDoCtrlIsTaskDone(WPARAM wParam, LPARAM lParam)
 			if (tasks.Load(sFile))
 			{
 				HTASKITEM ht = tasks.FindTask(wParam);
-				return ht ? tasks.IsTaskDone(ht) : FALSE;
+
+				if (ht)
+					return tasks.IsTaskDone(ht);
 			}
 		}
 	}
 	
-	return 0L;
+	// Tasklist or task cannot be found
+	return -1;
 }
 
 LRESULT CToDoListWnd::OnSessionStatusChange(WPARAM wp, LPARAM lp)
@@ -13128,7 +13133,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nFormat);
 		CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sFilePath);
 
-		const CTaskSelectionDlg& taskSel = dialog.GetTaskSelection();
+		const CTDLTaskSelectionPage& taskSel = dialog.GetTaskSelection();
 
 		CTaskFile tasks;
 		GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, taskSel, tasks);

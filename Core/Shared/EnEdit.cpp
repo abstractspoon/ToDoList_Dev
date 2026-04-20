@@ -12,7 +12,6 @@
 #include "icon.h"
 #include "winclasses.h"
 #include "wclassdefines.h"
-#include "osversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -65,14 +64,12 @@ CEnEdit::~CEnEdit()
 }
 
 BEGIN_MESSAGE_MAP(CEnEdit, CMaskEdit)
-	//{{AFX_MSG_MAP(CEnEdit)
 	ON_WM_NCCALCSIZE()
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_WM_NCHITTEST()
-	//}}AFX_MSG_MAP
 	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 	ON_WM_ENABLE()
@@ -83,7 +80,6 @@ BEGIN_MESSAGE_MAP(CEnEdit, CMaskEdit)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CEnEdit message handlers
 
 BOOL CEnEdit::AddButton(UINT nID, LPCTSTR szCaption, LPCTSTR szTip, int nWidth, LPCTSTR szFont)
 {
@@ -533,43 +529,19 @@ void CEnEdit::OnNcPaint()
 		SetWindowPos(NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOREDRAW); 
 	}
 
-	// If the button extends right up to the border
-	// do default rendering first
-	if ((m_nBtnPadding == 0) || (COSVersion() == OSV_LINUX))
-	{
-		Default();
+	Default();
 	
-		// our custom drawing
-		if (m_bParentIsCombo)
-		{
-			// Draw to parent dc
-			CWindowDC dc(GetParent());
-			CRect rWindow;
-		
-			GetParent()->GetWindowRect(rWindow);
-			rWindow.right -= EE_BTNWIDTH_DEFAULT;
-		
-			NcPaint(&dc, rWindow);
-		}
-		else
-		{
-			CWindowDC dc(this);
-			CRect rWindow;
+	// our custom drawing
+	CWnd* pDrawTarget = (m_bParentIsCombo ? GetParent() : this);
 
-			GetWindowRect(rWindow);
-			NcPaint(&dc, rWindow);
-		}
-	}
-	else // do default rendering last
-	{
-		CWindowDC dc(this);
-		CRect rWindow;
-		
-		GetWindowRect(rWindow);
-		NcPaint(&dc, rWindow);
+	CRect rWindow;
+	pDrawTarget->GetWindowRect(rWindow);
 
-		Default();
-	}
+	if (m_bParentIsCombo)
+		rWindow.right -= EE_BTNWIDTH_DEFAULT; // combo drop button
+
+	CWindowDC dc(pDrawTarget);
+	NcPaint(&dc, rWindow);
 }
 
 void CEnEdit::NcPaint(CDC* pDC, const CRect& rWindow)

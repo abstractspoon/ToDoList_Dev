@@ -43,15 +43,15 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 
 /////////////////////////////////////////////////////////////////////////////
 
+const UINT IDC_WORKLOADCTRL = 1001;
+
 const int PADDING = 3;
 const int DATE_RANGE_WIDTH = GraphicsMisc::ScaleByDPIFactor(400);
-
-const UINT IDC_WORKLOADCTRL = 1001;
 
 /////////////////////////////////////////////////////////////////////////////
 // CWorkloadWnd
 
-CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
+CWorkloadWnd::CWorkloadWnd(CWnd* pParent)
 	: 
 	CDialog(IDD_WORKLOAD_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
@@ -61,6 +61,8 @@ CWorkloadWnd::CWorkloadWnd(CWnd* pParent /*=NULL*/)
 {
 	m_icon.Load(IDR_WORKLOAD);
 	m_dtPeriod.m_bInclusive = TRUE;
+
+	CTreeSelectionHelper::EnableExtendedKeyboardSelection(FALSE, TRUE);
 }
 
 CWorkloadWnd::~CWorkloadWnd()
@@ -70,25 +72,29 @@ CWorkloadWnd::~CWorkloadWnd()
 void CWorkloadWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CWorkloadWnd)
+
 	DDX_DateTimeCtrl(pDX, IDC_PERIODBEGIN, m_dtPeriod.m_dtStart);
 	DDX_DateTimeCtrl(pDX, IDC_PERIODENDINCLUSIVE, m_dtPeriod.m_dtEnd);
 	DDX_Text(pDX, IDC_PERIODDURATION, m_sPeriodDuration);
-	//}}AFX_DATA_MAP
 	DDX_Control(pDX, IDC_PERIODBEGIN, m_dtcPeriodStart);
 	DDX_Control(pDX, IDC_PERIODENDINCLUSIVE, m_dtcPeriodEnd);
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 }
 
 BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
-	//{{AFX_MSG_MAP(CWorkloadWnd)
-	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
-	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_PREFS, OnUpdateWorkloadPreferences)
-	ON_COMMAND(ID_WORKLOAD_EDITALLOCATIONS, OnWorkloadEditAllocations)
-	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_EDITALLOCATIONS, OnUpdateWorkloadEditAllocations)
+	ON_WM_HELPINFO()
+	ON_WM_SETFOCUS()
+	ON_WM_ERASEBKGND()
+	ON_WM_NCDESTROY()
+	ON_WM_SIZE()
+	ON_WM_CTLCOLOR()
+	ON_WM_SHOWWINDOW()
+
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODBEGIN, OnChangePeriodBegin)
 	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_PERIODENDINCLUSIVE, OnChangePeriodEnd)
 
+	ON_COMMAND(ID_WORKLOAD_EDITALLOCATIONS, OnWorkloadEditAllocations)
+	ON_COMMAND(ID_WORKLOAD_PREFS, OnWorkloadPreferences)
 	ON_COMMAND(ID_MOVEPERIODBACKONEMONTH, OnMovePeriodBackOneMonth)
 	ON_COMMAND(ID_MOVEPERIODSTARTBACKONEMONTH, OnMovePeriodStartBackOneMonth)
 	ON_COMMAND(ID_MOVEPERIODSTARTFORWARDONEMONTH, OnMovePeriodStartForwardOneMonth)
@@ -96,6 +102,7 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_COMMAND(ID_MOVEPERIODENDFORWARDONEMONTH, OnMovePeriodEndForwardOneMonth)
 	ON_COMMAND(ID_MOVEPERIODENDBACKONEMONTH, OnMovePeriodEndBackOneMonth)
 	ON_COMMAND(ID_MOVEPERIODFORWARDONEMONTH, OnMovePeriodForwardOneMonth)
+	ON_COMMAND(ID_HELP, OnHelp)
 
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODBACKONEMONTH, OnUpdateMovePeriodBackOneMonth)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODSTARTBACKONEMONTH, OnUpdateMovePeriodStartBackOneMonth)
@@ -104,15 +111,8 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDFORWARDONEMONTH, OnUpdateMovePeriodEndForwardOneMonth)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODENDBACKONEMONTH, OnUpdateMovePeriodEndBackOneMonth)
 	ON_UPDATE_COMMAND_UI(ID_MOVEPERIODFORWARDONEMONTH, OnUpdateMovePeriodForwardOneMonth)
-	//}}AFX_MSG_MAP
-	ON_COMMAND(ID_HELP, OnHelp)
-	ON_WM_HELPINFO()
-	ON_WM_SETFOCUS()
-	ON_WM_ERASEBKGND()
-	ON_WM_NCDESTROY()
-	ON_WM_SIZE()
-	ON_WM_CTLCOLOR()
-	ON_WM_SHOWWINDOW()
+	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_PREFS, OnUpdateWorkloadPreferences)
+	ON_UPDATE_COMMAND_UI(ID_WORKLOAD_EDITALLOCATIONS, OnUpdateWorkloadEditAllocations)
 
 	ON_REGISTERED_MESSAGE(WM_WLCN_COMPLETIONCHANGE, OnWorkloadNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_WLCN_SORTCHANGE, OnWorkloadNotifySortChange)
@@ -128,7 +128,36 @@ BEGIN_MESSAGE_MAP(CWorkloadWnd, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CWorkloadWnd message handlers
+
+BOOL CWorkloadWnd::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	// non-translatables
+	CLocalizer::EnableTranslation(*GetDlgItem(IDC_SELECTEDTASKDATES), FALSE);
+
+	// create toolbar
+	if (m_toolbar.CreateEx(this))
+	{
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar));
+
+		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
+		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
+		m_toolbar.RefreshButtonStates(TRUE);
+	}
+
+	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
+	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
+
+	// Date range text needs to be big enough for all eventualities
+	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
+	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
+
+	m_ctrlWorkload.SetFocus();
+
+	return FALSE;
+}
 
 void CWorkloadWnd::OnNcDestroy()
 {
@@ -436,17 +465,21 @@ DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, IUI_HITTESTREASON nReason) const
 bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool /*bTaskLink*/)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	CAutoFlag af(m_bInSelectTask, TRUE);
 
-	return (m_ctrlWorkload.SelectTask(dwTaskID) != FALSE);
+	return SelectTasks(&dwTaskID, 1);
 }
 
-bool CWorkloadWnd::SelectTasks(const DWORD* /*pdwTaskIDs*/, int /*nTaskCount*/)
+bool CWorkloadWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	return false; // only support single selection
+
+	CDWordArray aTaskIDs;
+	aTaskIDs.SetSize(nTaskCount);
+
+	for (int nID = 0; nID < nTaskCount; nID++)
+		aTaskIDs[nID] = pdwTaskIDs[nID];
+
+	return (m_ctrlWorkload.SelectTasks(aTaskIDs) != FALSE);
 }
 
 bool CWorkloadWnd::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
@@ -479,16 +512,20 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlWorkload.ExpandAll(TRUE);
 		return true;
 
+	case IUI_SELECTALLVISIBLE:
+		m_ctrlWorkload.SelectAll();
+		return true;
+
 	case IUI_COLLAPSEALL:
 		m_ctrlWorkload.ExpandAll(FALSE);
 		return true;
 
 	case IUI_EXPANDSELECTED:
-		m_ctrlWorkload.ExpandItem(m_ctrlWorkload.GetSelectedItem(), TRUE, TRUE);
+		m_ctrlWorkload.ExpandSelection(TRUE, TRUE);
 		return true;
 
 	case IUI_COLLAPSESELECTED:
-		m_ctrlWorkload.ExpandItem(m_ctrlWorkload.GetSelectedItem(), FALSE);
+		m_ctrlWorkload.ExpandSelection(FALSE);
 		return true;
 
 	case IUI_SORT:
@@ -573,7 +610,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
-		return (m_ctrlWorkload.SelectTask(m_ctrlWorkload.GetSelectedTaskID()) != FALSE);
+		return (m_ctrlWorkload.ScrollToSelectedTask() != FALSE);
 	}
 
 	return false;
@@ -595,10 +632,10 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	switch (nCmd)
 	{
 	case IUI_EXPANDALL:
-		return (m_ctrlWorkload.CanExpandAll() != FALSE);
+		return (m_ctrlWorkload.CanExpandAll(TRUE) != FALSE);
 		
 	case IUI_COLLAPSEALL:
-		return (m_ctrlWorkload.CanCollapseAll() != FALSE);
+		return (m_ctrlWorkload.CanExpandAll(FALSE) != FALSE);
 		
 	case IUI_RESIZEATTRIBCOLUMNS:
 		return true;
@@ -607,18 +644,10 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		return (m_ctrlWorkload.GetTaskCount() > 0);
 
 	case IUI_EXPANDSELECTED:
-		{
-			HTREEITEM htiSel = m_ctrlWorkload.GetSelectedItem();
-			return (m_ctrlWorkload.CanExpandItem(htiSel, TRUE) != FALSE);
-		}
-		break;
+		return (m_ctrlWorkload.CanExpandSelection(TRUE) != FALSE);
 
 	case IUI_COLLAPSESELECTED:
-		{
-			HTREEITEM htiSel = m_ctrlWorkload.GetSelectedItem();
-			return (m_ctrlWorkload.CanExpandItem(htiSel, FALSE) != FALSE);
-		}
-		break;
+		return (m_ctrlWorkload.CanExpandSelection(FALSE) != FALSE);
 
 	case IUI_SORT:
 		if (pData)
@@ -643,6 +672,7 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		}
 		break;
 
+	case IUI_SELECTALLVISIBLE:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -678,37 +708,6 @@ void CWorkloadWnd::OnSize(UINT nType, int cx, int cy)
 	CDialog::OnSize(nType, cx, cy);
 	
 	Resize(cx, cy);
-}
-
-BOOL CWorkloadWnd::OnInitDialog() 
-{
-	CDialog::OnInitDialog();
-
-	// non-translatables
-	CLocalizer::EnableTranslation(*GetDlgItem(IDC_SELECTEDTASKDATES), FALSE);
-
-	// create toolbar
-	if (m_toolbar.CreateEx(this))
-	{
-		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
-		VERIFY(m_tbHelper.Initialize(&m_toolbar));
-
-		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
-		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
-		m_toolbar.RefreshButtonStates(TRUE);
-	}
-
-	// Date range text needs to be big enough for all eventualities
-	CRect rText = CDialogHelper::GetCtrlRect(this, IDC_ACTIVEDATERANGE_TEXT);
-	CDialogHelper::ResizeCtrl(this, IDC_ACTIVEDATERANGE_TEXT, (DATE_RANGE_WIDTH - rText.Width()), 0);
-
-	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_WORKLOAD_FRAME);
-	VERIFY(m_ctrlWorkload.Create(this, rCtrl, IDC_WORKLOADCTRL));
-
- 	m_ctrlWorkload.SetFocus();
-	
-	return FALSE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CWorkloadWnd::Resize(int cx, int cy)
@@ -789,8 +788,10 @@ BOOL CWorkloadWnd::OnEraseBkgnd(CDC* pDC)
 
 void CWorkloadWnd::SendParentSelectionUpdate()
 {
-	DWORD dwTaskID = m_ctrlWorkload.GetSelectedTaskID();
-	GetParent()->SendMessage(WM_IUI_SELECTTASK, 0, dwTaskID);
+	CDWordArray aTaskIDs;
+	int nNumTasks = m_ctrlWorkload.GetSelectedItemData(aTaskIDs);
+
+	GetParent()->SendMessage(WM_IUI_SELECTTASK, (LPARAM)aTaskIDs.GetData(), nNumTasks);
 }
 
 LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp)
@@ -984,7 +985,7 @@ void CWorkloadWnd::OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI)
 
 BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
 {
-	if (m_bReadOnly || !m_ctrlWorkload.GetSafeHwnd())
+	if (m_bReadOnly || !m_ctrlWorkload.GetSafeHwnd() || (m_ctrlWorkload.GetSelectionCount() != 1))
 		return FALSE;
 	
 	if (dwTaskID && (dwTaskID != m_ctrlWorkload.GetSelectedTaskID()))

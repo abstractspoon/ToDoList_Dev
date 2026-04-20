@@ -22,13 +22,13 @@
 #include "..\shared\deferwndmove.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
-#include "..\shared\osversion.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\icon.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\DlgUnits.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
 
@@ -2276,7 +2276,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 					case TDCA_DONEDATE:
 						// These can fail with incomplete dependencies
 						ASSERT(m_taskTree.SelectionHasDependencies() ||
-								TaskHasIncompleteDependencies(mod.dwSelectedTaskID, CString()) ||
+								TaskHasIncompleteDependencies(mod.dwSelectedTaskID) ||
 								aTasksForCompletion.GetSize());
 						break;
 
@@ -2369,8 +2369,13 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 		else
 			m_nExtModifyingAttrib = TDCA_POSITION_DIFFERENTPARENT;
 		
-		HTREEITEM htiDropItem = m_taskTree.GetItem(pMove->dwSelectedTaskID);
-		ASSERT(htiDropItem == GetSelectedItem());
+#ifdef _DEBUG
+		if (pMove->dwSelectedTaskID)
+		{
+			HTREEITEM htiDropItem = m_taskTree.GetItem(pMove->dwSelectedTaskID);
+			ASSERT(htiDropItem == GetSelectedItem());
+		}
+#endif // _DEBUG
 
 		HTREEITEM htiDropTarget = m_taskTree.GetItem(pMove->dwParentID);
 		HTREEITEM htiDropAfter = m_taskTree.GetItem(pMove->dwAfterSiblingID);
@@ -2692,7 +2697,7 @@ BOOL CTabbedToDoCtrl::CanSelectAll() const
 			ASSERT(pExtWnd);
 			
 			if (pExtWnd)
-				return pExtWnd->CanDoAppCommand(IUI_SELECTALL);
+				return pExtWnd->CanDoAppCommand(IUI_SELECTALLVISIBLE);
 		}
 		break;
 
@@ -2727,7 +2732,6 @@ void CTabbedToDoCtrl::SelectAll()
 			}
 			else
 			{
-				// save IDs only if not showing all tasks
 				CDWordArray aTaskIDs;
 
 				for (int nItem = 0; nItem < nNumItems; nItem++)
@@ -2759,8 +2763,8 @@ void CTabbedToDoCtrl::SelectAll()
 			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 			ASSERT(pExtWnd);
 
-			if (pExtWnd && pExtWnd->DoAppCommand(IUI_SELECTALL))
-				CToDoCtrl::SelectAll();
+			if (pExtWnd)
+				pExtWnd->DoAppCommand(IUI_SELECTALLVISIBLE);
 		}
 		break;
 
@@ -5883,6 +5887,7 @@ void CTabbedToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
 		CToDoCtrl::ExpandTasks(nWhat, bExpand);
+		break;
 
 	case FTCV_TASKLIST:
 		// no can do!

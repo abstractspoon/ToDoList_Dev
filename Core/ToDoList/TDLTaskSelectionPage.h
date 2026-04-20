@@ -1,14 +1,16 @@
-#if !defined(AFX_TASKSELECTIONDLG_H__3A5D7E88_CEC3_47DD_8BA6_79EC2C3B7167__INCLUDED_)
-#define AFX_TASKSELECTIONDLG_H__3A5D7E88_CEC3_47DD_8BA6_79EC2C3B7167__INCLUDED_
+#if !defined(AFX_TDLTASKSELECTIONPAGE_H__3A5D7E88_CEC3_47DD_8BA6_79EC2C3B7167__INCLUDED_)
+#define AFX_TDLTASKSELECTIONPAGE_H__3A5D7E88_CEC3_47DD_8BA6_79EC2C3B7167__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// TaskSelectionDlg.h : header file
+// TDLTaskSelectionPage.h : header file
 //
 
 #include "tdcenumcontainers.h"
 #include "TDLAttribListBox.h"
+
+#include "..\shared\PropertyPageHost.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -32,20 +34,20 @@ enum TSD_TASKS
 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CTaskSelectionDlg dialog
+// CTDLTaskSelectionPage page
 
 class CToDoCtrl;
 
-class CTaskSelectionDlg : public CDialog
+class CTDLTaskSelectionPage : public CCmdNotifyPropertyPage
 {
 public:
-	CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-					  LPCTSTR szRegKey = NULL, 
-					  BOOL bEnableSubtaskSelection = TRUE, 
-					  BOOL bVisibleColumnsOnly = FALSE); 
+	CTDLTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs,
+						  LPCTSTR szRegKey = NULL,
+						  BOOL bEnableSubtaskSelection = TRUE,
+						  BOOL bVisibleColumnsOnly = FALSE);
 
-	BOOL Create(UINT nIDRefFrame, CWnd* pParent, UINT nID = IDC_STATIC);
 	int DoModal() { ASSERT (0); return IDCANCEL; }
+	void SetWantWhatTasks(TSD_TASKS nWhat);
 
 	TSD_TASKS GetWantWhatTasks() const { return (TSD_TASKS)m_nWhatTasks; }
 	BOOL GetWantAllTasks() const { return m_nWhatTasks == TSDT_ALL; }
@@ -60,9 +62,6 @@ public:
 	TSD_ATTRIB GetAttributeOption() const { return (TSD_ATTRIB)m_nAttribOption; }
 	int GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttributeMap& mapAttrib) const;
 	BOOL GetWantCommentsWithVisible() const { return m_bIncludeComments; }
-
-	void SetWantWhatTasks(TSD_TASKS nWhat);
-	void OnOK();
 
 protected:
 	int		m_nAttribOption;
@@ -81,6 +80,7 @@ protected:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
+	virtual void OnOK();
 
 protected:
 	afx_msg void OnChangeAttribOption();
@@ -89,11 +89,10 @@ protected:
 	afx_msg void OnIncludeNotDone();
 	afx_msg void OnEnable(BOOL bEnable);
 	afx_msg void OnClearUserAttribSelection();
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	DECLARE_MESSAGE_MAP()
 
-	void UpdateEnableStates();
+	void EnableDisableControls();
 };
 
-#endif // !defined(AFX_TASKSELECTIONDLG_H__3A5D7E88_CEC3_47DD_8BA6_79EC2C3B7167__INCLUDED_)
+#endif // !defined(AFX_TDLTASKSELECTIONPAGE_H__3A5D7E88_CEC3_47DD_8BA6_79EC2C3B7167__INCLUDED_)

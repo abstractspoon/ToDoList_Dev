@@ -199,7 +199,6 @@
     <ClCompile Include="NcGutter.cpp" />
     <ClCompile Include="OleDropTargetEx.cpp" />
     <ClCompile Include="OrderedTreeCtrl.cpp" />
-    <ClCompile Include="OSVersion.cpp" />
     <ClCompile Include="OwnerdrawComboBoxBase.cpp" />
     <ClCompile Include="PasswordDialog.cpp" />
     <ClCompile Include="PopupEditCtrl.cpp" />
@@ -247,6 +246,7 @@
     <ClCompile Include="TreeCtrlHelper.cpp" />
     <ClCompile Include="TreeDragDropHelper.cpp" />
     <ClCompile Include="TreeListCtrl.cpp" />
+    <ClCompile Include="TreeListSelectionHelper.cpp" />
     <ClCompile Include="TreeListSyncer.cpp" />
     <ClCompile Include="TreeSelectionHelper.cpp" />
     <ClCompile Include="Unzipper.cpp" />
@@ -362,7 +362,6 @@
     <ClInclude Include="NcGutter.h" />
     <ClInclude Include="OleDropTargetEx.h" />
     <ClInclude Include="OrderedTreeCtrl.h" />
-    <ClInclude Include="OSVersion.h" />
     <ClInclude Include="OwnerdrawComboBoxBase.h" />
     <ClInclude Include="PasswordDialog.h" />
     <ClInclude Include="PopupEditCtrl.h" />
@@ -413,6 +412,7 @@
     <ClInclude Include="TreeCtrlHelper.h" />
     <ClInclude Include="TreeDragDropHelper.h" />
     <ClInclude Include="TreeListCtrl.h" />
+    <ClInclude Include="TreeListSelectionHelper.h" />
     <ClInclude Include="TreeListSyncer.h" />
     <ClInclude Include="TreeSelectionHelper.h" />
     <ClInclude Include="Unzipper.h" />

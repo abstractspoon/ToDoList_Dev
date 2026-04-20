@@ -106,9 +106,6 @@
     <ClCompile Include="OrderedTreeCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OSVersion.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PreferencesBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -457,6 +454,9 @@
     <ClCompile Include="TrayIcon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TreeListSelectionHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -577,9 +577,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OrderedTreeCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OSVersion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PreferencesBase.h">
@@ -954,6 +951,9 @@
     <ClInclude Include="WinStyles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TreeListSelectionHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -968,5 +968,8 @@
       <UniqueIdentifier>{2e2e3a98-dcbe-4808-a75f-c991fd49c1ec}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="msgs.txt" />
   </ItemGroup>
 </Project>

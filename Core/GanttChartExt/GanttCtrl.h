@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+/////////////////////////////////////////////////////////////////////////////
+
 #include "Ganttstruct.h"
 
 #include "..\shared\TreeListCtrl.h"
@@ -16,10 +18,6 @@
 
 #include "..\Interfaces\itasklist.h"
 #include "..\Interfaces\iuiextension.h"
-
-/////////////////////////////////////////////////////////////////////////////
-
-#define TVN_KEYUP (TVN_FIRST-16)
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -42,8 +40,11 @@ public:
 	bool PrepareNewTask(ITaskList* pTask) const;
 	BOOL CancelOperation();
 
-	DWORD GetSelectedTaskID() const;
 	BOOL SelectTask(DWORD dwTaskID);
+	BOOL SelectTasks(const CDWordArray& aTaskIDs);
+	DWORD GetSelectedTaskID() const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
+
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
@@ -52,13 +53,11 @@ public:
 	BOOL CanMoveSelectedTask(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
 
-	BOOL GetSelectedTaskDependencies(CDWordArray& aDepends) const;
 	BOOL AddSelectedTaskDependency(DWORD dwDependID);
 	BOOL EditSelectedTaskDependency(DWORD dwFromDependID, DWORD dwToDependID);
 	BOOL DeleteSelectedTaskDependency(DWORD dwDependID);
 
 	DWORD HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const;
-	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 
 	BOOL ZoomIn(BOOL bIn = TRUE);
 	BOOL ZoomBy(int nAmount);
@@ -75,8 +74,7 @@ public:
 	void ValidateMonthDisplay();
 
 	void ScrollToToday();
-	void ScrollToSelectedTask();
-	void ScrollToTask(DWORD dwTaskID);
+	BOOL ScrollToSelectedTask();
 
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) ? TRUE : FALSE); }
@@ -85,7 +83,6 @@ public:
 	void SetDefaultBarColor(COLORREF crDefault);
 	void SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color);
 	void SetMilestoneTag(const CString& sTag);
-	void SetReadOnly(bool bReadOnly);
 	
 	void SetDefaultSnapMode(GTLC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
 	GTLC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
@@ -111,8 +108,6 @@ public:
 	static GTLC_COLUMN MapAttributeToColumn(TDC_ATTRIBUTE nAttribID);
 
 protected:
-	BOOL m_bReadOnly;
-
 	GANTTDATERANGE m_dtDataRange, m_dtActiveRange;
 	GANTTITEM m_giPreDrag;
 	GANTTSORT m_sort;
@@ -169,11 +164,16 @@ protected:
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
 	BOOL OnHeaderDblClkDivider(NMHEADER* pHDN);
 
-
 	COLORREF GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const;
 	void DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected);
 	void DrawTreeItemIcon(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
 	void PostDrawTreeItem(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
+	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
+	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
+
+	// Pseudo-message handler
+	BOOL OnDependencyEditLButtonDown(UINT nFlags, CPoint ptScreen);
+	void OnDependencyEditMouseMove(UINT nFlags, CPoint ptScreen);
 
 	// Local methods
 	void DrawListHeaderItem(CDC* pDC, int nCol);
@@ -268,8 +268,10 @@ protected:
 
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const;
-	DWORD ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
+	DWORD ListDependencyHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
+	int GetDependencyListItem(DWORD dwTaskID) const;
 	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
+	void ScrollToTask(DWORD dwTaskID);
 
 	DWORD GetTaskID(HTREEITEM hti) const;
 	DWORD GetTaskID(int nItem) const;
@@ -314,10 +316,10 @@ protected:
 	void Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const GANTTSORTCOLUMN& col) const;
 
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
-	BOOL BuildDependency(DWORD dwFromTaskID, DWORD, GANTTDEPENDENCY& depend) const;
-	int BuildVisibleDependencyList(CGanttDependArray& aDepends) const;
-	int BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray& aDepends) const;
+	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
+	BOOL BuildDependency(DWORD dwFromTaskID, int nFromItem, DWORD dwToTaskID, int nToItem, GANTTDEPENDENCY& depend) const;
+	int BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC = NULL) const;
+	void BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMin, int nRangeMax, CGanttDependArray& aDepends) const;
 	BOOL IsDependencyPickLinePosValid() const;
 	void ResetDependencyPickLinePos();
 
@@ -345,7 +347,6 @@ protected:
 
 private:
 	void PreFixVScrollSyncBug();
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
 	const GANTTDATERANGE& ActiveDateRange() const;
 
 };

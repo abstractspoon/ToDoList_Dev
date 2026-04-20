@@ -27,7 +27,6 @@ public:
 
 protected:
 	CTDCStyleMap m_aStyles;
-	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 protected:
 	void BeginPerformanceTest(LPCTSTR szFunction, BOOL bWithAttributes);
@@ -56,10 +55,18 @@ protected:
 	void TestOffsetTaskDate(LPCTSTR szSubTest, CToDoCtrlData& data, DWORD dwTaskID);
 	void TestOffsetTaskDate(CToDoCtrlData& data, DWORD dwTaskID, TDC_DATE nDate, const TDCDATEOFFSET& offset);
 
+	void TestCanOffsetTaskCustomDate();
+	void TestCanOffsetTaskCustomDate(const CToDoCtrlData& data, DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& def, const TDCDATEOFFSET& offset);
+	void TestOffsetTaskCustomDate();
+	void TestOffsetTaskCustomDate(CToDoCtrlData& data, DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& def, const TDCDATEOFFSET& offset);
+	void InitDataForOffsetTaskCustomDateTests(CToDoCtrlData& data, CTDCCustomAttribDefinitionArray& aCustAttrib);
+	void HandleOffsetDateChangeResult(const TDCDATEOFFSET &offset, const COleDateTime &dtFrom, const COleDateTime &dtNew, BOOL& bReversibleTest);
+
 	static CString GetRegularityText(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2, TDC_RECURFROMOPTION nRecalcFrom);
 	static CString GetDateTypeText(TDC_DATE nDate);
 	static CString GetUnitsText(TDC_UNITS nUnit);
 
+	static COleDateTime GetTaskCustomDate(const CToDoCtrlData& data, DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& def);
 };
 
 #endif // !defined(AFX_TODOCTRLDATATEST_H__DD08C7F5_76D6_4587_8325_41F964BFB927__INCLUDED_)

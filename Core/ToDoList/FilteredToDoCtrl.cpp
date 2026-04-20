@@ -16,7 +16,6 @@
 #include "..\shared\enstring.h"
 #include "..\shared\deferwndmove.h"
 #include "..\shared\autoflag.h"
-#include "..\shared\osversion.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\savefocus.h"
 #include "..\shared\filemisc.h"
@@ -24,6 +23,8 @@
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\IUIExtension.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <math.h>
 
@@ -1219,11 +1220,11 @@ void CFilteredToDoCtrl::OnTimerNow()
 	const TODOSTRUCTURE* pTDS = m_data.GetStructure();
 	ASSERT(pTDS);
 	
-	if (FindNewNowFilterTasks(pTDS, params, m_taskTree.TreeItemMap()))
+	if (FindNewNowFilterTasks(pTDS, params))
 		RefreshFilter(FALSE);
 }
 
-BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& params, const CHTIMap& htiMap) const
+BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& params) const
 {
 	ASSERT(pTDS);
 
@@ -1231,10 +1232,9 @@ BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const S
 	if (!pTDS->IsRoot())
 	{
 		// is the task invisible?
-		HTREEITEM htiDummy;
 		DWORD dwTaskID = pTDS->GetTaskID();
 
-		if (!htiMap.Lookup(dwTaskID, htiDummy))
+		if (!m_taskTree.GetItem(dwTaskID))
 		{
 			// does the task match the current filter
 			SEARCHRESULT result;
@@ -1248,7 +1248,7 @@ BOOL CFilteredToDoCtrl::FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const S
 	// then children
 	for (int nTask = 0; nTask < pTDS->GetSubTaskCount(); nTask++)
 	{
-		if (FindNewNowFilterTasks(pTDS->GetSubTask(nTask), params, htiMap))
+		if (FindNewNowFilterTasks(pTDS->GetSubTask(nTask), params))
 			return TRUE;
 	}
 

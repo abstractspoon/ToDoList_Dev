@@ -23,8 +23,6 @@ CFG=zlibstat - Win32 Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/ZipUnzip/zlib", TCDAAAAA"
-# PROP Scc_LocalPath "."
 CPP=cl.exe
 RSC=rc.exe
 

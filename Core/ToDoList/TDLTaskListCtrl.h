@@ -178,7 +178,6 @@ protected:
 	BOOL IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const;
 
 protected:
-	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 	BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate);
 	void GetWindowRect(CRect& rWindow, BOOL bWithHeader) const;
 	inline HWND TasksHeader() const { return m_hdrTasks; }

@@ -91,13 +91,11 @@ const int MAX_HEADER_WIDTH			= 32000; // (SHRT_MAX - tolerance)
 }
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 CGanttCtrl::CGanttCtrl() 
 	:
 	CTreeListCtrl(this),
-	CTreeDragDropRenderer(m_tshDragDrop, m_tree),
+	CTreeDragDropRenderer(TSH(), m_tree),
 	m_nMonthWidth(DEF_MONTH_WIDTH),
 	m_nMonthDisplay(GTLC_DISPLAY_MONTHS_LONG),
 	m_dwOptions(GTLCF_AUTOSCROLLTOTASK | GTLCF_SHOWSPLITTERBAR),
@@ -112,7 +110,6 @@ CGanttCtrl::CGanttCtrl()
 	m_ptLastDependPick(0),
 	m_pDependEdit(NULL),
 	m_dwMaxTaskID(0),
-	m_bReadOnly(FALSE),
 	m_nDefSnapMode(GTLCSM_FREE)
 {
 
@@ -129,6 +126,7 @@ BEGIN_MESSAGE_MAP(CGanttCtrl, CTreeListCtrl)
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
+//////////////////////////////////////////////////////////////////////
 
 int CGanttCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
@@ -163,17 +161,6 @@ void CGanttCtrl::InitItemHeights()
 DWORD CGanttCtrl::GetSelectedTaskID() const
 {
 	return GetSelectedItemData();
-}
-
-BOOL CGanttCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) const
-{
-	DWORD dwTaskID = GetSelectedTaskID();
-	const GANTTITEM* pGI = NULL;
-	
-	GET_GI_RET(dwTaskID, pGI, FALSE);
-	
-	aDepends.Copy(pGI->aDependIDs);
-	return TRUE;
 }
 
 BOOL CGanttCtrl::AddSelectedTaskDependency(DWORD dwDependID)
@@ -258,6 +245,31 @@ BOOL CGanttCtrl::SelectTask(DWORD dwTaskID)
 	HTREEITEM hti = GetTreeItem(dwTaskID);
 
 	return SelectItem(hti);
+}
+
+BOOL CGanttCtrl::SelectTasks(const CDWordArray& aTaskIDs)
+{
+	CHTIList selection;
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+	{
+		HTREEITEM hti = m_tree.GetItem(aTaskIDs[nID]);
+
+		if (!hti)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		selection.AddTail(hti);
+	}
+
+	return SelectItems(selection);
+}
+
+int CGanttCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
+{
+	return GetSelectedItemData(aTaskIDs);
 }
 
 BOOL CGanttCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
@@ -409,7 +421,8 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 			CDWordArray aExpanded;
 			GetExpandedState(aExpanded);
 			
-			DWORD dwSelID = GetSelectedTaskID();
+			CDWordArray aSelTaskIDs;
+			GetSelectedTaskIDs(aSelTaskIDs);
 			
 			RebuildTree(pTasks);
 			RecalcDateRange();
@@ -421,9 +434,9 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 				PreFixVScrollSyncBug();
 			
 			SetExpandedState(aExpanded);
-			SelectTask(dwSelID);
+			SelectTasks(aSelTaskIDs);
 
-			if (dwSelID)
+			if (aSelTaskIDs.GetSize())
 				ScrollToSelectedTask();
 			else
 				ScrollToToday();
@@ -870,6 +883,8 @@ BOOL CGanttCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
 
 void CGanttCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
+	TSH().RemoveAll(TRUE, FALSE);
+
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
 	m_data.RemoveAll();
@@ -1389,7 +1404,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 			DrawHorzItemDivider(pDC, rFullWidth);
 
 			// Draw selection before text
-			GM_ITEMSTATE nState = GetItemState(nItem);
+			GM_ITEMSTATE nState = CTreeListCtrl::GetItemState(nItem);
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
@@ -1402,13 +1417,8 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 			// draw dependencies
 			CGanttDependArray aDepends;
 			
-			if (BuildVisibleDependencyList(aDepends))
+			if (BuildVisibleDependencyList(aDepends, pLVCD->nmcd.hdc))
 			{
-				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-
-				CRect rClient;
-				m_list.GetClientRect(rClient);
-
 				// see if we are currently editing a dependency
 				DWORD dwFromTaskID = 0, dwToTaskID = 0;
 
@@ -1419,6 +1429,10 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 					dwFromTaskID = m_pDependEdit->GetFromDependency(dwToTaskID);
 				}
 				
+				CRect rClient;
+				m_list.GetClientRect(rClient);
+
+				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 				int nDepend = aDepends.GetSize();
 
 				while (nDepend--)
@@ -1426,8 +1440,14 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aCo
 					GANTTDEPENDENCY& depend = aDepends[nDepend];
 
 					// don't draw the dependency we are actively editing
-					if (!IsDependencyEditing() || !depend.Matches(dwFromTaskID, dwToTaskID))
-						depend.Draw(pDC, rClient, FALSE);
+					if (IsDependencyEditing() && depend.Matches(dwFromTaskID, dwToTaskID))
+						continue;
+
+					// Don't draw dependencies outside (horizontally) the client rect
+					if (!depend.HitTest(rClient))
+						continue;
+
+					depend.Draw(pDC, FALSE);
 				}
 			}
 
@@ -1557,21 +1577,11 @@ void CGanttCtrl::OnBeginEditTreeLabel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	*pResult = TRUE; // cancel our edit
 
-	if (m_bReadOnly || IsDependencyEditing())
-		return;
-
-	CPoint point(GetMessagePos());
-	int nCol = -1;
-	HTREEITEM hti = TreeHitTestItem(point, TRUE, nCol);
-
-	if (!hti || (nCol == -1))
-		return;
-
-	if (m_treeHeader.GetItemData(nCol) != GTLCC_TITLE)
+	if (IsDependencyEditing())
 		return;
 
 	// notify app to edit
-	GetParent()->SendMessage(WM_GTLC_EDITTASKTITLE, 0, GetTaskID(hti));
+	GetParent()->SendMessage(WM_GTLC_EDITTASKTITLE, 0, GetSelectedTaskID());
 }
 
 void CGanttCtrl::OnClickTreeHeader(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -1623,7 +1633,7 @@ void CGanttCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
 	CTreeListCtrl::OnTreeSelectionChange(pNMTV);
 
-	if (!m_bMovingItem && HasOption(GTLCF_AUTOSCROLLTOTASK))
+	if (!m_bMovingItem && HasOption(GTLCF_AUTOSCROLLTOTASK) && !Misc::IsCursorKeyPressed(MKC_UPDOWN))
 		ScrollToSelectedTask();
 }
 
@@ -1643,10 +1653,17 @@ UINT CGanttCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)
 			return DD_DROPEFFECT_NONE;
 
 		// If the target is a reference, the source must be a reference
-		DWORD dwSelTaskID = GetTaskID(move.htiSel);
+		if (m_data.ItemIsReference(dwTargetID))
+		{
+			CDWordArray aTaskIDs;
+			int nSel = TSH().GetItemData(move.selection, aTaskIDs);
 
-		if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
-			return DD_DROPEFFECT_NONE;
+			while (nSel--)
+			{
+				if (!m_data.ItemIsReference(aTaskIDs[nSel]))
+					return DD_DROPEFFECT_NONE;
+			}
+		}
 	}
 
 	return nCursor;
@@ -1654,22 +1671,13 @@ UINT CGanttCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)
 
 BOOL CGanttCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 {
-	// Prevent dropping on locked tasks unless references
-	DWORD dwTargetID = GetTaskID(move.htiDestParent);
-
-	if (dwTargetID && m_data.ItemIsLocked(dwTargetID, TRUE))
-		return FALSE;
-
-	// If the target is a reference, the source must be a reference
-	DWORD dwSelTaskID = GetTaskID(move.htiSel);
-
-	if (m_data.ItemIsReference(dwTargetID) && !m_data.ItemIsReference(dwSelTaskID))
+	if (OnDragOverItem(move, DD_DROPEFFECT_MOVE) == DD_DROPEFFECT_NONE)
 		return FALSE;
 
 	// Notify parent of move
 	IUITASKMOVE taskMove = { 0 };
 
-	taskMove.dwSelectedTaskID = dwSelTaskID;
+	taskMove.dwSelectedTaskID = 0; // selected tasks
 	taskMove.dwParentID = GetTaskID(move.htiDestParent);
 	taskMove.dwAfterSiblingID = GetTaskID(move.htiDestAfterSibling);
 	taskMove.bCopy = (move.bCopy != FALSE);
@@ -1694,23 +1702,30 @@ BOOL CGanttCtrl::OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag)
 		return TRUE;
 
 	// Prevent dragging of locked tasks
-	DWORD dwTaskID = GetTaskID(move.htiSel);
-	ASSERT(dwTaskID);
+	POSITION pos = move.selection.GetHeadPosition();
 
-	if (m_data.ItemIsLocked(dwTaskID, TRUE))
-		return FALSE;
+	while (pos)
+	{
+		HTREEITEM htiSel = move.selection.GetNext(pos);
 
-	// Prevent dragging of subtasks of locked tasks
-	HTREEITEM htiParent = m_tree.GetParentItem(move.htiSel);
+		DWORD dwTaskID = GetTaskID(htiSel);
+		ASSERT(dwTaskID);
 
-	if (!htiParent || (htiParent == TVI_ROOT))
-		return TRUE;
+	 	if (m_data.ItemIsLocked(dwTaskID, TRUE))
+			return FALSE;
 
-	DWORD dwParentID = GetTaskID(htiParent);
-	ASSERT(dwTaskID);
+		// Prevent dragging of subtasks of locked tasks
+		HTREEITEM htiParent = m_tree.GetParentItem(htiSel);
 
-	if (m_data.ItemIsLocked(dwParentID, TRUE))
-		return FALSE;
+		if (htiParent && (htiParent != TVI_ROOT))
+		{
+			DWORD dwParentID = GetTaskID(htiParent);
+			ASSERT(dwParentID);
+
+			if (m_data.ItemIsLocked(dwParentID, TRUE))
+				return FALSE;
+		}
+	}
 
 	return TRUE;
 }
@@ -1746,17 +1761,14 @@ void CGanttCtrl::ClearDependencyPickLine(CDC* pDC)
 		if (bNullDC)
 			pDC = m_list.GetDC();
 			
-		CRect rClient;
-		m_list.GetClientRect(rClient);
-		
 		// calc 'from' point
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
 		GANTTDEPENDENCY depend;
 		
-		if (CalcDependencyEndPos(dwFromTaskID, depend, TRUE))
+		if (CalcDependencyEndPos(dwFromTaskID, -1, depend, TRUE))
 		{
 			depend.SetTo(m_ptLastDependPick);
-			depend.Draw(pDC, rClient, TRUE);
+			depend.Draw(pDC, TRUE);
 		}
 			
 		// clear last drag pos
@@ -1793,7 +1805,7 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
 		GANTTDEPENDENCY depend;
 
-		if (!CalcDependencyEndPos(dwFromTaskID, depend, TRUE))
+		if (!CalcDependencyEndPos(dwFromTaskID, -1, depend, TRUE))
 			return FALSE;
 
 		// calc new 'To' point to see if anything has actually changed
@@ -1804,7 +1816,7 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		
 		if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
 		{
-			if (!CalcDependencyEndPos(dwToTaskID, depend, FALSE, &ptTo))
+			if (!CalcDependencyEndPos(dwToTaskID, -1, depend, FALSE, &ptTo))
 				return FALSE;
 		}
 		else // use current cursor pos
@@ -1819,19 +1831,16 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		{
 			CClientDC dc(&m_list);
 			
-			CRect rClient;
-			m_list.GetClientRect(rClient);
-			
 			// clear 'old' line
 			if (IsDependencyPickLinePosValid())
 			{
 				depend.SetTo(m_ptLastDependPick);
-				depend.Draw(&dc, rClient, TRUE);
+				depend.Draw(&dc, TRUE);
 			}		
 			
 			// draw 'new' line
 			depend.SetTo(ptTo);
-			depend.Draw(&dc, rClient, TRUE);
+			depend.Draw(&dc, TRUE);
 
 			// update pos
 			m_ptLastDependPick = ptTo;
@@ -1855,10 +1864,9 @@ BOOL CGanttCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
 		{
 			if (!CanDragTask(dwTaskID, nDrag))
 			{
-				if (m_data.ItemIsLocked(dwTaskID, FALSE))
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				// Locked tasks should have been handled in WM_SETCURSOR
+				ASSERT(!m_data.ItemIsLocked(dwTaskID, FALSE));
 
-				// else
 				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
 			}
 			else
@@ -1909,8 +1917,13 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				m_list.ScreenToClient(&ptCursor);
 				int nItem = m_list.HitTest(ptCursor);
 
-				if ((nItem != -1) && m_data.ItemIsLocked(GetTaskID(nItem), FALSE))
-					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				if (nItem != -1)
+				{
+					DWORD dwHitID = GetTaskID(nItem);
+					
+					if (m_data.ItemIsLocked(dwHitID, FALSE))
+						return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+				}
 
 				if (!IsDependencyEditing())
 				{
@@ -1953,13 +1966,11 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			break;
 
 		case WM_LBUTTONDOWN:
+			if (!IsDependencyEditing())
 			{
 				// We can't begin dragging from OnListLButtonDown because we need to
 				// let the default handling occur first to ensure that a newly
 				// selected task is properly initialised
-				if (OnListLButtonDown(wp, lp))
-					return 0L; // eat
-
 				LRESULT lr = CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 
 				StartDragging(lp);
@@ -2001,6 +2012,18 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				return 0L; // eat
 			}
 			break;
+
+		case WM_KEYUP:
+			switch (wp)
+			{
+			case VK_UP:
+			case VK_DOWN:
+			case VK_PRIOR:
+			case VK_NEXT:
+				if (HasOption(GTLCF_AUTOSCROLLTOTASK))
+					ScrollToSelectedTask();
+				break;
+			}
 		}
 	}
 
@@ -2066,21 +2089,24 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	return CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
-BOOL CGanttCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
+BOOL CGanttCtrl::OnTreeMouseMove(UINT nFlags, CPoint point)
 {
-	if (!m_bReadOnly)
+	if (IsDependencyEditing())
 	{
-		if (IsPickingDependencyFromTask() || IsPickingDependencyToTask())
+		CPoint ptScreen(point);
+		m_tree.ClientToScreen(&ptScreen);
+
+		OnDependencyEditMouseMove(nFlags, ptScreen);
+
+		if (/*IsPickingDependencyFromTask() || */IsPickingDependencyToTask())
 		{
 			HTREEITEM htiHot = m_tree.HitTest(point);
 			m_tree.SelectDropTarget(htiHot);
 			
-			// track when the cursor leaves the tree ctrl
-			// so we can hide the temporary dependency line
 			CDialogHelper::TrackMouseLeave(m_tree);
-
-			return TRUE; // eat
 		}
+
+		return TRUE; // handled
 	}
 
 	// not handled
@@ -2089,41 +2115,11 @@ BOOL CGanttCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
 
 BOOL CGanttCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
-	if (!m_bReadOnly)
-	{
-		if (IsPickingDependencyFromTask())
-		{
-			DWORD dwFromTaskID = TreeHitTestTask(point, FALSE);
-			
-			if (dwFromTaskID)
-			{
-				if (m_data.ItemIsLocked(dwFromTaskID, FALSE))
-				{
-					MessageBeep(MB_ICONEXCLAMATION);
-				}
-				else if (m_pDependEdit->SetFromTask(dwFromTaskID))
-				{
-					m_tree.SelectDropTarget(NULL);
-					ResetDependencyPickLinePos();
-				}
-			}
-			
-			return TRUE; // eat
-		}
-		else if (IsPickingDependencyToTask())
-		{
-			DWORD dwToTaskID = TreeHitTestTask(point, FALSE);
-			
-			if (dwToTaskID)
-				m_pDependEdit->SetToTask(dwToTaskID);
-			
-			return TRUE; // eat
-		}
-		else if (IsPickingFromDependency())
-		{
-			return TRUE; // eat
-		}
-	}
+	CPoint ptScreen(point);
+	m_tree.ClientToScreen(&ptScreen);
+
+	if (OnDependencyEditLButtonDown(nFlags, ptScreen))
+		return TRUE;
 
 	return CTreeListCtrl::OnTreeLButtonDown(nFlags, point);
 }
@@ -2133,8 +2129,8 @@ BOOL CGanttCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
 	if (CTreeListCtrl::OnTreeLButtonUp(nFlags, point))
 		return TRUE;
 
-	// else
-	if (!m_bReadOnly)
+	// Handle icon editing
+	if (!m_bReadOnly && (0 == (nFlags & (MK_CONTROL | MK_SHIFT))))
 	{
 		HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 
@@ -2161,125 +2157,145 @@ BOOL CGanttCtrl::OnTreeCheckChange(HTREEITEM hti)
 	return TRUE; // always
 }
 
-BOOL CGanttCtrl::OnListMouseMove(UINT /*nFlags*/, CPoint point)
+GM_ITEMSTATE CGanttCtrl::GetItemState(HTREEITEM hti) const
 {
-	if (!m_bReadOnly)
+	GM_ITEMSTATE nState = CTreeListCtrl::GetItemState(hti);
+
+	if ((nState == GMIS_SELECTEDNOTFOCUSED) && IsDependencyEditing())
+		nState = GMIS_SELECTED;
+
+	return nState;
+}
+
+BOOL CGanttCtrl::OnListMouseMove(UINT nFlags, CPoint point)
+{
+	if (IsDependencyEditing())
 	{
-		if (IsDependencyEditing())
+		CPoint ptScreen(point);
+		m_list.ClientToScreen(&ptScreen);
+
+		OnDependencyEditMouseMove(nFlags, ptScreen);
+
+		if (IsPickingDependencyToTask())
 		{
-			if (IsPickingDependencyFromTask() || IsPickingDependencyToTask())
+			// Drop-highlighting does not play well with the 
+			// dependency line drawing so we brute force it
+			int nPrevHotItem = GetListItem(m_tree.GetDropHilightItem());
+			int nNewHotItem = m_list.HitTest(point);
+
+			if ((nPrevHotItem != -1) || (nNewHotItem != -1))
 			{
-				int nNewHotItem = m_list.HitTest(point);
-				HTREEITEM htiNewHot = GetTreeItem(nNewHotItem), htiPrevHot = m_tree.GetDropHilightItem();
-
-				if (htiNewHot != htiPrevHot)
-					m_tree.SelectDropTarget(htiNewHot);
-
-				if (IsPickingDependencyToTask())
-				{
-					int nPrevHotItem = GetListItem(htiPrevHot);
-					
-					// Drop-highlighting does not play well with the 
-					// dependency line drawing so we brute force it
-					if ((nPrevHotItem != -1) || (nNewHotItem != -1))
-					{
-						InvalidateList(nPrevHotItem, nNewHotItem);
-						RedrawList();
-						ResetDependencyPickLinePos();
-					}
-
-					if (DrawDependencyPickLine(point))
-					{
-						// track when the cursor leaves the list ctrl
-						TRACKMOUSEEVENT tme = { sizeof(tme), TME_LEAVE, m_list, 0 };
-						TrackMouseEvent(&tme);
-					}
-				}
+				RedrawList();
+				ResetDependencyPickLinePos();
 			}
+
+			// track when the cursor leaves the tree ctrl
+			// so we can hide the temporary dependency line
+			if (DrawDependencyPickLine(point))
+				CDialogHelper::TrackMouseLeave(m_list);
 		}
-		else if (UpdateDragging(point))
-		{
-			return TRUE; // eat
-		}
+
+		return TRUE;
+	}
+	else if (UpdateDragging(point))
+	{
+		return TRUE; // eat
 	}
 
 	// not handled
 	return FALSE;
 }
 
+void CGanttCtrl::OnDependencyEditMouseMove(UINT /*nFlags*/, CPoint ptScreen)
+{
+	if (IsPickingDependencyFromTask() || IsPickingDependencyToTask())
+	{
+		DWORD dwTaskID = HitTestTask(ptScreen, false);
+		m_tree.SelectDropTarget(GetTreeItem(dwTaskID));
+	}
+}
+
 BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 {
-	if (!m_bReadOnly)
+	CPoint ptScreen(point);
+	m_list.ClientToScreen(&ptScreen);
+	
+	if (OnDependencyEditLButtonDown(nFlags, ptScreen))
+		return TRUE;
+
+	// else
+	if (IsPickingFromDependency()) // to edit
 	{
-		if (IsPickingDependencyFromTask())
+		DWORD dwCurToTaskID = 0;
+		DWORD dwFromTaskID = ListDependencyHitTest(point, dwCurToTaskID);
+
+		if (dwFromTaskID && dwCurToTaskID)
 		{
-			int nHit = m_list.HitTest(point);
-
-			if (nHit != -1)
+			if (m_data.ItemIsLocked(dwFromTaskID, FALSE))
 			{
-				DWORD dwFromTaskID = GetTaskID(nHit);
-
-				if (m_data.ItemIsLocked(dwFromTaskID, FALSE))
-				{
-					MessageBeep(MB_ICONEXCLAMATION);
-				}
-				else if (m_pDependEdit->SetFromTask(dwFromTaskID))
-				{
-					m_tree.SelectDropTarget(NULL);
-					ResetDependencyPickLinePos();
-				}
+				MessageBeep(MB_ICONEXCLAMATION);
 			}
-
-			return TRUE; // eat
-		}
-		else if (IsPickingFromDependency()) // to edit
-		{
-			DWORD dwCurToTaskID = 0;
-			DWORD dwFromTaskID = ListDependsHitTest(point, dwCurToTaskID);
-			
-			if (dwFromTaskID && dwCurToTaskID)
+			else if (m_pDependEdit->SetFromDependency(dwFromTaskID, dwCurToTaskID))
 			{
-				if (m_data.ItemIsLocked(dwFromTaskID, FALSE))
-				{
-					MessageBeep(MB_ICONEXCLAMATION);
-				}
-				else if (m_pDependEdit->SetFromDependency(dwFromTaskID, dwCurToTaskID))
-				{
-					ResetDependencyPickLinePos();
-					RedrawList();
-					DrawDependencyPickLine(point);
-				}
+				ResetDependencyPickLinePos();
+				RedrawList();
+
+				// Select the 'from' task
+				SelectTask(dwFromTaskID);
+				NotifyParentSelectionChange();
 			}
-			
-			return TRUE; // eat
 		}
-		else if (IsPickingDependencyToTask())
-		{
-			int nHit = m_list.HitTest(point);
 
-			if (nHit != -1)
-			{
-				DWORD dwToTaskID = GetTaskID(nHit);
-
-				if (dwToTaskID != m_pDependEdit->GetFromTask())
-					m_pDependEdit->SetToTask(dwToTaskID);
-			}
-
-			return TRUE; // eat
-		}
-		// StartDragging handled in ScWindowProc
+		return TRUE; // always
 	}
 
-	// all else
+	// Note: Bar dragging handled in ScWindowProc
 	return CTreeListCtrl::OnListLButtonDown(nFlags, point);
+}
+
+BOOL CGanttCtrl::OnDependencyEditLButtonDown(UINT /*nFlags*/, CPoint ptScreen)
+{
+	if (m_bReadOnly || !IsDependencyEditing())
+		return FALSE;
+
+	if (IsPickingDependencyFromTask())
+	{
+		DWORD dwFromTaskID = HitTestTask(ptScreen, FALSE);
+
+		if (dwFromTaskID)
+		{
+			if (m_data.ItemIsLocked(dwFromTaskID, FALSE))
+			{
+				MessageBeep(MB_ICONEXCLAMATION);
+			}
+			else if (m_pDependEdit->SetFromTask(dwFromTaskID))
+			{
+				m_tree.SelectDropTarget(NULL);
+				ResetDependencyPickLinePos();
+
+				// Select the 'from' task
+				SelectTask(dwFromTaskID);
+				NotifyParentSelectionChange();
+			}
+		}
+
+		return TRUE; // handled
+	}
+	else if (IsPickingDependencyToTask())
+	{
+		DWORD dwToTaskID = HitTestTask(ptScreen, FALSE);
+		m_pDependEdit->SetToTask(dwToTaskID);
+
+		return TRUE; // handled
+	}
+
+	return FALSE;
 }
 
 BOOL CGanttCtrl::OnListLButtonUp(UINT /*nFlags*/, CPoint point)
 {
 	if (IsDragging() && EndDragging(point))
-	{
 		return TRUE; // eat
-	}
 
 	// not handled
 	return FALSE;
@@ -3552,7 +3568,7 @@ BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, const COleDateTime& dtMonthSt
 	return (rDate.right > 0);
 }
 
-DWORD CGanttCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
+DWORD CGanttCtrl::ListDependencyHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
 {
 	CGanttDependArray aDepends;
 	
@@ -3572,119 +3588,124 @@ DWORD CGanttCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
 	return 0;
 }
 
-int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) const
+int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC) const
 {
+	// Determine the range of interest
+	int nFirstItem = m_list.GetTopIndex(), nLastItem = (nFirstItem + m_list.GetCountPerPage());
+
+	if (hDC)
+	{
+		CRect rClip;
+		GetClipBox(hDC, rClip);
+
+		rClip.OffsetRect(0, -CDialogHelper::GetChildHeight(&m_listHeader));
+
+		int nRowHeight = GetItemHeight(m_list);
+
+		nFirstItem += (rClip.top / nRowHeight);
+		nLastItem = (nFirstItem + (rClip.Height() / nRowHeight));
+		
+		ASSERT(nLastItem > nFirstItem);
+	}
+
+	int nItemCount = m_list.GetItemCount();
+	nLastItem = min(nLastItem, nItemCount - 1);
+
+	// Process ALL tasks looking for dependencies where the
+	// source and target are NOT both above/below the visible range
 	aDepends.RemoveAll();
 
-	CRect rClient;
-	m_list.GetClientRect(rClient);
+	POSITION pos = m_data.GetStartPosition();
+	GANTTITEM* pGI;
+	DWORD dwTaskID;
 
-	// iterate all list items checking for dependencies
-	HTREEITEM htiFirstVis = m_tree.GetFirstVisibleItem();
-	HTREEITEM htiLastVis = TCH().GetLastVisibleItem();
-
-	HTREEITEM htiFrom = htiFirstVis;
-
-	while (htiFrom)
+	while (pos)
 	{
-		BuildVisibleDependencyList(htiFrom, aDepends);
-
-		if (htiFrom == htiLastVis)
-			break;
-
-		htiFrom = m_tree.GetNextVisibleItem(htiFrom);
+		m_data.GetNextAssoc(pos, dwTaskID, pGI);
+		BuildTaskVisibleDependencyList(*pGI, nFirstItem, nLastItem, aDepends);
 	}
-	
+
 	return aDepends.GetSize();
 }
 
-int CGanttCtrl::BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray& aDepends) const
+int CGanttCtrl::GetDependencyListItem(DWORD dwTaskID) const
 {
-	DWORD dwFromTaskID = GetTaskID(htiFrom);
+	HTREEITEM hti = GetTreeItem(dwTaskID);
 
-	const GANTTITEM* pGIFrom = GetGanttItem(dwFromTaskID);
-	ASSERT(pGIFrom);
-
-	if (pGIFrom)
+	// Use the parent as a proxy if collapsed
+	while (!TCH().IsParentItemExpanded(hti))
 	{
-		int nDepend = pGIFrom->aDependIDs.GetSize();
+		hti = m_tree.GetParentItem(hti);
+	}
 
-		while (nDepend--)
+	return GetListItem(hti);
+}
+
+void CGanttCtrl::BuildTaskVisibleDependencyList(const GANTTITEM& gi, int nRangeMin, int nRangeMax, CGanttDependArray& aDepends) const
+{
+	if (!gi.aDependIDs.GetSize())
+		return;
+
+	int nItem = GetListItem(gi.dwTaskID);
+
+	if (nItem >= 0) // task is visible
+	{
+		// If the source task is within the range then all its dependency
+		// lines will be visible else we'll need check each one
+		BOOL bWantDepends = ((nItem >= nRangeMin) && (nItem <= nRangeMax));
+
+		for (int nDepend = 0; nDepend < gi.aDependIDs.GetSize(); nDepend++)
 		{
-			DWORD dwToTaskID = pGIFrom->aDependIDs[nDepend];
+			DWORD dwDependID = gi.aDependIDs[nDepend];
+			int nDependItem = GetDependencyListItem(dwDependID);
 
-			if (!m_data.HasItem(dwToTaskID))
-				continue;
-
-			GANTTDEPENDENCY depend;
-
-			if (BuildDependency(dwFromTaskID, dwToTaskID, depend))
-				aDepends.Add(depend);
-		}
-
-		if (pGIFrom->bParent && HasOption(GTLCF_DISPLAYPARENTROLLUPS) && !TCH().IsItemExpanded(htiFrom))
-		{
-			HTREEITEM htiFromChild = m_tree.GetChildItem(htiFrom);
-
-			while (htiFromChild)
+			if (nDependItem == -1)
 			{
-				BuildVisibleDependencyList(htiFromChild, aDepends); // RECURSIVE CALL
-				htiFromChild = m_tree.GetNextItem(htiFromChild, TVGN_NEXT);
+				// We can arrive here in rare cases during the 
+				// user-expansion of a tree item when the tree 
+				// is in an intermediate state
+				continue;
+			}
+			else
+			{
+				if (!bWantDepends)
+				{
+					if ((nItem < nRangeMin) && (nDependItem < nRangeMin))
+						continue;
+
+					if ((nItem > nRangeMax) && (nDependItem > nRangeMax))
+						continue;
+				}
+
+				GANTTDEPENDENCY depend;
+
+				if (CalcDependencyEndPos(gi.dwTaskID, nItem, depend, TRUE) &&
+					CalcDependencyEndPos(dwDependID, nDependItem, depend, FALSE))
+				{
+					aDepends.Add(depend);
+				}
 			}
 		}
 	}
-
-	return aDepends.GetSize();
-}
-
-BOOL CGanttCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPENDENCY& depend) const
-{
-	if (!m_data.HasItem(dwFromTaskID) || !m_data.HasItem(dwToTaskID))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	if (CalcDependencyEndPos(dwFromTaskID, depend, TRUE) && 
-		CalcDependencyEndPos(dwToTaskID, depend, FALSE))
-	{
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-
-BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
-{
-	ASSERT(m_data.HasItem(dwTaskID));
-
-	int nItem = GetListItem(dwTaskID);
-
-	if (nItem == -1) // Collapsed 
-	{
-		// Use first visible parent as surrogate
-		HTREEITEM htiParent = m_tree.GetParentItem(GetTreeItem(dwTaskID));
-		ASSERT(htiParent);
-
-		while (htiParent)
-		{
-			nItem = GetListItem(htiParent);
-
-			if (nItem != -1)
-				break;
-
-			htiParent = m_tree.GetParentItem(htiParent);
-		}
-	}
-
-	return CalcDependencyEndPos(dwTaskID, nItem, depend, bFrom, lpp);
 }
 
 BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
+	ASSERT(m_data.HasItem(dwTaskID));
+	ASSERT((nItem >= 0) || (nItem == -1));
+
 	if (nItem == -1)
-		return FALSE;
+	{
+		nItem = GetDependencyListItem(dwTaskID);
+
+		if (nItem == -1)
+		{
+			// We can arrive here in rare cases during the 
+			// user-expansion of a tree item when the tree 
+			// is in an intermediate state
+			return FALSE;
+		}
+	}
 
 	const GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, FALSE);
@@ -4267,6 +4288,9 @@ BOOL CGanttCtrl::BeginDependencyEdit(IGanttDependencyEditor* pDependEdit)
 	
 	if (!m_bReadOnly && (m_pDependEdit == NULL) && pDependEdit->IsPicking())
 	{
+		// Restore a focused look without actually setting the focus
+		TSH().Invalidate();
+
 		m_pDependEdit = pDependEdit;
 		return TRUE;
 	}
@@ -4945,9 +4969,9 @@ void CGanttCtrl::ScrollToToday()
 	ScrollTo(COleDateTime::GetCurrentTime());
 }
 
-void CGanttCtrl::ScrollToSelectedTask()
+BOOL CGanttCtrl::ScrollToSelectedTask()
 {
-	ScrollToTask(GetSelectedTaskID());
+	return TSH().EnsureVisible(TRUE);
 }
 
 void CGanttCtrl::ScrollToTask(DWORD dwTaskID)
@@ -5519,12 +5543,16 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 	if (m_data.ItemIsLocked(dwTaskID, FALSE))
 		return FALSE;
 
+	// Disable for multi-selection (for now)
+	if ((TSH().GetCount() > 1) && TSH().HasItem(dwTaskID))
+		return FALSE;
+
 	// else
 	switch (nDrag)
 	{
 	case GTLCD_START:
 	case GTLCD_WHOLE:
-		if (HasOption(GTLCF_DISABLEDEPENDENTDRAGGING) && m_data.ItemHasDependecies(dwTaskID))
+		if (HasOption(GTLCF_DISABLEDEPENDENTDRAGGING) && m_data.ItemHasDependencies(dwTaskID))
 			return FALSE;
 		break;
 	}
@@ -5535,6 +5563,10 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 
 BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 {
+	// Disable for multi-selection (for now)
+	if (TSH().GetCount() != 1)
+		return FALSE;
+
 	ASSERT(!m_bReadOnly);
 	ASSERT(!IsDependencyEditing());
 
@@ -5873,13 +5905,6 @@ BOOL CGanttCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) co
 
 	// else
 	return FALSE;
-}
-
-void CGanttCtrl::SetReadOnly(bool bReadOnly) 
-{ 
-	m_bReadOnly = bReadOnly;
-
-	CTreeListCtrl::EnableDragAndDrop(!bReadOnly);
 }
 
 // external version
@@ -6272,9 +6297,8 @@ BOOL CGanttCtrl::CanMoveSelectedTask(const IUITASKMOVE& move) const
 	if (m_bReadOnly)
 		return FALSE;
 
-	TLCITEMMOVE itemMove = { 0 };
+	TLCITEMMOVE itemMove(TSH());
 
-	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
 	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
 	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 
@@ -6286,9 +6310,8 @@ BOOL CGanttCtrl::MoveSelectedTask(const IUITASKMOVE& move)
 	if (m_bReadOnly)
 		return FALSE;
 
-	TLCITEMMOVE itemMove = { 0 };
+	TLCITEMMOVE itemMove(TSH());
 
-	itemMove.htiSel = GetTreeItem(move.dwSelectedTaskID);
 	itemMove.htiDestParent = GetTreeItem(move.dwParentID);
 	itemMove.htiDestAfterSibling = GetTreeItem(move.dwAfterSiblingID);
 

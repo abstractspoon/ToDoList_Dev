@@ -7,7 +7,6 @@
 #include "Misc.h"
 #include "FileMisc.h"
 #include "themed.h"
-#include "osversion.h"
 #include "icon.h"
 #include "EnImageList.h"
 #include "EnBitmapEx.h"
@@ -17,6 +16,7 @@
 #include "..\3rdparty\ShellIcons.h"
 #include "..\3rdparty\GdiPlus.h"
 #include "..\3rdparty\XNamedColors.h"
+#include "..\3rdParty\OSVersion.h"
 
 #include <windef.h>
 #include <afxpriv.h>

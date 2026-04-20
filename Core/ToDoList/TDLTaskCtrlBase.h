@@ -239,7 +239,7 @@ public:
 	void ScreenToClient(LPRECT pRect) const { CWnd::ScreenToClient(pRect); }
 
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
-	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
+	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
 
 protected:
 	CListCtrl m_lcColumns;
@@ -286,7 +286,7 @@ protected:
 	CIconCache m_imageIcons;
 
 	static CTDCColumnMap s_mapColumns;
-	static short s_nExtendedSelection;
+	static DWORD s_dwAllowableExtendedKeyboardSelection;
 	static double s_dRecentModPeriod;
 
 private:
@@ -329,7 +329,6 @@ protected:
 	BOOL OnPrimaryHeaderBeginTracking(NMHEADER* /*pHDN*/) { return FALSE; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
-	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
 
 protected:
 	enum SELCHANGE_ACTION

@@ -22,7 +22,6 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTransformDialog dialog
 
-
 CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, 
 										 BOOL bEnableSubtaskSelection,
 										 LPCTSTR szStylesheet,
@@ -30,52 +29,44 @@ CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle,
 										 CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_TRANSFORM_DIALOG, _T("Transform"), pParent), 
-	m_dlgTaskSel(aAttribDefs, _T("Transform"), bEnableSubtaskSelection),
+	m_pageTaskSel(aAttribDefs, _T("Transform"), bEnableSubtaskSelection),
 	m_sTitle(szTitle), 
 	m_eStylesheet(FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
+	// Note: No bold text for the tab control
 {
-	//{{AFX_DATA_INIT(CTDLTransformDialog)
-	//}}AFX_DATA_INIT
-	// see what we had last time
 	CPreferences prefs;
 
 	m_bDate = prefs.GetProfileInt(m_sPrefsKey, _T("WantDate"), TRUE);
+	m_cbTitle.Load(prefs, _T("Print"));	// share same title history as print dialog
 
-	// share same title history as print dialog
-	m_cbTitle.Load(prefs, _T("Print"));
+	m_ppHost.AddPage(&m_pageTaskSel, CEnString(IDS_EXPORTDLG_TASKSEL));
 
 	InitStylesheet(szStylesheet);
 }
 
-
 void CTDLTransformDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLTransformDialog)
+
 	DDX_Control(pDX, IDC_STYLESHEET, m_eStylesheet);
 	DDX_Text(pDX, IDC_STYLESHEET, m_sStylesheet);
-	//}}AFX_DATA_MAP
 	DDX_Text(pDX, IDC_TRANSFORMTITLE, m_sTitle);
 	DDX_Check(pDX, IDC_TRANSFORMDATE, m_bDate);
 	DDX_Control(pDX, IDC_TRANSFORMTITLE, m_cbTitle);
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLTransformDialog, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLTransformDialog)
 	ON_EN_CHANGE(IDC_STYLESHEET, OnChangeStylesheet)
 	ON_BN_CLICKED(IDC_CONFIGURESTYLESHEET, OnConfigureStylesheet)
-	//}}AFX_MSG_MAP
 	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLTransformDialog message handlers
 
 void CTDLTransformDialog::OnOK() 
 {
 	CTDLDialog::OnOK();
-	m_dlgTaskSel.OnOK();
+	m_ppHost.OnOK();
 
 	CPreferences prefs;
 
@@ -90,26 +81,21 @@ BOOL CTDLTransformDialog::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 	
-    VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
+	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
 
 	OnChangeStylesheet();
 	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLTransformDialog::OnChangeStylesheet() 
 {
 	UpdateData();
 
-	BOOL bEnable = FileMisc::FileExists(GetStylesheet());
-	GetDlgItem(IDOK)->EnableWindow(bEnable);
+	BOOL bEnableOK = FileMisc::FileExists(GetStylesheet());
 
-	// Helpful text for why OK button is disabled
-	BOOL bMissingStylesheet = (!bEnable && !m_sStylesheet.IsEmpty());
-
-	GetDlgItem(IDC_STYLESHEETNOTFOUND)->EnableWindow(bMissingStylesheet);
-	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bMissingStylesheet ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDOK)->EnableWindow(bEnableOK);
+	GetDlgItem(IDC_STYLESHEETNOTFOUND)->ShowWindow(bEnableOK ? SW_HIDE : SW_SHOW);
 }
 
 CString CTDLTransformDialog::GetStylesheet() const 
@@ -155,5 +141,4 @@ COleDateTime CTDLTransformDialog::GetDate() const
 void CTDLTransformDialog::OnConfigureStylesheet() 
 {
 	// TODO: Add your control notification handler code here
-	
 }

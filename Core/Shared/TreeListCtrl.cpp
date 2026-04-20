@@ -9,8 +9,9 @@
 #include "graphicsMisc.h"
 #include "Misc.h"
 #include "autoflag.h"
-#include "osversion.h"
 #include "dialoghelper.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -34,6 +35,8 @@ const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 
+const int TIMER_BOUNDINGSEL		= 100;
+
 //////////////////////////////////////////////////////////////////////
 
 #ifndef GET_WHEEL_DELTA_WPARAM
@@ -42,10 +45,21 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 
 //////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
+TLCITEMMOVE::TLCITEMMOVE(const CTreeSelectionHelper& tsh)
+	:
+	htiDestParent(NULL),
+	htiDestAfterSibling(NULL),
+	bCopy(FALSE)
+{
+	tsh.CopySelection(selection, TRUE);
+}
 
 //////////////////////////////////////////////////////////////////////
 // CTreeListTreeCtrl
+
+IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
+
+//////////////////////////////////////////////////////////////////////
 
 CTreeListTreeCtrl::CTreeListTreeCtrl(const CEnHeaderCtrl& header)
 	:
@@ -58,8 +72,6 @@ CTreeListTreeCtrl::~CTreeListTreeCtrl()
 {
 }
 
-//////////////////////////////////////////////////////////////////////
-
 BEGIN_MESSAGE_MAP(CTreeListTreeCtrl, CTreeCtrl)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
@@ -68,7 +80,7 @@ BEGIN_MESSAGE_MAP(CTreeListTreeCtrl, CTreeCtrl)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
-//////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------
 
 HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelImage,
 										LPARAM lParam, HTREEITEM htiParent, HTREEITEM htiAfter)
@@ -316,18 +328,20 @@ void CTreeListTreeCtrl::OnDestroy()
 
 const int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
-//////////////////////////////////////////////////////////////////////
+// -----------------------------------------------------------------
 
 CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelWidth, int nMinColWidth)
 	:
-	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
+	CTreeListSyncer(TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
 	m_crAltLine(CLR_NONE),
 	m_crGridLine(CLR_NONE),
 	m_crBkgnd(GetSysColor(COLOR_3DFACE)),
 	m_bMovingItem(FALSE),
+	m_bBoundSelecting(FALSE),
+	m_bReadOnly(FALSE),
 	m_nMinTreeTitleColumnWidth(-1),
-	m_tshDragDrop(m_tree),
-	m_treeDragDrop(m_tshDragDrop, m_tree, pAltRenderer),
+	m_tsh(m_tree, m_list),
+	m_treeDragDrop(m_tsh, m_tree, pAltRenderer),
 	m_tree(m_treeHeader),
 
 	MIN_LABEL_WIDTH(GraphicsMisc::ScaleByDPIFactor(nMinLabelWidth)),
@@ -343,7 +357,6 @@ BEGIN_MESSAGE_MAP(CTreeListCtrl, CWnd)
 	ON_NOTIFY(HDN_ENDDRAG, IDC_TREELISTTREEHEADER, OnTreeHeaderEndDrag)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_TREELISTTREEHEADER, OnTreeHeaderDblClickDivider)
 	ON_NOTIFY(NM_RCLICK, IDC_TREELISTTREEHEADER, OnTreeHeaderRightClick)
-	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TREELISTTREE, OnTreeItemExpanded)
 
 	ON_REGISTERED_MESSAGE(WM_DD_DRAGENTER, OnTreeDragEnter)
 	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreePreDragMove)
@@ -356,6 +369,7 @@ BEGIN_MESSAGE_MAP(CTreeListCtrl, CWnd)
 	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
+// -----------------------------------------------------------------
 
 BOOL CTreeListCtrl::Create(CWnd* pParentWnd, const CRect& rect, UINT nID, BOOL bVisible)
 {
@@ -423,6 +437,14 @@ int CTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CTreeListCtrl::SetReadOnly(BOOL bReadOnly)
+{
+	m_bReadOnly = bReadOnly;
+
+	TSH().SetReadOnly(bReadOnly);
+	m_treeDragDrop.EnableDragDrop(!bReadOnly);
+}
+
 void CTreeListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 {
 	CRect rSplitter;
@@ -482,12 +504,17 @@ void CTreeListCtrl::InitItemHeights()
 
 HTREEITEM CTreeListCtrl::GetSelectedItem() const
 {
-	return GetTreeSelItem();
+	return TSH().GetFirstItem();
 }
 
 DWORD CTreeListCtrl::GetSelectedItemData() const
 {
-	return GetItemData(GetSelectedItem());
+	return GetItemData(TSH().GetFirstItem());
+}
+
+int CTreeListCtrl::GetSelectedItemData(CDWordArray& aItemData) const
+{
+	return TSH().GetItemData(aItemData);
 }
 
 BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
@@ -496,23 +523,25 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 		return FALSE;
 
 	BOOL bWasVisible = IsTreeItemVisible(m_tree, hti);
-	BOOL bWasSelected = TCH().IsSelectedItem(hti);
 
 	// Don't allow any horizontal movement because this 
 	// will break the way we have implemented click-handling
+	BOOL bSelChange = FALSE;
 	{
 		CHoldHScroll hs(m_tree);
 		CTLSHoldResync hr2(*this); 
 
-		SelectTreeItem(hti, FALSE);
+		TSH().SelectSingleItem(hti, bSelChange);
 	}
 
 	// Handle notifications ignored by CTLSHoldResync
 	if (!bWasVisible)
 		ExpandList();
 
-	if (!bWasSelected)
+	if (bSelChange)
 	{
+		SyncColumnSelectionToTasks();
+
 		NMTREEVIEW nmtv = { *this, GetDlgCtrlID(), TVN_SELCHANGED, 0 };
 
 		nmtv.itemNew.hItem = hti;
@@ -531,6 +560,40 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 	if ((GetCurrentMessage()->message == WM_LBUTTONDOWN) && !TCH().IsItemVisible(hti))
 		m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
 	
+	return TRUE;
+}
+
+BOOL CTreeListCtrl::SelectItems(const CHTIList& htItems)
+{
+	switch (htItems.GetCount())
+	{
+	case 0:
+		DeselectAll();
+		return TRUE;
+
+	case 1:
+		return SelectItem(htItems.GetHead());
+	}
+
+	// Scope CTLSHoldResync to end before SyncColumnSelectionToTasks
+	{
+		CHoldHScroll hs(m_tree);
+		CTLSHoldResync hr2(*this);
+
+		TSH().RemoveAll(FALSE, FALSE);
+		TSH().SetItems(htItems, TSHS_SELECT);
+		TSH().FixupTreeSelection();
+
+		if (!TSH().AllParentItemsAreExpanded(TRUE))
+		{
+			CHoldRedraw hr(*this);
+
+			TSH().ExpandParentItems(TRUE);
+			ExpandList();
+		}
+	}
+	SyncColumnSelectionToTasks();
+
 	return TRUE;
 }
 
@@ -600,12 +663,6 @@ BOOL CTreeListCtrl::IsListItemLineOdd(int nItem) const
 	return ((nItem % 2) == 1);
 }
 
-void CTreeListCtrl::SetFocus()
-{
-	if (!HasFocus())
-		m_tree.SetFocus();
-}
-
 void CTreeListCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
@@ -651,26 +708,58 @@ void CTreeListCtrl::ExpandAll(BOOL bExpand)
 	// currently selected item's top-level parent and
 	// move the selection there else the branch
 	// containing the selected item never closes
+	int nSelCount = GetSelectionCount();
+
 	if (!bExpand)
 	{
 		HTREEITEM htiSel = GetSelectedItem();
 		HTREEITEM htiParent = TCH().GetTopLevelItem(htiSel);
 
 		if (htiParent != htiSel)
-			SelectItem(htiParent);
+			m_tree.SelectItem(htiParent);
 	}
 
 	ExpandItem(NULL, bExpand, TRUE);
+
+	if (GetSelectionCount() != nSelCount)
+	{
+		ASSERT(!bExpand);
+		NotifyParentSelectionChange();
+	}
 }
 
-BOOL CTreeListCtrl::CanExpandAll() const
+void CTreeListCtrl::ExpandSelection(BOOL bExpand, BOOL bAndChildren)
 {
-	return TCH().IsAnyItemCollapsed();
+	int nSelCount = GetSelectionCount();
+
+	if (!bExpand || bAndChildren)
+		TSH().RemoveChildDuplicates();
+
+	POSITION pos = TSH().GetFirstItemPos();
+
+	while (pos)
+		ExpandItem(TSH().GetNextItem(pos), bExpand, bAndChildren);
+
+	if (GetSelectionCount() != nSelCount)
+		NotifyParentSelectionChange();
 }
 
-BOOL CTreeListCtrl::CanCollapseAll() const
+BOOL CTreeListCtrl::CanExpandAll(BOOL bExpand) const
 {
+	if (bExpand)
+		return TCH().IsAnyItemCollapsed();
+
+	// else
 	return TCH().IsAnyItemExpanded();
+}
+
+BOOL CTreeListCtrl::CanExpandSelection(BOOL bExpand) const
+{
+	if (bExpand)
+		return TSH().IsAnyItemCollapsed();
+
+	// else
+	return TSH().IsAnyItemExpanded();
 }
 
 void CTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
@@ -679,11 +768,10 @@ void CTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 	if (hti && !CanExpandItem(hti, bExpand))
 		return;
 
+	// Scope 'holds' to end before EnsureVisible()
 	{
 		CHoldRedraw hr(*this);
-		CAutoFlag af(m_bTreeExpanding, TRUE);
-	
-		EnableResync(FALSE);
+		CTLSHoldResync hr2(*this);
 
 		TCH().ExpandItem(hti, bExpand, bAndChildren);
 
@@ -704,10 +792,8 @@ void CTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 			CollapseList(hti);
 		}
 	
-		m_tree.EnsureVisible(hti);
-	
-		EnableResync(TRUE, m_tree);
 	}
+	m_tree.EnsureVisible(hti);
 
 	UpdateColumnWidths(bExpand ? UTWA_EXPAND : UTWA_COLLAPSE);
 }
@@ -744,7 +830,7 @@ GM_ITEMSTATE CTreeListCtrl::GetItemState(HTREEITEM hti) const
 		{
 			return GMIS_DROPHILITED;
 		}
-		else if (IsTreeItemSelected(m_tree, hti))
+		else if (TSH().HasItem(hti))
 		{
 			if (HasFocus())
 				return GMIS_SELECTED;
@@ -806,26 +892,14 @@ void CTreeListCtrl::OnTreeHeaderRightClick(NMHDR* /*pNMHDR*/, LRESULT* /*pResult
 	GetParent()->SendMessage(WM_CONTEXTMENU, (WPARAM)GetSafeHwnd(), (LPARAM)::GetMessagePos());
 }
 
-void CTreeListCtrl::OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* /*pResult*/)
-{
-	LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
-
-	if (!m_bMovingItem)
-		UpdateColumnWidths((pNMTV->action == TVE_EXPAND) ? UTWA_EXPAND : UTWA_COLLAPSE);
-}
-
 LRESULT CTreeListCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM lp)
 {
-	// Make sure the selection helper is synchronised
-	// with the tree's current selection
-	m_tshDragDrop.ClearHistory();
-	m_tshDragDrop.RemoveAll(TRUE, FALSE);
-	m_tshDragDrop.AddItem(m_tree.GetSelectedItem(), FALSE);
-
 	// Notify derived class
 	// Note: Right-click dragging not supported by default
 	const DRAGDROPINFO* pDDI = (DRAGDROPINFO*)lp;
-	TLCITEMMOVE move = { GetSelectedItem(), 0 };
+
+	TLCITEMMOVE move(TSH());
+	move.bCopy = Misc::ModKeysArePressed(MKS_CTRL);
 
 	if (!OnDragBeginItem(move, pDDI->bLeftDrag))
 		return FALSE;
@@ -844,7 +918,8 @@ LRESULT CTreeListCtrl::OnTreeDragOver(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	if (nCursor != DD_DROPEFFECT_NONE)
 	{
-		TLCITEMMOVE move = { GetSelectedItem(), 0 };
+		TLCITEMMOVE move(TSH());
+		move.bCopy = Misc::ModKeysArePressed(MKS_CTRL);
 
 		if (m_treeDragDrop.GetDropTarget(move.htiDestParent, move.htiDestAfterSibling, FALSE))
 		{
@@ -860,8 +935,9 @@ LRESULT CTreeListCtrl::OnTreeDragDrop(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	if (m_treeDragDrop.ProcessMessage(GetCurrentMessage()))
 	{
-		TLCITEMMOVE move = { GetSelectedItem(), 0 };
-		
+		TLCITEMMOVE move(TSH());
+		move.bCopy = Misc::ModKeysArePressed(MKS_CTRL);
+
 		if (m_treeDragDrop.GetDropTarget(move.htiDestParent, move.htiDestAfterSibling, FALSE))
 		{
 			// Notify derived class
@@ -881,9 +957,20 @@ LRESULT CTreeListCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
 	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
+void CTreeListCtrl::SyncColumnSelectionToTasks()
+{
+	ASSERT(CanResync());
+
+	if (CanResync())
+	{
+		CTLSResyncing tr(*this);
+		TSH().SyncListSelection();
+	}
+}
+
 void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
-	if (m_bMovingItem)
+	if (m_bMovingItem || m_bBoundSelecting)
 		return;
 	
 	// Ignore setting selection to 'NULL' unless there are no tasks at all
@@ -891,12 +978,102 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	if ((pNMTV->itemNew.hItem == NULL) && (m_tree.GetCount() != 0))
 		return;
 	
-	// we're NOT interested in keyboard changes
-	// because keyboard gets handled in WM_KEYUP
-	if (pNMTV->action == TVC_BYKEYBOARD)
-		return;
+	// snapshot current selection to test for changes
+	CHTIList lstPrevSel;
+	TSH().CopySelection(lstPrevSel);
 
-	GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
+	// Update selection
+	BOOL bSelChange = FALSE;
+	TSH().OnTreeNotifySelectionChange(pNMTV, bSelChange);
+
+	if (bSelChange)
+	{
+		SyncColumnSelectionToTasks();
+
+		HTREEITEM hti = pNMTV->itemNew.hItem;
+
+		if (hti && !TCH().IsItemVisible(hti, FALSE))
+		{
+			CLockUpdates lr(m_tree);
+			TCH().EnsureItemVisible(hti, FALSE);
+		}
+
+		// notify parent of selection change
+		// unless up/down cursor key still pressed
+		if (TSH().Matches(lstPrevSel) || Misc::IsCursorKeyPressed(MKC_UPDOWN))
+			return;
+
+		NotifyParentSelectionChange();
+	}
+}
+
+void CTreeListCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
+{
+	BOOL bSelChange = FALSE;
+	TSH().OnListNotifyParentSelChange(pNMLV, bSelChange);
+
+	if (bSelChange)
+	{
+		UpdateAll();
+
+		// notify parent of selection change
+		CPoint pt(GetMessagePos());
+		m_list.ScreenToClient(&pt);
+
+		int nHit = m_list.HitTest(pt);
+
+		if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
+		{
+			// vertical scrolling
+			// SHOULD NO LONGER GET HERE
+			ASSERT(0);
+			return;
+		}
+
+		BOOL bLBtnDown = Misc::IsKeyPressed(VK_LBUTTON);
+		BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
+
+		if (!m_bBoundSelecting)
+		{
+			if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
+			{
+				// In the middle of a simple click
+				// SHOULD NO LONGER GET HERE
+				ASSERT(0);
+				return;
+			}
+		}
+		else if ((nHit == -1) || (m_list.GetSelectedCount() > 2))
+		{
+			// bulk selecting
+			return;
+		}
+
+		NotifyParentSelectionChange();
+	}
+}
+
+void CTreeListCtrl::NotifyParentSelectionChange()
+{
+	GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID());
+}
+
+void CTreeListCtrl::DeselectAll()
+{
+	if (!TSH().IsEmpty())
+	{
+		CHoldRedraw hr(*this);
+		TSH().DeselectAll();
+	}
+}
+
+void CTreeListCtrl::SelectAll()
+{
+	int nSelCount = TSH().GetCount();
+	TSH().AddAll();
+
+	if (TSH().GetCount() != nSelCount)
+		ProcessSelectionChange(TRUE);
 }
 
 LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -910,11 +1087,67 @@ LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			switch (pNMHDR->code)
 			{
 			case TVN_BEGINLABELEDIT:
-				if (m_treeDragDrop.IsDragging())
-					return 1L; // cancel
+				{
+					if (m_bReadOnly)
+						return 1L; // cancel
+
+					if (m_bMovingItem)
+						return 1L; // cancel
+
+					if (m_treeDragDrop.IsDragging())
+						return 1L; // cancel
+
+					if (TSH().GetCount() != 1)
+						return 1L; // cancel
+
+					// else
+					CPoint point(GetMessagePos());
+					int nCol = -1;
+
+					HTREEITEM hti = TreeHitTestItem(point, TRUE, nCol);
+
+					if (!hti || (hti != TSH().GetFirstItem()) || (nCol != 0))
+					{
+						return 1L; // cancel
+					}
+				}
+				break;
+
+			case TVN_KEYDOWN:
+				TSH().OnTreeNotifyKeyDown((NMTVKEYDOWN*)pNMHDR);
+				break;
+
+			case TVN_ITEMEXPANDING:
+				{
+					BOOL bSelChange = FALSE;
+					TSH().OnTreeNotifyItemExpanding((NMTREEVIEW*)pNMHDR, bSelChange);
+
+					ProcessSelectionChange(bSelChange);
+				}
+				break;
+
+			case TVN_ITEMEXPANDED:
+				if (!m_bMovingItem)
+				{
+					LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
+					UpdateColumnWidths((pNMTV->action == TVE_EXPAND) ? UTWA_EXPAND : UTWA_COLLAPSE);
+				}
 				break;
 			}
 		}
+		break;
+
+	case WM_TIMER:
+		if ((wp == TIMER_BOUNDINGSEL) &&
+			m_bBoundSelecting && 
+			!Misc::IsKeyPressed(VK_LBUTTON))
+		{
+			m_bBoundSelecting = FALSE;
+			KillTimer(TIMER_BOUNDINGSEL);
+
+			NotifyParentSelectionChange();
+		}
+		break;
 	}
 
 	return CTreeListSyncer::WindowProc(hRealWnd, msg, wp, lp);
@@ -986,42 +1219,54 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		case WM_LBUTTONDBLCLK:
 			if (OnListLButtonDblClk(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // we handled it
 			}
 			break;
 
 		case WM_LBUTTONDOWN:
 			if (OnListLButtonDown(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // we handled it
 			}
 			break;
 
 		case WM_LBUTTONUP:
 			if (OnListLButtonUp(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // we handled it
 			}
 			break;
 
 		case WM_MOUSEMOVE:
 			if (OnListMouseMove(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // we handled it
 			}
 			break;
+
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+			{
+				// In the rare event that the list has gained the 
+				// focus let the tree process these messages 
+				ScWindowProc(m_tree, msg, wp, lp);
+
+				// And move the focus to the tree once we've 
+				// received WM_KEYUP
+				if (msg == WM_KEYUP)
+					m_tree.SetFocus();
+			}
+			return 0L; // we handled it
 
 		case WM_RBUTTONDOWN:
 			{
-				int nHit = ListHitTestItem(lp, FALSE);
+				BOOL bSelChange = FALSE;
+				TSH().OnListRButtonDown(wp, lp, bSelChange);
 
-				if (nHit != -1)
-					SelectItem(GetTreeItem(nHit));
+				ProcessSelectionChange(bSelChange);
+
+				// Let default handling produce context menu
 			}
-			break;
-
-		case WM_SETFOCUS:
-			m_tree.SetFocus();
 			break;
 		}
 	}
@@ -1041,9 +1286,7 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 					InvalidateListItem(htiOld);
 					InvalidateListItem(htiNew);
-
-					m_tree.UpdateWindow();
-					m_list.UpdateWindow();
+					UpdateAll();
 
 					return lr;
 				}
@@ -1052,38 +1295,87 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 		case WM_RBUTTONDOWN:
 			{
-				HTREEITEM hti = TreeHitTestItem(lp, FALSE);
+				BOOL bSelChange = FALSE;
+				TSH().OnTreeRButtonDown(wp, lp, bSelChange);
 
-				if (hti)
-					SelectItem(hti);
+				ProcessSelectionChange(bSelChange);
+
+				// Let default handling produce context menu
 			}
 			break;
 
 		case WM_LBUTTONDOWN:
 			if (OnTreeLButtonDown(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // we handled it
 			}
 			break;
 
 		case WM_LBUTTONUP:
 			if (OnTreeLButtonUp(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // we handled it
 			}
 			break;
 
 		case WM_LBUTTONDBLCLK:
 			if (OnTreeLButtonDblClk(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // we handled it
 			}
 			break;
 
 		case WM_MOUSEMOVE:
 			if (OnTreeMouseMove(wp, lp))
 			{
-				return FALSE; // eat
+				return 0L; // we handled it
+			}
+			break;
+
+		case WM_KEYDOWN:
+			{
+				BOOL bSelChange = FALSE;
+				TSH().OnTreeKeyDown(wp, lp, bSelChange);
+
+				if (ProcessSelectionChange(bSelChange))
+				{
+					return 0L; // we handled it
+				}
+				else if (Misc::ModKeysArePressed(0))
+				{
+					// Handle expanding/contracting tasks
+					switch (wp)
+					{
+					case VK_MULTIPLY:
+					case VK_RIGHT:
+						if (TSH().IsAnyItemCollapsed())
+						{
+							ExpandSelection(TRUE, (wp == VK_MULTIPLY));
+						}
+						return 0L; // we handled it
+
+					case VK_SUBTRACT:
+					case VK_LEFT:
+						if (TSH().IsAnyItemExpanded())
+						{
+							bSelChange = TSH().RemoveChildDuplicates();
+							ExpandSelection(FALSE);
+
+							ProcessSelectionChange(bSelChange);
+						}
+						return 0L; // we handled it
+					}
+				}
+			}
+			break;
+
+		case WM_KEYUP:
+			{
+				BOOL bSelChange = FALSE;
+				TSH().OnTreeKeyUp(wp, lp, bSelChange);
+
+				if (ProcessSelectionChange(bSelChange))
+					return 0L; // we handled it
 			}
 			break;
 
@@ -1100,10 +1392,10 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 					WORD wKeys = LOWORD(wp);
 
 					if ((zDelta == 0) || (wKeys != 0))
-						return TRUE; // eat
+						return TRUE; // we handled it
 
 					if (!CanScroll(m_tree, SB_HORZ, (zDelta > 0)))
-						return TRUE; // eat
+						return TRUE; // we handled it
 
 					CHoldRedraw hr(hRealWnd, NCR_PAINT | NCR_UPDATE);
 
@@ -1143,43 +1435,21 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			}
 			break;
 		}
+
 	}
-
-	// else tree or list
-	switch (msg)
-	{
-	case WM_KEYUP:
-		{
-			LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-
-			switch (wp)
-			{
-			case VK_UP:
-			case VK_DOWN:
-			case VK_PRIOR:
-			case VK_NEXT:
-				GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, GetDlgCtrlID(), (LPARAM)GetSelectedItem());
-				break;
-
-			default:
-				{
-					NMTVKEYDOWN tvkd = { 0 };
-
-					tvkd.hdr.hwndFrom = hRealWnd;
-					tvkd.hdr.idFrom = ::GetDlgCtrlID(hRealWnd);
-					tvkd.hdr.code = TVN_KEYUP;
-					tvkd.wVKey = LOWORD(wp);
-					tvkd.flags = lp;
-
-					lr = CWnd::SendMessage(WM_NOTIFY, tvkd.hdr.idFrom, (LPARAM)&tvkd);
-				}
-				break;
-			}
-			return lr;
-		}
-	}
-	
+		
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+BOOL CTreeListCtrl::ProcessSelectionChange(BOOL bSelChange)
+{
+	if (bSelChange)
+	{
+		SyncColumnSelectionToTasks();
+		NotifyParentSelectionChange();
+	}
+
+	return bSelChange;
 }
 
 BOOL CTreeListCtrl::OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
@@ -1226,38 +1496,30 @@ BOOL CTreeListCtrl::OnPrimaryHeaderBeginTracking(NMHEADER* pHDN)
 
 BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
-	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
-	
-	// Only process if NOT expanding an item
-	if (!(nFlags & TVHT_ONITEMBUTTON) && hti && (hti != GetTreeSelItem(m_tree)))
-	{
-		CLockUpdates hr(m_tree);
+	UINT nHitFlags = 0;
+	HTREEITEM htiHit = m_tree.HitTest(point, &nHitFlags);
 
-		m_tree.SetFocus();
-		SelectItem(hti);
+	BOOL bHitCheck = (nHitFlags & TVHT_ONITEMSTATEICON);
+	BOOL bCtrlOrShift = (nFlags & (MK_CONTROL | MK_SHIFT));
+
+	BOOL bSelChange = FALSE;
+
+	if (htiHit && (bCtrlOrShift || !bHitCheck))
+		TSH().OnTreeLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
+
+	ProcessSelectionChange(bSelChange);
+
+	// Handle checkbox clicking
+	if (!bCtrlOrShift && bHitCheck)
+	{
+		// Derived class gets first refusal
+		if (!OnTreeCheckChange(htiHit))
+			GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, GetDlgCtrlID(), (LPARAM)htiHit);
 
 		return TRUE;
 	}
 
-	// not handled
-	return FALSE;
-}
-
-BOOL CTreeListCtrl::OnTreeLButtonUp(UINT nFlags, CPoint point)
-{
-	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
-
-	if (hti && (nFlags & TVHT_ONITEMSTATEICON))
-	{
-		// Derived class gets first refusal
-		if (!OnTreeCheckChange(hti))
-			GetParent()->SendMessage(WM_TLC_ITEMCHECKCHANGE, GetDlgCtrlID(), (LPARAM)hti);
-		
-		return TRUE; // eat
-	}
-
-	// not handled
-	return FALSE;
+	return bSelChange;
 }
 
 BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
@@ -1297,15 +1559,45 @@ BOOL CTreeListCtrl::OnTreeLButtonDblClk(UINT nFlags, CPoint point)
 	return FALSE;
 }
 
-BOOL CTreeListCtrl::OnListLButtonDown(UINT /*nFlags*/, CPoint point)
+BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 {
-	m_list.ClientToScreen(&point);
+	m_bBoundSelecting = FALSE;
 
-	// don't let the selection to be set to -1
-	if (HitTestItem(point, FALSE) == NULL)
+	BOOL bSelChange = FALSE;
+	TSH().OnListLButtonDown(nFlags, MAKELPARAM(point.x, point.y), bSelChange);
+
+	if (ProcessSelectionChange(bSelChange))
+		return TRUE; // we handled it
+
+	// Check for bounds selection
+	int nHit = m_list.HitTest(point);
+	ASSERT((nHit == -1) || TSH().HasItem(GetTreeItem(nHit)));
+
+	if (nHit == -1)
 	{
-		SetFocus();
-		return TRUE; // eat
+		m_list.ClientToScreen(&point);
+
+		if (::DragDetect(m_list, point))
+		{
+			m_bBoundSelecting = TRUE;
+
+			if (0 == (nFlags & MK_CONTROL))
+				DeselectAll();
+
+			// I've found no reliable to way to detect the end of a
+			// bounding-box selection especially if the mouse 
+			// cursor ends up outside the window so we use a timer
+			SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
+		}
+		else
+		{ 
+			if (!HasFocus())
+				m_list.SetFocus();
+
+			// prevent deselection
+			TRACE(_T("Ate Listview ButtonDown\n"));
+			return TRUE;
+		}
 	}
 
 	// not handled
@@ -2329,11 +2621,14 @@ BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg)
 
 BOOL CTreeListCtrl::CanMoveItem(const TLCITEMMOVE& move) const
 {
+	if (m_bReadOnly)
+		return FALSE;
+
 	if (move.bCopy)
 		return FALSE;
 	
-	if ((move.htiSel != NULL) && !GetItemData(move.htiSel))
-		return FALSE;
+// 	if ((move.htiSel != NULL) && !GetItemData(move.htiSel))
+// 		return FALSE;
 
 	if ((move.htiDestParent != NULL) && (move.htiDestParent != TVI_ROOT) && !GetItemData(move.htiDestParent))
 		return FALSE;
@@ -2349,22 +2644,35 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 	if (!CanMoveItem(move))
 		return FALSE;
 
-	HTREEITEM htiSel = ((move.htiSel == NULL) ? GetSelectedItem() : move.htiSel);
-	
+	HTREEITEM htiSel = move.selection.GetHead();
+
 	BOOL bSameParent = (move.htiDestParent == m_tree.GetParentItem(htiSel));
 	int nPrevPos = TCH().GetItemTop(htiSel);
 
-	HTREEITEM htiNew = NULL;
-	
+	CHTIList selectionNew;
+	HTREEITEM htiNew = move.htiDestAfterSibling;
+
 	{
 		CAutoFlag af(m_bMovingItem, TRUE);
 		CLockUpdates lu(*this);
 		CHoldRedraw hr(*this);
 
-		htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, move.htiDestAfterSibling);
+		DeselectAll();
+		POSITION pos = move.selection.GetHeadPosition();
 
-		if (htiNew)
-			SelectItem(htiNew);
+		while (pos)
+		{
+			htiSel = move.selection.GetNext(pos);
+			htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, htiNew);
+
+			selectionNew.AddTail(htiNew);
+		}
+
+		if (selectionNew.GetCount())
+		{
+			TSH().SetItems(selectionNew, TSHS_SELECT);
+			TSH().FixupTreeSelection();
+		}
 	}
 	
 	if (htiNew && bSameParent)

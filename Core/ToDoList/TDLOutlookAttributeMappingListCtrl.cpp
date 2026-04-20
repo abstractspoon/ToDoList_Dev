@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "TDLImportOutlookObjectSetupListCtrl.h"
+#include "TDLOutlookAttributeMappingListCtrl.h"
 
 #include "..\Shared\AutoFlag.h"
 
@@ -18,29 +18,29 @@ static char THIS_FILE[] = __FILE__;
 enum { ATTRIB_ID = 5000 };
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportOutlookObjectSetupListCtrl
+// CTDLOutlookAttributeMappingListCtrl
 
-CTDLImportOutlookObjectSetupListCtrl::CTDLImportOutlookObjectSetupListCtrl()
+CTDLOutlookAttributeMappingListCtrl::CTDLOutlookAttributeMappingListCtrl()
  : CTDLImportExportAttributeMappingListCtrl(TRUE)
 {
 }
 
-CTDLImportOutlookObjectSetupListCtrl::~CTDLImportOutlookObjectSetupListCtrl()
+CTDLOutlookAttributeMappingListCtrl::~CTDLOutlookAttributeMappingListCtrl()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLImportOutlookObjectSetupListCtrl, CTDLImportExportAttributeMappingListCtrl)
-	//{{AFX_MSG_MAP(CTDLImportOutlookObjectSetupListCtrl)
+BEGIN_MESSAGE_MAP(CTDLOutlookAttributeMappingListCtrl, CTDLImportExportAttributeMappingListCtrl)
+	//{{AFX_MSG_MAP(CTDLOutlookAttributeMappingListCtrl)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
 	ON_CBN_SELENDOK(ATTRIB_ID, OnAttribEditOK)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLImportOutlookObjectSetupListCtrl message handlers
+// CTDLOutlookAttributeMappingListCtrl message handlers
 
-void CTDLImportOutlookObjectSetupListCtrl::OnAttribEditOK()
+void CTDLOutlookAttributeMappingListCtrl::OnAttribEditOK()
 {
 	// Turn on one-to-one mapping for everything except comments and title
 	// ie. Multiple Outlook fields can be handled by the comments/title field

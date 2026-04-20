@@ -17,10 +17,10 @@
 #include "..\shared\timehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\themed.h"
-#include "..\shared\osversion.h"
 
 #include "..\Interfaces\Preferences.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\colordef.h"
 
 #include <math.h>
@@ -152,11 +152,6 @@ void CTDLTaskListCtrl::SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn)
 		m_lcTasks.ModifyStyle(LVS_REPORT, LVS_SMALLICON);
 		m_lcTasks.ModifyStyle(LVS_SMALLICON, LVS_REPORT);
 	}
-}
-
-BOOL CTDLTaskListCtrl::IsListItemSelected(HWND hwnd, int nItem) const
-{
-	return (ListView_GetItemState(hwnd, nItem, LVIS_SELECTED) & LVIS_SELECTED);
 }
 
 void CTDLTaskListCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort)
@@ -345,11 +340,13 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 								
 		case CDDS_ITEMPREPAINT:
 			{
-				static BOOL bFillRow = !OsIsLinux();
+				// Don't fill the row on XP because it will overwrite
+				// the icon and check-box when hovering with the mouse
+				static BOOL bFillRow = (!OsIsXPOrLinux() || OsIsLinux());
 				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, pLVCD->clrText, pLVCD->clrTextBk, bFillRow);
-
+				
 				if (bFillRow)
- 					ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
+					ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
 			}
 			break;
 
@@ -1242,7 +1239,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				{
 					// if the item is not selected we must first deal
 					// with that before processing the click
-					BOOL bHitSelected = IsListItemSelected(m_lcTasks, nHit);
+					BOOL bHitSelected = IsItemSelected(nHit);
 					BOOL bSelChange = FALSE;
 					
 					if (!bHitSelected)
@@ -1592,7 +1589,7 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 		
 		if (nItem != -1)
 		{
-			ASSERT(IsListItemSelected(m_lcTasks, nItem)); 
+			ASSERT(IsItemSelected(nItem));
 
 			DWORD dwTaskID = GetTaskID(nItem);
 			TDC_COLUMN nColID = TDCC_NONE;
@@ -1808,7 +1805,7 @@ int CTDLTaskListCtrl::GetSelectedItem() const
 
 BOOL CTDLTaskListCtrl::IsItemSelected(int nItem) const
 {
-	return CTreeListSyncer::IsListItemSelected(m_lcTasks, nItem);
+	return ListItemHasState(m_lcTasks, nItem, LVIS_SELECTED);
 }
 
 BOOL CTDLTaskListCtrl::SelectItem(int nItem)

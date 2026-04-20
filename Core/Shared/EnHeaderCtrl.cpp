@@ -3,7 +3,8 @@
 #include "stdafx.h"
 #include "EnHeaderCtrl.h"
 #include "themed.h"
-#include "osversion.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

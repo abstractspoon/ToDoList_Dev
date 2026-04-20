@@ -20,22 +20,19 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSendTasksDlg dialog
 
-
 CTDLSendTasksDlg::CTDLSendTasksDlg(const CTDCImportExportMgr& mgr, 
 								   BOOL bSelectedTasks, 
 								   BOOL bEnableSubtaskSelection,
 								   const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 								   CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(CTDLSendTasksDlg::IDD, _T("SendTasks"), pParent), 
+	CTDLDialog(IDD_SENDTASKS_DIALOG, _T("SendTasks"), pParent),
 	m_mgrImportExport(mgr),
 	m_cbFormat(mgr, FALSE, TRUE),
-	m_dlgTaskSel(aAttribDefs, m_sPrefsKey, bEnableSubtaskSelection),
+	m_pageTaskSel(aAttribDefs, m_sPrefsKey, bEnableSubtaskSelection),
 	m_nHtmlStyle(TDLPDS_WRAP)
+	// Note: No bold text for the tab control
 {
-	//{{AFX_DATA_INIT(CTDLSendTasksDlg)
-	//}}AFX_DATA_INIT
-
 	CPreferences prefs;
 
 	m_nSendTasksAsOption = prefs.GetProfileInt(m_sPrefsKey, _T("SendTasksAs"), TDSA_TASKLIST);
@@ -55,19 +52,19 @@ CTDLSendTasksDlg::CTDLSendTasksDlg(const CTDCImportExportMgr& mgr,
 
 	// bSelected overrides saved state
 	if (bSelectedTasks)
-		m_dlgTaskSel.SetWantWhatTasks(TSDT_SELECTED);
-}
+		m_pageTaskSel.SetWantWhatTasks(TSDT_SELECTED);
 
+	m_ppHost.AddPage(&m_pageTaskSel, CEnString(IDS_EXPORTDLG_TASKSEL));
+}
 
 void CTDLSendTasksDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLSendTasksDlg)
+
 	DDX_CBIndex(pDX, IDC_SELTASKSSENDAS, m_nSendTasksAsOption);
 	DDX_Control(pDX, IDC_FORMATS, m_cbFormat);
 	DDX_Control(pDX, IDC_HTMLOPTIONS, m_cbHtmlOptions);
 	DDX_Control(pDX, IDC_HTMLOPTIONS_ICON, m_stHtmlOptionIcon);
-	//}}AFX_DATA_MAP
 
 	m_cbFormat.DDX(pDX, m_sFormatTypeID);
 	m_cbHtmlOptions.DDX(pDX, m_nHtmlStyle);
@@ -76,31 +73,27 @@ void CTDLSendTasksDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CTDLSendTasksDlg, CTDLDialog)
-	//{{AFX_MSG_MAP(CTDLSendTasksDlg)
-	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_FORMATS, OnSelChangeFormat)
 	ON_CBN_SELCHANGE(IDC_HTMLOPTIONS, OnSelChangeHtmlStyle)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLSendTasksDlg message handlers
 
 BOOL CTDLSendTasksDlg::OnInitDialog() 
 {
 	CTDLDialog::OnInitDialog();
 	
-    VERIFY(m_dlgTaskSel.Create(IDC_FRAME, this));
+	VERIFY(m_ppHost.Create(IDC_PAGEHOST, this));
 
 	UpdateHtmlOptionsVisibility();
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CTDLSendTasksDlg::OnOK()
 {
 	CTDLDialog::OnOK();
-	m_dlgTaskSel.OnOK();
+	m_ppHost.OnOK();
 
 	CPreferences prefs;
 	prefs.WriteProfileInt(m_sPrefsKey, _T("SendTasksAs"), m_nSendTasksAsOption);

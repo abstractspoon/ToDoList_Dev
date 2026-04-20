@@ -30,13 +30,13 @@
 #include "..\shared\autoflag.h"
 #include "..\shared\localizer.h"
 #include "..\shared\fileregister.h"
-#include "..\shared\osversion.h"
 #include "..\shared\rtlInputmgr.h"
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
 #include "..\3rdparty\base64coder.h"
@@ -786,12 +786,12 @@ void CToDoListApp::DoHelp(UINT nHelpID)
 			CASE(IDD_FINDTASKS_DIALOG)            
 			CASE(IDD_GOTOTASK_DIALOG)
 			CASE(IDD_IMPORT_DIALOG)               
-			CASE(IDD_IMPORT_OUTLOOK_DIALOG)
 			CASE(IDD_KEYBOARDSHORTCUTDISPLAYDIALOG)
 			CASE(IDD_LANGUAGE_DIALOG)             
 			CASE(IDD_MULTISORT_DIALOG)            
 			CASE(IDD_OFFSETDATES_DIALOG)          
-			CASE(IDD_OUTLOOKMSGIMPORT_DIALOG)     
+			CASE(IDD_OUTLOOKATTRIBMAPPING_DIALOG)     
+			CASE(IDD_OUTLOOKIMPORTITEMS_DIALOG)
 			CASE(IDD_PREFERENCES)                 
 			CASE(IDD_PREFEXPORT_PAGE)             
 			CASE(IDD_PREFFILE2_PAGE)              

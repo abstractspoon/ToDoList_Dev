@@ -5,6 +5,10 @@
 #include "stdafx.h"
 #include "TreeSelectionHelper.h"
 #include "Misc.h"
+#include "HoldRedraw.h"
+#include "TreeListSyncer.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -13,12 +17,21 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+DWORD CTreeSelectionHelper::s_dwAllowableExtendedKeyboardSelection = (HOTKEYF_CONTROL | HOTKEYF_SHIFT);
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
 CTreeSelectionHelper::CTreeSelectionHelper(CTreeCtrl& tree) 
 	: 
-	m_tree(tree), m_nCurSelection(0), m_htiAnchor(NULL), m_tch(tree)
+	m_tree(tree), 
+	m_nCurSelection(0), 
+	m_htiAnchor(NULL), 
+	m_tch(tree),
+	m_bReadOnly(FALSE),
+	m_nLastKeyDown(0)
 {
 
 }
@@ -156,11 +169,11 @@ DWORD CTreeSelectionHelper::GetNextItemData(POSITION& pos) const
 
 int CTreeSelectionHelper::GetCount() const 
 { 
-	if (m_tree.GetCount())
+	if (m_tree.GetSafeHwnd() && m_tree.GetCount())
 		return m_lstSelection.GetCount(); 
 
 	// else
-	return NULL;
+	return 0;
 }
 
 BOOL CTreeSelectionHelper::IsItemSelected(HTREEITEM hti, BOOL bCheckParents) const
@@ -217,29 +230,32 @@ BOOL CTreeSelectionHelper::SetItems(const CHTIList& lstHTI, TSH_SELECT nState, B
 	if (lstHTI.IsEmpty())
 		return FALSE;
 
-	// we can optimise if no items are currently selected
+	BOOL bRes = FALSE;
+
 	if (IsEmpty())
 	{
+		// we can optimise if no items are currently selected
 		if (nState == TSHS_DESELECT)
 			return FALSE; // probable error because selection is already empty
 
 		m_lstSelection.Copy(lstHTI);
+		bRes = TRUE;
+	}
+	else
+	{
+		BOOL bItemRedraw = (bRedraw && (lstHTI.GetCount() < 10));
+		POSITION pos = lstHTI.GetHeadPosition();
 
-		if (bRedraw)
-			m_tree.Invalidate(FALSE);
+		while (pos)
+			bRes |= SetItem(lstHTI.GetNext(pos), nState, bItemRedraw);
 
-		return TRUE;
+		if (bItemRedraw)
+			bRedraw = FALSE;
 	}
 
-	BOOL bRes = FALSE;
-	BOOL bItemRedraw = (bRedraw && (lstHTI.GetCount() < 10));
+	bRes |= FixupTreeSelection();
 
-	POSITION pos = lstHTI.GetHeadPosition();
-
-	while (pos) 
-		bRes |= SetItem(lstHTI.GetNext(pos), nState, bItemRedraw);
-
-	if (bRedraw && !bItemRedraw)
+	if (bRes && bRedraw)
 		m_tree.Invalidate(FALSE);
 
 	return bRes;
@@ -268,13 +284,13 @@ BOOL CTreeSelectionHelper::AddAll(BOOL bRedraw)
 	// remove all selection to update history
 	RemoveAll(FALSE, FALSE);
 
-	// traverse all top level aItems adding each in turn
+	// Add all visible items
 	HTREEITEM hti = m_tree.GetChildItem(NULL);
 
 	while (hti)
 	{
-		AddAll(hti);
-		hti = m_tree.GetNextItem(hti, TVGN_NEXT);
+		AddItem(hti, FALSE); // no redraw
+		hti = m_tree.GetNextItem(hti, TVGN_NEXTVISIBLE);
 	}
 
 	// redraw
@@ -282,20 +298,6 @@ BOOL CTreeSelectionHelper::AddAll(BOOL bRedraw)
 		m_tree.Invalidate();
 
 	return GetCount();
-}
-
-void CTreeSelectionHelper::AddAll(HTREEITEM hti)
-{
-	AddItem(hti, FALSE); // no redraw
-
-	// add children
-	HTREEITEM htiChild = m_tree.GetChildItem(hti);
-
-	while (htiChild)
-	{
-		AddAll(htiChild);
-		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-	}
 }
 
 BOOL CTreeSelectionHelper::RemoveAll(BOOL bRemoveFromHistory, BOOL bRedraw) 
@@ -355,7 +357,7 @@ BOOL CTreeSelectionHelper::RemoveAll(BOOL bRemoveFromHistory, BOOL bRedraw)
 	return FALSE;
 }
 
-BOOL CTreeSelectionHelper::InvalidateAll(BOOL bErase)
+BOOL CTreeSelectionHelper::Invalidate(BOOL bErase)
 {
 	POSITION pos = GetFirstItemPos();
 	CRect rItem;
@@ -388,28 +390,30 @@ BOOL CTreeSelectionHelper::AnyItemsHaveChildren() const
 	return FALSE;
 }
 
-int CTreeSelectionHelper::IsSelectionExpanded(BOOL bFully) const
+int CTreeSelectionHelper::IsAnyItemExpanded(BOOL bFully) const
 {
-	int nSelExpanded = -1;
 	POSITION pos = GetFirstItemPos();
 
 	while (pos)
 	{
-		HTREEITEM hti = GetNextItem(pos);
-		int nExpanded = m_tch.IsItemExpanded(hti, bFully);
-
-		if (nExpanded == 0)
-		{
-			return FALSE;
-		}
-		else if (nExpanded > 0)
-		{
-			nSelExpanded = TRUE;
-		}
+		if (m_tch.IsItemExpanded(GetNextItem(pos), bFully) > 0)
+			return TRUE;
 	}
 
-	// else
-	return nSelExpanded; // can be TRUE or -1
+	return FALSE;
+}
+
+int CTreeSelectionHelper::IsAnyItemCollapsed() const
+{
+	POSITION pos = GetFirstItemPos();
+
+	while (pos)
+	{
+		if (!m_tch.IsItemExpanded(GetNextItem(pos), TRUE))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CTreeSelectionHelper::GetBoundingRect(CRect& rSelection) const
@@ -454,8 +458,9 @@ BOOL CTreeSelectionHelper::ItemsAreAllParents() const
 	return FALSE; // nothing selected
 }
 
-void CTreeSelectionHelper::RemoveHiddenItems()
+int CTreeSelectionHelper::RemoveHiddenItems()
 {
+	int nNumRemoved = 0;
 	POSITION pos = GetFirstItemPos();
 
 	while (pos)
@@ -469,8 +474,11 @@ void CTreeSelectionHelper::RemoveHiddenItems()
 				m_htiAnchor = NULL;
 
 			m_lstSelection.RemoveAt(posPrev);
+			nNumRemoved++;
 		}
 	}
+
+	return nNumRemoved;
 }
 
 BOOL CTreeSelectionHelper::ItemsAreAllSiblings() const
@@ -555,13 +563,14 @@ int CTreeSelectionHelper::SortProc(const void* item1, const void* item2)
 	return (pItem1->nVPos - pItem2->nVPos);
 }
 
-void CTreeSelectionHelper::RemoveChildDuplicates() 
+int CTreeSelectionHelper::RemoveChildDuplicates() 
 { 
-	RemoveChildDuplicates(m_lstSelection); 
+	return RemoveChildDuplicates(m_lstSelection); 
 }
 
-void CTreeSelectionHelper::RemoveChildDuplicates(CHTIList& selection) const
+int CTreeSelectionHelper::RemoveChildDuplicates(CHTIList& selection) const
 {
+	int nNumRemoved = 0;
 	POSITION pos = selection.GetHeadPosition();
 
 	while (pos)
@@ -570,8 +579,45 @@ void CTreeSelectionHelper::RemoveChildDuplicates(CHTIList& selection) const
 		HTREEITEM hti = selection.GetNext(pos);
 
 		if (HasSelectedParent(hti, selection))
+		{
 			selection.RemoveAt(posChild);
+			nNumRemoved++;
+		}
 	}
+
+	return nNumRemoved;
+}
+
+
+int CTreeSelectionHelper::RemoveChildItems(HTREEITEM htiParent)
+{
+	return RemoveChildItems(htiParent, m_lstSelection);
+}
+
+int CTreeSelectionHelper::RemoveChildItems(HTREEITEM htiParent, CHTIList& selection) const
+{
+	if (!htiParent)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	int nNumRemoved = 0;
+	POSITION pos = selection.GetHeadPosition();
+
+	while (pos)
+	{
+		POSITION posChild = pos;
+		HTREEITEM hti = selection.GetNext(pos);
+
+		if (TCH().ItemHasParent(hti, htiParent))
+		{
+			selection.RemoveAt(posChild);
+			nNumRemoved++;
+		}
+	}
+
+	return nNumRemoved;
 }
 
 int CTreeSelectionHelper::CopySelection(CHTIList& selection, BOOL bRemoveChildDupes, BOOL bOrdered) const
@@ -692,7 +738,7 @@ BOOL CTreeSelectionHelper::NextSelection(const CHTIMap& mapItems, BOOL bRedraw)
 		{
 			// invalidate current selection
 			if (bRedraw)
-				InvalidateAll(FALSE);
+				Invalidate(FALSE);
 
 			// save current selection in history
 			CDWordArray aIDs;
@@ -714,7 +760,7 @@ BOOL CTreeSelectionHelper::NextSelection(const CHTIMap& mapItems, BOOL bRedraw)
 
 			// invalidate new selection
 			if (bRedraw)
-				InvalidateAll(FALSE);
+				Invalidate(FALSE);
 
 			return TRUE;
 		}
@@ -772,7 +818,7 @@ BOOL CTreeSelectionHelper::PrevSelection(const CHTIMap& mapItems, BOOL bRedraw)
 		{
 			// invalidate current selection
 			if (bRedraw)
-				InvalidateAll(FALSE);
+				Invalidate(FALSE);
 
 			// save current selection in history
 			int nSizeHistory = m_aHistory.GetSize();
@@ -797,7 +843,7 @@ BOOL CTreeSelectionHelper::PrevSelection(const CHTIMap& mapItems, BOOL bRedraw)
 
 			// invalidate new selection
 			if (bRedraw)
-				InvalidateAll(FALSE);
+				Invalidate(FALSE);
 
 			return TRUE;
 		}
@@ -948,25 +994,31 @@ BOOL CTreeSelectionHelper::HasUncheckedItems() const
 	return FALSE;
 }
 
-BOOL CTreeSelectionHelper::ParentItemsAreAllExpanded(BOOL bRecursive) const
+BOOL CTreeSelectionHelper::AllParentItemsAreExpanded(BOOL bRecursive) const
 {
-	CTreeCtrlHelper tch(m_tree);
 	POSITION pos = GetFirstItemPos();
 
 	while (pos)
 	{
 		HTREEITEM htiSel = GetNextItem(pos);
 		
-		if (!tch.IsParentItemExpanded(htiSel, bRecursive))
+		if (!m_tch.IsParentItemExpanded(htiSel, bRecursive))
 			return FALSE;
 	}
 
 	return TRUE;
 }
 
-void CTreeSelectionHelper::ExpandAllParentItems(BOOL bRecursive)
+void CTreeSelectionHelper::ExpandItems(BOOL bExpand, BOOL bFully)
 {
-	CTreeCtrlHelper tch(m_tree);
+	POSITION pos = GetFirstItemPos();
+
+	while (pos)
+		m_tch.ExpandItem(GetNextItem(pos), bExpand, bFully);
+}
+
+void CTreeSelectionHelper::ExpandParentItems(BOOL bRecursive)
+{
 	POSITION pos = GetFirstItemPos();
 
 	while (pos)
@@ -975,6 +1027,388 @@ void CTreeSelectionHelper::ExpandAllParentItems(BOOL bRecursive)
 		HTREEITEM htiParent = m_tree.GetParentItem(hti);
 
 		if (htiParent)
-			tch.ExpandItem(htiParent, TRUE, FALSE, bRecursive);
+			m_tch.ExpandItem(htiParent, TRUE, FALSE, bRecursive);
 	}
+}
+
+BOOL CTreeSelectionHelper::EnsureVisible(BOOL bHorzPartialOK)
+{
+	if (!GetCount())
+		return FALSE;
+
+	OSVERSION nOSVer = COSVersion();
+	HTREEITEM htiSel = m_tree.GetSelectedItem();
+
+	if (nOSVer < OSV_VISTA)
+	{
+		m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)htiSel);
+	}
+	else
+	{
+		// Check there's something to do because holding 
+		// the redraw/scroll has a cost
+		BOOL bAllExpanded = AllParentItemsAreExpanded(TRUE);
+		BOOL bVisible = (bAllExpanded && TCH().IsItemVisible(htiSel, FALSE, bHorzPartialOK));
+
+		if (!bVisible)
+		{
+			CHoldRedraw hr(m_tree);
+
+			if (!bAllExpanded)
+				ExpandParentItems(TRUE);
+
+			m_tch.EnsureItemVisible(htiSel, FALSE, bHorzPartialOK);
+		}
+	}
+
+	return TRUE;
+}
+
+void CTreeSelectionHelper::SetFocus()
+{
+	if (::GetFocus() != m_tree)
+		m_tree.SetFocus();
+}
+
+void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	// allow parent to handle any focus changes
+	// before we change our selection
+	SetFocus();
+
+	UINT nHitFlags = 0;
+	HTREEITEM htiHit = m_tree.HitTest(lp, &nHitFlags);
+
+	if (htiHit == NULL)
+		return;
+
+	if (nHitFlags & TVHT_ONITEMBUTTON)
+		return;
+
+	// Don't change selection if:
+	//
+	// 1. The expansion button was hit
+	// OR
+	// 2. The hit item was already selected 
+	// AND
+	// 3. The state/icon was clicked 
+	// AND
+	// 4. Neither Ctrl/Shift are pressed
+
+	BOOL bHitIcon = (nHitFlags & (TVHT_ONITEMICON | TVHT_ONITEMSTATEICON));
+	BOOL bCtrl = (wp & MK_CONTROL), bShift = (wp & MK_SHIFT);
+
+	if (HasItem(htiHit) && bHitIcon && !bCtrl && !bShift)
+		return;
+
+	HTREEITEM htiAnchor = GetAnchor();
+
+	if (!htiAnchor && bShift)
+		htiAnchor = htiHit;
+
+	if (bCtrl)
+	{
+		if (bShift)
+		{
+			SetItems(htiAnchor, htiHit, TSHS_SELECT);
+			bSelChange = TRUE;
+		}
+		else if (!DragDetect(lp))
+		{
+			// if this is not the beginning of a drag then toggle selection
+			SetItem(htiHit, TSHS_TOGGLE);
+			bSelChange = TRUE;
+		}
+	}
+	else if (bShift)
+	{
+		RemoveAll();
+		SetItems(htiAnchor, htiHit, TSHS_SELECT);
+		bSelChange = TRUE;
+	}
+	else if (htiHit) // !bCtrl && !bShift
+	{
+		// select item if not already
+		if (!HasItem(htiHit) || !DragDetect(lp))
+			SelectSingleItem(htiHit, bSelChange);
+	}
+
+	// update anchor
+	if (htiHit && !bShift)
+		SetAnchor(htiHit);
+}
+
+BOOL CTreeSelectionHelper::DragDetect(CPoint pt)
+{
+	return (!m_bReadOnly && ::DragDetect(m_tree, pt));
+}
+
+void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	// allow parent to handle any focus changes
+	// before we change our selection
+	SetFocus();
+
+	HTREEITEM hti = m_tree.HitTest(lp);
+
+	if (hti && !HasItem(hti))
+		SelectSingleItem(hti, bSelChange);
+}
+
+void CTreeSelectionHelper::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)
+{
+	s_dwAllowableExtendedKeyboardSelection = 0;
+
+	Misc::SetFlag(s_dwAllowableExtendedKeyboardSelection, HOTKEYF_CONTROL, bCtrl);
+	Misc::SetFlag(s_dwAllowableExtendedKeyboardSelection, HOTKEYF_SHIFT, bShift);
+}
+
+void CTreeSelectionHelper::OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	// <ctrl>+cursor handled here
+	// <ctrl>+<shift>+cursor here
+	if (Misc::IsKeyPressed(VK_MENU))
+		return; 
+
+	// get the real currently selected item
+	HTREEITEM hti = m_tree.GetSelectedItem();
+
+	BOOL bCtrl = (Misc::IsKeyPressed(VK_CONTROL) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL));
+	BOOL bShift = (Misc::IsKeyPressed(VK_SHIFT) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT));
+
+	switch (wp)
+	{
+	case VK_NEXT:
+	case VK_DOWN:
+		if (bCtrl)
+		{
+			HTREEITEM htiNext = NULL;
+
+			if (wp == VK_NEXT)
+				htiNext = TCH().GetNextPageVisibleItem(hti);
+			else
+				htiNext = TCH().GetNextVisibleItem(hti);
+
+			if (htiNext)
+			{
+				m_tch.SelectItem(htiNext);
+
+				// toggle items if shift is also down, but not the one 
+				// we're just moving on to
+				if (bShift)
+				{
+					HTREEITEM htiPrev = TCH().GetPrevVisibleItem(htiNext, FALSE);
+					SetItems(htiPrev, hti, TSHS_TOGGLE);
+				}
+
+				bSelChange = TRUE;
+			}
+		}
+		break;
+
+	case VK_UP:
+	case VK_PRIOR:
+		if (bCtrl)
+		{
+			HTREEITEM htiPrev = NULL;
+
+			if (wp == VK_PRIOR)
+				TCH().GetPrevPageVisibleItem(hti);
+			else
+				TCH().GetPrevVisibleItem(hti);
+
+			if (htiPrev)
+			{
+				m_tch.SelectItem(htiPrev);
+
+				// toggle items if shift is also down, but not the one 
+				// we're just moving on to
+				if (bShift)
+				{
+					HTREEITEM htiNext = TCH().GetNextVisibleItem(htiPrev, FALSE);
+					SetItems(htiNext, hti, TSHS_TOGGLE);
+				}
+
+				bSelChange = TRUE;
+			}
+		}
+		break;
+
+	case VK_SPACE:
+		if (bCtrl && !bShift)
+		{
+			// toggle real selected item state
+			SetItem(hti, TSHS_TOGGLE);
+
+			bSelChange = TRUE;
+		}
+		break;
+	}
+}
+
+void CTreeSelectionHelper::OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
+{
+	switch (wp)
+	{
+	case VK_NEXT:
+	case VK_DOWN:
+	case VK_UP:
+	case VK_PRIOR:
+		bSelChange = TRUE;
+		break;
+	}
+}
+
+void CTreeSelectionHelper::OnTreeNotifyKeyDown(NMTVKEYDOWN* pTVKD)
+{
+	m_nLastKeyDown = 0;
+
+	switch (pTVKD->wVKey)
+	{
+	case VK_NEXT:
+	case VK_DOWN:
+	case VK_UP:
+	case VK_PRIOR:
+	case VK_RIGHT:
+	case VK_LEFT:
+	case VK_HOME:
+	case VK_END:
+		m_nLastKeyDown = pTVKD->wVKey;
+		break;
+
+	default:
+		// handle alphanum method of changing selection
+		{
+			// convert to char because its easier to work out what
+			// are valid chars
+			UINT nChar = MapVirtualKey(pTVKD->wVKey, 2);
+
+			if ((nChar >= 0x20) && (nChar <= 0xFF))
+				m_nLastKeyDown = pTVKD->wVKey;
+		}
+		break;
+	}
+}
+
+void CTreeSelectionHelper::OnTreeNotifyItemExpanding(NMTREEVIEW* pNMTV, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	switch (pNMTV->hdr.code)
+	{
+	case TVN_ITEMEXPANDING:
+		if (pNMTV->action == TVE_COLLAPSE)
+		{
+			bSelChange = RemoveChildItems(pNMTV->itemNew.hItem);
+
+			if (IsEmpty())
+			{
+				ASSERT(bSelChange);
+
+				// move selection to parent
+				SelectSingleItem(pNMTV->itemNew.hItem, bSelChange);
+				ASSERT(bSelChange);
+			}
+		}
+		break;
+	}
+}
+
+void CTreeSelectionHelper::OnTreeNotifySelectionChange(NMTREEVIEW* pNMTV, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	if ((m_nLastKeyDown == 0) || (pNMTV->action != TVC_BYKEYBOARD))
+		return;
+
+	BOOL bCtrl = (Misc::IsKeyPressed(VK_CONTROL) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL));
+	BOOL bShift = (Misc::IsKeyPressed(VK_SHIFT) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT));
+
+	HTREEITEM hti = pNMTV->itemNew.hItem;
+
+	switch (m_nLastKeyDown)
+	{
+	case VK_NEXT:
+	case VK_DOWN:
+	case VK_UP:
+	case VK_PRIOR:
+	case VK_RIGHT:
+	case VK_LEFT:
+	case VK_HOME:
+	case VK_END:
+		if (!bCtrl)
+		{
+			if (bShift)
+			{
+				RemoveAll();
+				bSelChange = AddItems(GetAnchor(), hti);
+			}
+			else
+			{
+				SelectSingleItem(hti, bSelChange);
+			}
+		}
+		break;
+
+	default:
+		// Handle alphanum method of changing selection
+		SelectSingleItem(hti, bSelChange);
+		break;
+	}
+
+	m_nLastKeyDown = 0; // always
+}
+
+BOOL CTreeSelectionHelper::SelectSingleItem(HTREEITEM hti, BOOL& bSelChange)
+{
+	bSelChange = FALSE;
+
+	// Avoid unnecessary selections
+	if (GetCount() == 1)
+	{
+		HTREEITEM htiSel = GetFirstItem();
+
+		if ((hti == htiSel) && (htiSel == m_tree.GetSelectedItem()))
+			return TRUE;
+	}
+
+	BOOL bSelected = FALSE;
+	bSelChange = RemoveAll();
+
+	if (hti)
+	{
+		AddItem(hti);
+		SetAnchor(hti);
+
+		bSelChange = TRUE;
+		bSelected = m_tch.SelectItem(hti);
+
+		if (!TCH().IsItemVisible(hti, FALSE))
+		{
+			// Don't allow any horizontal movement because this 
+			// will break the way we have implemented click-handling
+			{
+				CLockUpdates hr(m_tree);
+				CHoldHScroll hh(m_tree);
+
+				m_tree.EnsureVisible(hti);
+			}
+
+			if (!TCH().IsItemVisible(hti))
+			{
+				// If the item is still not visible because of the horizontal
+				// hold and this was a mouse selection then we post a message to
+				// ensure that whatever called this has already finished
+				m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
+			}
+		}
+	}
+
+	return bSelected;
 }

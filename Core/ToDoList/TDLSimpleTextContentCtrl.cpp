@@ -22,8 +22,8 @@
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\holdredraw.h"
-#include "..\shared\osversion.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdParty\XNamedColors.h"
 
 #include "..\Interfaces\ipreferences.h"

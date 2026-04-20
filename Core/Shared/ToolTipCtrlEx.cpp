@@ -3,12 +3,12 @@
 
 #include "stdafx.h"
 #include "ToolTipCtrlEx.h"
-#include "OSVersion.h"
 #include "GraphicsMisc.h"
 #include "WinClasses.h"
 #include "WClassDefines.h"
 
 #include "..\3rdParty\MemDC.h"
+#include "..\3rdParty\OSVersion.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

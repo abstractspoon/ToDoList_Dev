@@ -165,17 +165,20 @@ COleDateTime TDCCADATA::AsDate() const
 { 
 	ASSERT(sExtra.IsEmpty());
 
-	if (sData.IsEmpty())
-		return CDateHelper::NullDate();
+	if (!sData.IsEmpty())
+	{
+		// Try decoding the date string first
+		COleDateTime date;
 
-	// Try decoding the date string first
-	COleDateTime date;
+		if (CDateHelper::DecodeDate(sData, date, TRUE))
+			return date;
 
-	if (CDateHelper::DecodeDate(sData, date, TRUE))
-		return date;
-	
-	// else
-	return _ttof(sData); 
+		if (Misc::IsNumber(sData))
+			return _ttof(sData);
+	}
+
+	// All else
+	return CDateHelper::NullDate();
 }
 
 bool TDCCADATA::AsBool() const 
@@ -292,7 +295,10 @@ void TDCCADATA::Set(int nValue)
 
 void TDCCADATA::Set(const COleDateTime& dtValue) 
 { 
-	Set(dtValue.m_dt); 
+	if (CDateHelper::IsDateSet(dtValue))
+		Set(dtValue.m_dt); 
+	else
+		sData.Empty();
 }
 
 void TDCCADATA::Set(const CString& sValue) 

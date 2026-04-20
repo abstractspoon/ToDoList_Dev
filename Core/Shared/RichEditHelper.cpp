@@ -11,10 +11,10 @@
 #include "webmisc.h"
 #include "enbitmap.h"
 #include "clipboard.h"
-#include "OSVersion.h"
 
 #include "..\3rdParty\TOM.h"
 #include "..\3rdParty\clipboardbackup.h"
+#include "..\3rdParty\OSVersion.h"
 
 #include <atlconv.h>
 

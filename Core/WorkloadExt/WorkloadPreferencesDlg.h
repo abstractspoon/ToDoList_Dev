@@ -14,11 +14,10 @@
 #include "..\Interfaces\ipreferences.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CWorkloadPreferencesPage dialog
+// CWorkloadPreferencesPage page
 
 class CWorkloadPreferencesPage : public CPreferencesPageBase
 {
-// Construction
 public:
 	CWorkloadPreferencesPage(CWnd* pParent = NULL);
 
@@ -38,8 +37,6 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CWorkloadPreferencesPage)
 	BOOL	m_bPreferTimeEstimateInCalcs;
 	BOOL	m_bAutoCalcAllocations;
 	BOOL	m_bEnableOverload;
@@ -48,7 +45,6 @@ protected:
 	int		m_bRecalcProportionally;
 	BOOL	m_bEnableOverlapColor;
 	BOOL	m_bIncludeDatelessTasksInPeriod;
-	//}}AFX_DATA
 	int		m_nOverloadFromPercent;
 	int		m_nUnderloadToPercent;
 	COLORREF m_crOverload, m_crUnderload, m_crOverlap;
@@ -59,24 +55,17 @@ protected:
 	CCheckListBoxEx m_lbColumnVisibility;
 	CDWordArray m_aColumnVis;
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CWorkloadPreferencesPage)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
-	//}}AFX_VIRTUAL
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CWorkloadPreferencesPage)
 	afx_msg void OnEnableOverload();
 	afx_msg void OnEnableUnderload();
 	afx_msg void OnSetRecalcAllocations();
 	afx_msg void OnEnableOverlapColor();
-	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -88,7 +77,6 @@ protected:
 
 class CWorkloadPreferencesDlg : public CPreferencesDlgBase
 {
-// Construction
 public:
 	CWorkloadPreferencesDlg(CWnd* pParent);
 
@@ -105,25 +93,14 @@ public:
 	BOOL GetIncludeDatelessTasksInPeriod() const { return m_page.GetIncludeDatelessTasksInPeriod(); }
 
 protected:
-// Dialog Data
-	//{{AFX_DATA(CWorkloadPreferencesDlg)
-	//}}AFX_DATA
 	CWorkloadPreferencesPage m_page;
 
 protected:
 	virtual BOOL OnInitDialog();
 	virtual void DoHelp();
 
-// Implementation
 protected:
-	// Generated message map functions
-	//{{AFX_MSG(CWorkloadPreferencesDlg)
-	//}}AFX_MSG
-
 	DECLARE_MESSAGE_MAP()
 };
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_WORKLOADPREFERENCESDLG_H__4BEDF571_7002_4C0D_B355_1334515CA1F9__INCLUDED_)

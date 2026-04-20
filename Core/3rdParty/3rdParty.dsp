@@ -23,8 +23,6 @@ CFG=3rdParty - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""$/3rdParty", WQDAAAAA"
-# PROP Scc_LocalPath "..\..\3rdparty"
 CPP=cl.exe
 RSC=rc.exe
 
@@ -186,6 +184,10 @@ SOURCE=.\msword.cpp
 # Begin Source File
 
 SOURCE=.\NewRandom.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\OSVersion.cpp
 # End Source File
 # Begin Source File
 
@@ -394,6 +396,10 @@ SOURCE=.\msword.h
 # Begin Source File
 
 SOURCE=.\NewRandom.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\OSVersion.h
 # End Source File
 # Begin Source File
 

@@ -12,6 +12,8 @@
 #include <afxtempl.h>
 #include "TreectrlHelper.h"
 
+//////////////////////////////////////////////////////////////////////
+
 class CHTIList : public CList<HTREEITEM, HTREEITEM>
 {
 public:
@@ -60,6 +62,8 @@ public:
 	}
 };
 
+//////////////////////////////////////////////////////////////////////
+
 enum TSH_SELECT
 {
 	TSHS_TOGGLE = -1,
@@ -67,7 +71,9 @@ enum TSH_SELECT
 	TSHS_SELECT,
 };
 
-class CTreeSelectionHelper  
+//////////////////////////////////////////////////////////////////////
+
+class CTreeSelectionHelper
 {
 public:
 	CTreeSelectionHelper(CTreeCtrl& tree);
@@ -92,12 +98,15 @@ public:
 	BOOL AddItems(HTREEITEM htiFrom, HTREEITEM htiTo, BOOL bRedraw = TRUE);
 	BOOL ToggleItems(HTREEITEM htiFrom, HTREEITEM htiTo, BOOL bRedraw = TRUE);
 	BOOL AddAll(BOOL bRedraw = TRUE);
+	BOOL SelectSingleItem(HTREEITEM hti, BOOL& bSelChange);
 
 	inline HTREEITEM GetFirstItem() const { return GetCount() ? m_lstSelection.GetHead() : NULL; }
 	inline HTREEITEM GetLastItem() const { return GetCount() ? m_lstSelection.GetTail() : NULL; }
 	inline POSITION GetFirstItemPos() const { return GetCount() ? m_lstSelection.GetHeadPosition() : NULL; }
 	inline HTREEITEM GetNextItem(POSITION& pos) const { return m_lstSelection.GetNext(pos); }
+	inline const CHTIList& Items() const { return m_lstSelection; }
 
+	inline HTREEITEM GetSingleSelectedItem() const { return (HasSingleSelection() ? GetFirstItem() : NULL); }
 	inline BOOL HasSingleSelection() const { return (GetCount() == 1); }
 	inline BOOL HasItem(HTREEITEM hti) const { return (hti && GetCount() && (m_lstSelection.Find(hti) != NULL)); }
 	BOOL IsItemSelected(HTREEITEM hti, BOOL bCheckParents) const;
@@ -112,22 +121,29 @@ public:
 	void SortSelection(CHTIList& selection, BOOL bAscending) const;
 
 	BOOL ContainsAllItems() const;
-	BOOL InvalidateAll(BOOL bErase = TRUE);
+	BOOL Invalidate(BOOL bErase = TRUE);
 	BOOL AnyItemsHaveChildren() const;
 
 	// TRUE, FALSE, -1 if no children
-	int IsSelectionExpanded(BOOL bFully = FALSE) const;
+	BOOL IsAnyItemExpanded(BOOL bFully = FALSE) const;
+	BOOL IsAnyItemCollapsed() const;
+	BOOL AllParentItemsAreExpanded(BOOL bRecursive) const;
+	void ExpandItems(BOOL bExpand, BOOL bFully = FALSE);
+	void ExpandParentItems(BOOL bRecursive);
 
 	BOOL ItemsAreAllParents() const;
 	BOOL ItemsAreAllSiblings() const;
 	BOOL ItemsAreAllSiblings(const CHTIList& selection) const;
 
 	// removes any items which are children of other items in the list
-	void RemoveChildDuplicates();
-	void RemoveChildDuplicates(CHTIList& selection) const;
+	int RemoveChildDuplicates();
+	int RemoveChildDuplicates(CHTIList& selection) const;
+
+	int RemoveChildItems(HTREEITEM htiParent);
+	int RemoveChildItems(HTREEITEM htiParent, CHTIList& selection) const;
 
 	// removes any items whose parent is collapsed
-	void RemoveHiddenItems();
+	int RemoveHiddenItems();
 
 	// returns TRUE if any direct ancestor is selected
 	BOOL HasSelectedParent(HTREEITEM hti) const;
@@ -157,10 +173,21 @@ public:
 	int GetItemData(const CHTIList& selection, CDWordArray& aData) const;
 	int GetItemData(CDWordArray& aItemData) const;
 
+	BOOL EnsureVisible(BOOL bHorzPartialOK);
 	BOOL HasUncheckedItems() const;
+	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 
-	BOOL ParentItemsAreAllExpanded(BOOL bRecursive) const;
-	void ExpandAllParentItems(BOOL bRecursive);
+	// Pseudo message handlers
+	void OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	void OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+
+	void OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	void OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange);
+	void OnTreeNotifyKeyDown(NMTVKEYDOWN* pTVKD);
+	void OnTreeNotifySelectionChange(NMTREEVIEW* pNMTV, BOOL& bSelChange);
+	void OnTreeNotifyItemExpanding(NMTREEVIEW* pNMTV, BOOL& bSelChange);
+
+	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
 
 protected:
 	CTreeCtrl& m_tree;
@@ -170,17 +197,22 @@ protected:
 	CTreeCtrlHelper m_tch;
 	CStringArray m_aHistory;
 
+	BOOL m_bReadOnly;
+	UINT m_nLastKeyDown;
+
+	static DWORD s_dwAllowableExtendedKeyboardSelection;
+
 protected:
 	void InvalidateItem(HTREEITEM hti);
 	BOOL HasSelectedParent(HTREEITEM hti, const CHTIList& selection) const;
-	void AddAll(HTREEITEM hti);
+	BOOL DragDetect(CPoint pt);
+	void SetFocus();
 
 	struct SORTITEM
 	{
 		HTREEITEM hti;
 		int nVPos;
 	};
-
 	typedef CArray<SORTITEM, SORTITEM&> CSortArray;
 
 	int BuildSortArray(const CHTIList& lstSelection, CSortArray& aItems) const;

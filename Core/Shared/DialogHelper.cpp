@@ -12,8 +12,9 @@
 #include "runtimedlg.h"
 #include "enstring.h"
 #include "AcceleratorString.h"
-#include "OSVersion.h"
 #include "OwnerdrawComboBoxBase.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <afxpriv.h>
 #include <afxtempl.h>

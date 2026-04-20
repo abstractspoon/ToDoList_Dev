@@ -9,7 +9,8 @@
 #include "..\shared\EnString.h"
 #include "..\shared\FileMisc.h"
 #include "..\shared\DialogHelper.h"
-#include "..\shared\OSVersion.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -16,7 +16,6 @@
 
 #include "..\Shared\Themed.h"
 #include "..\Shared\GraphicsMisc.h"
-#include "..\Shared\OSVersion.h"
 #include "..\Shared\TabCtrlEx.h"
 #include "..\Shared\MSOutlookHelper.h"
 #include "..\Shared\Localizer.h"
@@ -25,6 +24,8 @@
 
 #include "..\Interfaces\UIExtensionHelper.h"
 #include "..\Interfaces\UIExtensionMgr.h"
+
+#include "..\3rdParty\OSVersion.h"
 
 #include <afxadv.h> // for CRecentFileList
 

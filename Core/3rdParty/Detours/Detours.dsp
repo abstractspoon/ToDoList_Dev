@@ -23,8 +23,6 @@ CFG=Detours - Win32 Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""
-# PROP Scc_LocalPath ""
 
 !IF  "$(CFG)" == "Detours - Win32 Unicode Release"
 

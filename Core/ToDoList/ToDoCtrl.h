@@ -240,7 +240,8 @@ public:
 	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
 
 	BOOL OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDATEOFFSET& offset);
-	BOOL CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const;
+	BOOL OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet& mapCustAttribIDs, const TDCDATEOFFSET& offset);
+	BOOL CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates, const CStringSet& mapCustAttribIDs = CStringSet()) const;
 
 	CString GetSelectedTaskComments() const { return m_taskTree.GetSelectedTaskComments(); }
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
@@ -450,7 +451,7 @@ public:
 	virtual TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 
 	static BOOL IsReservedShortcut(DWORD dwShortcut);
-	static void EnableExtendedSelection(BOOL bCtrl, BOOL bShift);
+	static void EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift);
 	static void SetRecentlyModifiedPeriod(const COleDateTimeSpan& dtSpan);
 	static void SetDialogIcons(HICON hIconIconDlg, HICON hIconDependsDlg, HICON hIconRecursIcon, HICON hIconAddLogDlg);
 
@@ -758,7 +759,8 @@ protected:
 	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);
 	BOOL SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks);
 	BOOL CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, BOOL& bAndSubtasks) /*const*/;
-	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
+	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID) const;
+	int GetTaskIncompleteDependencies(DWORD dwTaskID, CDWordArray& aLocalTaskIDs, CStringArray& aNonLocalTaskLinks) const;
 	BOOL CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;
 
 	void LoadGlobals(const CTaskFile& tasks);

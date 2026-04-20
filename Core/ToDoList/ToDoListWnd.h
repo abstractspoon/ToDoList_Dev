@@ -16,7 +16,6 @@
 #include "TDCContentMgr.h"
 #include "TDLfilterbar.h"
 #include "TDLSendTasksDlg.h"
-#include "taskselectiondlg.h"
 #include "todoctrlreminders.h"
 #include "tdlTasklistStorageMgr.h"
 #include "tdcstartupoptions.h"
@@ -487,6 +486,7 @@ protected:
 	afx_msg void OnUpdateEditInsertDateAndOrTime(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditLocktask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOffsetDates(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditOffsetStartDueDates(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOpenFileLink(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteAfter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteAsRef(CCmdUI* pCmdUI);
@@ -841,7 +841,7 @@ protected:
 	
 	// helpers
 	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, const CString& sHtmlImageDir, BOOL bTransform, 
-					const CTaskSelectionDlg& taskSel, CTaskFile& tasks) const;
+					const CTDLTaskSelectionPage& taskSel, CTaskFile& tasks) const;
 	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, const CString& sHtmlImageDir, BOOL bTransform, 
 					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks) const;
 	

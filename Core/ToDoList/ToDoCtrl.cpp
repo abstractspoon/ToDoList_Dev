@@ -15,7 +15,6 @@
 #include "tdcenum.h"
 #include "tdltaskicondlg.h"
 #include "tdlreuserecurringtaskdlg.h"
-#include "tdlimportoutlookobjectsdlg.h"
 #include "tdladdloggedtimedlg.h"
 #include "tdcoutlookimporthelper.h"
 #include "ToDoCtrlDataDefines.h"
@@ -45,7 +44,6 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\misc.h"
 #include "..\shared\msoutlookhelper.h"
-#include "..\shared\osversion.h"
 #include "..\shared\passworddialog.h"
 #include "..\shared\savefocus.h"
 #include "..\shared\ScopedTimer.h"
@@ -57,6 +55,7 @@
 #include "..\shared\webmisc.h"
 #include "..\shared\winclasses.h"
 
+#include "..\3rdParty\OSVersion.h"
 #include "..\3rdparty\msoutl.h"
 #include "..\3rdparty\shellicons.h"
 #include "..\3rdparty\colordef.h"
@@ -456,9 +455,9 @@ BOOL CToDoCtrl::IsReservedShortcut(DWORD dwShortcut)
 	return CTDLTaskCtrlBase::IsReservedShortcut(dwShortcut);
 }
 
-void CToDoCtrl::EnableExtendedSelection(BOOL bCtrl, BOOL bShift)
+void CToDoCtrl::EnableExtendedKeyboardSelection(BOOL bCtrl, BOOL bShift)
 {
-	CTDLTaskCtrlBase::EnableExtendedSelection(bCtrl, bShift);
+	CTDLTaskTreeCtrl::EnableExtendedKeyboardSelection(bCtrl, bShift);
 }
 
 void CToDoCtrl::SetDialogIcons(HICON hIconIconDlg, HICON hIconDependsDlg, HICON hIconRecurDlg, HICON hIconAddLogDlg)
@@ -1530,7 +1529,7 @@ BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryD
 	if (!bInternal && (TSH().GetCount() == 1))
 		UpdateComments(GetSelectedTaskComments(), GetSelectedTaskCustomComments(m_cfComments));
 
-	TSH().InvalidateAll();
+	TSH().Invalidate();
 
 	SetModified(TDCA_COMMENTS, aModTaskIDs);
 	return TRUE;
@@ -1790,56 +1789,48 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates) const
+BOOL CToDoCtrl::CanOffsetSelectedTaskDates(const CTDCDateSet& mapDates, const CStringSet& mapCustAttribIDs) const
 {
-	if (mapDates.IsEmpty())
+	if (mapDates.IsEmpty() && mapCustAttribIDs.IsEmpty())
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	BOOL bCanAdjustDependDates = (!m_taskTree.SelectionHasDependencies() || !HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES));
+	// Default date attributes
 	POSITION pos = mapDates.GetStartPosition();
 
 	while (pos)
 	{
 		TDC_DATE nDate = mapDates.GetNext(pos);
+		TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
-		if (!CanEditSelectedTask(TDC::MapDateToAttribute(nDate)))
-			return FALSE;
-
-		switch (nDate)
-		{
-		case TDCD_CREATE:
-		case TDCD_DONE:
-		case TDCD_DONEDATE:
-		case TDCD_DONETIME:
-			break;
-
-		case TDCD_START:
-		case TDCD_STARTDATE:
-		case TDCD_STARTTIME:
-		case TDCD_DUE:
-		case TDCD_DUEDATE:
-		case TDCD_DUETIME:
-			if (!bCanAdjustDependDates)
-				return FALSE;
-			break;
-
-		default:
-			ASSERT(0);
-			return FALSE;
-		}
+		if (CanEditSelectedTask(nAttribID))
+			return TRUE;
 	}
 
-	return TRUE;
+	// Custom date attributes
+	pos = mapCustAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		CString sCustAttribID = mapCustAttribIDs.GetNext(pos);
+		TDC_ATTRIBUTE nCustAttribID = GetCustomAttributeDefs().GetAttributeID(sCustAttribID);
+
+		if (CanEditSelectedTask(nCustAttribID))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDATEOFFSET& offset)
 {
-	if (!CanOffsetSelectedTaskDates(mapDates))
-		return FALSE;
+	return OffsetSelectedTaskDates(mapDates, CStringSet(), offset);
+}
 
+BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, CStringSet& mapCustAttribIDs, const TDCDATEOFFSET& offset)
+{
 	Flush();
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
@@ -1851,13 +1842,12 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDA
 	CDWordArray aModTaskIDs;
 	CTDCAttributeMap mapAttribs;
 
-	POSITION posDate = mapDates.GetStartPosition();
+	// Default date attributes
+	POSITION pos = mapDates.GetStartPosition();
 
-	while (posDate)
+	while (pos)
 	{
-		TDC_DATE nDate = mapDates.GetNext(posDate);
-		CDWordArray aDateModTaskIDs;
-
+		TDC_DATE nDate = mapDates.GetNext(pos);
 		POSITION posTask = htiSel.GetHeadPosition();
 
 		while (posTask)
@@ -1869,18 +1859,42 @@ BOOL CToDoCtrl::OffsetSelectedTaskDates(const CTDCDateSet& mapDates, const TDCDA
 												 nDate,
 												 offset,
 												 aSelModTaskIDs);
+			if (nRes == SET_CHANGE)
+			{
+				TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
+				m_taskTree.GetAttributesAffectedByMod(nAttribID, mapAttribs);
 
-			aDateModTaskIDs.Append(aSelModTaskIDs);
-		}
-
-		if (aDateModTaskIDs.GetSize())
-		{
-			TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
-			m_taskTree.GetAttributesAffectedByMod(nAttribID, mapAttribs);
-
-			Misc::AppendItems(aDateModTaskIDs, aModTaskIDs, TRUE);
+				aModTaskIDs.Append(aSelModTaskIDs);
+			}
 		}
 	}
+
+	// Custom date attributes
+	pos = mapCustAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		CString sCustAttribID = mapCustAttribIDs.GetNext(pos);
+		POSITION posTask = htiSel.GetHeadPosition();
+
+		while (posTask)
+		{
+			DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(posTask));
+			CDWordArray aSelModTaskIDs;
+
+			TDC_SET nRes = m_data.OffsetTaskDate(dwTaskID,
+													   sCustAttribID,
+													   offset,
+													   aSelModTaskIDs);
+			if (nRes == SET_CHANGE)
+			{
+				mapAttribs.Add(TDCA_CUSTOMATTRIB);
+				aModTaskIDs.Append(aSelModTaskIDs);
+			}
+		}
+	}
+
+	Misc::RemoveDuplicates(aModTaskIDs);
 
 	if (!aModTaskIDs.GetSize())
 		return FALSE;
@@ -1911,18 +1925,18 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 	bAndSubtasks = FALSE;
 
 	// If there are no items to be completed then no further restrictions
-	CDWordArray aToDoIDs;
+	CDWordArray aTaskIDs;
 
-	if (aTasks.GetTaskIDsForCompletion(aToDoIDs) == 0)
+	if (aTasks.GetTaskIDsForCompletion(aTaskIDs) == 0)
 		return TRUE;
 
 	// check for circular dependencies
 	CDWordArray aCircularIDs;
 	int nID;
 
-	for (nID = 0; nID < aToDoIDs.GetSize(); nID++)
+	for (nID = 0; nID < aTaskIDs.GetSize(); nID++)
 	{
-		DWORD dwTaskID = aToDoIDs[nID];
+		DWORD dwTaskID = aTaskIDs[nID];
 
 		if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
 			aCircularIDs.Add(dwTaskID);
@@ -1936,39 +1950,51 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 		if (aCircularIDs.GetSize() == 1)
 			sMessage += CEnString(IDS_TDC_SELTASKHASCIRCULARDEPENDENCY);
 		else
-			sMessage += CEnString().Format(IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES, Misc::FormatArray(aToDoIDs));
+			sMessage += CEnString().Format(IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES, Misc::FormatArray(aTaskIDs));
 		
 		AfxMessageBox(sMessage, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 
 	// check for incomplete dependents
-	CString sIncomplete;
+	CDWordArray aLocalDependIDs;
+	CStringArray aNonLocalDependLinks;
 
-	for (nID = 0; nID < aToDoIDs.GetSize(); nID++)
+	for (nID = 0; nID < aTaskIDs.GetSize(); nID++)
+		GetTaskIncompleteDependencies(aTaskIDs[nID], aLocalDependIDs, aNonLocalDependLinks);
+
+	if (aLocalDependIDs.GetSize() || aNonLocalDependLinks.GetSize())
 	{
-		DWORD dwTaskID = aToDoIDs[nID];
+		CEnString sMessage(IDS_TASKCOMPLETION);
+		sMessage += '|';
 
-		if (TaskHasIncompleteDependencies(dwTaskID, sIncomplete))
-		{
-			CEnString sMessage(IDS_TASKCOMPLETION);
-			sMessage += '|';
+		if (aTaskIDs.GetSize() == 1)
 			sMessage += CEnString(IDS_TDC_SELTASKHASDEPENDENCY);
+		else
+			sMessage += CEnString(IDS_TDC_SELTASKSHAVEDEPENDENCIES);
 
-			if (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONERROR))
-				ShowTaskLink(sIncomplete, FALSE);
-
-			return FALSE;
+		if (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONERROR))
+		{
+			if (aLocalDependIDs.GetSize())
+				SelectTasks(aLocalDependIDs);
+			else
+				ShowTaskLink(aNonLocalDependLinks[0], FALSE);
 		}
+
+		return FALSE;
 	}
 
 	bAndSubtasks = (!m_data.WantUpdateInheritedAttibute(TDCA_DONEDATE) &&
-					CheckWantTaskSubtasksCompleted(aToDoIDs));
-
+					CheckWantTaskSubtasksCompleted(aTaskIDs));
 	return TRUE;
 }
 
-BOOL CToDoCtrl::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const
+BOOL CToDoCtrl::TaskHasIncompleteDependencies(DWORD dwTaskID) const
+{
+	return (GetTaskIncompleteDependencies(dwTaskID, CDWordArray(), CStringArray()) > 0);
+}
+
+int CToDoCtrl::GetTaskIncompleteDependencies(DWORD dwTaskID, CDWordArray& aLocalDependIDs, CStringArray& aNonLocalDependLinks) const
 {
 	CTDCDependencyArray aDepends;
 	int nNumDepends = m_data.GetTaskDependencies(dwTaskID, aDepends);
@@ -1981,20 +2007,14 @@ BOOL CToDoCtrl::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomple
 		if (depend.IsLocal())
 		{
 			if (m_data.HasTask(depend.dwTaskID) && !m_data.IsTaskDone(depend.dwTaskID))
-			{
-				sIncomplete = depend.Format();
-				return TRUE;
-			}
+				aLocalDependIDs.Add(depend.dwTaskID);
 		}
 		else if (!depend.sTasklist.IsEmpty()) // pass to parent if we can't handle
 		{
 			BOOL bDependentIsDone = GetParent()->SendMessage(WM_TDCM_ISTASKDONE, depend.dwTaskID, (LPARAM)(LPCTSTR)depend.sTasklist);
 
 			if (!bDependentIsDone)
-			{
-				sIncomplete = depend.Format();
-				return TRUE;
-			}
+				aNonLocalDependLinks.Add(depend.Format());
 		}
 	}
 
@@ -2007,13 +2027,10 @@ BOOL CToDoCtrl::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomple
 		int nPos = pTDS->GetSubTaskCount();
 
 		while (nPos--)
-		{
-			if (TaskHasIncompleteDependencies(pTDS->GetSubTaskID(nPos), sIncomplete))
-				return TRUE;
-		}
+			GetTaskIncompleteDependencies(pTDS->GetSubTaskID(nPos), aLocalDependIDs, aNonLocalDependLinks); // RECURSIVE CALL
 	}
 
-	return FALSE;
+	return (aLocalDependIDs.GetSize() + aNonLocalDependLinks.GetSize());
 }
 
 BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const
@@ -5103,7 +5120,7 @@ HTREEITEM CToDoCtrl::InsertTreeItem(const TODOITEM* pTDI, DWORD dwTaskID, HTREEI
 
 void CToDoCtrl::OnTreeChangeFocus(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	TSH().InvalidateAll(FALSE);
+	TSH().Invalidate(FALSE);
 	*pResult = 0;
 }
 
@@ -9555,15 +9572,7 @@ void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 		break;
 
 	case TDCEC_SELECTED:
-		{
-			POSITION pos = TSH().GetFirstItemPos();
-			
-			while (pos)
-			{
-				HTREEITEM hti = TSH().GetNextItem(pos);
-				m_taskTree.ExpandItem(hti, bExpand, TRUE);
-			}
-		}
+		m_taskTree.ExpandSelection(bExpand, TRUE);
 		break;
 
 	case TDCEC_DUE:
@@ -9638,10 +9647,11 @@ void CToDoCtrl::SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand)
 
 				// Its parents
 				if (m_data.GetTaskParentIDs(dwTaskID, aParentIDs))
-					Misc::AppendItems(aParentIDs, aTaskIDs, TRUE);
+					aTaskIDs.Append(aParentIDs);
 			}
 		}
 
+		Misc::RemoveDuplicates(aTaskIDs);
 		m_taskTree.ExpandTasks(aTaskIDs);
 	}
 	else // collapsing
@@ -9672,21 +9682,10 @@ BOOL CToDoCtrl::CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const
 		break;
 
 	case TDCEC_SELECTED:
-		{
-			int nFullyExpanded = TSH().IsSelectionExpanded(TRUE);
-			
-			if (nFullyExpanded == -1)	// selected items have no children
-			{
-				return FALSE; // can neither expand nor collapse
-			}
-			else if (bExpand)
-			{
-				return !nFullyExpanded;
-			}
-			
-			// else
-			return TSH().IsSelectionExpanded(FALSE);
-		}
+		if (bExpand)
+			return m_taskTree.TSH().IsAnyItemCollapsed();
+		else
+			return m_taskTree.TSH().IsAnyItemExpanded();
 		break;
 
 	case TDCEC_DUE:

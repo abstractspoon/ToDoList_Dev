@@ -145,6 +145,7 @@
     <ClCompile Include="msoutl.cpp" />
     <ClCompile Include="msword.cpp" />
     <ClCompile Include="NewRandom.cpp" />
+    <ClCompile Include="OSVersion.cpp" />
     <ClCompile Include="ProgressCtrlWithTimer.cpp" />
     <ClCompile Include="ProgressThread.cpp" />
     <ClCompile Include="Quantize.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="Html2Rtf.h" />
     <ClInclude Include="Ini.h" />
     <ClInclude Include="JalaliCalendar.h" />
+    <ClInclude Include="OSVersion.h" />
     <ClInclude Include="Quantize.h" />
     <ClInclude Include="RangeSlider.h" />
     <ClInclude Include="SimpleSplitter.h" />
