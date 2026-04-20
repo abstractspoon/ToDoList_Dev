@@ -352,13 +352,13 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 
 		case CDDS_ITEMPOSTPAINT:
 			{
-				CRect rRow(pLVCD->nmcd.rc);
+				//CRect rRow(pLVCD->nmcd.rc);
 
 				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				if (OsIsXPOrLinux())
-					m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
+					m_lcTasks.GetItemRect(nItem, &pLVCD->nmcd.rc, LVIR_BOUNDS);
 
-				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd, rRow);
+				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd/*, rRow*/);
 			
 				// restore default back colour set in CDDS_ITEMPREPAINT
 				ListView_SetBkColor(m_lcTasks, GetSysColor(COLOR_WINDOW));

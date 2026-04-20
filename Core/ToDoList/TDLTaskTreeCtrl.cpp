@@ -471,7 +471,7 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		{
 			// On Linux filling the background overwrites the tree insertion marker
 			BOOL bFillRow = !OsIsLinux();
-			dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc, bFillRow);
+			dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, /*pTVCD->nmcd.rc,*/ bFillRow);
 		}
 		break;
 	}

@@ -2622,11 +2622,13 @@ DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, COLORREF& 
 	return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 }
 
-DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rect, BOOL bFillRow)
+DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, /*const CRect& rect,*/ BOOL bFillRow)
 {
 	// Check row is visible
 	CRect rClient;
 	::GetClientRect(Tasks(), rClient);
+
+	CRect rect(nmcd.rc);
 
 	if ((rect.bottom > 0) && (rect.top <= rClient.bottom))
 	{
