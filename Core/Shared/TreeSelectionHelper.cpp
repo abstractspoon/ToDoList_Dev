@@ -908,6 +908,10 @@ void CTreeSelectionHelper::RestoreAnchorSel(HTREEITEM htiAnchor, HTREEITEM htiTr
 
 BOOL CTreeSelectionHelper::FixupTreeSelection()
 {
+	// Make sure all parent are first expanded else trying
+	// to set the tree selection to a hidden task will fail
+	ExpandParentItems(TRUE);
+
 	BOOL bTreeSelChanged = FALSE;
 	HTREEITEM htiTreeSel = m_tree.GetSelectedItem();
 

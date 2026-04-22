@@ -582,15 +582,8 @@ BOOL CTreeListCtrl::SelectItems(const CHTIList& htItems)
 
 		TSH().RemoveAll(FALSE, FALSE);
 		TSH().SetItems(htItems, TSHS_SELECT);
-		TSH().FixupTreeSelection();
 
-		if (!TSH().AllParentItemsAreExpanded(TRUE))
-		{
-			CHoldRedraw hr(*this);
-
-			TSH().ExpandParentItems(TRUE);
-			ExpandList();
-		}
+		ExpandList();
 	}
 	SyncColumnSelectionToTasks();
 
