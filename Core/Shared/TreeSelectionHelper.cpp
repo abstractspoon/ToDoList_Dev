@@ -253,8 +253,6 @@ BOOL CTreeSelectionHelper::SetItems(const CHTIList& lstHTI, TSH_SELECT nState, B
 			bRedraw = FALSE;
 	}
 
-	bRes |= FixupTreeSelection();
-
 	if (bRes && bRedraw)
 		m_tree.Invalidate(FALSE);
 
@@ -908,9 +906,9 @@ void CTreeSelectionHelper::RestoreAnchorSel(HTREEITEM htiAnchor, HTREEITEM htiTr
 
 BOOL CTreeSelectionHelper::FixupTreeSelection()
 {
-	// Make sure all parent are first expanded else trying
-	// to set the tree selection to a hidden task will fail
-	ExpandParentItems(TRUE);
+	// It's a requirement that selected tasks be visible to the user
+	if (!AllParentItemsAreExpanded(TRUE))
+		ExpandParentItems(TRUE);
 
 	BOOL bTreeSelChanged = FALSE;
 	HTREEITEM htiTreeSel = m_tree.GetSelectedItem();
@@ -929,7 +927,7 @@ BOOL CTreeSelectionHelper::FixupTreeSelection()
 		}
 		else if (GetCount())
 		{
-			m_tch.SelectItem(GetFirstItem());
+			m_tch.SelectItem(GetFirstItem()); // will expand the parents as required
 			bTreeSelChanged = TRUE;
 		}
 	}

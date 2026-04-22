@@ -7,6 +7,7 @@
 #include "TreeListSyncer.h"
 #include "holdredraw.h"
 #include "graphicsmisc.h"
+#include "misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -250,9 +251,7 @@ void CTreeCtrlHelper::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BO
 {
 	if (hti)
 	{
-		BOOL bIsExpanded = IsItemExpanded(hti);
-
-		if ((bIsExpanded && !bExpand) || (!bIsExpanded && bExpand))
+		if (Misc::StatesDiffer(IsItemExpanded(hti), bExpand))
 			m_tree.Expand(hti, bExpand ? TVE_EXPAND : TVE_COLLAPSE);
 	}
 	

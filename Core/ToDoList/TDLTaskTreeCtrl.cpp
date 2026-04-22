@@ -1323,6 +1323,7 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 	}
 
 	TSH().SetItems(moved, TSHS_SELECT, FALSE);
+	TSH().FixupTreeSelection();
 	TSH().SetAnchor(htiFirst);
 	TCH().SelectItem(htiFirst);
 	
