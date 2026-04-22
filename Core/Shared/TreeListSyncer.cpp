@@ -2270,7 +2270,7 @@ BOOL CTreeListSyncer::IsTreeItemVisible(HWND hwnd, HTREEITEM hti)
 		return FALSE;
 
 	// then check the parent's parent
-	return IsTreeItemVisible(hwnd, htiParent);
+	return IsTreeItemVisible(hwnd, htiParent); // RECURSIVE CALL
 }
 
 BOOL CTreeListSyncer::TreeItemHasState(HWND hwnd, HTREEITEM hti, UINT nStateMask)
