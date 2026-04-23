@@ -897,7 +897,7 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				return 0L; // always eat
 
  			case TVN_BEGINLABELEDIT:
-				if (!m_bMovingItem)
+				if (!IsReadOnly() && !m_bMovingItem && TSH().HasSingleSelection())
 				{
 					// Notify parent and cancel this default editing
 					NotifyParentOfColumnEditClick(TDCC_CLIENT, GetSelectedTaskID());
