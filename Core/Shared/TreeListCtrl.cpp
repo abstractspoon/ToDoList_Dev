@@ -1258,7 +1258,10 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 
 				ProcessSelectionChange(bSelChange);
 
-				// Let default handling produce context menu
+				// Eat the click if below the last item else
+				// let default handling produce context menu
+				if (m_list.HitTest(lp) == -1)
+					return 0L; // we handled it
 			}
 			break;
 		}
@@ -1589,7 +1592,6 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 				m_list.SetFocus();
 
 			// prevent deselection
-			TRACE(_T("Ate Listview ButtonDown\n"));
 			return TRUE;
 		}
 	}

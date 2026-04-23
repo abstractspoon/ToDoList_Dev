@@ -3606,7 +3606,7 @@ int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC)
 		nFirstItem += (rClip.top / nRowHeight);
 		nLastItem = (nFirstItem + (rClip.Height() / nRowHeight));
 		
-		ASSERT(nLastItem > nFirstItem);
+		ASSERT(nLastItem >= nFirstItem);
 	}
 
 	int nItemCount = m_list.GetItemCount();

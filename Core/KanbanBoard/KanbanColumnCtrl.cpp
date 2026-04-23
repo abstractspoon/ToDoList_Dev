@@ -2511,9 +2511,10 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM
 			}
 			else
 			{
-				// We need to be careful here not to clear
-				// an existing multiple selection which the 
-				// user intends either to drag or to edit
+				// If we're clicking on an already selected task it's
+				// either the beginning of a multi-selection drag or 
+				// it's a simple click to clear all the other selected
+				// tasks.
 				BOOL bSameTask = IsOnlySelectedTask(dwTaskID);
 				BOOL bWantEdit = (!bLeftBtn ||
 								  HitTestCheckbox(htiHit, point) || 
