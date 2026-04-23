@@ -342,7 +342,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 			{
 				// Don't fill the row on XP because it will overwrite
 				// the icon and check-box when hovering with the mouse
-				static BOOL bFillRow = !OsIsXP();
+				BOOL bFillRow = !OsIsXP();
 				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, pLVCD->clrText, pLVCD->clrTextBk, bFillRow);
 				
 				if (bFillRow)
