@@ -336,7 +336,7 @@ protected:
 	static BOOL CalcDateRect(const CRect& rMonth, const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
 	static CString GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
-	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
+	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
 	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
