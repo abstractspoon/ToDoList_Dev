@@ -205,7 +205,7 @@ protected:
 protected:
 	void InvalidateItem(HTREEITEM hti);
 	BOOL HasSelectedParent(HTREEITEM hti, const CHTIList& selection) const;
-	BOOL DragDetect(CPoint pt);
+	BOOL DragDetect(CPoint ptClient);
 	void SetFocus();
 
 	struct SORTITEM

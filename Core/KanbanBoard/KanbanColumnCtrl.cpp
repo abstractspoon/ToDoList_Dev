@@ -2449,13 +2449,9 @@ BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
 		{
 			m_aSelTaskIDs.InsertAt(0, dwTaskID); // new anchor
 		}
-		else
+		else if (!::DragDetect(*this, ::GetMessagePos()))
 		{
-			CPoint point = ::GetMessagePos();
-			ScreenToClient(&point);
-			
-			if (!::DragDetect(*this, point))
-				Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
+			Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
 		}
 
 		return TRUE;
@@ -2516,6 +2512,8 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM
 				BOOL bWantEdit = (!bLeftBtn ||
 								  HitTestCheckbox(htiHit, point) || 
 								  (HitTestImage(htiHit, point) != KBCI_NONE));
+
+				ClientToScreen(&point);
 
 				if (!bSameTask && !bWantEdit && !::DragDetect(*this, point))
 				{

@@ -4434,11 +4434,11 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				// when clicking below the last item
 				if (m_lcColumns.HitTest(lp) == -1)
 				{
-					CPoint pt(lp);
-					::ClientToScreen(hRealWnd, &pt);
+					CPoint ptScreen(lp);
+					::ClientToScreen(hRealWnd, &ptScreen);
 
 					// we don't want to disable drag selecting
-					if (!::DragDetect(m_lcColumns, pt))
+					if (!::DragDetect(m_lcColumns, ptScreen))
 					{
 						TRACE(_T("Ate Listview ButtonDown\n"));
 						return 0L; // eat it

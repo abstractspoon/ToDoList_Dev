@@ -2824,8 +2824,11 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 
 	if (nHit == TCCHT_BEGIN || nHit == TCCHT_END)
 		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
+
+	CPoint ptScreen(ptCursor);
+	ClientToScreen(ptScreen);
 	
-	if (!::DragDetect(GetSafeHwnd(), ptCursor))
+	if (!::DragDetect(GetSafeHwnd(), ptScreen))
 		return FALSE;
 	
 	SetCapture();
