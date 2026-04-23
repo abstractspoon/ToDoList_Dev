@@ -4638,9 +4638,10 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 	}
 	else
 	{
-		lc.ClientToScreen(&pt);
+		CPoint ptScreen(pt);
+		lc.ClientToScreen(&ptScreen);
 
-		if (::DragDetect(lc, pt))
+		if (::DragDetect(lc, ptScreen))
 		{
 			m_bBoundSelecting = -1;
 

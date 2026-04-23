@@ -1568,9 +1568,10 @@ BOOL CTreeListCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 
 	if (nHit == -1)
 	{
-		m_list.ClientToScreen(&point);
+		CPoint ptScreen(point);
+		m_list.ClientToScreen(&ptScreen);
 
-		if (::DragDetect(m_list, point))
+		if (::DragDetect(m_list, ptScreen))
 		{
 			m_bBoundSelecting = TRUE;
 

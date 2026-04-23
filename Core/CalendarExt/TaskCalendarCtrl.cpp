@@ -2826,9 +2826,9 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_SIZEWE));
 
 	CPoint ptScreen(ptCursor);
-	ClientToScreen(ptScreen);
+	ClientToScreen(&ptScreen);
 	
-	if (!::DragDetect(GetSafeHwnd(), ptScreen))
+	if (!::DragDetect(*this, ptScreen))
 		return FALSE;
 	
 	SetCapture();

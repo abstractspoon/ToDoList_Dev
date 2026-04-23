@@ -2356,7 +2356,10 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 			if (point.x > rIndentedItem.left)
 			{
-				if (::DragDetect(*this, point))
+				CPoint ptScreen(point);
+				ClientToScreen(&ptScreen);
+
+				if (::DragDetect(*this, ptScreen))
 				{
 					TRACE(_T("CKanbanColumnCtrl::OnLButtonDown(Faking drag start)\n"));
 
@@ -2449,9 +2452,12 @@ BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
 		{
 			m_aSelTaskIDs.InsertAt(0, dwTaskID); // new anchor
 		}
-		else if (!::DragDetect(*this, ::GetMessagePos()))
+		else
 		{
-			Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
+			CPoint ptScreen(::GetMessagePos());
+
+			if (!::DragDetect(*this, ptScreen))
+				Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
 		}
 
 		return TRUE;
@@ -2513,9 +2519,10 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM
 								  HitTestCheckbox(htiHit, point) || 
 								  (HitTestImage(htiHit, point) != KBCI_NONE));
 
-				ClientToScreen(&point);
+				CPoint ptScreen(point);
+				ClientToScreen(&ptScreen);
 
-				if (!bSameTask && !bWantEdit && !::DragDetect(*this, point))
+				if (!bSameTask && !bWantEdit && !::DragDetect(*this, ptScreen))
 				{
 					SelectTask(dwTaskID);
 					bHandled = TRUE;
