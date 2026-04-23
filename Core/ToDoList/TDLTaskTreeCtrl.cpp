@@ -471,7 +471,7 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		{
 			// On Linux filling the background overwrites the tree insertion marker
 			BOOL bFillRow = !OsIsLinux();
-			dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, pTVCD->nmcd.rc, bFillRow);
+			dwRes = OnPostPaintTaskTitle(pTVCD->nmcd, bFillRow);
 		}
 		break;
 	}
@@ -1221,8 +1221,6 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 {
 	ASSERT(hti);
 
-	static BOOL bOsIsLinux = OsIsLinux();
-
 	switch (nArea)
 	{
 	case TDCTR_TEXT:
@@ -1252,7 +1250,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 		{
 			rect.left -= TITLE_BORDER_OFFSET;
 
-			if (bOsIsLinux)
+			if (OsIsLinux())
 				rect.top--;
 			
 			return TRUE;
@@ -1262,7 +1260,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 	case TDCTR_EDIT:
 		if (GetItemTitleRect(hti, TDCTR_BKGND, rect)) // RECURSIVE CALL
 		{
-			if (!bOsIsLinux)
+			if (!OsIsLinux())
 				rect.top--;
 			
 			// return in screen coords

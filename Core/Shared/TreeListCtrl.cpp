@@ -1200,7 +1200,7 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			break;
 			
 		case WM_ERASEBKGND:
-			if (COSVersion() == OSV_LINUX)
+			if (OsIsLinux())
 			{
 				CRect rClient;
 				m_list.GetClientRect(rClient);
@@ -1708,7 +1708,7 @@ BOOL CTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 		rItem.right = rHdrItem.right;
 	}
 
-	if (COSVersion() == OSV_LINUX)
+	if (OsIsLinux())
 		rItem.top--;
 
 	return TRUE;
@@ -1918,8 +1918,8 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				if (bSelected)
 					rItem.right = rClient.right;
 
-				// Below Vista filling the background overwrites the tree insertion marker
-				if (!OsIsXPOrLinux())
+				// On Linux filling the background overwrites the tree insertion marker
+				if (!OsIsLinux())
 					DrawTreeItemBackground(pDC, hti, dwItemData, rItem, bSelected);
 
 				// draw horz gridline

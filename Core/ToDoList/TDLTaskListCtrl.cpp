@@ -300,10 +300,10 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 
 		case CDDS_ITEMPREPAINT:
 			{
-				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				CRect rRow(pLVCD->nmcd.rc);
 
-				if (OsIsXPOrLinux())
+				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
+				if (OsIsXP())
 					ListView_GetItemRect(hwndList, nItem, rRow, LVIR_BOUNDS);
 
 				if (rRow.Width())
@@ -342,7 +342,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 			{
 				// Don't fill the row on XP because it will overwrite
 				// the icon and check-box when hovering with the mouse
-				static BOOL bFillRow = (!OsIsXPOrLinux() || OsIsLinux());
+				BOOL bFillRow = !OsIsXP();
 				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, pLVCD->clrText, pLVCD->clrTextBk, bFillRow);
 				
 				if (bFillRow)
@@ -352,13 +352,11 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArra
 
 		case CDDS_ITEMPOSTPAINT:
 			{
-				CRect rRow(pLVCD->nmcd.rc);
-
 				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
-				if (OsIsXPOrLinux())
-					m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
+				if (OsIsXP())
+					m_lcTasks.GetItemRect(nItem, &pLVCD->nmcd.rc, LVIR_BOUNDS);
 
-				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd, rRow);
+				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd);
 			
 				// restore default back colour set in CDDS_ITEMPREPAINT
 				ListView_SetBkColor(m_lcTasks, GetSysColor(COLOR_WINDOW));

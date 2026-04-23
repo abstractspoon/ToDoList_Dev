@@ -834,15 +834,28 @@ void CTreeListSyncer::InitItemHeights()
 	}
 }
 
+// ---------------------------------------------------
+
+const OSVERSION OSVER = COSVersion();
+
+// ------------------------
+
 BOOL CTreeListSyncer::OsIsXPOrLinux()
 {
-	return (COSVersion() < OSV_VISTA);
+	return (OSVER < OSV_VISTA);
 }
 
 BOOL CTreeListSyncer::OsIsLinux()
 {
-	return (COSVersion() == OSV_LINUX);
+	return (OSVER == OSV_LINUX);
 }
+
+BOOL CTreeListSyncer::OsIsXP()
+{
+	return (OsIsXPOrLinux() && !OsIsLinux());
+}
+
+// ---------------------------------------------------
 
 int CTreeListSyncer::GetItemHeight(HWND hwnd)
 { 
