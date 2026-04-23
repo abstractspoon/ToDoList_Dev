@@ -1144,9 +1144,15 @@ void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 		SetAnchor(htiHit);
 }
 
-BOOL CTreeSelectionHelper::DragDetect(CPoint pt)
+BOOL CTreeSelectionHelper::DragDetect(const CPoint& ptClient)
 {
-	return (!m_bReadOnly && ::DragDetect(m_tree, pt));
+	if (m_bReadOnly)
+		return FALSE;
+	
+	CPoint ptScreen(ptClient);
+	m_tree.ClientToScreen(&ptScreen);
+
+	return ::DragDetect(m_tree, ptScreen);
 }
 
 void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)

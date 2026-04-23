@@ -854,14 +854,20 @@ void CTDLTaskAttributeListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	CRect rSplitBar;
 	GetSplitterRect(rSplitBar);
 
-	if (rSplitBar.PtInRect(point) && ::DragDetect(*this, point))
+	if (rSplitBar.PtInRect(point))
 	{
-		OnCancelEdit();
+		CPoint ptScreen(point);
+		ClientToScreen(&ptScreen);
 
-		m_bSplitting = TRUE;
-		SetCapture();
+		if (::DragDetect(*this, ptScreen))
+		{
+			OnCancelEdit();
 
-		return;
+			m_bSplitting = TRUE;
+			SetCapture();
+
+			return;
+		}
 	}
 
 	CInputListCtrl::OnLButtonDown(nFlags, point);
