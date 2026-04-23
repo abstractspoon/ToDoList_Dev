@@ -330,10 +330,10 @@ BOOL CGanttCtrl::SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bFo
 	}
 
 	if (bForwards)
-		return SelectTask(m_tree.TCH().GetNextItem(hti), select, TRUE);
+		return SelectTask(m_tree.TCH().GetNextItem(hti), select, TRUE); // RECURSIVE CALL
 
 	// else
-	return SelectTask(m_tree.TCH().GetPrevItem(hti), select, FALSE);
+	return SelectTask(m_tree.TCH().GetPrevItem(hti), select, FALSE); // RECURSIVE CALL
 }
 
 void CGanttCtrl::RecalcParentDates()
@@ -472,7 +472,7 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 			CHoldRedraw hr(GetHwnd());
 
 			CDWordSet mapIDs;
-			BuildTaskMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
+			BuildTaskIDMap(pTasks, pTasks->GetFirstTask(), mapIDs, TRUE);
 			
 			RemoveDeletedTasks(NULL, pTasks, mapIDs);
 			UpdateParentStatus(pTasks, pTasks->GetFirstTask(), TRUE);
@@ -492,7 +492,7 @@ void CGanttCtrl::PreFixVScrollSyncBug()
 	// Odd bug: The very last tree item will not scroll into view. 
 	// Expanding and collapsing an item is enough to resolve the issue.
 	HTREEITEM hti = TCH().FindFirstParent();
-		
+
 	if (hti)
 	{
 		TCH().ExpandItem(hti, TRUE);
@@ -757,6 +757,7 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 		// Always update these
 		pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+		pGI->bParent = pTasks->IsTaskParent(hTask);
 	}
 
 	// detect update
@@ -784,7 +785,7 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 	return bChange;
 }
 
-void CGanttCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
+void CGanttCtrl::BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 									  CDWordSet& mapIDs, BOOL bAndSiblings)
 {
 	if (hTask == NULL)
@@ -793,7 +794,7 @@ void CGanttCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	mapIDs.Add(pTasks->GetTaskID(hTask));
 
 	// children
-	BuildTaskMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
+	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE); // RECURSIVE CALL
 
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -803,7 +804,7 @@ void CGanttCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			BuildTaskMap(pTasks, hSibling, mapIDs, FALSE);
+			BuildTaskIDMap(pTasks, hSibling, mapIDs, FALSE);
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
@@ -3605,7 +3606,7 @@ int CGanttCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends, HDC hDC)
 		nFirstItem += (rClip.top / nRowHeight);
 		nLastItem = (nFirstItem + (rClip.Height() / nRowHeight));
 		
-		ASSERT(nLastItem > nFirstItem);
+		ASSERT(nLastItem >= nFirstItem);
 	}
 
 	int nItemCount = m_list.GetItemCount();

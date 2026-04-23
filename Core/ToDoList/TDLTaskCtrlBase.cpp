@@ -4249,7 +4249,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			if (wp == VK_TAB)
 			{
 				HandleTabKey(hRealWnd);
-				return 0L; // eat
+				return 0L; // We handled it
 			}
 			break;
 
@@ -4303,7 +4303,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			if (wp == VK_TAB)
 			{
 				HandleTabKey(hRealWnd);
-				return 0L; // eat
+				return 0L; // We handled it
 			}
 			break;
 
@@ -4416,7 +4416,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				// don't let the selection to be set to -1
 				// when clicking below the last item
 				if (m_lcColumns.HitTest(lp) == -1)
-					return 0L; // eat it
+					return 0L; // We handled it
 			}
 			break;
 
@@ -4431,23 +4431,13 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				// don't let the selection to be set to -1
 				// when clicking below the last item
 				if (m_lcColumns.HitTest(lp) == -1)
-				{
-					CPoint pt(lp);
-					::ClientToScreen(hRealWnd, &pt);
-
-					// we don't want to disable drag selecting
-					if (!::DragDetect(m_lcColumns, pt))
-					{
-						TRACE(_T("Ate Listview ButtonDown\n"));
-						return 0L; // eat it
-					}
-				}
+					return 0L; // We handled it
 			}
 			break;
 				
 		case WM_LBUTTONDOWN:
 			if (HandleListLBtnDown(m_lcColumns, lp))
-				return 0L; // eat it
+				return 0L; // We handled it
 			break;
 		}
 	}
@@ -4613,8 +4603,7 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 					else
 						NotifyParentOfColumnEditClick(nColID, dwTaskID);
 
-					TRACE(_T("Ate Listview LButtonDown\n"));
-					return TRUE; // eat it
+					return TRUE; // We handled it
 				}
 			}
 		}
@@ -4636,9 +4625,10 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 	}
 	else
 	{
-		lc.ClientToScreen(&pt);
+		CPoint ptScreen(pt);
+		lc.ClientToScreen(&ptScreen);
 
-		if (::DragDetect(lc, pt))
+		if (::DragDetect(lc, ptScreen))
 		{
 			m_bBoundSelecting = -1;
 
@@ -4653,10 +4643,10 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 			// cursor ends up outside the window so we use a timer
 			SetTimer(TIMER_BOUNDINGSEL, 50, NULL);
 		}
-		else // prevent deselection
+		else 
 		{
-			TRACE(_T("Ate Listview ButtonDown\n"));
-			return TRUE; // eat it
+			// prevent deselection
+			return TRUE;
 		}
 	}
 

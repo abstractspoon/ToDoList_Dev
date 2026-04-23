@@ -397,7 +397,8 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	CDWordArray aExpanded;
 	GetExpandedState(aExpanded);
 
-	DWORD dwSelID = GetSelectedTaskID();
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs);
 
 	// Stage 1: Update the data structures
 	switch (nUpdate)
@@ -453,7 +454,10 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 				PreFixVScrollSyncBug();
 
 			SetExpandedState(aExpanded);
-			SelectTask(dwSelID);
+			SelectTasks(aSelTaskIDs);
+
+			if (aSelTaskIDs.GetSize())
+				ScrollToSelectedTask();
 
 			UnlockWindowUpdate();
 			EnableResync(TRUE, m_tree);
@@ -631,12 +635,6 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 
 		if (dwParentID)
 		{
-			if (!m_data.HasItem(dwParentID))
-			{
-				ASSERT(0);
-				return FALSE;
-			}
-
 			htiParent = GetTreeItem(dwParentID);
 
 			if (!htiParent)
@@ -644,6 +642,12 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 				ASSERT(0);
 				return FALSE;
 			}
+
+			// Ensure 'parent' status
+			WORKLOADITEM* pWIParent = NULL;
+			GET_WI_RET(dwParentID, pWIParent, FALSE);
+
+			pWIParent->bParent = TRUE;
 		}
 
 		// Before anything else we increment the position of 
@@ -799,7 +803,7 @@ void CWorkloadCtrl::BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	mapIDs.Add(pTasks->GetTaskID(hTask));
 
 	// children
-	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
+	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE); // RECURSIVE CALL
 
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -889,11 +893,13 @@ WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID) const
 
 void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
-	m_dwMaxTaskID = 0;
+	TSH().RemoveAll(TRUE, FALSE);
 
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
 	m_data.RemoveAll();
+
+	m_dwMaxTaskID = 0;
 
 	m_aAllocTo.RemoveAll();
 	m_aAllocTo.Add(_T("")); // unallocated column
@@ -902,8 +908,8 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
 	m_data.RecalculateOverlaps();
 
-	ExpandList();
 	RefreshItemBoldState();
+	ExpandList();
 }
 
 void CWorkloadCtrl::UpdateAllocTo(const ITASKLISTBASE* pTasks)
@@ -1511,7 +1517,7 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		switch (pNMCD->dwDrawStage)
 		{
 		case CDDS_PREPAINT:
-			// only need handle drawing for coloumn sorting or double row height
+			// only need handle drawing for coloumn sorting
 			if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO))
 			{
 				return CDRF_NOTIFYITEMDRAW;
@@ -1559,9 +1565,7 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
 				
 				if (m_sort.IsSingleSortingBy(nColID))
-				{
 					m_treeHeader.DrawItemSortArrow(pDC, nCol, m_sort.single.bAscending);
-				}
 			}
 			break;
 		}

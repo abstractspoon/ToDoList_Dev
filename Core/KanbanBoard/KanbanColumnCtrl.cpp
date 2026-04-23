@@ -2356,7 +2356,10 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 			if (point.x > rIndentedItem.left)
 			{
-				if (::DragDetect(*this, point))
+				CPoint ptScreen(point);
+				ClientToScreen(&ptScreen);
+
+				if (::DragDetect(*this, ptScreen))
 				{
 					TRACE(_T("CKanbanColumnCtrl::OnLButtonDown(Faking drag start)\n"));
 
@@ -2451,10 +2454,9 @@ BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
 		}
 		else
 		{
-			CPoint point = ::GetMessagePos();
-			ScreenToClient(&point);
-			
-			if (!::DragDetect(*this, point))
+			CPoint ptScreen(::GetMessagePos());
+
+			if (!::DragDetect(*this, ptScreen))
 				Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
 		}
 
@@ -2509,15 +2511,19 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM
 			}
 			else
 			{
-				// We need to be careful here not to clear
-				// an existing multiple selection which the 
-				// user intends either to drag or to edit
+				// If we're clicking on an already selected task it's
+				// either the beginning of a multi-selection drag or 
+				// it's a simple click to clear all the other selected
+				// tasks.
 				BOOL bSameTask = IsOnlySelectedTask(dwTaskID);
 				BOOL bWantEdit = (!bLeftBtn ||
 								  HitTestCheckbox(htiHit, point) || 
 								  (HitTestImage(htiHit, point) != KBCI_NONE));
 
-				if (!bSameTask && !bWantEdit && !::DragDetect(*this, point))
+				CPoint ptScreen(point);
+				ClientToScreen(&ptScreen);
+
+				if (!bSameTask && !bWantEdit && !::DragDetect(*this, ptScreen))
 				{
 					SelectTask(dwTaskID);
 					bHandled = TRUE;

@@ -1598,14 +1598,13 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	case WM_LBUTTONDOWN:
 		{
 			SetFocus(); // always
-
-			CPoint ptCursor(lp);
 			
-			if (PtInSplitter(ptCursor))
+			if (PtInSplitter(lp))
 			{
-				::ClientToScreen(hRealWnd, &ptCursor);
+				CPoint ptScreen(lp);
+				::ClientToScreen(hRealWnd, &ptScreen);
 				
-				if (::DragDetect(hRealWnd, ptCursor))
+				if (::DragDetect(hRealWnd, ptScreen))
 				{
 					::SetCapture(hRealWnd);
 					m_bSplitting = TRUE;

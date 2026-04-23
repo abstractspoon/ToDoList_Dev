@@ -908,6 +908,10 @@ void CTreeSelectionHelper::RestoreAnchorSel(HTREEITEM htiAnchor, HTREEITEM htiTr
 
 BOOL CTreeSelectionHelper::FixupTreeSelection()
 {
+	// Make sure all parent are first expanded else trying
+	// to set the tree selection to a hidden task will fail
+	ExpandParentItems(TRUE);
+
 	BOOL bTreeSelChanged = FALSE;
 	HTREEITEM htiTreeSel = m_tree.GetSelectedItem();
 
@@ -1140,9 +1144,15 @@ void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 		SetAnchor(htiHit);
 }
 
-BOOL CTreeSelectionHelper::DragDetect(CPoint pt)
+BOOL CTreeSelectionHelper::DragDetect(const CPoint& ptClient)
 {
-	return (!m_bReadOnly && ::DragDetect(m_tree, pt));
+	if (m_bReadOnly)
+		return FALSE;
+	
+	CPoint ptScreen(ptClient);
+	m_tree.ClientToScreen(&ptScreen);
+
+	return ::DragDetect(m_tree, ptScreen);
 }
 
 void CTreeSelectionHelper::OnTreeRButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)

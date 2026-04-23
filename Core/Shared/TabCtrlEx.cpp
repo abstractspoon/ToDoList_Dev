@@ -825,29 +825,35 @@ void CTabCtrlEx::OnButtonDown(UINT nBtn, UINT /*nFlags*/, CPoint point)
 				// eat so that it does not cause a selection change
 				return;
 			}
-			else if (HasFlag(TCE_DRAGDROP) && (GetItemCount() > 1) && ::DragDetect(GetSafeHwnd(), point))
+			else if (HasFlag(TCE_DRAGDROP) && (GetItemCount() > 1))
 			{
-				m_bDragging = TRUE;
-				m_nDragTab = nHitTab;
-				m_nDropTab = HitTestDropTab(point);
-				m_ptBtnDown = point;
-				m_hwndPreDragFocus = ::GetFocus();
+				CPoint ptScreen(point);
+				ClientToScreen(&point);
 
-				CSize sizeImage;
-				
-				if (CreateDragImage(this, m_ilDragImage, sizeImage))
+				if (::DragDetect(*this, ptScreen))
 				{
-					m_ilDragImage.BeginDrag(0, CPoint(sizeImage.cx / 2, sizeImage.cy / 2));
+					m_bDragging = TRUE;
+					m_nDragTab = nHitTab;
+					m_nDropTab = HitTestDropTab(point);
+					m_ptBtnDown = point;
+					m_hwndPreDragFocus = ::GetFocus();
 
-					ClientToScreen(&point);
-					m_ilDragImage.DragEnter(NULL, point);
+					CSize sizeImage;
+					
+					if (CreateDragImage(this, m_ilDragImage, sizeImage))
+					{
+						m_ilDragImage.BeginDrag(0, CPoint(sizeImage.cx / 2, sizeImage.cy / 2));
+
+						ClientToScreen(&point);
+						m_ilDragImage.DragEnter(NULL, point);
+					}
+
+					SetCapture();
+					SetFocus(); // Required for keyboard cancellation
+
+					// eat so that it does not cause a selection change
+					return;
 				}
-
-				SetCapture();
-				SetFocus(); // Required for keyboard cancellation
-
-				// eat so that it does not cause a selection change
-				return;
 			}
 			break;
 
