@@ -106,7 +106,8 @@ CGanttCtrl::CGanttCtrl()
 	m_crNonWorkingHours(RGB(224, 224, 224)),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
 	m_nDragging(GTLCD_NONE), 
-	m_ptDragStart(0),
+	m_dtDragStart(CDateHelper::NullDate()),
+	m_dtDragMin(CDateHelper::NullDate()),
 	m_ptLastDependPick(0),
 	m_pDependEdit(NULL),
 	m_dwMaxTaskID(0),
@@ -5606,10 +5607,6 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, FALSE);
-	
-	// cache the original task and the start point
-	m_giPreDrag = *pGI;
-	m_ptDragStart = ptCursor;
 
 	// Ensure the gantt item has valid dates
 	COleDateTime dtStart, dtDue;
@@ -5633,10 +5630,27 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 		pGI->SetStartDate(dtStart, TRUE);
 	}
 	
-	// Start dragging
+	// cache the original task and the start point
+	m_giPreDrag = *pGI;
 	m_nDragging = nDrag;
 	m_dtDragMin = m_data.CalcMaxDependencyDate(m_giPreDrag);
 
+	switch (m_nDragging)
+	{
+	case GTLCD_WHOLE:
+		VERIFY(GetDateFromPoint(ptCursor, m_dtDragStart));
+		break;
+
+	case GTLCD_START:
+		m_dtDragStart = dtStart;
+		break;
+
+	case GTLCD_END:
+		m_dtDragStart = dtDue;
+		break;
+	}
+
+	// Start dragging
 	SetFocus();
 	m_list.SetCapture();
 	
@@ -5644,6 +5658,117 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	NotifyParentDragChange();
 
 	return TRUE;
+}
+
+BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
+{
+	ASSERT(!m_bReadOnly);
+	ASSERT(!IsDependencyEditing());
+
+	if (!IsDragging())
+		return FALSE;
+
+	CPoint ptDrag(ptCursor);
+	COleDateTime dtDrag;
+
+	if (ValidateDragPoint(ptDrag) && GetDateFromPoint(ptDrag, dtDrag))
+	{
+		dtDrag = GetNearestDate(dtDrag);
+
+		// if the drag date precedes the min date, constrain
+		// date appropriately and show the 'no drag' cursor
+		BOOL bNoDrag = (CDateHelper::IsDateSet(m_dtDragMin) && (dtDrag < m_dtDragMin));
+		LPCTSTR szCursor = NULL;
+
+		CDateHelper::Max(dtDrag, m_dtDragMin);
+
+		// Calculate the new task position
+		double dDaysOffset = (dtDrag.m_dt - m_dtDragStart.m_dt);
+
+		COleDateTime dtOrgStart, dtOrgEnd;
+		VERIFY(GetTaskStartEndDates(m_giPreDrag, dtOrgStart, dtOrgEnd));
+
+		GANTTITEM* pGI = NULL;
+		GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
+
+		COleDateTime dtCurStart, dtCurEnd;
+		VERIFY(GetTaskStartEndDates(*pGI, dtCurStart, dtCurEnd));
+
+		switch (m_nDragging)
+		{
+		case GTLCD_START:
+			{
+				COleDateTime dtNewStart = (dtOrgStart.m_dt + dDaysOffset);
+
+				// prevent the start and end dates from overlapping
+				if (dtNewStart >= dtCurEnd)
+				{
+					dtNewStart = dtOrgStart;
+					bNoDrag = TRUE;
+				}
+
+				pGI->SetStartDate(dtNewStart);
+				szCursor = IDC_SIZEWE;
+			}
+			break;
+
+		case GTLCD_END:
+			{
+				COleDateTime dtNewEnd = (dtOrgEnd.m_dt + dDaysOffset);
+
+				// prevent the start and end dates from overlapping
+				if (dtNewEnd <= dtCurStart)
+				{
+					dtNewEnd = dtOrgEnd;
+					bNoDrag = TRUE;
+				}
+
+				pGI->SetDueDate(dtNewEnd);
+				szCursor = IDC_SIZEWE;
+			}
+			break;
+
+		case GTLCD_WHOLE:
+			{
+				// Note: If the end date of the dragged task
+				// falls on a day-end GANTTDATERANGE will add
+				// a day because that's all it knows how to do.
+				// We however don't always want it to so we must
+				// detect those times and subtract a day as required
+				COleDateTime dtNewStart = (dtOrgStart.m_dt + dDaysOffset);
+				COleDateTime dtNewEnd = (dtOrgEnd.m_dt + dDaysOffset);
+
+				if (!CDateHelper::DateHasTime(dtNewEnd))
+					dtNewEnd.m_dt--;
+
+				pGI->dtRange.SetStart(dtNewStart);
+				pGI->dtRange.SetEnd(dtNewEnd);
+
+				szCursor = IDC_SIZEALL;
+			}
+			break;
+		}
+		ASSERT(szCursor);
+
+		if (bNoDrag)
+			GraphicsMisc::SetDragDropCursor(GMOC_NO);
+		else
+			GraphicsMisc::SetStandardCursor(szCursor);
+
+		RecalcParentDates();
+		RedrawList();
+		RedrawTree();
+
+		// keep parent informed
+		NotifyParentDragChange();
+	}
+	else
+	{
+		// We've dragged outside the client rect
+		GraphicsMisc::SetDragDropCursor(GMOC_NO);
+	}
+
+	return TRUE; // always
 }
 
 BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
@@ -5712,168 +5837,6 @@ BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
 
 	// else
 	return 0L;
-}
-
-BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
-{
-	ASSERT(!m_bReadOnly);
-	ASSERT(!IsDependencyEditing());
-	
-	if (IsDragging())
-	{
-		COleDateTime dtDrag;
-
-		if (GetValidDragDate(ptCursor, dtDrag))
-		{
-			GANTTITEM* pGI = NULL;
-			GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
-
-			COleDateTime dtCurStart, dtCurDue;
-			GetTaskStartEndDates(*pGI, dtCurStart, dtCurDue);
-
-			// if the drag date precedes the min date, constrain
-			// date appropriately and show the 'no drag' cursor
-			BOOL bNoDrag = (CDateHelper::IsDateSet(m_dtDragMin) && (dtDrag < m_dtDragMin));
-			LPCTSTR szCursor = NULL;
-
-			CDateHelper::Max(dtDrag, m_dtDragMin);
-
-			COleDateTime dtOrgStart, dtOrgDue;
-			GetTaskStartEndDates(m_giPreDrag, dtOrgStart, dtOrgDue);
-
-			switch (m_nDragging)
-			{
-			case GTLCD_START:
-				{
-					// prevent the start and end dates from overlapping
-					if (dtDrag >= dtCurDue)
-					{
-						bNoDrag = (dtOrgStart >= dtCurStart);
-						pGI->SetStartDate(max(dtCurStart, dtOrgStart));
-					}
-					else
-					{
-						pGI->SetStartDate(dtDrag);
-					}
-
-					szCursor = IDC_SIZEWE;
-				}
-				break;
-
-			case GTLCD_END:
-				{
-					// prevent the start and end dates from overlapping
-					if (dtDrag <= dtCurStart)
-					{
-						bNoDrag = (dtOrgDue <= dtCurDue);
-						pGI->SetDueDate(min(dtCurDue, dtOrgDue));
-					}
-					else
-					{
-						pGI->SetDueDate(dtDrag);
-					}
-
-					szCursor = IDC_SIZEWE;
-				}
-				break;
-
-			case GTLCD_WHOLE:
-				{
-					// Note: If the end date of the dragged task
-					// falls on a day-end GANTTDATERANGE will add
-					// a day because that's all it knows how to do.
-					// We however don't always want it to so we must
-					// detect those times and subtract a day as required
-					COleDateTime dtDuration(dtOrgDue - dtOrgStart);
-					COleDateTime dtEnd = (dtDrag + dtDuration);
-					
-					if (!CDateHelper::DateHasTime(dtEnd))
-						dtEnd.m_dt--;
-
-					pGI->dtRange.SetStart(dtDrag);
-					pGI->dtRange.SetEnd(dtEnd);
-
-					szCursor = IDC_SIZEALL;
-				}
-				break;
-			}
-			ASSERT(szCursor);
-
-			if (bNoDrag)
-				GraphicsMisc::SetDragDropCursor(GMOC_NO);
-			else
-				GraphicsMisc::SetStandardCursor(szCursor);
-
-			RecalcParentDates();
-			RedrawList();
-			RedrawTree();
-
-			// keep parent informed
-			NotifyParentDragChange();
-		}
-		else
-		{
-			// We've dragged outside the client rect
-			GraphicsMisc::SetDragDropCursor(GMOC_NO);
-		}
-
-		return TRUE; // always
-	}
-
-	// else
-	return FALSE; // not dragging
-}
-
-BOOL CGanttCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
-{
-	ASSERT(IsDragging());
-	CPoint ptDrag(ptCursor);
-
-	if (!ValidateDragPoint(ptDrag))
-		return FALSE;
-
-	if (!GetDateFromPoint(ptDrag, dtDrag))
-		return FALSE;
-
-	COleDateTime dtPreStart, dtPreEnd;
-	VERIFY(GetTaskStartEndDates(m_giPreDrag, dtPreStart, dtPreEnd));
-
-	switch (m_nDragging)
-	{
-	case GTLCD_WHOLE:
-		{
-			// if dragging the whole task, we calculate dtDrag as the 
-			// original start date plus the difference between the 
-			// current drag pos and the initial drag pos
-			COleDateTime dtOrg;
-			GetDateFromPoint(m_ptDragStart, dtOrg);
-		
-			double dOffset = (dtDrag.m_dt - dtOrg.m_dt);
-			dtDrag = (dtPreStart.m_dt + dOffset);
-		}
-		break;
-
-	case GTLCD_START:
-		// Clip the date to the start of the task being dragged
-		if (dtDrag > dtPreEnd)
-		{
-			dtDrag = dtPreStart;
-			return TRUE;
-		}
-		break;
-
-	case GTLCD_END:
-		// Clip the date to the end of the task being dragged
-		if (dtDrag < dtPreStart)
-		{
-			dtDrag = dtPreEnd;
-			return TRUE;
-		}
-		break;
-	}
-	
-	dtDrag = GetNearestDate(dtDrag);
-	return TRUE;
 }
 
 BOOL CGanttCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const

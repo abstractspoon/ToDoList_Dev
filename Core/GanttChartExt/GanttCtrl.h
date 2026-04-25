@@ -118,8 +118,8 @@ protected:
 
 	COLORREF m_crParent, m_crBarDefault;
 	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHours;
-	COleDateTime m_dtDragMin;
-	CPoint m_ptDragStart, m_ptLastDependPick;
+	COleDateTime m_dtDragStart, m_dtDragMin;
+	CPoint m_ptLastDependPick;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
 	GTLC_MONTH_DISPLAY m_nMonthDisplay;
@@ -285,7 +285,6 @@ protected:
 	void CancelDrag(BOOL bReleaseCapture);
 	BOOL IsDragging() const;
 	void GetDragLimits(CRect& rLimits) const;
-	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
 	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
