@@ -5568,14 +5568,14 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 
 	GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 	
-	DWORD dwTaskID = ListHitTestTask(ptCursor, FALSE, nHit, TRUE);
-	ASSERT((nHit == GTLCHT_NOWHERE) || (dwTaskID != 0));
+	DWORD dwHitTaskID = ListHitTestTask(ptCursor, FALSE, nHit, TRUE);
+	ASSERT((nHit == GTLCHT_NOWHERE) || (dwHitTaskID != 0));
 
 	if (nHit == GTLCHT_NOWHERE)
 		return FALSE;
 
-	if (!TSH().HasItem(GetTreeItem(dwTaskID)))
-		SelectTask(dwTaskID);
+	if (!TSH().HasItem(GetTreeItem(dwHitTaskID)))
+		SelectTask(dwHitTaskID);
 
 	CPoint ptScreen(ptCursor);
 	m_list.ClientToScreen(&ptScreen);
@@ -5589,41 +5589,59 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	GTLC_DRAG nDragging = MapHitTestToDrag(nHit);
 	ASSERT(GANTTBARDRAGINFO::IsDragging(nDragging));
 	
-	if (!CanDragTask(dwTaskID, nDragging))
+	if (!CanDragTask(dwHitTaskID, nDragging))
 	{
 		MessageBeep(MB_ICONEXCLAMATION);
 		return FALSE;
 	}
 	
-	GANTTITEM* pGI = NULL;
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	// Initialise the drag info structure
+	// Weeding out any non-draggable tasks as we go
+	CDWordArray aSelIDs;
+	int nID = TSH().GetItemData(aSelIDs);
 
-	// Ensure the gantt item has valid dates
-	COleDateTime dtStart, dtDue;
-	GetTaskStartEndDates(*pGI, dtStart, dtDue);
-	
-	if (!pGI->HasDueDate())
+	while (nID--)
 	{
-		if (!CDateHelper::IsDateSet(dtDue))
-			return FALSE;
+		DWORD dwTaskID = aSelIDs[nID];
+
+		if (!CanDragTask(dwTaskID, nDragging))
+		{
+			aSelIDs.RemoveAt(nID);
+			continue;
+		}
 
 		// else
-		pGI->SetDueDate(dtDue, TRUE);
-	}
-	
-	if (!pGI->HasStartDate())
-	{
-		if (!CDateHelper::IsDateSet(dtStart))
-			return FALSE;
+		GANTTITEM* pGI = m_data.GetItem(dwTaskID, TRUE);
+		ASSERT(pGI);
 
-		// else
-		pGI->SetStartDate(dtStart, TRUE);
-	}
+		m_barDragInfo.aGIPreDrag.Add(*pGI);
+
+		// Ensure the gantt item has valid dates for dragging
+		COleDateTime dtStart, dtDue;
+		GetTaskStartEndDates(*pGI, dtStart, dtDue);
 	
-	// cache the original task and the start point
-	m_barDragInfo.aGIPreDrag.Add(*pGI);
+		if (!pGI->HasDueDate())
+		{
+			if (!CDateHelper::IsDateSet(dtDue))
+				return FALSE;
+
+			// else
+			pGI->SetDueDate(dtDue, TRUE);
+		}
+
+		if (!pGI->HasStartDate())
+		{
+			if (!CDateHelper::IsDateSet(dtStart))
+				return FALSE;
+
+			// else
+			pGI->SetStartDate(dtStart, TRUE);
+		}
+
+		CDateHelper::Max(m_barDragInfo.dtDragMin, m_data.CalcMaxDependencyDate(*pGI));
+	}
+
 	m_barDragInfo.nDragging = nDragging;
-	m_barDragInfo.dtDragMin = m_data.CalcMaxDependencyDate(*pGI);
 
 	switch (nDragging)
 	{
@@ -5632,11 +5650,19 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 		break;
 
 	case GTLCD_START:
-		m_barDragInfo.dtDragStart = dtStart;
-		break;
-
 	case GTLCD_END:
-		m_barDragInfo.dtDragStart = dtDue;
+		{
+			GANTTITEM* pGIHit = m_data.GetItem(dwHitTaskID, TRUE);
+			ASSERT(pGIHit);
+
+			COleDateTime dtStart, dtDue;
+			GetTaskStartEndDates(*pGIHit, dtStart, dtDue);
+
+			if (nDragging == GTLCD_START)
+				m_barDragInfo.dtDragStart = dtStart;
+			else
+				m_barDragInfo.dtDragStart = dtDue;
+		}
 		break;
 	}
 
@@ -5673,74 +5699,80 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 			bNoDrag = TRUE;
 		}
 
-		// Calculate the new task position
+		// Calculate each new task's position
 		double dDaysOffset = (dtDrag.m_dt - m_barDragInfo.dtDragStart.m_dt);
 
-		COleDateTime dtOrgStart, dtOrgEnd;
-		const GANTTITEM& giPreDrag = m_barDragInfo.aGIPreDrag[0];
+		int nTask = m_barDragInfo.aGIPreDrag.GetSize();
 
-		VERIFY(GetTaskStartEndDates(giPreDrag, dtOrgStart, dtOrgEnd));
-
-		GANTTITEM* pGI = NULL;
-		GET_GI_RET(giPreDrag.dwTaskID, pGI, FALSE);
-
-		COleDateTime dtCurStart, dtCurEnd;
-		VERIFY(GetTaskStartEndDates(*pGI, dtCurStart, dtCurEnd));
-
-		switch (m_barDragInfo.nDragging)
+		while (nTask--)
 		{
-		case GTLCD_START:
-			{
-				COleDateTime dtNewStart = (dtOrgStart.m_dt + dDaysOffset);
+			COleDateTime dtOrgStart, dtOrgEnd;
+			const GANTTITEM& giPreDrag = m_barDragInfo.aGIPreDrag[nTask];
 
-				// prevent the start and end dates from overlapping
-				if (dtNewStart >= dtCurEnd)
+			VERIFY(GetTaskStartEndDates(giPreDrag, dtOrgStart, dtOrgEnd));
+
+			GANTTITEM* pGI = NULL;
+			GET_GI_RET(giPreDrag.dwTaskID, pGI, FALSE);
+
+			COleDateTime dtCurStart, dtCurEnd;
+			VERIFY(GetTaskStartEndDates(*pGI, dtCurStart, dtCurEnd));
+
+			switch (m_barDragInfo.nDragging)
+			{
+			case GTLCD_START:
 				{
-					dtNewStart = dtOrgStart;
-					bNoDrag = TRUE;
+					COleDateTime dtNewStart = (dtOrgStart.m_dt + dDaysOffset);
+
+					// prevent the start and end dates from overlapping
+					if (dtNewStart >= dtCurEnd)
+					{
+						dtNewStart = dtOrgStart;
+						bNoDrag = TRUE;
+					}
+
+					pGI->SetStartDate(dtNewStart);
+					szCursor = IDC_SIZEWE;
 				}
+				break;
 
-				pGI->SetStartDate(dtNewStart);
-				szCursor = IDC_SIZEWE;
-			}
-			break;
-
-		case GTLCD_END:
-			{
-				COleDateTime dtNewEnd = (dtOrgEnd.m_dt + dDaysOffset);
-
-				// prevent the start and end dates from overlapping
-				if (dtNewEnd <= dtCurStart)
+			case GTLCD_END:
 				{
-					dtNewEnd = dtOrgEnd;
-					bNoDrag = TRUE;
+					COleDateTime dtNewEnd = (dtOrgEnd.m_dt + dDaysOffset);
+
+					// prevent the start and end dates from overlapping
+					if (dtNewEnd <= dtCurStart)
+					{
+						dtNewEnd = dtOrgEnd;
+						bNoDrag = TRUE;
+					}
+
+					pGI->SetDueDate(dtNewEnd);
+					szCursor = IDC_SIZEWE;
 				}
+				break;
 
-				pGI->SetDueDate(dtNewEnd);
-				szCursor = IDC_SIZEWE;
+			case GTLCD_WHOLE:
+				{
+					// Note: If the end date of the dragged task
+					// falls on a day-end GANTTDATERANGE will add
+					// a day because that's all it knows how to do.
+					// We however don't always want it to so we must
+					// detect those times and subtract a day as required
+					COleDateTime dtNewStart = (dtOrgStart.m_dt + dDaysOffset);
+					COleDateTime dtNewEnd = (dtOrgEnd.m_dt + dDaysOffset);
+
+					if (!CDateHelper::DateHasTime(dtNewEnd))
+						dtNewEnd.m_dt--;
+
+					pGI->dtRange.SetStart(dtNewStart);
+					pGI->dtRange.SetEnd(dtNewEnd);
+
+					szCursor = IDC_SIZEALL;
+				}
+				break;
 			}
-			break;
-
-		case GTLCD_WHOLE:
-			{
-				// Note: If the end date of the dragged task
-				// falls on a day-end GANTTDATERANGE will add
-				// a day because that's all it knows how to do.
-				// We however don't always want it to so we must
-				// detect those times and subtract a day as required
-				COleDateTime dtNewStart = (dtOrgStart.m_dt + dDaysOffset);
-				COleDateTime dtNewEnd = (dtOrgEnd.m_dt + dDaysOffset);
-
-				if (!CDateHelper::DateHasTime(dtNewEnd))
-					dtNewEnd.m_dt--;
-
-				pGI->dtRange.SetStart(dtNewStart);
-				pGI->dtRange.SetEnd(dtNewEnd);
-
-				szCursor = IDC_SIZEALL;
-			}
-			break;
 		}
+
 		ASSERT(szCursor);
 
 		if (bNoDrag)
