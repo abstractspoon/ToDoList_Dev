@@ -2093,15 +2093,13 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 		break;
 		
 	case TDCA_OFFSETTASK:
-		if (dwTaskID != 0)
 		{
-			ASSERT(0);
-		}
-		else
-		{
-			ASSERT(GetSingleSelectedTaskID());
+			COleDateTime dtNewStart = CDateHelper::GetDate(mod.tValue);
 
-			bChange = ExtensionMoveSelectedTaskStartAndDueDates(CDateHelper::GetDate(mod.tValue));
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.OffsetTaskStartAndDueDates(dwTaskID, dtNewStart));
+			else
+				bChange = ExtensionMoveSelectedTaskStartAndDueDates(dtNewStart);
 		}
 		break;
 
@@ -2173,8 +2171,8 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 
 BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTime& dtNewStart)
 {
-	if (GetSelectedTaskCount() > 1)
-		return FALSE;
+// 	if (GetSelectedTaskCount() > 1)
+// 		return FALSE;
 
 	if (!CToDoCtrl::CanEditSelectedTask(TDCA_STARTDATE))
 		return FALSE;
@@ -2183,21 +2181,38 @@ BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTi
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	DWORD dwTaskID = GetSelectedTaskID();
-	TDC_SET nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, dtNewStart);
+	CDWordArray aModTaskIDs;
+	POSITION pos = TSH().GetFirstItemPos();
 
-	if (nRes != SET_CHANGE)
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		HandleModResult(dwTaskID, m_data.OffsetTaskStartAndDueDates(dwTaskID, dtNewStart), aModTaskIDs);
+	}
+
+	if (!aModTaskIDs.GetSize())
 		return FALSE;
 
-	// else
-	CDWordArray aModTaskIDs;
-	aModTaskIDs.Add(dwTaskID);
-
 	CToDoCtrl::SetModified(TDCA_OFFSETTASK, aModTaskIDs);
-
 	UpdateControls(FALSE); // don't update comments
 
 	return TRUE;
+
+// 	DWORD dwTaskID = GetSelectedTaskID();
+// 	TDC_SET nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, dtNewStart);
+// 
+// 	if (nRes != SET_CHANGE)
+// 		return FALSE;
+// 
+// 	// else
+// 	CDWordArray aModTaskIDs;
+// 	aModTaskIDs.Add(dwTaskID);
+// 
+// 	CToDoCtrl::SetModified(TDCA_OFFSETTASK, aModTaskIDs);
+// 
+// 	UpdateControls(FALSE); // don't update comments
+// 
+// 	return TRUE;
 }
 
 LRESULT CTabbedToDoCtrl::OnUIExtSetTasklistMetaData(WPARAM wParam, LPARAM lParam)

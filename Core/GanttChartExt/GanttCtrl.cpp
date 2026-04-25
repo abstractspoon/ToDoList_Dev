@@ -1856,28 +1856,25 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 
 BOOL CGanttCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
 {
-	if (nHit != GTLCHT_NOWHERE)
+	if ((nHit != GTLCHT_NOWHERE) && dwTaskID)
 	{
 		GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
 		ASSERT(IsDragging(nDrag));
 
-		if (dwTaskID != 0)
+		if (!CanDragTask(dwTaskID, nDrag))
 		{
-			if (!CanDragTask(dwTaskID, nDrag))
-			{
-				// Locked tasks should have been handled in WM_SETCURSOR
-				ASSERT(!m_data.ItemIsLocked(dwTaskID, FALSE));
+			// Locked tasks should have been handled in WM_SETCURSOR
+			ASSERT(!m_data.ItemIsLocked(dwTaskID, FALSE));
 
-				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
-			}
-			else
+			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+		}
+		else
+		{
+			switch (nDrag)
 			{
-				switch (nDrag)
-				{
-				case GTLCD_START:
-				case GTLCD_END:
-					return GraphicsMisc::SetStandardCursor(IDC_SIZEWE);
-				}
+			case GTLCD_START:
+			case GTLCD_END:
+				return GraphicsMisc::SetStandardCursor(IDC_SIZEWE);
 			}
 		}
 	}
@@ -1969,14 +1966,21 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 		case WM_LBUTTONDOWN:
 			if (!IsDependencyEditing())
 			{
-				// We can't begin dragging from OnListLButtonDown because we need to
-				// let the default handling occur first to ensure that a newly
-				// selected task is properly initialised
-				LRESULT lr = CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
+				// If it's a unselected task we need to let the default handling
+				// occur first to ensure that a newly selected task is properly initialised
+				int nHit = m_list.HitTest(lp);
 
-				StartDragging(lp);
+				if ((nHit != -1) && !TSH().IsItemSelected(GetTreeItem(nHit), FALSE))
+				{
+					LRESULT lr = CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 
-				return lr;
+					StartDragging(lp);
+					return lr;
+				}
+				else if (StartDragging(lp))
+				{
+					return 0L;
+				}
 			}
 			break;
 		}
@@ -5545,8 +5549,8 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 		return FALSE;
 
 	// Disable for multi-selection (for now)
-	if ((TSH().GetCount() > 1) && TSH().HasItem(dwTaskID))
-		return FALSE;
+// 	if ((TSH().GetCount() > 1) && TSH().HasItem(dwTaskID))
+// 		return FALSE;
 
 	// else
 	switch (nDrag)
@@ -5565,8 +5569,8 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 {
 	// Disable for multi-selection (for now)
-	if (TSH().GetCount() != 1)
-		return FALSE;
+// 	if (TSH().GetCount() != 1)
+// 		return FALSE;
 
 	ASSERT(!m_bReadOnly);
 	ASSERT(!IsDependencyEditing());
@@ -5577,15 +5581,6 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	ASSERT((nHit == GTLCHT_NOWHERE) || (dwTaskID != 0));
 
 	if (nHit == GTLCHT_NOWHERE)
-		return FALSE;
-
-	if (dwTaskID != GetSelectedTaskID())
-		SelectTask(dwTaskID);
-
-	CPoint ptScreen(ptCursor);
-	m_list.ClientToScreen(&ptScreen);
-	
-	if (!::DragDetect(m_list, ptScreen))
 		return FALSE;
 
 	// We save the check for drag-ability until
@@ -5600,6 +5595,15 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 		return FALSE;
 	}
 	
+	if (!TSH().HasItem(GetTreeItem(dwTaskID)))
+		SelectTask(dwTaskID);
+
+	CPoint ptScreen(ptCursor);
+	m_list.ClientToScreen(&ptScreen);
+	
+	if (!::DragDetect(m_list, ptScreen))
+		return FALSE;
+
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
