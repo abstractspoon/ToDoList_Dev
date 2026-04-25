@@ -5653,9 +5653,6 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	// Start dragging
 	SetFocus();
 	m_list.SetCapture();
-	
-	// keep parent informed
-	NotifyParentDragChange();
 
 	return TRUE;
 }
@@ -5758,9 +5755,6 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 		RecalcParentDates();
 		RedrawList();
 		RedrawTree();
-
-		// keep parent informed
-		NotifyParentDragChange();
 	}
 	else
 	{
@@ -5802,8 +5796,6 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 				RestoreGanttItem(m_giPreDrag);
 			else
 				RecalcDateRange();
-
-			NotifyParentDragChange();
 		}
 
 		return TRUE;
@@ -5817,14 +5809,6 @@ BOOL CGanttCtrl::DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2)
 {
 	return ((gi1.dtRange.GetStart() != gi2.dtRange.GetStart()) || 
 			(gi1.dtRange.GetEnd() != gi2.dtRange.GetEnd()));
-}
-
-void CGanttCtrl::NotifyParentDragChange()
-{
-	ASSERT(!m_bReadOnly);
-	ASSERT(GetSelectedTaskID());
-
-	GetParent()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
 }
 
 BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
@@ -5908,9 +5892,6 @@ void CGanttCtrl::CancelDrag(BOOL bReleaseCapture)
 	// cancel drag, restoring original task dates
 	RestoreGanttItem(m_giPreDrag);
 	m_nDragging = GTLCD_NONE;
-
-	// keep parent informed
-	NotifyParentDragChange();
 }
 
 void CGanttCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const

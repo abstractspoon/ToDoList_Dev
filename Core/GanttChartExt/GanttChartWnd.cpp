@@ -99,7 +99,6 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 
 	ON_REGISTERED_MESSAGE(WM_GTLC_EDITTASKTITLE, OnGanttEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_GTLC_DATECHANGE, OnGanttNotifyDateChange)
-	ON_REGISTERED_MESSAGE(WM_GTLC_DRAGCHANGE, OnGanttNotifyDragChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_COMPLETIONCHANGE, OnGanttNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYSORT, OnGanttNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYZOOM, OnGanttNotifyZoomChange)
@@ -1161,20 +1160,6 @@ void CGanttChartWnd::UpdateActiveRangeLabel()
 {
 	CString sRange = m_sliderDateRange.FormatRange();
 	SetDlgItemText(IDC_ACTIVEDATERANGE_TEXT, sRange);
-}
-
-LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-/*
-	// save snap changes as we go
-	GTLC_SNAPMODE nSnap = (GTLC_SNAPMODE)wp;
-	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
-
-	m_mapDisplaySnapModes[nDisplay] = nSnap;
-	m_cbSnapModes.SelectMode(nSnap);
-*/
-
-	return 0L;
 }
 
 void CGanttChartWnd::OnGanttGotoToday() 

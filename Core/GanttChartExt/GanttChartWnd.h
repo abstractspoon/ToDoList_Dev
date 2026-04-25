@@ -118,7 +118,6 @@ protected:
 	afx_msg LRESULT OnGanttEditTaskTitle(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifySelChanged(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyDateChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnGanttNotifyDragChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyCompletionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifySortChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp);
