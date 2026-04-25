@@ -5574,8 +5574,17 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	if (nHit == GTLCHT_NOWHERE)
 		return FALSE;
 
+	if (!TSH().HasItem(GetTreeItem(dwTaskID)))
+		SelectTask(dwTaskID);
+
+	CPoint ptScreen(ptCursor);
+	m_list.ClientToScreen(&ptScreen);
+	
+	if (!::DragDetect(m_list, ptScreen))
+		return FALSE;
+
 	// We save the check for drag-ability until
-	// after we detect that a drag has been started
+	// AFTER we detect that a drag has been started
 	// to avoid beeping on a simple click
 	GTLC_DRAG nDragging = MapHitTestToDrag(nHit);
 	ASSERT(GANTTBARDRAGINFO::IsDragging(nDragging));
@@ -5586,15 +5595,6 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 		return FALSE;
 	}
 	
-	if (!TSH().HasItem(GetTreeItem(dwTaskID)))
-		SelectTask(dwTaskID);
-
-	CPoint ptScreen(ptCursor);
-	m_list.ClientToScreen(&ptScreen);
-	
-	if (!::DragDetect(m_list, ptScreen))
-		return FALSE;
-
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 
