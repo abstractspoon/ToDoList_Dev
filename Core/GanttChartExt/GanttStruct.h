@@ -133,6 +133,26 @@ struct GANTTITEM
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct GANTTBARDRAGINFO
+{
+	GANTTBARDRAGINFO();
+
+	void Reset();
+	BOOL IsDragging() const;
+	BOOL IsValidDrag(const COleDateTime& dtDrag) const;
+
+	static BOOL IsDragging(GTLC_DRAG nDrag);
+	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
+
+	GTLC_DRAG nDragging;
+	COleDateTime dtDragStart;
+	COleDateTime dtDragMin;
+
+	CArray<GANTTITEM, GANTTITEM&> aGIPreDrag;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CGanttItemMap : public CMap<DWORD, DWORD, GANTTITEM*, GANTTITEM*&>
 {
 public:

@@ -109,8 +109,8 @@ public:
 
 protected:
 	GANTTDATERANGE m_dtDataRange, m_dtActiveRange;
-	GANTTITEM m_giPreDrag;
 	GANTTSORT m_sort;
+	GANTTBARDRAGINFO m_barDragInfo;
 
 	IGanttDependencyEditor* m_pDependEdit;
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
@@ -118,7 +118,6 @@ protected:
 
 	COLORREF m_crParent, m_crBarDefault;
 	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHours;
-	COleDateTime m_dtDragStart, m_dtDragMin;
 	CPoint m_ptLastDependPick;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
@@ -126,7 +125,6 @@ protected:
 	GTLC_PARENTCOLORING m_nParentColoring;
 	int m_nMonthWidth;
 	CString m_sMilestoneTag;
-	GTLC_DRAG m_nDragging;
 	GTLC_SNAPMODE m_nDefSnapMode;
 
 	CGanttItemMap m_data;
@@ -283,7 +281,7 @@ protected:
 	BOOL ValidateDragPoint(CPoint& ptDrag) const;
 	BOOL IsValidDragPoint(const CPoint& ptDrag) const;
 	void CancelDrag(BOOL bReleaseCapture);
-	BOOL IsDragging() const;
+	BOOL IsDragging() const { return m_barDragInfo.IsDragging(); }
 	void GetDragLimits(CRect& rLimits) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
@@ -339,8 +337,6 @@ protected:
 	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
 	static BOOL GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
 	static BOOL IsVerticalDivider(VERT_DIV nType);
-	static BOOL IsDragging(GTLC_DRAG nDrag);
-	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
 
 private:
 	void PreFixVScrollSyncBug();

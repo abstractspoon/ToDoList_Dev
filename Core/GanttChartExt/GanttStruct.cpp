@@ -1196,3 +1196,36 @@ BOOL GANTTSORT::Set(const GANTTSORTCOLUMNS& sort)
 
 /////////////////////////////////////////////////////////////////////////////
 
+GANTTBARDRAGINFO::GANTTBARDRAGINFO()
+{
+	Reset();
+}
+
+void GANTTBARDRAGINFO::Reset()
+{
+	nDragging = GTLCD_NONE;
+	dtDragStart = dtDragMin = CDateHelper::NullDate();
+	aGIPreDrag.RemoveAll();
+}
+
+BOOL GANTTBARDRAGINFO::IsDragging() const
+{
+	return IsDragging(nDragging);
+}
+
+BOOL GANTTBARDRAGINFO::IsDragging(GTLC_DRAG nDrag)
+{
+	return ((nDrag != GTLCD_ANY) && (nDrag != GTLCD_NONE));
+}
+
+BOOL GANTTBARDRAGINFO::IsDraggingEnds(GTLC_DRAG nDrag)
+{
+	return ((nDrag == GTLCD_START) || (nDrag == GTLCD_END));
+}
+
+BOOL GANTTBARDRAGINFO::IsValidDrag(const COleDateTime& dtDrag) const
+{
+	return (!CDateHelper::IsDateSet(dtDragMin) || (dtDrag >= dtDragMin));
+}
+
+/////////////////////////////////////////////////////////////////////////////

@@ -105,9 +105,9 @@ CGanttCtrl::CGanttCtrl()
 	m_crWeekend(RGB(224, 224, 224)),
 	m_crNonWorkingHours(RGB(224, 224, 224)),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
-	m_nDragging(GTLCD_NONE), 
-	m_dtDragStart(CDateHelper::NullDate()),
-	m_dtDragMin(CDateHelper::NullDate()),
+// 	m_nDragging(GTLCD_NONE), 
+// 	m_dtDragStart(CDateHelper::NullDate()),
+// 	m_dtDragMin(CDateHelper::NullDate()),
 	m_ptLastDependPick(0),
 	m_pDependEdit(NULL),
 	m_dwMaxTaskID(0),
@@ -1860,7 +1860,7 @@ BOOL CGanttCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
 	if ((nHit != GTLCHT_NOWHERE) && dwTaskID)
 	{
 		GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
-		ASSERT(IsDragging(nDrag));
+		ASSERT(GANTTBARDRAGINFO::IsDragging(nDrag));
 
 		if (!CanDragTask(dwTaskID, nDrag))
 		{
@@ -2012,10 +2012,15 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 		case WM_KEYDOWN:
 			// Even though we are dragging in the list, the focus is on the tree
-			if (wp == VK_ESCAPE && IsDragging())
+			switch (wp)
 			{
-				CancelDrag(TRUE);
-				return 0L; // eat
+			case VK_ESCAPE:
+				if (IsDragging())
+				{
+					CancelDrag(TRUE);
+					return 0L; // eat
+				}
+				break;
 			}
 			break;
 
@@ -5488,21 +5493,6 @@ DWORD CGanttCtrl::GetTaskID(int nItem) const
 	return GetItemData(GetTreeItem(nItem));
 }
 
-BOOL CGanttCtrl::IsDragging() const
-{
-	return IsDragging(m_nDragging);
-}
-
-BOOL CGanttCtrl::IsDragging(GTLC_DRAG nDrag)
-{
-	return ((nDrag != GTLCD_ANY) && (nDrag != GTLCD_NONE));
-}
-
-BOOL CGanttCtrl::IsDraggingEnds(GTLC_DRAG nDrag)
-{
-	return ((nDrag == GTLCD_START) || (nDrag == GTLCD_END));
-}
-
 BOOL CGanttCtrl::IsValidDragPoint(const CPoint& ptDrag) const
 {
 	if (!IsDragging())
@@ -5587,10 +5577,10 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	// We save the check for drag-ability until
 	// after we detect that a drag has been started
 	// to avoid beeping on a simple click
-	GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
-	ASSERT(IsDragging(nDrag));
+	GTLC_DRAG nDragging = MapHitTestToDrag(nHit);
+	ASSERT(GANTTBARDRAGINFO::IsDragging(nDragging));
 	
-	if (!CanDragTask(dwTaskID, nDrag))
+	if (!CanDragTask(dwTaskID, nDragging))
 	{
 		MessageBeep(MB_ICONEXCLAMATION);
 		return FALSE;
@@ -5631,22 +5621,22 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	}
 	
 	// cache the original task and the start point
-	m_giPreDrag = *pGI;
-	m_nDragging = nDrag;
-	m_dtDragMin = m_data.CalcMaxDependencyDate(m_giPreDrag);
+	m_barDragInfo.aGIPreDrag.Add(*pGI);
+	m_barDragInfo.nDragging = nDragging;
+	m_barDragInfo.dtDragMin = m_data.CalcMaxDependencyDate(*pGI);
 
-	switch (m_nDragging)
+	switch (nDragging)
 	{
 	case GTLCD_WHOLE:
-		VERIFY(GetDateFromPoint(ptCursor, m_dtDragStart));
+		VERIFY(GetDateFromPoint(ptCursor, m_barDragInfo.dtDragStart));
 		break;
 
 	case GTLCD_START:
-		m_dtDragStart = dtStart;
+		m_barDragInfo.dtDragStart = dtStart;
 		break;
 
 	case GTLCD_END:
-		m_dtDragStart = dtDue;
+		m_barDragInfo.dtDragStart = dtDue;
 		break;
 	}
 
@@ -5674,24 +5664,30 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 
 		// if the drag date precedes the min date, constrain
 		// date appropriately and show the 'no drag' cursor
-		BOOL bNoDrag = (CDateHelper::IsDateSet(m_dtDragMin) && (dtDrag < m_dtDragMin));
+		BOOL bNoDrag = FALSE;
 		LPCTSTR szCursor = NULL;
 
-		CDateHelper::Max(dtDrag, m_dtDragMin);
+		if (!m_barDragInfo.IsValidDrag(dtDrag))
+		{
+			CDateHelper::Max(dtDrag, m_barDragInfo.dtDragMin);
+			bNoDrag = TRUE;
+		}
 
 		// Calculate the new task position
-		double dDaysOffset = (dtDrag.m_dt - m_dtDragStart.m_dt);
+		double dDaysOffset = (dtDrag.m_dt - m_barDragInfo.dtDragStart.m_dt);
 
 		COleDateTime dtOrgStart, dtOrgEnd;
-		VERIFY(GetTaskStartEndDates(m_giPreDrag, dtOrgStart, dtOrgEnd));
+		const GANTTITEM& giPreDrag = m_barDragInfo.aGIPreDrag[0];
+
+		VERIFY(GetTaskStartEndDates(giPreDrag, dtOrgStart, dtOrgEnd));
 
 		GANTTITEM* pGI = NULL;
-		GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
+		GET_GI_RET(giPreDrag.dwTaskID, pGI, FALSE);
 
 		COleDateTime dtCurStart, dtCurEnd;
 		VERIFY(GetTaskStartEndDates(*pGI, dtCurStart, dtCurEnd));
 
-		switch (m_nDragging)
+		switch (m_barDragInfo.nDragging)
 		{
 		case GTLCD_START:
 			{
@@ -5780,23 +5776,23 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 			return FALSE;
 		}
 
-		GTLC_DRAG nDrag = m_nDragging;
+		GTLC_DRAG nDrag = m_barDragInfo.nDragging;
 		
 		// cleanup
-		m_nDragging = GTLCD_NONE;
+		m_barDragInfo.Reset();
 		::ReleaseCapture();
 
-		GANTTITEM* pGI = NULL;
-		GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
-
-		// keep parent informed
-		if (DragDatesDiffer(*pGI, m_giPreDrag))
-		{
-			if (!NotifyParentDateChange(nDrag))
-				RestoreGanttItem(m_giPreDrag);
-			else
-				RecalcDateRange();
-		}
+// 		GANTTITEM* pGI = NULL;
+// 		GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
+// 
+// 		// keep parent informed
+// 		if (DragDatesDiffer(*pGI, m_giPreDrag))
+// 		{
+// 			if (!NotifyParentDateChange(nDrag))
+// 				RestoreGanttItem(m_giPreDrag);
+// 			else
+// 				RecalcDateRange();
+// 		}
 
 		return TRUE;
 	}
@@ -5816,8 +5812,8 @@ BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
 	ASSERT(!m_bReadOnly);
 	ASSERT(GetSelectedTaskID());
 
-	if (IsDragging(nDrag))
-		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
+// 	if (IsDragging(nDrag))
+// 		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
 
 	// else
 	return 0L;
@@ -5890,8 +5886,8 @@ void CGanttCtrl::CancelDrag(BOOL bReleaseCapture)
 		ReleaseCapture();
 	
 	// cancel drag, restoring original task dates
-	RestoreGanttItem(m_giPreDrag);
-	m_nDragging = GTLCD_NONE;
+	RestoreGanttItem(m_barDragInfo.aGIPreDrag[0]);
+	m_barDragInfo.Reset();
 }
 
 void CGanttCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const
@@ -6075,7 +6071,7 @@ COleDateTime CGanttCtrl::GetNearestDate(const COleDateTime& dtDrag) const
 {
 	ASSERT(IsDragging());
 
-	BOOL bDraggingEnd = (m_nDragging == GTLCD_END);
+	BOOL bDraggingEnd = (m_barDragInfo.nDragging == GTLCD_END);
 
 	switch (GetSnapMode())
 	{
