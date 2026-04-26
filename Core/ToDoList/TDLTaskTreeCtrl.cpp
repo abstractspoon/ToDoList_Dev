@@ -1103,6 +1103,9 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 		case WM_LBUTTONDOWN:
+			// We only handle extended selection here and let the
+			// base class handle simple selection and column clicks
+			if (0 != (wp & (MK_CONTROL | MK_SHIFT)))
 			{
 				BOOL bSelChange = FALSE;
 				TSH().OnListLButtonDown(wp, lp, bSelChange);
