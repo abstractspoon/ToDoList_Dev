@@ -479,7 +479,9 @@ BOOL GANTTITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, 
 		{
 			// take earlier of due or completed date
 			dtStart = CDateHelper::GetDateOnly(dtDue);
-			CDateHelper::Min(dtStart, CDateHelper::GetDateOnly(dtDone));
+
+			if (bDoneSet)
+				CDateHelper::Min(dtStart, CDateHelper::GetDateOnly(dtDone));
 	
 			// take the earlier of that and 'today'
 			CDateHelper::Min(dtStart, CDateHelper::GetDate(DHD_TODAY));
