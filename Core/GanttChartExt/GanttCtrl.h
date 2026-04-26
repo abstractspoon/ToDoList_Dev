@@ -265,7 +265,7 @@ protected:
 	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
 
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
-	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const;
+	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit) const;
 	DWORD ListDependencyHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
 	int GetDependencyListItem(DWORD dwTaskID) const;
 	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);

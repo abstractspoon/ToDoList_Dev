@@ -170,6 +170,7 @@ public:
 
 	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	BOOL ItemIsReference(DWORD dwTaskID) const;
+	BOOL ItemIsParent(DWORD dwTaskID) const;
 	BOOL ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL ItemHasDependencies(DWORD dwTaskID) const;
 	BOOL IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const;

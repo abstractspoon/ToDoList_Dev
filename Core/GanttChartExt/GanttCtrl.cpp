@@ -1810,7 +1810,7 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		// calc new 'To' point to see if anything has actually changed
 
 		GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-		DWORD dwToTaskID = ListHitTestTask(ptClient, FALSE, nHit, TRUE);
+		DWORD dwToTaskID = ListHitTestTask(ptClient, FALSE, nHit);
 		CPoint ptTo;
 		
 		if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
@@ -1925,7 +1925,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				{
 					GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 
-					DWORD dwHitID = ListHitTestTask(ptCursor, FALSE, nHit, TRUE);
+					DWORD dwHitID = ListHitTestTask(ptCursor, FALSE, nHit);
 					ASSERT((nHit == GTLCHT_NOWHERE) || (dwHitID != 0));
 
 					if (SetListTaskCursor(dwHitID, nHit))
@@ -5388,7 +5388,7 @@ BOOL CGanttCtrl::GetListItemRect(int nItem, CRect& rItem) const
 	return FALSE;
 }
 
-DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const
+DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit) const
 {
 	nHit = GTLCHT_NOWHERE;
 
@@ -5406,10 +5406,6 @@ DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTES
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, 0);
 	
-	// No dragging on auto-calculated parent tasks
-	if (bDragging && HasOption(GTLCF_CALCPARENTDATES) && pGI->bParent)
-		return 0;
-
 	COleDateTime dtStart, dtEnd;
 	
 	if (!GetTaskStartEndDates(*pGI, dtStart, dtEnd))
@@ -5539,6 +5535,9 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 	if (m_data.ItemIsLocked(dwTaskID, FALSE))
 		return FALSE;
 
+	if (HasOption(GTLCF_CALCPARENTDATES) && m_data.ItemIsParent(dwTaskID))
+		return FALSE;
+
 	switch (nDrag)
 	{
 	case GTLCD_START:
@@ -5559,7 +5558,7 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 
 	GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 	
-	DWORD dwHitTaskID = ListHitTestTask(ptCursor, FALSE, nHit, TRUE);
+	DWORD dwHitTaskID = ListHitTestTask(ptCursor, FALSE, nHit);
 	ASSERT((nHit == GTLCHT_NOWHERE) || (dwHitTaskID != 0));
 
 	if (nHit == GTLCHT_NOWHERE)
