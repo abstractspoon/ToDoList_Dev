@@ -661,7 +661,9 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_MOVETASK:
 		if (pData)
 		{
-			ASSERT(pData->move.dwSelectedTaskID == m_ctrlGantt.GetSelectedTaskID());
+			ASSERT((pData->move.dwSelectedTaskID == 0) || 
+					(pData->move.dwSelectedTaskID == m_ctrlGantt.GetSelectedTaskID()));
+
 			return (m_ctrlGantt.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
@@ -740,6 +742,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 	case IUI_MOVETASK:
 		if (pData)
 			return (m_ctrlGantt.CanMoveSelectedTask(pData->move) != FALSE);
+		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
 		return (m_ctrlGantt.GetSelectionCount() != 0);
