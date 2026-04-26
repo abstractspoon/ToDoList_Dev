@@ -5765,7 +5765,16 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 
 		::ReleaseCapture();
 
-		if (!NotifyParentDateChange())
+		// Build a temporary GANTTBARDRAGINFO for notifying the parent
+		GANTTBARDRAGINFO bdiTemp;
+		bdiTemp.nDragMode = m_barDragInfo.nDragMode;
+		bdiTemp.aGIPreDrag.Copy(m_barDragInfo.aGIPreDrag);
+
+		// Drag info must be reset before notifying parent
+		m_barDragInfo.Reset();
+		
+		// Notify the parent and restore previous dates if it fails
+		if (!NotifyParentEndDrag(bdiTemp))
 		{
 			int nItem = m_barDragInfo.aGIPreDrag.GetSize();
 
@@ -5776,7 +5785,6 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 		{
 			RecalcDateRange();
 		}
-		m_barDragInfo.Reset();
 
 		return TRUE;
 	}
@@ -5785,37 +5793,34 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 	return FALSE;
 }
 
-BOOL CGanttCtrl::NotifyParentDateChange()
+BOOL CGanttCtrl::NotifyParentEndDrag(const GANTTBARDRAGINFO& bdi) const
 {
 	ASSERT(!m_bReadOnly);
-	ASSERT(m_barDragInfo.IsDragging());
+	ASSERT(!m_barDragInfo.IsDragging()); // Must be ended
+	
+	// Build a temporary list of the modified tasks for sending
+	// to the parent, in the same order the pre-drag array
+	CGanttItemArray aGIMod;
+	int nNumItems = bdi.aGIPreDrag.GetSize();
 
-	if (m_barDragInfo.IsDragging())
+	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		// Build a temporary list of the modified tasks for sending
-		// to the parent, in the same order the pre-drag array
-		CGanttItemArray aGIMod;
-		int nNumItems = m_barDragInfo.aGIPreDrag.GetSize();
+		const GANTTITEM& giPreDrag = bdi.aGIPreDrag[nItem];
+		DWORD dwTaskID = giPreDrag.dwTaskID;
 
-		for (int nItem = 0; nItem < nNumItems; nItem++)
-		{
-			const GANTTITEM& giPreDrag = m_barDragInfo.aGIPreDrag[nItem];
-			DWORD dwTaskID = giPreDrag.dwTaskID;
+		GANTTITEM* pGI = m_data.GetItem(dwTaskID, TRUE);
+		ASSERT(pGI);
 
-			GANTTITEM* pGI = m_data.GetItem(dwTaskID, TRUE);
-			ASSERT(pGI);
-
-			// Add task only if the dates changed
-			if (pGI->dtRange != giPreDrag.dtRange)
-				aGIMod.Add(*pGI);
-		}
-
-		// Either none moved or they all moved
-		ASSERT((aGIMod.GetSize() == 0) || (aGIMod.GetSize() == nNumItems));
-
-		if (aGIMod.GetSize())
-			return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)&m_barDragInfo, (LPARAM)&aGIMod);
+		// Add task only if the dates changed
+		if (pGI->dtRange != giPreDrag.dtRange)
+			aGIMod.Add(*pGI);
 	}
+
+	// Either none moved or they all moved
+	ASSERT((aGIMod.GetSize() == 0) || (aGIMod.GetSize() == nNumItems));
+
+	if (aGIMod.GetSize())
+		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)&bdi, (LPARAM)&aGIMod);
 
 	// else
 	return 0L;

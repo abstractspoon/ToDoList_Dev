@@ -286,7 +286,7 @@ protected:
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
 	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
 	BOOL SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const;
-	BOOL NotifyParentDateChange();
+	BOOL NotifyParentEndDrag(const GANTTBARDRAGINFO& bdi) const;
 
 	int CalcTreeColumnTextWidth(int nCol, CDC* pDC) const;
 	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
