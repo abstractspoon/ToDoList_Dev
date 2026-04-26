@@ -5321,15 +5321,10 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	ASSERT(hNewTask);
 
 	// Default date to 'today'
-	COleDateTime dt = CDateHelper::GetDate(DHD_TODAY);
-	time64_t tDate = 0;
-
-	VERIFY (CDateHelper::GetTimeT64(dt, tDate));
-
-	// If the task's parent is currently selected that use that 
-	COleDateTime dtStart;
+	COleDateTime dtStart = CDateHelper::GetDate(DHD_TODAY);
 	DWORD dwSelTaskID = GetSelectedTaskID();
 
+	// If the task's parent is currently selected that use that 
 	if ((dwSelTaskID != 0) && (pTasks->GetTaskParentID(hNewTask) == dwSelTaskID))
 	{
 		const GANTTITEM* pGIParent = NULL;
@@ -5340,11 +5335,9 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 		if (GetTaskStartEndDates(*pGIParent, dtParentStart, dtUnused))
 			dtStart = dtParentStart;
 	}
+	ASSERT(CDateHelper::IsDateSet(dtStart));
 
-	// Else use today
-	if (!CDateHelper::IsDateSet(dtStart))
-		dtStart = CDateHelper::GetDate(DHD_TODAY);
-
+	time64_t tDate = 0;
 	VERIFY(CDateHelper::GetTimeT64(dtStart, tDate));
 
 	pTasks->SetTaskStartDate64(hNewTask, tDate);
