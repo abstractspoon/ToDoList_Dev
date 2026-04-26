@@ -5670,8 +5670,6 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 
 	if (ValidateDragPoint(ptDrag) && GetDateFromPoint(ptDrag, dtDrag))
 	{
-		dtDrag = GetNearestDate(dtDrag);
-
 		// if the drag date precedes the min date, constrain
 		// date appropriately and show the 'no drag' cursor
 		BOOL bNoDrag = FALSE;
@@ -5705,7 +5703,7 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 			{
 			case GTLCD_START:
 				{
-					COleDateTime dtNewStart = (dtOrgStart.m_dt + dDaysOffset);
+					COleDateTime dtNewStart = GetNearestDate(dtOrgStart.m_dt + dDaysOffset);
 
 					// prevent the start and end dates from overlapping
 					if (dtNewStart >= dtCurEnd)
@@ -5721,7 +5719,7 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 
 			case GTLCD_END:
 				{
-					COleDateTime dtNewEnd = (dtOrgEnd.m_dt + dDaysOffset);
+					COleDateTime dtNewEnd = GetNearestDate(dtOrgEnd.m_dt + dDaysOffset);
 
 					// prevent the start and end dates from overlapping
 					if (dtNewEnd <= dtCurStart)
@@ -5742,7 +5740,9 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 					// a day because that's all it knows how to do.
 					// We however don't always want it to so we must
 					// detect those times and subtract a day as required
-					COleDateTime dtNewStart = (dtOrgStart.m_dt + dDaysOffset);
+					COleDateTime dtNewStart = GetNearestDate(dtOrgStart.m_dt + dDaysOffset);
+
+					dDaysOffset = (dtNewStart.m_dt - dtOrgStart.m_dt);
 					COleDateTime dtNewEnd = (dtOrgEnd.m_dt + dDaysOffset);
 
 					if (!CDateHelper::DateHasTime(dtNewEnd))
@@ -5834,14 +5834,16 @@ BOOL CGanttCtrl::NotifyParentDateChange()
 			GANTTITEM* pGI = m_data.GetItem(dwTaskID, TRUE);
 			ASSERT(pGI);
 
+			// Add task only if the dates changed
 			if (pGI->dtRange != giPreDrag.dtRange)
 				aGIMod.Add(*pGI);
 		}
 
-		ASSERT(aGIMod.GetSize());
-		ASSERT(aGIMod.GetSize() == nNumItems);
+		// Either none moved or they all moved
+		ASSERT((aGIMod.GetSize() == 0) || (aGIMod.GetSize() == nNumItems));
 
-		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)&m_barDragInfo, (LPARAM)&aGIMod);
+		if (aGIMod.GetSize())
+			return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)&m_barDragInfo, (LPARAM)&aGIMod);
 	}
 
 	// else
