@@ -1203,14 +1203,14 @@ GANTTBARDRAGINFO::GANTTBARDRAGINFO()
 
 void GANTTBARDRAGINFO::Reset()
 {
-	nDragging = GTLCD_NONE;
+	nDragMode = GTLCD_NONE;
 	dtDragStart = dtDragMin = CDateHelper::NullDate();
 	aGIPreDrag.RemoveAll();
 }
 
 BOOL GANTTBARDRAGINFO::IsDragging() const
 {
-	return IsDragging(nDragging);
+	return IsDragging(nDragMode);
 }
 
 BOOL GANTTBARDRAGINFO::IsDragging(GTLC_DRAG nDrag)

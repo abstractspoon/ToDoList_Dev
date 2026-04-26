@@ -49,6 +49,7 @@ public:
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	int GetTaskCount() const { return (int)m_tree.GetCount(); }
+	//BOOL GetTaskStartEndDates(DWORD dwTaskID, COleDateTime& dtStart, COleDateTime& dtDue) const;
 
 	BOOL CanMoveSelectedTask(const IUITASKMOVE& move) const;
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
@@ -287,7 +288,7 @@ protected:
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
 	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
 	BOOL SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const;
-	BOOL NotifyParentDateChange(GTLC_DRAG nDrag);
+	BOOL NotifyParentDateChange();
 
 	int CalcTreeColumnTextWidth(int nCol, CDC* pDC) const;
 	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;

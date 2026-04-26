@@ -3439,6 +3439,14 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 	}
 }
 
+// BOOL CGanttCtrl::GetTaskStartEndDates(DWORD dwTaskID, COleDateTime& dtStart, COleDateTime& dtDue) const
+// {
+// 	const GANTTITEM* pGI = NULL;
+// 	GET_GI_RET(dwTaskID, pGI, FALSE);
+// 
+// 	return GetTaskStartEndDates(*pGI, dtStart, dtDue);
+// }
+
 BOOL CGanttCtrl::GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	return gi.GetStartEndDates(HasOption(GTLCF_CALCPARENTDATES),
@@ -5641,7 +5649,7 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 		CDateHelper::Max(m_barDragInfo.dtDragMin, m_data.CalcMaxDependencyDate(*pGI));
 	}
 
-	m_barDragInfo.nDragging = nDragging;
+	m_barDragInfo.nDragMode = nDragging;
 
 	switch (nDragging)
 	{
@@ -5717,7 +5725,7 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 			COleDateTime dtCurStart, dtCurEnd;
 			VERIFY(GetTaskStartEndDates(*pGI, dtCurStart, dtCurEnd));
 
-			switch (m_barDragInfo.nDragging)
+			switch (m_barDragInfo.nDragMode)
 			{
 			case GTLCD_START:
 				{
@@ -5808,23 +5816,20 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 			return FALSE;
 		}
 
-		GTLC_DRAG nDrag = m_barDragInfo.nDragging;
-		
-		// cleanup
-		m_barDragInfo.Reset();
 		::ReleaseCapture();
 
-// 		GANTTITEM* pGI = NULL;
-// 		GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
-// 
-// 		// keep parent informed
-// 		if (DragDatesDiffer(*pGI, m_giPreDrag))
-// 		{
-// 			if (!NotifyParentDateChange(nDrag))
-// 				RestoreGanttItem(m_giPreDrag);
-// 			else
-// 				RecalcDateRange();
-// 		}
+		if (!NotifyParentDateChange())
+		{
+			int nItem = m_barDragInfo.aGIPreDrag.GetSize();
+
+			while (nItem--)
+				RestoreGanttItem(m_barDragInfo.aGIPreDrag[nItem]);
+		}
+		else
+		{
+			RecalcDateRange();
+		}
+		m_barDragInfo.Reset();
 
 		return TRUE;
 	}
@@ -5839,13 +5844,35 @@ BOOL CGanttCtrl::DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2)
 			(gi1.dtRange.GetEnd() != gi2.dtRange.GetEnd()));
 }
 
-BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
+BOOL CGanttCtrl::NotifyParentDateChange()
 {
 	ASSERT(!m_bReadOnly);
-	ASSERT(GetSelectedTaskID());
+	ASSERT(m_barDragInfo.IsDragging());
 
-// 	if (IsDragging(nDrag))
-// 		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
+	if (m_barDragInfo.IsDragging())
+	{
+		// Build a temporary list of the modified tasks for sending
+		// to the parent, in the same order the pre-drag array
+		CGanttItemArray aGIMod;
+		int nNumItems = m_barDragInfo.aGIPreDrag.GetSize();
+
+		for (int nItem = 0; nItem < nNumItems; nItem++)
+		{
+			const GANTTITEM& giPreDrag = m_barDragInfo.aGIPreDrag[nItem];
+			DWORD dwTaskID = giPreDrag.dwTaskID;
+
+			GANTTITEM* pGI = m_data.GetItem(dwTaskID, TRUE);
+			ASSERT(pGI);
+
+			if (DragDatesDiffer(*pGI, giPreDrag))
+				aGIMod.Add(*pGI);
+		}
+
+		ASSERT(aGIMod.GetSize());
+		ASSERT(aGIMod.GetSize() == nNumItems);
+
+		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)&m_barDragInfo, (LPARAM)&aGIMod);
+	}
 
 	// else
 	return 0L;
@@ -6103,7 +6130,7 @@ COleDateTime CGanttCtrl::GetNearestDate(const COleDateTime& dtDrag) const
 {
 	ASSERT(IsDragging());
 
-	BOOL bDraggingEnd = (m_barDragInfo.nDragging == GTLCD_END);
+	BOOL bDraggingEnd = (m_barDragInfo.nDragMode == GTLCD_END);
 
 	switch (GetSnapMode())
 	{

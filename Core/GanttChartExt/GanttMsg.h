@@ -11,7 +11,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = Hit test, LPARAM = Task ID
+// WPARAM = CGanttBarDragInfo*, LPARAM = CGanttItemArray*
 const UINT WM_GTLC_DATECHANGE				= ::RegisterWindowMessage(_T("WM_GTLC_DATECHANGE"));
 
 // WPARAM = HWND, LPARAM = TRUE/FALSE

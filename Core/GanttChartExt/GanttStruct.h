@@ -128,8 +128,11 @@ struct GANTTITEM
 	COLORREF GetBorderColor(BOOL bSelected) const;
 
 	static COleDateTime GetDate(time64_t tDate, BOOL bEndOfDay);
-
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+typedef CArray<GANTTITEM, GANTTITEM&> CGanttItemArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -144,11 +147,11 @@ struct GANTTBARDRAGINFO
 	static BOOL IsDragging(GTLC_DRAG nDrag);
 	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
 
-	GTLC_DRAG nDragging;
+	GTLC_DRAG nDragMode;
 	COleDateTime dtDragStart;
 	COleDateTime dtDragMin;
 
-	CArray<GANTTITEM, GANTTITEM&> aGIPreDrag;
+	CGanttItemArray aGIPreDrag; // copies
 };
 
 /////////////////////////////////////////////////////////////////////////////
