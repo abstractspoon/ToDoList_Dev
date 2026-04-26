@@ -2171,9 +2171,6 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 
 BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTime& dtNewStart)
 {
-// 	if (GetSelectedTaskCount() > 1)
-// 		return FALSE;
-
 	if (!CToDoCtrl::CanEditSelectedTask(TDCA_STARTDATE))
 		return FALSE;
 
@@ -2197,22 +2194,6 @@ BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTi
 	UpdateControls(FALSE); // don't update comments
 
 	return TRUE;
-
-// 	DWORD dwTaskID = GetSelectedTaskID();
-// 	TDC_SET nRes = m_data.OffsetTaskStartAndDueDates(dwTaskID, dtNewStart);
-// 
-// 	if (nRes != SET_CHANGE)
-// 		return FALSE;
-// 
-// 	// else
-// 	CDWordArray aModTaskIDs;
-// 	aModTaskIDs.Add(dwTaskID);
-// 
-// 	CToDoCtrl::SetModified(TDCA_OFFSETTASK, aModTaskIDs);
-// 
-// 	UpdateControls(FALSE); // don't update comments
-// 
-// 	return TRUE;
 }
 
 LRESULT CTabbedToDoCtrl::OnUIExtSetTasklistMetaData(WPARAM wParam, LPARAM lParam)

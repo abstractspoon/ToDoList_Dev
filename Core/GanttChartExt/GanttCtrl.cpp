@@ -105,9 +105,6 @@ CGanttCtrl::CGanttCtrl()
 	m_crWeekend(RGB(224, 224, 224)),
 	m_crNonWorkingHours(RGB(224, 224, 224)),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
-// 	m_nDragging(GTLCD_NONE), 
-// 	m_dtDragStart(CDateHelper::NullDate()),
-// 	m_dtDragMin(CDateHelper::NullDate()),
 	m_ptLastDependPick(0),
 	m_pDependEdit(NULL),
 	m_dwMaxTaskID(0),
@@ -3442,14 +3439,6 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 	}
 }
 
-// BOOL CGanttCtrl::GetTaskStartEndDates(DWORD dwTaskID, COleDateTime& dtStart, COleDateTime& dtDue) const
-// {
-// 	const GANTTITEM* pGI = NULL;
-// 	GET_GI_RET(dwTaskID, pGI, FALSE);
-// 
-// 	return GetTaskStartEndDates(*pGI, dtStart, dtDue);
-// }
-
 BOOL CGanttCtrl::GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	return gi.GetStartEndDates(HasOption(GTLCF_CALCPARENTDATES),
@@ -5550,11 +5539,6 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 	if (m_data.ItemIsLocked(dwTaskID, FALSE))
 		return FALSE;
 
-	// Disable for multi-selection (for now)
-// 	if ((TSH().GetCount() > 1) && TSH().HasItem(dwTaskID))
-// 		return FALSE;
-
-	// else
 	switch (nDrag)
 	{
 	case GTLCD_START:
@@ -5570,10 +5554,6 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 
 BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 {
-	// Disable for multi-selection (for now)
-// 	if (TSH().GetCount() != 1)
-// 		return FALSE;
-
 	ASSERT(!m_bReadOnly);
 	ASSERT(!IsDependencyEditing());
 
@@ -5652,6 +5632,7 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 		CDateHelper::Max(m_barDragInfo.dtDragMin, m_data.CalcMaxDependencyDate(*pGI));
 	}
 
+	// Initialise drag origin
 	m_barDragInfo.nDragMode = nDragging;
 
 	switch (nDragging)
@@ -5841,12 +5822,6 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 	return FALSE;
 }
 
-BOOL CGanttCtrl::DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2)
-{
-	return ((gi1.dtRange.GetStart() != gi2.dtRange.GetStart()) || 
-			(gi1.dtRange.GetEnd() != gi2.dtRange.GetEnd()));
-}
-
 BOOL CGanttCtrl::NotifyParentDateChange()
 {
 	ASSERT(!m_bReadOnly);
@@ -5867,7 +5842,7 @@ BOOL CGanttCtrl::NotifyParentDateChange()
 			GANTTITEM* pGI = m_data.GetItem(dwTaskID, TRUE);
 			ASSERT(pGI);
 
-			if (DragDatesDiffer(*pGI, giPreDrag))
+			if (pGI->dtRange != giPreDrag.dtRange)
 				aGIMod.Add(*pGI);
 		}
 
