@@ -209,35 +209,6 @@ BOOL CGanttCtrl::DeleteSelectedTaskDependency(DWORD dwDependID)
 	return Misc::RemoveItemT(dwDependID, pGI->aDependIDs);
 }
 
-BOOL CGanttCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
-{
-	DWORD dwTaskID = GetSelectedTaskID();
-	const GANTTITEM* pGI = NULL;
-
-	GET_GI_RET(dwTaskID, pGI, FALSE);
-	
-	if (GetTaskStartEndDates(*pGI, dtStart, dtDue))
-	{
-		// handle durations of whole days
-		COleDateTime dtDuration(dtDue - dtStart);
-
-		if (CDateHelper::IsDateSet(dtDuration) && (dtDuration > CDateHelper::GetEndOfDay(dtDuration)))
-		{
-			double dWholeDays = (CDateHelper::GetDateOnly(dtDuration).m_dt + 1.0);
-
-			if (!CDateHelper::DateHasTime(dtStart))
-				dWholeDays--;
-
-			dtDue.m_dt = (dtStart.m_dt + dWholeDays);
-		}
-
-		return TRUE;
-	}
-
-	// all else
-	return FALSE;
-}
-
 BOOL CGanttCtrl::SelectTask(DWORD dwTaskID)
 {
 	HTREEITEM hti = GetTreeItem(dwTaskID);

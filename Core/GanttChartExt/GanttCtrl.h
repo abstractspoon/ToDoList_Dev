@@ -46,7 +46,6 @@ public:
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
-	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	int GetTaskCount() const { return (int)m_tree.GetCount(); }
 
