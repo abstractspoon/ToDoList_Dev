@@ -2225,7 +2225,7 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 		return TRUE;
 
 	// else
-	if (IsPickingFromDependency()) // to edit
+	if (IsPickingFromDependency()) // to edit/delete
 	{
 		DWORD dwCurToTaskID = 0;
 		DWORD dwFromTaskID = ListDependencyHitTest(point, dwCurToTaskID);
@@ -2236,14 +2236,17 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 			{
 				MessageBeep(MB_ICONEXCLAMATION);
 			}
-			else if (m_pDependEdit->SetFromDependency(dwFromTaskID, dwCurToTaskID))
+			else
 			{
-				ResetDependencyPickLinePos();
-				RedrawList();
-
-				// Select the 'from' task
+				// Must select the owning task before the actual deletion
 				SelectTask(dwFromTaskID);
 				NotifyParentSelectionChange();
+				
+				if (m_pDependEdit->SetFromDependency(dwFromTaskID, dwCurToTaskID))
+				{
+					ResetDependencyPickLinePos();
+					RedrawList();
+				}
 			}
 		}
 

@@ -195,16 +195,12 @@ BOOL CGanttCreateDependsDlg::SetFromDependency(DWORD dwFromTaskID, DWORD dwCurTo
 	// so that DestroyWindow() will work
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	ASSERT(IsPickingFromDependency());
-
-	if (!IsPickingFromDependency())
+	// sanity checks
+	if (!IsPickingFromDependency() || !dwFromTaskID || !dwCurToTaskID)
+	{
+		ASSERT(0);
 		return FALSE;
-
-	ASSERT(dwFromTaskID);
-	ASSERT(dwCurToTaskID);
-
-	if (!dwFromTaskID || !dwCurToTaskID)
-		return FALSE;
+	}
 	
 	m_dwFromTaskID = dwFromTaskID;
 	m_dwCurToTaskID = dwCurToTaskID;
