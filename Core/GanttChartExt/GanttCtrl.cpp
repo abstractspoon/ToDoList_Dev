@@ -5736,8 +5736,16 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 			GraphicsMisc::SetStandardCursor(szCursor);
 
 		RecalcParentDates();
-		RedrawList();
-		RedrawTree();
+
+		// Redraw selected list items
+		POSITION pos = m_list.GetFirstSelectedItemPosition();
+
+		while (pos)
+			CTreeListSyncer::InvalidateListItem(m_list, m_list.GetNextSelectedItem(pos), FALSE);
+
+		m_list.UpdateWindow();
+		//RedrawList();
+		//RedrawTree();
 	}
 	else
 	{
