@@ -5744,8 +5744,6 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 			CTreeListSyncer::InvalidateListItem(m_list, m_list.GetNextSelectedItem(pos), FALSE);
 
 		m_list.UpdateWindow();
-		//RedrawList();
-		//RedrawTree();
 	}
 	else
 	{
