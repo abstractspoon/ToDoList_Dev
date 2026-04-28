@@ -5595,7 +5595,7 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 		CDateHelper::Max(m_barDragInfo.dtDragMin, m_data.CalcMaxDependencyDate(*pGI));
 	}
 
-	// Initialise drag origin
+	// Initialise drag origin from which offsets will be measured
 	m_barDragInfo.nDragMode = nDragging;
 
 	switch (nDragging)
@@ -5652,7 +5652,7 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 			bNoDrag = TRUE;
 		}
 
-		// Calculate each new task's position
+		// Calculate each task's new position
 		double dDaysOffset = (dtDrag.m_dt - m_barDragInfo.dtDragOrigin.m_dt);
 
 		int nTask = m_barDragInfo.aGIPreDrag.GetSize();
@@ -5764,7 +5764,7 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 
 		::ReleaseCapture();
 
-		// Build a temporary GANTTBARDRAGINFO for notifying the parent
+		// Cache and reset m_barDragInfo before notifying parent
 		GANTTBARDRAGINFO bdiTemp;
 		bdiTemp.nDragMode = m_barDragInfo.nDragMode;
 		bdiTemp.aGIPreDrag.Copy(m_barDragInfo.aGIPreDrag);
