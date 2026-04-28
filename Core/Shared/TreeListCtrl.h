@@ -303,6 +303,7 @@ protected:
 	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected);
 
 	void RedrawList(BOOL bErase = FALSE);
+	void RedrawListSelection(BOOL bErase = FALSE);
 	void InvalidateList(int nFrom, int nTo, BOOL bErase = FALSE);
 	void InvalidateListItem(HTREEITEM hti, BOOL bErase = FALSE);
 	void RedrawTree(BOOL bErase = FALSE);
