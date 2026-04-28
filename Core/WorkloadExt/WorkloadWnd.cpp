@@ -604,7 +604,9 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_MOVETASK:
 		if (pData)
 		{
-			ASSERT(pData->move.dwSelectedTaskID == m_ctrlWorkload.GetSelectedTaskID());
+			ASSERT((pData->move.dwSelectedTaskID == 0) ||
+					(pData->move.dwSelectedTaskID == m_ctrlWorkload.GetSelectedTaskID()));
+
 			return (m_ctrlWorkload.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;

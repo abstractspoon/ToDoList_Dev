@@ -531,6 +531,13 @@ BOOL CGanttItemMap::ItemIsReference(DWORD dwTaskID) const
 	return (pGI && pGI->dwOrgRefID);
 }
 
+BOOL CGanttItemMap::ItemIsParent(DWORD dwTaskID) const
+{
+	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
+
+	return (pGI && pGI->bParent);
+}
+
 BOOL CGanttItemMap::ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const
 {
 	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
@@ -627,18 +634,24 @@ GANTTITEM* CGanttItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) const
 	return pGI;
 }
 
-BOOL CGanttItemMap::RestoreItem(const GANTTITEM& giPrev)
+BOOL CGanttItemMap::RestoreItems(const CGanttItemArray& aGIPrev)
 {
-	GANTTITEM* pGI = NULL;
+	BOOL bAllRestored = TRUE;
+	int nItem = aGIPrev.GetSize();
 
-	if (Lookup(giPrev.dwTaskID, pGI) && pGI)
+	while (nItem--)
 	{
-		*pGI = giPrev;
-		return TRUE;
+		const GANTTITEM& giPrev = aGIPrev[nItem];
+		GANTTITEM* pGI = NULL;
+		
+		if (Lookup(giPrev.dwTaskID, pGI) && pGI)
+			*pGI = giPrev;
+		else
+			bAllRestored = FALSE;
 	}
 
-	ASSERT(0);
-	return FALSE;
+	ASSERT(bAllRestored);
+	return bAllRestored;
 }
 
 void CGanttItemMap::RemoveAllDependenciesOn(DWORD dwDependencyID)
@@ -1198,3 +1211,36 @@ BOOL GANTTSORT::Set(const GANTTSORTCOLUMNS& sort)
 
 /////////////////////////////////////////////////////////////////////////////
 
+GANTTBARDRAGINFO::GANTTBARDRAGINFO()
+{
+	Reset();
+}
+
+void GANTTBARDRAGINFO::Reset()
+{
+	nDragMode = GTLCD_NONE;
+	dtDragOrigin = dtDragMin = CDateHelper::NullDate();
+	aGIPreDrag.RemoveAll();
+}
+
+BOOL GANTTBARDRAGINFO::IsDragging() const
+{
+	return IsDragging(nDragMode);
+}
+
+BOOL GANTTBARDRAGINFO::IsDragging(GTLC_DRAG nDrag)
+{
+	return ((nDrag != GTLCD_ANY) && (nDrag != GTLCD_NONE));
+}
+
+BOOL GANTTBARDRAGINFO::IsDraggingEnds(GTLC_DRAG nDrag)
+{
+	return ((nDrag == GTLCD_START) || (nDrag == GTLCD_END));
+}
+
+BOOL GANTTBARDRAGINFO::IsValidDrag(const COleDateTime& dtDrag) const
+{
+	return (!CDateHelper::IsDateSet(dtDragMin) || (dtDrag >= dtDragMin));
+}
+
+/////////////////////////////////////////////////////////////////////////////

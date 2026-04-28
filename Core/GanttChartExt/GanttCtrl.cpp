@@ -105,8 +105,6 @@ CGanttCtrl::CGanttCtrl()
 	m_crWeekend(RGB(224, 224, 224)),
 	m_crNonWorkingHours(RGB(224, 224, 224)),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
-	m_nDragging(GTLCD_NONE), 
-	m_ptDragStart(0),
 	m_ptLastDependPick(0),
 	m_pDependEdit(NULL),
 	m_dwMaxTaskID(0),
@@ -209,35 +207,6 @@ BOOL CGanttCtrl::DeleteSelectedTaskDependency(DWORD dwDependID)
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 
 	return Misc::RemoveItemT(dwDependID, pGI->aDependIDs);
-}
-
-BOOL CGanttCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
-{
-	DWORD dwTaskID = GetSelectedTaskID();
-	const GANTTITEM* pGI = NULL;
-
-	GET_GI_RET(dwTaskID, pGI, FALSE);
-	
-	if (GetTaskStartEndDates(*pGI, dtStart, dtDue))
-	{
-		// handle durations of whole days
-		COleDateTime dtDuration(dtDue - dtStart);
-
-		if (CDateHelper::IsDateSet(dtDuration) && (dtDuration > CDateHelper::GetEndOfDay(dtDuration)))
-		{
-			double dWholeDays = (CDateHelper::GetDateOnly(dtDuration).m_dt + 1.0);
-
-			if (!CDateHelper::DateHasTime(dtStart))
-				dWholeDays--;
-
-			dtDue.m_dt = (dtStart.m_dt + dWholeDays);
-		}
-
-		return TRUE;
-	}
-
-	// all else
-	return FALSE;
 }
 
 BOOL CGanttCtrl::SelectTask(DWORD dwTaskID)
@@ -868,9 +837,9 @@ GANTTITEM* CGanttCtrl::GetGanttItem(DWORD dwTaskID) const
 	return m_data.GetItem(dwTaskID, TRUE);
 }
 
-BOOL CGanttCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
+BOOL CGanttCtrl::RestoreGanttItems(const CGanttItemArray& aGIPrev)
 {
-	if (m_data.RestoreItem(giPrev))
+	if (m_data.RestoreItems(aGIPrev))
 	{
 		RecalcParentDates();
 		RedrawList();
@@ -1812,7 +1781,7 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		// calc new 'To' point to see if anything has actually changed
 
 		GTLC_HITTEST nHit = GTLCHT_NOWHERE;
-		DWORD dwToTaskID = ListHitTestTask(ptClient, FALSE, nHit, TRUE);
+		DWORD dwToTaskID = ListHitTestTask(ptClient, FALSE, nHit);
 		CPoint ptTo;
 		
 		if (dwToTaskID && (nHit != GTLCHT_NOWHERE))
@@ -1856,28 +1825,25 @@ BOOL CGanttCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 
 BOOL CGanttCtrl::SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const
 {
-	if (nHit != GTLCHT_NOWHERE)
+	if ((nHit != GTLCHT_NOWHERE) && dwTaskID)
 	{
 		GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
-		ASSERT(IsDragging(nDrag));
+		ASSERT(GANTTBARDRAGINFO::IsDragging(nDrag));
 
-		if (dwTaskID != 0)
+		if (!CanDragTask(dwTaskID, nDrag))
 		{
-			if (!CanDragTask(dwTaskID, nDrag))
-			{
-				// Locked tasks should have been handled in WM_SETCURSOR
-				ASSERT(!m_data.ItemIsLocked(dwTaskID, FALSE));
+			// Locked tasks should have been handled in WM_SETCURSOR
+			ASSERT(!m_data.ItemIsLocked(dwTaskID, FALSE));
 
-				return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
-			}
-			else
+			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
+		}
+		else
+		{
+			switch (nDrag)
 			{
-				switch (nDrag)
-				{
-				case GTLCD_START:
-				case GTLCD_END:
-					return GraphicsMisc::SetStandardCursor(IDC_SIZEWE);
-				}
+			case GTLCD_START:
+			case GTLCD_END:
+				return GraphicsMisc::SetStandardCursor(IDC_SIZEWE);
 			}
 		}
 	}
@@ -1930,7 +1896,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				{
 					GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 
-					DWORD dwHitID = ListHitTestTask(ptCursor, FALSE, nHit, TRUE);
+					DWORD dwHitID = ListHitTestTask(ptCursor, FALSE, nHit);
 					ASSERT((nHit == GTLCHT_NOWHERE) || (dwHitID != 0));
 
 					if (SetListTaskCursor(dwHitID, nHit))
@@ -1969,14 +1935,21 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 		case WM_LBUTTONDOWN:
 			if (!IsDependencyEditing())
 			{
-				// We can't begin dragging from OnListLButtonDown because we need to
-				// let the default handling occur first to ensure that a newly
-				// selected task is properly initialised
-				LRESULT lr = CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
+				// If it's a unselected task we need to let the default handling
+				// occur first to ensure that a newly selected task is properly initialised
+				int nHit = m_list.HitTest(lp);
 
-				StartDragging(lp);
+				if ((nHit != -1) && !TSH().IsItemSelected(GetTreeItem(nHit), FALSE))
+				{
+					LRESULT lr = CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
 
-				return lr;
+					StartDragging(lp);
+					return lr;
+				}
+				else if (StartDragging(lp))
+				{
+					return 0L;
+				}
 			}
 			break;
 		}
@@ -2007,10 +1980,15 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 		case WM_KEYDOWN:
 			// Even though we are dragging in the list, the focus is on the tree
-			if (wp == VK_ESCAPE && IsDragging())
+			switch (wp)
 			{
-				CancelDrag(TRUE);
-				return 0L; // eat
+			case VK_ESCAPE:
+				if (IsDragging())
+				{
+					CancelDrag(TRUE);
+					return 0L; // eat
+				}
+				break;
 			}
 			break;
 
@@ -5314,15 +5292,10 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 	ASSERT(hNewTask);
 
 	// Default date to 'today'
-	COleDateTime dt = CDateHelper::GetDate(DHD_TODAY);
-	time64_t tDate = 0;
-
-	VERIFY (CDateHelper::GetTimeT64(dt, tDate));
-
-	// If the task's parent is currently selected that use that 
-	COleDateTime dtStart;
+	COleDateTime dtStart = CDateHelper::GetDate(DHD_TODAY);
 	DWORD dwSelTaskID = GetSelectedTaskID();
 
+	// If the task's parent is currently selected that use that 
 	if ((dwSelTaskID != 0) && (pTasks->GetTaskParentID(hNewTask) == dwSelTaskID))
 	{
 		const GANTTITEM* pGIParent = NULL;
@@ -5333,11 +5306,9 @@ bool CGanttCtrl::PrepareNewTask(ITaskList* pTaskList) const
 		if (GetTaskStartEndDates(*pGIParent, dtParentStart, dtUnused))
 			dtStart = dtParentStart;
 	}
+	ASSERT(CDateHelper::IsDateSet(dtStart));
 
-	// Else use today
-	if (!CDateHelper::IsDateSet(dtStart))
-		dtStart = CDateHelper::GetDate(DHD_TODAY);
-
+	time64_t tDate = 0;
 	VERIFY(CDateHelper::GetTimeT64(dtStart, tDate));
 
 	pTasks->SetTaskStartDate64(hNewTask, tDate);
@@ -5381,7 +5352,7 @@ BOOL CGanttCtrl::GetListItemRect(int nItem, CRect& rItem) const
 	return FALSE;
 }
 
-DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const
+DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit) const
 {
 	nHit = GTLCHT_NOWHERE;
 
@@ -5399,10 +5370,6 @@ DWORD CGanttCtrl::ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTES
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, 0);
 	
-	// No dragging on auto-calculated parent tasks
-	if (bDragging && HasOption(GTLCF_CALCPARENTDATES) && pGI->bParent)
-		return 0;
-
 	COleDateTime dtStart, dtEnd;
 	
 	if (!GetTaskStartEndDates(*pGI, dtStart, dtEnd))
@@ -5486,21 +5453,6 @@ DWORD CGanttCtrl::GetTaskID(int nItem) const
 	return GetItemData(GetTreeItem(nItem));
 }
 
-BOOL CGanttCtrl::IsDragging() const
-{
-	return IsDragging(m_nDragging);
-}
-
-BOOL CGanttCtrl::IsDragging(GTLC_DRAG nDrag)
-{
-	return ((nDrag != GTLCD_ANY) && (nDrag != GTLCD_NONE));
-}
-
-BOOL CGanttCtrl::IsDraggingEnds(GTLC_DRAG nDrag)
-{
-	return ((nDrag == GTLCD_START) || (nDrag == GTLCD_END));
-}
-
 BOOL CGanttCtrl::IsValidDragPoint(const CPoint& ptDrag) const
 {
 	if (!IsDragging())
@@ -5547,11 +5499,9 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 	if (m_data.ItemIsLocked(dwTaskID, FALSE))
 		return FALSE;
 
-	// Disable for multi-selection (for now)
-	if ((TSH().GetCount() > 1) && TSH().HasItem(dwTaskID))
+	if (HasOption(GTLCF_CALCPARENTDATES) && m_data.ItemIsParent(dwTaskID))
 		return FALSE;
 
-	// else
 	switch (nDrag)
 	{
 	case GTLCD_START:
@@ -5567,23 +5517,19 @@ BOOL CGanttCtrl::CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag) const
 
 BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 {
-	// Disable for multi-selection (for now)
-	if (TSH().GetCount() != 1)
-		return FALSE;
-
 	ASSERT(!m_bReadOnly);
 	ASSERT(!IsDependencyEditing());
 
 	GTLC_HITTEST nHit = GTLCHT_NOWHERE;
 	
-	DWORD dwTaskID = ListHitTestTask(ptCursor, FALSE, nHit, TRUE);
-	ASSERT((nHit == GTLCHT_NOWHERE) || (dwTaskID != 0));
+	DWORD dwHitTaskID = ListHitTestTask(ptCursor, FALSE, nHit);
+	ASSERT((nHit == GTLCHT_NOWHERE) || (dwHitTaskID != 0));
 
 	if (nHit == GTLCHT_NOWHERE)
 		return FALSE;
 
-	if (dwTaskID != GetSelectedTaskID())
-		SelectTask(dwTaskID);
+	if (!TSH().HasItem(GetTreeItem(dwHitTaskID)))
+		SelectTask(dwHitTaskID);
 
 	CPoint ptScreen(ptCursor);
 	m_list.ClientToScreen(&ptScreen);
@@ -5592,57 +5538,213 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 		return FALSE;
 
 	// We save the check for drag-ability until
-	// after we detect that a drag has been started
+	// AFTER we detect that a drag has been started
 	// to avoid beeping on a simple click
-	GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
-	ASSERT(IsDragging(nDrag));
+	GTLC_DRAG nDragging = MapHitTestToDrag(nHit);
+	ASSERT(GANTTBARDRAGINFO::IsDragging(nDragging));
 	
-	if (!CanDragTask(dwTaskID, nDrag))
+	if (!CanDragTask(dwHitTaskID, nDragging))
 	{
 		MessageBeep(MB_ICONEXCLAMATION);
 		return FALSE;
 	}
 	
-	GANTTITEM* pGI = NULL;
-	GET_GI_RET(dwTaskID, pGI, FALSE);
-	
-	// cache the original task and the start point
-	m_giPreDrag = *pGI;
-	m_ptDragStart = ptCursor;
+	// Initialise the drag info structure
+	// Weeding out any non-draggable tasks as we go
+	CDWordArray aSelIDs;
+	int nID = TSH().GetItemData(aSelIDs);
 
-	// Ensure the gantt item has valid dates
-	COleDateTime dtStart, dtDue;
-	GetTaskStartEndDates(*pGI, dtStart, dtDue);
-	
-	if (!pGI->HasDueDate())
+	while (nID--)
 	{
-		if (!CDateHelper::IsDateSet(dtDue))
-			return FALSE;
+		DWORD dwTaskID = aSelIDs[nID];
+
+		if (!CanDragTask(dwTaskID, nDragging))
+		{
+			aSelIDs.RemoveAt(nID);
+			continue;
+		}
 
 		// else
-		pGI->SetDueDate(dtDue, TRUE);
-	}
-	
-	if (!pGI->HasStartDate())
-	{
-		if (!CDateHelper::IsDateSet(dtStart))
-			return FALSE;
+		GANTTITEM* pGI = m_data.GetItem(dwTaskID, TRUE);
+		ASSERT(pGI);
 
-		// else
-		pGI->SetStartDate(dtStart, TRUE);
-	}
+		m_barDragInfo.aGIPreDrag.Add(*pGI);
+
+		// Ensure the gantt item has valid dates for dragging
+		COleDateTime dtStart, dtDue;
+		GetTaskStartEndDates(*pGI, dtStart, dtDue);
 	
+		if (!pGI->HasDueDate())
+		{
+			if (!CDateHelper::IsDateSet(dtDue))
+				return FALSE;
+
+			// else
+			pGI->SetDueDate(dtDue, TRUE);
+		}
+
+		if (!pGI->HasStartDate())
+		{
+			if (!CDateHelper::IsDateSet(dtStart))
+				return FALSE;
+
+			// else
+			pGI->SetStartDate(dtStart, TRUE);
+		}
+
+		CDateHelper::Max(m_barDragInfo.dtDragMin, m_data.CalcMaxDependencyDate(*pGI));
+	}
+
+	// Initialise drag origin from which offsets will be measured
+	m_barDragInfo.nDragMode = nDragging;
+
+	switch (nDragging)
+	{
+	case GTLCD_WHOLE:
+		VERIFY(GetDateFromPoint(ptCursor, m_barDragInfo.dtDragOrigin));
+		break;
+
+	case GTLCD_START:
+	case GTLCD_END:
+		{
+			GANTTITEM* pGIHit = m_data.GetItem(dwHitTaskID, TRUE);
+			ASSERT(pGIHit);
+
+			COleDateTime dtStart, dtDue;
+			GetTaskStartEndDates(*pGIHit, dtStart, dtDue);
+
+			if (nDragging == GTLCD_START)
+				m_barDragInfo.dtDragOrigin = dtStart;
+			else
+				m_barDragInfo.dtDragOrigin = dtDue;
+		}
+		break;
+	}
+
 	// Start dragging
-	m_nDragging = nDrag;
-	m_dtDragMin = m_data.CalcMaxDependencyDate(m_giPreDrag);
-
 	SetFocus();
 	m_list.SetCapture();
-	
-	// keep parent informed
-	NotifyParentDragChange();
 
 	return TRUE;
+}
+
+BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
+{
+	ASSERT(!m_bReadOnly);
+	ASSERT(!IsDependencyEditing());
+
+	if (!IsDragging())
+		return FALSE;
+
+	CPoint ptDrag(ptCursor);
+	COleDateTime dtDrag;
+
+	if (ValidateDragPoint(ptDrag) && GetDateFromPoint(ptDrag, dtDrag))
+	{
+		// if the drag date precedes the min date, constrain
+		// date appropriately and show the 'no drag' cursor
+		BOOL bNoDrag = FALSE;
+		LPCTSTR szCursor = NULL;
+
+		if (!m_barDragInfo.IsValidDrag(dtDrag))
+		{
+			CDateHelper::Max(dtDrag, m_barDragInfo.dtDragMin);
+			bNoDrag = TRUE;
+		}
+
+		// Calculate each task's new position
+		double dDaysOffset = (dtDrag.m_dt - m_barDragInfo.dtDragOrigin.m_dt);
+
+		int nTask = m_barDragInfo.aGIPreDrag.GetSize();
+
+		while (nTask--)
+		{
+			COleDateTime dtOrgStart, dtOrgEnd;
+			const GANTTITEM& giPreDrag = m_barDragInfo.aGIPreDrag[nTask];
+
+			VERIFY(GetTaskStartEndDates(giPreDrag, dtOrgStart, dtOrgEnd));
+
+			GANTTITEM* pGI = NULL;
+			GET_GI_RET(giPreDrag.dwTaskID, pGI, FALSE);
+
+			COleDateTime dtCurStart, dtCurEnd;
+			VERIFY(GetTaskStartEndDates(*pGI, dtCurStart, dtCurEnd));
+
+			switch (m_barDragInfo.nDragMode)
+			{
+			case GTLCD_START:
+				{
+					COleDateTime dtNewStart = GetNearestDate(dtOrgStart.m_dt + dDaysOffset);
+
+					// prevent the start and end dates from overlapping
+					if (dtNewStart >= dtCurEnd)
+					{
+						dtNewStart = dtOrgStart;
+						bNoDrag = TRUE;
+					}
+
+					pGI->SetStartDate(dtNewStart);
+					szCursor = IDC_SIZEWE;
+				}
+				break;
+
+			case GTLCD_END:
+				{
+					COleDateTime dtNewEnd = GetNearestDate(dtOrgEnd.m_dt + dDaysOffset);
+
+					// prevent the start and end dates from overlapping
+					if (dtNewEnd <= dtCurStart)
+					{
+						dtNewEnd = dtOrgEnd;
+						bNoDrag = TRUE;
+					}
+
+					pGI->SetDueDate(dtNewEnd);
+					szCursor = IDC_SIZEWE;
+				}
+				break;
+
+			case GTLCD_WHOLE:
+				{
+					// Note: If the end date of the dragged task
+					// falls on a day-end GANTTDATERANGE will add
+					// a day because that's all it knows how to do.
+					// We however don't always want it to so we must
+					// detect those times and subtract a day as required
+					COleDateTime dtNewStart = GetNearestDate(dtOrgStart.m_dt + dDaysOffset);
+
+					dDaysOffset = (dtNewStart.m_dt - dtOrgStart.m_dt);
+					COleDateTime dtNewEnd = (dtOrgEnd.m_dt + dDaysOffset);
+
+					if (!CDateHelper::DateHasTime(dtNewEnd))
+						dtNewEnd.m_dt--;
+
+					pGI->dtRange.SetStart(dtNewStart);
+					pGI->dtRange.SetEnd(dtNewEnd);
+
+					szCursor = IDC_SIZEALL;
+				}
+				break;
+			}
+		}
+
+		ASSERT(szCursor);
+
+		if (bNoDrag)
+			GraphicsMisc::SetDragDropCursor(GMOC_NO);
+		else
+			GraphicsMisc::SetStandardCursor(szCursor);
+
+		RecalcParentDates();
+		RedrawListSelection();
+	}
+	else
+	{
+		// We've dragged outside the client rect
+		GraphicsMisc::SetDragDropCursor(GMOC_NO);
+	}
+
+	return TRUE; // always
 }
 
 BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
@@ -5660,25 +5762,21 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 			return FALSE;
 		}
 
-		GTLC_DRAG nDrag = m_nDragging;
-		
-		// cleanup
-		m_nDragging = GTLCD_NONE;
 		::ReleaseCapture();
 
-		GANTTITEM* pGI = NULL;
-		GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
+		// Cache and reset m_barDragInfo before notifying parent
+		GANTTBARDRAGINFO bdiTemp;
 
-		// keep parent informed
-		if (DragDatesDiffer(*pGI, m_giPreDrag))
-		{
-			if (!NotifyParentDateChange(nDrag))
-				RestoreGanttItem(m_giPreDrag);
-			else
-				RecalcDateRange();
+		bdiTemp.nDragMode = m_barDragInfo.nDragMode;
+		bdiTemp.aGIPreDrag.Copy(m_barDragInfo.aGIPreDrag);
 
-			NotifyParentDragChange();
-		}
+		m_barDragInfo.Reset();
+		
+		// Notify the parent and restore previous dates if it fails
+		if (!NotifyParentEndDrag(bdiTemp))
+			m_data.RestoreItems(bdiTemp.aGIPreDrag);
+		else
+			RecalcDateRange();
 
 		return TRUE;
 	}
@@ -5687,192 +5785,37 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 	return FALSE;
 }
 
-BOOL CGanttCtrl::DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2)
-{
-	return ((gi1.dtRange.GetStart() != gi2.dtRange.GetStart()) || 
-			(gi1.dtRange.GetEnd() != gi2.dtRange.GetEnd()));
-}
-
-void CGanttCtrl::NotifyParentDragChange()
+BOOL CGanttCtrl::NotifyParentEndDrag(const GANTTBARDRAGINFO& bdi) const
 {
 	ASSERT(!m_bReadOnly);
-	ASSERT(GetSelectedTaskID());
+	ASSERT(!m_barDragInfo.IsDragging()); // Must be ended
+	
+	// Build a temporary list of the modified tasks for sending
+	// to the parent, in the same order the pre-drag array
+	CGanttItemArray aGIMod;
+	int nNumItems = bdi.aGIPreDrag.GetSize();
 
-	GetParent()->SendMessage(WM_GTLC_DRAGCHANGE, (WPARAM)GetSnapMode(), GetSelectedTaskID());
-}
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+	{
+		const GANTTITEM& giPreDrag = bdi.aGIPreDrag[nItem];
+		DWORD dwTaskID = giPreDrag.dwTaskID;
 
-BOOL CGanttCtrl::NotifyParentDateChange(GTLC_DRAG nDrag)
-{
-	ASSERT(!m_bReadOnly);
-	ASSERT(GetSelectedTaskID());
+		GANTTITEM* pGI = m_data.GetItem(dwTaskID, TRUE);
+		ASSERT(pGI);
 
-	if (IsDragging(nDrag))
-		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)nDrag, (LPARAM)&m_giPreDrag);
+		// Add task only if the dates changed
+		if (pGI->dtRange != giPreDrag.dtRange)
+			aGIMod.Add(*pGI);
+	}
+
+	// Either none moved or they all moved
+	ASSERT((aGIMod.GetSize() == 0) || (aGIMod.GetSize() == nNumItems));
+
+	if (aGIMod.GetSize())
+		return GetParent()->SendMessage(WM_GTLC_DATECHANGE, (WPARAM)&bdi, (LPARAM)&aGIMod);
 
 	// else
 	return 0L;
-}
-
-BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
-{
-	ASSERT(!m_bReadOnly);
-	ASSERT(!IsDependencyEditing());
-	
-	if (IsDragging())
-	{
-		COleDateTime dtDrag;
-
-		if (GetValidDragDate(ptCursor, dtDrag))
-		{
-			GANTTITEM* pGI = NULL;
-			GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
-
-			COleDateTime dtCurStart, dtCurDue;
-			GetTaskStartEndDates(*pGI, dtCurStart, dtCurDue);
-
-			// if the drag date precedes the min date, constrain
-			// date appropriately and show the 'no drag' cursor
-			BOOL bNoDrag = (CDateHelper::IsDateSet(m_dtDragMin) && (dtDrag < m_dtDragMin));
-			LPCTSTR szCursor = NULL;
-
-			CDateHelper::Max(dtDrag, m_dtDragMin);
-
-			COleDateTime dtOrgStart, dtOrgDue;
-			GetTaskStartEndDates(m_giPreDrag, dtOrgStart, dtOrgDue);
-
-			switch (m_nDragging)
-			{
-			case GTLCD_START:
-				{
-					// prevent the start and end dates from overlapping
-					if (dtDrag >= dtCurDue)
-					{
-						bNoDrag = (dtOrgStart >= dtCurStart);
-						pGI->SetStartDate(max(dtCurStart, dtOrgStart));
-					}
-					else
-					{
-						pGI->SetStartDate(dtDrag);
-					}
-
-					szCursor = IDC_SIZEWE;
-				}
-				break;
-
-			case GTLCD_END:
-				{
-					// prevent the start and end dates from overlapping
-					if (dtDrag <= dtCurStart)
-					{
-						bNoDrag = (dtOrgDue <= dtCurDue);
-						pGI->SetDueDate(min(dtCurDue, dtOrgDue));
-					}
-					else
-					{
-						pGI->SetDueDate(dtDrag);
-					}
-
-					szCursor = IDC_SIZEWE;
-				}
-				break;
-
-			case GTLCD_WHOLE:
-				{
-					// Note: If the end date of the dragged task
-					// falls on a day-end GANTTDATERANGE will add
-					// a day because that's all it knows how to do.
-					// We however don't always want it to so we must
-					// detect those times and subtract a day as required
-					COleDateTime dtDuration(dtOrgDue - dtOrgStart);
-					COleDateTime dtEnd = (dtDrag + dtDuration);
-					
-					if (!CDateHelper::DateHasTime(dtEnd))
-						dtEnd.m_dt--;
-
-					pGI->dtRange.SetStart(dtDrag);
-					pGI->dtRange.SetEnd(dtEnd);
-
-					szCursor = IDC_SIZEALL;
-				}
-				break;
-			}
-			ASSERT(szCursor);
-
-			if (bNoDrag)
-				GraphicsMisc::SetDragDropCursor(GMOC_NO);
-			else
-				GraphicsMisc::SetStandardCursor(szCursor);
-
-			RecalcParentDates();
-			RedrawList();
-			RedrawTree();
-
-			// keep parent informed
-			NotifyParentDragChange();
-		}
-		else
-		{
-			// We've dragged outside the client rect
-			GraphicsMisc::SetDragDropCursor(GMOC_NO);
-		}
-
-		return TRUE; // always
-	}
-
-	// else
-	return FALSE; // not dragging
-}
-
-BOOL CGanttCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
-{
-	ASSERT(IsDragging());
-	CPoint ptDrag(ptCursor);
-
-	if (!ValidateDragPoint(ptDrag))
-		return FALSE;
-
-	if (!GetDateFromPoint(ptDrag, dtDrag))
-		return FALSE;
-
-	COleDateTime dtPreStart, dtPreEnd;
-	VERIFY(GetTaskStartEndDates(m_giPreDrag, dtPreStart, dtPreEnd));
-
-	switch (m_nDragging)
-	{
-	case GTLCD_WHOLE:
-		{
-			// if dragging the whole task, we calculate dtDrag as the 
-			// original start date plus the difference between the 
-			// current drag pos and the initial drag pos
-			COleDateTime dtOrg;
-			GetDateFromPoint(m_ptDragStart, dtOrg);
-		
-			double dOffset = (dtDrag.m_dt - dtOrg.m_dt);
-			dtDrag = (dtPreStart.m_dt + dOffset);
-		}
-		break;
-
-	case GTLCD_START:
-		// Clip the date to the start of the task being dragged
-		if (dtDrag > dtPreEnd)
-		{
-			dtDrag = dtPreStart;
-			return TRUE;
-		}
-		break;
-
-	case GTLCD_END:
-		// Clip the date to the end of the task being dragged
-		if (dtDrag < dtPreStart)
-		{
-			dtDrag = dtPreEnd;
-			return TRUE;
-		}
-		break;
-	}
-	
-	dtDrag = GetNearestDate(dtDrag);
-	return TRUE;
 }
 
 BOOL CGanttCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const
@@ -5942,11 +5885,8 @@ void CGanttCtrl::CancelDrag(BOOL bReleaseCapture)
 		ReleaseCapture();
 	
 	// cancel drag, restoring original task dates
-	RestoreGanttItem(m_giPreDrag);
-	m_nDragging = GTLCD_NONE;
-
-	// keep parent informed
-	NotifyParentDragChange();
+	RestoreGanttItems(m_barDragInfo.aGIPreDrag);
+	m_barDragInfo.Reset();
 }
 
 void CGanttCtrl::GetColumnWidths(CIntArray& aTreeWidths, CIntArray& aListWidths) const
@@ -6130,7 +6070,7 @@ COleDateTime CGanttCtrl::GetNearestDate(const COleDateTime& dtDrag) const
 {
 	ASSERT(IsDragging());
 
-	BOOL bDraggingEnd = (m_nDragging == GTLCD_END);
+	BOOL bDraggingEnd = (m_barDragInfo.nDragMode == GTLCD_END);
 
 	switch (GetSnapMode())
 	{

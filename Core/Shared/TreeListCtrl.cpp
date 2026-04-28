@@ -2453,6 +2453,16 @@ void CTreeListCtrl::RedrawList(BOOL bErase)
 	m_list.UpdateWindow();
 }
 
+void CTreeListCtrl::RedrawListSelection(BOOL bErase)
+{
+	POSITION pos = m_list.GetFirstSelectedItemPosition();
+
+	while (pos)
+		CTreeListSyncer::InvalidateListItem(m_list, m_list.GetNextSelectedItem(pos), FALSE);
+
+	m_list.UpdateWindow();
+}
+
 void CTreeListCtrl::InvalidateList(int nFrom, int nTo, BOOL bErase)
 {
 	CRect rFrom, rTo;

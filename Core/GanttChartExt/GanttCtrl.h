@@ -46,7 +46,6 @@ public:
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
-	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	int GetTaskCount() const { return (int)m_tree.GetCount(); }
 
@@ -109,8 +108,8 @@ public:
 
 protected:
 	GANTTDATERANGE m_dtDataRange, m_dtActiveRange;
-	GANTTITEM m_giPreDrag;
 	GANTTSORT m_sort;
+	GANTTBARDRAGINFO m_barDragInfo;
 
 	IGanttDependencyEditor* m_pDependEdit;
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
@@ -118,15 +117,13 @@ protected:
 
 	COLORREF m_crParent, m_crBarDefault;
 	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHours;
-	COleDateTime m_dtDragMin;
-	CPoint m_ptDragStart, m_ptLastDependPick;
+	CPoint m_ptLastDependPick;
 	DWORD m_dwOptions;
 	DWORD m_dwMaxTaskID;
 	GTLC_MONTH_DISPLAY m_nMonthDisplay;
 	GTLC_PARENTCOLORING m_nParentColoring;
 	int m_nMonthWidth;
 	CString m_sMilestoneTag;
-	GTLC_DRAG m_nDragging;
 	GTLC_SNAPMODE m_nDefSnapMode;
 
 	CGanttItemMap m_data;
@@ -264,10 +261,10 @@ protected:
 	BOOL GetDrawPosFromDate(const COleDateTime& date, int& nPos) const;
 
 	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
-	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
+	BOOL RestoreGanttItems(const CGanttItemArray& aGIPrev);
 
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
-	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit, BOOL bDragging) const;
+	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit) const;
 	DWORD ListDependencyHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
 	int GetDependencyListItem(DWORD dwTaskID) const;
 	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
@@ -283,16 +280,13 @@ protected:
 	BOOL ValidateDragPoint(CPoint& ptDrag) const;
 	BOOL IsValidDragPoint(const CPoint& ptDrag) const;
 	void CancelDrag(BOOL bReleaseCapture);
-	BOOL IsDragging() const;
+	BOOL IsDragging() const { return m_barDragInfo.IsDragging(); }
 	void GetDragLimits(CRect& rLimits) const;
-	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
 	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
 	BOOL SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const;
-
-	BOOL NotifyParentDateChange(GTLC_DRAG nDrag);
-	void NotifyParentDragChange();
+	BOOL NotifyParentEndDrag(const GANTTBARDRAGINFO& bdi) const;
 
 	int CalcTreeColumnTextWidth(int nCol, CDC* pDC) const;
 	CString GetLongestVisibleAllocTo(HTREEITEM hti) const;
@@ -337,13 +331,10 @@ protected:
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
 	static CString GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	static void BuildTaskIDMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
-	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
 	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
 	static BOOL GetDateFromScrolledPos(int nPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
 	static BOOL IsVerticalDivider(VERT_DIV nType);
-	static BOOL IsDragging(GTLC_DRAG nDrag);
-	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
 
 private:
 	void PreFixVScrollSyncBug();

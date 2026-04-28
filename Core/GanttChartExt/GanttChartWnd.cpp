@@ -99,7 +99,6 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 
 	ON_REGISTERED_MESSAGE(WM_GTLC_EDITTASKTITLE, OnGanttEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_GTLC_DATECHANGE, OnGanttNotifyDateChange)
-	ON_REGISTERED_MESSAGE(WM_GTLC_DRAGCHANGE, OnGanttNotifyDragChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_COMPLETIONCHANGE, OnGanttNotifyCompletionChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYSORT, OnGanttNotifySortChange)
 	ON_REGISTERED_MESSAGE(WM_GTLC_NOTIFYZOOM, OnGanttNotifyZoomChange)
@@ -662,7 +661,9 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_MOVETASK:
 		if (pData)
 		{
-			ASSERT(pData->move.dwSelectedTaskID == m_ctrlGantt.GetSelectedTaskID());
+			ASSERT((pData->move.dwSelectedTaskID == 0) || 
+					(pData->move.dwSelectedTaskID == m_ctrlGantt.GetSelectedTaskID()));
+
 			return (m_ctrlGantt.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
@@ -741,6 +742,7 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 	case IUI_MOVETASK:
 		if (pData)
 			return (m_ctrlGantt.CanMoveSelectedTask(pData->move) != FALSE);
+		break;
 
 	case IUI_SCROLLTOSELECTEDTASK:
 		return (m_ctrlGantt.GetSelectionCount() != 0);
@@ -1099,59 +1101,110 @@ void CGanttChartWnd::UpdateGanttCtrlPreferences()
 
 LRESULT CGanttChartWnd::OnGanttNotifyDateChange(WPARAM wp, LPARAM lp)
 {
-	COleDateTime dtStart, dtDue;
-	if (m_ctrlGantt.GetSelectedTaskDates(dtStart, dtDue))
-	{
-		IUITASKMOD mod[2] = { { TDCA_NONE, 0 }, { TDCA_NONE, 0 } };
-		int nNumMod = 1;
-		
-		switch (wp)
-		{
-		case GTLCD_START:
-			if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
-			{
-				mod[0].nAttributeID = TDCA_STARTDATE;
-			}
-			break;
-			
-		case GTLCD_END:
-			if (CDateHelper::GetTimeT64(dtDue, mod[0].tValue))
-			{
-				mod[0].nAttributeID = TDCA_DUEDATE;
-			}
-			break;
-			
-		case GTLCD_WHOLE:
-			{
-				const GANTTITEM* pGIPreDrag = (const GANTTITEM*)lp;
-				ASSERT(pGIPreDrag);
-				
-				// if the pre-drag start or due dates were not set
-				// we set them explicitly else we offset the task
-				BOOL bStartSet = pGIPreDrag->HasStartDate();
-				BOOL bDueSet = pGIPreDrag->HasDueDate();
+	const GANTTBARDRAGINFO* pDragInfo = (GANTTBARDRAGINFO*)wp;
+	const CGanttItemArray* pGIMods = (const CGanttItemArray*)lp;
 
-				if (bStartSet && bDueSet)
+	int nNumGIMods = (pGIMods ? pGIMods->GetSize() : 0);
+
+	if (nNumGIMods)
+	{
+		ASSERT(nNumGIMods == pDragInfo->aGIPreDrag.GetSize());
+
+		CArray<IUITASKMOD, IUITASKMOD&> aIUIMods;
+
+		for (int nGIMod = 0; nGIMod < nNumGIMods; nGIMod++)
+		{
+			const GANTTITEM& giMod = pGIMods->GetAt(nGIMod);
+
+			COleDateTime dtStart = giMod.dtRange.GetStart();
+			COleDateTime dtDue = giMod.dtRange.GetEnd();
+
+			switch (pDragInfo->nDragMode)
+			{
+			case GTLCD_START:
 				{
-					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue))
-						mod[0].nAttributeID = TDCA_OFFSETTASK;
-				}
-				else
-				{
-					if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue) &&
-						CDateHelper::GetTimeT64(dtDue, mod[1].tValue))
+					IUITASKMOD mod = { TDCA_NONE, giMod.dwTaskID };
+
+					if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
 					{
-						mod[0].nAttributeID = TDCA_STARTDATE;
-						mod[1].nAttributeID = TDCA_DUEDATE;
-						nNumMod = 2;
+						mod.nAttributeID = TDCA_STARTDATE;
+						aIUIMods.Add(mod);
+					}
+					else
+					{
+						ASSERT(0);
 					}
 				}
+				break;
+			
+			case GTLCD_END:
+				{
+					IUITASKMOD mod = { TDCA_NONE, giMod.dwTaskID };
+
+					if (CDateHelper::GetTimeT64(dtDue, mod.tValue))
+					{
+						mod.nAttributeID = TDCA_DUEDATE;
+						aIUIMods.Add(mod);
+					}
+					else
+					{
+						ASSERT(0);
+					}
+				}
+				break;
+			
+			case GTLCD_WHOLE:
+				{
+					const GANTTITEM& giPreDrag = pDragInfo->aGIPreDrag.GetAt(nGIMod);
+					ASSERT(giMod.dwTaskID == giPreDrag.dwTaskID);
+
+					// if the pre-drag start or due dates were not set
+					// we set them explicitly else we offset the task
+					BOOL bStartSet = giPreDrag.HasStartDate();
+					BOOL bDueSet = giPreDrag.HasDueDate();
+
+					if (bStartSet && bDueSet)
+					{
+						IUITASKMOD mod = { TDCA_NONE, giMod.dwTaskID };
+
+						if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
+						{
+							mod.nAttributeID = TDCA_OFFSETTASK;
+							aIUIMods.Add(mod);
+						}
+						else
+						{
+							ASSERT(0);
+						}
+					}
+					else
+					{
+						IUITASKMOD mod[2] = { { TDCA_NONE, giMod.dwTaskID },{ TDCA_NONE, giMod.dwTaskID } };
+
+						if (CDateHelper::GetTimeT64(dtStart, mod[0].tValue) &&
+							CDateHelper::GetTimeT64(dtDue, mod[1].tValue))
+						{
+							mod[0].nAttributeID = TDCA_STARTDATE;
+							mod[1].nAttributeID = TDCA_DUEDATE;
+
+							aIUIMods.Add(mod[0]);
+							aIUIMods.Add(mod[1]);
+						}
+						else
+						{
+							ASSERT(0);
+						}
+					}
+				}
+				break;
 			}
-			break;
 		}
 		
-		if (mod[0].nAttributeID != TDCA_NONE)
-			return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumMod, (LPARAM)&mod[0]);
+		if (aIUIMods.GetSize())
+		{
+			CLockUpdates lu(*this);
+			return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, aIUIMods.GetSize(), (LPARAM)aIUIMods.GetData());
+		}
 	}
 
 	return 0L;
@@ -1161,20 +1214,6 @@ void CGanttChartWnd::UpdateActiveRangeLabel()
 {
 	CString sRange = m_sliderDateRange.FormatRange();
 	SetDlgItemText(IDC_ACTIVEDATERANGE_TEXT, sRange);
-}
-
-LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-/*
-	// save snap changes as we go
-	GTLC_SNAPMODE nSnap = (GTLC_SNAPMODE)wp;
-	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
-
-	m_mapDisplaySnapModes[nDisplay] = nSnap;
-	m_cbSnapModes.SelectMode(nSnap);
-*/
-
-	return 0L;
 }
 
 void CGanttChartWnd::OnGanttGotoToday() 

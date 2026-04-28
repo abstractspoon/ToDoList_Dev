@@ -128,7 +128,30 @@ struct GANTTITEM
 	COLORREF GetBorderColor(BOOL bSelected) const;
 
 	static COleDateTime GetDate(time64_t tDate, BOOL bEndOfDay);
+};
 
+/////////////////////////////////////////////////////////////////////////////
+
+typedef CArray<GANTTITEM, GANTTITEM&> CGanttItemArray;
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct GANTTBARDRAGINFO
+{
+	GANTTBARDRAGINFO();
+
+	void Reset();
+	BOOL IsDragging() const;
+	BOOL IsValidDrag(const COleDateTime& dtDrag) const;
+
+	static BOOL IsDragging(GTLC_DRAG nDrag);
+	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
+
+	GTLC_DRAG nDragMode;
+	COleDateTime dtDragOrigin;
+	COleDateTime dtDragMin;
+
+	CGanttItemArray aGIPreDrag; // copies
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -142,11 +165,12 @@ public:
 	BOOL DeleteItem(DWORD dwTaskID);
 	BOOL HasItem(DWORD dwTaskID) const;
 	GANTTITEM* GetItem(DWORD dwTaskID, BOOL bResolveReferences) const;
-	BOOL RestoreItem(const GANTTITEM& giPrev);
+	BOOL RestoreItems(const CGanttItemArray& aGIPrev);
 	void RemoveAllDependenciesOn(DWORD dwDependencyID);
 
 	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	BOOL ItemIsReference(DWORD dwTaskID) const;
+	BOOL ItemIsParent(DWORD dwTaskID) const;
 	BOOL ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL ItemHasDependencies(DWORD dwTaskID) const;
 	BOOL IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const;
