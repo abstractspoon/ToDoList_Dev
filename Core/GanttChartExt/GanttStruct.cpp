@@ -634,18 +634,24 @@ GANTTITEM* CGanttItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) const
 	return pGI;
 }
 
-BOOL CGanttItemMap::RestoreItem(const GANTTITEM& giPrev)
+BOOL CGanttItemMap::RestoreItems(const CGanttItemArray& aGIPrev)
 {
-	GANTTITEM* pGI = NULL;
+	BOOL bAllRestored = TRUE;
+	int nItem = aGIPrev.GetSize();
 
-	if (Lookup(giPrev.dwTaskID, pGI) && pGI)
+	while (nItem--)
 	{
-		*pGI = giPrev;
-		return TRUE;
+		const GANTTITEM& giPrev = aGIPrev[nItem];
+		GANTTITEM* pGI = NULL;
+		
+		if (Lookup(giPrev.dwTaskID, pGI) && pGI)
+			*pGI = giPrev;
+		else
+			bAllRestored = FALSE;
 	}
 
-	ASSERT(0);
-	return FALSE;
+	ASSERT(bAllRestored);
+	return bAllRestored;
 }
 
 void CGanttItemMap::RemoveAllDependenciesOn(DWORD dwDependencyID)

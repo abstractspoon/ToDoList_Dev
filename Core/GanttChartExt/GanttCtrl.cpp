@@ -837,9 +837,9 @@ GANTTITEM* CGanttCtrl::GetGanttItem(DWORD dwTaskID) const
 	return m_data.GetItem(dwTaskID, TRUE);
 }
 
-BOOL CGanttCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
+BOOL CGanttCtrl::RestoreGanttItems(const CGanttItemArray& aGIPrev)
 {
-	if (m_data.RestoreItem(giPrev))
+	if (m_data.RestoreItems(aGIPrev))
 	{
 		RecalcParentDates();
 		RedrawList();
@@ -5766,24 +5766,17 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 
 		// Cache and reset m_barDragInfo before notifying parent
 		GANTTBARDRAGINFO bdiTemp;
+
 		bdiTemp.nDragMode = m_barDragInfo.nDragMode;
 		bdiTemp.aGIPreDrag.Copy(m_barDragInfo.aGIPreDrag);
 
-		// Drag info must be reset before notifying parent
 		m_barDragInfo.Reset();
 		
 		// Notify the parent and restore previous dates if it fails
 		if (!NotifyParentEndDrag(bdiTemp))
-		{
-			int nItem = m_barDragInfo.aGIPreDrag.GetSize();
-
-			while (nItem--)
-				RestoreGanttItem(m_barDragInfo.aGIPreDrag[nItem]);
-		}
+			m_data.RestoreItems(bdiTemp.aGIPreDrag);
 		else
-		{
 			RecalcDateRange();
-		}
 
 		return TRUE;
 	}
@@ -5892,7 +5885,7 @@ void CGanttCtrl::CancelDrag(BOOL bReleaseCapture)
 		ReleaseCapture();
 	
 	// cancel drag, restoring original task dates
-	RestoreGanttItem(m_barDragInfo.aGIPreDrag[0]);
+	RestoreGanttItems(m_barDragInfo.aGIPreDrag);
 	m_barDragInfo.Reset();
 }
 

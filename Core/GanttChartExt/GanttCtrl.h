@@ -261,7 +261,7 @@ protected:
 	BOOL GetDrawPosFromDate(const COleDateTime& date, int& nPos) const;
 
 	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
-	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
+	BOOL RestoreGanttItems(const CGanttItemArray& aGIPrev);
 
 	DWORD TreeHitTestTask(const CPoint& point, BOOL bScreen) const;
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen, GTLC_HITTEST& nHit) const;
