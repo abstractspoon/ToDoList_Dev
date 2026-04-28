@@ -148,7 +148,7 @@ struct GANTTBARDRAGINFO
 	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
 
 	GTLC_DRAG nDragMode;
-	COleDateTime dtDragStart;
+	COleDateTime dtDragOrigin;
 	COleDateTime dtDragMin;
 
 	CGanttItemArray aGIPreDrag; // copies

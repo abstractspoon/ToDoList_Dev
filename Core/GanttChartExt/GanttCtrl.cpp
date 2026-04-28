@@ -5601,7 +5601,7 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	switch (nDragging)
 	{
 	case GTLCD_WHOLE:
-		VERIFY(GetDateFromPoint(ptCursor, m_barDragInfo.dtDragStart));
+		VERIFY(GetDateFromPoint(ptCursor, m_barDragInfo.dtDragOrigin));
 		break;
 
 	case GTLCD_START:
@@ -5614,9 +5614,9 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 			GetTaskStartEndDates(*pGIHit, dtStart, dtDue);
 
 			if (nDragging == GTLCD_START)
-				m_barDragInfo.dtDragStart = dtStart;
+				m_barDragInfo.dtDragOrigin = dtStart;
 			else
-				m_barDragInfo.dtDragStart = dtDue;
+				m_barDragInfo.dtDragOrigin = dtDue;
 		}
 		break;
 	}
@@ -5653,7 +5653,7 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 		}
 
 		// Calculate each new task's position
-		double dDaysOffset = (dtDrag.m_dt - m_barDragInfo.dtDragStart.m_dt);
+		double dDaysOffset = (dtDrag.m_dt - m_barDragInfo.dtDragOrigin.m_dt);
 
 		int nTask = m_barDragInfo.aGIPreDrag.GetSize();
 

@@ -1213,7 +1213,7 @@ GANTTBARDRAGINFO::GANTTBARDRAGINFO()
 void GANTTBARDRAGINFO::Reset()
 {
 	nDragMode = GTLCD_NONE;
-	dtDragStart = dtDragMin = CDateHelper::NullDate();
+	dtDragOrigin = dtDragMin = CDateHelper::NullDate();
 	aGIPreDrag.RemoveAll();
 }
 
