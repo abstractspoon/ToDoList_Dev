@@ -5229,14 +5229,6 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 				tasks.SetTaskFlag(hTask, (m_calculator.IsTaskFlagged(pTDI, pTDS) != FALSE), TRUE);
 		}
 
-		if (pTDI->bLocked && filter.WantAttribute(TDCA_LOCK))
-		{
-			tasks.SetTaskLock(hTask, (pTDI->bLocked != FALSE));
-
-			if (!pTDI->bLocked)
-				tasks.SetTaskLock(hTask, (m_calculator.IsTaskLocked(pTDI, pTDS) != FALSE), TRUE);
-		}
-
 		if (pTDI->IsRecurring() && filter.WantAttribute(TDCA_RECURRENCE))
 			tasks.SetTaskRecurrence(hTask, pTDI->trRecurrence);
 
@@ -5362,16 +5354,15 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 				tasks.SetTaskCalcTimeRemaining(hTask, dTime, nUnits);
 		}
 
-		// done date
+		// lock state always
+		tasks.SetTaskLock(hTask, pTDI->bLocked, FALSE);
+		tasks.SetTaskLock(hTask, (pTDI->bLocked || m_calculator.IsTaskLocked(pTDI, pTDS)), TRUE); // calculated
+
+		// completion state always
 		if (bDone)
-		{
 			tasks.SetTaskDoneDate(hTask, pTDI->dateDone);
-			tasks.SetTaskGoodAsDone(hTask, TRUE);
-		}
-		else if (m_calculator.IsTaskDone(pTDI, pTDS))
-		{
-			tasks.SetTaskGoodAsDone(hTask, TRUE);
-		}
+
+		tasks.SetTaskGoodAsDone(hTask, (bDone || m_calculator.IsTaskDone(pTDI, pTDS)));
 
 		// add due date if we're filtering by due date
 		if (CDateHelper::IsDateSet(filter.dateDueBy) || filter.WantAttribute(TDCA_DUEDATE))
