@@ -291,7 +291,6 @@ protected:
 	void InitialiseStyles(HWND hwndLeft, HWND hwndRight);
 	HWND PrimaryWnd() const;
 	int GetSelectedListItems(HWND hwndList, CIntArray& aItems);
-	BOOL ResyncListToTreeSelection(HWND hwndTree, const CList<HTREEITEM, HTREEITEM>& htItems, HTREEITEM htiFocused);
 	BOOL WantHoldHScroll(HWND hWnd) const;
 	BOOL IsHeaderTracking(HWND hwndHeader, int nCol = -1) const;
 	HWND HitTestHeader(const CPoint& ptScreen, int& nCol) const;
