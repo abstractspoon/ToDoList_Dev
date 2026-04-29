@@ -1396,56 +1396,75 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				NotifyParentSelChange(SC_BYKEYBOARD);
 			}
 		}
-		else if (IsGrouped())
+		else
 		{
+ 			// Linux Fix
+			// When the Up/Down keys are on repeat, the attributes column
+			// can lag behind so we force it to update before processing
 			switch (wp)
 			{
-				case VK_UP:
-				case VK_PRIOR:
-				case VK_HOME:
-					// If we are already on item 1 and moving 'up'
-					// then we eat the message because we are guaranteed
-					// to hit the first group header which causes a flicker
-					// when we subsequently fix it up.
-					if (GetSelectedItem() == 1)
-						return 0L;
+ 				case VK_NEXT:
+ 				case VK_DOWN:
+ 				case VK_UP:
+ 				case VK_PRIOR:
+ 					if (Misc::ModKeysArePressed(MKS_NONE) && OsIsLinux())
+ 					{
+ 						m_lcColumns.UpdateWindow();
+ 					}
+					break;
 			}
 
-			// else do default and then fix it up as necessary
-			LRESULT lr = ScDefault(hRealWnd);
-
-			int nSel = GetSelectedItem();
-
-			if (IsGroupHeaderItem(nSel))
+			if (IsGrouped())
 			{
 				switch (wp)
 				{
-				case VK_DOWN:
-				case VK_NEXT:
-					// group header can never be last item so we can always go down
-					nSel++;
-					break;
-
-				case VK_END:
-					// This should be impossible because group header can never be last item
-					ASSERT(0);
-					break;
-
-				case VK_UP:
-				case VK_PRIOR:
-				case VK_HOME:
-					if (nSel == 0)
-						nSel++;
-					else 
-						nSel--;
-					break;
+					case VK_UP:
+					case VK_PRIOR:
+					case VK_HOME:
+						// If we are already on item 1 and moving 'up'
+						// then we eat the message because we are guaranteed
+						// to hit the first group header which causes a flicker
+						// when we subsequently fix it up.
+						if (GetSelectedItem() == 1)
+							return 0L;
 				}
 
-				SelectItem(nSel);
-				NotifyParentSelChange(SC_BYKEYBOARD);
+				// else do default and then fix it up as necessary
+				LRESULT lr = ScDefault(hRealWnd);
+
+				int nSel = GetSelectedItem();
+
+				if (IsGroupHeaderItem(nSel))
+				{
+					switch (wp)
+					{
+					case VK_DOWN:
+					case VK_NEXT:
+						// group header can never be last item so we can always go down
+						nSel++;
+						break;
+
+					case VK_END:
+						// This should be impossible because group header can never be last item
+						ASSERT(0);
+						break;
+
+					case VK_UP:
+					case VK_PRIOR:
+					case VK_HOME:
+						if (nSel == 0)
+							nSel++;
+						else 
+							nSel--;
+						break;
+					}
+
+					SelectItem(nSel);
+					NotifyParentSelChange(SC_BYKEYBOARD);
+				}
+				
+				return lr;
 			}
-			
-			return lr;
 		}
 		break;
 
