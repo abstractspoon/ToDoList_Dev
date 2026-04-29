@@ -605,6 +605,32 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 	return bSynced;
 }
 
+void CTreeListSyncer::ClearListSelection(HWND hwndList, DWORD dwMask)
+{
+	ASSERT(IsList(hwndList));
+
+	// Wine's implementation of changing the state of ALL
+	// list items seems to be very slow so we do it manually
+	// for small(ish) numbers of selected tasks
+	if (OsIsLinux() && ((int)ListView_GetSelectedCount(hwndList) < ListView_GetCountPerPage(hwndList)))
+	{
+		// Adapted from AFXCMN.INL
+		int nItem = (int)::SendMessage(hwndList, LVM_GETNEXTITEM, -1, MAKELPARAM(dwMask, 0));
+		POSITION pos = (POSITION)(1 + nItem);
+		
+		while (pos)
+		{
+			nItem = (int)::SendMessage(hwndList, LVM_GETNEXTITEM, nItem, MAKELPARAM(dwMask, 0));
+			pos = (POSITION)(1 + nItem);
+		}
+		
+		return;
+	}
+
+	// All else
+	ListView_SetItemState(hwndList, -1, 0, dwMask);
+}
+
 BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel)
 {
 	if (!CanResync() || !HasFlag(TLSF_SYNCSELECTION))
@@ -673,7 +699,7 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 	else if (IsList(hwnd) && IsList(hwndTo)) // syncing list to list
 	{
 		// clear existing selection first
-		ListView_SetItemState(hwnd, -1, 0, LVIS_SELECTED);
+		ClearListSelection(hwnd);
 		
 		// then update
 		int nSelTo = ListView_GetNextItem(hwndTo, -1, LVIS_SELECTED);

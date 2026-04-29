@@ -1536,13 +1536,6 @@ DWORD CTDLTaskListCtrl::GetNextSelectedTaskID(POSITION& pos) const
 
 void CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 {
-	if (m_bDeletingGroupHeaders ||
-		IsGroupHeaderItem(GetSelectedItem()))
-	{
-		// Group headers are not selectable and have special IDs
-		return;
-	}
-	
 	if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
 	{
 		// User is in the middle of scrolling
@@ -1555,6 +1548,13 @@ void CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 		return;
 	}
 
+	if (m_bDeletingGroupHeaders ||
+		(IsGrouped() && IsGroupHeaderItem(GetSelectedItem())))
+	{
+		// Group headers are not selectable and have special IDs
+		return;
+	}
+	
 	// Don't notify de-selections EXCEPT in the very
 	// specific case where the CTRL key is down, we are 
 	// over an item and no mouse button is down
@@ -2168,8 +2168,8 @@ void CTDLTaskListCtrl::DeselectAll()
 	// prevent resyncing
 	CTLSHoldResync hr(*this);
 
-	m_lcTasks.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
-	m_lcColumns.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
+	ClearListSelection(m_lcTasks);
+	ClearListSelection(m_lcColumns);
 }
 
 BOOL CTDLTaskListCtrl::SelectAll() 

@@ -4246,10 +4246,24 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			return (DLGC_WANTTAB | ScDefault(hRealWnd));
 
 		case WM_KEYDOWN:
-			if (wp == VK_TAB)
 			{
-				HandleTabKey(hRealWnd);
-				return 0L; // We handled it
+				switch (wp)
+				{
+				case VK_TAB:
+					HandleTabKey(hRealWnd);
+					return 0L; // We handled it
+
+				case VK_NEXT:
+				case VK_DOWN:
+				case VK_UP:
+				case VK_PRIOR:
+					if (Misc::ModKeysArePressed(MKS_NONE) && OsIsLinux())
+					{
+						// When the Up/Down keys are on repeat, the list stops redrawing
+						// so we have to force it to update before processing
+						m_lcColumns.UpdateWindow();
+					}
+				}
 			}
 			break;
 

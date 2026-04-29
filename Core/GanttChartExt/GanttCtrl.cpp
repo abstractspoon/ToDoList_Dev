@@ -4289,7 +4289,7 @@ void CGanttCtrl::OnEndDepedencyEdit()
 	SetFocus();
 
 	m_tree.SelectDropTarget(NULL);
-	m_list.SetItemState(-1, 0, LVIS_DROPHILITED);
+	ClearListSelection(m_list, LVIS_DROPHILITED);
 	m_list.Invalidate(TRUE);
 }
 
