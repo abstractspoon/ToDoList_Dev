@@ -609,19 +609,17 @@ void CTreeListSyncer::ClearListSelection(HWND hwndList, DWORD dwMask)
 {
 	ASSERT(IsList(hwndList));
 
-	// Wine's implementation of changing the state of ALL
-	// list items seems to be very slow so we do it manually
-	// for small(ish) numbers of selected tasks
-	if (OsIsLinux() && ((int)ListView_GetSelectedCount(hwndList) < ListView_GetCountPerPage(hwndList)))
+	// Up to a certain (arbitrary) point it's more efficient
+	// to iterate the selected items, deselecting them in turn,
+	// than it is to clear the selection on all (-1) items
+	if ((int)ListView_GetSelectedCount(hwndList) < ListView_GetCountPerPage(hwndList))
 	{
-		// Adapted from AFXCMN.INL
-		int nItem = (int)::SendMessage(hwndList, LVM_GETNEXTITEM, -1, MAKELPARAM(dwMask, 0));
-		POSITION pos = (POSITION)(1 + nItem);
+		int nItem = ListView_GetNextItem(hwndList, -1, dwMask);
 		
-		while (pos)
+		while (nItem != -1)
 		{
-			nItem = (int)::SendMessage(hwndList, LVM_GETNEXTITEM, nItem, MAKELPARAM(dwMask, 0));
-			pos = (POSITION)(1 + nItem);
+			ListView_SetItemState(hwndList, nItem, 0, dwMask);
+			nItem = ListView_GetNextItem(hwndList, nItem, dwMask);
 		}
 		
 		return;
@@ -715,7 +713,10 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 			nSelTo = ListView_GetNextItem(hwndTo, nSelTo, LVIS_SELECTED);
 			
 			if (nSelTo == nPrevSel)
+			{
+				ASSERT(0);
 				break;
+			}
 		}
 
 		// selection mark
