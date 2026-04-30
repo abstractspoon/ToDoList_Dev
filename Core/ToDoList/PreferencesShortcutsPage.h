@@ -10,15 +10,69 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "..\shared\shortcutManager.h"
-#include "..\shared\orderedtreectrl.h"
+// #include "..\shared\orderedtreectrl.h"
 #include "..\shared\hotkeyctrlex.h"
 #include "..\shared\preferencesbase.h"
 #include "..\shared\enstring.h"
 #include "..\shared\FontCache.h"
+#include "..\shared\TreeListCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 class CMenuIconMgr;
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDLShortcutsTreeListCtrl : public CTreeListCtrl
+{
+public:
+	CTDLShortcutsTreeListCtrl(const CCtrlTextHighlighter& ctrlHighlighter,
+							  const CMenuIconMgr& mgrIcons,
+							  CWndPromptManager& mgrPrompts,
+							  CShortcutManager* pMgrShortcuts);
+
+	void BuildMenuTree();
+	BOOL AssignShortcut(UINT nCmdID, DWORD dwShortcut);
+	BOOL SaveToShortcutMgr();
+
+	BOOL MatchesSearch(const CString& sItem) const;
+	UINT GetSelectedCmdID() const;
+	UINT GetSelectedShortcut() const;
+	void CopyAllToClipboard() const;
+
+protected:
+	const CMenuIconMgr& m_mgrMenuIcons;
+	const CCtrlTextHighlighter& m_ctrlHighlighter;
+
+	CWndPromptManager& m_mgrPrompts;
+	CShortcutManager* m_pMgrShortcuts;
+
+	CMap<UINT, UINT, DWORD, DWORD&> m_mapID2Shortcut;
+ 	CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&> m_mapShortcut2HTI;
+	CFontCache m_fonts;
+
+protected:
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	DECLARE_MESSAGE_MAP()
+
+protected:
+	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd);
+	int GetLongestShortcutText(HTREEITEM hti, CDC* pDC);
+	void AddMiscShortcuts();
+	void RemoveUnusedDefaultFilterItems(CMenu& menu) const;
+	BOOL CopyItem(HTREEITEM hti, CString& sOutput) const;
+	HTREEITEM InsertItem(const CString& sItem, UINT nCmdID, HTREEITEM htiParent, BOOL bForceAdd);
+	BOOL WantKeepSubmenu(HTREEITEM hti) const;
+	BOOL WantItem(const CString& sItem) const;
+
+	// base class overrides
+	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths);
+	COLORREF GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const;
+	void DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected);
+	void DrawTreeItemIcon(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
+
+	static BOOL IsMiscCommandID(UINT nCmdID);
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesShortcutsPage dialog
@@ -33,18 +87,19 @@ public:
 	BOOL RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs);
 
 protected:
-	CHotKeyCtrlEx	m_hkCur;
-	COrderedTreeCtrl	m_tcCommands;
-	CHotKeyCtrlEx	m_hkNew;
-	CEnString	m_sOtherCmdID;
-	BOOL	m_bShowCommandIDs;
-	CFontCache m_fonts;
+//	COrderedTreeCtrl m_tcCommands;
+	CTDLShortcutsTreeListCtrl m_ctrlCommands;
 
-	const CMenuIconMgr& m_mgrMenuIcons;
+	CHotKeyCtrlEx m_hkCur;
+	CHotKeyCtrlEx m_hkNew;
+	CEnString m_sOtherCmdID;
+	BOOL m_bShowCommandIDs;
+
+//	const CMenuIconMgr& m_mgrMenuIcons;
 	CShortcutManager* m_pMgrShortcuts;
 
-	CMap<UINT, UINT, DWORD, DWORD&> m_mapID2Shortcut;
-	CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&> m_mapShortcut2HTI;
+// 	CMap<UINT, UINT, DWORD, DWORD&> m_mapID2Shortcut;
+// 	CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&> m_mapShortcut2HTI;
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -60,10 +115,10 @@ protected:
 	afx_msg void OnShowCmdIDs();
 	afx_msg void OnCopyall();
 	afx_msg void OnChangeShortcut();
-	afx_msg LRESULT OnGutterDrawItem(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnGutterPostDrawItem(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnGutterRecalcColWidth(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
+// 	afx_msg LRESULT OnGutterDrawItem(WPARAM wParam, LPARAM lParam);
+// 	afx_msg LRESULT OnGutterPostDrawItem(WPARAM wParam, LPARAM lParam);
+// 	afx_msg LRESULT OnGutterRecalcColWidth(WPARAM wParam, LPARAM lParam);
+// 	afx_msg void OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	DECLARE_MESSAGE_MAP()
 
@@ -74,16 +129,16 @@ protected:
 	virtual int HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight);
 	virtual void ClearHighlights();
 
-	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd);
-	int GetLongestShortcutText(HTREEITEM hti, CDC* pDC);
-	void AddMiscShortcuts();
-	void RemoveUnusedDefaultFilterItems(CMenu& menu) const;
-	BOOL CopyItem(HTREEITEM hti, CString& sOutput);
-	void BuildMenuTree();
-	HTREEITEM InsertItem(const CString& sItem, UINT nCmdID, HTREEITEM htiParent, BOOL bForceAdd);
-	BOOL WantKeepSubmenu(HTREEITEM hti) const;
-	BOOL WantItem(const CString& sItem) const;
-	BOOL MatchesSearch(const CString& sItem) const;
+// 	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd);
+// 	int GetLongestShortcutText(HTREEITEM hti, CDC* pDC);
+// 	void AddMiscShortcuts();
+// 	void RemoveUnusedDefaultFilterItems(CMenu& menu) const;
+// 	BOOL CopyItem(HTREEITEM hti, CString& sOutput);
+// 	void BuildMenuTree();
+// 	HTREEITEM InsertItem(const CString& sItem, UINT nCmdID, HTREEITEM htiParent, BOOL bForceAdd);
+// 	BOOL WantKeepSubmenu(HTREEITEM hti) const;
+// 	BOOL WantItem(const CString& sItem) const;
+// 	BOOL MatchesSearch(const CString& sItem) const;
 
 	static BOOL IsMiscCommandID(UINT nCmdID);
 
