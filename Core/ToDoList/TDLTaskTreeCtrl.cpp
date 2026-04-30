@@ -607,7 +607,6 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 			{
 				// In the middle of a simple click
 				// SHOULD NO LONGER GET HERE
-				ASSERT(0);
 				return;
 			}
 		}
