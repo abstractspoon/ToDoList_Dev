@@ -606,7 +606,6 @@ void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 			if ((nHit != -1) && bLBtnDown && !bCtrl && TSH().IsEmpty())
 			{
 				// In the middle of a simple click
-				// SHOULD NO LONGER GET HERE
 				return;
 			}
 		}
