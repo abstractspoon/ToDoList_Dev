@@ -1550,7 +1550,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			CRect rSplitter;
 			CPoint ptCursor;
 			
-			if (::GetCursorPos(&ptCursor) && PtInSplitter(ptCursor, TRUE))
+			if (m_bSplittingEnabled && ::GetCursorPos(&ptCursor) && PtInSplitter(ptCursor, TRUE))
 			{
 				GraphicsMisc::SetAfxCursor(AFX_IDC_HSPLITBAR);
 				return TRUE;
@@ -1562,7 +1562,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 		{
 			SetFocus(); // always
 			
-			if (PtInSplitter(lp))
+			if (m_bSplittingEnabled && PtInSplitter(lp))
 			{
 				CPoint ptScreen(lp);
 				::ClientToScreen(hRealWnd, &ptScreen);
@@ -1579,6 +1579,7 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	case WM_MOUSEMOVE:
 		if (m_bSplitting)
 		{
+			ASSERT(m_bSplittingEnabled);
 			ASSERT(GetCapture() == hRealWnd);
 			
 			CPoint ptCursor(lp);
@@ -1618,6 +1619,8 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	case WM_CAPTURECHANGED:
 		if (m_bSplitting)
 		{
+			ASSERT(m_bSplittingEnabled);
+
 			m_bSplitting = FALSE;
 			PostResize();
 		}
@@ -1626,6 +1629,8 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	case WM_LBUTTONUP:
 		if (m_bSplitting)
 		{
+			ASSERT(m_bSplittingEnabled);
+
 			VERIFY(::ReleaseCapture());
 			ASSERT(m_bSplitting == FALSE);
 		}
@@ -3662,6 +3667,11 @@ BOOL CTreeListSyncer::GetHeaderRect(HWND hwnd, CRect& rect, LPCRECT prcBounds) c
 		rect.bottom += LINUX_VOFFSET_FUDGE;
 	
 	return (rHeader.Height() > 0);
+}
+
+void CTreeListSyncer::EnableSplitting(BOOL bEnable) 
+{ 
+	m_bSplittingEnabled = bEnable; 
 }
 
 void CTreeListSyncer::SetSplitPos(int nPos)

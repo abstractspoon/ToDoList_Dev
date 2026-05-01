@@ -154,6 +154,7 @@ int CTDLShortcutsTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	SetGridLineColor(GetSysColor(COLOR_3DSHADOW));
 	SetSplitBarWidth(1);
+	EnableSplitting(FALSE);
 
 	return 0;
 }
