@@ -325,6 +325,7 @@ protected:
 	int CalcWidestTreeItem(BOOL bMaximum) const;
 	int CalcTreeTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC, int nMaxItemTextWidth) const;
+	int CalcTreeWidthFromSplitPos(int nSplitPos) const;
 
 	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;

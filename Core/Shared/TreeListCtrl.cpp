@@ -29,7 +29,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MIN_SPLIT_POS			= GraphicsMisc::ScaleByDPIFactor(200);
+const int MIN_TREE_WIDTH		= GraphicsMisc::ScaleByDPIFactor(200);
 const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
@@ -466,8 +466,20 @@ int CTreeListCtrl::CalcMaxListColumnsWidth() const
 int CTreeListCtrl::CalcSplitPosToFitListColumns(int nAvailWidth) const
 {
 	int nColsWidth = CalcMaxListColumnsWidth();
-	
-	return (nAvailWidth - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
+	int nNewSplitPos = (nColsWidth + GetSplitBarWidth() + LV_COLPADDING);
+
+	if (IsLeft(m_tree))
+	{
+		nNewSplitPos = (nAvailWidth - nNewSplitPos);
+		nNewSplitPos = max(MIN_TREE_WIDTH, nNewSplitPos);
+	}
+	else if ((nAvailWidth - nNewSplitPos) < MIN_TREE_WIDTH)
+	{
+		// tree is swapped
+		nNewSplitPos = (nAvailWidth - MIN_TREE_WIDTH);
+	}
+
+	return nNewSplitPos;
 }
 
 void CTreeListCtrl::AdjustSplitterToFitListColumns()
@@ -476,8 +488,7 @@ void CTreeListCtrl::AdjustSplitterToFitListColumns()
 	GetClientRect(rClient);
 
 	int nNewSplitPos = CalcSplitPosToFitListColumns(rClient.Width());
-	nNewSplitPos = max(MIN_SPLIT_POS, nNewSplitPos);
-	
+
 	if (nNewSplitPos != GetSplitPos())
 	{
 		SetSplitPos(nNewSplitPos);
@@ -488,7 +499,7 @@ void CTreeListCtrl::AdjustSplitterToFitListColumns()
 void CTreeListCtrl::AdjustSplitterToFitTreeColumns()
 {
 	int nNewSplitPos = m_treeHeader.CalcTotalItemWidth();
-	nNewSplitPos = max(MIN_SPLIT_POS, nNewSplitPos);
+	nNewSplitPos = max(MIN_TREE_WIDTH, nNewSplitPos);
 
 	if (nNewSplitPos != GetSplitPos())
 	{
@@ -1845,8 +1856,9 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	if (!IsHeaderTracking(m_hwndPrimaryHeader, 0))
 	{
 		int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
-		int nTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nSplitPos - nRestTreeColsWidth));
-
+		int nNewTreeWidth = CalcTreeWidthFromSplitPos(nSplitPos);
+		
+		int nTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nNewTreeWidth - nRestTreeColsWidth));
 		m_treeHeader.SetItemWidth(0, nTitleColWidth);
 
 		if (m_bSplitting)
@@ -1856,6 +1868,14 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 
 		UpdateWindow();
 	}
+}
+
+int CTreeListCtrl::CalcTreeWidthFromSplitPos(int nSplitPos) const
+{
+	if (IsLeft(m_tree))
+		return nSplitPos;
+
+	return (CDialogHelper::GetChildWidth(this) - nSplitPos);
 }
 
 BOOL CTreeListCtrl::HandleEraseBkgnd(CDC* pDC)
@@ -2075,8 +2095,9 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAct
 	int nAvailWidth = GetBoundingWidth();
 	int nSplitPos = GetSplitPos();
 	int nSplitBarWidth = GetSplitBarWidth();
+	int nTreeWidth = CalcTreeWidthFromSplitPos(nSplitPos);
 
-	int nCurListColsWidth = (nAvailWidth - nSplitPos - nSplitBarWidth - LV_COLPADDING);
+	int nCurListColsWidth = (nAvailWidth - nTreeWidth - nSplitBarWidth - LV_COLPADDING);
 	int nMaxListColsWidth = CalcMaxListColumnsWidth();
 
 	int nCurTitleWidth = m_treeHeader.GetItemWidth(0);
@@ -2102,7 +2123,7 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAct
 			// Allow for the difference between the required width of the
 			// rest of the tree columns and the actual amount visible
 			int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
-			int nVisibleRestTreeColsWidth = (nSplitPos - nCurTitleWidth);
+			int nVisibleRestTreeColsWidth = (nTreeWidth - nCurTitleWidth);
 
 			nOffset -= (nRestTreeColsWidth - nVisibleRestTreeColsWidth);
 

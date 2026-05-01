@@ -155,7 +155,7 @@ int CTDLShortcutsTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Add columns
 	m_treeHeader.InsertItem(0, 1000, CEnString(IDS_PSP_MENUITEM), (HDF_LEFT | HDF_STRING), 0, 1);
-	m_treeHeader.ModifyStyle(HDS_DRAGDROP | HDS_HOTTRACK | HDS_FULLDRAG | HDS_BUTTONS, 0);
+	m_treeHeader.ModifyStyle(HDS_DRAGDROP | HDS_BUTTONS, 0);
 	m_treeHeader.EnableItemDragging(0, FALSE);
 	m_treeHeader.EnableTracking(FALSE);
 
@@ -163,7 +163,7 @@ int CTDLShortcutsTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_list.InsertColumn(COL_CMDID, CEnString(IDS_TDC_COLUMN_ID), LVCFMT_LEFT, 100);
 
 	m_listHeader.ShowItem(COL_CMDID, m_bShowCommandIDs);
-	m_listHeader.ModifyStyle(HDS_DRAGDROP | /*HDS_HOTTRACK | HDS_FULLDRAG |*/ HDS_BUTTONS, 0);
+	m_listHeader.ModifyStyle(HDS_DRAGDROP | HDS_BUTTONS, 0);
 	m_listHeader.EnableItemDragging(COL_SHORTCUT, FALSE);
 	m_listHeader.EnableItemDragging(COL_CMDID, FALSE);
 	m_listHeader.EnableTracking(FALSE);
