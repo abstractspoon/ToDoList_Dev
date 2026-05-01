@@ -51,21 +51,9 @@ CPreferencesShortcutsPage::CPreferencesShortcutsPage(const CMenuIconMgr& mgrIcon
 	: 
 	CPreferencesPageBase(IDD_PREFSHORTCUTS_PAGE),
 	m_ctrlCommands(m_ctrlHighlighter, mgrIcons, m_mgrPrompts, pMgrShortcuts),
-//	m_mgrMenuIcons(mgrIcons),
 	m_pMgrShortcuts(pMgrShortcuts), 
-//	m_tcCommands(NCGS_SHOWHEADER),
 	m_bShowCommandIDs(FALSE)
 {
-
-// 	m_tcCommands.AddGutterColumn(PSP_SHORTCUTCOLUMNID, CEnString(IDS_PSP_SHORTCUT));
-// 	m_tcCommands.AddGutterColumn(PSP_COMMANDIDCOLUMNID, CEnString(IDS_TDC_COLUMN_ID), 0, DT_CENTER);
-// 	m_tcCommands.SetGutterColumnHeaderTitle(NCG_CLIENTCOLUMNID, CEnString(IDS_PSP_MENUITEM));
-// 	m_tcCommands.ShowGutterPosColumn(FALSE);
-// 	m_tcCommands.SetGridlineColor(OTC_GRIDCOLOR);
-// 	m_tcCommands.EnableGutterColumnHeaderClicking(PSP_SHORTCUTCOLUMNID, FALSE);
-// 	m_tcCommands.EnableGutterColumnHeaderClicking(PSP_COMMANDIDCOLUMNID, FALSE);
-// 	m_tcCommands.EnableGutterColumnHeaderClicking(NCG_CLIENTCOLUMNID, FALSE);
-// 	m_tcCommands.SetParentHandlesCustomDraw(TRUE);
 }
 
 CPreferencesShortcutsPage::~CPreferencesShortcutsPage()
@@ -77,7 +65,6 @@ void CPreferencesShortcutsPage::DoDataExchange(CDataExchange* pDX)
 	CPreferencesPageBase::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_CURHOTKEY, m_hkCur);
-//	DDX_Control(pDX, IDC_COMMANDS, m_tcCommands);
 	DDX_Control(pDX, IDC_NEWHOTKEY, m_hkNew);
 	DDX_Text(pDX, IDC_INUSE, m_sOtherCmdID);
 	DDX_Check(pDX, IDC_SHOWCMDIDS, m_bShowCommandIDs);
@@ -90,9 +77,6 @@ BEGIN_MESSAGE_MAP(CPreferencesShortcutsPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_COPYALL, OnCopyall)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_COMMANDS, OnSelchangedShortcuts)
 	ON_EN_CHANGE(IDC_NEWHOTKEY, OnChangeShortcut)
-// 	ON_REGISTERED_MESSAGE(WM_NCG_DRAWITEMCOLUMN, OnGutterDrawItem)
-// 	ON_REGISTERED_MESSAGE(WM_NCG_POSTDRAWITEM, OnGutterPostDrawItem)
-// 	ON_REGISTERED_MESSAGE(WM_NCG_RECALCCOLWIDTH, OnGutterRecalcColWidth)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
@@ -193,7 +177,6 @@ void CTDLShortcutsTreeListCtrl::BuildMenuTree()
 	ASSERT(m_pMgrShortcuts);
 
 	CTLSHoldResync hr(*this);
-	//CHoldRedraw hr2(*this);
 
 	m_tree.SetRedraw(FALSE);
 	m_tree.DeleteAllItems();
@@ -216,9 +199,6 @@ void CTDLShortcutsTreeListCtrl::BuildMenuTree()
 				htiFirst = hti;
 		}
 	}
-
-// 	if (m_bShowCommandIDs)
-// 		m_tree.RecalcGutterColumn(PSP_COMMANDIDCOLUMNID);
 
 	// add miscellaneous un-editable shortcuts
 	AddMiscShortcuts();
@@ -623,147 +603,6 @@ void CPreferencesShortcutsPage::OnChangeShortcut()
 	CPreferencesPageBase::OnControlChange();
 }
 
-/*
-LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM / *wParam* /, LPARAM lParam)
-{
-	NCGDRAWITEM* pNCGDI = (NCGDRAWITEM*)lParam;
-
-	if (pNCGDI->nColID != OTC_POSCOLUMNID)
-	{
-		BOOL bFocused = (::GetFocus() == m_tcCommands);
-
-		CRect rItem(pNCGDI->rItem);
-		HTREEITEM hti = (HTREEITEM)pNCGDI->dwItem;
-
-		// draw background
-		BOOL bSelected = (hti == m_tcCommands.GetSelectedItem());
-		BOOL bSubMenu = (m_tcCommands.GetItemData(hti) == ID_SUBMENU);
-
-		GM_ITEMSTATE nState = GMIS_NONE; 
-		DWORD dwDrawFlags = 0;
-
-		if (bSelected)
-		{
-			nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-			dwDrawFlags = (GMIB_CLIPRIGHT | GMIB_THEMECLASSIC);
-
-			if (pNCGDI->nColID == PSP_COMMANDIDCOLUMNID)
-				dwDrawFlags |= GMIB_CLIPLEFT;
-
-			GraphicsMisc::DrawExplorerItemSelection(pNCGDI->pDC, m_tcCommands, nState, rItem, dwDrawFlags, &rItem);
-			GraphicsMisc::DrawVertLine(pNCGDI->pDC, rItem.top, rItem.bottom, rItem.right - 1, m_tcCommands.GetGridlineColor());
-		}
-		else
-		{
-			if (bSubMenu)
-				pNCGDI->pDC->FillSolidRect(rItem, GetSysColor(COLOR_3DFACE));
-
-			GraphicsMisc::DrawVertLine(pNCGDI->pDC, rItem.top, rItem.bottom, rItem.right - 1, m_tcCommands.GetGridlineColor());
-			GraphicsMisc::DrawHorzLine(pNCGDI->pDC, rItem.left, rItem.right, rItem.bottom - 1, m_tcCommands.GetGridlineColor());
-		}
-
-		// draw text
-		if (!bSubMenu)
-		{
-			UINT nCmdID = m_tcCommands.GetItemData(hti);
-			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
-
-			if (bSelected)
-				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwDrawFlags);
-
-			pNCGDI->pDC->SetTextColor(crText);
-
-			rItem.left += TEXT_PADDING;
-
-			switch (pNCGDI->nColID)
-			{
-			case PSP_SHORTCUTCOLUMNID:
-				{
-					DWORD dwShortcut = 0;
-					m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
-
-					if (dwShortcut)
-					{
-						CString sText = m_pMgrShortcuts->GetShortcutText(dwShortcut);
-
-						// test for reserved shortcut and mark in red
-						if (!sText.IsEmpty())
-						{
-							if (CToDoCtrl::IsReservedShortcut(dwShortcut) && !IsMiscCommandID(nCmdID))
-								pNCGDI->pDC->SetTextColor(255);
-
-							pNCGDI->pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT | DT_NOPREFIX));
-						}
-					}
-				}
-				break;
-
-			case PSP_COMMANDIDCOLUMNID:
-				if (nCmdID && !IsMiscCommandID(nCmdID))
-				{
-					CString sText = Misc::Format((DWORD)nCmdID);
-
-					pNCGDI->pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT | DT_NOPREFIX));
-				}
-				break;
-			}
-		}
-	
-		return TRUE; // we handled it
-	}
-
-	return FALSE;
-}
-
-LRESULT CPreferencesShortcutsPage::OnGutterPostDrawItem(WPARAM / *wParam* /, LPARAM / *lParam* /)
-{
-	// we handle drawing of horz divider
-	return TRUE;
-}
-
-LRESULT CPreferencesShortcutsPage::OnGutterRecalcColWidth(WPARAM / *wParam* /, LPARAM lParam)
-{
-	if (!CHoldRedraw::IsHeld(m_tcCommands))
-	{
-		NCGRECALCCOLUMN* pNCRC = (NCGRECALCCOLUMN*)lParam;
-
-		switch (pNCRC->nColID)
-		{
-		case PSP_SHORTCUTCOLUMNID:
-			{
-				int nLongest = 0;
-				HTREEITEM hti = m_tcCommands.GetNextItem(TVI_ROOT, TVGN_CHILD);
-
-				while (hti)
-				{
-					int nWidth = GetLongestShortcutText(hti, pNCRC->pDC);
-					nLongest = max(nLongest, nWidth);
-
-					hti = m_tcCommands.GetNextItem(hti, TVGN_NEXT);
-				}
-
-				if (nLongest)
-					nLongest += (2 * TEXT_PADDING);
-
-				pNCRC->nWidth = max(SHORTCUTCOL_MINWIDTH, nLongest);
-				return TRUE; // we handled it
-			}
-			break;
-
-		case PSP_COMMANDIDCOLUMNID:
-			if (m_bShowCommandIDs)
-			{
-				pNCRC->nWidth = pNCRC->pDC->GetTextExtent(_T("00000")).cx;
-				return TRUE; // we handled it
-			}
-			break;
-		}
-	}
-
-	return FALSE;
-}
-*/
-
 void CTDLShortcutsTreeListCtrl::RecalcColumnsToFit()
 {
 	CClientDC dc(&m_tree);
@@ -1063,6 +902,7 @@ void CPreferencesShortcutsPage::OnShowCmdIDs()
 
 void CPreferencesShortcutsPage::OnCopyall() 
 {
+	m_ctrlCommands.CopyAllToClipboard();
 }
 
 void CTDLShortcutsTreeListCtrl::CopyAllToClipboard() const
@@ -1160,13 +1000,6 @@ void CPreferencesShortcutsPage::OnSize(UINT nType, int cx, int cy)
 
 		CDialogHelper::ResizeChild(&m_ctrlCommands, nXOffset, nYOffset);
 	}
-}
-
-void CTDLShortcutsTreeListCtrl::OnSize(UINT nType, int cx, int cy)
-{
-	CTreeListCtrl::OnSize(nType, cx, cy);
-
-	m_treeHeader.SetItemWidth(0, cx);
 }
 
 BOOL CPreferencesShortcutsPage::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs)
