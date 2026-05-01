@@ -850,12 +850,14 @@ LRESULT CTDLShortcutsTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const
 			UINT nCmdID = m_tree.GetItemData(hti);
 			BOOL bSubMenu = (nCmdID == ID_SUBMENU);
 
+			DWORD dwShortcut = 0;
+			m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+
 			// draw item bkgnd and gridlines full width of list
 			COLORREF crBack = GetSysColor(bSubMenu ? COLOR_3DFACE : COLOR_WINDOW);
 			pLVCD->clrTextBk = pLVCD->clrText = crBack;
 
 			CRect rFullWidth(pLVCD->nmcd.rc);
-			rFullWidth.left = 0;
 			rFullWidth.right = 2000;
 
 			GM_ITEMSTATE nState = CTreeListCtrl::GetItemState(nItem);
@@ -866,7 +868,7 @@ LRESULT CTDLShortcutsTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const
 				pDC->FillSolidRect(rFullWidth, crBack);
 
 			// draw horz gridline before selection
-			DrawHorzItemDivider(pDC, rFullWidth);
+			DrawHorzItemDivider(pDC, pLVCD->nmcd.rc);
 
 			// Draw selection before text
 			DWORD dwDrawFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW);
@@ -874,44 +876,54 @@ LRESULT CTDLShortcutsTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const
 			if (bSelected)
 				GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rFullWidth, dwDrawFlags);
 
-			// draw column text
-			if (!bSubMenu)
+			// Draw columns
+			CRect rItem(pLVCD->nmcd.rc);
+
+			for (int nCol = COL_SHORTCUT; nCol <= COL_CMDID; nCol++)
 			{
-				DWORD dwShortcut = 0;
-				m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+				rItem.right = (rItem.left + aColWidths[nCol]);
+				DrawVertItemDivider(pDC, rItem, bSelected);
 
-				COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
-
-				if (CToDoCtrl::IsReservedShortcut(dwShortcut) && !IsMiscCommandID(nCmdID))
-					crText = colorRed;
-
-				if (nState != GMIS_NONE)
-					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwDrawFlags);
-
-				pDC->SetTextColor(crText);
-
-				// Shortcut column
-				CRect rItem(pLVCD->nmcd.rc);
-
-				rItem.left += TEXT_PADDING;
-
-				if (dwShortcut)
+				if (!bSubMenu)
 				{
-					CString sText = m_pMgrShortcuts->GetShortcutText(dwShortcut);
+					COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+					CString sText;
 
-					// test for reserved shortcut and mark in red
+					switch (nCol)
+					{
+					case COL_SHORTCUT:
+						if (dwShortcut)
+						{
+							sText = m_pMgrShortcuts->GetShortcutText(dwShortcut);
+
+							// text for reserved shortcut and mark in red
+							if (CToDoCtrl::IsReservedShortcut(dwShortcut) && !IsMiscCommandID(nCmdID))
+							{
+								if (bSelected)
+									crText = GraphicsMisc::GetExplorerItemSelectionTextColor(colorRed, nState, dwDrawFlags);
+								else
+									crText = colorRed;
+							}
+						}
+						break;
+
+					case COL_CMDID:
+						if (m_bShowCommandIDs && nCmdID && !IsMiscCommandID(nCmdID))
+							sText = Misc::Format((DWORD)nCmdID);
+						break;
+					}
+
 					if (!sText.IsEmpty())
+					{
+						rItem.left += TEXT_PADDING;
+
+						pDC->SetTextColor(crText);
 						pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT | DT_NOPREFIX));
+					}
 				}
 
-				// Command ID
-				if (m_bShowCommandIDs && nCmdID && !IsMiscCommandID(nCmdID))
-				{
-					rItem.left += m_listHeader.GetItemWidth(COL_SHORTCUT);
-	
-					CString sText = Misc::Format((DWORD)nCmdID);
-					pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT | DT_NOPREFIX));
-				}
+				// next column
+				rItem.left = rItem.right; 
 			}
 		}
 		return CDRF_SKIPDEFAULT;
