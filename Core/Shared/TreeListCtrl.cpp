@@ -1071,6 +1071,9 @@ void CTreeListCtrl::SelectAll()
 
 LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	if (!IsResyncEnabled())
+		return CTreeListSyncer::WindowProc(hRealWnd, msg, wp, lp);
+
 	switch (msg)
 	{
 	case WM_NOTIFY:
@@ -1896,7 +1899,7 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	case CDDS_ITEMPOSTPAINT:
 		{
 			// check row is visible
-			CRect rItem;
+			CRect rItem(pTVCD->nmcd.rc);
 			GetTreeItemRect(hti, 0, rItem);
 
 			CRect rClient;
@@ -1909,9 +1912,6 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 				GM_ITEMSTATE nState = GetItemState(hti);
 				BOOL bSelected = (nState != GMIS_NONE);
-
-				// Draw icon
-				DrawTreeItemIcon(pDC, hti, dwItemData, rItem);
 
 				// Redraw the entire row background if the item is selected
 				// or just the title column if it is not
@@ -1926,11 +1926,18 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawHorzItemDivider(pDC, pTVCD->nmcd.rc);
 
 				// Draw selection before drawing text
-				if (!m_bSavingToImage)
+				if (!m_bSavingToImage && bSelected)
 				{
 					DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW | GMIB_POSTDRAW);
-					GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, nState, rItem, dwFlags);
+
+					if (HasStyle(m_tree, TVS_FULLROWSELECT, FALSE))
+						GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, nState, pTVCD->nmcd.rc, dwFlags);
+					else
+						GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, nState, rItem, dwFlags);
 				}
+
+				// Draw icon
+				DrawTreeItemIcon(pDC, hti, dwItemData, rItem);
 
 				// draw tree item attribute columns
 				DrawTreeItemText(pDC, hti, dwItemData, bSelected);
@@ -2024,19 +2031,24 @@ void CTreeListCtrl::DrawVertItemDivider(CDC* pDC, const CRect& rItem, BOOL bSele
 	if (rItem.right < 0)
 		return;
 
-	CRect rDiv(rItem);
-	rDiv.left = (rDiv.right - 1);
+	if (crDiv == CLR_NONE)
+	{
+		if (m_crGridLine == CLR_NONE)
+			return;
+
+		crDiv = m_crGridLine;
+	}
 
 	COLORREF crOld = pDC->GetBkColor();
-
-	if (crDiv == CLR_NONE)
-		crDiv = m_crGridLine;
 
 	if (bSelected)
 	{
 		// Make color a little darker
 		crDiv = GraphicsMisc::Darker(crDiv, 0.1);
 	}
+
+	CRect rDiv(rItem);
+	rDiv.left = (rDiv.right - 1);
 
 	pDC->FillSolidRect(rDiv, crDiv);
 	pDC->SetBkColor(crOld);

@@ -34,6 +34,8 @@ public:
 	void BuildMenuTree();
 	BOOL AssignShortcut(UINT nCmdID, DWORD dwShortcut);
 	BOOL SaveToShortcutMgr();
+	void ShowCommandIDs(BOOL bShow = TRUE);
+	void RecalcColumnsToFit();
 
 	BOOL MatchesSearch(const CString& sItem) const;
 	UINT GetSelectedCmdID() const;
@@ -50,14 +52,16 @@ protected:
 	CMap<UINT, UINT, DWORD, DWORD&> m_mapID2Shortcut;
  	CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&> m_mapShortcut2HTI;
 	CFontCache m_fonts;
+	BOOL m_bShowCommandIDs;
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd);
-	int GetLongestShortcutText(HTREEITEM hti, CDC* pDC);
+	int GetLongestShortcutText(CDC* pDC, HTREEITEM hti = NULL);
 	void AddMiscShortcuts();
 	void RemoveUnusedDefaultFilterItems(CMenu& menu) const;
 	BOOL CopyItem(HTREEITEM hti, CString& sOutput) const;

@@ -19,6 +19,8 @@
 #include "..\shared\themed.h"
 #include "..\shared\AcceleratorString.h"
 
+#include "..\3rdParty\XNamedColors.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -26,6 +28,12 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+enum 
+{
+	COL_SHORTCUT = 0,
+	COL_CMDID,
+};
 
 #define PSP_SHORTCUTCOLUMNID	(OTC_POSCOLUMNID - 1)
 #define PSP_COMMANDIDCOLUMNID	(OTC_POSCOLUMNID - 2)
@@ -102,8 +110,6 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_COMMANDS_FRAME);
 	VERIFY(m_ctrlCommands.Create(this, rCtrl, IDC_COMMANDS));
 
-	//m_ctrlCommands.SwapSides();
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -135,7 +141,8 @@ CTDLShortcutsTreeListCtrl::CTDLShortcutsTreeListCtrl(const CCtrlTextHighlighter&
 	m_ctrlHighlighter(ctrlHighlighter),
 	m_mgrMenuIcons(mgrIcons),
 	m_mgrPrompts(mgrPrompts),
-	m_pMgrShortcuts(pMgrShortcuts)
+	m_pMgrShortcuts(pMgrShortcuts),
+	m_bShowCommandIDs(FALSE)
 {
 }
 
@@ -144,23 +151,49 @@ int CTDLShortcutsTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CTreeListCtrl::OnCreate(lpCreateStruct) != 0)
 		return -1;
 
-	m_tree.ModifyStyle(TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT, TVS_FULLROWSELECT | TVS_NOHSCROLL);
+	m_tree.ModifyStyle(TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT, TVS_FULLROWSELECT);
 
 	// Add columns
-	m_treeHeader.InsertItem(0, 300, _T("Dummy"), (HDF_LEFT | HDF_STRING), 0, 0);
-	m_list.InsertColumn(0, _T("Dummy"), LVCFMT_LEFT, 100);
-	// TODO
+	m_treeHeader.InsertItem(0, 1000, CEnString(IDS_PSP_MENUITEM), (HDF_LEFT | HDF_STRING), 0, 1);
+	m_treeHeader.ModifyStyle(HDS_DRAGDROP | HDS_HOTTRACK | HDS_FULLDRAG | HDS_BUTTONS, 0);
+	m_treeHeader.EnableItemDragging(0, FALSE);
+	m_treeHeader.EnableTracking(FALSE);
 
+	m_list.InsertColumn(COL_SHORTCUT, CEnString(IDS_PSP_SHORTCUT), LVCFMT_LEFT, 100);
+	m_list.InsertColumn(COL_CMDID, CEnString(IDS_TDC_COLUMN_ID), LVCFMT_LEFT, 100);
 
+	m_listHeader.ShowItem(COL_CMDID, m_bShowCommandIDs);
+	m_listHeader.ModifyStyle(HDS_DRAGDROP | /*HDS_HOTTRACK | HDS_FULLDRAG |*/ HDS_BUTTONS, 0);
+	m_listHeader.EnableItemDragging(COL_SHORTCUT, FALSE);
+	m_listHeader.EnableItemDragging(COL_CMDID, FALSE);
+	m_listHeader.EnableTracking(FALSE);
+
+	SetGridLineColor(GetSysColor(COLOR_3DSHADOW));
+	SetSplitBarWidth(1);
 
 	return 0;
+}
+
+void CTDLShortcutsTreeListCtrl::ShowCommandIDs(BOOL bShow)
+{
+	if (Misc::StatesDiffer(bShow, m_bShowCommandIDs))
+	{
+		m_bShowCommandIDs = bShow;
+
+		if (m_listHeader.GetSafeHwnd())
+		{
+			m_listHeader.ShowItem(COL_CMDID, bShow);
+			RecalcColumnsToFit();
+		}
+	}
 }
 
 void CTDLShortcutsTreeListCtrl::BuildMenuTree()
 {
 	ASSERT(m_pMgrShortcuts);
 
-	CHoldRedraw ht(*this);
+	CTLSHoldResync hr(*this);
+	//CHoldRedraw hr2(*this);
 
 	m_tree.SetRedraw(FALSE);
 	m_tree.DeleteAllItems();
@@ -190,7 +223,7 @@ void CTDLShortcutsTreeListCtrl::BuildMenuTree()
 	// add miscellaneous un-editable shortcuts
 	AddMiscShortcuts();
 
-	CTreeCtrlHelper(m_tree).ExpandAll();
+	ExpandAll();
 	m_tree.SetRedraw(TRUE);
 
 	if (htiFirst)
@@ -199,8 +232,10 @@ void CTDLShortcutsTreeListCtrl::BuildMenuTree()
 	if (m_tree.GetCount() == 0)
 		m_mgrPrompts.SetPrompt(m_tree, CEnString(IDS_PSP_NOMATCHES), TVM_GETCOUNT);
 
-//	SwapSides();
-	m_fonts.Initialise(*this);
+	m_fonts.Initialise(m_tree);
+
+ 	SwapSides();
+	RecalcColumnsToFit();
 }
 
 HTREEITEM CTDLShortcutsTreeListCtrl::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd)
@@ -729,28 +764,66 @@ LRESULT CPreferencesShortcutsPage::OnGutterRecalcColWidth(WPARAM / *wParam* /, L
 }
 */
 
-int CTDLShortcutsTreeListCtrl::GetLongestShortcutText(HTREEITEM hti, CDC* pDC)
+void CTDLShortcutsTreeListCtrl::RecalcColumnsToFit()
+{
+	CClientDC dc(&m_tree);
+
+	// Shortcut Column
+	int nMaxShortcutWidth = GetLongestShortcutText(&dc);
+
+	if (nMaxShortcutWidth)
+		nMaxShortcutWidth += (2 * TEXT_PADDING);
+
+	nMaxShortcutWidth = max(SHORTCUTCOL_MINWIDTH, nMaxShortcutWidth);
+
+	m_listHeader.SetItemWidth(0, nMaxShortcutWidth);
+
+	// ID column
+	int nMaxIDWidth = 0;
+	
+//	if (m_bShowCommandIDs)
+	{
+		nMaxIDWidth = (dc.GetTextExtent(_T("12345")).cx + (2 * TEXT_PADDING));
+
+		m_listHeader.SetItemWidth(1, nMaxIDWidth);
+	}
+
+	SetSplitPos(nMaxShortcutWidth + (m_bShowCommandIDs ? nMaxIDWidth : 0));
+
+	// Tree
+	CRect rClient;
+	GetClientRect(rClient);
+
+	m_treeHeader.SetItemWidth(0, rClient.Width() - nMaxIDWidth - nMaxShortcutWidth);
+}
+
+int CTDLShortcutsTreeListCtrl::GetLongestShortcutText(CDC* pDC, HTREEITEM hti)
 {
 	int nLongest = 0;
-	int nCmdID = m_tree.GetItemData(hti);
 
-	if (nCmdID)
+	if (hti != NULL)
 	{
-		DWORD dwShortcut = 0;
-		m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+		int nCmdID = m_tree.GetItemData(hti);
 
-		if (dwShortcut)
+		if (nCmdID)
 		{
-			CString sShortcut = m_pMgrShortcuts->GetShortcutText(dwShortcut);
-			nLongest = sShortcut.IsEmpty() ? 0 : pDC->GetTextExtent(sShortcut).cx;
+			DWORD dwShortcut = 0;
+			m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+
+			if (dwShortcut)
+			{
+				CString sShortcut = m_pMgrShortcuts->GetShortcutText(dwShortcut);
+				nLongest = sShortcut.IsEmpty() ? 0 : pDC->GetTextExtent(sShortcut).cx;
+			}
 		}
 	}
 
+	// children
 	HTREEITEM htiChild = m_tree.GetChildItem(hti);
 
 	while (htiChild)
 	{
-		int nWidth = GetLongestShortcutText(htiChild, pDC);
+		int nWidth = GetLongestShortcutText(pDC, htiChild);
 		nLongest = max(nLongest, nWidth);
 
 		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
@@ -761,6 +834,89 @@ int CTDLShortcutsTreeListCtrl::GetLongestShortcutText(HTREEITEM hti, CDC* pDC)
 
 LRESULT CTDLShortcutsTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const CIntArray& aColOrder, const CIntArray& aColWidths)
 {
+	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
+	int nItem = (int)pLVCD->nmcd.dwItemSpec;
+
+	switch (pLVCD->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		return CDRF_NOTIFYITEMDRAW;
+
+	case CDDS_ITEMPREPAINT:
+		{
+			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+			HTREEITEM hti = (HTREEITEM)pLVCD->nmcd.lItemlParam;
+
+			UINT nCmdID = m_tree.GetItemData(hti);
+			BOOL bSubMenu = (nCmdID == ID_SUBMENU);
+
+			// draw item bkgnd and gridlines full width of list
+			COLORREF crBack = GetSysColor(bSubMenu ? COLOR_3DFACE : COLOR_WINDOW);
+			pLVCD->clrTextBk = pLVCD->clrText = crBack;
+
+			CRect rFullWidth(pLVCD->nmcd.rc);
+			rFullWidth.left = 0;
+			rFullWidth.right = 2000;
+
+			GM_ITEMSTATE nState = CTreeListCtrl::GetItemState(nItem);
+			BOOL bSelected = (nState != GMIS_NONE);
+
+			// Fill bkgnd before drawing gridline
+			if (bSubMenu && !bSelected)
+				pDC->FillSolidRect(rFullWidth, crBack);
+
+			// draw horz gridline before selection
+			DrawHorzItemDivider(pDC, rFullWidth);
+
+			// Draw selection before text
+			DWORD dwDrawFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW);
+
+			if (bSelected)
+				GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rFullWidth, dwDrawFlags);
+
+			// draw column text
+			if (!bSubMenu)
+			{
+				DWORD dwShortcut = 0;
+				m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+
+				COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+
+				if (CToDoCtrl::IsReservedShortcut(dwShortcut) && !IsMiscCommandID(nCmdID))
+					crText = colorRed;
+
+				if (nState != GMIS_NONE)
+					crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwDrawFlags);
+
+				pDC->SetTextColor(crText);
+
+				// Shortcut column
+				CRect rItem(pLVCD->nmcd.rc);
+
+				rItem.left += TEXT_PADDING;
+
+				if (dwShortcut)
+				{
+					CString sText = m_pMgrShortcuts->GetShortcutText(dwShortcut);
+
+					// test for reserved shortcut and mark in red
+					if (!sText.IsEmpty())
+						pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT | DT_NOPREFIX));
+				}
+
+				// Command ID
+				if (m_bShowCommandIDs && nCmdID && !IsMiscCommandID(nCmdID))
+				{
+					rItem.left += m_listHeader.GetItemWidth(COL_SHORTCUT);
+	
+					CString sText = Misc::Format((DWORD)nCmdID);
+					pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT | DT_NOPREFIX));
+				}
+			}
+		}
+		return CDRF_SKIPDEFAULT;
+	}
+
 	return CDRF_DODEFAULT;
 }
 
@@ -871,6 +1027,7 @@ BOOL CPreferencesShortcutsPage::PreTranslateMessage(MSG* pMsg)
 void CPreferencesShortcutsPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	m_bShowCommandIDs = pPrefs->GetProfileInt(_T("KeyboardShortcuts"), _T("ShowCommandIDs"), FALSE);
+	m_ctrlCommands.ShowCommandIDs(m_bShowCommandIDs);
 }
 
 void CPreferencesShortcutsPage::SavePreferences(IPreferences* pPrefs, LPCTSTR /*szKey*/) const
@@ -889,7 +1046,7 @@ void CPreferencesShortcutsPage::OnShowCmdIDs()
 	GetDlgItem(IDC_COPYALL)->ShowWindow(m_bShowCommandIDs ? SW_SHOW : SW_HIDE);
 	GetDlgItem(IDC_COPYALL)->EnableWindow(m_bShowCommandIDs);
 
-	//m_tcCommands.RecalcGutter();
+	m_ctrlCommands.ShowCommandIDs(m_bShowCommandIDs);
 }
 
 void CPreferencesShortcutsPage::OnCopyall() 
@@ -991,6 +1148,13 @@ void CPreferencesShortcutsPage::OnSize(UINT nType, int cx, int cy)
 
 		CDialogHelper::ResizeChild(&m_ctrlCommands, nXOffset, nYOffset);
 	}
+}
+
+void CTDLShortcutsTreeListCtrl::OnSize(UINT nType, int cx, int cy)
+{
+	CTreeListCtrl::OnSize(nType, cx, cy);
+
+	m_treeHeader.SetItemWidth(0, cx);
 }
 
 BOOL CPreferencesShortcutsPage::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs)
