@@ -11,13 +11,6 @@
 
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
-// #include "..\shared\holdredraw.h"
-// #include "..\shared\treectrlhelper.h"
-// #include "..\shared\misc.h"
-// #include "..\shared\graphicsmisc.h"
-// #include "..\shared\clipboard.h"
-// #include "..\shared\themed.h"
-// #include "..\shared\AcceleratorString.h"
 #include "..\shared\ShortcutManager.h"
 
 #include "..\3rdParty\XNamedColors.h"
@@ -27,23 +20,6 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
-
-/////////////////////////////////////////////////////////////////////////////
-
-// enum 
-// {
-// 	COL_SHORTCUT = 0,
-// 	COL_CMDID,
-// };
-// 
-// #define PSP_SHORTCUTCOLUMNID	(OTC_POSCOLUMNID - 1)
-// #define PSP_COMMANDIDCOLUMNID	(OTC_POSCOLUMNID - 2)
-// 
-// #define ID_SUBMENU ((UINT)-1)
-// 
-// const int TEXT_PADDING			= 3;
-// const int SHORTCUTCOL_MINWIDTH	= 75;
-// const int ICON_OFFSET			= GraphicsMisc::ScaleByDPIFactor(20);
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesShortcutsPage property page
@@ -82,7 +58,6 @@ BEGIN_MESSAGE_MAP(CPreferencesShortcutsPage, CPreferencesPageBase)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CPreferencesShortcutsPage message handlers
 
 BOOL CPreferencesShortcutsPage::OnInitDialog()  
 {
@@ -91,8 +66,7 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_COMMANDS_FRAME);
 	VERIFY(m_ctrlCommands.Create(this, rCtrl, IDC_COMMANDS));
 
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	return TRUE;
 }
 
 void CPreferencesShortcutsPage::OnFirstShow()
