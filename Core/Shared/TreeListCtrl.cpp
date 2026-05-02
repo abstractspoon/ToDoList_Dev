@@ -387,27 +387,26 @@ int CTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BOOL bVisible = (lpCreateStruct->style & WS_VISIBLE);
 	CRect rect(0, 0, lpCreateStruct->cx, lpCreateStruct->cy);
 	
-	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));
+	DWORD dwDefStyles = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));
+	DWORD dwTreeStyles = (dwDefStyles | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT | TVS_NOTOOLTIPS | TVS_EDITLABELS);
 	
-	if (!m_tree.Create((dwStyle | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT | TVS_NOTOOLTIPS | TVS_EDITLABELS),
-							rect, 
-							this, 
-							IDC_TREELISTTREE))
+	if (!m_tree.Create(dwTreeStyles, rect, this, IDC_TREELISTTREE))
 	{
 		return -1;
 	}
 	
 	// Tasks Header ---------------------------------------------------------------------
-	if (!m_treeHeader.Create((dwStyle | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP | HDS_FULLDRAG), 
-							 rect, 
-							 this, 
-							 IDC_TREELISTTREEHEADER))
+	DWORD dwHeaderStyles = (dwDefStyles | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP | HDS_FULLDRAG);
+
+	if (!m_treeHeader.Create(dwHeaderStyles, rect, this, IDC_TREELISTTREEHEADER))
 	{
 		return -1;
 	}
 	
 	// Column List ---------------------------------------------------------------------
-	if (!m_list.Create((dwStyle | WS_TABSTOP | LVS_SHOWSELALWAYS), rect, this, IDC_TREELISTLIST))
+	DWORD dwListStyles = (dwDefStyles | WS_TABSTOP | LVS_SHOWSELALWAYS | (TSH().IsMultiSelection() ? 0 : LVS_SINGLESEL));
+
+	if (!m_list.Create(dwListStyles, rect, this, IDC_TREELISTLIST))
 	{
 		return -1;
 	}
@@ -2539,6 +2538,17 @@ void CTreeListCtrl::EnableColumnHeaderSorting(BOOL bEnable)
 {
 	CDialogHelper::SetStyle(&m_treeHeader, HDS_BUTTONS, bEnable);
 	CDialogHelper::SetStyle(&m_listHeader, HDS_BUTTONS, bEnable);
+}
+
+void CTreeListCtrl::EnableMultiSelection(BOOL bEnable) 
+{ 
+	TSH().EnableMultiSelection(bEnable); 
+
+	if (m_list.GetSafeHwnd())
+	{
+		m_list.ModifyStyle((bEnable ? LVS_SINGLESEL : 0),
+							(bEnable ? 0 : LVS_SINGLESEL));
+	}
 }
 
 BOOL CTreeListCtrl::CancelOperation()

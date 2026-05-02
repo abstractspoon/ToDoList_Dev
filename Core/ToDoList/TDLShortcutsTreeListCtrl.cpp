@@ -59,6 +59,7 @@ CTDLShortcutsTreeListCtrl::CTDLShortcutsTreeListCtrl(const CCtrlTextHighlighter&
 	m_pMgrShortcuts(pMgrShortcuts),
 	m_bShowCommandIDs(FALSE)
 {
+	EnableMultiSelection(FALSE);
 }
 
 BEGIN_MESSAGE_MAP(CTDLShortcutsTreeListCtrl, CTreeListCtrl)
