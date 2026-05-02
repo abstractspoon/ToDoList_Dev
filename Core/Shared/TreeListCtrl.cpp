@@ -449,7 +449,7 @@ void CTreeListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 {
 	CRect rSplitter;
 	
-	if (GetSplitterRect(rSplitter) && rSplitter.PtInRect(point))
+	if (m_bSplittingEnabled && GetSplitterRect(rSplitter) && rSplitter.PtInRect(point))
 		AdjustSplitterToFitListColumns();
 }
 

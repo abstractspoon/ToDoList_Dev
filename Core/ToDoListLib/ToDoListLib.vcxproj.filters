@@ -506,6 +506,9 @@
     <ClCompile Include="..\ToDoList\TDLTaskSelectionPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLShortcutsTreeListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -1028,6 +1031,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLTaskSelectionPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLShortcutsTreeListCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
