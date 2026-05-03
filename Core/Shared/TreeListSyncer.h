@@ -159,6 +159,8 @@ public:
 
 	void Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, HTREEITEM hti = NULL);
 	
+	static void ClearListSelection(HWND hwndList, DWORD dwMask = LVIS_SELECTED);
+
 protected:
 	// all tree/list window hooking gets routed to this function
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);

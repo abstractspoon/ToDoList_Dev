@@ -4246,10 +4246,13 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			return (DLGC_WANTTAB | ScDefault(hRealWnd));
 
 		case WM_KEYDOWN:
-			if (wp == VK_TAB)
 			{
-				HandleTabKey(hRealWnd);
-				return 0L; // We handled it
+				switch (wp)
+				{
+				case VK_TAB:
+					HandleTabKey(hRealWnd);
+					return 0L; // We handled it
+				}
 			}
 			break;
 

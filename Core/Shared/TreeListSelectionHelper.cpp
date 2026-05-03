@@ -31,10 +31,11 @@ CTreeListSelectionHelper::~CTreeListSelectionHelper()
 
 void CTreeListSelectionHelper::DeselectAll()
 {
-	RemoveAll(FALSE, FALSE);
+	RemoveAll(FALSE, FALSE); // tree selection
 
 	m_tch.SelectItem(NULL);
-	m_list.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
+
+	CTreeListSyncer::ClearListSelection(m_list);
 }
 
 void CTreeListSelectionHelper::SyncListSelection(BOOL bUpdate)
@@ -42,7 +43,7 @@ void CTreeListSelectionHelper::SyncListSelection(BOOL bUpdate)
 	BOOL bMultiSel = ((m_list.GetSelectedCount() > 1) || (GetCount() > 1));
 
 	// Clear existing selection which also invalidates each affected item
-	m_list.SetItemState(-1, 0, LVIS_SELECTED | LVIS_FOCUSED);
+	CTreeListSyncer::ClearListSelection(m_list);
 
 	// Set new selection which also invalidates each affected item
 	POSITION pos = GetFirstItemPos();
