@@ -465,20 +465,14 @@ int CTreeListCtrl::CalcMaxListColumnsWidth() const
 int CTreeListCtrl::CalcSplitPosToFitListColumns(int nAvailWidth) const
 {
 	int nColsWidth = CalcMaxListColumnsWidth();
-	int nNewSplitPos = (nColsWidth + GetSplitBarWidth() + LV_COLPADDING);
 
-	if (IsLeft(m_tree))
-	{
-		nNewSplitPos = (nAvailWidth - nNewSplitPos);
-		nNewSplitPos = max(MIN_TREE_WIDTH, nNewSplitPos);
-	}
-	else if ((nAvailWidth - nNewSplitPos) < MIN_TREE_WIDTH)
-	{
-		// tree is swapped
-		nNewSplitPos = (nAvailWidth - MIN_TREE_WIDTH);
-	}
+	// If the list is on the right add a smidgin to avoid a scrollbar
+	if (IsRight(m_list))
+		nColsWidth += LV_COLPADDING;
 
-	return nNewSplitPos;
+	int nNewTreeWidth = (nAvailWidth - nColsWidth - GetSplitBarWidth());
+
+	return CalcSplitPosFromTreeWidth(max(MIN_TREE_WIDTH, nNewTreeWidth));
 }
 
 void CTreeListCtrl::AdjustSplitterToFitListColumns()
@@ -497,8 +491,8 @@ void CTreeListCtrl::AdjustSplitterToFitListColumns()
 
 void CTreeListCtrl::AdjustSplitterToFitTreeColumns()
 {
-	int nNewSplitPos = m_treeHeader.CalcTotalItemWidth();
-	nNewSplitPos = max(MIN_TREE_WIDTH, nNewSplitPos);
+	int nTreeWidth = m_treeHeader.CalcTotalItemWidth();
+	int nNewSplitPos = CalcSplitPosFromTreeWidth(max(MIN_TREE_WIDTH, nTreeWidth));
 
 	if (nNewSplitPos != GetSplitPos())
 	{
@@ -873,13 +867,13 @@ BOOL CTreeListCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
 
 		CClientDC dc(&m_tree);
 		
-		int nPrevWidth = m_treeHeader.GetItemWidth(nCol);
-		int nNewWidth = RecalcTreeColumnWidth(nCol, &dc, TRUE);
+		int nPrevColWidth = m_treeHeader.GetItemWidth(nCol);
+		int nNewColWidth = RecalcTreeColumnWidth(nCol, &dc, TRUE);
 
 		// Adjust the splitter if there was a change
-		if (nNewWidth != nPrevWidth)
+		if (nNewColWidth != nPrevColWidth)
 		{
-			SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+			SetSplitPos(CalcSplitPosFromTreeWidth());
 			Resize();
 		}
 
@@ -1830,7 +1824,7 @@ void CTreeListCtrl::ResizeListColumnsToFit(BOOL bForce)
 	// Adjust the splitter if there was a change
 	if (m_treeHeader.CalcTotalItemWidth(0) != nPrevTreeWidth)
 	{
-		SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+		SetSplitPos(CalcSplitPosFromTreeWidth());
 		Resize();
 	}
 }
@@ -1854,27 +1848,40 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	// Adjust 'Title' column to suit unless it's the title column we are actively tracking
 	if (!IsHeaderTracking(m_hwndPrimaryHeader, 0))
 	{
-		int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
 		int nNewTreeWidth = CalcTreeWidthFromSplitPos(nSplitPos);
+		int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
 		
-		int nTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nNewTreeWidth - nRestTreeColsWidth));
-		m_treeHeader.SetItemWidth(0, nTitleColWidth);
+		int nNewTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nNewTreeWidth - nRestTreeColsWidth));
+		m_treeHeader.SetItemWidth(0, nNewTitleColWidth);
 
 		if (m_bSplitting)
 			m_treeHeader.SetItemTracked(0, TRUE);
 
 		m_treeHeader.UpdateWindow();
-
 		UpdateWindow();
 	}
 }
 
+int CTreeListCtrl::CalcSplitPosFromTreeWidth(int nTreeWidth) const
+{
+	if (nTreeWidth < 0)
+		nTreeWidth = m_treeHeader.CalcTotalItemWidth();
+
+	if (IsLeft(m_tree))
+		return nTreeWidth;
+
+	return (CDialogHelper::GetChildWidth(this) - nTreeWidth - GetSplitBarWidth());
+}
+
 int CTreeListCtrl::CalcTreeWidthFromSplitPos(int nSplitPos) const
 {
+	if (nSplitPos < 0)
+		nSplitPos = GetSplitPos();
+
 	if (IsLeft(m_tree))
 		return nSplitPos;
 
-	return (CDialogHelper::GetChildWidth(this) - nSplitPos);
+	return (CDialogHelper::GetChildWidth(this) - nSplitPos - GetSplitBarWidth());
 }
 
 BOOL CTreeListCtrl::HandleEraseBkgnd(CDC* pDC)
@@ -2092,9 +2099,8 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAct
 
 	// Recalculate the title column, preserving width of list columns 
 	int nAvailWidth = GetBoundingWidth();
-	int nSplitPos = GetSplitPos();
 	int nSplitBarWidth = GetSplitBarWidth();
-	int nTreeWidth = CalcTreeWidthFromSplitPos(nSplitPos);
+	int nTreeWidth = CalcTreeWidthFromSplitPos();
 
 	int nCurListColsWidth = (nAvailWidth - nTreeWidth - nSplitBarWidth - LV_COLPADDING);
 	int nMaxListColsWidth = CalcMaxListColumnsWidth();
@@ -2285,7 +2291,7 @@ BOOL CTreeListCtrl::SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF c
 	int nColWidth = CalcTreeColumnWidth(0, &dc);
 
 	m_treeHeader.SetItemWidth(0, nColWidth);
-	SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+	SetSplitPos(CalcSplitPosFromTreeWidth());
 	Resize();
 
 	// Allows derived classes to be involved
