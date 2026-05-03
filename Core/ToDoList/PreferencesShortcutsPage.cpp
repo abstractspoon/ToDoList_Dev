@@ -148,7 +148,7 @@ BOOL CPreferencesShortcutsPage::OnHelpInfo(HELPINFO* pHelpInfo)
 
 void CPreferencesShortcutsPage::OnAssignshortcut() 
 {
-	UINT nCmdID = m_ctrlCommands.GetSelectedShortcut();
+	UINT nCmdID = m_ctrlCommands.GetSelectedCmdID();
 
 	if (nCmdID)
 	{

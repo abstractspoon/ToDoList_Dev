@@ -400,42 +400,46 @@ CString CTDLShortcutsTreeListCtrl::GetMenuText(UINT nCmdID) const
 	return m_tree.GetItemText(hti);
 }
 
-BOOL CTDLShortcutsTreeListCtrl::AssignShortcut(UINT nCmdID, DWORD dwShortcut)
+BOOL CTDLShortcutsTreeListCtrl::AssignShortcut(UINT nCmdID, DWORD dwNewShortcut)
 {
+	// Sanity checks
 	if (!nCmdID)
+		return FALSE;
+
+	DWORD dwCurShortcut = GetShortcut(nCmdID);
+
+	if (dwNewShortcut == dwCurShortcut)
 		return FALSE;
 
 	// remove any shortcut currently assigned to nCmdID
 	m_mapShortcut2HTI.RemoveKey(GetShortcut(nCmdID));
-
-	// handle special case where user is explicitly deleting a shortcut
-	if (!dwShortcut)
+	
+	if (!dwNewShortcut)
 	{
-		dwShortcut = NO_SHORTCUT;
+		// Special case: User is explicitly deleting a shortcut
+		dwNewShortcut = NO_SHORTCUT;
 	}
 	else
 	{
 		// else if anyone has this shortcut we must remove their mapping first
-		HTREEITEM htiOther = NULL;
+		UINT nOtherCmdID = GetCmdID(dwNewShortcut);
 
-		if (m_mapShortcut2HTI.Lookup(dwShortcut, htiOther) && htiOther)
+		if (nOtherCmdID)
 		{
-			UINT nOtherCmdID = GetItemData(htiOther);
-
-			if (nOtherCmdID)
-				m_mapID2Shortcut.RemoveKey(nOtherCmdID);
+			m_mapID2Shortcut.RemoveKey(nOtherCmdID);
+			InvalidateListItem(GetTreeItem((DWORD)nOtherCmdID));
 		}
 	}
 
-	// update maps
-	m_mapID2Shortcut[nCmdID] = dwShortcut;
+	// Set new shortcut
+	m_mapID2Shortcut[nCmdID] = dwNewShortcut;
 
 	HTREEITEM hti = GetTreeItem((DWORD)nCmdID);
 
-	if (dwShortcut != NO_SHORTCUT)
-		m_mapShortcut2HTI[dwShortcut] = hti;
+	if (dwNewShortcut != NO_SHORTCUT)
+		m_mapShortcut2HTI[dwNewShortcut] = hti;
 
-	VERIFY(TCH().InvalidateItem(hti));
+	InvalidateListItem(hti);
 	return TRUE;
 }
 

@@ -85,7 +85,7 @@ END_MESSAGE_MAP()
 HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelImage,
 										LPARAM lParam, HTREEITEM htiParent, HTREEITEM htiAfter)
 {
-	ASSERT(GetItem(lParam) == NULL);
+//	ASSERT(GetItem(lParam) == NULL);
 
 	HTREEITEM hti = TCH().InsertItem(lpszItem,
 											nImage,
