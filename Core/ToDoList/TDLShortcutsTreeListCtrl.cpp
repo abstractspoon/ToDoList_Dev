@@ -91,7 +91,7 @@ int CTDLShortcutsTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_listHeader.EnableItemDragging(COL_CMDID, FALSE);
 	m_listHeader.EnableTracking(FALSE);
 
-	SetGridLineColor(GetSysColor(COLOR_3DSHADOW));
+	SetGridLineColor(colorSilver);
 	SetSplitBarWidth(1);
 	EnableSplitting(FALSE);
 	SwapSides();
@@ -562,7 +562,9 @@ LRESULT CTDLShortcutsTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const
 				pDC->FillSolidRect(&pLVCD->nmcd.rc, crBack);
 
 			// draw horz gridline before selection
-			DrawHorzItemDivider(pDC, pLVCD->nmcd.rc);
+			CRect rFullWidth(pLVCD->nmcd.rc);
+			rFullWidth.right += 1000;
+			DrawHorzItemDivider(pDC, rFullWidth);
 
 			// Draw selection before text
 			DWORD dwDrawFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW);
