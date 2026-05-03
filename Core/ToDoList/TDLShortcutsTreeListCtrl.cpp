@@ -229,7 +229,7 @@ HTREEITEM CTDLShortcutsTreeListCtrl::AddMenuItem(HTREEITEM htiParent, const CMen
 		if (dwShortcut)
 		{
 			m_mapID2Shortcut[nCmdID] = dwShortcut;
-			m_mapShortcut2HTI[dwShortcut] = hti;
+			m_mapShortcut2ID[dwShortcut] = nCmdID;
 		}
 	}
 
@@ -271,8 +271,6 @@ HTREEITEM CTDLShortcutsTreeListCtrl::InsertItem(const CString& sItem, UINT nCmdI
 	
 	HTREEITEM hti = m_tree.InsertItem(sItem, -1, -1, nCmdID, htiParent, TVI_LAST);
 	ASSERT(hti);
-
-	//m_tree.SetItemData(hti, nCmdID);
 
 	return hti;
 }
@@ -382,10 +380,10 @@ UINT CTDLShortcutsTreeListCtrl::GetCmdID(DWORD dwShortcut) const
 	if (!dwShortcut || (dwShortcut == NO_SHORTCUT))
 		return 0;
 
-	HTREEITEM hti = NULL;
-	m_mapShortcut2HTI.Lookup(dwShortcut, hti);
+	UINT nCmdID = 0;
+	m_mapShortcut2ID.Lookup(dwShortcut, nCmdID);
 
-	return (hti ? m_tree.GetItemData(hti) : 0);
+	return nCmdID;
 }
 
 BOOL CTDLShortcutsTreeListCtrl::HasShorcut(DWORD dwShortcut) const
@@ -412,7 +410,7 @@ BOOL CTDLShortcutsTreeListCtrl::AssignShortcut(UINT nCmdID, DWORD dwNewShortcut)
 		return FALSE;
 
 	// remove any shortcut currently assigned to nCmdID
-	m_mapShortcut2HTI.RemoveKey(GetShortcut(nCmdID));
+	m_mapShortcut2ID.RemoveKey(dwCurShortcut);
 	
 	if (!dwNewShortcut)
 	{
@@ -434,12 +432,10 @@ BOOL CTDLShortcutsTreeListCtrl::AssignShortcut(UINT nCmdID, DWORD dwNewShortcut)
 	// Set new shortcut
 	m_mapID2Shortcut[nCmdID] = dwNewShortcut;
 
-	HTREEITEM hti = GetTreeItem((DWORD)nCmdID);
-
 	if (dwNewShortcut != NO_SHORTCUT)
-		m_mapShortcut2HTI[dwNewShortcut] = hti;
+		m_mapShortcut2ID[dwNewShortcut] = nCmdID;
 
-	InvalidateListItem(hti);
+	InvalidateListItem(GetTreeItem((DWORD)nCmdID));
 	return TRUE;
 }
 
@@ -455,12 +451,10 @@ BOOL CTDLShortcutsTreeListCtrl::DeleteShortcut(UINT nCmdID)
 		return FALSE;
 
 	// else
-	m_mapShortcut2HTI.RemoveKey(dwShortcut);
+	m_mapShortcut2ID.RemoveKey(dwShortcut);
 	m_mapID2Shortcut[nCmdID] = 0;
 
-	HTREEITEM hti = GetTreeItem((DWORD)nCmdID);
-	VERIFY(TCH().InvalidateItem(hti));
-
+	InvalidateListItem(GetTreeItem((DWORD)nCmdID));
 	return TRUE;
 }
 
@@ -486,13 +480,10 @@ void CTDLShortcutsTreeListCtrl::RecalcColumnsToFit()
 
 	m_listHeader.SetItemWidth(1, nMaxIDWidth);
 
-// 	SetSplitPos(nMaxShortcutWidth + nMaxIDWidth);
-// 
 // 	// Tree
 	CRect rClient;
 	GetClientRect(rClient);
-// 
-// 	m_treeHeader.SetItemWidth(0, rClient.Width() - nMaxIDWidth - nMaxShortcutWidth);
+
 	CTreeListSyncer::Resize(rClient, nMaxShortcutWidth + nMaxIDWidth);
 }
 

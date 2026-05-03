@@ -57,7 +57,7 @@ protected:
 	CShortcutManager* m_pMgrShortcuts;
 
 	CMap<UINT, UINT, DWORD, DWORD&> m_mapID2Shortcut;
- 	CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&> m_mapShortcut2HTI;
+ 	CMap<DWORD, DWORD, UINT, UINT&> m_mapShortcut2ID;
 	CFontCache m_fonts;
 	BOOL m_bShowCommandIDs;
 
