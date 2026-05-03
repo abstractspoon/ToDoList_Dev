@@ -52,7 +52,7 @@ BEGIN_MESSAGE_MAP(CPreferencesShortcutsPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_ASSIGNSHORTCUT, OnAssignshortcut)
 	ON_BN_CLICKED(IDC_SHOWCMDIDS, OnShowCmdIDs)
 	ON_BN_CLICKED(IDC_COPYALL, OnCopyall)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_COMMANDS, OnSelchangedShortcuts)
+	ON_REGISTERED_MESSAGE(WM_TLC_ITEMSELCHANGE, OnSelchangedShortcuts)
 	ON_EN_CHANGE(IDC_NEWHOTKEY, OnChangeShortcut)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
@@ -88,15 +88,14 @@ void CPreferencesShortcutsPage::OnFirstShow()
 	}
 }
 
-void CPreferencesShortcutsPage::OnSelchangedShortcuts(NMHDR* pNMHDR, LRESULT* pResult) 
+LRESULT CPreferencesShortcutsPage::OnSelchangedShortcuts(WPARAM wp, LPARAM lp)
 {
-/*
-	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
+// 	NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR;
 
-	UINT nCmdID = (UINT)pNMTreeView->itemNew.lParam;
-	DWORD dwShortcut = 0;
+	UINT nCmdID = m_ctrlCommands.GetSelectedCmdID();//UINT)pNMTreeView->itemNew.lParam;
+	DWORD dwShortcut = m_ctrlCommands.GetSelectedShortcut();
 
-	m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+	// m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
 
 	WORD wVKeyCode = LOWORD(dwShortcut);
 	WORD wModifiers = HIWORD(dwShortcut);
@@ -105,8 +104,8 @@ void CPreferencesShortcutsPage::OnSelchangedShortcuts(NMHDR* pNMHDR, LRESULT* pR
 	m_hkNew.SetHotKey(wVKeyCode, wModifiers);
 
 	// if it's a misc item or a sub-menu then disable keys
-	BOOL bSubMenu = (pNMTreeView->itemNew.lParam == ID_SUBMENU);
-	BOOL bCanHaveShortcut = (!bSubMenu && nCmdID && !IsMiscCommandID(nCmdID));
+	BOOL bSubMenu = ((int)nCmdID <= 0);//(pNMTreeView->itemNew.lParam == ID_SUBMENU);
+	BOOL bCanHaveShortcut = (!bSubMenu && nCmdID && !m_ctrlCommands.IsMiscCommandID(nCmdID));
 
 	m_hkNew.EnableWindow(bCanHaveShortcut);
 	GetDlgItem(IDC_CURLABEL)->EnableWindow(bCanHaveShortcut);
@@ -125,10 +124,9 @@ void CPreferencesShortcutsPage::OnSelchangedShortcuts(NMHDR* pNMHDR, LRESULT* pR
 	}
 
 	GetDlgItem(IDC_ASSIGNSHORTCUT)->EnableWindow(bCanHaveShortcut);
-*/
 	UpdateData(FALSE);
 	
-	*pResult = 0;
+	return 0;
 }
 
 void CPreferencesShortcutsPage::OnOK()
@@ -174,13 +172,7 @@ void CPreferencesShortcutsPage::OnAssignshortcut()
 
 void CPreferencesShortcutsPage::OnChangeShortcut()
 {
-/*
-	HTREEITEM htiSel = m_tcCommands.GetSelectedItem();
-
-	if (!htiSel)
-		return;
-
-	UINT nCmdID = m_tcCommands.GetItemData(htiSel);
+	UINT nCmdID = m_ctrlCommands.GetSelectedCmdID();
 
 	WORD wVKeyCode = 0, wModifiers = 0;
 	m_hkNew.GetHotKey(wVKeyCode, wModifiers);
@@ -199,11 +191,8 @@ void CPreferencesShortcutsPage::OnChangeShortcut()
 
 	DWORD dwShortcut = MAKELONG(wVKeyCode, wModifiers);
 
-	// if anyone has this shortcut we show who it is
+	// if any other command has this shortcut we show who it is
 	BOOL bReserved = FALSE;
-	HTREEITEM htiOther = NULL;
-
-	m_mapShortcut2HTI.Lookup(dwShortcut, htiOther);
 	m_sOtherCmdID.Empty();
 
 	if (CToDoCtrl::IsReservedShortcut(dwShortcut))
@@ -211,14 +200,21 @@ void CPreferencesShortcutsPage::OnChangeShortcut()
 		m_sOtherCmdID.LoadString(IDS_PSP_RESERVED);
 		bReserved = TRUE;
 	}
-	else if (htiOther && m_tcCommands.GetItemData(htiOther) != nCmdID)
+	else 
 	{
-		m_sOtherCmdID.Format(IDS_PSP_CURRENTLYASSIGNED, m_tcCommands.GetItemText(htiOther));
+		UINT nOtherCmdID = m_ctrlCommands.GetCmdID(dwShortcut);
+
+		if (nOtherCmdID && (nOtherCmdID != nCmdID))
+		{
+			CString sOtherMenu = m_ctrlCommands.GetMenuText(nOtherCmdID);
+
+			if (!sOtherMenu.IsEmpty())
+				m_sOtherCmdID.Format(IDS_PSP_CURRENTLYASSIGNED, sOtherMenu);
+		}
 	}
 
 	GetDlgItem(IDC_ASSIGNSHORTCUT)->EnableWindow(!bReserved);
 	UpdateData(FALSE);
-*/
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -236,35 +232,14 @@ BOOL CPreferencesShortcutsPage::PreTranslateMessage(MSG* pMsg)
 		switch (pMsg->wParam)
 		{
 		case VK_DELETE:
-			{
-/*
-				if (GetFocus() == &m_tcCommands)
-				{
-					HTREEITEM htiSel = m_tcCommands.GetSelectedItem();
+			if (m_ctrlCommands.HasFocus() && 
+				m_ctrlCommands.DeleteShortcut(m_ctrlCommands.GetSelectedCmdID()))
+			{	
+				m_hkCur.SetHotKey(0, 0);
+				m_hkNew.SetHotKey(0, 0);
+				m_sOtherCmdID.Empty();
 
-					if (htiSel)
-					{
-						UINT nCmdID = m_tcCommands.GetItemData(htiSel);
-
-						if (nCmdID)
-						{
-							DWORD dwShortcut = 0;
-
-							if (m_mapID2Shortcut.Lookup(nCmdID, dwShortcut))
-								m_mapShortcut2HTI.RemoveKey(dwShortcut);
-
-							m_mapID2Shortcut[nCmdID] = 0;
-						}
-					}
-
-					m_hkCur.SetHotKey(0, 0);
-					m_hkNew.SetHotKey(0, 0);
-					m_sOtherCmdID.Empty();
-
-					m_tcCommands.RecalcGutter();
-					m_tcCommands.RedrawGutter();
-				}
-*/
+				return TRUE;
 			}
 			break;
 		}

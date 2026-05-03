@@ -50,7 +50,7 @@ protected:
 
 protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnSelchangedShortcuts(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg LRESULT OnSelchangedShortcuts(WPARAM wp, LPARAM lp);
 	afx_msg void OnAssignshortcut();
 	afx_msg void OnShowCmdIDs();
 	afx_msg void OnCopyall();
@@ -64,9 +64,6 @@ protected:
 
 	virtual int HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight);
 	virtual void ClearHighlights();
-
-	static BOOL IsMiscCommandID(UINT nCmdID);
-
 };
 
 #endif // !defined(AFX_PREFERERENCESSHORTCUTSPAGE_H__DA5D005D_C6CC_453A_A431_A2B85A920CE5__INCLUDED_)

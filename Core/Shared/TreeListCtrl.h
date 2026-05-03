@@ -126,6 +126,7 @@ public:
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 	void SetFocus() { CTreeListSyncer::SetFocus(); }
+	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);

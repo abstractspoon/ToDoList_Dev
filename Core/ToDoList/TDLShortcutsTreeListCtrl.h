@@ -31,15 +31,23 @@ public:
 							  CShortcutManager* pMgrShortcuts);
 
 	void BuildMenuTree();
-	BOOL AssignShortcut(UINT nCmdID, DWORD dwShortcut);
 	BOOL SaveToShortcutMgr();
 	void ShowCommandIDs(BOOL bShow = TRUE);
 	void RecalcColumnsToFit();
 
+	BOOL AssignShortcut(UINT nCmdID, DWORD dwShortcut);
+	BOOL DeleteShortcut(UINT nCmdID);
+	DWORD GetShortcut(UINT nCmdID) const;
+	BOOL HasShorcut(DWORD dwShortcut) const;
+	UINT GetCmdID(DWORD dwShortcut) const;
+	CString GetMenuText(UINT nCmdID) const;
+
 	BOOL MatchesSearch(const CString& sItem) const;
 	UINT GetSelectedCmdID() const;
-	UINT GetSelectedShortcut() const;
+	DWORD GetSelectedShortcut() const;
 	void CopyAllToClipboard() const;
+
+	static BOOL IsMiscCommandID(UINT nCmdID);
 
 protected:
 	const CMenuIconMgr& m_mgrMenuIcons;
@@ -73,8 +81,6 @@ protected:
 	COLORREF GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const;
 	void DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected);
 	void DrawTreeItemIcon(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
-
-	static BOOL IsMiscCommandID(UINT nCmdID);
 };
 
 #endif // !defined(AFX_TDLSHORTCUTSTREELISTCTRL_H__DA5D005D_C6CC_453A_A431_A2B85A920CE5__INCLUDED_)

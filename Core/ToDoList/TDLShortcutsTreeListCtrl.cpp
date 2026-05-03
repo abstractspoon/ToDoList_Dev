@@ -364,13 +364,40 @@ UINT CTDLShortcutsTreeListCtrl::GetSelectedCmdID() const
 	return GetSelectedItemData();
 }
 
-UINT CTDLShortcutsTreeListCtrl::GetSelectedShortcut() const
+DWORD CTDLShortcutsTreeListCtrl::GetSelectedShortcut() const
 {
-	HTREEITEM hti = GetSelectedItem();
-	UINT nCmdID = GetItemData(hti);
-	DWORD dwShortcut = 0;
+	return GetShortcut(GetSelectedCmdID());
+}
 
-	return (m_mapID2Shortcut.Lookup(nCmdID, dwShortcut) ? dwShortcut : 0);
+DWORD CTDLShortcutsTreeListCtrl::GetShortcut(UINT nCmdID) const
+{
+	DWORD dwShortcut = 0;
+	m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+
+	return ((dwShortcut == NO_SHORTCUT) ? 0 : dwShortcut);
+}
+
+UINT CTDLShortcutsTreeListCtrl::GetCmdID(DWORD dwShortcut) const
+{
+	if (!dwShortcut || (dwShortcut == NO_SHORTCUT))
+		return 0;
+
+	HTREEITEM hti = NULL;
+	m_mapShortcut2HTI.Lookup(dwShortcut, hti);
+
+	return (hti ? m_tree.GetItemData(hti) : 0);
+}
+
+BOOL CTDLShortcutsTreeListCtrl::HasShorcut(DWORD dwShortcut) const
+{
+	return (GetCmdID(dwShortcut) != 0);
+}
+
+CString CTDLShortcutsTreeListCtrl::GetMenuText(UINT nCmdID) const
+{
+	HTREEITEM hti = GetTreeItem((DWORD)nCmdID);
+
+	return m_tree.GetItemText(hti);
 }
 
 BOOL CTDLShortcutsTreeListCtrl::AssignShortcut(UINT nCmdID, DWORD dwShortcut)
@@ -379,10 +406,7 @@ BOOL CTDLShortcutsTreeListCtrl::AssignShortcut(UINT nCmdID, DWORD dwShortcut)
 		return FALSE;
 
 	// remove any shortcut currently assigned to nCmdID
-	DWORD dwPrevSC = 0;
-
-	if (m_mapID2Shortcut.Lookup(nCmdID, dwPrevSC))
-		m_mapShortcut2HTI.RemoveKey(dwPrevSC);
+	m_mapShortcut2HTI.RemoveKey(GetShortcut(nCmdID));
 
 	// handle special case where user is explicitly deleting a shortcut
 	if (!dwShortcut)
@@ -406,12 +430,33 @@ BOOL CTDLShortcutsTreeListCtrl::AssignShortcut(UINT nCmdID, DWORD dwShortcut)
 	// update maps
 	m_mapID2Shortcut[nCmdID] = dwShortcut;
 
-	HTREEITEM htiSel = GetTreeItem((DWORD)nCmdID);
+	HTREEITEM hti = GetTreeItem((DWORD)nCmdID);
 
 	if (dwShortcut != NO_SHORTCUT)
-		m_mapShortcut2HTI[dwShortcut] = htiSel;
+		m_mapShortcut2HTI[dwShortcut] = hti;
 
-	CTreeCtrlHelper(m_tree).InvalidateItem(htiSel);
+	VERIFY(TCH().InvalidateItem(hti));
+	return TRUE;
+}
+
+BOOL CTDLShortcutsTreeListCtrl::DeleteShortcut(UINT nCmdID)
+{
+	if (!nCmdID)
+		return FALSE;
+
+	// remove any shortcut currently assigned to nCmdID
+	DWORD dwShortcut = GetShortcut(nCmdID);
+
+	if (!dwShortcut)
+		return FALSE;
+
+	// else
+	m_mapShortcut2HTI.RemoveKey(dwShortcut);
+	m_mapID2Shortcut[nCmdID] = 0;
+
+	HTREEITEM hti = GetTreeItem((DWORD)nCmdID);
+	VERIFY(TCH().InvalidateItem(hti));
+
 	return TRUE;
 }
 
