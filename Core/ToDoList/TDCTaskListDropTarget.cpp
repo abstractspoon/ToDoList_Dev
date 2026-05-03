@@ -14,6 +14,7 @@
 #include "..\shared\fileedit.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\clipboard.h"
+#include "..\shared\TreeListSyncer.h"
 
 #include "..\3rdparty\msoutl.h"
 
@@ -138,7 +139,7 @@ void CTDCTaskListDropTarget::ResetDrag(CWnd* pWnd)
 	}
 	else if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
 	{
-		ListView_SetItemState(pWnd->GetSafeHwnd(), -1, 0, LVIS_DROPHILITED); // all items
+		CTreeListSyncer::ClearListSelection(pWnd->GetSafeHwnd(), LVIS_DROPHILITED);
 	}
 	
 	m_dwTVHoverStart = 0;
