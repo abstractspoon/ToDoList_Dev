@@ -37,7 +37,7 @@ enum
 
 /////////////////////////////////////////////////////////////////////////////
 
-#define ID_SUBMENU ((UINT)-1)
+#define ID_MISC_SUBMENU ((UINT)-1)
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -140,9 +140,13 @@ void CTDLShortcutsTreeListCtrl::BuildMenuTree()
 	{
 		RemoveUnusedDefaultFilterItems(menu);
 
+		// CTreeListCtrl wants all tree item data to be unique 
+		// so submenus cannot all be -1
+		UINT nNextSubMenuCmdID = (ID_MISC_SUBMENU - 1);
+
 		for (int nPos = 0; nPos < (int)menu.GetMenuItemCount(); nPos++)
 		{
-			HTREEITEM hti = AddMenuItem(TVI_ROOT, &menu, nPos, !m_ctrlHighlighter.HasSearch());
+			HTREEITEM hti = AddMenuItem(TVI_ROOT, &menu, nPos, !m_ctrlHighlighter.HasSearch(), nNextSubMenuCmdID);
 
 			if (!htiFirst)
 				htiFirst = hti;
@@ -166,16 +170,21 @@ void CTDLShortcutsTreeListCtrl::BuildMenuTree()
 	RecalcColumnsToFit();
 }
 
-HTREEITEM CTDLShortcutsTreeListCtrl::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd)
+HTREEITEM CTDLShortcutsTreeListCtrl::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, 
+												 int nPos, BOOL bForceAdd, UINT& nNextSubMenuCmdID)
 {
 	UINT nCmdID = pMenu->GetMenuItemID(nPos);
-	BOOL bSubMenu = (nCmdID == ID_SUBMENU);
+	BOOL bSubMenu = IsSubMenu(nCmdID);
 
 	// Exclude the debug menu
 	if (bSubMenu)
 	{
 		if (pMenu->GetSubMenu(nPos)->GetMenuItemID(0) == ID_DEBUG_ENDSESSION)
 			return NULL;
+
+		// CTreeListCtrl wants all tree item data to be unique 
+		// so submenus cannot all be -1
+		nCmdID = nNextSubMenuCmdID--;
 	}
 
 	CString sItem;
@@ -212,7 +221,7 @@ HTREEITEM CTDLShortcutsTreeListCtrl::AddMenuItem(HTREEITEM htiParent, const CMen
 		{
 			for (int nSubPos = 0; nSubPos < (int)pSubMenu->GetMenuItemCount(); nSubPos++)
 			{
-				AddMenuItem(hti, pSubMenu, nSubPos, bForceAdd); // RECURSIVE CALL
+				AddMenuItem(hti, pSubMenu, nSubPos, bForceAdd, nNextSubMenuCmdID); // RECURSIVE CALL
 			}
 		}
 
@@ -264,9 +273,7 @@ HTREEITEM CTDLShortcutsTreeListCtrl::InsertItem(const CString& sItem, UINT nCmdI
 {
 	// Exclude leaf tasks not matching the search terms
 	// unless their parent matches the search
-	BOOL bSubMenu = (nCmdID == ID_SUBMENU);
-
-	if (!bSubMenu && !bForceAdd && !WantItem(sItem))
+	if (!IsSubMenu(nCmdID) && !bForceAdd && !WantItem(sItem))
 		return NULL;
 	
 	HTREEITEM hti = m_tree.InsertItem(sItem, -1, -1, nCmdID, htiParent, TVI_LAST);
@@ -284,7 +291,7 @@ void CTDLShortcutsTreeListCtrl::AddMiscShortcuts()
 	CEnString sSubMenuText(IDS_MISCSHORTCUTS);
 
 	BOOL bForceAdd = !m_ctrlHighlighter.HasSearch();
-	HTREEITEM htiParent = InsertItem(sSubMenuText, ID_SUBMENU, TVI_ROOT, bForceAdd);
+	HTREEITEM htiParent = InsertItem(sSubMenuText, ID_MISC_SUBMENU, TVI_ROOT, bForceAdd);
 
 	// add children
 	for (int nItem = 0; nItem < NUM_MISCSHORTCUTS; nItem++)
@@ -302,7 +309,7 @@ void CTDLShortcutsTreeListCtrl::AddMiscShortcuts()
 			if (hti && dwShortcut)
 			{
 				m_mapID2Shortcut[nCmdID] = dwShortcut;
-				m_mapShortcut2HTI[dwShortcut] = hti;
+				m_mapShortcut2ID[dwShortcut] = nCmdID;
 			}
 		}
 	}
@@ -538,7 +545,7 @@ LRESULT CTDLShortcutsTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const
 			HTREEITEM hti = (HTREEITEM)pLVCD->nmcd.lItemlParam;
 
 			UINT nCmdID = m_tree.GetItemData(hti);
-			BOOL bSubMenu = (nCmdID == ID_SUBMENU);
+			BOOL bSubMenu = IsSubMenu(nCmdID);
 
 			DWORD dwShortcut = 0;
 			m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
@@ -621,7 +628,7 @@ LRESULT CTDLShortcutsTreeListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD, const
 
 COLORREF CTDLShortcutsTreeListCtrl::GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const
 {
-	if (dwItemData == ID_SUBMENU)
+	if (IsSubMenu(dwItemData))
 		return GetSysColor(COLOR_3DFACE);
 
 	return CTreeListCtrl::GetTreeItemBackColor(hti, dwItemData, bSelected);
@@ -655,7 +662,7 @@ void CTDLShortcutsTreeListCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWO
 		crText = colorRed;
 	}
 
-	BOOL bBold = (dwItemData == ID_SUBMENU);
+	BOOL bBold = IsSubMenu(dwItemData);
 	HGDIOBJ hOldFont = pDC->SelectObject(m_fonts.GetHFont(bBold, FALSE, FALSE, FALSE));
 
 	pDC->SetTextColor(crText);

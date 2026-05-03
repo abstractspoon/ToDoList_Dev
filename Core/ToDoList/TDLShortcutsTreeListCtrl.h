@@ -67,7 +67,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd);
+	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd, UINT& nNextSubMenuCmdID);
 	int GetLongestShortcutText(CDC* pDC, HTREEITEM hti = NULL);
 	void AddMiscShortcuts();
 	void RemoveUnusedDefaultFilterItems(CMenu& menu) const;
@@ -81,6 +81,8 @@ protected:
 	COLORREF GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const;
 	void DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected);
 	void DrawTreeItemIcon(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
+
+	static BOOL IsSubMenu(UINT nCmdID) { return ((int)nCmdID < 0); }
 };
 
 #endif // !defined(AFX_TDLSHORTCUTSTREELISTCTRL_H__DA5D005D_C6CC_453A_A431_A2B85A920CE5__INCLUDED_)
