@@ -122,6 +122,7 @@ protected:
 	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
 	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 	virtual int GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bInCollapsedChildren) const;
+	virtual void RefreshTasklistPrompt();
 
 	void SaveState() const;
 	void LoadState();

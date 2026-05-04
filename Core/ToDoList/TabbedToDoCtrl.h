@@ -239,6 +239,7 @@ protected:
 	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttribID, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
 	virtual int GetColumnTaskIDs(CDWordArray& aTaskIDs, int nFrom = 0, int nTo = -1) const;
+	virtual void RefreshTasklistPrompt();
 
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildTree = FALSE) const; 

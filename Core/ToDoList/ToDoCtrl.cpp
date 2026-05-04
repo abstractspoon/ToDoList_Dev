@@ -189,10 +189,14 @@ void CToDoCtrl::IDLETASKS::RefreshAttributeValues(const CTDCAttributeMap& mapAtt
 
 BOOL CToDoCtrl::IDLETASKS::Process()
 {
-	if (!m_mapRefreshAttribIDs.IsEmpty())
+	if (m_bRefreshTasklistPrompt)
+	{
+		m_tdc.RefreshTasklistPrompt();
+		m_bRefreshTasklistPrompt = FALSE;
+	}
+	else if (!m_mapRefreshAttribIDs.IsEmpty())
 	{
 		m_tdc.m_ctrlAttributes.RefreshSelectedTasksValues(m_mapRefreshAttribIDs);
-
 		m_mapRefreshAttribIDs.RemoveAll();
 	}
 
@@ -201,7 +205,7 @@ BOOL CToDoCtrl::IDLETASKS::Process()
 
 BOOL CToDoCtrl::IDLETASKS::HasTasks() const
 {
-	return !m_mapRefreshAttribIDs.IsEmpty();
+	return (m_bRefreshTasklistPrompt || !m_mapRefreshAttribIDs.IsEmpty());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -296,6 +300,7 @@ CToDoCtrl::CToDoCtrl(const CTDCContentMgr& mgrContent,
 	}
 	
 	m_data.SetDefaultCommentsFormat(m_cfDefault);
+	m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_INITIALISING_PROMPT));
 }
 
 CToDoCtrl::~CToDoCtrl()
@@ -585,7 +590,6 @@ BOOL CToDoCtrl::OnInitDialog()
 
 	// Window prompts
 	m_mgrPrompts.SetEditPrompt(IDC_PROJECTNAME, *this, IDS_TDC_EDITPROMPT_PROJECT);
-	m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
 
 	// tree drag drop
 	m_treeDragDrop.Initialize(this);
@@ -600,8 +604,15 @@ BOOL CToDoCtrl::OnInitDialog()
 	// Start the timer which checks for midnight (day changeover)
 	// which runs persistently
 	m_timerMidnight.Enable(*this);
+
+	m_idleTasks.RefreshTasklistPrompt();
 	
 	return FALSE;  // return TRUE unless you set the focus to a control
+}
+
+void CToDoCtrl::RefreshTasklistPrompt()
+{
+	m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_NOTASKS_PROMPT));
 }
 
 void CToDoCtrl::LoadTaskIcons()

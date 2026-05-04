@@ -4233,6 +4233,20 @@ void CTDLTaskCtrlBase::HandleTabKey(HWND hWnd)
 	}
 }
 
+void CTDLTaskCtrlBase::SetWindowPrompt(LPCTSTR szPrompt) 
+{ 
+	if (m_sTasksWndPrompt != szPrompt)
+	{
+		m_sTasksWndPrompt = szPrompt;
+
+		if (GetSafeHwnd() && !m_lcColumns.GetItemCount())
+		{
+			ASSERT(Tasks());
+			::InvalidateRect(Tasks(), NULL, 0);
+		}
+	}
+}
+
 LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (!IsResyncEnabled())

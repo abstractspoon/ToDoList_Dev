@@ -166,7 +166,7 @@ public:
 	BOOL InvalidateColumnSelection(BOOL bUpdate = FALSE);
 	void InvalidateAll(BOOL bErase = FALSE, BOOL bUpdate = FALSE);
 	void UpdateAll() { CTreeListSyncer::UpdateAll(); }
-	void SetWindowPrompt(LPCTSTR szPrompt) { m_sTasksWndPrompt = szPrompt; }
+	void SetWindowPrompt(LPCTSTR szPrompt);
 	void DoUpdateSelectedTaskPath();
 
 	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1, BOOL bSelected = FALSE) const;

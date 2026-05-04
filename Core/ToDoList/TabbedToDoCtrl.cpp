@@ -145,6 +145,8 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(const CUIExtensionMgr& mgrUIExt,
 	// tab is on by default
 	m_styles[TDCS_SHOWTREELISTBAR] = TRUE;
 	m_styles[TDCS_SHOWTASKVIEWTABCLOSEBUTTON] = TRUE;
+
+	m_taskList.SetWindowPrompt(CEnString(IDS_TDC_INITIALISING_PROMPT));
 }
 
 CTabbedToDoCtrl::~CTabbedToDoCtrl()
@@ -211,6 +213,13 @@ void CTabbedToDoCtrl::SetDefaultTaskViews(const CStringArray& aTypeIDs)
 	s_aDefTaskViews.Copy(aTypeIDs);
 }
 
+void CTabbedToDoCtrl::RefreshTasklistPrompt()
+{
+	CToDoCtrl::RefreshTasklistPrompt();
+
+	m_taskList.SetWindowPrompt(CEnString(IDS_TDC_NOTASKS_PROMPT));
+}
+
 BOOL CTabbedToDoCtrl::OnInitDialog()
 {
 	CToDoCtrl::OnInitDialog();
@@ -224,7 +233,6 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	// list initialisation
 	m_dtList.Register(&m_taskList.List(), this);
 	m_taskList.SetWindowPos(&m_taskTree, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
-	m_taskList.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
 
 	// add tree and list as tabbed views
 	CIcon icon;

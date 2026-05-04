@@ -585,14 +585,25 @@ BOOL CFilteredToDoCtrl::RefreshTreeFilter()
 			m_bTreeNeedResort = TRUE;
 		}
 	}
-	
-	// modify the tree prompt depending on whether there is a filter set
-	if (HasAnyFilter())
-		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
-	else
-		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
+
+	RefreshTasklistPrompt();
 
 	return TRUE;
+}
+
+void CFilteredToDoCtrl::RefreshTasklistPrompt()
+{
+	if (m_data.GetTaskCount() && HasAnyFilter())
+	{
+		CEnString sPrompt(IDS_TDC_NOFILTEREDTASKS_PROMPT);
+
+		m_taskTree.SetWindowPrompt(sPrompt);
+		m_taskList.SetWindowPrompt(sPrompt);
+	}
+	else
+	{
+		CTabbedToDoCtrl::RefreshTasklistPrompt();
+	}
 }
 
 void CFilteredToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, const void* pContext)
@@ -611,7 +622,7 @@ void CFilteredToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, c
 
 		CTabbedToDoCtrl::RebuildList(bChangeGroup, nNewGroupBy, &params);
 
-		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
+		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_NOFILTEREDTASKS_PROMPT));
 	}
 	else
 	{

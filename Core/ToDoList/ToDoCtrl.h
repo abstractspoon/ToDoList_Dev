@@ -55,11 +55,13 @@ private:
 		IDLETASKS(CToDoCtrl& tdc);
 
 		void RefreshAttributeValues(const CTDCAttributeMap& aAttribIDs = TDCA_ALL);
+		void RefreshTasklistPrompt() { m_bRefreshTasklistPrompt = TRUE; }
 		BOOL Process();
 
 	protected:
 		CToDoCtrl& m_tdc;
 		CTDCAttributeMap m_mapRefreshAttribIDs;
+		BOOL m_bRefreshTasklistPrompt;
 
 	protected:
 		BOOL HasTasks() const;
@@ -685,6 +687,7 @@ protected:
 	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
 	virtual DWORD GetNextNonSelectedTaskID() const;
 	virtual int GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncCollapsedChildren) const;
+	virtual void RefreshTasklistPrompt();
 
 	enum
 	{
