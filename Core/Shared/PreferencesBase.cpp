@@ -446,6 +446,8 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 
 	VERIFY(CreatePPHost(rHost));
 
+	m_ppHost.SetWindowPos(GetDlgItem(m_nPPHostFrameCtrlID), 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
 	if (m_btnHelp.Create(IDHELP, this) && (m_nHelpBtnIconID != 0))
 	{
 		HICON hIcon = GraphicsMisc::LoadIcon(m_nHelpBtnIconID);

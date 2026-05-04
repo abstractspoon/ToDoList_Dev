@@ -66,6 +66,9 @@ BOOL CPreferencesShortcutsPage::OnInitDialog()
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_COMMANDS_FRAME);
 	VERIFY(m_ctrlCommands.Create(this, rCtrl, IDC_COMMANDS));
 
+	// Insert before frame in Z-order
+	m_ctrlCommands.SetWindowPos(GetDlgItem(IDC_COMMANDS_FRAME), 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
 	return TRUE;
 }
 

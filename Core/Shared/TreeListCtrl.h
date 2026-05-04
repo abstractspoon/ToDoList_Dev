@@ -218,6 +218,9 @@ protected:
 	const static int IMAGE_SIZE;
 
 protected:
+	BOOL PreTranslateMessage(MSG* pMsg);
+
+protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
@@ -317,6 +320,7 @@ protected:
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 	void DeselectAll();
 	BOOL ProcessSelectionChange(BOOL bSelChange);
+	void HandleTabKey(HWND hWnd);
 
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);

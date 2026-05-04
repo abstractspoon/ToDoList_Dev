@@ -1444,6 +1444,23 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
+void CTreeListCtrl::HandleTabKey(HWND hWnd)
+{
+	// If the next/prev item is still a child of 'ours'
+	// then get the control after that and then stop
+	BOOL bPrevItem = Misc::IsKeyPressed(VK_SHIFT);
+	CWnd* pWndNext = CWnd::GetParent()->GetNextDlgTabItem(CWnd::FromHandle(hWnd), bPrevItem);
+
+	if (pWndNext)
+	{
+		if (IsChild(pWndNext))
+			pWndNext = CWnd::GetParent()->GetNextDlgTabItem(pWndNext, bPrevItem);
+
+		if (pWndNext && (pWndNext->GetSafeHwnd() != hWnd))
+			pWndNext->SetFocus();
+	}
+}
+
 BOOL CTreeListCtrl::ProcessSelectionChange(BOOL bSelChange)
 {
 	if (bSelChange)
@@ -2647,12 +2664,17 @@ void CTreeListCtrl::FilterToolTipMessage(MSG* pMsg)
 
 BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg) 
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return PreTranslateMessage(pMsg);
+}
+
+BOOL CTreeListCtrl::PreTranslateMessage(MSG* pMsg)
+{
 	switch (pMsg->message)
 	{
 	case WM_KEYDOWN:
 		{
-			AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
 			switch (pMsg->wParam)
 			{
 			case VK_ESCAPE:
@@ -2665,6 +2687,10 @@ BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg)
 				if (Misc::ModKeysArePressed(MKS_CTRL) && (m_list.GetSafeHwnd() == pMsg->hwnd))
 					return true;
 				break;
+
+			case VK_TAB:
+				HandleTabKey(pMsg->hwnd);
+				return true; // we handled it
 			}
 		}
 		break;

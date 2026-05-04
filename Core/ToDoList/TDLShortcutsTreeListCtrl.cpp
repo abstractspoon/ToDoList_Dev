@@ -91,6 +91,8 @@ int CTDLShortcutsTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_listHeader.EnableItemDragging(COL_CMDID, FALSE);
 	m_listHeader.EnableTracking(FALSE);
 
+	m_mgrPrompts.SetPrompt(m_tree, CEnString(IDS_PSP_NOMATCHES), TVM_GETCOUNT);
+
 	SetGridLineColor(colorSilver);
 	SetSplitBarWidth(1);
 	SwapSides();
@@ -128,46 +130,33 @@ void CTDLShortcutsTreeListCtrl::BuildMenuTree()
 {
 	ASSERT(m_pMgrShortcuts);
 
-	CTLSHoldResync hr(*this);
-
-	m_tree.SetRedraw(FALSE);
-	m_tree.DeleteAllItems();
-	m_tree.SetIndent(ICON_OFFSET);
-
 	CWaitCursor cursor;
-	HTREEITEM htiFirst = NULL;
 
-	CTDCMainMenu menu;
-
-	if (menu.LoadMenu())
 	{
-		RemoveUnusedDefaultFilterItems(menu);
+		CTLSHoldResync hr(*this);
 
-		// CTreeListCtrl wants all tree item data to be unique 
-		// so submenus cannot all be -1
-		UINT nNextSubMenuCmdID = (ID_MISC_SUBMENU - 1);
+		m_tree.DeleteAllItems();
+		m_tree.SetIndent(ICON_OFFSET);
 
-		for (int nPos = 0; nPos < (int)menu.GetMenuItemCount(); nPos++)
+		CTDCMainMenu menu;
+
+		if (menu.LoadMenu())
 		{
-			HTREEITEM hti = AddMenuItem(TVI_ROOT, &menu, nPos, !m_ctrlHighlighter.HasSearch(), nNextSubMenuCmdID);
+			RemoveUnusedDefaultFilterItems(menu);
 
-			if (!htiFirst)
-				htiFirst = hti;
+			// CTreeListCtrl wants all tree item data to be unique 
+			// so submenus cannot all be -1
+			UINT nNextSubMenuCmdID = (ID_MISC_SUBMENU - 1);
+
+			for (int nPos = 0; nPos < (int)menu.GetMenuItemCount(); nPos++)
+				AddMenuItem(TVI_ROOT, &menu, nPos, !m_ctrlHighlighter.HasSearch(), nNextSubMenuCmdID);
 		}
+
+		AddMiscShortcuts(); // un-editable shortcuts
+		ExpandAll();
 	}
 
-	// add miscellaneous un-editable shortcuts
-	AddMiscShortcuts();
-
-	ExpandAll();
-	m_tree.SetRedraw(TRUE);
-
-	if (htiFirst)
-		m_tree.EnsureVisible(htiFirst);
-
-	if (m_tree.GetCount() == 0)
-		m_mgrPrompts.SetPrompt(m_tree, CEnString(IDS_PSP_NOMATCHES), TVM_GETCOUNT);
-
+	SelectItem(m_tree.GetChildItem(NULL));
 	m_fonts.Initialise(m_tree);
 
 	RecalcColumnsToFit();
