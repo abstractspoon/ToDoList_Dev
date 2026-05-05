@@ -353,7 +353,7 @@ protected:
 	HTREEITEM GetSelectedItem() const;
 	DWORD GetSelectedItemData() const;
 
-	void SyncColumnSelectionToTasks();
+	void SyncListSelectionToTree();
 	void NotifyParentSelectionChange();
 
 	BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }

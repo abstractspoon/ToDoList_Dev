@@ -557,7 +557,7 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 
 	if (bSelChange)
 	{
-		SyncColumnSelectionToTasks();
+		SyncListSelectionToTree();
 
 		NMTREEVIEW nmtv = { *this, GetDlgCtrlID(), TVN_SELCHANGED, 0 };
 
@@ -592,7 +592,7 @@ BOOL CTreeListCtrl::SelectItems(const CHTIList& htItems)
 		return SelectItem(htItems.GetHead());
 	}
 
-	// Scope CTLSHoldResync to end before SyncColumnSelectionToTasks
+	// Scope CTLSHoldResync to end before SyncListSelectionToTree
 	{
 		CHoldHScroll hs(m_tree);
 		CTLSHoldResync hr2(*this);
@@ -602,7 +602,7 @@ BOOL CTreeListCtrl::SelectItems(const CHTIList& htItems)
 
 		ExpandList();
 	}
-	SyncColumnSelectionToTasks();
+	SyncListSelectionToTree();
 
 	return TRUE;
 }
@@ -967,7 +967,7 @@ LRESULT CTreeListCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
 	return m_treeDragDrop.ProcessMessage(GetCurrentMessage());
 }
 
-void CTreeListCtrl::SyncColumnSelectionToTasks()
+void CTreeListCtrl::SyncListSelectionToTree()
 {
 	ASSERT(CanResync());
 
@@ -998,7 +998,7 @@ void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 
 	if (bSelChange)
 	{
-		SyncColumnSelectionToTasks();
+		SyncListSelectionToTree();
 
 		HTREEITEM hti = pNMTV->itemNew.hItem;
 
@@ -1478,7 +1478,7 @@ BOOL CTreeListCtrl::ProcessSelectionChange(BOOL bSelChange)
 {
 	if (bSelChange)
 	{
-		SyncColumnSelectionToTasks();
+		SyncListSelectionToTree();
 		NotifyParentSelectionChange();
 	}
 
