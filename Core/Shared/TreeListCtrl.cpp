@@ -29,7 +29,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MIN_SPLIT_POS			= GraphicsMisc::ScaleByDPIFactor(200);
+const int MIN_TREE_WIDTH		= GraphicsMisc::ScaleByDPIFactor(200);
 const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
 const int LV_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int TV_TIPPADDING			= GraphicsMisc::ScaleByDPIFactor(3);
@@ -85,7 +85,12 @@ END_MESSAGE_MAP()
 HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelImage,
 										LPARAM lParam, HTREEITEM htiParent, HTREEITEM htiAfter)
 {
-	ASSERT(GetItem(lParam) == NULL);
+#ifdef _DEBUG
+	if (GetItem(lParam) != NULL)
+	{
+		int breakpoint = 0;
+	}
+#endif
 
 	HTREEITEM hti = TCH().InsertItem(lpszItem,
 											nImage,
@@ -95,7 +100,6 @@ HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelIm
 											htiAfter,
 											FALSE,
 											FALSE);
-
 	if (!hti)
 		ASSERT(0);
 	else
@@ -387,27 +391,26 @@ int CTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	BOOL bVisible = (lpCreateStruct->style & WS_VISIBLE);
 	CRect rect(0, 0, lpCreateStruct->cx, lpCreateStruct->cy);
 	
-	DWORD dwStyle = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));
+	DWORD dwDefStyles = (WS_CHILD | (bVisible ? WS_VISIBLE : 0));
+	DWORD dwTreeStyles = (dwDefStyles | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT | TVS_NOTOOLTIPS | TVS_EDITLABELS);
 	
-	if (!m_tree.Create((dwStyle | WS_TABSTOP | TVS_SHOWSELALWAYS | TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_NONEVENHEIGHT | TVS_NOTOOLTIPS | TVS_EDITLABELS),
-							rect, 
-							this, 
-							IDC_TREELISTTREE))
+	if (!m_tree.Create(dwTreeStyles, rect, this, IDC_TREELISTTREE))
 	{
 		return -1;
 	}
 	
 	// Tasks Header ---------------------------------------------------------------------
-	if (!m_treeHeader.Create((dwStyle | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP | HDS_FULLDRAG), 
-							 rect, 
-							 this, 
-							 IDC_TREELISTTREEHEADER))
+	DWORD dwHeaderStyles = (dwDefStyles | HDS_HOTTRACK | HDS_BUTTONS | HDS_DRAGDROP | HDS_FULLDRAG);
+
+	if (!m_treeHeader.Create(dwHeaderStyles, rect, this, IDC_TREELISTTREEHEADER))
 	{
 		return -1;
 	}
 	
 	// Column List ---------------------------------------------------------------------
-	if (!m_list.Create((dwStyle | WS_TABSTOP | LVS_SHOWSELALWAYS), rect, this, IDC_TREELISTLIST))
+	DWORD dwListStyles = (dwDefStyles | WS_TABSTOP | LVS_SHOWSELALWAYS | (TSH().IsMultiSelection() ? 0 : LVS_SINGLESEL));
+
+	if (!m_list.Create(dwListStyles, rect, this, IDC_TREELISTLIST))
 	{
 		return -1;
 	}
@@ -449,7 +452,7 @@ void CTreeListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 {
 	CRect rSplitter;
 	
-	if (GetSplitterRect(rSplitter) && rSplitter.PtInRect(point))
+	if (m_bSplittingEnabled && GetSplitterRect(rSplitter) && rSplitter.PtInRect(point))
 		AdjustSplitterToFitListColumns();
 }
 
@@ -466,8 +469,14 @@ int CTreeListCtrl::CalcMaxListColumnsWidth() const
 int CTreeListCtrl::CalcSplitPosToFitListColumns(int nAvailWidth) const
 {
 	int nColsWidth = CalcMaxListColumnsWidth();
-	
-	return (nAvailWidth - nColsWidth - GetSplitBarWidth() - LV_COLPADDING);
+
+	// If the list is on the right add a smidgin to avoid a scrollbar
+	if (IsRight(m_list))
+		nColsWidth += LV_COLPADDING;
+
+	int nNewTreeWidth = (nAvailWidth - nColsWidth - GetSplitBarWidth());
+
+	return CalcSplitPosFromTreeWidth(max(MIN_TREE_WIDTH, nNewTreeWidth));
 }
 
 void CTreeListCtrl::AdjustSplitterToFitListColumns()
@@ -476,8 +485,7 @@ void CTreeListCtrl::AdjustSplitterToFitListColumns()
 	GetClientRect(rClient);
 
 	int nNewSplitPos = CalcSplitPosToFitListColumns(rClient.Width());
-	nNewSplitPos = max(MIN_SPLIT_POS, nNewSplitPos);
-	
+
 	if (nNewSplitPos != GetSplitPos())
 	{
 		SetSplitPos(nNewSplitPos);
@@ -487,8 +495,8 @@ void CTreeListCtrl::AdjustSplitterToFitListColumns()
 
 void CTreeListCtrl::AdjustSplitterToFitTreeColumns()
 {
-	int nNewSplitPos = m_treeHeader.CalcTotalItemWidth();
-	nNewSplitPos = max(MIN_SPLIT_POS, nNewSplitPos);
+	int nTreeWidth = m_treeHeader.CalcTotalItemWidth();
+	int nNewSplitPos = CalcSplitPosFromTreeWidth(max(MIN_TREE_WIDTH, nTreeWidth));
 
 	if (nNewSplitPos != GetSplitPos())
 	{
@@ -515,6 +523,15 @@ DWORD CTreeListCtrl::GetSelectedItemData() const
 int CTreeListCtrl::GetSelectedItemData(CDWordArray& aItemData) const
 {
 	return TSH().GetItemData(aItemData);
+}
+
+void CTreeListCtrl::DeleteAllItems(BOOL bRedraw)
+{
+	// Must clear selection first
+	TSH().RemoveAll(TRUE, bRedraw);
+
+	m_list.DeleteAllItems();
+	m_tree.DeleteAllItems();
 }
 
 BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
@@ -863,13 +880,13 @@ BOOL CTreeListCtrl::OnHeaderDblClkDivider(NMHEADER* pHDN)
 
 		CClientDC dc(&m_tree);
 		
-		int nPrevWidth = m_treeHeader.GetItemWidth(nCol);
-		int nNewWidth = RecalcTreeColumnWidth(nCol, &dc, TRUE);
+		int nPrevColWidth = m_treeHeader.GetItemWidth(nCol);
+		int nNewColWidth = RecalcTreeColumnWidth(nCol, &dc, TRUE);
 
 		// Adjust the splitter if there was a change
-		if (nNewWidth != nPrevWidth)
+		if (nNewColWidth != nPrevColWidth)
 		{
-			SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+			SetSplitPos(CalcSplitPosFromTreeWidth());
 			Resize();
 		}
 
@@ -1071,6 +1088,9 @@ void CTreeListCtrl::SelectAll()
 
 LRESULT CTreeListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	if (!IsResyncEnabled())
+		return CTreeListSyncer::WindowProc(hRealWnd, msg, wp, lp);
+
 	switch (msg)
 	{
 	case WM_NOTIFY:
@@ -1435,6 +1455,23 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	}
 		
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
+}
+
+void CTreeListCtrl::HandleTabKey(HWND hWnd)
+{
+	// If the next/prev item is still a child of 'ours'
+	// then get the control after that and then stop
+	BOOL bPrevItem = Misc::IsKeyPressed(VK_SHIFT);
+	CWnd* pWndNext = CWnd::GetParent()->GetNextDlgTabItem(CWnd::FromHandle(hWnd), bPrevItem);
+
+	if (pWndNext)
+	{
+		if (IsChild(pWndNext))
+			pWndNext = CWnd::GetParent()->GetNextDlgTabItem(pWndNext, bPrevItem);
+
+		if (pWndNext && (pWndNext->GetSafeHwnd() != hWnd))
+			pWndNext->SetFocus();
+	}
 }
 
 BOOL CTreeListCtrl::ProcessSelectionChange(BOOL bSelChange)
@@ -1817,7 +1854,7 @@ void CTreeListCtrl::ResizeListColumnsToFit(BOOL bForce)
 	// Adjust the splitter if there was a change
 	if (m_treeHeader.CalcTotalItemWidth(0) != nPrevTreeWidth)
 	{
-		SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+		SetSplitPos(CalcSplitPosFromTreeWidth());
 		Resize();
 	}
 }
@@ -1841,18 +1878,40 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	// Adjust 'Title' column to suit unless it's the title column we are actively tracking
 	if (!IsHeaderTracking(m_hwndPrimaryHeader, 0))
 	{
+		int nNewTreeWidth = CalcTreeWidthFromSplitPos(nSplitPos);
 		int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
-		int nTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nSplitPos - nRestTreeColsWidth));
-
-		m_treeHeader.SetItemWidth(0, nTitleColWidth);
+		
+		int nNewTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nNewTreeWidth - nRestTreeColsWidth));
+		m_treeHeader.SetItemWidth(0, nNewTitleColWidth);
 
 		if (m_bSplitting)
 			m_treeHeader.SetItemTracked(0, TRUE);
 
 		m_treeHeader.UpdateWindow();
-
 		UpdateWindow();
 	}
+}
+
+int CTreeListCtrl::CalcSplitPosFromTreeWidth(int nTreeWidth) const
+{
+	if (nTreeWidth < 0)
+		nTreeWidth = m_treeHeader.CalcTotalItemWidth();
+
+	if (IsLeft(m_tree))
+		return nTreeWidth;
+
+	return (CDialogHelper::GetChildWidth(this) - nTreeWidth - GetSplitBarWidth());
+}
+
+int CTreeListCtrl::CalcTreeWidthFromSplitPos(int nSplitPos) const
+{
+	if (nSplitPos < 0)
+		nSplitPos = GetSplitPos();
+
+	if (IsLeft(m_tree))
+		return nSplitPos;
+
+	return (CDialogHelper::GetChildWidth(this) - nSplitPos - GetSplitBarWidth());
 }
 
 BOOL CTreeListCtrl::HandleEraseBkgnd(CDC* pDC)
@@ -1896,7 +1955,7 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	case CDDS_ITEMPOSTPAINT:
 		{
 			// check row is visible
-			CRect rItem;
+			CRect rItem(pTVCD->nmcd.rc);
 			GetTreeItemRect(hti, 0, rItem);
 
 			CRect rClient;
@@ -1909,9 +1968,6 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 				GM_ITEMSTATE nState = GetItemState(hti);
 				BOOL bSelected = (nState != GMIS_NONE);
-
-				// Draw icon
-				DrawTreeItemIcon(pDC, hti, dwItemData, rItem);
 
 				// Redraw the entire row background if the item is selected
 				// or just the title column if it is not
@@ -1926,11 +1982,18 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawHorzItemDivider(pDC, pTVCD->nmcd.rc);
 
 				// Draw selection before drawing text
-				if (!m_bSavingToImage)
+				if (!m_bSavingToImage && bSelected)
 				{
 					DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW | GMIB_POSTDRAW);
-					GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, nState, rItem, dwFlags);
+
+					if (HasStyle(m_tree, TVS_FULLROWSELECT, FALSE))
+						GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, nState, pTVCD->nmcd.rc, dwFlags);
+					else
+						GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, nState, rItem, dwFlags);
 				}
+
+				// Draw icon
+				DrawTreeItemIcon(pDC, hti, dwItemData, rItem);
 
 				// draw tree item attribute columns
 				DrawTreeItemText(pDC, hti, dwItemData, bSelected);
@@ -2024,19 +2087,24 @@ void CTreeListCtrl::DrawVertItemDivider(CDC* pDC, const CRect& rItem, BOOL bSele
 	if (rItem.right < 0)
 		return;
 
-	CRect rDiv(rItem);
-	rDiv.left = (rDiv.right - 1);
+	if (crDiv == CLR_NONE)
+	{
+		if (m_crGridLine == CLR_NONE)
+			return;
+
+		crDiv = m_crGridLine;
+	}
 
 	COLORREF crOld = pDC->GetBkColor();
-
-	if (crDiv == CLR_NONE)
-		crDiv = m_crGridLine;
 
 	if (bSelected)
 	{
 		// Make color a little darker
 		crDiv = GraphicsMisc::Darker(crDiv, 0.1);
 	}
+
+	CRect rDiv(rItem);
+	rDiv.left = (rDiv.right - 1);
 
 	pDC->FillSolidRect(rDiv, crDiv);
 	pDC->SetBkColor(crOld);
@@ -2061,10 +2129,10 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAct
 
 	// Recalculate the title column, preserving width of list columns 
 	int nAvailWidth = GetBoundingWidth();
-	int nSplitPos = GetSplitPos();
 	int nSplitBarWidth = GetSplitBarWidth();
+	int nTreeWidth = CalcTreeWidthFromSplitPos();
 
-	int nCurListColsWidth = (nAvailWidth - nSplitPos - nSplitBarWidth - LV_COLPADDING);
+	int nCurListColsWidth = (nAvailWidth - nTreeWidth - nSplitBarWidth - LV_COLPADDING);
 	int nMaxListColsWidth = CalcMaxListColumnsWidth();
 
 	int nCurTitleWidth = m_treeHeader.GetItemWidth(0);
@@ -2090,7 +2158,7 @@ BOOL CTreeListCtrl::UpdateTreeColumnWidths(CDC* pDC, UPDATETITLEWIDTHACTION nAct
 			// Allow for the difference between the required width of the
 			// rest of the tree columns and the actual amount visible
 			int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
-			int nVisibleRestTreeColsWidth = (nSplitPos - nCurTitleWidth);
+			int nVisibleRestTreeColsWidth = (nTreeWidth - nCurTitleWidth);
 
 			nOffset -= (nRestTreeColsWidth - nVisibleRestTreeColsWidth);
 
@@ -2253,7 +2321,7 @@ BOOL CTreeListCtrl::SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF c
 	int nColWidth = CalcTreeColumnWidth(0, &dc);
 
 	m_treeHeader.SetItemWidth(0, nColWidth);
-	SetSplitPos(m_treeHeader.CalcTotalItemWidth());
+	SetSplitPos(CalcSplitPosFromTreeWidth());
 	Resize();
 
 	// Allows derived classes to be involved
@@ -2508,6 +2576,17 @@ void CTreeListCtrl::EnableColumnHeaderSorting(BOOL bEnable)
 	CDialogHelper::SetStyle(&m_listHeader, HDS_BUTTONS, bEnable);
 }
 
+void CTreeListCtrl::EnableMultiSelection(BOOL bEnable) 
+{ 
+	TSH().EnableMultiSelection(bEnable); 
+
+	if (m_list.GetSafeHwnd())
+	{
+		m_list.ModifyStyle((bEnable ? LVS_SINGLESEL : 0),
+							(bEnable ? 0 : LVS_SINGLESEL));
+	}
+}
+
 BOOL CTreeListCtrl::CancelOperation()
 {
 	if (m_treeDragDrop.IsDragging())
@@ -2598,12 +2677,17 @@ void CTreeListCtrl::FilterToolTipMessage(MSG* pMsg)
 
 BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg) 
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return PreTranslateMessage(pMsg);
+}
+
+BOOL CTreeListCtrl::PreTranslateMessage(MSG* pMsg)
+{
 	switch (pMsg->message)
 	{
 	case WM_KEYDOWN:
 		{
-			AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
 			switch (pMsg->wParam)
 			{
 			case VK_ESCAPE:
@@ -2616,6 +2700,10 @@ BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg)
 				if (Misc::ModKeysArePressed(MKS_CTRL) && (m_list.GetSafeHwnd() == pMsg->hwnd))
 					return true;
 				break;
+
+			case VK_TAB:
+				HandleTabKey(pMsg->hwnd);
+				return true; // we handled it
 			}
 		}
 		break;

@@ -196,9 +196,7 @@
     <ClCompile Include="MSOutlookHelper.cpp" />
     <ClCompile Include="MSProjectHelper.cpp" />
     <ClCompile Include="MSWordHelper.cpp" />
-    <ClCompile Include="NcGutter.cpp" />
     <ClCompile Include="OleDropTargetEx.cpp" />
-    <ClCompile Include="OrderedTreeCtrl.cpp" />
     <ClCompile Include="OwnerdrawComboBoxBase.cpp" />
     <ClCompile Include="PasswordDialog.cpp" />
     <ClCompile Include="PopupEditCtrl.cpp" />
@@ -359,9 +357,7 @@
     <ClInclude Include="MSOutlookHelperEnum.h" />
     <ClInclude Include="MSProjectHelper.h" />
     <ClInclude Include="MSWordHelper.h" />
-    <ClInclude Include="NcGutter.h" />
     <ClInclude Include="OleDropTargetEx.h" />
-    <ClInclude Include="OrderedTreeCtrl.h" />
     <ClInclude Include="OwnerdrawComboBoxBase.h" />
     <ClInclude Include="PasswordDialog.h" />
     <ClInclude Include="PopupEditCtrl.h" />

@@ -884,6 +884,7 @@
 #define IDC_PLACEHOLDER                 1599
 #define IDC_NOATTRIBSELECTED            1599
 #define IDC_IMPORTERLIST                1600
+#define IDC_COMMANDS_FRAME              1601
 #define IDC_TASKLIST                    2000
 #define IDD_OUTLOOKIMPORTITEMS_DIALOG   2000
 #define IDC_REMOVEOUTLOOKTASKS          2002
@@ -2607,7 +2608,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        339
 #define _APS_NEXT_COMMAND_VALUE         34789
-#define _APS_NEXT_CONTROL_VALUE         1601
+#define _APS_NEXT_CONTROL_VALUE         1602
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
