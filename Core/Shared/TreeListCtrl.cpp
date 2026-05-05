@@ -100,7 +100,6 @@ HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelIm
 											htiAfter,
 											FALSE,
 											FALSE);
-
 	if (!hti)
 		ASSERT(0);
 	else
