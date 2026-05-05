@@ -12,6 +12,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\enstring.h"
 #include "..\shared\filemisc.h"
+#include "..\shared\ShortcutManager.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\ContentMgr.h"

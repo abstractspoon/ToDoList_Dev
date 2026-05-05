@@ -18,9 +18,9 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTreeListSelectionHelper::CTreeListSelectionHelper(CTreeCtrl& tree, CListCtrl& list) 
+CTreeListSelectionHelper::CTreeListSelectionHelper(CTreeCtrl& tree, CListCtrl& list, BOOL bMultiSel)
 	: 
-	CTreeSelectionHelper(tree), 
+	CTreeSelectionHelper(tree, bMultiSel), 
 	m_list(list)
 {
 }
@@ -88,7 +88,8 @@ void CTreeListSelectionHelper::OnListLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSe
 
 	HTREEITEM htiHit = GetTreeItem(nHit);
 
-	BOOL bCtrl = (wp & MK_CONTROL), bShift = (wp & MK_SHIFT);
+	BOOL bCtrl = (m_bMultiSelEnabled && (wp & MK_CONTROL));
+	BOOL bShift = (m_bMultiSelEnabled && (wp & MK_SHIFT));
 	HTREEITEM htiAnchor = GetAnchor();
 
 	if (!htiAnchor && bShift)

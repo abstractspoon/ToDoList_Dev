@@ -126,10 +126,12 @@ public:
 
 	BOOL SetFont(HFONT hFont, BOOL bRedraw = TRUE);
 	void SetFocus() { CTreeListSyncer::SetFocus(); }
+	BOOL HasFocus() const { return CTreeListSyncer::HasFocus(); }
 
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
+	void DeleteAllItems(BOOL bRedraw = TRUE);
 
 	BOOL SelectItem(HTREEITEM hti);
 	BOOL SelectItems(const CHTIList& htItems);
@@ -141,6 +143,7 @@ public:
 	void EnableTreeImagePlaceholder(BOOL bEnable = TRUE) { m_tree.EnableImagePlaceholder(bEnable); }
 	void EnableTreeLabelTips(BOOL bEnable = TRUE) { m_tree.EnableLabelTips(bEnable); }
 	void EnableColumnHeaderSorting(BOOL bEnable = TRUE);
+	void EnableMultiSelection(BOOL bEnable = TRUE);
 
 	BOOL CanMoveItem(const TLCITEMMOVE& move) const;
 	BOOL MoveItem(const TLCITEMMOVE& move);
@@ -214,6 +217,9 @@ protected:
 	const int MIN_LABEL_WIDTH;
 
 	const static int IMAGE_SIZE;
+
+protected:
+	BOOL PreTranslateMessage(MSG* pMsg);
 
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -315,6 +321,7 @@ protected:
 	BOOL CanExpandItem(HTREEITEM hti, BOOL bExpand = TRUE) const;
 	void DeselectAll();
 	BOOL ProcessSelectionChange(BOOL bSelChange);
+	void HandleTabKey(HWND hWnd);
 
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);
@@ -325,6 +332,8 @@ protected:
 	int CalcWidestTreeItem(BOOL bMaximum) const;
 	int CalcTreeTitleColumnWidth(CDC* pDC, BOOL bMaximum) const;
 	int CalcTreeColumnWidth(int nCol, CDC* pDC, int nMaxItemTextWidth) const;
+	int CalcTreeWidthFromSplitPos(int nSplitPos = -1) const;
+	int CalcSplitPosFromTreeWidth(int nTreeWidth = -1) const;
 
 	HTREEITEM HitTestItem(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 	HTREEITEM TreeHitTestItem(const CPoint& point, BOOL bScreen) const;

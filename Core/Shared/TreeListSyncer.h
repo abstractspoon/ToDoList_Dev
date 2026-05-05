@@ -133,6 +133,7 @@ public:
 	virtual void GetBoundingRect(CRect& rect) const;
 	virtual BOOL HandleEraseBkgnd(CDC* pDC);
 
+	void EnableSplitting(BOOL bEnable); // enabled by default
 	int GetSplitPos() const { return m_nSplitPos; }
 	void SetSplitPos(int nPos);
 	int GetSplitBarWidth() const { return m_nSplitBarWidth; }
@@ -174,7 +175,7 @@ protected:
 	BOOL m_bTreeExpanding;
 	CSubclassWnd m_scLeft, m_scRight;
 	DWORD m_dwFlags;
-	BOOL m_bSplitting;
+	BOOL m_bSplitting, m_bSplittingEnabled;
 	COLORREF m_crSplitBar;
 	HIMAGELIST m_hilSize;
 	BOOL m_bSavingToImage;

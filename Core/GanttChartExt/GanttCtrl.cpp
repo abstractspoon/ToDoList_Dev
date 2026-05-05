@@ -853,12 +853,9 @@ BOOL CGanttCtrl::RestoreGanttItems(const CGanttItemArray& aGIPrev)
 
 void CGanttCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
-	TSH().RemoveAll(TRUE, FALSE);
+	DeleteAllItems(FALSE);
 
-	m_tree.DeleteAllItems();
-	m_list.DeleteAllItems();
 	m_data.RemoveAll();
-
 	m_dwMaxTaskID = 0;
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);

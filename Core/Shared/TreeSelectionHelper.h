@@ -76,7 +76,7 @@ enum TSH_SELECT
 class CTreeSelectionHelper
 {
 public:
-	CTreeSelectionHelper(CTreeCtrl& tree);
+	CTreeSelectionHelper(CTreeCtrl& tree, BOOL bMultiSel = TRUE);
 	virtual ~CTreeSelectionHelper();
 
 	const CTreeCtrl& TreeCtrl() const { return m_tree; }
@@ -85,7 +85,9 @@ public:
 	BOOL IsEmpty() const { return (m_lstSelection.GetCount() == 0); }
  	BOOL Matches(const CHTIList& list) { return (m_lstSelection == list); }
 
-	// 1 = add, 0 = remove, -1 = toggle
+	void EnableMultiSelection(BOOL bEnable = TRUE);
+	BOOL IsMultiSelection() const { return m_bMultiSelEnabled; }
+
 	BOOL SetItem(HTREEITEM hti, TSH_SELECT nState, BOOL bRedraw = TRUE);
 	BOOL SetItems(HTREEITEM htiFrom, HTREEITEM htiTo, TSH_SELECT nState, BOOL bRedraw = TRUE);
 	BOOL SetItems(const CHTIList& lstHTI, TSH_SELECT nState, BOOL bRedraw = TRUE);
@@ -198,6 +200,7 @@ protected:
 	CStringArray m_aHistory;
 
 	BOOL m_bReadOnly;
+	BOOL m_bMultiSelEnabled;
 	UINT m_nLastKeyDown;
 
 	static DWORD s_dwAllowableExtendedKeyboardSelection;

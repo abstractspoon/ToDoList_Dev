@@ -24,13 +24,14 @@ DWORD CTreeSelectionHelper::s_dwAllowableExtendedKeyboardSelection = (HOTKEYF_CO
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTreeSelectionHelper::CTreeSelectionHelper(CTreeCtrl& tree) 
+CTreeSelectionHelper::CTreeSelectionHelper(CTreeCtrl& tree, BOOL bMultiSel) 
 	: 
 	m_tree(tree), 
 	m_nCurSelection(0), 
 	m_htiAnchor(NULL), 
 	m_tch(tree),
 	m_bReadOnly(FALSE),
+	m_bMultiSelEnabled(bMultiSel),
 	m_nLastKeyDown(0)
 {
 
@@ -39,6 +40,28 @@ CTreeSelectionHelper::CTreeSelectionHelper(CTreeCtrl& tree)
 CTreeSelectionHelper::~CTreeSelectionHelper()
 {
 
+}
+
+void CTreeSelectionHelper::EnableMultiSelection(BOOL bEnable) 
+{ 
+	if (Misc::StatesDiffer(m_bMultiSelEnabled, bEnable))
+	{
+		m_bMultiSelEnabled = bEnable;
+
+		if (!bEnable && (GetCount() > 0))
+		{
+			if (m_tree.GetSafeHwnd())
+			{
+				BOOL bUnused;
+				SelectSingleItem(m_htiAnchor, bUnused);
+			}
+			else
+			{
+				RemoveAll(TRUE, FALSE);
+				AddItem(m_htiAnchor);
+			}
+		}
+	}
 }
 
 BOOL CTreeSelectionHelper::SetItem(HTREEITEM hti, TSH_SELECT nState, BOOL bRedraw)
@@ -1102,7 +1125,8 @@ void CTreeSelectionHelper::OnTreeLButtonDown(WPARAM wp, LPARAM lp, BOOL& bSelCha
 	// 4. Neither Ctrl/Shift are pressed
 
 	BOOL bHitIcon = (nHitFlags & (TVHT_ONITEMICON | TVHT_ONITEMSTATEICON));
-	BOOL bCtrl = (wp & MK_CONTROL), bShift = (wp & MK_SHIFT);
+	BOOL bCtrl = (m_bMultiSelEnabled && (wp & MK_CONTROL));
+	BOOL bShift = (m_bMultiSelEnabled && (wp & MK_SHIFT));
 
 	if (HasItem(htiHit) && bHitIcon && !bCtrl && !bShift)
 		return;
@@ -1189,8 +1213,8 @@ void CTreeSelectionHelper::OnTreeKeyDown(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 	// get the real currently selected item
 	HTREEITEM hti = m_tree.GetSelectedItem();
 
-	BOOL bCtrl = (Misc::IsKeyPressed(VK_CONTROL) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL));
-	BOOL bShift = (Misc::IsKeyPressed(VK_SHIFT) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT));
+	BOOL bCtrl = (m_bMultiSelEnabled && Misc::IsKeyPressed(VK_CONTROL) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL));
+	BOOL bShift = (m_bMultiSelEnabled && Misc::IsKeyPressed(VK_SHIFT) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT));
 
 	switch (wp)
 	{
@@ -1270,7 +1294,7 @@ void CTreeSelectionHelper::OnTreeKeyUp(WPARAM wp, LPARAM lp, BOOL& bSelChange)
 	case VK_DOWN:
 	case VK_UP:
 	case VK_PRIOR:
-		bSelChange = TRUE;
+		bSelChange = m_bMultiSelEnabled;
 		break;
 	}
 }
@@ -1337,8 +1361,8 @@ void CTreeSelectionHelper::OnTreeNotifySelectionChange(NMTREEVIEW* pNMTV, BOOL& 
 	if ((m_nLastKeyDown == 0) || (pNMTV->action != TVC_BYKEYBOARD))
 		return;
 
-	BOOL bCtrl = (Misc::IsKeyPressed(VK_CONTROL) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL));
-	BOOL bShift = (Misc::IsKeyPressed(VK_SHIFT) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT));
+	BOOL bCtrl = (m_bMultiSelEnabled && Misc::IsKeyPressed(VK_CONTROL) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_CONTROL));
+	BOOL bShift = (m_bMultiSelEnabled && Misc::IsKeyPressed(VK_SHIFT) && (s_dwAllowableExtendedKeyboardSelection & HOTKEYF_SHIFT));
 
 	HTREEITEM hti = pNMTV->itemNew.hItem;
 

@@ -16,7 +16,7 @@
 class CTreeListSelectionHelper : public CTreeSelectionHelper
 {
 public:
-	CTreeListSelectionHelper(CTreeCtrl& tree, CListCtrl& list);
+	CTreeListSelectionHelper(CTreeCtrl& tree, CListCtrl& list, BOOL bMultiSel = TRUE);
 	virtual ~CTreeListSelectionHelper();
 
 	void DeselectAll();

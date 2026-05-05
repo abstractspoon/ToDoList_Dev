@@ -23,6 +23,8 @@ CFG=ToDoListLib - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
+# PROP Scc_ProjName ""
+# PROP Scc_LocalPath ""
 CPP=cl.exe
 RSC=rc.exe
 
@@ -576,6 +578,10 @@ SOURCE=..\ToDoList\TDLSendTasksDlg.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLSetReminderDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLShortcutsTreeListCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -1272,6 +1278,10 @@ SOURCE=..\ToDoList\TDLSendTasksDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLSetReminderDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLShortcutsTreeListCtrl.h
 # End Source File
 # Begin Source File
 
