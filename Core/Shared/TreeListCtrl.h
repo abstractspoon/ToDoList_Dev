@@ -131,6 +131,7 @@ public:
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	BOOL HandleEraseBkgnd(CDC* pDC);
+	void DeleteAllItems(BOOL bRedraw = TRUE);
 
 	BOOL SelectItem(HTREEITEM hti);
 	BOOL SelectItems(const CHTIList& htItems);

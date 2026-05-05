@@ -893,12 +893,9 @@ WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID) const
 
 void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
-	TSH().RemoveAll(TRUE, FALSE);
+	DeleteAllItems(FALSE);
 
-	m_tree.DeleteAllItems();
-	m_list.DeleteAllItems();
 	m_data.RemoveAll();
-
 	m_dwMaxTaskID = 0;
 
 	m_aAllocTo.RemoveAll();

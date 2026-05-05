@@ -75,6 +75,7 @@ int CTDLShortcutsTreeListCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	m_tree.ModifyStyle(TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT, TVS_FULLROWSELECT);
+	m_tree.SetIndent(ICON_OFFSET);
 
 	// Add columns
 	m_treeHeader.InsertItem(0, 1000, CEnString(IDS_PSP_MENUITEM), (HDF_LEFT | HDF_STRING), 0, 1);
@@ -134,9 +135,9 @@ void CTDLShortcutsTreeListCtrl::BuildMenuTree()
 
 	{
 		CTLSHoldResync hr(*this);
+		CHoldRedraw hr2(m_tree);
 
-		m_tree.DeleteAllItems();
-		m_tree.SetIndent(ICON_OFFSET);
+		DeleteAllItems(FALSE);
 
 		CTDCMainMenu menu;
 

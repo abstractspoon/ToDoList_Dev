@@ -85,7 +85,12 @@ END_MESSAGE_MAP()
 HTREEITEM CTreeListTreeCtrl::InsertItem(LPCTSTR lpszItem, int nImage, int nSelImage,
 										LPARAM lParam, HTREEITEM htiParent, HTREEITEM htiAfter)
 {
-	ASSERT(GetItem(lParam) == NULL);
+#ifdef _DEBUG
+	if (GetItem(lParam) != NULL)
+	{
+		int breakpoint = 0;
+	}
+#endif
 
 	HTREEITEM hti = TCH().InsertItem(lpszItem,
 											nImage,
@@ -519,6 +524,15 @@ DWORD CTreeListCtrl::GetSelectedItemData() const
 int CTreeListCtrl::GetSelectedItemData(CDWordArray& aItemData) const
 {
 	return TSH().GetItemData(aItemData);
+}
+
+void CTreeListCtrl::DeleteAllItems(BOOL bRedraw)
+{
+	// Must clear selection first
+	TSH().RemoveAll(TRUE, bRedraw);
+
+	m_list.DeleteAllItems();
+	m_tree.DeleteAllItems();
 }
 
 BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
