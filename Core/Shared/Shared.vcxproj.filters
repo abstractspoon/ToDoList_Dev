@@ -100,12 +100,6 @@
     <ClCompile Include="MSWordHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NcGutter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OrderedTreeCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PreferencesBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -571,12 +565,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MSWordHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NcGutter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OrderedTreeCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PreferencesBase.h">

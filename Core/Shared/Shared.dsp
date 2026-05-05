@@ -23,6 +23,8 @@ CFG=Shared - Win32 Unicode Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
+# PROP Scc_ProjName ""
+# PROP Scc_LocalPath ""
 CPP=cl.exe
 RSC=rc.exe
 
@@ -419,15 +421,7 @@ SOURCE=.\MSWordHelper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\NcGutter.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\OleDropTargetEx.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\OrderedTreeCtrl.cpp
 # End Source File
 # Begin Source File
 
@@ -1063,15 +1057,7 @@ SOURCE=.\MSWordHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\NcGutter.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\OleDropTargetEx.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\OrderedTreeCtrl.h
 # End Source File
 # Begin Source File
 
