@@ -293,7 +293,7 @@ BOOL CToDoListWnd::IDLETASKS::Process()
 		}
 		else if (m_bUpdateFocusedControl)
 		{
-			CFocusWatcher::UpdateFocus();
+			CFocusWatcher::RefreshFocus();
 
 			m_bUpdateFocusedControl = FALSE;
 		}
@@ -2544,7 +2544,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	// late initialization
 	CMouseWheelMgr::Initialize();
 	CEditShortcutMgr::Initialize();
-	CFocusWatcher::Initialize(this);
+	CFocusWatcher::Initialize(*this);
 	CComboListboxPositioner::Initialize();
 
 	CLocalizer::SetMenuPostTranslationCallback(*this);
@@ -9121,7 +9121,6 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 		m_mgrUIExtensions.Release();
 		m_mgrStorage.Release();
 			
-		CFocusWatcher::Release();
 		CMouseWheelMgr::Release();
 		CEditShortcutMgr::Release();
 

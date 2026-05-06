@@ -71,11 +71,11 @@ public:
 	BOOL IsPage(HWND hWnd) const;
 	void InvalidateActivePage(BOOL bErase = TRUE);
 
-	CPropertyPage* GetActivePage();
+	CPropertyPage* GetActivePage() const;
 	int GetPageIndex(const CPropertyPage* pPage) const;
 	CPropertyPage* GetPage(int nIndex);
 	const CPropertyPage* GetPage(int nIndex) const;
-	CPropertyPage* FindPage(DWORD dwItemData);
+	CPropertyPage* FindPage(DWORD dwItemData) const;
 
 	BOOL AddPage(CPropertyPage* pPage, LPCTSTR szTitle = NULL, DWORD dwItemData = 0);
 	int GetPageCount() const { return m_aPages.GetSize(); }

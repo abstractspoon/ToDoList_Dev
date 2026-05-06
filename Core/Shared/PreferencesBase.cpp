@@ -518,7 +518,7 @@ BOOL CPreferencesDlgBase::CreatePPHost(LPRECT pRect)
 				ASSERT(pPage);
 
 				if (pPage)
-					m_ppHost.ScrollTo(pPage->GetDlgItem(m_nInitCtrlID));
+					m_ppHost.ScrollToTop(pPage->GetDlgItem(m_nInitCtrlID));
 			}
 		}
 		

@@ -12,53 +12,84 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// Construction/Destruction
+
+CMap<HWND, HWND, BOOL, BOOL&> CFocusWatcher::s_mapCallbacks;
+
 //////////////////////////////////////////////////////////////////////
 
-CFocusWatcher::CFocusWatcher() : m_pMainWnd(NULL)
+BOOL CFocusWatcher::Initialize(HWND hwndCallback, BOOL bChildrenOnly)
 {
-
-}
-
-CFocusWatcher::~CFocusWatcher()
-{
-
-}
-
-BOOL CFocusWatcher::Initialize(CWnd* pMainWnd)
-{
-	if (Instance().InitHooks(HM_CBT))
+	if (!::IsWindow(hwndCallback))
 	{
-		Instance().m_pMainWnd = pMainWnd;
-		return TRUE;
+		ASSERT(0);
+		return FALSE;
 	}
 
-	return FALSE;
-}
+	if (s_mapCallbacks.GetCount() == 0)
+	{
+		if (!Instance().InitHooks(HM_CBT))
+			return FALSE;
+	}
 
-void CFocusWatcher::Release()
-{
-	GetInstance().ReleaseHooks();
+	s_mapCallbacks[hwndCallback] = bChildrenOnly;
+	return TRUE;
 }
 
 BOOL CFocusWatcher::OnCbt(int nCode, WPARAM wParam, LPARAM lParam)
 {   
 	ASSERT (m_hCbtHook);
 
-	if (nCode == HCBT_SETFOCUS)
+	switch (nCode)
 	{
-		ASSERT (m_pMainWnd && m_pMainWnd->GetSafeHwnd());
-		m_pMainWnd->SendMessage(WM_FW_FOCUSCHANGE, wParam, lParam);
+	case HCBT_SETFOCUS:
+		HandleFocusChange((HWND)wParam, (HWND)lParam);
+		break;
+
+	case HCBT_DESTROYWND:
+		s_mapCallbacks.RemoveKey((HWND)wParam);
+
+		if (s_mapCallbacks.GetCount() == 0)
+			Instance().ReleaseHooks();
+		break;
 	}
 	
-	return FALSE; // to continue routing
+	return FALSE; // continue routing
 }
 
-void CFocusWatcher::UpdateFocus(CWnd* pFocus)
+void CFocusWatcher::RefreshFocus(HWND hwndFocus)
 {
-	if (pFocus == NULL)
-		pFocus = CWnd::GetFocus();
+	if (hwndFocus == NULL)
+		hwndFocus = ::GetFocus();
 
-	ASSERT(Instance().m_pMainWnd && Instance().m_pMainWnd->GetSafeHwnd());
-	Instance().m_pMainWnd->SendMessage(WM_FW_FOCUSCHANGE, (WPARAM)(pFocus ? pFocus->GetSafeHwnd() : NULL), 0L);
+	HandleFocusChange(hwndFocus, NULL);
+}
+
+void CFocusWatcher::HandleFocusChange(HWND hwndGotFocus, HWND hwndLostFocus)
+{
+	POSITION pos = s_mapCallbacks.GetStartPosition();
+
+	while (pos)
+	{
+		HWND hwndCallback = NULL;
+		BOOL bChildrenOnly = FALSE;
+
+		s_mapCallbacks.GetNextAssoc(pos, hwndCallback, bChildrenOnly);
+
+		// Windows should get cleaned up when they are destroyed
+		// but it seems that the precise ordering of events is tricky
+		if (!::IsWindow(hwndCallback))
+			continue;
+
+		if (bChildrenOnly)
+		{
+			BOOL bGotFocusIsChild = (hwndGotFocus && ::IsChild(hwndCallback, hwndGotFocus));
+			BOOL bLostFocusIsChild = (hwndLostFocus && ::IsChild(hwndCallback, hwndLostFocus));
+			
+			if (!bGotFocusIsChild && !bLostFocusIsChild)
+				continue;
+		}
+
+		// All else
+		::SendMessage(hwndCallback, WM_FW_FOCUSCHANGE, (WPARAM)hwndGotFocus, (LPARAM)hwndLostFocus);
+	}
 }
