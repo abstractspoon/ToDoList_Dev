@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "scrollingPropertyPageHost.h"
 #include "dialoghelper.h"
+#include "FocusWatcher.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -12,10 +13,12 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+//////////////////////////////////////////////////////////////////////
+
 const UINT IDC_SCROLLBAR = 1001;
 
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
+const int BORDER = 6;
+
 //////////////////////////////////////////////////////////////////////
 
 CScrollingPropertyPageHost::CScrollingPropertyPageHost() : CPropertyPageHost()
@@ -29,13 +32,24 @@ CScrollingPropertyPageHost::~CScrollingPropertyPageHost()
 }
 
 BEGIN_MESSAGE_MAP(CScrollingPropertyPageHost, CPropertyPageHost)
-	//{{AFX_MSG_MAP(CPropertyPageHost)
-	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 	ON_WM_VSCROLL()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_SIZE()
+	ON_WM_CREATE()
+	ON_REGISTERED_MESSAGE(WM_FW_FOCUSCHANGE, OnFocusChange)
 END_MESSAGE_MAP()
+
+//////////////////////////////////////////////////////////////////////
+
+int CScrollingPropertyPageHost::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CPropertyPageHost::OnCreate(lpCreateStruct) < 0)
+		return -1;
+
+	CFocusWatcher::Initialize(*this, TRUE); // children only
+	return 0;
+}
 
 BOOL CScrollingPropertyPageHost::ConstructScrollbar()
 {
@@ -187,6 +201,14 @@ void CScrollingPropertyPageHost::OnSize(UINT nType, int cx, int cy)
 	CPropertyPageHost::OnSize(nType, cx, cy);
 }
 
+LRESULT CScrollingPropertyPageHost::OnFocusChange(WPARAM wp, LPARAM lp)
+{
+	if (wp)
+		EnsureVisible(CWnd::FromHandle((HWND)wp));
+
+	return 0L;
+}
+
 int CScrollingPropertyPageHost::GetScrollPos() const
 {
 	if (m_scroll.GetSafeHwnd())
@@ -196,37 +218,69 @@ int CScrollingPropertyPageHost::GetScrollPos() const
 	return 0;
 }
 
-BOOL CScrollingPropertyPageHost::ScrollTo(CWnd* pCtrl)
+BOOL CScrollingPropertyPageHost::EnsureVisible(CWnd* pCtrl)
 {
+	if (!GetChildOfActivePage(pCtrl))
+		return FALSE;
+
 	if (m_scroll.GetSafeHwnd())
 	{
-		CPropertyPage* pPage = GetActivePage();
-		ASSERT(pPage);
-		
-		if (!pCtrl || !pPage->IsChild(pCtrl))
-			return FALSE;
+		CRect rClient;
+		GetClientRect(rClient);
 
-		// if the control is the first child, just scroll to top
-		if (pCtrl == pPage->GetWindow(GW_CHILD))
+		CRect rCtrl = CDialogHelper::GetChildRect(pCtrl);
+		GetActivePage()->MapWindowPoints(this, rCtrl);
+
+		int nOffset = 0;
+
+		if (rCtrl.top < rClient.top)
 		{
-			return ScrollToTop();
+			nOffset = (rCtrl.top - rClient.top - BORDER);
 		}
-		else
+		else if (rCtrl.bottom > rClient.bottom)
 		{
-			return ScrollTo(CDialogHelper::GetChildRect(pCtrl).top - 6);
+			nOffset = (rCtrl.bottom - rClient.bottom + BORDER);
 		}
+
+		if (nOffset)
+			ScrollTo(nOffset + GetScrollPos());
 	}
-
-	// else
-	return FALSE;
+	
+	return TRUE;
 }
 
-BOOL CScrollingPropertyPageHost::ScrollToTop()
+BOOL CScrollingPropertyPageHost::GetChildOfActivePage(CWnd*& pFocus) const
 {
-	if (GetScrollPos())
+	if (!pFocus)
+		return FALSE;
+
+	CPropertyPage* pPage = GetActivePage();
+
+	if (!pPage)
+		return FALSE;
+
+	if (!pPage->IsChild(pFocus))
+		return FALSE;
+
+	while (pFocus->GetParent() != pPage)
+		pFocus = pFocus->GetParent();
+
+	return TRUE;
+}
+
+BOOL CScrollingPropertyPageHost::ScrollToTop(CWnd* pCtrl)
+{
+	if (!pCtrl)
 		return ScrollTo(0L);
 
-	return FALSE;
+	if (!GetChildOfActivePage(pCtrl))
+		return FALSE;
+
+	// if the control is the first child, just scroll to top
+	if (pCtrl == GetActivePage()->GetWindow(GW_CHILD))
+		return ScrollTo(0L);
+
+	return ScrollTo(CDialogHelper::GetChildRect(pCtrl).top - BORDER);
 }
 
 BOOL CScrollingPropertyPageHost::ScrollTo(LONG nPos)

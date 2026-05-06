@@ -511,13 +511,10 @@ void CPreferencesDlg::OnTreeSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 			pScrollTo = pPage->GetFirstHighlightedItem();
 
 		// else move to the section
-		if ((pScrollTo == NULL) && (nIDSection > 0))
+		if ((pScrollTo == NULL) && ((int)nIDSection > 0))
 			pScrollTo = pPage->GetDlgItem(nIDSection);
 
-		if (pScrollTo)
-			m_ppHost.ScrollTo(pScrollTo);
-		else
-			m_ppHost.ScrollToTop();
+		m_ppHost.ScrollToTop(pScrollTo);
 
 		// Custom page handling
 		OnShowPage(pPage);

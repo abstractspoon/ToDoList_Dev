@@ -178,7 +178,7 @@ int CPropertyPageHost::GetActiveIndex() const
 	return m_nSelIndex;
 }
 
-CPropertyPage* CPropertyPageHost::GetActivePage()
+CPropertyPage* CPropertyPageHost::GetActivePage() const
 {
 	if (m_nSelIndex < 0)
 		return NULL;
@@ -639,7 +639,7 @@ const CPropertyPage* CPropertyPageHost::GetPage(int nIndex) const
 	return m_aPages[nIndex].pPage;
 }
 
-CPropertyPage* CPropertyPageHost::FindPage(DWORD dwItemData)
+CPropertyPage* CPropertyPageHost::FindPage(DWORD dwItemData) const
 {
 	int nPage = m_aPages.GetSize();
 

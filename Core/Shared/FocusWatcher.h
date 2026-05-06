@@ -11,25 +11,32 @@
 
 #include "hookmgr.h"
 
+#include <afxtempl.h>
+
+//////////////////////////////////////////////////////////////////////
+
 const UINT WM_FW_FOCUSCHANGE = ::RegisterWindowMessage(_T("WM_FW_FOCUSCHANGE")); 
 
-class CFocusWatcher : public CHookMgr<CFocusWatcher>  
+//////////////////////////////////////////////////////////////////////
+
+class CFocusWatcher : protected CHookMgr<CFocusWatcher>  
 {
 	friend class CHookMgr<CFocusWatcher>;
 
 public:
-	CFocusWatcher();
-	virtual ~CFocusWatcher();
+	virtual ~CFocusWatcher() {}
 
-	static BOOL Initialize(CWnd* pMainWnd);
-	static void Release();
-	static void UpdateFocus(CWnd* pFocus = NULL);
+	static BOOL Initialize(HWND hwndCallback, BOOL bChildrenOnly = FALSE);
+	static void RefreshFocus(HWND hwndFocus = NULL);
 
 protected:
-	CWnd* m_pMainWnd;
+	static CMap<HWND, HWND, BOOL, BOOL&> s_mapCallbacks;
 
 protected:		
+	static void HandleFocusChange(HWND hwndGotFocus, HWND hwndLostFocus);
 	static CFocusWatcher& Instance() { return CHookMgr<CFocusWatcher>::GetInstance(); }
+
+	// Base class override
 	virtual BOOL OnCbt(int nCode, WPARAM wParam, LPARAM lParam); 
 };
 
