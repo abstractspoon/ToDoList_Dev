@@ -28,18 +28,27 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.m_EisenhowerCtrl = new EisenhowerUIExtension.EisenhowerControl();
 			this.SuspendLayout();
+			// 
+			// m_EisenhowerCtrl
+			// 
+			this.m_EisenhowerCtrl.Location = new System.Drawing.Point(0, 32);
+			this.m_EisenhowerCtrl.Name = "m_EisenhowerCtrl";
+			this.m_EisenhowerCtrl.Size = new System.Drawing.Size(613, 415);
+			this.m_EisenhowerCtrl.TabIndex = 0;
 			// 
 			// EisenhowerUIExtensionCore
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.m_EisenhowerCtrl);
 			this.Name = "EisenhowerUIExtensionCore";
-			this.Size = new System.Drawing.Size(701, 459);
+			this.Size = new System.Drawing.Size(616, 450);
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
+
+		private EisenhowerControl m_EisenhowerCtrl;
 	}
 }

@@ -124,7 +124,7 @@ namespace EisenhowerUIExtension
 
 		public void SetUITheme(UITheme theme)
 		{
-			// 			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
 			// 
 			// 			m_OptionsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 			// 			m_AlignmentLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
@@ -225,6 +225,20 @@ namespace EisenhowerUIExtension
 		{
 			return false;
 			//return m_Eisenhower.CanSaveToImage();
+		}
+
+		// Message handlers ---------------------------------------------------
+		protected override void OnSizeChanged(EventArgs e)
+		{
+			base.OnSizeChanged(e);
+
+			Rectangle rCtrl = m_EisenhowerCtrl.Bounds;
+
+			rCtrl.X = 0;
+			rCtrl.Width = Width;
+			rCtrl.Height = (Height - rCtrl.Top);
+
+			m_EisenhowerCtrl.Bounds = rCtrl;
 		}
 	}
 

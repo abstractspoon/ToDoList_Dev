@@ -12,7 +12,6 @@ using System.Windows.Forms.VisualStyles;
 /////////////////////////////////////////////////////////////////////////////////////
 
 using ScrollHelper;
-using TreeViewHelper;
 using ImageHelper;
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -46,7 +45,7 @@ namespace EisenhowerUIExtension
         { 
             get 
             {
-				return TreeViewUtils.ExpansionButtonSize;
+				return 0;//TreeViewUtils.ExpansionButtonSize;
             } 
         }
 
@@ -2478,13 +2477,13 @@ namespace EisenhowerUIExtension
 		private void DrawExpansionButton(Graphics graphics, TreeNode node)
 		{
 			// Only for parent nodes and Root is always expanded
-			if (IsParent(node) && !IsRoot(node))
-			{
-				var btnRect = CalculateExpansionButtonRect(node);
-				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(btnRect, 2, 4).Contains(PointToClient(MousePosition)));
-
-				TreeViewUtils.DrawExpansionButton(graphics, btnRect, node.IsExpanded, pressed);
-			}
+// 			if (IsParent(node) && !IsRoot(node))
+// 			{
+// 				var btnRect = CalculateExpansionButtonRect(node);
+// 				bool pressed = ((MouseButtons == MouseButtons.Left) && Rectangle.Inflate(btnRect, 2, 4).Contains(PointToClient(MousePosition)));
+// 
+// 				TreeViewUtils.DrawExpansionButton(graphics, btnRect, node.IsExpanded, pressed);
+// 			}
 		}
 
 		private void DrawConnections(Graphics graphics, TreeNode node, Rectangle clipRect)
